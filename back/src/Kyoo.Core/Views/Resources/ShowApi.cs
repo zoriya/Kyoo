@@ -24,6 +24,7 @@ using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
+using Kyoo.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using static Kyoo.Abstractions.Models.Utils.Constants;
@@ -225,6 +226,85 @@ namespace Kyoo.Core.Api
 			if (!resources.Any() && await _libraryManager.Shows.GetOrDefault(identifier.IsSame<Show>()) == null)
 				return NotFound();
 			return Page(resources, pagination.Limit);
+		}
+
+		/// <summary>
+		/// Get watch status
+		/// </summary>
+		/// <remarks>
+		/// Get when an item has been wathed and if it was watched.
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the <see cref="Show"/>.</param>
+		/// <returns>The status.</returns>
+		/// <response code="204">This show does not have a specific status.</response>
+		/// <response code="404">No show with the given ID or slug could be found.</response>
+		[HttpGet("{identifier:id}/watchStatus")]
+		[HttpGet("{identifier:id}/watchStatus", Order = AlternativeRoute)]
+		[UserOnly]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<ShowWatchStatus?> GetWatchStatus(Identifier identifier)
+		{
+			return await _libraryManager.WatchStatus.GetShowStatus(
+				identifier.IsSame<Show>(),
+				User.GetId()!.Value
+			);
+		}
+
+		/// <summary>
+		/// Set watch status
+		/// </summary>
+		/// <remarks>
+		/// Set when an item has been wathed and if it was watched.
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the <see cref="Show"/>.</param>
+		/// <param name="status">The new watch status.</param>
+		/// <returns>The newly set status.</returns>
+		/// <response code="200">The status has been set</response>
+		/// <response code="204">The status was not considered impactfull enough to be saved (less then 5% of watched for example).</response>
+		/// <response code="404">No movie with the given ID or slug could be found.</response>
+		[HttpPost("{identifier:id}/watchStatus")]
+		[HttpPost("{identifier:id}/watchStatus", Order = AlternativeRoute)]
+		[UserOnly]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<ShowWatchStatus?> SetWatchStatus(Identifier identifier, WatchStatus status)
+		{
+			int id = await identifier.Match(
+				id => Task.FromResult(id),
+				async slug => (await _libraryManager.Shows.Get(slug)).Id
+			);
+			return await _libraryManager.WatchStatus.SetShowStatus(
+				id,
+				User.GetId()!.Value,
+				status
+			);
+		}
+
+		/// <summary>
+		/// Delete watch status
+		/// </summary>
+		/// <remarks>
+		/// Delete watch status (to rewatch for example).
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the <see cref="Show"/>.</param>
+		/// <returns>The newly set status.</returns>
+		/// <response code="204">The status has been deleted.</response>
+		/// <response code="404">No show with the given ID or slug could be found.</response>
+		[HttpDelete("{identifier:id}/watchStatus")]
+		[HttpDelete("{identifier:id}/watchStatus", Order = AlternativeRoute)]
+		[UserOnly]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task DeleteWatchStatus(Identifier identifier)
+		{
+			await _libraryManager.WatchStatus.DeleteShowStatus(
+				identifier.IsSame<Show>(),
+				User.GetId()!.Value
+			);
 		}
 	}
 }

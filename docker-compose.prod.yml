@@ -4,7 +4,7 @@ services:
   back:
     image: zoriya/kyoo_back:edge
     restart: unless-stopped
-    cpus: 0.8
+    cpus: 1.5
     env_file:
       - ./.env
     depends_on:
@@ -36,7 +36,6 @@ services:
   transcoder:
     image: zoriya/kyoo_transcoder:edge
     restart: unless-stopped
-    cpus: 0.8
     env_file:
       - ./.env
     volumes:
