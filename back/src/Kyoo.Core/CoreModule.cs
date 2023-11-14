@@ -67,6 +67,7 @@ namespace Kyoo.Core
 			builder.RegisterRepository<StudioRepository>();
 			builder.RegisterRepository<UserRepository>();
 			builder.RegisterRepository<NewsRepository>();
+			builder.RegisterType<WatchStatusRepository>().As<IWatchStatusRepository>().AsSelf().InstancePerLifetimeScope();
 		}
 
 		/// <inheritdoc />

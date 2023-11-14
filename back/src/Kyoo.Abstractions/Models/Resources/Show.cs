@@ -187,7 +187,7 @@ namespace Kyoo.Abstractions.Models
 
 		private int _EpisodesCount => Episodes!.Count;
 
-		[SerializeIgnore] public ICollection<ShowWatchStatus> Watched { get; set; }
+		[SerializeIgnore] public ICollection<ShowWatchStatus>? Watched { get; set; }
 
 		/// <summary>
 		/// Metadata of what an user as started/planned to watch.
@@ -196,7 +196,7 @@ namespace Kyoo.Abstractions.Models
 		[LoadableRelation] public ShowWatchStatus? WatchStatus { get; set; }
 
 		// There is a global query filter to filter by user so we just need to do single.
-		private ShowWatchStatus? _WatchStatus => Watched.FirstOrDefault();
+		private ShowWatchStatus? _WatchStatus => Watched!.FirstOrDefault();
 
 		/// <inheritdoc />
 		public void OnMerge(object merged)
