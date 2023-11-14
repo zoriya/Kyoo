@@ -146,16 +146,16 @@ namespace Kyoo.Abstractions.Models
 			Hls = $"/video/movie/{Slug}/master.m3u8",
 		};
 
-		[SerializeIgnore] public ICollection<MovieWatchStatus> Watched { get; set; }
+		[SerializeIgnore] public ICollection<MovieWatchStatus>? Watched { get; set; }
 
 		/// <summary>
 		/// Metadata of what an user as started/planned to watch.
 		/// </summary>
 		[Projectable(UseMemberBody = nameof(_WatchStatus), OnlyOnInclude = true)]
-		[LoadableRelation] public MovieWatchStatus WatchStatus { get; set; }
+		[LoadableRelation] public MovieWatchStatus? WatchStatus { get; set; }
 
 		// There is a global query filter to filter by user so we just need to do single.
-		private MovieWatchStatus? _WatchStatus => Watched.FirstOrDefault();
+		private MovieWatchStatus? _WatchStatus => Watched!.FirstOrDefault();
 
 		/// <inheritdoc />
 		public void OnMerge(object merged)

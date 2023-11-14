@@ -175,7 +175,7 @@ namespace Kyoo.Postgresql
 		{
 			// TODO: Waiting for https://github.com/dotnet/efcore/issues/29825
 			// modelBuilder.Entity<T>()
-			// 	.OwnsOne(x => x.ExternalIDs, x =>
+			// 	.OwnsOne(x => x.ExternalId, x =>
 			// 	{
 			// 		x.ToJson();
 			// 	});

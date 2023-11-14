@@ -217,7 +217,7 @@ namespace Kyoo.Abstractions.Models
 		[NotMapped]
 		public int? WatchedTime { get; set; }
 
-		private int? _WatchedTime => NextEpisode?.Watched.FirstOrDefault()?.WatchedTime;
+		private int? _WatchedTime => NextEpisode?.Watched!.FirstOrDefault()?.WatchedTime;
 
 		/// <summary>
 		/// Where the player has stopped watching the episode (in percentage between 0 and 100).
@@ -229,6 +229,6 @@ namespace Kyoo.Abstractions.Models
 		[NotMapped]
 		public int? WatchedPercent { get; set; }
 
-		private int? _WatchedPercent => NextEpisode?.Watched.FirstOrDefault()?.WatchedPercent;
+		private int? _WatchedPercent => NextEpisode?.Watched!.FirstOrDefault()?.WatchedPercent;
 	}
 }
