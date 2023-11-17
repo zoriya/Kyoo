@@ -96,7 +96,7 @@ namespace Kyoo.Core.Controllers
 			if (resource.Studio != null)
 			{
 				resource.Studio = await _studios.CreateIfNotExists(resource.Studio);
-				resource.StudioID = resource.Studio.Id;
+				resource.StudioId = resource.Studio.Id;
 			}
 
 			if (resource.People != null)
@@ -116,7 +116,7 @@ namespace Kyoo.Core.Controllers
 		{
 			await Validate(changed);
 
-			if (changed.Studio != null || changed.StudioID == null)
+			if (changed.Studio != null || changed.StudioId == null)
 			{
 				await Database.Entry(resource).Reference(x => x.Studio).LoadAsync();
 				resource.Studio = changed.Studio;

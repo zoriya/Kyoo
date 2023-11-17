@@ -115,12 +115,12 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the Studio that made this show.
 		/// </summary>
-		[SerializeIgnore] public int? StudioID { get; set; }
+		[SerializeIgnore] public int? StudioId { get; set; }
 
 		/// <summary>
 		/// The Studio that made this show.
 		/// </summary>
-		[LoadableRelation(nameof(StudioID))][EditableRelation] public Studio? Studio { get; set; }
+		[LoadableRelation(nameof(StudioId))][EditableRelation] public Studio? Studio { get; set; }
 
 		/// <summary>
 		/// The list of people that made this show.
