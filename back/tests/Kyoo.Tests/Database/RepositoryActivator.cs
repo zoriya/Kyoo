@@ -54,7 +54,7 @@ namespace Kyoo.Tests.Database
 			MovieRepository movies = new(_NewContext(), studio, people, thumbs.Object);
 			ShowRepository show = new(_NewContext(), studio, people, thumbs.Object);
 			SeasonRepository season = new(_NewContext(), thumbs.Object);
-			LibraryItemRepository libraryItem = new(_NewContext(), thumbs.Object);
+			LibraryItemRepository libraryItem = new(_NewContext());
 			EpisodeRepository episode = new(_NewContext(), show, thumbs.Object);
 			UserRepository user = new(_NewContext(), thumbs.Object);
 
