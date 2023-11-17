@@ -53,7 +53,7 @@ namespace Kyoo.Meiliseach
 						CamelCase.ConvertName(nameof(LibraryItem.Genres)),
 						CamelCase.ConvertName(nameof(LibraryItem.Status)),
 						CamelCase.ConvertName(nameof(LibraryItem.AirDate)),
-						CamelCase.ConvertName(nameof(Movie.StudioID)),
+						CamelCase.ConvertName(nameof(Movie.StudioId)),
 						CamelCase.ConvertName(nameof(LibraryItem.Kind)),
 					},
 					SortableAttributes = new[]
