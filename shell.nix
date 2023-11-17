@@ -27,6 +27,7 @@ in
       postgresql_15
       eslint_d
       prettierd
+      pgformatter
     ];
 
     RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
