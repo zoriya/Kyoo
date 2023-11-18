@@ -92,6 +92,7 @@ services:
       - "5432:5432"
     environment:
      - POSTGRES_HOST_AUTH_METHOD=trust
+    command: ["postgres", "-c", "log_statement=all"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
