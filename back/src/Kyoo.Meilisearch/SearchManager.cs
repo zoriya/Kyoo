@@ -73,10 +73,10 @@ public class SearchManager : ISearchManager
 		};
 	}
 
-	public async Task<SearchPage<LibraryItem>.SearchResult> SearchItems(string? query,
-		Sort<LibraryItem> sortBy,
+	public async Task<SearchPage<ILibraryItem>.SearchResult> SearchItems(string? query,
+		Sort<ILibraryItem> sortBy,
 		SearchPagination pagination,
-		Include<LibraryItem>? include = default)
+		Include<ILibraryItem>? include = default)
 	{
 		// TODO: add filters and facets
 		ISearchable<IdResource> res = await _client.Index("items").SearchAsync<IdResource>(query, new SearchQuery()
@@ -96,7 +96,7 @@ public class SearchManager : ISearchManager
 			_ => throw new InvalidOperationException("An unknown item kind was found in meilisearch"),
 		}).ToList();
 
-		return new SearchPage<LibraryItem>.SearchResult
+		return new SearchPage<ILibraryItem>.SearchResult
 		{
 			Query = query,
 			Items = await _libraryManager.LibraryItems

@@ -135,14 +135,14 @@ namespace Kyoo.Core.Api
 		/// <returns>A list of items found for the specified query.</returns>
 		[HttpGet("items")]
 		[HttpGet("item", Order = AlternativeRoute)]
-		[Permission(nameof(LibraryItem), Kind.Read)]
+		[Permission(nameof(ILibraryItem), Kind.Read)]
 		[ApiDefinition("Item")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
-		public async Task<SearchPage<LibraryItem>> SearchItems(
+		public async Task<SearchPage<ILibraryItem>> SearchItems(
 			[FromQuery] string? q,
-			[FromQuery] Sort<LibraryItem> sortBy,
+			[FromQuery] Sort<ILibraryItem> sortBy,
 			[FromQuery] SearchPagination pagination,
-			[FromQuery] Include<LibraryItem> fields)
+			[FromQuery] Include<ILibraryItem> fields)
 		{
 			return SearchPage(await _searchManager.SearchItems(q, sortBy, pagination, fields));
 		}

@@ -28,12 +28,12 @@ namespace Kyoo.Abstractions.Models
 	public enum NewsKind
 	{
 		/// <summary>
-		/// The <see cref="LibraryItem"/> is an <see cref="Episode"/>.
+		/// The <see cref="ILibraryItem"/> is an <see cref="Episode"/>.
 		/// </summary>
 		Episode,
 
 		/// <summary>
-		/// The <see cref="LibraryItem"/> is a Movie.
+		/// The <see cref="ILibraryItem"/> is a Movie.
 		/// </summary>
 		Movie,
 	}

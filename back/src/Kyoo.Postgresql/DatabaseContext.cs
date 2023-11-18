@@ -93,14 +93,6 @@ namespace Kyoo.Postgresql
 		public DbSet<PeopleRole> PeopleRoles { get; set; }
 
 		/// <summary>
-		/// The list of library items (shows and collections that are part of a library - or the global one).
-		/// </summary>
-		/// <remarks>
-		/// This set is ready only, on most database this will be a view.
-		/// </remarks>
-		public DbSet<LibraryItem> LibraryItems { get; set; }
-
-		/// <summary>
 		/// The list of new items (episodes and movies).
 		/// </summary>
 		/// <remarks>
@@ -291,7 +283,6 @@ namespace Kyoo.Postgresql
 				.WithMany("Users")
 				.UsingEntity(x => x.ToTable(LinkName<User, Show>()));
 
-			_HasMetadata<LibraryItem>(modelBuilder);
 			_HasMetadata<News>(modelBuilder);
 			_HasMetadata<Collection>(modelBuilder);
 			_HasMetadata<Movie>(modelBuilder);
@@ -301,7 +292,6 @@ namespace Kyoo.Postgresql
 			_HasMetadata<People>(modelBuilder);
 			_HasMetadata<Studio>(modelBuilder);
 
-			_HasImages<LibraryItem>(modelBuilder);
 			_HasImages<News>(modelBuilder);
 			_HasImages<Collection>(modelBuilder);
 			_HasImages<Movie>(modelBuilder);
@@ -310,7 +300,6 @@ namespace Kyoo.Postgresql
 			_HasImages<Episode>(modelBuilder);
 			_HasImages<People>(modelBuilder);
 
-			_HasAddedDate<LibraryItem>(modelBuilder);
 			_HasAddedDate<News>(modelBuilder);
 			_HasAddedDate<Collection>(modelBuilder);
 			_HasAddedDate<Movie>(modelBuilder);
@@ -356,8 +345,6 @@ namespace Kyoo.Postgresql
 				.IsUnique();
 
 			modelBuilder.Entity<Movie>()
-				.Ignore(x => x.Links);
-			modelBuilder.Entity<LibraryItem>()
 				.Ignore(x => x.Links);
 			modelBuilder.Entity<News>()
 				.Ignore(x => x.Links);

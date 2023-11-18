@@ -28,7 +28,7 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A series or a movie.
 	/// </summary>
-	public class Movie : IResource, IMetadata, IOnMerge, IThumbnails, IAddedDate
+	public class Movie : IResource, IMetadata, IOnMerge, IThumbnails, IAddedDate, ILibraryItem
 	{
 		/// <inheritdoc />
 		public int Id { get; set; }
