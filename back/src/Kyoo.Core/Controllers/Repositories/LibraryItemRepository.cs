@@ -25,6 +25,7 @@ using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Dapper;
+using InterpolatedSql.Dapper;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Exceptions;
@@ -97,9 +98,9 @@ namespace Kyoo.Core.Controllers
 			return sort switch
 			{
 				// TODO: Implement default sort by
-				Sort<T>.Default => "",
-				Sort<T>.By(string key, bool desc) => $"coalesce({tables.Select(x => $"{x}.{key}")}) {(desc ? "desc" : "asc")}",
-				Sort<T>.Random(var seed) => $"md5({seed} || coalesce({tables.Select(x => $"{x}.id")}))",
+				Sort<T>.Default => $"coalesce({string.Join(", ", tables.Select(x => $"{x}.name"))})",
+				Sort<T>.By(string key, bool desc) => $"coalesce({string.Join(", ", tables.Select(x => $"{x}.{key}"))}) {(desc ? "desc" : "asc")}",
+				Sort<T>.Random(var seed) => $"md5({seed} || coalesce({string.Join(", ", tables.Select(x => $"{x}.id"))}))",
 				Sort<T>.Conglomerate(var list) => string.Join(", ", list.Select(x => ProcessSort(x, tables))),
 				_ => throw new SwitchExpressionException(),
 			};
@@ -112,19 +113,30 @@ namespace Kyoo.Core.Controllers
 			Include<LibraryItem>? include = null)
 		{
 			// language=PostgreSQL
-			string sql = @"
-				select s.*, m.*, c.*, st.* from shows as s full outer join (
-					select * from movies
-				) as m on false
-				full outer join (
-					select * from collections
-				) as c on false
-				left join studios as st on st.id = coalesce(s.studio_id, m.studio_id)
-				order by @SortBy
-				limit @Take
-			";
+			IDapperSqlCommand query = _database.SqlBuilder($"""
+				select
+					s.*,
+					m.*,
+					c.*,
+					st.*
+				from
+					shows as s
+					full outer join (
+					select
+						*
+					from
+						movies) as m on false
+					full outer join (
+						select
+							*
+						from
+							collections) as c on false
+					left join studios as st on st.id = coalesce(s.studio_id, m.studio_id)
+				order by {ProcessSort(sort, new[] { "s", "m", "c" }):raw}
+				limit {limit.Limit}
+			""").Build();
 
-			var data = await _database.QueryAsync<IResource>(sql, new[] { typeof(Show), typeof(Movie), typeof(Collection), typeof(Studio) }, items =>
+			var data = await query.QueryAsync<IResource>(new[] { typeof(Show), typeof(Movie), typeof(Collection), typeof(Studio) }, items =>
 			{
 				var studio = items[3] as Studio;
 				if (items[0] is Show show && show.Id != 0)
@@ -134,7 +146,7 @@ namespace Kyoo.Core.Controllers
 				if (items[2] is Collection collection && collection.Id != 0)
 					return collection;
 				throw new InvalidDataException();
-			}, new { SortBy = ProcessSort(sort, new[] { "s", "m", "c" }), Take = limit.Limit });
+			});
 
 			// await using DbDataReader reader = await _database.ExecuteReaderAsync(sql);
 			// int kindOrdinal = reader.GetOrdinal("kind");
