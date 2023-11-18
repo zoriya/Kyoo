@@ -30,7 +30,7 @@ namespace Kyoo.Core.Controllers
 		private readonly IBaseRepository[] _repositories;
 
 		public LibraryManager(
-			IRepository<LibraryItem> libraryItemRepository,
+			IRepository<ILibraryItem> libraryItemRepository,
 			IRepository<Collection> collectionRepository,
 			IRepository<Movie> movieRepository,
 			IRepository<Show> showRepository,
@@ -65,7 +65,7 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public IRepository<LibraryItem> LibraryItems { get; }
+		public IRepository<ILibraryItem> LibraryItems { get; }
 
 		/// <inheritdoc />
 		public IRepository<Collection> Collections { get; }

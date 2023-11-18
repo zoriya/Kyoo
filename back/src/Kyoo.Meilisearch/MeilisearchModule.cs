@@ -41,32 +41,32 @@ namespace Kyoo.Meiliseach
 				{
 					SearchableAttributes = new[]
 					{
-						CamelCase.ConvertName(nameof(LibraryItem.Name)),
-						CamelCase.ConvertName(nameof(LibraryItem.Slug)),
-						CamelCase.ConvertName(nameof(LibraryItem.Aliases)),
-						CamelCase.ConvertName(nameof(LibraryItem.Path)),
-						CamelCase.ConvertName(nameof(LibraryItem.Tags)),
-						CamelCase.ConvertName(nameof(LibraryItem.Overview)),
+						CamelCase.ConvertName(nameof(Movie.Name)),
+						CamelCase.ConvertName(nameof(Movie.Slug)),
+						CamelCase.ConvertName(nameof(Movie.Aliases)),
+						CamelCase.ConvertName(nameof(Movie.Path)),
+						CamelCase.ConvertName(nameof(Movie.Tags)),
+						CamelCase.ConvertName(nameof(Movie.Overview)),
 					},
 					FilterableAttributes = new[]
 					{
-						CamelCase.ConvertName(nameof(LibraryItem.Genres)),
-						CamelCase.ConvertName(nameof(LibraryItem.Status)),
-						CamelCase.ConvertName(nameof(LibraryItem.AirDate)),
+						CamelCase.ConvertName(nameof(Movie.Genres)),
+						CamelCase.ConvertName(nameof(Movie.Status)),
+						CamelCase.ConvertName(nameof(Movie.AirDate)),
 						CamelCase.ConvertName(nameof(Movie.StudioId)),
-						CamelCase.ConvertName(nameof(LibraryItem.Kind)),
+						"kind"
 					},
 					SortableAttributes = new[]
 					{
-						CamelCase.ConvertName(nameof(LibraryItem.AirDate)),
-						CamelCase.ConvertName(nameof(LibraryItem.AddedDate)),
-						CamelCase.ConvertName(nameof(LibraryItem.Rating)),
-						CamelCase.ConvertName(nameof(LibraryItem.Runtime)),
+						CamelCase.ConvertName(nameof(Movie.AirDate)),
+						CamelCase.ConvertName(nameof(Movie.AddedDate)),
+						CamelCase.ConvertName(nameof(Movie.Rating)),
+						CamelCase.ConvertName(nameof(Movie.Runtime)),
 					},
 					DisplayedAttributes = new[]
 					{
-						CamelCase.ConvertName(nameof(LibraryItem.Id)),
-						CamelCase.ConvertName(nameof(LibraryItem.Kind)),
+						CamelCase.ConvertName(nameof(Movie.Id)),
+						"kind"
 					},
 					RankingRules = new[]
 					{
@@ -76,10 +76,9 @@ namespace Kyoo.Meiliseach
 						"attribute",
 						"sort",
 						"exactness",
-						$"{CamelCase.ConvertName(nameof(LibraryItem.Rating))}:desc",
+						$"{CamelCase.ConvertName(nameof(Movie.Rating))}:desc",
 					}
 					// TODO: Add stopwords
-					// TODO: Extend default ranking to add ratings.
 				}
 			},
 			{

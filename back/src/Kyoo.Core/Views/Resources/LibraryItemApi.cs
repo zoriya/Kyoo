@@ -35,12 +35,12 @@ namespace Kyoo.Core.Api
 	[ResourceView]
 	[PartialPermission("LibraryItem")]
 	[ApiDefinition("Items", Group = ResourcesGroup)]
-	public class LibraryItemApi : CrudThumbsApi<LibraryItem>
+	public class LibraryItemApi : CrudThumbsApi<ILibraryItem>
 	{
 		/// <summary>
 		/// The library item repository used to modify or retrieve information in the data store.
 		/// </summary>
-		private readonly IRepository<LibraryItem> _libraryItems;
+		private readonly IRepository<ILibraryItem> _libraryItems;
 
 		/// <summary>
 		/// Create a new <see cref="LibraryItemApi"/>.
@@ -49,7 +49,7 @@ namespace Kyoo.Core.Api
 		/// The library item repository used to modify or retrieve information in the data store.
 		/// </param>
 		/// <param name="thumbs">Thumbnail manager to retrieve images.</param>
-		public LibraryItemApi(IRepository<LibraryItem> libraryItems, IThumbnailsManager thumbs)
+		public LibraryItemApi(IRepository<ILibraryItem> libraryItems, IThumbnailsManager thumbs)
 			: base(libraryItems, thumbs)
 		{
 			_libraryItems = libraryItems;

@@ -138,16 +138,16 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Page<LibraryItem>>> GetItems(Identifier identifier,
-			[FromQuery] Sort<LibraryItem> sortBy,
+		public async Task<ActionResult<Page<ILibraryItem>>> GetItems(Identifier identifier,
+			[FromQuery] Sort<ILibraryItem> sortBy,
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] Pagination pagination,
-			[FromQuery] Include<LibraryItem>? fields)
+			[FromQuery] Include<ILibraryItem>? fields)
 		{
-			ICollection<LibraryItem> resources = await _items.GetAllOfCollection(
+			ICollection<ILibraryItem> resources = await _items.GetAllOfCollection(
 				identifier.IsSame<Collection>(),
-				ApiHelper.ParseWhere<LibraryItem>(where),
-				sortBy == new Sort<LibraryItem>.Default() ? new Sort<LibraryItem>.By(x => x.AirDate) : sortBy,
+				ApiHelper.ParseWhere<ILibraryItem>(where),
+				sortBy == new Sort<ILibraryItem>.Default() ? new Sort<ILibraryItem>.By(nameof(Movie.AirDate)) : sortBy,
 				pagination,
 				fields
 			);

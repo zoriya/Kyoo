@@ -28,7 +28,7 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A class representing collections of <see cref="Show"/>.
 	/// </summary>
-	public class Collection : IResource, IMetadata, IThumbnails, IAddedDate
+	public class Collection : IResource, IMetadata, IThumbnails, IAddedDate, ILibraryItem
 	{
 		/// <inheritdoc />
 		public int Id { get; set; }

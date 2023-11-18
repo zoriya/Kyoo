@@ -36,13 +36,11 @@ namespace Kyoo.Core.Controllers
 	/// <summary>
 	/// A local repository to handle library items.
 	/// </summary>
-	public class LibraryItemRepository : IRepository<LibraryItem>
+	public class LibraryItemRepository : IRepository<ILibraryItem>
 	{
 		private readonly DbConnection _database;
 
-		protected Sort<LibraryItem> DefaultSort => new Sort<LibraryItem>.By(x => x.Name);
-
-		public Type RepositoryType => typeof(LibraryItem);
+		public Type RepositoryType => typeof(ILibraryItem);
 
 		public LibraryItemRepository(DbConnection database)
 		{
@@ -50,45 +48,45 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc/>
-		public virtual async Task<LibraryItem> Get(int id, Include<LibraryItem>? include = default)
+		public virtual async Task<ILibraryItem> Get(int id, Include<ILibraryItem>? include = default)
 		{
-			LibraryItem? ret = await GetOrDefault(id, include);
+			ILibraryItem? ret = await GetOrDefault(id, include);
 			if (ret == null)
-				throw new ItemNotFoundException($"No {nameof(LibraryItem)} found with the id {id}");
+				throw new ItemNotFoundException($"No {nameof(ILibraryItem)} found with the id {id}");
 			return ret;
 		}
 
 		/// <inheritdoc/>
-		public virtual async Task<LibraryItem> Get(string slug, Include<LibraryItem>? include = default)
+		public virtual async Task<ILibraryItem> Get(string slug, Include<ILibraryItem>? include = default)
 		{
-			LibraryItem? ret = await GetOrDefault(slug, include);
+			ILibraryItem? ret = await GetOrDefault(slug, include);
 			if (ret == null)
-				throw new ItemNotFoundException($"No {nameof(LibraryItem)} found with the slug {slug}");
+				throw new ItemNotFoundException($"No {nameof(ILibraryItem)} found with the slug {slug}");
 			return ret;
 		}
 
 		/// <inheritdoc/>
-		public virtual async Task<LibraryItem> Get(
-			Expression<Func<LibraryItem, bool>> where,
-			Include<LibraryItem>? include = default)
+		public virtual async Task<ILibraryItem> Get(
+			Expression<Func<ILibraryItem, bool>> where,
+			Include<ILibraryItem>? include = default)
 		{
-			LibraryItem? ret = await GetOrDefault(where, include: include);
+			ILibraryItem? ret = await GetOrDefault(where, include: include);
 			if (ret == null)
-				throw new ItemNotFoundException($"No {nameof(LibraryItem)} found with the given predicate.");
+				throw new ItemNotFoundException($"No {nameof(ILibraryItem)} found with the given predicate.");
 			return ret;
 		}
 
-		public Task<LibraryItem?> GetOrDefault(int id, Include<LibraryItem>? include = null)
+		public Task<ILibraryItem?> GetOrDefault(int id, Include<ILibraryItem>? include = null)
 		{
 			throw new NotImplementedException();
 		}
 
-		public Task<LibraryItem?> GetOrDefault(string slug, Include<LibraryItem>? include = null)
+		public Task<ILibraryItem?> GetOrDefault(string slug, Include<ILibraryItem>? include = null)
 		{
 			throw new NotImplementedException();
 		}
 
-		public Task<LibraryItem?> GetOrDefault(Expression<Func<LibraryItem, bool>> where, Include<LibraryItem>? include = null, Sort<LibraryItem>? sortBy = null)
+		public Task<ILibraryItem?> GetOrDefault(Expression<Func<ILibraryItem, bool>> where, Include<ILibraryItem>? include = null, Sort<ILibraryItem>? sortBy = null)
 		{
 			throw new NotImplementedException();
 		}
@@ -106,11 +104,11 @@ namespace Kyoo.Core.Controllers
 			};
 		}
 
-		public async Task<ICollection<LibraryItem>> GetAll(
-			Expression<Func<LibraryItem, bool>>? where = null,
-			Sort<LibraryItem>? sort = null,
+		public async Task<ICollection<ILibraryItem>> GetAll(
+			Expression<Func<ILibraryItem, bool>>? where = null,
+			Sort<ILibraryItem>? sort = null,
 			Pagination? limit = null,
-			Include<LibraryItem>? include = null)
+			Include<ILibraryItem>? include = null)
 		{
 			// language=PostgreSQL
 			IDapperSqlCommand query = _database.SqlBuilder($"""
@@ -136,7 +134,8 @@ namespace Kyoo.Core.Controllers
 				limit {limit.Limit}
 			""").Build();
 
-			var data = await query.QueryAsync<IResource>(new[] { typeof(Show), typeof(Movie), typeof(Collection), typeof(Studio) }, items =>
+			Type[] types = new[] { typeof(Show), typeof(Movie), typeof(Collection), typeof(Studio) };
+			IEnumerable<ILibraryItem> data = await query.QueryAsync<ILibraryItem>(types, items =>
 			{
 				var studio = items[3] as Studio;
 				if (items[0] is Show show && show.Id != 0)
@@ -147,44 +146,26 @@ namespace Kyoo.Core.Controllers
 					return collection;
 				throw new InvalidDataException();
 			});
-
-			// await using DbDataReader reader = await _database.ExecuteReaderAsync(sql);
-			// int kindOrdinal = reader.GetOrdinal("kind");
-			// var showParser = reader.GetRowParser<IResource>(typeof(Show));
-			// var movieParser = reader.GetRowParser<IResource>(typeof(Movie));
-			// var collectionParser = reader.GetRowParser<IResource>(typeof(Collection));
-			//
-			// while (await reader.ReadAsync())
-			// {
-			// 	ItemKind type = await reader.GetFieldValueAsync<ItemKind>(kindOrdinal);
-			// 	ret.Add(type switch
-			// 	{
-			// 		ItemKind.Show => showParser(reader),
-			// 		ItemKind.Movie => movieParser(reader),
-			// 		ItemKind.Collection => collectionParser(reader),
-			// 		_ => throw new InvalidDataException(),
-			// 	});
-			// }
-			throw new NotImplementedException();
-			// return ret;
+			return data.ToList();
 		}
 
-		public Task<int> GetCount(Expression<Func<LibraryItem, bool>>? where = null)
+		public Task<int> GetCount(Expression<Func<ILibraryItem, bool>>? where = null)
 		{
 			throw new NotImplementedException();
 		}
 
-		public Task<ICollection<LibraryItem>> FromIds(IList<int> ids, Include<LibraryItem>? include = null)
+		public Task<ICollection<ILibraryItem>> FromIds(IList<int> ids, Include<ILibraryItem>? include = null)
 		{
 			throw new NotImplementedException();
 		}
 
-		public Task DeleteAll(Expression<Func<LibraryItem, bool>> where)
+		public Task DeleteAll(Expression<Func<ILibraryItem, bool>> where)
 		{
 			throw new NotImplementedException();
 		}
+
 		/// <inheritdoc />
-		public async Task<ICollection<LibraryItem>> Search(string query, Include<LibraryItem>? include = default)
+		public async Task<ICollection<ILibraryItem>> Search(string query, Include<ILibraryItem>? include = default)
 		{
 			throw new NotImplementedException();
 			// return await Sort(
@@ -195,12 +176,12 @@ namespace Kyoo.Core.Controllers
 			// 	.ToListAsync();
 		}
 
-		public async Task<ICollection<LibraryItem>> GetAllOfCollection(
+		public async Task<ICollection<ILibraryItem>> GetAllOfCollection(
 			Expression<Func<Collection, bool>> selector,
-			Expression<Func<LibraryItem, bool>>? where = null,
-			Sort<LibraryItem>? sort = default,
+			Expression<Func<ILibraryItem, bool>>? where = null,
+			Sort<ILibraryItem>? sort = default,
 			Pagination? limit = default,
-			Include<LibraryItem>? include = default)
+			Include<ILibraryItem>? include = default)
 		{
 			throw new NotImplementedException();
 			// return await ApplyFilters(
@@ -220,19 +201,19 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public Task<LibraryItem> Create(LibraryItem obj)
+		public Task<ILibraryItem> Create(ILibraryItem obj)
 			=> throw new InvalidOperationException();
 
 		/// <inheritdoc />
-		public Task<LibraryItem> CreateIfNotExists(LibraryItem obj)
+		public Task<ILibraryItem> CreateIfNotExists(ILibraryItem obj)
 			=> throw new InvalidOperationException();
 
 		/// <inheritdoc />
-		public Task<LibraryItem> Edit(LibraryItem edited)
+		public Task<ILibraryItem> Edit(ILibraryItem edited)
 			=> throw new InvalidOperationException();
 
 		/// <inheritdoc />
-		public Task<LibraryItem> Patch(int id, Func<LibraryItem, Task<bool>> patch)
+		public Task<ILibraryItem> Patch(int id, Func<ILibraryItem, Task<bool>> patch)
 			=> throw new InvalidOperationException();
 
 		/// <inheritdoc />
@@ -244,7 +225,7 @@ namespace Kyoo.Core.Controllers
 			=> throw new InvalidOperationException();
 
 		/// <inheritdoc />
-		public Task Delete(LibraryItem obj)
+		public Task Delete(ILibraryItem obj)
 			=> throw new InvalidOperationException();
 	}
 }

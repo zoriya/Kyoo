@@ -35,10 +35,10 @@ public interface ISearchManager
 	/// <param name="pagination">How pagination should be done (where to start and how many to return)</param>
 	/// <param name="include">The related fields to include.</param>
 	/// <returns>A list of resources that match every filters</returns>
-	public Task<SearchPage<LibraryItem>.SearchResult> SearchItems(string? query,
-		Sort<LibraryItem> sortBy,
+	public Task<SearchPage<ILibraryItem>.SearchResult> SearchItems(string? query,
+		Sort<ILibraryItem> sortBy,
 		SearchPagination pagination,
-		Include<LibraryItem>? include = default);
+		Include<ILibraryItem>? include = default);
 
 	/// <summary>
 	/// Search for movies.
