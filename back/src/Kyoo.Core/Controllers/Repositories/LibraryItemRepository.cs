@@ -98,7 +98,7 @@ namespace Kyoo.Core.Controllers
 				// TODO: Implement default sort by
 				Sort<T>.Default => $"coalesce({string.Join(", ", tables.Select(x => $"{x}.name"))})",
 				Sort<T>.By(string key, bool desc) => $"coalesce({string.Join(", ", tables.Select(x => $"{x}.{key}"))}) {(desc ? "desc" : "asc")}",
-				Sort<T>.Random(var seed) => $"md5({seed} || coalesce({string.Join(", ", tables.Select(x => $"{x}.id"))}))",
+				Sort<T>.Random(var seed) => $"md5('{seed}' || coalesce({string.Join(", ", tables.Select(x => $"{x}.id"))}))",
 				Sort<T>.Conglomerate(var list) => string.Join(", ", list.Select(x => ProcessSort(x, tables))),
 				_ => throw new SwitchExpressionException(),
 			};

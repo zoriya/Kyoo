@@ -16,7 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
@@ -58,8 +60,7 @@ namespace Kyoo.Core.Api
 			{
 				property.ShouldSerialize = _ =>
 				{
-					ICollection<string>? fields = (ICollection<string>)_httpContextAccessor.HttpContext!.Items["fields"]!;
-					if (fields == null)
+					if (_httpContextAccessor.HttpContext!.Items["fields"] is not ICollection<string> fields)
 						return false;
 					return fields.Contains(member.Name);
 				};
@@ -70,6 +71,44 @@ namespace Kyoo.Core.Api
 			if (member.GetCustomAttribute<DeserializeIgnoreAttribute>() != null)
 				property.ShouldDeserialize = _ => false;
 			return property;
+		}
+
+		protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
+		{
+			IList<JsonProperty> properties = base.CreateProperties(type, memberSerialization);
+
+			if (properties.All(x => x.PropertyName != "kind"))
+			{
+				properties.Add(new JsonProperty()
+				{
+					DeclaringType = type,
+					PropertyName = "kind",
+					UnderlyingName = "kind",
+					PropertyType = typeof(string),
+					ValueProvider = new FixedValueProvider(type.Name),
+					Readable = true,
+					Writable = false,
+					TypeNameHandling = TypeNameHandling.None,
+				});
+			}
+
+			return properties;
+		}
+
+		public class FixedValueProvider : IValueProvider
+		{
+			private readonly object _value;
+
+			public FixedValueProvider(object value)
+			{
+				_value = value;
+			}
+
+			public object GetValue(object target)
+				=> _value;
+
+			public void SetValue(object target, object? value)
+				=> throw new NotImplementedException();
 		}
 	}
 }
