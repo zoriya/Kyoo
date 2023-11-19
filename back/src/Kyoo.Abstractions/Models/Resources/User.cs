@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Utils;
 using Newtonsoft.Json;
@@ -28,8 +29,10 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A single user of the app.
 	/// </summary>
-	public class User : IResource, IAddedDate
+	public class User : IQuery, IResource, IAddedDate
 	{
+		public static Sort DefaultSort => new Sort<User>.By(x => x.Username);
+
 		/// <inheritdoc />
 		public int Id { get; set; }
 

@@ -18,6 +18,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Utils;
 using Newtonsoft.Json;
@@ -27,8 +28,10 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// An actor, voice actor, writer, animator, somebody who worked on a <see cref="Show"/>.
 	/// </summary>
-	public class People : IResource, IMetadata, IThumbnails
+	public class People : IQuery, IResource, IMetadata, IThumbnails
 	{
+		public static Sort DefaultSort => new Sort<People>.By(x => x.Name);
+
 		/// <inheritdoc />
 		public int Id { get; set; }
 

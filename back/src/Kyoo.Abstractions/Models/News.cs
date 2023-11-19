@@ -41,7 +41,7 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A new item
 	/// </summary>
-	public class News : IResource, IMetadata, IThumbnails, IAddedDate
+	public class News : IResource, IMetadata, IThumbnails, IAddedDate, IQuery
 	{
 		/// <inheritdoc />
 		public int Id { get; set; }

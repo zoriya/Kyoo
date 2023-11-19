@@ -36,7 +36,7 @@ namespace Kyoo.Core.Api
 	[ApiController]
 	[ResourceView]
 	public class CrudThumbsApi<T> : CrudApi<T>
-		where T : class, IResource, IThumbnails
+		where T : class, IResource, IThumbnails, IQuery
 	{
 		/// <summary>
 		/// The thumbnail manager used to retrieve images paths.

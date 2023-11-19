@@ -35,6 +35,69 @@ namespace Kyoo.Utils
 	public static class Utility
 	{
 		/// <summary>
+		/// Convert a string to snake case. Stollen from
+		/// https://github.com/efcore/EFCore.NamingConventions/blob/main/EFCore.NamingConventions/Internal/SnakeCaseNameRewriter.cs
+		/// </summary>
+		/// <param name="name">The string to convert.</param>
+		/// <returns>The string in snake case</returns>
+		public static string ToSnakeCase(this string name)
+		{
+			StringBuilder builder = new(name.Length + Math.Min(2, name.Length / 5));
+			UnicodeCategory? previousCategory = default;
+
+			for (int currentIndex = 0; currentIndex < name.Length; currentIndex++)
+			{
+				char currentChar = name[currentIndex];
+				if (currentChar == '_')
+				{
+					builder.Append('_');
+					previousCategory = null;
+					continue;
+				}
+
+				UnicodeCategory currentCategory = char.GetUnicodeCategory(currentChar);
+				switch (currentCategory)
+				{
+					case UnicodeCategory.UppercaseLetter:
+					case UnicodeCategory.TitlecaseLetter:
+						if (previousCategory == UnicodeCategory.SpaceSeparator ||
+							previousCategory == UnicodeCategory.LowercaseLetter ||
+							(previousCategory != UnicodeCategory.DecimalDigitNumber &&
+							previousCategory != null &&
+							currentIndex > 0 &&
+							currentIndex + 1 < name.Length &&
+							char.IsLower(name[currentIndex + 1])))
+						{
+							builder.Append('_');
+						}
+
+						currentChar = char.ToLowerInvariant(currentChar);
+						break;
+
+					case UnicodeCategory.LowercaseLetter:
+					case UnicodeCategory.DecimalDigitNumber:
+						if (previousCategory == UnicodeCategory.SpaceSeparator)
+						{
+							builder.Append('_');
+						}
+						break;
+
+					default:
+						if (previousCategory != null)
+						{
+							previousCategory = UnicodeCategory.SpaceSeparator;
+						}
+						continue;
+				}
+
+				builder.Append(currentChar);
+				previousCategory = currentCategory;
+			}
+
+			return builder.ToString();
+		}
+
+		/// <summary>
 		/// Is the lambda expression a member (like x => x.Body).
 		/// </summary>
 		/// <param name="ex">The expression that should be checked</param>

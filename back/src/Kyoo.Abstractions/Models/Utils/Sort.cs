@@ -21,15 +21,20 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Utils;
 
 namespace Kyoo.Abstractions.Controllers
 {
+	public record Sort;
+
 	/// <summary>
 	/// Information about how a query should be sorted. What factor should decide the sort and in which order.
 	/// </summary>
 	/// <typeparam name="T">For witch type this sort applies</typeparam>
-	public record Sort<T>
+	public record Sort<T> : Sort
+		where T : IQuery
 	{
 		/// <summary>
 		/// Sort by a specific key
@@ -61,7 +66,13 @@ namespace Kyoo.Abstractions.Controllers
 		public record Random(uint seed) : Sort<T>;
 
 		/// <summary>The default sort method for the given type.</summary>
-		public record Default : Sort<T>;
+		public record Default : Sort<T>
+		{
+			public void Deconstruct(out Sort<T> value)
+			{
+				value = (Sort<T>)T.DefaultSort;
+			}
+		}
 
 		/// <summary>
 		/// Create a new <see cref="Sort{T}"/> instance from a key's name (case insensitive).
@@ -91,7 +102,11 @@ namespace Kyoo.Abstractions.Controllers
 				null => false,
 				_ => throw new ValidationException($"The sort order, if set, should be :asc or :desc but it was :{order}.")
 			};
-			PropertyInfo? property = typeof(T).GetProperty(key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+
+			Type[] types = typeof(T).GetCustomAttribute<OneOfAttribute>()?.Types ?? new[] { typeof(T) };
+			PropertyInfo? property = types
+				.Select(x => x.GetProperty(key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance))
+				.FirstOrDefault();
 			if (property == null)
 				throw new ValidationException("The given sort key is not valid.");
 			return new By(property.Name, desendant);

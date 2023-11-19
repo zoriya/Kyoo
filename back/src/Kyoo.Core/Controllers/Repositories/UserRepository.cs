@@ -37,9 +37,6 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		private readonly DatabaseContext _database;
 
-		/// <inheritdoc />
-		protected override Sort<User> DefaultSort => new Sort<User>.By(x => x.Username);
-
 		/// <summary>
 		/// Create a new <see cref="UserRepository"/>
 		/// </summary>
@@ -54,10 +51,8 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<ICollection<User>> Search(string query, Include<User>? include = default)
 		{
-			return await Sort(
-					AddIncludes(_database.Users, include)
-						.Where(_database.Like<User>(x => x.Username, $"%{query}%"))
-				)
+			return await AddIncludes(_database.Users, include)
+				.Where(_database.Like<User>(x => x.Username, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
 		}

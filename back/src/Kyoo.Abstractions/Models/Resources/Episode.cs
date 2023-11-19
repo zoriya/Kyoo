@@ -23,6 +23,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using EntityFrameworkCore.Projectables;
 using JetBrains.Annotations;
+using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Abstractions.Models
@@ -30,8 +31,15 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A class to represent a single show's episode.
 	/// </summary>
-	public class Episode : IResource, IMetadata, IThumbnails, IAddedDate
+	public class Episode : IQuery, IResource, IMetadata, IThumbnails, IAddedDate
 	{
+		// Use absolute numbers by default and fallback to season/episodes if it does not exists.
+		public static Sort DefaultSort => new Sort<Episode>.Conglomerate(
+			new Sort<Episode>.By(x => x.AbsoluteNumber),
+			new Sort<Episode>.By(x => x.SeasonNumber),
+			new Sort<Episode>.By(x => x.EpisodeNumber)
+		);
+
 		/// <inheritdoc />
 		public int Id { get; set; }
 

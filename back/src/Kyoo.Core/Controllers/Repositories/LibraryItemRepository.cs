@@ -30,6 +30,7 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Utils;
+using Kyoo.Utils;
 
 namespace Kyoo.Core.Controllers
 {
@@ -91,17 +92,30 @@ namespace Kyoo.Core.Controllers
 			throw new NotImplementedException();
 		}
 
-		public string ProcessSort<T>(Sort<T> sort, string[] tables)
+		public string ProcessSort<T>(Sort<T> sort, Dictionary<string, Type> config)
+			where T : IQuery
 		{
-			return sort switch
+			string Property(string key)
 			{
-				// TODO: Implement default sort by
-				Sort<T>.Default => $"coalesce({string.Join(", ", tables.Select(x => $"{x}.name"))})",
-				Sort<T>.By(string key, bool desc) => $"coalesce({string.Join(", ", tables.Select(x => $"{x}.{key}"))}) {(desc ? "desc" : "asc")}",
-				Sort<T>.Random(var seed) => $"md5('{seed}' || coalesce({string.Join(", ", tables.Select(x => $"{x}.id"))}))",
-				Sort<T>.Conglomerate(var list) => string.Join(", ", list.Select(x => ProcessSort(x, tables))),
+				if (config.Count == 1)
+					return $"{config.First()}.{key.ToSnakeCase()}";
+
+				IEnumerable<string> keys = config
+					.Where(x => x.Value.GetProperty(key) != null)
+					.Select(x => $"{x.Key}.{key.ToSnakeCase()}");
+				return $"coalesce({string.Join(", ", keys)})";
+			}
+
+			string ret = sort switch
+			{
+				Sort<T>.Default(var value) => ProcessSort(value, config),
+				Sort<T>.By(string key, bool desc) => $"{Property(key)} {(desc ? "desc nulls last" : "asc")}",
+				Sort<T>.Random(var seed) => $"md5('{seed}' || {Property("id")})",
+				Sort<T>.Conglomerate(var list) => string.Join(", ", list.Select(x => ProcessSort(x, config))),
 				_ => throw new SwitchExpressionException(),
 			};
+			// always end query by an id sort.
+			return $"{ret}, {Property("id")} asc";
 		}
 
 		public async Task<ICollection<ILibraryItem>> GetAll(
@@ -110,6 +124,12 @@ namespace Kyoo.Core.Controllers
 			Pagination? limit = null,
 			Include<ILibraryItem>? include = null)
 		{
+			Dictionary<string, Type> config = new()
+			{
+				{ "s", typeof(Show) },
+				{ "m", typeof(Movie) },
+				{ "c", typeof(Collection) }
+			};
 			// language=PostgreSQL
 			IDapperSqlCommand query = _database.SqlBuilder($"""
 				select
@@ -130,11 +150,11 @@ namespace Kyoo.Core.Controllers
 						from
 							collections) as c on false
 					left join studios as st on st.id = coalesce(s.studio_id, m.studio_id)
-				order by {ProcessSort(sort, new[] { "s", "m", "c" }):raw}
+				order by {ProcessSort(sort, config):raw}
 				limit {limit.Limit}
 			""").Build();
 
-			Type[] types = new[] { typeof(Show), typeof(Movie), typeof(Collection), typeof(Studio) };
+			Type[] types = config.Select(x => x.Value).Concat(new[] { typeof(Studio) }).ToArray();
 			IEnumerable<ILibraryItem> data = await query.QueryAsync<ILibraryItem>(types, items =>
 			{
 				var studio = items[3] as Studio;

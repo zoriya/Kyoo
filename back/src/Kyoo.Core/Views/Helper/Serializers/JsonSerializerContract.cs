@@ -77,7 +77,7 @@ namespace Kyoo.Core.Api
 		{
 			IList<JsonProperty> properties = base.CreateProperties(type, memberSerialization);
 
-			if (properties.All(x => x.PropertyName != "kind"))
+			if (properties.All(x => x.PropertyName != "kind") && type.IsAssignableTo(typeof(IResource)))
 			{
 				properties.Add(new JsonProperty()
 				{

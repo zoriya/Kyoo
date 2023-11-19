@@ -50,7 +50,6 @@ namespace Kyoo.Postgresql
 		{
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<Status>();
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<Genre>();
-			NpgsqlConnection.GlobalTypeMapper.MapEnum<ItemKind>();
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<NewsKind>();
 		}
 
@@ -104,7 +103,6 @@ namespace Kyoo.Postgresql
 		{
 			modelBuilder.HasPostgresEnum<Status>();
 			modelBuilder.HasPostgresEnum<Genre>();
-			modelBuilder.HasPostgresEnum<ItemKind>();
 			modelBuilder.HasPostgresEnum<NewsKind>();
 
 			modelBuilder.HasDbFunction(typeof(DatabaseContext).GetMethod(nameof(MD5))!)

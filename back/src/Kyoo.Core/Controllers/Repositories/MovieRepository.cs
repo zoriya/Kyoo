@@ -47,9 +47,6 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		private readonly IRepository<People> _people;
 
-		/// <inheritdoc />
-		protected override Sort<Movie> DefaultSort => new Sort<Movie>.By(x => x.Name);
-
 		/// <summary>
 		/// Create a new <see cref="MovieRepository"/>.
 		/// </summary>
@@ -71,10 +68,8 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<ICollection<Movie>> Search(string query, Include<Movie>? include = default)
 		{
-			return await Sort(
-					AddIncludes(_database.Movies, include)
-						.Where(_database.Like<Movie>(x => x.Name + " " + x.Slug, $"%{query}%"))
-				)
+			return await AddIncludes(_database.Movies, include)
+				.Where(_database.Like<Movie>(x => x.Name + " " + x.Slug, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
 		}

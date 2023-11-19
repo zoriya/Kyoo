@@ -16,16 +16,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using Kyoo.Abstractions.Controllers;
-using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Abstractions.Models;
 
-/// <summary>
-/// A show, a movie or a collection.
-/// </summary>
-[OneOf(Types = new[] { typeof(Show), typeof(Movie), typeof(Collection) })]
-public interface ILibraryItem : IResource, IThumbnails, IMetadata, IAddedDate, IQuery
+public interface IQuery
 {
-	static Sort IQuery.DefaultSort => new Sort<ILibraryItem>.By(nameof(Movie.AirDate));
+	/// <summary>
+	/// The sorting that will be used when no user defined one is present.
+	/// </summary>
+	public static virtual Sort DefaultSort => throw new NotImplementedException();
 }

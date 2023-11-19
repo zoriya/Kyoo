@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Utils;
 using Newtonsoft.Json;
@@ -28,8 +29,10 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A series or a movie.
 	/// </summary>
-	public class Movie : IResource, IMetadata, IOnMerge, IThumbnails, IAddedDate, ILibraryItem
+	public class Movie : IQuery, IResource, IMetadata, IOnMerge, IThumbnails, IAddedDate, ILibraryItem
 	{
+		public static Sort DefaultSort => new Sort<Movie>.By(x => x.Name);
+
 		/// <inheritdoc />
 		public int Id { get; set; }
 

@@ -31,7 +31,7 @@ namespace Kyoo.Abstractions.Controllers
 	/// </summary>
 	/// <typeparam name="T">The resource's type that this repository manage.</typeparam>
 	public interface IRepository<T> : IBaseRepository
-		where T : class, IResource
+		where T : class, IResource, IQuery
 	{
 		/// <summary>
 		/// The event handler type for all events of this repository.

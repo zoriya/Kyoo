@@ -37,7 +37,7 @@ namespace Kyoo.Core.Api
 	[ApiController]
 	[ResourceView]
 	public class CrudApi<T> : BaseApi
-		where T : class, IResource
+		where T : class, IResource, IQuery
 	{
 		/// <summary>
 		/// The repository of the resource, used to retrieve, save and do operations on the baking store.

@@ -194,10 +194,6 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("genre[]")
                         .HasColumnName("genres");
 
-                    b.Property<ItemKind>("Kind")
-                        .HasColumnType("item_kind")
-                        .HasColumnName("kind");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
