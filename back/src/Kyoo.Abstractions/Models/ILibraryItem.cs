@@ -16,34 +16,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
-using Kyoo.Utils;
+using Kyoo.Abstractions.Models.Attributes;
 
-namespace Kyoo.Abstractions.Models
-{
-	/// <summary>
-	/// The type of item, ether a show, a movie or a collection.
-	/// </summary>
-	public enum ItemKind
-	{
-		/// <summary>
-		/// The <see cref="ILibraryItem"/> is a <see cref="Show"/>.
-		/// </summary>
-		Show,
+namespace Kyoo.Abstractions.Models;
 
-		/// <summary>
-		/// The <see cref="ILibraryItem"/> is a Movie.
-		/// </summary>
-		Movie,
-
-		/// <summary>
-		/// The <see cref="ILibraryItem"/> is a <see cref="Collection"/>.
-		/// </summary>
-		Collection
-	}
-
-	public interface ILibraryItem : IResource, IThumbnails, IMetadata, IAddedDate { }
-}
+/// <summary>
+/// A show, a movie or a collection.
+/// </summary>
+[OneOf(Types = new[] { typeof(Show), typeof(Movie), typeof(Collection) })]
+public interface ILibraryItem : IResource, IThumbnails, IMetadata, IAddedDate { }
