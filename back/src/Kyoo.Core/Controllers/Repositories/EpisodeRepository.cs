@@ -41,14 +41,6 @@ namespace Kyoo.Core.Controllers
 
 		private readonly IRepository<Show> _shows;
 
-		/// <inheritdoc />
-		// Use absolute numbers by default and fallback to season/episodes if it does not exists.
-		protected override Sort<Episode> DefaultSort => new Sort<Episode>.Conglomerate(
-			new Sort<Episode>.By(x => x.AbsoluteNumber),
-			new Sort<Episode>.By(x => x.SeasonNumber),
-			new Sort<Episode>.By(x => x.EpisodeNumber)
-		);
-
 		static EpisodeRepository()
 		{
 			// Edit episode slugs when the show's slug changes.
@@ -86,10 +78,8 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<ICollection<Episode>> Search(string query, Include<Episode>? include = default)
 		{
-			return await Sort(
-				AddIncludes(_database.Episodes, include)
-					.Where(_database.Like<Episode>(x => x.Name!, $"%{query}%"))
-				)
+			return await AddIncludes(_database.Episodes, include)
+				.Where(_database.Like<Episode>(x => x.Name!, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
 		}

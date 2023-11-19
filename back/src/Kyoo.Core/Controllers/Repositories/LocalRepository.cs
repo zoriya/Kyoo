@@ -40,7 +40,7 @@ namespace Kyoo.Core.Controllers
 	/// </summary>
 	/// <typeparam name="T">The type of this repository</typeparam>
 	public abstract class LocalRepository<T> : IRepository<T>
-		where T : class, IResource
+		where T : class, IResource, IQuery
 	{
 		/// <summary>
 		/// The Entity Framework's Database handle.
@@ -51,11 +51,6 @@ namespace Kyoo.Core.Controllers
 		/// The thumbnail manager used to store images.
 		/// </summary>
 		private readonly IThumbnailsManager _thumbs;
-
-		/// <summary>
-		/// The default sort order that will be used for this resource's type.
-		/// </summary>
-		protected abstract Sort<T> DefaultSort { get; }
 
 		/// <summary>
 		/// Create a new base <see cref="LocalRepository{T}"/> with the given database handle.
@@ -77,9 +72,9 @@ namespace Kyoo.Core.Controllers
 		/// <param name="query">The query to sort.</param>
 		/// <param name="sortBy">How to sort the query.</param>
 		/// <returns>The newly sorted query.</returns>
-		protected IOrderedQueryable<T> Sort(IQueryable<T> query, Sort<T>? sortBy = null)
+		protected IOrderedQueryable<T> Sort(IQueryable<T> query, Sort<T>? sortBy)
 		{
-			sortBy ??= DefaultSort;
+			sortBy ??= new Sort<T>.Default();
 
 			IOrderedQueryable<T> _SortBy(IQueryable<T> qr, Expression<Func<T, object>> sort, bool desc, bool then)
 			{
@@ -98,8 +93,8 @@ namespace Kyoo.Core.Controllers
 			{
 				switch (sortBy)
 				{
-					case Sort<T>.Default:
-						return _Sort(query, DefaultSort, then);
+					case Sort<T>.Default(var value):
+						return _Sort(query, value, then);
 					case Sort<T>.By(var key, var desc):
 						return _SortBy(query, x => EF.Property<T>(x, key), desc, then);
 					case Sort<T>.Random(var seed):
@@ -154,7 +149,7 @@ namespace Kyoo.Core.Controllers
 			T reference,
 			bool next = true)
 		{
-			sort ??= DefaultSort;
+			sort ??= new Sort<T>.Default();
 
 			// x =>
 			ParameterExpression x = Expression.Parameter(typeof(T), "x");
@@ -173,7 +168,7 @@ namespace Kyoo.Core.Controllers
 			{
 				return sort switch
 				{
-					Sort<T>.Default => GetSortsBy(DefaultSort),
+					Sort<T>.Default(var value) => GetSortsBy(value),
 					Sort<T>.By @sortBy => new[] { new SortIndicator(sortBy.Key, sortBy.Desendant, null) },
 					Sort<T>.Conglomerate(var list) => list.SelectMany(GetSortsBy),
 					Sort<T>.Random(var seed) => new[] { new SortIndicator("random", false, seed.ToString()) },

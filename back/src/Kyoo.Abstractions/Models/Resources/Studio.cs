@@ -18,6 +18,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Utils;
 using Newtonsoft.Json;
@@ -27,8 +28,10 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A studio that make shows.
 	/// </summary>
-	public class Studio : IResource, IMetadata
+	public class Studio : IQuery, IResource, IMetadata
 	{
+		public static Sort DefaultSort => new Sort<Studio>.By(x => x.Name);
+
 		/// <inheritdoc />
 		public int Id { get; set; }
 

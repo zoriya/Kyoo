@@ -44,9 +44,6 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		private readonly Lazy<IRepository<Show>> _shows;
 
-		/// <inheritdoc />
-		protected override Sort<People> DefaultSort => new Sort<People>.By(x => x.Name);
-
 		/// <summary>
 		/// Create a new <see cref="PeopleRepository"/>
 		/// </summary>
@@ -65,10 +62,8 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<ICollection<People>> Search(string query, Include<People>? include = default)
 		{
-			return await Sort(
-				AddIncludes(_database.People, include)
-					.Where(_database.Like<People>(x => x.Name, $"%{query}%"))
-				)
+			return await AddIncludes(_database.People, include)
+				.Where(_database.Like<People>(x => x.Name, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
 		}

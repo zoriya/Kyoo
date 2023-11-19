@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Utils;
 using Newtonsoft.Json;
@@ -28,8 +29,10 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A class representing collections of <see cref="Show"/>.
 	/// </summary>
-	public class Collection : IResource, IMetadata, IThumbnails, IAddedDate, ILibraryItem
+	public class Collection : IQuery, IResource, IMetadata, IThumbnails, IAddedDate, ILibraryItem
 	{
+		public static Sort DefaultSort => new Sort<Collection>.By(nameof(Collection.Name));
+
 		/// <inheritdoc />
 		public int Id { get; set; }
 

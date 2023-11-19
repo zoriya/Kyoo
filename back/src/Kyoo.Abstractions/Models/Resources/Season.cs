@@ -23,6 +23,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.RegularExpressions;
 using EntityFrameworkCore.Projectables;
 using JetBrains.Annotations;
+using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Abstractions.Models
@@ -30,8 +31,10 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A season of a <see cref="Show"/>.
 	/// </summary>
-	public class Season : IResource, IMetadata, IThumbnails, IAddedDate
+	public class Season : IQuery, IResource, IMetadata, IThumbnails, IAddedDate
 	{
+		public static Sort DefaultSort => new Sort<Season>.By(x => x.SeasonNumber);
+
 		/// <inheritdoc />
 		public int Id { get; set; }
 

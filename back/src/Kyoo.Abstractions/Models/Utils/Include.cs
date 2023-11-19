@@ -43,11 +43,14 @@ public class Include<T>
 
 		return new Include<T>
 		{
-			Fields = fields.Split(',').Select(x =>
+			Fields = fields.Split(',').Select(key =>
 			{
-				PropertyInfo? prop = typeof(T).GetProperty(x, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+				Type[] types = typeof(T).GetCustomAttribute<OneOfAttribute>()?.Types ?? new[] { typeof(T) };
+				PropertyInfo? prop = types
+					.Select(x => x.GetProperty(key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance))
+					.FirstOrDefault();
 				if (prop?.GetCustomAttribute<LoadableRelationAttribute>() == null)
-					throw new ValidationException($"No loadable relation with the name {x}.");
+					throw new ValidationException($"No loadable relation with the name {key}.");
 				return prop.Name;
 			}).ToArray()
 		};

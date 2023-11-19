@@ -31,6 +31,7 @@ public class SearchManager : ISearchManager
 	private readonly ILibraryManager _libraryManager;
 
 	private static IEnumerable<string> _GetSortsBy<T>(string index, Sort<T>? sort)
+		where T : IQuery
 	{
 		return sort switch
 		{
@@ -55,7 +56,7 @@ public class SearchManager : ISearchManager
 		Sort<T>? sortBy = default,
 		SearchPagination? pagination = default,
 		Include<T>? include = default)
-		where T : class, IResource
+		where T : class, IResource, IQuery
 	{
 		// TODO: add filters and facets
 		ISearchable<IdResource> res = await _client.Index(index).SearchAsync<IdResource>(query, new SearchQuery()

@@ -39,9 +39,6 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		private readonly DatabaseContext _database;
 
-		/// <inheritdoc/>
-		protected override Sort<Season> DefaultSort => new Sort<Season>.By(x => x.SeasonNumber);
-
 		static SeasonRepository()
 		{
 			// Edit seasons slugs when the show's slug changes.
@@ -76,10 +73,8 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc/>
 		public override async Task<ICollection<Season>> Search(string query, Include<Season>? include = default)
 		{
-			return await Sort(
-					AddIncludes(_database.Seasons, include)
-						.Where(_database.Like<Season>(x => x.Name!, $"%{query}%"))
-				)
+			return await AddIncludes(_database.Seasons, include)
+				.Where(_database.Like<Season>(x => x.Name!, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
 		}

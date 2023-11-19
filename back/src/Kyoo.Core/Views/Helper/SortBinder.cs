@@ -20,6 +20,7 @@ using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 
@@ -38,7 +39,7 @@ public class SortBinder : IModelBinder
 		);
 		try
 		{
-			object sort = bindingContext.ModelType.GetMethod(nameof(Sort<object>.From))!
+			object sort = bindingContext.ModelType.GetMethod(nameof(Sort<Movie>.From))!
 				.Invoke(null, new object?[] { sortBy.FirstValue, seed })!;
 			bindingContext.Result = ModelBindingResult.Success(sort);
 			bindingContext.HttpContext.Items["seed"] = seed;

@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -39,9 +38,6 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		private readonly DatabaseContext _database;
 
-		/// <inheritdoc />
-		protected override Sort<Collection> DefaultSort => new Sort<Collection>.By(nameof(Collection.Name));
-
 		/// <summary>
 		/// Create a new <see cref="CollectionRepository"/>.
 		/// </summary>
@@ -56,11 +52,10 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<ICollection<Collection>> Search(string query, Include<Collection>? include = default)
 		{
-			return await Sort(
-				AddIncludes(_database.Collections, include)
-					.Where(_database.Like<Collection>(x => x.Name + " " + x.Slug, $"%{query}%"))
-					.Take(20)
-				).ToListAsync();
+			return await AddIncludes(_database.Collections, include)
+				.Where(_database.Like<Collection>(x => x.Name + " " + x.Slug, $"%{query}%"))
+				.Take(20)
+				.ToListAsync();
 		}
 
 		/// <inheritdoc />

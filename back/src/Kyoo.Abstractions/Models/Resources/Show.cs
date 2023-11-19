@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using EntityFrameworkCore.Projectables;
+using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Utils;
 using Newtonsoft.Json;
@@ -30,8 +31,10 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A series or a movie.
 	/// </summary>
-	public class Show : IResource, IMetadata, IOnMerge, IThumbnails, IAddedDate, ILibraryItem
+	public class Show : IQuery, IResource, IMetadata, IOnMerge, IThumbnails, IAddedDate, ILibraryItem
 	{
+		public static Sort DefaultSort => new Sort<Show>.By(x => x.Name);
+
 		/// <inheritdoc />
 		public int Id { get; set; }
 
@@ -107,7 +110,8 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public string? Trailer { get; set; }
 
-		[SerializeIgnore] public DateTime? AirDate => StartAir;
+		[SerializeIgnore]
+		public DateTime? AirDate => StartAir;
 
 		/// <inheritdoc />
 		public Dictionary<string, MetadataId> ExternalId { get; set; } = new();

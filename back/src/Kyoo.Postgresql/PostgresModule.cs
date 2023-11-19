@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Text.RegularExpressions;
 using Dapper;
-using EFCore.NamingConventions.Internal;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Postgresql.Utils;

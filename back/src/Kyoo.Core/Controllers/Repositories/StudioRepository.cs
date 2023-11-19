@@ -38,9 +38,6 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		private readonly DatabaseContext _database;
 
-		/// <inheritdoc />
-		protected override Sort<Studio> DefaultSort => new Sort<Studio>.By(x => x.Name);
-
 		/// <summary>
 		/// Create a new <see cref="StudioRepository"/>.
 		/// </summary>
@@ -55,10 +52,8 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<ICollection<Studio>> Search(string query, Include<Studio>? include = default)
 		{
-			return await Sort(
-					AddIncludes(_database.Studios, include)
-						.Where(_database.Like<Studio>(x => x.Name, $"%{query}%"))
-				)
+			return await AddIncludes(_database.Studios, include)
+				.Where(_database.Like<Studio>(x => x.Name, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
 		}
