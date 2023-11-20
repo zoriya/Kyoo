@@ -17,6 +17,7 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -59,7 +60,19 @@ public class Include<T>
 					throw new ValidationException($"No loadable relation with the name {key}.");
 				if (attr.RelationID != null)
 					return new SingleRelation(prop.Name, prop.PropertyType, attr.RelationID);
-				return new MultipleRelation(prop.Name);
+
+				// Multiples relations are disabled due to:
+				//   - Cartesian Explosions perfs
+				//   - Code complexity added.
+				// if (typeof(IEnumerable).IsAssignableFrom(prop.PropertyType) && prop.PropertyType != typeof(string))
+				// {
+				// 	// The property is either a list or a an array.
+				// 	return new MultipleRelation(
+				// 		prop.Name,
+				// 		prop.PropertyType.GetElementType() ?? prop.PropertyType.GenericTypeArguments.First()
+				// 	);
+				// }
+				throw new NotImplementedException();
 			}).ToArray()
 		};
 	}
@@ -67,6 +80,4 @@ public class Include<T>
 	public abstract record Metadata(string Name);
 
 	public record SingleRelation(string Name, Type type, string RelationIdName) : Metadata(Name);
-
-	public record MultipleRelation(string Name) : Metadata(Name);
 }

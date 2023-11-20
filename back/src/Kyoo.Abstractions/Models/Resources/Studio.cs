@@ -47,12 +47,12 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The list of shows that are made by this studio.
 		/// </summary>
-		[LoadableRelation] public ICollection<Show>? Shows { get; set; }
+		[SerializeIgnore] public ICollection<Show>? Shows { get; set; }
 
 		/// <summary>
 		/// The list of movies that are made by this studio.
 		/// </summary>
-		[LoadableRelation] public ICollection<Movie>? Movies { get; set; }
+		[SerializeIgnore] public ICollection<Movie>? Movies { get; set; }
 
 		/// <inheritdoc />
 		public Dictionary<string, MetadataId> ExternalId { get; set; } = new();

@@ -121,7 +121,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The list of episodes that this season contains.
 		/// </summary>
-		[LoadableRelation] public ICollection<Episode>? Episodes { get; set; }
+		[SerializeIgnore] public ICollection<Episode>? Episodes { get; set; }
 
 		/// <summary>
 		/// The number of episodes in this season.

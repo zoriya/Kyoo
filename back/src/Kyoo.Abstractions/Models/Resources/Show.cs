@@ -124,29 +124,29 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The Studio that made this show.
 		/// </summary>
-		[LoadableRelation(nameof(StudioId))][EditableRelation] public Studio? Studio { get; set; }
+		[LoadableRelation(nameof(StudioId))] public Studio? Studio { get; set; }
 
 		/// <summary>
 		/// The list of people that made this show.
 		/// </summary>
-		[LoadableRelation][EditableRelation] public ICollection<PeopleRole>? People { get; set; }
+		[SerializeIgnore] public ICollection<PeopleRole>? People { get; set; }
 
 		/// <summary>
 		/// The different seasons in this show. If this is a movie, this list is always null or empty.
 		/// </summary>
-		[LoadableRelation] public ICollection<Season>? Seasons { get; set; }
+		[SerializeIgnore] public ICollection<Season>? Seasons { get; set; }
 
 		/// <summary>
 		/// The list of episodes in this show.
 		/// If this is a movie, there will be a unique episode (with the seasonNumber and episodeNumber set to null).
 		/// Having an episode is necessary to store metadata and tracks.
 		/// </summary>
-		[LoadableRelation] public ICollection<Episode>? Episodes { get; set; }
+		[SerializeIgnore] public ICollection<Episode>? Episodes { get; set; }
 
 		/// <summary>
 		/// The list of collections that contains this show.
 		/// </summary>
-		[LoadableRelation] public ICollection<Collection>? Collections { get; set; }
+		[SerializeIgnore] public ICollection<Collection>? Collections { get; set; }
 
 		/// <summary>
 		/// The first episode of this show.

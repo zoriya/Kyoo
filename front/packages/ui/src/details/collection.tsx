@@ -18,10 +18,17 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { KyooImage } from "@kyoo/models";
-import { H2, ImageBackground, Link, P, focusReset, ts } from "@kyoo/primitives";
+import {
+	Collection,
+	CollectionP,
+	KyooImage,
+	QueryIdentifier,
+	useInfiniteFetch,
+} from "@kyoo/models";
+import { Container, H2, ImageBackground, Link, P, focusReset, ts } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { Theme, useYoshiki } from "yoshiki/native";
+import { ErrorView, Fetch } from "../fetch";
 
 export const PartOf = ({
 	name,
@@ -69,3 +76,36 @@ export const PartOf = ({
 		</Link>
 	);
 };
+
+export const DetailsCollections = ({ type, slug }: { type: "movie" | "show"; slug: string }) => {
+	const { items, error } = useInfiniteFetch(DetailsCollections.query(type, slug));
+	const { css } = useYoshiki();
+
+	if (error) return <ErrorView error={error} />;
+
+	// Since most items dont have collections, not having a skeleton reduces layout shifts.
+	if (!items) return null;
+
+	return (
+		<Container {...css({ marginY: ts(2) })}>
+			{items.map((x) => (
+				<PartOf
+					key={x.id}
+					name={x.name}
+					overview={x.overview}
+					thumbnail={x.thumbnail}
+					href={x.href}
+				/>
+			))}
+		</Container>
+	);
+};
+
+DetailsCollections.query = (type: "movie" | "show", slug: string): QueryIdentifier<Collection> => ({
+	parser: CollectionP,
+	path: [type, slug, "collections"],
+	params: {
+		limit: 0,
+	},
+	infinite: true,
+});
