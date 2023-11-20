@@ -34,7 +34,12 @@ public class Include<T>
 	/// <summary>
 	/// The aditional fields to include in the result.
 	/// </summary>
-	public ICollection<string> Fields { get; private init; } = ArraySegment<string>.Empty;
+	public ICollection<Metadata> Metadatas { get; private init; } = ArraySegment<Metadata>.Empty;
+
+	/// <summary>
+	/// The aditional fields names to include in the result.
+	/// </summary>
+	public ICollection<string> Fields => Metadatas.Select(x => x.Name).ToList();
 
 	public static Include<T> From(string? fields)
 	{
@@ -43,16 +48,25 @@ public class Include<T>
 
 		return new Include<T>
 		{
-			Fields = fields.Split(',').Select(key =>
+			Metadatas = fields.Split(',').Select<string, Metadata>(key =>
 			{
 				Type[] types = typeof(T).GetCustomAttribute<OneOfAttribute>()?.Types ?? new[] { typeof(T) };
 				PropertyInfo? prop = types
 					.Select(x => x.GetProperty(key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance))
 					.FirstOrDefault();
-				if (prop?.GetCustomAttribute<LoadableRelationAttribute>() == null)
+				LoadableRelationAttribute? attr = prop?.GetCustomAttribute<LoadableRelationAttribute>();
+				if (prop == null || attr == null)
 					throw new ValidationException($"No loadable relation with the name {key}.");
-				return prop.Name;
+				if (attr.RelationID != null)
+					return new SingleRelation(prop.Name, prop.PropertyType, attr.RelationID);
+				return new MultipleRelation(prop.Name);
 			}).ToArray()
 		};
 	}
+
+	public abstract record Metadata(string Name);
+
+	public record SingleRelation(string Name, Type type, string RelationIdName) : Metadata(Name);
+
+	public record MultipleRelation(string Name) : Metadata(Name);
 }

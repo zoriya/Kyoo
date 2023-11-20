@@ -27,5 +27,5 @@ namespace Kyoo.Abstractions.Models;
 [OneOf(Types = new[] { typeof(Show), typeof(Movie), typeof(Collection) })]
 public interface ILibraryItem : IResource, IThumbnails, IMetadata, IAddedDate, IQuery
 {
-	static Sort IQuery.DefaultSort => new Sort<ILibraryItem>.By(nameof(Movie.AirDate));
+	static Sort IQuery.DefaultSort => new Sort<ILibraryItem>.By(nameof(Movie.Name));
 }
