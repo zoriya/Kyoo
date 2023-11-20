@@ -18,14 +18,18 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Common;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading.Tasks;
 using Dapper;
 using InterpolatedSql.Dapper;
+using InterpolatedSql.SqlBuilders;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Exceptions;
@@ -92,30 +96,68 @@ namespace Kyoo.Core.Controllers
 			throw new NotImplementedException();
 		}
 
-		public string ProcessSort<T>(Sort<T> sort, Dictionary<string, Type> config)
+		private static string _Property(string key, Dictionary<string, Type> config)
+		{
+			if (config.Count == 1)
+				return $"{config.First()}.{key.ToSnakeCase()}";
+
+			IEnumerable<string> keys = config
+				.Where(x => key == "id" || x.Value.GetProperty(key) != null)
+				.Select(x => $"{x.Key}.{key.ToSnakeCase()}");
+			return $"coalesce({string.Join(", ", keys)})";
+		}
+
+		public static string ProcessSort<T>(Sort<T> sort, Dictionary<string, Type> config, bool recurse = false)
 			where T : IQuery
 		{
-			string Property(string key)
-			{
-				if (config.Count == 1)
-					return $"{config.First()}.{key.ToSnakeCase()}";
-
-				IEnumerable<string> keys = config
-					.Where(x => x.Value.GetProperty(key) != null)
-					.Select(x => $"{x.Key}.{key.ToSnakeCase()}");
-				return $"coalesce({string.Join(", ", keys)})";
-			}
-
 			string ret = sort switch
 			{
-				Sort<T>.Default(var value) => ProcessSort(value, config),
-				Sort<T>.By(string key, bool desc) => $"{Property(key)} {(desc ? "desc nulls last" : "asc")}",
-				Sort<T>.Random(var seed) => $"md5('{seed}' || {Property("id")})",
-				Sort<T>.Conglomerate(var list) => string.Join(", ", list.Select(x => ProcessSort(x, config))),
+				Sort<T>.Default(var value) => ProcessSort(value, config, true),
+				Sort<T>.By(string key, bool desc) => $"{_Property(key, config)} {(desc ? "desc nulls last" : "asc")}",
+				Sort<T>.Random(var seed) => $"md5('{seed}' || {_Property("id", config)})",
+				Sort<T>.Conglomerate(var list) => string.Join(", ", list.Select(x => ProcessSort(x, config, true))),
 				_ => throw new SwitchExpressionException(),
 			};
+			if (recurse)
+				return ret;
 			// always end query by an id sort.
-			return $"{ret}, {Property("id")} asc";
+			return $"{ret}, {_Property("id", config)} asc";
+		}
+
+		public static (
+			Dictionary<string, Type> config,
+			string join,
+			Func<T, IEnumerable<object>, T> map
+		) ProcessInclude<T>(Include<T> include, Dictionary<string, Type> config)
+			where T : class
+		{
+			Dictionary<string, Type> retConfig = new();
+			StringBuilder join = new();
+
+			foreach (Include<T>.Metadata metadata in include.Metadatas)
+			{
+				switch (metadata)
+				{
+					case Include<T>.SingleRelation(var name, var type, var rid):
+						string tableName = type.GetCustomAttribute<TableAttribute>()?.Name ?? $"{type.Name.ToSnakeCase()}s";
+						retConfig.Add(tableName, type);
+						join.AppendLine($"left join {tableName} on {tableName}.id = {_Property(rid, config)}");
+						break;
+				}
+			}
+
+			T Map(T item, IEnumerable<object> relations)
+			{
+				foreach ((string name, object value) in include.Fields.Zip(relations))
+				{
+					PropertyInfo? prop = item.GetType().GetProperty(name);
+					if (prop != null)
+						prop.SetValue(item, value);
+				}
+				return item;
+			}
+
+			return (retConfig, join.ToString(), Map);
 		}
 
 		public async Task<ICollection<ILibraryItem>> GetAll(
@@ -130,13 +172,15 @@ namespace Kyoo.Core.Controllers
 				{ "m", typeof(Movie) },
 				{ "c", typeof(Collection) }
 			};
+			var (includeConfig, includeJoin, mapIncludes) = ProcessInclude(include, config);
+
 			// language=PostgreSQL
 			IDapperSqlCommand query = _database.SqlBuilder($"""
 				select
 					s.*,
 					m.*,
-					c.*,
-					st.*
+					c.*
+					{string.Join(string.Empty, includeConfig.Select(x => $", {x.Key}.*")):raw}
 				from
 					shows as s
 					full outer join (
@@ -149,21 +193,22 @@ namespace Kyoo.Core.Controllers
 							*
 						from
 							collections) as c on false
-					left join studios as st on st.id = coalesce(s.studio_id, m.studio_id)
+				{includeJoin:raw}
 				order by {ProcessSort(sort, config):raw}
 				limit {limit.Limit}
 			""").Build();
 
-			Type[] types = config.Select(x => x.Value).Concat(new[] { typeof(Studio) }).ToArray();
+			Type[] types = config.Select(x => x.Value)
+				.Concat(includeConfig.Select(x => x.Value))
+				.ToArray();
 			IEnumerable<ILibraryItem> data = await query.QueryAsync<ILibraryItem>(types, items =>
 			{
-				var studio = items[3] as Studio;
 				if (items[0] is Show show && show.Id != 0)
-					return show;
+					return mapIncludes(show, items.Skip(3));
 				if (items[1] is Movie movie && movie.Id != 0)
-					return movie;
+					return mapIncludes(movie, items.Skip(3));
 				if (items[2] is Collection collection && collection.Id != 0)
-					return collection;
+					return mapIncludes(collection, items.Skip(3));
 				throw new InvalidDataException();
 			});
 			return data.ToList();
