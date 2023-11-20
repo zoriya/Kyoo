@@ -131,25 +131,36 @@ namespace Kyoo.Core.Controllers
 		) ProcessInclude<T>(Include<T> include, Dictionary<string, Type> config)
 			where T : class
 		{
+			int relation = 0;
 			Dictionary<string, Type> retConfig = new();
 			StringBuilder join = new();
 
 			foreach (Include<T>.Metadata metadata in include.Metadatas)
 			{
+				relation++;
 				switch (metadata)
 				{
 					case Include<T>.SingleRelation(var name, var type, var rid):
 						string tableName = type.GetCustomAttribute<TableAttribute>()?.Name ?? $"{type.Name.ToSnakeCase()}s";
-						retConfig.Add(tableName, type);
-						join.AppendLine($"left join {tableName} on {tableName}.id = {_Property(rid, config)}");
+						retConfig.Add($"r{relation}", type);
+						join.AppendLine($"left join {tableName} as r{relation} on r{relation}.id = {_Property(rid, config)}");
 						break;
+					case Include<T>.CustomRelation(var name, var type, var sql, var on, var declaring):
+						string owner = config.First(x => x.Value == declaring).Key;
+						retConfig.Add($"r{relation}", type);
+						join.AppendLine($"left join ({sql}) as r{relation} on r{relation}.{on} = {owner}.id");
+						break;
+					default:
+						throw new NotImplementedException();
 				}
 			}
 
 			T Map(T item, IEnumerable<object> relations)
 			{
-				foreach ((string name, object value) in include.Fields.Zip(relations))
+				foreach ((string name, object? value) in include.Fields.Zip(relations))
 				{
+					if (value == null)
+						continue;
 					PropertyInfo? prop = item.GetType().GetProperty(name);
 					if (prop != null)
 						prop.SetValue(item, value);

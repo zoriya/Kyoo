@@ -31,6 +31,10 @@ namespace Kyoo.Abstractions.Models.Attributes
 		/// </summary>
 		public string? RelationID { get; }
 
+		public string? Sql { get; set; }
+
+		public string? On { get; set; }
+
 		/// <summary>
 		/// Create a new <see cref="LoadableRelationAttribute"/>.
 		/// </summary>

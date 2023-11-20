@@ -17,7 +17,6 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -47,32 +46,42 @@ public class Include<T>
 		if (string.IsNullOrEmpty(fields))
 			return new Include<T>();
 
+		Type[] types = typeof(T).GetCustomAttribute<OneOfAttribute>()?.Types ?? new[] { typeof(T) };
 		return new Include<T>
 		{
-			Metadatas = fields.Split(',').Select<string, Metadata>(key =>
+			Metadatas = fields.Split(',').SelectMany(key =>
 			{
-				Type[] types = typeof(T).GetCustomAttribute<OneOfAttribute>()?.Types ?? new[] { typeof(T) };
-				PropertyInfo? prop = types
-					.Select(x => x.GetProperty(key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance))
-					.FirstOrDefault();
-				LoadableRelationAttribute? attr = prop?.GetCustomAttribute<LoadableRelationAttribute>();
-				if (prop == null || attr == null)
+				var relations = types
+					.Select(x => x.GetProperty(key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)!)
+					.Select(prop => (prop, attr: prop?.GetCustomAttribute<LoadableRelationAttribute>()!))
+					.Where(x => x.prop != null && x.attr != null)
+					.ToList();
+				if (!relations.Any())
 					throw new ValidationException($"No loadable relation with the name {key}.");
-				if (attr.RelationID != null)
-					return new SingleRelation(prop.Name, prop.PropertyType, attr.RelationID);
+				return relations
+					.Select(x =>
+					{
+						(PropertyInfo prop, LoadableRelationAttribute attr) = x;
 
-				// Multiples relations are disabled due to:
-				//   - Cartesian Explosions perfs
-				//   - Code complexity added.
-				// if (typeof(IEnumerable).IsAssignableFrom(prop.PropertyType) && prop.PropertyType != typeof(string))
-				// {
-				// 	// The property is either a list or a an array.
-				// 	return new MultipleRelation(
-				// 		prop.Name,
-				// 		prop.PropertyType.GetElementType() ?? prop.PropertyType.GenericTypeArguments.First()
-				// 	);
-				// }
-				throw new NotImplementedException();
+						if (attr.RelationID != null)
+							return new SingleRelation(prop.Name, prop.PropertyType, attr.RelationID) as Metadata;
+
+						// Multiples relations are disabled due to:
+						//   - Cartesian Explosions perfs
+						//   - Code complexity added.
+						// if (typeof(IEnumerable).IsAssignableFrom(prop.PropertyType) && prop.PropertyType != typeof(string))
+						// {
+						// 	// The property is either a list or a an array.
+						// 	return new MultipleRelation(
+						// 		prop.Name,
+						// 		prop.PropertyType.GetElementType() ?? prop.PropertyType.GenericTypeArguments.First()
+						// 	);
+						// }
+						if (attr.Sql != null && attr.On != null)
+							return new CustomRelation(prop.Name, prop.PropertyType, attr.Sql, attr.On, prop.DeclaringType!);
+						throw new NotImplementedException();
+					})
+					.Distinct();
 			}).ToArray()
 		};
 	}
@@ -80,4 +89,6 @@ public class Include<T>
 	public abstract record Metadata(string Name);
 
 	public record SingleRelation(string Name, Type type, string RelationIdName) : Metadata(Name);
+
+	public record CustomRelation(string Name, Type type, string Sql, string On, Type Declaring) : Metadata(Name);
 }
