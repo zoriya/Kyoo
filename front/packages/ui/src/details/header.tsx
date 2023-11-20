@@ -459,19 +459,6 @@ export const Header = ({
 							</Chip>
 						))}
 					</Container>
-					{data?.collections && (
-						<Container {...css({ marginY: ts(2) })}>
-							{data.collections.map((x) => (
-								<PartOf
-									key={x.id}
-									name={x.name}
-									overview={x.overview}
-									thumbnail={x.thumbnail}
-									href={x.href}
-								/>
-							))}
-						</Container>
-					)}
 				</>
 			)}
 		</Fetch>

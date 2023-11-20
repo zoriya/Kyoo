@@ -23,12 +23,13 @@ import { Platform, ScrollView } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 import { DefaultLayout } from "../layout";
 import { Header } from "./header";
+import { DetailsCollections } from "./collection";
 
 const query = (slug: string): QueryIdentifier<Movie> => ({
 	parser: MovieP,
 	path: ["movies", slug],
 	params: {
-		fields: ["studio", "collections"],
+		fields: ["studio"],
 	},
 });
 
@@ -49,6 +50,7 @@ export const MovieDetails: QueryPage<{ slug: string }> = ({ slug }) => {
 			)}
 		>
 			<Header type="movie" query={query(slug)} />
+			<DetailsCollections type="movie" slug={slug} />
 			{/* <Staff slug={slug} /> */}
 		</ScrollView>
 	);
@@ -56,6 +58,7 @@ export const MovieDetails: QueryPage<{ slug: string }> = ({ slug }) => {
 
 MovieDetails.getFetchUrls = ({ slug }) => [
 	query(slug),
+	DetailsCollections.query("movie", slug),
 	// ShowStaff.query(slug),
 ];
 

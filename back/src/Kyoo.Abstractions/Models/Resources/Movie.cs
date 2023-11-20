@@ -123,17 +123,17 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The Studio that made this show.
 		/// </summary>
-		[LoadableRelation(nameof(StudioId))][EditableRelation] public Studio? Studio { get; set; }
+		[LoadableRelation(nameof(StudioId))] public Studio? Studio { get; set; }
 
 		/// <summary>
 		/// The list of people that made this show.
 		/// </summary>
-		[LoadableRelation][EditableRelation] public ICollection<PeopleRole>? People { get; set; }
+		[SerializeIgnore] public ICollection<PeopleRole>? People { get; set; }
 
 		/// <summary>
 		/// The list of collections that contains this show.
 		/// </summary>
-		[LoadableRelation] public ICollection<Collection>? Collections { get; set; }
+		[SerializeIgnore] public ICollection<Collection>? Collections { get; set; }
 
 		/// <summary>
 		/// Links to watch this movie.

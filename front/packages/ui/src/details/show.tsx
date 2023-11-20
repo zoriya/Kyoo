@@ -27,6 +27,7 @@ import { Header } from "./header";
 import Svg, { Path, SvgProps } from "react-native-svg";
 import { Container } from "@kyoo/primitives";
 import { forwardRef } from "react";
+import { DetailsCollections } from "./collection";
 
 export const SvgWave = (props: SvgProps) => {
 	const { css } = useYoshiki();
@@ -65,6 +66,7 @@ const ShowHeader = forwardRef<View, ViewProps & { slug: string }>(function ShowH
 			)}
 		>
 			<Header type="show" query={query(slug)} />
+			<DetailsCollections type="movie" slug={slug} />
 			{/* <Staff slug={slug} /> */}
 			<SvgWave
 				fill={theme.variant.background}
@@ -96,6 +98,7 @@ export const ShowDetails: QueryPage<{ slug: string; season: string }> = ({ slug,
 
 ShowDetails.getFetchUrls = ({ slug, season }) => [
 	query(slug),
+	DetailsCollections.query("show", slug),
 	// ShowStaff.query(slug),
 	EpisodeList.query(slug, season),
 	SeasonHeader.query(slug),
