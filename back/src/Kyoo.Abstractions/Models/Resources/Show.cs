@@ -152,7 +152,23 @@ namespace Kyoo.Abstractions.Models
 		/// The first episode of this show.
 		/// </summary>
 		[Projectable(UseMemberBody = nameof(_FirstEpisode), OnlyOnInclude = true)]
-		[LoadableRelation] public Episode? FirstEpisode { get; set; }
+		[LoadableRelation(
+			// language=PostgreSQL
+			Sql = """
+				select
+					fe.*
+				from (
+					select
+						e.*,
+						row_number() over (partition by e.show_id order by e.absolute_number, e.season_number, e.episode_number) as number
+					from
+						episodes as e) as fe
+				where
+					fe.number <= 1
+			""",
+			On = "show_id"
+		)]
+		public Episode? FirstEpisode { get; set; }
 
 		private Episode? _FirstEpisode => Episodes!
 			.OrderBy(x => x.AbsoluteNumber)
