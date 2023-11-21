@@ -245,7 +245,8 @@ namespace Kyoo.Postgresql
 			base.OnModelCreating(modelBuilder);
 
 			modelBuilder.Entity<Show>()
-				.Ignore(x => x.FirstEpisode);
+				.Ignore(x => x.FirstEpisode)
+				.Ignore(x => x.AirDate);
 			modelBuilder.Entity<Episode>()
 				.Ignore(x => x.PreviousEpisode)
 				.Ignore(x => x.NextEpisode);
