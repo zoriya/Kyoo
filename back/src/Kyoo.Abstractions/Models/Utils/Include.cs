@@ -25,17 +25,28 @@ using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Abstractions.Models.Utils;
 
-/// <summary>
-/// The aditional fields to include in the result.
-/// </summary>
-/// <typeparam name="T">The type related to the new fields</typeparam>
-public class Include<T>
+public class Include
 {
 	/// <summary>
 	/// The aditional fields to include in the result.
 	/// </summary>
-	public ICollection<Metadata> Metadatas { get; private init; } = ArraySegment<Metadata>.Empty;
+	public ICollection<Metadata> Metadatas { get; init; } = ArraySegment<Metadata>.Empty;
 
+	public abstract record Metadata(string Name);
+
+	public record SingleRelation(string Name, Type type, string RelationIdName) : Metadata(Name);
+
+	public record CustomRelation(string Name, Type type, string Sql, string? On, Type Declaring) : Metadata(Name);
+
+	public record ProjectedRelation(string Name, string Sql) : Metadata(Name);
+}
+
+/// <summary>
+/// The aditional fields to include in the result.
+/// </summary>
+/// <typeparam name="T">The type related to the new fields</typeparam>
+public class Include<T> : Include
+{
 	/// <summary>
 	/// The aditional fields names to include in the result.
 	/// </summary>
@@ -79,16 +90,12 @@ public class Include<T>
 						// }
 						if (attr.Sql != null)
 							return new CustomRelation(prop.Name, prop.PropertyType, attr.Sql, attr.On, prop.DeclaringType!);
+						if (attr.Projected != null)
+							return new ProjectedRelation(prop.Name, attr.Projected);
 						throw new NotImplementedException();
 					})
 					.Distinct();
 			}).ToArray()
 		};
 	}
-
-	public abstract record Metadata(string Name);
-
-	public record SingleRelation(string Name, Type type, string RelationIdName) : Metadata(Name);
-
-	public record CustomRelation(string Name, Type type, string Sql, string? On, Type Declaring) : Metadata(Name);
 }

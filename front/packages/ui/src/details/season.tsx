@@ -94,6 +94,7 @@ SeasonHeader.query = (slug: string): QueryIdentifier<Season, SeasonProcessed> =>
 	params: {
 		// Fetch all seasons at one, there won't be hundred of thems anyways.
 		limit: 0,
+		fields: ["episodesCount"],
 	},
 	infinite: {
 		value: true,

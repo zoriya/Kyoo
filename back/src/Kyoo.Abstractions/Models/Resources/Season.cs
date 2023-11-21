@@ -126,8 +126,20 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The number of episodes in this season.
 		/// </summary>
-		[Projectable(UseMemberBody = nameof(_EpisodesCount))]
+		[Projectable(UseMemberBody = nameof(_EpisodesCount), OnlyOnInclude = true)]
 		[NotMapped]
+		[LoadableRelation(
+			// language=PostgreSQL
+			Projected = """
+				(
+					select
+						count(*)::int
+					from
+						episodes as e
+					where
+						e.season_id = id) as episode_count
+			"""
+		)]
 		public int EpisodesCount { get; set; }
 
 		private int _EpisodesCount => Episodes!.Count;

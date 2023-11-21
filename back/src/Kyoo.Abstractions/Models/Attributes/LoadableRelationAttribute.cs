@@ -35,6 +35,8 @@ namespace Kyoo.Abstractions.Models.Attributes
 
 		public string? On { get; set; }
 
+		public string? Projected { get; set; }
+
 		/// <summary>
 		/// Create a new <see cref="LoadableRelationAttribute"/>.
 		/// </summary>

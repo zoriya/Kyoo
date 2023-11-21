@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using EntityFrameworkCore.Projectables;
 using Kyoo.Abstractions.Controllers;
@@ -111,6 +112,7 @@ namespace Kyoo.Abstractions.Models
 		public string? Trailer { get; set; }
 
 		[SerializeIgnore]
+		[Column("start_air")]
 		public DateTime? AirDate => StartAir;
 
 		/// <inheritdoc />

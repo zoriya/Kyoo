@@ -32,6 +32,7 @@ using InterpolatedSql.Dapper;
 using InterpolatedSql.SqlBuilders;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Utils;
@@ -103,7 +104,7 @@ namespace Kyoo.Core.Controllers
 
 			IEnumerable<string> keys = config
 				.Where(x => key == "id" || x.Value.GetProperty(key) != null)
-				.Select(x => $"{x.Key}.{key.ToSnakeCase()}");
+				.Select(x => $"{x.Key}.{x.Value.GetProperty(key)?.GetCustomAttribute<ColumnAttribute>()?.Name ?? key.ToSnakeCase()}");
 			return $"coalesce({string.Join(", ", keys)})";
 		}
 
@@ -140,12 +141,12 @@ namespace Kyoo.Core.Controllers
 				relation++;
 				switch (metadata)
 				{
-					case Include<T>.SingleRelation(var name, var type, var rid):
+					case Include.SingleRelation(var name, var type, var rid):
 						string tableName = type.GetCustomAttribute<TableAttribute>()?.Name ?? $"{type.Name.ToSnakeCase()}s";
 						retConfig.Add($"r{relation}", type);
 						join.AppendLine($"left join {tableName} as r{relation} on r{relation}.id = {_Property(rid, config)}");
 						break;
-					case Include<T>.CustomRelation(var name, var type, var sql, var on, var declaring):
+					case Include.CustomRelation(var name, var type, var sql, var on, var declaring):
 						string owner = config.First(x => x.Value == declaring).Key;
 						string lateral = sql.Contains("\"this\"") ? " lateral" : string.Empty;
 						sql = sql.Replace("\"this\"", owner);
@@ -153,6 +154,8 @@ namespace Kyoo.Core.Controllers
 						retConfig.Add($"r{relation}", type);
 						join.AppendLine($"left join{lateral} ({sql}) as r{relation} on r{relation}.{on}");
 						break;
+					case Include.ProjectedRelation:
+						continue;
 					default:
 						throw new NotImplementedException();
 				}
@@ -174,6 +177,17 @@ namespace Kyoo.Core.Controllers
 			return (retConfig, join.ToString(), Map);
 		}
 
+		public static string ExpendProjections<T>(string? prefix, Include include)
+		{
+			prefix = prefix != null ? $"{prefix}." : string.Empty;
+			IEnumerable<string> projections = include.Metadatas
+				.Select(x => x is Include.ProjectedRelation(var name, var sql) ? sql : null!)
+				.Where(x => x != null)
+				.Select(x => x.Replace("\"this\".", prefix));
+			string projStr = string.Join(string.Empty, projections.Select(x => $", {x}"));
+			return $"{prefix}*" + projStr;
+		}
+
 		public async Task<ICollection<ILibraryItem>> GetAll(
 			Expression<Func<ILibraryItem, bool>>? where = null,
 			Sort<ILibraryItem>? sort = null,
@@ -191,7 +205,7 @@ namespace Kyoo.Core.Controllers
 			// language=PostgreSQL
 			IDapperSqlCommand query = _database.SqlBuilder($"""
 				select
-					s.*,
+					{ExpendProjections<Show>("s", include):raw},
 					m.*,
 					c.*
 					{string.Join(string.Empty, includeConfig.Select(x => $", {x.Key}.*")):raw}
@@ -199,12 +213,12 @@ namespace Kyoo.Core.Controllers
 					shows as s
 					full outer join (
 					select
-						*
+						{ExpendProjections<Movie>(null, include):raw}
 					from
 						movies) as m on false
-					full outer join (
+						full outer join (
 						select
-							*
+							{ExpendProjections<Collection>(null, include):raw}
 						from
 							collections) as c on false
 				{includeJoin:raw}
