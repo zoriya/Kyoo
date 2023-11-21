@@ -156,17 +156,17 @@ namespace Kyoo.Abstractions.Models
 			// language=PostgreSQL
 			Sql = """
 				select
-					fe.*
+					"fe".*
 				from (
 					select
 						e.*,
 						row_number() over (partition by e.show_id order by e.absolute_number, e.season_number, e.episode_number) as number
 					from
-						episodes as e) as fe
+						episodes as e) as "fe"
 				where
-					fe.number <= 1
+					"fe".number <= 1
 			""",
-			On = "show_id"
+			On = "show_id = \"this\".id"
 		)]
 		public Episode? FirstEpisode { get; set; }
 

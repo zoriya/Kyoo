@@ -170,7 +170,27 @@ namespace Kyoo.Abstractions.Models
 		/// The previous episode that should be seen before viewing this one.
 		/// </summary>
 		[Projectable(UseMemberBody = nameof(_PreviousEpisode), OnlyOnInclude = true)]
-		[LoadableRelation] public Episode? PreviousEpisode { get; set; }
+		[LoadableRelation(
+			// language=PostgreSQL
+			Sql = """
+				select
+					"pe".*,
+				from
+					episodes as "pe"
+				where
+					"pe".show_id = "this".show_id
+					and ("pe".absolute_number < "this".absolute_number
+						or "pe".season_number < "this".season_number
+						or ("pe".season_number = "this".season_number
+							and e.episode_number < "this".episode_number))
+				order by
+					"pe".absolute_number desc,
+					"pe".season_number desc,
+					"pe".episode_number desc
+				limit 1
+			"""
+		)]
+		public Episode? PreviousEpisode { get; set; }
 
 		private Episode? _PreviousEpisode => Show!.Episodes!
 			.OrderByDescending(x => x.AbsoluteNumber)
@@ -186,7 +206,27 @@ namespace Kyoo.Abstractions.Models
 		/// The next episode to watch after this one.
 		/// </summary>
 		[Projectable(UseMemberBody = nameof(_NextEpisode), OnlyOnInclude = true)]
-		[LoadableRelation] public Episode? NextEpisode { get; set; }
+		[LoadableRelation(
+			// language=PostgreSQL
+			Sql = """
+				select
+					"ne".*,
+				from
+					episodes as "ne"
+				where
+					"ne".show_id = "this".show_id
+					and ("ne".absolute_number > "this".absolute_number
+						or "ne".season_number > "this".season_number
+						or ("ne".season_number = "this".season_number
+							and e.episode_number > "this".episode_number))
+				order by
+					"ne".absolute_number,
+					"ne".season_number,
+					"ne".episode_number
+				limit 1
+			"""
+		)]
+		public Episode? NextEpisode { get; set; }
 
 		private Episode? _NextEpisode => Show!.Episodes!
 			.OrderBy(x => x.AbsoluteNumber)
