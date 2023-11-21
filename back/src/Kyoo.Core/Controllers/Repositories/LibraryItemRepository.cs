@@ -147,8 +147,11 @@ namespace Kyoo.Core.Controllers
 						break;
 					case Include<T>.CustomRelation(var name, var type, var sql, var on, var declaring):
 						string owner = config.First(x => x.Value == declaring).Key;
+						string lateral = sql.Contains("\"this\"") ? " lateral" : string.Empty;
+						sql = sql.Replace("\"this\"", owner);
+						on = on?.Replace("\"this\"", owner);
 						retConfig.Add($"r{relation}", type);
-						join.AppendLine($"left join ({sql}) as r{relation} on r{relation}.{on} = {owner}.id");
+						join.AppendLine($"left join{lateral} ({sql}) as r{relation} on r{relation}.{on}");
 						break;
 					default:
 						throw new NotImplementedException();

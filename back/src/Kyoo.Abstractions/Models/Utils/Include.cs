@@ -77,7 +77,7 @@ public class Include<T>
 						// 		prop.PropertyType.GetElementType() ?? prop.PropertyType.GenericTypeArguments.First()
 						// 	);
 						// }
-						if (attr.Sql != null && attr.On != null)
+						if (attr.Sql != null)
 							return new CustomRelation(prop.Name, prop.PropertyType, attr.Sql, attr.On, prop.DeclaringType!);
 						throw new NotImplementedException();
 					})
@@ -90,5 +90,5 @@ public class Include<T>
 
 	public record SingleRelation(string Name, Type type, string RelationIdName) : Metadata(Name);
 
-	public record CustomRelation(string Name, Type type, string Sql, string On, Type Declaring) : Metadata(Name);
+	public record CustomRelation(string Name, Type type, string Sql, string? On, Type Declaring) : Metadata(Name);
 }
