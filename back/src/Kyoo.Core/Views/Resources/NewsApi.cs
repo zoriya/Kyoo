@@ -16,13 +16,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
-using Kyoo.Core.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 
@@ -37,25 +34,10 @@ namespace Kyoo.Core.Api
 	[ResourceView]
 	[PartialPermission("LibraryItem")]
 	[ApiDefinition("News", Group = ResourcesGroup)]
-	public class NewsApi : BaseApi
+	public class NewsApi : CrudThumbsApi<News>
 	{
-		private readonly NewsRepository _news;
-
-		public NewsApi(NewsRepository news)
-		{
-			_news = news;
-		}
-
-		public async Task<ActionResult<Page<News>>> GetAll(
-			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] Pagination pagination)
-		{
-			ICollection<News> resources = await _news.GetAll(
-				ApiHelper.ParseWhere<News>(where),
-				limit: pagination
-			);
-
-			return Page(resources, pagination.Limit);
-		}
+		public NewsApi(IRepository<News> news, IThumbnailsManager thumbs)
+			: base(news, thumbs)
+		{ }
 	}
 }

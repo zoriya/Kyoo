@@ -79,7 +79,7 @@ namespace Kyoo.Core.Controllers
 		public override async Task<ICollection<Episode>> Search(string query, Include<Episode>? include = default)
 		{
 			return await AddIncludes(_database.Episodes, include)
-				.Where(_database.Like<Episode>(x => x.Name!, $"%{query}%"))
+				.Where(x => EF.Functions.ILike(x.Name!, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
 		}
@@ -92,8 +92,8 @@ namespace Kyoo.Core.Controllers
 			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync(() =>
 				obj is { SeasonNumber: not null, EpisodeNumber: not null }
-				? Get(x => x.ShowId == obj.ShowId && x.SeasonNumber == obj.SeasonNumber && x.EpisodeNumber == obj.EpisodeNumber)
-				: Get(x => x.ShowId == obj.ShowId && x.AbsoluteNumber == obj.AbsoluteNumber));
+				? _database.Episodes.FirstOrDefaultAsync(x => x.ShowId == obj.ShowId && x.SeasonNumber == obj.SeasonNumber && x.EpisodeNumber == obj.EpisodeNumber)
+				: _database.Episodes.FirstOrDefaultAsync(x => x.ShowId == obj.ShowId && x.AbsoluteNumber == obj.AbsoluteNumber));
 			await IRepository<Episode>.OnResourceCreated(obj);
 			return obj;
 		}

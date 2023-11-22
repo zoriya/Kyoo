@@ -120,7 +120,7 @@ namespace Kyoo.Core.Api
 		/// </remarks>
 		/// <param name="identifier">The ID or slug of the <see cref="Show"/>.</param>
 		/// <param name="sortBy">A key to sort collections by.</param>
-		/// <param name="where">An optional list of filters.</param>
+		/// <param name="filter">An optional list of filters.</param>
 		/// <param name="pagination">The number of collections to return.</param>
 		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>A page of collections.</returns>
@@ -134,15 +134,15 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<Page<Collection>>> GetCollections(Identifier identifier,
 			[FromQuery] Sort<Collection> sortBy,
-			[FromQuery] Dictionary<string, string> where,
+			[FromQuery] Filter<Collection>? filter,
 			[FromQuery] Pagination pagination,
 			[FromQuery] Include<Collection> fields)
 		{
 			ICollection<Collection> resources = await _libraryManager.Collections.GetAll(
-				ApiHelper.ParseWhere(where, identifier.IsContainedIn<Collection, Movie>(x => x.Movies!)),
+				Filter.And(filter, identifier.IsContainedIn<Collection, Movie>(x => x.Movies)),
 				sortBy,
-				pagination,
-				fields
+				fields,
+				pagination
 			);
 
 			if (!resources.Any() && await _libraryManager.Movies.GetOrDefault(identifier.IsSame<Movie>()) == null)

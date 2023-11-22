@@ -65,7 +65,7 @@ namespace Kyoo.Core.Api
 		/// </remarks>
 		/// <param name="identifier">The ID or slug of the <see cref="Studio"/>.</param>
 		/// <param name="sortBy">A key to sort shows by.</param>
-		/// <param name="where">An optional list of filters.</param>
+		/// <param name="filter">An optional list of filters.</param>
 		/// <param name="pagination">The number of shows to return.</param>
 		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>A page of shows.</returns>
@@ -79,15 +79,15 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<Page<Show>>> GetShows(Identifier identifier,
 			[FromQuery] Sort<Show> sortBy,
-			[FromQuery] Dictionary<string, string> where,
+			[FromQuery] Filter<Show>? filter,
 			[FromQuery] Pagination pagination,
 			[FromQuery] Include<Show> fields)
 		{
 			ICollection<Show> resources = await _libraryManager.Shows.GetAll(
-				ApiHelper.ParseWhere(where, identifier.Matcher<Show>(x => x.StudioId, x => x.Studio!.Slug)),
+				Filter.And(filter, identifier.Matcher<Show>(x => x.StudioId, x => x.Studio!.Slug)),
 				sortBy,
-				pagination,
-				fields
+				fields,
+				pagination
 			);
 
 			if (!resources.Any() && await _libraryManager.Studios.GetOrDefault(identifier.IsSame<Studio>()) == null)

@@ -53,7 +53,7 @@ namespace Kyoo.Core.Controllers
 		public override async Task<ICollection<Collection>> Search(string query, Include<Collection>? include = default)
 		{
 			return await AddIncludes(_database.Collections, include)
-				.Where(_database.Like<Collection>(x => x.Name + " " + x.Slug, $"%{query}%"))
+				.Where(x => EF.Functions.ILike(x.Name + " " + x.Slug, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
 		}

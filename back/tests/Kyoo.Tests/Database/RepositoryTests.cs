@@ -29,7 +29,7 @@ using Xunit;
 namespace Kyoo.Tests.Database
 {
 	public abstract class RepositoryTests<T> : IDisposable, IAsyncDisposable
-		where T : class, IResource
+		where T : class, IResource, IQuery
 	{
 		protected readonly RepositoryActivator Repositories;
 		private readonly IRepository<T> _repository;

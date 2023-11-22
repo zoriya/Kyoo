@@ -113,6 +113,11 @@ namespace Kyoo.Core.Controllers
 			return _Sort(query, sortBy, false).ThenBy(x => x.Id);
 		}
 
+		protected static Expression<Func<T, bool>> ParseFilter(Filter<T>? filter)
+		{
+			throw new NotImplementedException();
+		}
+
 		private static Func<Expression, Expression, BinaryExpression> _GetComparisonExpression(
 			bool desc,
 			bool next,
@@ -297,9 +302,9 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc/>
-		public virtual async Task<T> Get(Expression<Func<T, bool>> where, Include<T>? include = default)
+		public virtual async Task<T> Get(Filter<T> filter, Include<T>? include = default)
 		{
-			T? ret = await GetOrDefault(where, include: include);
+			T? ret = await GetOrDefault(filter, include: include);
 			if (ret == null)
 				throw new ItemNotFoundException($"No {typeof(T).Name} found with the given predicate.");
 			return ret;
@@ -326,7 +331,7 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public virtual Task<T?> GetOrDefault(Expression<Func<T, bool>> where,
+		public virtual Task<T?> GetOrDefault(Filter<T>? filter,
 			Include<T>? include = default,
 			Sort<T>? sortBy = default)
 		{
@@ -334,7 +339,7 @@ namespace Kyoo.Core.Controllers
 					AddIncludes(Database.Set<T>(), include),
 					sortBy
 				)
-				.FirstOrDefaultAsync(where);
+				.FirstOrDefaultAsync(ParseFilter(filter));
 		}
 
 		/// <inheritdoc/>
@@ -353,12 +358,12 @@ namespace Kyoo.Core.Controllers
 		public abstract Task<ICollection<T>> Search(string query, Include<T>? include = default);
 
 		/// <inheritdoc/>
-		public virtual Task<ICollection<T>> GetAll(Expression<Func<T, bool>>? where = null,
+		public virtual Task<ICollection<T>> GetAll(Filter<T>? filter = null,
 			Sort<T>? sort = default,
-			Pagination? limit = default,
-			Include<T>? include = default)
+			Include<T>? include = default,
+			Pagination limit = default)
 		{
-			return ApplyFilters(Database.Set<T>(), where, sort, limit, include);
+			return ApplyFilters(Database.Set<T>(), ParseFilter(filter), sort, limit, include);
 		}
 
 		/// <summary>
@@ -373,7 +378,7 @@ namespace Kyoo.Core.Controllers
 		protected async Task<ICollection<T>> ApplyFilters(IQueryable<T> query,
 			Expression<Func<T, bool>>? where = null,
 			Sort<T>? sort = default,
-			Pagination? limit = default,
+			Pagination limit = default,
 			Include<T>? include = default)
 		{
 			query = AddIncludes(query, include);
@@ -381,25 +386,25 @@ namespace Kyoo.Core.Controllers
 			if (where != null)
 				query = query.Where(where);
 
-			if (limit?.AfterID != null)
+			if (limit.AfterID != null)
 			{
 				T reference = await Get(limit.AfterID.Value);
 				query = query.Where(KeysetPaginate(sort, reference, !limit.Reverse));
 			}
-			if (limit?.Reverse == true)
+			if (limit.Reverse)
 				query = query.Reverse();
-			if (limit?.Limit > 0)
+			if (limit.Limit > 0)
 				query = query.Take(limit.Limit);
 
 			return await query.ToListAsync();
 		}
 
 		/// <inheritdoc/>
-		public virtual Task<int> GetCount(Expression<Func<T, bool>>? where = null)
+		public virtual Task<int> GetCount(Filter<T>? filter = null)
 		{
 			IQueryable<T> query = Database.Set<T>();
-			if (where != null)
-				query = query.Where(where);
+			if (filter != null)
+				query = query.Where(ParseFilter(filter));
 			return query.CountAsync();
 		}
 
@@ -559,9 +564,9 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc/>
-		public async Task DeleteAll(Expression<Func<T, bool>> where)
+		public async Task DeleteAll(Filter<T> filter)
 		{
-			foreach (T resource in await GetAll(where))
+			foreach (T resource in await GetAll(filter))
 				await Delete(resource);
 		}
 	}
