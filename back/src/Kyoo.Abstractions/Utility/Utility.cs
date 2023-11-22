@@ -342,18 +342,5 @@ namespace Kyoo.Utils
 				return string.Empty;
 			return "?" + string.Join('&', query.Select(x => $"{x.Key}={x.Value}"));
 		}
-
-		/// <summary>
-		/// Rethrow the exception without modifying the stack trace.
-		/// This is similar to the <c>rethrow;</c> code but is useful when the exception is not in a catch block.
-		/// </summary>
-		/// <param name="ex">The exception to rethrow.</param>
-		[System.Diagnostics.CodeAnalysis.DoesNotReturn]
-		public static void ReThrow(this Exception ex)
-		{
-			if (ex == null)
-				throw new ArgumentNullException(nameof(ex));
-			ExceptionDispatchInfo.Capture(ex).Throw();
-		}
 	}
 }

@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -86,16 +85,16 @@ namespace Kyoo.Core.Api
 		/// <remarks>
 		/// Get the number of resources that match the filters.
 		/// </remarks>
-		/// <param name="where">A list of filters to respect.</param>
+		/// <param name="filter">A list of filters to respect.</param>
 		/// <returns>How many resources matched that filter.</returns>
 		/// <response code="400">Invalid filters.</response>
 		[HttpGet("count")]
 		[PartialPermission(Kind.Read)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
-		public async Task<ActionResult<int>> GetCount([FromQuery] Dictionary<string, string> where)
+		public async Task<ActionResult<int>> GetCount([FromQuery] Filter<T> filter)
 		{
-			return await Repository.GetCount(ApiHelper.ParseWhere<T>(where));
+			return await Repository.GetCount(filter);
 		}
 
 		/// <summary>
@@ -105,7 +104,7 @@ namespace Kyoo.Core.Api
 		/// Get all resources that match the given filter.
 		/// </remarks>
 		/// <param name="sortBy">Sort information about the query (sort by, sort order).</param>
-		/// <param name="where">Filter the returned items.</param>
+		/// <param name="filter">Filter the returned items.</param>
 		/// <param name="pagination">How many items per page should be returned, where should the page start...</param>
 		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>A list of resources that match every filters.</returns>
@@ -116,15 +115,15 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		public async Task<ActionResult<Page<T>>> GetAll(
 			[FromQuery] Sort<T> sortBy,
-			[FromQuery] Dictionary<string, string> where,
+			[FromQuery] Filter<T>? filter,
 			[FromQuery] Pagination pagination,
 			[FromQuery] Include<T>? fields)
 		{
 			ICollection<T> resources = await Repository.GetAll(
-				ApiHelper.ParseWhere<T>(where),
+				filter,
 				sortBy,
-				pagination,
-				fields
+				fields,
+				pagination
 			);
 
 			return Page(resources, pagination.Limit);
@@ -231,20 +230,19 @@ namespace Kyoo.Core.Api
 		/// <remarks>
 		/// Delete all items matching the given filters. If no filter is specified, delete all items.
 		/// </remarks>
-		/// <param name="where">The list of filters.</param>
+		/// <param name="filter">The list of filters.</param>
 		/// <returns>The item(s) has successfully been deleted.</returns>
 		/// <response code="400">One or multiple filters are invalid.</response>
 		[HttpDelete]
 		[PartialPermission(Kind.Delete)]
 		[ProducesResponseType(StatusCodes.Status204NoContent)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
-		public async Task<IActionResult> Delete([FromQuery] Dictionary<string, string> where)
+		public async Task<IActionResult> Delete([FromQuery] Filter<T> filter)
 		{
-			Expression<Func<T, bool>>? w = ApiHelper.ParseWhere<T>(where);
-			if (w == null)
+			if (filter == null)
 				return BadRequest(new RequestError("Incule a filter to delete items, all items won't be deleted."));
 
-			await Repository.DeleteAll(w);
+			await Repository.DeleteAll(filter);
 			return NoContent();
 		}
 	}

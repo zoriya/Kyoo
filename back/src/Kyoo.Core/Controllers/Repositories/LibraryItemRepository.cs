@@ -29,10 +29,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Dapper;
 using InterpolatedSql.Dapper;
-using InterpolatedSql.SqlBuilders;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
-using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Utils;
@@ -72,11 +70,10 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc/>
-		public virtual async Task<ILibraryItem> Get(
-			Expression<Func<ILibraryItem, bool>> where,
+		public virtual async Task<ILibraryItem> Get(Filter<ILibraryItem> filter,
 			Include<ILibraryItem>? include = default)
 		{
-			ILibraryItem? ret = await GetOrDefault(where, include: include);
+			ILibraryItem? ret = await GetOrDefault(filter, include: include);
 			if (ret == null)
 				throw new ItemNotFoundException($"No {nameof(ILibraryItem)} found with the given predicate.");
 			return ret;
@@ -92,7 +89,8 @@ namespace Kyoo.Core.Controllers
 			throw new NotImplementedException();
 		}
 
-		public Task<ILibraryItem?> GetOrDefault(Expression<Func<ILibraryItem, bool>> where, Include<ILibraryItem>? include = null, Sort<ILibraryItem>? sortBy = null)
+		public Task<ILibraryItem?> GetOrDefault(Filter<ILibraryItem>? filter, Include<ILibraryItem>? include = default,
+			Sort<ILibraryItem>? sortBy = default)
 		{
 			throw new NotImplementedException();
 		}
@@ -108,9 +106,11 @@ namespace Kyoo.Core.Controllers
 			return $"coalesce({string.Join(", ", keys)})";
 		}
 
-		public static string ProcessSort<T>(Sort<T> sort, Dictionary<string, Type> config, bool recurse = false)
+		public static string ProcessSort<T>(Sort<T>? sort, Dictionary<string, Type> config, bool recurse = false)
 			where T : IQuery
 		{
+			sort ??= new Sort<T>.Default();
+
 			string ret = sort switch
 			{
 				Sort<T>.Default(var value) => ProcessSort(value, config, true),
@@ -188,12 +188,24 @@ namespace Kyoo.Core.Controllers
 			return $"{prefix}*" + projStr;
 		}
 
-		public async Task<ICollection<ILibraryItem>> GetAll(
-			Expression<Func<ILibraryItem, bool>>? where = null,
-			Sort<ILibraryItem>? sort = null,
-			Pagination? limit = null,
-			Include<ILibraryItem>? include = null)
+		public static string ProcessFilter<T>(Filter<T> filter, Dictionary<string, Type> config)
 		{
+			return filter switch
+			{
+				Filter<T>.And(var first, var second) => $"({ProcessFilter(first, config)} and {ProcessFilter(second, config)})",
+				Filter<T>.Or(var first, var second) => $"({ProcessFilter(first, config)} or {ProcessFilter(second, config)})",
+				Filter<T>.Not(var inner) => $"(not {ProcessFilter(inner, config)})",
+				Filter<T>.Eq(var property, var value) => $"({_Property(property, config)} = {value})",
+			};
+		}
+
+		public async Task<ICollection<ILibraryItem>> GetAll(Filter<ILibraryItem>? filter = null,
+			Sort<ILibraryItem>? sort = default,
+			Include<ILibraryItem>? include = default,
+			Pagination limit = default)
+		{
+			include ??= new();
+
 			Dictionary<string, Type> config = new()
 			{
 				{ "s", typeof(Show) },
@@ -203,7 +215,7 @@ namespace Kyoo.Core.Controllers
 			var (includeConfig, includeJoin, mapIncludes) = ProcessInclude(include, config);
 
 			// language=PostgreSQL
-			IDapperSqlCommand query = _database.SqlBuilder($"""
+			var query = _database.SqlBuilder($"""
 				select
 					{ExpendProjections<Show>("s", include):raw},
 					m.*,
@@ -224,7 +236,10 @@ namespace Kyoo.Core.Controllers
 				{includeJoin:raw}
 				order by {ProcessSort(sort, config):raw}
 				limit {limit.Limit}
-			""").Build();
+			""");
+
+			if (filter != null)
+				query += $"where {ProcessFilter(filter, config):raw}";
 
 			Type[] types = config.Select(x => x.Value)
 				.Concat(includeConfig.Select(x => x.Value))
@@ -242,7 +257,7 @@ namespace Kyoo.Core.Controllers
 			return data.ToList();
 		}
 
-		public Task<int> GetCount(Expression<Func<ILibraryItem, bool>>? where = null)
+		public Task<int> GetCount(Filter<ILibraryItem>? filter = null)
 		{
 			throw new NotImplementedException();
 		}
@@ -252,7 +267,7 @@ namespace Kyoo.Core.Controllers
 			throw new NotImplementedException();
 		}
 
-		public Task DeleteAll(Expression<Func<ILibraryItem, bool>> where)
+		public Task DeleteAll(Filter<ILibraryItem> filter)
 		{
 			throw new NotImplementedException();
 		}

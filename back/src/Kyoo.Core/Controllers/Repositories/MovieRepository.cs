@@ -69,7 +69,7 @@ namespace Kyoo.Core.Controllers
 		public override async Task<ICollection<Movie>> Search(string query, Include<Movie>? include = default)
 		{
 			return await AddIncludes(_database.Movies, include)
-				.Where(_database.Like<Movie>(x => x.Name + " " + x.Slug, $"%{query}%"))
+				.Where(x => EF.Functions.ILike(x.Name + " " + x.Slug, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
 		}

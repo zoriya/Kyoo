@@ -61,11 +61,11 @@ namespace Kyoo.Abstractions.Controllers
 		/// <summary>
 		/// Get the first resource that match the predicate.
 		/// </summary>
-		/// <param name="where">A predicate to filter the resource.</param>
+		/// <param name="filter">A predicate to filter the resource.</param>
 		/// <param name="include">The related fields to include.</param>
 		/// <exception cref="ItemNotFoundException">If the item could not be found.</exception>
 		/// <returns>The resource found</returns>
-		Task<T> Get(Expression<Func<T, bool>> where, Include<T>? include = default);
+		Task<T> Get(Filter<T> filter, Include<T>? include = default);
 
 		/// <summary>
 		/// Get a resource from it's ID or null if it is not found.
@@ -86,11 +86,11 @@ namespace Kyoo.Abstractions.Controllers
 		/// <summary>
 		/// Get the first resource that match the predicate or null if it is not found.
 		/// </summary>
-		/// <param name="where">A predicate to filter the resource.</param>
+		/// <param name="filter">A predicate to filter the resource.</param>
 		/// <param name="include">The related fields to include.</param>
 		/// <param name="sortBy">A custom sort method to handle cases where multiples items match the filters.</param>
 		/// <returns>The resource found</returns>
-		Task<T?> GetOrDefault(Expression<Func<T, bool>> where,
+		Task<T?> GetOrDefault(Filter<T>? filter,
 			Include<T>? include = default,
 			Sort<T>? sortBy = default);
 
@@ -105,22 +105,22 @@ namespace Kyoo.Abstractions.Controllers
 		/// <summary>
 		/// Get every resources that match all filters
 		/// </summary>
-		/// <param name="where">A filter predicate</param>
+		/// <param name="filter">A filter predicate</param>
 		/// <param name="sort">Sort information about the query (sort by, sort order)</param>
-		/// <param name="limit">How pagination should be done (where to start and how many to return)</param>
 		/// <param name="include">The related fields to include.</param>
+		/// <param name="limit">How pagination should be done (where to start and how many to return)</param>
 		/// <returns>A list of resources that match every filters</returns>
-		Task<ICollection<T>> GetAll(Expression<Func<T, bool>>? where = null,
+		Task<ICollection<T>> GetAll(Filter<T>? filter = null,
 			Sort<T>? sort = default,
-			Pagination? limit = default,
-			Include<T>? include = default);
+			Include<T>? include = default,
+			Pagination limit = default);
 
 		/// <summary>
 		/// Get the number of resources that match the filter's predicate.
 		/// </summary>
-		/// <param name="where">A filter predicate</param>
+		/// <param name="filter">A filter predicate</param>
 		/// <returns>How many resources matched that filter</returns>
-		Task<int> GetCount(Expression<Func<T, bool>>? where = null);
+		Task<int> GetCount(Filter<T>? filter = null);
 
 		/// <summary>
 		/// Map a list of ids to a list of items (keep the order).
@@ -217,9 +217,9 @@ namespace Kyoo.Abstractions.Controllers
 		/// <summary>
 		/// Delete all resources that match the predicate.
 		/// </summary>
-		/// <param name="where">A predicate to filter resources to delete. Every resource that match this will be deleted.</param>
+		/// <param name="filter">A predicate to filter resources to delete. Every resource that match this will be deleted.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		Task DeleteAll(Expression<Func<T, bool>> where);
+		Task DeleteAll(Filter<T> filter);
 
 		/// <summary>
 		/// Called when a resource has been edited.

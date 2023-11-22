@@ -70,7 +70,7 @@ namespace Kyoo.Core.Controllers
 		public override async Task<ICollection<Show>> Search(string query, Include<Show>? include = default)
 		{
 			return await AddIncludes(_database.Shows, include)
-				.Where(_database.Like<Show>(x => x.Name + " " + x.Slug, $"%{query}%"))
+				.Where(x => EF.Functions.ILike(x.Name + " " + x.Slug, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
 		}
@@ -88,8 +88,6 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		protected override async Task Validate(Show resource)
 		{
-			resource.Slug ??= Utility.ToSlug(resource.Name);
-
 			await base.Validate(resource);
 			if (resource.Studio != null)
 			{

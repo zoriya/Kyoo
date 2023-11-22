@@ -99,13 +99,14 @@ namespace Kyoo.Abstractions.Models.Utils
 		/// identifier.Matcher&lt;Season&gt;(x => x.ShowID, x => x.Show.Slug)
 		/// </code>
 		/// </example>
-		public Expression<Func<T, bool>> Matcher<T>(Expression<Func<T, int>> idGetter,
+		public Filter<T> Matcher<T>(Expression<Func<T, int>> idGetter,
 			Expression<Func<T, string>> slugGetter)
 		{
 			ConstantExpression self = Expression.Constant(_id.HasValue ? _id.Value : _slug);
 			BinaryExpression equal = Expression.Equal(_id.HasValue ? idGetter.Body : slugGetter.Body, self);
 			ICollection<ParameterExpression> parameters = _id.HasValue ? idGetter.Parameters : slugGetter.Parameters;
-			return Expression.Lambda<Func<T, bool>>(equal, parameters);
+			Expression<Func<T, bool>> lambda = Expression.Lambda<Func<T, bool>>(equal, parameters);
+			return new Filter<T>.Lambda(lambda);
 		}
 
 		/// <summary>
@@ -117,13 +118,14 @@ namespace Kyoo.Abstractions.Models.Utils
 		/// <param name="slugGetter">An expression to retrieve a slug from the type <typeparamref name="T"/>.</param>
 		/// <typeparam name="T">The type to match against this identifier.</typeparam>
 		/// <returns>An expression to match the type <typeparamref name="T"/> to this identifier.</returns>
-		public Expression<Func<T, bool>> Matcher<T>(Expression<Func<T, int?>> idGetter,
+		public Filter<T> Matcher<T>(Expression<Func<T, int?>> idGetter,
 			Expression<Func<T, string>> slugGetter)
 		{
 			ConstantExpression self = Expression.Constant(_id.HasValue ? _id.Value : _slug);
 			BinaryExpression equal = Expression.Equal(_id.HasValue ? idGetter.Body : slugGetter.Body, self);
 			ICollection<ParameterExpression> parameters = _id.HasValue ? idGetter.Parameters : slugGetter.Parameters;
-			return Expression.Lambda<Func<T, bool>>(equal, parameters);
+			Expression<Func<T, bool>> lambda = Expression.Lambda<Func<T, bool>>(equal, parameters);
+			return new Filter<T>.Lambda(lambda);
 		}
 
 		/// <summary>
@@ -142,13 +144,21 @@ namespace Kyoo.Abstractions.Models.Utils
 		}
 
 		/// <summary>
-		/// Return an expression that return true if this <see cref="Identifier"/> match a given resource.
+		/// Return a filter to get this <see cref="Identifier"/> match a given resource.
 		/// </summary>
 		/// <typeparam name="T">The type of resource to match against.</typeparam>
 		/// <returns>
 		/// <c>true</c> if the given resource match this identifier, <c>false</c> otherwise.
 		/// </returns>
-		public Expression<Func<T, bool>> IsSame<T>()
+		public Filter<T> IsSame<T>()
+			where T : IResource
+		{
+			return _id.HasValue
+				? new Filter<T>.Eq("Id", _id.Value)
+				: new Filter<T>.Eq("Slug", _slug!);
+		}
+
+		private Expression<Func<T, bool>> _IsSameExpression<T>()
 			where T : IResource
 		{
 			return _id.HasValue
@@ -163,7 +173,7 @@ namespace Kyoo.Abstractions.Models.Utils
 		/// <typeparam name="T">The type that contain the list to check.</typeparam>
 		/// <typeparam name="T2">The type of resource to check this identifier against.</typeparam>
 		/// <returns>An expression to check if this <see cref="Identifier"/> is contained.</returns>
-		public Expression<Func<T, bool>> IsContainedIn<T, T2>(Expression<Func<T, IEnumerable<T2>>> listGetter)
+		public Filter<T> IsContainedIn<T, T2>(Expression<Func<T, IEnumerable<T2>?>> listGetter)
 			where T2 : IResource
 		{
 			MethodInfo method = typeof(Enumerable)
@@ -171,8 +181,9 @@ namespace Kyoo.Abstractions.Models.Utils
 				.Where(x => x.Name == nameof(Enumerable.Any))
 				.FirstOrDefault(x => x.GetParameters().Length == 2)!
 				.MakeGenericMethod(typeof(T2));
-			MethodCallExpression call = Expression.Call(null, method, listGetter.Body, IsSame<T2>());
-			return Expression.Lambda<Func<T, bool>>(call, listGetter.Parameters);
+			MethodCallExpression call = Expression.Call(null, method, listGetter.Body, _IsSameExpression<T2>());
+			Expression<Func<T, bool>> lambda = Expression.Lambda<Func<T, bool>>(call, listGetter.Parameters);
+			return new Filter<T>.Lambda(lambda);
 		}
 
 		/// <inheritdoc />

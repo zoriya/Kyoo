@@ -96,7 +96,7 @@ namespace Kyoo.Authentication.Views
 		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
 		public async Task<ActionResult<JwtToken>> Login([FromBody] LoginRequest request)
 		{
-			User? user = await _users.GetOrDefault(x => x.Username == request.Username);
+			User? user = await _users.GetOrDefault(new Filter<User>.Eq(nameof(Abstractions.Models.User.Username), request.Username));
 			if (user == null || !BCryptNet.Verify(request.Password, user.Password))
 				return Forbid(new RequestError("The user and password does not match."));
 
@@ -126,7 +126,7 @@ namespace Kyoo.Authentication.Views
 			User user = request.ToUser();
 			user.Permissions = _permissions.NewUser;
 			// If no users exists, the new one will be an admin. Give it every permissions.
-			if (await _users.GetOrDefault(where: x => true) == null)
+			if (await _users.GetOrDefault(1) == null)
 				user.Permissions = PermissionOption.Admin;
 			try
 			{

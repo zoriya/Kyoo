@@ -67,7 +67,7 @@ namespace Kyoo.Core.Api
 		/// </remarks>
 		/// <param name="identifier">The ID or slug of the <see cref="Season"/>.</param>
 		/// <param name="sortBy">A key to sort episodes by.</param>
-		/// <param name="where">An optional list of filters.</param>
+		/// <param name="filter">An optional list of filters.</param>
 		/// <param name="pagination">The number of episodes to return.</param>
 		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>A page of episodes.</returns>
@@ -81,15 +81,15 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<Page<Episode>>> GetEpisode(Identifier identifier,
 			[FromQuery] Sort<Episode> sortBy,
-			[FromQuery] Dictionary<string, string> where,
+			[FromQuery] Filter<Episode>? filter,
 			[FromQuery] Pagination pagination,
 			[FromQuery] Include<Episode> fields)
 		{
 			ICollection<Episode> resources = await _libraryManager.Episodes.GetAll(
-				ApiHelper.ParseWhere(where, identifier.Matcher<Episode>(x => x.SeasonId, x => x.Season!.Slug)),
+				Filter.And(filter, identifier.Matcher<Episode>(x => x.SeasonId, x => x.Season!.Slug)),
 				sortBy,
-				pagination,
-				fields
+				fields,
+				pagination
 			);
 
 			if (!resources.Any() && await _libraryManager.Seasons.GetOrDefault(identifier.IsSame<Season>()) == null)
