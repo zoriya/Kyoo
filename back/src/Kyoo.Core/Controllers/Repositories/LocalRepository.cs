@@ -115,7 +115,30 @@ namespace Kyoo.Core.Controllers
 
 		protected static Expression<Func<T, bool>> ParseFilter(Filter<T>? filter)
 		{
-			throw new NotImplementedException();
+			if (filter == null)
+				return x => true;
+
+			ParameterExpression x = Expression.Parameter(typeof(T), "x");
+
+			Expression Parse(Filter<T> f)
+			{
+				return f switch
+				{
+					Filter<T>.And(var first, var second) => Expression.AndAlso(Parse(first), Parse(second)),
+					Filter<T>.Or(var first, var second) => Expression.OrElse(Parse(first), Parse(second)),
+					Filter<T>.Not(var inner) => Expression.Not(Parse(inner)),
+					Filter<T>.Eq(var property, var value) => Expression.Equal(Expression.Property(x, property), Expression.Constant(value)),
+					Filter<T>.Ne(var property, var value) => Expression.NotEqual(Expression.Property(x, property), Expression.Constant(value)),
+					Filter<T>.Gt(var property, var value) => Expression.GreaterThan(Expression.Property(x, property), Expression.Constant(value)),
+					Filter<T>.Ge(var property, var value) => Expression.GreaterThanOrEqual(Expression.Property(x, property), Expression.Constant(value)),
+					Filter<T>.Lt(var property, var value) => Expression.LessThan(Expression.Property(x, property), Expression.Constant(value)),
+					Filter<T>.Le(var property, var value) => Expression.LessThanOrEqual(Expression.Property(x, property), Expression.Constant(value)),
+					Filter<T>.Lambda(var lambda) => ExpressionArgumentReplacer.ReplaceParams(lambda.Body, lambda.Parameters, x),
+				};
+			}
+
+			Expression body = Parse(filter);
+			return Expression.Lambda<Func<T, bool>>(body, x);
 		}
 
 		private static Func<Expression, Expression, BinaryExpression> _GetComparisonExpression(
