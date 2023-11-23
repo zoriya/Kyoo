@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Text.RegularExpressions;
 using Dapper;
+using InterpolatedSql.SqlBuilders;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Postgresql.Utils;
@@ -87,6 +88,7 @@ namespace Kyoo.Postgresql
 			SqlMapper.AddTypeHandler(typeof(Dictionary<string, MetadataId>), new JsonTypeHandler<Dictionary<string, MetadataId>>());
 			SqlMapper.AddTypeHandler(typeof(List<string>), new ListTypeHandler<string>());
 			SqlMapper.AddTypeHandler(typeof(List<Genre>), new ListTypeHandler<Genre>());
+			InterpolatedSqlBuilderOptions.DefaultOptions.ReuseIdenticalParameters = true;
 		}
 
 		/// <inheritdoc />

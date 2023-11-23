@@ -177,7 +177,7 @@ namespace Kyoo.Core.Controllers
 			return (retConfig, join.ToString(), Map);
 		}
 
-		public static string ExpendProjections<T>(string? prefix, Include include)
+		public static FormattableString ExpendProjections<T>(string? prefix, Include include)
 		{
 			prefix = prefix != null ? $"{prefix}." : string.Empty;
 			IEnumerable<string> projections = include.Metadatas
@@ -185,18 +185,40 @@ namespace Kyoo.Core.Controllers
 				.Where(x => x != null)
 				.Select(x => x.Replace("\"this\".", prefix));
 			string projStr = string.Join(string.Empty, projections.Select(x => $", {x}"));
-			return $"{prefix}*" + projStr;
+			return $"{prefix:raw}*{projStr:raw}";
 		}
 
-		public static string ProcessFilter<T>(Filter<T> filter, Dictionary<string, Type> config)
+		public static FormattableString ProcessFilter<T>(Filter<T> filter, Dictionary<string, Type> config)
 		{
-			return filter switch
+			FormattableString Format(string key, FormattableString op)
 			{
-				Filter<T>.And(var first, var second) => $"({ProcessFilter(first, config)} and {ProcessFilter(second, config)})",
-				Filter<T>.Or(var first, var second) => $"({ProcessFilter(first, config)} or {ProcessFilter(second, config)})",
-				Filter<T>.Not(var inner) => $"(not {ProcessFilter(inner, config)})",
-				Filter<T>.Eq(var property, var value) => $"({_Property(property, config)} = {value})",
-			};
+				IEnumerable<string> properties = config
+					.Where(x => key == "id" || x.Value.GetProperty(key) != null)
+					.Select(x => $"{x.Key}.{x.Value.GetProperty(key)?.GetCustomAttribute<ColumnAttribute>()?.Name ?? key.ToSnakeCase()}");
+
+				FormattableString ret = $"{properties.First():raw} {op}";
+				foreach (string property in properties.Skip(1))
+					ret = $"{ret} or {property:raw} {op}";
+				return $"({ret})";
+			}
+
+			FormattableString Process(Filter<T> fil)
+			{
+				return fil switch
+				{
+					Filter<T>.And(var first, var second) => $"({Process(first)} and {Process(second)})",
+					Filter<T>.Or(var first, var second) => $"({Process(first)} or {Process(second)})",
+					Filter<T>.Not(var inner) => $"(not {Process(inner)})",
+					Filter<T>.Eq(var property, var value) => Format(property, $"= {value}"),
+					Filter<T>.Ne(var property, var value) => Format(property, $"!= {value}"),
+					Filter<T>.Gt(var property, var value) => Format(property, $"> {value}"),
+					Filter<T>.Ge(var property, var value) => Format(property, $">= {value}"),
+					Filter<T>.Lt(var property, var value) => Format(property, $"< {value}"),
+					Filter<T>.Le(var property, var value) => Format(property, $"> {value}"),
+					Filter<T>.Lambda(var lambda) => throw new NotSupportedException(),
+				};
+			}
+			return $"where {Process(filter)}";
 		}
 
 		public async Task<ICollection<ILibraryItem>> GetAll(Filter<ILibraryItem>? filter = null,
@@ -217,7 +239,7 @@ namespace Kyoo.Core.Controllers
 			// language=PostgreSQL
 			var query = _database.SqlBuilder($"""
 				select
-					{ExpendProjections<Show>("s", include):raw},
+					{ExpendProjections<Show>("s", include)},
 					m.*,
 					c.*
 					{string.Join(string.Empty, includeConfig.Select(x => $", {x.Key}.*")):raw}
@@ -225,21 +247,21 @@ namespace Kyoo.Core.Controllers
 					shows as s
 					full outer join (
 					select
-						{ExpendProjections<Movie>(null, include):raw}
+						{ExpendProjections<Movie>(null, include)}
 					from
 						movies) as m on false
 						full outer join (
 						select
-							{ExpendProjections<Collection>(null, include):raw}
+							{ExpendProjections<Collection>(null, include)}
 						from
 							collections) as c on false
 				{includeJoin:raw}
-				order by {ProcessSort(sort, config):raw}
-				limit {limit.Limit}
 			""");
 
 			if (filter != null)
-				query += $"where {ProcessFilter(filter, config):raw}";
+				query += ProcessFilter(filter, config);
+			query += $"order by {ProcessSort(sort, config):raw}";
+			query += $"limit {limit.Limit}";
 
 			Type[] types = config.Select(x => x.Value)
 				.Concat(includeConfig.Select(x => x.Value))
