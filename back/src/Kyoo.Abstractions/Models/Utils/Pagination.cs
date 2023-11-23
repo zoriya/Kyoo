@@ -21,7 +21,7 @@ namespace Kyoo.Abstractions.Controllers
 	/// <summary>
 	/// Information about the pagination. How many items should be displayed and where to start.
 	/// </summary>
-	public struct Pagination
+	public class Pagination
 	{
 		/// <summary>
 		/// The count of items to return.

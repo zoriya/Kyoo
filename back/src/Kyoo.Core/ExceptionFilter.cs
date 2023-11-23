@@ -48,9 +48,6 @@ namespace Kyoo.Core
 		{
 			switch (context.Exception)
 			{
-				case ArgumentException ex:
-					context.Result = new BadRequestObjectResult(new RequestError(ex.Message));
-					break;
 				case ValidationException ex:
 					context.Result = new BadRequestObjectResult(new RequestError(ex.Message));
 					break;
