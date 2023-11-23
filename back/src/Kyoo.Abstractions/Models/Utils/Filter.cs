@@ -17,11 +17,13 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Kyoo.Abstractions.Models.Attributes;
 using Sprache;
 
 namespace Kyoo.Abstractions.Models.Utils;
@@ -115,9 +117,12 @@ public abstract record Filter<T> : Filter
 
 			return property.Then(prop =>
 			{
-				PropertyInfo? propInfo = typeof(T).GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+				Type[] types = typeof(T).GetCustomAttribute<OneOfAttribute>()?.Types ?? new[] { typeof(T) };
+				PropertyInfo? propInfo = types
+					.Select(x => x.GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance))
+					.FirstOrDefault();
 				if (propInfo == null)
-					throw new ValidationException($"The given filter {property} is invalid.");
+					throw new ValidationException($"The given filter '{prop}' is invalid.");
 
 				Parser<object> value;
 
@@ -149,14 +154,25 @@ public abstract record Filter<T> : Filter
 						throw new ValidationException($"Invalid enum value. Unexpected {x}");
 					});
 				}
-				// TODO: Support arrays
+				else if (propInfo.PropertyType == typeof(DateTime))
+				{
+					value =
+						from year in Parse.Digit.Repeat(4).Text().Select(int.Parse)
+						from yd in Parse.Char('-')
+						from mouth in Parse.Digit.Repeat(2).Text().Select(int.Parse)
+						from md in Parse.Char('-')
+						from day in Parse.Digit.Repeat(2).Text().Select(int.Parse)
+						select new DateTime(year, mouth, day) as object;
+				}
+				else if (typeof(IEnumerable).IsAssignableFrom(propInfo.PropertyType))
+					throw new ValidationException("Can't filter a list with a default comparator, use the 'in' filter.");
 				else
 					throw new ValidationException("Unfilterable field found");
 
 				return
 					from eq in op
 					from val in value
-					select apply(prop, val);
+					select apply(propInfo.Name, val);
 			});
 		}
 
