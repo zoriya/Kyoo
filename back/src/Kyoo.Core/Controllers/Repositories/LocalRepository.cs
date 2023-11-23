@@ -113,7 +113,7 @@ namespace Kyoo.Core.Controllers
 			return _Sort(query, sortBy, false).ThenBy(x => x.Id);
 		}
 
-		protected static Expression<Func<T, bool>> ParseFilter(Filter<T>? filter)
+		protected Expression<Func<T, bool>> ParseFilter(Filter<T>? filter)
 		{
 			if (filter == null)
 				return x => true;
@@ -259,7 +259,7 @@ namespace Kyoo.Core.Controllers
 				}
 				else
 					GetRandomSortKeys(seed, out xkey, out rkey);
-				BinaryExpression lastCompare = ApiHelper.StringCompatibleExpression(comparer, xkey, rkey);
+				BinaryExpression lastCompare = null;//ApiHelper.StringCompatibleExpression(comparer, xkey, rkey);
 
 				// Comparing a value with null always return false for nulls so we must add nulls to the results manually.
 				// Postgres sorts them after values so we will do the same
