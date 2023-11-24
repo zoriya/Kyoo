@@ -106,7 +106,7 @@ namespace Kyoo.Abstractions.Controllers
 			Type[] types = typeof(T).GetCustomAttribute<OneOfAttribute>()?.Types ?? new[] { typeof(T) };
 			PropertyInfo? property = types
 				.Select(x => x.GetProperty(key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance))
-				.FirstOrDefault();
+				.FirstOrDefault(x => x != null);
 			if (property == null)
 				throw new ValidationException("The given sort key is not valid.");
 			return new By(property.Name, desendant);

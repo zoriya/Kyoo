@@ -114,7 +114,7 @@ namespace Kyoo.Core.Controllers
 			string ret = sort switch
 			{
 				Sort<T>.Default(var value) => ProcessSort(value, config, true),
-				Sort<T>.By(string key, bool desc) => $"{_Property(key, config)} {(desc ? "desc nulls last" : "asc")}",
+				Sort<T>.By(string key, bool desc) => $"{_Property(key, config)} {(desc ? "desc" : "asc")}",
 				Sort<T>.Random(var seed) => $"md5('{seed}' || {_Property("id", config)})",
 				Sort<T>.Conglomerate(var list) => string.Join(", ", list.Select(x => ProcessSort(x, config, true))),
 				_ => throw new SwitchExpressionException(),
@@ -216,14 +216,18 @@ namespace Kyoo.Core.Controllers
 					Filter<T>.And(var first, var second) => $"({Process(first)} and {Process(second)})",
 					Filter<T>.Or(var first, var second) => $"({Process(first)} or {Process(second)})",
 					Filter<T>.Not(var inner) => $"(not {Process(inner)})",
-					Filter<T>.Eq(var property, var value) => Format(property, $"= {P(value)}"),
-					Filter<T>.Ne(var property, var value) => Format(property, $"!= {P(value)}"),
+					Filter<T>.Eq(var property, var value) when value is null => Format(property, $"is null"),
+					Filter<T>.Ne(var property, var value) when value is null => Format(property, $"is not null"),
+					Filter<T>.Eq(var property, var value) => Format(property, $"= {P(value!)}"),
+					Filter<T>.Ne(var property, var value) => Format(property, $"!= {P(value!)}"),
 					Filter<T>.Gt(var property, var value) => Format(property, $"> {P(value)}"),
 					Filter<T>.Ge(var property, var value) => Format(property, $">= {P(value)}"),
 					Filter<T>.Lt(var property, var value) => Format(property, $"< {P(value)}"),
 					Filter<T>.Le(var property, var value) => Format(property, $"> {P(value)}"),
 					Filter<T>.Has(var property, var value) => $"{P(value)} = any({_Property(property, config):raw})",
+					Filter<T>.EqRandom(var seed, var id) => $"md5({seed} || {config.Select(x => $"{x.Key}.id"):raw}) = md5({seed} || {id.ToString()})",
 					Filter<T>.Lambda(var lambda) => throw new NotSupportedException(),
+					_ => throw new NotImplementedException(),
 				};
 			}
 			return $"where {Process(filter)}";
@@ -266,6 +270,12 @@ namespace Kyoo.Core.Controllers
 				{includeJoin:raw}
 			""");
 
+			if (limit.AfterID != null)
+			{
+				ILibraryItem reference = await Get(limit.AfterID.Value);
+				Filter<ILibraryItem>? keysetFilter = RepositoryHelper.KeysetPaginate(sort, reference, !limit.Reverse);
+				filter = Filter.And(filter, keysetFilter);
+			}
 			if (filter != null)
 				query += ProcessFilter(filter, config);
 			query += $"order by {ProcessSort(sort, config):raw}";

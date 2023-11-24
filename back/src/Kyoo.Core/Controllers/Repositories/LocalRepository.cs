@@ -119,6 +119,27 @@ namespace Kyoo.Core.Controllers
 
 			ParameterExpression x = Expression.Parameter(typeof(T), "x");
 
+			Expression EqRandomHandler(string seed, int refId)
+			{
+				MethodInfo concat = typeof(string).GetMethod(nameof(string.Concat), new[] { typeof(string), typeof(string) })!;
+				Expression id = Expression.Call(Expression.Property(x, "ID"), nameof(int.ToString), null);
+				Expression xrng = Expression.Call(concat, Expression.Constant(seed), id);
+				Expression left = Expression.Call(typeof(DatabaseContext), nameof(DatabaseContext.MD5), null, xrng);
+				Expression right = Expression.Call(typeof(DatabaseContext), nameof(DatabaseContext.MD5), null, Expression.Constant($"{seed}{refId}"));
+				return Expression.Equal(left, right);
+			}
+
+			BinaryExpression StringCompatibleExpression(
+				Func<Expression, Expression, BinaryExpression> operand,
+				Expression left,
+				Expression right)
+			{
+				if (left.Type != typeof(string))
+					return operand(left, right);
+				MethodCallExpression call = Expression.Call(typeof(string), "Compare", null, left, right);
+				return operand(call, Expression.Constant(0));
+			}
+
 			Expression Parse(Filter<T> f)
 			{
 				return f switch
@@ -128,159 +149,19 @@ namespace Kyoo.Core.Controllers
 					Filter<T>.Not(var inner) => Expression.Not(Parse(inner)),
 					Filter<T>.Eq(var property, var value) => Expression.Equal(Expression.Property(x, property), Expression.Constant(value)),
 					Filter<T>.Ne(var property, var value) => Expression.NotEqual(Expression.Property(x, property), Expression.Constant(value)),
-					Filter<T>.Gt(var property, var value) => Expression.GreaterThan(Expression.Property(x, property), Expression.Constant(value)),
-					Filter<T>.Ge(var property, var value) => Expression.GreaterThanOrEqual(Expression.Property(x, property), Expression.Constant(value)),
-					Filter<T>.Lt(var property, var value) => Expression.LessThan(Expression.Property(x, property), Expression.Constant(value)),
-					Filter<T>.Le(var property, var value) => Expression.LessThanOrEqual(Expression.Property(x, property), Expression.Constant(value)),
+					Filter<T>.Gt(var property, var value) => StringCompatibleExpression(Expression.GreaterThan, Expression.Property(x, property), Expression.Constant(value)),
+					Filter<T>.Ge(var property, var value) => StringCompatibleExpression(Expression.GreaterThanOrEqual, Expression.Property(x, property), Expression.Constant(value)),
+					Filter<T>.Lt(var property, var value) => StringCompatibleExpression(Expression.LessThan, Expression.Property(x, property), Expression.Constant(value)),
+					Filter<T>.Le(var property, var value) => StringCompatibleExpression(Expression.LessThanOrEqual, Expression.Property(x, property), Expression.Constant(value)),
 					Filter<T>.Has(var property, var value) => Expression.Call(typeof(Enumerable), "Contains", new[] { value.GetType() }, Expression.Property(x, property), Expression.Constant(value)),
+					Filter<T>.EqRandom(var seed, var refId) => EqRandomHandler(seed, refId),
 					Filter<T>.Lambda(var lambda) => ExpressionArgumentReplacer.ReplaceParams(lambda.Body, lambda.Parameters, x),
+					_ => throw new NotImplementedException(),
 				};
 			}
 
 			Expression body = Parse(filter);
 			return Expression.Lambda<Func<T, bool>>(body, x);
-		}
-
-		private static Func<Expression, Expression, BinaryExpression> _GetComparisonExpression(
-			bool desc,
-			bool next,
-			bool orEqual)
-		{
-			bool greaterThan = desc ^ next;
-
-			return orEqual
-				? (greaterThan ? Expression.GreaterThanOrEqual : Expression.LessThanOrEqual)
-				: (greaterThan ? Expression.GreaterThan : Expression.LessThan);
-		}
-
-		private record SortIndicator(string Key, bool Desc, string? Seed);
-
-		/// <summary>
-		/// Create a filter (where) expression on the query to skip everything before/after the referenceID.
-		/// The generalized expression for this in pseudocode is:
-		///   (x > a) OR
-		///   (x = a AND y > b) OR
-		///   (x = a AND y = b AND z > c) OR...
-		///
-		/// Of course, this will be a bit more complex when ASC and DESC are mixed.
-		/// Assume x is ASC, y is DESC, and z is ASC:
-		///   (x > a) OR
-		///   (x = a AND y &lt; b) OR
-		///   (x = a AND y = b AND z > c) OR...
-		/// </summary>
-		/// <param name="sort">How items are sorted in the query</param>
-		/// <param name="reference">The reference item (the AfterID query)</param>
-		/// <param name="next">True if the following page should be returned, false for the previous.</param>
-		/// <returns>An expression ready to be added to a Where close of a sorted query to handle the AfterID</returns>
-		protected Expression<Func<T, bool>> KeysetPaginate(
-			Sort<T>? sort,
-			T reference,
-			bool next = true)
-		{
-			sort ??= new Sort<T>.Default();
-
-			// x =>
-			ParameterExpression x = Expression.Parameter(typeof(T), "x");
-			ConstantExpression referenceC = Expression.Constant(reference, typeof(T));
-
-			void GetRandomSortKeys(string seed, out Expression left, out Expression right)
-			{
-				MethodInfo concat = typeof(string).GetMethod(nameof(string.Concat), new[] { typeof(string), typeof(string) })!;
-				Expression id = Expression.Call(Expression.Property(x, "ID"), nameof(int.ToString), null);
-				Expression xrng = Expression.Call(concat, Expression.Constant(seed), id);
-				right = Expression.Call(typeof(DatabaseContext), nameof(DatabaseContext.MD5), null, Expression.Constant($"{seed}{reference.Id}"));
-				left = Expression.Call(typeof(DatabaseContext), nameof(DatabaseContext.MD5), null, xrng);
-			}
-
-			IEnumerable<SortIndicator> GetSortsBy(Sort<T> sort)
-			{
-				return sort switch
-				{
-					Sort<T>.Default(var value) => GetSortsBy(value),
-					Sort<T>.By @sortBy => new[] { new SortIndicator(sortBy.Key, sortBy.Desendant, null) },
-					Sort<T>.Conglomerate(var list) => list.SelectMany(GetSortsBy),
-					Sort<T>.Random(var seed) => new[] { new SortIndicator("random", false, seed.ToString()) },
-					_ => Array.Empty<SortIndicator>(),
-				};
-			}
-
-			// Don't forget that every sorts must end with a ID sort (to differentiate equalities).
-			IEnumerable<SortIndicator> sorts = GetSortsBy(sort)
-				.Append(new SortIndicator("Id", false, null));
-
-			BinaryExpression? filter = null;
-			List<SortIndicator> previousSteps = new();
-			// TODO: Add an outer query >= for perf
-			// PERF: See https://use-the-index-luke.com/sql/partial-results/fetch-next-page#sb-equivalent-logic
-			foreach ((string key, bool desc, string? seed) in sorts)
-			{
-				BinaryExpression? compare = null;
-				PropertyInfo? property = key != "random"
-					? typeof(T).GetProperty(key)
-					: null;
-
-				// Comparing a value with null always return false so we short opt < > comparisons with null.
-				if (property != null && property.GetValue(reference) == null)
-				{
-					previousSteps.Add(new SortIndicator(key, desc, seed));
-					continue;
-				}
-
-				// Create all the equality statements for previous sorts.
-				foreach ((string pKey, bool pDesc, string? pSeed) in previousSteps)
-				{
-					BinaryExpression pcompare;
-
-					if (pSeed == null)
-					{
-						pcompare = Expression.Equal(
-							Expression.Property(x, pKey),
-							Expression.Property(referenceC, pKey)
-						);
-					}
-					else
-					{
-						GetRandomSortKeys(pSeed, out Expression left, out Expression right);
-						pcompare = Expression.Equal(left, right);
-					}
-					compare = compare != null
-						? Expression.AndAlso(compare, pcompare)
-						: pcompare;
-				}
-
-				// Create the last comparison of the statement.
-				Func<Expression, Expression, BinaryExpression> comparer = _GetComparisonExpression(desc, next, false);
-				Expression xkey;
-				Expression rkey;
-				if (seed == null)
-				{
-					xkey = Expression.Property(x, key);
-					rkey = Expression.Property(referenceC, key);
-				}
-				else
-					GetRandomSortKeys(seed, out xkey, out rkey);
-				BinaryExpression lastCompare = null;//ApiHelper.StringCompatibleExpression(comparer, xkey, rkey);
-
-				// Comparing a value with null always return false for nulls so we must add nulls to the results manually.
-				// Postgres sorts them after values so we will do the same
-				// We only add this condition if the column type is nullable
-				if (property != null && Nullable.GetUnderlyingType(property.PropertyType) != null)
-				{
-					BinaryExpression equalNull = Expression.Equal(xkey, Expression.Constant(null));
-					lastCompare = Expression.OrElse(lastCompare, equalNull);
-				}
-
-				compare = compare != null
-					? Expression.AndAlso(compare, lastCompare)
-					: lastCompare;
-
-				filter = filter != null
-					? Expression.OrElse(filter, compare)
-					: compare;
-
-				previousSteps.Add(new SortIndicator(key, desc, seed));
-			}
-			return Expression.Lambda<Func<T, bool>>(filter!, x);
 		}
 
 		protected IQueryable<T> AddIncludes(IQueryable<T> query, Include<T>? include)
@@ -386,34 +267,37 @@ namespace Kyoo.Core.Controllers
 			Include<T>? include = default,
 			Pagination limit = default)
 		{
-			return ApplyFilters(Database.Set<T>(), ParseFilter(filter), sort, limit, include);
+			return ApplyFilters(Database.Set<T>(), filter, sort, limit, include);
 		}
 
 		/// <summary>
 		/// Apply filters to a query to ease sort, pagination and where queries for resources of this repository
 		/// </summary>
 		/// <param name="query">The base query to filter.</param>
-		/// <param name="where">An expression to filter based on arbitrary conditions</param>
+		/// <param name="filter">An expression to filter based on arbitrary conditions</param>
 		/// <param name="sort">The sort settings (sort order and sort by)</param>
 		/// <param name="limit">Pagination information (where to start and how many to get)</param>
 		/// <param name="include">Related fields to also load with this query.</param>
 		/// <returns>The filtered query</returns>
 		protected async Task<ICollection<T>> ApplyFilters(IQueryable<T> query,
-			Expression<Func<T, bool>>? where = null,
+			Filter<T>? filter = null,
 			Sort<T>? sort = default,
 			Pagination limit = default,
 			Include<T>? include = default)
 		{
 			query = AddIncludes(query, include);
 			query = Sort(query, sort);
-			if (where != null)
-				query = query.Where(where);
 
 			if (limit.AfterID != null)
 			{
 				T reference = await Get(limit.AfterID.Value);
-				query = query.Where(KeysetPaginate(sort, reference, !limit.Reverse));
+				Filter<T>? keysetFilter = RepositoryHelper.KeysetPaginate(sort, reference, !limit.Reverse);
+				filter = Filter.And(filter, keysetFilter);
+				Console.WriteLine(filter);
 			}
+			if (filter != null)
+				query = query.Where(ParseFilter(filter));
+
 			if (limit.Reverse)
 				query = query.Reverse();
 			if (limit.Limit > 0)
