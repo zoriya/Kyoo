@@ -25,6 +25,7 @@ using InterpolatedSql.SqlBuilders;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Postgresql.Utils;
+using Kyoo.Utils;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -88,6 +89,7 @@ namespace Kyoo.Postgresql
 			SqlMapper.AddTypeHandler(typeof(Dictionary<string, MetadataId>), new JsonTypeHandler<Dictionary<string, MetadataId>>());
 			SqlMapper.AddTypeHandler(typeof(List<string>), new ListTypeHandler<string>());
 			SqlMapper.AddTypeHandler(typeof(List<Genre>), new ListTypeHandler<Genre>());
+			SqlMapper.AddTypeHandler(typeof(Wrapper), new Wrapper.Handler());
 			InterpolatedSqlBuilderOptions.DefaultOptions.ReuseIdenticalParameters = true;
 		}
 

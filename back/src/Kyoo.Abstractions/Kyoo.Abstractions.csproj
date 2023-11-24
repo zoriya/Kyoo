@@ -8,6 +8,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Autofac" Version="7.1.0" />
+		<PackageReference Include="Dapper" Version="2.1.24" />
 		<PackageReference Include="EntityFrameworkCore.Projectables" Version="4.1.4-prebeta" />
 		<PackageReference Include="JetBrains.Annotations" Version="2023.2.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />

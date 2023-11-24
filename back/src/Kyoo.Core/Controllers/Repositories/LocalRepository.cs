@@ -28,7 +28,6 @@ using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Utils;
-using Kyoo.Core.Api;
 using Kyoo.Postgresql;
 using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
@@ -133,6 +132,7 @@ namespace Kyoo.Core.Controllers
 					Filter<T>.Ge(var property, var value) => Expression.GreaterThanOrEqual(Expression.Property(x, property), Expression.Constant(value)),
 					Filter<T>.Lt(var property, var value) => Expression.LessThan(Expression.Property(x, property), Expression.Constant(value)),
 					Filter<T>.Le(var property, var value) => Expression.LessThanOrEqual(Expression.Property(x, property), Expression.Constant(value)),
+					Filter<T>.Has(var property, var value) => Expression.Call(typeof(Enumerable), "Contains", new[] { value.GetType() }, Expression.Property(x, property), Expression.Constant(value)),
 					Filter<T>.Lambda(var lambda) => ExpressionArgumentReplacer.ReplaceParams(lambda.Body, lambda.Parameters, x),
 				};
 			}

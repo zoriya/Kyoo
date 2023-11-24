@@ -28,6 +28,25 @@ using Sprache;
 
 namespace Kyoo.Abstractions.Models.Utils;
 
+public static class ParseHelper
+{
+	public static Parser<T> ErrorMessage<T>(this Parser<T> @this, string message) =>
+		input =>
+		{
+			IResult<T> result = @this(input);
+
+			return result.WasSuccessful
+				? result
+				: Result.Failure<T>(result.Remainder, message, result.Expectations);
+		};
+
+	public static Parser<T> Error<T>(string message) =>
+		input =>
+		{
+			return Result.Failure<T>(input, message, Array.Empty<string>());
+		};
+}
+
 public abstract record Filter
 {
 	public static Filter<T>? And<T>(params Filter<T>?[] filters)
@@ -45,29 +64,29 @@ public abstract record Filter
 
 public abstract record Filter<T> : Filter
 {
-	public record And(Filter<T> first, Filter<T> second) : Filter<T>;
+	public record And(Filter<T> First, Filter<T> Second) : Filter<T>;
 
-	public record Or(Filter<T> first, Filter<T> second) : Filter<T>;
+	public record Or(Filter<T> First, Filter<T> Second) : Filter<T>;
 
-	public record Not(Filter<T> filter) : Filter<T>;
+	public record Not(Filter<T> Filter) : Filter<T>;
 
-	public record Eq(string property, object value) : Filter<T>;
+	public record Eq(string Property, object Value) : Filter<T>;
 
-	public record Ne(string property, object value) : Filter<T>;
+	public record Ne(string Property, object Value) : Filter<T>;
 
-	public record Gt(string property, object value) : Filter<T>;
+	public record Gt(string Property, object Value) : Filter<T>;
 
-	public record Ge(string property, object value) : Filter<T>;
+	public record Ge(string Property, object Value) : Filter<T>;
 
-	public record Lt(string property, object value) : Filter<T>;
+	public record Lt(string Property, object Value) : Filter<T>;
 
-	public record Le(string property, object value) : Filter<T>;
+	public record Le(string Property, object Value) : Filter<T>;
 
-	public record Has(string property, object value) : Filter<T>;
+	public record Has(string Property, object Value) : Filter<T>;
 
-	public record In(string property, object[] value) : Filter<T>;
+	public record In(string Property, object[] Value) : Filter<T>;
 
-	public record Lambda(Expression<Func<T, bool>> lambda) : Filter<T>;
+	public record Lambda(Expression<Func<T, bool>> Inner) : Filter<T>;
 
 	public static class FilterParsers
 	{
@@ -79,7 +98,8 @@ public abstract record Filter<T> : Filter
 				.Or(Parse.Ref(() => Gt))
 				.Or(Parse.Ref(() => Ge))
 				.Or(Parse.Ref(() => Lt))
-				.Or(Parse.Ref(() => Le));
+				.Or(Parse.Ref(() => Le))
+				.Or(Parse.Ref(() => Has));
 
 		public static readonly Parser<Filter<T>> CompleteFilter =
 			Parse.Ref(() => Or)
@@ -100,18 +120,70 @@ public abstract record Filter<T> : Filter
 			.Or(Parse.String("||"))
 			.Token();
 
-		public static readonly Parser<Filter<T>> And = Parse.ChainOperator(AndOperator, Filter, (_, a, b) => new Filter<T>.And(a, b));
+		public static readonly Parser<Filter<T>> And = Parse.ChainOperator(AndOperator, Filter, (_, a, b) => new And(a, b));
 
-		public static readonly Parser<Filter<T>> Or = Parse.ChainOperator(OrOperator, And.Or(Filter), (_, a, b) => new Filter<T>.Or(a, b));
+		public static readonly Parser<Filter<T>> Or = Parse.ChainOperator(OrOperator, And.Or(Filter), (_, a, b) => new Or(a, b));
 
 		public static readonly Parser<Filter<T>> Not =
 			from not in Parse.IgnoreCase("not")
 				.Or(Parse.String("!"))
 				.Token()
 			from filter in CompleteFilter
-			select new Filter<T>.Not(filter);
+			select new Not(filter);
 
-		private static Parser<Filter<T>> _GetOperationParser(Parser<object> op, Func<string, object, Filter<T>> apply)
+		private static Parser<object> _GetValueParser(Type type)
+		{
+			if (type == typeof(int))
+				return Parse.Number.Select(x => int.Parse(x) as object);
+			if (type == typeof(float))
+			{
+				return
+					from a in Parse.Number
+					from dot in Parse.Char('.')
+					from b in Parse.Number
+					select float.Parse($"{a}.{b}") as object;
+			}
+
+			if (type == typeof(string))
+			{
+				return (
+					from lq in Parse.Char('"').Or(Parse.Char('\''))
+					from str in Parse.AnyChar.Where(x => x is not '"' and not '\'').Many().Text()
+					from rq in Parse.Char('"').Or(Parse.Char('\''))
+					select str
+				).Or(Parse.LetterOrDigit.Many().Text());
+			}
+
+			if (type.IsEnum)
+			{
+				return Parse.LetterOrDigit.Many().Text().Then(x =>
+				{
+					if (Enum.TryParse(type, x, true, out object? value))
+						return Parse.Return(value);
+					return ParseHelper.Error<object>($"Invalid enum value. Unexpected {x}");
+				});
+			}
+
+			if (type == typeof(DateTime))
+			{
+				return
+					from year in Parse.Digit.Repeat(4).Text().Select(int.Parse)
+					from yd in Parse.Char('-')
+					from mouth in Parse.Digit.Repeat(2).Text().Select(int.Parse)
+					from md in Parse.Char('-')
+					from day in Parse.Digit.Repeat(2).Text().Select(int.Parse)
+					select new DateTime(year, mouth, day) as object;
+			}
+
+			if (typeof(IEnumerable).IsAssignableFrom(type))
+				return ParseHelper.Error<object>("Can't filter a list with a default comparator, use the 'has' filter.");
+			return ParseHelper.Error<object>("Unfilterable field found");
+		}
+
+		private static Parser<Filter<T>> _GetOperationParser(
+			Parser<object> op,
+			Func<string, object, Filter<T>> apply,
+			Func<Type, Parser<object>>? customTypeParser = null)
 		{
 			Parser<string> property = Parse.LetterOrDigit.AtLeastOnce().Text();
 
@@ -122,52 +194,11 @@ public abstract record Filter<T> : Filter
 					.Select(x => x.GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance))
 					.FirstOrDefault();
 				if (propInfo == null)
-					throw new ValidationException($"The given filter '{prop}' is invalid.");
+					return ParseHelper.Error<Filter<T>>($"The given filter '{prop}' is invalid.");
 
-				Parser<object> value;
-
-				if (propInfo.PropertyType == typeof(int))
-					value = Parse.Number.Select(x => int.Parse(x) as object);
-				else if (propInfo.PropertyType == typeof(float))
-				{
-					value =
-						from a in Parse.Number
-						from dot in Parse.Char('.')
-						from b in Parse.Number
-						select float.Parse($"{a}.{b}") as object;
-				}
-				else if (propInfo.PropertyType == typeof(string))
-				{
-					value = (
-						from lq in Parse.Char('"').Or(Parse.Char('\''))
-						from str in Parse.AnyChar.Where(x => x is not '"' and not '\'').Many().Text()
-						from rq in Parse.Char('"').Or(Parse.Char('\''))
-						select str
-					).Or(Parse.LetterOrDigit.Many().Text());
-				}
-				else if (propInfo.PropertyType.IsEnum)
-				{
-					value = Parse.LetterOrDigit.Many().Text().Select(x =>
-					{
-						if (Enum.TryParse(propInfo.PropertyType, x, true, out object? value))
-							return value!;
-						throw new ValidationException($"Invalid enum value. Unexpected {x}");
-					});
-				}
-				else if (propInfo.PropertyType == typeof(DateTime))
-				{
-					value =
-						from year in Parse.Digit.Repeat(4).Text().Select(int.Parse)
-						from yd in Parse.Char('-')
-						from mouth in Parse.Digit.Repeat(2).Text().Select(int.Parse)
-						from md in Parse.Char('-')
-						from day in Parse.Digit.Repeat(2).Text().Select(int.Parse)
-						select new DateTime(year, mouth, day) as object;
-				}
-				else if (typeof(IEnumerable).IsAssignableFrom(propInfo.PropertyType))
-					throw new ValidationException("Can't filter a list with a default comparator, use the 'in' filter.");
-				else
-					throw new ValidationException("Unfilterable field found");
+				Parser<object> value = customTypeParser != null
+					? customTypeParser(propInfo.PropertyType)
+					: _GetValueParser(propInfo.PropertyType);
 
 				return
 					from eq in op
@@ -205,6 +236,22 @@ public abstract record Filter<T> : Filter
 			Parse.IgnoreCase("le").Or(Parse.String("<=")).Token(),
 			(property, value) => new Le(property, value)
 		);
+
+		public static readonly Parser<Filter<T>> Has = _GetOperationParser(
+			Parse.IgnoreCase("has").Token(),
+			(property, value) => new Has(property, value),
+			(Type type) =>
+			{
+				if (typeof(IEnumerable).IsAssignableFrom(type) && type != typeof(string))
+					return _GetValueParser(type.GetElementType() ?? type.GenericTypeArguments.First());
+				return ParseHelper.Error<object>("Can't use 'has' on a non-list.");
+			}
+		);
+
+		// public static readonly Parser<Filter<T>> In = _GetOperationParser(
+		// 	Parse.IgnoreCase("in").Token(),
+		// 	(property, value) => new In(property, value)
+		// );
 	}
 
 	public static Filter<T>? From(string? filter)
@@ -212,9 +259,16 @@ public abstract record Filter<T> : Filter
 		if (filter == null)
 			return null;
 
-		IResult<Filter<T>> ret = FilterParsers.CompleteFilter.End().TryParse(filter);
-		if (ret.WasSuccessful)
-			return ret.Value;
-		throw new ValidationException($"Could not parse filter argument: {ret.Message}. Not parsed: {filter[ret.Remainder.Position..]}");
+		try
+		{
+			IResult<Filter<T>> ret = FilterParsers.CompleteFilter.End().TryParse(filter);
+			if (ret.WasSuccessful)
+				return ret.Value;
+			throw new ValidationException($"Could not parse filter argument: {ret.Message}. Not parsed: {filter[ret.Remainder.Position..]}");
+		}
+		catch (ParseException ex)
+		{
+			throw new ValidationException($"Could not parse filter argument: {ex.Message}.");
+		}
 	}
 }
