@@ -202,6 +202,13 @@ namespace Kyoo.Core.Controllers
 				return $"({ret})";
 			}
 
+			object P(object value)
+			{
+				if (value is Enum)
+					return new Wrapper(value);
+				return value;
+			}
+
 			FormattableString Process(Filter<T> fil)
 			{
 				return fil switch
@@ -209,12 +216,13 @@ namespace Kyoo.Core.Controllers
 					Filter<T>.And(var first, var second) => $"({Process(first)} and {Process(second)})",
 					Filter<T>.Or(var first, var second) => $"({Process(first)} or {Process(second)})",
 					Filter<T>.Not(var inner) => $"(not {Process(inner)})",
-					Filter<T>.Eq(var property, var value) => Format(property, $"= {value}"),
-					Filter<T>.Ne(var property, var value) => Format(property, $"!= {value}"),
-					Filter<T>.Gt(var property, var value) => Format(property, $"> {value}"),
-					Filter<T>.Ge(var property, var value) => Format(property, $">= {value}"),
-					Filter<T>.Lt(var property, var value) => Format(property, $"< {value}"),
-					Filter<T>.Le(var property, var value) => Format(property, $"> {value}"),
+					Filter<T>.Eq(var property, var value) => Format(property, $"= {P(value)}"),
+					Filter<T>.Ne(var property, var value) => Format(property, $"!= {P(value)}"),
+					Filter<T>.Gt(var property, var value) => Format(property, $"> {P(value)}"),
+					Filter<T>.Ge(var property, var value) => Format(property, $">= {P(value)}"),
+					Filter<T>.Lt(var property, var value) => Format(property, $"< {P(value)}"),
+					Filter<T>.Le(var property, var value) => Format(property, $"> {P(value)}"),
+					Filter<T>.Has(var property, var value) => $"{P(value)} = any({_Property(property, config):raw})",
 					Filter<T>.Lambda(var lambda) => throw new NotSupportedException(),
 				};
 			}
