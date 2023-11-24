@@ -84,8 +84,6 @@ public abstract record Filter<T> : Filter
 
 	public record Has(string Property, object Value) : Filter<T>;
 
-	public record In(string Property, object[] Value) : Filter<T>;
-
 	public record Lambda(Expression<Func<T, bool>> Inner) : Filter<T>;
 
 	public static class FilterParsers
@@ -247,11 +245,6 @@ public abstract record Filter<T> : Filter
 				return ParseHelper.Error<object>("Can't use 'has' on a non-list.");
 			}
 		);
-
-		// public static readonly Parser<Filter<T>> In = _GetOperationParser(
-		// 	Parse.IgnoreCase("in").Token(),
-		// 	(property, value) => new In(property, value)
-		// );
 	}
 
 	public static Filter<T>? From(string? filter)
