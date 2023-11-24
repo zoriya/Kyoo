@@ -60,6 +60,18 @@ public abstract record Filter
 				return new Filter<T>.And(acc, filter!);
 			});
 	}
+
+	public static Filter<T>? Or<T>(params Filter<T>?[] filters)
+	{
+		return filters
+			.Where(x => x != null)
+			.Aggregate((Filter<T>?)null, (acc, filter) =>
+			{
+				if (acc == null)
+					return filter;
+				return new Filter<T>.Or(acc, filter!);
+			});
+	}
 }
 
 public abstract record Filter<T> : Filter
@@ -70,9 +82,9 @@ public abstract record Filter<T> : Filter
 
 	public record Not(Filter<T> Filter) : Filter<T>;
 
-	public record Eq(string Property, object Value) : Filter<T>;
+	public record Eq(string Property, object? Value) : Filter<T>;
 
-	public record Ne(string Property, object Value) : Filter<T>;
+	public record Ne(string Property, object? Value) : Filter<T>;
 
 	public record Gt(string Property, object Value) : Filter<T>;
 
@@ -84,6 +96,15 @@ public abstract record Filter<T> : Filter
 
 	public record Has(string Property, object Value) : Filter<T>;
 
+	/// <summary>
+	/// Internal filter used for keyset paginations to resume random sorts.
+	/// The pseudo sql is md5(seed || table.id) = md5(seed || 'hardCodedId')
+	/// </summary>
+	public record EqRandom(string Seed, int ReferenceId) : Filter<T>;
+
+	/// <summary>
+	/// Internal filter used only in EF with hard coded lamdas (used for relations).
+	/// </summary>
 	public record Lambda(Expression<Func<T, bool>> Inner) : Filter<T>;
 
 	public static class FilterParsers
@@ -181,7 +202,7 @@ public abstract record Filter<T> : Filter
 		private static Parser<Filter<T>> _GetOperationParser(
 			Parser<object> op,
 			Func<string, object, Filter<T>> apply,
-			Func<Type, Parser<object>>? customTypeParser = null)
+			Func<Type, Parser<object?>>? customTypeParser = null)
 		{
 			Parser<string> property = Parse.LetterOrDigit.AtLeastOnce().Text();
 
@@ -194,7 +215,7 @@ public abstract record Filter<T> : Filter
 				if (propInfo == null)
 					return ParseHelper.Error<Filter<T>>($"The given filter '{prop}' is invalid.");
 
-				Parser<object> value = customTypeParser != null
+				Parser<object?> value = customTypeParser != null
 					? customTypeParser(propInfo.PropertyType)
 					: _GetValueParser(propInfo.PropertyType);
 
@@ -207,12 +228,28 @@ public abstract record Filter<T> : Filter
 
 		public static readonly Parser<Filter<T>> Eq = _GetOperationParser(
 			Parse.IgnoreCase("eq").Or(Parse.String("=")).Token(),
-			(property, value) => new Eq(property, value)
+			(property, value) => new Eq(property, value),
+			(Type type) =>
+			{
+				Type? inner = Nullable.GetUnderlyingType(type);
+				if (inner == null)
+					return _GetValueParser(type);
+				return Parse.String("null").Token().Return((object?)null)
+					.Or(_GetValueParser(inner));
+			}
 		);
 
 		public static readonly Parser<Filter<T>> Ne = _GetOperationParser(
 			Parse.IgnoreCase("ne").Or(Parse.String("!=")).Token(),
-			(property, value) => new Ne(property, value)
+			(property, value) => new Ne(property, value),
+			(Type type) =>
+			{
+				Type? inner = Nullable.GetUnderlyingType(type);
+				if (inner == null)
+					return _GetValueParser(type);
+				return Parse.String("null").Token().Return((object?)null)
+					.Or(_GetValueParser(inner));
+			}
 		);
 
 		public static readonly Parser<Filter<T>> Gt = _GetOperationParser(
