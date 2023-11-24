@@ -106,23 +106,23 @@ namespace Kyoo.Core.Controllers
 			return $"coalesce({string.Join(", ", keys)})";
 		}
 
-		public static string ProcessSort<T>(Sort<T>? sort, Dictionary<string, Type> config, bool recurse = false)
+		public static string ProcessSort<T>(Sort<T>? sort, bool reverse, Dictionary<string, Type> config, bool recurse = false)
 			where T : IQuery
 		{
 			sort ??= new Sort<T>.Default();
 
 			string ret = sort switch
 			{
-				Sort<T>.Default(var value) => ProcessSort(value, config, true),
-				Sort<T>.By(string key, bool desc) => $"{_Property(key, config)} {(desc ? "desc" : "asc")}",
-				Sort<T>.Random(var seed) => $"md5('{seed}' || {_Property("id", config)})",
-				Sort<T>.Conglomerate(var list) => string.Join(", ", list.Select(x => ProcessSort(x, config, true))),
+				Sort<T>.Default(var value) => ProcessSort(value, reverse, config, true),
+				Sort<T>.By(string key, bool desc) => $"{_Property(key, config)} {(desc ^ reverse ? "desc" : "asc")}",
+				Sort<T>.Random(var seed) => $"md5('{seed}' || {_Property("id", config)}) {(reverse ? "desc" : "asc")}",
+				Sort<T>.Conglomerate(var list) => string.Join(", ", list.Select(x => ProcessSort(x, reverse, config, true))),
 				_ => throw new SwitchExpressionException(),
 			};
 			if (recurse)
 				return ret;
 			// always end query by an id sort.
-			return $"{ret}, {_Property("id", config)} asc";
+			return $"{ret}, {_Property("id", config)} {(reverse ? "desc" : "asc")}";
 		}
 
 		public static (
@@ -278,7 +278,7 @@ namespace Kyoo.Core.Controllers
 			}
 			if (filter != null)
 				query += ProcessFilter(filter, config);
-			query += $"order by {ProcessSort(sort, config):raw}";
+			query += $"order by {ProcessSort(sort, limit.Reverse, config):raw}";
 			query += $"limit {limit.Limit}";
 
 			Type[] types = config.Select(x => x.Value)
@@ -294,6 +294,8 @@ namespace Kyoo.Core.Controllers
 					return mapIncludes(collection, items.Skip(3));
 				throw new InvalidDataException();
 			});
+			if (limit.Reverse)
+				data = data.Reverse();
 			return data.ToList();
 		}
 

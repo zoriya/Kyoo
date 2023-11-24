@@ -31,7 +31,6 @@ namespace Kyoo.Core.Api
 	[Route("news")]
 	[Route("new", Order = AlternativeRoute)]
 	[ApiController]
-	[ResourceView]
 	[PartialPermission("LibraryItem")]
 	[ApiDefinition("News", Group = ResourcesGroup)]
 	public class NewsApi : CrudThumbsApi<News>
