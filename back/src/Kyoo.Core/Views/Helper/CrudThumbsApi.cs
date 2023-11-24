@@ -34,7 +34,6 @@ namespace Kyoo.Core.Api
 	/// </summary>
 	/// <typeparam name="T">The type of resource to make CRUD and thumbnails apis for.</typeparam>
 	[ApiController]
-	[ResourceView]
 	public class CrudThumbsApi<T> : CrudApi<T>
 		where T : class, IResource, IThumbnails, IQuery
 	{

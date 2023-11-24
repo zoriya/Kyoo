@@ -34,7 +34,6 @@ namespace Kyoo.Core.Api
 	/// </summary>
 	/// <typeparam name="T">The type of resource to make CRUD apis for.</typeparam>
 	[ApiController]
-	[ResourceView]
 	public class CrudApi<T> : BaseApi
 		where T : class, IResource, IQuery
 	{

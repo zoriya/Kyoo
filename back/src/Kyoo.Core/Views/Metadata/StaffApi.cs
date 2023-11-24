@@ -16,16 +16,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
-using Kyoo.Abstractions.Models.Utils;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 
@@ -37,7 +31,6 @@ namespace Kyoo.Core.Api
 	[Route("staff")]
 	[Route("people", Order = AlternativeRoute)]
 	[ApiController]
-	[ResourceView]
 	[PartialPermission(nameof(People))]
 	[ApiDefinition("Staff", Group = MetadataGroup)]
 	public class StaffApi : CrudThumbsApi<People>

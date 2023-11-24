@@ -302,6 +302,8 @@ namespace Kyoo.Core.Controllers
 				query = query.Reverse();
 			if (limit.Limit > 0)
 				query = query.Take(limit.Limit);
+			if (limit.Reverse)
+				query = query.Reverse();
 
 			return await query.ToListAsync();
 		}

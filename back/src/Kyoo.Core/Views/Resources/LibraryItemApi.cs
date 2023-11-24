@@ -32,7 +32,6 @@ namespace Kyoo.Core.Api
 	[Route("items")]
 	[Route("item", Order = AlternativeRoute)]
 	[ApiController]
-	[ResourceView]
 	[PartialPermission("LibraryItem")]
 	[ApiDefinition("Items", Group = ResourcesGroup)]
 	public class LibraryItemApi : CrudThumbsApi<ILibraryItem>

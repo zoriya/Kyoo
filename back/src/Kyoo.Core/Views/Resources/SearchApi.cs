@@ -34,7 +34,6 @@ namespace Kyoo.Core.Api
 	/// </summary>
 	[Route("search")]
 	[ApiController]
-	[ResourceView]
 	[ApiDefinition("Search", Group = ResourcesGroup)]
 	public class SearchApi : BaseApi
 	{
