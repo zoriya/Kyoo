@@ -18,87 +18,156 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
+using System.Data.Common;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Utils;
-using Kyoo.Utils;
 
 namespace Kyoo.Core.Controllers;
 
-public class DapperRepository<T> : IRepository<T>
+public abstract class DapperRepository<T> : IRepository<T>
 	where T : class, IResource, IQuery
 {
 	public Type RepositoryType => typeof(T);
 
+	protected abstract FormattableString Sql { get; }
+
+	protected abstract Dictionary<string, Type> Config { get; }
+
+	protected abstract T Mapper(List<object?> items);
+
+	protected DbConnection Database { get; init; }
+
+	public DapperRepository(DbConnection database)
+	{
+		Database = database;
+	}
+
+	/// <inheritdoc/>
+	public virtual async Task<T> Get(int id, Include<T>? include = default)
+	{
+		T? ret = await GetOrDefault(id, include);
+		if (ret == null)
+			throw new ItemNotFoundException($"No {typeof(T).Name} found with the id {id}");
+		return ret;
+	}
+
+	/// <inheritdoc/>
+	public virtual async Task<T> Get(string slug, Include<T>? include = default)
+	{
+		T? ret = await GetOrDefault(slug, include);
+		if (ret == null)
+			throw new ItemNotFoundException($"No {typeof(T).Name} found with the slug {slug}");
+		return ret;
+	}
+
+	/// <inheritdoc/>
+	public virtual async Task<T> Get(Filter<T> filter,
+		Include<T>? include = default)
+	{
+		T? ret = await GetOrDefault(filter, include: include);
+		if (ret == null)
+			throw new ItemNotFoundException($"No {typeof(T).Name} found with the given predicate.");
+		return ret;
+	}
+
+	/// <inheritdoc />
 	public Task<ICollection<T>> FromIds(IList<int> ids, Include<T>? include = null)
 	{
 		throw new NotImplementedException();
 	}
 
-	public Task<T> Get(int id, Include<T>? include = null)
-	{
-		throw new NotImplementedException();
-	}
-
-	public Task<T> Get(string slug, Include<T>? include = null)
-	{
-		throw new NotImplementedException();
-	}
-
-	public Task<T> Get(Filter<T> filter, Include<T>? include = null)
-	{
-		throw new NotImplementedException();
-	}
-
-	public Task<ICollection<T>> GetAll(Filter<T>? filter = null, Sort<T>? sort = null, Include<T>? include = null, Pagination? limit = null)
-	{
-		throw new NotImplementedException();
-	}
-
-	public Task<int> GetCount(Filter<T>? filter = null)
-	{
-		throw new NotImplementedException();
-	}
-
+	/// <inheritdoc />
 	public Task<T?> GetOrDefault(int id, Include<T>? include = null)
 	{
-		throw new NotImplementedException();
+		return Database.QuerySingle<T>(
+			Sql,
+			Config,
+			Mapper,
+			include,
+			new Filter<T>.Eq(nameof(IResource.Id), id)
+		);
 	}
 
+	/// <inheritdoc />
 	public Task<T?> GetOrDefault(string slug, Include<T>? include = null)
 	{
-		throw new NotImplementedException();
+		return Database.QuerySingle<T>(
+			Sql,
+			Config,
+			Mapper,
+			include,
+			new Filter<T>.Eq(nameof(IResource.Slug), slug)
+		);
 	}
 
+	/// <inheritdoc />
 	public Task<T?> GetOrDefault(Filter<T>? filter, Include<T>? include = null, Sort<T>? sortBy = null)
 	{
-		throw new NotImplementedException();
+		return Database.QuerySingle<T>(
+			Sql,
+			Config,
+			Mapper,
+			include,
+			filter,
+			sortBy
+		);
 	}
 
-	public Task<ICollection<T>> Search(string query, Include<T>? include = null)
+	/// <inheritdoc />
+	public Task<ICollection<T>> GetAll(Filter<T>? filter = default,
+		Sort<T>? sort = default,
+		Include<T>? include = default,
+		Pagination? limit = default)
 	{
-		throw new NotImplementedException();
+		return Database.Query<T>(
+			Sql,
+			Config,
+			Mapper,
+			(id) => Get(id),
+			include,
+			filter,
+			sort ?? new Sort<T>.Default(),
+			limit ?? new()
+		);
 	}
 
+	/// <inheritdoc />
+	public Task<int> GetCount(Filter<T>? filter = null)
+	{
+		return Database.Count(
+			Sql,
+			Config,
+			filter
+		);
+	}
+
+	/// <inheritdoc />
+	public Task<ICollection<T>> Search(string query, Include<T>? include = null) => throw new NotImplementedException();
+
+	/// <inheritdoc />
 	public Task<T> Create(T obj) => throw new NotImplementedException();
 
+	/// <inheritdoc />
 	public Task<T> CreateIfNotExists(T obj) => throw new NotImplementedException();
 
+	/// <inheritdoc />
 	public Task Delete(int id) => throw new NotImplementedException();
 
+	/// <inheritdoc />
 	public Task Delete(string slug) => throw new NotImplementedException();
 
+	/// <inheritdoc />
 	public Task Delete(T obj) => throw new NotImplementedException();
 
+	/// <inheritdoc />
 	public Task DeleteAll(Filter<T> filter) => throw new NotImplementedException();
 
+	/// <inheritdoc />
 	public Task<T> Edit(T edited) => throw new NotImplementedException();
 
+	/// <inheritdoc />
 	public Task<T> Patch(int id, Func<T, Task<bool>> patch) => throw new NotImplementedException();
 }
