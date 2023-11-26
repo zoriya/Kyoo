@@ -139,7 +139,7 @@ namespace Kyoo.Core.Controllers
 					throw new InvalidDataException();
 				},
 				(id) => Get(id),
-				include, filter, sort, limit
+				include, filter, sort, limit ?? new()
 			);
 		}
 

@@ -70,7 +70,7 @@ public static class DapperHelper
 	public static (
 		Dictionary<string, Type> config,
 		string join,
-		Func<T, IEnumerable<object>, T> map
+		Func<T, IEnumerable<object?>, T> map
 	) ProcessInclude<T>(Include<T> include, Dictionary<string, Type> config)
 		where T : class
 	{
@@ -166,7 +166,6 @@ public static class DapperHelper
 
 	public static string ExpendProjections(string type, string? prefix, Include include)
 	{
-		prefix = prefix != null ? $"{prefix}." : string.Empty;
 		IEnumerable<string> projections = include.Metadatas
 			.Select(x => x is Include.ProjectedRelation(var name, var sql) ? sql : null!)
 			.Where(x => x != null)
@@ -212,21 +211,33 @@ public static class DapperHelper
 		// Build query and prepare to do the query/projections
 		IDapperSqlCommand cmd = query.Build();
 		string sql = cmd.Sql;
-		Type[] types = config.Select(x => x.Value)
+		List<Type> types = config.Select(x => x.Value)
 			.Concat(includeConfig.Select(x => x.Value))
-			.ToArray();
+			.ToList();
 
 		// Expand projections on every types received.
 		sql = Regex.Replace(sql, @"(,?) -- (\w+)( as (\w+))?", (match) =>
 		{
 			string leadingComa = match.Groups[1].Value;
 			string type = match.Groups[2].Value;
-			string? prefix = match.Groups[3].Value;
+			string? prefix = match.Groups[4].Value;
+			prefix = !string.IsNullOrEmpty(prefix) ? $"{prefix}." : string.Empty;
 
 			// Only project top level items with explicit includes.
 			string? projection = config.Any(x => x.Value.Name == type)
 				? ExpendProjections(type, prefix, include)
 				: null;
+			Type? typeV = types.FirstOrDefault(x => x.Name == type);
+			if (typeV?.IsAssignableTo(typeof(IThumbnails)) == true)
+			{
+				string posterProj = string.Join(", ", new[] { "poster", "thumbnail", "logo" }
+					.Select(x => $"{prefix}{x}_source as source, {prefix}{x}_blurhash as blurhash"));
+				projection = string.IsNullOrEmpty(projection)
+					? posterProj
+					: $"{posterProj}, {projection}";
+				types.InsertRange(types.IndexOf(typeV) + 1, Enumerable.Repeat(typeof(Image), 3));
+			}
+
 			if (string.IsNullOrEmpty(projection))
 				return leadingComa;
 			return $", {projection}{leadingComa}";
@@ -234,9 +245,25 @@ public static class DapperHelper
 
 		IEnumerable<T> data = await db.QueryAsync<T>(
 			sql,
-			types,
-			items => mapIncludes(mapper(items), items.Skip(config.Count)),
-			ParametersDictionary.LoadFrom(cmd)
+			types.ToArray(),
+			items =>
+			{
+				List<object?> nItems = new(items.Length);
+				for (int i = 0; i < items.Length; i++)
+				{
+					if (types[i] == typeof(Image))
+						continue;
+					nItems.Add(items[i]);
+					if (items[i] is not IThumbnails thumbs)
+						continue;
+					thumbs.Poster = items[++i] as Image;
+					thumbs.Thumbnail = items[++i] as Image;
+					thumbs.Logo = items[++i] as Image;
+				}
+				return mapIncludes(mapper(nItems.ToArray()), nItems.Skip(config.Count));
+			},
+			ParametersDictionary.LoadFrom(cmd),
+			splitOn: string.Join(',', types.Select(x => x == typeof(Image) ? "source" : "id"))
 		);
 		if (limit.Reverse)
 			data = data.Reverse();
