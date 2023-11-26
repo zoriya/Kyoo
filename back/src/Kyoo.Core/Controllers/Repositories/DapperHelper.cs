@@ -154,7 +154,7 @@ public static class DapperHelper
 				Filter<T>.Lt(var property, var value) => Format(property, $"< {P(value)}"),
 				Filter<T>.Le(var property, var value) => Format(property, $"> {P(value)}"),
 				Filter<T>.Has(var property, var value) => $"{P(value)} = any({_Property(property, config):raw})",
-				Filter<T>.EqRandom(var seed, var id) => $"md5({seed} || {config.Select(x => $"{x.Key}.id"):raw}) = md5({seed} || {id.ToString()})",
+				Filter<T>.EqRandom(var seed, var id) => $"md5({seed} || coalesce({string.Join(", ", config.Select(x => $"{x.Key}.id")):raw})) = md5({seed} || {id.ToString()})",
 				Filter<T>.Lambda(var lambda) => throw new NotSupportedException(),
 				_ => throw new NotImplementedException(),
 			};
