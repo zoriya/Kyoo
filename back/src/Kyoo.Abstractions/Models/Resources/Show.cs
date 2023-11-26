@@ -158,7 +158,7 @@ namespace Kyoo.Abstractions.Models
 			// language=PostgreSQL
 			Sql = """
 				select
-					"fe".* -- Episode as fe
+					fe.* -- Episode as fe
 				from (
 					select
 						e.*,
@@ -166,7 +166,7 @@ namespace Kyoo.Abstractions.Models
 					from
 						episodes as e) as "fe"
 				where
-					"fe".number <= 1
+					fe.number <= 1
 			""",
 			On = "show_id = \"this\".id"
 		)]

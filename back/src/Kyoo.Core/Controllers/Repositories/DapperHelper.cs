@@ -48,11 +48,9 @@ public static class DapperHelper
 		return $"coalesce({string.Join(", ", keys)})";
 	}
 
-	public static string ProcessSort<T>(Sort<T>? sort, bool reverse, Dictionary<string, Type> config, bool recurse = false)
+	public static string ProcessSort<T>(Sort<T> sort, bool reverse, Dictionary<string, Type> config, bool recurse = false)
 		where T : IQuery
 	{
-		sort ??= new Sort<T>.Default();
-
 		string ret = sort switch
 		{
 			Sort<T>.Default(var value) => ProcessSort(value, reverse, config, true),
@@ -78,7 +76,7 @@ public static class DapperHelper
 		Dictionary<string, Type> retConfig = new();
 		StringBuilder join = new();
 
-		foreach (Include<T>.Metadata metadata in include.Metadatas)
+		foreach (Include.Metadata metadata in include.Metadatas)
 		{
 			relation++;
 			switch (metadata)
@@ -103,7 +101,7 @@ public static class DapperHelper
 			}
 		}
 
-		T Map(T item, IEnumerable<object> relations)
+		T Map(T item, IEnumerable<object?> relations)
 		{
 			foreach ((string name, object? value) in include.Fields.Zip(relations))
 			{
@@ -177,7 +175,7 @@ public static class DapperHelper
 		this IDbConnection db,
 		FormattableString command,
 		Dictionary<string, Type> config,
-		Func<object?[], T> mapper,
+		Func<List<object?>, T> mapper,
 		Func<int, Task<T>> get,
 		Include<T>? include,
 		Filter<T>? filter,
@@ -205,7 +203,8 @@ public static class DapperHelper
 		}
 		if (filter != null)
 			query += ProcessFilter(filter, config);
-		query += $"\norder by {ProcessSort(sort, limit.Reverse, config):raw}";
+		if (sort != null)
+			query += $"\norder by {ProcessSort(sort, limit.Reverse, config):raw}";
 		query += $"\nlimit {limit.Limit}";
 
 		// Build query and prepare to do the query/projections
@@ -260,7 +259,7 @@ public static class DapperHelper
 					thumbs.Thumbnail = items[++i] as Image;
 					thumbs.Logo = items[++i] as Image;
 				}
-				return mapIncludes(mapper(nItems.ToArray()), nItems.Skip(config.Count));
+				return mapIncludes(mapper(nItems), nItems.Skip(config.Count));
 			},
 			ParametersDictionary.LoadFrom(cmd),
 			splitOn: string.Join(',', types.Select(x => x == typeof(Image) ? "source" : "id"))
@@ -268,5 +267,41 @@ public static class DapperHelper
 		if (limit.Reverse)
 			data = data.Reverse();
 		return data.ToList();
+	}
+
+	public static async Task<T?> QuerySingle<T>(
+		this IDbConnection db,
+		FormattableString command,
+		Dictionary<string, Type> config,
+		Func<List<object?>, T> mapper,
+		Include<T>? include,
+		Filter<T>? filter,
+		Sort<T>? sort = null)
+		where T : class, IResource, IQuery
+	{
+		ICollection<T> ret = await db.Query<T>(command, config, mapper, null!, include, filter, sort, new Pagination(1));
+		return ret.FirstOrDefault();
+	}
+
+	public static async Task<int> Count<T>(
+		this IDbConnection db,
+		FormattableString command,
+		Dictionary<string, Type> config,
+		Filter<T>? filter)
+		where T : class, IResource
+	{
+		InterpolatedSql.Dapper.SqlBuilders.SqlBuilder query = new(db, command);
+
+		if (filter != null)
+			query += ProcessFilter(filter, config);
+
+		IDapperSqlCommand cmd = query.Build();
+		// language=postgreSQL
+		string sql = $"select count(*) from ({cmd.Sql})";
+
+		return await db.ExecuteAsync(
+			sql,
+			ParametersDictionary.LoadFrom(cmd)
+		);
 	}
 }
