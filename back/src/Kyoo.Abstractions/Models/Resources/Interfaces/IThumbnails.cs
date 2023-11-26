@@ -20,6 +20,7 @@ using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using Newtonsoft.Json;
 
 namespace Kyoo.Abstractions.Models
 {
@@ -59,6 +60,9 @@ namespace Kyoo.Abstractions.Models
 		[MaxLength(32)]
 		public string Blurhash { get; set; }
 
+		public Image() { }
+
+		[JsonConstructor]
 		public Image(string source, string? blurhash = null)
 		{
 			Source = source;
