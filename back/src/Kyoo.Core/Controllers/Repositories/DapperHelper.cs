@@ -297,9 +297,9 @@ public static class DapperHelper
 
 		IDapperSqlCommand cmd = query.Build();
 		// language=postgreSQL
-		string sql = $"select count(*) from ({cmd.Sql})";
+		string sql = $"select count(*) from ({cmd.Sql}) as query";
 
-		return await db.ExecuteAsync(
+		return await db.QuerySingleAsync<int>(
 			sql,
 			ParametersDictionary.LoadFrom(cmd)
 		);
