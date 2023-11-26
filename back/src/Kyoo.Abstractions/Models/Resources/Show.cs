@@ -158,7 +158,7 @@ namespace Kyoo.Abstractions.Models
 			// language=PostgreSQL
 			Sql = """
 				select
-					"fe".*
+					"fe".* -- Episode as fe
 				from (
 					select
 						e.*,

@@ -113,7 +113,7 @@ namespace Kyoo.Abstractions.Controllers
 		Task<ICollection<T>> GetAll(Filter<T>? filter = null,
 			Sort<T>? sort = default,
 			Include<T>? include = default,
-			Pagination limit = default);
+			Pagination? limit = default);
 
 		/// <summary>
 		/// Get the number of resources that match the filter's predicate.

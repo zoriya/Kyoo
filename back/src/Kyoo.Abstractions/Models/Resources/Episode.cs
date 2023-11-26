@@ -174,7 +174,7 @@ namespace Kyoo.Abstractions.Models
 			// language=PostgreSQL
 			Sql = """
 				select
-					"pe".*,
+					"pe".* -- Episode as pe
 				from
 					episodes as "pe"
 				where
@@ -210,7 +210,7 @@ namespace Kyoo.Abstractions.Models
 			// language=PostgreSQL
 			Sql = """
 				select
-					"ne".*,
+					"ne".* -- Episode as ne
 				from
 					episodes as "ne"
 				where

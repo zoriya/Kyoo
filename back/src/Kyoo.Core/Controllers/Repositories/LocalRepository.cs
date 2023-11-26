@@ -265,7 +265,7 @@ namespace Kyoo.Core.Controllers
 		public virtual Task<ICollection<T>> GetAll(Filter<T>? filter = null,
 			Sort<T>? sort = default,
 			Include<T>? include = default,
-			Pagination limit = default)
+			Pagination? limit = default)
 		{
 			return ApplyFilters(Database.Set<T>(), filter, sort, limit, include);
 		}
@@ -282,11 +282,12 @@ namespace Kyoo.Core.Controllers
 		protected async Task<ICollection<T>> ApplyFilters(IQueryable<T> query,
 			Filter<T>? filter = null,
 			Sort<T>? sort = default,
-			Pagination limit = default,
+			Pagination? limit = default,
 			Include<T>? include = default)
 		{
 			query = AddIncludes(query, include);
 			query = Sort(query, sort);
+			limit ??= new();
 
 			if (limit.AfterID != null)
 			{
