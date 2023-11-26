@@ -46,7 +46,7 @@
 
 	<PropertyGroup Condition="$(CheckCodingStyle) == true">
 		<CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)../Kyoo.ruleset</CodeAnalysisRuleSet>
-		<NoWarn>1591;1305;8618</NoWarn>
+		<NoWarn>1591;1305;8618;SYSLIB1045</NoWarn>
 		<!-- <AnalysisMode>All</AnalysisMode> -->
 	</PropertyGroup>
 
