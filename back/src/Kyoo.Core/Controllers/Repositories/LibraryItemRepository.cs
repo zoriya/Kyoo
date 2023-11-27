@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.IO;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -66,9 +65,15 @@ namespace Kyoo.Core.Controllers
 			if (items[0] is Show show && show.Id != 0)
 				return show;
 			if (items[1] is Movie movie && movie.Id != 0)
+			{
+				movie.Id = -movie.Id;
 				return movie;
+			}
 			if (items[2] is Collection collection && collection.Id != 0)
+			{
+				collection.Id += 10_000;
 				return collection;
+			}
 			throw new InvalidDataException();
 		}
 
@@ -77,27 +82,48 @@ namespace Kyoo.Core.Controllers
 		{ }
 
 		public async Task<ICollection<ILibraryItem>> GetAllOfCollection(
-			Expression<Func<Collection, bool>> selector,
-			Expression<Func<ILibraryItem, bool>>? where = null,
+			int collectionId,
+			Filter<ILibraryItem>? filter = default,
 			Sort<ILibraryItem>? sort = default,
-			Pagination? limit = default,
-			Include<ILibraryItem>? include = default)
+			Include<ILibraryItem>? include = default,
+			Pagination? limit = default)
 		{
-			throw new NotImplementedException();
-			// return await ApplyFilters(
-			// 	_database.LibraryItems
-			// 		.Where(item =>
-			// 			_database.Movies
-			// 				.Where(x => x.Id == -item.Id)
-			// 				.Any(x => x.Collections!.AsQueryable().Any(selector))
-			// 			|| _database.Shows
-			// 				.Where(x => x.Id == item.Id)
-			// 				.Any(x => x.Collections!.AsQueryable().Any(selector))
-			// 		),
-			// 	where,
-			// 	sort,
-			// 	limit,
-			// 	include);
+			// language=PostgreSQL
+			FormattableString sql = $"""
+				select
+					s.*,
+					m.*
+					/* includes */
+				from (
+					select
+						* -- Show
+					from
+						shows
+					inner join link_collection_show as ls on ls.show_id = id and ls.collection_id = {collectionId}
+				) as s
+				full outer join (
+					select
+						* -- Movie
+					from
+						movies
+					inner join link_collection_movie as lm on lm.movie_id = id and lm.collection_id = {collectionId}
+				) as m on false
+			""";
+
+			return await Database.Query<ILibraryItem>(
+				sql,
+				new()
+				{
+					{ "s", typeof(Show) },
+					{ "m", typeof(Movie) },
+				},
+				Mapper,
+				(id) => Get(id),
+				include,
+				filter,
+				sort ?? new Sort<ILibraryItem>.Default(),
+				limit ?? new()
+			);
 		}
 	}
 }

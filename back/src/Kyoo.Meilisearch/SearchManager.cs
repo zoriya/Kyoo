@@ -88,7 +88,7 @@ public class SearchManager : ISearchManager
 		});
 
 		// Since library items's ID are still ints mapped from real items ids, we must map it here to match the db's value.
-		// Look at the items Migration's sql to understand where magic numbers come from.
+		// Look at the LibraryItemRepository's Mapper to understand what those magic numbers are.
 		List<int> ids = res.Hits.Select(x => x.Kind switch
 		{
 			nameof(Show) => x.Id,

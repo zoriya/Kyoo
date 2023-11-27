@@ -144,17 +144,21 @@ namespace Kyoo.Core.Api
 			[FromQuery] Pagination pagination,
 			[FromQuery] Include<ILibraryItem>? fields)
 		{
-			// ICollection<ILibraryItem> resources = await _items.GetAllOfCollection(
-			// 	identifier.IsSame<Collection>(),
-			// 	filter,
-			// 	sortBy == new Sort<ILibraryItem>.Default() ? new Sort<ILibraryItem>.By(nameof(Movie.AirDate)) : sortBy,
-			// 	pagination,
-			// 	fields
-			// );
+			int collectionId = await identifier.Match(
+				id => Task.FromResult(id),
+				async slug => (await _libraryManager.Collections.Get(slug)).Id
+			);
+			ICollection<ILibraryItem> resources = await _items.GetAllOfCollection(
+				collectionId,
+				filter,
+				sortBy == new Sort<ILibraryItem>.Default() ? new Sort<ILibraryItem>.By(nameof(Movie.AirDate)) : sortBy,
+				fields,
+				pagination
+			);
 
-			// if (!resources.Any() && await _libraryManager.Collections.GetOrDefault(identifier.IsSame<Collection>()) == null)
+			if (!resources.Any() && await _libraryManager.Collections.GetOrDefault(identifier.IsSame<Collection>()) == null)
 				return NotFound();
-			// return Page(resources, pagination.Limit);
+			return Page(resources, pagination.Limit);
 		}
 
 		/// <summary>
