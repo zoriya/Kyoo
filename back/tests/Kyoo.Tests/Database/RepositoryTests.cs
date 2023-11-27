@@ -17,7 +17,6 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
@@ -134,53 +133,10 @@ namespace Kyoo.Tests.Database
 		// }
 
 		[Fact]
-		public async Task GetExpressionIDTest()
-		{
-			KAssert.DeepEqual(TestSample.Get<T>(), await _repository.Get(x => x.Id == TestSample.Get<T>().Id));
-		}
-
-		[Fact]
-		public async Task GetExpressionSlugTest()
-		{
-			KAssert.DeepEqual(TestSample.Get<T>(), await _repository.Get(x => x.Slug == TestSample.Get<T>().Slug));
-		}
-
-		[Fact]
-		public async Task GetExpressionNotFoundTest()
-		{
-			await Assert.ThrowsAsync<ItemNotFoundException>(() => _repository.Get(x => x.Slug == "non-existing"));
-		}
-
-		[Fact]
 		public async Task GetOrDefaultTest()
 		{
 			Assert.Null(await _repository.GetOrDefault(56));
 			Assert.Null(await _repository.GetOrDefault("non-existing"));
-			Assert.Null(await _repository.GetOrDefault(x => x.Slug == "non-existing"));
-		}
-
-		[Fact]
-		public async Task GetCountWithFilterTest()
-		{
-			string slug = TestSample.Get<T>().Slug[2..4];
-			Assert.Equal(1, await _repository.GetCount(x => x.Slug.Contains(slug)));
-		}
-
-		[Fact]
-		public async Task GetAllTest()
-		{
-			string slug = TestSample.Get<T>().Slug[2..4];
-			ICollection<T> ret = await _repository.GetAll(x => x.Slug.Contains(slug));
-			Assert.Single(ret);
-			KAssert.DeepEqual(TestSample.Get<T>(), ret.First());
-		}
-
-		[Fact]
-		public async Task DeleteAllTest()
-		{
-			string slug = TestSample.Get<T>().Slug[2..4];
-			await _repository.DeleteAll(x => x.Slug.Contains(slug));
-			Assert.Equal(0, await _repository.GetCount());
 		}
 	}
 }

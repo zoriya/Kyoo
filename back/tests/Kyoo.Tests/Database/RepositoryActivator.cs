@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
@@ -37,7 +38,7 @@ namespace Kyoo.Tests.Database
 		public TestContext Context { get; }
 		public ILibraryManager LibraryManager { get; }
 
-		private readonly List<DatabaseContext> _databases = new();
+		private readonly List<IAsyncDisposable> _databases = new();
 
 		private readonly IBaseRepository[] _repositories;
 
@@ -54,7 +55,7 @@ namespace Kyoo.Tests.Database
 			MovieRepository movies = new(_NewContext(), studio, people, thumbs.Object);
 			ShowRepository show = new(_NewContext(), studio, people, thumbs.Object);
 			SeasonRepository season = new(_NewContext(), thumbs.Object);
-			LibraryItemRepository libraryItem = new(_NewContext());
+			LibraryItemRepository libraryItem = new(_NewConnection());
 			EpisodeRepository episode = new(_NewContext(), show, thumbs.Object);
 			UserRepository user = new(_NewContext(), thumbs.Object);
 
@@ -101,9 +102,16 @@ namespace Kyoo.Tests.Database
 			return context;
 		}
 
+		private DbConnection _NewConnection()
+		{
+			DbConnection context = Context.NewConnection();
+			_databases.Add(context);
+			return context;
+		}
+
 		public void Dispose()
 		{
-			foreach (DatabaseContext context in _databases)
+			foreach (IDisposable context in _databases)
 				context.Dispose();
 			Context.Dispose();
 			GC.SuppressFinalize(this);
@@ -111,7 +119,7 @@ namespace Kyoo.Tests.Database
 
 		public async ValueTask DisposeAsync()
 		{
-			foreach (DatabaseContext context in _databases)
+			foreach (IAsyncDisposable context in _databases)
 				await context.DisposeAsync();
 			await Context.DisposeAsync();
 		}
