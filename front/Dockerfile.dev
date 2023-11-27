@@ -14,4 +14,4 @@ RUN yarn --immutable
 ENV NEXT_TELEMETRY_DISABLED 1
 EXPOSE 3000
 EXPOSE 8081
-CMD yarn dev
+ENTRYPOINT ["yarn", "dev"]

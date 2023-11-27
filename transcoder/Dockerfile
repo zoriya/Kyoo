@@ -17,4 +17,4 @@ RUN apk add --no-cache ffmpeg mediainfo musl-dev
 COPY --from=builder /usr/local/cargo/bin/transcoder ./transcoder
 
 EXPOSE 7666
-CMD ./transcoder
+ENTRYPOINT ["./transcoder"]

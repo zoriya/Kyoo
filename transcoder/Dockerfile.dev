@@ -10,4 +10,4 @@ RUN cargo build
 RUN rm src/lib.rs
 
 EXPOSE 7666
-CMD cargo watch -x run
+ENTRYPOINT ["cargo", "watch", "-x", "run"]
