@@ -37,7 +37,10 @@ export const EpisodeP = BaseEpisodeP.and(
 
 		show: ShowP.optional(),
 	}),
-);
+).transform((x) => {
+	if (x.show && !x.thumbnail && x.show.thumbnail) x.thumbnail = x.show.thumbnail;
+	return x;
+});
 
 /**
  * A class to represent a single show's episode.

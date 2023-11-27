@@ -18,11 +18,8 @@
 
 using System;
 using System.Globalization;
-using System.Linq.Expressions;
-using System.Reflection;
 using EFCore.NamingConventions.Internal;
 using Kyoo.Abstractions.Models;
-using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Npgsql;
@@ -50,7 +47,6 @@ namespace Kyoo.Postgresql
 		{
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<Status>();
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<Genre>();
-			NpgsqlConnection.GlobalTypeMapper.MapEnum<NewsKind>();
 		}
 
 		/// <summary>
@@ -103,7 +99,6 @@ namespace Kyoo.Postgresql
 		{
 			modelBuilder.HasPostgresEnum<Status>();
 			modelBuilder.HasPostgresEnum<Genre>();
-			modelBuilder.HasPostgresEnum<NewsKind>();
 
 			modelBuilder.HasDbFunction(typeof(DatabaseContext).GetMethod(nameof(MD5))!)
 				.HasTranslation(args =>

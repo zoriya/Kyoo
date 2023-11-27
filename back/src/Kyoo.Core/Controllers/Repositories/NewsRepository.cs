@@ -18,53 +18,53 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Kyoo.Abstractions.Controllers;
+using System.Data.Common;
+using System.IO;
 using Kyoo.Abstractions.Models;
-using Kyoo.Abstractions.Models.Utils;
-using Kyoo.Postgresql;
 
 namespace Kyoo.Core.Controllers
 {
 	/// <summary>
 	/// A local repository to handle shows
 	/// </summary>
-	public class NewsRepository : LocalRepository<News>
+	public class NewsRepository : DapperRepository<INews>
 	{
-		public NewsRepository(DatabaseContext database, IThumbnailsManager thumbs)
-			: base(database, thumbs)
+		// language=PostgreSQL
+		protected override FormattableString Sql => $"""
+			select
+				e.*, -- Episode as e
+				m.*
+				/* includes */
+			from
+				episodes as e
+			full outer join (
+				select
+					* -- Movie
+				from
+					movies
+			) as m on false
+		""";
+
+		protected override Dictionary<string, Type> Config => new()
+		{
+			{ "e", typeof(Episode) },
+			{ "m", typeof(Movie) },
+		};
+
+		protected override INews Mapper(List<object?> items)
+		{
+			if (items[0] is Episode episode && episode.Id != 0)
+				return episode;
+			if (items[1] is Movie movie && movie.Id != 0)
+			{
+				movie.Id = -movie.Id;
+				return movie;
+			}
+			throw new InvalidDataException();
+		}
+
+		public NewsRepository(DbConnection database)
+			: base(database)
 		{ }
-
-		/// <inheritdoc />
-		public override Task<ICollection<News>> Search(string query, Include<News>? include = default)
-			=> throw new InvalidOperationException();
-
-		/// <inheritdoc />
-		public override Task<News> Create(News obj)
-			=> throw new InvalidOperationException();
-
-		/// <inheritdoc />
-		public override Task<News> CreateIfNotExists(News obj)
-			=> throw new InvalidOperationException();
-
-		/// <inheritdoc />
-		public override Task<News> Edit(News edited)
-			=> throw new InvalidOperationException();
-
-		/// <inheritdoc />
-		public override Task<News> Patch(int id, Func<News, Task<bool>> patch)
-			=> throw new InvalidOperationException();
-
-		/// <inheritdoc />
-		public override Task Delete(int id)
-			=> throw new InvalidOperationException();
-
-		/// <inheritdoc />
-		public override Task Delete(string slug)
-			=> throw new InvalidOperationException();
-
-		/// <inheritdoc />
-		public override Task Delete(News obj)
-			=> throw new InvalidOperationException();
 	}
 }

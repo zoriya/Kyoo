@@ -20,9 +20,7 @@
 
 import { z } from "zod";
 import { MovieP } from "./movie";
-import { BaseEpisodeP } from "./episode.base";
-import { ResourceP } from "../traits/resource";
-import { withImages } from "../traits/images";
+import { EpisodeP } from "./episode";
 
 /**
  * The type of item, ether a a movie or an episode.
@@ -36,29 +34,7 @@ export const NewsP = z.union([
 	/*
 	 * Either an episode
 	 */
-	BaseEpisodeP.and(
-		z.object({
-			kind: z.literal(NewsKind.Episode),
-			show: withImages(
-				ResourceP.extend({
-					name: z.string(),
-				}),
-				"shows",
-			).transform((x) => {
-				if (!x.thumbnail && x.poster) {
-					x.thumbnail = { ...x.poster };
-					if (x.thumbnail) {
-						x.thumbnail.low = x.thumbnail.high;
-						x.thumbnail.medium = x.thumbnail.high;
-					}
-				}
-				return x;
-			}),
-		}),
-	).transform((x) => {
-		if (!x.thumbnail && x.show.thumbnail) x.thumbnail = x.show.thumbnail;
-		return x;
-	}),
+	EpisodeP.and(z.object({ kind: z.literal(NewsKind.Episode) })),
 	/*
 	 * Or a Movie
 	 */

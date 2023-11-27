@@ -93,14 +93,6 @@ namespace Kyoo.Postgresql
 		public DbSet<PeopleRole> PeopleRoles { get; set; }
 
 		/// <summary>
-		/// The list of new items (episodes and movies).
-		/// </summary>
-		/// <remarks>
-		/// This set is ready only, on most database this will be a view.
-		/// </remarks>
-		public DbSet<News> News { get; set; }
-
-		/// <summary>
 		/// Add a many to many link between two resources.
 		/// </summary>
 		/// <remarks>Types are order dependant. You can't inverse the order. Please always put the owner first.</remarks>
@@ -284,7 +276,6 @@ namespace Kyoo.Postgresql
 				.WithMany("Users")
 				.UsingEntity(x => x.ToTable(LinkName<User, Show>()));
 
-			_HasMetadata<News>(modelBuilder);
 			_HasMetadata<Collection>(modelBuilder);
 			_HasMetadata<Movie>(modelBuilder);
 			_HasMetadata<Show>(modelBuilder);
@@ -293,7 +284,6 @@ namespace Kyoo.Postgresql
 			_HasMetadata<People>(modelBuilder);
 			_HasMetadata<Studio>(modelBuilder);
 
-			_HasImages<News>(modelBuilder);
 			_HasImages<Collection>(modelBuilder);
 			_HasImages<Movie>(modelBuilder);
 			_HasImages<Show>(modelBuilder);
@@ -301,7 +291,6 @@ namespace Kyoo.Postgresql
 			_HasImages<Episode>(modelBuilder);
 			_HasImages<People>(modelBuilder);
 
-			_HasAddedDate<News>(modelBuilder);
 			_HasAddedDate<Collection>(modelBuilder);
 			_HasAddedDate<Movie>(modelBuilder);
 			_HasAddedDate<Show>(modelBuilder);
@@ -347,14 +336,6 @@ namespace Kyoo.Postgresql
 
 			modelBuilder.Entity<Movie>()
 				.Ignore(x => x.Links);
-			modelBuilder.Entity<News>()
-				.Ignore(x => x.Links);
-
-			var builder = modelBuilder.Entity<News>()
-				.OwnsOne(x => x.Show);
-			builder.OwnsOne(x => x.Poster);
-			builder.OwnsOne(x => x.Thumbnail);
-			builder.OwnsOne(x => x.Logo);
 		}
 
 		/// <summary>
