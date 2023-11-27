@@ -37,7 +37,7 @@ export const Image = ({
 }: Props & { style?: ImageStyle } & { layout: ImageLayout }) => {
 	const { css } = useYoshiki();
 	const [state, setState] = useState<"loading" | "errored" | "finished">(
-		src ? (typeof window === "undefined" ? "finished" : "loading") : "errored",
+		typeof window === "undefined" ? "finished" : "loading",
 	);
 
 	const border = { borderRadius: 6 } satisfies ViewStyle;

@@ -34,5 +34,10 @@ export const withRoute = <Props,>(
 
 	const { ...all } = Component;
 	Object.assign(WithUseRoute, { ...all });
+	if ("getFetchUrls" in Component) {
+		const oldGet = Component.getFetchUrls as (obj: object) => object;
+		WithUseRoute.getFetchUrls = (props: object) => oldGet({ ...defaultProps, ...props });
+	}
+
 	return WithUseRoute;
 };
