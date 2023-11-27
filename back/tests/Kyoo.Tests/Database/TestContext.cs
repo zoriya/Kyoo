@@ -17,6 +17,7 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Data.Common;
 using System.Threading.Tasks;
 using Kyoo.Postgresql;
 using Microsoft.EntityFrameworkCore;
@@ -68,22 +69,23 @@ namespace Kyoo.Tests
 
 	public sealed class PostgresTestContext : TestContext
 	{
+		private readonly string _database;
 		private readonly DbContextOptions<DatabaseContext> _context;
 
 		public PostgresTestContext(PostgresFixture template, ITestOutputHelper output)
 		{
 			string id = Guid.NewGuid().ToString().Replace('-', '_');
-			string database = $"kyoo_test_{id}";
+			_database = $"kyoo_test_{id}";
 
 			using (NpgsqlConnection connection = new(template.Connection))
 			{
 				connection.Open();
-				using NpgsqlCommand cmd = new($"CREATE DATABASE {database} WITH TEMPLATE {template.Template}", connection);
+				using NpgsqlCommand cmd = new($"CREATE DATABASE {_database} WITH TEMPLATE {template.Template}", connection);
 				cmd.ExecuteNonQuery();
 			}
 
 			_context = new DbContextOptionsBuilder<DatabaseContext>()
-				.UseNpgsql(GetConnectionString(database))
+				.UseNpgsql(GetConnectionString(_database))
 				.UseLoggerFactory(LoggerFactory.Create(x =>
 				{
 					x.ClearProviders();
@@ -119,6 +121,11 @@ namespace Kyoo.Tests
 		{
 			return new PostgresContext(_context);
 		}
+
+		public override DbConnection NewConnection()
+		{
+			return new NpgsqlConnection(GetConnectionString(_database));
+		}
 	}
 
 	/// <summary>
@@ -153,6 +160,8 @@ namespace Kyoo.Tests
 		/// </summary>
 		/// <returns>A valid DatabaseContext</returns>
 		public abstract DatabaseContext New();
+
+		public abstract DbConnection NewConnection();
 
 		public abstract void Dispose();
 
