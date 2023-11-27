@@ -63,7 +63,18 @@ namespace Kyoo.Abstractions.Controllers
 		public record Conglomerate(params Sort<T>[] List) : Sort<T>;
 
 		/// <summary>Sort randomly items</summary>
-		public record Random(uint seed) : Sort<T>;
+		public record Random(uint Seed) : Sort<T>
+		{
+			public Random()
+				: this(0)
+			{
+				uint seed = BitConverter.ToUInt32(
+					BitConverter.GetBytes(new System.Random().Next(int.MinValue, int.MaxValue)),
+					0
+				);
+				Seed = seed;
+			}
+		}
 
 		/// <summary>The default sort method for the given type.</summary>
 		public record Default : Sort<T>

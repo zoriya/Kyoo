@@ -35,7 +35,7 @@ public sealed class ExpressionArgumentReplacer : ExpressionVisitor
 	{
 		if (_mapping.TryGetValue(node, out Expression? mappedArgument))
 			return Visit(mappedArgument);
-		return VisitParameter(node);
+		return base.VisitParameter(node);
 	}
 
 	public static Expression ReplaceParams(Expression expression, IEnumerable<ParameterExpression> epxParams, params ParameterExpression[] param)

@@ -220,5 +220,6 @@ Recommanded.query = (): QueryIdentifier<LibraryItem> => ({
 	params: {
 		sortBy: "random",
 		limit: 6,
+		fields: ["firstEpisode"],
 	},
 });

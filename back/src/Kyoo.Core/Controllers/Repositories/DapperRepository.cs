@@ -94,6 +94,17 @@ public abstract class DapperRepository<T> : IRepository<T>
 	/// <inheritdoc />
 	public Task<T?> GetOrDefault(string slug, Include<T>? include = null)
 	{
+		if (slug == "random")
+		{
+			return Database.QuerySingle<T>(
+				Sql,
+				Config,
+				Mapper,
+				include,
+				filter: null,
+				new Sort<T>.Random()
+			);
+		}
 		return Database.QuerySingle<T>(
 			Sql,
 			Config,

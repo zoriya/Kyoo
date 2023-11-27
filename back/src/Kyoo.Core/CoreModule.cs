@@ -66,7 +66,7 @@ namespace Kyoo.Core
 			builder.RegisterRepository<PeopleRepository>();
 			builder.RegisterRepository<StudioRepository>();
 			builder.RegisterRepository<UserRepository>();
-			builder.RegisterType<NewsRepository>().InstancePerLifetimeScope();
+			builder.RegisterRepository<NewsRepository>();
 		}
 
 		/// <inheritdoc />
