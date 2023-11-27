@@ -105,7 +105,7 @@ GenreGrid.query = (genre: Genre): QueryIdentifier<LibraryItem> => ({
 	infinite: true,
 	path: ["items"],
 	params: {
-		genres: genre,
+		filter: `genres has ${genre}`,
 		sortBy: "random",
 		// Limit the inital numbers of items
 		limit: 10,

@@ -36,11 +36,7 @@ export const LibraryItemP = z.union([
 	/*
 	 * Either a Show
 	 */
-	ShowP.and(
-		z.object({
-			kind: z.literal(ItemKind.Show),
-		}),
-	).transform((x) => ({ ...x, playHref: `/watch/${x.slug}-s1e1` })),
+	ShowP.and(z.object({ kind: z.literal(ItemKind.Show) })),
 	/*
 	 * Or a Movie
 	 */

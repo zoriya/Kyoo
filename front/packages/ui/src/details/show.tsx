@@ -66,7 +66,7 @@ const ShowHeader = forwardRef<View, ViewProps & { slug: string }>(function ShowH
 			)}
 		>
 			<Header type="show" query={query(slug)} />
-			<DetailsCollections type="movie" slug={slug} />
+			<DetailsCollections type="show" slug={slug} />
 			{/* <Staff slug={slug} /> */}
 			<SvgWave
 				fill={theme.variant.background}
@@ -83,7 +83,7 @@ const query = (slug: string): QueryIdentifier<Show> => ({
 	parser: ShowP,
 	path: ["shows", slug],
 	params: {
-		fields: ["studio", "firstEpisode", "collections"],
+		fields: ["studio", "firstEpisode"],
 	},
 });
 
