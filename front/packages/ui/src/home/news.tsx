@@ -92,5 +92,6 @@ NewsList.query = (): QueryIdentifier<News> => ({
 	params: {
 		// Limit the inital numbers of items
 		limit: 10,
+		fields: ["show"],
 	},
 });

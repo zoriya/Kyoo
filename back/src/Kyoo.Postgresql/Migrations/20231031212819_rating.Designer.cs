@@ -390,10 +390,6 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnType("genre[]")
 						.HasColumnName("genres");
 
-					b.Property<NewsKind>("Kind")
-						.HasColumnType("news_kind")
-						.HasColumnName("kind");
-
 					b.Property<string>("Name")
 						.HasColumnType("text")
 						.HasColumnName("name");

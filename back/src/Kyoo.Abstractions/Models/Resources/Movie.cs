@@ -29,7 +29,7 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A series or a movie.
 	/// </summary>
-	public class Movie : IQuery, IResource, IMetadata, IOnMerge, IThumbnails, IAddedDate, ILibraryItem
+	public class Movie : IQuery, IResource, IMetadata, IOnMerge, IThumbnails, IAddedDate, ILibraryItem, INews
 	{
 		public static Sort DefaultSort => new Sort<Movie>.By(x => x.Name);
 

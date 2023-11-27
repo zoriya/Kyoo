@@ -33,9 +33,9 @@ namespace Kyoo.Core.Api
 	[ApiController]
 	[PartialPermission("LibraryItem")]
 	[ApiDefinition("News", Group = ResourcesGroup)]
-	public class NewsApi : CrudThumbsApi<News>
+	public class NewsApi : CrudThumbsApi<INews>
 	{
-		public NewsApi(IRepository<News> news, IThumbnailsManager thumbs)
+		public NewsApi(IRepository<INews> news, IThumbnailsManager thumbs)
 			: base(news, thumbs)
 		{ }
 	}

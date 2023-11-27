@@ -39,12 +39,12 @@ public static class DapperHelper
 {
 	private static string _Property(string key, Dictionary<string, Type> config)
 	{
-		if (config.Count == 1)
-			return $"{config.First()}.{key.ToSnakeCase()}";
-
-		IEnumerable<string> keys = config
+		string[] keys = config
 			.Where(x => key == "id" || x.Value.GetProperty(key) != null)
-			.Select(x => $"{x.Key}.{x.Value.GetProperty(key)?.GetCustomAttribute<ColumnAttribute>()?.Name ?? key.ToSnakeCase()}");
+			.Select(x => $"{x.Key}.{x.Value.GetProperty(key)?.GetCustomAttribute<ColumnAttribute>()?.Name ?? key.ToSnakeCase()}")
+			.ToArray();
+		if (keys.Length == 1)
+			return keys.First();
 		return $"coalesce({string.Join(", ", keys)})";
 	}
 
@@ -66,14 +66,16 @@ public static class DapperHelper
 	}
 
 	public static (
-		Dictionary<string, Type> config,
+		string projection,
 		string join,
+		List<Type> types,
 		Func<T, IEnumerable<object?>, T> map
 	) ProcessInclude<T>(Include<T> include, Dictionary<string, Type> config)
 		where T : class
 	{
 		int relation = 0;
-		Dictionary<string, Type> retConfig = new();
+		List<Type> types = new();
+		StringBuilder projection = new();
 		StringBuilder join = new();
 
 		foreach (Include.Metadata metadata in include.Metadatas)
@@ -83,7 +85,8 @@ public static class DapperHelper
 			{
 				case Include.SingleRelation(var name, var type, var rid):
 					string tableName = type.GetCustomAttribute<TableAttribute>()?.Name ?? $"{type.Name.ToSnakeCase()}s";
-					retConfig.Add($"r{relation}", type);
+					types.Add(type);
+					projection.AppendLine($", r{relation}.* -- {type.Name} as r{relation}");
 					join.Append($"\nleft join {tableName} as r{relation} on r{relation}.id = {_Property(rid, config)}");
 					break;
 				case Include.CustomRelation(var name, var type, var sql, var on, var declaring):
@@ -91,7 +94,8 @@ public static class DapperHelper
 					string lateral = sql.Contains("\"this\"") ? " lateral" : string.Empty;
 					sql = sql.Replace("\"this\"", owner);
 					on = on?.Replace("\"this\"", owner);
-					retConfig.Add($"r{relation}", type);
+					types.Add(type);
+					projection.AppendLine($", r{relation}.*");
 					join.Append($"\nleft join{lateral} ({sql}) as r{relation} on r{relation}.{on}");
 					break;
 				case Include.ProjectedRelation:
@@ -114,7 +118,7 @@ public static class DapperHelper
 			return item;
 		}
 
-		return (retConfig, join.ToString(), Map);
+		return (projection.ToString(), join.ToString(), types, Map);
 	}
 
 	public static FormattableString ProcessFilter<T>(Filter<T> filter, Dictionary<string, Type> config)
@@ -187,9 +191,8 @@ public static class DapperHelper
 
 		// Include handling
 		include ??= new();
-		var (includeConfig, includeJoin, mapIncludes) = ProcessInclude(include, config);
+		var (includeProjection, includeJoin, includeTypes, mapIncludes) = ProcessInclude(include, config);
 		query.AppendLiteral(includeJoin);
-		string includeProjection = string.Join(string.Empty, includeConfig.Select(x => $", {x.Key}.*"));
 		query.Replace("/* includes */", $"{includeProjection:raw}", out bool replaced);
 		if (!replaced)
 			throw new ArgumentException("Missing '/* includes */' placeholder in top level sql select to support includes.");
@@ -210,9 +213,7 @@ public static class DapperHelper
 		// Build query and prepare to do the query/projections
 		IDapperSqlCommand cmd = query.Build();
 		string sql = cmd.Sql;
-		List<Type> types = config.Select(x => x.Value)
-			.Concat(includeConfig.Select(x => x.Value))
-			.ToList();
+		List<Type> types = config.Select(x => x.Value).Concat(includeTypes).ToList();
 
 		// Expand projections on every types received.
 		sql = Regex.Replace(sql, @"(,?) -- (\w+)( as (\w+))?", (match) =>
@@ -296,6 +297,7 @@ public static class DapperHelper
 			query += ProcessFilter(filter, config);
 
 		IDapperSqlCommand cmd = query.Build();
+
 		// language=postgreSQL
 		string sql = $"select count(*) from ({cmd.Sql}) as query";
 
