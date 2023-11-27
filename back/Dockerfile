@@ -27,4 +27,4 @@ WORKDIR /kyoo
 EXPOSE 5000
 # The back can take a long time to start if meilisearch is initializing
 HEALTHCHECK --interval=5s --retries=15 CMD curl --fail http://localhost:5000/health || exit
-CMD /app/Kyoo.Host
+ENTRYPOINT ["/app/Kyoo.Host"]
