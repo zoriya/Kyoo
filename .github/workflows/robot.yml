@@ -28,12 +28,13 @@ jobs:
 
       - name: Start the service
         run: |
-          docker compose up -d back postgres ingress # --wait Wait is not available on gha
+          docker compose up -d back postgres ingress meilisearch # --wait Wait is not available on gha
 
       - name: Perform healthchecks
         run: |
           docker compose ps -a
-          wget --retry-connrefused --retry-on-http-error=502 http://localhost:8901/api/health
+          docker compose logs
+          wget --retry-connrefused --retry-on-http-error=502 http://localhost:8901/api/health || (docker compose logs && exit 1)
 
       - name: Run robot tests
         run: |
