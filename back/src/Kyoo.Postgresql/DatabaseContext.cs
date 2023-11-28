@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.Json;
@@ -28,6 +29,7 @@ using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.ValueGeneration;
 
 namespace Kyoo.Postgresql
 {
@@ -282,8 +284,8 @@ namespace Kyoo.Postgresql
 			_HasImages<Movie>(modelBuilder);
 			_HasImages<Show>(modelBuilder);
 			_HasImages<Season>(modelBuilder);
-			_HasImages<Episode>(modelBuilder);
 			// _HasImages<People>(modelBuilder);
+			_HasImages<Episode>(modelBuilder);
 
 			_HasAddedDate<Collection>(modelBuilder);
 			_HasAddedDate<Movie>(modelBuilder);

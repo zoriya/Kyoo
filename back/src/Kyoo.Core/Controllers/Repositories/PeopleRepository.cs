@@ -60,12 +60,13 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public override async Task<ICollection<People>> Search(string query, Include<People>? include = default)
+		public override Task<ICollection<People>> Search(string query, Include<People>? include = default)
 		{
-			return await AddIncludes(_database.People, include)
-				.Where(x => EF.Functions.ILike(x.Name, $"%{query}%"))
-				.Take(20)
-				.ToListAsync();
+			throw new NotImplementedException();
+			// return await AddIncludes(_database.People, include)
+			// 	.Where(x => EF.Functions.ILike(x.Name, $"%{query}%"))
+			// 	.Take(20)
+			// 	.ToListAsync();
 		}
 
 		/// <inheritdoc />

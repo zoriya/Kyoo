@@ -24,7 +24,7 @@ export const ResourceP = z.object({
 	/**
 	 * A unique ID for this type of resource. This can't be changed and duplicates are not allowed.
 	 */
-	id: z.number(),
+	id: z.string(),
 
 	/**
 	 * A human-readable identifier that can be used instead of an ID. A slug must be unique for a type
