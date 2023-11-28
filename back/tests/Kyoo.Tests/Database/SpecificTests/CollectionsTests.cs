@@ -85,7 +85,7 @@ namespace Kyoo.Tests.Database
 			};
 			await _repository.Create(collection);
 
-			Collection retrieved = await _repository.Get(2);
+			Collection retrieved = await _repository.Get(2.AsGuid());
 			Assert.Equal(2, retrieved.ExternalId.Count);
 			KAssert.DeepEqual(collection.ExternalId.First(), retrieved.ExternalId.First());
 			KAssert.DeepEqual(collection.ExternalId.Last(), retrieved.ExternalId.Last());

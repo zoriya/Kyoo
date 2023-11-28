@@ -36,11 +36,11 @@ namespace Kyoo.Tests.Utility
 			Studio genre2 = new()
 			{
 				Name = "test",
-				Id = 5,
+				Id = 5.AsGuid(),
 			};
 			Studio ret = Merger.Complete(genre, genre2);
 			Assert.True(ReferenceEquals(genre, ret));
-			Assert.Equal(5, ret.Id);
+			Assert.Equal(5.AsGuid(), ret.Id);
 			Assert.Equal("test", genre.Name);
 			Assert.Null(genre.Slug);
 		}
@@ -54,12 +54,12 @@ namespace Kyoo.Tests.Utility
 			};
 			Collection collection2 = new()
 			{
-				Id = 5,
+				Id = 5.AsGuid(),
 				Name = "test",
 			};
 			Collection ret = Merger.Complete(collection, collection2);
 			Assert.True(ReferenceEquals(collection, ret));
-			Assert.Equal(5, ret.Id);
+			Assert.Equal(5.AsGuid(), ret.Id);
 			Assert.Equal("test", ret.Name);
 			Assert.Null(ret.Slug);
 		}

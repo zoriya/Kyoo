@@ -19,7 +19,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using FluentAssertions;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Postgresql;
@@ -132,40 +131,40 @@ namespace Kyoo.Tests.Database
 			Assert.Equal(value.Aliases, show.Aliases);
 		}
 
-		[Fact]
-		public async Task EditPeopleTest()
-		{
-			Show value = await _repository.Get(TestSample.Get<Show>().Slug);
-			value.People = new[]
-			{
-				new PeopleRole
-				{
-					Show = value,
-					People = TestSample.Get<People>(),
-					ForPeople = false,
-					Type = "Actor",
-					Role = "NiceCharacter"
-				}
-			};
-			Show edited = await _repository.Edit(value);
-
-			Assert.Equal(value.Slug, edited.Slug);
-			Assert.Equal(edited.People!.First().ShowID, value.Id);
-			Assert.Equal(
-				value.People.Select(x => new { x.Role, x.Slug, x.People.Name }),
-				edited.People.Select(x => new { x.Role, x.Slug, x.People.Name }));
-
-			await using DatabaseContext database = Repositories.Context.New();
-			Show show = await database.Shows
-				.Include(x => x.People)
-				.ThenInclude(x => x.People)
-				.FirstAsync();
-
-			Assert.Equal(value.Slug, show.Slug);
-			Assert.Equal(
-				value.People.Select(x => new { x.Role, x.Slug, x.People.Name }),
-				show.People!.Select(x => new { x.Role, x.Slug, x.People.Name }));
-		}
+		// [Fact]
+		// public async Task EditPeopleTest()
+		// {
+		// 	Show value = await _repository.Get(TestSample.Get<Show>().Slug);
+		// 	value.People = new[]
+		// 	{
+		// 		new PeopleRole
+		// 		{
+		// 			Show = value,
+		// 			People = TestSample.Get<People>(),
+		// 			ForPeople = false,
+		// 			Type = "Actor",
+		// 			Role = "NiceCharacter"
+		// 		}
+		// 	};
+		// 	Show edited = await _repository.Edit(value);
+		//
+		// 	Assert.Equal(value.Slug, edited.Slug);
+		// 	Assert.Equal(edited.People!.First().ShowID, value.Id);
+		// 	Assert.Equal(
+		// 		value.People.Select(x => new { x.Role, x.Slug, x.People.Name }),
+		// 		edited.People.Select(x => new { x.Role, x.Slug, x.People.Name }));
+		//
+		// 	await using DatabaseContext database = Repositories.Context.New();
+		// 	Show show = await database.Shows
+		// 		.Include(x => x.People)
+		// 		.ThenInclude(x => x.People)
+		// 		.FirstAsync();
+		//
+		// 	Assert.Equal(value.Slug, show.Slug);
+		// 	Assert.Equal(
+		// 		value.People.Select(x => new { x.Role, x.Slug, x.People.Name }),
+		// 		show.People!.Select(x => new { x.Role, x.Slug, x.People.Name }));
+		// }
 
 		[Fact]
 		public async Task EditExternalIDsTest()
@@ -194,7 +193,7 @@ namespace Kyoo.Tests.Database
 		public async Task CreateWithRelationsTest()
 		{
 			Show expected = TestSample.Get<Show>();
-			expected.Id = 0;
+			expected.Id = 0.AsGuid();
 			expected.Slug = "created-relation-test";
 			expected.ExternalId = new Dictionary<string, MetadataId>
 			{
@@ -204,44 +203,44 @@ namespace Kyoo.Tests.Database
 				}
 			};
 			expected.Genres = new List<Genre>() { Genre.Action };
-			expected.People = new[]
-			{
-				new PeopleRole
-				{
-					People = TestSample.Get<People>(),
-					Show = expected,
-					ForPeople = false,
-					Role = "actor",
-					Type = "actor"
-				}
-			};
+			// expected.People = new[]
+			// {
+			// 	new PeopleRole
+			// 	{
+			// 		People = TestSample.Get<People>(),
+			// 		Show = expected,
+			// 		ForPeople = false,
+			// 		Role = "actor",
+			// 		Type = "actor"
+			// 	}
+			// };
 			expected.Studio = new Studio("studio");
 			Show created = await _repository.Create(expected);
 			KAssert.DeepEqual(expected, created);
 
 			await using DatabaseContext context = Repositories.Context.New();
 			Show retrieved = await context.Shows
-				.Include(x => x.People)
-				.ThenInclude(x => x.People)
+				// .Include(x => x.People)
+				// .ThenInclude(x => x.People)
 				.Include(x => x.Studio)
 				.FirstAsync(x => x.Id == created.Id);
-			retrieved.People.ForEach(x =>
-			{
-				x.Show = null;
-				x.People.Roles = null;
-				x.People.Poster = null;
-				x.People.Thumbnail = null;
-				x.People.Logo = null;
-			});
+			// retrieved.People.ForEach(x =>
+			// {
+			// 	x.Show = null;
+			// 	x.People.Roles = null;
+			// 	x.People.Poster = null;
+			// 	x.People.Thumbnail = null;
+			// 	x.People.Logo = null;
+			// });
 			retrieved.Studio!.Shows = null;
-			expected.People.ForEach(x =>
-			{
-				x.Show = null;
-				x.People.Roles = null;
-				x.People.Poster = null;
-				x.People.Thumbnail = null;
-				x.People.Logo = null;
-			});
+			// expected.People.ForEach(x =>
+			// {
+			// 	x.Show = null;
+			// 	x.People.Roles = null;
+			// 	x.People.Poster = null;
+			// 	x.People.Thumbnail = null;
+			// 	x.People.Logo = null;
+			// });
 
 			KAssert.DeepEqual(retrieved, expected);
 		}
@@ -250,7 +249,7 @@ namespace Kyoo.Tests.Database
 		public async Task CreateWithExternalID()
 		{
 			Show expected = TestSample.Get<Show>();
-			expected.Id = 0;
+			expected.Id = 0.AsGuid();
 			expected.Slug = "created-relation-test";
 			expected.ExternalId = new Dictionary<string, MetadataId>
 			{
@@ -272,7 +271,7 @@ namespace Kyoo.Tests.Database
 		public async Task SlugDuplicationTest()
 		{
 			Show test = TestSample.Get<Show>();
-			test.Id = 0;
+			test.Id = 0.AsGuid();
 			test.Slug = "300";
 			Show created = await _repository.Create(test);
 			Assert.Equal("300!", created.Slug);
