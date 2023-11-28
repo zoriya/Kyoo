@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Exceptions;
@@ -47,7 +46,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="include">The related fields to include.</param>
 		/// <exception cref="ItemNotFoundException">If the item could not be found.</exception>
 		/// <returns>The resource found</returns>
-		Task<T> Get(int id, Include<T>? include = default);
+		Task<T> Get(Guid id, Include<T>? include = default);
 
 		/// <summary>
 		/// Get a resource from it's slug.
@@ -73,7 +72,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="id">The id of the resource</param>
 		/// <param name="include">The related fields to include.</param>
 		/// <returns>The resource found</returns>
-		Task<T?> GetOrDefault(int id, Include<T>? include = default);
+		Task<T?> GetOrDefault(Guid id, Include<T>? include = default);
 
 		/// <summary>
 		/// Get a resource from it's slug or null if it is not found.
@@ -128,7 +127,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="ids">The list of items id.</param>
 		/// <param name="include">The related fields to include.</param>
 		/// <returns>A list of resources mapped from ids.</returns>
-		Task<ICollection<T>> FromIds(IList<int> ids, Include<T>? include = default);
+		Task<ICollection<T>> FromIds(IList<Guid> ids, Include<T>? include = default);
 
 		/// <summary>
 		/// Create a new resource.
@@ -175,7 +174,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </param>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The resource edited and completed by database's information (related items and so on)</returns>
-		Task<T> Patch(int id, Func<T, Task<bool>> patch);
+		Task<T> Patch(Guid id, Func<T, Task<bool>> patch);
 
 		/// <summary>
 		/// Called when a resource has been edited.
@@ -196,7 +195,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="id">The ID of the resource</param>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		Task Delete(int id);
+		Task Delete(Guid id);
 
 		/// <summary>
 		/// Delete a resource by it's slug

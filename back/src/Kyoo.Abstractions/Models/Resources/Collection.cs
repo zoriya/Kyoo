@@ -34,7 +34,7 @@ namespace Kyoo.Abstractions.Models
 		public static Sort DefaultSort => new Sort<Collection>.By(nameof(Collection.Name));
 
 		/// <inheritdoc />
-		public int Id { get; set; }
+		public Guid Id { get; set; }
 
 		/// <inheritdoc />
 		[MaxLength(256)] public string Slug { get; set; }

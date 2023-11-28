@@ -46,7 +46,7 @@ public abstract class DapperRepository<T> : IRepository<T>
 	}
 
 	/// <inheritdoc/>
-	public virtual async Task<T> Get(int id, Include<T>? include = default)
+	public virtual async Task<T> Get(Guid id, Include<T>? include = default)
 	{
 		T? ret = await GetOrDefault(id, include);
 		if (ret == null)
@@ -74,13 +74,13 @@ public abstract class DapperRepository<T> : IRepository<T>
 	}
 
 	/// <inheritdoc />
-	public Task<ICollection<T>> FromIds(IList<int> ids, Include<T>? include = null)
+	public Task<ICollection<T>> FromIds(IList<Guid> ids, Include<T>? include = null)
 	{
 		throw new NotImplementedException();
 	}
 
 	/// <inheritdoc />
-	public Task<T?> GetOrDefault(int id, Include<T>? include = null)
+	public Task<T?> GetOrDefault(Guid id, Include<T>? include = null)
 	{
 		return Database.QuerySingle<T>(
 			Sql,
@@ -165,7 +165,7 @@ public abstract class DapperRepository<T> : IRepository<T>
 	public Task<T> CreateIfNotExists(T obj) => throw new NotImplementedException();
 
 	/// <inheritdoc />
-	public Task Delete(int id) => throw new NotImplementedException();
+	public Task Delete(Guid id) => throw new NotImplementedException();
 
 	/// <inheritdoc />
 	public Task Delete(string slug) => throw new NotImplementedException();
@@ -180,5 +180,5 @@ public abstract class DapperRepository<T> : IRepository<T>
 	public Task<T> Edit(T edited) => throw new NotImplementedException();
 
 	/// <inheritdoc />
-	public Task<T> Patch(int id, Func<T, Task<bool>> patch) => throw new NotImplementedException();
+	public Task<T> Patch(Guid id, Func<T, Task<bool>> patch) => throw new NotImplementedException();
 }

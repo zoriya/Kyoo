@@ -41,7 +41,7 @@ namespace Kyoo.Abstractions.Models
 		);
 
 		/// <inheritdoc />
-		public int Id { get; set; }
+		public Guid Id { get; set; } = Guid.Empty;
 
 		/// <inheritdoc />
 		[Computed]
@@ -90,7 +90,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the Show containing this episode.
 		/// </summary>
-		public int ShowId { get; set; }
+		public Guid ShowId { get; set; }
 
 		/// <summary>
 		/// The show that contains this episode.
@@ -100,7 +100,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the Season containing this episode.
 		/// </summary>
-		public int? SeasonId { get; set; }
+		public Guid? SeasonId { get; set; }
 
 		/// <summary>
 		/// The season that contains this episode.

@@ -37,7 +37,7 @@ namespace Kyoo.Abstractions.Models.Utils
 		/// <summary>
 		/// The ID of the resource or null if the slug is specified.
 		/// </summary>
-		private readonly int? _id;
+		private readonly Guid? _id;
 
 		/// <summary>
 		/// The slug of the resource or null if the id is specified.
@@ -48,7 +48,7 @@ namespace Kyoo.Abstractions.Models.Utils
 		/// Create a new <see cref="Identifier"/> for the given id.
 		/// </summary>
 		/// <param name="id">The id of the resource.</param>
-		public Identifier(int id)
+		public Identifier(Guid id)
 		{
 			_id = id;
 		}
@@ -80,7 +80,7 @@ namespace Kyoo.Abstractions.Models.Utils
 		/// );
 		/// </code>
 		/// </example>
-		public T Match<T>(Func<int, T> idFunc, Func<string, T> slugFunc)
+		public T Match<T>(Func<Guid, T> idFunc, Func<string, T> slugFunc)
 		{
 			return _id.HasValue
 				? idFunc(_id.Value)
@@ -99,7 +99,7 @@ namespace Kyoo.Abstractions.Models.Utils
 		/// identifier.Matcher&lt;Season&gt;(x => x.ShowID, x => x.Show.Slug)
 		/// </code>
 		/// </example>
-		public Filter<T> Matcher<T>(Expression<Func<T, int>> idGetter,
+		public Filter<T> Matcher<T>(Expression<Func<T, Guid>> idGetter,
 			Expression<Func<T, string>> slugGetter)
 		{
 			ConstantExpression self = Expression.Constant(_id.HasValue ? _id.Value : _slug);
@@ -111,14 +111,14 @@ namespace Kyoo.Abstractions.Models.Utils
 
 		/// <summary>
 		/// A matcher overload for nullable IDs. See
-		/// <see cref="Matcher{T}(Expression{Func{T,int}},Expression{Func{T,string}})"/>
+		/// <see cref="Matcher{T}(Expression{Func{T,Guid}},Expression{Func{T,string}})"/>
 		/// for more details.
 		/// </summary>
 		/// <param name="idGetter">An expression to retrieve an ID from the type <typeparamref name="T"/>.</param>
 		/// <param name="slugGetter">An expression to retrieve a slug from the type <typeparamref name="T"/>.</param>
 		/// <typeparam name="T">The type to match against this identifier.</typeparam>
 		/// <returns>An expression to match the type <typeparamref name="T"/> to this identifier.</returns>
-		public Filter<T> Matcher<T>(Expression<Func<T, int?>> idGetter,
+		public Filter<T> Matcher<T>(Expression<Func<T, Guid?>> idGetter,
 			Expression<Func<T, string>> slugGetter)
 		{
 			ConstantExpression self = Expression.Constant(_id.HasValue ? _id.Value : _slug);
@@ -210,11 +210,11 @@ namespace Kyoo.Abstractions.Models.Utils
 			/// <inheritdoc />
 			public override object ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
 			{
-				if (value is int id)
+				if (value is Guid id)
 					return new Identifier(id);
 				if (value is not string slug)
 					return base.ConvertFrom(context, culture, value)!;
-				return int.TryParse(slug, out id)
+				return Guid.TryParse(slug, out id)
 					? new Identifier(id)
 					: new Identifier(slug);
 			}

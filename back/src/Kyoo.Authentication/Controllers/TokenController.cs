@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
@@ -61,7 +60,7 @@ namespace Kyoo.Authentication
 				: string.Empty;
 			List<Claim> claims = new()
 			{
-				new Claim(Claims.Id, user.Id.ToString(CultureInfo.InvariantCulture)),
+				new Claim(Claims.Id, user.Id.ToString()),
 				new Claim(Claims.Name, user.Username),
 				new Claim(Claims.Permissions, permissions),
 				new Claim(Claims.Type, "access")
@@ -85,7 +84,7 @@ namespace Kyoo.Authentication
 				signingCredentials: credential,
 				claims: new[]
 				{
-					new Claim(Claims.Id, user.Id.ToString(CultureInfo.InvariantCulture)),
+					new Claim(Claims.Id, user.Id.ToString()),
 					new Claim(Claims.Guid, Guid.NewGuid().ToString()),
 					new Claim(Claims.Type, "refresh")
 				},
@@ -96,7 +95,7 @@ namespace Kyoo.Authentication
 		}
 
 		/// <inheritdoc />
-		public int GetRefreshTokenUserID(string refreshToken)
+		public Guid GetRefreshTokenUserID(string refreshToken)
 		{
 			SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_options.Secret));
 			JwtSecurityTokenHandler tokenHandler = new();
@@ -120,7 +119,7 @@ namespace Kyoo.Authentication
 			if (principal.Claims.First(x => x.Type == Claims.Type).Value != "refresh")
 				throw new SecurityTokenException("Invalid token type. The token should be a refresh token.");
 			Claim identifier = principal.Claims.First(x => x.Type == Claims.Id);
-			if (int.TryParse(identifier.Value, out int id))
+			if (Guid.TryParse(identifier.Value, out Guid id))
 				return id;
 			throw new SecurityTokenException("Token not associated to any user.");
 		}

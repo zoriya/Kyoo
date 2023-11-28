@@ -62,18 +62,12 @@ namespace Kyoo.Core.Controllers
 
 		protected override ILibraryItem Mapper(List<object?> items)
 		{
-			if (items[0] is Show show && show.Id != 0)
+			if (items[0] is Show show && show.Id != Guid.Empty)
 				return show;
-			if (items[1] is Movie movie && movie.Id != 0)
-			{
-				movie.Id = -movie.Id;
+			if (items[1] is Movie movie && movie.Id != Guid.Empty)
 				return movie;
-			}
-			if (items[2] is Collection collection && collection.Id != 0)
-			{
-				collection.Id += 10_000;
+			if (items[2] is Collection collection && collection.Id != Guid.Empty)
 				return collection;
-			}
 			throw new InvalidDataException();
 		}
 
@@ -82,7 +76,7 @@ namespace Kyoo.Core.Controllers
 		{ }
 
 		public async Task<ICollection<ILibraryItem>> GetAllOfCollection(
-			int collectionId,
+			Guid collectionId,
 			Filter<ILibraryItem>? filter = default,
 			Sort<ILibraryItem>? sort = default,
 			Include<ILibraryItem>? include = default,

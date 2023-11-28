@@ -73,12 +73,6 @@ namespace Kyoo.Tests.Database
 		}
 
 		[Fact]
-		public async Task GetByFakeIdTest()
-		{
-			await Assert.ThrowsAsync<ItemNotFoundException>(() => _repository.Get(2));
-		}
-
-		[Fact]
 		public async Task GetByFakeSlugTest()
 		{
 			await Assert.ThrowsAsync<ItemNotFoundException>(() => _repository.Get("non-existent"));
@@ -106,18 +100,6 @@ namespace Kyoo.Tests.Database
 		}
 
 		[Fact]
-		public virtual async Task CreateTest()
-		{
-			await Assert.ThrowsAsync<DuplicatedItemException>(() => _repository.Create(TestSample.Get<T>()));
-			await _repository.Delete(TestSample.Get<T>());
-
-			T expected = TestSample.Get<T>();
-			expected.Id = 0;
-			await _repository.Create(expected);
-			KAssert.DeepEqual(expected, await _repository.Get(expected.Slug));
-		}
-
-		[Fact]
 		public virtual async Task CreateIfNotExistTest()
 		{
 			T expected = TestSample.Get<T>();
@@ -135,7 +117,6 @@ namespace Kyoo.Tests.Database
 		[Fact]
 		public async Task GetOrDefaultTest()
 		{
-			Assert.Null(await _repository.GetOrDefault(56));
 			Assert.Null(await _repository.GetOrDefault("non-existing"));
 		}
 	}

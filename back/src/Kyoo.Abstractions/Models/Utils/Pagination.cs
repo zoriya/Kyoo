@@ -16,6 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+
 namespace Kyoo.Abstractions.Controllers
 {
 	/// <summary>
@@ -31,7 +33,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <summary>
 		/// Where to start? Using the given sort.
 		/// </summary>
-		public int? AfterID { get; set; }
+		public Guid? AfterID { get; set; }
 
 		/// <summary>
 		/// Should the previous page be returned instead of the next?
@@ -54,7 +56,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="count">Set the <see cref="Limit"/> value</param>
 		/// <param name="afterID">Set the <see cref="AfterID"/> value. If not specified, it will start from the start</param>
 		/// <param name="reverse">Should the previous page be returned instead of the next?</param>
-		public Pagination(int count, int? afterID = null, bool reverse = false)
+		public Pagination(int count, Guid? afterID = null, bool reverse = false)
 		{
 			Limit = count;
 			AfterID = afterID;

@@ -16,6 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+
 namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
@@ -29,7 +31,7 @@ namespace Kyoo.Abstractions.Models
 	public class PeopleRole : IResource
 	{
 		/// <inheritdoc />
-		public int Id { get; set; }
+		public Guid Id { get; set; }
 
 		/// <inheritdoc />
 		public string Slug => ForPeople ? Show!.Slug : People.Slug;
@@ -43,7 +45,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the People playing the role.
 		/// </summary>
-		public int PeopleID { get; set; }
+		public Guid PeopleID { get; set; }
 
 		/// <summary>
 		/// The people that played this role.
@@ -53,14 +55,14 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the Show where the People playing in.
 		/// </summary>
-		public int? ShowID { get; set; }
+		public Guid? ShowID { get; set; }
 
 		/// <summary>
 		/// The show where the People played in.
 		/// </summary>
 		public Show? Show { get; set; }
 
-		public int? MovieID { get; set; }
+		public Guid? MovieID { get; set; }
 
 		public Movie? Movie { get; set; }
 

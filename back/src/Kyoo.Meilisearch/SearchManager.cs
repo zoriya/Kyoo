@@ -74,35 +74,13 @@ public class SearchManager : ISearchManager
 		};
 	}
 
-	public async Task<SearchPage<ILibraryItem>.SearchResult> SearchItems(string? query,
+	/// <inheritdoc/>
+	public Task<SearchPage<ILibraryItem>.SearchResult> SearchItems(string? query,
 		Sort<ILibraryItem> sortBy,
 		SearchPagination pagination,
 		Include<ILibraryItem>? include = default)
 	{
-		// TODO: add filters and facets
-		ISearchable<IdResource> res = await _client.Index("items").SearchAsync<IdResource>(query, new SearchQuery()
-		{
-			Sort = _GetSortsBy("items", sortBy),
-			Limit = pagination?.Limit ?? 50,
-			Offset = pagination?.Skip ?? 0,
-		});
-
-		// Since library items's ID are still ints mapped from real items ids, we must map it here to match the db's value.
-		// Look at the LibraryItemRepository's Mapper to understand what those magic numbers are.
-		List<int> ids = res.Hits.Select(x => x.Kind switch
-		{
-			nameof(Show) => x.Id,
-			nameof(Movie) => -x.Id,
-			nameof(Collection) => x.Id + 10_000,
-			_ => throw new InvalidOperationException("An unknown item kind was found in meilisearch"),
-		}).ToList();
-
-		return new SearchPage<ILibraryItem>.SearchResult
-		{
-			Query = query,
-			Items = await _libraryManager.LibraryItems
-				.FromIds(ids, include),
-		};
+		return _Search("items", query, null, sortBy, pagination, include);
 	}
 
 	/// <inheritdoc/>
@@ -152,7 +130,7 @@ public class SearchManager : ISearchManager
 
 	private class IdResource
 	{
-		public int Id { get; set; }
+		public Guid Id { get; set; }
 
 		public string? Kind { get; set; }
 	}

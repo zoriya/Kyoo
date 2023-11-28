@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -75,11 +76,11 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status409Conflict)]
 		public async Task<ActionResult> AddMovie(Identifier identifier, Identifier movie)
 		{
-			int collectionId = await identifier.Match(
+			Guid collectionId = await identifier.Match(
 				async id => (await _libraryManager.Collections.Get(id)).Id,
 				async slug => (await _libraryManager.Collections.Get(slug)).Id
 			);
-			int movieId = await movie.Match(
+			Guid movieId = await movie.Match(
 				async id => (await _libraryManager.Movies.Get(id)).Id,
 				async slug => (await _libraryManager.Movies.Get(slug)).Id
 			);
@@ -106,11 +107,11 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status409Conflict)]
 		public async Task<ActionResult> AddShow(Identifier identifier, Identifier show)
 		{
-			int collectionId = await identifier.Match(
+			Guid collectionId = await identifier.Match(
 				async id => (await _libraryManager.Collections.Get(id)).Id,
 				async slug => (await _libraryManager.Collections.Get(slug)).Id
 			);
-			int showId = await show.Match(
+			Guid showId = await show.Match(
 				async id => (await _libraryManager.Shows.Get(id)).Id,
 				async slug => (await _libraryManager.Shows.Get(slug)).Id
 			);
@@ -144,7 +145,7 @@ namespace Kyoo.Core.Api
 			[FromQuery] Pagination pagination,
 			[FromQuery] Include<ILibraryItem>? fields)
 		{
-			int collectionId = await identifier.Match(
+			Guid collectionId = await identifier.Match(
 				id => Task.FromResult(id),
 				async slug => (await _libraryManager.Collections.Get(slug)).Id
 			);

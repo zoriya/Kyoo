@@ -53,13 +53,10 @@ namespace Kyoo.Core.Controllers
 
 		protected override INews Mapper(List<object?> items)
 		{
-			if (items[0] is Episode episode && episode.Id != 0)
+			if (items[0] is Episode episode && episode.Id != Guid.Empty)
 				return episode;
-			if (items[1] is Movie movie && movie.Id != 0)
-			{
-				movie.Id = -movie.Id;
+			if (items[1] is Movie movie && movie.Id != Guid.Empty)
 				return movie;
-			}
 			throw new InvalidDataException();
 		}
 

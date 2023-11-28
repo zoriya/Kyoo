@@ -16,11 +16,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+
 namespace Kyoo.Models;
 
 public class PartialResource
 {
-	public int? Id { get; set; }
+	public Guid? Id { get; set; }
 
 	public string? Slug { get; set; }
 }

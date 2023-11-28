@@ -102,7 +102,7 @@ namespace Kyoo.Core.Controllers
 		protected override async Task Validate(Episode resource)
 		{
 			await base.Validate(resource);
-			if (resource.ShowId <= 0)
+			if (resource.ShowId != Guid.Empty)
 			{
 				if (resource.Show == null)
 				{
