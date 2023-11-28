@@ -27,5 +27,5 @@ namespace Kyoo.Abstractions.Models;
 [OneOf(Types = new[] { typeof(Episode), typeof(Movie) })]
 public interface INews : IResource, IThumbnails, IMetadata, IAddedDate, IQuery
 {
-	static Sort IQuery.DefaultSort => new Sort<INews>.By(nameof(AddedDate));
+	static Sort IQuery.DefaultSort => new Sort<INews>.By(nameof(AddedDate), true);
 }
