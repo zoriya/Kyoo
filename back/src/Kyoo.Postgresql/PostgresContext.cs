@@ -132,7 +132,7 @@ namespace Kyoo.Postgresql
 		/// <inheritdoc />
 		protected override bool IsDuplicateException(Exception ex)
 		{
-			return ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation };
+			return ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation or PostgresErrorCodes.ForeignKeyViolation };
 		}
 	}
 }
