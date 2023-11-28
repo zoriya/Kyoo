@@ -33,28 +33,28 @@ namespace Kyoo.Core.Api
 		/// <inheritdoc />
 		public override void WriteJson(JsonWriter writer, PeopleRole? value, JsonSerializer serializer)
 		{
-			if (value == null)
-			{
-				writer.WriteNull();
-				return;
-			}
-
-			ICollection<PeopleRole>? oldPeople = value.Show?.People;
-			ICollection<PeopleRole>? oldRoles = value.People?.Roles;
-			if (value.Show != null)
-				value.Show.People = null;
-			if (value.People != null)
-				value.People.Roles = null;
-
-			JObject obj = JObject.FromObject((value.ForPeople ? value.People : value.Show)!, serializer);
-			obj.Add("role", value.Role);
-			obj.Add("type", value.Type);
-			obj.WriteTo(writer);
-
-			if (value.Show != null)
-				value.Show.People = oldPeople;
-			if (value.People != null)
-				value.People.Roles = oldRoles;
+			// if (value == null)
+			// {
+			// 	writer.WriteNull();
+			// 	return;
+			// }
+			//
+			// ICollection<PeopleRole>? oldPeople = value.Show?.People;
+			// ICollection<PeopleRole>? oldRoles = value.People?.Roles;
+			// if (value.Show != null)
+			// 	value.Show.People = null;
+			// if (value.People != null)
+			// 	value.People.Roles = null;
+			//
+			// JObject obj = JObject.FromObject((value.ForPeople ? value.People : value.Show)!, serializer);
+			// obj.Add("role", value.Role);
+			// obj.Add("type", value.Type);
+			// obj.WriteTo(writer);
+			//
+			// if (value.Show != null)
+			// 	value.Show.People = oldPeople;
+			// if (value.People != null)
+			// 	value.People.Roles = oldRoles;
 		}
 
 		/// <inheritdoc />

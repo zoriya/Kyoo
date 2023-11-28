@@ -72,10 +72,10 @@ namespace Kyoo.Postgresql
 		/// </summary>
 		public DbSet<Episode> Episodes { get; set; }
 
-		/// <summary>
-		/// All people of Kyoo. See <see cref="People"/>.
-		/// </summary>
-		public DbSet<People> People { get; set; }
+		// /// <summary>
+		// /// All people of Kyoo. See <see cref="People"/>.
+		// /// </summary>
+		// public DbSet<People> People { get; set; }
 
 		/// <summary>
 		/// All studios of Kyoo. See <see cref="Studio"/>.
@@ -87,10 +87,10 @@ namespace Kyoo.Postgresql
 		/// </summary>
 		public DbSet<User> Users { get; set; }
 
-		/// <summary>
-		/// All people's role. See <see cref="PeopleRole"/>.
-		/// </summary>
-		public DbSet<PeopleRole> PeopleRoles { get; set; }
+		// /// <summary>
+		// /// All people's role. See <see cref="PeopleRole"/>.
+		// /// </summary>
+		// public DbSet<PeopleRole> PeopleRoles { get; set; }
 
 		/// <summary>
 		/// Add a many to many link between two resources.
@@ -243,9 +243,8 @@ namespace Kyoo.Postgresql
 				.Ignore(x => x.PreviousEpisode)
 				.Ignore(x => x.NextEpisode);
 
-			modelBuilder.Entity<PeopleRole>()
-				.Ignore(x => x.ForPeople);
-
+			// modelBuilder.Entity<PeopleRole>()
+			// 	.Ignore(x => x.ForPeople);
 			modelBuilder.Entity<Show>()
 				.HasMany(x => x.Seasons)
 				.WithOne(x => x.Show)
@@ -271,17 +270,12 @@ namespace Kyoo.Postgresql
 			_HasManyToMany<Collection, Movie>(modelBuilder, x => x.Movies, x => x.Collections);
 			_HasManyToMany<Collection, Show>(modelBuilder, x => x.Shows, x => x.Collections);
 
-			modelBuilder.Entity<User>()
-				.HasMany(x => x.Watched)
-				.WithMany("Users")
-				.UsingEntity(x => x.ToTable(LinkName<User, Show>()));
-
 			_HasMetadata<Collection>(modelBuilder);
 			_HasMetadata<Movie>(modelBuilder);
 			_HasMetadata<Show>(modelBuilder);
 			_HasMetadata<Season>(modelBuilder);
 			_HasMetadata<Episode>(modelBuilder);
-			_HasMetadata<People>(modelBuilder);
+			// _HasMetadata<People>(modelBuilder);
 			_HasMetadata<Studio>(modelBuilder);
 
 			_HasImages<Collection>(modelBuilder);
@@ -289,7 +283,7 @@ namespace Kyoo.Postgresql
 			_HasImages<Show>(modelBuilder);
 			_HasImages<Season>(modelBuilder);
 			_HasImages<Episode>(modelBuilder);
-			_HasImages<People>(modelBuilder);
+			// _HasImages<People>(modelBuilder);
 
 			_HasAddedDate<Collection>(modelBuilder);
 			_HasAddedDate<Movie>(modelBuilder);
@@ -300,15 +294,12 @@ namespace Kyoo.Postgresql
 
 			modelBuilder.Entity<User>().OwnsOne(x => x.Logo);
 
-			modelBuilder.Entity<WatchedEpisode>()
-				.HasKey(x => new { User = x.UserID, Episode = x.EpisodeID });
-
 			modelBuilder.Entity<Collection>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
-			modelBuilder.Entity<People>()
-				.HasIndex(x => x.Slug)
-				.IsUnique();
+			// modelBuilder.Entity<People>()
+			// 	.HasIndex(x => x.Slug)
+			// 	.IsUnique();
 			modelBuilder.Entity<Movie>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();

@@ -69,18 +69,6 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public Image? Logo { get; set; }
 
-		/// <summary>
-		/// The list of shows the user has finished.
-		/// </summary>
-		[SerializeIgnore]
-		public ICollection<Show>? Watched { get; set; }
-
-		/// <summary>
-		/// The list of episodes the user is watching (stopped in progress or the next episode of the show)
-		/// </summary>
-		[SerializeIgnore]
-		public ICollection<WatchedEpisode>? CurrentlyWatching { get; set; }
-
 		public User() { }
 
 		[JsonConstructor]

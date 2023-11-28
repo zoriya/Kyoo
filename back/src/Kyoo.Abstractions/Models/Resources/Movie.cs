@@ -125,10 +125,10 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		[LoadableRelation(nameof(StudioId))] public Studio? Studio { get; set; }
 
-		/// <summary>
-		/// The list of people that made this show.
-		/// </summary>
-		[SerializeIgnore] public ICollection<PeopleRole>? People { get; set; }
+		// /// <summary>
+		// /// The list of people that made this show.
+		// /// </summary>
+		// [SerializeIgnore] public ICollection<PeopleRole>? People { get; set; }
 
 		/// <summary>
 		/// The list of collections that contains this show.
@@ -147,11 +147,11 @@ namespace Kyoo.Abstractions.Models
 		/// <inheritdoc />
 		public void OnMerge(object merged)
 		{
-			if (People != null)
-			{
-				foreach (PeopleRole link in People)
-					link.Movie = this;
-			}
+			// if (People != null)
+			// {
+			// 	foreach (PeopleRole link in People)
+			// 		link.Movie = this;
+			// }
 		}
 
 		public Movie() { }

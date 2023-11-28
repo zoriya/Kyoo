@@ -128,10 +128,10 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		[LoadableRelation(nameof(StudioId))] public Studio? Studio { get; set; }
 
-		/// <summary>
-		/// The list of people that made this show.
-		/// </summary>
-		[SerializeIgnore] public ICollection<PeopleRole>? People { get; set; }
+		// /// <summary>
+		// /// The list of people that made this show.
+		// /// </summary>
+		// [SerializeIgnore] public ICollection<PeopleRole>? People { get; set; }
 
 		/// <summary>
 		/// The different seasons in this show. If this is a movie, this list is always null or empty.
@@ -181,11 +181,11 @@ namespace Kyoo.Abstractions.Models
 		/// <inheritdoc />
 		public void OnMerge(object merged)
 		{
-			if (People != null)
-			{
-				foreach (PeopleRole link in People)
-					link.Show = this;
-			}
+			// if (People != null)
+			// {
+			// 	foreach (PeopleRole link in People)
+			// 		link.Show = this;
+			// }
 
 			if (Seasons != null)
 			{
