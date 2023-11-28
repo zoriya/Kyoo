@@ -17,16 +17,16 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Blurhash.SkiaSharp;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Exceptions;
 using Microsoft.Extensions.Logging;
 using SkiaSharp;
-
-#nullable enable
 
 namespace Kyoo.Core.Controllers
 {
@@ -35,9 +35,8 @@ namespace Kyoo.Core.Controllers
 	/// </summary>
 	public class ThumbnailsManager : IThumbnailsManager
 	{
-		/// <summary>
-		/// A logger to report errors.
-		/// </summary>
+		private static readonly Dictionary<string, TaskCompletionSource<object>> _downloading = new();
+
 		private readonly ILogger<ThumbnailsManager> _logger;
 
 		private readonly IHttpClientFactory _clientFactory;
@@ -106,13 +105,49 @@ namespace Kyoo.Core.Controllers
 		public async Task DownloadImages<T>(T item)
 			where T : IThumbnails
 		{
-			if (item == null)
-				throw new ArgumentNullException(nameof(item));
-
 			string name = item is IResource res ? res.Slug : "???";
-			await _DownloadImage(item.Poster, _GetBaseImagePath(item, "poster"), $"The poster of {name}");
-			await _DownloadImage(item.Thumbnail, _GetBaseImagePath(item, "thumbnail"), $"The poster of {name}");
-			await _DownloadImage(item.Logo, _GetBaseImagePath(item, "logo"), $"The poster of {name}");
+
+			string posterPath = $"{_GetBaseImagePath(item, "poster")}.{ImageQuality.High.ToString().ToLowerInvariant()}.webp";
+			bool duplicated = false;
+			TaskCompletionSource<object>? sync = null;
+			try
+			{
+				lock (_downloading)
+				{
+					if (File.Exists(posterPath) || _downloading.ContainsKey(posterPath))
+					{
+						duplicated = true;
+						sync = _downloading.GetValueOrDefault(posterPath);
+					}
+					else
+					{
+						sync = new();
+						_downloading.Add(posterPath, sync);
+					}
+				}
+				if (duplicated)
+				{
+					object? dup = sync != null
+						? await sync.Task
+						: null;
+					throw new DuplicatedItemException(dup);
+				}
+
+				await _DownloadImage(item.Poster, _GetBaseImagePath(item, "poster"), $"The poster of {name}");
+				await _DownloadImage(item.Thumbnail, _GetBaseImagePath(item, "thumbnail"), $"The poster of {name}");
+				await _DownloadImage(item.Logo, _GetBaseImagePath(item, "logo"), $"The poster of {name}");
+			}
+			finally
+			{
+				if (!duplicated)
+				{
+					lock (_downloading)
+					{
+						_downloading.Remove(posterPath);
+						sync!.SetResult(item);
+					}
+				}
+			}
 		}
 
 		private static string _GetBaseImagePath<T>(T item, string image)
