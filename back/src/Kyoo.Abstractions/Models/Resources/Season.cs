@@ -36,7 +36,7 @@ namespace Kyoo.Abstractions.Models
 		public static Sort DefaultSort => new Sort<Season>.By(x => x.SeasonNumber);
 
 		/// <inheritdoc />
-		public int Id { get; set; }
+		public Guid Id { get; set; }
 
 		/// <inheritdoc />
 		[Computed]
@@ -71,7 +71,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the Show containing this season.
 		/// </summary>
-		public int ShowId { get; set; }
+		public Guid ShowId { get; set; }
 
 		/// <summary>
 		/// The show that contains this season.

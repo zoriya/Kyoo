@@ -49,6 +49,6 @@ namespace Kyoo.Authentication
 		/// <param name="refreshToken">The refresh token to validate.</param>
 		/// <exception cref="SecurityTokenException">The given refresh token is not valid.</exception>
 		/// <returns>The id of the token's user.</returns>
-		int GetRefreshTokenUserID(string refreshToken);
+		Guid GetRefreshTokenUserID(string refreshToken);
 	}
 }

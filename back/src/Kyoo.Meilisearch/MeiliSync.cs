@@ -68,12 +68,12 @@ public class MeiliSync
 		return _client.Index(index).AddDocumentsAsync(new[] { item });
 	}
 
-	private Task _Delete(string index, int id, string? kind = null)
+	private Task _Delete(string index, Guid id, string? kind = null)
 	{
 		if (kind != null)
 		{
 			return _client.Index(index).DeleteOneDocumentAsync($"{kind}/{id}");
 		}
-		return _client.Index(index).DeleteOneDocumentAsync(id);
+		return _client.Index(index).DeleteOneDocumentAsync(id.ToString());
 	}
 }

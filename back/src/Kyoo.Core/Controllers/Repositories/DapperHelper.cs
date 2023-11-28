@@ -180,7 +180,7 @@ public static class DapperHelper
 		FormattableString command,
 		Dictionary<string, Type> config,
 		Func<List<object?>, T> mapper,
-		Func<int, Task<T>> get,
+		Func<Guid, Task<T>> get,
 		Include<T>? include,
 		Filter<T>? filter,
 		Sort<T>? sort,

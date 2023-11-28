@@ -100,7 +100,7 @@ namespace Kyoo.Postgresql
 		/// <param name="second">The ID of the second resource.</param>
 		/// <typeparam name="T1">The first resource type of the relation. It is the owner of the second</typeparam>
 		/// <typeparam name="T2">The second resource type of the relation. It is the contained resource.</typeparam>
-		public void AddLinks<T1, T2>(int first, int second)
+		public void AddLinks<T1, T2>(Guid first, Guid second)
 			where T1 : class, IResource
 			where T2 : class, IResource
 		{

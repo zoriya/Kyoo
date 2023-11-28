@@ -77,13 +77,13 @@ namespace Kyoo.Core.Controllers
 				throw new ArgumentException("The collection's name must be set and not empty");
 		}
 
-		public async Task AddMovie(int id, int movieId)
+		public async Task AddMovie(Guid id, Guid movieId)
 		{
 			_database.AddLinks<Collection, Movie>(id, movieId);
 			await _database.SaveChangesAsync();
 		}
 
-		public async Task AddShow(int id, int showId)
+		public async Task AddShow(Guid id, Guid showId)
 		{
 			_database.AddLinks<Collection, Show>(id, showId);
 			await _database.SaveChangesAsync();

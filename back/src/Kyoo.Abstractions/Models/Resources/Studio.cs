@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Kyoo.Abstractions.Controllers;
@@ -33,7 +34,7 @@ namespace Kyoo.Abstractions.Models
 		public static Sort DefaultSort => new Sort<Studio>.By(x => x.Name);
 
 		/// <inheritdoc />
-		public int Id { get; set; }
+		public Guid Id { get; set; }
 
 		/// <inheritdoc />
 		[MaxLength(256)]

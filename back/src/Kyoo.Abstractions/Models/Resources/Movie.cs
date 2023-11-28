@@ -34,7 +34,7 @@ namespace Kyoo.Abstractions.Models
 		public static Sort DefaultSort => new Sort<Movie>.By(x => x.Name);
 
 		/// <inheritdoc />
-		public int Id { get; set; }
+		public Guid Id { get; set; }
 
 		/// <inheritdoc />
 		[MaxLength(256)]
@@ -118,7 +118,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the Studio that made this show.
 		/// </summary>
-		[SerializeIgnore] public int? StudioId { get; set; }
+		[SerializeIgnore] public Guid? StudioId { get; set; }
 
 		/// <summary>
 		/// The Studio that made this show.

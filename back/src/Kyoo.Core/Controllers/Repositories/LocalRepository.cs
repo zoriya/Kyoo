@@ -119,10 +119,10 @@ namespace Kyoo.Core.Controllers
 
 			ParameterExpression x = Expression.Parameter(typeof(T), "x");
 
-			Expression EqRandomHandler(string seed, int refId)
+			Expression EqRandomHandler(string seed, Guid refId)
 			{
 				MethodInfo concat = typeof(string).GetMethod(nameof(string.Concat), new[] { typeof(string), typeof(string) })!;
-				Expression id = Expression.Call(Expression.Property(x, "ID"), nameof(int.ToString), null);
+				Expression id = Expression.Call(Expression.Property(x, "ID"), nameof(Guid.ToString), null);
 				Expression xrng = Expression.Call(concat, Expression.Constant(seed), id);
 				Expression left = Expression.Call(typeof(DatabaseContext), nameof(DatabaseContext.MD5), null, xrng);
 				Expression right = Expression.Call(typeof(DatabaseContext), nameof(DatabaseContext.MD5), null, Expression.Constant($"{seed}{refId}"));
@@ -179,7 +179,7 @@ namespace Kyoo.Core.Controllers
 		/// <param name="id">The ID of the resource</param>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The tracked resource with the given ID</returns>
-		protected virtual async Task<T> GetWithTracking(int id)
+		protected virtual async Task<T> GetWithTracking(Guid id)
 		{
 			T? ret = await Database.Set<T>().AsTracking().FirstOrDefaultAsync(x => x.Id == id);
 			if (ret == null)
@@ -188,7 +188,7 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc/>
-		public virtual async Task<T> Get(int id, Include<T>? include = default)
+		public virtual async Task<T> Get(Guid id, Include<T>? include = default)
 		{
 			T? ret = await GetOrDefault(id, include);
 			if (ret == null)
@@ -215,7 +215,7 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public virtual Task<T?> GetOrDefault(int id, Include<T>? include = default)
+		public virtual Task<T?> GetOrDefault(Guid id, Include<T>? include = default)
 		{
 			return AddIncludes(Database.Set<T>(), include)
 				.FirstOrDefaultAsync(x => x.Id == id);
@@ -247,7 +247,7 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc/>
-		public virtual async Task<ICollection<T>> FromIds(IList<int> ids, Include<T>? include = default)
+		public virtual async Task<ICollection<T>> FromIds(IList<Guid> ids, Include<T>? include = default)
 		{
 			return (
 				await AddIncludes(Database.Set<T>(), include)
@@ -375,7 +375,7 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc/>
-		public virtual async Task<T> Patch(int id, Func<T, Task<bool>> patch)
+		public virtual async Task<T> Patch(Guid id, Func<T, Task<bool>> patch)
 		{
 			bool lazyLoading = Database.ChangeTracker.LazyLoadingEnabled;
 			Database.ChangeTracker.LazyLoadingEnabled = false;
@@ -453,7 +453,7 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc/>
-		public virtual async Task Delete(int id)
+		public virtual async Task Delete(Guid id)
 		{
 			T resource = await Get(id);
 			await Delete(resource);

@@ -17,6 +17,7 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
@@ -126,7 +127,7 @@ namespace Kyoo.Authentication.Views
 			User user = request.ToUser();
 			user.Permissions = _permissions.NewUser;
 			// If no users exists, the new one will be an admin. Give it every permissions.
-			if (await _users.GetOrDefault(1) == null)
+			if ((await _users.GetAll(limit: new Pagination(1))).Any())
 				user.Permissions = PermissionOption.Admin;
 			try
 			{
@@ -161,7 +162,7 @@ namespace Kyoo.Authentication.Views
 		{
 			try
 			{
-				int userId = _token.GetRefreshTokenUserID(token);
+				Guid userId = _token.GetRefreshTokenUserID(token);
 				User user = await _users.Get(userId);
 				return new JwtToken(
 					_token.CreateAccessToken(user, out TimeSpan expireIn),
@@ -196,7 +197,7 @@ namespace Kyoo.Authentication.Views
 		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
 		public async Task<ActionResult<User>> GetMe()
 		{
-			if (!int.TryParse(User.FindFirstValue(Claims.Id), out int userID))
+			if (!Guid.TryParse(User.FindFirstValue(Claims.Id), out Guid userID))
 				return Unauthorized(new RequestError("User not authenticated or token invalid."));
 			try
 			{
@@ -225,7 +226,7 @@ namespace Kyoo.Authentication.Views
 		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
 		public async Task<ActionResult<User>> EditMe(User user)
 		{
-			if (!int.TryParse(User.FindFirstValue(Claims.Id), out int userID))
+			if (!Guid.TryParse(User.FindFirstValue(Claims.Id), out Guid userID))
 				return Unauthorized(new RequestError("User not authenticated or token invalid."));
 			try
 			{
@@ -255,7 +256,7 @@ namespace Kyoo.Authentication.Views
 		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
 		public async Task<ActionResult<User>> PatchMe(PartialResource user)
 		{
-			if (!int.TryParse(User.FindFirstValue(Claims.Id), out int userID))
+			if (!Guid.TryParse(User.FindFirstValue(Claims.Id), out Guid userID))
 				return Unauthorized(new RequestError("User not authenticated or token invalid."));
 			try
 			{
@@ -285,7 +286,7 @@ namespace Kyoo.Authentication.Views
 		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
 		public async Task<ActionResult<User>> DeleteMe()
 		{
-			if (!int.TryParse(User.FindFirstValue(Claims.Id), out int userID))
+			if (!Guid.TryParse(User.FindFirstValue(Claims.Id), out Guid userID))
 				return Unauthorized(new RequestError("User not authenticated or token invalid."));
 			try
 			{
