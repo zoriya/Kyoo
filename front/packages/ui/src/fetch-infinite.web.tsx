@@ -137,7 +137,7 @@ const InfiniteScroll = <Props,>({
 export const InfiniteFetchList = <Data, _, HeaderProps>({
 	query,
 	incremental = false,
-	placeholderCount = 15,
+	placeholderCount = 2,
 	children,
 	layout,
 	empty,
