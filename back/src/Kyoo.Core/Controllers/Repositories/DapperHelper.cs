@@ -39,6 +39,8 @@ public static class DapperHelper
 {
 	private static string _Property(string key, Dictionary<string, Type> config)
 	{
+		if (key == "kind")
+			return "kind";
 		string[] keys = config
 			.Where(x => key == "id" || x.Value.GetProperty(key) != null)
 			.Select(x => $"{x.Key}.{x.Value.GetProperty(key)?.GetCustomAttribute<ColumnAttribute>()?.Name ?? key.ToSnakeCase()}")
@@ -125,6 +127,20 @@ public static class DapperHelper
 	{
 		FormattableString Format(string key, FormattableString op)
 		{
+			if (key == "kind")
+			{
+				string cases = string.Join('\n', config
+					.Skip(1)
+					.Select(x => $"when {x.Key}.id is not null then '{x.Value.Name.ToLowerInvariant()}'")
+				);
+				return $"""
+					case
+						{cases:raw}
+						else '{config.First().Value.Name.ToLowerInvariant():raw}'
+					end {op}
+				""";
+			}
+
 			IEnumerable<string> properties = config
 				.Where(x => key == "id" || x.Value.GetProperty(key) != null)
 				.Select(x => $"{x.Key}.{x.Value.GetProperty(key)?.GetCustomAttribute<ColumnAttribute>()?.Name ?? key.ToSnakeCase()}");

@@ -209,6 +209,17 @@ public abstract record Filter<T> : Filter
 			return property.Then(prop =>
 			{
 				Type[] types = typeof(T).GetCustomAttribute<OneOfAttribute>()?.Types ?? new[] { typeof(T) };
+
+				if (string.Equals(prop, "kind", StringComparison.OrdinalIgnoreCase))
+				{
+					return
+						from eq in op
+						from val in types
+							.Select(x => Parse.IgnoreCase(x.Name).Text())
+							.Aggregate(null as Parser<string>, (acc, x) => acc == null ? x : Parse.Or(acc, x))
+						select apply("kind", val);
+				}
+
 				PropertyInfo? propInfo = types
 					.Select(x => x.GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance))
 					.FirstOrDefault();
