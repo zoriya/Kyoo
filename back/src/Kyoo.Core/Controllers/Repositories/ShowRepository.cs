@@ -95,16 +95,16 @@ namespace Kyoo.Core.Controllers
 				resource.StudioId = resource.Studio.Id;
 			}
 
-			if (resource.People != null)
-			{
-				foreach (PeopleRole role in resource.People)
-				{
-					role.People = _database.LocalEntity<People>(role.People.Slug)
-						?? await _people.CreateIfNotExists(role.People);
-					role.PeopleID = role.People.Id;
-					_database.Entry(role).State = EntityState.Added;
-				}
-			}
+			// if (resource.People != null)
+			// {
+			// 	foreach (PeopleRole role in resource.People)
+			// 	{
+			// 		role.People = _database.LocalEntity<People>(role.People.Slug)
+			// 			?? await _people.CreateIfNotExists(role.People);
+			// 		role.PeopleID = role.People.Id;
+			// 		_database.Entry(role).State = EntityState.Added;
+			// 	}
+			// }
 		}
 
 		/// <inheritdoc />
@@ -118,11 +118,11 @@ namespace Kyoo.Core.Controllers
 				resource.Studio = changed.Studio;
 			}
 
-			if (changed.People != null)
-			{
-				await Database.Entry(resource).Collection(x => x.People!).LoadAsync();
-				resource.People = changed.People;
-			}
+			// if (changed.People != null)
+			// {
+			// 	await Database.Entry(resource).Collection(x => x.People!).LoadAsync();
+			// 	resource.People = changed.People;
+			// }
 		}
 
 		/// <inheritdoc />

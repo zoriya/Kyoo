@@ -166,7 +166,7 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<T>> Edit([FromBody] T resource)
 		{
-			if (resource.Id != null)
+			if (resource.Id != Guid.Empty)
 				return await Repository.Edit(resource);
 
 			T old = await Repository.Get(resource.Slug);
