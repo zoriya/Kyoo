@@ -26,7 +26,7 @@ import { EmptyView, ErrorView, Layout, WithLoading, addHeader } from "./fetch";
 
 export const InfiniteFetchList = <Data, Props, _>({
 	query,
-	placeholderCount = 15,
+	placeholderCount = 2,
 	incremental = false,
 	children,
 	layout,

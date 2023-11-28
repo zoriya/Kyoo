@@ -145,7 +145,7 @@ export const CollectionPage: QueryPage<{ slug: string }> = ({ slug }) => {
 	return (
 		<InfiniteFetch
 			query={query(slug)}
-			placeholderCount={15}
+			placeholderCount={2}
 			layout={{ ...ItemDetails.layout, numColumns: { xs: 1, md: 2 } }}
 			Header={CollectionHeader}
 			headerProps={{ slug }}

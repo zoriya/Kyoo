@@ -18,39 +18,38 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Person, PersonP, QueryIdentifier } from "@kyoo/models";
-import { useTranslation } from "react-i18next";
-import { InfiniteFetch } from "../fetch-infinite";
-import { PersonAvatar } from "./person";
+// import { Person, PersonP, QueryIdentifier } from "@kyoo/models";
+// import { useTranslation } from "react-i18next";
+// import { InfiniteFetch } from "../fetch-infinite";
+// import { PersonAvatar } from "./person";
 
-export const Staff = ({ slug }: { slug: string }) => {
-	const { t } = useTranslation();
-
-	return (
-		<InfiniteFetch
-			query={Staff.query(slug)}
-			horizontal
-			layout={{ numColumns: 1, size: PersonAvatar.width }}
-			empty={t("show.staff-none")}
-			placeholderCount={20}
-		>
-			{(item, key) => (
-				<PersonAvatar
-					key={key}
-					isLoading={item.isLoading}
-					slug={item?.slug}
-					name={item?.name}
-					role={item?.type ? `${item?.type} (${item?.role})` : item?.role}
-					poster={item?.poster}
-					// sx={{ width: { xs: "7rem", lg: "10rem" }, flexShrink: 0, px: 2 }}
-				/>
-			)}
-		</InfiniteFetch>
-	);
-};
-
-Staff.query = (slug: string): QueryIdentifier<Person> => ({
-	parser: PersonP,
-	path: ["shows", slug, "people"],
-	infinite: true,
-});
+// export const Staff = ({ slug }: { slug: string }) => {
+// 	const { t } = useTranslation();
+//
+// 	return (
+// 		<InfiniteFetch
+// 			query={Staff.query(slug)}
+// 			horizontal
+// 			layout={{ numColumns: 1, size: PersonAvatar.width }}
+// 			empty={t("show.staff-none")}
+// 		>
+// 			{(item, key) => (
+// 				<PersonAvatar
+// 					key={key}
+// 					isLoading={item.isLoading}
+// 					slug={item?.slug}
+// 					name={item?.name}
+// 					role={item?.type ? `${item?.type} (${item?.role})` : item?.role}
+// 					poster={item?.poster}
+// 					// sx={{ width: { xs: "7rem", lg: "10rem" }, flexShrink: 0, px: 2 }}
+// 				/>
+// 			)}
+// 		</InfiniteFetch>
+// 	);
+// };
+//
+// Staff.query = (slug: string): QueryIdentifier<Person> => ({
+// 	parser: PersonP,
+// 	path: ["shows", slug, "people"],
+// 	infinite: true,
+// });

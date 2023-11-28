@@ -73,7 +73,6 @@ export const BrowsePage: QueryPage = () => {
 	return (
 		<InfiniteFetch
 			query={query(sortKey, sortOrd)}
-			placeholderCount={15}
 			layout={LayoutComponent.layout}
 			Header={
 				<BrowseSettings
