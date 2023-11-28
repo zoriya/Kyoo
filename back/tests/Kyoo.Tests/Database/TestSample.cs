@@ -225,39 +225,28 @@ namespace Kyoo.Tests
 		public static void FillDatabase(DatabaseContext context)
 		{
 			Collection collection = Get<Collection>();
-			collection.Id = 0.AsGuid();
 			context.Collections.Add(collection);
 
 			Show show = Get<Show>();
-			show.Id = 0.AsGuid();
-			show.StudioId = 0.AsGuid();
 			context.Shows.Add(show);
 
 			Season season = Get<Season>();
-			season.Id = 0.AsGuid();
-			season.ShowId = 0.AsGuid();
 			season.Show = show;
 			context.Seasons.Add(season);
 
 			Episode episode = Get<Episode>();
-			episode.Id = 0.AsGuid();
-			episode.ShowId = 0.AsGuid();
 			episode.Show = show;
-			episode.SeasonId = 0.AsGuid();
 			episode.Season = season;
 			context.Episodes.Add(episode);
 
 			Studio studio = Get<Studio>();
-			studio.Id = 0.AsGuid();
 			studio.Shows = new List<Show> { show };
 			context.Studios.Add(studio);
 
 			People people = Get<People>();
-			people.Id = 0.AsGuid();
 			// context.People.Add(people);
 
 			User user = Get<User>();
-			user.Id = 0.AsGuid();
 			context.Users.Add(user);
 
 			context.SaveChanges();
