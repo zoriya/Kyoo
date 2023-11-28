@@ -51,21 +51,21 @@ namespace Kyoo.Tests.Database
 		[Fact]
 		public async Task SlugEditTest()
 		{
-			Season season = await _repository.Get(1);
+			Season season = await _repository.Get(1.AsGuid());
 			Assert.Equal("anohana-s1", season.Slug);
 			await Repositories.LibraryManager.Shows.Patch(season.ShowId, (x) =>
 			{
 				x.Slug = "new-slug";
 				return Task.FromResult(true);
 			});
-			season = await _repository.Get(1);
+			season = await _repository.Get(1.AsGuid());
 			Assert.Equal("new-slug-s1", season.Slug);
 		}
 
 		[Fact]
 		public async Task SeasonNumberEditTest()
 		{
-			Season season = await _repository.Get(1);
+			Season season = await _repository.Get(1.AsGuid());
 			Assert.Equal("anohana-s1", season.Slug);
 			await _repository.Patch(season.Id, (x) =>
 			{
@@ -73,7 +73,7 @@ namespace Kyoo.Tests.Database
 				return Task.FromResult(true);
 			}
 			);
-			season = await _repository.Get(1);
+			season = await _repository.Get(1.AsGuid());
 			Assert.Equal("anohana-s2", season.Slug);
 		}
 
@@ -107,7 +107,7 @@ namespace Kyoo.Tests.Database
 			};
 			await _repository.Create(season);
 
-			Season retrieved = await _repository.Get(2);
+			Season retrieved = await _repository.Get(2.AsGuid());
 			Assert.Equal(2, retrieved.ExternalId.Count);
 			KAssert.DeepEqual(season.ExternalId.First(), retrieved.ExternalId.First());
 			KAssert.DeepEqual(season.ExternalId.Last(), retrieved.ExternalId.Last());
@@ -194,7 +194,7 @@ namespace Kyoo.Tests.Database
 			Season value = new()
 			{
 				Name = "This is a test super title",
-				ShowId = 1
+				ShowId = 1.AsGuid()
 			};
 			await _repository.Create(value);
 			ICollection<Season> ret = await _repository.Search(query);

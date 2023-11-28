@@ -186,7 +186,6 @@ namespace Kyoo.Abstractions.Models
 			// 	foreach (PeopleRole link in People)
 			// 		link.Show = this;
 			// }
-
 			if (Seasons != null)
 			{
 				foreach (Season season in Seasons)

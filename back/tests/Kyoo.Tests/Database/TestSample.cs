@@ -31,7 +31,7 @@ namespace Kyoo.Tests
 				typeof(Collection),
 				() => new Collection
 				{
-					Id = 2,
+					Id = 2.AsGuid(),
 					Slug = "new-collection",
 					Name = "New Collection",
 					Overview = "A collection created by new sample",
@@ -42,7 +42,7 @@ namespace Kyoo.Tests
 				typeof(Show),
 				() => new Show
 				{
-					Id = 2,
+					Id = 2.AsGuid(),
 					Slug = "new-show",
 					Name = "New Show",
 					Overview = "overview",
@@ -59,8 +59,8 @@ namespace Kyoo.Tests
 				typeof(Season),
 				() => new Season
 				{
-					Id = 2,
-					ShowId = 1,
+					Id = 2.AsGuid(),
+					ShowId = 1.AsGuid(),
 					ShowSlug = Get<Show>().Slug,
 					Name = "New season",
 					Overview = "New overview",
@@ -74,10 +74,10 @@ namespace Kyoo.Tests
 				typeof(Episode),
 				() => new Episode
 				{
-					Id = 2,
-					ShowId = 1,
+					Id = 2.AsGuid(),
+					ShowId = 1.AsGuid(),
 					ShowSlug = Get<Show>().Slug,
-					SeasonId = 1,
+					SeasonId = 1.AsGuid(),
 					SeasonNumber = Get<Season>().SeasonNumber,
 					EpisodeNumber = 3,
 					AbsoluteNumber = 4,
@@ -92,7 +92,7 @@ namespace Kyoo.Tests
 				typeof(People),
 				() => new People
 				{
-					Id = 2,
+					Id = 2.AsGuid(),
 					Slug = "new-person-name",
 					Name = "New person name",
 					Logo = new Image("Old Logo"),
@@ -107,7 +107,7 @@ namespace Kyoo.Tests
 				typeof(Collection),
 				() => new Collection
 				{
-					Id = 1,
+					Id = 1.AsGuid(),
 					Slug = "collection",
 					Name = "Collection",
 					Overview = "A nice collection for tests",
@@ -118,7 +118,7 @@ namespace Kyoo.Tests
 				typeof(Show),
 				() => new Show
 				{
-					Id = 1,
+					Id = 1.AsGuid(),
 					Slug = "anohana",
 					Name = "Anohana: The Flower We Saw That Day",
 					Aliases = new List<string>
@@ -131,7 +131,7 @@ namespace Kyoo.Tests
 						"In time, however, these childhood friends drifted apart, and when they became high " +
 						"school students, they had long ceased to think of each other as friends.",
 					Status = Status.Finished,
-					StudioId = 1,
+					StudioId = 1.AsGuid(),
 					StartAir = new DateTime(2011, 1, 1).ToUniversalTime(),
 					EndAir = new DateTime(2011, 1, 1).ToUniversalTime(),
 					Poster = new Image("Poster"),
@@ -144,9 +144,9 @@ namespace Kyoo.Tests
 				typeof(Season),
 				() => new Season
 				{
-					Id = 1,
+					Id = 1.AsGuid(),
 					ShowSlug = "anohana",
-					ShowId = 1,
+					ShowId = 1.AsGuid(),
 					SeasonNumber = 1,
 					Name = "Season 1",
 					Overview = "The first season",
@@ -161,10 +161,10 @@ namespace Kyoo.Tests
 				typeof(Episode),
 				() => new Episode
 				{
-					Id = 1,
+					Id = 1.AsGuid(),
 					ShowSlug = "anohana",
-					ShowId = 1,
-					SeasonId = 1,
+					ShowId = 1.AsGuid(),
+					SeasonId = 1.AsGuid(),
 					SeasonNumber = 1,
 					EpisodeNumber = 1,
 					AbsoluteNumber = 1,
@@ -181,7 +181,7 @@ namespace Kyoo.Tests
 				typeof(People),
 				() => new People
 				{
-					Id = 1,
+					Id = 1.AsGuid(),
 					Slug = "the-actor",
 					Name = "The Actor",
 					Poster = new Image("Poster"),
@@ -193,7 +193,7 @@ namespace Kyoo.Tests
 				typeof(Studio),
 				() => new Studio
 				{
-					Id = 1,
+					Id = 1.AsGuid(),
 					Slug = "hyper-studio",
 					Name = "Hyper studio",
 				}
@@ -202,7 +202,7 @@ namespace Kyoo.Tests
 				typeof(User),
 				() => new User
 				{
-					Id = 1,
+					Id = 1.AsGuid(),
 					Slug = "user",
 					Username = "User",
 					Email = "user@im-a-user.com",
@@ -225,39 +225,39 @@ namespace Kyoo.Tests
 		public static void FillDatabase(DatabaseContext context)
 		{
 			Collection collection = Get<Collection>();
-			collection.Id = 0;
+			collection.Id = 0.AsGuid();
 			context.Collections.Add(collection);
 
 			Show show = Get<Show>();
-			show.Id = 0;
-			show.StudioId = 0;
+			show.Id = 0.AsGuid();
+			show.StudioId = 0.AsGuid();
 			context.Shows.Add(show);
 
 			Season season = Get<Season>();
-			season.Id = 0;
-			season.ShowId = 0;
+			season.Id = 0.AsGuid();
+			season.ShowId = 0.AsGuid();
 			season.Show = show;
 			context.Seasons.Add(season);
 
 			Episode episode = Get<Episode>();
-			episode.Id = 0;
-			episode.ShowId = 0;
+			episode.Id = 0.AsGuid();
+			episode.ShowId = 0.AsGuid();
 			episode.Show = show;
-			episode.SeasonId = 0;
+			episode.SeasonId = 0.AsGuid();
 			episode.Season = season;
 			context.Episodes.Add(episode);
 
 			Studio studio = Get<Studio>();
-			studio.Id = 0;
+			studio.Id = 0.AsGuid();
 			studio.Shows = new List<Show> { show };
 			context.Studios.Add(studio);
 
 			People people = Get<People>();
-			people.Id = 0;
-			context.People.Add(people);
+			people.Id = 0.AsGuid();
+			// context.People.Add(people);
 
 			User user = Get<User>();
-			user.Id = 0;
+			user.Id = 0.AsGuid();
 			context.Users.Add(user);
 
 			context.SaveChanges();
@@ -267,9 +267,9 @@ namespace Kyoo.Tests
 		{
 			return new()
 			{
-				Id = 2,
+				Id = 2.AsGuid(),
 				ShowSlug = "anohana",
-				ShowId = 1,
+				ShowId = 1.AsGuid(),
 				SeasonNumber = null,
 				EpisodeNumber = null,
 				AbsoluteNumber = 3,

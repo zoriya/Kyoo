@@ -17,6 +17,7 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Security.Cryptography;
 using FluentAssertions;
 using JetBrains.Annotations;
 using Kyoo.Abstractions.Models;
@@ -63,6 +64,22 @@ namespace Kyoo.Tests
 		public static void Fail(string message)
 		{
 			throw new XunitException(message);
+		}
+
+		public static Guid AsGuid(this string src)
+		{
+			// Use MD5 since (1) it's faster then SHA and (2) it's already 16 bytes which matches the Guid
+			return string.IsNullOrWhiteSpace(src)
+				? Guid.Empty
+				: new Guid(MD5.Create().ComputeHash(System.Text.Encoding.UTF8.GetBytes(src)));
+		}
+
+		public static Guid AsGuid(this int src)
+		{
+			// Use MD5 since (1) it's faster then SHA and (2) it's already 16 bytes which matches the Guid
+			return src == 0
+				? Guid.Empty
+				: new Guid(MD5.Create().ComputeHash(BitConverter.GetBytes(src)));
 		}
 	}
 }
