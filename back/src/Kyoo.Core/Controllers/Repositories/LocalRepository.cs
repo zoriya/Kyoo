@@ -214,6 +214,11 @@ namespace Kyoo.Core.Controllers
 			return ret;
 		}
 
+		protected virtual Task<T?> GetDuplicated(T item)
+		{
+			return GetOrDefault(item.Slug);
+		}
+
 		/// <inheritdoc />
 		public virtual Task<T?> GetOrDefault(Guid id, Include<T>? include = default)
 		{
@@ -324,7 +329,14 @@ namespace Kyoo.Core.Controllers
 			await Validate(obj);
 			if (obj is IThumbnails thumbs)
 			{
-				await _thumbs.DownloadImages(thumbs);
+				try
+				{
+					await _thumbs.DownloadImages(thumbs);
+				}
+				catch (DuplicatedItemException e) when (e.Existing is null)
+				{
+					throw new DuplicatedItemException(await GetDuplicated(obj));
+				}
 				if (thumbs.Poster != null)
 					Database.Entry(thumbs).Reference(x => x.Poster).TargetEntry!.State = EntityState.Added;
 				if (thumbs.Thumbnail != null)
@@ -470,6 +482,8 @@ namespace Kyoo.Core.Controllers
 		public virtual Task Delete(T obj)
 		{
 			IRepository<T>.OnResourceDeleted(obj);
+			if (obj is IThumbnails thumbs)
+				return _thumbs.DeleteImages(thumbs);
 			return Task.CompletedTask;
 		}
 

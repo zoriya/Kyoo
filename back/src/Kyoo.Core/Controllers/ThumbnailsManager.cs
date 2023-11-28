@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Blurhash.SkiaSharp;
@@ -166,6 +167,25 @@ namespace Kyoo.Core.Controllers
 			where T : IThumbnails
 		{
 			return $"{_GetBaseImagePath(item, image)}.{quality.ToString().ToLowerInvariant()}.webp";
+		}
+
+		/// <inheritdoc />
+		public Task DeleteImages<T>(T item)
+			where T : IThumbnails
+		{
+			IEnumerable<string> images = new[] { "poster", "thumbnail", "logo" }
+				.SelectMany(x => _GetBaseImagePath(item, x))
+				.SelectMany(x => new[]
+					{
+						ImageQuality.High.ToString().ToLowerInvariant(),
+						ImageQuality.Medium.ToString().ToLowerInvariant(),
+						ImageQuality.Low.ToString().ToLowerInvariant(),
+					}.Select(quality => $"{x}.{quality}.webp")
+				);
+
+			foreach (string image in images)
+				File.Delete(image);
+			return Task.CompletedTask;
 		}
 	}
 }

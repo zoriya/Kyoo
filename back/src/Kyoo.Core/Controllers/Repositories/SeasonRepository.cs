@@ -16,12 +16,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Postgresql;
 using Microsoft.EntityFrameworkCore;
@@ -70,6 +71,11 @@ namespace Kyoo.Core.Controllers
 			_database = database;
 		}
 
+		protected override Task<Season?> GetDuplicated(Season item)
+		{
+			return _database.Seasons.FirstOrDefaultAsync(x => x.ShowId == item.ShowId && x.SeasonNumber == item.SeasonNumber);
+		}
+
 		/// <inheritdoc/>
 		public override async Task<ICollection<Season>> Search(string query, Include<Season>? include = default)
 		{
@@ -83,11 +89,10 @@ namespace Kyoo.Core.Controllers
 		public override async Task<Season> Create(Season obj)
 		{
 			await base.Create(obj);
-			obj.ShowSlug = _database.Shows.First(x => x.Id == obj.ShowId).Slug;
+			obj.ShowSlug = (await _database.Shows.FirstOrDefaultAsync(x => x.Id == obj.ShowId))?.Slug
+				?? throw new ItemNotFoundException($"No show found with ID {obj.ShowId}");
 			_database.Entry(obj).State = EntityState.Added;
-			await _database.SaveChangesAsync(() =>
-				_database.Seasons.FirstOrDefaultAsync(x => x.ShowId == obj.ShowId && x.SeasonNumber == obj.SeasonNumber)
-			);
+			await _database.SaveChangesAsync(() => GetDuplicated(obj));
 			await IRepository<Season>.OnResourceCreated(obj);
 			return obj;
 		}
@@ -100,7 +105,7 @@ namespace Kyoo.Core.Controllers
 			{
 				if (resource.Show == null)
 				{
-					throw new ArgumentException($"Can't store a season not related to any show " +
+					throw new ValidationException($"Can't store a season not related to any show " +
 						$"(showID: {resource.ShowId}).");
 				}
 				resource.ShowId = resource.Show.Id;

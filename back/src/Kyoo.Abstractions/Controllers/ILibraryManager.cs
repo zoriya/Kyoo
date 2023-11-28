@@ -26,7 +26,7 @@ namespace Kyoo.Abstractions.Controllers
 	public interface ILibraryManager
 	{
 		IRepository<T> Repository<T>()
-			where T : class, IResource, IQuery;
+			where T : IResource, IQuery;
 
 		/// <summary>
 		/// The repository that handle libraries items (a wrapper around shows and collections).
