@@ -36,7 +36,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// The item to cache images.
 		/// </param>
 		/// <typeparam name="T">The type of the item</typeparam>
-		/// <returns><c>true</c> if an image has been downloaded, <c>false</c> otherwise.</returns>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task DownloadImages<T>(T item)
 			where T : IThumbnails;
 
@@ -49,6 +49,17 @@ namespace Kyoo.Abstractions.Controllers
 		/// <typeparam name="T">The type of the item</typeparam>
 		/// <returns>The path of the image for the given resource or null if it does not exists.</returns>
 		string GetImagePath<T>(T item, string image, ImageQuality quality)
+			where T : IThumbnails;
+
+		/// <summary>
+		/// Delete images associated with the item.
+		/// </summary>
+		/// <param name="item">
+		/// The item with cached images.
+		/// </param>
+		/// <typeparam name="T">The type of the item</typeparam>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+		Task DeleteImages<T>(T item)
 			where T : IThumbnails;
 	}
 }

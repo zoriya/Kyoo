@@ -25,7 +25,7 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// An interface to represent a resource that can be retrieved from the database.
 	/// </summary>
-	public interface IResource
+	public interface IResource : IQuery
 	{
 		/// <summary>
 		/// A unique ID for this type of resource. This can't be changed and duplicates are not allowed.

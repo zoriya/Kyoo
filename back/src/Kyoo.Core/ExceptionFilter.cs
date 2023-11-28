@@ -54,8 +54,12 @@ namespace Kyoo.Core
 				case ItemNotFoundException ex:
 					context.Result = new NotFoundObjectResult(new RequestError(ex.Message));
 					break;
-				case DuplicatedItemException ex:
+				case DuplicatedItemException ex when ex.Existing is not null:
 					context.Result = new ConflictObjectResult(ex.Existing);
+					break;
+				case DuplicatedItemException:
+					// Should not happen but if it does, it is better than returning a 409 with no body since clients expect json content
+					context.Result = new ConflictObjectResult(new RequestError("Duplicated item"));
 					break;
 				case Exception ex:
 					_logger.LogError(ex, "Unhandled error");

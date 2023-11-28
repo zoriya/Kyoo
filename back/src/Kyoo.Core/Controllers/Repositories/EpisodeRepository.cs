@@ -84,16 +84,20 @@ namespace Kyoo.Core.Controllers
 				.ToListAsync();
 		}
 
+		protected override Task<Episode?> GetDuplicated(Episode item)
+		{
+			if (item is { SeasonNumber: not null, EpisodeNumber: not null })
+				return _database.Episodes.FirstOrDefaultAsync(x => x.ShowId == item.ShowId && x.SeasonNumber == item.SeasonNumber && x.EpisodeNumber == item.EpisodeNumber);
+			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowId == item.ShowId && x.AbsoluteNumber == item.AbsoluteNumber);
+		}
+
 		/// <inheritdoc />
 		public override async Task<Episode> Create(Episode obj)
 		{
 			obj.ShowSlug = obj.Show?.Slug ?? (await _database.Shows.FirstAsync(x => x.Id == obj.ShowId)).Slug;
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			await _database.SaveChangesAsync(() =>
-				obj is { SeasonNumber: not null, EpisodeNumber: not null }
-				? _database.Episodes.FirstOrDefaultAsync(x => x.ShowId == obj.ShowId && x.SeasonNumber == obj.SeasonNumber && x.EpisodeNumber == obj.EpisodeNumber)
-				: _database.Episodes.FirstOrDefaultAsync(x => x.ShowId == obj.ShowId && x.AbsoluteNumber == obj.AbsoluteNumber));
+			await _database.SaveChangesAsync(() => GetDuplicated(obj));
 			await IRepository<Episode>.OnResourceCreated(obj);
 			return obj;
 		}

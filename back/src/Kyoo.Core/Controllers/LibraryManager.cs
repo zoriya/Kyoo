@@ -92,7 +92,7 @@ namespace Kyoo.Core.Controllers
 		public IRepository<User> Users { get; }
 
 		public IRepository<T> Repository<T>()
-			where T : class, IResource, IQuery
+			where T : IResource, IQuery
 		{
 			return (IRepository<T>)_repositories.First(x => x.RepositoryType == typeof(T));
 		}
