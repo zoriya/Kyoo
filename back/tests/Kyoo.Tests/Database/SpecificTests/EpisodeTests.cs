@@ -287,7 +287,7 @@ namespace Kyoo.Tests.Database
 		}
 
 		[Fact]
-		public override async Task CreateTest()
+		public async Task CreateTest()
 		{
 			await Assert.ThrowsAsync<DuplicatedItemException>(() => _repository.Create(TestSample.Get<Episode>()));
 			await _repository.Delete(TestSample.Get<Episode>());

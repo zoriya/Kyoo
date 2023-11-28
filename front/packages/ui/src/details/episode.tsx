@@ -144,7 +144,7 @@ export const EpisodeLine = ({
 	seasonNumber: number | null;
 	releaseDate: Date | null;
 	runtime: number | null;
-	id: number;
+	id: string;
 }> &
 	Stylable) => {
 	const { css } = useYoshiki();
