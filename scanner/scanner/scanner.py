@@ -6,7 +6,7 @@ import re
 from aiohttp import ClientSession
 from pathlib import Path
 from guessit import guessit
-from typing import List, Literal
+from typing import List, Literal, Any
 from providers.provider import Provider
 from providers.types.collection import Collection
 from providers.types.episode import Episode, PartialShow
@@ -186,7 +186,7 @@ class Scanner:
 		)
 		return await self.post("seasons", data=season.to_kyoo())
 
-	async def post(self, path: str, *, data: object) -> str:
+	async def post(self, path: str, *, data: dict[str, Any]) -> str:
 		logging.debug(
 			"Sending %s: %s",
 			path,
@@ -206,19 +206,32 @@ class Scanner:
 				logging.error(f"Request error: {await r.text()}")
 				r.raise_for_status()
 			ret = await r.json()
+
+			if r.status == 409 and (
+				(path == "shows" and ret["startAir"][:4] != str(data["start_air"].year))
+				or (
+					path == "movies" and ret["airDate"][:4] != str(data["air_date"].year)
+				)
+			):
+				logging.info(
+					f"Found a {path} with the same slug ({ret['slug']}) and a different date, using the date as part of the slug"
+				)
+				year = (data["start_air"] if path == "movie" else data["air_date"]).year
+				data["slug"] = f"{ret['slug']}-{year}"
+				return await self.post(path, data=data)
 			return ret["id"]
 
 	async def delete(self, path: str):
 		logging.info("Deleting %s", path)
 		async with self._client.delete(
-			f"{self._url}/movies?path={path}", headers={"X-API-Key": self._api_key}
+			f"{self._url}/movies?filter=path eq \"{path}\"", headers={"X-API-Key": self._api_key}
 		) as r:
 			if not r.ok:
 				logging.error(f"Request error: {await r.text()}")
 				r.raise_for_status()
 
 		async with self._client.delete(
-			f"{self._url}/episodes?path={path}", headers={"X-API-Key": self._api_key}
+			f"{self._url}/episodes?filter=path eq \"{path}\"", headers={"X-API-Key": self._api_key}
 		) as r:
 			if not r.ok:
 				logging.error(f"Request error: {await r.text()}")
