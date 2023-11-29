@@ -19,11 +19,13 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Utils;
+using static Kyoo.Core.Controllers.DapperHelper;
 
 namespace Kyoo.Core.Controllers;
 
@@ -74,9 +76,20 @@ public abstract class DapperRepository<T> : IRepository<T>
 	}
 
 	/// <inheritdoc />
-	public Task<ICollection<T>> FromIds(IList<Guid> ids, Include<T>? include = null)
+	public async Task<ICollection<T>> FromIds(IList<Guid> ids, Include<T>? include = null)
 	{
-		throw new NotImplementedException();
+		return (await Database.Query<T>(
+				Sql,
+				Config,
+				Mapper,
+				(id) => Get(id),
+				include,
+				Filter.Or(ids.Select(x => new Filter<T>.Eq("id", x)).ToArray()),
+				sort: null,
+				limit: null
+			))
+			.OrderBy(x => ids.IndexOf(x.Id))
+			.ToList();
 	}
 
 	/// <inheritdoc />

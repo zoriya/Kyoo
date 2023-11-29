@@ -100,7 +100,7 @@ public abstract record Filter<T> : Filter
 	/// Internal filter used for keyset paginations to resume random sorts.
 	/// The pseudo sql is md5(seed || table.id) = md5(seed || 'hardCodedId')
 	/// </summary>
-	public record EqRandom(string Seed, Guid ReferenceId) : Filter<T>;
+	public record CmpRandom(string cmp, string Seed, Guid ReferenceId) : Filter<T>;
 
 	/// <summary>
 	/// Internal filter used only in EF with hard coded lamdas (used for relations).

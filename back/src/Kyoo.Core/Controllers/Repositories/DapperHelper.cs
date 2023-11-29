@@ -37,7 +37,7 @@ namespace Kyoo.Core.Controllers;
 
 public static class DapperHelper
 {
-	private static string _Property(string key, Dictionary<string, Type> config)
+	public static string Property(string key, Dictionary<string, Type> config)
 	{
 		if (key == "kind")
 			return "kind";
@@ -56,15 +56,15 @@ public static class DapperHelper
 		string ret = sort switch
 		{
 			Sort<T>.Default(var value) => ProcessSort(value, reverse, config, true),
-			Sort<T>.By(string key, bool desc) => $"{_Property(key, config)} {(desc ^ reverse ? "desc" : "asc")}",
-			Sort<T>.Random(var seed) => $"md5('{seed}' || {_Property("id", config)}) {(reverse ? "desc" : "asc")}",
+			Sort<T>.By(string key, bool desc) => $"{Property(key, config)} {(desc ^ reverse ? "desc" : "asc")}",
+			Sort<T>.Random(var seed) => $"md5('{seed}' || {Property("id", config)}) {(reverse ? "desc" : "asc")}",
 			Sort<T>.Conglomerate(var list) => string.Join(", ", list.Select(x => ProcessSort(x, reverse, config, true))),
 			_ => throw new SwitchExpressionException(),
 		};
 		if (recurse)
 			return ret;
 		// always end query by an id sort.
-		return $"{ret}, {_Property("id", config)} {(reverse ? "desc" : "asc")}";
+		return $"{ret}, {Property("id", config)} {(reverse ? "desc" : "asc")}";
 	}
 
 	public static (
@@ -89,7 +89,7 @@ public static class DapperHelper
 					string tableName = type.GetCustomAttribute<TableAttribute>()?.Name ?? $"{type.Name.ToSnakeCase()}s";
 					types.Add(type);
 					projection.AppendLine($", r{relation}.* -- {type.Name} as r{relation}");
-					join.Append($"\nleft join {tableName} as r{relation} on r{relation}.id = {_Property(rid, config)}");
+					join.Append($"\nleft join {tableName} as r{relation} on r{relation}.id = {Property(rid, config)}");
 					break;
 				case Include.CustomRelation(var name, var type, var sql, var on, var declaring):
 					string owner = config.First(x => x.Value == declaring).Key;
@@ -173,8 +173,8 @@ public static class DapperHelper
 				Filter<T>.Ge(var property, var value) => Format(property, $">= {P(value)}"),
 				Filter<T>.Lt(var property, var value) => Format(property, $"< {P(value)}"),
 				Filter<T>.Le(var property, var value) => Format(property, $"> {P(value)}"),
-				Filter<T>.Has(var property, var value) => $"{P(value)} = any({_Property(property, config):raw})",
-				Filter<T>.EqRandom(var seed, var id) => $"md5({seed} || coalesce({string.Join(", ", config.Select(x => $"{x.Key}.id")):raw})) = md5({seed} || {id.ToString()})",
+				Filter<T>.Has(var property, var value) => $"{P(value)} = any({Property(property, config):raw})",
+				Filter<T>.CmpRandom(var op, var seed, var id) => $"md5({seed} || coalesce({string.Join(", ", config.Select(x => $"{x.Key}.id")):raw})) {op:raw} md5({seed} || {id.ToString()})",
 				Filter<T>.Lambda(var lambda) => throw new NotSupportedException(),
 				_ => throw new NotImplementedException(),
 			};
@@ -200,7 +200,7 @@ public static class DapperHelper
 		Include<T>? include,
 		Filter<T>? filter,
 		Sort<T>? sort,
-		Pagination limit)
+		Pagination? limit)
 		where T : class, IResource, IQuery
 	{
 		InterpolatedSql.Dapper.SqlBuilders.SqlBuilder query = new(db, command);
@@ -214,7 +214,7 @@ public static class DapperHelper
 			throw new ArgumentException("Missing '/* includes */' placeholder in top level sql select to support includes.");
 
 		// Handle pagination, orders and filter.
-		if (limit.AfterID != null)
+		if (limit?.AfterID != null)
 		{
 			T reference = await get(limit.AfterID.Value);
 			Filter<T>? keysetFilter = RepositoryHelper.KeysetPaginate(sort, reference, !limit.Reverse);
@@ -223,8 +223,9 @@ public static class DapperHelper
 		if (filter != null)
 			query += ProcessFilter(filter, config);
 		if (sort != null)
-			query += $"\norder by {ProcessSort(sort, limit.Reverse, config):raw}";
-		query += $"\nlimit {limit.Limit}";
+			query += $"\norder by {ProcessSort(sort, limit?.Reverse ?? false, config):raw}";
+		if (limit != null)
+			query += $"\nlimit {limit.Limit}";
 
 		// Build query and prepare to do the query/projections
 		IDapperSqlCommand cmd = query.Build();
@@ -281,7 +282,7 @@ public static class DapperHelper
 			ParametersDictionary.LoadFrom(cmd),
 			splitOn: string.Join(',', types.Select(x => x == typeof(Image) ? "source" : "id"))
 		);
-		if (limit.Reverse)
+		if (limit?.Reverse == true)
 			data = data.Reverse();
 		return data.ToList();
 	}
