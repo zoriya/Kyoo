@@ -119,14 +119,20 @@ namespace Kyoo.Core.Controllers
 
 			ParameterExpression x = Expression.Parameter(typeof(T), "x");
 
-			Expression EqRandomHandler(string seed, Guid refId)
+			Expression CmpRandomHandler(string cmp, string seed, Guid refId)
 			{
 				MethodInfo concat = typeof(string).GetMethod(nameof(string.Concat), new[] { typeof(string), typeof(string) })!;
 				Expression id = Expression.Call(Expression.Property(x, "ID"), nameof(Guid.ToString), null);
 				Expression xrng = Expression.Call(concat, Expression.Constant(seed), id);
 				Expression left = Expression.Call(typeof(DatabaseContext), nameof(DatabaseContext.MD5), null, xrng);
 				Expression right = Expression.Call(typeof(DatabaseContext), nameof(DatabaseContext.MD5), null, Expression.Constant($"{seed}{refId}"));
-				return Expression.Equal(left, right);
+				return cmp switch
+				{
+					"=" => Expression.Equal(left, right),
+					"<" => Expression.GreaterThan(left, right),
+					">" => Expression.LessThan(left, right),
+					_ => throw new NotImplementedException()
+				};
 			}
 
 			BinaryExpression StringCompatibleExpression(
@@ -154,7 +160,7 @@ namespace Kyoo.Core.Controllers
 					Filter<T>.Lt(var property, var value) => StringCompatibleExpression(Expression.LessThan, Expression.Property(x, property), Expression.Constant(value)),
 					Filter<T>.Le(var property, var value) => StringCompatibleExpression(Expression.LessThanOrEqual, Expression.Property(x, property), Expression.Constant(value)),
 					Filter<T>.Has(var property, var value) => Expression.Call(typeof(Enumerable), "Contains", new[] { value.GetType() }, Expression.Property(x, property), Expression.Constant(value)),
-					Filter<T>.EqRandom(var seed, var refId) => EqRandomHandler(seed, refId),
+					Filter<T>.CmpRandom(var op, var seed, var refId) => CmpRandomHandler(op, seed, refId),
 					Filter<T>.Lambda(var lambda) => ExpressionArgumentReplacer.ReplaceParams(lambda.Body, lambda.Parameters, x),
 					_ => throw new NotImplementedException(),
 				};

@@ -90,7 +90,7 @@ public class RepositoryHelper
 			{
 				Filter<T> pEquals = pSeed == null
 					? new Filter<T>.Eq(pKey, reference.GetType().GetProperty(pKey)?.GetValue(reference))
-					: new Filter<T>.EqRandom(pSeed, reference.Id);
+					: new Filter<T>.CmpRandom("=", pSeed, reference.Id);
 				equals = Filter.And(equals, pEquals);
 			}
 
@@ -100,7 +100,7 @@ public class RepositoryHelper
 				: (prop, val) => new Filter<T>.Lt(prop, val);
 			Filter<T> last = seed == null
 				? comparer(key, value!)
-				: new Filter<T>.EqRandom(seed, reference.Id);
+				: new Filter<T>.CmpRandom(greaterThan ? ">" : "<", seed, reference.Id);
 
 			if (key != "random")
 			{
