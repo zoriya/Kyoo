@@ -23,6 +23,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Postgresql;
 using Microsoft.EntityFrameworkCore;
 
@@ -57,18 +58,15 @@ public class WatchStatusRepository : IWatchStatusRepository
 	}
 
 	/// <inheritdoc />
-	public Task<MovieWatchStatus?> GetMovieStatus(Expression<Func<Movie, bool>> where, int userId)
+	public Task<MovieWatchStatus?> GetMovieStatus(Guid movieId, Guid userId)
 	{
-		return _database.MovieWatchStatus.FirstOrDefaultAsync(x =>
-			x.Movie == _database.Movies.FirstOrDefault(where)
-			&& x.UserId == userId
-		);
+		return _database.MovieWatchStatus.FirstOrDefaultAsync(x => x.MovieId == movieId && x.UserId == userId);
 	}
 
 	/// <inheritdoc />
 	public async Task<MovieWatchStatus?> SetMovieStatus(
-		int movieId,
-		int userId,
+		Guid movieId,
+		Guid userId,
 		WatchStatus status,
 		int? watchedTime)
 	{
@@ -105,28 +103,24 @@ public class WatchStatusRepository : IWatchStatusRepository
 
 	/// <inheritdoc />
 	public async Task DeleteMovieStatus(
-		Expression<Func<Movie, bool>> where,
-		int userId)
+		Guid movieId,
+		Guid userId)
 	{
 		await _database.MovieWatchStatus
-			.Where(x => x.Movie == _database.Movies.FirstOrDefault(where)
-				&& x.UserId == userId)
+			.Where(x => x.MovieId == movieId && x.UserId == userId)
 			.ExecuteDeleteAsync();
 	}
 
 	/// <inheritdoc />
-	public Task<ShowWatchStatus?> GetShowStatus(Expression<Func<Show, bool>> where, int userId)
+	public Task<ShowWatchStatus?> GetShowStatus(Guid showId, Guid userId)
 	{
-		return _database.ShowWatchStatus.FirstOrDefaultAsync(x =>
-			x.Show == _database.Shows.FirstOrDefault(where)
-			&& x.UserId == userId
-		);
+		return _database.ShowWatchStatus.FirstOrDefaultAsync(x => x.ShowId == showId && x.UserId == userId);
 	}
 
 	/// <inheritdoc />
 	public async Task<ShowWatchStatus?> SetShowStatus(
-		int showId,
-		int userId,
+		Guid showId,
+		Guid userId,
 		WatchStatus status)
 	{
 		int unseenEpisodeCount = await _database.Episodes
@@ -143,9 +137,11 @@ public class WatchStatusRepository : IWatchStatusRepository
 			Status = status,
 			NextEpisode = status == WatchStatus.Watching
 				? await _episodes.GetOrDefault(
-					where: x => x.ShowId == showId
-						&& (x.WatchStatus!.Status == WatchStatus.Watching
-							|| x.WatchStatus.Status == WatchStatus.Completed),
+					new Filter<Episode>.Lambda(
+						x => x.ShowId == showId
+							&& (x.WatchStatus!.Status == WatchStatus.Watching
+								|| x.WatchStatus.Status == WatchStatus.Completed)
+					),
 					reverse: true
 				)
 				: null,
@@ -160,32 +156,27 @@ public class WatchStatusRepository : IWatchStatusRepository
 
 	/// <inheritdoc />
 	public async Task DeleteShowStatus(
-		Expression<Func<Show, bool>> where,
-		int userId)
+		Guid showId,
+		Guid userId)
 	{
 		await _database.ShowWatchStatus
-			.Where(x => x.Show == _database.Shows.FirstOrDefault(where)
-				&& x.UserId == userId)
+			.Where(x => x.ShowId == showId && x.UserId == userId)
 			.ExecuteDeleteAsync();
 		await _database.EpisodeWatchStatus
-			.Where(x => x.Episode.Show == _database.Shows.FirstOrDefault(where)
-				&& x.UserId == userId)
+			.Where(x => x.Episode.ShowId == showId && x.UserId == userId)
 			.ExecuteDeleteAsync();
 	}
 
 	/// <inheritdoc />
-	public Task<EpisodeWatchStatus?> GetEpisodeStatus(Expression<Func<Episode, bool>> where, int userId)
+	public Task<EpisodeWatchStatus?> GetEpisodeStatus(Guid episodeId, Guid userId)
 	{
-		return _database.EpisodeWatchStatus.FirstOrDefaultAsync(x =>
-			x.Episode == _database.Episodes.FirstOrDefault(where)
-			&& x.UserId == userId
-		);
+		return _database.EpisodeWatchStatus.FirstOrDefaultAsync(x => x.EpisodeId == episodeId && x.UserId == userId);
 	}
 
 	/// <inheritdoc />
 	public async Task<EpisodeWatchStatus?> SetEpisodeStatus(
-		int episodeId,
-		int userId,
+		Guid episodeId,
+		Guid userId,
 		WatchStatus status,
 		int? watchedTime)
 	{
@@ -224,12 +215,11 @@ public class WatchStatusRepository : IWatchStatusRepository
 
 	/// <inheritdoc />
 	public async Task DeleteEpisodeStatus(
-		Expression<Func<Episode, bool>> where,
-		int userId)
+		Guid episodeId,
+		Guid userId)
 	{
 		await _database.EpisodeWatchStatus
-			.Where(x => x.Episode == _database.Episodes.FirstOrDefault(where)
-				&& x.UserId == userId)
+			.Where(x => x.EpisodeId == episodeId && x.UserId == userId)
 			.ExecuteDeleteAsync();
 	}
 }

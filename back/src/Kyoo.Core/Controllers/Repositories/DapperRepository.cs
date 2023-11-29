@@ -128,7 +128,10 @@ public abstract class DapperRepository<T> : IRepository<T>
 	}
 
 	/// <inheritdoc />
-	public Task<T?> GetOrDefault(Filter<T>? filter, Include<T>? include = null, Sort<T>? sortBy = null)
+	public Task<T?> GetOrDefault(Filter<T>? filter,
+		Include<T>? include = null,
+		Sort<T>? sortBy = null,
+		bool reverse = false)
 	{
 		return Database.QuerySingle<T>(
 			Sql,

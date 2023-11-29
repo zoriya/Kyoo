@@ -294,10 +294,20 @@ public static class DapperHelper
 		Func<List<object?>, T> mapper,
 		Include<T>? include,
 		Filter<T>? filter,
-		Sort<T>? sort = null)
+		Sort<T>? sort = null,
+		bool reverse = false)
 		where T : class, IResource, IQuery
 	{
-		ICollection<T> ret = await db.Query<T>(command, config, mapper, null!, include, filter, sort, new Pagination(1));
+		ICollection<T> ret = await db.Query<T>(
+			command,
+			config,
+			mapper,
+			get: null!,
+			include,
+			filter,
+			sort,
+			new Pagination(1, reverse: reverse)
+		);
 		return ret.FirstOrDefault();
 	}
 
