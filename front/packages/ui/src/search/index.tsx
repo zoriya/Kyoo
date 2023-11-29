@@ -61,6 +61,7 @@ export const SearchPage: QueryPage<{ q?: string }> = ({ q }) => {
 			query={query(q, sortKey, sortOrd)}
 			layout={LayoutComponent.layout}
 			empty={t("search.empty")}
+			incremental
 			Header={
 				<BrowseSettings
 					availableSorts={Object.values(SearchSort)}
