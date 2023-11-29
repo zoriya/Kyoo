@@ -210,7 +210,8 @@ class Scanner:
 			if r.status == 409 and (
 				(path == "shows" and ret["startAir"][:4] != str(data["start_air"].year))
 				or (
-					path == "movies" and ret["airDate"][:4] != str(data["air_date"].year)
+					path == "movies"
+					and ret["airDate"][:4] != str(data["air_date"].year)
 				)
 			):
 				logging.info(
@@ -224,14 +225,16 @@ class Scanner:
 	async def delete(self, path: str):
 		logging.info("Deleting %s", path)
 		async with self._client.delete(
-			f"{self._url}/movies?filter=path eq \"{path}\"", headers={"X-API-Key": self._api_key}
+			f'{self._url}/movies?filter=path eq "{path}"',
+			headers={"X-API-Key": self._api_key},
 		) as r:
 			if not r.ok:
 				logging.error(f"Request error: {await r.text()}")
 				r.raise_for_status()
 
 		async with self._client.delete(
-			f"{self._url}/episodes?filter=path eq \"{path}\"", headers={"X-API-Key": self._api_key}
+			f'{self._url}/episodes?filter=path eq "{path}"',
+			headers={"X-API-Key": self._api_key},
 		) as r:
 			if not r.ok:
 				logging.error(f"Request error: {await r.text()}")
