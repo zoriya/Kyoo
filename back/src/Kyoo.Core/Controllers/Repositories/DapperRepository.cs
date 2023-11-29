@@ -25,7 +25,6 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Utils;
-using static Kyoo.Core.Controllers.DapperHelper;
 
 namespace Kyoo.Core.Controllers;
 
@@ -42,9 +41,13 @@ public abstract class DapperRepository<T> : IRepository<T>
 
 	protected DbConnection Database { get; init; }
 
-	public DapperRepository(DbConnection database)
+	protected SqlVariableContext Context { get; init; }
+
+
+	public DapperRepository(DbConnection database, SqlVariableContext context)
 	{
 		Database = database;
+		Context = context;
 	}
 
 	/// <inheritdoc/>
@@ -83,6 +86,7 @@ public abstract class DapperRepository<T> : IRepository<T>
 				Config,
 				Mapper,
 				(id) => Get(id),
+				Context,
 				include,
 				Filter.Or(ids.Select(x => new Filter<T>.Eq("id", x)).ToArray()),
 				sort: null,
@@ -99,6 +103,7 @@ public abstract class DapperRepository<T> : IRepository<T>
 			Sql,
 			Config,
 			Mapper,
+			Context,
 			include,
 			new Filter<T>.Eq(nameof(IResource.Id), id)
 		);
@@ -113,6 +118,7 @@ public abstract class DapperRepository<T> : IRepository<T>
 				Sql,
 				Config,
 				Mapper,
+				Context,
 				include,
 				filter: null,
 				new Sort<T>.Random()
@@ -122,6 +128,7 @@ public abstract class DapperRepository<T> : IRepository<T>
 			Sql,
 			Config,
 			Mapper,
+			Context,
 			include,
 			new Filter<T>.Eq(nameof(IResource.Slug), slug)
 		);
@@ -137,6 +144,7 @@ public abstract class DapperRepository<T> : IRepository<T>
 			Sql,
 			Config,
 			Mapper,
+			Context,
 			include,
 			filter,
 			sortBy
@@ -154,6 +162,7 @@ public abstract class DapperRepository<T> : IRepository<T>
 			Config,
 			Mapper,
 			(id) => Get(id),
+			Context,
 			include,
 			filter,
 			sort ?? new Sort<T>.Default(),
@@ -167,6 +176,7 @@ public abstract class DapperRepository<T> : IRepository<T>
 		return Database.Count(
 			Sql,
 			Config,
+			Context,
 			filter
 		);
 	}

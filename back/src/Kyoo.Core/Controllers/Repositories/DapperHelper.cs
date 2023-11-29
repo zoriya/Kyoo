@@ -28,15 +28,35 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Dapper;
 using InterpolatedSql.Dapper;
+using InterpolatedSql.Dapper.SqlBuilders;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Utils;
+using Kyoo.Authentication;
 using Kyoo.Utils;
+using Microsoft.AspNetCore.Http;
 
 namespace Kyoo.Core.Controllers;
 
 public static class DapperHelper
 {
+	public static SqlBuilder ProcessVariables(SqlBuilder sql, SqlVariableContext context)
+	{
+		int start = 0;
+		while ((start = sql.IndexOf("[", start, false)) != -1)
+		{
+			int end = sql.IndexOf("]", start, false);
+			if (end == -1)
+				throw new ArgumentException("Invalid sql variable substitue (missing ])");
+			string var = sql.Format[(start + 1)..end];
+			sql.Remove(start, end - start + 1);
+			sql.Insert(start, $"{context.ReadVar(var)}");
+		}
+
+		return sql;
+	}
+
 	public static string Property(string key, Dictionary<string, Type> config)
 	{
 		if (key == "kind")
@@ -95,10 +115,12 @@ public static class DapperHelper
 					string owner = config.First(x => x.Value == declaring).Key;
 					string lateral = sql.Contains("\"this\"") ? " lateral" : string.Empty;
 					sql = sql.Replace("\"this\"", owner);
-					on = on?.Replace("\"this\"", owner);
+					on = on?.Replace("\"this\"", owner)?.Replace("\"relation\"", $"r{relation}");
+					if (sql.Any(char.IsWhiteSpace))
+						sql = $"({sql})";
 					types.Add(type);
 					projection.AppendLine($", r{relation}.*");
-					join.Append($"\nleft join{lateral} ({sql}) as r{relation} on r{relation}.{on}");
+					join.Append($"\nleft join{lateral} {sql} as r{relation} on r{relation}.{on}");
 					break;
 				case Include.ProjectedRelation:
 					continue;
@@ -197,13 +219,14 @@ public static class DapperHelper
 		Dictionary<string, Type> config,
 		Func<List<object?>, T> mapper,
 		Func<Guid, Task<T>> get,
+		SqlVariableContext context,
 		Include<T>? include,
 		Filter<T>? filter,
 		Sort<T>? sort,
 		Pagination? limit)
 		where T : class, IResource, IQuery
 	{
-		InterpolatedSql.Dapper.SqlBuilders.SqlBuilder query = new(db, command);
+		SqlBuilder query = new(db, command);
 
 		// Include handling
 		include ??= new();
@@ -226,6 +249,8 @@ public static class DapperHelper
 			query += $"\norder by {ProcessSort(sort, limit?.Reverse ?? false, config):raw}";
 		if (limit != null)
 			query += $"\nlimit {limit.Limit}";
+
+		ProcessVariables(query, context);
 
 		// Build query and prepare to do the query/projections
 		IDapperSqlCommand cmd = query.Build();
@@ -280,7 +305,7 @@ public static class DapperHelper
 				return mapIncludes(mapper(nItems), nItems.Skip(config.Count));
 			},
 			ParametersDictionary.LoadFrom(cmd),
-			splitOn: string.Join(',', types.Select(x => x == typeof(Image) ? "source" : "id"))
+			splitOn: string.Join(',', types.Select(x => x.GetCustomAttribute<SqlFirstColumnAttribute>()?.Name ?? "id"))
 		);
 		if (limit?.Reverse == true)
 			data = data.Reverse();
@@ -292,6 +317,7 @@ public static class DapperHelper
 		FormattableString command,
 		Dictionary<string, Type> config,
 		Func<List<object?>, T> mapper,
+		SqlVariableContext context,
 		Include<T>? include,
 		Filter<T>? filter,
 		Sort<T>? sort = null,
@@ -303,6 +329,7 @@ public static class DapperHelper
 			config,
 			mapper,
 			get: null!,
+			context,
 			include,
 			filter,
 			sort,
@@ -315,6 +342,7 @@ public static class DapperHelper
 		this IDbConnection db,
 		FormattableString command,
 		Dictionary<string, Type> config,
+		SqlVariableContext context,
 		Filter<T>? filter)
 		where T : class, IResource
 	{
@@ -322,7 +350,7 @@ public static class DapperHelper
 
 		if (filter != null)
 			query += ProcessFilter(filter, config);
-
+		ProcessVariables(query, context);
 		IDapperSqlCommand cmd = query.Build();
 
 		// language=postgreSQL
@@ -332,5 +360,24 @@ public static class DapperHelper
 			sql,
 			ParametersDictionary.LoadFrom(cmd)
 		);
+	}
+}
+
+public class SqlVariableContext
+{
+	private readonly IHttpContextAccessor _accessor;
+
+	public SqlVariableContext(IHttpContextAccessor accessor)
+	{
+		_accessor = accessor;
+	}
+
+	public object? ReadVar(string var)
+	{
+		return var switch
+		{
+			"current_user" => _accessor.HttpContext?.User.GetId(),
+			_ => throw new ArgumentException($"Invalid sql variable name: {var}")
+		};
 	}
 }

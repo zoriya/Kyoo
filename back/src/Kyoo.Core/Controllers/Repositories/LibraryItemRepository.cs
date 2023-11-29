@@ -76,8 +76,8 @@ namespace Kyoo.Core.Controllers
 			throw new InvalidDataException();
 		}
 
-		public LibraryItemRepository(DbConnection database)
-			: base(database)
+		public LibraryItemRepository(DbConnection database, SqlVariableContext context)
+			: base(database, context)
 		{ }
 
 		public async Task<ICollection<ILibraryItem>> GetAllOfCollection(
@@ -118,6 +118,7 @@ namespace Kyoo.Core.Controllers
 				},
 				Mapper,
 				(id) => Get(id),
+				Context,
 				include,
 				filter,
 				sort ?? new Sort<ILibraryItem>.Default(),

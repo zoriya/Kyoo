@@ -20,6 +20,7 @@ using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using Kyoo.Abstractions.Models.Attributes;
 using Newtonsoft.Json;
 
 namespace Kyoo.Abstractions.Models
@@ -47,6 +48,7 @@ namespace Kyoo.Abstractions.Models
 	}
 
 	[TypeConverter(typeof(ImageConvertor))]
+	[SqlFirstColumn(nameof(Source))]
 	public class Image
 	{
 		/// <summary>

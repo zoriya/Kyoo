@@ -68,6 +68,7 @@ namespace Kyoo.Core
 			builder.RegisterRepository<UserRepository>();
 			builder.RegisterRepository<NewsRepository>();
 			builder.RegisterType<WatchStatusRepository>().As<IWatchStatusRepository>().AsSelf().InstancePerLifetimeScope();
+			builder.RegisterType<SqlVariableContext>().InstancePerLifetimeScope();
 		}
 
 		/// <inheritdoc />
