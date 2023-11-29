@@ -152,8 +152,17 @@ public abstract record Filter<T> : Filter
 
 		private static Parser<object> _GetValueParser(Type type)
 		{
+			Type? nullable = Nullable.GetUnderlyingType(type);
+			if (nullable != null)
+			{
+				return
+					from value in _GetValueParser(nullable)
+					select value;
+			}
+
 			if (type == typeof(int))
 				return Parse.Number.Select(x => int.Parse(x) as object);
+
 			if (type == typeof(float))
 			{
 				return

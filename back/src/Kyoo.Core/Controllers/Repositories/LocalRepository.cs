@@ -137,13 +137,22 @@ namespace Kyoo.Core.Controllers
 
 			BinaryExpression StringCompatibleExpression(
 				Func<Expression, Expression, BinaryExpression> operand,
-				Expression left,
-				Expression right)
+				string property,
+				object value)
 			{
+				var left = Expression.Property(x, property);
+				var right = Expression.Constant(value, ((PropertyInfo)left.Member).PropertyType);
 				if (left.Type != typeof(string))
 					return operand(left, right);
 				MethodCallExpression call = Expression.Call(typeof(string), "Compare", null, left, right);
 				return operand(call, Expression.Constant(0));
+			}
+
+			Expression Exp(Func<Expression, Expression, BinaryExpression> operand, string property, object? value)
+			{
+				var prop = Expression.Property(x, property);
+				var val = Expression.Constant(value, ((PropertyInfo)prop.Member).PropertyType);
+				return operand(prop, val);
 			}
 
 			Expression Parse(Filter<T> f)
@@ -153,12 +162,12 @@ namespace Kyoo.Core.Controllers
 					Filter<T>.And(var first, var second) => Expression.AndAlso(Parse(first), Parse(second)),
 					Filter<T>.Or(var first, var second) => Expression.OrElse(Parse(first), Parse(second)),
 					Filter<T>.Not(var inner) => Expression.Not(Parse(inner)),
-					Filter<T>.Eq(var property, var value) => Expression.Equal(Expression.Property(x, property), Expression.Constant(value)),
-					Filter<T>.Ne(var property, var value) => Expression.NotEqual(Expression.Property(x, property), Expression.Constant(value)),
-					Filter<T>.Gt(var property, var value) => StringCompatibleExpression(Expression.GreaterThan, Expression.Property(x, property), Expression.Constant(value)),
-					Filter<T>.Ge(var property, var value) => StringCompatibleExpression(Expression.GreaterThanOrEqual, Expression.Property(x, property), Expression.Constant(value)),
-					Filter<T>.Lt(var property, var value) => StringCompatibleExpression(Expression.LessThan, Expression.Property(x, property), Expression.Constant(value)),
-					Filter<T>.Le(var property, var value) => StringCompatibleExpression(Expression.LessThanOrEqual, Expression.Property(x, property), Expression.Constant(value)),
+					Filter<T>.Eq(var property, var value) => Exp(Expression.Equal, property, value),
+					Filter<T>.Ne(var property, var value) => Exp(Expression.NotEqual, property, value),
+					Filter<T>.Gt(var property, var value) => StringCompatibleExpression(Expression.GreaterThan, property, value),
+					Filter<T>.Ge(var property, var value) => StringCompatibleExpression(Expression.GreaterThanOrEqual, property, value),
+					Filter<T>.Lt(var property, var value) => StringCompatibleExpression(Expression.LessThan, property, value),
+					Filter<T>.Le(var property, var value) => StringCompatibleExpression(Expression.LessThanOrEqual, property, value),
 					Filter<T>.Has(var property, var value) => Expression.Call(typeof(Enumerable), "Contains", new[] { value.GetType() }, Expression.Property(x, property), Expression.Constant(value)),
 					Filter<T>.CmpRandom(var op, var seed, var refId) => CmpRandomHandler(op, seed, refId),
 					Filter<T>.Lambda(var lambda) => ExpressionArgumentReplacer.ReplaceParams(lambda.Body, lambda.Parameters, x),
