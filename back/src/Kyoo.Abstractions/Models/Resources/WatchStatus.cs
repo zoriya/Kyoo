@@ -53,6 +53,7 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// Metadata of what an user as started/planned to watch.
 	/// </summary>
+	[SqlFirstColumn(nameof(UserId))]
 	public class MovieWatchStatus : IAddedDate
 	{
 		/// <summary>
@@ -105,6 +106,7 @@ namespace Kyoo.Abstractions.Models
 		public int? WatchedPercent { get; set; }
 	}
 
+	[SqlFirstColumn(nameof(UserId))]
 	public class EpisodeWatchStatus : IAddedDate
 	{
 		/// <summary>
@@ -157,6 +159,7 @@ namespace Kyoo.Abstractions.Models
 		public int? WatchedPercent { get; set; }
 	}
 
+	[SqlFirstColumn(nameof(UserId))]
 	public class ShowWatchStatus : IAddedDate
 	{
 		/// <summary>

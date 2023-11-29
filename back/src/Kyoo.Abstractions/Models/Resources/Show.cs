@@ -193,7 +193,11 @@ namespace Kyoo.Abstractions.Models
 		/// Metadata of what an user as started/planned to watch.
 		/// </summary>
 		[Projectable(UseMemberBody = nameof(_WatchStatus), OnlyOnInclude = true)]
-		[LoadableRelation] public ShowWatchStatus? WatchStatus { get; set; }
+		[LoadableRelation(
+			Sql = "show_watch_status",
+			On = "show_id = \"this\".id and \"relation\".user_id = [current_user]"
+		)]
+		public ShowWatchStatus? WatchStatus { get; set; }
 
 		// There is a global query filter to filter by user so we just need to do single.
 		private ShowWatchStatus? _WatchStatus => Watched!.FirstOrDefault();

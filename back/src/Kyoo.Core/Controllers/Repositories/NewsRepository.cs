@@ -60,8 +60,8 @@ namespace Kyoo.Core.Controllers
 			throw new InvalidDataException();
 		}
 
-		public NewsRepository(DbConnection database)
-			: base(database)
+		public NewsRepository(DbConnection database, SqlVariableContext context)
+			: base(database, context)
 		{ }
 	}
 }
