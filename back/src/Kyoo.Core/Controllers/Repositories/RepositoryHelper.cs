@@ -54,7 +54,7 @@ public class RepositoryHelper
 	{
 		sort ??= new Sort<T>.Default();
 
-		IEnumerable<SortIndicator> GetSortsBy(Sort<T> sort)
+		static IEnumerable<SortIndicator> GetSortsBy(Sort<T> sort)
 		{
 			return sort switch
 			{
