@@ -56,7 +56,7 @@ namespace Kyoo.Core.Controllers
 					group by c.id
 					having count(*) > 1
 				) as c on false
-		""";
+			""";
 
 		protected override Dictionary<string, Type> Config => new()
 		{
@@ -107,7 +107,7 @@ namespace Kyoo.Core.Controllers
 						movies
 					inner join link_collection_movie as lm on lm.movie_id = id and lm.collection_id = {collectionId}
 				) as m on false
-			""";
+				""";
 
 			return await Database.Query<ILibraryItem>(
 				sql,
