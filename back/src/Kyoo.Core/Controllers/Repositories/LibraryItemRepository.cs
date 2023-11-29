@@ -48,9 +48,14 @@ namespace Kyoo.Core.Controllers
 					movies) as m on false
 				full outer join(
 					select
-						* -- Collection
+						c.* -- Collection as c
 					from
-						collections) as c on false
+						collections as c
+					left join link_collection_show as ls on ls.collection_id = c.id
+					left join link_collection_movie as lm on lm.collection_id = c.id
+					group by c.id
+					having count(*) > 1
+				) as c on false
 		""";
 
 		protected override Dictionary<string, Type> Config => new()
