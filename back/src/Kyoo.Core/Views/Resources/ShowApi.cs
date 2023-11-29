@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -246,10 +247,11 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ShowWatchStatus?> GetWatchStatus(Identifier identifier)
 		{
-			return await _libraryManager.WatchStatus.GetShowStatus(
-				identifier.IsSame<Show>(),
-				User.GetId()!.Value
+			Guid id = await identifier.Match(
+				id => Task.FromResult(id),
+				async slug => (await _libraryManager.Shows.Get(slug)).Id
 			);
+			return await _libraryManager.WatchStatus.GetShowStatus(id, User.GetId()!.Value);
 		}
 
 		/// <summary>
@@ -273,7 +275,7 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ShowWatchStatus?> SetWatchStatus(Identifier identifier, WatchStatus status)
 		{
-			int id = await identifier.Match(
+			Guid id = await identifier.Match(
 				id => Task.FromResult(id),
 				async slug => (await _libraryManager.Shows.Get(slug)).Id
 			);
@@ -301,10 +303,11 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task DeleteWatchStatus(Identifier identifier)
 		{
-			await _libraryManager.WatchStatus.DeleteShowStatus(
-				identifier.IsSame<Show>(),
-				User.GetId()!.Value
+			Guid id = await identifier.Match(
+				id => Task.FromResult(id),
+				async slug => (await _libraryManager.Shows.Get(slug)).Id
 			);
+			await _libraryManager.WatchStatus.DeleteShowStatus(id, User.GetId()!.Value);
 		}
 	}
 }
