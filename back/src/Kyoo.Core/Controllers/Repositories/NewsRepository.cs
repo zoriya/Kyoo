@@ -43,7 +43,7 @@ namespace Kyoo.Core.Controllers
 				from
 					movies
 			) as m on false
-		""";
+			""";
 
 		protected override Dictionary<string, Type> Config => new()
 		{
