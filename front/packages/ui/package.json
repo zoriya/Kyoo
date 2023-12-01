@@ -8,10 +8,10 @@
 		"@kyoo/primitives": "workspace:^"
 	},
 	"devDependencies": {
-		"@shopify/flash-list": "^1.6.2",
-		"@types/react": "18.2.34",
+		"@shopify/flash-list": "^1.6.3",
+		"@types/react": "18.2.39",
 		"react-native-uuid": "^2.0.1",
-		"typescript": "^5.2.2"
+		"typescript": "^5.3.2"
 	},
 	"peerDependencies": {
 		"@material-symbols/svg-400": "*",
