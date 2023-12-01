@@ -27,6 +27,7 @@ import { useMMKVString } from "react-native-mmkv";
 import { Platform } from "react-native";
 import { queryFn, useFetch } from "./query";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { KyooErrors } from "./kyoo-errors";
 
 export const TokenP = z.object({
 	token_type: z.literal("Bearer"),
@@ -47,6 +48,10 @@ export const AccountP = UserP.and(
 export type Account = z.infer<typeof AccountP>;
 
 const AccountContext = createContext<(Account & { select: () => void; remove: () => void })[]>([]);
+export const ConnectionErrorContext = createContext<{
+	error: KyooErrors | null;
+	retry?: () => void;
+}>({ error: null });
 
 export const AccountProvider = ({ children }: { children: ReactNode }) => {
 	const [accStr] = useMMKVString("accounts");
@@ -80,15 +85,27 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 	const oldSelectedId = useRef<string | undefined>(selected?.id);
 	useEffect(() => {
 		// if the user change account (or connect/disconnect), reset query cache.
-		if (selected?.id !== oldSelectedId.current)
-			queryClient.invalidateQueries();
+		if (selected?.id !== oldSelectedId.current) queryClient.invalidateQueries();
 		oldSelectedId.current = selected?.id;
 
 		// update cookies for ssr (needs to contains token, theme, language...)
 		if (Platform.OS === "web") setAccountCookie(selected);
 	}, [selected, queryClient]);
 
-	return <AccountContext.Provider value={accounts}>{children}</AccountContext.Provider>;
+	return (
+		<AccountContext.Provider value={accounts}>
+			<ConnectionErrorContext.Provider
+				value={{
+					error: user.error,
+					retry: () => {
+						queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+					},
+				}}
+			>
+				{children}
+			</ConnectionErrorContext.Provider>
+		</AccountContext.Provider>
+	);
 };
 
 export const useAccount = () => {
