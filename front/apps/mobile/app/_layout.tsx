@@ -21,7 +21,7 @@
 import { PortalProvider } from "@gorhom/portal";
 import { ThemeSelector } from "@kyoo/primitives";
 import { NavbarRight, NavbarTitle } from "@kyoo/ui";
-import { AccountContext, createQueryClient, useAccounts } from "@kyoo/models";
+import { AccountProvider, createQueryClient, useAccounts } from "@kyoo/models";
 import { QueryClientProvider } from "@tanstack/react-query";
 import i18next from "i18next";
 import { Stack } from "expo-router";
@@ -121,8 +121,8 @@ export default function Root() {
 	if (!isReady) return null;
 	rendered = true;
 	return (
-		<AccountContext.Provider value={info}>
-			<QueryClientProvider client={queryClient}>
+		<QueryClientProvider client={queryClient}>
+			<AccountProvider>
 				<ThemeSelector
 					theme={theme ?? "light"}
 					font={{
@@ -138,7 +138,7 @@ export default function Root() {
 						{info.type === "ok" && <AuthGuard selected={info.selected} />}
 					</PortalProvider>
 				</ThemeSelector>
-			</QueryClientProvider>
-		</AccountContext.Provider>
+			</AccountProvider>
+		</QueryClientProvider>
 	);
 }
