@@ -63,7 +63,7 @@ export const AccountProvider = ({
 }) => {
 	if (Platform.OS === "web" && typeof window === "undefined") {
 		const accs = ssrAccount
-			? [{ ...ssrAccount, selected: true, select: () => { }, remove: () => { } }]
+			? [{ ...ssrAccount, selected: true, select: () => {}, remove: () => {} }]
 			: [];
 		return (
 			<AccountContext.Provider value={accs}>

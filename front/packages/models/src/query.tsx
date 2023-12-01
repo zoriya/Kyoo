@@ -37,8 +37,8 @@ const kyooUrl =
 	Platform.OS !== "web"
 		? process.env.PUBLIC_BACK_URL
 		: typeof window === "undefined"
-			? process.env.KYOO_URL ?? "http://localhost:5000"
-			: "/api";
+		  ? process.env.KYOO_URL ?? "http://localhost:5000"
+		  : "/api";
 
 export let kyooApiUrl: string | null = kyooUrl || null;
 
@@ -50,13 +50,13 @@ export const queryFn = async <Data,>(
 	context:
 		| (QueryFunctionContext & { timeout?: number })
 		| {
-			path: (string | false | undefined | null)[];
-			body?: object;
-			method: "GET" | "POST" | "DELETE";
-			authenticated?: boolean;
-			apiUrl?: string;
-			timeout?: number;
-		},
+				path: (string | false | undefined | null)[];
+				body?: object;
+				method: "GET" | "POST" | "DELETE";
+				authenticated?: boolean;
+				apiUrl?: string;
+				timeout?: number;
+		  },
 	type?: z.ZodType<Data>,
 	token?: string | null,
 ): Promise<Data> => {
@@ -72,8 +72,8 @@ export const queryFn = async <Data,>(
 			"path" in context
 				? (context.path.filter((x) => x) as string[])
 				: "pageParam" in context && context.pageParam
-					? [context.pageParam as string]
-					: (context.queryKey.filter((x, i) => x && i) as string[]),
+				  ? [context.pageParam as string]
+				  : (context.queryKey.filter((x, i) => x && i) as string[]),
 		)
 		.join("/")
 		.replace("/?", "?");
@@ -109,7 +109,8 @@ export const queryFn = async <Data,>(
 			data = { errors: [error] } as KyooErrors;
 		}
 		console.log(
-			`Invalid response (${"method" in context && context.method ? context.method : "GET"
+			`Invalid response (${
+				"method" in context && context.method ? context.method : "GET"
 			} ${path}):`,
 			data,
 			resp.status,
@@ -173,8 +174,8 @@ export type QueryPage<Props = {}, Items = unknown> = ComponentType<
 > & {
 	getFetchUrls?: (route: { [key: string]: string }, randomItems: Items[]) => QueryIdentifier<any>[];
 	getLayout?:
-	| QueryPage<{ page: ReactElement }>
-	| { Layout: QueryPage<{ page: ReactElement }>; props: object };
+		| QueryPage<{ page: ReactElement }>
+		| { Layout: QueryPage<{ page: ReactElement }>; props: object };
 	randomItems?: Items[];
 };
 
@@ -186,10 +187,10 @@ const toQueryKey = <Data, Ret>(query: QueryIdentifier<Data, Ret>) => {
 			...prefix,
 			...query.path,
 			"?" +
-			Object.entries(query.params)
-				.filter(([_, v]) => v !== undefined)
-				.map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(",") : v}`)
-				.join("&"),
+				Object.entries(query.params)
+					.filter(([_, v]) => v !== undefined)
+					.map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(",") : v}`)
+					.join("&"),
 		];
 	} else {
 		return [...prefix, ...query.path];

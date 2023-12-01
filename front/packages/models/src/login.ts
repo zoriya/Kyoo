@@ -59,9 +59,10 @@ export const login = async (
 	}
 };
 
-export const getTokenWJ = async (account?: Account | null): Promise<[string, Token] | [null, null]> => {
-	if (account === undefined)
-		account = getCurrentAccount();
+export const getTokenWJ = async (
+	account?: Account | null,
+): Promise<[string, Token] | [null, null]> => {
+	if (account === undefined) account = getCurrentAccount();
 	if (!account) return [null, null];
 
 	if (account.token.expire_at <= new Date(new Date().getTime() + 10 * 1000)) {
@@ -81,8 +82,7 @@ export const getTokenWJ = async (account?: Account | null): Promise<[string, Tok
 	return [`${account.token.token_type} ${account.token.access_token}`, account.token];
 };
 
-export const getToken = async (): Promise<string | null> =>
-	(await getTokenWJ())[0];
+export const getToken = async (): Promise<string | null> => (await getTokenWJ())[0];
 
 export const logout = () => {
 	removeAccounts((x) => x.selected);

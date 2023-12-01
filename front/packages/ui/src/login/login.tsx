@@ -74,7 +74,11 @@ export const LoginPage: QueryPage = () => {
 			<Button
 				text={t("login.login")}
 				onPress={async () => {
-					const { error } = await login("login", { username, password, apiUrl: cleanApiUrl(apiUrl) });
+					const { error } = await login("login", {
+						username,
+						password,
+						apiUrl: cleanApiUrl(apiUrl),
+					});
 					setError(error);
 					if (error) return;
 					router.replace("/", undefined, {
