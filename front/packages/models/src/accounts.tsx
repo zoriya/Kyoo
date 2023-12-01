@@ -19,14 +19,14 @@
  */
 
 import { ReactNode, createContext, useContext, useEffect, useMemo, useRef } from "react";
-import { User, UserP } from "./resources";
+import { UserP } from "./resources";
 import { z } from "zod";
 import { zdate } from "./utils";
 import { removeAccounts, setAccountCookie, updateAccount } from "./account-internal";
 import { useMMKVString } from "react-native-mmkv";
 import { Platform } from "react-native";
-import { queryFn, useFetch } from "./query";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useFetch } from "./query";
+import { useQueryClient } from "@tanstack/react-query";
 import { KyooErrors } from "./kyoo-errors";
 
 export const TokenP = z.object({
@@ -82,7 +82,7 @@ export const AccountProvider = ({
 	}
 
 	const [accStr] = useMMKVString("accounts");
-	const acc = accStr ? z.array(AccountP).parse(accStr) : null;
+	const acc = accStr ? z.array(AccountP).parse(JSON.parse(accStr)) : null;
 	const accounts = useMemo(
 		() =>
 			acc?.map((account) => ({
@@ -104,6 +104,8 @@ export const AccountProvider = ({
 	});
 	useEffect(() => {
 		if (!selected || !user.isSuccess || user.isPlaceholderData) return;
+		// The id is different when user is stale data, we need to wait for the use effect to invalidate the query.
+		if (user.data.id !== selected.id) return;
 		const nUser = { ...selected, ...user.data };
 		if (!Object.is(selected, nUser)) updateAccount(nUser.id, nUser);
 	}, [selected, user]);

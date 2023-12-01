@@ -42,9 +42,9 @@ export const setAccountCookie = (account?: Account) => {
 	// A year
 	d.setTime(d.getTime() + 365 * 24 * 60 * 60 * 1000);
 	const expires = value ? "expires=" + d.toUTCString() : "expires=Thu, 01 Jan 1970 00:00:01 GMT";
-	document.cookie = "account=" + value + ";" + expires + ";path=/";
+	document.cookie = "account=" + value + ";" + expires + ";path=/;samesite=strict";
 	return null;
-}
+};
 
 export const readAccountCookie = (cookies?: string) => {
 	if (!cookies) return null;
@@ -62,18 +62,18 @@ export const readAccountCookie = (cookies?: string) => {
 		}
 	}
 	return null;
-}
+};
 
 export const getCurrentAccount = () => {
 	const accounts = readAccounts();
-	return accounts.find(x => x.selected);
-}
+	return accounts.find((x) => x.selected);
+};
 
 export const addAccount = (account: Account) => {
 	const accounts = readAccounts();
 
 	// Prevent the user from adding the same account twice.
-	if (accounts.find(x => x.id == account.id)) {
+	if (accounts.find((x) => x.id == account.id)) {
 		updateAccount(account.id, account);
 		return;
 	}
@@ -85,7 +85,7 @@ export const addAccount = (account: Account) => {
 
 export const removeAccounts = (filter: (acc: Account) => boolean) => {
 	let accounts = readAccounts();
-	accounts = accounts.filter(filter);
+	accounts = accounts.filter((x) => !filter(x));
 	if (!accounts.find((x) => x.selected) && accounts.length > 0) {
 		accounts[0].selected = true;
 	}
@@ -99,10 +99,9 @@ export const updateAccount = (id: string, account: Account) => {
 
 	if (account.selected) {
 		for (const acc of accounts) acc.selected = false;
-	} else if(accounts[idx].selected) {
+	} else if (accounts[idx].selected) {
 		// we just unselected the current account, focus another one.
-		if (accounts.length > 0)
-			accounts[0].selected = true
+		if (accounts.length > 0) accounts[0].selected = true;
 	}
 
 	accounts[idx] = account;

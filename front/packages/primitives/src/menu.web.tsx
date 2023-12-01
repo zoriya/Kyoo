@@ -140,7 +140,7 @@ const MenuItem = ({
 		<Icon
 			icon={icon ?? Dot}
 			color={disabled ? theme.overlay0 : theme.paragraph}
-			size={ts(icon ? 2 : 1)}
+			size={icon ? 24 : ts(1)}
 			{...nCss({ paddingRight: ts(1) })}
 		/>
 	);
@@ -169,21 +169,17 @@ const MenuItem = ({
 			>
 				{left && left}
 				{!left && icn && icn}
-				{
-					<P
-						{...nCss([
-							{
-								paddingLeft: ts(icon || selected || left ? 0 : 2 + +!!icon),
-								flexGrow: 1,
-							},
-							disabled && {
-								color: theme.overlay0,
-							},
-						])}
-					>
-						{label}
-					</P>
-				}
+				<P
+					{...nCss([
+						{ paddingLeft: 8 * 2 + +!(icon || selected || left) * 24, flexGrow: 1 },
+						disabled && {
+							color: theme.overlay0,
+						},
+					])}
+				>
+					{label}
+				</P>
+
 				{left && icn && icn}
 			</Item>
 		</>
