@@ -11283,7 +11283,7 @@ __metadata:
     react-native-uuid: ^2.0.1
     react-native-video: ^6.0.0-beta.0
     typescript: ^5.3.2
-    yoshiki: 1.2.12
+    yoshiki: 1.2.14
   languageName: unknown
   linkType: soft
 
@@ -15185,7 +15185,7 @@ __metadata:
     sweetalert2: ^11.10.1
     typescript: ^5.3.2
     webpack: ^5.89.0
-    yoshiki: 1.2.12
+    yoshiki: 1.2.14
     zod: ^3.22.4
   languageName: unknown
   linkType: soft
@@ -15612,9 +15612,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yoshiki@npm:1.2.12":
-  version: 1.2.12
-  resolution: "yoshiki@npm:1.2.12"
+"yoshiki@npm:1.2.14":
+  version: 1.2.14
+  resolution: "yoshiki@npm:1.2.14"
   dependencies:
     "@types/inline-style-prefixer": ^5.0.0
     "@types/node": 18.x.x
@@ -15629,7 +15629,7 @@ __metadata:
       optional: true
     react-native-web:
       optional: true
-  checksum: e5e59d8fa3df0039a19641f3d476cc7315cef31d0eb1a8a15fcff56f0a74f870b7d5d78b471b02a32dfab0582a02d33c6aa805a69035fa17ed621ecbe0f0c285
+  checksum: 0f7c6d8195f400492795576d84fbc4a503b59fe124b1dfc67664f6f41659e47ebc30c4dd4c3f74d4ce70dfa955c7deceaf2af0a27a383ed54fb1d7088e50f010
   languageName: node
   linkType: hard
 

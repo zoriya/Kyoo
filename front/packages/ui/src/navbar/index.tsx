@@ -87,8 +87,10 @@ const SearchBar = forwardRef<TextInput, Stylable>(function SearchBar(props, ref)
 				setQuery(q);
 			}}
 			placeholder={t("navbar.search")}
+			placeholderTextColor={theme.colors.white}
+			containerStyle={{ height: ts(4), flexShrink: 1, borderColor: (theme) => theme.colors.white }}
 			{...tooltip(t("navbar.search"))}
-			{...css({ height: ts(4), flexShrink: 1, borderColor: (theme) => theme.colors.white }, props)}
+			{...props}
 		/>
 	);
 });
