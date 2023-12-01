@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { loginFunc, QueryPage } from "@kyoo/models";
+import { login, QueryPage } from "@kyoo/models";
 import { Button, P, Input, ts, H1, A } from "@kyoo/primitives";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -30,7 +30,6 @@ import { DefaultLayout } from "../layout";
 import { FormPage } from "./form";
 import { PasswordInput } from "./password-input";
 import { useQueryClient } from "@tanstack/react-query";
-import { setSecureItem } from "@kyoo/models/src/secure-store";
 import { cleanApiUrl } from "./login";
 
 export const RegisterPage: QueryPage = () => {
@@ -84,15 +83,13 @@ export const RegisterPage: QueryPage = () => {
 				text={t("login.register")}
 				disabled={password !== confirm}
 				onPress={async () => {
-					const { error } = await loginFunc(
+					const { error } = await login(
 						"register",
-						{ email, username, password },
-						cleanApiUrl(apiUrl),
+						{ email, username, password, apiUrl: cleanApiUrl(apiUrl) },
 						5_000,
 					);
 					setError(error);
 					if (error) return;
-					queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
 					router.replace("/", undefined, {
 						experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
 					});

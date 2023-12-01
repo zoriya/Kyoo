@@ -18,102 +18,74 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { z } from "zod";
-import { deleteSecureItem, getSecureItem, setSecureItem } from "./secure-store";
-import { zdate } from "./utils";
 import { queryFn } from "./query";
 import { KyooErrors } from "./kyoo-errors";
-import { Platform } from "react-native";
-
-const TokenP = z.object({
-	token_type: z.literal("Bearer"),
-	access_token: z.string(),
-	refresh_token: z.string(),
-	expire_in: z.string(),
-	expire_at: zdate(),
-});
-type Token = z.infer<typeof TokenP>;
+import { Account, Token, TokenP } from "./accounts";
+import { UserP } from "./resources";
+import { addAccount, getCurrentAccount, removeAccounts, updateAccount } from "./account-internal";
 
 type Result<A, B> =
 	| { ok: true; value: A; error?: undefined }
 	| { ok: false; value?: undefined; error: B };
 
-export type Account = Token & { apiUrl: string; username: string };
-
-const addAccount = (token: Token, apiUrl: string, username: string | null) => {
-	const accounts: Account[] = JSON.parse(getSecureItem("accounts") ?? "[]");
-	if (accounts.find((x) => x.username === username && x.apiUrl === apiUrl)) return;
-	accounts.push({ ...token, username: username!, apiUrl });
-	setSecureItem("accounts", JSON.stringify(accounts));
-	setSecureItem("selected", (accounts.length - 1).toString());
-};
-
-const setCurrentAccountToken = (token: Token) => {
-	const accounts: Account[] = JSON.parse(getSecureItem("accounts") ?? "[]");
-	const selected = parseInt(getSecureItem("selected") ?? "0");
-	if (selected >= accounts.length) return;
-
-	accounts[selected] = { ...accounts[selected], ...token };
-	setSecureItem("accounts", JSON.stringify(accounts));
-};
-
-export const loginFunc = async (
-	action: "register" | "login" | "refresh",
-	body: { username: string; password: string; email?: string } | string,
-	apiUrl?: string,
+export const login = async (
+	action: "register" | "login",
+	{ apiUrl, ...body }: { username: string; password: string; email?: string; apiUrl?: string },
 	timeout?: number,
-): Promise<Result<Token, string>> => {
+): Promise<Result<Account, string>> => {
 	try {
-		const controller = timeout !== undefined ? new AbortController() : undefined;
-		if (controller) setTimeout(() => controller.abort(), timeout);
 		const token = await queryFn(
 			{
-				path: ["auth", action, typeof body === "string" && `?token=${body}`],
-				method: typeof body === "string" ? "GET" : "POST",
-				body: typeof body === "object" ? body : undefined,
+				path: ["auth", action],
+				method: "POST",
+				body,
 				authenticated: false,
 				apiUrl,
-				abortSignal: controller?.signal,
+				timeout,
 			},
 			TokenP,
 		);
-
-		if (typeof window !== "undefined") setSecureItem("auth", JSON.stringify(token));
-		if (Platform.OS !== "web" && apiUrl && typeof body !== "string")
-			addAccount(token, apiUrl, body.username);
-		else if (Platform.OS !== "web" && action === "refresh") setCurrentAccountToken(token);
-		return { ok: true, value: token };
+		const user = await queryFn(
+			{ path: ["auth", "me"], method: "GET", apiUrl },
+			UserP,
+			token.access_token,
+		);
+		const account: Account = { ...user, apiUrl: apiUrl ?? "/api", token, selected: true };
+		addAccount(account);
+		return { ok: true, value: account };
 	} catch (e) {
 		console.error(action, e);
 		return { ok: false, error: (e as KyooErrors).errors[0] };
 	}
 };
 
-export const getTokenWJ = async (cookies?: string): Promise<[string, Token] | [null, null]> => {
-	const tokenStr = getSecureItem("auth", cookies);
-	if (!tokenStr) return [null, null];
-	let token = TokenP.parse(JSON.parse(tokenStr));
+export const getTokenWJ = async (account?: Account | null): Promise<[string, Token] | [null, null]> => {
+	if (account === null)
+		account = getCurrentAccount();
+	if (!account) return [null, null];
 
-	if (token.expire_at <= new Date(new Date().getTime() + 10 * 1000)) {
-		const { ok, value: nToken, error } = await loginFunc("refresh", token.refresh_token);
-		if (!ok) console.error("Error refreshing token durring ssr:", error);
-		else token = nToken;
+	if (account.token.expire_at <= new Date(new Date().getTime() + 10 * 1000)) {
+		try {
+			const token = await queryFn(
+				{
+					path: ["auth", "refresh", `?token=${account.token.refresh_token}`],
+					method: "GET",
+				},
+				TokenP,
+			);
+			updateAccount(account.id, { ...account, token });
+		} catch (e) {
+			console.error("Error refreshing token durring ssr:", e);
+		}
 	}
-	return [`${token.token_type} ${token.access_token}`, token];
+	return [`${account.token.token_type} ${account.token.access_token}`, account.token];
 };
 
-export const getToken = async (cookies?: string): Promise<string | null> =>
-	(await getTokenWJ(cookies))[0];
+export const getToken = async (): Promise<string | null> =>
+	(await getTokenWJ())[0];
 
 export const logout = () => {
-	if (Platform.OS !== "web") {
-		let accounts: Account[] = JSON.parse(getSecureItem("accounts") ?? "[]");
-		const selected = parseInt(getSecureItem("selected") ?? "0");
-		accounts.splice(selected, 1);
-		setSecureItem("accounts", JSON.stringify(accounts));
-	}
-
-	deleteSecureItem("auth");
+	removeAccounts((x) => x.selected);
 };
 
 export const deleteAccount = async () => {

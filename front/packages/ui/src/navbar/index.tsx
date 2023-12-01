@@ -18,7 +18,15 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { AccountContext, deleteAccount, logout, QueryIdentifier, User, UserP } from "@kyoo/models";
+import {
+	deleteAccount,
+	logout,
+	QueryIdentifier,
+	useAccount,
+	useAccounts,
+	User,
+	UserP,
+} from "@kyoo/models";
 import {
 	Alert,
 	Input,
@@ -99,79 +107,65 @@ const getDisplayUrl = (url: string) => {
 export const NavbarProfile = () => {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
-	const queryClient = useQueryClient();
-	const { accounts, selected, setSelected } = useContext(AccountContext);
+	const account = useAccount();
+	const accounts = useAccounts();
 
 	return (
-		<FetchNE query={MeQuery}>
-			{({ isError: isGuest, username }) => (
-				<Menu
-					Trigger={Avatar}
-					as={PressableFeedback}
-					placeholder={username}
-					alt={t("navbar.login")}
-					size={24}
-					color={theme.colors.white}
-					{...css({ marginLeft: ts(1), justifyContent: "center" })}
-					{...tooltip(username ?? t("navbar.login"))}
-				>
-					{accounts?.map((x, i) => (
-						<Menu.Item
-							key={x.refresh_token}
-							label={`${x.username} - ${getDisplayUrl(x.apiUrl)}`}
-							left={<Avatar placeholder={x.username} />}
-							selected={selected === i}
-							onSelect={() => setSelected!(i)}
-						/>
-					))}
-					{accounts && accounts.length > 0 && <HR />}
-					{isGuest ? (
-						<>
-							<Menu.Item label={t("login.login")} icon={Login} href="/login" />
-							<Menu.Item label={t("login.register")} icon={Register} href="/register" />
-						</>
-					) : (
-						<>
-							<Menu.Item label={t("login.add-account")} icon={Login} href="/login" />
-							<Menu.Item
-								label={t("login.logout")}
-								icon={Logout}
-								onSelect={() => {
-									logout();
-									queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
-								}}
-							/>
-							<Menu.Item
-								label={t("login.delete")}
-								icon={Delete}
-								onSelect={async () => {
-									Alert.alert(
-										t("login.delete"),
-										t("login.delete-confirmation"),
-										[
-											{
-												text: t("misc.delete"),
-												onPress: async () => {
-													await deleteAccount();
-													queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
-												},
-												style: "destructive",
-											},
-											{ text: t("misc.cancel"), style: "cancel" },
-										],
-										{
-											cancelable: true,
-											userInterfaceStyle: theme.mode === "auto" ? "light" : theme.mode,
-											icon: "warning",
-										},
-									);
-								}}
-							/>
-						</>
-					)}
-				</Menu>
+		<Menu
+			Trigger={Avatar}
+			as={PressableFeedback}
+			placeholder={account?.username}
+			alt={t("navbar.login")}
+			size={24}
+			color={theme.colors.white}
+			{...css({ marginLeft: ts(1), justifyContent: "center" })}
+			{...tooltip(account?.username ?? t("navbar.login"))}
+		>
+			{accounts?.map((x, i) => (
+				<Menu.Item
+					key={x.id}
+					label={`${x.username} - ${getDisplayUrl(x.apiUrl)}`}
+					left={<Avatar placeholder={x.username} />}
+					selected={x.selected}
+					onSelect={() => x.select()}
+				/>
+			))}
+			{accounts.length > 0 && <HR />}
+			{!accounts ? (
+				<>
+					<Menu.Item label={t("login.login")} icon={Login} href="/login" />
+					<Menu.Item label={t("login.register")} icon={Register} href="/register" />
+				</>
+			) : (
+				<>
+					<Menu.Item label={t("login.add-account")} icon={Login} href="/login" />
+					<Menu.Item label={t("login.logout")} icon={Logout} onSelect={logout} />
+					<Menu.Item
+						label={t("login.delete")}
+						icon={Delete}
+						onSelect={async () => {
+							Alert.alert(
+								t("login.delete"),
+								t("login.delete-confirmation"),
+								[
+									{
+										text: t("misc.delete"),
+										onPress: deleteAccount,
+										style: "destructive",
+									},
+									{ text: t("misc.cancel"), style: "cancel" },
+								],
+								{
+									cancelable: true,
+									userInterfaceStyle: theme.mode === "auto" ? "light" : theme.mode,
+									icon: "warning",
+								},
+							);
+						}}
+					/>
+				</>
 			)}
-		</FetchNE>
+		</Menu>
 	);
 };
 export const NavbarRight = () => {
