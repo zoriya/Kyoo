@@ -88,7 +88,7 @@ const SearchBar = forwardRef<TextInput, Stylable>(function SearchBar(props, ref)
 			}}
 			placeholder={t("navbar.search")}
 			{...tooltip(t("navbar.search"))}
-			{...css({ height: ts(4), flexShrink: 1 }, props)}
+			{...css({ height: ts(4), flexShrink: 1, borderColor: (theme) => theme.colors.white }, props)}
 		/>
 	);
 });
@@ -131,7 +131,7 @@ export const NavbarProfile = () => {
 				/>
 			))}
 			{accounts.length > 0 && <HR />}
-			{!accounts ? (
+			{!account ? (
 				<>
 					<Menu.Item label={t("login.login")} icon={Login} href="/login" />
 					<Menu.Item label={t("login.register")} icon={Register} href="/register" />
