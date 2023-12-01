@@ -21,7 +21,7 @@
 import { PortalProvider } from "@gorhom/portal";
 import { ThemeSelector } from "@kyoo/primitives";
 import { NavbarRight, NavbarTitle } from "@kyoo/ui";
-import { AccountProvider, createQueryClient, useAccounts } from "@kyoo/models";
+import { AccountProvider, createQueryClient, useAccount, useAccounts } from "@kyoo/models";
 import { QueryClientProvider } from "@tanstack/react-query";
 import i18next from "i18next";
 import { Stack } from "expo-router";
@@ -92,53 +92,53 @@ const ThemedStack = ({ onLayout }: { onLayout?: () => void }) => {
 	);
 };
 
-const AuthGuard = ({ selected }: { selected: number | null }) => {
+const AuthGuard = () => {
 	const router = useRouter();
+	// TODO: support guest accounts on mobile too.
+	const account = useAccount();
 
 	useEffect(() => {
-		if (selected === null)
+		if (account === null)
 			router.replace("/login", undefined, {
 				experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
 			});
-	}, [selected, router]);
+	}, [account, router]);
 	return null;
 };
 
-let rendered: boolean = false;
 SplashScreen.preventAutoHideAsync();
 
 export default function Root() {
 	const [queryClient] = useState(() => createQueryClient());
 	const theme = useColorScheme();
 	const [fontsLoaded] = useFonts({ Poppins_300Light, Poppins_400Regular, Poppins_900Black });
-	const info = useAccounts();
-	const isReady = fontsLoaded && (rendered || info.type !== "loading");
 
 	useEffect(() => {
-		if (isReady) SplashScreen.hideAsync();
-	}, [isReady]);
+		if (fontsLoaded) SplashScreen.hideAsync();
+	}, [fontsLoaded]);
 
-	if (!isReady) return null;
-	rendered = true;
+	if (!fontsLoaded) return null;
 	return (
 		<QueryClientProvider client={queryClient}>
-			<AccountProvider>
-				<ThemeSelector
-					theme={theme ?? "light"}
-					font={{
-						normal: "Poppins_400Regular",
-						"300": "Poppins_300Light",
-						"400": "Poppins_400Regular",
-						"900": "Poppins_900Black",
-					}}
-				>
-					<PortalProvider>
-						{info.type === "loading" ? <CircularProgress /> : <ThemedStack />}
-						{info.type === "error" && <ConnectionError />}
-						{info.type === "ok" && <AuthGuard selected={info.selected} />}
-					</PortalProvider>
-				</ThemeSelector>
-			</AccountProvider>
+			<ThemeSelector
+				theme={theme ?? "light"}
+				font={{
+					normal: "Poppins_400Regular",
+					"300": "Poppins_300Light",
+					"400": "Poppins_400Regular",
+					"900": "Poppins_900Black",
+				}}
+			>
+				<PortalProvider>
+					<AccountProvider>
+						<>
+							<ThemedStack />
+							<ConnectionError />
+							<AuthGuard />
+						</>
+					</AccountProvider>
+				</PortalProvider>
+			</ThemeSelector>
 		</QueryClientProvider>
 	);
 }

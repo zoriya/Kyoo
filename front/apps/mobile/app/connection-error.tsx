@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { AccountContext } from "@kyoo/models";
+import { ConnectionErrorContext } from "@kyoo/models";
 import { Button, H1, P, ts } from "@kyoo/primitives";
 import { useRouter } from "expo-router";
 import { useContext } from "react";
@@ -30,12 +30,12 @@ const ConnectionError = () => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 	const router = useRouter();
-	const { error, retry } = useContext(AccountContext);
+	const { error, retry } = useContext(ConnectionErrorContext);
 
 	return (
 		<View {...css({ padding: ts(2) })}>
 			<H1 {...css({ textAlign: "center" })}>{t("errors.connection")}</H1>
-			<P>{error ?? t("error.unknown")}</P>
+			<P>{error?.errors[0] ?? t("error.unknown")}</P>
 			<P>{t("errors.connection-tips")}</P>
 			<Button onPress={retry} text={t("errors.try-again")} {...css({ m: ts(1) })} />
 			<Button
