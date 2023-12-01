@@ -170,7 +170,6 @@ App.getInitialProps = async (ctx: AppContext) => {
 
 	if (typeof window !== "undefined") return { pageProps: superjson.serialize(appProps.pageProps) };
 
-
 	const getUrl = Component.getFetchUrls;
 	const getLayoutUrl =
 		Component.getLayout && "Layout" in Component.getLayout
