@@ -98,6 +98,7 @@ const nextConfig = {
 		"react-native-web",
 		"react-native-svg",
 		"react-native-reanimated",
+		"react-native-mmkv",
 		"moti",
 		"yoshiki",
 		"@expo/vector-icons",

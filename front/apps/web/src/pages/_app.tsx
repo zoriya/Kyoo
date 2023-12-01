@@ -109,7 +109,7 @@ const YoshikiDebug = ({ children }: { children: JSX.Element }) => {
 
 const App = ({ Component, pageProps }: AppProps) => {
 	const [queryClient] = useState(() => createQueryClient());
-	const { queryState, token, randomItems, ...props } = superjson.deserialize<any>(
+	const { queryState, token, randomItems, account, ...props } = superjson.deserialize<any>(
 		pageProps ?? { json: {} },
 	);
 	const layoutInfo = (Component as QueryPage).getLayout ?? (({ page }) => page);
@@ -132,7 +132,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 					<meta name="description" content="A portable and vast media library solution." />
 				</Head>
 				<QueryClientProvider client={queryClient}>
-					<AccountProvider>
+					<AccountProvider ssrAccount={account}>
 						<HydrationBoundary state={queryState}>
 							<ThemeSelector theme="auto" font={{ normal: "inherit" }}>
 								<GlobalCssTheme />
@@ -160,27 +160,32 @@ const App = ({ Component, pageProps }: AppProps) => {
 };
 
 App.getInitialProps = async (ctx: AppContext) => {
-	const account = readAccountCookie(ctx.ctx.req?.headers.cookie);
 	const appProps = await NextApp.getInitialProps(ctx);
 	const Component = ctx.Component as QueryPage;
+
+	const items = arrayShuffle(Component.randomItems ?? []);
+	appProps.pageProps.randomItems = {
+		[Component.displayName!]: items,
+	};
+
+	if (typeof window !== "undefined") return { pageProps: superjson.serialize(appProps.pageProps) };
+
 
 	const getUrl = Component.getFetchUrls;
 	const getLayoutUrl =
 		Component.getLayout && "Layout" in Component.getLayout
 			? Component.getLayout.Layout.getFetchUrls
 			: Component.getLayout?.getFetchUrls;
-
-	const items = arrayShuffle(Component.randomItems ?? []);
-	appProps.pageProps.randomItems = {
-		[Component.displayName!]: items,
-	};
 	const urls: QueryIdentifier[] = [
 		...(getUrl ? getUrl(ctx.router.query as any, items) : []),
 		...(getLayoutUrl ? getLayoutUrl(ctx.router.query as any, items) : []),
 	];
+
+	const account = readAccountCookie(ctx.ctx.req?.headers.cookie);
 	const [authToken, token] = await getTokenWJ(account ?? null);
 	appProps.pageProps.queryState = await fetchQuery(urls, authToken);
 	appProps.pageProps.token = token;
+	appProps.pageProps.account = account;
 
 	return { pageProps: superjson.serialize(appProps.pageProps) };
 };

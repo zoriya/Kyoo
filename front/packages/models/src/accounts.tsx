@@ -53,16 +53,43 @@ export const ConnectionErrorContext = createContext<{
 	retry?: () => void;
 }>({ error: null });
 
-export const AccountProvider = ({ children }: { children: ReactNode }) => {
+/* eslint-disable react-hooks/rules-of-hooks */
+export const AccountProvider = ({
+	children,
+	ssrAccount,
+}: {
+	children: ReactNode;
+	ssrAccount?: Account;
+}) => {
+	if (Platform.OS === "web" && typeof window === "undefined") {
+		const accs = ssrAccount
+			? [{ ...ssrAccount, selected: true, select: () => { }, remove: () => { } }]
+			: [];
+		return (
+			<AccountContext.Provider value={accs}>
+				<ConnectionErrorContext.Provider
+					value={{
+						error: null,
+						retry: () => {
+							queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+						},
+					}}
+				>
+					{children}
+				</ConnectionErrorContext.Provider>
+			</AccountContext.Provider>
+		);
+	}
+
 	const [accStr] = useMMKVString("accounts");
-	const acc = z.array(AccountP).parse(accStr);
+	const acc = accStr ? z.array(AccountP).parse(accStr) : null;
 	const accounts = useMemo(
 		() =>
-			acc.map((account) => ({
+			acc?.map((account) => ({
 				...account,
 				select: () => updateAccount(account.id, { ...account, selected: true }),
 				remove: () => removeAccounts((x) => x.id == x.id),
-			})),
+			})) ?? [],
 		[acc],
 	);
 

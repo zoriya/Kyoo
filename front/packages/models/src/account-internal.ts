@@ -35,9 +35,9 @@ const writeAccounts = (accounts: Account[]) => {
 };
 
 export const setAccountCookie = (account?: Account) => {
-	const value = JSON.stringify(account);
+	let value = JSON.stringify(account);
 	// Remove illegal values from json. There should not be one in the account anyways.
-	value.replaceAll(";", "");
+	value = value?.replaceAll(";", "");
 	const d = new Date();
 	// A year
 	d.setTime(d.getTime() + 365 * 24 * 60 * 60 * 1000);
