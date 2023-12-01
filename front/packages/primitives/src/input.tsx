@@ -38,7 +38,7 @@ export const Input = forwardRef<
 			{...css(
 				[
 					{
-						borderColor: (theme) => theme.colors.white,
+						borderColor: (theme) => theme.accent,
 						borderRadius: ts(1),
 						borderWidth: px(1),
 						borderStyle: "solid",

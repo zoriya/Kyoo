@@ -23,7 +23,7 @@ import { ComponentProps, ComponentType, forwardRef, ReactElement, ReactNode } fr
 import Link from "next/link";
 import { PressableProps } from "react-native";
 import { useYoshiki } from "yoshiki/web";
-import { px, useYoshiki as useNativeYoshiki, calc } from "yoshiki/native";
+import { useYoshiki as useNativeYoshiki } from "yoshiki/native";
 import { P } from "./text";
 import { ContrastArea, SwitchVariant } from "./themes";
 import { Icon } from "./icons";
@@ -162,7 +162,7 @@ const MenuItem = ({
 						alignItems: "center",
 						padding: "8px",
 						height: "32px",
-						focus: focusReset as any,
+						...focusReset,
 					},
 					props as any,
 				)}
