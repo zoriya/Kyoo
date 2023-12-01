@@ -48,7 +48,7 @@ export const login = async (
 		const user = await queryFn(
 			{ path: ["auth", "me"], method: "GET", apiUrl },
 			UserP,
-			token.access_token,
+			`Bearer ${token.access_token}`,
 		);
 		const account: Account = { ...user, apiUrl: apiUrl ?? "/api", token, selected: true };
 		addAccount(account);
