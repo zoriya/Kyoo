@@ -18,74 +18,84 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { getSecureItem, setSecureItem, storage } from "./secure-store";
-import { setApiUrl } from "./query";
-import { createContext, useEffect, useState } from "react";
-import { useMMKVListener } from "react-native-mmkv";
-import { Account, loginFunc } from "./login";
+import { ReactNode, createContext, useContext, useEffect, useMemo, useRef } from "react";
+import { User, UserP } from "./resources";
+import { z } from "zod";
+import { zdate } from "./utils";
+import { removeAccounts, setAccountCookie, updateAccount } from "./account-internal";
+import { useMMKVString } from "react-native-mmkv";
+import { Platform } from "react-native";
+import { queryFn, useFetch } from "./query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-export const AccountContext = createContext<ReturnType<typeof useAccounts>>({ type: "loading" });
+export const TokenP = z.object({
+	token_type: z.literal("Bearer"),
+	access_token: z.string(),
+	refresh_token: z.string(),
+	expire_in: z.string(),
+	expire_at: zdate(),
+});
+export type Token = z.infer<typeof TokenP>;
+
+export const AccountP = UserP.and(
+	z.object({
+		token: TokenP,
+		apiUrl: z.string(),
+		selected: z.boolean(),
+	}),
+);
+export type Account = z.infer<typeof AccountP>;
+
+const AccountContext = createContext<(Account & { select: () => void; remove: () => void })[]>([]);
+
+export const AccountProvider = ({ children }: { children: ReactNode }) => {
+	const [accStr] = useMMKVString("accounts");
+	const acc = z.array(AccountP).parse(accStr);
+	const accounts = useMemo(
+		() =>
+			acc.map((account) => ({
+				...account,
+				select: () => updateAccount(account.id, { ...account, selected: true }),
+				remove: () => removeAccounts((x) => x.id == x.id),
+			})),
+		[acc],
+	);
+
+	// update user's data from kyoo un startup, it could have changed.
+	const selected = useMemo(() => accounts.find((x) => x.selected), [accounts]);
+	const user = useFetch({
+		path: ["auth", "me"],
+		parser: UserP,
+		placeholderData: selected,
+		enabled: !!selected,
+		timeout: 5_000,
+	});
+	useEffect(() => {
+		if (!selected || !user.isSuccess || user.isPlaceholderData) return;
+		const nUser = { ...selected, ...user.data };
+		if (!Object.is(selected, nUser)) updateAccount(nUser.id, nUser);
+	}, [selected, user]);
+
+	const queryClient = useQueryClient();
+	const oldSelectedId = useRef<string | undefined>(selected?.id);
+	useEffect(() => {
+		// if the user change account (or connect/disconnect), reset query cache.
+		if (selected?.id !== oldSelectedId.current)
+			queryClient.invalidateQueries();
+		oldSelectedId.current = selected?.id;
+
+		// update cookies for ssr (needs to contains token, theme, language...)
+		if (Platform.OS === "web") setAccountCookie(selected);
+	}, [selected, queryClient]);
+
+	return <AccountContext.Provider value={accounts}>{children}</AccountContext.Provider>;
+};
+
+export const useAccount = () => {
+	const acc = useContext(AccountContext);
+	return acc.find((x) => x.selected);
+};
 
 export const useAccounts = () => {
-	const [accounts, setAccounts] = useState<Account[]>(
-		JSON.parse(getSecureItem("accounts") ?? "[]"),
-	);
-	const [verified, setVerified] = useState<{
-		status: "ok" | "error" | "loading" | "unverified";
-		error?: string;
-	}>({ status: "loading" });
-	const [retryCount, setRetryCount] = useState(0);
-
-	const sel = getSecureItem("selected");
-	let [selected, _setSelected] = useState<number | null>(
-		sel ? parseInt(sel) : accounts.length > 0 ? 0 : null,
-	);
-	if (selected === null && accounts.length > 0) selected = 0;
-	if (accounts.length === 0) selected = null;
-
-	const setSelected = (selected: number) => {
-		_setSelected(selected);
-		setSecureItem("selected", selected.toString());
-	};
-
-	useEffect(() => {
-		async function check() {
-			setVerified({ status: "loading" });
-			const selAcc = accounts![selected!];
-			setApiUrl(selAcc.apiUrl);
-			const verif = await loginFunc("refresh", selAcc.refresh_token, undefined, 5_000);
-			setVerified(verif.ok ? { status: "ok" } : { status: "error", error: verif.error });
-		}
-
-		if (accounts.length && selected !== null) check();
-		else setVerified({ status: "unverified" });
-		// Use the length of the array and not the array directly because we don't care if the refresh token changes.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [accounts.length, selected, retryCount]);
-
-	useMMKVListener((key) => {
-		if (key === "accounts") setAccounts(JSON.parse(getSecureItem("accounts") ?? "[]"));
-	}, storage);
-
-	if (verified.status === "loading") return { type: "loading" } as const;
-	if (accounts.length && verified.status === "unverified") return { type: "loading" } as const;
-	if (verified.status === "error") {
-		return {
-			type: "error",
-			accounts,
-			selected,
-			error: verified.error,
-			setSelected,
-			retry: () => {
-				setVerified({ status: "loading" });
-				setRetryCount((x) => x + 1);
-			},
-		} as const;
-	}
-	return {
-		type: "ok",
-		accounts,
-		selected,
-		setSelected,
-	} as const;
+	return useContext(AccountContext);
 };
