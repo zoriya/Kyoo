@@ -60,7 +60,7 @@ export const login = async (
 };
 
 export const getTokenWJ = async (account?: Account | null): Promise<[string, Token] | [null, null]> => {
-	if (account === null)
+	if (account === undefined)
 		account = getCurrentAccount();
 	if (!account) return [null, null];
 
