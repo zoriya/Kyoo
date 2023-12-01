@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { loginFunc, QueryPage } from "@kyoo/models";
+import { login, QueryPage } from "@kyoo/models";
 import { Button, P, Input, ts, H1, A } from "@kyoo/primitives";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -74,10 +74,9 @@ export const LoginPage: QueryPage = () => {
 			<Button
 				text={t("login.login")}
 				onPress={async () => {
-					const { error } = await loginFunc("login", { username, password }, cleanApiUrl(apiUrl));
+					const { error } = await login("login", { username, password, apiUrl: cleanApiUrl(apiUrl) });
 					setError(error);
 					if (error) return;
-					queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
 					router.replace("/", undefined, {
 						experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
 					});
