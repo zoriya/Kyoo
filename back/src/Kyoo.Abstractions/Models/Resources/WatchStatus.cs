@@ -196,7 +196,7 @@ namespace Kyoo.Abstractions.Models
 		public WatchStatus Status { get; set; }
 
 		/// <summary>
-		/// The numder of episodes the user has not seen.
+		/// The number of episodes the user has not seen.
 		/// </summary>
 		public int UnseenEpisodesCount { get; set; }
 
@@ -206,7 +206,7 @@ namespace Kyoo.Abstractions.Models
 		[SerializeIgnore] public Guid NextEpisodeId { get; set; }
 
 		/// <summary>
-		/// The <see cref="Show"/> started.
+		/// The next <see cref="Episode"/> to watch.
 		/// </summary>
 		public Episode? NextEpisode { get; set; }
 

@@ -26,6 +26,7 @@ import { StudioP } from "./studio";
 import { Status } from "./show";
 import { CollectionP } from "./collection";
 import { MetadataP } from "./metadata";
+import { WatchStatusP } from "./watch-status";
 
 export const MovieP = withImages(
 	ResourceP.extend({
@@ -99,6 +100,10 @@ export const MovieP = withImages(
 		 * The link to metadata providers that this show has.
 		 */
 		externalId: MetadataP,
+		/**
+		 * Metadata of what an user as started/planned to watch.
+		 */
+		watchStatus: WatchStatusP.optional().nullable(),
 	}),
 	"movies",
 )

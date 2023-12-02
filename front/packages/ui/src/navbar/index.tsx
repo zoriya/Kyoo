@@ -18,15 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-	deleteAccount,
-	logout,
-	QueryIdentifier,
-	useAccount,
-	useAccounts,
-	User,
-	UserP,
-} from "@kyoo/models";
+import { deleteAccount, logout, useAccount, useAccounts } from "@kyoo/models";
 import {
 	Alert,
 	Input,
@@ -49,10 +41,8 @@ import Login from "@material-symbols/svg-400/rounded/login.svg";
 import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
 import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import Delete from "@material-symbols/svg-400/rounded/delete.svg";
-import { FetchNE } from "../fetch";
 import { KyooLongLogo } from "./icon";
-import { forwardRef, useContext, useEffect, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { forwardRef, useEffect, useRef, useState } from "react";
 
 export const NavbarTitle = (props: Stylable & { onLayout?: ViewProps["onLayout"] }) => {
 	const { t } = useTranslation();
@@ -94,11 +84,6 @@ const SearchBar = forwardRef<TextInput, Stylable>(function SearchBar(props, ref)
 		/>
 	);
 });
-
-export const MeQuery: QueryIdentifier<User> = {
-	path: ["auth", "me"],
-	parser: UserP,
-};
 
 const getDisplayUrl = (url: string) => {
 	url = url.replace(/\/api$/, "");

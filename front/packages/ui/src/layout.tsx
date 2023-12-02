@@ -19,7 +19,7 @@
  */
 
 import { ReactElement } from "react";
-import { MeQuery, Navbar } from "./navbar";
+import { Navbar } from "./navbar";
 import { useYoshiki, vw } from "yoshiki/native";
 import { Main } from "@kyoo/primitives";
 
@@ -60,4 +60,3 @@ export const DefaultLayout = ({
 		</>
 	);
 };
-DefaultLayout.getFetchUrls = () => [MeQuery];

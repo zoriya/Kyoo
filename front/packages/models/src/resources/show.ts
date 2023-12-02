@@ -27,6 +27,7 @@ import { StudioP } from "./studio";
 import { BaseEpisodeP } from "./episode.base";
 import { CollectionP } from "./collection";
 import { MetadataP } from "./metadata";
+import { WatchStatusP } from "./watch-status";
 
 /**
  * The enum containing show's status.
@@ -104,6 +105,23 @@ export const ShowP = withImages(
 		 * The link to metadata providers that this show has.
 		 */
 		externalId: MetadataP,
+		/**
+		 * Metadata of what an user as started/planned to watch.
+		 */
+		watchStatus: WatchStatusP.and(
+			z.object({
+				/**
+				 * The number of episodes the user has not seen.
+				 */
+				unseenEpisodeCount: z.number().int().gte(0),
+				/**
+				 * The next episode to watch
+				 */
+				nextEpisode: BaseEpisodeP.nullable(),
+			}),
+		)
+			.nullable()
+			.optional(),
 	}),
 	"shows",
 )
