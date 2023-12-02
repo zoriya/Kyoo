@@ -21,6 +21,7 @@
 import { z } from "zod";
 import { ShowP } from "./show";
 import { BaseEpisodeP } from "./episode.base";
+import { WatchStatusP } from "./watch-status";
 
 export const EpisodeP = BaseEpisodeP.and(
 	z.object({
@@ -36,6 +37,10 @@ export const EpisodeP = BaseEpisodeP.and(
 		nextEpisode: BaseEpisodeP.nullable().optional(),
 
 		show: ShowP.optional(),
+		/**
+		 * Metadata of what an user as started/planned to watch.
+		 */
+		watchStatus: WatchStatusP.optional().nullable(),
 	}),
 ).transform((x) => {
 	if (x.show && !x.thumbnail && x.show.thumbnail) x.thumbnail = x.show.thumbnail;
