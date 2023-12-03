@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Authentication.Models;
 
 namespace Kyoo.Authentication
@@ -51,6 +52,14 @@ namespace Kyoo.Authentication
 			if (Guid.TryParse(value?.Value, out Guid id))
 				return id;
 			return null;
+		}
+
+		public static Guid GetIdOrThrow(this ClaimsPrincipal user)
+		{
+			Guid? ret = user.GetId();
+			if (ret == null)
+				throw new UnauthorizedException();
+			return ret.Value;
 		}
 	}
 }

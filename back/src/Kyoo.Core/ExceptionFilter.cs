@@ -61,6 +61,9 @@ namespace Kyoo.Core
 					// Should not happen but if it does, it is better than returning a 409 with no body since clients expect json content
 					context.Result = new ConflictObjectResult(new RequestError("Duplicated item"));
 					break;
+				case UnauthorizedException ex:
+					context.Result = new UnauthorizedObjectResult(new RequestError(ex.Message ?? "User not authenticated or token invalid."));
+					break;
 				case Exception ex:
 					_logger.LogError(ex, "Unhandled error");
 					context.Result = new ServerErrorObjectResult(new RequestError("Internal Server Error"));
