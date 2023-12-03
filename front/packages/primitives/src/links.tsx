@@ -23,7 +23,6 @@ import { Platform, Pressable, TextProps, View, PressableProps } from "react-nati
 import { TextLink, useLink } from "solito/link";
 import { useTheme, useYoshiki } from "yoshiki/native";
 import { alpha } from "./themes";
-import { NextLink } from "solito/build/link/next-link";
 
 export const A = ({
 	href,

@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { IconButton, tooltip } from "@kyoo/primitives";
+import { Icon, IconButton, tooltip } from "@kyoo/primitives";
 import { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import BookmarkAdd from "@material-symbols/svg-400/rounded/bookmark_add.svg";
@@ -26,7 +26,7 @@ import Bookmark from "@material-symbols/svg-400/rounded/bookmark-fill.svg";
 import BookmarkAdded from "@material-symbols/svg-400/rounded/bookmark_added-fill.svg";
 import BookmarkRemove from "@material-symbols/svg-400/rounded/bookmark_remove.svg";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { WatchStatusV, queryFn } from "@kyoo/models";
+import { WatchStatusV, queryFn, useAccount } from "@kyoo/models";
 
 export const WatchListInfo = ({
 	type,
@@ -39,6 +39,7 @@ export const WatchListInfo = ({
 	status: WatchStatusV | null;
 	color: ComponentProps<typeof IconButton>["color"];
 }) => {
+	const account = useAccount();
 	const { t } = useTranslation();
 
 	const queryClient = useQueryClient();
@@ -50,8 +51,17 @@ export const WatchListInfo = ({
 			}),
 		onSettled: async () => await queryClient.invalidateQueries({ queryKey: [type, slug] }),
 	});
-
 	if (mutation.isPending) status = mutation.variables;
+
+	if (account == null) {
+		return <IconButton
+			icon={BookmarkAdd}
+			disabled
+			{...tooltip(t("show.watchlistLogin"))}
+			{...props}
+		/>
+	}
+
 	switch (status) {
 		case null:
 			return (
