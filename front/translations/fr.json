@@ -22,7 +22,8 @@
 		"partOf": "Fait parti de",
 		"watchlistAdd": "Ajouter à votre liste de visionnage",
 		"watchlistEdit": "Editer le status",
-		"watchlistRemove": "Marquer comme non vu"
+		"watchlistRemove": "Marquer comme non vu",
+		"watchlistLogin": "Connectez-vous pour ajouter a votre liste de visionnage"
 	},
 	"browse": {
 		"sortby": "Trier par {{key}}",

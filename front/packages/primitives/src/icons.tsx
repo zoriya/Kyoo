@@ -74,7 +74,7 @@ export const IconButton = forwardRef(function IconButton<AsProps = PressableProp
 	} & AsProps,
 	ref: ForwardedRef<unknown>,
 ) {
-	const { css } = useYoshiki();
+	const { css, theme } = useYoshiki();
 
 	const Container = as ?? PressableFeedback;
 
@@ -98,7 +98,11 @@ export const IconButton = forwardRef(function IconButton<AsProps = PressableProp
 				asProps,
 			) as AsProps)}
 		>
-			<Icon icon={icon} size={size} color={color} />
+			<Icon
+				icon={icon}
+				size={size}
+				color={"disabled" in asProps && asProps.disabled ? theme.overlay1 : color}
+			/>
 		</Container>
 	);
 });
