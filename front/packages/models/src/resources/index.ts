@@ -29,4 +29,5 @@ export * from "./studio";
 export * from "./episode";
 export * from "./season";
 export * from "./watch-info";
+export * from "./watch-status";
 export * from "./user";

@@ -50,7 +50,7 @@ import {
 } from "@kyoo/primitives";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
-import { ImageStyle, Platform, Text, View } from "react-native";
+import { ImageStyle, Platform, View } from "react-native";
 import {
 	Theme,
 	md,
@@ -69,7 +69,8 @@ import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg";
 import { Rating } from "../components/rating";
 import { displayRuntime } from "./episode";
-import { PartOf } from "./collection";
+import { WatchListInfo } from "../components/watchlist-info";
+import { WatchStatusV } from "@kyoo/models/src/resources/watch-status";
 
 export const TitleLine = ({
 	isLoading,
@@ -83,6 +84,8 @@ export const TitleLine = ({
 	studio,
 	trailerUrl,
 	type,
+	watchStatus,
+	slug,
 	...props
 }: {
 	isLoading: boolean;
@@ -95,7 +98,9 @@ export const TitleLine = ({
 	poster?: KyooImage | null;
 	studio?: Studio | null;
 	trailerUrl?: string | null;
+	watchStatus?: WatchStatusV | null;
 	type: "movie" | "show" | "collection";
+	slug?: string;
 } & Stylable) => {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
@@ -221,6 +226,14 @@ export const TitleLine = ({
 								target="_blank"
 								color={{ xs: theme.user.contrast, md: theme.colors.white }}
 								{...tooltip(t("show.trailer"))}
+							/>
+						)}
+						{watchStatus !== undefined && type !== "collection" && slug && (
+							<WatchListInfo
+								type={type}
+								slug={slug}
+								status={watchStatus}
+								color={{ xs: theme.user.contrast, md: theme.colors.white }}
 							/>
 						)}
 						{rating !== null && (
@@ -405,6 +418,7 @@ export const Header = ({
 						<TitleLine
 							isLoading={isLoading}
 							type={type}
+							slug={data?.slug}
 							playHref={data?.playHref}
 							name={data?.name}
 							tagline={data?.tagline}
@@ -414,6 +428,7 @@ export const Header = ({
 							poster={data?.poster}
 							trailerUrl={data?.trailer}
 							studio={data?.studio}
+							watchStatus={data?.watchStatus?.status ?? null}
 							{...css(Header.childStyle)}
 						/>
 					</ImageBackground>
