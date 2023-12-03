@@ -81,9 +81,9 @@ const ShowHeader = forwardRef<View, ViewProps & { slug: string }>(function ShowH
 
 const query = (slug: string): QueryIdentifier<Show> => ({
 	parser: ShowP,
-	path: ["shows", slug],
+	path: ["show", slug],
 	params: {
-		fields: ["studio", "firstEpisode"],
+		fields: ["studio", "firstEpisode", "watchStatus"],
 	},
 });
 

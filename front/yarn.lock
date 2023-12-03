@@ -4541,6 +4541,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/query-devtools@npm:5.12.1":
+  version: 5.12.1
+  resolution: "@tanstack/query-devtools@npm:5.12.1"
+  checksum: 1956ef3edb9f54bae2c80a0a6ffbdcfe9167078f187d05db42a507675e6099857f41f1a5523eeed27dd3e1d2f878c6cf14c5912313823ed49532e210eaf3492a
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query-devtools@npm:^5.12.2":
+  version: 5.12.2
+  resolution: "@tanstack/react-query-devtools@npm:5.12.2"
+  dependencies:
+    "@tanstack/query-devtools": 5.12.1
+  peerDependencies:
+    "@tanstack/react-query": ^5.12.2
+    react: ^18.0.0
+  checksum: b08093902d3ae000d4a9d90d249dc9bad9be56d1a84dc0c1ae2784a054c61582a66a8b26db2cb15cd2c160950027ffea253113869ac2fb74f7c82619960d6bdb
+  languageName: node
+  linkType: hard
+
 "@tanstack/react-query@npm:^5.12.1":
   version: 5.12.1
   resolution: "@tanstack/react-query@npm:5.12.1"
@@ -15153,6 +15172,7 @@ __metadata:
     "@radix-ui/react-dropdown-menu": ^2.0.6
     "@svgr/webpack": ^8.1.0
     "@tanstack/react-query": ^5.12.1
+    "@tanstack/react-query-devtools": ^5.12.2
     "@types/node": 20.10.1
     "@types/react": 18.2.39
     "@types/react-dom": 18.2.17
