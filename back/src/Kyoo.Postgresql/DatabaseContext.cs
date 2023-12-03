@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.Json;
@@ -31,7 +30,6 @@ using Kyoo.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.ValueGeneration;
 
 namespace Kyoo.Postgresql
 {
@@ -204,7 +202,8 @@ namespace Kyoo.Postgresql
 		{
 			modelBuilder.Entity<T>()
 				.Property(x => x.AddedDate)
-				.HasDefaultValueSql("now() at time zone 'utc'");
+				.HasDefaultValueSql("now() at time zone 'utc'")
+				.ValueGeneratedOnAdd();
 		}
 
 		/// <summary>
@@ -316,6 +315,8 @@ namespace Kyoo.Postgresql
 			modelBuilder.Entity<MovieWatchStatus>().HasQueryFilter(x => x.UserId == CurrentUserId);
 			modelBuilder.Entity<ShowWatchStatus>().HasQueryFilter(x => x.UserId == CurrentUserId);
 			modelBuilder.Entity<EpisodeWatchStatus>().HasQueryFilter(x => x.UserId == CurrentUserId);
+
+			modelBuilder.Entity<ShowWatchStatus>().Navigation(x => x.NextEpisode).AutoInclude();
 
 			_HasAddedDate<MovieWatchStatus>(modelBuilder);
 			_HasAddedDate<ShowWatchStatus>(modelBuilder);

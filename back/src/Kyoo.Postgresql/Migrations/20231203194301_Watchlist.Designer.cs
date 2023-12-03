@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Kyoo.Postgresql.Migrations
 {
 	[DbContext(typeof(PostgresContext))]
-	[Migration("20231129014309_Watchlist")]
+	[Migration("20231203194301_Watchlist")]
 	partial class Watchlist
 	{
 		/// <inheritdoc />
@@ -495,7 +495,7 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnName("added_date")
 						.HasDefaultValueSql("now() at time zone 'utc'");
 
-					b.Property<Guid>("NextEpisodeId")
+					b.Property<Guid?>("NextEpisodeId")
 						.HasColumnType("uuid")
 						.HasColumnName("next_episode_id");
 
@@ -1167,8 +1167,6 @@ namespace Kyoo.Postgresql.Migrations
 					b.HasOne("Kyoo.Abstractions.Models.Episode", "NextEpisode")
 						.WithMany()
 						.HasForeignKey("NextEpisodeId")
-						.OnDelete(DeleteBehavior.Cascade)
-						.IsRequired()
 						.HasConstraintName("fk_show_watch_status_episodes_next_episode_id");
 
 					b.HasOne("Kyoo.Abstractions.Models.Show", "Show")

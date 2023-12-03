@@ -124,14 +124,20 @@ export const Slider = ({
 			>
 				{subtleProgress !== undefined && (
 					<View
-						{...css({
-							bg: (theme) => theme.overlay1,
-							position: "absolute",
-							top: 0,
-							bottom: 0,
-							left: 0,
-							width: percent((subtleProgress / max) * 100),
-						})}
+						{...css(
+							{
+								bg: (theme) => theme.overlay1,
+								position: "absolute",
+								top: 0,
+								bottom: 0,
+								left: 0,
+							},
+							{
+								style: {
+									width: percent((subtleProgress / max) * 100),
+								},
+							},
+						)}
 					/>
 				)}
 				<View
