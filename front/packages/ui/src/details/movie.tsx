@@ -27,9 +27,9 @@ import { DetailsCollections } from "./collection";
 
 const query = (slug: string): QueryIdentifier<Movie> => ({
 	parser: MovieP,
-	path: ["movies", slug],
+	path: ["movie", slug],
 	params: {
-		fields: ["studio"],
+		fields: ["studio", "watchStatus"],
 	},
 });
 

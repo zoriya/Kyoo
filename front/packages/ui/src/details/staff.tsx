@@ -50,6 +50,6 @@
 //
 // Staff.query = (slug: string): QueryIdentifier<Person> => ({
 // 	parser: PersonP,
-// 	path: ["shows", slug, "people"],
+// 	path: ["show", slug, "people"],
 // 	infinite: true,
 // });

@@ -21,6 +21,7 @@
 import "../polyfill";
 
 import { HydrationBoundary, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { HiddenIfNoJs, SkeletonCss, ThemeSelector } from "@kyoo/primitives";
 import { WebTooltip } from "@kyoo/primitives/src/tooltip.web";
 import {
@@ -153,6 +154,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 							</ThemeSelector>
 						</HydrationBoundary>
 					</AccountProvider>
+					<ReactQueryDevtools initialIsOpen={false} />
 				</QueryClientProvider>
 			</>
 		</YoshikiDebug>

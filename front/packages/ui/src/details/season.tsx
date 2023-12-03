@@ -90,7 +90,7 @@ export const SeasonHeader = ({
 
 SeasonHeader.query = (slug: string): QueryIdentifier<Season, SeasonProcessed> => ({
 	parser: SeasonP,
-	path: ["shows", slug, "seasons"],
+	path: ["show", slug, "seasons"],
 	params: {
 		// Fetch all seasons at one, there won't be hundred of thems anyways.
 		limit: 0,
@@ -159,7 +159,7 @@ EpisodeList.query = (
 	season: string | number,
 ): QueryIdentifier<Episode, Episode & { firstOfSeason?: boolean }> => ({
 	parser: EpisodeP,
-	path: ["shows", slug, "episode"],
+	path: ["show", slug, "episode"],
 	params: {
 		seasonNumber: season ? `gte:${season}` : undefined,
 	},

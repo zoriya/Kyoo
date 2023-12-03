@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Icon, IconButton, tooltip } from "@kyoo/primitives";
+import { IconButton, tooltip } from "@kyoo/primitives";
 import { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import BookmarkAdd from "@material-symbols/svg-400/rounded/bookmark_add.svg";
