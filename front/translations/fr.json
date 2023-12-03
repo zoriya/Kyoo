@@ -19,7 +19,10 @@
 		"tags": "Tags",
 		"links": "Liens",
 		"jumpToSeason": "Aller sur une saison",
-		"partOf": "Fait parti de"
+		"partOf": "Fait parti de",
+		"watchlistAdd": "Ajouter à votre liste de visionnage",
+		"watchlistEdit": "Editer le status",
+		"watchlistRemove": "Marquer comme non vu"
 	},
 	"browse": {
 		"sortby": "Trier par {{key}}",

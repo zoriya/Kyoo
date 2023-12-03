@@ -19,7 +19,8 @@
  */
 
 import { z } from "zod";
-import { zdate } from "../utils"
+import { zdate } from "../utils";
+import { BaseEpisodeP } from "./episode.base";
 
 export enum WatchStatusV {
 	Completed = "Completed",
@@ -50,7 +51,20 @@ export const WatchStatusP = z.object({
 	 * Where the player has stopped watching the episode (in percentage between 0 and 100).
 	 * Null if the status is not Watching or if the next episode is not started.
 	 */
-	watchedPercent: z.number().int().gte(0).lte(100),
+	watchedPercent: z.number().int().gte(0).lte(100).nullable(),
 });
-
 export type WatchStatus = z.infer<typeof WatchStatusP>;
+
+export const ShowWatchStatusP = WatchStatusP.and(
+	z.object({
+		/**
+		 * The number of episodes the user has not seen.
+		 */
+		unseenEpisodesCount: z.number().int().gte(0),
+		/**
+		 * The next episode to watch
+		 */
+		nextEpisode: BaseEpisodeP.nullable(),
+	}),
+);
+export type ShowWatchStatus = z.infer<typeof ShowWatchStatusP>;

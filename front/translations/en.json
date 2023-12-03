@@ -19,7 +19,10 @@
 		"tags": "Tags",
 		"links": "Links",
 		"jumpToSeason": "Jump to season",
-		"partOf": "Part of the"
+		"partOf": "Part of the",
+		"watchlistAdd": "Add to your plan to watch list",
+		"watchlistEdit": "Edit watch status",
+		"watchlistRemove": "Mark as not seen"
 	},
 	"browse": {
 		"sortby": "Sort by {{key}}",
