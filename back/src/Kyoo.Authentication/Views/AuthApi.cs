@@ -197,11 +197,9 @@ namespace Kyoo.Authentication.Views
 		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
 		public async Task<ActionResult<User>> GetMe()
 		{
-			if (!Guid.TryParse(User.FindFirstValue(Claims.Id), out Guid userID))
-				return Unauthorized(new RequestError("User not authenticated or token invalid."));
 			try
 			{
-				return await _users.Get(userID);
+				return await _users.Get(User.GetIdOrThrow());
 			}
 			catch (ItemNotFoundException)
 			{
@@ -226,11 +224,9 @@ namespace Kyoo.Authentication.Views
 		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
 		public async Task<ActionResult<User>> EditMe(User user)
 		{
-			if (!Guid.TryParse(User.FindFirstValue(Claims.Id), out Guid userID))
-				return Unauthorized(new RequestError("User not authenticated or token invalid."));
 			try
 			{
-				user.Id = userID;
+				user.Id = User.GetIdOrThrow();
 				return await _users.Edit(user);
 			}
 			catch (ItemNotFoundException)
@@ -256,13 +252,12 @@ namespace Kyoo.Authentication.Views
 		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
 		public async Task<ActionResult<User>> PatchMe(PartialResource user)
 		{
-			if (!Guid.TryParse(User.FindFirstValue(Claims.Id), out Guid userID))
-				return Unauthorized(new RequestError("User not authenticated or token invalid."));
+			Guid userId = User.GetIdOrThrow();
 			try
 			{
-				if (user.Id.HasValue && user.Id != userID)
+				if (user.Id.HasValue && user.Id != userId)
 					throw new ArgumentException("Can't edit your user id.");
-				return await _users.Patch(userID, TryUpdateModelAsync);
+				return await _users.Patch(userId, TryUpdateModelAsync);
 			}
 			catch (ItemNotFoundException)
 			{
@@ -286,11 +281,9 @@ namespace Kyoo.Authentication.Views
 		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
 		public async Task<ActionResult<User>> DeleteMe()
 		{
-			if (!Guid.TryParse(User.FindFirstValue(Claims.Id), out Guid userID))
-				return Unauthorized(new RequestError("User not authenticated or token invalid."));
 			try
 			{
-				await _users.Delete(userID);
+				await _users.Delete(User.GetIdOrThrow());
 				return NoContent();
 			}
 			catch (ItemNotFoundException)

@@ -122,7 +122,6 @@ namespace Kyoo.Core.Api
 		/// <response code="204">This episode does not have a specific status.</response>
 		/// <response code="404">No episode with the given ID or slug could be found.</response>
 		[HttpGet("{identifier:id}/watchStatus")]
-		[HttpGet("{identifier:id}/watchStatus", Order = AlternativeRoute)]
 		[UserOnly]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -133,7 +132,7 @@ namespace Kyoo.Core.Api
 				id => Task.FromResult(id),
 				async slug => (await _libraryManager.Episodes.Get(slug)).Id
 			);
-			return await _libraryManager.WatchStatus.GetEpisodeStatus(id, User.GetId()!.Value);
+			return await _libraryManager.WatchStatus.GetEpisodeStatus(id, User.GetIdOrThrow());
 		}
 
 		/// <summary>
@@ -150,7 +149,6 @@ namespace Kyoo.Core.Api
 		/// <response code="204">The status was not considered impactfull enough to be saved (less then 5% of watched for example).</response>
 		/// <response code="404">No episode with the given ID or slug could be found.</response>
 		[HttpPost("{identifier:id}/watchStatus")]
-		[HttpPost("{identifier:id}/watchStatus", Order = AlternativeRoute)]
 		[UserOnly]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -164,7 +162,7 @@ namespace Kyoo.Core.Api
 			);
 			return await _libraryManager.WatchStatus.SetEpisodeStatus(
 				id,
-				User.GetId()!.Value,
+				User.GetIdOrThrow(),
 				status,
 				watchedTime
 			);
@@ -181,7 +179,6 @@ namespace Kyoo.Core.Api
 		/// <response code="204">The status has been deleted.</response>
 		/// <response code="404">No episode with the given ID or slug could be found.</response>
 		[HttpDelete("{identifier:id}/watchStatus")]
-		[HttpDelete("{identifier:id}/watchStatus", Order = AlternativeRoute)]
 		[UserOnly]
 		[ProducesResponseType(StatusCodes.Status204NoContent)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -191,7 +188,7 @@ namespace Kyoo.Core.Api
 				id => Task.FromResult(id),
 				async slug => (await _libraryManager.Episodes.Get(slug)).Id
 			);
-			await _libraryManager.WatchStatus.DeleteEpisodeStatus(id, User.GetId()!.Value);
+			await _libraryManager.WatchStatus.DeleteEpisodeStatus(id, User.GetIdOrThrow());
 		}
 	}
 }

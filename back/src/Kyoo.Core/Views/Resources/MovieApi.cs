@@ -163,7 +163,6 @@ namespace Kyoo.Core.Api
 		/// <response code="204">This movie does not have a specific status.</response>
 		/// <response code="404">No movie with the given ID or slug could be found.</response>
 		[HttpGet("{identifier:id}/watchStatus")]
-		[HttpGet("{identifier:id}/watchStatus", Order = AlternativeRoute)]
 		[UserOnly]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -174,7 +173,7 @@ namespace Kyoo.Core.Api
 				id => Task.FromResult(id),
 				async slug => (await _libraryManager.Movies.Get(slug)).Id
 			);
-			return await _libraryManager.WatchStatus.GetMovieStatus(id, User.GetId()!.Value);
+			return await _libraryManager.WatchStatus.GetMovieStatus(id, User.GetIdOrThrow());
 		}
 
 		/// <summary>
@@ -192,7 +191,6 @@ namespace Kyoo.Core.Api
 		/// <response code="400">WatchedTime can't be specified if status is not watching.</response>
 		/// <response code="404">No movie with the given ID or slug could be found.</response>
 		[HttpPost("{identifier:id}/watchStatus")]
-		[HttpPost("{identifier:id}/watchStatus", Order = AlternativeRoute)]
 		[UserOnly]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -206,7 +204,7 @@ namespace Kyoo.Core.Api
 			);
 			return await _libraryManager.WatchStatus.SetMovieStatus(
 				id,
-				User.GetId()!.Value,
+				User.GetIdOrThrow(),
 				status,
 				watchedTime
 			);
@@ -223,7 +221,6 @@ namespace Kyoo.Core.Api
 		/// <response code="204">The status has been deleted.</response>
 		/// <response code="404">No movie with the given ID or slug could be found.</response>
 		[HttpDelete("{identifier:id}/watchStatus")]
-		[HttpDelete("{identifier:id}/watchStatus", Order = AlternativeRoute)]
 		[UserOnly]
 		[ProducesResponseType(StatusCodes.Status204NoContent)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -233,7 +230,7 @@ namespace Kyoo.Core.Api
 				id => Task.FromResult(id),
 				async slug => (await _libraryManager.Movies.Get(slug)).Id
 			);
-			await _libraryManager.WatchStatus.DeleteMovieStatus(id, User.GetId()!.Value);
+			await _libraryManager.WatchStatus.DeleteMovieStatus(id, User.GetIdOrThrow());
 		}
 	}
 }
