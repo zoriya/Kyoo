@@ -105,7 +105,7 @@ namespace Kyoo.Postgresql.Migrations
 					played_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
 					status = table.Column<WatchStatus>(type: "watch_status", nullable: false),
 					unseen_episodes_count = table.Column<int>(type: "integer", nullable: false),
-					next_episode_id = table.Column<Guid>(type: "uuid", nullable: false)
+					next_episode_id = table.Column<Guid>(type: "uuid", nullable: true)
 				},
 				constraints: table =>
 				{
@@ -114,8 +114,7 @@ namespace Kyoo.Postgresql.Migrations
 						name: "fk_show_watch_status_episodes_next_episode_id",
 						column: x => x.next_episode_id,
 						principalTable: "episodes",
-						principalColumn: "id",
-						onDelete: ReferentialAction.Cascade);
+						principalColumn: "id");
 					table.ForeignKey(
 						name: "fk_show_watch_status_shows_show_id",
 						column: x => x.show_id,

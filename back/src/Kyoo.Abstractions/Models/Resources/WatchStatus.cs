@@ -203,7 +203,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the episode started.
 		/// </summary>
-		[SerializeIgnore] public Guid NextEpisodeId { get; set; }
+		[SerializeIgnore] public Guid? NextEpisodeId { get; set; }
 
 		/// <summary>
 		/// The next <see cref="Episode"/> to watch.
