@@ -23,7 +23,14 @@
 		"watchlistAdd": "Ajouter à votre liste de visionnage",
 		"watchlistEdit": "Editer le status",
 		"watchlistRemove": "Marquer comme non vu",
-		"watchlistLogin": "Connectez-vous pour ajouter a votre liste de visionnage"
+		"watchlistLogin": "Connectez-vous pour ajouter a votre liste de visionnage",
+		"watchlistMark": {
+			"completed": "Marquer comme complété",
+			"planned": "Marquer comme prévu a voir",
+			"watching": "Marquer en cours de visionnage",
+			"droped": "Marquer comme abandonné",
+			"null": "Marquer comme non vu"
+		}
 	},
 	"browse": {
 		"sortby": "Trier par {{key}}",

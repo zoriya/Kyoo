@@ -141,7 +141,7 @@ const MenuItem = ({
 			icon={icon ?? Dot}
 			color={disabled ? theme.overlay0 : theme.paragraph}
 			size={icon ? 24 : ts(1)}
-			{...nCss({ paddingRight: ts(1) })}
+			{...nCss({ paddingX: ts(1) })}
 		/>
 	);
 

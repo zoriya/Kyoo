@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { IconButton, tooltip } from "@kyoo/primitives";
+import { IconButton, Menu, tooltip } from "@kyoo/primitives";
 import { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import BookmarkAdd from "@material-symbols/svg-400/rounded/bookmark_add.svg";
@@ -54,12 +54,9 @@ export const WatchListInfo = ({
 	if (mutation.isPending) status = mutation.variables;
 
 	if (account == null) {
-		return <IconButton
-			icon={BookmarkAdd}
-			disabled
-			{...tooltip(t("show.watchlistLogin"))}
-			{...props}
-		/>
+		return (
+			<IconButton icon={BookmarkAdd} disabled {...tooltip(t("show.watchlistLogin"))} {...props} />
+		);
 	}
 
 	switch (status) {
@@ -72,24 +69,6 @@ export const WatchListInfo = ({
 					{...props}
 				/>
 			);
-		case WatchStatusV.Planned:
-			return (
-				<IconButton
-					icon={Bookmark}
-					// onPress={() => mutation.mutate(WatchStatusV.)}
-					{...tooltip(t("show.watchlistEdit"))}
-					{...props}
-				/>
-			);
-		case WatchStatusV.Watching:
-			return (
-				<IconButton
-					icon={Bookmark}
-					// onPress={() => mutation.mutate(WatchStatusV.Planned)}
-					{...tooltip(t("show.watchlistEdit"))}
-					{...props}
-				/>
-			);
 		case WatchStatusV.Completed:
 			return (
 				<IconButton
@@ -99,14 +78,21 @@ export const WatchListInfo = ({
 					{...props}
 				/>
 			);
+		case WatchStatusV.Planned:
+		case WatchStatusV.Watching:
 		case WatchStatusV.Droped:
 			return (
-				<IconButton
-					icon={BookmarkRemove}
-					// onPress={() => mutation.mutate(WatchStatusV.Planned)}
-					{...tooltip(t("show.watchlistEdit"))}
-					{...props}
-				/>
+				<Menu Trigger={IconButton} icon={Bookmark} {...tooltip(t("show.watchlistEdit"))} {...props}>
+					{Object.values(WatchStatusV).map((x) => (
+						<Menu.Item
+							key={x}
+							label={t(`show.watchlistMark.${x.toLowerCase()}`)}
+							onSelect={() => mutation.mutate(x)}
+							selected={x === status}
+						/>
+					))}
+					<Menu.Item label={t("show.watchlistMark.null")} onSelect={() => mutation.mutate(null)} />
+				</Menu>
 			);
 	}
 };
