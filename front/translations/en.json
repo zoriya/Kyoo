@@ -23,7 +23,14 @@
 		"watchlistAdd": "Add to your plan to watch list",
 		"watchlistEdit": "Edit watch status",
 		"watchlistRemove": "Mark as not seen",
-		"watchlistLogin": "Login to add to your watchlist"
+		"watchlistLogin": "Login to add to your watchlist",
+		"watchlistMark": {
+			"completed": "Mark as completed",
+			"planned": "Mark as planned",
+			"watching": "Mark as watching",
+			"droped": "Mark as dropped",
+			"null": "Mark as not seen"
+		}
 	},
 	"browse": {
 		"sortby": "Sort by {{key}}",

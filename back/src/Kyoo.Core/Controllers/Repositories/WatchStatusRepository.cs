@@ -165,6 +165,7 @@ public class WatchStatusRepository : IWatchStatusRepository
 		Guid userId)
 	{
 		await _database.ShowWatchStatus
+			.IgnoreAutoIncludes()
 			.Where(x => x.ShowId == showId && x.UserId == userId)
 			.ExecuteDeleteAsync();
 		await _database.EpisodeWatchStatus
