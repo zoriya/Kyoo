@@ -71,10 +71,11 @@ export const getTokenWJ = async (
 				{
 					path: ["auth", "refresh", `?token=${account.token.refresh_token}`],
 					method: "GET",
+					authenticated: false,
 				},
 				TokenP,
 			);
-			updateAccount(account.id, { ...account, token });
+			if (typeof window !== "undefined") updateAccount(account.id, { ...account, token });
 		} catch (e) {
 			console.error("Error refreshing token durring ssr:", e);
 		}
