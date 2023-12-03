@@ -19,7 +19,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -43,6 +42,12 @@ public class WatchStatusRepository : IWatchStatusRepository
 	/// This value is lower to account credits in movies that can last really long.
 	/// </remarks>
 	public const int MaxWatchPercent = 90;
+
+	// Those two are defined here because x => WatchingStatus.Watching complies to x => 1
+	// but x => Watching compiles to x => Convert.ToInt(WatchingStatus.Watching)
+	// The second one can be converted to sql wherase the first can't (tries to compare WatchStatus with int).
+	private WatchStatus Watching = WatchStatus.Watching;
+	private WatchStatus Completed = WatchStatus.Completed;
 
 	private readonly DatabaseContext _database;
 	private readonly IRepository<Episode> _episodes;
@@ -96,7 +101,7 @@ public class WatchStatusRepository : IWatchStatusRepository
 			PlayedDate = DateTime.UtcNow
 		};
 		await _database.MovieWatchStatus.Upsert(ret)
-			.UpdateIf(x => !(status == WatchStatus.Watching && x.Status == WatchStatus.Completed))
+			.UpdateIf(x => status != Watching || x.Status != Completed)
 			.RunAsync();
 		return ret;
 	}
@@ -149,7 +154,7 @@ public class WatchStatusRepository : IWatchStatusRepository
 			PlayedDate = DateTime.UtcNow
 		};
 		await _database.ShowWatchStatus.Upsert(ret)
-			.UpdateIf(x => !(status == WatchStatus.Watching && x.Status == WatchStatus.Completed))
+			.UpdateIf(x => status != Watching || x.Status != Completed)
 			.RunAsync();
 		return ret;
 	}
@@ -207,7 +212,7 @@ public class WatchStatusRepository : IWatchStatusRepository
 			PlayedDate = DateTime.UtcNow
 		};
 		await _database.EpisodeWatchStatus.Upsert(ret)
-			.UpdateIf(x => !(status == WatchStatus.Watching && x.Status == WatchStatus.Completed))
+			.UpdateIf(x => status != Watching || x.Status != Completed)
 			.RunAsync();
 		await SetShowStatus(episode.ShowId, userId, WatchStatus.Watching);
 		return ret;

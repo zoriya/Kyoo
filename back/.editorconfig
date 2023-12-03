@@ -91,6 +91,9 @@ resharper_wrap_before_arrow_with_expressions = true
 resharper_xmldoc_attribute_indent = align_by_first_attribute
 resharper_xmldoc_indent_child_elements = RemoveIndent
 resharper_xmldoc_indent_text = RemoveIndent
+# Switch on enum
+dotnet_diagnostic.CS8509.severity=error # missing switch case for named enum value
+dotnet_diagnostic.CS8524.severity=none # missing switch case for unnamed enum value
 
 # Waiting for https://github.com/dotnet/roslyn/issues/44596 to get fixed.
 # file_header_template = Kyoo - A portable and vast media library solution.\nCopyright (c) Kyoo.\n\nSee AUTHORS.md and LICENSE file in the project root for full license information.\n\nKyoo is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\nany later version.\n\nKyoo is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with Kyoo. If not, see <https://www.gnu.org/licenses/>.

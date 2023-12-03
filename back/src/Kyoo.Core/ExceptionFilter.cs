@@ -62,7 +62,7 @@ namespace Kyoo.Core
 					context.Result = new ConflictObjectResult(new RequestError("Duplicated item"));
 					break;
 				case UnauthorizedException ex:
-					context.Result = new UnauthorizedObjectResult(new RequestError(ex.Message ?? "User not authenticated or token invalid."));
+					context.Result = new UnauthorizedObjectResult(new RequestError(ex.Message));
 					break;
 				case Exception ex:
 					_logger.LogError(ex, "Unhandled error");
