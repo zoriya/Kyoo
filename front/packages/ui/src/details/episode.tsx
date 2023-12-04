@@ -18,12 +18,22 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { focusReset, H6, Image, ImageProps, Link, P, Skeleton, SubP, ts } from "@kyoo/primitives";
+import {
+	focusReset,
+	H6,
+	ImageBackground,
+	ImageProps,
+	Link,
+	P,
+	Skeleton,
+	SubP,
+	ts,
+} from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { ImageStyle, View } from "react-native";
 import { Layout, WithLoading } from "../fetch";
-import { percent, px, rem, Stylable, Theme, useYoshiki } from "yoshiki/native";
-import { KyooImage } from "@kyoo/models";
+import { percent, rem, Stylable, Theme, useYoshiki } from "yoshiki/native";
+import { KyooImage, WatchStatusV } from "@kyoo/models";
 
 export const episodeDisplayNumber = (
 	episode: {
@@ -50,6 +60,8 @@ export const EpisodeBox = ({
 	thumbnail,
 	isLoading,
 	href,
+	watchedPercent,
+	watchedStatus,
 	...props
 }: Stylable &
 	WithLoading<{
@@ -57,6 +69,8 @@ export const EpisodeBox = ({
 		overview: string | null;
 		href: string;
 		thumbnail?: ImageProps["src"] | null;
+		watchedPercent: number | null;
+		watchedStatus: WatchStatusV | null;
 	}>) => {
 	const { css } = useYoshiki("episodebox");
 	const { t } = useTranslation();
@@ -87,14 +101,39 @@ export const EpisodeBox = ({
 				props,
 			)}
 		>
-			<Image
+			<ImageBackground
 				src={thumbnail}
 				quality="low"
 				alt=""
+				graditent={false}
+				hideLoad={false}
 				forcedLoading={isLoading}
 				layout={{ width: percent(100), aspectRatio: 16 / 9 }}
 				{...(css("poster") as any)}
-			/>
+			>
+				{(watchedPercent || watchedStatus === WatchStatusV.Completed) && (
+					<>
+						<View
+							{...css({
+								backgroundColor: (theme) => theme.overlay0,
+								width: percent(100),
+								height: ts(0.5),
+								position: "absolute",
+								bottom: 0,
+							})}
+						/>
+						<View
+							{...css({
+								backgroundColor: (theme) => theme.accent,
+								width: percent(watchedPercent ?? 100),
+								height: ts(0.5),
+								position: "absolute",
+								bottom: 0,
+							})}
+						/>
+					</>
+				)}
+			</ImageBackground>
 			<Skeleton {...css({ width: percent(50) })}>
 				{isLoading || (
 					<P {...css([{ marginY: 0, textAlign: "center" }, "title"])}>
@@ -132,8 +171,11 @@ export const EpisodeLine = ({
 	seasonNumber,
 	releaseDate,
 	runtime,
+	watchedPercent,
+	watchedStatus,
 	...props
 }: WithLoading<{
+	id: string;
 	slug: string;
 	displayNumber: string;
 	name: string | null;
@@ -144,7 +186,8 @@ export const EpisodeLine = ({
 	seasonNumber: number | null;
 	releaseDate: Date | null;
 	runtime: number | null;
-	id: string;
+	watchedPercent: number | null;
+	watchedStatus: WatchStatusV | null;
 }> &
 	Stylable) => {
 	const { css } = useYoshiki();
@@ -157,18 +200,8 @@ export const EpisodeLine = ({
 				{
 					alignItems: "center",
 					flexDirection: "row",
-					child: {
-						poster: {
-							borderColor: "transparent",
-							borderWidth: px(4),
-						},
-					},
-					focus: {
+					fover: {
 						self: focusReset,
-						poster: {
-							transform: "scale(1.1)" as any,
-							borderColor: (theme: Theme) => theme.accent,
-						},
 						title: {
 							textDecorationLine: "underline",
 						},
@@ -180,16 +213,41 @@ export const EpisodeLine = ({
 			<P {...css({ width: rem(4), flexShrink: 0, m: ts(1), textAlign: "center" })}>
 				{isLoading ? <Skeleton variant="filltext" /> : displayNumber}
 			</P>
-			<Image
+			<ImageBackground
 				src={thumbnail}
 				quality="low"
 				alt=""
+				gradient={false}
+				hideLoad={false}
 				layout={{
 					width: percent(18),
 					aspectRatio: 16 / 9,
 				}}
-				{...(css(["poster", { flexShrink: 0, m: ts(1) }]) as { style: ImageStyle })}
-			/>
+				{...(css({ flexShrink: 0, m: ts(1) }) as { style: ImageStyle })}
+			>
+				{(watchedPercent || watchedStatus === WatchStatusV.Completed) && (
+					<>
+						<View
+							{...css({
+								backgroundColor: (theme) => theme.overlay0,
+								width: percent(100),
+								height: ts(0.5),
+								position: "absolute",
+								bottom: 0,
+							})}
+						/>
+						<View
+							{...css({
+								backgroundColor: (theme) => theme.accent,
+								width: percent(watchedPercent ?? 100),
+								height: ts(0.5),
+								position: "absolute",
+								bottom: 0,
+							})}
+						/>
+					</>
+				)}
+			</ImageBackground>
 			<View {...css({ flexGrow: 1, flexShrink: 1, m: ts(1) })}>
 				<View
 					{...css({

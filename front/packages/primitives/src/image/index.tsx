@@ -19,7 +19,7 @@
  */
 
 import { ImageStyle, View, ViewProps, ViewStyle } from "react-native";
-import { Props, YoshikiEnhanced } from "./base-image";
+import { Props, ImageLayout, YoshikiEnhanced } from "./base-image";
 import { Image } from "./image";
 import { ComponentType, ReactNode } from "react";
 import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
@@ -47,6 +47,8 @@ export const ImageBackground = <AsProps = ViewProps,>({
 	containerStyle,
 	imageStyle,
 	forcedLoading,
+	hideLoad = true,
+	layout,
 	...asProps
 }: {
 	as?: ComponentType<AsProps>;
@@ -54,13 +56,20 @@ export const ImageBackground = <AsProps = ViewProps,>({
 	children: ReactNode;
 	containerStyle?: YoshikiEnhanced<ViewStyle>;
 	imageStyle?: YoshikiEnhanced<ImageStyle>;
+	hideLoad?: boolean;
+	layout?: ImageLayout;
 } & AsProps &
 	Props) => {
 	const Container = as ?? View;
 	return (
 		<ContrastArea contrastText>
 			{({ css, theme }) => (
-				<Container {...(asProps as AsProps)}>
+				<Container
+					{...(css(
+						[layout, !hideLoad && { borderRadius: 6, overflow: "hidden" }],
+						asProps,
+					) as AsProps)}
+				>
 					<View
 						{...css([
 							{
@@ -75,14 +84,14 @@ export const ImageBackground = <AsProps = ViewProps,>({
 							containerStyle,
 						])}
 					>
-						{src && (
+						{(src || !hideLoad) && (
 							<Image
 								src={src}
 								quality={quality}
 								forcedLoading={forcedLoading}
 								alt={alt!}
 								layout={{ width: percent(100), height: percent(100) }}
-								Error={null}
+								Error={hideLoad ? null : undefined}
 								{...(css([{ borderWidth: 0, borderRadius: 0 }, imageStyle]) as {
 									style: ImageStyle;
 								})}
