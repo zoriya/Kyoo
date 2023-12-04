@@ -25,6 +25,7 @@ import {
 	LibraryItemP,
 	ItemKind,
 	getDisplayDate,
+	WatchStatusV,
 } from "@kyoo/models";
 import { ComponentProps, useState } from "react";
 import { createParam } from "solito";
@@ -43,6 +44,15 @@ export const itemMap = (
 ): WithLoading<ComponentProps<typeof ItemGrid> & ComponentProps<typeof ItemList>> => {
 	if (item.isLoading) return item;
 
+	let watchInfo: string | WatchStatusV | null = null;
+	if (item.kind !== ItemKind.Collection && item.watchStatus?.status === WatchStatusV.Completed)
+		watchInfo = WatchStatusV.Completed;
+	else if (item.kind === ItemKind.Show) {
+		if (!item.watchStatus) watchInfo = item.episodesCount!.toString();
+		else if (item.watchStatus.status === WatchStatusV.Watching)
+			watchInfo = item.watchStatus.unseenEpisodesCount.toString();
+	}
+
 	return {
 		isLoading: item.isLoading,
 		name: item.name,
@@ -50,6 +60,7 @@ export const itemMap = (
 		href: item.href,
 		poster: item.poster,
 		thumbnail: item.thumbnail,
+		watchInfo: watchInfo,
 	};
 };
 
@@ -59,6 +70,7 @@ const query = (sortKey?: SortBy, sortOrd?: SortOrd): QueryIdentifier<LibraryItem
 	infinite: true,
 	params: {
 		sortBy: sortKey ? `${sortKey}:${sortOrd ?? "asc"}` : "name:asc",
+		fields: ["watchStatus", "episodesCount"],
 	},
 });
 

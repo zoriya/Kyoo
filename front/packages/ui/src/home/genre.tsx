@@ -36,6 +36,7 @@ import ChevronLeft from "@material-symbols/svg-400/rounded/chevron_left-fill.svg
 import ChevronRight from "@material-symbols/svg-400/rounded/chevron_right-fill.svg";
 import { InfiniteFetch, InfiniteFetchList } from "../fetch-infinite";
 import { useTranslation } from "react-i18next";
+import { itemMap } from "../browse";
 
 export const Header = ({ title }: { title: string }) => {
 	const { css } = useYoshiki();
@@ -85,13 +86,7 @@ export const GenreGrid = ({ genre }: { genre: Genre }) => {
 					return (
 						<ItemGrid
 							key={x.id ?? i}
-							isLoading={x.isLoading as any}
-							href={x.href}
-							name={x.name}
-							subtitle={
-								x.kind !== ItemKind.Collection && !x.isLoading ? getDisplayDate(x) : undefined
-							}
-							poster={x.poster}
+							{...itemMap(x)}
 						/>
 					);
 				}}
@@ -105,6 +100,7 @@ GenreGrid.query = (genre: Genre): QueryIdentifier<LibraryItem> => ({
 	infinite: true,
 	path: ["items"],
 	params: {
+		fields: ["watchStatus", "episodesCount"],
 		filter: `genres has ${genre}`,
 		sortBy: "random",
 		// Limit the inital numbers of items
