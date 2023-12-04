@@ -42,6 +42,7 @@ import { episodeDisplayNumber } from "../details/episode";
 import { useVideoKeyboard } from "./keyboard";
 import { MediaSessionManager } from "./media-session";
 import { ErrorView } from "../fetch";
+import { WatchStatusObserver } from "./watch-status-observer";
 
 type Item = (Movie & { type: "movie" }) | (Episode & { type: "episode" });
 
@@ -203,6 +204,7 @@ export const Player: QueryPage<{ slug: string; type: "episode" | "movie" }> = ({
 				next={next}
 				previous={previous}
 			/>
+			{data && <WatchStatusObserver type={type} slug={data.slug} />}
 			<View
 				onPointerLeave={(e) => {
 					if (e.nativeEvent.pointerType === "mouse") setMouseMoved(false);
