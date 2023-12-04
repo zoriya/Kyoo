@@ -508,6 +508,14 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnType("integer")
 						.HasColumnName("unseen_episodes_count");
 
+					b.Property<int?>("WatchedPercent")
+						.HasColumnType("integer")
+						.HasColumnName("watched_percent");
+
+					b.Property<int?>("WatchedTime")
+						.HasColumnType("integer")
+						.HasColumnName("watched_time");
+
 					b.HasKey("UserId", "ShowId")
 						.HasName("pk_show_watch_status");
 

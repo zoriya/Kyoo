@@ -62,9 +62,18 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="filter">A predicate to filter the resource.</param>
 		/// <param name="include">The related fields to include.</param>
+		/// <param name="sortBy">A custom sort method to handle cases where multiples items match the filters.</param>
+		/// <param name="reverse">Reverse the sort.</param>
+		/// <param name="afterId">Select the first element after this id if it was in a list.</param>
 		/// <exception cref="ItemNotFoundException">If the item could not be found.</exception>
 		/// <returns>The resource found</returns>
-		Task<T> Get(Filter<T> filter, Include<T>? include = default);
+		Task<T> Get(
+			Filter<T> filter,
+			Include<T>? include = default,
+			Sort<T>? sortBy = default,
+			bool reverse = false,
+			Guid? afterId = default
+		);
 
 		/// <summary>
 		/// Get a resource from it's ID or null if it is not found.
@@ -89,11 +98,13 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="include">The related fields to include.</param>
 		/// <param name="sortBy">A custom sort method to handle cases where multiples items match the filters.</param>
 		/// <param name="reverse">Reverse the sort.</param>
+		/// <param name="afterId">Select the first element after this id if it was in a list.</param>
 		/// <returns>The resource found</returns>
 		Task<T?> GetOrDefault(Filter<T>? filter,
 			Include<T>? include = default,
 			Sort<T>? sortBy = default,
-			bool reverse = false);
+			bool reverse = false,
+			Guid? afterId = default);
 
 		/// <summary>
 		/// Search for resources with the database.

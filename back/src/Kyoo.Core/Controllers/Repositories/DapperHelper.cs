@@ -321,7 +321,8 @@ public static class DapperHelper
 		Include<T>? include,
 		Filter<T>? filter,
 		Sort<T>? sort = null,
-		bool reverse = false)
+		bool reverse = false,
+		Guid? afterId = default)
 		where T : class, IResource, IQuery
 	{
 		ICollection<T> ret = await db.Query<T>(
@@ -333,7 +334,7 @@ public static class DapperHelper
 			include,
 			filter,
 			sort,
-			new Pagination(1, reverse: reverse)
+			new Pagination(1, afterId, reverse)
 		);
 		return ret.FirstOrDefault();
 	}

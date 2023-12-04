@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Kyoo.Postgresql.Migrations
 {
 	[DbContext(typeof(PostgresContext))]
-	[Migration("20231203194301_Watchlist")]
+	[Migration("20231204000849_Watchlist")]
 	partial class Watchlist
 	{
 		/// <inheritdoc />
@@ -510,6 +510,14 @@ namespace Kyoo.Postgresql.Migrations
 					b.Property<int>("UnseenEpisodesCount")
 						.HasColumnType("integer")
 						.HasColumnName("unseen_episodes_count");
+
+					b.Property<int?>("WatchedPercent")
+						.HasColumnType("integer")
+						.HasColumnName("watched_percent");
+
+					b.Property<int?>("WatchedTime")
+						.HasColumnType("integer")
+						.HasColumnName("watched_time");
 
 					b.HasKey("UserId", "ShowId")
 						.HasName("pk_show_watch_status");
