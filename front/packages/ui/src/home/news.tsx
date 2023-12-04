@@ -18,23 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-	Genre,
-	ItemKind,
-	News,
-	NewsKind,
-	NewsP,
-	QueryIdentifier,
-	getDisplayDate,
-} from "@kyoo/models";
-import { H3, IconButton, ts } from "@kyoo/primitives";
-import { ReactElement, forwardRef, useRef } from "react";
-import { View } from "react-native";
-import { px, useYoshiki } from "yoshiki/native";
+import { News, NewsKind, NewsP, QueryIdentifier, getDisplayDate } from "@kyoo/models";
+import { useYoshiki } from "yoshiki/native";
 import { ItemGrid } from "../browse/grid";
-import ChevronLeft from "@material-symbols/svg-400/rounded/chevron_left-fill.svg";
-import ChevronRight from "@material-symbols/svg-400/rounded/chevron_right-fill.svg";
-import { InfiniteFetch, InfiniteFetchList } from "../fetch-infinite";
+import { InfiniteFetch } from "../fetch-infinite";
 import { useTranslation } from "react-i18next";
 import { Header } from "./genre";
 import { EpisodeBox, episodeDisplayNumber } from "../details/episode";
@@ -74,6 +61,8 @@ export const NewsList = () => {
 							overview={x.name}
 							thumbnail={x.thumbnail}
 							href={x.href}
+							watchedPercent={x.watchStatus?.watchedPercent || null}
+							watchedStatus={x.watchStatus?.status || null}
 							// TODO: support this on mobile too
 							// @ts-expect-error This is a web only property
 							{...css({ gridColumnEnd: "span 2" })}
@@ -92,6 +81,6 @@ NewsList.query = (): QueryIdentifier<News> => ({
 	params: {
 		// Limit the inital numbers of items
 		limit: 10,
-		fields: ["show"],
+		fields: ["show", "watchStatus"],
 	},
 });

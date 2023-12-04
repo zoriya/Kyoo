@@ -18,11 +18,11 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { useLayoutEffect, useState } from "react";
+import { useState } from "react";
 import { ImageStyle, View, ViewStyle } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 import { Props, ImageLayout } from "./base-image";
-import { BlurhashContainer, blurHashToDataURL } from "./blurhash.web";
+import { BlurhashContainer } from "./blurhash.web";
 import { Skeleton } from "../skeleton";
 import NextImage from "next/image";
 

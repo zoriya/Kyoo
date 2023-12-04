@@ -146,6 +146,8 @@ export const EpisodeList = <Props,>({
 						<EpisodeLine
 							{...item}
 							displayNumber={item.isLoading ? undefined! : episodeDisplayNumber(item)!}
+							watchedPercent={item.watchStatus?.watchedPercent ?? null}
+							watchedStatus={item.watchStatus?.status ?? null}
 						/>
 					</>
 				);
@@ -162,6 +164,7 @@ EpisodeList.query = (
 	path: ["show", slug, "episode"],
 	params: {
 		seasonNumber: season ? `gte:${season}` : undefined,
+		fields: ["watchStatus"],
 	},
 	infinite: {
 		value: true,
