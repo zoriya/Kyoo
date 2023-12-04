@@ -30,7 +30,8 @@
 			"watching": "Mark as watching",
 			"droped": "Mark as dropped",
 			"null": "Mark as not seen"
-		}
+		},
+		"nextUp": "Next up"
 	},
 	"browse": {
 		"sortby": "Sort by {{key}}",
