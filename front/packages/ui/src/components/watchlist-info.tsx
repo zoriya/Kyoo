@@ -82,7 +82,12 @@ export const WatchListInfo = ({
 		case WatchStatusV.Watching:
 		case WatchStatusV.Droped:
 			return (
-				<Menu Trigger={IconButton} icon={Bookmark} {...tooltip(t("show.watchlistEdit"))} {...props}>
+				<Menu
+					Trigger={IconButton}
+					icon={status === WatchStatusV.Droped ? BookmarkRemove : Bookmark}
+					{...tooltip(t("show.watchlistEdit"))}
+					{...props}
+				>
 					{Object.values(WatchStatusV).map((x) => (
 						<Menu.Item
 							key={x}
