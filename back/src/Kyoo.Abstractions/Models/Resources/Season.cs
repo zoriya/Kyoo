@@ -137,7 +137,7 @@ namespace Kyoo.Abstractions.Models
 					from
 						episodes as e
 					where
-						e.season_id = id) as episode_count
+						e.season_id = id) as episodes_count
 			"""
 		)]
 		public int EpisodesCount { get; set; }

@@ -204,13 +204,14 @@ public static class DapperHelper
 		return $"\nwhere {Process(filter)}";
 	}
 
-	public static string ExpendProjections(string type, string? prefix, Include include)
+	public static string ExpendProjections(Type type, string? prefix, Include include)
 	{
 		IEnumerable<string> projections = include.Metadatas
-			.Select(x => x is Include.ProjectedRelation(var name, var sql) ? sql : null!)
+			.Select(x => (x as Include.ProjectedRelation)!)
 			.Where(x => x != null)
-			.Select(x => x.Replace("\"this\".", prefix));
-		return string.Join(string.Empty, projections.Select(x => $", {x}"));
+			.Where(x => type.GetProperty(x.Name) != null)
+			.Select(x => x.Sql.Replace("\"this\".", prefix));
+		return string.Join(", ", projections);
 	}
 
 	public static async Task<ICollection<T>> Query<T>(
@@ -265,18 +266,20 @@ public static class DapperHelper
 			string? prefix = match.Groups[4].Value;
 			prefix = !string.IsNullOrEmpty(prefix) ? $"{prefix}." : string.Empty;
 
+			Type typeV = types.First(x => x.Name == type);
+
 			// Only project top level items with explicit includes.
 			string? projection = config.Any(x => x.Value.Name == type)
-				? ExpendProjections(type, prefix, include)
+				? ExpendProjections(typeV, prefix, include)
 				: null;
-			Type? typeV = types.FirstOrDefault(x => x.Name == type);
-			if (typeV?.IsAssignableTo(typeof(IThumbnails)) == true)
+
+			if (typeV.IsAssignableTo(typeof(IThumbnails)))
 			{
 				string posterProj = string.Join(", ", new[] { "poster", "thumbnail", "logo" }
 					.Select(x => $"{prefix}{x}_source as source, {prefix}{x}_blurhash as blurhash"));
 				projection = string.IsNullOrEmpty(projection)
 					? posterProj
-					: $"{posterProj}, {projection}";
+					: $"{projection}, {posterProj}";
 				types.InsertRange(types.IndexOf(typeV) + 1, Enumerable.Repeat(typeof(Image), 3));
 			}
 
