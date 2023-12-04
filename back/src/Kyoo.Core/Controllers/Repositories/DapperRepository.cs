@@ -69,10 +69,13 @@ public abstract class DapperRepository<T> : IRepository<T>
 	}
 
 	/// <inheritdoc/>
-	public virtual async Task<T> Get(Filter<T> filter,
-		Include<T>? include = default)
+	public virtual async Task<T> Get(Filter<T>? filter,
+		Include<T>? include = default,
+		Sort<T>? sortBy = default,
+		bool reverse = false,
+		Guid? afterId = default)
 	{
-		T? ret = await GetOrDefault(filter, include: include);
+		T? ret = await GetOrDefault(filter, include, sortBy, reverse, afterId);
 		if (ret == null)
 			throw new ItemNotFoundException($"No {typeof(T).Name} found with the given predicate.");
 		return ret;
@@ -135,10 +138,11 @@ public abstract class DapperRepository<T> : IRepository<T>
 	}
 
 	/// <inheritdoc />
-	public Task<T?> GetOrDefault(Filter<T>? filter,
-		Include<T>? include = null,
-		Sort<T>? sortBy = null,
-		bool reverse = false)
+	public virtual Task<T?> GetOrDefault(Filter<T>? filter,
+		Include<T>? include = default,
+		Sort<T>? sortBy = default,
+		bool reverse = false,
+		Guid? afterId = default)
 	{
 		return Database.QuerySingle<T>(
 			Sql,
@@ -147,7 +151,9 @@ public abstract class DapperRepository<T> : IRepository<T>
 			Context,
 			include,
 			filter,
-			sortBy
+			sortBy,
+			reverse,
+			afterId
 		);
 	}
 

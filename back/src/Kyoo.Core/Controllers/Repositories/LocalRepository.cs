@@ -221,9 +221,15 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc/>
-		public virtual async Task<T> Get(Filter<T> filter, Include<T>? include = default)
+		public virtual async Task<T> Get(
+			Filter<T> filter,
+			Include<T>? include = default,
+			Sort<T>? sortBy = default,
+			bool reverse = false,
+			Guid? afterId = default
+		)
 		{
-			T? ret = await GetOrDefault(filter, include: include);
+			T? ret = await GetOrDefault(filter, include, sortBy, reverse, afterId);
 			if (ret == null)
 				throw new ItemNotFoundException($"No {typeof(T).Name} found with the given predicate.");
 			return ret;
@@ -255,18 +261,20 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public virtual Task<T?> GetOrDefault(Filter<T>? filter,
+		public virtual async Task<T?> GetOrDefault(Filter<T>? filter,
 			Include<T>? include = default,
 			Sort<T>? sortBy = default,
-			bool reverse = false)
+			bool reverse = false,
+			Guid? afterId = default)
 		{
-			IQueryable<T> query = Sort(
-				AddIncludes(Database.Set<T>(), include),
-				sortBy
+			IQueryable<T> query = await ApplyFilters(
+				Database.Set<T>(),
+				filter,
+				sortBy,
+				new Pagination(1, afterId, reverse),
+				include
 			);
-			if (reverse)
-				query = query.Reverse();
-			return query.FirstOrDefaultAsync(ParseFilter(filter));
+			return await query.FirstOrDefaultAsync();
 		}
 
 		/// <inheritdoc/>
@@ -285,12 +293,13 @@ namespace Kyoo.Core.Controllers
 		public abstract Task<ICollection<T>> Search(string query, Include<T>? include = default);
 
 		/// <inheritdoc/>
-		public virtual Task<ICollection<T>> GetAll(Filter<T>? filter = null,
+		public virtual async Task<ICollection<T>> GetAll(Filter<T>? filter = null,
 			Sort<T>? sort = default,
 			Include<T>? include = default,
 			Pagination? limit = default)
 		{
-			return ApplyFilters(Database.Set<T>(), filter, sort, limit, include);
+			IQueryable<T> query = await ApplyFilters(Database.Set<T>(), filter, sort, limit, include);
+			return await query.ToListAsync();
 		}
 
 		/// <summary>
@@ -302,7 +311,7 @@ namespace Kyoo.Core.Controllers
 		/// <param name="limit">Pagination information (where to start and how many to get)</param>
 		/// <param name="include">Related fields to also load with this query.</param>
 		/// <returns>The filtered query</returns>
-		protected async Task<ICollection<T>> ApplyFilters(IQueryable<T> query,
+		protected async Task<IQueryable<T>> ApplyFilters(IQueryable<T> query,
 			Filter<T>? filter = null,
 			Sort<T>? sort = default,
 			Pagination? limit = default,
@@ -317,7 +326,6 @@ namespace Kyoo.Core.Controllers
 				T reference = await Get(limit.AfterID.Value);
 				Filter<T>? keysetFilter = RepositoryHelper.KeysetPaginate(sort, reference, !limit.Reverse);
 				filter = Filter.And(filter, keysetFilter);
-				Console.WriteLine(filter);
 			}
 			if (filter != null)
 				query = query.Where(ParseFilter(filter));
@@ -329,7 +337,7 @@ namespace Kyoo.Core.Controllers
 			if (limit.Reverse)
 				query = query.Reverse();
 
-			return await query.ToListAsync();
+			return query;
 		}
 
 		/// <inheritdoc/>

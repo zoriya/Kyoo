@@ -19,6 +19,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -98,7 +99,8 @@ public class WatchStatusRepository : IWatchStatusRepository
 			MovieId = movieId,
 			Status = status,
 			WatchedTime = watchedTime,
-			PlayedDate = DateTime.UtcNow
+			AddedDate = DateTime.UtcNow,
+			PlayedDate = status == WatchStatus.Completed ? DateTime.UtcNow : null,
 		};
 		await _database.MovieWatchStatus.Upsert(ret)
 			.UpdateIf(x => status != Watching || x.Status != Completed)
@@ -135,23 +137,44 @@ public class WatchStatusRepository : IWatchStatusRepository
 		if (unseenEpisodeCount == 0)
 			status = WatchStatus.Completed;
 
+		Episode? cursor = null;
+		Guid? nextEpisodeId = null;
+		if (status == WatchStatus.Watching)
+		{
+			cursor = await _episodes.GetOrDefault(
+				new Filter<Episode>.Lambda(
+					x => x.ShowId == showId
+						&& (x.WatchStatus!.Status == WatchStatus.Completed
+							|| x.WatchStatus.Status == WatchStatus.Watching)
+				),
+				new Include<Episode>(nameof(Episode.WatchStatus)),
+				reverse: true
+			);
+			nextEpisodeId = cursor?.WatchStatus?.Status == WatchStatus.Watching
+				? cursor.Id
+				: ((await _episodes.GetOrDefault(
+					new Filter<Episode>.Lambda(
+						x => x.ShowId == showId && x.WatchStatus!.Status != WatchStatus.Completed
+					),
+					afterId: cursor?.Id
+				))?.Id);
+		}
+
 		ShowWatchStatus ret = new()
 		{
 			UserId = userId,
 			ShowId = showId,
 			Status = status,
-			NextEpisode = status == WatchStatus.Watching
-				? await _episodes.GetOrDefault(
-					new Filter<Episode>.Lambda(
-						x => x.ShowId == showId
-							&& (x.WatchStatus!.Status == WatchStatus.Watching
-								|| x.WatchStatus.Status == WatchStatus.Completed)
-					),
-					reverse: true
-				)
+			AddedDate = DateTime.UtcNow,
+			NextEpisodeId = nextEpisodeId,
+			WatchedTime = cursor?.WatchStatus?.Status == WatchStatus.Watching
+				? cursor.WatchStatus.WatchedTime
+				: null,
+			WatchedPercent = cursor?.WatchStatus?.Status == WatchStatus.Watching
+				? cursor.WatchStatus.WatchedPercent
 				: null,
 			UnseenEpisodesCount = unseenEpisodeCount,
-			PlayedDate = DateTime.UtcNow
+			PlayedDate = status == WatchStatus.Completed ? DateTime.UtcNow : null,
 		};
 		await _database.ShowWatchStatus.Upsert(ret)
 			.UpdateIf(x => status != Watching || x.Status != Completed)
@@ -210,7 +233,8 @@ public class WatchStatusRepository : IWatchStatusRepository
 			Status = status,
 			WatchedTime = watchedTime,
 			WatchedPercent = percent,
-			PlayedDate = DateTime.UtcNow
+			AddedDate = DateTime.UtcNow,
+			PlayedDate = status == WatchStatus.Completed ? DateTime.UtcNow : null,
 		};
 		await _database.EpisodeWatchStatus.Upsert(ret)
 			.UpdateIf(x => status != Watching || x.Status != Completed)

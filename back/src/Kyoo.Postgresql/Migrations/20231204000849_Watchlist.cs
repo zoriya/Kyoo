@@ -105,7 +105,9 @@ namespace Kyoo.Postgresql.Migrations
 					played_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
 					status = table.Column<WatchStatus>(type: "watch_status", nullable: false),
 					unseen_episodes_count = table.Column<int>(type: "integer", nullable: false),
-					next_episode_id = table.Column<Guid>(type: "uuid", nullable: true)
+					next_episode_id = table.Column<Guid>(type: "uuid", nullable: true),
+					watched_time = table.Column<int>(type: "integer", nullable: true),
+					watched_percent = table.Column<int>(type: "integer", nullable: true)
 				},
 				constraints: table =>
 				{
