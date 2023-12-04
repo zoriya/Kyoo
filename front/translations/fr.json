@@ -30,7 +30,8 @@
 			"watching": "Marquer en cours de visionnage",
 			"droped": "Marquer comme abandonné",
 			"null": "Marquer comme non vu"
-		}
+		},
+		"nextUp": "Continuer"
 	},
 	"browse": {
 		"sortby": "Trier par {{key}}",

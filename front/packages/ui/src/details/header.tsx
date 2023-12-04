@@ -47,6 +47,8 @@ import {
 	ts,
 	Chip,
 	DottedSeparator,
+	focusReset,
+	SwitchVariant,
 } from "@kyoo/primitives";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
@@ -68,9 +70,9 @@ import { Fetch } from "../fetch";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg";
 import { Rating } from "../components/rating";
-import { displayRuntime } from "./episode";
+import { EpisodeLine, displayRuntime, episodeDisplayNumber } from "./episode";
 import { WatchListInfo } from "../components/watchlist-info";
-import { WatchStatusV } from "@kyoo/models/src/resources/watch-status";
+import { ShowWatchStatus, WatchStatusV } from "@kyoo/models/src/resources/watch-status";
 
 export const TitleLine = ({
 	isLoading,
@@ -474,6 +476,33 @@ export const Header = ({
 							</Chip>
 						))}
 					</Container>
+					{type === "show" && (data.watchStatus as ShowWatchStatus)?.nextEpisode && (
+						<SwitchVariant>
+							{({ css }) => (
+								<Container
+									{...css({
+										marginY: ts(2),
+										borderRadius: 16,
+										overflow: "hidden",
+										borderWidth: ts(0.5),
+										borderStyle: "solid",
+										borderColor: (theme) => theme.background,
+										backgroundColor: (theme) => theme.background,
+										fover: {
+											self: { ...focusReset, borderColor: (theme: Theme) => theme.accent },
+										},
+									})}
+								>
+									<H2 {...css({ marginLeft: ts(2) })}>{t("show.nextUp")}</H2>
+									<EpisodeLine
+										isLoading={false}
+										{...(data.watchStatus as ShowWatchStatus).nextEpisode!}
+										displayNumber={episodeDisplayNumber((data.watchStatus as ShowWatchStatus).nextEpisode!)!}
+									/>
+								</Container>
+							)}
+						</SwitchVariant>
+					)}
 				</>
 			)}
 		</Fetch>

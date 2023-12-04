@@ -27,7 +27,7 @@ import { StudioP } from "./studio";
 import { BaseEpisodeP } from "./episode.base";
 import { CollectionP } from "./collection";
 import { MetadataP } from "./metadata";
-import { ShowWatchStatusP, WatchStatusP } from "./watch-status";
+import { ShowWatchStatusP } from "./watch-status";
 
 /**
  * The enum containing show's status.
