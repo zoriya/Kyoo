@@ -90,14 +90,6 @@ export const ShowP = withImages(
 		 */
 		studio: StudioP.optional().nullable(),
 		/**
-		 * The collection this movie is part of.
-		 */
-		collections: z.array(CollectionP).optional(),
-		/**
-		 * The list of seasons of this show.
-		 */
-		seasons: z.array(SeasonP).optional(),
-		/**
 		 * The first episode of this show
 		 */
 		firstEpisode: BaseEpisodeP.optional().nullable(),
@@ -109,6 +101,10 @@ export const ShowP = withImages(
 		 * Metadata of what an user as started/planned to watch.
 		 */
 		watchStatus: ShowWatchStatusP.nullable().optional(),
+		/**
+		 * The number of episodes in this show.
+		 */
+		episodesCount: z.number().int().gte(0).optional(),
 	}),
 	"shows",
 )

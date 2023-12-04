@@ -19,7 +19,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
