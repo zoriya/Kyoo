@@ -21,7 +21,7 @@
 import { ImageStyle, View, ViewProps, ViewStyle } from "react-native";
 import { Props, ImageLayout, YoshikiEnhanced } from "./base-image";
 import { Image } from "./image";
-import { ComponentType, ReactNode } from "react";
+import { ComponentProps, ComponentType, ReactNode } from "react";
 import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
 import { ContrastArea } from "../themes";
 import { percent } from "yoshiki/native";
@@ -36,6 +36,22 @@ export const Poster = ({
 }: Props & { style?: ImageStyle } & {
 	layout: YoshikiEnhanced<{ width: ImageStyle["width"] } | { height: ImageStyle["height"] }>;
 }) => <Image alt={alt!} layout={{ aspectRatio: 2 / 3, ...layout }} {...props} />;
+
+export const PosterBackground = ({
+	alt,
+	layout,
+	...props
+}: Omit<ComponentProps<typeof ImageBackground>, "layout"> & { style?: ImageStyle } & {
+	layout: YoshikiEnhanced<{ width: ImageStyle["width"] } | { height: ImageStyle["height"] }>;
+}) => (
+	<ImageBackground
+		alt={alt!}
+		layout={{ aspectRatio: 2 / 3, ...layout }}
+		hideLoad={false}
+		gradient={false}
+		{...props}
+	/>
+);
 
 export const ImageBackground = <AsProps = ViewProps,>({
 	src,
