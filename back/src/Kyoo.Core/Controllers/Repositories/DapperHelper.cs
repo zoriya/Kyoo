@@ -36,6 +36,7 @@ using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Authentication;
 using Kyoo.Utils;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 
 namespace Kyoo.Core.Controllers;
 
@@ -131,7 +132,10 @@ public static class DapperHelper
 
 		T Map(T item, IEnumerable<object?> relations)
 		{
-			foreach ((string name, object? value) in include.Fields.Zip(relations))
+			IEnumerable<string> metadatas = include.Metadatas
+				.Where(x => x is not Include.ProjectedRelation)
+				.Select(x => x.Name);
+			foreach ((string name, object? value) in metadatas.Zip(relations))
 			{
 				if (value == null)
 					continue;
