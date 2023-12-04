@@ -23,6 +23,7 @@ import { KyooErrors } from "./kyoo-errors";
 import { Account, Token, TokenP } from "./accounts";
 import { UserP } from "./resources";
 import { addAccount, getCurrentAccount, removeAccounts, updateAccount } from "./account-internal";
+import { Platform } from "react-native";
 
 type Result<A, B> =
 	| { ok: true; value: A; error?: undefined }
@@ -59,28 +60,43 @@ export const login = async (
 	}
 };
 
+let running: ReturnType<typeof getTokenWJ> | null = null;
+
 export const getTokenWJ = async (
 	account?: Account | null,
-): Promise<[string, Token] | [null, null]> => {
-	if (account === undefined) account = getCurrentAccount();
-	if (!account) return [null, null];
+): ReturnType<typeof run> => {
+	async function run() {
+		if (account === undefined) account = getCurrentAccount();
+		if (!account) return [null, null] as const;
 
-	if (account.token.expire_at <= new Date(new Date().getTime() + 10 * 1000)) {
-		try {
-			const token = await queryFn(
-				{
-					path: ["auth", "refresh", `?token=${account.token.refresh_token}`],
-					method: "GET",
-					authenticated: false,
-				},
-				TokenP,
-			);
-			if (typeof window !== "undefined") updateAccount(account.id, { ...account, token });
-		} catch (e) {
-			console.error("Error refreshing token durring ssr:", e);
+		if (account.token.expire_at <= new Date(new Date().getTime() + 10 * 1000)) {
+			console.log("refreshing token...");
+			try {
+				const token = await queryFn(
+					{
+						path: ["auth", "refresh", `?token=${account.token.refresh_token}`],
+						method: "GET",
+						authenticated: false,
+					},
+					TokenP,
+				);
+				if (Platform.OS === "web" && typeof window !== "undefined")
+					updateAccount(account.id, { ...account, token });
+			} catch (e) {
+				console.error("Error refreshing token durring ssr:", e);
+			}
 		}
+		return [`${account.token.token_type} ${account.token.access_token}`, account.token] as const;
 	}
-	return [`${account.token.token_type} ${account.token.access_token}`, account.token];
+
+	// Do not cache promise durring ssr.
+	if (Platform.OS === "web" && typeof window === "undefined") return await run();
+
+	if (running) return await running;
+	running = run();
+	const ret = await running;
+	running = null;
+	return ret;
 };
 
 export const getToken = async (): Promise<string | null> => (await getTokenWJ())[0];
