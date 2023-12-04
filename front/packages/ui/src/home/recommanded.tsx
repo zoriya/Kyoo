@@ -25,15 +25,17 @@ import {
 	LibraryItem,
 	LibraryItemP,
 	QueryIdentifier,
+	WatchStatusV,
 	getDisplayDate,
 } from "@kyoo/models";
 import {
 	Chip,
 	H3,
+	Icon,
 	IconFab,
-	ImageBackground,
 	Link,
 	P,
+	PosterBackground,
 	Skeleton,
 	SubP,
 	focusReset,
@@ -48,6 +50,7 @@ import { Layout, WithLoading } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import { ItemGrid } from "../browse/grid";
+import Done from "@material-symbols/svg-400/rounded/done-fill.svg";
 
 export const ItemDetails = ({
 	isLoading,
@@ -59,6 +62,8 @@ export const ItemDetails = ({
 	genres,
 	href,
 	playHref,
+	watchStatus,
+	unseenEpisodesCount,
 	...props
 }: WithLoading<{
 	name: string;
@@ -69,6 +74,8 @@ export const ItemDetails = ({
 	overview: string | null;
 	href: string;
 	playHref: string | null;
+	watchStatus: WatchStatusV | null;
+	unseenEpisodesCount: number | null;
 }>) => {
 	const { push } = useRouter();
 	const { t } = useTranslation();
@@ -100,13 +107,12 @@ export const ItemDetails = ({
 				props,
 			)}
 		>
-			<ImageBackground
+			<PosterBackground
 				src={poster}
 				alt=""
 				quality="low"
-				gradient={false}
 				forcedLoading={isLoading}
-				{...css({ height: percent(100), aspectRatio: 2 / 3 })}
+				layout={{ height: percent(100) }}
 			>
 				<View
 					{...css({
@@ -127,7 +133,29 @@ export const ItemDetails = ({
 						</Skeleton>
 					)}
 				</View>
-			</ImageBackground>
+				{(watchStatus === WatchStatusV.Completed || unseenEpisodesCount) && (
+					<View
+						{...css({
+							position: "absolute",
+							top: 0,
+							right: 0,
+							minWidth: ts(3.5),
+							aspectRatio: 1,
+							justifyContent: "center",
+							m: ts(0.5),
+							pX: ts(0.5),
+							bg: (theme) => theme.darkOverlay,
+							borderRadius: 999999,
+						})}
+					>
+						{watchStatus === WatchStatusV.Completed ? (
+							<Icon icon={Done} size={16} />
+						) : (
+							<P {...css({ m: 0, textAlign: "center" })}>{unseenEpisodesCount}</P>
+						)}
+					</View>
+				)}
+			</PosterBackground>
 			<View {...css({ flexShrink: 1, flexGrow: 1, justifyContent: "flex-end" })}>
 				{(isLoading || tagline) && (
 					<Skeleton {...css({ m: ts(1), marginVertical: ts(2) })}>
@@ -195,7 +223,7 @@ export const Recommanded = () => {
 				fetchMore={false}
 				{...css({ padding: 0 })}
 			>
-				{(x, i) => (
+				{(x) => (
 					<ItemDetails
 						isLoading={x.isLoading as any}
 						name={x.name}
@@ -208,6 +236,14 @@ export const Recommanded = () => {
 						genres={"genres" in x ? x.genres : null}
 						href={x.href}
 						playHref={x.kind !== ItemKind.Collection && !x.isLoading ? x.playHref : undefined}
+						watchStatus={
+							!x.isLoading && x.kind !== ItemKind.Collection ? x.watchStatus?.status ?? null : null
+						}
+						unseenEpisodesCount={
+							x.kind === ItemKind.Show
+								? x.watchStatus?.unseenEpisodesCount ?? x.episodesCount!
+								: null
+						}
 					/>
 				)}
 			</InfiniteFetch>
@@ -222,6 +258,6 @@ Recommanded.query = (): QueryIdentifier<LibraryItem> => ({
 	params: {
 		sortBy: "random",
 		limit: 6,
-		fields: ["firstEpisode"],
+		fields: ["firstEpisode", "episodesCount", "watchStatus"],
 	},
 });

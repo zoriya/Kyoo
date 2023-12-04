@@ -22,7 +22,6 @@ import { KyooImage, WatchStatusV } from "@kyoo/models";
 import {
 	Link,
 	Skeleton,
-	Poster,
 	ts,
 	focusReset,
 	P,
@@ -31,7 +30,7 @@ import {
 	Icon,
 } from "@kyoo/primitives";
 import { ImageStyle, View } from "react-native";
-import { percent, px, rem, Stylable, Theme, useYoshiki } from "yoshiki/native";
+import { percent, px, Stylable, Theme, useYoshiki } from "yoshiki/native";
 import { Layout, WithLoading } from "../fetch";
 import Done from "@material-symbols/svg-400/rounded/done-fill.svg";
 
@@ -41,14 +40,16 @@ export const ItemGrid = ({
 	subtitle,
 	poster,
 	isLoading,
-	watchInfo,
+	watchStatus,
+	unseenEpisodesCount,
 	...props
 }: WithLoading<{
 	href: string;
 	name: string;
 	subtitle?: string;
 	poster?: KyooImage | null;
-	watchInfo: WatchStatusV | string | null;
+	watchStatus: WatchStatusV | null;
+	unseenEpisodesCount: number | null;
 }> &
 	Stylable<"text">) => {
 	const { css } = useYoshiki("grid");
@@ -89,7 +90,7 @@ export const ItemGrid = ({
 				layout={{ width: percent(100) }}
 				{...(css("poster") as { style: ImageStyle })}
 			>
-				{watchInfo && (
+				{(watchStatus === WatchStatusV.Completed || unseenEpisodesCount) && (
 					<View
 						{...css({
 							position: "absolute",
@@ -104,10 +105,10 @@ export const ItemGrid = ({
 							borderRadius: 999999,
 						})}
 					>
-						{watchInfo === WatchStatusV.Completed ? (
+						{watchStatus === WatchStatusV.Completed ? (
 							<Icon icon={Done} size={16} />
 						) : (
-							<P {...css({ m: 0, textAlign: "center" })}>{watchInfo}</P>
+							<P {...css({ m: 0, textAlign: "center" })}>{unseenEpisodesCount}</P>
 						)}
 					</View>
 				)}

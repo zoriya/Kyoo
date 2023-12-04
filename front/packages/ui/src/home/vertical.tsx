@@ -26,6 +26,7 @@ import { InfiniteFetch } from "../fetch-infinite";
 import { ItemList } from "../browse/list";
 import { useTranslation } from "react-i18next";
 import { ItemGrid } from "../browse/grid";
+import { itemMap } from "../browse";
 
 export const VerticalRecommanded = () => {
 	const { t } = useTranslation();
@@ -40,19 +41,7 @@ export const VerticalRecommanded = () => {
 				layout={{ ...ItemList.layout, layout: "vertical" }}
 				fetchMore={false}
 			>
-				{(x, i) => (
-					<ItemList
-						key={x.id ?? i}
-						isLoading={x.isLoading as any}
-						href={x.href}
-						name={x.name}
-						subtitle={
-							x.kind !== ItemKind.Collection && !x.isLoading ? getDisplayDate(x) : undefined
-						}
-						poster={x.poster}
-						thumbnail={x.thumbnail}
-					/>
-				)}
+				{(x, i) => <ItemList key={x.id ?? i} {...itemMap(x)} />}
 			</InfiniteFetch>
 		</View>
 	);
@@ -63,6 +52,7 @@ VerticalRecommanded.query = (): QueryIdentifier<LibraryItem> => ({
 	infinite: true,
 	path: ["items"],
 	params: {
+		fields: ["episodesCount", "watchStatus"],
 		sortBy: "random",
 		limit: 3,
 	},
