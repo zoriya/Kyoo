@@ -18,12 +18,23 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { KyooImage } from "@kyoo/models";
-import { Link, P, Skeleton, ts, ImageBackground, Poster, Heading } from "@kyoo/primitives";
+import { KyooImage, WatchStatusV } from "@kyoo/models";
+import {
+	Link,
+	P,
+	Skeleton,
+	ts,
+	ImageBackground,
+	Poster,
+	Heading,
+	Icon,
+	PosterBackground,
+} from "@kyoo/primitives";
 import { useState } from "react";
 import { View } from "react-native";
 import { percent, px, rem, useYoshiki } from "yoshiki/native";
 import { Layout, WithLoading } from "../fetch";
+import Done from "@material-symbols/svg-400/rounded/done-fill.svg";
 
 export const ItemList = ({
 	href,
@@ -32,12 +43,17 @@ export const ItemList = ({
 	thumbnail,
 	poster,
 	isLoading,
+	watchStatus,
+	unseenEpisodesCount,
+	...props
 }: WithLoading<{
 	href: string;
 	name: string;
 	subtitle?: string;
 	poster?: KyooImage | null;
 	thumbnail?: KyooImage | null;
+	watchStatus: WatchStatusV | null;
+	unseenEpisodesCount: number | null;
 }>) => {
 	const { css } = useYoshiki();
 	const [isHovered, setHovered] = useState(0);
@@ -59,14 +75,17 @@ export const ItemList = ({
 			imageStyle={{
 				borderRadius: px(6),
 			}}
-			{...css({
-				alignItems: "center",
-				justifyContent: "space-evenly",
-				flexDirection: "row",
-				height: ItemList.layout.size,
-				borderRadius: px(6),
-				marginX: ItemList.layout.gap,
-			})}
+			{...css(
+				{
+					alignItems: "center",
+					justifyContent: "space-evenly",
+					flexDirection: "row",
+					height: ItemList.layout.size,
+					borderRadius: px(6),
+					marginX: ItemList.layout.gap,
+				},
+				props,
+			)}
 		>
 			<View
 				{...css({
@@ -104,13 +123,36 @@ export const ItemList = ({
 					</Skeleton>
 				)}
 			</View>
-			<Poster
+			<PosterBackground
 				src={poster}
 				alt=""
 				quality="low"
 				forcedLoading={isLoading}
 				layout={{ height: percent(80) }}
-			/>
+			>
+				{(watchStatus === WatchStatusV.Completed || unseenEpisodesCount) && (
+					<View
+						{...css({
+							position: "absolute",
+							top: 0,
+							left: 0,
+							minWidth: ts(3.5),
+							aspectRatio: 1,
+							justifyContent: "center",
+							m: ts(0.5),
+							pX: ts(0.5),
+							bg: (theme) => theme.darkOverlay,
+							borderRadius: 999999,
+						})}
+					>
+						{watchStatus === WatchStatusV.Completed ? (
+							<Icon icon={Done} size={16} />
+						) : (
+							<P {...css({ m: 0, textAlign: "center" })}>{unseenEpisodesCount}</P>
+						)}
+					</View>
+				)}
+			</PosterBackground>
 		</ImageBackground>
 	);
 };
