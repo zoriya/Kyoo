@@ -17,7 +17,10 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Data.Common;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
@@ -28,7 +31,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Core.Controllers;
 
-public class WatchStatusRepository : IWatchStatusRepository
+public class WatchStatusRepository : DapperRepository<IWatchlist>, IWatchStatusRepository
 {
 	/// <summary>
 	/// If the watch percent is below this value, don't consider the item started.
@@ -55,11 +58,62 @@ public class WatchStatusRepository : IWatchStatusRepository
 
 	public WatchStatusRepository(DatabaseContext database,
 		IRepository<Episode> episodes,
-		IRepository<Movie> movies)
+		IRepository<Movie> movies,
+		DbConnection db,
+		SqlVariableContext context)
+		: base(db, context)
 	{
 		_database = database;
 		_episodes = episodes;
 		_movies = movies;
+	}
+
+	// language=PostgreSQL
+	protected override FormattableString Sql => $"""
+		select
+			s.*,
+			m.*,
+			e.*
+			/* includes */
+		from (
+			select
+				s.* -- Show as s
+			from
+				shows as s
+				inner join show_watch_status as sw on sw.show_id = s.id
+					and sw.user_id = [current_user]) as s
+			full outer join (
+			select
+				m.* -- Movie as m
+			from
+				movies as m
+				inner join movie_watch_status as mw on mw.movie_id = m.id
+					and mw.user_id = [current_user]) as s) as m
+			full outer join (
+			select
+				e.* -- Episode as e
+			from
+				episode as es
+				inner join episode_watch_status as ew on ew.episode_id = e.id
+					and ew.user_id = [current_user])) as e
+		""";
+
+	protected override Dictionary<string, Type> Config => new()
+		{
+			{ "s", typeof(Show) },
+			{ "m", typeof(Movie) },
+			{ "e", typeof(Episode) },
+		};
+
+	protected override IWatchlist Mapper(List<object?> items)
+	{
+		if (items[0] is Show show && show.Id != Guid.Empty)
+			return show;
+		if (items[1] is Movie movie && movie.Id != Guid.Empty)
+			return movie;
+		if (items[2] is Episode episode && episode.Id != Guid.Empty)
+			return episode;
+		throw new InvalidDataException();
 	}
 
 	/// <inheritdoc />
