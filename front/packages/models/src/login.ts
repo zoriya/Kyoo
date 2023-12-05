@@ -20,9 +20,15 @@
 
 import { queryFn } from "./query";
 import { KyooErrors } from "./kyoo-errors";
-import { Account, Token, TokenP } from "./accounts";
+import { Account, TokenP } from "./accounts";
 import { UserP } from "./resources";
-import { addAccount, getCurrentAccount, removeAccounts, updateAccount } from "./account-internal";
+import {
+	addAccount,
+	getCurrentAccount,
+	removeAccounts,
+	unselectAllAccounts,
+	updateAccount,
+} from "./account-internal";
 import { Platform } from "react-native";
 
 type Result<A, B> =
@@ -62,9 +68,7 @@ export const login = async (
 
 let running: ReturnType<typeof getTokenWJ> | null = null;
 
-export const getTokenWJ = async (
-	account?: Account | null,
-): ReturnType<typeof run> => {
+export const getTokenWJ = async (account?: Account | null): ReturnType<typeof run> => {
 	async function run() {
 		if (account === undefined) account = getCurrentAccount();
 		if (!account) return [null, null] as const;
@@ -81,10 +85,12 @@ export const getTokenWJ = async (
 					},
 					TokenP,
 				);
-				if (Platform.OS === "web" && typeof window !== "undefined")
+				if (Platform.OS !== "web" || typeof window !== "undefined")
 					updateAccount(account.id, { ...account, token });
 			} catch (e) {
 				console.error("Error refreshing token durring ssr:", e);
+				if (Platform.OS !== "web" || typeof window !== "undefined") unselectAllAccounts();
+				return [null, null];
 			}
 		}
 		return [`${token.token_type} ${token.access_token}`, token] as const;
