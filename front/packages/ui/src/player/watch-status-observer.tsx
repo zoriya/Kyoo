@@ -20,8 +20,9 @@
 
 import { WatchStatusV, queryFn } from "@kyoo/models";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { useAtomValue } from "jotai";
+import { useAtomCallback } from "jotai/utils";
 import { playAtom, progressAtom } from "./state";
 
 export const WatchStatusObserver = ({
@@ -32,7 +33,7 @@ export const WatchStatusObserver = ({
 	slug: string;
 }) => {
 	const queryClient = useQueryClient();
-	const mutation = useMutation({
+	const { mutate } = useMutation({
 		mutationFn: (seconds: number) =>
 			queryFn({
 				path: [
@@ -46,13 +47,28 @@ export const WatchStatusObserver = ({
 		onSettled: async () =>
 			await queryClient.invalidateQueries({ queryKey: [type === "episode" ? "show" : type, slug] }),
 	});
+	const readProgress = useAtomCallback(
+		useCallback((get) => {
+			const currCount = get(progressAtom);
+			return currCount;
+		}, []),
+	);
 
-	const isPlaying = useAtomValue(playAtom);
-	const progress = useAtomValue(progressAtom);
+	// update watch status every 10 seconds and on unmount.
 	useEffect(() => {
-		mutation.mutate(progress);
-		// Do not make a request every seconds.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [type, slug, isPlaying]);
+		const timer = setInterval(() => {
+			mutate(readProgress());
+		}, 10_000);
+		return () => {
+			clearInterval(timer);
+			mutate(readProgress());
+		};
+	}, [type, slug, readProgress, mutate]);
+
+	// update watch status when play status change (and on mount).
+	const isPlaying = useAtomValue(playAtom);
+	useEffect(() => {
+		mutate(readProgress())
+	}, [type, slug, isPlaying, readProgress, mutate])
 	return null;
 };
