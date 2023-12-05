@@ -17,7 +17,6 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Models;
 
@@ -26,7 +25,7 @@ namespace Kyoo.Abstractions.Controllers;
 /// <summary>
 /// A local repository to handle watched items
 /// </summary>
-public interface IWatchStatusRepository
+public interface IWatchStatusRepository : IRepository<IWatchlist>
 {
 	// /// <summary>
 	// /// The event handler type for all events of this repository.

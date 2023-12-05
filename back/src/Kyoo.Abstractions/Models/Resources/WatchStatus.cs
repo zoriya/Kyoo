@@ -17,9 +17,6 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using EntityFrameworkCore.Projectables;
 using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Abstractions.Models
