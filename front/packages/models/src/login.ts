@@ -69,10 +69,11 @@ export const getTokenWJ = async (
 		if (account === undefined) account = getCurrentAccount();
 		if (!account) return [null, null] as const;
 
+		let token = account.token;
+
 		if (account.token.expire_at <= new Date(new Date().getTime() + 10 * 1000)) {
-			console.log("refreshing token...");
 			try {
-				const token = await queryFn(
+				token = await queryFn(
 					{
 						path: ["auth", "refresh", `?token=${account.token.refresh_token}`],
 						method: "GET",
@@ -86,7 +87,7 @@ export const getTokenWJ = async (
 				console.error("Error refreshing token durring ssr:", e);
 			}
 		}
-		return [`${account.token.token_type} ${account.token.access_token}`, account.token] as const;
+		return [`${token.token_type} ${token.access_token}`, token] as const;
 	}
 
 	// Do not cache promise durring ssr.
