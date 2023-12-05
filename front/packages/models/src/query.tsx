@@ -117,9 +117,8 @@ export const queryFn = async <Data,>(
 		throw data as KyooErrors;
 	}
 
-	// If the method is DELETE, 204 NoContent is returned from kyoo.
-	// @ts-ignore
-	if (context.method === "DELETE") return undefined;
+	// @ts-expect-error Assume Data is nullable.
+	if (resp.status === 204) return null;
 
 	let data;
 	try {
