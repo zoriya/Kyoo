@@ -49,7 +49,7 @@ import { Theme, percent, px, rem, useYoshiki } from "yoshiki/native";
 import { Layout, WithLoading } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
-import { ItemGrid } from "../browse/grid";
+import { ItemGrid, ItemWatchStatus } from "../browse/grid";
 import Done from "@material-symbols/svg-400/rounded/done-fill.svg";
 
 export const ItemDetails = ({
@@ -133,28 +133,7 @@ export const ItemDetails = ({
 						</Skeleton>
 					)}
 				</View>
-				{(watchStatus === WatchStatusV.Completed || unseenEpisodesCount) && (
-					<View
-						{...css({
-							position: "absolute",
-							top: 0,
-							right: 0,
-							minWidth: ts(3.5),
-							aspectRatio: 1,
-							justifyContent: "center",
-							m: ts(0.5),
-							pX: ts(0.5),
-							bg: (theme) => theme.darkOverlay,
-							borderRadius: 999999,
-						})}
-					>
-						{watchStatus === WatchStatusV.Completed ? (
-							<Icon icon={Done} size={16} />
-						) : (
-							<P {...css({ m: 0, textAlign: "center" })}>{unseenEpisodesCount}</P>
-						)}
-					</View>
-				)}
+				<ItemWatchStatus watchStatus={watchStatus} unseenEpisodesCount={unseenEpisodesCount} />
 			</PosterBackground>
 			<View {...css({ flexShrink: 1, flexGrow: 1, justifyContent: "flex-end" })}>
 				{(isLoading || tagline) && (
