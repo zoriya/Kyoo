@@ -107,3 +107,9 @@ export const updateAccount = (id: string, account: Account) => {
 	accounts[idx] = account;
 	writeAccounts(accounts);
 };
+
+export const unselectAllAccounts = () => {
+	const accounts = readAccounts();
+	for (const acc of accounts) acc.selected = false;
+	writeAccounts(accounts);
+}
