@@ -257,16 +257,22 @@ class TheMovieDatabase(Provider):
 					self.name: MetadataID(
 						show["id"], f"https://www.themoviedb.org/tv/{show['id']}"
 					),
-					"imdb": MetadataID(
-						show["external_ids"]["imdb_id"],
-						f"https://www.imdb.com/title/{show['external_ids']['imdb_id']}",
-					)
+				}
+				| (
+					{
+						"imdb": MetadataID(
+							show["external_ids"]["imdb_id"],
+							f"https://www.imdb.com/title/{show['external_ids']['imdb_id']}",
+						)
+					}
 					if show["external_ids"]["imdb_id"]
-					else None,
-					"tvdb": MetadataID(show["external_ids"]["tvdb_id"], link=None)
+					else {}
+				)
+				| (
+					{"tvdb": MetadataID(show["external_ids"]["tvdb_id"], link=None)}
 					if show["external_ids"]["tvdb_id"]
-					else None,
-				},
+					else {}
+				),
 				seasons=[
 					self.to_season(x, language=lng, show_id=show["id"])
 					for x in show["seasons"]

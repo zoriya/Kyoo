@@ -41,7 +41,7 @@ namespace Kyoo.Abstractions.Models
 		);
 
 		/// <inheritdoc />
-		public Guid Id { get; set; } = Guid.Empty;
+		public Guid Id { get; set; }
 
 		/// <inheritdoc />
 		[Computed]
