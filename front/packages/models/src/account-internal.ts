@@ -112,4 +112,4 @@ export const unselectAllAccounts = () => {
 	const accounts = readAccounts();
 	for (const acc of accounts) acc.selected = false;
 	writeAccounts(accounts);
-}
+};
