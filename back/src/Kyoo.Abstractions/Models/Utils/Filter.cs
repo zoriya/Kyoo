@@ -172,6 +172,13 @@ public abstract record Filter<T> : Filter
 					select float.Parse($"{a}.{b}") as object;
 			}
 
+			if (type == typeof(Guid))
+			{
+				return
+					from guid in Parse.Regex(@"[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?", "Guid")
+					select Guid.Parse(guid) as object;
+			}
+
 			if (type == typeof(string))
 			{
 				return (
