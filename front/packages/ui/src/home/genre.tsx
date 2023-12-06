@@ -83,12 +83,7 @@ export const GenreGrid = ({ genre }: { genre: Genre }) => {
 				{(x, i) => {
 					// only display empty list if a loading as been displayed (not durring ssr)
 					if (x.isLoading) displayEmpty.current = true;
-					return (
-						<ItemGrid
-							key={x.id ?? i}
-							{...itemMap(x)}
-						/>
-					);
+					return <ItemGrid key={x.id ?? i} {...itemMap(x)} />;
 				}}
 			</InfiniteFetchList>
 		</>

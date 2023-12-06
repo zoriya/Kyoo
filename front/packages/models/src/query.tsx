@@ -36,8 +36,8 @@ const kyooUrl =
 	Platform.OS !== "web"
 		? process.env.PUBLIC_BACK_URL
 		: typeof window === "undefined"
-		? process.env.KYOO_URL ?? "http://localhost:5000"
-		: "/api";
+		  ? process.env.KYOO_URL ?? "http://localhost:5000"
+		  : "/api";
 
 export let kyooApiUrl: string | null = kyooUrl || null;
 
@@ -71,8 +71,8 @@ export const queryFn = async <Data,>(
 			"path" in context
 				? (context.path.filter((x) => x) as string[])
 				: "pageParam" in context && context.pageParam
-				? [context.pageParam as string]
-				: (context.queryKey.filter((x) => x) as string[]),
+				  ? [context.pageParam as string]
+				  : (context.queryKey.filter((x) => x) as string[]),
 		)
 		.join("/")
 		.replace("/?", "?");

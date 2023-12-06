@@ -89,7 +89,11 @@ export const WatchlistList = () => {
 			) : (
 				<View {...css({ justifyContent: "center", alignItems: "center" })}>
 					<P>{t("home.watchlistLogin")}</P>
-					<Button text={t("login.login")} href={"/login"} {...css({ minWidth: ts(24), margin: ts(2) })}/>
+					<Button
+						text={t("login.login")}
+						href={"/login"}
+						{...css({ minWidth: ts(24), margin: ts(2) })}
+					/>
 				</View>
 			)}
 		</>
