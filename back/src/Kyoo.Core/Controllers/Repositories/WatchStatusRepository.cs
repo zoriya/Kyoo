@@ -25,13 +25,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Postgresql;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Core.Controllers;
 
-public class WatchStatusRepository : DapperRepository<IWatchlist>, IWatchStatusRepository
+public class WatchStatusRepository : IWatchStatusRepository
 {
 	/// <summary>
 	/// If the watch percent is below this value, don't consider the item started.
@@ -55,21 +56,24 @@ public class WatchStatusRepository : DapperRepository<IWatchlist>, IWatchStatusR
 	private readonly DatabaseContext _database;
 	private readonly IRepository<Episode> _episodes;
 	private readonly IRepository<Movie> _movies;
+	private readonly DbConnection _db;
+	private readonly SqlVariableContext _context;
 
 	public WatchStatusRepository(DatabaseContext database,
 		IRepository<Episode> episodes,
 		IRepository<Movie> movies,
 		DbConnection db,
 		SqlVariableContext context)
-		: base(db, context)
 	{
 		_database = database;
 		_episodes = episodes;
 		_movies = movies;
+		_db = db;
+		_context = context;
 	}
 
 	// language=PostgreSQL
-	protected override FormattableString Sql => $"""
+	protected FormattableString Sql => $"""
 		select
 			s.*,
 			m.*,
@@ -77,35 +81,53 @@ public class WatchStatusRepository : DapperRepository<IWatchlist>, IWatchStatusR
 			/* includes */
 		from (
 			select
-				s.* -- Show as s
+				s.*, -- Show as s
+				sw.*,
+				sw.added_date as order,
+				sw.status as watch_status
 			from
 				shows as s
 				inner join show_watch_status as sw on sw.show_id = s.id
 					and sw.user_id = [current_user]) as s
 			full outer join (
 			select
-				m.* -- Movie as m
+				m.*, -- Movie as m
+				mw.*,
+				mw.added_date as order,
+				mw.status as watch_status
 			from
 				movies as m
 				inner join movie_watch_status as mw on mw.movie_id = m.id
-					and mw.user_id = [current_user]) as s) as m
+					and mw.user_id = [current_user]) as m on false
 			full outer join (
 			select
-				e.* -- Episode as e
+				e.*, -- Episode as e
+				ew.*,
+				ew.added_date as order,
+				ew.status as watch_status
 			from
-				episode as es
+				episodes as e
 				inner join episode_watch_status as ew on ew.episode_id = e.id
-					and ew.user_id = [current_user])) as e
+					and ew.user_id = [current_user]) as e on false
+		where
+			coalesce(s.watch_status, m.watch_status, e.watch_status) = 'watching'::watch_status
+			or coalesce(s.watch_status, m.watch_status, e.watch_status) = 'completed'::watch_status
+		order by
+			coalesce(s.order, m.order, e.order) desc,
+			coalesce(s.id, m.id, e.id) asc
 		""";
 
-	protected override Dictionary<string, Type> Config => new()
+	protected Dictionary<string, Type> Config => new()
 		{
 			{ "s", typeof(Show) },
+			{ "sw", typeof(ShowWatchStatus) },
 			{ "m", typeof(Movie) },
+			{ "mw", typeof(MovieWatchStatus) },
 			{ "e", typeof(Episode) },
+			{ "ew", typeof(EpisodeWatchStatus) },
 		};
 
-	protected override IWatchlist Mapper(List<object?> items)
+	protected IWatchlist Mapper(List<object?> items)
 	{
 		if (items[0] is Show show && show.Id != Guid.Empty)
 			return show;
@@ -114,6 +136,46 @@ public class WatchStatusRepository : DapperRepository<IWatchlist>, IWatchStatusR
 		if (items[2] is Episode episode && episode.Id != Guid.Empty)
 			return episode;
 		throw new InvalidDataException();
+	}
+
+	/// <inheritdoc/>
+	public virtual async Task<IWatchlist> Get(Guid id, Include<IWatchlist>? include = default)
+	{
+		IWatchlist? ret = await GetOrDefault(id, include);
+		if (ret == null)
+			throw new ItemNotFoundException($"No {nameof(IWatchlist)} found with the id {id}");
+		return ret;
+	}
+
+	/// <inheritdoc />
+	public Task<IWatchlist?> GetOrDefault(Guid id, Include<IWatchlist>? include = null)
+	{
+		return _db.QuerySingle<IWatchlist>(
+			Sql,
+			Config,
+			Mapper,
+			_context,
+			include,
+			new Filter<IWatchlist>.Eq(nameof(IResource.Id), id)
+		);
+	}
+
+	/// <inheritdoc />
+	public Task<ICollection<IWatchlist>> GetAll(
+		Include<IWatchlist>? include = default,
+		Pagination? limit = default)
+	{
+		return _db.Query(
+			Sql,
+			Config,
+			Mapper,
+			(id) => Get(id),
+			_context,
+			include,
+			null,
+			null,
+			limit ?? new()
+		);
 	}
 
 	/// <inheritdoc />

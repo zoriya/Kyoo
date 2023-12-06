@@ -27,5 +27,5 @@ namespace Kyoo.Abstractions.Models;
 [OneOf(Types = new[] { typeof(Show), typeof(Movie), typeof(Episode) })]
 public interface IWatchlist : IResource, IThumbnails, IMetadata, IAddedDate, IQuery
 {
-	static Sort IQuery.DefaultSort => new Sort<INews>.By(nameof(AddedDate), true);
+	static Sort IQuery.DefaultSort => new Sort<IWatchlist>.By(nameof(AddedDate), true);
 }

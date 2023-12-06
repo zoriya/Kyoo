@@ -36,7 +36,6 @@ using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Authentication;
 using Kyoo.Utils;
 using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
 
 namespace Kyoo.Core.Controllers;
 
@@ -354,7 +353,7 @@ public static class DapperHelper
 		Filter<T>? filter)
 		where T : class, IResource
 	{
-		InterpolatedSql.Dapper.SqlBuilders.SqlBuilder query = new(db, command);
+		SqlBuilder query = new(db, command);
 
 		if (filter != null)
 			query += ProcessFilter(filter, config);
