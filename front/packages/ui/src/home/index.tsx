@@ -28,6 +28,7 @@ import { Recommanded } from "./recommanded";
 import { VerticalRecommanded } from "./vertical";
 import { NewsList } from "./news";
 import { useEffect, useState } from "react";
+import { WatchlistList } from "./watchlist";
 
 export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
 	const [isClient, setClient] = useState(false);
@@ -48,6 +49,7 @@ export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
 					/>
 				)}
 			</Fetch>
+			<WatchlistList />
 			<NewsList />
 			{randomItems
 				.filter((_, i) => i < 2)
@@ -72,6 +74,7 @@ HomePage.getLayout = { Layout: DefaultLayout, props: { transparent: true } };
 
 HomePage.getFetchUrls = (_, randomItems) => [
 	Header.query(),
+	WatchlistList.query(),
 	NewsList.query(),
 	...randomItems.filter((_, i) => i < 6).map((x) => GenreGrid.query(x)),
 	Recommanded.query(),

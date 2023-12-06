@@ -18,17 +18,30 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./library-item";
-export * from "./news";
-export * from "./show";
-export * from "./movie";
-export * from "./collection";
-export * from "./genre";
-export * from "./person";
-export * from "./studio";
-export * from "./episode";
-export * from "./season";
-export * from "./watch-info";
-export * from "./watch-status";
-export * from "./watchlist";
-export * from "./user";
+import { z } from "zod";
+import { MovieP } from "./movie";
+import { ShowP } from "./show";
+
+/**
+ * The type of item, ether a show, a movie or an episode.
+ */
+export enum WatchlistKind {
+	Show = "Show",
+	Movie = "Movie",
+}
+
+export const WatchlistP = z.union([
+	/*
+	 * Either a show
+	 */
+	ShowP.and(z.object({ kind: z.literal(WatchlistKind.Show) })),
+	/*
+	 * Or a Movie
+	 */
+	MovieP.and(z.object({ kind: z.literal(WatchlistKind.Movie) })),
+]);
+
+/**
+ * A item in the user's watchlist.
+ */
+export type Watchlist = z.infer<typeof WatchlistP>;
