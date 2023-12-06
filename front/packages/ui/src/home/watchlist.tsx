@@ -24,6 +24,7 @@ import {
 	WatchlistKind,
 	WatchlistP,
 	getDisplayDate,
+	useAccount,
 } from "@kyoo/models";
 import { useYoshiki } from "yoshiki/native";
 import { ItemGrid } from "../browse/grid";
@@ -31,56 +32,66 @@ import { InfiniteFetch } from "../fetch-infinite";
 import { useTranslation } from "react-i18next";
 import { Header } from "./genre";
 import { EpisodeBox, episodeDisplayNumber } from "../details/episode";
+import { View } from "react-native";
+import { Button, P, ts } from "@kyoo/primitives";
 
 export const WatchlistList = () => {
 	const { t } = useTranslation();
 	const { css } = useYoshiki();
+	const account = useAccount();
 
 	return (
 		<>
 			<Header title={t("home.watchlist")} />
-			<InfiniteFetch
-				query={WatchlistList.query()}
-				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
-				getItemType={(x, i) =>
-					(x.kind === WatchlistKind.Show && x.watchStatus?.nextEpisode) || (x.isLoading && i % 2)
-						? "episode"
-						: "item"
-				}
-				empty={t("home.none")}
-			>
-				{(x, i) => {
-					const episode = x.kind === WatchlistKind.Show ? x.watchStatus?.nextEpisode : null;
-					return (x.kind === WatchlistKind.Show && x.watchStatus?.nextEpisode) ||
-						(x.isLoading && i % 2) ? (
-						<EpisodeBox
-							isLoading={x.isLoading as any}
-							name={episode ? `${x.name} ${episodeDisplayNumber(episode)}` : undefined}
-							overview={episode?.name}
-							thumbnail={episode?.thumbnail ?? x.thumbnail}
-							href={episode?.href}
-							watchedPercent={x.watchStatus?.watchedPercent || null}
-							// TODO: support this on mobile too
-							// @ts-expect-error This is a web only property
-							{...css({ gridColumnEnd: "span 2" })}
-						/>
-					) : (
-						<ItemGrid
-							isLoading={x.isLoading as any}
-							href={x.href}
-							name={x.name!}
-							subtitle={!x.isLoading ? getDisplayDate(x) : undefined}
-							poster={x.poster}
-							watchStatus={x.watchStatus?.status || null}
-							watchPercent={x.watchStatus?.watchedPercent || null}
-							unseenEpisodesCount={
-								x.kind === WatchlistKind.Show ? x.watchStatus?.unseenEpisodesCount : null
-							}
-							type={x.kind === WatchlistKind.Movie ? "movie" : "show"}
-						/>
-					);
-				}}
-			</InfiniteFetch>
+			{account ? (
+				<InfiniteFetch
+					query={WatchlistList.query()}
+					layout={{ ...ItemGrid.layout, layout: "horizontal" }}
+					getItemType={(x, i) =>
+						(x.kind === WatchlistKind.Show && x.watchStatus?.nextEpisode) || (x.isLoading && i % 2)
+							? "episode"
+							: "item"
+					}
+					empty={t("home.none")}
+				>
+					{(x, i) => {
+						const episode = x.kind === WatchlistKind.Show ? x.watchStatus?.nextEpisode : null;
+						return (x.kind === WatchlistKind.Show && x.watchStatus?.nextEpisode) ||
+							(x.isLoading && i % 2) ? (
+							<EpisodeBox
+								isLoading={x.isLoading as any}
+								name={episode ? `${x.name} ${episodeDisplayNumber(episode)}` : undefined}
+								overview={episode?.name}
+								thumbnail={episode?.thumbnail ?? x.thumbnail}
+								href={episode?.href}
+								watchedPercent={x.watchStatus?.watchedPercent || null}
+								// TODO: support this on mobile too
+								// @ts-expect-error This is a web only property
+								{...css({ gridColumnEnd: "span 2" })}
+							/>
+						) : (
+							<ItemGrid
+								isLoading={x.isLoading as any}
+								href={x.href}
+								name={x.name!}
+								subtitle={!x.isLoading ? getDisplayDate(x) : undefined}
+								poster={x.poster}
+								watchStatus={x.watchStatus?.status || null}
+								watchPercent={x.watchStatus?.watchedPercent || null}
+								unseenEpisodesCount={
+									x.kind === WatchlistKind.Show ? x.watchStatus?.unseenEpisodesCount : null
+								}
+								type={x.kind === WatchlistKind.Movie ? "movie" : "show"}
+							/>
+						);
+					}}
+				</InfiniteFetch>
+			) : (
+				<View {...css({ justifyContent: "center", alignItems: "center" })}>
+					<P>{t("home.watchlistLogin")}</P>
+					<Button text={t("login.login")} href={"/login"} {...css({ minWidth: ts(24), margin: ts(2) })}/>
+				</View>
+			)}
 		</>
 	);
 };

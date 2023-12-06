@@ -4,7 +4,8 @@
 		"news": "News",
 		"watchlist": "Continue watching",
 		"info": "See more",
-		"none": "No episodes"
+		"none": "No episodes",
+		"watchlistLogin": "To keep track of what you watched or plan to watch, you need to login."
 	},
 	"show": {
 		"play": "Play",
