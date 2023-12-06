@@ -49,6 +49,9 @@ export const NewsList = () => {
 							name={x.name!}
 							subtitle={!x.isLoading ? getDisplayDate(x) : undefined}
 							poster={x.poster}
+							watchStatus={x.watchStatus?.status || null}
+							watchPercent={x.watchStatus?.watchedPercent || null}
+							type={"movie"}
 						/>
 					) : (
 						<EpisodeBox

@@ -51,6 +51,9 @@ export const itemMap = (
 		poster: item.poster,
 		thumbnail: item.thumbnail,
 		watchStatus: item.kind !== ItemKind.Collection ? item.watchStatus?.status ?? null : null,
+		type: item.kind.toLowerCase() as any,
+		watchPercent:
+			item.kind !== ItemKind.Collection ? item.watchStatus?.watchedPercent ?? null : null,
 		unseenEpisodesCount:
 			item.kind === ItemKind.Show
 				? item.watchStatus?.unseenEpisodesCount ?? item.episodesCount!

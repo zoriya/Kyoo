@@ -72,6 +72,9 @@ export const WatchlistList = () => {
 							name={x.name!}
 							subtitle={!x.isLoading ? getDisplayDate(x) : undefined}
 							poster={x.poster}
+							watchStatus={x.watchStatus?.status || null}
+							watchPercent={x.watchStatus?.watchedPercent || null}
+							type={x.kind === WatchlistKind.Movie ? "movie" : "show"}
 						/>
 					);
 				}}

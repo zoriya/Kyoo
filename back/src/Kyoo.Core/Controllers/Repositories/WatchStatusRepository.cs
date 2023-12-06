@@ -233,6 +233,7 @@ public class WatchStatusRepository : IWatchStatusRepository
 			MovieId = movieId,
 			Status = status,
 			WatchedTime = watchedTime,
+			WatchedPercent = percent,
 			AddedDate = DateTime.UtcNow,
 			PlayedDate = status == WatchStatus.Completed ? DateTime.UtcNow : null,
 		};

@@ -64,6 +64,7 @@ export const ImageBackground = <AsProps = ViewProps,>({
 	imageStyle,
 	forcedLoading,
 	hideLoad = true,
+	contrast = "dark",
 	layout,
 	...asProps
 }: {
@@ -73,12 +74,13 @@ export const ImageBackground = <AsProps = ViewProps,>({
 	containerStyle?: YoshikiEnhanced<ViewStyle>;
 	imageStyle?: YoshikiEnhanced<ImageStyle>;
 	hideLoad?: boolean;
+	contrast?: "light" | "dark" | "user";
 	layout?: ImageLayout;
 } & AsProps &
 	Props) => {
 	const Container = as ?? View;
 	return (
-		<ContrastArea contrastText>
+		<ContrastArea contrastText mode={contrast}>
 			{({ css, theme }) => (
 				<Container
 					{...(css(

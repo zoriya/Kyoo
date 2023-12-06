@@ -65,13 +65,42 @@ export const ItemWatchStatus = ({
 	);
 };
 
+export const ItemProgress = ({ watchPercent }: { watchPercent: number }) => {
+	const { css } = useYoshiki("episodebox");
+
+	return (
+		<>
+			<View
+				{...css({
+					backgroundColor: (theme) => theme.user.overlay0,
+					width: percent(100),
+					height: ts(0.5),
+					position: "absolute",
+					bottom: 0,
+				})}
+			/>
+			<View
+				{...css({
+					backgroundColor: (theme) => theme.user.accent,
+					width: percent(watchPercent),
+					height: ts(0.5),
+					position: "absolute",
+					bottom: 0,
+				})}
+			/>
+		</>
+	);
+};
+
 export const ItemGrid = ({
 	href,
 	name,
+	type,
 	subtitle,
 	poster,
 	isLoading,
 	watchStatus,
+	watchPercent,
 	unseenEpisodesCount,
 	...props
 }: WithLoading<{
@@ -80,6 +109,8 @@ export const ItemGrid = ({
 	subtitle?: string;
 	poster?: KyooImage | null;
 	watchStatus: WatchStatusV | null;
+	watchPercent: number | null;
+	type: "movie" | "show" | "collection";
 	unseenEpisodesCount: number | null;
 }> &
 	Stylable<"text">) => {
@@ -122,6 +153,7 @@ export const ItemGrid = ({
 				{...(css("poster") as { style: ImageStyle })}
 			>
 				<ItemWatchStatus watchStatus={watchStatus} unseenEpisodesCount={unseenEpisodesCount} />
+				{type === "movie" && watchPercent && <ItemProgress watchPercent={watchPercent} />}
 			</PosterBackground>
 			<Skeleton>
 				{isLoading || (
