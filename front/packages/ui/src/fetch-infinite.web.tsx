@@ -67,7 +67,8 @@ const InfiniteScroll = <Props,>({
 		const offset =
 			layout.layout === "horizontal" ? ref.current.offsetWidth : ref.current.offsetHeight;
 
-		if (scroll <= offset * 1.2) loadMore();
+		// Load more if less than 3 element's worth of scroll is left
+		if (scroll <= offset * 3) loadMore();
 	}, [hasMore, isFetching, layout, loadMore, fetchMore]);
 	const scrollProps = { ref, onScroll };
 
