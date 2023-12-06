@@ -29,6 +29,7 @@ using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Postgresql;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Core.Controllers;
 
@@ -52,21 +53,36 @@ public class WatchStatusRepository : IWatchStatusRepository
 	// The second one can be converted to sql wherase the first can't (tries to compare WatchStatus with int).
 	private WatchStatus Watching = WatchStatus.Watching;
 	private WatchStatus Completed = WatchStatus.Completed;
+	private WatchStatus Planned = WatchStatus.Planned;
 
 	private readonly DatabaseContext _database;
-	private readonly IRepository<Episode> _episodes;
 	private readonly IRepository<Movie> _movies;
 	private readonly DbConnection _db;
 	private readonly SqlVariableContext _context;
 
+	static WatchStatusRepository()
+	{
+		IRepository<Episode>.OnCreated += async (ep) =>
+		{
+			await using AsyncServiceScope scope = CoreModule.Services.CreateAsyncScope();
+			DatabaseContext db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+			WatchStatusRepository repo = scope.ServiceProvider.GetRequiredService<WatchStatusRepository>();
+			List<Guid> users = await db.ShowWatchStatus
+				.IgnoreQueryFilters()
+				.Where(x => x.ShowId == ep.ShowId && x.Status == WatchStatus.Completed)
+				.Select(x => x.UserId)
+				.ToListAsync();
+			foreach (Guid userId in users)
+				await repo._SetShowStatus(ep.ShowId, userId, WatchStatus.Watching, true);
+		};
+	}
+
 	public WatchStatusRepository(DatabaseContext database,
-		IRepository<Episode> episodes,
 		IRepository<Movie> movies,
 		DbConnection db,
 		SqlVariableContext context)
 	{
 		_database = database;
-		_episodes = episodes;
 		_movies = movies;
 		_db = db;
 		_context = context;
@@ -260,39 +276,70 @@ public class WatchStatusRepository : IWatchStatusRepository
 	}
 
 	/// <inheritdoc />
-	public async Task<ShowWatchStatus?> SetShowStatus(
+	public Task<ShowWatchStatus?> SetShowStatus(
 		Guid showId,
 		Guid userId,
-		WatchStatus status)
+		WatchStatus status
+	) => _SetShowStatus(showId, userId, status);
+
+	private async Task<ShowWatchStatus?> _SetShowStatus(
+		Guid showId,
+		Guid userId,
+		WatchStatus status,
+		bool newEpisode = false)
 	{
-		int unseenEpisodeCount = await _database.Episodes
-			.Where(x => x.ShowId == showId)
-			.Where(x => x.WatchStatus!.Status != WatchStatus.Completed)
-			.CountAsync();
+		int unseenEpisodeCount = status != WatchStatus.Completed
+			? await _database.Episodes
+				.Where(x => x.ShowId == showId)
+				.Where(x => x.Watched!.First(x => x.UserId == userId)!.Status != WatchStatus.Completed)
+				.CountAsync()
+			: 0;
 		if (unseenEpisodeCount == 0)
 			status = WatchStatus.Completed;
 
-		Episode? cursor = null;
+		EpisodeWatchStatus? cursorWatchStatus = null;
 		Guid? nextEpisodeId = null;
 		if (status == WatchStatus.Watching)
 		{
-			cursor = await _episodes.GetOrDefault(
-				new Filter<Episode>.Lambda(
-					x => x.ShowId == showId
-						&& (x.WatchStatus!.Status == WatchStatus.Completed
-							|| x.WatchStatus.Status == WatchStatus.Watching)
-				),
-				new Include<Episode>(nameof(Episode.WatchStatus)),
-				reverse: true
-			);
-			nextEpisodeId = cursor?.WatchStatus?.Status == WatchStatus.Watching
+			var cursor = await _database.Episodes
+				.IgnoreQueryFilters()
+				.Where(x => x.ShowId == showId)
+				.OrderByDescending(x => x.AbsoluteNumber)
+				.OrderByDescending(x => x.SeasonNumber)
+				.OrderByDescending(x => x.EpisodeNumber)
+				.Select(x => new { x.Id, Status = x.Watched!.First(x => x.UserId == userId) })
+				.FirstOrDefaultAsync(x => x.Status.Status == WatchStatus.Completed || x.Status.Status == WatchStatus.Watching);
+			cursorWatchStatus = cursor?.Status;
+			nextEpisodeId = cursor?.Status.Status == WatchStatus.Watching
 				? cursor.Id
-				: ((await _episodes.GetOrDefault(
-					new Filter<Episode>.Lambda(
-						x => x.ShowId == showId && x.WatchStatus!.Status != WatchStatus.Completed
-					),
-					afterId: cursor?.Id
-				))?.Id);
+				: await _database.Episodes
+					.IgnoreQueryFilters()
+					.Where(x => x.ShowId == showId)
+					.OrderByDescending(x => x.AbsoluteNumber)
+					.OrderByDescending(x => x.SeasonNumber)
+					.OrderByDescending(x => x.EpisodeNumber)
+					.Select(x => new { x.Id, Status = x.Watched!.FirstOrDefault(x => x.UserId == userId) })
+					.Where(x => x.Status == null || x.Status.Status != WatchStatus.Completed)
+					.Select(x => x.Id)
+					.FirstOrDefaultAsync();
+		}
+		else if (status == WatchStatus.Completed)
+		{
+			List<Guid> episodes = await _database.Episodes
+				.Where(x => x.ShowId == showId)
+				.Select(x => x.Id)
+				.ToListAsync();
+			await _database.EpisodeWatchStatus
+				.UpsertRange(episodes.Select(episodeId => new EpisodeWatchStatus
+				{
+					UserId = userId,
+					EpisodeId = episodeId,
+					Status = WatchStatus.Completed,
+					AddedDate = DateTime.UtcNow,
+					PlayedDate = DateTime.UtcNow
+				}))
+				.UpdateIf(x => x.Status == Watching || x.Status == Planned)
+				.RunAsync();
 		}
 
 		ShowWatchStatus ret = new()
@@ -302,17 +349,17 @@ public class WatchStatusRepository : IWatchStatusRepository
 			Status = status,
 			AddedDate = DateTime.UtcNow,
 			NextEpisodeId = nextEpisodeId,
-			WatchedTime = cursor?.WatchStatus?.Status == WatchStatus.Watching
-				? cursor.WatchStatus.WatchedTime
+			WatchedTime = cursorWatchStatus?.Status == WatchStatus.Watching
+				? cursorWatchStatus.WatchedTime
 				: null,
-			WatchedPercent = cursor?.WatchStatus?.Status == WatchStatus.Watching
-				? cursor.WatchStatus.WatchedPercent
+			WatchedPercent = cursorWatchStatus?.Status == WatchStatus.Watching
+				? cursorWatchStatus.WatchedPercent
 				: null,
 			UnseenEpisodesCount = unseenEpisodeCount,
 			PlayedDate = status == WatchStatus.Completed ? DateTime.UtcNow : null,
 		};
 		await _database.ShowWatchStatus.Upsert(ret)
-			.UpdateIf(x => status != Watching || x.Status != Completed)
+			.UpdateIf(x => status != Watching || x.Status != Completed || newEpisode)
 			.RunAsync();
 		return ret;
 	}
@@ -344,7 +391,7 @@ public class WatchStatusRepository : IWatchStatusRepository
 		WatchStatus status,
 		int? watchedTime)
 	{
-		Episode episode = await _episodes.Get(episodeId);
+		Episode episode = await _database.Episodes.FirstAsync(x => x.Id == episodeId);
 		int? percent = watchedTime != null && episode.Runtime > 0
 			? (int)Math.Round(watchedTime.Value / (episode.Runtime * 60f) * 100f)
 			: null;
