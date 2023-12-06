@@ -103,7 +103,7 @@ public class WatchStatusRepository : IWatchStatusRepository
 		/* includesJoin */
 		where
 			(coalesce(s.watch_status, m.watch_status) = 'watching'::watch_status
-			or coalesce(s.watch_status, m.watch_status) = 'completed'::watch_status)
+			or coalesce(s.watch_status, m.watch_status) = 'planned'::watch_status)
 			/* where */
 		order by
 			coalesce(s.order, m.order) desc,
