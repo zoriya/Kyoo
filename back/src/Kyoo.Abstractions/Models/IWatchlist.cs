@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Abstractions.Models;
@@ -24,8 +23,6 @@ namespace Kyoo.Abstractions.Models;
 /// <summary>
 /// A watch list item.
 /// </summary>
-[OneOf(Types = new[] { typeof(Show), typeof(Movie), typeof(Episode) })]
-public interface IWatchlist : IResource, IThumbnails, IMetadata, IAddedDate, IQuery
-{
-	static Sort IQuery.DefaultSort => new Sort<IWatchlist>.By(nameof(AddedDate), true);
-}
+[OneOf(Types = new[] { typeof(Show), typeof(Movie) })]
+public interface IWatchlist : IResource, IThumbnails, IMetadata, IAddedDate
+{ }

@@ -37,6 +37,7 @@ public interface IWatchStatusRepository
 	// public delegate Task ResourceEventHandler(T resource);
 
 	Task<ICollection<IWatchlist>> GetAll(
+		Filter<IWatchlist>? filter = default,
 		Include<IWatchlist>? include = default,
 		Pagination? limit = default);
 

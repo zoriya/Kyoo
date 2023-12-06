@@ -91,6 +91,7 @@ namespace Kyoo.Postgresql
 			SqlMapper.AddTypeHandler(typeof(List<Genre>), new ListTypeHandler<Genre>());
 			SqlMapper.AddTypeHandler(typeof(Wrapper), new Wrapper.Handler());
 			InterpolatedSqlBuilderOptions.DefaultOptions.ReuseIdenticalParameters = true;
+			InterpolatedSqlBuilderOptions.DefaultOptions.AutoFixSingleQuotes = false;
 		}
 
 		/// <inheritdoc />

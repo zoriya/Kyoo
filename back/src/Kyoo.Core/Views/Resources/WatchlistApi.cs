@@ -51,6 +51,7 @@ namespace Kyoo.Core.Api
 		/// <remarks>
 		/// Get all resources that match the given filter.
 		/// </remarks>
+		/// <param name="filter">Filter the returned items.</param>
 		/// <param name="pagination">How many items per page should be returned, where should the page start...</param>
 		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>A list of resources that match every filters.</returns>
@@ -60,10 +61,12 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		public async Task<ActionResult<Page<IWatchlist>>> GetAll(
+			[FromQuery] Filter<IWatchlist>? filter,
 			[FromQuery] Pagination pagination,
 			[FromQuery] Include<IWatchlist>? fields)
 		{
 			ICollection<IWatchlist> resources = await _repository.GetAll(
+				filter,
 				fields,
 				pagination
 			);
