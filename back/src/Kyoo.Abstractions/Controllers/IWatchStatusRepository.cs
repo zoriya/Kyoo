@@ -17,15 +17,17 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Utils;
 
 namespace Kyoo.Abstractions.Controllers;
 
 /// <summary>
 /// A local repository to handle watched items
 /// </summary>
-public interface IWatchStatusRepository : IRepository<IWatchlist>
+public interface IWatchStatusRepository
 {
 	// /// <summary>
 	// /// The event handler type for all events of this repository.
@@ -33,6 +35,10 @@ public interface IWatchStatusRepository : IRepository<IWatchlist>
 	// /// <param name="resource">The resource created/modified/deleted</param>
 	// /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 	// public delegate Task ResourceEventHandler(T resource);
+
+	Task<ICollection<IWatchlist>> GetAll(
+		Include<IWatchlist>? include = default,
+		Pagination? limit = default);
 
 	Task<MovieWatchStatus?> GetMovieStatus(Guid movieId, Guid userId);
 
