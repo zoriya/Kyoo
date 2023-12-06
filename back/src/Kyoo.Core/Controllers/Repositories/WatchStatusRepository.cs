@@ -76,6 +76,7 @@ public class WatchStatusRepository : IWatchStatusRepository
 	protected FormattableString Sql => $"""
 		select
 			s.*,
+			swe.*, -- Episode as swe
 			m.*
 			/* includes */
 		from (
@@ -98,6 +99,7 @@ public class WatchStatusRepository : IWatchStatusRepository
 				movies as m
 				inner join movie_watch_status as mw on mw.movie_id = m.id
 					and mw.user_id = [current_user]) as m on false
+		left join episodes as swe on swe.id = s.next_episode_id
 		/* includesJoin */
 		where
 			(coalesce(s.watch_status, m.watch_status) = 'watching'::watch_status
@@ -112,6 +114,7 @@ public class WatchStatusRepository : IWatchStatusRepository
 		{
 			{ "s", typeof(Show) },
 			{ "_sw", typeof(ShowWatchStatus) },
+			{ "_swe", typeof(Episode) },
 			{ "m", typeof(Movie) },
 			{ "_mw", typeof(MovieWatchStatus) },
 		};
@@ -121,11 +124,13 @@ public class WatchStatusRepository : IWatchStatusRepository
 		if (items[0] is Show show && show.Id != Guid.Empty)
 		{
 			show.WatchStatus = items[1] as ShowWatchStatus;
+			if (show.WatchStatus != null)
+				show.WatchStatus.NextEpisode = items[2] as Episode;
 			return show;
 		}
-		if (items[2] is Movie movie && movie.Id != Guid.Empty)
+		if (items[3] is Movie movie && movie.Id != Guid.Empty)
 		{
-			movie.WatchStatus = items[3] as MovieWatchStatus;
+			movie.WatchStatus = items[4] as MovieWatchStatus;
 			return movie;
 		}
 		throw new InvalidDataException();
