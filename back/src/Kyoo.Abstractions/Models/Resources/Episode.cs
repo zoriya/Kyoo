@@ -184,7 +184,7 @@ namespace Kyoo.Abstractions.Models
 						or (pe.season_number = "this".season_number
 							and e.episode_number < "this".episode_number))
 				order by
-					pe.absolute_number desc,
+					pe.absolute_number desc nulls last,
 					pe.season_number desc,
 					pe.episode_number desc
 				limit 1
@@ -193,7 +193,8 @@ namespace Kyoo.Abstractions.Models
 		public Episode? PreviousEpisode { get; set; }
 
 		private Episode? _PreviousEpisode => Show!.Episodes!
-			.OrderByDescending(x => x.AbsoluteNumber)
+			.OrderBy(x => x.AbsoluteNumber == null)
+			.ThenByDescending(x => x.AbsoluteNumber)
 			.ThenByDescending(x => x.SeasonNumber)
 			.ThenByDescending(x => x.EpisodeNumber)
 			.FirstOrDefault(x =>
