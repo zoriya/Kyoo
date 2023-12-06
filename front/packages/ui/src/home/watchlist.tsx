@@ -60,7 +60,6 @@ export const WatchlistList = () => {
 							thumbnail={episode?.thumbnail ?? x.thumbnail}
 							href={episode?.href}
 							watchedPercent={x.watchStatus?.watchedPercent || null}
-							watchedStatus={x.watchStatus?.status || null}
 							// TODO: support this on mobile too
 							// @ts-expect-error This is a web only property
 							{...css({ gridColumnEnd: "span 2" })}
@@ -74,6 +73,9 @@ export const WatchlistList = () => {
 							poster={x.poster}
 							watchStatus={x.watchStatus?.status || null}
 							watchPercent={x.watchStatus?.watchedPercent || null}
+							unseenEpisodesCount={
+								x.kind === WatchlistKind.Show ? x.watchStatus?.unseenEpisodesCount : null
+							}
 							type={x.kind === WatchlistKind.Movie ? "movie" : "show"}
 						/>
 					);
