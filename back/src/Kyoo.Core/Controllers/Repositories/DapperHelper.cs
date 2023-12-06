@@ -62,7 +62,9 @@ public static class DapperHelper
 		if (key == "kind")
 			return "kind";
 		string[] keys = config
-			.Where(x => key == "id" || x.Value.GetProperty(key) != null)
+			.Where(x => !x.Key.StartsWith('_'))
+			// If first char is lower, assume manual sql instead of reflection.
+			.Where(x => char.IsLower(key.First()) || x.Value.GetProperty(key) != null)
 			.Select(x => $"{x.Key}.{x.Value.GetProperty(key)?.GetCustomAttribute<ColumnAttribute>()?.Name ?? key.ToSnakeCase()}")
 			.ToArray();
 		if (keys.Length == 1)
@@ -167,7 +169,9 @@ public static class DapperHelper
 			}
 
 			IEnumerable<string> properties = config
-				.Where(x => key == "id" || x.Value.GetProperty(key) != null)
+				.Where(x => !x.Key.StartsWith('_'))
+				// If first char is lower, assume manual sql instead of reflection.
+				.Where(x => char.IsLower(key.First()) || x.Value.GetProperty(key) != null)
 				.Select(x => $"{x.Key}.{x.Value.GetProperty(key)?.GetCustomAttribute<ColumnAttribute>()?.Name ?? key.ToSnakeCase()}");
 
 			FormattableString ret = $"{properties.First():raw} {op}";
@@ -204,7 +208,7 @@ public static class DapperHelper
 				_ => throw new NotImplementedException(),
 			};
 		}
-		return $"\nwhere {Process(filter)}";
+		return Process(filter);
 	}
 
 	public static string ExpendProjections(Type type, string? prefix, Include include)
@@ -235,8 +239,10 @@ public static class DapperHelper
 		// Include handling
 		include ??= new();
 		var (includeProjection, includeJoin, includeTypes, mapIncludes) = ProcessInclude(include, config);
-		query.AppendLiteral(includeJoin);
-		query.Replace("/* includes */", $"{includeProjection:raw}", out bool replaced);
+		query.Replace("/* includesJoin */", $"{includeJoin:raw}", out bool replaced);
+		if (!replaced)
+			query.AppendLiteral(includeJoin);
+		query.Replace("/* includes */", $"{includeProjection:raw}", out replaced);
 		if (!replaced)
 			throw new ArgumentException("Missing '/* includes */' placeholder in top level sql select to support includes.");
 
@@ -248,7 +254,12 @@ public static class DapperHelper
 			filter = Filter.And(filter, keysetFilter);
 		}
 		if (filter != null)
-			query += ProcessFilter(filter, config);
+		{
+			FormattableString filterSql = ProcessFilter(filter, config);
+			query.Replace("/* where */", $"and {filterSql}", out replaced);
+			if (!replaced)
+				query += $"\nwhere {filterSql}";
+		}
 		if (sort != null)
 			query += $"\norder by {ProcessSort(sort, limit?.Reverse ?? false, config):raw}";
 		if (limit != null)

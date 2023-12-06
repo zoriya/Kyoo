@@ -76,8 +76,7 @@ public class WatchStatusRepository : IWatchStatusRepository
 	protected FormattableString Sql => $"""
 		select
 			s.*,
-			m.*,
-			e.*
+			m.*
 			/* includes */
 		from (
 			select
@@ -99,42 +98,36 @@ public class WatchStatusRepository : IWatchStatusRepository
 				movies as m
 				inner join movie_watch_status as mw on mw.movie_id = m.id
 					and mw.user_id = [current_user]) as m on false
-			full outer join (
-			select
-				e.*, -- Episode as e
-				ew.*,
-				ew.added_date as order,
-				ew.status as watch_status
-			from
-				episodes as e
-				inner join episode_watch_status as ew on ew.episode_id = e.id
-					and ew.user_id = [current_user]) as e on false
+		/* includesJoin */
 		where
-			coalesce(s.watch_status, m.watch_status, e.watch_status) = 'watching'::watch_status
-			or coalesce(s.watch_status, m.watch_status, e.watch_status) = 'completed'::watch_status
+			(coalesce(s.watch_status, m.watch_status) = 'watching'::watch_status
+			or coalesce(s.watch_status, m.watch_status) = 'completed'::watch_status)
+			/* where */
 		order by
-			coalesce(s.order, m.order, e.order) desc,
-			coalesce(s.id, m.id, e.id) asc
+			coalesce(s.order, m.order) desc,
+			coalesce(s.id, m.id) asc
 		""";
 
 	protected Dictionary<string, Type> Config => new()
 		{
 			{ "s", typeof(Show) },
-			{ "sw", typeof(ShowWatchStatus) },
+			{ "_sw", typeof(ShowWatchStatus) },
 			{ "m", typeof(Movie) },
-			{ "mw", typeof(MovieWatchStatus) },
-			{ "e", typeof(Episode) },
-			{ "ew", typeof(EpisodeWatchStatus) },
+			{ "_mw", typeof(MovieWatchStatus) },
 		};
 
 	protected IWatchlist Mapper(List<object?> items)
 	{
 		if (items[0] is Show show && show.Id != Guid.Empty)
+		{
+			show.WatchStatus = items[1] as ShowWatchStatus;
 			return show;
-		if (items[1] is Movie movie && movie.Id != Guid.Empty)
+		}
+		if (items[2] is Movie movie && movie.Id != Guid.Empty)
+		{
+			movie.WatchStatus = items[3] as MovieWatchStatus;
 			return movie;
-		if (items[2] is Episode episode && episode.Id != Guid.Empty)
-			return episode;
+		}
 		throw new InvalidDataException();
 	}
 
@@ -161,18 +154,39 @@ public class WatchStatusRepository : IWatchStatusRepository
 	}
 
 	/// <inheritdoc />
-	public Task<ICollection<IWatchlist>> GetAll(
+	public async Task<ICollection<IWatchlist>> GetAll(
+		Filter<IWatchlist>? filter = default,
 		Include<IWatchlist>? include = default,
 		Pagination? limit = default)
 	{
-		return _db.Query(
+		if (include != null)
+			include.Metadatas = include.Metadatas.Where(x => x.Name != nameof(Show.WatchStatus)).ToList();
+
+		// We can't use the generic after id hanler since the sort depends on a relation.
+		if (limit?.AfterID != null)
+		{
+			dynamic cursor = await Get(limit.AfterID.Value);
+			filter = Filter.And(
+				filter,
+				Filter.Or(
+					new Filter<IWatchlist>.Lt("order", cursor.WatchStatus.AddedDate),
+					Filter.And(
+						new Filter<IWatchlist>.Eq("order", cursor.WatchStatus.AddedDate),
+						new Filter<IWatchlist>.Gt("Id", cursor.Id)
+					)
+				)
+			);
+			limit.AfterID = null;
+		}
+
+		return await _db.Query(
 			Sql,
 			Config,
 			Mapper,
 			(id) => Get(id),
 			_context,
 			include,
-			null,
+			filter,
 			null,
 			limit ?? new()
 		);

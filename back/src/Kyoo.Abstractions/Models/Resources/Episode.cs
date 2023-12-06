@@ -31,7 +31,7 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A class to represent a single show's episode.
 	/// </summary>
-	public class Episode : IQuery, IResource, IMetadata, IThumbnails, IAddedDate, INews, IWatchlist
+	public class Episode : IQuery, IResource, IMetadata, IThumbnails, IAddedDate, INews
 	{
 		// Use absolute numbers by default and fallback to season/episodes if it does not exists.
 		public static Sort DefaultSort => new Sort<Episode>.Conglomerate(

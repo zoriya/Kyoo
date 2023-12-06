@@ -30,7 +30,7 @@ public class Include
 	/// <summary>
 	/// The aditional fields to include in the result.
 	/// </summary>
-	public ICollection<Metadata> Metadatas { get; init; } = ArraySegment<Metadata>.Empty;
+	public ICollection<Metadata> Metadatas { get; set; } = ArraySegment<Metadata>.Empty;
 
 	public abstract record Metadata(string Name);
 
