@@ -68,7 +68,7 @@ export const WatchStatusObserver = ({
 	// update watch status when play status change (and on mount).
 	const isPlaying = useAtomValue(playAtom);
 	useEffect(() => {
-		mutate(readProgress())
-	}, [type, slug, isPlaying, readProgress, mutate])
+		mutate(readProgress());
+	}, [type, slug, isPlaying, readProgress, mutate]);
 	return null;
 };

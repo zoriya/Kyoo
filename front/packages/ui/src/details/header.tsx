@@ -499,7 +499,9 @@ export const Header = ({
 										{...(data.watchStatus as ShowWatchStatus).nextEpisode!}
 										watchedPercent={data.watchStatus?.watchedPercent || null}
 										watchedStatus={data.watchStatus?.status || null}
-										displayNumber={episodeDisplayNumber((data.watchStatus as ShowWatchStatus).nextEpisode!)!}
+										displayNumber={
+											episodeDisplayNumber((data.watchStatus as ShowWatchStatus).nextEpisode!)!
+										}
 									/>
 								</Container>
 							)}
