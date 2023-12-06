@@ -34,6 +34,7 @@ import { ImageStyle, View } from "react-native";
 import { Layout, WithLoading } from "../fetch";
 import { percent, rem, Stylable, Theme, useYoshiki } from "yoshiki/native";
 import { KyooImage, WatchStatusV } from "@kyoo/models";
+import { ItemProgress } from "../browse/grid";
 
 export const episodeDisplayNumber = (
 	episode: {
@@ -112,26 +113,7 @@ export const EpisodeBox = ({
 				{...(css("poster") as any)}
 			>
 				{(watchedPercent || watchedStatus === WatchStatusV.Completed) && (
-					<>
-						<View
-							{...css({
-								backgroundColor: (theme) => theme.overlay0,
-								width: percent(100),
-								height: ts(0.5),
-								position: "absolute",
-								bottom: 0,
-							})}
-						/>
-						<View
-							{...css({
-								backgroundColor: (theme) => theme.accent,
-								width: percent(watchedPercent ?? 100),
-								height: ts(0.5),
-								position: "absolute",
-								bottom: 0,
-							})}
-						/>
-					</>
+					<ItemProgress watchPercent={watchedPercent ?? 100} />
 				)}
 			</ImageBackground>
 			<Skeleton {...css({ width: percent(50) })}>
