@@ -18,8 +18,15 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./breakpoints";
-export * from "./nojs";
-export * from "./head";
-export * from "./spacing";
-export * from "./capitalize";
+export const capitalize = (str: string): string => {
+	return str
+		.split(" ")
+		.map((s) => s.trim())
+		.map((s) => {
+			if (s.length > 1) {
+				return s.charAt(0).toUpperCase() + s.slice(1);
+			}
+			return s;
+		})
+		.join(" ");
+};

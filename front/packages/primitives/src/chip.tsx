@@ -50,12 +50,12 @@ export const Chip = <AsProps = { label: string },>({
 				[
 					{
 						pY: ts(1 * sizeMult),
-						pX: ts(1.5 * sizeMult),
+						pX: ts(2.5 * sizeMult),
 						borderRadius: ts(3),
 						fontSize: rem(0.8),
 					},
 					!outline && {
-						color: (theme: Theme) => theme.contrast,
+						color: (theme: Theme) => theme.alternate.contrast,
 						bg: color ?? ((theme: Theme) => theme.accent),
 					},
 					outline && {
