@@ -5,16 +5,16 @@ jobs:
   back:
     name: "Lint Back"
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./back
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 7.0.x
-
-      - name: Build the app
-        run: cd back && dotnet build -p:CheckCodingStyle=true -p:TreatWarningsAsErrors=true '-p:SkipTranscoder=true'
+      - name: Check coding style
+        run: |
+          dotnet tool restore
+          dotnet csharpier . --check
 
   front:
     name: "Lint Front"
