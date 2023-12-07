@@ -73,6 +73,7 @@ import { Rating } from "../components/rating";
 import { EpisodeLine, displayRuntime, episodeDisplayNumber } from "./episode";
 import { WatchListInfo } from "../components/watchlist-info";
 import { ShowWatchStatus, WatchStatusV } from "@kyoo/models/src/resources/watch-status";
+import { capitalize } from "@kyoo/primitives";
 
 export const TitleLine = ({
 	isLoading,
@@ -366,7 +367,12 @@ const Description = ({
 				>
 					<P {...css({ marginRight: ts(0.5) })}>{t("show.tags")}:</P>
 					{(isLoading ? [...Array<string>(3)] : tags!).map((tag, i) => (
-						<Chip key={tag ?? i} label={tag} size="small" {...css({ m: ts(0.5) })} />
+						<Chip
+							key={tag ?? i}
+							label={tag && capitalize(tag)}
+							size="small"
+							{...css({ m: ts(0.5) })}
+						/>
 					))}
 				</View>
 			</View>
@@ -472,7 +478,7 @@ export const Header = ({
 									},
 								}) as any)}
 							>
-								{data ? name : <Skeleton {...css({ width: rem(3) })} />}
+								{data ? capitalize(name) : <Skeleton {...css({ width: rem(3) })} />}
 							</Chip>
 						))}
 					</Container>
