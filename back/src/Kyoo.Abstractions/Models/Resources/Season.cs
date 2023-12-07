@@ -49,7 +49,6 @@ namespace Kyoo.Abstractions.Models
 					return $"{ShowId}-s{SeasonNumber}";
 				return $"{ShowSlug ?? Show?.Slug}-s{SeasonNumber}";
 			}
-
 			[UsedImplicitly]
 			[NotNull]
 			private set
@@ -57,7 +56,9 @@ namespace Kyoo.Abstractions.Models
 				Match match = Regex.Match(value, @"(?<show>.+)-s(?<season>\d+)");
 
 				if (!match.Success)
-					throw new ArgumentException("Invalid season slug. Format: {showSlug}-s{seasonNumber}");
+					throw new ArgumentException(
+						"Invalid season slug. Format: {showSlug}-s{seasonNumber}"
+					);
 				ShowSlug = match.Groups["show"].Value;
 				SeasonNumber = int.Parse(match.Groups["season"].Value);
 			}
@@ -66,7 +67,8 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The slug of the Show that contain this episode. If this is not set, this season is ill-formed.
 		/// </summary>
-		[SerializeIgnore] public string? ShowSlug { private get; set; }
+		[SerializeIgnore]
+		public string? ShowSlug { private get; set; }
 
 		/// <summary>
 		/// The ID of the Show containing this season.
@@ -76,7 +78,8 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The show that contains this season.
 		/// </summary>
-		[LoadableRelation(nameof(ShowId))] public Show? Show { get; set; }
+		[LoadableRelation(nameof(ShowId))]
+		public Show? Show { get; set; }
 
 		/// <summary>
 		/// The number of this season. This can be set to 0 to indicate specials.
@@ -121,7 +124,8 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The list of episodes that this season contains.
 		/// </summary>
-		[SerializeIgnore] public ICollection<Episode>? Episodes { get; set; }
+		[SerializeIgnore]
+		public ICollection<Episode>? Episodes { get; set; }
 
 		/// <summary>
 		/// The number of episodes in this season.

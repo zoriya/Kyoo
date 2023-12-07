@@ -57,13 +57,22 @@ namespace Kyoo.Authentication
 		/// <inheritdoc />
 		public IFilterMetadata Create(PermissionAttribute attribute)
 		{
-			return new PermissionValidatorFilter(attribute.Type, attribute.Kind, attribute.Group, _options);
+			return new PermissionValidatorFilter(
+				attribute.Type,
+				attribute.Kind,
+				attribute.Group,
+				_options
+			);
 		}
 
 		/// <inheritdoc />
 		public IFilterMetadata Create(PartialPermissionAttribute attribute)
 		{
-			return new PermissionValidatorFilter(((object?)attribute.Type ?? attribute.Kind)!, attribute.Group, _options);
+			return new PermissionValidatorFilter(
+				((object?)attribute.Type ?? attribute.Kind)!,
+				attribute.Group,
+				_options
+			);
 		}
 
 		/// <summary>
@@ -102,7 +111,8 @@ namespace Kyoo.Authentication
 				string permission,
 				Kind kind,
 				Group group,
-				PermissionOption options)
+				PermissionOption options
+			)
 			{
 				_permission = permission;
 				_kind = kind;
@@ -116,7 +126,11 @@ namespace Kyoo.Authentication
 			/// <param name="partialInfo">The partial permission to validate.</param>
 			/// <param name="group">The group of the permission.</param>
 			/// <param name="options">The option containing default values.</param>
-			public PermissionValidatorFilter(object partialInfo, Group? group, PermissionOption options)
+			public PermissionValidatorFilter(
+				object partialInfo,
+				Group? group,
+				PermissionOption options
+			)
 			{
 				switch (partialInfo)
 				{
@@ -127,7 +141,9 @@ namespace Kyoo.Authentication
 						_permission = perm;
 						break;
 					default:
-						throw new ArgumentException($"{nameof(partialInfo)} can only be a permission string or a kind.");
+						throw new ArgumentException(
+							$"{nameof(partialInfo)} can only be a permission string or a kind."
+						);
 				}
 
 				if (group != null)
@@ -158,13 +174,17 @@ namespace Kyoo.Authentication
 							context.HttpContext.Items["PermissionType"] = permission;
 							return;
 						default:
-							throw new ArgumentException("Multiple non-matching partial permission attribute " +
-								"are not supported.");
+							throw new ArgumentException(
+								"Multiple non-matching partial permission attribute "
+									+ "are not supported."
+							);
 					}
 					if (permission == null || kind == null)
 					{
-						throw new ArgumentException("The permission type or kind is still missing after two partial " +
-							"permission attributes, this is unsupported.");
+						throw new ArgumentException(
+							"The permission type or kind is still missing after two partial "
+								+ "permission attributes, this is unsupported."
+						);
 					}
 				}
 
@@ -178,25 +198,43 @@ namespace Kyoo.Authentication
 				{
 					ICollection<string> permissions = res.Principal.GetPermissions();
 					if (permissions.All(x => x != permStr && x != overallStr))
-						context.Result = _ErrorResult($"Missing permission {permStr} or {overallStr}", StatusCodes.Status403Forbidden);
+						context.Result = _ErrorResult(
+							$"Missing permission {permStr} or {overallStr}",
+							StatusCodes.Status403Forbidden
+						);
 				}
 				else if (res.None)
 				{
 					ICollection<string> permissions = _options.Default ?? Array.Empty<string>();
 					if (permissions.All(x => x != permStr && x != overallStr))
 					{
-						context.Result = _ErrorResult($"Unlogged user does not have permission {permStr} or {overallStr}", StatusCodes.Status401Unauthorized);
+						context.Result = _ErrorResult(
+							$"Unlogged user does not have permission {permStr} or {overallStr}",
+							StatusCodes.Status401Unauthorized
+						);
 					}
 				}
 				else if (res.Failure != null)
-					context.Result = _ErrorResult(res.Failure.Message, StatusCodes.Status403Forbidden);
+					context.Result = _ErrorResult(
+						res.Failure.Message,
+						StatusCodes.Status403Forbidden
+					);
 				else
-					context.Result = _ErrorResult("Authentication panic", StatusCodes.Status500InternalServerError);
+					context.Result = _ErrorResult(
+						"Authentication panic",
+						StatusCodes.Status500InternalServerError
+					);
 			}
 
 			private AuthenticateResult _ApiKeyCheck(ActionContext context)
 			{
-				if (!context.HttpContext.Request.Headers.TryGetValue("X-API-Key", out StringValues apiKey))
+				if (
+					!context
+						.HttpContext
+						.Request
+						.Headers
+						.TryGetValue("X-API-Key", out StringValues apiKey)
+				)
 					return AuthenticateResult.NoResult();
 				if (!_options.ApiKeys.Contains<string>(apiKey!))
 					return AuthenticateResult.Fail("Invalid API-Key.");
@@ -205,11 +243,16 @@ namespace Kyoo.Authentication
 						new ClaimsPrincipal(
 							new[]
 							{
-								new ClaimsIdentity(new[]
-								{
-									// TODO: Make permission configurable, for now every APIKEY as all permissions.
-									new Claim(Claims.Permissions, string.Join(',', PermissionOption.Admin))
-								})
+								new ClaimsIdentity(
+									new[]
+									{
+										// TODO: Make permission configurable, for now every APIKEY as all permissions.
+										new Claim(
+											Claims.Permissions,
+											string.Join(',', PermissionOption.Admin)
+										)
+									}
+								)
 							}
 						),
 						"apikey"
@@ -219,10 +262,14 @@ namespace Kyoo.Authentication
 
 			private async Task<AuthenticateResult> _JwtCheck(ActionContext context)
 			{
-				AuthenticateResult ret = await context.HttpContext.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
+				AuthenticateResult ret = await context
+					.HttpContext
+					.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
 				// Change the failure message to make the API nice to use.
 				if (ret.Failure != null)
-					return AuthenticateResult.Fail("Invalid JWT token. The token may have expired.");
+					return AuthenticateResult.Fail(
+						"Invalid JWT token. The token may have expired."
+					);
 				return ret;
 			}
 		}

@@ -63,7 +63,8 @@ namespace Kyoo.Core.Api
 		public async Task<ActionResult<Page<IWatchlist>>> GetAll(
 			[FromQuery] Filter<IWatchlist>? filter,
 			[FromQuery] Pagination pagination,
-			[FromQuery] Include<IWatchlist>? fields)
+			[FromQuery] Include<IWatchlist>? fields
+		)
 		{
 			ICollection<IWatchlist> resources = await _repository.GetAll(
 				filter,

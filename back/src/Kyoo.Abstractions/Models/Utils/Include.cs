@@ -36,7 +36,8 @@ public class Include
 
 	public record SingleRelation(string Name, Type type, string RelationIdName) : Metadata(Name);
 
-	public record CustomRelation(string Name, Type type, string Sql, string? On, Type Declaring) : Metadata(Name);
+	public record CustomRelation(string Name, Type type, string Sql, string? On, Type Declaring)
+		: Metadata(Name);
 
 	public record ProjectedRelation(string Name, string Sql) : Metadata(Name);
 }
@@ -57,30 +58,49 @@ public class Include<T> : Include
 	public Include(params string[] fields)
 	{
 		Type[] types = typeof(T).GetCustomAttribute<OneOfAttribute>()?.Types ?? new[] { typeof(T) };
-		Metadatas = fields.SelectMany(key =>
-		{
-			var relations = types
-				.Select(x => x.GetProperty(key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)!)
-				.Select(prop => (prop, attr: prop?.GetCustomAttribute<LoadableRelationAttribute>()!))
-				.Where(x => x.prop != null && x.attr != null)
-				.ToList();
-			if (!relations.Any())
-				throw new ValidationException($"No loadable relation with the name {key}.");
-			return relations
-				.Select(x =>
-				{
-					(PropertyInfo prop, LoadableRelationAttribute attr) = x;
+		Metadatas = fields
+			.SelectMany(key =>
+			{
+				var relations = types
+					.Select(
+						x =>
+							x.GetProperty(
+								key,
+								BindingFlags.IgnoreCase
+									| BindingFlags.Public
+									| BindingFlags.Instance
+							)!
+					)
+					.Select(
+						prop => (prop, attr: prop?.GetCustomAttribute<LoadableRelationAttribute>()!)
+					)
+					.Where(x => x.prop != null && x.attr != null)
+					.ToList();
+				if (!relations.Any())
+					throw new ValidationException($"No loadable relation with the name {key}.");
+				return relations
+					.Select(x =>
+					{
+						(PropertyInfo prop, LoadableRelationAttribute attr) = x;
 
-					if (attr.RelationID != null)
-						return new SingleRelation(prop.Name, prop.PropertyType, attr.RelationID) as Metadata;
-					if (attr.Sql != null)
-						return new CustomRelation(prop.Name, prop.PropertyType, attr.Sql, attr.On, prop.DeclaringType!);
-					if (attr.Projected != null)
-						return new ProjectedRelation(prop.Name, attr.Projected);
-					throw new NotImplementedException();
-				})
-				.Distinct();
-		}).ToArray();
+						if (attr.RelationID != null)
+							return new SingleRelation(prop.Name, prop.PropertyType, attr.RelationID)
+								as Metadata;
+						if (attr.Sql != null)
+							return new CustomRelation(
+								prop.Name,
+								prop.PropertyType,
+								attr.Sql,
+								attr.On,
+								prop.DeclaringType!
+							);
+						if (attr.Projected != null)
+							return new ProjectedRelation(prop.Name, attr.Projected);
+						throw new NotImplementedException();
+					})
+					.Distinct();
+			})
+			.ToArray();
 	}
 
 	public static Include<T> From(string? fields)

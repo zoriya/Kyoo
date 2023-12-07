@@ -82,7 +82,11 @@ namespace Kyoo.Abstractions.Models
 			}
 
 			/// <inheritdoc />
-			public override object ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
+			public override object ConvertFrom(
+				ITypeDescriptorContext? context,
+				CultureInfo? culture,
+				object value
+			)
 			{
 				if (value is not string source)
 					return base.ConvertFrom(context, culture, value)!;
@@ -90,7 +94,10 @@ namespace Kyoo.Abstractions.Models
 			}
 
 			/// <inheritdoc />
-			public override bool CanConvertTo(ITypeDescriptorContext? context, Type? destinationType)
+			public override bool CanConvertTo(
+				ITypeDescriptorContext? context,
+				Type? destinationType
+			)
 			{
 				return false;
 			}

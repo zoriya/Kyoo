@@ -55,23 +55,24 @@ namespace Kyoo.Authentication
 
 			SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_options.Secret));
 			SigningCredentials credential = new(key, SecurityAlgorithms.HmacSha256Signature);
-			string permissions = user.Permissions != null
-				? string.Join(',', user.Permissions)
-				: string.Empty;
-			List<Claim> claims = new()
-			{
-				new Claim(Claims.Id, user.Id.ToString()),
-				new Claim(Claims.Name, user.Username),
-				new Claim(Claims.Permissions, permissions),
-				new Claim(Claims.Type, "access")
-			};
+			string permissions =
+				user.Permissions != null ? string.Join(',', user.Permissions) : string.Empty;
+			List<Claim> claims =
+				new()
+				{
+					new Claim(Claims.Id, user.Id.ToString()),
+					new Claim(Claims.Name, user.Username),
+					new Claim(Claims.Permissions, permissions),
+					new Claim(Claims.Type, "access")
+				};
 			if (user.Email != null)
 				claims.Add(new Claim(Claims.Email, user.Email));
-			JwtSecurityToken token = new(
-				signingCredentials: credential,
-				claims: claims,
-				expires: DateTime.UtcNow.Add(expireIn)
-			);
+			JwtSecurityToken token =
+				new(
+					signingCredentials: credential,
+					claims: claims,
+					expires: DateTime.UtcNow.Add(expireIn)
+				);
 			return new JwtSecurityTokenHandler().WriteToken(token);
 		}
 
@@ -80,16 +81,17 @@ namespace Kyoo.Authentication
 		{
 			SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_options.Secret));
 			SigningCredentials credential = new(key, SecurityAlgorithms.HmacSha256Signature);
-			JwtSecurityToken token = new(
-				signingCredentials: credential,
-				claims: new[]
-				{
-					new Claim(Claims.Id, user.Id.ToString()),
-					new Claim(Claims.Guid, Guid.NewGuid().ToString()),
-					new Claim(Claims.Type, "refresh")
-				},
-				expires: DateTime.UtcNow.AddYears(1)
-			);
+			JwtSecurityToken token =
+				new(
+					signingCredentials: credential,
+					claims: new[]
+					{
+						new Claim(Claims.Id, user.Id.ToString()),
+						new Claim(Claims.Guid, Guid.NewGuid().ToString()),
+						new Claim(Claims.Type, "refresh")
+					},
+					expires: DateTime.UtcNow.AddYears(1)
+				);
 			// TODO: refresh keys are unique (thanks to the guid) but we could store them in DB to invalidate them if requested by the user.
 			return Task.FromResult(new JwtSecurityTokenHandler().WriteToken(token));
 		}
@@ -102,14 +104,18 @@ namespace Kyoo.Authentication
 			ClaimsPrincipal principal;
 			try
 			{
-				principal = tokenHandler.ValidateToken(refreshToken, new TokenValidationParameters
-				{
-					ValidateIssuer = false,
-					ValidateAudience = false,
-					ValidateIssuerSigningKey = true,
-					ValidateLifetime = true,
-					IssuerSigningKey = key
-				}, out SecurityToken _);
+				principal = tokenHandler.ValidateToken(
+					refreshToken,
+					new TokenValidationParameters
+					{
+						ValidateIssuer = false,
+						ValidateAudience = false,
+						ValidateIssuerSigningKey = true,
+						ValidateLifetime = true,
+						IssuerSigningKey = key
+					},
+					out SecurityToken _
+				);
 			}
 			catch (Exception)
 			{
@@ -117,7 +123,9 @@ namespace Kyoo.Authentication
 			}
 
 			if (principal.Claims.First(x => x.Type == Claims.Type).Value != "refresh")
-				throw new SecurityTokenException("Invalid token type. The token should be a refresh token.");
+				throw new SecurityTokenException(
+					"Invalid token type. The token should be a refresh token."
+				);
 			Claim identifier = principal.Claims.First(x => x.Type == Claims.Id);
 			if (Guid.TryParse(identifier.Value, out Guid id))
 				return id;

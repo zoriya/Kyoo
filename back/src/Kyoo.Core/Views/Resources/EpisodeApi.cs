@@ -52,8 +52,7 @@ namespace Kyoo.Core.Api
 		/// The library manager used to modify or retrieve information in the data store.
 		/// </param>
 		/// <param name="thumbnails">The thumbnail manager used to retrieve images paths.</param>
-		public EpisodeApi(ILibraryManager libraryManager,
-			IThumbnailsManager thumbnails)
+		public EpisodeApi(ILibraryManager libraryManager, IThumbnailsManager thumbnails)
 			: base(libraryManager.Episodes, thumbnails)
 		{
 			_libraryManager = libraryManager;
@@ -73,9 +72,14 @@ namespace Kyoo.Core.Api
 		[PartialPermission(Kind.Read)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Show>> GetShow(Identifier identifier, [FromQuery] Include<Show> fields)
+		public async Task<ActionResult<Show>> GetShow(
+			Identifier identifier,
+			[FromQuery] Include<Show> fields
+		)
 		{
-			return await _libraryManager.Shows.Get(identifier.IsContainedIn<Show, Episode>(x => x.Episodes!), fields);
+			return await _libraryManager
+				.Shows
+				.Get(identifier.IsContainedIn<Show, Episode>(x => x.Episodes!), fields);
 		}
 
 		/// <summary>
@@ -94,21 +98,21 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status204NoContent)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Season>> GetSeason(Identifier identifier, [FromQuery] Include<Season> fields)
+		public async Task<ActionResult<Season>> GetSeason(
+			Identifier identifier,
+			[FromQuery] Include<Season> fields
+		)
 		{
-			Season? ret = await _libraryManager.Seasons.GetOrDefault(
-				identifier.IsContainedIn<Season, Episode>(x => x.Episodes!),
-				fields
-			);
+			Season? ret = await _libraryManager
+				.Seasons
+				.GetOrDefault(identifier.IsContainedIn<Season, Episode>(x => x.Episodes!), fields);
 			if (ret != null)
 				return ret;
 			Episode? episode = await identifier.Match(
 				id => _libraryManager.Episodes.GetOrDefault(id),
 				slug => _libraryManager.Episodes.GetOrDefault(slug)
 			);
-			return episode == null
-				? NotFound()
-				: NoContent();
+			return episode == null ? NotFound() : NoContent();
 		}
 
 		/// <summary>
@@ -154,18 +158,19 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status204NoContent)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<EpisodeWatchStatus?> SetWatchStatus(Identifier identifier, WatchStatus status, int? watchedTime)
+		public async Task<EpisodeWatchStatus?> SetWatchStatus(
+			Identifier identifier,
+			WatchStatus status,
+			int? watchedTime
+		)
 		{
 			Guid id = await identifier.Match(
 				id => Task.FromResult(id),
 				async slug => (await _libraryManager.Episodes.Get(slug)).Id
 			);
-			return await _libraryManager.WatchStatus.SetEpisodeStatus(
-				id,
-				User.GetIdOrThrow(),
-				status,
-				watchedTime
-			);
+			return await _libraryManager
+				.WatchStatus
+				.SetEpisodeStatus(id, User.GetIdOrThrow(), status, watchedTime);
 		}
 
 		/// <summary>

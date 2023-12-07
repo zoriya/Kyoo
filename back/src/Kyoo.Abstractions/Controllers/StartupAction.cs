@@ -17,7 +17,6 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Abstractions.Controllers
@@ -26,8 +25,6 @@ namespace Kyoo.Abstractions.Controllers
 	/// A list of constant priorities used for <see cref="IStartupAction"/>'s <see cref="IStartupAction.Priority"/>.
 	/// It also contains helper methods for creating new <see cref="StartupAction"/>.
 	/// </summary>
-	[SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1649:File name should match first type name",
-		Justification = "StartupAction is nested and the name SA is short to improve readability in plugin's startup.")]
 	public static class SA
 	{
 		/// <summary>
@@ -72,8 +69,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="action">The action to run</param>
 		/// <param name="priority">The priority of the new action</param>
 		/// <returns>A new <see cref="StartupAction"/></returns>
-		public static StartupAction New(Action action, int priority)
-			=> new(action, priority);
+		public static StartupAction New(Action action, int priority) => new(action, priority);
 
 		/// <summary>
 		/// Create a new <see cref="StartupAction"/>.
@@ -83,8 +79,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <typeparam name="T">A dependency that this action will use.</typeparam>
 		/// <returns>A new <see cref="StartupAction"/></returns>
 		public static StartupAction<T> New<T>(Action<T> action, int priority)
-			where T : notnull
-			=> new(action, priority);
+			where T : notnull => new(action, priority);
 
 		/// <summary>
 		/// Create a new <see cref="StartupAction"/>.
@@ -96,8 +91,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <returns>A new <see cref="StartupAction"/></returns>
 		public static StartupAction<T, T2> New<T, T2>(Action<T, T2> action, int priority)
 			where T : notnull
-			where T2 : notnull
-			=> new(action, priority);
+			where T2 : notnull => new(action, priority);
 
 		/// <summary>
 		/// Create a new <see cref="StartupAction"/>.
@@ -108,11 +102,13 @@ namespace Kyoo.Abstractions.Controllers
 		/// <typeparam name="T2">A second dependency that this action will use.</typeparam>
 		/// <typeparam name="T3">A third dependency that this action will use.</typeparam>
 		/// <returns>A new <see cref="StartupAction"/></returns>
-		public static StartupAction<T, T2, T3> New<T, T2, T3>(Action<T, T2, T3> action, int priority)
+		public static StartupAction<T, T2, T3> New<T, T2, T3>(
+			Action<T, T2, T3> action,
+			int priority
+		)
 			where T : notnull
 			where T2 : notnull
-			where T3 : notnull
-			=> new(action, priority);
+			where T3 : notnull => new(action, priority);
 
 		/// <summary>
 		/// A <see cref="IStartupAction"/> with no dependencies.
@@ -209,10 +205,7 @@ namespace Kyoo.Abstractions.Controllers
 			/// <inheritdoc />
 			public void Run(IServiceProvider provider)
 			{
-				_action.Invoke(
-					provider.GetRequiredService<T>(),
-					provider.GetRequiredService<T2>()
-				);
+				_action.Invoke(provider.GetRequiredService<T>(), provider.GetRequiredService<T2>());
 			}
 		}
 

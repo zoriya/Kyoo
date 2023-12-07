@@ -65,22 +65,33 @@ public static class DapperHelper
 			.Where(x => !x.Key.StartsWith('_'))
 			// If first char is lower, assume manual sql instead of reflection.
 			.Where(x => char.IsLower(key.First()) || x.Value.GetProperty(key) != null)
-			.Select(x => $"{x.Key}.{x.Value.GetProperty(key)?.GetCustomAttribute<ColumnAttribute>()?.Name ?? key.ToSnakeCase()}")
+			.Select(
+				x =>
+					$"{x.Key}.{x.Value.GetProperty(key)?.GetCustomAttribute<ColumnAttribute>()?.Name ?? key.ToSnakeCase()}"
+			)
 			.ToArray();
 		if (keys.Length == 1)
 			return keys.First();
 		return $"coalesce({string.Join(", ", keys)})";
 	}
 
-	public static string ProcessSort<T>(Sort<T> sort, bool reverse, Dictionary<string, Type> config, bool recurse = false)
+	public static string ProcessSort<T>(
+		Sort<T> sort,
+		bool reverse,
+		Dictionary<string, Type> config,
+		bool recurse = false
+	)
 		where T : IQuery
 	{
 		string ret = sort switch
 		{
 			Sort<T>.Default(var value) => ProcessSort(value, reverse, config, true),
-			Sort<T>.By(string key, bool desc) => $"{Property(key, config)} {(desc ^ reverse ? "desc" : "asc")}",
-			Sort<T>.Random(var seed) => $"md5('{seed}' || {Property("id", config)}) {(reverse ? "desc" : "asc")}",
-			Sort<T>.Conglomerate(var list) => string.Join(", ", list.Select(x => ProcessSort(x, reverse, config, true))),
+			Sort<T>.By(string key, bool desc)
+				=> $"{Property(key, config)} {(desc ^ reverse ? "desc" : "asc")}",
+			Sort<T>.Random(var seed)
+				=> $"md5('{seed}' || {Property("id", config)}) {(reverse ? "desc" : "asc")}",
+			Sort<T>.Conglomerate(var list)
+				=> string.Join(", ", list.Select(x => ProcessSort(x, reverse, config, true))),
 			_ => throw new SwitchExpressionException(),
 		};
 		if (recurse)
@@ -108,10 +119,14 @@ public static class DapperHelper
 			switch (metadata)
 			{
 				case Include.SingleRelation(var name, var type, var rid):
-					string tableName = type.GetCustomAttribute<TableAttribute>()?.Name ?? $"{type.Name.ToSnakeCase()}s";
+					string tableName =
+						type.GetCustomAttribute<TableAttribute>()?.Name
+						?? $"{type.Name.ToSnakeCase()}s";
 					types.Add(type);
 					projection.AppendLine($", r{relation}.* -- {type.Name} as r{relation}");
-					join.Append($"\nleft join {tableName} as r{relation} on r{relation}.id = {Property(rid, config)}");
+					join.Append(
+						$"\nleft join {tableName} as r{relation} on r{relation}.id = {Property(rid, config)}"
+					);
 					break;
 				case Include.CustomRelation(var name, var type, var sql, var on, var declaring):
 					string owner = config.First(x => x.Value == declaring).Key;
@@ -133,7 +148,8 @@ public static class DapperHelper
 
 		T Map(T item, IEnumerable<object?> relations)
 		{
-			IEnumerable<string> metadatas = include.Metadatas
+			IEnumerable<string> metadatas = include
+				.Metadatas
 				.Where(x => x is not Include.ProjectedRelation)
 				.Select(x => x.Name);
 			foreach ((string name, object? value) in metadatas.Zip(relations))
@@ -150,15 +166,23 @@ public static class DapperHelper
 		return (projection.ToString(), join.ToString(), types, Map);
 	}
 
-	public static FormattableString ProcessFilter<T>(Filter<T> filter, Dictionary<string, Type> config)
+	public static FormattableString ProcessFilter<T>(
+		Filter<T> filter,
+		Dictionary<string, Type> config
+	)
 	{
 		FormattableString Format(string key, FormattableString op)
 		{
 			if (key == "kind")
 			{
-				string cases = string.Join('\n', config
-					.Skip(1)
-					.Select(x => $"when {x.Key}.id is not null then '{x.Value.Name.ToLowerInvariant()}'")
+				string cases = string.Join(
+					'\n',
+					config
+						.Skip(1)
+						.Select(
+							x =>
+								$"when {x.Key}.id is not null then '{x.Value.Name.ToLowerInvariant()}'"
+						)
 				);
 				return $"""
 					case
@@ -172,7 +196,10 @@ public static class DapperHelper
 				.Where(x => !x.Key.StartsWith('_'))
 				// If first char is lower, assume manual sql instead of reflection.
 				.Where(x => char.IsLower(key.First()) || x.Value.GetProperty(key) != null)
-				.Select(x => $"{x.Key}.{x.Value.GetProperty(key)?.GetCustomAttribute<ColumnAttribute>()?.Name ?? key.ToSnakeCase()}");
+				.Select(
+					x =>
+						$"{x.Key}.{x.Value.GetProperty(key)?.GetCustomAttribute<ColumnAttribute>()?.Name ?? key.ToSnakeCase()}"
+				);
 
 			FormattableString ret = $"{properties.First():raw} {op}";
 			foreach (string property in properties.Skip(1))
@@ -194,16 +221,20 @@ public static class DapperHelper
 				Filter<T>.And(var first, var second) => $"({Process(first)} and {Process(second)})",
 				Filter<T>.Or(var first, var second) => $"({Process(first)} or {Process(second)})",
 				Filter<T>.Not(var inner) => $"(not {Process(inner)})",
-				Filter<T>.Eq(var property, var value) when value is null => Format(property, $"is null"),
-				Filter<T>.Ne(var property, var value) when value is null => Format(property, $"is not null"),
+				Filter<T>.Eq(var property, var value) when value is null
+					=> Format(property, $"is null"),
+				Filter<T>.Ne(var property, var value) when value is null
+					=> Format(property, $"is not null"),
 				Filter<T>.Eq(var property, var value) => Format(property, $"= {P(value!)}"),
 				Filter<T>.Ne(var property, var value) => Format(property, $"!= {P(value!)}"),
 				Filter<T>.Gt(var property, var value) => Format(property, $"> {P(value)}"),
 				Filter<T>.Ge(var property, var value) => Format(property, $">= {P(value)}"),
 				Filter<T>.Lt(var property, var value) => Format(property, $"< {P(value)}"),
 				Filter<T>.Le(var property, var value) => Format(property, $"> {P(value)}"),
-				Filter<T>.Has(var property, var value) => $"{P(value)} = any({Property(property, config):raw})",
-				Filter<T>.CmpRandom(var op, var seed, var id) => $"md5({seed} || coalesce({string.Join(", ", config.Select(x => $"{x.Key}.id")):raw})) {op:raw} md5({seed} || {id.ToString()})",
+				Filter<T>.Has(var property, var value)
+					=> $"{P(value)} = any({Property(property, config):raw})",
+				Filter<T>.CmpRandom(var op, var seed, var id)
+					=> $"md5({seed} || coalesce({string.Join(", ", config.Select(x => $"{x.Key}.id")):raw})) {op:raw} md5({seed} || {id.ToString()})",
 				Filter<T>.Lambda(var lambda) => throw new NotSupportedException(),
 				_ => throw new NotImplementedException(),
 			};
@@ -213,7 +244,8 @@ public static class DapperHelper
 
 	public static string ExpendProjections(Type type, string? prefix, Include include)
 	{
-		IEnumerable<string> projections = include.Metadatas
+		IEnumerable<string> projections = include
+			.Metadatas
 			.Select(x => (x as Include.ProjectedRelation)!)
 			.Where(x => x != null)
 			.Where(x => type.GetProperty(x.Name) != null)
@@ -231,26 +263,36 @@ public static class DapperHelper
 		Include<T>? include,
 		Filter<T>? filter,
 		Sort<T>? sort,
-		Pagination? limit)
+		Pagination? limit
+	)
 		where T : class, IResource, IQuery
 	{
 		SqlBuilder query = new(db, command);
 
 		// Include handling
 		include ??= new();
-		var (includeProjection, includeJoin, includeTypes, mapIncludes) = ProcessInclude(include, config);
+		var (includeProjection, includeJoin, includeTypes, mapIncludes) = ProcessInclude(
+			include,
+			config
+		);
 		query.Replace("/* includesJoin */", $"{includeJoin:raw}", out bool replaced);
 		if (!replaced)
 			query.AppendLiteral(includeJoin);
 		query.Replace("/* includes */", $"{includeProjection:raw}", out replaced);
 		if (!replaced)
-			throw new ArgumentException("Missing '/* includes */' placeholder in top level sql select to support includes.");
+			throw new ArgumentException(
+				"Missing '/* includes */' placeholder in top level sql select to support includes."
+			);
 
 		// Handle pagination, orders and filter.
 		if (limit?.AfterID != null)
 		{
 			T reference = await get(limit.AfterID.Value);
-			Filter<T>? keysetFilter = RepositoryHelper.KeysetPaginate(sort, reference, !limit.Reverse);
+			Filter<T>? keysetFilter = RepositoryHelper.KeysetPaginate(
+				sort,
+				reference,
+				!limit.Reverse
+			);
 			filter = Filter.And(filter, keysetFilter);
 		}
 		if (filter != null)
@@ -273,34 +315,45 @@ public static class DapperHelper
 		List<Type> types = config.Select(x => x.Value).Concat(includeTypes).ToList();
 
 		// Expand projections on every types received.
-		sql = Regex.Replace(sql, @"(,?) -- (\w+)( as (\w+))?", (match) =>
-		{
-			string leadingComa = match.Groups[1].Value;
-			string type = match.Groups[2].Value;
-			string? prefix = match.Groups[4].Value;
-			prefix = !string.IsNullOrEmpty(prefix) ? $"{prefix}." : string.Empty;
-
-			Type typeV = types.First(x => x.Name == type);
-
-			// Only project top level items with explicit includes.
-			string? projection = config.Any(x => x.Value.Name == type)
-				? ExpendProjections(typeV, prefix, include)
-				: null;
-
-			if (typeV.IsAssignableTo(typeof(IThumbnails)))
+		sql = Regex.Replace(
+			sql,
+			@"(,?) -- (\w+)( as (\w+))?",
+			(match) =>
 			{
-				string posterProj = string.Join(", ", new[] { "poster", "thumbnail", "logo" }
-					.Select(x => $"{prefix}{x}_source as source, {prefix}{x}_blurhash as blurhash"));
-				projection = string.IsNullOrEmpty(projection)
-					? posterProj
-					: $"{projection}, {posterProj}";
-				types.InsertRange(types.IndexOf(typeV) + 1, Enumerable.Repeat(typeof(Image), 3));
-			}
+				string leadingComa = match.Groups[1].Value;
+				string type = match.Groups[2].Value;
+				string? prefix = match.Groups[4].Value;
+				prefix = !string.IsNullOrEmpty(prefix) ? $"{prefix}." : string.Empty;
 
-			if (string.IsNullOrEmpty(projection))
-				return leadingComa;
-			return $", {projection}{leadingComa}";
-		});
+				Type typeV = types.First(x => x.Name == type);
+
+				// Only project top level items with explicit includes.
+				string? projection = config.Any(x => x.Value.Name == type)
+					? ExpendProjections(typeV, prefix, include)
+					: null;
+
+				if (typeV.IsAssignableTo(typeof(IThumbnails)))
+				{
+					string posterProj = string.Join(
+						", ",
+						new[] { "poster", "thumbnail", "logo" }.Select(
+							x => $"{prefix}{x}_source as source, {prefix}{x}_blurhash as blurhash"
+						)
+					);
+					projection = string.IsNullOrEmpty(projection)
+						? posterProj
+						: $"{projection}, {posterProj}";
+					types.InsertRange(
+						types.IndexOf(typeV) + 1,
+						Enumerable.Repeat(typeof(Image), 3)
+					);
+				}
+
+				if (string.IsNullOrEmpty(projection))
+					return leadingComa;
+				return $", {projection}{leadingComa}";
+			}
+		);
 
 		IEnumerable<T> data = await db.QueryAsync<T>(
 			sql,
@@ -322,7 +375,10 @@ public static class DapperHelper
 				return mapIncludes(mapper(nItems), nItems.Skip(config.Count));
 			},
 			ParametersDictionary.LoadFrom(cmd),
-			splitOn: string.Join(',', types.Select(x => x.GetCustomAttribute<SqlFirstColumnAttribute>()?.Name ?? "id"))
+			splitOn: string.Join(
+				',',
+				types.Select(x => x.GetCustomAttribute<SqlFirstColumnAttribute>()?.Name ?? "id")
+			)
 		);
 		if (limit?.Reverse == true)
 			data = data.Reverse();
@@ -339,7 +395,8 @@ public static class DapperHelper
 		Filter<T>? filter,
 		Sort<T>? sort = null,
 		bool reverse = false,
-		Guid? afterId = default)
+		Guid? afterId = default
+	)
 		where T : class, IResource, IQuery
 	{
 		ICollection<T> ret = await db.Query<T>(
@@ -361,7 +418,8 @@ public static class DapperHelper
 		FormattableString command,
 		Dictionary<string, Type> config,
 		SqlVariableContext context,
-		Filter<T>? filter)
+		Filter<T>? filter
+	)
 		where T : class, IResource
 	{
 		SqlBuilder query = new(db, command);
@@ -374,10 +432,7 @@ public static class DapperHelper
 		// language=postgreSQL
 		string sql = $"select count(*) from ({cmd.Sql}) as query";
 
-		return await db.QuerySingleAsync<int>(
-			sql,
-			ParametersDictionary.LoadFrom(cmd)
-		);
+		return await db.QuerySingleAsync<int>(sql, ParametersDictionary.LoadFrom(cmd));
 	}
 }
 

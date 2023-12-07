@@ -54,7 +54,10 @@ namespace Kyoo.Core
 		/// <inheritdoc />
 		public void Configure(ContainerBuilder builder)
 		{
-			builder.RegisterType<ThumbnailsManager>().As<IThumbnailsManager>().InstancePerLifetimeScope();
+			builder
+				.RegisterType<ThumbnailsManager>()
+				.As<IThumbnailsManager>()
+				.InstancePerLifetimeScope();
 			builder.RegisterType<LibraryManager>().As<ILibraryManager>().InstancePerLifetimeScope();
 
 			builder.RegisterRepository<LibraryItemRepository>();
@@ -67,7 +70,11 @@ namespace Kyoo.Core
 			builder.RegisterRepository<StudioRepository>();
 			builder.RegisterRepository<UserRepository>();
 			builder.RegisterRepository<NewsRepository>();
-			builder.RegisterType<WatchStatusRepository>().As<IWatchStatusRepository>().AsSelf().InstancePerLifetimeScope();
+			builder
+				.RegisterType<WatchStatusRepository>()
+				.As<IWatchStatusRepository>()
+				.AsSelf()
+				.InstancePerLifetimeScope();
 			builder.RegisterType<SqlVariableContext>().InstancePerLifetimeScope();
 		}
 
@@ -77,7 +84,8 @@ namespace Kyoo.Core
 			services.AddHttpContextAccessor();
 			services.AddTransient<IConfigureOptions<MvcNewtonsoftJsonOptions>, JsonOptions>();
 
-			services.AddMvcCore(options =>
+			services
+				.AddMvcCore(options =>
 				{
 					options.Filters.Add<ExceptionFilter>();
 					options.ModelBinderProviders.Insert(0, new SortBinder.Provider());
@@ -120,12 +128,16 @@ namespace Kyoo.Core
 		}
 
 		/// <inheritdoc />
-		public IEnumerable<IStartupAction> ConfigureSteps => new IStartupAction[]
-		{
-			SA.New<IApplicationBuilder>(app => app.UseHsts(), SA.Before),
-			SA.New<IApplicationBuilder>(app => app.UseResponseCompression(), SA.Routing + 1),
-			SA.New<IApplicationBuilder>(app => app.UseRouting(), SA.Routing),
-			SA.New<IApplicationBuilder>(app => app.UseEndpoints(x => x.MapControllers()), SA.Endpoint)
-		};
+		public IEnumerable<IStartupAction> ConfigureSteps =>
+			new IStartupAction[]
+			{
+				SA.New<IApplicationBuilder>(app => app.UseHsts(), SA.Before),
+				SA.New<IApplicationBuilder>(app => app.UseResponseCompression(), SA.Routing + 1),
+				SA.New<IApplicationBuilder>(app => app.UseRouting(), SA.Routing),
+				SA.New<IApplicationBuilder>(
+					app => app.UseEndpoints(x => x.MapControllers()),
+					SA.Endpoint
+				)
+			};
 	}
 }

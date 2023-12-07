@@ -60,13 +60,17 @@ namespace Kyoo.Utils
 				{
 					case UnicodeCategory.UppercaseLetter:
 					case UnicodeCategory.TitlecaseLetter:
-						if (previousCategory == UnicodeCategory.SpaceSeparator ||
-							previousCategory == UnicodeCategory.LowercaseLetter ||
-							(previousCategory != UnicodeCategory.DecimalDigitNumber &&
-							previousCategory != null &&
-							currentIndex > 0 &&
-							currentIndex + 1 < name.Length &&
-							char.IsLower(name[currentIndex + 1])))
+						if (
+							previousCategory == UnicodeCategory.SpaceSeparator
+							|| previousCategory == UnicodeCategory.LowercaseLetter
+							|| (
+								previousCategory != UnicodeCategory.DecimalDigitNumber
+								&& previousCategory != null
+								&& currentIndex > 0
+								&& currentIndex + 1 < name.Length
+								&& char.IsLower(name[currentIndex + 1])
+							)
+						)
 						{
 							builder.Append('_');
 						}
@@ -105,7 +109,10 @@ namespace Kyoo.Utils
 		public static bool IsPropertyExpression(LambdaExpression ex)
 		{
 			return ex.Body is MemberExpression
-				|| (ex.Body.NodeType == ExpressionType.Convert && ((UnaryExpression)ex.Body).Operand is MemberExpression);
+				|| (
+					ex.Body.NodeType == ExpressionType.Convert
+					&& ((UnaryExpression)ex.Body).Operand is MemberExpression
+				);
 		}
 
 		/// <summary>
@@ -118,9 +125,10 @@ namespace Kyoo.Utils
 		{
 			if (!IsPropertyExpression(ex))
 				throw new ArgumentException($"{ex} is not a property expression.");
-			MemberExpression? member = ex.Body.NodeType == ExpressionType.Convert
-				? ((UnaryExpression)ex.Body).Operand as MemberExpression
-				: ex.Body as MemberExpression;
+			MemberExpression? member =
+				ex.Body.NodeType == ExpressionType.Convert
+					? ((UnaryExpression)ex.Body).Operand as MemberExpression
+					: ex.Body as MemberExpression;
 			return member!.Member.Name;
 		}
 
@@ -175,7 +183,8 @@ namespace Kyoo.Utils
 			IEnumerable<Type> types = genericType.IsInterface
 				? type.GetInterfaces()
 				: type.GetInheritanceTree();
-			return types.Prepend(type)
+			return types
+				.Prepend(type)
 				.Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericType);
 		}
 
@@ -195,8 +204,11 @@ namespace Kyoo.Utils
 			IEnumerable<Type> types = genericType.IsInterface
 				? type.GetInterfaces()
 				: type.GetInheritanceTree();
-			return types.Prepend(type)
-				.FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericType);
+			return types
+				.Prepend(type)
+				.FirstOrDefault(
+					x => x.IsGenericType && x.GetGenericTypeDefinition() == genericType
+				);
 		}
 
 		/// <summary>
@@ -221,11 +233,13 @@ namespace Kyoo.Utils
 		/// <exception cref="ArgumentException">No method match the given constraints.</exception>
 		/// <returns>The method handle of the matching method.</returns>
 		[PublicAPI]
-		public static MethodInfo GetMethod(Type type,
+		public static MethodInfo GetMethod(
+			Type type,
 			BindingFlags flag,
 			string name,
 			Type[] generics,
-			object?[] args)
+			object?[] args
+		)
 		{
 			MethodInfo[] methods = type.GetMethods(flag | BindingFlags.Public)
 				.Where(x => x.Name == name)
@@ -233,9 +247,11 @@ namespace Kyoo.Utils
 				.Where(x => x.GetParameters().Length == args.Length)
 				.IfEmpty(() =>
 				{
-					throw new ArgumentException($"A method named {name} with " +
-						$"{args.Length} arguments and {generics.Length} generic " +
-						$"types could not be found on {type.Name}.");
+					throw new ArgumentException(
+						$"A method named {name} with "
+							+ $"{args.Length} arguments and {generics.Length} generic "
+							+ $"types could not be found on {type.Name}."
+					);
 				})
 				// TODO this won't work but I don't know why.
 				// .Where(x =>
@@ -257,7 +273,9 @@ namespace Kyoo.Utils
 
 			if (methods.Length == 1)
 				return methods[0];
-			throw new ArgumentException($"Multiple methods named {name} match the generics and parameters constraints.");
+			throw new ArgumentException(
+				$"Multiple methods named {name} match the generics and parameters constraints."
+			);
 		}
 
 		/// <summary>
@@ -288,7 +306,8 @@ namespace Kyoo.Utils
 			Type owner,
 			string methodName,
 			Type type,
-			params object[] args)
+			params object[] args
+		)
 		{
 			return RunGenericMethod<T>(owner, methodName, new[] { type }, args);
 		}
@@ -323,10 +342,13 @@ namespace Kyoo.Utils
 			Type owner,
 			string methodName,
 			Type[] types,
-			params object?[] args)
+			params object?[] args
+		)
 		{
 			if (types.Length < 1)
-				throw new ArgumentException($"The {nameof(types)} array is empty. At least one type is needed.");
+				throw new ArgumentException(
+					$"The {nameof(types)} array is empty. At least one type is needed."
+				);
 			MethodInfo method = GetMethod(owner, BindingFlags.Static, methodName, types, args);
 			return (T?)method.MakeGenericMethod(types).Invoke(null, args);
 		}

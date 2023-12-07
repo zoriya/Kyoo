@@ -54,10 +54,12 @@ namespace Kyoo.Core.Controllers
 		/// <param name="studios">A studio repository</param>
 		/// <param name="people">A people repository</param>
 		/// <param name="thumbs">The thumbnail manager used to store images.</param>
-		public MovieRepository(DatabaseContext database,
+		public MovieRepository(
+			DatabaseContext database,
 			IRepository<Studio> studios,
 			IRepository<People> people,
-			IThumbnailsManager thumbs)
+			IThumbnailsManager thumbs
+		)
 			: base(database, thumbs)
 		{
 			_database = database;
@@ -66,7 +68,10 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public override async Task<ICollection<Movie>> Search(string query, Include<Movie>? include = default)
+		public override async Task<ICollection<Movie>> Search(
+			string query,
+			Include<Movie>? include = default
+		)
 		{
 			return await AddIncludes(_database.Movies, include)
 				.Where(x => EF.Functions.ILike(x.Name + " " + x.Slug, $"%{query}%"))

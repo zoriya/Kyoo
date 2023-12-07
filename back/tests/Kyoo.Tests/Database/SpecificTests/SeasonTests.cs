@@ -53,11 +53,17 @@ namespace Kyoo.Tests.Database
 		{
 			Season season = await _repository.Get(1.AsGuid());
 			Assert.Equal("anohana-s1", season.Slug);
-			await Repositories.LibraryManager.Shows.Patch(season.ShowId, (x) =>
-			{
-				x.Slug = "new-slug";
-				return Task.FromResult(true);
-			});
+			await Repositories
+				.LibraryManager
+				.Shows
+				.Patch(
+					season.ShowId,
+					(x) =>
+					{
+						x.Slug = "new-slug";
+						return Task.FromResult(true);
+					}
+				);
 			season = await _repository.Get(1.AsGuid());
 			Assert.Equal("new-slug-s1", season.Slug);
 		}
@@ -67,11 +73,13 @@ namespace Kyoo.Tests.Database
 		{
 			Season season = await _repository.Get(1.AsGuid());
 			Assert.Equal("anohana-s1", season.Slug);
-			await _repository.Patch(season.Id, (x) =>
-			{
-				x.SeasonNumber = 2;
-				return Task.FromResult(true);
-			}
+			await _repository.Patch(
+				season.Id,
+				(x) =>
+				{
+					x.SeasonNumber = 2;
+					return Task.FromResult(true);
+				}
 			);
 			season = await _repository.Get(1.AsGuid());
 			Assert.Equal("anohana-s2", season.Slug);
@@ -80,11 +88,9 @@ namespace Kyoo.Tests.Database
 		[Fact]
 		public async Task SeasonCreationSlugTest()
 		{
-			Season season = await _repository.Create(new Season
-			{
-				ShowId = TestSample.Get<Show>().Id,
-				SeasonNumber = 2
-			});
+			Season season = await _repository.Create(
+				new Season { ShowId = TestSample.Get<Show>().Id, SeasonNumber = 2 }
+			);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s2", season.Slug);
 		}
 
@@ -94,16 +100,8 @@ namespace Kyoo.Tests.Database
 			Season season = TestSample.GetNew<Season>();
 			season.ExternalId = new Dictionary<string, MetadataId>
 			{
-				["2"] = new()
-				{
-					Link = "link",
-					DataId = "id"
-				},
-				["1"] = new()
-				{
-					Link = "new-provider-link",
-					DataId = "new-id"
-				}
+				["2"] = new() { Link = "link", DataId = "id" },
+				["1"] = new() { Link = "new-provider-link", DataId = "new-id" }
 			};
 			await _repository.Create(season);
 
@@ -133,11 +131,7 @@ namespace Kyoo.Tests.Database
 			Season value = await _repository.Get(TestSample.Get<Season>().Slug);
 			value.ExternalId = new Dictionary<string, MetadataId>
 			{
-				["toto"] = new()
-				{
-					Link = "link",
-					DataId = "id"
-				},
+				["toto"] = new() { Link = "link", DataId = "id" },
 			};
 			await _repository.Edit(value);
 
@@ -153,11 +147,7 @@ namespace Kyoo.Tests.Database
 			Season value = await _repository.Get(TestSample.Get<Season>().Slug);
 			value.ExternalId = new Dictionary<string, MetadataId>
 			{
-				["1"] = new()
-				{
-					Link = "link",
-					DataId = "id"
-				},
+				["1"] = new() { Link = "link", DataId = "id" },
 			};
 			await _repository.Edit(value);
 
@@ -168,11 +158,7 @@ namespace Kyoo.Tests.Database
 				KAssert.DeepEqual(value, retrieved);
 			}
 
-			value.ExternalId.Add("toto", new MetadataId
-			{
-				Link = "link",
-				DataId = "id"
-			});
+			value.ExternalId.Add("toto", new MetadataId { Link = "link", DataId = "id" });
 			await _repository.Edit(value);
 
 			{
@@ -191,11 +177,7 @@ namespace Kyoo.Tests.Database
 		[InlineData("SuPeR")]
 		public async Task SearchTest(string query)
 		{
-			Season value = new()
-			{
-				Name = "This is a test super title",
-				ShowId = 1.AsGuid()
-			};
+			Season value = new() { Name = "This is a test super title", ShowId = 1.AsGuid() };
 			await _repository.Create(value);
 			ICollection<Season> ret = await _repository.Search(query);
 			KAssert.DeepEqual(value, ret.First());

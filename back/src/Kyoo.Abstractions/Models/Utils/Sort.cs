@@ -111,12 +111,22 @@ namespace Kyoo.Abstractions.Controllers
 				"desc" => true,
 				"asc" => false,
 				null => false,
-				_ => throw new ValidationException($"The sort order, if set, should be :asc or :desc but it was :{order}.")
+				_
+					=> throw new ValidationException(
+						$"The sort order, if set, should be :asc or :desc but it was :{order}."
+					)
 			};
 
-			Type[] types = typeof(T).GetCustomAttribute<OneOfAttribute>()?.Types ?? new[] { typeof(T) };
+			Type[] types =
+				typeof(T).GetCustomAttribute<OneOfAttribute>()?.Types ?? new[] { typeof(T) };
 			PropertyInfo? property = types
-				.Select(x => x.GetProperty(key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance))
+				.Select(
+					x =>
+						x.GetProperty(
+							key,
+							BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance
+						)
+				)
 				.FirstOrDefault(x => x != null);
 			if (property == null)
 				throw new ValidationException("The given sort key is not valid.");

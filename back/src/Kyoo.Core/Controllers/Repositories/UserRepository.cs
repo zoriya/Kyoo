@@ -49,7 +49,10 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public override async Task<ICollection<User>> Search(string query, Include<User>? include = default)
+		public override async Task<ICollection<User>> Search(
+			string query,
+			Include<User>? include = default
+		)
 		{
 			return await AddIncludes(_database.Users, include)
 				.Where(x => EF.Functions.ILike(x.Username, $"%{query}%"))

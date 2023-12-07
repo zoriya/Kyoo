@@ -172,10 +172,7 @@ namespace Kyoo.Tests.Database
 			Show value = await _repository.Get(TestSample.Get<Show>().Slug);
 			value.ExternalId = new Dictionary<string, MetadataId>()
 			{
-				["test"] = new()
-				{
-					DataId = "1234"
-				}
+				["test"] = new() { DataId = "1234" }
 			};
 			Show edited = await _repository.Edit(value);
 
@@ -197,10 +194,7 @@ namespace Kyoo.Tests.Database
 			expected.Slug = "created-relation-test";
 			expected.ExternalId = new Dictionary<string, MetadataId>
 			{
-				["test"] = new()
-				{
-					DataId = "ID"
-				}
+				["test"] = new() { DataId = "ID" }
 			};
 			expected.Genres = new List<Genre>() { Genre.Action };
 			// expected.People = new[]
@@ -219,7 +213,8 @@ namespace Kyoo.Tests.Database
 			KAssert.DeepEqual(expected, created);
 
 			await using DatabaseContext context = Repositories.Context.New();
-			Show retrieved = await context.Shows
+			Show retrieved = await context
+				.Shows
 				// .Include(x => x.People)
 				// .ThenInclude(x => x.People)
 				.Include(x => x.Studio)
@@ -253,10 +248,7 @@ namespace Kyoo.Tests.Database
 			expected.Slug = "created-relation-test";
 			expected.ExternalId = new Dictionary<string, MetadataId>
 			{
-				["test"] = new()
-				{
-					DataId = "ID"
-				}
+				["test"] = new() { DataId = "ID" }
 			};
 			Show created = await _repository.Create(expected);
 			KAssert.DeepEqual(expected, created);
@@ -285,11 +277,7 @@ namespace Kyoo.Tests.Database
 		[InlineData("SuPeR")]
 		public async Task SearchTest(string query)
 		{
-			Show value = new()
-			{
-				Slug = "super-test",
-				Name = "This is a test title?"
-			};
+			Show value = new() { Slug = "super-test", Name = "This is a test title?" };
 			await _repository.Create(value);
 			ICollection<Show> ret = await _repository.Search(query);
 			KAssert.DeepEqual(value, ret.First());

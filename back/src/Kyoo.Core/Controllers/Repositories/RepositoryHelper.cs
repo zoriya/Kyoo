@@ -59,9 +59,11 @@ public class RepositoryHelper
 			return sort switch
 			{
 				Sort<T>.Default(var value) => GetSortsBy(value),
-				Sort<T>.By @sortBy => new[] { new SortIndicator(sortBy.Key, sortBy.Desendant, null) },
+				Sort<T>.By @sortBy
+					=> new[] { new SortIndicator(sortBy.Key, sortBy.Desendant, null) },
 				Sort<T>.Conglomerate(var list) => list.SelectMany(GetSortsBy),
-				Sort<T>.Random(var seed) => new[] { new SortIndicator("random", false, seed.ToString()) },
+				Sort<T>.Random(var seed)
+					=> new[] { new SortIndicator("random", false, seed.ToString()) },
 				_ => Array.Empty<SortIndicator>(),
 			};
 		}
@@ -88,9 +90,13 @@ public class RepositoryHelper
 			Filter<T>? equals = null;
 			foreach ((string pKey, bool pDesc, string? pSeed) in previousSteps)
 			{
-				Filter<T> pEquals = pSeed == null
-					? new Filter<T>.Eq(pKey, reference.GetType().GetProperty(pKey)?.GetValue(reference))
-					: new Filter<T>.CmpRandom("=", pSeed, reference.Id);
+				Filter<T> pEquals =
+					pSeed == null
+						? new Filter<T>.Eq(
+							pKey,
+							reference.GetType().GetProperty(pKey)?.GetValue(reference)
+						)
+						: new Filter<T>.CmpRandom("=", pSeed, reference.Id);
 				equals = Filter.And(equals, pEquals);
 			}
 
@@ -98,14 +104,18 @@ public class RepositoryHelper
 			Func<string, object, Filter<T>> comparer = greaterThan
 				? (prop, val) => new Filter<T>.Gt(prop, val)
 				: (prop, val) => new Filter<T>.Lt(prop, val);
-			Filter<T> last = seed == null
-				? comparer(key, value!)
-				: new Filter<T>.CmpRandom(greaterThan ? ">" : "<", seed, reference.Id);
+			Filter<T> last =
+				seed == null
+					? comparer(key, value!)
+					: new Filter<T>.CmpRandom(greaterThan ? ">" : "<", seed, reference.Id);
 
 			if (key != "random")
 			{
-				Type[] types = typeof(T).GetCustomAttribute<OneOfAttribute>()?.Types ?? new[] { typeof(T) };
-				PropertyInfo property = types.Select(x => x.GetProperty(key)!).First(x => x != null);
+				Type[] types =
+					typeof(T).GetCustomAttribute<OneOfAttribute>()?.Types ?? new[] { typeof(T) };
+				PropertyInfo property = types
+					.Select(x => x.GetProperty(key)!)
+					.First(x => x != null);
 				if (Nullable.GetUnderlyingType(property.PropertyType) != null)
 					last = new Filter<T>.Or(last, new Filter<T>.Eq(key, null));
 			}

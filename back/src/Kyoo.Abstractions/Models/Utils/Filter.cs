@@ -53,24 +53,30 @@ public abstract record Filter
 	{
 		return filters
 			.Where(x => x != null)
-			.Aggregate((Filter<T>?)null, (acc, filter) =>
-			{
-				if (acc == null)
-					return filter;
-				return new Filter<T>.And(acc, filter!);
-			});
+			.Aggregate(
+				(Filter<T>?)null,
+				(acc, filter) =>
+				{
+					if (acc == null)
+						return filter;
+					return new Filter<T>.And(acc, filter!);
+				}
+			);
 	}
 
 	public static Filter<T>? Or<T>(params Filter<T>?[] filters)
 	{
 		return filters
 			.Where(x => x != null)
-			.Aggregate((Filter<T>?)null, (acc, filter) =>
-			{
-				if (acc == null)
-					return filter;
-				return new Filter<T>.Or(acc, filter!);
-			});
+			.Aggregate(
+				(Filter<T>?)null,
+				(acc, filter) =>
+				{
+					if (acc == null)
+						return filter;
+					return new Filter<T>.Or(acc, filter!);
+				}
+			);
 	}
 }
 
@@ -109,21 +115,21 @@ public abstract record Filter<T> : Filter
 
 	public static class FilterParsers
 	{
-		public static readonly Parser<Filter<T>> Filter =
-			Parse.Ref(() => Bracket)
-				.Or(Parse.Ref(() => Not))
-				.Or(Parse.Ref(() => Eq))
-				.Or(Parse.Ref(() => Ne))
-				.Or(Parse.Ref(() => Gt))
-				.Or(Parse.Ref(() => Ge))
-				.Or(Parse.Ref(() => Lt))
-				.Or(Parse.Ref(() => Le))
-				.Or(Parse.Ref(() => Has));
+		public static readonly Parser<Filter<T>> Filter = Parse
+			.Ref(() => Bracket)
+			.Or(Parse.Ref(() => Not))
+			.Or(Parse.Ref(() => Eq))
+			.Or(Parse.Ref(() => Ne))
+			.Or(Parse.Ref(() => Gt))
+			.Or(Parse.Ref(() => Ge))
+			.Or(Parse.Ref(() => Lt))
+			.Or(Parse.Ref(() => Le))
+			.Or(Parse.Ref(() => Has));
 
-		public static readonly Parser<Filter<T>> CompleteFilter =
-			Parse.Ref(() => Or)
-				.Or(Parse.Ref(() => And))
-				.Or(Filter);
+		public static readonly Parser<Filter<T>> CompleteFilter = Parse
+			.Ref(() => Or)
+			.Or(Parse.Ref(() => And))
+			.Or(Filter);
 
 		public static readonly Parser<Filter<T>> Bracket =
 			from open in Parse.Char('(').Token()
@@ -131,22 +137,30 @@ public abstract record Filter<T> : Filter
 			from close in Parse.Char(')').Token()
 			select filter;
 
-		public static readonly Parser<IEnumerable<char>> AndOperator = Parse.IgnoreCase("and")
+		public static readonly Parser<IEnumerable<char>> AndOperator = Parse
+			.IgnoreCase("and")
 			.Or(Parse.String("&&"))
 			.Token();
 
-		public static readonly Parser<IEnumerable<char>> OrOperator = Parse.IgnoreCase("or")
+		public static readonly Parser<IEnumerable<char>> OrOperator = Parse
+			.IgnoreCase("or")
 			.Or(Parse.String("||"))
 			.Token();
 
-		public static readonly Parser<Filter<T>> And = Parse.ChainOperator(AndOperator, Filter, (_, a, b) => new And(a, b));
+		public static readonly Parser<Filter<T>> And = Parse.ChainOperator(
+			AndOperator,
+			Filter,
+			(_, a, b) => new And(a, b)
+		);
 
-		public static readonly Parser<Filter<T>> Or = Parse.ChainOperator(OrOperator, And.Or(Filter), (_, a, b) => new Or(a, b));
+		public static readonly Parser<Filter<T>> Or = Parse.ChainOperator(
+			OrOperator,
+			And.Or(Filter),
+			(_, a, b) => new Or(a, b)
+		);
 
 		public static readonly Parser<Filter<T>> Not =
-			from not in Parse.IgnoreCase("not")
-				.Or(Parse.String("!"))
-				.Token()
+			from not in Parse.IgnoreCase("not").Or(Parse.String("!")).Token()
 			from filter in CompleteFilter
 			select new Not(filter);
 
@@ -155,9 +169,7 @@ public abstract record Filter<T> : Filter
 			Type? nullable = Nullable.GetUnderlyingType(type);
 			if (nullable != null)
 			{
-				return
-					from value in _GetValueParser(nullable)
-					select value;
+				return from value in _GetValueParser(nullable) select value;
 			}
 
 			if (type == typeof(int))
@@ -165,8 +177,7 @@ public abstract record Filter<T> : Filter
 
 			if (type == typeof(float))
 			{
-				return
-					from a in Parse.Number
+				return from a in Parse.Number
 					from dot in Parse.Char('.')
 					from b in Parse.Number
 					select float.Parse($"{a}.{b}") as object;
@@ -174,8 +185,10 @@ public abstract record Filter<T> : Filter
 
 			if (type == typeof(Guid))
 			{
-				return
-					from guid in Parse.Regex(@"[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?", "Guid")
+				return from guid in Parse.Regex(
+						@"[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?",
+						"Guid"
+					)
 					select Guid.Parse(guid) as object;
 			}
 
@@ -191,18 +204,21 @@ public abstract record Filter<T> : Filter
 
 			if (type.IsEnum)
 			{
-				return Parse.LetterOrDigit.Many().Text().Then(x =>
-				{
-					if (Enum.TryParse(type, x, true, out object? value))
-						return Parse.Return(value);
-					return ParseHelper.Error<object>($"Invalid enum value. Unexpected {x}");
-				});
+				return Parse
+					.LetterOrDigit
+					.Many()
+					.Text()
+					.Then(x =>
+					{
+						if (Enum.TryParse(type, x, true, out object? value))
+							return Parse.Return(value);
+						return ParseHelper.Error<object>($"Invalid enum value. Unexpected {x}");
+					});
 			}
 
 			if (type == typeof(DateTime))
 			{
-				return
-					from year in Parse.Digit.Repeat(4).Text().Select(int.Parse)
+				return from year in Parse.Digit.Repeat(4).Text().Select(int.Parse)
 					from yd in Parse.Char('-')
 					from mouth in Parse.Digit.Repeat(2).Text().Select(int.Parse)
 					from md in Parse.Char('-')
@@ -211,43 +227,57 @@ public abstract record Filter<T> : Filter
 			}
 
 			if (typeof(IEnumerable).IsAssignableFrom(type))
-				return ParseHelper.Error<object>("Can't filter a list with a default comparator, use the 'has' filter.");
+				return ParseHelper.Error<object>(
+					"Can't filter a list with a default comparator, use the 'has' filter."
+				);
 			return ParseHelper.Error<object>("Unfilterable field found");
 		}
 
 		private static Parser<Filter<T>> _GetOperationParser(
 			Parser<object> op,
 			Func<string, object, Filter<T>> apply,
-			Func<Type, Parser<object?>>? customTypeParser = null)
+			Func<Type, Parser<object?>>? customTypeParser = null
+		)
 		{
 			Parser<string> property = Parse.LetterOrDigit.AtLeastOnce().Text();
 
 			return property.Then(prop =>
 			{
-				Type[] types = typeof(T).GetCustomAttribute<OneOfAttribute>()?.Types ?? new[] { typeof(T) };
+				Type[] types =
+					typeof(T).GetCustomAttribute<OneOfAttribute>()?.Types ?? new[] { typeof(T) };
 
 				if (string.Equals(prop, "kind", StringComparison.OrdinalIgnoreCase))
 				{
-					return
-						from eq in op
+					return from eq in op
 						from val in types
 							.Select(x => Parse.IgnoreCase(x.Name).Text())
-							.Aggregate(null as Parser<string>, (acc, x) => acc == null ? x : Parse.Or(acc, x))
+							.Aggregate(
+								null as Parser<string>,
+								(acc, x) => acc == null ? x : Parse.Or(acc, x)
+							)
 						select apply("kind", val);
 				}
 
 				PropertyInfo? propInfo = types
-					.Select(x => x.GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance))
+					.Select(
+						x =>
+							x.GetProperty(
+								prop,
+								BindingFlags.IgnoreCase
+									| BindingFlags.Public
+									| BindingFlags.Instance
+							)
+					)
 					.FirstOrDefault();
 				if (propInfo == null)
 					return ParseHelper.Error<Filter<T>>($"The given filter '{prop}' is invalid.");
 
-				Parser<object?> value = customTypeParser != null
-					? customTypeParser(propInfo.PropertyType)
-					: _GetValueParser(propInfo.PropertyType);
+				Parser<object?> value =
+					customTypeParser != null
+						? customTypeParser(propInfo.PropertyType)
+						: _GetValueParser(propInfo.PropertyType);
 
-				return
-					from eq in op
+				return from eq in op
 					from val in value
 					select apply(propInfo.Name, val);
 			});
@@ -261,7 +291,10 @@ public abstract record Filter<T> : Filter
 				Type? inner = Nullable.GetUnderlyingType(type);
 				if (inner == null)
 					return _GetValueParser(type);
-				return Parse.String("null").Token().Return((object?)null)
+				return Parse
+					.String("null")
+					.Token()
+					.Return((object?)null)
 					.Or(_GetValueParser(inner));
 			}
 		);
@@ -274,7 +307,10 @@ public abstract record Filter<T> : Filter
 				Type? inner = Nullable.GetUnderlyingType(type);
 				if (inner == null)
 					return _GetValueParser(type);
-				return Parse.String("null").Token().Return((object?)null)
+				return Parse
+					.String("null")
+					.Token()
+					.Return((object?)null)
 					.Or(_GetValueParser(inner));
 			}
 		);
@@ -305,7 +341,9 @@ public abstract record Filter<T> : Filter
 			(Type type) =>
 			{
 				if (typeof(IEnumerable).IsAssignableFrom(type) && type != typeof(string))
-					return _GetValueParser(type.GetElementType() ?? type.GenericTypeArguments.First());
+					return _GetValueParser(
+						type.GetElementType() ?? type.GenericTypeArguments.First()
+					);
 				return ParseHelper.Error<object>("Can't use 'has' on a non-list.");
 			}
 		);
@@ -321,7 +359,9 @@ public abstract record Filter<T> : Filter
 			IResult<Filter<T>> ret = FilterParsers.CompleteFilter.End().TryParse(filter);
 			if (ret.WasSuccessful)
 				return ret.Value;
-			throw new ValidationException($"Could not parse filter argument: {ret.Message}. Not parsed: {filter[ret.Remainder.Position..]}");
+			throw new ValidationException(
+				$"Could not parse filter argument: {ret.Message}. Not parsed: {filter[ret.Remainder.Position..]}"
+			);
 		}
 		catch (ParseException ex)
 		{

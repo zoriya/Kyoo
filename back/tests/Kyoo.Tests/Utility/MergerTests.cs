@@ -29,15 +29,8 @@ namespace Kyoo.Tests.Utility
 		[Fact]
 		public void CompleteTest()
 		{
-			Studio genre = new()
-			{
-				Name = "merged"
-			};
-			Studio genre2 = new()
-			{
-				Name = "test",
-				Id = 5.AsGuid(),
-			};
+			Studio genre = new() { Name = "merged" };
+			Studio genre2 = new() { Name = "test", Id = 5.AsGuid(), };
 			Studio ret = Merger.Complete(genre, genre2);
 			Assert.True(ReferenceEquals(genre, ret));
 			Assert.Equal(5.AsGuid(), ret.Id);
@@ -48,15 +41,8 @@ namespace Kyoo.Tests.Utility
 		[Fact]
 		public void CompleteDictionaryTest()
 		{
-			Collection collection = new()
-			{
-				Name = "merged",
-			};
-			Collection collection2 = new()
-			{
-				Id = 5.AsGuid(),
-				Name = "test",
-			};
+			Collection collection = new() { Name = "merged", };
+			Collection collection2 = new() { Id = 5.AsGuid(), Name = "test", };
 			Collection ret = Merger.Complete(collection, collection2);
 			Assert.True(ReferenceEquals(collection, ret));
 			Assert.Equal(5.AsGuid(), ret.Id);
@@ -67,17 +53,14 @@ namespace Kyoo.Tests.Utility
 		[Fact]
 		public void CompleteDictionaryOutParam()
 		{
-			Dictionary<string, string> first = new()
-			{
-				["logo"] = "logo",
-				["poster"] = "poster"
-			};
-			Dictionary<string, string> second = new()
-			{
-				["poster"] = "new-poster",
-				["thumbnail"] = "thumbnails"
-			};
-			IDictionary<string, string> ret = Merger.CompleteDictionaries(first, second, out bool changed);
+			Dictionary<string, string> first = new() { ["logo"] = "logo", ["poster"] = "poster" };
+			Dictionary<string, string> second =
+				new() { ["poster"] = "new-poster", ["thumbnail"] = "thumbnails" };
+			IDictionary<string, string> ret = Merger.CompleteDictionaries(
+				first,
+				second,
+				out bool changed
+			);
 			Assert.True(changed);
 			Assert.Equal(3, ret.Count);
 			Assert.Equal("new-poster", ret["poster"]);
@@ -88,15 +71,13 @@ namespace Kyoo.Tests.Utility
 		[Fact]
 		public void CompleteDictionaryEqualTest()
 		{
-			Dictionary<string, string> first = new()
-			{
-				["poster"] = "poster"
-			};
-			Dictionary<string, string> second = new()
-			{
-				["poster"] = "new-poster",
-			};
-			IDictionary<string, string> ret = Merger.CompleteDictionaries(first, second, out bool changed);
+			Dictionary<string, string> first = new() { ["poster"] = "poster" };
+			Dictionary<string, string> second = new() { ["poster"] = "new-poster", };
+			IDictionary<string, string> ret = Merger.CompleteDictionaries(
+				first,
+				second,
+				out bool changed
+			);
 			Assert.True(changed);
 			Assert.Single(ret);
 			Assert.Equal("new-poster", ret["poster"]);
@@ -121,17 +102,8 @@ namespace Kyoo.Tests.Utility
 		[Fact]
 		public void CompleteDictionaryNoChangeNoSetTest()
 		{
-			TestMergeSetter first = new()
-			{
-				Backing = new Dictionary<int, int>
-				{
-					[2] = 3
-				}
-			};
-			TestMergeSetter second = new()
-			{
-				Backing = new Dictionary<int, int>()
-			};
+			TestMergeSetter first = new() { Backing = new Dictionary<int, int> { [2] = 3 } };
+			TestMergeSetter second = new() { Backing = new Dictionary<int, int>() };
 			Merger.Complete(first, second);
 			// This should no call the setter of first so the test should pass.
 		}
@@ -139,17 +111,14 @@ namespace Kyoo.Tests.Utility
 		[Fact]
 		public void CompleteDictionaryNullValue()
 		{
-			Dictionary<string, string> first = new()
-			{
-				["logo"] = "logo",
-				["poster"] = null
-			};
-			Dictionary<string, string> second = new()
-			{
-				["poster"] = "new-poster",
-				["thumbnail"] = "thumbnails"
-			};
-			IDictionary<string, string> ret = Merger.CompleteDictionaries(first, second, out bool changed);
+			Dictionary<string, string> first = new() { ["logo"] = "logo", ["poster"] = null };
+			Dictionary<string, string> second =
+				new() { ["poster"] = "new-poster", ["thumbnail"] = "thumbnails" };
+			IDictionary<string, string> ret = Merger.CompleteDictionaries(
+				first,
+				second,
+				out bool changed
+			);
 			Assert.True(changed);
 			Assert.Equal(3, ret.Count);
 			Assert.Equal("new-poster", ret["poster"]);
@@ -160,16 +129,13 @@ namespace Kyoo.Tests.Utility
 		[Fact]
 		public void CompleteDictionaryNullValueNoChange()
 		{
-			Dictionary<string, string> first = new()
-			{
-				["logo"] = "logo",
-				["poster"] = null
-			};
-			Dictionary<string, string> second = new()
-			{
-				["poster"] = null,
-			};
-			IDictionary<string, string> ret = Merger.CompleteDictionaries(first, second, out bool changed);
+			Dictionary<string, string> first = new() { ["logo"] = "logo", ["poster"] = null };
+			Dictionary<string, string> second = new() { ["poster"] = null, };
+			IDictionary<string, string> ret = Merger.CompleteDictionaries(
+				first,
+				second,
+				out bool changed
+			);
 			Assert.False(changed);
 			Assert.Equal(2, ret.Count);
 			Assert.Null(ret["poster"]);

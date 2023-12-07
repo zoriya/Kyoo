@@ -45,11 +45,13 @@ namespace Kyoo.Core.Api
 		protected Page<TResult> Page<TResult>(ICollection<TResult> resources, int limit)
 			where TResult : IResource
 		{
-			Dictionary<string, string> query = Request.Query.ToDictionary(
-				x => x.Key,
-				x => x.Value.ToString(),
-				StringComparer.InvariantCultureIgnoreCase
-			);
+			Dictionary<string, string> query = Request
+				.Query
+				.ToDictionary(
+					x => x.Key,
+					x => x.Value.ToString(),
+					StringComparer.InvariantCultureIgnoreCase
+				);
 
 			// If the query was sorted randomly, add the seed to the url to get reproducible links (next,prev,first...)
 			if (query.ContainsKey("sortBy"))
@@ -58,28 +60,27 @@ namespace Kyoo.Core.Api
 
 				query["sortBy"] = Regex.Replace(query["sortBy"], "random(?!:)", $"random:{seed}");
 			}
-			return new Page<TResult>(
-				resources,
-				Request.Path,
-				query,
-				limit
-			);
+			return new Page<TResult>(resources, Request.Path, query, limit);
 		}
 
 		protected SearchPage<TResult> SearchPage<TResult>(SearchPage<TResult>.SearchResult result)
 			where TResult : IResource
 		{
-			Dictionary<string, string> query = Request.Query.ToDictionary(
-				x => x.Key,
-				x => x.Value.ToString(),
-				StringComparer.InvariantCultureIgnoreCase
-			);
+			Dictionary<string, string> query = Request
+				.Query
+				.ToDictionary(
+					x => x.Key,
+					x => x.Value.ToString(),
+					StringComparer.InvariantCultureIgnoreCase
+				);
 
 			string self = Request.Path + query.ToQueryString();
 			string? previous = null;
 			string? next = null;
 			string first;
-			int limit = query.TryGetValue("limit", out string? limitStr) ? int.Parse(limitStr) : new SearchPagination().Limit;
+			int limit = query.TryGetValue("limit", out string? limitStr)
+				? int.Parse(limitStr)
+				: new SearchPagination().Limit;
 			int? skip = query.TryGetValue("skip", out string? skipStr) ? int.Parse(skipStr) : null;
 
 			if (skip != null)
@@ -97,13 +98,7 @@ namespace Kyoo.Core.Api
 			query.Remove("skip");
 			first = Request.Path + query.ToQueryString();
 
-			return new SearchPage<TResult>(
-				result,
-				self,
-				previous,
-				next,
-				first
-			);
+			return new SearchPage<TResult>(result, self, previous, next, first);
 		}
 	}
 }

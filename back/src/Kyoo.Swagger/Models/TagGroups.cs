@@ -17,8 +17,8 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using Newtonsoft.Json;
 using NSwag;
+using Newtonsoft.Json;
 
 namespace Kyoo.Swagger.Models
 {

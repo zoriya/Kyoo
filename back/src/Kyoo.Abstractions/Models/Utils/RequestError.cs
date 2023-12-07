@@ -51,7 +51,10 @@ namespace Kyoo.Abstractions.Models.Utils
 		public RequestError(string[] errors)
 		{
 			if (errors == null || !errors.Any())
-				throw new ArgumentException("Errors must be non null and not empty", nameof(errors));
+				throw new ArgumentException(
+					"Errors must be non null and not empty",
+					nameof(errors)
+				);
 			Errors = errors;
 		}
 	}

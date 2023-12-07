@@ -82,9 +82,7 @@ namespace Kyoo.Abstractions.Models.Utils
 		/// </example>
 		public T Match<T>(Func<Guid, T> idFunc, Func<string, T> slugFunc)
 		{
-			return _id.HasValue
-				? idFunc(_id.Value)
-				: slugFunc(_slug!);
+			return _id.HasValue ? idFunc(_id.Value) : slugFunc(_slug!);
 		}
 
 		/// <summary>
@@ -99,12 +97,19 @@ namespace Kyoo.Abstractions.Models.Utils
 		/// identifier.Matcher&lt;Season&gt;(x => x.ShowID, x => x.Show.Slug)
 		/// </code>
 		/// </example>
-		public Filter<T> Matcher<T>(Expression<Func<T, Guid>> idGetter,
-			Expression<Func<T, string>> slugGetter)
+		public Filter<T> Matcher<T>(
+			Expression<Func<T, Guid>> idGetter,
+			Expression<Func<T, string>> slugGetter
+		)
 		{
 			ConstantExpression self = Expression.Constant(_id.HasValue ? _id.Value : _slug);
-			BinaryExpression equal = Expression.Equal(_id.HasValue ? idGetter.Body : slugGetter.Body, self);
-			ICollection<ParameterExpression> parameters = _id.HasValue ? idGetter.Parameters : slugGetter.Parameters;
+			BinaryExpression equal = Expression.Equal(
+				_id.HasValue ? idGetter.Body : slugGetter.Body,
+				self
+			);
+			ICollection<ParameterExpression> parameters = _id.HasValue
+				? idGetter.Parameters
+				: slugGetter.Parameters;
 			Expression<Func<T, bool>> lambda = Expression.Lambda<Func<T, bool>>(equal, parameters);
 			return new Filter<T>.Lambda(lambda);
 		}
@@ -118,12 +123,19 @@ namespace Kyoo.Abstractions.Models.Utils
 		/// <param name="slugGetter">An expression to retrieve a slug from the type <typeparamref name="T"/>.</param>
 		/// <typeparam name="T">The type to match against this identifier.</typeparam>
 		/// <returns>An expression to match the type <typeparamref name="T"/> to this identifier.</returns>
-		public Filter<T> Matcher<T>(Expression<Func<T, Guid?>> idGetter,
-			Expression<Func<T, string>> slugGetter)
+		public Filter<T> Matcher<T>(
+			Expression<Func<T, Guid?>> idGetter,
+			Expression<Func<T, string>> slugGetter
+		)
 		{
 			ConstantExpression self = Expression.Constant(_id.HasValue ? _id.Value : _slug);
-			BinaryExpression equal = Expression.Equal(_id.HasValue ? idGetter.Body : slugGetter.Body, self);
-			ICollection<ParameterExpression> parameters = _id.HasValue ? idGetter.Parameters : slugGetter.Parameters;
+			BinaryExpression equal = Expression.Equal(
+				_id.HasValue ? idGetter.Body : slugGetter.Body,
+				self
+			);
+			ICollection<ParameterExpression> parameters = _id.HasValue
+				? idGetter.Parameters
+				: slugGetter.Parameters;
 			Expression<Func<T, bool>> lambda = Expression.Lambda<Func<T, bool>>(equal, parameters);
 			return new Filter<T>.Lambda(lambda);
 		}
@@ -137,10 +149,7 @@ namespace Kyoo.Abstractions.Models.Utils
 		/// </returns>
 		public bool IsSame(IResource resource)
 		{
-			return Match(
-				id => resource.Id == id,
-				slug => resource.Slug == slug
-			);
+			return Match(id => resource.Id == id, slug => resource.Slug == slug);
 		}
 
 		/// <summary>
@@ -161,9 +170,7 @@ namespace Kyoo.Abstractions.Models.Utils
 		private Expression<Func<T, bool>> _IsSameExpression<T>()
 			where T : IResource
 		{
-			return _id.HasValue
-				? x => x.Id == _id.Value
-				: x => x.Slug == _slug;
+			return _id.HasValue ? x => x.Id == _id.Value : x => x.Slug == _slug;
 		}
 
 		/// <summary>
@@ -181,17 +188,23 @@ namespace Kyoo.Abstractions.Models.Utils
 				.Where(x => x.Name == nameof(Enumerable.Any))
 				.FirstOrDefault(x => x.GetParameters().Length == 2)!
 				.MakeGenericMethod(typeof(T2));
-			MethodCallExpression call = Expression.Call(null, method, listGetter.Body, _IsSameExpression<T2>());
-			Expression<Func<T, bool>> lambda = Expression.Lambda<Func<T, bool>>(call, listGetter.Parameters);
+			MethodCallExpression call = Expression.Call(
+				null,
+				method,
+				listGetter.Body,
+				_IsSameExpression<T2>()
+			);
+			Expression<Func<T, bool>> lambda = Expression.Lambda<Func<T, bool>>(
+				call,
+				listGetter.Parameters
+			);
 			return new Filter<T>.Lambda(lambda);
 		}
 
 		/// <inheritdoc />
 		public override string ToString()
 		{
-			return _id.HasValue
-				? _id.Value.ToString()
-				: _slug!;
+			return _id.HasValue ? _id.Value.ToString() : _slug!;
 		}
 
 		/// <summary>
@@ -208,15 +221,17 @@ namespace Kyoo.Abstractions.Models.Utils
 			}
 
 			/// <inheritdoc />
-			public override object ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
+			public override object ConvertFrom(
+				ITypeDescriptorContext? context,
+				CultureInfo? culture,
+				object value
+			)
 			{
 				if (value is Guid id)
 					return new Identifier(id);
 				if (value is not string slug)
 					return base.ConvertFrom(context, culture, value)!;
-				return Guid.TryParse(slug, out id)
-					? new Identifier(id)
-					: new Identifier(slug);
+				return Guid.TryParse(slug, out id) ? new Identifier(id) : new Identifier(slug);
 			}
 		}
 	}

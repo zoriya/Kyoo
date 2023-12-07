@@ -31,7 +31,11 @@ namespace Kyoo.Core.Api
 	public class PeopleRoleConverter : JsonConverter<PeopleRole>
 	{
 		/// <inheritdoc />
-		public override void WriteJson(JsonWriter writer, PeopleRole? value, JsonSerializer serializer)
+		public override void WriteJson(
+			JsonWriter writer,
+			PeopleRole? value,
+			JsonSerializer serializer
+		)
 		{
 			// if (value == null)
 			// {
@@ -58,11 +62,13 @@ namespace Kyoo.Core.Api
 		}
 
 		/// <inheritdoc />
-		public override PeopleRole ReadJson(JsonReader reader,
+		public override PeopleRole ReadJson(
+			JsonReader reader,
 			Type objectType,
 			PeopleRole? existingValue,
 			bool hasExistingValue,
-			JsonSerializer serializer)
+			JsonSerializer serializer
+		)
 		{
 			throw new NotImplementedException();
 		}

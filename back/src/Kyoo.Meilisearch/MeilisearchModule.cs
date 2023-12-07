@@ -33,103 +33,98 @@ namespace Kyoo.Meiliseach
 
 		private readonly IConfiguration _configuration;
 
-		public static Dictionary<string, Settings> IndexSettings => new()
-		{
+		public static Dictionary<string, Settings> IndexSettings =>
+			new()
 			{
-				"items",
-				new Settings()
 				{
-					SearchableAttributes = new[]
+					"items",
+					new Settings()
 					{
-						CamelCase.ConvertName(nameof(Movie.Name)),
-						CamelCase.ConvertName(nameof(Movie.Slug)),
-						CamelCase.ConvertName(nameof(Movie.Aliases)),
-						CamelCase.ConvertName(nameof(Movie.Path)),
-						CamelCase.ConvertName(nameof(Movie.Tags)),
-						CamelCase.ConvertName(nameof(Movie.Overview)),
-					},
-					FilterableAttributes = new[]
-					{
-						CamelCase.ConvertName(nameof(Movie.Genres)),
-						CamelCase.ConvertName(nameof(Movie.Status)),
-						CamelCase.ConvertName(nameof(Movie.AirDate)),
-						CamelCase.ConvertName(nameof(Movie.StudioId)),
-						"kind"
-					},
-					SortableAttributes = new[]
-					{
-						CamelCase.ConvertName(nameof(Movie.AirDate)),
-						CamelCase.ConvertName(nameof(Movie.AddedDate)),
-						CamelCase.ConvertName(nameof(Movie.Rating)),
-						CamelCase.ConvertName(nameof(Movie.Runtime)),
-					},
-					DisplayedAttributes = new[]
-					{
-						CamelCase.ConvertName(nameof(Movie.Id)),
-						"kind"
-					},
-					RankingRules = new[]
-					{
-						"words",
-						"typo",
-						"proximity",
-						"attribute",
-						"sort",
-						"exactness",
-						$"{CamelCase.ConvertName(nameof(Movie.Rating))}:desc",
+						SearchableAttributes = new[]
+						{
+							CamelCase.ConvertName(nameof(Movie.Name)),
+							CamelCase.ConvertName(nameof(Movie.Slug)),
+							CamelCase.ConvertName(nameof(Movie.Aliases)),
+							CamelCase.ConvertName(nameof(Movie.Path)),
+							CamelCase.ConvertName(nameof(Movie.Tags)),
+							CamelCase.ConvertName(nameof(Movie.Overview)),
+						},
+						FilterableAttributes = new[]
+						{
+							CamelCase.ConvertName(nameof(Movie.Genres)),
+							CamelCase.ConvertName(nameof(Movie.Status)),
+							CamelCase.ConvertName(nameof(Movie.AirDate)),
+							CamelCase.ConvertName(nameof(Movie.StudioId)),
+							"kind"
+						},
+						SortableAttributes = new[]
+						{
+							CamelCase.ConvertName(nameof(Movie.AirDate)),
+							CamelCase.ConvertName(nameof(Movie.AddedDate)),
+							CamelCase.ConvertName(nameof(Movie.Rating)),
+							CamelCase.ConvertName(nameof(Movie.Runtime)),
+						},
+						DisplayedAttributes = new[]
+						{
+							CamelCase.ConvertName(nameof(Movie.Id)),
+							"kind"
+						},
+						RankingRules = new[]
+						{
+							"words",
+							"typo",
+							"proximity",
+							"attribute",
+							"sort",
+							"exactness",
+							$"{CamelCase.ConvertName(nameof(Movie.Rating))}:desc",
+						}
+						// TODO: Add stopwords
 					}
-					// TODO: Add stopwords
-				}
-			},
-			{
-				nameof(Episode),
-				new Settings()
+				},
 				{
-					SearchableAttributes = new[]
+					nameof(Episode),
+					new Settings()
 					{
-						CamelCase.ConvertName(nameof(Episode.Name)),
-						CamelCase.ConvertName(nameof(Episode.Overview)),
-						CamelCase.ConvertName(nameof(Episode.Slug)),
-						CamelCase.ConvertName(nameof(Episode.Path)),
-					},
-					FilterableAttributes = new[]
-					{
-						CamelCase.ConvertName(nameof(Episode.SeasonNumber)),
-					},
-					SortableAttributes = new[]
-					{
-						CamelCase.ConvertName(nameof(Episode.ReleaseDate)),
-						CamelCase.ConvertName(nameof(Episode.AddedDate)),
-						CamelCase.ConvertName(nameof(Episode.SeasonNumber)),
-						CamelCase.ConvertName(nameof(Episode.EpisodeNumber)),
-						CamelCase.ConvertName(nameof(Episode.AbsoluteNumber)),
-					},
-					DisplayedAttributes = new[]
-					{
-						CamelCase.ConvertName(nameof(Episode.Id)),
-					},
-					// TODO: Add stopwords
-				}
-			},
-			{
-				nameof(Studio),
-				new Settings()
+						SearchableAttributes = new[]
+						{
+							CamelCase.ConvertName(nameof(Episode.Name)),
+							CamelCase.ConvertName(nameof(Episode.Overview)),
+							CamelCase.ConvertName(nameof(Episode.Slug)),
+							CamelCase.ConvertName(nameof(Episode.Path)),
+						},
+						FilterableAttributes = new[]
+						{
+							CamelCase.ConvertName(nameof(Episode.SeasonNumber)),
+						},
+						SortableAttributes = new[]
+						{
+							CamelCase.ConvertName(nameof(Episode.ReleaseDate)),
+							CamelCase.ConvertName(nameof(Episode.AddedDate)),
+							CamelCase.ConvertName(nameof(Episode.SeasonNumber)),
+							CamelCase.ConvertName(nameof(Episode.EpisodeNumber)),
+							CamelCase.ConvertName(nameof(Episode.AbsoluteNumber)),
+						},
+						DisplayedAttributes = new[] { CamelCase.ConvertName(nameof(Episode.Id)), },
+						// TODO: Add stopwords
+					}
+				},
 				{
-					SearchableAttributes = new[]
+					nameof(Studio),
+					new Settings()
 					{
-						CamelCase.ConvertName(nameof(Studio.Name)),
-						CamelCase.ConvertName(nameof(Studio.Slug)),
-					},
-					FilterableAttributes = Array.Empty<string>(),
-					SortableAttributes = Array.Empty<string>(),
-					DisplayedAttributes = new[]
-					{
-						CamelCase.ConvertName(nameof(Studio.Id)),
-					},
-					// TODO: Add stopwords
-				}
-			},
-		};
+						SearchableAttributes = new[]
+						{
+							CamelCase.ConvertName(nameof(Studio.Name)),
+							CamelCase.ConvertName(nameof(Studio.Slug)),
+						},
+						FilterableAttributes = Array.Empty<string>(),
+						SortableAttributes = Array.Empty<string>(),
+						DisplayedAttributes = new[] { CamelCase.ConvertName(nameof(Studio.Id)), },
+						// TODO: Add stopwords
+					}
+				},
+			};
 
 		public MeilisearchModule(IConfiguration configuration)
 		{
@@ -173,7 +168,10 @@ namespace Kyoo.Meiliseach
 
 		private static async Task _CreateIndex(MeilisearchClient client, string index, bool hasKind)
 		{
-			TaskInfo task = await client.CreateIndexAsync(index, hasKind ? "ref" : CamelCase.ConvertName(nameof(IResource.Id)));
+			TaskInfo task = await client.CreateIndexAsync(
+				index,
+				hasKind ? "ref" : CamelCase.ConvertName(nameof(IResource.Id))
+			);
 			await client.WaitForTaskAsync(task.TaskUid);
 			await client.Index(index).UpdateSettingsAsync(IndexSettings[index]);
 		}
@@ -181,12 +179,15 @@ namespace Kyoo.Meiliseach
 		/// <inheritdoc />
 		public void Configure(ContainerBuilder builder)
 		{
-			builder.RegisterInstance(new MeilisearchClient(
-				_configuration.GetValue("MEILI_HOST", "http://meilisearch:7700"),
-				_configuration.GetValue<string?>("MEILI_MASTER_KEY")
-			)).SingleInstance();
-			builder.RegisterType<MeiliSync>().AsSelf().SingleInstance()
-				.AutoActivate();
+			builder
+				.RegisterInstance(
+					new MeilisearchClient(
+						_configuration.GetValue("MEILI_HOST", "http://meilisearch:7700"),
+						_configuration.GetValue<string?>("MEILI_MASTER_KEY")
+					)
+				)
+				.SingleInstance();
+			builder.RegisterType<MeiliSync>().AsSelf().SingleInstance().AutoActivate();
 			builder.RegisterType<SearchManager>().As<ISearchManager>().InstancePerLifetimeScope();
 		}
 	}

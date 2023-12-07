@@ -79,14 +79,11 @@ namespace Kyoo.Host
 		/// The logger factory used to log while the application is setting itself up.
 		/// </param>
 		/// <returns>A new <see cref="PluginsStartup"/>.</returns>
-		public static PluginsStartup FromWebHost(WebHostBuilderContext host,
-			ILoggerFactory logger)
+		public static PluginsStartup FromWebHost(WebHostBuilderContext host, ILoggerFactory logger)
 		{
-			HostServiceProvider hostProvider = new(host.HostingEnvironment, host.Configuration, logger);
-			PluginManager plugins = new(
-				hostProvider,
-				logger.CreateLogger<PluginManager>()
-			);
+			HostServiceProvider hostProvider =
+				new(host.HostingEnvironment, host.Configuration, logger);
+			PluginManager plugins = new(hostProvider, logger.CreateLogger<PluginManager>());
 			return new PluginsStartup(plugins);
 		}
 
@@ -96,7 +93,9 @@ namespace Kyoo.Host
 		/// <param name="services">The service collection to fill.</param>
 		public void ConfigureServices(IServiceCollection services)
 		{
-			foreach (Assembly assembly in _plugins.GetAllPlugins().Select(x => x.GetType().Assembly))
+			foreach (
+				Assembly assembly in _plugins.GetAllPlugins().Select(x => x.GetType().Assembly)
+			)
 				services.AddMvcCore().AddApplicationPart(assembly);
 
 			_hostModule.Configure(services);
@@ -122,13 +121,14 @@ namespace Kyoo.Host
 		/// <param name="container">An autofac container used to create a new scope to configure asp-net.</param>
 		public void Configure(IApplicationBuilder app, ILifetimeScope container)
 		{
-			IEnumerable<IStartupAction> steps = _plugins.GetAllPlugins()
+			IEnumerable<IStartupAction> steps = _plugins
+				.GetAllPlugins()
 				.Append(_hostModule)
 				.SelectMany(x => x.ConfigureSteps)
 				.OrderByDescending(x => x.Priority);
 
-			using ILifetimeScope scope = container.BeginLifetimeScope(x =>
-				x.RegisterInstance(app).SingleInstance().ExternallyOwned()
+			using ILifetimeScope scope = container.BeginLifetimeScope(
+				x => x.RegisterInstance(app).SingleInstance().ExternallyOwned()
 			);
 			IServiceProvider provider = scope.Resolve<IServiceProvider>();
 			foreach (IStartupAction step in steps)
@@ -164,9 +164,11 @@ namespace Kyoo.Host
 			/// </param>
 			/// <param name="configuration">The configuration context</param>
 			/// <param name="loggerFactory">A logger factory used to create a logger for the plugin manager.</param>
-			public HostServiceProvider(IWebHostEnvironment hostEnvironment,
+			public HostServiceProvider(
+				IWebHostEnvironment hostEnvironment,
 				IConfiguration configuration,
-				ILoggerFactory loggerFactory)
+				ILoggerFactory loggerFactory
+			)
 			{
 				_hostEnvironment = hostEnvironment;
 				_configuration = configuration;
@@ -176,7 +178,10 @@ namespace Kyoo.Host
 			/// <inheritdoc />
 			public object GetService(Type serviceType)
 			{
-				if (serviceType == typeof(IWebHostEnvironment) || serviceType == typeof(IHostEnvironment))
+				if (
+					serviceType == typeof(IWebHostEnvironment)
+					|| serviceType == typeof(IHostEnvironment)
+				)
 					return _hostEnvironment;
 				if (serviceType == typeof(IConfiguration))
 					return _configuration;

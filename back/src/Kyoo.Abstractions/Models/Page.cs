@@ -67,7 +67,13 @@ namespace Kyoo.Abstractions.Models
 		/// <param name="previous">The link of the previous page.</param>
 		/// <param name="next">The link of the next page.</param>
 		/// <param name="first">The link of the first page.</param>
-		public Page(ICollection<T> items, string @this, string? previous, string? next, string first)
+		public Page(
+			ICollection<T> items,
+			string @this,
+			string? previous,
+			string? next,
+			string first
+		)
 		{
 			Items = items;
 			This = @this;
@@ -83,10 +89,7 @@ namespace Kyoo.Abstractions.Models
 		/// <param name="url">The base url of the resources available from this page.</param>
 		/// <param name="query">The list of query strings of the current page</param>
 		/// <param name="limit">The number of items requested for the current page.</param>
-		public Page(ICollection<T> items,
-			string url,
-			Dictionary<string, string> query,
-			int limit)
+		public Page(ICollection<T> items, string url, Dictionary<string, string> query, int limit)
 		{
 			Items = items;
 			This = url + query.ToQueryString();

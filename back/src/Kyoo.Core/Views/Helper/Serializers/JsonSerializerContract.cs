@@ -51,16 +51,23 @@ namespace Kyoo.Core.Api
 		}
 
 		/// <inheritdoc />
-		protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
+		protected override JsonProperty CreateProperty(
+			MemberInfo member,
+			MemberSerialization memberSerialization
+		)
 		{
 			JsonProperty property = base.CreateProperty(member, memberSerialization);
 
-			LoadableRelationAttribute? relation = member.GetCustomAttribute<LoadableRelationAttribute>();
+			LoadableRelationAttribute? relation =
+				member.GetCustomAttribute<LoadableRelationAttribute>();
 			if (relation != null)
 			{
 				property.ShouldSerialize = _ =>
 				{
-					if (_httpContextAccessor.HttpContext!.Items["fields"] is not ICollection<string> fields)
+					if (
+						_httpContextAccessor.HttpContext!.Items["fields"]
+						is not ICollection<string> fields
+					)
 						return false;
 					return fields.Contains(member.Name);
 				};
@@ -73,23 +80,31 @@ namespace Kyoo.Core.Api
 			return property;
 		}
 
-		protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
+		protected override IList<JsonProperty> CreateProperties(
+			Type type,
+			MemberSerialization memberSerialization
+		)
 		{
 			IList<JsonProperty> properties = base.CreateProperties(type, memberSerialization);
 
-			if (properties.All(x => x.PropertyName != "kind") && type.IsAssignableTo(typeof(IResource)))
+			if (
+				properties.All(x => x.PropertyName != "kind")
+				&& type.IsAssignableTo(typeof(IResource))
+			)
 			{
-				properties.Add(new JsonProperty()
-				{
-					DeclaringType = type,
-					PropertyName = "kind",
-					UnderlyingName = "kind",
-					PropertyType = typeof(string),
-					ValueProvider = new FixedValueProvider(type.Name),
-					Readable = true,
-					Writable = false,
-					TypeNameHandling = TypeNameHandling.None,
-				});
+				properties.Add(
+					new JsonProperty()
+					{
+						DeclaringType = type,
+						PropertyName = "kind",
+						UnderlyingName = "kind",
+						PropertyType = typeof(string),
+						ValueProvider = new FixedValueProvider(type.Name),
+						Readable = true,
+						Writable = false,
+						TypeNameHandling = TypeNameHandling.None,
+					}
+				);
 			}
 
 			return properties;
@@ -104,11 +119,10 @@ namespace Kyoo.Core.Api
 				_value = value;
 			}
 
-			public object GetValue(object target)
-				=> _value;
+			public object GetValue(object target) => _value;
 
-			public void SetValue(object target, object? value)
-				=> throw new NotImplementedException();
+			public void SetValue(object target, object? value) =>
+				throw new NotImplementedException();
 		}
 	}
 }

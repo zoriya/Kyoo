@@ -36,49 +36,69 @@ namespace Kyoo.Swagger
 		/// <inheritdoc />
 		public bool Process(OperationProcessorContext context)
 		{
-			context.OperationDescription.Operation.Security ??= new List<OpenApiSecurityRequirement>();
-			OpenApiSecurityRequirement perms = context.MethodInfo.GetCustomAttributes<UserOnlyAttribute>()
-				.Aggregate(new OpenApiSecurityRequirement(), (agg, _) =>
-				{
-					agg[nameof(Kyoo)] = Array.Empty<string>();
-					return agg;
-				});
+			context.OperationDescription.Operation.Security ??=
+				new List<OpenApiSecurityRequirement>();
+			OpenApiSecurityRequirement perms = context
+				.MethodInfo
+				.GetCustomAttributes<UserOnlyAttribute>()
+				.Aggregate(
+					new OpenApiSecurityRequirement(),
+					(agg, _) =>
+					{
+						agg[nameof(Kyoo)] = Array.Empty<string>();
+						return agg;
+					}
+				);
 
-			perms = context.MethodInfo.GetCustomAttributes<PermissionAttribute>()
-				.Aggregate(perms, (agg, cur) =>
-				{
-					ICollection<string> permissions = _GetPermissionsList(agg, cur.Group);
-					permissions.Add($"{cur.Type}.{cur.Kind.ToString().ToLower()}");
-					agg[nameof(Kyoo)] = permissions;
-					return agg;
-				});
+			perms = context
+				.MethodInfo
+				.GetCustomAttributes<PermissionAttribute>()
+				.Aggregate(
+					perms,
+					(agg, cur) =>
+					{
+						ICollection<string> permissions = _GetPermissionsList(agg, cur.Group);
+						permissions.Add($"{cur.Type}.{cur.Kind.ToString().ToLower()}");
+						agg[nameof(Kyoo)] = permissions;
+						return agg;
+					}
+				);
 
-			PartialPermissionAttribute controller = context.ControllerType
+			PartialPermissionAttribute controller = context
+				.ControllerType
 				.GetCustomAttribute<PartialPermissionAttribute>();
 			if (controller != null)
 			{
-				perms = context.MethodInfo.GetCustomAttributes<PartialPermissionAttribute>()
-					.Aggregate(perms, (agg, cur) =>
-					{
-						Group? group = controller.Group != Group.Overall
-							? controller.Group
-							: cur.Group;
-						string type = controller.Type ?? cur.Type;
-						Kind? kind = controller.Type == null
-							? controller.Kind
-							: cur.Kind;
-						ICollection<string> permissions = _GetPermissionsList(agg, group ?? Group.Overall);
-						permissions.Add($"{type}.{kind!.Value.ToString().ToLower()}");
-						agg[nameof(Kyoo)] = permissions;
-						return agg;
-					});
+				perms = context
+					.MethodInfo
+					.GetCustomAttributes<PartialPermissionAttribute>()
+					.Aggregate(
+						perms,
+						(agg, cur) =>
+						{
+							Group? group =
+								controller.Group != Group.Overall ? controller.Group : cur.Group;
+							string type = controller.Type ?? cur.Type;
+							Kind? kind = controller.Type == null ? controller.Kind : cur.Kind;
+							ICollection<string> permissions = _GetPermissionsList(
+								agg,
+								group ?? Group.Overall
+							);
+							permissions.Add($"{type}.{kind!.Value.ToString().ToLower()}");
+							agg[nameof(Kyoo)] = permissions;
+							return agg;
+						}
+					);
 			}
 
 			context.OperationDescription.Operation.Security.Add(perms);
 			return true;
 		}
 
-		private static ICollection<string> _GetPermissionsList(OpenApiSecurityRequirement security, Group group)
+		private static ICollection<string> _GetPermissionsList(
+			OpenApiSecurityRequirement security,
+			Group group
+		)
 		{
 			return security.TryGetValue(group.ToString(), out IEnumerable<string> perms)
 				? perms.ToList()

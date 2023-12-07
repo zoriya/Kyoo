@@ -66,7 +66,11 @@ namespace Kyoo.Authentication.Views
 		/// <param name="users">The repository used to check if the user exists.</param>
 		/// <param name="token">The token generator.</param>
 		/// <param name="permissions">The permission opitons.</param>
-		public AuthApi(IRepository<User> users, ITokenController token, PermissionOption permissions)
+		public AuthApi(
+			IRepository<User> users,
+			ITokenController token,
+			PermissionOption permissions
+		)
 		{
 			_users = users;
 			_token = token;
@@ -97,7 +101,9 @@ namespace Kyoo.Authentication.Views
 		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
 		public async Task<ActionResult<JwtToken>> Login([FromBody] LoginRequest request)
 		{
-			User? user = await _users.GetOrDefault(new Filter<User>.Eq(nameof(Abstractions.Models.User.Username), request.Username));
+			User? user = await _users.GetOrDefault(
+				new Filter<User>.Eq(nameof(Abstractions.Models.User.Username), request.Username)
+			);
 			if (user == null || !BCryptNet.Verify(request.Password, user.Password))
 				return Forbid(new RequestError("The user and password does not match."));
 

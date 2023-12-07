@@ -62,7 +62,8 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The list of roles this person has played in. See <see cref="PeopleRole"/> for more information.
 		/// </summary>
-		[SerializeIgnore] public ICollection<PeopleRole>? Roles { get; set; }
+		[SerializeIgnore]
+		public ICollection<PeopleRole>? Roles { get; set; }
 
 		public People() { }
 

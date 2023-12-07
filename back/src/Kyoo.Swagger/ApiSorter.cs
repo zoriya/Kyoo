@@ -38,7 +38,8 @@ namespace Kyoo.Swagger
 			options.PostProcess += postProcess =>
 			{
 				// We can't reorder items by assigning the sorted value to the Paths variable since it has no setter.
-				List<KeyValuePair<string, OpenApiPathItem>> sorted = postProcess.Paths
+				List<KeyValuePair<string, OpenApiPathItem>> sorted = postProcess
+					.Paths
 					.OrderBy(x => x.Key)
 					.ToList();
 				postProcess.Paths.Clear();
@@ -56,9 +57,7 @@ namespace Kyoo.Swagger
 					.Select(x =>
 					{
 						x.Name = x.Name[(x.Name.IndexOf(':') + 1)..];
-						x.Tags = x.Tags
-							.OrderBy(y => y)
-							.ToList();
+						x.Tags = x.Tags.OrderBy(y => y).ToList();
 						return x;
 					})
 					.ToList();

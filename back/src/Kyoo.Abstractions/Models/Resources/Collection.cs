@@ -37,7 +37,8 @@ namespace Kyoo.Abstractions.Models
 		public Guid Id { get; set; }
 
 		/// <inheritdoc />
-		[MaxLength(256)] public string Slug { get; set; }
+		[MaxLength(256)]
+		public string Slug { get; set; }
 
 		/// <summary>
 		/// The name of this collection.
@@ -64,12 +65,14 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The list of movies contained in this collection.
 		/// </summary>
-		[SerializeIgnore] public ICollection<Movie>? Movies { get; set; }
+		[SerializeIgnore]
+		public ICollection<Movie>? Movies { get; set; }
 
 		/// <summary>
 		/// The list of shows contained in this collection.
 		/// </summary>
-		[SerializeIgnore] public ICollection<Show>? Shows { get; set; }
+		[SerializeIgnore]
+		public ICollection<Show>? Shows { get; set; }
 
 		/// <inheritdoc />
 		public Dictionary<string, MetadataId> ExternalId { get; set; } = new();

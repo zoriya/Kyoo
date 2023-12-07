@@ -100,11 +100,13 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="reverse">Reverse the sort.</param>
 		/// <param name="afterId">Select the first element after this id if it was in a list.</param>
 		/// <returns>The resource found</returns>
-		Task<T?> GetOrDefault(Filter<T>? filter,
+		Task<T?> GetOrDefault(
+			Filter<T>? filter,
 			Include<T>? include = default,
 			Sort<T>? sortBy = default,
 			bool reverse = false,
-			Guid? afterId = default);
+			Guid? afterId = default
+		);
 
 		/// <summary>
 		/// Search for resources with the database.
@@ -122,10 +124,12 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="include">The related fields to include.</param>
 		/// <param name="limit">How pagination should be done (where to start and how many to return)</param>
 		/// <returns>A list of resources that match every filters</returns>
-		Task<ICollection<T>> GetAll(Filter<T>? filter = null,
+		Task<ICollection<T>> GetAll(
+			Filter<T>? filter = null,
 			Sort<T>? sort = default,
 			Include<T>? include = default,
-			Pagination? limit = default);
+			Pagination? limit = default
+		);
 
 		/// <summary>
 		/// Get the number of resources that match the filter's predicate.
@@ -166,8 +170,8 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="obj">The resource newly created.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		protected static Task OnResourceCreated(T obj)
-			=> OnCreated?.Invoke(obj) ?? Task.CompletedTask;
+		protected static Task OnResourceCreated(T obj) =>
+			OnCreated?.Invoke(obj) ?? Task.CompletedTask;
 
 		/// <summary>
 		/// Edit a resource and replace every property
@@ -199,8 +203,8 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="obj">The resource newly edited.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		protected static Task OnResourceEdited(T obj)
-			=> OnEdited?.Invoke(obj) ?? Task.CompletedTask;
+		protected static Task OnResourceEdited(T obj) =>
+			OnEdited?.Invoke(obj) ?? Task.CompletedTask;
 
 		/// <summary>
 		/// Delete a resource by it's ID
@@ -243,8 +247,8 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="obj">The resource newly deleted.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		protected static Task OnResourceDeleted(T obj)
-			=> OnDeleted?.Invoke(obj) ?? Task.CompletedTask;
+		protected static Task OnResourceDeleted(T obj) =>
+			OnDeleted?.Invoke(obj) ?? Task.CompletedTask;
 	}
 
 	/// <summary>

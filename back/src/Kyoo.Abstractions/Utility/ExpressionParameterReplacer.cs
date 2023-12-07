@@ -38,13 +38,14 @@ public sealed class ExpressionArgumentReplacer : ExpressionVisitor
 		return base.VisitParameter(node);
 	}
 
-	public static Expression ReplaceParams(Expression expression, IEnumerable<ParameterExpression> epxParams, params ParameterExpression[] param)
+	public static Expression ReplaceParams(
+		Expression expression,
+		IEnumerable<ParameterExpression> epxParams,
+		params ParameterExpression[] param
+	)
 	{
-		ExpressionArgumentReplacer replacer = new(
-			epxParams
-				.Zip(param)
-				.ToDictionary(x => x.First, x => x.Second as Expression)
-		);
+		ExpressionArgumentReplacer replacer =
+			new(epxParams.Zip(param).ToDictionary(x => x.First, x => x.Second as Expression));
 		return replacer.Visit(expression);
 	}
 }

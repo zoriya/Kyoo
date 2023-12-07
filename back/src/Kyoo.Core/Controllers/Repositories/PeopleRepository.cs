@@ -50,9 +50,11 @@ namespace Kyoo.Core.Controllers
 		/// <param name="database">The database handle</param>
 		/// <param name="shows">A lazy loaded show repository</param>
 		/// <param name="thumbs">The thumbnail manager used to store images.</param>
-		public PeopleRepository(DatabaseContext database,
+		public PeopleRepository(
+			DatabaseContext database,
 			Lazy<IRepository<Show>> shows,
-			IThumbnailsManager thumbs)
+			IThumbnailsManager thumbs
+		)
 			: base(database, thumbs)
 		{
 			_database = database;
@@ -60,7 +62,10 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public override Task<ICollection<People>> Search(string query, Include<People>? include = default)
+		public override Task<ICollection<People>> Search(
+			string query,
+			Include<People>? include = default
+		)
 		{
 			throw new NotImplementedException();
 			// return await AddIncludes(_database.People, include)
@@ -88,7 +93,8 @@ namespace Kyoo.Core.Controllers
 			{
 				foreach (PeopleRole role in resource.Roles)
 				{
-					role.Show = _database.LocalEntity<Show>(role.Show!.Slug)
+					role.Show =
+						_database.LocalEntity<Show>(role.Show!.Slug)
 						?? await _shows.Value.CreateIfNotExists(role.Show);
 					role.ShowID = role.Show.Id;
 					_database.Entry(role).State = EntityState.Added;

@@ -39,11 +39,17 @@ public interface IWatchStatusRepository
 	Task<ICollection<IWatchlist>> GetAll(
 		Filter<IWatchlist>? filter = default,
 		Include<IWatchlist>? include = default,
-		Pagination? limit = default);
+		Pagination? limit = default
+	);
 
 	Task<MovieWatchStatus?> GetMovieStatus(Guid movieId, Guid userId);
 
-	Task<MovieWatchStatus?> SetMovieStatus(Guid movieId, Guid userId, WatchStatus status, int? watchedTime);
+	Task<MovieWatchStatus?> SetMovieStatus(
+		Guid movieId,
+		Guid userId,
+		WatchStatus status,
+		int? watchedTime
+	);
 
 	Task DeleteMovieStatus(Guid movieId, Guid userId);
 
@@ -57,7 +63,12 @@ public interface IWatchStatusRepository
 
 	/// <param name="watchedTime">Where the user has stopped watching. Only usable if Status
 	/// is <see cref="WatchStatus.Watching"/></param>
-	Task<EpisodeWatchStatus?> SetEpisodeStatus(Guid episodeId, Guid userId, WatchStatus status, int? watchedTime);
+	Task<EpisodeWatchStatus?> SetEpisodeStatus(
+		Guid episodeId,
+		Guid userId,
+		WatchStatus status,
+		int? watchedTime
+	);
 
 	Task DeleteEpisodeStatus(Guid episodeId, Guid userId);
 }

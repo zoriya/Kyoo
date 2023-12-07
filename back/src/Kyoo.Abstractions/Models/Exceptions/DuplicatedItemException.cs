@@ -48,7 +48,6 @@ namespace Kyoo.Abstractions.Models.Exceptions
 		/// <param name="info">Serialization infos</param>
 		/// <param name="context">The serialization context</param>
 		protected DuplicatedItemException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{ }
+			: base(info, context) { }
 	}
 }

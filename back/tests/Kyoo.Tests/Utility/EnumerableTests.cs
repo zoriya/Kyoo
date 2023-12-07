@@ -29,9 +29,12 @@ namespace Kyoo.Tests.Utility
 		public void IfEmptyTest()
 		{
 			int[] list = { 1, 2, 3, 4 };
-			list = list.IfEmpty(() => KAssert.Fail("Empty action should not be triggered.")).ToArray();
+			list = list.IfEmpty(() => KAssert.Fail("Empty action should not be triggered."))
+				.ToArray();
 			list = Array.Empty<int>();
-			Assert.Throws<ArgumentException>(() => list.IfEmpty(() => throw new ArgumentException()).ToList());
+			Assert.Throws<ArgumentException>(
+				() => list.IfEmpty(() => throw new ArgumentException()).ToList()
+			);
 			Assert.Empty(list.IfEmpty(() => { }));
 		}
 	}

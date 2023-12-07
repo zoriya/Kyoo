@@ -54,8 +54,7 @@ namespace Kyoo.Core.Api
 		/// The library manager used to modify or retrieve information about the data store.
 		/// </param>
 		/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
-		public MovieApi(ILibraryManager libraryManager,
-			IThumbnailsManager thumbs)
+		public MovieApi(ILibraryManager libraryManager, IThumbnailsManager thumbs)
 			: base(libraryManager.Movies, thumbs)
 		{
 			_libraryManager = libraryManager;
@@ -109,9 +108,14 @@ namespace Kyoo.Core.Api
 		[PartialPermission(Kind.Read)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Studio>> GetStudio(Identifier identifier, [FromQuery] Include<Studio> fields)
+		public async Task<ActionResult<Studio>> GetStudio(
+			Identifier identifier,
+			[FromQuery] Include<Studio> fields
+		)
 		{
-			return await _libraryManager.Studios.Get(identifier.IsContainedIn<Studio, Movie>(x => x.Movies!), fields);
+			return await _libraryManager
+				.Studios
+				.Get(identifier.IsContainedIn<Studio, Movie>(x => x.Movies!), fields);
 		}
 
 		/// <summary>
@@ -134,20 +138,27 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Page<Collection>>> GetCollections(Identifier identifier,
+		public async Task<ActionResult<Page<Collection>>> GetCollections(
+			Identifier identifier,
 			[FromQuery] Sort<Collection> sortBy,
 			[FromQuery] Filter<Collection>? filter,
 			[FromQuery] Pagination pagination,
-			[FromQuery] Include<Collection> fields)
+			[FromQuery] Include<Collection> fields
+		)
 		{
-			ICollection<Collection> resources = await _libraryManager.Collections.GetAll(
-				Filter.And(filter, identifier.IsContainedIn<Collection, Movie>(x => x.Movies)),
-				sortBy,
-				fields,
-				pagination
-			);
+			ICollection<Collection> resources = await _libraryManager
+				.Collections
+				.GetAll(
+					Filter.And(filter, identifier.IsContainedIn<Collection, Movie>(x => x.Movies)),
+					sortBy,
+					fields,
+					pagination
+				);
 
-			if (!resources.Any() && await _libraryManager.Movies.GetOrDefault(identifier.IsSame<Movie>()) == null)
+			if (
+				!resources.Any()
+				&& await _libraryManager.Movies.GetOrDefault(identifier.IsSame<Movie>()) == null
+			)
 				return NotFound();
 			return Page(resources, pagination.Limit);
 		}
@@ -196,18 +207,19 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status204NoContent)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<MovieWatchStatus?> SetWatchStatus(Identifier identifier, WatchStatus status, int? watchedTime)
+		public async Task<MovieWatchStatus?> SetWatchStatus(
+			Identifier identifier,
+			WatchStatus status,
+			int? watchedTime
+		)
 		{
 			Guid id = await identifier.Match(
 				id => Task.FromResult(id),
 				async slug => (await _libraryManager.Movies.Get(slug)).Id
 			);
-			return await _libraryManager.WatchStatus.SetMovieStatus(
-				id,
-				User.GetIdOrThrow(),
-				status,
-				watchedTime
-			);
+			return await _libraryManager
+				.WatchStatus
+				.SetMovieStatus(id, User.GetIdOrThrow(), status, watchedTime);
 		}
 
 		/// <summary>

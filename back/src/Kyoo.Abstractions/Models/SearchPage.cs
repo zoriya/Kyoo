@@ -32,7 +32,8 @@ namespace Kyoo.Abstractions.Models
 			string @this,
 			string? previous,
 			string? next,
-			string first)
+			string first
+		)
 			: base(result.Items, @this, previous, next, first)
 		{
 			Query = result.Query;

@@ -56,22 +56,26 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the user that started watching this episode.
 		/// </summary>
-		[SerializeIgnore] public Guid UserId { get; set; }
+		[SerializeIgnore]
+		public Guid UserId { get; set; }
 
 		/// <summary>
 		/// The user that started watching this episode.
 		/// </summary>
-		[SerializeIgnore] public User User { get; set; }
+		[SerializeIgnore]
+		public User User { get; set; }
 
 		/// <summary>
 		/// The ID of the movie started.
 		/// </summary>
-		[SerializeIgnore] public Guid MovieId { get; set; }
+		[SerializeIgnore]
+		public Guid MovieId { get; set; }
 
 		/// <summary>
 		/// The <see cref="Movie"/> started.
 		/// </summary>
-		[SerializeIgnore] public Movie Movie { get; set; }
+		[SerializeIgnore]
+		public Movie Movie { get; set; }
 
 		/// <inheritdoc/>
 		public DateTime AddedDate { get; set; }
@@ -109,22 +113,26 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the user that started watching this episode.
 		/// </summary>
-		[SerializeIgnore] public Guid UserId { get; set; }
+		[SerializeIgnore]
+		public Guid UserId { get; set; }
 
 		/// <summary>
 		/// The user that started watching this episode.
 		/// </summary>
-		[SerializeIgnore] public User User { get; set; }
+		[SerializeIgnore]
+		public User User { get; set; }
 
 		/// <summary>
 		/// The ID of the episode started.
 		/// </summary>
-		[SerializeIgnore] public Guid? EpisodeId { get; set; }
+		[SerializeIgnore]
+		public Guid? EpisodeId { get; set; }
 
 		/// <summary>
 		/// The <see cref="Episode"/> started.
 		/// </summary>
-		[SerializeIgnore] public Episode Episode { get; set; }
+		[SerializeIgnore]
+		public Episode Episode { get; set; }
 
 		/// <inheritdoc/>
 		public DateTime AddedDate { get; set; }
@@ -162,22 +170,26 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the user that started watching this episode.
 		/// </summary>
-		[SerializeIgnore] public Guid UserId { get; set; }
+		[SerializeIgnore]
+		public Guid UserId { get; set; }
 
 		/// <summary>
 		/// The user that started watching this episode.
 		/// </summary>
-		[SerializeIgnore] public User User { get; set; }
+		[SerializeIgnore]
+		public User User { get; set; }
 
 		/// <summary>
 		/// The ID of the show started.
 		/// </summary>
-		[SerializeIgnore] public Guid ShowId { get; set; }
+		[SerializeIgnore]
+		public Guid ShowId { get; set; }
 
 		/// <summary>
 		/// The <see cref="Show"/> started.
 		/// </summary>
-		[SerializeIgnore] public Show Show { get; set; }
+		[SerializeIgnore]
+		public Show Show { get; set; }
 
 		/// <inheritdoc/>
 		public DateTime AddedDate { get; set; }
@@ -200,7 +212,8 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the episode started.
 		/// </summary>
-		[SerializeIgnore] public Guid? NextEpisodeId { get; set; }
+		[SerializeIgnore]
+		public Guid? NextEpisodeId { get; set; }
 
 		/// <summary>
 		/// The next <see cref="Episode"/> to watch.

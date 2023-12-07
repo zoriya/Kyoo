@@ -61,22 +61,29 @@ namespace Kyoo.Authentication
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services)
 		{
-			string secret = _configuration.GetValue("AUTHENTICATION_SECRET", AuthenticationOption.DefaultSecret)!;
-			PermissionOption permissions = new()
-			{
-				Default = _configuration.GetValue("UNLOGGED_PERMISSIONS", "overall.read")!.Split(','),
-				NewUser = _configuration.GetValue("DEFAULT_PERMISSIONS", "overall.read")!.Split(','),
-				ApiKeys = _configuration.GetValue("KYOO_APIKEYS", string.Empty)!.Split(','),
-			};
+			string secret = _configuration.GetValue(
+				"AUTHENTICATION_SECRET",
+				AuthenticationOption.DefaultSecret
+			)!;
+			PermissionOption permissions =
+				new()
+				{
+					Default = _configuration
+						.GetValue("UNLOGGED_PERMISSIONS", "overall.read")!
+						.Split(','),
+					NewUser = _configuration
+						.GetValue("DEFAULT_PERMISSIONS", "overall.read")!
+						.Split(','),
+					ApiKeys = _configuration.GetValue("KYOO_APIKEYS", string.Empty)!.Split(','),
+				};
 			services.AddSingleton(permissions);
-			services.AddSingleton(new AuthenticationOption()
-			{
-				Secret = secret,
-				Permissions = permissions,
-			});
+			services.AddSingleton(
+				new AuthenticationOption() { Secret = secret, Permissions = permissions, }
+			);
 
 			// TODO handle direct-videos with bearers (probably add a cookie and a app.Use to translate that for videos)
-			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+			services
+				.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 				.AddJwtBearer(options =>
 				{
 					options.TokenValidationParameters = new TokenValidationParameters
@@ -91,9 +98,10 @@ namespace Kyoo.Authentication
 		}
 
 		/// <inheritdoc />
-		public IEnumerable<IStartupAction> ConfigureSteps => new IStartupAction[]
-		{
-			SA.New<IApplicationBuilder>(app => app.UseAuthentication(), SA.Authentication),
-		};
+		public IEnumerable<IStartupAction> ConfigureSteps =>
+			new IStartupAction[]
+			{
+				SA.New<IApplicationBuilder>(app => app.UseAuthentication(), SA.Authentication),
+			};
 	}
 }

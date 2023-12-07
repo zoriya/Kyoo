@@ -30,7 +30,8 @@ namespace Kyoo.Core.Controllers
 	public class NewsRepository : DapperRepository<INews>
 	{
 		// language=PostgreSQL
-		protected override FormattableString Sql => $"""
+		protected override FormattableString Sql =>
+			$"""
 			select
 				e.*, -- Episode as e
 				m.*
@@ -45,11 +46,8 @@ namespace Kyoo.Core.Controllers
 			) as m on false
 			""";
 
-		protected override Dictionary<string, Type> Config => new()
-		{
-			{ "e", typeof(Episode) },
-			{ "m", typeof(Movie) },
-		};
+		protected override Dictionary<string, Type> Config =>
+			new() { { "e", typeof(Episode) }, { "m", typeof(Movie) }, };
 
 		protected override INews Mapper(List<object?> items)
 		{
@@ -61,7 +59,6 @@ namespace Kyoo.Core.Controllers
 		}
 
 		public NewsRepository(DbConnection database, SqlVariableContext context)
-			: base(database, context)
-		{ }
+			: base(database, context) { }
 	}
 }

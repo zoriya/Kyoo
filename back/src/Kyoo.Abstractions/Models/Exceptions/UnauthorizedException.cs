@@ -25,15 +25,12 @@ namespace Kyoo.Abstractions.Models.Exceptions
 	public class UnauthorizedException : Exception
 	{
 		public UnauthorizedException()
-			: base("User not authenticated or token invalid.")
-		{ }
+			: base("User not authenticated or token invalid.") { }
 
 		public UnauthorizedException(string message)
-			: base(message)
-		{ }
+			: base(message) { }
 
 		protected UnauthorizedException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{ }
+			: base(info, context) { }
 	}
 }

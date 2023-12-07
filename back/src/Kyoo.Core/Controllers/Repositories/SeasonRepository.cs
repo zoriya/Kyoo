@@ -47,8 +47,12 @@ namespace Kyoo.Core.Controllers
 			IRepository<Show>.OnEdited += async (show) =>
 			{
 				await using AsyncServiceScope scope = CoreModule.Services.CreateAsyncScope();
-				DatabaseContext database = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
-				List<Season> seasons = await database.Seasons.AsTracking()
+				DatabaseContext database = scope
+					.ServiceProvider
+					.GetRequiredService<DatabaseContext>();
+				List<Season> seasons = await database
+					.Seasons
+					.AsTracking()
 					.Where(x => x.ShowId == show.Id)
 					.ToListAsync();
 				foreach (Season season in seasons)
@@ -65,8 +69,7 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		/// <param name="database">The database handle that will be used</param>
 		/// <param name="thumbs">The thumbnail manager used to store images.</param>
-		public SeasonRepository(DatabaseContext database,
-			IThumbnailsManager thumbs)
+		public SeasonRepository(DatabaseContext database, IThumbnailsManager thumbs)
 			: base(database, thumbs)
 		{
 			_database = database;
@@ -74,11 +77,18 @@ namespace Kyoo.Core.Controllers
 
 		protected override Task<Season?> GetDuplicated(Season item)
 		{
-			return _database.Seasons.FirstOrDefaultAsync(x => x.ShowId == item.ShowId && x.SeasonNumber == item.SeasonNumber);
+			return _database
+				.Seasons
+				.FirstOrDefaultAsync(
+					x => x.ShowId == item.ShowId && x.SeasonNumber == item.SeasonNumber
+				);
 		}
 
 		/// <inheritdoc/>
-		public override async Task<ICollection<Season>> Search(string query, Include<Season>? include = default)
+		public override async Task<ICollection<Season>> Search(
+			string query,
+			Include<Season>? include = default
+		)
 		{
 			return await AddIncludes(_database.Seasons, include)
 				.Where(x => EF.Functions.ILike(x.Name!, $"%{query}%"))
@@ -90,7 +100,8 @@ namespace Kyoo.Core.Controllers
 		public override async Task<Season> Create(Season obj)
 		{
 			await base.Create(obj);
-			obj.ShowSlug = (await _database.Shows.FirstOrDefaultAsync(x => x.Id == obj.ShowId))?.Slug
+			obj.ShowSlug =
+				(await _database.Shows.FirstOrDefaultAsync(x => x.Id == obj.ShowId))?.Slug
 				?? throw new ItemNotFoundException($"No show found with ID {obj.ShowId}");
 			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync(() => GetDuplicated(obj));
@@ -106,8 +117,10 @@ namespace Kyoo.Core.Controllers
 			{
 				if (resource.Show == null)
 				{
-					throw new ValidationException($"Can't store a season not related to any show " +
-						$"(showID: {resource.ShowId}).");
+					throw new ValidationException(
+						$"Can't store a season not related to any show "
+							+ $"(showID: {resource.ShowId})."
+					);
 				}
 				resource.ShowId = resource.Show.Id;
 			}
