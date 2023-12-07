@@ -41,22 +41,27 @@ namespace Kyoo.Swagger
 		public int Order => -1;
 
 		/// <inheritdoc />
-		public void OnProvidersExecuted(ApplicationModelProviderContext context)
-		{ }
+		public void OnProvidersExecuted(ApplicationModelProviderContext context) { }
 
 		/// <inheritdoc />
 		public void OnProvidersExecuting(ApplicationModelProviderContext context)
 		{
 			foreach (ActionModel action in context.Result.Controllers.SelectMany(x => x.Actions))
 			{
-				IEnumerable<ProducesResponseTypeAttribute> responses = action.Filters
+				IEnumerable<ProducesResponseTypeAttribute> responses = action
+					.Filters
 					.OfType<ProducesResponseTypeAttribute>()
 					.Where(x => x.Type == typeof(ActionResult<>));
 				foreach (ProducesResponseTypeAttribute response in responses)
 				{
 					Type type = action.ActionMethod.ReturnType;
-					type = Utility.GetGenericDefinition(type, typeof(Task<>))?.GetGenericArguments()[0] ?? type;
-					type = Utility.GetGenericDefinition(type, typeof(ActionResult<>))?.GetGenericArguments()[0] ?? type;
+					type =
+						Utility.GetGenericDefinition(type, typeof(Task<>))?.GetGenericArguments()[0]
+						?? type;
+					type =
+						Utility
+							.GetGenericDefinition(type, typeof(ActionResult<>))
+							?.GetGenericArguments()[0] ?? type;
 					response.Type = type;
 				}
 			}

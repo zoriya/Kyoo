@@ -66,9 +66,12 @@ namespace Kyoo.Core.Api
 			[FromQuery] string? q,
 			[FromQuery] Sort<Collection> sortBy,
 			[FromQuery] SearchPagination pagination,
-			[FromQuery] Include<Collection> fields)
+			[FromQuery] Include<Collection> fields
+		)
 		{
-			return SearchPage(await _searchManager.SearchCollections(q, sortBy, pagination, fields));
+			return SearchPage(
+				await _searchManager.SearchCollections(q, sortBy, pagination, fields)
+			);
 		}
 
 		/// <summary>
@@ -91,7 +94,8 @@ namespace Kyoo.Core.Api
 			[FromQuery] string? q,
 			[FromQuery] Sort<Show> sortBy,
 			[FromQuery] SearchPagination pagination,
-			[FromQuery] Include<Show> fields)
+			[FromQuery] Include<Show> fields
+		)
 		{
 			return SearchPage(await _searchManager.SearchShows(q, sortBy, pagination, fields));
 		}
@@ -116,7 +120,8 @@ namespace Kyoo.Core.Api
 			[FromQuery] string? q,
 			[FromQuery] Sort<Movie> sortBy,
 			[FromQuery] SearchPagination pagination,
-			[FromQuery] Include<Movie> fields)
+			[FromQuery] Include<Movie> fields
+		)
 		{
 			return SearchPage(await _searchManager.SearchMovies(q, sortBy, pagination, fields));
 		}
@@ -141,7 +146,8 @@ namespace Kyoo.Core.Api
 			[FromQuery] string? q,
 			[FromQuery] Sort<ILibraryItem> sortBy,
 			[FromQuery] SearchPagination pagination,
-			[FromQuery] Include<ILibraryItem> fields)
+			[FromQuery] Include<ILibraryItem> fields
+		)
 		{
 			return SearchPage(await _searchManager.SearchItems(q, sortBy, pagination, fields));
 		}
@@ -166,7 +172,8 @@ namespace Kyoo.Core.Api
 			[FromQuery] string? q,
 			[FromQuery] Sort<Episode> sortBy,
 			[FromQuery] SearchPagination pagination,
-			[FromQuery] Include<Episode> fields)
+			[FromQuery] Include<Episode> fields
+		)
 		{
 			return SearchPage(await _searchManager.SearchEpisodes(q, sortBy, pagination, fields));
 		}
@@ -191,7 +198,8 @@ namespace Kyoo.Core.Api
 			[FromQuery] string? q,
 			[FromQuery] Sort<Studio> sortBy,
 			[FromQuery] SearchPagination pagination,
-			[FromQuery] Include<Studio> fields)
+			[FromQuery] Include<Studio> fields
+		)
 		{
 			return SearchPage(await _searchManager.SearchStudios(q, sortBy, pagination, fields));
 		}

@@ -36,11 +36,21 @@ public class SearchManager : ISearchManager
 		return sort switch
 		{
 			Sort<T>.Default => Array.Empty<string>(),
-			Sort<T>.By @sortBy => MeilisearchModule.IndexSettings[index].SortableAttributes.Contains(sortBy.Key, StringComparer.InvariantCultureIgnoreCase)
-				? new[] { $"{CamelCase.ConvertName(sortBy.Key)}:{(sortBy.Desendant ? "desc" : "asc")}" }
-				: throw new ValidationException($"Invalid sorting mode: {sortBy.Key}"),
+			Sort<T>.By @sortBy
+				=> MeilisearchModule
+					.IndexSettings[index]
+					.SortableAttributes
+					.Contains(sortBy.Key, StringComparer.InvariantCultureIgnoreCase)
+					? new[]
+					{
+						$"{CamelCase.ConvertName(sortBy.Key)}:{(sortBy.Desendant ? "desc" : "asc")}"
+					}
+					: throw new ValidationException($"Invalid sorting mode: {sortBy.Key}"),
 			Sort<T>.Conglomerate(var list) => list.SelectMany(x => _GetSortsBy(index, x)),
-			Sort<T>.Random => throw new ValidationException("Random sorting is not supported while searching."),
+			Sort<T>.Random
+				=> throw new ValidationException(
+					"Random sorting is not supported while searching."
+				),
 			_ => Array.Empty<string>(),
 		};
 	}
@@ -51,79 +61,100 @@ public class SearchManager : ISearchManager
 		_libraryManager = libraryManager;
 	}
 
-	private async Task<SearchPage<T>.SearchResult> _Search<T>(string index, string? query,
+	private async Task<SearchPage<T>.SearchResult> _Search<T>(
+		string index,
+		string? query,
 		string? where = null,
 		Sort<T>? sortBy = default,
 		SearchPagination? pagination = default,
-		Include<T>? include = default)
+		Include<T>? include = default
+	)
 		where T : class, IResource, IQuery
 	{
 		// TODO: add filters and facets
-		ISearchable<IdResource> res = await _client.Index(index).SearchAsync<IdResource>(query, new SearchQuery()
-		{
-			Filter = where,
-			Sort = _GetSortsBy(index, sortBy),
-			Limit = pagination?.Limit ?? 50,
-			Offset = pagination?.Skip ?? 0,
-		});
+		ISearchable<IdResource> res = await _client
+			.Index(index)
+			.SearchAsync<IdResource>(
+				query,
+				new SearchQuery()
+				{
+					Filter = where,
+					Sort = _GetSortsBy(index, sortBy),
+					Limit = pagination?.Limit ?? 50,
+					Offset = pagination?.Skip ?? 0,
+				}
+			);
 		return new SearchPage<T>.SearchResult
 		{
 			Query = query,
-			Items = await _libraryManager.Repository<T>()
+			Items = await _libraryManager
+				.Repository<T>()
 				.FromIds(res.Hits.Select(x => x.Id).ToList(), include),
 		};
 	}
 
 	/// <inheritdoc/>
-	public Task<SearchPage<ILibraryItem>.SearchResult> SearchItems(string? query,
+	public Task<SearchPage<ILibraryItem>.SearchResult> SearchItems(
+		string? query,
 		Sort<ILibraryItem> sortBy,
 		SearchPagination pagination,
-		Include<ILibraryItem>? include = default)
+		Include<ILibraryItem>? include = default
+	)
 	{
 		return _Search("items", query, null, sortBy, pagination, include);
 	}
 
 	/// <inheritdoc/>
-	public Task<SearchPage<Movie>.SearchResult> SearchMovies(string? query,
+	public Task<SearchPage<Movie>.SearchResult> SearchMovies(
+		string? query,
 		Sort<Movie> sortBy,
 		SearchPagination pagination,
-		Include<Movie>? include = default)
+		Include<Movie>? include = default
+	)
 	{
 		return _Search("items", query, $"kind = {nameof(Movie)}", sortBy, pagination, include);
 	}
 
 	/// <inheritdoc/>
-	public Task<SearchPage<Show>.SearchResult> SearchShows(string? query,
+	public Task<SearchPage<Show>.SearchResult> SearchShows(
+		string? query,
 		Sort<Show> sortBy,
 		SearchPagination pagination,
-		Include<Show>? include = default)
+		Include<Show>? include = default
+	)
 	{
 		return _Search("items", query, $"kind = {nameof(Show)}", sortBy, pagination, include);
 	}
 
 	/// <inheritdoc/>
-	public Task<SearchPage<Collection>.SearchResult> SearchCollections(string? query,
+	public Task<SearchPage<Collection>.SearchResult> SearchCollections(
+		string? query,
 		Sort<Collection> sortBy,
 		SearchPagination pagination,
-		Include<Collection>? include = default)
+		Include<Collection>? include = default
+	)
 	{
 		return _Search("items", query, $"kind = {nameof(Collection)}", sortBy, pagination, include);
 	}
 
 	/// <inheritdoc/>
-	public Task<SearchPage<Episode>.SearchResult> SearchEpisodes(string? query,
+	public Task<SearchPage<Episode>.SearchResult> SearchEpisodes(
+		string? query,
 		Sort<Episode> sortBy,
 		SearchPagination pagination,
-		Include<Episode>? include = default)
+		Include<Episode>? include = default
+	)
 	{
 		return _Search(nameof(Episode), query, null, sortBy, pagination, include);
 	}
 
 	/// <inheritdoc/>
-	public Task<SearchPage<Studio>.SearchResult> SearchStudios(string? query,
+	public Task<SearchPage<Studio>.SearchResult> SearchStudios(
+		string? query,
 		Sort<Studio> sortBy,
 		SearchPagination pagination,
-		Include<Studio>? include = default)
+		Include<Studio>? include = default
+	)
 	{
 		return _Search(nameof(Studio), query, null, sortBy, pagination, include);
 	}

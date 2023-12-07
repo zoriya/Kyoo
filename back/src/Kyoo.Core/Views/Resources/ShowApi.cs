@@ -54,8 +54,7 @@ namespace Kyoo.Core.Api
 		/// The library manager used to modify or retrieve information about the data store.
 		/// </param>
 		/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
-		public ShowApi(ILibraryManager libraryManager,
-			IThumbnailsManager thumbs)
+		public ShowApi(ILibraryManager libraryManager, IThumbnailsManager thumbs)
 			: base(libraryManager.Shows, thumbs)
 		{
 			_libraryManager = libraryManager;
@@ -81,20 +80,30 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Page<Season>>> GetSeasons(Identifier identifier,
+		public async Task<ActionResult<Page<Season>>> GetSeasons(
+			Identifier identifier,
 			[FromQuery] Sort<Season> sortBy,
 			[FromQuery] Filter<Season>? filter,
 			[FromQuery] Pagination pagination,
-			[FromQuery] Include<Season> fields)
+			[FromQuery] Include<Season> fields
+		)
 		{
-			ICollection<Season> resources = await _libraryManager.Seasons.GetAll(
-				Filter.And(filter, identifier.Matcher<Season>(x => x.ShowId, x => x.Show!.Slug)),
-				sortBy,
-				fields,
-				pagination
-			);
+			ICollection<Season> resources = await _libraryManager
+				.Seasons
+				.GetAll(
+					Filter.And(
+						filter,
+						identifier.Matcher<Season>(x => x.ShowId, x => x.Show!.Slug)
+					),
+					sortBy,
+					fields,
+					pagination
+				);
 
-			if (!resources.Any() && await _libraryManager.Shows.GetOrDefault(identifier.IsSame<Show>()) == null)
+			if (
+				!resources.Any()
+				&& await _libraryManager.Shows.GetOrDefault(identifier.IsSame<Show>()) == null
+			)
 				return NotFound();
 			return Page(resources, pagination.Limit);
 		}
@@ -119,20 +128,30 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Page<Episode>>> GetEpisodes(Identifier identifier,
+		public async Task<ActionResult<Page<Episode>>> GetEpisodes(
+			Identifier identifier,
 			[FromQuery] Sort<Episode> sortBy,
 			[FromQuery] Filter<Episode>? filter,
 			[FromQuery] Pagination pagination,
-			[FromQuery] Include<Episode> fields)
+			[FromQuery] Include<Episode> fields
+		)
 		{
-			ICollection<Episode> resources = await _libraryManager.Episodes.GetAll(
-				Filter.And(filter, identifier.Matcher<Episode>(x => x.ShowId, x => x.Show!.Slug)),
-				sortBy,
-				fields,
-				pagination
-			);
+			ICollection<Episode> resources = await _libraryManager
+				.Episodes
+				.GetAll(
+					Filter.And(
+						filter,
+						identifier.Matcher<Episode>(x => x.ShowId, x => x.Show!.Slug)
+					),
+					sortBy,
+					fields,
+					pagination
+				);
 
-			if (!resources.Any() && await _libraryManager.Shows.GetOrDefault(identifier.IsSame<Show>()) == null)
+			if (
+				!resources.Any()
+				&& await _libraryManager.Shows.GetOrDefault(identifier.IsSame<Show>()) == null
+			)
 				return NotFound();
 			return Page(resources, pagination.Limit);
 		}
@@ -186,9 +205,14 @@ namespace Kyoo.Core.Api
 		[PartialPermission(Kind.Read)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Studio>> GetStudio(Identifier identifier, [FromQuery] Include<Studio> fields)
+		public async Task<ActionResult<Studio>> GetStudio(
+			Identifier identifier,
+			[FromQuery] Include<Studio> fields
+		)
 		{
-			return await _libraryManager.Studios.Get(identifier.IsContainedIn<Studio, Show>(x => x.Shows!), fields);
+			return await _libraryManager
+				.Studios
+				.Get(identifier.IsContainedIn<Studio, Show>(x => x.Shows!), fields);
 		}
 
 		/// <summary>
@@ -211,20 +235,27 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Page<Collection>>> GetCollections(Identifier identifier,
+		public async Task<ActionResult<Page<Collection>>> GetCollections(
+			Identifier identifier,
 			[FromQuery] Sort<Collection> sortBy,
 			[FromQuery] Filter<Collection>? filter,
 			[FromQuery] Pagination pagination,
-			[FromQuery] Include<Collection> fields)
+			[FromQuery] Include<Collection> fields
+		)
 		{
-			ICollection<Collection> resources = await _libraryManager.Collections.GetAll(
-				Filter.And(filter, identifier.IsContainedIn<Collection, Show>(x => x.Shows!)),
-				sortBy,
-				fields,
-				pagination
-			);
+			ICollection<Collection> resources = await _libraryManager
+				.Collections
+				.GetAll(
+					Filter.And(filter, identifier.IsContainedIn<Collection, Show>(x => x.Shows!)),
+					sortBy,
+					fields,
+					pagination
+				);
 
-			if (!resources.Any() && await _libraryManager.Shows.GetOrDefault(identifier.IsSame<Show>()) == null)
+			if (
+				!resources.Any()
+				&& await _libraryManager.Shows.GetOrDefault(identifier.IsSame<Show>()) == null
+			)
 				return NotFound();
 			return Page(resources, pagination.Limit);
 		}
@@ -271,17 +302,16 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status204NoContent)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ShowWatchStatus?> SetWatchStatus(Identifier identifier, WatchStatus status)
+		public async Task<ShowWatchStatus?> SetWatchStatus(
+			Identifier identifier,
+			WatchStatus status
+		)
 		{
 			Guid id = await identifier.Match(
 				id => Task.FromResult(id),
 				async slug => (await _libraryManager.Shows.Get(slug)).Id
 			);
-			return await _libraryManager.WatchStatus.SetShowStatus(
-				id,
-				User.GetIdOrThrow(),
-				status
-			);
+			return await _libraryManager.WatchStatus.SetShowStatus(id, User.GetIdOrThrow(), status);
 		}
 
 		/// <summary>

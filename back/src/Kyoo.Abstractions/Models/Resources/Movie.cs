@@ -31,7 +31,16 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A series or a movie.
 	/// </summary>
-	public class Movie : IQuery, IResource, IMetadata, IOnMerge, IThumbnails, IAddedDate, ILibraryItem, INews, IWatchlist
+	public class Movie
+		: IQuery,
+			IResource,
+			IMetadata,
+			IOnMerge,
+			IThumbnails,
+			IAddedDate,
+			ILibraryItem,
+			INews,
+			IWatchlist
 	{
 		public static Sort DefaultSort => new Sort<Movie>.By(x => x.Name);
 
@@ -120,12 +129,14 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the Studio that made this show.
 		/// </summary>
-		[SerializeIgnore] public Guid? StudioId { get; set; }
+		[SerializeIgnore]
+		public Guid? StudioId { get; set; }
 
 		/// <summary>
 		/// The Studio that made this show.
 		/// </summary>
-		[LoadableRelation(nameof(StudioId))] public Studio? Studio { get; set; }
+		[LoadableRelation(nameof(StudioId))]
+		public Studio? Studio { get; set; }
 
 		// /// <summary>
 		// /// The list of people that made this show.
@@ -135,18 +146,21 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The list of collections that contains this show.
 		/// </summary>
-		[SerializeIgnore] public ICollection<Collection>? Collections { get; set; }
+		[SerializeIgnore]
+		public ICollection<Collection>? Collections { get; set; }
 
 		/// <summary>
 		/// Links to watch this movie.
 		/// </summary>
-		public VideoLinks Links => new()
-		{
-			Direct = $"/video/movie/{Slug}/direct",
-			Hls = $"/video/movie/{Slug}/master.m3u8",
-		};
+		public VideoLinks Links =>
+			new()
+			{
+				Direct = $"/video/movie/{Slug}/direct",
+				Hls = $"/video/movie/{Slug}/master.m3u8",
+			};
 
-		[SerializeIgnore] public ICollection<MovieWatchStatus>? Watched { get; set; }
+		[SerializeIgnore]
+		public ICollection<MovieWatchStatus>? Watched { get; set; }
 
 		/// <summary>
 		/// Metadata of what an user as started/planned to watch.

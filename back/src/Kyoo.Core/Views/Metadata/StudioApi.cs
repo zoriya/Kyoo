@@ -77,20 +77,30 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Page<Show>>> GetShows(Identifier identifier,
+		public async Task<ActionResult<Page<Show>>> GetShows(
+			Identifier identifier,
 			[FromQuery] Sort<Show> sortBy,
 			[FromQuery] Filter<Show>? filter,
 			[FromQuery] Pagination pagination,
-			[FromQuery] Include<Show> fields)
+			[FromQuery] Include<Show> fields
+		)
 		{
-			ICollection<Show> resources = await _libraryManager.Shows.GetAll(
-				Filter.And(filter, identifier.Matcher<Show>(x => x.StudioId, x => x.Studio!.Slug)),
-				sortBy,
-				fields,
-				pagination
-			);
+			ICollection<Show> resources = await _libraryManager
+				.Shows
+				.GetAll(
+					Filter.And(
+						filter,
+						identifier.Matcher<Show>(x => x.StudioId, x => x.Studio!.Slug)
+					),
+					sortBy,
+					fields,
+					pagination
+				);
 
-			if (!resources.Any() && await _libraryManager.Studios.GetOrDefault(identifier.IsSame<Studio>()) == null)
+			if (
+				!resources.Any()
+				&& await _libraryManager.Studios.GetOrDefault(identifier.IsSame<Studio>()) == null
+			)
 				return NotFound();
 			return Page(resources, pagination.Limit);
 		}

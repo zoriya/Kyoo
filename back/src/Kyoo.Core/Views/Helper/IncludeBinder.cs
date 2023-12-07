@@ -31,10 +31,14 @@ public class IncludeBinder : IModelBinder
 
 	public Task BindModelAsync(ModelBindingContext bindingContext)
 	{
-		ValueProviderResult fields = bindingContext.ValueProvider.GetValue(bindingContext.FieldName);
+		ValueProviderResult fields = bindingContext
+			.ValueProvider
+			.GetValue(bindingContext.FieldName);
 		try
 		{
-			object include = bindingContext.ModelType.GetMethod(nameof(Include<object>.From))!
+			object include = bindingContext
+				.ModelType
+				.GetMethod(nameof(Include<object>.From))!
 				.Invoke(null, new object?[] { fields.FirstValue })!;
 			bindingContext.Result = ModelBindingResult.Success(include);
 			bindingContext.HttpContext.Items["fields"] = ((dynamic)include).Fields;

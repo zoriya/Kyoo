@@ -96,12 +96,10 @@ namespace Kyoo.Host
 			_logger = Log.Logger.ForContext<Application>();
 
 			AppDomain.CurrentDomain.ProcessExit += (_, _) => Log.CloseAndFlush();
-			AppDomain.CurrentDomain.UnhandledException += (_, ex)
-				=> Log.Fatal(ex.ExceptionObject as Exception, "Unhandled exception");
+			AppDomain.CurrentDomain.UnhandledException += (_, ex) =>
+				Log.Fatal(ex.ExceptionObject as Exception, "Unhandled exception");
 
-			IHost host = _CreateWebHostBuilder(args)
-				.ConfigureContainer(configure)
-				.Build();
+			IHost host = _CreateWebHostBuilder(args).ConfigureContainer(configure).Build();
 
 			await using (AsyncServiceScope scope = host.Services.CreateAsyncScope())
 			{
@@ -122,8 +120,14 @@ namespace Kyoo.Host
 			try
 			{
 				CoreModule.Services = host.Services;
-				_logger.Information("Version: {Version}", Assembly.GetExecutingAssembly().GetName().Version.ToString(3));
-				_logger.Information("Data directory: {DataDirectory}", Environment.CurrentDirectory);
+				_logger.Information(
+					"Version: {Version}",
+					Assembly.GetExecutingAssembly().GetName().Version.ToString(3)
+				);
+				_logger.Information(
+					"Data directory: {DataDirectory}",
+					Environment.CurrentDirectory
+				);
 				await host.RunAsync(cancellationToken);
 			}
 			catch (Exception ex)
@@ -146,12 +150,25 @@ namespace Kyoo.Host
 				.ConfigureAppConfiguration(x => _SetupConfig(x, args))
 				.UseSerilog((host, services, builder) => _ConfigureLogging(builder))
 				.ConfigureServices(x => x.AddRouting())
-				.ConfigureWebHost(x => x
-					.UseKestrel(options => { options.AddServerHeader = false; })
-					.UseIIS()
-					.UseIISIntegration()
-					.UseUrls(Environment.GetEnvironmentVariable("KYOO_BIND_URL") ?? "http://*:5000")
-					.UseStartup(host => PluginsStartup.FromWebHost(host, new LoggerFactory().AddSerilog()))
+				.ConfigureWebHost(
+					x =>
+						x.UseKestrel(options =>
+							{
+								options.AddServerHeader = false;
+							})
+							.UseIIS()
+							.UseIISIntegration()
+							.UseUrls(
+								Environment.GetEnvironmentVariable("KYOO_BIND_URL")
+									?? "http://*:5000"
+							)
+							.UseStartup(
+								host =>
+									PluginsStartup.FromWebHost(
+										host,
+										new LoggerFactory().AddSerilog()
+									)
+							)
 				);
 		}
 
@@ -179,13 +196,20 @@ namespace Kyoo.Host
 				"[{@t:HH:mm:ss} {@l:u3} {Substring(SourceContext, LastIndexOf(SourceContext, '.') + 1), 25} "
 				+ "({@i:D10})] {@m}{#if not EndsWith(@m, '\n')}\n{#end}{@x}";
 			builder
-				.MinimumLevel.Warning()
-				.MinimumLevel.Override("Kyoo", LogEventLevel.Verbose)
-				.MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Verbose)
-				.MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Fatal)
-				.WriteTo.Console(new ExpressionTemplate(template, theme: TemplateTheme.Code))
-				.Enrich.WithThreadId()
-				.Enrich.FromLogContext();
+				.MinimumLevel
+				.Warning()
+				.MinimumLevel
+				.Override("Kyoo", LogEventLevel.Verbose)
+				.MinimumLevel
+				.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Verbose)
+				.MinimumLevel
+				.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Fatal)
+				.WriteTo
+				.Console(new ExpressionTemplate(template, theme: TemplateTheme.Code))
+				.Enrich
+				.WithThreadId()
+				.Enrich
+				.FromLogContext();
 		}
 	}
 }

@@ -49,14 +49,17 @@ namespace Kyoo.Core.Api
 		/// The repository to use as a baking store for the type <typeparamref name="T"/>.
 		/// </param>
 		/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
-		public CrudThumbsApi(IRepository<T> repository,
-			IThumbnailsManager thumbs)
+		public CrudThumbsApi(IRepository<T> repository, IThumbnailsManager thumbs)
 			: base(repository)
 		{
 			_thumbs = thumbs;
 		}
 
-		private async Task<IActionResult> _GetImage(Identifier identifier, string image, ImageQuality? quality)
+		private async Task<IActionResult> _GetImage(
+			Identifier identifier,
+			string image,
+			ImageQuality? quality
+		)
 		{
 			T? resource = await identifier.Match(
 				id => Repository.GetOrDefault(id),
@@ -94,7 +97,10 @@ namespace Kyoo.Core.Api
 		[PartialPermission(Kind.Read)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public Task<IActionResult> GetPoster(Identifier identifier, [FromQuery] ImageQuality? quality)
+		public Task<IActionResult> GetPoster(
+			Identifier identifier,
+			[FromQuery] ImageQuality? quality
+		)
 		{
 			return _GetImage(identifier, "poster", quality);
 		}
@@ -134,7 +140,10 @@ namespace Kyoo.Core.Api
 		/// </response>
 		[HttpGet("{identifier:id}/thumbnail")]
 		[HttpGet("{identifier:id}/backdrop", Order = AlternativeRoute)]
-		public Task<IActionResult> GetBackdrop(Identifier identifier, [FromQuery] ImageQuality? quality)
+		public Task<IActionResult> GetBackdrop(
+			Identifier identifier,
+			[FromQuery] ImageQuality? quality
+		)
 		{
 			return _GetImage(identifier, "thumbnail", quality);
 		}

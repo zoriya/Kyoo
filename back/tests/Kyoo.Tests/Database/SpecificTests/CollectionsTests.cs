@@ -72,16 +72,8 @@ namespace Kyoo.Tests.Database
 			Collection collection = TestSample.GetNew<Collection>();
 			collection.ExternalId = new Dictionary<string, MetadataId>
 			{
-				["1"] = new()
-				{
-					Link = "link",
-					DataId = "id"
-				},
-				["2"] = new()
-				{
-					Link = "new-provider-link",
-					DataId = "new-id"
-				}
+				["1"] = new() { Link = "link", DataId = "id" },
+				["2"] = new() { Link = "new-provider-link", DataId = "new-id" }
 			};
 			await _repository.Create(collection);
 
@@ -111,11 +103,7 @@ namespace Kyoo.Tests.Database
 			Collection value = await _repository.Get(TestSample.Get<Collection>().Slug);
 			value.ExternalId = new Dictionary<string, MetadataId>
 			{
-				["test"] = new()
-				{
-					Link = "link",
-					DataId = "id"
-				},
+				["test"] = new() { Link = "link", DataId = "id" },
 			};
 			await _repository.Edit(value);
 
@@ -131,11 +119,7 @@ namespace Kyoo.Tests.Database
 			Collection value = await _repository.Get(TestSample.Get<Collection>().Slug);
 			value.ExternalId = new Dictionary<string, MetadataId>
 			{
-				["toto"] = new()
-				{
-					Link = "link",
-					DataId = "id"
-				},
+				["toto"] = new() { Link = "link", DataId = "id" },
 			};
 			await _repository.Edit(value);
 
@@ -146,11 +130,7 @@ namespace Kyoo.Tests.Database
 				KAssert.DeepEqual(value, retrieved);
 			}
 
-			value.ExternalId.Add("test", new MetadataId
-			{
-				Link = "link",
-				DataId = "id"
-			});
+			value.ExternalId.Add("test", new MetadataId { Link = "link", DataId = "id" });
 			await _repository.Edit(value);
 
 			{
@@ -169,11 +149,7 @@ namespace Kyoo.Tests.Database
 		[InlineData("SuPeR")]
 		public async Task SearchTest(string query)
 		{
-			Collection value = new()
-			{
-				Slug = "super-test",
-				Name = "This is a test title",
-			};
+			Collection value = new() { Slug = "super-test", Name = "This is a test title", };
 			await _repository.Create(value);
 			ICollection<Collection> ret = await _repository.Search(query);
 			KAssert.DeepEqual(value, ret.First());

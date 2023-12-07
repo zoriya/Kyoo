@@ -51,8 +51,7 @@ namespace Kyoo.Host.Controllers
 		/// </summary>
 		/// <param name="provider">A service container to allow initialization of plugins</param>
 		/// <param name="logger">The logger used by this class.</param>
-		public PluginManager(IServiceProvider provider,
-			ILogger<PluginManager> logger)
+		public PluginManager(IServiceProvider provider, ILogger<PluginManager> logger)
 		{
 			_provider = provider;
 			_logger = logger;
@@ -86,9 +85,10 @@ namespace Kyoo.Host.Controllers
 		/// <inheritdoc />
 		public void LoadPlugins(params Type[] plugins)
 		{
-			LoadPlugins(plugins
-				.Select(x => (IPlugin)ActivatorUtilities.CreateInstance(_provider, x))
-				.ToArray()
+			LoadPlugins(
+				plugins
+					.Select(x => (IPlugin)ActivatorUtilities.CreateInstance(_provider, x))
+					.ToArray()
 			);
 		}
 	}

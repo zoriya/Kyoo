@@ -25,192 +25,207 @@ namespace Kyoo.Tests
 {
 	public static class TestSample
 	{
-		private static readonly Dictionary<Type, Func<object>> NewSamples = new()
-		{
+		private static readonly Dictionary<Type, Func<object>> NewSamples =
+			new()
 			{
-				typeof(Collection),
-				() => new Collection
 				{
-					Id = 2.AsGuid(),
-					Slug = "new-collection",
-					Name = "New Collection",
-					Overview = "A collection created by new sample",
-					Thumbnail = new Image("thumbnail")
-				}
-			},
-			{
-				typeof(Show),
-				() => new Show
+					typeof(Collection),
+					() =>
+						new Collection
+						{
+							Id = 2.AsGuid(),
+							Slug = "new-collection",
+							Name = "New Collection",
+							Overview = "A collection created by new sample",
+							Thumbnail = new Image("thumbnail")
+						}
+				},
 				{
-					Id = 2.AsGuid(),
-					Slug = "new-show",
-					Name = "New Show",
-					Overview = "overview",
-					Status = Status.Planned,
-					StartAir = new DateTime(2011, 1, 1).ToUniversalTime(),
-					EndAir = new DateTime(2011, 1, 1).ToUniversalTime(),
-					Poster = new Image("Poster"),
-					Logo = new Image("Logo"),
-					Thumbnail = new Image("Thumbnail"),
-					Studio = null
-				}
-			},
-			{
-				typeof(Season),
-				() => new Season
+					typeof(Show),
+					() =>
+						new Show
+						{
+							Id = 2.AsGuid(),
+							Slug = "new-show",
+							Name = "New Show",
+							Overview = "overview",
+							Status = Status.Planned,
+							StartAir = new DateTime(2011, 1, 1).ToUniversalTime(),
+							EndAir = new DateTime(2011, 1, 1).ToUniversalTime(),
+							Poster = new Image("Poster"),
+							Logo = new Image("Logo"),
+							Thumbnail = new Image("Thumbnail"),
+							Studio = null
+						}
+				},
 				{
-					Id = 2.AsGuid(),
-					ShowId = 1.AsGuid(),
-					ShowSlug = Get<Show>().Slug,
-					Name = "New season",
-					Overview = "New overview",
-					EndDate = new DateTime(2000, 10, 10).ToUniversalTime(),
-					SeasonNumber = 2,
-					StartDate = new DateTime(2010, 10, 10).ToUniversalTime(),
-					Logo = new Image("logo")
-				}
-			},
-			{
-				typeof(Episode),
-				() => new Episode
+					typeof(Season),
+					() =>
+						new Season
+						{
+							Id = 2.AsGuid(),
+							ShowId = 1.AsGuid(),
+							ShowSlug = Get<Show>().Slug,
+							Name = "New season",
+							Overview = "New overview",
+							EndDate = new DateTime(2000, 10, 10).ToUniversalTime(),
+							SeasonNumber = 2,
+							StartDate = new DateTime(2010, 10, 10).ToUniversalTime(),
+							Logo = new Image("logo")
+						}
+				},
 				{
-					Id = 2.AsGuid(),
-					ShowId = 1.AsGuid(),
-					ShowSlug = Get<Show>().Slug,
-					SeasonId = 1.AsGuid(),
-					SeasonNumber = Get<Season>().SeasonNumber,
-					EpisodeNumber = 3,
-					AbsoluteNumber = 4,
-					Path = "/episode-path",
-					Name = "New Episode Title",
-					ReleaseDate = new DateTime(2000, 10, 10).ToUniversalTime(),
-					Overview = "new episode overview",
-					Logo = new Image("new episode logo")
-				}
-			},
-			{
-				typeof(People),
-				() => new People
+					typeof(Episode),
+					() =>
+						new Episode
+						{
+							Id = 2.AsGuid(),
+							ShowId = 1.AsGuid(),
+							ShowSlug = Get<Show>().Slug,
+							SeasonId = 1.AsGuid(),
+							SeasonNumber = Get<Season>().SeasonNumber,
+							EpisodeNumber = 3,
+							AbsoluteNumber = 4,
+							Path = "/episode-path",
+							Name = "New Episode Title",
+							ReleaseDate = new DateTime(2000, 10, 10).ToUniversalTime(),
+							Overview = "new episode overview",
+							Logo = new Image("new episode logo")
+						}
+				},
 				{
-					Id = 2.AsGuid(),
-					Slug = "new-person-name",
-					Name = "New person name",
-					Logo = new Image("Old Logo"),
-					Poster = new Image("Old poster")
+					typeof(People),
+					() =>
+						new People
+						{
+							Id = 2.AsGuid(),
+							Slug = "new-person-name",
+							Name = "New person name",
+							Logo = new Image("Old Logo"),
+							Poster = new Image("Old poster")
+						}
 				}
-			}
-		};
+			};
 
-		private static readonly Dictionary<Type, Func<object>> Samples = new()
-		{
+		private static readonly Dictionary<Type, Func<object>> Samples =
+			new()
 			{
-				typeof(Collection),
-				() => new Collection
 				{
-					Id = 1.AsGuid(),
-					Slug = "collection",
-					Name = "Collection",
-					Overview = "A nice collection for tests",
-					Poster = new Image("Poster")
-				}
-			},
-			{
-				typeof(Show),
-				() => new Show
+					typeof(Collection),
+					() =>
+						new Collection
+						{
+							Id = 1.AsGuid(),
+							Slug = "collection",
+							Name = "Collection",
+							Overview = "A nice collection for tests",
+							Poster = new Image("Poster")
+						}
+				},
 				{
-					Id = 1.AsGuid(),
-					Slug = "anohana",
-					Name = "Anohana: The Flower We Saw That Day",
-					Aliases = new List<string>
-					{
-						"Ano Hi Mita Hana no Namae o Bokutachi wa Mada Shiranai.",
-						"AnoHana",
-						"We Still Don't Know the Name of the Flower We Saw That Day."
-					},
-					Overview = "When Yadomi Jinta was a child, he was a central piece in a group of close friends. " +
-						"In time, however, these childhood friends drifted apart, and when they became high " +
-						"school students, they had long ceased to think of each other as friends.",
-					Status = Status.Finished,
-					StudioId = 1.AsGuid(),
-					StartAir = new DateTime(2011, 1, 1).ToUniversalTime(),
-					EndAir = new DateTime(2011, 1, 1).ToUniversalTime(),
-					Poster = new Image("Poster"),
-					Logo = new Image("Logo"),
-					Thumbnail = new Image("Thumbnail"),
-					Studio = null
-				}
-			},
-			{
-				typeof(Season),
-				() => new Season
+					typeof(Show),
+					() =>
+						new Show
+						{
+							Id = 1.AsGuid(),
+							Slug = "anohana",
+							Name = "Anohana: The Flower We Saw That Day",
+							Aliases = new List<string>
+							{
+								"Ano Hi Mita Hana no Namae o Bokutachi wa Mada Shiranai.",
+								"AnoHana",
+								"We Still Don't Know the Name of the Flower We Saw That Day."
+							},
+							Overview =
+								"When Yadomi Jinta was a child, he was a central piece in a group of close friends. "
+								+ "In time, however, these childhood friends drifted apart, and when they became high "
+								+ "school students, they had long ceased to think of each other as friends.",
+							Status = Status.Finished,
+							StudioId = 1.AsGuid(),
+							StartAir = new DateTime(2011, 1, 1).ToUniversalTime(),
+							EndAir = new DateTime(2011, 1, 1).ToUniversalTime(),
+							Poster = new Image("Poster"),
+							Logo = new Image("Logo"),
+							Thumbnail = new Image("Thumbnail"),
+							Studio = null
+						}
+				},
 				{
-					Id = 1.AsGuid(),
-					ShowSlug = "anohana",
-					ShowId = 1.AsGuid(),
-					SeasonNumber = 1,
-					Name = "Season 1",
-					Overview = "The first season",
-					StartDate = new DateTime(2020, 06, 05).ToUniversalTime(),
-					EndDate = new DateTime(2020, 07, 05).ToUniversalTime(),
-					Poster = new Image("Poster"),
-					Logo = new Image("Logo"),
-					Thumbnail = new Image("Thumbnail")
-				}
-			},
-			{
-				typeof(Episode),
-				() => new Episode
+					typeof(Season),
+					() =>
+						new Season
+						{
+							Id = 1.AsGuid(),
+							ShowSlug = "anohana",
+							ShowId = 1.AsGuid(),
+							SeasonNumber = 1,
+							Name = "Season 1",
+							Overview = "The first season",
+							StartDate = new DateTime(2020, 06, 05).ToUniversalTime(),
+							EndDate = new DateTime(2020, 07, 05).ToUniversalTime(),
+							Poster = new Image("Poster"),
+							Logo = new Image("Logo"),
+							Thumbnail = new Image("Thumbnail")
+						}
+				},
 				{
-					Id = 1.AsGuid(),
-					ShowSlug = "anohana",
-					ShowId = 1.AsGuid(),
-					SeasonId = 1.AsGuid(),
-					SeasonNumber = 1,
-					EpisodeNumber = 1,
-					AbsoluteNumber = 1,
-					Path = "/home/kyoo/anohana-s1e1",
-					Poster = new Image("Poster"),
-					Logo = new Image("Logo"),
-					Thumbnail = new Image("Thumbnail"),
-					Name = "Episode 1",
-					Overview = "Summary of the first episode",
-					ReleaseDate = new DateTime(2020, 06, 05).ToUniversalTime()
-				}
-			},
-			{
-				typeof(People),
-				() => new People
+					typeof(Episode),
+					() =>
+						new Episode
+						{
+							Id = 1.AsGuid(),
+							ShowSlug = "anohana",
+							ShowId = 1.AsGuid(),
+							SeasonId = 1.AsGuid(),
+							SeasonNumber = 1,
+							EpisodeNumber = 1,
+							AbsoluteNumber = 1,
+							Path = "/home/kyoo/anohana-s1e1",
+							Poster = new Image("Poster"),
+							Logo = new Image("Logo"),
+							Thumbnail = new Image("Thumbnail"),
+							Name = "Episode 1",
+							Overview = "Summary of the first episode",
+							ReleaseDate = new DateTime(2020, 06, 05).ToUniversalTime()
+						}
+				},
 				{
-					Id = 1.AsGuid(),
-					Slug = "the-actor",
-					Name = "The Actor",
-					Poster = new Image("Poster"),
-					Logo = new Image("Logo"),
-					Thumbnail = new Image("Thumbnail")
-				}
-			},
-			{
-				typeof(Studio),
-				() => new Studio
+					typeof(People),
+					() =>
+						new People
+						{
+							Id = 1.AsGuid(),
+							Slug = "the-actor",
+							Name = "The Actor",
+							Poster = new Image("Poster"),
+							Logo = new Image("Logo"),
+							Thumbnail = new Image("Thumbnail")
+						}
+				},
 				{
-					Id = 1.AsGuid(),
-					Slug = "hyper-studio",
-					Name = "Hyper studio",
-				}
-			},
-			{
-				typeof(User),
-				() => new User
+					typeof(Studio),
+					() =>
+						new Studio
+						{
+							Id = 1.AsGuid(),
+							Slug = "hyper-studio",
+							Name = "Hyper studio",
+						}
+				},
 				{
-					Id = 1.AsGuid(),
-					Slug = "user",
-					Username = "User",
-					Email = "user@im-a-user.com",
-					Password = "MD5-encoded",
-					Permissions = new[] { "overall.read" }
+					typeof(User),
+					() =>
+						new User
+						{
+							Id = 1.AsGuid(),
+							Slug = "user",
+							Username = "User",
+							Email = "user@im-a-user.com",
+							Password = "MD5-encoded",
+							Permissions = new[] { "overall.read" }
+						}
 				}
-			}
-		};
+			};
 
 		public static T Get<T>()
 		{

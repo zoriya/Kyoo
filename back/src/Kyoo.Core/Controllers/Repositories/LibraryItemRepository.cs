@@ -33,7 +33,8 @@ namespace Kyoo.Core.Controllers
 	public class LibraryItemRepository : DapperRepository<ILibraryItem>
 	{
 		// language=PostgreSQL
-		protected override FormattableString Sql => $"""
+		protected override FormattableString Sql =>
+			$"""
 			select
 				s.*, -- Show as s
 				m.*,
@@ -58,12 +59,13 @@ namespace Kyoo.Core.Controllers
 				) as c on false
 			""";
 
-		protected override Dictionary<string, Type> Config => new()
-		{
-			{ "s", typeof(Show) },
-			{ "m", typeof(Movie) },
-			{ "c", typeof(Collection) }
-		};
+		protected override Dictionary<string, Type> Config =>
+			new()
+			{
+				{ "s", typeof(Show) },
+				{ "m", typeof(Movie) },
+				{ "c", typeof(Collection) }
+			};
 
 		protected override ILibraryItem Mapper(List<object?> items)
 		{
@@ -77,15 +79,15 @@ namespace Kyoo.Core.Controllers
 		}
 
 		public LibraryItemRepository(DbConnection database, SqlVariableContext context)
-			: base(database, context)
-		{ }
+			: base(database, context) { }
 
 		public async Task<ICollection<ILibraryItem>> GetAllOfCollection(
 			Guid collectionId,
 			Filter<ILibraryItem>? filter = default,
 			Sort<ILibraryItem>? sort = default,
 			Include<ILibraryItem>? include = default,
-			Pagination? limit = default)
+			Pagination? limit = default
+		)
 		{
 			// language=PostgreSQL
 			FormattableString sql = $"""
@@ -111,11 +113,7 @@ namespace Kyoo.Core.Controllers
 
 			return await Database.Query<ILibraryItem>(
 				sql,
-				new()
-				{
-					{ "s", typeof(Show) },
-					{ "m", typeof(Movie) },
-				},
+				new() { { "s", typeof(Show) }, { "m", typeof(Movie) }, },
 				Mapper,
 				(id) => Get(id),
 				Context,

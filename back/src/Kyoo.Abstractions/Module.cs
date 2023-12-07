@@ -37,11 +37,15 @@ namespace Kyoo.Abstractions
 		/// If your repository implements a special interface, please use <see cref="RegisterRepository{T,T2}"/>
 		/// </remarks>
 		/// <returns>The initial container.</returns>
-		public static IRegistrationBuilder<T, ConcreteReflectionActivatorData, SingleRegistrationStyle>
-			RegisterRepository<T>(this ContainerBuilder builder)
+		public static IRegistrationBuilder<
+			T,
+			ConcreteReflectionActivatorData,
+			SingleRegistrationStyle
+		> RegisterRepository<T>(this ContainerBuilder builder)
 			where T : IBaseRepository
 		{
-			return builder.RegisterType<T>()
+			return builder
+				.RegisterType<T>()
 				.AsSelf()
 				.As<IBaseRepository>()
 				.As(Utility.GetGenericDefinition(typeof(T), typeof(IRepository<>))!)
@@ -58,8 +62,11 @@ namespace Kyoo.Abstractions
 		/// If your repository does not implements a special interface, please use <see cref="RegisterRepository{T}"/>
 		/// </remarks>
 		/// <returns>The initial container.</returns>
-		public static IRegistrationBuilder<T2, ConcreteReflectionActivatorData, SingleRegistrationStyle>
-			RegisterRepository<T, T2>(this ContainerBuilder builder)
+		public static IRegistrationBuilder<
+			T2,
+			ConcreteReflectionActivatorData,
+			SingleRegistrationStyle
+		> RegisterRepository<T, T2>(this ContainerBuilder builder)
 			where T : notnull
 			where T2 : IBaseRepository, T
 		{

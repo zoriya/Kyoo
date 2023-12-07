@@ -32,7 +32,15 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A series or a movie.
 	/// </summary>
-	public class Show : IQuery, IResource, IMetadata, IOnMerge, IThumbnails, IAddedDate, ILibraryItem, IWatchlist
+	public class Show
+		: IQuery,
+			IResource,
+			IMetadata,
+			IOnMerge,
+			IThumbnails,
+			IAddedDate,
+			ILibraryItem,
+			IWatchlist
 	{
 		public static Sort DefaultSort => new Sort<Show>.By(x => x.Name);
 
@@ -121,12 +129,14 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the Studio that made this show.
 		/// </summary>
-		[SerializeIgnore] public Guid? StudioId { get; set; }
+		[SerializeIgnore]
+		public Guid? StudioId { get; set; }
 
 		/// <summary>
 		/// The Studio that made this show.
 		/// </summary>
-		[LoadableRelation(nameof(StudioId))] public Studio? Studio { get; set; }
+		[LoadableRelation(nameof(StudioId))]
+		public Studio? Studio { get; set; }
 
 		// /// <summary>
 		// /// The list of people that made this show.
@@ -136,19 +146,22 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The different seasons in this show. If this is a movie, this list is always null or empty.
 		/// </summary>
-		[SerializeIgnore] public ICollection<Season>? Seasons { get; set; }
+		[SerializeIgnore]
+		public ICollection<Season>? Seasons { get; set; }
 
 		/// <summary>
 		/// The list of episodes in this show.
 		/// If this is a movie, there will be a unique episode (with the seasonNumber and episodeNumber set to null).
 		/// Having an episode is necessary to store metadata and tracks.
 		/// </summary>
-		[SerializeIgnore] public ICollection<Episode>? Episodes { get; set; }
+		[SerializeIgnore]
+		public ICollection<Episode>? Episodes { get; set; }
 
 		/// <summary>
 		/// The list of collections that contains this show.
 		/// </summary>
-		[SerializeIgnore] public ICollection<Collection>? Collections { get; set; }
+		[SerializeIgnore]
+		public ICollection<Collection>? Collections { get; set; }
 
 		/// <summary>
 		/// The first episode of this show.
@@ -172,11 +185,12 @@ namespace Kyoo.Abstractions.Models
 		)]
 		public Episode? FirstEpisode { get; set; }
 
-		private Episode? _FirstEpisode => Episodes!
-			.OrderBy(x => x.AbsoluteNumber)
-			.ThenBy(x => x.SeasonNumber)
-			.ThenBy(x => x.EpisodeNumber)
-			.FirstOrDefault();
+		private Episode? _FirstEpisode =>
+			Episodes!
+				.OrderBy(x => x.AbsoluteNumber)
+				.ThenBy(x => x.SeasonNumber)
+				.ThenBy(x => x.EpisodeNumber)
+				.FirstOrDefault();
 
 		/// <summary>
 		/// The number of episodes in this show.
@@ -199,7 +213,8 @@ namespace Kyoo.Abstractions.Models
 
 		private int _EpisodesCount => Episodes!.Count;
 
-		[SerializeIgnore] public ICollection<ShowWatchStatus>? Watched { get; set; }
+		[SerializeIgnore]
+		public ICollection<ShowWatchStatus>? Watched { get; set; }
 
 		/// <summary>
 		/// Metadata of what an user as started/planned to watch.

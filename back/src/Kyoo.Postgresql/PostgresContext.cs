@@ -56,8 +56,7 @@ namespace Kyoo.Postgresql
 		/// Design time constructor (dotnet ef migrations add). Do not use
 		/// </summary>
 		public PostgresContext()
-			: base(null!)
-		{ }
+			: base(null!) { }
 
 		public PostgresContext(DbContextOptions options, IHttpContextAccessor accessor)
 			: base(options, accessor)
@@ -98,16 +97,18 @@ namespace Kyoo.Postgresql
 			modelBuilder.HasPostgresEnum<Genre>();
 			modelBuilder.HasPostgresEnum<WatchStatus>();
 
-			modelBuilder.HasDbFunction(typeof(DatabaseContext).GetMethod(nameof(MD5))!)
-				.HasTranslation(args =>
-					new SqlFunctionExpression(
-						"md5",
-						args,
-						nullable: true,
-						argumentsPropagateNullability: new[] { false },
-						type: args[0].Type,
-						typeMapping: args[0].TypeMapping
-					)
+			modelBuilder
+				.HasDbFunction(typeof(DatabaseContext).GetMethod(nameof(MD5))!)
+				.HasTranslation(
+					args =>
+						new SqlFunctionExpression(
+							"md5",
+							args,
+							nullable: true,
+							argumentsPropagateNullability: new[] { false },
+							type: args[0].Type,
+							typeMapping: args[0].TypeMapping
+						)
 				);
 
 			base.OnModelCreating(modelBuilder);
@@ -130,7 +131,12 @@ namespace Kyoo.Postgresql
 		/// <inheritdoc />
 		protected override bool IsDuplicateException(Exception ex)
 		{
-			return ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation or PostgresErrorCodes.ForeignKeyViolation };
+			return ex.InnerException
+				is PostgresException
+				{
+					SqlState: PostgresErrorCodes.UniqueViolation
+						or PostgresErrorCodes.ForeignKeyViolation
+				};
 		}
 	}
 }

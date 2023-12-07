@@ -45,9 +45,11 @@ namespace Kyoo.Utils
 		/// set to those of <paramref name="first"/>.
 		/// </returns>
 		[ContractAnnotation("first:notnull => notnull; second:notnull => notnull", true)]
-		public static IDictionary<T, T2>? CompleteDictionaries<T, T2>(IDictionary<T, T2>? first,
+		public static IDictionary<T, T2>? CompleteDictionaries<T, T2>(
+			IDictionary<T, T2>? first,
 			IDictionary<T, T2>? second,
-			out bool hasChanged)
+			out bool hasChanged
+		)
 		{
 			if (first == null)
 			{
@@ -58,7 +60,9 @@ namespace Kyoo.Utils
 			hasChanged = false;
 			if (second == null)
 				return first;
-			hasChanged = second.Any(x => !first.ContainsKey(x.Key) || x.Value?.Equals(first[x.Key]) == false);
+			hasChanged = second.Any(
+				x => !first.ContainsKey(x.Key) || x.Value?.Equals(first[x.Key]) == false
+			);
 			foreach ((T key, T2 value) in first)
 				second.TryAdd(key, value);
 			return second;
@@ -83,17 +87,22 @@ namespace Kyoo.Utils
 		/// </param>
 		/// <typeparam name="T">Fields of T will be completed</typeparam>
 		/// <returns><paramref name="first"/></returns>
-		public static T Complete<T>(T first,
+		public static T Complete<T>(
+			T first,
 			T? second,
-			[InstantHandle] Func<PropertyInfo, bool>? where = null)
+			[InstantHandle] Func<PropertyInfo, bool>? where = null
+		)
 		{
 			if (second == null)
 				return first;
 
 			Type type = typeof(T);
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
-				.Where(x => x is { CanRead: true, CanWrite: true }
-					&& Attribute.GetCustomAttribute(x, typeof(NotMergeableAttribute)) == null);
+				.Where(
+					x =>
+						x is { CanRead: true, CanWrite: true }
+						&& Attribute.GetCustomAttribute(x, typeof(NotMergeableAttribute)) == null
+				);
 
 			if (where != null)
 				properties = properties.Where(where);
@@ -107,19 +116,16 @@ namespace Kyoo.Utils
 
 				if (Utility.IsOfGenericType(property.PropertyType, typeof(IDictionary<,>)))
 				{
-					Type[] dictionaryTypes = Utility.GetGenericDefinition(property.PropertyType, typeof(IDictionary<,>))!
+					Type[] dictionaryTypes = Utility
+						.GetGenericDefinition(property.PropertyType, typeof(IDictionary<,>))!
 						.GenericTypeArguments;
-					object?[] parameters =
-					{
-						property.GetValue(first),
-						value,
-						false
-					};
+					object?[] parameters = { property.GetValue(first), value, false };
 					object newDictionary = Utility.RunGenericMethod<object>(
 						typeof(Merger),
 						nameof(CompleteDictionaries),
 						dictionaryTypes,
-						parameters)!;
+						parameters
+					)!;
 					if ((bool)parameters[2]!)
 						property.SetValue(first, newDictionary);
 				}

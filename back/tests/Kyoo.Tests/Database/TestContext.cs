@@ -29,8 +29,7 @@ using Xunit.Abstractions;
 namespace Kyoo.Tests
 {
 	[CollectionDefinition(nameof(Postgresql))]
-	public class PostgresCollection : ICollectionFixture<PostgresFixture>
-	{ }
+	public class PostgresCollection : ICollectionFixture<PostgresFixture> { }
 
 	public sealed class PostgresFixture : IDisposable
 	{
@@ -45,9 +44,7 @@ namespace Kyoo.Tests
 			string id = Guid.NewGuid().ToString().Replace('-', '_');
 			Template = $"kyoo_template_{id}";
 
-			_options = new DbContextOptionsBuilder<DatabaseContext>()
-				.UseNpgsql(Connection)
-				.Options;
+			_options = new DbContextOptionsBuilder<DatabaseContext>().UseNpgsql(Connection).Options;
 
 			using PostgresContext context = new(_options, null);
 			context.Database.Migrate();
@@ -80,17 +77,23 @@ namespace Kyoo.Tests
 			using (NpgsqlConnection connection = new(template.Connection))
 			{
 				connection.Open();
-				using NpgsqlCommand cmd = new($"CREATE DATABASE {_database} WITH TEMPLATE {template.Template}", connection);
+				using NpgsqlCommand cmd =
+					new(
+						$"CREATE DATABASE {_database} WITH TEMPLATE {template.Template}",
+						connection
+					);
 				cmd.ExecuteNonQuery();
 			}
 
 			_context = new DbContextOptionsBuilder<DatabaseContext>()
 				.UseNpgsql(GetConnectionString(_database))
-				.UseLoggerFactory(LoggerFactory.Create(x =>
-				{
-					x.ClearProviders();
-					x.AddXunit(output);
-				}))
+				.UseLoggerFactory(
+					LoggerFactory.Create(x =>
+					{
+						x.ClearProviders();
+						x.AddXunit(output);
+					})
+				)
 				.EnableSensitiveDataLogging()
 				.EnableDetailedErrors()
 				.Options;
@@ -101,7 +104,8 @@ namespace Kyoo.Tests
 			string server = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "127.0.0.1";
 			string port = Environment.GetEnvironmentVariable("POSTGRES_PORT") ?? "5432";
 			string username = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "KyooUser";
-			string password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "KyooPassword";
+			string password =
+				Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "KyooPassword";
 			return $"Server={server};Port={port};Database={database};User ID={username};Password={password};Include Error Detail=true";
 		}
 

@@ -52,8 +52,7 @@ namespace Kyoo.Core.Api
 		/// The library manager used to modify or retrieve information in the data store.
 		/// </param>
 		/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
-		public SeasonApi(ILibraryManager libraryManager,
-			IThumbnailsManager thumbs)
+		public SeasonApi(ILibraryManager libraryManager, IThumbnailsManager thumbs)
 			: base(libraryManager.Seasons, thumbs)
 		{
 			_libraryManager = libraryManager;
@@ -79,20 +78,30 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Page<Episode>>> GetEpisode(Identifier identifier,
+		public async Task<ActionResult<Page<Episode>>> GetEpisode(
+			Identifier identifier,
 			[FromQuery] Sort<Episode> sortBy,
 			[FromQuery] Filter<Episode>? filter,
 			[FromQuery] Pagination pagination,
-			[FromQuery] Include<Episode> fields)
+			[FromQuery] Include<Episode> fields
+		)
 		{
-			ICollection<Episode> resources = await _libraryManager.Episodes.GetAll(
-				Filter.And(filter, identifier.Matcher<Episode>(x => x.SeasonId, x => x.Season!.Slug)),
-				sortBy,
-				fields,
-				pagination
-			);
+			ICollection<Episode> resources = await _libraryManager
+				.Episodes
+				.GetAll(
+					Filter.And(
+						filter,
+						identifier.Matcher<Episode>(x => x.SeasonId, x => x.Season!.Slug)
+					),
+					sortBy,
+					fields,
+					pagination
+				);
 
-			if (!resources.Any() && await _libraryManager.Seasons.GetOrDefault(identifier.IsSame<Season>()) == null)
+			if (
+				!resources.Any()
+				&& await _libraryManager.Seasons.GetOrDefault(identifier.IsSame<Season>()) == null
+			)
 				return NotFound();
 			return Page(resources, pagination.Limit);
 		}
@@ -111,12 +120,14 @@ namespace Kyoo.Core.Api
 		[PartialPermission(Kind.Read)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Show>> GetShow(Identifier identifier, [FromQuery] Include<Show> fields)
+		public async Task<ActionResult<Show>> GetShow(
+			Identifier identifier,
+			[FromQuery] Include<Show> fields
+		)
 		{
-			Show? ret = await _libraryManager.Shows.GetOrDefault(
-				identifier.IsContainedIn<Show, Season>(x => x.Seasons!),
-				fields
-			);
+			Show? ret = await _libraryManager
+				.Shows
+				.GetOrDefault(identifier.IsContainedIn<Show, Season>(x => x.Seasons!), fields);
 			if (ret == null)
 				return NotFound();
 			return ret;

@@ -55,9 +55,7 @@ namespace Kyoo.Host
 		}
 
 		/// <inheritdoc />
-		public IEnumerable<IStartupAction> ConfigureSteps => new[]
-		{
-			SA.New<IApplicationBuilder>(app => app.UseSerilogRequestLogging(), SA.Before)
-		};
+		public IEnumerable<IStartupAction> ConfigureSteps =>
+			new[] { SA.New<IApplicationBuilder>(app => app.UseSerilogRequestLogging(), SA.Before) };
 	}
 }

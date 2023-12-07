@@ -79,14 +79,24 @@ namespace Kyoo.Postgresql
 
 			SqlMapper.TypeMapProvider = (type) =>
 			{
-				return new CustomPropertyTypeMap(type, (type, name) =>
-				{
-					string newName = Regex.Replace(name, "(^|_)([a-z])", (match) => match.Groups[2].Value.ToUpperInvariant());
-					// TODO: Add images handling here (name: poster_source, newName: PosterSource) should set Poster.Source
-					return type.GetProperty(newName)!;
-				});
+				return new CustomPropertyTypeMap(
+					type,
+					(type, name) =>
+					{
+						string newName = Regex.Replace(
+							name,
+							"(^|_)([a-z])",
+							(match) => match.Groups[2].Value.ToUpperInvariant()
+						);
+						// TODO: Add images handling here (name: poster_source, newName: PosterSource) should set Poster.Source
+						return type.GetProperty(newName)!;
+					}
+				);
 			};
-			SqlMapper.AddTypeHandler(typeof(Dictionary<string, MetadataId>), new JsonTypeHandler<Dictionary<string, MetadataId>>());
+			SqlMapper.AddTypeHandler(
+				typeof(Dictionary<string, MetadataId>),
+				new JsonTypeHandler<Dictionary<string, MetadataId>>()
+			);
 			SqlMapper.AddTypeHandler(typeof(List<string>), new ListTypeHandler<string>());
 			SqlMapper.AddTypeHandler(typeof(List<Genre>), new ListTypeHandler<Genre>());
 			SqlMapper.AddTypeHandler(typeof(Wrapper), new Wrapper.Handler());
@@ -97,26 +107,31 @@ namespace Kyoo.Postgresql
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services)
 		{
-			DbConnectionStringBuilder builder = new()
-			{
-				["USER ID"] = _configuration.GetValue("POSTGRES_USER", "KyooUser"),
-				["PASSWORD"] = _configuration.GetValue("POSTGRES_PASSWORD", "KyooPassword"),
-				["SERVER"] = _configuration.GetValue("POSTGRES_SERVER", "db"),
-				["PORT"] = _configuration.GetValue("POSTGRES_PORT", "5432"),
-				["DATABASE"] = _configuration.GetValue("POSTGRES_DB", "kyooDB"),
-				["POOLING"] = "true",
-				["MAXPOOLSIZE"] = "95",
-				["TIMEOUT"] = "30"
-			};
+			DbConnectionStringBuilder builder =
+				new()
+				{
+					["USER ID"] = _configuration.GetValue("POSTGRES_USER", "KyooUser"),
+					["PASSWORD"] = _configuration.GetValue("POSTGRES_PASSWORD", "KyooPassword"),
+					["SERVER"] = _configuration.GetValue("POSTGRES_SERVER", "db"),
+					["PORT"] = _configuration.GetValue("POSTGRES_PORT", "5432"),
+					["DATABASE"] = _configuration.GetValue("POSTGRES_DB", "kyooDB"),
+					["POOLING"] = "true",
+					["MAXPOOLSIZE"] = "95",
+					["TIMEOUT"] = "30"
+				};
 
-			services.AddDbContext<DatabaseContext, PostgresContext>(x =>
-			{
-				x.UseNpgsql(builder.ConnectionString)
-					.UseProjectables();
-				if (_environment.IsDevelopment())
-					x.EnableDetailedErrors().EnableSensitiveDataLogging();
-			}, ServiceLifetime.Transient);
-			services.AddTransient<DbConnection>((_) => new NpgsqlConnection(builder.ConnectionString));
+			services.AddDbContext<DatabaseContext, PostgresContext>(
+				x =>
+				{
+					x.UseNpgsql(builder.ConnectionString).UseProjectables();
+					if (_environment.IsDevelopment())
+						x.EnableDetailedErrors().EnableSensitiveDataLogging();
+				},
+				ServiceLifetime.Transient
+			);
+			services.AddTransient<DbConnection>(
+				(_) => new NpgsqlConnection(builder.ConnectionString)
+			);
 
 			services.AddHealthChecks().AddDbContextCheck<DatabaseContext>();
 		}

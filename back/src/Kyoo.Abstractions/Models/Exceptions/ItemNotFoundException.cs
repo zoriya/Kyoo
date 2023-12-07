@@ -37,8 +37,7 @@ namespace Kyoo.Abstractions.Models.Exceptions
 		/// </summary>
 		/// <param name="message">The message of the exception</param>
 		public ItemNotFoundException(string message)
-			: base(message)
-		{ }
+			: base(message) { }
 
 		/// <summary>
 		/// The serialization constructor
@@ -46,7 +45,6 @@ namespace Kyoo.Abstractions.Models.Exceptions
 		/// <param name="info">Serialization infos</param>
 		/// <param name="context">The serialization context</param>
 		protected ItemNotFoundException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{ }
+			: base(info, context) { }
 	}
 }

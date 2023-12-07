@@ -24,5 +24,4 @@ namespace Kyoo.Abstractions.Models;
 /// A watch list item.
 /// </summary>
 [OneOf(Types = new[] { typeof(Show), typeof(Movie) })]
-public interface IWatchlist : IResource, IThumbnails, IMetadata, IAddedDate
-{ }
+public interface IWatchlist : IResource, IThumbnails, IMetadata, IAddedDate { }

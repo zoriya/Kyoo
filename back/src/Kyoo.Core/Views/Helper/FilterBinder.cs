@@ -28,10 +28,14 @@ public class FilterBinder : IModelBinder
 {
 	public Task BindModelAsync(ModelBindingContext bindingContext)
 	{
-		ValueProviderResult fields = bindingContext.ValueProvider.GetValue(bindingContext.FieldName);
+		ValueProviderResult fields = bindingContext
+			.ValueProvider
+			.GetValue(bindingContext.FieldName);
 		try
 		{
-			object? filter = bindingContext.ModelType.GetMethod(nameof(Filter<object>.From))!
+			object? filter = bindingContext
+				.ModelType
+				.GetMethod(nameof(Filter<object>.From))!
 				.Invoke(null, new object?[] { fields.FirstValue });
 			bindingContext.Result = ModelBindingResult.Success(filter);
 			return Task.CompletedTask;

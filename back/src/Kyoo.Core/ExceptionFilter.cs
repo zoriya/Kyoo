@@ -66,7 +66,9 @@ namespace Kyoo.Core
 					break;
 				case Exception ex:
 					_logger.LogError(ex, "Unhandled error");
-					context.Result = new ServerErrorObjectResult(new RequestError("Internal Server Error"));
+					context.Result = new ServerErrorObjectResult(
+						new RequestError("Internal Server Error")
+					);
 					break;
 			}
 		}

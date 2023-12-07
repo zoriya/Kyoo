@@ -43,7 +43,6 @@ public abstract class DapperRepository<T> : IRepository<T>
 
 	protected SqlVariableContext Context { get; init; }
 
-
 	public DapperRepository(DbConnection database, SqlVariableContext context)
 	{
 		Database = database;
@@ -69,11 +68,13 @@ public abstract class DapperRepository<T> : IRepository<T>
 	}
 
 	/// <inheritdoc/>
-	public virtual async Task<T> Get(Filter<T>? filter,
+	public virtual async Task<T> Get(
+		Filter<T>? filter,
 		Include<T>? include = default,
 		Sort<T>? sortBy = default,
 		bool reverse = false,
-		Guid? afterId = default)
+		Guid? afterId = default
+	)
 	{
 		T? ret = await GetOrDefault(filter, include, sortBy, reverse, afterId);
 		if (ret == null)
@@ -84,7 +85,8 @@ public abstract class DapperRepository<T> : IRepository<T>
 	/// <inheritdoc />
 	public async Task<ICollection<T>> FromIds(IList<Guid> ids, Include<T>? include = null)
 	{
-		return (await Database.Query<T>(
+		return (
+			await Database.Query<T>(
 				Sql,
 				Config,
 				Mapper,
@@ -94,7 +96,8 @@ public abstract class DapperRepository<T> : IRepository<T>
 				Filter.Or(ids.Select(x => new Filter<T>.Eq("id", x)).ToArray()),
 				sort: null,
 				limit: null
-			))
+			)
+		)
 			.OrderBy(x => ids.IndexOf(x.Id))
 			.ToList();
 	}
@@ -138,11 +141,13 @@ public abstract class DapperRepository<T> : IRepository<T>
 	}
 
 	/// <inheritdoc />
-	public virtual Task<T?> GetOrDefault(Filter<T>? filter,
+	public virtual Task<T?> GetOrDefault(
+		Filter<T>? filter,
 		Include<T>? include = default,
 		Sort<T>? sortBy = default,
 		bool reverse = false,
-		Guid? afterId = default)
+		Guid? afterId = default
+	)
 	{
 		return Database.QuerySingle<T>(
 			Sql,
@@ -158,10 +163,12 @@ public abstract class DapperRepository<T> : IRepository<T>
 	}
 
 	/// <inheritdoc />
-	public Task<ICollection<T>> GetAll(Filter<T>? filter = default,
+	public Task<ICollection<T>> GetAll(
+		Filter<T>? filter = default,
 		Sort<T>? sort = default,
 		Include<T>? include = default,
-		Pagination? limit = default)
+		Pagination? limit = default
+	)
 	{
 		return Database.Query<T>(
 			Sql,
@@ -179,16 +186,12 @@ public abstract class DapperRepository<T> : IRepository<T>
 	/// <inheritdoc />
 	public Task<int> GetCount(Filter<T>? filter = null)
 	{
-		return Database.Count(
-			Sql,
-			Config,
-			Context,
-			filter
-		);
+		return Database.Count(Sql, Config, Context, filter);
 	}
 
 	/// <inheritdoc />
-	public Task<ICollection<T>> Search(string query, Include<T>? include = null) => throw new NotImplementedException();
+	public Task<ICollection<T>> Search(string query, Include<T>? include = null) =>
+		throw new NotImplementedException();
 
 	/// <inheritdoc />
 	public Task<T> Create(T obj) => throw new NotImplementedException();

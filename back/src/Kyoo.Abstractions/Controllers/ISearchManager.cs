@@ -35,10 +35,12 @@ public interface ISearchManager
 	/// <param name="pagination">How pagination should be done (where to start and how many to return)</param>
 	/// <param name="include">The related fields to include.</param>
 	/// <returns>A list of resources that match every filters</returns>
-	public Task<SearchPage<ILibraryItem>.SearchResult> SearchItems(string? query,
+	public Task<SearchPage<ILibraryItem>.SearchResult> SearchItems(
+		string? query,
 		Sort<ILibraryItem> sortBy,
 		SearchPagination pagination,
-		Include<ILibraryItem>? include = default);
+		Include<ILibraryItem>? include = default
+	);
 
 	/// <summary>
 	/// Search for movies.
@@ -48,10 +50,12 @@ public interface ISearchManager
 	/// <param name="pagination">How pagination should be done (where to start and how many to return)</param>
 	/// <param name="include">The related fields to include.</param>
 	/// <returns>A list of resources that match every filters</returns>
-	public Task<SearchPage<Movie>.SearchResult> SearchMovies(string? query,
+	public Task<SearchPage<Movie>.SearchResult> SearchMovies(
+		string? query,
 		Sort<Movie> sortBy,
 		SearchPagination pagination,
-		Include<Movie>? include = default);
+		Include<Movie>? include = default
+	);
 
 	/// <summary>
 	/// Search for shows.
@@ -61,10 +65,12 @@ public interface ISearchManager
 	/// <param name="pagination">How pagination should be done (where to start and how many to return)</param>
 	/// <param name="include">The related fields to include.</param>
 	/// <returns>A list of resources that match every filters</returns>
-	public Task<SearchPage<Show>.SearchResult> SearchShows(string? query,
+	public Task<SearchPage<Show>.SearchResult> SearchShows(
+		string? query,
 		Sort<Show> sortBy,
 		SearchPagination pagination,
-		Include<Show>? include = default);
+		Include<Show>? include = default
+	);
 
 	/// <summary>
 	/// Search for collections.
@@ -74,10 +80,12 @@ public interface ISearchManager
 	/// <param name="pagination">How pagination should be done (where to start and how many to return)</param>
 	/// <param name="include">The related fields to include.</param>
 	/// <returns>A list of resources that match every filters</returns>
-	public Task<SearchPage<Collection>.SearchResult> SearchCollections(string? query,
+	public Task<SearchPage<Collection>.SearchResult> SearchCollections(
+		string? query,
 		Sort<Collection> sortBy,
 		SearchPagination pagination,
-		Include<Collection>? include = default);
+		Include<Collection>? include = default
+	);
 
 	/// <summary>
 	/// Search for episodes.
@@ -87,10 +95,12 @@ public interface ISearchManager
 	/// <param name="pagination">How pagination should be done (where to start and how many to return)</param>
 	/// <param name="include">The related fields to include.</param>
 	/// <returns>A list of resources that match every filters</returns>
-	public Task<SearchPage<Episode>.SearchResult> SearchEpisodes(string? query,
+	public Task<SearchPage<Episode>.SearchResult> SearchEpisodes(
+		string? query,
 		Sort<Episode> sortBy,
 		SearchPagination pagination,
-		Include<Episode>? include = default);
+		Include<Episode>? include = default
+	);
 
 	/// <summary>
 	/// Search for studios.
@@ -100,8 +110,10 @@ public interface ISearchManager
 	/// <param name="pagination">How pagination should be done (where to start and how many to return)</param>
 	/// <param name="include">The related fields to include.</param>
 	/// <returns>A list of resources that match every filters</returns>
-	public Task<SearchPage<Studio>.SearchResult> SearchStudios(string? query,
+	public Task<SearchPage<Studio>.SearchResult> SearchStudios(
+		string? query,
 		Sort<Studio> sortBy,
 		SearchPagination pagination,
-		Include<Studio>? include = default);
+		Include<Studio>? include = default
+	);
 }

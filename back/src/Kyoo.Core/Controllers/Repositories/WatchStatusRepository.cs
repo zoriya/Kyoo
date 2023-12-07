@@ -66,7 +66,9 @@ public class WatchStatusRepository : IWatchStatusRepository
 		{
 			await using AsyncServiceScope scope = CoreModule.Services.CreateAsyncScope();
 			DatabaseContext db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
-			WatchStatusRepository repo = scope.ServiceProvider.GetRequiredService<WatchStatusRepository>();
+			WatchStatusRepository repo = scope
+				.ServiceProvider
+				.GetRequiredService<WatchStatusRepository>();
 			List<Guid> users = await db.ShowWatchStatus
 				.IgnoreQueryFilters()
 				.Where(x => x.ShowId == ep.ShowId && x.Status == WatchStatus.Completed)
@@ -77,10 +79,12 @@ public class WatchStatusRepository : IWatchStatusRepository
 		};
 	}
 
-	public WatchStatusRepository(DatabaseContext database,
+	public WatchStatusRepository(
+		DatabaseContext database,
 		IRepository<Movie> movies,
 		DbConnection db,
-		SqlVariableContext context)
+		SqlVariableContext context
+	)
 	{
 		_database = database;
 		_movies = movies;
@@ -89,7 +93,8 @@ public class WatchStatusRepository : IWatchStatusRepository
 	}
 
 	// language=PostgreSQL
-	protected FormattableString Sql => $"""
+	protected FormattableString Sql =>
+		$"""
 		select
 			s.*,
 			swe.*, -- Episode as swe
@@ -126,7 +131,8 @@ public class WatchStatusRepository : IWatchStatusRepository
 			coalesce(s.id, m.id) asc
 		""";
 
-	protected Dictionary<string, Type> Config => new()
+	protected Dictionary<string, Type> Config =>
+		new()
 		{
 			{ "s", typeof(Show) },
 			{ "_sw", typeof(ShowWatchStatus) },
@@ -178,10 +184,14 @@ public class WatchStatusRepository : IWatchStatusRepository
 	public async Task<ICollection<IWatchlist>> GetAll(
 		Filter<IWatchlist>? filter = default,
 		Include<IWatchlist>? include = default,
-		Pagination? limit = default)
+		Pagination? limit = default
+	)
 	{
 		if (include != null)
-			include.Metadatas = include.Metadatas.Where(x => x.Name != nameof(Show.WatchStatus)).ToList();
+			include.Metadatas = include
+				.Metadatas
+				.Where(x => x.Name != nameof(Show.WatchStatus))
+				.ToList();
 
 		// We can't use the generic after id hanler since the sort depends on a relation.
 		if (limit?.AfterID != null)
@@ -216,7 +226,9 @@ public class WatchStatusRepository : IWatchStatusRepository
 	/// <inheritdoc />
 	public Task<MovieWatchStatus?> GetMovieStatus(Guid movieId, Guid userId)
 	{
-		return _database.MovieWatchStatus.FirstOrDefaultAsync(x => x.MovieId == movieId && x.UserId == userId);
+		return _database
+			.MovieWatchStatus
+			.FirstOrDefaultAsync(x => x.MovieId == movieId && x.UserId == userId);
 	}
 
 	/// <inheritdoc />
@@ -224,12 +236,14 @@ public class WatchStatusRepository : IWatchStatusRepository
 		Guid movieId,
 		Guid userId,
 		WatchStatus status,
-		int? watchedTime)
+		int? watchedTime
+	)
 	{
 		Movie movie = await _movies.Get(movieId);
-		int? percent = watchedTime != null && movie.Runtime > 0
-			? (int)Math.Round(watchedTime.Value / (movie.Runtime * 60f) * 100f)
-			: null;
+		int? percent =
+			watchedTime != null && movie.Runtime > 0
+				? (int)Math.Round(watchedTime.Value / (movie.Runtime * 60f) * 100f)
+				: null;
 
 		if (percent < MinWatchPercent)
 			return null;
@@ -241,30 +255,34 @@ public class WatchStatusRepository : IWatchStatusRepository
 		}
 
 		if (watchedTime.HasValue && status != WatchStatus.Watching)
-			throw new ValidationException("Can't have a watched time if the status is not watching.");
+			throw new ValidationException(
+				"Can't have a watched time if the status is not watching."
+			);
 
-		MovieWatchStatus ret = new()
-		{
-			UserId = userId,
-			MovieId = movieId,
-			Status = status,
-			WatchedTime = watchedTime,
-			WatchedPercent = percent,
-			AddedDate = DateTime.UtcNow,
-			PlayedDate = status == WatchStatus.Completed ? DateTime.UtcNow : null,
-		};
-		await _database.MovieWatchStatus.Upsert(ret)
+		MovieWatchStatus ret =
+			new()
+			{
+				UserId = userId,
+				MovieId = movieId,
+				Status = status,
+				WatchedTime = watchedTime,
+				WatchedPercent = percent,
+				AddedDate = DateTime.UtcNow,
+				PlayedDate = status == WatchStatus.Completed ? DateTime.UtcNow : null,
+			};
+		await _database
+			.MovieWatchStatus
+			.Upsert(ret)
 			.UpdateIf(x => status != Watching || x.Status != Completed)
 			.RunAsync();
 		return ret;
 	}
 
 	/// <inheritdoc />
-	public async Task DeleteMovieStatus(
-		Guid movieId,
-		Guid userId)
+	public async Task DeleteMovieStatus(Guid movieId, Guid userId)
 	{
-		await _database.MovieWatchStatus
+		await _database
+			.MovieWatchStatus
 			.Where(x => x.MovieId == movieId && x.UserId == userId)
 			.ExecuteDeleteAsync();
 	}
@@ -272,28 +290,34 @@ public class WatchStatusRepository : IWatchStatusRepository
 	/// <inheritdoc />
 	public Task<ShowWatchStatus?> GetShowStatus(Guid showId, Guid userId)
 	{
-		return _database.ShowWatchStatus.FirstOrDefaultAsync(x => x.ShowId == showId && x.UserId == userId);
+		return _database
+			.ShowWatchStatus
+			.FirstOrDefaultAsync(x => x.ShowId == showId && x.UserId == userId);
 	}
 
 	/// <inheritdoc />
-	public Task<ShowWatchStatus?> SetShowStatus(
-		Guid showId,
-		Guid userId,
-		WatchStatus status
-	) => _SetShowStatus(showId, userId, status);
+	public Task<ShowWatchStatus?> SetShowStatus(Guid showId, Guid userId, WatchStatus status) =>
+		_SetShowStatus(showId, userId, status);
 
 	private async Task<ShowWatchStatus?> _SetShowStatus(
 		Guid showId,
 		Guid userId,
 		WatchStatus status,
-		bool newEpisode = false)
+		bool newEpisode = false
+	)
 	{
-		int unseenEpisodeCount = status != WatchStatus.Completed
-			? await _database.Episodes
-				.Where(x => x.ShowId == showId)
-				.Where(x => x.Watched!.First(x => x.UserId == userId)!.Status != WatchStatus.Completed)
-				.CountAsync()
-			: 0;
+		int unseenEpisodeCount =
+			status != WatchStatus.Completed
+				? await _database
+					.Episodes
+					.Where(x => x.ShowId == showId)
+					.Where(
+						x =>
+							x.Watched!.First(x => x.UserId == userId)!.Status
+							!= WatchStatus.Completed
+					)
+					.CountAsync()
+				: 0;
 		if (unseenEpisodeCount == 0)
 			status = WatchStatus.Completed;
 
@@ -301,79 +325,105 @@ public class WatchStatusRepository : IWatchStatusRepository
 		Guid? nextEpisodeId = null;
 		if (status == WatchStatus.Watching)
 		{
-			var cursor = await _database.Episodes
+			var cursor = await _database
+				.Episodes
 				.IgnoreQueryFilters()
 				.Where(x => x.ShowId == showId)
 				.OrderByDescending(x => x.AbsoluteNumber)
 				.OrderByDescending(x => x.SeasonNumber)
 				.OrderByDescending(x => x.EpisodeNumber)
 				.Select(x => new { x.Id, Status = x.Watched!.First(x => x.UserId == userId) })
-				.FirstOrDefaultAsync(x => x.Status.Status == WatchStatus.Completed || x.Status.Status == WatchStatus.Watching);
+				.FirstOrDefaultAsync(
+					x =>
+						x.Status.Status == WatchStatus.Completed
+						|| x.Status.Status == WatchStatus.Watching
+				);
 			cursorWatchStatus = cursor?.Status;
-			nextEpisodeId = cursor?.Status.Status == WatchStatus.Watching
-				? cursor.Id
-				: await _database.Episodes
-					.IgnoreQueryFilters()
-					.Where(x => x.ShowId == showId)
-					.OrderByDescending(x => x.AbsoluteNumber)
-					.OrderByDescending(x => x.SeasonNumber)
-					.OrderByDescending(x => x.EpisodeNumber)
-					.Select(x => new { x.Id, Status = x.Watched!.FirstOrDefault(x => x.UserId == userId) })
-					.Where(x => x.Status == null || x.Status.Status != WatchStatus.Completed)
-					.Select(x => x.Id)
-					.FirstOrDefaultAsync();
+			nextEpisodeId =
+				cursor?.Status.Status == WatchStatus.Watching
+					? cursor.Id
+					: await _database
+						.Episodes
+						.IgnoreQueryFilters()
+						.Where(x => x.ShowId == showId)
+						.OrderByDescending(x => x.AbsoluteNumber)
+						.OrderByDescending(x => x.SeasonNumber)
+						.OrderByDescending(x => x.EpisodeNumber)
+						.Select(
+							x =>
+								new
+								{
+									x.Id,
+									Status = x.Watched!.FirstOrDefault(x => x.UserId == userId)
+								}
+						)
+						.Where(x => x.Status == null || x.Status.Status != WatchStatus.Completed)
+						.Select(x => x.Id)
+						.FirstOrDefaultAsync();
 		}
 		else if (status == WatchStatus.Completed)
 		{
-			List<Guid> episodes = await _database.Episodes
+			List<Guid> episodes = await _database
+				.Episodes
 				.Where(x => x.ShowId == showId)
 				.Select(x => x.Id)
 				.ToListAsync();
-			await _database.EpisodeWatchStatus
-				.UpsertRange(episodes.Select(episodeId => new EpisodeWatchStatus
-				{
-					UserId = userId,
-					EpisodeId = episodeId,
-					Status = WatchStatus.Completed,
-					AddedDate = DateTime.UtcNow,
-					PlayedDate = DateTime.UtcNow
-				}))
+			await _database
+				.EpisodeWatchStatus
+				.UpsertRange(
+					episodes.Select(
+						episodeId =>
+							new EpisodeWatchStatus
+							{
+								UserId = userId,
+								EpisodeId = episodeId,
+								Status = WatchStatus.Completed,
+								AddedDate = DateTime.UtcNow,
+								PlayedDate = DateTime.UtcNow
+							}
+					)
+				)
 				.UpdateIf(x => x.Status == Watching || x.Status == Planned)
 				.RunAsync();
 		}
 
-		ShowWatchStatus ret = new()
-		{
-			UserId = userId,
-			ShowId = showId,
-			Status = status,
-			AddedDate = DateTime.UtcNow,
-			NextEpisodeId = nextEpisodeId,
-			WatchedTime = cursorWatchStatus?.Status == WatchStatus.Watching
-				? cursorWatchStatus.WatchedTime
-				: null,
-			WatchedPercent = cursorWatchStatus?.Status == WatchStatus.Watching
-				? cursorWatchStatus.WatchedPercent
-				: null,
-			UnseenEpisodesCount = unseenEpisodeCount,
-			PlayedDate = status == WatchStatus.Completed ? DateTime.UtcNow : null,
-		};
-		await _database.ShowWatchStatus.Upsert(ret)
+		ShowWatchStatus ret =
+			new()
+			{
+				UserId = userId,
+				ShowId = showId,
+				Status = status,
+				AddedDate = DateTime.UtcNow,
+				NextEpisodeId = nextEpisodeId,
+				WatchedTime =
+					cursorWatchStatus?.Status == WatchStatus.Watching
+						? cursorWatchStatus.WatchedTime
+						: null,
+				WatchedPercent =
+					cursorWatchStatus?.Status == WatchStatus.Watching
+						? cursorWatchStatus.WatchedPercent
+						: null,
+				UnseenEpisodesCount = unseenEpisodeCount,
+				PlayedDate = status == WatchStatus.Completed ? DateTime.UtcNow : null,
+			};
+		await _database
+			.ShowWatchStatus
+			.Upsert(ret)
 			.UpdateIf(x => status != Watching || x.Status != Completed || newEpisode)
 			.RunAsync();
 		return ret;
 	}
 
 	/// <inheritdoc />
-	public async Task DeleteShowStatus(
-		Guid showId,
-		Guid userId)
+	public async Task DeleteShowStatus(Guid showId, Guid userId)
 	{
-		await _database.ShowWatchStatus
+		await _database
+			.ShowWatchStatus
 			.IgnoreAutoIncludes()
 			.Where(x => x.ShowId == showId && x.UserId == userId)
 			.ExecuteDeleteAsync();
-		await _database.EpisodeWatchStatus
+		await _database
+			.EpisodeWatchStatus
 			.Where(x => x.Episode.ShowId == showId && x.UserId == userId)
 			.ExecuteDeleteAsync();
 	}
@@ -381,7 +431,9 @@ public class WatchStatusRepository : IWatchStatusRepository
 	/// <inheritdoc />
 	public Task<EpisodeWatchStatus?> GetEpisodeStatus(Guid episodeId, Guid userId)
 	{
-		return _database.EpisodeWatchStatus.FirstOrDefaultAsync(x => x.EpisodeId == episodeId && x.UserId == userId);
+		return _database
+			.EpisodeWatchStatus
+			.FirstOrDefaultAsync(x => x.EpisodeId == episodeId && x.UserId == userId);
 	}
 
 	/// <inheritdoc />
@@ -389,12 +441,14 @@ public class WatchStatusRepository : IWatchStatusRepository
 		Guid episodeId,
 		Guid userId,
 		WatchStatus status,
-		int? watchedTime)
+		int? watchedTime
+	)
 	{
 		Episode episode = await _database.Episodes.FirstAsync(x => x.Id == episodeId);
-		int? percent = watchedTime != null && episode.Runtime > 0
-			? (int)Math.Round(watchedTime.Value / (episode.Runtime * 60f) * 100f)
-			: null;
+		int? percent =
+			watchedTime != null && episode.Runtime > 0
+				? (int)Math.Round(watchedTime.Value / (episode.Runtime * 60f) * 100f)
+				: null;
 
 		if (percent < MinWatchPercent)
 			return null;
@@ -406,19 +460,24 @@ public class WatchStatusRepository : IWatchStatusRepository
 		}
 
 		if (watchedTime.HasValue && status != WatchStatus.Watching)
-			throw new ValidationException("Can't have a watched time if the status is not watching.");
+			throw new ValidationException(
+				"Can't have a watched time if the status is not watching."
+			);
 
-		EpisodeWatchStatus ret = new()
-		{
-			UserId = userId,
-			EpisodeId = episodeId,
-			Status = status,
-			WatchedTime = watchedTime,
-			WatchedPercent = percent,
-			AddedDate = DateTime.UtcNow,
-			PlayedDate = status == WatchStatus.Completed ? DateTime.UtcNow : null,
-		};
-		await _database.EpisodeWatchStatus.Upsert(ret)
+		EpisodeWatchStatus ret =
+			new()
+			{
+				UserId = userId,
+				EpisodeId = episodeId,
+				Status = status,
+				WatchedTime = watchedTime,
+				WatchedPercent = percent,
+				AddedDate = DateTime.UtcNow,
+				PlayedDate = status == WatchStatus.Completed ? DateTime.UtcNow : null,
+			};
+		await _database
+			.EpisodeWatchStatus
+			.Upsert(ret)
 			.UpdateIf(x => status != Watching || x.Status != Completed)
 			.RunAsync();
 		await SetShowStatus(episode.ShowId, userId, WatchStatus.Watching);
@@ -426,11 +485,10 @@ public class WatchStatusRepository : IWatchStatusRepository
 	}
 
 	/// <inheritdoc />
-	public async Task DeleteEpisodeStatus(
-		Guid episodeId,
-		Guid userId)
+	public async Task DeleteEpisodeStatus(Guid episodeId, Guid userId)
 	{
-		await _database.EpisodeWatchStatus
+		await _database
+			.EpisodeWatchStatus
 			.Where(x => x.EpisodeId == episodeId && x.UserId == userId)
 			.ExecuteDeleteAsync();
 	}

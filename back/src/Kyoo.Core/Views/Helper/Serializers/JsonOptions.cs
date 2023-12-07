@@ -47,7 +47,9 @@ namespace Kyoo.Core.Api
 		/// <inheritdoc />
 		public void Configure(MvcNewtonsoftJsonOptions options)
 		{
-			options.SerializerSettings.ContractResolver = new JsonSerializerContract(_httpContextAccessor);
+			options.SerializerSettings.ContractResolver = new JsonSerializerContract(
+				_httpContextAccessor
+			);
 			options.SerializerSettings.Converters.Add(new PeopleRoleConverter());
 		}
 	}

@@ -50,7 +50,10 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public override async Task<ICollection<Studio>> Search(string query, Include<Studio>? include = default)
+		public override async Task<ICollection<Studio>> Search(
+			string query,
+			Include<Studio>? include = default
+		)
 		{
 			return await AddIncludes(_database.Studios, include)
 				.Where(x => EF.Functions.ILike(x.Name, $"%{query}%"))

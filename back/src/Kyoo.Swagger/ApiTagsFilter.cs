@@ -21,10 +21,10 @@ using System.Linq;
 using System.Reflection;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Swagger.Models;
-using Namotion.Reflection;
 using NSwag;
 using NSwag.Generation.AspNetCore;
 using NSwag.Generation.Processors.Contexts;
+using Namotion.Reflection;
 
 namespace Kyoo.Swagger
 {
@@ -42,21 +42,30 @@ namespace Kyoo.Swagger
 		/// <returns>This always return <c>true</c> since it should not remove operations.</returns>
 		public static bool OperationFilter(OperationProcessorContext context)
 		{
-			ApiDefinitionAttribute def = context.ControllerType.GetCustomAttribute<ApiDefinitionAttribute>();
+			ApiDefinitionAttribute def = context
+				.ControllerType
+				.GetCustomAttribute<ApiDefinitionAttribute>();
 			string name = def?.Name ?? context.ControllerType.Name;
 
-			ApiDefinitionAttribute methodOverride = context.MethodInfo.GetCustomAttribute<ApiDefinitionAttribute>();
+			ApiDefinitionAttribute methodOverride = context
+				.MethodInfo
+				.GetCustomAttribute<ApiDefinitionAttribute>();
 			if (methodOverride != null)
 				name = methodOverride.Name;
 
 			context.OperationDescription.Operation.Tags.Add(name);
 			if (context.Document.Tags.All(x => x.Name != name))
 			{
-				context.Document.Tags.Add(new OpenApiTag
-				{
-					Name = name,
-					Description = context.ControllerType.GetXmlDocsSummary()
-				});
+				context
+					.Document
+					.Tags
+					.Add(
+						new OpenApiTag
+						{
+							Name = name,
+							Description = context.ControllerType.GetXmlDocsSummary()
+						}
+					);
 			}
 
 			if (def?.Group == null)
@@ -73,11 +82,13 @@ namespace Kyoo.Swagger
 			}
 			else
 			{
-				obj.Add(new TagGroups
-				{
-					Name = def.Group,
-					Tags = new List<string> { def.Name }
-				});
+				obj.Add(
+					new TagGroups
+					{
+						Name = def.Group,
+						Tags = new List<string> { def.Name }
+					}
+				);
 			}
 
 			return true;
@@ -94,19 +105,14 @@ namespace Kyoo.Swagger
 		public static void AddLeftoversToOthersGroup(this OpenApiDocument postProcess)
 		{
 			List<TagGroups> tagGroups = (List<TagGroups>)postProcess.ExtensionData["x-tagGroups"];
-			List<string> tagsWithoutGroup = postProcess.Tags
+			List<string> tagsWithoutGroup = postProcess
+				.Tags
 				.Select(x => x.Name)
-				.Where(x => tagGroups
-					.SelectMany(y => y.Tags)
-					.All(y => y != x))
+				.Where(x => tagGroups.SelectMany(y => y.Tags).All(y => y != x))
 				.ToList();
 			if (tagsWithoutGroup.Any())
 			{
-				tagGroups.Add(new TagGroups
-				{
-					Name = "Others",
-					Tags = tagsWithoutGroup
-				});
+				tagGroups.Add(new TagGroups { Name = "Others", Tags = tagsWithoutGroup });
 			}
 		}
 

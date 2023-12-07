@@ -117,11 +117,13 @@ namespace Kyoo.Postgresql
 			where T2 : class, IResource
 		{
 			Set<Dictionary<string, object>>(LinkName<T1, T2>())
-				.Add(new Dictionary<string, object>
-				{
-					[LinkNameFk<T1>()] = first,
-					[LinkNameFk<T2>()] = second
-				});
+				.Add(
+					new Dictionary<string, object>
+					{
+						[LinkNameFk<T1>()] = first,
+						[LinkNameFk<T2>()] = second
+					}
+				);
 		}
 
 		protected DatabaseContext(IHttpContextAccessor accessor)
@@ -177,11 +179,16 @@ namespace Kyoo.Postgresql
 			// 	{
 			// 		x.ToJson();
 			// 	});
-			modelBuilder.Entity<T>()
+			modelBuilder
+				.Entity<T>()
 				.Property(x => x.ExternalId)
 				.HasConversion(
 					v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-					v => JsonSerializer.Deserialize<Dictionary<string, MetadataId>>(v, (JsonSerializerOptions?)null)!
+					v =>
+						JsonSerializer.Deserialize<Dictionary<string, MetadataId>>(
+							v,
+							(JsonSerializerOptions?)null
+						)!
 				)
 				.HasColumnType("json");
 		}
@@ -189,18 +196,16 @@ namespace Kyoo.Postgresql
 		private static void _HasImages<T>(ModelBuilder modelBuilder)
 			where T : class, IThumbnails
 		{
-			modelBuilder.Entity<T>()
-				.OwnsOne(x => x.Poster);
-			modelBuilder.Entity<T>()
-				.OwnsOne(x => x.Thumbnail);
-			modelBuilder.Entity<T>()
-				.OwnsOne(x => x.Logo);
+			modelBuilder.Entity<T>().OwnsOne(x => x.Poster);
+			modelBuilder.Entity<T>().OwnsOne(x => x.Thumbnail);
+			modelBuilder.Entity<T>().OwnsOne(x => x.Logo);
 		}
 
 		private static void _HasAddedDate<T>(ModelBuilder modelBuilder)
 			where T : class, IAddedDate
 		{
-			modelBuilder.Entity<T>()
+			modelBuilder
+				.Entity<T>()
 				.Property(x => x.AddedDate)
 				.HasDefaultValueSql("now() at time zone 'utc'")
 				.ValueGeneratedOnAdd();
@@ -215,27 +220,30 @@ namespace Kyoo.Postgresql
 		/// <param name="secondNavigation">The second navigation expression from T2 to T</param>
 		/// <typeparam name="T">The owning type of the relationship</typeparam>
 		/// <typeparam name="T2">The owned type of the relationship</typeparam>
-		private void _HasManyToMany<T, T2>(ModelBuilder modelBuilder,
+		private void _HasManyToMany<T, T2>(
+			ModelBuilder modelBuilder,
 			Expression<Func<T, IEnumerable<T2>?>> firstNavigation,
-			Expression<Func<T2, IEnumerable<T>?>> secondNavigation)
+			Expression<Func<T2, IEnumerable<T>?>> secondNavigation
+		)
 			where T : class, IResource
 			where T2 : class, IResource
 		{
-			modelBuilder.Entity<T2>()
+			modelBuilder
+				.Entity<T2>()
 				.HasMany(secondNavigation)
 				.WithMany(firstNavigation)
 				.UsingEntity<Dictionary<string, object>>(
 					LinkName<T, T2>(),
-					x => x
-						.HasOne<T>()
-						.WithMany()
-						.HasForeignKey(LinkNameFk<T>())
-						.OnDelete(DeleteBehavior.Cascade),
-					x => x
-						.HasOne<T2>()
-						.WithMany()
-						.HasForeignKey(LinkNameFk<T2>())
-						.OnDelete(DeleteBehavior.Cascade)
+					x =>
+						x.HasOne<T>()
+							.WithMany()
+							.HasForeignKey(LinkNameFk<T>())
+							.OnDelete(DeleteBehavior.Cascade),
+					x =>
+						x.HasOne<T2>()
+							.WithMany()
+							.HasForeignKey(LinkNameFk<T2>())
+							.OnDelete(DeleteBehavior.Cascade)
 				);
 		}
 
@@ -247,33 +255,37 @@ namespace Kyoo.Postgresql
 		{
 			base.OnModelCreating(modelBuilder);
 
-			modelBuilder.Entity<Show>()
-				.Ignore(x => x.FirstEpisode)
-				.Ignore(x => x.AirDate);
-			modelBuilder.Entity<Episode>()
+			modelBuilder.Entity<Show>().Ignore(x => x.FirstEpisode).Ignore(x => x.AirDate);
+			modelBuilder
+				.Entity<Episode>()
 				.Ignore(x => x.PreviousEpisode)
 				.Ignore(x => x.NextEpisode);
 
 			// modelBuilder.Entity<PeopleRole>()
 			// 	.Ignore(x => x.ForPeople);
-			modelBuilder.Entity<Show>()
+			modelBuilder
+				.Entity<Show>()
 				.HasMany(x => x.Seasons)
 				.WithOne(x => x.Show)
 				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<Show>()
+			modelBuilder
+				.Entity<Show>()
 				.HasMany(x => x.Episodes)
 				.WithOne(x => x.Show)
 				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<Season>()
+			modelBuilder
+				.Entity<Season>()
 				.HasMany(x => x.Episodes)
 				.WithOne(x => x.Season)
 				.OnDelete(DeleteBehavior.Cascade);
 
-			modelBuilder.Entity<Movie>()
+			modelBuilder
+				.Entity<Movie>()
 				.HasOne(x => x.Studio)
 				.WithMany(x => x.Movies)
 				.OnDelete(DeleteBehavior.SetNull);
-			modelBuilder.Entity<Show>()
+			modelBuilder
+				.Entity<Show>()
 				.HasOne(x => x.Studio)
 				.WithMany(x => x.Shows)
 				.OnDelete(DeleteBehavior.SetNull);
@@ -305,16 +317,21 @@ namespace Kyoo.Postgresql
 
 			modelBuilder.Entity<User>().OwnsOne(x => x.Logo);
 
-			modelBuilder.Entity<MovieWatchStatus>()
+			modelBuilder
+				.Entity<MovieWatchStatus>()
 				.HasKey(x => new { User = x.UserId, Movie = x.MovieId });
-			modelBuilder.Entity<ShowWatchStatus>()
+			modelBuilder
+				.Entity<ShowWatchStatus>()
 				.HasKey(x => new { User = x.UserId, Show = x.ShowId });
-			modelBuilder.Entity<EpisodeWatchStatus>()
+			modelBuilder
+				.Entity<EpisodeWatchStatus>()
 				.HasKey(x => new { User = x.UserId, Episode = x.EpisodeId });
 
 			modelBuilder.Entity<MovieWatchStatus>().HasQueryFilter(x => x.UserId == CurrentUserId);
 			modelBuilder.Entity<ShowWatchStatus>().HasQueryFilter(x => x.UserId == CurrentUserId);
-			modelBuilder.Entity<EpisodeWatchStatus>().HasQueryFilter(x => x.UserId == CurrentUserId);
+			modelBuilder
+				.Entity<EpisodeWatchStatus>()
+				.HasQueryFilter(x => x.UserId == CurrentUserId);
 
 			modelBuilder.Entity<ShowWatchStatus>().Navigation(x => x.NextEpisode).AutoInclude();
 
@@ -326,39 +343,35 @@ namespace Kyoo.Postgresql
 			modelBuilder.Entity<Show>().Ignore(x => x.WatchStatus);
 			modelBuilder.Entity<Episode>().Ignore(x => x.WatchStatus);
 
-			modelBuilder.Entity<Collection>()
-				.HasIndex(x => x.Slug)
-				.IsUnique();
+			modelBuilder.Entity<Collection>().HasIndex(x => x.Slug).IsUnique();
 			// modelBuilder.Entity<People>()
 			// 	.HasIndex(x => x.Slug)
 			// 	.IsUnique();
-			modelBuilder.Entity<Movie>()
-				.HasIndex(x => x.Slug)
-				.IsUnique();
-			modelBuilder.Entity<Show>()
-				.HasIndex(x => x.Slug)
-				.IsUnique();
-			modelBuilder.Entity<Studio>()
-				.HasIndex(x => x.Slug)
-				.IsUnique();
-			modelBuilder.Entity<Season>()
+			modelBuilder.Entity<Movie>().HasIndex(x => x.Slug).IsUnique();
+			modelBuilder.Entity<Show>().HasIndex(x => x.Slug).IsUnique();
+			modelBuilder.Entity<Studio>().HasIndex(x => x.Slug).IsUnique();
+			modelBuilder
+				.Entity<Season>()
 				.HasIndex(x => new { ShowID = x.ShowId, x.SeasonNumber })
 				.IsUnique();
-			modelBuilder.Entity<Season>()
-				.HasIndex(x => x.Slug)
+			modelBuilder.Entity<Season>().HasIndex(x => x.Slug).IsUnique();
+			modelBuilder
+				.Entity<Episode>()
+				.HasIndex(
+					x =>
+						new
+						{
+							ShowID = x.ShowId,
+							x.SeasonNumber,
+							x.EpisodeNumber,
+							x.AbsoluteNumber
+						}
+				)
 				.IsUnique();
-			modelBuilder.Entity<Episode>()
-				.HasIndex(x => new { ShowID = x.ShowId, x.SeasonNumber, x.EpisodeNumber, x.AbsoluteNumber })
-				.IsUnique();
-			modelBuilder.Entity<Episode>()
-				.HasIndex(x => x.Slug)
-				.IsUnique();
-			modelBuilder.Entity<User>()
-				.HasIndex(x => x.Slug)
-				.IsUnique();
+			modelBuilder.Entity<Episode>().HasIndex(x => x.Slug).IsUnique();
+			modelBuilder.Entity<User>().HasIndex(x => x.Slug).IsUnique();
 
-			modelBuilder.Entity<Movie>()
-				.Ignore(x => x.Links);
+			modelBuilder.Entity<Movie>().Ignore(x => x.Links);
 		}
 
 		/// <summary>
@@ -428,8 +441,10 @@ namespace Kyoo.Postgresql
 		/// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete</param>
 		/// <exception cref="DuplicatedItemException">A duplicated item has been found.</exception>
 		/// <returns>The number of state entries written to the database.</returns>
-		public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
-			CancellationToken cancellationToken = default)
+		public override async Task<int> SaveChangesAsync(
+			bool acceptAllChangesOnSuccess,
+			CancellationToken cancellationToken = default
+		)
 		{
 			try
 			{
@@ -450,7 +465,9 @@ namespace Kyoo.Postgresql
 		/// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete</param>
 		/// <exception cref="DuplicatedItemException">A duplicated item has been found.</exception>
 		/// <returns>The number of state entries written to the database.</returns>
-		public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+		public override async Task<int> SaveChangesAsync(
+			CancellationToken cancellationToken = default
+		)
 		{
 			try
 			{
@@ -475,7 +492,8 @@ namespace Kyoo.Postgresql
 		/// <returns>The number of state entries written to the database.</returns>
 		public async Task<int> SaveChangesAsync<T>(
 			Func<Task<T>> getExisting,
-			CancellationToken cancellationToken = default)
+			CancellationToken cancellationToken = default
+		)
 		{
 			try
 			{
@@ -523,9 +541,7 @@ namespace Kyoo.Postgresql
 		public T? LocalEntity<T>(string slug)
 			where T : class, IResource
 		{
-			return ChangeTracker.Entries<T>()
-				.FirstOrDefault(x => x.Entity.Slug == slug)
-				?.Entity;
+			return ChangeTracker.Entries<T>().FirstOrDefault(x => x.Entity.Slug == slug)?.Entity;
 		}
 
 		/// <summary>
@@ -540,7 +556,11 @@ namespace Kyoo.Postgresql
 		/// </summary>
 		public void DiscardChanges()
 		{
-			foreach (EntityEntry entry in ChangeTracker.Entries().Where(x => x.State != EntityState.Detached))
+			foreach (
+				EntityEntry entry in ChangeTracker
+					.Entries()
+					.Where(x => x.State != EntityState.Detached)
+			)
 			{
 				entry.State = EntityState.Detached;
 			}

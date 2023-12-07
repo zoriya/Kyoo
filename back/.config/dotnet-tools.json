@@ -7,6 +7,12 @@
       "commands": [
         "dotnet-ef"
       ]
+    },
+    "csharpier": {
+      "version": "0.26.4",
+      "commands": [
+        "dotnet-csharpier"
+      ]
     }
   }
 }

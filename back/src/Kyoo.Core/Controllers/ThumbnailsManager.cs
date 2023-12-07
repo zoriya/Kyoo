@@ -36,7 +36,8 @@ namespace Kyoo.Core.Controllers
 	/// </summary>
 	public class ThumbnailsManager : IThumbnailsManager
 	{
-		private static readonly Dictionary<string, TaskCompletionSource<object>> _downloading = new();
+		private static readonly Dictionary<string, TaskCompletionSource<object>> _downloading =
+			new();
 
 		private readonly ILogger<ThumbnailsManager> _logger;
 
@@ -47,8 +48,10 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		/// <param name="clientFactory">Client factory</param>
 		/// <param name="logger">A logger to report errors</param>
-		public ThumbnailsManager(IHttpClientFactory clientFactory,
-			ILogger<ThumbnailsManager> logger)
+		public ThumbnailsManager(
+			IHttpClientFactory clientFactory,
+			ILogger<ThumbnailsManager> logger
+		)
 		{
 			_clientFactory = clientFactory;
 			_logger = logger;
@@ -85,14 +88,35 @@ namespace Kyoo.Core.Controllers
 				info.ColorType = SKColorType.Rgba8888;
 				using SKBitmap original = SKBitmap.Decode(codec, info);
 
-				using SKBitmap high = original.Resize(new SKSizeI(original.Width, original.Height), SKFilterQuality.High);
-				await _WriteTo(original, $"{localPath}.{ImageQuality.High.ToString().ToLowerInvariant()}.webp", 90);
+				using SKBitmap high = original.Resize(
+					new SKSizeI(original.Width, original.Height),
+					SKFilterQuality.High
+				);
+				await _WriteTo(
+					original,
+					$"{localPath}.{ImageQuality.High.ToString().ToLowerInvariant()}.webp",
+					90
+				);
 
-				using SKBitmap medium = high.Resize(new SKSizeI((int)(high.Width / 1.5), (int)(high.Height / 1.5)), SKFilterQuality.Medium);
-				await _WriteTo(medium, $"{localPath}.{ImageQuality.Medium.ToString().ToLowerInvariant()}.webp", 75);
+				using SKBitmap medium = high.Resize(
+					new SKSizeI((int)(high.Width / 1.5), (int)(high.Height / 1.5)),
+					SKFilterQuality.Medium
+				);
+				await _WriteTo(
+					medium,
+					$"{localPath}.{ImageQuality.Medium.ToString().ToLowerInvariant()}.webp",
+					75
+				);
 
-				using SKBitmap low = medium.Resize(new SKSizeI(original.Width / 2, original.Height / 2), SKFilterQuality.Low);
-				await _WriteTo(low, $"{localPath}.{ImageQuality.Low.ToString().ToLowerInvariant()}.webp", 50);
+				using SKBitmap low = medium.Resize(
+					new SKSizeI(original.Width / 2, original.Height / 2),
+					SKFilterQuality.Low
+				);
+				await _WriteTo(
+					low,
+					$"{localPath}.{ImageQuality.Low.ToString().ToLowerInvariant()}.webp",
+					50
+				);
 
 				image.Blurhash = Blurhasher.Encode(low, 4, 3);
 			}
@@ -108,7 +132,8 @@ namespace Kyoo.Core.Controllers
 		{
 			string name = item is IResource res ? res.Slug : "???";
 
-			string posterPath = $"{_GetBaseImagePath(item, "poster")}.{ImageQuality.High.ToString().ToLowerInvariant()}.webp";
+			string posterPath =
+				$"{_GetBaseImagePath(item, "poster")}.{ImageQuality.High.ToString().ToLowerInvariant()}.webp";
 			bool duplicated = false;
 			TaskCompletionSource<object>? sync = null;
 			try
@@ -128,15 +153,25 @@ namespace Kyoo.Core.Controllers
 				}
 				if (duplicated)
 				{
-					object? dup = sync != null
-						? await sync.Task
-						: null;
+					object? dup = sync != null ? await sync.Task : null;
 					throw new DuplicatedItemException(dup);
 				}
 
-				await _DownloadImage(item.Poster, _GetBaseImagePath(item, "poster"), $"The poster of {name}");
-				await _DownloadImage(item.Thumbnail, _GetBaseImagePath(item, "thumbnail"), $"The poster of {name}");
-				await _DownloadImage(item.Logo, _GetBaseImagePath(item, "logo"), $"The poster of {name}");
+				await _DownloadImage(
+					item.Poster,
+					_GetBaseImagePath(item, "poster"),
+					$"The poster of {name}"
+				);
+				await _DownloadImage(
+					item.Thumbnail,
+					_GetBaseImagePath(item, "thumbnail"),
+					$"The poster of {name}"
+				);
+				await _DownloadImage(
+					item.Logo,
+					_GetBaseImagePath(item, "logo"),
+					$"The poster of {name}"
+				);
 			}
 			finally
 			{
@@ -155,7 +190,8 @@ namespace Kyoo.Core.Controllers
 		{
 			string directory = item switch
 			{
-				IResource res => Path.Combine("./metadata", item.GetType().Name.ToLowerInvariant(), res.Slug),
+				IResource res
+					=> Path.Combine("./metadata", item.GetType().Name.ToLowerInvariant(), res.Slug),
 				_ => Path.Combine("./metadata", typeof(T).Name.ToLowerInvariant())
 			};
 			Directory.CreateDirectory(directory);
@@ -175,12 +211,14 @@ namespace Kyoo.Core.Controllers
 		{
 			IEnumerable<string> images = new[] { "poster", "thumbnail", "logo" }
 				.SelectMany(x => _GetBaseImagePath(item, x))
-				.SelectMany(x => new[]
-					{
-						ImageQuality.High.ToString().ToLowerInvariant(),
-						ImageQuality.Medium.ToString().ToLowerInvariant(),
-						ImageQuality.Low.ToString().ToLowerInvariant(),
-					}.Select(quality => $"{x}.{quality}.webp")
+				.SelectMany(
+					x =>
+						new[]
+						{
+							ImageQuality.High.ToString().ToLowerInvariant(),
+							ImageQuality.Medium.ToString().ToLowerInvariant(),
+							ImageQuality.Low.ToString().ToLowerInvariant(),
+						}.Select(quality => $"{x}.{quality}.webp")
 				);
 
 			foreach (string image in images)

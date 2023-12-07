@@ -67,7 +67,10 @@ namespace Kyoo.Core.Api
 		[PartialPermission(Kind.Read)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<T>> Get(Identifier identifier, [FromQuery] Include<T>? fields)
+		public async Task<ActionResult<T>> Get(
+			Identifier identifier,
+			[FromQuery] Include<T>? fields
+		)
 		{
 			T? ret = await identifier.Match(
 				id => Repository.GetOrDefault(id, fields),
@@ -116,14 +119,10 @@ namespace Kyoo.Core.Api
 			[FromQuery] Sort<T> sortBy,
 			[FromQuery] Filter<T>? filter,
 			[FromQuery] Pagination pagination,
-			[FromQuery] Include<T>? fields)
+			[FromQuery] Include<T>? fields
+		)
 		{
-			ICollection<T> resources = await Repository.GetAll(
-				filter,
-				sortBy,
-				fields,
-				pagination
-			);
+			ICollection<T> resources = await Repository.GetAll(filter, sortBy, fields, pagination);
 
 			return Page(resources, pagination.Limit);
 		}
@@ -195,7 +194,9 @@ namespace Kyoo.Core.Api
 			if (resource.Id.HasValue)
 				return await Repository.Patch(resource.Id.Value, TryUpdateModelAsync);
 			if (resource.Slug == null)
-				throw new ArgumentException("Either the Id or the slug of the resource has to be defined to edit it.");
+				throw new ArgumentException(
+					"Either the Id or the slug of the resource has to be defined to edit it."
+				);
 
 			T old = await Repository.Get(resource.Slug);
 			return await Repository.Patch(old.Id, TryUpdateModelAsync);
@@ -216,10 +217,7 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<IActionResult> Delete(Identifier identifier)
 		{
-			await identifier.Match(
-				id => Repository.Delete(id),
-				slug => Repository.Delete(slug)
-			);
+			await identifier.Match(id => Repository.Delete(id), slug => Repository.Delete(slug));
 			return NoContent();
 		}
 
@@ -239,7 +237,9 @@ namespace Kyoo.Core.Api
 		public async Task<IActionResult> Delete([FromQuery] Filter<T> filter)
 		{
 			if (filter == null)
-				return BadRequest(new RequestError("Incule a filter to delete items, all items won't be deleted."));
+				return BadRequest(
+					new RequestError("Incule a filter to delete items, all items won't be deleted.")
+				);
 
 			await Repository.DeleteAll(filter);
 			return NoContent();

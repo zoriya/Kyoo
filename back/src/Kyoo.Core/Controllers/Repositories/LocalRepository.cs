@@ -75,17 +75,18 @@ namespace Kyoo.Core.Controllers
 		{
 			sortBy ??= new Sort<T>.Default();
 
-			IOrderedQueryable<T> _SortBy(IQueryable<T> qr, Expression<Func<T, object>> sort, bool desc, bool then)
+			IOrderedQueryable<T> _SortBy(
+				IQueryable<T> qr,
+				Expression<Func<T, object>> sort,
+				bool desc,
+				bool then
+			)
 			{
 				if (then && qr is IOrderedQueryable<T> qro)
 				{
-					return desc
-						? qro.ThenByDescending(sort)
-						: qro.ThenBy(sort);
+					return desc ? qro.ThenByDescending(sort) : qro.ThenBy(sort);
 				}
-				return desc
-					? qr.OrderByDescending(sort)
-					: qr.OrderBy(sort);
+				return desc ? qr.OrderByDescending(sort) : qr.OrderBy(sort);
 			}
 
 			IOrderedQueryable<T> _Sort(IQueryable<T> query, Sort<T> sortBy, bool then)
@@ -98,7 +99,12 @@ namespace Kyoo.Core.Controllers
 						return _SortBy(query, x => EF.Property<T>(x, key), desc, then);
 					case Sort<T>.Random(var seed):
 						// NOTE: To edit this, don't forget to edit the random handiling inside the KeysetPaginate function
-						return _SortBy(query, x => DatabaseContext.MD5(seed + x.Id.ToString()), false, then);
+						return _SortBy(
+							query,
+							x => DatabaseContext.MD5(seed + x.Id.ToString()),
+							false,
+							then
+						);
 					case Sort<T>.Conglomerate(var sorts):
 						IOrderedQueryable<T> nQuery = _Sort(query, sorts.First(), false);
 						foreach (Sort<T> sort in sorts.Skip(1))
@@ -121,11 +127,28 @@ namespace Kyoo.Core.Controllers
 
 			Expression CmpRandomHandler(string cmp, string seed, Guid refId)
 			{
-				MethodInfo concat = typeof(string).GetMethod(nameof(string.Concat), new[] { typeof(string), typeof(string) })!;
-				Expression id = Expression.Call(Expression.Property(x, "ID"), nameof(Guid.ToString), null);
+				MethodInfo concat = typeof(string).GetMethod(
+					nameof(string.Concat),
+					new[] { typeof(string), typeof(string) }
+				)!;
+				Expression id = Expression.Call(
+					Expression.Property(x, "ID"),
+					nameof(Guid.ToString),
+					null
+				);
 				Expression xrng = Expression.Call(concat, Expression.Constant(seed), id);
-				Expression left = Expression.Call(typeof(DatabaseContext), nameof(DatabaseContext.MD5), null, xrng);
-				Expression right = Expression.Call(typeof(DatabaseContext), nameof(DatabaseContext.MD5), null, Expression.Constant($"{seed}{refId}"));
+				Expression left = Expression.Call(
+					typeof(DatabaseContext),
+					nameof(DatabaseContext.MD5),
+					null,
+					xrng
+				);
+				Expression right = Expression.Call(
+					typeof(DatabaseContext),
+					nameof(DatabaseContext.MD5),
+					null,
+					Expression.Constant($"{seed}{refId}")
+				);
 				return cmp switch
 				{
 					"=" => Expression.Equal(left, right),
@@ -138,17 +161,28 @@ namespace Kyoo.Core.Controllers
 			BinaryExpression StringCompatibleExpression(
 				Func<Expression, Expression, BinaryExpression> operand,
 				string property,
-				object value)
+				object value
+			)
 			{
 				var left = Expression.Property(x, property);
 				var right = Expression.Constant(value, ((PropertyInfo)left.Member).PropertyType);
 				if (left.Type != typeof(string))
 					return operand(left, right);
-				MethodCallExpression call = Expression.Call(typeof(string), "Compare", null, left, right);
+				MethodCallExpression call = Expression.Call(
+					typeof(string),
+					"Compare",
+					null,
+					left,
+					right
+				);
 				return operand(call, Expression.Constant(0));
 			}
 
-			Expression Exp(Func<Expression, Expression, BinaryExpression> operand, string property, object? value)
+			Expression Exp(
+				Func<Expression, Expression, BinaryExpression> operand,
+				string property,
+				object? value
+			)
 			{
 				var prop = Expression.Property(x, property);
 				var val = Expression.Constant(value, ((PropertyInfo)prop.Member).PropertyType);
@@ -159,18 +193,42 @@ namespace Kyoo.Core.Controllers
 			{
 				return f switch
 				{
-					Filter<T>.And(var first, var second) => Expression.AndAlso(Parse(first), Parse(second)),
-					Filter<T>.Or(var first, var second) => Expression.OrElse(Parse(first), Parse(second)),
+					Filter<T>.And(var first, var second)
+						=> Expression.AndAlso(Parse(first), Parse(second)),
+					Filter<T>.Or(var first, var second)
+						=> Expression.OrElse(Parse(first), Parse(second)),
 					Filter<T>.Not(var inner) => Expression.Not(Parse(inner)),
 					Filter<T>.Eq(var property, var value) => Exp(Expression.Equal, property, value),
-					Filter<T>.Ne(var property, var value) => Exp(Expression.NotEqual, property, value),
-					Filter<T>.Gt(var property, var value) => StringCompatibleExpression(Expression.GreaterThan, property, value),
-					Filter<T>.Ge(var property, var value) => StringCompatibleExpression(Expression.GreaterThanOrEqual, property, value),
-					Filter<T>.Lt(var property, var value) => StringCompatibleExpression(Expression.LessThan, property, value),
-					Filter<T>.Le(var property, var value) => StringCompatibleExpression(Expression.LessThanOrEqual, property, value),
-					Filter<T>.Has(var property, var value) => Expression.Call(typeof(Enumerable), "Contains", new[] { value.GetType() }, Expression.Property(x, property), Expression.Constant(value)),
-					Filter<T>.CmpRandom(var op, var seed, var refId) => CmpRandomHandler(op, seed, refId),
-					Filter<T>.Lambda(var lambda) => ExpressionArgumentReplacer.ReplaceParams(lambda.Body, lambda.Parameters, x),
+					Filter<T>.Ne(var property, var value)
+						=> Exp(Expression.NotEqual, property, value),
+					Filter<T>.Gt(var property, var value)
+						=> StringCompatibleExpression(Expression.GreaterThan, property, value),
+					Filter<T>.Ge(var property, var value)
+						=> StringCompatibleExpression(
+							Expression.GreaterThanOrEqual,
+							property,
+							value
+						),
+					Filter<T>.Lt(var property, var value)
+						=> StringCompatibleExpression(Expression.LessThan, property, value),
+					Filter<T>.Le(var property, var value)
+						=> StringCompatibleExpression(Expression.LessThanOrEqual, property, value),
+					Filter<T>.Has(var property, var value)
+						=> Expression.Call(
+							typeof(Enumerable),
+							"Contains",
+							new[] { value.GetType() },
+							Expression.Property(x, property),
+							Expression.Constant(value)
+						),
+					Filter<T>.CmpRandom(var op, var seed, var refId)
+						=> CmpRandomHandler(op, seed, refId),
+					Filter<T>.Lambda(var lambda)
+						=> ExpressionArgumentReplacer.ReplaceParams(
+							lambda.Body,
+							lambda.Parameters,
+							x
+						),
 					_ => throw new NotImplementedException(),
 				};
 			}
@@ -231,7 +289,9 @@ namespace Kyoo.Core.Controllers
 		{
 			T? ret = await GetOrDefault(filter, include, sortBy, reverse, afterId);
 			if (ret == null)
-				throw new ItemNotFoundException($"No {typeof(T).Name} found with the given predicate.");
+				throw new ItemNotFoundException(
+					$"No {typeof(T).Name} found with the given predicate."
+				);
 			return ret;
 		}
 
@@ -243,8 +303,7 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public virtual Task<T?> GetOrDefault(Guid id, Include<T>? include = default)
 		{
-			return AddIncludes(Database.Set<T>(), include)
-				.FirstOrDefaultAsync(x => x.Id == id);
+			return AddIncludes(Database.Set<T>(), include).FirstOrDefaultAsync(x => x.Id == id);
 		}
 
 		/// <inheritdoc />
@@ -256,16 +315,17 @@ namespace Kyoo.Core.Controllers
 					.OrderBy(x => EF.Functions.Random())
 					.FirstOrDefaultAsync();
 			}
-			return AddIncludes(Database.Set<T>(), include)
-				.FirstOrDefaultAsync(x => x.Slug == slug);
+			return AddIncludes(Database.Set<T>(), include).FirstOrDefaultAsync(x => x.Slug == slug);
 		}
 
 		/// <inheritdoc />
-		public virtual async Task<T?> GetOrDefault(Filter<T>? filter,
+		public virtual async Task<T?> GetOrDefault(
+			Filter<T>? filter,
 			Include<T>? include = default,
 			Sort<T>? sortBy = default,
 			bool reverse = false,
-			Guid? afterId = default)
+			Guid? afterId = default
+		)
 		{
 			IQueryable<T> query = await ApplyFilters(
 				Database.Set<T>(),
@@ -278,13 +338,16 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc/>
-		public virtual async Task<ICollection<T>> FromIds(IList<Guid> ids, Include<T>? include = default)
+		public virtual async Task<ICollection<T>> FromIds(
+			IList<Guid> ids,
+			Include<T>? include = default
+		)
 		{
 			return (
 				await AddIncludes(Database.Set<T>(), include)
 					.Where(x => ids.Contains(x.Id))
 					.ToListAsync()
-				)
+			)
 				.OrderBy(x => ids.IndexOf(x.Id))
 				.ToList();
 		}
@@ -293,12 +356,20 @@ namespace Kyoo.Core.Controllers
 		public abstract Task<ICollection<T>> Search(string query, Include<T>? include = default);
 
 		/// <inheritdoc/>
-		public virtual async Task<ICollection<T>> GetAll(Filter<T>? filter = null,
+		public virtual async Task<ICollection<T>> GetAll(
+			Filter<T>? filter = null,
 			Sort<T>? sort = default,
 			Include<T>? include = default,
-			Pagination? limit = default)
+			Pagination? limit = default
+		)
 		{
-			IQueryable<T> query = await ApplyFilters(Database.Set<T>(), filter, sort, limit, include);
+			IQueryable<T> query = await ApplyFilters(
+				Database.Set<T>(),
+				filter,
+				sort,
+				limit,
+				include
+			);
 			return await query.ToListAsync();
 		}
 
@@ -311,11 +382,13 @@ namespace Kyoo.Core.Controllers
 		/// <param name="limit">Pagination information (where to start and how many to get)</param>
 		/// <param name="include">Related fields to also load with this query.</param>
 		/// <returns>The filtered query</returns>
-		protected async Task<IQueryable<T>> ApplyFilters(IQueryable<T> query,
+		protected async Task<IQueryable<T>> ApplyFilters(
+			IQueryable<T> query,
 			Filter<T>? filter = null,
 			Sort<T>? sort = default,
 			Pagination? limit = default,
-			Include<T>? include = default)
+			Include<T>? include = default
+		)
 		{
 			query = AddIncludes(query, include);
 			query = Sort(query, sort);
@@ -324,7 +397,11 @@ namespace Kyoo.Core.Controllers
 			if (limit.AfterID != null)
 			{
 				T reference = await Get(limit.AfterID.Value);
-				Filter<T>? keysetFilter = RepositoryHelper.KeysetPaginate(sort, reference, !limit.Reverse);
+				Filter<T>? keysetFilter = RepositoryHelper.KeysetPaginate(
+					sort,
+					reference,
+					!limit.Reverse
+				);
 				filter = Filter.And(filter, keysetFilter);
 			}
 			if (filter != null)
@@ -364,11 +441,14 @@ namespace Kyoo.Core.Controllers
 					throw new DuplicatedItemException(await GetDuplicated(obj));
 				}
 				if (thumbs.Poster != null)
-					Database.Entry(thumbs).Reference(x => x.Poster).TargetEntry!.State = EntityState.Added;
+					Database.Entry(thumbs).Reference(x => x.Poster).TargetEntry!.State =
+						EntityState.Added;
 				if (thumbs.Thumbnail != null)
-					Database.Entry(thumbs).Reference(x => x.Thumbnail).TargetEntry!.State = EntityState.Added;
+					Database.Entry(thumbs).Reference(x => x.Thumbnail).TargetEntry!.State =
+						EntityState.Added;
 				if (thumbs.Logo != null)
-					Database.Entry(thumbs).Reference(x => x.Logo).TargetEntry!.State = EntityState.Added;
+					Database.Entry(thumbs).Reference(x => x.Logo).TargetEntry!.State =
+						EntityState.Added;
 			}
 			return obj;
 		}
@@ -399,7 +479,11 @@ namespace Kyoo.Core.Controllers
 			{
 				T old = await GetWithTracking(edited.Id);
 
-				Merger.Complete(old, edited, x => x.GetCustomAttribute<LoadableRelationAttribute>() == null);
+				Merger.Complete(
+					old,
+					edited,
+					x => x.GetCustomAttribute<LoadableRelationAttribute>() == null
+				);
 				await EditRelations(old, edited);
 				await Database.SaveChangesAsync();
 				await IRepository<T>.OnResourceEdited(old);
@@ -450,8 +534,10 @@ namespace Kyoo.Core.Controllers
 		{
 			if (resource is IThumbnails thumbs && changed is IThumbnails chng)
 			{
-				Database.Entry(thumbs).Reference(x => x.Poster).IsModified = thumbs.Poster != chng.Poster;
-				Database.Entry(thumbs).Reference(x => x.Thumbnail).IsModified = thumbs.Thumbnail != chng.Thumbnail;
+				Database.Entry(thumbs).Reference(x => x.Poster).IsModified =
+					thumbs.Poster != chng.Poster;
+				Database.Entry(thumbs).Reference(x => x.Thumbnail).IsModified =
+					thumbs.Thumbnail != chng.Thumbnail;
 				Database.Entry(thumbs).Reference(x => x.Logo).IsModified = thumbs.Logo != chng.Logo;
 			}
 			return Validate(resource);
@@ -468,7 +554,11 @@ namespace Kyoo.Core.Controllers
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		protected virtual Task Validate(T resource)
 		{
-			if (typeof(T).GetProperty(nameof(resource.Slug))!.GetCustomAttribute<ComputedAttribute>() != null)
+			if (
+				typeof(T)
+					.GetProperty(nameof(resource.Slug))!
+					.GetCustomAttribute<ComputedAttribute>() != null
+			)
 				return Task.CompletedTask;
 			if (string.IsNullOrEmpty(resource.Slug))
 				throw new ArgumentException("Resource can't have null as a slug.");
@@ -476,15 +566,21 @@ namespace Kyoo.Core.Controllers
 			{
 				try
 				{
-					MethodInfo? setter = typeof(T).GetProperty(nameof(resource.Slug))!.GetSetMethod();
+					MethodInfo? setter = typeof(T)
+						.GetProperty(nameof(resource.Slug))!
+						.GetSetMethod();
 					if (setter != null)
 						setter.Invoke(resource, new object[] { resource.Slug + '!' });
 					else
-						throw new ArgumentException("Resources slug can't be number only or the literal \"random\".");
+						throw new ArgumentException(
+							"Resources slug can't be number only or the literal \"random\"."
+						);
 				}
 				catch
 				{
-					throw new ArgumentException("Resources slug can't be number only or the literal \"random\".");
+					throw new ArgumentException(
+						"Resources slug can't be number only or the literal \"random\"."
+					);
 				}
 			}
 			return Task.CompletedTask;

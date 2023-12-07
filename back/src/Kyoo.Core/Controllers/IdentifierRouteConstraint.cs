@@ -28,11 +28,13 @@ namespace Kyoo.Core.Controllers
 	public class IdentifierRouteConstraint : IRouteConstraint
 	{
 		/// <inheritdoc />
-		public bool Match(HttpContext? httpContext,
+		public bool Match(
+			HttpContext? httpContext,
 			IRouter? route,
 			string routeKey,
 			RouteValueDictionary values,
-			RouteDirection routeDirection)
+			RouteDirection routeDirection
+		)
 		{
 			return values.ContainsKey(routeKey);
 		}

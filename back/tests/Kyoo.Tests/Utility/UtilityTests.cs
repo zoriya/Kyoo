@@ -21,7 +21,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Kyoo.Abstractions.Models;
 using Xunit;
-
 using KUtility = Kyoo.Utils.Utility;
 
 namespace Kyoo.Tests.Utility
@@ -54,32 +53,44 @@ namespace Kyoo.Tests.Utility
 		[Fact]
 		public void GetMethodTest()
 		{
-			MethodInfo method = KUtility.GetMethod(typeof(UtilityTests),
+			MethodInfo method = KUtility.GetMethod(
+				typeof(UtilityTests),
 				BindingFlags.Instance | BindingFlags.Public,
 				nameof(GetMethodTest),
 				Array.Empty<Type>(),
-				Array.Empty<object>());
+				Array.Empty<object>()
+			);
 			Assert.Equal(MethodBase.GetCurrentMethod(), method);
 		}
 
 		[Fact]
 		public void GetMethodInvalidGenericsTest()
 		{
-			Assert.Throws<ArgumentException>(() => KUtility.GetMethod(typeof(UtilityTests),
-				BindingFlags.Instance | BindingFlags.Public,
-				nameof(GetMethodTest),
-				new[] { typeof(KUtility) },
-				Array.Empty<object>()));
+			Assert.Throws<ArgumentException>(
+				() =>
+					KUtility.GetMethod(
+						typeof(UtilityTests),
+						BindingFlags.Instance | BindingFlags.Public,
+						nameof(GetMethodTest),
+						new[] { typeof(KUtility) },
+						Array.Empty<object>()
+					)
+			);
 		}
 
 		[Fact]
 		public void GetMethodInvalidParamsTest()
 		{
-			Assert.Throws<ArgumentException>(() => KUtility.GetMethod(typeof(UtilityTests),
-				BindingFlags.Instance | BindingFlags.Public,
-				nameof(GetMethodTest),
-				Array.Empty<Type>(),
-				new object[] { this }));
+			Assert.Throws<ArgumentException>(
+				() =>
+					KUtility.GetMethod(
+						typeof(UtilityTests),
+						BindingFlags.Instance | BindingFlags.Public,
+						nameof(GetMethodTest),
+						Array.Empty<Type>(),
+						new object[] { this }
+					)
+			);
 		}
 	}
 }

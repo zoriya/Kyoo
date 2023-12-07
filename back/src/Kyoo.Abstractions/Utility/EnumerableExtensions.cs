@@ -50,8 +50,7 @@ namespace Kyoo.Utils
 				do
 				{
 					yield return enumerator.Current;
-				}
-				while (enumerator.MoveNext());
+				} while (enumerator.MoveNext());
 			}
 
 			return Generator(self, action);

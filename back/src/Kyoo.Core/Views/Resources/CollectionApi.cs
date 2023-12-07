@@ -46,10 +46,12 @@ namespace Kyoo.Core.Api
 		private readonly CollectionRepository _collections;
 		private readonly LibraryItemRepository _items;
 
-		public CollectionApi(ILibraryManager libraryManager,
+		public CollectionApi(
+			ILibraryManager libraryManager,
 			CollectionRepository collections,
 			LibraryItemRepository items,
-			IThumbnailsManager thumbs)
+			IThumbnailsManager thumbs
+		)
 			: base(libraryManager.Collections, thumbs)
 		{
 			_libraryManager = libraryManager;
@@ -139,11 +141,13 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Page<ILibraryItem>>> GetItems(Identifier identifier,
+		public async Task<ActionResult<Page<ILibraryItem>>> GetItems(
+			Identifier identifier,
 			[FromQuery] Sort<ILibraryItem> sortBy,
 			[FromQuery] Filter<ILibraryItem>? filter,
 			[FromQuery] Pagination pagination,
-			[FromQuery] Include<ILibraryItem>? fields)
+			[FromQuery] Include<ILibraryItem>? fields
+		)
 		{
 			Guid collectionId = await identifier.Match(
 				id => Task.FromResult(id),
@@ -152,12 +156,18 @@ namespace Kyoo.Core.Api
 			ICollection<ILibraryItem> resources = await _items.GetAllOfCollection(
 				collectionId,
 				filter,
-				sortBy == new Sort<ILibraryItem>.Default() ? new Sort<ILibraryItem>.By(nameof(Movie.AirDate)) : sortBy,
+				sortBy == new Sort<ILibraryItem>.Default()
+					? new Sort<ILibraryItem>.By(nameof(Movie.AirDate))
+					: sortBy,
 				fields,
 				pagination
 			);
 
-			if (!resources.Any() && await _libraryManager.Collections.GetOrDefault(identifier.IsSame<Collection>()) == null)
+			if (
+				!resources.Any()
+				&& await _libraryManager.Collections.GetOrDefault(identifier.IsSame<Collection>())
+					== null
+			)
 				return NotFound();
 			return Page(resources, pagination.Limit);
 		}
@@ -182,20 +192,31 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Page<Show>>> GetShows(Identifier identifier,
+		public async Task<ActionResult<Page<Show>>> GetShows(
+			Identifier identifier,
 			[FromQuery] Sort<Show> sortBy,
 			[FromQuery] Filter<Show>? filter,
 			[FromQuery] Pagination pagination,
-			[FromQuery] Include<Show>? fields)
+			[FromQuery] Include<Show>? fields
+		)
 		{
-			ICollection<Show> resources = await _libraryManager.Shows.GetAll(
-				Filter.And(filter, identifier.IsContainedIn<Show, Collection>(x => x.Collections)),
-				sortBy == new Sort<Show>.Default() ? new Sort<Show>.By(x => x.AirDate) : sortBy,
-				fields,
-				pagination
-			);
+			ICollection<Show> resources = await _libraryManager
+				.Shows
+				.GetAll(
+					Filter.And(
+						filter,
+						identifier.IsContainedIn<Show, Collection>(x => x.Collections)
+					),
+					sortBy == new Sort<Show>.Default() ? new Sort<Show>.By(x => x.AirDate) : sortBy,
+					fields,
+					pagination
+				);
 
-			if (!resources.Any() && await _libraryManager.Collections.GetOrDefault(identifier.IsSame<Collection>()) == null)
+			if (
+				!resources.Any()
+				&& await _libraryManager.Collections.GetOrDefault(identifier.IsSame<Collection>())
+					== null
+			)
 				return NotFound();
 			return Page(resources, pagination.Limit);
 		}
@@ -220,20 +241,33 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Page<Movie>>> GetMovies(Identifier identifier,
+		public async Task<ActionResult<Page<Movie>>> GetMovies(
+			Identifier identifier,
 			[FromQuery] Sort<Movie> sortBy,
 			[FromQuery] Filter<Movie>? filter,
 			[FromQuery] Pagination pagination,
-			[FromQuery] Include<Movie>? fields)
+			[FromQuery] Include<Movie>? fields
+		)
 		{
-			ICollection<Movie> resources = await _libraryManager.Movies.GetAll(
-				Filter.And(filter, identifier.IsContainedIn<Movie, Collection>(x => x.Collections)),
-				sortBy == new Sort<Movie>.Default() ? new Sort<Movie>.By(x => x.AirDate) : sortBy,
-				fields,
-				pagination
-			);
+			ICollection<Movie> resources = await _libraryManager
+				.Movies
+				.GetAll(
+					Filter.And(
+						filter,
+						identifier.IsContainedIn<Movie, Collection>(x => x.Collections)
+					),
+					sortBy == new Sort<Movie>.Default()
+						? new Sort<Movie>.By(x => x.AirDate)
+						: sortBy,
+					fields,
+					pagination
+				);
 
-			if (!resources.Any() && await _libraryManager.Collections.GetOrDefault(identifier.IsSame<Collection>()) == null)
+			if (
+				!resources.Any()
+				&& await _libraryManager.Collections.GetOrDefault(identifier.IsSame<Collection>())
+					== null
+			)
 				return NotFound();
 			return Page(resources, pagination.Limit);
 		}

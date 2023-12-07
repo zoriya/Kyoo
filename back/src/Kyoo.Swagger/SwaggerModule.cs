@@ -78,39 +78,58 @@ namespace Kyoo.Swagger
 				document.AddOperationFilter(x =>
 				{
 					if (x is AspNetCoreOperationProcessorContext ctx)
-						return ctx.ApiDescription.ActionDescriptor.AttributeRouteInfo?.Order != AlternativeRoute;
+						return ctx.ApiDescription.ActionDescriptor.AttributeRouteInfo?.Order
+							!= AlternativeRoute;
 					return true;
 				});
-				document.SchemaGenerator.Settings.TypeMappers.Add(new PrimitiveTypeMapper(typeof(Identifier), x =>
-				{
-					x.IsNullableRaw = false;
-					x.Type = JsonObjectType.String | JsonObjectType.Integer;
-				}));
+				document
+					.SchemaGenerator
+					.Settings
+					.TypeMappers
+					.Add(
+						new PrimitiveTypeMapper(
+							typeof(Identifier),
+							x =>
+							{
+								x.IsNullableRaw = false;
+								x.Type = JsonObjectType.String | JsonObjectType.Integer;
+							}
+						)
+					);
 
-				document.AddSecurity(nameof(Kyoo), new OpenApiSecurityScheme
-				{
-					Type = OpenApiSecuritySchemeType.Http,
-					Scheme = "Bearer",
-					BearerFormat = "JWT",
-					Description = "The user's bearer"
-				});
+				document.AddSecurity(
+					nameof(Kyoo),
+					new OpenApiSecurityScheme
+					{
+						Type = OpenApiSecuritySchemeType.Http,
+						Scheme = "Bearer",
+						BearerFormat = "JWT",
+						Description = "The user's bearer"
+					}
+				);
 				document.OperationProcessors.Add(new OperationPermissionProcessor());
 			});
 		}
 
 		/// <inheritdoc />
-		public IEnumerable<IStartupAction> ConfigureSteps => new IStartupAction[]
-		{
-			SA.New<IApplicationBuilder>(app => app.UseOpenApi(), SA.Before + 1),
-			SA.New<IApplicationBuilder>(app => app.UseReDoc(x =>
+		public IEnumerable<IStartupAction> ConfigureSteps =>
+			new IStartupAction[]
 			{
-				x.Path = "/doc";
-				x.TransformToExternalPath = (internalUiRoute, _) => "/api" + internalUiRoute;
-				x.AdditionalSettings["theme"] = new
-				{
-					colors = new { primary = new { main = "#e13e13" } }
-				};
-			}), SA.Before)
-		};
+				SA.New<IApplicationBuilder>(app => app.UseOpenApi(), SA.Before + 1),
+				SA.New<IApplicationBuilder>(
+					app =>
+						app.UseReDoc(x =>
+						{
+							x.Path = "/doc";
+							x.TransformToExternalPath = (internalUiRoute, _) =>
+								"/api" + internalUiRoute;
+							x.AdditionalSettings["theme"] = new
+							{
+								colors = new { primary = new { main = "#e13e13" } }
+							};
+						}),
+					SA.Before
+				)
+			};
 	}
 }

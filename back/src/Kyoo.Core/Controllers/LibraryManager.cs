@@ -40,7 +40,8 @@ namespace Kyoo.Core.Controllers
 			IRepository<Episode> episodeRepository,
 			IRepository<People> peopleRepository,
 			IRepository<Studio> studioRepository,
-			IRepository<User> userRepository)
+			IRepository<User> userRepository
+		)
 		{
 			LibraryItems = libraryItemRepository;
 			News = newsRepository;

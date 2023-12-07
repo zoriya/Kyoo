@@ -48,9 +48,12 @@ namespace Kyoo.Tests.Database
 			Mock<IThumbnailsManager> thumbs = new();
 			CollectionRepository collection = new(_NewContext(), thumbs.Object);
 			StudioRepository studio = new(_NewContext(), thumbs.Object);
-			PeopleRepository people = new(_NewContext(),
-				new Lazy<IRepository<Show>>(() => LibraryManager.Shows),
-				thumbs.Object);
+			PeopleRepository people =
+				new(
+					_NewContext(),
+					new Lazy<IRepository<Show>>(() => LibraryManager.Shows),
+					thumbs.Object
+				);
 			MovieRepository movies = new(_NewContext(), studio, people, thumbs.Object);
 			ShowRepository show = new(_NewContext(), studio, people, thumbs.Object);
 			SeasonRepository season = new(_NewContext(), thumbs.Object);

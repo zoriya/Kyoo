@@ -36,7 +36,6 @@ namespace Kyoo.Core.Api
 	public class NewsApi : CrudThumbsApi<INews>
 	{
 		public NewsApi(IRepository<INews> news, IThumbnailsManager thumbs)
-			: base(news, thumbs)
-		{ }
+			: base(news, thumbs) { }
 	}
 }

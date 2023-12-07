@@ -47,8 +47,7 @@ namespace Kyoo.Core.Api
 		/// The library manager used to modify or retrieve information about the data store.
 		/// </param>
 		/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
-		public StaffApi(ILibraryManager libraryManager,
-			IThumbnailsManager thumbs)
+		public StaffApi(ILibraryManager libraryManager, IThumbnailsManager thumbs)
 			: base(libraryManager.People, thumbs)
 		{
 			_libraryManager = libraryManager;
