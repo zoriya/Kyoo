@@ -472,7 +472,7 @@ export const Header = ({
 									color: (theme: Theme) => theme.contrast,
 									fover: {
 										self: {
-											color: (theme: Theme) => theme.contrast,
+											color: (theme: Theme) => theme.alternate.contrast,
 											bg: (theme: Theme) => theme.accent,
 										},
 									},
