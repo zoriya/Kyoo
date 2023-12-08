@@ -113,6 +113,7 @@ export const ItemDetails = ({
 				quality="low"
 				forcedLoading={isLoading}
 				layout={{ height: percent(100) }}
+				style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
 			>
 				<View
 					{...css({
