@@ -23,6 +23,8 @@ import { ComponentType, useEffect } from "react";
 import { StatusBar, StatusBarProps } from "react-native";
 import * as ScreenOrientation from "expo-screen-orientation";
 import * as NavigationBar from "expo-navigation-bar";
+import arrayShuffle from "array-shuffle";
+import { QueryPage } from "@kyoo/models";
 
 const FullscreenProvider = () => {
 	useEffect(() => {
@@ -52,7 +54,12 @@ export const withRoute = <Props,>(
 				{routeOptions && <Stack.Screen {...routeOptions} />}
 				{statusBar && <StatusBar {...statusBar} />}
 				{fullscreen && <FullscreenProvider />}
-				<Component {...defaultProps} {...routeParams} {...props} />
+				<Component
+					{...defaultProps}
+					randomItems={arrayShuffle((Component as QueryPage).randomItems ?? [])}
+					{...routeParams}
+					{...props}
+				/>
 			</>
 		);
 	};
