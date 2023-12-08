@@ -50,8 +50,9 @@ export type Account = z.infer<typeof AccountP>;
 const AccountContext = createContext<(Account & { select: () => void; remove: () => void })[]>([]);
 export const ConnectionErrorContext = createContext<{
 	error: KyooErrors | null;
+	loading: boolean;
 	retry?: () => void;
-}>({ error: null });
+}>({ error: null, loading: true });
 
 /* eslint-disable react-hooks/rules-of-hooks */
 export const AccountProvider = ({
@@ -70,6 +71,7 @@ export const AccountProvider = ({
 				<ConnectionErrorContext.Provider
 					value={{
 						error: null,
+						loading: false,
 						retry: () => {
 							queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
 						},
@@ -126,6 +128,7 @@ export const AccountProvider = ({
 			<ConnectionErrorContext.Provider
 				value={{
 					error: user.error,
+					loading: user.isLoading,
 					retry: () => {
 						queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
 					},
