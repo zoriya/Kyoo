@@ -18,10 +18,12 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import "react-native-reanimated";
+
 import { PortalProvider } from "@gorhom/portal";
 import { ThemeSelector } from "@kyoo/primitives";
 import { NavbarRight, NavbarTitle } from "@kyoo/ui";
-import { AccountProvider, createQueryClient, useAccount, useAccounts } from "@kyoo/models";
+import { AccountProvider, createQueryClient, useAccount } from "@kyoo/models";
 import { QueryClientProvider } from "@tanstack/react-query";
 import i18next from "i18next";
 import { Stack } from "expo-router";
@@ -37,7 +39,6 @@ import { useEffect, useState } from "react";
 import { useColorScheme } from "react-native";
 import { initReactI18next } from "react-i18next";
 import { useTheme } from "yoshiki/native";
-import { CircularProgress } from "@kyoo/primitives";
 import { useRouter } from "solito/router";
 import "intl-pluralrules";
 import "@formatjs/intl-locale/polyfill";
