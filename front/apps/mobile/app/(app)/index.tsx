@@ -18,6 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { HomePage } from "@kyoo/ui";
+import { HomePage, BrowsePage } from "@kyoo/ui";
+import { withRoute } from "../utils";
 
-export default HomePage;
+export default withRoute(BrowsePage);

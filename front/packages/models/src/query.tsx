@@ -31,19 +31,12 @@ import { KyooErrors } from "./kyoo-errors";
 import { Page, Paged } from "./page";
 import { Platform } from "react-native";
 import { getToken } from "./login";
+import { getCurrentAccount } from "./account-internal";
 
 const kyooUrl =
-	Platform.OS !== "web"
-		? process.env.PUBLIC_BACK_URL
-		: typeof window === "undefined"
-		  ? process.env.KYOO_URL ?? "http://localhost:5000"
-		  : "/api";
-
-export let kyooApiUrl: string | null = kyooUrl || null;
-
-export const setApiUrl = (apiUrl: string) => {
-	kyooApiUrl = apiUrl;
-};
+	typeof window === "undefined" ? process.env.KYOO_URL ?? "http://localhost:5000" : "/api";
+// The url of kyoo, set after each query (used by the image parser).
+export let kyooApiUrl = kyooUrl;
 
 export const queryFn = async <Data,>(
 	context:
@@ -60,8 +53,7 @@ export const queryFn = async <Data,>(
 	token?: string | null,
 ): Promise<Data> => {
 	// @ts-ignore
-	let url: string | null = context.apiUrl ?? kyooApiUrl;
-	if (!url) console.error("Kyoo's url is not defined.");
+	const url = context.apiUrl ?? (Platform.OS === "web" ? kyooUrl : getCurrentAccount()!.apiUrl);
 	kyooApiUrl = url;
 
 	// @ts-ignore
@@ -71,8 +63,8 @@ export const queryFn = async <Data,>(
 			"path" in context
 				? (context.path.filter((x) => x) as string[])
 				: "pageParam" in context && context.pageParam
-				  ? [context.pageParam as string]
-				  : (context.queryKey.filter((x) => x) as string[]),
+				? [context.pageParam as string]
+				: (context.queryKey.filter((x) => x) as string[]),
 		)
 		.join("/")
 		.replace("/?", "?");
@@ -93,7 +85,7 @@ export const queryFn = async <Data,>(
 			signal: controller?.signal,
 		});
 	} catch (e) {
-		console.log("Fetch error", e);
+		console.log("Fetch error", e, path);
 		throw { errors: ["Could not reach Kyoo's server."] } as KyooErrors;
 	}
 	if (resp.status === 404) {
