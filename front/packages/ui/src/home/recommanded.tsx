@@ -33,6 +33,7 @@ import {
 	H3,
 	Icon,
 	IconFab,
+	ImageBorderRadius,
 	Link,
 	P,
 	PosterBackground,
@@ -89,7 +90,7 @@ export const ItemDetails = ({
 					height: ItemDetails.layout.size,
 					flexDirection: "row",
 					bg: (theme) => theme.variant.background,
-					borderRadius: 6,
+					borderRadius: 12, // to make the border stick to the poster
 					overflow: "hidden",
 					borderColor: (theme) => theme.background,
 					borderWidth: ts(0.25),
