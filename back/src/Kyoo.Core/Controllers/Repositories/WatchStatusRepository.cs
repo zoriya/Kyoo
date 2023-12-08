@@ -330,9 +330,19 @@ public class WatchStatusRepository : IWatchStatusRepository
 				.IgnoreQueryFilters()
 				.Where(x => x.ShowId == showId)
 				.OrderByDescending(x => x.AbsoluteNumber)
-				.OrderByDescending(x => x.SeasonNumber)
-				.OrderByDescending(x => x.EpisodeNumber)
-				.Select(x => new { x.Id, Status = x.Watched!.First(x => x.UserId == userId) })
+				.ThenByDescending(x => x.SeasonNumber)
+				.ThenByDescending(x => x.EpisodeNumber)
+				.Select(
+					x =>
+						new
+						{
+							x.Id,
+							x.AbsoluteNumber,
+							x.SeasonNumber,
+							x.EpisodeNumber,
+							Status = x.Watched!.First(x => x.UserId == userId)
+						}
+				)
 				.FirstOrDefaultAsync(
 					x =>
 						x.Status.Status == WatchStatus.Completed
@@ -346,9 +356,19 @@ public class WatchStatusRepository : IWatchStatusRepository
 						.Episodes
 						.IgnoreQueryFilters()
 						.Where(x => x.ShowId == showId)
-						.OrderByDescending(x => x.AbsoluteNumber)
-						.OrderByDescending(x => x.SeasonNumber)
-						.OrderByDescending(x => x.EpisodeNumber)
+						.OrderBy(x => x.AbsoluteNumber)
+						.ThenBy(x => x.SeasonNumber)
+						.ThenBy(x => x.EpisodeNumber)
+						.Where(
+							x =>
+								cursor == null
+								|| x.AbsoluteNumber > cursor.AbsoluteNumber
+								|| x.SeasonNumber > cursor.SeasonNumber
+								|| (
+									x.SeasonNumber == cursor.SeasonNumber
+									&& x.EpisodeNumber > cursor.EpisodeNumber
+								)
+						)
 						.Select(
 							x =>
 								new
