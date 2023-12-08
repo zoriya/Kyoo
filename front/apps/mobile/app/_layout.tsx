@@ -22,11 +22,10 @@ import "react-native-reanimated";
 
 import { PortalProvider } from "@gorhom/portal";
 import { ThemeSelector } from "@kyoo/primitives";
-import { NavbarRight, NavbarTitle } from "@kyoo/ui";
-import { AccountProvider, createQueryClient, useAccount } from "@kyoo/models";
+import { AccountProvider, createQueryClient } from "@kyoo/models";
 import { QueryClientProvider } from "@tanstack/react-query";
 import i18next from "i18next";
-import { Stack } from "expo-router";
+import { Slot } from "expo-router";
 import { getLocales } from "expo-localization";
 import { SplashScreen } from "expo-router";
 import {
@@ -38,8 +37,6 @@ import {
 import { useEffect, useState } from "react";
 import { useColorScheme } from "react-native";
 import { initReactI18next } from "react-i18next";
-import { useTheme } from "yoshiki/native";
-import { useRouter } from "solito/router";
 import "intl-pluralrules";
 import "@formatjs/intl-locale/polyfill";
 import "@formatjs/intl-displaynames/polyfill";
@@ -61,51 +58,6 @@ i18next.use(initReactI18next).init({
 		fr: { translation: fr },
 	},
 });
-
-export const ConnectionError = () => {
-	const router = useRouter();
-
-	useEffect(() => {
-		router.replace("/connection-error", undefined, {
-			experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
-		});
-	}, [router]);
-	return null;
-};
-
-const ThemedStack = ({ onLayout }: { onLayout?: () => void }) => {
-	const theme = useTheme();
-
-	return (
-		<Stack
-			screenOptions={{
-				headerTitle: () => <NavbarTitle onLayout={onLayout} />,
-				headerRight: () => <NavbarRight />,
-				contentStyle: {
-					backgroundColor: theme.background,
-				},
-				headerStyle: {
-					backgroundColor: theme.accent,
-				},
-				headerTintColor: theme.colors.white,
-			}}
-		/>
-	);
-};
-
-const AuthGuard = () => {
-	const router = useRouter();
-	// TODO: support guest accounts on mobile too.
-	const account = useAccount();
-
-	useEffect(() => {
-		if (account === null)
-			router.replace("/login", undefined, {
-				experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
-			});
-	}, [account, router]);
-	return null;
-};
 
 SplashScreen.preventAutoHideAsync();
 
@@ -132,11 +84,7 @@ export default function Root() {
 			>
 				<PortalProvider>
 					<AccountProvider>
-						<>
-							<ThemedStack />
-							<ConnectionError />
-							<AuthGuard />
-						</>
+						<Slot/>
 					</AccountProvider>
 				</PortalProvider>
 			</ThemeSelector>
