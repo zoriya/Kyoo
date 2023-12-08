@@ -108,10 +108,10 @@ export const NavbarProfile = () => {
 			{...css({ marginLeft: ts(1), justifyContent: "center" })}
 			{...tooltip(account?.username ?? t("navbar.login"))}
 		>
-			{accounts?.map((x, i) => (
+			{accounts?.map((x) => (
 				<Menu.Item
 					key={x.id}
-					label={`${x.username} - ${getDisplayUrl(x.apiUrl)}`}
+					label={Platform.OS === "web" ? x.username : `${x.username} - ${getDisplayUrl(x.apiUrl)}`}
 					left={<Avatar placeholder={x.username} />}
 					selected={x.selected}
 					onSelect={() => x.select()}
