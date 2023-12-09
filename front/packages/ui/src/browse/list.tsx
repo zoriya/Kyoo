@@ -29,7 +29,7 @@ import {
 	Heading,
 	Icon,
 	PosterBackground,
-	ImageBorderRadius,
+	imageBorderRadius,
 } from "@kyoo/primitives";
 import { useState } from "react";
 import { View } from "react-native";
@@ -72,10 +72,10 @@ export const ItemList = ({
 			onPressIn={() => setHovered((i) => i + 1)}
 			onPressOut={() => setHovered((i) => i - 1)}
 			containerStyle={{
-				borderRadius: px(ImageBorderRadius),
+				borderRadius: px(imageBorderRadius),
 			}}
 			imageStyle={{
-				borderRadius: px(ImageBorderRadius),
+				borderRadius: px(imageBorderRadius),
 			}}
 			{...css(
 				{
@@ -83,7 +83,7 @@ export const ItemList = ({
 					justifyContent: "space-evenly",
 					flexDirection: "row",
 					height: ItemList.layout.size,
-					borderRadius: px(ImageBorderRadius),
+					borderRadius: px(imageBorderRadius),
 					marginX: ItemList.layout.gap,
 				},
 				props,

@@ -18,4 +18,4 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export const ImageBorderRadius = 10;
+export const imageBorderRadius = 10;
