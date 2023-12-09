@@ -127,7 +127,7 @@ export const ItemDetails = ({
 					})}
 				>
 					<Skeleton {...css({ width: percent(100) })}>
-						{isLoading || <P {...css([{ m: 0 }, "title"])}>{name}</P>}
+						{isLoading || <P {...css([{ m: 0, color: 'white' }, "title"])}>{name}</P>}
 					</Skeleton>
 					{(subtitle || isLoading) && (
 						<Skeleton {...css({ height: rem(0.8) })}>
