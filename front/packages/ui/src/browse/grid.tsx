@@ -157,7 +157,10 @@ export const ItemGrid = ({
 			</PosterBackground>
 			<Skeleton>
 				{isLoading || (
-					<P numberOfLines={subtitle ? 1 : 2} {...css([{ marginY: 0, textAlign: "center" }, "title"])}>
+					<P
+						numberOfLines={subtitle ? 1 : 2}
+						{...css([{ marginY: 0, textAlign: "center" }, "title"])}
+					>
 						{name}
 					</P>
 				)}

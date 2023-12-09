@@ -29,7 +29,7 @@ import {
 	Heading,
 	Icon,
 	PosterBackground,
-	ImageBorderRadius
+	ImageBorderRadius,
 } from "@kyoo/primitives";
 import { useState } from "react";
 import { View } from "react-native";

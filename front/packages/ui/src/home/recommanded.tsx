@@ -127,7 +127,7 @@ export const ItemDetails = ({
 					})}
 				>
 					<Skeleton {...css({ width: percent(100) })}>
-						{isLoading || <P {...css([{ m: 0, color: 'white' }, "title"])}>{name}</P>}
+						{isLoading || <P {...css([{ m: 0, color: "white" }, "title"])}>{name}</P>}
 					</Skeleton>
 					{(subtitle || isLoading) && (
 						<Skeleton {...css({ height: rem(0.8) })}>
@@ -159,7 +159,7 @@ export const ItemDetails = ({
 						minHeight: px(50),
 					})}
 				>
-					{(
+					{
 						<ScrollView horizontal {...css({ alignItems: "center" })}>
 							{(genres ?? Array(3))?.map((x, i) => (
 								<Chip key={x ?? i} size="small" {...css({ mX: ts(0.5) })}>
@@ -167,7 +167,7 @@ export const ItemDetails = ({
 								</Chip>
 							))}
 						</ScrollView>
-					)}
+					}
 					{playHref !== null && (
 						<IconFab
 							icon={PlayArrow}
