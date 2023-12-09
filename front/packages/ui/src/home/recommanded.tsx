@@ -46,7 +46,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, View } from "react-native";
 import { useRouter } from "solito/router";
-import { Theme, percent, px, rem, useYoshiki } from "yoshiki/native";
+import { Theme, calc, percent, px, rem, useYoshiki } from "yoshiki/native";
 import { Layout, WithLoading } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
@@ -90,7 +90,7 @@ export const ItemDetails = ({
 					height: ItemDetails.layout.size,
 					flexDirection: "row",
 					bg: (theme) => theme.variant.background,
-					borderRadius: 12, // to make the border stick to the poster
+					borderRadius: calc(px(ImageBorderRadius), "+", ts(.25)),
 					overflow: "hidden",
 					borderColor: (theme) => theme.background,
 					borderWidth: ts(0.25),
