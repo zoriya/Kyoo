@@ -155,19 +155,19 @@ export const ItemDetails = ({
 						bg: (theme) => theme.themeOverlay,
 						flexDirection: "row",
 						pX: 4,
-						justifyContent: "space-between",
+						justifyContent: "flex-end",
 						minHeight: px(50),
 					})}
 				>
-					{
+					{(isLoading || genres) && (
 						<ScrollView horizontal {...css({ alignItems: "center" })}>
-							{(genres ?? Array(3))?.map((x, i) => (
+							{(genres || [...Array(3)])?.map((x, i) => (
 								<Chip key={x ?? i} size="small" {...css({ mX: ts(0.5) })}>
 									{x ?? <Skeleton {...css({ width: rem(3), height: rem(0.8) })} />}
 								</Chip>
 							))}
 						</ScrollView>
-					}
+					)}
 					{playHref !== null && (
 						<IconFab
 							icon={PlayArrow}
