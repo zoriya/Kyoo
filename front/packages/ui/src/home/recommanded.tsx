@@ -90,7 +90,7 @@ export const ItemDetails = ({
 					height: ItemDetails.layout.size,
 					flexDirection: "row",
 					bg: (theme) => theme.variant.background,
-					borderRadius: calc(px(imageBorderRadius), "+", ts(.25)),
+					borderRadius: calc(px(imageBorderRadius), "+", ts(0.25)),
 					overflow: "hidden",
 					borderColor: (theme) => theme.background,
 					borderWidth: ts(0.25),
@@ -127,7 +127,11 @@ export const ItemDetails = ({
 					})}
 				>
 					<Skeleton {...css({ width: percent(100) })}>
-						{isLoading || <P {...css([{ m: 0, color: (theme: Theme) => theme.colors.white }, "title"])}>{name}</P>}
+						{isLoading || (
+							<P {...css([{ m: 0, color: (theme: Theme) => theme.colors.white }, "title"])}>
+								{name}
+							</P>
+						)}
 					</Skeleton>
 					{(subtitle || isLoading) && (
 						<Skeleton {...css({ height: rem(0.8) })}>
