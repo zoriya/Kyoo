@@ -154,6 +154,7 @@ export const ItemDetails = ({
 					{...css({
 						bg: (theme) => theme.themeOverlay,
 						flexDirection: "row",
+						pX: 4,
 						justifyContent: "space-between",
 						minHeight: px(50),
 					})}
