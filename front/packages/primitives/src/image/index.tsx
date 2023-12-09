@@ -25,7 +25,7 @@ import { ComponentProps, ComponentType, ReactNode } from "react";
 import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
 import { ContrastArea } from "../themes";
 import { percent } from "yoshiki/native";
-import { ImageBorderRadius } from "../constants";
+import { imageBorderRadius } from "../constants";
 
 export { BlurhashContainer } from "./blurhash";
 export { type Props as ImageProps, Image };
@@ -85,7 +85,7 @@ export const ImageBackground = <AsProps = ViewProps,>({
 			{({ css, theme }) => (
 				<Container
 					{...(css(
-						[layout, !hideLoad && { borderRadius: ImageBorderRadius, overflow: "hidden" }],
+						[layout, !hideLoad && { borderRadius: imageBorderRadius, overflow: "hidden" }],
 						asProps,
 					) as AsProps)}
 				>

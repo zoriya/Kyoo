@@ -25,7 +25,7 @@ import { Props, ImageLayout } from "./base-image";
 import { BlurhashContainer } from "./blurhash.web";
 import { Skeleton } from "../skeleton";
 import NextImage from "next/image";
-import { ImageBorderRadius } from "../constants";
+import { imageBorderRadius } from "../constants";
 
 export const Image = ({
 	src,
@@ -41,7 +41,7 @@ export const Image = ({
 		typeof window === "undefined" ? "finished" : "loading",
 	);
 
-	const border = { borderRadius: ImageBorderRadius } satisfies ViewStyle;
+	const border = { borderRadius: imageBorderRadius } satisfies ViewStyle;
 
 	if (forcedLoading) return <Skeleton variant="custom" {...css([layout, border], props)} />;
 	if (!src || state === "errored") {
