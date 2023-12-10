@@ -27,7 +27,7 @@ import { useYoshiki } from "yoshiki/native";
 export type Layout = {
 	numColumns: Breakpoint<number>;
 	size: Breakpoint<number>;
-	gap: Breakpoint<number | string>;
+	gap: Breakpoint<number>;
 	layout: "grid" | "horizontal" | "vertical";
 };
 

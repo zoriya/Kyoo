@@ -190,7 +190,7 @@ export const InfiniteFetchList = <Data, _, HeaderProps>({
 			{...props}
 		>
 			{(items ?? oldItems.current)?.map((item, i) => (
-				<Fragment key={(item as any).id?.toString()}>
+				<Fragment key={(item as any).id}>
 					{Divider && i !== 0 && (Divider === true ? <HR /> : <Divider />)}
 					{children({ ...item, isLoading: false } as any, i)}
 				</Fragment>
