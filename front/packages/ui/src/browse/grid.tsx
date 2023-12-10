@@ -21,7 +21,7 @@
 import { KyooImage, WatchStatusV } from "@kyoo/models";
 import { Link, Skeleton, ts, focusReset, P, SubP, PosterBackground, Icon } from "@kyoo/primitives";
 import { ImageStyle, View } from "react-native";
-import { percent, px, Stylable, Theme, useYoshiki } from "yoshiki/native";
+import { max, percent, px, rem, Stylable, Theme, useYoshiki } from "yoshiki/native";
 import { Layout, WithLoading } from "../fetch";
 import Done from "@material-symbols/svg-400/rounded/done-fill.svg";
 
@@ -44,7 +44,7 @@ export const ItemWatchStatus = ({
 					position: "absolute",
 					top: 0,
 					right: 0,
-					minWidth: ts(3.5),
+					minWidth: max(rem(1), ts(3.5)),
 					aspectRatio: 1,
 					justifyContent: "center",
 					alignItems: "center",
@@ -59,7 +59,9 @@ export const ItemWatchStatus = ({
 			{watchStatus === WatchStatusV.Completed ? (
 				<Icon icon={Done} size={16} />
 			) : (
-				<P {...css({ m: 0, textAlign: "center" })}>{unseenEpisodesCount}</P>
+				<P {...css({ marginVertical: 0, verticalAlign: "middle", textAlign: "center" })}>
+					{unseenEpisodesCount}
+				</P>
 			)}
 		</View>
 	);
