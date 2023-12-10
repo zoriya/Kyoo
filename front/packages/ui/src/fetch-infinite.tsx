@@ -23,6 +23,7 @@ import { useBreakpointMap, HR } from "@kyoo/primitives";
 import { FlashList } from "@shopify/flash-list";
 import { ComponentProps, ComponentType, isValidElement, ReactElement, useRef } from "react";
 import { EmptyView, ErrorView, Layout, WithLoading, addHeader } from "./fetch";
+import { View, DimensionValue } from "react-native";
 
 export const InfiniteFetchList = <Data, Props, _>({
 	query,
@@ -54,7 +55,7 @@ export const InfiniteFetchList = <Data, Props, _>({
 	getItemType?: (item: WithLoading<Data>, index: number) => string | number;
 	fetchMore?: boolean;
 }): JSX.Element | null => {
-	const { numColumns, size } = useBreakpointMap(layout);
+	const { numColumns, size, gap } = useBreakpointMap(layout);
 	const oldItems = useRef<Data[] | undefined>();
 	let { items, error, fetchNextPage, hasNextPage, isFetching, refetch, isRefetching } = query;
 	if (incremental && items) oldItems.current = items;
@@ -75,10 +76,22 @@ export const InfiniteFetchList = <Data, Props, _>({
 	if (headerProps && !isValidElement(Header)) Header = <Header {...headerProps} />;
 	return (
 		<FlashList
-			renderItem={({ item, index }) => children({ isLoading: false, ...item } as any, index)}
+			contentContainerStyle={{
+				paddingHorizontal: layout.layout !== "vertical" ? gap / 2 : 0,
+			}}
+			renderItem={({ item, index }) => (
+				<View
+					style={{
+						paddingHorizontal: layout.layout !== "vertical" ? gap / 2 : 0,
+						paddingVertical: layout.layout !== "horizontal" ? gap / 2 : 0,
+					}}
+				>
+					{children({ isLoading: false, ...item } as any, index)}
+				</View>
+			)}
 			data={hasNextPage || isFetching ? [...(items || []), ...placeholders] : items}
 			horizontal={layout.layout === "horizontal"}
-			keyExtractor={(item: any) => item.id?.toString()}
+			keyExtractor={(item: any) => item.id}
 			numColumns={numColumns}
 			estimatedItemSize={size}
 			onEndReached={fetchMore ? fetchNextPage : undefined}
