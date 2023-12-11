@@ -74,6 +74,7 @@ import { EpisodeLine, displayRuntime, episodeDisplayNumber } from "./episode";
 import { WatchListInfo } from "../components/watchlist-info";
 import { ShowWatchStatus, WatchStatusV } from "@kyoo/models/src/resources/watch-status";
 import { capitalize } from "@kyoo/primitives";
+import { ShowWatchStatusCard } from "./show";
 
 export const TitleLine = ({
 	isLoading,
@@ -472,37 +473,7 @@ export const Header = ({
 							/>
 						))}
 					</Container>
-					{type === "show" && (data.watchStatus as ShowWatchStatus)?.nextEpisode && (
-						<SwitchVariant>
-							{({ css }) => (
-								<Container
-									{...css({
-										marginY: ts(2),
-										borderRadius: 16,
-										overflow: "hidden",
-										borderWidth: ts(0.5),
-										borderStyle: "solid",
-										borderColor: (theme) => theme.background,
-										backgroundColor: (theme) => theme.background,
-										fover: {
-											self: { ...focusReset, borderColor: (theme: Theme) => theme.accent },
-										},
-									})}
-								>
-									<H2 {...css({ marginLeft: ts(2) })}>{t("show.nextUp")}</H2>
-									<EpisodeLine
-										isLoading={false}
-										{...(data.watchStatus as ShowWatchStatus).nextEpisode!}
-										watchedPercent={data.watchStatus?.watchedPercent || null}
-										watchedStatus={data.watchStatus?.status || null}
-										displayNumber={
-											episodeDisplayNumber((data.watchStatus as ShowWatchStatus).nextEpisode!)!
-										}
-									/>
-								</Container>
-							)}
-						</SwitchVariant>
-					)}
+					{type === "show" && <ShowWatchStatusCard {...data?.watchStatus as any} />}
 				</>
 			)}
 		</Fetch>

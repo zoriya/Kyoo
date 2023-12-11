@@ -18,16 +18,18 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { QueryIdentifier, QueryPage, Show, ShowP } from "@kyoo/models";
+import { QueryIdentifier, QueryPage, Show, ShowP, ShowWatchStatus } from "@kyoo/models";
 import { Platform, View, ViewProps } from "react-native";
 import { percent, useYoshiki } from "yoshiki/native";
 import { DefaultLayout } from "../layout";
 import { EpisodeList, SeasonHeader } from "./season";
 import { Header } from "./header";
 import Svg, { Path, SvgProps } from "react-native-svg";
-import { Container } from "@kyoo/primitives";
-import { forwardRef } from "react";
+import { Container, H2, SwitchVariant, focusReset, ts } from "@kyoo/primitives";
+import { forwardRef, useState } from "react";
 import { DetailsCollections } from "./collection";
+import { EpisodeLine, episodeDisplayNumber } from "./episode";
+import { useTranslation } from "react-i18next";
 
 export const SvgWave = (props: SvgProps) => {
 	const { css } = useYoshiki();
@@ -40,6 +42,50 @@ export const SvgWave = (props: SvgProps) => {
 				<Path d="M0,375.175c68,-5.1,136,-0.85,204,7.948c68,9.052,136,22.652,204,24.777s136,-8.075,170,-12.878l34,-4.973v35.7h-612" />
 			</Svg>
 		</View>
+	);
+};
+
+export const ShowWatchStatusCard = ({ watchedPercent, status, nextEpisode }: ShowWatchStatus) => {
+	const { t } = useTranslation();
+	const [focused, setFocus] = useState(false);
+
+	if (!nextEpisode) return null;
+
+	return (
+		<SwitchVariant>
+			{({ css }) => (
+				<Container
+					{...css([
+						{
+							marginY: ts(2),
+							borderRadius: 16,
+							overflow: "hidden",
+							borderWidth: ts(0.5),
+							borderStyle: "solid",
+							borderColor: (theme) => theme.background,
+							backgroundColor: (theme) => theme.background,
+						},
+						focused && {
+							...focusReset,
+							borderColor: (theme) => theme.accent,
+						},
+					])}
+				>
+					<H2 {...css({ marginLeft: ts(2) })}>{t("show.nextUp")}</H2>
+					<EpisodeLine
+						isLoading={false}
+						{...nextEpisode}
+						watchedPercent={watchedPercent || null}
+						watchedStatus={status || null}
+						displayNumber={episodeDisplayNumber(nextEpisode, "???")!}
+						onHoverIn={() => setFocus(true)}
+						onHoverOut={() => setFocus(false)}
+						onFocus={() => setFocus(true)}
+						onBlur={() => setFocus(false)}
+					/>
+				</Container>
+			)}
+		</SwitchVariant>
 	);
 };
 
