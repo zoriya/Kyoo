@@ -172,7 +172,7 @@ export const EpisodeLine = ({
 	watchedStatus: WatchStatusV | null;
 }> &
 	Stylable) => {
-	const { css } = useYoshiki();
+	const { css } = useYoshiki("episode-line");
 	const { t } = useTranslation();
 
 	return (

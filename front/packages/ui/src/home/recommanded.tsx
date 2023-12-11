@@ -166,9 +166,7 @@ export const ItemDetails = ({
 					{(isLoading || genres) && (
 						<ScrollView horizontal {...css({ alignItems: "center" })}>
 							{(genres || [...Array(3)])?.map((x, i) => (
-								<Chip key={x ?? i} size="small" {...css({ mX: ts(0.5) })}>
-									{x ?? <Skeleton {...css({ width: rem(3), height: rem(0.8) })} />}
-								</Chip>
+								<Chip key={x ?? i} label={x} size="small" {...css({ mX: ts(0.5) })} />
 							))}
 						</ScrollView>
 					)}

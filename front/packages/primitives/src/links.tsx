@@ -19,7 +19,7 @@
  */
 
 import { forwardRef, ReactNode } from "react";
-import { Platform, Pressable, TextProps, View, PressableProps } from "react-native";
+import { Platform, Pressable, TextProps, View, PressableProps, Linking } from "react-native";
 import { TextLink, useLink } from "solito/link";
 import { useTheme, useYoshiki } from "yoshiki/native";
 import { alpha } from "./themes";
@@ -107,7 +107,16 @@ export const Link = ({
 	// @ts-ignore Missing hrefAttrs type definition.
 	linkProps.hrefAttrs = { ...linkProps.hrefAttrs, target };
 	return (
-		<PressableFeedback {...linkProps} {...props}>
+		<PressableFeedback
+			{...linkProps}
+			{...props}
+			onPress={(e?: any) => {
+				props?.onPress?.(e);
+				if (e?.defaultPrevented) return;
+				if (Platform.OS !== "web" && href?.includes("://")) Linking.openURL(href);
+				else linkProps.onPress(e);
+			}}
+		>
 			{children}
 		</PressableFeedback>
 	);
