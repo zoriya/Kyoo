@@ -22,8 +22,7 @@ import { px, rem, Theme, useYoshiki } from "yoshiki/native";
 import { Link } from "./links";
 import { P } from "./text";
 import { capitalize, ts } from "./utils";
-import { EnhancedStyle } from "yoshiki/src/native/type";
-import { TextProps, TextStyle, ViewStyle } from "react-native";
+import { TextProps } from "react-native";
 import { Skeleton } from "./skeleton";
 
 export const Chip = ({

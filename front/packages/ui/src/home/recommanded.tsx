@@ -44,14 +44,12 @@ import {
 	ts,
 } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
-import { Pressable, ScrollView, View } from "react-native";
-import { useRouter } from "solito/router";
+import { ScrollView, View } from "react-native";
 import { Theme, calc, percent, px, rem, useYoshiki } from "yoshiki/native";
 import { Layout, WithLoading } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import { ItemGrid, ItemWatchStatus } from "../browse/grid";
-import Done from "@material-symbols/svg-400/rounded/done-fill.svg";
 
 export const ItemDetails = ({
 	isLoading,
@@ -78,111 +76,134 @@ export const ItemDetails = ({
 	watchStatus: WatchStatusV | null;
 	unseenEpisodesCount: number | null;
 }>) => {
-	const { push } = useRouter();
 	const { t } = useTranslation();
 	const { css } = useYoshiki("recommanded-card");
 
 	return (
-		<Link
-			href={href}
-			{...css(
-				{
-					height: ItemDetails.layout.size,
-					flexDirection: "row",
-					bg: (theme) => theme.variant.background,
-					borderRadius: calc(px(imageBorderRadius), "+", ts(0.25)),
-					overflow: "hidden",
-					borderColor: (theme) => theme.background,
-					borderWidth: ts(0.25),
-					borderStyle: "solid",
-					fover: {
-						self: {
-							...focusReset,
-							borderColor: (theme: Theme) => theme.accent,
-						},
-						title: {
-							textDecorationLine: "underline",
-						},
-					},
-				},
-				props,
-			)}
+		<View
+			{...css({
+				height: ItemDetails.layout.size,
+			})}
 		>
-			<PosterBackground
-				src={poster}
-				alt=""
-				quality="low"
-				forcedLoading={isLoading}
-				layout={{ height: percent(100) }}
-				style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
-			>
-				<View
-					{...css({
-						bg: (theme) => theme.darkOverlay,
+			<Link
+				href={href}
+				{...css(
+					{
 						position: "absolute",
+						top: 0,
 						left: 0,
 						right: 0,
 						bottom: 0,
-						p: ts(1),
-					})}
+						flexDirection: "row",
+						bg: (theme) => theme.variant.background,
+						borderRadius: calc(px(imageBorderRadius), "+", ts(0.25)),
+						overflow: "hidden",
+						borderColor: (theme) => theme.background,
+						borderWidth: ts(0.25),
+						borderStyle: "solid",
+						fover: {
+							self: {
+								...focusReset,
+								borderColor: (theme: Theme) => theme.accent,
+							},
+							title: {
+								textDecorationLine: "underline",
+							},
+						},
+					},
+					props,
+				)}
+			>
+				<PosterBackground
+					src={poster}
+					alt=""
+					quality="low"
+					forcedLoading={isLoading}
+					layout={{ height: percent(100) }}
+					style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
 				>
-					<Skeleton {...css({ width: percent(100) })}>
-						{isLoading || (
-							<P {...css([{ m: 0, color: (theme: Theme) => theme.colors.white }, "title"])}>
-								{name}
-							</P>
+					<View
+						{...css({
+							bg: (theme) => theme.darkOverlay,
+							position: "absolute",
+							left: 0,
+							right: 0,
+							bottom: 0,
+							p: ts(1),
+						})}
+					>
+						<Skeleton {...css({ width: percent(100) })}>
+							{isLoading || (
+								<P {...css([{ m: 0, color: (theme: Theme) => theme.colors.white }, "title"])}>
+									{name}
+								</P>
+							)}
+						</Skeleton>
+						{(subtitle || isLoading) && (
+							<Skeleton {...css({ height: rem(0.8) })}>
+								{isLoading || <SubP {...css({ m: 0 })}>{subtitle}</SubP>}
+							</Skeleton>
 						)}
-					</Skeleton>
-					{(subtitle || isLoading) && (
-						<Skeleton {...css({ height: rem(0.8) })}>
-							{isLoading || <SubP {...css({ m: 0 })}>{subtitle}</SubP>}
+					</View>
+					<ItemWatchStatus watchStatus={watchStatus} unseenEpisodesCount={unseenEpisodesCount} />
+				</PosterBackground>
+				<View
+					{...css({ flexShrink: 1, flexGrow: 1, justifyContent: "flex-end", marginBottom: px(50) })}
+				>
+					{(isLoading || tagline) && (
+						<Skeleton {...css({ m: ts(1), marginVertical: ts(2) })}>
+							{isLoading || <P {...css({ p: ts(1) })}>{tagline}</P>}
 						</Skeleton>
 					)}
+					<ScrollView {...css({ pX: ts(1) })}>
+						<Skeleton lines={5} {...css({ height: rem(0.8) })}>
+							{isLoading || (
+								<SubP {...css({ textAlign: "justify" })}>{overview ?? t("show.noOverview")}</SubP>
+							)}
+						</Skeleton>
+					</ScrollView>
 				</View>
-				<ItemWatchStatus watchStatus={watchStatus} unseenEpisodesCount={unseenEpisodesCount} />
-			</PosterBackground>
-			<View {...css({ flexShrink: 1, flexGrow: 1, justifyContent: "flex-end" })}>
-				{(isLoading || tagline) && (
-					<Skeleton {...css({ m: ts(1), marginVertical: ts(2) })}>
-						{isLoading || <P {...css({ p: ts(1) })}>{tagline}</P>}
-					</Skeleton>
+			</Link>
+
+			{/* This view needs to be out of the Link because nested <a> are not allowed on the web */}
+			<View
+				{...css({
+					position: "absolute",
+					// Take the border into account
+					bottom: ts(0.25),
+					right: ts(0.25),
+					borderWidth: ts(0.25),
+					borderColor: "transparent",
+					borderBottomEndRadius: px(imageBorderRadius),
+					overflow: "hidden",
+					// Calculate the size of the poster
+					left: calc(ItemDetails.layout.size, "*", 2 / 3),
+					bg: (theme) => theme.themeOverlay,
+					flexDirection: "row",
+					pX: 4,
+					justifyContent: "flex-end",
+					height: px(50),
+				})}
+			>
+				{(isLoading || genres) && (
+					<ScrollView horizontal contentContainerStyle={{ alignItems: "center" }}>
+						{(genres || [...Array(3)])?.map((x, i) => (
+							<Chip key={x ?? i} label={x} size="small" {...css({ mX: ts(0.5) })} />
+						))}
+					</ScrollView>
 				)}
-				<ScrollView {...css({ pX: ts(1) })}>
-					<Skeleton lines={5} {...css({ height: rem(0.8) })}>
-						{isLoading || (
-							<SubP {...css({ textAlign: "justify" })}>{overview ?? t("show.noOverview")}</SubP>
-						)}
-					</Skeleton>
-				</ScrollView>
-				<View
-					{...css({
-						bg: (theme) => theme.themeOverlay,
-						flexDirection: "row",
-						pX: 4,
-						justifyContent: "flex-end",
-						minHeight: px(50),
-					})}
-				>
-					{(isLoading || genres) && (
-						<ScrollView horizontal {...css({ alignItems: "center" })}>
-							{(genres || [...Array(3)])?.map((x, i) => (
-								<Chip key={x ?? i} label={x} size="small" {...css({ mX: ts(0.5) })} />
-							))}
-						</ScrollView>
-					)}
-					{playHref !== null && (
-						<IconFab
-							icon={PlayArrow}
-							size={20}
-							as={Pressable}
-							onPress={() => push(playHref ?? "")}
-							{...tooltip(t("show.play"))}
-							{...css({ fover: { self: { transform: "scale(1.2)" as any, mX: ts(0.5) } } })}
-						/>
-					)}
-				</View>
+				{playHref !== null && (
+					<IconFab
+						icon={PlayArrow}
+						size={20}
+						as={Link}
+						href={playHref}
+						{...tooltip(t("show.play"))}
+						{...css({ fover: { self: { transform: "scale(1.2)" as any, mX: ts(0.5) } } })}
+					/>
+				)}
 			</View>
-		</Link>
+		</View>
 	);
 };
 
@@ -205,7 +226,7 @@ export const Recommanded = () => {
 				layout={ItemDetails.layout}
 				placeholderCount={6}
 				fetchMore={false}
-				{...css({ padding: 0 })}
+				contentContainerStyle={{ padding: 0, paddingHorizontal: 0 }}
 			>
 				{(x) => (
 					<ItemDetails

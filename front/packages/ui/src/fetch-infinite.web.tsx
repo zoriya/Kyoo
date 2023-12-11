@@ -32,6 +32,8 @@ import {
 } from "react";
 import { Stylable, nativeStyleToCss, useYoshiki, ysMap } from "yoshiki";
 import { EmptyView, ErrorView, Layout, WithLoading, addHeader } from "./fetch";
+import { ViewStyle } from "react-native";
+import type { ContentStyle } from "@shopify/flash-list";
 
 const InfiniteScroll = <Props,>({
 	children,
@@ -43,6 +45,7 @@ const InfiniteScroll = <Props,>({
 	Header,
 	headerProps,
 	fetchMore = true,
+	contentContainerStyle,
 	...props
 }: {
 	children?: ReactElement | (ReactElement | null)[] | null;
@@ -54,6 +57,7 @@ const InfiniteScroll = <Props,>({
 	Header?: ComponentType<Props & { children: JSX.Element }> | ReactElement;
 	headerProps?: Props;
 	fetchMore?: boolean;
+	contentContainerStyle?: ContentStyle;
 } & Stylable) => {
 	const ref = useRef<HTMLDivElement>(null);
 	const { css } = useYoshiki();
@@ -110,6 +114,7 @@ const InfiniteScroll = <Props,>({
 						overflowY: "auto",
 						padding: layout.gap as any,
 					},
+					contentContainerStyle as any,
 				],
 				nativeStyleToCss(props),
 			)}
@@ -162,6 +167,7 @@ export const InfiniteFetchList = <Data, _, HeaderProps>({
 	headerProps: HeaderProps;
 	getItemType?: (item: WithLoading<Data>, index: number) => string | number;
 	fetchMore?: boolean;
+	contentContainerStyle?: ContentStyle;
 }): JSX.Element | null => {
 	const oldItems = useRef<Data[] | undefined>();
 	const { items, error, fetchNextPage, hasNextPage, isFetching } = query;

@@ -87,6 +87,7 @@ export const IconButton = forwardRef(function IconButton<AsProps = PressableProp
 					alignSelf: "center",
 					p: ts(1),
 					m: px(2),
+					overflow: "hidden",
 					borderRadius: 9999,
 					fover: {
 						self: {
