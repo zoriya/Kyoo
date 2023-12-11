@@ -370,6 +370,7 @@ const Description = ({
 						<Chip
 							key={tag ?? i}
 							label={tag && capitalize(tag)}
+							href={`/search?q=${tag}`}
 							size="small"
 							{...css({ m: ts(0.5) })}
 						/>
