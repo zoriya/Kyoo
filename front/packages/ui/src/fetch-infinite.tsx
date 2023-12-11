@@ -23,7 +23,7 @@ import { useBreakpointMap, HR } from "@kyoo/primitives";
 import { ContentStyle, FlashList } from "@shopify/flash-list";
 import { ComponentProps, ComponentType, isValidElement, ReactElement, useRef } from "react";
 import { EmptyView, ErrorView, Layout, WithLoading, addHeader } from "./fetch";
-import { View, ViewStyle } from "react-native";
+import { FlatList, View, ViewStyle } from "react-native";
 
 const emulateGap = (
 	layout: "grid" | "vertical" | "horizontal",
@@ -64,6 +64,7 @@ export const InfiniteFetchList = <Data, Props, _>({
 	headerProps,
 	getItemType,
 	fetchMore = true,
+	nested = false,
 	contentContainerStyle,
 	...props
 }: {
@@ -82,6 +83,7 @@ export const InfiniteFetchList = <Data, Props, _>({
 	headerProps?: Props;
 	getItemType?: (item: WithLoading<Data>, index: number) => string | number;
 	fetchMore?: boolean;
+	nested?: boolean;
 	contentContainerStyle?: ContentStyle;
 }): JSX.Element | null => {
 	const { numColumns, size, gap } = useBreakpointMap(layout);
@@ -101,10 +103,12 @@ export const InfiniteFetchList = <Data, Props, _>({
 		(_, i) => ({ id: `gen${i}`, isLoading: true }) as Data,
 	);
 
+	const List = nested ? FlatList as unknown as typeof FlashList : FlashList;
+
 	// @ts-ignore
 	if (headerProps && !isValidElement(Header)) Header = <Header {...headerProps} />;
 	return (
-		<FlashList
+		<List
 			contentContainerStyle={{
 				paddingHorizontal: layout.layout !== "vertical" ? gap : 0,
 				...contentContainerStyle,
@@ -126,6 +130,8 @@ export const InfiniteFetchList = <Data, Props, _>({
 			ItemSeparatorComponent={divider === true ? HR : divider || null}
 			ListHeaderComponent={Header}
 			getItemType={getItemType}
+			nestedScrollEnabled={nested}
+			scrollEnabled={!nested}
 			{...props}
 		/>
 	);

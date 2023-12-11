@@ -226,6 +226,7 @@ export const Recommanded = () => {
 				layout={ItemDetails.layout}
 				placeholderCount={6}
 				fetchMore={false}
+				nested
 				contentContainerStyle={{ padding: 0, paddingHorizontal: 0 }}
 			>
 				{(x) => (

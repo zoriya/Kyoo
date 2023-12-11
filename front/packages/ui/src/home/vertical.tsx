@@ -18,8 +18,8 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ItemKind, LibraryItem, LibraryItemP, QueryIdentifier, getDisplayDate } from "@kyoo/models";
-import { H3, ts } from "@kyoo/primitives";
+import { LibraryItem, LibraryItemP, QueryIdentifier } from "@kyoo/models";
+import { H3 } from "@kyoo/primitives";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 import { InfiniteFetch } from "../fetch-infinite";
@@ -40,6 +40,7 @@ export const VerticalRecommanded = () => {
 				placeholderCount={3}
 				layout={{ ...ItemList.layout, layout: "vertical" }}
 				fetchMore={false}
+				nested
 			>
 				{(x, i) => <ItemList key={x.id ?? i} {...itemMap(x)} />}
 			</InfiniteFetch>
