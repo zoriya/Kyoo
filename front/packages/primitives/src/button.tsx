@@ -28,7 +28,7 @@ export const Button = ({
 	text,
 	...props
 }: { text: string } & ComponentProps<typeof PressableFeedback>) => {
-	const { css } = useYoshiki();
+	const { css } = useYoshiki("button");
 
 	return (
 		<PressableFeedback

@@ -52,7 +52,7 @@ import {
 } from "@kyoo/primitives";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
-import { ImageStyle, Platform, View } from "react-native";
+import { ImageStyle, Platform, Text, View } from "react-native";
 import {
 	Theme,
 	md,
@@ -458,28 +458,17 @@ export const Header = ({
 						<P {...css({ marginRight: ts(0.5), textAlign: "center" })}>{t("show.links")}:</P>
 						{(!isLoading
 							? Object.entries(data.externalId!).filter(([_, data]) => data.link)
-							: [...Array(3)].map((_, i) => [i, undefined] as const)
-						).map(([name, data]) => (
+							: [...Array(3)].map((_) => [undefined, undefined] as const)
+						).map(([name, data], i) => (
 							<Chip
-								key={name}
-								as={A}
-								href={data?.link}
+								key={name ?? i}
+								label={name}
+								href={data?.link || undefined}
 								target="_blank"
 								size="small"
 								outline
-								{...(css({
-									m: ts(0.5),
-									color: (theme: Theme) => theme.contrast,
-									fover: {
-										self: {
-											color: (theme: Theme) => theme.alternate.contrast,
-											bg: (theme: Theme) => theme.accent,
-										},
-									},
-								}) as any)}
-							>
-								{data ? capitalize(name) : <Skeleton {...css({ width: rem(3) })} />}
-							</Chip>
+								{...css({ m: ts(0.5) })}
+							/>
 						))}
 					</Container>
 					{type === "show" && (data.watchStatus as ShowWatchStatus)?.nextEpisode && (

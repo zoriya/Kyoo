@@ -18,54 +18,88 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { px, rem, Stylable, Theme, useYoshiki } from "yoshiki/native";
+import { px, rem, Theme, useYoshiki } from "yoshiki/native";
+import { Link } from "./links";
 import { P } from "./text";
-import { ts } from "./utils";
-import { A } from "./links";
-import { ComponentType } from "react";
+import { capitalize, ts } from "./utils";
+import { EnhancedStyle } from "yoshiki/src/native/type";
+import { TextProps, TextStyle, ViewStyle } from "react-native";
+import { Skeleton } from "./skeleton";
 
-export const Chip = <AsProps = { label: string },>({
+export const Chip = ({
 	color,
 	size = "medium",
 	outline = false,
-	as,
+	label,
+	href,
+	replace,
+	target,
+	textProps,
 	...props
 }: {
 	color?: string;
 	size?: "small" | "medium" | "large";
 	outline?: boolean;
-	as?: ComponentType<AsProps>;
-} & AsProps) => {
-	const { css } = useYoshiki();
+	label?: string;
+	href?: string;
+	replace?: boolean;
+	target?: string;
+	textProps?: TextProps;
+}) => {
+	const { css } = useYoshiki("chip");
+
+	textProps ??= {};
 
 	const sizeMult = size == "medium" ? 1 : size == "small" ? 0.5 : 1.5;
 
-	const As = as ?? (P as any);
-	// @ts-ignore backward compatibilty
-	if (!as && props.label) props.children = props.label;
-
 	return (
-		<As
+		<Link
+			href={href}
+			replace={replace}
+			target={target}
 			{...css(
 				[
 					{
 						pY: ts(1 * sizeMult),
 						pX: ts(2.5 * sizeMult),
 						borderRadius: ts(3),
-						fontSize: rem(0.8),
-					},
-					!outline && {
-						color: (theme: Theme) => theme.alternate.contrast,
-						bg: color ?? ((theme: Theme) => theme.accent),
+						overflow: "hidden",
 					},
 					outline && {
 						borderColor: color ?? ((theme: Theme) => theme.accent),
 						borderStyle: "solid",
 						borderWidth: px(1),
+						fover: {
+							self: {
+								bg: (theme: Theme) => theme.accent,
+							},
+							text: {
+								color: (theme: Theme) => theme.alternate.contrast,
+							},
+						},
+					},
+					!outline && {
+						bg: color ?? ((theme: Theme) => theme.accent),
 					},
 				],
 				props,
 			)}
-		/>
+		>
+			<P
+				{...css(
+					[
+						"text",
+						{
+							marginVertical: 0,
+							fontSize: rem(0.8),
+							color: (theme: Theme) => (outline ? theme.contrast : theme.alternate.contrast),
+						},
+					],
+					textProps,
+				)}
+			>
+				{label ? capitalize(label) : <Skeleton {...css({ width: rem(3) })} />}
+			</P>
+		</Link>
 	);
 };
