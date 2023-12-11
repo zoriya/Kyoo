@@ -20,10 +20,37 @@
 
 import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { useBreakpointMap, HR } from "@kyoo/primitives";
-import { FlashList } from "@shopify/flash-list";
+import { ContentStyle, FlashList } from "@shopify/flash-list";
 import { ComponentProps, ComponentType, isValidElement, ReactElement, useRef } from "react";
 import { EmptyView, ErrorView, Layout, WithLoading, addHeader } from "./fetch";
-import { View, DimensionValue } from "react-native";
+import { View, ViewStyle } from "react-native";
+
+const emulateGap = (
+	layout: "grid" | "vertical" | "horizontal",
+	gap: number,
+	numColumns: number,
+	index: number,
+): ViewStyle => {
+	let marginLeft = 0;
+	let marginRight = 0;
+
+	if (layout !== "vertical" && numColumns > 1) {
+		if (index % numColumns === 0) {
+			marginRight = (gap * 2) / 3;
+		} else if ((index + 1) % numColumns === 0) {
+			marginLeft = (gap * 2) / 3;
+		} else {
+			marginLeft = gap / 3;
+			marginRight = gap / 3;
+		}
+	}
+
+	return {
+		marginLeft,
+		marginRight,
+		marginTop: layout !== "horizontal" && index >= numColumns ? gap : 0,
+	};
+};
 
 export const InfiniteFetchList = <Data, Props, _>({
 	query,
@@ -37,6 +64,7 @@ export const InfiniteFetchList = <Data, Props, _>({
 	headerProps,
 	getItemType,
 	fetchMore = true,
+	contentContainerStyle,
 	...props
 }: {
 	query: ReturnType<typeof useInfiniteFetch<_, Data>>;
@@ -54,10 +82,11 @@ export const InfiniteFetchList = <Data, Props, _>({
 	headerProps?: Props;
 	getItemType?: (item: WithLoading<Data>, index: number) => string | number;
 	fetchMore?: boolean;
+	contentContainerStyle?: ContentStyle;
 }): JSX.Element | null => {
 	const { numColumns, size, gap } = useBreakpointMap(layout);
 	const oldItems = useRef<Data[] | undefined>();
-	let { items, error, fetchNextPage, hasNextPage, isFetching, refetch, isRefetching } = query;
+	let { items, error, fetchNextPage, isFetching, refetch, isRefetching } = query;
 	if (incremental && items) oldItems.current = items;
 
 	if (error) return <ErrorView error={error} />;
@@ -77,15 +106,11 @@ export const InfiniteFetchList = <Data, Props, _>({
 	return (
 		<FlashList
 			contentContainerStyle={{
-				paddingHorizontal: layout.layout !== "vertical" ? gap / 2 : 0,
+				paddingHorizontal: layout.layout !== "vertical" ? gap : 0,
+				...contentContainerStyle,
 			}}
 			renderItem={({ item, index }) => (
-				<View
-					style={{
-						paddingHorizontal: layout.layout !== "vertical" ? gap / 2 : 0,
-						paddingVertical: layout.layout !== "horizontal" ? gap / 2 : 0,
-					}}
-				>
+				<View style={emulateGap(layout.layout, gap, numColumns, index)}>
 					{children({ isLoading: false, ...item } as any, index)}
 				</View>
 			)}
