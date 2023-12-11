@@ -30,7 +30,9 @@ export const Rating = ({ rating, color }: { rating?: number; color: Breakpoint<s
 		<View {...css({ flexDirection: "row", alignItems: "center" })}>
 			<Icon icon={Star} color={color} {...css({ marginRight: ts(0.5) })} />
 			<Skeleton {...css({ width: rem(2) })}>
-				{rating !== undefined && <P {...css({ color, verticalAlign: "middle" })}>{rating ? rating / 10 : "??"} / 10</P>}
+				{rating !== undefined && (
+					<P {...css({ color, verticalAlign: "middle" })}>{rating ? rating / 10 : "??"} / 10</P>
+				)}
 			</Skeleton>
 		</View>
 	);

@@ -63,8 +63,8 @@ export const queryFn = async <Data,>(
 			"path" in context
 				? (context.path.filter((x) => x) as string[])
 				: "pageParam" in context && context.pageParam
-				? [context.pageParam as string]
-				: (context.queryKey.filter((x) => x) as string[]),
+				  ? [context.pageParam as string]
+				  : (context.queryKey.filter((x) => x) as string[]),
 		)
 		.join("/")
 		.replace("/?", "?");
