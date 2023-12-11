@@ -18,7 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { HomePage, BrowsePage } from "@kyoo/ui";
+import { HomePage } from "@kyoo/ui";
 import { withRoute } from "../utils";
 
-export default withRoute(BrowsePage);
+export default withRoute(HomePage, {
+	options: { headerTransparent: true, headerStyle: { backgroundColor: "transparent" } },
+	statusBar: { barStyle: "light-content" },
+});
