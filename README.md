@@ -15,9 +15,10 @@ Feel free to open issues or pull requests, all contribution are welcomed.
 
 ## Features
  - Manage your movies, tv-series & anime
- - Download metadata automatically
  - Transmux/Transcode files to make them available on every platform
- - Account system with a permission system
+ - Create smart watchlists that will automatically update when you watch movies/episodes
+ - Search your collection via names, tags or descriptions
+ - Download metadata automatically
  - Handle subtitles natively with embedded fonts (ass, subrip or vtt)
  - Entirely free and works without internet (when metadata have already been downloaded)
 
