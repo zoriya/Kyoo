@@ -115,7 +115,7 @@ const InfiniteScroll = <Props,>({
 			)}
 		>
 			{children}
-			{((hasMore && fetchMore) || isFetching) && loader}
+			{isFetching && loader}
 		</div>
 	);
 

@@ -57,7 +57,7 @@ export const queryFn = async <Data,>(
 	kyooApiUrl = url;
 
 	// @ts-ignore
-	if (!token && context.authenticated !== false) token = await getToken();
+	if (token === undefined && context.authenticated !== false) token = await getToken();
 	const path = [url]
 		.concat(
 			"path" in context
@@ -150,10 +150,6 @@ export type QueryIdentifier<T = unknown, Ret = T> = {
 	path: (string | undefined)[];
 	params?: { [query: string]: boolean | number | string | string[] | undefined };
 	infinite?: boolean | { value: true; map?: (x: any[]) => Ret[] };
-	/**
-	 * A custom get next function if the infinite query is not a page.
-	 */
-	getNext?: (item: unknown) => string | undefined;
 
 	placeholderData?: T | (() => T);
 	enabled?: boolean;
@@ -195,19 +191,6 @@ export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 };
 
 export const useInfiniteFetch = <Data, Ret>(query: QueryIdentifier<Data, Ret>) => {
-	if (query.getNext) {
-		// eslint-disable-next-line react-hooks/rules-of-hooks
-		const ret = useInfiniteQuery<Data[], KyooErrors>({
-			queryKey: toQueryKey(query),
-			queryFn: (ctx) => queryFn({ ...ctx, timeout: query.timeout }, z.array(query.parser)),
-			getNextPageParam: query.getNext,
-			initialPageParam: undefined,
-			placeholderData: query.placeholderData as any,
-			enabled: query.enabled,
-		});
-		return { ...ret, items: ret.data?.pages.flatMap((x) => x) as unknown as Ret[] | undefined };
-	}
-	// eslint-disable-next-line react-hooks/rules-of-hooks
 	const ret = useInfiniteQuery<Page<Data>, KyooErrors>({
 		queryKey: toQueryKey(query),
 		queryFn: (ctx) => queryFn({ ...ctx, timeout: query.timeout }, Paged(query.parser)),
