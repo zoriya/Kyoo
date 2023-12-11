@@ -89,7 +89,7 @@ export const InfiniteFetchList = <Data, Props, _>({
 					{children({ isLoading: false, ...item } as any, index)}
 				</View>
 			)}
-			data={hasNextPage || isFetching ? [...(items || []), ...placeholders] : items}
+			data={isFetching ? [...(items || []), ...placeholders] : items}
 			horizontal={layout.layout === "horizontal"}
 			keyExtractor={(item: any) => item.id}
 			numColumns={numColumns}
