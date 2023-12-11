@@ -32,7 +32,6 @@ import {
 } from "react";
 import { Stylable, nativeStyleToCss, useYoshiki, ysMap } from "yoshiki";
 import { EmptyView, ErrorView, Layout, WithLoading, addHeader } from "./fetch";
-import { ViewStyle } from "react-native";
 import type { ContentStyle } from "@shopify/flash-list";
 
 const InfiniteScroll = <Props,>({

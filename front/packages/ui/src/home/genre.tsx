@@ -20,21 +20,17 @@
 
 import {
 	Genre,
-	ItemKind,
 	LibraryItem,
 	LibraryItemP,
 	QueryIdentifier,
-	getDisplayDate,
 	useInfiniteFetch,
 } from "@kyoo/models";
-import { H3, IconButton, ts } from "@kyoo/primitives";
-import { ReactElement, forwardRef, useRef } from "react";
+import { H3, ts } from "@kyoo/primitives";
+import { useRef } from "react";
 import { View } from "react-native";
-import { px, useYoshiki } from "yoshiki/native";
+import { useYoshiki } from "yoshiki/native";
 import { ItemGrid } from "../browse/grid";
-import ChevronLeft from "@material-symbols/svg-400/rounded/chevron_left-fill.svg";
-import ChevronRight from "@material-symbols/svg-400/rounded/chevron_right-fill.svg";
-import { InfiniteFetch, InfiniteFetchList } from "../fetch-infinite";
+import { InfiniteFetchList } from "../fetch-infinite";
 import { useTranslation } from "react-i18next";
 import { itemMap } from "../browse";
 

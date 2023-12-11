@@ -103,7 +103,7 @@ export const InfiniteFetchList = <Data, Props, _>({
 		(_, i) => ({ id: `gen${i}`, isLoading: true }) as Data,
 	);
 
-	const List = nested ? FlatList as unknown as typeof FlashList : FlashList;
+	const List = nested ? (FlatList as unknown as typeof FlashList) : FlashList;
 
 	// @ts-ignore
 	if (headerProps && !isValidElement(Header)) Header = <Header {...headerProps} />;
@@ -114,14 +114,21 @@ export const InfiniteFetchList = <Data, Props, _>({
 				...contentContainerStyle,
 			}}
 			renderItem={({ item, index }) => (
-				<View style={emulateGap(layout.layout, gap, numColumns, index)}>
+				<View
+					style={[
+						emulateGap(layout.layout, gap, numColumns, index),
+						layout.layout === "horizontal" && {
+							width: size,
+						},
+					]}
+				>
 					{children({ isLoading: false, ...item } as any, index)}
 				</View>
 			)}
 			data={isFetching ? [...(items || []), ...placeholders] : items}
 			horizontal={layout.layout === "horizontal"}
 			keyExtractor={(item: any) => item.id}
-			numColumns={numColumns}
+			numColumns={layout.layout === "horizontal" ? 1 : numColumns}
 			estimatedItemSize={size}
 			onEndReached={fetchMore ? fetchNextPage : undefined}
 			onEndReachedThreshold={0.5}
