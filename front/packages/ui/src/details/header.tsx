@@ -473,7 +473,7 @@ export const Header = ({
 							/>
 						))}
 					</Container>
-					{type === "show" && <ShowWatchStatusCard {...data?.watchStatus as any} />}
+					{type === "show" && <ShowWatchStatusCard {...(data?.watchStatus as any)} />}
 				</>
 			)}
 		</Fetch>

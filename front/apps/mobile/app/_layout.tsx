@@ -84,7 +84,7 @@ export default function Root() {
 			>
 				<PortalProvider>
 					<AccountProvider>
-						<Slot/>
+						<Slot />
 					</AccountProvider>
 				</PortalProvider>
 			</ThemeSelector>
