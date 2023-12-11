@@ -30,7 +30,7 @@ import {
 	ts,
 } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
-import { ImageStyle, View } from "react-native";
+import { ImageStyle, PressableProps, View } from "react-native";
 import { Layout, WithLoading } from "../fetch";
 import { percent, rem, Stylable, Theme, useYoshiki } from "yoshiki/native";
 import { KyooImage, WatchStatusV } from "@kyoo/models";
@@ -171,7 +171,7 @@ export const EpisodeLine = ({
 	watchedPercent: number | null;
 	watchedStatus: WatchStatusV | null;
 }> &
-	Stylable) => {
+	Partial<PressableProps>) => {
 	const { css } = useYoshiki("episode-line");
 	const { t } = useTranslation();
 
@@ -189,7 +189,7 @@ export const EpisodeLine = ({
 						},
 					},
 				},
-				props,
+				props as any,
 			)}
 		>
 			<P {...css({ width: rem(4), flexShrink: 0, m: ts(1), textAlign: "center" })}>
