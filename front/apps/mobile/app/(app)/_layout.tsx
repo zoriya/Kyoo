@@ -38,7 +38,6 @@ export default function SignGuard() {
 
 	if (error) return <Redirect href={"/connection-error"} />;
 	if (!account) return <Redirect href="/login" />;
-
 	return (
 		<Stack
 			screenOptions={{

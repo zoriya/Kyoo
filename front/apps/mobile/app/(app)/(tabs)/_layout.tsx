@@ -18,10 +18,33 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { HomePage } from "@kyoo/ui";
-import { withRoute } from "../utils";
+import { Icon } from "@kyoo/primitives";
+import { Tabs } from "expo-router";
+import { useTheme } from "yoshiki/native";
+import Home from "@material-symbols/svg-400/rounded/home.svg";
+import Browse from "@material-symbols/svg-400/rounded/browse.svg";
 
-export default withRoute(HomePage, {
-	options: { headerTransparent: true, headerStyle: { backgroundColor: "transparent" } },
-	statusBar: { barStyle: "light-content" },
-});
+export default function TabsLayout() {
+	return (
+		<Tabs
+			screenOptions={{
+				headerShown: false,
+			}}
+		>
+			<Tabs.Screen
+				name="index"
+				options={{
+					tabBarLabel: "Home",
+					tabBarIcon: ({ color, size }) => <Icon icon={Home} color={color} size={size} />,
+				}}
+			/>
+			<Tabs.Screen
+				name="browse"
+				options={{
+					tabBarLabel: "Browse",
+					tabBarIcon: ({ color, size }) => <Icon icon={Browse} color={color} size={size} />,
+				}}
+			/>
+		</Tabs>
+	);
+}
