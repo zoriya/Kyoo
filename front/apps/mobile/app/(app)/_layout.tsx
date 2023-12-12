@@ -41,6 +41,7 @@ export default function SignGuard() {
 	return (
 		<Stack
 			screenOptions={{
+				navigationBarColor: theme.variant.background,
 				headerTitle: () => <NavbarTitle />,
 				headerRight: () => <NavbarRight />,
 				contentStyle: {

@@ -33,7 +33,7 @@ export const VerticalRecommanded = () => {
 	const { css } = useYoshiki();
 
 	return (
-		<View {...css({ marginTop: ItemGrid.layout.gap })}>
+		<View {...css({ marginY: ItemGrid.layout.gap })}>
 			<H3 {...css({ mX: ItemGrid.layout.gap })}>{t("home.recommanded")}</H3>
 			<InfiniteFetch
 				query={VerticalRecommanded.query()}

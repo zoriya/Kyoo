@@ -21,8 +21,8 @@
 import { Icon } from "@kyoo/primitives";
 import { Tabs } from "expo-router";
 import { useTheme } from "yoshiki/native";
-import Home from "@material-symbols/svg-400/rounded/home.svg";
-import Browse from "@material-symbols/svg-400/rounded/browse.svg";
+import Home from "@material-symbols/svg-400/rounded/home-fill.svg";
+import Browse from "@material-symbols/svg-400/rounded/browse-fill.svg";
 
 export default function TabsLayout() {
 	return (
