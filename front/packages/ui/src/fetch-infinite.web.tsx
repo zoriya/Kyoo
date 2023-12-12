@@ -150,6 +150,7 @@ export const InfiniteFetchList = <Data, _, HeaderProps, Kind>({
 	Header,
 	headerProps,
 	getItemType,
+	nested,
 	...props
 }: {
 	query: ReturnType<typeof useInfiniteFetch<_, Data>>;
@@ -165,9 +166,10 @@ export const InfiniteFetchList = <Data, _, HeaderProps, Kind>({
 	Header?: ComponentType<{ children: JSX.Element } & HeaderProps> | ReactElement;
 	headerProps: HeaderProps;
 	getItemType?: (item: WithLoading<Data>, index: number) => Kind;
-	getItemSize?: (kind: Kind) => number
+	getItemSize?: (kind: Kind) => number;
 	fetchMore?: boolean;
 	contentContainerStyle?: ContentStyle;
+	nested?: boolean;
 }): JSX.Element | null => {
 	const oldItems = useRef<Data[] | undefined>();
 	const { items, error, fetchNextPage, hasNextPage, isFetching } = query;

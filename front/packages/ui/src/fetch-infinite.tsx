@@ -21,7 +21,16 @@
 import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { useBreakpointMap, HR } from "@kyoo/primitives";
 import { ContentStyle, FlashList } from "@shopify/flash-list";
-import { ComponentProps, ComponentType, isValidElement, ReactElement, useRef } from "react";
+import {
+	ComponentProps,
+	ComponentType,
+	isValidElement,
+	ReactElement,
+	useCallback,
+	useReducer,
+	useRef,
+	useState,
+} from "react";
 import { EmptyView, ErrorView, Layout, WithLoading, addHeader } from "./fetch";
 import { FlatList, View, ViewStyle } from "react-native";
 
@@ -122,6 +131,7 @@ export const InfiniteFetchList = <Data, Props, _, Kind>({
 						layout.layout === "horizontal" && {
 							width:
 								size * (getItemType && getItemSize ? getItemSize(getItemType(item, index)) : 1),
+							height: size * 2,
 						},
 					]}
 				>
