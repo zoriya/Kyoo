@@ -289,8 +289,9 @@ const useSubtitle = (
 					workerUrl: "/_next/static/chunks/jassub-worker.js",
 					wasmUrl: "/_next/static/chunks/jassub-worker.wasm",
 					legacyWasmUrl: "/_next/static/chunks/jassub-worker.wasm.js",
-					// Disable offscreen renderer for firefox (see https://github.com/ThaUnknown/jassub/issues/31)
-					offscreenRender: !/firefox/i.test(navigator.userAgent),
+					// Disable offscreen renderer due to bugs on firefox and chrome android
+					// (see https://github.com/ThaUnknown/jassub/issues/31)
+					offscreenRender: false,
 					subUrl: value.link,
 					fonts: fonts,
 				});
