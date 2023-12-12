@@ -19,13 +19,12 @@
  */
 
 import React, { ComponentProps, ComponentType, ForwardedRef, forwardRef } from "react";
-import { Platform, PressableProps, ViewStyle } from "react-native";
+import { Platform, PressableProps } from "react-native";
 import { SvgProps } from "react-native-svg";
 import { YoshikiStyle } from "yoshiki";
 import { px, Stylable, Theme, useYoshiki } from "yoshiki/native";
 import { PressableFeedback } from "./links";
-import { alpha } from "./themes";
-import { Breakpoint, focusReset, ts, useBreakpointValue } from "./utils";
+import { Breakpoint, focusReset, ts } from "./utils";
 import { P } from "./text";
 
 declare module "react" {
