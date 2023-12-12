@@ -27,13 +27,9 @@ import { GenreGrid } from "./genre";
 import { Recommanded } from "./recommanded";
 import { VerticalRecommanded } from "./vertical";
 import { NewsList } from "./news";
-import { useEffect, useState } from "react";
 import { WatchlistList } from "./watchlist";
 
 export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
-	const [isClient, setClient] = useState(false);
-	useEffect(() => setClient(true), []);
-
 	return (
 		<ScrollView>
 			<Fetch query={Header.query()}>
@@ -63,7 +59,10 @@ export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
 					<GenreGrid key={x} genre={x} />
 				))}
 			<VerticalRecommanded />
-			{isClient && randomItems.filter((_, i) => i >= 6).map((x) => <GenreGrid key={x} genre={x} />)}
+			{/*
+				TODO: Lazy load those items
+				{randomItems.filter((_, i) => i >= 6).map((x) => <GenreGrid key={x} genre={x} />)}
+			*/}
 		</ScrollView>
 	);
 };
