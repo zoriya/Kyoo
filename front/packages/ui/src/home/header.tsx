@@ -70,7 +70,11 @@ export const Header = ({
 				{...css({ width: { md: percent(70) }, position: "absolute", bottom: 0, margin: ts(2) })}
 			>
 				<Skeleton {...css({ width: rem(8), height: rem(2.5) })}>
-					{isLoading || <H1>{name}</H1>}
+					{isLoading || (
+						<H1 numberOfLines={4} {...css({ fontSize: { xs: rem(2), sm: rem(3) } })}>
+							{name}
+						</H1>
+					)}
 				</Skeleton>
 				<View {...css({ flexDirection: "row", alignItems: "center" })}>
 					{link !== null && (
@@ -90,12 +94,18 @@ export const Header = ({
 						{...tooltip(t("home.info"))}
 						{...css({ marginRight: ts(2) })}
 					/>
-					<Skeleton {...css({ width: rem(25), height: rem(2) })}>
-						{isLoading || <H2>{tagline}</H2>}
+					<Skeleton
+						{...css({ width: rem(25), height: rem(2), display: { xs: "none", sm: "flex" } })}
+					>
+						{isLoading || <H2 {...css({ display: { xs: "none", sm: "flex" } })}>{tagline}</H2>}
 					</Skeleton>
 				</View>
 				<Skeleton lines={4} {...css({ marginTop: ts(1) })}>
-					{isLoading || <P {...css({ display: { xs: "none", md: "flex" } })}>{overview}</P>}
+					{isLoading || (
+						<P numberOfLines={4} {...css({ display: { xs: "none", md: "flex" } })}>
+							{overview}
+						</P>
+					)}
 				</Skeleton>
 			</View>
 		</ImageBackground>

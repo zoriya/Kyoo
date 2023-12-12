@@ -150,6 +150,7 @@ export const InfiniteFetchList = <Data, _, HeaderProps, Kind extends number | st
 	Header,
 	headerProps,
 	getItemType,
+	getItemSize,
 	nested,
 	...props
 }: {
