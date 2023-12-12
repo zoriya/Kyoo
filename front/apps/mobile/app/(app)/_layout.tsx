@@ -19,10 +19,10 @@
  */
 
 import { ConnectionErrorContext, useAccount } from "@kyoo/models";
+import { CircularProgress } from "@kyoo/primitives";
 import { NavbarRight, NavbarTitle } from "@kyoo/ui";
-import { LoadingIndicator } from "@kyoo/ui/src/player/components/hover";
-import { Redirect, Stack } from "expo-router";
-import { useContext, useRef } from "react";
+import { Redirect, SplashScreen, Stack } from "expo-router";
+import { useContext, useEffect } from "react";
 import { useTheme } from "yoshiki/native";
 
 export default function SignGuard() {
@@ -30,12 +30,12 @@ export default function SignGuard() {
 	// TODO: support guest accounts on mobile too.
 	const account = useAccount();
 	const { loading, error } = useContext(ConnectionErrorContext);
-	const wasRendered = useRef(false);
 
-	// While loading, keep the splashcreen if possible. if not, display a spinner.
-	if (loading) return wasRendered.current ? <LoadingIndicator /> : null;
-	wasRendered.current = true;
+	useEffect(() => {
+		if (!loading) SplashScreen.hideAsync();
+	}, [loading]);
 
+	if (loading) return <CircularProgress />;
 	if (error) return <Redirect href={"/connection-error"} />;
 	if (!account) return <Redirect href="/login" />;
 	return (
