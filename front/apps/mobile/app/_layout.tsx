@@ -34,7 +34,7 @@ import {
 	Poppins_400Regular,
 	Poppins_900Black,
 } from "@expo-google-fonts/poppins";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useState } from "react";
 import { useColorScheme } from "react-native";
 import { initReactI18next } from "react-i18next";
 import { ThemeProvider as RNThemeProvider } from "@react-navigation/native";
@@ -61,8 +61,6 @@ i18next.use(initReactI18next).init({
 	},
 });
 
-SplashScreen.preventAutoHideAsync();
-
 const NavigationThemeProvider = ({ children }: { children: ReactNode }) => {
 	const theme = useTheme();
 	return (
@@ -84,14 +82,12 @@ const NavigationThemeProvider = ({ children }: { children: ReactNode }) => {
 	);
 };
 
+SplashScreen.preventAutoHideAsync();
+
 export default function Root() {
 	const [queryClient] = useState(() => createQueryClient());
 	const theme = useColorScheme();
 	const [fontsLoaded] = useFonts({ Poppins_300Light, Poppins_400Regular, Poppins_900Black });
-
-	useEffect(() => {
-		if (fontsLoaded) SplashScreen.hideAsync();
-	}, [fontsLoaded]);
 
 	if (!fontsLoaded) return null;
 	return (
