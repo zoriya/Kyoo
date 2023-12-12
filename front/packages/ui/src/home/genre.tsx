@@ -18,13 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-	Genre,
-	LibraryItem,
-	LibraryItemP,
-	QueryIdentifier,
-	useInfiniteFetch,
-} from "@kyoo/models";
+import { Genre, LibraryItem, LibraryItemP, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { H3, ts } from "@kyoo/primitives";
 import { useRef } from "react";
 import { View } from "react-native";

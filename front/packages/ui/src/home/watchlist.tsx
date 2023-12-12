@@ -52,7 +52,7 @@ export const WatchlistList = () => {
 							? "episode"
 							: "item"
 					}
-					getItemSize={(kind) => kind === "episode" ? 2 : 1}
+					getItemSize={(kind) => (kind === "episode" ? 2 : 1)}
 					empty={t("home.none")}
 				>
 					{(x, i) => {

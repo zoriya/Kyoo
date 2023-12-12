@@ -39,7 +39,7 @@ export const NewsList = () => {
 				getItemType={(x, i) =>
 					x.kind === NewsKind.Movie || (x.isLoading && i % 2) ? "movie" : "episode"
 				}
-				getItemSize={(kind) => kind === "episode" ? 2 : 1}
+				getItemSize={(kind) => (kind === "episode" ? 2 : 1)}
 				empty={t("home.none")}
 			>
 				{(x, i) =>
