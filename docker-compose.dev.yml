@@ -77,9 +77,6 @@ services:
       - BACK_URL=${KYOO_URL:-http://back:5000}
     volumes:
       - ./nginx.conf.template:/etc/nginx/templates/kyoo.conf.template:ro
-    depends_on:
-      - back
-      - front
     ports:
       - "8901:8901"
 
