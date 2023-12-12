@@ -139,7 +139,7 @@ const InfiniteScroll = <Props,>({
 	);
 };
 
-export const InfiniteFetchList = <Data, _, HeaderProps, Kind>({
+export const InfiniteFetchList = <Data, _, HeaderProps, Kind extends number | string>({
 	query,
 	incremental = false,
 	placeholderCount = 2,
@@ -207,7 +207,7 @@ export const InfiniteFetchList = <Data, _, HeaderProps, Kind>({
 	);
 };
 
-export const InfiniteFetch = <Data, Props, _, Kind>({
+export const InfiniteFetch = <Data, Props, _, Kind extends number | string>({
 	query,
 	...props
 }: {

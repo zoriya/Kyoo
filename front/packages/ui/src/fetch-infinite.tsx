@@ -21,16 +21,7 @@
 import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { useBreakpointMap, HR } from "@kyoo/primitives";
 import { ContentStyle, FlashList } from "@shopify/flash-list";
-import {
-	ComponentProps,
-	ComponentType,
-	isValidElement,
-	ReactElement,
-	useCallback,
-	useReducer,
-	useRef,
-	useState,
-} from "react";
+import { ComponentProps, ComponentType, isValidElement, ReactElement, useRef } from "react";
 import { EmptyView, ErrorView, Layout, WithLoading, addHeader } from "./fetch";
 import { FlatList, View, ViewStyle } from "react-native";
 
@@ -61,7 +52,7 @@ const emulateGap = (
 	};
 };
 
-export const InfiniteFetchList = <Data, Props, _, Kind>({
+export const InfiniteFetchList = <Data, Props, _, Kind extends number | string>({
 	query,
 	placeholderCount = 2,
 	incremental = false,
@@ -157,7 +148,7 @@ export const InfiniteFetchList = <Data, Props, _, Kind>({
 	);
 };
 
-export const InfiniteFetch = <Data, Props, _, Kind>({
+export const InfiniteFetch = <Data, Props, _, Kind extends number | string>({
 	query,
 	...props
 }: {
