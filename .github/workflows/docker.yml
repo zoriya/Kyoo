@@ -34,6 +34,13 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            should_run:
+              - '${{matrix.context}}/**'
+          
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v4
@@ -65,6 +72,7 @@ jobs:
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
+        if: steps.filter.outputs.should_build
         with:
           context: ${{matrix.context}}
           platforms: linux/amd64,linux/arm64
