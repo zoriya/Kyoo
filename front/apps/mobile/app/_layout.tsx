@@ -34,9 +34,10 @@ import {
 	Poppins_400Regular,
 	Poppins_900Black,
 } from "@expo-google-fonts/poppins";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useColorScheme } from "react-native";
 import { initReactI18next } from "react-i18next";
+import { ThemeProvider as RNThemeProvider } from "@react-navigation/native";
 import "intl-pluralrules";
 import "@formatjs/intl-locale/polyfill";
 import "@formatjs/intl-displaynames/polyfill";
@@ -46,6 +47,7 @@ import "@formatjs/intl-displaynames/locale-data/fr";
 // TODO: use a backend to load jsons.
 import en from "../../../translations/en.json";
 import fr from "../../../translations/fr.json";
+import { useTheme } from "yoshiki/native";
 
 i18next.use(initReactI18next).init({
 	interpolation: {
@@ -60,6 +62,27 @@ i18next.use(initReactI18next).init({
 });
 
 SplashScreen.preventAutoHideAsync();
+
+const NavigationThemeProvider = ({ children }: { children: ReactNode }) => {
+	const theme = useTheme();
+	return (
+		<RNThemeProvider
+			value={{
+				dark: theme.mode === "dark",
+				colors: {
+					primary: theme.accent,
+					card: theme.variant.background,
+					text: theme.paragraph,
+					border: theme.background,
+					notification: theme.background,
+					background: theme.background,
+				},
+			}}
+		>
+			{children}
+		</RNThemeProvider>
+	);
+};
 
 export default function Root() {
 	const [queryClient] = useState(() => createQueryClient());
@@ -84,7 +107,9 @@ export default function Root() {
 			>
 				<PortalProvider>
 					<AccountProvider>
-						<Slot />
+						<NavigationThemeProvider>
+							<Slot />
+						</NavigationThemeProvider>
 					</AccountProvider>
 				</PortalProvider>
 			</ThemeSelector>

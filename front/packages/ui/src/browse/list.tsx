@@ -25,9 +25,7 @@ import {
 	Skeleton,
 	ts,
 	ImageBackground,
-	Poster,
 	Heading,
-	Icon,
 	PosterBackground,
 	imageBorderRadius,
 } from "@kyoo/primitives";
@@ -35,7 +33,6 @@ import { useState } from "react";
 import { View } from "react-native";
 import { percent, px, rem, useYoshiki } from "yoshiki/native";
 import { Layout, WithLoading } from "../fetch";
-import Done from "@material-symbols/svg-400/rounded/done-fill.svg";
 import { ItemWatchStatus } from "./grid";
 
 export const ItemList = ({
@@ -84,6 +81,7 @@ export const ItemList = ({
 					flexDirection: "row",
 					height: ItemList.layout.size,
 					borderRadius: px(imageBorderRadius),
+					overflow: "hidden",
 					marginX: ItemList.layout.gap,
 				},
 				props,
