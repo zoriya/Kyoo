@@ -139,7 +139,7 @@ const InfiniteScroll = <Props,>({
 	);
 };
 
-export const InfiniteFetchList = <Data, _, HeaderProps>({
+export const InfiniteFetchList = <Data, _, HeaderProps, Kind>({
 	query,
 	incremental = false,
 	placeholderCount = 2,
@@ -164,7 +164,8 @@ export const InfiniteFetchList = <Data, _, HeaderProps>({
 	divider?: boolean | ComponentType;
 	Header?: ComponentType<{ children: JSX.Element } & HeaderProps> | ReactElement;
 	headerProps: HeaderProps;
-	getItemType?: (item: WithLoading<Data>, index: number) => string | number;
+	getItemType?: (item: WithLoading<Data>, index: number) => Kind;
+	getItemSize?: (kind: Kind) => number
 	fetchMore?: boolean;
 	contentContainerStyle?: ContentStyle;
 }): JSX.Element | null => {
@@ -204,12 +205,12 @@ export const InfiniteFetchList = <Data, _, HeaderProps>({
 	);
 };
 
-export const InfiniteFetch = <Data, Props, _>({
+export const InfiniteFetch = <Data, Props, _, Kind>({
 	query,
 	...props
 }: {
 	query: QueryIdentifier<_, Data>;
-} & Omit<ComponentProps<typeof InfiniteFetchList<Data, Props, _>>, "query">) => {
+} & Omit<ComponentProps<typeof InfiniteFetchList<Data, Props, _, Kind>>, "query">) => {
 	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
 
 	const ret = useInfiniteFetch(query);

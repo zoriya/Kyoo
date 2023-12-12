@@ -52,7 +52,7 @@ const emulateGap = (
 	};
 };
 
-export const InfiniteFetchList = <Data, Props, _>({
+export const InfiniteFetchList = <Data, Props, _, Kind>({
 	query,
 	placeholderCount = 2,
 	incremental = false,
@@ -63,6 +63,7 @@ export const InfiniteFetchList = <Data, Props, _>({
 	Header,
 	headerProps,
 	getItemType,
+	getItemSize,
 	fetchMore = true,
 	nested = false,
 	contentContainerStyle,
@@ -81,7 +82,8 @@ export const InfiniteFetchList = <Data, Props, _>({
 	divider?: boolean | ComponentType;
 	Header?: ComponentType<Props & { children: JSX.Element }> | ReactElement;
 	headerProps?: Props;
-	getItemType?: (item: WithLoading<Data>, index: number) => string | number;
+	getItemType?: (item: WithLoading<Data>, index: number) => Kind;
+	getItemSize?: (kind: Kind) => number;
 	fetchMore?: boolean;
 	nested?: boolean;
 	contentContainerStyle?: ContentStyle;
@@ -118,7 +120,8 @@ export const InfiniteFetchList = <Data, Props, _>({
 					style={[
 						emulateGap(layout.layout, gap, numColumns, index),
 						layout.layout === "horizontal" && {
-							width: size,
+							width:
+								size * (getItemType && getItemSize ? getItemSize(getItemType(item, index)) : 1),
 						},
 					]}
 				>
@@ -144,12 +147,12 @@ export const InfiniteFetchList = <Data, Props, _>({
 	);
 };
 
-export const InfiniteFetch = <Data, Props, _>({
+export const InfiniteFetch = <Data, Props, _, Kind>({
 	query,
 	...props
 }: {
 	query: QueryIdentifier<_, Data>;
-} & Omit<ComponentProps<typeof InfiniteFetchList<Data, Props, _>>, "query">) => {
+} & Omit<ComponentProps<typeof InfiniteFetchList<Data, Props, _, Kind>>, "query">) => {
 	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
 
 	const ret = useInfiniteFetch(query);

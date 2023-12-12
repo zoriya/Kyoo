@@ -52,6 +52,7 @@ export const WatchlistList = () => {
 							? "episode"
 							: "item"
 					}
+					getItemSize={(kind) => kind === "episode" ? 2 : 1}
 					empty={t("home.none")}
 				>
 					{(x, i) => {
@@ -65,7 +66,7 @@ export const WatchlistList = () => {
 								thumbnail={episode?.thumbnail ?? x.thumbnail}
 								href={episode?.href}
 								watchedPercent={x.watchStatus?.watchedPercent || null}
-								// TODO: support this on mobile too
+								// TODO: Move this into the ItemList (using getItemSize)
 								// @ts-expect-error This is a web only property
 								{...css({ gridColumnEnd: "span 2" })}
 							/>

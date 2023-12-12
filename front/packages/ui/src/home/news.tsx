@@ -19,12 +19,12 @@
  */
 
 import { News, NewsKind, NewsP, QueryIdentifier, getDisplayDate } from "@kyoo/models";
-import { useYoshiki } from "yoshiki/native";
 import { ItemGrid } from "../browse/grid";
 import { InfiniteFetch } from "../fetch-infinite";
 import { useTranslation } from "react-i18next";
 import { Header } from "./genre";
 import { EpisodeBox, episodeDisplayNumber } from "../details/episode";
+import { useYoshiki } from "yoshiki/native";
 
 export const NewsList = () => {
 	const { t } = useTranslation();
@@ -39,6 +39,7 @@ export const NewsList = () => {
 				getItemType={(x, i) =>
 					x.kind === NewsKind.Movie || (x.isLoading && i % 2) ? "movie" : "episode"
 				}
+				getItemSize={(kind) => kind === "episode" ? 2 : 1}
 				empty={t("home.none")}
 			>
 				{(x, i) =>
@@ -66,7 +67,7 @@ export const NewsList = () => {
 							href={x.href}
 							watchedPercent={x.watchStatus?.watchedPercent || null}
 							watchedStatus={x.watchStatus?.status || null}
-							// TODO: support this on mobile too
+							// TODO: Move this into the ItemList (using getItemSize)
 							// @ts-expect-error This is a web only property
 							{...css({ gridColumnEnd: "span 2" })}
 						/>
