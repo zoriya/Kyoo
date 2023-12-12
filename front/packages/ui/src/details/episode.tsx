@@ -241,7 +241,7 @@ export const EpisodeLine = ({
 				>
 					<Skeleton>
 						{isLoading || (
-							<H6 aria-level={undefined} {...css("title")}>
+							<H6 aria-level={undefined} {...css([{ flexShrink: 1 }, "title"])}>
 								{name ?? t("show.episodeNoMetadata")}
 							</H6>
 						)}

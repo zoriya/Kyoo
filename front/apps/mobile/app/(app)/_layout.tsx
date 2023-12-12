@@ -23,9 +23,11 @@ import { CircularProgress } from "@kyoo/primitives";
 import { NavbarRight, NavbarTitle } from "@kyoo/ui";
 import { Redirect, SplashScreen, Stack } from "expo-router";
 import { useContext, useEffect } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "yoshiki/native";
 
 export default function SignGuard() {
+	const insets = useSafeAreaInsets();
 	const theme = useTheme();
 	// TODO: support guest accounts on mobile too.
 	const account = useAccount();
@@ -46,6 +48,9 @@ export default function SignGuard() {
 				headerRight: () => <NavbarRight />,
 				contentStyle: {
 					backgroundColor: theme.background,
+					paddingBottom: insets.bottom,
+					paddingLeft: insets.left,
+					paddingRight: insets.right,
 				},
 				headerStyle: {
 					backgroundColor: theme.accent,
