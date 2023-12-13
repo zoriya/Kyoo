@@ -5,7 +5,10 @@
 		"watchlist": "Continue watching",
 		"info": "See more",
 		"none": "No episodes",
-		"watchlistLogin": "To keep track of what you watched or plan to watch, you need to login."
+		"watchlistLogin": "To keep track of what you watched or plan to watch, you need to login.",
+		"episodeMore": {
+			"goToShow": "Go to show"
+		}
 	},
 	"show": {
 		"play": "Play",
@@ -58,7 +61,8 @@
 		"prev-page": "Previous page",
 		"next-page": "Next page",
 		"delete": "Delete",
-		"cancel": "Cancel"
+		"cancel": "Cancel",
+		"more": "More"
 	},
 	"navbar": {
 		"home": "Home",

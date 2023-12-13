@@ -30,11 +30,13 @@ import {
 	ts,
 } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
-import { ImageStyle, PressableProps, View } from "react-native";
+import { ImageStyle, Platform, PressableProps, View } from "react-native";
 import { Layout, WithLoading } from "../fetch";
 import { percent, rem, Stylable, Theme, useYoshiki } from "yoshiki/native";
 import { KyooImage, WatchStatusV } from "@kyoo/models";
 import { ItemProgress } from "../browse/grid";
+import { EpisodesContext } from "../components/context-menus";
+import { useRef, useState } from "react";
 
 export const episodeDisplayNumber = (
 	episode: {
@@ -172,20 +174,30 @@ export const EpisodeLine = ({
 	watchedStatus: WatchStatusV | null;
 }> &
 	Partial<PressableProps>) => {
+	const [moreOpened, setMoreOpened] = useState(false);
 	const { css } = useYoshiki("episode-line");
 	const { t } = useTranslation();
 
 	return (
 		<Link
 			href={slug ? `/watch/${slug}` : ""}
+			onLongPress={() => setMoreOpened(true)}
 			{...css(
 				{
 					alignItems: "center",
 					flexDirection: "row",
+					child: {
+						more: {
+							display: "none",
+						},
+					},
 					fover: {
 						self: focusReset,
 						title: {
 							textDecorationLine: "underline",
+						},
+						more: {
+							display: "flex",
 						},
 					},
 				},
@@ -249,7 +261,17 @@ export const EpisodeLine = ({
 					{isLoading ||
 						(runtime && <Skeleton>{isLoading || <SubP>{displayRuntime(runtime)}</SubP>}</Skeleton>)}
 				</View>
-				<Skeleton>{isLoading || <P numberOfLines={3}>{overview}</P>}</Skeleton>
+				<View {...css({ flexDirection: "row" })}>
+					<Skeleton>{isLoading || <P numberOfLines={3}>{overview}</P>}</Skeleton>
+					<EpisodesContext
+						isOpen={moreOpened}
+						setOpen={setMoreOpened}
+						{...css([
+							"more",
+							Platform.OS === "web" && moreOpened && { display: "flex !important" as any },
+						])}
+					/>
+				</View>
 			</View>
 		</Link>
 	);
