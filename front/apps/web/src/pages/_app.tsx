@@ -22,7 +22,7 @@ import "../polyfill";
 
 import { HydrationBoundary, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { HiddenIfNoJs, SkeletonCss, ThemeSelector } from "@kyoo/primitives";
+import { HiddenIfNoJs, TouchOnlyCss, SkeletonCss, ThemeSelector } from "@kyoo/primitives";
 import { WebTooltip } from "@kyoo/primitives/src/tooltip.web";
 import {
 	AccountProvider,
@@ -96,6 +96,7 @@ const GlobalCssTheme = () => {
 			`}</style>
 			<WebTooltip theme={theme} />
 			<SkeletonCss />
+			<TouchOnlyCss />
 			<HiddenIfNoJs />
 		</>
 	);

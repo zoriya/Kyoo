@@ -18,10 +18,20 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { IconButton, Link, P, Slider, tooltip, ts } from "@kyoo/primitives";
+import {
+	IconButton,
+	Link,
+	NoTouch,
+	P,
+	Slider,
+	noTouch,
+	tooltip,
+	touchOnly,
+	ts,
+} from "@kyoo/primitives";
 import { useAtom, useAtomValue } from "jotai";
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import SkipPrevious from "@material-symbols/svg-400/rounded/skip_previous-fill.svg";
 import SkipNext from "@material-symbols/svg-400/rounded/skip_next-fill.svg";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
@@ -31,7 +41,8 @@ import VolumeMute from "@material-symbols/svg-400/rounded/volume_mute-fill.svg";
 import VolumeDown from "@material-symbols/svg-400/rounded/volume_down-fill.svg";
 import VolumeUp from "@material-symbols/svg-400/rounded/volume_up-fill.svg";
 import { durationAtom, mutedAtom, playAtom, progressAtom, volumeAtom } from "../state";
-import { px, useYoshiki } from "yoshiki/native";
+import { Stylable, px, useYoshiki } from "yoshiki/native";
+import { Component, ComponentProps } from "react";
 
 export const LeftButtons = ({
 	previousSlug,
@@ -48,12 +59,76 @@ export const LeftButtons = ({
 
 	return (
 		<View {...css({ flexDirection: "row" })}>
+			<View {...css({ flexDirection: "row" }, noTouch)}>
+				{previousSlug && (
+					<IconButton
+						icon={SkipPrevious}
+						as={Link}
+						href={previousSlug}
+						replace
+						{...tooltip(t("player.previous"), true)}
+						{...spacing}
+					/>
+				)}
+				<IconButton
+					icon={isPlaying ? Pause : PlayArrow}
+					onPress={() => setPlay(!isPlaying)}
+					{...tooltip(isPlaying ? t("player.pause") : t("player.play"), true)}
+					{...spacing}
+				/>
+				{nextSlug && (
+					<IconButton
+						icon={SkipNext}
+						as={Link}
+						href={nextSlug}
+						replace
+						{...tooltip(t("player.next"), true)}
+						{...spacing}
+					/>
+				)}
+				{Platform.OS === "web" && <VolumeSlider />}
+			</View>
+			<ProgressText {...css({ marginLeft: ts(1) })} />
+		</View>
+	);
+};
+
+export const TouchControls = ({
+	previousSlug,
+	nextSlug,
+}: {
+	previousSlug?: string | null;
+	nextSlug?: string | null;
+}) => {
+	const { css } = useYoshiki();
+	const { t } = useTranslation();
+	const [isPlaying, setPlay] = useAtom(playAtom);
+
+	const spacing = css({ backgroundColor: (theme) => theme.darkOverlay, marginHorizontal: ts(3) });
+
+	return (
+		<View
+			{...css(
+				{
+					flexDirection: "row",
+					justifyContent: "center",
+					alignItems: "center",
+					position: "absolute",
+					top: 0,
+					left: 0,
+					right: 0,
+					bottom: 0,
+				},
+				touchOnly,
+			)}
+		>
 			{previousSlug && (
 				<IconButton
 					icon={SkipPrevious}
 					as={Link}
 					href={previousSlug}
 					replace
+					size={ts(4)}
 					{...tooltip(t("player.previous"), true)}
 					{...spacing}
 				/>
@@ -61,6 +136,7 @@ export const LeftButtons = ({
 			<IconButton
 				icon={isPlaying ? Pause : PlayArrow}
 				onPress={() => setPlay(!isPlaying)}
+				size={ts(8)}
 				{...tooltip(isPlaying ? t("player.pause") : t("player.play"), true)}
 				{...spacing}
 			/>
@@ -70,16 +146,14 @@ export const LeftButtons = ({
 					as={Link}
 					href={nextSlug}
 					replace
+					size={ts(4)}
 					{...tooltip(t("player.next"), true)}
 					{...spacing}
 				/>
 			)}
-			<VolumeSlider />
-			<ProgressText />
 		</View>
 	);
 };
-
 const VolumeSlider = () => {
 	const [volume, setVolume] = useAtom(volumeAtom);
 	const [isMuted, setMuted] = useAtom(mutedAtom);
@@ -119,13 +193,13 @@ const VolumeSlider = () => {
 	);
 };
 
-const ProgressText = () => {
+const ProgressText = (props: Stylable) => {
 	const progress = useAtomValue(progressAtom);
 	const duration = useAtomValue(durationAtom);
 	const { css } = useYoshiki();
 
 	return (
-		<P {...css({ alignSelf: "center" })}>
+		<P {...css({ alignSelf: "center" }, props)}>
 			{toTimerString(progress, duration)} : {toTimerString(duration)}
 		</P>
 	);

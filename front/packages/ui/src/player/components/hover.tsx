@@ -31,6 +31,7 @@ import {
 	Skeleton,
 	Slider,
 	tooltip,
+	touchOnly,
 	ts,
 } from "@kyoo/primitives";
 import { Chapter, KyooImage, Subtitle, Audio } from "@kyoo/models";
@@ -40,7 +41,7 @@ import { useTranslation } from "react-i18next";
 import { percent, rem, useYoshiki } from "yoshiki/native";
 import { useRouter } from "solito/router";
 import ArrowBack from "@material-symbols/svg-400/rounded/arrow_back-fill.svg";
-import { LeftButtons } from "./left-buttons";
+import { LeftButtons, TouchControls } from "./left-buttons";
 import { RightButtons } from "./right-buttons";
 import { bufferedAtom, durationAtom, loadAtom, playAtom, progressAtom } from "../state";
 
@@ -84,6 +85,7 @@ export const Hover = ({
 			{({ css }) => (
 				<>
 					<Back isLoading={isLoading} name={showName} href={href} {...css(opacity, props)} />
+					<TouchControls previousSlug={previousSlug} nextSlug={nextSlug} />
 					<Pressable
 						tabIndex={-1}
 						onPointerDown={onPointerDown}
@@ -144,7 +146,7 @@ export const Hover = ({
 	);
 };
 
-export const ProgressBar = ({ chapters }: { chapters?: Chapter[] }) => {
+const ProgressBar = ({ chapters }: { chapters?: Chapter[] }) => {
 	const [progress, setProgress] = useAtom(progressAtom);
 	const buffered = useAtomValue(bufferedAtom);
 	const duration = useAtomValue(durationAtom);
@@ -163,7 +165,7 @@ export const ProgressBar = ({ chapters }: { chapters?: Chapter[] }) => {
 	);
 };
 
-export const Back = ({
+const Back = ({
 	isLoading,
 	name,
 	href,

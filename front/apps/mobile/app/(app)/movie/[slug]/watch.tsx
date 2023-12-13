@@ -26,6 +26,7 @@ export default withRoute(
 	{
 		options: {
 			headerShown: false,
+			navigationBarHidden: true,
 		},
 		statusBar: { hidden: true },
 		fullscreen: true,
