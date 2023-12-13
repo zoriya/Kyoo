@@ -31,13 +31,13 @@ import {
 } from "@kyoo/models";
 import { Head } from "@kyoo/primitives";
 import { useState, useEffect, ComponentProps } from "react";
-import { Platform, StyleSheet, View, PointerEvent as NativePointerEvent } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "solito/router";
-import { useAtom } from "jotai";
+import { useSetAtom } from "jotai";
 import { useYoshiki } from "yoshiki/native";
 import { Back, Hover, LoadingIndicator } from "./components/hover";
-import { fullscreenAtom, playAtom, Video } from "./state";
+import { fullscreenAtom, Video } from "./state";
 import { episodeDisplayNumber } from "../details/episode";
 import { useVideoKeyboard } from "./keyboard";
 import { MediaSessionManager } from "./media-session";
@@ -86,14 +86,6 @@ const mapData = (
 	};
 };
 
-// Callback used to hide the controls when the mouse goes iddle. This is stored globally to clear the old timeout
-// if the mouse moves again (if this is stored as a state, the whole page is redrawn on mouse move)
-let mouseCallback: NodeJS.Timeout;
-// Number of time the video has been pressed. Used to handle double click. Since there is only one player,
-// this can be global and not in the state.
-let touchCount = 0;
-let touchTimeout: NodeJS.Timeout;
-
 export const Player: QueryPage<{ slug: string; type: "episode" | "movie" }> = ({ slug, type }) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
@@ -113,64 +105,14 @@ export const Player: QueryPage<{ slug: string; type: "episode" | "movie" }> = ({
 
 	useVideoKeyboard(info?.subtitles, info?.fonts, previous, next);
 
-	const [isFullscreen, setFullscreen] = useAtom(fullscreenAtom);
-	const [isPlaying, setPlay] = useAtom(playAtom);
-	const [showHover, setHover] = useState(false);
-	const [mouseMoved, setMouseMoved] = useState(false);
-	const [menuOpenned, setMenuOpen] = useState(false);
-
-	const displayControls = showHover || !isPlaying || mouseMoved || menuOpenned;
-	const show = () => {
-		setMouseMoved(true);
-		if (mouseCallback) clearTimeout(mouseCallback);
-		mouseCallback = setTimeout(() => {
-			setMouseMoved(false);
-		}, 2500);
-	};
+	const setFullscreen = useSetAtom(fullscreenAtom);
 	useEffect(() => {
 		if (Platform.OS !== "web") return;
-		const handler = (e: PointerEvent) => {
-			if (e.pointerType !== "mouse") return;
-			show();
-		};
-
-		document.addEventListener("pointermove", handler);
-		return () => document.removeEventListener("pointermove", handler);
-	});
-
-	useEffect(() => {
-		if (Platform.OS !== "web" || !/Mobi/i.test(window.navigator.userAgent)) return;
-		setFullscreen(true);
+		if (!/Mobi/i.test(window.navigator.userAgent)) setFullscreen(true);
 		return () => {
 			setFullscreen(false);
 		};
 	}, [setFullscreen]);
-
-	const onPointerDown = (e: NativePointerEvent) => {
-		if (Platform.OS === "web") e.preventDefault();
-		if (Platform.OS !== "web" || e.nativeEvent.pointerType !== "mouse") {
-			displayControls ? setMouseMoved(false) : show();
-			return;
-		}
-		touchCount++;
-		if (touchCount == 2) {
-			touchCount = 0;
-			setFullscreen(!isFullscreen);
-			clearTimeout(touchTimeout);
-		} else
-			touchTimeout = setTimeout(() => {
-				touchCount = 0;
-			}, 400);
-		setPlay(!isPlaying);
-	};
-
-	// When the controls hide, remove focus so space can be used to play/pause instead of triggering the button
-	// It also serves to hide the tooltip.
-	useEffect(() => {
-		if (Platform.OS !== "web") return;
-		if (!displayControls && document.activeElement instanceof HTMLElement)
-			document.activeElement.blur();
-	}, [displayControls]);
 
 	if (error || infoError || playbackError)
 		return (
@@ -206,15 +148,10 @@ export const Player: QueryPage<{ slug: string; type: "episode" | "movie" }> = ({
 			/>
 			{data && <WatchStatusObserver type={type} slug={data.slug} />}
 			<View
-				onPointerLeave={(e) => {
-					if (e.nativeEvent.pointerType === "mouse") setMouseMoved(false);
-				}}
 				{...css({
 					flexGrow: 1,
 					flexShrink: 1,
 					bg: "black",
-					// @ts-ignore Web only
-					cursor: displayControls ? "unset" : "none",
 				})}
 			>
 				<Video
@@ -222,7 +159,6 @@ export const Player: QueryPage<{ slug: string; type: "episode" | "movie" }> = ({
 					subtitles={info?.subtitles}
 					setError={setPlaybackError}
 					fonts={info?.fonts}
-					onPointerDown={(e) => onPointerDown(e)}
 					onEnd={() => {
 						if (!data) return;
 						if (data.type === "movie")
@@ -239,32 +175,7 @@ export const Player: QueryPage<{ slug: string; type: "episode" | "movie" }> = ({
 					{...css(StyleSheet.absoluteFillObject)}
 				/>
 				<LoadingIndicator />
-				<Hover
-					{...mapData(data, info, previous, next)}
-					onPointerEnter={(e) => {
-						if (Platform.OS !== "web" || e.nativeEvent.pointerType === "mouse") setHover(true);
-					}}
-					onPointerLeave={(e) => {
-						if (e.nativeEvent.pointerType === "mouse") setHover(false);
-					}}
-					onPointerDown={(e) => {
-						if (!displayControls) {
-							onPointerDown(e);
-							if (Platform.OS === "web") e.preventDefault();
-						}
-					}}
-					onMenuOpen={() => setMenuOpen(true)}
-					onMenuClose={() => {
-						// Disable hover since the menu overlay makes the mouseout unreliable.
-						setHover(false);
-						setMenuOpen(false);
-					}}
-					show={displayControls}
-					{...css({
-						// @ts-ignore Web only
-						cursor: "unset",
-					})}
-				/>
+				<Hover {...mapData(data, info, previous, next)} />
 			</View>
 		</>
 	);

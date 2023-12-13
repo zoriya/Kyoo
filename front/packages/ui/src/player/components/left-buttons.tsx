@@ -18,17 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-	IconButton,
-	Link,
-	NoTouch,
-	P,
-	Slider,
-	noTouch,
-	tooltip,
-	touchOnly,
-	ts,
-} from "@kyoo/primitives";
+import { IconButton, Link, P, Slider, noTouch, tooltip, touchOnly, ts } from "@kyoo/primitives";
 import { useAtom, useAtomValue } from "jotai";
 import { useTranslation } from "react-i18next";
 import { Platform, View } from "react-native";
@@ -38,11 +28,11 @@ import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import Pause from "@material-symbols/svg-400/rounded/pause-fill.svg";
 import VolumeOff from "@material-symbols/svg-400/rounded/volume_off-fill.svg";
 import VolumeMute from "@material-symbols/svg-400/rounded/volume_mute-fill.svg";
-import VolumeDown from "@material-symbols/svg-400/rounded/volume_down-fill.svg";
+import common from "@material-symbols/svg-400/rounded/volume_down-fill.svg";
 import VolumeUp from "@material-symbols/svg-400/rounded/volume_up-fill.svg";
 import { durationAtom, mutedAtom, playAtom, progressAtom, volumeAtom } from "../state";
 import { Stylable, px, useYoshiki } from "yoshiki/native";
-import { Component, ComponentProps } from "react";
+import { HoverTouch, hoverAtom } from "./hover";
 
 export const LeftButtons = ({
 	previousSlug,
@@ -96,18 +86,30 @@ export const LeftButtons = ({
 export const TouchControls = ({
 	previousSlug,
 	nextSlug,
+	...props
 }: {
 	previousSlug?: string | null;
 	nextSlug?: string | null;
 }) => {
 	const { css } = useYoshiki();
-	const { t } = useTranslation();
 	const [isPlaying, setPlay] = useAtom(playAtom);
+	const hover = useAtomValue(hoverAtom);
 
-	const spacing = css({ backgroundColor: (theme) => theme.darkOverlay, marginHorizontal: ts(3) });
+	const common = css(
+		[
+			{
+				backgroundColor: (theme) => theme.darkOverlay,
+				marginHorizontal: ts(3),
+			},
+			!hover && {
+				display: "none",
+			},
+		],
+		touchOnly,
+	);
 
 	return (
-		<View
+		<HoverTouch
 			{...css(
 				{
 					flexDirection: "row",
@@ -119,7 +121,7 @@ export const TouchControls = ({
 					right: 0,
 					bottom: 0,
 				},
-				touchOnly,
+				props,
 			)}
 		>
 			{previousSlug && (
@@ -129,31 +131,22 @@ export const TouchControls = ({
 					href={previousSlug}
 					replace
 					size={ts(4)}
-					{...tooltip(t("player.previous"), true)}
-					{...spacing}
+					{...common}
 				/>
 			)}
 			<IconButton
 				icon={isPlaying ? Pause : PlayArrow}
 				onPress={() => setPlay(!isPlaying)}
 				size={ts(8)}
-				{...tooltip(isPlaying ? t("player.pause") : t("player.play"), true)}
-				{...spacing}
+				{...common}
 			/>
 			{nextSlug && (
-				<IconButton
-					icon={SkipNext}
-					as={Link}
-					href={nextSlug}
-					replace
-					size={ts(4)}
-					{...tooltip(t("player.next"), true)}
-					{...spacing}
-				/>
+				<IconButton icon={SkipNext} as={Link} href={nextSlug} replace size={ts(4)} {...common} />
 			)}
-		</View>
+		</HoverTouch>
 	);
 };
+
 const VolumeSlider = () => {
 	const [volume, setVolume] = useAtom(volumeAtom);
 	const [isMuted, setMuted] = useAtom(mutedAtom);
