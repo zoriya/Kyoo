@@ -50,18 +50,24 @@ const Menu = <AsProps extends { onPress: PressableProps["onPress"] }>({
 	onMenuOpen,
 	onMenuClose,
 	children,
+	isOpen,
+	setOpen,
 	...props
 }: {
 	Trigger: ComponentType<AsProps>;
 	children: ReactNode | ReactNode[] | null;
 	onMenuOpen?: () => void;
 	onMenuClose?: () => void;
+	isOpen?: boolean;
+	setOpen?: (v: boolean) => void;
 } & Omit<AsProps, "onPress">) => {
 	return (
 		<DropdownMenu.Root
 			modal
-			onOpenChange={(isOpen) => {
-				if (isOpen) onMenuOpen?.call(null);
+			open={isOpen}
+			onOpenChange={(newOpen) => {
+				if (setOpen) setOpen(newOpen)
+				if (newOpen) onMenuOpen?.call(null);
 				else onMenuClose?.call(null);
 			}}
 		>

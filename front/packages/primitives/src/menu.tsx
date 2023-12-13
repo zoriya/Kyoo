@@ -49,15 +49,21 @@ const Menu = <AsProps,>({
 	onMenuOpen,
 	onMenuClose,
 	children,
+	isOpen: outerOpen,
+	setOpen: outerSetOpen,
 	...props
 }: {
 	Trigger: ComponentType<AsProps>;
 	children?: ReactNode | ReactNode[] | null;
 	onMenuOpen?: () => void;
 	onMenuClose?: () => void;
+	isOpen?: boolean;
+	setOpen?: (v: boolean) => void;
 } & Omit<AsProps, "onPress">) => {
 	const insets = useSafeAreaInsets();
-	const [isOpen, setOpen] = useState(false);
+	const [isOpen, setOpen] =
+		// eslint-disable-next-line react-hooks/rules-of-hooks
+		outerOpen !== undefined && outerSetOpen ? [outerOpen, outerSetOpen] : useState(false);
 
 	useEffect(() => {
 		if (isOpen) onMenuOpen?.call(null);

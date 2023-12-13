@@ -5,7 +5,10 @@
 		"watchlist": "Continuer de regarder",
 		"info": "Voir plus",
 		"none": "Aucun episode",
-		"watchlistLogin": "Pour suivre ce que vous avez regardé ou prévoyez de regarder, vous devez vous connecter."
+		"watchlistLogin": "Pour suivre ce que vous avez regardé ou prévoyez de regarder, vous devez vous connecter.",
+		"episodeMore": {
+			"goToShow": "Aller a la serie"
+		}
 	},
 	"show": {
 		"play": "Lecture",
@@ -58,7 +61,8 @@
 		"prev-page": "Page précédente",
 		"next-page": "Page suivante",
 		"delete": "Supprimer",
-		"cancel": "Annuler"
+		"cancel": "Annuler",
+		"more": "Plus"
 	},
 	"navbar": {
 		"home": "Accueil",
