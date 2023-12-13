@@ -21,6 +21,7 @@
 		"react-native-blurhash": "*",
 		"react-native-fast-image": "*",
 		"react-native-reanimated": "*",
+		"react-native-safe-area-context": "*",
 		"react-native-svg": "*",
 		"yoshiki": "*"
 	},
@@ -38,6 +39,9 @@
 			"optional": true
 		},
 		"react-native-fast-image": {
+			"optional": true
+		},
+		"react-native-safe-area-context": {
 			"optional": true
 		},
 		"react-native-web": {
