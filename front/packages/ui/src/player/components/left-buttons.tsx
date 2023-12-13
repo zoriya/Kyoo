@@ -28,7 +28,7 @@ import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import Pause from "@material-symbols/svg-400/rounded/pause-fill.svg";
 import VolumeOff from "@material-symbols/svg-400/rounded/volume_off-fill.svg";
 import VolumeMute from "@material-symbols/svg-400/rounded/volume_mute-fill.svg";
-import common from "@material-symbols/svg-400/rounded/volume_down-fill.svg";
+import VolumeDown from "@material-symbols/svg-400/rounded/volume_down-fill.svg";
 import VolumeUp from "@material-symbols/svg-400/rounded/volume_up-fill.svg";
 import { durationAtom, mutedAtom, playAtom, progressAtom, volumeAtom } from "../state";
 import { Stylable, px, useYoshiki } from "yoshiki/native";
