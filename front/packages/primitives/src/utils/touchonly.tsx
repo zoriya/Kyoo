@@ -18,18 +18,24 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Player } from "@kyoo/ui";
-import { withRoute } from "../../utils";
+import { Platform, ViewProps } from "react-native";
 
-export default withRoute(
-	Player,
-	{
-		options: {
-			headerShown: false,
-			navigationBarHidden: true,
-		},
-		statusBar: { hidden: true },
-		fullscreen: true,
-	},
-	{ type: "episode" },
-);
+export const TouchOnlyCss = () => {
+	return (
+		<style jsx global>{`
+			:where(body.noHover) .noTouch {
+				display: none;
+			}
+			:where(body:not(.noHover)) .touchOnly {
+				display: none;
+			}
+		`}</style>
+	);
+};
+
+export const touchOnly: ViewProps = {
+	style: Platform.OS === "web" ? ({ $$css: true, touchOnly: "touchOnly" } as any) : {},
+};
+export const noTouch: ViewProps = {
+	style: Platform.OS === "web" ? ({ $$css: true, noTouch: "noTouch" } as any) : { display: "none" },
+};
