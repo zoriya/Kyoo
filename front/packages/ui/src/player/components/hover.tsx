@@ -120,7 +120,8 @@ export const Hover = ({
 							left: 0,
 							bottom: 0,
 							right: 0,
-							pointerEvents: "none",
+							// box-none does not work on the web while none does not work on android
+							pointerEvents: Platform.OS === "web" ? "none" : "box-none",
 						})}
 					>
 						<Back
