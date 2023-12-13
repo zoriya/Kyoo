@@ -31,19 +31,43 @@ import {
 	Skeleton,
 	Slider,
 	tooltip,
-	touchOnly,
 	ts,
 } from "@kyoo/primitives";
 import { Chapter, KyooImage, Subtitle, Audio } from "@kyoo/models";
 import { useAtomValue, useSetAtom, useAtom } from "jotai";
-import { ImageStyle, Platform, Pressable, View, ViewProps } from "react-native";
+import {
+	ImageStyle,
+	Platform,
+	Pressable,
+	View,
+	ViewProps,
+	PointerEvent as NativePointerEvent,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 import { percent, rem, useYoshiki } from "yoshiki/native";
 import { useRouter } from "solito/router";
 import ArrowBack from "@material-symbols/svg-400/rounded/arrow_back-fill.svg";
 import { LeftButtons, TouchControls } from "./left-buttons";
 import { RightButtons } from "./right-buttons";
-import { bufferedAtom, durationAtom, loadAtom, playAtom, progressAtom } from "../state";
+import {
+	bufferedAtom,
+	durationAtom,
+	fullscreenAtom,
+	loadAtom,
+	playAtom,
+	progressAtom,
+} from "../state";
+import { ReactNode, useCallback, useEffect, useRef } from "react";
+import { atom } from "jotai";
+
+const hoverReasonAtom = atom({
+	mouseMoved: false,
+	mouseHover: false,
+	menuOpened: false,
+});
+export const hoverAtom = atom((get) =>
+	[!get(playAtom), ...Object.values(get(hoverReasonAtom))].includes(true),
+);
 
 export const Hover = ({
 	isLoading,
@@ -57,11 +81,6 @@ export const Hover = ({
 	fonts,
 	previousSlug,
 	nextSlug,
-	onMenuOpen,
-	onMenuClose,
-	show,
-	onPointerDown,
-	...props
 }: {
 	isLoading: boolean;
 	name?: string | null;
@@ -74,75 +93,204 @@ export const Hover = ({
 	fonts?: string[];
 	previousSlug?: string | null;
 	nextSlug?: string | null;
-	onMenuOpen: () => void;
-	onMenuClose: () => void;
-	show: boolean;
-} & ViewProps) => {
-	// TODO: animate show
-	const opacity = !show && (Platform.OS === "web" ? { opacity: 0 } : { display: "none" as const });
+}) => {
+	const show = useAtomValue(hoverAtom);
+	const setHover = useSetAtom(hoverReasonAtom);
+
 	return (
 		<ContrastArea mode="dark">
 			{({ css }) => (
 				<>
-					<Back isLoading={isLoading} name={showName} href={href} {...css(opacity, props)} />
 					<TouchControls previousSlug={previousSlug} nextSlug={nextSlug} />
-					<Pressable
-						tabIndex={-1}
-						onPointerDown={onPointerDown}
-						onPress={Platform.OS !== "web" ? () => onPointerDown?.({} as any) : undefined}
-						{...css(
-							[
-								{
-									// Fixed is used because firefox android make the hover disapear under the navigation bar in absolute
-									position: Platform.OS === "web" ? ("fixed" as any) : "absolute",
-									bottom: 0,
-									left: 0,
-									right: 0,
-									bg: (theme) => theme.darkOverlay,
-									flexDirection: "row",
-									padding: percent(1),
-								},
-								opacity,
-							],
-							props,
-						)}
+					<View
+						onPointerEnter={(e) => {
+							if (e.nativeEvent.pointerType === "mouse")
+								setHover((x) => ({ ...x, mouseHover: true }));
+						}}
+						onPointerLeave={(e) => {
+							if (e.nativeEvent.pointerType === "mouse")
+								setHover((x) => ({ ...x, mouseHover: false }));
+						}}
+						pointerEvents="none"
+						{...css({
+							// TODO: animate show
+							display: !show ? "none" : "flex",
+							position: "absolute",
+							top: 0,
+							left: 0,
+							bottom: 0,
+							right: 0,
+						})}
 					>
-						<VideoPoster poster={poster} alt={showName} isLoading={isLoading} />
+						<Back isLoading={isLoading} name={showName} href={href} pointerEvents="auto" />
 						<View
+							pointerEvents="auto"
 							{...css({
-								marginLeft: { xs: ts(0.5), sm: ts(3) },
-								flexDirection: "column",
-								flexGrow: 1,
-								flexShrink: 1,
-								maxWidth: percent(100),
+								// Fixed is used because firefox android make the hover disapear under the navigation bar in absolute
+								position: Platform.OS === "web" ? ("fixed" as any) : "absolute",
+								bottom: 0,
+								left: 0,
+								right: 0,
+								bg: (theme) => theme.darkOverlay,
+								flexDirection: "row",
+								padding: percent(1),
 							})}
 						>
-							<H2 {...css({ paddingBottom: ts(1) })}>
-								{isLoading ? <Skeleton {...css({ width: rem(15), height: rem(2) })} /> : name}
-							</H2>
-							<ProgressBar chapters={chapters} />
+							<VideoPoster poster={poster} alt={showName} isLoading={isLoading} />
 							<View
 								{...css({
-									flexDirection: "row",
+									marginLeft: { xs: ts(0.5), sm: ts(3) },
+									flexDirection: "column",
 									flexGrow: 1,
-									justifyContent: "space-between",
-									flexWrap: "wrap",
+									flexShrink: 1,
+									maxWidth: percent(100),
 								})}
 							>
-								<LeftButtons previousSlug={previousSlug} nextSlug={nextSlug} />
-								<RightButtons
-									subtitles={subtitles}
-									audios={audios}
-									fonts={fonts}
-									onMenuOpen={onMenuOpen}
-									onMenuClose={onMenuClose}
-								/>
+								<H2 numberOfLines={1} {...css({ paddingBottom: ts(1) })}>
+									{isLoading ? <Skeleton {...css({ width: rem(15), height: rem(2) })} /> : name}
+								</H2>
+								<ProgressBar chapters={chapters} />
+								<View
+									{...css({
+										flexDirection: "row",
+										flexGrow: 1,
+										justifyContent: "space-between",
+										flexWrap: "wrap",
+									})}
+								>
+									<LeftButtons previousSlug={previousSlug} nextSlug={nextSlug} />
+									<RightButtons
+										subtitles={subtitles}
+										audios={audios}
+										fonts={fonts}
+										onMenuOpen={() => setHover((x) => ({ ...x, menuOpened: true }))}
+										onMenuClose={() => {
+											// Disable hover since the menu overlay makes the mouseout unreliable.
+											setHover((x) => ({ ...x, menuOpened: false, mouseHover: false }));
+										}}
+									/>
+								</View>
 							</View>
 						</View>
-					</Pressable>
+					</View>
 				</>
 			)}
 		</ContrastArea>
+	);
+};
+
+export const HoverTouch = ({ children, ...props }: { children: ReactNode }) => {
+	const hover = useAtomValue(hoverAtom);
+	const setHover = useSetAtom(hoverReasonAtom);
+	const mouseCallback = useRef<NodeJS.Timeout | null>(null);
+	const touch = useRef<{ count: number; timeout?: NodeJS.Timeout }>({ count: 0 });
+	const playerWidth = useRef<number | null>(null);
+
+	const show = useCallback(() => {
+		setHover((x) => ({ ...x, mouseMoved: true }));
+		if (mouseCallback.current) clearTimeout(mouseCallback.current);
+		mouseCallback.current = setTimeout(() => {
+			setHover((x) => ({ ...x, mouseMoved: false }));
+		}, 2500);
+	}, [setHover]);
+
+	// On mouse move
+	useEffect(() => {
+		if (Platform.OS !== "web") return;
+		const handler = (e: PointerEvent) => {
+			if (e.pointerType !== "mouse") return;
+			show();
+		};
+
+		document.addEventListener("pointermove", handler);
+		return () => document.removeEventListener("pointermove", handler);
+	}, [show]);
+
+	// When the controls hide, remove focus so space can be used to play/pause instead of triggering the button
+	// It also serves to hide the tooltip.
+	useEffect(() => {
+		if (Platform.OS !== "web") return;
+		if (!hover && document.activeElement instanceof HTMLElement) document.activeElement.blur();
+	}, [hover]);
+
+	const { css } = useYoshiki();
+
+	const duration = useAtomValue(durationAtom);
+	const setPlay = useSetAtom(playAtom);
+	const setProgress = useSetAtom(progressAtom);
+	const setFullscreen = useSetAtom(fullscreenAtom);
+
+	const onPress = (e: NativePointerEvent) => {
+		if (Platform.OS === "web" && e.nativeEvent.pointerType === "mouse") {
+			setPlay((x) => !x);
+			return;
+		}
+		if (hover) setHover((x) => ({ ...x, mouseMoved: false }));
+		else show();
+	};
+	const onDoublePress = (e: NativePointerEvent) => {
+		if (Platform.OS === "web" && e.nativeEvent.pointerType === "mouse") {
+			// Only reset touch count for the web, on mobile you can continue to seek by pressing again.
+			touch.current.count = 0;
+			setFullscreen((x) => !x);
+			return;
+		}
+
+		if (!duration || !playerWidth.current) return;
+
+		if (e.nativeEvent.x < playerWidth.current * 0.33) {
+			setProgress((x) => Math.max(x - 10, 0));
+		}
+		if (e.nativeEvent.x > playerWidth.current * 0.66) {
+			setProgress((x) => Math.min(x + 10, duration));
+		}
+	};
+
+	return (
+		<Pressable
+			tabIndex={-1}
+			onPointerLeave={(e) => {
+				if (e.nativeEvent.pointerType === "mouse") setHover((x) => ({ ...x, mouseMoved: false }));
+			}}
+			onPointerDown={(e) => {
+				console.log("down");
+				if (Platform.OS === "web") e.preventDefault();
+
+				touch.current.count++;
+				if (touch.current.count >= 2) {
+					touch.current.count = 0;
+					onDoublePress(e);
+					clearTimeout(touch.current.timeout);
+				} else {
+					onPress(e);
+				}
+
+				touch.current.timeout = setTimeout(() => {
+					touch.current.count = 0;
+					touch.current.timeout = undefined;
+				}, 400);
+			}}
+			onLayout={(e) => {
+				playerWidth.current = e.nativeEvent.layout.width;
+			}}
+			{...css(
+				{
+					flexDirection: "row",
+					justifyContent: "center",
+					alignItems: "center",
+					position: "absolute",
+					top: 0,
+					left: 0,
+					right: 0,
+					bottom: 0,
+					// @ts-expect-error Web only property
+					cursor: hover ? "unset" : "none",
+				},
+				props,
+			)}
+		>
+			{children}
+		</Pressable>
 	);
 };
 
@@ -165,7 +313,7 @@ const ProgressBar = ({ chapters }: { chapters?: Chapter[] }) => {
 	);
 };
 
-const Back = ({
+export const Back = ({
 	isLoading,
 	name,
 	href,

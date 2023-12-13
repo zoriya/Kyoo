@@ -39,9 +39,13 @@ export const durationAtom = atom<number | undefined>(undefined);
 
 export const progressAtom = atom(
 	(get) => get(privateProgressAtom),
-	(_, set, value: number) => {
-		set(privateProgressAtom, value);
-		set(publicProgressAtom, value);
+	(get, set, update: number | ((value: number) => number)) => {
+		const run = (value: number) => {
+			set(privateProgressAtom, value);
+			set(publicProgressAtom, value);
+		};
+		if (typeof update === "function") run(update(get(privateProgressAtom)));
+		else run(update);
 	},
 );
 const privateProgressAtom = atom(0);
@@ -52,23 +56,27 @@ export const mutedAtom = atom(false);
 
 export const fullscreenAtom = atom(
 	(get) => get(privateFullscreen),
-	async (_, set, value: boolean) => {
-		try {
-			if (value) {
-				await document.body.requestFullscreen({
-					navigationUI: "hide",
-				});
-				set(privateFullscreen, true);
-				// @ts-expect-error Firefox does not support this so ts complains
-				await screen.orientation.lock("landscape");
-			} else {
-				await document.exitFullscreen();
-				set(privateFullscreen, false);
-				screen.orientation.unlock();
+	(get, set, update: boolean | ((value: boolean) => boolean)) => {
+		const run = async (value: boolean) => {
+			try {
+				if (value) {
+					await document.body.requestFullscreen({
+						navigationUI: "hide",
+					});
+					set(privateFullscreen, true);
+					// @ts-expect-error Firefox does not support this so ts complains
+					await screen.orientation.lock("landscape");
+				} else {
+					if (document.fullscreenElement) await document.exitFullscreen();
+					set(privateFullscreen, false);
+					screen.orientation.unlock();
+				}
+			} catch (e) {
+				console.error(e);
 			}
-		} catch (e) {
-			console.error(e);
-		}
+		};
+		if (typeof update === "function") run(update(get(privateFullscreen)));
+		else run(update);
 	},
 );
 const privateFullscreen = atom(false);
