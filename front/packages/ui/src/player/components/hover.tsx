@@ -42,6 +42,7 @@ import {
 	View,
 	ViewProps,
 	PointerEvent as NativePointerEvent,
+	GestureResponderEvent,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { percent, rem, useYoshiki } from "yoshiki/native";
@@ -111,7 +112,6 @@ export const Hover = ({
 							if (e.nativeEvent.pointerType === "mouse")
 								setHover((x) => ({ ...x, mouseHover: false }));
 						}}
-						pointerEvents="none"
 						{...css({
 							// TODO: animate show
 							display: !show ? "none" : "flex",
@@ -120,11 +120,18 @@ export const Hover = ({
 							left: 0,
 							bottom: 0,
 							right: 0,
+							pointerEvents: "none",
 						})}
 					>
-						<Back isLoading={isLoading} name={showName} href={href} pointerEvents="auto" />
+						<Back
+							isLoading={isLoading}
+							name={showName}
+							href={href}
+							{...css({
+								pointerEvents: "auto",
+							})}
+						/>
 						<View
-							pointerEvents="auto"
 							{...css({
 								// Fixed is used because firefox android make the hover disapear under the navigation bar in absolute
 								position: Platform.OS === "web" ? ("fixed" as any) : "absolute",
@@ -133,6 +140,7 @@ export const Hover = ({
 								right: 0,
 								bg: (theme) => theme.darkOverlay,
 								flexDirection: "row",
+								pointerEvents: "auto",
 								padding: percent(1),
 							})}
 						>
@@ -220,30 +228,46 @@ export const HoverTouch = ({ children, ...props }: { children: ReactNode }) => {
 	const setProgress = useSetAtom(progressAtom);
 	const setFullscreen = useSetAtom(fullscreenAtom);
 
-	const onPress = (e: NativePointerEvent) => {
-		if (Platform.OS === "web" && e.nativeEvent.pointerType === "mouse") {
+	const onPress = (e: { pointerType: string; x: number }) => {
+		if (Platform.OS === "web" && e.pointerType === "mouse") {
 			setPlay((x) => !x);
 			return;
 		}
 		if (hover) setHover((x) => ({ ...x, mouseMoved: false }));
 		else show();
 	};
-	const onDoublePress = (e: NativePointerEvent) => {
-		if (Platform.OS === "web" && e.nativeEvent.pointerType === "mouse") {
+	const onDoublePress = (e: { pointerType: string; x: number }) => {
+		if (Platform.OS === "web" && e.pointerType === "mouse") {
 			// Only reset touch count for the web, on mobile you can continue to seek by pressing again.
 			touch.current.count = 0;
 			setFullscreen((x) => !x);
 			return;
 		}
 
+		show();
 		if (!duration || !playerWidth.current) return;
 
-		if (e.nativeEvent.x < playerWidth.current * 0.33) {
+		if (e.x < playerWidth.current * 0.33) {
 			setProgress((x) => Math.max(x - 10, 0));
 		}
-		if (e.nativeEvent.x > playerWidth.current * 0.66) {
+		if (e.x > playerWidth.current * 0.66) {
 			setProgress((x) => Math.min(x + 10, duration));
 		}
+	};
+
+	const onAnyPress = (e: { pointerType: string; x: number }) => {
+		touch.current.count++;
+		if (touch.current.count >= 2) {
+			onDoublePress(e);
+			clearTimeout(touch.current.timeout);
+		} else {
+			onPress(e);
+		}
+
+		touch.current.timeout = setTimeout(() => {
+			touch.current.count = 0;
+			touch.current.timeout = undefined;
+		}, 400);
 	};
 
 	return (
@@ -253,22 +277,17 @@ export const HoverTouch = ({ children, ...props }: { children: ReactNode }) => {
 				if (e.nativeEvent.pointerType === "mouse") setHover((x) => ({ ...x, mouseMoved: false }));
 			}}
 			onPointerDown={(e) => {
-				console.log("down");
-				if (Platform.OS === "web") e.preventDefault();
-
-				touch.current.count++;
-				if (touch.current.count >= 2) {
-					touch.current.count = 0;
-					onDoublePress(e);
-					clearTimeout(touch.current.timeout);
-				} else {
-					onPress(e);
-				}
-
-				touch.current.timeout = setTimeout(() => {
-					touch.current.count = 0;
-					touch.current.timeout = undefined;
-				}, 400);
+				// Theorically, this is available everywhere but android never calls this pointerDown so
+				// touch are handled in the onPress and we early return here if it is every called to prevent
+				// the click action to run twice.
+				if (Platform.OS !== "web") return;
+				e.preventDefault();
+				onAnyPress(e.nativeEvent);
+			}}
+			onPress={(e) => {
+				if (Platform.OS === "web") return;
+				e.preventDefault();
+				onAnyPress({ pointerType: "touch", x: e.nativeEvent.locationX });
 			}}
 			onLayout={(e) => {
 				playerWidth.current = e.nativeEvent.layout.width;
