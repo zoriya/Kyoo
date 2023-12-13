@@ -30,6 +30,7 @@ import {
 	useState,
 } from "react";
 import { StyleSheet, Pressable, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { percent, px, sm, useYoshiki, vh, xl } from "yoshiki/native";
 import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
 import { Icon, IconButton } from "./icons";
@@ -55,6 +56,7 @@ const Menu = <AsProps,>({
 	onMenuOpen?: () => void;
 	onMenuClose?: () => void;
 } & Omit<AsProps, "onPress">) => {
+	const insets = useSafeAreaInsets();
 	const [isOpen, setOpen] = useState(false);
 
 	useEffect(() => {
@@ -89,6 +91,7 @@ const Menu = <AsProps,>({
 												borderTopRightRadius: { xs: px(26), xl: 0 },
 												paddingTop: { xs: px(26), xl: 0 },
 												marginTop: { xs: px(72), xl: 0 },
+												paddingBottom: insets.bottom,
 											},
 											sm({
 												maxWidth: px(640),
