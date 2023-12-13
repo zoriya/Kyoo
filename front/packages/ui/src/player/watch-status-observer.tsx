@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { WatchStatusV, queryFn } from "@kyoo/models";
+import { WatchStatusV, queryFn, useAccount } from "@kyoo/models";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useCallback } from "react";
 import { useAtomValue } from "jotai";
@@ -32,6 +32,7 @@ export const WatchStatusObserver = ({
 	type: "episode" | "movie";
 	slug: string;
 }) => {
+	const account = useAccount();
 	const queryClient = useQueryClient();
 	const { mutate } = useMutation({
 		mutationFn: (seconds: number) =>
@@ -56,6 +57,7 @@ export const WatchStatusObserver = ({
 
 	// update watch status every 10 seconds and on unmount.
 	useEffect(() => {
+		if (!account) return;
 		const timer = setInterval(() => {
 			mutate(readProgress());
 		}, 10_000);
@@ -63,12 +65,13 @@ export const WatchStatusObserver = ({
 			clearInterval(timer);
 			mutate(readProgress());
 		};
-	}, [type, slug, readProgress, mutate]);
+	}, [account, type, slug, readProgress, mutate]);
 
 	// update watch status when play status change (and on mount).
 	const isPlaying = useAtomValue(playAtom);
 	useEffect(() => {
+		if (!account) return;
 		mutate(readProgress());
-	}, [type, slug, isPlaying, readProgress, mutate]);
+	}, [account, type, slug, isPlaying, readProgress, mutate]);
 	return null;
 };
