@@ -158,11 +158,13 @@ export const EpisodeLine = ({
 	runtime,
 	watchedPercent,
 	watchedStatus,
+	href,
 	...props
 }: WithLoading<{
 	id: string;
 	slug: string;
-	showSlug: string;
+	// if show slug is null, disable "Go to show" in the context menu
+	showSlug: string | null;
 	displayNumber: string;
 	name: string | null;
 	overview: string | null;
@@ -174,6 +176,7 @@ export const EpisodeLine = ({
 	runtime: number | null;
 	watchedPercent: number | null;
 	watchedStatus: WatchStatusV | null;
+	href: string;
 }> &
 	Partial<PressableProps>) => {
 	const [moreOpened, setMoreOpened] = useState(false);
@@ -182,7 +185,7 @@ export const EpisodeLine = ({
 
 	return (
 		<Link
-			href={slug ? `/watch/${slug}` : ""}
+			href={moreOpened ? undefined : href}
 			onLongPress={() => setMoreOpened(true)}
 			{...css(
 				{

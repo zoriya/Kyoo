@@ -147,6 +147,7 @@ export const EpisodeList = <Props,>({
 						)}
 						<EpisodeLine
 							{...item}
+							showSlug={null}
 							displayNumber={item.isLoading ? undefined! : episodeDisplayNumber(item)!}
 							watchedPercent={item.watchStatus?.watchedPercent ?? null}
 							watchedStatus={item.watchStatus?.status ?? null}

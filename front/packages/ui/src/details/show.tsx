@@ -75,6 +75,7 @@ export const ShowWatchStatusCard = ({ watchedPercent, status, nextEpisode }: Sho
 					<EpisodeLine
 						isLoading={false}
 						{...nextEpisode}
+						showSlug={null}
 						watchedPercent={watchedPercent || null}
 						watchedStatus={status || null}
 						displayNumber={episodeDisplayNumber(nextEpisode, "???")!}
