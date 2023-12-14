@@ -23,6 +23,7 @@ import {
 	H6,
 	ImageBackground,
 	ImageProps,
+	important,
 	Link,
 	P,
 	Skeleton,
@@ -58,6 +59,8 @@ export const displayRuntime = (runtime: number) => {
 };
 
 export const EpisodeBox = ({
+	slug,
+	showSlug,
 	name,
 	overview,
 	thumbnail,
@@ -68,6 +71,9 @@ export const EpisodeBox = ({
 	...props
 }: Stylable &
 	WithLoading<{
+		slug: string;
+		// if show slug is null, disable "Go to show" in the context menu
+		showSlug: string | null;
 		name: string | null;
 		overview: string | null;
 		href: string;
@@ -75,12 +81,14 @@ export const EpisodeBox = ({
 		watchedPercent: number | null;
 		watchedStatus: WatchStatusV | null;
 	}>) => {
+	const [moreOpened, setMoreOpened] = useState(false);
 	const { css } = useYoshiki("episodebox");
 	const { t } = useTranslation();
 
 	return (
 		<Link
-			href={href}
+			href={moreOpened ? undefined : href}
+			onLongPress={() => setMoreOpened(true)}
 			{...css(
 				{
 					alignItems: "center",
@@ -90,6 +98,9 @@ export const EpisodeBox = ({
 							borderWidth: ts(0.5),
 							borderStyle: "solid",
 						},
+						more: {
+							display: "none",
+						},
 					},
 					fover: {
 						self: focusReset,
@@ -98,6 +109,9 @@ export const EpisodeBox = ({
 						},
 						title: {
 							textDecorationLine: "underline",
+						},
+						more: {
+							display: "flex",
 						},
 					},
 				},
@@ -116,6 +130,25 @@ export const EpisodeBox = ({
 			>
 				{(watchedPercent || watchedStatus === WatchStatusV.Completed) && (
 					<ItemProgress watchPercent={watchedPercent ?? 100} />
+				)}
+				{slug && watchedStatus !== undefined && (
+					<EpisodesContext
+						slug={slug}
+						showSlug={showSlug}
+						status={watchedStatus}
+						isOpen={moreOpened}
+						setOpen={(v) => setMoreOpened(v)}
+						{...css([
+							{
+								position: "absolute",
+								top: 0,
+								right: 0,
+								bg: (theme) => theme.darkOverlay,
+							},
+							"more",
+							Platform.OS === "web" && moreOpened && { display: important("flex") },
+						])}
+					/>
 				)}
 			</ImageBackground>
 			<Skeleton {...css({ width: percent(50) })}>
@@ -177,8 +210,7 @@ export const EpisodeLine = ({
 	watchedPercent: number | null;
 	watchedStatus: WatchStatusV | null;
 	href: string;
-}> &
-	Partial<PressableProps>) => {
+}>) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 	const { css } = useYoshiki("episode-line");
 	const { t } = useTranslation();
@@ -206,7 +238,7 @@ export const EpisodeLine = ({
 						},
 					},
 				},
-				props as any,
+				props,
 			)}
 		>
 			<P {...css({ width: rem(4), flexShrink: 0, m: ts(1), textAlign: "center" })}>
@@ -277,7 +309,7 @@ export const EpisodeLine = ({
 							setOpen={(v) => setMoreOpened(v)}
 							{...css([
 								"more",
-								Platform.OS === "web" && moreOpened && { display: "flex !important" as any },
+								Platform.OS === "web" && moreOpened && { display: important("flex") },
 							])}
 						/>
 					)}

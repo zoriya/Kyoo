@@ -67,6 +67,10 @@ export const BaseEpisodeP = withImages(
 			 */
 			hls: z.string().transform(imageFn),
 		}),
+		/**
+		 * The id of the show containing this episode
+		 */
+		showId: z.string(),
 	}),
 	"episodes",
 )

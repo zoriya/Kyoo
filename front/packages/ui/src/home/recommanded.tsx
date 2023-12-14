@@ -49,9 +49,13 @@ import { Layout, WithLoading } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import { ItemGrid, ItemWatchStatus } from "../browse/grid";
+import { useState } from "react";
+import { ItemContext } from "../components/context-menus";
 
 export const ItemDetails = ({
 	isLoading,
+	slug,
+	type,
 	name,
 	tagline,
 	subtitle,
@@ -64,6 +68,8 @@ export const ItemDetails = ({
 	unseenEpisodesCount,
 	...props
 }: WithLoading<{
+	slug: string;
+	type: "movie" | "show" | "collection";
 	name: string;
 	tagline: string | null;
 	subtitle: string;
@@ -75,8 +81,9 @@ export const ItemDetails = ({
 	watchStatus: WatchStatusV | null;
 	unseenEpisodesCount: number | null;
 }>) => {
-	const { t } = useTranslation();
+	const [moreOpened, setMoreOpened] = useState(false);
 	const { css } = useYoshiki("recommanded-card");
+	const { t } = useTranslation();
 
 	return (
 		<View
@@ -88,7 +95,8 @@ export const ItemDetails = ({
 			)}
 		>
 			<Link
-				href={href}
+				href={moreOpened ? undefined : href}
+				onLongPress={() => setMoreOpened(true)}
 				{...css({
 					position: "absolute",
 					top: 0,
@@ -149,11 +157,22 @@ export const ItemDetails = ({
 				<View
 					{...css({ flexShrink: 1, flexGrow: 1, justifyContent: "flex-end", marginBottom: px(50) })}
 				>
-					{(isLoading || tagline) && (
-						<Skeleton {...css({ m: ts(1), marginVertical: ts(2) })}>
-							{isLoading || <P {...css({ p: ts(1) })}>{tagline}</P>}
-						</Skeleton>
-					)}
+					<View {...css({ flexDirection: "row-reverse", justifyContent: "space-between" })}>
+						{slug && type && type !== "collection" && watchStatus !== undefined && (
+							<ItemContext
+								type={type}
+								slug={slug}
+								status={watchStatus}
+								isOpen={moreOpened}
+								setOpen={(v) => setMoreOpened(v)}
+							/>
+						)}
+						{(isLoading || tagline) && (
+							<Skeleton {...css({ m: ts(1), marginVertical: ts(2) })}>
+								{isLoading || <P {...css({ p: ts(1) })}>{tagline}</P>}
+							</Skeleton>
+						)}
+					</View>
 					<ScrollView {...css({ pX: ts(1) })}>
 						<Skeleton lines={5} {...css({ height: rem(0.8) })}>
 							{isLoading || (
@@ -231,6 +250,8 @@ export const Recommanded = () => {
 				{(x) => (
 					<ItemDetails
 						isLoading={x.isLoading as any}
+						slug={x.slug}
+						type={x.kind?.toLowerCase() as any}
 						name={x.name}
 						tagline={"tagline" in x ? x.tagline : null}
 						overview={x.overview}

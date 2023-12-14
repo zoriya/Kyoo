@@ -28,15 +28,19 @@ import {
 	Heading,
 	PosterBackground,
 	imageBorderRadius,
+	important,
 } from "@kyoo/primitives";
 import { useState } from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import { percent, px, rem, useYoshiki } from "yoshiki/native";
 import { Layout, WithLoading } from "../fetch";
 import { ItemWatchStatus } from "./grid";
+import { ItemContext } from "../components/context-menus";
 
 export const ItemList = ({
 	href,
+	slug,
+	type,
 	name,
 	subtitle,
 	thumbnail,
@@ -47,6 +51,8 @@ export const ItemList = ({
 	...props
 }: WithLoading<{
 	href: string;
+	slug: string;
+	type: "movie" | "show" | "collection";
 	name: string;
 	subtitle?: string;
 	poster?: KyooImage | null;
@@ -55,7 +61,7 @@ export const ItemList = ({
 	unseenEpisodesCount: number | null;
 }>) => {
 	const { css } = useYoshiki();
-	const [isHovered, setHovered] = useState(0);
+	const [moreOpened, setMoreOpened] = useState(false);
 
 	return (
 		<ImageBackground
@@ -63,11 +69,8 @@ export const ItemList = ({
 			alt={name}
 			quality="medium"
 			as={Link}
-			href={href ?? ""}
-			onFocus={() => setHovered((i) => i + 1)}
-			onBlur={() => setHovered((i) => i - 1)}
-			onPressIn={() => setHovered((i) => i + 1)}
-			onPressOut={() => setHovered((i) => i - 1)}
+			href={moreOpened ? undefined : href}
+			onLongPress={() => setMoreOpened(true)}
 			containerStyle={{
 				borderRadius: px(imageBorderRadius),
 			}}
@@ -83,38 +86,78 @@ export const ItemList = ({
 					borderRadius: px(imageBorderRadius),
 					overflow: "hidden",
 					marginX: ItemList.layout.gap,
+					child: {
+						more: {
+							opacity: 0,
+						},
+					},
+					fover: {
+						title: {
+							textDecorationLine: "underline",
+						},
+						more: {
+							opacity: 100,
+						},
+					},
 				},
 				props,
 			)}
 		>
 			<View
 				{...css({
-					flexDirection: "column",
 					width: { xs: "50%", lg: "30%" },
 				})}
 			>
-				<Skeleton {...css({ height: rem(2), alignSelf: "center" })}>
-					{isLoading || (
-						<Heading
-							{...css({
-								textAlign: "center",
-								fontSize: rem(2),
-								letterSpacing: rem(0.002),
-								fontWeight: "900",
-								textTransform: "uppercase",
-								textDecorationLine: isHovered ? "underline" : "none",
-							})}
-						>
-							{name}
-						</Heading>
+				<View
+					{...css({
+						flexDirection: "row",
+						justifyContent: "center",
+					})}
+				>
+					<Skeleton {...css({ height: rem(2), alignSelf: "center" })}>
+						{isLoading || (
+							<Heading
+								{...css([
+									"title",
+									{
+										textAlign: "center",
+										fontSize: rem(2),
+										letterSpacing: rem(0.002),
+										fontWeight: "900",
+										textTransform: "uppercase",
+									},
+								])}
+							>
+								{name}
+							</Heading>
+						)}
+					</Skeleton>
+					{slug && watchStatus !== undefined && type && type !== "collection" && (
+						<ItemContext
+							type={type}
+							slug={slug}
+							status={watchStatus}
+							isOpen={moreOpened}
+							setOpen={(v) => setMoreOpened(v)}
+							{...css([
+								{
+									// I dont know why marginLeft gets overwritten by the margin: px(2) so we important
+									marginLeft: important(ts(2)),
+									bg: (theme) => theme.darkOverlay,
+								},
+								"more",
+								Platform.OS === "web" && moreOpened && { opacity: important(100) },
+							])}
+						/>
 					)}
-				</Skeleton>
+				</View>
 				{(isLoading || subtitle) && (
 					<Skeleton {...css({ width: rem(5), alignSelf: "center" })}>
 						{isLoading || (
 							<P
 								{...css({
 									textAlign: "center",
+									marginRight: ts(4),
 								})}
 							>
 								{subtitle}

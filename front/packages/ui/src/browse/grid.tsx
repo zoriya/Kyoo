@@ -19,11 +19,13 @@
  */
 
 import { KyooImage, WatchStatusV } from "@kyoo/models";
-import { Link, Skeleton, ts, focusReset, P, SubP, PosterBackground, Icon } from "@kyoo/primitives";
-import { ImageStyle, View } from "react-native";
+import { Link, Skeleton, ts, focusReset, P, SubP, PosterBackground, Icon, important } from "@kyoo/primitives";
+import { ImageStyle, Platform, View } from "react-native";
 import { max, percent, px, rem, Stylable, Theme, useYoshiki } from "yoshiki/native";
 import { Layout, WithLoading } from "../fetch";
 import Done from "@material-symbols/svg-400/rounded/done-fill.svg";
+import { ItemContext } from "../components/context-menus";
+import { useState } from "react";
 
 export const ItemWatchStatus = ({
 	watchStatus,
@@ -96,6 +98,7 @@ export const ItemProgress = ({ watchPercent }: { watchPercent: number }) => {
 
 export const ItemGrid = ({
 	href,
+	slug,
 	name,
 	type,
 	subtitle,
@@ -107,6 +110,7 @@ export const ItemGrid = ({
 	...props
 }: WithLoading<{
 	href: string;
+	slug: string;
 	name: string;
 	subtitle?: string;
 	poster?: KyooImage | null;
@@ -116,11 +120,13 @@ export const ItemGrid = ({
 	unseenEpisodesCount: number | null;
 }> &
 	Stylable<"text">) => {
+	const [moreOpened, setMoreOpened] = useState(false);
 	const { css } = useYoshiki("grid");
 
 	return (
 		<Link
-			href={href}
+			href={moreOpened ? undefined : href}
+			onLongPress={() => setMoreOpened(true)}
 			{...css(
 				{
 					flexDirection: "column",
@@ -132,6 +138,9 @@ export const ItemGrid = ({
 							borderWidth: ts(0.5),
 							borderStyle: "solid",
 						},
+						more: {
+							display: "none",
+						},
 					},
 					fover: {
 						self: focusReset,
@@ -140,6 +149,9 @@ export const ItemGrid = ({
 						},
 						title: {
 							textDecorationLine: "underline",
+						},
+						more: {
+							display: "flex",
 						},
 					},
 				},
@@ -156,6 +168,25 @@ export const ItemGrid = ({
 			>
 				<ItemWatchStatus watchStatus={watchStatus} unseenEpisodesCount={unseenEpisodesCount} />
 				{type === "movie" && watchPercent && <ItemProgress watchPercent={watchPercent} />}
+				{slug && watchStatus !== undefined && type && type !== "collection" && (
+					<ItemContext
+						type={type}
+						slug={slug}
+						status={watchStatus}
+						isOpen={moreOpened}
+						setOpen={(v) => setMoreOpened(v)}
+						{...css([
+							{
+								position: "absolute",
+								top: 0,
+								right: 0,
+								bg: (theme) => theme.dark.background,
+							},
+							"more",
+							Platform.OS === "web" && moreOpened && { display: important("flex") },
+						])}
+					/>
+				)}
 			</PosterBackground>
 			<Skeleton>
 				{isLoading || (

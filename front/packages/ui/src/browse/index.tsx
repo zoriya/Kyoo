@@ -45,6 +45,7 @@ export const itemMap = (
 
 	return {
 		isLoading: item.isLoading,
+		slug: item.slug,
 		name: item.name,
 		subtitle: item.kind !== ItemKind.Collection ? getDisplayDate(item) : undefined,
 		href: item.href,

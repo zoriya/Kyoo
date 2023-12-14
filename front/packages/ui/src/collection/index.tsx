@@ -160,6 +160,8 @@ export const CollectionPage: QueryPage<{ slug: string }> = ({ slug }) => {
 			{(x) => (
 				<ItemDetails
 					isLoading={x.isLoading as any}
+					slug={x.slug}
+					type={x.kind?.toLowerCase() as any}
 					name={x.name}
 					tagline={"tagline" in x ? x.tagline : null}
 					overview={x.overview}
