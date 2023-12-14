@@ -39,6 +39,7 @@ import { InfiniteFetch } from "../fetch-infinite";
 import { DefaultLayout } from "../layout";
 import { ItemDetails } from "../home/recommanded";
 import { SvgWave } from "../details/show";
+import { ItemGrid } from "../browse/grid";
 
 const Header = ({ slug }: { slug: string }) => {
 	const { css } = useYoshiki();
@@ -144,6 +145,7 @@ const query = (slug: string): QueryIdentifier<LibraryItem> => ({
 });
 
 export const CollectionPage: QueryPage<{ slug: string }> = ({ slug }) => {
+	const { css } = useYoshiki();
 	const pageStyle = usePageStyle();
 
 	return (
@@ -153,7 +155,7 @@ export const CollectionPage: QueryPage<{ slug: string }> = ({ slug }) => {
 			layout={{ ...ItemDetails.layout, numColumns: { xs: 1, md: 2 } }}
 			Header={CollectionHeader}
 			headerProps={{ slug }}
-			contentContainerStyle={pageStyle}
+			contentContainerStyle={{ padding: 0, paddingHorizontal: 0, ...pageStyle }}
 		>
 			{(x) => (
 				<ItemDetails
@@ -172,6 +174,7 @@ export const CollectionPage: QueryPage<{ slug: string }> = ({ slug }) => {
 					unseenEpisodesCount={
 						x.kind === ItemKind.Show ? x.watchStatus?.unseenEpisodesCount ?? x.episodesCount! : null
 					}
+					{...css({ marginX: ItemGrid.layout.gap })}
 				/>
 			)}
 		</InfiniteFetch>

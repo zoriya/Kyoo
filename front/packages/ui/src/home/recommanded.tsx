@@ -80,38 +80,38 @@ export const ItemDetails = ({
 
 	return (
 		<View
-			{...css({
-				height: ItemDetails.layout.size,
-			})}
+			{...css(
+				{
+					height: ItemDetails.layout.size,
+				},
+				props,
+			)}
 		>
 			<Link
 				href={href}
-				{...css(
-					{
-						position: "absolute",
-						top: 0,
-						left: 0,
-						right: 0,
-						bottom: 0,
-						flexDirection: "row",
-						bg: (theme) => theme.variant.background,
-						borderRadius: calc(px(imageBorderRadius), "+", ts(0.25)),
-						overflow: "hidden",
-						borderColor: (theme) => theme.background,
-						borderWidth: ts(0.25),
-						borderStyle: "solid",
-						fover: {
-							self: {
-								...focusReset,
-								borderColor: (theme: Theme) => theme.accent,
-							},
-							title: {
-								textDecorationLine: "underline",
-							},
+				{...css({
+					position: "absolute",
+					top: 0,
+					left: 0,
+					right: 0,
+					bottom: 0,
+					flexDirection: "row",
+					bg: (theme) => theme.variant.background,
+					borderRadius: calc(px(imageBorderRadius), "+", ts(0.25)),
+					overflow: "hidden",
+					borderColor: (theme) => theme.background,
+					borderWidth: ts(0.25),
+					borderStyle: "solid",
+					fover: {
+						self: {
+							...focusReset,
+							borderColor: (theme: Theme) => theme.accent,
+						},
+						title: {
+							textDecorationLine: "underline",
 						},
 					},
-					props,
-				)}
+				})}
 			>
 				<PosterBackground
 					src={poster}
