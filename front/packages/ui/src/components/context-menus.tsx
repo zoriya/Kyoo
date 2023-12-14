@@ -28,13 +28,17 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { watchListIcon } from "./watchlist-info";
 
 export const EpisodesContext = ({
-	showSlug,
+	type = "episode",
 	slug,
+	showSlug,
 	status,
 	...props
-}: { showSlug?: string | null; slug: string; status: WatchStatusV | null } & Partial<
-	ComponentProps<typeof Menu<typeof IconButton>>
->) => {
+}: {
+	type?: "show" | "movie" | "episode";
+	showSlug?: string | null;
+	slug: string;
+	status: WatchStatusV | null;
+} & Partial<ComponentProps<typeof Menu<typeof IconButton>>>) => {
 	const account = useAccount();
 	const { t } = useTranslation();
 
@@ -42,10 +46,10 @@ export const EpisodesContext = ({
 	const mutation = useMutation({
 		mutationFn: (newStatus: WatchStatusV | null) =>
 			queryFn({
-				path: ["episode", slug, "watchStatus", newStatus && `?status=${newStatus}`],
+				path: [type, slug, "watchStatus", newStatus && `?status=${newStatus}`],
 				method: newStatus ? "POST" : "DELETE",
 			}),
-		onSettled: async () => await queryClient.invalidateQueries({ queryKey: ["episode", slug] }),
+		onSettled: async () => await queryClient.invalidateQueries({ queryKey: [type, slug] }),
 	});
 
 	return (
@@ -72,4 +76,17 @@ export const EpisodesContext = ({
 			</Menu.Sub>
 		</Menu>
 	);
+};
+
+export const ItemContext = ({
+	type,
+	slug,
+	status,
+	...props
+}: {
+	type: "movie" | "show";
+	slug: string;
+	status: WatchStatusV | null;
+} & Partial<ComponentProps<typeof Menu<typeof IconButton>>>) => {
+	return <EpisodesContext type={type} slug={slug} status={status} showSlug={null} {...props} />;
 };

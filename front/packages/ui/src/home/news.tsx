@@ -57,6 +57,8 @@ export const NewsList = () => {
 					) : (
 						<EpisodeBox
 							isLoading={x.isLoading as any}
+							slug={x.slug}
+							showSlug={x.showId}
 							name={
 								x.kind === NewsKind.Episode
 									? `${x.show!.name} ${episodeDisplayNumber(x)}`

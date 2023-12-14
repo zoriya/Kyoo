@@ -61,11 +61,14 @@ export const WatchlistList = () => {
 							(x.isLoading && i % 2) ? (
 							<EpisodeBox
 								isLoading={x.isLoading as any}
+								slug={episode?.slug}
+								showSlug={x.slug}
 								name={episode ? `${x.name} ${episodeDisplayNumber(episode)}` : undefined}
 								overview={episode?.name}
 								thumbnail={episode?.thumbnail ?? x.thumbnail}
 								href={episode?.href}
 								watchedPercent={x.watchStatus?.watchedPercent || null}
+								watchedStatus={x.watchStatus?.status || null}
 								// TODO: Move this into the ItemList (using getItemSize)
 								// @ts-expect-error This is a web only property
 								{...css({ gridColumnEnd: "span 2" })}
