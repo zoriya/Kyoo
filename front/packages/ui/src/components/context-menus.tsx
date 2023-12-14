@@ -32,7 +32,7 @@ export const EpisodesContext = ({
 	slug,
 	status,
 	...props
-}: { showSlug?: string; slug: string; status: WatchStatusV | null } & Partial<
+}: { showSlug?: string | null; slug: string; status: WatchStatusV | null } & Partial<
 	ComponentProps<typeof Menu<typeof IconButton>>
 >) => {
 	const account = useAccount();
@@ -50,11 +50,6 @@ export const EpisodesContext = ({
 
 	return (
 		<Menu Trigger={IconButton} icon={MoreVert} {...tooltip(t("misc.more"))} {...(props as any)}>
-			<Menu.Item
-				label={t("home.episodeMore.goToShow")}
-				icon={Info}
-				onSelect={() => console.log("tot")}
-			/>
 			{showSlug && (
 				<Menu.Item label={t("home.episodeMore.goToShow")} icon={Info} href={`/show/${showSlug}`} />
 			)}
