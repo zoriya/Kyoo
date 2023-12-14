@@ -66,7 +66,7 @@ const Menu = <AsProps extends { onPress: PressableProps["onPress"] }>({
 			modal
 			open={isOpen}
 			onOpenChange={(newOpen) => {
-				if (setOpen) setOpen(newOpen)
+				if (setOpen) setOpen(newOpen);
 				if (newOpen) onMenuOpen?.call(null);
 				else onMenuClose?.call(null);
 			}}
@@ -77,7 +77,7 @@ const Menu = <AsProps extends { onPress: PressableProps["onPress"] }>({
 			<ContrastArea mode="user">
 				<SwitchVariant>
 					<YoshikiProvider>
-						{({ css }) => (
+						{({ css, theme }) => (
 							<DropdownMenu.Portal>
 								<DropdownMenu.Content
 									onFocusOutside={(e) => e.stopImmediatePropagation()}
@@ -93,6 +93,7 @@ const Menu = <AsProps extends { onPress: PressableProps["onPress"] }>({
 									})}
 								>
 									{children}
+									<DropdownMenu.Arrow fill={theme.background} />
 								</DropdownMenu.Content>
 							</DropdownMenu.Portal>
 						)}
@@ -106,10 +107,10 @@ const Menu = <AsProps extends { onPress: PressableProps["onPress"] }>({
 const Item = forwardRef<
 	HTMLDivElement,
 	ComponentProps<typeof DropdownMenu.Item> & { href?: string }
->(function _Item({ children, href, ...props }, ref) {
+>(function _Item({ children, href, onSelect, ...props }, ref) {
 	if (href) {
 		return (
-			<DropdownMenu.Item ref={ref} {...props} asChild>
+			<DropdownMenu.Item ref={ref} onSelect={onSelect} {...props} asChild>
 				<Link href={href} style={{ textDecoration: "none" }}>
 					{children}
 				</Link>
@@ -117,28 +118,22 @@ const Item = forwardRef<
 		);
 	}
 	return (
-		<DropdownMenu.Item ref={ref} {...props}>
+		<DropdownMenu.Item ref={ref} onSelect={onSelect} {...props}>
 			{children}
 		</DropdownMenu.Item>
 	);
 });
 
-const MenuItem = ({
-	label,
-	icon,
-	left,
-	selected,
-	onSelect,
-	href,
-	disabled,
-	...props
-}: {
-	label: string;
-	icon?: ComponentType<SvgProps>;
-	left?: ReactElement;
-	disabled?: boolean;
-	selected?: boolean;
-} & ({ onSelect: () => void; href?: undefined } | { href: string; onSelect?: undefined })) => {
+const MenuItem = forwardRef<
+	HTMLDivElement,
+	{
+		label: string;
+		icon?: ComponentType<SvgProps>;
+		left?: ReactElement;
+		disabled?: boolean;
+		selected?: boolean;
+	} & ({ onSelect: () => void; href?: undefined } | { href: string; onSelect?: undefined })
+>(function MenuItem({ label, icon, left, selected, onSelect, href, disabled, ...props }, ref) {
 	const { css: nCss } = useNativeYoshiki();
 	const { css, theme } = useYoshiki();
 
@@ -159,6 +154,7 @@ const MenuItem = ({
 				}
 			`}</style>
 			<Item
+				ref={ref}
 				onSelect={onSelect}
 				href={href}
 				disabled={disabled}
@@ -190,7 +186,49 @@ const MenuItem = ({
 			</Item>
 		</>
 	);
-};
+});
 Menu.Item = MenuItem;
+
+const Sub = <AsProps,>({
+	children,
+	disabled,
+	...props
+}: {
+	label: string;
+	selected?: boolean;
+	left?: ReactElement;
+	disabled?: boolean;
+	icon?: ComponentType<SvgProps>;
+	children: ReactNode | ReactNode[] | null;
+} & AsProps) => {
+	const { css, theme } = useYoshiki();
+
+	return (
+		<DropdownMenu.Sub>
+			<DropdownMenu.SubTrigger asChild disabled={disabled}>
+				<MenuItem disabled={disabled} {...props} onSelect={(e?: any) => e.preventDefault()} />
+			</DropdownMenu.SubTrigger>
+			<DropdownMenu.Portal>
+				<DropdownMenu.SubContent
+					onFocusOutside={(e) => e.stopImmediatePropagation()}
+					{...css({
+						bg: (theme) => theme.background,
+						overflow: "auto",
+						minWidth: "220px",
+						borderRadius: "8px",
+						boxShadow:
+							"0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2)",
+						zIndex: 2,
+						maxHeight: "calc(var(--radix-dropdown-menu-content-available-height) * 0.8)",
+					})}
+				>
+					{children}
+					<DropdownMenu.Arrow fill={theme.background} />
+				</DropdownMenu.SubContent>
+			</DropdownMenu.Portal>
+		</DropdownMenu.Sub>
+	);
+};
+Menu.Sub = Sub;
 
 export { Menu };

@@ -27,6 +27,7 @@ import {
 	ReactNode,
 	useContext,
 	useEffect,
+	useRef,
 	useState,
 } from "react";
 import { StyleSheet, Pressable, View } from "react-native";
@@ -44,6 +45,8 @@ import { SvgProps } from "react-native-svg";
 
 const MenuContext = createContext<((open: boolean) => void) | undefined>(undefined);
 
+type Optional<T, K extends keyof any> = Omit<T, K> & Partial<T>;
+
 const Menu = <AsProps,>({
 	Trigger,
 	onMenuOpen,
@@ -59,20 +62,31 @@ const Menu = <AsProps,>({
 	onMenuClose?: () => void;
 	isOpen?: boolean;
 	setOpen?: (v: boolean) => void;
-} & Omit<AsProps, "onPress">) => {
+} & Optional<AsProps, "onPress">) => {
 	const insets = useSafeAreaInsets();
+	const alreadyRendered = useRef(false);
 	const [isOpen, setOpen] =
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		outerOpen !== undefined && outerSetOpen ? [outerOpen, outerSetOpen] : useState(false);
 
+	// deos the same as a useMemo but for props.
+	const memoRef = useRef({ onMenuOpen, onMenuClose });
+	memoRef.current = { onMenuOpen, onMenuClose };
 	useEffect(() => {
-		if (isOpen) onMenuOpen?.call(null);
-		else onMenuClose?.call(null);
-	}, [isOpen, onMenuClose, onMenuOpen]);
+		if (isOpen) memoRef.current.onMenuOpen?.();
+		else if (alreadyRendered.current) memoRef.current.onMenuClose?.();
+		alreadyRendered.current = true;
+	}, [isOpen]);
 
 	return (
 		<>
-			<Trigger onPress={() => setOpen(true)} {...(props as any)} />
+			<Trigger
+				onPress={() => {
+					if ("onPress" in props && typeof props.onPress === "function") props.onPress();
+					setOpen(true);
+				}}
+				{...(props as any)}
+			/>
 			{isOpen && (
 				<Portal>
 					<ContrastArea mode="user">
@@ -194,5 +208,25 @@ const MenuItem = ({
 	);
 };
 Menu.Item = MenuItem;
+
+const Sub = <AsProps,>({
+	children,
+	...props
+}: {
+	label: string;
+	selected?: boolean;
+	left?: ReactElement;
+	disabled?: boolean;
+	icon?: ComponentType<SvgProps>;
+	children?: ReactNode | ReactNode[] | null;
+} & AsProps) => {
+	const setOpen = useContext(MenuContext);
+	return (
+		<Menu Trigger={MenuItem} onMenuClose={() => setOpen?.(false)} {...props}>
+			{children}
+		</Menu>
+	);
+};
+Menu.Sub = Sub;
 
 export { Menu };

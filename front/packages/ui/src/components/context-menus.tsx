@@ -23,16 +23,58 @@ import { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
 import Info from "@material-symbols/svg-400/rounded/info.svg";
+import { WatchStatusV, queryFn, useAccount } from "@kyoo/models";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { watchListIcon } from "./watchlist-info";
 
 export const EpisodesContext = ({
 	showSlug,
+	slug,
+	status,
 	...props
-}: { showSlug: string } & Partial<ComponentProps<typeof Menu<typeof IconButton>>>) => {
+}: { showSlug?: string; slug: string; status: WatchStatusV | null } & Partial<
+	ComponentProps<typeof Menu<typeof IconButton>>
+>) => {
+	const account = useAccount();
 	const { t } = useTranslation();
+
+	const queryClient = useQueryClient();
+	const mutation = useMutation({
+		mutationFn: (newStatus: WatchStatusV | null) =>
+			queryFn({
+				path: ["episode", slug, "watchStatus", newStatus && `?status=${newStatus}`],
+				method: newStatus ? "POST" : "DELETE",
+			}),
+		onSettled: async () => await queryClient.invalidateQueries({ queryKey: ["episode", slug] }),
+	});
 
 	return (
 		<Menu Trigger={IconButton} icon={MoreVert} {...tooltip(t("misc.more"))} {...(props as any)}>
-			<Menu.Item label={t("home.episodeMore.goToShow")} icon={Info} href={`/show/${showSlug}`} />
+			<Menu.Item
+				label={t("home.episodeMore.goToShow")}
+				icon={Info}
+				onSelect={() => console.log("tot")}
+			/>
+			{showSlug && (
+				<Menu.Item label={t("home.episodeMore.goToShow")} icon={Info} href={`/show/${showSlug}`} />
+			)}
+			<Menu.Sub
+				label={account ? t("show.watchlistEdit") : t("show.watchlistLogin")}
+				disabled={!account}
+				icon={watchListIcon(status)}
+			>
+				{Object.values(WatchStatusV).map((x) => (
+					<Menu.Item
+						key={x}
+						label={t(`show.watchlistMark.${x.toLowerCase()}`)}
+						onSelect={() => mutation.mutate(x)}
+						selected={x === status}
+					/>
+				))}
+				{status !== null && (
+					<Menu.Item label={t("show.watchlistMark.null")} onSelect={() => mutation.mutate(null)} />
+				)}
+			</Menu.Sub>
 		</Menu>
 	);
 };

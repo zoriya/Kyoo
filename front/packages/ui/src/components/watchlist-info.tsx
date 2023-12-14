@@ -28,6 +28,19 @@ import BookmarkRemove from "@material-symbols/svg-400/rounded/bookmark_remove.sv
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { WatchStatusV, queryFn, useAccount } from "@kyoo/models";
 
+export const watchListIcon = (status: WatchStatusV | null) => {
+	switch (status) {
+		case null:
+			return BookmarkAdd;
+		case WatchStatusV.Completed:
+			return BookmarkAdded;
+		case WatchStatusV.Droped:
+			return BookmarkRemove;
+		default:
+			return Bookmark;
+	}
+};
+
 export const WatchListInfo = ({
 	type,
 	slug,
@@ -84,7 +97,7 @@ export const WatchListInfo = ({
 			return (
 				<Menu
 					Trigger={IconButton}
-					icon={status === WatchStatusV.Droped ? BookmarkRemove : Bookmark}
+					icon={watchListIcon(status)}
 					{...tooltip(t("show.watchlistEdit"))}
 					{...props}
 				>
