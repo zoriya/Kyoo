@@ -29,7 +29,7 @@ import {
 	getDisplayDate,
 } from "@kyoo/models";
 import { Header as ShowHeader, TitleLine } from "../details/header";
-import { Container, Head, ImageBackground, P, Skeleton, ts } from "@kyoo/primitives";
+import { Container, Head, ImageBackground, P, Skeleton, ts, usePageStyle } from "@kyoo/primitives";
 import { percent, px, useYoshiki } from "yoshiki/native";
 import { useTranslation } from "react-i18next";
 import { forwardRef } from "react";
@@ -122,6 +122,7 @@ const CollectionHeader = forwardRef<View, ViewProps & { slug: string }>(function
 			<View {...css({ bg: theme.background, paddingTop: { xs: ts(8), md: 0 } })}>
 				<View
 					{...css({
+						width: percent(100),
 						maxWidth: { xs: percent(100), lg: px(1170) },
 						alignSelf: "center",
 					})}
@@ -137,10 +138,13 @@ const query = (slug: string): QueryIdentifier<LibraryItem> => ({
 	parser: LibraryItemP,
 	path: ["collections", slug, "items"],
 	infinite: true,
+	params: {
+		fields: ["firstEpisode", "episodesCount", "watchStatus"],
+	},
 });
 
 export const CollectionPage: QueryPage<{ slug: string }> = ({ slug }) => {
-	const { css } = useYoshiki();
+	const pageStyle = usePageStyle();
 
 	return (
 		<InfiniteFetch
@@ -149,7 +153,7 @@ export const CollectionPage: QueryPage<{ slug: string }> = ({ slug }) => {
 			layout={{ ...ItemDetails.layout, numColumns: { xs: 1, md: 2 } }}
 			Header={CollectionHeader}
 			headerProps={{ slug }}
-			{...css({ padding: { xs: ts(1), sm: ts(8) } })}
+			contentContainerStyle={pageStyle}
 		>
 			{(x) => (
 				<ItemDetails
@@ -162,6 +166,12 @@ export const CollectionPage: QueryPage<{ slug: string }> = ({ slug }) => {
 					genres={"genres" in x ? x.genres : null}
 					href={x.href}
 					playHref={x.kind !== ItemKind.Collection && !x.isLoading ? x.playHref : undefined}
+					watchStatus={
+						!x.isLoading && x.kind !== ItemKind.Collection ? x.watchStatus?.status ?? null : null
+					}
+					unseenEpisodesCount={
+						x.kind === ItemKind.Show ? x.watchStatus?.unseenEpisodesCount ?? x.episodesCount! : null
+					}
 				/>
 			)}
 		</InfiniteFetch>

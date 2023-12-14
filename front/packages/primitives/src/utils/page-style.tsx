@@ -18,10 +18,9 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./breakpoints";
-export * from "./nojs";
-export * from "./head";
-export * from "./spacing";
-export * from "./capitalize";
-export * from "./touchonly";
-export * from "./page-style";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+export const usePageStyle = () => {
+	const insets = useSafeAreaInsets();
+	return { paddingBottom: insets.bottom } as const;
+};

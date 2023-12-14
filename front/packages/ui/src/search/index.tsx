@@ -25,10 +25,11 @@ import { createParam } from "solito";
 import { DefaultLayout } from "../layout";
 import { InfiniteFetch } from "../fetch-infinite";
 import { itemMap } from "../browse";
-import { SearchSort, SortOrd, SortBy, Layout } from "../browse/types";
+import { SearchSort, SortOrd, Layout } from "../browse/types";
 import { BrowseSettings } from "../browse/header";
 import { ItemGrid } from "../browse/grid";
 import { ItemList } from "../browse/list";
+import { usePageStyle } from "@kyoo/primitives";
 
 const { useParam } = createParam<{ sortBy?: string }>();
 
@@ -48,6 +49,7 @@ const query = (
 });
 
 export const SearchPage: QueryPage<{ q?: string }> = ({ q }) => {
+	const pageStyle = usePageStyle();
 	const { t } = useTranslation();
 	const [sort, setSort] = useParam("sortBy");
 	const sortKey = (sort?.split(":")[0] as SearchSort) || SearchSort.Relevance;
@@ -74,6 +76,7 @@ export const SearchPage: QueryPage<{ q?: string }> = ({ q }) => {
 					setLayout={setLayout}
 				/>
 			}
+			contentContainerStyle={pageStyle}
 		>
 			{(item) => <LayoutComponent {...itemMap(item)} />}
 		</InfiniteFetch>

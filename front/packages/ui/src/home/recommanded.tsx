@@ -31,7 +31,6 @@ import {
 import {
 	Chip,
 	H3,
-	Icon,
 	IconFab,
 	imageBorderRadius,
 	Link,
