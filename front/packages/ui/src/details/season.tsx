@@ -26,7 +26,7 @@ import {
 	SeasonP,
 	useInfiniteFetch,
 } from "@kyoo/models";
-import { Skeleton, H6, HR, P, ts, Menu, IconButton, tooltip } from "@kyoo/primitives";
+import { Skeleton, H6, HR, P, ts, Menu, IconButton, tooltip, usePageStyle } from "@kyoo/primitives";
 import { rem, useYoshiki } from "yoshiki/native";
 import { View } from "react-native";
 import { InfiniteFetch } from "../fetch-infinite";
@@ -114,6 +114,7 @@ export const EpisodeList = <Props,>({
 	Header: ComponentType<Props & { children: JSX.Element }>;
 	headerProps: Props;
 }) => {
+	const pageStyle = usePageStyle();
 	const { t } = useTranslation();
 	const { items: seasons, error } = useInfiniteFetch(SeasonHeader.query(slug));
 
@@ -128,6 +129,7 @@ export const EpisodeList = <Props,>({
 			Header={Header}
 			headerProps={headerProps}
 			getItemType={(item) => (item.firstOfSeason ? "withHeader" : "normal")}
+			contentContainerStyle={pageStyle}
 		>
 			{(item) => {
 				const sea = item?.firstOfSeason

@@ -24,6 +24,7 @@ import { useYoshiki } from "yoshiki/native";
 import { DefaultLayout } from "../layout";
 import { Header } from "./header";
 import { DetailsCollections } from "./collection";
+import { usePageStyle } from "@kyoo/primitives";
 
 const query = (slug: string): QueryIdentifier<Movie> => ({
 	parser: MovieP,
@@ -35,10 +36,11 @@ const query = (slug: string): QueryIdentifier<Movie> => ({
 
 export const MovieDetails: QueryPage<{ slug: string }> = ({ slug }) => {
 	const { css } = useYoshiki();
+	const pageStyle = usePageStyle();
 
 	return (
 		<ScrollView
-			{...css(
+			{...css([
 				Platform.OS === "web" && {
 					// @ts-ignore Web only property
 					overflow: "auto" as any,
@@ -47,7 +49,8 @@ export const MovieDetails: QueryPage<{ slug: string }> = ({ slug }) => {
 					// @ts-ignore Web only property
 					overflowY: "overlay",
 				},
-			)}
+				pageStyle,
+			])}
 		>
 			<Header type="movie" query={query(slug)} />
 			<DetailsCollections type="movie" slug={slug} />
