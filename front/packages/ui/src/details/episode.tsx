@@ -144,6 +144,7 @@ export const EpisodeBox = ({
 
 export const EpisodeLine = ({
 	slug,
+	showSlug,
 	displayNumber,
 	name,
 	thumbnail,
@@ -161,6 +162,7 @@ export const EpisodeLine = ({
 }: WithLoading<{
 	id: string;
 	slug: string;
+	showSlug: string;
 	displayNumber: string;
 	name: string | null;
 	overview: string | null;
@@ -263,14 +265,19 @@ export const EpisodeLine = ({
 				</View>
 				<View {...css({ flexDirection: "row" })}>
 					<Skeleton>{isLoading || <P numberOfLines={3}>{overview}</P>}</Skeleton>
-					<EpisodesContext
-						isOpen={moreOpened}
-						setOpen={setMoreOpened}
-						{...css([
-							"more",
-							Platform.OS === "web" && moreOpened && { display: "flex !important" as any },
-						])}
-					/>
+					{slug && watchedStatus !== undefined && (
+						<EpisodesContext
+							slug={slug}
+							showSlug={showSlug}
+							status={watchedStatus}
+							isOpen={moreOpened}
+							setOpen={(v) => setMoreOpened(v)}
+							{...css([
+								"more",
+								Platform.OS === "web" && moreOpened && { display: "flex !important" as any },
+							])}
+						/>
+					)}
 				</View>
 			</View>
 		</Link>
