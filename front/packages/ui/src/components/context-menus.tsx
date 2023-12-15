@@ -23,9 +23,11 @@ import { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
 import Info from "@material-symbols/svg-400/rounded/info.svg";
+import Download from "@material-symbols/svg-400/rounded/download.svg";
 import { WatchStatusV, queryFn, useAccount } from "@kyoo/models";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { watchListIcon } from "./watchlist-info";
+import { downloadFile } from "../downloads/download";
 
 export const EpisodesContext = ({
 	type = "episode",
@@ -74,6 +76,13 @@ export const EpisodesContext = ({
 					<Menu.Item label={t("show.watchlistMark.null")} onSelect={() => mutation.mutate(null)} />
 				)}
 			</Menu.Sub>
+			{type !== "show" && (
+				<Menu.Item
+					label={t("home.episodeMore.download")}
+					icon={Download}
+					onSelect={() => downloadFile(type, slug)}
+				/>
+			)}
 		</Menu>
 	);
 };
