@@ -40,7 +40,7 @@ export let kyooApiUrl = kyooUrl;
 
 export const queryFn = async <Data,>(
 	context:
-		| (QueryFunctionContext & { timeout?: number })
+		| (QueryFunctionContext & { timeout?: number, apiUrl?: string })
 		| {
 				path: (string | false | undefined | null)[];
 				body?: object;
@@ -52,7 +52,6 @@ export const queryFn = async <Data,>(
 	type?: z.ZodType<Data>,
 	token?: string | null,
 ): Promise<Data> => {
-	// @ts-ignore
 	const url = context.apiUrl ?? (Platform.OS === "web" ? kyooUrl : getCurrentAccount()!.apiUrl);
 	kyooApiUrl = url;
 
@@ -166,7 +165,7 @@ export type QueryPage<Props = {}, Items = unknown> = ComponentType<
 	randomItems?: Items[];
 };
 
-const toQueryKey = <Data, Ret>(query: QueryIdentifier<Data, Ret>) => {
+export const toQueryKey = <Data, Ret>(query: QueryIdentifier<Data, Ret>) => {
 	if (query.params) {
 		return [
 			...query.path,

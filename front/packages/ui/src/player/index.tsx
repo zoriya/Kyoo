@@ -24,7 +24,6 @@ import {
 	Movie,
 	MovieP,
 	QueryIdentifier,
-	QueryPage,
 	WatchInfo,
 	WatchInfoP,
 	useFetch,
@@ -45,24 +44,6 @@ import { ErrorView } from "../fetch";
 import { WatchStatusObserver } from "./watch-status-observer";
 
 type Item = (Movie & { type: "movie" }) | (Episode & { type: "episode" });
-
-const query = (type: string, slug: string): QueryIdentifier<Item> =>
-	type === "episode"
-		? {
-				path: ["episode", slug],
-				params: {
-					fields: ["nextEpisode", "previousEpisode", "show"],
-				},
-				parser: EpisodeP.transform((x) => ({ ...x, type: "episode" })),
-		  }
-		: {
-				path: ["movie", slug],
-				parser: MovieP.transform((x) => ({ ...x, type: "movie" })),
-		  };
-const infoQuery = (type: string, slug: string): QueryIdentifier<WatchInfo> => ({
-	path: ["video", type, slug, "info"],
-	parser: WatchInfoP,
-});
 
 const mapData = (
 	data: Item | undefined,
@@ -86,14 +67,14 @@ const mapData = (
 	};
 };
 
-export const Player: QueryPage<{ slug: string; type: "episode" | "movie" }> = ({ slug, type }) => {
+export const Player = ({ slug, type }: { slug: string; type: "episode" | "movie" }) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 	const router = useRouter();
 
 	const [playbackError, setPlaybackError] = useState<string | undefined>(undefined);
-	const { data, error } = useFetch(query(type, slug));
-	const { data: info, error: infoError } = useFetch(infoQuery(type, slug));
+	const { data, error } = useFetch(Player.query(type, slug));
+	const { data: info, error: infoError } = useFetch(Player.infoQuery(type, slug));
 	const previous =
 		data && data.type === "episode" && data.previousEpisode
 			? `/watch/${data.previousEpisode.slug}`
@@ -181,4 +162,27 @@ export const Player: QueryPage<{ slug: string; type: "episode" | "movie" }> = ({
 	);
 };
 
-Player.getFetchUrls = ({ slug, type }) => [query(type, slug), infoQuery(type, slug)];
+Player.query = (type: "episode" | "movie", slug: string): QueryIdentifier<Item> =>
+	type === "episode"
+		? {
+				path: ["episode", slug],
+				params: {
+					fields: ["nextEpisode", "previousEpisode", "show"],
+				},
+				parser: EpisodeP.transform((x) => ({ ...x, type: "episode" })),
+		  }
+		: {
+				path: ["movie", slug],
+				parser: MovieP.transform((x) => ({ ...x, type: "movie" })),
+		  };
+
+Player.infoQuery = (type: "episode" | "movie", slug: string): QueryIdentifier<WatchInfo> => ({
+	path: ["video", type, slug, "info"],
+	parser: WatchInfoP,
+});
+
+// if more queries are needed, dont forget to update download.tsx to cache those.
+Player.getFetchUrls = ({ slug, type }: { slug: string; type: "episode" | "movie" }) => [
+	Player.query(type, slug),
+	Player.infoQuery(type, slug),
+];

@@ -22,7 +22,7 @@ import { z } from "zod";
 import { Account, AccountP } from "./accounts";
 import { MMKV } from "react-native-mmkv";
 
-const storage = new MMKV();
+export const storage = new MMKV();
 
 const readAccounts = () => {
 	const acc = storage.getString("accounts");
