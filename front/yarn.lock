@@ -2857,6 +2857,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@kesha-antonov/react-native-background-downloader@npm:^2.10.0":
+  version: 2.10.0
+  resolution: "@kesha-antonov/react-native-background-downloader@npm:2.10.0"
+  peerDependencies:
+    react-native: ">=0.57.0"
+  checksum: f56e4bf5f28b07d8b9e776ce3bdc6ed715ef3d9a95d3ec67b4852dc2992c51283550b5406106454557654a1c2503e920ec62d895aa6240aae97ba4f029df8a32
+  languageName: node
+  linkType: hard
+
 "@kyoo/models@workspace:^, @kyoo/models@workspace:packages/models":
   version: 0.0.0-use.local
   resolution: "@kyoo/models@workspace:packages/models"
@@ -2869,6 +2878,9 @@ __metadata:
     "@tanstack/react-query": "*"
     react: "*"
     react-native: "*"
+  dependenciesMeta:
+    "@kesha-antonov/react-native-background-downloader":
+      optional: true
   peerDependenciesMeta:
     react-native-web:
       optional: true
@@ -2935,6 +2947,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@kyoo/ui@workspace:packages/ui"
   dependencies:
+    "@kesha-antonov/react-native-background-downloader": ^2.10.0
     "@kyoo/models": "workspace:^"
     "@kyoo/primitives": "workspace:^"
     "@shopify/flash-list": ^1.6.3
@@ -2942,6 +2955,7 @@ __metadata:
     react-native-uuid: ^2.0.1
     typescript: ^5.3.2
   peerDependencies:
+    "@kesha-antonov/react-native-background-downloader": "*"
     "@material-symbols/svg-400": "*"
     "@shopify/flash-list": ^1.3.1
     "@tanstack/react-query": "*"
@@ -2954,6 +2968,12 @@ __metadata:
     react-native-reanimated: "*"
     react-native-svg: "*"
     yoshiki: "*"
+  dependenciesMeta:
+    "@kesha-antonov/react-native-background-downloader":
+      optional: true
+  peerDependenciesMeta:
+    "@kesha-antonov/react-native-background-downloader":
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -11269,6 +11289,7 @@ __metadata:
     "@formatjs/intl-displaynames": ^6.6.4
     "@formatjs/intl-locale": ^3.4.3
     "@gorhom/portal": ^1.0.14
+    "@kesha-antonov/react-native-background-downloader": ^2.10.0
     "@kyoo/ui": "workspace:^"
     "@material-symbols/svg-400": ^0.14.1
     "@shopify/flash-list": 1.4.3

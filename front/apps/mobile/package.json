@@ -17,6 +17,7 @@
 		"@formatjs/intl-displaynames": "^6.6.4",
 		"@formatjs/intl-locale": "^3.4.3",
 		"@gorhom/portal": "^1.0.14",
+		"@kesha-antonov/react-native-background-downloader": "^2.10.0",
 		"@kyoo/ui": "workspace:^",
 		"@material-symbols/svg-400": "^0.14.1",
 		"@shopify/flash-list": "1.4.3",
