@@ -19,7 +19,17 @@
  */
 
 import { KyooImage, WatchStatusV } from "@kyoo/models";
-import { Link, Skeleton, ts, focusReset, P, SubP, PosterBackground, Icon, important } from "@kyoo/primitives";
+import {
+	Link,
+	Skeleton,
+	ts,
+	focusReset,
+	P,
+	SubP,
+	PosterBackground,
+	Icon,
+	important,
+} from "@kyoo/primitives";
 import { ImageStyle, Platform, View } from "react-native";
 import { max, percent, px, rem, Stylable, Theme, useYoshiki } from "yoshiki/native";
 import { Layout, WithLoading } from "../fetch";
