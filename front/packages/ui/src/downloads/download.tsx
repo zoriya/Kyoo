@@ -24,7 +24,6 @@ import {
 	directories,
 	DownloadTask,
 	checkForExistingDownloads,
-	Network,
 	ensureDownloadsAreRunning,
 } from "@kesha-antonov/react-native-background-downloader";
 import {
@@ -37,9 +36,9 @@ import {
 	toQueryKey,
 } from "@kyoo/models";
 import { Player } from "../player";
-import { atom, useSetAtom, useAtom, Atom, PrimitiveAtom, useStore } from "jotai";
+import { atom, useSetAtom, PrimitiveAtom, useStore } from "jotai";
 import { getCurrentAccount, storage } from "@kyoo/models/src/account-internal";
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 
 type State = {
 	status: "DOWNLOADING" | "PAUSED" | "DONE" | "FAILED" | "STOPPED";
@@ -75,23 +74,19 @@ const query = <T,>(query: QueryIdentifier<T>, info: Account): Promise<T> =>
 		info.token.access_token,
 	);
 
-const listenToTask = (
-	task: DownloadTask,
-	atom: PrimitiveAtom<State>,
-	atomStore: ReturnType<typeof useStore>,
-) => {
+const listenToTask = (task: DownloadTask, update: (f: (old: State) => State) => void) => {
 	task
-		.begin(({ expectedBytes }) => atomStore.set(atom, (x) => ({ ...x, size: expectedBytes })))
+		.begin(({ expectedBytes }) => update((x) => ({ ...x, size: expectedBytes })))
 		.progress((percent, availableSize, size) =>
-			atomStore.set(atom, (x) => ({ ...x, percent, size, availableSize })),
+			update((x) => ({ ...x, percent, size, availableSize })),
 		)
 		.done(() => {
-			atomStore.set(atom, (x) => ({ ...x, percent: 100, status: "DONE" }));
+			update((x) => ({ ...x, percent: 100, status: "DONE" }));
 			// apparently this is needed for ios /shrug i'm totaly gona forget this
 			// if i ever implement ios so keeping this here
 			completeHandler(task.id);
 		})
-		.error((error) => atomStore.set(atom, (x) => ({ ...x, status: "FAILED", error })));
+		.error((error) => update((x) => ({ ...x, status: "FAILED", error })));
 };
 
 export const useDownloader = () => {
@@ -138,7 +133,7 @@ export const useDownloader = () => {
 
 		// we use the store instead of the onMount because we want to update the state to cache it even if it was not
 		// used during this launch of the app.
-		listenToTask(task, state, atomStore);
+		listenToTask(task, (f) => atomStore.set(state, f));
 		setDownloads((x) => [...x, { data, info, path, state }]);
 	};
 };
@@ -151,12 +146,12 @@ export const DownloadProvider = () => {
 			const tasks = await checkForExistingDownloads();
 			const downloads = store.get(downloadAtom);
 			for (const t of tasks) {
-				const downAtom = downloads.find((x) => x.data.id === t.id);
-				if (!downAtom) {
+				const d = downloads.find((x) => x.data.id === t.id);
+				if (!d) {
 					t.stop();
 					continue;
 				}
-				listenToTask(t, downAtom.state, store);
+				listenToTask(t, (f) => store.set(d.state, f));
 			}
 			ensureDownloadsAreRunning();
 		}
