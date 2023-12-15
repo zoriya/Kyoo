@@ -7,7 +7,8 @@
 		"none": "Aucun episode",
 		"watchlistLogin": "Pour suivre ce que vous avez regardé ou prévoyez de regarder, vous devez vous connecter.",
 		"episodeMore": {
-			"goToShow": "Aller a la serie"
+			"goToShow": "Aller a la serie",
+			"download": "Télécharger"
 		}
 	},
 	"show": {
