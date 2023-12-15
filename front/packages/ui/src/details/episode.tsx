@@ -210,7 +210,9 @@ export const EpisodeLine = ({
 	watchedPercent: number | null;
 	watchedStatus: WatchStatusV | null;
 	href: string;
-}>) => {
+}> &
+	PressableProps &
+	Stylable) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 	const { css } = useYoshiki("episode-line");
 	const { t } = useTranslation();
