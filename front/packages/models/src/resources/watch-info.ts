@@ -111,6 +111,10 @@ export const WatchInfoP = z.object({
 	 */
 	path: z.string(),
 	/**
+	 * The extension used to store this video file.
+	 */
+	extension: z.string(),
+	/**
 	 * The container of the video file of this episode. Common containers are mp4, mkv, avi and so on.
 	 */
 	container: z.string(),

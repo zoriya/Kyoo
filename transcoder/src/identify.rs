@@ -20,6 +20,8 @@ pub struct MediaInfo {
 	pub sha: String,
 	/// The internal path of the video file.
 	pub path: String,
+	/// The extension currently used to store this video file
+	pub extension: String,
 	/// The length of the media in seconds.
 	pub length: f32,
 	/// The container of the video file of this episode.
@@ -203,6 +205,7 @@ pub async fn identify(path: String) -> Option<MediaInfo> {
 
 	Some(MediaInfo {
 		length: parse::<f32>(&general["Duration"])?,
+		extension: Path::new(path).extension(),
 		container: general["Format"].as_str().unwrap().to_string(),
 		video: {
 			let v = output["media"]["track"]
