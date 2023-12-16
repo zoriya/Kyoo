@@ -26,6 +26,7 @@ import {
 	checkForExistingDownloads,
 	ensureDownloadsAreRunning,
 } from "@kesha-antonov/react-native-background-downloader";
+import { deleteAsync } from "expo-file-system";
 import {
 	Account,
 	Episode,
@@ -46,9 +47,9 @@ type State = {
 	size: number;
 	availableSize: number;
 	error?: string;
-	pause: () => void;
-	resume: () => void;
-	stop: () => void;
+	pause: (() => void) | null;
+	resume: (() => void) | null;
+	remove: () => void;
 	play: () => void;
 };
 
@@ -74,11 +75,42 @@ const query = <T,>(query: QueryIdentifier<T>, info: Account): Promise<T> =>
 		info.token.access_token,
 	);
 
-const listenToTask = (task: DownloadTask, update: (f: (old: State) => State) => void) => {
+const setupDownloadTask = (
+	state: { data: Episode | Movie; info: WatchInfo; path: string },
+	task: DownloadTask,
+	store: ReturnType<typeof useStore>,
+) => {
+	const stateAtom = atom({
+		status: task.state,
+		progress: task.percent * 100,
+		size: task.totalBytes,
+		availableSize: task.bytesWritten,
+		pause: () => {
+			task.pause();
+			store.set(stateAtom, (x) => ({ ...x, state: "PAUSED" }));
+		},
+		resume: () => {
+			task.resume();
+			store.set(stateAtom, (x) => ({ ...x, state: "DOWNLOADING" }));
+		},
+		remove: () => {
+			task.stop();
+			store.set(downloadAtom, (x) => x.filter((y) => y.data.id !== task.id));
+		},
+		play: () => {
+			// TODO: set useQuery cache
+			// TODO: move to the play page.
+		},
+	} as State);
+
+	// we use the store instead of the onMount because we want to update the state to cache it even if it was not
+	// used during this launch of the app.
+	const update = updater(store, stateAtom);
+
 	task
 		.begin(({ expectedBytes }) => update((x) => ({ ...x, size: expectedBytes })))
 		.progress((percent, availableSize, size) =>
-			update((x) => ({ ...x, percent, size, availableSize })),
+			update((x) => ({ ...x, percent, size, availableSize, status: "DOWNLOADING" })),
 		)
 		.done(() => {
 			update((x) => ({ ...x, percent: 100, status: "DONE" }));
@@ -87,11 +119,36 @@ const listenToTask = (task: DownloadTask, update: (f: (old: State) => State) => 
 			completeHandler(task.id);
 		})
 		.error((error) => update((x) => ({ ...x, status: "FAILED", error })));
+
+	return { data: state.data, info: state.info, path: state.path, state: stateAtom };
+};
+
+const updater = (
+	store: ReturnType<typeof useStore>,
+	atom: PrimitiveAtom<State>,
+): ((f: (old: State) => State) => void) => {
+	return (f) => {
+		// if it lags, we could only store progress info on status change and not on every change.
+		store.set(atom, f);
+
+		const downloads = store.get(downloadAtom);
+		storage.set(
+			"downloads",
+			JSON.stringify(
+				downloads.map((d) => ({
+					data: d.data,
+					info: d.info,
+					path: d.path,
+					state: store.get(d.state),
+				})),
+			),
+		);
+	};
 };
 
 export const useDownloader = () => {
 	const setDownloads = useSetAtom(downloadAtom);
-	const atomStore = useStore();
+	const store = useStore();
 
 	return async (type: "episode" | "movie", slug: string) => {
 		const account = getCurrentAccount()!;
@@ -114,27 +171,7 @@ export const useDownloader = () => {
 			// network: Network.ALL,
 		});
 
-		const state = atom({
-			status: task.state,
-			progress: task.percent * 100,
-			size: task.totalBytes,
-			availableSize: task.bytesWritten,
-			pause: () => task.pause(),
-			resume: () => task.resume(),
-			stop: () => {
-				task.stop();
-				setDownloads((x) => x.filter((y) => y.data.id !== task.id));
-			},
-			play: () => {
-				// TODO: set useQuery cache
-				// TODO: move to the play page.
-			},
-		});
-
-		// we use the store instead of the onMount because we want to update the state to cache it even if it was not
-		// used during this launch of the app.
-		listenToTask(task, (f) => atomStore.set(state, f));
-		setDownloads((x) => [...x, { data, info, path, state }]);
+		setDownloads((x) => [...x, setupDownloadTask({ data, info, path }, task, store)]);
 	};
 };
 
@@ -143,15 +180,39 @@ export const DownloadProvider = () => {
 
 	useEffect(() => {
 		async function run() {
+			if (store.get(downloadAtom).length) return;
+
 			const tasks = await checkForExistingDownloads();
-			const downloads = store.get(downloadAtom);
+			const dls: { data: Episode | Movie; info: WatchInfo; path: string; state: State }[] =
+				JSON.parse(storage.getString("downloads") ?? "[]");
+			const downloads = dls.map((dl) => {
+				const t = tasks.find((x) => x.id == dl.data.id);
+				if (t) return setupDownloadTask(dl, t, store);
+				return {
+					data: dl.data,
+					info: dl.info,
+					path: dl.path,
+					state: atom({
+						status: dl.state.status === "DONE" ? "DONE" : "FAILED",
+						progress: dl.state.progress,
+						size: dl.state.size,
+						availableSize: dl.state.availableSize,
+						pause: null,
+						resume: null,
+						play: () => {
+							// TODO: setup this
+						},
+						remove: () => {
+							deleteAsync(dl.path);
+							store.set(downloadAtom, (x) => x.filter((y) => y.data.id !== dl.data.id));
+						},
+					} as State),
+				};
+			});
+			store.set(downloadAtom, downloads);
+
 			for (const t of tasks) {
-				const d = downloads.find((x) => x.data.id === t.id);
-				if (!d) {
-					t.stop();
-					continue;
-				}
-				listenToTask(t, (f) => store.set(d.state, f));
+				if (!downloads.find((x) => x.data.id === t.id)) t.stop();
 			}
 			ensureDownloadsAreRunning();
 		}
