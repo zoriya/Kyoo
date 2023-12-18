@@ -52,6 +52,7 @@ const styleText = (
 						{
 							marginVertical: rem(0.5),
 							color: type === "header" ? theme.heading : theme.paragraph,
+							flexShrink: 1,
 							fontSize: rem(1),
 							fontFamily: theme.font.normal,
 						},
