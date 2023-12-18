@@ -4,7 +4,7 @@ use serde::Serialize;
 use std::{
 	collections::{hash_map::DefaultHasher, HashMap},
 	hash::{Hash, Hasher},
-	path::PathBuf,
+	path::{Path, PathBuf},
 	process::Stdio,
 	str::{self, FromStr},
 };
@@ -205,7 +205,10 @@ pub async fn identify(path: String) -> Option<MediaInfo> {
 
 	Some(MediaInfo {
 		length: parse::<f32>(&general["Duration"])?,
-		extension: Path::new(path).extension(),
+		extension: Path::new(&path)
+			.extension()
+			.map(|x| x.to_os_string().into_string().unwrap())
+			.unwrap_or(String::from(".mkv")),
 		container: general["Format"].as_str().unwrap().to_string(),
 		video: {
 			let v = output["media"]["track"]
