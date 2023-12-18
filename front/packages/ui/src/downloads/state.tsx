@@ -18,13 +18,8 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-	download,
-	completeHandler,
-	directories,
-	DownloadTask,
-	checkForExistingDownloads,
-	ensureDownloadsAreRunning,
+import RNBackgroundDownloader, {
+	type DownloadTask,
 } from "@kesha-antonov/react-native-background-downloader";
 import { deleteAsync } from "expo-file-system";
 import {
@@ -39,7 +34,7 @@ import {
 import { Player } from "../player";
 import { atom, useSetAtom, PrimitiveAtom, useStore } from "jotai";
 import { getCurrentAccount, storage } from "@kyoo/models/src/account-internal";
-import { useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 
 type State = {
 	status: "DOWNLOADING" | "PAUSED" | "DONE" | "FAILED" | "STOPPED";
@@ -53,7 +48,7 @@ type State = {
 	play: () => void;
 };
 
-const downloadAtom = atom<
+export const downloadAtom = atom<
 	{
 		data: Episode | Movie;
 		info: WatchInfo;
@@ -116,7 +111,7 @@ const setupDownloadTask = (
 			update((x) => ({ ...x, percent: 100, status: "DONE" }));
 			// apparently this is needed for ios /shrug i'm totaly gona forget this
 			// if i ever implement ios so keeping this here
-			completeHandler(task.id);
+			RNBackgroundDownloader.completeHandler(task.id);
 		})
 		.error((error) => update((x) => ({ ...x, status: "FAILED", error })));
 
@@ -158,8 +153,8 @@ export const useDownloader = () => {
 		]);
 
 		// TODO: support custom paths
-		const path = `${directories.documents}/${slug}-${data.id}.${info.extension}`;
-		const task = download({
+		const path = `${RNBackgroundDownloader.directories.documents}/${slug}-${data.id}.${info.extension}`;
+		const task = RNBackgroundDownloader.download({
 			id: data.id,
 			// TODO: support variant qualities
 			url: `${account.apiUrl}/api/video/${type}/${slug}/direct`,
@@ -175,14 +170,14 @@ export const useDownloader = () => {
 	};
 };
 
-export const DownloadProvider = () => {
+export const DownloadProvider = ({ children }: { children: ReactNode }) => {
 	const store = useStore();
 
 	useEffect(() => {
 		async function run() {
 			if (store.get(downloadAtom).length) return;
 
-			const tasks = await checkForExistingDownloads();
+			const tasks = await RNBackgroundDownloader.checkForExistingDownloads();
 			const dls: { data: Episode | Movie; info: WatchInfo; path: string; state: State }[] =
 				JSON.parse(storage.getString("downloads") ?? "[]");
 			const downloads = dls.map((dl) => {
@@ -214,8 +209,10 @@ export const DownloadProvider = () => {
 			for (const t of tasks) {
 				if (!downloads.find((x) => x.data.id === t.id)) t.stop();
 			}
-			ensureDownloadsAreRunning();
+			RNBackgroundDownloader.ensureDownloadsAreRunning();
 		}
 		run();
 	}, [store]);
+
+	return children;
 };

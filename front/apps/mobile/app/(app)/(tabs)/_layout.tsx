@@ -22,6 +22,7 @@ import { Icon } from "@kyoo/primitives";
 import { Tabs } from "expo-router";
 import Home from "@material-symbols/svg-400/rounded/home-fill.svg";
 import Browse from "@material-symbols/svg-400/rounded/browse-fill.svg";
+import Downloading from "@material-symbols/svg-400/rounded/downloading-fill.svg";
 
 export default function TabsLayout() {
 	return (
@@ -42,6 +43,13 @@ export default function TabsLayout() {
 				options={{
 					tabBarLabel: "Browse",
 					tabBarIcon: ({ color, size }) => <Icon icon={Browse} color={color} size={size} />,
+				}}
+			/>
+			<Tabs.Screen
+				name="downloads"
+				options={{
+					tabBarLabel: "Downloads",
+					tabBarIcon: ({ color, size }) => <Icon icon={Downloading} color={color} size={size} />,
 				}}
 			/>
 		</Tabs>

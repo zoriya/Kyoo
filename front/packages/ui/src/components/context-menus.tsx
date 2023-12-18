@@ -27,7 +27,7 @@ import Download from "@material-symbols/svg-400/rounded/download.svg";
 import { WatchStatusV, queryFn, useAccount } from "@kyoo/models";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { watchListIcon } from "./watchlist-info";
-import { downloadFile } from "../downloads/download";
+import { downloadFile } from "../downloads/state";
 
 export const EpisodesContext = ({
 	type = "episode",

@@ -48,6 +48,7 @@ import "@formatjs/intl-displaynames/locale-data/fr";
 import en from "../../../translations/en.json";
 import fr from "../../../translations/fr.json";
 import { useTheme } from "yoshiki/native";
+import { DownloadProvider } from "@kyoo/ui";
 
 i18next.use(initReactI18next).init({
 	interpolation: {
@@ -103,9 +104,11 @@ export default function Root() {
 			>
 				<PortalProvider>
 					<AccountProvider>
-						<NavigationThemeProvider>
-							<Slot />
-						</NavigationThemeProvider>
+						<DownloadProvider>
+							<NavigationThemeProvider>
+								<Slot />
+							</NavigationThemeProvider>
+						</DownloadProvider>
 					</AccountProvider>
 				</PortalProvider>
 			</ThemeSelector>
