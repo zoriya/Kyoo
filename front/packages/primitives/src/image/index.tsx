@@ -71,7 +71,7 @@ export const ImageBackground = <AsProps = ViewProps,>({
 }: {
 	as?: ComponentType<AsProps>;
 	gradient?: Partial<LinearGradientProps> | boolean;
-	children: ReactNode;
+	children?: ReactNode;
 	containerStyle?: YoshikiEnhanced<ViewStyle>;
 	imageStyle?: YoshikiEnhanced<ImageStyle>;
 	hideLoad?: boolean;

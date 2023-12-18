@@ -18,7 +18,6 @@
 
 using System;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;

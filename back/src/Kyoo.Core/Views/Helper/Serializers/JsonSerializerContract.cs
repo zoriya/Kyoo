@@ -25,6 +25,7 @@ using Kyoo.Abstractions.Models.Attributes;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using static System.Text.Json.JsonNamingPolicy;
 
 namespace Kyoo.Core.Api
 {
@@ -99,7 +100,7 @@ namespace Kyoo.Core.Api
 						PropertyName = "kind",
 						UnderlyingName = "kind",
 						PropertyType = typeof(string),
-						ValueProvider = new FixedValueProvider(type.Name),
+						ValueProvider = new FixedValueProvider(CamelCase.ConvertName(type.Name)),
 						Readable = true,
 						Writable = false,
 						TypeNameHandling = TypeNameHandling.None,

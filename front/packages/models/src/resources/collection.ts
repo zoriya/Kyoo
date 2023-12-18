@@ -22,7 +22,7 @@ import { z } from "zod";
 import { withImages, ResourceP } from "../traits";
 
 export const CollectionP = withImages(
-	ResourceP.extend({
+	ResourceP("collection").extend({
 		/**
 		 * The title of this collection.
 		 */
@@ -31,8 +31,7 @@ export const CollectionP = withImages(
 		 * The summary of this show.
 		 */
 		overview: z.string().nullable(),
-	}),
-	"collections",
+	})
 ).transform((x) => ({
 	...x,
 	href: `/collection/${x.slug}`,

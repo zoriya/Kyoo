@@ -23,7 +23,6 @@ import {
 	QueryPage,
 	LibraryItem,
 	LibraryItemP,
-	ItemKind,
 	getDisplayDate,
 } from "@kyoo/models";
 import { ComponentProps, useState } from "react";
@@ -47,16 +46,16 @@ export const itemMap = (
 		isLoading: item.isLoading,
 		slug: item.slug,
 		name: item.name,
-		subtitle: item.kind !== ItemKind.Collection ? getDisplayDate(item) : undefined,
+		subtitle: item.kind !== "collection" ? getDisplayDate(item) : undefined,
 		href: item.href,
 		poster: item.poster,
 		thumbnail: item.thumbnail,
-		watchStatus: item.kind !== ItemKind.Collection ? item.watchStatus?.status ?? null : null,
-		type: item.kind.toLowerCase() as any,
+		watchStatus: item.kind !== "collection" ? item.watchStatus?.status ?? null : null,
+		type: item.kind,
 		watchPercent:
-			item.kind !== ItemKind.Collection ? item.watchStatus?.watchedPercent ?? null : null,
+			item.kind !== "collection" ? item.watchStatus?.watchedPercent ?? null : null,
 		unseenEpisodesCount:
-			item.kind === ItemKind.Show
+			item.kind === "show"
 				? item.watchStatus?.unseenEpisodesCount ?? item.episodesCount!
 				: null,
 	};

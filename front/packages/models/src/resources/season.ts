@@ -24,7 +24,7 @@ import { withImages } from "../traits";
 import { ResourceP } from "../traits/resource";
 
 export const SeasonP = withImages(
-	ResourceP.extend({
+	ResourceP("season").extend({
 		/**
 		 * The name of this season.
 		 */
@@ -50,7 +50,6 @@ export const SeasonP = withImages(
 		 */
 		episodesCount: z.number(),
 	}),
-	"seasons",
 );
 
 /**

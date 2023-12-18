@@ -24,7 +24,7 @@ import { withImages, imageFn } from "../traits";
 import { ResourceP } from "../traits/resource";
 
 export const BaseEpisodeP = withImages(
-	ResourceP.extend({
+	ResourceP("episode").extend({
 		/**
 		 * The season in witch this episode is in.
 		 */
@@ -72,7 +72,6 @@ export const BaseEpisodeP = withImages(
 		 */
 		showId: z.string(),
 	}),
-	"episodes",
 )
 	.transform((x) => ({
 		...x,

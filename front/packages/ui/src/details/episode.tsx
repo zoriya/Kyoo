@@ -37,7 +37,7 @@ import { percent, rem, Stylable, Theme, useYoshiki } from "yoshiki/native";
 import { KyooImage, WatchStatusV } from "@kyoo/models";
 import { ItemProgress } from "../browse/grid";
 import { EpisodesContext } from "../components/context-menus";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 export const episodeDisplayNumber = (
 	episode: {

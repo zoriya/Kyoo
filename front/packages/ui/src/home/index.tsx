@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Genre, ItemKind, QueryPage } from "@kyoo/models";
+import { Genre, QueryPage } from "@kyoo/models";
 import { Fetch } from "../fetch";
 import { Header } from "./header";
 import { DefaultLayout } from "../layout";
@@ -40,7 +40,7 @@ export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
 						tagline={"tagline" in x ? x.tagline : null}
 						overview={x.overview}
 						thumbnail={x.thumbnail}
-						link={x.kind !== ItemKind.Collection && !x.isLoading ? x.playHref : undefined}
+						link={x.kind !== "collection" && !x.isLoading ? x.playHref : undefined}
 						infoLink={x.href}
 					/>
 				)}

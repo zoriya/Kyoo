@@ -29,7 +29,7 @@ import { MetadataP } from "./metadata";
 import { WatchStatusP } from "./watch-status";
 
 export const MovieP = withImages(
-	ResourceP.extend({
+	ResourceP("movie").extend({
 		/**
 		 * The title of this movie.
 		 */
@@ -105,7 +105,6 @@ export const MovieP = withImages(
 		 */
 		watchStatus: WatchStatusP.optional().nullable(),
 	}),
-	"movies",
 )
 	.transform((x) => ({
 		...x,

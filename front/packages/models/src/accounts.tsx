@@ -19,7 +19,7 @@
  */
 
 import { ReactNode, createContext, useContext, useEffect, useMemo, useRef } from "react";
-import { UserP } from "./resources";
+import { User, UserP } from "./resources";
 import { z } from "zod";
 import { zdate } from "./utils";
 import { removeAccounts, setAccountCookie, updateAccount } from "./account-internal";
@@ -38,13 +38,13 @@ export const TokenP = z.object({
 });
 export type Token = z.infer<typeof TokenP>;
 
-export const AccountP = UserP.and(
-	z.object({
-		token: TokenP,
-		apiUrl: z.string(),
-		selected: z.boolean(),
-	}),
-);
+export const AccountP = UserP.merge(z.object({
+	// set it optional for accounts logged in before the kind was present
+	kind: z.literal("user").optional(),
+	token: TokenP,
+	apiUrl: z.string(),
+	selected: z.boolean(),
+}));
 export type Account = z.infer<typeof AccountP>;
 
 const AccountContext = createContext<(Account & { select: () => void; remove: () => void })[]>([]);
@@ -100,7 +100,7 @@ export const AccountProvider = ({
 	const user = useFetch({
 		path: ["auth", "me"],
 		parser: UserP,
-		placeholderData: selected,
+		placeholderData: selected as User,
 		enabled: !!selected,
 		timeout: 5_000,
 	});
