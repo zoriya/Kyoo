@@ -35,6 +35,7 @@ import { Player } from "../player";
 import { atom, useSetAtom, PrimitiveAtom, useStore } from "jotai";
 import { getCurrentAccount, storage } from "@kyoo/models/src/account-internal";
 import { ReactNode, useEffect } from "react";
+import { Platform, ToastAndroid } from "react-native";
 
 type State = {
 	status: "DOWNLOADING" | "PAUSED" | "DONE" | "FAILED" | "STOPPED";
@@ -111,9 +112,13 @@ const setupDownloadTask = (
 			update((x) => ({ ...x, percent: 100, status: "DONE" }));
 			// apparently this is needed for ios /shrug i'm totaly gona forget this
 			// if i ever implement ios so keeping this here
-			RNBackgroundDownloader.completeHandler(task.id);
+			if (Platform.OS === "ios") RNBackgroundDownloader.completeHandler(task.id);
 		})
-		.error((error) => update((x) => ({ ...x, status: "FAILED", error })));
+		.error((error) => {
+			update((x) => ({ ...x, status: "FAILED", error }));
+			console.error(`Error downloading ${state.data.slug}`, error);
+			ToastAndroid.show(`Error downloading ${state.data.slug}`, ToastAndroid.LONG);
+		});
 
 	return { data: state.data, info: state.info, path: state.path, state: stateAtom };
 };
@@ -146,27 +151,33 @@ export const useDownloader = () => {
 	const store = useStore();
 
 	return async (type: "episode" | "movie", slug: string) => {
-		const account = getCurrentAccount()!;
-		const [data, info] = await Promise.all([
-			query(Player.query(type, slug), account),
-			query(Player.infoQuery(type, slug), account),
-		]);
+		try {
+			const account = getCurrentAccount()!;
+			const [data, info] = await Promise.all([
+				query(Player.query(type, slug), account),
+				query(Player.infoQuery(type, slug), account),
+			]);
 
-		// TODO: support custom paths
-		const path = `${RNBackgroundDownloader.directories.documents}/${slug}-${data.id}.${info.extension}`;
-		const task = RNBackgroundDownloader.download({
-			id: data.id,
-			// TODO: support variant qualities
-			url: `${account.apiUrl}/api/video/${type}/${slug}/direct`,
-			destination: path,
-			headers: {
-				Authorization: account.token.access_token,
-			},
-			// TODO: Implement only wifi
-			// network: Network.ALL,
-		});
+			// TODO: support custom paths
+			const path = `${RNBackgroundDownloader.directories.documents}/${slug}-${data.id}.${info.extension}`;
+			const task = RNBackgroundDownloader.download({
+				id: data.id,
+				// TODO: support variant qualities
+				url: `${account.apiUrl}/video/${type}/${slug}/direct`,
+				destination: path,
+				headers: {
+					Authorization: account.token.access_token,
+				},
+				// TODO: Implement only wifi
+				// network: Network.ALL,
+			});
+			console.log("Starting download", path);
 
-		setDownloads((x) => [...x, setupDownloadTask({ data, info, path }, task, store)]);
+			setDownloads((x) => [...x, setupDownloadTask({ data, info, path }, task, store)]);
+		} catch (e) {
+			console.error("download error", e);
+			ToastAndroid.show(`Error downloading ${slug}`, ToastAndroid.LONG);
+		}
 	};
 };
 

@@ -157,7 +157,13 @@ export const ItemDetails = ({
 				<View
 					{...css({ flexShrink: 1, flexGrow: 1, justifyContent: "flex-end", marginBottom: px(50) })}
 				>
-					<View {...css({ flexDirection: "row-reverse", justifyContent: "space-between" })}>
+					<View
+						{...css({
+							flexDirection: "row-reverse",
+							justifyContent: "space-between",
+							alignContent: "flex-start",
+						})}
+					>
 						{slug && type && type !== "collection" && watchStatus !== undefined && (
 							<ItemContext
 								type={type}
@@ -165,6 +171,7 @@ export const ItemDetails = ({
 								status={watchStatus}
 								isOpen={moreOpened}
 								setOpen={(v) => setMoreOpened(v)}
+								force
 							/>
 						)}
 						{(isLoading || tagline) && (

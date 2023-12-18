@@ -27,21 +27,27 @@ import Download from "@material-symbols/svg-400/rounded/download.svg";
 import { WatchStatusV, queryFn, useAccount } from "@kyoo/models";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { watchListIcon } from "./watchlist-info";
-import { downloadFile } from "../downloads/state";
+import { useDownloader } from "../downloads/state";
+import { Platform } from "react-native";
+import { useYoshiki } from "yoshiki/native";
 
 export const EpisodesContext = ({
 	type = "episode",
 	slug,
 	showSlug,
 	status,
+	force,
 	...props
 }: {
 	type?: "show" | "movie" | "episode";
 	showSlug?: string | null;
 	slug: string;
 	status: WatchStatusV | null;
+	force?: boolean;
 } & Partial<ComponentProps<typeof Menu<typeof IconButton>>>) => {
 	const account = useAccount();
+	const downloader = useDownloader();
+	const { css } = useYoshiki();
 	const { t } = useTranslation();
 
 	const queryClient = useQueryClient();
@@ -55,7 +61,12 @@ export const EpisodesContext = ({
 	});
 
 	return (
-		<Menu Trigger={IconButton} icon={MoreVert} {...tooltip(t("misc.more"))} {...(props as any)}>
+		<Menu
+			Trigger={IconButton}
+			icon={MoreVert}
+			{...tooltip(t("misc.more"))}
+			{...(css([Platform.OS !== "web" && !force && { display: "none" }], props) as any)}
+		>
 			{showSlug && (
 				<Menu.Item label={t("home.episodeMore.goToShow")} icon={Info} href={`/show/${showSlug}`} />
 			)}
@@ -80,7 +91,7 @@ export const EpisodesContext = ({
 				<Menu.Item
 					label={t("home.episodeMore.download")}
 					icon={Download}
-					onSelect={() => downloadFile(type, slug)}
+					onSelect={() => downloader(type, slug)}
 				/>
 			)}
 		</Menu>
@@ -91,11 +102,22 @@ export const ItemContext = ({
 	type,
 	slug,
 	status,
+	force,
 	...props
 }: {
 	type: "movie" | "show";
 	slug: string;
 	status: WatchStatusV | null;
+	force?: boolean;
 } & Partial<ComponentProps<typeof Menu<typeof IconButton>>>) => {
-	return <EpisodesContext type={type} slug={slug} status={status} showSlug={null} {...props} />;
+	return (
+		<EpisodesContext
+			type={type}
+			slug={slug}
+			status={status}
+			showSlug={null}
+			force={force}
+			{...props}
+		/>
+	);
 };
