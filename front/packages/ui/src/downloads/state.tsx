@@ -37,7 +37,7 @@ import { getCurrentAccount, storage } from "@kyoo/models/src/account-internal";
 import { ReactNode, useEffect } from "react";
 import { Platform, ToastAndroid } from "react-native";
 
-type State = {
+export type State = {
 	status: "DOWNLOADING" | "PAUSED" | "DONE" | "FAILED" | "STOPPED";
 	progress: number;
 	size: number;
@@ -157,6 +157,11 @@ export const useDownloader = () => {
 				query(Player.query(type, slug), account),
 				query(Player.infoQuery(type, slug), account),
 			]);
+
+			if (store.get(downloadAtom).find((x) => x.data.id === data.id)) {
+				ToastAndroid.show(`${slug} is already downloaded, skipping`, ToastAndroid.LONG);
+				return;
+			}
 
 			// TODO: support custom paths
 			const path = `${RNBackgroundDownloader.directories.documents}/${slug}-${data.id}.${info.extension}`;

@@ -82,7 +82,6 @@ const Menu = <AsProps,>({
 		<>
 			<Trigger
 				onPress={() => {
-					if ("onPress" in props && typeof props.onPress === "function") props.onPress();
 					setOpen(true);
 				}}
 				{...(props as any)}

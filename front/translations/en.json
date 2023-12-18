@@ -107,6 +107,15 @@
 		"delete": "Delete your account",
 		"delete-confirmation": "This action can't be reverted. Are you sure?"
 	},
+	"downloads": {
+		"empty": "Nothing downloaded yet, start browsing for something you like",
+		"error": "Error: {{error}}",
+		"delete": "Delete item",
+		"deleteMessage": "Do you want to remove this item from your local storage?",
+		"pause": "Pause",
+		"resume": "Resume",
+		"retry": "Retry"
+	},
 	"errors": {
 		"connection": "Could not connect to the kyoo's server",
 		"connection-tips": "Troublshotting tips:\n - Are you connected to internet?\n - Is your kyoo's server online?\n - Have your account been banned?",

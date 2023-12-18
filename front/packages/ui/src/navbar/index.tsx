@@ -55,7 +55,7 @@ export const NavbarTitle = (props: Stylable & { onLayout?: ViewProps["onLayout"]
 };
 
 const SearchBar = forwardRef<TextInput, Stylable>(function SearchBar(props, ref) {
-	const { css, theme } = useYoshiki();
+	const { theme } = useYoshiki();
 	const { t } = useTranslation();
 	const { push, replace, back } = useRouter();
 	const hasChanged = useRef<boolean>(false);
@@ -135,12 +135,12 @@ export const NavbarProfile = () => {
 								t("login.delete"),
 								t("login.delete-confirmation"),
 								[
+									{ text: t("misc.cancel"), style: "cancel" },
 									{
 										text: t("misc.delete"),
 										onPress: deleteAccount,
 										style: "destructive",
 									},
-									{ text: t("misc.cancel"), style: "cancel" },
 								],
 								{
 									cancelable: true,
