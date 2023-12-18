@@ -22,6 +22,7 @@ import { useAtomValue } from "jotai";
 import { downloadAtom } from "./state";
 import { FlashList } from "@shopify/flash-list";
 import { View } from "react-native";
+import { P } from "@kyoo/primitives";
 
 export const DownloadPage = () => {
 	const downloads = useAtomValue(downloadAtom);
@@ -29,9 +30,7 @@ export const DownloadPage = () => {
 	return (
 		<FlashList
 			data={downloads}
-			renderItem={({ item }) => {
-				<View>{item.data.name}</View>;
-			}}
+			renderItem={({ item }) => <P>{item.data.name}</P>}
 			keyExtractor={(x) => x.data.id}
 			numColumns={1}
 		/>
