@@ -107,6 +107,15 @@
 		"delete": "Supprimer votre compte",
 		"delete-confirmation": "Cette action ne peut pas être annulée. Êtes-vous sur?"
 	},
+	"downloads": {
+		"empty": "Rien de téléchargé pour l'instant, commencez à rechercher quelque chose que vous aimez",
+		"error": "Erreur: {{error}}",
+		"delete": "Supprimer un item télechargé",
+		"deleteMessage": "Voulez-vous vraiment supprimer un item télechgargé ?",
+		"pause": "Pause",
+		"resume": "Reprendre",
+		"retry": "Réessayer"
+	},
 	"errors": {
 		"connection": "Impossible de se connecter au serveur de kyoo.",
 		"connection-tips": "Possible causes:\n - Etes-vous connecté a internet ?\n - Votre serveur kyoo est-il allumé ?\n - Votre compte est-il bannis ?",
