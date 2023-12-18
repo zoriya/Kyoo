@@ -21,7 +21,7 @@
 import { z } from "zod";
 import { ResourceP } from "../traits/resource";
 
-export const StudioP = ResourceP.extend({
+export const StudioP = ResourceP("studio").extend({
 	/**
 	 * The name of this studio.
 	 */

@@ -23,28 +23,19 @@ import { CollectionP } from "./collection";
 import { MovieP } from "./movie";
 import { ShowP } from "./show";
 
-/**
- * The type of item, ether a show, a movie or a collection.
- */
-export enum ItemKind {
-	Show = "Show",
-	Movie = "Movie",
-	Collection = "Collection",
-}
-
 export const LibraryItemP = z.union([
 	/*
 	 * Either a Show
 	 */
-	ShowP.and(z.object({ kind: z.literal(ItemKind.Show) })),
+	ShowP,
 	/*
 	 * Or a Movie
 	 */
-	MovieP.and(z.object({ kind: z.literal(ItemKind.Movie) })),
+	MovieP,
 	/*
 	 * Or a Collection
 	 */
-	CollectionP.and(z.object({ kind: z.literal(ItemKind.Collection) })),
+	CollectionP,
 ]);
 
 /**

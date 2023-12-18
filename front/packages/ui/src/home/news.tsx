@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { News, NewsKind, NewsP, QueryIdentifier, getDisplayDate } from "@kyoo/models";
+import { News, NewsP, QueryIdentifier, getDisplayDate } from "@kyoo/models";
 import { ItemGrid } from "../browse/grid";
 import { InfiniteFetch } from "../fetch-infinite";
 import { useTranslation } from "react-i18next";
@@ -37,13 +37,13 @@ export const NewsList = () => {
 				query={NewsList.query()}
 				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
 				getItemType={(x, i) =>
-					x.kind === NewsKind.Movie || (x.isLoading && i % 2) ? "movie" : "episode"
+					x.kind === "movie" || (x.isLoading && i % 2) ? "movie" : "episode"
 				}
 				getItemSize={(kind) => (kind === "episode" ? 2 : 1)}
 				empty={t("home.none")}
 			>
 				{(x, i) =>
-					x.kind === NewsKind.Movie || (x.isLoading && i % 2) ? (
+					x.kind === "movie" || (x.isLoading && i % 2) ? (
 						<ItemGrid
 							isLoading={x.isLoading as any}
 							href={x.href}
@@ -58,9 +58,9 @@ export const NewsList = () => {
 						<EpisodeBox
 							isLoading={x.isLoading as any}
 							slug={x.slug}
-							showSlug={x.kind === NewsKind.Episode ? x.showId : null}
+							showSlug={x.kind === "episode" ? x.showId : null}
 							name={
-								x.kind === NewsKind.Episode
+								x.kind === "episode"
 									? `${x.show!.name} ${episodeDisplayNumber(x)}`
 									: undefined
 							}

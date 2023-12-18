@@ -23,7 +23,7 @@ import { withImages } from "../traits";
 import { ResourceP } from "../traits/resource";
 
 export const PersonP = withImages(
-	ResourceP.extend({
+	ResourceP("people").extend({
 		/**
 		 * The name of this person.
 		 */
@@ -40,7 +40,6 @@ export const PersonP = withImages(
 		 */
 		role: z.string().optional(),
 	}),
-	"people",
 );
 
 /**

@@ -21,7 +21,6 @@
 import {
 	QueryIdentifier,
 	Watchlist,
-	WatchlistKind,
 	WatchlistP,
 	getDisplayDate,
 	useAccount,
@@ -48,7 +47,7 @@ export const WatchlistList = () => {
 					query={WatchlistList.query()}
 					layout={{ ...ItemGrid.layout, layout: "horizontal" }}
 					getItemType={(x, i) =>
-						(x.kind === WatchlistKind.Show && x.watchStatus?.nextEpisode) || (x.isLoading && i % 2)
+						(x.kind === "show" && x.watchStatus?.nextEpisode) || (x.isLoading && i % 2)
 							? "episode"
 							: "item"
 					}
@@ -56,8 +55,8 @@ export const WatchlistList = () => {
 					empty={t("home.none")}
 				>
 					{(x, i) => {
-						const episode = x.kind === WatchlistKind.Show ? x.watchStatus?.nextEpisode : null;
-						return (x.kind === WatchlistKind.Show && x.watchStatus?.nextEpisode) ||
+						const episode = x.kind === "show" ? x.watchStatus?.nextEpisode : null;
+						return (x.kind === "show" && x.watchStatus?.nextEpisode) ||
 							(x.isLoading && i % 2) ? (
 							<EpisodeBox
 								isLoading={x.isLoading as any}
@@ -83,9 +82,9 @@ export const WatchlistList = () => {
 								watchStatus={x.watchStatus?.status || null}
 								watchPercent={x.watchStatus?.watchedPercent || null}
 								unseenEpisodesCount={
-									x.kind === WatchlistKind.Show ? x.watchStatus?.unseenEpisodesCount : null
+									x.kind === "show" ? x.watchStatus?.unseenEpisodesCount : null
 								}
-								type={x.kind === WatchlistKind.Movie ? "movie" : "show"}
+								type={x.kind}
 							/>
 						);
 					}}

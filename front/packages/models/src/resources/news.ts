@@ -22,23 +22,15 @@ import { z } from "zod";
 import { MovieP } from "./movie";
 import { EpisodeP } from "./episode";
 
-/**
- * The type of item, ether a a movie or an episode.
- */
-export enum NewsKind {
-	Episode = "Episode",
-	Movie = "Movie",
-}
-
 export const NewsP = z.union([
 	/*
 	 * Either an episode
 	 */
-	EpisodeP.and(z.object({ kind: z.literal(NewsKind.Episode) })),
+	EpisodeP,
 	/*
 	 * Or a Movie
 	 */
-	MovieP.and(z.object({ kind: z.literal(NewsKind.Movie) })),
+	MovieP,
 ]);
 
 /**

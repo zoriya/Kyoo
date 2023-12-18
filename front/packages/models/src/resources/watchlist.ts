@@ -22,23 +22,15 @@ import { z } from "zod";
 import { MovieP } from "./movie";
 import { ShowP } from "./show";
 
-/**
- * The type of item, ether a show, a movie or an episode.
- */
-export enum WatchlistKind {
-	Show = "Show",
-	Movie = "Movie",
-}
-
 export const WatchlistP = z.union([
 	/*
 	 * Either a show
 	 */
-	ShowP.and(z.object({ kind: z.literal(WatchlistKind.Show) })),
+	ShowP,
 	/*
 	 * Or a Movie
 	 */
-	MovieP.and(z.object({ kind: z.literal(WatchlistKind.Movie) })),
+	MovieP,
 ]);
 
 /**

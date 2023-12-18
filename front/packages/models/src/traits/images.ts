@@ -62,13 +62,13 @@ const addQualities = (x: object | null | undefined, href: string) => {
 	};
 };
 
-export const withImages = <T extends ZodRawShape>(parser: ZodObject<T>, type: string) => {
+export const withImages = <T extends ZodRawShape>(parser: ZodObject<T>) => {
 	return parser.merge(ImagesP).transform((x) => {
 		return {
 			...x,
-			poster: addQualities(x.poster, `/${type}/${x.slug}/poster`),
-			thumbnail: addQualities(x.thumbnail, `/${type}/${x.slug}/thumbnail`),
-			logo: addQualities(x.logo, `/${type}/${x.slug}/logo`),
+			poster: addQualities(x.poster, `/${x.kind}/${x.slug}/poster`),
+			thumbnail: addQualities(x.thumbnail, `/${x.kind}/${x.slug}/thumbnail`),
+			logo: addQualities(x.logo, `/${x.kind}/${x.slug}/logo`),
 		};
 	});
 };

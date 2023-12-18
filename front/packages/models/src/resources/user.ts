@@ -21,10 +21,7 @@
 import { z } from "zod";
 import { ResourceP } from "../traits/resource";
 
-/**
- * The library that will contain Shows, Collections...
- */
-export const UserP = ResourceP.extend({
+export const UserP = ResourceP("user").extend({
 	/**
 	 * The name of this user.
 	 */

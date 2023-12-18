@@ -22,10 +22,8 @@ import { z } from "zod";
 import { zdate } from "../utils";
 import { withImages, ResourceP } from "../traits";
 import { Genre } from "./genre";
-import { SeasonP } from "./season";
 import { StudioP } from "./studio";
 import { BaseEpisodeP } from "./episode.base";
-import { CollectionP } from "./collection";
 import { MetadataP } from "./metadata";
 import { ShowWatchStatusP } from "./watch-status";
 
@@ -40,7 +38,7 @@ export enum Status {
 }
 
 export const ShowP = withImages(
-	ResourceP.extend({
+	ResourceP("show").extend({
 		/**
 		 * The title of this show.
 		 */
@@ -106,7 +104,6 @@ export const ShowP = withImages(
 		 */
 		episodesCount: z.number().int().gte(0).optional(),
 	}),
-	"shows",
 )
 	.transform((x) => {
 		if (!x.thumbnail && x.poster) {

@@ -20,7 +20,6 @@
 
 import {
 	Genre,
-	ItemKind,
 	KyooImage,
 	LibraryItem,
 	LibraryItemP,
@@ -258,24 +257,20 @@ export const Recommanded = () => {
 					<ItemDetails
 						isLoading={x.isLoading as any}
 						slug={x.slug}
-						type={x.kind?.toLowerCase() as any}
+						type={x.kind}
 						name={x.name}
 						tagline={"tagline" in x ? x.tagline : null}
 						overview={x.overview}
 						poster={x.poster}
-						subtitle={
-							x.kind !== ItemKind.Collection && !x.isLoading ? getDisplayDate(x) : undefined
-						}
+						subtitle={x.kind !== "collection" && !x.isLoading ? getDisplayDate(x) : undefined}
 						genres={"genres" in x ? x.genres : null}
 						href={x.href}
-						playHref={x.kind !== ItemKind.Collection && !x.isLoading ? x.playHref : undefined}
+						playHref={x.kind !== "collection" && !x.isLoading ? x.playHref : undefined}
 						watchStatus={
-							!x.isLoading && x.kind !== ItemKind.Collection ? x.watchStatus?.status ?? null : null
+							!x.isLoading && x.kind !== "collection" ? x.watchStatus?.status ?? null : null
 						}
 						unseenEpisodesCount={
-							x.kind === ItemKind.Show
-								? x.watchStatus?.unseenEpisodesCount ?? x.episodesCount!
-								: null
+							x.kind === "show" ? x.watchStatus?.unseenEpisodesCount ?? x.episodesCount! : null
 						}
 					/>
 				)}
