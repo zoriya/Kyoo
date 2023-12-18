@@ -36,6 +36,8 @@ import { atom, useSetAtom, PrimitiveAtom, useStore } from "jotai";
 import { getCurrentAccount, storage } from "@kyoo/models/src/account-internal";
 import { ReactNode, useEffect } from "react";
 import { Platform, ToastAndroid } from "react-native";
+import { useQueryClient } from "@tanstack/react-query";
+import { Router } from "expo-router/build/types";
 
 export type State = {
 	status: "DOWNLOADING" | "PAUSED" | "DONE" | "FAILED" | "STOPPED";
@@ -46,7 +48,7 @@ export type State = {
 	pause: (() => void) | null;
 	resume: (() => void) | null;
 	remove: () => void;
-	play: () => void;
+	play: (router: Router) => void;
 };
 
 export const downloadAtom = atom<
@@ -94,8 +96,7 @@ const setupDownloadTask = (
 			store.set(downloadAtom, (x) => x.filter((y) => y.data.id !== task.id));
 		},
 		play: () => {
-			// TODO: set useQuery cache
-			// TODO: move to the play page.
+			ToastAndroid.show("The file has not finished downloading", ToastAndroid.LONG);
 		},
 	} as State);
 
@@ -188,6 +189,7 @@ export const useDownloader = () => {
 
 export const DownloadProvider = ({ children }: { children: ReactNode }) => {
 	const store = useStore();
+	const queryClient = useQueryClient();
 
 	useEffect(() => {
 		async function run() {
@@ -210,8 +212,21 @@ export const DownloadProvider = ({ children }: { children: ReactNode }) => {
 						availableSize: dl.state.availableSize,
 						pause: null,
 						resume: null,
-						play: () => {
-							// TODO: setup this
+						play: (router: Router) => {
+							dl.data.links.direct = dl.path;
+							queryClient.setQueryData(
+								toQueryKey(Player.query(dl.data.kind, dl.data.slug)),
+								dl.data,
+							);
+							queryClient.setQueryData(
+								toQueryKey(Player.infoQuery(dl.data.kind, dl.data.slug)),
+								dl.info,
+							);
+							router.push(
+								dl.data.kind === "episode"
+									? { pathname: "/watch/[slug]", params: { slug: dl.data.slug } }
+									: { pathname: "/movie/[slug]/watch", params: { slug: dl.data.slug } },
+							);
 						},
 						remove: () => {
 							deleteAsync(dl.path);
@@ -228,7 +243,7 @@ export const DownloadProvider = ({ children }: { children: ReactNode }) => {
 			RNBackgroundDownloader.ensureDownloadsAreRunning();
 		}
 		run();
-	}, [store]);
+	}, [store, queryClient]);
 
 	return children;
 };

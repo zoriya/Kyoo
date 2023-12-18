@@ -45,6 +45,7 @@ import DownloadForOffline from "@material-symbols/svg-400/rounded/download_for_o
 import Downloading from "@material-symbols/svg-400/rounded/downloading.svg";
 import Error from "@material-symbols/svg-400/rounded/error.svg";
 import NotStarted from "@material-symbols/svg-400/rounded/not_started.svg";
+import { useRouter } from "expo-router";
 
 const DownloadedItem = ({
 	name,
@@ -62,11 +63,12 @@ const DownloadedItem = ({
 }) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
+	const router = useRouter();
 	const { error, status, pause, resume, remove, play } = useAtomValue(statusAtom);
 
 	return (
 		<PressableFeedback
-			onPress={() => play?.()}
+			onPress={() => play?.(router)}
 			{...css(
 				{
 					alignItems: "center",
