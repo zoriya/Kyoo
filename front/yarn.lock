@@ -2950,6 +2950,7 @@ __metadata:
     "@shopify/flash-list": ^1.6.3
     "@types/react": 18.2.39
     expo-file-system: ^15.6.0
+    expo-router: ^2.0.14
     react-native-uuid: ^2.0.1
     typescript: ^5.3.2
   peerDependencies:
@@ -2959,6 +2960,7 @@ __metadata:
     "@tanstack/react-query": "*"
     expo-file-system: "*"
     expo-linear-gradient: "*"
+    expo-router: "*"
     i18next: "*"
     moti: "*"
     react: "*"
@@ -2972,8 +2974,12 @@ __metadata:
       optional: true
     expo-file-system:
       optional: true
+    expo-router:
+      optional: true
   peerDependenciesMeta:
     "@kesha-antonov/react-native-background-downloader":
+      optional: true
+    expo-router:
       optional: true
   languageName: unknown
   linkType: soft
@@ -8088,7 +8094,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-router@npm:2.0.14":
+"expo-router@npm:2.0.14, expo-router@npm:^2.0.14":
   version: 2.0.14
   resolution: "expo-router@npm:2.0.14"
   dependencies:

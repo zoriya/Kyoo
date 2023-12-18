@@ -35,6 +35,7 @@ export const Button = ({
 			{...css(
 				{
 					flexGrow: 0,
+					overflow: "hidden",
 					p: ts(0.5),
 					borderRadius: ts(5),
 					borderColor: (theme) => theme.accent,
@@ -44,8 +45,7 @@ export const Button = ({
 						text: { color: (theme: Theme) => theme.colors.white },
 					},
 				},
-				// @ts-ignore ??
-				props,
+				props as any,
 			)}
 		>
 			<P {...css({ textAlign: "center" }, "text")}>{text}</P>
