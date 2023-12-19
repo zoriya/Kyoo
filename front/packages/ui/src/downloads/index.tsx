@@ -19,4 +19,4 @@
  */
 
 export { DownloadPage } from "./page";
-export { DownloadProvider } from "./state";
+export { DownloadProvider, useDownloader } from "./state";
