@@ -36,9 +36,7 @@ export const NewsList = () => {
 			<InfiniteFetch
 				query={NewsList.query()}
 				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
-				getItemType={(x, i) =>
-					x.kind === "movie" || (x.isLoading && i % 2) ? "movie" : "episode"
-				}
+				getItemType={(x, i) => (x.kind === "movie" || (x.isLoading && i % 2) ? "movie" : "episode")}
 				getItemSize={(kind) => (kind === "episode" ? 2 : 1)}
 				empty={t("home.none")}
 			>
@@ -59,11 +57,7 @@ export const NewsList = () => {
 							isLoading={x.isLoading as any}
 							slug={x.slug}
 							showSlug={x.kind === "episode" ? x.showId : null}
-							name={
-								x.kind === "episode"
-									? `${x.show!.name} ${episodeDisplayNumber(x)}`
-									: undefined
-							}
+							name={x.kind === "episode" ? `${x.show!.name} ${episodeDisplayNumber(x)}` : undefined}
 							overview={x.name}
 							thumbnail={x.thumbnail}
 							href={x.href}

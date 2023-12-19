@@ -18,13 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-	QueryIdentifier,
-	Watchlist,
-	WatchlistP,
-	getDisplayDate,
-	useAccount,
-} from "@kyoo/models";
+import { QueryIdentifier, Watchlist, WatchlistP, getDisplayDate, useAccount } from "@kyoo/models";
 import { useYoshiki } from "yoshiki/native";
 import { ItemGrid } from "../browse/grid";
 import { InfiniteFetch } from "../fetch-infinite";
@@ -56,8 +50,7 @@ export const WatchlistList = () => {
 				>
 					{(x, i) => {
 						const episode = x.kind === "show" ? x.watchStatus?.nextEpisode : null;
-						return (x.kind === "show" && x.watchStatus?.nextEpisode) ||
-							(x.isLoading && i % 2) ? (
+						return (x.kind === "show" && x.watchStatus?.nextEpisode) || (x.isLoading && i % 2) ? (
 							<EpisodeBox
 								isLoading={x.isLoading as any}
 								slug={episode?.slug}
@@ -81,9 +74,7 @@ export const WatchlistList = () => {
 								poster={x.poster}
 								watchStatus={x.watchStatus?.status || null}
 								watchPercent={x.watchStatus?.watchedPercent || null}
-								unseenEpisodesCount={
-									x.kind === "show" ? x.watchStatus?.unseenEpisodesCount : null
-								}
+								unseenEpisodesCount={x.kind === "show" ? x.watchStatus?.unseenEpisodesCount : null}
 								type={x.kind}
 							/>
 						);

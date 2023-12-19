@@ -38,13 +38,15 @@ export const TokenP = z.object({
 });
 export type Token = z.infer<typeof TokenP>;
 
-export const AccountP = UserP.merge(z.object({
-	// set it optional for accounts logged in before the kind was present
-	kind: z.literal("user").optional(),
-	token: TokenP,
-	apiUrl: z.string(),
-	selected: z.boolean(),
-}));
+export const AccountP = UserP.merge(
+	z.object({
+		// set it optional for accounts logged in before the kind was present
+		kind: z.literal("user").optional(),
+		token: TokenP,
+		apiUrl: z.string(),
+		selected: z.boolean(),
+	}),
+);
 export type Account = z.infer<typeof AccountP>;
 
 const AccountContext = createContext<(Account & { select: () => void; remove: () => void })[]>([]);

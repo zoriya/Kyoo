@@ -31,7 +31,7 @@ export const CollectionP = withImages(
 		 * The summary of this show.
 		 */
 		overview: z.string().nullable(),
-	})
+	}),
 ).transform((x) => ({
 	...x,
 	href: `/collection/${x.slug}`,
