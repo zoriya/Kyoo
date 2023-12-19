@@ -53,6 +53,7 @@ export type State = {
 	resume: (() => void) | null;
 	remove: () => void;
 	play: (router: Router) => void;
+	retry: (() => void) | null;
 };
 
 export const downloadAtom = atom<
@@ -81,19 +82,21 @@ const setupDownloadTask = (
 	state: { data: Episode | Movie; info: WatchInfo; path: string },
 	task: DownloadTask,
 	store: ReturnType<typeof useStore>,
+	stateAtom?: PrimitiveAtom<State>,
 ) => {
-	const stateAtom = atom({
+	if (!stateAtom) stateAtom = atom({} as State);
+	store.set(stateAtom, {
 		status: task.state,
 		progress: task.percent * 100,
 		size: task.totalBytes,
 		availableSize: task.bytesWritten,
 		pause: () => {
 			task.pause();
-			store.set(stateAtom, (x) => ({ ...x, state: "PAUSED" }));
+			store.set(stateAtom!, (x) => ({ ...x, state: "PAUSED" }));
 		},
 		resume: () => {
 			task.resume();
-			store.set(stateAtom, (x) => ({ ...x, state: "DOWNLOADING" }));
+			store.set(stateAtom!, (x) => ({ ...x, state: "DOWNLOADING" }));
 		},
 		remove: () => {
 			task.stop();
@@ -102,7 +105,19 @@ const setupDownloadTask = (
 		play: () => {
 			ToastAndroid.show("The file has not finished downloading", ToastAndroid.LONG);
 		},
-	} as State);
+		retry: () => {
+			const [newTask, path] = download(
+				{
+					type: state.data.kind,
+					id: state.data.id,
+					slug: state.data.slug,
+					extension: state.info.extension,
+				},
+				getCurrentAccount()!,
+			);
+			setupDownloadTask({ ...state, path }, newTask, store, stateAtom);
+		},
+	});
 
 	// we use the store instead of the onMount because we want to update the state to cache it even if it was not
 	// used during this launch of the app.
@@ -110,11 +125,17 @@ const setupDownloadTask = (
 
 	task
 		.begin(({ expectedBytes }) => update((x) => ({ ...x, size: expectedBytes })))
-		.progress((percent, availableSize, size) =>
-			update((x) => ({ ...x, percent, size, availableSize, status: "DOWNLOADING" })),
-		)
+		.progress((percent, availableSize, size) => {
+			update((x) => ({
+				...x,
+				progress: Math.round(percent * 100),
+				size,
+				availableSize,
+				status: "DOWNLOADING",
+			}));
+		})
 		.done(() => {
-			update((x) => ({ ...x, percent: 100, status: "DONE" }));
+			update((x) => ({ ...x, progress: 100, status: "DONE" }));
 			// apparently this is needed for ios /shrug i'm totaly gona forget this
 			// if i ever implement ios so keeping this here
 			if (Platform.OS === "ios") RNBackgroundDownloader.completeHandler(task.id);
@@ -151,6 +172,32 @@ const updater = (
 	};
 };
 
+const download = (
+	{
+		type,
+		id,
+		slug,
+		extension,
+	}: { slug: string; id: string; type: "episode" | "movie"; extension: string },
+	account: Account,
+) => {
+	// TODO: support custom paths
+	const path = `${RNBackgroundDownloader.directories.documents}/${slug}-${id}.${extension}`;
+	const task = RNBackgroundDownloader.download({
+		id: id,
+		// TODO: support variant qualities
+		url: `${account.apiUrl}/video/${type}/${slug}/direct`,
+		destination: path,
+		headers: {
+			Authorization: account.token.access_token,
+		},
+		// TODO: Implement only wifi
+		// network: Network.ALL,
+	});
+	console.log("Starting download", path);
+	return [task, path] as const;
+};
+
 export const useDownloader = () => {
 	const setDownloads = useSetAtom(downloadAtom);
 	const store = useStore();
@@ -168,21 +215,10 @@ export const useDownloader = () => {
 				return;
 			}
 
-			// TODO: support custom paths
-			const path = `${RNBackgroundDownloader.directories.documents}/${slug}-${data.id}.${info.extension}`;
-			const task = RNBackgroundDownloader.download({
-				id: data.id,
-				// TODO: support variant qualities
-				url: `${account.apiUrl}/video/${type}/${slug}/direct`,
-				destination: path,
-				headers: {
-					Authorization: account.token.access_token,
-				},
-				// TODO: Implement only wifi
-				// network: Network.ALL,
-			});
-			console.log("Starting download", path);
-
+			const [task, path] = download(
+				{ type, slug, id: data.id, extension: info.extension },
+				account,
+			);
 			setDownloads((x) => [...x, setupDownloadTask({ data, info, path }, task, store)]);
 		} catch (e) {
 			console.error("download error", e);
@@ -205,38 +241,50 @@ export const DownloadProvider = ({ children }: { children: ReactNode }) => {
 			const downloads = dls.map((dl) => {
 				const t = tasks.find((x) => x.id == dl.data.id);
 				if (t) return setupDownloadTask(dl, t, store);
+
+				const stateAtom = atom({
+					status: dl.state.status === "DONE" ? "DONE" : "FAILED",
+					progress: dl.state.progress,
+					size: dl.state.size,
+					availableSize: dl.state.availableSize,
+					pause: null,
+					resume: null,
+					play: (router: Router) => {
+						dl.data.links.direct = dl.path;
+						dl.data.links.hls = null;
+						queryClient.setQueryData(toQueryKey(Player.query(dl.data.kind, dl.data.slug)), dl.data);
+						queryClient.setQueryData(
+							toQueryKey(Player.infoQuery(dl.data.kind, dl.data.slug)),
+							dl.info,
+						);
+						router.push(
+							dl.data.kind === "episode"
+								? { pathname: "/watch/[slug]", params: { slug: dl.data.slug } }
+								: { pathname: "/movie/[slug]/watch", params: { slug: dl.data.slug } },
+						);
+					},
+					remove: () => {
+						deleteAsync(dl.path);
+						store.set(downloadAtom, (x) => x.filter((y) => y.data.id !== dl.data.id));
+					},
+					retry: () => {
+						const [newTask, path] = download(
+							{
+								type: dl.data.kind,
+								id: dl.data.id,
+								slug: dl.data.slug,
+								extension: dl.info.extension,
+							},
+							getCurrentAccount()!,
+						);
+						setupDownloadTask({ ...dl, path }, newTask, store, stateAtom);
+					},
+				} as State);
 				return {
 					data: z.union([EpisodeP, MovieP]).parse(dl.data),
 					info: WatchInfoP.parse(dl.info),
 					path: dl.path,
-					state: atom({
-						status: dl.state.status === "DONE" ? "DONE" : "FAILED",
-						progress: dl.state.progress,
-						size: dl.state.size,
-						availableSize: dl.state.availableSize,
-						pause: null,
-						resume: null,
-						play: (router: Router) => {
-							dl.data.links.direct = dl.path;
-							queryClient.setQueryData(
-								toQueryKey(Player.query(dl.data.kind, dl.data.slug)),
-								dl.data,
-							);
-							queryClient.setQueryData(
-								toQueryKey(Player.infoQuery(dl.data.kind, dl.data.slug)),
-								dl.info,
-							);
-							router.push(
-								dl.data.kind === "episode"
-									? { pathname: "/watch/[slug]", params: { slug: dl.data.slug } }
-									: { pathname: "/movie/[slug]/watch", params: { slug: dl.data.slug } },
-							);
-						},
-						remove: () => {
-							deleteAsync(dl.path);
-							store.set(downloadAtom, (x) => x.filter((y) => y.data.id !== dl.data.id));
-						},
-					} as State),
+					state: stateAtom,
 				};
 			});
 			store.set(downloadAtom, downloads);
