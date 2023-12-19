@@ -25,7 +25,6 @@ import {
 	H1,
 	H2,
 	IconButton,
-	Link,
 	Poster,
 	PressableFeedback,
 	Skeleton,
@@ -35,15 +34,7 @@ import {
 } from "@kyoo/primitives";
 import { Chapter, KyooImage, Subtitle, Audio } from "@kyoo/models";
 import { useAtomValue, useSetAtom, useAtom } from "jotai";
-import {
-	ImageStyle,
-	Platform,
-	Pressable,
-	View,
-	ViewProps,
-	PointerEvent as NativePointerEvent,
-	GestureResponderEvent,
-} from "react-native";
+import { ImageStyle, Platform, Pressable, View, ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
 import { percent, rem, useYoshiki } from "yoshiki/native";
 import { useRouter } from "solito/router";
@@ -127,7 +118,6 @@ export const Hover = ({
 						<Back
 							isLoading={isLoading}
 							name={showName}
-							href={href}
 							{...css({
 								pointerEvents: "auto",
 							})}
@@ -336,9 +326,8 @@ const ProgressBar = ({ chapters }: { chapters?: Chapter[] }) => {
 export const Back = ({
 	isLoading,
 	name,
-	href,
 	...props
-}: { isLoading: boolean; name?: string; href?: string } & ViewProps) => {
+}: { isLoading: boolean; name?: string } & ViewProps) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 	const router = useRouter();
@@ -363,9 +352,8 @@ export const Back = ({
 		>
 			<IconButton
 				icon={ArrowBack}
-				{...(href
-					? { as: Link as any, href: href }
-					: { as: PressableFeedback, onPress: router.back })}
+				as={PressableFeedback}
+				onPress={router.back}
 				{...tooltip(t("player.back"))}
 			/>
 			<Skeleton>
