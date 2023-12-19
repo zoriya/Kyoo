@@ -298,7 +298,11 @@ export const EpisodeLine = ({
 						)}
 					</Skeleton>
 					{isLoading ||
-						(runtime && <Skeleton>{isLoading || <SubP>{displayRuntime(runtime)}</SubP>}</Skeleton>)}
+						(runtime && (
+							<Skeleton>
+								{isLoading || <SubP {...css({ flexShrink: 0 })}>{displayRuntime(runtime)}</SubP>}
+							</Skeleton>
+						))}
 				</View>
 				<View {...css({ flexDirection: "row" })}>
 					<Skeleton>{isLoading || <P numberOfLines={3}>{overview}</P>}</Skeleton>
