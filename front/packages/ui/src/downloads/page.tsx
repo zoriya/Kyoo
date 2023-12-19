@@ -64,7 +64,7 @@ const DownloadedItem = ({
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 	const router = useRouter();
-	const { error, status, pause, resume, remove, play } = useAtomValue(statusAtom);
+	const { error, status, progress, pause, resume, remove, play, retry } = useAtomValue(statusAtom);
 
 	return (
 		<PressableFeedback
@@ -90,8 +90,8 @@ const DownloadedItem = ({
 				gradient={false}
 				hideLoad={false}
 				layout={{
-					width: percent(18),
-					aspectRatio: 16 / 9,
+					width: percent(25),
+					aspectRatio: kind === "episode" ? 16 / 9 : 2 / 3,
 				}}
 				{...(css({ flexShrink: 0, m: ts(1) }) as { style: ImageStyle })}
 			>
@@ -131,10 +131,34 @@ const DownloadedItem = ({
 						{name ?? t("show.episodeNoMetadata")}
 					</H6>
 					{status === "FAILED" && <P>{t("downloads.error", { error: error ?? "Unknow error" })}</P>}
-					{runtime && status !== "FAILED" && <SubP>{displayRuntime(runtime)}</SubP>}
+					{runtime && status === "DONE" && <SubP>{displayRuntime(runtime)}</SubP>}
+					{progress !== 100 && (
+						<View {...css({ flexDirection: "row", alignItems: "center" })}>
+							<SubP {...css({ flexShrink: 0 })}>{progress}%</SubP>
+							<View
+								{...css({
+									flexGrow: 1,
+									flexShrink: 1,
+									marginLeft: ts(0.5),
+									height: ts(0.5),
+									backgroundColor: (theme) => theme.user.overlay0,
+								})}
+							>
+								<View
+									{...css({
+										backgroundColor: (theme) => theme.user.accent,
+										width: percent(progress),
+										height: percent(100),
+									})}
+								/>
+							</View>
+						</View>
+					)}
 				</View>
 				<Menu Trigger={IconButton} icon={downloadIcon(status)}>
-					{status === "FAILED" && <Menu.Item label={t("downloads.retry")} onSelect={() => {}} />}
+					{status === "FAILED" && (
+						<Menu.Item label={t("downloads.retry")} onSelect={() => retry?.()} />
+					)}
 					{status === "DOWNLOADING" && (
 						<Menu.Item label={t("downloads.pause")} onSelect={() => pause?.()} />
 					)}
