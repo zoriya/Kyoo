@@ -27,7 +27,7 @@ import Download from "@material-symbols/svg-400/rounded/download.svg";
 import { WatchStatusV, queryFn, useAccount } from "@kyoo/models";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { watchListIcon } from "./watchlist-info";
-import { useDownloader } from "../downloads/state";
+import { useDownloader } from "../downloads";
 import { Platform } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 
