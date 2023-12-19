@@ -63,7 +63,7 @@ const mapData = (
 		fonts: info?.fonts,
 		previousSlug,
 		nextSlug,
-		qualitiesAvailables: !!data.links.hls
+		qualitiesAvailables: !!data.links.hls,
 	};
 };
 
@@ -89,9 +89,9 @@ export const Player = ({ slug, type }: { slug: string; type: "episode" | "movie"
 	const setFullscreen = useSetAtom(fullscreenAtom);
 	useEffect(() => {
 		if (Platform.OS !== "web") return;
-		if (!/Mobi/i.test(window.navigator.userAgent)) setFullscreen(true);
+		if (/Mobi/i.test(window.navigator.userAgent)) setFullscreen(true);
 		return () => {
-			setFullscreen(false);
+			if (!document.location.href.includes("/watch")) setFullscreen(false);
 		};
 	}, [setFullscreen]);
 
