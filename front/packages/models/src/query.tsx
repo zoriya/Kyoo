@@ -40,7 +40,7 @@ export let kyooApiUrl = kyooUrl;
 
 export const queryFn = async <Data,>(
 	context:
-		| (QueryFunctionContext & { timeout?: number, apiUrl?: string })
+		| (QueryFunctionContext & { timeout?: number; apiUrl?: string })
 		| {
 				path: (string | false | undefined | null)[];
 				body?: object;

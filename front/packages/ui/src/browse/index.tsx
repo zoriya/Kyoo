@@ -52,12 +52,9 @@ export const itemMap = (
 		thumbnail: item.thumbnail,
 		watchStatus: item.kind !== "collection" ? item.watchStatus?.status ?? null : null,
 		type: item.kind,
-		watchPercent:
-			item.kind !== "collection" ? item.watchStatus?.watchedPercent ?? null : null,
+		watchPercent: item.kind !== "collection" ? item.watchStatus?.watchedPercent ?? null : null,
 		unseenEpisodesCount:
-			item.kind === "show"
-				? item.watchStatus?.unseenEpisodesCount ?? item.episodesCount!
-				: null,
+			item.kind === "show" ? item.watchStatus?.unseenEpisodesCount ?? item.episodesCount! : null,
 	};
 };
 
