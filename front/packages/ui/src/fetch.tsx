@@ -21,6 +21,7 @@
 import { Page, QueryIdentifier, useFetch, KyooErrors } from "@kyoo/models";
 import { Breakpoint, P } from "@kyoo/primitives";
 import { ComponentType, ReactElement, isValidElement } from "react";
+import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 
@@ -43,7 +44,7 @@ export type WithError<Item> =
 const isPage = <T = unknown,>(obj: unknown): obj is Page<T> =>
 	(typeof obj === "object" && obj && "items" in obj) || false;
 
-export const FetchNE = <Data,>({
+export const Fetch = <Data,>({
 	query,
 	placeholderCount = 1,
 	children,
@@ -57,10 +58,10 @@ export const FetchNE = <Data,>({
 		i: number,
 	) => JSX.Element | null;
 }): JSX.Element | null => {
-	const { data, error } = useFetch(query);
+	const { data, isPaused, error } = useFetch(query);
 
-	// @ts-ignore
-	if (error) return children({ isError: true, error }, 0);
+	if (error) return <ErrorView error={error} />;
+	if (isPaused) return <OfflineView />;
 	if (!data) {
 		const placeholders = [...Array(placeholderCount)].map((_, i) =>
 			children({ isLoading: true } as any, i),
@@ -72,24 +73,21 @@ export const FetchNE = <Data,>({
 	return <>{data.items.map((item, i) => children({ ...item, isLoading: false } as any, i))}</>;
 };
 
-export const Fetch = <Data,>({
-	children,
-	...params
-}: {
-	query: QueryIdentifier<Data>;
-	placeholderCount?: number;
-	children: (
-		item: Data extends Page<infer Item> ? WithLoading<Item> : WithLoading<Data>,
-		i: number,
-	) => JSX.Element | null;
-}): JSX.Element | null => {
+export const OfflineView = () => {
+	const { css } = useYoshiki();
+	const { t } = useTranslation();
+
 	return (
-		<FetchNE {...params}>
-			{({ isError, error, ...item }, i) =>
-				// @ts-ignore
-				isError ? <ErrorView error={error} /> : children(item, i)
-			}
-		</FetchNE>
+		<View
+			{...css({
+				flexGrow: 1,
+				flexShrink: 1,
+				justifyContent: "center",
+				alignItems: "center",
+			})}
+		>
+			<P {...css({ color: (theme) => theme.colors.white })}>{t("errors.offline")}</P>
+		</View>
 	);
 };
 
