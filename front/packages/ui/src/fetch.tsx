@@ -47,9 +47,7 @@ export const Fetch = <Data,>({
 	query: QueryIdentifier<Data>;
 	placeholderCount?: number;
 	children: (
-		item: Data extends Page<infer Item>
-			? WithLoading<Item>
-			: WithLoading<Data>,
+		item: Data extends Page<infer Item> ? WithLoading<Item> : WithLoading<Data>,
 		i: number,
 	) => JSX.Element | null;
 }): JSX.Element | null => {
