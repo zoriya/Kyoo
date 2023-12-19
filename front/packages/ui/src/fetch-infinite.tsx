@@ -94,7 +94,7 @@ export const InfiniteFetchList = <Data, Props, _, Kind extends number | string>(
 	if (incremental && items) oldItems.current = items;
 
 	if (error) return <ErrorView error={error} />;
-	if (isPaused) return <OfflineView />
+	if (isPaused) return <OfflineView />;
 	if (empty && items && items.length === 0) {
 		if (typeof empty !== "string") return addHeader(Header, empty, headerProps);
 		return addHeader(Header, <EmptyView message={empty} />, headerProps);
