@@ -48,11 +48,10 @@ import {
 	Chip,
 	DottedSeparator,
 	focusReset,
-	SwitchVariant,
 } from "@kyoo/primitives";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
-import { ImageStyle, Platform, Text, View } from "react-native";
+import { ImageStyle, Platform, View } from "react-native";
 import {
 	Theme,
 	md,
@@ -70,9 +69,9 @@ import { Fetch } from "../fetch";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg";
 import { Rating } from "../components/rating";
-import { EpisodeLine, displayRuntime, episodeDisplayNumber } from "./episode";
+import { displayRuntime } from "./episode";
 import { WatchListInfo } from "../components/watchlist-info";
-import { ShowWatchStatus, WatchStatusV } from "@kyoo/models/src/resources/watch-status";
+import { WatchStatusV } from "@kyoo/models/src/resources/watch-status";
 import { capitalize } from "@kyoo/primitives";
 import { ShowWatchStatusCard } from "./show";
 

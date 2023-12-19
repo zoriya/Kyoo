@@ -94,7 +94,7 @@ export const MovieP = withImages(
 			/**
 			 * The link to an HLS master playlist containing all qualities available for this video.
 			 */
-			hls: z.string().transform(imageFn),
+			hls: z.string().transform(imageFn).nullable(),
 		}),
 		/**
 		 * The link to metadata providers that this show has.

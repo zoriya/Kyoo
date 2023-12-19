@@ -36,11 +36,6 @@ export type WithLoading<Item> =
 	| (Item & { isLoading: false })
 	| (Partial<Item> & { isLoading: true });
 
-// We keep a Partial<Item> on the error value to allow destructuring.
-export type WithError<Item> =
-	| (Item & { isError: false; error: undefined })
-	| (Partial<Item> & { isError: true; error: KyooErrors });
-
 const isPage = <T = unknown,>(obj: unknown): obj is Page<T> =>
 	(typeof obj === "object" && obj && "items" in obj) || false;
 
@@ -53,8 +48,8 @@ export const Fetch = <Data,>({
 	placeholderCount?: number;
 	children: (
 		item: Data extends Page<infer Item>
-			? WithError<WithLoading<Item>>
-			: WithError<WithLoading<Data>>,
+			? WithLoading<Item>
+			: WithLoading<Data>,
 		i: number,
 	) => JSX.Element | null;
 }): JSX.Element | null => {

@@ -65,7 +65,7 @@ export const BaseEpisodeP = withImages(
 			/**
 			 * The link to an HLS master playlist containing all qualities available for this video.
 			 */
-			hls: z.string().transform(imageFn),
+			hls: z.string().transform(imageFn).nullable(),
 		}),
 		/**
 		 * The id of the show containing this episode
