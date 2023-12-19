@@ -121,6 +121,7 @@
 		"connection-tips": "Troublshotting tips:\n - Are you connected to internet?\n - Is your kyoo's server online?\n - Have your account been banned?",
 		"unknown": "Unknown error",
 		"try-again": "Try again",
-		"re-login": "Re login"
+		"re-login": "Re login",
+		"offline": "You are not connected to internet. Try again later."
 	}
 }

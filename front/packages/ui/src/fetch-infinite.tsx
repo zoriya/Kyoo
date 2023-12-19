@@ -22,7 +22,7 @@ import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { useBreakpointMap, HR } from "@kyoo/primitives";
 import { ContentStyle, FlashList } from "@shopify/flash-list";
 import { ComponentProps, ComponentType, isValidElement, ReactElement, useRef } from "react";
-import { EmptyView, ErrorView, Layout, WithLoading, addHeader } from "./fetch";
+import { EmptyView, ErrorView, Layout, OfflineView, WithLoading, addHeader } from "./fetch";
 import { FlatList, View, ViewStyle } from "react-native";
 
 const emulateGap = (
@@ -90,10 +90,11 @@ export const InfiniteFetchList = <Data, Props, _, Kind extends number | string>(
 }): JSX.Element | null => {
 	const { numColumns, size, gap } = useBreakpointMap(layout);
 	const oldItems = useRef<Data[] | undefined>();
-	let { items, error, fetchNextPage, isFetching, refetch, isRefetching } = query;
+	let { items, isPaused, error, fetchNextPage, isFetching, refetch, isRefetching } = query;
 	if (incremental && items) oldItems.current = items;
 
 	if (error) return <ErrorView error={error} />;
+	if (isPaused) return <OfflineView />
 	if (empty && items && items.length === 0) {
 		if (typeof empty !== "string") return addHeader(Header, empty, headerProps);
 		return addHeader(Header, <EmptyView message={empty} />, headerProps);

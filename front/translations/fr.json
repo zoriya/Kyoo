@@ -121,6 +121,7 @@
 		"connection-tips": "Possible causes:\n - Etes-vous connecté a internet ?\n - Votre serveur kyoo est-il allumé ?\n - Votre compte est-il bannis ?",
 		"unknown": "Erreur inconnue",
 		"try-again": "Réessayer",
-		"re-login": "Se reconnecter"
+		"re-login": "Se reconnecter",
+		"offline": "Vous n'êtes pas connecté à Internet. Réessayez plus tard."
 	}
 }
