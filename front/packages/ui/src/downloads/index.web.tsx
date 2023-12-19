@@ -21,6 +21,7 @@
 import { WatchInfo, kyooApiUrl, queryFn, toQueryKey } from "@kyoo/models";
 import { Player } from "../player";
 import { getCurrentAccount } from "@kyoo/models/src/account-internal";
+import { ReactNode } from "react";
 
 export const useDownloader = () => {
 	return async (type: "episode" | "movie", slug: string) => {
@@ -46,3 +47,6 @@ export const useDownloader = () => {
 		a.click();
 	};
 };
+
+export const DownloadPage = () => {};
+export const DownloadProvider = ({ children }: { children: ReactNode }) => children;
