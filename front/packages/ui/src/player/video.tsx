@@ -42,7 +42,7 @@ import NativeVideo, { OnLoadData, VideoProps } from "react-native-video";
 import { useTranslation } from "react-i18next";
 import { PlayMode, playModeAtom, subtitleAtom } from "./state";
 import uuid from "react-native-uuid";
-import { Pressable } from "react-native";
+import { View } from "react-native";
 import "@kyoo/primitives/src/types.d.ts";
 import { useYoshiki } from "yoshiki/native";
 
@@ -59,7 +59,7 @@ const audioAtom = atom(0);
 const clientId = uuid.v4() as string;
 
 const Video = forwardRef<NativeVideo, VideoProps>(function Video(
-	{ onLoad, source, onPointerDown, subtitles, ...props },
+	{ onLoad, onBuffer, source, onPointerDown, subtitles, ...props },
 	ref,
 ) {
 	const { css } = useYoshiki();
@@ -77,11 +77,7 @@ const Video = forwardRef<NativeVideo, VideoProps>(function Video(
 	}, [source]);
 
 	return (
-		<Pressable
-			tabIndex={-1}
-			onPress={() => onPointerDown?.({ nativeEvent: { pointerType: "pointer" } } as any)}
-			{...css({ flexGrow: 1, flexShrink: 1 })}
-		>
+		<View {...css({ flexGrow: 1, flexShrink: 1 })}>
 			<NativeVideo
 				ref={ref}
 				source={{
@@ -92,9 +88,11 @@ const Video = forwardRef<NativeVideo, VideoProps>(function Video(
 					},
 				}}
 				onLoad={(info) => {
+					onBuffer?.({ isBuffering: false });
 					setInfo(info);
 					onLoad?.(info);
 				}}
+				onBuffer={onBuffer}
 				selectedVideoTrack={video === -1 ? { type: "auto" } : { type: "resolution", value: video }}
 				selectedAudioTrack={{ type: "index", value: audio }}
 				textTracks={subtitles?.map((x) => ({
@@ -113,7 +111,7 @@ const Video = forwardRef<NativeVideo, VideoProps>(function Video(
 				}
 				{...props}
 			/>
-		</Pressable>
+		</View>
 	);
 });
 

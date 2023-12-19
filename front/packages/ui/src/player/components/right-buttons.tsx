@@ -31,7 +31,6 @@ import MusicNote from "@material-symbols/svg-400/rounded/music_note-fill.svg";
 import { Stylable, useYoshiki } from "yoshiki/native";
 import { fullscreenAtom, subtitleAtom } from "../state";
 import { AudiosMenu, QualitiesMenu } from "../video";
-import i18next from "i18next";
 
 export const RightButtons = ({
 	audios,
@@ -39,6 +38,7 @@ export const RightButtons = ({
 	fonts,
 	onMenuOpen,
 	onMenuClose,
+	qualitiesAvailables,
 	...props
 }: {
 	audios?: Audio[];
@@ -46,6 +46,7 @@ export const RightButtons = ({
 	fonts?: string[];
 	onMenuOpen: () => void;
 	onMenuClose: () => void;
+	qualitiesAvailables: boolean;
 } & Stylable) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
@@ -90,14 +91,16 @@ export const RightButtons = ({
 				{...tooltip(t("player.audios"), true)}
 				{...spacing}
 			/>
-			<QualitiesMenu
-				Trigger={IconButton}
-				icon={SettingsIcon}
-				onMenuOpen={onMenuOpen}
-				onMenuClose={onMenuClose}
-				{...tooltip(t("player.quality"), true)}
-				{...spacing}
-			/>
+			{qualitiesAvailables && (
+				<QualitiesMenu
+					Trigger={IconButton}
+					icon={SettingsIcon}
+					onMenuOpen={onMenuOpen}
+					onMenuClose={onMenuClose}
+					{...tooltip(t("player.quality"), true)}
+					{...spacing}
+				/>
+			)}
 			{Platform.OS === "web" && (
 				<IconButton
 					icon={isFullscreen ? FullscreenExit : Fullscreen}
