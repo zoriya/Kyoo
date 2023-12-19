@@ -25,9 +25,12 @@ import { deleteAsync } from "expo-file-system";
 import {
 	Account,
 	Episode,
+	EpisodeP,
 	Movie,
+	MovieP,
 	QueryIdentifier,
 	WatchInfo,
+	WatchInfoP,
 	queryFn,
 	toQueryKey,
 } from "@kyoo/models";
@@ -38,6 +41,7 @@ import { ReactNode, useEffect } from "react";
 import { Platform, ToastAndroid } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { Router } from "expo-router/build/types";
+import { z } from "zod";
 
 export type State = {
 	status: "DOWNLOADING" | "PAUSED" | "DONE" | "FAILED" | "STOPPED";
@@ -202,8 +206,8 @@ export const DownloadProvider = ({ children }: { children: ReactNode }) => {
 				const t = tasks.find((x) => x.id == dl.data.id);
 				if (t) return setupDownloadTask(dl, t, store);
 				return {
-					data: dl.data,
-					info: dl.info,
+					data: z.union([EpisodeP, MovieP]).parse(dl.data),
+					info: WatchInfoP.parse(dl.info),
 					path: dl.path,
 					state: atom({
 						status: dl.state.status === "DONE" ? "DONE" : "FAILED",

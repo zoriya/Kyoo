@@ -208,7 +208,7 @@ pub async fn identify(path: String) -> Option<MediaInfo> {
 		extension: Path::new(&path)
 			.extension()
 			.map(|x| x.to_os_string().into_string().unwrap())
-			.unwrap_or(String::from(".mkv")),
+			.unwrap_or(String::from("mkv")),
 		container: general["Format"].as_str().unwrap().to_string(),
 		video: {
 			let v = output["media"]["track"]
