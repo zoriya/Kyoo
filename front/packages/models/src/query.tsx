@@ -24,6 +24,7 @@ import {
 	QueryClient,
 	QueryFunctionContext,
 	useInfiniteQuery,
+	useMutation,
 	useQuery,
 } from "@tanstack/react-query";
 import { z } from "zod";
@@ -131,6 +132,13 @@ export const queryFn = async <Data,>(
 	return parsed.data;
 };
 
+export type MutationParam = {
+	params?: Record<string, number | string>;
+	body?: object;
+	path: string[];
+	method: "POST" | "DELETE";
+};
+
 export const createQueryClient = () =>
 	new QueryClient({
 		defaultOptions: {
@@ -140,6 +148,15 @@ export const createQueryClient = () =>
 				refetchOnWindowFocus: false,
 				refetchOnReconnect: false,
 				retry: false,
+			},
+			mutations: {
+				mutationFn: (({ method, path, body, params }: MutationParam) => {
+					return queryFn({
+						method,
+						path: toQueryKey({ path, params }),
+						body,
+					});
+				}) as any,
 			},
 		},
 	});
@@ -165,7 +182,10 @@ export type QueryPage<Props = {}, Items = unknown> = ComponentType<
 	randomItems?: Items[];
 };
 
-export const toQueryKey = <Data, Ret>(query: QueryIdentifier<Data, Ret>) => {
+export const toQueryKey = (query: {
+	path: (string | undefined)[];
+	params?: { [query: string]: boolean | number | string | string[] | undefined };
+}) => {
 	if (query.params) {
 		return [
 			...query.path,

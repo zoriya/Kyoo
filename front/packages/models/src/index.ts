@@ -19,6 +19,7 @@
  */
 
 export * from "./accounts";
+export { storage } from "./account-internal";
 export * from "./resources";
 export * from "./traits";
 export * from "./page";

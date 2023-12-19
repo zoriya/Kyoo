@@ -22,8 +22,10 @@ import "react-native-reanimated";
 
 import { PortalProvider } from "@gorhom/portal";
 import { ThemeSelector } from "@kyoo/primitives";
-import { AccountProvider, createQueryClient } from "@kyoo/models";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { DownloadProvider } from "@kyoo/ui";
+import { AccountProvider, createQueryClient, storage } from "@kyoo/models";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import i18next from "i18next";
 import { Slot } from "expo-router";
 import { getLocales } from "expo-localization";
@@ -48,7 +50,29 @@ import "@formatjs/intl-displaynames/locale-data/fr";
 import en from "../../../translations/en.json";
 import fr from "../../../translations/fr.json";
 import { useTheme } from "yoshiki/native";
-import { DownloadProvider } from "@kyoo/ui";
+import NetInfo from "@react-native-community/netinfo";
+import { onlineManager } from "@tanstack/react-query";
+
+onlineManager.setEventListener((setOnline) => {
+	return NetInfo.addEventListener((state) => {
+		setOnline(!!state.isConnected);
+	});
+});
+
+const clientStorage = {
+	setItem: (key, value) => {
+		storage.set(key, value);
+	},
+	getItem: (key) => {
+		const value = storage.getString(key);
+		return value === undefined ? null : value;
+	},
+	removeItem: (key) => {
+		storage.delete(key);
+	},
+} satisfies Partial<Storage>;
+
+export const clientPersister = createSyncStoragePersister({ storage: clientStorage });
 
 i18next.use(initReactI18next).init({
 	interpolation: {
@@ -92,7 +116,14 @@ export default function Root() {
 
 	if (!fontsLoaded) return null;
 	return (
-		<QueryClientProvider client={queryClient}>
+		<PersistQueryClientProvider
+			client={queryClient}
+			persistOptions={{
+				persister: clientPersister,
+				// Only dehydrate mutations, queries are not json serializable anyways.
+				dehydrateOptions: { shouldDehydrateQuery: () => false },
+			}}
+		>
 			<ThemeSelector
 				theme={theme ?? "light"}
 				font={{
@@ -112,6 +143,6 @@ export default function Root() {
 					</AccountProvider>
 				</PortalProvider>
 			</ThemeSelector>
-		</QueryClientProvider>
+		</PersistQueryClientProvider>
 	);
 }

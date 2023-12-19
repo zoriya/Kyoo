@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { WatchStatusV, queryFn, useAccount } from "@kyoo/models";
+import { MutationParam, WatchStatusV, useAccount } from "@kyoo/models";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useCallback } from "react";
 import { useAtomValue } from "jotai";
@@ -34,20 +34,23 @@ export const WatchStatusObserver = ({
 }) => {
 	const account = useAccount();
 	const queryClient = useQueryClient();
-	const { mutate } = useMutation({
-		mutationFn: (seconds: number) =>
-			queryFn({
-				path: [
-					type,
-					slug,
-					"watchStatus",
-					`?status=${WatchStatusV.Watching}&watchedTime=${Math.round(seconds)}`,
-				],
-				method: "POST",
-			}),
+	const { mutate: _mutate } = useMutation<unknown, Error, MutationParam>({
+		mutationKey: [type, slug, "watchStatus"],
 		onSettled: async () =>
 			await queryClient.invalidateQueries({ queryKey: [type === "episode" ? "show" : type, slug] }),
 	});
+	const mutate = useCallback(
+		(seconds: number) =>
+			_mutate({
+				method: "POST",
+				path: [type, slug, "watchStatus"],
+				params: {
+					status: WatchStatusV.Watching,
+					watchedTime: Math.round(seconds),
+				},
+			}),
+		[_mutate, type, slug],
+	);
 	const readProgress = useAtomCallback(
 		useCallback((get) => {
 			const currCount = get(progressAtom);

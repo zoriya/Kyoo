@@ -144,7 +144,7 @@ export const AccountProvider = ({
 
 export const useAccount = () => {
 	const acc = useContext(AccountContext);
-	return acc.find((x) => x.selected);
+	return acc.find((x) => x.selected) || null;
 };
 
 export const useAccounts = () => {

@@ -18,16 +18,26 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { NavbarTitle } from "@kyoo/ui";
-import { Stack } from "expo-router";
+import { Account, ConnectionErrorContext, useAccount } from "@kyoo/models";
+import { NavbarProfile, NavbarTitle } from "@kyoo/ui";
+import { Redirect, Stack } from "expo-router";
+import { useContext, useRef } from "react";
 import { useTheme } from "yoshiki/native";
 
 export default function PublicLayout() {
 	const theme = useTheme();
+	const account = useAccount();
+	const { error } = useContext(ConnectionErrorContext);
+	const oldAccount = useRef<Account | null>(null);
+
+	if (account && !error && account != oldAccount.current) return <Redirect href="/" />;
+	oldAccount.current = account;
+
 	return (
 		<Stack
 			screenOptions={{
 				headerTitle: () => <NavbarTitle />,
+				headerRight: () => <NavbarProfile />,
 				contentStyle: {
 					backgroundColor: theme.background,
 				},
