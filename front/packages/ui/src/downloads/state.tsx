@@ -186,8 +186,7 @@ const download = (
 	const path = `${RNBackgroundDownloader.directories.documents}/${slug}-${id}.${extension}`;
 	const task = RNBackgroundDownloader.download({
 		id: id,
-		// TODO: support variant qualities
-		url: `${account.apiUrl}/video/${type}/${slug}/direct`,
+		url: `${account.apiUrl}/video/${type}/${slug}/offline?quality=${account.settings.downloadQuality}`,
 		destination: path,
 		headers: {
 			Authorization: account.token.access_token,
@@ -218,7 +217,12 @@ export const useDownloader = () => {
 			}
 
 			const [task, path] = download(
-				{ type, slug, id: data.id, extension: info.extension },
+				{
+					type,
+					slug,
+					id: data.id,
+					extension: info.extension,
+				},
 				account,
 			);
 			setDownloads((x) => [

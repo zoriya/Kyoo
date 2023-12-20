@@ -18,7 +18,17 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { QueryIdentifier, QueryPage, User, UserP, setUserTheme, useUserTheme } from "@kyoo/models";
+import {
+	MutationParam,
+	QueryIdentifier,
+	QueryPage,
+	User,
+	UserP,
+	queryFn,
+	setUserTheme,
+	useAccount,
+	useUserTheme,
+} from "@kyoo/models";
 import { Container, H1, H2, IconButton, P, Select, tooltip, ts } from "@kyoo/primitives";
 import { DefaultLayout } from "../layout";
 import { ReactNode } from "react";
@@ -26,6 +36,7 @@ import { useTranslation } from "react-i18next";
 import { Platform, ScrollView, ToastAndroid, View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 import Info from "@material-symbols/svg-400/rounded/info.svg";
+import { QueryClient, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const Preference = ({
 	label,
@@ -71,13 +82,25 @@ const Preference = ({
 	);
 };
 
-const query: QueryIdentifier<User> = {
-	parser: UserP,
-	path: ["auth", "me"],
-};
-
 export const SettingsPage: QueryPage = () => {
 	const { t } = useTranslation();
+
+	const account = useAccount();
+	const queryClient = useQueryClient();
+	const { mutate: setUserSetting } = useMutation({
+		mutationFn: ({ key, value }: { key: string; value: string }) =>
+			queryFn({
+				method: "PATCH",
+				path: ["auth", "me"],
+				body: {
+					settings: {
+						...account!.settings,
+						[key]: value,
+					},
+				},
+			}),
+		onSettled: async () => await queryClient.invalidateQueries({ queryKey: ["auth", "me"] }),
+	});
 
 	const theme = useUserTheme("auto");
 	return (
@@ -93,25 +116,26 @@ export const SettingsPage: QueryPage = () => {
 					/>
 				</Preference>
 
-				<H2>{t("settings.downloads.title")}</H2>
-				<Preference
-					label={t("settings.downloads.quality.label")}
-					info={t("settings.downloads.quality.info")}
-				>
-					<Select
-						label={t("settings.downloads.quality.label")}
-						value={"original"}
-						// TODO: Implement this setter
-						onValueChange={(value) => {}}
-						values={["original", "8k", "4k", "1440p", "1080p", "720p", "480p", "360p", "240p"]}
-						getLabel={(key) => (key === "original" ? t("player.direct") : key)}
-					/>
-				</Preference>
+				{account && (
+					<>
+						<H2>{t("settings.downloads.title")}</H2>
+						<Preference
+							label={t("settings.downloads.quality.label")}
+							info={t("settings.downloads.quality.info")}
+						>
+							<Select
+								label={t("settings.downloads.quality.label")}
+								value={account.settings.downloadQuality}
+								onValueChange={(value) => setUserSetting({ key: "downloadQuality", value })}
+								values={["original", "8k", "4k", "1440p", "1080p", "720p", "480p", "360p", "240p"]}
+								getLabel={(key) => (key === "original" ? t("player.direct") : key)}
+							/>
+						</Preference>
+					</>
+				)}
 			</Container>
 		</ScrollView>
 	);
 };
 
 SettingsPage.getLayout = DefaultLayout;
-
-SettingsPage.getFetchUrls = () => [query];
