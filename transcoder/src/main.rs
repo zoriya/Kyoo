@@ -11,12 +11,14 @@ use utoipa::OpenApi;
 
 use crate::{
 	audio::*,
+	downloads::*,
 	identify::{identify, Audio, Chapter, MediaInfo, Subtitle, Video},
 	state::Transcoder,
 	transcode::Quality,
 	video::*,
 };
 mod audio;
+mod downloads;
 mod error;
 mod identify;
 mod paths;
@@ -178,6 +180,7 @@ async fn get_swagger() -> String {
 			identify_resource,
 			get_attachment,
 			get_subtitle,
+			get_offline,
 		),
 		components(schemas(MediaInfo, Video, Audio, Subtitle, Chapter, Quality))
 	)]
@@ -208,6 +211,7 @@ async fn main() -> std::io::Result<()> {
 			.service(get_swagger)
 			.service(get_attachment)
 			.service(get_subtitle)
+			.service(get_offline)
 	})
 	.bind(("0.0.0.0", 7666))?
 	.run()
