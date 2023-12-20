@@ -59,6 +59,7 @@
 		"switchToList": "Switch to list view"
 	},
 	"misc": {
+		"settings": "Settings",
 		"prev-page": "Previous page",
 		"next-page": "Next page",
 		"delete": "Delete",
@@ -70,6 +71,14 @@
 		"browse": "Browse",
 		"search": "Search",
 		"login": "Login"
+	},
+	"settings": {
+		"theme": {
+			"label": "Theme",
+			"system": "System",
+			"light": "Light",
+			"dark": "Dark"
+		}
 	},
 	"player": {
 		"back": "Back",
