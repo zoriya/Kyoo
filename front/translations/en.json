@@ -75,7 +75,7 @@
 	"settings": {
 		"theme": {
 			"label": "Theme",
-			"system": "System",
+			"auto": "System",
 			"light": "Light",
 			"dark": "Dark"
 		}

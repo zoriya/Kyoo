@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { z } from "zod";
+import { ZodObject, ZodRawShape, z } from "zod";
 import { Account, AccountP } from "./accounts";
 import { MMKV } from "react-native-mmkv";
 
@@ -34,21 +34,25 @@ const writeAccounts = (accounts: Account[]) => {
 	storage.set("accounts", JSON.stringify(accounts));
 };
 
-export const setAccountCookie = (account?: Account) => {
-	let value = JSON.stringify(account);
+export const setCookie = (key: string, val?: unknown) => {
+	let value = JSON.stringify(val);
 	// Remove illegal values from json. There should not be one in the account anyways.
 	value = value?.replaceAll(";", "");
 	const d = new Date();
 	// A year
 	d.setTime(d.getTime() + 365 * 24 * 60 * 60 * 1000);
 	const expires = value ? "expires=" + d.toUTCString() : "expires=Thu, 01 Jan 1970 00:00:01 GMT";
-	document.cookie = "account=" + value + ";" + expires + ";path=/;samesite=strict";
+	document.cookie = key + "=" + value + ";" + expires + ";path=/;samesite=strict";
 	return null;
 };
 
-export const readAccountCookie = (cookies?: string) => {
+export const readCookie = <T extends ZodRawShape>(
+	cookies: string | undefined,
+	key: string,
+	parser?: ZodObject<T>,
+) => {
 	if (!cookies) return null;
-	const name = "account=";
+	const name = `${key}=`;
 	const decodedCookie = decodeURIComponent(cookies);
 	const ca = decodedCookie.split(";");
 	for (let i = 0; i < ca.length; i++) {
@@ -58,7 +62,8 @@ export const readAccountCookie = (cookies?: string) => {
 		}
 		if (c.indexOf(name) == 0) {
 			const str = c.substring(name.length, c.length);
-			return AccountP.parse(JSON.parse(str));
+			const ret = JSON.parse(str);
+			return parser ? parser.parse(ret) : ret;
 		}
 	}
 	return null;

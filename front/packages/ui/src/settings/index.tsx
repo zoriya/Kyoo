@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { QueryIdentifier, QueryPage, User, UserP } from "@kyoo/models";
+import { QueryIdentifier, QueryPage, User, UserP, setUserTheme, useUserTheme } from "@kyoo/models";
 import { Container, P, Select, ts } from "@kyoo/primitives";
 import { DefaultLayout } from "../layout";
 import { ReactNode } from "react";
@@ -56,15 +56,16 @@ const query: QueryIdentifier<User> = {
 export const SettingsPage: QueryPage = () => {
 	const { t } = useTranslation();
 
+	const theme = useUserTheme("auto");
 	return (
 		<ScrollView>
 			<Container>
 				<Preference label={t("settings.theme.label")}>
 					<Select
 						label={t("settings.theme.label")}
-						value="system"
-						onValueChange={() => {}}
-						values={["system", "light", "dark"]}
+						value={theme}
+						onValueChange={(value) => setUserTheme(value)}
+						values={["auto", "light", "dark"]}
 						getLabel={(key) => t(`settings.theme.${key}`)}
 					/>
 				</Preference>

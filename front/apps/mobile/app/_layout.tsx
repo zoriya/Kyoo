@@ -23,7 +23,7 @@ import "react-native-reanimated";
 import { PortalProvider } from "@gorhom/portal";
 import { ThemeSelector } from "@kyoo/primitives";
 import { DownloadProvider } from "@kyoo/ui";
-import { AccountProvider, createQueryClient, storage } from "@kyoo/models";
+import { AccountProvider, createQueryClient, storage, useUserTheme } from "@kyoo/models";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import i18next from "i18next";
@@ -111,8 +111,11 @@ SplashScreen.preventAutoHideAsync();
 
 export default function Root() {
 	const [queryClient] = useState(() => createQueryClient());
-	const theme = useColorScheme();
+	let theme = useUserTheme();
+	const systemTheme = useColorScheme();
 	const [fontsLoaded] = useFonts({ Poppins_300Light, Poppins_400Regular, Poppins_900Black });
+
+	if (theme === "auto") theme = systemTheme ?? "light";
 
 	if (!fontsLoaded) return null;
 	return (
@@ -125,7 +128,7 @@ export default function Root() {
 			}}
 		>
 			<ThemeSelector
-				theme={theme ?? "light"}
+				theme={theme}
 				font={{
 					normal: "Poppins_400Regular",
 					"300": "Poppins_300Light",
