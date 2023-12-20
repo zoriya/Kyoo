@@ -7,6 +7,7 @@
 		"mobile": "yarn workspace mobile dev",
 		"build:web": "yarn workspace web build",
 		"build:mobile": "yarn workspace mobile build",
+		"build:mobile:apk": "yarn workspace mobile build:apk",
 		"build:mobile:dev": "yarn workspace mobile build:dev",
 		"update": "yarn workspace mobile update",
 		"lint": "eslint .",

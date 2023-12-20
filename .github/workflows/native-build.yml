@@ -1,9 +1,6 @@
 name: Native build
 on:
   push:
-    branches:
-      - master
-      - next
     tags:
      - v*
 
@@ -43,7 +40,7 @@ jobs:
         run: yarn install --immutable
 
       - name: Build Mobile Release
-        run: yarn build:mobile | tee log.txt
+        run: yarn build:mobile:apk | tee log.txt
 
       - name: Parse Asset URL
         id: url
