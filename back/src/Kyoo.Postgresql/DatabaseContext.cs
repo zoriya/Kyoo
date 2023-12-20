@@ -315,6 +315,18 @@ namespace Kyoo.Postgresql
 			_HasAddedDate<Episode>(modelBuilder);
 			_HasAddedDate<User>(modelBuilder);
 
+			modelBuilder
+				.Entity<User>()
+				.Property(x => x.Settings)
+				.HasConversion(
+					v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+					v =>
+						JsonSerializer.Deserialize<Dictionary<string, string>>(
+							v,
+							(JsonSerializerOptions?)null
+						)!
+				)
+				.HasColumnType("json");
 			modelBuilder.Entity<User>().OwnsOne(x => x.Logo);
 
 			modelBuilder
