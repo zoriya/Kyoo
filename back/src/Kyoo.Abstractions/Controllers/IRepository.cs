@@ -187,11 +187,11 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="id">The id of the resource to edit</param>
 		/// <param name="patch">
 		/// A method that will be called when you need to update every properties that you want to
-		/// persist. It can return false to abort the process via an ArgumentException
+		/// persist.
 		/// </param>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The resource edited and completed by database's information (related items and so on)</returns>
-		Task<T> Patch(Guid id, Func<T, Task<bool>> patch);
+		Task<T> Patch(Guid id, Func<T, T> patch);
 
 		/// <summary>
 		/// Called when a resource has been edited.

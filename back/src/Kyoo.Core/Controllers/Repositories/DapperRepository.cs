@@ -217,5 +217,5 @@ public abstract class DapperRepository<T> : IRepository<T>
 	public Task<T> Edit(T edited) => throw new NotImplementedException();
 
 	/// <inheritdoc />
-	public Task<T> Patch(Guid id, Func<T, Task<bool>> patch) => throw new NotImplementedException();
+	public Task<T> Patch(Guid id, Func<T, T> patch) => throw new NotImplementedException();
 }
