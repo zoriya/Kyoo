@@ -2,12 +2,18 @@ use std::str::FromStr;
 
 use actix_files::NamedFile;
 use actix_web::{get, web};
+use serde::Deserialize;
 
 use crate::{
 	error::ApiError,
 	paths,
 	transcode::{transcode_for_offline, Quality},
 };
+
+#[derive(Debug, Deserialize)]
+struct QualityParam {
+	quality: Option<String>,
+}
 
 /// Download item
 ///
@@ -26,9 +32,15 @@ use crate::{
 	)
 )]
 #[get("/{resource}/{slug}/offline")]
-async fn get_offline(query: web::Path<(String, String, String)>) -> Result<NamedFile, ApiError> {
-	let (resource, slug, quality) = query.into_inner();
-	let quality = Quality::from_str(quality.as_str()).map_err(|_| ApiError::BadRequest {
+async fn get_offline(
+	path: web::Path<(String, String)>,
+	query: web::Query<QualityParam>,
+) -> Result<NamedFile, ApiError> {
+	let (resource, slug) = path.into_inner();
+	let quality_str = query.into_inner().quality.ok_or(ApiError::BadRequest {
+		error: "Quality needs to be specified".to_string(),
+	})?;
+	let quality = Quality::from_str(quality_str.as_str()).map_err(|_| ApiError::BadRequest {
 		error: "Invalid quality".to_string(),
 	})?;
 

@@ -43,7 +43,6 @@ namespace Kyoo.Core.Api
 		[Permission("video", Kind.Read)]
 		public Task Proxy(string rest, [FromQuery] Dictionary<string, string> query)
 		{
-			// TODO: Use an env var to configure transcoder:7666.
 			return this.HttpProxyAsync($"http://transcoder:7666/{rest}" + query.ToQueryString());
 		}
 	}
