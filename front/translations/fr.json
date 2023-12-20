@@ -80,6 +80,13 @@
 			"auto": "Système",
 			"light": "Clair",
 			"dark": "Sombre"
+		},
+		"downloads": {
+			"title": "Téléchargements",
+			"quality": {
+				"label": "Qualité",
+				"info": "Les films et épisodes téléchargés seront automatiquement convertis et téléchargés dans la qualité sélectionnée."
+			}
 		}
 	},
 	"player": {

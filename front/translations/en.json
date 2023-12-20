@@ -80,6 +80,13 @@
 			"auto": "System",
 			"light": "Light",
 			"dark": "Dark"
+		},
+		"downloads": {
+			"title": "Downloads",
+			"quality": {
+				"label": "Quality",
+				"info": "Movies and episodes downloaded will automatically be converted and downloaded in the selected quality."
+			}
 		}
 	},
 	"player": {
