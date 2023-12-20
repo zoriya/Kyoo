@@ -33,6 +33,7 @@ export * from "./progress";
 export * from "./slider";
 export * from "./alert";
 export * from "./menu";
+export * from "./select";
 export * from "./input";
 export * from "./button";
 export * from "./chip";
