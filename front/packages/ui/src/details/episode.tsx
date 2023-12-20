@@ -62,6 +62,10 @@ export const displayRuntime = (runtime: number) => {
 	return `${Math.floor(runtime / 60)}h${runtime % 60}`;
 };
 
+export const displayAirDate = (airDate: Date) => {
+	return airDate.toLocaleDateString("en-US");
+};
+
 export const EpisodeBox = ({
 	slug,
 	showSlug,
@@ -248,9 +252,6 @@ export const EpisodeLine = ({
 				props,
 			)}
 		>
-			<P {...css({ width: rem(4), flexShrink: 0, m: ts(1), textAlign: "center" })}>
-				{isLoading ? <Skeleton variant="filltext" /> : displayNumber}
-			</P>
 			<ImageBackground
 				src={thumbnail}
 				quality="low"
@@ -298,7 +299,7 @@ export const EpisodeLine = ({
 					<Skeleton>
 						{isLoading || (
 							<H6 aria-level={undefined} {...css([{ flexShrink: 1 }, "title"])}>
-								{name ?? t("show.episodeNoMetadata")}
+								{[displayNumber, name ?? t("show.episodeNoMetadata")].join(" · ")}
 							</H6>
 						)}
 					</Skeleton>
@@ -306,7 +307,13 @@ export const EpisodeLine = ({
 						{isLoading ||
 							(runtime && (
 								<Skeleton>
-									{isLoading || <SubP {...css({ flexShrink: 0 })}>{displayRuntime(runtime)}</SubP>}
+									{isLoading || (
+										<SubP {...css({ flexShrink: 0 })}>
+											{[releaseDate ? displayAirDate(releaseDate) : null, displayRuntime(runtime)]
+												.filter((item) => item != null)
+												.join(" · ")}
+										</SubP>
+									)}
 								</Skeleton>
 							))}
 					</View>
