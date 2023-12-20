@@ -221,7 +221,10 @@ export const useDownloader = () => {
 				{ type, slug, id: data.id, extension: info.extension },
 				account,
 			);
-			setDownloads((x) => [...x, setupDownloadTask({ data, info, path }, task, store, queryClient)]);
+			setDownloads((x) => [
+				...x,
+				setupDownloadTask({ data, info, path }, task, store, queryClient),
+			]);
 		} catch (e) {
 			console.error("download error", e);
 			ToastAndroid.show(`Error downloading ${slug}`, ToastAndroid.LONG);
