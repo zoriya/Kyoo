@@ -18,13 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./navbar";
-export { HomePage } from "./home";
-export { BrowsePage } from "./browse";
-export { MovieDetails, ShowDetails } from "./details";
-export { CollectionPage } from "./collection";
-export { Player } from "./player";
-export { SearchPage } from "./search";
-export { LoginPage, RegisterPage } from "./login";
-export { DownloadPage, DownloadProvider } from "./downloads";
-export { SettingsPage } from "./settings";
+import { SettingsPage } from "@kyoo/ui";
+
+export default SettingsPage;
+

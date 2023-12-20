@@ -28,7 +28,7 @@ export default function PublicLayout() {
 	const theme = useTheme();
 	const account = useAccount();
 	const { error } = useContext(ConnectionErrorContext);
-	const oldAccount = useRef<Account | null>(null);
+	const oldAccount = useRef<Account | null>(account);
 
 	if (account && !error && account != oldAccount.current) return <Redirect href="/" />;
 	oldAccount.current = account;

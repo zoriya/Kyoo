@@ -41,6 +41,7 @@ import Login from "@material-symbols/svg-400/rounded/login.svg";
 import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
 import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import Delete from "@material-symbols/svg-400/rounded/delete.svg";
+import Settings from "@material-symbols/svg-400/rounded/settings.svg";
 import { KyooLongLogo } from "./icon";
 import { forwardRef, useEffect, useRef, useState } from "react";
 
@@ -118,6 +119,7 @@ export const NavbarProfile = () => {
 				/>
 			))}
 			{accounts.length > 0 && <HR />}
+			<Menu.Item label={t("misc.settings")} icon={Settings} href="/settings" />
 			{!account ? (
 				<>
 					<Menu.Item label={t("login.login")} icon={Login} href="/login" />
@@ -178,7 +180,7 @@ export const NavbarRight = () => {
 };
 
 export const Navbar = (props: Stylable) => {
-	const { css, theme } = useYoshiki();
+	const { css } = useYoshiki();
 	const { t } = useTranslation();
 
 	return (
