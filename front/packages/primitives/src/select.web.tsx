@@ -19,7 +19,7 @@
  */
 
 import * as RSelect from "@radix-ui/react-select";
-import { ReactNode, forwardRef } from "react";
+import { forwardRef } from "react";
 import { Icon } from "./icons";
 import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
 import ExpandMore from "@material-symbols/svg-400/rounded/expand_more-fill.svg";
@@ -33,15 +33,17 @@ import { P } from "./text";
 import { focusReset, ts } from "./utils";
 
 export const Select = ({
-	children,
 	label,
 	value,
 	onValueChange,
+	values,
+	getLabel,
 }: {
-	children: ReactNode;
 	label: string;
 	value: string;
 	onValueChange: (v: string) => void;
+	values: string[];
+	getLabel: (key: string) => string;
 }) => {
 	const { css } = useNativeYoshiki();
 
@@ -92,7 +94,11 @@ export const Select = ({
 									<RSelect.ScrollUpButton asChild>
 										<Icon icon={ExpandLess} />
 									</RSelect.ScrollUpButton>
-									<RSelect.Viewport>{children}</RSelect.Viewport>
+									<RSelect.Viewport>
+										{values.map((x) => (
+											<Item key={x} label={getLabel(x)} value={x} />
+										))}
+									</RSelect.Viewport>
 									<RSelect.ScrollDownButton asChild>
 										<Icon icon={ExpandMore} />
 									</RSelect.ScrollDownButton>
@@ -126,6 +132,8 @@ const Item = forwardRef<HTMLDivElement, { label: string; value: string }>(functi
 					{
 						display: "flex",
 						alignItems: "center",
+						paddingTop: "8px",
+						paddingBottom: "8px",
 						paddingLeft: "35px",
 						paddingRight: "25px",
 						height: "32px",
@@ -156,4 +164,3 @@ const Item = forwardRef<HTMLDivElement, { label: string; value: string }>(functi
 		</>
 	);
 });
-Select.Item = Item;
