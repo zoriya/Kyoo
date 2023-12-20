@@ -39,7 +39,7 @@ import { atom, useSetAtom, PrimitiveAtom, useStore } from "jotai";
 import { getCurrentAccount, storage } from "@kyoo/models/src/account-internal";
 import { ReactNode, useEffect } from "react";
 import { Platform, ToastAndroid } from "react-native";
-import { useQueryClient } from "@tanstack/react-query";
+import { QueryClient, useQueryClient } from "@tanstack/react-query";
 import { Router } from "expo-router/build/types";
 import { z } from "zod";
 
@@ -82,6 +82,7 @@ const setupDownloadTask = (
 	state: { data: Episode | Movie; info: WatchInfo; path: string },
 	task: DownloadTask,
 	store: ReturnType<typeof useStore>,
+	queryClient: QueryClient,
 	stateAtom?: PrimitiveAtom<State>,
 ) => {
 	if (!stateAtom) stateAtom = atom({} as State);
@@ -115,7 +116,7 @@ const setupDownloadTask = (
 				},
 				getCurrentAccount()!,
 			);
-			setupDownloadTask({ ...state, path }, newTask, store, stateAtom);
+			setupDownloadTask({ ...state, path }, newTask, store, queryClient, stateAtom);
 		},
 	});
 
@@ -135,7 +136,7 @@ const setupDownloadTask = (
 			}));
 		})
 		.done(() => {
-			update((x) => ({ ...x, progress: 100, status: "DONE" }));
+			update((x) => ({ ...x, progress: 100, status: "DONE", play: playFn(state, queryClient) }));
 			// apparently this is needed for ios /shrug i'm totaly gona forget this
 			// if i ever implement ios so keeping this here
 			if (Platform.OS === "ios") RNBackgroundDownloader.completeHandler(task.id);
@@ -201,6 +202,7 @@ const download = (
 export const useDownloader = () => {
 	const setDownloads = useSetAtom(downloadAtom);
 	const store = useStore();
+	const queryClient = useQueryClient();
 
 	return async (type: "episode" | "movie", slug: string) => {
 		try {
@@ -219,13 +221,27 @@ export const useDownloader = () => {
 				{ type, slug, id: data.id, extension: info.extension },
 				account,
 			);
-			setDownloads((x) => [...x, setupDownloadTask({ data, info, path }, task, store)]);
+			setDownloads((x) => [...x, setupDownloadTask({ data, info, path }, task, store, queryClient)]);
 		} catch (e) {
 			console.error("download error", e);
 			ToastAndroid.show(`Error downloading ${slug}`, ToastAndroid.LONG);
 		}
 	};
 };
+
+const playFn =
+	(dl: { data: Episode | Movie; info: WatchInfo; path: string }, queryClient: QueryClient) =>
+	(router: Router) => {
+		dl.data.links.direct = dl.path;
+		dl.data.links.hls = null;
+		queryClient.setQueryData(toQueryKey(Player.query(dl.data.kind, dl.data.slug)), dl.data);
+		queryClient.setQueryData(toQueryKey(Player.infoQuery(dl.data.kind, dl.data.slug)), dl.info);
+		router.push(
+			dl.data.kind === "episode"
+				? { pathname: "/watch/[slug]", params: { slug: dl.data.slug } }
+				: { pathname: "/movie/[slug]/watch", params: { slug: dl.data.slug } },
+		);
+	};
 
 export const DownloadProvider = ({ children }: { children: ReactNode }) => {
 	const store = useStore();
@@ -240,7 +256,7 @@ export const DownloadProvider = ({ children }: { children: ReactNode }) => {
 				JSON.parse(storage.getString("downloads") ?? "[]");
 			const downloads = dls.map((dl) => {
 				const t = tasks.find((x) => x.id == dl.data.id);
-				if (t) return setupDownloadTask(dl, t, store);
+				if (t) return setupDownloadTask(dl, t, store, queryClient);
 
 				const stateAtom = atom({
 					status: dl.state.status === "DONE" ? "DONE" : "FAILED",
@@ -249,20 +265,7 @@ export const DownloadProvider = ({ children }: { children: ReactNode }) => {
 					availableSize: dl.state.availableSize,
 					pause: null,
 					resume: null,
-					play: (router: Router) => {
-						dl.data.links.direct = dl.path;
-						dl.data.links.hls = null;
-						queryClient.setQueryData(toQueryKey(Player.query(dl.data.kind, dl.data.slug)), dl.data);
-						queryClient.setQueryData(
-							toQueryKey(Player.infoQuery(dl.data.kind, dl.data.slug)),
-							dl.info,
-						);
-						router.push(
-							dl.data.kind === "episode"
-								? { pathname: "/watch/[slug]", params: { slug: dl.data.slug } }
-								: { pathname: "/movie/[slug]/watch", params: { slug: dl.data.slug } },
-						);
-					},
+					play: playFn(dl, queryClient),
 					remove: () => {
 						deleteAsync(dl.path);
 						store.set(downloadAtom, (x) => x.filter((y) => y.data.id !== dl.data.id));
@@ -277,7 +280,7 @@ export const DownloadProvider = ({ children }: { children: ReactNode }) => {
 							},
 							getCurrentAccount()!,
 						);
-						setupDownloadTask({ ...dl, path }, newTask, store, stateAtom);
+						setupDownloadTask({ ...dl, path }, newTask, store, queryClient, stateAtom);
 					},
 				} as State);
 				return {
