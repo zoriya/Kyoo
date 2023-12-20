@@ -17,12 +17,30 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
+using System.Reflection;
+using Kyoo.Abstractions.Models;
+using Newtonsoft.Json.Linq;
 
 namespace Kyoo.Models;
 
-public class PartialResource
+public class Patch<T> : Dictionary<string, JObject>
+	where T : class, IResource
 {
-	public Guid? Id { get; set; }
+	public Guid? Id => this.GetValueOrDefault(nameof(IResource.Id))?.ToObject<Guid>();
 
-	public string? Slug { get; set; }
+	public string? Slug => this.GetValueOrDefault(nameof(IResource.Slug))?.ToObject<string>();
+
+	public T Apply(T current)
+	{
+		foreach ((string property, JObject value) in this)
+		{
+			PropertyInfo prop = typeof(T).GetProperty(
+				property,
+				BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance
+			)!;
+			prop.SetValue(current, value.ToObject(prop.PropertyType));
+		}
+		return current;
+	}
 }

@@ -497,7 +497,7 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc/>
-		public virtual async Task<T> Patch(Guid id, Func<T, Task<bool>> patch)
+		public virtual async Task<T> Patch(Guid id, Func<T, T> patch)
 		{
 			bool lazyLoading = Database.ChangeTracker.LazyLoadingEnabled;
 			Database.ChangeTracker.LazyLoadingEnabled = false;
@@ -505,8 +505,7 @@ namespace Kyoo.Core.Controllers
 			{
 				T resource = await GetWithTracking(id);
 
-				if (!await patch(resource))
-					throw new ArgumentException("Could not patch resource");
+				resource = patch(resource);
 
 				await Database.SaveChangesAsync();
 				await IRepository<T>.OnResourceEdited(resource);

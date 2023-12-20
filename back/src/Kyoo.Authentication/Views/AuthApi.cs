@@ -246,7 +246,7 @@ namespace Kyoo.Authentication.Views
 		/// <remarks>
 		/// Edit only provided informations about the currently authenticated user.
 		/// </remarks>
-		/// <param name="user">The new data for the current user.</param>
+		/// <param name="patch">The new data for the current user.</param>
 		/// <returns>The currently authenticated user after modifications.</returns>
 		/// <response code="401">The user is not authenticated.</response>
 		/// <response code="403">The given access token is invalid.</response>
@@ -255,14 +255,14 @@ namespace Kyoo.Authentication.Views
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
-		public async Task<ActionResult<User>> PatchMe(PartialResource user)
+		public async Task<ActionResult<User>> PatchMe([FromBody] Patch<User> patch)
 		{
 			Guid userId = User.GetIdOrThrow();
 			try
 			{
-				if (user.Id.HasValue && user.Id != userId)
+				if (patch.Id.HasValue && patch.Id != userId)
 					throw new ArgumentException("Can't edit your user id.");
-				return await _users.Patch(userId, TryUpdateModelAsync);
+				return await _users.Patch(userId, patch.Apply);
 			}
 			catch (ItemNotFoundException)
 			{

@@ -180,7 +180,7 @@ namespace Kyoo.Core.Api
 		/// Edit only specified properties of an item. If the ID is specified it will be used to identify the resource.
 		/// If not, the slug will be used to identify it.
 		/// </remarks>
-		/// <param name="resource">The resource to patch.</param>
+		/// <param name="patch">The resource to patch.</param>
 		/// <returns>The edited resource.</returns>
 		/// <response code="400">The resource in the request body is invalid.</response>
 		/// <response code="404">No item found with the specified ID (or slug).</response>
@@ -189,17 +189,17 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<T>> Patch([FromBody] PartialResource resource)
+		public async Task<ActionResult<T>> Patch([FromBody] Patch<T> patch)
 		{
-			if (resource.Id.HasValue)
-				return await Repository.Patch(resource.Id.Value, TryUpdateModelAsync);
-			if (resource.Slug == null)
+			if (patch.Id.HasValue)
+				return await Repository.Patch(patch.Id.Value, patch.Apply);
+			if (patch.Slug == null)
 				throw new ArgumentException(
 					"Either the Id or the slug of the resource has to be defined to edit it."
 				);
 
-			T old = await Repository.Get(resource.Slug);
-			return await Repository.Patch(old.Id, TryUpdateModelAsync);
+			T old = await Repository.Get(patch.Slug);
+			return await Repository.Patch(old.Id, patch.Apply);
 		}
 
 		/// <summary>
