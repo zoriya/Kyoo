@@ -64,7 +64,9 @@
 		"next-page": "Page suivante",
 		"delete": "Supprimer",
 		"cancel": "Annuler",
-		"more": "Plus"
+		"more": "Plus",
+		"expand": "Développer",
+		"collapse": "Replier"
 	},
 	"navbar": {
 		"home": "Accueil",
