@@ -21,4 +21,3 @@
 import { SettingsPage } from "@kyoo/ui";
 
 export default SettingsPage;
-
