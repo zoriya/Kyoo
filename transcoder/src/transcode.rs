@@ -315,7 +315,6 @@ pub async fn transcode_for_offline(path: String, quality: Quality) -> Result<Pat
 	cmd.args(&["-progress", "pipe:1"])
 		.args(&["-nostats", "-hide_banner", "-loglevel", "warning"])
 		.args(&["-i", path.as_str()])
-		.args(&["-f", "mkv"])
 		.args(get_transcode_video_quality_args(&quality, 0))
 		.args(&["-map", "0:a?", "-c:a", "aac", "-ac", "2", "-b:a", "128k"])
 		// also include subtitles, font attachments and chapters.
@@ -359,7 +358,7 @@ pub fn get_dl_path(path: &String, quality: Quality) -> String {
 	path.hash(&mut hasher);
 	quality.hash(&mut hasher);
 	let hash = hasher.finish();
-	format!("/cache/dl-{hash:x}")
+	format!("/cache/dl-{hash:x}.mkv")
 }
 
 pub struct TranscodeInfo {
