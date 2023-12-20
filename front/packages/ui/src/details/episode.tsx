@@ -62,10 +62,6 @@ export const displayRuntime = (runtime: number) => {
 	return `${Math.floor(runtime / 60)}h${runtime % 60}`;
 };
 
-export const displayAirDate = (airDate: Date) => {
-	return airDate.toLocaleDateString("en-US");
-};
-
 export const EpisodeBox = ({
 	slug,
 	showSlug,
@@ -109,6 +105,9 @@ export const EpisodeBox = ({
 						more: {
 							opacity: 0,
 						},
+						less: {
+							display: "flex",
+						},
 					},
 					fover: {
 						self: focusReset,
@@ -120,6 +119,9 @@ export const EpisodeBox = ({
 						},
 						more: {
 							opacity: 1,
+						},
+						less: {
+							display: "none",
 						},
 					},
 				},
@@ -306,16 +308,34 @@ export const EpisodeLine = ({
 					<View {...css({ flexDirection: "row", alignItems: "center" })}>
 						{isLoading ||
 							(runtime && (
-								<Skeleton>
+								<Skeleton {...css(["less"])}>
 									{isLoading || (
-										<SubP {...css({ flexShrink: 0 })}>
-											{[releaseDate ? displayAirDate(releaseDate) : null, displayRuntime(runtime)]
+										<SubP>
+											{/* Source https://www.i18next.com/translation-function/formatting#datetime */}
+											{[
+												releaseDate ? t("{{val, datetime}}", { val: releaseDate }) : null,
+												displayRuntime(runtime),
+											]
 												.filter((item) => item != null)
 												.join(" · ")}
 										</SubP>
 									)}
 								</Skeleton>
 							))}
+						{slug && watchedStatus !== undefined && (
+							<EpisodesContext
+								slug={slug}
+								showSlug={showSlug}
+								status={watchedStatus}
+								isOpen={moreOpened}
+								setOpen={(v) => setMoreOpened(v)}
+								{...css([
+									"more",
+									{ display: "flex", marginLeft: ts(3) },
+									Platform.OS === "web" && moreOpened && { display: important("flex") },
+								])}
+							/>
+						)}
 					</View>
 				</View>
 				<View {...css({ flexDirection: "row" })}>
@@ -331,20 +351,6 @@ export const EpisodeLine = ({
 							setDescriptionExpanded((isExpanded) => !isExpanded);
 						}}
 					/>
-					{slug && watchedStatus !== undefined && (
-						<EpisodesContext
-							slug={slug}
-							showSlug={showSlug}
-							status={watchedStatus}
-							isOpen={moreOpened}
-							setOpen={(v) => setMoreOpened(v)}
-							{...css([
-								"more",
-								{ display: "flex", marginLeft: ts(3) },
-								Platform.OS === "web" && moreOpened && { display: important("flex") },
-							])}
-						/>
-					)}
 				</View>
 			</View>
 		</Link>
