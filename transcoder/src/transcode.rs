@@ -160,7 +160,7 @@ fn get_transcode_video_quality_args(quality: &Quality, segment_time: u32) -> Vec
 	vec![
 		// superfast or ultrafast would produce a file extremly big so we prever veryfast.
 		vec![
-			"-map", "0:V:0", "-c:v", "libx264", "-crf", "21", "-preset", "veryfast",
+			"-map", "0:V:0", "-c:v", "libx264", "-crf", "22", "-preset", "veryfast",
 		],
 		vec![
 			"-vf",
