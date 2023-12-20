@@ -25,12 +25,14 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { HiddenIfNoJs, TouchOnlyCss, SkeletonCss, ThemeSelector } from "@kyoo/primitives";
 import { WebTooltip } from "@kyoo/primitives/src/tooltip.web";
 import {
+	AccountP,
 	AccountProvider,
 	createQueryClient,
 	fetchQuery,
 	getTokenWJ,
 	QueryIdentifier,
 	QueryPage,
+	useUserTheme,
 } from "@kyoo/models";
 import { useState } from "react";
 import NextApp, { AppContext, type AppProps } from "next/app";
@@ -41,11 +43,7 @@ import Head from "next/head";
 import { withTranslations } from "../i18n";
 import arrayShuffle from "array-shuffle";
 import { Tooltip } from "react-tooltip";
-import {
-	getCurrentAccount,
-	readAccountCookie,
-	updateAccount,
-} from "@kyoo/models/src/account-internal";
+import { getCurrentAccount, readCookie, updateAccount } from "@kyoo/models/src/account-internal";
 
 const font = Poppins({ weight: ["300", "400", "900"], subsets: ["latin"], display: "swap" });
 
@@ -111,13 +109,14 @@ const YoshikiDebug = ({ children }: { children: JSX.Element }) => {
 
 const App = ({ Component, pageProps }: AppProps) => {
 	const [queryClient] = useState(() => createQueryClient());
-	const { queryState, token, randomItems, account, ...props } = superjson.deserialize<any>(
+	const { queryState, token, randomItems, account, theme, ...props } = superjson.deserialize<any>(
 		pageProps ?? { json: {} },
 	);
 	const layoutInfo = (Component as QueryPage).getLayout ?? (({ page }) => page);
 	const { Layout, props: layoutProps } =
 		typeof layoutInfo === "function" ? { Layout: layoutInfo, props: {} } : layoutInfo;
 
+	const userTheme = useUserTheme(theme);
 	useMobileHover();
 
 	// Set the auth from the server (if the token was refreshed during SSR).
@@ -136,7 +135,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 				<QueryClientProvider client={queryClient}>
 					<AccountProvider ssrAccount={account}>
 						<HydrationBoundary state={queryState}>
-							<ThemeSelector theme="auto" font={{ normal: "inherit" }}>
+							<ThemeSelector theme={userTheme} font={{ normal: "inherit" }}>
 								<GlobalCssTheme />
 								<Layout
 									page={
@@ -183,11 +182,12 @@ App.getInitialProps = async (ctx: AppContext) => {
 		...(getLayoutUrl ? getLayoutUrl(ctx.router.query as any, items) : []),
 	];
 
-	const account = readAccountCookie(ctx.ctx.req?.headers.cookie);
-	const [authToken, token] = await getTokenWJ(account ?? null);
+	const account = readCookie(ctx.ctx.req?.headers.cookie, "account", AccountP);
+	const [authToken, token] = await getTokenWJ(account);
 	appProps.pageProps.queryState = await fetchQuery(urls, authToken);
 	appProps.pageProps.token = token;
 	appProps.pageProps.account = account;
+	appProps.pageProps.theme = readCookie(ctx.ctx.req?.headers.cookie, "theme") ?? "auto";
 
 	return { pageProps: superjson.serialize(appProps.pageProps) };
 };

@@ -23,7 +23,7 @@ import ExpandMore from "@material-symbols/svg-400/rounded/expand_more-fill.svg";
 import { Menu } from "./menu";
 import { Button } from "./button";
 
-export const Select = ({
+export const Select = <Value extends string>({
 	label,
 	value,
 	onValueChange,
@@ -31,10 +31,10 @@ export const Select = ({
 	getLabel,
 }: {
 	label: string;
-	value: string;
-	onValueChange: (v: string) => void;
-	values: string[];
-	getLabel: (key: string) => string;
+	value: Value;
+	onValueChange: (v: Value) => void;
+	values: Value[];
+	getLabel: (key: Value) => string;
 }) => {
 	return (
 		<Menu Trigger={Button} text={getLabel(value)} icon={<Icon icon={ExpandMore} />}>
@@ -43,7 +43,7 @@ export const Select = ({
 					key={x}
 					label={getLabel(x)}
 					selected={x === value}
-					onSelect={() => onValueChange(value)}
+					onSelect={() => onValueChange(x)}
 				/>
 			))}
 		</Menu>

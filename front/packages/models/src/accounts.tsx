@@ -22,7 +22,7 @@ import { ReactNode, createContext, useContext, useEffect, useMemo, useRef } from
 import { User, UserP } from "./resources";
 import { z } from "zod";
 import { zdate } from "./utils";
-import { removeAccounts, setAccountCookie, updateAccount } from "./account-internal";
+import { removeAccounts, setCookie, updateAccount } from "./account-internal";
 import { useMMKVString } from "react-native-mmkv";
 import { Platform } from "react-native";
 import { useFetch } from "./query";
@@ -122,7 +122,7 @@ export const AccountProvider = ({
 		oldSelectedId.current = selected?.id;
 
 		// update cookies for ssr (needs to contains token, theme, language...)
-		if (Platform.OS === "web") setAccountCookie(selected);
+		if (Platform.OS === "web") setCookie("account", selected);
 	}, [selected, queryClient]);
 
 	return (
