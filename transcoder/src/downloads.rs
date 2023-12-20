@@ -35,6 +35,15 @@ async fn get_offline(query: web::Path<(String, String, String)>) -> Result<Named
 	let path = paths::get_path(resource, slug)
 		.await
 		.map_err(|_| ApiError::NotFound)?;
+	if quality == Quality::Original {
+		return NamedFile::open_async(path).await.map_err(|e| {
+			eprintln!(
+				"Unhandled error occured while openning the direct stream: {}",
+				e
+			);
+			ApiError::InternalError
+		});
+	}
 	transcode_for_offline(path, quality)
 		.await
 		.map_err(|e| {
