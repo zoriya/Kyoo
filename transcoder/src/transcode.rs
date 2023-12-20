@@ -1,3 +1,4 @@
+use cached::proc_macro::cached;
 use derive_more::Display;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
@@ -23,7 +24,7 @@ pub enum TranscodeError {
 	ArgumentError(String),
 }
 
-#[derive(PartialEq, Eq, Serialize, Display, Clone, Copy, ToSchema)]
+#[derive(Hash, PartialEq, Eq, Serialize, Display, Clone, Copy, ToSchema)]
 pub enum Quality {
 	#[display(fmt = "240p")]
 	P240,
@@ -306,6 +307,37 @@ async fn start_transcode(
 	}
 }
 
+// cache for 1 hour
+#[cached(sync_writes = true, time = 3600)]
+pub async fn transcode_for_offline(path: String, quality: Quality) -> Result<PathBuf, String> {
+	let out = get_dl_path(&path, quality);
+	let mut cmd = Command::new("ffmpeg");
+	cmd.args(&["-progress", "pipe:1"])
+		.args(&["-nostats", "-hide_banner", "-loglevel", "warning"])
+		.args(&["-i", path.as_str()])
+		.args(&["-f", "mkv"])
+		.args(get_transcode_video_quality_args(&quality, 0))
+		.args(&["-map", "0:a?", "-c:a", "aac", "-ac", "2", "-b:a", "128k"])
+		// also include subtitles, font attachments and chapters.
+		.args(&["-map", "0:s?"])
+		.args(&["-map", "0:d?"])
+		.args(&["-map", "0:t?"])
+		.arg(&out)
+		.stdout(Stdio::null())
+		.stderr(Stdio::piped());
+	println!("Starting a transcode with the command: {:?}", cmd);
+
+	let mut child = cmd.spawn().expect("ffmpeg failed to start");
+	let ret = child.wait().await.unwrap();
+	match ret.success() {
+		true => Ok(PathBuf::from(out)),
+		false => {
+			let output = child.wait_with_output().await.unwrap();
+			Err(String::from_utf8(output.stderr).unwrap())
+		}
+	}
+}
+
 pub fn get_audio_path(path: &String, audio: u32) -> String {
 	let mut hasher = DefaultHasher::new();
 	path.hash(&mut hasher);
@@ -320,6 +352,14 @@ pub fn get_cache_path(info: &TranscodeInfo) -> PathBuf {
 
 pub fn get_cache_path_from_uuid(uuid: &String) -> PathBuf {
 	return PathBuf::from(format!("/cache/{uuid}/", uuid = &uuid));
+}
+
+pub fn get_dl_path(path: &String, quality: Quality) -> String {
+	let mut hasher = DefaultHasher::new();
+	path.hash(&mut hasher);
+	quality.hash(&mut hasher);
+	let hash = hasher.finish();
+	format!("/cache/dl-{hash:x}")
 }
 
 pub struct TranscodeInfo {

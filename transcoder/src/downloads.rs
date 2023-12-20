@@ -1,12 +1,12 @@
 use std::str::FromStr;
 
-use actix_web::{get, web, HttpRequest};
+use actix_files::NamedFile;
+use actix_web::{get, web};
 
 use crate::{
 	error::ApiError,
 	paths,
-	state::Transcoder,
-	transcode::{Quality, TranscodeError},
+	transcode::{transcode_for_offline, Quality},
 };
 
 /// Download item
@@ -26,11 +26,7 @@ use crate::{
 	)
 )]
 #[get("/{resource}/{slug}/offline")]
-async fn get_offline(
-	req: HttpRequest,
-	query: web::Path<(String, String, String)>,
-	transcoder: web::Data<Transcoder>,
-) -> Result<String, ApiError> {
+async fn get_offline(query: web::Path<(String, String, String)>) -> Result<NamedFile, ApiError> {
 	let (resource, slug, quality) = query.into_inner();
 	let quality = Quality::from_str(quality.as_str()).map_err(|_| ApiError::BadRequest {
 		error: "Invalid quality".to_string(),
@@ -39,24 +35,19 @@ async fn get_offline(
 	let path = paths::get_path(resource, slug)
 		.await
 		.map_err(|_| ApiError::NotFound)?;
-	transcoder
-		.download(path, quality)
+	transcode_for_offline(path, quality)
 		.await
-		.map_err(|e| match e {
-			TranscodeError::ArgumentError(err) => ApiError::BadRequest { error: err },
-			TranscodeError::FFmpegError(err) => {
-				eprintln!(
-					"Unhandled ffmpeg error occured while transcoding video: {}",
-					err
-				);
+		.map_err(|e| {
+			eprintln!(
+				"Unhandled ffmpeg error occured while transcoding for offline: {}",
+				e
+			);
+			ApiError::InternalError
+		})
+		.and_then(|path| {
+			NamedFile::open(path).map_err(|err| {
+				eprintln!("Transcode for offline file does not exist: {}", err);
 				ApiError::InternalError
-			}
-			TranscodeError::ReadError(err) => {
-				eprintln!(
-					"Unhandled read error occured while transcoding video: {}",
-					err
-				);
-				ApiError::InternalError
-			}
+			})
 		})
 }
