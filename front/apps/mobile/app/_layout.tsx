@@ -126,6 +126,10 @@ export default function Root() {
 				// Only dehydrate mutations, queries are not json serializable anyways.
 				dehydrateOptions: { shouldDehydrateQuery: () => false },
 			}}
+			onSuccess={async () => {
+				await queryClient.resumePausedMutations();
+				queryClient.invalidateQueries();
+			}}
 		>
 			<ThemeSelector
 				theme={theme}
