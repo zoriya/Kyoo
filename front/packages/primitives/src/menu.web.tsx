@@ -32,11 +32,11 @@ import { focusReset, ts } from "./utils";
 import { SvgProps } from "react-native-svg";
 
 type YoshikiFunc<T> = (props: ReturnType<typeof useYoshiki>) => T;
-const YoshikiProvider = ({ children }: { children: YoshikiFunc<ReactNode> }) => {
+export const YoshikiProvider = ({ children }: { children: YoshikiFunc<ReactNode> }) => {
 	const yoshiki = useYoshiki();
 	return <>{children(yoshiki)}</>;
 };
-const InternalTriger = forwardRef<unknown, any>(function _Triger(
+export const InternalTriger = forwardRef<unknown, any>(function _Triger(
 	{ Component, ComponentProps, ...props },
 	ref,
 ) {
