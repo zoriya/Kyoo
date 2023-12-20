@@ -17,6 +17,7 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
@@ -68,11 +69,10 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public Image? Logo { get; set; }
 
-		// /// <summary>
-		// /// The user's watch list.
-		// /// </summary>
-		// // [SerializeIgnore]
-		// // public ICollection<WatchInfo>? Watchlist { get; set; }
+		/// <summary>
+		/// User settings
+		/// </summary>
+		public Dictionary<string, string> Settings { get; set; } = new();
 
 		public User() { }
 
