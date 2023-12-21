@@ -105,9 +105,6 @@ export const EpisodeBox = ({
 						more: {
 							opacity: 0,
 						},
-						less: {
-							display: "flex",
-						},
 					},
 					fover: {
 						self: focusReset,
@@ -119,9 +116,6 @@ export const EpisodeBox = ({
 						},
 						more: {
 							opacity: 1,
-						},
-						less: {
-							display: "none",
 						},
 					},
 				},
@@ -308,7 +302,7 @@ export const EpisodeLine = ({
 					<View {...css({ flexDirection: "row", alignItems: "center" })}>
 						{isLoading ||
 							(runtime && (
-								<Skeleton {...css(["less"])}>
+								<Skeleton>
 									{isLoading || (
 										<SubP>
 											{/* Source https://www.i18next.com/translation-function/formatting#datetime */}
