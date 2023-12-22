@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use actix_files::NamedFile;
-use actix_web::{get, web};
+use actix_web::{get, web, HttpResponse};
 use serde::Deserialize;
 
 use crate::{
@@ -66,9 +66,6 @@ async fn get_offline(
 			ApiError::InternalError
 		})
 		.and_then(|path| {
-			NamedFile::open(path).map_err(|err| {
-				eprintln!("Transcode for offline file does not exist: {}", err);
-				ApiError::InternalError
-			})
+			HttpResponse::Ok().streaming(stream)
 		})
 }

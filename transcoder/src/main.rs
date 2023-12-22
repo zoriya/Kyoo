@@ -20,6 +20,7 @@ use crate::{
 mod audio;
 mod downloads;
 mod error;
+mod ffmpeg_stream;
 mod identify;
 mod paths;
 mod state;

@@ -3,6 +3,7 @@ use derive_more::Display;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use serde::Serialize;
+use tokio::fs::File;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::path::PathBuf;
@@ -327,6 +328,13 @@ pub async fn transcode_for_offline(path: String, quality: Quality) -> Result<Pat
 	println!("Starting a transcode with the command: {:?}", cmd);
 
 	let mut child = cmd.spawn().expect("ffmpeg failed to start");
+
+
+	let task = child.wait();
+	tokio::pin!(task);
+	return FileStream { task, file: File::open(out) };
+
+	return Ok(PathBuf::from(out));
 	let ret = child.wait().await.unwrap();
 	match ret.success() {
 		true => Ok(PathBuf::from(out)),
