@@ -21,6 +21,7 @@
 import {
 	focusReset,
 	H6,
+	IconButton,
 	ImageBackground,
 	ImageProps,
 	important,
@@ -28,6 +29,7 @@ import {
 	P,
 	Skeleton,
 	SubP,
+	tooltip,
 	ts,
 } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
@@ -38,6 +40,8 @@ import { KyooImage, WatchStatusV } from "@kyoo/models";
 import { ItemProgress } from "../browse/grid";
 import { EpisodesContext } from "../components/context-menus";
 import { useState } from "react";
+import ExpandMore from "@material-symbols/svg-400/rounded/expand_more-fill.svg";
+import ExpandLess from "@material-symbols/svg-400/rounded/expand_less-fill.svg";
 
 export const episodeDisplayNumber = (
 	episode: {
@@ -99,7 +103,7 @@ export const EpisodeBox = ({
 							borderStyle: "solid",
 						},
 						more: {
-							display: "none",
+							opacity: 0,
 						},
 					},
 					fover: {
@@ -111,7 +115,7 @@ export const EpisodeBox = ({
 							textDecorationLine: "underline",
 						},
 						more: {
-							display: "flex",
+							opacity: 1,
 						},
 					},
 				},
@@ -214,6 +218,7 @@ export const EpisodeLine = ({
 	PressableProps &
 	Stylable) => {
 	const [moreOpened, setMoreOpened] = useState(false);
+	const [descriptionExpanded, setDescriptionExpanded] = useState(false);
 	const { css } = useYoshiki("episode-line");
 	const { t } = useTranslation();
 
@@ -227,7 +232,7 @@ export const EpisodeLine = ({
 					flexDirection: "row",
 					child: {
 						more: {
-							display: "none",
+							opacity: 0,
 						},
 					},
 					fover: {
@@ -236,16 +241,13 @@ export const EpisodeLine = ({
 							textDecorationLine: "underline",
 						},
 						more: {
-							display: "flex",
+							opacity: 1,
 						},
 					},
 				},
 				props,
 			)}
 		>
-			<P {...css({ width: rem(4), flexShrink: 0, m: ts(1), textAlign: "center" })}>
-				{isLoading ? <Skeleton variant="filltext" /> : displayNumber}
-			</P>
 			<ImageBackground
 				src={thumbnail}
 				quality="low"
@@ -293,32 +295,56 @@ export const EpisodeLine = ({
 					<Skeleton>
 						{isLoading || (
 							<H6 aria-level={undefined} {...css([{ flexShrink: 1 }, "title"])}>
-								{name ?? t("show.episodeNoMetadata")}
+								{[displayNumber, name ?? t("show.episodeNoMetadata")].join(" · ")}
 							</H6>
 						)}
 					</Skeleton>
-					{isLoading ||
-						(runtime && (
-							<Skeleton>
-								{isLoading || <SubP {...css({ flexShrink: 0 })}>{displayRuntime(runtime)}</SubP>}
-							</Skeleton>
-						))}
+					<View {...css({ flexDirection: "row", alignItems: "center" })}>
+						{isLoading ||
+							(runtime && (
+								<Skeleton>
+									{isLoading || (
+										<SubP>
+											{/* Source https://www.i18next.com/translation-function/formatting#datetime */}
+											{[
+												releaseDate ? t("{{val, datetime}}", { val: releaseDate }) : null,
+												displayRuntime(runtime),
+											]
+												.filter((item) => item != null)
+												.join(" · ")}
+										</SubP>
+									)}
+								</Skeleton>
+							))}
+						{slug && watchedStatus !== undefined && (
+							<EpisodesContext
+								slug={slug}
+								showSlug={showSlug}
+								status={watchedStatus}
+								isOpen={moreOpened}
+								setOpen={(v) => setMoreOpened(v)}
+								{...css([
+									"more",
+									{ display: "flex", marginLeft: ts(3) },
+									Platform.OS === "web" && moreOpened && { display: important("flex") },
+								])}
+							/>
+						)}
+					</View>
 				</View>
 				<View {...css({ flexDirection: "row" })}>
-					<Skeleton>{isLoading || <P numberOfLines={3}>{overview}</P>}</Skeleton>
-					{slug && watchedStatus !== undefined && (
-						<EpisodesContext
-							slug={slug}
-							showSlug={showSlug}
-							status={watchedStatus}
-							isOpen={moreOpened}
-							setOpen={(v) => setMoreOpened(v)}
-							{...css([
-								"more",
-								Platform.OS === "web" && moreOpened && { display: important("flex") },
-							])}
-						/>
-					)}
+					<Skeleton>
+						{isLoading || <P numberOfLines={descriptionExpanded ? undefined : 3}>{overview}</P>}
+					</Skeleton>
+					<IconButton
+						{...css(["more"])}
+						icon={descriptionExpanded ? ExpandLess : ExpandMore}
+						{...tooltip(t(descriptionExpanded ? "misc.collapse" : "misc.expand"))}
+						onPress={(e) => {
+							e.preventDefault();
+							setDescriptionExpanded((isExpanded) => !isExpanded);
+						}}
+					/>
 				</View>
 			</View>
 		</Link>

@@ -74,6 +74,8 @@ import { WatchListInfo } from "../components/watchlist-info";
 import { WatchStatusV } from "@kyoo/models/src/resources/watch-status";
 import { capitalize } from "@kyoo/primitives";
 import { ShowWatchStatusCard } from "./show";
+import Download from "@material-symbols/svg-400/rounded/download.svg";
+import { useDownloader } from "../downloads";
 
 export const TitleLine = ({
 	isLoading,
@@ -107,6 +109,7 @@ export const TitleLine = ({
 } & Stylable) => {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
+	const downloader = useDownloader();
 
 	return (
 		<Container
@@ -237,6 +240,14 @@ export const TitleLine = ({
 								slug={slug}
 								status={watchStatus}
 								color={{ xs: theme.user.contrast, md: theme.colors.white }}
+							/>
+						)}
+						{type === "movie" && slug && (
+							<IconButton
+								icon={Download}
+								onPress={() => downloader(type, slug)}
+								color={{ xs: theme.user.contrast, md: theme.colors.white }}
+								{...tooltip(t("home.episodeMore.download"))}
 							/>
 						)}
 						{rating !== null && (
