@@ -390,9 +390,9 @@ class TheMovieDatabase(Provider):
 			and (season is None or episode_nbr is None)
 			and show_id in self.absolute_episode_cache
 			and self.absolute_episode_cache[show_id] is not None
-			and absolute in self.absolute_episode_cache[show_id]
-		):
 			# Using absolute - 1 since the array is 0based (absolute episode 1 is at index 0)
+			and len(self.absolute_episode_cache[show_id]) >= absolute
+		):
 			season = self.absolute_episode_cache[show_id][absolute - 1]["season_number"]
 			episode_nbr = self.absolute_episode_cache[show_id][absolute - 1][
 				"episode_number"
