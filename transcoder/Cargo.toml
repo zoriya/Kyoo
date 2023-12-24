@@ -16,3 +16,4 @@ json = "0.12.4"
 cached = { version = "0.46.1", features = ["async"] }
 pin-project = "1.1.3"
 futures = "0.3.29"
+async-stream = "0.3.5"
