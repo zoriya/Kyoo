@@ -85,6 +85,8 @@ public abstract class DapperRepository<T> : IRepository<T>
 	/// <inheritdoc />
 	public async Task<ICollection<T>> FromIds(IList<Guid> ids, Include<T>? include = null)
 	{
+		if (!ids.Any())
+			return Array.Empty<T>();
 		return (
 			await Database.Query<T>(
 				Sql,
