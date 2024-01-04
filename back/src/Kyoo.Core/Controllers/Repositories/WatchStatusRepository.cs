@@ -378,7 +378,9 @@ public class WatchStatusRepository : IWatchStatusRepository
 								}
 						)
 						.Where(x => x.Status == null || x.Status.Status != WatchStatus.Completed)
-						.Select(x => x.Id)
+						// The as Guid? is here to add the nullability status of the queryable.
+						// Without this, FirstOrDefault returns new Guid() when no result is found (which is 16 0s and invalid in sql).
+						.Select(x => x.Id as Guid?)
 						.FirstOrDefaultAsync();
 		}
 		else if (status == WatchStatus.Completed)
