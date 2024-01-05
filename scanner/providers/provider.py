@@ -17,13 +17,15 @@ Self = TypeVar("Self", bound="Provider")
 class Provider:
 	@classmethod
 	def get_all(cls: type[Self], client: ClientSession) -> list[Self]:
-		from providers.implementations.themoviedatabase import TheMovieDatabase
-
 		providers = []
 
+		from providers.implementations.thexem import TheXem
+		xem = TheXem(client)
+
+		from providers.implementations.themoviedatabase import TheMovieDatabase
 		tmdb = os.environ.get("THEMOVIEDB_APIKEY")
 		if tmdb:
-			providers.append(TheMovieDatabase(client, tmdb))
+			providers.append(TheMovieDatabase(client, tmdb, xem))
 
 		if not any(providers):
 			raise ProviderError(
