@@ -15,7 +15,6 @@ class IdMapper:
 		self.language = language
 		self._tmdb = tmdb
 
-	@cache(ttl=timedelta(days=1))
 	async def get_show(
 		self, show: dict[str, MetadataID], *, required: Optional[List[str]] = None
 	):
