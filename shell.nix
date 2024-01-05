@@ -6,6 +6,7 @@
       sdk_7_0
       aspnetcore_7_0
     ];
+  python = pkgs.python312;
 in
   pkgs.mkShell {
     packages = with pkgs; [
@@ -14,8 +15,8 @@ in
       nodePackages.eas-cli
       nodePackages.expo-cli
       dotnet
-      python3
-      python3Packages.pip
+      python
+      python312Packages.pip
       cargo
       cargo-watch
       rustfmt
@@ -37,7 +38,7 @@ in
       # Install python modules
       SOURCE_DATE_EPOCH=$(date +%s)
       if [ ! -d "${venvDir}" ]; then
-          ${pkgs.python3}/bin/python3 -m venv ${toString ./.}/${venvDir}
+          ${python}/bin/python3 -m venv ${toString ./.}/${venvDir}
           source ${venvDir}/bin/activate
           export PIP_DISABLE_PIP_VERSION_CHECK=1
           pip install -r ${pythonPkgs} >&2
