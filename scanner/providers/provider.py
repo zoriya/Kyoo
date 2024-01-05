@@ -5,7 +5,7 @@ from typing import Optional, TypeVar
 
 from providers.utils import ProviderError
 
-from .types.episode import Episode, PartialShow
+from .types.episode import Episode
 from .types.show import Show
 from .types.movie import Movie
 from .types.collection import Collection
@@ -16,21 +16,34 @@ Self = TypeVar("Self", bound="Provider")
 
 class Provider:
 	@classmethod
-	def get_all(cls: type[Self], client: ClientSession) -> list[Self]:
+	def get_all(
+		cls: type[Self], client: ClientSession, languages: list[str]
+	) -> list[Self]:
 		providers = []
 
+		from providers.idmapper import IdMapper
+
+		idmapper = IdMapper()
+
 		from providers.implementations.thexem import TheXem
+
 		xem = TheXem(client)
 
 		from providers.implementations.themoviedatabase import TheMovieDatabase
+
 		tmdb = os.environ.get("THEMOVIEDB_APIKEY")
 		if tmdb:
-			providers.append(TheMovieDatabase(client, tmdb, xem))
+			tmdb = TheMovieDatabase(client, tmdb, xem, idmapper)
+			providers.append(tmdb)
+		else:
+			tmdb = None
 
 		if not any(providers):
 			raise ProviderError(
 				"No provider configured. You probably forgot to specify an API Key"
 			)
+
+		idmapper.init(tmdb=tmdb, language=languages[0])
 
 		return providers
 
@@ -45,7 +58,9 @@ class Provider:
 		raise NotImplementedError
 
 	@abstractmethod
-	async def identify_show(self, show: PartialShow, *, language: list[str]) -> Show:
+	async def identify_show(
+		self, show_id: str, *, original_language: Optional[str], language: list[str]
+	) -> Show:
 		raise NotImplementedError
 
 	@abstractmethod

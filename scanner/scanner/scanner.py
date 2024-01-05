@@ -28,7 +28,7 @@ class Scanner:
 		except Exception as e:
 			self._ignore_pattern = re.compile("")
 			logging.error(f"Invalid ignore pattern. Ignoring. Error: {e}")
-		self.provider = Provider.get_all(client)[0]
+		self.provider = Provider.get_all(client, languages)[0]
 		self.cache = {"shows": {}, "seasons": {}, "collections": {}}
 		self.languages = languages
 
@@ -156,7 +156,11 @@ class Scanner:
 		async def create_show(_: str):
 			# TODO: Check if a show with the same metadata id exists already on kyoo.
 			show = (
-				await self.provider.identify_show(episode.show, language=self.languages)
+				await self.provider.identify_show(
+					episode.show.external_id[self.provider.name].data_id,
+					original_language=episode.show.original_language,
+					language=self.languages,
+				)
 				if isinstance(episode.show, PartialShow)
 				else episode.show
 			)
