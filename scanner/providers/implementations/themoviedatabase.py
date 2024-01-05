@@ -1,6 +1,5 @@
 import asyncio
 import logging
-from sys import orig_argv
 from aiohttp import ClientSession
 from datetime import datetime, timedelta
 from typing import Awaitable, Callable, Dict, List, Optional, Any, TypeVar
