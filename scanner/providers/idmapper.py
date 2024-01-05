@@ -5,6 +5,8 @@ if TYPE_CHECKING:
 	from providers.implementations.themoviedatabase import TheMovieDatabase
 
 from typing import List, Optional
+from datetime import timedelta
+from scanner.cache import cache
 from providers.types.metadataid import MetadataID
 
 
@@ -13,6 +15,7 @@ class IdMapper:
 		self.language = language
 		self._tmdb = tmdb
 
+	@cache(ttl=timedelta(days=1))
 	async def get_show(
 		self, show: dict[str, MetadataID], *, required: Optional[List[str]] = None
 	):

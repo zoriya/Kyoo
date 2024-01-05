@@ -1,12 +1,13 @@
 import asyncio
 import logging
 from aiohttp import ClientSession
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Awaitable, Callable, Dict, List, Optional, Any, TypeVar
 from providers.idmapper import IdMapper
 from providers.implementations.thexem import TheXem
 
 from providers.utils import ProviderError
+from scanner.cache import cache
 
 from ..provider import Provider
 from ..types.movie import Movie, MovieTranslation, Status as MovieStatus
@@ -373,6 +374,26 @@ class TheMovieDatabase(Provider):
 			},
 		)
 
+	@cache(ttl=timedelta(days=1))
+	async def search_show(self, name: str, year: Optional[int]):
+		search_results = (
+			await self.get("search/tv", params={"query": name, "year": year})
+		)["results"]
+		if len(search_results) == 0:
+			raise ProviderError(f"No result for a tv show named: {name}")
+		search = self.get_best_result(search_results, name, year)
+		show_id = search["id"]
+		return PartialShow(
+			name=search["name"],
+			original_language=search["original_language"],
+			external_id={
+				self.name: MetadataID(
+					show_id, f"https://www.themoviedb.org/tv/{show_id}"
+				)
+			},
+		)
+
+
 	async def identify_episode(
 		self,
 		name: str,
@@ -383,23 +404,11 @@ class TheMovieDatabase(Provider):
 		*,
 		language: list[str],
 	) -> Episode:
-		search_results = (
-			await self.get("search/tv", params={"query": name, "year": year})
-		)["results"]
-		if len(search_results) == 0:
-			raise ProviderError(f"No result for a tv show named: {name}")
-		search = self.get_best_result(search_results, name, year)
-		show_id = search["id"]
-		show = PartialShow(
-			original_language=search["original_language"],
-			external_id={
-				self.name: MetadataID(
-					show_id, f"https://www.themoviedb.org/tv/{show_id}"
-				)
-			},
-		)
-		if search["original_language"] not in language:
-			language.append(search["original_language"])
+		show = await self.search_show(name, year)
+		if show.original_language not in language:
+			language.append(show.original_language)
+		name = show.name
+		show_id = show.external_id[self.name].data_id
 
 		# Handle weird season names overrides from thexem.
 		# For example when name is "Jojo's bizzare adventure - Stone Ocean", with season None,
@@ -461,7 +470,7 @@ class TheMovieDatabase(Provider):
 				params={
 					"language": lng,
 				},
-				not_found_fail=f"Could not find episode {episode_nbr} of season {season} of serie {search['name']}",
+				not_found_fail=f"Could not find episode {episode_nbr} of season {season} of serie {name}",
 			)
 			logging.debug("TMDb responded: %s", episode)
 

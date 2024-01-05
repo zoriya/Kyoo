@@ -1,12 +1,12 @@
 {pkgs ? import <nixpkgs> {}}: let
   venvDir = "./scanner/.venv";
+  python = pkgs.python312;
   pythonPkgs = ./scanner/requirements.txt;
   dotnet = with pkgs.dotnetCorePackages;
     combinePackages [
       sdk_7_0
       aspnetcore_7_0
     ];
-  python = pkgs.python312;
 in
   pkgs.mkShell {
     packages = with pkgs; [
@@ -16,6 +16,7 @@ in
       nodePackages.expo-cli
       dotnet
       python
+      python312Packages.setuptools
       python312Packages.pip
       cargo
       cargo-watch
