@@ -2,7 +2,6 @@ import asyncio
 from datetime import datetime, timedelta
 from functools import wraps
 from typing import Any, Optional, Tuple
-from providers.utils import ProviderError
 
 type Cache = dict[Any, Tuple[Optional[asyncio.Event], Optional[datetime], Any]]
 
