@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from sys import orig_argv
 from aiohttp import ClientSession
 from datetime import datetime, timedelta
 from typing import Awaitable, Callable, Dict, List, Optional, Any, TypeVar
@@ -222,6 +223,7 @@ class TheMovieDatabase(Provider):
 		ret.external_id = await self._idmapper.get_movie(ret.external_id)
 		return ret
 
+	@cache(ttl=timedelta(days=1))
 	async def identify_show(
 		self,
 		show_id: str,
@@ -375,12 +377,36 @@ class TheMovieDatabase(Provider):
 		)
 
 	@cache(ttl=timedelta(days=1))
-	async def search_show(self, name: str, year: Optional[int]):
+	async def search_show(self, name: str, year: Optional[int]) -> PartialShow:
 		search_results = (
 			await self.get("search/tv", params={"query": name, "year": year})
 		)["results"]
+
 		if len(search_results) == 0:
-			raise ProviderError(f"No result for a tv show named: {name}")
+			(new_name, tvdbid) = await self._xem.get_show_override("tvdb", name)
+			if new_name is None or tvdbid is None or name.lower() == new_name.lower():
+				raise ProviderError(f"No result for a tv show named: {name}")
+			ret = PartialShow(
+				name=new_name,
+				original_language=None,
+				external_id={
+					"tvdb": MetadataID(tvdbid, link=None),
+				},
+			)
+			ret.external_id = await self._idmapper.get_show(
+				ret.external_id, required=[self.name]
+			)
+
+			if self.name in ret.external_id:
+				return ret
+			logging.warn(
+				"Could not map xem exception to themoviedb, searching instead for %s",
+				new_name,
+			)
+			nret = await self.search_show(new_name, year)
+			nret.external_id = {**ret.external_id, **nret.external_id}
+			return nret
+
 		search = self.get_best_result(search_results, name, year)
 		show_id = search["id"]
 		return PartialShow(
@@ -393,7 +419,6 @@ class TheMovieDatabase(Provider):
 			},
 		)
 
-
 	async def identify_episode(
 		self,
 		name: str,
@@ -405,8 +430,10 @@ class TheMovieDatabase(Provider):
 		language: list[str],
 	) -> Episode:
 		show = await self.search_show(name, year)
-		if show.original_language not in language:
+		if show.original_language and show.original_language not in language:
 			language.append(show.original_language)
+		# Keep it for xem overrides of season/episode
+		old_name = name
 		name = show.name
 		show_id = show.external_id[self.name].data_id
 
@@ -414,14 +441,14 @@ class TheMovieDatabase(Provider):
 		# For example when name is "Jojo's bizzare adventure - Stone Ocean", with season None,
 		# We want something like season 6 ep 3.
 		if season is None and absolute is not None:
-			ids = await self._idmapper.get_show(show.external_id, required=["tmdbid"])
+			ids = await self._idmapper.get_show(show.external_id, required=["tvdb"])
 			if ids["tvdb"] is not None:
 				(
 					tvdb_season,
 					tvdb_episode,
 					absolute,
 				) = await self._xem.get_episode_override(
-					"tvdb", ids["tvdb"].data_id, name, absolute
+					"tvdb", ids["tvdb"].data_id, old_name, absolute
 				)
 				# Most of the time, tvdb absolute and tmdb absolute are in think so we use that as our souce of truth.
 				# tvdb_season/episode are not in sync with tmdb so we discard those and use our usual absolute order fetching.

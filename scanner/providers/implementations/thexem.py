@@ -22,6 +22,7 @@ class TheXem:
 			params={
 				"origin": provider,
 				"seasonNumbers": 1,  # 1 here means true
+				"defaultNames": 1,
 			},
 		) as r:
 			r.raise_for_status()
@@ -55,13 +56,27 @@ class TheXem:
 				raise ProviderError("Could not fetch xem mapping")
 			return ret["data"]
 
+	async def get_show_override(
+		self, provider: Literal["tvdb"] | Literal["anidb"], show_name: str
+	):
+		map = await self.get_map(provider)
+		for [id, v] in map.items():
+			# Only the first element is a string (the show name) so we need to ignore the type hint
+			master_show_name: str = v[0] # type: ignore
+			for x in v[1:]:
+				[(name, season)] = x.items()
+				if show_name.lower() == name.lower():
+					return master_show_name, id
+		return None, None
+
 	async def get_season_override(
 		self, provider: Literal["tvdb"] | Literal["anidb"], id: str, show_name: str
 	):
 		map = await self.get_map(provider)
 		if id not in map:
 			return None
-		for x in map[id]:
+		# Ignore the first element, this is the show name has a string
+		for x in map[id][1:]:
 			[(name, season)] = x.items()
 			# TODO: replace .lower() with something a bit smarter
 			if show_name.lower() == name.lower():
