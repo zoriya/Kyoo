@@ -384,8 +384,11 @@ class TheMovieDatabase(Provider):
 		if search["original_language"] not in language:
 			language.append(search["original_language"])
 
-		if season is None:
-			season = await self._xem.get_season_override("tvdb", tvdbid, name)
+		# Handle weird season names overrides from thexem.
+		# For example when name is "Jojo's bizzare adventure - Stone Ocean", with season None,
+		# We want something like season 6 ep 3.
+		if season is None and absolute is not None:
+			(season, episode, absolute) = await self._xem.get_episode_override("tvdb", tvdbid, name, absolute)
 
 		if not show_id in self.absolute_episode_cache:
 			await self.get_absolute_order(show_id)
