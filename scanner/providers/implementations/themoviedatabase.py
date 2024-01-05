@@ -388,7 +388,10 @@ class TheMovieDatabase(Provider):
 		# For example when name is "Jojo's bizzare adventure - Stone Ocean", with season None,
 		# We want something like season 6 ep 3.
 		if season is None and absolute is not None:
-			(season, episode, absolute) = await self._xem.get_episode_override("tvdb", tvdbid, name, absolute)
+			(tvdb_season, tvdb_episode, absolute) = await self._xem.get_episode_override("tvdb", tvdbid, name, absolute)
+			# Most of the time, tvdb absolute and tmdb absolute are in think so we use that as our souce of truth.
+			# tvdb_season/episode are not in sync with tmdb so we discard those and use our usual absolute order fetching.
+			(_, _) = tvdb_season, tvdb_episode
 
 		if not show_id in self.absolute_episode_cache:
 			await self.get_absolute_order(show_id)
