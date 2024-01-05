@@ -1,29 +1,10 @@
 import logging
 from typing import Dict, List, Literal
 from aiohttp import ClientSession
-from datetime import timedelta, datetime
-from functools import wraps
+from datetime import timedelta
 
 from providers.utils import ProviderError
-
-
-def cache(ttl: timedelta):
-	def wrap(func):
-		time, value = None, None
-
-		@wraps(func)
-		async def wrapped(*args, **kw):
-			nonlocal time
-			nonlocal value
-			now = datetime.now()
-			if not time or now - time > ttl:
-				value = await func(*args, **kw)
-				time = now
-			return value
-
-		return wrapped
-
-	return wrap
+from scanner.cache import cache
 
 
 class TheXem:
@@ -31,7 +12,6 @@ class TheXem:
 		self._client = client
 		self.base = "https://thexem.info"
 
-	# TODO: make the cache support different providers and handle concurrent calls to the function.
 	@cache(ttl=timedelta(days=1))
 	async def get_map(
 		self, provider: Literal["tvdb"] | Literal["anidb"]
