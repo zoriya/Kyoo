@@ -108,6 +108,8 @@ def make_key(
 	if kwds:
 		key += kwd_mark
 		for item in kwds.items():
+			if isinstance(item[1], list):
+				item = (item[0], tuple(item[1]))
 			key += item
 	if typed:
 		key += tuple(type(v) for v in args)
