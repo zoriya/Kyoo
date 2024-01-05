@@ -3,6 +3,7 @@ import logging
 from aiohttp import ClientSession
 from datetime import datetime
 from typing import Awaitable, Callable, Dict, List, Optional, Any, TypeVar
+from providers.idmapper import IdMapper
 from providers.implementations.thexem import TheXem
 
 from providers.utils import ProviderError
@@ -19,10 +20,13 @@ from ..types.collection import Collection, CollectionTranslation
 
 
 class TheMovieDatabase(Provider):
-	def __init__(self, client: ClientSession, api_key: str, xem: TheXem) -> None:
+	def __init__(
+		self, client: ClientSession, api_key: str, xem: TheXem, idmapper: IdMapper
+	) -> None:
 		super().__init__()
 		self._client = client
 		self._xem = xem
+		self._idmapper = idmapper
 		self.base = "https://api.themoviedb.org/3"
 		self.api_key = api_key
 		self.genre_map = {
@@ -212,17 +216,20 @@ class TheMovieDatabase(Provider):
 			ret.translations = {lng: translation}
 			return ret
 
-		return await self.process_translations(for_language, language)
+		ret = await self.process_translations(for_language, language)
+		# If we have more external_ids freely available, add them.
+		ret.external_id = await self._idmapper.get_movie(ret.external_id)
+		return ret
 
 	async def identify_show(
 		self,
-		pshow: PartialShow,
+		show_id: str,
 		*,
+		original_language: Optional[str],
 		language: list[str],
 	) -> Show:
-		show_id = pshow.external_id[self.name].data_id
-		if pshow.original_language not in language:
-			language.append(pshow.original_language)
+		if original_language and original_language not in language:
+			language.append(original_language)
 
 		async def for_language(lng: str) -> Show:
 			show = await self.get(
@@ -290,7 +297,7 @@ class TheMovieDatabase(Provider):
 					show["images"]["posters"]
 					+ (
 						[{"file_path": show["poster_path"]}]
-						if lng == pshow.original_language
+						if lng == show["original_language"]
 						else []
 					)
 				),
@@ -299,7 +306,7 @@ class TheMovieDatabase(Provider):
 					show["images"]["backdrops"]
 					+ (
 						[{"file_path": show["backdrop_path"]}]
-						if lng == pshow.original_language
+						if lng == show["original_language"]
 						else []
 					)
 				),
@@ -333,6 +340,8 @@ class TheMovieDatabase(Provider):
 		ret = await self.process_translations(
 			for_language, language, merge_seasons_translations
 		)
+		# If we have more external_ids freely available, add them.
+		ret.external_id = await self._idmapper.get_show(ret.external_id)
 		return ret
 
 	def to_season(
@@ -381,6 +390,14 @@ class TheMovieDatabase(Provider):
 			raise ProviderError(f"No result for a tv show named: {name}")
 		search = self.get_best_result(search_results, name, year)
 		show_id = search["id"]
+		show = PartialShow(
+			original_language=search["original_language"],
+			external_id={
+				self.name: MetadataID(
+					show_id, f"https://www.themoviedb.org/tv/{show_id}"
+				)
+			},
+		)
 		if search["original_language"] not in language:
 			language.append(search["original_language"])
 
@@ -388,10 +405,18 @@ class TheMovieDatabase(Provider):
 		# For example when name is "Jojo's bizzare adventure - Stone Ocean", with season None,
 		# We want something like season 6 ep 3.
 		if season is None and absolute is not None:
-			(tvdb_season, tvdb_episode, absolute) = await self._xem.get_episode_override("tvdb", tvdbid, name, absolute)
-			# Most of the time, tvdb absolute and tmdb absolute are in think so we use that as our souce of truth.
-			# tvdb_season/episode are not in sync with tmdb so we discard those and use our usual absolute order fetching.
-			(_, _) = tvdb_season, tvdb_episode
+			ids = await self._idmapper.get_show(show.external_id, required=["tmdbid"])
+			if ids["tvdb"] is not None:
+				(
+					tvdb_season,
+					tvdb_episode,
+					absolute,
+				) = await self._xem.get_episode_override(
+					"tvdb", ids["tvdb"].data_id, name, absolute
+				)
+				# Most of the time, tvdb absolute and tmdb absolute are in think so we use that as our souce of truth.
+				# tvdb_season/episode are not in sync with tmdb so we discard those and use our usual absolute order fetching.
+				(_, _) = tvdb_season, tvdb_episode
 
 		if not show_id in self.absolute_episode_cache:
 			await self.get_absolute_order(show_id)
@@ -441,15 +466,7 @@ class TheMovieDatabase(Provider):
 			logging.debug("TMDb responded: %s", episode)
 
 			ret = Episode(
-				show=PartialShow(
-					name=search["name"],
-					original_language=search["original_language"],
-					external_id={
-						self.name: MetadataID(
-							show_id, f"https://www.themoviedb.org/tv/{show_id}"
-						)
-					},
-				),
+				show=show,
 				season_number=episode["season_number"],
 				episode_number=episode["episode_number"],
 				absolute_number=absolute,

@@ -9,7 +9,6 @@ from .metadataid import MetadataID
 
 @dataclass
 class PartialShow:
-	name: str
 	original_language: str
 	external_id: dict[str, MetadataID]
 
