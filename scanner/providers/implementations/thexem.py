@@ -41,7 +41,7 @@ class TheXem:
 			f"{self.base}/map/allNames",
 			params={
 				"origin": provider,
-				"seasonNumbers": True,
+				"seasonNumbers": 1,  # 1 here means true
 			},
 		) as r:
 			r.raise_for_status()
@@ -96,6 +96,19 @@ class TheXem:
 		episode: int,
 	):
 		master_season = await self.get_season_override(provider, id, show_name)
+
+		# -1 means this is the show's name, not season specific.
+		# we do not need to remap episodes numbers.
+		if master_season is None or master_season == -1:
+			return [None, None, episode]
+
+		logging.info(
+			"Fount xem override for show %s, ep %d. Master season: %d",
+			show_name,
+			episode,
+			master_season,
+		)
+
 		# master season is not always a direct translation with a tvdb season, we need to translate that back
 		map = await self.get_show_map(provider, id)
 		ep = next(
@@ -112,7 +125,7 @@ class TheXem:
 				"Could not get xem mapping for show %s, falling back to identifier mapping.",
 				show_name,
 			)
-			return [master_season, episode, None]
+			return [master_season, episode, episode]
 
 		# Only tvdb has a proper absolute handling so we always use this one.
 		return (ep[provider]["season"], ep[provider]["episode"], ep["tvdb"]["absolute"])
