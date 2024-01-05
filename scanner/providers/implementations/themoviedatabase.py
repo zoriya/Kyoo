@@ -3,6 +3,7 @@ import logging
 from aiohttp import ClientSession
 from datetime import datetime
 from typing import Awaitable, Callable, Dict, List, Optional, Any, TypeVar
+from providers.implementations.thexem import TheXem
 
 from providers.utils import ProviderError
 
@@ -18,9 +19,10 @@ from ..types.collection import Collection, CollectionTranslation
 
 
 class TheMovieDatabase(Provider):
-	def __init__(self, client: ClientSession, api_key: str) -> None:
+	def __init__(self, client: ClientSession, api_key: str, xem: TheXem) -> None:
 		super().__init__()
 		self._client = client
+		self._xem = xem
 		self.base = "https://api.themoviedb.org/3"
 		self.api_key = api_key
 		self.genre_map = {
@@ -381,6 +383,9 @@ class TheMovieDatabase(Provider):
 		show_id = search["id"]
 		if search["original_language"] not in language:
 			language.append(search["original_language"])
+
+		if season is None:
+			season = await self._xem.get_season_override("tvdb", tvdbid, name)
 
 		if not show_id in self.absolute_episode_cache:
 			await self.get_absolute_order(show_id)
