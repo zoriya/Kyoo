@@ -38,7 +38,7 @@ def cache(ttl: timedelta, cache: Optional[Cache] = None, typed=False):
 			if (
 				ret[2] is not None
 				and ret[1] is not None
-				and ret[1] - datetime.now() < ttl
+				and datetime.now() - ret[1] < ttl
 			):
 				return ret[2]
 
@@ -58,8 +58,8 @@ async def exec_as_cache(cache: Cache, key, f):
 		event.set()
 		raise
 
-	event.set()
 	cache[key] = (None, datetime.now(), result)
+	event.set()
 	return result
 
 
