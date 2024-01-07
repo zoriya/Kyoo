@@ -5,7 +5,7 @@ from typing import Any, Optional, Tuple
 
 type Cache = dict[Any, Tuple[Optional[asyncio.Event], Optional[datetime], Any]]
 
-def cache(ttl: timedelta, cache: Cache={}, typed=False):
+def cache(ttl: timedelta, cache: Optional[Cache] = None, typed=False):
 	"""
 	A cache decorator for async methods. If the same method is called twice with
 	the same args, the underlying method will only be called once and the first
@@ -16,6 +16,9 @@ def cache(ttl: timedelta, cache: Cache={}, typed=False):
 		ttl: how many time should the cached value be considered valid?
 
 	"""
+
+	if cache is None:
+		cache = {}
 
 	def wrap(f):
 		@wraps(f)
