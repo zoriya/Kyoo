@@ -3,9 +3,10 @@ import logging
 from aiohttp import ClientSession
 from datetime import datetime, timedelta
 from typing import Awaitable, Callable, Dict, List, Optional, Any, TypeVar
+from itertools import accumulate
+
 from providers.idmapper import IdMapper
 from providers.implementations.thexem import TheXem
-
 from providers.utils import ProviderError
 from scanner.cache import cache
 
@@ -134,7 +135,6 @@ class TheMovieDatabase(Provider):
 				},
 			)
 			logging.debug("TMDb responded: %s", movie)
-			# TODO: Use collection data
 
 			ret = Movie(
 				original_language=movie["original_language"],
@@ -350,6 +350,7 @@ class TheMovieDatabase(Provider):
 	) -> Season:
 		return Season(
 			season_number=season["season_number"],
+			episodes_count=season["episode_count"],
 			start_air=datetime.strptime(season["air_date"], "%Y-%m-%d").date()
 			if season["air_date"]
 			else None,
@@ -458,12 +459,13 @@ class TheMovieDatabase(Provider):
 			)
 
 		if season is None or episode_nbr is None:
-			# Some shows don't have absolute numbering because the default one is absolute on tmdb (for example detetive conan)
-			season = 1
-			episode_nbr = absolute
-
-		if season is None or episode_nbr is None:
-			raise ProviderError("Could not guess season or episode number of the episode %s %d-%d (%d)", name, season, episode_nbr, absolute)
+			raise ProviderError(
+				"Could not guess season or episode number of the episode %s %d-%d (%d)",
+				name,
+				season,
+				episode_nbr,
+				absolute,
+			)
 
 		if absolute is None:
 			absolute = await self.get_absolute_number(show_id, season, episode_nbr)
@@ -575,6 +577,7 @@ class TheMovieDatabase(Provider):
 			logging.exception(
 				"Could not retrieve absolute ordering information", exc_info=e
 			)
+			return None
 
 	async def get_episode_from_absolute(self, show_id: str, absolute: int):
 		absgrp = await self.get_absolute_order(show_id)
@@ -584,16 +587,26 @@ class TheMovieDatabase(Provider):
 			season = absgrp[absolute - 1]["season_number"]
 			episode_nbr = absgrp[absolute - 1]["episode_number"]
 			return (season, episode_nbr)
-		# TODO: if no group exist, simulate one by checking each season ep count and substracting the right amount to get an ep
-		# This means that we assume that each season should be played in order with no special episodes.
-		return (None, None)
+		# We assume that each season should be played in order with no special episodes.
+		show = await self.identify_show(show_id, original_language=None, language=[])
+		seasons = [x.episodes_count for x in show.seasons]
+		# enumerate(accumulate(season)) return [(0, 12), (1, 24)] if the show has two seasons with 12 eps
+		# we take the last group that has less total episodes than the absolute number.
+		(season, total_ep_count) = next(
+			(snbr, ep_cnt)
+			for snbr, ep_cnt in reversed(list(enumerate(accumulate(seasons))))
+			if ep_cnt <= absolute
+		)
+		return (show.seasons[season].season_number, absolute - total_ep_count)
 
 	async def get_absolute_number(self, show_id: str, season: int, episode_nbr: int):
 		absgrp = await self.get_absolute_order(show_id)
 		if absgrp is None:
-			# TODO: if no group exist, simulate one by checking each season ep count and adding the right amount to get an ep
-			# This means that we assume that each season should be played in order with no special episodes.
-			return None
+			# We assume that each season should be played in order with no special episodes.
+			show = await self.identify_show(
+				show_id, original_language=None, language=[]
+			)
+			return sum(x.episodes_count for x in show.seasons[:season]) + episode_nbr
 		return next(
 			(
 				# The + 1 is to go from 0based index to 1based absolute number
