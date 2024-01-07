@@ -29,7 +29,7 @@ def cache(ttl: timedelta, cache: Cache={}, typed=False):
 				ret = cache.get(key, (None, None, None))
 				if ret[2] is None:
 					# ret[2] can be None if the cached method failed. if that is the case, run again.
-					return wrapper(*args, **kwargs)
+					return await wrapper(*args, **kwargs)
 				return ret[2]
 			# Return the cached result if it exits and is not expired
 			if (
