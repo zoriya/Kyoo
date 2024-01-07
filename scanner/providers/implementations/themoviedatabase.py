@@ -50,7 +50,6 @@ class TheMovieDatabase(Provider):
 			10752: Genre.WAR,
 			37: Genre.WESTERN,
 		}
-		self.absolute_episode_cache = {}
 
 	@property
 	def name(self) -> str:
@@ -453,42 +452,21 @@ class TheMovieDatabase(Provider):
 				# tvdb_season/episode are not in sync with tmdb so we discard those and use our usual absolute order fetching.
 				(_, _) = tvdb_season, tvdb_episode
 
-		if not show_id in self.absolute_episode_cache:
-			await self.get_absolute_order(show_id)
-
-		if (
-			absolute is not None
-			and (season is None or episode_nbr is None)
-			and show_id in self.absolute_episode_cache
-			and self.absolute_episode_cache[show_id] is not None
-			# Using absolute - 1 since the array is 0based (absolute episode 1 is at index 0)
-			and len(self.absolute_episode_cache[show_id]) >= absolute
-		):
-			season = self.absolute_episode_cache[show_id][absolute - 1]["season_number"]
-			episode_nbr = self.absolute_episode_cache[show_id][absolute - 1][
-				"episode_number"
-			]
+		if absolute is not None and (season is None or episode_nbr is None):
+			(season, episode_nbr) = await self.get_episode_from_absolute(
+				show_id, absolute
+			)
 
 		if season is None or episode_nbr is None:
 			# Some shows don't have absolute numbering because the default one is absolute on tmdb (for example detetive conan)
 			season = 1
 			episode_nbr = absolute
 
-		if (
-			absolute is None
-			and show_id in self.absolute_episode_cache
-			and self.absolute_episode_cache[show_id]
-		):
-			absolute = next(
-				(
-					# The + 1 is to go from 0based index to 1based absolute number
-					i + 1
-					for i, x in enumerate(self.absolute_episode_cache[show_id])
-					if x["episode_number"] == episode_nbr
-					and x["season_number"] == season
-				),
-				None,
-			)
+		if season is None or episode_nbr is None:
+			raise ProviderError("Could not guess season or episode number of the episode %s %d-%d (%d)", name, season, episode_nbr, absolute)
+
+		if absolute is None:
+			absolute = await self.get_absolute_number(show_id, season, episode_nbr)
 
 		async def for_language(lng: str) -> Episode:
 			episode = await self.get(
@@ -566,7 +544,15 @@ class TheMovieDatabase(Provider):
 
 		return results[0]
 
+	@cache(ttl=timedelta(days=1))
 	async def get_absolute_order(self, show_id: str):
+		"""
+		TheMovieDb does not allow to fetch an episode by an absolute number but it
+		support groups where you can list episodes. One type is the absolute group
+		where everything should be on one season, this method tries to find a complete
+		absolute-ordered group and return it
+		"""
+
 		try:
 			groups = await self.get(f"tv/{show_id}/episode_groups")
 			ep_count = max((x["episode_count"] for x in groups["results"]), default=0)
@@ -581,15 +567,42 @@ class TheMovieDatabase(Provider):
 			)
 
 			if group_id is None:
-				self.absolute_episode_cache[show_id] = None
-				return
+				return None
 			group = await self.get(f"tv/episode_group/{group_id}")
 			grp = next(iter(group["groups"]), None)
-			self.absolute_episode_cache[show_id] = grp["episodes"] if grp else None
+			return grp["episodes"] if grp else None
 		except Exception as e:
 			logging.exception(
 				"Could not retrieve absolute ordering information", exc_info=e
 			)
+
+	async def get_episode_from_absolute(self, show_id: str, absolute: int):
+		absgrp = await self.get_absolute_order(show_id)
+
+		if absgrp is not None and len(absgrp) >= absolute:
+			# Using absolute - 1 since the array is 0based (absolute episode 1 is at index 0)
+			season = absgrp[absolute - 1]["season_number"]
+			episode_nbr = absgrp[absolute - 1]["episode_number"]
+			return (season, episode_nbr)
+		# TODO: if no group exist, simulate one by checking each season ep count and substracting the right amount to get an ep
+		# This means that we assume that each season should be played in order with no special episodes.
+		return (None, None)
+
+	async def get_absolute_number(self, show_id: str, season: int, episode_nbr: int):
+		absgrp = await self.get_absolute_order(show_id)
+		if absgrp is None:
+			# TODO: if no group exist, simulate one by checking each season ep count and adding the right amount to get an ep
+			# This means that we assume that each season should be played in order with no special episodes.
+			return None
+		return next(
+			(
+				# The + 1 is to go from 0based index to 1based absolute number
+				i + 1
+				for i, x in enumerate(absgrp)
+				if x["episode_number"] == episode_nbr and x["season_number"] == season
+			),
+			None,
+		)
 
 	async def identify_collection(
 		self, provider_id: str, *, language: list[str]
