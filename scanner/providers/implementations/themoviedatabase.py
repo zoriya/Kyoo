@@ -18,14 +18,21 @@ from ..types.studio import Studio
 from ..types.genre import Genre
 from ..types.metadataid import MetadataID
 from ..types.show import Show, ShowTranslation, Status as ShowStatus
+from ..types.season import Season
 from ..types.collection import Collection, CollectionTranslation
 
 
 class TheMovieDatabase(Provider):
 	def __init__(
-		self, client: ClientSession, api_key: str, xem: TheXem, idmapper: IdMapper
+		self,
+		languages,
+		client: ClientSession,
+		api_key: str,
+		xem: TheXem,
+		idmapper: IdMapper,
 	) -> None:
 		super().__init__()
+		self._languages = languages
 		self._client = client
 		self._xem = xem
 		self._idmapper = idmapper
@@ -55,6 +62,9 @@ class TheMovieDatabase(Provider):
 	@property
 	def name(self) -> str:
 		return "themoviedatabase"
+
+	def get_languages(self, *args):
+		return self._languages + list(args)
 
 	async def get(
 		self,
@@ -113,9 +123,7 @@ class TheMovieDatabase(Provider):
 			},
 		)
 
-	async def identify_movie(
-		self, name: str, year: Optional[int], *, language: list[str]
-	) -> Movie:
+	async def identify_movie(self, name: str, year: Optional[int]) -> Movie:
 		search_results = (
 			await self.get("search/movie", params={"query": name, "year": year})
 		)["results"]
@@ -123,8 +131,7 @@ class TheMovieDatabase(Provider):
 			raise ProviderError(f"No result for a movie named: {name}")
 		search = self.get_best_result(search_results, name, year)
 		movie_id = search["id"]
-		if search["original_language"] not in language:
-			language.append(search["original_language"])
+		languages = self.get_languages(search["original_language"])
 
 		async def for_language(lng: str) -> Movie:
 			movie = await self.get(
@@ -216,7 +223,7 @@ class TheMovieDatabase(Provider):
 			ret.translations = {lng: translation}
 			return ret
 
-		ret = await self.process_translations(for_language, language)
+		ret = await self.process_translations(for_language, languages)
 		# If we have more external_ids freely available, add them.
 		ret.external_id = await self._idmapper.get_movie(ret.external_id)
 		return ret
@@ -225,12 +232,8 @@ class TheMovieDatabase(Provider):
 	async def identify_show(
 		self,
 		show_id: str,
-		*,
-		original_language: Optional[str],
-		language: list[str],
 	) -> Show:
-		if original_language and original_language not in language:
-			language.append(original_language)
+		languages = self.get_languages()
 
 		async def for_language(lng: str) -> Show:
 			show = await self.get(
@@ -332,15 +335,17 @@ class TheMovieDatabase(Provider):
 						)
 						for x in items
 					],
-					languages=language,
+					languages=languages,
 				)
 				for season in item.seasons
 			]
 			return item
 
 		ret = await self.process_translations(
-			for_language, language, merge_seasons_translations
+			for_language, languages, merge_seasons_translations
 		)
+		if ret.original_language is not None and ret.original_language not in ret.translations:
+			ret.translations[ret.original_language] = (await for_language(ret.original_language)).translations[ret.original_language]
 		# If we have more external_ids freely available, add them.
 		ret.external_id = await self._idmapper.get_show(ret.external_id)
 		return ret
@@ -374,6 +379,11 @@ class TheMovieDatabase(Provider):
 				)
 			},
 		)
+
+	async def identify_season(self, show_id: str, season_number: int) -> Season:
+		# We already get seasons info in the identify_show and chances are this gets cached already
+		show = await self.identify_show(show_id)
+		return show.seasons[season_number]
 
 	@cache(ttl=timedelta(days=1))
 	async def search_show(self, name: str, year: Optional[int]) -> PartialShow:
@@ -425,12 +435,9 @@ class TheMovieDatabase(Provider):
 		episode_nbr: Optional[int],
 		absolute: Optional[int],
 		year: Optional[int],
-		*,
-		language: list[str],
 	) -> Episode:
 		show = await self.search_show(name, year)
-		if show.original_language and show.original_language not in language:
-			language.append(show.original_language)
+		languages = self.get_languages(show.original_language)
 		# Keep it for xem overrides of season/episode
 		old_name = name
 		name = show.name
@@ -506,7 +513,7 @@ class TheMovieDatabase(Provider):
 			ret.translations = {lng: translation}
 			return ret
 
-		return await self.process_translations(for_language, language)
+		return await self.process_translations(for_language, languages)
 
 	def get_best_result(
 		self, search_results: List[Any], name: str, year: Optional[int]
@@ -588,7 +595,7 @@ class TheMovieDatabase(Provider):
 			episode_nbr = absgrp[absolute - 1]["episode_number"]
 			return (season, episode_nbr)
 		# We assume that each season should be played in order with no special episodes.
-		show = await self.identify_show(show_id, original_language=None, language=[])
+		show = await self.identify_show(show_id)
 		seasons = [x.episodes_count for x in show.seasons]
 		# enumerate(accumulate(season)) return [(0, 12), (1, 24)] if the show has two seasons with 12 eps
 		# we take the last group that has less total episodes than the absolute number.
@@ -603,9 +610,7 @@ class TheMovieDatabase(Provider):
 		absgrp = await self.get_absolute_order(show_id)
 		if absgrp is None:
 			# We assume that each season should be played in order with no special episodes.
-			show = await self.identify_show(
-				show_id, original_language=None, language=[]
-			)
+			show = await self.identify_show(show_id)
 			return sum(x.episodes_count for x in show.seasons[:season]) + episode_nbr
 		return next(
 			(
@@ -617,9 +622,9 @@ class TheMovieDatabase(Provider):
 			None,
 		)
 
-	async def identify_collection(
-		self, provider_id: str, *, language: list[str]
-	) -> Collection:
+	async def identify_collection(self, provider_id: str) -> Collection:
+		languages = self.get_languages()
+
 		async def for_language(lng: str) -> Collection:
 			collection = await self.get(
 				f"collection/{provider_id}",
@@ -651,4 +656,4 @@ class TheMovieDatabase(Provider):
 			ret.translations = {lng: translation}
 			return ret
 
-		return await self.process_translations(for_language, language)
+		return await self.process_translations(for_language, languages)

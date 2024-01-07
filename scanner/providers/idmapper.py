@@ -5,8 +5,6 @@ if TYPE_CHECKING:
 	from providers.implementations.themoviedatabase import TheMovieDatabase
 
 from typing import List, Optional
-from datetime import timedelta
-from scanner.cache import cache
 from providers.types.metadataid import MetadataID
 
 
@@ -23,11 +21,7 @@ class IdMapper:
 		# Only fetch using tmdb if one of the required ids is not already known.
 		should_fetch = required is not None and any((x not in ids for x in required))
 		if self._tmdb and self._tmdb.name in ids and should_fetch:
-			tmdb_info = await self._tmdb.identify_show(
-				ids[self._tmdb.name].data_id,
-				original_language=None,
-				language=[self.language],
-			)
+			tmdb_info = await self._tmdb.identify_show(ids[self._tmdb.name].data_id)
 			return {**ids, **tmdb_info.external_id}
 		return ids
 
