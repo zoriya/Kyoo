@@ -10,8 +10,9 @@ from guessit import guessit
 from typing import List, Literal, Any
 from providers.provider import Provider
 from providers.types.collection import Collection
+from providers.types.show import Show
 from providers.types.episode import Episode, PartialShow
-from providers.types.season import Season, SeasonTranslation
+from providers.types.season import Season
 from .utils import batch, log_errors
 from .cache import cache, exec_as_cache, make_key
 
@@ -88,9 +89,7 @@ class Scanner:
 		logging.info("Identied %s: %s", path, raw)
 
 		if raw["type"] == "movie":
-			movie = await self.provider.identify_movie(
-				raw["title"], raw.get("year"), language=self.languages
-			)
+			movie = await self.provider.identify_movie(raw["title"], raw.get("year"))
 			movie.path = str(path)
 			logging.debug("Got movie: %s", movie)
 			movie_id = await self.post("movies", data=movie.to_kyoo())
@@ -109,7 +108,6 @@ class Scanner:
 				episode_nbr=raw.get("episode"),
 				absolute=raw.get("episode") if "season" not in raw else None,
 				year=raw.get("year"),
-				language=self.languages,
 			)
 			episode.path = str(path)
 			logging.debug("Got episode: %s", episode)
@@ -117,8 +115,7 @@ class Scanner:
 
 			if episode.season_number is not None:
 				episode.season_id = await self.register_seasons(
-					show_id=episode.show_id,
-					season_number=episode.season_number,
+					episode.show, episode.show_id, episode.season_number
 				)
 			await self.post("episodes", data=episode.to_kyoo())
 		else:
@@ -129,9 +126,7 @@ class Scanner:
 		async def create_collection(provider_id: str):
 			# TODO: Check if a collection with the same metadata id exists already on kyoo.
 			new_collection = (
-				await self.provider.identify_collection(
-					provider_id, language=self.languages
-				)
+				await self.provider.identify_collection(provider_id)
 				if not any(collection.translations.keys())
 				else collection
 			)
@@ -161,8 +156,6 @@ class Scanner:
 			show = (
 				await self.provider.identify_show(
 					episode.show.external_id[self.provider.name].data_id,
-					original_language=episode.show.original_language,
-					language=self.languages,
 				)
 				if isinstance(episode.show, PartialShow)
 				else episode.show
@@ -194,16 +187,19 @@ class Scanner:
 		provider_id = episode.show.external_id[self.provider.name].data_id
 		return await create_show(provider_id)
 
-	# We use an external season cache because we want to edit this cache programatically
-	@cache(ttl=timedelta(days=1), cache=season_cache)
-	async def register_seasons(self, show_id: str, season_number: int) -> str:
-		# TODO: fetch season here. this will be useful when a new season of a show is aired after the show has been created on kyoo.
-		season = Season(
-			season_number=season_number,
-			show_id=show_id,
-			translations={lng: SeasonTranslation() for lng in self.languages},
-		)
-		return await self.post("seasons", data=season.to_kyoo())
+	async def register_seasons(
+		self, show: Show | PartialShow, show_id: str, season_number: int
+	) -> str:
+		# We use an external season cache because we want to edit this cache programatically
+		@cache(ttl=timedelta(days=1), cache=season_cache)
+		async def create_season(_: str, __: int):
+			season = await self.provider.identify_season(
+				show.external_id[self.provider.name].data_id, season_number
+			)
+			season.show_id = show_id
+			return await self.post("seasons", data=season.to_kyoo())
+
+		return await create_season(show_id, season_number)
 
 	async def post(self, path: str, *, data: dict[str, Any]) -> str:
 		logging.debug(

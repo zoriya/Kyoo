@@ -5,8 +5,9 @@ from typing import Optional, TypeVar
 
 from providers.utils import ProviderError
 
-from .types.episode import Episode
 from .types.show import Show
+from .types.season import Season
+from .types.episode import Episode
 from .types.movie import Movie
 from .types.collection import Collection
 
@@ -33,7 +34,7 @@ class Provider:
 
 		tmdb = os.environ.get("THEMOVIEDB_APIKEY")
 		if tmdb:
-			tmdb = TheMovieDatabase(client, tmdb, xem, idmapper)
+			tmdb = TheMovieDatabase(languages, client, tmdb, xem, idmapper)
 			providers.append(tmdb)
 		else:
 			tmdb = None
@@ -52,15 +53,17 @@ class Provider:
 		raise NotImplementedError
 
 	@abstractmethod
-	async def identify_movie(
-		self, name: str, year: Optional[int], *, language: list[str]
-	) -> Movie:
+	async def identify_movie(self, name: str, year: Optional[int]) -> Movie:
 		raise NotImplementedError
 
 	@abstractmethod
-	async def identify_show(
-		self, show_id: str, *, original_language: Optional[str], language: list[str]
-	) -> Show:
+	async def identify_show(self, show_id: str) -> Show:
+		raise NotImplementedError
+
+	@abstractmethod
+	async def identify_season(
+		self, show_id: str, season_number: Optional[int]
+	) -> Season:
 		raise NotImplementedError
 
 	@abstractmethod
@@ -71,13 +74,9 @@ class Provider:
 		episode_nbr: Optional[int],
 		absolute: Optional[int],
 		year: Optional[int],
-		*,
-		language: list[str]
 	) -> Episode:
 		raise NotImplementedError
 
 	@abstractmethod
-	async def identify_collection(
-		self, provider_id: str, *, language: list[str]
-	) -> Collection:
+	async def identify_collection(self, provider_id: str) -> Collection:
 		raise NotImplementedError
