@@ -53,7 +53,7 @@ jobs:
 
       - name: Run black
         run: |
-          pip install black-with-tabs
+          pip3 install black-with-tabs
           black . --check
 
   transcoder:
