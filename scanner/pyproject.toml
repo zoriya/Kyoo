@@ -1,0 +1,4 @@
+[tool.black]
+extend-exclude = '''
+^/scanner/cache.py
+'''
