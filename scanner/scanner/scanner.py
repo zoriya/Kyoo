@@ -16,8 +16,6 @@ from providers.types.season import Season
 from .utils import batch, log_errors
 from .cache import cache, exec_as_cache, make_key
 
-season_cache = {}
-
 
 class Scanner:
 	def __init__(
@@ -35,6 +33,10 @@ class Scanner:
 			logging.error(f"Invalid ignore pattern. Ignoring. Error: {e}")
 		self.provider = Provider.get_all(client, languages)[0]
 		self.languages = languages
+
+		self._collection_cache = {}
+		self._show_cache = {}
+		self._season_cache = {}
 
 	async def scan(self, path: str):
 		logging.info("Starting the scan. It can take some times...")
@@ -122,7 +124,7 @@ class Scanner:
 			logging.warn("Unknown video file type: %s", raw["type"])
 
 	async def create_or_get_collection(self, collection: Collection) -> str:
-		@cache(ttl=timedelta(days=1))
+		@cache(ttl=timedelta(days=1), cache=self._collection_cache)
 		async def create_collection(provider_id: str):
 			# TODO: Check if a collection with the same metadata id exists already on kyoo.
 			new_collection = (
@@ -150,7 +152,7 @@ class Scanner:
 				r.raise_for_status()
 
 	async def create_or_get_show(self, episode: Episode) -> str:
-		@cache(ttl=timedelta(days=1))
+		@cache(ttl=timedelta(days=1), cache=self._show_cache)
 		async def create_show(_: str):
 			# TODO: Check if a show with the same metadata id exists already on kyoo.
 			show = (
@@ -164,20 +166,20 @@ class Scanner:
 			logging.debug("Got show: %s", episode)
 			ret = await self.post("show", data=show.to_kyoo())
 
-			async def create_season(season: Season):
+			async def create_season(season: Season, id: str):
 				try:
-					season.show_id = ret
+					season.show_id = id
 					return await self.post("seasons", data=season.to_kyoo())
 				except Exception as e:
 					logging.exception("Unhandled error create a season", exc_info=e)
 
-			season_tasks = (
-				exec_as_cache(
-					season_cache,
+			season_tasks = map(
+				lambda s: exec_as_cache(
+					self._season_cache,
 					make_key((ret, s.season_number)),
-					lambda: create_season(s),
-				)
-				for s in show.seasons
+					lambda: create_season(s, ret),
+				),
+				show.seasons,
 			)
 			await asyncio.gather(*season_tasks)
 
@@ -191,7 +193,7 @@ class Scanner:
 		self, show: Show | PartialShow, show_id: str, season_number: int
 	) -> str:
 		# We use an external season cache because we want to edit this cache programatically
-		@cache(ttl=timedelta(days=1), cache=season_cache)
+		@cache(ttl=timedelta(days=1), cache=self._season_cache)
 		async def create_season(_: str, __: int):
 			season = await self.provider.identify_season(
 				show.external_id[self.provider.name].data_id, season_number
