@@ -18,9 +18,8 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { deleteAccount, logout, useAccount, useAccounts } from "@kyoo/models";
+import { logout, useAccount, useAccounts } from "@kyoo/models";
 import {
-	Alert,
 	Input,
 	IconButton,
 	Header,
@@ -40,7 +39,6 @@ import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import Login from "@material-symbols/svg-400/rounded/login.svg";
 import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
 import Logout from "@material-symbols/svg-400/rounded/logout.svg";
-import Delete from "@material-symbols/svg-400/rounded/delete.svg";
 import Settings from "@material-symbols/svg-400/rounded/settings.svg";
 import { KyooLongLogo } from "./icon";
 import { forwardRef, useEffect, useRef, useState } from "react";
@@ -129,29 +127,6 @@ export const NavbarProfile = () => {
 				<>
 					<Menu.Item label={t("login.add-account")} icon={Login} href="/login" />
 					<Menu.Item label={t("login.logout")} icon={Logout} onSelect={logout} />
-					<Menu.Item
-						label={t("login.delete")}
-						icon={Delete}
-						onSelect={async () => {
-							Alert.alert(
-								t("login.delete"),
-								t("login.delete-confirmation"),
-								[
-									{ text: t("misc.cancel"), style: "cancel" },
-									{
-										text: t("misc.delete"),
-										onPress: deleteAccount,
-										style: "destructive",
-									},
-								],
-								{
-									cancelable: true,
-									userInterfaceStyle: theme.mode === "auto" ? "light" : theme.mode,
-									icon: "warning",
-								},
-							);
-						}}
-					/>
 				</>
 			)}
 		</Menu>

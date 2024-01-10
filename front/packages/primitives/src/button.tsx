@@ -27,8 +27,10 @@ import { View } from "react-native";
 
 export const Button = forwardRef<
 	View,
-	{ text: string; icon?: ReactElement } & ComponentProps<typeof PressableFeedback>
->(function Button({ text, icon, ...props }, ref) {
+	{ text: string; licon?: ReactElement; icon?: ReactElement } & ComponentProps<
+		typeof PressableFeedback
+	>
+>(function Button({ text, icon, licon, ...props }, ref) {
 	const { css } = useYoshiki("button");
 
 	return (
@@ -60,6 +62,7 @@ export const Button = forwardRef<
 					alignItems: "center",
 				})}
 			>
+				{licon}
 				<P {...css({ textAlign: "center" }, "text")}>{text}</P>
 				{icon}
 			</View>
