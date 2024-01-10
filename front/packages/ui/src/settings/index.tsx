@@ -20,7 +20,6 @@
 
 import {
 	Account,
-	MutationParam,
 	QueryIdentifier,
 	QueryPage,
 	User,
@@ -38,6 +37,7 @@ import {
 	Icon,
 	Input,
 	P,
+	Popup,
 	Select,
 	SubP,
 	SwitchVariant,
@@ -145,54 +145,32 @@ const ChangePopup = ({
 	const [value, setValue] = useState(inital);
 
 	return (
-		<Portal>
-			<SwitchVariant>
-				{({ css }) => (
-					<View
-						{...css({
-							position: "absolute",
-							top: 0,
-							left: 0,
-							right: 0,
-							bottom: 0,
-							bg: (theme) => theme.themeOverlay,
-						})}
-					>
-						<Container
-							{...css({
-								borderRadius: px(imageBorderRadius),
-								position: "absolute",
-								top: percent(35),
-								padding: ts(4),
-								gap: ts(2),
-								bg: (theme) => theme.background,
-							})}
-						>
-							<View {...css({ flexDirection: "row", alignItems: "center", gap: ts(2) })}>
-								<Icon icon={icon} />
-								<H1 {...css({ fontSize: rem(2) })}>{label}</H1>
-							</View>
-							<Input variant="big" value={value} onChangeText={(v) => setValue(v)} />
-							<View {...css({ flexDirection: "row", alignSelf: "flex-end", gap: ts(1) })}>
-								<Button
-									text={t("misc.cancel")}
-									onPress={() => close()}
-									{...css({ minWidth: rem(6) })}
-								/>
-								<Button
-									text={t("misc.edit")}
-									onPress={async () => {
-										await apply(value);
-										close();
-									}}
-									{...css({ minWidth: rem(6) })}
-								/>
-							</View>
-						</Container>
+		<Popup>
+			{({ css }) => (
+				<>
+					<View {...css({ flexDirection: "row", alignItems: "center", gap: ts(2) })}>
+						<Icon icon={icon} />
+						<H1 {...css({ fontSize: rem(2) })}>{label}</H1>
 					</View>
-				)}
-			</SwitchVariant>
-		</Portal>
+					<Input variant="big" value={value} onChangeText={(v) => setValue(v)} />
+					<View {...css({ flexDirection: "row", alignSelf: "flex-end", gap: ts(1) })}>
+						<Button
+							text={t("misc.cancel")}
+							onPress={() => close()}
+							{...css({ minWidth: rem(6) })}
+						/>
+						<Button
+							text={t("misc.edit")}
+							onPress={async () => {
+								await apply(value);
+								close();
+							}}
+							{...css({ minWidth: rem(6) })}
+						/>
+					</View>
+				</>
+			)}
+		</Popup>
 	);
 };
 
