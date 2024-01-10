@@ -18,20 +18,44 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Genre, QueryPage } from "@kyoo/models";
+import { Genre, QueryPage, toQueryKey } from "@kyoo/models";
 import { Fetch } from "../fetch";
 import { Header } from "./header";
 import { DefaultLayout } from "../layout";
-import { ScrollView } from "react-native";
+import { RefreshControl, ScrollView } from "react-native";
 import { GenreGrid } from "./genre";
 import { Recommanded } from "./recommanded";
 import { VerticalRecommanded } from "./vertical";
 import { NewsList } from "./news";
 import { WatchlistList } from "./watchlist";
+import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
 export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
+	const queryClient = useQueryClient();
+	const [refreshing, setRefreshing] = useState(false);
+
 	return (
-		<ScrollView>
+		<ScrollView
+			refreshControl={
+				<RefreshControl
+					onRefresh={async () => {
+						setRefreshing(true);
+						await Promise.all(
+							HomePage.getFetchUrls!({}, randomItems).map((query) =>
+								queryClient.refetchQueries({
+									queryKey: toQueryKey(query),
+									type: "active",
+									exact: true,
+								}),
+							),
+						);
+						setRefreshing(false);
+					}}
+					refreshing={refreshing}
+				/>
+			}
+		>
 			<Fetch query={Header.query()}>
 				{(x) => (
 					<Header
