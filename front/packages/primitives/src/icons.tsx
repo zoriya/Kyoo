@@ -33,8 +33,10 @@ declare module "react" {
 	): (props: P & React.RefAttributes<T>) => React.ReactElement | null;
 }
 
+export type Icon =ComponentType<SvgProps>;
+
 type IconProps = {
-	icon: ComponentType<SvgProps>;
+	icon: Icon;
 	color?: Breakpoint<string>;
 	size?: YoshikiStyle<number | string>;
 };
