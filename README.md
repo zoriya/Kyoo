@@ -14,9 +14,13 @@ Feel free to open issues or pull requests, all contribution are welcomed.
 - [Contributing](./CONTRIBUTING.md)
 
 ## Features
- - Manage your movies, tv-series & anime
+ - Automatically organize your library of movies, tv or animes
+ - No configuration or manual edit needed
+ - guessit, thexem and themoviedb are used to retrive metadata even if your files are named in absurd ways
  - Transmux/Transcode files to make them available on every platform
  - Create smart watchlists that will automatically update when you watch movies/episodes
+ - Download files for offline support (your watchlists will still be updated)
+ - Android and web apps
  - Search your collection via names, tags or descriptions
  - Download metadata automatically
  - Handle subtitles natively with embedded fonts (ass, subrip or vtt)
