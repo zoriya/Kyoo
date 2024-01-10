@@ -25,12 +25,15 @@ import {
 	QueryPage,
 	User,
 	UserP,
+	deleteAccount,
+	logout,
 	queryFn,
 	setUserTheme,
 	useAccount,
 	useUserTheme,
 } from "@kyoo/models";
 import {
+	Alert,
 	Button,
 	Container,
 	H1,
@@ -50,13 +53,15 @@ import { Children, ComponentProps, ReactElement, ReactNode, useState } from "rea
 import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
 import { px, rem, useYoshiki } from "yoshiki/native";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { PasswordInput } from "../login/password-input";
 
 import Theme from "@material-symbols/svg-400/outlined/dark_mode.svg";
 import Username from "@material-symbols/svg-400/outlined/badge.svg";
 import Mail from "@material-symbols/svg-400/outlined/mail.svg";
 import Password from "@material-symbols/svg-400/outlined/password.svg";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { PasswordInput } from "../login/password-input";
+import Logout from "@material-symbols/svg-400/rounded/logout.svg";
+import Delete from "@material-symbols/svg-400/rounded/delete.svg";
 
 const Preference = ({
 	icon,
@@ -100,13 +105,17 @@ const Preference = ({
 const SettingsContainer = ({
 	children,
 	title,
+	extra,
+	...props
 }: {
 	children: ReactElement | ReactElement[];
 	title: string;
+	extra?: ReactElement;
 }) => {
 	const { css } = useYoshiki();
+
 	return (
-		<Container>
+		<Container {...props}>
 			<H1 {...css({ fontSize: rem(2) })}>{title}</H1>
 			<SwitchVariant>
 				{({ css }) => (
@@ -125,6 +134,7 @@ const SettingsContainer = ({
 					</View>
 				)}
 			</SwitchVariant>
+			{extra}
 		</Container>
 	);
 };
@@ -248,6 +258,7 @@ const ChangePasswordPopup = ({
 
 const AccountSettings = ({ setPopup }: { setPopup: (e?: ReactElement) => void }) => {
 	const account = useAccount();
+	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 
 	const queryClient = useQueryClient();
@@ -271,7 +282,43 @@ const AccountSettings = ({ setPopup }: { setPopup: (e?: ReactElement) => void })
 
 	return (
 		account && (
-			<SettingsContainer title={t("settings.account.label")}>
+			<SettingsContainer
+				title={t("settings.account.label")}
+				extra={
+					<View {...css({ marginTop: ts(2), gap: ts(2), flexDirection: "row" })}>
+						<Button
+							licon={<Icon icon={Logout} {...css({ marginX: ts(1) })} />}
+							text={t("login.logout")}
+							onPress={logout}
+							{...css({ flex: 1 })}
+						/>
+						<Button
+							licon={<Icon icon={Delete} {...css({ marginX: ts(1) })} />}
+							text={t("login.delete")}
+							onPress={async () => {
+								Alert.alert(
+									t("login.delete"),
+									t("login.delete-confirmation"),
+									[
+										{ text: t("misc.cancel"), style: "cancel" },
+										{
+											text: t("misc.delete"),
+											onPress: deleteAccount,
+											style: "destructive",
+										},
+									],
+									{
+										cancelable: true,
+										userInterfaceStyle: theme.mode === "auto" ? "light" : theme.mode,
+										icon: "warning",
+									},
+								);
+							}}
+							{...css({ flex: 1 })}
+						/>
+					</View>
+				}
+			>
 				<Preference
 					icon={Username}
 					label={t("settings.account.username.label")}
