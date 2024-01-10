@@ -84,6 +84,11 @@
 				"auto": "Système",
 				"light": "Clair",
 				"dark": "Sombre"
+			},
+			"language": {
+				"label": "Langue",
+				"description": "Définissez la langue de votre application",
+				"system": "Système"
 			}
 		},
 		"account": {
@@ -103,6 +108,17 @@
 				"description": "Changer de mot de passe",
 				"oldPassword": "Ancien mot de passe",
 				"newPassword": "Nouveau mot de passe"
+			}
+		},
+		"about": {
+			"label": "À propos",
+			"android-app": {
+				"label": "Application Android",
+				"description": "Téléchargez l'application Android"
+			},
+			"git": {
+				"label": "Github",
+				"description": "Ouvrez la page github où vous pouvez lire le code de kyoo"
 			}
 		}
 	},

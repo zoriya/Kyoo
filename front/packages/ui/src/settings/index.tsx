@@ -55,6 +55,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { PasswordInput } from "../login/password-input";
 
 import Theme from "@material-symbols/svg-400/outlined/dark_mode.svg";
+import Language from "@material-symbols/svg-400/outlined/language.svg";
 import Username from "@material-symbols/svg-400/outlined/badge.svg";
 import Mail from "@material-symbols/svg-400/outlined/mail.svg";
 import Password from "@material-symbols/svg-400/outlined/password.svg";
@@ -386,7 +387,8 @@ const AccountSettings = ({ setPopup }: { setPopup: (e?: ReactElement) => void })
 };
 
 export const SettingsPage: QueryPage = () => {
-	const { t } = useTranslation();
+	const { t, i18n } = useTranslation();
+	const languages = new Intl.DisplayNames([i18n.language ?? "en"], { type: "language" });
 	const [popup, setPopup] = useState<ReactElement | undefined>(undefined);
 
 	const theme = useUserTheme("auto");
@@ -407,10 +409,30 @@ export const SettingsPage: QueryPage = () => {
 							getLabel={(key) => t(`settings.general.theme.${key}`)}
 						/>
 					</Preference>
+					<Preference
+						icon={Language}
+						label={t("settings.general.language.label")}
+						description={t("settings.general.language.description")}
+					>
+						<Select
+							label={t("settings.general.language.label")}
+							value={i18n.resolvedLanguage!}
+							onValueChange={(value) =>
+								i18n.changeLanguage(value !== "system" ? value : (i18n.options.lng as string))
+							}
+							values={["system", ...Object.keys(i18n.options.resources!)]}
+							getLabel={(key) =>
+								key === "system" ? t("settings.general.language.system") : languages.of(key) ?? key
+							}
+						/>
+					</Preference>
 				</SettingsContainer>
 				<AccountSettings setPopup={setPopup} />
 				<SettingsContainer title={t("settings.about.label")}>
-					<Link href="https://github.com/zoriya/kyoo/releases/latest/download/kyoo.apk" target="_blank">
+					<Link
+						href="https://github.com/zoriya/kyoo/releases/latest/download/kyoo.apk"
+						target="_blank"
+					>
 						<Preference
 							icon={Android}
 							label={t("settings.about.android-app.label")}

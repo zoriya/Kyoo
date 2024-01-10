@@ -84,6 +84,11 @@
 				"auto": "System",
 				"light": "Light",
 				"dark": "Dark"
+			},
+			"language": {
+				"label": "Language",
+				"description": "Set the language of your application",
+				"system": "System"
 			}
 		},
 		"account": {
