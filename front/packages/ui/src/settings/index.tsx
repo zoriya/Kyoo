@@ -91,9 +91,9 @@ const Preference = ({
 				props,
 			)}
 		>
-			<View {...css({ flexDirection: "row", alignItems: "center" })}>
+			<View {...css({ flexDirection: "row", alignItems: "center", flexShrink: 1 })}>
 				<Icon icon={icon} {...css({ marginX: ts(2) })} />
-				<View>
+				<View {...css({ flexShrink: 1 })}>
 					<P {...css({ marginBottom: 0 })}>{label}</P>
 					<SubP>{description}</SubP>
 				</View>
@@ -291,7 +291,7 @@ const AccountSettings = ({ setPopup }: { setPopup: (e?: ReactElement) => void })
 							licon={<Icon icon={Logout} {...css({ marginX: ts(1) })} />}
 							text={t("login.logout")}
 							onPress={logout}
-							{...css({ flex: 1 })}
+							{...css({ flexGrow: 1, flexShrink: 1, flexBasis: 0 })}
 						/>
 						<Button
 							licon={<Icon icon={Delete} {...css({ marginX: ts(1) })} />}
@@ -315,7 +315,7 @@ const AccountSettings = ({ setPopup }: { setPopup: (e?: ReactElement) => void })
 									},
 								);
 							}}
-							{...css({ flex: 1 })}
+							{...css({ flexGrow: 1, flexShrink: 1, flexBasis: 0 })}
 						/>
 					</View>
 				}
@@ -394,7 +394,7 @@ export const SettingsPage: QueryPage = () => {
 	const theme = useUserTheme("auto");
 	return (
 		<>
-			<ScrollView contentContainerStyle={{ gap: ts(4) }}>
+			<ScrollView contentContainerStyle={{ gap: ts(4), paddingBottom: ts(4) }}>
 				<SettingsContainer title={t("settings.general.label")}>
 					<Preference
 						icon={Theme}
