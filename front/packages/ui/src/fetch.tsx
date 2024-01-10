@@ -33,7 +33,7 @@ export type Layout = {
 };
 
 export type WithLoading<Item> =
-	| (Item & { isLoading: false })
+	| (Item & { isLoading?: false })
 	| (Partial<Item> & { isLoading: true });
 
 const isPage = <T = unknown,>(obj: unknown): obj is Page<T> =>
@@ -113,7 +113,6 @@ export const EmptyView = ({ message }: { message: string }) => {
 		<View
 			{...css({
 				flexGrow: 1,
-				flexShrink: 1,
 				justifyContent: "center",
 				alignItems: "center",
 			})}
