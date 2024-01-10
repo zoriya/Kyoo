@@ -30,7 +30,7 @@ const emulateGap = (
 	gap: number,
 	numColumns: number,
 	index: number,
-	itemsCount: number
+	itemsCount: number,
 ): ViewStyle => {
 	let marginLeft = 0;
 	let marginRight = 0;
@@ -107,7 +107,7 @@ export const InfiniteFetchList = <Data, Props, _, Kind extends number | string>(
 	const placeholders = [...Array(count === 0 ? numColumns : count)].map(
 		(_, i) => ({ id: `gen${i}`, isLoading: true }) as Data,
 	);
-	const data = isFetching ? [...(items || []), ...placeholders] : items;
+	const data = isFetching || !items ? [...(items || []), ...placeholders] : items;
 
 	const List = nested ? (FlatList as unknown as typeof FlashList) : FlashList;
 
@@ -122,7 +122,7 @@ export const InfiniteFetchList = <Data, Props, _, Kind extends number | string>(
 			renderItem={({ item, index }) => (
 				<View
 					style={[
-						emulateGap(layout.layout, gap, numColumns, index, data?.length ?? 0),
+						emulateGap(layout.layout, gap, numColumns, index, data.length),
 						layout.layout === "horizontal" && {
 							width:
 								size * (getItemType && getItemSize ? getItemSize(getItemType(item, index)) : 1),

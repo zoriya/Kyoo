@@ -33,7 +33,7 @@ export type Layout = {
 };
 
 export type WithLoading<Item> =
-	| (Item & { isLoading?: false })
+	| (Item & { isLoading: false })
 	| (Partial<Item> & { isLoading: true });
 
 const isPage = <T = unknown,>(obj: unknown): obj is Page<T> =>
