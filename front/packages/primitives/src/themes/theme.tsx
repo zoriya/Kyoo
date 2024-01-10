@@ -155,7 +155,7 @@ export const ThemeSelector = ({
 	return <ThemeProvider theme={newTheme}>{children}</ThemeProvider>;
 };
 
-type YoshikiFunc<T> = (props: ReturnType<typeof useYoshiki>) => T;
+export type YoshikiFunc<T> = (props: ReturnType<typeof useYoshiki>) => T;
 
 const YoshikiProvider = ({ children }: { children: YoshikiFunc<ReactNode> }) => {
 	const yoshiki = useYoshiki();
