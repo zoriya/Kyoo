@@ -24,7 +24,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Kyoo.Models;
 
-public class Patch<T> : Dictionary<string, JObject>
+public class Patch<T> : Dictionary<string, JToken>
 	where T : class, IResource
 {
 	public Guid? Id => this.GetValueOrDefault(nameof(IResource.Id))?.ToObject<Guid>();
@@ -33,7 +33,7 @@ public class Patch<T> : Dictionary<string, JObject>
 
 	public T Apply(T current)
 	{
-		foreach ((string property, JObject value) in this)
+		foreach ((string property, JToken value) in this)
 		{
 			PropertyInfo prop = typeof(T).GetProperty(
 				property,
