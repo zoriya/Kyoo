@@ -18,15 +18,26 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { QueryIdentifier, QueryPage, User, UserP, setUserTheme, useUserTheme } from "@kyoo/models";
-import { Container, H1, Icon, P, Select, SubP, imageBorderRadius, ts } from "@kyoo/primitives";
+import {
+	QueryIdentifier,
+	QueryPage,
+	User,
+	UserP,
+	setUserTheme,
+	useAccount,
+	useUserTheme,
+} from "@kyoo/models";
+import { Container, H1, HR, Icon, P, Select, SubP, imageBorderRadius, ts } from "@kyoo/primitives";
 import { DefaultLayout } from "../layout";
-import { ReactElement, ReactNode } from "react";
+import { Children, ReactElement, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
 import { px, rem, useYoshiki } from "yoshiki/native";
 
 import Theme from "@material-symbols/svg-400/outlined/dark_mode.svg";
+import Username from "@material-symbols/svg-400/outlined/badge.svg";
+import Mail from "@material-symbols/svg-400/outlined/mail.svg";
+import Password from "@material-symbols/svg-400/outlined/password.svg";
 
 const Preference = ({
 	icon,
@@ -38,7 +49,7 @@ const Preference = ({
 	icon: Icon;
 	label: string;
 	description: string;
-	children: ReactNode;
+	children?: ReactNode;
 }) => {
 	const { css } = useYoshiki();
 
@@ -67,7 +78,13 @@ const Preference = ({
 	);
 };
 
-const SettingsContainer = ({ children, title }: { children: ReactElement; title: string }) => {
+const SettingsContainer = ({
+	children,
+	title,
+}: {
+	children: ReactElement | ReactElement[];
+	title: string;
+}) => {
 	const { css } = useYoshiki();
 	return (
 		<Container>
@@ -75,7 +92,12 @@ const SettingsContainer = ({ children, title }: { children: ReactElement; title:
 			<View
 				{...css({ bg: (theme) => theme.variant.background, borderRadius: px(imageBorderRadius) })}
 			>
-				{children}
+				{Children.map(children, (x, i) => (
+					<>
+						{i !== 0 && <HR {...css({ marginY: ts(1) })} />}
+						{x}
+					</>
+				))}
 			</View>
 		</Container>
 	);
@@ -90,8 +112,9 @@ export const SettingsPage: QueryPage = () => {
 	const { t } = useTranslation();
 
 	const theme = useUserTheme("auto");
+	const account = useAccount();
 	return (
-		<ScrollView>
+		<ScrollView contentContainerStyle={{ gap: ts(4) }}>
 			<SettingsContainer title={t("settings.general.label")}>
 				<Preference
 					icon={Theme}
@@ -107,6 +130,25 @@ export const SettingsPage: QueryPage = () => {
 					/>
 				</Preference>
 			</SettingsContainer>
+			{account && (
+				<SettingsContainer title={t("settings.account.label")}>
+					<Preference
+						icon={Username}
+						label={t("settings.account.username.label")}
+						description={account.username}
+					></Preference>
+					<Preference
+						icon={Mail}
+						label={t("settings.account.email.label")}
+						description={account.email}
+					></Preference>
+					<Preference
+						icon={Password}
+						label={t("settings.account.password.label")}
+						description={t("settings.account.password.description")}
+					></Preference>
+				</SettingsContainer>
+			)}
 		</ScrollView>
 	);
 };

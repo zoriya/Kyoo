@@ -84,6 +84,19 @@
 				"light": "Light",
 				"dark": "Dark"
 			}
+		},
+		"account": {
+			"label": "Account",
+			"username": {
+				"label": "Username"
+			},
+			"email": {
+				"label": "Email"
+			},
+			"password": {
+				"label": "Password",
+				"description": "Change your password"
+			}
 		}
 	},
 	"player": {
