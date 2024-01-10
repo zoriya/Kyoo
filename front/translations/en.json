@@ -91,6 +91,10 @@
 			"username": {
 				"label": "Username"
 			},
+			"avatar": {
+				"label": "Avatar",
+				"description": "Change your profile icon"
+			},
 			"email": {
 				"label": "Email"
 			},
@@ -99,6 +103,17 @@
 				"description": "Change your password",
 				"oldPassword": "Old password",
 				"newPassword": "New password"
+			}
+		},
+		"about": {
+			"label": "About",
+			"android-app": {
+				"label": "Android app",
+				"description": "Download the android app"
+			},
+			"git": {
+				"label": "Github",
+				"description": "Open the github repository where you can browse the code of kyoo"
 			}
 		}
 	},

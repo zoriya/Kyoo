@@ -91,6 +91,10 @@
 			"username": {
 				"label": "Nom d'utilisateur"
 			},
+			"avatar": {
+				"label": "Avatar",
+				"description": "Changez votre photo de profil"
+			},
 			"email": {
 				"label": "Email"
 			},

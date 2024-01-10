@@ -21,10 +21,7 @@
 import {
 	Account,
 	KyooErrors,
-	QueryIdentifier,
 	QueryPage,
-	User,
-	UserP,
 	deleteAccount,
 	logout,
 	queryFn,
@@ -40,6 +37,7 @@ import {
 	HR,
 	Icon,
 	Input,
+	Link,
 	P,
 	Popup,
 	Select,
@@ -62,6 +60,8 @@ import Mail from "@material-symbols/svg-400/outlined/mail.svg";
 import Password from "@material-symbols/svg-400/outlined/password.svg";
 import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import Delete from "@material-symbols/svg-400/rounded/delete.svg";
+import Android from "@material-symbols/svg-400/rounded/android.svg";
+import Public from "@material-symbols/svg-400/rounded/public.svg";
 
 const Preference = ({
 	icon,
@@ -385,11 +385,6 @@ const AccountSettings = ({ setPopup }: { setPopup: (e?: ReactElement) => void })
 	);
 };
 
-const query: QueryIdentifier<User> = {
-	parser: UserP,
-	path: ["auth", "me"],
-};
-
 export const SettingsPage: QueryPage = () => {
 	const { t } = useTranslation();
 	const [popup, setPopup] = useState<ReactElement | undefined>(undefined);
@@ -414,6 +409,22 @@ export const SettingsPage: QueryPage = () => {
 					</Preference>
 				</SettingsContainer>
 				<AccountSettings setPopup={setPopup} />
+				<SettingsContainer title={t("settings.about.label")}>
+					<Link href="https://github.com/zoriya/kyoo/releases/latest/download/kyoo.apk" target="_blank">
+						<Preference
+							icon={Android}
+							label={t("settings.about.android-app.label")}
+							description={t("settings.about.android-app.description")}
+						/>
+					</Link>
+					<Link href="https://github.com/zoriya/kyoo" target="_blank">
+						<Preference
+							icon={Public}
+							label={t("settings.about.git.label")}
+							description={t("settings.about.git.description")}
+						/>
+					</Link>
+				</SettingsContainer>
 			</ScrollView>
 			{popup}
 		</>
@@ -421,5 +432,3 @@ export const SettingsPage: QueryPage = () => {
 };
 
 SettingsPage.getLayout = DefaultLayout;
-
-SettingsPage.getFetchUrls = () => [query];
