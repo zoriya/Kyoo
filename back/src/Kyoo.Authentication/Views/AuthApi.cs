@@ -203,11 +203,14 @@ namespace Kyoo.Authentication.Views
 			User user = await _users.Get(User.GetIdOrThrow());
 			if (!BCryptNet.Verify(request.OldPassword, user.Password))
 				return Forbid(new RequestError("The old password is invalid."));
-			return await _users.Patch(user.Id, (user) =>
-			{
-				user.Password = BCryptNet.HashPassword(request.NewPassword);
-				return user;
-			});
+			return await _users.Patch(
+				user.Id,
+				(user) =>
+				{
+					user.Password = BCryptNet.HashPassword(request.NewPassword);
+					return user;
+				}
+			);
 		}
 
 		/// <summary>
@@ -288,7 +291,9 @@ namespace Kyoo.Authentication.Views
 				if (patch.Id.HasValue && patch.Id != userId)
 					throw new ArgumentException("Can't edit your user id.");
 				if (patch.ContainsKey(nameof(Abstractions.Models.User.Password)))
-					throw new ArgumentException("Can't edit your password via a PATCH. Use /auth/password-reset");
+					throw new ArgumentException(
+						"Can't edit your password via a PATCH. Use /auth/password-reset"
+					);
 				return await _users.Patch(userId, patch.Apply);
 			}
 			catch (ItemNotFoundException)
