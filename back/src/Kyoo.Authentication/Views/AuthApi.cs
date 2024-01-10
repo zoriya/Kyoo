@@ -186,6 +186,31 @@ namespace Kyoo.Authentication.Views
 		}
 
 		/// <summary>
+		/// Reset your password
+		/// </summary>
+		/// <remarks>
+		/// Change your password.
+		/// </remarks>
+		/// <param name="request">The old and new password</param>
+		/// <returns>Your account info.</returns>
+		/// <response code="403">The old password is invalid.</response>
+		[HttpPost("password-reset")]
+		[UserOnly]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
+		public async Task<ActionResult<User>> ResetPassword([FromBody] PasswordResetRequest request)
+		{
+			User user = await _users.Get(User.GetIdOrThrow());
+			if (!BCryptNet.Verify(request.OldPassword, user.Password))
+				return Forbid(new RequestError("The old password is invalid."));
+			return await _users.Patch(user.Id, (user) =>
+			{
+				user.Password = BCryptNet.HashPassword(request.NewPassword);
+				return user;
+			});
+		}
+
+		/// <summary>
 		/// Get authenticated user.
 		/// </summary>
 		/// <remarks>
@@ -262,6 +287,8 @@ namespace Kyoo.Authentication.Views
 			{
 				if (patch.Id.HasValue && patch.Id != userId)
 					throw new ArgumentException("Can't edit your user id.");
+				if (patch.ContainsKey(nameof(Abstractions.Models.User.Password)))
+					throw new ArgumentException("Can't edit your password via a PATCH. Use /auth/password-reset");
 				return await _users.Patch(userId, patch.Apply);
 			}
 			catch (ItemNotFoundException)
