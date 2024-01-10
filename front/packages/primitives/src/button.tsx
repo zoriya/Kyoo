@@ -53,8 +53,16 @@ export const Button = forwardRef<
 				props as any,
 			)}
 		>
-			<P {...css({ textAlign: "center" }, "text")}>{text}</P>
-			{icon}
+			<View
+				{...css({
+					paddingX: ts(3),
+					flexDirection: "row",
+					alignItems: "center",
+				})}
+			>
+				<P {...css({ textAlign: "center" }, "text")}>{text}</P>
+				{icon}
+			</View>
 		</PressableFeedback>
 	);
 });
