@@ -61,7 +61,7 @@ namespace Kyoo.Tests.Database
 					(x) =>
 					{
 						x.Slug = "new-slug";
-						return Task.FromResult(true);
+						return x;
 					}
 				);
 			season = await _repository.Get(1.AsGuid());
@@ -78,7 +78,7 @@ namespace Kyoo.Tests.Database
 				(x) =>
 				{
 					x.SeasonNumber = 2;
-					return Task.FromResult(true);
+					return x;
 				}
 			);
 			season = await _repository.Get(1.AsGuid());

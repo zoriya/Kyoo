@@ -62,7 +62,7 @@ namespace Kyoo.Tests.Database
 					(x) =>
 					{
 						x.Slug = "new-slug";
-						return Task.FromResult(true);
+						return x;
 					}
 				);
 			episode = await _repository.Get(1.AsGuid());
@@ -79,7 +79,7 @@ namespace Kyoo.Tests.Database
 				(x) =>
 				{
 					x.SeasonNumber = 2;
-					return Task.FromResult(true);
+					return x;
 				}
 			);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s2e1", episode.Slug);
@@ -100,7 +100,7 @@ namespace Kyoo.Tests.Database
 					(x) =>
 					{
 						x.EpisodeNumber = 2;
-						return Task.FromResult(true);
+						return x;
 					}
 				);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s1e2", episode.Slug);
@@ -151,7 +151,7 @@ namespace Kyoo.Tests.Database
 					(x) =>
 					{
 						x.Slug = "new-slug";
-						return Task.FromResult(true);
+						return x;
 					}
 				);
 			episode = await _repository.Get(2.AsGuid());
@@ -167,7 +167,7 @@ namespace Kyoo.Tests.Database
 				(x) =>
 				{
 					x.AbsoluteNumber = 56;
-					return Task.FromResult(true);
+					return x;
 				}
 			);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-56", episode.Slug);
@@ -185,7 +185,7 @@ namespace Kyoo.Tests.Database
 				{
 					x.SeasonNumber = 1;
 					x.EpisodeNumber = 2;
-					return Task.FromResult(true);
+					return x;
 				}
 			);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s1e2", episode.Slug);
