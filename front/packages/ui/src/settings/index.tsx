@@ -20,6 +20,7 @@
 
 import {
 	Account,
+	KyooErrors,
 	QueryIdentifier,
 	QueryPage,
 	User,
@@ -45,17 +46,17 @@ import {
 	ts,
 } from "@kyoo/primitives";
 import { DefaultLayout } from "../layout";
-import { Children, ReactElement, ReactNode, useState, useTransition } from "react";
+import { Children, ComponentProps, ReactElement, ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
-import { Portal } from "@gorhom/portal";
-import { percent, px, rem, useYoshiki } from "yoshiki/native";
+import { px, rem, useYoshiki } from "yoshiki/native";
 
 import Theme from "@material-symbols/svg-400/outlined/dark_mode.svg";
 import Username from "@material-symbols/svg-400/outlined/badge.svg";
 import Mail from "@material-symbols/svg-400/outlined/mail.svg";
 import Password from "@material-symbols/svg-400/outlined/password.svg";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { PasswordInput } from "../login/password-input";
 
 const Preference = ({
 	icon,
@@ -132,12 +133,14 @@ const ChangePopup = ({
 	label,
 	icon,
 	inital,
+	autoComplete,
 	apply,
 	close,
 }: {
 	label: string;
 	icon: Icon;
 	inital: string;
+	autoComplete: ComponentProps<typeof Input>["autoComplete"];
 	apply: (v: string) => Promise<unknown>;
 	close: () => void;
 }) => {
@@ -152,7 +155,12 @@ const ChangePopup = ({
 						<Icon icon={icon} />
 						<H1 {...css({ fontSize: rem(2) })}>{label}</H1>
 					</View>
-					<Input variant="big" value={value} onChangeText={(v) => setValue(v)} />
+					<Input
+						autoComplete={autoComplete}
+						variant="big"
+						value={value}
+						onChangeText={(v) => setValue(v)}
+					/>
 					<View {...css({ flexDirection: "row", alignSelf: "flex-end", gap: ts(1) })}>
 						<Button
 							text={t("misc.cancel")}
@@ -174,9 +182,72 @@ const ChangePopup = ({
 	);
 };
 
+const ChangePasswordPopup = ({
+	label,
+	icon,
+	apply,
+	close,
+}: {
+	label: string;
+	icon: Icon;
+	apply: (oldPassword: string, newPassword: string) => Promise<unknown>;
+	close: () => void;
+}) => {
+	const { t } = useTranslation();
+	const [oldValue, setOldValue] = useState("");
+	const [newValue, setNewValue] = useState("");
+	const [error, setError] = useState<string | null>(null);
+
+	return (
+		<Popup>
+			{({ css }) => (
+				<>
+					<View {...css({ flexDirection: "row", alignItems: "center", gap: ts(2) })}>
+						<Icon icon={icon} />
+						<H1 {...css({ fontSize: rem(2) })}>{label}</H1>
+					</View>
+					<PasswordInput
+						autoComplete="current-password"
+						variant="big"
+						value={oldValue}
+						onChangeText={(v) => setOldValue(v)}
+						placeholder={t("settings.account.password.oldPassword")}
+					/>
+					<PasswordInput
+						autoComplete="password-new"
+						variant="big"
+						value={newValue}
+						onChangeText={(v) => setNewValue(v)}
+						placeholder={t("settings.account.password.newPassword")}
+					/>
+					{error && <P {...css({ color: (theme) => theme.colors.red })}>{error}</P>}
+					<View {...css({ flexDirection: "row", alignSelf: "flex-end", gap: ts(1) })}>
+						<Button
+							text={t("misc.cancel")}
+							onPress={() => close()}
+							{...css({ minWidth: rem(6) })}
+						/>
+						<Button
+							text={t("misc.edit")}
+							onPress={async () => {
+								try {
+									await apply(oldValue, newValue);
+									close();
+								} catch (e) {
+									setError((e as KyooErrors).errors[0]);
+								}
+							}}
+							{...css({ minWidth: rem(6) })}
+						/>
+					</View>
+				</>
+			)}
+		</Popup>
+	);
+};
+
 const AccountSettings = ({ setPopup }: { setPopup: (e?: ReactElement) => void }) => {
 	const account = useAccount();
-	const { css } = useYoshiki();
 	const { t } = useTranslation();
 
 	const queryClient = useQueryClient();
@@ -188,6 +259,14 @@ const AccountSettings = ({ setPopup }: { setPopup: (e?: ReactElement) => void })
 				body: update,
 			}),
 		onSettled: async () => await queryClient.invalidateQueries({ queryKey: ["auth", "me"] }),
+	});
+	const { mutateAsync: editPassword } = useMutation({
+		mutationFn: async (request: { newPassword: string; oldPassword: string }) =>
+			await queryFn({
+				path: ["auth", "password-reset"],
+				method: "POST",
+				body: request,
+			}),
 	});
 
 	return (
@@ -204,6 +283,7 @@ const AccountSettings = ({ setPopup }: { setPopup: (e?: ReactElement) => void })
 							setPopup(
 								<ChangePopup
 									icon={Username}
+									autoComplete="username-new"
 									label={t("settings.account.username.label")}
 									inital={account.username}
 									apply={async (v) => await mutateAsync({ username: v })}
@@ -224,6 +304,7 @@ const AccountSettings = ({ setPopup }: { setPopup: (e?: ReactElement) => void })
 							setPopup(
 								<ChangePopup
 									icon={Mail}
+									autoComplete="email"
 									label={t("settings.account.email.label")}
 									inital={account.email}
 									apply={async (v) => await mutateAsync({ email: v })}
@@ -237,7 +318,21 @@ const AccountSettings = ({ setPopup }: { setPopup: (e?: ReactElement) => void })
 					icon={Password}
 					label={t("settings.account.password.label")}
 					description={t("settings.account.password.description")}
-				></Preference>
+				>
+					<Button
+						text={t("misc.edit")}
+						onPress={() =>
+							setPopup(
+								<ChangePasswordPopup
+									icon={Password}
+									label={t("settings.account.password.label")}
+									apply={async (op, np) => await editPassword({ oldPassword: op, newPassword: np })}
+									close={() => setPopup(undefined)}
+								/>,
+							)
+						}
+					/>
+				</Preference>
 			</SettingsContainer>
 		)
 	);

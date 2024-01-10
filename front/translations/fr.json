@@ -96,7 +96,9 @@
 			},
 			"password": {
 				"label": "Mot de passe",
-				"description": "Changer de mot de passe"
+				"description": "Changer de mot de passe",
+				"oldPassword": "Ancien mot de passe",
+				"newPassword": "Nouveau mot de passe"
 			}
 		}
 	},
