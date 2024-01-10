@@ -75,11 +75,15 @@
 		"login": "Login"
 	},
 	"settings": {
-		"theme": {
-			"label": "Theme",
-			"auto": "System",
-			"light": "Light",
-			"dark": "Dark"
+		"general": {
+			"label": "General",
+			"theme": {
+				"label": "Theme",
+				"description": "Set the theme of your application",
+				"auto": "System",
+				"light": "Light",
+				"dark": "Dark"
+			}
 		}
 	},
 	"player": {

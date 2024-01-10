@@ -75,11 +75,15 @@
 		"login": "Connexion"
 	},
 	"settings": {
-		"theme": {
-			"label": "Thème",
-			"auto": "Système",
-			"light": "Clair",
-			"dark": "Sombre"
+		"general": {
+			"label": "General",
+			"theme": {
+				"label": "Thème",
+				"description": "Définissez le thème de votre application",
+				"auto": "Système",
+				"light": "Clair",
+				"dark": "Sombre"
+			}
 		}
 	},
 	"player": {
