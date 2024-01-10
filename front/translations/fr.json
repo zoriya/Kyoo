@@ -84,6 +84,19 @@
 				"light": "Clair",
 				"dark": "Sombre"
 			}
+		},
+		"account": {
+			"label": "Compte",
+			"username": {
+				"label": "Nom d'utilisateur"
+			},
+			"email": {
+				"label": "Email"
+			},
+			"password": {
+				"label": "Mot de passe",
+				"description": "Changer de mot de passe"
+			}
 		}
 	},
 	"player": {
