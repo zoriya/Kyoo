@@ -29,7 +29,6 @@ import { percent, px, useYoshiki } from "yoshiki/native";
 import { DefaultLayout } from "../layout";
 import { FormPage } from "./form";
 import { PasswordInput } from "./password-input";
-import { useQueryClient } from "@tanstack/react-query";
 import { cleanApiUrl } from "./login";
 
 export const RegisterPage: QueryPage = () => {
@@ -41,7 +40,6 @@ export const RegisterPage: QueryPage = () => {
 	const [error, setError] = useState<string | undefined>(undefined);
 
 	const router = useRouter();
-	const queryClient = useQueryClient();
 	const { t } = useTranslation();
 	const { css } = useYoshiki();
 
