@@ -16,9 +16,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AspNetCore.Proxy;
 using Kyoo.Abstractions.Models.Permissions;
+using Kyoo.Utils;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Core.Api
@@ -39,10 +41,10 @@ namespace Kyoo.Core.Api
 		/// <returns>The return value of the transcoder.</returns>
 		[Route("video/{**rest}")]
 		[Permission("video", Kind.Read)]
-		public Task Proxy(string rest)
+		public Task Proxy(string rest, [FromQuery] Dictionary<string, string> query)
 		{
 			// TODO: Use an env var to configure transcoder:7666.
-			return this.HttpProxyAsync($"http://transcoder:7666/{rest}");
+			return this.HttpProxyAsync($"http://transcoder:7666/{rest}" + query.ToQueryString());
 		}
 	}
 }
