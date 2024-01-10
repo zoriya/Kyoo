@@ -137,7 +137,7 @@ export const InfiniteFetchList = <Data, Props, _, Kind extends number | string>(
 			estimatedItemSize={size}
 			onEndReached={fetchMore ? fetchNextPage : undefined}
 			onEndReachedThreshold={0.5}
-			onRefresh={refetch}
+			onRefresh={layout.layout !== "horizontal" ? refetch : null}
 			refreshing={isRefetching}
 			ItemSeparatorComponent={divider === true ? HR : divider || null}
 			ListHeaderComponent={Header}
