@@ -31,6 +31,7 @@ import { useYoshiki } from "yoshiki";
 import { PressableFeedback } from "./links";
 import { P } from "./text";
 import { focusReset, ts } from "./utils";
+import { View } from "react-native";
 
 export const Select = ({
 	label,
@@ -68,10 +69,18 @@ export const Select = ({
 						},
 					})}
 				>
-					<P {...css({ textAlign: "center" }, "text")}>{<RSelect.Value />}</P>
-					<RSelect.Icon asChild>
-						<Icon icon={ExpandMore} />
-					</RSelect.Icon>
+					<View
+						{...css({
+							paddingX: ts(3),
+							flexDirection: "row",
+							alignItems: "center",
+						})}
+					>
+						<P {...css({ textAlign: "center" }, "text")}>{<RSelect.Value />}</P>
+						<RSelect.Icon asChild>
+							<Icon icon={ExpandMore} />
+						</RSelect.Icon>
+					</View>
 				</InternalTriger>
 			</RSelect.Trigger>
 			<ContrastArea mode="user">

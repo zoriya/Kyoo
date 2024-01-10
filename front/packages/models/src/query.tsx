@@ -45,7 +45,7 @@ export const queryFn = async <Data,>(
 		| {
 				path: (string | false | undefined | null)[];
 				body?: object;
-				method: "GET" | "POST" | "DELETE";
+				method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 				authenticated?: boolean;
 				apiUrl?: string;
 				timeout?: number;

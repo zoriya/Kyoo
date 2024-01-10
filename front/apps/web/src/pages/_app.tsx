@@ -44,6 +44,7 @@ import { withTranslations } from "../i18n";
 import arrayShuffle from "array-shuffle";
 import { Tooltip } from "react-tooltip";
 import { getCurrentAccount, readCookie, updateAccount } from "@kyoo/models/src/account-internal";
+import { PortalProvider } from "@gorhom/portal";
 
 const font = Poppins({ weight: ["300", "400", "900"], subsets: ["latin"], display: "swap" });
 
@@ -136,21 +137,23 @@ const App = ({ Component, pageProps }: AppProps) => {
 					<AccountProvider ssrAccount={account}>
 						<HydrationBoundary state={queryState}>
 							<ThemeSelector theme={userTheme} font={{ normal: "inherit" }}>
-								<GlobalCssTheme />
-								<Layout
-									page={
-										<Component
-											randomItems={
-												randomItems[Component.displayName!] ??
-												arrayShuffle((Component as QueryPage).randomItems ?? [])
-											}
-											{...props}
-										/>
-									}
-									randomItems={[]}
-									{...layoutProps}
-								/>
-								<Tooltip id="tooltip" positionStrategy={"fixed"} />
+								<PortalProvider>
+									<GlobalCssTheme />
+									<Layout
+										page={
+											<Component
+												randomItems={
+													randomItems[Component.displayName!] ??
+													arrayShuffle((Component as QueryPage).randomItems ?? [])
+												}
+												{...props}
+											/>
+										}
+										randomItems={[]}
+										{...layoutProps}
+									/>
+									<Tooltip id="tooltip" positionStrategy={"fixed"} />
+								</PortalProvider>
 							</ThemeSelector>
 						</HydrationBoundary>
 					</AccountProvider>
