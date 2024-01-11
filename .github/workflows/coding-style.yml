@@ -61,8 +61,5 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
-      - uses: dtolnay/rust-toolchain@stable
-
-      - name: Run cargo fmt
-        run: |
-          cargo fmt --check
+      - name: Run go fmt
+        run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then exit 1; fi
