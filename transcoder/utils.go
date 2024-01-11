@@ -55,3 +55,24 @@ func GetPath(resource string, slug string) (*string, error) {
 
 	return &ret.Path, nil
 }
+
+func GetClientId(c echo.Context) (*string, error) {
+	key := c.Request().Header.Get("X-CLIENT-ID")
+	if key == "" {
+		return nil, errors.New("Missing client id. Please specify the X-CLIENT-ID header to a guid constant for the lifetime of the player (but unique per instance).")
+	}
+	return &key, nil
+}
+
+func ErrorHandler(err error, c echo.Context) {
+	code := http.StatusInternalServerError
+	if he, ok := err.(*echo.HTTPError); ok {
+		code = he.Code
+	} else {
+		c.Logger().Error(err)
+	}
+	c.JSON(code, struct {
+		Errors []string `json:"errors"`
+	}{Errors: []string{fmt.Sprint(err)}})
+}
+
