@@ -23,7 +23,7 @@ func DirectStream(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	return c.File(*path)
+	return c.File(path)
 }
 
 // Get master playlist
@@ -47,7 +47,7 @@ func (h *Handler) GetMaster(c echo.Context) error {
 		return err
 	}
 
-	ret, err := h.transcoder.GetMaster(*path, *client)
+	ret, err := h.transcoder.GetMaster(path, client)
 	if err != nil {
 		return err
 	}

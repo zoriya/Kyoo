@@ -5,14 +5,14 @@ type Transcoder struct {
 	streams map[string]FileStream
 }
 
-func (t *Transcoder) GetMaster(path string, client string) (*string, error) {
+func (t *Transcoder) GetMaster(path string, client string) (string, error) {
 	stream, ok := t.streams[path]
 	if !ok {
 		stream, err := NewFileStream(path)
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 		t.streams[path] = *stream
 	}
-	return &stream.GetMaster()
+	return stream.GetMaster(), nil
 }

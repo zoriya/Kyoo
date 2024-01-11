@@ -18,29 +18,29 @@ type Item struct {
 	Path string `json:"path"`
 }
 
-func GetPath(resource string, slug string) (*string, error) {
+func GetPath(resource string, slug string) (string, error) {
 	url := os.Getenv("API_URL")
 	if url == "" {
 		url = "http://back:5000"
 	}
 	key := os.Getenv("KYOO_APIKEYS")
 	if key == "" {
-		return nil, errors.New("missing api keys")
+		return "", errors.New("missing api keys")
 	}
 	key = strings.Split(key, ",")[0]
 
 	req, err := http.NewRequest("GET", strings.Join([]string{url, resource, slug}, "/"), nil)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	req.Header.Set("X-API-KEY", key)
 	res, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	if res.StatusCode != 200 {
-		return nil, echo.NewHTTPError(
+		return "", echo.NewHTTPError(
 			http.StatusNotAcceptable,
 			fmt.Sprintf("No %s found with the slug %s.", resource, slug),
 		)
@@ -50,18 +50,18 @@ func GetPath(resource string, slug string) (*string, error) {
 	ret := Item{}
 	err = json.NewDecoder(res.Body).Decode(&ret)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return &ret.Path, nil
+	return ret.Path, nil
 }
 
-func GetClientId(c echo.Context) (*string, error) {
+func GetClientId(c echo.Context) (string, error) {
 	key := c.Request().Header.Get("X-CLIENT-ID")
 	if key == "" {
-		return nil, errors.New("Missing client id. Please specify the X-CLIENT-ID header to a guid constant for the lifetime of the player (but unique per instance).")
+		return "", errors.New("missing client id. Please specify the X-CLIENT-ID header to a guid constant for the lifetime of the player (but unique per instance)")
 	}
-	return &key, nil
+	return key, nil
 }
 
 func ErrorHandler(err error, c echo.Context) {
