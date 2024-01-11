@@ -18,12 +18,8 @@ in
       python
       python312Packages.setuptools
       python312Packages.pip
-      cargo
-      cargo-watch
-      rustfmt
-      rustc
-      pkgconfig
-      openssl
+      go
+      wgo
       mediainfo
       ffmpeg
       postgresql_15
@@ -32,7 +28,6 @@ in
       pgformatter
     ];
 
-    RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
     DOTNET_ROOT = "${dotnet}";
 
     shellHook = ''

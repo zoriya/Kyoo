@@ -1,13 +1,6 @@
-FROM rust:alpine
-RUN apk add --no-cache musl-dev ffmpeg mediainfo
-RUN cargo install cargo-watch
+FROM golang:1.20-alpine
+RUN go install github.com/bokwoon95/wgo@latest
 WORKDIR /app
 
-# FIX: see https://github.com/rust-lang/cargo/issues/2644
-RUN mkdir src/ && touch src/lib.rs
-COPY Cargo.toml Cargo.lock ./
-RUN cargo build
-RUN rm src/lib.rs
-
 EXPOSE 7666
-ENTRYPOINT ["cargo", "watch", "-x", "run"]
+CMD wgo run .
