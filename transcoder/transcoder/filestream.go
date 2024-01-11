@@ -95,3 +95,7 @@ func (fs *FileStream) IsDead() bool {
 	}
 	return false
 }
+
+func (fs *FileStream) GetMaster() string {
+	return ""
+}
