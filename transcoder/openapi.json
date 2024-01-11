@@ -1,0 +1,697 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "transcoder",
+    "description": "Transcoder's open api.",
+    "license": {
+      "name": ""
+    },
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/{resource}/{slug}/audio/{audio}/index.m3u8": {
+      "get": {
+        "tags": [
+          "crate"
+        ],
+        "summary": "Transcode audio",
+        "description": "Transcode audio\n\nGet the selected audio\nThis route can take a few seconds to respond since it will way for at least one segment to be\navailable.",
+        "operationId": "get_audio_transcoded",
+        "parameters": [
+          {
+            "name": "resource",
+            "in": "path",
+            "description": "Episode or movie",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "slug",
+            "in": "path",
+            "description": "The slug of the movie/episode.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "audio",
+            "in": "path",
+            "description": "Specify the audio stream you want. For mappings, refer to the audios fields of the /watch response.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get the m3u8 playlist."
+          },
+          "404": {
+            "description": "Invalid slug."
+          }
+        }
+      }
+    },
+    "/{resource}/{slug}/audio/{audio}/segments-{chunk}.ts": {
+      "get": {
+        "tags": [
+          "crate"
+        ],
+        "summary": "Get audio chunk",
+        "description": "Get audio chunk\n\nRetrieve a chunk of a transcoded audio.",
+        "operationId": "get_audio_chunk",
+        "parameters": [
+          {
+            "name": "resource",
+            "in": "path",
+            "description": "Episode or movie",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "slug",
+            "in": "path",
+            "description": "The slug of the movie/episode.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "audio",
+            "in": "path",
+            "description": "Specify the audio you want",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "chunk",
+            "in": "path",
+            "description": "The number of the chunk",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get a hls chunk."
+          },
+          "404": {
+            "description": "Invalid slug."
+          }
+        }
+      }
+    },
+    "/{resource}/{slug}/direct": {
+      "get": {
+        "tags": [
+          "crate"
+        ],
+        "summary": "Direct video",
+        "description": "Direct video\n\nRetrieve the raw video stream, in the same container as the one on the server. No transcoding or\ntransmuxing is done.",
+        "operationId": "get_direct",
+        "parameters": [
+          {
+            "name": "resource",
+            "in": "path",
+            "description": "Episode or movie",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "slug",
+            "in": "path",
+            "description": "The slug of the movie/episode.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The item is returned"
+          },
+          "404": {
+            "description": "Invalid slug."
+          }
+        }
+      }
+    },
+    "/{resource}/{slug}/info": {
+      "get": {
+        "tags": [
+          "crate"
+        ],
+        "summary": "Identify",
+        "description": "Identify\n\nIdentify metadata about a file",
+        "operationId": "identify_resource",
+        "parameters": [
+          {
+            "name": "resource",
+            "in": "path",
+            "description": "Episode or movie",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "slug",
+            "in": "path",
+            "description": "The slug of the movie/episode.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaInfo"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invalid slug."
+          }
+        }
+      }
+    },
+    "/{resource}/{slug}/master.m3u8": {
+      "get": {
+        "tags": [
+          "crate"
+        ],
+        "summary": "Get master playlist",
+        "description": "Get master playlist\n\nGet a master playlist containing all possible video qualities and audios available for this resource.\nNote that the direct stream is missing (since the direct is not an hls stream) and\nsubtitles/fonts are not included to support more codecs than just webvtt.",
+        "operationId": "get_master",
+        "parameters": [
+          {
+            "name": "resource",
+            "in": "path",
+            "description": "Episode or movie",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "slug",
+            "in": "path",
+            "description": "The slug of the movie/episode.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get the m3u8 master playlist."
+          },
+          "404": {
+            "description": "Invalid slug."
+          }
+        }
+      }
+    },
+    "/{resource}/{slug}/{quality}/index.m3u8": {
+      "get": {
+        "tags": [
+          "crate"
+        ],
+        "summary": "Transcode video",
+        "description": "Transcode video\n\nTranscode the video to the selected quality.\nThis route can take a few seconds to respond since it will way for at least one segment to be\navailable.",
+        "operationId": "get_transcoded",
+        "parameters": [
+          {
+            "name": "resource",
+            "in": "path",
+            "description": "Episode or movie",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "slug",
+            "in": "path",
+            "description": "The slug of the movie/episode.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "quality",
+            "in": "path",
+            "description": "Specify the quality you want",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-client-id",
+            "in": "header",
+            "description": "A unique identify for a player's instance. Used to cancel unused transcode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get the m3u8 playlist."
+          },
+          "404": {
+            "description": "Invalid slug."
+          }
+        }
+      }
+    },
+    "/{resource}/{slug}/{quality}/segments-{chunk}.ts": {
+      "get": {
+        "tags": [
+          "crate"
+        ],
+        "summary": "Get transmuxed chunk",
+        "description": "Get transmuxed chunk\n\nRetrieve a chunk of a transmuxed video.",
+        "operationId": "get_chunk",
+        "parameters": [
+          {
+            "name": "resource",
+            "in": "path",
+            "description": "Episode or movie",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "slug",
+            "in": "path",
+            "description": "The slug of the movie/episode.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "quality",
+            "in": "path",
+            "description": "Specify the quality you want",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chunk",
+            "in": "path",
+            "description": "The number of the chunk",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "x-client-id",
+            "in": "header",
+            "description": "A unique identify for a player's instance. Used to cancel unused transcode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get a hls chunk."
+          },
+          "404": {
+            "description": "Invalid slug."
+          }
+        }
+      }
+    },
+    "/{sha}/attachment/{name}": {
+      "get": {
+        "tags": [
+          "crate"
+        ],
+        "summary": "Get attachments",
+        "description": "Get attachments\n\nGet a specific attachment",
+        "operationId": "get_attachment",
+        "parameters": [
+          {
+            "name": "sha",
+            "in": "path",
+            "description": "The sha1 of the file",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "description": "The name of the attachment.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaInfo"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invalid slug."
+          }
+        }
+      }
+    },
+    "/{sha}/subtitle/{name}": {
+      "get": {
+        "tags": [
+          "crate"
+        ],
+        "summary": "Get subtitle",
+        "description": "Get subtitle\n\nGet a specific subtitle",
+        "operationId": "get_subtitle",
+        "parameters": [
+          {
+            "name": "sha",
+            "in": "path",
+            "description": "The sha1 of the file",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "description": "The name of the subtitle.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaInfo"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invalid slug."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Audio": {
+        "type": "object",
+        "required": [
+          "index",
+          "codec",
+          "isDefault",
+          "isForced"
+        ],
+        "properties": {
+          "codec": {
+            "type": "string",
+            "description": "The codec of this stream."
+          },
+          "index": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The index of this track on the media.",
+            "minimum": 0
+          },
+          "isDefault": {
+            "type": "boolean",
+            "description": "Is this stream the default one of it's type?"
+          },
+          "isForced": {
+            "type": "boolean",
+            "description": "Is this stream tagged as forced? (useful only for subtitles)"
+          },
+          "language": {
+            "type": "string",
+            "description": "The language of this stream (as a ISO-639-2 language code)",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the stream.",
+            "nullable": true
+          }
+        }
+      },
+      "Chapter": {
+        "type": "object",
+        "required": [
+          "startTime",
+          "endTime",
+          "name"
+        ],
+        "properties": {
+          "endTime": {
+            "type": "number",
+            "format": "float",
+            "description": "The end time of the chapter (in second from the start of the episode)."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of this chapter. This should be a human-readable name that could be presented to the user."
+          },
+          "startTime": {
+            "type": "number",
+            "format": "float",
+            "description": "The start time of the chapter (in second from the start of the episode)."
+          }
+        }
+      },
+      "MediaInfo": {
+        "type": "object",
+        "required": [
+          "sha",
+          "path",
+          "extension",
+          "length",
+          "container",
+          "video",
+          "audios",
+          "subtitles",
+          "fonts",
+          "chapters"
+        ],
+        "properties": {
+          "audios": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Audio"
+            },
+            "description": "The list of audio tracks."
+          },
+          "chapters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Chapter"
+            },
+            "description": "The list of chapters. See Chapter for more information."
+          },
+          "container": {
+            "type": "string",
+            "description": "The container of the video file of this episode."
+          },
+          "extension": {
+            "type": "string",
+            "description": "The extension currently used to store this video file"
+          },
+          "fonts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The list of fonts that can be used to display subtitles."
+          },
+          "length": {
+            "type": "number",
+            "format": "float",
+            "description": "The length of the media in seconds."
+          },
+          "path": {
+            "type": "string",
+            "description": "The internal path of the video file."
+          },
+          "sha": {
+            "type": "string",
+            "description": "The sha1 of the video file."
+          },
+          "subtitles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Subtitle"
+            },
+            "description": "The list of subtitles tracks."
+          },
+          "video": {
+            "$ref": "#/components/schemas/Video"
+          }
+        }
+      },
+      "Quality": {
+        "type": "string",
+        "enum": [
+          "P240",
+          "P360",
+          "P480",
+          "P720",
+          "P1080",
+          "P1440",
+          "P4k",
+          "P8k",
+          "Original"
+        ]
+      },
+      "Subtitle": {
+        "type": "object",
+        "required": [
+          "index",
+          "codec",
+          "isDefault",
+          "isForced"
+        ],
+        "properties": {
+          "codec": {
+            "type": "string",
+            "description": "The codec of this stream."
+          },
+          "extension": {
+            "type": "string",
+            "description": "The extension for the codec.",
+            "nullable": true
+          },
+          "index": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The index of this track on the media.",
+            "minimum": 0
+          },
+          "isDefault": {
+            "type": "boolean",
+            "description": "Is this stream the default one of it's type?"
+          },
+          "isForced": {
+            "type": "boolean",
+            "description": "Is this stream tagged as forced? (useful only for subtitles)"
+          },
+          "language": {
+            "type": "string",
+            "description": "The language of this stream (as a ISO-639-2 language code)",
+            "nullable": true
+          },
+          "link": {
+            "type": "string",
+            "description": "The link to access this subtitle.",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the stream.",
+            "nullable": true
+          }
+        }
+      },
+      "Video": {
+        "type": "object",
+        "required": [
+          "codec",
+          "quality",
+          "width",
+          "height",
+          "bitrate"
+        ],
+        "properties": {
+          "bitrate": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The average bitrate of the video in bytes/s",
+            "minimum": 0
+          },
+          "codec": {
+            "type": "string",
+            "description": "The codec of this stream (defined as the RFC 6381)."
+          },
+          "height": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The height of the video stream",
+            "minimum": 0
+          },
+          "language": {
+            "type": "string",
+            "description": "The language of this stream (as a ISO-639-2 language code)",
+            "nullable": true
+          },
+          "quality": {
+            "$ref": "#/components/schemas/Quality"
+          },
+          "width": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The width of the video stream",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  }
+}
