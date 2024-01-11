@@ -9,7 +9,7 @@
 		"ios": "expo start --ios",
 		"web": "expo start --web",
 		"build": "eas build --profile production --platform android --non-interactive --auto-submit",
-		"build:apk": "eas build --profile preview --platform android --non-interactive",
+		"build:apk": "eas build --profile preview --platform android --non-interactive --json",
 		"build:dev": "eas build --profile development --platform android --non-interactive",
 		"update": "eas update --auto --channel prod"
 	},

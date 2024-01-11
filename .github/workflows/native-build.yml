@@ -45,7 +45,7 @@ jobs:
       - name: Parse Asset URL
         id: url
         run: |
-          ASSET_URL=$(grep -oe 'https://expo.dev/artifacts/eas/.*' log.txt)
+          ASSET_URL=$(cat log.txt | jq '.[0].artifacts.buildUrl' -r)
           echo The android url is $ASSET_URL
           echo "assetUrl=$ASSET_URL" >> $GITHUB_OUTPUT
 
