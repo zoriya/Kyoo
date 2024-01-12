@@ -30,6 +30,7 @@ func (t *Transcoder) GetMaster(path string, client string) (string, error) {
 	} else if !ok {
 		t.mutex.Lock()
 		t.preparing[path] = true
+		t.cleanUnused()
 		t.mutex.Unlock()
 
 		stream, err := NewFileStream(path)
@@ -49,5 +50,17 @@ func (t *Transcoder) GetMaster(path string, client string) (string, error) {
 
 		t.channel <- stream
 	}
+
 	return stream.GetMaster(), nil
+}
+
+// This method assume the lock is already taken.
+func (t *Transcoder) cleanUnused() {
+	for path, stream := range t.streams {
+		if !stream.IsDead() {
+			continue
+		}
+		stream.Destroy()
+		delete(t.streams, path)
+	}
 }

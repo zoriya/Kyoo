@@ -90,10 +90,15 @@ func GetKeyframes(path string) ([]float64, bool, error) {
 func (fs *FileStream) IsDead() bool {
 	for _, s := range fs.streams {
 		if len(s.Clients) > 0 {
-			return true
+			return false
 		}
 	}
-	return false
+	// TODO: Also check how long this stream has been unused. We dont want to kill streams created 2min ago
+	return true
+}
+
+func (fs *FileStream) Destroy() {
+	// TODO: kill child process and delete data
 }
 
 func (fs *FileStream) GetMaster() string {
