@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/zoriya/kyoo/transcoder/transcoder"
+	"github.com/zoriya/kyoo/transcoder/src"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -55,7 +55,7 @@ func (h *Handler) GetMaster(c echo.Context) error {
 }
 
 type Handler struct {
-	transcoder *transcoder.Transcoder
+	transcoder *src.Transcoder
 }
 
 func main() {
