@@ -9,27 +9,26 @@ type Transcoder struct {
 	// All file streams currently running, index is file path
 	streams map[string]FileStream
 	// Streams that are staring up
-	preparing map[string]bool
-
+	preparing map[string]chan *FileStream
 	mutex   sync.RWMutex
-	channel chan *FileStream
 }
 
 func (t *Transcoder) GetMaster(path string, client string) (string, error) {
 	t.mutex.RLock()
 	stream, ok := t.streams[path]
-	preparing := t.preparing[path]
+	channel, preparing := t.preparing[path]
 	t.mutex.RUnlock()
 
 	if preparing {
-		pstream := <-t.channel
+		pstream := <-channel
 		if pstream == nil {
 			return "", errors.New("could not transcode file. Try again later")
 		}
 		stream = *pstream
 	} else if !ok {
 		t.mutex.Lock()
-		t.preparing[path] = true
+		channel = make(chan *FileStream, 1)
+		t.preparing[path] = channel
 		t.cleanUnused()
 		t.mutex.Unlock()
 
@@ -38,7 +37,7 @@ func (t *Transcoder) GetMaster(path string, client string) (string, error) {
 			t.mutex.Lock()
 			delete(t.preparing, path)
 			t.mutex.Unlock()
-			t.channel <- nil
+			channel <- nil
 
 			return "", err
 		}
@@ -48,7 +47,7 @@ func (t *Transcoder) GetMaster(path string, client string) (string, error) {
 		delete(t.preparing, path)
 		t.mutex.Unlock()
 
-		t.channel <- stream
+		channel <- stream
 	}
 
 	return stream.GetMaster(), nil
