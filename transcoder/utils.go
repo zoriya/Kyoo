@@ -41,7 +41,7 @@ func GetPath(resource string, slug string) (string, error) {
 
 	if res.StatusCode != 200 {
 		return "", echo.NewHTTPError(
-			http.StatusNotAcceptable,
+			http.StatusNotFound,
 			fmt.Sprintf("No %s found with the slug %s.", resource, slug),
 		)
 	}

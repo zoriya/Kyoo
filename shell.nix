@@ -21,6 +21,7 @@ in
       go
       wgo
       mediainfo
+      libmediainfo
       ffmpeg
       postgresql_15
       eslint_d
