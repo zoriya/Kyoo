@@ -36,7 +36,7 @@ type Video struct {
 	/// The codec of this stream (defined as the RFC 6381).
 	Codec string `json:"codec"`
 	/// The language of this stream (as a ISO-639-2 language code)
-	Language string `json:"language,omitempty"`
+	Language *string `json:"language"`
 	/// The max quality of this video track.
 	Quality Quality `json:"quality"`
 	/// The width of the video stream
@@ -51,9 +51,9 @@ type Audio struct {
 	/// The index of this track on the media.
 	Index uint32 `json:"index"`
 	/// The title of the stream.
-	Title string `json:"title,omitempty"`
+	Title *string `json:"title"`
 	/// The language of this stream (as a ISO-639-2 language code)
-	Language string `json:"language,omitempty"`
+	Language *string `json:"language"`
 	/// The codec of this stream.
 	Codec string `json:"codec"`
 	/// Is this stream the default one of it's type?
@@ -66,19 +66,19 @@ type Subtitle struct {
 	/// The index of this track on the media.
 	Index uint32 `json:"index"`
 	/// The title of the stream.
-	Title string `json:"title,omitempty"`
+	Title *string `json:"title"`
 	/// The language of this stream (as a ISO-639-2 language code)
-	Language string `json:"language,omitempty"`
+	Language *string `json:"language"`
 	/// The codec of this stream.
 	Codec string `json:"codec"`
 	/// The extension for the codec.
-	Extension string `json:"extension,omitempty"`
+	Extension *string `json:"extension"`
 	/// Is this stream the default one of it's type?
 	IsDefault bool `json:"isDefault"`
 	/// Is this stream tagged as forced? (useful only for subtitles)
 	IsForced bool `json:"isForced"`
 	/// The link to access this subtitle.
-	Link string `json:"link,omitempty"`
+	Link *string `json:"link"`
 }
 
 type Chapter struct {
@@ -120,6 +120,20 @@ func Or[T comparable](vals ...T) T {
 	return zero
 }
 
+func Map[T any](ts []T, f func(int) T) []T {
+	for i := range ts {
+		ts[i] = f(i)
+	}
+	return ts
+}
+
+func OrNull(str string) *string {
+	if str == "" {
+		return nil
+	}
+	return &str
+}
+
 func GetInfo(path string) (MediaInfo, error) {
 	mi, err := mediainfo.Open(path)
 	if err != nil {
@@ -151,7 +165,7 @@ func GetInfo(path string) (MediaInfo, error) {
 		Video: Video{
 			// This codec is not in the right format (does not include bitdepth...).
 			Codec:    mi.Parameter(mediainfo.StreamVideo, 0, "Format"),
-			Language: mi.Parameter(mediainfo.StreamVideo, 0, "Language"),
+			Language: OrNull(mi.Parameter(mediainfo.StreamVideo, 0, "Language")),
 			Quality:  QualityFromHeight(ParseUint(mi.Parameter(mediainfo.StreamVideo, 0, "Height"))),
 			Width:    ParseUint(mi.Parameter(mediainfo.StreamVideo, 0, "Width")),
 			Height:   ParseUint(mi.Parameter(mediainfo.StreamVideo, 0, "Height")),
@@ -162,5 +176,16 @@ func GetInfo(path string) (MediaInfo, error) {
 				),
 			),
 		},
+		Audios: Map(make([]Audio, ParseUint(mi.Parameter(mediainfo.StreamAudio, 0, "StreamCount"))), func(i int) Audio {
+			return Audio{
+				Index:    uint32(i),
+				Title:    OrNull(mi.Parameter(mediainfo.StreamAudio, i, "Title")),
+				Language: OrNull(mi.Parameter(mediainfo.StreamAudio, i, "Language")),
+				// TODO: format is invalid. Channels count missing...
+				Codec:     mi.Parameter(mediainfo.StreamAudio, i, "Format"),
+				IsDefault: mi.Parameter(mediainfo.StreamAudio, i, "Default") == "Yes",
+				IsForced:  mi.Parameter(mediainfo.StreamAudio, i, "Forced") == "Yes",
+			}
+		}),
 	}, nil
 }
