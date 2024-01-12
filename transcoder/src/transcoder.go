@@ -1,6 +1,7 @@
 package src
 
 import (
+	"errors"
 	"sync"
 )
 
@@ -21,7 +22,11 @@ func (t *Transcoder) GetMaster(path string, client string) (string, error) {
 	t.mutex.RUnlock()
 
 	if preparing {
-		stream = *<- t.channel
+		pstream := <-t.channel
+		if pstream == nil {
+			return "", errors.New("could not transcode file. Try again later")
+		}
+		stream = *pstream
 	} else if !ok {
 		t.mutex.Lock()
 		t.preparing[path] = true
@@ -29,6 +34,11 @@ func (t *Transcoder) GetMaster(path string, client string) (string, error) {
 
 		stream, err := NewFileStream(path)
 		if err != nil {
+			t.mutex.Lock()
+			delete(t.preparing, path)
+			t.mutex.Unlock()
+			t.channel <- nil
+
 			return "", err
 		}
 
