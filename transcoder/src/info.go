@@ -3,8 +3,10 @@ package src
 import (
 	"crypto/sha1"
 	"encoding/hex"
+	"fmt"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/zelenin/go-mediainfo"
 )
@@ -134,6 +136,12 @@ func OrNull(str string) *string {
 	return &str
 }
 
+var SubtitleExtensions = map[string]string{
+	"subrip": "srt",
+	"ass":    "srt",
+	"vtt":    "vtt",
+}
+
 func GetInfo(path string) (MediaInfo, error) {
 	mi, err := mediainfo.Open(path)
 	if err != nil {
@@ -185,6 +193,28 @@ func GetInfo(path string) (MediaInfo, error) {
 				Codec:     mi.Parameter(mediainfo.StreamAudio, i, "Format"),
 				IsDefault: mi.Parameter(mediainfo.StreamAudio, i, "Default") == "Yes",
 				IsForced:  mi.Parameter(mediainfo.StreamAudio, i, "Forced") == "Yes",
+			}
+		}),
+		Subtitles: Map(make([]Subtitle, ParseUint(mi.Parameter(mediainfo.StreamText, 0, "StreamCount"))), func(i int) Subtitle {
+			format := strings.ToLower(mi.Parameter(mediainfo.StreamText, i, "Format"))
+			if format == "utf-8" {
+				format = "subrip"
+			}
+			extension := OrNull(SubtitleExtensions[format])
+			var link *string
+			if extension != nil {
+				x := fmt.Sprintf("/video/%s/subtitle/%d.%s", sha, i, *extension)
+				link = &x
+			}
+			return Subtitle{
+				Index:     uint32(i),
+				Title:     OrNull(mi.Parameter(mediainfo.StreamText, i, "Title")),
+				Language:  OrNull(mi.Parameter(mediainfo.StreamText, i, "Language")),
+				Codec:     format,
+				Extension: extension,
+				IsDefault: mi.Parameter(mediainfo.StreamText, i, "Default") == "Yes",
+				IsForced:  mi.Parameter(mediainfo.StreamText, i, "Forced") == "Yes",
+				Link:      link,
 			}
 		}),
 	}, nil
