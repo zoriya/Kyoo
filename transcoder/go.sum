@@ -13,8 +13,10 @@ github.com/valyala/bytebufferpool v1.0.0 h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6Kllzaw
 github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
 github.com/valyala/fasttemplate v1.2.2 h1:lxLXG0uE3Qnshl9QyaK6XJxMXlQZELvChBOCmQD0Loo=
 github.com/valyala/fasttemplate v1.2.2/go.mod h1:KHLXt3tVN2HBp8eijSv/kGJopbvo7S+qRAEEKiv+SiQ=
-github.com/zelenin/go-mediainfo v1.0.0 h1:P0rKGyrSwKBCj37Ul7TLkrhf5OVBPlh3fFe9ZqjiaKQ=
-github.com/zelenin/go-mediainfo v1.0.0/go.mod h1:6jxR5y1gDozFdCD7NYq/kUjCo5nqeogYCal6wpv81nY=
+github.com/zoriya/go-mediainfo v0.0.0-20240112235842-ce0c807be738 h1:FV9TIvf/T84cRxRdBN6brSWKq+PqrGHmqbeDhmI+3tc=
+github.com/zoriya/go-mediainfo v0.0.0-20240112235842-ce0c807be738/go.mod h1:jzun1oQGoJSh65g1XKaolTmjd6HW/34WHH7VMdJdbvM=
+github.com/zoriya/go-mediainfo v0.0.0-20240113000440-36f500affcfd h1:AOdEpcmYJkmIW4I76TQim6LT4+9duYTdXNgkQsPHpuA=
+github.com/zoriya/go-mediainfo v0.0.0-20240113000440-36f500affcfd/go.mod h1:jzun1oQGoJSh65g1XKaolTmjd6HW/34WHH7VMdJdbvM=
 golang.org/x/crypto v0.17.0 h1:r8bRNjWL3GshPW3gkd+RpvzWrZAwPS49OmTGZ/uhM4k=
 golang.org/x/crypto v0.17.0/go.mod h1:gCAAfMLgwOJRpTjQ2zCCt2OcSfYMTeZVSRtQlPC7Nq4=
 golang.org/x/net v0.19.0 h1:zTwKpTd2XuCqf8huc7Fo2iSy+4RHPd10s4KzeTnVr1c=

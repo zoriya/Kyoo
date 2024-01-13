@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/zelenin/go-mediainfo"
+	"github.com/zoriya/go-mediainfo"
 )
 
 type MediaInfo struct {
@@ -96,7 +96,7 @@ type Chapter struct {
 func ParseFloat(str string) float32 {
 	f, err := strconv.ParseFloat(str, 32)
 	if err != nil {
-		panic(err)
+		return 0
 	}
 	return float32(f)
 }
@@ -104,9 +104,18 @@ func ParseFloat(str string) float32 {
 func ParseUint(str string) uint32 {
 	i, err := strconv.ParseUint(str, 10, 32)
 	if err != nil {
-		panic(err)
+		return 0
 	}
 	return uint32(i)
+}
+
+func ParseTime(str string) float32 {
+	x := strings.Split(str, ":")
+	hours, minutes, sms := ParseFloat(x[0]), ParseFloat(x[1]), x[2]
+	y := strings.Split(sms, ".")
+	seconds, ms := ParseFloat(y[0]), ParseFloat(y[1])
+
+	return (hours*60.+minutes)*60. + seconds + ms/1000.
 }
 
 // Stolen from the cmp.Or code that is not yet released
@@ -162,6 +171,9 @@ func GetInfo(path string) (MediaInfo, error) {
 		sha = hex.EncodeToString(h.Sum(nil))
 	}
 
+	chapters_begin := ParseUint(mi.Parameter(mediainfo.StreamMenu, 0, "Chapters_Pos_Begin"))
+	chapters_end := ParseUint(mi.Parameter(mediainfo.StreamMenu, 0, "Chapters_Pos_End"))
+
 	return MediaInfo{
 		Sha:  sha,
 		Path: path,
@@ -215,6 +227,14 @@ func GetInfo(path string) (MediaInfo, error) {
 				IsDefault: mi.Parameter(mediainfo.StreamText, i, "Default") == "Yes",
 				IsForced:  mi.Parameter(mediainfo.StreamText, i, "Forced") == "Yes",
 				Link:      link,
+			}
+		}),
+		Chapters: Map(make([]Chapter, chapters_end-chapters_begin-1), func(i int) Chapter {
+			return Chapter{
+				StartTime: ParseTime(mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoName)),
+				// +1 is safe, the value at chapters_end contains the right duration
+				EndTime: ParseTime(mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i+1, mediainfo.InfoName)),
+				Name:    mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoText),
 			}
 		}),
 	}, nil
