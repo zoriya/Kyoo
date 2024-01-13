@@ -1,6 +1,7 @@
 package src
 
 import (
+	"fmt"
 	"math"
 	"os/exec"
 	"strconv"
@@ -11,12 +12,29 @@ type FileStream struct {
 	Path        string
 	Keyframes   []float64
 	CanTransmux bool
+	Info        *MediaInfo
 	streams     map[Quality]TranscodeStream
 }
 
 func NewFileStream(path string) (*FileStream, error) {
+	info_chan := make(chan struct {
+		info *MediaInfo
+		err  error
+	})
+	go func() {
+		ret, err := GetInfo(path)
+		info_chan <- struct {
+			info *MediaInfo
+			err  error
+		}{ret, err}
+	}()
+
 	keyframes, can_transmux, err := GetKeyframes(path)
 	if err != nil {
+		return nil, err
+	}
+	info := <-info_chan
+	if info.err != nil {
 		return nil, err
 	}
 
@@ -24,6 +42,7 @@ func NewFileStream(path string) (*FileStream, error) {
 		Path:        path,
 		Keyframes:   keyframes,
 		CanTransmux: can_transmux,
+		Info:        info.info,
 		streams:     make(map[Quality]TranscodeStream),
 	}, nil
 }
@@ -102,5 +121,45 @@ func (fs *FileStream) Destroy() {
 }
 
 func (fs *FileStream) GetMaster() string {
-	return ""
+	master := "#EXTM3U\n"
+	// TODO: also check if the codec is valid in a hls before putting transmux
+	if fs.CanTransmux {
+		master += "#EXT-X-STREAM-INF:"
+		master += fmt.Sprintf("AVERAGE-BANDWIDTH=%d,", fs.Info.Video.Bitrate)
+		master += fmt.Sprintf("BANDWIDTH=%d,", int(float32(fs.Info.Video.Bitrate)*1.2))
+		master += fmt.Sprintf("RESOLUTION=%dx%d,", fs.Info.Video.Width, fs.Info.Video.Height)
+		master += "AUDIO=\"audio\","
+		master += "CLOSED-CAPTIONS=NONE\n"
+		master += fmt.Sprintf("./%s/index.m3u8\n", Original)
+	}
+	aspectRatio := float32(fs.Info.Video.Width) / float32(fs.Info.Video.Height)
+	for _, quality := range Qualities {
+		if quality.Height() < fs.Info.Video.Quality.Height() && quality.AverageBitrate() < fs.Info.Video.Bitrate {
+			master += "#EXT-X-STREAM-INF:"
+			master += fmt.Sprintf("AVERAGE-BANDWIDTH=%d,", quality.AverageBitrate())
+			master += fmt.Sprintf("BANDWIDTH=%d,", quality.MaxBitrate())
+			master += fmt.Sprintf("RESOLUTION=%dx%d,", int(aspectRatio*float32(quality.Height())+0.5), quality.Height())
+			master += "CODECS=\"avc1.640028\","
+			master += "AUDIO=\"audio\","
+			master += "CLOSED-CAPTIONS=NONE\n"
+			master += fmt.Sprintf("./%s/index.m3u8\n", quality)
+		}
+	}
+	for _, audio := range fs.Info.Audios {
+		master += "#EXT-X-MEDIA:TYPE=AUDIO,"
+		master += "GROUP-ID=\"audio\","
+		if audio.Language != nil {
+			master += fmt.Sprintf("LANGUAGE=\"%s\",", *audio.Language)
+		}
+		if audio.Title != nil {
+			master += fmt.Sprintf("NAME=\"%s\",", *audio.Title)
+		} else if audio.Language != nil {
+			master += fmt.Sprintf("NAME=\"%s\",", *audio.Language)
+		} else {
+			master += fmt.Sprintf("NAME=\"Audio %d\",", audio.Index)
+		}
+		master += "DEFAULT=YES,"
+		master += fmt.Sprintf("URI=\"./audio/%d/index.m3u8\"\n", audio.Index)
+	}
+	return master
 }
