@@ -132,9 +132,9 @@ func Or[T comparable](vals ...T) T {
 	return zero
 }
 
-func Map[T any](ts []T, f func(int) T) []T {
+func Map[T any](ts []T, f func(T, int) T) []T {
 	for i := range ts {
-		ts[i] = f(i)
+		ts[i] = f(ts[i], i)
 	}
 	return ts
 }
@@ -155,7 +155,7 @@ func Max(x, y uint32) uint32 {
 
 var SubtitleExtensions = map[string]string{
 	"subrip": "srt",
-	"ass":    "srt",
+	"ass":    "ass",
 	"vtt":    "vtt",
 }
 
@@ -206,7 +206,7 @@ func GetInfo(path string) (*MediaInfo, error) {
 				),
 			),
 		},
-		Audios: Map(make([]Audio, ParseUint(mi.Parameter(mediainfo.StreamAudio, 0, "StreamCount"))), func(i int) Audio {
+		Audios: Map(make([]Audio, ParseUint(mi.Parameter(mediainfo.StreamAudio, 0, "StreamCount"))), func(_ Audio, i int) Audio {
 			return Audio{
 				Index:    uint32(i),
 				Title:    OrNull(mi.Parameter(mediainfo.StreamAudio, i, "Title")),
@@ -217,7 +217,7 @@ func GetInfo(path string) (*MediaInfo, error) {
 				IsForced:  mi.Parameter(mediainfo.StreamAudio, i, "Forced") == "Yes",
 			}
 		}),
-		Subtitles: Map(make([]Subtitle, ParseUint(mi.Parameter(mediainfo.StreamText, 0, "StreamCount"))), func(i int) Subtitle {
+		Subtitles: Map(make([]Subtitle, ParseUint(mi.Parameter(mediainfo.StreamText, 0, "StreamCount"))), func(_ Subtitle, i int) Subtitle {
 			format := strings.ToLower(mi.Parameter(mediainfo.StreamText, i, "Format"))
 			if format == "utf-8" {
 				format = "subrip"
@@ -239,7 +239,7 @@ func GetInfo(path string) (*MediaInfo, error) {
 				Link:      link,
 			}
 		}),
-		Chapters: Map(make([]Chapter, Max(chapters_end-chapters_begin, 1)-1), func(i int) Chapter {
+		Chapters: Map(make([]Chapter, Max(chapters_end-chapters_begin, 1)-1), func(_ Chapter, i int) Chapter {
 			return Chapter{
 				StartTime: ParseTime(mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoName)),
 				// +1 is safe, the value at chapters_end contains the right duration
@@ -247,7 +247,10 @@ func GetInfo(path string) (*MediaInfo, error) {
 				Name:    mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoText),
 			}
 		}),
-		// TODO: populate fonts
-		Fonts: make([]string, 0),
+		Fonts: Map(
+			strings.Split(mi.Parameter(mediainfo.StreamGeneral, 0, "Attachments"), " / "),
+			func(font string, _ int) string {
+				return fmt.Sprintf("/video/%s/attachment/%s", sha, font)
+			}),
 	}, nil
 }
