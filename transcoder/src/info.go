@@ -4,6 +4,7 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
+	"log"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -159,6 +160,8 @@ var SubtitleExtensions = map[string]string{
 }
 
 func GetInfo(path string) (*MediaInfo, error) {
+	log.Printf("Running mediainfo for %s", path)
+
 	mi, err := mediainfo.Open(path)
 	if err != nil {
 		return nil, err

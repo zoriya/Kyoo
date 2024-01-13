@@ -2,6 +2,7 @@ package src
 
 import (
 	"errors"
+	"log"
 	"sync"
 )
 
@@ -10,7 +11,14 @@ type Transcoder struct {
 	streams map[string]FileStream
 	// Streams that are staring up
 	preparing map[string]chan *FileStream
-	mutex   sync.RWMutex
+	mutex     sync.RWMutex
+}
+
+func NewTranscoder() *Transcoder {
+	return &Transcoder{
+		streams:   make(map[string]FileStream),
+		preparing: make(map[string]chan *FileStream),
+	}
 }
 
 func (t *Transcoder) GetMaster(path string, client string) (string, error) {
@@ -32,7 +40,8 @@ func (t *Transcoder) GetMaster(path string, client string) (string, error) {
 		t.cleanUnused()
 		t.mutex.Unlock()
 
-		stream, err := NewFileStream(path)
+		newstream, err := NewFileStream(path)
+		log.Printf("Stream created for %s", path)
 		if err != nil {
 			t.mutex.Lock()
 			delete(t.preparing, path)
@@ -43,11 +52,12 @@ func (t *Transcoder) GetMaster(path string, client string) (string, error) {
 		}
 
 		t.mutex.Lock()
-		t.streams[path] = *stream
+		t.streams[path] = *newstream
+		stream = t.streams[path]
 		delete(t.preparing, path)
 		t.mutex.Unlock()
 
-		channel <- stream
+		channel <- &stream
 	}
 
 	return stream.GetMaster(), nil
