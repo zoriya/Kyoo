@@ -84,7 +84,7 @@ func main() {
 	e.Use(middleware.Logger())
 	e.HTTPErrorHandler = ErrorHandler
 
-	h := Handler{}
+	h := Handler{transcoder: src.NewTranscoder()}
 
 	e.GET("/:resource/:slug/direct", DirectStream)
 	e.GET("/:resource/:slug/master.m3u8", h.GetMaster)

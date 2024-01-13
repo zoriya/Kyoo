@@ -14,7 +14,8 @@ const (
 	Original Quality = "original"
 )
 
-var Qualities = []Quality{P240, P360, P480, P720, P1080, P1440, P4k, P8k, Original}
+// Purposfully removing Original from this list (since it require special treatments anyways)
+var Qualities = []Quality{P240, P360, P480, P720, P1080, P1440, P4k, P8k}
 
 // I'm not entierly sure about the values for bitrates. Double checking would be nice.
 func (v Quality) AverageBitrate() uint32 {

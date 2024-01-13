@@ -2,6 +2,7 @@ package src
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"os/exec"
 	"strconv"
@@ -49,6 +50,7 @@ func NewFileStream(path string) (*FileStream, error) {
 
 func GetKeyframes(path string) ([]float64, bool, error) {
 	// run ffprobe to return all IFrames, IFrames are points where we can split the video in segments.
+	log.Printf("Starting ffprobe for keyframes analysis for %s", path)
 	out, err := exec.Command(
 		"ffprobe",
 		"-loglevel", "error",
@@ -57,6 +59,7 @@ func GetKeyframes(path string) ([]float64, bool, error) {
 		"-of", "csv=print_section=0",
 		path,
 	).Output()
+	log.Printf("%s ffprobe analysis finished", path)
 	// We ask ffprobe to return the time of each frame and it's flags
 	// We could ask it to return only i-frames (keyframes) with the -skip_frame nokey but using it is extremly slow
 	// since ffmpeg parses every frames when this flag is set.
@@ -68,6 +71,10 @@ func GetKeyframes(path string) ([]float64, bool, error) {
 	last := 0.
 	can_transmux := true
 	for _, frame := range strings.Split(string(out), "\n") {
+		if frame == "" {
+			continue
+		}
+
 		x := strings.Split(frame, ",")
 		pts, flags := x[0], x[1]
 
