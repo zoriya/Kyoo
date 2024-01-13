@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type FileStream struct {
@@ -51,6 +52,7 @@ func NewFileStream(path string) (*FileStream, error) {
 func GetKeyframes(path string) ([]float64, bool, error) {
 	// run ffprobe to return all IFrames, IFrames are points where we can split the video in segments.
 	log.Printf("Starting ffprobe for keyframes analysis for %s", path)
+	start := time.Now()
 	out, err := exec.Command(
 		"ffprobe",
 		"-loglevel", "error",
@@ -59,7 +61,7 @@ func GetKeyframes(path string) ([]float64, bool, error) {
 		"-of", "csv=print_section=0",
 		path,
 	).Output()
-	log.Printf("%s ffprobe analysis finished", path)
+	log.Printf("%s ffprobe analysis finished in %s", path, time.Since(start))
 	// We ask ffprobe to return the time of each frame and it's flags
 	// We could ask it to return only i-frames (keyframes) with the -skip_frame nokey but using it is extremly slow
 	// since ffmpeg parses every frames when this flag is set.
