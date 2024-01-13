@@ -158,10 +158,10 @@ var SubtitleExtensions = map[string]string{
 	"vtt":    "vtt",
 }
 
-func GetInfo(path string) (MediaInfo, error) {
+func GetInfo(path string) (*MediaInfo, error) {
 	mi, err := mediainfo.Open(path)
 	if err != nil {
-		return MediaInfo{}, err
+		return nil, err
 	}
 	defer mi.Close()
 
@@ -181,7 +181,7 @@ func GetInfo(path string) (MediaInfo, error) {
 	chapters_begin := ParseUint(mi.Parameter(mediainfo.StreamMenu, 0, "Chapters_Pos_Begin"))
 	chapters_end := ParseUint(mi.Parameter(mediainfo.StreamMenu, 0, "Chapters_Pos_End"))
 
-	return MediaInfo{
+	return &MediaInfo{
 		Sha:  sha,
 		Path: path,
 		// Remove leading .
