@@ -1,6 +1,7 @@
 package src
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"log"
@@ -75,6 +76,38 @@ func (ts *Stream) run(start int32, end int32) error {
 		args...,
 	)
 	log.Printf("Running %s", strings.Join(cmd.Args, " "))
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
+	var stderr strings.Builder
+	cmd.Stderr = &stderr
+
+	go func() {
+		scanner := bufio.NewScanner(stdout)
+		for scanner.Scan() {
+			var segment int32
+			_, _ = fmt.Sscanf(scanner.Text(), "segment-%d.ts", &segment)
+
+			ts.lock.Lock()
+			ts.segments[segment] = true
+			ts.lock.Unlock()
+		}
+
+		if err := scanner.Err(); err != nil {
+			log.Println("Error reading stdout of ffmpeg", err)
+		}
+	}()
+
+	go func() {
+		err := cmd.Wait()
+		if err != nil {
+			log.Println("ffmpeg occured an error", err, stderr.String())
+		} else {
+			log.Println("ffmpeg finished successfully")
+		}
+	}()
 
 	return nil
 }
