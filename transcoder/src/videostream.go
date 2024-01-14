@@ -3,8 +3,22 @@ package src
 import "fmt"
 
 type VideoStream struct {
-	TranscodeStream
+	Stream
 	quality Quality
+}
+
+func NewVideoStream(file *FileStream, quality Quality) (*VideoStream, error) {
+	ret := VideoStream{
+		Stream: Stream{
+			file:     file,
+			Clients:  make([]string, 4),
+			segments: make([]bool, len(file.Keyframes)),
+		},
+		quality: quality,
+	}
+	// Start the transcode up to the 100th segment (or less)
+	ret.run(0, Min(100, int32(len(file.Keyframes))))
+	return &ret, nil
 }
 
 func (vs *VideoStream) getOutPath() string {

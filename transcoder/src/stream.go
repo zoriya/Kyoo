@@ -16,13 +16,13 @@ func Min(a int32, b int32) int32 {
 	return b
 }
 
-type Stream interface {
+type TranscodeStream interface {
 	getTranscodeArgs(segments string) []string
 	getOutPath() string
 }
 
-type TranscodeStream struct {
-	Stream
+type Stream struct {
+	TranscodeStream
 	file    *FileStream
 	Clients []string
 	// true if the segment at given index is completed/transcoded, false otherwise
@@ -33,18 +33,7 @@ type TranscodeStream struct {
 	// TODO: add ffmpeg process
 }
 
-func NewStream(file *FileStream) (*TranscodeStream, error) {
-	ret := TranscodeStream{
-		file:     file,
-		Clients:  make([]string, 4),
-		segments: make([]bool, len(file.Keyframes)),
-	}
-	// Start the transcode up to the 100th segment (or less)
-	ret.run(0, Min(100, int32(len(file.Keyframes))))
-	return &ret, nil
-}
-
-func (ts *TranscodeStream) run(start int32, end int32) error {
+func (ts *Stream) run(start int32, end int32) error {
 	log.Printf(
 		"Starting transcode for %s (from %d to %d out of %d segments)",
 		ts.file.Path,
@@ -90,7 +79,7 @@ func (ts *TranscodeStream) run(start int32, end int32) error {
 	return nil
 }
 
-func (ts *TranscodeStream) GetIndex(client string) (string, error) {
+func (ts *Stream) GetIndex(client string) (string, error) {
 	index := `#EXTM3U
 #EXT-X-VERSION:3
 #EXT-X-PLAYLIST-TYPE:VOD
