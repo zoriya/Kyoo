@@ -17,7 +17,8 @@ type FileStream struct {
 	Keyframes   []float64
 	CanTransmux bool
 	Info        *MediaInfo
-	streams     map[Quality]*TranscodeStream
+	streams     map[Quality]*VideoStream
+	// audios     map[uint32]*AudioStream
 }
 
 func GetOutPath() string {
@@ -56,7 +57,7 @@ func NewFileStream(path string) (*FileStream, error) {
 		Keyframes:   keyframes,
 		CanTransmux: can_transmux,
 		Info:        info.info,
-		streams:     make(map[Quality]*TranscodeStream),
+		streams:     make(map[Quality]*VideoStream),
 	}, nil
 }
 
