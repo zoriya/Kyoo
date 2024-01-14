@@ -21,7 +21,7 @@ func NewTranscoder() *Transcoder {
 	}
 }
 
-func (t *Transcoder) GetMaster(path string, client string) (string, error) {
+func (t *Transcoder) getFileStream(path string) (*FileStream, error) {
 	t.mutex.RLock()
 	stream, ok := t.streams[path]
 	channel, preparing := t.preparing[path]
@@ -30,7 +30,7 @@ func (t *Transcoder) GetMaster(path string, client string) (string, error) {
 	if preparing {
 		pstream := <-channel
 		if pstream == nil {
-			return "", errors.New("could not transcode file. Try again later")
+			return nil, errors.New("could not transcode file. Try again later")
 		}
 		stream = *pstream
 	} else if !ok {
@@ -48,7 +48,7 @@ func (t *Transcoder) GetMaster(path string, client string) (string, error) {
 			t.mutex.Unlock()
 			channel <- nil
 
-			return "", err
+			return nil, err
 		}
 
 		t.mutex.Lock()
@@ -59,8 +59,7 @@ func (t *Transcoder) GetMaster(path string, client string) (string, error) {
 
 		channel <- &stream
 	}
-
-	return stream.GetMaster(), nil
+	return &stream, nil
 }
 
 // This method assume the lock is already taken.
@@ -74,8 +73,20 @@ func (t *Transcoder) cleanUnused() {
 	}
 }
 
+func (t *Transcoder) GetMaster(path string, client string) (string, error) {
+	stream, err := t.getFileStream(path)
+	if err != nil {
+		return "", err
+	}
+	return stream.GetMaster(), nil
+}
+
 func (t *Transcoder) GetVideoIndex(path string, quality Quality, client string) (string, error) {
-	return "", nil
+	stream, err := t.getFileStream(path)
+	if err != nil {
+		return "", err
+	}
+	return stream.GetIndex(quality, client)
 }
 
 func (t *Transcoder) GetAudioIndex(path string, audio string, client string) (string, error) {
