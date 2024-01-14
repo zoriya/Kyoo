@@ -73,3 +73,29 @@ func (t *Transcoder) cleanUnused() {
 		delete(t.streams, path)
 	}
 }
+
+func (t *Transcoder) GetVideoIndex(path string, quality Quality, client string) (string, error) {
+	return "", nil
+}
+
+func (t *Transcoder) GetAudioIndex(path string, audio string, client string) (string, error) {
+	return "", nil
+}
+
+func (t *Transcoder) GetVideoSegment(
+	path string,
+	quality Quality,
+	segment int32,
+	client string,
+) (string, error) {
+	return "", nil
+}
+
+func (t *Transcoder) GetAudioSegment(
+	path string,
+	audio string,
+	segment int32,
+	client string,
+) (string, error) {
+	return "", nil
+}
