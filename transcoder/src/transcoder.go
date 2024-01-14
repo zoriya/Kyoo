@@ -8,7 +8,7 @@ import (
 
 type Transcoder struct {
 	// All file streams currently running, index is file path
-	streams map[string]FileStream
+	streams map[string]*FileStream
 	// Streams that are staring up
 	preparing map[string]chan *FileStream
 	mutex     sync.RWMutex
@@ -16,7 +16,7 @@ type Transcoder struct {
 
 func NewTranscoder() *Transcoder {
 	return &Transcoder{
-		streams:   make(map[string]FileStream),
+		streams:   make(map[string]*FileStream),
 		preparing: make(map[string]chan *FileStream),
 	}
 }
@@ -28,11 +28,10 @@ func (t *Transcoder) getFileStream(path string) (*FileStream, error) {
 	t.mutex.RUnlock()
 
 	if preparing {
-		pstream := <-channel
-		if pstream == nil {
+		stream = <-channel
+		if stream == nil {
 			return nil, errors.New("could not transcode file. Try again later")
 		}
-		stream = *pstream
 	} else if !ok {
 		t.mutex.Lock()
 		channel = make(chan *FileStream, 1)
@@ -40,7 +39,7 @@ func (t *Transcoder) getFileStream(path string) (*FileStream, error) {
 		t.cleanUnused()
 		t.mutex.Unlock()
 
-		newstream, err := NewFileStream(path)
+		stream, err := NewFileStream(path)
 		log.Printf("Stream created for %s", path)
 		if err != nil {
 			t.mutex.Lock()
@@ -52,14 +51,13 @@ func (t *Transcoder) getFileStream(path string) (*FileStream, error) {
 		}
 
 		t.mutex.Lock()
-		t.streams[path] = *newstream
-		stream = t.streams[path]
+		t.streams[path] = stream
 		delete(t.preparing, path)
 		t.mutex.Unlock()
 
-		channel <- &stream
+		channel <- stream
 	}
-	return &stream, nil
+	return stream, nil
 }
 
 // This method assume the lock is already taken.
@@ -86,7 +84,7 @@ func (t *Transcoder) GetVideoIndex(path string, quality Quality, client string) 
 	if err != nil {
 		return "", err
 	}
-	return stream.GetIndex(quality, client)
+	return stream.GetVideoIndex(quality, client)
 }
 
 func (t *Transcoder) GetAudioIndex(path string, audio string, client string) (string, error) {

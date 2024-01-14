@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -12,10 +13,19 @@ import (
 
 type FileStream struct {
 	Path        string
+	Out         string
 	Keyframes   []float64
 	CanTransmux bool
 	Info        *MediaInfo
-	streams     map[Quality]TranscodeStream
+	streams     map[Quality]*TranscodeStream
+}
+
+func GetOutPath() string {
+	out := os.Getenv("CACHE_ROOT")
+	if out == "" {
+		return "/cache"
+	}
+	return out
 }
 
 func NewFileStream(path string) (*FileStream, error) {
@@ -42,16 +52,17 @@ func NewFileStream(path string) (*FileStream, error) {
 
 	return &FileStream{
 		Path:        path,
+		Out:         fmt.Sprintf("%s/%s", GetOutPath(), info.info.Sha),
 		Keyframes:   keyframes,
 		CanTransmux: can_transmux,
 		Info:        info.info,
-		streams:     make(map[Quality]TranscodeStream),
+		streams:     make(map[Quality]*TranscodeStream),
 	}, nil
 }
 
 func GetKeyframes(path string) ([]float64, bool, error) {
-	// run ffprobe to return all IFrames, IFrames are points where we can split the video in segments.
 	log.Printf("Starting ffprobe for keyframes analysis for %s", path)
+	// run ffprobe to return all IFrames, IFrames are points where we can split the video in segments.
 	start := time.Now()
 	out, err := exec.Command(
 		"ffprobe",
@@ -173,19 +184,7 @@ func (fs *FileStream) GetMaster() string {
 	return master
 }
 
-func (fs *FileStream) GetIndex(quality Quality, client string) (string, error) {
-	index := `#EXTM3U
-#EXT-X-VERSION:3
-#EXT-X-PLAYLIST-TYPE:VOD
-#EXT-X-ALLOW-CACHE:YES
-#EXT-X-TARGETDURATION:4
-#EXT-X-MEDIA-SEQUENCE:0
-`
-
-	for segment := 1; segment < len(fs.Keyframes); segment++ {
-		index += fmt.Sprintf("#EXTINF:%.6f\n", fs.Keyframes[segment]-fs.Keyframes[segment-1])
-		index += fmt.Sprintf("segment-%d.ts\n", segment)
-	}
-	index += `#EXT-X-ENDLIST`
-	return index, nil
+func (fs *FileStream) GetVideoIndex(quality Quality, client string) (string, error) {
+	stream := fs.streams[quality]
+	return stream.GetIndex(client)
 }
