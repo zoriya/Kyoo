@@ -172,3 +172,20 @@ func (fs *FileStream) GetMaster() string {
 	}
 	return master
 }
+
+func (fs *FileStream) GetIndex(quality Quality, client string) (string, error) {
+	index := `#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-PLAYLIST-TYPE:VOD
+#EXT-X-ALLOW-CACHE:YES
+#EXT-X-TARGETDURATION:4
+#EXT-X-MEDIA-SEQUENCE:0
+`
+
+	for segment := 1; segment < len(fs.Keyframes); segment++ {
+		index += fmt.Sprintf("#EXTINF:%.6f\n", fs.Keyframes[segment]-fs.Keyframes[segment-1])
+		index += fmt.Sprintf("segment-%d.ts\n", segment)
+	}
+	index += `#EXT-X-ENDLIST`
+	return index, nil
+}
