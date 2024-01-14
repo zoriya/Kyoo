@@ -64,15 +64,26 @@ func GetClientId(c echo.Context) (string, error) {
 	return key, nil
 }
 
+func ParseSegment(segment string) (int32, error) {
+	var ret int32
+	_, err := fmt.Sscanf(segment, "segment-%d.ts", &ret)
+	if err != nil {
+		return 0, echo.NewHTTPError(http.StatusBadRequest, "Could not parse segment.")
+	}
+	return ret, nil
+}
+
 func ErrorHandler(err error, c echo.Context) {
 	code := http.StatusInternalServerError
+	var message string
 	if he, ok := err.(*echo.HTTPError); ok {
 		code = he.Code
+		message = fmt.Sprint(he.Message)
 	} else {
 		c.Logger().Error(err)
+		message = "Internal server error"
 	}
 	c.JSON(code, struct {
 		Errors []string `json:"errors"`
-	}{Errors: []string{fmt.Sprint(err)}})
+	}{Errors: []string{message}})
 }
-

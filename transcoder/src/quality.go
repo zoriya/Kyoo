@@ -1,5 +1,11 @@
 package src
 
+import (
+	"net/http"
+
+	"github.com/labstack/echo/v4"
+)
+
 type Quality string
 
 const (
@@ -16,6 +22,20 @@ const (
 
 // Purposfully removing Original from this list (since it require special treatments anyways)
 var Qualities = []Quality{P240, P360, P480, P720, P1080, P1440, P4k, P8k}
+
+func QualityFromString(str string) (Quality, error) {
+	if str == string(Original) {
+		return Original, nil
+	}
+
+	qualities := Qualities
+	for _, quality := range qualities {
+		if string(quality) == str {
+			return quality, nil
+		}
+	}
+	return Original, echo.NewHTTPError(http.StatusBadRequest, "Invalid quality")
+}
 
 // I'm not entierly sure about the values for bitrates. Double checking would be nice.
 func (v Quality) AverageBitrate() uint32 {
