@@ -2,7 +2,6 @@ package src
 
 import (
 	"bufio"
-	"context"
 	"fmt"
 	"log"
 	"math"
@@ -29,9 +28,9 @@ type Stream struct {
 	//
 	segments []chan (struct{})
 	heads    []int32
+	commands []*exec.Cmd
 	// the lock used for the segments array and the heads
 	lock sync.RWMutex
-	ctx  context.Context
 }
 
 func (ts *Stream) run(start int32) error {
@@ -47,6 +46,8 @@ func (ts *Stream) run(start int32) error {
 	}
 	encoder_id := len(ts.heads)
 	ts.heads = append(ts.heads, start)
+	// we set nil while the command has not started, this is just to reserve the index
+	ts.commands = append(ts.commands, nil)
 	ts.lock.RUnlock()
 
 	log.Printf(
@@ -84,11 +85,7 @@ func (ts *Stream) run(start int32) error {
 		ts.getOutPath(),
 	}...)
 
-	cmd := exec.CommandContext(
-		ts.ctx,
-		"ffmpeg",
-		args...,
-	)
+	cmd := exec.Command("ffmpeg", args...)
 	log.Printf("Running %s", strings.Join(cmd.Args, " "))
 
 	stdout, err := cmd.StdoutPipe()
@@ -97,6 +94,14 @@ func (ts *Stream) run(start int32) error {
 	}
 	var stderr strings.Builder
 	cmd.Stderr = &stderr
+
+	err = cmd.Start()
+	if err != nil {
+		return err
+	}
+	ts.lock.Lock()
+	ts.commands[encoder_id] = cmd
+	ts.lock.Unlock()
 
 	go func() {
 		scanner := bufio.NewScanner(stdout)
@@ -134,6 +139,7 @@ func (ts *Stream) run(start int32) error {
 		defer ts.lock.Unlock()
 		// we can't delete the head directly because it would invalidate the others encoder_id
 		ts.heads[encoder_id] = -1
+		ts.commands[encoder_id] = nil
 	}()
 
 	return nil
@@ -190,4 +196,16 @@ func (ts *Stream) getMinEncoderDistance(time float64) float64 {
 		return ts.file.Keyframes[i] - time
 	})
 	return slices.Min(distances)
+}
+
+func (ts *Stream) Kill() {
+	ts.lock.Lock()
+	defer ts.lock.Unlock()
+
+	for _, cmd := range ts.commands {
+		if cmd == nil {
+			continue
+		}
+		cmd.Process.Signal(os.Interrupt)
+	}
 }
