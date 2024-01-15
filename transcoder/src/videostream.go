@@ -12,9 +12,12 @@ func NewVideoStream(file *FileStream, quality Quality) (*VideoStream, error) {
 		Stream: Stream{
 			file:     file,
 			Clients:  make([]string, 4),
-			segments: make([]bool, len(file.Keyframes)),
+			segments: make([]chan struct{}, len(file.Keyframes)),
 		},
 		quality: quality,
+	}
+	for seg := range ret.segments {
+		ret.segments[seg] = make(chan struct{})
 	}
 	ret.run(0)
 	return &ret, nil
