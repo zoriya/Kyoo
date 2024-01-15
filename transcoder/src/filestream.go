@@ -189,3 +189,8 @@ func (fs *FileStream) GetVideoIndex(quality Quality, client string) (string, err
 	stream := fs.streams[quality]
 	return stream.GetIndex(client)
 }
+
+func (fs *FileStream) GetVideoSegment(quality Quality, segment int32, client string) (string, error) {
+	stream := fs.streams[quality]
+	return stream.GetSegment(segment, client)
+}

@@ -6,16 +6,10 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"slices"
 	"strings"
 	"sync"
 )
-
-func Min(a int32, b int32) int32 {
-	if a < b {
-		return a
-	}
-	return b
-}
 
 type TranscodeStream interface {
 	getTranscodeArgs(segments string) []string
@@ -28,13 +22,27 @@ type Stream struct {
 	Clients []string
 	// true if the segment at given index is completed/transcoded, false otherwise
 	segments []bool
-	// the lock used for the segments array
+	heads    []int32
+	// the lock used for the segments array and the heads
 	lock sync.RWMutex
 	ctx  context.Context
-	// TODO: add ffmpeg process
 }
 
-func (ts *Stream) run(start int32, end int32) error {
+func (ts *Stream) run(start int32) error {
+	// Start the transcode up to the 100th segment (or less)
+	// Stop at the first finished segment
+	end := min(start+100, int32(len(ts.file.Keyframes)))
+	ts.lock.RLock()
+	for i := start; i < end; i++ {
+		if ts.segments[i] {
+			end = i
+			break
+		}
+	}
+	encoder_id := len(ts.heads)
+	ts.heads = append(ts.heads, start)
+	ts.lock.RUnlock()
+
 	log.Printf(
 		"Starting transcode for %s (from %d to %d out of %d segments)",
 		ts.file.Path,
@@ -92,6 +100,7 @@ func (ts *Stream) run(start int32, end int32) error {
 
 			ts.lock.Lock()
 			ts.segments[segment] = true
+			ts.heads[encoder_id] = segment
 			ts.lock.Unlock()
 		}
 
@@ -127,4 +136,29 @@ func (ts *Stream) GetIndex(client string) (string, error) {
 	}
 	index += `#EXT-X-ENDLIST`
 	return index, nil
+}
+
+func (ts *Stream) GetSegment(segment int32, client string) (string, error) {
+	ts.lock.RLock()
+	ready := ts.segments[segment]
+	ts.lock.RUnlock()
+
+	if !ready {
+		// Only start a new encode if there is more than 10s between the current encoder and the segment.
+		if ts.getMinEncoderDistance(ts.file.Keyframes[segment]) > 10 {
+			err := ts.run(segment)
+			if err != nil {
+				return "", err
+			}
+		}
+		// TODO: wait for ready
+	}
+	return fmt.Sprintf(ts.getOutPath(), segment), nil
+}
+
+func (ts *Stream) getMinEncoderDistance(time float64) float64 {
+	ts.lock.RLock()
+	defer ts.lock.RUnlock()
+	distances := Map(ts.heads, func(i int32, _ int) float64 { return max(0, ts.file.Keyframes[i]-time) })
+	return slices.Min(distances)
 }

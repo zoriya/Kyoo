@@ -16,8 +16,7 @@ func NewVideoStream(file *FileStream, quality Quality) (*VideoStream, error) {
 		},
 		quality: quality,
 	}
-	// Start the transcode up to the 100th segment (or less)
-	ret.run(0, Min(100, int32(len(file.Keyframes))))
+	ret.run(0)
 	return &ret, nil
 }
 

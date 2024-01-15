@@ -97,7 +97,11 @@ func (t *Transcoder) GetVideoSegment(
 	segment int32,
 	client string,
 ) (string, error) {
-	return "", nil
+	stream, err := t.getFileStream(path)
+	if err != nil {
+		return "", err
+	}
+	return stream.GetVideoSegment(quality, segment, client)
 }
 
 func (t *Transcoder) GetAudioSegment(

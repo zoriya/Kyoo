@@ -132,11 +132,12 @@ func Or[T comparable](vals ...T) T {
 	return zero
 }
 
-func Map[T any](ts []T, f func(T, int) T) []T {
+func Map[T, U any](ts []T, f func(T, int) U) []U {
+	us := make([]U, len(ts))
 	for i := range ts {
-		ts[i] = f(ts[i], i)
+		us[i] = f(ts[i], i)
 	}
-	return ts
+	return us
 }
 
 func OrNull(str string) *string {
