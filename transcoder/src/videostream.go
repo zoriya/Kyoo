@@ -1,6 +1,9 @@
 package src
 
-import "fmt"
+import (
+	"fmt"
+	"os/exec"
+)
 
 type VideoStream struct {
 	Stream
@@ -13,6 +16,8 @@ func NewVideoStream(file *FileStream, quality Quality) (*VideoStream, error) {
 			file:     file,
 			Clients:  make([]string, 4),
 			segments: make([]chan struct{}, len(file.Keyframes)),
+			heads:    make([]int32, 1),
+			commands: make([]*exec.Cmd, 1),
 		},
 		quality: quality,
 	}
