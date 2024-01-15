@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -18,11 +19,12 @@ type FileStream struct {
 	CanTransmux bool
 	Info        *MediaInfo
 	streams     map[Quality]*VideoStream
+	vlock       sync.RWMutex
 	// audios     map[uint32]*AudioStream
 }
 
 func GetOutPath() string {
-	out := os.Getenv("CACHE_ROOT")
+	out := os.Getenv("GOCODER_CACHE_ROOT")
 	if out == "" {
 		return "/cache"
 	}
@@ -185,12 +187,27 @@ func (fs *FileStream) GetMaster() string {
 	return master
 }
 
+func (fs *FileStream) getVideoStream(quality Quality) *VideoStream {
+	fs.vlock.RLock()
+	stream, ok := fs.streams[quality]
+	fs.vlock.RUnlock()
+
+	if ok {
+		return stream
+	}
+
+	fs.vlock.Lock()
+	defer fs.vlock.Unlock()
+	fs.streams[quality] = NewVideoStream(fs, quality)
+	return fs.streams[quality]
+}
+
 func (fs *FileStream) GetVideoIndex(quality Quality, client string) (string, error) {
-	stream := fs.streams[quality]
+	stream := fs.getVideoStream(quality)
 	return stream.GetIndex(client)
 }
 
 func (fs *FileStream) GetVideoSegment(quality Quality, segment int32, client string) (string, error) {
-	stream := fs.streams[quality]
+	stream := fs.getVideoStream(quality)
 	return stream.GetSegment(segment, client)
 }
