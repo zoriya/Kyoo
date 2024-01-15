@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/zoriya/kyoo/transcoder/src"
 
@@ -96,7 +97,10 @@ func (h *Handler) GetVideoIndex(c echo.Context) error {
 func (h *Handler) GetAudioIndex(c echo.Context) error {
 	resource := c.Param("resource")
 	slug := c.Param("slug")
-	audio := c.Param("audio")
+	audio, err := strconv.ParseInt(c.Param("audio"), 10, 32)
+	if err != nil {
+		return err
+	}
 
 	client, err := GetClientId(c)
 	if err != nil {
@@ -108,7 +112,7 @@ func (h *Handler) GetAudioIndex(c echo.Context) error {
 		return err
 	}
 
-	ret, err := h.transcoder.GetAudioIndex(path, audio, client)
+	ret, err := h.transcoder.GetAudioIndex(path, int32(audio), client)
 	if err != nil {
 		return err
 	}
@@ -157,7 +161,10 @@ func (h *Handler) GetVideoSegment(c echo.Context) error {
 func (h *Handler) GetAudioSegment(c echo.Context) error {
 	resource := c.Param("resource")
 	slug := c.Param("slug")
-	audio := c.Param("audio")
+	audio, err := strconv.ParseInt(c.Param("audio"), 10, 32)
+	if err != nil {
+		return err
+	}
 	segment, err := ParseSegment(c.Param("chunk"))
 	if err != nil {
 		return err
@@ -173,7 +180,7 @@ func (h *Handler) GetAudioSegment(c echo.Context) error {
 		return err
 	}
 
-	ret, err := h.transcoder.GetAudioSegment(path, audio, segment, client)
+	ret, err := h.transcoder.GetAudioSegment(path, int32(audio), segment, client)
 	if err != nil {
 		return err
 	}

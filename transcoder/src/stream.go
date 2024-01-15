@@ -172,7 +172,6 @@ func (ts *Stream) run(start int32) error {
 			// we need this and not a return in the condition because we want to unlock
 			// the lock (and can't defer since this is a loop)
 			if should_stop {
-				println("close because requested", encoder_id)
 				return
 			}
 		}
