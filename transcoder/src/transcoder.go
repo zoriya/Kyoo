@@ -39,7 +39,8 @@ func (t *Transcoder) getFileStream(path string) (*FileStream, error) {
 		t.cleanUnused()
 		t.mutex.Unlock()
 
-		stream, err := NewFileStream(path)
+		var err error
+		stream, err = NewFileStream(path)
 		log.Printf("Stream created for %s", path)
 		if err != nil {
 			t.mutex.Lock()
