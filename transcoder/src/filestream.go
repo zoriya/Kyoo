@@ -20,7 +20,8 @@ type FileStream struct {
 	Info        *MediaInfo
 	streams     map[Quality]*VideoStream
 	vlock       sync.RWMutex
-	// audios     map[uint32]*AudioStream
+	audios      map[int32]*AudioStream
+	alock       sync.RWMutex
 }
 
 func GetOutPath() string {
@@ -60,6 +61,7 @@ func NewFileStream(path string) (*FileStream, error) {
 		CanTransmux: can_transmux,
 		Info:        info.info,
 		streams:     make(map[Quality]*VideoStream),
+		audios:      make(map[int32]*AudioStream),
 	}, nil
 }
 
@@ -209,5 +211,30 @@ func (fs *FileStream) GetVideoIndex(quality Quality, client string) (string, err
 
 func (fs *FileStream) GetVideoSegment(quality Quality, segment int32, client string) (string, error) {
 	stream := fs.getVideoStream(quality)
+	return stream.GetSegment(segment, client)
+}
+
+func (fs *FileStream) getAudioStream(audio int32) *AudioStream {
+	fs.alock.RLock()
+	stream, ok := fs.audios[audio]
+	fs.alock.RUnlock()
+
+	if ok {
+		return stream
+	}
+
+	fs.alock.Lock()
+	defer fs.alock.Unlock()
+	fs.audios[audio] = NewAudioStream(fs, audio)
+	return fs.audios[audio]
+}
+
+func (fs *FileStream) GetAudioIndex(audio int32, client string) (string, error) {
+	stream := fs.getAudioStream(audio)
+	return stream.GetIndex(client)
+}
+
+func (fs *FileStream) GetAudioSegment(audio int32, segment int32, client string) (string, error) {
+	stream := fs.getAudioStream(audio)
 	return stream.GetSegment(segment, client)
 }

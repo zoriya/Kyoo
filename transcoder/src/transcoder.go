@@ -88,8 +88,12 @@ func (t *Transcoder) GetVideoIndex(path string, quality Quality, client string) 
 	return stream.GetVideoIndex(quality, client)
 }
 
-func (t *Transcoder) GetAudioIndex(path string, audio string, client string) (string, error) {
-	return "", nil
+func (t *Transcoder) GetAudioIndex(path string, audio int32, client string) (string, error) {
+	stream, err := t.getFileStream(path)
+	if err != nil {
+		return "", err
+	}
+	return stream.GetAudioIndex(audio, client)
 }
 
 func (t *Transcoder) GetVideoSegment(
@@ -107,9 +111,13 @@ func (t *Transcoder) GetVideoSegment(
 
 func (t *Transcoder) GetAudioSegment(
 	path string,
-	audio string,
+	audio int32,
 	segment int32,
 	client string,
 ) (string, error) {
-	return "", nil
+	stream, err := t.getFileStream(path)
+	if err != nil {
+		return "", err
+	}
+	return stream.GetAudioSegment(audio, segment, client)
 }
