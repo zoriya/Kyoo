@@ -2,7 +2,7 @@ package src
 
 import (
 	"fmt"
-	"os/exec"
+	"log"
 )
 
 type VideoStream struct {
@@ -10,22 +10,12 @@ type VideoStream struct {
 	quality Quality
 }
 
-func NewVideoStream(file *FileStream, quality Quality) (*VideoStream, error) {
-	ret := VideoStream{
-		Stream: Stream{
-			file:     file,
-			Clients:  make([]string, 4),
-			segments: make([]chan struct{}, len(file.Keyframes)),
-			heads:    make([]int32, 1),
-			commands: make([]*exec.Cmd, 1),
-		},
+func NewVideoStream(file *FileStream, quality Quality) *VideoStream {
+	log.Printf("Creating a new video stream for %s in quality %s", file.Path, quality)
+	return &VideoStream{
+		Stream:  NewStream(file),
 		quality: quality,
 	}
-	for seg := range ret.segments {
-		ret.segments[seg] = make(chan struct{})
-	}
-	ret.run(0)
-	return &ret, nil
 }
 
 func (vs *VideoStream) getOutPath() string {
