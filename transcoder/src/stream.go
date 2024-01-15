@@ -12,13 +12,13 @@ import (
 	"sync"
 )
 
-type TranscodeStream interface {
+type StreamHandle interface {
 	getTranscodeArgs(segments string) []string
 	getOutPath() string
 }
 
 type Stream struct {
-	TranscodeStream
+	handle  StreamHandle
 	file    *FileStream
 	Clients []string
 	// channel open if the segment is not ready. closed if ready.
@@ -35,8 +35,9 @@ type Stream struct {
 	lock sync.RWMutex
 }
 
-func NewStream(file *FileStream) Stream {
+func NewStream(file *FileStream, handle StreamHandle) Stream {
 	ret := Stream{
+		handle:   handle,
 		file:     file,
 		Clients:  make([]string, 0),
 		segments: make([]chan struct{}, len(file.Keyframes)),
@@ -92,6 +93,12 @@ func (ts *Stream) run(start int32) error {
 	}
 	segments_str := strings.Join(segments, ",")
 
+	outpath := ts.handle.getOutPath()
+	err := os.MkdirAll(filepath.Dir(outpath), 0o644)
+	if err != nil {
+		return err
+	}
+
 	args := []string{
 		"-nostats", "-hide_banner", "-loglevel", "warning",
 		"-copyts",
@@ -100,7 +107,7 @@ func (ts *Stream) run(start int32) error {
 		"-to", fmt.Sprintf("%.6f", ts.file.Keyframes[end]),
 		"-i", ts.file.Path,
 	}
-	args = append(args, ts.getTranscodeArgs(segments_str)...)
+	args = append(args, ts.handle.getTranscodeArgs(segments_str)...)
 	args = append(args, []string{
 		"-f", "segment",
 		"-segment_time_delta", "0.2",
@@ -109,7 +116,7 @@ func (ts *Stream) run(start int32) error {
 		"-segment_start_number", fmt.Sprint(start),
 		"-segment_list_type", "flat",
 		"-segment_list", "pipe:1",
-		ts.getOutPath(),
+		outpath,
 	}...)
 
 	cmd := exec.Command("ffmpeg", args...)
