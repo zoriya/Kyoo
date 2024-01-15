@@ -5,6 +5,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
+	"os"
 	"os/exec"
 	"slices"
 	"strings"
@@ -105,6 +107,13 @@ func (ts *Stream) run(start int32) error {
 			ts.lock.Lock()
 			close(ts.segments[segment])
 			ts.heads[encoder_id] = segment
+
+			if int32(len(ts.segments)) == segment+1 {
+				// file finished, ffmped will finish soon on it's own
+			} else if _, ready := <-ts.segments[segment+1]; ready {
+				// ask ffmpeg to stop gracefully (nicer cmd.Process.Kill())
+				cmd.Process.Signal(os.Interrupt)
+			}
 			ts.lock.Unlock()
 		}
 
@@ -120,6 +129,11 @@ func (ts *Stream) run(start int32) error {
 		} else {
 			log.Println("ffmpeg finished successfully")
 		}
+
+		ts.lock.Lock()
+		defer ts.lock.Unlock()
+		// we can't delete the head directly because it would invalidate the others encoder_id
+		ts.heads[encoder_id] = -1
 	}()
 
 	return nil
@@ -168,6 +182,12 @@ func (ts *Stream) GetSegment(segment int32, client string) (string, error) {
 func (ts *Stream) getMinEncoderDistance(time float64) float64 {
 	ts.lock.RLock()
 	defer ts.lock.RUnlock()
-	distances := Map(ts.heads, func(i int32, _ int) float64 { return max(0, ts.file.Keyframes[i]-time) })
+	distances := Map(ts.heads, func(i int32, _ int) float64 {
+		// ignore killed heads or heads after the current time
+		if i < 0 || ts.file.Keyframes[i] > time {
+			return math.Inf(1)
+		}
+		return ts.file.Keyframes[i] - time
+	})
 	return slices.Min(distances)
 }
