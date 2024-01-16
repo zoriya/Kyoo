@@ -67,6 +67,7 @@ func (t *Transcoder) cleanUnused() {
 		if !stream.IsDead() {
 			continue
 		}
+		log.Printf("Steam is dead (%s). Killing it.", path)
 		stream.Destroy()
 		delete(t.streams, path)
 	}
