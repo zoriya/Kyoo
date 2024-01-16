@@ -183,7 +183,9 @@ func (ts *Stream) run(start int32) error {
 
 	go func() {
 		err := cmd.Wait()
-		if err != nil {
+		if exiterr, ok := err.(*exec.ExitError); ok && exiterr.ExitCode() == 255 {
+			log.Println("ffmpeg was killed by us")
+		} else if err != nil {
 			log.Println("ffmpeg occured an error", err, stderr.String())
 		} else {
 			log.Println("ffmpeg finished successfully")
@@ -255,10 +257,10 @@ func (ts *Stream) getMinEncoderDistance(segment int32) float64 {
 	time := ts.file.Keyframes[segment]
 	distances := Map(ts.heads, func(i int32, _ int) float64 {
 		// ignore killed heads or heads after the current time
-		if i < 0 || ts.file.Keyframes[i] < time {
+		if i < 0 || ts.file.Keyframes[i] > time {
 			return math.Inf(1)
 		}
-		return ts.file.Keyframes[i] - time
+		return time - ts.file.Keyframes[i]
 	})
 	if len(distances) == 0 {
 		return math.Inf(1)
