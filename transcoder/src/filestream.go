@@ -1,6 +1,7 @@
 package src
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"math"
@@ -87,26 +88,35 @@ func GetKeyframes(path string) ([]float64, bool, error) {
 	log.Printf("Starting ffprobe for keyframes analysis for %s", path)
 	// run ffprobe to return all IFrames, IFrames are points where we can split the video in segments.
 	start := time.Now()
-	out, err := exec.Command(
+	// We ask ffprobe to return the time of each frame and it's flags
+	// We could ask it to return only i-frames (keyframes) with the -skip_frame nokey but using it is extremly slow
+	// since ffmpeg parses every frames when this flag is set.
+	cmd := exec.Command(
 		"ffprobe",
 		"-loglevel", "error",
 		"-select_streams", "v:0",
 		"-show_entries", "packet=pts_time,flags",
 		"-of", "csv=print_section=0",
 		path,
-	).Output()
-	log.Printf("%s ffprobe analysis finished in %s", path, time.Since(start))
-	// We ask ffprobe to return the time of each frame and it's flags
-	// We could ask it to return only i-frames (keyframes) with the -skip_frame nokey but using it is extremly slow
-	// since ffmpeg parses every frames when this flag is set.
+	)
+	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		return nil, false, err
 	}
+	err = cmd.Start()
+	if err != nil {
+		return nil, false, err
+	}
+	log.Printf("%s ffprobe analysis finished in %s", path, time.Since(start))
 
-	ret := make([]float64, 0, 300)
+	scanner := bufio.NewScanner(stdout)
+
+	ret := make([]float64, 1, 300)
+	ret[0] = 0
 	last := 0.
 	can_transmux := true
-	for _, frame := range strings.Split(string(out), "\n") {
+	for scanner.Scan() {
+		frame := scanner.Text()
 		if frame == "" {
 			continue
 		}
