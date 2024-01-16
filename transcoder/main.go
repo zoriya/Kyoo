@@ -217,7 +217,12 @@ func main() {
 	e.Use(middleware.Logger())
 	e.HTTPErrorHandler = ErrorHandler
 
-	h := Handler{transcoder: src.NewTranscoder()}
+	transcoder, err := src.NewTranscoder()
+	if err != nil {
+		e.Logger.Fatal(err)
+		return
+	}
+	h := Handler{transcoder: transcoder}
 
 	e.GET("/:resource/:slug/direct", DirectStream)
 	e.GET("/:resource/:slug/master.m3u8", h.GetMaster)
