@@ -3,6 +3,8 @@ package src
 import (
 	"errors"
 	"log"
+	"os"
+	"path"
 	"sync"
 )
 
@@ -14,11 +16,23 @@ type Transcoder struct {
 	mutex     sync.RWMutex
 }
 
-func NewTranscoder() *Transcoder {
+func NewTranscoder() (*Transcoder, error) {
+	out := GetOutPath()
+	dir, err := os.ReadDir(out)
+	if err != nil {
+		return nil, err
+	}
+	for _, d := range dir {
+		err = os.RemoveAll(path.Join(out, d.Name()))
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return &Transcoder{
 		streams:   make(map[string]*FileStream),
 		preparing: make(map[string]chan *FileStream),
-	}
+	}, nil
 }
 
 func (t *Transcoder) getFileStream(path string) (*FileStream, error) {
