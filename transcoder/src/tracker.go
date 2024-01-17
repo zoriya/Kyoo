@@ -2,6 +2,7 @@ package src
 
 import (
 	"log"
+	"time"
 )
 
 type ClientInfo struct {
@@ -14,12 +15,14 @@ type ClientInfo struct {
 
 type Tracker struct {
 	clients    map[string]ClientInfo
+	visitDate  map[string]time.Time
 	transcoder *Transcoder
 }
 
 func NewTracker(t *Transcoder) *Tracker {
 	ret := &Tracker{
 		clients:    make(map[string]ClientInfo),
+		visitDate:  make(map[string]time.Time),
 		transcoder: t,
 	}
 	go ret.start()
@@ -34,53 +37,86 @@ func Abs(x int32) int32 {
 }
 
 func (t *Tracker) start() {
+	inactive_time := 1 * time.Hour
+	timer := time.After(inactive_time)
 	for {
-		info := <-t.transcoder.clientChan
-		old, ok := t.clients[info.client]
-		if ok && old.path == info.path {
-			// First fixup the info. Most routes ruturn partial infos
-			if info.quality == nil {
-				info.quality = old.quality
-			}
-			if info.audio == -1 {
-				info.audio = old.audio
-			}
-			if info.head == -1 {
-				info.head = old.head
+		select {
+		case info, ok := <-t.transcoder.clientChan:
+			if !ok {
+				return
 			}
 
-			if old.audio != info.audio && old.audio != -1 {
-				t.KillAudioIfDead(old.path, old.audio)
+			old, ok := t.clients[info.client]
+			if ok && old.path == info.path {
+				// First fixup the info. Most routes ruturn partial infos
+				if info.quality == nil {
+					info.quality = old.quality
+				}
+				if info.audio == -1 {
+					info.audio = old.audio
+				}
+				if info.head == -1 {
+					info.head = old.head
+				}
+
+				if old.audio != info.audio && old.audio != -1 {
+					t.KillAudioIfDead(old.path, old.audio)
+				}
+				if old.quality != info.quality && old.quality != nil {
+					t.KillQualityIfDead(old.path, *old.quality)
+				}
+				if old.head != -1 && Abs(info.head-old.head) > 100 {
+					t.KillOrphanedHeads(old.path, old.quality, old.audio)
+				}
+			} else if ok {
+				t.KillStreamIfDead(old.path)
 			}
-			if old.quality != info.quality && old.quality != nil {
-				t.KillQualityIfDead(old.path, *old.quality)
+
+			t.clients[info.client] = info
+			t.visitDate[info.client] = time.Now()
+
+		case <-timer:
+			timer = time.After(inactive_time)
+			// Purge old clients
+			for client, date := range t.visitDate {
+				if time.Since(date) < inactive_time {
+					continue
+				}
+
+				info := t.clients[client]
+
+				if !t.KillStreamIfDead(info.path) {
+					audio_cleanup := info.audio != -1 && t.KillAudioIfDead(info.path, info.audio)
+					video_cleanup := info.quality != nil && t.KillQualityIfDead(info.path, *info.quality)
+					if !audio_cleanup || !video_cleanup {
+						t.KillOrphanedHeads(info.path, info.quality, info.audio)
+					}
+				}
+
+				delete(t.clients, client)
+				delete(t.visitDate, client)
 			}
-			if old.head != -1 && Abs(info.head-old.head) > 100 {
-				t.KillOrphanedHeads(old.path, old.quality, old.audio)
-			}
-		} else if ok {
-			t.KillStreamIfDead(old.path)
 		}
-		t.clients[info.client] = info
 	}
 }
 
-func (t *Tracker) KillStreamIfDead(path string) {
+func (t *Tracker) KillStreamIfDead(path string) bool {
 	for _, stream := range t.clients {
 		if stream.path == path {
-			return
+			return false
 		}
 	}
 	t.transcoder.mutex.Lock()
 	defer t.transcoder.mutex.Unlock()
 	t.transcoder.streams[path].Destroy()
 	delete(t.transcoder.streams, path)
+	return true
 }
 
-func (t *Tracker) KillAudioIfDead(path string, audio int32) {
+func (t *Tracker) KillAudioIfDead(path string, audio int32) bool {
 	for _, stream := range t.clients {
 		if stream.path == path && stream.audio == audio {
-			return
+			return false
 		}
 	}
 	t.transcoder.mutex.RLock()
@@ -90,12 +126,13 @@ func (t *Tracker) KillAudioIfDead(path string, audio int32) {
 	stream.alock.RLock()
 	defer stream.alock.RUnlock()
 	stream.audios[audio].Kill()
+	return true
 }
 
-func (t *Tracker) KillQualityIfDead(path string, quality Quality) {
+func (t *Tracker) KillQualityIfDead(path string, quality Quality) bool {
 	for _, stream := range t.clients {
 		if stream.path == path && stream.quality != nil && *stream.quality == quality {
-			return
+			return false
 		}
 	}
 	t.transcoder.mutex.RLock()
@@ -105,6 +142,7 @@ func (t *Tracker) KillQualityIfDead(path string, quality Quality) {
 	stream.vlock.RLock()
 	defer stream.vlock.RUnlock()
 	stream.streams[quality].Kill()
+	return true
 }
 
 func (t *Tracker) KillOrphanedHeads(path string, quality *Quality, audio int32) {
