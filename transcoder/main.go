@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -208,6 +209,46 @@ func GetInfo(c echo.Context) error {
 	return c.JSON(http.StatusOK, ret)
 }
 
+// Get attachments
+//
+// Get a specific attachment
+//
+// Path: /:sha/attachment/:name
+func GetAttachment(c echo.Context) error {
+	sha := c.Param("sha")
+	name := c.Param("name")
+
+	if err := SanitizePath(sha); err != nil {
+		return err
+	}
+	if err := SanitizePath(name); err != nil {
+		return err
+	}
+
+	path := fmt.Sprintf("%s/%s/att/%s", src.GetMetadataPath(), sha, name)
+	return c.File(path)
+}
+
+// Get subtitle
+//
+// Get a specific subtitle
+//
+// Path: /:sha/sub/:name
+func GetSubtitle(c echo.Context) error {
+	sha := c.Param("sha")
+	name := c.Param("name")
+
+	if err := SanitizePath(sha); err != nil {
+		return err
+	}
+	if err := SanitizePath(name); err != nil {
+		return err
+	}
+
+	path := fmt.Sprintf("%s/%s/sub/%s", src.GetMetadataPath(), sha, name)
+	return c.File(path)
+}
+
 type Handler struct {
 	transcoder *src.Transcoder
 }
@@ -231,6 +272,8 @@ func main() {
 	e.GET("/:resource/:slug/:quality/:chunk", h.GetVideoSegment)
 	e.GET("/:resource/:slug/audio/:audio/:chunk", h.GetAudioSegment)
 	e.GET("/:resource/:slug/info", GetInfo)
+	e.GET("/:sha/attachment/:name", GetAttachment)
+	e.GET("/:sha/sub/:name", GetSubtitle)
 
 	e.Logger.Fatal(e.Start(":7666"))
 }

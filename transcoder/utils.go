@@ -56,6 +56,13 @@ func GetPath(resource string, slug string) (string, error) {
 	return ret.Path, nil
 }
 
+func SanitizePath(path string) error {
+	if strings.Contains(path, "/") || strings.Contains(path, "..") {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid parameter. Can't contains path delimiters or ..")
+	}
+	return nil
+}
+
 func GetClientId(c echo.Context) (string, error) {
 	key := c.Request().Header.Get("X-CLIENT-ID")
 	if key == "" {
