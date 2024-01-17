@@ -1,5 +1,9 @@
 package src
 
+import (
+	"log"
+)
+
 type ClientInfo struct {
 	client  string
 	path    string
@@ -20,6 +24,13 @@ func NewTracker(t *Transcoder) *Tracker {
 	}
 	go ret.start()
 	return ret
+}
+
+func Abs(x int32) int32 {
+	if x < 0 {
+		return -x
+	}
+	return x
 }
 
 func (t *Tracker) start() {
@@ -43,6 +54,9 @@ func (t *Tracker) start() {
 			}
 			if old.quality != info.quality && old.quality != nil {
 				t.KillQualityIfDead(old.path, *old.quality)
+			}
+			if old.head != -1 && Abs(info.head-old.head) > 100 {
+				t.KillOrphanedHeads(old.path, old.quality, old.audio)
 			}
 		} else if ok {
 			t.KillStreamIfDead(old.path)
@@ -91,4 +105,44 @@ func (t *Tracker) KillQualityIfDead(path string, quality Quality) {
 	stream.vlock.RLock()
 	defer stream.vlock.RUnlock()
 	stream.streams[quality].Kill()
+}
+
+func (t *Tracker) KillOrphanedHeads(path string, quality *Quality, audio int32) {
+	t.transcoder.mutex.RLock()
+	stream := t.transcoder.streams[path]
+	t.transcoder.mutex.RUnlock()
+
+	if quality != nil {
+		stream.vlock.RLock()
+		vstream := stream.streams[*quality]
+		stream.vlock.RUnlock()
+
+		t.killOrphanedeheads(&vstream.Stream)
+	}
+	if audio != -1 {
+		stream.alock.RLock()
+		astream := stream.audios[audio]
+		stream.alock.RUnlock()
+
+		t.killOrphanedeheads(&astream.Stream)
+	}
+}
+
+func (t *Tracker) killOrphanedeheads(stream *Stream) {
+	stream.lock.Lock()
+	defer stream.lock.Unlock()
+
+	for encoder_id, head := range stream.heads {
+		distance := int32(99999)
+		for _, info := range t.clients {
+			if info.head == -1 {
+				continue
+			}
+			distance = min(Abs(info.head-head), distance)
+		}
+		if distance > 100 {
+			log.Printf("Killing orphaned head %s %d", stream.file.Path, encoder_id)
+			stream.KillHead(encoder_id)
+		}
+	}
 }

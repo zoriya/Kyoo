@@ -21,8 +21,8 @@ type StreamHandle interface {
 }
 
 type Stream struct {
-	handle  StreamHandle
-	file    *FileStream
+	handle StreamHandle
+	file   *FileStream
 	// channel open if the segment is not ready. closed if ready.
 	// one can check if segment 1 is open by doing:
 	//
@@ -270,10 +270,17 @@ func (ts *Stream) Kill() {
 	ts.lock.Lock()
 	defer ts.lock.Unlock()
 
-	for _, cmd := range ts.commands {
-		if cmd == nil {
-			continue
-		}
-		cmd.Process.Signal(os.Interrupt)
+	for id := range ts.commands {
+		ts.KillHead(id)
 	}
+}
+
+// Stream assume to be locked
+func (ts *Stream) KillHead(encoder_id int) {
+	if ts.commands[encoder_id] == nil {
+		return
+	}
+	ts.commands[encoder_id].Process.Signal(os.Interrupt)
+	ts.commands[encoder_id] = nil
+	ts.heads[encoder_id] = -1
 }
