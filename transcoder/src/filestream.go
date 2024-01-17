@@ -170,16 +170,16 @@ func (fs *FileStream) IsDead() bool {
 		// if the encode is relatively new, don't mark it as dead even if nobody is listening.
 		return false
 	}
-	for _, s := range fs.streams {
-		if len(s.Clients) > 0 {
-			return false
-		}
-	}
-	for _, s := range fs.audios {
-		if len(s.Clients) > 0 {
-			return false
-		}
-	}
+	// for _, s := range fs.streams {
+	// 	if len(s.Clients) > 0 {
+	// 		return false
+	// 	}
+	// }
+	// for _, s := range fs.audios {
+	// 	if len(s.Clients) > 0 {
+	// 		return false
+	// 	}
+	// }
 	return true
 }
 
@@ -259,14 +259,14 @@ func (fs *FileStream) getVideoStream(quality Quality) *VideoStream {
 	return fs.streams[quality]
 }
 
-func (fs *FileStream) GetVideoIndex(quality Quality, client string) (string, error) {
+func (fs *FileStream) GetVideoIndex(quality Quality) (string, error) {
 	stream := fs.getVideoStream(quality)
-	return stream.GetIndex(client)
+	return stream.GetIndex()
 }
 
-func (fs *FileStream) GetVideoSegment(quality Quality, segment int32, client string) (string, error) {
+func (fs *FileStream) GetVideoSegment(quality Quality, segment int32) (string, error) {
 	stream := fs.getVideoStream(quality)
-	return stream.GetSegment(segment, client)
+	return stream.GetSegment(segment)
 }
 
 func (fs *FileStream) getAudioStream(audio int32) *AudioStream {
@@ -285,12 +285,12 @@ func (fs *FileStream) getAudioStream(audio int32) *AudioStream {
 	return fs.audios[audio]
 }
 
-func (fs *FileStream) GetAudioIndex(audio int32, client string) (string, error) {
+func (fs *FileStream) GetAudioIndex(audio int32) (string, error) {
 	stream := fs.getAudioStream(audio)
-	return stream.GetIndex(client)
+	return stream.GetIndex()
 }
 
-func (fs *FileStream) GetAudioSegment(audio int32, segment int32, client string) (string, error) {
+func (fs *FileStream) GetAudioSegment(audio int32, segment int32) (string, error) {
 	stream := fs.getAudioStream(audio)
-	return stream.GetSegment(segment, client)
+	return stream.GetSegment(segment)
 }

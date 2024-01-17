@@ -23,7 +23,6 @@ type StreamHandle interface {
 type Stream struct {
 	handle  StreamHandle
 	file    *FileStream
-	Clients []string
 	// channel open if the segment is not ready. closed if ready.
 	// one can check if segment 1 is open by doing:
 	//
@@ -42,7 +41,6 @@ func NewStream(file *FileStream, handle StreamHandle) Stream {
 	ret := Stream{
 		handle:   handle,
 		file:     file,
-		Clients:  make([]string, 0),
 		segments: make([]chan struct{}, len(file.Keyframes)),
 		heads:    make([]int32, 0),
 		commands: make([]*exec.Cmd, 0),
@@ -201,7 +199,7 @@ func (ts *Stream) run(start int32) error {
 	return nil
 }
 
-func (ts *Stream) GetIndex(client string) (string, error) {
+func (ts *Stream) GetIndex() (string, error) {
 	index := `#EXTM3U
 #EXT-X-VERSION:3
 #EXT-X-PLAYLIST-TYPE:VOD
@@ -218,7 +216,7 @@ func (ts *Stream) GetIndex(client string) (string, error) {
 	return index, nil
 }
 
-func (ts *Stream) GetSegment(segment int32, client string) (string, error) {
+func (ts *Stream) GetSegment(segment int32) (string, error) {
 	ts.lock.RLock()
 	ready := ts.isSegmentReady(segment)
 	// we want to calculate distance in the same lock else it can be funky
