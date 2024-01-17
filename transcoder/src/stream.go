@@ -151,7 +151,6 @@ func (ts *Stream) run(start int32) error {
 
 			ts.lock.Lock()
 			ts.heads[encoder_id] = segment
-			log.Printf("encode %d finished %d", encoder_id, segment)
 			if ts.isSegmentReady(segment) {
 				// the current segment is already marked at done so another process has already gone up to here.
 				cmd.Process.Signal(os.Interrupt)

@@ -143,9 +143,9 @@ func GetKeyframes(path string) ([]float64, bool, error) {
 
 func (fs *FileStream) Destroy() {
 	fs.vlock.Lock()
-	defer fs.vlock.Lock()
+	defer fs.vlock.Unlock()
 	fs.alock.Lock()
-	defer fs.alock.Lock()
+	defer fs.alock.Unlock()
 
 	for _, s := range fs.streams {
 		s.Kill()

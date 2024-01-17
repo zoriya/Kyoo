@@ -47,8 +47,8 @@ func (t *Tracker) start() {
 			}
 
 			old, ok := t.clients[info.client]
+			// First fixup the info. Most routes ruturn partial infos
 			if ok && old.path == info.path {
-				// First fixup the info. Most routes ruturn partial infos
 				if info.quality == nil {
 					info.quality = old.quality
 				}
@@ -58,7 +58,13 @@ func (t *Tracker) start() {
 				if info.head == -1 {
 					info.head = old.head
 				}
+			}
 
+			t.clients[info.client] = info
+			t.visitDate[info.client] = time.Now()
+
+			// now that the new info is stored and fixed, kill old streams
+			if ok && old.path == info.path {
 				if old.audio != info.audio && old.audio != -1 {
 					t.KillAudioIfDead(old.path, old.audio)
 				}
@@ -71,9 +77,6 @@ func (t *Tracker) start() {
 			} else if ok {
 				t.KillStreamIfDead(old.path)
 			}
-
-			t.clients[info.client] = info
-			t.visitDate[info.client] = time.Now()
 
 		case <-timer:
 			timer = time.After(inactive_time)
@@ -106,6 +109,7 @@ func (t *Tracker) KillStreamIfDead(path string) bool {
 			return false
 		}
 	}
+	log.Printf("Nobody is watching %s. Killing it", path)
 	t.transcoder.mutex.Lock()
 	defer t.transcoder.mutex.Unlock()
 	t.transcoder.streams[path].Destroy()
@@ -119,6 +123,7 @@ func (t *Tracker) KillAudioIfDead(path string, audio int32) bool {
 			return false
 		}
 	}
+	log.Printf("Nobody is listening audio %d of %s. Killing it", audio, path)
 	t.transcoder.mutex.RLock()
 	stream := t.transcoder.streams[path]
 	t.transcoder.mutex.RUnlock()
@@ -135,6 +140,7 @@ func (t *Tracker) KillQualityIfDead(path string, quality Quality) bool {
 			return false
 		}
 	}
+	log.Printf("Nobody is watching quality %s of %s. Killing it", quality, path)
 	t.transcoder.mutex.RLock()
 	stream := t.transcoder.streams[path]
 	t.transcoder.mutex.RUnlock()
