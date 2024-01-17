@@ -23,9 +23,6 @@ type FileStream struct {
 	vlock       sync.RWMutex
 	audios      map[int32]*AudioStream
 	alock       sync.RWMutex
-	lastUsed    time.Time
-	usageChan   chan time.Time
-	luLock      sync.RWMutex
 }
 
 func GetOutPath() string {
@@ -58,7 +55,7 @@ func NewFileStream(path string) (*FileStream, error) {
 		return nil, err
 	}
 
-	ret := &FileStream{
+	return &FileStream{
 		Path:        path,
 		Out:         fmt.Sprintf("%s/%s", GetOutPath(), info.info.Sha),
 		Keyframes:   keyframes,
@@ -66,22 +63,7 @@ func NewFileStream(path string) (*FileStream, error) {
 		Info:        info.info,
 		streams:     make(map[Quality]*VideoStream),
 		audios:      make(map[int32]*AudioStream),
-		usageChan:   make(chan time.Time, 5),
-	}
-
-	go func() {
-		for {
-			lu, ok := <-ret.usageChan
-			if !ok {
-				return
-			}
-			ret.luLock.Lock()
-			ret.lastUsed = lu
-			ret.luLock.Unlock()
-		}
-	}()
-
-	return ret, nil
+	}, nil
 }
 
 func GetKeyframes(path string) ([]float64, bool, error) {
@@ -159,30 +141,6 @@ func GetKeyframes(path string) ([]float64, bool, error) {
 	return ret, can_transmux, nil
 }
 
-func (fs *FileStream) IsDead() bool {
-	fs.luLock.Lock()
-	timeSince := time.Since(fs.lastUsed)
-	fs.luLock.Unlock()
-	if timeSince >= 4*time.Hour {
-		return true
-	}
-	if timeSince < 5*time.Minute {
-		// if the encode is relatively new, don't mark it as dead even if nobody is listening.
-		return false
-	}
-	// for _, s := range fs.streams {
-	// 	if len(s.Clients) > 0 {
-	// 		return false
-	// 	}
-	// }
-	// for _, s := range fs.audios {
-	// 	if len(s.Clients) > 0 {
-	// 		return false
-	// 	}
-	// }
-	return true
-}
-
 func (fs *FileStream) Destroy() {
 	fs.vlock.Lock()
 	defer fs.vlock.Lock()
@@ -199,7 +157,6 @@ func (fs *FileStream) Destroy() {
 }
 
 func (fs *FileStream) GetMaster() string {
-	fs.usageChan <- time.Now()
 	master := "#EXTM3U\n"
 	// TODO: also check if the codec is valid in a hls before putting transmux
 	if fs.CanTransmux {
@@ -244,7 +201,6 @@ func (fs *FileStream) GetMaster() string {
 }
 
 func (fs *FileStream) getVideoStream(quality Quality) *VideoStream {
-	fs.usageChan <- time.Now()
 	fs.vlock.RLock()
 	stream, ok := fs.streams[quality]
 	fs.vlock.RUnlock()
@@ -270,7 +226,6 @@ func (fs *FileStream) GetVideoSegment(quality Quality, segment int32) (string, e
 }
 
 func (fs *FileStream) getAudioStream(audio int32) *AudioStream {
-	fs.usageChan <- time.Now()
 	fs.alock.RLock()
 	stream, ok := fs.audios[audio]
 	fs.alock.RUnlock()
