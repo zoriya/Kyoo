@@ -67,7 +67,7 @@ func (ts *Stream) run(start int32) error {
 	// Start the transcode up to the 100th segment (or less)
 	// Stop at the first finished segment
 	end := min(start+100, int32(len(ts.file.Keyframes))-1)
-	ts.lock.RLock()
+	ts.lock.Lock()
 	for i := start; i < end; i++ {
 		if ts.isSegmentReady(i) {
 			end = i
@@ -78,7 +78,7 @@ func (ts *Stream) run(start int32) error {
 	ts.heads = append(ts.heads, start)
 	// we set nil while the command has not started, this is just to reserve the index
 	ts.commands = append(ts.commands, nil)
-	ts.lock.RUnlock()
+	ts.lock.Unlock()
 
 	log.Printf(
 		"Starting transcode for %s (from %d to %d out of %d segments)",
@@ -222,6 +222,19 @@ func (ts *Stream) GetSegment(segment int32) (string, error) {
 	distance := 0.
 	if !ready {
 		distance = ts.getMinEncoderDistance(segment)
+	} else {
+		// if the current segment is ready, check next segments are ready and if not start a transcode for them
+		for i := int32(1); i <= 10; i++ {
+			if slices.Contains(ts.heads, segment+i) {
+				// no need to create a new transcoder if there is already one running for this segment
+				break
+			}
+			if !ts.isSegmentReady(segment + i) {
+				log.Printf("Creating new head for future segment (%d)", segment+i)
+				go ts.run(segment + i)
+				break
+			}
+		}
 	}
 	ts.lock.RUnlock()
 
