@@ -12,8 +12,10 @@ type Transcoder struct {
 	// All file streams currently running, index is file path
 	streams map[string]*FileStream
 	// Streams that are staring up
-	preparing map[string]chan *FileStream
-	mutex     sync.RWMutex
+	preparing  map[string]chan *FileStream
+	mutex      sync.RWMutex
+	clientChan chan ClientInfo
+	tracker    *Tracker
 }
 
 func NewTranscoder() (*Transcoder, error) {
@@ -29,10 +31,13 @@ func NewTranscoder() (*Transcoder, error) {
 		}
 	}
 
-	return &Transcoder{
-		streams:   make(map[string]*FileStream),
-		preparing: make(map[string]chan *FileStream),
-	}, nil
+	ret := &Transcoder{
+		streams:    make(map[string]*FileStream),
+		preparing:  make(map[string]chan *FileStream),
+		clientChan: make(chan ClientInfo, 10),
+	}
+	ret.tracker = NewTracker(ret)
+	return ret, nil
 }
 
 func (t *Transcoder) getFileStream(path string) (*FileStream, error) {
@@ -50,7 +55,6 @@ func (t *Transcoder) getFileStream(path string) (*FileStream, error) {
 		t.mutex.Lock()
 		channel = make(chan *FileStream, 1)
 		t.preparing[path] = channel
-		t.cleanUnused()
 		t.mutex.Unlock()
 
 		var err error
@@ -75,22 +79,17 @@ func (t *Transcoder) getFileStream(path string) (*FileStream, error) {
 	return stream, nil
 }
 
-// This method assume the lock is already taken.
-func (t *Transcoder) cleanUnused() {
-	for path, stream := range t.streams {
-		if !stream.IsDead() {
-			continue
-		}
-		log.Printf("Steam is dead (%s). Killing it.", path)
-		stream.Destroy()
-		delete(t.streams, path)
-	}
-}
-
 func (t *Transcoder) GetMaster(path string, client string) (string, error) {
 	stream, err := t.getFileStream(path)
 	if err != nil {
 		return "", err
+	}
+	t.clientChan <- ClientInfo{
+		client:  client,
+		path:    path,
+		quality: nil,
+		audio:   -1,
+		head:    -1,
 	}
 	return stream.GetMaster(), nil
 }
@@ -100,7 +99,14 @@ func (t *Transcoder) GetVideoIndex(path string, quality Quality, client string) 
 	if err != nil {
 		return "", err
 	}
-	return stream.GetVideoIndex(quality, client)
+	t.clientChan <- ClientInfo{
+		client:  client,
+		path:    path,
+		quality: &quality,
+		audio:   -1,
+		head:    -1,
+	}
+	return stream.GetVideoIndex(quality)
 }
 
 func (t *Transcoder) GetAudioIndex(path string, audio int32, client string) (string, error) {
@@ -108,7 +114,13 @@ func (t *Transcoder) GetAudioIndex(path string, audio int32, client string) (str
 	if err != nil {
 		return "", err
 	}
-	return stream.GetAudioIndex(audio, client)
+	t.clientChan <- ClientInfo{
+		client: client,
+		path:   path,
+		audio:  audio,
+		head:   -1,
+	}
+	return stream.GetAudioIndex(audio)
 }
 
 func (t *Transcoder) GetVideoSegment(
@@ -121,7 +133,14 @@ func (t *Transcoder) GetVideoSegment(
 	if err != nil {
 		return "", err
 	}
-	return stream.GetVideoSegment(quality, segment, client)
+	t.clientChan <- ClientInfo{
+		client:  client,
+		path:    path,
+		quality: &quality,
+		audio:   -1,
+		head:    segment,
+	}
+	return stream.GetVideoSegment(quality, segment)
 }
 
 func (t *Transcoder) GetAudioSegment(
@@ -134,5 +153,11 @@ func (t *Transcoder) GetAudioSegment(
 	if err != nil {
 		return "", err
 	}
-	return stream.GetAudioSegment(audio, segment, client)
+	t.clientChan <- ClientInfo{
+		client: client,
+		path:   path,
+		audio:  audio,
+		head:   segment,
+	}
+	return stream.GetAudioSegment(audio, segment)
 }
