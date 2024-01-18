@@ -15,9 +15,7 @@ in
       nodePackages.eas-cli
       nodePackages.expo-cli
       dotnet
-      python
-      python312Packages.setuptools
-      python312Packages.pip
+      (python312.withPackages (ps: with ps; [setuptools pip]))
       go
       wgo
       mediainfo
