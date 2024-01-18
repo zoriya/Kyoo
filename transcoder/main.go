@@ -190,7 +190,7 @@ func (h *Handler) GetAudioSegment(c echo.Context) error {
 
 // Identify
 //
-// Identify metadata about a file
+// Identify metadata about a file.
 //
 // Path: /:resource/:slug/info
 func (h *Handler) GetInfo(c echo.Context) error {
@@ -212,7 +212,7 @@ func (h *Handler) GetInfo(c echo.Context) error {
 
 // Get attachments
 //
-// Get a specific attachment
+// Get a specific attachment.
 //
 // Path: /:sha/attachment/:name
 func (h *Handler) GetAttachment(c echo.Context) error {
@@ -238,7 +238,7 @@ func (h *Handler) GetAttachment(c echo.Context) error {
 
 // Get subtitle
 //
-// Get a specific subtitle
+// Get a specific subtitle.
 //
 // Path: /:sha/subtitle/:name
 func (h *Handler) GetSubtitle(c echo.Context) error {
