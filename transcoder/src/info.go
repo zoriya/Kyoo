@@ -169,8 +169,6 @@ func GetInfo(path string) (*MediaInfo, error) {
 	}
 	defer mi.Close()
 
-	// TODO: extract
-
 	sha := mi.Parameter(mediainfo.StreamGeneral, 0, "UniqueID")
 	// Remove dummy values that some tools use.
 	if len(sha) <= 5 {
