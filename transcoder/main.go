@@ -190,10 +190,10 @@ func (h *Handler) GetAudioSegment(c echo.Context) error {
 
 // Identify
 //
-// # Identify metadata about a file
+// Identify metadata about a file
 //
 // Path: /:resource/:slug/info
-func GetInfo(c echo.Context) error {
+func (h *Handler) GetInfo(c echo.Context) error {
 	resource := c.Param("resource")
 	slug := c.Param("slug")
 
@@ -206,6 +206,7 @@ func GetInfo(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	h.extractor.RunExtractor(ret.Path, ret.Sha, &ret.Subtitles)
 	return c.JSON(http.StatusOK, ret)
 }
 
@@ -214,7 +215,7 @@ func GetInfo(c echo.Context) error {
 // Get a specific attachment
 //
 // Path: /:sha/attachment/:name
-func GetAttachment(c echo.Context) error {
+func (h *Handler) GetAttachment(c echo.Context) error {
 	sha := c.Param("sha")
 	name := c.Param("name")
 
@@ -224,6 +225,12 @@ func GetAttachment(c echo.Context) error {
 	if err := SanitizePath(name); err != nil {
 		return err
 	}
+
+	wait, ok := h.extractor.Extract(sha)
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, "Not extracted yet. Call /info to extract.")
+	}
+	<-wait
 
 	path := fmt.Sprintf("%s/%s/att/%s", src.GetMetadataPath(), sha, name)
 	return c.File(path)
@@ -233,8 +240,8 @@ func GetAttachment(c echo.Context) error {
 //
 // Get a specific subtitle
 //
-// Path: /:sha/sub/:name
-func GetSubtitle(c echo.Context) error {
+// Path: /:sha/subtitle/:name
+func (h *Handler) GetSubtitle(c echo.Context) error {
 	sha := c.Param("sha")
 	name := c.Param("name")
 
@@ -245,12 +252,19 @@ func GetSubtitle(c echo.Context) error {
 		return err
 	}
 
+	wait, ok := h.extractor.Extract(sha)
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, "Not extracted yet. Call /info to extract.")
+	}
+	<-wait
+
 	path := fmt.Sprintf("%s/%s/sub/%s", src.GetMetadataPath(), sha, name)
 	return c.File(path)
 }
 
 type Handler struct {
 	transcoder *src.Transcoder
+	extractor  *src.Extractor
 }
 
 func main() {
@@ -263,7 +277,7 @@ func main() {
 		e.Logger.Fatal(err)
 		return
 	}
-	h := Handler{transcoder: transcoder}
+	h := Handler{transcoder: transcoder, extractor: src.NewExtractor()}
 
 	e.GET("/:resource/:slug/direct", DirectStream)
 	e.GET("/:resource/:slug/master.m3u8", h.GetMaster)
@@ -271,9 +285,9 @@ func main() {
 	e.GET("/:resource/:slug/audio/:audio/index.m3u8", h.GetAudioIndex)
 	e.GET("/:resource/:slug/:quality/:chunk", h.GetVideoSegment)
 	e.GET("/:resource/:slug/audio/:audio/:chunk", h.GetAudioSegment)
-	e.GET("/:resource/:slug/info", GetInfo)
-	e.GET("/:sha/attachment/:name", GetAttachment)
-	e.GET("/:sha/sub/:name", GetSubtitle)
+	e.GET("/:resource/:slug/info", h.GetInfo)
+	e.GET("/:sha/attachment/:name", h.GetAttachment)
+	e.GET("/:sha/subtitle/:name", h.GetSubtitle)
 
 	e.Logger.Fatal(e.Start(":7666"))
 }
