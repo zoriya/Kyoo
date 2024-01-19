@@ -28,6 +28,33 @@ func DirectStream(c echo.Context) error {
 	return c.File(path)
 }
 
+// Download item
+//
+// Transcode the video/audio to the selected quality for offline use.
+// This route will be slow and stream an incomplete file, this is not meant to be used while
+// streaming.
+//
+// Path: /:resource/:slug/offline?quality=:quality
+func (h *Handler) GetOffline(c echo.Context) error {
+	resource := c.Param("resource")
+	slug := c.Param("slug")
+	quality, err := src.QualityFromString(c.QueryParam("quality"))
+	if err != nil {
+		return err
+	}
+
+	path, err := GetPath(resource, slug)
+	if err != nil {
+		return err
+	}
+
+	ret, err := h.downloader.GetOffline(path, quality)
+	if err != nil {
+		return err
+	}
+	return c.String(http.StatusOK, ret)
+}
+
 // Get master playlist
 //
 // Get a master playlist containing all possible video qualities and audios available for this resource.
@@ -265,6 +292,7 @@ func (h *Handler) GetSubtitle(c echo.Context) error {
 type Handler struct {
 	transcoder *src.Transcoder
 	extractor  *src.Extractor
+	downloader *src.Downloader
 }
 
 func main() {
@@ -277,9 +305,14 @@ func main() {
 		e.Logger.Fatal(err)
 		return
 	}
-	h := Handler{transcoder: transcoder, extractor: src.NewExtractor()}
+	h := Handler{
+		transcoder: transcoder,
+		extractor:  src.NewExtractor(),
+		downloader: src.NewDownloader(),
+	}
 
 	e.GET("/:resource/:slug/direct", DirectStream)
+	e.GET("/:resource/:slug/offline", h.GetOffline)
 	e.GET("/:resource/:slug/master.m3u8", h.GetMaster)
 	e.GET("/:resource/:slug/:quality/index.m3u8", h.GetVideoIndex)
 	e.GET("/:resource/:slug/audio/:audio/index.m3u8", h.GetAudioIndex)
