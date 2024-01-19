@@ -38,7 +38,7 @@ const kyooUrl =
 // The url of kyoo, set after each query (used by the image parser).
 export let kyooApiUrl = kyooUrl;
 
-export const queryFn = async <Data extends ZodType,>(
+export const queryFn = async <Data extends ZodType>(
 	context:
 		| (QueryFunctionContext & { timeout?: number; apiUrl?: string })
 		| {
