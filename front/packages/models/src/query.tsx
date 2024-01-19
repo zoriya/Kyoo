@@ -24,10 +24,9 @@ import {
 	QueryClient,
 	QueryFunctionContext,
 	useInfiniteQuery,
-	useMutation,
 	useQuery,
 } from "@tanstack/react-query";
-import { z } from "zod";
+import { ZodType, z } from "zod";
 import { KyooErrors } from "./kyoo-errors";
 import { Page, Paged } from "./page";
 import { Platform } from "react-native";
@@ -39,7 +38,7 @@ const kyooUrl =
 // The url of kyoo, set after each query (used by the image parser).
 export let kyooApiUrl = kyooUrl;
 
-export const queryFn = async <Data,>(
+export const queryFn = async <Data extends ZodType,>(
 	context:
 		| (QueryFunctionContext & { timeout?: number; apiUrl?: string })
 		| {
@@ -50,9 +49,9 @@ export const queryFn = async <Data,>(
 				apiUrl?: string;
 				timeout?: number;
 		  },
-	type?: z.ZodType<Data>,
+	type?: Data,
 	token?: string | null,
-): Promise<Data> => {
+): Promise<z.infer<Data>> => {
 	const url = context.apiUrl ?? (Platform.OS === "web" ? kyooUrl : getCurrentAccount()!.apiUrl);
 	kyooApiUrl = url;
 
@@ -109,7 +108,6 @@ export const queryFn = async <Data,>(
 		throw data as KyooErrors;
 	}
 
-	// @ts-expect-error Assume Data is nullable.
 	if (resp.status === 204) return null;
 
 	let data;
