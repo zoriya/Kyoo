@@ -124,12 +124,12 @@ func (t *Tracker) KillAudioIfDead(path string, audio int32) bool {
 		}
 	}
 	log.Printf("Nobody is listening audio %d of %s. Killing it", audio, path)
-	t.transcoder.mutex.RLock()
+	t.transcoder.mutex.Lock()
 	stream := t.transcoder.streams[path]
-	t.transcoder.mutex.RUnlock()
+	t.transcoder.mutex.Unlock()
 
-	stream.alock.RLock()
-	defer stream.alock.RUnlock()
+	stream.alock.Lock()
+	defer stream.alock.Unlock()
 	stream.audios[audio].Kill()
 	return true
 }
@@ -141,32 +141,32 @@ func (t *Tracker) KillQualityIfDead(path string, quality Quality) bool {
 		}
 	}
 	log.Printf("Nobody is watching quality %s of %s. Killing it", quality, path)
-	t.transcoder.mutex.RLock()
+	t.transcoder.mutex.Lock()
 	stream := t.transcoder.streams[path]
-	t.transcoder.mutex.RUnlock()
+	t.transcoder.mutex.Unlock()
 
-	stream.vlock.RLock()
-	defer stream.vlock.RUnlock()
+	stream.vlock.Lock()
+	defer stream.vlock.Unlock()
 	stream.streams[quality].Kill()
 	return true
 }
 
 func (t *Tracker) KillOrphanedHeads(path string, quality *Quality, audio int32) {
-	t.transcoder.mutex.RLock()
+	t.transcoder.mutex.Lock()
 	stream := t.transcoder.streams[path]
-	t.transcoder.mutex.RUnlock()
+	t.transcoder.mutex.Unlock()
 
 	if quality != nil {
-		stream.vlock.RLock()
+		stream.vlock.Lock()
 		vstream := stream.streams[*quality]
-		stream.vlock.RUnlock()
+		stream.vlock.Unlock()
 
 		t.killOrphanedeheads(&vstream.Stream)
 	}
 	if audio != -1 {
-		stream.alock.RLock()
+		stream.alock.Lock()
 		astream := stream.audios[audio]
-		stream.alock.RUnlock()
+		stream.alock.Unlock()
 
 		t.killOrphanedeheads(&astream.Stream)
 	}

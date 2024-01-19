@@ -13,7 +13,7 @@ type Transcoder struct {
 	streams map[string]*FileStream
 	// Streams that are staring up
 	preparing  map[string]chan *FileStream
-	mutex      sync.RWMutex
+	mutex      sync.Mutex
 	clientChan chan ClientInfo
 	tracker    *Tracker
 }
@@ -41,10 +41,14 @@ func NewTranscoder() (*Transcoder, error) {
 }
 
 func (t *Transcoder) getFileStream(path string) (*FileStream, error) {
-	t.mutex.RLock()
+	t.mutex.Lock()
 	stream, ok := t.streams[path]
 	channel, preparing := t.preparing[path]
-	t.mutex.RUnlock()
+	if !preparing && !ok {
+		channel = make(chan *FileStream, 1)
+		t.preparing[path] = channel
+	}
+	t.mutex.Unlock()
 
 	if preparing {
 		stream = <-channel
@@ -52,11 +56,6 @@ func (t *Transcoder) getFileStream(path string) (*FileStream, error) {
 			return nil, errors.New("could not transcode file. Try again later")
 		}
 	} else if !ok {
-		t.mutex.Lock()
-		channel = make(chan *FileStream, 1)
-		t.preparing[path] = channel
-		t.mutex.Unlock()
-
 		var err error
 		stream, err = NewFileStream(path)
 		log.Printf("Stream created for %s", path)

@@ -20,9 +20,9 @@ type FileStream struct {
 	CanTransmux bool
 	Info        *MediaInfo
 	streams     map[Quality]*VideoStream
-	vlock       sync.RWMutex
+	vlock       sync.Mutex
 	audios      map[int32]*AudioStream
-	alock       sync.RWMutex
+	alock       sync.Mutex
 }
 
 func GetOutPath() string {
@@ -201,16 +201,13 @@ func (fs *FileStream) GetMaster() string {
 }
 
 func (fs *FileStream) getVideoStream(quality Quality) *VideoStream {
-	fs.vlock.RLock()
+	fs.vlock.Lock()
+	defer fs.vlock.Unlock()
 	stream, ok := fs.streams[quality]
-	fs.vlock.RUnlock()
 
 	if ok {
 		return stream
 	}
-
-	fs.vlock.Lock()
-	defer fs.vlock.Unlock()
 	fs.streams[quality] = NewVideoStream(fs, quality)
 	return fs.streams[quality]
 }
@@ -226,16 +223,13 @@ func (fs *FileStream) GetVideoSegment(quality Quality, segment int32) (string, e
 }
 
 func (fs *FileStream) getAudioStream(audio int32) *AudioStream {
-	fs.alock.RLock()
+	fs.alock.Lock()
+	defer fs.alock.Unlock()
 	stream, ok := fs.audios[audio]
-	fs.alock.RUnlock()
 
 	if ok {
 		return stream
 	}
-
-	fs.alock.Lock()
-	defer fs.alock.Unlock()
 	fs.audios[audio] = NewAudioStream(fs, audio)
 	return fs.audios[audio]
 }
