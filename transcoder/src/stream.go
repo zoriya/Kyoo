@@ -88,13 +88,24 @@ func (ts *Stream) run(start int32) error {
 		len(ts.file.Keyframes),
 	)
 
-	segments := make([]string, end-start)
-	for i := range segments {
+	var segments_str string
+	if end-start > 0 {
 		// We do not need the first value (start of the transcode)
-		time := ts.file.Keyframes[int(start)+i+1] - ts.file.Keyframes[start]
-		segments[i] = fmt.Sprintf("%.6f", time)
+		// nor the last one (end of the -to argument)
+		// if we specify one of those, ffmpeg creates a really small segment and
+		// we miss a segment's worth of data
+		segments := make([]string, end-start-1)
+		for i := range segments {
+			time := ts.file.Keyframes[int(start)+i+1] - ts.file.Keyframes[start]
+			segments[i] = fmt.Sprintf("%.6f", time)
+		}
+		segments_str = strings.Join(segments, ",")
+	} else {
+		// we set a dummy value when we want to have a single segment.
+		// this can't be left empty else ffmpeg errors out
+		// this can't be the length of the file else ffmpeg risk creating a second segment
+		segments_str = "9999999999"
 	}
-	segments_str := strings.Join(segments, ",")
 
 	outpath := ts.handle.getOutPath()
 	err := os.MkdirAll(filepath.Dir(outpath), 0o755)
