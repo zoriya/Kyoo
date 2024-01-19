@@ -89,7 +89,7 @@ func (ts *Stream) run(start int32) error {
 	)
 
 	var segments_str string
-	if end-start > 0 {
+	if end-start-1 > 0 {
 		// We do not need the first value (start of the transcode)
 		// nor the last one (end of the -to argument)
 		// if we specify one of those, ffmpeg creates a really small segment and
