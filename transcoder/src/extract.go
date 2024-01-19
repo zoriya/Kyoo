@@ -52,7 +52,7 @@ func (e *Extractor) RunExtractor(path string, sha string, subs *[]Subtitle) <-ch
 		attachment_path := fmt.Sprintf("%s/%s/att/", GetMetadataPath(), sha)
 		subs_path := fmt.Sprintf("%s/%s/sub/", GetMetadataPath(), sha)
 		os.MkdirAll(attachment_path, 0o644)
-		os.MkdirAll(subs_path, 0o644)
+		os.MkdirAll(subs_path, 0o755)
 
 		fmt.Printf("Extract subs and fonts for %s", path)
 		cmd := exec.Command(
