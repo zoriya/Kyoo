@@ -34,6 +34,29 @@ export const UserP = ResourceP("user").extend({
 	 * The list of permissions of the user. The format of this is implementation dependent.
 	 */
 	permissions: z.array(z.string()),
+	/**
+	 * User settings
+	 */
+	settings: z
+		.object({
+			downloadQuality: z
+				.union([
+					z.literal("original"),
+					z.literal("8k"),
+					z.literal("4k"),
+					z.literal("1440p"),
+					z.literal("1080p"),
+					z.literal("720p"),
+					z.literal("480p"),
+					z.literal("360p"),
+					z.literal("240p"),
+				])
+				.default("original")
+				.catch("original"),
+		})
+		.catchall(z.string())
+		// keep a default for older versions of the api
+		.default({}),
 });
 
 export type User = z.infer<typeof UserP>;

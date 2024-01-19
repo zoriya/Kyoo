@@ -110,6 +110,13 @@
 				"newPassword": "Nouveau mot de passe"
 			}
 		},
+		"downloads": {
+			"label": "Téléchargements",
+			"quality": {
+				"label": "Qualité",
+				"description": "Les films et épisodes téléchargés seront automatiquement convertis et téléchargés dans la qualité sélectionnée"
+			}
+		},
 		"about": {
 			"label": "À propos",
 			"android-app": {

@@ -110,6 +110,13 @@
 				"newPassword": "New password"
 			}
 		},
+		"downloads": {
+			"label": "Downloads",
+			"quality": {
+				"label": "Quality",
+				"description": "Movies and episodes downloaded will automatically be converted and downloaded in the selected quality"
+			}
+		},
 		"about": {
 			"label": "About",
 			"android-app": {
