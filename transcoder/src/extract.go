@@ -57,6 +57,7 @@ func (e *Extractor) RunExtractor(path string, sha string, subs *[]Subtitle) <-ch
 		fmt.Printf("Extract subs and fonts for %s", path)
 		cmd := exec.Command(
 			"ffmpeg",
+			"-nostats", "-hide_banner", "-loglevel", "warning",
 			"-dump_attachment:t", "",
 			"-i", path,
 		)

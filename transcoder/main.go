@@ -48,11 +48,11 @@ func (h *Handler) GetOffline(c echo.Context) error {
 		return err
 	}
 
-	ret, err := h.downloader.GetOffline(path, quality)
+	ret, path, err := h.downloader.GetOffline(path, quality)
 	if err != nil {
 		return err
 	}
-	return c.String(http.StatusOK, ret)
+	return ServeOfflineFile(path, ret, c)
 }
 
 // Get master playlist

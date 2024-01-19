@@ -111,7 +111,7 @@ func (ts *Stream) run(start int32) error {
 		"-copyts",
 	}
 	args = append(args, ts.handle.getTranscodeArgs(segments_str)...)
-	args = append(args, []string{
+	args = append(args,
 		"-f", "segment",
 		"-segment_time_delta", "0.2",
 		"-segment_format", "mpegts",
@@ -120,7 +120,7 @@ func (ts *Stream) run(start int32) error {
 		"-segment_list_type", "flat",
 		"-segment_list", "pipe:1",
 		outpath,
-	}...)
+	)
 
 	cmd := exec.Command("ffmpeg", args...)
 	log.Printf("Running %s", strings.Join(cmd.Args, " "))

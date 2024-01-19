@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -93,4 +95,67 @@ func ErrorHandler(err error, c echo.Context) {
 	c.JSON(code, struct {
 		Errors []string `json:"errors"`
 	}{Errors: []string{message}})
+}
+
+func ServeOfflineFile(path string, done <-chan struct{}, c echo.Context) error {
+	select {
+	case <-done:
+		// if the transcode is already finished, no need to do anything, just return the file
+		return c.File(path)
+	default:
+		break
+	}
+
+	var f *os.File
+	var err error
+	for {
+		// wait for the file to be created by the transcoder.
+		f, err = os.Open(path)
+		if err == nil {
+			break
+		}
+		time.Sleep(2 * time.Second)
+	}
+	defer f.Close()
+
+	// Offline transcoding always return a mkv and video/webm allow some browser to play a mkv video
+	c.Response().Header().Set(echo.HeaderContentType, "video/webm")
+	c.Response().Header().Set("Trailer", echo.HeaderContentLength)
+	c.Response().WriteHeader(http.StatusOK)
+
+	buffer := make([]byte, 1024)
+	not_done := true
+
+	for not_done {
+		select {
+		case <-done:
+			info, err := f.Stat()
+			if err != nil {
+				log.Printf("Stats error %s", err)
+				return err
+			}
+			c.Response().Header().Set(echo.HeaderContentLength, fmt.Sprint(info.Size()))
+			c.Response().WriteHeader(http.StatusOK)
+			not_done = false
+		case <-time.After(5 * time.Second):
+		}
+	read:
+		for {
+			size, err := f.Read(buffer)
+			if size == 0 && err == io.EOF {
+				break read
+			}
+			if err != nil && err != io.EOF {
+				return err
+			}
+
+			_, err = c.Response().Writer.Write(buffer[:size])
+			if err != nil {
+				log.Printf("Could not write transcoded file to response.")
+				return nil
+			}
+		}
+		c.Response().Flush()
+	}
+	return nil
 }
