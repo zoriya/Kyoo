@@ -97,7 +97,7 @@ func (ts *Stream) run(start int32) error {
 	segments_str := strings.Join(segments, ",")
 
 	outpath := ts.handle.getOutPath()
-	err := os.MkdirAll(filepath.Dir(outpath), 0o644)
+	err := os.MkdirAll(filepath.Dir(outpath), 0o755)
 	if err != nil {
 		return err
 	}
