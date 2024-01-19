@@ -205,6 +205,7 @@ func (ts *Stream) GetIndex() (string, error) {
 #EXT-X-ALLOW-CACHE:YES
 #EXT-X-TARGETDURATION:4
 #EXT-X-MEDIA-SEQUENCE:0
+#EXT-X-INDEPENDENT-SEGMENTS
 `
 
 	for segment := 0; segment < len(ts.file.Keyframes)-1; segment++ {
