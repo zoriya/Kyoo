@@ -224,14 +224,14 @@ func (ts *Stream) GetSegment(segment int32) (string, error) {
 		distance = ts.getMinEncoderDistance(segment)
 	} else {
 		// if the current segment is ready, check next segments are ready and if not start a transcode for them
-		for i := int32(1); i <= 10; i++ {
-			if slices.Contains(ts.heads, segment+i) {
+		for i := segment + 1; i <= min(segment+10, int32(len(ts.segments))); i++ {
+			if slices.Contains(ts.heads, i) {
 				// no need to create a new transcoder if there is already one running for this segment
 				break
 			}
-			if !ts.isSegmentReady(segment + i) {
-				log.Printf("Creating new head for future segment (%d)", segment+i)
-				go ts.run(segment + i)
+			if !ts.isSegmentReady(i) {
+				log.Printf("Creating new head for future segment (%d)", i)
+				go ts.run(i)
 				break
 			}
 		}
