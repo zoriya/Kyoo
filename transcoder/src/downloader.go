@@ -29,6 +29,13 @@ func NewDownloader() *Downloader {
 }
 
 func (d *Downloader) GetOffline(path string, quality Quality) (<-chan struct{}, string, error) {
+	if quality == Original {
+		// no need to do anything for original quality
+		done := make(chan struct{})
+		close(done)
+		return done, path, nil
+	}
+
 	key := Key{path, quality}
 	d.lock.Lock()
 	defer d.lock.Unlock()
