@@ -61,7 +61,7 @@ export const MovieP = withImages(
 		/**
 		 * How long is this movie? (in minutes).
 		 */
-		runtime: z.number().int(),
+		runtime: z.number().int().nullable(),
 		/**
 		 * The date this movie aired. It can also be null if this is unknown.
 		 */

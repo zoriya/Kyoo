@@ -57,7 +57,8 @@ export const episodeDisplayNumber = (
 	return def;
 };
 
-export const displayRuntime = (runtime: number) => {
+export const displayRuntime = (runtime: number | null) => {
+	if (!runtime) return null;
 	if (runtime < 60) return `${runtime}min`;
 	return `${Math.floor(runtime / 60)}h${runtime % 60}`;
 };
@@ -300,22 +301,19 @@ export const EpisodeLine = ({
 						)}
 					</Skeleton>
 					<View {...css({ flexDirection: "row", alignItems: "center" })}>
-						{isLoading ||
-							(runtime && (
-								<Skeleton>
-									{isLoading || (
-										<SubP>
-											{/* Source https://www.i18next.com/translation-function/formatting#datetime */}
-											{[
-												releaseDate ? t("{{val, datetime}}", { val: releaseDate }) : null,
-												displayRuntime(runtime),
-											]
-												.filter((item) => item != null)
-												.join(" · ")}
-										</SubP>
-									)}
-								</Skeleton>
-							))}
+						<Skeleton>
+							{isLoading || (
+								<SubP>
+									{/* Source https://www.i18next.com/translation-function/formatting#datetime */}
+									{[
+										releaseDate ? t("{{val, datetime}}", { val: releaseDate }) : null,
+										displayRuntime(runtime),
+									]
+										.filter((item) => item != null)
+										.join(" · ")}
+								</SubP>
+							)}
+						</Skeleton>
 						{slug && watchedStatus !== undefined && (
 							<EpisodesContext
 								slug={slug}

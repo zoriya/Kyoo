@@ -107,6 +107,10 @@ export const WatchInfoP = z.object({
 	 */
 	sha: z.string(),
 	/**
+	 * The duration of the video (in seconds).
+	 */
+	length: z.number(),
+	/**
 	 * The internal path of the video file.
 	 */
 	path: z.string(),

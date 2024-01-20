@@ -127,7 +127,7 @@ export const Player = ({ slug, type }: { slug: string; type: "episode" | "movie"
 				next={next}
 				previous={previous}
 			/>
-			{data && <WatchStatusObserver type={type} slug={data.slug} />}
+			{data && info && <WatchStatusObserver type={type} slug={data.slug} duration={info.length} />}
 			<View
 				{...css({
 					flexGrow: 1,
