@@ -48,7 +48,8 @@ public interface IWatchStatusRepository
 		Guid movieId,
 		Guid userId,
 		WatchStatus status,
-		int? watchedTime
+		int? watchedTime,
+		int? percent
 	);
 
 	Task DeleteMovieStatus(Guid movieId, Guid userId);
@@ -67,7 +68,8 @@ public interface IWatchStatusRepository
 		Guid episodeId,
 		Guid userId,
 		WatchStatus status,
-		int? watchedTime
+		int? watchedTime,
+		int? percent
 	);
 
 	Task DeleteEpisodeStatus(Guid episodeId, Guid userId);

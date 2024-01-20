@@ -99,7 +99,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// How long is this movie? (in minutes)
 		/// </summary>
-		public int Runtime { get; set; }
+		public int? Runtime { get; set; }
 
 		/// <summary>
 		/// The date this movie aired.

@@ -28,9 +28,11 @@ import { playAtom, progressAtom } from "./state";
 export const WatchStatusObserver = ({
 	type,
 	slug,
+	duration,
 }: {
 	type: "episode" | "movie";
 	slug: string;
+	duration: number;
 }) => {
 	const account = useAccount();
 	const queryClient = useQueryClient();
@@ -47,9 +49,10 @@ export const WatchStatusObserver = ({
 				params: {
 					status: WatchStatusV.Watching,
 					watchedTime: Math.round(seconds),
+					percent: Math.round((seconds / duration) * 100),
 				},
 			}),
-		[_mutate, type, slug],
+		[_mutate, type, slug, duration],
 	);
 	const readProgress = useAtomCallback(
 		useCallback((get) => {

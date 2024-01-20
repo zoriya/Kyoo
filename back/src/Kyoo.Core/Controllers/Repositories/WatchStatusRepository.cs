@@ -236,14 +236,14 @@ public class WatchStatusRepository : IWatchStatusRepository
 		Guid movieId,
 		Guid userId,
 		WatchStatus status,
-		int? watchedTime
+		int? watchedTime,
+		int? percent
 	)
 	{
 		Movie movie = await _movies.Get(movieId);
-		int? percent =
-			watchedTime != null && movie.Runtime > 0
-				? (int)Math.Round(watchedTime.Value / (movie.Runtime * 60f) * 100f)
-				: null;
+
+		if (percent == null && watchedTime != null && movie.Runtime > 0)
+			percent = (int)Math.Round(watchedTime.Value / (movie.Runtime.Value * 60f) * 100f);
 
 		if (percent < MinWatchPercent)
 			return null;
@@ -257,6 +257,12 @@ public class WatchStatusRepository : IWatchStatusRepository
 		if (watchedTime.HasValue && status != WatchStatus.Watching)
 			throw new ValidationException(
 				"Can't have a watched time if the status is not watching."
+			);
+
+		if (watchedTime.HasValue != percent.HasValue)
+			throw new ValidationException(
+				"Can't specify watched time without specifing percent (or vise-versa)."
+					+ "Percent could not be guessed since duration is unknown."
 			);
 
 		MovieWatchStatus ret =
@@ -463,14 +469,14 @@ public class WatchStatusRepository : IWatchStatusRepository
 		Guid episodeId,
 		Guid userId,
 		WatchStatus status,
-		int? watchedTime
+		int? watchedTime,
+		int? percent
 	)
 	{
 		Episode episode = await _database.Episodes.FirstAsync(x => x.Id == episodeId);
-		int? percent =
-			watchedTime != null && episode.Runtime > 0
-				? (int)Math.Round(watchedTime.Value / (episode.Runtime * 60f) * 100f)
-				: null;
+
+		if (percent == null && watchedTime != null && episode.Runtime > 0)
+			percent = (int)Math.Round(watchedTime.Value / (episode.Runtime.Value * 60f) * 100f);
 
 		if (percent < MinWatchPercent)
 			return null;
@@ -484,6 +490,12 @@ public class WatchStatusRepository : IWatchStatusRepository
 		if (watchedTime.HasValue && status != WatchStatus.Watching)
 			throw new ValidationException(
 				"Can't have a watched time if the status is not watching."
+			);
+
+		if (watchedTime.HasValue != percent.HasValue)
+			throw new ValidationException(
+				"Can't specify watched time without specifing percent (or vise-versa)."
+					+ "Percent could not be guessed since duration is unknown."
 			);
 
 		EpisodeWatchStatus ret =

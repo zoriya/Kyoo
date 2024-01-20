@@ -49,7 +49,7 @@ export const BaseEpisodeP = withImages(
 		/**
 		 * How long is this movie? (in minutes).
 		 */
-		runtime: z.number().int(),
+		runtime: z.number().int().nullable(),
 		/**
 		 * The release date of this episode. It can be null if unknown.
 		 */

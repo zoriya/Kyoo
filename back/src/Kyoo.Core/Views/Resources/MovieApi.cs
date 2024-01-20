@@ -196,6 +196,7 @@ namespace Kyoo.Core.Api
 		/// <param name="identifier">The ID or slug of the <see cref="Movie"/>.</param>
 		/// <param name="status">The new watch status.</param>
 		/// <param name="watchedTime">Where the user stopped watching.</param>
+		/// <param name="percent">Where the user stopped watching (in percent).</param>
 		/// <returns>The newly set status.</returns>
 		/// <response code="200">The status has been set</response>
 		/// <response code="204">The status was not considered impactfull enough to be saved (less then 5% of watched for example).</response>
@@ -210,7 +211,8 @@ namespace Kyoo.Core.Api
 		public async Task<MovieWatchStatus?> SetWatchStatus(
 			Identifier identifier,
 			WatchStatus status,
-			int? watchedTime
+			int? watchedTime,
+			int? percent
 		)
 		{
 			Guid id = await identifier.Match(
@@ -219,7 +221,7 @@ namespace Kyoo.Core.Api
 			);
 			return await _libraryManager
 				.WatchStatus
-				.SetMovieStatus(id, User.GetIdOrThrow(), status, watchedTime);
+				.SetMovieStatus(id, User.GetIdOrThrow(), status, watchedTime, percent);
 		}
 
 		/// <summary>
