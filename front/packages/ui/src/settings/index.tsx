@@ -61,6 +61,7 @@ import Mail from "@material-symbols/svg-400/outlined/mail.svg";
 import Password from "@material-symbols/svg-400/outlined/password.svg";
 import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import Delete from "@material-symbols/svg-400/rounded/delete.svg";
+import Quality from "@material-symbols/svg-400/rounded/high_quality.svg";
 import Android from "@material-symbols/svg-400/rounded/android.svg";
 import Public from "@material-symbols/svg-400/rounded/public.svg";
 
@@ -386,6 +387,43 @@ const AccountSettings = ({ setPopup }: { setPopup: (e?: ReactElement) => void })
 	);
 };
 
+const DownloadSettings = () => {
+	const { t } = useTranslation();
+	const account = useAccount();
+
+	const queryClient = useQueryClient();
+	const { mutateAsync } = useMutation({
+		mutationFn: async (update: Partial<Account>) =>
+			await queryFn({
+				path: ["auth", "me"],
+				method: "PATCH",
+				body: update,
+			}),
+		onSettled: async () => await queryClient.invalidateQueries({ queryKey: ["auth", "me"] }),
+	});
+
+	if (!account) return null;
+	return (
+		<SettingsContainer title={t("settings.downloads.label")}>
+			<Preference
+				icon={Quality}
+				label={t("settings.downloads.quality.label")}
+				description={t("settings.downloads.quality.description")}
+			>
+				<Select
+					label={t("settings.downloads.quality.label")}
+					value={account.settings.downloadQuality}
+					onValueChange={(value) =>
+						mutateAsync({ settings: { ...account.settings, downloadQuality: value } })
+					}
+					values={["original", "8k", "4k", "1440p", "1080p", "720p", "480p", "360p", "240p"]}
+					getLabel={(key) => (key === "original" ? t("player.direct") : key)}
+				/>
+			</Preference>
+		</SettingsContainer>
+	);
+};
+
 export const SettingsPage: QueryPage = () => {
 	const { t, i18n } = useTranslation();
 	const languages = new Intl.DisplayNames([i18n.language ?? "en"], { type: "language" });
@@ -428,6 +466,7 @@ export const SettingsPage: QueryPage = () => {
 					</Preference>
 				</SettingsContainer>
 				<AccountSettings setPopup={setPopup} />
+				<DownloadSettings />
 				<SettingsContainer title={t("settings.about.label")}>
 					<Link
 						href="https://github.com/zoriya/kyoo/releases/latest/download/kyoo.apk"
