@@ -33,6 +33,39 @@ const getDisplayName = (sub: Track) => {
 };
 
 /**
+ * A Video track
+ */
+export const VideoP = z.object({
+	/**
+	 * The Codec of the Video Track.
+	 * E.g. "AVC"
+	 */
+	codec: z.string(),
+	/**
+	 * The Quality of the Video
+	 * E.g. "1080p" (TODO: FIND ACTUAL ENUM)
+	 */
+    quality: z.string(),
+	/**
+	 * The Width of the Video Frame
+	 * E.g. 1424
+	 */
+    width: z.number(),
+	/**
+	 * The Height of the Video Frame
+	 * E.g. 1072
+	 */
+    height: z.number(),
+	/**
+	 * The Bitrate (in bits/seconds) of the video track
+	 * E.g. 2693245
+	 */
+    bitrate: z.number()
+})
+
+export type Video = z.infer<typeof VideoP>;
+
+/**
  * A audio or subtitle track.
  */
 export const TrackP = z.object({
@@ -122,6 +155,10 @@ export const WatchInfoP = z.object({
 	 * The container of the video file of this episode. Common containers are mp4, mkv, avi and so on.
 	 */
 	container: z.string(),
+	/**
+	 * The video track.
+	 */
+	video: VideoP,
 	/**
 	 * The list of audio tracks.
 	 */
