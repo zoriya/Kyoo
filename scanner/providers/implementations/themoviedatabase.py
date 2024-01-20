@@ -498,7 +498,9 @@ class TheMovieDatabase(Provider):
 				season_number=episode["season_number"],
 				episode_number=episode["episode_number"],
 				absolute_number=absolute,
-				runtime=int(episode["runtime"]) if episode["runtime"] is not None else None,
+				runtime=int(episode["runtime"])
+				if episode["runtime"] is not None
+				else None,
 				release_date=datetime.strptime(episode["air_date"], "%Y-%m-%d").date()
 				if episode["air_date"]
 				else None,
