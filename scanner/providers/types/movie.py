@@ -36,7 +36,7 @@ class Movie:
 	air_date: Optional[date | int]
 	status: Status
 	rating: int
-	runtime: int
+	runtime: Optional[int]
 	studios: list[Studio]
 	genres: list[Genre]
 	# TODO: handle staff
