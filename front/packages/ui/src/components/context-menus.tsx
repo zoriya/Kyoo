@@ -19,7 +19,7 @@
  */
 
 import { IconButton, Menu, tooltip } from "@kyoo/primitives";
-import { ComponentProps } from "react";
+import { ComponentProps, ReactElement, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
 import Info from "@material-symbols/svg-400/rounded/info.svg";
@@ -30,6 +30,7 @@ import { watchListIcon } from "./watchlist-info";
 import { useDownloader } from "../downloads";
 import { Platform } from "react-native";
 import { useYoshiki } from "yoshiki/native";
+import { MediaInfoPopup } from "./media-info";
 
 export const EpisodesContext = ({
 	type = "episode",
@@ -49,6 +50,7 @@ export const EpisodesContext = ({
 	const downloader = useDownloader();
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
+	const [popup, setPopup] = useState<ReactElement | undefined>();
 
 	const queryClient = useQueryClient();
 	const mutation = useMutation({
@@ -61,40 +63,65 @@ export const EpisodesContext = ({
 	});
 
 	return (
-		<Menu
-			Trigger={IconButton}
-			icon={MoreVert}
-			{...tooltip(t("misc.more"))}
-			{...(css([Platform.OS !== "web" && !force && { display: "none" }], props) as any)}
-		>
-			{showSlug && (
-				<Menu.Item label={t("home.episodeMore.goToShow")} icon={Info} href={`/show/${showSlug}`} />
-			)}
-			<Menu.Sub
-				label={account ? t("show.watchlistEdit") : t("show.watchlistLogin")}
-				disabled={!account}
-				icon={watchListIcon(status)}
+		<>
+			<Menu
+				Trigger={IconButton}
+				icon={MoreVert}
+				{...tooltip(t("misc.more"))}
+				{...(css([Platform.OS !== "web" && !force && { display: "none" }], props) as any)}
 			>
-				{Object.values(WatchStatusV).map((x) => (
+				{showSlug && (
 					<Menu.Item
-						key={x}
-						label={t(`show.watchlistMark.${x.toLowerCase()}`)}
-						onSelect={() => mutation.mutate(x)}
-						selected={x === status}
+						label={t("home.episodeMore.goToShow")}
+						icon={Info}
+						href={`/show/${showSlug}`}
 					/>
-				))}
-				{status !== null && (
-					<Menu.Item label={t("show.watchlistMark.null")} onSelect={() => mutation.mutate(null)} />
 				)}
-			</Menu.Sub>
-			{type !== "show" && (
-				<Menu.Item
-					label={t("home.episodeMore.download")}
-					icon={Download}
-					onSelect={() => downloader(type, slug)}
-				/>
-			)}
-		</Menu>
+				<Menu.Sub
+					label={account ? t("show.watchlistEdit") : t("show.watchlistLogin")}
+					disabled={!account}
+					icon={watchListIcon(status)}
+				>
+					{Object.values(WatchStatusV).map((x) => (
+						<Menu.Item
+							key={x}
+							label={t(`show.watchlistMark.${x.toLowerCase()}`)}
+							onSelect={() => mutation.mutate(x)}
+							selected={x === status}
+						/>
+					))}
+					{status !== null && (
+						<Menu.Item
+							label={t("show.watchlistMark.null")}
+							onSelect={() => mutation.mutate(null)}
+						/>
+					)}
+				</Menu.Sub>
+				{type !== "show" && (
+					<>
+						<Menu.Item
+							label={t("home.episodeMore.download")}
+							icon={Download}
+							onSelect={() => downloader(type, slug)}
+						/>
+						<Menu.Item
+							label={t("home.episodeMore.mediainfo")}
+							icon={Info}
+							onSelect={() =>
+								setPopup(
+									<MediaInfoPopup
+										mediaType={type}
+										mediaSlug={slug}
+										close={() => setPopup(undefined)}
+									/>,
+								)
+							}
+						/>
+					</>
+				)}
+			</Menu>
+			{popup}
+		</>
 	);
 };
 
