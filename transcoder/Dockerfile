@@ -1,5 +1,5 @@
 FROM golang:1.21-alpine as build
-RUN apk add --no-cache build-base ffmpeg libmediainfo-dev
+RUN apk add --no-cache build-base ffmpeg ffmpeg-dev libmediainfo-dev
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
