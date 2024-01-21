@@ -19,6 +19,8 @@ type MediaInfo struct {
 	Path string `json:"path"`
 	/// The extension currently used to store this video file
 	Extension string `json:"extension"`
+	/// The file size of the video file.
+	Size uint64 `json:"size"`
 	/// The length of the media in seconds.
 	Length float32 `json:"length"`
 	/// The container of the video file of this episode.
@@ -105,9 +107,19 @@ func ParseFloat(str string) float32 {
 func ParseUint(str string) uint32 {
 	i, err := strconv.ParseUint(str, 10, 32)
 	if err != nil {
+		println(str)
 		return 0
 	}
 	return uint32(i)
+}
+
+func ParseUint64(str string) uint64 {
+	i, err := strconv.ParseUint(str, 10, 64)
+	if err != nil {
+		println(str)
+		return 0
+	}
+	return i
 }
 
 func ParseTime(str string) float32 {
@@ -188,6 +200,7 @@ func GetInfo(path string) (*MediaInfo, error) {
 		Path: path,
 		// Remove leading .
 		Extension: filepath.Ext(path)[1:],
+		Size:      ParseUint64(mi.Parameter(mediainfo.StreamGeneral, 0, "FileSize")),
 		// convert seconds to ms
 		Length:    ParseFloat(mi.Parameter(mediainfo.StreamGeneral, 0, "Duration")) / 1000,
 		Container: mi.Parameter(mediainfo.StreamGeneral, 0, "Format"),
