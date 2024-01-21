@@ -15,6 +15,9 @@ import (
 
 // We want to have a thumbnail every ${interval} seconds.
 var default_interval = 10
+// The maximim number of thumbnails per video.
+// Setting this too high allows really long processing times.
+var max_numcaps = 150
 
 type ThumbnailsCreator struct {
 	created map[string]string
@@ -71,7 +74,7 @@ func extractThumbnail(path string, name string) (string, error) {
 	sprite_path := fmt.Sprintf("%s/sprite.png", out)
 	vtt_path := fmt.Sprintf("%s/sprite.vtt", out)
 
-	if _, err := os.Stat(sprite_path); err != nil {
+	if _, err := os.Stat(sprite_path); err == nil {
 		return out, nil
 	}
 
@@ -84,39 +87,36 @@ func extractThumbnail(path string, name string) (string, error) {
 
 	gen.Fast = true
 
-	// truncate duration to full seconds
-	// this prevents empty/black images when the movie is some milliseconds longer
-	// ffmpeg then sometimes takes a black screenshot AFTER the movie finished for some reason
-	duration := 1000 * (int(gen.Duration) / 1000)
-	var numcaps, interval int
+	duration := int(gen.Duration) / 1000
+	var numcaps int
 	if default_interval < duration {
-		numcaps = duration / default_interval * 1000
-		interval = default_interval
+		numcaps = duration / default_interval
 	} else {
 		numcaps = duration / 10
-		interval = duration / numcaps
 	}
+	numcaps = min(numcaps, max_numcaps)
+	interval := duration / numcaps
 	columns := int(math.Sqrt(float64(numcaps)))
 	rows := int(math.Ceil(float64(numcaps) / float64(columns)))
 
-	width := gen.Width()
-	height := gen.Height()
+	height := 144
+	width := int(float64(height) / float64(gen.Height()) * float64(gen.Width()))
 
 	sprite := imaging.New(width*columns, height*rows, color.Black)
 	vtt := "WEBVTT\n\n"
 
+	log.Printf("Extracting %d thumbnails for %s (interval of %d).", numcaps, path, interval)
+
 	ts := 0
 	for i := 0; i < numcaps; i++ {
-		img, err := gen.Image(int64(ts))
+		img, err := gen.ImageWxH(int64(ts*1000), width, height)
 		if err != nil {
 			log.Printf("Could not generate screenshot %s", err)
 			return "", err
 		}
 
-		// TODO: resize image
-
-		x := i % width
-		y := i / width
+		x := (i % columns) * width
+		y := (i / columns) * height
 		sprite = imaging.Paste(sprite, img, image.Pt(x, y))
 
 		timestamps := ts
