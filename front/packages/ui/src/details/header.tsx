@@ -49,8 +49,9 @@ import {
 	DottedSeparator,
 	focusReset,
 } from "@kyoo/primitives";
-import { Fragment } from "react";
+import { Fragment, ReactElement, useState } from "react";
 import { useTranslation } from "react-i18next";
+import Info from "@material-symbols/svg-400/rounded/info.svg";
 import { ImageStyle, Platform, View } from "react-native";
 import {
 	Theme,
@@ -76,6 +77,7 @@ import { capitalize } from "@kyoo/primitives";
 import { ShowWatchStatusCard } from "./show";
 import Download from "@material-symbols/svg-400/rounded/download.svg";
 import { useDownloader } from "../downloads";
+import { MediaInfoPopup } from "../components/media-info";
 
 export const TitleLine = ({
 	isLoading,
@@ -110,6 +112,7 @@ export const TitleLine = ({
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 	const downloader = useDownloader();
+	const [popup, setPopup] = useState<ReactElement | undefined>(undefined);
 
 	return (
 		<Container
@@ -250,6 +253,21 @@ export const TitleLine = ({
 								{...tooltip(t("home.episodeMore.download"))}
 							/>
 						)}
+						{type === "movie" && (
+							<IconButton
+								icon={Info}
+								onPress={() =>
+									slug && setPopup(
+										<MediaInfoPopup
+											mediaType={type}
+											mediaSlug={slug}
+											close={() => setPopup(undefined)}
+										/>,
+									)
+								}
+							/>
+						)}
+						{popup}
 						{rating !== null && (
 							<>
 								<DottedSeparator
