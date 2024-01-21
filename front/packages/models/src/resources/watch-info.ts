@@ -45,23 +45,23 @@ export const VideoP = z.object({
 	 * The Quality of the Video
 	 * E.g. "1080p" (TODO: FIND ACTUAL ENUM)
 	 */
-    quality: z.string(),
+	quality: z.string(),
 	/**
 	 * The Width of the Video Frame
 	 * E.g. 1424
 	 */
-    width: z.number(),
+	width: z.number(),
 	/**
 	 * The Height of the Video Frame
 	 * E.g. 1072
 	 */
-    height: z.number(),
+	height: z.number(),
 	/**
 	 * The Bitrate (in bits/seconds) of the video track
 	 * E.g. 2693245
 	 */
-    bitrate: z.number()
-})
+	bitrate: z.number(),
+});
 
 export type Video = z.infer<typeof VideoP>;
 

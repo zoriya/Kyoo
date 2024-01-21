@@ -58,7 +58,7 @@ const MediaInfoTable = ({
 	const table = (
 		[
 			{
-				[t("mediainfo.file")]: path?.replace(/^\/video\//, ''),
+				[t("mediainfo.file")]: path?.replace(/^\/video\//, ""),
 				[t("mediainfo.container")]: container,
 			},
 			{
