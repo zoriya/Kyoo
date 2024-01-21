@@ -7,6 +7,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"sync"
 
 	"github.com/disintegration/imaging"
 	"gitlab.com/opennota/screengen"
@@ -15,7 +16,53 @@ import (
 // We want to have a thumbnail every ${interval} seconds.
 var default_interval = 10
 
-func ExtractThumbnail(path string) (string, error) {
+type ThumbnailsCreator struct {
+	created map[string]string
+	running map[string]chan struct{}
+	lock    sync.Mutex
+}
+
+func NewThumbnailsCreator() *ThumbnailsCreator {
+	return &ThumbnailsCreator{
+		created: make(map[string]string),
+		running: make(map[string]chan struct{}),
+	}
+}
+
+func (t *ThumbnailsCreator) ExtractThumbnail(path string, name string) (string, error) {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	out, ok := t.created[path]
+	if ok {
+		return out, nil
+	}
+
+	wait, ok := t.running[path]
+	if ok {
+		t.lock.Unlock()
+		<-wait
+		t.lock.Lock()
+		out = t.created[path]
+		return out, nil
+	}
+	wait = make(chan struct{})
+	t.running[path] = wait
+
+	t.lock.Unlock()
+
+	out, err := extractThumbnail(path, name)
+	t.lock.Lock()
+	// this will be unlocked by the defer at the top of the function.
+
+	delete(t.running, path)
+	if err == nil {
+		t.created[path] = out
+	}
+	return out, err
+}
+
+func extractThumbnail(path string, name string) (string, error) {
 	ret, err := GetInfo(path)
 	if err != nil {
 		return "", err

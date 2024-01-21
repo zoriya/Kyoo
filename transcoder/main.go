@@ -264,7 +264,7 @@ func (h *Handler) GetSubtitle(c echo.Context) error {
 
 // Get thumbnail sprite
 //
-// Get a sprite file containing all the thumbnails of the show
+// Get a sprite file containing all the thumbnails of the show.
 //
 // Path: /:resource/:slug/thumbnails.png
 func (h *Handler) GetThumbnails(c echo.Context) error {
@@ -276,7 +276,10 @@ func (h *Handler) GetThumbnails(c echo.Context) error {
 		return err
 	}
 
-	out, err := src.ExtractThumbnail(path)
+	out, err := h.thumbnails.ExtractThumbnail(
+		path,
+		fmt.Sprintf("%s/%s/thumbnails.png", resource, slug),
+	)
 	if err != nil {
 		return err
 	}
@@ -299,7 +302,10 @@ func (h *Handler) GetThumbnailsVtt(c echo.Context) error {
 		return err
 	}
 
-	out, err := src.ExtractThumbnail(path)
+	out, err := h.thumbnails.ExtractThumbnail(
+		path,
+		fmt.Sprintf("%s/%s/thumbnails.png", resource, slug),
+	)
 	if err != nil {
 		return err
 	}
@@ -310,6 +316,7 @@ func (h *Handler) GetThumbnailsVtt(c echo.Context) error {
 type Handler struct {
 	transcoder *src.Transcoder
 	extractor  *src.Extractor
+	thumbnails *src.ThumbnailsCreator
 }
 
 func main() {
@@ -322,7 +329,11 @@ func main() {
 		e.Logger.Fatal(err)
 		return
 	}
-	h := Handler{transcoder: transcoder, extractor: src.NewExtractor()}
+	h := Handler{
+		transcoder: transcoder,
+		extractor:  src.NewExtractor(),
+		thumbnails: src.NewThumbnailsCreator(),
+	}
 
 	e.GET("/:resource/:slug/direct", DirectStream)
 	e.GET("/:resource/:slug/master.m3u8", h.GetMaster)
