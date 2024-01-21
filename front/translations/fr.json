@@ -8,7 +8,8 @@
 		"watchlistLogin": "Pour suivre ce que vous avez regardé ou prévoyez de regarder, vous devez vous connecter.",
 		"episodeMore": {
 			"goToShow": "Aller a la serie",
-			"download": "Télécharger"
+			"download": "Télécharger",
+			"mediainfo": "Voir les infos du fichier"
 		}
 	},
 	"show": {
@@ -174,5 +175,12 @@
 		"try-again": "Réessayer",
 		"re-login": "Se reconnecter",
 		"offline": "Vous n'êtes pas connecté à Internet. Réessayez plus tard."
+	},
+	"mediainfo": {
+		"file": "Fichier",
+		"container": "Conteneur",
+		"video": "Video",
+		"audio": "Audio",
+		"subtitles": "Sous titres"
 	}
 }
