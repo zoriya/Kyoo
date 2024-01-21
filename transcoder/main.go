@@ -262,6 +262,51 @@ func (h *Handler) GetSubtitle(c echo.Context) error {
 	return c.File(path)
 }
 
+// Get thumbnail sprite
+//
+// Get a sprite file containing all the thumbnails of the show
+//
+// Path: /:resource/:slug/thumbnails.png
+func (h *Handler) GetThumbnails(c echo.Context) error {
+	resource := c.Param("resource")
+	slug := c.Param("slug")
+
+	path, err := GetPath(resource, slug)
+	if err != nil {
+		return err
+	}
+
+	out, err := src.ExtractThumbnail(path)
+	if err != nil {
+		return err
+	}
+
+	return c.File(fmt.Sprintf("%s/sprite.png", out))
+}
+
+// Get thumbnail vtt
+//
+// Get a vtt file containing timing/position of thumbnails inside the sprite file.
+// https://developer.bitmovin.com/playback/docs/webvtt-based-thumbnails for more info.
+//
+// Path: /:resource/:slug/thumbnails.vtt
+func (h *Handler) GetThumbnailsVtt(c echo.Context) error {
+	resource := c.Param("resource")
+	slug := c.Param("slug")
+
+	path, err := GetPath(resource, slug)
+	if err != nil {
+		return err
+	}
+
+	out, err := src.ExtractThumbnail(path)
+	if err != nil {
+		return err
+	}
+
+	return c.File(fmt.Sprintf("%s/sprite.vtt", out))
+}
+
 type Handler struct {
 	transcoder *src.Transcoder
 	extractor  *src.Extractor
@@ -286,6 +331,8 @@ func main() {
 	e.GET("/:resource/:slug/:quality/:chunk", h.GetVideoSegment)
 	e.GET("/:resource/:slug/audio/:audio/:chunk", h.GetAudioSegment)
 	e.GET("/:resource/:slug/info", h.GetInfo)
+	e.GET("/:resource/:slug/thumbnails.png", h.GetThumbnails)
+	e.GET("/:resource/:slug/thumbnails.vtt", h.GetThumbnailsVtt)
 	e.GET("/:sha/attachment/:name", h.GetAttachment)
 	e.GET("/:sha/subtitle/:name", h.GetSubtitle)
 
