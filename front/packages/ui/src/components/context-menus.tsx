@@ -50,7 +50,7 @@ export const EpisodesContext = ({
 	const downloader = useDownloader();
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
-	const [popup, setPopup] = useState<ReactElement | undefined>();
+	const [popup, setPopup] = useState<ReactElement | undefined>(undefined);
 
 	const queryClient = useQueryClient();
 	const mutation = useMutation({
