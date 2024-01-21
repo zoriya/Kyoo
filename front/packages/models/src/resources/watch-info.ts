@@ -29,7 +29,7 @@ const getDisplayName = (sub: Track) => {
 	if (lng && sub.title && sub.title !== lng) return `${lng} - ${sub.title}`;
 	if (lng) return lng;
 	if (sub.title) return sub.title;
-	return `Unknwon (${sub.index})`;
+	return `Unknown (${sub.index})`;
 };
 
 /**
