@@ -1,5 +1,5 @@
 FROM golang:1.21-alpine
-RUN apk add --no-cache build-base ffmpeg libmediainfo-dev
+RUN apk add --no-cache build-base ffmpeg ffmpeg-dev libmediainfo-dev
 RUN go install github.com/bokwoon95/wgo@latest
 WORKDIR /app
 
