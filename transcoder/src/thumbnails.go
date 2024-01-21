@@ -71,6 +71,10 @@ func extractThumbnail(path string, name string) (string, error) {
 	sprite_path := fmt.Sprintf("%s/sprite.png", out)
 	vtt_path := fmt.Sprintf("%s/sprite.vtt", out)
 
+	if _, err := os.Stat(sprite_path); err != nil {
+		return out, nil
+	}
+
 	gen, err := screengen.NewGenerator(path)
 	if err != nil {
 		log.Printf("Error reading video file: %v", err)
