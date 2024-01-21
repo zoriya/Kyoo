@@ -257,7 +257,8 @@ export const TitleLine = ({
 							<IconButton
 								icon={Info}
 								onPress={() =>
-									slug && setPopup(
+									slug &&
+									setPopup(
 										<MediaInfoPopup
 											mediaType={type}
 											mediaSlug={slug}
