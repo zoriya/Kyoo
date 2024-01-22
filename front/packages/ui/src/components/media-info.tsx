@@ -39,14 +39,16 @@ const MediaInfoTable = ({
 		if (trackTable.length == 0) {
 			return undefined;
 		}
+		const singleTrack = trackTable.length == 1
 		return trackTable.reduce(
 			(collected, audioTrack, index) => ({
 				...collected,
 				// If there is only one track, we do not need to show an index
-				[trackTable.length == 1 ? t(s) : `${t(s)} ${index + 1}`]: [
+				[singleTrack ? t(s) : `${t(s)} ${index + 1}`]: [
 					audioTrack.displayName,
-					audioTrack.isDefault ? t("Default") : undefined,
-					audioTrack.isForced ? t("Forced") : undefined,
+					// Only show it if there is more than one track
+					(audioTrack.isDefault && !singleTrack) ? t("mediainfo.default") : undefined,
+					audioTrack.isForced ? t("mediainfo.forced") : undefined,
 					audioTrack.codec,
 				]
 					.filter((x) => x !== undefined)
