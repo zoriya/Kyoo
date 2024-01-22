@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { IconButton, Menu, tooltip } from "@kyoo/primitives";
+import { IconButton, Menu, tooltip, usePopup } from "@kyoo/primitives";
 import { ComponentProps, ReactElement, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
@@ -51,7 +51,7 @@ export const EpisodesContext = ({
 	const downloader = useDownloader();
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
-	const [popup, setPopup] = useState<ReactElement | undefined>(undefined);
+	const [setPopup, close] = usePopup();
 
 	const queryClient = useQueryClient();
 	const mutation = useMutation({
@@ -109,19 +109,12 @@ export const EpisodesContext = ({
 							label={t("home.episodeMore.mediainfo")}
 							icon={MovieInfo}
 							onSelect={() =>
-								setPopup(
-									<MediaInfoPopup
-										mediaType={type}
-										mediaSlug={slug}
-										close={() => setPopup(undefined)}
-									/>,
-								)
+								setPopup(<MediaInfoPopup mediaType={type} mediaSlug={slug} close={close} />)
 							}
 						/>
 					</>
 				)}
 			</Menu>
-			{popup}
 		</>
 	);
 };
