@@ -181,6 +181,8 @@
 		"container": "Conteneur",
 		"video": "Video",
 		"audio": "Audio",
-		"subtitles": "Sous titres"
+		"subtitles": "Sous titres",
+		"forced": "Forcé",
+		"default": "Par Défaut"
 	}
 }
