@@ -183,6 +183,7 @@
 		"audio": "Audio",
 		"subtitles": "Sous titres",
 		"forced": "Forcé",
-		"default": "Par Défaut"
+		"default": "Par Défaut",
+		"duration": "Duration"
 	}
 }
