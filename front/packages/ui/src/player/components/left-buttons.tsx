@@ -198,10 +198,15 @@ const ProgressText = (props: Stylable) => {
 	);
 };
 
-const toTimerString = (timer?: number, duration?: number) => {
+export const toTimerString = (timer?: number, duration?: number) => {
 	if (!duration) duration = timer;
 	if (timer === undefined || duration === undefined || isNaN(duration) || isNaN(timer))
 		return "??:??";
-	if (duration >= 3600) return new Date(timer * 1000).toISOString().substring(11, 19);
-	return new Date(timer * 1000).toISOString().substring(14, 19);
+	const h = Math.floor(timer / 3600);
+	const min = Math.floor((timer / 60) % 60);
+	const sec = Math.round(timer % 60);
+	const fmt = (n: number) => n.toString().padStart(2, "0");
+
+	if (duration >= 3600) return `${fmt(h)}:${fmt(min)}:${fmt(sec)}`;
+	return `${fmt(min)}:${fmt(sec)}`;
 };
