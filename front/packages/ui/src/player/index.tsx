@@ -157,7 +157,7 @@ export const Player = ({ slug, type }: { slug: string; type: "episode" | "movie"
 					{...css(StyleSheet.absoluteFillObject)}
 				/>
 				<LoadingIndicator />
-				<Hover {...mapData(data, info, previous, next)} />
+				<Hover {...mapData(data, info, previous, next)} url={`${type}/${slug}`} />
 			</View>
 		</>
 	);

@@ -27,6 +27,7 @@ import { ContrastArea } from "../themes";
 import { percent } from "yoshiki/native";
 import { imageBorderRadius } from "../constants";
 
+export { FastImage } from "./fast-image";
 export { BlurhashContainer } from "./blurhash";
 export { type Props as ImageProps, Image };
 
