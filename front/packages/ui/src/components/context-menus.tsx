@@ -23,6 +23,7 @@ import { ComponentProps, ReactElement, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
 import Info from "@material-symbols/svg-400/rounded/info.svg";
+import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
 import Download from "@material-symbols/svg-400/rounded/download.svg";
 import { WatchStatusV, queryFn, useAccount } from "@kyoo/models";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -106,7 +107,7 @@ export const EpisodesContext = ({
 						/>
 						<Menu.Item
 							label={t("home.episodeMore.mediainfo")}
-							icon={Info}
+							icon={MovieInfo}
 							onSelect={() =>
 								setPopup(
 									<MediaInfoPopup
