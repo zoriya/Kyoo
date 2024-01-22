@@ -181,7 +181,7 @@ export const WatchInfoP = z
 	.transform((x) => {
 		const hour = Math.floor(x.length / 3600);
 		const minutes = Math.ceil((x.length % 3600) / 60);
-		const duration = hour ? `${hour}h` : "" + `${minutes}m`;
+		const duration = `${hour ? `${hour}h` : ""}${minutes}m`;
 		return {
 			...x,
 			duration,
