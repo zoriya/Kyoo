@@ -37,7 +37,7 @@ const MediaInfoTable = ({
 		if (trackTable.length == 0) {
 			return undefined;
 		}
-		const singleTrack = trackTable.length == 1
+		const singleTrack = trackTable.length == 1;
 		return trackTable.reduce(
 			(collected, audioTrack, index) => ({
 				...collected,
@@ -45,7 +45,7 @@ const MediaInfoTable = ({
 				[singleTrack ? t(s) : `${t(s)} ${index + 1}`]: [
 					audioTrack.displayName,
 					// Only show it if there is more than one track
-					(audioTrack.isDefault && !singleTrack) ? t("mediainfo.default") : undefined,
+					audioTrack.isDefault && !singleTrack ? t("mediainfo.default") : undefined,
 					audioTrack.isForced ? t("mediainfo.forced") : undefined,
 					audioTrack.codec,
 				]
