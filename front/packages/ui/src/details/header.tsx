@@ -213,76 +213,93 @@ export const TitleLine = ({
 							)}
 						</Skeleton>
 					)}
-					<View {...css({ flexDirection: "row", alignItems: "center" })}>
-						{playHref !== null && (
-							<IconFab
-								icon={PlayArrow}
-								as={Link}
-								href={playHref}
-								color={{ xs: theme.user.colors.black, md: theme.colors.black }}
-								{...css({
-									bg: theme.user.accent,
-									fover: { self: { bg: theme.user.accent } },
-								})}
-								{...tooltip(t("show.play"))}
-							/>
-						)}
-						{trailerUrl && (
-							<IconButton
-								icon={Theaters}
-								as={Link}
-								href={trailerUrl}
-								target="_blank"
-								color={{ xs: theme.user.contrast, md: theme.colors.white }}
-								{...tooltip(t("show.trailer"))}
-							/>
-						)}
-						{watchStatus !== undefined && type !== "collection" && slug && (
-							<WatchListInfo
-								type={type}
-								slug={slug}
-								status={watchStatus}
-								color={{ xs: theme.user.contrast, md: theme.colors.white }}
-							/>
-						)}
-						{type === "movie" && slug && (
-							<>
+					<View
+						{...css({
+							flexDirection: "row",
+							alignItems: "center",
+							flexWrap: "wrap",
+							justifyContent: "center",
+						})}
+					>
+						<View
+							{...css({ flexDirection: "row", alignItems: "center", justifyContent: "center" })}
+						>
+							{playHref !== null && (
+								<IconFab
+									icon={PlayArrow}
+									as={Link}
+									href={playHref}
+									color={{ xs: theme.user.colors.black, md: theme.colors.black }}
+									{...css({
+										bg: theme.user.accent,
+										fover: { self: { bg: theme.user.accent } },
+									})}
+									{...tooltip(t("show.play"))}
+								/>
+							)}
+							{trailerUrl && (
 								<IconButton
-									icon={Download}
-									onPress={() => downloader(type, slug)}
+									icon={Theaters}
+									as={Link}
+									href={trailerUrl}
+									target="_blank"
 									color={{ xs: theme.user.contrast, md: theme.colors.white }}
-									{...tooltip(t("home.episodeMore.download"))}
+									{...tooltip(t("show.trailer"))}
 								/>
-								<IconButton
-									icon={MovieInfo}
-									color={{ xs: theme.user.contrast, md: theme.colors.white }}
-									onPress={() =>
-										setPopup(<MediaInfoPopup mediaType={"movie"} mediaSlug={slug!} close={close} />)
-									}
-								/>
-							</>
-						)}
-						{rating !== null && (
-							<>
-								<DottedSeparator
-									{...css({ color: { xs: theme.user.contrast, md: theme.colors.white } })}
-								/>
-								<Rating
-									rating={rating}
+							)}
+							{watchStatus !== undefined && type !== "collection" && slug && (
+								<WatchListInfo
+									type={type}
+									slug={slug}
+									status={watchStatus}
 									color={{ xs: theme.user.contrast, md: theme.colors.white }}
 								/>
-							</>
-						)}
-						{runtime && (
-							<>
-								<DottedSeparator
-									{...css({ color: { xs: theme.user.contrast, md: theme.colors.white } })}
-								/>
-								<P {...css({ color: { xs: theme.user.contrast, md: theme.colors.white } })}>
-									{displayRuntime(runtime)}
-								</P>
-							</>
-						)}
+							)}
+							{type === "movie" && slug && (
+								<>
+									<IconButton
+										icon={Download}
+										onPress={() => downloader(type, slug)}
+										color={{ xs: theme.user.contrast, md: theme.colors.white }}
+										{...tooltip(t("home.episodeMore.download"))}
+									/>
+									<IconButton
+										icon={MovieInfo}
+										color={{ xs: theme.user.contrast, md: theme.colors.white }}
+										onPress={() =>
+											setPopup(
+												<MediaInfoPopup mediaType={"movie"} mediaSlug={slug!} close={close} />,
+											)
+										}
+									/>
+								</>
+							)}
+						</View>
+						<View
+							{...css({ flexDirection: "row", alignItems: "center", justifyContent: "center" })}
+						>
+							{rating !== null && (
+								<>
+									<DottedSeparator
+										{...css({ color: { xs: theme.user.contrast, md: theme.colors.white } })}
+									/>
+									<Rating
+										rating={rating}
+										color={{ xs: theme.user.contrast, md: theme.colors.white }}
+									/>
+								</>
+							)}
+							{runtime && (
+								<>
+									<DottedSeparator
+										{...css({ color: { xs: theme.user.contrast, md: theme.colors.white } })}
+									/>
+									<P {...css({ color: { xs: theme.user.contrast, md: theme.colors.white } })}>
+										{displayRuntime(runtime)}
+									</P>
+								</>
+							)}
+						</View>
 					</View>
 				</View>
 			</View>
