@@ -45,6 +45,7 @@ import {
 	SwitchVariant,
 	imageBorderRadius,
 	ts,
+	usePopup,
 } from "@kyoo/primitives";
 import { DefaultLayout } from "../layout";
 import { Children, ComponentProps, ReactElement, ReactNode, useState } from "react";
@@ -257,10 +258,11 @@ const ChangePasswordPopup = ({
 	);
 };
 
-const AccountSettings = ({ setPopup }: { setPopup: (e?: ReactElement) => void }) => {
+const AccountSettings = () => {
 	const account = useAccount();
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
+	const [setPopup, close] = usePopup();
 
 	const queryClient = useQueryClient();
 	const { mutateAsync } = useMutation({
@@ -335,7 +337,7 @@ const AccountSettings = ({ setPopup }: { setPopup: (e?: ReactElement) => void })
 									label={t("settings.account.username.label")}
 									inital={account.username}
 									apply={async (v) => await mutateAsync({ username: v })}
-									close={() => setPopup(undefined)}
+									close={close}
 								/>,
 							)
 						}
@@ -356,7 +358,7 @@ const AccountSettings = ({ setPopup }: { setPopup: (e?: ReactElement) => void })
 									label={t("settings.account.email.label")}
 									inital={account.email}
 									apply={async (v) => await mutateAsync({ email: v })}
-									close={() => setPopup(undefined)}
+									close={close}
 								/>,
 							)
 						}
@@ -375,7 +377,7 @@ const AccountSettings = ({ setPopup }: { setPopup: (e?: ReactElement) => void })
 									icon={Password}
 									label={t("settings.account.password.label")}
 									apply={async (op, np) => await editPassword({ oldPassword: op, newPassword: np })}
-									close={() => setPopup(undefined)}
+									close={close}
 								/>,
 							)
 						}
@@ -389,67 +391,63 @@ const AccountSettings = ({ setPopup }: { setPopup: (e?: ReactElement) => void })
 export const SettingsPage: QueryPage = () => {
 	const { t, i18n } = useTranslation();
 	const languages = new Intl.DisplayNames([i18n.language ?? "en"], { type: "language" });
-	const [popup, setPopup] = useState<ReactElement | undefined>(undefined);
 
 	const theme = useUserTheme("auto");
 	return (
-		<>
-			<ScrollView contentContainerStyle={{ gap: ts(4), paddingBottom: ts(4) }}>
-				<SettingsContainer title={t("settings.general.label")}>
-					<Preference
-						icon={Theme}
+		<ScrollView contentContainerStyle={{ gap: ts(4), paddingBottom: ts(4) }}>
+			<SettingsContainer title={t("settings.general.label")}>
+				<Preference
+					icon={Theme}
+					label={t("settings.general.theme.label")}
+					description={t("settings.general.theme.description")}
+				>
+					<Select
 						label={t("settings.general.theme.label")}
-						description={t("settings.general.theme.description")}
-					>
-						<Select
-							label={t("settings.general.theme.label")}
-							value={theme}
-							onValueChange={(value) => setUserTheme(value)}
-							values={["auto", "light", "dark"]}
-							getLabel={(key) => t(`settings.general.theme.${key}`)}
-						/>
-					</Preference>
-					<Preference
-						icon={Language}
+						value={theme}
+						onValueChange={(value) => setUserTheme(value)}
+						values={["auto", "light", "dark"]}
+						getLabel={(key) => t(`settings.general.theme.${key}`)}
+					/>
+				</Preference>
+				<Preference
+					icon={Language}
+					label={t("settings.general.language.label")}
+					description={t("settings.general.language.description")}
+				>
+					<Select
 						label={t("settings.general.language.label")}
-						description={t("settings.general.language.description")}
-					>
-						<Select
-							label={t("settings.general.language.label")}
-							value={i18n.resolvedLanguage!}
-							onValueChange={(value) =>
-								i18n.changeLanguage(value !== "system" ? value : (i18n.options.lng as string))
-							}
-							values={["system", ...Object.keys(i18n.options.resources!)]}
-							getLabel={(key) =>
-								key === "system" ? t("settings.general.language.system") : languages.of(key) ?? key
-							}
-						/>
-					</Preference>
-				</SettingsContainer>
-				<AccountSettings setPopup={setPopup} />
-				<SettingsContainer title={t("settings.about.label")}>
-					<Link
-						href="https://github.com/zoriya/kyoo/releases/latest/download/kyoo.apk"
-						target="_blank"
-					>
-						<Preference
-							icon={Android}
-							label={t("settings.about.android-app.label")}
-							description={t("settings.about.android-app.description")}
-						/>
-					</Link>
-					<Link href="https://github.com/zoriya/kyoo" target="_blank">
-						<Preference
-							icon={Public}
-							label={t("settings.about.git.label")}
-							description={t("settings.about.git.description")}
-						/>
-					</Link>
-				</SettingsContainer>
-			</ScrollView>
-			{popup}
-		</>
+						value={i18n.resolvedLanguage!}
+						onValueChange={(value) =>
+							i18n.changeLanguage(value !== "system" ? value : (i18n.options.lng as string))
+						}
+						values={["system", ...Object.keys(i18n.options.resources!)]}
+						getLabel={(key) =>
+							key === "system" ? t("settings.general.language.system") : languages.of(key) ?? key
+						}
+					/>
+				</Preference>
+			</SettingsContainer>
+			<AccountSettings />
+			<SettingsContainer title={t("settings.about.label")}>
+				<Link
+					href="https://github.com/zoriya/kyoo/releases/latest/download/kyoo.apk"
+					target="_blank"
+				>
+					<Preference
+						icon={Android}
+						label={t("settings.about.android-app.label")}
+						description={t("settings.about.android-app.description")}
+					/>
+				</Link>
+				<Link href="https://github.com/zoriya/kyoo" target="_blank">
+					<Preference
+						icon={Public}
+						label={t("settings.about.git.label")}
+						description={t("settings.about.git.description")}
+					/>
+				</Link>
+			</SettingsContainer>
+		</ScrollView>
 	);
 };
 

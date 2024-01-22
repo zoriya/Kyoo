@@ -18,10 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ReactNode } from "react";
+import { ReactElement, ReactNode, useCallback, useEffect, useState } from "react";
 import { Container } from "./container";
-import { Portal } from "@gorhom/portal";
-import { SwitchVariant, YoshikiFunc } from "./themes";
+import { Portal, usePortal } from "@gorhom/portal";
+import { ContrastArea, SwitchVariant, YoshikiFunc } from "./themes";
 import { View } from "react-native";
 import { imageBorderRadius } from "./constants";
 import { px } from "yoshiki/native";
@@ -29,7 +29,7 @@ import { ts } from "./utils";
 
 export const Popup = ({ children, ...props }: { children: ReactNode | YoshikiFunc<ReactNode> }) => {
 	return (
-		<Portal>
+		<ContrastArea mode="user">
 			<SwitchVariant>
 				{({ css, theme }) => (
 					<View
@@ -60,6 +60,19 @@ export const Popup = ({ children, ...props }: { children: ReactNode | YoshikiFun
 					</View>
 				)}
 			</SwitchVariant>
-		</Portal>
+		</ContrastArea>
 	);
+};
+
+export const usePopup = () => {
+	const { addPortal, removePortal } = usePortal();
+	const [current, setPopup] = useState<ReactNode>();
+	const close = useCallback(() => setPopup(undefined), []);
+
+	useEffect(() => {
+		addPortal("popup", current);
+		return () => removePortal("popup");
+	}, [current, addPortal, removePortal]);
+
+	return [setPopup, close];
 };

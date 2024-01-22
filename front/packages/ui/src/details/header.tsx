@@ -47,9 +47,9 @@ import {
 	ts,
 	Chip,
 	DottedSeparator,
-	focusReset,
+	usePopup,
 } from "@kyoo/primitives";
-import { Fragment, ReactElement, useState } from "react";
+import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
 import { ImageStyle, Platform, View } from "react-native";
@@ -112,7 +112,7 @@ export const TitleLine = ({
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 	const downloader = useDownloader();
-	const [popup, setPopup] = useState<ReactElement | undefined>(undefined);
+	const [setPopup, close] = usePopup();
 
 	return (
 		<Container
@@ -246,30 +246,22 @@ export const TitleLine = ({
 							/>
 						)}
 						{type === "movie" && slug && (
-							<IconButton
-								icon={Download}
-								onPress={() => downloader(type, slug)}
-								color={{ xs: theme.user.contrast, md: theme.colors.white }}
-								{...tooltip(t("home.episodeMore.download"))}
-							/>
+							<>
+								<IconButton
+									icon={Download}
+									onPress={() => downloader(type, slug)}
+									color={{ xs: theme.user.contrast, md: theme.colors.white }}
+									{...tooltip(t("home.episodeMore.download"))}
+								/>
+								<IconButton
+									icon={MovieInfo}
+									color={{ xs: theme.user.contrast, md: theme.colors.white }}
+									onPress={() =>
+										setPopup(<MediaInfoPopup mediaType={"movie"} mediaSlug={slug!} close={close} />)
+									}
+								/>
+							</>
 						)}
-						{type === "movie" && (
-							<IconButton
-								icon={MovieInfo}
-								color={{ xs: theme.user.contrast, md: theme.colors.white }}
-								onPress={() =>
-									slug &&
-									setPopup(
-										<MediaInfoPopup
-											mediaType={type}
-											mediaSlug={slug}
-											close={() => setPopup(undefined)}
-										/>,
-									)
-								}
-							/>
-						)}
-						{popup}
 						{rating !== null && (
 							<>
 								<DottedSeparator
