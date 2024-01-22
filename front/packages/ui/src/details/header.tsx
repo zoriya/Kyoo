@@ -256,6 +256,7 @@ export const TitleLine = ({
 						{type === "movie" && (
 							<IconButton
 								icon={MovieInfo}
+								color={{ xs: theme.user.contrast, md: theme.colors.white }}
 								onPress={() =>
 									slug &&
 									setPopup(
