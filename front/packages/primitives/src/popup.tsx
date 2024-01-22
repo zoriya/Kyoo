@@ -24,7 +24,7 @@ import { Portal } from "@gorhom/portal";
 import { SwitchVariant, YoshikiFunc } from "./themes";
 import { View } from "react-native";
 import { imageBorderRadius } from "./constants";
-import { percent, px } from "yoshiki/native";
+import { px } from "yoshiki/native";
 import { ts } from "./utils";
 
 export const Popup = ({ children }: { children: ReactNode | YoshikiFunc<ReactNode> }) => {
@@ -40,13 +40,13 @@ export const Popup = ({ children }: { children: ReactNode | YoshikiFunc<ReactNod
 							right: 0,
 							bottom: 0,
 							bg: (theme) => theme.themeOverlay,
+							justifyContent: "center",
+							alignItems: "center",
 						})}
 					>
 						<Container
 							{...css({
 								borderRadius: px(imageBorderRadius),
-								position: "absolute",
-								top: percent(35),
 								padding: ts(4),
 								gap: ts(2),
 								bg: (theme) => theme.background,
