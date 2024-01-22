@@ -87,5 +87,5 @@ export const usePopup = () => {
 		return () => removePortal("popup");
 	}, [current, addPortal, removePortal]);
 
-	return [setPopup, close];
+	return [setPopup, close] as const;
 };
