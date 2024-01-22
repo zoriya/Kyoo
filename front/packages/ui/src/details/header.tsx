@@ -51,7 +51,7 @@ import {
 } from "@kyoo/primitives";
 import { Fragment, ReactElement, useState } from "react";
 import { useTranslation } from "react-i18next";
-import Info from "@material-symbols/svg-400/rounded/info.svg";
+import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
 import { ImageStyle, Platform, View } from "react-native";
 import {
 	Theme,
@@ -255,7 +255,7 @@ export const TitleLine = ({
 						)}
 						{type === "movie" && (
 							<IconButton
-								icon={Info}
+								icon={MovieInfo}
 								onPress={() =>
 									slug &&
 									setPopup(
