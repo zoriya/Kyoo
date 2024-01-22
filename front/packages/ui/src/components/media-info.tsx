@@ -22,8 +22,9 @@ import { Audio, Subtitle, WatchInfo, WatchInfoP } from "@kyoo/models";
 import { Button, HR, P, Popup, Skeleton } from "@kyoo/primitives";
 import { Fetch } from "../fetch";
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
-import { useYoshiki } from "yoshiki/native";
+import { ScrollView, View } from "react-native";
+import { percent, px, useYoshiki } from "yoshiki/native";
+import { Fragment } from "react";
 
 const MediaInfoTable = ({
 	mediaInfo: { path, video, container, audios, subtitles, duration },
@@ -81,8 +82,8 @@ const MediaInfoTable = ({
 		<View>
 			{table.map((g) =>
 				Object.entries(g).map(([label, value], index, l) => (
-					<>
-						<View key={`media-info-${label}`} {...css({ flexDirection: "row" })}>
+					<Fragment key={`media-info-${label}`}>
+						<View {...css({ flexDirection: "row" })}>
 							<View {...css({ flex: 1 })}>
 								<P>{label}</P>
 							</View>
@@ -91,7 +92,7 @@ const MediaInfoTable = ({
 							</View>
 						</View>
 						{index == l.length - 1 && <HR />}
-					</>
+					</Fragment>
 				)),
 			)}
 		</View>
@@ -107,17 +108,20 @@ export const MediaInfoPopup = ({
 	mediaType: "episode" | "movie";
 	mediaSlug: string;
 }) => {
+	const y = useYoshiki();
 	const mediaInfoQuery = {
 		path: ["video", mediaType, mediaSlug, "info"],
 		parser: WatchInfoP,
 	};
 	return (
 		<Popup>
-			{({ css }) => (
+			{() => (
 				<>
-					<Fetch query={mediaInfoQuery}>
-						{(mediaInfo) => <MediaInfoTable mediaInfo={mediaInfo} />}
-					</Fetch>
+					<ScrollView>
+						<Fetch query={mediaInfoQuery}>
+							{(mediaInfo) => <MediaInfoTable mediaInfo={mediaInfo} />}
+						</Fetch>
+					</ScrollView>
 					<Button text="OK" onPress={() => close()} />
 				</>
 			)}
