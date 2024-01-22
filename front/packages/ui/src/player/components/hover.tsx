@@ -152,6 +152,7 @@ export const Hover = ({
 									{isLoading ? <Skeleton {...css({ width: rem(15), height: rem(2) })} /> : name}
 								</H2>
 								<ProgressBar chapters={chapters} />
+								<BottomScrubber url={url}/>
 								<View
 									{...css({
 										flexDirection: "row",
@@ -173,7 +174,6 @@ export const Hover = ({
 										}}
 									/>
 								</View>
-								<BottomScrubber url={url}/>
 							</View>
 						</View>
 					</View>
