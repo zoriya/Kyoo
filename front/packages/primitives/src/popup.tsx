@@ -27,22 +27,25 @@ import { imageBorderRadius } from "./constants";
 import { px } from "yoshiki/native";
 import { ts } from "./utils";
 
-export const Popup = ({ children }: { children: ReactNode | YoshikiFunc<ReactNode> }) => {
+export const Popup = ({ children, ...props }: { children: ReactNode | YoshikiFunc<ReactNode> }) => {
 	return (
 		<Portal>
 			<SwitchVariant>
 				{({ css, theme }) => (
 					<View
-						{...css({
-							position: "absolute",
-							top: 0,
-							left: 0,
-							right: 0,
-							bottom: 0,
-							bg: (theme) => theme.themeOverlay,
-							justifyContent: "center",
-							alignItems: "center",
-						})}
+						{...css(
+							{
+								position: "absolute",
+								top: 0,
+								left: 0,
+								right: 0,
+								bottom: 0,
+								bg: (theme) => theme.themeOverlay,
+								justifyContent: "center",
+								alignItems: "center",
+							},
+							props,
+						)}
 					>
 						<Container
 							{...css({
