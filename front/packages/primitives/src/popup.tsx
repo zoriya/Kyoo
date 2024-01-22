@@ -18,13 +18,13 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ReactElement, ReactNode, useCallback, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import { Container } from "./container";
-import { Portal, usePortal } from "@gorhom/portal";
+import { usePortal } from "@gorhom/portal";
 import { ContrastArea, SwitchVariant, YoshikiFunc } from "./themes";
-import { View } from "react-native";
+import { View, ScrollView } from "react-native";
 import { imageBorderRadius } from "./constants";
-import { px } from "yoshiki/native";
+import { px, vh } from "yoshiki/native";
 import { ts } from "./utils";
 
 export const Popup = ({ children, ...props }: { children: ReactNode | YoshikiFunc<ReactNode> }) => {
@@ -33,29 +33,42 @@ export const Popup = ({ children, ...props }: { children: ReactNode | YoshikiFun
 			<SwitchVariant>
 				{({ css, theme }) => (
 					<View
-						{...css(
-							{
-								position: "absolute",
-								top: 0,
-								left: 0,
-								right: 0,
-								bottom: 0,
-								bg: (theme) => theme.themeOverlay,
-								justifyContent: "center",
-								alignItems: "center",
-							},
-							props,
-						)}
+						{...css({
+							position: "absolute",
+							top: 0,
+							left: 0,
+							right: 0,
+							bottom: 0,
+							bg: (theme) => theme.themeOverlay,
+							justifyContent: "center",
+							alignItems: "center",
+						})}
 					>
 						<Container
-							{...css({
-								borderRadius: px(imageBorderRadius),
-								padding: ts(4),
-								gap: ts(2),
-								bg: (theme) => theme.background,
-							})}
+							{...css(
+								{
+									borderRadius: px(imageBorderRadius),
+									paddingHorizontal: 0,
+									bg: (theme) => theme.background,
+									overflow: "hidden",
+								},
+								props,
+							)}
 						>
-							{typeof children === "function" ? children({ css, theme }) : children}
+							<ScrollView
+								contentContainerStyle={{
+									paddingHorizontal: px(15),
+									paddingVertical: ts(4),
+									gap: ts(2),
+								}}
+								{...css({
+									maxHeight: vh(95),
+									flexGrow: 0,
+									flexShrink: 1,
+								})}
+							>
+								{typeof children === "function" ? children({ css, theme }) : children}
+							</ScrollView>
 						</Container>
 					</View>
 				)}

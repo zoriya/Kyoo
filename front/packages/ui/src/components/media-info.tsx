@@ -19,11 +19,11 @@
  */
 
 import { Audio, QueryIdentifier, Subtitle, WatchInfo, WatchInfoP } from "@kyoo/models";
-import { Button, HR, P, Popup, Skeleton } from "@kyoo/primitives";
+import { Button, HR, P, Popup, Skeleton, ts } from "@kyoo/primitives";
 import { Fetch } from "../fetch";
 import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
-import { percent, px, useYoshiki } from "yoshiki/native";
+import { percent, px, useYoshiki, vh } from "yoshiki/native";
 import { Fragment } from "react";
 
 const MediaInfoTable = ({
@@ -108,18 +108,11 @@ export const MediaInfoPopup = ({
 	mediaType: "episode" | "movie";
 	mediaSlug: string;
 }) => {
-	const { css } = useYoshiki();
-	const mediaInfoQuery = {
-		path: ["video", mediaType, mediaSlug, "info"],
-		parser: WatchInfoP,
-	};
 	return (
 		<Popup>
-			<ScrollView>
-				<Fetch query={MediaInfoPopup.query(mediaType, mediaSlug)}>
-					{(mediaInfo) => <MediaInfoTable mediaInfo={mediaInfo} />}
-				</Fetch>
-			</ScrollView>
+			<Fetch query={MediaInfoPopup.query(mediaType, mediaSlug)}>
+				{(mediaInfo) => <MediaInfoTable mediaInfo={mediaInfo} />}
+			</Fetch>
 			<Button text="OK" onPress={() => close()} />
 		</Popup>
 	);
