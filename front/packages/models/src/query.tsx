@@ -24,7 +24,6 @@ import {
 	QueryClient,
 	QueryFunctionContext,
 	useInfiniteQuery,
-	useMutation,
 	useQuery,
 } from "@tanstack/react-query";
 import { z } from "zod";
@@ -49,6 +48,7 @@ export const queryFn = async <Data,>(
 				authenticated?: boolean;
 				apiUrl?: string;
 				timeout?: number;
+				plainText?: boolean;
 		  },
 	type?: z.ZodType<Data>,
 	token?: string | null,
@@ -112,12 +112,14 @@ export const queryFn = async <Data,>(
 	// @ts-expect-error Assume Data is nullable.
 	if (resp.status === 204) return null;
 
+	if ("plainText" in context && context.plainText) return (await resp.text()) as unknown as Data;
+
 	let data;
 	try {
 		data = await resp.json();
 	} catch (e) {
-		console.error("Invald json from kyoo", e);
-		throw { errors: ["Invalid repsonse from kyoo"] };
+		console.error("Invalid json from kyoo", e);
+		throw { errors: ["Invalid response from kyoo"] };
 	}
 	if (!type) return data;
 	const parsed = await type.safeParseAsync(data);
@@ -170,6 +172,7 @@ export type QueryIdentifier<T = unknown, Ret = T> = {
 	placeholderData?: T | (() => T);
 	enabled?: boolean;
 	timeout?: number;
+	options?: Partial<Parameters<typeof queryFn>[0]>;
 };
 
 export type QueryPage<Props = {}, Items = unknown> = ComponentType<
@@ -203,7 +206,7 @@ export const toQueryKey = (query: {
 export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 	return useQuery<Data, KyooErrors>({
 		queryKey: toQueryKey(query),
-		queryFn: (ctx) => queryFn({ ...ctx, timeout: query.timeout }, query.parser),
+		queryFn: (ctx) => queryFn({ ...ctx, timeout: query.timeout, ...query.options }, query.parser),
 		placeholderData: query.placeholderData as any,
 		enabled: query.enabled,
 	});

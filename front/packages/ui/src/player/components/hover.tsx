@@ -51,6 +51,7 @@ import {
 } from "../state";
 import { ReactNode, useCallback, useEffect, useRef } from "react";
 import { atom } from "jotai";
+import { BottomScrubber } from "./scrubber";
 
 const hoverReasonAtom = atom({
 	mouseMoved: false,
@@ -63,6 +64,7 @@ export const hoverAtom = atom((get) =>
 
 export const Hover = ({
 	isLoading,
+	url,
 	name,
 	showName,
 	poster,
@@ -75,6 +77,7 @@ export const Hover = ({
 	qualitiesAvailables = true,
 }: {
 	isLoading: boolean;
+	url: string;
 	name?: string | null;
 	showName?: string;
 	poster?: KyooImage | null;
@@ -170,6 +173,7 @@ export const Hover = ({
 										}}
 									/>
 								</View>
+								<BottomScrubber url={url}/>
 							</View>
 						</View>
 					</View>
