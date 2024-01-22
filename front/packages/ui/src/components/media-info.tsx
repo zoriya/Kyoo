@@ -23,16 +23,15 @@ import { Button, HR, P, Popup, Skeleton } from "@kyoo/primitives";
 import { Fetch } from "../fetch";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import { NativeCssFunc } from "yoshiki/src/native/type";
+import { useYoshiki } from "yoshiki/native";
 
 const MediaInfoTable = ({
 	mediaInfo: { path, video, container, audios, subtitles, duration },
-	css,
 }: {
-	css: NativeCssFunc;
 	mediaInfo: Partial<WatchInfo>;
 }) => {
 	const { t } = useTranslation();
+	const { css } = useYoshiki();
 	const formatBitrate = (b: number) => `${(b / 1000000).toFixed(2)} Mbps`;
 	const formatTrackTable = (trackTable: (Audio | Subtitle)[], s: string) => {
 		if (trackTable.length == 0) {
@@ -117,7 +116,7 @@ export const MediaInfoPopup = ({
 			{({ css }) => (
 				<>
 					<Fetch query={mediaInfoQuery}>
-						{(mediaInfo) => <MediaInfoTable css={css} mediaInfo={mediaInfo} />}
+						{(mediaInfo) => <MediaInfoTable mediaInfo={mediaInfo} />}
 					</Fetch>
 					<Button text="OK" onPress={() => close()} />
 				</>
