@@ -21,6 +21,7 @@
 import { z } from "zod";
 import { imageFn } from "../traits";
 import i18next from "i18next";
+import { QualityP } from "./quality";
 
 const getDisplayName = (sub: Track) => {
 	const languageNames = new Intl.DisplayNames([i18next.language ?? "en"], { type: "language" });
@@ -43,9 +44,9 @@ export const VideoP = z.object({
 	codec: z.string(),
 	/**
 	 * The Quality of the Video
-	 * E.g. "1080p" (TODO: FIND ACTUAL ENUM)
+	 * E.g. "1080p"
 	 */
-	quality: z.string(),
+	quality: QualityP,
 	/**
 	 * The Width of the Video Frame
 	 * E.g. 1424
