@@ -23,11 +23,10 @@ import { Button, HR, P, Popup, Skeleton } from "@kyoo/primitives";
 import { Fetch } from "../fetch";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import { useYoshiki } from "yoshiki";
 import { NativeCssFunc } from "yoshiki/src/native/type";
 
 const MediaInfoTable = ({
-	mediaInfo: { path, video, container, audios, subtitles },
+	mediaInfo: { path, video, container, audios, subtitles, duration },
 	css,
 }: {
 	css: NativeCssFunc;
@@ -62,6 +61,7 @@ const MediaInfoTable = ({
 			{
 				[t("mediainfo.file")]: path?.replace(/^\/video\//, ""),
 				[t("mediainfo.container")]: container,
+				[t("mediainfo.duration")]: duration,
 			},
 			{
 				[t("mediainfo.video")]: video

@@ -135,48 +135,58 @@ export type Chapter = z.infer<typeof ChapterP>;
 /**
  * The transcoder's info for this item. This include subtitles, fonts, chapters...
  */
-export const WatchInfoP = z.object({
-	/**
-	 * The sha1 of the video file.
-	 */
-	sha: z.string(),
-	/**
-	 * The duration of the video (in seconds).
-	 */
-	length: z.number(),
-	/**
-	 * The internal path of the video file.
-	 */
-	path: z.string(),
-	/**
-	 * The extension used to store this video file.
-	 */
-	extension: z.string(),
-	/**
-	 * The container of the video file of this episode. Common containers are mp4, mkv, avi and so on.
-	 */
-	container: z.string(),
-	/**
-	 * The video track.
-	 */
-	video: VideoP,
-	/**
-	 * The list of audio tracks.
-	 */
-	audios: z.array(AudioP),
-	/**
-	 * The list of subtitles tracks.
-	 */
-	subtitles: z.array(SubtitleP),
-	/**
-	 * The list of fonts that can be used to display subtitles.
-	 */
-	fonts: z.array(z.string().transform(imageFn)),
-	/**
-	 * The list of chapters. See Chapter for more information.
-	 */
-	chapters: z.array(ChapterP),
-});
+export const WatchInfoP = z
+	.object({
+		/**
+		 * The sha1 of the video file.
+		 */
+		sha: z.string(),
+		/**
+		 * The duration of the video (in seconds).
+		 */
+		length: z.number(),
+		/**
+		 * The internal path of the video file.
+		 */
+		path: z.string(),
+		/**
+		 * The extension used to store this video file.
+		 */
+		extension: z.string(),
+		/**
+		 * The container of the video file of this episode. Common containers are mp4, mkv, avi and so on.
+		 */
+		container: z.string(),
+		/**
+		 * The video track.
+		 */
+		video: VideoP,
+		/**
+		 * The list of audio tracks.
+		 */
+		audios: z.array(AudioP),
+		/**
+		 * The list of subtitles tracks.
+		 */
+		subtitles: z.array(SubtitleP),
+		/**
+		 * The list of fonts that can be used to display subtitles.
+		 */
+		fonts: z.array(z.string().transform(imageFn)),
+		/**
+		 * The list of chapters. See Chapter for more information.
+		 */
+		chapters: z.array(ChapterP),
+	})
+	.transform((x) => {
+		const hour = Math.floor(x.length / 3600);
+		const minutes = Math.ceil((x.length % 3600) / 60);
+		const duration = hour ? `${hour}h` : "" + `${minutes}m`;
+		return {
+			...x,
+			duration,
+		};
+	});
 
 /**
  * A watch info for a video
