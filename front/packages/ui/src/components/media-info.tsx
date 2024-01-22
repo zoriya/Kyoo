@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Audio, Subtitle, WatchInfo, WatchInfoP } from "@kyoo/models";
+import { Audio, QueryIdentifier, Subtitle, WatchInfo, WatchInfoP } from "@kyoo/models";
 import { Button, HR, P, Popup, Skeleton } from "@kyoo/primitives";
 import { Fetch } from "../fetch";
 import { useTranslation } from "react-i18next";
@@ -108,23 +108,24 @@ export const MediaInfoPopup = ({
 	mediaType: "episode" | "movie";
 	mediaSlug: string;
 }) => {
-	const y = useYoshiki();
+	const { css } = useYoshiki();
 	const mediaInfoQuery = {
 		path: ["video", mediaType, mediaSlug, "info"],
 		parser: WatchInfoP,
 	};
 	return (
 		<Popup>
-			{() => (
-				<>
-					<ScrollView>
-						<Fetch query={mediaInfoQuery}>
-							{(mediaInfo) => <MediaInfoTable mediaInfo={mediaInfo} />}
-						</Fetch>
-					</ScrollView>
-					<Button text="OK" onPress={() => close()} />
-				</>
-			)}
+			<ScrollView>
+				<Fetch query={MediaInfoPopup.query(mediaType, mediaSlug)}>
+					{(mediaInfo) => <MediaInfoTable mediaInfo={mediaInfo} />}
+				</Fetch>
+			</ScrollView>
+			<Button text="OK" onPress={() => close()} />
 		</Popup>
 	);
 };
+
+MediaInfoPopup.query = (mediaType: string, mediaSlug: string): QueryIdentifier<WatchInfo> => ({
+	path: ["video", mediaType, mediaSlug, "info"],
+	parser: WatchInfoP,
+});
