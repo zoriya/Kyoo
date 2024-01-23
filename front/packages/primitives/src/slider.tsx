@@ -179,7 +179,7 @@ export const Slider = ({
 							position: "absolute",
 							top: 0,
 							bottom: 0,
-							marginY: ts(Platform.OS === "android" ? -0.5 : 0.5),
+							marginY: ts(0.5),
 							bg: (theme) => theme.accent,
 							width: ts(2),
 							height: ts(2),
