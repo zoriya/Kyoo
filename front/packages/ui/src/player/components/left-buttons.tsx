@@ -124,25 +124,28 @@ export const TouchControls = ({
 				props,
 			)}
 		>
-			{previousSlug && (
-				<IconButton
-					icon={SkipPrevious}
-					as={Link}
-					href={previousSlug}
-					replace
-					size={ts(4)}
-					{...common}
-				/>
-			)}
+			<IconButton
+				icon={SkipPrevious}
+				as={Link}
+				href={previousSlug}
+				replace
+				size={ts(4)}
+				{...css([!previousSlug && { opacity: 0, pointerEvents: "none" }], common)}
+			/>
 			<IconButton
 				icon={isPlaying ? Pause : PlayArrow}
 				onPress={() => setPlay(!isPlaying)}
 				size={ts(8)}
 				{...common}
 			/>
-			{nextSlug && (
-				<IconButton icon={SkipNext} as={Link} href={nextSlug} replace size={ts(4)} {...common} />
-			)}
+			<IconButton
+				icon={SkipNext}
+				as={Link}
+				href={nextSlug}
+				replace
+				size={ts(4)}
+				{...css([!nextSlug && { opacity: 0, pointerEvents: "none" }], common)}
+			/>
 		</HoverTouch>
 	);
 };
