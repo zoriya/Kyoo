@@ -15,6 +15,7 @@ import (
 
 // We want to have a thumbnail every ${interval} seconds.
 var default_interval = 10
+
 // The maximim number of thumbnails per video.
 // Setting this too high allows really long processing times.
 var max_numcaps = 150
@@ -139,5 +140,5 @@ func extractThumbnail(path string, name string) (string, error) {
 }
 
 func tsToVttTime(ts int) string {
-	return fmt.Sprintf("%02d:%02d:%02d.000", ts/3600, ts/60, ts%60)
+	return fmt.Sprintf("%02d:%02d:%02d.000", ts/3600, (ts/60)%60, ts%60)
 }
