@@ -185,6 +185,8 @@
 		"forced": "Forcé",
 		"default": "Par Défaut",
 		"duration": "Duration",
-		"size": "Taille"
+		"size": "Taille",
+		"novideo": "Pas de video",
+		"nocontainer": "Conteneur invalide"
 	}
 }

@@ -60,7 +60,7 @@ const MediaInfoTable = ({
 		[
 			{
 				[t("mediainfo.file")]: path?.replace(/^\/video\//, ""),
-				[t("mediainfo.container")]: container,
+				[t("mediainfo.container")]: container !== null ? container : t("mediainfo.nocontainer"),
 				[t("mediainfo.duration")]: duration,
 				[t("mediainfo.size")]: size,
 			},
@@ -69,7 +69,9 @@ const MediaInfoTable = ({
 					? `${video.width}x${video.height} (${video.quality}) - ${formatBitrate(
 							video.bitrate,
 						)} - ${video.codec}`
-					: undefined,
+					: video === null
+						? t("mediainfo.novideo")
+						: undefined,
 			},
 			audios === undefined
 				? { [t("mediainfo.audio")]: undefined }
