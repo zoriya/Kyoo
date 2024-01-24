@@ -142,10 +142,6 @@ export const WatchInfoP = z
 		 */
 		sha: z.string(),
 		/**
-		 * The duration of the video (in seconds).
-		 */
-		length: z.number(),
-		/**
 		 * The internal path of the video file.
 		 */
 		path: z.string(),
@@ -153,6 +149,14 @@ export const WatchInfoP = z
 		 * The extension used to store this video file.
 		 */
 		extension: z.string(),
+		/**
+		 * The file size of the video file.
+		 */
+		size: z.number(),
+		/**
+		 * The duration of the video (in seconds).
+		 */
+		duration: z.number(),
 		/**
 		 * The container of the video file of this episode. Common containers are mp4, mkv, avi and so on.
 		 */
@@ -179,14 +183,22 @@ export const WatchInfoP = z
 		chapters: z.array(ChapterP),
 	})
 	.transform((x) => {
-		const hour = Math.floor(x.length / 3600);
-		const minutes = Math.ceil((x.length % 3600) / 60);
-		const duration = `${hour ? `${hour}h` : ""}${minutes}m`;
+		const hour = Math.floor(x.duration / 3600);
+		const minutes = Math.ceil((x.duration % 3600) / 60);
+
 		return {
 			...x,
-			duration,
+			duration: `${hour ? `${hour}h` : ""}${minutes}m`,
+			durationSeconds: x.duration,
+			size: humanFileSize(x.size),
 		};
 	});
+
+// from https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable-string
+const humanFileSize = (size: number): string => {
+	var i = size == 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
+	return (size / Math.pow(1024, i)).toFixed(2) * 1 + " " + ["B", "kB", "MB", "GB", "TB"][i];
+};
 
 /**
  * A watch info for a video

@@ -184,6 +184,7 @@
 		"subtitles": "Subtitles",
 		"forced": "Forced",
 		"default": "Default",
-		"duration": "Duration"
+		"duration": "Duration",
+		"size": "Size"
 	}
 }
