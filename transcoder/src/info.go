@@ -22,7 +22,7 @@ type MediaInfo struct {
 	/// The file size of the video file.
 	Size uint64 `json:"size"`
 	/// The length of the media in seconds.
-	Length float32 `json:"length"`
+	Duration float32 `json:"duration"`
 	/// The container of the video file of this episode.
 	Container string `json:"container"`
 	/// The video codec and infromations.
@@ -201,8 +201,8 @@ func GetInfo(path string) (*MediaInfo, error) {
 		// Remove leading .
 		Extension: filepath.Ext(path)[1:],
 		Size:      ParseUint64(mi.Parameter(mediainfo.StreamGeneral, 0, "FileSize")),
-		// convert seconds to ms
-		Length:    ParseFloat(mi.Parameter(mediainfo.StreamGeneral, 0, "Duration")) / 1000,
+		// convert ms to seconds
+		Duration:  ParseFloat(mi.Parameter(mediainfo.StreamGeneral, 0, "Duration")) / 1000,
 		Container: mi.Parameter(mediainfo.StreamGeneral, 0, "Format"),
 		Video: Video{
 			// This codec is not in the right format (does not include bitdepth...).

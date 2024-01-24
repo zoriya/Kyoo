@@ -184,6 +184,7 @@
 		"subtitles": "Sous titres",
 		"forced": "Forcé",
 		"default": "Par Défaut",
-		"duration": "Duration"
+		"duration": "Duration",
+		"size": "Taille"
 	}
 }

@@ -19,15 +19,15 @@
  */
 
 import { Audio, QueryIdentifier, Subtitle, WatchInfo, WatchInfoP } from "@kyoo/models";
-import { Button, HR, P, Popup, Skeleton, ts } from "@kyoo/primitives";
+import { Button, HR, P, Popup, Skeleton } from "@kyoo/primitives";
 import { Fetch } from "../fetch";
 import { useTranslation } from "react-i18next";
-import { ScrollView, View } from "react-native";
-import { percent, px, useYoshiki, vh } from "yoshiki/native";
+import { View } from "react-native";
+import { useYoshiki } from "yoshiki/native";
 import { Fragment } from "react";
 
 const MediaInfoTable = ({
-	mediaInfo: { path, video, container, audios, subtitles, duration },
+	mediaInfo: { path, video, container, audios, subtitles, duration, size },
 }: {
 	mediaInfo: Partial<WatchInfo>;
 }) => {
@@ -62,6 +62,7 @@ const MediaInfoTable = ({
 				[t("mediainfo.file")]: path?.replace(/^\/video\//, ""),
 				[t("mediainfo.container")]: container,
 				[t("mediainfo.duration")]: duration,
+				[t("mediainfo.size")]: size,
 			},
 			{
 				[t("mediainfo.video")]: video
