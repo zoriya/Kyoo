@@ -31,9 +31,9 @@ import { toTimerString } from "./left-buttons";
 
 type Thumb = { to: number; url: string; x: number; y: number; width: number; height: number };
 
-export const BottomScrubber = ({ url }: { url: string }) => {
-	const { css } = useYoshiki();
-	const { data, error } = useFetch(BottomScrubber.query(url));
+export const useScrubber = (url: string) => {
+	const { data, error } = useFetch(useScrubber.query(url));
+	// TODO: put the info here on the react-query cache to prevent multiples runs of this
 	const info = useMemo(() => {
 		if (!data) return [];
 
@@ -66,6 +66,21 @@ export const BottomScrubber = ({ url }: { url: string }) => {
 		}
 		return ret;
 	}, [data]);
+
+	return { info, error } as const;
+};
+
+useScrubber.query = (url: string): QueryIdentifier<string> => ({
+	path: ["video", url, "thumbnails.vtt"],
+	parser: null!,
+	options: {
+		plainText: true,
+	},
+});
+
+export const BottomScrubber = ({ url }: { url: string }) => {
+	const { css } = useYoshiki();
+	const { info, error } = useScrubber(url);
 
 	const progress = useAtomValue(progressAtom);
 	const duration = useAtomValue(durationAtom);
@@ -142,11 +157,3 @@ export const BottomScrubber = ({ url }: { url: string }) => {
 		</View>
 	);
 };
-
-BottomScrubber.query = (url: string): QueryIdentifier<string> => ({
-	path: ["video", url, "thumbnails.vtt"],
-	parser: null!,
-	options: {
-		plainText: true,
-	},
-});
