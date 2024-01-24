@@ -195,6 +195,11 @@ func GetInfo(path string) (*MediaInfo, error) {
 	chapters_begin := ParseUint(mi.Parameter(mediainfo.StreamMenu, 0, "Chapters_Pos_Begin"))
 	chapters_end := ParseUint(mi.Parameter(mediainfo.StreamMenu, 0, "Chapters_Pos_End"))
 
+	attachments := strings.Split(mi.Parameter(mediainfo.StreamGeneral, 0, "Attachments"), " / ")
+	if len(attachments) == 1 && attachments[0] == "" {
+		attachments = make([]string, 0)
+	}
+
 	return &MediaInfo{
 		Sha:  sha,
 		Path: path,
@@ -260,7 +265,7 @@ func GetInfo(path string) (*MediaInfo, error) {
 			}
 		}),
 		Fonts: Map(
-			strings.Split(mi.Parameter(mediainfo.StreamGeneral, 0, "Attachments"), " / "),
+			attachments,
 			func(font string, _ int) string {
 				return fmt.Sprintf("/video/%s/attachment/%s", sha, font)
 			}),
