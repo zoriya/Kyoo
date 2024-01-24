@@ -160,11 +160,11 @@ export const WatchInfoP = z
 		/**
 		 * The container of the video file of this episode. Common containers are mp4, mkv, avi and so on.
 		 */
-		container: z.string(),
+		container: z.string().nullable(),
 		/**
 		 * The video track.
 		 */
-		video: VideoP,
+		video: VideoP.nullable(),
 		/**
 		 * The list of audio tracks.
 		 */

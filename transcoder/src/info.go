@@ -24,9 +24,11 @@ type MediaInfo struct {
 	/// The length of the media in seconds.
 	Duration float32 `json:"duration"`
 	/// The container of the video file of this episode.
-	Container string `json:"container"`
+	Container *string `json:"container"`
 	/// The video codec and infromations.
-	Video Video `json:"video"`
+	Video *Video `json:"video"`
+	/// The list of videos if there are multiples.
+	Videos []Video `json:"videos"`
 	/// The list of audio tracks.
 	Audios []Audio `json:"audios"`
 	/// The list of subtitles tracks.
@@ -200,7 +202,7 @@ func GetInfo(path string) (*MediaInfo, error) {
 		attachments = make([]string, 0)
 	}
 
-	return &MediaInfo{
+	ret := MediaInfo{
 		Sha:  sha,
 		Path: path,
 		// Remove leading .
@@ -208,21 +210,23 @@ func GetInfo(path string) (*MediaInfo, error) {
 		Size:      ParseUint64(mi.Parameter(mediainfo.StreamGeneral, 0, "FileSize")),
 		// convert ms to seconds
 		Duration:  ParseFloat(mi.Parameter(mediainfo.StreamGeneral, 0, "Duration")) / 1000,
-		Container: mi.Parameter(mediainfo.StreamGeneral, 0, "Format"),
-		Video: Video{
-			// This codec is not in the right format (does not include bitdepth...).
-			Codec:    mi.Parameter(mediainfo.StreamVideo, 0, "Format"),
-			Language: OrNull(mi.Parameter(mediainfo.StreamVideo, 0, "Language")),
-			Quality:  QualityFromHeight(ParseUint(mi.Parameter(mediainfo.StreamVideo, 0, "Height"))),
-			Width:    ParseUint(mi.Parameter(mediainfo.StreamVideo, 0, "Width")),
-			Height:   ParseUint(mi.Parameter(mediainfo.StreamVideo, 0, "Height")),
-			Bitrate: ParseUint(
-				Or(
-					mi.Parameter(mediainfo.StreamVideo, 0, "BitRate"),
-					mi.Parameter(mediainfo.StreamVideo, 0, "OverallBitRate"),
+		Container: OrNull(mi.Parameter(mediainfo.StreamGeneral, 0, "Format")),
+		Videos: Map(make([]Video, ParseUint(mi.Parameter(mediainfo.StreamVideo, 0, "StreamCount"))), func(_ Video, i int) Video {
+			return Video{
+				// This codec is not in the right format (does not include bitdepth...).
+				Codec:    mi.Parameter(mediainfo.StreamVideo, 0, "Format"),
+				Language: OrNull(mi.Parameter(mediainfo.StreamVideo, 0, "Language")),
+				Quality:  QualityFromHeight(ParseUint(mi.Parameter(mediainfo.StreamVideo, 0, "Height"))),
+				Width:    ParseUint(mi.Parameter(mediainfo.StreamVideo, 0, "Width")),
+				Height:   ParseUint(mi.Parameter(mediainfo.StreamVideo, 0, "Height")),
+				Bitrate: ParseUint(
+					Or(
+						mi.Parameter(mediainfo.StreamVideo, 0, "BitRate"),
+						mi.Parameter(mediainfo.StreamVideo, 0, "OverallBitRate"),
+					),
 				),
-			),
-		},
+			}
+		}),
 		Audios: Map(make([]Audio, ParseUint(mi.Parameter(mediainfo.StreamAudio, 0, "StreamCount"))), func(_ Audio, i int) Audio {
 			return Audio{
 				Index:    uint32(i),
@@ -269,5 +273,9 @@ func GetInfo(path string) (*MediaInfo, error) {
 			func(font string, _ int) string {
 				return fmt.Sprintf("/video/%s/attachment/%s", sha, font)
 			}),
-	}, nil
+	}
+	if len(ret.Videos) > 0 {
+		ret.Video = &ret.Videos[0]
+	}
+	return &ret, nil
 }
