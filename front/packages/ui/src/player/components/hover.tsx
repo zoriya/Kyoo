@@ -29,6 +29,7 @@ import {
 	PressableFeedback,
 	Skeleton,
 	Slider,
+	Tooltip,
 	tooltip,
 	ts,
 } from "@kyoo/primitives";
@@ -49,9 +50,9 @@ import {
 	playAtom,
 	progressAtom,
 } from "../state";
-import { ReactNode, useCallback, useEffect, useRef } from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { atom } from "jotai";
-import { BottomScrubber } from "./scrubber";
+import { BottomScrubber, ScrubberTooltip } from "./scrubber";
 
 const hoverReasonAtom = atom({
 	mouseMoved: false,
@@ -151,8 +152,8 @@ export const Hover = ({
 								<H2 numberOfLines={1} {...css({ paddingBottom: ts(1) })}>
 									{isLoading ? <Skeleton {...css({ width: rem(15), height: rem(2) })} /> : name}
 								</H2>
-								<ProgressBar chapters={chapters} />
-								<BottomScrubber url={url}/>
+								<ProgressBar url={url} chapters={chapters} />
+								<BottomScrubber url={url} />
 								<View
 									{...css({
 										flexDirection: "row",
@@ -309,22 +310,42 @@ export const HoverTouch = ({ children, ...props }: { children: ReactNode }) => {
 	);
 };
 
-const ProgressBar = ({ chapters }: { chapters?: Chapter[] }) => {
+const ProgressBar = ({ url, chapters }: { url: string; chapters?: Chapter[] }) => {
 	const [progress, setProgress] = useAtom(progressAtom);
 	const buffered = useAtomValue(bufferedAtom);
 	const duration = useAtomValue(durationAtom);
 	const setPlay = useSetAtom(playAtom);
+	const [hoverProgress, setHoverProgress] = useState<number | null>(null);
+	const [layout, setLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
 
 	return (
-		<Slider
-			progress={progress}
-			startSeek={() => setPlay(false)}
-			endSeek={() => setTimeout(() => setPlay(true), 10)}
-			setProgress={setProgress}
-			subtleProgress={buffered}
-			max={duration}
-			markers={chapters?.map((x) => x.startTime)}
-		/>
+		<>
+			<Slider
+				progress={progress}
+				startSeek={() => setPlay(false)}
+				endSeek={() => setTimeout(() => setPlay(true), 10)}
+				onHover={(progress, layout) => {
+					setHoverProgress(progress);
+					setLayout(layout);
+				}}
+				setProgress={setProgress}
+				subtleProgress={buffered}
+				max={duration}
+				markers={chapters?.map((x) => x.startTime)}
+				dataSet={{ tooltipId: "progress-scrubber" }}
+			/>
+			<Tooltip
+				id={"progress-scrubber"}
+				isOpen={hoverProgress !== null}
+				imperativeModeOnly
+				position={{ x: layout.x + (layout.width * hoverProgress!) / (duration ?? 1), y: layout.y }}
+				render={() =>
+					hoverProgress ? (
+						<ScrubberTooltip seconds={hoverProgress} chapters={chapters} url={url} />
+					) : null
+				}
+			/>
+		</>
 	);
 };
 

@@ -18,10 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { useFetch, QueryIdentifier, imageFn } from "@kyoo/models";
-import { FastImage, P, imageBorderRadius, tooltip, ts } from "@kyoo/primitives";
+import { useFetch, QueryIdentifier, imageFn, Chapter } from "@kyoo/models";
+import { FastImage, P, Tooltip, imageBorderRadius, tooltip, ts } from "@kyoo/primitives";
 import { Platform, View } from "react-native";
-import { percent, useYoshiki, px, vh } from "yoshiki/native";
+import { percent, useYoshiki, px, vh, Theme } from "yoshiki/native";
 import { ErrorView } from "../../fetch";
 import { ComponentProps, useEffect, useMemo } from "react";
 import { CssObject } from "yoshiki/src/web/generator";
@@ -91,6 +91,43 @@ useScrubber.query = (url: string): QueryIdentifier<string> => ({
 	},
 });
 
+export const ScrubberTooltip = ({
+	url,
+	chapters,
+	seconds,
+}: {
+	url: string;
+	chapters?: Chapter[];
+	seconds: number;
+}) => {
+	const { info, error, stats } = useScrubber(url);
+	const { css } = useYoshiki();
+
+	if (error) return <ErrorView error={error} />;
+
+	const current = info.findLast((x) => x.to < seconds * 1000);
+	const chapter = chapters?.findLast((x) => x.endTime < seconds);
+
+	return (
+		<View {...css({ justifyContent: "center" })}>
+			{current && (
+				<FastImage
+					src={current.url}
+					alt={""}
+					width={current.width}
+					height={current.height}
+					x={current.x}
+					y={current.y}
+					columns={stats!.columns}
+					rows={stats!.rows}
+				/>
+			)}
+			<P>{toTimerString(seconds)}</P>
+			{chapter && <P>{chapter.name}</P>}
+		</View>
+	);
+};
+
 export const BottomScrubber = ({ url }: { url: string }) => {
 	const { css } = useYoshiki();
 	const { info, error, stats } = useScrubber(url);
@@ -124,8 +161,8 @@ export const BottomScrubber = ({ url }: { url: string }) => {
 						height={thumb.height}
 						x={thumb.x}
 						y={thumb.y}
-						columns={stats?.columns}
-						rows={stats?.rows}
+						columns={stats!.columns}
+						rows={stats!.rows}
 					/>
 				))}
 			</View>
@@ -153,7 +190,7 @@ export const BottomScrubber = ({ url }: { url: string }) => {
 				<P
 					{...css({
 						textAlign: "center",
-						color: (theme) => theme.colors.white,
+						color: (theme: Theme) => theme.colors.white,
 						bg: (theme) => theme.darkOverlay,
 						padding: ts(0.5),
 						borderRadius: imageBorderRadius,
