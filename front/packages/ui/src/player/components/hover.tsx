@@ -33,12 +33,13 @@ import {
 	Tooltip,
 	tooltip,
 	ts,
+	useIsTouch,
 } from "@kyoo/primitives";
 import { Chapter, KyooImage, Subtitle, Audio } from "@kyoo/models";
 import { useAtomValue, useSetAtom, useAtom } from "jotai";
 import { ImageStyle, Platform, Pressable, View, ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
-import { percent, rem, useYoshiki } from "yoshiki/native";
+import { percent, rem, useYoshiki, vh } from "yoshiki/native";
 import { useRouter } from "solito/router";
 import ArrowBack from "@material-symbols/svg-400/rounded/arrow_back-fill.svg";
 import { LeftButtons, TouchControls } from "./left-buttons";
@@ -63,6 +64,7 @@ const hoverReasonAtom = atom({
 export const hoverAtom = atom((get) =>
 	[!get(playAtom), ...Object.values(get(hoverReasonAtom))].includes(true),
 );
+export const seekingAtom = atom(false);
 
 export const Hover = ({
 	isLoading,
@@ -93,6 +95,10 @@ export const Hover = ({
 }) => {
 	const show = useAtomValue(hoverAtom);
 	const setHover = useSetAtom(hoverReasonAtom);
+	const isSeeking = useAtomValue(seekingAtom);
+	const isTouch = useIsTouch();
+
+	const showBottomSeeker = isSeeking && isTouch;
 
 	return (
 		<ContrastArea mode="dark">
@@ -150,32 +156,37 @@ export const Hover = ({
 									maxWidth: percent(100),
 								})}
 							>
-								<H2 numberOfLines={1} {...css({ paddingBottom: ts(1) })}>
-									{isLoading ? <Skeleton {...css({ width: rem(15), height: rem(2) })} /> : name}
-								</H2>
-								<ProgressBar url={url} chapters={chapters} />
-								<BottomScrubber url={url} />
-								<View
-									{...css({
-										flexDirection: "row",
-										flexGrow: 1,
-										justifyContent: "space-between",
-										flexWrap: "wrap",
-									})}
-								>
-									<LeftButtons previousSlug={previousSlug} nextSlug={nextSlug} />
-									<RightButtons
-										subtitles={subtitles}
-										audios={audios}
-										fonts={fonts}
-										qualitiesAvailables={qualitiesAvailables}
-										onMenuOpen={() => setHover((x) => ({ ...x, menuOpened: true }))}
-										onMenuClose={() => {
-											// Disable hover since the menu overlay makes the mouseout unreliable.
-											setHover((x) => ({ ...x, menuOpened: false, mouseHover: false }));
-										}}
-									/>
-								</View>
+								{!showBottomSeeker && (
+									<H2 numberOfLines={1} {...css({ paddingBottom: ts(1) })}>
+										{isLoading ? <Skeleton {...css({ width: rem(15), height: rem(2) })} /> : name}
+									</H2>
+								)}
+								<ProgressBar chapters={chapters} url={url} />
+								{showBottomSeeker ? (
+									<BottomScrubber url={url} />
+								) : (
+									<View
+										{...css({
+											flexDirection: "row",
+											flexGrow: 1,
+											justifyContent: "space-between",
+											flexWrap: "wrap",
+										})}
+									>
+										<LeftButtons previousSlug={previousSlug} nextSlug={nextSlug} />
+										<RightButtons
+											subtitles={subtitles}
+											audios={audios}
+											fonts={fonts}
+											qualitiesAvailables={qualitiesAvailables}
+											onMenuOpen={() => setHover((x) => ({ ...x, menuOpened: true }))}
+											onMenuClose={() => {
+												// Disable hover since the menu overlay makes the mouseout unreliable.
+												setHover((x) => ({ ...x, menuOpened: false, mouseHover: false }));
+											}}
+										/>
+									</View>
+								)}
 							</View>
 						</View>
 					</View>
@@ -318,13 +329,20 @@ const ProgressBar = ({ url, chapters }: { url: string; chapters?: Chapter[] }) =
 	const setPlay = useSetAtom(playAtom);
 	const [hoverProgress, setHoverProgress] = useState<number | null>(null);
 	const [layout, setLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
+	const setSeeking = useSetAtom(seekingAtom);
 
 	return (
 		<>
 			<Slider
 				progress={progress}
-				startSeek={() => setPlay(false)}
-				endSeek={() => setTimeout(() => setPlay(true), 10)}
+				startSeek={() => {
+					setPlay(false);
+					setSeeking(true);
+				}}
+				endSeek={() => {
+					setSeeking(false);
+					setTimeout(() => setPlay(true), 10);
+				}}
 				onHover={(progress, layout) => {
 					setHoverProgress(progress);
 					setLayout(layout);
