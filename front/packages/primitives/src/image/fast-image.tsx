@@ -18,6 +18,8 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { ComponentProps } from "react";
+import { View } from "react-native";
 import FImage from "react-native-fast-image";
 
 export const FastImage = ({
@@ -25,6 +27,10 @@ export const FastImage = ({
 	alt,
 	width,
 	height,
+	x,
+	y,
+	rows,
+	columns,
 	style,
 	...props
 }: {
@@ -32,18 +38,31 @@ export const FastImage = ({
 	alt: string;
 	width: number | string;
 	height: number | string;
+	x: number;
+	y: number;
+	rows: number;
+	columns: number;
 	style?: object;
 }) => {
 	return (
-		<FImage
-			source={{
-				uri: src,
-				priority: FImage.priority.low,
-			}}
-			accessibilityLabel={alt}
-			resizeMode={FImage.resizeMode.cover}
-			style={style}
-			{...props}
-		/>
+		<View style={{ width, height, overflow: "hidden", flexGrow: 0, flexShrink: 0 }}>
+			<FImage
+				source={{
+					uri: src,
+					priority: FImage.priority.low,
+				}}
+				accessibilityLabel={alt}
+				resizeMode={FImage.resizeMode.cover}
+				style={[
+					{
+						width: width * columns,
+						height: height * rows,
+						transform: `translate(${-x}px, ${-y}px)`,
+					},
+					style,
+				]}
+				{...props}
+			/>
+		</View>
 	);
 };
