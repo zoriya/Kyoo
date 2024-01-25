@@ -18,7 +18,6 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ComponentProps } from "react";
 import { View } from "react-native";
 import FImage from "react-native-fast-image";
 
@@ -36,8 +35,8 @@ export const FastImage = ({
 }: {
 	src: string;
 	alt: string;
-	width: number | string;
-	height: number | string;
+	width: number;
+	height: number;
 	x: number;
 	y: number;
 	rows: number;

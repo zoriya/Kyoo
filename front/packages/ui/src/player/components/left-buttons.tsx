@@ -127,7 +127,7 @@ export const TouchControls = ({
 			<IconButton
 				icon={SkipPrevious}
 				as={Link}
-				href={previousSlug}
+				href={previousSlug!}
 				replace
 				size={ts(4)}
 				{...css([!previousSlug && { opacity: 0, pointerEvents: "none" }], common)}
@@ -141,7 +141,7 @@ export const TouchControls = ({
 			<IconButton
 				icon={SkipNext}
 				as={Link}
-				href={nextSlug}
+				href={nextSlug!}
 				replace
 				size={ts(4)}
 				{...css([!nextSlug && { opacity: 0, pointerEvents: "none" }], common)}
