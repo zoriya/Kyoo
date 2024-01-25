@@ -18,6 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { useEffect } from "react";
 import { Platform, ViewProps } from "react-native";
 
 export const TouchOnlyCss = () => {
@@ -38,4 +39,11 @@ export const touchOnly: ViewProps = {
 };
 export const noTouch: ViewProps = {
 	style: Platform.OS === "web" ? ({ $$css: true, noTouch: "noTouch" } as any) : { display: "none" },
+};
+
+export const useIsTouch = () => {
+	if (Platform.OS !== "web") return true;
+	if (typeof window === "undefined") return false;
+	// TODO: Subscribe to the change.
+	return document.body.classList.contains("noHover");
 };
