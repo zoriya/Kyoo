@@ -25,3 +25,6 @@ export const tooltip = (tooltip: string, up?: boolean) => ({
 		ToastAndroid.show(tooltip, ToastAndroid.SHORT);
 	},
 });
+
+import type { Tooltip as RTooltip } from "react-tooltip";
+export declare const Tooltip: RTooltip;

@@ -22,6 +22,7 @@ import { useRef, useState } from "react";
 import { GestureResponderEvent, Platform, View } from "react-native";
 import { px, percent, Stylable, useYoshiki } from "yoshiki/native";
 import { focusReset } from "./utils";
+import { ViewProps } from "react-native-svg/lib/typescript/fabric/utils";
 
 export const Slider = ({
 	progress,
@@ -31,6 +32,7 @@ export const Slider = ({
 	setProgress,
 	startSeek,
 	endSeek,
+	onHover,
 	size = 6,
 	...props
 }: {
@@ -41,11 +43,15 @@ export const Slider = ({
 	setProgress: (progress: number) => void;
 	startSeek?: () => void;
 	endSeek?: () => void;
+	onHover?: (
+		position: number | null,
+		layout: { x: number; y: number; width: number; height: number },
+	) => void;
 	size?: number;
-} & Stylable) => {
+} & Partial<ViewProps>) => {
 	const { css } = useYoshiki();
 	const ref = useRef<View>(null);
-	const [layout, setLayout] = useState({ x: 0, width: 0 });
+	const [layout, setLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
 	const [isSeeking, setSeek] = useState(false);
 	const [isHover, setHover] = useState(false);
 	const [isFocus, setFocus] = useState(false);
@@ -68,7 +74,14 @@ export const Slider = ({
 			// @ts-ignore Web only
 			onMouseEnter={() => setHover(true)}
 			// @ts-ignore Web only
-			onMouseLeave={() => setHover(false)}
+			onMouseLeave={() => {
+				setHover(false);
+				onHover?.(null, layout);
+			}}
+			// @ts-ignore Web only
+			onMouseMove={(e) =>
+				onHover?.(Math.max(0, Math.min((e.clientX - layout.x) / layout.width, 1) * max), layout)
+			}
 			tabIndex={0}
 			onFocus={() => setFocus(true)}
 			onBlur={() => setFocus(false)}
@@ -84,7 +97,9 @@ export const Slider = ({
 			onResponderStart={change}
 			onResponderMove={change}
 			onLayout={() =>
-				ref.current?.measure((_, __, width, ___, pageX) => setLayout({ width: width, x: pageX }))
+				ref.current?.measure((_, __, width, height, pageX, pageY) =>
+					setLayout({ width, height, x: pageX, y: pageY }),
+				)
 			}
 			onKeyDown={(e: KeyboardEvent) => {
 				switch (e.code) {

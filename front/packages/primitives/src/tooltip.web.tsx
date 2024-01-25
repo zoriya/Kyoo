@@ -42,3 +42,5 @@ export const WebTooltip = ({ theme }: { theme: Theme }) => {
 		`}</style>
 	);
 };
+
+export { Tooltip } from "react-tooltip";
