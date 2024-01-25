@@ -27,4 +27,4 @@ export const tooltip = (tooltip: string, up?: boolean) => ({
 });
 
 import type { Tooltip as RTooltip } from "react-tooltip";
-export declare const Tooltip: RTooltip;
+export const Tooltip: typeof RTooltip = (() => null) as any;

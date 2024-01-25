@@ -19,16 +19,14 @@
  */
 
 import { useFetch, QueryIdentifier, imageFn, Chapter } from "@kyoo/models";
-import { FastImage, P, Tooltip, imageBorderRadius, tooltip, ts } from "@kyoo/primitives";
-import { Platform, View } from "react-native";
-import { percent, useYoshiki, px, vh, Theme } from "yoshiki/native";
+import { FastImage, P, imageBorderRadius, ts } from "@kyoo/primitives";
+import { View } from "react-native";
+import { percent, useYoshiki, px, Theme } from "yoshiki/native";
 import { ErrorView } from "../../fetch";
-import { ComponentProps, useEffect, useMemo } from "react";
-import { CssObject } from "yoshiki/src/web/generator";
+import { useMemo } from "react";
 import { useAtomValue } from "jotai";
-import { durationAtom, playAtom, progressAtom } from "../state";
+import { durationAtom, progressAtom } from "../state";
 import { toTimerString } from "./left-buttons";
-import { useSetAtom } from "jotai";
 
 type Thumb = {
 	from: number;
@@ -89,7 +87,7 @@ export const useScrubber = (url: string) => {
 					columns: Math.max(...info.map((x) => x.x)) / last.width + 1,
 					width: last.width,
 					height: last.height,
-			  }
+				}
 			: null,
 	} as const;
 };
