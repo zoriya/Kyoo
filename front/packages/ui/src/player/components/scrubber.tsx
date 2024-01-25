@@ -30,7 +30,20 @@ import { durationAtom, playAtom, progressAtom } from "../state";
 import { toTimerString } from "./left-buttons";
 import { useSetAtom } from "jotai";
 
-type Thumb = { to: number; url: string; x: number; y: number; width: number; height: number };
+type Thumb = {
+	from: number;
+	to: number;
+	url: string;
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+};
+
+const parseTs = (time: string) => {
+	const times = time.split(":");
+	return (parseInt(times[0]) * 3600 + parseInt(times[1]) * 60 + parseFloat(times[2])) * 1000;
+};
 
 export const useScrubber = (url: string) => {
 	const { data, error } = useFetch(useScrubber.query(url));
@@ -51,13 +64,11 @@ export const useScrubber = (url: string) => {
 		const ret = new Array<Thumb>(lines.length / 2);
 		for (let i = 0; i < ret.length; i++) {
 			const times = lines[i * 2].split(" --> ");
-			const timesV = times[1].split(":");
-			const ts =
-				(parseInt(timesV[0]) * 3600 + parseInt(timesV[1]) * 60 + parseFloat(timesV[2])) * 1000;
 			const url = lines[i * 2 + 1].split("#xywh=");
 			const xywh = url[1].split(",").map((x) => parseInt(x));
 			ret[i] = {
-				to: ts,
+				from: parseTs(times[0]),
+				to: parseTs(times[1]),
 				url: imageFn("/video/" + url[0]),
 				x: xywh[0],
 				y: xywh[1],
@@ -105,11 +116,19 @@ export const ScrubberTooltip = ({
 
 	if (error) return <ErrorView error={error} />;
 
-	const current = info.findLast((x) => x.to < seconds * 1000);
-	const chapter = chapters?.findLast((x) => x.endTime < seconds);
+	const current =
+		info.findLast((x) => x.from <= seconds * 1000 && seconds * 1000 < x.to) ??
+		info.findLast(() => true);
+	const chapter = chapters?.findLast((x) => x.startTime <= seconds && seconds < x.endTime);
 
 	return (
-		<View {...css({ justifyContent: "center" })}>
+		<View
+			{...css({
+				justifyContent: "center",
+				borderRadius: imageBorderRadius,
+				overflow: "hidden",
+			})}
+		>
 			{current && (
 				<FastImage
 					src={current.url}
@@ -122,8 +141,9 @@ export const ScrubberTooltip = ({
 					rows={stats!.rows}
 				/>
 			)}
-			<P>{toTimerString(seconds)}</P>
-			{chapter && <P>{chapter.name}</P>}
+			<P {...css({ textAlign: "center" })}>
+				{toTimerString(seconds)} {chapter && `- ${chapter.name}`}
+			</P>
 		</View>
 	);
 };

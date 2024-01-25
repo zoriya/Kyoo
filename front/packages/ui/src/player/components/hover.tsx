@@ -25,6 +25,7 @@ import {
 	H1,
 	H2,
 	IconButton,
+	imageBorderRadius,
 	Poster,
 	PressableFeedback,
 	Skeleton,
@@ -337,13 +338,14 @@ const ProgressBar = ({ url, chapters }: { url: string; chapters?: Chapter[] }) =
 			<Tooltip
 				id={"progress-scrubber"}
 				isOpen={hoverProgress !== null}
-				imperativeModeOnly
 				position={{ x: layout.x + (layout.width * hoverProgress!) / (duration ?? 1), y: layout.y }}
 				render={() =>
 					hoverProgress ? (
 						<ScrubberTooltip seconds={hoverProgress} chapters={chapters} url={url} />
 					) : null
 				}
+				opacity={1}
+				style={{ padding: 0, borderRadius: imageBorderRadius }}
 			/>
 		</>
 	);
