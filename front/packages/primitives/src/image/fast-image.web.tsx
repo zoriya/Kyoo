@@ -24,11 +24,17 @@ export const FastImage = ({
 	src,
 	alt,
 	style,
+	x,
+	y,
 	...props
 }: {
 	src: string;
 	alt: string;
 	style?: object;
+	width: number | string;
+	height: number | string;
+	x: number;
+	y: number;
 }) => {
 	return (
 		<NextImage
@@ -37,7 +43,7 @@ export const FastImage = ({
 			alt={alt!}
 			// Don't use next's server to reprocess images, they are already optimized by kyoo.
 			unoptimized={true}
-			style={style}
+			style={{ objectFit: "none", objectPosition: `${-x}px ${-y}px`, ...style }}
 			{...props}
 		/>
 	);

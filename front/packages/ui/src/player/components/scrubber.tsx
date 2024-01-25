@@ -23,11 +23,12 @@ import { FastImage, P, imageBorderRadius, tooltip, ts } from "@kyoo/primitives";
 import { Platform, View } from "react-native";
 import { percent, useYoshiki, px, vh } from "yoshiki/native";
 import { ErrorView } from "../../fetch";
-import { useMemo } from "react";
+import { ComponentProps, useEffect, useMemo } from "react";
 import { CssObject } from "yoshiki/src/web/generator";
 import { useAtomValue } from "jotai";
-import { durationAtom, progressAtom } from "../state";
+import { durationAtom, playAtom, progressAtom } from "../state";
 import { toTimerString } from "./left-buttons";
+import { useSetAtom } from "jotai";
 
 type Thumb = { to: number; url: string; x: number; y: number; width: number; height: number };
 
@@ -67,7 +68,19 @@ export const useScrubber = (url: string) => {
 		return ret;
 	}, [data]);
 
-	return { info, error } as const;
+	const last = info?.[info.length - 1];
+	return {
+		info,
+		error,
+		stats: last
+			? {
+					rows: last.y / last.height + 1,
+					columns: Math.max(...info.map((x) => x.x)) / last.width + 1,
+					width: last.width,
+					height: last.height,
+			  }
+			: null,
+	} as const;
 };
 
 useScrubber.query = (url: string): QueryIdentifier<string> => ({
@@ -80,14 +93,14 @@ useScrubber.query = (url: string): QueryIdentifier<string> => ({
 
 export const BottomScrubber = ({ url }: { url: string }) => {
 	const { css } = useYoshiki();
-	const { info, error } = useScrubber(url);
+	const { info, error, stats } = useScrubber(url);
 
 	const progress = useAtomValue(progressAtom);
-	const duration = useAtomValue(durationAtom);
+	const duration = useAtomValue(durationAtom) ?? 1;
 
 	if (error) return <ErrorView error={error} />;
 
-	const width = info?.[0]?.width ?? 0;
+	const width = stats?.width ?? 1;
 	return (
 		<View {...css({ overflow: "hidden" })}>
 			<View
@@ -109,15 +122,10 @@ export const BottomScrubber = ({ url }: { url: string }) => {
 						alt=""
 						width={thumb.width}
 						height={thumb.height}
-						style={
-							Platform.OS === "web"
-								? ({
-										objectFit: "none",
-										objectPosition: `${-thumb.x}px ${-thumb.y}px`,
-										flexShrink: 0,
-								  } as CssObject)
-								: undefined
-						}
+						x={thumb.x}
+						y={thumb.y}
+						columns={stats?.columns}
+						rows={stats?.rows}
 					/>
 				))}
 			</View>
