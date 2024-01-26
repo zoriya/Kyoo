@@ -88,12 +88,14 @@ export const Video = memo(function Video({
 	subtitles,
 	setError,
 	fonts,
+	startTime,
 	...props
 }: {
 	links?: Episode["links"];
 	subtitles?: Subtitle[];
 	setError: (error: string | undefined) => void;
 	fonts?: string[];
+	startTime?: number | null;
 } & Partial<VideoProps>) {
 	const ref = useRef<ElementRef<typeof NativeVideo> | null>(null);
 	const [isPlaying, setPlay] = useAtom(playAtom);
@@ -148,6 +150,7 @@ export const Video = memo(function Video({
 			{...props}
 			source={{
 				uri: source,
+				startPosition: startTime ? startTime * 1000 : undefined,
 				...links,
 			}}
 			paused={!isPlaying}

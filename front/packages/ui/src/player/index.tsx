@@ -36,7 +36,7 @@ import { useRouter } from "solito/router";
 import { useSetAtom } from "jotai";
 import { useYoshiki } from "yoshiki/native";
 import { Back, Hover, LoadingIndicator } from "./components/hover";
-import { fullscreenAtom, Video } from "./state";
+import { fullscreenAtom, progressAtom, Video } from "./state";
 import { episodeDisplayNumber } from "../details/episode";
 import { useVideoKeyboard } from "./keyboard";
 import { MediaSessionManager } from "./media-session";
@@ -140,6 +140,7 @@ export const Player = ({ slug, type }: { slug: string; type: "episode" | "movie"
 					subtitles={info?.subtitles}
 					setError={setPlaybackError}
 					fonts={info?.fonts}
+					startTime={data?.watchStatus?.watchedTime}
 					onEnd={() => {
 						if (!data) return;
 						if (data.type === "movie")
@@ -167,12 +168,15 @@ Player.query = (type: "episode" | "movie", slug: string): QueryIdentifier<Item> 
 		? {
 				path: ["episode", slug],
 				params: {
-					fields: ["nextEpisode", "previousEpisode", "show"],
+					fields: ["nextEpisode", "previousEpisode", "show", "watchStatus"],
 				},
 				parser: EpisodeP.transform((x) => ({ ...x, type: "episode" })),
 		  }
 		: {
 				path: ["movie", slug],
+				params: {
+					fields: ["watchStatus"],
+				},
 				parser: MovieP.transform((x) => ({ ...x, type: "movie" })),
 		  };
 

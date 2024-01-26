@@ -28,7 +28,7 @@ declare module "react-native-video" {
 		onMediaUnsupported?: () => void;
 	}
 	export type VideoProps = Omit<VideoProperties, "source"> & {
-		source: { uri: string; hls: string | null };
+		source: { uri: string; hls: string | null; startPosition?: number | null };
 	};
 }
 
