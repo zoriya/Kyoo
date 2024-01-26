@@ -33,7 +33,7 @@ import { VideoProps } from "react-native-video";
 import { useAtomValue, useSetAtom, useAtom } from "jotai";
 import { useYoshiki } from "yoshiki";
 import Jassub from "jassub";
-import { playAtom, PlayMode, playModeAtom, subtitleAtom } from "./state";
+import { playAtom, PlayMode, playModeAtom, progressAtom, subtitleAtom } from "./state";
 import Hls, { Level, LoadPolicy } from "hls.js";
 import { useTranslation } from "react-i18next";
 import { Menu } from "@kyoo/primitives";
@@ -77,7 +77,6 @@ const initHls = async (): Promise<Hls> => {
 		},
 		autoStartLoad: false,
 		// debug: true,
-		startPosition: 0,
 		fragLoadPolicy: {
 			default: {
 				maxTimeToFirstByteMs: Infinity,
@@ -167,7 +166,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 				ref.current.src = source.uri;
 			} else {
 				hls.attachMedia(ref.current);
-				hls.startLoad(0);
+				hls.startLoad(source.startPosition ?? 0);
 				hls.on(Hls.Events.ERROR, (_, d) => {
 					if (!d.fatal || !hls?.media) return;
 					console.warn("Hls error", d);
@@ -187,6 +186,8 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 		// Set play state to the player's value (if autoplay is denied)
 		setPlay(!ref.current.paused);
 	}, [setPlay]);
+
+	const setProgress = useSetAtom(progressAtom);
 
 	return (
 		<video
@@ -220,6 +221,9 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 						error: { "": "", errorString: ref.current?.error?.message ?? "Unknown error" },
 					});
 				}
+			}}
+			onLoadedMetadata={() => {
+				if (source.startPosition) setProgress(source.startPosition / 1000);
 			}}
 			// BUG: If this is enabled, switching to fullscreen or opening a menu make a play/pause loop until firefox crash.
 			// onPlay={() => onPlayPause?.call(null, true)}
