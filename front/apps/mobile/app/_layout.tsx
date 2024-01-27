@@ -29,7 +29,7 @@ import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persist
 import i18next from "i18next";
 import { Slot } from "expo-router";
 import { getLocales } from "expo-localization";
-import { SplashScreen } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import {
 	useFonts,
 	Poppins_300Light,
@@ -79,7 +79,7 @@ i18next.use(initReactI18next).init({
 		escapeValue: false,
 	},
 	fallbackLng: "en",
-	lng: getLocales()[0].languageCode,
+	lng: getLocales()[0].languageCode ?? "en",
 	resources: {
 		en: { translation: en },
 		fr: { translation: fr },
