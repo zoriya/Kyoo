@@ -5,9 +5,9 @@
 	"sideEffects": false,
 	"packageManager": "yarn@3.2.4",
 	"devDependencies": {
-		"@types/react": "18.2.39",
+		"@types/react": "18.2.48",
 		"react-native-mmkv": "^2.11.0",
-		"typescript": "^5.3.2"
+		"typescript": "^5.3.3"
 	},
 	"peerDependencies": {
 		"@tanstack/react-query": "*",
