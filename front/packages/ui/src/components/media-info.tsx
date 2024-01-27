@@ -67,7 +67,7 @@ const MediaInfoTable = ({
 				[t("mediainfo.video")]: video
 					? `${video.width}x${video.height} (${video.quality}) - ${formatBitrate(
 							video.bitrate,
-					  )} - ${video.codec}`
+						)} - ${video.codec}`
 					: undefined,
 			},
 			audios === undefined

@@ -34,5 +34,5 @@ export const focusReset: object =
 		? {
 				boxShadow: "unset",
 				outline: "none",
-		  }
+			}
 		: {};

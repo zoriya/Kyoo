@@ -321,7 +321,7 @@ const toWebVtt = async (srtUrl: string) => {
 		headers: token
 			? {
 					Authorization: token,
-			  }
+				}
 			: undefined,
 	});
 	const srt = await query.blob();

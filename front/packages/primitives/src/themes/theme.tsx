@@ -195,7 +195,7 @@ export const ContrastArea = ({
 							overlay1: theme.user.overlay1,
 							heading: theme.contrast,
 							paragraph: theme.heading,
-					  }
+						}
 					: theme
 			}
 		>
