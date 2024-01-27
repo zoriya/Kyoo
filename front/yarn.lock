@@ -2509,12 +2509,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@kesha-antonov/react-native-background-downloader@npm:^2.10.0":
-  version: 2.10.0
-  resolution: "@kesha-antonov/react-native-background-downloader@npm:2.10.0"
+"@kesha-antonov/react-native-background-downloader@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "@kesha-antonov/react-native-background-downloader@npm:3.0.1"
   peerDependencies:
     react-native: ">=0.57.0"
-  checksum: f56e4bf5f28b07d8b9e776ce3bdc6ed715ef3d9a95d3ec67b4852dc2992c51283550b5406106454557654a1c2503e920ec62d895aa6240aae97ba4f029df8a32
+  checksum: f369689009b74add987e667746bd80409646ad2ebb51f9a4831242b365e898975d89759b7effd4169156d74ff4cc89d84318f1ab5a854dcd72bcba91081ba3a0
   languageName: node
   linkType: hard
 
@@ -2603,7 +2603,7 @@ __metadata:
   resolution: "@kyoo/ui@workspace:packages/ui"
   dependencies:
     "@gorhom/portal": ^1.0.14
-    "@kesha-antonov/react-native-background-downloader": ^2.10.0
+    "@kesha-antonov/react-native-background-downloader": ^3.0.1
     "@kyoo/models": "workspace:^"
     "@kyoo/primitives": "workspace:^"
     "@shopify/flash-list": ^1.6.3
@@ -10409,7 +10409,7 @@ __metadata:
     "@formatjs/intl-displaynames": ^6.6.6
     "@formatjs/intl-locale": ^3.4.5
     "@gorhom/portal": ^1.0.14
-    "@kesha-antonov/react-native-background-downloader": ^2.10.0
+    "@kesha-antonov/react-native-background-downloader": ^3.0.1
     "@kyoo/ui": "workspace:^"
     "@material-symbols/svg-400": ^0.14.6
     "@react-native-community/netinfo": 11.1.0
