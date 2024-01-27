@@ -33,7 +33,7 @@
 		"yoshiki": "*"
 	},
 	"optionalDependencies": {
-		"@kesha-antonov/react-native-background-downloader": "^3.0.1",
+		"@kesha-antonov/react-native-background-downloader": "git+https://github.com/zoriya/react-native-background-downloader.git",
 		"expo-file-system": "^16.0.5",
 		"expo-router": "^3.4.6"
 	},

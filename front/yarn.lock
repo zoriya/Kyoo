@@ -2509,12 +2509,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@kesha-antonov/react-native-background-downloader@npm:^3.0.1":
+"@kesha-antonov/react-native-background-downloader@git+https://github.com/zoriya/react-native-background-downloader.git":
   version: 3.0.1
-  resolution: "@kesha-antonov/react-native-background-downloader@npm:3.0.1"
+  resolution: "@kesha-antonov/react-native-background-downloader@https://github.com/zoriya/react-native-background-downloader.git#commit=3c1b703c80f82418936ee17b2e90e6ae49fc8310"
   peerDependencies:
     react-native: ">=0.57.0"
-  checksum: f369689009b74add987e667746bd80409646ad2ebb51f9a4831242b365e898975d89759b7effd4169156d74ff4cc89d84318f1ab5a854dcd72bcba91081ba3a0
+  checksum: 05b84e0fe11db3f818ab81bca5e36e1648ce7532335c35d2b65efb24b9241233f6755ee14c77affc765d4d24b0576f87a5951d347948fe532c515ff6322ea3f4
   languageName: node
   linkType: hard
 
@@ -2603,7 +2603,7 @@ __metadata:
   resolution: "@kyoo/ui@workspace:packages/ui"
   dependencies:
     "@gorhom/portal": ^1.0.14
-    "@kesha-antonov/react-native-background-downloader": ^3.0.1
+    "@kesha-antonov/react-native-background-downloader": "git+https://github.com/zoriya/react-native-background-downloader.git"
     "@kyoo/models": "workspace:^"
     "@kyoo/primitives": "workspace:^"
     "@shopify/flash-list": ^1.6.3
@@ -10409,7 +10409,7 @@ __metadata:
     "@formatjs/intl-displaynames": ^6.6.6
     "@formatjs/intl-locale": ^3.4.5
     "@gorhom/portal": ^1.0.14
-    "@kesha-antonov/react-native-background-downloader": ^3.0.1
+    "@kesha-antonov/react-native-background-downloader": "git+https://github.com/zoriya/react-native-background-downloader.git"
     "@kyoo/ui": "workspace:^"
     "@material-symbols/svg-400": ^0.14.6
     "@react-native-community/netinfo": 11.1.0

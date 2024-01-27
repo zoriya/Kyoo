@@ -26,7 +26,6 @@ import {
 	H6,
 	IconButton,
 	ImageBackground,
-	Link,
 	Menu,
 	P,
 	PressableFeedback,
@@ -132,9 +131,9 @@ const DownloadedItem = ({
 					</H6>
 					{status === "FAILED" && <P>{t("downloads.error", { error: error ?? "Unknow error" })}</P>}
 					{runtime && status === "DONE" && <SubP>{displayRuntime(runtime)}</SubP>}
-					{progress !== 100 && (
+					{progress !== 100 && progress !== null && (
 						<View {...css({ flexDirection: "row", alignItems: "center" })}>
-							<SubP {...css({ flexShrink: 0 })}>{progress}%</SubP>
+							<SubP {...css({ flexShrink: 0 })}>{Math.round(progress)}%</SubP>
 							<View
 								{...css({
 									flexGrow: 1,
