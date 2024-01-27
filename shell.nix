@@ -1,7 +1,12 @@
 {pkgs ? import <nixpkgs> {}}: let
-  venvDir = "./scanner/.venv";
-  python = pkgs.python312;
-  pythonPkgs = ./scanner/requirements.txt;
+  python = pkgs.python312.withPackages (ps:
+    with ps; [
+      guessit
+      aiohttp
+      jsons
+      watchfiles
+      black
+    ]);
   dotnet = with pkgs.dotnetCorePackages;
     combinePackages [
       sdk_7_0
@@ -15,7 +20,8 @@ in
       nodePackages.eas-cli
       nodePackages.expo-cli
       dotnet
-      (python312.withPackages (ps: with ps; [setuptools pip]))
+      # csharpier
+      # python
       go
       wgo
       mediainfo
@@ -28,17 +34,4 @@ in
     ];
 
     DOTNET_ROOT = "${dotnet}";
-
-    shellHook = ''
-      # Install python modules
-      SOURCE_DATE_EPOCH=$(date +%s)
-      if [ ! -d "${venvDir}" ]; then
-          ${python}/bin/python3 -m venv ${toString ./.}/${venvDir}
-          source ${venvDir}/bin/activate
-          export PIP_DISABLE_PIP_VERSION_CHECK=1
-          pip install -r ${pythonPkgs} >&2
-      else
-          source ${venvDir}/bin/activate
-      fi
-    '';
   }
