@@ -88,9 +88,9 @@ const setupDownloadTask = (
 	if (!stateAtom) stateAtom = atom({} as State);
 	store.set(stateAtom, {
 		status: task.state,
-		progress: task.percent * 100,
-		size: task.totalBytes,
-		availableSize: task.bytesWritten,
+		progress: (task.bytesDownloaded / task.bytesTotal) * 100,
+		size: task.bytesTotal,
+		availableSize: task.bytesDownloaded,
 		pause: () => {
 			task.pause();
 			store.set(stateAtom!, (x) => ({ ...x, state: "PAUSED" }));
@@ -126,22 +126,20 @@ const setupDownloadTask = (
 
 	task
 		.begin(({ expectedBytes }) => update((x) => ({ ...x, size: expectedBytes })))
-		.progress((percent, availableSize, size) => {
+		.progress(({ bytesDownloaded, bytesTotal }) => {
 			update((x) => ({
 				...x,
-				progress: Math.round(percent * 100),
-				size,
-				availableSize,
+				progress: Math.round((bytesDownloaded / bytesTotal) * 100),
+				size: bytesTotal,
+				availableSize: bytesDownloaded,
 				status: "DOWNLOADING",
 			}));
 		})
 		.done(() => {
 			update((x) => ({ ...x, progress: 100, status: "DONE", play: playFn(state, queryClient) }));
-			// apparently this is needed for ios /shrug i'm totaly gona forget this
-			// if i ever implement ios so keeping this here
-			if (Platform.OS === "ios") RNBackgroundDownloader.completeHandler(task.id);
+			RNBackgroundDownloader.completeHandler(task.id);
 		})
-		.error((error) => {
+		.error(({ error }) => {
 			update((x) => ({ ...x, status: "FAILED", error }));
 			console.error(`Error downloading ${state.data.slug}`, error);
 			ToastAndroid.show(`Error downloading ${state.data.slug}`, ToastAndroid.LONG);
