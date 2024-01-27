@@ -18,7 +18,7 @@
 		"@formatjs/intl-displaynames": "^6.6.6",
 		"@formatjs/intl-locale": "^3.4.5",
 		"@gorhom/portal": "^1.0.14",
-		"@kesha-antonov/react-native-background-downloader": "^3.0.1",
+		"@kesha-antonov/react-native-background-downloader": "git+https://github.com/zoriya/react-native-background-downloader.git",
 		"@kyoo/ui": "workspace:^",
 		"@material-symbols/svg-400": "^0.14.6",
 		"@react-native-community/netinfo": "11.1.0",

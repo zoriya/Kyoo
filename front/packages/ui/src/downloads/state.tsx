@@ -45,7 +45,7 @@ import { z } from "zod";
 
 export type State = {
 	status: "DOWNLOADING" | "PAUSED" | "DONE" | "FAILED" | "STOPPED";
-	progress: number;
+	progress: number | null;
 	size: number;
 	availableSize: number;
 	error?: string;
@@ -88,7 +88,7 @@ const setupDownloadTask = (
 	if (!stateAtom) stateAtom = atom({} as State);
 	store.set(stateAtom, {
 		status: task.state,
-		progress: (task.bytesDownloaded / task.bytesTotal) * 100,
+		progress: task.bytesTotal ? (task.bytesDownloaded / task.bytesTotal) * 100 : null,
 		size: task.bytesTotal,
 		availableSize: task.bytesDownloaded,
 		pause: () => {
@@ -190,6 +190,7 @@ const download = (
 		headers: {
 			Authorization: account.token.access_token,
 		},
+		showNotification: true,
 		// TODO: Implement only wifi
 		// network: Network.ALL,
 	});
