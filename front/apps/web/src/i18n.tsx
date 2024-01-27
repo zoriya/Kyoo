@@ -47,8 +47,8 @@ export const withTranslations = (
 							...commonOptions,
 							lng: props.pageProps.__lang,
 							resources: props.pageProps.__resources,
-					  }),
-					  i18next),
+						}),
+						i18next),
 			[props.pageProps.__lang, props.pageProps.__resources],
 		);
 

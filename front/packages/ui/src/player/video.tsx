@@ -106,7 +106,7 @@ const Video = forwardRef<NativeVideo, VideoProps>(function Video(
 						? {
 								type: "index",
 								value: subtitles?.indexOf(subtitle),
-						  }
+							}
 						: { type: "disabled" }
 				}
 				{...props}

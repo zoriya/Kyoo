@@ -167,10 +167,10 @@ const VolumeSlider = () => {
 					isMuted || volume == 0
 						? VolumeOff
 						: volume < 25
-						  ? VolumeMute
-						  : volume < 65
-						    ? VolumeDown
-						    : VolumeUp
+							? VolumeMute
+							: volume < 65
+								? VolumeDown
+								: VolumeUp
 				}
 				onPress={() => setMuted(!isMuted)}
 				{...tooltip(t("player.mute"), true)}

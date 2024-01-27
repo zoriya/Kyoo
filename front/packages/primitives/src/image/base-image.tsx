@@ -26,7 +26,7 @@ import { YoshikiStyle } from "yoshiki/src/type";
 export type YoshikiEnhanced<Style> = Style extends any
 	? {
 			[key in keyof Style]: YoshikiStyle<Style[key]>;
-	  }
+		}
 	: never;
 
 export type Props = {

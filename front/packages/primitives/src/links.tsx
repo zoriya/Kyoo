@@ -48,7 +48,7 @@ export const A = ({
 					? {
 							nativeBehavior: "stack-replace",
 							isNestedNavigator: false,
-					  }
+						}
 					: undefined
 			}
 			textProps={css(

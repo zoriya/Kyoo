@@ -111,12 +111,12 @@ export const Player = ({ slug, type }: { slug: string; type: "episode" | "movie"
 						data.type === "movie"
 							? data.name
 							: data.show!.name +
-							  " " +
-							  episodeDisplayNumber({
+								" " +
+								episodeDisplayNumber({
 									seasonNumber: data.seasonNumber,
 									episodeNumber: data.episodeNumber,
 									absoluteNumber: data.absoluteNumber,
-							  })
+								})
 					}
 					description={data.overview}
 				/>
@@ -171,14 +171,14 @@ Player.query = (type: "episode" | "movie", slug: string): QueryIdentifier<Item> 
 					fields: ["nextEpisode", "previousEpisode", "show", "watchStatus"],
 				},
 				parser: EpisodeP.transform((x) => ({ ...x, type: "episode" })),
-		  }
+			}
 		: {
 				path: ["movie", slug],
 				params: {
 					fields: ["watchStatus"],
 				},
 				parser: MovieP.transform((x) => ({ ...x, type: "movie" })),
-		  };
+			};
 
 Player.infoQuery = (type: "episode" | "movie", slug: string): QueryIdentifier<WatchInfo> => ({
 	path: ["video", type, slug, "info"],
