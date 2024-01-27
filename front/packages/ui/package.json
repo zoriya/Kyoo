@@ -10,9 +10,9 @@
 	"devDependencies": {
 		"@gorhom/portal": "^1.0.14",
 		"@shopify/flash-list": "^1.6.3",
-		"@types/react": "18.2.39",
+		"@types/react": "18.2.48",
 		"react-native-uuid": "^2.0.1",
-		"typescript": "^5.3.2"
+		"typescript": "^5.3.3"
 	},
 	"peerDependencies": {
 		"@gorhom/portal": "*",
@@ -34,8 +34,8 @@
 	},
 	"optionalDependencies": {
 		"@kesha-antonov/react-native-background-downloader": "^2.10.0",
-		"expo-file-system": "^15.6.0",
-		"expo-router": "^2.0.14"
+		"expo-file-system": "^16.0.5",
+		"expo-router": "^3.4.6"
 	},
 	"peerDependenciesMeta": {
 		"@kesha-antonov/react-native-background-downloader": {
