@@ -12,14 +12,6 @@ type Extractor struct {
 	lock      sync.RWMutex
 }
 
-func GetMetadataPath() string {
-	out := os.Getenv("GOCODER_METADATA_ROOT")
-	if out == "" {
-		return "/metadata"
-	}
-	return out
-}
-
 func NewExtractor() *Extractor {
 	return &Extractor{
 		extracted: make(map[string]<-chan struct{}),
@@ -49,8 +41,8 @@ func (e *Extractor) RunExtractor(path string, sha string, subs *[]Subtitle) <-ch
 	e.lock.Unlock()
 
 	go func() {
-		attachment_path := fmt.Sprintf("%s/%s/att", GetMetadataPath(), sha)
-		subs_path := fmt.Sprintf("%s/%s/sub", GetMetadataPath(), sha)
+		attachment_path := fmt.Sprintf("%s/%s/att", Settings.Metadata, sha)
+		subs_path := fmt.Sprintf("%s/%s/sub", Settings.Metadata, sha)
 		os.MkdirAll(attachment_path, 0o644)
 		os.MkdirAll(subs_path, 0o755)
 

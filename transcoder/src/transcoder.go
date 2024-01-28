@@ -19,7 +19,7 @@ type Transcoder struct {
 }
 
 func NewTranscoder() (*Transcoder, error) {
-	out := GetOutPath()
+	out := Settings.Outpath
 	dir, err := os.ReadDir(out)
 	if err != nil {
 		return nil, err
