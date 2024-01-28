@@ -18,33 +18,40 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import NextImage from "next/image";
+import { Image, View } from "react-native";
 
-export const FastImage = ({
+export const Sprite = ({
 	src,
 	alt,
-	style,
+	width,
+	height,
 	x,
 	y,
+	rows,
+	columns,
+	style,
 	...props
 }: {
 	src: string;
 	alt: string;
-	style?: object;
-	width: number | string;
-	height: number | string;
+	width: number;
+	height: number;
 	x: number;
 	y: number;
+	rows: number;
+	columns: number;
+	style?: object;
 }) => {
 	return (
-		<NextImage
-			src={src}
-			priority={false}
-			alt={alt!}
-			// Don't use next's server to reprocess images, they are already optimized by kyoo.
-			unoptimized={true}
-			style={{ objectFit: "none", objectPosition: `${-x}px ${-y}px`, ...style }}
-			{...props}
-		/>
+		<View style={{ width, height, overflow: "hidden", flexGrow: 0, flexShrink: 0 }}>
+			<Image
+				source={{ uri: src }}
+				alt={alt}
+				width={width * columns}
+				height={height * rows}
+				style={{ transform: [{ translateX: -x }, { translateY: -y }] }}
+				{...props}
+			/>
+		</View>
 	);
 };
