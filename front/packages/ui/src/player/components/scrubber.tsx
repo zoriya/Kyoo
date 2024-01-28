@@ -23,10 +23,11 @@ import { Sprite, P, imageBorderRadius, ts } from "@kyoo/primitives";
 import { View, Platform } from "react-native";
 import { percent, useYoshiki, px, Theme, useForceRerender } from "yoshiki/native";
 import { ErrorView } from "../../fetch";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useAtomValue } from "jotai";
-import { durationAtom, progressAtom } from "../state";
+import { durationAtom } from "../state";
 import { toTimerString } from "./left-buttons";
+import { seekProgressAtom } from "./hover";
 
 type Thumb = {
 	from: number;
@@ -147,17 +148,18 @@ export const ScrubberTooltip = ({
 };
 let scrubberWidth = 0;
 
-export const BottomScrubber = ({ url }: { url: string }) => {
+export const BottomScrubber = ({ url, chapters }: { url: string; chapters?: Chapter[] }) => {
 	const { css } = useYoshiki();
 	const { info, error, stats } = useScrubber(url);
 	const rerender = useForceRerender();
 
-	const progress = useAtomValue(progressAtom);
+	const progress = useAtomValue(seekProgressAtom) ?? 0;
 	const duration = useAtomValue(durationAtom) ?? 1;
 
 	if (error) return <ErrorView error={error} />;
 
 	const width = stats?.width ?? 1;
+	const chapter = chapters?.findLast((x) => x.startTime <= progress && progress < x.endTime);
 	return (
 		<View {...css({ overflow: "hidden" })}>
 			<View
@@ -231,6 +233,7 @@ export const BottomScrubber = ({ url }: { url: string }) => {
 					})}
 				>
 					{toTimerString(progress)}
+					{chapter && `\n${chapter.name}`}
 				</P>
 			</View>
 		</View>

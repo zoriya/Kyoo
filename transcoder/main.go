@@ -206,7 +206,12 @@ func (h *Handler) GetInfo(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	// Run extractors to have them in cache
 	h.extractor.RunExtractor(ret.Path, ret.Sha, &ret.Subtitles)
+	h.thumbnails.ExtractThumbnail(
+		ret.Path,
+		fmt.Sprintf("%s/%s/thumbnails.png", resource, slug),
+	)
 	return c.JSON(http.StatusOK, ret)
 }
 
