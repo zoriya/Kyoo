@@ -29,12 +29,9 @@ jobs:
             image: zoriya/kyoo_transcoder
     name: Build ${{matrix.label}}
     steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-          fetch-depth: 0
+      - uses: actions/checkout@v4
 
-      - uses: dorny/paths-filter@v2
+      - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
@@ -43,12 +40,13 @@ jobs:
 
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ${{matrix.image}}
           tags: |
             type=edge
             type=ref,event=branch
+            type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
 
@@ -57,21 +55,21 @@ jobs:
           echo "SHOULD_PUSH=$([ "${GITHUB_REF##*/}" == "master" ] || [ "${GITHUB_REF##*/}" == "next" ] && echo "true" || echo "false")" >> $GITHUB_ENV
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to DockerHub
-        if: ${{env.SHOULD_PUSH}}
-        uses: docker/login-action@v1
+        if: env.SHOULD_PUSH == 'true'
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push
         id: docker_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         if: steps.filter.outputs.should_run == 'true'
         with:
           context: ${{matrix.context}}
@@ -82,7 +80,7 @@ jobs:
           tags: ${{steps.meta.outputs.tags}}
 
       - name: Sync README.MD
-        if: ${{env.SHOULD_PUSH}}
+        if: env.SHOULD_PUSH == 'true'
         uses: ms-jpq/sync-dockerhub-readme@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
