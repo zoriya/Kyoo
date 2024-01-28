@@ -19,6 +19,9 @@
  */
 
 import { Theme } from "yoshiki/native";
+import { Tooltip as RTooltip } from "react-tooltip";
+import { forwardRef } from "react";
+import { ContrastArea } from "./themes";
 
 export const tooltip = (tooltip: string, up?: boolean) => ({
 	dataSet: {
@@ -43,4 +46,10 @@ export const WebTooltip = ({ theme }: { theme: Theme }) => {
 	);
 };
 
-export { Tooltip } from "react-tooltip";
+export const Tooltip = forwardRef(function Tooltip(props, ref) {
+	return (
+		<ContrastArea mode="alternate">
+			<RTooltip {...props} ref={ref} />
+		</ContrastArea>
+	);
+}) as typeof RTooltip;
