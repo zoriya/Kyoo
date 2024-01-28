@@ -3,14 +3,12 @@ package src
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"math"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 )
 
 type FileStream struct {
@@ -67,9 +65,8 @@ func NewFileStream(path string) (*FileStream, error) {
 }
 
 func GetKeyframes(path string) ([]float64, bool, error) {
-	log.Printf("Starting ffprobe for keyframes analysis for %s", path)
+	defer printExecTime("ffprobe analysis for %s", path)()
 	// run ffprobe to return all IFrames, IFrames are points where we can split the video in segments.
-	start := time.Now()
 	// We ask ffprobe to return the time of each frame and it's flags
 	// We could ask it to return only i-frames (keyframes) with the -skip_frame nokey but using it is extremly slow
 	// since ffmpeg parses every frames when this flag is set.
@@ -89,7 +86,6 @@ func GetKeyframes(path string) ([]float64, bool, error) {
 	if err != nil {
 		return nil, false, err
 	}
-	log.Printf("%s ffprobe analysis finished in %s", path, time.Since(start))
 
 	scanner := bufio.NewScanner(stdout)
 
@@ -194,7 +190,9 @@ func (fs *FileStream) GetMaster() string {
 		} else {
 			master += fmt.Sprintf("NAME=\"Audio %d\",", audio.Index)
 		}
-		master += "DEFAULT=YES,"
+		if audio.IsDefault {
+			master += "DEFAULT=YES,"
+		}
 		master += fmt.Sprintf("URI=\"./audio/%d/index.m3u8\"\n", audio.Index)
 	}
 	return master
