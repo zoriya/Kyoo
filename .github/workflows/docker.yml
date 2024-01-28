@@ -78,6 +78,8 @@ jobs:
             VERSION=0.0.0
           push: ${{env.SHOULD_PUSH}}
           tags: ${{steps.meta.outputs.tags}}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Sync README.MD
         if: env.SHOULD_PUSH == 'true'
