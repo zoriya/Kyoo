@@ -208,7 +208,7 @@ func (h *Handler) GetInfo(c echo.Context) error {
 	}
 	// Run extractors to have them in cache
 	h.extractor.RunExtractor(ret.Path, ret.Sha, &ret.Subtitles)
-	h.thumbnails.ExtractThumbnail(
+	go h.thumbnails.ExtractThumbnail(
 		ret.Path,
 		fmt.Sprintf("%s/%s/thumbnails.png", resource, slug),
 	)
