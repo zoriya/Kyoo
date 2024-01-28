@@ -66,7 +66,7 @@ func SanitizePath(path string) error {
 func GetClientId(c echo.Context) (string, error) {
 	key := c.Request().Header.Get("X-CLIENT-ID")
 	if key == "" {
-		return "", errors.New("missing client id. Please specify the X-CLIENT-ID header to a guid constant for the lifetime of the player (but unique per instance)")
+		return "", echo.NewHTTPError(http.StatusBadRequest, "missing client id. Please specify the X-CLIENT-ID header to a guid constant for the lifetime of the player (but unique per instance)")
 	}
 	return key, nil
 }
