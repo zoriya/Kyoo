@@ -19,11 +19,11 @@
  */
 
 import { useFetch, QueryIdentifier, imageFn, Chapter } from "@kyoo/models";
-import { FastImage, P, imageBorderRadius, ts } from "@kyoo/primitives";
-import { View } from "react-native";
-import { percent, useYoshiki, px, Theme } from "yoshiki/native";
+import { Sprite, P, imageBorderRadius, ts } from "@kyoo/primitives";
+import { View, Platform } from "react-native";
+import { percent, useYoshiki, px, Theme, useForceRerender } from "yoshiki/native";
 import { ErrorView } from "../../fetch";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useAtomValue } from "jotai";
 import { durationAtom, progressAtom } from "../state";
 import { toTimerString } from "./left-buttons";
@@ -128,7 +128,7 @@ export const ScrubberTooltip = ({
 			})}
 		>
 			{current && (
-				<FastImage
+				<Sprite
 					src={current.url}
 					alt={""}
 					width={current.width}
@@ -145,10 +145,12 @@ export const ScrubberTooltip = ({
 		</View>
 	);
 };
+let scrubberWidth = 0;
 
 export const BottomScrubber = ({ url }: { url: string }) => {
 	const { css } = useYoshiki();
 	const { info, error, stats } = useScrubber(url);
+	const rerender = useForceRerender();
 
 	const progress = useAtomValue(progressAtom);
 	const duration = useAtomValue(durationAtom) ?? 1;
@@ -159,30 +161,44 @@ export const BottomScrubber = ({ url }: { url: string }) => {
 	return (
 		<View {...css({ overflow: "hidden" })}>
 			<View
-				{...css(
-					{ flexDirection: "row" },
-					{
-						style: {
-							transform: `translateX(calc(${
-								(progress / duration) * -width * info.length - width / 2
-							}px + 50%))`,
-						},
-					},
-				)}
+				{...(Platform.OS === "web"
+					? css({ transform: `translateX(50%)` })
+					: {
+							// react-native does not support translateX by percentage so we simulate it
+							style: { transform: [{ translateX: scrubberWidth / 2 }] },
+							onLayout: (e) => {
+								if (!e.nativeEvent.layout.width) return;
+								scrubberWidth = e.nativeEvent.layout.width;
+								rerender();
+							},
+						})}
 			>
-				{info.map((thumb) => (
-					<FastImage
-						key={thumb.to}
-						src={thumb.url}
-						alt=""
-						width={thumb.width}
-						height={thumb.height}
-						x={thumb.x}
-						y={thumb.y}
-						columns={stats!.columns}
-						rows={stats!.rows}
-					/>
-				))}
+				<View
+					{...css(
+						{ flexDirection: "row" },
+						{
+							style: {
+								transform: `translateX(${
+									(progress / duration) * -width * info.length - width / 2
+								}px)`,
+							},
+						},
+					)}
+				>
+					{info.map((thumb) => (
+						<Sprite
+							key={thumb.to}
+							src={thumb.url}
+							alt=""
+							width={thumb.width}
+							height={thumb.height}
+							x={thumb.x}
+							y={thumb.y}
+							columns={stats!.columns}
+							rows={stats!.rows}
+						/>
+					))}
+				</View>
 			</View>
 			<View
 				{...css({
