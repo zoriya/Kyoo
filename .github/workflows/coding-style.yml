@@ -9,7 +9,7 @@ jobs:
       run:
         working-directory: ./back
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Check coding style
         run: |
@@ -23,10 +23,10 @@ jobs:
       run:
         working-directory: ./front
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: 18.x
           cache: yarn
@@ -45,7 +45,7 @@ jobs:
       run:
         working-directory: ./scanner
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
 
       - name: Run black
         run: |
@@ -59,7 +59,7 @@ jobs:
       run:
         working-directory: ./transcoder
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
 
       - name: Run go fmt
         run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then exit 1; fi

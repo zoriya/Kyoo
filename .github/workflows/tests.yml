@@ -22,7 +22,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
@@ -47,14 +47,14 @@ jobs:
 
     - name: Upload tests results
       if: ${{ always() }}
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: results.xml
         path: "**/TestOutputResults.xml"
 
     - name: Upload coverage report
       if: ${{ always() }}
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: coverage.xml
         path: "**/coverage.opencover.xml"

@@ -13,7 +13,7 @@ jobs:
         working-directory: ./front
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Check for EXPO_TOKEN
         run: |
@@ -23,7 +23,7 @@ jobs:
           fi
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: 18.x
           cache: yarn
@@ -52,7 +52,7 @@ jobs:
       - name: Download APK Asset
         run: wget -O kyoo.apk ${{ steps.url.outputs.assetUrl }}
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: kyoo.apk
           path: ./front/kyoo.apk
