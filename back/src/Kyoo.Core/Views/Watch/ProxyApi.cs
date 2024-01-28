@@ -19,8 +19,11 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AspNetCore.Proxy;
+using AspNetCore.Proxy.Options;
 using Kyoo.Abstractions.Models.Permissions;
+using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Utils;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Core.Api
@@ -31,6 +34,12 @@ namespace Kyoo.Core.Api
 	[ApiController]
 	public class ProxyApi : Controller
 	{
+		private readonly HttpProxyOptions _proxyOptions = HttpProxyOptionsBuilder.Instance.WithHandleFailure(async (context, exception) =>
+		{
+			context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+			await context.Response.WriteAsJsonAsync(new RequestError("Service unavailable"));
+		}).Build();
+
 		/// <summary>
 		/// Transcoder proxy
 		/// </summary>
@@ -44,7 +53,7 @@ namespace Kyoo.Core.Api
 		public Task Proxy(string rest, [FromQuery] Dictionary<string, string> query)
 		{
 			// TODO: Use an env var to configure transcoder:7666.
-			return this.HttpProxyAsync($"http://transcoder:7666/{rest}" + query.ToQueryString());
+			return this.HttpProxyAsync($"http://transcoder:7666/{rest}" + query.ToQueryString(), _proxyOptions);
 		}
 	}
 }
