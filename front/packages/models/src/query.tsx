@@ -22,6 +22,7 @@ import { ComponentType, ReactElement } from "react";
 import {
 	dehydrate,
 	QueryClient,
+	QueryFunction,
 	QueryFunctionContext,
 	useInfiniteQuery,
 	useQuery,
@@ -39,24 +40,25 @@ const kyooUrl =
 export let kyooApiUrl = kyooUrl;
 
 export const queryFn = async <Data,>(
-	context:
-		| (QueryFunctionContext & { timeout?: number; apiUrl?: string })
-		| {
+	context: {
+		timeout?: number;
+		apiUrl?: string;
+		authenticated?: boolean;
+		method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+	} & (
+		| QueryFunctionContext
+		| ({
 				path: (string | false | undefined | null)[];
 				body?: object;
-				method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-				authenticated?: boolean;
-				apiUrl?: string;
-				timeout?: number;
 				plainText?: boolean;
-		  },
+		  } & Partial<QueryFunctionContext>)
+	),
 	type?: z.ZodType<Data>,
 	token?: string | null,
 ): Promise<Data> => {
 	const url = context.apiUrl ?? (Platform.OS === "web" ? kyooUrl : getCurrentAccount()!.apiUrl);
 	kyooApiUrl = url;
 
-	// @ts-ignore
 	if (token === undefined && context.authenticated !== false) token = await getToken();
 	const path = [url]
 		.concat(
@@ -74,15 +76,13 @@ export const queryFn = async <Data,>(
 		if (controller) setTimeout(() => controller.abort(), context.timeout);
 
 		resp = await fetch(path, {
-			// @ts-ignore
 			method: context.method,
-			// @ts-ignore
-			body: context.body ? JSON.stringify(context.body) : undefined,
+			body: "body" in context && context.body ? JSON.stringify(context.body) : undefined,
 			headers: {
 				...(token ? { Authorization: token } : {}),
 				...("body" in context ? { "Content-Type": "application/json" } : {}),
 			},
-			signal: controller?.signal,
+			signal: controller?.signal ?? context.signal,
 		});
 	} catch (e) {
 		console.log("Fetch error", e, path);
