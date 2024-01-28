@@ -65,6 +65,7 @@ export const hoverAtom = atom((get) =>
 	[!get(playAtom), ...Object.values(get(hoverReasonAtom))].includes(true),
 );
 export const seekingAtom = atom(false);
+export const seekProgressAtom = atom<number | null>(null);
 
 export const Hover = ({
 	isLoading,
@@ -163,7 +164,7 @@ export const Hover = ({
 								)}
 								<ProgressBar chapters={chapters} url={url} />
 								{showBottomSeeker ? (
-									<BottomScrubber url={url} />
+									<BottomScrubber url={url} chapters={chapters} />
 								) : (
 									<View
 										{...css({
@@ -329,25 +330,28 @@ const ProgressBar = ({ url, chapters }: { url: string; chapters?: Chapter[] }) =
 	const setPlay = useSetAtom(playAtom);
 	const [hoverProgress, setHoverProgress] = useState<number | null>(null);
 	const [layout, setLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
+	const [seekProgress, setSeekProgress] = useAtom(seekProgressAtom);
 	const setSeeking = useSetAtom(seekingAtom);
 
 	return (
 		<>
 			<Slider
-				progress={progress}
+				progress={seekProgress ?? progress}
 				startSeek={() => {
 					setPlay(false);
 					setSeeking(true);
 				}}
 				endSeek={() => {
 					setSeeking(false);
+					setProgress(seekProgress!);
+					setSeekProgress(null);
 					setTimeout(() => setPlay(true), 10);
 				}}
 				onHover={(progress, layout) => {
 					setHoverProgress(progress);
 					setLayout(layout);
 				}}
-				setProgress={setProgress}
+				setProgress={(progress) => setSeekProgress(progress)}
 				subtleProgress={buffered}
 				max={duration}
 				markers={chapters?.map((x) => x.startTime)}
