@@ -23,14 +23,6 @@ type FileStream struct {
 	alock       sync.Mutex
 }
 
-func GetOutPath() string {
-	out := os.Getenv("GOCODER_CACHE_ROOT")
-	if out == "" {
-		return "/cache"
-	}
-	return out
-}
-
 func NewFileStream(path string) (*FileStream, error) {
 	info_chan := make(chan struct {
 		info *MediaInfo
@@ -55,7 +47,7 @@ func NewFileStream(path string) (*FileStream, error) {
 
 	return &FileStream{
 		Path:        path,
-		Out:         fmt.Sprintf("%s/%s", GetOutPath(), info.info.Sha),
+		Out:         fmt.Sprintf("%s/%s", Settings.Outpath, info.info.Sha),
 		Keyframes:   keyframes,
 		CanTransmux: can_transmux,
 		Info:        info.info,

@@ -237,7 +237,7 @@ func (h *Handler) GetAttachment(c echo.Context) error {
 	}
 	<-wait
 
-	path := fmt.Sprintf("%s/%s/att/%s", src.GetMetadataPath(), sha, name)
+	path := fmt.Sprintf("%s/%s/att/%s", src.Settings.Metadata, sha, name)
 	return c.File(path)
 }
 
@@ -263,7 +263,7 @@ func (h *Handler) GetSubtitle(c echo.Context) error {
 	}
 	<-wait
 
-	path := fmt.Sprintf("%s/%s/sub/%s", src.GetMetadataPath(), sha, name)
+	path := fmt.Sprintf("%s/%s/sub/%s", src.Settings.Metadata, sha, name)
 	return c.File(path)
 }
 

@@ -71,7 +71,7 @@ func extractThumbnail(path string, name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	out := fmt.Sprintf("%s/%s", GetMetadataPath(), ret.Sha)
+	out := fmt.Sprintf("%s/%s", Settings.Metadata, ret.Sha)
 	sprite_path := fmt.Sprintf("%s/sprite.png", out)
 	vtt_path := fmt.Sprintf("%s/sprite.vtt", out)
 
