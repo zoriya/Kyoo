@@ -18,7 +18,6 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { setUserTheme, useAccount } from "@kyoo/models";
 import { Select } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { Preference, SettingsContainer, useSetting } from "./base";

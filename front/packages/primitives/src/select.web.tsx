@@ -77,7 +77,7 @@ export const Select = ({
 						})}
 					>
 						<P {...css({ textAlign: "center" }, "text")}>{<RSelect.Value />}</P>
-						<RSelect.Icon asChild>
+						<RSelect.Icon>
 							<Icon icon={ExpandMore} />
 						</RSelect.Icon>
 					</View>
@@ -100,7 +100,7 @@ export const Select = ({
 										maxHeight: "calc(var(--radix-dropdown-menu-content-available-height) * 0.8)",
 									})}
 								>
-									<RSelect.ScrollUpButton asChild>
+									<RSelect.ScrollUpButton>
 										<Icon icon={ExpandLess} />
 									</RSelect.ScrollUpButton>
 									<RSelect.Viewport>
@@ -108,7 +108,7 @@ export const Select = ({
 											<Item key={x} label={getLabel(x)} value={x} />
 										))}
 									</RSelect.Viewport>
-									<RSelect.ScrollDownButton asChild>
+									<RSelect.ScrollDownButton>
 										<Icon icon={ExpandMore} />
 									</RSelect.ScrollDownButton>
 								</RSelect.Content>
