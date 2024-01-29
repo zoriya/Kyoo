@@ -31,12 +31,12 @@ import {
 } from "react";
 import { VideoProps } from "react-native-video";
 import { useAtomValue, useSetAtom, useAtom } from "jotai";
-import { useYoshiki } from "yoshiki";
+import { useForceRerender, useYoshiki } from "yoshiki";
 import Jassub from "jassub";
 import { playAtom, PlayMode, playModeAtom, progressAtom, subtitleAtom } from "./state";
 import Hls, { Level, LoadPolicy } from "hls.js";
 import { useTranslation } from "react-i18next";
-import { Menu } from "@kyoo/primitives";
+import { Menu, tooltip } from "@kyoo/primitives";
 import toVttBlob from "srt-webvtt";
 
 let hls: Hls | null = null;
@@ -331,8 +331,21 @@ const toWebVtt = async (srtUrl: string) => {
 export const AudiosMenu = ({
 	audios,
 	...props
-}: ComponentProps<typeof Menu> & { audios?: Audio[] }) => {
-	if (!hls || hls.audioTracks.length < 2) return null;
+}: ComponentProps<typeof Menu<{ disabled?: boolean }>> & { audios?: Audio[] }) => {
+	const { t } = useTranslation();
+	const rerender = useForceRerender();
+	// force rerender when mode changes
+	useAtomValue(playModeAtom);
+
+	useEffect(() => {
+		if (!hls) return;
+		hls.on(Hls.Events.AUDIO_TRACK_LOADED, rerender);
+		return () => hls!.off(Hls.Events.AUDIO_TRACK_LOADED, rerender);
+	});
+
+	if (!hls || hls.audioTracks.length < 2)
+		return <Menu {...props} disabled {...tooltip(t("player.notInPristine"))} />;
+
 	return (
 		<Menu {...props}>
 			{hls.audioTracks.map((x, i) => (
@@ -350,7 +363,7 @@ export const AudiosMenu = ({
 export const QualitiesMenu = (props: ComponentProps<typeof Menu>) => {
 	const { t } = useTranslation();
 	const [mode, setPlayMode] = useAtom(playModeAtom);
-	const [_, rerender] = useReducer((x) => x + 1, 0);
+	const rerender = useForceRerender();
 
 	useEffect(() => {
 		if (!hls) return;
