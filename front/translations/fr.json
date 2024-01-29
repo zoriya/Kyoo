@@ -92,6 +92,18 @@
 				"system": "Système"
 			}
 		},
+		"playback": {
+			"label": "Lecteur",
+			"audioLanguage": {
+				"label": "Langue audio",
+				"description": "Langue audio par défaut utilisée lors de la lecture de vidéos multi-audio"
+			},
+			"subtitleLanguage": {
+				"label": "Langue des sous-titres",
+				"description": "Langue des sous-titres utilisée par défaut",
+				"none": "Aucun"
+			}
+		},
 		"account": {
 			"label": "Compte",
 			"username": {

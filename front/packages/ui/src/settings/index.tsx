@@ -24,12 +24,14 @@ import { ScrollView } from "react-native";
 import { DefaultLayout } from "../layout";
 import { AccountSettings } from "./account";
 import { About, GeneralSettings } from "./general";
+import { PlaybackSettings } from "./playback";
 
 export const SettingsPage: QueryPage = () => {
 	const account = useAccount();
 	return (
 		<ScrollView contentContainerStyle={{ gap: ts(4), paddingBottom: ts(4) }}>
 			<GeneralSettings />
+			{account && <PlaybackSettings />}
 			{account && <AccountSettings />}
 			<About />
 		</ScrollView>
