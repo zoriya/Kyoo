@@ -165,6 +165,7 @@ func (ts *Stream) run(start int32) error {
 			if ts.isSegmentReady(segment) {
 				// the current segment is already marked at done so another process has already gone up to here.
 				cmd.Process.Signal(os.Interrupt)
+				log.Printf("Killing ffmpeg because segment %d is already ready", segment)
 				should_stop = true
 			} else {
 				close(ts.segments[segment])
@@ -173,6 +174,7 @@ func (ts *Stream) run(start int32) error {
 					should_stop = true
 				} else if ts.isSegmentReady(segment + 1) {
 					cmd.Process.Signal(os.Interrupt)
+					log.Printf("Killing ffmpeg because next segment %d is ready", segment)
 					should_stop = true
 				}
 			}
@@ -251,15 +253,15 @@ func (ts *Stream) GetSegment(segment int32) (string, error) {
 	ts.lock.RUnlock()
 
 	if !ready {
-		// Only start a new encode if there is more than 10s between the current encoder and the segment.
-		if distance > 10_000 {
-			log.Printf("Creating new head for %d since closest head is %fs aways", segment, distance/1000)
+		// Only start a new encode if there is too big a distance between the current encoder and the segment.
+		if distance > 60 {
+			log.Printf("Creating new head for %d since closest head is %fs aways", segment, distance)
 			err := ts.run(segment)
 			if err != nil {
 				return "", err
 			}
 		} else {
-			log.Printf("Waiting for segment %d since encoder head is %fs aways", segment, distance/1000)
+			log.Printf("Waiting for segment %d since encoder head is %fs aways", segment, distance)
 		}
 
 		ts.lock.RLock()
@@ -268,7 +270,7 @@ func (ts *Stream) GetSegment(segment int32) (string, error) {
 
 		select {
 		case <-ready_chan:
-		case <-time.After(10 * time.Second):
+		case <-time.After(60 * time.Second):
 			return "", errors.New("could not retrive the selected segment (timeout)")
 		}
 	}
