@@ -46,6 +46,7 @@ export const Select = ({
 	values: string[];
 	getLabel: (key: string) => string;
 }) => {
+	const { css: wCss } = useYoshiki();
 	const { css } = useNativeYoshiki();
 
 	return (
@@ -77,7 +78,7 @@ export const Select = ({
 						})}
 					>
 						<P {...css({ textAlign: "center" }, "text")}>{<RSelect.Value />}</P>
-						<RSelect.Icon>
+						<RSelect.Icon {...wCss({ display: "flex", justifyContent: "center" })}>
 							<Icon icon={ExpandMore} />
 						</RSelect.Icon>
 					</View>
