@@ -1,6 +1,8 @@
 package src
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 	"image"
 	"image/color"
@@ -67,11 +69,18 @@ func (t *ThumbnailsCreator) ExtractThumbnail(path string, name string) (string, 
 }
 
 func extractThumbnail(path string, name string) (string, error) {
-	ret, err := GetInfo(path)
+	defer printExecTime("extracting thumbnails for %s", path)()
+	info, err := os.Stat(path)
 	if err != nil {
 		return "", err
 	}
-	out := fmt.Sprintf("%s/%s", Settings.Metadata, ret.Sha)
+	h := sha1.New()
+	h.Write([]byte(path))
+	h.Write([]byte(info.ModTime().String()))
+	sha := hex.EncodeToString(h.Sum(nil))
+
+	out := fmt.Sprintf("%s/%s", Settings.Metadata, sha)
+	os.MkdirAll(out, 0o755)
 	sprite_path := fmt.Sprintf("%s/sprite.png", out)
 	vtt_path := fmt.Sprintf("%s/sprite.vtt", out)
 
@@ -134,8 +143,14 @@ func extractThumbnail(path string, name string) (string, error) {
 		)
 	}
 
-	os.WriteFile(vtt_path, []byte(vtt), 0o644)
-	imaging.Save(sprite, sprite_path)
+	err = os.WriteFile(vtt_path, []byte(vtt), 0o644)
+	if err != nil {
+		return "", err
+	}
+	err = imaging.Save(sprite, sprite_path)
+	if err != nil {
+		return "", err
+	}
 	return out, nil
 }
 
