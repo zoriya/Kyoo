@@ -79,7 +79,6 @@ export const Hover = ({
 	fonts,
 	previousSlug,
 	nextSlug,
-	qualitiesAvailables = true,
 }: {
 	isLoading: boolean;
 	url: string;
@@ -92,7 +91,6 @@ export const Hover = ({
 	fonts?: string[];
 	previousSlug?: string | null;
 	nextSlug?: string | null;
-	qualitiesAvailables?: boolean;
 }) => {
 	const show = useAtomValue(hoverAtom);
 	const setHover = useSetAtom(hoverReasonAtom);
@@ -179,7 +177,6 @@ export const Hover = ({
 											subtitles={subtitles}
 											audios={audios}
 											fonts={fonts}
-											qualitiesAvailables={qualitiesAvailables}
 											onMenuOpen={() => setHover((x) => ({ ...x, menuOpened: true }))}
 											onMenuClose={() => {
 												// Disable hover since the menu overlay makes the mouseout unreliable.
