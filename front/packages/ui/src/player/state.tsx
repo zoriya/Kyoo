@@ -20,7 +20,8 @@
 
 import { Episode, Subtitle } from "@kyoo/models";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { ElementRef, memo, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useAtomCallback } from "jotai/utils";
+import { ElementRef, memo, useEffect, useLayoutEffect, useRef, useState, useCallback } from "react";
 import NativeVideo, { VideoProperties as VideoProps } from "./video";
 import { Platform } from "react-native";
 
@@ -88,7 +89,7 @@ export const Video = memo(function Video({
 	subtitles,
 	setError,
 	fonts,
-	startTime,
+	startTime: startTimeP,
 	...props
 }: {
 	links?: Episode["links"];
@@ -103,6 +104,11 @@ export const Video = memo(function Video({
 	const [source, setSource] = useState<string | null>(null);
 	const [mode, setPlayMode] = useAtom(playModeAtom);
 
+	const startTime = useRef(startTimeP);
+	useLayoutEffect(() => {
+		startTime.current = startTimeP;
+	}, [startTimeP]);
+
 	const publicProgress = useAtomValue(publicProgressAtom);
 	const setPrivateProgress = useSetAtom(privateProgressAtom);
 	const setPublicProgress = useSetAtom(publicProgressAtom);
@@ -112,14 +118,21 @@ export const Video = memo(function Video({
 		ref.current?.seek(publicProgress);
 	}, [publicProgress]);
 
+	const getProgress = useAtomCallback(useCallback((get) => get(progressAtom), []));
+	const oldLinks = useRef(links);
 	useLayoutEffect(() => {
 		// Reset the state when a new video is loaded.
 		setSource((mode === PlayMode.Direct ? links?.direct : links?.hls) ?? null);
 		setLoad(true);
-		setPrivateProgress(0);
-		setPublicProgress(0);
+		if (oldLinks.current !== links) {
+			setPrivateProgress(startTime.current ?? 0);
+			setPublicProgress(startTime.current ?? 0);
+		} else {
+			startTime.current = getProgress();
+		}
+		oldLinks.current = links;
 		setPlay(true);
-	}, [mode, links, setLoad, setPrivateProgress, setPublicProgress, setPlay]);
+	}, [mode, links, setLoad, setPrivateProgress, setPublicProgress, setPlay, getProgress]);
 
 	const [subtitle, setSubtitle] = useAtom(subtitleAtom);
 	useEffect(() => {
@@ -150,7 +163,7 @@ export const Video = memo(function Video({
 			{...props}
 			source={{
 				uri: source,
-				startPosition: startTime ? startTime * 1000 : undefined,
+				startPosition: startTime.current ? startTime.current * 1000 : undefined,
 				...links,
 			}}
 			paused={!isPlaying}

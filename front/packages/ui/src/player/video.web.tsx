@@ -158,9 +158,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 				if (hls) hls.destroy();
 				hls = null;
 				hls = await initHls();
-				// Still load the hls source to list available qualities.
-				// Note: This may ask the server to transmux the audio/video by loading the index.m3u8
-				hls.loadSource(source.hls);
+				hls.loadSource(source.hls!);
 				oldHls.current = source.hls;
 			}
 			if (!source.uri.endsWith(".m3u8")) {
