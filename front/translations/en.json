@@ -150,7 +150,8 @@
 		"fullscreen": "Fullscreen",
 		"direct": "Pristine",
 		"transmux": "Original",
-		"auto": "Auto"
+		"auto": "Auto",
+		"notInPristine": "Unavailable in pristine"
 	},
 	"search": {
 		"empty": "No result found. Try a different query."
