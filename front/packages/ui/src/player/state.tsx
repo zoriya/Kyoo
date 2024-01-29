@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Episode, Subtitle } from "@kyoo/models";
+import { Episode, Subtitle, useAccount } from "@kyoo/models";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useAtomCallback } from "jotai/utils";
 import { ElementRef, memo, useEffect, useLayoutEffect, useRef, useState, useCallback } from "react";
@@ -128,20 +128,29 @@ export const Video = memo(function Video({
 			setPrivateProgress(startTime.current ?? 0);
 			setPublicProgress(startTime.current ?? 0);
 		} else {
+			// keep current time when changing between direct and hls.
 			startTime.current = getProgress();
 		}
 		oldLinks.current = links;
 		setPlay(true);
 	}, [mode, links, setLoad, setPrivateProgress, setPublicProgress, setPlay, getProgress]);
 
-	const [subtitle, setSubtitle] = useAtom(subtitleAtom);
+	const account = useAccount();
+	const defaultSubLanguage = account?.settings.subtitleLanguage;
+	const setSubtitle = useSetAtom(subtitleAtom);
 	useEffect(() => {
-		if (!subtitle || !subtitles) return;
-		setSubtitle(subtitles.find((x) => x.language === subtitle.language) ?? null);
+		if (!subtitles) return;
+		setSubtitle((subtitle) => {
+			const subRet = subtitle ? subtitles.find((x) => x.language === subtitle.language) : null;
+			if (subRet) return subRet;
+			if (!defaultSubLanguage) return null;
+			if (defaultSubLanguage == "default") return subtitles.find((x) => x.isDefault) ?? null;
+			return subtitles.find((x) => x.language === defaultSubLanguage) ?? null;
+		});
 		// When the video change, try to persist the subtitle language.
 		// Also include the player ref, it can be initalised after the subtitles.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [subtitles, ref.current]);
+	}, [subtitles, setSubtitle, defaultSubLanguage, ref.current]);
 
 	const volume = useAtomValue(volumeAtom);
 	const isMuted = useAtomValue(mutedAtom);
