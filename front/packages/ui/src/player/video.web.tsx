@@ -166,7 +166,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 				ref.current.src = source.uri;
 			} else {
 				hls.attachMedia(ref.current);
-				hls.startLoad(source.startPosition ?? 0);
+				hls.startLoad(source.startPosition ? source.startPosition / 1000 : 0);
 				hls.on(Hls.Events.ERROR, (_, d) => {
 					if (!d.fatal || !hls?.media) return;
 					console.warn("Hls error", d);
