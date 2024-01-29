@@ -92,6 +92,18 @@
 				"system": "System"
 			}
 		},
+		"playback": {
+			"label": "Playback",
+			"audioLanguage": {
+				"label": "Audio language",
+				"description": "The default audio language used when playing multi-audio videos"
+			},
+			"subtitleLanguage": {
+				"label": "Subtitle language",
+				"description": "The default subtitle language used",
+				"none": "None"
+			}
+		},
 		"account": {
 			"label": "Account",
 			"username": {

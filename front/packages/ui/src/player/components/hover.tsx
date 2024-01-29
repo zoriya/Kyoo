@@ -360,6 +360,7 @@ const ProgressBar = ({ url, chapters }: { url: string; chapters?: Chapter[] }) =
 			<Tooltip
 				id={"progress-scrubber"}
 				isOpen={hoverProgress !== null}
+				place="top"
 				position={{ x: layout.x + (layout.width * hoverProgress!) / (duration ?? 1), y: layout.y }}
 				render={() =>
 					hoverProgress ? (
