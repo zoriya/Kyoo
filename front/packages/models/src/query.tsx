@@ -85,6 +85,8 @@ export const queryFn = async <Data,>(
 			signal: controller?.signal ?? context.signal,
 		});
 	} catch (e) {
+		if (typeof e === "object" && e && "name" in e && e.name === "AbortError")
+			throw { errors: ["Aborted"] } as KyooErrors;
 		console.log("Fetch error", e, path);
 		throw { errors: ["Could not reach Kyoo's server."] } as KyooErrors;
 	}
