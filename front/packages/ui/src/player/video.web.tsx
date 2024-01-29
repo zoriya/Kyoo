@@ -99,7 +99,9 @@ const initHls = async (): Promise<Hls> => {
 		manifestLoadPolicy: loadPolicy,
 		steeringManifestLoadPolicy: loadPolicy,
 	});
-	// hls.currentLevel = hls.startLevel;
+	hls.on(Hls.Events.MANIFEST_PARSED, () => {
+		if (hls) hls.startLevel = hls.firstLevel;
+	});
 	return hls;
 };
 
