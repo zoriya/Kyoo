@@ -38,7 +38,6 @@ export const RightButtons = ({
 	fonts,
 	onMenuOpen,
 	onMenuClose,
-	qualitiesAvailables,
 	...props
 }: {
 	audios?: Audio[];
@@ -46,7 +45,6 @@ export const RightButtons = ({
 	fonts?: string[];
 	onMenuOpen: () => void;
 	onMenuClose: () => void;
-	qualitiesAvailables: boolean;
 } & Stylable) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
@@ -91,16 +89,14 @@ export const RightButtons = ({
 				{...tooltip(t("player.audios"), true)}
 				{...spacing}
 			/>
-			{qualitiesAvailables && (
-				<QualitiesMenu
-					Trigger={IconButton}
-					icon={SettingsIcon}
-					onMenuOpen={onMenuOpen}
-					onMenuClose={onMenuClose}
-					{...tooltip(t("player.quality"), true)}
-					{...spacing}
-				/>
-			)}
+			<QualitiesMenu
+				Trigger={IconButton}
+				icon={SettingsIcon}
+				onMenuOpen={onMenuOpen}
+				onMenuClose={onMenuClose}
+				{...tooltip(t("player.quality"), true)}
+				{...spacing}
+			/>
 			{Platform.OS === "web" && (
 				<IconButton
 					icon={isFullscreen ? FullscreenExit : Fullscreen}
