@@ -45,6 +45,7 @@ export const NewsList = () => {
 						<ItemGrid
 							isLoading={x.isLoading as any}
 							href={x.href}
+							slug={x.slug}
 							name={x.name!}
 							subtitle={!x.isLoading ? getDisplayDate(x) : undefined}
 							poster={x.poster}
