@@ -1,4 +1,0 @@
-[submodule "transcoder"]
-	path = src/Kyoo.Transcoder
-	url = ../Kyoo.Transcoder.git
-	branch = master
