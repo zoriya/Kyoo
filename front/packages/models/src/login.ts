@@ -41,6 +41,8 @@ export const login = async (
 	timeout?: number,
 ): Promise<Result<Account, string>> => {
 	try {
+		const controller = new AbortController();
+		setTimeout(() => controller.abort(), 5_000);
 		const token = await queryFn(
 			{
 				path: ["auth", action],
@@ -48,7 +50,7 @@ export const login = async (
 				body,
 				authenticated: false,
 				apiUrl,
-				timeout,
+				signal: controller.signal,
 			},
 			TokenP,
 		);
