@@ -458,7 +458,7 @@ class TheMovieDatabase(Provider):
 		# We want something like season 6 ep 3.
 		if season is None and absolute is not None:
 			ids = await self._idmapper.get_show(show.external_id, required=["tvdb"])
-			if ids["tvdb"] is not None:
+			if "tvdb" in ids and ids["tvdb"] is not None:
 				(
 					tvdb_season,
 					tvdb_episode,
