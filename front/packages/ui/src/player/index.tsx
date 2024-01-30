@@ -63,7 +63,6 @@ const mapData = (
 		fonts: info?.fonts,
 		previousSlug,
 		nextSlug,
-		qualitiesAvailables: !!data.links.hls,
 	};
 };
 
@@ -139,6 +138,7 @@ export const Player = ({ slug, type }: { slug: string; type: "episode" | "movie"
 			>
 				<Video
 					links={data?.links}
+					audios={info?.audios}
 					subtitles={info?.subtitles}
 					setError={setPlaybackError}
 					fonts={info?.fonts}

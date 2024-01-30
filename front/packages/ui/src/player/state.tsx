@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Episode, Subtitle, useAccount } from "@kyoo/models";
+import { Audio, Episode, Subtitle, useAccount } from "@kyoo/models";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useAtomCallback } from "jotai/utils";
 import { ElementRef, memo, useEffect, useLayoutEffect, useRef, useState, useCallback } from "react";
@@ -83,10 +83,12 @@ export const fullscreenAtom = atom(
 const privateFullscreen = atom(false);
 
 export const subtitleAtom = atom<Subtitle | null>(null);
+export const audioAtom = atom<Audio>({ index: 0 } as Audio);
 
 export const Video = memo(function Video({
 	links,
 	subtitles,
+	audios,
 	setError,
 	fonts,
 	startTime: startTimeP,
@@ -94,6 +96,7 @@ export const Video = memo(function Video({
 }: {
 	links?: Episode["links"];
 	subtitles?: Subtitle[];
+	audios?: Audio[];
 	setError: (error: string | undefined) => void;
 	fonts?: string[];
 	startTime?: number | null;
@@ -151,6 +154,26 @@ export const Video = memo(function Video({
 		// Also include the player ref, it can be initalised after the subtitles.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [subtitles, setSubtitle, defaultSubLanguage, ref.current]);
+
+	const defaultAudioLanguage = account?.settings.audioLanguage ?? "default";
+	const setAudio = useSetAtom(audioAtom);
+	useEffect(() => {
+		if (!audios) return;
+		setAudio((audio) => {
+			if (audio) {
+				const ret = audios.find((x) => x.language === audio.language);
+				if (ret) return ret;
+			}
+			if (defaultAudioLanguage !== "default") {
+				const ret = audios.find((x) => x.language === defaultAudioLanguage);
+				if (ret) return ret;
+			}
+			return audios.find((x) => x.isDefault) ?? audios[0];
+		});
+		// When the video change, try to persist the subtitle language.
+		// Also include the player ref, it can be initalised after the subtitles.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [audios, setAudio, defaultAudioLanguage, ref.current]);
 
 	const volume = useAtomValue(volumeAtom);
 	const isMuted = useAtomValue(mutedAtom);

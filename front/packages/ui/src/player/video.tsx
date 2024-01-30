@@ -40,7 +40,7 @@ import { ComponentProps, forwardRef, useEffect, useRef } from "react";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import NativeVideo, { OnLoadData, VideoProps } from "react-native-video";
 import { useTranslation } from "react-i18next";
-import { PlayMode, playModeAtom, subtitleAtom } from "./state";
+import { PlayMode, audioAtom, playModeAtom, subtitleAtom } from "./state";
 import uuid from "react-native-uuid";
 import { View } from "react-native";
 import "@kyoo/primitives/src/types.d.ts";
@@ -54,7 +54,6 @@ const MimeTypes: Map<string, string> = new Map([
 
 const infoAtom = atom<OnLoadData | null>(null);
 const videoAtom = atom(0);
-const audioAtom = atom(0);
 
 const clientId = uuid.v4() as string;
 
@@ -94,7 +93,7 @@ const Video = forwardRef<NativeVideo, VideoProps>(function Video(
 				}}
 				onBuffer={onBuffer}
 				selectedVideoTrack={video === -1 ? { type: "auto" } : { type: "resolution", value: video }}
-				selectedAudioTrack={{ type: "index", value: audio }}
+				selectedAudioTrack={{ type: "index", value: audio.index }}
 				textTracks={subtitles?.map((x) => ({
 					type: MimeTypes.get(x.codec) as any,
 					uri: x.link!,
@@ -130,8 +129,8 @@ export const AudiosMenu = ({ audios, ...props }: CustomMenu & { audios?: Audio[]
 				<Menu.Item
 					key={x.index}
 					label={audios?.[x.index].displayName ?? x.title}
-					selected={audio === x.index}
-					onSelect={() => setAudio(x.index)}
+					selected={audio!.index === x.index}
+					onSelect={() => setAudio(x as any)}
 				/>
 			))}
 		</Menu>

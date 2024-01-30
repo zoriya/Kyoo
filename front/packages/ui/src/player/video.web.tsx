@@ -26,14 +26,13 @@ import {
 	useImperativeHandle,
 	useLayoutEffect,
 	useRef,
-	useReducer,
 	ComponentProps,
 } from "react";
 import { VideoProps } from "react-native-video";
 import { useAtomValue, useSetAtom, useAtom } from "jotai";
 import { useForceRerender, useYoshiki } from "yoshiki";
 import Jassub from "jassub";
-import { playAtom, PlayMode, playModeAtom, progressAtom, subtitleAtom } from "./state";
+import { audioAtom, playAtom, PlayMode, playModeAtom, progressAtom, subtitleAtom } from "./state";
 import Hls, { Level, LoadPolicy } from "hls.js";
 import { useTranslation } from "react-i18next";
 import { Menu, tooltip } from "@kyoo/primitives";
@@ -179,6 +178,19 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 		// onError changes should not restart the playback.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [source.uri, source.hls]);
+
+	const mode = useAtomValue(playModeAtom);
+	const audio = useAtomValue(audioAtom);
+	useEffect(() => {
+		if (!hls) return;
+		const update = () => {
+			if (!hls) return;
+			hls.audioTrack = audio.index;
+		};
+		update();
+		hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, update);
+		return () => hls?.off(Hls.Events.AUDIO_TRACKS_UPDATED, update);
+	}, [audio, mode]);
 
 	const setPlay = useSetAtom(playAtom);
 	useEffect(() => {
@@ -334,6 +346,7 @@ export const AudiosMenu = ({
 }: ComponentProps<typeof Menu<{ disabled?: boolean }>> & { audios?: Audio[] }) => {
 	const { t } = useTranslation();
 	const rerender = useForceRerender();
+	const [_, setAudio] = useAtom(audioAtom);
 	// force rerender when mode changes
 	useAtomValue(playModeAtom);
 
@@ -343,8 +356,8 @@ export const AudiosMenu = ({
 		return () => hls!.off(Hls.Events.AUDIO_TRACK_LOADED, rerender);
 	});
 
-	if (!hls || hls.audioTracks.length < 2)
-		return <Menu {...props} disabled {...tooltip(t("player.notInPristine"))} />;
+	if (!hls) return <Menu {...props} disabled {...tooltip(t("player.notInPristine"))} />;
+	if (hls.audioTracks.length < 2) return null;
 
 	return (
 		<Menu {...props}>
@@ -353,7 +366,7 @@ export const AudiosMenu = ({
 					key={i.toString()}
 					label={audios?.[i].displayName ?? x.name}
 					selected={hls!.audioTrack === i}
-					onSelect={() => (hls!.audioTrack = i)}
+					onSelect={() => setAudio(audios?.[i] ?? ({ index: i } as any))}
 				/>
 			))}
 		</Menu>
