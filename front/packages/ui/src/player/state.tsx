@@ -22,7 +22,7 @@ import { Audio, Episode, Subtitle, useAccount } from "@kyoo/models";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useAtomCallback } from "jotai/utils";
 import { ElementRef, memo, useEffect, useLayoutEffect, useRef, useState, useCallback } from "react";
-import NativeVideo, { VideoProperties as VideoProps } from "./video";
+import NativeVideo, { VideoProps } from "./video";
 import { Platform } from "react-native";
 
 export const playAtom = atom(true);
