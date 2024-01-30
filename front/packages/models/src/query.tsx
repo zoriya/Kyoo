@@ -22,7 +22,6 @@ import { ComponentType, ReactElement } from "react";
 import {
 	dehydrate,
 	QueryClient,
-	QueryFunction,
 	QueryFunctionContext,
 	useInfiniteQuery,
 	useQuery,
@@ -41,7 +40,6 @@ export let kyooApiUrl = kyooUrl;
 
 export const queryFn = async <Data,>(
 	context: {
-		timeout?: number;
 		apiUrl?: string;
 		authenticated?: boolean;
 		method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -72,9 +70,6 @@ export const queryFn = async <Data,>(
 		.replace("/?", "?");
 	let resp;
 	try {
-		const controller = context.timeout !== undefined ? new AbortController() : undefined;
-		if (controller) setTimeout(() => controller.abort(), context.timeout);
-
 		resp = await fetch(path, {
 			method: context.method,
 			body: "body" in context && context.body ? JSON.stringify(context.body) : undefined,
@@ -82,7 +77,7 @@ export const queryFn = async <Data,>(
 				...(token ? { Authorization: token } : {}),
 				...("body" in context ? { "Content-Type": "application/json" } : {}),
 			},
-			signal: controller?.signal ?? context.signal,
+			signal: context.signal,
 		});
 	} catch (e) {
 		if (typeof e === "object" && e && "name" in e && e.name === "AbortError")
@@ -173,7 +168,6 @@ export type QueryIdentifier<T = unknown, Ret = T> = {
 
 	placeholderData?: T | (() => T);
 	enabled?: boolean;
-	timeout?: number;
 	options?: Partial<Parameters<typeof queryFn>[0]>;
 };
 
@@ -208,7 +202,7 @@ export const toQueryKey = (query: {
 export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 	return useQuery<Data, KyooErrors>({
 		queryKey: toQueryKey(query),
-		queryFn: (ctx) => queryFn({ ...ctx, timeout: query.timeout, ...query.options }, query.parser),
+		queryFn: (ctx) => queryFn({ ...ctx, ...query.options }, query.parser),
 		placeholderData: query.placeholderData as any,
 		enabled: query.enabled,
 	});
@@ -217,7 +211,7 @@ export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 export const useInfiniteFetch = <Data, Ret>(query: QueryIdentifier<Data, Ret>) => {
 	const ret = useInfiniteQuery<Page<Data>, KyooErrors>({
 		queryKey: toQueryKey(query),
-		queryFn: (ctx) => queryFn({ ...ctx, timeout: query.timeout }, Paged(query.parser)),
+		queryFn: (ctx) => queryFn({ ...ctx, ...query.options }, Paged(query.parser)),
 		getNextPageParam: (page: Page<Data>) => page?.next || undefined,
 		initialPageParam: undefined,
 		placeholderData: query.placeholderData as any,
