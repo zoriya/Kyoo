@@ -99,12 +99,19 @@ export const AccountProvider = ({
 
 	// update user's data from kyoo un startup, it could have changed.
 	const selected = useMemo(() => accounts.find((x) => x.selected), [accounts]);
+	const controller = useMemo(() => {
+		const ret = new AbortController();
+		setTimeout(() => ret.abort(), 5_000);
+		return ret;
+	}, [selected]);
 	const user = useFetch({
 		path: ["auth", "me"],
 		parser: UserP,
 		placeholderData: selected as User,
 		enabled: !!selected,
-		timeout: 5_000,
+		options: {
+			signal: controller.signal,
+		},
 	});
 	useEffect(() => {
 		if (!selected || !user.isSuccess || user.isPlaceholderData) return;
