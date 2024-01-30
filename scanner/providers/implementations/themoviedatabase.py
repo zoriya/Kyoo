@@ -607,6 +607,10 @@ class TheMovieDatabase(Provider):
 		# Dont forget to ingore the special season (season_number 0)
 		seasons_nbrs = [x.season_number for x in show.seasons if x.season_number != 0]
 		seasons_eps = [x.episodes_count for x in show.seasons if x.season_number != 0]
+
+		if not any(seasons_nbrs):
+			return (None, None)
+
 		# zip_longest(seasons_nbrs[1:], accumulate(seasons_eps)) return [(2, 12), (None, 24)] if the show has two seasons with 12 eps
 		# we take the last group that has less total episodes than the absolute number.
 		return next(
