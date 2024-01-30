@@ -241,6 +241,7 @@ class Scanner:
 
 	async def delete(self, path: str):
 		logging.info("Deleting %s", path)
+		self.registered = filter(lambda x: x != path, self.registered)
 		async with self._client.delete(
 			f'{self._url}/movies?filter=path eq "{path}"',
 			headers={"X-API-Key": self._api_key},
