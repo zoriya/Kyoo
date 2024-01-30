@@ -18,17 +18,17 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import "./react-native-video.d.ts";
+import "react-native-video";
 
 declare module "react-native-video" {
-	interface VideoProperties {
+	interface ReactVideoProps {
 		fonts?: string[];
 		subtitles?: Subtitle[];
 		onPlayPause: (isPlaying: boolean) => void;
 		onMediaUnsupported?: () => void;
 	}
-	export type VideoProps = Omit<VideoProperties, "source"> & {
-		source: { uri: string; hls: string | null; startPosition?: number | null };
+	export type VideoProps = Omit<ReactVideoProps, "source"> & {
+		source: { uri: string; hls: string | null; startPosition?: number };
 	};
 }
 
@@ -38,7 +38,13 @@ import { Audio, Subtitle, getToken } from "@kyoo/models";
 import { IconButton, Menu } from "@kyoo/primitives";
 import { ComponentProps, forwardRef, useEffect, useRef } from "react";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import NativeVideo, { OnLoadData, VideoProps } from "react-native-video";
+import NativeVideo, {
+	VideoRef,
+	OnLoadData,
+	VideoProps,
+	SelectedTrackType,
+	SelectedVideoTrackType,
+} from "react-native-video";
 import { useTranslation } from "react-i18next";
 import { PlayMode, audioAtom, playModeAtom, subtitleAtom } from "./state";
 import uuid from "react-native-uuid";
@@ -57,7 +63,7 @@ const videoAtom = atom(0);
 
 const clientId = uuid.v4() as string;
 
-const Video = forwardRef<NativeVideo, VideoProps>(function Video(
+const Video = forwardRef<VideoRef, VideoProps>(function Video(
 	{ onLoad, onBuffer, source, onPointerDown, subtitles, ...props },
 	ref,
 ) {
@@ -92,21 +98,25 @@ const Video = forwardRef<NativeVideo, VideoProps>(function Video(
 					onLoad?.(info);
 				}}
 				onBuffer={onBuffer}
-				selectedVideoTrack={video === -1 ? { type: "auto" } : { type: "resolution", value: video }}
-				selectedAudioTrack={{ type: "index", value: audio.index }}
+				selectedVideoTrack={
+					video === -1
+						? { type: SelectedVideoTrackType.AUDO }
+						: { type: SelectedVideoTrackType.RESOLUTION, value: video }
+				}
+				selectedAudioTrack={{ type: SelectedTrackType.INDEX, value: audio.index }}
 				textTracks={subtitles?.map((x) => ({
 					type: MimeTypes.get(x.codec) as any,
 					uri: x.link!,
 					title: x.title ?? "Unknown",
-					language: x.language ?? "Unknown",
+					language: x.language ?? ("Unknown" as any),
 				}))}
 				selectedTextTrack={
 					subtitle
 						? {
-								type: "index",
+								type: SelectedTrackType.INDEX,
 								value: subtitles?.indexOf(subtitle),
 							}
-						: { type: "disabled" }
+						: { type: SelectedTrackType.DISABLED }
 				}
 				{...props}
 			/>
@@ -128,7 +138,7 @@ export const AudiosMenu = ({ audios, ...props }: CustomMenu & { audios?: Audio[]
 			{info.audioTracks.map((x) => (
 				<Menu.Item
 					key={x.index}
-					label={audios?.[x.index].displayName ?? x.title}
+					label={audios?.[x.index].displayName ?? x.title ?? x.language ?? "Unknown"}
 					selected={audio!.index === x.index}
 					onSelect={() => setAudio(x as any)}
 				/>

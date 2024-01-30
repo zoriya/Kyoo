@@ -170,7 +170,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 					if (!d.fatal || !hls?.media) return;
 					console.warn("Hls error", d);
 					onError?.call(null, {
-						error: { "": "", errorString: d.reason ?? d.error?.message ?? "Unknown hls error" },
+						error: { errorString: d.reason ?? d.error?.message ?? "Unknown hls error" },
 					});
 				});
 			}
@@ -230,7 +230,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 					onMediaUnsupported?.call(undefined);
 				else {
 					onError?.call(null, {
-						error: { "": "", errorString: ref.current?.error?.message ?? "Unknown error" },
+						error: { errorString: ref.current?.error?.message ?? "Unknown error" },
 					});
 				}
 			}}
