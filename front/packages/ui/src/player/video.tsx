@@ -170,6 +170,7 @@ export const QualitiesMenu = (props: CustomMenu) => {
 				}}
 			/>
 			{/* TODO: Support video tracks when the play mode is not hls. */}
+			{/* @ts-expect-error They forgot to type this. */}
 			{info?.videoTracks.map((x) => (
 				<Menu.Item
 					key={x.height}

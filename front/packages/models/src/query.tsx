@@ -38,7 +38,7 @@ const kyooUrl =
 // The url of kyoo, set after each query (used by the image parser).
 export let kyooApiUrl = kyooUrl;
 
-export const queryFn = async <Data,>(
+export const queryFn = async <Parser extends z.ZodTypeAny>(
 	context: {
 		apiUrl?: string;
 		authenticated?: boolean;
@@ -51,9 +51,9 @@ export const queryFn = async <Data,>(
 				plainText?: boolean;
 		  } & Partial<QueryFunctionContext>)
 	),
-	type?: z.ZodType<Data>,
+	type?: Parser,
 	token?: string | null,
-): Promise<Data> => {
+): Promise<z.infer<Parser>> => {
 	const url = context.apiUrl ?? (Platform.OS === "web" ? kyooUrl : getCurrentAccount()!.apiUrl);
 	kyooApiUrl = url;
 
@@ -106,10 +106,9 @@ export const queryFn = async <Data,>(
 		throw data as KyooErrors;
 	}
 
-	// @ts-expect-error Assume Data is nullable.
 	if (resp.status === 204) return null;
 
-	if ("plainText" in context && context.plainText) return (await resp.text()) as unknown as Data;
+	if ("plainText" in context && context.plainText) return (await resp.text()) as unknown;
 
 	let data;
 	try {
