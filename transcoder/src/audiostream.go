@@ -19,7 +19,7 @@ func NewAudioStream(file *FileStream, idx int32) *AudioStream {
 }
 
 func (as *AudioStream) getOutPath() string {
-	return fmt.Sprintf("%s/segment-a%d-%%03d.ts", as.file.Out, as.index)
+	return fmt.Sprintf("%s/segment-a%d-%%06d.ts", as.file.Out, as.index)
 }
 
 func (as *AudioStream) getTranscodeArgs(segments string) []string {
