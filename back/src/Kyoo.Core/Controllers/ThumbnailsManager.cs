@@ -140,7 +140,7 @@ namespace Kyoo.Core.Controllers
 			{
 				lock (_downloading)
 				{
-					if (File.Exists(posterPath) || _downloading.ContainsKey(posterPath))
+					if (_downloading.ContainsKey(posterPath))
 					{
 						duplicated = true;
 						sync = _downloading.GetValueOrDefault(posterPath);
@@ -154,7 +154,8 @@ namespace Kyoo.Core.Controllers
 				if (duplicated)
 				{
 					object? dup = sync != null ? await sync.Task : null;
-					throw new DuplicatedItemException(dup);
+					if (dup != null)
+						throw new DuplicatedItemException(dup);
 				}
 
 				await _DownloadImage(
