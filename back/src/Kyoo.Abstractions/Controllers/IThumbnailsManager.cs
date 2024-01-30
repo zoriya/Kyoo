@@ -19,8 +19,6 @@
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Models;
 
-#nullable enable
-
 namespace Kyoo.Abstractions.Controllers
 {
 	/// <summary>
