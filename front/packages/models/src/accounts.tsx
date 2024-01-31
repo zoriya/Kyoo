@@ -99,11 +99,8 @@ export const AccountProvider = ({
 
 	// update user's data from kyoo un startup, it could have changed.
 	const selected = useMemo(() => accounts.find((x) => x.selected), [accounts]);
-	const controller = useMemo(() => {
-		const ret = new AbortController();
-		setTimeout(() => ret.abort(), 5_000);
-		return ret;
-	}, [selected]);
+	const controller = new AbortController();
+	setTimeout(() => controller.abort(), 5_000);
 	const user = useFetch({
 		path: ["auth", "me"],
 		parser: UserP,
