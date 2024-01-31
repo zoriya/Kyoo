@@ -24,6 +24,8 @@ import { useAtomCallback } from "jotai/utils";
 import { ElementRef, memo, useEffect, useLayoutEffect, useRef, useState, useCallback } from "react";
 import NativeVideo, { VideoProps } from "./video";
 import { Platform } from "react-native";
+import { useSnackbar } from "@kyoo/primitives";
+import { useTranslation } from "react-i18next";
 
 export const playAtom = atom(true);
 export const loadAtom = atom(false);
@@ -188,6 +190,9 @@ export const Video = memo(function Video({
 		return () => document.removeEventListener("fullscreenchange", handler);
 	});
 
+	const createSnackbar = useSnackbar();
+	const { t } = useTranslation();
+
 	if (!source || !links) return null;
 	return (
 		<NativeVideo
@@ -218,6 +223,11 @@ export const Video = memo(function Video({
 			fonts={fonts}
 			subtitles={subtitles}
 			onMediaUnsupported={() => {
+				createSnackbar({
+					key: "unsuported",
+					label: t("player.unsupportedError"),
+					duration: 3,
+				});
 				if (mode == PlayMode.Direct) setPlayMode(PlayMode.Hls);
 			}}
 		/>

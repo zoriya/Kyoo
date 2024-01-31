@@ -21,7 +21,7 @@
 import "react-native-reanimated";
 
 import { PortalProvider } from "@gorhom/portal";
-import { ThemeSelector } from "@kyoo/primitives";
+import { SnackbarProvider, ThemeSelector } from "@kyoo/primitives";
 import { DownloadProvider } from "@kyoo/ui";
 import { AccountProvider, createQueryClient, storage, useUserTheme } from "@kyoo/models";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
@@ -144,7 +144,9 @@ export default function Root() {
 					<AccountProvider>
 						<DownloadProvider>
 							<NavigationThemeProvider>
-								<Slot />
+								<SnackbarProvider>
+									<Slot />
+								</SnackbarProvider>
 							</NavigationThemeProvider>
 						</DownloadProvider>
 					</AccountProvider>
