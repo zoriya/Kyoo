@@ -94,6 +94,10 @@
 		},
 		"playback": {
 			"label": "Playback",
+			"playmode": {
+				"label": "Default play mode",
+				"description": "The default play mode used on this client. Pristine is lighter on the server but does not allow automatic quality changes"
+			},
 			"audioLanguage": {
 				"label": "Audio language",
 				"description": "The default audio language used when playing multi-audio videos"

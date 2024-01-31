@@ -94,6 +94,10 @@
 		},
 		"playback": {
 			"label": "Lecteur",
+			"playmode": {
+				"label": "Mode de lecture par default",
+				"description": "Mode de lecture par défaut utilisé sur ce client. Pristine est plus léger pour le serveur mais ne permet pas de modifier automatiquement la qualité"
+			},
 			"audioLanguage": {
 				"label": "Langue audio",
 				"description": "Langue audio par défaut utilisée lors de la lecture de vidéos multi-audio"

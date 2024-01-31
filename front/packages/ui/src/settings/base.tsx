@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Account, User, queryFn, useAccount } from "@kyoo/models";
+import { User, queryFn, useAccount } from "@kyoo/models";
 import {
 	Container,
 	H1,
