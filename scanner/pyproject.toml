@@ -1,4 +1,2 @@
-[tool.black]
-extend-exclude = '''
-^/scanner/cache.py
-'''
+[tool.ruff.format]
+indent-style = "tab"

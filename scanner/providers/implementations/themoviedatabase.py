@@ -18,7 +18,6 @@ from ..types.studio import Studio
 from ..types.genre import Genre
 from ..types.metadataid import MetadataID
 from ..types.show import Show, ShowTranslation, Status as ShowStatus
-from ..types.season import Season
 from ..types.collection import Collection, CollectionTranslation
 
 
