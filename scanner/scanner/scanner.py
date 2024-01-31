@@ -82,7 +82,7 @@ class Scanner:
 
 		raw = guessit(path, {"episode_prefer_number": True, "excludes": "language"})
 
-		if not "mimetype" in raw or not raw["mimetype"].startswith("video"):
+		if "mimetype" not in raw or not raw["mimetype"].startswith("video"):
 			return
 		# Remove seasons in "One Piece (1999) 152.mkv" for example
 		if raw.get("season") == raw.get("year") and "season" in raw:

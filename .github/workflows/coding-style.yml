@@ -47,10 +47,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run black
-        run: |
-          pip3 install black-with-tabs
-          black . --check
+      - uses: chartboost/ruff-action@v1
+        with:
+          args: format --check
 
   transcoder:
     name: "Lint transcoder"

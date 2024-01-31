@@ -4,12 +4,17 @@ from functools import wraps
 from typing import Any, Optional, Tuple, Final, Literal
 from enum import Enum
 
+
 # Waiting for https://github.com/python/typing/issues/689 for better sentinels
 class Sentinel(Enum):
 	NoneSentinel = 0
 
+
 none: Final = Sentinel.NoneSentinel
-type Cache = dict[Any, Tuple[asyncio.Event | Literal[none], datetime | Literal[none], Any]]
+type Cache = dict[
+	Any, Tuple[asyncio.Event | Literal[none], datetime | Literal[none], Any]
+]
+
 
 def cache(ttl: timedelta, cache: Optional[Cache] = None, typed=False):
 	"""
@@ -18,8 +23,8 @@ def cache(ttl: timedelta, cache: Optional[Cache] = None, typed=False):
 	result will be cached.
 
 	Args:
-		typed: same as functools.lru_cache
-		ttl: how many time should the cached value be considered valid?
+	        typed: same as functools.lru_cache
+	        ttl: how many time should the cached value be considered valid?
 
 	"""
 
@@ -41,11 +46,7 @@ def cache(ttl: timedelta, cache: Optional[Cache] = None, typed=False):
 					return await wrapper(*args, **kwargs)
 				return ret[2]
 			# Return the cached result if it exits and is not expired
-			if (
-				ret[2] != none
-				and ret[1] != none
-				and datetime.now() - ret[1] < ttl
-			):
+			if ret[2] != none and ret[1] != none and datetime.now() - ret[1] < ttl:
 				return ret[2]
 
 			return await exec_as_cache(cache, key, lambda: f(*args, **kwargs))
@@ -53,6 +54,7 @@ def cache(ttl: timedelta, cache: Optional[Cache] = None, typed=False):
 		return wrapper
 
 	return wrap
+
 
 async def exec_as_cache(cache: Cache, key, f):
 	event = asyncio.Event()

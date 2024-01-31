@@ -1,11 +1,10 @@
 {pkgs ? import <nixpkgs> {}}: let
-  python = pkgs.python312.withPackages (ps:
+  python = pkgs.python311.withPackages (ps:
     with ps; [
       guessit
       aiohttp
       jsons
       watchfiles
-      black
     ]);
   dotnet = with pkgs.dotnetCorePackages;
     combinePackages [
@@ -20,8 +19,9 @@ in
       nodePackages.eas-cli
       nodePackages.expo-cli
       dotnet
-      # csharpier
-      # python
+      csharpier
+      python
+      ruff
       go
       wgo
       mediainfo
