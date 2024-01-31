@@ -22,7 +22,13 @@ import "../polyfill";
 
 import { HydrationBoundary, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { HiddenIfNoJs, TouchOnlyCss, SkeletonCss, ThemeSelector } from "@kyoo/primitives";
+import {
+	HiddenIfNoJs,
+	TouchOnlyCss,
+	SkeletonCss,
+	ThemeSelector,
+	SnackbarProvider,
+} from "@kyoo/primitives";
 import { WebTooltip } from "@kyoo/primitives/src/tooltip.web";
 import {
 	AccountP,
@@ -138,21 +144,23 @@ const App = ({ Component, pageProps }: AppProps) => {
 						<HydrationBoundary state={queryState}>
 							<ThemeSelector theme={userTheme} font={{ normal: "inherit" }}>
 								<PortalProvider>
-									<GlobalCssTheme />
-									<Layout
-										page={
-											<Component
-												randomItems={
-													randomItems[Component.displayName!] ??
-													arrayShuffle((Component as QueryPage).randomItems ?? [])
-												}
-												{...props}
-											/>
-										}
-										randomItems={[]}
-										{...layoutProps}
-									/>
-									<Tooltip id="tooltip" positionStrategy={"fixed"} />
+									<SnackbarProvider>
+										<GlobalCssTheme />
+										<Layout
+											page={
+												<Component
+													randomItems={
+														randomItems[Component.displayName!] ??
+														arrayShuffle((Component as QueryPage).randomItems ?? [])
+													}
+													{...props}
+												/>
+											}
+											randomItems={[]}
+											{...layoutProps}
+										/>
+										<Tooltip id="tooltip" positionStrategy={"fixed"} />
+									</SnackbarProvider>
 								</PortalProvider>
 							</ThemeSelector>
 						</HydrationBoundary>

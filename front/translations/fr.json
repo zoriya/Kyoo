@@ -150,7 +150,9 @@
 		"fullscreen": "Plein-écran",
 		"direct": "Pristine",
 		"transmux": "Original",
-		"auto": "Auto"
+		"auto": "Auto",
+		"notInPristine": "Non disponible en pristine",
+		"unsupportedError": "Video codec not supported, transcoding in progress..."
 	},
 	"search": {
 		"empty": "Aucun résultat trouvé. Essayer avec une autre recherche."
