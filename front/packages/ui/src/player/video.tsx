@@ -64,7 +64,7 @@ const videoAtom = atom(0);
 const clientId = uuid.v4() as string;
 
 const Video = forwardRef<VideoRef, VideoProps>(function Video(
-	{ onLoad, onBuffer, source, subtitles, ...props },
+	{ onLoad, onBuffer, onError, onMediaUnsupported, source, subtitles, ...props },
 	ref,
 ) {
 	const { css } = useYoshiki();
@@ -98,6 +98,11 @@ const Video = forwardRef<VideoRef, VideoProps>(function Video(
 					onLoad?.(info);
 				}}
 				onBuffer={onBuffer}
+				onError={(e) => {
+					// 24001 is codec error
+					if (e.error.errorCode === "24001") onMediaUnsupported?.();
+					else onError?.(e);
+				}}
 				selectedVideoTrack={
 					video === -1
 						? { type: SelectedVideoTrackType.AUDO }

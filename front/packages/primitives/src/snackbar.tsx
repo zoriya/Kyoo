@@ -32,7 +32,7 @@ export type Snackbar = {
 	key?: string;
 	label: string;
 	duration: number;
-	actions: Action[];
+	actions?: Action[];
 };
 
 export type Action = {
