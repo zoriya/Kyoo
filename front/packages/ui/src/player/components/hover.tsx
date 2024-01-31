@@ -39,7 +39,7 @@ import { Chapter, KyooImage, Subtitle, Audio } from "@kyoo/models";
 import { useAtomValue, useSetAtom, useAtom } from "jotai";
 import { ImageStyle, Platform, Pressable, View, ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
-import { percent, rem, useYoshiki, vh } from "yoshiki/native";
+import { percent, rem, useYoshiki } from "yoshiki/native";
 import { useRouter } from "solito/router";
 import ArrowBack from "@material-symbols/svg-400/rounded/arrow_back-fill.svg";
 import { LeftButtons, TouchControls } from "./left-buttons";
@@ -200,6 +200,7 @@ export const HoverTouch = ({ children, ...props }: { children: ReactNode }) => {
 	const mouseCallback = useRef<NodeJS.Timeout | null>(null);
 	const touch = useRef<{ count: number; timeout?: NodeJS.Timeout }>({ count: 0 });
 	const playerWidth = useRef<number | null>(null);
+	const isTouch = useIsTouch();
 
 	const show = useCallback(() => {
 		setHover((x) => ({ ...x, mouseMoved: true }));
@@ -283,18 +284,9 @@ export const HoverTouch = ({ children, ...props }: { children: ReactNode }) => {
 			onPointerLeave={(e) => {
 				if (e.nativeEvent.pointerType === "mouse") setHover((x) => ({ ...x, mouseMoved: false }));
 			}}
-			onPointerDown={(e) => {
-				// Theorically, this is available everywhere but android never calls this pointerDown so
-				// touch are handled in the onPress and we early return here if it is every called to prevent
-				// the click action to run twice.
-				if (Platform.OS !== "web") return;
-				e.preventDefault();
-				onAnyPress(e.nativeEvent);
-			}}
 			onPress={(e) => {
-				if (Platform.OS === "web") return;
 				e.preventDefault();
-				onAnyPress({ pointerType: "touch", x: e.nativeEvent.locationX });
+				onAnyPress({ pointerType: isTouch ? "touch" : "mouse", x: e.nativeEvent.locationX });
 			}}
 			onLayout={(e) => {
 				playerWidth.current = e.nativeEvent.layout.width;
