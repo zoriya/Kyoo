@@ -19,11 +19,15 @@
  */
 
 import { Select } from "@kyoo/primitives";
+import { useLocalSetting } from "@kyoo/models";
 import { useTranslation } from "react-i18next";
+import { useSetAtom } from "jotai";
 import { Preference, SettingsContainer, useSetting } from "./base";
+import { PlayMode, playModeAtom } from "../player/state";
 
-import SubtitleLanguage from "@material-symbols/svg-400/rounded/closed_caption-fill.svg";
+import PlayModeI from "@material-symbols/svg-400/rounded/display_settings-fill.svg";
 import AudioLanguage from "@material-symbols/svg-400/rounded/music_note-fill.svg";
+import SubtitleLanguage from "@material-symbols/svg-400/rounded/closed_caption-fill.svg";
 
 // I gave up on finding a way to retrive this using the Intl api (probably does not exist)
 // Simply copy pasted the list of languages from https://www.localeplanet.com/api/codelist.json
@@ -32,6 +36,8 @@ const allLanguages = ["af", "agq", "ak", "am", "ar", "as", "asa", "ast", "az", "
 
 export const PlaybackSettings = () => {
 	const { t, i18n } = useTranslation();
+	const [playMode, setDefaultPlayMode] = useLocalSetting("playmode", "direct");
+	const setCurrentPlayMode = useSetAtom(playModeAtom);
 	const [audio, setAudio] = useSetting("audioLanguage")!;
 	const [subtitle, setSubtitle] = useSetting("subtitleLanguage")!;
 	const languages = new Intl.DisplayNames([i18n.language ?? "en"], {
@@ -41,6 +47,22 @@ export const PlaybackSettings = () => {
 
 	return (
 		<SettingsContainer title={t("settings.playback.label")}>
+			<Preference
+				icon={PlayModeI}
+				label={t("settings.playback.playmode.label")}
+				description={t("settings.playback.playmode.description")}
+			>
+				<Select
+					label={t("settings.playback.playmode.label")}
+					value={playMode}
+					onValueChange={(value) => {
+						setDefaultPlayMode(value);
+						setCurrentPlayMode(value === "direct" ? PlayMode.Direct : PlayMode.Hls);
+					}}
+					values={["direct", "auto"]}
+					getLabel={(key) => t(`player.${key}`)}
+				/>
+			</Preference>
 			<Preference
 				icon={AudioLanguage}
 				label={t("settings.playback.audioLanguage.label")}

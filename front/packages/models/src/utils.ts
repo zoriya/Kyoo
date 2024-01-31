@@ -18,8 +18,11 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { Platform } from "react-native";
 import { Movie, Show } from "./resources";
 import { z } from "zod";
+import { useMMKVString } from "react-native-mmkv";
+import { storage } from "./account-internal";
 
 export const zdate = z.coerce.date;
 
@@ -39,3 +42,15 @@ export const getDisplayDate = (data: Show | Movie) => {
 		return airDate.getFullYear().toString();
 	}
 };
+
+export const useLocalSetting = (setting: string, def: string) => {
+	if (Platform.OS === "web" && typeof window === "undefined") return [def, null!] as const;
+	// eslint-disable-next-line react-hooks/rules-of-hooks
+	const [val, setter] = useMMKVString(`settings.${setting}`, storage);
+	return [val ?? def, setter] as const;
+};
+
+export const getLocalSetting = (setting: string, def: string) => {
+	if (Platform.OS === "web" && typeof window === "undefined") return def;
+	return storage.getString(`settings.${setting}`) ?? setting;
+}

@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Audio, Episode, Subtitle, useAccount } from "@kyoo/models";
+import { Audio, Episode, Subtitle, getLocalSetting, useAccount } from "@kyoo/models";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useAtomCallback } from "jotai/utils";
 import { ElementRef, memo, useEffect, useLayoutEffect, useRef, useState, useCallback } from "react";
@@ -30,12 +30,13 @@ import { useTranslation } from "react-i18next";
 export const playAtom = atom(true);
 export const loadAtom = atom(false);
 
-// TODO: Default to auto or pristine depending on the user settings.
 export enum PlayMode {
 	Direct,
 	Hls,
 }
-export const playModeAtom = atom<PlayMode>(PlayMode.Direct);
+export const playModeAtom = atom<PlayMode>(
+	getLocalSetting("playmode", "direct") !== "auto" ? PlayMode.Direct : PlayMode.Hls,
+);
 
 export const bufferedAtom = atom(0);
 export const durationAtom = atom<number | undefined>(undefined);
