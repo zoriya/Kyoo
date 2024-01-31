@@ -133,9 +133,7 @@ export const TouchControls = ({
 					/>
 					<IconButton
 						icon={isPlaying ? Pause : PlayArrow}
-						onPress={() => {
-							console.log("play pressed")
-						setPlay(!isPlaying)}}
+						onPress={() => setPlay(!isPlaying)}
 						size={ts(8)}
 						{...common}
 					/>
