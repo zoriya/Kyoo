@@ -70,9 +70,10 @@ const Video = forwardRef<VideoRef, VideoProps>(function Video(
 	const { css } = useYoshiki();
 	const token = useRef<string | null>(null);
 	const setInfo = useSetAtom(infoAtom);
-	const video = useAtomValue(videoAtom);
+	const [video, setVideo] = useAtom(videoAtom);
 	const audio = useAtomValue(audioAtom);
 	const subtitle = useAtomValue(subtitleAtom);
+	const mode = useAtomValue(playModeAtom);
 
 	useEffect(() => {
 		async function run() {
@@ -80,6 +81,10 @@ const Video = forwardRef<VideoRef, VideoProps>(function Video(
 		}
 		run();
 	}, [source]);
+
+	useEffect(() => {
+		if (mode === PlayMode.Hls) setVideo(-1);
+	}, [mode, setVideo]);
 
 	return (
 		<View {...css({ flexGrow: 1, flexShrink: 1 })}>
