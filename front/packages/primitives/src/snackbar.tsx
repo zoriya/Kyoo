@@ -20,10 +20,10 @@
 
 import { usePortal } from "@gorhom/portal";
 import { ReactElement, createContext, useCallback, useContext, useRef } from "react";
-import { SwitchVariant } from "./themes";
-import { P } from "@expo/html-elements";
+import { ContrastArea, SwitchVariant } from "./themes";
+import { P } from "./text";
 import { View } from "react-native";
-import { min, percent, px } from "yoshiki/native";
+import { percent, px } from "yoshiki/native";
 import { ts } from "./utils";
 import { Button } from "./button";
 import { imageBorderRadius } from "./constants";
