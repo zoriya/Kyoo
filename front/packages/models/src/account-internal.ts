@@ -102,8 +102,11 @@ export const updateAccount = (id: string, account: Account) => {
 	const idx = accounts.findIndex((x) => x.id == id);
 	if (idx === -1) return;
 
-	if (account.selected) {
+	const selected = account.selected;
+	if (selected) {
 		for (const acc of accounts) acc.selected = false;
+		// if account was already on the accounts list, we keep it selected.
+		account.selected = selected;
 	} else if (accounts[idx].selected) {
 		// we just unselected the current account, focus another one.
 		if (accounts.length > 0) accounts[0].selected = true;
