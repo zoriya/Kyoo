@@ -122,6 +122,16 @@ export const useSetting = <Setting extends keyof User["settings"]>(setting: Sett
 				method: "PATCH",
 				body: { settings: { ...account!.settings, ...update } },
 			}),
+		onMutate: async (newSettings) => {
+			const next = { ...account!, settings: { ...account!.settings, ...newSettings } };
+			await queryClient.cancelQueries({ queryKey: ["auth", "me"] });
+			const previous = queryClient.getQueryData(["auth", "me"]);
+			queryClient.setQueryData(["auth", "me"], next);
+			return { previous, next };
+		},
+		onError: (_, __, context) => {
+			queryClient.setQueryData(["auth", "me"], context!.previous);
+		},
 		onSettled: async () => await queryClient.invalidateQueries({ queryKey: ["auth", "me"] }),
 	});
 
