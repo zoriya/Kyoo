@@ -53,4 +53,4 @@ export const useLocalSetting = (setting: string, def: string) => {
 export const getLocalSetting = (setting: string, def: string) => {
 	if (Platform.OS === "web" && typeof window === "undefined") return def;
 	return storage.getString(`settings.${setting}`) ?? setting;
-}
+};
