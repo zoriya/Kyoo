@@ -36,7 +36,7 @@ import { useRouter } from "solito/router";
 import { useSetAtom } from "jotai";
 import { useYoshiki } from "yoshiki/native";
 import { Back, Hover, LoadingIndicator } from "./components/hover";
-import { fullscreenAtom, progressAtom, Video } from "./state";
+import { fullscreenAtom, Video } from "./state";
 import { episodeDisplayNumber } from "../details/episode";
 import { useVideoKeyboard } from "./keyboard";
 import { MediaSessionManager } from "./media-session";
@@ -66,6 +66,8 @@ const mapData = (
 	};
 };
 
+let firstSlug: string | null = null;
+
 export const Player = ({ slug, type }: { slug: string; type: "episode" | "movie" }) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
@@ -84,6 +86,17 @@ export const Player = ({ slug, type }: { slug: string; type: "episode" | "movie"
 			: undefined;
 
 	useVideoKeyboard(info?.subtitles, info?.fonts, previous, next);
+
+	firstSlug ??= slug;
+	// can't use useRef since the player get's remonted everytime (don't know why)
+	useEffect(() => {
+		return () => {
+			if (!document.location.href.includes("/watch")) firstSlug = null;
+		};
+	}, [slug]);
+	// only use the start time when the player was inited with this episode/movie
+	// (don't actually resume an episode when you auto-play the next for example)
+	const startTime = firstSlug === slug ? data?.watchStatus?.watchedTime : 0;
 
 	const setFullscreen = useSetAtom(fullscreenAtom);
 	useEffect(() => {
@@ -142,7 +155,7 @@ export const Player = ({ slug, type }: { slug: string; type: "episode" | "movie"
 					subtitles={info?.subtitles}
 					setError={setPlaybackError}
 					fonts={info?.fonts}
-					startTime={data?.watchStatus?.watchedTime}
+					startTime={startTime}
 					onEnd={() => {
 						if (!data) return;
 						if (data.type === "movie")
