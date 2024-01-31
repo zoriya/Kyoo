@@ -68,7 +68,15 @@ const mapData = (
 
 let firstSlug: string | null = null;
 
-export const Player = ({ slug, type }: { slug: string; type: "episode" | "movie" }) => {
+export const Player = ({
+	slug,
+	type,
+	t: startTimeP,
+}: {
+	slug: string;
+	type: "episode" | "movie";
+	t?: number;
+}) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 	const router = useRouter();
@@ -78,25 +86,16 @@ export const Player = ({ slug, type }: { slug: string; type: "episode" | "movie"
 	const { data: info, error: infoError } = useFetch(Player.infoQuery(type, slug));
 	const previous =
 		data && data.type === "episode" && data.previousEpisode
-			? `/watch/${data.previousEpisode.slug}`
+			? `/watch/${data.previousEpisode.slug}?t=0`
 			: undefined;
 	const next =
 		data && data.type === "episode" && data.nextEpisode
-			? `/watch/${data.nextEpisode.slug}`
+			? `/watch/${data.nextEpisode.slug}?t=0`
 			: undefined;
 
 	useVideoKeyboard(info?.subtitles, info?.fonts, previous, next);
 
-	firstSlug ??= slug;
-	// can't use useRef since the player get's remonted everytime (don't know why)
-	useEffect(() => {
-		return () => {
-			if (!document.location.href.includes("/watch")) firstSlug = null;
-		};
-	}, [slug]);
-	// only use the start time when the player was inited with this episode/movie
-	// (don't actually resume an episode when you auto-play the next for example)
-	const startTime = firstSlug === slug ? data?.watchStatus?.watchedTime : 0;
+	const startTime = startTimeP ?? data?.watchStatus?.watchedTime;
 
 	const setFullscreen = useSetAtom(fullscreenAtom);
 	useEffect(() => {
