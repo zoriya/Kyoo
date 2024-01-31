@@ -101,9 +101,6 @@ export const TouchControls = ({
 				backgroundColor: (theme) => theme.darkOverlay,
 				marginHorizontal: ts(3),
 			},
-			!hover && {
-				display: "none",
-			},
 		],
 		touchOnly,
 	);
@@ -124,28 +121,34 @@ export const TouchControls = ({
 				props,
 			)}
 		>
-			<IconButton
-				icon={SkipPrevious}
-				as={Link}
-				href={previousSlug!}
-				replace
-				size={ts(4)}
-				{...css([!previousSlug && { opacity: 0, pointerEvents: "none" }], common)}
-			/>
-			<IconButton
-				icon={isPlaying ? Pause : PlayArrow}
-				onPress={() => setPlay(!isPlaying)}
-				size={ts(8)}
-				{...common}
-			/>
-			<IconButton
-				icon={SkipNext}
-				as={Link}
-				href={nextSlug!}
-				replace
-				size={ts(4)}
-				{...css([!nextSlug && { opacity: 0, pointerEvents: "none" }], common)}
-			/>
+			{hover && (
+				<>
+					<IconButton
+						icon={SkipPrevious}
+						as={Link}
+						href={previousSlug!}
+						replace
+						size={ts(4)}
+						{...css([!previousSlug && { opacity: 0, pointerEvents: "none" }], common)}
+					/>
+					<IconButton
+						icon={isPlaying ? Pause : PlayArrow}
+						onPress={() => {
+							console.log("play pressed")
+						setPlay(!isPlaying)}}
+						size={ts(8)}
+						{...common}
+					/>
+					<IconButton
+						icon={SkipNext}
+						as={Link}
+						href={nextSlug!}
+						replace
+						size={ts(4)}
+						{...css([!nextSlug && { opacity: 0, pointerEvents: "none" }], common)}
+					/>
+				</>
+			)}
 		</HoverTouch>
 	);
 };

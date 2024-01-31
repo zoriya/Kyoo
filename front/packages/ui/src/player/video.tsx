@@ -64,7 +64,7 @@ const videoAtom = atom(0);
 const clientId = uuid.v4() as string;
 
 const Video = forwardRef<VideoRef, VideoProps>(function Video(
-	{ onLoad, onBuffer, source, onPointerDown, subtitles, ...props },
+	{ onLoad, onBuffer, source, subtitles, ...props },
 	ref,
 ) {
 	const { css } = useYoshiki();
