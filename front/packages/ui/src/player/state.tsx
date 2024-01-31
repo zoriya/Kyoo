@@ -122,7 +122,7 @@ export const Video = memo(function Video({
 	}, [publicProgress]);
 
 	const getProgress = useAtomCallback(useCallback((get) => get(progressAtom), []));
-	const oldLinks = useRef(links);
+	const oldLinks = useRef<typeof links | null>(null);
 	useLayoutEffect(() => {
 		// Reset the state when a new video is loaded.
 		setSource((mode === PlayMode.Direct ? links?.direct : links?.hls) ?? null);
