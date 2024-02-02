@@ -89,9 +89,13 @@ class Scanner:
 			del raw["season"]
 
 		if isinstance(raw.get("season"), List):
-			raise ProviderError(f"An episode can't have multiple seasons (found {raw.get("season")} for {path})")
+			raise ProviderError(
+				f"An episode can't have multiple seasons (found {raw.get("season")} for {path})"
+			)
 		if isinstance(raw.get("episode"), List):
-			raise ProviderError(f"Multi-episodes files are not yet supported (for {path})")
+			raise ProviderError(
+				f"Multi-episodes files are not yet supported (for {path})"
+			)
 
 		logging.info("Identied %s: %s", path, raw)
 
