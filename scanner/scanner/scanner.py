@@ -6,13 +6,13 @@ import jsons
 import re
 from aiohttp import ClientSession
 from pathlib import Path
-from guessit import guessit
 from typing import List, Literal, Any
 from providers.provider import Provider
 from providers.types.collection import Collection
 from providers.types.show import Show
 from providers.types.episode import Episode, PartialShow
 from providers.types.season import Season
+from .parser.guess import guessit
 from .utils import batch, log_errors
 from .cache import cache, exec_as_cache, make_key
 
@@ -80,7 +80,7 @@ class Scanner:
 		if path in self.registered or self._ignore_pattern.match(path):
 			return
 
-		raw = guessit(path, {"episode_prefer_number": True, "excludes": "language"})
+		raw = guessit(path)
 
 		if "mimetype" not in raw or not raw["mimetype"].startswith("video"):
 			return
