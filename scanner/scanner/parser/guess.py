@@ -4,7 +4,10 @@ from guessit.api import default_api
 from typing import cast
 from rebulk import Rebulk
 
-import rules
+try:
+	from . import rules
+except:
+	import rules
 
 default_api.configure({})
 rblk = cast(Rebulk, default_api.rebulk)
