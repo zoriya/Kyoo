@@ -1,6 +1,6 @@
 # Read that for examples/rules: https://github.com/pymedusa/Medusa/blob/master/medusa/name_parser/rules/rules.py
 
-from typing import Any, List, Optional, cast
+from typing import Any, Generator, Iterable, List, Optional, cast
 from rebulk import Rule, RemoveMatch, AppendMatch, POST_PROCESS
 from rebulk.match import Matches, Match
 from copy import copy
@@ -60,6 +60,74 @@ class EpisodeTitlePromotion(Rule):
 			match.value = int(str(tmatch.value))
 			to_add.append(match)
 		return [to_remove, to_add]
+
+
+class TitleNumberFixup(Rule):
+	"""Fix titles having numbers in them
+
+	Example: '[Erai-raws] Zom 100 - Zombie ni Naru made ni Shitai 100 no Koto - 01 [1080p][Multiple Subtitle][8AFBB298].mkv'
+	     (or '[SubsPlease] Mob Psycho 100 Season 3 - 12 (1080p) [E5058D7B].mkv')
+
+	Default:
+	```json
+	{
+	        "release_group": "Erai-raws",
+	        "title": "Zom",
+	        "episode": [
+	                100,
+	                1
+	        ],
+	        "episode_title": "Zombie ni Naru made ni Shitai",
+	        "screen_size": "1080p",
+	        "subtitle_language": "Multiple languages",
+	        "crc32": "8AFBB298",
+	        "container": "mkv",
+	        "mimetype": "video/x-matroska",
+	        "type": "episode"
+	}
+	```
+
+	Expected:
+	```json
+	{
+	        "release_group": "Erai-raws",
+	        "title": "Zom 100",
+	        "episode": 1,
+	        "episode_title": "Zombie ni Naru made ni Shitai 100 no Koto",
+	        "screen_size": "1080p",
+	        "subtitle_language": "Multiple languages",
+	        "crc32": "8AFBB298",
+	        "container": "mkv",
+	        "mimetype": "video/x-matroska",
+	        "type": "episode"
+	}
+	```
+	"""
+
+	priority = POST_PROCESS
+	consequence = [RemoveMatch, AppendMatch]
+
+	def when(self, matches: Matches, context) -> Any:
+		episodes: List[Match] = matches.named("episode")  # type: ignore
+
+		if not episodes or len(episodes) < 2:
+			return
+
+		episode = episodes[0]
+		prevs: List[Match] = matches.previous(episode)  # type: ignore
+		title = prevs[0] if len(prevs) > 0 and prevs[0].name == "title" else None
+		if not title:
+			return
+
+		# do not fixup if there was a - or any separator between the title and the episode number
+		holes = matches.holes(title.end, episode.start)
+		if holes:
+			return
+
+		newTitle = copy(title)
+		newTitle.end = episode.end
+		newTitle.value = f"{title.value} {episode.value}"
+		return [[title, episode], [newTitle]]
 
 
 class MultipleSeasonRule(Rule):
