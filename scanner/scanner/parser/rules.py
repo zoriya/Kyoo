@@ -113,21 +113,36 @@ class TitleNumberFixup(Rule):
 		if not episodes or len(episodes) < 2:
 			return
 
-		episode = episodes[0]
-		prevs: List[Match] = matches.previous(episode)  # type: ignore
-		title = prevs[0] if len(prevs) > 0 and prevs[0].name == "title" else None
-		if not title:
-			return
+		to_remove = []
+		to_add = []
+		for episode in episodes:
+			prevs: List[Match] = matches.previous(episode)  # type: ignore
+			title = prevs[0] if len(prevs) > 0 and prevs[0].tagged("title") else None
+			if not title:
+				continue
 
-		# do not fixup if there was a - or any separator between the title and the episode number
-		holes = matches.holes(title.end, episode.start)
-		if holes:
-			return
+			# do not fixup if there was a - or any separator between the title and the episode number
+			holes = matches.holes(title.end, episode.start)
+			if holes:
+				continue
 
-		newTitle = copy(title)
-		newTitle.end = episode.end
-		newTitle.value = f"{title.value} {episode.value}"
-		return [[title, episode], [newTitle]]
+			to_remove.extend([title, episode])
+			newTitle = copy(title)
+			newTitle.end = episode.end
+			newTitle.value = f"{title.value} {episode.value}"
+
+			# If an hole was created to parse the episode at the current pos, merge it back into the title
+			holes = matches.holes(episode.end)
+			if holes and holes[0].start == episode.end:
+				val: str = holes[0].value
+				if "-" in val:
+					val, *_ = val.split("-")
+					val = val.rstrip()
+				newTitle.value = f"{newTitle.value}{val}"
+				newTitle.end += len(val)
+
+			to_add.append(newTitle)
+		return [to_remove, to_add]
 
 
 class MultipleSeasonRule(Rule):
