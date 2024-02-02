@@ -7,7 +7,7 @@ import re
 from aiohttp import ClientSession
 from pathlib import Path
 from typing import List, Literal, Any
-from providers.provider import Provider
+from providers.provider import Provider, ProviderError
 from providers.types.collection import Collection
 from providers.types.show import Show
 from providers.types.episode import Episode, PartialShow
@@ -87,6 +87,11 @@ class Scanner:
 		# Remove seasons in "One Piece (1999) 152.mkv" for example
 		if raw.get("season") == raw.get("year") and "season" in raw:
 			del raw["season"]
+
+		if isinstance(raw.get("season"), List):
+			raise ProviderError(f"An episode can't have multiple seasons (found {raw.get("season")} for {path})")
+		if isinstance(raw.get("episode"), List):
+			raise ProviderError(f"Multi-episodes files are not yet supported (for {path})")
 
 		logging.info("Identied %s: %s", path, raw)
 
