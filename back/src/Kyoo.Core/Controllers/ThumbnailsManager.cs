@@ -21,6 +21,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using Blurhash.SkiaSharp;
 using Kyoo.Abstractions.Controllers;
@@ -34,28 +36,14 @@ namespace Kyoo.Core.Controllers
 	/// <summary>
 	/// Download images and retrieve the path of those images for a resource.
 	/// </summary>
-	public class ThumbnailsManager : IThumbnailsManager
+	public class ThumbnailsManager(
+		IHttpClientFactory clientFactory,
+		ILogger<ThumbnailsManager> logger,
+		Lazy<IRepository<User>> users
+	) : IThumbnailsManager
 	{
 		private static readonly Dictionary<string, TaskCompletionSource<object>> _downloading =
 			new();
-
-		private readonly ILogger<ThumbnailsManager> _logger;
-
-		private readonly IHttpClientFactory _clientFactory;
-
-		/// <summary>
-		/// Create a new <see cref="ThumbnailsManager"/>.
-		/// </summary>
-		/// <param name="clientFactory">Client factory</param>
-		/// <param name="logger">A logger to report errors</param>
-		public ThumbnailsManager(
-			IHttpClientFactory clientFactory,
-			ILogger<ThumbnailsManager> logger
-		)
-		{
-			_clientFactory = clientFactory;
-			_logger = logger;
-		}
 
 		private static async Task _WriteTo(SKBitmap bitmap, string path, int quality)
 		{
@@ -71,16 +59,16 @@ namespace Kyoo.Core.Controllers
 				return;
 			try
 			{
-				_logger.LogInformation("Downloading image {What}", what);
+				logger.LogInformation("Downloading image {What}", what);
 
-				HttpClient client = _clientFactory.CreateClient();
+				HttpClient client = clientFactory.CreateClient();
 				HttpResponseMessage response = await client.GetAsync(image.Source);
 				response.EnsureSuccessStatusCode();
 				await using Stream reader = await response.Content.ReadAsStreamAsync();
 				using SKCodec codec = SKCodec.Create(reader);
 				if (codec == null)
 				{
-					_logger.LogError("Unsupported codec for {What}", what);
+					logger.LogError("Unsupported codec for {What}", what);
 					return;
 				}
 
@@ -122,7 +110,7 @@ namespace Kyoo.Core.Controllers
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "{What} could not be downloaded", what);
+				logger.LogError(ex, "{What} could not be downloaded", what);
 			}
 		}
 
@@ -224,6 +212,45 @@ namespace Kyoo.Core.Controllers
 			foreach (string image in images)
 				File.Delete(image);
 			return Task.CompletedTask;
+		}
+
+		public async Task<Stream> GetUserImage(Guid userId)
+		{
+			try
+			{
+				await using FileStream img = File.Open(
+					$"/metadata/user/${userId}.webp",
+					FileMode.Open
+				);
+				return img;
+			}
+			catch (FileNotFoundException) { }
+
+			User user = await users.Value.Get(userId);
+			if (user.Email == null) throw new ItemNotFoundException();
+			using MD5 md5 = MD5.Create();
+			string hash = Convert.ToHexString(md5.ComputeHash(Encoding.ASCII.GetBytes(user.Email)));
+			try
+			{
+				HttpClient client = clientFactory.CreateClient();
+				HttpResponseMessage response = await client.GetAsync($"https://www.gravatar.com/avatar/{hash}.jpg?d=404&s=250");
+				response.EnsureSuccessStatusCode();
+				return await response.Content.ReadAsStreamAsync();
+			}
+			catch
+			{
+				throw new ItemNotFoundException();
+			}
+		}
+
+		public async Task SetUserImage(Guid userId, Stream? image)
+		{
+			using SKCodec codec = SKCodec.Create(image);
+			SKImageInfo info = codec.Info;
+			info.ColorType = SKColorType.Rgba8888;
+			using SKBitmap original = SKBitmap.Decode(codec, info);
+			using SKBitmap ret = original.Resize(new SKSizeI(250, 250), SKFilterQuality.High);
+			await _WriteTo(ret, $"/metadata/user/${userId}.webp", 75);
 		}
 	}
 }

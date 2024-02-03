@@ -17,6 +17,7 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
@@ -42,40 +43,13 @@ namespace Kyoo.Authentication.Views
 	[ApiController]
 	[Route("auth")]
 	[ApiDefinition("Authentication", Group = UsersGroup)]
-	public class AuthApi : ControllerBase
+	public class AuthApi(
+		IRepository<User> users,
+		ITokenController tokenController,
+		IThumbnailsManager thumbs,
+		PermissionOption permissions
+	) : ControllerBase
 	{
-		/// <summary>
-		/// The repository to handle users.
-		/// </summary>
-		private readonly IRepository<User> _users;
-
-		/// <summary>
-		/// The token generator.
-		/// </summary>
-		private readonly ITokenController _token;
-
-		/// <summary>
-		/// The permisson options.
-		/// </summary>
-		private readonly PermissionOption _permissions;
-
-		/// <summary>
-		/// Create a new <see cref="AuthApi"/>.
-		/// </summary>
-		/// <param name="users">The repository used to check if the user exists.</param>
-		/// <param name="token">The token generator.</param>
-		/// <param name="permissions">The permission opitons.</param>
-		public AuthApi(
-			IRepository<User> users,
-			ITokenController token,
-			PermissionOption permissions
-		)
-		{
-			_users = users;
-			_token = token;
-			_permissions = permissions;
-		}
-
 		/// <summary>
 		/// Create a new Forbidden result from an object.
 		/// </summary>
@@ -100,15 +74,15 @@ namespace Kyoo.Authentication.Views
 		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
 		public async Task<ActionResult<JwtToken>> Login([FromBody] LoginRequest request)
 		{
-			User? user = await _users.GetOrDefault(
+			User? user = await users.GetOrDefault(
 				new Filter<User>.Eq(nameof(Abstractions.Models.User.Username), request.Username)
 			);
 			if (user == null || !BCryptNet.Verify(request.Password, user.Password))
 				return Forbid(new RequestError("The user and password does not match."));
 
 			return new JwtToken(
-				_token.CreateAccessToken(user, out TimeSpan expireIn),
-				await _token.CreateRefreshToken(user),
+				tokenController.CreateAccessToken(user, out TimeSpan expireIn),
+				await tokenController.CreateRefreshToken(user),
 				expireIn
 			);
 		}
@@ -130,13 +104,13 @@ namespace Kyoo.Authentication.Views
 		public async Task<ActionResult<JwtToken>> Register([FromBody] RegisterRequest request)
 		{
 			User user = request.ToUser();
-			user.Permissions = _permissions.NewUser;
+			user.Permissions = permissions.NewUser;
 			// If no users exists, the new one will be an admin. Give it every permissions.
-			if ((await _users.GetAll(limit: new Pagination(1))).Any())
+			if ((await users.GetAll(limit: new Pagination(1))).Any())
 				user.Permissions = PermissionOption.Admin;
 			try
 			{
-				await _users.Create(user);
+				await users.Create(user);
 			}
 			catch (DuplicatedItemException)
 			{
@@ -144,8 +118,8 @@ namespace Kyoo.Authentication.Views
 			}
 
 			return new JwtToken(
-				_token.CreateAccessToken(user, out TimeSpan expireIn),
-				await _token.CreateRefreshToken(user),
+				tokenController.CreateAccessToken(user, out TimeSpan expireIn),
+				await tokenController.CreateRefreshToken(user),
 				expireIn
 			);
 		}
@@ -167,11 +141,11 @@ namespace Kyoo.Authentication.Views
 		{
 			try
 			{
-				Guid userId = _token.GetRefreshTokenUserID(token);
-				User user = await _users.Get(userId);
+				Guid userId = tokenController.GetRefreshTokenUserID(token);
+				User user = await users.Get(userId);
 				return new JwtToken(
-					_token.CreateAccessToken(user, out TimeSpan expireIn),
-					await _token.CreateRefreshToken(user),
+					tokenController.CreateAccessToken(user, out TimeSpan expireIn),
+					await tokenController.CreateRefreshToken(user),
 					expireIn
 				);
 			}
@@ -200,10 +174,10 @@ namespace Kyoo.Authentication.Views
 		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
 		public async Task<ActionResult<User>> ResetPassword([FromBody] PasswordResetRequest request)
 		{
-			User user = await _users.Get(User.GetIdOrThrow());
+			User user = await users.Get(User.GetIdOrThrow());
 			if (!BCryptNet.Verify(request.OldPassword, user.Password))
 				return Forbid(new RequestError("The old password is invalid."));
-			return await _users.Patch(
+			return await users.Patch(
 				user.Id,
 				(user) =>
 				{
@@ -232,7 +206,7 @@ namespace Kyoo.Authentication.Views
 		{
 			try
 			{
-				return await _users.Get(User.GetIdOrThrow());
+				return await users.Get(User.GetIdOrThrow());
 			}
 			catch (ItemNotFoundException)
 			{
@@ -260,7 +234,7 @@ namespace Kyoo.Authentication.Views
 			try
 			{
 				user.Id = User.GetIdOrThrow();
-				return await _users.Edit(user);
+				return await users.Edit(user);
 			}
 			catch (ItemNotFoundException)
 			{
@@ -294,7 +268,7 @@ namespace Kyoo.Authentication.Views
 					throw new ArgumentException(
 						"Can't edit your password via a PATCH. Use /auth/password-reset"
 					);
-				return await _users.Patch(userId, patch.Apply);
+				return await users.Patch(userId, patch.Apply);
 			}
 			catch (ItemNotFoundException)
 			{
@@ -308,7 +282,6 @@ namespace Kyoo.Authentication.Views
 		/// <remarks>
 		/// Delete the current account.
 		/// </remarks>
-		/// <returns>The currently authenticated user after modifications.</returns>
 		/// <response code="401">The user is not authenticated.</response>
 		/// <response code="403">The given access token is invalid.</response>
 		[HttpDelete("me")]
@@ -320,13 +293,55 @@ namespace Kyoo.Authentication.Views
 		{
 			try
 			{
-				await _users.Delete(User.GetIdOrThrow());
+				await users.Delete(User.GetIdOrThrow());
 				return NoContent();
 			}
 			catch (ItemNotFoundException)
 			{
 				return Forbid(new RequestError("Invalid token"));
 			}
+		}
+
+		/// <summary>
+		/// Set profile picture
+		/// </summary>
+		/// <remarks>
+		/// Set your profile picture
+		/// </remarks>
+		/// <response code="401">The user is not authenticated.</response>
+		/// <response code="403">The given access token is invalid.</response>
+		[HttpPost("me/logo")]
+		[UserOnly]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
+		public async Task<ActionResult> SetProfilePicture(IFormFile picture)
+		{
+			if (picture == null || picture.Length == 0)
+				return BadRequest();
+			await thumbs.SetUserImage(User.GetIdOrThrow(), picture.OpenReadStream());
+			return NoContent();
+		}
+
+		/// <summary>
+		/// Get profile picture
+		/// </summary>
+		/// <remarks>
+		/// Get your profile picture
+		/// </remarks>
+		/// <response code="401">The user is not authenticated.</response>
+		/// <response code="403">The given access token is invalid.</response>
+		[HttpGet("me/logo")]
+		[UserOnly]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
+		public async Task<ActionResult> GetProfilePicture()
+		{
+			Stream img = await thumbs.GetUserImage(User.GetIdOrThrow());
+			// Allow clients to cache the image for 6 month.
+			Response.Headers.Add("Cache-Control", $"public, max-age={60 * 60 * 24 * 31 * 6}");
+			return File(img, "image/webp", true);
 		}
 	}
 }
