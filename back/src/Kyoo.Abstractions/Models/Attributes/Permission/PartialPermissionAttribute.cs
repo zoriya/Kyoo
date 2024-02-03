@@ -42,7 +42,7 @@ namespace Kyoo.Abstractions.Models.Permissions
 		/// <summary>
 		/// The group of this permission.
 		/// </summary>
-		public Group? Group { get; set; }
+		public Group Group { get; set; }
 
 		/// <summary>
 		/// Ask a permission to run an action.

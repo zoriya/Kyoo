@@ -93,7 +93,7 @@ namespace Kyoo.Authentication
 			/// <summary>
 			/// The group of he permission.
 			/// </summary>
-			private readonly Group _group = Group.Overall;
+			private Group _group;
 
 			/// <summary>
 			/// The permissions options to retrieve default permissions.
@@ -146,7 +146,7 @@ namespace Kyoo.Authentication
 						);
 				}
 
-				if (group != null)
+				if (group is not null and not Group.None)
 					_group = group.Value;
 				_options = options;
 			}
@@ -159,6 +159,16 @@ namespace Kyoo.Authentication
 
 				if (permission == null || kind == null)
 				{
+					if (
+						context.HttpContext.Items["PermissionGroup"]
+						is Group group and not Group.None
+					)
+						_group = group;
+					else if (_group == Group.None)
+						_group = Group.Overall;
+					else
+						context.HttpContext.Items["PermissionGroup"] = _group;
+
 					switch (context.HttpContext.Items["PermissionType"])
 					{
 						case string perm:
