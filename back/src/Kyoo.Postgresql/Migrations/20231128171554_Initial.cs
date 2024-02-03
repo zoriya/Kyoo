@@ -41,42 +41,41 @@ namespace Kyoo.Postgresql.Migrations
 
 			migrationBuilder.CreateTable(
 				name: "collections",
-				columns: table =>
-					new
-					{
-						id = table.Column<Guid>(type: "uuid", nullable: false),
-						slug = table.Column<string>(
-							type: "character varying(256)",
-							maxLength: 256,
-							nullable: false
-						),
-						name = table.Column<string>(type: "text", nullable: false),
-						overview = table.Column<string>(type: "text", nullable: true),
-						added_date = table.Column<DateTime>(
-							type: "timestamp with time zone",
-							nullable: false,
-							defaultValueSql: "now() at time zone 'utc'"
-						),
-						poster_source = table.Column<string>(type: "text", nullable: true),
-						poster_blurhash = table.Column<string>(
-							type: "character varying(32)",
-							maxLength: 32,
-							nullable: true
-						),
-						thumbnail_source = table.Column<string>(type: "text", nullable: true),
-						thumbnail_blurhash = table.Column<string>(
-							type: "character varying(32)",
-							maxLength: 32,
-							nullable: true
-						),
-						logo_source = table.Column<string>(type: "text", nullable: true),
-						logo_blurhash = table.Column<string>(
-							type: "character varying(32)",
-							maxLength: 32,
-							nullable: true
-						),
-						external_id = table.Column<string>(type: "json", nullable: false)
-					},
+				columns: table => new
+				{
+					id = table.Column<Guid>(type: "uuid", nullable: false),
+					slug = table.Column<string>(
+						type: "character varying(256)",
+						maxLength: 256,
+						nullable: false
+					),
+					name = table.Column<string>(type: "text", nullable: false),
+					overview = table.Column<string>(type: "text", nullable: true),
+					added_date = table.Column<DateTime>(
+						type: "timestamp with time zone",
+						nullable: false,
+						defaultValueSql: "now() at time zone 'utc'"
+					),
+					poster_source = table.Column<string>(type: "text", nullable: true),
+					poster_blurhash = table.Column<string>(
+						type: "character varying(32)",
+						maxLength: 32,
+						nullable: true
+					),
+					thumbnail_source = table.Column<string>(type: "text", nullable: true),
+					thumbnail_blurhash = table.Column<string>(
+						type: "character varying(32)",
+						maxLength: 32,
+						nullable: true
+					),
+					logo_source = table.Column<string>(type: "text", nullable: true),
+					logo_blurhash = table.Column<string>(
+						type: "character varying(32)",
+						maxLength: 32,
+						nullable: true
+					),
+					external_id = table.Column<string>(type: "json", nullable: false)
+				},
 				constraints: table =>
 				{
 					table.PrimaryKey("pk_collections", x => x.id);
@@ -85,18 +84,17 @@ namespace Kyoo.Postgresql.Migrations
 
 			migrationBuilder.CreateTable(
 				name: "studios",
-				columns: table =>
-					new
-					{
-						id = table.Column<Guid>(type: "uuid", nullable: false),
-						slug = table.Column<string>(
-							type: "character varying(256)",
-							maxLength: 256,
-							nullable: false
-						),
-						name = table.Column<string>(type: "text", nullable: false),
-						external_id = table.Column<string>(type: "json", nullable: false)
-					},
+				columns: table => new
+				{
+					id = table.Column<Guid>(type: "uuid", nullable: false),
+					slug = table.Column<string>(
+						type: "character varying(256)",
+						maxLength: 256,
+						nullable: false
+					),
+					name = table.Column<string>(type: "text", nullable: false),
+					external_id = table.Column<string>(type: "json", nullable: false)
+				},
 				constraints: table =>
 				{
 					table.PrimaryKey("pk_studios", x => x.id);
@@ -105,31 +103,30 @@ namespace Kyoo.Postgresql.Migrations
 
 			migrationBuilder.CreateTable(
 				name: "users",
-				columns: table =>
-					new
-					{
-						id = table.Column<Guid>(type: "uuid", nullable: false),
-						slug = table.Column<string>(
-							type: "character varying(256)",
-							maxLength: 256,
-							nullable: false
-						),
-						username = table.Column<string>(type: "text", nullable: false),
-						email = table.Column<string>(type: "text", nullable: false),
-						password = table.Column<string>(type: "text", nullable: false),
-						permissions = table.Column<string[]>(type: "text[]", nullable: false),
-						added_date = table.Column<DateTime>(
-							type: "timestamp with time zone",
-							nullable: false,
-							defaultValueSql: "now() at time zone 'utc'"
-						),
-						logo_source = table.Column<string>(type: "text", nullable: true),
-						logo_blurhash = table.Column<string>(
-							type: "character varying(32)",
-							maxLength: 32,
-							nullable: true
-						)
-					},
+				columns: table => new
+				{
+					id = table.Column<Guid>(type: "uuid", nullable: false),
+					slug = table.Column<string>(
+						type: "character varying(256)",
+						maxLength: 256,
+						nullable: false
+					),
+					username = table.Column<string>(type: "text", nullable: false),
+					email = table.Column<string>(type: "text", nullable: false),
+					password = table.Column<string>(type: "text", nullable: false),
+					permissions = table.Column<string[]>(type: "text[]", nullable: false),
+					added_date = table.Column<DateTime>(
+						type: "timestamp with time zone",
+						nullable: false,
+						defaultValueSql: "now() at time zone 'utc'"
+					),
+					logo_source = table.Column<string>(type: "text", nullable: true),
+					logo_blurhash = table.Column<string>(
+						type: "character varying(32)",
+						maxLength: 32,
+						nullable: true
+					)
+				},
 				constraints: table =>
 				{
 					table.PrimaryKey("pk_users", x => x.id);
@@ -138,56 +135,55 @@ namespace Kyoo.Postgresql.Migrations
 
 			migrationBuilder.CreateTable(
 				name: "movies",
-				columns: table =>
-					new
-					{
-						id = table.Column<Guid>(type: "uuid", nullable: false),
-						slug = table.Column<string>(
-							type: "character varying(256)",
-							maxLength: 256,
-							nullable: false
-						),
-						name = table.Column<string>(type: "text", nullable: false),
-						tagline = table.Column<string>(type: "text", nullable: true),
-						aliases = table.Column<string[]>(type: "text[]", nullable: false),
-						path = table.Column<string>(type: "text", nullable: false),
-						overview = table.Column<string>(type: "text", nullable: true),
-						tags = table.Column<string[]>(type: "text[]", nullable: false),
-						genres = table.Column<Genre[]>(type: "genre[]", nullable: false),
-						status = table.Column<Status>(type: "status", nullable: false),
-						rating = table.Column<int>(type: "integer", nullable: false),
-						runtime = table.Column<int>(type: "integer", nullable: false),
-						air_date = table.Column<DateTime>(
-							type: "timestamp with time zone",
-							nullable: true
-						),
-						added_date = table.Column<DateTime>(
-							type: "timestamp with time zone",
-							nullable: false,
-							defaultValueSql: "now() at time zone 'utc'"
-						),
-						poster_source = table.Column<string>(type: "text", nullable: true),
-						poster_blurhash = table.Column<string>(
-							type: "character varying(32)",
-							maxLength: 32,
-							nullable: true
-						),
-						thumbnail_source = table.Column<string>(type: "text", nullable: true),
-						thumbnail_blurhash = table.Column<string>(
-							type: "character varying(32)",
-							maxLength: 32,
-							nullable: true
-						),
-						logo_source = table.Column<string>(type: "text", nullable: true),
-						logo_blurhash = table.Column<string>(
-							type: "character varying(32)",
-							maxLength: 32,
-							nullable: true
-						),
-						trailer = table.Column<string>(type: "text", nullable: true),
-						external_id = table.Column<string>(type: "json", nullable: false),
-						studio_id = table.Column<Guid>(type: "uuid", nullable: true)
-					},
+				columns: table => new
+				{
+					id = table.Column<Guid>(type: "uuid", nullable: false),
+					slug = table.Column<string>(
+						type: "character varying(256)",
+						maxLength: 256,
+						nullable: false
+					),
+					name = table.Column<string>(type: "text", nullable: false),
+					tagline = table.Column<string>(type: "text", nullable: true),
+					aliases = table.Column<string[]>(type: "text[]", nullable: false),
+					path = table.Column<string>(type: "text", nullable: false),
+					overview = table.Column<string>(type: "text", nullable: true),
+					tags = table.Column<string[]>(type: "text[]", nullable: false),
+					genres = table.Column<Genre[]>(type: "genre[]", nullable: false),
+					status = table.Column<Status>(type: "status", nullable: false),
+					rating = table.Column<int>(type: "integer", nullable: false),
+					runtime = table.Column<int>(type: "integer", nullable: false),
+					air_date = table.Column<DateTime>(
+						type: "timestamp with time zone",
+						nullable: true
+					),
+					added_date = table.Column<DateTime>(
+						type: "timestamp with time zone",
+						nullable: false,
+						defaultValueSql: "now() at time zone 'utc'"
+					),
+					poster_source = table.Column<string>(type: "text", nullable: true),
+					poster_blurhash = table.Column<string>(
+						type: "character varying(32)",
+						maxLength: 32,
+						nullable: true
+					),
+					thumbnail_source = table.Column<string>(type: "text", nullable: true),
+					thumbnail_blurhash = table.Column<string>(
+						type: "character varying(32)",
+						maxLength: 32,
+						nullable: true
+					),
+					logo_source = table.Column<string>(type: "text", nullable: true),
+					logo_blurhash = table.Column<string>(
+						type: "character varying(32)",
+						maxLength: 32,
+						nullable: true
+					),
+					trailer = table.Column<string>(type: "text", nullable: true),
+					external_id = table.Column<string>(type: "json", nullable: false),
+					studio_id = table.Column<Guid>(type: "uuid", nullable: true)
+				},
 				constraints: table =>
 				{
 					table.PrimaryKey("pk_movies", x => x.id);
@@ -203,58 +199,57 @@ namespace Kyoo.Postgresql.Migrations
 
 			migrationBuilder.CreateTable(
 				name: "shows",
-				columns: table =>
-					new
-					{
-						id = table.Column<Guid>(type: "uuid", nullable: false),
-						slug = table.Column<string>(
-							type: "character varying(256)",
-							maxLength: 256,
-							nullable: false
-						),
-						name = table.Column<string>(type: "text", nullable: false),
-						tagline = table.Column<string>(type: "text", nullable: true),
-						aliases = table.Column<List<string>>(type: "text[]", nullable: false),
-						overview = table.Column<string>(type: "text", nullable: true),
-						tags = table.Column<List<string>>(type: "text[]", nullable: false),
-						genres = table.Column<List<Genre>>(type: "genre[]", nullable: false),
-						status = table.Column<Status>(type: "status", nullable: false),
-						rating = table.Column<int>(type: "integer", nullable: false),
-						start_air = table.Column<DateTime>(
-							type: "timestamp with time zone",
-							nullable: true
-						),
-						end_air = table.Column<DateTime>(
-							type: "timestamp with time zone",
-							nullable: true
-						),
-						added_date = table.Column<DateTime>(
-							type: "timestamp with time zone",
-							nullable: false,
-							defaultValueSql: "now() at time zone 'utc'"
-						),
-						poster_source = table.Column<string>(type: "text", nullable: true),
-						poster_blurhash = table.Column<string>(
-							type: "character varying(32)",
-							maxLength: 32,
-							nullable: true
-						),
-						thumbnail_source = table.Column<string>(type: "text", nullable: true),
-						thumbnail_blurhash = table.Column<string>(
-							type: "character varying(32)",
-							maxLength: 32,
-							nullable: true
-						),
-						logo_source = table.Column<string>(type: "text", nullable: true),
-						logo_blurhash = table.Column<string>(
-							type: "character varying(32)",
-							maxLength: 32,
-							nullable: true
-						),
-						trailer = table.Column<string>(type: "text", nullable: true),
-						external_id = table.Column<string>(type: "json", nullable: false),
-						studio_id = table.Column<Guid>(type: "uuid", nullable: true)
-					},
+				columns: table => new
+				{
+					id = table.Column<Guid>(type: "uuid", nullable: false),
+					slug = table.Column<string>(
+						type: "character varying(256)",
+						maxLength: 256,
+						nullable: false
+					),
+					name = table.Column<string>(type: "text", nullable: false),
+					tagline = table.Column<string>(type: "text", nullable: true),
+					aliases = table.Column<List<string>>(type: "text[]", nullable: false),
+					overview = table.Column<string>(type: "text", nullable: true),
+					tags = table.Column<List<string>>(type: "text[]", nullable: false),
+					genres = table.Column<List<Genre>>(type: "genre[]", nullable: false),
+					status = table.Column<Status>(type: "status", nullable: false),
+					rating = table.Column<int>(type: "integer", nullable: false),
+					start_air = table.Column<DateTime>(
+						type: "timestamp with time zone",
+						nullable: true
+					),
+					end_air = table.Column<DateTime>(
+						type: "timestamp with time zone",
+						nullable: true
+					),
+					added_date = table.Column<DateTime>(
+						type: "timestamp with time zone",
+						nullable: false,
+						defaultValueSql: "now() at time zone 'utc'"
+					),
+					poster_source = table.Column<string>(type: "text", nullable: true),
+					poster_blurhash = table.Column<string>(
+						type: "character varying(32)",
+						maxLength: 32,
+						nullable: true
+					),
+					thumbnail_source = table.Column<string>(type: "text", nullable: true),
+					thumbnail_blurhash = table.Column<string>(
+						type: "character varying(32)",
+						maxLength: 32,
+						nullable: true
+					),
+					logo_source = table.Column<string>(type: "text", nullable: true),
+					logo_blurhash = table.Column<string>(
+						type: "character varying(32)",
+						maxLength: 32,
+						nullable: true
+					),
+					trailer = table.Column<string>(type: "text", nullable: true),
+					external_id = table.Column<string>(type: "json", nullable: false),
+					studio_id = table.Column<Guid>(type: "uuid", nullable: true)
+				},
 				constraints: table =>
 				{
 					table.PrimaryKey("pk_shows", x => x.id);
@@ -270,12 +265,11 @@ namespace Kyoo.Postgresql.Migrations
 
 			migrationBuilder.CreateTable(
 				name: "link_collection_movie",
-				columns: table =>
-					new
-					{
-						collection_id = table.Column<Guid>(type: "uuid", nullable: false),
-						movie_id = table.Column<Guid>(type: "uuid", nullable: false)
-					},
+				columns: table => new
+				{
+					collection_id = table.Column<Guid>(type: "uuid", nullable: false),
+					movie_id = table.Column<Guid>(type: "uuid", nullable: false)
+				},
 				constraints: table =>
 				{
 					table.PrimaryKey(
@@ -301,12 +295,11 @@ namespace Kyoo.Postgresql.Migrations
 
 			migrationBuilder.CreateTable(
 				name: "link_collection_show",
-				columns: table =>
-					new
-					{
-						collection_id = table.Column<Guid>(type: "uuid", nullable: false),
-						show_id = table.Column<Guid>(type: "uuid", nullable: false)
-					},
+				columns: table => new
+				{
+					collection_id = table.Column<Guid>(type: "uuid", nullable: false),
+					show_id = table.Column<Guid>(type: "uuid", nullable: false)
+				},
 				constraints: table =>
 				{
 					table.PrimaryKey(
@@ -332,52 +325,51 @@ namespace Kyoo.Postgresql.Migrations
 
 			migrationBuilder.CreateTable(
 				name: "seasons",
-				columns: table =>
-					new
-					{
-						id = table.Column<Guid>(type: "uuid", nullable: false),
-						slug = table.Column<string>(
-							type: "character varying(256)",
-							maxLength: 256,
-							nullable: false
-						),
-						show_id = table.Column<Guid>(type: "uuid", nullable: false),
-						season_number = table.Column<int>(type: "integer", nullable: false),
-						name = table.Column<string>(type: "text", nullable: true),
-						overview = table.Column<string>(type: "text", nullable: true),
-						start_date = table.Column<DateTime>(
-							type: "timestamp with time zone",
-							nullable: true
-						),
-						added_date = table.Column<DateTime>(
-							type: "timestamp with time zone",
-							nullable: false,
-							defaultValueSql: "now() at time zone 'utc'"
-						),
-						end_date = table.Column<DateTime>(
-							type: "timestamp with time zone",
-							nullable: true
-						),
-						poster_source = table.Column<string>(type: "text", nullable: true),
-						poster_blurhash = table.Column<string>(
-							type: "character varying(32)",
-							maxLength: 32,
-							nullable: true
-						),
-						thumbnail_source = table.Column<string>(type: "text", nullable: true),
-						thumbnail_blurhash = table.Column<string>(
-							type: "character varying(32)",
-							maxLength: 32,
-							nullable: true
-						),
-						logo_source = table.Column<string>(type: "text", nullable: true),
-						logo_blurhash = table.Column<string>(
-							type: "character varying(32)",
-							maxLength: 32,
-							nullable: true
-						),
-						external_id = table.Column<string>(type: "json", nullable: false)
-					},
+				columns: table => new
+				{
+					id = table.Column<Guid>(type: "uuid", nullable: false),
+					slug = table.Column<string>(
+						type: "character varying(256)",
+						maxLength: 256,
+						nullable: false
+					),
+					show_id = table.Column<Guid>(type: "uuid", nullable: false),
+					season_number = table.Column<int>(type: "integer", nullable: false),
+					name = table.Column<string>(type: "text", nullable: true),
+					overview = table.Column<string>(type: "text", nullable: true),
+					start_date = table.Column<DateTime>(
+						type: "timestamp with time zone",
+						nullable: true
+					),
+					added_date = table.Column<DateTime>(
+						type: "timestamp with time zone",
+						nullable: false,
+						defaultValueSql: "now() at time zone 'utc'"
+					),
+					end_date = table.Column<DateTime>(
+						type: "timestamp with time zone",
+						nullable: true
+					),
+					poster_source = table.Column<string>(type: "text", nullable: true),
+					poster_blurhash = table.Column<string>(
+						type: "character varying(32)",
+						maxLength: 32,
+						nullable: true
+					),
+					thumbnail_source = table.Column<string>(type: "text", nullable: true),
+					thumbnail_blurhash = table.Column<string>(
+						type: "character varying(32)",
+						maxLength: 32,
+						nullable: true
+					),
+					logo_source = table.Column<string>(type: "text", nullable: true),
+					logo_blurhash = table.Column<string>(
+						type: "character varying(32)",
+						maxLength: 32,
+						nullable: true
+					),
+					external_id = table.Column<string>(type: "json", nullable: false)
+				},
 				constraints: table =>
 				{
 					table.PrimaryKey("pk_seasons", x => x.id);
@@ -393,53 +385,52 @@ namespace Kyoo.Postgresql.Migrations
 
 			migrationBuilder.CreateTable(
 				name: "episodes",
-				columns: table =>
-					new
-					{
-						id = table.Column<Guid>(type: "uuid", nullable: false),
-						slug = table.Column<string>(
-							type: "character varying(256)",
-							maxLength: 256,
-							nullable: false
-						),
-						show_id = table.Column<Guid>(type: "uuid", nullable: false),
-						season_id = table.Column<Guid>(type: "uuid", nullable: true),
-						season_number = table.Column<int>(type: "integer", nullable: true),
-						episode_number = table.Column<int>(type: "integer", nullable: true),
-						absolute_number = table.Column<int>(type: "integer", nullable: true),
-						path = table.Column<string>(type: "text", nullable: false),
-						name = table.Column<string>(type: "text", nullable: true),
-						overview = table.Column<string>(type: "text", nullable: true),
-						runtime = table.Column<int>(type: "integer", nullable: false),
-						release_date = table.Column<DateTime>(
-							type: "timestamp with time zone",
-							nullable: true
-						),
-						added_date = table.Column<DateTime>(
-							type: "timestamp with time zone",
-							nullable: false,
-							defaultValueSql: "now() at time zone 'utc'"
-						),
-						poster_source = table.Column<string>(type: "text", nullable: true),
-						poster_blurhash = table.Column<string>(
-							type: "character varying(32)",
-							maxLength: 32,
-							nullable: true
-						),
-						thumbnail_source = table.Column<string>(type: "text", nullable: true),
-						thumbnail_blurhash = table.Column<string>(
-							type: "character varying(32)",
-							maxLength: 32,
-							nullable: true
-						),
-						logo_source = table.Column<string>(type: "text", nullable: true),
-						logo_blurhash = table.Column<string>(
-							type: "character varying(32)",
-							maxLength: 32,
-							nullable: true
-						),
-						external_id = table.Column<string>(type: "json", nullable: false)
-					},
+				columns: table => new
+				{
+					id = table.Column<Guid>(type: "uuid", nullable: false),
+					slug = table.Column<string>(
+						type: "character varying(256)",
+						maxLength: 256,
+						nullable: false
+					),
+					show_id = table.Column<Guid>(type: "uuid", nullable: false),
+					season_id = table.Column<Guid>(type: "uuid", nullable: true),
+					season_number = table.Column<int>(type: "integer", nullable: true),
+					episode_number = table.Column<int>(type: "integer", nullable: true),
+					absolute_number = table.Column<int>(type: "integer", nullable: true),
+					path = table.Column<string>(type: "text", nullable: false),
+					name = table.Column<string>(type: "text", nullable: true),
+					overview = table.Column<string>(type: "text", nullable: true),
+					runtime = table.Column<int>(type: "integer", nullable: false),
+					release_date = table.Column<DateTime>(
+						type: "timestamp with time zone",
+						nullable: true
+					),
+					added_date = table.Column<DateTime>(
+						type: "timestamp with time zone",
+						nullable: false,
+						defaultValueSql: "now() at time zone 'utc'"
+					),
+					poster_source = table.Column<string>(type: "text", nullable: true),
+					poster_blurhash = table.Column<string>(
+						type: "character varying(32)",
+						maxLength: 32,
+						nullable: true
+					),
+					thumbnail_source = table.Column<string>(type: "text", nullable: true),
+					thumbnail_blurhash = table.Column<string>(
+						type: "character varying(32)",
+						maxLength: 32,
+						nullable: true
+					),
+					logo_source = table.Column<string>(type: "text", nullable: true),
+					logo_blurhash = table.Column<string>(
+						type: "character varying(32)",
+						maxLength: 32,
+						nullable: true
+					),
+					external_id = table.Column<string>(type: "json", nullable: false)
+				},
 				constraints: table =>
 				{
 					table.PrimaryKey("pk_episodes", x => x.id);

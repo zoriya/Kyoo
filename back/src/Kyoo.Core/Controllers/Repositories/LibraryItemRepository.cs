@@ -35,29 +35,29 @@ namespace Kyoo.Core.Controllers
 		// language=PostgreSQL
 		protected override FormattableString Sql =>
 			$"""
-			select
-				s.*, -- Show as s
-				m.*,
-				c.*
-				/* includes */
-			from
-				shows as s
-				full outer join (
 				select
-					* -- Movie
+					s.*, -- Show as s
+					m.*,
+					c.*
+					/* includes */
 				from
-					movies) as m on false
-				full outer join(
+					shows as s
+					full outer join (
 					select
-						c.* -- Collection as c
+						* -- Movie
 					from
-						collections as c
-					left join link_collection_show as ls on ls.collection_id = c.id
-					left join link_collection_movie as lm on lm.collection_id = c.id
-					group by c.id
-					having count(*) > 1
-				) as c on false
-			""";
+						movies) as m on false
+					full outer join(
+						select
+							c.* -- Collection as c
+						from
+							collections as c
+						left join link_collection_show as ls on ls.collection_id = c.id
+						left join link_collection_movie as lm on lm.collection_id = c.id
+						group by c.id
+						having count(*) > 1
+					) as c on false
+				""";
 
 		protected override Dictionary<string, Type> Config =>
 			new()

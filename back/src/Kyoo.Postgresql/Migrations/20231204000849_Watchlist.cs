@@ -46,24 +46,23 @@ namespace Kyoo.Postgresql.Migrations
 
 			migrationBuilder.CreateTable(
 				name: "episode_watch_status",
-				columns: table =>
-					new
-					{
-						user_id = table.Column<Guid>(type: "uuid", nullable: false),
-						episode_id = table.Column<Guid>(type: "uuid", nullable: false),
-						added_date = table.Column<DateTime>(
-							type: "timestamp with time zone",
-							nullable: false,
-							defaultValueSql: "now() at time zone 'utc'"
-						),
-						played_date = table.Column<DateTime>(
-							type: "timestamp with time zone",
-							nullable: true
-						),
-						status = table.Column<WatchStatus>(type: "watch_status", nullable: false),
-						watched_time = table.Column<int>(type: "integer", nullable: true),
-						watched_percent = table.Column<int>(type: "integer", nullable: true)
-					},
+				columns: table => new
+				{
+					user_id = table.Column<Guid>(type: "uuid", nullable: false),
+					episode_id = table.Column<Guid>(type: "uuid", nullable: false),
+					added_date = table.Column<DateTime>(
+						type: "timestamp with time zone",
+						nullable: false,
+						defaultValueSql: "now() at time zone 'utc'"
+					),
+					played_date = table.Column<DateTime>(
+						type: "timestamp with time zone",
+						nullable: true
+					),
+					status = table.Column<WatchStatus>(type: "watch_status", nullable: false),
+					watched_time = table.Column<int>(type: "integer", nullable: true),
+					watched_percent = table.Column<int>(type: "integer", nullable: true)
+				},
 				constraints: table =>
 				{
 					table.PrimaryKey(
@@ -89,24 +88,23 @@ namespace Kyoo.Postgresql.Migrations
 
 			migrationBuilder.CreateTable(
 				name: "movie_watch_status",
-				columns: table =>
-					new
-					{
-						user_id = table.Column<Guid>(type: "uuid", nullable: false),
-						movie_id = table.Column<Guid>(type: "uuid", nullable: false),
-						added_date = table.Column<DateTime>(
-							type: "timestamp with time zone",
-							nullable: false,
-							defaultValueSql: "now() at time zone 'utc'"
-						),
-						played_date = table.Column<DateTime>(
-							type: "timestamp with time zone",
-							nullable: true
-						),
-						status = table.Column<WatchStatus>(type: "watch_status", nullable: false),
-						watched_time = table.Column<int>(type: "integer", nullable: true),
-						watched_percent = table.Column<int>(type: "integer", nullable: true)
-					},
+				columns: table => new
+				{
+					user_id = table.Column<Guid>(type: "uuid", nullable: false),
+					movie_id = table.Column<Guid>(type: "uuid", nullable: false),
+					added_date = table.Column<DateTime>(
+						type: "timestamp with time zone",
+						nullable: false,
+						defaultValueSql: "now() at time zone 'utc'"
+					),
+					played_date = table.Column<DateTime>(
+						type: "timestamp with time zone",
+						nullable: true
+					),
+					status = table.Column<WatchStatus>(type: "watch_status", nullable: false),
+					watched_time = table.Column<int>(type: "integer", nullable: true),
+					watched_percent = table.Column<int>(type: "integer", nullable: true)
+				},
 				constraints: table =>
 				{
 					table.PrimaryKey("pk_movie_watch_status", x => new { x.user_id, x.movie_id });
@@ -129,26 +127,25 @@ namespace Kyoo.Postgresql.Migrations
 
 			migrationBuilder.CreateTable(
 				name: "show_watch_status",
-				columns: table =>
-					new
-					{
-						user_id = table.Column<Guid>(type: "uuid", nullable: false),
-						show_id = table.Column<Guid>(type: "uuid", nullable: false),
-						added_date = table.Column<DateTime>(
-							type: "timestamp with time zone",
-							nullable: false,
-							defaultValueSql: "now() at time zone 'utc'"
-						),
-						played_date = table.Column<DateTime>(
-							type: "timestamp with time zone",
-							nullable: true
-						),
-						status = table.Column<WatchStatus>(type: "watch_status", nullable: false),
-						unseen_episodes_count = table.Column<int>(type: "integer", nullable: false),
-						next_episode_id = table.Column<Guid>(type: "uuid", nullable: true),
-						watched_time = table.Column<int>(type: "integer", nullable: true),
-						watched_percent = table.Column<int>(type: "integer", nullable: true)
-					},
+				columns: table => new
+				{
+					user_id = table.Column<Guid>(type: "uuid", nullable: false),
+					show_id = table.Column<Guid>(type: "uuid", nullable: false),
+					added_date = table.Column<DateTime>(
+						type: "timestamp with time zone",
+						nullable: false,
+						defaultValueSql: "now() at time zone 'utc'"
+					),
+					played_date = table.Column<DateTime>(
+						type: "timestamp with time zone",
+						nullable: true
+					),
+					status = table.Column<WatchStatus>(type: "watch_status", nullable: false),
+					unseen_episodes_count = table.Column<int>(type: "integer", nullable: false),
+					next_episode_id = table.Column<Guid>(type: "uuid", nullable: true),
+					watched_time = table.Column<int>(type: "integer", nullable: true),
+					watched_percent = table.Column<int>(type: "integer", nullable: true)
+				},
 				constraints: table =>
 				{
 					table.PrimaryKey("pk_show_watch_status", x => new { x.user_id, x.show_id });

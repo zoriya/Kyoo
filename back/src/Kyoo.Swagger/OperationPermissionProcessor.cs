@@ -39,8 +39,7 @@ namespace Kyoo.Swagger
 			context.OperationDescription.Operation.Security ??=
 				new List<OpenApiSecurityRequirement>();
 			OpenApiSecurityRequirement perms = context
-				.MethodInfo
-				.GetCustomAttributes<UserOnlyAttribute>()
+				.MethodInfo.GetCustomAttributes<UserOnlyAttribute>()
 				.Aggregate(
 					new OpenApiSecurityRequirement(),
 					(agg, _) =>
@@ -51,8 +50,7 @@ namespace Kyoo.Swagger
 				);
 
 			perms = context
-				.MethodInfo
-				.GetCustomAttributes<PermissionAttribute>()
+				.MethodInfo.GetCustomAttributes<PermissionAttribute>()
 				.Aggregate(
 					perms,
 					(agg, cur) =>
@@ -64,14 +62,12 @@ namespace Kyoo.Swagger
 					}
 				);
 
-			PartialPermissionAttribute controller = context
-				.ControllerType
-				.GetCustomAttribute<PartialPermissionAttribute>();
+			PartialPermissionAttribute controller =
+				context.ControllerType.GetCustomAttribute<PartialPermissionAttribute>();
 			if (controller != null)
 			{
 				perms = context
-					.MethodInfo
-					.GetCustomAttributes<PartialPermissionAttribute>()
+					.MethodInfo.GetCustomAttributes<PartialPermissionAttribute>()
 					.Aggregate(
 						perms,
 						(agg, cur) =>

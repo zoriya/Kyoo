@@ -212,14 +212,13 @@ namespace Kyoo.Core.Controllers
 		{
 			IEnumerable<string> images = new[] { "poster", "thumbnail", "logo" }
 				.SelectMany(x => _GetBaseImagePath(item, x))
-				.SelectMany(
-					x =>
-						new[]
-						{
-							ImageQuality.High.ToString().ToLowerInvariant(),
-							ImageQuality.Medium.ToString().ToLowerInvariant(),
-							ImageQuality.Low.ToString().ToLowerInvariant(),
-						}.Select(quality => $"{x}.{quality}.webp")
+				.SelectMany(x =>
+					new[]
+					{
+						ImageQuality.High.ToString().ToLowerInvariant(),
+						ImageQuality.Medium.ToString().ToLowerInvariant(),
+						ImageQuality.Low.ToString().ToLowerInvariant(),
+					}.Select(quality => $"{x}.{quality}.webp")
 				);
 
 			foreach (string image in images)

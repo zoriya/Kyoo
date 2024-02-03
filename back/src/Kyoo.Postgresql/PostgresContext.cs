@@ -99,17 +99,14 @@ namespace Kyoo.Postgresql
 
 			modelBuilder
 				.HasDbFunction(typeof(DatabaseContext).GetMethod(nameof(MD5))!)
-				.HasTranslation(
-					args =>
-						new SqlFunctionExpression(
-							"md5",
-							args,
-							nullable: true,
-							argumentsPropagateNullability: new[] { false },
-							type: args[0].Type,
-							typeMapping: args[0].TypeMapping
-						)
-				);
+				.HasTranslation(args => new SqlFunctionExpression(
+					"md5",
+					args,
+					nullable: true,
+					argumentsPropagateNullability: new[] { false },
+					type: args[0].Type,
+					typeMapping: args[0].TypeMapping
+				));
 
 			base.OnModelCreating(modelBuilder);
 		}

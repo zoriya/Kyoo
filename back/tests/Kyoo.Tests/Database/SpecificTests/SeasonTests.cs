@@ -53,17 +53,14 @@ namespace Kyoo.Tests.Database
 		{
 			Season season = await _repository.Get(1.AsGuid());
 			Assert.Equal("anohana-s1", season.Slug);
-			await Repositories
-				.LibraryManager
-				.Shows
-				.Patch(
-					season.ShowId,
-					(x) =>
-					{
-						x.Slug = "new-slug";
-						return x;
-					}
-				);
+			await Repositories.LibraryManager.Shows.Patch(
+				season.ShowId,
+				(x) =>
+				{
+					x.Slug = "new-slug";
+					return x;
+				}
+			);
 			season = await _repository.Get(1.AsGuid());
 			Assert.Equal("new-slug-s1", season.Slug);
 		}

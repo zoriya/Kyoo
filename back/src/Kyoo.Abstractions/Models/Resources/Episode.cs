@@ -181,37 +181,35 @@ namespace Kyoo.Abstractions.Models
 		[LoadableRelation(
 			// language=PostgreSQL
 			Sql = """
-				select
-					pe.* -- Episode as pe
-				from
-					episodes as "pe"
-				where
-					pe.show_id = "this".show_id
-					and (pe.absolute_number < "this".absolute_number
-						or pe.season_number < "this".season_number
-						or (pe.season_number = "this".season_number
-							and e.episode_number < "this".episode_number))
-				order by
-					pe.absolute_number desc nulls last,
-					pe.season_number desc,
-					pe.episode_number desc
-				limit 1
-			"""
+					select
+						pe.* -- Episode as pe
+					from
+						episodes as "pe"
+					where
+						pe.show_id = "this".show_id
+						and (pe.absolute_number < "this".absolute_number
+							or pe.season_number < "this".season_number
+							or (pe.season_number = "this".season_number
+								and e.episode_number < "this".episode_number))
+					order by
+						pe.absolute_number desc nulls last,
+						pe.season_number desc,
+						pe.episode_number desc
+					limit 1
+				"""
 		)]
 		public Episode? PreviousEpisode { get; set; }
 
 		private Episode? _PreviousEpisode =>
 			Show!
-				.Episodes!
-				.OrderBy(x => x.AbsoluteNumber == null)
+				.Episodes!.OrderBy(x => x.AbsoluteNumber == null)
 				.ThenByDescending(x => x.AbsoluteNumber)
 				.ThenByDescending(x => x.SeasonNumber)
 				.ThenByDescending(x => x.EpisodeNumber)
-				.FirstOrDefault(
-					x =>
-						x.AbsoluteNumber < AbsoluteNumber
-						|| x.SeasonNumber < SeasonNumber
-						|| (x.SeasonNumber == SeasonNumber && x.EpisodeNumber < EpisodeNumber)
+				.FirstOrDefault(x =>
+					x.AbsoluteNumber < AbsoluteNumber
+					|| x.SeasonNumber < SeasonNumber
+					|| (x.SeasonNumber == SeasonNumber && x.EpisodeNumber < EpisodeNumber)
 				);
 
 		/// <summary>
@@ -221,36 +219,34 @@ namespace Kyoo.Abstractions.Models
 		[LoadableRelation(
 			// language=PostgreSQL
 			Sql = """
-				select
-					ne.* -- Episode as ne
-				from
-					episodes as "ne"
-				where
-					ne.show_id = "this".show_id
-					and (ne.absolute_number > "this".absolute_number
-						or ne.season_number > "this".season_number
-						or (ne.season_number = "this".season_number
-							and e.episode_number > "this".episode_number))
-				order by
-					ne.absolute_number,
-					ne.season_number,
-					ne.episode_number
-				limit 1
-			"""
+					select
+						ne.* -- Episode as ne
+					from
+						episodes as "ne"
+					where
+						ne.show_id = "this".show_id
+						and (ne.absolute_number > "this".absolute_number
+							or ne.season_number > "this".season_number
+							or (ne.season_number = "this".season_number
+								and e.episode_number > "this".episode_number))
+					order by
+						ne.absolute_number,
+						ne.season_number,
+						ne.episode_number
+					limit 1
+				"""
 		)]
 		public Episode? NextEpisode { get; set; }
 
 		private Episode? _NextEpisode =>
 			Show!
-				.Episodes!
-				.OrderBy(x => x.AbsoluteNumber)
+				.Episodes!.OrderBy(x => x.AbsoluteNumber)
 				.ThenBy(x => x.SeasonNumber)
 				.ThenBy(x => x.EpisodeNumber)
-				.FirstOrDefault(
-					x =>
-						x.AbsoluteNumber > AbsoluteNumber
-						|| x.SeasonNumber > SeasonNumber
-						|| (x.SeasonNumber == SeasonNumber && x.EpisodeNumber > EpisodeNumber)
+				.FirstOrDefault(x =>
+					x.AbsoluteNumber > AbsoluteNumber
+					|| x.SeasonNumber > SeasonNumber
+					|| (x.SeasonNumber == SeasonNumber && x.EpisodeNumber > EpisodeNumber)
 				);
 
 		[SerializeIgnore]

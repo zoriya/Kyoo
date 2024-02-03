@@ -85,17 +85,12 @@ namespace Kyoo.Core.Api
 			[FromQuery] Include<Show> fields
 		)
 		{
-			ICollection<Show> resources = await _libraryManager
-				.Shows
-				.GetAll(
-					Filter.And(
-						filter,
-						identifier.Matcher<Show>(x => x.StudioId, x => x.Studio!.Slug)
-					),
-					sortBy,
-					fields,
-					pagination
-				);
+			ICollection<Show> resources = await _libraryManager.Shows.GetAll(
+				Filter.And(filter, identifier.Matcher<Show>(x => x.StudioId, x => x.Studio!.Slug)),
+				sortBy,
+				fields,
+				pagination
+			);
 
 			if (
 				!resources.Any()

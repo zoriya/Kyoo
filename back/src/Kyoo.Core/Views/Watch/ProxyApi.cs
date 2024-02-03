@@ -35,14 +35,13 @@ namespace Kyoo.Core.Api
 	public class ProxyApi : Controller
 	{
 		private readonly HttpProxyOptions _proxyOptions = HttpProxyOptionsBuilder
-			.Instance
-			.WithHandleFailure(
+			.Instance.WithHandleFailure(
 				async (context, exception) =>
 				{
 					context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
-					await context
-						.Response
-						.WriteAsJsonAsync(new RequestError("Service unavailable"));
+					await context.Response.WriteAsJsonAsync(
+						new RequestError("Service unavailable")
+					);
 				}
 			)
 			.Build();

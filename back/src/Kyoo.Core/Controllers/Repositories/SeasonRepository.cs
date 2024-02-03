@@ -47,12 +47,10 @@ namespace Kyoo.Core.Controllers
 			IRepository<Show>.OnEdited += async (show) =>
 			{
 				await using AsyncServiceScope scope = CoreModule.Services.CreateAsyncScope();
-				DatabaseContext database = scope
-					.ServiceProvider
-					.GetRequiredService<DatabaseContext>();
+				DatabaseContext database =
+					scope.ServiceProvider.GetRequiredService<DatabaseContext>();
 				List<Season> seasons = await database
-					.Seasons
-					.AsTracking()
+					.Seasons.AsTracking()
 					.Where(x => x.ShowId == show.Id)
 					.ToListAsync();
 				foreach (Season season in seasons)
@@ -77,11 +75,9 @@ namespace Kyoo.Core.Controllers
 
 		protected override Task<Season?> GetDuplicated(Season item)
 		{
-			return _database
-				.Seasons
-				.FirstOrDefaultAsync(
-					x => x.ShowId == item.ShowId && x.SeasonNumber == item.SeasonNumber
-				);
+			return _database.Seasons.FirstOrDefaultAsync(x =>
+				x.ShowId == item.ShowId && x.SeasonNumber == item.SeasonNumber
+			);
 		}
 
 		/// <inheritdoc/>

@@ -120,12 +120,11 @@ namespace Kyoo.Abstractions.Controllers
 			Type[] types =
 				typeof(T).GetCustomAttribute<OneOfAttribute>()?.Types ?? new[] { typeof(T) };
 			PropertyInfo? property = types
-				.Select(
-					x =>
-						x.GetProperty(
-							key,
-							BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance
-						)
+				.Select(x =>
+					x.GetProperty(
+						key,
+						BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance
+					)
 				)
 				.FirstOrDefault(x => x != null);
 			if (property == null)

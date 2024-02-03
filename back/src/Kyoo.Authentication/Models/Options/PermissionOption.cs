@@ -40,10 +40,8 @@ namespace Kyoo.Authentication.Models
 			get
 			{
 				return Enum.GetNames<Group>()
-					.SelectMany(
-						group =>
-							Enum.GetNames<Kind>()
-								.Select(kind => $"{group}.{kind}".ToLowerInvariant())
+					.SelectMany(group =>
+						Enum.GetNames<Kind>().Select(kind => $"{group}.{kind}".ToLowerInvariant())
 					)
 					.ToArray();
 			}

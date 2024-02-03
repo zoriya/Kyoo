@@ -135,14 +135,14 @@ namespace Kyoo.Abstractions.Models
 		[LoadableRelation(
 			// language=PostgreSQL
 			Projected = """
-				(
-					select
-						count(*)::int
-					from
-						episodes as e
-					where
-						e.season_id = id) as episodes_count
-			"""
+					(
+						select
+							count(*)::int
+						from
+							episodes as e
+						where
+							e.season_id = id) as episodes_count
+				"""
 		)]
 		public int EpisodesCount { get; set; }
 

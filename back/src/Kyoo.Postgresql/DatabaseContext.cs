@@ -369,16 +369,13 @@ namespace Kyoo.Postgresql
 			modelBuilder.Entity<Season>().HasIndex(x => x.Slug).IsUnique();
 			modelBuilder
 				.Entity<Episode>()
-				.HasIndex(
-					x =>
-						new
-						{
-							ShowID = x.ShowId,
-							x.SeasonNumber,
-							x.EpisodeNumber,
-							x.AbsoluteNumber
-						}
-				)
+				.HasIndex(x => new
+				{
+					ShowID = x.ShowId,
+					x.SeasonNumber,
+					x.EpisodeNumber,
+					x.AbsoluteNumber
+				})
 				.IsUnique();
 			modelBuilder.Entity<Episode>().HasIndex(x => x.Slug).IsUnique();
 			modelBuilder.Entity<User>().HasIndex(x => x.Slug).IsUnique();

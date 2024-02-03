@@ -200,17 +200,12 @@ namespace Kyoo.Core.Api
 			[FromQuery] Include<Show>? fields
 		)
 		{
-			ICollection<Show> resources = await _libraryManager
-				.Shows
-				.GetAll(
-					Filter.And(
-						filter,
-						identifier.IsContainedIn<Show, Collection>(x => x.Collections)
-					),
-					sortBy == new Sort<Show>.Default() ? new Sort<Show>.By(x => x.AirDate) : sortBy,
-					fields,
-					pagination
-				);
+			ICollection<Show> resources = await _libraryManager.Shows.GetAll(
+				Filter.And(filter, identifier.IsContainedIn<Show, Collection>(x => x.Collections)),
+				sortBy == new Sort<Show>.Default() ? new Sort<Show>.By(x => x.AirDate) : sortBy,
+				fields,
+				pagination
+			);
 
 			if (
 				!resources.Any()
@@ -249,19 +244,12 @@ namespace Kyoo.Core.Api
 			[FromQuery] Include<Movie>? fields
 		)
 		{
-			ICollection<Movie> resources = await _libraryManager
-				.Movies
-				.GetAll(
-					Filter.And(
-						filter,
-						identifier.IsContainedIn<Movie, Collection>(x => x.Collections)
-					),
-					sortBy == new Sort<Movie>.Default()
-						? new Sort<Movie>.By(x => x.AirDate)
-						: sortBy,
-					fields,
-					pagination
-				);
+			ICollection<Movie> resources = await _libraryManager.Movies.GetAll(
+				Filter.And(filter, identifier.IsContainedIn<Movie, Collection>(x => x.Collections)),
+				sortBy == new Sort<Movie>.Default() ? new Sort<Movie>.By(x => x.AirDate) : sortBy,
+				fields,
+				pagination
+			);
 
 			if (
 				!resources.Any()

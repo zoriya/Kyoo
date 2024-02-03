@@ -62,17 +62,14 @@ public class Include<T> : Include
 			.SelectMany(key =>
 			{
 				var relations = types
-					.Select(
-						x =>
-							x.GetProperty(
-								key,
-								BindingFlags.IgnoreCase
-									| BindingFlags.Public
-									| BindingFlags.Instance
-							)!
+					.Select(x =>
+						x.GetProperty(
+							key,
+							BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance
+						)!
 					)
-					.Select(
-						prop => (prop, attr: prop?.GetCustomAttribute<LoadableRelationAttribute>()!)
+					.Select(prop =>
+						(prop, attr: prop?.GetCustomAttribute<LoadableRelationAttribute>()!)
 					)
 					.Where(x => x.prop != null && x.attr != null)
 					.ToList();

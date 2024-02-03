@@ -60,8 +60,8 @@ namespace Kyoo.Utils
 			hasChanged = false;
 			if (second == null)
 				return first;
-			hasChanged = second.Any(
-				x => !first.ContainsKey(x.Key) || x.Value?.Equals(first[x.Key]) == false
+			hasChanged = second.Any(x =>
+				!first.ContainsKey(x.Key) || x.Value?.Equals(first[x.Key]) == false
 			);
 			foreach ((T key, T2 value) in first)
 				second.TryAdd(key, value);
@@ -98,10 +98,9 @@ namespace Kyoo.Utils
 
 			Type type = typeof(T);
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
-				.Where(
-					x =>
-						x is { CanRead: true, CanWrite: true }
-						&& Attribute.GetCustomAttribute(x, typeof(NotMergeableAttribute)) == null
+				.Where(x =>
+					x is { CanRead: true, CanWrite: true }
+					&& Attribute.GetCustomAttribute(x, typeof(NotMergeableAttribute)) == null
 				);
 
 			if (where != null)
