@@ -167,6 +167,16 @@ namespace Kyoo.Abstractions.Models.Utils
 				: new Filter<T>.Eq("Slug", _slug!);
 		}
 
+		public bool Is(Guid uid)
+		{
+			return _id.HasValue && _id.Value == uid;
+		}
+
+		public bool Is(string slug)
+		{
+			return !_id.HasValue && _slug == slug;
+		}
+
 		private Expression<Func<T, bool>> _IsSameExpression<T>()
 			where T : IResource
 		{
@@ -215,7 +225,7 @@ namespace Kyoo.Abstractions.Models.Utils
 			/// <inheritdoc />
 			public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
 			{
-				if (sourceType == typeof(int) || sourceType == typeof(string))
+				if (sourceType == typeof(Guid) || sourceType == typeof(string))
 					return true;
 				return base.CanConvertFrom(context, sourceType);
 			}
