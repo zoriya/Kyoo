@@ -55,6 +55,11 @@ namespace Kyoo.Abstractions.Models.Permissions
 	public enum Group
 	{
 		/// <summary>
+		/// Default group indicating no value.
+		/// </summary>
+		None,
+
+		/// <summary>
 		/// Allow all operations on basic items types.
 		/// </summary>
 		Overall,
