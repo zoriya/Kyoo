@@ -16,6 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.IO;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Models;
 
@@ -59,5 +61,19 @@ namespace Kyoo.Abstractions.Controllers
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task DeleteImages<T>(T item)
 			where T : IThumbnails;
+
+		/// <summary>
+		/// Set the user's profile picture
+		/// </summary>
+		/// <param name="userId">The id of the user. </param>
+		/// <returns>The byte stream of the image. Null if no image exist.</returns>
+		Task<Stream> GetUserImage(Guid userId);
+
+		/// <summary>
+		/// Set the user's profile picture
+		/// </summary>
+		/// <param name="userId">The id of the user. </param>
+		/// <param name="image">The byte stream of the image. Null to delete the image.</param>
+		Task SetUserImage(Guid userId, Stream? image);
 	}
 }
