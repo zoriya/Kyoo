@@ -1,7 +1,7 @@
 <Project>
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
-		<LangVersion>default</LangVersion>
+		<LangVersion>preview</LangVersion>
 		<Company>Kyoo</Company>
 		<Authors>Kyoo</Authors>
 		<Copyright>Copyright (c) Kyoo</Copyright>

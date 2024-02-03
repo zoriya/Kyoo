@@ -30,7 +30,8 @@ namespace Kyoo.Abstractions.Models.Exceptions
 		/// <summary>
 		/// Create a default <see cref="ItemNotFoundException"/> with no message.
 		/// </summary>
-		public ItemNotFoundException() { }
+		public ItemNotFoundException()
+			: base("Item not found") { }
 
 		/// <summary>
 		/// Create a new <see cref="ItemNotFoundException"/> with a message

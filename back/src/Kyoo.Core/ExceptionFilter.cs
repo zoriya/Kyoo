@@ -30,19 +30,12 @@ namespace Kyoo.Core
 	/// <summary>
 	/// A middleware to handle errors globally.
 	/// </summary>
-	public class ExceptionFilter : IExceptionFilter
+	/// <remarks>
+	/// Initializes a new instance of the <see cref="ExceptionFilter"/> class.
+	/// </remarks>
+	/// <param name="logger">The logger used to log errors.</param>
+	public class ExceptionFilter(ILogger<ExceptionFilter> logger) : IExceptionFilter
 	{
-		private readonly ILogger _logger;
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ExceptionFilter"/> class.
-		/// </summary>
-		/// <param name="logger">The logger used to log errors.</param>
-		public ExceptionFilter(ILogger<ExceptionFilter> logger)
-		{
-			_logger = logger;
-		}
-
 		/// <inheritdoc/>
 		public void OnException(ExceptionContext context)
 		{
@@ -65,7 +58,7 @@ namespace Kyoo.Core
 					context.Result = new UnauthorizedObjectResult(new RequestError(ex.Message));
 					break;
 				case Exception ex:
-					_logger.LogError(ex, "Unhandled error");
+					logger.LogError(ex, "Unhandled error");
 					context.Result = new ServerErrorObjectResult(
 						new RequestError("Internal Server Error")
 					);

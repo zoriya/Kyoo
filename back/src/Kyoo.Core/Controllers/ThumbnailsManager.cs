@@ -219,17 +219,18 @@ namespace Kyoo.Core.Controllers
 			try
 			{
 				await using FileStream img = File.Open(
-					$"/metadata/user/${userId}.webp",
+					$"/metadata/user/{userId}.webp",
 					FileMode.Open
 				);
 				return img;
 			}
 			catch (FileNotFoundException) { }
+			catch (DirectoryNotFoundException) { }
 
 			User user = await users.Value.Get(userId);
 			if (user.Email == null) throw new ItemNotFoundException();
 			using MD5 md5 = MD5.Create();
-			string hash = Convert.ToHexString(md5.ComputeHash(Encoding.ASCII.GetBytes(user.Email)));
+			string hash = Convert.ToHexString(md5.ComputeHash(Encoding.ASCII.GetBytes(user.Email))).ToLower();
 			try
 			{
 				HttpClient client = clientFactory.CreateClient();
@@ -250,7 +251,8 @@ namespace Kyoo.Core.Controllers
 			info.ColorType = SKColorType.Rgba8888;
 			using SKBitmap original = SKBitmap.Decode(codec, info);
 			using SKBitmap ret = original.Resize(new SKSizeI(250, 250), SKFilterQuality.High);
-			await _WriteTo(ret, $"/metadata/user/${userId}.webp", 75);
+			Directory.CreateDirectory("/metadata/user");
+			await _WriteTo(ret, $"/metadata/user/{userId}.webp", 75);
 		}
 	}
 }
