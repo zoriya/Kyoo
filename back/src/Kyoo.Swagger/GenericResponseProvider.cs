@@ -49,8 +49,7 @@ namespace Kyoo.Swagger
 			foreach (ActionModel action in context.Result.Controllers.SelectMany(x => x.Actions))
 			{
 				IEnumerable<ProducesResponseTypeAttribute> responses = action
-					.Filters
-					.OfType<ProducesResponseTypeAttribute>()
+					.Filters.OfType<ProducesResponseTypeAttribute>()
 					.Where(x => x.Type == typeof(ActionResult<>));
 				foreach (ProducesResponseTypeAttribute response in responses)
 				{

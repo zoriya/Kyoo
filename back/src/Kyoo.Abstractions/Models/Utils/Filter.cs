@@ -205,8 +205,7 @@ public abstract record Filter<T> : Filter
 			if (type.IsEnum)
 			{
 				return Parse
-					.LetterOrDigit
-					.Many()
+					.LetterOrDigit.Many()
 					.Text()
 					.Then(x =>
 					{
@@ -259,14 +258,11 @@ public abstract record Filter<T> : Filter
 				}
 
 				PropertyInfo? propInfo = types
-					.Select(
-						x =>
-							x.GetProperty(
-								prop,
-								BindingFlags.IgnoreCase
-									| BindingFlags.Public
-									| BindingFlags.Instance
-							)
+					.Select(x =>
+						x.GetProperty(
+							prop,
+							BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance
+						)
 					)
 					.FirstOrDefault();
 				if (propInfo == null)

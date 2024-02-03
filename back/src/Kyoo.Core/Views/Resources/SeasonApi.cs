@@ -86,17 +86,15 @@ namespace Kyoo.Core.Api
 			[FromQuery] Include<Episode> fields
 		)
 		{
-			ICollection<Episode> resources = await _libraryManager
-				.Episodes
-				.GetAll(
-					Filter.And(
-						filter,
-						identifier.Matcher<Episode>(x => x.SeasonId, x => x.Season!.Slug)
-					),
-					sortBy,
-					fields,
-					pagination
-				);
+			ICollection<Episode> resources = await _libraryManager.Episodes.GetAll(
+				Filter.And(
+					filter,
+					identifier.Matcher<Episode>(x => x.SeasonId, x => x.Season!.Slug)
+				),
+				sortBy,
+				fields,
+				pagination
+			);
 
 			if (
 				!resources.Any()
@@ -125,9 +123,10 @@ namespace Kyoo.Core.Api
 			[FromQuery] Include<Show> fields
 		)
 		{
-			Show? ret = await _libraryManager
-				.Shows
-				.GetOrDefault(identifier.IsContainedIn<Show, Season>(x => x.Seasons!), fields);
+			Show? ret = await _libraryManager.Shows.GetOrDefault(
+				identifier.IsContainedIn<Show, Season>(x => x.Seasons!),
+				fields
+			);
 			if (ret == null)
 				return NotFound();
 			return ret;

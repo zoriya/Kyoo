@@ -66,11 +66,10 @@ public class WatchStatusRepository : IWatchStatusRepository
 		{
 			await using AsyncServiceScope scope = CoreModule.Services.CreateAsyncScope();
 			DatabaseContext db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
-			WatchStatusRepository repo = scope
-				.ServiceProvider
-				.GetRequiredService<WatchStatusRepository>();
-			List<Guid> users = await db.ShowWatchStatus
-				.IgnoreQueryFilters()
+			WatchStatusRepository repo =
+				scope.ServiceProvider.GetRequiredService<WatchStatusRepository>();
+			List<Guid> users = await db
+				.ShowWatchStatus.IgnoreQueryFilters()
 				.Where(x => x.ShowId == ep.ShowId && x.Status == WatchStatus.Completed)
 				.Select(x => x.UserId)
 				.ToListAsync();
@@ -95,41 +94,41 @@ public class WatchStatusRepository : IWatchStatusRepository
 	// language=PostgreSQL
 	protected FormattableString Sql =>
 		$"""
-		select
-			s.*,
-			swe.*, -- Episode as swe
-			m.*
-			/* includes */
-		from (
 			select
-				s.*, -- Show as s
-				sw.*,
-				sw.added_date as order,
-				sw.status as watch_status
-			from
-				shows as s
-				inner join show_watch_status as sw on sw.show_id = s.id
-					and sw.user_id = [current_user]) as s
-			full outer join (
-			select
-				m.*, -- Movie as m
-				mw.*,
-				mw.added_date as order,
-				mw.status as watch_status
-			from
-				movies as m
-				inner join movie_watch_status as mw on mw.movie_id = m.id
-					and mw.user_id = [current_user]) as m on false
-		left join episodes as swe on swe.id = s.next_episode_id
-		/* includesJoin */
-		where
-			(coalesce(s.watch_status, m.watch_status) = 'watching'::watch_status
-			or coalesce(s.watch_status, m.watch_status) = 'planned'::watch_status)
-			/* where */
-		order by
-			coalesce(s.order, m.order) desc,
-			coalesce(s.id, m.id) asc
-		""";
+				s.*,
+				swe.*, -- Episode as swe
+				m.*
+				/* includes */
+			from (
+				select
+					s.*, -- Show as s
+					sw.*,
+					sw.added_date as order,
+					sw.status as watch_status
+				from
+					shows as s
+					inner join show_watch_status as sw on sw.show_id = s.id
+						and sw.user_id = [current_user]) as s
+				full outer join (
+				select
+					m.*, -- Movie as m
+					mw.*,
+					mw.added_date as order,
+					mw.status as watch_status
+				from
+					movies as m
+					inner join movie_watch_status as mw on mw.movie_id = m.id
+						and mw.user_id = [current_user]) as m on false
+			left join episodes as swe on swe.id = s.next_episode_id
+			/* includesJoin */
+			where
+				(coalesce(s.watch_status, m.watch_status) = 'watching'::watch_status
+				or coalesce(s.watch_status, m.watch_status) = 'planned'::watch_status)
+				/* where */
+			order by
+				coalesce(s.order, m.order) desc,
+				coalesce(s.id, m.id) asc
+			""";
 
 	protected Dictionary<string, Type> Config =>
 		new()
@@ -189,8 +188,7 @@ public class WatchStatusRepository : IWatchStatusRepository
 	{
 		if (include != null)
 			include.Metadatas = include
-				.Metadatas
-				.Where(x => x.Name != nameof(Show.WatchStatus))
+				.Metadatas.Where(x => x.Name != nameof(Show.WatchStatus))
 				.ToList();
 
 		// We can't use the generic after id hanler since the sort depends on a relation.
@@ -226,9 +224,9 @@ public class WatchStatusRepository : IWatchStatusRepository
 	/// <inheritdoc />
 	public Task<MovieWatchStatus?> GetMovieStatus(Guid movieId, Guid userId)
 	{
-		return _database
-			.MovieWatchStatus
-			.FirstOrDefaultAsync(x => x.MovieId == movieId && x.UserId == userId);
+		return _database.MovieWatchStatus.FirstOrDefaultAsync(x =>
+			x.MovieId == movieId && x.UserId == userId
+		);
 	}
 
 	/// <inheritdoc />
@@ -277,8 +275,7 @@ public class WatchStatusRepository : IWatchStatusRepository
 				PlayedDate = status == WatchStatus.Completed ? DateTime.UtcNow : null,
 			};
 		await _database
-			.MovieWatchStatus
-			.Upsert(ret)
+			.MovieWatchStatus.Upsert(ret)
 			.UpdateIf(x => status != Watching || x.Status != Completed)
 			.RunAsync();
 		return ret;
@@ -288,17 +285,16 @@ public class WatchStatusRepository : IWatchStatusRepository
 	public async Task DeleteMovieStatus(Guid movieId, Guid userId)
 	{
 		await _database
-			.MovieWatchStatus
-			.Where(x => x.MovieId == movieId && x.UserId == userId)
+			.MovieWatchStatus.Where(x => x.MovieId == movieId && x.UserId == userId)
 			.ExecuteDeleteAsync();
 	}
 
 	/// <inheritdoc />
 	public Task<ShowWatchStatus?> GetShowStatus(Guid showId, Guid userId)
 	{
-		return _database
-			.ShowWatchStatus
-			.FirstOrDefaultAsync(x => x.ShowId == showId && x.UserId == userId);
+		return _database.ShowWatchStatus.FirstOrDefaultAsync(x =>
+			x.ShowId == showId && x.UserId == userId
+		);
 	}
 
 	/// <inheritdoc />
@@ -315,12 +311,9 @@ public class WatchStatusRepository : IWatchStatusRepository
 		int unseenEpisodeCount =
 			status != WatchStatus.Completed
 				? await _database
-					.Episodes
-					.Where(x => x.ShowId == showId)
-					.Where(
-						x =>
-							x.Watched!.First(x => x.UserId == userId)!.Status
-							!= WatchStatus.Completed
+					.Episodes.Where(x => x.ShowId == showId)
+					.Where(x =>
+						x.Watched!.First(x => x.UserId == userId)!.Status != WatchStatus.Completed
 					)
 					.CountAsync()
 				: 0;
@@ -332,57 +325,47 @@ public class WatchStatusRepository : IWatchStatusRepository
 		if (status == WatchStatus.Watching)
 		{
 			var cursor = await _database
-				.Episodes
-				.IgnoreQueryFilters()
+				.Episodes.IgnoreQueryFilters()
 				.Where(x => x.ShowId == showId)
 				.OrderByDescending(x => x.AbsoluteNumber)
 				.ThenByDescending(x => x.SeasonNumber)
 				.ThenByDescending(x => x.EpisodeNumber)
-				.Select(
-					x =>
-						new
-						{
-							x.Id,
-							x.AbsoluteNumber,
-							x.SeasonNumber,
-							x.EpisodeNumber,
-							Status = x.Watched!.First(x => x.UserId == userId)
-						}
-				)
-				.FirstOrDefaultAsync(
-					x =>
-						x.Status.Status == WatchStatus.Completed
-						|| x.Status.Status == WatchStatus.Watching
+				.Select(x => new
+				{
+					x.Id,
+					x.AbsoluteNumber,
+					x.SeasonNumber,
+					x.EpisodeNumber,
+					Status = x.Watched!.First(x => x.UserId == userId)
+				})
+				.FirstOrDefaultAsync(x =>
+					x.Status.Status == WatchStatus.Completed
+					|| x.Status.Status == WatchStatus.Watching
 				);
 			cursorWatchStatus = cursor?.Status;
 			nextEpisodeId =
 				cursor?.Status.Status == WatchStatus.Watching
 					? cursor.Id
 					: await _database
-						.Episodes
-						.IgnoreQueryFilters()
+						.Episodes.IgnoreQueryFilters()
 						.Where(x => x.ShowId == showId)
 						.OrderBy(x => x.AbsoluteNumber)
 						.ThenBy(x => x.SeasonNumber)
 						.ThenBy(x => x.EpisodeNumber)
-						.Where(
-							x =>
-								cursor == null
-								|| x.AbsoluteNumber > cursor.AbsoluteNumber
-								|| x.SeasonNumber > cursor.SeasonNumber
-								|| (
-									x.SeasonNumber == cursor.SeasonNumber
-									&& x.EpisodeNumber > cursor.EpisodeNumber
-								)
+						.Where(x =>
+							cursor == null
+							|| x.AbsoluteNumber > cursor.AbsoluteNumber
+							|| x.SeasonNumber > cursor.SeasonNumber
+							|| (
+								x.SeasonNumber == cursor.SeasonNumber
+								&& x.EpisodeNumber > cursor.EpisodeNumber
+							)
 						)
-						.Select(
-							x =>
-								new
-								{
-									x.Id,
-									Status = x.Watched!.FirstOrDefault(x => x.UserId == userId)
-								}
-						)
+						.Select(x => new
+						{
+							x.Id,
+							Status = x.Watched!.FirstOrDefault(x => x.UserId == userId)
+						})
 						.Where(x => x.Status == null || x.Status.Status != WatchStatus.Completed)
 						// The as Guid? is here to add the nullability status of the queryable.
 						// Without this, FirstOrDefault returns new Guid() when no result is found (which is 16 0s and invalid in sql).
@@ -392,24 +375,19 @@ public class WatchStatusRepository : IWatchStatusRepository
 		else if (status == WatchStatus.Completed)
 		{
 			List<Guid> episodes = await _database
-				.Episodes
-				.Where(x => x.ShowId == showId)
+				.Episodes.Where(x => x.ShowId == showId)
 				.Select(x => x.Id)
 				.ToListAsync();
 			await _database
-				.EpisodeWatchStatus
-				.UpsertRange(
-					episodes.Select(
-						episodeId =>
-							new EpisodeWatchStatus
-							{
-								UserId = userId,
-								EpisodeId = episodeId,
-								Status = WatchStatus.Completed,
-								AddedDate = DateTime.UtcNow,
-								PlayedDate = DateTime.UtcNow
-							}
-					)
+				.EpisodeWatchStatus.UpsertRange(
+					episodes.Select(episodeId => new EpisodeWatchStatus
+					{
+						UserId = userId,
+						EpisodeId = episodeId,
+						Status = WatchStatus.Completed,
+						AddedDate = DateTime.UtcNow,
+						PlayedDate = DateTime.UtcNow
+					})
 				)
 				.UpdateIf(x => x.Status == Watching || x.Status == Planned)
 				.RunAsync();
@@ -435,8 +413,7 @@ public class WatchStatusRepository : IWatchStatusRepository
 				PlayedDate = status == WatchStatus.Completed ? DateTime.UtcNow : null,
 			};
 		await _database
-			.ShowWatchStatus
-			.Upsert(ret)
+			.ShowWatchStatus.Upsert(ret)
 			.UpdateIf(x => status != Watching || x.Status != Completed || newEpisode)
 			.RunAsync();
 		return ret;
@@ -446,22 +423,20 @@ public class WatchStatusRepository : IWatchStatusRepository
 	public async Task DeleteShowStatus(Guid showId, Guid userId)
 	{
 		await _database
-			.ShowWatchStatus
-			.IgnoreAutoIncludes()
+			.ShowWatchStatus.IgnoreAutoIncludes()
 			.Where(x => x.ShowId == showId && x.UserId == userId)
 			.ExecuteDeleteAsync();
 		await _database
-			.EpisodeWatchStatus
-			.Where(x => x.Episode.ShowId == showId && x.UserId == userId)
+			.EpisodeWatchStatus.Where(x => x.Episode.ShowId == showId && x.UserId == userId)
 			.ExecuteDeleteAsync();
 	}
 
 	/// <inheritdoc />
 	public Task<EpisodeWatchStatus?> GetEpisodeStatus(Guid episodeId, Guid userId)
 	{
-		return _database
-			.EpisodeWatchStatus
-			.FirstOrDefaultAsync(x => x.EpisodeId == episodeId && x.UserId == userId);
+		return _database.EpisodeWatchStatus.FirstOrDefaultAsync(x =>
+			x.EpisodeId == episodeId && x.UserId == userId
+		);
 	}
 
 	/// <inheritdoc />
@@ -510,8 +485,7 @@ public class WatchStatusRepository : IWatchStatusRepository
 				PlayedDate = status == WatchStatus.Completed ? DateTime.UtcNow : null,
 			};
 		await _database
-			.EpisodeWatchStatus
-			.Upsert(ret)
+			.EpisodeWatchStatus.Upsert(ret)
 			.UpdateIf(x => status != Watching || x.Status != Completed)
 			.RunAsync();
 		await SetShowStatus(episode.ShowId, userId, WatchStatus.Watching);
@@ -522,8 +496,7 @@ public class WatchStatusRepository : IWatchStatusRepository
 	public async Task DeleteEpisodeStatus(Guid episodeId, Guid userId)
 	{
 		await _database
-			.EpisodeWatchStatus
-			.Where(x => x.EpisodeId == episodeId && x.UserId == userId)
+			.EpisodeWatchStatus.Where(x => x.EpisodeId == episodeId && x.UserId == userId)
 			.ExecuteDeleteAsync();
 	}
 }

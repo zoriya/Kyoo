@@ -229,11 +229,10 @@ namespace Kyoo.Authentication
 			private AuthenticateResult _ApiKeyCheck(ActionContext context)
 			{
 				if (
-					!context
-						.HttpContext
-						.Request
-						.Headers
-						.TryGetValue("X-API-Key", out StringValues apiKey)
+					!context.HttpContext.Request.Headers.TryGetValue(
+						"X-API-Key",
+						out StringValues apiKey
+					)
 				)
 					return AuthenticateResult.NoResult();
 				if (!_options.ApiKeys.Contains<string>(apiKey!))
@@ -262,9 +261,9 @@ namespace Kyoo.Authentication
 
 			private async Task<AuthenticateResult> _JwtCheck(ActionContext context)
 			{
-				AuthenticateResult ret = await context
-					.HttpContext
-					.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
+				AuthenticateResult ret = await context.HttpContext.AuthenticateAsync(
+					JwtBearerDefaults.AuthenticationScheme
+				);
 				// Change the failure message to make the API nice to use.
 				if (ret.Failure != null)
 					return AuthenticateResult.Fail(

@@ -113,9 +113,10 @@ namespace Kyoo.Core.Api
 			[FromQuery] Include<Studio> fields
 		)
 		{
-			return await _libraryManager
-				.Studios
-				.Get(identifier.IsContainedIn<Studio, Movie>(x => x.Movies!), fields);
+			return await _libraryManager.Studios.Get(
+				identifier.IsContainedIn<Studio, Movie>(x => x.Movies!),
+				fields
+			);
 		}
 
 		/// <summary>
@@ -146,14 +147,12 @@ namespace Kyoo.Core.Api
 			[FromQuery] Include<Collection> fields
 		)
 		{
-			ICollection<Collection> resources = await _libraryManager
-				.Collections
-				.GetAll(
-					Filter.And(filter, identifier.IsContainedIn<Collection, Movie>(x => x.Movies)),
-					sortBy,
-					fields,
-					pagination
-				);
+			ICollection<Collection> resources = await _libraryManager.Collections.GetAll(
+				Filter.And(filter, identifier.IsContainedIn<Collection, Movie>(x => x.Movies)),
+				sortBy,
+				fields,
+				pagination
+			);
 
 			if (
 				!resources.Any()
@@ -219,9 +218,13 @@ namespace Kyoo.Core.Api
 				id => Task.FromResult(id),
 				async slug => (await _libraryManager.Movies.Get(slug)).Id
 			);
-			return await _libraryManager
-				.WatchStatus
-				.SetMovieStatus(id, User.GetIdOrThrow(), status, watchedTime, percent);
+			return await _libraryManager.WatchStatus.SetMovieStatus(
+				id,
+				User.GetIdOrThrow(),
+				status,
+				watchedTime,
+				percent
+			);
 		}
 
 		/// <summary>

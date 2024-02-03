@@ -32,9 +32,9 @@ public class SortBinder : IModelBinder
 
 	public Task BindModelAsync(ModelBindingContext bindingContext)
 	{
-		ValueProviderResult sortBy = bindingContext
-			.ValueProvider
-			.GetValue(bindingContext.FieldName);
+		ValueProviderResult sortBy = bindingContext.ValueProvider.GetValue(
+			bindingContext.FieldName
+		);
 		uint seed = BitConverter.ToUInt32(
 			BitConverter.GetBytes(_rng.Next(int.MinValue, int.MaxValue)),
 			0
@@ -42,8 +42,7 @@ public class SortBinder : IModelBinder
 		try
 		{
 			object sort = bindingContext
-				.ModelType
-				.GetMethod(nameof(Sort<Movie>.From))!
+				.ModelType.GetMethod(nameof(Sort<Movie>.From))!
 				.Invoke(null, new object?[] { sortBy.FirstValue, seed })!;
 			bindingContext.Result = ModelBindingResult.Success(sort);
 			bindingContext.HttpContext.Items["seed"] = seed;

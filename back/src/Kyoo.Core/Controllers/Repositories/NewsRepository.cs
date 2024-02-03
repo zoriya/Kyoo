@@ -32,19 +32,19 @@ namespace Kyoo.Core.Controllers
 		// language=PostgreSQL
 		protected override FormattableString Sql =>
 			$"""
-			select
-				e.*, -- Episode as e
-				m.*
-				/* includes */
-			from
-				episodes as e
-			full outer join (
 				select
-					* -- Movie
+					e.*, -- Episode as e
+					m.*
+					/* includes */
 				from
-					movies
-			) as m on false
-			""";
+					episodes as e
+				full outer join (
+					select
+						* -- Movie
+					from
+						movies
+				) as m on false
+				""";
 
 		protected override Dictionary<string, Type> Config =>
 			new() { { "e", typeof(Episode) }, { "m", typeof(Movie) }, };

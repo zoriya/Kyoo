@@ -88,17 +88,12 @@ namespace Kyoo.Core.Api
 			[FromQuery] Include<Season> fields
 		)
 		{
-			ICollection<Season> resources = await _libraryManager
-				.Seasons
-				.GetAll(
-					Filter.And(
-						filter,
-						identifier.Matcher<Season>(x => x.ShowId, x => x.Show!.Slug)
-					),
-					sortBy,
-					fields,
-					pagination
-				);
+			ICollection<Season> resources = await _libraryManager.Seasons.GetAll(
+				Filter.And(filter, identifier.Matcher<Season>(x => x.ShowId, x => x.Show!.Slug)),
+				sortBy,
+				fields,
+				pagination
+			);
 
 			if (
 				!resources.Any()
@@ -136,17 +131,12 @@ namespace Kyoo.Core.Api
 			[FromQuery] Include<Episode> fields
 		)
 		{
-			ICollection<Episode> resources = await _libraryManager
-				.Episodes
-				.GetAll(
-					Filter.And(
-						filter,
-						identifier.Matcher<Episode>(x => x.ShowId, x => x.Show!.Slug)
-					),
-					sortBy,
-					fields,
-					pagination
-				);
+			ICollection<Episode> resources = await _libraryManager.Episodes.GetAll(
+				Filter.And(filter, identifier.Matcher<Episode>(x => x.ShowId, x => x.Show!.Slug)),
+				sortBy,
+				fields,
+				pagination
+			);
 
 			if (
 				!resources.Any()
@@ -210,9 +200,10 @@ namespace Kyoo.Core.Api
 			[FromQuery] Include<Studio> fields
 		)
 		{
-			return await _libraryManager
-				.Studios
-				.Get(identifier.IsContainedIn<Studio, Show>(x => x.Shows!), fields);
+			return await _libraryManager.Studios.Get(
+				identifier.IsContainedIn<Studio, Show>(x => x.Shows!),
+				fields
+			);
 		}
 
 		/// <summary>
@@ -243,14 +234,12 @@ namespace Kyoo.Core.Api
 			[FromQuery] Include<Collection> fields
 		)
 		{
-			ICollection<Collection> resources = await _libraryManager
-				.Collections
-				.GetAll(
-					Filter.And(filter, identifier.IsContainedIn<Collection, Show>(x => x.Shows!)),
-					sortBy,
-					fields,
-					pagination
-				);
+			ICollection<Collection> resources = await _libraryManager.Collections.GetAll(
+				Filter.And(filter, identifier.IsContainedIn<Collection, Show>(x => x.Shows!)),
+				sortBy,
+				fields,
+				pagination
+			);
 
 			if (
 				!resources.Any()

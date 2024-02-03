@@ -206,8 +206,8 @@ namespace Kyoo.Utils
 				: type.GetInheritanceTree();
 			return types
 				.Prepend(type)
-				.FirstOrDefault(
-					x => x.IsGenericType && x.GetGenericTypeDefinition() == genericType
+				.FirstOrDefault(x =>
+					x.IsGenericType && x.GetGenericTypeDefinition() == genericType
 				);
 		}
 

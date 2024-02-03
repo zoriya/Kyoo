@@ -77,9 +77,10 @@ namespace Kyoo.Core.Api
 			[FromQuery] Include<Show> fields
 		)
 		{
-			return await _libraryManager
-				.Shows
-				.Get(identifier.IsContainedIn<Show, Episode>(x => x.Episodes!), fields);
+			return await _libraryManager.Shows.Get(
+				identifier.IsContainedIn<Show, Episode>(x => x.Episodes!),
+				fields
+			);
 		}
 
 		/// <summary>
@@ -103,9 +104,10 @@ namespace Kyoo.Core.Api
 			[FromQuery] Include<Season> fields
 		)
 		{
-			Season? ret = await _libraryManager
-				.Seasons
-				.GetOrDefault(identifier.IsContainedIn<Season, Episode>(x => x.Episodes!), fields);
+			Season? ret = await _libraryManager.Seasons.GetOrDefault(
+				identifier.IsContainedIn<Season, Episode>(x => x.Episodes!),
+				fields
+			);
 			if (ret != null)
 				return ret;
 			Episode? episode = await identifier.Match(
@@ -170,9 +172,13 @@ namespace Kyoo.Core.Api
 				id => Task.FromResult(id),
 				async slug => (await _libraryManager.Episodes.Get(slug)).Id
 			);
-			return await _libraryManager
-				.WatchStatus
-				.SetEpisodeStatus(id, User.GetIdOrThrow(), status, watchedTime, percent);
+			return await _libraryManager.WatchStatus.SetEpisodeStatus(
+				id,
+				User.GetIdOrThrow(),
+				status,
+				watchedTime,
+				percent
+			);
 		}
 
 		/// <summary>

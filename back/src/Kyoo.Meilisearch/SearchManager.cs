@@ -39,8 +39,10 @@ public class SearchManager : ISearchManager
 			Sort<T>.By @sortBy
 				=> MeilisearchModule
 					.IndexSettings[index]
-					.SortableAttributes
-					.Contains(sortBy.Key, StringComparer.InvariantCultureIgnoreCase)
+					.SortableAttributes.Contains(
+						sortBy.Key,
+						StringComparer.InvariantCultureIgnoreCase
+					)
 					? new[]
 					{
 						$"{CamelCase.ConvertName(sortBy.Key)}:{(sortBy.Desendant ? "desc" : "asc")}"

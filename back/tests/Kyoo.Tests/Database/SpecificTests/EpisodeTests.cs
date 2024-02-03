@@ -54,17 +54,14 @@ namespace Kyoo.Tests.Database
 		{
 			Episode episode = await _repository.Get(1.AsGuid());
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s1e1", episode.Slug);
-			await Repositories
-				.LibraryManager
-				.Shows
-				.Patch(
-					episode.ShowId,
-					(x) =>
-					{
-						x.Slug = "new-slug";
-						return x;
-					}
-				);
+			await Repositories.LibraryManager.Shows.Patch(
+				episode.ShowId,
+				(x) =>
+				{
+					x.Slug = "new-slug";
+					return x;
+				}
+			);
 			episode = await _repository.Get(1.AsGuid());
 			Assert.Equal("new-slug-s1e1", episode.Slug);
 		}
@@ -92,17 +89,14 @@ namespace Kyoo.Tests.Database
 		{
 			Episode episode = await _repository.Get(1.AsGuid());
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s1e1", episode.Slug);
-			episode = await Repositories
-				.LibraryManager
-				.Episodes
-				.Patch(
-					episode.Id,
-					(x) =>
-					{
-						x.EpisodeNumber = 2;
-						return x;
-					}
-				);
+			episode = await Repositories.LibraryManager.Episodes.Patch(
+				episode.Id,
+				(x) =>
+				{
+					x.EpisodeNumber = 2;
+					return x;
+				}
+			);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s1e2", episode.Slug);
 			episode = await _repository.Get(1.AsGuid());
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s1e2", episode.Slug);
@@ -143,17 +137,14 @@ namespace Kyoo.Tests.Database
 		public async Task SlugEditAbsoluteTest()
 		{
 			Episode episode = await _repository.Create(TestSample.GetAbsoluteEpisode());
-			await Repositories
-				.LibraryManager
-				.Shows
-				.Patch(
-					episode.ShowId,
-					(x) =>
-					{
-						x.Slug = "new-slug";
-						return x;
-					}
-				);
+			await Repositories.LibraryManager.Shows.Patch(
+				episode.ShowId,
+				(x) =>
+				{
+					x.Slug = "new-slug";
+					return x;
+				}
+			);
 			episode = await _repository.Get(2.AsGuid());
 			Assert.Equal($"new-slug-3", episode.Slug);
 		}

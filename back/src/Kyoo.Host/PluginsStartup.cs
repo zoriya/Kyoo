@@ -127,8 +127,8 @@ namespace Kyoo.Host
 				.SelectMany(x => x.ConfigureSteps)
 				.OrderByDescending(x => x.Priority);
 
-			using ILifetimeScope scope = container.BeginLifetimeScope(
-				x => x.RegisterInstance(app).SingleInstance().ExternallyOwned()
+			using ILifetimeScope scope = container.BeginLifetimeScope(x =>
+				x.RegisterInstance(app).SingleInstance().ExternallyOwned()
 			);
 			IServiceProvider provider = scope.Resolve<IServiceProvider>();
 			foreach (IStartupAction step in steps)

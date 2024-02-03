@@ -65,9 +65,8 @@ public static class DapperHelper
 			.Where(x => !x.Key.StartsWith('_'))
 			// If first char is lower, assume manual sql instead of reflection.
 			.Where(x => char.IsLower(key.First()) || x.Value.GetProperty(key) != null)
-			.Select(
-				x =>
-					$"{x.Key}.{x.Value.GetProperty(key)?.GetCustomAttribute<ColumnAttribute>()?.Name ?? key.ToSnakeCase()}"
+			.Select(x =>
+				$"{x.Key}.{x.Value.GetProperty(key)?.GetCustomAttribute<ColumnAttribute>()?.Name ?? key.ToSnakeCase()}"
 			)
 			.ToArray();
 		if (keys.Length == 1)
@@ -149,8 +148,7 @@ public static class DapperHelper
 		T Map(T item, IEnumerable<object?> relations)
 		{
 			IEnumerable<string> metadatas = include
-				.Metadatas
-				.Where(x => x is not Include.ProjectedRelation)
+				.Metadatas.Where(x => x is not Include.ProjectedRelation)
 				.Select(x => x.Name);
 			foreach ((string name, object? value) in metadatas.Zip(relations))
 			{
@@ -179,26 +177,24 @@ public static class DapperHelper
 					'\n',
 					config
 						.Skip(1)
-						.Select(
-							x =>
-								$"when {x.Key}.id is not null then '{x.Value.Name.ToLowerInvariant()}'"
+						.Select(x =>
+							$"when {x.Key}.id is not null then '{x.Value.Name.ToLowerInvariant()}'"
 						)
 				);
 				return $"""
-					case
-						{cases:raw}
-						else '{config.First().Value.Name.ToLowerInvariant():raw}'
-					end {op}
-				""";
+						case
+							{cases:raw}
+							else '{config.First().Value.Name.ToLowerInvariant():raw}'
+						end {op}
+					""";
 			}
 
 			IEnumerable<string> properties = config
 				.Where(x => !x.Key.StartsWith('_'))
 				// If first char is lower, assume manual sql instead of reflection.
 				.Where(x => char.IsLower(key.First()) || x.Value.GetProperty(key) != null)
-				.Select(
-					x =>
-						$"{x.Key}.{x.Value.GetProperty(key)?.GetCustomAttribute<ColumnAttribute>()?.Name ?? key.ToSnakeCase()}"
+				.Select(x =>
+					$"{x.Key}.{x.Value.GetProperty(key)?.GetCustomAttribute<ColumnAttribute>()?.Name ?? key.ToSnakeCase()}"
 				);
 
 			FormattableString ret = $"{properties.First():raw} {op}";
@@ -245,8 +241,7 @@ public static class DapperHelper
 	public static string ExpendProjections(Type type, string? prefix, Include include)
 	{
 		IEnumerable<string> projections = include
-			.Metadatas
-			.Select(x => (x as Include.ProjectedRelation)!)
+			.Metadatas.Select(x => (x as Include.ProjectedRelation)!)
 			.Where(x => x != null)
 			.Where(x => type.GetProperty(x.Name) != null)
 			.Select(x => x.Sql.Replace("\"this\".", prefix));
@@ -336,8 +331,8 @@ public static class DapperHelper
 				{
 					string posterProj = string.Join(
 						", ",
-						new[] { "poster", "thumbnail", "logo" }.Select(
-							x => $"{prefix}{x}_source as source, {prefix}{x}_blurhash as blurhash"
+						new[] { "poster", "thumbnail", "logo" }.Select(x =>
+							$"{prefix}{x}_source as source, {prefix}{x}_blurhash as blurhash"
 						)
 					);
 					projection = string.IsNullOrEmpty(projection)

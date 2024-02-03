@@ -82,20 +82,16 @@ namespace Kyoo.Swagger
 							!= AlternativeRoute;
 					return true;
 				});
-				document
-					.SchemaGenerator
-					.Settings
-					.TypeMappers
-					.Add(
-						new PrimitiveTypeMapper(
-							typeof(Identifier),
-							x =>
-							{
-								x.IsNullableRaw = false;
-								x.Type = JsonObjectType.String | JsonObjectType.Integer;
-							}
-						)
-					);
+				document.SchemaGenerator.Settings.TypeMappers.Add(
+					new PrimitiveTypeMapper(
+						typeof(Identifier),
+						x =>
+						{
+							x.IsNullableRaw = false;
+							x.Type = JsonObjectType.String | JsonObjectType.Integer;
+						}
+					)
+				);
 
 				document.AddSecurity(
 					nameof(Kyoo),

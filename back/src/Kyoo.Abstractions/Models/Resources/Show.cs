@@ -170,17 +170,17 @@ namespace Kyoo.Abstractions.Models
 		[LoadableRelation(
 			// language=PostgreSQL
 			Sql = """
-				select
-					fe.* -- Episode as fe
-				from (
 					select
-						e.*,
-						row_number() over (partition by e.show_id order by e.absolute_number, e.season_number, e.episode_number) as number
-					from
-						episodes as e) as "fe"
-				where
-					fe.number <= 1
-			""",
+						fe.* -- Episode as fe
+					from (
+						select
+							e.*,
+							row_number() over (partition by e.show_id order by e.absolute_number, e.season_number, e.episode_number) as number
+						from
+							episodes as e) as "fe"
+					where
+						fe.number <= 1
+				""",
 			On = "show_id = \"this\".id"
 		)]
 		public Episode? FirstEpisode { get; set; }
@@ -200,14 +200,14 @@ namespace Kyoo.Abstractions.Models
 		[LoadableRelation(
 			// language=PostgreSQL
 			Projected = """
-				(
-					select
-						count(*)::int
-					from
-						episodes as e
-					where
-						e.show_id = "this".id) as episodes_count
-			"""
+					(
+						select
+							count(*)::int
+						from
+							episodes as e
+						where
+							e.show_id = "this".id) as episodes_count
+				"""
 		)]
 		public int EpisodesCount { get; set; }
 

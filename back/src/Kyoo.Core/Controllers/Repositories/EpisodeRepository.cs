@@ -47,12 +47,10 @@ namespace Kyoo.Core.Controllers
 			IRepository<Show>.OnEdited += async (show) =>
 			{
 				await using AsyncServiceScope scope = CoreModule.Services.CreateAsyncScope();
-				DatabaseContext database = scope
-					.ServiceProvider
-					.GetRequiredService<DatabaseContext>();
+				DatabaseContext database =
+					scope.ServiceProvider.GetRequiredService<DatabaseContext>();
 				List<Episode> episodes = await database
-					.Episodes
-					.AsTracking()
+					.Episodes.AsTracking()
 					.Where(x => x.ShowId == show.Id)
 					.ToListAsync();
 				foreach (Episode ep in episodes)
@@ -96,19 +94,14 @@ namespace Kyoo.Core.Controllers
 		protected override Task<Episode?> GetDuplicated(Episode item)
 		{
 			if (item is { SeasonNumber: not null, EpisodeNumber: not null })
-				return _database
-					.Episodes
-					.FirstOrDefaultAsync(
-						x =>
-							x.ShowId == item.ShowId
-							&& x.SeasonNumber == item.SeasonNumber
-							&& x.EpisodeNumber == item.EpisodeNumber
-					);
-			return _database
-				.Episodes
-				.FirstOrDefaultAsync(
-					x => x.ShowId == item.ShowId && x.AbsoluteNumber == item.AbsoluteNumber
+				return _database.Episodes.FirstOrDefaultAsync(x =>
+					x.ShowId == item.ShowId
+					&& x.SeasonNumber == item.SeasonNumber
+					&& x.EpisodeNumber == item.EpisodeNumber
 				);
+			return _database.Episodes.FirstOrDefaultAsync(x =>
+				x.ShowId == item.ShowId && x.AbsoluteNumber == item.AbsoluteNumber
+			);
 		}
 
 		/// <inheritdoc />
@@ -140,11 +133,9 @@ namespace Kyoo.Core.Controllers
 			}
 			if (resource.SeasonId == null && resource.SeasonNumber != null)
 			{
-				resource.Season = await _database
-					.Seasons
-					.FirstOrDefaultAsync(
-						x => x.ShowId == resource.ShowId && x.SeasonNumber == resource.SeasonNumber
-					);
+				resource.Season = await _database.Seasons.FirstOrDefaultAsync(x =>
+					x.ShowId == resource.ShowId && x.SeasonNumber == resource.SeasonNumber
+				);
 			}
 		}
 
@@ -152,8 +143,7 @@ namespace Kyoo.Core.Controllers
 		public override async Task Delete(Episode obj)
 		{
 			int epCount = await _database
-				.Episodes
-				.Where(x => x.ShowId == obj.ShowId)
+				.Episodes.Where(x => x.ShowId == obj.ShowId)
 				.Take(2)
 				.CountAsync();
 			_database.Entry(obj).State = EntityState.Deleted;
