@@ -38,7 +38,7 @@ export const TokenP = z.object({
 });
 export type Token = z.infer<typeof TokenP>;
 
-export const AccountP = UserP.merge(
+export const AccountP = UserP.and(
 	z.object({
 		// set it optional for accounts logged in before the kind was present
 		kind: z.literal("user").optional(),
@@ -126,7 +126,10 @@ export const AccountProvider = ({
 		oldSelectedId.current = selected?.id;
 
 		// update cookies for ssr (needs to contains token, theme, language...)
-		if (Platform.OS === "web") setCookie("account", selected);
+		if (Platform.OS === "web") {
+			setCookie("account", selected);
+			setCookie("X-Bearer", selected?.token.access_token);
+		}
 	}, [selected, queryClient]);
 
 	return (

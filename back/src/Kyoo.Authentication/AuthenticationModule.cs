@@ -18,6 +18,7 @@
 
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Autofac;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Authentication.Models;
@@ -86,6 +87,14 @@ namespace Kyoo.Authentication
 				.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 				.AddJwtBearer(options =>
 				{
+					options.Events = new()
+					{
+						OnMessageReceived = (ctx) =>
+						{
+							ctx.Token ??= ctx.Request.Cookies["X-Bearer"];
+							return Task.CompletedTask;
+						}
+					};
 					options.TokenValidationParameters = new TokenValidationParameters
 					{
 						ValidateIssuer = false,
