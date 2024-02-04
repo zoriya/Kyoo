@@ -8,13 +8,9 @@ namespace Kyoo.Postgresql.Migrations
 		/// <inheritdoc />
 		protected override void Up(MigrationBuilder migrationBuilder)
 		{
-			migrationBuilder.DropColumn(
-				name: "logo_blurhash",
-				table: "users");
+			migrationBuilder.DropColumn(name: "logo_blurhash", table: "users");
 
-			migrationBuilder.DropColumn(
-				name: "logo_source",
-				table: "users");
+			migrationBuilder.DropColumn(name: "logo_source", table: "users");
 		}
 
 		/// <inheritdoc />
@@ -25,13 +21,15 @@ namespace Kyoo.Postgresql.Migrations
 				table: "users",
 				type: "character varying(32)",
 				maxLength: 32,
-				nullable: true);
+				nullable: true
+			);
 
 			migrationBuilder.AddColumn<string>(
 				name: "logo_source",
 				table: "users",
 				type: "text",
-				nullable: true);
+				nullable: true
+			);
 		}
 	}
 }

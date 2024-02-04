@@ -161,7 +161,8 @@ namespace Kyoo.Authentication
 				{
 					if (
 						context.HttpContext.Items["PermissionGroup"]
-						is Group group and not Group.None
+						is Group group
+							and not Group.None
 					)
 						_group = group;
 					else if (_group == Group.None)
