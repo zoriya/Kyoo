@@ -2619,6 +2619,7 @@ __metadata:
     "@shopify/flash-list": ^1.3.1
     "@tanstack/react-query": "*"
     expo-file-system: "*"
+    expo-image-picker: ~14.7.1
     expo-linear-gradient: "*"
     expo-router: "*"
     i18next: "*"
@@ -7420,6 +7421,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-image-loader@npm:~4.6.0":
+  version: 4.6.0
+  resolution: "expo-image-loader@npm:4.6.0"
+  peerDependencies:
+    expo: "*"
+  checksum: 02981667f03dc429cd9db37e0acc302e4a0c4bb5875dc087b1c26388ef64563481e52dddc1d42dd32794eb7051d1acf5bc0c078413469c29025a02d4d4af1154
+  languageName: node
+  linkType: hard
+
+"expo-image-picker@npm:~14.7.1":
+  version: 14.7.1
+  resolution: "expo-image-picker@npm:14.7.1"
+  dependencies:
+    expo-image-loader: ~4.6.0
+  peerDependencies:
+    expo: "*"
+  checksum: f9022cc9162365471b8e979df2c7a2156f43819b4717fb6ba376aedb6b55352a7b60b3a50a279dd58cf2551fbdd8a0719c5c903dcde4703436029e0fdca9c035
+  languageName: node
+  linkType: hard
+
 "expo-json-utils@npm:~0.12.0":
   version: 0.12.3
   resolution: "expo-json-utils@npm:0.12.3"
@@ -10426,6 +10447,7 @@ __metadata:
     expo-dev-client: ~3.3.7
     expo-file-system: ~16.0.5
     expo-font: ~11.10.2
+    expo-image-picker: ~14.7.1
     expo-linear-gradient: ~12.7.1
     expo-linking: ~6.2.2
     expo-localization: ~14.8.3
@@ -13998,6 +14020,7 @@ __metadata:
     copy-webpack-plugin: ^12.0.2
     eslint: ^8.56.0
     eslint-config-next: 14.1.0
+    expo-image-picker: ~14.7.1
     expo-linear-gradient: ^12.7.1
     expo-modules-core: ^1.11.8
     hls.js: ^1.5.2

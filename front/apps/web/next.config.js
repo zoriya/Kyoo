@@ -108,6 +108,7 @@ const nextConfig = {
 		"expo-av",
 		"expo-modules-core",
 		"expo-linear-gradient",
+		"expo-image-picker",
 	],
 	experimental: {
 		outputFileTracingRoot: path.join(__dirname, "../../"),

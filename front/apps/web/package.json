@@ -24,6 +24,7 @@
 		"@tanstack/react-query": "^5.17.19",
 		"@tanstack/react-query-devtools": "^5.17.21",
 		"array-shuffle": "^3.0.0",
+		"expo-image-picker": "~14.7.1",
 		"expo-linear-gradient": "^12.7.1",
 		"expo-modules-core": "^1.11.8",
 		"hls.js": "^1.5.2",

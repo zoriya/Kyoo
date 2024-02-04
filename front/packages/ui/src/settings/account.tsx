@@ -19,20 +19,32 @@
  */
 
 import { Account, KyooErrors, deleteAccount, logout, queryFn, useAccount } from "@kyoo/models";
-import { Alert, Button, H1, Icon, Input, P, Popup, ts, usePopup } from "@kyoo/primitives";
+import { Alert, Avatar, Button, H1, Icon, Input, P, Popup, ts, usePopup } from "@kyoo/primitives";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ComponentProps, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { rem, useYoshiki } from "yoshiki/native";
+import * as ImagePicker from "expo-image-picker";
 import { PasswordInput } from "../login/password-input";
 import { Preference, SettingsContainer } from "./base";
 
 import Username from "@material-symbols/svg-400/outlined/badge.svg";
+import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
 import Mail from "@material-symbols/svg-400/outlined/mail.svg";
 import Password from "@material-symbols/svg-400/outlined/password.svg";
 import Delete from "@material-symbols/svg-400/rounded/delete.svg";
 import Logout from "@material-symbols/svg-400/rounded/logout.svg";
+
+function dataURItoBlob(dataURI: string) {
+	const byteString = atob(dataURI.split(",")[1]);
+	const ab = new ArrayBuffer(byteString.length);
+	const ia = new Uint8Array(ab);
+	for (var i = 0; i < byteString.length; i++) {
+		ia[i] = byteString.charCodeAt(i);
+	}
+	return new Blob([ab], { type: "image/jpeg" });
+}
 
 export const AccountSettings = () => {
 	const account = useAccount()!;
@@ -116,6 +128,33 @@ export const AccountSettings = () => {
 							/>,
 						)
 					}
+				/>
+			</Preference>
+			<Preference
+				icon={AccountCircle}
+				customIcon={<Avatar src={account.logo} />}
+				label={t("settings.account.avatar.label")}
+				description={t("settings.account.avatar.description")}
+			>
+				<Button
+					text={t("misc.edit")}
+					onPress={async () => {
+						const img = await ImagePicker.launchImageLibraryAsync({
+							mediaTypes: ImagePicker.MediaTypeOptions.Images,
+							aspect: [1, 1],
+							quality: 1,
+							base64: true,
+						});
+						if (img.canceled || img.assets.length !== 1) return;
+						const data = dataURItoBlob(img.assets[0].uri);
+						const formData = new FormData();
+						formData.append("picture", data);
+						await queryFn({
+							method: "POST",
+							path: ["auth", "me", "logo"],
+							formData,
+						});
+					}}
 				/>
 			</Preference>
 			<Preference icon={Mail} label={t("settings.account.email.label")} description={account.email}>

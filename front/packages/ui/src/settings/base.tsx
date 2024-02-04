@@ -36,12 +36,14 @@ import { View } from "react-native";
 import { px, rem, useYoshiki } from "yoshiki/native";
 
 export const Preference = ({
+	customIcon,
 	icon,
 	label,
 	description,
 	children,
 	...props
 }: {
+	customIcon?: ReactElement;
 	icon: Icon;
 	label: string;
 	description: string;
@@ -62,8 +64,16 @@ export const Preference = ({
 				props,
 			)}
 		>
-			<View {...css({ flexDirection: "row", alignItems: "center", flexShrink: 1 })}>
-				<Icon icon={icon} {...css({ marginX: ts(2) })} />
+			<View
+				{...css({
+					flexDirection: "row",
+					alignItems: "center",
+					flexShrink: 1,
+					marginX: ts(2),
+					gap: ts(2),
+				})}
+			>
+				{customIcon ?? <Icon icon={icon} />}
 				<View {...css({ flexShrink: 1 })}>
 					<P {...css({ marginBottom: 0 })}>{label}</P>
 					<SubP>{description}</SubP>
