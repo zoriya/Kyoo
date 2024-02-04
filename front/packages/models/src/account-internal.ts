@@ -35,7 +35,7 @@ const writeAccounts = (accounts: Account[]) => {
 };
 
 export const setCookie = (key: string, val?: unknown) => {
-	let value = JSON.stringify(val);
+	let value = typeof val !== "string" ? JSON.stringify(val) : val;
 	// Remove illegal values from json. There should not be one in the account anyways.
 	value = value?.replaceAll(";", "");
 	const d = new Date();

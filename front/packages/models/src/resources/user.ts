@@ -20,44 +20,47 @@
 
 import { z } from "zod";
 import { ResourceP } from "../traits/resource";
+import { imageFn } from "../traits/images";
 
-export const UserP = ResourceP("user").extend({
-	/**
-	 * The name of this user.
-	 */
-	username: z.string(),
-	/**
-	 * The user email address.
-	 */
-	email: z.string(),
-	/**
-	 * The list of permissions of the user. The format of this is implementation dependent.
-	 */
-	permissions: z.array(z.string()),
-	/**
-	 * User settings
-	 */
-	settings: z
-		.object({
-			downloadQuality: z
-				.union([
-					z.literal("original"),
-					z.literal("8k"),
-					z.literal("4k"),
-					z.literal("1440p"),
-					z.literal("1080p"),
-					z.literal("720p"),
-					z.literal("480p"),
-					z.literal("360p"),
-					z.literal("240p"),
-				])
-				.default("original")
-				.catch("original"),
-			audioLanguage: z.string().default("default").catch("default"),
-			subtitleLanguage: z.string().nullable().default(null).catch(null),
-		})
-		// keep a default for older versions of the api
-		.default({}),
-});
+export const UserP = ResourceP("user")
+	.extend({
+		/**
+		 * The name of this user.
+		 */
+		username: z.string(),
+		/**
+		 * The user email address.
+		 */
+		email: z.string(),
+		/**
+		 * The list of permissions of the user. The format of this is implementation dependent.
+		 */
+		permissions: z.array(z.string()),
+		/**
+		 * User settings
+		 */
+		settings: z
+			.object({
+				downloadQuality: z
+					.union([
+						z.literal("original"),
+						z.literal("8k"),
+						z.literal("4k"),
+						z.literal("1440p"),
+						z.literal("1080p"),
+						z.literal("720p"),
+						z.literal("480p"),
+						z.literal("360p"),
+						z.literal("240p"),
+					])
+					.default("original")
+					.catch("original"),
+				audioLanguage: z.string().default("default").catch("default"),
+				subtitleLanguage: z.string().nullable().default(null).catch(null),
+			})
+			// keep a default for older versions of the api
+			.default({}),
+	})
+	.transform((x) => ({ ...x, logo: imageFn(`/user/${x.slug}/logo`) }));
 
 export type User = z.infer<typeof UserP>;
