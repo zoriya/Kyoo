@@ -114,4 +114,3 @@ public class UserApi(ILibraryManager libraryManager, IThumbnailsManager thumbs)
 		return NoContent();
 	}
 }
-

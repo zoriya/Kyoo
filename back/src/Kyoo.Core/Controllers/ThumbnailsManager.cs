@@ -218,22 +218,24 @@ namespace Kyoo.Core.Controllers
 		{
 			try
 			{
-				return File.Open(
-					$"/metadata/user/{userId}.webp",
-					FileMode.Open
-				);
+				return File.Open($"/metadata/user/{userId}.webp", FileMode.Open);
 			}
 			catch (FileNotFoundException) { }
 			catch (DirectoryNotFoundException) { }
 
 			User user = await users.Value.Get(userId);
-			if (user.Email == null) throw new ItemNotFoundException();
+			if (user.Email == null)
+				throw new ItemNotFoundException();
 			using MD5 md5 = MD5.Create();
-			string hash = Convert.ToHexString(md5.ComputeHash(Encoding.ASCII.GetBytes(user.Email))).ToLower();
+			string hash = Convert
+				.ToHexString(md5.ComputeHash(Encoding.ASCII.GetBytes(user.Email)))
+				.ToLower();
 			try
 			{
 				HttpClient client = clientFactory.CreateClient();
-				HttpResponseMessage response = await client.GetAsync($"https://www.gravatar.com/avatar/{hash}.jpg?d=404&s=250");
+				HttpResponseMessage response = await client.GetAsync(
+					$"https://www.gravatar.com/avatar/{hash}.jpg?d=404&s=250"
+				);
 				response.EnsureSuccessStatusCode();
 				return await response.Content.ReadAsStreamAsync();
 			}
@@ -250,7 +252,8 @@ namespace Kyoo.Core.Controllers
 				try
 				{
 					File.Delete($"/metadata/user/{userId}.webp");
-				} catch { }
+				}
+				catch { }
 				return;
 			}
 			using SKCodec codec = SKCodec.Create(image);

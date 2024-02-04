@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ZodObject, ZodRawShape, z } from "zod";
+import { ZodTypeAny, z } from "zod";
 import { Account, AccountP } from "./accounts";
 import { MMKV } from "react-native-mmkv";
 
@@ -46,10 +46,10 @@ export const setCookie = (key: string, val?: unknown) => {
 	return null;
 };
 
-export const readCookie = <T extends ZodRawShape>(
+export const readCookie = <T extends ZodTypeAny>(
 	cookies: string | undefined,
 	key: string,
-	parser?: ZodObject<T>,
+	parser?: T,
 ) => {
 	if (!cookies) return null;
 	const name = `${key}=`;

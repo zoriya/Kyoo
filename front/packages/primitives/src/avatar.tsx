@@ -102,7 +102,7 @@ export const Avatar = forwardRef<
 				alt={alt}
 				width={size}
 				height={size}
-				{...css({ position: "absolute" }) as ImageProps}
+				{...(css({ position: "absolute" }) as ImageProps)}
 			/>
 		</Container>
 	);
