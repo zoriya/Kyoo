@@ -67,5 +67,51 @@ public class UserApi(ILibraryManager libraryManager, IThumbnailsManager thumbs)
 		}
 		return File(img, "image/webp", true);
 	}
+
+	/// <summary>
+	/// Set profile picture
+	/// </summary>
+	/// <remarks>
+	/// Set user profile picture
+	/// </remarks>
+	[HttpPost("{identifier:id}/logo")]
+	[PartialPermission(Kind.Write)]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(RequestError))]
+	[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
+	public async Task<ActionResult> SetProfilePicture(Identifier identifier, IFormFile picture)
+	{
+		if (picture == null || picture.Length == 0)
+			return BadRequest();
+		Guid gid = await identifier.Match(
+			id => Task.FromResult(id),
+			async slug => (await libraryManager.Users.Get(slug)).Id
+		);
+		await thumbs.SetUserImage(gid, picture.OpenReadStream());
+		return NoContent();
+	}
+
+	/// <summary>
+	/// Delete profile picture
+	/// </summary>
+	/// <remarks>
+	/// Delete your profile picture
+	/// </remarks>
+	/// <response code="401">The user is not authenticated.</response>
+	/// <response code="403">The given access token is invalid.</response>
+	[HttpDelete("{identifier:id}/logo")]
+	[PartialPermission(Kind.Delete)]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(RequestError))]
+	[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
+	public async Task<ActionResult> DeleteProfilePicture(Identifier identifier)
+	{
+		Guid gid = await identifier.Match(
+			id => Task.FromResult(id),
+			async slug => (await libraryManager.Users.Get(slug)).Id
+		);
+		await thumbs.SetUserImage(gid, null);
+		return NoContent();
+	}
 }
 
