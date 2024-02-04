@@ -60,8 +60,6 @@ public class UserRepository(DatabaseContext database, IThumbnailsManager thumbs)
 	{
 		await base.Create(obj);
 		_database.Entry(obj).State = EntityState.Added;
-		if (obj.Logo != null)
-			_database.Entry(obj).Reference(x => x.Logo).TargetEntry!.State = EntityState.Added;
 		await _database.SaveChangesAsync(() => Get(obj.Slug));
 		await IRepository<User>.OnResourceCreated(obj);
 		return obj;
