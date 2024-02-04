@@ -18,14 +18,13 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { View, ViewStyle } from "react-native";
-import { Image, ImageProps } from "./image";
+import { View, ViewStyle, Image } from "react-native";
 import { useYoshiki, px, Stylable } from "yoshiki/native";
 import { Icon } from "./icons";
 import { P } from "./text";
 import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
 import { YoshikiStyle } from "yoshiki";
-import { ComponentType, forwardRef, RefAttributes } from "react";
+import { ComponentType, forwardRef, RefAttributes, useEffect, useState } from "react";
 
 const stringToColor = (string: string) => {
 	let hash = 0;
@@ -46,10 +45,9 @@ const stringToColor = (string: string) => {
 export const Avatar = forwardRef<
 	View,
 	{
-		src?: ImageProps["src"];
-		quality?: ImageProps["quality"];
+		src?: string;
 		alt?: string;
-		size?: YoshikiStyle<number>;
+		size?: number;
 		placeholder?: string;
 		color?: string;
 		isLoading?: boolean;
@@ -57,18 +55,7 @@ export const Avatar = forwardRef<
 		as?: ComponentType<{ style?: ViewStyle } & RefAttributes<View>>;
 	} & Stylable
 >(function Avatar(
-	{
-		src,
-		quality = "low",
-		alt,
-		size = px(24),
-		color,
-		placeholder,
-		isLoading = false,
-		fill = false,
-		as,
-		...props
-	},
+	{ src, alt, size = px(24), color, placeholder, isLoading = false, fill = false, as, ...props },
 	ref,
 ) {
 	const { css, theme } = useYoshiki();
@@ -89,18 +76,14 @@ export const Avatar = forwardRef<
 					fill && {
 						bg: col,
 					},
-					placeholder &&
-						!src &&
-						!isLoading && {
-							bg: stringToColor(placeholder),
-						},
+					placeholder && {
+						bg: stringToColor(placeholder),
+					},
 				],
 				props,
 			)}
 		>
-			{src || isLoading ? (
-				<Image src={src} quality={quality} alt={alt} layout={{ width: size, height: size }} />
-			) : placeholder ? (
+			{placeholder ? (
 				<P
 					{...css({
 						marginVertical: 0,
@@ -113,6 +96,14 @@ export const Avatar = forwardRef<
 			) : (
 				<Icon icon={AccountCircle} size={size} color={fill ? col : theme.colors.white} />
 			)}
+			<Image
+				resizeMode="cover"
+				source={{ uri: src, width: size, height: size }}
+				alt={alt}
+				width={size}
+				height={size}
+				{...css({ position: "absolute" })}
+			/>
 		</Container>
 	);
 });

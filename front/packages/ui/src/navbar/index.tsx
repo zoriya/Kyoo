@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { logout, useAccount, useAccounts } from "@kyoo/models";
+import { imageFn, logout, useAccount, useAccounts } from "@kyoo/models";
 import {
 	Input,
 	IconButton,
@@ -100,6 +100,7 @@ export const NavbarProfile = () => {
 		<Menu
 			Trigger={Avatar}
 			as={PressableFeedback}
+			src={account?.logo}
 			placeholder={account?.username}
 			alt={t("navbar.login")}
 			size={24}
@@ -111,7 +112,7 @@ export const NavbarProfile = () => {
 				<Menu.Item
 					key={x.id}
 					label={Platform.OS === "web" ? x.username : `${x.username} - ${getDisplayUrl(x.apiUrl)}`}
-					left={<Avatar placeholder={x.username} />}
+					left={<Avatar placeholder={x.username} src={x.logo} />}
 					selected={x.selected}
 					onSelect={() => x.select()}
 				/>
