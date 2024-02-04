@@ -48,6 +48,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 		| ({
 				path: (string | false | undefined | null)[];
 				body?: object;
+				formData?: FormData;
 				plainText?: boolean;
 		  } & Partial<QueryFunctionContext>)
 	),
@@ -72,7 +73,12 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 	try {
 		resp = await fetch(path, {
 			method: context.method,
-			body: "body" in context && context.body ? JSON.stringify(context.body) : undefined,
+			body:
+				"body" in context && context.body
+					? JSON.stringify(context.body)
+					: "formData" in context && context.formData
+						? context.formData
+						: undefined,
 			headers: {
 				...(token ? { Authorization: token } : {}),
 				...("body" in context ? { "Content-Type": "application/json" } : {}),
