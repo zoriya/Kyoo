@@ -303,6 +303,27 @@ namespace Kyoo.Authentication.Views
 		}
 
 		/// <summary>
+		/// Get profile picture
+		/// </summary>
+		/// <remarks>
+		/// Get your profile picture
+		/// </remarks>
+		/// <response code="401">The user is not authenticated.</response>
+		/// <response code="403">The given access token is invalid.</response>
+		[HttpGet("me/logo")]
+		[UserOnly]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
+		public async Task<ActionResult> GetProfilePicture()
+		{
+			Stream img = await thumbs.GetUserImage(User.GetIdOrThrow());
+			// Allow clients to cache the image for 6 month.
+			Response.Headers.Add("Cache-Control", $"public, max-age={60 * 60 * 24 * 31 * 6}");
+			return File(img, "image/webp", true);
+		}
+
+		/// <summary>
 		/// Set profile picture
 		/// </summary>
 		/// <remarks>
@@ -324,24 +345,22 @@ namespace Kyoo.Authentication.Views
 		}
 
 		/// <summary>
-		/// Get profile picture
+		/// Delete profile picture
 		/// </summary>
 		/// <remarks>
-		/// Get your profile picture
+		/// Delete your profile picture
 		/// </remarks>
 		/// <response code="401">The user is not authenticated.</response>
 		/// <response code="403">The given access token is invalid.</response>
-		[HttpGet("me/logo")]
+		[HttpDelete("me/logo")]
 		[UserOnly]
-		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
 		[ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
-		public async Task<ActionResult> GetProfilePicture()
+		public async Task<ActionResult> DeleteProfilePicture()
 		{
-			Stream img = await thumbs.GetUserImage(User.GetIdOrThrow());
-			// Allow clients to cache the image for 6 month.
-			Response.Headers.Add("Cache-Control", $"public, max-age={60 * 60 * 24 * 31 * 6}");
-			return File(img, "image/webp", true);
+			await thumbs.SetUserImage(User.GetIdOrThrow(), null);
+			return NoContent();
 		}
 	}
 }

@@ -245,6 +245,14 @@ namespace Kyoo.Core.Controllers
 
 		public async Task SetUserImage(Guid userId, Stream? image)
 		{
+			if (image == null)
+			{
+				try
+				{
+					File.Delete($"/metadata/user/{userId}.webp");
+				} catch { }
+				return;
+			}
 			using SKCodec codec = SKCodec.Create(image);
 			SKImageInfo info = codec.Info;
 			info.ColorType = SKColorType.Rgba8888;
