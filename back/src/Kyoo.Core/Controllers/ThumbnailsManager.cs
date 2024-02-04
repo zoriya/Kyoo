@@ -218,11 +218,10 @@ namespace Kyoo.Core.Controllers
 		{
 			try
 			{
-				await using FileStream img = File.Open(
+				return File.Open(
 					$"/metadata/user/{userId}.webp",
 					FileMode.Open
 				);
-				return img;
 			}
 			catch (FileNotFoundException) { }
 			catch (DirectoryNotFoundException) { }

@@ -69,6 +69,7 @@ export const Avatar = forwardRef<
 				[
 					{
 						borderRadius: 999999,
+						overflow: "hidden",
 						height: size,
 						width: size,
 					},
