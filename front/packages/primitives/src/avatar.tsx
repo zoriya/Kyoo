@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { View, ViewStyle, Image } from "react-native";
+import { View, ViewStyle, Image, ImageProps } from "react-native";
 import { useYoshiki, px, Stylable } from "yoshiki/native";
 import { Icon } from "./icons";
 import { P } from "./text";
@@ -102,7 +102,7 @@ export const Avatar = forwardRef<
 				alt={alt}
 				width={size}
 				height={size}
-				{...css({ position: "absolute" })}
+				{...css({ position: "absolute" }) as ImageProps}
 			/>
 		</Container>
 	);

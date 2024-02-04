@@ -136,26 +136,37 @@ export const AccountSettings = () => {
 				label={t("settings.account.avatar.label")}
 				description={t("settings.account.avatar.description")}
 			>
-				<Button
-					text={t("misc.edit")}
-					onPress={async () => {
-						const img = await ImagePicker.launchImageLibraryAsync({
-							mediaTypes: ImagePicker.MediaTypeOptions.Images,
-							aspect: [1, 1],
-							quality: 1,
-							base64: true,
-						});
-						if (img.canceled || img.assets.length !== 1) return;
-						const data = dataURItoBlob(img.assets[0].uri);
-						const formData = new FormData();
-						formData.append("picture", data);
-						await queryFn({
-							method: "POST",
-							path: ["auth", "me", "logo"],
-							formData,
-						});
-					}}
-				/>
+				<View {...css({ flexDirection: "row", gap: ts(1) })}>
+					<Button
+						text={t("misc.edit")}
+						onPress={async () => {
+							const img = await ImagePicker.launchImageLibraryAsync({
+								mediaTypes: ImagePicker.MediaTypeOptions.Images,
+								aspect: [1, 1],
+								quality: 1,
+								base64: true,
+							});
+							if (img.canceled || img.assets.length !== 1) return;
+							const data = dataURItoBlob(img.assets[0].uri);
+							const formData = new FormData();
+							formData.append("picture", data);
+							await queryFn({
+								method: "POST",
+								path: ["auth", "me", "logo"],
+								formData,
+							});
+						}}
+					/>
+					<Button
+						text={t("misc.delete")}
+						onPress={async () => {
+							await queryFn({
+								method: "DELETE",
+								path: ["auth", "me", "logo"],
+							});
+						}}
+					/>
+				</View>
 			</Preference>
 			<Preference icon={Mail} label={t("settings.account.email.label")} description={account.email}>
 				<Button
