@@ -48,7 +48,6 @@ public class UserApi(ILibraryManager libraryManager, IThumbnailsManager thumbs)
 	/// Get the profile picture of someone
 	/// </remarks>
 	[HttpGet("{identifier:id}/logo")]
-	[PartialPermission(Kind.Read)]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(RequestError))]
 	[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
