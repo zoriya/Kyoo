@@ -65,11 +65,6 @@ namespace Kyoo.Abstractions.Models
 		public DateTime AddedDate { get; set; }
 
 		/// <summary>
-		/// A logo is a small image representing the resource.
-		/// </summary>
-		public Image? Logo { get; set; }
-
-		/// <summary>
 		/// User settings
 		/// </summary>
 		public Dictionary<string, string> Settings { get; set; } = new();

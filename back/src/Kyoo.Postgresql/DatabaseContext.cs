@@ -327,7 +327,6 @@ namespace Kyoo.Postgresql
 						)!
 				)
 				.HasColumnType("json");
-			modelBuilder.Entity<User>().OwnsOne(x => x.Logo);
 
 			modelBuilder
 				.Entity<MovieWatchStatus>()
