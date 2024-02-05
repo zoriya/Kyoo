@@ -1,3 +1,4 @@
+import re
 import logging
 from typing import Dict, List, Literal
 from aiohttp import ClientSession
@@ -133,7 +134,9 @@ class TheXem:
 		titles = []
 
 		def clean(s: str):
-			return s.lower().replace(" ", "")
+			s = s.lower()
+			s = re.sub(r"\([^)]*\)", "", s) # remove content of () (guessit does not allow them as part of a name)
+			return re.sub(r"[\W_]+", "", s) # remove non alphanum content (it does keep non us chars like kanjis or accents)
 
 		for x in map.values():
 			# Only the first element is a string (the show name) so we need to ignore the type hint
