@@ -457,13 +457,21 @@ class TheMovieDatabase(Provider):
 		# We want something like season 6 ep 3.
 		if season is None and absolute is not None:
 			ids = await self._idmapper.get_show(show.external_id, required=["tvdb"])
-			if "tvdb" in ids and ids["tvdb"] is not None:
+			tvdb_id = (
+				ids["tvdb"].data_id
+				if "tvdb" in ids and ids["tvdb"] is not None
+				else None
+			)
+			if tvdb_id is None:
+				logging.info("Tvdb could not be found, trying xem name lookup for %s", name)
+				_, tvdb_id = await self._xem.get_show_override("tvdb", old_name)
+			if tvdb_id is not None:
 				(
 					tvdb_season,
 					tvdb_episode,
 					absolute,
 				) = await self._xem.get_episode_override(
-					"tvdb", ids["tvdb"].data_id, old_name, absolute
+					"tvdb", tvdb_id, old_name, absolute
 				)
 				# Most of the time, tvdb absolute and tmdb absolute are in think so we use that as our souce of truth.
 				# tvdb_season/episode are not in sync with tmdb so we discard those and use our usual absolute order fetching.
