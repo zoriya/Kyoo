@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime, timedelta
 from functools import wraps
-from typing import Any, Optional, Tuple, Final, Literal
+from typing import Any, Optional, Tuple, Final, Literal, TypeVar
 from enum import Enum
 
 
@@ -14,6 +14,7 @@ none: Final = Sentinel.NoneSentinel
 type Cache = dict[
 	Any, Tuple[asyncio.Event | Literal[none], datetime | Literal[none], Any]
 ]
+# Cache = TypeVar("Cache")  # type: ignore
 
 
 def cache(ttl: timedelta, cache: Optional[Cache] = None, typed=False):
