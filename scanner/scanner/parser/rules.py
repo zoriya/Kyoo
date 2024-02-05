@@ -3,8 +3,9 @@
 from typing import Any, List, Optional, cast
 from rebulk import Rule, RemoveMatch, AppendMatch, POST_PROCESS
 from rebulk.match import Matches, Match
-import re
 from copy import copy
+
+from providers.implementations.thexem import clean
 
 
 class EpisodeTitlePromotion(Rule):
@@ -249,9 +250,6 @@ class XemFixup(Rule):
 		new_title = copy(title)
 		new_title.end = nmatch[0].end
 		new_title.value = f"{title.value}{hole}{nmatch[0].value}"
-
-		def clean(s: str):
-			return re.sub(r"[\W_]+", "", s.lower())
 
 		if clean(new_title.value) in context["xem_titles"]:
 			return [[title, nmatch[0]], [new_title]]

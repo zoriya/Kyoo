@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+if __name__ == "__main__":
+	import sys
+	from pathlib import Path
+
+	sys.path.append(str(Path(f"{__file__}/../../..").resolve()))
+
 from guessit.api import default_api
 from typing import cast, List
 from rebulk import Rebulk
@@ -29,13 +35,10 @@ def guessit(name: str, *, xem_titles: List[str] = []):
 if __name__ == "__main__":
 	import sys
 	import json
-	from pathlib import Path
+	from providers.implementations.thexem import TheXem
 	from guessit.jsonutils import GuessitEncoder
 	from aiohttp import ClientSession
 	import asyncio
-
-	sys.path.append(str(Path(f"{__file__}/../../..").resolve()))
-	from providers.implementations.thexem import TheXem
 
 	async def main():
 		async with ClientSession() as client:
