@@ -234,7 +234,7 @@ class XemFixup(Rule):
 	def when(self, matches: Matches, context) -> Any:
 		titles: List[Match] = matches.named("title", lambda m: m.tagged("title"))  # type: ignore
 
-		if not titles:
+		if not titles or not context["xem_titles"]:
 			return
 		title = titles[0]
 
@@ -249,6 +249,5 @@ class XemFixup(Rule):
 		new_title.end = nmatch[0].end
 		new_title.value = f"{title.value}{hole}{nmatch[0].value}"
 
-		# TODO: check if new_title exists on thexem, if not early return
-
-		return [[title, nmatch[0]], [new_title]]
+		if new_title.value.lower().replace(" ", "") in context["xem_titles"]:
+			return [[title, nmatch[0]], [new_title]]

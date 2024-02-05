@@ -124,3 +124,21 @@ class TheXem:
 
 		# Only tvdb has a proper absolute handling so we always use this one.
 		return (ep[provider]["season"], ep[provider]["episode"], ep["tvdb"]["absolute"])
+
+	@cache(ttl=timedelta(days=1))
+	async def get_expected_titles(
+		self, provider: Literal["tvdb"] | Literal["anidb"] = "tvdb"
+	) -> list[str]:
+		map = await self.get_map(provider)
+		titles = []
+
+		def clean(s: str):
+			return s.lower().replace(" ", "")
+
+		for x in map.values():
+			# Only the first element is a string (the show name) so we need to ignore the type hint
+			master_show_name: str = x[0]  # type: ignore
+			titles.append(clean(master_show_name))
+			for y in x[1:]:
+				titles.extend(clean(name) for name in y.keys())
+		return titles

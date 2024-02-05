@@ -3,6 +3,7 @@ from aiohttp import ClientSession
 from abc import abstractmethod, abstractproperty
 from typing import Optional, TypeVar
 
+from providers.implementations.thexem import TheXem
 from providers.utils import ProviderError
 
 from .types.show import Show
@@ -19,15 +20,12 @@ class Provider:
 	@classmethod
 	def get_all(
 		cls: type[Self], client: ClientSession, languages: list[str]
-	) -> list[Self]:
+	) -> tuple[list[Self], TheXem]:
 		providers = []
 
 		from providers.idmapper import IdMapper
 
 		idmapper = IdMapper()
-
-		from providers.implementations.thexem import TheXem
-
 		xem = TheXem(client)
 
 		from providers.implementations.themoviedatabase import TheMovieDatabase
@@ -46,7 +44,7 @@ class Provider:
 
 		idmapper.init(tmdb=tmdb, language=languages[0])
 
-		return providers
+		return providers, xem
 
 	@abstractproperty
 	def name(self) -> str:

@@ -1,8 +1,3 @@
-from providers.utils import ProviderError
-from .scanner import Scanner
-from .monitor import monitor
-
-
 async def main():
 	import os
 	import logging
@@ -11,7 +6,9 @@ async def main():
 	from datetime import date
 	from typing import Optional
 	from aiohttp import ClientSession
-	from providers.utils import format_date
+	from providers.utils import format_date, ProviderError
+	from .scanner import Scanner
+	from .monitor import monitor
 
 	path = os.environ.get("SCANNER_LIBRARY_ROOT", "/video")
 	languages = os.environ.get("LIBRARY_LANGUAGES")

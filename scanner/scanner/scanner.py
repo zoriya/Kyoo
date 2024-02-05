@@ -31,7 +31,7 @@ class Scanner:
 		except Exception as e:
 			self._ignore_pattern = re.compile("")
 			logging.error(f"Invalid ignore pattern. Ignoring. Error: {e}")
-		self.provider = Provider.get_all(client, languages)[0]
+		[self.provider, *_], self._xem = Provider.get_all(client, languages)
 		self.languages = languages
 
 		self._collection_cache = {}
@@ -80,7 +80,7 @@ class Scanner:
 		if path in self.registered or self._ignore_pattern.match(path):
 			return
 
-		raw = guessit(path)
+		raw = guessit(path, xem_titles=await self._xem.get_expected_titles())
 
 		if "mimetype" not in raw or not raw["mimetype"].startswith("video"):
 			return
@@ -90,7 +90,7 @@ class Scanner:
 
 		if isinstance(raw.get("season"), List):
 			raise ProviderError(
-				f"An episode can't have multiple seasons (found {raw.get("season")} for {path})"
+				f"An episode can't have multiple seasons (found {raw.get('season')} for {path})"
 			)
 		if isinstance(raw.get("episode"), List):
 			raise ProviderError(
