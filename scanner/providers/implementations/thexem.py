@@ -8,6 +8,17 @@ from providers.utils import ProviderError
 from scanner.cache import cache
 
 
+def clean(s: str):
+	s = s.lower()
+	# remove content of () (guessit does not allow them as part of a name)
+	s = re.sub(r"\([^)]*\)", "", s)
+	# remove separators
+	s = re.sub(r"[:\-_/\\&|,;.=\"'+~～@`ー]+", " ", s)
+	# remove subsequent spaces (that may be introduced above)
+	s = re.sub(r" +", " ", s)
+	return s
+
+
 class TheXem:
 	def __init__(self, client: ClientSession) -> None:
 		self._client = client
@@ -61,12 +72,13 @@ class TheXem:
 		self, provider: Literal["tvdb"] | Literal["anidb"], show_name: str
 	):
 		map = await self.get_map(provider)
+		show_name = clean(show_name)
 		for [id, v] in map.items():
 			# Only the first element is a string (the show name) so we need to ignore the type hint
 			master_show_name: str = v[0]  # type: ignore
 			for x in v[1:]:
 				[(name, season)] = x.items()
-				if show_name.lower() == name.lower():
+				if show_name == clean(name):
 					return master_show_name, id
 		return None, None
 
@@ -76,11 +88,12 @@ class TheXem:
 		map = await self.get_map(provider)
 		if id not in map:
 			return None
+		show_name = clean(show_name)
 		# Ignore the first element, this is the show name has a string
 		for x in map[id][1:]:
 			[(name, season)] = x.items()
 			# TODO: replace .lower() with something a bit smarter
-			if show_name.lower() == name.lower():
+			if show_name == clean(name):
 				return season
 		return None
 
@@ -132,11 +145,6 @@ class TheXem:
 	) -> list[str]:
 		map = await self.get_map(provider)
 		titles = []
-
-		def clean(s: str):
-			s = s.lower()
-			s = re.sub(r"\([^)]*\)", "", s) # remove content of () (guessit does not allow them as part of a name)
-			return re.sub(r"[\W_]+", "", s) # remove non alphanum content (it does keep non us chars like kanjis or accents)
 
 		for x in map.values():
 			# Only the first element is a string (the show name) so we need to ignore the type hint

@@ -463,7 +463,9 @@ class TheMovieDatabase(Provider):
 				else None
 			)
 			if tvdb_id is None:
-				logging.info("Tvdb could not be found, trying xem name lookup for %s", name)
+				logging.info(
+					"Tvdb could not be found, trying xem name lookup for %s", name
+				)
 				_, tvdb_id = await self._xem.get_show_override("tvdb", old_name)
 			if tvdb_id is not None:
 				(
