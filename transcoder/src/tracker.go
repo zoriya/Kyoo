@@ -182,9 +182,9 @@ func (t *Tracker) killOrphanedeheads(stream *Stream) {
 			if info.head == -1 {
 				continue
 			}
-			distance = min(Abs(info.head-head), distance)
+			distance = min(Abs(info.head-head.segment), distance)
 		}
-		if distance > 100 {
+		if distance > 20 {
 			log.Printf("Killing orphaned head %s %d", stream.file.Path, encoder_id)
 			stream.KillHead(encoder_id)
 		}
