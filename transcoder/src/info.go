@@ -201,6 +201,8 @@ func GetInfo(path string) (*MediaInfo, error) {
 		attachments = make([]string, 0)
 	}
 
+	// fmt.Printf("%s", mi.Option("info_parameters", ""))
+
 	ret := MediaInfo{
 		Sha:  sha,
 		Path: path,
@@ -222,6 +224,7 @@ func GetInfo(path string) (*MediaInfo, error) {
 					Or(
 						mi.Parameter(mediainfo.StreamVideo, 0, "BitRate"),
 						mi.Parameter(mediainfo.StreamVideo, 0, "OverallBitRate"),
+						mi.Parameter(mediainfo.StreamVideo, 0, "BitRate_Nominal"),
 					),
 				),
 			}
