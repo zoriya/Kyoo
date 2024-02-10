@@ -135,8 +135,12 @@ func (ts *Stream) run(start int32) error {
 
 		"-ss", fmt.Sprintf("%.6f", ts.file.Keyframes[start]),
 		"-i", ts.file.Path,
-		"-to", fmt.Sprintf("%.6f", ts.file.Keyframes[end]),
 		"-copyts",
+	}
+	if end != int32(len(ts.file.Keyframes)-1) {
+		args = append(args,
+			"-to", fmt.Sprintf("%.6f", ts.file.Keyframes[end]),
+		)
 	}
 	args = append(args, ts.handle.getTranscodeArgs(segments_str)...)
 	args = append(args, []string{
