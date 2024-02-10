@@ -145,6 +145,7 @@ func (ts *Stream) run(start int32) error {
 	args = append(args, ts.handle.getTranscodeArgs(segments_str)...)
 	args = append(args, []string{
 		"-f", "segment",
+		"-segment_time_delta", "0.2",
 		"-segment_format", "mpegts",
 		"-segment_times", segments_str,
 		"-segment_start_number", fmt.Sprint(start),
