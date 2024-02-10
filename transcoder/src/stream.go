@@ -191,7 +191,7 @@ func (ts *Stream) run(start int32) error {
 				should_stop = true
 			} else {
 				close(ts.segments[segment])
-				if int32(len(ts.segments)) == segment+1 {
+				if segment == end-1 {
 					// file finished, ffmped will finish soon on it's own
 					should_stop = true
 				} else if ts.isSegmentReady(segment + 1) {
