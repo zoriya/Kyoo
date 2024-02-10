@@ -137,7 +137,8 @@ func (ts *Stream) run(start int32) error {
 		"-i", ts.file.Path,
 		"-copyts",
 	}
-	if end != int32(len(ts.file.Keyframes)-1) {
+	// do not include -to if we want the file to go to the end
+	if end != int32(len(ts.file.Keyframes)) {
 		args = append(args,
 			"-to", fmt.Sprintf("%.6f", ts.file.Keyframes[end]),
 		)
