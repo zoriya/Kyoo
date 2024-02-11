@@ -18,6 +18,10 @@ func NewVideoStream(file *FileStream, quality Quality) *VideoStream {
 	return ret
 }
 
+func (vs *VideoStream) getFlags() Flags {
+	return VideoF
+}
+
 func (vs *VideoStream) getOutPath(encoder_id int) string {
 	return fmt.Sprintf("%s/segment-%s-%d-%%d.ts", vs.file.Out, vs.quality, encoder_id)
 }

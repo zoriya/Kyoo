@@ -15,9 +15,17 @@ import (
 	"time"
 )
 
+type Flags int32
+
+const (
+	AudioF Flags = 1 << 0
+	VideoF Flags = 1 << 1
+)
+
 type StreamHandle interface {
 	getTranscodeArgs(segments string) []string
 	getOutPath(encoder_id int) string
+	getFlags() Flags
 }
 
 type Stream struct {
@@ -154,12 +162,17 @@ func (ts *Stream) run(start int32) error {
 
 	args := []string{
 		"-nostats", "-hide_banner", "-loglevel", "warning",
+	}
 
+	if ts.handle.getFlags()&VideoF != 0 {
 		// This is the default behavior in transmux mode and needed to force pre/post segment to work
-		"-noaccurate_seek",
+		// This must be disabled when processing only audio because it creates gaps in audio
+		args = append(args, "-noaccurate_seek")
+	}
+	args = append(args,
 		"-ss", fmt.Sprintf("%.6f", start_ref),
 		"-i", ts.file.Path,
-	}
+	)
 	// do not include -to if we want the file to go to the end
 	if end+1 < int32(len(ts.file.Keyframes)) {
 		// sometimes, the duration is shorter than expected (only during transcode it seems)
