@@ -147,14 +147,18 @@ func (ts *Stream) run(start int32) error {
 	args := []string{
 		"-nostats", "-hide_banner", "-loglevel", "warning",
 
+		// This is the default behavior in transmux mode and needed to force pre/post segment to work
+		"-noaccurate_seek",
 		"-ss", fmt.Sprintf("%.6f", start_ref),
 		"-i", ts.file.Path,
-		"-copyts",
 	}
 	// do not include -to if we want the file to go to the end
-	if end != int32(len(ts.file.Keyframes)) {
+	if end+1 < int32(len(ts.file.Keyframes)) {
+		// sometimes, the duration is shorter than expected (only during transcode it seems)
+		// always include more and use the -f segment to split the file where we want
+		end_ref := ts.file.Keyframes[end+1]
 		args = append(args,
-			"-to", fmt.Sprintf("%.6f", ts.file.Keyframes[end]),
+			"-t", fmt.Sprintf("%.6f", end_ref-start_ref),
 		)
 	}
 	args = append(args, ts.handle.getTranscodeArgs(segments_str)...)
