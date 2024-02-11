@@ -178,9 +178,22 @@ func (ts *Stream) run(start int32) error {
 		// sometimes, the duration is shorter than expected (only during transcode it seems)
 		// always include more and use the -f segment to split the file where we want
 		end_ref := ts.file.Keyframes[end+1]
-		args = append(args,
-			"-t", fmt.Sprintf("%.6f", end_ref-start_ref),
-		)
+		if ts.handle.getFlags()&AudioF != 0 {
+			// for reasons i don't understand, not using -copyts breaks hls.js
+			// segments are split where they should but hls.js think this is not the right segment and seek after
+			// another weird think is that -t can't be used with -copyts, ffmpeg creates 1 empty segment and stops
+			args = append(args,
+				"-copyts",
+				"-to", fmt.Sprintf("%.6f", end_ref),
+			)
+		} else {
+			// videos on the other end needs to not use -copyts and instead use -t
+			// if -copyts and -to are used, sometimes the video is cut too short so
+			// we miss a segment or two at the end
+			args = append(args,
+				"-t", fmt.Sprintf("%.6f", end_ref-start_ref),
+			)
+		}
 	}
 	args = append(args, ts.handle.getTranscodeArgs(segments_str)...)
 	args = append(args,
