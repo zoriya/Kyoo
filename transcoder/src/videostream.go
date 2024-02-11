@@ -18,8 +18,8 @@ func NewVideoStream(file *FileStream, quality Quality) *VideoStream {
 	return ret
 }
 
-func (vs *VideoStream) getOutPath() string {
-	return fmt.Sprintf("%s/segment-%s-%%06d.ts", vs.file.Out, vs.quality)
+func (vs *VideoStream) getOutPath(encoder_id int) string {
+	return fmt.Sprintf("%s/segment-%s-%d-%%d.ts", vs.file.Out, vs.quality, encoder_id)
 }
 
 func (vs *VideoStream) getTranscodeArgs(segments string) []string {
