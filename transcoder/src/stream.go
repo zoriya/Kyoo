@@ -110,9 +110,19 @@ func (ts *Stream) run(start int32) error {
 		len(ts.file.Keyframes),
 	)
 
+	// Include both the start and end delimiter because -ss and -to are not accurate
+	// Having an extra segment allows us to cut precisely the segments we want with the
+	// -f segment that does cut the begining and the end at the keyframe like asked
+	start_ref := float64(0)
 	start_padding := int32(0)
 	if start == 0 {
 		start_padding = 1
+	} else {
+		// the param for the -ss. This takes the keyframe before the specificed time
+		// (if the specified time is a keyframe, it either takes that keyframe or the one before)
+		// to prevent this weird behavior, we specify a bit before the keyframe that interest us
+		// and the first segment will contains the extra we do not want.
+		start_ref = (ts.file.Keyframes[start-1] + ts.file.Keyframes[start]) / 2
 	}
 	end_padding := int32(1)
 	if end == int32(len(ts.file.Keyframes)) {
@@ -120,20 +130,13 @@ func (ts *Stream) run(start int32) error {
 	}
 	segments := ts.file.Keyframes[start+start_padding : end+end_padding]
 	segments_str := strings.Join(Map(segments, func(seg float64, _ int) string {
-		seg = seg - ts.file.Keyframes[start]
+		seg = seg - start_ref
 		return fmt.Sprintf("%.6f", seg)
 	}), ",")
 	if segments_str == "" {
 		// we can't leave that empty else ffmpeg errors out.
 		segments_str = "99999999"
 	}
-
-	// We do not need the first value (start of the transcode)
-	// but we want the last one (the same as the -to argument)
-	// ffmpeg might create an extra segment for (starting from the -to aka end-limit and ending a few ms afters)
-	// this extra segment will contains duplicate value as
-	// if we specify one of those, ffmpeg creates a really small segment and
-	// we miss a segment's worth of data
 
 	outpath := ts.handle.getOutPath(encoder_id)
 	err := os.MkdirAll(filepath.Dir(outpath), 0o755)
@@ -144,7 +147,7 @@ func (ts *Stream) run(start int32) error {
 	args := []string{
 		"-nostats", "-hide_banner", "-loglevel", "warning",
 
-		"-ss", fmt.Sprintf("%.6f", ts.file.Keyframes[start]),
+		"-ss", fmt.Sprintf("%.6f", start_ref),
 		"-i", ts.file.Path,
 		"-copyts",
 	}
@@ -198,12 +201,12 @@ func (ts *Stream) run(start int32) error {
 			_, _ = fmt.Sscanf(scanner.Text(), format, &segment)
 
 			if segment < start {
-				log.Printf("Ignore pre-start segment (%d), start %d", segment, start)
+				// This happen because we use -f segments for accurate cutting (since -ss is not)
+				// check comment at begining of function for more info
 				continue
 			}
 			ts.lock.Lock()
 			ts.heads[encoder_id].segment = segment
-			log.Printf("Segment got ready %d %d", segment, end)
 			if ts.isSegmentReady(segment) {
 				// the current segment is already marked at done so another process has already gone up to here.
 				cmd.Process.Signal(os.Interrupt)

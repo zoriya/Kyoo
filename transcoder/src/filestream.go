@@ -104,8 +104,13 @@ func GetKeyframes(path string) ([]float64, bool, error) {
 			return nil, false, err
 		}
 
-		// Only save keyframes with at least 3s betweens, we dont want a segment of 0.2s
-		if fpts-last < 3 {
+		// Before, we wanted to only save keyframes with at least 3s betweens
+		// to prevent segments of 0.2s but sometimes, the -f segment muxer discards
+		// the segment time and decide to cut at a random keyframe. Having every keyframe
+		// handled as a segment prevents that.
+		// if fpts-last < 3 {
+		if fpts == 0 {
+			// we still ignore a keyframe in 0 because we hard code it above
 			continue
 		}
 
