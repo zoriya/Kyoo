@@ -22,6 +22,10 @@ func (as *AudioStream) getOutPath(encoder_id int) string {
 	return fmt.Sprintf("%s/segment-a%d-%d-%%d.ts", as.file.Out, as.index, encoder_id)
 }
 
+func (as *AudioStream) getFlags() Flags {
+	return AudioF
+}
+
 func (as *AudioStream) getTranscodeArgs(segments string) []string {
 	return []string{
 		"-map", fmt.Sprintf("0:a:%d", as.index),
