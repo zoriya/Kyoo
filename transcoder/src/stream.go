@@ -104,7 +104,7 @@ func toSegmentStr(segments []float64) string {
 func (ts *Stream) run(start int32) error {
 	// Start the transcode up to the 100th segment (or less)
 	// Stop at the first finished segment
-	end := min(start+3, int32(len(ts.file.Keyframes)))
+	end := min(start+100, int32(len(ts.file.Keyframes)))
 	ts.lock.Lock()
 	for i := start; i < end; i++ {
 		if ts.isSegmentReady(i) || ts.isSegmentTranscoding(i) {
