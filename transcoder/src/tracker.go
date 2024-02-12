@@ -177,6 +177,10 @@ func (t *Tracker) killOrphanedeheads(stream *Stream) {
 	defer stream.lock.Unlock()
 
 	for encoder_id, head := range stream.heads {
+		if head == DeletedHead {
+			continue
+		}
+
 		distance := int32(99999)
 		for _, info := range t.clients {
 			if info.head == -1 {
