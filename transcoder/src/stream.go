@@ -184,7 +184,7 @@ func (ts *Stream) run(start int32) error {
 			// (because it searches for a keyframe)
 			// add back the time that would be lost otherwise
 			// this only appens when -to is before -i but having -to after -i gave a bug (not sure, don't remember)
-			end_ref += start_ref-ts.file.Keyframes[start-1]
+			end_ref += start_ref - ts.file.Keyframes[start-1]
 		}
 		args = append(args,
 			"-to", fmt.Sprintf("%.6f", end_ref),
