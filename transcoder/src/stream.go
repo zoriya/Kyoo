@@ -358,6 +358,12 @@ func (ts *Stream) GetSegment(segment int32) (string, error) {
 }
 
 func (ts *Stream) prerareNextSegements(segment int32) {
+	// Audio is way cheaper to create than video so we don't need to run them in advance
+	// Running it in advance might actually slow down the video encode since less compute
+	// power can be used so we simply disable that.
+	if ts.handle.getFlags()&VideoF == 0 {
+		return
+	}
 	ts.lock.RLock()
 	defer ts.lock.RUnlock()
 	for i := segment + 1; i <= min(segment+10, int32(len(ts.segments)-1)); i++ {
