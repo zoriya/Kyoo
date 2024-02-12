@@ -171,31 +171,29 @@ func (ts *Stream) run(start int32) error {
 	}
 	args = append(args,
 		"-ss", fmt.Sprintf("%.6f", start_ref),
-		"-i", ts.file.Path,
 	)
 	// do not include -to if we want the file to go to the end
 	if end+1 < int32(len(ts.file.Keyframes)) {
 		// sometimes, the duration is shorter than expected (only during transcode it seems)
 		// always include more and use the -f segment to split the file where we want
 		end_ref := ts.file.Keyframes[end+1]
-		if ts.handle.getFlags()&AudioF != 0 {
-			// for reasons i don't understand, not using -copyts breaks hls.js
-			// segments are split where they should but hls.js think this is not the right segment and seek after
-			// another weird think is that -t can't be used with -copyts, ffmpeg creates 1 empty segment and stops
-			args = append(args,
-				"-copyts",
-				"-to", fmt.Sprintf("%.6f", end_ref),
-			)
-		} else {
-			// videos on the other end needs to not use -copyts and instead use -t
-			// if -copyts and -to are used, sometimes the video is cut too short so
-			// we miss a segment or two at the end
-			args = append(args,
-				"-t", fmt.Sprintf("%.6f", end_ref-start_ref),
-			)
+		if start_ref != 0 {
+			// it seems that the -to is confused when -ss seek before the given time
+			// (because it searches for a keyframe)
+			// add back the time that would be lost otherwise
+			// this only appens when -to is before -i but having -to after -i gave a bug (not sure, don't remember)
+			end_ref += start_ref-ts.file.Keyframes[start-1]
 		}
+		args = append(args,
+			"-to", fmt.Sprintf("%.6f", end_ref),
+		)
 	}
-	args = append(args, ts.handle.getTranscodeArgs(segments_str)...)
+	args = append(args,
+		"-i", ts.file.Path,
+		// for hls streams, -copyts is mandatory
+		"-copyts",
+	)
+	args = append(args, ts.handle.getTranscodeArgs(toSegmentStr(segments))...)
 	args = append(args,
 		"-f", "segment",
 		"-segment_time_delta", "0.2",
