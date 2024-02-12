@@ -95,6 +95,12 @@ func (ts *Stream) isSegmentTranscoding(segment int32) bool {
 	return false
 }
 
+func toSegmentStr(segments []float64) string {
+	return strings.Join(Map(segments, func(seg float64, _ int) string {
+		return fmt.Sprintf("%.6f", seg)
+	}), ",")
+}
+
 func (ts *Stream) run(start int32) error {
 	// Start the transcode up to the 100th segment (or less)
 	// Stop at the first finished segment
@@ -145,13 +151,9 @@ func (ts *Stream) run(start int32) error {
 		end_padding = 0
 	}
 	segments := ts.file.Keyframes[start+start_padding : end+end_padding]
-	segments_str := strings.Join(Map(segments, func(seg float64, _ int) string {
-		seg = seg - start_ref
-		return fmt.Sprintf("%.6f", seg)
-	}), ",")
-	if segments_str == "" {
+	if len(segments) == 0 {
 		// we can't leave that empty else ffmpeg errors out.
-		segments_str = "99999999"
+		segments = []float64{9999999}
 	}
 
 	outpath := ts.handle.getOutPath(encoder_id)
@@ -196,9 +198,14 @@ func (ts *Stream) run(start int32) error {
 	args = append(args, ts.handle.getTranscodeArgs(toSegmentStr(segments))...)
 	args = append(args,
 		"-f", "segment",
+		// needed for rounding issues when forcing keyframes
 		"-segment_time_delta", "0.2",
 		"-segment_format", "mpegts",
-		"-segment_times", segments_str,
+		"-segment_times", toSegmentStr(Map(segments, func(seg float64, _ int) float64 {
+			// for a strange reason, -segment-times does not respects -copyts so we must
+			// remove the start_ref (-ss param)
+			return seg - start_ref
+		})),
 		"-segment_list_type", "flat",
 		"-segment_list", "pipe:1",
 	)
