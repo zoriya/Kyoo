@@ -157,3 +157,11 @@ export const useAccount = () => {
 export const useAccounts = () => {
 	return useContext(AccountContext);
 };
+
+export const useHasPermission = (...perms: string[]) => {
+	const account = useAccount();
+
+	// TODO: Read permission of guest account here.
+	if (!account) return false;
+	return perms.every((perm) => account.permissions.includes(perm));
+};
