@@ -74,7 +74,8 @@
 		"home": "Accueil",
 		"browse": "Liste",
 		"search": "Rechercher",
-		"login": "Connexion"
+		"login": "Connexion",
+		"admin": "Section admin"
 	},
 	"settings": {
 		"general": {

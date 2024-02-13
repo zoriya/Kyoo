@@ -74,7 +74,8 @@
 		"home": "Home",
 		"browse": "Browse",
 		"search": "Search",
-		"login": "Login"
+		"login": "Login",
+		"admin": "Admin panel"
 	},
 	"settings": {
 		"general": {

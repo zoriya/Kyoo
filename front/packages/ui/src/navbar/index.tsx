@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { imageFn, logout, useAccount, useAccounts } from "@kyoo/models";
+import { logout, useAccount, useAccounts, useHasPermission } from "@kyoo/models";
 import {
 	Input,
 	IconButton,
@@ -30,6 +30,7 @@ import {
 	Menu,
 	PressableFeedback,
 	HR,
+	Link,
 } from "@kyoo/primitives";
 import { Platform, TextInput, View, ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
@@ -39,6 +40,7 @@ import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import Login from "@material-symbols/svg-400/rounded/login.svg";
 import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
 import Logout from "@material-symbols/svg-400/rounded/logout.svg";
+import Admin from "@material-symbols/svg-400/rounded/admin_panel_settings.svg";
 import Settings from "@material-symbols/svg-400/rounded/settings.svg";
 import { KyooLongLogo } from "./icon";
 import { forwardRef, useEffect, useRef, useState } from "react";
@@ -105,7 +107,7 @@ export const NavbarProfile = () => {
 			alt={t("navbar.login")}
 			size={24}
 			color={theme.colors.white}
-			{...css({ marginLeft: ts(1), justifyContent: "center" })}
+			{...css({ margin: ts(1), justifyContent: "center" })}
 			{...tooltip(account?.username ?? t("navbar.login"))}
 		>
 			{accounts?.map((x) => (
@@ -137,6 +139,7 @@ export const NavbarRight = () => {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 	const { push } = useRouter();
+	const isAdmin = useHasPermission("admin.read");
 
 	return (
 		<View {...css({ flexDirection: "row", alignItems: "center", flexShrink: 1 })}>
@@ -148,6 +151,15 @@ export const NavbarRight = () => {
 					color={theme.colors.white}
 					onPress={() => push("/search")}
 					{...tooltip(t("navbar.search"))}
+				/>
+			)}
+			{isAdmin && (
+				<IconButton
+					icon={Admin}
+					color={theme.colors.white}
+					as={Link}
+					href={"/admin"}
+					{...tooltip(t("navbar.admin"))}
 				/>
 			)}
 			<NavbarProfile />
