@@ -44,7 +44,7 @@
 		"react-native-web": "0.19.10",
 		"react-tooltip": "^5.26.0",
 		"solito": "^4.2.0",
-		"srt-webvtt": "^2.0.0",
+		"srt-webvtt": "zoriya/srt-webvtt#build",
 		"superjson": "^2.2.1",
 		"sweetalert2": "^11.10.4",
 		"yoshiki": "1.2.14",
