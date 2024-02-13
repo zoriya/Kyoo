@@ -106,7 +106,7 @@ namespace Kyoo.Authentication.Views
 			User user = request.ToUser();
 			user.Permissions = permissions.NewUser;
 			// If no users exists, the new one will be an admin. Give it every permissions.
-			if ((await users.GetAll(limit: new Pagination(1))).Any())
+			if (!(await users.GetAll(limit: new Pagination(1))).Any())
 				user.Permissions = PermissionOption.Admin;
 			try
 			{
