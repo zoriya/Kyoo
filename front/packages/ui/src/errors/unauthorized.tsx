@@ -36,7 +36,7 @@ export const Unauthorized = ({ missing }: { missing: string[] }) => {
 				alignItems: "center",
 			})}
 		>
-			<P>{t("errors.unauthorized", { permission: missing.join(", ") })}</P>
+			<P>{t("errors.unauthorized", { permission: missing?.join(", ") })}</P>
 		</View>
 	);
 };

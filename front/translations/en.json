@@ -214,6 +214,7 @@
 			"label": "Users",
 			"adminUser": "Admin",
 			"regularUser": "User",
+			"set-permissions": "Set permissions",
 			"delete": "Delete user"
 		}
 	}
