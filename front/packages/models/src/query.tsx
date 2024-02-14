@@ -183,7 +183,7 @@ export type QueryPage<Props = {}, Items = unknown> = ComponentType<
 	getLayout?:
 		| QueryPage<{ page: ReactElement }>
 		| { Layout: QueryPage<{ page: ReactElement }>; props: object };
-	requiredPermissions?: string[]
+	requiredPermissions?: string[];
 	randomItems?: Items[];
 };
 
