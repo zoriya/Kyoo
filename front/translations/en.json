@@ -208,5 +208,13 @@
 		"size": "Size",
 		"novideo": "No video",
 		"nocontainer": "Invalid container"
+	},
+	"admin": {
+		"users": {
+			"label": "Users",
+			"adminUser": "Admin",
+			"regularUser": "User",
+			"delete": "Delete user"
+		}
 	}
 }

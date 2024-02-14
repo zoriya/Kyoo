@@ -208,5 +208,13 @@
 		"size": "Taille",
 		"novideo": "Pas de video",
 		"nocontainer": "Conteneur invalide"
+	},
+	"admin": {
+		"users": {
+			"label": "Comptes",
+			"adminUser": "Admin",
+			"regularUser": "Utilisateur",
+			"delete": "Supprimer l'utilisateur"
+		}
 	}
 }
