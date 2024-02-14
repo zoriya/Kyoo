@@ -133,7 +133,7 @@ const UserGrid = ({
 
 UserGrid.layout = {
 	size: px(150),
-	numColumns: { xs: 3, sm: 4, md: 5, lg: 6, xl: 8 },
+	numColumns: { xs: 2, sm: 3, md: 5, lg: 6, xl: 7 },
 	gap: { xs: ts(1), sm: ts(2), md: ts(4) },
 	layout: "grid",
 } satisfies Layout;
