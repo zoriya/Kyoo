@@ -203,6 +203,34 @@ namespace Kyoo.Core.Api
 		}
 
 		/// <summary>
+		/// Patch
+		/// </summary>
+		/// <remarks>
+		/// Edit only specified properties of an item. If the ID is specified it will be used to identify the resource.
+		/// If not, the slug will be used to identify it.
+		/// </remarks>
+		/// <param name="identifier">The id or slug of the resource.</param>
+		/// <param name="patch">The resource to patch.</param>
+		/// <returns>The edited resource.</returns>
+		/// <response code="400">The resource in the request body is invalid.</response>
+		/// <response code="404">No item found with the specified ID (or slug).</response>
+		[HttpPatch("{identifier:id}")]
+		[PartialPermission(Kind.Write)]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<ActionResult<T>> Patch(Identifier identifier, [FromBody] Patch<T> patch)
+		{
+			Guid id = await identifier.Match(
+				id => Task.FromResult(id),
+				async slug => (await Repository.Get(slug)).Id
+			);
+			if (patch.Id.HasValue && patch.Id.Value != id)
+				throw new ArgumentException("Can not edit id of a resource.");
+			return await Repository.Patch(id, patch.Apply);
+		}
+
+		/// <summary>
 		/// Delete an item
 		/// </summary>
 		/// <remarks>
