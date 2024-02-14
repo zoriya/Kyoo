@@ -18,15 +18,25 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./navbar";
-export { HomePage } from "./home";
-export { BrowsePage } from "./browse";
-export { MovieDetails, ShowDetails } from "./details";
-export { CollectionPage } from "./collection";
-export { Player } from "./player";
-export { SearchPage } from "./search";
-export { LoginPage, RegisterPage } from "./login";
-export { DownloadPage, DownloadProvider } from "./downloads";
-export { SettingsPage } from "./settings";
-export { AdminPage } from "./admin";
-export * from "./errors";
+import { P } from "@kyoo/primitives";
+import { useTranslation } from "react-i18next";
+import { View } from "react-native";
+import { useYoshiki } from "yoshiki/native";
+
+export const Unauthorized = ({ missing }: { missing: string[] }) => {
+	const { t } = useTranslation();
+	const { css } = useYoshiki();
+
+	return (
+		<View
+			{...css({
+				flexGrow: 1,
+				flexShrink: 1,
+				justifyContent: "center",
+				alignItems: "center",
+			})}
+		>
+			<P>{t("errors.unauthorized", { permission: missing.join(", ") })}</P>
+		</View>
+	);
+};

@@ -193,7 +193,8 @@
 		"unknown": "Erreur inconnue",
 		"try-again": "Réessayer",
 		"re-login": "Se reconnecter",
-		"offline": "Vous n'êtes pas connecté à Internet. Réessayez plus tard."
+		"offline": "Vous n'êtes pas connecté à Internet. Réessayez plus tard.",
+		"unauthorized": "Il vous manque les autorisations {{permission}} pour accéder à cette page."
 	},
 	"mediainfo": {
 		"file": "Fichier",

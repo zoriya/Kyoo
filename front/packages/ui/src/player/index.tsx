@@ -40,8 +40,8 @@ import { fullscreenAtom, Video } from "./state";
 import { episodeDisplayNumber } from "../details/episode";
 import { useVideoKeyboard } from "./keyboard";
 import { MediaSessionManager } from "./media-session";
-import { ErrorView } from "../fetch";
 import { WatchStatusObserver } from "./watch-status-observer";
+import { ErrorView } from "../errors";
 
 type Item = (Movie & { type: "movie" }) | (Episode & { type: "episode" });
 
@@ -65,8 +65,6 @@ const mapData = (
 		nextSlug,
 	};
 };
-
-let firstSlug: string | null = null;
 
 export const Player = ({
 	slug,

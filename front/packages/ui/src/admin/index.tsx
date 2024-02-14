@@ -18,15 +18,18 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./navbar";
-export { HomePage } from "./home";
-export { BrowsePage } from "./browse";
-export { MovieDetails, ShowDetails } from "./details";
-export { CollectionPage } from "./collection";
-export { Player } from "./player";
-export { SearchPage } from "./search";
-export { LoginPage, RegisterPage } from "./login";
-export { DownloadPage, DownloadProvider } from "./downloads";
-export { SettingsPage } from "./settings";
-export { AdminPage } from "./admin";
-export * from "./errors";
+import { QueryPage } from "@kyoo/models";
+import { P, ts } from "@kyoo/primitives";
+import { ScrollView } from "react-native";
+import { DefaultLayout } from "../layout";
+
+export const AdminPage: QueryPage = () => {
+	return (
+		<ScrollView contentContainerStyle={{ gap: ts(4), paddingBottom: ts(4) }}>
+			<P>hbgen</P>
+		</ScrollView>
+	);
+};
+
+AdminPage.getLayout = DefaultLayout;
+AdminPage.requiredPermissions = ["admin.read"];

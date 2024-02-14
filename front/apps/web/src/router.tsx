@@ -18,6 +18,8 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { QueryPage, useHasPermission } from "@kyoo/models";
+import { Unauthorized } from "@kyoo/ui";
 import { useRouter } from "next/router";
 import { ComponentType } from "react";
 
@@ -27,7 +29,10 @@ export const withRoute = <Props,>(
 ) => {
 	const WithUseRoute = (props: Props) => {
 		const router = useRouter();
+		const hasPermissions = useHasPermission((Component as QueryPage).requiredPermissions ?? []);
 
+		if (!hasPermissions)
+			return <Unauthorized missing={(Component as QueryPage).requiredPermissions!} />;
 		// @ts-ignore
 		return <Component {...defaultProps} {...router.query} {...props} />;
 	};

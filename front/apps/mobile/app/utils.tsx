@@ -24,7 +24,8 @@ import { StatusBar, StatusBarProps } from "react-native";
 import * as ScreenOrientation from "expo-screen-orientation";
 import * as NavigationBar from "expo-navigation-bar";
 import arrayShuffle from "array-shuffle";
-import { QueryPage } from "@kyoo/models";
+import { QueryPage, useHasPermission } from "@kyoo/models";
+import { Unauthorized } from "@kyoo/ui";
 
 const FullscreenProvider = () => {
 	useEffect(() => {
@@ -49,6 +50,11 @@ export const withRoute = <Props,>(
 	const { statusBar, fullscreen, ...routeOptions } = options ?? {};
 	const WithUseRoute = (props: any) => {
 		const routeParams = useLocalSearchParams();
+		const hasPermissions = useHasPermission((Component as QueryPage).requiredPermissions ?? []);
+
+		if (!hasPermissions)
+			return <Unauthorized missing={(Component as QueryPage).requiredPermissions!} />;
+
 		return (
 			<>
 				{routeOptions && <Stack.Screen {...routeOptions} />}
