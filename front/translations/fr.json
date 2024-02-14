@@ -214,6 +214,7 @@
 			"label": "Comptes",
 			"adminUser": "Admin",
 			"regularUser": "Utilisateur",
+			"set-permissions": "Definir les permissions",
 			"delete": "Supprimer l'utilisateur"
 		}
 	}

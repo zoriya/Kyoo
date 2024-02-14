@@ -32,19 +32,28 @@ import UserI from "@material-symbols/svg-400/rounded/account_circle.svg";
 import Admin from "@material-symbols/svg-400/rounded/shield_person.svg";
 import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
 import Delete from "@material-symbols/svg-400/rounded/delete.svg";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const UserGrid = ({
 	isLoading,
-	slug,
+	id,
 	username,
 	avatar,
 	isAdmin,
 	...props
-}: WithLoading<{ slug: string; username: string; avatar: string; isAdmin: boolean }>) => {
+}: WithLoading<{ id: string; username: string; avatar: string; isAdmin: boolean }>) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 	const queryClient = useQueryClient();
+	const { mutateAsync } = useMutation({
+		mutationFn: async (update: Partial<User>) =>
+			await queryFn({
+				path: ["users", id],
+				method: "PATCH",
+				body: update,
+			}),
+		onSettled: async () => await queryClient.invalidateQueries({ queryKey: ["users"] }),
+	});
 
 	return (
 		<View {...css({ alignItems: "center" }, props)}>
@@ -62,6 +71,35 @@ const UserGrid = ({
 					<P>{username}</P>
 				</Skeleton>
 				<Menu Trigger={IconButton} icon={MoreVert} {...tooltip(t("misc.more"))}>
+					<Menu.Sub label={t("admin.users.set-permissions")} icon={Admin}>
+						<Menu.Item
+							selected={!isAdmin}
+							label={t("admin.users.regularUser")}
+							onSelect={() =>
+								mutateAsync({
+									permissions: ["overall.read"],
+								})
+							}
+						/>
+						<Menu.Item
+							selected={isAdmin}
+							label={t("admin.users.adminUser")}
+							onSelect={() =>
+								mutateAsync({
+									permissions: [
+										"overall.read",
+										"overall.write",
+										"overall.create",
+										"overall.delete",
+										"admin.read",
+										"admin.write",
+										"admin.create",
+										"admin.delete",
+									],
+								})
+							}
+						/>
+					</Menu.Sub>
 					<Menu.Item
 						label={t("admin.users.delete")}
 						icon={Delete}
@@ -74,7 +112,7 @@ const UserGrid = ({
 									{
 										text: t("misc.delete"),
 										onPress: async () => {
-											await queryFn({ path: ["users", slug], method: "DELETE" });
+											await queryFn({ path: ["users", id], method: "DELETE" });
 											await queryClient.invalidateQueries({ queryKey: ["users"] });
 										},
 										style: "destructive",
@@ -109,7 +147,7 @@ const UserList = () => {
 				{(user) => (
 					<UserGrid
 						isLoading={user.isLoading as any}
-						slug={user.slug}
+						id={user.id}
 						username={user.username}
 						avatar={user.logo}
 						isAdmin={user.permissions?.includes("admin.write")}
