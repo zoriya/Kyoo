@@ -18,12 +18,13 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Page, QueryIdentifier, useFetch, KyooErrors } from "@kyoo/models";
+import { Page, QueryIdentifier, useFetch } from "@kyoo/models";
 import { Breakpoint, P } from "@kyoo/primitives";
 import { ComponentType, ReactElement, isValidElement } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
+import { ErrorView } from "./errors";
 
 export type Layout = {
 	numColumns: Breakpoint<number>;
@@ -80,28 +81,6 @@ export const OfflineView = () => {
 			})}
 		>
 			<P {...css({ color: (theme) => theme.colors.white })}>{t("errors.offline")}</P>
-		</View>
-	);
-};
-
-export const ErrorView = ({ error }: { error: KyooErrors }) => {
-	const { css } = useYoshiki();
-
-	return (
-		<View
-			{...css({
-				backgroundColor: (theme) => theme.colors.red,
-				flexGrow: 1,
-				flexShrink: 1,
-				justifyContent: "center",
-				alignItems: "center",
-			})}
-		>
-			{error.errors.map((x, i) => (
-				<P key={i} {...css({ color: (theme) => theme.colors.white })}>
-					{x}
-				</P>
-			))}
 		</View>
 	);
 };

@@ -44,6 +44,7 @@ import Admin from "@material-symbols/svg-400/rounded/admin_panel_settings.svg";
 import Settings from "@material-symbols/svg-400/rounded/settings.svg";
 import { KyooLongLogo } from "./icon";
 import { forwardRef, useEffect, useRef, useState } from "react";
+import { AdminPage } from "../admin";
 
 export const NavbarTitle = (props: Stylable & { onLayout?: ViewProps["onLayout"] }) => {
 	const { t } = useTranslation();
@@ -139,7 +140,7 @@ export const NavbarRight = () => {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 	const { push } = useRouter();
-	const isAdmin = useHasPermission("admin.read");
+	const isAdmin = useHasPermission(AdminPage.requiredPermissions);
 
 	return (
 		<View {...css({ flexDirection: "row", alignItems: "center", flexShrink: 1 })}>

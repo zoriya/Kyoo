@@ -22,7 +22,8 @@ import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { useBreakpointMap, HR } from "@kyoo/primitives";
 import { ContentStyle, FlashList } from "@shopify/flash-list";
 import { ComponentProps, ComponentType, isValidElement, ReactElement, useRef } from "react";
-import { EmptyView, ErrorView, Layout, OfflineView, WithLoading, addHeader } from "./fetch";
+import { EmptyView, Layout, OfflineView, WithLoading, addHeader } from "./fetch";
+import { ErrorView } from "./errors";
 import { FlatList, View, ViewStyle } from "react-native";
 
 const emulateGap = (

@@ -18,15 +18,29 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./navbar";
-export { HomePage } from "./home";
-export { BrowsePage } from "./browse";
-export { MovieDetails, ShowDetails } from "./details";
-export { CollectionPage } from "./collection";
-export { Player } from "./player";
-export { SearchPage } from "./search";
-export { LoginPage, RegisterPage } from "./login";
-export { DownloadPage, DownloadProvider } from "./downloads";
-export { SettingsPage } from "./settings";
-export { AdminPage } from "./admin";
-export * from "./errors";
+import { KyooErrors } from "@kyoo/models";
+import { P } from "@kyoo/primitives";
+import { View } from "react-native";
+import { useYoshiki } from "yoshiki/native";
+
+export const ErrorView = ({ error }: { error: KyooErrors }) => {
+	const { css } = useYoshiki();
+
+	return (
+		<View
+			{...css({
+				backgroundColor: (theme) => theme.colors.red,
+				flexGrow: 1,
+				flexShrink: 1,
+				justifyContent: "center",
+				alignItems: "center",
+			})}
+		>
+			{error.errors.map((x, i) => (
+				<P key={i} {...css({ color: (theme) => theme.colors.white })}>
+					{x}
+				</P>
+			))}
+		</View>
+	);
+};

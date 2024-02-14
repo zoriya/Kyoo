@@ -22,12 +22,12 @@ import { useFetch, QueryIdentifier, imageFn, Chapter } from "@kyoo/models";
 import { Sprite, P, imageBorderRadius, ts } from "@kyoo/primitives";
 import { View, Platform } from "react-native";
 import { percent, useYoshiki, px, Theme, useForceRerender } from "yoshiki/native";
-import { ErrorView } from "../../fetch";
 import { useMemo } from "react";
 import { useAtomValue } from "jotai";
 import { durationAtom } from "../state";
 import { toTimerString } from "./left-buttons";
 import { seekProgressAtom } from "./hover";
+import { ErrorView } from "../../errors";
 
 type Thumb = {
 	from: number;

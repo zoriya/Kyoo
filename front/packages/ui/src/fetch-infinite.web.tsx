@@ -31,7 +31,8 @@ import {
 	useRef,
 } from "react";
 import { Stylable, nativeStyleToCss, useYoshiki, ysMap } from "yoshiki";
-import { EmptyView, ErrorView, Layout, WithLoading, addHeader } from "./fetch";
+import { EmptyView, Layout, WithLoading, addHeader } from "./fetch";
+import { ErrorView } from "./errors";
 import type { ContentStyle } from "@shopify/flash-list";
 
 const InfiniteScroll = <Props,>({
