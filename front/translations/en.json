@@ -216,6 +216,10 @@
 			"regularUser": "User",
 			"set-permissions": "Set permissions",
 			"delete": "Delete user"
+		},
+		"scanner": {
+			"label": "Scanner",
+			"empty": "No issue found. All your items are registered."
 		}
 	}
 }
