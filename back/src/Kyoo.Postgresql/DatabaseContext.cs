@@ -409,9 +409,7 @@ namespace Kyoo.Postgresql
 
 			modelBuilder.Entity<Movie>().Ignore(x => x.Links);
 
-
-			modelBuilder.Entity<Issue>()
-				.HasKey(x => new { x.Domain, x.Cause });
+			modelBuilder.Entity<Issue>().HasKey(x => new { x.Domain, x.Cause });
 
 			// TODO: Waiting for https://github.com/dotnet/efcore/issues/29825
 			// modelBuilder.Entity<T>()
@@ -419,7 +417,8 @@ namespace Kyoo.Postgresql
 			// 	{
 			// 		x.ToJson();
 			// 	});
-			modelBuilder.Entity<Issue>()
+			modelBuilder
+				.Entity<Issue>()
 				.Property(x => x.Extra)
 				.HasConversion(
 					v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),

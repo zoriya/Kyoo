@@ -39,7 +39,7 @@ namespace Kyoo.Core.Api;
 [PartialPermission(nameof(User), Group = Group.Admin)]
 [ApiDefinition("Users", Group = ResourcesGroup)]
 public class UserApi(ILibraryManager libraryManager, IThumbnailsManager thumbs)
-	: CrudApi<User>(libraryManager.Users)
+	: CrudApi<User>(libraryManager!.Users)
 {
 	/// <summary>
 	/// Get profile picture

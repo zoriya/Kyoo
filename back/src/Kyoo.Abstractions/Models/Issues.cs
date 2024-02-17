@@ -45,7 +45,7 @@ public class Issue : IAddedDate
 	/// <summary>
 	/// Some extra data that could store domain-specific info.
 	/// </summary>
-	public Dictionary<string, object> Extra { get; set; }
+	public Dictionary<string, object> Extra { get; set; } = new();
 
 	/// <inheritdoc/>
 	public DateTime AddedDate { get; set; }
