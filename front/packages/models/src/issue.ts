@@ -18,15 +18,31 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./accounts";
-export { storage } from "./account-internal";
-export * from "./theme";
-export * from "./resources";
-export * from "./traits";
-export * from "./page";
-export * from "./kyoo-errors";
-export * from "./utils";
-export * from "./login";
-export * from "./issue";
+import { z } from "zod";
+import { zdate } from "./utils";
 
-export * from "./query";
+export const IssueP = z.object({
+	/**
+	 * The type of issue (for example, "Scanner" if this issue was created due to scanning error).
+	 */
+	domain: z.string(),
+	/**
+	 * Why this issue was caused? An unique cause that can be used to identify this issue.
+	 * For the scanner, a cause should be a video path.
+	 */
+	cause: z.string(),
+	/**
+	 * A human readable string explaining why this issue occured.
+	 */
+	reason: z.string(),
+	/**
+	 * Some extra data that could store domain-specific info.
+	 */
+	extra: z.record(z.string(), z.any()),
+	/**
+	 * The date the issue was reported.
+	 */
+	addedDate: zdate(),
+});
+
+export type Issue = z.infer<typeof IssueP>;

@@ -23,11 +23,13 @@ import { ts } from "@kyoo/primitives";
 import { ScrollView } from "react-native";
 import { DefaultLayout } from "../layout";
 import { UserList } from "./users";
+import { Scanner } from "./scanner";
 
 export const AdminPage: QueryPage = () => {
 	return (
 		<ScrollView contentContainerStyle={{ gap: ts(4), paddingBottom: ts(4) }}>
 			<UserList />
+			<Scanner />
 		</ScrollView>
 	);
 };

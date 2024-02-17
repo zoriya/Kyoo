@@ -216,6 +216,10 @@
 			"regularUser": "Utilisateur",
 			"set-permissions": "Definir les permissions",
 			"delete": "Supprimer l'utilisateur"
+		},
+		"scanner": {
+			"label": "Scanner",
+			"empty": "Aucun problème trouvé. Toutes vos vidéos sont enregistrés."
 		}
 	}
 }
