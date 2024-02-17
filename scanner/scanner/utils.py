@@ -1,8 +1,12 @@
+from __future__ import annotations
 import logging
 from functools import wraps
 from itertools import islice
-from typing import Iterator, List, TypeVar
+from typing import TYPE_CHECKING, Iterator, List, TypeVar
 from providers.utils import ProviderError
+
+if TYPE_CHECKING:
+	from scanner.scanner import Scanner
 
 
 T = TypeVar("T")
@@ -19,14 +23,34 @@ def batch(iterable: Iterator[T], n: int) -> Iterator[List[T]]:
 		yield batch
 
 
-def log_errors(f):
+def handle_errors(f):
 	@wraps(f)
-	async def internal(*args, **kwargs):
+	async def internal(self: Scanner, path: str):
 		try:
-			await f(*args, **kwargs)
+			await f(self, path)
+			if path in self.issues:
+				await self._client.delete(
+					f'{self._url}/issues?filter=domain eq scanner and cause eq "{path}"',
+					headers={"X-API-Key": self._api_key},
+				)
 		except ProviderError as e:
 			logging.error(str(e))
+			await self._client.post(
+				f"{self._url}/issues",
+				json={"domain": "scanner", "cause": path, "reason": str(e)},
+				headers={"X-API-Key": self._api_key},
+			)
 		except Exception as e:
 			logging.exception("Unhandled error", exc_info=e)
+			await self._client.post(
+				f"{self._url}/issues",
+				json={
+					"domain": "scanner",
+					"cause": path,
+					"reason": "Unknown error",
+					"extra": {"type": type(e).__name__, "message": str(e)},
+				},
+				headers={"X-API-Key": self._api_key},
+			)
 
 	return internal

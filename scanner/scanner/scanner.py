@@ -13,7 +13,7 @@ from providers.types.show import Show
 from providers.types.episode import Episode, PartialShow
 from providers.types.season import Season
 from .parser.guess import guessit
-from .utils import batch, log_errors
+from .utils import batch, handle_errors
 from .cache import cache, exec_as_cache, make_key
 
 
@@ -41,6 +41,7 @@ class Scanner:
 	async def scan(self, path: str):
 		logging.info("Starting the scan. It can take some times...")
 		self.registered = await self.get_registered_paths()
+		self.issues = await self.get_issues()
 		videos = [str(p) for p in Path(path).rglob("*") if p.is_file()]
 		deleted = [x for x in self.registered if x not in videos]
 
@@ -75,7 +76,17 @@ class Scanner:
 			paths += list(x["path"] for x in ret["items"])
 		return paths
 
-	@log_errors
+	async def get_issues(self) -> List[str]:
+		async with self._client.get(
+			f"{self._url}/issues",
+			params={"limit": 0},
+			headers={"X-API-Key": self._api_key},
+		) as r:
+			r.raise_for_status()
+			ret = await r.json()
+			return [x["cause"] for x in ret if x["domain"] == "scanner"]
+
+	@handle_errors
 	async def identify(self, path: str):
 		if path in self.registered or self._ignore_pattern.match(path):
 			return
