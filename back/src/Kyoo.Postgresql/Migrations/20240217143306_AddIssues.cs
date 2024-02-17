@@ -13,7 +13,8 @@ namespace Kyoo.Postgresql.Migrations
 		{
 			migrationBuilder.DropForeignKey(
 				name: "fk_show_watch_status_episodes_next_episode_id",
-				table: "show_watch_status");
+				table: "show_watch_status"
+			);
 
 			migrationBuilder.CreateTable(
 				name: "issues",
@@ -23,12 +24,17 @@ namespace Kyoo.Postgresql.Migrations
 					cause = table.Column<string>(type: "text", nullable: false),
 					reason = table.Column<string>(type: "text", nullable: false),
 					extra = table.Column<string>(type: "json", nullable: false),
-					added_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now() at time zone 'utc'")
+					added_date = table.Column<DateTime>(
+						type: "timestamp with time zone",
+						nullable: false,
+						defaultValueSql: "now() at time zone 'utc'"
+					)
 				},
 				constraints: table =>
 				{
 					table.PrimaryKey("pk_issues", x => new { x.domain, x.cause });
-				});
+				}
+			);
 
 			migrationBuilder.AddForeignKey(
 				name: "fk_show_watch_status_episodes_next_episode_id",
@@ -36,7 +42,8 @@ namespace Kyoo.Postgresql.Migrations
 				column: "next_episode_id",
 				principalTable: "episodes",
 				principalColumn: "id",
-				onDelete: ReferentialAction.SetNull);
+				onDelete: ReferentialAction.SetNull
+			);
 		}
 
 		/// <inheritdoc />
@@ -44,17 +51,18 @@ namespace Kyoo.Postgresql.Migrations
 		{
 			migrationBuilder.DropForeignKey(
 				name: "fk_show_watch_status_episodes_next_episode_id",
-				table: "show_watch_status");
+				table: "show_watch_status"
+			);
 
-			migrationBuilder.DropTable(
-				name: "issues");
+			migrationBuilder.DropTable(name: "issues");
 
 			migrationBuilder.AddForeignKey(
 				name: "fk_show_watch_status_episodes_next_episode_id",
 				table: "show_watch_status",
 				column: "next_episode_id",
 				principalTable: "episodes",
-				principalColumn: "id");
+				principalColumn: "id"
+			);
 		}
 	}
 }

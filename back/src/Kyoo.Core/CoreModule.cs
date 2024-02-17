@@ -75,6 +75,11 @@ namespace Kyoo.Core
 				.As<IWatchStatusRepository>()
 				.AsSelf()
 				.InstancePerLifetimeScope();
+			builder
+				.RegisterType<IssueRepository>()
+				.As<IIssueRepository>()
+				.AsSelf()
+				.InstancePerLifetimeScope();
 			builder.RegisterType<SqlVariableContext>().InstancePerLifetimeScope();
 		}
 
