@@ -104,6 +104,8 @@ namespace Kyoo.Postgresql
 
 		public DbSet<EpisodeWatchStatus> EpisodeWatchStatus { get; set; }
 
+		public DbSet<Issue> Issues { get; set; }
+
 		/// <summary>
 		/// Add a many to many link between two resources.
 		/// </summary>
@@ -314,6 +316,7 @@ namespace Kyoo.Postgresql
 			_HasAddedDate<Season>(modelBuilder);
 			_HasAddedDate<Episode>(modelBuilder);
 			_HasAddedDate<User>(modelBuilder);
+			_HasAddedDate<Issue>(modelBuilder);
 
 			modelBuilder
 				.Entity<User>()
@@ -405,6 +408,28 @@ namespace Kyoo.Postgresql
 			modelBuilder.Entity<User>().HasIndex(x => x.Slug).IsUnique();
 
 			modelBuilder.Entity<Movie>().Ignore(x => x.Links);
+
+
+			modelBuilder.Entity<Issue>()
+				.HasKey(x => new { x.Domain, x.Cause });
+
+			// TODO: Waiting for https://github.com/dotnet/efcore/issues/29825
+			// modelBuilder.Entity<T>()
+			// 	.OwnsOne(x => x.ExternalId, x =>
+			// 	{
+			// 		x.ToJson();
+			// 	});
+			modelBuilder.Entity<Issue>()
+				.Property(x => x.Extra)
+				.HasConversion(
+					v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+					v =>
+						JsonSerializer.Deserialize<Dictionary<string, object>>(
+							v,
+							(JsonSerializerOptions?)null
+						)!
+				)
+				.HasColumnType("json");
 		}
 
 		/// <summary>
