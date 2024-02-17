@@ -314,6 +314,10 @@ func (ts *Stream) GetIndex() (string, error) {
 		index += fmt.Sprintf("#EXTINF:%.6f\n", ts.file.Keyframes[segment+1]-ts.file.Keyframes[segment])
 		index += fmt.Sprintf("segment-%d.ts\n", segment)
 	}
+	// do not forget to add the last segment between the last keyframe and the end of the file
+	index += fmt.Sprintf("#EXTINF:%.6f\n", float64(ts.file.Info.Duration)-ts.file.Keyframes[len(ts.file.Keyframes)-1])
+	index += fmt.Sprintf("segment-%d.ts\n", len(ts.file.Keyframes)-1)
+
 	index += `#EXT-X-ENDLIST`
 	return index, nil
 }
