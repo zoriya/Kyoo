@@ -338,6 +338,31 @@ namespace Kyoo.Postgresql
 				.Entity<EpisodeWatchStatus>()
 				.HasKey(x => new { User = x.UserId, Episode = x.EpisodeId });
 
+			modelBuilder
+				.Entity<MovieWatchStatus>()
+				.HasOne(x => x.Movie)
+				.WithMany(x => x.Watched)
+				.HasForeignKey(x => x.MovieId)
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder
+				.Entity<ShowWatchStatus>()
+				.HasOne(x => x.Show)
+				.WithMany(x => x.Watched)
+				.HasForeignKey(x => x.ShowId)
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder
+				.Entity<ShowWatchStatus>()
+				.HasOne(x => x.NextEpisode)
+				.WithMany()
+				.HasForeignKey(x => x.NextEpisodeId)
+				.OnDelete(DeleteBehavior.SetNull);
+			modelBuilder
+				.Entity<EpisodeWatchStatus>()
+				.HasOne(x => x.Episode)
+				.WithMany(x => x.Watched)
+				.HasForeignKey(x => x.EpisodeId)
+				.OnDelete(DeleteBehavior.Cascade);
+
 			modelBuilder.Entity<MovieWatchStatus>().HasQueryFilter(x => x.UserId == CurrentUserId);
 			modelBuilder.Entity<ShowWatchStatus>().HasQueryFilter(x => x.UserId == CurrentUserId);
 			modelBuilder
