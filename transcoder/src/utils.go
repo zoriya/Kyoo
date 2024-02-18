@@ -19,7 +19,7 @@ func printExecTime(message string, args ...any) func() {
 	}
 }
 
-func getHash(path string) (string, error) {
+func GetHash(path string) (string, error) {
 	info, err := os.Stat(path)
 	if err != nil {
 		return "", err

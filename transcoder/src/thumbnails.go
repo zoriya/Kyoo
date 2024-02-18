@@ -68,7 +68,7 @@ func (t *ThumbnailsCreator) ExtractThumbnail(path string, name string) (string, 
 
 func extractThumbnail(path string, name string) (string, error) {
 	defer printExecTime("extracting thumbnails for %s", path)()
-	sha, err := getHash(path)
+	sha, err := GetHash(path)
 	if err != nil {
 		return "", err
 	}

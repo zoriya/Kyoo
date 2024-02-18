@@ -176,12 +176,16 @@ func (h *Handler) GetInfo(c echo.Context) error {
 		return err
 	}
 
+	sha, err := src.GetHash(path)
+	if err != nil {
+		return err
+	}
 	ret, err := src.GetInfo(path)
 	if err != nil {
 		return err
 	}
 	// Run extractors to have them in cache
-	h.extractor.RunExtractor(ret.Path, ret.Sha, &ret.Subtitles)
+	src.Extract(ret.Path, sha)
 	go h.thumbnails.ExtractThumbnail(
 		ret.Path,
 		fmt.Sprintf("%s/thumbnails.png", c.Request().Header.Get("X-Route")),
@@ -195,46 +199,56 @@ func (h *Handler) GetInfo(c echo.Context) error {
 //
 // Path: /attachment/:name
 func (h *Handler) GetAttachment(c echo.Context) error {
+	path, err := GetPath(c)
+	if err != nil {
+		return err
+	}
 	name := c.Param("name")
-
 	if err := SanitizePath(name); err != nil {
 		return err
 	}
 
-	wait, ok := h.extractor.Extract(sha)
-	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, "Not extracted yet. Call /info to extract.")
+	sha, err := src.GetHash(path)
+	if err != nil {
+		return err
+	}
+	wait, err := src.Extract(path, sha)
+	if err != nil {
+		return err
 	}
 	<-wait
 
-	path := fmt.Sprintf("%s/%s/att/%s", src.Settings.Metadata, sha, name)
-	return c.File(path)
+	ret := fmt.Sprintf("%s/%s/att/%s", src.Settings.Metadata, sha, name)
+	return c.File(ret)
 }
 
 // Get subtitle
 //
 // Get a specific subtitle.
 //
-// Path: /:sha/subtitle/:name
+// Path: /subtitle/:name
 func (h *Handler) GetSubtitle(c echo.Context) error {
-	sha := c.Param("sha")
-	name := c.Param("name")
-
-	if err := SanitizePath(sha); err != nil {
+	path, err := GetPath(c)
+	if err != nil {
 		return err
 	}
+	name := c.Param("name")
 	if err := SanitizePath(name); err != nil {
 		return err
 	}
 
-	wait, ok := h.extractor.Extract(sha)
-	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, "Not extracted yet. Call /info to extract.")
+	sha, err := src.GetHash(path)
+	if err != nil {
+		return err
+	}
+	wait, err := src.Extract(path, sha)
+	if err != nil {
+		return err
 	}
 	<-wait
 
-	path := fmt.Sprintf("%s/%s/sub/%s", src.Settings.Metadata, sha, name)
-	return c.File(path)
+	ret := fmt.Sprintf("%s/%s/sub/%s", src.Settings.Metadata, sha, name)
+	return c.File(ret)
 }
 
 // Get thumbnail sprite
@@ -284,7 +298,6 @@ func (h *Handler) GetThumbnailsVtt(c echo.Context) error {
 
 type Handler struct {
 	transcoder *src.Transcoder
-	extractor  *src.Extractor
 	thumbnails *src.ThumbnailsCreator
 }
 
@@ -300,7 +313,6 @@ func main() {
 	}
 	h := Handler{
 		transcoder: transcoder,
-		extractor:  src.NewExtractor(),
 		thumbnails: src.NewThumbnailsCreator(),
 	}
 

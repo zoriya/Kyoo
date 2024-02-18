@@ -4,36 +4,24 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"sync"
 )
 
-type Extractor struct {
-	extracted map[string]<-chan struct{}
-	lock      sync.RWMutex
-}
+var extracted = NewCMap[string, <-chan struct{}]()
 
-func NewExtractor() *Extractor {
-	return &Extractor{
-		extracted: make(map[string]<-chan struct{}),
-	}
-}
-
-func (e *Extractor) Extract(path string, subs *[]Subtitle) (<-chan struct{}, error) {
-	sha, err := getHash(path)
-	if err != nil {
-		return nil, err
-	}
-
-	e.lock.Lock()
-	existing, ok := e.extracted[sha]
-	if ok {
+func Extract(path string, sha string) (<-chan struct{}, error) {
+	ret := make(chan struct{})
+	existing, created := extracted.GetOrSet(sha, ret)
+	if !created {
 		return existing, nil
 	}
-	ret := make(chan struct{})
-	e.extracted[sha] = ret
-	e.lock.Unlock()
 
 	go func() {
+		info, err := GetInfo(path)
+		if err != nil {
+			extracted.Remove(sha)
+			close(ret)
+			return
+		}
 		attachment_path := fmt.Sprintf("%s/%s/att", Settings.Metadata, sha)
 		subs_path := fmt.Sprintf("%s/%s/sub", Settings.Metadata, sha)
 		os.MkdirAll(attachment_path, 0o644)
@@ -49,7 +37,7 @@ func (e *Extractor) Extract(path string, subs *[]Subtitle) (<-chan struct{}, err
 		)
 		cmd.Dir = attachment_path
 
-		for _, sub := range *subs {
+		for _, sub := range info.Subtitles {
 			if ext := sub.Extension; ext != nil {
 				cmd.Args = append(
 					cmd.Args,
@@ -61,8 +49,9 @@ func (e *Extractor) Extract(path string, subs *[]Subtitle) (<-chan struct{}, err
 		}
 		fmt.Printf("Starting extraction with the command: %s", cmd)
 		cmd.Stdout = nil
-		err := cmd.Run()
+		err = cmd.Run()
 		if err != nil {
+			extracted.Remove(sha)
 			fmt.Println("Error starting ffmpeg extract:", err)
 		}
 		close(ret)
