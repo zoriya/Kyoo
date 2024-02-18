@@ -1,11 +1,8 @@
 package main
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -18,42 +15,12 @@ type Item struct {
 	Path string `json:"path"`
 }
 
-func GetPath(resource string, slug string) (string, error) {
-	url := os.Getenv("API_URL")
-	if url == "" {
-		url = "http://back:5000"
-	}
-	key := os.Getenv("KYOO_APIKEYS")
+func GetPath(c echo.Context) (string, error) {
+	key := c.Request().Header.Get("X-Path")
 	if key == "" {
-		return "", errors.New("missing api keys")
+		return "", echo.NewHTTPError(http.StatusBadRequest, "Missing resouce path. You need to set the X-Path header.")
 	}
-	key = strings.Split(key, ",")[0]
-
-	req, err := http.NewRequest("GET", strings.Join([]string{url, resource, slug}, "/"), nil)
-	if err != nil {
-		return "", err
-	}
-	req.Header.Set("X-API-KEY", key)
-	res, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-
-	if res.StatusCode != 200 {
-		return "", echo.NewHTTPError(
-			http.StatusNotFound,
-			fmt.Sprintf("No %s found with the slug %s.", resource, slug),
-		)
-	}
-
-	defer res.Body.Close()
-	ret := Item{}
-	err = json.NewDecoder(res.Body).Decode(&ret)
-	if err != nil {
-		return "", err
-	}
-
-	return ret.Path, nil
+	return key, nil
 }
 
 func SanitizePath(path string) error {

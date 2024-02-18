@@ -16,14 +16,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AspNetCore.Proxy;
-using AspNetCore.Proxy.Options;
+using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
+using Kyoo.Core.Controllers;
 using Kyoo.Utils;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Core.Api
@@ -32,20 +32,9 @@ namespace Kyoo.Core.Api
 	/// Proxy to other services
 	/// </summary>
 	[ApiController]
-	public class ProxyApi : Controller
+	[Obsolete("Use /episode/id/master.m3u8 or routes like that")]
+	public class ProxyApi(ILibraryManager library, Transcoder transcoder) : Controller
 	{
-		private readonly HttpProxyOptions _proxyOptions = HttpProxyOptionsBuilder
-			.Instance.WithHandleFailure(
-				async (context, exception) =>
-				{
-					context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
-					await context.Response.WriteAsJsonAsync(
-						new RequestError("Service unavailable")
-					);
-				}
-			)
-			.Build();
-
 		/// <summary>
 		/// Transcoder proxy
 		/// </summary>
@@ -54,15 +43,28 @@ namespace Kyoo.Core.Api
 		/// </remarks>
 		/// <param name="rest">The path of the transcoder.</param>
 		/// <returns>The return value of the transcoder.</returns>
-		[Route("video/{**rest}")]
+		[Route("video/{type}/{id:id}/{**rest}")]
 		[Permission("video", Kind.Read)]
-		public Task Proxy(string rest, [FromQuery] Dictionary<string, string> query)
+		[Obsolete("Use /episode/id/master.m3u8 or routes like that")]
+		public async Task Proxy(
+			string type,
+			Identifier id,
+			string rest,
+			[FromQuery] Dictionary<string, string> query
+		)
 		{
-			// TODO: Use an env var to configure transcoder:7666.
-			return this.HttpProxyAsync(
-				$"http://transcoder:7666/{rest}" + query.ToQueryString(),
-				_proxyOptions
+			string path = await (
+				type is "movie" or "movies"
+					? id.Match(
+						async id => (await library.Movies.Get(id)).Path,
+						async slug => (await library.Movies.Get(slug)).Path
+					)
+					: id.Match(
+						async id => (await library.Episodes.Get(id)).Path,
+						async slug => (await library.Episodes.Get(slug)).Path
+					)
 			);
+			await transcoder.Proxy(rest + query.ToQueryString(), path);
 		}
 	}
 }

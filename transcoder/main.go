@@ -16,12 +16,9 @@ import (
 // Retrieve the raw video stream, in the same container as the one on the server. No transcoding or
 // transmuxing is done.
 //
-// Path: /:resource/:slug/direct
+// Path: /direct
 func DirectStream(c echo.Context) error {
-	resource := c.Param("resource")
-	slug := c.Param("slug")
-
-	path, err := GetPath(resource, slug)
+	path, err := GetPath(c)
 	if err != nil {
 		return err
 	}
@@ -34,17 +31,13 @@ func DirectStream(c echo.Context) error {
 // Note that the direct stream is missing (since the direct is not an hls stream) and
 // subtitles/fonts are not included to support more codecs than just webvtt.
 //
-// Path: /:resource/:slug/master.m3u8
+// Path: /master.m3u8
 func (h *Handler) GetMaster(c echo.Context) error {
-	resource := c.Param("resource")
-	slug := c.Param("slug")
-
 	client, err := GetClientId(c)
 	if err != nil {
 		return err
 	}
-
-	path, err := GetPath(resource, slug)
+	path, err := GetPath(c)
 	if err != nil {
 		return err
 	}
@@ -62,21 +55,17 @@ func (h *Handler) GetMaster(c echo.Context) error {
 // This route can take a few seconds to respond since it will way for at least one segment to be
 // available.
 //
-// Path: /:resource/:slug/:quality/index.m3u8
+// Path: /:quality/index.m3u8
 func (h *Handler) GetVideoIndex(c echo.Context) error {
-	resource := c.Param("resource")
-	slug := c.Param("slug")
 	quality, err := src.QualityFromString(c.Param("quality"))
 	if err != nil {
 		return err
 	}
-
 	client, err := GetClientId(c)
 	if err != nil {
 		return err
 	}
-
-	path, err := GetPath(resource, slug)
+	path, err := GetPath(c)
 	if err != nil {
 		return err
 	}
@@ -94,21 +83,17 @@ func (h *Handler) GetVideoIndex(c echo.Context) error {
 // This route can take a few seconds to respond since it will way for at least one segment to be
 // available.
 //
-// Path: /:resource/:slug/audio/:audio/index.m3u8
+// Path: /audio/:audio/index.m3u8
 func (h *Handler) GetAudioIndex(c echo.Context) error {
-	resource := c.Param("resource")
-	slug := c.Param("slug")
 	audio, err := strconv.ParseInt(c.Param("audio"), 10, 32)
 	if err != nil {
 		return err
 	}
-
 	client, err := GetClientId(c)
 	if err != nil {
 		return err
 	}
-
-	path, err := GetPath(resource, slug)
+	path, err := GetPath(c)
 	if err != nil {
 		return err
 	}
@@ -124,10 +109,8 @@ func (h *Handler) GetAudioIndex(c echo.Context) error {
 //
 // Retrieve a chunk of a transmuxed video.
 //
-// Path: /:resource/:slug/:quality/segments-:chunk.ts
+// Path: /:quality/segments-:chunk.ts
 func (h *Handler) GetVideoSegment(c echo.Context) error {
-	resource := c.Param("resource")
-	slug := c.Param("slug")
 	quality, err := src.QualityFromString(c.Param("quality"))
 	if err != nil {
 		return err
@@ -136,13 +119,11 @@ func (h *Handler) GetVideoSegment(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
 	client, err := GetClientId(c)
 	if err != nil {
 		return err
 	}
-
-	path, err := GetPath(resource, slug)
+	path, err := GetPath(c)
 	if err != nil {
 		return err
 	}
@@ -158,10 +139,8 @@ func (h *Handler) GetVideoSegment(c echo.Context) error {
 //
 // Retrieve a chunk of a transcoded audio.
 //
-// Path: /:resource/:slug/audio/:audio/segments-:chunk.ts
+// Path: /audio/:audio/segments-:chunk.ts
 func (h *Handler) GetAudioSegment(c echo.Context) error {
-	resource := c.Param("resource")
-	slug := c.Param("slug")
 	audio, err := strconv.ParseInt(c.Param("audio"), 10, 32)
 	if err != nil {
 		return err
@@ -170,13 +149,11 @@ func (h *Handler) GetAudioSegment(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
 	client, err := GetClientId(c)
 	if err != nil {
 		return err
 	}
-
-	path, err := GetPath(resource, slug)
+	path, err := GetPath(c)
 	if err != nil {
 		return err
 	}
@@ -192,12 +169,9 @@ func (h *Handler) GetAudioSegment(c echo.Context) error {
 //
 // Identify metadata about a file.
 //
-// Path: /:resource/:slug/info
+// Path: /info
 func (h *Handler) GetInfo(c echo.Context) error {
-	resource := c.Param("resource")
-	slug := c.Param("slug")
-
-	path, err := GetPath(resource, slug)
+	path, err := GetPath(c)
 	if err != nil {
 		return err
 	}
@@ -208,10 +182,10 @@ func (h *Handler) GetInfo(c echo.Context) error {
 	}
 	// Run extractors to have them in cache
 	h.extractor.RunExtractor(ret.Path, ret.Sha, &ret.Subtitles)
-	go h.thumbnails.ExtractThumbnail(
-		ret.Path,
-		fmt.Sprintf("%s/%s/thumbnails.png", resource, slug),
-	)
+	// go h.thumbnails.ExtractThumbnail(
+	// 	ret.Path,
+	// 	fmt.Sprintf("%s/%s/thumbnails.png", resource, slug),
+	// )
 	return c.JSON(http.StatusOK, ret)
 }
 
@@ -340,13 +314,13 @@ func main() {
 		thumbnails: src.NewThumbnailsCreator(),
 	}
 
-	e.GET("/:resource/:slug/direct", DirectStream)
-	e.GET("/:resource/:slug/master.m3u8", h.GetMaster)
-	e.GET("/:resource/:slug/:quality/index.m3u8", h.GetVideoIndex)
-	e.GET("/:resource/:slug/audio/:audio/index.m3u8", h.GetAudioIndex)
-	e.GET("/:resource/:slug/:quality/:chunk", h.GetVideoSegment)
-	e.GET("/:resource/:slug/audio/:audio/:chunk", h.GetAudioSegment)
-	e.GET("/:resource/:slug/info", h.GetInfo)
+	e.GET("/direct", DirectStream)
+	e.GET("/master.m3u8", h.GetMaster)
+	e.GET("/:quality/index.m3u8", h.GetVideoIndex)
+	e.GET("/audio/:audio/index.m3u8", h.GetAudioIndex)
+	e.GET("/:quality/:chunk", h.GetVideoSegment)
+	e.GET("/audio/:audio/:chunk", h.GetAudioSegment)
+	e.GET("/info", h.GetInfo)
 	e.GET("/:resource/:slug/thumbnails.png", h.GetThumbnails)
 	e.GET("/:resource/:slug/thumbnails.vtt", h.GetThumbnailsVtt)
 	e.GET("/:sha/attachment/:name", h.GetAttachment)
