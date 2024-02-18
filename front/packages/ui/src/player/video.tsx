@@ -103,11 +103,7 @@ const Video = forwardRef<VideoRef, VideoProps>(function Video(
 					onLoad?.(info);
 				}}
 				onBuffer={onBuffer}
-				onError={(e) => {
-					// 24001 is codec error
-					if (e.error.errorCode === "24001") onMediaUnsupported?.();
-					else onError?.(e);
-				}}
+				onError={onMediaUnsupported}
 				selectedVideoTrack={
 					video === -1
 						? { type: SelectedVideoTrackType.AUDO }
