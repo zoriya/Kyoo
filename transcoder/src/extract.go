@@ -18,25 +18,18 @@ func NewExtractor() *Extractor {
 	}
 }
 
-func (e *Extractor) Extract(sha string) (<-chan struct{}, bool) {
-	e.lock.RLock()
-	existing, ok := e.extracted[sha]
-	e.lock.RUnlock()
-
-	if ok {
-		return existing, true
-	}
-	return nil, false
-}
-
-func (e *Extractor) RunExtractor(path string, sha string, subs *[]Subtitle) <-chan struct{} {
-	existing, ok := e.Extract(sha)
-	if ok {
-		return existing
+func (e *Extractor) Extract(path string, subs *[]Subtitle) (<-chan struct{}, error) {
+	sha, err := getHash(path)
+	if err != nil {
+		return nil, err
 	}
 
-	ret := make(chan struct{})
 	e.lock.Lock()
+	existing, ok := e.extracted[sha]
+	if ok {
+		return existing, nil
+	}
+	ret := make(chan struct{})
 	e.extracted[sha] = ret
 	e.lock.Unlock()
 
@@ -73,5 +66,5 @@ func (e *Extractor) RunExtractor(path string, sha string, subs *[]Subtitle) <-ch
 		close(ret)
 	}()
 
-	return ret
+	return ret, nil
 }

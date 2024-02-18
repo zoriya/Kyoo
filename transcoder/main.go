@@ -193,14 +193,10 @@ func (h *Handler) GetInfo(c echo.Context) error {
 //
 // Get a specific attachment.
 //
-// Path: /:sha/attachment/:name
+// Path: /attachment/:name
 func (h *Handler) GetAttachment(c echo.Context) error {
-	sha := c.Param("sha")
 	name := c.Param("name")
 
-	if err := SanitizePath(sha); err != nil {
-		return err
-	}
 	if err := SanitizePath(name); err != nil {
 		return err
 	}
@@ -317,8 +313,8 @@ func main() {
 	e.GET("/info", h.GetInfo)
 	e.GET("/thumbnails.png", h.GetThumbnails)
 	e.GET("/thumbnails.vtt", h.GetThumbnailsVtt)
-	e.GET("/:sha/attachment/:name", h.GetAttachment)
-	e.GET("/:sha/subtitle/:name", h.GetSubtitle)
+	e.GET("/attachment/:name", h.GetAttachment)
+	e.GET("/subtitle/:name", h.GetSubtitle)
 
 	e.Logger.Fatal(e.Start(":7666"))
 }
