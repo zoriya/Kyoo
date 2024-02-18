@@ -176,19 +176,20 @@ func (h *Handler) GetInfo(c echo.Context) error {
 		return err
 	}
 
+	route := GetRoute(c)
 	sha, err := src.GetHash(path)
 	if err != nil {
 		return err
 	}
-	ret, err := src.GetInfo(path)
+	ret, err := src.GetInfo(path, sha, route)
 	if err != nil {
 		return err
 	}
 	// Run extractors to have them in cache
-	src.Extract(ret.Path, sha)
+	src.Extract(ret.Path, sha, route)
 	go h.thumbnails.ExtractThumbnail(
 		ret.Path,
-		fmt.Sprintf("%s/thumbnails.png", c.Request().Header.Get("X-Route")),
+		fmt.Sprintf("%s/thumbnails.png", route),
 	)
 	return c.JSON(http.StatusOK, ret)
 }
@@ -208,11 +209,12 @@ func (h *Handler) GetAttachment(c echo.Context) error {
 		return err
 	}
 
+	route := GetRoute(c)
 	sha, err := src.GetHash(path)
 	if err != nil {
 		return err
 	}
-	wait, err := src.Extract(path, sha)
+	wait, err := src.Extract(path, sha, route)
 	if err != nil {
 		return err
 	}
@@ -237,11 +239,12 @@ func (h *Handler) GetSubtitle(c echo.Context) error {
 		return err
 	}
 
+	route := GetRoute(c)
 	sha, err := src.GetHash(path)
 	if err != nil {
 		return err
 	}
-	wait, err := src.Extract(path, sha)
+	wait, err := src.Extract(path, sha, route)
 	if err != nil {
 		return err
 	}
@@ -264,7 +267,7 @@ func (h *Handler) GetThumbnails(c echo.Context) error {
 
 	out, err := h.thumbnails.ExtractThumbnail(
 		path,
-		fmt.Sprintf("%s/thumbnails.png", c.Request().Header.Get("X-Route")),
+		fmt.Sprintf("%s/thumbnails.png", GetRoute(c)),
 	)
 	if err != nil {
 		return err
@@ -287,7 +290,7 @@ func (h *Handler) GetThumbnailsVtt(c echo.Context) error {
 
 	out, err := h.thumbnails.ExtractThumbnail(
 		path,
-		fmt.Sprintf("%s/thumbnails.png", c.Request().Header.Get("X-Route")),
+		fmt.Sprintf("%s/thumbnails.png", GetRoute(c)),
 	)
 	if err != nil {
 		return err

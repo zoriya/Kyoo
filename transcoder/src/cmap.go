@@ -48,6 +48,13 @@ func (m *CMap[K, V]) GetOrSet(key K, val V) (V, bool) {
 	return m.GetOrCreate(key, func() V { return val })
 }
 
+func (m *CMap[K, V]) Set(key K, val V) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	m.data[key] = val
+}
+
 func (m *CMap[K, V]) Remove(key K) {
 	m.lock.Lock()
 	defer m.lock.Unlock()

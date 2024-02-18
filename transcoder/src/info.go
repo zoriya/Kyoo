@@ -1,8 +1,6 @@
 package src
 
 import (
-	"crypto/sha1"
-	"encoding/hex"
 	"fmt"
 	"path/filepath"
 	"strconv"
@@ -12,6 +10,8 @@ import (
 )
 
 type MediaInfo struct {
+	// closed if the mediainfo is ready for read. open otherwise
+	ready <-chan struct{}
 	// The sha1 of the video file.
 	Sha string `json:"sha"`
 	/// The internal path of the video file.
@@ -173,7 +173,32 @@ var SubtitleExtensions = map[string]string{
 	"vtt":    "vtt",
 }
 
-func GetInfo(path string) (*MediaInfo, error) {
+var infos = NewCMap[string, *MediaInfo]()
+
+func GetInfo(path string, sha string, route string) (*MediaInfo, error) {
+	var err error
+
+	ret, _ := infos.GetOrCreate(sha, func() *MediaInfo {
+		readyChan := make(chan struct{})
+		mi := &MediaInfo{
+			Sha: sha,
+			ready: readyChan,
+		}
+		go func() {
+			var val *MediaInfo
+			val, err = getInfo(path, route)
+			*mi = *val
+			mi.ready = readyChan
+			mi.Sha = sha
+			close(readyChan)
+		}()
+		return mi
+	})
+	<-ret.ready
+	return ret, err
+}
+
+func getInfo(path string, route string) (*MediaInfo, error) {
 	defer printExecTime("mediainfo for %s", path)()
 
 	mi, err := mediainfo.Open(path)
@@ -181,17 +206,6 @@ func GetInfo(path string) (*MediaInfo, error) {
 		return nil, err
 	}
 	defer mi.Close()
-
-	sha := mi.Parameter(mediainfo.StreamGeneral, 0, "UniqueID")
-	// Remove dummy values that some tools use.
-	if len(sha) <= 5 {
-		date := mi.Parameter(mediainfo.StreamGeneral, 0, "File_Modified_Date")
-
-		h := sha1.New()
-		h.Write([]byte(path))
-		h.Write([]byte(date))
-		sha = hex.EncodeToString(h.Sum(nil))
-	}
 
 	chapters_begin := ParseUint(mi.Parameter(mediainfo.StreamMenu, 0, "Chapters_Pos_Begin"))
 	chapters_end := ParseUint(mi.Parameter(mediainfo.StreamMenu, 0, "Chapters_Pos_End"))
@@ -204,7 +218,6 @@ func GetInfo(path string) (*MediaInfo, error) {
 	// fmt.Printf("%s", mi.Option("info_parameters", ""))
 
 	ret := MediaInfo{
-		Sha:  sha,
 		Path: path,
 		// Remove leading .
 		Extension: filepath.Ext(path)[1:],
@@ -248,7 +261,7 @@ func GetInfo(path string) (*MediaInfo, error) {
 			extension := OrNull(SubtitleExtensions[format])
 			var link *string
 			if extension != nil {
-				x := fmt.Sprintf("/video/%s/subtitle/%d.%s", sha, i, *extension)
+				x := fmt.Sprintf("%s/subtitle/%d.%s", route, i, *extension)
 				link = &x
 			}
 			return Subtitle{
@@ -273,7 +286,7 @@ func GetInfo(path string) (*MediaInfo, error) {
 		Fonts: Map(
 			attachments,
 			func(font string, _ int) string {
-				return fmt.Sprintf("/video/%s/attachment/%s", sha, font)
+				return fmt.Sprintf("%s/attachment/%s", route, font)
 			}),
 	}
 	if len(ret.Videos) > 0 {
