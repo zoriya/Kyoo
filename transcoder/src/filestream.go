@@ -152,26 +152,28 @@ func (fs *FileStream) Destroy() {
 func (fs *FileStream) GetMaster() string {
 	master := "#EXTM3U\n"
 	// TODO: also check if the codec is valid in a hls before putting transmux
-	if fs.CanTransmux {
-		master += "#EXT-X-STREAM-INF:"
-		master += fmt.Sprintf("AVERAGE-BANDWIDTH=%d,", fs.Info.Video.Bitrate)
-		master += fmt.Sprintf("BANDWIDTH=%d,", int(float32(fs.Info.Video.Bitrate)*1.2))
-		master += fmt.Sprintf("RESOLUTION=%dx%d,", fs.Info.Video.Width, fs.Info.Video.Height)
-		master += "AUDIO=\"audio\","
-		master += "CLOSED-CAPTIONS=NONE\n"
-		master += fmt.Sprintf("./%s/index.m3u8\n", Original)
-	}
-	aspectRatio := float32(fs.Info.Video.Width) / float32(fs.Info.Video.Height)
-	for _, quality := range Qualities {
-		if quality.Height() < fs.Info.Video.Quality.Height() && quality.AverageBitrate() < fs.Info.Video.Bitrate {
+	if fs.Info.Video != nil {
+		if fs.CanTransmux {
 			master += "#EXT-X-STREAM-INF:"
-			master += fmt.Sprintf("AVERAGE-BANDWIDTH=%d,", quality.AverageBitrate())
-			master += fmt.Sprintf("BANDWIDTH=%d,", quality.MaxBitrate())
-			master += fmt.Sprintf("RESOLUTION=%dx%d,", int(aspectRatio*float32(quality.Height())+0.5), quality.Height())
-			master += "CODECS=\"avc1.640028\","
+			master += fmt.Sprintf("AVERAGE-BANDWIDTH=%d,", fs.Info.Video.Bitrate)
+			master += fmt.Sprintf("BANDWIDTH=%d,", int(float32(fs.Info.Video.Bitrate)*1.2))
+			master += fmt.Sprintf("RESOLUTION=%dx%d,", fs.Info.Video.Width, fs.Info.Video.Height)
 			master += "AUDIO=\"audio\","
 			master += "CLOSED-CAPTIONS=NONE\n"
-			master += fmt.Sprintf("./%s/index.m3u8\n", quality)
+			master += fmt.Sprintf("./%s/index.m3u8\n", Original)
+		}
+		aspectRatio := float32(fs.Info.Video.Width) / float32(fs.Info.Video.Height)
+		for _, quality := range Qualities {
+			if quality.Height() < fs.Info.Video.Quality.Height() && quality.AverageBitrate() < fs.Info.Video.Bitrate {
+				master += "#EXT-X-STREAM-INF:"
+				master += fmt.Sprintf("AVERAGE-BANDWIDTH=%d,", quality.AverageBitrate())
+				master += fmt.Sprintf("BANDWIDTH=%d,", quality.MaxBitrate())
+				master += fmt.Sprintf("RESOLUTION=%dx%d,", int(aspectRatio*float32(quality.Height())+0.5), quality.Height())
+				master += "CODECS=\"avc1.640028\","
+				master += "AUDIO=\"audio\","
+				master += "CLOSED-CAPTIONS=NONE\n"
+				master += fmt.Sprintf("./%s/index.m3u8\n", quality)
+			}
 		}
 	}
 	for _, audio := range fs.Info.Audios {
