@@ -24,7 +24,6 @@ using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Authentication;
-using Kyoo.Core.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using static Kyoo.Abstractions.Models.Utils.Constants;
@@ -39,11 +38,8 @@ namespace Kyoo.Core.Api
 	[ApiController]
 	[PartialPermission(nameof(Episode))]
 	[ApiDefinition("Episodes", Group = ResourcesGroup)]
-	public class EpisodeApi(
-		ILibraryManager libraryManager,
-		IThumbnailsManager thumbnails,
-		Transcoder transcoder
-	) : CrudThumbsApi<Episode>(libraryManager.Episodes, thumbnails)
+	public class EpisodeApi(ILibraryManager libraryManager, IThumbnailsManager thumbnails)
+		: TranscoderApi<Episode>(libraryManager.Episodes, thumbnails)
 	{
 		/// <summary>
 		/// Get episode's show
@@ -191,95 +187,12 @@ namespace Kyoo.Core.Api
 			await libraryManager.WatchStatus.DeleteEpisodeStatus(id, User.GetIdOrThrow());
 		}
 
-		/// <summary>
-		/// Direct stream
-		/// </summary>
-		/// <remarks>
-		/// Retrieve the raw video stream, in the same container as the one on the server. No transcoding or
-		/// transmuxing is done.
-		/// </remarks>
-		/// <param name="identifier">The ID or slug of the <see cref="Episode"/>.</param>
-		/// <returns>The video file of this episode.</returns>
-		/// <response code="404">No episode with the given ID or slug could be found.</response>
-		[HttpGet("{identifier:id}/direct")]
-		[PartialPermission(Kind.Play)]
-		[ProducesResponseType(StatusCodes.Status206PartialContent)]
-		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task GetDirectStream(Identifier identifier)
+		protected override async Task<string> GetPath(Identifier identifier)
 		{
-			string path = await identifier.Match(
-				async id => (await libraryManager.Episodes.Get(id)).Path,
-				async slug => (await libraryManager.Episodes.Get(slug)).Path
+			return await identifier.Match(
+				async id => (await Repository.Get(id)).Path,
+				async slug => (await Repository.Get(slug)).Path
 			);
-			await transcoder.Proxy("/direct", path);
-		}
-
-		/// <summary>
-		/// Get master playlist
-		/// </summary>
-		/// <remarks>
-		/// Get a master playlist containing all possible video qualities and audios available for this resource.
-		/// Note that the direct stream is missing (since the direct is not an hls stream) and
-		/// subtitles/fonts are not included to support more codecs than just webvtt.
-		/// </remarks>
-		/// <param name="identifier">The ID or slug of the <see cref="Episode"/>.</param>
-		/// <returns>The master playlist of this episode.</returns>
-		/// <response code="404">No episode with the given ID or slug could be found.</response>
-		[HttpGet("{identifier:id}/master.m3u8")]
-		[PartialPermission(Kind.Play)]
-		[ProducesResponseType(StatusCodes.Status206PartialContent)]
-		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task GetMaster(Identifier identifier)
-		{
-			string path = await identifier.Match(
-				async id => (await libraryManager.Episodes.Get(id)).Path,
-				async slug => (await libraryManager.Episodes.Get(slug)).Path
-			);
-			await transcoder.Proxy("/master.m3u8", path);
-		}
-
-		[HttpGet("{identifier:id}/{quality}/index.m3u8")]
-		[PartialPermission(Kind.Play)]
-		public async Task GetVideoIndex(Identifier identifier, string quality)
-		{
-			string path = await identifier.Match(
-				async id => (await libraryManager.Episodes.Get(id)).Path,
-				async slug => (await libraryManager.Episodes.Get(slug)).Path
-			);
-			await transcoder.Proxy($"/{quality}/index.m3u8", path);
-		}
-
-		[HttpGet("{identifier:id}/audio/{audio}/index.m3u8")]
-		[PartialPermission(Kind.Play)]
-		public async Task GetAudioIndex(Identifier identifier, string audio)
-		{
-			string path = await identifier.Match(
-				async id => (await libraryManager.Episodes.Get(id)).Path,
-				async slug => (await libraryManager.Episodes.Get(slug)).Path
-			);
-			await transcoder.Proxy($"/audio/{audio}/index.m3u8", path);
-		}
-
-		[HttpGet("{identifier:id}/audio/{audio}/{segment}")]
-		[PartialPermission(Kind.Play)]
-		public async Task GetAudioSegment(Identifier identifier, string audio, string segment)
-		{
-			string path = await identifier.Match(
-				async id => (await libraryManager.Episodes.Get(id)).Path,
-				async slug => (await libraryManager.Episodes.Get(slug)).Path
-			);
-			await transcoder.Proxy($"/audio/{audio}/{segment}", path);
-		}
-
-		[HttpGet("{identifier:id}/info")]
-		[PartialPermission(Kind.Play)]
-		public async Task GetInfo(Identifier identifier)
-		{
-			string path = await identifier.Match(
-				async id => (await libraryManager.Episodes.Get(id)).Path,
-				async slug => (await libraryManager.Episodes.Get(slug)).Path
-			);
-			await transcoder.Proxy("/info", path);
 		}
 	}
 }
