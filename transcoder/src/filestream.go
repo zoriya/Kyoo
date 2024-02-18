@@ -153,10 +153,18 @@ func (fs *FileStream) GetMaster() string {
 	master := "#EXTM3U\n"
 	// TODO: also check if the codec is valid in a hls before putting transmux
 	if fs.Info.Video != nil {
+		var transmux_quality Quality
+		for _, quality := range Qualities {
+			if quality.Height() >= fs.Info.Video.Quality.Height() || quality.AverageBitrate() >= fs.Info.Video.Bitrate {
+				transmux_quality = quality
+				break
+			}
+		}
 		if fs.CanTransmux {
+			bitrate := float64(fs.Info.Video.Bitrate)
 			master += "#EXT-X-STREAM-INF:"
-			master += fmt.Sprintf("AVERAGE-BANDWIDTH=%d,", fs.Info.Video.Bitrate)
-			master += fmt.Sprintf("BANDWIDTH=%d,", int(float32(fs.Info.Video.Bitrate)*1.2))
+			master += fmt.Sprintf("AVERAGE-BANDWIDTH=%d,", int(math.Min(bitrate*0.8, float64(transmux_quality.AverageBitrate()))))
+			master += fmt.Sprintf("BANDWIDTH=%d,", int(math.Min(bitrate, float64(transmux_quality.MaxBitrate()))))
 			master += fmt.Sprintf("RESOLUTION=%dx%d,", fs.Info.Video.Width, fs.Info.Video.Height)
 			master += "AUDIO=\"audio\","
 			master += "CLOSED-CAPTIONS=NONE\n"
