@@ -41,21 +41,21 @@ func QualityFromString(str string) (Quality, error) {
 func (v Quality) AverageBitrate() uint32 {
 	switch v {
 	case P240:
-		return 400000
+		return 400_000
 	case P360:
-		return 800000
+		return 800_000
 	case P480:
-		return 1200000
+		return 1_200_000
 	case P720:
-		return 2400000
+		return 2_400_000
 	case P1080:
-		return 4800000
+		return 4_800_000
 	case P1440:
-		return 9600000
+		return 9_600_000
 	case P4k:
-		return 16000000
+		return 16_000_000
 	case P8k:
-		return 28000000
+		return 28_000_000
 	case Original:
 		panic("Original quality must be handled specially")
 	}
@@ -65,21 +65,21 @@ func (v Quality) AverageBitrate() uint32 {
 func (v Quality) MaxBitrate() uint32 {
 	switch v {
 	case P240:
-		return 700000
+		return 700_000
 	case P360:
-		return 1400000
+		return 1_400_000
 	case P480:
-		return 2100000
+		return 2_100_000
 	case P720:
-		return 4000000
+		return 4_000_000
 	case P1080:
-		return 8000000
+		return 8_000_000
 	case P1440:
-		return 12000000
+		return 12_000_000
 	case P4k:
-		return 28000000
+		return 28_000_000
 	case P8k:
-		return 40000000
+		return 40_000_000
 	case Original:
 		panic("Original quality must be handled specially")
 	}

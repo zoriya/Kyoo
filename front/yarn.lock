@@ -8465,10 +8465,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hls.js@npm:^1.5.2":
-  version: 1.5.2
-  resolution: "hls.js@npm:1.5.2"
-  checksum: fb03209ca3b691e996c3d0b83dac2bcc63dba468f9c24b7414d1dc9b950c3ac0fdcfc2349d8b16d98a96c6fbe35c2836d5740a832d1844451187be4749469957
+"hls.js@npm:^1.5.6":
+  version: 1.5.6
+  resolution: "hls.js@npm:1.5.6"
+  checksum: 685564b223955267194ec1089179717e040354a92e0269dd72150598b422448cede1cb4882c0c63b8124f42d823e156b6433bbd3048443c4d4ff29cae3ec4efa
   languageName: node
   linkType: hard
 
@@ -14023,7 +14023,7 @@ __metadata:
     expo-image-picker: ~14.7.1
     expo-linear-gradient: ^12.7.1
     expo-modules-core: ^1.11.8
-    hls.js: ^1.5.2
+    hls.js: ^1.5.6
     i18next: ^23.7.20
     jassub: ^1.7.15
     jotai: ^2.6.3

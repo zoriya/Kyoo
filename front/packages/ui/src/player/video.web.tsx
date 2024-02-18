@@ -49,10 +49,8 @@ function uuidv4(): string {
 
 let client_id = typeof window === "undefined" ? "ssr" : uuidv4();
 
-const initHls = async (): Promise<Hls> => {
+const initHls = (): Hls => {
 	if (hls !== null) return hls;
-	const token = await getToken();
-
 	const loadPolicy: LoadPolicy = {
 		default: {
 			maxTimeToFirstByteMs: Infinity,
@@ -70,12 +68,17 @@ const initHls = async (): Promise<Hls> => {
 		},
 	};
 	hls = new Hls({
-		xhrSetup: (xhr) => {
+		xhrSetup: async (xhr) => {
+			const token = await getToken();
 			if (token) xhr.setRequestHeader("Authorization", `Bearer: ${token}`);
 			xhr.setRequestHeader("X-CLIENT-ID", client_id);
 		},
 		autoStartLoad: false,
+		startLevel: Infinity,
+		abrEwmaDefaultEstimate: 35_000_000,
+		abrEwmaDefaultEstimateMax: 50_000_000,
 		// debug: true,
+		lowLatencyMode: false,
 		fragLoadPolicy: {
 			default: {
 				maxTimeToFirstByteMs: Infinity,
@@ -97,9 +100,6 @@ const initHls = async (): Promise<Hls> => {
 		playlistLoadPolicy: loadPolicy,
 		manifestLoadPolicy: loadPolicy,
 		steeringManifestLoadPolicy: loadPolicy,
-	});
-	hls.on(Hls.Events.MANIFEST_PARSED, () => {
-		if (hls) hls.startLevel = hls.firstLevel;
 	});
 	return hls;
 };
@@ -149,31 +149,29 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 	useSubtitle(ref, subtitle, fonts);
 
 	useLayoutEffect(() => {
-		(async () => {
-			if (!ref?.current || !source.uri) return;
-			if (!hls || oldHls.current !== source.hls) {
-				// Reinit the hls player when we change track.
-				if (hls) hls.destroy();
-				hls = null;
-				hls = await initHls();
-				hls.loadSource(source.hls!);
-				oldHls.current = source.hls;
-			}
-			if (!source.uri.endsWith(".m3u8")) {
-				hls.detachMedia();
-				ref.current.src = source.uri;
-			} else {
-				hls.attachMedia(ref.current);
-				hls.startLoad(source.startPosition ? source.startPosition / 1000 : 0);
-				hls.on(Hls.Events.ERROR, (_, d) => {
-					if (!d.fatal || !hls?.media) return;
-					console.warn("Hls error", d);
-					onError?.call(null, {
-						error: { errorString: d.reason ?? d.error?.message ?? "Unknown hls error" },
-					});
+		if (!ref?.current || !source.uri) return;
+		if (!hls || oldHls.current !== source.hls) {
+			// Reinit the hls player when we change track.
+			if (hls) hls.destroy();
+			hls = null;
+			hls = initHls();
+			hls.loadSource(source.hls!);
+			oldHls.current = source.hls;
+		}
+		if (!source.uri.endsWith(".m3u8")) {
+			hls.detachMedia();
+			ref.current.src = source.uri;
+		} else {
+			hls.attachMedia(ref.current);
+			hls.startLoad(source.startPosition ? source.startPosition / 1000 : 0);
+			hls.on(Hls.Events.ERROR, (_, d) => {
+				if (!d.fatal || !hls?.media) return;
+				console.warn("Hls error", d);
+				onError?.call(null, {
+					error: { errorString: d.reason ?? d.error?.message ?? "Unknown hls error" },
 				});
-			}
-		})();
+			});
+		}
 		// onError changes should not restart the playback.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [source.uri, source.hls]);
