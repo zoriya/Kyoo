@@ -23,6 +23,10 @@ func GetPath(c echo.Context) (string, error) {
 	return key, nil
 }
 
+func GetRoute(c echo.Context) string {
+	return c.Request().Header.Get("X-Route")
+}
+
 func SanitizePath(path string) error {
 	if strings.Contains(path, "/") || strings.Contains(path, "..") {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid parameter. Can't contains path delimiters or ..")
