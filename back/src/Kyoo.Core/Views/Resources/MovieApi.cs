@@ -233,12 +233,13 @@ namespace Kyoo.Core.Api
 			await libraryManager.WatchStatus.DeleteMovieStatus(id, User.GetIdOrThrow());
 		}
 
-		protected override Task<string> GetPath(Identifier identifier)
+		protected override async Task<(string path, string route)> GetPath(Identifier identifier)
 		{
-			return identifier.Match(
+			string path = await identifier.Match(
 				async id => (await Repository.Get(id)).Path,
 				async slug => (await Repository.Get(slug)).Path
 			);
+			return (path, $"/movies/{identifier}");
 		}
 	}
 }

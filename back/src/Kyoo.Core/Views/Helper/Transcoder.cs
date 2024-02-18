@@ -32,13 +32,14 @@ public abstract class TranscoderApi<T>(IRepository<T> repository, IThumbnailsMan
 	: CrudThumbsApi<T>(repository, thumbs)
 	where T : class, IResource, IThumbnails, IQuery
 {
-	private Task _Proxy(string route, string path)
+	private Task _Proxy(string route, (string path, string route) info)
 	{
 		HttpProxyOptions proxyOptions = HttpProxyOptionsBuilder
 			.Instance.WithBeforeSend(
 				(ctx, req) =>
 				{
-					req.Headers.Add("X-Path", path);
+					req.Headers.Add("X-Path", info.path);
+					req.Headers.Add("X-Route", info.route);
 					return Task.CompletedTask;
 				}
 			)
@@ -55,7 +56,7 @@ public abstract class TranscoderApi<T>(IRepository<T> repository, IThumbnailsMan
 		return this.HttpProxyAsync($"http://transcoder:7666/{route}", proxyOptions);
 	}
 
-	protected abstract Task<string> GetPath(Identifier identifier);
+	protected abstract Task<(string path, string route)> GetPath(Identifier identifier);
 
 	/// <summary>
 	/// Direct stream
@@ -117,10 +118,52 @@ public abstract class TranscoderApi<T>(IRepository<T> repository, IThumbnailsMan
 		await _Proxy($"/audio/{audio}/{segment}", await GetPath(identifier));
 	}
 
+	/// <summary>
+	/// Get file info
+	/// </summary>
+	/// <remarks>
+	/// Identify metadata about a file.
+	/// </remarks>
+	/// <param name="identifier">The ID or slug of the <see cref="Episode"/>.</param>
+	/// <returns>The media infos of the file.</returns>
+	/// <response code="404">No episode with the given ID or slug could be found.</response>
 	[HttpGet("{identifier:id}/info")]
-	[PartialPermission(Kind.Play)]
+	[PartialPermission(Kind.Read)]
 	public async Task GetInfo(Identifier identifier)
 	{
 		await _Proxy("/info", await GetPath(identifier));
+	}
+
+	/// <summary>
+	/// Get thumbnail sprite
+	/// </summary>
+	/// <remarks>
+	/// Get a sprite file containing all the thumbnails of the show.
+	/// </remarks>
+	/// <param name="identifier">The ID or slug of the <see cref="Episode"/>.</param>
+	/// <returns>A sprite with an image for every X seconds of the video file.</returns>
+	/// <response code="404">No episode with the given ID or slug could be found.</response>
+	[HttpGet("{identifier:id}/thumbnails.png")]
+	[PartialPermission(Kind.Read)]
+	public async Task GetThumbnails(Identifier identifier)
+	{
+		await _Proxy("/thumbnails.png", await GetPath(identifier));
+	}
+
+	/// <summary>
+	/// Get thumbnail vtt
+	/// </summary>
+	/// <remarks>
+	/// Get a vtt file containing timing/position of thumbnails inside the sprite file.
+	/// https://developer.bitmovin.com/playback/docs/webvtt-based-thumbnails for more info.
+	/// </remarks>
+	/// <param name="identifier">The ID or slug of the <see cref="Episode"/>.</param>
+	/// <returns>A vtt file containing metadata about timing and x/y/width/height of the sprites of /thumbnails.png.</returns>
+	/// <response code="404">No episode with the given ID or slug could be found.</response>
+	[HttpGet("{identifier:id}/thumbnails.vtt")]
+	[PartialPermission(Kind.Read)]
+	public async Task GetThumbnailsVtt(Identifier identifier)
+	{
+		await _Proxy("/thumbnails.vtt", await GetPath(identifier));
 	}
 }

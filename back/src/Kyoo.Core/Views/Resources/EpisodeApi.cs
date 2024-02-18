@@ -187,12 +187,13 @@ namespace Kyoo.Core.Api
 			await libraryManager.WatchStatus.DeleteEpisodeStatus(id, User.GetIdOrThrow());
 		}
 
-		protected override async Task<string> GetPath(Identifier identifier)
+		protected override async Task<(string path, string route)> GetPath(Identifier identifier)
 		{
-			return await identifier.Match(
+			string path = await identifier.Match(
 				async id => (await Repository.Get(id)).Path,
 				async slug => (await Repository.Get(slug)).Path
 			);
+			return (path, $"/episodes/{identifier}");
 		}
 	}
 }

@@ -182,10 +182,10 @@ func (h *Handler) GetInfo(c echo.Context) error {
 	}
 	// Run extractors to have them in cache
 	h.extractor.RunExtractor(ret.Path, ret.Sha, &ret.Subtitles)
-	// go h.thumbnails.ExtractThumbnail(
-	// 	ret.Path,
-	// 	fmt.Sprintf("%s/%s/thumbnails.png", resource, slug),
-	// )
+	go h.thumbnails.ExtractThumbnail(
+		ret.Path,
+		fmt.Sprintf("%s/thumbnails.png", c.Request().Header.Get("X-Route")),
+	)
 	return c.JSON(http.StatusOK, ret)
 }
 
@@ -245,19 +245,16 @@ func (h *Handler) GetSubtitle(c echo.Context) error {
 //
 // Get a sprite file containing all the thumbnails of the show.
 //
-// Path: /:resource/:slug/thumbnails.png
+// Path: /thumbnails.png
 func (h *Handler) GetThumbnails(c echo.Context) error {
-	resource := c.Param("resource")
-	slug := c.Param("slug")
-
-	path, err := GetPath(resource, slug)
+	path, err := GetPath(c)
 	if err != nil {
 		return err
 	}
 
 	out, err := h.thumbnails.ExtractThumbnail(
 		path,
-		fmt.Sprintf("%s/%s/thumbnails.png", resource, slug),
+		fmt.Sprintf("%s/thumbnails.png", c.Request().Header.Get("X-Route")),
 	)
 	if err != nil {
 		return err
@@ -273,17 +270,14 @@ func (h *Handler) GetThumbnails(c echo.Context) error {
 //
 // Path: /:resource/:slug/thumbnails.vtt
 func (h *Handler) GetThumbnailsVtt(c echo.Context) error {
-	resource := c.Param("resource")
-	slug := c.Param("slug")
-
-	path, err := GetPath(resource, slug)
+	path, err := GetPath(c)
 	if err != nil {
 		return err
 	}
 
 	out, err := h.thumbnails.ExtractThumbnail(
 		path,
-		fmt.Sprintf("%s/%s/thumbnails.png", resource, slug),
+		fmt.Sprintf("%s/thumbnails.png", c.Request().Header.Get("X-Route")),
 	)
 	if err != nil {
 		return err
@@ -321,8 +315,8 @@ func main() {
 	e.GET("/:quality/:chunk", h.GetVideoSegment)
 	e.GET("/audio/:audio/:chunk", h.GetAudioSegment)
 	e.GET("/info", h.GetInfo)
-	e.GET("/:resource/:slug/thumbnails.png", h.GetThumbnails)
-	e.GET("/:resource/:slug/thumbnails.vtt", h.GetThumbnailsVtt)
+	e.GET("/thumbnails.png", h.GetThumbnails)
+	e.GET("/thumbnails.vtt", h.GetThumbnailsVtt)
 	e.GET("/:sha/attachment/:name", h.GetAttachment)
 	e.GET("/:sha/subtitle/:name", h.GetSubtitle)
 
