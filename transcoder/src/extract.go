@@ -43,6 +43,8 @@ func (e *Extractor) Extract(path string, subs *[]Subtitle) (<-chan struct{}, err
 		cmd := exec.Command(
 			"ffmpeg",
 			"-dump_attachment:t", "",
+			// override old attachments
+			"-y",
 			"-i", path,
 		)
 		cmd.Dir = attachment_path
