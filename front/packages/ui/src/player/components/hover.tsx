@@ -286,7 +286,10 @@ export const HoverTouch = ({ children, ...props }: { children: ReactNode }) => {
 			}}
 			onPress={(e) => {
 				e.preventDefault();
-				onAnyPress({ pointerType: isTouch ? "touch" : "mouse", x: e.nativeEvent.locationX ?? e.nativeEvent.pageX });
+				onAnyPress({
+					pointerType: isTouch ? "touch" : "mouse",
+					x: e.nativeEvent.locationX ?? e.nativeEvent.pageX,
+				});
 			}}
 			onLayout={(e) => {
 				playerWidth.current = e.nativeEvent.layout.width;
