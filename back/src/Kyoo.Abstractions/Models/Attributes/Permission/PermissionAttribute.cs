@@ -44,9 +44,14 @@ namespace Kyoo.Abstractions.Models.Permissions
 		Create,
 
 		/// <summary>
-		/// Allow the user to delete this kind od data.
+		/// Allow the user to delete this kind of data.
 		/// </summary>
-		Delete
+		Delete,
+
+		/// <summary>
+		/// Allow the user to play this file.
+		/// </summary>
+		Play,
 	}
 
 	/// <summary>
