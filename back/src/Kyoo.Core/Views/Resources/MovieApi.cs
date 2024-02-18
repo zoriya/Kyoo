@@ -40,26 +40,9 @@ namespace Kyoo.Core.Api
 	[ApiController]
 	[PartialPermission(nameof(Show))]
 	[ApiDefinition("Shows", Group = ResourcesGroup)]
-	public class MovieApi : CrudThumbsApi<Movie>
+	public class MovieApi(ILibraryManager libraryManager, IThumbnailsManager thumbs)
+		: TranscoderApi<Movie>(libraryManager.Movies, thumbs)
 	{
-		/// <summary>
-		/// The library manager used to modify or retrieve information in the data store.
-		/// </summary>
-		private readonly ILibraryManager _libraryManager;
-
-		/// <summary>
-		/// Create a new <see cref="ShowApi"/>.
-		/// </summary>
-		/// <param name="libraryManager">
-		/// The library manager used to modify or retrieve information about the data store.
-		/// </param>
-		/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
-		public MovieApi(ILibraryManager libraryManager, IThumbnailsManager thumbs)
-			: base(libraryManager.Movies, thumbs)
-		{
-			_libraryManager = libraryManager;
-		}
-
 		// /// <summary>
 		// /// Get staff
 		// /// </summary>
@@ -113,7 +96,7 @@ namespace Kyoo.Core.Api
 			[FromQuery] Include<Studio> fields
 		)
 		{
-			return await _libraryManager.Studios.Get(
+			return await libraryManager.Studios.Get(
 				identifier.IsContainedIn<Studio, Movie>(x => x.Movies!),
 				fields
 			);
@@ -147,7 +130,7 @@ namespace Kyoo.Core.Api
 			[FromQuery] Include<Collection> fields
 		)
 		{
-			ICollection<Collection> resources = await _libraryManager.Collections.GetAll(
+			ICollection<Collection> resources = await libraryManager.Collections.GetAll(
 				Filter.And(filter, identifier.IsContainedIn<Collection, Movie>(x => x.Movies)),
 				sortBy,
 				fields,
@@ -156,7 +139,7 @@ namespace Kyoo.Core.Api
 
 			if (
 				!resources.Any()
-				&& await _libraryManager.Movies.GetOrDefault(identifier.IsSame<Movie>()) == null
+				&& await libraryManager.Movies.GetOrDefault(identifier.IsSame<Movie>()) == null
 			)
 				return NotFound();
 			return Page(resources, pagination.Limit);
@@ -181,9 +164,9 @@ namespace Kyoo.Core.Api
 		{
 			Guid id = await identifier.Match(
 				id => Task.FromResult(id),
-				async slug => (await _libraryManager.Movies.Get(slug)).Id
+				async slug => (await libraryManager.Movies.Get(slug)).Id
 			);
-			return await _libraryManager.WatchStatus.GetMovieStatus(id, User.GetIdOrThrow());
+			return await libraryManager.WatchStatus.GetMovieStatus(id, User.GetIdOrThrow());
 		}
 
 		/// <summary>
@@ -216,9 +199,9 @@ namespace Kyoo.Core.Api
 		{
 			Guid id = await identifier.Match(
 				id => Task.FromResult(id),
-				async slug => (await _libraryManager.Movies.Get(slug)).Id
+				async slug => (await libraryManager.Movies.Get(slug)).Id
 			);
-			return await _libraryManager.WatchStatus.SetMovieStatus(
+			return await libraryManager.WatchStatus.SetMovieStatus(
 				id,
 				User.GetIdOrThrow(),
 				status,
@@ -245,9 +228,17 @@ namespace Kyoo.Core.Api
 		{
 			Guid id = await identifier.Match(
 				id => Task.FromResult(id),
-				async slug => (await _libraryManager.Movies.Get(slug)).Id
+				async slug => (await libraryManager.Movies.Get(slug)).Id
 			);
-			await _libraryManager.WatchStatus.DeleteMovieStatus(id, User.GetIdOrThrow());
+			await libraryManager.WatchStatus.DeleteMovieStatus(id, User.GetIdOrThrow());
+		}
+
+		protected override Task<string> GetPath(Identifier identifier)
+		{
+			return identifier.Match(
+				async id => (await Repository.Get(id)).Path,
+				async slug => (await Repository.Get(slug)).Path
+			);
 		}
 	}
 }
