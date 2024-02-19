@@ -19,16 +19,16 @@ type FileStream struct {
 	Keyframes   []float64
 	CanTransmux bool
 	Info        *MediaInfo
-	videos     CMap[Quality, *VideoStream]
+	videos      CMap[Quality, *VideoStream]
 	audios      CMap[int32, *AudioStream]
 }
 
 func NewFileStream(path string, sha string, route string) *FileStream {
 	ret := &FileStream{
-		Path:    path,
-		Out:     fmt.Sprintf("%s/%s", Settings.Outpath, sha),
+		Path:   path,
+		Out:    fmt.Sprintf("%s/%s", Settings.Outpath, sha),
 		videos: NewCMap[Quality, *VideoStream](),
-		audios:  NewCMap[int32, *AudioStream](),
+		audios: NewCMap[int32, *AudioStream](),
 	}
 
 	ret.ready.Add(1)

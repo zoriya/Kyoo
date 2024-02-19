@@ -111,7 +111,6 @@ public abstract class TranscoderApi<T>(IRepository<T> repository, IThumbnailsMan
 		await _Proxy($"/{quality}/{segment}", await GetPath(identifier));
 	}
 
-
 	[HttpGet("{identifier:id}/audio/{audio}/index.m3u8")]
 	[PartialPermission(Kind.Play)]
 	public async Task GetAudioIndex(Identifier identifier, string audio)

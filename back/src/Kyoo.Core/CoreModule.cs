@@ -110,7 +110,8 @@ namespace Kyoo.Core
 					options.SuppressMapClientErrors = true;
 					options.InvalidModelStateResponseFactory = ctx =>
 					{
-						string[] errors = ctx.ModelState.SelectMany(x => x.Value!.Errors)
+						string[] errors = ctx
+							.ModelState.SelectMany(x => x.Value!.Errors)
 							.Select(x => x.ErrorMessage)
 							.ToArray();
 						return new BadRequestObjectResult(new RequestError(errors));

@@ -68,7 +68,8 @@ public class WatchStatusRepository : IWatchStatusRepository
 			DatabaseContext db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
 			WatchStatusRepository repo =
 				scope.ServiceProvider.GetRequiredService<WatchStatusRepository>();
-			List<Guid> users = await db.ShowWatchStatus.IgnoreQueryFilters()
+			List<Guid> users = await db
+				.ShowWatchStatus.IgnoreQueryFilters()
 				.Where(x => x.ShowId == ep.ShowId && x.Status == WatchStatus.Completed)
 				.Select(x => x.UserId)
 				.ToListAsync();

@@ -153,11 +153,7 @@ namespace Kyoo.Abstractions.Models
 		/// Links to watch this movie.
 		/// </summary>
 		public VideoLinks Links =>
-			new()
-			{
-				Direct = $"/movie/{Slug}/direct",
-				Hls = $"/movie/{Slug}/master.m3u8",
-			};
+			new() { Direct = $"/movie/{Slug}/direct", Hls = $"/movie/{Slug}/master.m3u8", };
 
 		[SerializeIgnore]
 		public ICollection<MovieWatchStatus>? Watched { get; set; }

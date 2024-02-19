@@ -181,7 +181,7 @@ func GetInfo(path string, sha string, route string) (*MediaInfo, error) {
 	ret, _ := infos.GetOrCreate(sha, func() *MediaInfo {
 		readyChan := make(chan struct{})
 		mi := &MediaInfo{
-			Sha: sha,
+			Sha:   sha,
 			ready: readyChan,
 		}
 		go func() {
