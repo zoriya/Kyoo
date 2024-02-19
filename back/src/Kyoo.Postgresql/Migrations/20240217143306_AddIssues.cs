@@ -46,7 +46,9 @@ namespace Kyoo.Postgresql.Migrations
 			);
 
 			// language=PostgreSQL
-			migrationBuilder.Sql("update users set permissions = ARRAY_APPEND(permissions, 'overall.play');");
+			migrationBuilder.Sql(
+				"update users set permissions = ARRAY_APPEND(permissions, 'overall.play');"
+			);
 		}
 
 		/// <inheritdoc />

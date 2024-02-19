@@ -269,11 +269,7 @@ namespace Kyoo.Abstractions.Models
 		/// Links to watch this episode.
 		/// </summary>
 		public VideoLinks Links =>
-			new()
-			{
-				Direct = $"/episode/{Slug}/direct",
-				Hls = $"/episode/{Slug}/master.m3u8",
-			};
+			new() { Direct = $"/episode/{Slug}/direct", Hls = $"/episode/{Slug}/master.m3u8", };
 
 		/// <summary>
 		/// Get the slug of an episode.
