@@ -122,6 +122,6 @@ export const MediaInfoPopup = ({
 };
 
 MediaInfoPopup.query = (mediaType: string, mediaSlug: string): QueryIdentifier<WatchInfo> => ({
-	path: ["video", mediaType, mediaSlug, "info"],
+	path: [mediaType, mediaSlug, "info"],
 	parser: WatchInfoP,
 });

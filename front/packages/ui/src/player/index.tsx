@@ -193,7 +193,7 @@ Player.query = (type: "episode" | "movie", slug: string): QueryIdentifier<Item> 
 			};
 
 Player.infoQuery = (type: "episode" | "movie", slug: string): QueryIdentifier<WatchInfo> => ({
-	path: ["video", type, slug, "info"],
+	path: [type, slug, "info"],
 	parser: WatchInfoP,
 });
 

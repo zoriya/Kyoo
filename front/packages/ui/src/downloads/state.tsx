@@ -185,7 +185,7 @@ const download = (
 	const task = RNBackgroundDownloader.download({
 		id: id,
 		// TODO: support variant qualities
-		url: `${account.apiUrl}/video/${type}/${slug}/direct`,
+		url: `${account.apiUrl}/${type}/${slug}/direct`,
 		destination: path,
 		headers: {
 			Authorization: account.token.access_token,
