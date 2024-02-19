@@ -411,7 +411,7 @@ func (ts *Stream) Kill() {
 
 // Stream assume to be locked
 func (ts *Stream) KillHead(encoder_id int) {
-	if ts.heads[encoder_id] == DeletedHead {
+	if ts.heads[encoder_id] == DeletedHead || ts.heads[encoder_id].command == nil {
 		return
 	}
 	ts.heads[encoder_id].command.Process.Signal(os.Interrupt)
