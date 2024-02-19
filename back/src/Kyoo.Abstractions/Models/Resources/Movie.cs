@@ -155,8 +155,8 @@ namespace Kyoo.Abstractions.Models
 		public VideoLinks Links =>
 			new()
 			{
-				Direct = $"/video/movie/{Slug}/direct",
-				Hls = $"/video/movie/{Slug}/master.m3u8",
+				Direct = $"/movie/{Slug}/direct",
+				Hls = $"/movie/{Slug}/master.m3u8",
 			};
 
 		[SerializeIgnore]
