@@ -19,11 +19,13 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AspNetCore.Proxy;
+using AspNetCore.Proxy.Options;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
-using Kyoo.Core.Controllers;
 using Kyoo.Utils;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Core.Api
@@ -33,8 +35,32 @@ namespace Kyoo.Core.Api
 	/// </summary>
 	[ApiController]
 	[Obsolete("Use /episode/id/master.m3u8 or routes like that")]
-	public class ProxyApi(ILibraryManager library, Transcoder transcoder) : Controller
+	public class ProxyApi(ILibraryManager library) : Controller
 	{
+		private Task _Proxy(string route, (string path, string route) info)
+		{
+			HttpProxyOptions proxyOptions = HttpProxyOptionsBuilder
+				.Instance.WithBeforeSend(
+					(ctx, req) =>
+					{
+						req.Headers.Add("X-Path", info.path);
+						req.Headers.Add("X-Route", info.route);
+						return Task.CompletedTask;
+					}
+				)
+				.WithHandleFailure(
+					async (context, exception) =>
+					{
+						context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+						await context.Response.WriteAsJsonAsync(
+							new RequestError("Service unavailable")
+						);
+					}
+				)
+				.Build();
+			return this.HttpProxyAsync($"http://transcoder:7666/{route}", proxyOptions);
+		}
+
 		/// <summary>
 		/// Transcoder proxy
 		/// </summary>
@@ -64,7 +90,7 @@ namespace Kyoo.Core.Api
 						async slug => (await library.Episodes.Get(slug)).Path
 					)
 			);
-			await transcoder.Proxy(rest + query.ToQueryString(), path);
+			await _Proxy(rest + query.ToQueryString(), (path, $"{type}/{id}"));
 		}
 	}
 }
