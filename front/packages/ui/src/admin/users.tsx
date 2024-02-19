@@ -76,7 +76,7 @@ export const UserGrid = ({
 							label={t("admin.users.regularUser")}
 							onSelect={() =>
 								mutateAsync({
-									permissions: ["overall.read"],
+									permissions: ["overall.read", "overall.play"],
 								})
 							}
 						/>
@@ -90,6 +90,7 @@ export const UserGrid = ({
 										"overall.write",
 										"overall.create",
 										"overall.delete",
+										"overall.play",
 										"admin.read",
 										"admin.write",
 										"admin.create",
