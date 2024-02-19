@@ -94,7 +94,7 @@ export const useScrubber = (url: string) => {
 };
 
 useScrubber.query = (url: string): QueryIdentifier<string> => ({
-	path: ["video", url, "thumbnails.vtt"],
+	path: [url, "thumbnails.vtt"],
 	parser: null!,
 	options: {
 		plainText: true,

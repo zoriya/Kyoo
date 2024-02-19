@@ -41,7 +41,7 @@ export const useDownloader = () => {
 		// TODO: This methods does not work with auth.
 		const a = document.createElement("a");
 		a.style.display = "none";
-		a.href = `${kyooApiUrl}/video/${type}/${slug}/direct`;
+		a.href = `${kyooApiUrl}/${type}/${slug}/direct`;
 		a.download = `${slug}.${info.extension}`;
 		document.body.appendChild(a);
 		a.click();
