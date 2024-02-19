@@ -20,71 +20,47 @@ var default_interval = 10
 // Setting this too high allows really long processing times.
 var max_numcaps = 150
 
-type ThumbnailsCreator struct {
-	created map[string]string
-	running map[string]chan struct{}
-	lock    sync.Mutex
+type Thumbnail struct {
+	ready sync.WaitGroup
+	path  string
 }
 
-func NewThumbnailsCreator() *ThumbnailsCreator {
-	return &ThumbnailsCreator{
-		created: make(map[string]string),
-		running: make(map[string]chan struct{}),
-	}
+var thumbnails = NewCMap[string, *Thumbnail]()
+
+func ExtractThumbnail(path string, route string, sha *string) (string, error) {
+	ret, _ := thumbnails.GetOrCreate(path, func() *Thumbnail {
+		if sha == nil {
+			nsha, err := GetHash(path)
+			if err != nil {
+				return nil
+			}
+			sha = &nsha
+		}
+		ret := &Thumbnail{
+			path: fmt.Sprintf("%s/%s", Settings.Metadata, sha),
+		}
+		ret.ready.Add(1)
+		go extractThumbnail(path, ret.path, fmt.Sprintf("%s/thumbnails.png", route))
+		return ret
+	})
+	ret.ready.Wait()
+	return ret.path, nil
 }
 
-func (t *ThumbnailsCreator) ExtractThumbnail(path string, name string) (string, error) {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-
-	out, ok := t.created[path]
-	if ok {
-		return out, nil
-	}
-
-	wait, ok := t.running[path]
-	if ok {
-		t.lock.Unlock()
-		<-wait
-		t.lock.Lock()
-		out = t.created[path]
-		return out, nil
-	}
-	wait = make(chan struct{})
-	t.running[path] = wait
-
-	t.lock.Unlock()
-
-	out, err := extractThumbnail(path, name)
-	t.lock.Lock()
-	// this will be unlocked by the defer at the top of the function.
-
-	delete(t.running, path)
-	if err == nil {
-		t.created[path] = out
-	}
-	return out, err
-}
-
-func extractThumbnail(path string, name string) (string, error) {
+func extractThumbnail(path string, out string, name string) error {
 	defer printExecTime("extracting thumbnails for %s", path)()
-	sha, err := GetHash(path)
-	if err != nil {
-		return "", err
-	}
-	out := fmt.Sprintf("%s/%s", Settings.Metadata, sha)
 	os.MkdirAll(out, 0o755)
 	sprite_path := fmt.Sprintf("%s/sprite.png", out)
 	vtt_path := fmt.Sprintf("%s/sprite.vtt", out)
 
 	if _, err := os.Stat(sprite_path); err == nil {
-		return out, nil
+		return nil
 	}
 
 	gen, err := screengen.NewGenerator(path)
 	if err != nil {
 		log.Printf("Error reading video file: %v", err)
-		return "", err
+		return err
 	}
 	defer gen.Close()
 
@@ -115,7 +91,7 @@ func extractThumbnail(path string, name string) (string, error) {
 		img, err := gen.ImageWxH(int64(ts*1000), width, height)
 		if err != nil {
 			log.Printf("Could not generate screenshot %s", err)
-			return "", err
+			return err
 		}
 
 		x := (i % columns) * width
@@ -138,13 +114,13 @@ func extractThumbnail(path string, name string) (string, error) {
 
 	err = os.WriteFile(vtt_path, []byte(vtt), 0o644)
 	if err != nil {
-		return "", err
+		return err
 	}
 	err = imaging.Save(sprite, sprite_path)
 	if err != nil {
-		return "", err
+		return err
 	}
-	return out, nil
+	return nil
 }
 
 func tsToVttTime(ts int) string {

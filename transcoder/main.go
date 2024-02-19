@@ -187,9 +187,10 @@ func (h *Handler) GetInfo(c echo.Context) error {
 	}
 	// Run extractors to have them in cache
 	src.Extract(ret.Path, sha, route)
-	go h.thumbnails.ExtractThumbnail(
+	go src.ExtractThumbnail(
 		ret.Path,
-		fmt.Sprintf("%s/thumbnails.png", route),
+		route,
+		&sha,
 	)
 	return c.JSON(http.StatusOK, ret)
 }
@@ -265,9 +266,10 @@ func (h *Handler) GetThumbnails(c echo.Context) error {
 		return err
 	}
 
-	out, err := h.thumbnails.ExtractThumbnail(
+	out, err := src.ExtractThumbnail(
 		path,
-		fmt.Sprintf("%s/thumbnails.png", GetRoute(c)),
+		GetRoute(c),
+		nil,
 	)
 	if err != nil {
 		return err
@@ -288,9 +290,10 @@ func (h *Handler) GetThumbnailsVtt(c echo.Context) error {
 		return err
 	}
 
-	out, err := h.thumbnails.ExtractThumbnail(
+	out, err := src.ExtractThumbnail(
 		path,
-		fmt.Sprintf("%s/thumbnails.png", GetRoute(c)),
+		GetRoute(c),
+		nil,
 	)
 	if err != nil {
 		return err
@@ -301,7 +304,6 @@ func (h *Handler) GetThumbnailsVtt(c echo.Context) error {
 
 type Handler struct {
 	transcoder *src.Transcoder
-	thumbnails *src.ThumbnailsCreator
 }
 
 func main() {
@@ -316,7 +318,6 @@ func main() {
 	}
 	h := Handler{
 		transcoder: transcoder,
-		thumbnails: src.NewThumbnailsCreator(),
 	}
 
 	e.GET("/direct", DirectStream)
