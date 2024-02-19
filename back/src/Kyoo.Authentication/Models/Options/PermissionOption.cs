@@ -40,6 +40,7 @@ namespace Kyoo.Authentication.Models
 			get
 			{
 				return Enum.GetNames<Group>()
+					.Where(x => x != nameof(Group.None))
 					.SelectMany(group =>
 						Enum.GetNames<Kind>().Select(kind => $"{group}.{kind}".ToLowerInvariant())
 					)
@@ -50,12 +51,12 @@ namespace Kyoo.Authentication.Models
 		/// <summary>
 		/// The default permissions that will be given to a non-connected user.
 		/// </summary>
-		public string[] Default { get; set; } = { "overall.read" };
+		public string[] Default { get; set; } = { "overall.read", "overall.play" };
 
 		/// <summary>
 		/// Permissions applied to a new user.
 		/// </summary>
-		public string[] NewUser { get; set; } = { "overall.read" };
+		public string[] NewUser { get; set; } = { "overall.read", "overall.play" };
 
 		/// <summary>
 		/// The list of available ApiKeys.
