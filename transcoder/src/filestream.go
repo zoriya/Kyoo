@@ -12,6 +12,8 @@ import (
 )
 
 type FileStream struct {
+	ready       sync.WaitGroup
+	err         error
 	Path        string
 	Out         string
 	Keyframes   []float64
@@ -23,37 +25,36 @@ type FileStream struct {
 	alock       sync.Mutex
 }
 
-func NewFileStream(path string) (*FileStream, error) {
-	info_chan := make(chan struct {
-		info *MediaInfo
-		err  error
-	})
+func NewFileStream(path string, sha string, route string) *FileStream {
+	ret := &FileStream{
+		Path:    path,
+		Out:     fmt.Sprintf("%s/%s", Settings.Outpath, sha),
+		streams: make(map[Quality]*VideoStream),
+		audios:  make(map[int32]*AudioStream),
+	}
+
+	ret.ready.Add(1)
 	go func() {
-		ret, err := GetInfo(path)
-		info_chan <- struct {
-			info *MediaInfo
-			err  error
-		}{ret, err}
+		defer ret.ready.Done()
+		info, err := GetInfo(path, sha, route)
+		ret.Info = info
+		if err != nil {
+			ret.err = err
+		}
 	}()
 
-	keyframes, can_transmux, err := GetKeyframes(path)
-	if err != nil {
-		return nil, err
-	}
-	info := <-info_chan
-	if info.err != nil {
-		return nil, err
-	}
+	ret.ready.Add(1)
+	go func() {
+		defer ret.ready.Done()
+		keyframes, can_transmux, err := GetKeyframes(path)
+		ret.Keyframes = keyframes
+		ret.CanTransmux = can_transmux
+		if err != nil {
+			ret.err = err
+		}
+	}()
 
-	return &FileStream{
-		Path:        path,
-		Out:         fmt.Sprintf("%s/%s", Settings.Outpath, info.info.Sha),
-		Keyframes:   keyframes,
-		CanTransmux: can_transmux,
-		Info:        info.info,
-		streams:     make(map[Quality]*VideoStream),
-		audios:      make(map[int32]*AudioStream),
-	}, nil
+	return ret
 }
 
 func GetKeyframes(path string) ([]float64, bool, error) {
