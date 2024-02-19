@@ -61,3 +61,12 @@ func (m *CMap[K, V]) Remove(key K) {
 
 	delete(m.data, key)
 }
+
+func (m *CMap[K, V]) GetAndRemove(key K) (V, bool) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	val, ok := m.data[key]
+	delete(m.data, key)
+	return val, ok
+}

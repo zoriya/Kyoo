@@ -19,18 +19,16 @@ type FileStream struct {
 	Keyframes   []float64
 	CanTransmux bool
 	Info        *MediaInfo
-	streams     map[Quality]*VideoStream
-	vlock       sync.Mutex
-	audios      map[int32]*AudioStream
-	alock       sync.Mutex
+	videos     CMap[Quality, *VideoStream]
+	audios      CMap[int32, *AudioStream]
 }
 
 func NewFileStream(path string, sha string, route string) *FileStream {
 	ret := &FileStream{
 		Path:    path,
 		Out:     fmt.Sprintf("%s/%s", Settings.Outpath, sha),
-		streams: make(map[Quality]*VideoStream),
-		audios:  make(map[int32]*AudioStream),
+		videos: NewCMap[Quality, *VideoStream](),
+		audios:  NewCMap[int32, *AudioStream](),
 	}
 
 	ret.ready.Add(1)
@@ -82,7 +80,7 @@ func GetKeyframes(path string) ([]float64, bool, error) {
 
 	scanner := bufio.NewScanner(stdout)
 
-	ret := make([]float64, 1, 300)
+	ret := make([]float64, 1, 1000)
 	ret[0] = 0
 	last := 0.
 	can_transmux := true
@@ -135,24 +133,27 @@ func GetKeyframes(path string) ([]float64, bool, error) {
 	return ret, can_transmux, nil
 }
 
-func (fs *FileStream) Destroy() {
-	fs.vlock.Lock()
-	defer fs.vlock.Unlock()
-	fs.alock.Lock()
-	defer fs.alock.Unlock()
+func (fs *FileStream) Kill() {
+	fs.videos.lock.Lock()
+	defer fs.videos.lock.Unlock()
+	fs.audios.lock.Lock()
+	defer fs.audios.lock.Unlock()
 
-	for _, s := range fs.streams {
+	for _, s := range fs.videos.data {
 		s.Kill()
 	}
-	for _, s := range fs.audios {
+	for _, s := range fs.audios.data {
 		s.Kill()
 	}
+}
+
+func (fs *FileStream) Destroy() {
+	fs.Kill()
 	_ = os.RemoveAll(fs.Out)
 }
 
 func (fs *FileStream) GetMaster() string {
 	master := "#EXTM3U\n"
-	// TODO: also check if the codec is valid in a hls before putting transmux
 	if fs.Info.Video != nil {
 		var transmux_quality Quality
 		for _, quality := range Qualities {
@@ -161,6 +162,7 @@ func (fs *FileStream) GetMaster() string {
 				break
 			}
 		}
+		// TODO: also check if the codec is valid in a hls before putting transmux
 		if fs.CanTransmux {
 			bitrate := float64(fs.Info.Video.Bitrate)
 			master += "#EXT-X-STREAM-INF:"
@@ -207,15 +209,10 @@ func (fs *FileStream) GetMaster() string {
 }
 
 func (fs *FileStream) getVideoStream(quality Quality) *VideoStream {
-	fs.vlock.Lock()
-	defer fs.vlock.Unlock()
-	stream, ok := fs.streams[quality]
-
-	if ok {
-		return stream
-	}
-	fs.streams[quality] = NewVideoStream(fs, quality)
-	return fs.streams[quality]
+	stream, _ := fs.videos.GetOrCreate(quality, func() *VideoStream {
+		return NewVideoStream(fs, quality)
+	})
+	return stream
 }
 
 func (fs *FileStream) GetVideoIndex(quality Quality) (string, error) {
@@ -229,15 +226,10 @@ func (fs *FileStream) GetVideoSegment(quality Quality, segment int32) (string, e
 }
 
 func (fs *FileStream) getAudioStream(audio int32) *AudioStream {
-	fs.alock.Lock()
-	defer fs.alock.Unlock()
-	stream, ok := fs.audios[audio]
-
-	if ok {
-		return stream
-	}
-	fs.audios[audio] = NewAudioStream(fs, audio)
-	return fs.audios[audio]
+	stream, _ := fs.audios.GetOrCreate(audio, func() *AudioStream {
+		return NewAudioStream(fs, audio)
+	})
+	return stream
 }
 
 func (fs *FileStream) GetAudioIndex(audio int32) (string, error) {

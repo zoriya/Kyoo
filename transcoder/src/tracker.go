@@ -14,15 +14,21 @@ type ClientInfo struct {
 }
 
 type Tracker struct {
-	clients    map[string]ClientInfo
-	visitDate  map[string]time.Time
-	transcoder *Transcoder
+	// key: client_id
+	clients map[string]ClientInfo
+	// key: client_id
+	visitDate map[string]time.Time
+	// key: path
+	lastUsage     map[string]time.Time
+	transcoder    *Transcoder
+	deletedStream chan string
 }
 
 func NewTracker(t *Transcoder) *Tracker {
 	ret := &Tracker{
 		clients:    make(map[string]ClientInfo),
 		visitDate:  make(map[string]time.Time),
+		lastUsage:  make(map[string]time.Time),
 		transcoder: t,
 	}
 	go ret.start()
@@ -62,6 +68,7 @@ func (t *Tracker) start() {
 
 			t.clients[info.client] = info
 			t.visitDate[info.client] = time.Now()
+			t.lastUsage[info.path] = time.Now()
 
 			// now that the new info is stored and fixed, kill old streams
 			if ok && old.path == info.path {
@@ -99,6 +106,8 @@ func (t *Tracker) start() {
 				delete(t.clients, client)
 				delete(t.visitDate, client)
 			}
+		case path := <-t.deletedStream:
+			t.DestroyStreamIfOld(path)
 		}
 	}
 }
@@ -110,11 +119,28 @@ func (t *Tracker) KillStreamIfDead(path string) bool {
 		}
 	}
 	log.Printf("Nobody is watching %s. Killing it", path)
-	t.transcoder.mutex.Lock()
-	defer t.transcoder.mutex.Unlock()
-	t.transcoder.streams[path].Destroy()
-	delete(t.transcoder.streams, path)
+
+	stream, ok := t.transcoder.streams.Get(path)
+	if !ok {
+		return false
+	}
+	stream.Kill()
+	go func() {
+		time.Sleep(4 * time.Hour)
+		t.deletedStream <- path
+	}()
 	return true
+}
+
+func (t *Tracker) DestroyStreamIfOld(path string) {
+	if time.Since(t.lastUsage[path]) < 4*time.Hour {
+		return
+	}
+	stream, ok := t.transcoder.streams.GetAndRemove(path)
+	if !ok {
+		return
+	}
+	stream.Destroy()
 }
 
 func (t *Tracker) KillAudioIfDead(path string, audio int32) bool {
@@ -124,13 +150,16 @@ func (t *Tracker) KillAudioIfDead(path string, audio int32) bool {
 		}
 	}
 	log.Printf("Nobody is listening audio %d of %s. Killing it", audio, path)
-	t.transcoder.mutex.Lock()
-	stream := t.transcoder.streams[path]
-	t.transcoder.mutex.Unlock()
 
-	stream.alock.Lock()
-	defer stream.alock.Unlock()
-	stream.audios[audio].Kill()
+	stream, ok := t.transcoder.streams.Get(path)
+	if !ok {
+		return false
+	}
+	astream, aok := stream.audios.Get(audio)
+	if !aok {
+		return false
+	}
+	astream.Kill()
 	return true
 }
 
@@ -141,34 +170,36 @@ func (t *Tracker) KillQualityIfDead(path string, quality Quality) bool {
 		}
 	}
 	log.Printf("Nobody is watching quality %s of %s. Killing it", quality, path)
-	t.transcoder.mutex.Lock()
-	stream := t.transcoder.streams[path]
-	t.transcoder.mutex.Unlock()
 
-	stream.vlock.Lock()
-	defer stream.vlock.Unlock()
-	stream.streams[quality].Kill()
+	stream, ok := t.transcoder.streams.Get(path)
+	if !ok {
+		return false
+	}
+	vstream, vok := stream.videos.Get(quality)
+	if !vok {
+		return false
+	}
+	vstream.Kill()
 	return true
 }
 
 func (t *Tracker) KillOrphanedHeads(path string, quality *Quality, audio int32) {
-	t.transcoder.mutex.Lock()
-	stream := t.transcoder.streams[path]
-	t.transcoder.mutex.Unlock()
+	stream, ok := t.transcoder.streams.Get(path)
+	if !ok {
+		return
+	}
 
 	if quality != nil {
-		stream.vlock.Lock()
-		vstream := stream.streams[*quality]
-		stream.vlock.Unlock()
-
-		t.killOrphanedeheads(&vstream.Stream)
+		vstream, vok := stream.videos.Get(*quality)
+		if vok {
+			t.killOrphanedeheads(&vstream.Stream)
+		}
 	}
 	if audio != -1 {
-		stream.alock.Lock()
-		astream := stream.audios[audio]
-		stream.alock.Unlock()
-
-		t.killOrphanedeheads(&astream.Stream)
+		astream, aok := stream.audios.Get(audio)
+		if aok {
+			t.killOrphanedeheads(&astream.Stream)
+		}
 	}
 }
 
