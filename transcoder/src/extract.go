@@ -2,6 +2,7 @@ package src
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 )
@@ -16,6 +17,7 @@ func Extract(path string, sha string, route string) (<-chan struct{}, error) {
 	}
 
 	go func() {
+		defer printExecTime("Starting extraction of %s", path)()
 		info, err := GetInfo(path, sha, route)
 		if err != nil {
 			extracted.Remove(sha)
@@ -27,7 +29,6 @@ func Extract(path string, sha string, route string) (<-chan struct{}, error) {
 		os.MkdirAll(attachment_path, 0o644)
 		os.MkdirAll(subs_path, 0o755)
 
-		fmt.Printf("Extract subs and fonts for %s", path)
 		cmd := exec.Command(
 			"ffmpeg",
 			"-dump_attachment:t", "",
@@ -47,7 +48,7 @@ func Extract(path string, sha string, route string) (<-chan struct{}, error) {
 				)
 			}
 		}
-		fmt.Printf("Starting extraction with the command: %s", cmd)
+		log.Printf("Starting extraction with the command: %s", cmd)
 		cmd.Stdout = nil
 		err = cmd.Run()
 		if err != nil {
