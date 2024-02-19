@@ -506,7 +506,7 @@ class TheMovieDatabase(Provider):
 					params={
 						"language": lng,
 					},
-					 not_found_fail=f"Could not find episode {episode_nbr} of season {season} of serie {name} (absolute: {absolute})",
+					not_found_fail=f"Could not find episode {episode_nbr} of season {season} of serie {name} (absolute: {absolute})",
 				)
 			logging.debug("TMDb responded: %s", episode)
 
