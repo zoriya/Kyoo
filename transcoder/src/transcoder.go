@@ -1,19 +1,13 @@
 package src
 
 import (
-	"errors"
-	"log"
 	"os"
 	"path"
-	"sync"
 )
 
 type Transcoder struct {
 	// All file streams currently running, index is file path
-	streams map[string]*FileStream
-	// Streams that are staring up
-	preparing  map[string]chan *FileStream
-	mutex      sync.Mutex
+	streams    CMap[string, *FileStream]
 	clientChan chan ClientInfo
 	tracker    *Tracker
 }
@@ -32,54 +26,32 @@ func NewTranscoder() (*Transcoder, error) {
 	}
 
 	ret := &Transcoder{
-		streams:    make(map[string]*FileStream),
-		preparing:  make(map[string]chan *FileStream),
+		streams:    NewCMap[string, *FileStream](),
 		clientChan: make(chan ClientInfo, 10),
 	}
 	ret.tracker = NewTracker(ret)
 	return ret, nil
 }
 
-func (t *Transcoder) getFileStream(path string) (*FileStream, error) {
-	t.mutex.Lock()
-	stream, ok := t.streams[path]
-	channel, preparing := t.preparing[path]
-	if !preparing && !ok {
-		channel = make(chan *FileStream, 1)
-		t.preparing[path] = channel
-	}
-	t.mutex.Unlock()
-
-	if preparing {
-		stream = <-channel
-		if stream == nil {
-			return nil, errors.New("could not transcode file. Try again later")
-		}
-	} else if !ok {
-		var err error
-		stream, err = NewFileStream(path)
-		log.Printf("Stream created for %s", path)
+func (t *Transcoder) getFileStream(path string, route string) (*FileStream, error) {
+	var err error
+	ret, _ := t.streams.GetOrCreate(path, func() *FileStream {
+		sha, err := GetHash(path)
 		if err != nil {
-			t.mutex.Lock()
-			delete(t.preparing, path)
-			t.mutex.Unlock()
-			channel <- nil
-
-			return nil, err
+			return nil
 		}
-
-		t.mutex.Lock()
-		t.streams[path] = stream
-		delete(t.preparing, path)
-		t.mutex.Unlock()
-
-		channel <- stream
+		return NewFileStream(path, sha, route)
+	})
+	ret.ready.Wait()
+	if err != nil || ret.err != nil {
+		t.streams.Remove(path)
+		return nil, ret.err
 	}
-	return stream, nil
+	return ret, nil
 }
 
-func (t *Transcoder) GetMaster(path string, client string) (string, error) {
-	stream, err := t.getFileStream(path)
+func (t *Transcoder) GetMaster(path string, client string, route string) (string, error) {
+	stream, err := t.getFileStream(path, route)
 	if err != nil {
 		return "", err
 	}
@@ -93,8 +65,13 @@ func (t *Transcoder) GetMaster(path string, client string) (string, error) {
 	return stream.GetMaster(), nil
 }
 
-func (t *Transcoder) GetVideoIndex(path string, quality Quality, client string) (string, error) {
-	stream, err := t.getFileStream(path)
+func (t *Transcoder) GetVideoIndex(
+	path string,
+	quality Quality,
+	client string,
+	route string,
+) (string, error) {
+	stream, err := t.getFileStream(path, route)
 	if err != nil {
 		return "", err
 	}
@@ -108,8 +85,13 @@ func (t *Transcoder) GetVideoIndex(path string, quality Quality, client string) 
 	return stream.GetVideoIndex(quality)
 }
 
-func (t *Transcoder) GetAudioIndex(path string, audio int32, client string) (string, error) {
-	stream, err := t.getFileStream(path)
+func (t *Transcoder) GetAudioIndex(
+	path string,
+	audio int32,
+	client string,
+	route string,
+) (string, error) {
+	stream, err := t.getFileStream(path, route)
 	if err != nil {
 		return "", err
 	}
@@ -127,8 +109,9 @@ func (t *Transcoder) GetVideoSegment(
 	quality Quality,
 	segment int32,
 	client string,
+	route string,
 ) (string, error) {
-	stream, err := t.getFileStream(path)
+	stream, err := t.getFileStream(path, route)
 	if err != nil {
 		return "", err
 	}
@@ -147,8 +130,9 @@ func (t *Transcoder) GetAudioSegment(
 	audio int32,
 	segment int32,
 	client string,
+	route string,
 ) (string, error) {
-	stream, err := t.getFileStream(path)
+	stream, err := t.getFileStream(path, route)
 	if err != nil {
 		return "", err
 	}
