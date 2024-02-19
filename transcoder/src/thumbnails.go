@@ -40,7 +40,10 @@ func ExtractThumbnail(path string, route string, sha *string) (string, error) {
 			path: fmt.Sprintf("%s/%s", Settings.Metadata, sha),
 		}
 		ret.ready.Add(1)
-		go extractThumbnail(path, ret.path, fmt.Sprintf("%s/thumbnails.png", route))
+		go func() {
+			extractThumbnail(path, ret.path, fmt.Sprintf("%s/thumbnails.png", route))
+			ret.ready.Done()
+		}()
 		return ret
 	})
 	ret.ready.Wait()
