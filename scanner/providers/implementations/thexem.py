@@ -65,7 +65,7 @@ class TheXem:
 			ret = await r.json()
 			if "data" not in ret or ret["result"] == "failure":
 				logging.error("Could not fetch xem mapping. Error: %s", ret["message"])
-				raise ProviderError("Could not fetch xem mapping")
+				return []
 			return ret["data"]
 
 	async def get_show_override(
