@@ -59,9 +59,7 @@ class Provider:
 		raise NotImplementedError
 
 	@abstractmethod
-	async def identify_season(
-		self, show_id: str, season_number: Optional[int]
-	) -> Season:
+	async def identify_season(self, show_id: str, season_number: int) -> Season:
 		raise NotImplementedError
 
 	@abstractmethod
