@@ -493,13 +493,21 @@ class TheMovieDatabase(Provider):
 			absolute = await self.get_absolute_number(show_id, season, episode_nbr)
 
 		async def for_language(lng: str) -> Episode:
-			episode = await self.get(
-				f"tv/{show_id}/season/{season}/episode/{episode_nbr}",
-				params={
-					"language": lng,
-				},
-				not_found_fail=f"Could not find episode {episode_nbr} of season {season} of serie {name}",
-			)
+			try:
+				episode = await self.get(
+					f"tv/{show_id}/season/{season}/episode/{episode_nbr}",
+					params={
+						"language": lng,
+					},
+				)
+			except:
+				episode = await self.get(
+					f"tv/{show_id}/season/{season}/episode/{absolute}",
+					params={
+						"language": lng,
+					},
+					 not_found_fail=f"Could not find episode {episode_nbr} of season {season} of serie {name} (absolute: {absolute})",
+				)
 			logging.debug("TMDb responded: %s", episode)
 
 			ret = Episode(
