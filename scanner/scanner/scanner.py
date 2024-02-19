@@ -277,3 +277,8 @@ class Scanner:
 			if not r.ok:
 				logging.error(f"Request error: {await r.text()}")
 				r.raise_for_status()
+		if path in self.issues:
+			await self._client.delete(
+				f'{self._url}/issues?filter=domain eq scanner and cause eq "{path}"',
+				headers={"X-API-Key": self._api_key},
+			)
