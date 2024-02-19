@@ -53,7 +53,7 @@ public abstract class TranscoderApi<T>(IRepository<T> repository, IThumbnailsMan
 				}
 			)
 			.Build();
-		return this.HttpProxyAsync($"http://transcoder:7666/{route}", proxyOptions);
+		return this.HttpProxyAsync($"http://transcoder:7666{route}", proxyOptions);
 	}
 
 	protected abstract Task<(string path, string route)> GetPath(Identifier identifier);
@@ -103,6 +103,14 @@ public abstract class TranscoderApi<T>(IRepository<T> repository, IThumbnailsMan
 	{
 		await _Proxy($"/{quality}/index.m3u8", await GetPath(identifier));
 	}
+
+	[HttpGet("{identifier:id}/{quality}/{segment}")]
+	[PartialPermission(Kind.Play)]
+	public async Task GetVideoSegment(Identifier identifier, string quality, string segment)
+	{
+		await _Proxy($"/{quality}/{segment}", await GetPath(identifier));
+	}
+
 
 	[HttpGet("{identifier:id}/audio/{audio}/index.m3u8")]
 	[PartialPermission(Kind.Play)]
