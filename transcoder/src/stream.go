@@ -166,14 +166,16 @@ func (ts *Stream) run(start int32) error {
 		"-nostats", "-hide_banner", "-loglevel", "warning",
 	}
 
-	if ts.handle.getFlags()&VideoF != 0 {
-		// This is the default behavior in transmux mode and needed to force pre/post segment to work
-		// This must be disabled when processing only audio because it creates gaps in audio
-		args = append(args, "-noaccurate_seek")
+	if start_ref != 0 {
+		if ts.handle.getFlags()&VideoF != 0 {
+			// This is the default behavior in transmux mode and needed to force pre/post segment to work
+			// This must be disabled when processing only audio because it creates gaps in audio
+			args = append(args, "-noaccurate_seek")
+		}
+		args = append(args,
+			"-ss", fmt.Sprintf("%.6f", start_ref),
+		)
 	}
-	args = append(args,
-		"-ss", fmt.Sprintf("%.6f", start_ref),
-	)
 	// do not include -to if we want the file to go to the end
 	if end+1 < int32(len(ts.file.Keyframes)) {
 		// sometimes, the duration is shorter than expected (only during transcode it seems)
