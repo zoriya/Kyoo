@@ -19,6 +19,9 @@ func NewVideoStream(file *FileStream, quality Quality) *VideoStream {
 }
 
 func (vs *VideoStream) getFlags() Flags {
+	if vs.quality == Original {
+		return VideoF & Transmux
+	}
 	return VideoF
 }
 
@@ -27,18 +30,24 @@ func (vs *VideoStream) getOutPath(encoder_id int) string {
 }
 
 func (vs *VideoStream) getTranscodeArgs(segments string) []string {
-	if vs.quality == Original {
-		return []string{"-map", "0:V:0", "-c:v", "copy"}
+	args := []string{
+		"-map", "0:V:0",
 	}
 
-	return []string{
-		// superfast or ultrafast would produce a file extremly big so we prever veryfast or faster.
-		"-map", "0:V:0", "-c:v", "libx264", "-crf", "21", "-preset", "faster",
+	if vs.quality == Original {
+		args = append(args,
+			"-c:v", "copy",
+		)
+		return args
+	}
+
+	args = append(args, Settings.HwAccel.EncodeFlags...)
+	args = append(args,
 		// resize but keep aspect ratio (also force a width that is a multiple of two else some apps behave badly.
 		"-vf", fmt.Sprintf("scale=-2:'min(%d,ih)'", vs.quality.Height()),
 		// Even less sure but bufsize are 5x the avergae bitrate since the average bitrate is only
 		// useful for hls segments.
-		"-bufsize", fmt.Sprint(vs.quality.MaxBitrate() * 5),
+		"-bufsize", fmt.Sprint(vs.quality.MaxBitrate()*5),
 		"-b:v", fmt.Sprint(vs.quality.AverageBitrate()),
 		"-maxrate", fmt.Sprint(vs.quality.MaxBitrate()),
 		// Force segments to be split exactly on keyframes (only works when transcoding)
@@ -48,5 +57,6 @@ func (vs *VideoStream) getTranscodeArgs(segments string) []string {
 		// we disable it to prevents whole scenes from behing removed due to the -f segment failing to find the corresonding keyframe
 		"-sc_threshold", "0",
 		"-strict", "-2",
-	}
+	)
+	return args
 }

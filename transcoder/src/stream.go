@@ -18,8 +18,9 @@ import (
 type Flags int32
 
 const (
-	AudioF Flags = 1 << 0
-	VideoF Flags = 1 << 1
+	AudioF   Flags = 1 << 0
+	VideoF   Flags = 1 << 1
+	Transmux Flags = 1 << 3
 )
 
 type StreamHandle interface {
@@ -164,6 +165,12 @@ func (ts *Stream) run(start int32) error {
 
 	args := []string{
 		"-nostats", "-hide_banner", "-loglevel", "warning",
+	}
+
+	// do not enabled hardware accelaration when transmuxing
+	// this can either be slower or fail depending on hardware
+	if ts.handle.getFlags()&Transmux == 0 {
+		args = append(args, Settings.HwAccel.DecodeFlags...)
 	}
 
 	if start_ref != 0 {
