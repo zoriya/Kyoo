@@ -29,6 +29,16 @@ func (vs *VideoStream) getOutPath(encoder_id int) string {
 	return fmt.Sprintf("%s/segment-%s-%d-%%d.ts", vs.file.Out, vs.quality, encoder_id)
 }
 
+func closestMultiple(n int32, x int32) int32 {
+	if x > n {
+		return x
+	}
+
+	n = n + x/2
+	n = n - (n % x)
+	return n
+}
+
 func (vs *VideoStream) getTranscodeArgs(segments string) []string {
 	args := []string{
 		"-map", "0:V:0",
@@ -42,9 +52,11 @@ func (vs *VideoStream) getTranscodeArgs(segments string) []string {
 	}
 
 	args = append(args, Settings.HwAccel.EncodeFlags...)
+	width := int32(float64(vs.quality.Height()) / float64(vs.file.Info.Video.Height) * float64(vs.file.Info.Video.Width))
+	// force a width that is a multiple of two else some apps behave badly.
+	width = closestMultiple(width, 2)
 	args = append(args,
-		// resize but keep aspect ratio (also force a width that is a multiple of two else some apps behave badly.
-		"-vf", fmt.Sprintf("scale=-2:'min(%d,ih)'", vs.quality.Height()),
+		"-vf", fmt.Sprintf(Settings.HwAccel.ScaleFilter, width, vs.quality.Height()),
 		// Even less sure but bufsize are 5x the avergae bitrate since the average bitrate is only
 		// useful for hls segments.
 		"-bufsize", fmt.Sprint(vs.quality.MaxBitrate()*5),

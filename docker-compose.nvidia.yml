@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  transcoder:
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    environment:
+      - GOTRANSCODER_HWACCEL=nvidia

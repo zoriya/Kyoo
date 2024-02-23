@@ -2,6 +2,7 @@ FROM golang:1.21
 RUN apt-get update \
 	&& apt-get install --no-install-recommends --no-install-suggests -y \
 	ffmpeg libavformat-dev libavutil-dev libswscale-dev libmediainfo-dev \
+	&& apt-get clean autoclean -y \
 	&& apt-get autoremove -y
 RUN go install github.com/bokwoon95/wgo@latest
 WORKDIR /app
