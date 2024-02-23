@@ -20,6 +20,7 @@ type HwAccelT struct {
 	Name        string
 	DecodeFlags []string
 	EncodeFlags []string
+	ScaleFilter string
 }
 
 var Settings = SettingsT{

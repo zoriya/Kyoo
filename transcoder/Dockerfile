@@ -2,6 +2,7 @@ FROM golang:1.21 as build
 RUN apt-get update \
 	&& apt-get install --no-install-recommends --no-install-suggests -y \
 	ffmpeg libavformat-dev libavutil-dev libswscale-dev libmediainfo-dev \
+	&& apt-get clean autoclean -y \
 	&& apt-get autoremove -y
 WORKDIR /app
 COPY go.mod go.sum ./

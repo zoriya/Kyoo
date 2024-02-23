@@ -1,7 +1,11 @@
 package src
 
+import "log"
+
 func DetectHardwareAccel() HwAccelT {
-	name := "disabled"
+	name := GetEnvOr("GOTRANSCODER_HWACCEL", "disabled")
+	log.Printf("Using hardware acceleration: %s", name)
+
 	switch name {
 	case "nvidia":
 		return HwAccelT{
@@ -17,6 +21,7 @@ func DetectHardwareAccel() HwAccelT {
 				"-c:v", "h264_nvenc",
 				"-preset", "fast",
 			},
+			ScaleFilter: "hwupload_cuda,scale_cuda=%d:%d:force_original_aspect_ratio=decrease",
 		}
 	default:
 		return HwAccelT{
@@ -27,6 +32,7 @@ func DetectHardwareAccel() HwAccelT {
 				// superfast or ultrafast would produce a file extremly big so we prever veryfast or faster.
 				"-preset", "faster",
 			},
+			ScaleFilter: "scale=%d:%d:force_original_aspect_ratio=decrease",
 		}
 	}
 }
