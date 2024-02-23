@@ -21,7 +21,9 @@ func DetectHardwareAccel() HwAccelT {
 				"-c:v", "h264_nvenc",
 				"-preset", "fast",
 			},
-			ScaleFilter: "hwupload_cuda,scale_cuda=%d:%d:force_original_aspect_ratio=decrease",
+			// if the decode goes into system memory, we need to prepend the filters with "hwupload_cuda".
+			// since we use hwaccel_output_format, decoded data stays in gpu memory so we must not specify it (it errors)
+			ScaleFilter: "scale_cuda=%d:%d",
 		}
 	default:
 		return HwAccelT{
@@ -32,7 +34,9 @@ func DetectHardwareAccel() HwAccelT {
 				// superfast or ultrafast would produce a file extremly big so we prever veryfast or faster.
 				"-preset", "faster",
 			},
-			ScaleFilter: "scale=%d:%d:force_original_aspect_ratio=decrease",
+			// we could put :force_original_aspect_ratio=decrease:force_divisible_by=2 here but we already calculate a correct width and
+			// aspect ratio in our code so there is no need.
+			ScaleFilter: "scale=%d:%d",
 		}
 	}
 }
