@@ -126,7 +126,8 @@ func (ts *Stream) run(start int32) error {
 	ts.lock.Unlock()
 
 	log.Printf(
-		"Starting transcode for %s (from %d to %d out of %d segments)",
+		"Starting transcode %d for %s (from %d to %d out of %d segments)",
+		encoder_id,
 		ts.file.Path,
 		start,
 		end,
@@ -201,6 +202,9 @@ func (ts *Stream) run(start int32) error {
 	}
 	args = append(args,
 		"-i", ts.file.Path,
+		// this makes behaviors consistent between soft and hardware decodes.
+		// this also means that after a -ss 50, the output video will start at 50s
+		"-start_at_zero",
 		// for hls streams, -copyts is mandatory
 		"-copyts",
 	)
