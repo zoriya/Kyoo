@@ -1,7 +1,14 @@
-FROM golang:1.21-alpine
-RUN apk add --no-cache build-base ffmpeg ffmpeg-dev libmediainfo-dev
+FROM golang:1.21
+RUN apt-get update \
+	&& apt-get install --no-install-recommends --no-install-suggests -y \
+	ffmpeg libavformat-dev libavutil-dev libswscale-dev libmediainfo-dev \
+	&& apt-get autoremove -y
 RUN go install github.com/bokwoon95/wgo@latest
 WORKDIR /app
+
+# flags for nvidia acceleration on docker < 25.0
+ENV NVIDIA_VISIBLE_DEVICES="all"
+ENV NVIDIA_DRIVER_CAPABILITIES="all"
 
 EXPOSE 7666
 CMD wgo run .
