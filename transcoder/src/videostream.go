@@ -64,10 +64,6 @@ func (vs *VideoStream) getTranscodeArgs(segments string) []string {
 		"-maxrate", fmt.Sprint(vs.quality.MaxBitrate()),
 		// Force segments to be split exactly on keyframes (only works when transcoding)
 		"-force_key_frames", segments,
-		// sc_threshold is a scene detection mechanisum used to create a keyframe when the scene changes
-		// this is on by default and inserts keyframes where we don't want to (it also breaks force_key_frames)
-		// we disable it to prevents whole scenes from behing removed due to the -f segment failing to find the corresonding keyframe
-		"-sc_threshold", "0",
 		"-strict", "-2",
 	)
 	return args
