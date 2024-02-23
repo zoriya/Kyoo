@@ -55,35 +55,7 @@ func NewFileStream(path string, sha string, route string) *FileStream {
 	return ret
 }
 
-// sometimes, videos can start at a timing greater than 0:00. We need to take that into account
-// and only list keyframes that come after the start of the video (without that, our segments count
-// mismatch and we can have the same segment twice on the stream).
-func GetStartTime(path string) (float64, error) {
-	// we can't run this ffprobe in the same call as below because stream entries
-	// are always after packet entries and we want to start processing packets as
-	// soon as possible (but we need start_time for that)
-	cmd := exec.Command(
-		"ffprobe",
-		"-loglevel", "quiet",
-		"-select_streams", "v:0",
-		"-show_entries", "stream=start_time",
-		"-of", "csv=p=0",
-		path,
-	)
-	out, err := cmd.Output()
-	if err != nil {
-		return 0, err
-	}
-	ret := strings.TrimSpace(string(out))
-	return strconv.ParseFloat(ret, 64)
-}
-
 func GetKeyframes(path string) ([]float64, bool, error) {
-	start_time, err := GetStartTime(path)
-	if err != nil {
-		return nil, false, err
-	}
-
 	defer printExecTime("ffprobe analysis for %s", path)()
 	// run ffprobe to return all IFrames, IFrames are points where we can split the video in segments.
 	// We ask ffprobe to return the time of each frame and it's flags
@@ -108,8 +80,7 @@ func GetKeyframes(path string) ([]float64, bool, error) {
 
 	scanner := bufio.NewScanner(stdout)
 
-	ret := make([]float64, 1, 1000)
-	ret[0] = 0
+	ret := make([]float64, 0, 1000)
 	last := 0.
 	can_transmux := true
 	for scanner.Scan() {
@@ -136,9 +107,14 @@ func GetKeyframes(path string) ([]float64, bool, error) {
 		// the segment time and decide to cut at a random keyframe. Having every keyframe
 		// handled as a segment prevents that.
 
-		if fpts <= start_time {
-			// look GetStartTime comment for explanations
-			// tldr: start time can be greater than 0, ignore keyframes before start_time
+		if len(ret) == 0 {
+			// sometimes, videos can start at a timing greater than 0:00. We need to take that into account
+			// and only list keyframes that come after the start of the video (without that, our segments count
+			// mismatch and we can have the same segment twice on the stream).
+
+			// we hardcode 0 as the first keyframe (even if this is fake) because it makes the code way easier to follow.
+			// this value is actually never sent to ffmpeg anyways.
+			ret = append(ret, 0)
 			continue
 		}
 
