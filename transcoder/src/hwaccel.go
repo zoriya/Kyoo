@@ -20,6 +20,8 @@ func DetectHardwareAccel() HwAccelT {
 			EncodeFlags: []string{
 				"-c:v", "h264_nvenc",
 				"-preset", "fast",
+				// the exivalent of -sc_threshold on nvidia.
+				"-no-scenecut", "1",
 			},
 			// if the decode goes into system memory, we need to prepend the filters with "hwupload_cuda".
 			// since we use hwaccel_output_format, decoded data stays in gpu memory so we must not specify it (it errors)
@@ -33,6 +35,10 @@ func DetectHardwareAccel() HwAccelT {
 				"-c:v", "libx264",
 				// superfast or ultrafast would produce a file extremly big so we prever veryfast or faster.
 				"-preset", "faster",
+				// sc_threshold is a scene detection mechanisum used to create a keyframe when the scene changes
+				// this is on by default and inserts keyframes where we don't want to (it also breaks force_key_frames)
+				// we disable it to prevents whole scenes from behing removed due to the -f segment failing to find the corresonding keyframe
+				"-sc_threshold", "0",
 			},
 			// we could put :force_original_aspect_ratio=decrease:force_divisible_by=2 here but we already calculate a correct width and
 			// aspect ratio in our code so there is no need.
