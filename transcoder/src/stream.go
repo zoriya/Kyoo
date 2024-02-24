@@ -225,13 +225,9 @@ func (ts *Stream) run(start int32) error {
 		})),
 		"-segment_list_type", "flat",
 		"-segment_list", "pipe:1",
+		"-segment_start_number", fmt.Sprint(start),
+		outpath,
 	)
-	if start != 0 {
-		args = append(args,
-			"-segment_start_number", fmt.Sprint(start-1),
-		)
-	}
-	args = append(args, outpath)
 
 	cmd := exec.Command("ffmpeg", args...)
 	log.Printf("Running %s", strings.Join(cmd.Args, " "))
