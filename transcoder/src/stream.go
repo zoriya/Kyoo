@@ -138,21 +138,21 @@ func (ts *Stream) run(start int32) error {
 	// Having an extra segment allows us to cut precisely the segments we want with the
 	// -f segment that does cut the begining and the end at the keyframe like asked
 	start_ref := float64(0)
-	start_padding := int32(0)
-	if start == 0 {
-		start_padding = 1
-	} else {
-		// the param for the -ss. This takes the keyframe before the specificed time
+	if start != 0 {
+		// the param for the -ss takes the keyframe before the specificed time
 		// (if the specified time is a keyframe, it either takes that keyframe or the one before)
-		// to prevent this weird behavior, we specify a bit before the keyframe that interest us
-		// and the first segment will contains the extra we do not want.
-		start_ref = (ts.file.Keyframes[start-1] + ts.file.Keyframes[start]) / 2
+		// to prevent this weird behavior, we specify a bit after the keyframe that interest us
+		if start+1 == int32(len(ts.file.Keyframes)) {
+			start_ref = (ts.file.Keyframes[start] + float64(ts.file.Info.Duration)) / 2
+		} else {
+			start_ref = (ts.file.Keyframes[start] + ts.file.Keyframes[start+1]) / 2
+		}
 	}
 	end_padding := int32(1)
 	if end == int32(len(ts.file.Keyframes)) {
 		end_padding = 0
 	}
-	segments := ts.file.Keyframes[start+start_padding : end+end_padding]
+	segments := ts.file.Keyframes[start+1 : end+end_padding]
 	if len(segments) == 0 {
 		// we can't leave that empty else ffmpeg errors out.
 		segments = []float64{9999999}
@@ -189,13 +189,10 @@ func (ts *Stream) run(start int32) error {
 		// sometimes, the duration is shorter than expected (only during transcode it seems)
 		// always include more and use the -f segment to split the file where we want
 		end_ref := ts.file.Keyframes[end+1]
-		if start_ref != 0 {
-			// it seems that the -to is confused when -ss seek before the given time
-			// (because it searches for a keyframe)
-			// add back the time that would be lost otherwise
-			// this only appens when -to is before -i but having -to after -i gave a bug (not sure, don't remember)
-			end_ref += start_ref - ts.file.Keyframes[start-1]
-		}
+		// it seems that the -to is confused when -ss seek before the given time (because it searches for a keyframe)
+		// add back the time that would be lost otherwise
+		// this only appens when -to is before -i but having -to after -i gave a bug (not sure, don't remember)
+		end_ref += start_ref - ts.file.Keyframes[start]
 		args = append(args,
 			"-to", fmt.Sprintf("%.6f", end_ref),
 		)
