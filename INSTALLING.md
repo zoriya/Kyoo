@@ -1,3 +1,14 @@
+# Installing TLDR
+
+1. Install docker & docker-compose
+2. Download the
+   [`docker-compose.yml`](https://raw.githubusercontent.com/zoriya/Kyoo/master/docker-compose.prod.yml),
+   [`nginx.conf.template`](https://raw.githubusercontent.com/zoriya/Kyoo/master/nginx.conf.template) and
+   [`.env`](https://raw.githubusercontent.com/zoriya/Kyoo/master/.env.example) files
+3. Fill the `.env` file with your configuration options (and an API Key from [themoviedb.org](https://www.themoviedb.org/))
+4. Look at [Hardware Acceleration section](#Hardware-Acceleration) if you need it
+4. Run `docker compose up -d` and see kyoo at `http://localhost:8901`
+
 # Installing
 
 To install Kyoo, you need docker and docker-compose. Those can be installed from here for
@@ -24,20 +35,12 @@ To retrieve metadata, Kyoo will need to communicate with an external service. Fo
 For this purpose, you will need to get an API Key. For that, go to [themoviedb.org](https://www.themoviedb.org/) and create an account, then
 go [here](https://www.themoviedb.org/settings/api) and copy the `API Key (v3 auth)`, paste it after the `THEMOVIEDB_APIKEY=` on the `.env` file.
 
+If you need hardware acceleration, look at [Hardware Acceleration section](#Hardware-Acceleration) if you need it
+
 The next and last step is actually starting Kyoo. To do that, open a terminal in the same directory as the 3 configurations files
 and run `docker-compose up -d`.
 
 Congratulation, everything is now ready to use Kyoo. You can navigate to `http://localhost:8901` on a web browser to see your instance of Kyoo.
-
-# Installing TLDR
-
-1. Install docker & docker-compose
-2. Download the
-   [`docker-compose.yml`](https://raw.githubusercontent.com/zoriya/Kyoo/master/docker-compose.prod.yml),
-   [`nginx.conf.template`](https://raw.githubusercontent.com/zoriya/Kyoo/master/nginx.conf.template) and
-   [`.env`](https://raw.githubusercontent.com/zoriya/Kyoo/master/.env.example) files
-3. Fill the `.env` file with your configuration options (and an API Key from [themoviedb.org](https://www.themoviedb.org/))
-4. Run `docker-compose up -d`
 
 # Updating
 
@@ -54,3 +57,17 @@ TLDR: `docker run -d --name watchtower -e WATCHTOWER_CLEANUP=true -e WATCHTOWER_
 
 To uninstall Kyoo, you need to open a terminal in the configuration's directory and run `docker-compose down`. This will
 stop Kyoo's services. You can then remove the configuration files.
+
+# Hardware Acceleration
+
+## Nvidia
+
+To enable nvidia hardware acceleration, first install necessary drivers on your system.
+
+Then, install the [nvidia-container-toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html), you can simply
+follow the instructions on the official webpage or your distribution wiki.
+
+To test if everything works, you can run `sudo docker run --rm --gpus all ubuntu nvidia-smi`. If your version of docker is older,
+you might need to add `--runtime nvidia` like so: `sudo docker run --rm --runtime=nvidia --gpus all ubuntu nvidia-smi`
+
+After that, you can now use `docker compose --profile nvidia up -d` to start kyoo with nvidia hardware acceleration.
