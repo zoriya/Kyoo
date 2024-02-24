@@ -71,3 +71,6 @@ To test if everything works, you can run `sudo docker run --rm --gpus all ubuntu
 you might need to add `--runtime nvidia` like so: `sudo docker run --rm --runtime=nvidia --gpus all ubuntu nvidia-smi`
 
 After that, you can now use `docker compose --profile nvidia up -d` to start kyoo with nvidia hardware acceleration.
+
+Note that most nvidia cards have an artifical limit on the number of encodes. You can confirm your card limit [here](https://developer.nvidia.com/video-encode-and-decode-gpu-support-matrix-new).
+This limit can also be remove by applying an [unofficial patch](https://github.com/keylase/nvidia-patch) to you driver.
