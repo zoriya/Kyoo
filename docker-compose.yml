@@ -1,5 +1,19 @@
 version: "3.8"
 
+x-transcoder: &transcoder-base
+  build: ./transcoder
+  networks:
+    default:
+      aliases:
+        - transcoder
+  restart: on-failure
+  env_file:
+    - ./.env
+  volumes:
+    - ${LIBRARY_ROOT}:/video
+    - ${CACHE_ROOT}:/cache
+    - metadata:/metadata
+
 services:
   back:
     build: ./back
@@ -35,14 +49,19 @@ services:
       - ${LIBRARY_ROOT}:/video
 
   transcoder:
-    build: ./transcoder
-    restart: on-failure
-    env_file:
-      - ./.env
-    volumes:
-      - ${LIBRARY_ROOT}:/video
-      - ${CACHE_ROOT}:/cache
-      - metadata:/metadata
+    <<: *transcoder-base
+    profiles: ['']
+
+  transcoder-nvidia:
+    <<: *transcoder-base
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    environment:
+      - GOTRANSCODER_HWACCEL=nvidia
+    profiles: ['nvidia']
 
   ingress:
     image: nginx

@@ -1,5 +1,25 @@
 version: "3.8"
 
+x-transcoder: &transcoder-base
+  build:
+    context: ./transcoder
+    dockerfile: Dockerfile.dev
+  networks:
+    default:
+      aliases:
+        - transcoder
+  ports:
+    - "7666:7666"
+  restart: on-failure
+  cpus: 1
+  env_file:
+    - ./.env
+  volumes:
+    - ./transcoder:/app
+    - ${LIBRARY_ROOT}:/video
+    - ${CACHE_ROOT}:/cache
+    - metadata:/metadata
+
 services:
   back:
     build:
@@ -53,20 +73,19 @@ services:
       - ${LIBRARY_ROOT}:/video
 
   transcoder:
-    build:
-      context: ./transcoder
-      dockerfile: Dockerfile.dev
-    ports:
-      - "7666:7666"
-    restart: on-failure
-    cpus: 1
-    env_file:
-      - ./.env
-    volumes:
-      - ./transcoder:/app
-      - ${LIBRARY_ROOT}:/video
-      - ${CACHE_ROOT}:/cache
-      - metadata:/metadata
+    <<: *transcoder-base
+    profiles: ['']
+
+  transcoder-nvidia:
+    <<: *transcoder-base
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    environment:
+      - GOTRANSCODER_HWACCEL=nvidia
+    profiles: ['nvidia']
 
   ingress:
     image: nginx
