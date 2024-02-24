@@ -138,14 +138,20 @@ func (ts *Stream) run(start int32) error {
 	// Having an extra segment allows us to cut precisely the segments we want with the
 	// -f segment that does cut the begining and the end at the keyframe like asked
 	start_ref := float64(0)
+	start_segment := start
 	if start != 0 {
+		if ts.handle.getFlags()&AudioF != 0 {
+			// when segmenting audio, we need -ss to have the context before the start time
+			// without it, the cut loses a bit of audio (audio gap of ~100ms)
+			start_segment = start - 1
+		}
 		// the param for the -ss takes the keyframe before the specificed time
 		// (if the specified time is a keyframe, it either takes that keyframe or the one before)
 		// to prevent this weird behavior, we specify a bit after the keyframe that interest us
-		if start+1 == int32(len(ts.file.Keyframes)) {
-			start_ref = (ts.file.Keyframes[start] + float64(ts.file.Info.Duration)) / 2
+		if start_segment+1 == int32(len(ts.file.Keyframes)) {
+			start_ref = (ts.file.Keyframes[start_segment] + float64(ts.file.Info.Duration)) / 2
 		} else {
-			start_ref = (ts.file.Keyframes[start] + ts.file.Keyframes[start+1]) / 2
+			start_ref = (ts.file.Keyframes[start_segment] + ts.file.Keyframes[start_segment+1]) / 2
 		}
 	}
 	end_padding := int32(1)
@@ -192,7 +198,7 @@ func (ts *Stream) run(start int32) error {
 		// it seems that the -to is confused when -ss seek before the given time (because it searches for a keyframe)
 		// add back the time that would be lost otherwise
 		// this only appens when -to is before -i but having -to after -i gave a bug (not sure, don't remember)
-		end_ref += start_ref - ts.file.Keyframes[start]
+		end_ref += start_ref - ts.file.Keyframes[start_segment]
 		args = append(args,
 			"-to", fmt.Sprintf("%.6f", end_ref),
 		)
@@ -221,7 +227,7 @@ func (ts *Stream) run(start int32) error {
 			// segment_times want durations, not timestamps so we must substract the -ss param
 			// since we give a greater value to -ss to prevent wrong seeks but -segment_times
 			// needs precise segments, we use the keyframe we want to seek to as a reference.
-			return seg - ts.file.Keyframes[start]
+			return seg - ts.file.Keyframes[start_segment]
 		})),
 		"-segment_list_type", "flat",
 		"-segment_list", "pipe:1",
