@@ -1,12 +1,32 @@
 package src
 
-import "log"
+import (
+	"log"
+	"os"
+)
 
 func DetectHardwareAccel() HwAccelT {
 	name := GetEnvOr("GOTRANSCODER_HWACCEL", "disabled")
 	log.Printf("Using hardware acceleration: %s", name)
 
 	switch name {
+	case "default":
+		return HwAccelT{
+			Name:        "disabled",
+			DecodeFlags: []string{},
+			EncodeFlags: []string{
+				"-c:v", "libx264",
+				// superfast or ultrafast would produce a file extremly big so we prever veryfast or faster.
+				"-preset", "faster",
+				// sc_threshold is a scene detection mechanisum used to create a keyframe when the scene changes
+				// this is on by default and inserts keyframes where we don't want to (it also breaks force_key_frames)
+				// we disable it to prevents whole scenes from behing removed due to the -f segment failing to find the corresonding keyframe
+				"-sc_threshold", "0",
+			},
+			// we could put :force_original_aspect_ratio=decrease:force_divisible_by=2 here but we already calculate a correct width and
+			// aspect ratio in our code so there is no need.
+			ScaleFilter: "scale=%d:%d",
+		}
 	case "nvidia":
 		return HwAccelT{
 			Name: "nvidia",
@@ -28,21 +48,8 @@ func DetectHardwareAccel() HwAccelT {
 			ScaleFilter: "scale_cuda=%d:%d",
 		}
 	default:
-		return HwAccelT{
-			Name:        "disabled",
-			DecodeFlags: []string{},
-			EncodeFlags: []string{
-				"-c:v", "libx264",
-				// superfast or ultrafast would produce a file extremly big so we prever veryfast or faster.
-				"-preset", "faster",
-				// sc_threshold is a scene detection mechanisum used to create a keyframe when the scene changes
-				// this is on by default and inserts keyframes where we don't want to (it also breaks force_key_frames)
-				// we disable it to prevents whole scenes from behing removed due to the -f segment failing to find the corresonding keyframe
-				"-sc_threshold", "0",
-			},
-			// we could put :force_original_aspect_ratio=decrease:force_divisible_by=2 here but we already calculate a correct width and
-			// aspect ratio in our code so there is no need.
-			ScaleFilter: "scale=%d:%d",
-		}
+		log.Printf("No hardware accelerator named: %s", name)
+		os.Exit(2)
+		panic("unreachable")
 	}
 }
