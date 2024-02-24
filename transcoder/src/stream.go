@@ -207,6 +207,12 @@ func (ts *Stream) run(start int32) error {
 		"-start_at_zero",
 		// for hls streams, -copyts is mandatory
 		"-copyts",
+		// this makes output file start at 0s instead of a random delay + the -ss value
+		// this also cancel -start_at_zero weird delay.
+		// this is not always respected but generally it gives better results.
+		// even when this is not respected, it does not result in a bugged experience but this is something
+		// to keep in mind when debugging
+		"-muxdelay", "0",
 	)
 	args = append(args, ts.handle.getTranscodeArgs(toSegmentStr(segments))...)
 	args = append(args,
