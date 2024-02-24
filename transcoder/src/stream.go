@@ -174,11 +174,7 @@ func (ts *Stream) run(start int32) error {
 		"-nostats", "-hide_banner", "-loglevel", "warning",
 	}
 
-	// do not enabled hardware accelaration when transmuxing
-	// this can either be slower or fail depending on hardware
-	if ts.handle.getFlags()&Transmux == 0 {
-		args = append(args, Settings.HwAccel.DecodeFlags...)
-	}
+	args = append(args, Settings.HwAccel.DecodeFlags...)
 
 	if start_ref != 0 {
 		if ts.handle.getFlags()&VideoF != 0 {
