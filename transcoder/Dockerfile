@@ -33,8 +33,11 @@ RUN go build -o ./transcoder
 # we use trixie (debian's testing because ffmpeg on latest is v5 and we need v6)
 # https://packages.debian.org/bookworm/ffmpeg for version tracking
 FROM debian:trixie-slim
+RUN sed -i -e's/ main/ main contrib non-free/g' /etc/apt/sources.list.d/debian.sources
 RUN apt-get update \
-	&& apt-get install --no-install-recommends --no-install-suggests -y ffmpeg libmediainfo-dev \
+	&& apt-get install --no-install-recommends --no-install-suggests -y \
+	ffmpeg libmediainfo-dev \
+	vainfo mesa-va-drivers intel-media-va-driver-non-free i965-va-driver-shaders \
 	&& apt-get clean autoclean -y \
 	&& apt-get autoremove -y \
 	&& rm -rf /var/lib/apt/lists/*

@@ -64,6 +64,15 @@ services:
       - GOTRANSCODER_HWACCEL=nvidia
     profiles: ['nvidia']
 
+  transcoder-vaapi:
+    <<: *transcoder-base
+    devices:
+      - /dev/dri:/dev/dri
+    environment:
+      - GOTRANSCODER_HWACCEL=vaapi
+      - GOTRANSCODER_VAAPI_RENDERER=${GOTRANSCODER_VAAPI_RENDERER:-/dev/dri/renderD128}
+    profiles: ['vaapi']
+
   ingress:
     image: nginx
     restart: unless-stopped

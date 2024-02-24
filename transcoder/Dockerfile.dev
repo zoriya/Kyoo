@@ -23,9 +23,15 @@ ENV SSL_CERT_DIR=/etc/ssl/certs
 RUN update-ca-certificates
 
 RUN go install github.com/bokwoon95/wgo@latest
+RUN sed -i -e's/ main/ main contrib non-free/g' /etc/apt/sources.list.d/debian.sources
 RUN apt-get update \
 	&& apt-get install --no-install-recommends --no-install-suggests -y \
-	ffmpeg libavformat-dev libavutil-dev libswscale-dev libmediainfo-dev \
+	# runtime dependencies
+	ffmpeg libavformat-dev \
+	# build dependencies
+	libavutil-dev libswscale-dev libmediainfo-dev \
+	# hwaccel dependencies
+	vainfo mesa-va-drivers intel-media-va-driver-non-free i965-va-driver-shaders \
 	&& apt-get clean autoclean -y \
 	&& apt-get autoremove -y
 WORKDIR /app

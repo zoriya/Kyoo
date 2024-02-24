@@ -31,7 +31,6 @@ func DetectHardwareAccel() HwAccelT {
 		return HwAccelT{
 			Name: "nvidia",
 			DecodeFlags: []string{
-				// TODO: check if this can always be enabled (for example with weird video formats)
 				"-hwaccel", "cuda",
 				// this flag prevents data to go from gpu space to cpu space
 				// it forces the whole dec/enc to be on the gpu. We want that.
@@ -46,6 +45,24 @@ func DetectHardwareAccel() HwAccelT {
 			// if the decode goes into system memory, we need to prepend the filters with "hwupload_cuda".
 			// since we use hwaccel_output_format, decoded data stays in gpu memory so we must not specify it (it errors)
 			ScaleFilter: "scale_cuda=%d:%d",
+		}
+	case "vaapi":
+		return HwAccelT{
+			Name: name,
+			DecodeFlags: []string{
+				"-hwaccel", "vaapi",
+				"-hwaccel_device", GetEnvOr("GOTRANSCODER_VAAPI_RENDERER", "/dev/dri/renderD128"),
+				"-hwaccel_output_format", "vaapi",
+			},
+			EncodeFlags: []string{
+				// h264_vaapi does not have any preset or scenecut flags.
+				"-c:v", "h264_vaapi",
+				// if the hardware decoder could not work and fallbacked to soft decode, we need to instruct ffmpeg to
+				// upload back frames to gpu space (after converting them)
+				// see https://trac.ffmpeg.org/wiki/Hardware/VAAPI#Encoding for more info
+				// "-vf", "format=nv12|vaapi,hwupload",
+			},
+			ScaleFilter: "scale_vaapi=%d:%d",
 		}
 	default:
 		log.Printf("No hardware accelerator named: %s", name)

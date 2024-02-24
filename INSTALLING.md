@@ -60,6 +60,28 @@ stop Kyoo's services. You can then remove the configuration files.
 
 # Hardware Acceleration
 
+## VA-API (intel, amd)
+
+First install necessary drivers on your system, when running `vainfo` you should have something like this:
+```
+libva info: VA-API version 1.20.0
+libva info: Trying to open /run/opengl-driver/lib/dri/iHD_drv_video.so
+libva info: Found init function __vaDriverInit_1_20
+libva info: va_openDriver() returns 0
+vainfo: VA-API version: 1.20 (libva 2.20.1)
+vainfo: Driver version: Intel iHD driver for Intel(R) Gen Graphics - 23.3.5 ()
+vainfo: Supported profile and entrypoints
+      VAProfileH264Main               :	VAEntrypointVLD
+      VAProfileH264Main               :	VAEntrypointEncSlice
+      ...Truncated...
+      VAProfileHEVCSccMain444_10      :	VAEntrypointVLD
+      VAProfileHEVCSccMain444_10      :	VAEntrypointEncSliceLP
+```
+Kyoo will default to use your primary card (located at `/dev/dri/renderD128`). If you need to specify a secondary one, you
+can use the `GOTRANSCODER_VAAPI_RENDERER` env-var to specify `/dev/dri/renderD129` or another one.
+
+Then you can simply run kyoo using `docker compose --profile vaapi up -d` (notice the `--profile vaapi` added)
+
 ## Nvidia
 
 To enable nvidia hardware acceleration, first install necessary drivers on your system.
@@ -70,7 +92,7 @@ follow the instructions on the official webpage or your distribution wiki.
 To test if everything works, you can run `sudo docker run --rm --gpus all ubuntu nvidia-smi`. If your version of docker is older,
 you might need to add `--runtime nvidia` like so: `sudo docker run --rm --runtime=nvidia --gpus all ubuntu nvidia-smi`
 
-After that, you can now use `docker compose --profile nvidia up -d` to start kyoo with nvidia hardware acceleration.
+After that, you can now use `docker compose --profile nvidia up -d` to start kyoo with nvidia hardware acceleration (notice the `--profile nvidia` added).
 
-Note that most nvidia cards have an artifical limit on the number of encodes. You can confirm your card limit [here](https://developer.nvidia.com/video-encode-and-decode-gpu-support-matrix-new).
-This limit can also be remove by applying an [unofficial patch](https://github.com/keylase/nvidia-patch) to you driver.
+Note that most nvidia cards have an artificial limit on the number of encodes. You can confirm your card limit [here](https://developer.nvidia.com/video-encode-and-decode-gpu-support-matrix-new).
+This limit can also be removed by applying an [unofficial patch](https://github.com/keylase/nvidia-patch) to you driver.
