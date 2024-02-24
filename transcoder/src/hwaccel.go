@@ -10,7 +10,7 @@ func DetectHardwareAccel() HwAccelT {
 	log.Printf("Using hardware acceleration: %s", name)
 
 	switch name {
-	case "default":
+	case "disabled":
 		return HwAccelT{
 			Name:        "disabled",
 			DecodeFlags: []string{},
