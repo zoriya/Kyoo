@@ -218,9 +218,10 @@ func (ts *Stream) run(start int32) error {
 		"-segment_time_delta", "0.2",
 		"-segment_format", "mpegts",
 		"-segment_times", toSegmentStr(Map(segments, func(seg float64, _ int) float64 {
-			// for a strange reason, -segment-times does not respects -copyts so we must
-			// remove the start_ref (-ss param)
-			return seg - start_ref
+			// segment_times want durations, not timestamps so we must substract the -ss param
+			// since we give a greater value to -ss to prevent wrong seeks but -segment_times
+			// needs precise segments, we use the keyframe we want to seek to as a reference.
+			return seg - ts.file.Keyframes[start]
 		})),
 		"-segment_list_type", "flat",
 		"-segment_list", "pipe:1",
