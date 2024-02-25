@@ -27,7 +27,7 @@ in
       wgo
       mediainfo
       libmediainfo
-      ffmpeg
+      ffmpeg-full
       postgresql_15
       eslint_d
       prettierd

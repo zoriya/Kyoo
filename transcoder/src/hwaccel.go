@@ -17,7 +17,7 @@ func DetectHardwareAccel() HwAccelT {
 			EncodeFlags: []string{
 				"-c:v", "libx264",
 				// superfast or ultrafast would produce a file extremly big so we prever veryfast or faster.
-				"-preset", "faster",
+				"-preset", "fast",
 				// sc_threshold is a scene detection mechanisum used to create a keyframe when the scene changes
 				// this is on by default and inserts keyframes where we don't want to (it also breaks force_key_frames)
 				// we disable it to prevents whole scenes from behing removed due to the -f segment failing to find the corresonding keyframe
@@ -63,6 +63,19 @@ func DetectHardwareAccel() HwAccelT {
 				// "-vf", "format=nv12|vaapi,hwupload",
 			},
 			ScaleFilter: "scale_vaapi=%d:%d",
+		}
+	case "qsv", "intel":
+		return HwAccelT{
+			Name: name,
+			DecodeFlags: []string{
+				"-hwaccel", "qsv",
+				"-hwaccel_output_format", "qsv",
+			},
+			EncodeFlags: []string{
+				"-c:v", "h264_qsv",
+				"-preset", "fast",
+			},
+			ScaleFilter: "scale_qsv=%d:%d",
 		}
 	default:
 		log.Printf("No hardware accelerator named: %s", name)
