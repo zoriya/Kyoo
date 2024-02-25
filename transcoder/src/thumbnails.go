@@ -27,15 +27,8 @@ type Thumbnail struct {
 
 var thumbnails = NewCMap[string, *Thumbnail]()
 
-func ExtractThumbnail(path string, route string, sha *string) (string, error) {
-	ret, _ := thumbnails.GetOrCreate(path, func() *Thumbnail {
-		if sha == nil {
-			nsha, err := GetHash(path)
-			if err != nil {
-				return nil
-			}
-			sha = &nsha
-		}
+func ExtractThumbnail(path string, route string, sha string) (string, error) {
+	ret, _ := thumbnails.GetOrCreate(sha, func() *Thumbnail {
 		ret := &Thumbnail{
 			path: fmt.Sprintf("%s/%s", Settings.Metadata, sha),
 		}

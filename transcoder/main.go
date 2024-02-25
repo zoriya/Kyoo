@@ -190,7 +190,7 @@ func (h *Handler) GetInfo(c echo.Context) error {
 	go src.ExtractThumbnail(
 		ret.Path,
 		route,
-		&sha,
+		sha,
 	)
 	return c.JSON(http.StatusOK, ret)
 }
@@ -265,11 +265,15 @@ func (h *Handler) GetThumbnails(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	sha, err := src.GetHash(path)
+	if err != nil {
+		return err
+	}
 
 	out, err := src.ExtractThumbnail(
 		path,
 		GetRoute(c),
-		nil,
+		sha,
 	)
 	if err != nil {
 		return err
@@ -289,11 +293,15 @@ func (h *Handler) GetThumbnailsVtt(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	sha, err := src.GetHash(path)
+	if err != nil {
+		return err
+	}
 
 	out, err := src.ExtractThumbnail(
 		path,
 		GetRoute(c),
-		nil,
+		sha,
 	)
 	if err != nil {
 		return err
