@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using EntityFrameworkCore.Projectables;
 using Kyoo.Abstractions.Controllers;
@@ -117,6 +118,14 @@ namespace Kyoo.Abstractions.Models
 
 		/// <inheritdoc />
 		public Image? Logo { get; set; }
+
+		[SerializeIgnore]
+		[Column("air_date")]
+		public DateTime? StartAir => AirDate;
+
+		[SerializeIgnore]
+		[Column("air_date")]
+		public DateTime? EndAir => AirDate;
 
 		/// <summary>
 		/// A video of a few minutes that tease the content.
