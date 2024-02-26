@@ -33,11 +33,20 @@ RUN go build -o ./transcoder
 # we use trixie (debian's testing because ffmpeg on latest is v5 and we need v6)
 # https://packages.debian.org/bookworm/ffmpeg for version tracking
 FROM debian:trixie-slim
+
+# read target arch from buildx or default to amd64 if using legacy builder.
+ARG TARGETARCH
+ENV TARGETARCH=${TARGETARCH:-amd64}
+RUN echo $TARGETARCH
 RUN sed -i -e's/ main/ main contrib non-free/g' /etc/apt/sources.list.d/debian.sources
-RUN apt-get update \
+RUN set -x && apt-get update \
 	&& apt-get install --no-install-recommends --no-install-suggests -y \
+	# runtime dependencies
 	ffmpeg libmediainfo-dev \
-	vainfo mesa-va-drivers intel-media-va-driver-non-free i965-va-driver-shaders \
+	# hwaccel dependencies
+	vainfo mesa-va-drivers \
+	# intel hwaccel dependencies, not available everywhere
+	$([ " $TARGETARCH" = " amd64" ] && echo "intel-media-va-driver-non-free i965-va-driver-shaders") \
 	&& apt-get clean autoclean -y \
 	&& apt-get autoremove -y \
 	&& rm -rf /var/lib/apt/lists/*
