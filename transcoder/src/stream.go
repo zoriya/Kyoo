@@ -68,13 +68,25 @@ func NewStream(file *FileStream, handle StreamHandle, ret *Stream) {
 	ret.heads = make([]Head, 0)
 
 	length, is_done := file.Keyframes.Length()
-	ret.segments = make([]Segment, length)
+	ret.segments = make([]Segment, length, 2000)
 	for seg := range ret.segments {
 		ret.segments[seg].channel = make(chan struct{})
 	}
 
 	if !is_done {
-		// TODO: create new ret.segments for every new keyframes that get created in the file.
+		file.Keyframes.AddListener(func(keyframes []float64) {
+			ret.lock.Lock()
+			defer ret.lock.Unlock()
+			old_length := len(ret.segments)
+			if cap(ret.segments) > len(keyframes) {
+				ret.segments = ret.segments[:len(keyframes)]
+			} else {
+				ret.segments = append(ret.segments, make([]Segment, len(keyframes)-old_length)...)
+			}
+			for seg := old_length; seg < len(keyframes); seg++ {
+				ret.segments[seg].channel = make(chan struct{})
+			}
+		})
 	}
 }
 
@@ -111,7 +123,7 @@ func (ts *Stream) run(start int32) error {
 	// if keyframes analysys is not finished, always have a 1-segment padding
 	// for the extra segment needed for precise split (look comment before -to flag)
 	if !is_done {
-		end--
+		end -= 2
 	}
 	// Stop at the first finished segment
 	ts.lock.Lock()
