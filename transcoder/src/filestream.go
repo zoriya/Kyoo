@@ -12,8 +12,7 @@ type FileStream struct {
 	err         error
 	Path        string
 	Out         string
-	Keyframes   []float64
-	CanTransmux bool
+	Keyframes   *Keyframe
 	Info        *MediaInfo
 	videos      CMap[Quality, *VideoStream]
 	audios      CMap[int32, *AudioStream]
@@ -40,12 +39,7 @@ func NewFileStream(path string, sha string, route string) *FileStream {
 	ret.ready.Add(1)
 	go func() {
 		defer ret.ready.Done()
-		keyframes, can_transmux, err := GetKeyframes(path)
-		ret.Keyframes = keyframes
-		ret.CanTransmux = can_transmux
-		if err != nil {
-			ret.err = err
-		}
+		ret.Keyframes = GetKeyframes(sha, path)
 	}()
 
 	return ret

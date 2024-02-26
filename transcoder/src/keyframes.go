@@ -2,13 +2,75 @@ package src
 
 import (
 	"bufio"
-	"math"
+	"fmt"
+	"log"
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
 )
 
-func GetKeyframes(path string) ([]float64, bool, error) {
+type Keyframe struct {
+	Sha         string
+	Keyframes   []float64
+	CanTransmux bool
+	IsDone      bool
+	mutex       sync.RWMutex
+	ready       sync.WaitGroup
+}
+
+func (kf *Keyframe) Get(idx int32) float64 {
+	kf.mutex.RLock()
+	defer kf.mutex.RUnlock()
+	return kf.Keyframes[idx]
+}
+
+func (kf *Keyframe) Slice(start int32, end int32) []float64 {
+	if end <= start {
+		return []float64{}
+	}
+	kf.mutex.RLock()
+	defer kf.mutex.RUnlock()
+	ref := kf.Keyframes[start:end]
+	ret := make([]float64, end-start)
+	copy(ret, ref)
+	return ret
+}
+
+func (kf *Keyframe) Length() (int32, bool) {
+	kf.mutex.RLock()
+	defer kf.mutex.RUnlock()
+	return int32(len(kf.Keyframes)), kf.IsDone
+}
+
+var keyframes = NewCMap[string, *Keyframe]()
+
+func GetKeyframes(sha string, path string) *Keyframe {
+	ret, _ := keyframes.GetOrCreate(sha, func() *Keyframe {
+		kf := &Keyframe{
+			Sha:    sha,
+			IsDone: false,
+		}
+		kf.ready.Add(1)
+		go func() {
+			save_path := fmt.Sprintf("%s/%s/keyframes.json", Settings.Metadata, sha)
+			if err := getSavedInfo(save_path, kf); err == nil {
+				log.Printf("Using keyframes cache on filesystem for %s", path)
+				return
+			}
+
+			err := getKeyframes(path, kf)
+			if err == nil {
+				saveInfo(save_path, kf)
+			}
+		}()
+		return kf
+	})
+	ret.ready.Wait()
+	return ret
+}
+
+func getKeyframes(path string, kf *Keyframe) error {
 	defer printExecTime("ffprobe analysis for %s", path)()
 	// run ffprobe to return all IFrames, IFrames are points where we can split the video in segments.
 	// We ask ffprobe to return the time of each frame and it's flags
@@ -24,11 +86,11 @@ func GetKeyframes(path string) ([]float64, bool, error) {
 	)
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		return nil, false, err
+		return err
 	}
 	err = cmd.Start()
 	if err != nil {
-		return nil, false, err
+		return err
 	}
 
 	scanner := bufio.NewScanner(stdout)
@@ -50,7 +112,7 @@ func GetKeyframes(path string) ([]float64, bool, error) {
 
 		fpts, err := strconv.ParseFloat(pts, 64)
 		if err != nil {
-			return nil, false, err
+			return err
 		}
 
 		// Before, we wanted to only save keyframes with at least 3s betweens
@@ -70,5 +132,8 @@ func GetKeyframes(path string) ([]float64, bool, error) {
 		}
 		ret = append(ret, fpts)
 	}
-	return ret, can_transmux, nil
+	kf.Keyframes = ret
+	kf.IsDone = true
+	kf.ready.Done()
+	return nil
 }
