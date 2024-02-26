@@ -69,6 +69,7 @@ func DetectHardwareAccel() HwAccelT {
 			Name: name,
 			DecodeFlags: []string{
 				"-hwaccel", "qsv",
+				// "-qsv_device", GetEnvOr("GOTRANSCODER_QSV_RENDERER", "/dev/dri/renderD128"),
 				"-hwaccel_output_format", "qsv",
 			},
 			EncodeFlags: []string{
