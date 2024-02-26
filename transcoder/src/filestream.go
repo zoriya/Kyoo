@@ -81,7 +81,7 @@ func (fs *FileStream) GetMaster() string {
 			}
 		}
 		// TODO: also check if the codec is valid in a hls before putting transmux
-		if fs.CanTransmux {
+		if true {
 			bitrate := float64(fs.Info.Video.Bitrate)
 			master += "#EXT-X-STREAM-INF:"
 			master += fmt.Sprintf("AVERAGE-BANDWIDTH=%d,", int(math.Min(bitrate*0.8, float64(transmux_quality.AverageBitrate()))))
