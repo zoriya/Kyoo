@@ -210,7 +210,7 @@ func GetInfo(path string, sha string, route string) (*MediaInfo, error) {
 	return ret, err
 }
 
-func getSavedInfo(save_path string, mi *MediaInfo) error {
+func getSavedInfo[T any](save_path string, mi *T) error {
 	saved_file, err := os.Open(save_path)
 	if err != nil {
 		return err
@@ -226,7 +226,7 @@ func getSavedInfo(save_path string, mi *MediaInfo) error {
 	return nil
 }
 
-func saveInfo(save_path string, mi *MediaInfo) error {
+func saveInfo[T any](save_path string, mi *T) error {
 	content, err := json.Marshal(*mi)
 	if err != nil {
 		return err
