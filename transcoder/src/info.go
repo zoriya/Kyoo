@@ -1,7 +1,11 @@
 package src
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"log"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -185,6 +189,12 @@ func GetInfo(path string, sha string, route string) (*MediaInfo, error) {
 			ready: readyChan,
 		}
 		go func() {
+			if err := getSavedInfo(sha, mi); err == nil {
+				log.Printf("Using mediainfo cache on filesystem for %s", path)
+				close(readyChan)
+				return
+			}
+
 			var val *MediaInfo
 			val, err = getInfo(path, route)
 			*mi = *val
@@ -196,6 +206,22 @@ func GetInfo(path string, sha string, route string) (*MediaInfo, error) {
 	})
 	<-ret.ready
 	return ret, err
+}
+
+func getSavedInfo(sha string, mi *MediaInfo) error {
+	saved_file, err := os.Open(fmt.Sprintf("%s/%s/info.json", Settings.Metadata, sha))
+	if err != nil {
+		return err
+	}
+	saved, err := io.ReadAll(saved_file)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal([]byte(saved), mi)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func getInfo(path string, route string) (*MediaInfo, error) {
