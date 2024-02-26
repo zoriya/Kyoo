@@ -1,4 +1,5 @@
 async def main():
+	import asyncio
 	import os
 	import logging
 	import sys
@@ -38,8 +39,9 @@ async def main():
 	) as client:
 		try:
 			scanner = Scanner(client, languages=languages.split(","), api_key=api_key)
-			await scanner.scan(path)
-			logging.info("Scan finished. Starting to monitor...")
-			await monitor(path, scanner)
+			await asyncio.gather(
+				monitor(path, scanner),
+				scanner.scan(path),
+			)
 		except ProviderError as e:
 			logging.error(e)

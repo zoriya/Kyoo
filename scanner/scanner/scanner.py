@@ -54,6 +54,7 @@ class Scanner:
 		# We batch videos by 20 because too mutch at once kinda DDOS everything.
 		for group in batch(iter(videos), 20):
 			await asyncio.gather(*map(self.identify, group))
+		logging.info("Scan finished.")
 
 	async def get_registered_paths(self) -> List[str]:
 		paths = None
