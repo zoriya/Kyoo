@@ -14,7 +14,7 @@ func NewAudioStream(file *FileStream, idx int32) *AudioStream {
 	log.Printf("Creating a audio stream %d for %s", idx, file.Path)
 	ret := new(AudioStream)
 	ret.index = idx
-	ret.Stream = NewStream(file, ret)
+	NewStream(file, ret, &ret.Stream)
 	return ret
 }
 
