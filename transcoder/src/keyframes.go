@@ -17,6 +17,7 @@ type Keyframe struct {
 	IsDone      bool
 	mutex       sync.RWMutex
 	ready       sync.WaitGroup
+	listeners   []func(keyframes []float64)
 }
 
 func (kf *Keyframe) Get(idx int32) float64 {
@@ -41,6 +42,21 @@ func (kf *Keyframe) Length() (int32, bool) {
 	kf.mutex.RLock()
 	defer kf.mutex.RUnlock()
 	return int32(len(kf.Keyframes)), kf.IsDone
+}
+
+func (kf *Keyframe) add(values []float64) {
+	kf.mutex.Lock()
+	defer kf.mutex.Unlock()
+	kf.Keyframes = append(kf.Keyframes, values...)
+	for _, listener := range kf.listeners {
+		listener(kf.Keyframes)
+	}
+}
+
+func (kf *Keyframe) AddListener(callback func(keyframes []float64)) {
+	kf.mutex.RLock()
+	defer kf.mutex.RUnlock()
+	kf.listeners = append(kf.listeners, callback)
 }
 
 var keyframes = NewCMap[string, *Keyframe]()
@@ -96,6 +112,8 @@ func getKeyframes(path string, kf *Keyframe) error {
 	scanner := bufio.NewScanner(stdout)
 
 	ret := make([]float64, 0, 1000)
+	max := 100
+	done := 0
 	for scanner.Scan() {
 		frame := scanner.Text()
 		if frame == "" {
@@ -120,7 +138,7 @@ func getKeyframes(path string, kf *Keyframe) error {
 		// the segment time and decide to cut at a random keyframe. Having every keyframe
 		// handled as a segment prevents that.
 
-		if len(ret) == 0 {
+		if done == 0 && len(ret) == 0 {
 			// sometimes, videos can start at a timing greater than 0:00. We need to take that into account
 			// and only list keyframes that come after the start of the video (without that, our segments count
 			// mismatch and we can have the same segment twice on the stream).
@@ -131,9 +149,23 @@ func getKeyframes(path string, kf *Keyframe) error {
 			continue
 		}
 		ret = append(ret, fpts)
+
+		if len(ret) == max {
+			kf.add(ret)
+			if done == 0 {
+				kf.ready.Done()
+			} else if done >= 500 {
+				max = 500
+			}
+			done += max
+			// clear the array without reallocing it
+			ret = ret[:0]
+		}
 	}
-	kf.Keyframes = ret
+	kf.add(ret)
+	if done == 0 {
+		kf.ready.Done()
+	}
 	kf.IsDone = true
-	kf.ready.Done()
 	return nil
 }
