@@ -189,7 +189,8 @@ func GetInfo(path string, sha string, route string) (*MediaInfo, error) {
 			ready: readyChan,
 		}
 		go func() {
-			if err := getSavedInfo(sha, mi); err == nil {
+			save_path := fmt.Sprintf("%s/%s/info.json", Settings.Metadata, sha)
+			if err := getSavedInfo(save_path, mi); err == nil {
 				log.Printf("Using mediainfo cache on filesystem for %s", path)
 				close(readyChan)
 				return
@@ -201,6 +202,7 @@ func GetInfo(path string, sha string, route string) (*MediaInfo, error) {
 			mi.ready = readyChan
 			mi.Sha = sha
 			close(readyChan)
+			saveInfo(save_path, mi)
 		}()
 		return mi
 	})
@@ -208,8 +210,8 @@ func GetInfo(path string, sha string, route string) (*MediaInfo, error) {
 	return ret, err
 }
 
-func getSavedInfo(sha string, mi *MediaInfo) error {
-	saved_file, err := os.Open(fmt.Sprintf("%s/%s/info.json", Settings.Metadata, sha))
+func getSavedInfo(save_path string, mi *MediaInfo) error {
+	saved_file, err := os.Open(save_path)
 	if err != nil {
 		return err
 	}
@@ -222,6 +224,14 @@ func getSavedInfo(sha string, mi *MediaInfo) error {
 		return err
 	}
 	return nil
+}
+
+func saveInfo(save_path string, mi *MediaInfo) error {
+	content, err := json.Marshal(*mi)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(save_path, content, 0o644)
 }
 
 func getInfo(path string, route string) (*MediaInfo, error) {
