@@ -8,14 +8,14 @@ import (
 )
 
 type FileStream struct {
-	ready       sync.WaitGroup
-	err         error
-	Path        string
-	Out         string
-	Keyframes   *Keyframe
-	Info        *MediaInfo
-	videos      CMap[Quality, *VideoStream]
-	audios      CMap[int32, *AudioStream]
+	ready     sync.WaitGroup
+	err       error
+	Path      string
+	Out       string
+	Keyframes *Keyframe
+	Info      *MediaInfo
+	videos    CMap[Quality, *VideoStream]
+	audios    CMap[int32, *AudioStream]
 }
 
 func NewFileStream(path string, sha string, route string) *FileStream {
