@@ -34,8 +34,6 @@ func GetKeyframes(path string) ([]float64, bool, error) {
 	scanner := bufio.NewScanner(stdout)
 
 	ret := make([]float64, 0, 1000)
-	last := 0.
-	can_transmux := true
 	for scanner.Scan() {
 		frame := scanner.Text()
 		if frame == "" {
@@ -70,22 +68,6 @@ func GetKeyframes(path string) ([]float64, bool, error) {
 			ret = append(ret, 0)
 			continue
 		}
-
-		// If we have a segment of more than 20s, create new keyframes during transcode and disable transmuxing
-		if fpts-last > 20 {
-			can_transmux = false
-
-			fake_count := math.Ceil(fpts - last/4)
-			duration := (fpts - last) / fake_count
-			// let the last one be handled normally, this prevents floating points rounding
-			for fake_count > 1 {
-				fake_count--
-				last = last + duration
-				ret = append(ret, last)
-			}
-		}
-
-		last = fpts
 		ret = append(ret, fpts)
 	}
 	return ret, can_transmux, nil
