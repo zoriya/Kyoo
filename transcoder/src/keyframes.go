@@ -54,8 +54,8 @@ func (kf *Keyframe) add(values []float64) {
 }
 
 func (kf *Keyframe) AddListener(callback func(keyframes []float64)) {
-	kf.mutex.RLock()
-	defer kf.mutex.RUnlock()
+	kf.mutex.Lock()
+	defer kf.mutex.Unlock()
 	kf.listeners = append(kf.listeners, callback)
 }
 
@@ -72,6 +72,7 @@ func GetKeyframes(sha string, path string) *Keyframe {
 			save_path := fmt.Sprintf("%s/%s/keyframes.json", Settings.Metadata, sha)
 			if err := getSavedInfo(save_path, kf); err == nil {
 				log.Printf("Using keyframes cache on filesystem for %s", path)
+				kf.ready.Done()
 				return
 			}
 

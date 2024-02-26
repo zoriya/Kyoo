@@ -377,6 +377,7 @@ func (ts *Stream) GetSegment(segment int32) (string, error) {
 			}
 		}
 	}
+	readyChan := ts.segments[segment].channel
 	ts.lock.RUnlock()
 
 	if !ready {
@@ -392,7 +393,7 @@ func (ts *Stream) GetSegment(segment int32) (string, error) {
 		}
 
 		select {
-		case <-ts.segments[segment].channel:
+		case <-readyChan:
 		case <-time.After(60 * time.Second):
 			return "", errors.New("could not retrive the selected segment (timeout)")
 		}
