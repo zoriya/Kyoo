@@ -78,6 +78,7 @@ export const getTokenWJ = async (account?: Account | null): ReturnType<typeof ru
 		let token = account.token;
 
 		if (account.token.expire_at <= new Date(new Date().getTime() + 10 * 1000)) {
+			console.log("refreshing token for account", account.slug);
 			try {
 				token = await queryFn(
 					{
