@@ -655,7 +655,7 @@ class TheMovieDatabase(Provider):
 				)
 				+ episode_nbr
 			)
-		return next(
+		absolute = next(
 			(
 				# The + 1 is to go from 0based index to 1based absolute number
 				i + 1
@@ -664,6 +664,18 @@ class TheMovieDatabase(Provider):
 			),
 			None,
 		)
+		if absolute is not None:
+			return absolute
+		# assume we use tmdb weird absolute by default (for example, One Piece S21E800, the first
+		# episode of S21 si not reset to 0 but keep increasing so it can be 800
+		start = next(
+			(x["episode_number"] for x in absgrp if x["season_number"] == season), None
+		)
+		if start is None or start <= episode_nbr:
+			return None
+		# add back the continuous number (imagine the user has one piece S21e31
+		# but tmdb registered it as S21E831 since S21's first ep is 800
+		return await self.get_absolute_number(show_id, season, episode_nbr + start)
 
 	async def identify_collection(self, provider_id: str) -> Collection:
 		languages = self.get_languages()
