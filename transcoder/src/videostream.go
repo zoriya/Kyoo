@@ -14,7 +14,7 @@ func NewVideoStream(file *FileStream, quality Quality) *VideoStream {
 	log.Printf("Creating a new video stream for %s in quality %s", file.Path, quality)
 	ret := new(VideoStream)
 	ret.quality = quality
-	ret.Stream = NewStream(file, ret)
+	NewStream(file, ret, &ret.Stream)
 	return ret
 }
 
