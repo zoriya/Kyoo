@@ -10,7 +10,7 @@ x-transcoder: &transcoder-base
   env_file:
     - ./.env
   volumes:
-    - ${LIBRARY_ROOT}:/video
+    - ${LIBRARY_ROOT}:/video:ro
     - ${CACHE_ROOT}:/cache
     - metadata:/metadata
 
@@ -46,7 +46,7 @@ services:
     environment:
       - KYOO_URL=${KYOO_URL:-http://back:5000}
     volumes:
-      - ${LIBRARY_ROOT}:/video
+      - ${LIBRARY_ROOT}:/video:ro
 
   transcoder:
     <<: *transcoder-base
