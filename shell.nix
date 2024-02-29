@@ -10,7 +10,7 @@
     combinePackages [
       sdk_7_0
       aspnetcore_7_0
-      runtime_6_0
+      aspnetcore_6_0
     ];
 in
   pkgs.mkShell {
