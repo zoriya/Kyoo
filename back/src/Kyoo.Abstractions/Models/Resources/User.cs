@@ -69,6 +69,11 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public Dictionary<string, string> Settings { get; set; } = new();
 
+		/// <summary>
+		/// User accounts on other services.
+		/// </summary>
+		public Dictionary<string, ExternalToken> ExternalId { get; set; } = new();
+
 		public User() { }
 
 		[JsonConstructor]
@@ -80,5 +85,24 @@ namespace Kyoo.Abstractions.Models
 				Username = username;
 			}
 		}
+	}
+
+	public class ExternalToken
+	{
+		/// <summary>
+		/// The id of this user on the external service.
+		/// </summary>
+		public string Id { get; set; }
+
+		/// <summary>
+		/// A jwt token used to interact with the service.
+		/// Do not forget to refresh it when using it if necessary.
+		/// </summary>
+		public JwtToken Token { get; set; }
+
+		/// <summary>
+		/// The link to the user profile on this website. Null if it does not exist.
+		/// </summary>
+		public string? ProfileUrl { get; set; }
 	}
 }
