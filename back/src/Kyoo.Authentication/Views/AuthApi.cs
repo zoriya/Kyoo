@@ -18,7 +18,6 @@
 
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -47,7 +46,7 @@ namespace Kyoo.Authentication.Views
 		IRepository<User> users,
 		ITokenController tokenController,
 		IThumbnailsManager thumbs,
-		PermissionOption permissions
+		PermissionOption options
 	) : ControllerBase
 	{
 		/// <summary>
@@ -58,6 +57,64 @@ namespace Kyoo.Authentication.Views
 		public static ObjectResult Forbid(object value)
 		{
 			return new ObjectResult(value) { StatusCode = StatusCodes.Status403Forbidden };
+		}
+
+		/// <summary>
+		/// Oauth Login.
+		/// </summary>
+		/// <remarks>
+		/// Login via a registered oauth provider.
+		/// </remarks>
+		/// <returns>A redirect to the provider's login page.</returns>
+		/// <response code="404">The provider is not register with this instance of kyoo.</response>
+		[HttpPost("login/{provider}")]
+		[ProducesResponseType(StatusCodes.Status302Found)]
+		[ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(RequestError))]
+		public ActionResult<JwtToken> LoginVia(string provider)
+		{
+			if (!options.OIDC.ContainsKey(provider))
+			{
+				return NotFound(
+					new RequestError(
+						$"Invalid provider. {provider} is not registered no this instance of kyoo."
+					)
+				);
+			}
+			OidcProvider prov = options.OIDC[provider];
+			char querySep = prov.AuthorizationUrl.Contains('?') ? '&' : '?';
+			string url = $"{prov.AuthorizationUrl}{querySep}response_type=code";
+			url += $"&client_id={prov.ClientId}";
+			url += $"&redirect_uri={options.PublicUrl.TrimEnd('/')}/api/auth/callback/{provider}";
+			if (prov.Scope is not null)
+				url += $"&scope={prov.Scope}";
+			return Redirect(url);
+		}
+
+		/// <summary>
+		/// Oauth Login Callback.
+		/// </summary>
+		/// <remarks>
+		/// This route is not meant to be called manually, the user should be redirected automatically here
+		/// after a successful login on the /login/{provider} page.
+		/// </remarks>
+		/// <returns>A redirect to the provider's login page.</returns>
+		/// <response code="403">The provider gave an error.</response>
+		[HttpPost("callback/{provider}")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
+		public async Task<ActionResult<JwtToken>> OauthCallback(string provider, dynamic val)
+		{
+			throw new NotImplementedException();
+			// User? user = await users.GetOrDefault(
+			// 	new Filter<User>.Lambda(x => x.ExternalId[provider].Id == val.Id)
+			// );
+			// if (user == null)
+			// 	user = await users.Create(val);
+			// return new JwtToken(
+			// 	tokenController.CreateAccessToken(user, out TimeSpan expireIn),
+			// 	await tokenController.CreateRefreshToken(user),
+			// 	expireIn
+			// );
 		}
 
 		/// <summary>
@@ -104,10 +161,7 @@ namespace Kyoo.Authentication.Views
 		public async Task<ActionResult<JwtToken>> Register([FromBody] RegisterRequest request)
 		{
 			User user = request.ToUser();
-			user.Permissions = permissions.NewUser;
-			// If no users exists, the new one will be an admin. Give it every permissions.
-			if (!(await users.GetAll(limit: new Pagination(1))).Any())
-				user.Permissions = PermissionOption.Admin;
+			user.Permissions = options.NewUser;
 			try
 			{
 				await users.Create(user);
