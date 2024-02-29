@@ -34,7 +34,6 @@ services:
     restart: unless-stopped
     environment:
       - KYOO_URL=${KYOO_URL:-http://back:5000}
-      - PUBLIC_BACK_URL=${PUBLIC_BACK_URL}
 
   scanner:
     image: zoriya/kyoo_scanner:edge
