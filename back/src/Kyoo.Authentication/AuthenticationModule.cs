@@ -17,6 +17,7 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
@@ -26,6 +27,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Kyoo.Authentication
@@ -33,7 +35,13 @@ namespace Kyoo.Authentication
 	/// <summary>
 	/// A module that enable OpenID authentication for Kyoo.
 	/// </summary>
-	public class AuthenticationModule : IPlugin
+	/// <remarks>
+	/// Create a new authentication module instance and use the given configuration.
+	/// </remarks>
+	public class AuthenticationModule(
+		IConfiguration configuration,
+		ILogger<AuthenticationModule> logger
+	) : IPlugin
 	{
 		/// <inheritdoc />
 		public string Name => "Authentication";
@@ -41,16 +49,7 @@ namespace Kyoo.Authentication
 		/// <summary>
 		/// The configuration to use.
 		/// </summary>
-		private readonly IConfiguration _configuration;
-
-		/// <summary>
-		/// Create a new authentication module instance and use the given configuration.
-		/// </summary>
-		/// <param name="configuration">The configuration to use</param>
-		public AuthenticationModule(IConfiguration configuration)
-		{
-			_configuration = configuration;
-		}
+		private readonly IConfiguration _configuration = configuration;
 
 		/// <inheritdoc />
 		public void Configure(ContainerBuilder builder)
@@ -75,7 +74,53 @@ namespace Kyoo.Authentication
 					NewUser = _configuration
 						.GetValue("DEFAULT_PERMISSIONS", "overall.read")!
 						.Split(','),
+					PublicUrl =
+						_configuration.GetValue<string?>("PUBLIC_URL")
+						?? "http://localhost:8901",
 					ApiKeys = _configuration.GetValue("KYOO_APIKEYS", string.Empty)!.Split(','),
+					OIDC = _configuration
+						.AsEnumerable()
+						.Where((pair) => pair.Key.StartsWith("OIDC_"))
+						.Aggregate(
+							new Dictionary<string, OidcProvider>(),
+							(acc, val) =>
+							{
+								if (val.Value is null)
+									return acc;
+								if (val.Key.Split("_") is not ["OIDC", string provider, string key])
+								{
+									logger.LogError("Invalid oidc config value: {}", val.Key);
+									return acc;
+								}
+								provider = provider.ToLowerInvariant();
+								key = key.ToLowerInvariant();
+
+								if (!acc.ContainsKey(provider))
+									acc.Add(provider, new());
+								switch (key)
+								{
+									case "clientid":
+										acc[provider].ClientId = val.Value;
+										break;
+									case "secret":
+										acc[provider].Secret = val.Value;
+										break;
+									case "scope":
+										acc[provider].Scope = val.Value;
+										break;
+									case "authorization":
+										acc[provider].AuthorizationUrl = val.Value;
+										break;
+									case "userinfo":
+										acc[provider].UserinfoUrl = val.Value;
+										break;
+									default:
+										logger.LogError("Invalid oidc config value: {}", key);
+										return acc;
+								}
+								return acc;
+							}
+						),
 				};
 			services.AddSingleton(permissions);
 			services.AddSingleton(

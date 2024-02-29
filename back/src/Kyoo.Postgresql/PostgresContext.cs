@@ -20,7 +20,6 @@ using System;
 using System.Globalization;
 using EFCore.NamingConventions.Internal;
 using Kyoo.Abstractions.Models;
-using Kyoo.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
