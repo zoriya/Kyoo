@@ -17,50 +17,55 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Kyoo.Abstractions.Models.Permissions;
 
-namespace Kyoo.Authentication.Models
+namespace Kyoo.Authentication.Models;
+
+/// <summary>
+/// Permission options.
+/// </summary>
+public class PermissionOption
 {
 	/// <summary>
-	/// Permission options.
+	/// The path to get this option from the root configuration.
 	/// </summary>
-	public class PermissionOption
-	{
-		/// <summary>
-		/// The path to get this option from the root configuration.
-		/// </summary>
-		public const string Path = "authentication:permissions";
+	public const string Path = "authentication:permissions";
 
-		/// <summary>
-		/// All permissions possibles, this is used to create an admin group.
-		/// </summary>
-		public static string[] Admin
-		{
-			get
-			{
-				return Enum.GetNames<Group>()
-					.Where(x => x != nameof(Group.None))
-					.SelectMany(group =>
-						Enum.GetNames<Kind>().Select(kind => $"{group}.{kind}".ToLowerInvariant())
-					)
-					.ToArray();
-			}
-		}
+	/// <summary>
+	/// The default permissions that will be given to a non-connected user.
+	/// </summary>
+	public string[] Default { get; set; } = { "overall.read", "overall.play" };
 
-		/// <summary>
-		/// The default permissions that will be given to a non-connected user.
-		/// </summary>
-		public string[] Default { get; set; } = { "overall.read", "overall.play" };
+	/// <summary>
+	/// Permissions applied to a new user.
+	/// </summary>
+	public string[] NewUser { get; set; } = { "overall.read", "overall.play" };
 
-		/// <summary>
-		/// Permissions applied to a new user.
-		/// </summary>
-		public string[] NewUser { get; set; } = { "overall.read", "overall.play" };
+	public static string[] Admin =>
+		Enum.GetNames<Group>()
+			.Where(x => x != nameof(Group.None))
+			.SelectMany(group =>
+				Enum.GetNames<Kind>().Select(kind => $"{group}.{kind}".ToLowerInvariant())
+			)
+			.ToArray();
 
-		/// <summary>
-		/// The list of available ApiKeys.
-		/// </summary>
-		public string[] ApiKeys { get; set; } = Array.Empty<string>();
-	}
+	/// <summary>
+	/// The list of available ApiKeys.
+	/// </summary>
+	public string[] ApiKeys { get; set; } = Array.Empty<string>();
+
+	public string PublicUrl { get; set; }
+
+	public Dictionary<string, OidcProvider> OIDC { get; set; }
+}
+
+public class OidcProvider
+{
+	public string AuthorizationUrl { get; set; }
+	public string UserinfoUrl { get; set; }
+	public string ClientId { get; set; }
+	public string Secret { get; set; }
+	public string? Scope { get; set; }
 }
