@@ -16,11 +16,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Postgresql;
 using Microsoft.EntityFrameworkCore;
@@ -58,6 +60,16 @@ public class UserRepository(DatabaseContext database, IThumbnailsManager thumbs)
 	/// <inheritdoc />
 	public override async Task<User> Create(User obj)
 	{
+		// If no users exists, the new one will be an admin. Give it every permissions.
+		if (!await _database.Users.AnyAsync())
+		{
+			obj.Permissions = Enum.GetNames<Group>()
+				.Where(x => x != nameof(Group.None))
+				.SelectMany(group =>
+					Enum.GetNames<Kind>().Select(kind => $"{group}.{kind}".ToLowerInvariant())
+				)
+				.ToArray();
+		}
 		await base.Create(obj);
 		_database.Entry(obj).State = EntityState.Added;
 		await _database.SaveChangesAsync(() => Get(obj.Slug));
