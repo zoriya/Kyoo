@@ -167,6 +167,14 @@ namespace Kyoo.Postgresql
 			optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 		}
 
+		private static ValueComparer<Dictionary<string, T>> _GetComparer<T>()
+		{
+			return new(
+				(c1, c2) => c1!.SequenceEqual(c2!),
+				c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode()))
+			);
+		}
+
 		/// <summary>
 		/// Build the metadata model for the given type.
 		/// </summary>
@@ -193,6 +201,10 @@ namespace Kyoo.Postgresql
 						)!
 				)
 				.HasColumnType("json");
+			modelBuilder
+				.Entity<T>()
+				.Property(x => x.ExternalId)
+				.Metadata.SetValueComparer(_GetComparer<MetadataId>());
 		}
 
 		private static void _HasImages<T>(ModelBuilder modelBuilder)
@@ -319,19 +331,6 @@ namespace Kyoo.Postgresql
 			_HasAddedDate<Issue>(modelBuilder);
 
 			modelBuilder
-				.Entity<User>()
-				.Property(x => x.Settings)
-				.HasConversion(
-					v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-					v =>
-						JsonSerializer.Deserialize<Dictionary<string, string>>(
-							v,
-							(JsonSerializerOptions?)null
-						)!
-				)
-				.HasColumnType("json");
-
-			modelBuilder
 				.Entity<MovieWatchStatus>()
 				.HasKey(x => new { User = x.UserId, Movie = x.MovieId });
 			modelBuilder
@@ -418,6 +417,40 @@ namespace Kyoo.Postgresql
 			// 		x.ToJson();
 			// 	});
 			modelBuilder
+				.Entity<User>()
+				.Property(x => x.Settings)
+				.HasConversion(
+					v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+					v =>
+						JsonSerializer.Deserialize<Dictionary<string, string>>(
+							v,
+							(JsonSerializerOptions?)null
+						)!
+				)
+				.HasColumnType("json");
+			modelBuilder
+				.Entity<User>()
+				.Property(x => x.Settings)
+				.Metadata.SetValueComparer(_GetComparer<string>());
+
+			modelBuilder
+				.Entity<User>()
+				.Property(x => x.ExternalId)
+				.HasConversion(
+					v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+					v =>
+						JsonSerializer.Deserialize<Dictionary<string, ExternalToken>>(
+							v,
+							(JsonSerializerOptions?)null
+						)!
+				)
+				.HasColumnType("json");
+			modelBuilder
+				.Entity<User>()
+				.Property(x => x.ExternalId)
+				.Metadata.SetValueComparer(_GetComparer<ExternalToken>());
+
+			modelBuilder
 				.Entity<Issue>()
 				.Property(x => x.Extra)
 				.HasConversion(
@@ -429,6 +462,10 @@ namespace Kyoo.Postgresql
 						)!
 				)
 				.HasColumnType("json");
+			modelBuilder
+				.Entity<Issue>()
+				.Property(x => x.Extra)
+				.Metadata.SetValueComparer(_GetComparer<object>());
 		}
 
 		/// <summary>
