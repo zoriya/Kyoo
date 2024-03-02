@@ -64,8 +64,31 @@ public class PermissionOption
 public class OidcProvider
 {
 	public string AuthorizationUrl { get; set; }
-	public string UserinfoUrl { get; set; }
+	public string TokenUrl { get; set; }
+	public string ProfileUrl { get; set; }
 	public string ClientId { get; set; }
 	public string Secret { get; set; }
 	public string? Scope { get; set; }
+
+	public bool Enabled =>
+		AuthorizationUrl != null
+		&& TokenUrl != null
+		&& ProfileUrl != null
+		&& ClientId != null
+		&& Secret != null;
+
+	public OidcProvider(string provider)
+	{
+		switch (provider)
+		{
+			case "google":
+				AuthorizationUrl = "https://accounts.google.com/o/oauth2/v2/auth";
+				TokenUrl = "https://oauth2.googleapis.com/token";
+				ProfileUrl = "https://openidconnect.googleapis.com/v1/userinfo";
+				Scope = "email profile";
+				break;
+			default:
+				break;
+		}
+	}
 }
