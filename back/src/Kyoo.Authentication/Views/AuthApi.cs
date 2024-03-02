@@ -193,6 +193,7 @@ namespace Kyoo.Authentication.Views
 			newUser.Username = username;
 			newUser.Slug = Utils.Utility.ToSlug(newUser.Username);
 			newUser.ExternalId.Add(provider, extToken);
+			newUser.Permissions = options.NewUser;
 
 			User? user = await users.GetByExternalId(provider, extToken.Id);
 			if (user == null)
