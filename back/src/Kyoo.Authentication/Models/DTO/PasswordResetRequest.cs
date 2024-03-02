@@ -28,7 +28,7 @@ public class PasswordResetRequest
 	/// <summary>
 	/// The old password
 	/// </summary>
-	public string OldPassword { get; set; }
+	public string? OldPassword { get; set; }
 
 	/// <summary>
 	/// The new password

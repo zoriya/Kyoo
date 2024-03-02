@@ -316,7 +316,7 @@ namespace Kyoo.Authentication.Views
 		public async Task<ActionResult<User>> ResetPassword([FromBody] PasswordResetRequest request)
 		{
 			User user = await users.Get(User.GetIdOrThrow());
-			if (!BCryptNet.Verify(request.OldPassword, user.Password))
+			if (user.HasPassword && !BCryptNet.Verify(request.OldPassword, user.Password))
 				return Forbid(new RequestError("The old password is invalid."));
 			return await users.Patch(
 				user.Id,

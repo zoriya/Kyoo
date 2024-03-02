@@ -54,7 +54,9 @@ namespace Kyoo.Abstractions.Models
 		/// The user password (hashed, it can't be read like that). The hashing format is implementation defined.
 		/// </summary>
 		[SerializeIgnore]
-		public string Password { get; set; }
+		public string? Password { get; set; }
+
+		public bool HasPassword => Password != null;
 
 		/// <summary>
 		/// The list of permissions of the user. The format of this is implementation dependent.
