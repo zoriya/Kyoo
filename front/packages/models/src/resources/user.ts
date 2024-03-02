@@ -37,6 +37,10 @@ export const UserP = ResourceP("user")
 		 */
 		permissions: z.array(z.string()),
 		/**
+		 * Does the user can sign-in with a password or only via oidc?
+		 */
+		hasPassword: z.boolean().default(true),
+		/**
 		 * User settings
 		 */
 		settings: z
