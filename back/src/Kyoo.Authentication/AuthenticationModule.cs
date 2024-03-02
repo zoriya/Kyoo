@@ -89,14 +89,14 @@ namespace Kyoo.Authentication
 									return acc;
 								if (val.Key.Split("_") is not ["OIDC", string provider, string key])
 								{
-									logger.LogError("Invalid oidc config value: {}", val.Key);
+									logger.LogError("Invalid oidc config value: {Key}", val.Key);
 									return acc;
 								}
 								provider = provider.ToLowerInvariant();
 								key = key.ToLowerInvariant();
 
 								if (!acc.ContainsKey(provider))
-									acc.Add(provider, new());
+									acc.Add(provider, new(provider));
 								switch (key)
 								{
 									case "clientid":
@@ -111,11 +111,15 @@ namespace Kyoo.Authentication
 									case "authorization":
 										acc[provider].AuthorizationUrl = val.Value;
 										break;
+									case "token":
+										acc[provider].TokenUrl = val.Value;
+										break;
 									case "userinfo":
-										acc[provider].UserinfoUrl = val.Value;
+									case "profile":
+										acc[provider].ProfileUrl = val.Value;
 										break;
 									default:
-										logger.LogError("Invalid oidc config value: {}", key);
+										logger.LogError("Invalid oidc config value: {Key}", key);
 										return acc;
 								}
 								return acc;

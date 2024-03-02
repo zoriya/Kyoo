@@ -17,7 +17,12 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -31,6 +36,9 @@ using Kyoo.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 using BCryptNet = BCrypt.Net.BCrypt;
 
@@ -46,6 +54,7 @@ namespace Kyoo.Authentication.Views
 		IRepository<User> users,
 		ITokenController tokenController,
 		IThumbnailsManager thumbs,
+		IHttpClientFactory clientFactory,
 		PermissionOption options
 	) : ControllerBase
 	{
@@ -59,6 +68,19 @@ namespace Kyoo.Authentication.Views
 			return new ObjectResult(value) { StatusCode = StatusCodes.Status403Forbidden };
 		}
 
+		private static string _BuildUrl(string baseUrl, Dictionary<string, string?> queryParams)
+		{
+			char querySep = baseUrl.Contains('?') ? '&' : '?';
+			foreach ((string key, string? val) in queryParams)
+			{
+				if (val is null)
+					continue;
+				baseUrl += $"{querySep}{key}={val}";
+				querySep = '&';
+			}
+			return baseUrl;
+		}
+
 		/// <summary>
 		/// Oauth Login.
 		/// </summary>
@@ -67,12 +89,12 @@ namespace Kyoo.Authentication.Views
 		/// </remarks>
 		/// <returns>A redirect to the provider's login page.</returns>
 		/// <response code="404">The provider is not register with this instance of kyoo.</response>
-		[HttpPost("login/{provider}")]
+		[HttpGet("login/{provider}")]
 		[ProducesResponseType(StatusCodes.Status302Found)]
 		[ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(RequestError))]
 		public ActionResult<JwtToken> LoginVia(string provider)
 		{
-			if (!options.OIDC.ContainsKey(provider))
+			if (!options.OIDC.ContainsKey(provider) || !options.OIDC[provider].Enabled)
 			{
 				return NotFound(
 					new RequestError(
@@ -81,13 +103,19 @@ namespace Kyoo.Authentication.Views
 				);
 			}
 			OidcProvider prov = options.OIDC[provider];
-			char querySep = prov.AuthorizationUrl.Contains('?') ? '&' : '?';
-			string url = $"{prov.AuthorizationUrl}{querySep}response_type=code";
-			url += $"&client_id={prov.ClientId}";
-			url += $"&redirect_uri={options.PublicUrl.TrimEnd('/')}/api/auth/callback/{provider}";
-			if (prov.Scope is not null)
-				url += $"&scope={prov.Scope}";
-			return Redirect(url);
+			return Redirect(
+				_BuildUrl(
+					prov.AuthorizationUrl,
+					new()
+					{
+						["response_type"] = "code",
+						["client_id"] = prov.ClientId,
+						["redirect_uri"] =
+							$"{options.PublicUrl.TrimEnd('/')}/api/auth/callback/{provider}",
+						["scope"] = prov.Scope,
+					}
+				)
+			);
 		}
 
 		/// <summary>
@@ -99,22 +127,88 @@ namespace Kyoo.Authentication.Views
 		/// </remarks>
 		/// <returns>A redirect to the provider's login page.</returns>
 		/// <response code="403">The provider gave an error.</response>
-		[HttpPost("callback/{provider}")]
+		[HttpGet("callback/{provider}")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
-		public async Task<ActionResult<JwtToken>> OauthCallback(string provider, dynamic val)
+		public async Task<ActionResult<JwtToken>> OauthCallback(string provider, string code)
 		{
-			throw new NotImplementedException();
-			// User? user = await users.GetOrDefault(
-			// 	new Filter<User>.Lambda(x => x.ExternalId[provider].Id == val.Id)
-			// );
-			// if (user == null)
-			// 	user = await users.Create(val);
-			// return new JwtToken(
-			// 	tokenController.CreateAccessToken(user, out TimeSpan expireIn),
-			// 	await tokenController.CreateRefreshToken(user),
-			// 	expireIn
-			// );
+			if (!options.OIDC.ContainsKey(provider) || !options.OIDC[provider].Enabled)
+			{
+				return NotFound(
+					new RequestError(
+						$"Invalid provider. {provider} is not registered no this instance of kyoo."
+					)
+				);
+			}
+			if (code == null)
+				return BadRequest(new RequestError("Invalid code."));
+			OidcProvider prov = options.OIDC[provider];
+
+			HttpClient client = clientFactory.CreateClient();
+
+			string auth = Convert.ToBase64String(
+				Encoding.UTF8.GetBytes($"{prov.ClientId}:{prov.Secret}")
+			);
+			client.DefaultRequestHeaders.Add("Authorization", $"Basic {auth}");
+
+			HttpResponseMessage resp = await client.PostAsync(
+				_BuildUrl(
+					prov.TokenUrl,
+					new()
+					{
+						["code"] = code,
+						["client_id"] = prov.ClientId,
+						["client_secret"] = prov.Secret,
+						["redirect_uri"] =
+							$"{options.PublicUrl.TrimEnd('/')}/api/auth/callback/{provider}",
+						["grant_type"] = "authorization_code",
+					}
+				),
+				null
+			);
+			if (!resp.IsSuccessStatusCode)
+				return BadRequest("Invalid code or configuration.");
+			JwtToken? token = await resp.Content.ReadFromJsonAsync<JwtToken>();
+			if (token is null)
+				return BadRequest("Could not retrive token.");
+
+			client.DefaultRequestHeaders.Remove("Authorization");
+			client.DefaultRequestHeaders.Add(
+				"Authorization",
+				$"{token.TokenType} {token.AccessToken}"
+			);
+			JwtProfile? profile = await client.GetFromJsonAsync<JwtProfile>(prov.ProfileUrl);
+			if (profile is null || profile.Sub is null)
+				return BadRequest("Missing sub on user object");
+			ExternalToken extToken = new() { Id = profile.Sub, Token = token, };
+			User newUser = new();
+			if (profile.Email is not null)
+				newUser.Email = profile.Email;
+			if (profile.Username is not null)
+				newUser.Username = profile.Username;
+			else if (profile.Name is not null)
+				newUser.Username = profile.Name;
+			else
+			{
+				return BadRequest(
+					new RequestError(
+						$"Could not find a username for the user. You may need to add more scopes. Fields: {string.Join(',', profile.Extra)}"
+					)
+				);
+			}
+			newUser.Slug = Utils.Utility.ToSlug(newUser.Username);
+			newUser.ExternalId.Add(provider, extToken);
+
+			User? user = await users.GetOrDefault(
+				new Filter<User>.Lambda(x => x.ExternalId[provider].Id == extToken.Id)
+			);
+			if (user == null)
+				user = await users.Create(newUser);
+			return new JwtToken(
+				tokenController.CreateAccessToken(user, out TimeSpan expireIn),
+				await tokenController.CreateRefreshToken(user),
+				expireIn
+			);
 		}
 
 		/// <summary>
