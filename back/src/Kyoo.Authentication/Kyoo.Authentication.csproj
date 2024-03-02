@@ -10,6 +10,7 @@
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 
 		<ProjectReference Include="../Kyoo.Abstractions/Kyoo.Abstractions.csproj" />
+		<ProjectReference Include="../Kyoo.Core/Kyoo.Core.csproj" />
 	</ItemGroup>
 
 </Project>

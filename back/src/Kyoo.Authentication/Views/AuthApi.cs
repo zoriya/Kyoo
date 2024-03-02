@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
@@ -32,13 +31,11 @@ using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Authentication.Models;
 using Kyoo.Authentication.Models.DTO;
+using Kyoo.Core.Controllers;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Linq;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 using BCryptNet = BCrypt.Net.BCrypt;
 
@@ -51,7 +48,7 @@ namespace Kyoo.Authentication.Views
 	[Route("auth")]
 	[ApiDefinition("Authentication", Group = UsersGroup)]
 	public class AuthApi(
-		IRepository<User> users,
+		UserRepository users,
 		ITokenController tokenController,
 		IThumbnailsManager thumbs,
 		IHttpClientFactory clientFactory,
@@ -184,11 +181,8 @@ namespace Kyoo.Authentication.Views
 			User newUser = new();
 			if (profile.Email is not null)
 				newUser.Email = profile.Email;
-			if (profile.Username is not null)
-				newUser.Username = profile.Username;
-			else if (profile.Name is not null)
-				newUser.Username = profile.Name;
-			else
+			string? username = profile.Username ?? profile.Name;
+			if (username is null)
 			{
 				return BadRequest(
 					new RequestError(
@@ -196,12 +190,11 @@ namespace Kyoo.Authentication.Views
 					)
 				);
 			}
+			newUser.Username = username;
 			newUser.Slug = Utils.Utility.ToSlug(newUser.Username);
 			newUser.ExternalId.Add(provider, extToken);
 
-			User? user = await users.GetOrDefault(
-				new Filter<User>.Lambda(x => x.ExternalId[provider].Id == extToken.Id)
-			);
+			User? user = await users.GetByExternalId(provider, extToken.Id);
 			if (user == null)
 				user = await users.Create(newUser);
 			return new JwtToken(
