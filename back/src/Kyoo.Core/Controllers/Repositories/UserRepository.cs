@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
@@ -35,10 +36,12 @@ namespace Kyoo.Core.Controllers;
 /// <remarks>
 /// Create a new <see cref="UserRepository"/>
 /// </remarks>
-/// <param name="database">The database handle to use</param>
-/// <param name="thumbs">The thumbnail manager used to store images.</param>
-public class UserRepository(DatabaseContext database, IThumbnailsManager thumbs)
-	: LocalRepository<User>(database, thumbs)
+public class UserRepository(
+	DatabaseContext database,
+	DbConnection db,
+	SqlVariableContext context,
+	IThumbnailsManager thumbs
+) : LocalRepository<User>(database, thumbs)
 {
 	/// <summary>
 	/// The database handle
@@ -83,5 +86,27 @@ public class UserRepository(DatabaseContext database, IThumbnailsManager thumbs)
 		_database.Entry(obj).State = EntityState.Deleted;
 		await _database.SaveChangesAsync();
 		await base.Delete(obj);
+	}
+
+	public Task<User?> GetByExternalId(string provider, string id)
+	{
+		// language=PostgreSQL
+		return db.QuerySingle<User>(
+			$"""
+			select
+				u.* -- User as u
+				/* includes */
+			from
+				users as u
+			where
+				u.external_id->{provider}->>'id' = {id}
+			""",
+			new() { ["u"] = typeof(User) },
+			(items) => (items[0] as User)!,
+			context,
+			null,
+			null,
+			null
+		);
 	}
 }
