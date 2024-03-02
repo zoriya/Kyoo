@@ -99,7 +99,7 @@ public class UserRepository(
 			from
 				users as u
 			where
-				u.external_id->{provider}->>'id' = {id}
+				u.external_id->{provider}->>'Id' = {id}
 			""",
 			new() { ["u"] = typeof(User) },
 			(items) => (items[0] as User)!,

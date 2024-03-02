@@ -97,6 +97,14 @@ namespace Kyoo.Postgresql
 				typeof(Dictionary<string, MetadataId>),
 				new JsonTypeHandler<Dictionary<string, MetadataId>>()
 			);
+			SqlMapper.AddTypeHandler(
+				typeof(Dictionary<string, string>),
+				new JsonTypeHandler<Dictionary<string, string>>()
+			);
+			SqlMapper.AddTypeHandler(
+				typeof(Dictionary<string, ExternalToken>),
+				new JsonTypeHandler<Dictionary<string, ExternalToken>>()
+			);
 			SqlMapper.AddTypeHandler(typeof(List<string>), new ListTypeHandler<string>());
 			SqlMapper.AddTypeHandler(typeof(List<Genre>), new ListTypeHandler<Genre>());
 			SqlMapper.AddTypeHandler(typeof(Wrapper), new Wrapper.Handler());
