@@ -56,6 +56,9 @@ namespace Kyoo.Abstractions.Models
 		[SerializeIgnore]
 		public string? Password { get; set; }
 
+		/// <summary>
+		/// Does the user can sign-in with a password or only via oidc?
+		/// </summary>
 		public bool HasPassword => Password != null;
 
 		/// <summary>

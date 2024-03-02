@@ -197,6 +197,7 @@ export const AccountSettings = () => {
 							<ChangePasswordPopup
 								icon={Password}
 								label={t("settings.account.password.label")}
+								hasPassword={account.hasPassword}
 								apply={async (op, np) => await editPassword({ oldPassword: op, newPassword: np })}
 								close={close}
 							/>,
@@ -264,11 +265,13 @@ const ChangePopup = ({
 const ChangePasswordPopup = ({
 	label,
 	icon,
+	hasPassword,
 	apply,
 	close,
 }: {
 	label: string;
 	icon: Icon;
+	hasPassword: boolean;
 	apply: (oldPassword: string, newPassword: string) => Promise<unknown>;
 	close: () => void;
 }) => {
@@ -285,13 +288,15 @@ const ChangePasswordPopup = ({
 						<Icon icon={icon} />
 						<H1 {...css({ fontSize: rem(2) })}>{label}</H1>
 					</View>
-					<PasswordInput
-						autoComplete="current-password"
-						variant="big"
-						value={oldValue}
-						onChangeText={(v) => setOldValue(v)}
-						placeholder={t("settings.account.password.oldPassword")}
-					/>
+					{hasPassword && (
+						<PasswordInput
+							autoComplete="current-password"
+							variant="big"
+							value={oldValue}
+							onChangeText={(v) => setOldValue(v)}
+							placeholder={t("settings.account.password.oldPassword")}
+						/>
+					)}
 					<PasswordInput
 						autoComplete="password-new"
 						variant="big"
