@@ -18,18 +18,37 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./library-item";
-export * from "./news";
-export * from "./show";
-export * from "./movie";
-export * from "./collection";
-export * from "./genre";
-export * from "./person";
-export * from "./studio";
-export * from "./episode";
-export * from "./season";
-export * from "./watch-info";
-export * from "./watch-status";
-export * from "./watchlist";
-export * from "./user";
-export * from "./server-info";
+import { z } from "zod";
+import { imageFn } from "..";
+
+export const OidcInfoP = z.object({
+	/*
+	 * The name of this oidc service. Human readable.
+	 */
+	displayName: z.string(),
+	/*
+	 * A url returing a square logo for this provider.
+	 */
+	logoUrl: z.string().nullable(),
+});
+
+export const ServerInfoP = z.object({
+	/*
+	 * The list of oidc providers configured for this instance of kyoo.
+	 */
+	oidc: z
+		.record(z.string(), OidcInfoP)
+		.transform((x) =>
+			Object.fromEntries(
+				Object.entries(x).map(([provider, info]) => [
+					provider,
+					{ ...info, link: imageFn(`/auth/login/${provider}`) },
+				]),
+			),
+		),
+});
+
+/**
+ * A season of a Show.
+ */
+export type ServerInfo = z.infer<typeof ServerInfoP>;

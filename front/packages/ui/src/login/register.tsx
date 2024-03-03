@@ -30,6 +30,7 @@ import { DefaultLayout } from "../layout";
 import { FormPage } from "./form";
 import { PasswordInput } from "./password-input";
 import { cleanApiUrl } from "./login";
+import { OidcLogin } from "./oidc";
 
 export const RegisterPage: QueryPage = () => {
 	const [apiUrl, setApiUrl] = useState("");
@@ -46,6 +47,7 @@ export const RegisterPage: QueryPage = () => {
 	return (
 		<FormPage>
 			<H1>{t("login.register")}</H1>
+			<OidcLogin />
 			{Platform.OS !== "web" && (
 				<>
 					<P {...css({ paddingLeft: ts(1) })}>{t("login.server")}</P>
@@ -108,5 +110,7 @@ export const RegisterPage: QueryPage = () => {
 		</FormPage>
 	);
 };
+
+RegisterPage.getFetchUrls = () => [OidcLogin.query()];
 
 RegisterPage.getLayout = DefaultLayout;

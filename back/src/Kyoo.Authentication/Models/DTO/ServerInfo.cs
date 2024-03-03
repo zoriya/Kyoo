@@ -22,11 +22,21 @@ namespace Kyoo.Authentication.Models;
 
 public class ServerInfo
 {
+	/// <summary>
+	/// The list of oidc providers configured for this instance of kyoo.
+	/// </summary>
 	public Dictionary<string, OidcInfo> Oidc { get; set; }
 }
 
 public class OidcInfo
 {
+	/// <summary>
+	/// The name of this oidc service. Human readable.
+	/// </summary>
 	public string DisplayName { get; set; }
+
+	/// <summary>
+	/// A url returing a square logo for this provider.
+	/// </summary>
 	public string? LogoUrl { get; set; }
 }

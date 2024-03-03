@@ -29,7 +29,7 @@ import { percent, px, useYoshiki } from "yoshiki/native";
 import { DefaultLayout } from "../layout";
 import { FormPage } from "./form";
 import { PasswordInput } from "./password-input";
-import { useQueryClient } from "@tanstack/react-query";
+import { OidcLogin } from "./oidc";
 
 export const cleanApiUrl = (apiUrl: string) => {
 	if (Platform.OS === "web") return undefined;
@@ -45,7 +45,6 @@ export const LoginPage: QueryPage = () => {
 	const [error, setError] = useState<string | undefined>(undefined);
 
 	const router = useRouter();
-	const queryClient = useQueryClient();
 	const { t } = useTranslation();
 	const { css } = useYoshiki();
 
@@ -56,6 +55,7 @@ export const LoginPage: QueryPage = () => {
 			})}
 		>
 			<H1>{t("login.login")}</H1>
+			<OidcLogin />
 			{Platform.OS !== "web" && (
 				<>
 					<P {...css({ paddingLeft: ts(1) })}>{t("login.server")}</P>
@@ -101,5 +101,7 @@ export const LoginPage: QueryPage = () => {
 		</FormPage>
 	);
 };
+
+LoginPage.getFetchUrls = () => [OidcLogin.query()];
 
 LoginPage.getLayout = DefaultLayout;
