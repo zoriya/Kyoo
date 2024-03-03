@@ -38,11 +38,11 @@ export const cleanApiUrl = (apiUrl: string) => {
 	return apiUrl + "/api";
 };
 
-export const LoginPage: QueryPage = () => {
+export const LoginPage: QueryPage<{ error?: string }> = ({ error: initialError }) => {
 	const [apiUrl, setApiUrl] = useState("");
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
-	const [error, setError] = useState<string | undefined>(undefined);
+	const [error, setError] = useState<string | undefined>(initialError);
 
 	const router = useRouter();
 	const { t } = useTranslation();

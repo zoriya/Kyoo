@@ -19,6 +19,7 @@
  */
 
 import {
+	KyooErrors,
 	QueryIdentifier,
 	QueryPage,
 	ServerInfo,
@@ -30,7 +31,7 @@ import { Button, HR, P, Skeleton, ts } from "@kyoo/primitives";
 import { View, ImageBackground } from "react-native";
 import { percent, rem, useYoshiki } from "yoshiki/native";
 import { useTranslation } from "react-i18next";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "solito/router";
 import { ErrorView } from "../errors";
 
@@ -95,23 +96,30 @@ export const OidcCallbackPage: QueryPage<{ provider: string; code: string; error
 	code,
 	error,
 }) => {
-	const [err, setErr] = useState<string | undefined>();
+	const hasRun = useRef(false);
 	const router = useRouter();
 
 	useEffect(() => {
-		async function run() {
-			if (error) {
-				setErr(error);
-				return;
-			}
-			const { error: loginError } = await oidcLogin(provider, code);
-			setErr(loginError);
-			if (loginError) return;
-			router.replace("/", undefined, {
+		if (hasRun.current) return;
+		hasRun.current = true;
+
+		function onError(error: string) {
+			router.replace(`/login?error=${error}`, undefined, {
 				experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
 			});
 		}
-		run();
+		async function run() {
+			const { error: loginError } = await oidcLogin(provider, code);
+			if (loginError) onError(loginError);
+			else {
+				router.replace("/", undefined, {
+					experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
+				});
+			}
+		}
+
+		if (error) onError(error);
+		else run();
 	}, [provider, code, router, error]);
-	return <P>{err ?? "Loading"}</P>;
+	return <P>{"Loading"}</P>;
 };
