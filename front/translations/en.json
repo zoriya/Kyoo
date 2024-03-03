@@ -68,7 +68,8 @@
 		"more": "More",
 		"expand": "Expand",
 		"collapse": "Collapse",
-		"edit": "Edit"
+		"edit": "Edit",
+		"or": "OR"
 	},
 	"navbar": {
 		"home": "Home",
@@ -165,6 +166,7 @@
 	"login": {
 		"login": "Login",
 		"register": "Register",
+		"via": "Continue via {{provider}}",
 		"add-account": "Add account",
 		"logout": "Logout",
 		"server": "Server Address",

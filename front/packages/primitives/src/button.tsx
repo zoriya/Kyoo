@@ -23,14 +23,17 @@ import { Theme, useYoshiki } from "yoshiki/native";
 import { PressableFeedback } from "./links";
 import { P } from "./text";
 import { ts } from "./utils";
-import { View } from "react-native";
+import { Falsy, View } from "react-native";
 
 export const Button = forwardRef<
 	View,
-	{ text: string; licon?: ReactElement; icon?: ReactElement } & ComponentProps<
-		typeof PressableFeedback
-	>
->(function Button({ text, icon, licon, ...props }, ref) {
+	{
+		children?: ReactElement | Falsy;
+		text?: string;
+		licon?: ReactElement | Falsy;
+		icon?: ReactElement | Falsy;
+	} & ComponentProps<typeof PressableFeedback>
+>(function Button({ children, text, icon, licon, ...props }, ref) {
 	const { css } = useYoshiki("button");
 
 	return (
@@ -55,17 +58,20 @@ export const Button = forwardRef<
 				props as any,
 			)}
 		>
-			<View
-				{...css({
-					paddingX: ts(3),
-					flexDirection: "row",
-					alignItems: "center",
-				})}
-			>
-				{licon}
-				<P {...css({ textAlign: "center" }, "text")}>{text}</P>
-				{icon}
-			</View>
+			{(licon || text || icon) != null && (
+				<View
+					{...css({
+						paddingX: ts(3),
+						flexDirection: "row",
+						alignItems: "center",
+					})}
+				>
+					{licon}
+					{text && <P {...css({ textAlign: "center" }, "text")}>{text}</P>}
+					{icon}
+				</View>
+			)}
+			{children}
 		</PressableFeedback>
 	);
 });
