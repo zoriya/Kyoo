@@ -55,7 +55,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 	type?: Parser,
 	token?: string | null,
 ): Promise<z.infer<Parser>> => {
-	const url = context.apiUrl ?? (Platform.OS === "web" ? kyooUrl : getCurrentAccount()!.apiUrl);
+	const url = context.apiUrl ?? (Platform.OS === "web" ? kyooUrl : getCurrentAccount()?.apiUrl);
 	kyooApiUrl = url;
 
 	if (token === undefined && context.authenticated !== false) token = await getToken();

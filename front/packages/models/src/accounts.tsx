@@ -136,7 +136,7 @@ export const AccountProvider = ({
 		<AccountContext.Provider value={accounts}>
 			<ConnectionErrorContext.Provider
 				value={{
-					error: user.error,
+					error: selected ? user.error : null,
 					loading: user.isLoading,
 					retry: () => {
 						queryClient.invalidateQueries({ queryKey: ["auth", "me"] });

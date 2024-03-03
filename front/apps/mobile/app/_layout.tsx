@@ -36,7 +36,7 @@ import {
 	Poppins_400Regular,
 	Poppins_900Black,
 } from "@expo-google-fonts/poppins";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useColorScheme } from "react-native";
 import { initReactI18next } from "react-i18next";
 import { ThemeProvider as RNThemeProvider } from "@react-navigation/native";
@@ -116,6 +116,10 @@ export default function Root() {
 	const [fontsLoaded] = useFonts({ Poppins_300Light, Poppins_400Regular, Poppins_900Black });
 
 	if (theme === "auto") theme = systemTheme ?? "light";
+
+	useEffect(() => {
+		if (fontsLoaded) SplashScreen.hideAsync();
+	}, [fontsLoaded]);
 
 	if (!fontsLoaded) return null;
 	return (
