@@ -19,7 +19,7 @@
  */
 
 import { HR as EHR } from "@expo/html-elements";
-import { percent, px, Stylable, useYoshiki } from "yoshiki/native";
+import { px, Stylable, useYoshiki } from "yoshiki/native";
 import { ts } from "./utils";
 
 export const HR = ({
@@ -39,13 +39,13 @@ export const HR = ({
 					},
 					orientation === "vertical" && {
 						width: px(1),
-						height: percent(100),
+						height: "auto",
 						marginY: ts(1),
 						marginX: ts(2),
 					},
 					orientation === "horizontal" && {
 						height: px(1),
-						width: percent(100),
+						width: "auto",
 						marginX: ts(1),
 						marginY: ts(2),
 					},
