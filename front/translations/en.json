@@ -166,7 +166,7 @@
 	"login": {
 		"login": "Login",
 		"register": "Register",
-		"via": "Continue via {{provider}}",
+		"via": "Continue with {{provider}}",
 		"add-account": "Add account",
 		"logout": "Logout",
 		"server": "Server Address",
