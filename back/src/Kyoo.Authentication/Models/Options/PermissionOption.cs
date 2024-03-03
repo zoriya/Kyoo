@@ -106,5 +106,14 @@ public class OidcProvider
 			ProfileUrl = "https://openidconnect.googleapis.com/v1/userinfo",
 			Scope = "email profile",
 		},
+		["discord"] = new("discord")
+		{
+			DisplayName = "Discord",
+			LogoUrl = "https://logo.clearbit.com/discord.com",
+			AuthorizationUrl = "https://discord.com/oauth2/authorize",
+			TokenUrl = "https://discord.com/api/oauth2/token",
+			ProfileUrl = "https://discord.com/api/users/@me",
+			Scope = "email+identify",
+		}
 	};
 }
