@@ -405,6 +405,7 @@ namespace Kyoo.Postgresql
 				.IsUnique();
 			modelBuilder.Entity<Episode>().HasIndex(x => x.Slug).IsUnique();
 			modelBuilder.Entity<User>().HasIndex(x => x.Slug).IsUnique();
+			modelBuilder.Entity<User>().HasIndex(x => x.Username).IsUnique();
 
 			modelBuilder.Entity<Movie>().Ignore(x => x.Links);
 
