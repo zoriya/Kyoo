@@ -26,7 +26,6 @@ import {
 	addAccount,
 	getCurrentAccount,
 	removeAccounts,
-	unselectAllAccounts,
 	updateAccount,
 } from "./account-internal";
 import { Platform } from "react-native";
@@ -38,7 +37,6 @@ type Result<A, B> =
 export const login = async (
 	action: "register" | "login",
 	{ apiUrl, ...body }: { username: string; password: string; email?: string; apiUrl?: string },
-	timeout?: number,
 ): Promise<Result<Account, string>> => {
 	try {
 		const controller = new AbortController();
@@ -117,7 +115,6 @@ export const getTokenWJ = async (account?: Account | null): ReturnType<typeof ru
 					updateAccount(account.id, { ...account, token });
 			} catch (e) {
 				console.error("Error refreshing token durring ssr:", e);
-				if (Platform.OS !== "web" || typeof window !== "undefined") unselectAllAccounts();
 				return [null, null];
 			}
 		}

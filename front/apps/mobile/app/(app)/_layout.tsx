@@ -19,12 +19,10 @@
  */
 
 import { ConnectionErrorContext, useAccount } from "@kyoo/models";
-import { CircularProgress } from "@kyoo/primitives";
 import { NavbarRight, NavbarTitle } from "@kyoo/ui";
 import { useNetInfo } from "@react-native-community/netinfo";
 import { Redirect, Stack } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "yoshiki/native";
 
@@ -33,14 +31,9 @@ export default function SignGuard() {
 	const theme = useTheme();
 	// TODO: support guest accounts on mobile too.
 	const account = useAccount();
-	const { loading, error } = useContext(ConnectionErrorContext);
+	const { error } = useContext(ConnectionErrorContext);
 	const netInfo = useNetInfo();
 
-	useEffect(() => {
-		if (!loading) SplashScreen.hideAsync();
-	}, [loading]);
-
-	if (loading) return <CircularProgress />;
 	if (error && netInfo.isConnected) return <Redirect href={"/connection-error"} />;
 	if (!account) return <Redirect href="/login" />;
 	return (
