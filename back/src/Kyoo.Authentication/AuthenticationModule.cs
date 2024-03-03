@@ -118,6 +118,12 @@ namespace Kyoo.Authentication
 									case "profile":
 										acc[provider].ProfileUrl = val.Value;
 										break;
+									case "name":
+										acc[provider].DisplayName = val.Value;
+										break;
+									case "logo":
+										acc[provider].LogoUrl = val.Value;
+										break;
 									default:
 										logger.LogError("Invalid oidc config value: {Key}", key);
 										return acc;
