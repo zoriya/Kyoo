@@ -20,3 +20,4 @@
 
 export * from "./error";
 export * from "./unauthorized";
+export * from "./connection";
