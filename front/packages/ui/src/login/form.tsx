@@ -64,7 +64,7 @@ export const FormPage = ({ children, ...props }: { children: ReactNode } & Styla
 			<SvgBlob {...css({ position: "absolute", top: 0, left: 0 })} />
 			<ScrollView
 				{...css({
-					paddingHorizontal: ts(3),
+					paddingRight: ts(3),
 				})}
 			>
 				<View
@@ -72,8 +72,9 @@ export const FormPage = ({ children, ...props }: { children: ReactNode } & Styla
 						{
 							maxWidth: px(600),
 							backgroundColor: (theme) => theme.background,
-							borderRadius: ts(25),
+							borderBottomRightRadius: ts(25),
 							paddingBottom: ts(5),
+							paddingLeft: ts(3),
 						},
 						props,
 					)}
