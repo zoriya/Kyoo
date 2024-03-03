@@ -184,9 +184,9 @@ namespace Kyoo.Authentication.Views
 			client.DefaultRequestHeaders.Add("Authorization", $"Basic {auth}");
 
 			HttpResponseMessage resp = await client.PostAsync(
-				_BuildUrl(
-					prov.TokenUrl,
-					new()
+				prov.TokenUrl,
+				new FormUrlEncodedContent(
+					new Dictionary<string, string>()
 					{
 						["code"] = code,
 						["client_id"] = prov.ClientId,
@@ -195,11 +195,12 @@ namespace Kyoo.Authentication.Views
 							$"{options.PublicUrl.TrimEnd('/')}/api/auth/logged/{provider}",
 						["grant_type"] = "authorization_code",
 					}
-				),
-				null
+				)
 			);
 			if (!resp.IsSuccessStatusCode)
-				return BadRequest("Invalid code or configuration.");
+				return BadRequest(
+					$"Invalid code or configuration. {resp.StatusCode}: {await resp.Content.ReadAsStringAsync()}"
+				);
 			JwtToken? token = await resp.Content.ReadFromJsonAsync<JwtToken>();
 			if (token is null)
 				return BadRequest("Could not retrive token.");
@@ -232,7 +233,18 @@ namespace Kyoo.Authentication.Views
 
 			User? user = await users.GetByExternalId(provider, extToken.Id);
 			if (user == null)
-				user = await users.Create(newUser);
+			{
+				try
+				{
+					user = await users.Create(newUser);
+				}
+				catch
+				{
+					return BadRequest(
+						"A user already exists with the same username. If this is you, login via username and then link your account."
+					);
+				}
+			}
 			return new JwtToken(
 				tokenController.CreateAccessToken(user, out TimeSpan expireIn),
 				await tokenController.CreateRefreshToken(user),
