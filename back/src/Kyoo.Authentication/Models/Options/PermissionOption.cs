@@ -63,12 +63,14 @@ public class PermissionOption
 
 public class OidcProvider
 {
+	public string DisplayName { get; set; }
+	public string? LogoUrl { get; set; }
 	public string AuthorizationUrl { get; set; }
 	public string TokenUrl { get; set; }
 	public string ProfileUrl { get; set; }
+	public string? Scope { get; set; }
 	public string ClientId { get; set; }
 	public string Secret { get; set; }
-	public string? Scope { get; set; }
 
 	public bool Enabled =>
 		AuthorizationUrl != null
@@ -79,16 +81,30 @@ public class OidcProvider
 
 	public OidcProvider(string provider)
 	{
-		switch (provider)
+		DisplayName = provider;
+		if (KnownProviders?.ContainsKey(provider) == true)
 		{
-			case "google":
-				AuthorizationUrl = "https://accounts.google.com/o/oauth2/v2/auth";
-				TokenUrl = "https://oauth2.googleapis.com/token";
-				ProfileUrl = "https://openidconnect.googleapis.com/v1/userinfo";
-				Scope = "email profile";
-				break;
-			default:
-				break;
+			DisplayName = KnownProviders[provider].DisplayName;
+			LogoUrl = KnownProviders[provider].LogoUrl;
+			AuthorizationUrl = KnownProviders[provider].AuthorizationUrl;
+			TokenUrl = KnownProviders[provider].TokenUrl;
+			ProfileUrl = KnownProviders[provider].ProfileUrl;
+			Scope = KnownProviders[provider].Scope;
+			ClientId = KnownProviders[provider].ClientId;
+			Secret = KnownProviders[provider].Secret;
 		}
 	}
+
+	public static readonly Dictionary<string, OidcProvider> KnownProviders = new()
+	{
+		["google"] = new("google")
+		{
+			DisplayName = "Google",
+			LogoUrl = "https://logo.clearbit.com/google.com",
+			AuthorizationUrl = "https://accounts.google.com/o/oauth2/v2/auth",
+			TokenUrl = "https://oauth2.googleapis.com/token",
+			ProfileUrl = "https://openidconnect.googleapis.com/v1/userinfo",
+			Scope = "email profile",
+		},
+	};
 }
