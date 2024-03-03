@@ -68,7 +68,8 @@
 		"more": "Plus",
 		"expand": "Développer",
 		"collapse": "Replier",
-		"edit": "Changer"
+		"edit": "Changer",
+		"or": "OU"
 	},
 	"navbar": {
 		"home": "Accueil",
@@ -164,6 +165,7 @@
 	},
 	"login": {
 		"login": "Connexion",
+		"via": "Continuer avec {{provider}}",
 		"register": "Créer un compte",
 		"add-account": "Ajouter un compte",
 		"logout": "Déconnexion",

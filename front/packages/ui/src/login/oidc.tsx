@@ -19,7 +19,7 @@
  */
 
 import { QueryIdentifier, ServerInfo, ServerInfoP, useFetch } from "@kyoo/models";
-import { Button, HR, P, Skeleton, tooltip, ts } from "@kyoo/primitives";
+import { Button, HR, P, Skeleton, ts } from "@kyoo/primitives";
 import { View, ImageBackground } from "react-native";
 import { percent, rem, useYoshiki } from "yoshiki/native";
 import { useTranslation } from "react-i18next";
@@ -50,7 +50,6 @@ export const OidcLogin = () => {
 							)
 						}
 						text={t("login.via", { provider: x.displayName })}
-						{...tooltip(t("login.via", { provider: x.displayName }))}
 						{...btn}
 					/>
 				))
