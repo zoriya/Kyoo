@@ -33,14 +33,16 @@ import { WebTooltip } from "@kyoo/primitives/src/tooltip.web";
 import {
 	AccountP,
 	AccountProvider,
+	ConnectionErrorContext,
 	createQueryClient,
 	fetchQuery,
 	getTokenWJ,
 	QueryIdentifier,
 	QueryPage,
+	UserP,
 	useUserTheme,
 } from "@kyoo/models";
-import { useState } from "react";
+import { Component, ComponentType, useContext, useState } from "react";
 import NextApp, { AppContext, type AppProps } from "next/app";
 import { Poppins } from "next/font/google";
 import { useTheme, useMobileHover, useStyleRegistry, StyleRegistryProvider } from "yoshiki/web";
@@ -51,6 +53,7 @@ import arrayShuffle from "array-shuffle";
 import { Tooltip } from "react-tooltip";
 import { getCurrentAccount, readCookie, updateAccount } from "@kyoo/models/src/account-internal";
 import { PortalProvider } from "@gorhom/portal";
+import { ConnectionError } from "@kyoo/ui";
 
 const font = Poppins({ weight: ["300", "400", "900"], subsets: ["latin"], display: "swap" });
 
@@ -114,15 +117,24 @@ const YoshikiDebug = ({ children }: { children: JSX.Element }) => {
 	return <StyleRegistryProvider registry={registry}>{children}</StyleRegistryProvider>;
 };
 
-const App = ({ Component, pageProps }: AppProps) => {
-	const [queryClient] = useState(() => createQueryClient());
-	const { queryState, token, randomItems, account, theme, ...props } = superjson.deserialize<any>(
-		pageProps ?? { json: {} },
-	);
+const ConnectionErrorVerifier = ({ children }: { children: JSX.Element }) => {
+	const { error } = useContext(ConnectionErrorContext);
+
+	if (!error) return children;
+	return <WithLayout Component={ConnectionError} />;
+};
+
+const WithLayout = ({ Component, ...props }: { Component: ComponentType }) => {
 	const layoutInfo = (Component as QueryPage).getLayout ?? (({ page }) => page);
 	const { Layout, props: layoutProps } =
 		typeof layoutInfo === "function" ? { Layout: layoutInfo, props: {} } : layoutInfo;
+	return <Layout page={<Component {...props} />} randomItems={[]} {...layoutProps} />;
+};
 
+const App = ({ Component, pageProps }: AppProps) => {
+	const [queryClient] = useState(() => createQueryClient());
+	const { queryState, ssrError, token, randomItems, account, theme, ...props } =
+		superjson.deserialize<any>(pageProps ?? { json: {} });
 	const userTheme = useUserTheme(theme);
 	useMobileHover();
 
@@ -140,25 +152,22 @@ const App = ({ Component, pageProps }: AppProps) => {
 					<meta name="description" content="A portable and vast media library solution." />
 				</Head>
 				<QueryClientProvider client={queryClient}>
-					<AccountProvider ssrAccount={account}>
+					<AccountProvider ssrAccount={account} ssrError={ssrError}>
 						<HydrationBoundary state={queryState}>
 							<ThemeSelector theme={userTheme} font={{ normal: "inherit" }}>
 								<PortalProvider>
 									<SnackbarProvider>
 										<GlobalCssTheme />
-										<Layout
-											page={
-												<Component
-													randomItems={
-														randomItems[Component.displayName!] ??
-														arrayShuffle((Component as QueryPage).randomItems ?? [])
-													}
-													{...props}
-												/>
-											}
-											randomItems={[]}
-											{...layoutProps}
-										/>
+										<ConnectionErrorVerifier>
+											<WithLayout
+												Component={Component}
+												randomItems={
+													randomItems[Component.displayName!] ??
+													arrayShuffle((Component as QueryPage).randomItems ?? [])
+												}
+												{...props}
+											/>
+										</ConnectionErrorVerifier>
 										<Tooltip id="tooltip" positionStrategy={"fixed"} />
 									</SnackbarProvider>
 								</PortalProvider>
@@ -194,8 +203,10 @@ App.getInitialProps = async (ctx: AppContext) => {
 	];
 
 	const account = readCookie(ctx.ctx.req?.headers.cookie, "account", AccountP);
-	const [authToken, token] = await getTokenWJ(account);
-	appProps.pageProps.queryState = await fetchQuery(urls, authToken);
+	if (account) urls.push({ path: ["auth", "me"], parser: UserP });
+	const [authToken, token, error] = await getTokenWJ(account);
+	if (error) appProps.pageProps.ssrError = error;
+	else appProps.pageProps.queryState = await fetchQuery(urls, authToken);
 	appProps.pageProps.token = token;
 	appProps.pageProps.account = account;
 	appProps.pageProps.theme = readCookie(ctx.ctx.req?.headers.cookie, "theme") ?? "auto";

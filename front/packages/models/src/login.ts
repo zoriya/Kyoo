@@ -96,7 +96,7 @@ let running: ReturnType<typeof getTokenWJ> | null = null;
 export const getTokenWJ = async (account?: Account | null): ReturnType<typeof run> => {
 	async function run() {
 		if (account === undefined) account = getCurrentAccount();
-		if (!account) return [null, null] as const;
+		if (!account) return [null, null, null] as const;
 
 		let token = account.token;
 
@@ -115,10 +115,10 @@ export const getTokenWJ = async (account?: Account | null): ReturnType<typeof ru
 					updateAccount(account.id, { ...account, token });
 			} catch (e) {
 				console.error("Error refreshing token durring ssr:", e);
-				return [null, null];
+				return [null, null, e as KyooErrors] as const;
 			}
 		}
-		return [`${token.token_type} ${token.access_token}`, token] as const;
+		return [`${token.token_type} ${token.access_token}`, token, null] as const;
 	}
 
 	// Do not cache promise durring ssr.

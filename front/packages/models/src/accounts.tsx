@@ -60,9 +60,11 @@ export const ConnectionErrorContext = createContext<{
 export const AccountProvider = ({
 	children,
 	ssrAccount,
+	ssrError,
 }: {
 	children: ReactNode;
 	ssrAccount?: Account;
+	ssrError?: KyooErrors;
 }) => {
 	if (Platform.OS === "web" && typeof window === "undefined") {
 		const accs = ssrAccount
@@ -72,7 +74,7 @@ export const AccountProvider = ({
 			<AccountContext.Provider value={accs}>
 				<ConnectionErrorContext.Provider
 					value={{
-						error: null,
+						error: ssrError || null,
 						loading: false,
 						retry: () => {
 							queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
@@ -84,6 +86,8 @@ export const AccountProvider = ({
 			</AccountContext.Provider>
 		);
 	}
+
+	const initialSsrError = useRef(ssrError);
 
 	const [accStr] = useMMKVString("accounts");
 	const acc = accStr ? z.array(AccountP).parse(JSON.parse(accStr)) : null;
@@ -99,16 +103,11 @@ export const AccountProvider = ({
 
 	// update user's data from kyoo un startup, it could have changed.
 	const selected = useMemo(() => accounts.find((x) => x.selected), [accounts]);
-	const controller = new AbortController();
-	setTimeout(() => controller.abort(), 5_000);
 	const user = useFetch({
 		path: ["auth", "me"],
 		parser: UserP,
 		placeholderData: selected as User,
 		enabled: !!selected,
-		options: {
-			signal: controller.signal,
-		},
 	});
 	useEffect(() => {
 		if (!selected || !user.isSuccess || user.isPlaceholderData) return;
@@ -122,7 +121,10 @@ export const AccountProvider = ({
 	const oldSelectedId = useRef<string | undefined>(selected?.id);
 	useEffect(() => {
 		// if the user change account (or connect/disconnect), reset query cache.
-		if (selected?.id !== oldSelectedId.current) queryClient.invalidateQueries();
+		if (selected?.id !== oldSelectedId.current) {
+			initialSsrError.current = undefined;
+			queryClient.invalidateQueries();
+		}
 		oldSelectedId.current = selected?.id;
 
 		// update cookies for ssr (needs to contains token, theme, language...)
@@ -136,7 +138,7 @@ export const AccountProvider = ({
 		<AccountContext.Provider value={accounts}>
 			<ConnectionErrorContext.Provider
 				value={{
-					error: selected ? user.error : null,
+					error: selected ? initialSsrError.current ?? user.error : null,
 					loading: user.isLoading,
 					retry: () => {
 						queryClient.invalidateQueries({ queryKey: ["auth", "me"] });

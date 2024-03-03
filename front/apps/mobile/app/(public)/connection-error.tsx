@@ -18,33 +18,6 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ConnectionErrorContext } from "@kyoo/models";
-import { Button, H1, P, ts } from "@kyoo/primitives";
-import { useRouter } from "expo-router";
-import { useContext } from "react";
-import { useTranslation } from "react-i18next";
-import { View } from "react-native";
-import { useYoshiki } from "yoshiki/native";
-
-const ConnectionError = () => {
-	const { css } = useYoshiki();
-	const { t } = useTranslation();
-	const router = useRouter();
-	const { error, retry } = useContext(ConnectionErrorContext);
-
-	return (
-		<View {...css({ padding: ts(2) })}>
-			<H1 {...css({ textAlign: "center" })}>{t("errors.connection")}</H1>
-			<P>{error?.errors[0] ?? t("error.unknown")}</P>
-			<P>{t("errors.connection-tips")}</P>
-			<Button onPress={retry} text={t("errors.try-again")} {...css({ m: ts(1) })} />
-			<Button
-				onPress={() => router.push("/login")}
-				text={t("errors.re-login")}
-				{...css({ m: ts(1) })}
-			/>
-		</View>
-	);
-};
+import { ConnectionError } from "@kyoo/ui";
 
 export default ConnectionError;
