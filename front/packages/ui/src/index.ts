@@ -25,7 +25,7 @@ export { MovieDetails, ShowDetails } from "./details";
 export { CollectionPage } from "./collection";
 export { Player } from "./player";
 export { SearchPage } from "./search";
-export { LoginPage, RegisterPage } from "./login";
+export { LoginPage, RegisterPage, OidcCallbackPage } from "./login";
 export { DownloadPage, DownloadProvider } from "./downloads";
 export { SettingsPage } from "./settings";
 export { AdminPage } from "./admin";

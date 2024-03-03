@@ -18,37 +18,8 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { z } from "zod";
-import { baseAppUrl, imageFn } from "..";
+import { OidcCallbackPage } from "@kyoo/ui";
+import { withRoute } from "~/router";
 
-export const OidcInfoP = z.object({
-	/*
-	 * The name of this oidc service. Human readable.
-	 */
-	displayName: z.string(),
-	/*
-	 * A url returing a square logo for this provider.
-	 */
-	logoUrl: z.string().nullable(),
-});
+export default withRoute(OidcCallbackPage);
 
-export const ServerInfoP = z.object({
-	/*
-	 * The list of oidc providers configured for this instance of kyoo.
-	 */
-	oidc: z
-		.record(z.string(), OidcInfoP)
-		.transform((x) =>
-			Object.fromEntries(
-				Object.entries(x).map(([provider, info]) => [
-					provider,
-					{ ...info, link: imageFn(`/auth/login/${provider}?redirectUrl=${baseAppUrl()}/login/callback`) },
-				]),
-			),
-		),
-});
-
-/**
- * A season of a Show.
- */
-export type ServerInfo = z.infer<typeof ServerInfoP>;

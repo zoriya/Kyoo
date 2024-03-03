@@ -68,6 +68,31 @@ export const login = async (
 	}
 };
 
+export const oidcLogin = async (provider: string, code: string, apiUrl?: string) => {
+	try {
+		const token = await queryFn(
+			{
+				path: ["auth", "callback", provider, `?code=${code}`],
+				method: "POST",
+				authenticated: false,
+				apiUrl,
+			},
+			TokenP,
+		);
+		const user = await queryFn(
+			{ path: ["auth", "me"], method: "GET", apiUrl },
+			UserP,
+			`Bearer ${token.access_token}`,
+		);
+		const account: Account = { ...user, apiUrl: apiUrl ?? "/api", token, selected: true };
+		addAccount(account);
+		return { ok: true, value: account };
+	} catch (e) {
+		console.error("oidcLogin", e);
+		return { ok: false, error: (e as KyooErrors).errors[0] };
+	}
+};
+
 let running: ReturnType<typeof getTokenWJ> | null = null;
 
 export const getTokenWJ = async (account?: Account | null): ReturnType<typeof run> => {
