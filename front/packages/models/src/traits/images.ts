@@ -24,6 +24,8 @@ import { kyooApiUrl } from "..";
 
 export const imageFn = (url: string) => (Platform.OS === "web" ? `/api${url}` : kyooApiUrl + url);
 
+export const baseAppUrl = () => Platform.OS === "web" ? window.location.origin : "kyoo://";
+
 export const Img = z.object({
 	source: z.string(),
 	blurhash: z.string(),

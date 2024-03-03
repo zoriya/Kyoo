@@ -18,11 +18,20 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { QueryIdentifier, ServerInfo, ServerInfoP, useFetch } from "@kyoo/models";
+import {
+	QueryIdentifier,
+	QueryPage,
+	ServerInfo,
+	ServerInfoP,
+	oidcLogin,
+	useFetch,
+} from "@kyoo/models";
 import { Button, HR, P, Skeleton, ts } from "@kyoo/primitives";
 import { View, ImageBackground } from "react-native";
 import { percent, rem, useYoshiki } from "yoshiki/native";
 import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react";
+import { useRouter } from "solito/router";
 import { ErrorView } from "../errors";
 
 export const OidcLogin = () => {
@@ -80,3 +89,29 @@ OidcLogin.query = (): QueryIdentifier<ServerInfo> => ({
 	path: ["info"],
 	parser: ServerInfoP,
 });
+
+export const OidcCallbackPage: QueryPage<{ provider: string; code: string; error?: string }> = ({
+	provider,
+	code,
+	error,
+}) => {
+	const [err, setErr] = useState<string | undefined>();
+	const router = useRouter();
+
+	useEffect(() => {
+		async function run() {
+			if (error) {
+				setErr(error);
+				return;
+			}
+			const { error: loginError } = await oidcLogin(provider, code);
+			setErr(loginError);
+			if (loginError) return;
+			router.replace("/", undefined, {
+				experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
+			});
+		}
+		run();
+	}, [provider, code, router, error]);
+	return <P>{err ?? "Loading"}</P>;
+};

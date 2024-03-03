@@ -84,12 +84,16 @@ namespace Kyoo.Authentication.Views
 		/// <remarks>
 		/// Login via a registered oauth provider.
 		/// </remarks>
+		/// <param name="provider">The provider code.</param>
+		/// <param name="redirectUrl">
+		/// A url where you will be redirected with the query params provider, code and error. It can be a deep link.
+		/// </param>
 		/// <returns>A redirect to the provider's login page.</returns>
 		/// <response code="404">The provider is not register with this instance of kyoo.</response>
 		[HttpGet("login/{provider}")]
 		[ProducesResponseType(StatusCodes.Status302Found)]
 		[ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(RequestError))]
-		public ActionResult<JwtToken> LoginVia(string provider)
+		public ActionResult<JwtToken> LoginVia(string provider, [FromQuery] string redirectUrl)
 		{
 			if (!options.OIDC.ContainsKey(provider) || !options.OIDC[provider].Enabled)
 			{
@@ -108,15 +112,16 @@ namespace Kyoo.Authentication.Views
 						["response_type"] = "code",
 						["client_id"] = prov.ClientId,
 						["redirect_uri"] =
-							$"{options.PublicUrl.TrimEnd('/')}/api/auth/callback/{provider}",
+							$"{options.PublicUrl.TrimEnd('/')}/api/auth/logged/{provider}",
 						["scope"] = prov.Scope,
+						["state"] = redirectUrl,
 					}
 				)
 			);
 		}
 
 		/// <summary>
-		/// Oauth Login Callback.
+		/// Oauth Code Redirect.
 		/// </summary>
 		/// <remarks>
 		/// This route is not meant to be called manually, the user should be redirected automatically here
@@ -124,9 +129,39 @@ namespace Kyoo.Authentication.Views
 		/// </remarks>
 		/// <returns>A redirect to the provider's login page.</returns>
 		/// <response code="403">The provider gave an error.</response>
-		[HttpGet("callback/{provider}")]
+		[HttpGet("logged/{provider}")]
+		[ProducesResponseType(StatusCodes.Status302Found)]
+		public ActionResult OauthCodeRedirect(
+			string provider,
+			string code,
+			string state,
+			string? error
+		)
+		{
+			return Redirect(
+				_BuildUrl(
+					state,
+					new()
+					{
+						["provider"] = provider,
+						["code"] = code,
+						["error"] = error,
+					}
+				)
+			);
+		}
+
+		/// <summary>
+		/// Oauth callback
+		/// </summary>
+		/// <remarks>
+		/// This route should be manually called by the page that got redirected to after a call to /login/{provider}.
+		/// </remarks>
+		/// <returns>A jwt token</returns>
+		/// <response code="400">Bad provider or code</response>
+		[HttpPost("callback/{provider}")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		public async Task<ActionResult<JwtToken>> OauthCallback(string provider, string code)
 		{
 			if (!options.OIDC.ContainsKey(provider) || !options.OIDC[provider].Enabled)
@@ -157,7 +192,7 @@ namespace Kyoo.Authentication.Views
 						["client_id"] = prov.ClientId,
 						["client_secret"] = prov.Secret,
 						["redirect_uri"] =
-							$"{options.PublicUrl.TrimEnd('/')}/api/auth/callback/{provider}",
+							$"{options.PublicUrl.TrimEnd('/')}/api/auth/logged/{provider}",
 						["grant_type"] = "authorization_code",
 					}
 				),
