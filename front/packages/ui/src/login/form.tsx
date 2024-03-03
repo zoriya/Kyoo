@@ -67,7 +67,19 @@ export const FormPage = ({ children, ...props }: { children: ReactNode } & Styla
 					paddingHorizontal: ts(3),
 				})}
 			>
-				<View {...css({ maxWidth: px(600) }, props)}>{children}</View>
+				<View
+					{...css(
+						{
+							maxWidth: px(600),
+							backgroundColor: (theme) => theme.background,
+							borderRadius: ts(25),
+							paddingBottom: ts(5),
+						},
+						props,
+					)}
+				>
+					{children}
+				</View>
 			</ScrollView>
 		</ImageBackground>
 	);
