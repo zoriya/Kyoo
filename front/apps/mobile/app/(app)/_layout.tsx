@@ -35,7 +35,7 @@ export default function SignGuard() {
 	const netInfo = useNetInfo();
 
 	if (error && netInfo.isConnected) return <Redirect href={"/connection-error"} />;
-	if (!account) return <Redirect href="/login" />;
+	if (!account) return <Redirect href="/server-url" />;
 	return (
 		<Stack
 			screenOptions={{

@@ -167,6 +167,7 @@
 		"login": "Connexion",
 		"via": "Continuer avec {{provider}}",
 		"register": "Créer un compte",
+		"guest": "Continuer en tant qu'invité",
 		"add-account": "Ajouter un compte",
 		"logout": "Déconnexion",
 		"server": "Addresse du serveur",

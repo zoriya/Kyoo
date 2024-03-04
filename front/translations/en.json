@@ -166,6 +166,7 @@
 	"login": {
 		"login": "Login",
 		"register": "Register",
+		"guest": "Continue as guest",
 		"via": "Continue with {{provider}}",
 		"add-account": "Add account",
 		"logout": "Logout",
