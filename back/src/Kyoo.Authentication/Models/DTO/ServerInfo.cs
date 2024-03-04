@@ -26,6 +26,11 @@ public class ServerInfo
 	/// The list of oidc providers configured for this instance of kyoo.
 	/// </summary>
 	public Dictionary<string, OidcInfo> Oidc { get; set; }
+
+	/// <summary>
+	/// True if guest accounts are allowed on this instance.
+	/// </summary>
+	public bool AllowGuests { get; set; }
 }
 
 public class OidcInfo

@@ -38,6 +38,7 @@ public class InfoApi(PermissionOption options) : ControllerBase
 		return Ok(
 			new ServerInfo()
 			{
+				AllowGuests = options.Default.Any(),
 				Oidc = options
 					.OIDC.Select(x => new KeyValuePair<string, OidcInfo>(
 						x.Key,
