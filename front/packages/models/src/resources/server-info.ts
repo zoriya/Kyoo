@@ -38,21 +38,23 @@ export const ServerInfoP = z.object({
 	 */
 	allowGuests: z.boolean(),
 	/*
+	 * The list of permissions available for the guest account.
+	 */
+	guestPermissions: z.array(z.string()),
+	/*
 	 * The list of oidc providers configured for this instance of kyoo.
 	 */
-	oidc: z
-		.record(z.string(), OidcInfoP)
-		.transform((x) =>
-			Object.fromEntries(
-				Object.entries(x).map(([provider, info]) => [
-					provider,
-					{
-						...info,
-						link: imageFn(`/auth/login/${provider}?redirectUrl=${baseAppUrl()}/login/callback`),
-					},
-				]),
-			),
+	oidc: z.record(z.string(), OidcInfoP).transform((x) =>
+		Object.fromEntries(
+			Object.entries(x).map(([provider, info]) => [
+				provider,
+				{
+					...info,
+					link: imageFn(`/auth/login/${provider}?redirectUrl=${baseAppUrl()}/login/callback`),
+				},
+			]),
 		),
+	),
 });
 
 /**

@@ -31,6 +31,11 @@ public class ServerInfo
 	/// True if guest accounts are allowed on this instance.
 	/// </summary>
 	public bool AllowGuests { get; set; }
+
+	/// <summary>
+	/// The list of permissions available for the guest account.
+	/// </summary>
+	public List<string> GuestPermissions { get; set; }
 }
 
 public class OidcInfo
