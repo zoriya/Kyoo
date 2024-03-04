@@ -31,15 +31,7 @@ import { FormPage } from "./form";
 import { PasswordInput } from "./password-input";
 import { OidcLogin } from "./oidc";
 
-export const cleanApiUrl = (apiUrl: string) => {
-	if (Platform.OS === "web") return undefined;
-	if (!/https?:\/\//.test(apiUrl)) apiUrl = "http://" + apiUrl;
-	apiUrl = apiUrl.replace(/\/$/, "");
-	return apiUrl + "/api";
-};
-
 export const LoginPage: QueryPage<{ error?: string }> = ({ error: initialError }) => {
-	const [apiUrl, setApiUrl] = useState("");
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState<string | undefined>(initialError);
@@ -49,19 +41,9 @@ export const LoginPage: QueryPage<{ error?: string }> = ({ error: initialError }
 	const { css } = useYoshiki();
 
 	return (
-		<FormPage
-			{...css({
-				marginTop: Platform.OS === "web" ? ts(6) : 0,
-			})}
-		>
+		<FormPage>
 			<H1>{t("login.login")}</H1>
 			<OidcLogin />
-			{Platform.OS !== "web" && (
-				<>
-					<P {...css({ paddingLeft: ts(1) })}>{t("login.server")}</P>
-					<Input variant="big" onChangeText={setApiUrl} />
-				</>
-			)}
 			<P {...css({ paddingLeft: ts(1) })}>{t("login.username")}</P>
 			<Input autoComplete="username" variant="big" onChangeText={(value) => setUsername(value)} />
 			<P {...css({ paddingLeft: ts(1) })}>{t("login.password")}</P>

@@ -19,7 +19,6 @@
  */
 
 import {
-	KyooErrors,
 	QueryIdentifier,
 	QueryPage,
 	ServerInfo,
@@ -31,7 +30,7 @@ import { Button, HR, P, Skeleton, ts } from "@kyoo/primitives";
 import { View, ImageBackground } from "react-native";
 import { percent, rem, useYoshiki } from "yoshiki/native";
 import { useTranslation } from "react-i18next";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "solito/router";
 import { ErrorView } from "../errors";
 

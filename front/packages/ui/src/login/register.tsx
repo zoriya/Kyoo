@@ -29,11 +29,9 @@ import { percent, px, useYoshiki } from "yoshiki/native";
 import { DefaultLayout } from "../layout";
 import { FormPage } from "./form";
 import { PasswordInput } from "./password-input";
-import { cleanApiUrl } from "./login";
 import { OidcLogin } from "./oidc";
 
 export const RegisterPage: QueryPage = () => {
-	const [apiUrl, setApiUrl] = useState("");
 	const [email, setEmail] = useState("");
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
@@ -86,7 +84,6 @@ export const RegisterPage: QueryPage = () => {
 					const { error } = await login(
 						"register",
 						{ email, username, password, apiUrl: cleanApiUrl(apiUrl) },
-						5_000,
 					);
 					setError(error);
 					if (error) return;
