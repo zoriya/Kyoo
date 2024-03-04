@@ -34,6 +34,10 @@ export const OidcInfoP = z.object({
 
 export const ServerInfoP = z.object({
 	/*
+	 * True if guest accounts are allowed on this instance.
+	 */
+	allowGuests: z.boolean(),
+	/*
 	 * The list of oidc providers configured for this instance of kyoo.
 	 */
 	oidc: z
@@ -42,7 +46,10 @@ export const ServerInfoP = z.object({
 			Object.fromEntries(
 				Object.entries(x).map(([provider, info]) => [
 					provider,
-					{ ...info, link: imageFn(`/auth/login/${provider}?redirectUrl=${baseAppUrl()}/login/callback`) },
+					{
+						...info,
+						link: imageFn(`/auth/login/${provider}?redirectUrl=${baseAppUrl()}/login/callback`),
+					},
 				]),
 			),
 		),
