@@ -104,7 +104,7 @@ export const OidcCallbackPage: QueryPage<{
 		hasRun.current = true;
 
 		function onError(error: string) {
-			router.replace(`/login?error=${error}${apiUrl ? `&apiUrl=${apiUrl}` : ""}`, undefined, {
+			router.replace({pathname: "/login", query: { error, apiUrl }}, undefined, {
 				experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
 			});
 		}
