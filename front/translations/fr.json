@@ -69,7 +69,8 @@
 		"expand": "Développer",
 		"collapse": "Replier",
 		"edit": "Changer",
-		"or": "OU"
+		"or": "OU",
+		"loading": "Chargement en cours"
 	},
 	"navbar": {
 		"home": "Accueil",
@@ -168,6 +169,7 @@
 		"via": "Continuer avec {{provider}}",
 		"register": "Créer un compte",
 		"guest": "Continuer en tant qu'invité",
+		"guest-forbidden": "Cette instance de kyoo n'autorise pas les comptes invités.",
 		"add-account": "Ajouter un compte",
 		"logout": "Déconnexion",
 		"server": "Addresse du serveur",

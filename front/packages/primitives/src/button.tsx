@@ -31,6 +31,7 @@ export const Button = forwardRef(function Button<AsProps = PressableProps>(
 		text,
 		icon,
 		licon,
+		disabled,
 		as,
 		...props
 	}: {
@@ -38,6 +39,7 @@ export const Button = forwardRef(function Button<AsProps = PressableProps>(
 		text?: string;
 		licon?: ReactElement | Falsy;
 		icon?: ReactElement | Falsy;
+		disabled?: boolean;
 		as?: ComponentType<AsProps>;
 	} & AsProps,
 	ref: ForwardedRef<unknown>,
@@ -48,22 +50,35 @@ export const Button = forwardRef(function Button<AsProps = PressableProps>(
 	return (
 		<Container
 			ref={ref as any}
+			disabled={disabled}
 			{...(css(
-				{
-					flexGrow: 0,
-					flexDirection: "row",
-					alignItems: "center",
-					justifyContent: "center",
-					overflow: "hidden",
-					p: ts(0.5),
-					borderRadius: ts(5),
-					borderColor: (theme: Theme) => theme.accent,
-					borderWidth: ts(0.5),
-					fover: {
-						self: { bg: (theme: Theme) => theme.accent },
-						text: { color: (theme: Theme) => theme.colors.white },
+				[
+					{
+						flexGrow: 0,
+						flexDirection: "row",
+						alignItems: "center",
+						justifyContent: "center",
+						overflow: "hidden",
+						p: ts(0.5),
+						borderRadius: ts(5),
+						borderColor: (theme: Theme) => theme.accent,
+						borderWidth: ts(0.5),
+						fover: {
+							self: { bg: (theme: Theme) => theme.accent },
+							text: { color: (theme: Theme) => theme.colors.white },
+						},
 					},
-				},
+					disabled && {
+						child: {
+							self: {
+								borderColor: (theme) => theme.overlay1,
+							},
+							text: {
+								color: (theme) => theme.overlay1,
+							},
+						},
+					},
+				],
 				props as any,
 			) as AsProps)}
 		>

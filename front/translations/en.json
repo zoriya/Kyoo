@@ -69,7 +69,8 @@
 		"expand": "Expand",
 		"collapse": "Collapse",
 		"edit": "Edit",
-		"or": "OR"
+		"or": "OR",
+		"loading": "Loading"
 	},
 	"navbar": {
 		"home": "Home",
@@ -167,6 +168,7 @@
 		"login": "Login",
 		"register": "Register",
 		"guest": "Continue as guest",
+		"guest-forbidden": "This instance of kyoo does not allow guests",
 		"via": "Continue with {{provider}}",
 		"add-account": "Add account",
 		"logout": "Logout",

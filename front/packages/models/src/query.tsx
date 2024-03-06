@@ -49,7 +49,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 	type?: Parser,
 	token?: string | null,
 ): Promise<z.infer<Parser>> => {
-	const url = context.apiUrl ? null : getCurrentApiUrl();
+	const url = context.apiUrl ?? getCurrentApiUrl();
 	if (token === undefined && context.authenticated !== false) token = await getToken();
 	const path = [url]
 		.concat(
@@ -166,6 +166,7 @@ export type QueryIdentifier<T = unknown, Ret = T> = {
 
 	placeholderData?: T | (() => T);
 	enabled?: boolean;
+	apiUrl?: string;
 	options?: Partial<Parameters<typeof queryFn>[0]>;
 };
 
@@ -183,10 +184,10 @@ export type QueryPage<Props = {}, Items = unknown> = ComponentType<
 export const toQueryKey = (query: {
 	path: (string | undefined)[];
 	params?: { [query: string]: boolean | number | string | string[] | undefined };
-	options?: { apiUrl?: string };
+	apiUrl?: string;
 }) => {
 	return [
-		query.options?.apiUrl,
+		query.apiUrl,
 		...query.path,
 		query.params
 			? "?" +
@@ -195,7 +196,7 @@ export const toQueryKey = (query: {
 					.map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(",") : v}`)
 					.join("&")
 			: null,
-	];
+	].filter((x) => x);
 };
 
 export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {

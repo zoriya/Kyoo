@@ -19,7 +19,7 @@
  */
 
 import { QueryIdentifier, QueryPage, ServerInfo, ServerInfoP, useFetch } from "@kyoo/models";
-import { Button, P, Input, ts, H1, HR, Link } from "@kyoo/primitives";
+import { Button, P, Input, ts, H1, HR, Link, tooltip } from "@kyoo/primitives";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, View } from "react-native";
@@ -42,11 +42,12 @@ const query: QueryIdentifier<ServerInfo> = {
 export const ServerUrlPage: QueryPage = () => {
 	const [_apiUrl, setApiUrl] = useState("");
 	const apiUrl = cleanApiUrl(_apiUrl);
-	const { data, error } = useFetch({ ...query, options: { apiUrl: apiUrl } });
+	const { data, error } = useFetch({ ...query, apiUrl });
 	const router = useRouter();
 	const { t } = useTranslation();
 	const { css } = useYoshiki();
 
+	console.log(data);
 	return (
 		<View
 			{...css({
@@ -58,15 +59,18 @@ export const ServerUrlPage: QueryPage = () => {
 			<H1>{t("login.server")}</H1>
 			<View {...css({ justifyContent: "center" })}>
 				<Input variant="big" onChangeText={setApiUrl} />
-				<P {...css({ color: (theme: Theme) => theme.colors.red, alignSelf: "center" })}>
-					{error?.errors[0] ?? " "}
-				</P>
+				{!data && (
+					<P {...css({ color: (theme: Theme) => theme.colors.red, alignSelf: "center" })}>
+						{error?.errors[0] ?? t("misc.loading")}
+					</P>
+				)}
 			</View>
 			<View {...css({ marginTop: ts(5) })}>
 				<Button
 					text={t("login.guest")}
 					onPress={() => {}}
-					disabled={error != null || data?.allowGuests != true}
+					disabled={data?.allowGuests != true}
+					{...(data?.allowGuests === false ? tooltip(t("login.guets-forbidden")) : {})}
 				/>
 				<HR />
 				<View {...css({ flexDirection: "row", gap: ts(2) })}>
@@ -75,7 +79,7 @@ export const ServerUrlPage: QueryPage = () => {
 						onPress={() => {
 							router.push(`/login?apiUrl=${apiUrl}`);
 						}}
-						disabled={error != null}
+						disabled={data == null}
 						{...css({ flexGrow: 1, flexShrink: 1 })}
 					/>
 					<Button
@@ -83,7 +87,7 @@ export const ServerUrlPage: QueryPage = () => {
 						onPress={() => {
 							router.push(`/register?apiUrl=${apiUrl}`);
 						}}
-						disabled={error != null}
+						disabled={data == null}
 						{...css({ flexGrow: 1, flexShrink: 1 })}
 					/>
 				</View>
