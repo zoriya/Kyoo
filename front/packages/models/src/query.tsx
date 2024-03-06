@@ -34,7 +34,7 @@ import { getCurrentApiUrl } from ".";
 
 export const queryFn = async <Parser extends z.ZodTypeAny>(
 	context: {
-		apiUrl?: string;
+		apiUrl?: string | null;
 		authenticated?: boolean;
 		method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 	} & (
@@ -49,7 +49,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 	type?: Parser,
 	token?: string | null,
 ): Promise<z.infer<Parser>> => {
-	const url = context.apiUrl ?? getCurrentApiUrl();
+	const url = context.apiUrl === undefined ? getCurrentApiUrl() : context.apiUrl;
 	if (token === undefined && context.authenticated !== false) token = await getToken();
 	const path = [url]
 		.concat(
@@ -202,7 +202,8 @@ export const toQueryKey = (query: {
 export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 	return useQuery<Data, KyooErrors>({
 		queryKey: toQueryKey(query),
-		queryFn: (ctx) => queryFn({ ...ctx, ...query.options }, query.parser),
+		queryFn: (ctx) =>
+			queryFn({ ...ctx, apiUrl: query.apiUrl ? null : undefined, ...query.options }, query.parser),
 		placeholderData: query.placeholderData as any,
 		enabled: query.enabled,
 	});
@@ -211,7 +212,11 @@ export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 export const useInfiniteFetch = <Data, Ret>(query: QueryIdentifier<Data, Ret>) => {
 	const ret = useInfiniteQuery<Page<Data>, KyooErrors>({
 		queryKey: toQueryKey(query),
-		queryFn: (ctx) => queryFn({ ...ctx, ...query.options }, Paged(query.parser)),
+		queryFn: (ctx) =>
+			queryFn(
+				{ ...ctx, apiUrl: query.apiUrl ? null : undefined, ...query.options },
+				Paged(query.parser),
+			),
 		getNextPageParam: (page: Page<Data>) => page?.next || undefined,
 		initialPageParam: undefined,
 		placeholderData: query.placeholderData as any,
