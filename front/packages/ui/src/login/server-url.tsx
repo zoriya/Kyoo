@@ -72,6 +72,7 @@ export const ServerUrlPage: QueryPage = () => {
 							<Link
 								key={x.displayName}
 								href={{ pathname: x.link, query: { apiUrl } }}
+								target="_blank"
 								{...css({ justifyContent: "center" })}
 							>
 								{x.logoUrl != null ? (
