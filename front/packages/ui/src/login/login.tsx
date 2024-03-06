@@ -87,7 +87,8 @@ export const LoginPage: QueryPage<{ apiUrl?: string; error?: string }> = ({
 			/>
 			<P>
 				<Trans i18nKey="login.or-register">
-					Don’t have an account? <A href="/register">Register</A>.
+					Don’t have an account? <A href={{ pathname: "/register", query: { apiUrl } }}>Register</A>
+					.
 				</Trans>
 			</P>
 		</FormPage>

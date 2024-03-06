@@ -34,7 +34,6 @@ declare module "react-native" {
 		transitionDuration?: string;
 	}
 	interface TextProps {
-		href?: string;
 		hrefAttrs?: {
 			rel?: "noreferrer";
 			target?: string;

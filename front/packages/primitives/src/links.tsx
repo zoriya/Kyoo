@@ -22,6 +22,7 @@ import { forwardRef, ReactNode } from "react";
 import { Platform, Pressable, TextProps, View, PressableProps, Linking } from "react-native";
 import { TextLink, useLink } from "solito/link";
 import { useTheme, useYoshiki } from "yoshiki/native";
+import type { UrlObject } from "url";
 import { alpha } from "./themes";
 
 export const A = ({
@@ -31,7 +32,7 @@ export const A = ({
 	target,
 	...props
 }: TextProps & {
-	href?: string | null;
+	href?: string | UrlObject | null;
 	target?: string;
 	replace?: boolean;
 	children: ReactNode;
