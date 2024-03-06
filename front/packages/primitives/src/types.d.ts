@@ -41,7 +41,6 @@ declare module "react-native" {
 	}
 	interface ViewProps {
 		dataSet?: Record<string, string>;
-		href?: string;
 		hrefAttrs?: {
 			rel: "noreferrer";
 			target?: "_blank";

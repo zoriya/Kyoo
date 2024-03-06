@@ -19,12 +19,12 @@
  */
 
 import { QueryIdentifier, QueryPage, ServerInfo, ServerInfoP, useFetch } from "@kyoo/models";
-import { Button, P, Input, ts, H1, HR } from "@kyoo/primitives";
+import { Button, P, Link, Input, ts, H1, HR } from "@kyoo/primitives";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform, View } from "react-native";
+import { ImageBackground, Platform, View } from "react-native";
 import { useRouter } from "solito/router";
-import { Theme, useYoshiki } from "yoshiki/native";
+import { Theme, percent, useYoshiki } from "yoshiki/native";
 import { DefaultLayout } from "../layout";
 
 export const cleanApiUrl = (apiUrl: string) => {
@@ -65,6 +65,25 @@ export const ServerUrlPage: QueryPage = () => {
 				)}
 			</View>
 			<View {...css({ marginTop: ts(5) })}>
+				<View {...css({ flexDirection: "row", width: percent(100), alignItems: "center" })}>
+					{data &&
+						Object.values(data.oidc).map((x) => (
+							<Link
+								key={x.displayName}
+								href={{ pathname: x.link, query: { apiUrl } }}
+								{...css({ justifyContent: "center" })}
+							>
+								{x.logoUrl != null ? (
+									<ImageBackground
+										source={{ uri: x.logoUrl }}
+										{...css({ width: ts(3), height: ts(3), margin: ts(1) })}
+									/>
+								) : (
+									t("login.via", { provider: x.displayName })
+								)}
+							</Link>
+						))}
+				</View>
 				<HR />
 				<View {...css({ flexDirection: "row", gap: ts(2) })}>
 					<Button
