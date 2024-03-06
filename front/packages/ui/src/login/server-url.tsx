@@ -19,7 +19,7 @@
  */
 
 import { QueryIdentifier, QueryPage, ServerInfo, ServerInfoP, useFetch } from "@kyoo/models";
-import { Button, P, Input, ts, H1, HR, Link, tooltip } from "@kyoo/primitives";
+import { Button, P, Input, ts, H1, HR } from "@kyoo/primitives";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, View } from "react-native";
@@ -47,7 +47,6 @@ export const ServerUrlPage: QueryPage = () => {
 	const { t } = useTranslation();
 	const { css } = useYoshiki();
 
-	console.log(data);
 	return (
 		<View
 			{...css({
@@ -66,12 +65,6 @@ export const ServerUrlPage: QueryPage = () => {
 				)}
 			</View>
 			<View {...css({ marginTop: ts(5) })}>
-				<Button
-					text={t("login.guest")}
-					onPress={() => {}}
-					disabled={data?.allowGuests != true}
-					{...(data?.allowGuests === false ? tooltip(t("login.guets-forbidden")) : {})}
-				/>
 				<HR />
 				<View {...css({ flexDirection: "row", gap: ts(2) })}>
 					<Button
