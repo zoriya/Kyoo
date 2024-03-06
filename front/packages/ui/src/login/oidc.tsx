@@ -34,10 +34,10 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "solito/router";
 import { ErrorView } from "../errors";
 
-export const OidcLogin = () => {
+export const OidcLogin = ({ apiUrl }: { apiUrl?: string }) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
-	const { data, error } = useFetch(OidcLogin.query());
+	const { data, error } = useFetch({ options: { apiUrl }, ...OidcLogin.query() });
 
 	const btn = css({ width: { xs: percent(100), sm: percent(75) }, marginY: ts(1) });
 
@@ -48,7 +48,7 @@ export const OidcLogin = () => {
 			) : data ? (
 				Object.values(data.oidc).map((x) => (
 					<Button
-						href={x.link}
+						href={apiUrl ? `${x.link}&apiUrl=${apiUrl}` : x.link}
 						key={x.displayName}
 						licon={
 							x.logoUrl != null && (
@@ -90,11 +90,12 @@ OidcLogin.query = (): QueryIdentifier<ServerInfo> => ({
 	parser: ServerInfoP,
 });
 
-export const OidcCallbackPage: QueryPage<{ provider: string; code: string; error?: string }> = ({
-	provider,
-	code,
-	error,
-}) => {
+export const OidcCallbackPage: QueryPage<{
+	apiUrl?: string;
+	provider: string;
+	code: string;
+	error?: string;
+}> = ({ apiUrl, provider, code, error }) => {
 	const hasRun = useRef(false);
 	const router = useRouter();
 
@@ -103,12 +104,12 @@ export const OidcCallbackPage: QueryPage<{ provider: string; code: string; error
 		hasRun.current = true;
 
 		function onError(error: string) {
-			router.replace(`/login?error=${error}`, undefined, {
+			router.replace(`/login?error=${error}${apiUrl ? `&apiUrl=${apiUrl}` : ""}`, undefined, {
 				experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
 			});
 		}
 		async function run() {
-			const { error: loginError } = await oidcLogin(provider, code);
+			const { error: loginError } = await oidcLogin(provider, code, apiUrl);
 			if (loginError) onError(loginError);
 			else {
 				router.replace("/", undefined, {
@@ -119,6 +120,6 @@ export const OidcCallbackPage: QueryPage<{ provider: string; code: string; error
 
 		if (error) onError(error);
 		else run();
-	}, [provider, code, router, error]);
+	}, [provider, code, apiUrl, router, error]);
 	return <P>{"Loading"}</P>;
 };

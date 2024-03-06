@@ -20,9 +20,8 @@
 
 import { login, QueryPage } from "@kyoo/models";
 import { Button, P, Input, ts, H1, A } from "@kyoo/primitives";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform } from "react-native";
 import { Trans } from "react-i18next";
 import { useRouter } from "solito/router";
 import { percent, px, useYoshiki } from "yoshiki/native";
@@ -30,8 +29,12 @@ import { DefaultLayout } from "../layout";
 import { FormPage } from "./form";
 import { PasswordInput } from "./password-input";
 import { OidcLogin } from "./oidc";
+import { Platform } from "react-native";
 
-export const LoginPage: QueryPage<{ error?: string }> = ({ error: initialError }) => {
+export const LoginPage: QueryPage<{ apiUrl?: string; error?: string }> = ({
+	apiUrl,
+	error: initialError,
+}) => {
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState<string | undefined>(initialError);
@@ -40,10 +43,17 @@ export const LoginPage: QueryPage<{ error?: string }> = ({ error: initialError }
 	const { t } = useTranslation();
 	const { css } = useYoshiki();
 
+	useEffect(() => {
+		if (!apiUrl && Platform.OS !== "web")
+			router.replace("/server-url", undefined, {
+				experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
+			});
+	}, [apiUrl, router]);
+
 	return (
 		<FormPage>
 			<H1>{t("login.login")}</H1>
-			<OidcLogin />
+			<OidcLogin apiUrl={apiUrl} />
 			<P {...css({ paddingLeft: ts(1) })}>{t("login.username")}</P>
 			<Input autoComplete="username" variant="big" onChangeText={(value) => setUsername(value)} />
 			<P {...css({ paddingLeft: ts(1) })}>{t("login.password")}</P>
@@ -59,7 +69,7 @@ export const LoginPage: QueryPage<{ error?: string }> = ({ error: initialError }
 					const { error } = await login("login", {
 						username,
 						password,
-						apiUrl: cleanApiUrl(apiUrl),
+						apiUrl,
 					});
 					setError(error);
 					if (error) return;

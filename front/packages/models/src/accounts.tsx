@@ -19,14 +19,15 @@
  */
 
 import { ReactNode, createContext, useContext, useEffect, useMemo, useRef } from "react";
-import { User, UserP } from "./resources";
+import { ServerInfoP, User, UserP } from "./resources";
 import { z } from "zod";
 import { zdate } from "./utils";
 import { removeAccounts, setCookie, updateAccount } from "./account-internal";
 import { useMMKVString } from "react-native-mmkv";
 import { Platform } from "react-native";
-import { useFetch } from "./query";
 import { useQueryClient } from "@tanstack/react-query";
+import { atom, getDefaultStore, useAtomValue, useSetAtom } from "jotai";
+import { useFetch, } from "./query";
 import { KyooErrors } from "./kyoo-errors";
 
 export const TokenP = z.object({
@@ -49,6 +50,16 @@ export const AccountP = UserP.and(
 );
 export type Account = z.infer<typeof AccountP>;
 
+const defaultApiUrl = Platform.OS === "web" ? "/api" : null;
+const currentApiUrl = atom<string | null>(defaultApiUrl);
+export const getCurrentApiUrl = () => {
+	const store = getDefaultStore();
+	return store.get(currentApiUrl);
+};
+export const useCurrentApiUrl = () => {
+	return useAtomValue(currentApiUrl);
+};
+
 const AccountContext = createContext<(Account & { select: () => void; remove: () => void })[]>([]);
 export const ConnectionErrorContext = createContext<{
 	error: KyooErrors | null;
@@ -66,10 +77,14 @@ export const AccountProvider = ({
 	ssrAccount?: Account;
 	ssrError?: KyooErrors;
 }) => {
+	const setApiUrl = useSetAtom(currentApiUrl);
 	if (Platform.OS === "web" && typeof window === "undefined") {
 		const accs = ssrAccount
 			? [{ ...ssrAccount, selected: true, select: () => {}, remove: () => {} }]
 			: [];
+
+		setApiUrl(process.env.KYOO_URL ?? "http://localhost:5000");
+
 		return (
 			<AccountContext.Provider value={accs}>
 				<ConnectionErrorContext.Provider
@@ -103,6 +118,10 @@ export const AccountProvider = ({
 
 	// update user's data from kyoo un startup, it could have changed.
 	const selected = useMemo(() => accounts.find((x) => x.selected), [accounts]);
+	useEffect(() => {
+		setApiUrl(selected?.apiUrl ?? defaultApiUrl);
+	}, [selected, setApiUrl]);
+
 	const user = useFetch({
 		path: ["auth", "me"],
 		parser: UserP,
@@ -130,6 +149,7 @@ export const AccountProvider = ({
 		// update cookies for ssr (needs to contains token, theme, language...)
 		if (Platform.OS === "web") {
 			setCookie("account", selected);
+			// cookie used for images and videos since we can't add Authorization headers in img or video tags.
 			setCookie("X-Bearer", selected?.token.access_token);
 		}
 	}, [selected, queryClient]);
@@ -162,10 +182,14 @@ export const useAccounts = () => {
 
 export const useHasPermission = (perms?: string[]) => {
 	const account = useAccount();
+	const { data } = useFetch({
+		path: ["info"],
+		parser: ServerInfoP,
+	});
 
 	if (!perms || !perms[0]) return true;
 
-	// TODO: Read permission of guest account here.
-	if (!account) return false;
-	return perms.every((perm) => account.permissions.includes(perm));
+	const available = account?.permissions ?? data?.guestPermissions;
+	if (!available) return false;
+	return perms.every((perm) => available.includes(perm));
 };
