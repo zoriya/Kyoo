@@ -24,6 +24,7 @@ import { TextLink, useLink } from "solito/link";
 import { useTheme, useYoshiki } from "yoshiki/native";
 import type { UrlObject } from "url";
 import { alpha } from "./themes";
+import { parseNextPath } from "solito/router";
 
 export const A = ({
 	href,
@@ -114,8 +115,11 @@ export const Link = ({
 			onPress={(e?: any) => {
 				props?.onPress?.(e);
 				if (e?.defaultPrevented) return;
-				if (Platform.OS !== "web" && typeof href === "string" && href?.includes("://"))
-					Linking.openURL(href);
+				if (
+					(Platform.OS !== "web" && typeof href === "string" && href?.includes("://")) ||
+					(typeof href === "object" && href?.pathname?.includes("://"))
+				)
+					Linking.openURL(typeof href === "object" ? parseNextPath(href) : href);
 				else linkProps.onPress(e);
 			}}
 		>
