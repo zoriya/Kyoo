@@ -20,10 +20,10 @@
 
 import { Platform } from "react-native";
 import { ZodObject, ZodRawShape, z } from "zod";
-import { getCurrentApiUrl } from "..";
+import { lastUsedUrl } from "..";
 
 export const imageFn = (url: string) =>
-	Platform.OS === "web" ? `/api${url}` : `${getCurrentApiUrl()!}${url}`;
+	Platform.OS === "web" ? `/api${url}` : `${lastUsedUrl}${url}`;
 
 export const baseAppUrl = () => (Platform.OS === "web" ? window.location.origin : "kyoo://");
 

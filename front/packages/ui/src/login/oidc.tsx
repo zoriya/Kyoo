@@ -26,7 +26,7 @@ import {
 	oidcLogin,
 	useFetch,
 } from "@kyoo/models";
-import { Button, HR, P, Skeleton, ts } from "@kyoo/primitives";
+import { Button, HR, Link, P, Skeleton, ts } from "@kyoo/primitives";
 import { View, ImageBackground } from "react-native";
 import { percent, rem, useYoshiki } from "yoshiki/native";
 import { useTranslation } from "react-i18next";
@@ -48,7 +48,8 @@ export const OidcLogin = ({ apiUrl }: { apiUrl?: string }) => {
 			) : data ? (
 				Object.values(data.oidc).map((x) => (
 					<Button
-						href={apiUrl ? `${x.link}&apiUrl=${apiUrl}` : x.link}
+						as={Link}
+						href={{ pathname: x.link, query: { apiUrl } }}
 						key={x.displayName}
 						licon={
 							x.logoUrl != null && (
@@ -104,7 +105,7 @@ export const OidcCallbackPage: QueryPage<{
 		hasRun.current = true;
 
 		function onError(error: string) {
-			router.replace({pathname: "/login", query: { error, apiUrl }}, undefined, {
+			router.replace({ pathname: "/login", query: { error, apiUrl } }, undefined, {
 				experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
 			});
 		}

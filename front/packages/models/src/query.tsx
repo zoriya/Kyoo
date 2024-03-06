@@ -25,12 +25,15 @@ import {
 	QueryFunctionContext,
 	useInfiniteQuery,
 	useQuery,
+	useQueryClient,
 } from "@tanstack/react-query";
 import { z } from "zod";
 import { KyooErrors } from "./kyoo-errors";
 import { Page, Paged } from "./page";
 import { getToken } from "./login";
 import { getCurrentApiUrl } from ".";
+
+export let lastUsedUrl: string = null!;
 
 export const queryFn = async <Parser extends z.ZodTypeAny>(
 	context: {
@@ -49,7 +52,9 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 	type?: Parser,
 	token?: string | null,
 ): Promise<z.infer<Parser>> => {
-	const url = context.apiUrl === undefined ? getCurrentApiUrl() : context.apiUrl;
+	const url = context.apiUrl ?? getCurrentApiUrl();
+	lastUsedUrl = url!;
+
 	if (token === undefined && context.authenticated !== false) token = await getToken();
 	const path = [url]
 		.concat(
@@ -166,7 +171,6 @@ export type QueryIdentifier<T = unknown, Ret = T> = {
 
 	placeholderData?: T | (() => T);
 	enabled?: boolean;
-	apiUrl?: string;
 	options?: Partial<Parameters<typeof queryFn>[0]>;
 };
 
@@ -184,10 +188,10 @@ export type QueryPage<Props = {}, Items = unknown> = ComponentType<
 export const toQueryKey = (query: {
 	path: (string | undefined)[];
 	params?: { [query: string]: boolean | number | string | string[] | undefined };
-	apiUrl?: string;
+	options?: { apiUrl?: string | null };
 }) => {
 	return [
-		query.apiUrl,
+		query.options?.apiUrl,
 		...query.path,
 		query.params
 			? "?" +
@@ -203,7 +207,14 @@ export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 	return useQuery<Data, KyooErrors>({
 		queryKey: toQueryKey(query),
 		queryFn: (ctx) =>
-			queryFn({ ...ctx, apiUrl: query.apiUrl ? null : undefined, ...query.options }, query.parser),
+			queryFn(
+				{
+					...ctx,
+					queryKey: toQueryKey({ ...query, options: {} }),
+					...query.options,
+				},
+				query.parser,
+			),
 		placeholderData: query.placeholderData as any,
 		enabled: query.enabled,
 	});
@@ -214,7 +225,7 @@ export const useInfiniteFetch = <Data, Ret>(query: QueryIdentifier<Data, Ret>) =
 		queryKey: toQueryKey(query),
 		queryFn: (ctx) =>
 			queryFn(
-				{ ...ctx, apiUrl: query.apiUrl ? null : undefined, ...query.options },
+				{ ...ctx, queryKey: toQueryKey({ ...query, options: {} }), ...query.options },
 				Paged(query.parser),
 			),
 		getNextPageParam: (page: Page<Data>) => page?.next || undefined,
