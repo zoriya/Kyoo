@@ -20,14 +20,9 @@
 
 import { queryFn } from "./query";
 import { KyooErrors } from "./kyoo-errors";
-import { Account, TokenP } from "./accounts";
+import { Account, TokenP, getCurrentApiUrl } from "./accounts";
 import { UserP } from "./resources";
-import {
-	addAccount,
-	getCurrentAccount,
-	removeAccounts,
-	updateAccount,
-} from "./account-internal";
+import { addAccount, getCurrentAccount, removeAccounts, updateAccount } from "./account-internal";
 import { Platform } from "react-native";
 
 type Result<A, B> =
@@ -38,6 +33,7 @@ export const login = async (
 	action: "register" | "login",
 	{ apiUrl, ...body }: { username: string; password: string; email?: string; apiUrl?: string },
 ): Promise<Result<Account, string>> => {
+	apiUrl ??= getCurrentApiUrl()!;
 	try {
 		const controller = new AbortController();
 		setTimeout(() => controller.abort(), 5_000);
@@ -57,7 +53,7 @@ export const login = async (
 			UserP,
 			`Bearer ${token.access_token}`,
 		);
-		const account: Account = { ...user, apiUrl: apiUrl ?? "/api", token, selected: true };
+		const account: Account = { ...user, apiUrl: apiUrl, token, selected: true };
 		addAccount(account);
 		return { ok: true, value: account };
 	} catch (e) {
@@ -67,6 +63,7 @@ export const login = async (
 };
 
 export const oidcLogin = async (provider: string, code: string, apiUrl?: string) => {
+	apiUrl ??= getCurrentApiUrl()!;
 	try {
 		const token = await queryFn(
 			{
@@ -82,7 +79,7 @@ export const oidcLogin = async (provider: string, code: string, apiUrl?: string)
 			UserP,
 			`Bearer ${token.access_token}`,
 		);
-		const account: Account = { ...user, apiUrl: apiUrl ?? "/api", token, selected: true };
+		const account: Account = { ...user, apiUrl: apiUrl, token, selected: true };
 		addAccount(account);
 		return { ok: true, value: account };
 	} catch (e) {

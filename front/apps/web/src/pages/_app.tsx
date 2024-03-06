@@ -42,7 +42,7 @@ import {
 	UserP,
 	useUserTheme,
 } from "@kyoo/models";
-import { Component, ComponentType, useContext, useState } from "react";
+import { ComponentType, useContext, useState } from "react";
 import NextApp, { AppContext, type AppProps } from "next/app";
 import { Poppins } from "next/font/google";
 import { useTheme, useMobileHover, useStyleRegistry, StyleRegistryProvider } from "yoshiki/web";

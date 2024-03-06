@@ -29,14 +29,8 @@ import {
 import { z } from "zod";
 import { KyooErrors } from "./kyoo-errors";
 import { Page, Paged } from "./page";
-import { Platform } from "react-native";
 import { getToken } from "./login";
-import { getCurrentAccount } from "./account-internal";
-
-const kyooUrl =
-	typeof window === "undefined" ? process.env.KYOO_URL ?? "http://localhost:5000" : "/api";
-// The url of kyoo, set after each query (used by the image parser).
-export let kyooApiUrl = kyooUrl;
+import { getCurrentApiUrl } from ".";
 
 export const queryFn = async <Parser extends z.ZodTypeAny>(
 	context: {
@@ -55,9 +49,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 	type?: Parser,
 	token?: string | null,
 ): Promise<z.infer<Parser>> => {
-	const url = context.apiUrl ?? (Platform.OS === "web" ? kyooUrl : getCurrentAccount()?.apiUrl);
-	kyooApiUrl = url;
-
+	const url = context.apiUrl ?? getCurrentApiUrl();
 	if (token === undefined && context.authenticated !== false) token = await getToken();
 	const path = [url]
 		.concat(

@@ -20,9 +20,8 @@
 
 import { login, QueryPage } from "@kyoo/models";
 import { Button, P, Input, ts, H1, A } from "@kyoo/primitives";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform } from "react-native";
 import { Trans } from "react-i18next";
 import { useRouter } from "solito/router";
 import { percent, px, useYoshiki } from "yoshiki/native";
@@ -30,8 +29,9 @@ import { DefaultLayout } from "../layout";
 import { FormPage } from "./form";
 import { PasswordInput } from "./password-input";
 import { OidcLogin } from "./oidc";
+import { Platform } from "react-native";
 
-export const RegisterPage: QueryPage = () => {
+export const RegisterPage: QueryPage<{ apiUrl?: string }> = ({ apiUrl }) => {
 	const [email, setEmail] = useState("");
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
@@ -42,17 +42,17 @@ export const RegisterPage: QueryPage = () => {
 	const { t } = useTranslation();
 	const { css } = useYoshiki();
 
+	useEffect(() => {
+		if (!apiUrl && Platform.OS !== "web")
+			router.replace("/server-url", undefined, {
+				experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
+			});
+	}, [apiUrl, router]);
+
 	return (
 		<FormPage>
 			<H1>{t("login.register")}</H1>
-			<OidcLogin />
-			{Platform.OS !== "web" && (
-				<>
-					<P {...css({ paddingLeft: ts(1) })}>{t("login.server")}</P>
-					<Input variant="big" onChangeText={setApiUrl} />
-				</>
-			)}
-
+			<OidcLogin apiUrl={apiUrl} />
 			<P {...css({ paddingLeft: ts(1) })}>{t("login.username")}</P>
 			<Input autoComplete="username" variant="big" onChangeText={(value) => setUsername(value)} />
 
@@ -81,10 +81,7 @@ export const RegisterPage: QueryPage = () => {
 				text={t("login.register")}
 				disabled={password !== confirm}
 				onPress={async () => {
-					const { error } = await login(
-						"register",
-						{ email, username, password, apiUrl: cleanApiUrl(apiUrl) },
-					);
+					const { error } = await login("register", { email, username, password, apiUrl });
 					setError(error);
 					if (error) return;
 					router.replace("/", undefined, {
