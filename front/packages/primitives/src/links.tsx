@@ -99,7 +99,7 @@ export const Link = ({
 	target,
 	children,
 	...props
-}: { href?: string | null; target?: string; replace?: boolean } & PressableProps) => {
+}: { href?: string | UrlObject | null; target?: string; replace?: boolean } & PressableProps) => {
 	const linkProps = useLink({
 		href: href ?? "#",
 		replace,
@@ -114,7 +114,8 @@ export const Link = ({
 			onPress={(e?: any) => {
 				props?.onPress?.(e);
 				if (e?.defaultPrevented) return;
-				if (Platform.OS !== "web" && href?.includes("://")) Linking.openURL(href);
+				if (Platform.OS !== "web" && typeof href === "string" && href?.includes("://"))
+					Linking.openURL(href);
 				else linkProps.onPress(e);
 			}}
 		>
