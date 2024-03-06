@@ -42,10 +42,11 @@ const query: QueryIdentifier<ServerInfo> = {
 export const ServerUrlPage: QueryPage = () => {
 	const [_apiUrl, setApiUrl] = useState("");
 	const apiUrl = cleanApiUrl(_apiUrl);
-	const { data, error } = useFetch({ ...query, apiUrl });
+	const { data, error } = useFetch({ ...query, options: { apiUrl } });
 	const router = useRouter();
 	const { t } = useTranslation();
 	const { css } = useYoshiki();
+
 
 	return (
 		<View
