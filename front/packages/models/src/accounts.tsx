@@ -27,7 +27,7 @@ import { useMMKVString } from "react-native-mmkv";
 import { Platform } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { atom, getDefaultStore, useAtomValue, useSetAtom } from "jotai";
-import { useFetch, } from "./query";
+import { useFetch } from "./query";
 import { KyooErrors } from "./kyoo-errors";
 
 export const TokenP = z.object({
