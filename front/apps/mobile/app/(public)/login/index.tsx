@@ -19,5 +19,6 @@
  */
 
 import { LoginPage } from "@kyoo/ui";
+import { withRoute } from "../../utils";
 
-export default LoginPage;
+export default withRoute(LoginPage);

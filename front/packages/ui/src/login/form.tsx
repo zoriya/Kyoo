@@ -40,10 +40,14 @@ const SvgBlob = (props: SvgProps) => {
 	);
 };
 
-export const FormPage = ({ children, ...props }: { children: ReactNode } & Stylable) => {
+export const FormPage = ({
+	children,
+	apiUrl,
+	...props
+}: { children: ReactNode; apiUrl?: string } & Stylable) => {
 	const { css } = useYoshiki();
 
-	const src = imageFn("/items/random/thumbnail");
+	const src = apiUrl ? `${apiUrl}/items/random/thumbnail` : imageFn("/items/random/thumbnail");
 	const nativeProps = Platform.select<Partial<ImageProps>>({
 		web: {
 			defaultSource: { uri: src },

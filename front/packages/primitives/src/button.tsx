@@ -18,28 +18,37 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ComponentProps, ReactElement, forwardRef } from "react";
+import { ComponentType, ForwardedRef, ReactElement, forwardRef } from "react";
 import { Theme, useYoshiki } from "yoshiki/native";
 import { PressableFeedback } from "./links";
 import { P } from "./text";
 import { ts } from "./utils";
-import { Falsy, View } from "react-native";
+import { Falsy, PressableProps, View } from "react-native";
 
-export const Button = forwardRef<
-	View,
+export const Button = forwardRef(function Button<AsProps = PressableProps>(
 	{
+		children,
+		text,
+		icon,
+		licon,
+		as,
+		...props
+	}: {
 		children?: ReactElement | Falsy;
 		text?: string;
 		licon?: ReactElement | Falsy;
 		icon?: ReactElement | Falsy;
-	} & ComponentProps<typeof PressableFeedback>
->(function Button({ children, text, icon, licon, ...props }, ref) {
+		as?: ComponentType<AsProps>;
+	} & AsProps,
+	ref: ForwardedRef<unknown>,
+) {
 	const { css } = useYoshiki("button");
 
+	const Container = as ?? PressableFeedback;
 	return (
-		<PressableFeedback
-			ref={ref}
-			{...css(
+		<Container
+			ref={ref as any}
+			{...(css(
 				{
 					flexGrow: 0,
 					flexDirection: "row",
@@ -48,7 +57,7 @@ export const Button = forwardRef<
 					overflow: "hidden",
 					p: ts(0.5),
 					borderRadius: ts(5),
-					borderColor: (theme) => theme.accent,
+					borderColor: (theme: Theme) => theme.accent,
 					borderWidth: ts(0.5),
 					fover: {
 						self: { bg: (theme: Theme) => theme.accent },
@@ -56,7 +65,7 @@ export const Button = forwardRef<
 					},
 				},
 				props as any,
-			)}
+			) as AsProps)}
 		>
 			{(licon || text || icon) != null && (
 				<View
@@ -72,6 +81,6 @@ export const Button = forwardRef<
 				</View>
 			)}
 			{children}
-		</PressableFeedback>
+		</Container>
 	);
 });

@@ -19,5 +19,6 @@
  */
 
 import { RegisterPage } from "@kyoo/ui";
+import { withRoute } from "../../utils";
 
-export default RegisterPage;
+export default withRoute(RegisterPage);

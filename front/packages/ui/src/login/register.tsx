@@ -50,7 +50,7 @@ export const RegisterPage: QueryPage<{ apiUrl?: string }> = ({ apiUrl }) => {
 	}, [apiUrl, router]);
 
 	return (
-		<FormPage>
+		<FormPage apiUrl={apiUrl}>
 			<H1>{t("login.register")}</H1>
 			<OidcLogin apiUrl={apiUrl} />
 			<P {...css({ paddingLeft: ts(1) })}>{t("login.username")}</P>

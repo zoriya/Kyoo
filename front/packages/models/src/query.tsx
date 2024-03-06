@@ -49,16 +49,17 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 	type?: Parser,
 	token?: string | null,
 ): Promise<z.infer<Parser>> => {
-	const url = context.apiUrl ?? getCurrentApiUrl();
+	const url = context.apiUrl ? null : getCurrentApiUrl();
 	if (token === undefined && context.authenticated !== false) token = await getToken();
 	const path = [url]
 		.concat(
 			"path" in context
-				? (context.path.filter((x) => x) as string[])
+				? (context.path as string[])
 				: "pageParam" in context && context.pageParam
 					? [context.pageParam as string]
-					: (context.queryKey.filter((x) => x) as string[]),
+					: (context.queryKey as string[]),
 		)
+		.filter((x) => x)
 		.join("/")
 		.replace("/?", "?");
 	let resp;
@@ -182,19 +183,19 @@ export type QueryPage<Props = {}, Items = unknown> = ComponentType<
 export const toQueryKey = (query: {
 	path: (string | undefined)[];
 	params?: { [query: string]: boolean | number | string | string[] | undefined };
+	options?: { apiUrl?: string };
 }) => {
-	if (query.params) {
-		return [
-			...query.path,
-			"?" +
+	return [
+		query.options?.apiUrl,
+		...query.path,
+		query.params
+			? "?" +
 				Object.entries(query.params)
 					.filter(([_, v]) => v !== undefined)
 					.map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(",") : v}`)
-					.join("&"),
-		];
-	} else {
-		return query.path;
-	}
+					.join("&")
+			: null,
+	];
 };
 
 export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {

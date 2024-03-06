@@ -44,6 +44,7 @@ export const LoginPage: QueryPage<{ apiUrl?: string; error?: string }> = ({
 	const { css } = useYoshiki();
 
 	useEffect(() => {
+		console.log("login", apiUrl);
 		if (!apiUrl && Platform.OS !== "web")
 			router.replace("/server-url", undefined, {
 				experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
@@ -51,7 +52,7 @@ export const LoginPage: QueryPage<{ apiUrl?: string; error?: string }> = ({
 	}, [apiUrl, router]);
 
 	return (
-		<FormPage>
+		<FormPage apiUrl={apiUrl}>
 			<H1>{t("login.login")}</H1>
 			<OidcLogin apiUrl={apiUrl} />
 			<P {...css({ paddingLeft: ts(1) })}>{t("login.username")}</P>
