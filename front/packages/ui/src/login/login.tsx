@@ -44,7 +44,6 @@ export const LoginPage: QueryPage<{ apiUrl?: string; error?: string }> = ({
 	const { css } = useYoshiki();
 
 	useEffect(() => {
-		console.log("login", apiUrl);
 		if (!apiUrl && Platform.OS !== "web")
 			router.replace("/server-url", undefined, {
 				experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
