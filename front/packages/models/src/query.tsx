@@ -183,7 +183,7 @@ export type QueryPage<Props = {}, Items = unknown> = ComponentType<
 		| { Layout: QueryPage<{ page: ReactElement }>; props: object };
 	requiredPermissions?: string[];
 	randomItems?: Items[];
-	isPublic?: boolean
+	isPublic?: boolean;
 };
 
 export const toQueryKey = (query: {
