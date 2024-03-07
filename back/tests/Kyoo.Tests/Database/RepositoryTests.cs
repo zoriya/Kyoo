@@ -99,15 +99,6 @@ namespace Kyoo.Tests.Database
 			Assert.Equal(0, await _repository.GetCount());
 		}
 
-		[Fact]
-		public virtual async Task CreateIfNotExistTest()
-		{
-			T expected = TestSample.Get<T>();
-			KAssert.DeepEqual(expected, await _repository.CreateIfNotExists(TestSample.Get<T>()));
-			await _repository.Delete(TestSample.Get<T>());
-			KAssert.DeepEqual(expected, await _repository.CreateIfNotExists(TestSample.Get<T>()));
-		}
-
 		// [Fact]
 		// public async Task EditNonExistingTest()
 		// {

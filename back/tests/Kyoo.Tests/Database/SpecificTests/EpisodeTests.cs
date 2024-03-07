@@ -309,7 +309,7 @@ namespace Kyoo.Tests.Database
 		}
 
 		[Fact]
-		public override async Task CreateIfNotExistTest()
+		public async Task CreateIfNotExistTest()
 		{
 			Episode expected = TestSample.Get<Episode>();
 			KAssert.DeepEqual(
