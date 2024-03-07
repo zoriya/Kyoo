@@ -35,7 +35,7 @@ export const Button = forwardRef(function Button<AsProps = PressableProps>(
 		as,
 		...props
 	}: {
-		children?: ReactElement | Falsy;
+		children?: ReactElement | ReactElement[] | Falsy;
 		text?: string;
 		licon?: ReactElement | Falsy;
 		icon?: ReactElement | Falsy;

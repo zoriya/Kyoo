@@ -47,7 +47,6 @@ export const ServerUrlPage: QueryPage = () => {
 	const { t } = useTranslation();
 	const { css } = useYoshiki();
 
-
 	return (
 		<View
 			{...css({

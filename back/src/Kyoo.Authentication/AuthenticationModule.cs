@@ -75,8 +75,7 @@ namespace Kyoo.Authentication
 						.GetValue("DEFAULT_PERMISSIONS", "overall.read")!
 						.Split(','),
 					PublicUrl =
-						_configuration.GetValue<string?>("PUBLIC_URL")
-						?? "http://localhost:8901",
+						_configuration.GetValue<string?>("PUBLIC_URL") ?? "http://localhost:8901",
 					ApiKeys = _configuration.GetValue("KYOO_APIKEYS", string.Empty)!.Split(','),
 					OIDC = _configuration
 						.AsEnumerable()

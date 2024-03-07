@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { WatchInfo, kyooApiUrl, queryFn, toQueryKey } from "@kyoo/models";
+import { WatchInfo, getCurrentApiUrl, queryFn, toQueryKey } from "@kyoo/models";
 import { Player } from "../player";
 import { getCurrentAccount } from "@kyoo/models/src/account-internal";
 import { ReactNode } from "react";
@@ -41,7 +41,7 @@ export const useDownloader = () => {
 		// TODO: This methods does not work with auth.
 		const a = document.createElement("a");
 		a.style.display = "none";
-		a.href = `${kyooApiUrl}/${type}/${slug}/direct`;
+		a.href = `${getCurrentApiUrl()!}/${type}/${slug}/direct`;
 		a.download = `${slug}.${info.extension}`;
 		document.body.appendChild(a);
 		a.click();

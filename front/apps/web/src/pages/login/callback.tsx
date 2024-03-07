@@ -22,4 +22,3 @@ import { OidcCallbackPage } from "@kyoo/ui";
 import { withRoute } from "~/router";
 
 export default withRoute(OidcCallbackPage);
-
