@@ -24,9 +24,18 @@ namespace Kyoo.Authentication.Models.DTO;
 public class JwtProfile
 {
 	public string Sub { get; set; }
-	public string Uid { set => Sub = value; }
-	public string Id { set => Sub = value; }
-	public string Guid { set => Sub = value; }
+	public string Uid
+	{
+		set => Sub = value;
+	}
+	public string Id
+	{
+		set => Sub = value;
+	}
+	public string Guid
+	{
+		set => Sub = value;
+	}
 
 	public string? Name { get; set; }
 	public string? Username { get; set; }

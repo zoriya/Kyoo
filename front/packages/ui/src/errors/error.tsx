@@ -26,7 +26,7 @@ import { useYoshiki } from "yoshiki/native";
 export const ErrorView = ({ error }: { error: KyooErrors }) => {
 	const { css } = useYoshiki();
 
-	console.log(error)
+	console.log(error);
 	return (
 		<View
 			{...css({
