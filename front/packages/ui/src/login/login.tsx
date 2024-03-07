@@ -96,5 +96,5 @@ export const LoginPage: QueryPage<{ apiUrl?: string; error?: string }> = ({
 };
 
 LoginPage.getFetchUrls = () => [OidcLogin.query()];
-
+LoginPage.isPublic = true;
 LoginPage.getLayout = DefaultLayout;

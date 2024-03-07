@@ -117,10 +117,16 @@ const YoshikiDebug = ({ children }: { children: JSX.Element }) => {
 	return <StyleRegistryProvider registry={registry}>{children}</StyleRegistryProvider>;
 };
 
-const ConnectionErrorVerifier = ({ children }: { children: JSX.Element }) => {
+const ConnectionErrorVerifier = ({
+	children,
+	skipErrors,
+}: {
+	children: JSX.Element;
+	skipErrors?: boolean;
+}) => {
 	const { error } = useContext(ConnectionErrorContext);
 
-	if (!error) return children;
+	if (!error || skipErrors) return children;
 	return <WithLayout Component={ConnectionError} />;
 };
 
@@ -158,7 +164,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 								<PortalProvider>
 									<SnackbarProvider>
 										<GlobalCssTheme />
-										<ConnectionErrorVerifier>
+										<ConnectionErrorVerifier skipErrors={(Component as QueryPage).isPublic}>
 											<WithLayout
 												Component={Component}
 												randomItems={
