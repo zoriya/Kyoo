@@ -106,5 +106,5 @@ export const RegisterPage: QueryPage<{ apiUrl?: string }> = ({ apiUrl }) => {
 };
 
 RegisterPage.getFetchUrls = () => [OidcLogin.query()];
-
+RegisterPage.isPublic = true;
 RegisterPage.getLayout = DefaultLayout;
