@@ -60,7 +60,7 @@ public class JwtToken(string accessToken, string refreshToken, TimeSpan expireIn
 	/// </summary>
 	[JsonProperty("expire_in")]
 	[JsonPropertyName("expire_in")]
-	public TimeSpan ExpireIn { get; set; } = expireIn;
+	public TimeSpan ExpireIn => ExpireAt.Subtract(DateTime.UtcNow);
 
 	/// <summary>
 	/// The exact date at which the access token will expire.
