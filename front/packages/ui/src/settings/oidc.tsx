@@ -19,7 +19,7 @@
  */
 
 import { QueryIdentifier, ServerInfo, ServerInfoP, useAccount, useFetch } from "@kyoo/models";
-import { IconButton, Skeleton, tooltip, ts } from "@kyoo/primitives";
+import { A, Button, IconButton, Link, Skeleton, tooltip, ts } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { ImageBackground } from "react-native";
 import { rem, useYoshiki } from "yoshiki/native";
@@ -41,37 +41,54 @@ export const OidcSettings = () => {
 			{error ? (
 				<ErrorView error={error} />
 			) : data ? (
-				Object.values(data.oidc).map((x) => (
-					<Preference
-						key={x.displayName}
-						icon={Badge}
-						label={x.displayName}
-						description={
-							true
-								? t("settings.oidc.connected", { username: "test" })
-								: t("settings.oidc.not-connected")
-						}
-						customIcon={
-							x.logoUrl != null && (
-								<ImageBackground
-									source={{ uri: x.logoUrl }}
-									{...css({ width: ts(3), height: ts(3), marginRight: ts(2) })}
+				Object.entries(data.oidc).map(([id, x]) => {
+					const acc = account.externalId[id];
+					return (
+						<Preference
+							key={x.displayName}
+							icon={Badge}
+							label={x.displayName}
+							description={
+								acc
+									? t("settings.oidc.connected", { username: acc.username })
+									: t("settings.oidc.not-connected")
+							}
+							customIcon={
+								x.logoUrl != null && (
+									<ImageBackground
+										source={{ uri: x.logoUrl }}
+										{...css({ width: ts(3), height: ts(3), marginRight: ts(2) })}
+									/>
+								)
+							}
+						>
+							{acc ? (
+								<>
+									{acc.profileUrl && (
+										<IconButton
+											icon={OpenProfile}
+											as={Link}
+											href={acc.profileUrl}
+											target="_blank"
+											{...tooltip(t("settings.oidc.open-profile", { provider: x.displayName }))}
+										/>
+									)}
+									<IconButton
+										icon={Remove}
+										onPress={() => {}}
+										{...tooltip(t("settings.oidc.delete", { provider: x.displayName }))}
+									/>
+								</>
+							) : (
+								<Button
+									text={t("settings.oidc.link")}
+									onPress={() => {}}
+									{...css({ minWidth: rem(6) })}
 								/>
-							)
-						}
-					>
-						<IconButton
-							icon={OpenProfile}
-							onPress={() => {}}
-							{...tooltip(t("settings.oidc.open-profile", { provider: x.displayName }))}
-						/>
-						<IconButton
-							icon={Remove}
-							onPress={() => {}}
-							{...tooltip(t("settings.oidc.delete", { provider: x.displayName }))}
-						/>
-					</Preference>
-				))
+							)}
+						</Preference>
+					);
+				})
 			) : (
 				[...Array(3)].map((_, i) => (
 					<Preference

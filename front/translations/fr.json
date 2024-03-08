@@ -135,6 +135,7 @@
 			"connected": "Connecté en tant que {{username}}.",
 			"not-connected": "Déconnecté",
 			"open-profile": "Ouvrir votre profil {{provider}}",
+			"link": "Associer",
 			"delete": "Dissocier votre compte Kyoo de votre compte {{provider}}"
 		},
 		"about": {
