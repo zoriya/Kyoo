@@ -149,7 +149,7 @@ export const AccountSettings = () => {
 						const data = dataURItoBlob(img.assets[0].uri);
 						const formData = new FormData();
 						formData.append("picture", data);
-					await queryFn({
+						await queryFn({
 							method: "POST",
 							path: ["auth", "me", "logo"],
 							formData,
@@ -159,13 +159,12 @@ export const AccountSettings = () => {
 				<Button
 					text={t("misc.delete")}
 					onPress={async () => {
-					await queryFn({
+						await queryFn({
 							method: "DELETE",
 							path: ["auth", "me", "logo"],
 						});
 					}}
 				/>
-
 			</Preference>
 			<Preference icon={Mail} label={t("settings.account.email.label")} description={account.email}>
 				<Button
