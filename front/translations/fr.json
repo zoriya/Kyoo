@@ -130,6 +130,13 @@
 				"newPassword": "Nouveau mot de passe"
 			}
 		},
+		"oidc": {
+			"label": "Comptes liés",
+			"connected": "Connecté en tant que {{username}}.",
+			"not-connected": "Déconnecté",
+			"open-profile": "Ouvrir votre profil {{provider}}",
+			"delete": "Dissocier votre compte Kyoo de votre compte {{provider}}"
+		},
 		"about": {
 			"label": "À propos",
 			"android-app": {

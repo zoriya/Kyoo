@@ -130,6 +130,13 @@
 				"newPassword": "New password"
 			}
 		},
+		"oidc": {
+			"label": "Linked accounts",
+			"connected": "Connected as {{username}}.",
+			"not-connected": "Disconnected",
+			"open-profile": "Open your {{provider}} profile",
+			"delete": "Unlink your kyoo's account with your {{provider}} account"
+		},
 		"about": {
 			"label": "About",
 			"android-app": {
