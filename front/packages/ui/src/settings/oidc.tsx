@@ -19,10 +19,10 @@
  */
 
 import { QueryIdentifier, ServerInfo, ServerInfoP, useAccount, useFetch } from "@kyoo/models";
-import { IconButton, tooltip, ts } from "@kyoo/primitives";
+import { IconButton, Skeleton, tooltip, ts } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { ImageBackground } from "react-native";
-import { useYoshiki } from "yoshiki/native";
+import { rem, useYoshiki } from "yoshiki/native";
 import { ErrorView } from "../errors";
 import { Preference, SettingsContainer } from "./base";
 
@@ -72,7 +72,17 @@ export const OidcSettings = () => {
 						/>
 					</Preference>
 				))
-			) : null}
+			) : (
+				[...Array(3)].map((_, i) => (
+					<Preference
+						key={i}
+						customIcon={<Skeleton {...css({ width: ts(3), height: ts(3) })} />}
+						icon={null!}
+						label={<Skeleton {...css({ width: rem(6) })} />}
+						description={<Skeleton {...css({ width: rem(7), height: rem(0.8) })} />}
+					/>
+				))
+			)}
 		</SettingsContainer>
 	);
 };
