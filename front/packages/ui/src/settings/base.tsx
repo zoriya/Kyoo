@@ -32,7 +32,7 @@ import {
 } from "@kyoo/primitives";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Children, ReactElement, ReactNode } from "react";
-import { View } from "react-native";
+import { Falsy, View } from "react-native";
 import { px, rem, useYoshiki } from "yoshiki/native";
 
 export const Preference = ({
@@ -43,7 +43,7 @@ export const Preference = ({
 	children,
 	...props
 }: {
-	customIcon?: ReactElement;
+	customIcon?: ReactElement | Falsy;
 	icon: Icon;
 	label: string;
 	description: string;
@@ -79,7 +79,7 @@ export const Preference = ({
 					<SubP>{description}</SubP>
 				</View>
 			</View>
-			<View {...css({ marginX: ts(2) })}>{children}</View>
+			<View {...css({ marginX: ts(2), flexDirection: "row", gap: ts(1) })}>{children}</View>
 		</View>
 	);
 };
@@ -90,7 +90,7 @@ export const SettingsContainer = ({
 	extra,
 	...props
 }: {
-	children: ReactElement | ReactElement[];
+	children: ReactElement | (ReactElement | Falsy)[] | Falsy;
 	title: string;
 	extra?: ReactElement;
 }) => {

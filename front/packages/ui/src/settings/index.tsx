@@ -25,6 +25,7 @@ import { DefaultLayout } from "../layout";
 import { AccountSettings } from "./account";
 import { About, GeneralSettings } from "./general";
 import { PlaybackSettings } from "./playback";
+import { OidcSettings } from "./oidc";
 
 export const SettingsPage: QueryPage = () => {
 	const account = useAccount();
@@ -33,9 +34,11 @@ export const SettingsPage: QueryPage = () => {
 			<GeneralSettings />
 			{account && <PlaybackSettings />}
 			{account && <AccountSettings />}
+			{account && <OidcSettings />}
 			<About />
 		</ScrollView>
 	);
 };
 
 SettingsPage.getLayout = DefaultLayout;
+SettingsPage.getFetchUrls = () => [OidcSettings.query()];
