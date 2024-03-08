@@ -222,14 +222,14 @@ App.getInitialProps = async (ctx: AppContext) => {
 	else {
 		const client = (await fetchQuery(urls, authToken))!;
 		appProps.pageProps.queryState = dehydrate(client);
-		appProps.pageProps.token = token;
-		appProps.pageProps.account = {
-			...client.getQueryData(["auth", "me"]),
-			...account,
-		};
+		if (account) {
+			appProps.pageProps.token = token;
+			appProps.pageProps.account = {
+				...client.getQueryData(["auth", "me"]),
+				...account,
+			};
+		}
 	}
-	// TODO: return account from /auth/me and not the one from cookies,
-	// do not forget to leave apiUrl and selected intact
 	appProps.pageProps.theme = readCookie(ctx.ctx.req?.headers.cookie, "theme") ?? "auto";
 
 	return { pageProps: superjson.serialize(appProps.pageProps) };

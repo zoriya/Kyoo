@@ -19,7 +19,7 @@
  */
 
 import { QueryIdentifier, ServerInfo, ServerInfoP, useAccount, useFetch } from "@kyoo/models";
-import { A, Button, IconButton, Link, Skeleton, tooltip, ts } from "@kyoo/primitives";
+import { Button, IconButton, Link, Skeleton, tooltip, ts } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { ImageBackground } from "react-native";
 import { rem, useYoshiki } from "yoshiki/native";
@@ -82,7 +82,9 @@ export const OidcSettings = () => {
 							) : (
 								<Button
 									text={t("settings.oidc.link")}
-									onPress={() => {}}
+									as={Link}
+									href={x.link}
+									target="_blank"
 									{...css({ minWidth: rem(6) })}
 								/>
 							)}
