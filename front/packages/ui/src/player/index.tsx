@@ -160,11 +160,9 @@ export const Player = ({
 								experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
 							});
 						else
-							router.replace(
-								data.nextEpisode ? `/watch/${data.nextEpisode.slug}` : `/show/${data.show!.slug}`,
-								undefined,
-								{ experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false } },
-							);
+							router.replace(next ?? `/show/${data.show!.slug}`, undefined, {
+								experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
+							});
 					}}
 					{...css(StyleSheet.absoluteFillObject)}
 				/>
