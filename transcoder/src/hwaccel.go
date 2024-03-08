@@ -6,8 +6,16 @@ import (
 )
 
 func DetectHardwareAccel() HwAccelT {
-	name := GetEnvOr("GOTRANSCODER_HWACCEL", "disabled")
+	name := GetEnvOr("GOCODER_HWACCEL", "disabled")
+	if name == "disabled" {
+		name = GetEnvOr("GOTRANSCODER_HWACCEL", "disabled")
+	}
 	log.Printf("Using hardware acceleration: %s", name)
+
+	// superfast or ultrafast would produce a file extremly big so we prever to ignore them. Fast is available on all hw accel modes
+	// so we use that by default.
+	// vaapi does not have any presets so this flag is unused for vaapi hwaccel.
+	preset := GetEnvOr("GOCODER_PRESET", "fast")
 
 	switch name {
 	case "disabled":
@@ -16,8 +24,7 @@ func DetectHardwareAccel() HwAccelT {
 			DecodeFlags: []string{},
 			EncodeFlags: []string{
 				"-c:v", "libx264",
-				// superfast or ultrafast would produce a file extremly big so we prever veryfast or faster.
-				"-preset", "fast",
+				"-preset", preset,
 				// sc_threshold is a scene detection mechanisum used to create a keyframe when the scene changes
 				// this is on by default and inserts keyframes where we don't want to (it also breaks force_key_frames)
 				// we disable it to prevents whole scenes from behing removed due to the -f segment failing to find the corresonding keyframe
@@ -38,7 +45,7 @@ func DetectHardwareAccel() HwAccelT {
 			},
 			EncodeFlags: []string{
 				"-c:v", "h264_nvenc",
-				"-preset", "fast",
+				"-preset", preset,
 				// the exivalent of -sc_threshold on nvidia.
 				"-no-scenecut", "1",
 			},
@@ -51,7 +58,7 @@ func DetectHardwareAccel() HwAccelT {
 			Name: name,
 			DecodeFlags: []string{
 				"-hwaccel", "vaapi",
-				"-hwaccel_device", GetEnvOr("GOTRANSCODER_VAAPI_RENDERER", "/dev/dri/renderD128"),
+				"-hwaccel_device", GetEnvOr("GOCODER_VAAPI_RENDERER", "/dev/dri/renderD128"),
 				"-hwaccel_output_format", "vaapi",
 			},
 			EncodeFlags: []string{
@@ -69,12 +76,12 @@ func DetectHardwareAccel() HwAccelT {
 			Name: name,
 			DecodeFlags: []string{
 				"-hwaccel", "qsv",
-				// "-qsv_device", GetEnvOr("GOTRANSCODER_QSV_RENDERER", "/dev/dri/renderD128"),
+				// "-qsv_device", GetEnvOr("GOCODER_QSV_RENDERER", "/dev/dri/renderD128"),
 				"-hwaccel_output_format", "qsv",
 			},
 			EncodeFlags: []string{
 				"-c:v", "h264_qsv",
-				"-preset", "fast",
+				"-preset", preset,
 			},
 			ScaleFilter: "scale_qsv=%d:%d",
 		}

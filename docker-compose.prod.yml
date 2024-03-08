@@ -60,7 +60,7 @@ services:
           devices:
             - capabilities: [gpu]
     environment:
-      - GOTRANSCODER_HWACCEL=nvidia
+      - GOCODER_HWACCEL=nvidia
     profiles: ['nvidia']
 
   transcoder-vaapi:
@@ -68,8 +68,8 @@ services:
     devices:
       - /dev/dri:/dev/dri
     environment:
-      - GOTRANSCODER_HWACCEL=vaapi
-      - GOTRANSCODER_VAAPI_RENDERER=${GOTRANSCODER_VAAPI_RENDERER:-/dev/dri/renderD128}
+      - GOCODER_HWACCEL=vaapi
+      - GOCODER_VAAPI_RENDERER=${GOCODER_VAAPI_RENDERER:-/dev/dri/renderD128}
     profiles: ['vaapi']
   # qsv is the same setup as vaapi but with the hwaccel env var different
   transcoder-qsv:
@@ -77,8 +77,8 @@ services:
     devices:
       - /dev/dri:/dev/dri
     environment:
-      - GOTRANSCODER_HWACCEL=qsv
-      - GOTRANSCODER_VAAPI_RENDERER=${GOTRANSCODER_VAAPI_RENDERER:-/dev/dri/renderD128}
+      - GOCODER_HWACCEL=qsv
+      - GOCODER_VAAPI_RENDERER=${GOCODER_VAAPI_RENDERER:-/dev/dri/renderD128}
     profiles: ['qsv']
 
   ingress:
