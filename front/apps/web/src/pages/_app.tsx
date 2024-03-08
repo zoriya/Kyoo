@@ -56,7 +56,6 @@ import { Tooltip } from "react-tooltip";
 import { getCurrentAccount, readCookie, updateAccount } from "@kyoo/models/src/account-internal";
 import { PortalProvider } from "@gorhom/portal";
 import { ConnectionError } from "@kyoo/ui";
-import { getDefaultStore } from "jotai";
 
 const font = Poppins({ weight: ["300", "400", "900"], subsets: ["latin"], display: "swap" });
 
