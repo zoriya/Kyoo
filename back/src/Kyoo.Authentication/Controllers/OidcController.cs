@@ -31,8 +31,10 @@ using Kyoo.Core.Controllers;
 namespace Kyoo.Authentication;
 
 public class OidcController(
-		UserRepository users,
-	IHttpClientFactory clientFactory, PermissionOption options)
+	UserRepository users,
+	IHttpClientFactory clientFactory,
+	PermissionOption options
+)
 {
 	private async Task<(User, ExternalToken)> _TranslateCode(string provider, string code)
 	{
