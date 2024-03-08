@@ -7,7 +7,7 @@
    [`.env`](https://raw.githubusercontent.com/zoriya/Kyoo/master/.env.example) files
 3. Fill the `.env` file with your configuration options (and an API Key from [themoviedb.org](https://www.themoviedb.org/))
 4. Look at [Hardware Acceleration section](#Hardware-Acceleration) if you need it
-4. Run `docker compose up -d` and see kyoo at `http://localhost:8901`
+5. Run `docker compose up -d` and see kyoo at `http://localhost:8901`
 
 # Installing
 
