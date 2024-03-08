@@ -45,8 +45,8 @@ export const Preference = ({
 }: {
 	customIcon?: ReactElement | Falsy;
 	icon: Icon;
-	label: string;
-	description: string;
+	label: string | ReactElement;
+	description: string | ReactElement;
 	children?: ReactNode;
 }) => {
 	const { css } = useYoshiki();
