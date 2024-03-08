@@ -23,7 +23,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
-using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Postgresql;
@@ -115,6 +114,14 @@ public class UserRepository(
 	{
 		User user = await GetWithTracking(userId);
 		user.ExternalId[provider] = token;
+		await database.SaveChangesAsync();
+		return user;
+	}
+
+	public async Task<User> DeleteExternalToken(Guid userId, string provider)
+	{
+		User user = await GetWithTracking(userId);
+		user.ExternalId.Remove(provider);
 		await database.SaveChangesAsync();
 		return user;
 	}

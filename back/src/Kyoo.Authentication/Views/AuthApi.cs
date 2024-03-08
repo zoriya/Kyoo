@@ -19,9 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Text;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -187,6 +184,23 @@ namespace Kyoo.Authentication.Views
 		}
 
 		/// <summary>
+		/// Unlink account
+		/// </summary>
+		/// <remarks>
+		/// Unlink your account from an external account.
+		/// </remarks>
+		/// <param name="provider">The provider code.</param>
+		/// <returns>Your updated user account</returns>
+		[HttpDelete("login/{provider}")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[UserOnly]
+		public Task<User> UnlinkAccount(string provider)
+		{
+			Guid id = User.GetIdOrThrow();
+			return users.DeleteExternalToken(id, provider);
+		}
+
+		/// <summary>
 		/// Login.
 		/// </summary>
 		/// <remarks>
@@ -257,7 +271,6 @@ namespace Kyoo.Authentication.Views
 		/// <returns>A new access and refresh token.</returns>
 		/// <response code="403">The given refresh token is invalid.</response>
 		[HttpGet("refresh")]
-		[UserOnly]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
 		public async Task<ActionResult<JwtToken>> Refresh([FromQuery] string token)
