@@ -175,7 +175,10 @@ namespace Kyoo.Authentication.Views
 			if (code == null)
 				return BadRequest(new RequestError("Invalid code."));
 
-			User user = await oidc.LoginViaCode(provider, code);
+			Guid? userId = User.GetId();
+			User user = userId.HasValue
+				? await oidc.LinkAccount(userId.Value, provider, code)
+				: await oidc.LoginViaCode(provider, code);
 			return new JwtToken(
 				tokenController.CreateAccessToken(user, out TimeSpan expireIn),
 				await tokenController.CreateRefreshToken(user),
