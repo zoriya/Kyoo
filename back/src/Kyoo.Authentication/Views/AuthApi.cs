@@ -49,9 +49,9 @@ namespace Kyoo.Authentication.Views
 	[ApiDefinition("Authentication", Group = UsersGroup)]
 	public class AuthApi(
 		UserRepository users,
+		OidcController oidc,
 		ITokenController tokenController,
 		IThumbnailsManager thumbs,
-		IHttpClientFactory clientFactory,
 		PermissionOption options
 	) : ControllerBase
 	{
@@ -174,77 +174,8 @@ namespace Kyoo.Authentication.Views
 			}
 			if (code == null)
 				return BadRequest(new RequestError("Invalid code."));
-			OidcProvider prov = options.OIDC[provider];
 
-			HttpClient client = clientFactory.CreateClient();
-
-			string auth = Convert.ToBase64String(
-				Encoding.UTF8.GetBytes($"{prov.ClientId}:{prov.Secret}")
-			);
-			client.DefaultRequestHeaders.Add("Authorization", $"Basic {auth}");
-
-			HttpResponseMessage resp = await client.PostAsync(
-				prov.TokenUrl,
-				new FormUrlEncodedContent(
-					new Dictionary<string, string>()
-					{
-						["code"] = code,
-						["client_id"] = prov.ClientId,
-						["client_secret"] = prov.Secret,
-						["redirect_uri"] =
-							$"{options.PublicUrl.TrimEnd('/')}/api/auth/logged/{provider}",
-						["grant_type"] = "authorization_code",
-					}
-				)
-			);
-			if (!resp.IsSuccessStatusCode)
-				return BadRequest(
-					$"Invalid code or configuration. {resp.StatusCode}: {await resp.Content.ReadAsStringAsync()}"
-				);
-			JwtToken? token = await resp.Content.ReadFromJsonAsync<JwtToken>();
-			if (token is null)
-				return BadRequest("Could not retrive token.");
-
-			client.DefaultRequestHeaders.Remove("Authorization");
-			client.DefaultRequestHeaders.Add(
-				"Authorization",
-				$"{token.TokenType} {token.AccessToken}"
-			);
-			JwtProfile? profile = await client.GetFromJsonAsync<JwtProfile>(prov.ProfileUrl);
-			if (profile is null || profile.Sub is null)
-				return BadRequest("Missing sub on user object");
-			ExternalToken extToken = new() { Id = profile.Sub, Token = token, };
-			User newUser = new();
-			if (profile.Email is not null)
-				newUser.Email = profile.Email;
-			string? username = profile.Username ?? profile.Name;
-			if (username is null)
-			{
-				return BadRequest(
-					new RequestError(
-						$"Could not find a username for the user. You may need to add more scopes. Fields: {string.Join(',', profile.Extra)}"
-					)
-				);
-			}
-			newUser.Username = username;
-			newUser.Slug = Utils.Utility.ToSlug(newUser.Username);
-			newUser.ExternalId.Add(provider, extToken);
-			newUser.Permissions = options.NewUser;
-
-			User? user = await users.GetByExternalId(provider, extToken.Id);
-			if (user == null)
-			{
-				try
-				{
-					user = await users.Create(newUser);
-				}
-				catch
-				{
-					return BadRequest(
-						"A user already exists with the same username. If this is you, login via username and then link your account."
-					);
-				}
-			}
+			User user = await oidc.LoginViaCode(provider, code);
 			return new JwtToken(
 				tokenController.CreateAccessToken(user, out TimeSpan expireIn),
 				await tokenController.CreateRefreshToken(user),
