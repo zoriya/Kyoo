@@ -28,6 +28,11 @@ public class ServerInfo
 	public Dictionary<string, OidcInfo> Oidc { get; set; }
 
 	/// <summary>
+	/// The url to reach the homepage of kyoo (add /api for the api).
+	/// </summary>
+	public string PublicUrl { get; set; }
+
+	/// <summary>
 	/// True if guest accounts are allowed on this instance.
 	/// </summary>
 	public bool AllowGuests { get; set; }

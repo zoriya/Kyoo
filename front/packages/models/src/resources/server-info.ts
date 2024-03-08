@@ -19,7 +19,8 @@
  */
 
 import { z } from "zod";
-import { baseAppUrl, imageFn } from "..";
+import { imageFn } from "..";
+import { Platform } from "react-native";
 
 export const OidcInfoP = z.object({
 	/*
@@ -32,30 +33,40 @@ export const OidcInfoP = z.object({
 	logoUrl: z.string().nullable(),
 });
 
-export const ServerInfoP = z.object({
-	/*
-	 * True if guest accounts are allowed on this instance.
-	 */
-	allowGuests: z.boolean(),
-	/*
-	 * The list of permissions available for the guest account.
-	 */
-	guestPermissions: z.array(z.string()),
-	/*
-	 * The list of oidc providers configured for this instance of kyoo.
-	 */
-	oidc: z.record(z.string(), OidcInfoP).transform((x) =>
-		Object.fromEntries(
-			Object.entries(x).map(([provider, info]) => [
-				provider,
-				{
-					...info,
-					link: imageFn(`/auth/login/${provider}?redirectUrl=${baseAppUrl()}/login/callback`),
-				},
-			]),
-		),
-	),
-});
+export const ServerInfoP = z
+	.object({
+		/*
+		 * True if guest accounts are allowed on this instance.
+		 */
+		allowGuests: z.boolean(),
+		/*
+		 * The list of permissions available for the guest account.
+		 */
+		guestPermissions: z.array(z.string()),
+		/*
+		 * The url to reach the homepage of kyoo (add /api for the api).
+		 */
+		publicUrl: z.string(),
+		/*
+		 * The list of oidc providers configured for this instance of kyoo.
+		 */
+		oidc: z.record(z.string(), OidcInfoP),
+	})
+	.transform((x) => {
+		const baseUrl = Platform.OS === "web" ? x.publicUrl : "kyoo://";
+		return {
+			...x,
+			oidc: Object.fromEntries(
+				Object.entries(x.oidc).map(([provider, info]) => [
+					provider,
+					{
+						...info,
+						link: imageFn(`/auth/login/${provider}?redirectUrl=${baseUrl}/login/callback`),
+					},
+				]),
+			),
+		};
+	});
 
 /**
  * A season of a Show.

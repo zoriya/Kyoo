@@ -20,12 +20,10 @@
 
 import { ComponentType, ReactElement } from "react";
 import {
-	dehydrate,
 	QueryClient,
 	QueryFunctionContext,
 	useInfiniteQuery,
 	useQuery,
-	useQueryClient,
 } from "@tanstack/react-query";
 import { z } from "zod";
 import { KyooErrors } from "./kyoo-errors";
