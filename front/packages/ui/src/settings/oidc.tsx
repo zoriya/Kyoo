@@ -18,7 +18,14 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { QueryIdentifier, ServerInfo, ServerInfoP, useAccount, useFetch } from "@kyoo/models";
+import {
+	QueryIdentifier,
+	ServerInfo,
+	ServerInfoP,
+	queryFn,
+	useAccount,
+	useFetch,
+} from "@kyoo/models";
 import { Button, IconButton, Link, Skeleton, tooltip, ts } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { ImageBackground } from "react-native";
@@ -29,12 +36,22 @@ import { Preference, SettingsContainer } from "./base";
 import Badge from "@material-symbols/svg-400/outlined/badge.svg";
 import OpenProfile from "@material-symbols/svg-400/outlined/open_in_new.svg";
 import Remove from "@material-symbols/svg-400/outlined/close.svg";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const OidcSettings = () => {
 	const account = useAccount()!;
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 	const { data, error } = useFetch(OidcSettings.query());
+	const queryClient = useQueryClient();
+	const { mutateAsync: unlinkAccount } = useMutation({
+		mutationFn: async (provider: string) =>
+			await queryFn({
+				path: ["auth", "login", provider],
+				method: "DELETE",
+			}),
+		onSettled: async () => await queryClient.invalidateQueries({ queryKey: ["auth", "me"] }),
+	});
 
 	return (
 		<SettingsContainer title={t("settings.oidc.label")}>
@@ -75,7 +92,7 @@ export const OidcSettings = () => {
 									)}
 									<IconButton
 										icon={Remove}
-										onPress={() => {}}
+										onPress={() => unlinkAccount(id)}
 										{...tooltip(t("settings.oidc.delete", { provider: x.displayName }))}
 									/>
 								</>
