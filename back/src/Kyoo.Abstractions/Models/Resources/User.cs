@@ -100,14 +100,19 @@ namespace Kyoo.Abstractions.Models
 		public string Id { get; set; }
 
 		/// <summary>
-		/// A jwt token used to interact with the service.
-		/// Do not forget to refresh it when using it if necessary.
+		/// The username on the external service.
 		/// </summary>
-		public JwtToken Token { get; set; }
+		public string Username { get; set; }
 
 		/// <summary>
 		/// The link to the user profile on this website. Null if it does not exist.
 		/// </summary>
 		public string? ProfileUrl { get; set; }
+
+		/// <summary>
+		/// A jwt token used to interact with the service.
+		/// Do not forget to refresh it when using it if necessary.
+		/// </summary>
+		public JwtToken Token { get; set; }
 	}
 }
