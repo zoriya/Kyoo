@@ -59,6 +59,10 @@ export const getCurrentApiUrl = () => {
 export const useCurrentApiUrl = () => {
 	return useAtomValue(currentApiUrl);
 };
+export const setSsrApiUrl = () => {
+	const store = getDefaultStore();
+	store.set(currentApiUrl, process.env.KYOO_URL ?? "http://localhost:5000");
+};
 
 const AccountContext = createContext<(Account & { select: () => void; remove: () => void })[]>([]);
 export const ConnectionErrorContext = createContext<{
@@ -82,8 +86,6 @@ export const AccountProvider = ({
 		const accs = ssrAccount
 			? [{ ...ssrAccount, selected: true, select: () => {}, remove: () => {} }]
 			: [];
-
-		setApiUrl(process.env.KYOO_URL ?? "http://localhost:5000");
 
 		return (
 			<AccountContext.Provider value={accs}>

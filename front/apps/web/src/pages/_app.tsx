@@ -20,7 +20,7 @@
 
 import "../polyfill";
 
-import { HydrationBoundary, QueryClientProvider } from "@tanstack/react-query";
+import { HydrationBoundary, QueryClientProvider, dehydrate } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {
 	HiddenIfNoJs,
@@ -39,6 +39,8 @@ import {
 	getTokenWJ,
 	QueryIdentifier,
 	QueryPage,
+	ServerInfoP,
+	setSsrApiUrl,
 	UserP,
 	useUserTheme,
 } from "@kyoo/models";
@@ -54,6 +56,7 @@ import { Tooltip } from "react-tooltip";
 import { getCurrentAccount, readCookie, updateAccount } from "@kyoo/models/src/account-internal";
 import { PortalProvider } from "@gorhom/portal";
 import { ConnectionError } from "@kyoo/ui";
+import { getDefaultStore } from "jotai";
 
 const font = Poppins({ weight: ["300", "400", "900"], subsets: ["latin"], display: "swap" });
 
@@ -206,15 +209,27 @@ App.getInitialProps = async (ctx: AppContext) => {
 	const urls: QueryIdentifier[] = [
 		...(getUrl ? getUrl(ctx.router.query as any, items) : []),
 		...(getLayoutUrl ? getLayoutUrl(ctx.router.query as any, items) : []),
+		// always include server info for guest permissions.
+		{ path: ["info"], parser: ServerInfoP },
 	];
+
+	setSsrApiUrl();
 
 	const account = readCookie(ctx.ctx.req?.headers.cookie, "account", AccountP);
 	if (account) urls.push({ path: ["auth", "me"], parser: UserP });
 	const [authToken, token, error] = await getTokenWJ(account);
 	if (error) appProps.pageProps.ssrError = error;
-	else appProps.pageProps.queryState = await fetchQuery(urls, authToken);
-	appProps.pageProps.token = token;
-	appProps.pageProps.account = account;
+	else {
+		const client = (await fetchQuery(urls, authToken))!;
+		appProps.pageProps.queryState = dehydrate(client);
+		appProps.pageProps.token = token;
+		appProps.pageProps.account = {
+			...client.getQueryData(["auth", "me"]),
+			...account,
+		};
+	}
+	// TODO: return account from /auth/me and not the one from cookies,
+	// do not forget to leave apiUrl and selected intact
 	appProps.pageProps.theme = readCookie(ctx.ctx.req?.headers.cookie, "theme") ?? "auto";
 
 	return { pageProps: superjson.serialize(appProps.pageProps) };

@@ -72,7 +72,7 @@ export const UserP = ResourceP("user")
 				z.string(),
 				z.object({
 					id: z.string(),
-					username: z.string().optional(),
+					username: z.string().nullable().default(""),
 					profileUrl: z.string().nullable(),
 				}),
 			)
