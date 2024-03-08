@@ -247,7 +247,7 @@ export const useInfiniteFetch = <Data, Ret>(query: QueryIdentifier<Data, Ret>) =
 export const fetchQuery = async (queries: QueryIdentifier[], authToken?: string | null) => {
 	// we can't put this check in a function because we want build time optimizations
 	// see https://github.com/vercel/next.js/issues/5354 for details
-	if (typeof window !== "undefined") return {};
+	if (typeof window !== "undefined") return null;
 
 	const client = createQueryClient();
 	await Promise.all(
@@ -266,5 +266,5 @@ export const fetchQuery = async (queries: QueryIdentifier[], authToken?: string 
 			}
 		}),
 	);
-	return dehydrate(client);
+	return client;
 };
