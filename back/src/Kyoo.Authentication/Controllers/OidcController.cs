@@ -110,4 +110,10 @@ public class OidcController(
 		}
 		return user;
 	}
+
+	public async Task<User> LinkAccount(Guid userId, string provider, string code)
+	{
+		(_, ExternalToken extToken) = await _TranslateCode(provider, code);
+		return await users.AddExternalToken(userId, provider, extToken);
+	}
 }
