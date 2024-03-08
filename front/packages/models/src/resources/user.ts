@@ -64,6 +64,19 @@ export const UserP = ResourceP("user")
 			})
 			// keep a default for older versions of the api
 			.default({}),
+		/**
+		 * User accounts on other services.
+		 */
+		externalId: z
+			.record(
+				z.string(),
+				z.object({
+					id: z.string(),
+					username: z.string().optional(),
+					profileUrl: z.string().nullable(),
+				}),
+			)
+			.default({}),
 	})
 	.transform((x) => ({ ...x, logo: imageFn(`/user/${x.slug}/logo`) }));
 
