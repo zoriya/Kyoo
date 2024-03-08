@@ -78,7 +78,7 @@ vainfo: Supported profile and entrypoints
       VAProfileHEVCSccMain444_10      :	VAEntrypointEncSliceLP
 ```
 Kyoo will default to use your primary card (located at `/dev/dri/renderD128`). If you need to specify a secondary one, you
-can use the `GOTRANSCODER_VAAPI_RENDERER` env-var to specify `/dev/dri/renderD129` or another one.
+can use the `GOCODER_VAAPI_RENDERER` env-var to specify `/dev/dri/renderD129` or another one.
 
 Then you can simply run kyoo using `docker compose --profile vaapi up -d` (notice the `--profile vaapi` added)
 You can also add `COMPOSE_PROFILES=vaapi` to your `.env` instead of adding the `--profile` flag.
