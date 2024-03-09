@@ -33,9 +33,19 @@ public class ServerInfo
 	public string PublicUrl { get; set; }
 
 	/// <summary>
+	/// Which security mode was chosen for this instance.
+	/// </summary>
+	public SecurityMode SecurityMode { get; set; }
+
+	/// <summary>
 	/// True if guest accounts are allowed on this instance.
 	/// </summary>
 	public bool AllowGuests { get; set; }
+
+	/// <summary>
+	/// True if a user is able to register.
+	/// </summary>
+	public bool AllowRegister { get; set; }
 
 	/// <summary>
 	/// The list of permissions available for the guest account.
