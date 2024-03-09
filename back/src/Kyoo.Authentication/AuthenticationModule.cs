@@ -29,6 +29,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Kyoo.Authentication
@@ -69,12 +70,8 @@ namespace Kyoo.Authentication
 			PermissionOption options =
 				new()
 				{
-					Default = _configuration
-						.GetValue("UNLOGGED_PERMISSIONS", "overall.read,overall.play")!
-						.Split(','),
-					NewUser = _configuration
-						.GetValue("DEFAULT_PERMISSIONS", "overall.read,overall.play")!
-						.Split(','),
+					Default = _configuration.GetValue("UNLOGGED_PERMISSIONS", "")!.Split(',').Where(x => x.Length > 0).ToArray(),
+					NewUser = _configuration.GetValue("DEFAULT_PERMISSIONS", "overall.read,overall.play")!.Split(','),
 					RequireVerification = _configuration.GetValue(
 						"REQUIRE_ACCOUNT_VERIFICATION",
 						true
@@ -141,7 +138,6 @@ namespace Kyoo.Authentication
 				new AuthenticationOption() { Secret = secret, Permissions = options, }
 			);
 
-			// TODO handle direct-videos with bearers (probably add a cookie and a app.Use to translate that for videos)
 			services
 				.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 				.AddJwtBearer(options =>
@@ -150,6 +146,18 @@ namespace Kyoo.Authentication
 					{
 						OnMessageReceived = (ctx) =>
 						{
+							string prefix = "Bearer ";
+							if (
+								ctx.Request.Headers.TryGetValue(
+									"Authorization",
+									out StringValues val
+								)
+								&& val.ToString() is string auth
+								&& auth.StartsWith(prefix)
+							)
+							{
+								ctx.Token ??= auth[prefix.Length..];
+							}
 							ctx.Token ??= ctx.Request.Cookies["X-Bearer"];
 							return Task.CompletedTask;
 						}

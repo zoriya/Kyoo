@@ -50,7 +50,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 	type?: Parser,
 	token?: string | null,
 ): Promise<z.infer<Parser>> => {
-	const url = context.apiUrl ?? getCurrentApiUrl();
+	const url = context.apiUrl && context.apiUrl.length > 0 ? context.apiUrl : getCurrentApiUrl();
 	lastUsedUrl = url!;
 
 	if (token === undefined && context.authenticated !== false) token = await getToken();
