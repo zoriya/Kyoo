@@ -228,7 +228,9 @@
 			"adminUser": "Admin",
 			"regularUser": "User",
 			"set-permissions": "Set permissions",
-			"delete": "Delete user"
+			"delete": "Delete user",
+			"unverifed": "Unverifed",
+			"verify": "Verify user"
 		},
 		"scanner": {
 			"label": "Scanner",
