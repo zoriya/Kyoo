@@ -28,7 +28,6 @@ using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Authentication.Models;
 using Kyoo.Authentication.Models.DTO;
-using Kyoo.Core.Controllers;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -45,7 +44,7 @@ namespace Kyoo.Authentication.Views
 	[Route("auth")]
 	[ApiDefinition("Authentication", Group = UsersGroup)]
 	public class AuthApi(
-		UserRepository users,
+		IUserRepository users,
 		OidcController oidc,
 		ITokenController tokenController,
 		IThumbnailsManager thumbs,
@@ -243,22 +242,19 @@ namespace Kyoo.Authentication.Views
 		[ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(RequestError))]
 		public async Task<ActionResult<JwtToken>> Register([FromBody] RegisterRequest request)
 		{
-			User user = request.ToUser();
-			user.Permissions = options.NewUser;
 			try
 			{
-				await users.Create(user);
+				User user = await users.Create(request.ToUser());
+				return new JwtToken(
+					tokenController.CreateAccessToken(user, out TimeSpan expireIn),
+					await tokenController.CreateRefreshToken(user),
+					expireIn
+				);
 			}
 			catch (DuplicatedItemException)
 			{
 				return Conflict(new RequestError("A user already exists with this username."));
 			}
-
-			return new JwtToken(
-				tokenController.CreateAccessToken(user, out TimeSpan expireIn),
-				await tokenController.CreateRefreshToken(user),
-				expireIn
-			);
 		}
 
 		/// <summary>
