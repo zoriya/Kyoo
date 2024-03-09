@@ -23,27 +23,6 @@ using Kyoo.Abstractions.Models.Permissions;
 
 namespace Kyoo.Authentication.Models;
 
-public enum SecurityMode
-{
-	/// <summary>
-	/// Anyone can use your instance, even without an account (guest mode is enabled).
-	/// To specify guest permissions, see UNLOGGED_PERMISSIONS.
-	/// </summary>
-	Open,
-
-	/// <summary>
-	/// Anyone can create an account but their account needs to be manually verified
-	/// by an admin before they can use kyoo.
-	/// </summary>
-	Verif,
-
-	/// <summary>
-	/// Only created and verified accounts can access your instance. To allow someone else
-	/// to use your instance, you need to invite them.
-	/// </summary>
-	Invite,
-}
-
 /// <summary>
 /// Permission options.
 /// </summary>
@@ -55,9 +34,9 @@ public class PermissionOption
 	public const string Path = "authentication:permissions";
 
 	/// <summary>
-	/// Which security mode was chosen for this instance.
+	/// True if new users needs to be verifed.
 	/// </summary>
-	public SecurityMode SecurityMode { get; set; }
+	public bool RequireVerification { get; set; }
 
 	/// <summary>
 	/// The default permissions that will be given to a non-connected user.
