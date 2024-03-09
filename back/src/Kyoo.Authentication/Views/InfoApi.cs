@@ -38,9 +38,8 @@ public class InfoApi(PermissionOption options) : ControllerBase
 		return Ok(
 			new ServerInfo()
 			{
-				SecurityMode = options.SecurityMode,
 				AllowGuests = options.Default.Any(),
-				AllowRegister = options.SecurityMode != SecurityMode.Invite,
+				RequireVerification = options.RequireVerification,
 				GuestPermissions = options.Default.ToList(),
 				PublicUrl = options.PublicUrl,
 				Oidc = options

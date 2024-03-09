@@ -69,11 +69,16 @@ namespace Kyoo.Authentication
 			PermissionOption options =
 				new()
 				{
-					Default = _configuration.GetValue("UNLOGGED_PERMISSIONS", "")!.Split(','),
+					Default = _configuration
+						.GetValue("UNLOGGED_PERMISSIONS", "overall.read,overall.play")!
+						.Split(','),
 					NewUser = _configuration
 						.GetValue("DEFAULT_PERMISSIONS", "overall.read,overall.play")!
 						.Split(','),
-					SecurityMode = _configuration.GetValue("SECURITY_MODE", SecurityMode.Verif),
+					RequireVerification = _configuration.GetValue(
+						"REQUIRE_ACCOUNT_VERIFICATION",
+						true
+					),
 					PublicUrl =
 						_configuration.GetValue<string?>("PUBLIC_URL") ?? "http://localhost:8901",
 					ApiKeys = _configuration.GetValue("KYOO_APIKEYS", string.Empty)!.Split(','),
@@ -128,16 +133,9 @@ namespace Kyoo.Authentication
 										return acc;
 								}
 								return acc;
-						}
+							}
 						),
 				};
-			if (!options.Default.Any())
-			{
-				options.Default =
-					options.SecurityMode == SecurityMode.Open
-						? new string[] {"overall.read", "overall.play"}
-						: Array.Empty<string>();
-			}
 			services.AddSingleton(options);
 			services.AddSingleton(
 				new AuthenticationOption() { Secret = secret, Permissions = options, }
