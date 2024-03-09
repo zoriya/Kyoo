@@ -33,7 +33,7 @@ export const login = async (
 	action: "register" | "login",
 	{ apiUrl, ...body }: { username: string; password: string; email?: string; apiUrl?: string },
 ): Promise<Result<Account, string>> => {
-	apiUrl ??= getCurrentApiUrl()!;
+	if (!apiUrl || apiUrl.length === 0) apiUrl = getCurrentApiUrl()!;
 	try {
 		const controller = new AbortController();
 		setTimeout(() => controller.abort(), 5_000);
@@ -63,7 +63,7 @@ export const login = async (
 };
 
 export const oidcLogin = async (provider: string, code: string, apiUrl?: string) => {
-	apiUrl ??= getCurrentApiUrl()!;
+	if (!apiUrl || apiUrl.length === 0) apiUrl = getCurrentApiUrl()!;
 	try {
 		const token = await queryFn(
 			{
