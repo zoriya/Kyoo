@@ -30,6 +30,7 @@ import { SettingsContainer } from "../settings/base";
 import UserI from "@material-symbols/svg-400/rounded/account_circle.svg";
 import Delete from "@material-symbols/svg-400/rounded/delete.svg";
 import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
+import Unverifed from "@material-symbols/svg-400/rounded/gpp_bad.svg";
 import Admin from "@material-symbols/svg-400/rounded/shield_person.svg";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -39,8 +40,15 @@ export const UserGrid = ({
 	username,
 	avatar,
 	isAdmin,
+	isVerifed,
 	...props
-}: WithLoading<{ id: string; username: string; avatar: string; isAdmin: boolean }>) => {
+}: WithLoading<{
+	id: string;
+	username: string;
+	avatar: string;
+	isAdmin: boolean;
+	isVerifed: boolean;
+}>) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 	const queryClient = useQueryClient();
@@ -59,17 +67,35 @@ export const UserGrid = ({
 			<Avatar src={avatar} alt={username} placeholder={username} size={UserGrid.layout.size} fill />
 			<View {...css({ flexDirection: "row" })}>
 				<Icon
-					icon={isAdmin ? Admin : UserI}
+					icon={isVerifed ? Unverifed : isAdmin ? Admin : UserI}
 					{...css({
 						alignSelf: "center",
 						m: ts(1),
 					})}
-					{...tooltip(t(isAdmin ? "admin.users.adminUser" : "admin.users.regularUser"))}
+					{...tooltip(
+						t(
+							isVerifed
+								? "admin.users.unverifed"
+								: isAdmin
+									? "admin.users.adminUser"
+									: "admin.users.regularUser",
+						),
+					)}
 				/>
 				<Skeleton>
 					<P>{username}</P>
 				</Skeleton>
 				<Menu Trigger={IconButton} icon={MoreVert} {...tooltip(t("misc.more"))}>
+					{!isVerifed && (
+						<Menu.Item
+							label={t("admin.users.verify")}
+							onSelect={() =>
+								mutateAsync({
+									permissions: ["overall.read", "overall.play"],
+								})
+							}
+						/>
+					)}
 					<Menu.Sub label={t("admin.users.set-permissions")} icon={Admin}>
 						<Menu.Item
 							selected={!isAdmin}
@@ -151,6 +177,7 @@ export const UserList = () => {
 						username={user.username}
 						avatar={user.logo}
 						isAdmin={user.permissions?.includes("admin.write")}
+						isVerified={user.permissions?.length == 0}
 					/>
 				)}
 			</InfiniteFetch>
