@@ -23,15 +23,15 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
+using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Authentication.Models;
 using Kyoo.Authentication.Models.DTO;
-using Kyoo.Core.Controllers;
 
 namespace Kyoo.Authentication;
 
 public class OidcController(
-	UserRepository users,
+	IUserRepository users,
 	IHttpClientFactory clientFactory,
 	PermissionOption options
 )
@@ -89,7 +89,6 @@ public class OidcController(
 		newUser.Username = username;
 		newUser.Slug = Utils.Utility.ToSlug(newUser.Username);
 		newUser.ExternalId.Add(provider, extToken);
-		newUser.Permissions = options.NewUser;
 		return (newUser, extToken);
 	}
 

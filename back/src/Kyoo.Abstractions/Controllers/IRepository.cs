@@ -261,4 +261,11 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		Type RepositoryType { get; }
 	}
+
+	public interface IUserRepository : IRepository<User>
+	{
+		Task<User?> GetByExternalId(string provider, string id);
+		Task<User> AddExternalToken(Guid userId, string provider, ExternalToken token);
+		Task<User> DeleteExternalToken(Guid userId, string provider);
+	}
 }

@@ -23,8 +23,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
-using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
+using Kyoo.Authentication.Models;
 using Kyoo.Postgresql;
 using Microsoft.EntityFrameworkCore;
 
@@ -40,8 +40,9 @@ public class UserRepository(
 	DatabaseContext database,
 	DbConnection db,
 	SqlVariableContext context,
-	IThumbnailsManager thumbs
-) : LocalRepository<User>(database, thumbs)
+	IThumbnailsManager thumbs,
+	PermissionOption options
+) : LocalRepository<User>(database, thumbs), IUserRepository
 {
 	/// <inheritdoc />
 	public override async Task<ICollection<User>> Search(
@@ -60,14 +61,13 @@ public class UserRepository(
 	{
 		// If no users exists, the new one will be an admin. Give it every permissions.
 		if (!await database.Users.AnyAsync())
-		{
-			obj.Permissions = Enum.GetNames<Group>()
-				.Where(x => x != nameof(Group.None))
-				.SelectMany(group =>
-					Enum.GetNames<Kind>().Select(kind => $"{group}.{kind}".ToLowerInvariant())
-				)
-				.ToArray();
-		}
+
+			obj.Permissions = PermissionOption.Admin;
+		else if (!options.RequireVerification)
+			obj.Permissions = options.NewUser;
+		else
+			obj.Permissions = Array.Empty<string>();
+
 		await base.Create(obj);
 		database.Entry(obj).State = EntityState.Added;
 		await database.SaveChangesAsync(() => Get(obj.Slug));

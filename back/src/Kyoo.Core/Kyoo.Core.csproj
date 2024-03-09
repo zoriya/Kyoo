@@ -21,5 +21,6 @@
 	<ItemGroup>
 		<ProjectReference Include="../Kyoo.Abstractions/Kyoo.Abstractions.csproj" />
 		<ProjectReference Include="../Kyoo.Postgresql/Kyoo.Postgresql.csproj" />
+		<ProjectReference Include="../Kyoo.Authentication/Kyoo.Authentication.csproj" />
 	</ItemGroup>
 </Project>
