@@ -85,10 +85,10 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 		if (typeof e === "object" && e && "name" in e && e.name === "AbortError")
 			throw { errors: ["Aborted"] } as KyooErrors;
 		console.log("Fetch error", e, path);
-		throw { errors: ["Could not reach Kyoo's server."] } as KyooErrors;
+		throw { errors: ["Could not reach Kyoo's server."], status: "aborted" } as KyooErrors;
 	}
 	if (resp.status === 404) {
-		throw { errors: ["Resource not found."] } as KyooErrors;
+		throw { errors: ["Resource not found."], status: 404 } as KyooErrors;
 	}
 	if (!resp.ok) {
 		const error = await resp.text();
@@ -98,6 +98,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 		} catch (e) {
 			data = { errors: [error] } as KyooErrors;
 		}
+		data.status = resp.status;
 		console.log(
 			`Invalid response (${
 				"method" in context && context.method ? context.method : "GET"
@@ -117,7 +118,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 		data = await resp.json();
 	} catch (e) {
 		console.error("Invalid json from kyoo", e);
-		throw { errors: ["Invalid response from kyoo"] };
+		throw { errors: ["Invalid response from kyoo"], status: "json" };
 	}
 	if (!type) return data;
 	const parsed = await type.safeParseAsync(data);
@@ -127,6 +128,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 			errors: [
 				"Invalid response from kyoo. Possible version mismatch between the server and the application.",
 			],
+			status: "parse"
 		} as KyooErrors;
 	}
 	return parsed.data;

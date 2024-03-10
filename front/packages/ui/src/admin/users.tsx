@@ -179,7 +179,7 @@ export const UserList = () => {
 						username={user.username}
 						avatar={user.logo}
 						isAdmin={user.permissions?.includes("admin.write")}
-						isVerified={user.permissions && user.permissions.length > 0}
+						isVerified={user.isVerified}
 					/>
 				)}
 			</InfiniteFetch>
