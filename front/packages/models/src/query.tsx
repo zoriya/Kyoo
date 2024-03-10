@@ -53,8 +53,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 	const url = context.apiUrl && context.apiUrl.length > 0 ? context.apiUrl : getCurrentApiUrl();
 	lastUsedUrl = url!;
 
-	const token =
-		iToken === undefined && context.authenticated !== false ? await getToken() : iToken;
+	const token = iToken === undefined && context.authenticated !== false ? await getToken() : iToken;
 	const path = [url]
 		.concat(
 			"path" in context
