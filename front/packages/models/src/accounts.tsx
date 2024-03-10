@@ -94,7 +94,7 @@ export const AccountProvider = ({
 						error: ssrError || null,
 						loading: false,
 						retry: () => {
-							queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+							queryClient.resetQueries({ queryKey: ["auth", "me"] });
 						},
 					}}
 				>
@@ -144,7 +144,7 @@ export const AccountProvider = ({
 		// if the user change account (or connect/disconnect), reset query cache.
 		if (selected?.id !== oldSelectedId.current) {
 			initialSsrError.current = undefined;
-			queryClient.invalidateQueries();
+			queryClient.resetQueries();
 		}
 		oldSelectedId.current = selected?.id;
 
