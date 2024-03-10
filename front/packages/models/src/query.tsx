@@ -28,7 +28,7 @@ import {
 import { z } from "zod";
 import { KyooErrors } from "./kyoo-errors";
 import { Page, Paged } from "./page";
-import { getToken } from "./login";
+import { getToken, getTokenWJ } from "./login";
 import { getCurrentApiUrl } from ".";
 
 export let lastUsedUrl: string = null!;
@@ -48,12 +48,13 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 		  } & Partial<QueryFunctionContext>)
 	),
 	type?: Parser,
-	token?: string | null,
+	iToken?: string | null,
 ): Promise<z.infer<Parser>> => {
 	const url = context.apiUrl && context.apiUrl.length > 0 ? context.apiUrl : getCurrentApiUrl();
 	lastUsedUrl = url!;
 
-	if (token === undefined && context.authenticated !== false) token = await getToken();
+	const token =
+		iToken === undefined && context.authenticated !== false ? await getToken() : undefined;
 	const path = [url]
 		.concat(
 			"path" in context
@@ -89,6 +90,14 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 	}
 	if (resp.status === 404) {
 		throw { errors: ["Resource not found."], status: 404 } as KyooErrors;
+	}
+	// If we got a forbidden, try to refresh the token
+	// if we got a token as an argument, it either means we already retried or we go one provided that's fresh
+	// so we can't retry either ways.
+	if (resp.status === 403 && iToken === undefined && token) {
+		const [newToken, _, error] = await getTokenWJ(undefined, true);
+		if (newToken) return await queryFn(context, type, newToken);
+		else console.error("refresh error while retrying a forbidden", error);
 	}
 	if (!resp.ok) {
 		const error = await resp.text();
@@ -128,7 +137,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 			errors: [
 				"Invalid response from kyoo. Possible version mismatch between the server and the application.",
 			],
-			status: "parse"
+			status: "parse",
 		} as KyooErrors;
 	}
 	return parsed.data;
