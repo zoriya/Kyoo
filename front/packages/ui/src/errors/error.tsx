@@ -18,9 +18,9 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { KyooErrors } from "@kyoo/models";
+import { KyooErrors, useAccount } from "@kyoo/models";
 import { P } from "@kyoo/primitives";
-import { ReactElement, createContext, useContext, useLayoutEffect, useState } from "react";
+import { ReactElement, createContext, useContext, useEffect, useLayoutEffect, useState } from "react";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 import { PermissionError } from "./unauthorized";
@@ -60,8 +60,15 @@ export const ErrorView = ({
 };
 
 const ErrorCtx = createContext<(val: KyooErrors | null) => void>(null!);
+
 export const ErrorContext = ({ children }: { children: ReactElement }) => {
 	const [error, setError] = useState<KyooErrors | null>(null);
+	const account = useAccount();
+
+	useEffect(() => {
+		setError(null);
+	}, [account, children]);
+
 	if (error && (error.status === 401 || error.status === 403))
 		return <PermissionError error={error} />;
 	if (error) return <ErrorView error={error} noBubble />;

@@ -139,7 +139,7 @@ const WithLayout = ({ Component, ...props }: { Component: ComponentType }) => {
 	return (
 		<Layout
 			page={
-				<ErrorContext key={Component as any}>
+				<ErrorContext>
 					<Component {...props} />
 				</ErrorContext>
 			}
