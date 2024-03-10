@@ -107,7 +107,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 			data = { errors: [error] } as KyooErrors;
 		}
 		data.status = resp.status;
-		console.log(
+		console.trace(
 			`Invalid response (${
 				"method" in context && context.method ? context.method : "GET"
 			} ${path}):`,
