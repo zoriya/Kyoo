@@ -48,6 +48,9 @@ class Scanner:
 		if len(deleted) != len(self.registered):
 			for x in deleted:
 				await self.delete(x)
+			for x in self.issues:
+				if x not in videos:
+					await self.delete(x, "issue")
 		elif len(deleted) > 0:
 			logging.warning("All video files are unavailable. Check your disks.")
 
@@ -260,25 +263,34 @@ class Scanner:
 				return await self.post(path, data=data)
 			return ret["id"]
 
-	async def delete(self, path: str):
+	async def delete(
+		self,
+		path: str,
+		type: Literal["episode", "movie", "issue"] | None = None,
+	):
 		logging.info("Deleting %s", path)
 		self.registered = filter(lambda x: x != path, self.registered)
-		async with self._client.delete(
-			f'{self._url}/movies?filter=path eq "{path}"',
-			headers={"X-API-Key": self._api_key},
-		) as r:
-			if not r.ok:
-				logging.error(f"Request error: {await r.text()}")
-				r.raise_for_status()
 
-		async with self._client.delete(
-			f'{self._url}/episodes?filter=path eq "{path}"',
-			headers={"X-API-Key": self._api_key},
-		) as r:
-			if not r.ok:
-				logging.error(f"Request error: {await r.text()}")
-				r.raise_for_status()
+		if type is None or type == "movie":
+			async with self._client.delete(
+				f'{self._url}/movies?filter=path eq "{path}"',
+				headers={"X-API-Key": self._api_key},
+			) as r:
+				if not r.ok:
+					logging.error(f"Request error: {await r.text()}")
+					r.raise_for_status()
+
+		if type is None or type == "episode":
+			async with self._client.delete(
+				f'{self._url}/episodes?filter=path eq "{path}"',
+				headers={"X-API-Key": self._api_key},
+			) as r:
+				if not r.ok:
+					logging.error(f"Request error: {await r.text()}")
+					r.raise_for_status()
+
 		if path in self.issues:
+			self.issues = filter(lambda x: x != path, self.issues)
 			await self._client.delete(
 				f'{self._url}/issues?filter=domain eq scanner and cause eq "{path}"',
 				headers={"X-API-Key": self._api_key},
