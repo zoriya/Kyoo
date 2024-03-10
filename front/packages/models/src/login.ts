@@ -20,7 +20,7 @@
 
 import { queryFn } from "./query";
 import { KyooErrors } from "./kyoo-errors";
-import { Account, TokenP, getCurrentApiUrl } from "./accounts";
+import { Account, Token, TokenP, getCurrentApiUrl } from "./accounts";
 import { UserP } from "./resources";
 import { addAccount, getCurrentAccount, removeAccounts, updateAccount } from "./account-internal";
 import { Platform } from "react-native";
@@ -88,16 +88,21 @@ export const oidcLogin = async (provider: string, code: string, apiUrl?: string)
 	}
 };
 
+let running_id: string | null = null;
 let running: ReturnType<typeof getTokenWJ> | null = null;
 
-export const getTokenWJ = async (account?: Account | null): ReturnType<typeof run> => {
-	async function run() {
-		if (account === undefined) account = getCurrentAccount();
-		if (!account) return [null, null, null] as const;
+export const getTokenWJ = async (
+	acc?: Account | null,
+	forceRefresh: boolean = false,
+): Promise<readonly [string, Token, null] | readonly [null, null, KyooErrors | null]> => {
+	if (acc === undefined) acc = getCurrentAccount();
+	if (!acc) return [null, null, null] as const;
+	const account = acc;
 
+	async function run() {
 		let token = account.token;
 
-		if (account.token.expire_at <= new Date(new Date().getTime() + 10 * 1000)) {
+		if (forceRefresh || account.token.expire_at <= new Date(new Date().getTime() + 10 * 1000)) {
 			console.log("refreshing token for account", account.slug);
 			try {
 				token = await queryFn(
@@ -121,9 +126,11 @@ export const getTokenWJ = async (account?: Account | null): ReturnType<typeof ru
 	// Do not cache promise durring ssr.
 	if (Platform.OS === "web" && typeof window === "undefined") return await run();
 
-	if (running) return await running;
+	if (running && running_id === account.id) return await running;
+	running_id = account.id;
 	running = run();
 	const ret = await running;
+	running_id = null;
 	running = null;
 	return ret;
 };
