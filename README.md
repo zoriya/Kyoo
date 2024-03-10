@@ -7,6 +7,7 @@ Welcome to Kyoo, the next-generation open-source media browser that redefines yo
 ## 🌐 Getting Started
 
 - **[Installation](./INSTALLING.md):** Set up Kyoo effortlessly to enjoy seamless streaming of your favorite movies, TV shows, or anime.
+- **[Join the discord](https://discord.gg/E6Apw3aFaA):** Join our Discord community for discussions and support
 - **[API Documentation](https://kyoo.zoriya.dev/api/doc):** Dive into our comprehensive API documentation to explore advanced functionalities.
 - **[Contributing](./CONTRIBUTING.md):** Feel free to open issues, submit pull requests, and contribute to making Kyoo even better.
 
@@ -31,6 +32,14 @@ Welcome to Kyoo, the next-generation open-source media browser that redefines yo
 ## 🌟 Philosophy: Setup Once, Enjoy Forever
 
 Kyoo's philosophy revolves around simplicity. Set it up once, forget about configuration hassles. Once installed, your library undergoes automatic scanning, adding new episodes or movies as soon as they're moved into your library's folder. No need for a specific file structure or meticulously renamed files – Kyoo does the right thing™.
+
+## 📜 Why another media-browser?
+
+From a technical standpoint, both Jellyfin and Plex lean on SQLite and confine everything within a single container, Kyoo takes a different route. We're not afraid to bring in additional containers when it makes sense – whether for specialized features like Meilisearch powering our search system or for scalability, as seen with our transcoder.
+
+Kyoo embraces the "setup once, forget about it" philosophy. Unlike Plex and Jellyfin, we don't burden you with manual file renaming or specific folder structures. Kyoo seamlessly works with files straight from your download directory, minimizing the maintenance headache for server admins.
+
+Kyoo narrows its focus to movies, TV shows, and anime streaming. No music, ebooks, or games – just pure cinematic delight.
 
 ## 🔗 Live Demo
 
