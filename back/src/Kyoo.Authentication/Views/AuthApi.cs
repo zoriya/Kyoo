@@ -173,7 +173,7 @@ namespace Kyoo.Authentication.Views
 
 			Guid? userId = User.GetId();
 			User user = userId.HasValue
-				? await oidc.LinkAccount(userId.Value, provider, code)
+				? await oidc.LinkAccountOrLogin(userId.Value, provider, code)
 				: await oidc.LoginViaCode(provider, code);
 			return new JwtToken(
 				tokenController.CreateAccessToken(user, out TimeSpan expireIn),
