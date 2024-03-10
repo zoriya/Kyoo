@@ -50,7 +50,6 @@ export const OidcLogin = ({ apiUrl }: { apiUrl?: string }) => {
 					<Button
 						as={Link}
 						href={{ pathname: x.link, query: { apiUrl } }}
-						target="_blank"
 						key={x.displayName}
 						licon={
 							x.logoUrl != null && (
