@@ -70,8 +70,14 @@ namespace Kyoo.Authentication
 			PermissionOption options =
 				new()
 				{
-					Default = _configuration.GetValue("UNLOGGED_PERMISSIONS", "")!.Split(',').Where(x => x.Length > 0).ToArray(),
-					NewUser = _configuration.GetValue("DEFAULT_PERMISSIONS", "overall.read,overall.play")!.Split(','),
+					Default = _configuration
+						.GetValue("UNLOGGED_PERMISSIONS", "")!
+						.Split(',')
+						.Where(x => x.Length > 0)
+						.ToArray(),
+					NewUser = _configuration
+						.GetValue("DEFAULT_PERMISSIONS", "overall.read,overall.play")!
+						.Split(','),
 					RequireVerification = _configuration.GetValue(
 						"REQUIRE_ACCOUNT_VERIFICATION",
 						true

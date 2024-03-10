@@ -61,7 +61,6 @@ public class UserRepository(
 	{
 		// If no users exists, the new one will be an admin. Give it every permissions.
 		if (!await database.Users.AnyAsync())
-
 			obj.Permissions = PermissionOption.Admin;
 		else if (!options.RequireVerification)
 			obj.Permissions = options.NewUser;
