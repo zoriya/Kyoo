@@ -95,12 +95,13 @@ export const PressableFeedback = forwardRef<View, PressableProps>(function Feedb
 });
 
 export const Link = ({
-	href,
+	href: link,
 	replace,
 	target,
 	children,
 	...props
 }: { href?: string | UrlObject | null; target?: string; replace?: boolean } & PressableProps) => {
+	const href = link && typeof link === "object" ? parseNextPath(link) : link;
 	const linkProps = useLink({
 		href: href ?? "#",
 		replace,
@@ -115,11 +116,7 @@ export const Link = ({
 			onPress={(e?: any) => {
 				props?.onPress?.(e);
 				if (e?.defaultPrevented) return;
-				if (
-					(Platform.OS !== "web" && typeof href === "string" && href?.includes("://")) ||
-					(typeof href === "object" && href?.pathname?.includes("://"))
-				)
-					Linking.openURL(typeof href === "object" ? parseNextPath(href) : href);
+				if (Platform.OS !== "web" && href?.includes("://")) Linking.openURL(href);
 				else linkProps.onPress(e);
 			}}
 		>
