@@ -78,6 +78,10 @@ export const UserP = ResourceP("user")
 			)
 			.default({}),
 	})
-	.transform((x) => ({ ...x, logo: imageFn(`/user/${x.slug}/logo`) }));
+	.transform((x) => ({
+		...x,
+		logo: imageFn(`/user/${x.slug}/logo`),
+		isVerified: x.permissions.length > 0,
+	}));
 
 export type User = z.infer<typeof UserP>;

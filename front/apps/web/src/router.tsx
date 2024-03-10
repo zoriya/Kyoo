@@ -33,8 +33,7 @@ export const withRoute = <Props,>(
 
 		if (!hasPermissions)
 			return <Unauthorized missing={(Component as QueryPage).requiredPermissions!} />;
-		// @ts-ignore
-		return <Component {...defaultProps} {...router.query} {...props} />;
+		return <Component {...defaultProps} {...router.query} {...(props as any)} />;
 	};
 
 	const { ...all } = Component;

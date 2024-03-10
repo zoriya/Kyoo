@@ -207,7 +207,9 @@
 		"try-again": "Try again",
 		"re-login": "Re login",
 		"offline": "You are not connected to internet. Try again later.",
-		"unauthorized": "You are missing the permissions {{permission}} to access this page."
+		"unauthorized": "You are missing the permissions {{permission}} to access this page.",
+		"needVerification": "Your account needs to be verified by your server administrator before you can use it.",
+		"needAccount": "This page can't be accessed in guest mode. You need to create an account or login."
 	},
 	"mediainfo": {
 		"file": "File",

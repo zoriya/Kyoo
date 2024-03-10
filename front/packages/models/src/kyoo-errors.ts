@@ -28,4 +28,6 @@ export interface KyooErrors {
 	 * @example `["InvalidFilter: no field 'startYear' on a collection"]`
 	 */
 	errors: string[];
+
+	status: number | "aborted" | "parse" | "json"
 }

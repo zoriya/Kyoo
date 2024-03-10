@@ -207,7 +207,9 @@
 		"try-again": "Réessayer",
 		"re-login": "Se reconnecter",
 		"offline": "Vous n'êtes pas connecté à Internet. Réessayez plus tard.",
-		"unauthorized": "Il vous manque les autorisations {{permission}} pour accéder à cette page."
+		"unauthorized": "Il vous manque les autorisations {{permission}} pour accéder à cette page.",
+		"needVerification": "Votre compte doit être vérifié par l'administrateur de votre serveur avant de pouvoir l'utiliser.",
+		"needAccount": "Cette page n'est pas accessible en mode invité. Vous devez créer un compte ou vous connecter."
 	},
 	"mediainfo": {
 		"file": "Fichier",
