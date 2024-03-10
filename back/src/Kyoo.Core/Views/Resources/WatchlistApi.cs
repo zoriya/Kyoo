@@ -21,8 +21,10 @@ using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
+using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
+using Kyoo.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using static Kyoo.Abstractions.Models.Utils.Constants;
@@ -36,15 +38,9 @@ namespace Kyoo.Core.Api
 	[ApiController]
 	[PartialPermission("LibraryItem")]
 	[ApiDefinition("News", Group = ResourcesGroup)]
-	public class WatchlistApi : BaseApi
+	[UserOnly]
+	public class WatchlistApi(IWatchStatusRepository repository) : BaseApi
 	{
-		private readonly IWatchStatusRepository _repository;
-
-		public WatchlistApi(IWatchStatusRepository repository)
-		{
-			_repository = repository;
-		}
-
 		/// <summary>
 		/// Get all
 		/// </summary>
@@ -66,11 +62,9 @@ namespace Kyoo.Core.Api
 			[FromQuery] Include<IWatchlist>? fields
 		)
 		{
-			ICollection<IWatchlist> resources = await _repository.GetAll(
-				filter,
-				fields,
-				pagination
-			);
+			if (User.GetId() == null)
+				throw new UnauthorizedException();
+			ICollection<IWatchlist> resources = await repository.GetAll(filter, fields, pagination);
 
 			return Page(resources, pagination.Limit);
 		}
