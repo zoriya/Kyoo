@@ -59,7 +59,8 @@ namespace Kyoo.Tests.Database
 			SeasonRepository season = new(_NewContext(), thumbs.Object);
 			LibraryItemRepository libraryItem = new(_NewConnection(), new(null));
 			EpisodeRepository episode = new(_NewContext(), show, thumbs.Object);
-			UserRepository user = new(_NewContext(), _NewConnection(), new(null), thumbs.Object, new());
+			UserRepository user =
+				new(_NewContext(), _NewConnection(), new(null), thumbs.Object, new());
 
 			_repositories = new IBaseRepository[]
 			{

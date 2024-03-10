@@ -29,5 +29,5 @@ export interface KyooErrors {
 	 */
 	errors: string[];
 
-	status: number | "aborted" | "parse" | "json"
+	status?: number | "aborted" | "parse" | "json";
 }
