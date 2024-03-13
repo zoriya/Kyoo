@@ -120,9 +120,18 @@ services:
       - .env
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--spider", "http://localhost:7700/health"]
-      interval: 10s
+      interval: 30s
       timeout: 5s
       retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-alpine
+    restart: on-failure
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - 5672:5672
 
 volumes:
   kyoo:
