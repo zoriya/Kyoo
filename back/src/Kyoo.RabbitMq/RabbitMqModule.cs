@@ -39,8 +39,9 @@ public class RabbitMqModule(IConfiguration configuration) : IPlugin
 						new()
 						{
 							UserName = configuration.GetValue("RABBITMQ_DEFAULT_USER", "guest"),
-							Password = configuration.GetValue("RABBITMQ_DEFAULT_USER", "guest"),
-							HostName = configuration.GetValue("RABBITMQ_HOST", "rabbitmq:5672"),
+							Password = configuration.GetValue("RABBITMQ_DEFAULT_PASS", "guest"),
+							HostName = configuration.GetValue("RABBITMQ_HOST", "rabbitmq"),
+							Port = 5672,
 						};
 
 					return factory.CreateConnection();
