@@ -29,12 +29,7 @@ namespace Kyoo.Abstractions.Controllers;
 /// </summary>
 public interface IWatchStatusRepository
 {
-	// /// <summary>
-	// /// The event handler type for all events of this repository.
-	// /// </summary>
-	// /// <param name="resource">The resource created/modified/deleted</param>
-	// /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-	// public delegate Task ResourceEventHandler(T resource);
+	public delegate Task ResourceEventHandler<T>(T resource);
 
 	Task<ICollection<IWatchlist>> GetAll(
 		Filter<IWatchlist>? filter = default,
@@ -52,11 +47,21 @@ public interface IWatchStatusRepository
 		int? percent
 	);
 
+	static event ResourceEventHandler<Movie> OnMovieStatusChangedHandler;
+
+	protected static Task OnMovieStatusChanged(Movie obj) =>
+		OnMovieStatusChangedHandler?.Invoke(obj) ?? Task.CompletedTask;
+
 	Task DeleteMovieStatus(Guid movieId, Guid userId);
 
 	Task<ShowWatchStatus?> GetShowStatus(Guid showId, Guid userId);
 
 	Task<ShowWatchStatus?> SetShowStatus(Guid showId, Guid userId, WatchStatus status);
+
+	static event ResourceEventHandler<Show> OnShowStatusChangedHandler;
+
+	protected static Task OnShowStatusChanged(Show obj) =>
+		OnShowStatusChangedHandler?.Invoke(obj) ?? Task.CompletedTask;
 
 	Task DeleteShowStatus(Guid showId, Guid userId);
 
@@ -71,6 +76,11 @@ public interface IWatchStatusRepository
 		int? watchedTime,
 		int? percent
 	);
+
+	static event ResourceEventHandler<Episode> OnEpisodeStatusChangedHandler;
+
+	protected static Task OnEpisodeStatusChanged(Episode obj) =>
+		OnEpisodeStatusChangedHandler?.Invoke(obj) ?? Task.CompletedTask;
 
 	Task DeleteEpisodeStatus(Guid episodeId, Guid userId);
 }
