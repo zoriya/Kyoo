@@ -62,8 +62,7 @@ export const readCookie = <T extends ZodTypeAny>(
 		}
 		if (c.indexOf(name) == 0) {
 			const str = c.substring(name.length, c.length);
-			const ret = JSON.parse(str);
-			return parser ? parser.parse(ret) : ret;
+			return parser ? parser.parse(JSON.parse(str)) : str;
 		}
 	}
 	return null;
