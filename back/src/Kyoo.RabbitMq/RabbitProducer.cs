@@ -32,43 +32,31 @@ public class RabbitProducer
 	{
 		_channel = rabbitConnection.CreateModel();
 
-		_channel.ExchangeDeclare(exchange: "events.resource.collection", type: ExchangeType.Fanout);
-		IRepository<Collection>.OnCreated += _Publish<Collection>("events.resource.collection", "created");
-		IRepository<Collection>.OnEdited += _Publish<Collection>("events.resource.collection", "edited");
-		IRepository<Collection>.OnDeleted += _Publish<Collection>("events.resource.collection", "deleted");
-
-		_channel.ExchangeDeclare(exchange: "events.resource.movie", type: ExchangeType.Fanout);
-		IRepository<Movie>.OnCreated += _Publish<Movie>("events.resource.movie", "created");
-		IRepository<Movie>.OnEdited += _Publish<Movie>("events.resource.movie", "edited");
-		IRepository<Movie>.OnDeleted += _Publish<Movie>("events.resource.movie", "deleted");
-
-		_channel.ExchangeDeclare(exchange: "events.resource.show", type: ExchangeType.Fanout);
-		IRepository<Show>.OnCreated += _Publish<Show>("events.resource.show", "created");
-		IRepository<Show>.OnEdited += _Publish<Show>("events.resource.show", "edited");
-		IRepository<Show>.OnDeleted += _Publish<Show>("events.resource.show", "deleted");
-
-		_channel.ExchangeDeclare(exchange: "events.resource.season", type: ExchangeType.Fanout);
-		IRepository<Season>.OnCreated += _Publish<Season>("events.resource.season", "created");
-		IRepository<Season>.OnEdited += _Publish<Season>("events.resource.season", "edited");
-		IRepository<Season>.OnDeleted += _Publish<Season>("events.resource.season", "deleted");
-
-		_channel.ExchangeDeclare(exchange: "events.resource.episode", type: ExchangeType.Fanout);
-		IRepository<Episode>.OnCreated += _Publish<Episode>("events.resource.episode", "created");
-		IRepository<Episode>.OnEdited += _Publish<Episode>("events.resource.episode", "edited");
-		IRepository<Episode>.OnDeleted += _Publish<Episode>("events.resource.episode", "deleted");
-
-		_channel.ExchangeDeclare(exchange: "events.resource.studio", type: ExchangeType.Fanout);
-		IRepository<Studio>.OnCreated += _Publish<Studio>("events.resource.studio", "created");
-		IRepository<Studio>.OnEdited += _Publish<Studio>("events.resource.studio", "edited");
-		IRepository<Studio>.OnDeleted += _Publish<Studio>("events.resource.studio", "deleted");
-
-		_channel.ExchangeDeclare(exchange: "events.resource.user", type: ExchangeType.Fanout);
-		IRepository<User>.OnCreated += _Publish<User>("events.resource.user", "created");
-		IRepository<User>.OnEdited += _Publish<User>("events.resource.user", "edited");
-		IRepository<User>.OnDeleted += _Publish<User>("events.resource.user", "deleted");
+		_channel.ExchangeDeclare("events.resource", ExchangeType.Topic);
+		_ListenResourceEvents<Collection>("events.resource");
+		_ListenResourceEvents<Movie>("events.resource");
+		_ListenResourceEvents<Show>("events.resource");
+		_ListenResourceEvents<Season>("events.resource");
+		_ListenResourceEvents<Episode>("events.resource");
+		_ListenResourceEvents<Studio>("events.resource");
+		_ListenResourceEvents<User>("events.resource");
 	}
 
-	private IRepository<T>.ResourceEventHandler _Publish<T>(string exchange, string action)
+	private void _ListenResourceEvents<T>(string exchange)
+		where T : IResource, IQuery
+	{
+		string type = typeof(T).Name.ToLowerInvariant();
+
+		IRepository<T>.OnCreated += _Publish<T>(exchange, type, "created");
+		IRepository<T>.OnEdited += _Publish<T>(exchange, type, "edited");
+		IRepository<T>.OnDeleted += _Publish<T>(exchange, type, "deleted");
+	}
+
+	private IRepository<T>.ResourceEventHandler _Publish<T>(
+		string exchange,
+		string type,
+		string action
+	)
 		where T : IResource, IQuery
 	{
 		return (T resource) =>
@@ -76,12 +64,12 @@ public class RabbitProducer
 			var message = new
 			{
 				Action = action,
-				Type = typeof(T).Name.ToLowerInvariant(),
-				Value = resource,
+				Type = type,
+				Resource = resource,
 			};
 			_channel.BasicPublish(
 				exchange,
-				routingKey: string.Empty,
+				routingKey: $"{type}.{action}",
 				body: Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message))
 			);
 			return Task.CompletedTask;
