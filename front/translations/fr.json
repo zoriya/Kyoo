@@ -68,7 +68,7 @@
 		"more": "Plus",
 		"expand": "Développer",
 		"collapse": "Replier",
-		"edit": "Changer",
+		"edit": "Modifier",
 		"or": "OU",
 		"loading": "Chargement en cours"
 	},
@@ -125,7 +125,7 @@
 			},
 			"password": {
 				"label": "Mot de passe",
-				"description": "Changer de mot de passe",
+				"description": "Modifier votre mot de passe",
 				"oldPassword": "Ancien mot de passe",
 				"newPassword": "Nouveau mot de passe"
 			}
