@@ -46,13 +46,27 @@ public enum WatchStatus
 	/// The user has not started watching this but plans to.
 	/// </summary>
 	Planned,
+
+	/// <summary>
+	/// The watch status was deleted and can not be retrived again.
+	/// </summary>
+	Deleted,
 }
+
+public interface IWatchStatus
+{
+	/// <summary>
+	/// Has the user started watching, is it planned?
+	/// </summary>
+	public WatchStatus Status { get; set; }
+}
+
 
 /// <summary>
 /// Metadata of what an user as started/planned to watch.
 /// </summary>
 [SqlFirstColumn(nameof(UserId))]
-public class MovieWatchStatus : IAddedDate
+public class MovieWatchStatus : IAddedDate, IWatchStatus
 {
 	/// <summary>
 	/// The ID of the user that started watching this episode.
@@ -107,7 +121,7 @@ public class MovieWatchStatus : IAddedDate
 }
 
 [SqlFirstColumn(nameof(UserId))]
-public class EpisodeWatchStatus : IAddedDate
+public class EpisodeWatchStatus : IAddedDate, IWatchStatus
 {
 	/// <summary>
 	/// The ID of the user that started watching this episode.
@@ -162,7 +176,7 @@ public class EpisodeWatchStatus : IAddedDate
 }
 
 [SqlFirstColumn(nameof(UserId))]
-public class ShowWatchStatus : IAddedDate
+public class ShowWatchStatus : IAddedDate, IWatchStatus
 {
 	/// <summary>
 	/// The ID of the user that started watching this episode.

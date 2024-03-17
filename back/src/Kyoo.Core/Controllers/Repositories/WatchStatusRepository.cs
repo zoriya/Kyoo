@@ -38,7 +38,7 @@ public class WatchStatusRepository(
 	IRepository<Movie> movies,
 	DbConnection db,
 	SqlVariableContext context
-	) : IWatchStatusRepository
+) : IWatchStatusRepository
 {
 	/// <summary>
 	/// If the watch percent is below this value, don't consider the item started.
@@ -275,7 +275,15 @@ public class WatchStatusRepository(
 		await database
 			.MovieWatchStatus.Where(x => x.MovieId == movieId && x.UserId == userId)
 			.ExecuteDeleteAsync();
-		await IWatchStatusRepository.OnMovieStatusDeleted(movieId, userId);
+		await IWatchStatusRepository.OnMovieStatusChanged(
+			new()
+			{
+				UserId = userId,
+				MovieId = movieId,
+				AddedDate = DateTime.UtcNow,
+				Status = WatchStatus.Deleted,
+			}
+		);
 	}
 
 	/// <inheritdoc />
@@ -419,7 +427,15 @@ public class WatchStatusRepository(
 		await database
 			.EpisodeWatchStatus.Where(x => x.Episode.ShowId == showId && x.UserId == userId)
 			.ExecuteDeleteAsync();
-		await IWatchStatusRepository.OnShowStatusDeleted(showId, userId);
+		await IWatchStatusRepository.OnShowStatusChanged(
+			new()
+			{
+				UserId = userId,
+				ShowId = showId,
+				AddedDate = DateTime.UtcNow,
+				Status = WatchStatus.Deleted,
+			}
+		);
 	}
 
 	/// <inheritdoc />
@@ -490,6 +506,14 @@ public class WatchStatusRepository(
 		await database
 			.EpisodeWatchStatus.Where(x => x.EpisodeId == episodeId && x.UserId == userId)
 			.ExecuteDeleteAsync();
-		await IWatchStatusRepository.OnEpisodeStatusDeleted(episodeId, userId);
+		await IWatchStatusRepository.OnEpisodeStatusChanged(
+			new()
+			{
+				UserId = userId,
+				EpisodeId = episodeId,
+				AddedDate = DateTime.UtcNow,
+				Status = WatchStatus.Deleted,
+			}
+		);
 	}
 }

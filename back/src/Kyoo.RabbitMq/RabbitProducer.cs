@@ -16,8 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System.Text;
-using System.Text.Json;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using RabbitMQ.Client;
@@ -40,6 +38,16 @@ public class RabbitProducer
 		_ListenResourceEvents<Episode>("events.resource");
 		_ListenResourceEvents<Studio>("events.resource");
 		_ListenResourceEvents<User>("events.resource");
+
+		_channel.ExchangeDeclare("events.watched", ExchangeType.Topic);
+		IWatchStatusRepository.OnMovieStatusChangedHandler += _PublishWatchStatus<MovieWatchStatus>(
+			"movie"
+		);
+		IWatchStatusRepository.OnShowStatusChangedHandler += _PublishWatchStatus<ShowWatchStatus>(
+			"show"
+		);
+		IWatchStatusRepository.OnEpisodeStatusChangedHandler +=
+			_PublishWatchStatus<EpisodeWatchStatus>("episode");
 	}
 
 	private void _ListenResourceEvents<T>(string exchange)
@@ -61,16 +69,38 @@ public class RabbitProducer
 	{
 		return (T resource) =>
 		{
-			var message = new
-			{
-				Action = action,
-				Type = type,
-				Resource = resource,
-			};
+			Message message =
+				new()
+				{
+					Action = action,
+					Type = type,
+					Value = resource,
+				};
 			_channel.BasicPublish(
 				exchange,
-				routingKey: $"{type}.{action}",
-				body: Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message))
+				routingKey: message.AsRoutingKey(),
+				body: message.AsBytes()
+			);
+			return Task.CompletedTask;
+		};
+	}
+
+	private IWatchStatusRepository.ResourceEventHandler<T> _PublishWatchStatus<T>(string resource)
+		where T : IWatchStatus
+	{
+		return (status) =>
+		{
+			Message message =
+				new()
+				{
+					Type = resource,
+					Action = status.Status.ToString().ToLowerInvariant(),
+					Value = status,
+				};
+			_channel.BasicPublish(
+				exchange: "events.watched",
+				routingKey: message.AsRoutingKey(),
+				body: message.AsBytes()
 			);
 			return Task.CompletedTask;
 		};
