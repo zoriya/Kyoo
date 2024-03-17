@@ -30,6 +30,7 @@ namespace Kyoo.Abstractions.Controllers;
 public interface IWatchStatusRepository
 {
 	public delegate Task ResourceEventHandler<T>(T resource);
+	public delegate Task WatchStatusDeletedEventHandler(Guid resourceId, Guid userId);
 
 	Task<ICollection<IWatchlist>> GetAll(
 		Filter<IWatchlist>? filter = default,
@@ -47,23 +48,29 @@ public interface IWatchStatusRepository
 		int? percent
 	);
 
-	static event ResourceEventHandler<Movie> OnMovieStatusChangedHandler;
-
-	protected static Task OnMovieStatusChanged(Movie obj) =>
+	static event ResourceEventHandler<MovieWatchStatus> OnMovieStatusChangedHandler;
+	protected static Task OnMovieStatusChanged(MovieWatchStatus obj) =>
 		OnMovieStatusChangedHandler?.Invoke(obj) ?? Task.CompletedTask;
 
 	Task DeleteMovieStatus(Guid movieId, Guid userId);
+
+	static event WatchStatusDeletedEventHandler OnMovieStatusDeletedHandler;
+	protected static Task OnMovieStatusDeleted(Guid movieId, Guid userId) =>
+		OnMovieStatusDeletedHandler?.Invoke(movieId, userId) ?? Task.CompletedTask;
 
 	Task<ShowWatchStatus?> GetShowStatus(Guid showId, Guid userId);
 
 	Task<ShowWatchStatus?> SetShowStatus(Guid showId, Guid userId, WatchStatus status);
 
-	static event ResourceEventHandler<Show> OnShowStatusChangedHandler;
-
-	protected static Task OnShowStatusChanged(Show obj) =>
+	static event ResourceEventHandler<ShowWatchStatus> OnShowStatusChangedHandler;
+	protected static Task OnShowStatusChanged(ShowWatchStatus obj) =>
 		OnShowStatusChangedHandler?.Invoke(obj) ?? Task.CompletedTask;
 
 	Task DeleteShowStatus(Guid showId, Guid userId);
+
+	static event WatchStatusDeletedEventHandler OnShowStatusDeletedHandler;
+	protected static Task OnShowStatusDeleted(Guid showId, Guid userId) =>
+		OnShowStatusDeletedHandler?.Invoke(showId, userId) ?? Task.CompletedTask;
 
 	Task<EpisodeWatchStatus?> GetEpisodeStatus(Guid episodeId, Guid userId);
 
@@ -77,10 +84,14 @@ public interface IWatchStatusRepository
 		int? percent
 	);
 
-	static event ResourceEventHandler<Episode> OnEpisodeStatusChangedHandler;
-
-	protected static Task OnEpisodeStatusChanged(Episode obj) =>
+	static event ResourceEventHandler<EpisodeWatchStatus> OnEpisodeStatusChangedHandler;
+	protected static Task OnEpisodeStatusChanged(EpisodeWatchStatus obj) =>
 		OnEpisodeStatusChangedHandler?.Invoke(obj) ?? Task.CompletedTask;
 
 	Task DeleteEpisodeStatus(Guid episodeId, Guid userId);
+
+	static event WatchStatusDeletedEventHandler OnEpisodeStatusDeletedHandler;
+	protected static Task OnEpisodeStatusDeleted(Guid episodeId, Guid userId) =>
+		OnEpisodeStatusDeletedHandler?.Invoke(episodeId, userId) ?? Task.CompletedTask;
+
 }

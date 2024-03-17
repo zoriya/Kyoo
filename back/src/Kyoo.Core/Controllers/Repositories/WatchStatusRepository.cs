@@ -265,6 +265,7 @@ public class WatchStatusRepository(
 			.MovieWatchStatus.Upsert(ret)
 			.UpdateIf(x => status != Watching || x.Status != Completed)
 			.RunAsync();
+		await IWatchStatusRepository.OnMovieStatusChanged(ret);
 		return ret;
 	}
 
@@ -274,6 +275,7 @@ public class WatchStatusRepository(
 		await database
 			.MovieWatchStatus.Where(x => x.MovieId == movieId && x.UserId == userId)
 			.ExecuteDeleteAsync();
+		await IWatchStatusRepository.OnMovieStatusDeleted(movieId, userId);
 	}
 
 	/// <inheritdoc />
@@ -403,6 +405,7 @@ public class WatchStatusRepository(
 			.ShowWatchStatus.Upsert(ret)
 			.UpdateIf(x => status != Watching || x.Status != Completed || newEpisode)
 			.RunAsync();
+		await IWatchStatusRepository.OnShowStatusChanged(ret);
 		return ret;
 	}
 
@@ -416,6 +419,7 @@ public class WatchStatusRepository(
 		await database
 			.EpisodeWatchStatus.Where(x => x.Episode.ShowId == showId && x.UserId == userId)
 			.ExecuteDeleteAsync();
+		await IWatchStatusRepository.OnShowStatusDeleted(showId, userId);
 	}
 
 	/// <inheritdoc />
@@ -475,6 +479,7 @@ public class WatchStatusRepository(
 			.EpisodeWatchStatus.Upsert(ret)
 			.UpdateIf(x => status != Watching || x.Status != Completed)
 			.RunAsync();
+		await IWatchStatusRepository.OnEpisodeStatusChanged(ret);
 		await SetShowStatus(episode.ShowId, userId, WatchStatus.Watching);
 		return ret;
 	}
@@ -485,5 +490,6 @@ public class WatchStatusRepository(
 		await database
 			.EpisodeWatchStatus.Where(x => x.EpisodeId == episodeId && x.UserId == userId)
 			.ExecuteDeleteAsync();
+		await IWatchStatusRepository.OnEpisodeStatusDeleted(episodeId, userId);
 	}
 }
