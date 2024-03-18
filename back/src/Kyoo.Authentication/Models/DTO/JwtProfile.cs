@@ -17,29 +17,56 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
 namespace Kyoo.Authentication.Models.DTO;
 
 public class JwtProfile
 {
-	public string Sub { get; set; }
-	public string Uid
+	public string? Sub { get; set; }
+	public string? Uid
 	{
-		set => Sub = value;
+		set => Sub ??= value;
 	}
-	public string Id
+	public string? Id
 	{
-		set => Sub = value;
+		set => Sub ??= value;
 	}
-	public string Guid
+	public string? Guid
 	{
-		set => Sub = value;
+		set => Sub ??= value;
 	}
 
-	public string? Name { get; set; }
 	public string? Username { get; set; }
+	public string? Name
+	{
+		set => Username ??= value;
+	}
+
 	public string? Email { get; set; }
+
+	public JsonObject? Account
+	{
+		set
+		{
+			if (value is null)
+				return;
+			// simkl store their ids there.
+			Sub ??= value["id"]?.ToString();
+		}
+	}
+
+	public JsonObject? User
+	{
+		set
+		{
+			if (value is null)
+				return;
+			// simkl store their name there.
+			Username ??= value["name"]?.ToString();
+		}
+	}
 
 	[JsonExtensionData]
 	public Dictionary<string, object> Extra { get; set; }

@@ -101,7 +101,6 @@ export const OidcSettings = () => {
 									text={t("settings.oidc.link")}
 									as={Link}
 									href={x.link}
-									target="_blank"
 									{...css({ minWidth: rem(6) })}
 								/>
 							)}
