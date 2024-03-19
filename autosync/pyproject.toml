@@ -1,0 +1,2 @@
+[tool.ruff.format]
+indent-style = "tab"

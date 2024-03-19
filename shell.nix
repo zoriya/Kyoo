@@ -5,6 +5,7 @@
       aiohttp
       jsons
       watchfiles
+      pika
     ]);
   dotnet = with pkgs.dotnetCorePackages;
     combinePackages [
