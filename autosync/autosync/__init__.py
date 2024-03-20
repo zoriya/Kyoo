@@ -4,11 +4,11 @@ import pika
 from pika import spec
 from pika.adapters.blocking_connection import BlockingChannel
 import pika.credentials
+from autosync.services.aggregate import Aggregate
 
 from autosync.services.simkl import Simkl
 
-# TODO: declare multiples services
-service = Simkl()
+service = Aggregate([Simkl()])
 
 
 def on_message(

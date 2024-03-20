@@ -1,5 +1,9 @@
+import os
+from typing_extensions import assert_type
 import requests
 import logging
+
+from autosync.services.service import Service
 from ..models.user import User
 from ..models.show import Show
 from ..models.movie import Movie
@@ -7,12 +11,20 @@ from ..models.episode import Episode
 from ..models.watch_status import WatchStatus, Status
 
 
-class Simkl:
+class Simkl(Service):
 	def __init__(self) -> None:
-		self._api_key = ""
+		self._api_key = os.environ.get("OIDC_SIMKL_CLIENTID")
+
+	@property
+	def name(self) -> str:
+		return "simkl"
+
+	@property
+	def enabled(self) -> bool:
+		return self._api_key is not None
 
 	def update(self, user: User, resource: Movie | Show | Episode, status: WatchStatus):
-		if "simkl" not in user.external_id:
+		if "simkl" not in user.external_id or self._api_key is None:
 			return
 
 		watch_date = status.played_date or status.added_date
