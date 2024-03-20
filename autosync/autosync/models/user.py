@@ -1,8 +1,10 @@
 from datetime import datetime, time
 from dataclasses import dataclass
+from dataclasses_json import dataclass_json, LetterCase
 from typing import Optional
 
 
+@dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class JwtToken:
 	token_type: str
@@ -12,6 +14,7 @@ class JwtToken:
 	expire_at: datetime
 
 
+@dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class ExternalToken:
 	id: str
@@ -20,6 +23,7 @@ class ExternalToken:
 	token: JwtToken
 
 
+@dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class User:
 	id: str

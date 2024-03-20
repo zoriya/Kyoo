@@ -1,10 +1,12 @@
 from typing import Literal, Optional
 from datetime import date
 from dataclasses import dataclass
+from dataclasses_json import dataclass_json, LetterCase
 
 from .metadataid import MetadataID
 
 
+@dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class Show:
 	name: str

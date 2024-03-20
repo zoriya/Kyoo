@@ -18,4 +18,9 @@ class Aggregate(Service):
 
 	def update(self, user: User, resource: Movie | Show | Episode, status: WatchStatus):
 		for service in self._services:
-			service.update(user, resource, status)
+			try:
+				service.update(user, resource, status)
+			except Exception as e:
+				logging.exception(
+					"Unhandled error on autosync %s:", service.name, exc_info=e
+				)

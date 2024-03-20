@@ -1,13 +1,22 @@
-import json
+import logging
 import os
+import dataclasses_json
 import pika
 from pika import spec
 from pika.adapters.blocking_connection import BlockingChannel
 import pika.credentials
+from datetime import date, datetime
+from autosync.models.message import Message
 from autosync.services.aggregate import Aggregate
 
 from autosync.services.simkl import Simkl
 
+dataclasses_json.cfg.global_config.encoders[date] = date.isoformat
+dataclasses_json.cfg.global_config.decoders[date] = date.fromisoformat
+dataclasses_json.cfg.global_config.encoders[datetime] = datetime.isoformat
+dataclasses_json.cfg.global_config.decoders[datetime] = datetime.fromisoformat
+
+logging.basicConfig(level=logging.INFO)
 service = Aggregate([Simkl()])
 
 
@@ -17,8 +26,12 @@ def on_message(
 	properties: spec.BasicProperties,
 	body: bytes,
 ):
-	status = json.loads(body)
-	service.update(status.user, status.resource, status)
+	try:
+		status = Message.from_json(body)
+		service.update(status.user, status.resource, status)
+	except Exception as e:
+		logging.exception("Error processing message.", exc_info=e)
+		logging.exception("Body: %s", body)
 
 
 def main():
@@ -41,4 +54,5 @@ def main():
 	channel.basic_consume(
 		queue=queue_name, on_message_callback=on_message, auto_ack=True
 	)
+	logging.info("Listening for autosync.")
 	channel.start_consuming()

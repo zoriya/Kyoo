@@ -1,5 +1,4 @@
 import os
-from typing_extensions import assert_type
 import requests
 import logging
 
