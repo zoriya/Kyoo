@@ -36,6 +36,9 @@ namespace Kyoo.Core.Controllers;
 public class WatchStatusRepository(
 	DatabaseContext database,
 	IRepository<Movie> movies,
+	IRepository<Show> shows,
+	IRepository<Episode> episodes,
+	IRepository<User> users,
 	DbConnection db,
 	SqlVariableContext context
 ) : IWatchStatusRepository
@@ -265,7 +268,18 @@ public class WatchStatusRepository(
 			.MovieWatchStatus.Upsert(ret)
 			.UpdateIf(x => status != Watching || x.Status != Completed)
 			.RunAsync();
-		await IWatchStatusRepository.OnMovieStatusChanged(ret);
+		await IWatchStatusRepository.OnMovieStatusChanged(
+			new()
+			{
+				User = await users.Get(ret.UserId),
+				Resource = await movies.Get(ret.MovieId),
+				Status = ret.Status,
+				WatchedTime = ret.WatchedTime,
+				WatchedPercent = ret.WatchedPercent,
+				AddedDate = ret.AddedDate,
+				PlayedDate = ret.PlayedDate,
+			}
+		);
 		return ret;
 	}
 
@@ -278,8 +292,8 @@ public class WatchStatusRepository(
 		await IWatchStatusRepository.OnMovieStatusChanged(
 			new()
 			{
-				UserId = userId,
-				MovieId = movieId,
+				User = await users.Get(userId),
+				Resource = await movies.Get(movieId),
 				AddedDate = DateTime.UtcNow,
 				Status = WatchStatus.Deleted,
 			}
@@ -413,7 +427,18 @@ public class WatchStatusRepository(
 			.ShowWatchStatus.Upsert(ret)
 			.UpdateIf(x => status != Watching || x.Status != Completed || newEpisode)
 			.RunAsync();
-		await IWatchStatusRepository.OnShowStatusChanged(ret);
+		await IWatchStatusRepository.OnShowStatusChanged(
+			new()
+			{
+				User = await users.Get(ret.UserId),
+				Resource = await shows.Get(ret.ShowId),
+				Status = ret.Status,
+				WatchedTime = ret.WatchedTime,
+				WatchedPercent = ret.WatchedPercent,
+				AddedDate = ret.AddedDate,
+				PlayedDate = ret.PlayedDate,
+			}
+		);
 		return ret;
 	}
 
@@ -430,8 +455,8 @@ public class WatchStatusRepository(
 		await IWatchStatusRepository.OnShowStatusChanged(
 			new()
 			{
-				UserId = userId,
-				ShowId = showId,
+				User = await users.Get(userId),
+				Resource = await shows.Get(showId),
 				AddedDate = DateTime.UtcNow,
 				Status = WatchStatus.Deleted,
 			}
@@ -495,7 +520,18 @@ public class WatchStatusRepository(
 			.EpisodeWatchStatus.Upsert(ret)
 			.UpdateIf(x => status != Watching || x.Status != Completed)
 			.RunAsync();
-		await IWatchStatusRepository.OnEpisodeStatusChanged(ret);
+		await IWatchStatusRepository.OnEpisodeStatusChanged(
+			new()
+			{
+				User = await users.Get(ret.UserId),
+				Resource = await episodes.Get(ret.EpisodeId),
+				Status = ret.Status,
+				WatchedTime = ret.WatchedTime,
+				WatchedPercent = ret.WatchedPercent,
+				AddedDate = ret.AddedDate,
+				PlayedDate = ret.PlayedDate,
+			}
+		);
 		await SetShowStatus(episode.ShowId, userId, WatchStatus.Watching);
 		return ret;
 	}
@@ -509,8 +545,8 @@ public class WatchStatusRepository(
 		await IWatchStatusRepository.OnEpisodeStatusChanged(
 			new()
 			{
-				UserId = userId,
-				EpisodeId = episodeId,
+				User = await users.Get(userId),
+				Resource = await episodes.Get(episodeId),
 				AddedDate = DateTime.UtcNow,
 				Status = WatchStatus.Deleted,
 			}

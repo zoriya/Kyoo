@@ -53,20 +53,11 @@ public enum WatchStatus
 	Deleted,
 }
 
-public interface IWatchStatus
-{
-	/// <summary>
-	/// Has the user started watching, is it planned?
-	/// </summary>
-	public WatchStatus Status { get; set; }
-}
-
-
 /// <summary>
 /// Metadata of what an user as started/planned to watch.
 /// </summary>
 [SqlFirstColumn(nameof(UserId))]
-public class MovieWatchStatus : IAddedDate, IWatchStatus
+public class MovieWatchStatus : IAddedDate
 {
 	/// <summary>
 	/// The ID of the user that started watching this episode.
@@ -121,7 +112,7 @@ public class MovieWatchStatus : IAddedDate, IWatchStatus
 }
 
 [SqlFirstColumn(nameof(UserId))]
-public class EpisodeWatchStatus : IAddedDate, IWatchStatus
+public class EpisodeWatchStatus : IAddedDate
 {
 	/// <summary>
 	/// The ID of the user that started watching this episode.
@@ -176,7 +167,7 @@ public class EpisodeWatchStatus : IAddedDate, IWatchStatus
 }
 
 [SqlFirstColumn(nameof(UserId))]
-public class ShowWatchStatus : IAddedDate, IWatchStatus
+public class ShowWatchStatus : IAddedDate
 {
 	/// <summary>
 	/// The ID of the user that started watching this episode.
@@ -243,4 +234,46 @@ public class ShowWatchStatus : IAddedDate, IWatchStatus
 	/// Null if the status is not Watching or if the next episode is not started.
 	/// </remarks>
 	public int? WatchedPercent { get; set; }
+}
+
+public class WatchStatus<T> : IAddedDate
+{
+	/// <summary>
+	/// Has the user started watching, is it planned?
+	/// </summary>
+	public required WatchStatus Status { get; set; }
+
+	/// <inheritdoc/>
+	public DateTime AddedDate { get; set; }
+
+	/// <summary>
+	/// The date at which this item was played.
+	/// </summary>
+	public DateTime? PlayedDate { get; set; }
+
+	/// <summary>
+	/// Where the player has stopped watching the episode (in seconds).
+	/// </summary>
+	/// <remarks>
+	/// Null if the status is not Watching or if the next episode is not started.
+	/// </remarks>
+	public int? WatchedTime { get; set; }
+
+	/// <summary>
+	/// Where the player has stopped watching the episode (in percentage between 0 and 100).
+	/// </summary>
+	/// <remarks>
+	/// Null if the status is not Watching or if the next episode is not started.
+	/// </remarks>
+	public int? WatchedPercent { get; set; }
+
+	/// <summary>
+	/// The user that started watching this episode.
+	/// </summary>
+	public required User User { get; set; }
+
+	/// <summary>
+	/// The episode/show/movie whose status changed
+	/// </summary>
+	public required T Resource { get; set; }
 }

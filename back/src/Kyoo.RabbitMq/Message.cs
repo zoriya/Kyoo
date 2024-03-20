@@ -21,11 +21,11 @@ using System.Text.Json;
 
 namespace Kyoo.RabbitMq;
 
-public class Message
+public class Message<T>
 {
 	public string Action { get; set; }
 	public string Type { get; set; }
-	public object Value { get; set; }
+	public T Value { get; set; }
 
 	public string AsRoutingKey()
 	{

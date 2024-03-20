@@ -47,8 +47,8 @@ public interface IWatchStatusRepository
 		int? percent
 	);
 
-	static event ResourceEventHandler<MovieWatchStatus> OnMovieStatusChangedHandler;
-	protected static Task OnMovieStatusChanged(MovieWatchStatus obj) =>
+	static event ResourceEventHandler<WatchStatus<Movie>> OnMovieStatusChangedHandler;
+	protected static Task OnMovieStatusChanged(WatchStatus<Movie> obj) =>
 		OnMovieStatusChangedHandler?.Invoke(obj) ?? Task.CompletedTask;
 
 	Task DeleteMovieStatus(Guid movieId, Guid userId);
@@ -57,8 +57,8 @@ public interface IWatchStatusRepository
 
 	Task<ShowWatchStatus?> SetShowStatus(Guid showId, Guid userId, WatchStatus status);
 
-	static event ResourceEventHandler<ShowWatchStatus> OnShowStatusChangedHandler;
-	protected static Task OnShowStatusChanged(ShowWatchStatus obj) =>
+	static event ResourceEventHandler<WatchStatus<Show>> OnShowStatusChangedHandler;
+	protected static Task OnShowStatusChanged(WatchStatus<Show> obj) =>
 		OnShowStatusChangedHandler?.Invoke(obj) ?? Task.CompletedTask;
 
 	Task DeleteShowStatus(Guid showId, Guid userId);
@@ -75,8 +75,8 @@ public interface IWatchStatusRepository
 		int? percent
 	);
 
-	static event ResourceEventHandler<EpisodeWatchStatus> OnEpisodeStatusChangedHandler;
-	protected static Task OnEpisodeStatusChanged(EpisodeWatchStatus obj) =>
+	static event ResourceEventHandler<WatchStatus<Episode>> OnEpisodeStatusChangedHandler;
+	protected static Task OnEpisodeStatusChanged(WatchStatus<Episode> obj) =>
 		OnEpisodeStatusChangedHandler?.Invoke(obj) ?? Task.CompletedTask;
 
 	Task DeleteEpisodeStatus(Guid episodeId, Guid userId);

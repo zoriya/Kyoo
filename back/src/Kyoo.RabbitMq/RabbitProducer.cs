@@ -40,14 +40,11 @@ public class RabbitProducer
 		_ListenResourceEvents<User>("events.resource");
 
 		_channel.ExchangeDeclare("events.watched", ExchangeType.Topic);
-		IWatchStatusRepository.OnMovieStatusChangedHandler += _PublishWatchStatus<MovieWatchStatus>(
-			"movie"
+		IWatchStatusRepository.OnMovieStatusChangedHandler += _PublishWatchStatus<Movie>("movie");
+		IWatchStatusRepository.OnShowStatusChangedHandler += _PublishWatchStatus<Show>("show");
+		IWatchStatusRepository.OnEpisodeStatusChangedHandler += _PublishWatchStatus<Episode>(
+			"episode"
 		);
-		IWatchStatusRepository.OnShowStatusChangedHandler += _PublishWatchStatus<ShowWatchStatus>(
-			"show"
-		);
-		IWatchStatusRepository.OnEpisodeStatusChangedHandler +=
-			_PublishWatchStatus<EpisodeWatchStatus>("episode");
 	}
 
 	private void _ListenResourceEvents<T>(string exchange)
@@ -69,7 +66,7 @@ public class RabbitProducer
 	{
 		return (T resource) =>
 		{
-			Message message =
+			Message<T> message =
 				new()
 				{
 					Action = action,
@@ -85,12 +82,13 @@ public class RabbitProducer
 		};
 	}
 
-	private IWatchStatusRepository.ResourceEventHandler<T> _PublishWatchStatus<T>(string resource)
-		where T : IWatchStatus
+	private IWatchStatusRepository.ResourceEventHandler<WatchStatus<T>> _PublishWatchStatus<T>(
+		string resource
+	)
 	{
 		return (status) =>
 		{
-			Message message =
+			Message<WatchStatus<T>> message =
 				new()
 				{
 					Type = resource,
