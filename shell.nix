@@ -6,6 +6,7 @@
       jsons
       watchfiles
       pika
+      requests
     ]);
   dotnet = with pkgs.dotnetCorePackages;
     combinePackages [

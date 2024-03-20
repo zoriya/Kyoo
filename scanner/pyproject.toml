@@ -1,2 +1,5 @@
 [tool.ruff.format]
 indent-style = "tab"
+
+[tool.pyright]
+reportAbstractUsage = false
