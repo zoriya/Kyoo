@@ -35,6 +35,8 @@ services:
         condition: service_healthy
       meilisearch:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     volumes:
       - ./back:/app
       - /app/out/
@@ -70,6 +72,15 @@ services:
       - KYOO_URL=${KYOO_URL:-http://back:5000}
     volumes:
       - ${LIBRARY_ROOT}:/video:ro
+
+  autosync:
+    build: ./autosync
+    restart: on-failure
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    env_file:
+      - ./.env
 
   transcoder:
     <<: *transcoder-base
@@ -160,6 +171,12 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
 
 volumes:
   kyoo:
