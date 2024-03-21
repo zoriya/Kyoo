@@ -524,7 +524,7 @@ public class WatchStatusRepository(
 			new()
 			{
 				User = await users.Get(ret.UserId),
-				Resource = await episodes.Get(ret.EpisodeId),
+				Resource = await episodes.Get(episodeId, new(nameof(Episode.Show))),
 				Status = ret.Status,
 				WatchedTime = ret.WatchedTime,
 				WatchedPercent = ret.WatchedPercent,
@@ -546,7 +546,7 @@ public class WatchStatusRepository(
 			new()
 			{
 				User = await users.Get(userId),
-				Resource = await episodes.Get(episodeId),
+				Resource = await episodes.Get(episodeId, new(nameof(Episode.Show))),
 				AddedDate = DateTime.UtcNow,
 				Status = WatchStatus.Deleted,
 			}
