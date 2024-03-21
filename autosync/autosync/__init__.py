@@ -1,20 +1,28 @@
 import logging
 import os
+
 import dataclasses_json
+from datetime import datetime
+from marshmallow import fields
+
+dataclasses_json.cfg.global_config.encoders[datetime] = datetime.isoformat
+dataclasses_json.cfg.global_config.decoders[datetime] = datetime.fromisoformat
+dataclasses_json.cfg.global_config.mm_fields[datetime] = fields.DateTime(format="iso")
+dataclasses_json.cfg.global_config.encoders[datetime | None] = datetime.isoformat
+dataclasses_json.cfg.global_config.decoders[datetime | None] = datetime.fromisoformat
+dataclasses_json.cfg.global_config.mm_fields[datetime | None] = fields.DateTime(
+	format="iso"
+)
+
 import pika
 from pika import spec
 from pika.adapters.blocking_connection import BlockingChannel
 import pika.credentials
-from datetime import date, datetime
 from autosync.models.message import Message
 from autosync.services.aggregate import Aggregate
 
 from autosync.services.simkl import Simkl
 
-dataclasses_json.cfg.global_config.encoders[date] = date.isoformat
-dataclasses_json.cfg.global_config.decoders[date] = date.fromisoformat
-dataclasses_json.cfg.global_config.encoders[datetime] = datetime.isoformat
-dataclasses_json.cfg.global_config.decoders[datetime] = datetime.fromisoformat
 
 logging.basicConfig(level=logging.INFO)
 service = Aggregate([Simkl()])
@@ -27,8 +35,8 @@ def on_message(
 	body: bytes,
 ):
 	try:
-		status = Message.from_json(body)
-		service.update(status.user, status.resource, status)
+		message = Message.from_json(body)  # type: Message
+		service.update(message.value.user, message.value.resource, message.value)
 	except Exception as e:
 		logging.exception("Error processing message.", exc_info=e)
 		logging.exception("Body: %s", body)

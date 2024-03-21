@@ -1,5 +1,5 @@
 from typing import Literal, Optional
-from datetime import date
+from datetime import datetime
 from dataclasses import dataclass
 from dataclasses_json import dataclass_json, LetterCase
 
@@ -10,7 +10,7 @@ from .metadataid import MetadataID
 @dataclass
 class Show:
 	name: str
-	start_air: Optional[date]
+	start_air: Optional[datetime]
 	external_id: dict[str, MetadataID]
 	kind: Literal["show"]
 

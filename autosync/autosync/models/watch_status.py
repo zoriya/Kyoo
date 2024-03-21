@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 from dataclasses import dataclass
 from dataclasses_json import dataclass_json, LetterCase
 from typing import Optional
@@ -16,8 +16,8 @@ class Status(str, Enum):
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class WatchStatus:
-	added_date: date
-	played_date: Optional[date]
+	added_date: datetime
+	played_date: Optional[datetime]
 	status: Status
 	watched_time: Optional[int]
 	watched_percent: Optional[int]

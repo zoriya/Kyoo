@@ -9,7 +9,7 @@ from typing import Optional
 class JwtToken:
 	token_type: str
 	access_token: str
-	refresh_token: str
+	refresh_token: Optional[str]
 	expire_in: time
 	expire_at: datetime
 
