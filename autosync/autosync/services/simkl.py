@@ -1,6 +1,7 @@
 import os
 import requests
 import logging
+from autosync.models.metadataid import MetadataID
 
 from autosync.services.service import Service
 from ..models.user import User
@@ -31,16 +32,24 @@ class Simkl(Service):
 		if resource.kind == "episode":
 			if status.status != Status.COMPLETED:
 				return
+
 			resp = requests.post(
 				"https://api.simkl.com/sync/history",
 				json={
-					"episodes": {
-						"watched_at": watch_date.isoformat(),
-						"ids": {
-							service: id.data_id
-							for service, id in resource.external_id.items()
-						},
-					}
+					"shows": [
+						{
+							"watched_at": watch_date.isoformat(),
+							"title": resource.show.name,
+							"year": resource.show.year,
+							"ids": self._map_external_ids(resource.show.external_id),
+							"seasons": [
+								{
+									"number": resource.season_number,
+									"episodes": [{"number": resource.episode_number}],
+								},
+							],
+						}
+					]
 				},
 				headers={
 					"Authorization": f"Bearer {user.external_id["simkl"].token.access_token}",
@@ -52,25 +61,24 @@ class Simkl(Service):
 
 		category = "movies" if resource.kind == "movie" else "shows"
 
-		simkl_status = self._to_simkl_status(status.status)
+		simkl_status = self._map_status(status.status)
 		if simkl_status is None:
 			return
 
 		resp = requests.post(
 			"https://api.simkl.com/sync/add-to-list",
 			json={
-				category: {
-					"to": simkl_status,
-					"watched_at": watch_date
-					if status.status == Status.COMPLETED
-					else None,
-					"title": resource.name,
-					"year": resource.year,
-					"ids": {
-						service: id.data_id
-						for service, id in resource.external_id.items()
-					},
-				}
+				category: [
+					{
+						"to": simkl_status,
+						"watched_at": watch_date.isoformat()
+						if status.status == Status.COMPLETED
+						else None,
+						"title": resource.name,
+						"year": resource.year,
+						"ids": self._map_external_ids(resource.external_id),
+					}
+				]
 			},
 			headers={
 				"Authorization": f"Bearer {user.external_id["simkl"].token.access_token}",
@@ -79,7 +87,7 @@ class Simkl(Service):
 		)
 		logging.info("Simkl response: %s %s", resp.status_code, resp.text)
 
-	def _to_simkl_status(self, status: Status):
+	def _map_status(self, status: Status):
 		match status:
 			case Status.COMPLETED:
 				return "completed"
@@ -94,3 +102,15 @@ class Simkl(Service):
 				return None
 			case _:
 				return None
+
+	def _map_external_ids(self, ids: dict[str, MetadataID]):
+		return {
+			# "simkl": int(ids["simkl"].data_id) if "simkl" in ids else None,
+			# "mal": int(ids["mal"].data_id) if "mal" in ids else None,
+			# "tvdb": int(ids["tvdb"].data_id) if "tvdb" in ids else None,
+			"imdb": ids["imdb"].data_id if "imdb" in ids else None,
+			# "anidb": int(ids["anidb"].data_id) if "anidb" in ids else None,
+			"tmdb": int(ids["themoviedatabase"].data_id)
+			if "themoviedatabase" in ids
+			else None,
+		}
