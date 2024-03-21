@@ -35,7 +35,7 @@ class Simkl(Service):
 				"https://api.simkl.com/sync/history",
 				json={
 					"episodes": {
-						"watched_at": watch_date,
+						"watched_at": watch_date.isoformat(),
 						"ids": {
 							service: id.data_id
 							for service, id in resource.external_id.items()
@@ -44,10 +44,10 @@ class Simkl(Service):
 				},
 				headers={
 					"Authorization": f"Bearer {user.external_id["simkl"].token.access_token}",
-					"simkl_api_key": self._api_key,
+					"simkl-api-key": self._api_key,
 				},
 			)
-			logging.debug("Simkl response: %s", resp.json())
+			logging.info("Simkl response: %s %s", resp.status_code, resp.text)
 			return
 
 		category = "movies" if resource.kind == "movie" else "shows"
@@ -74,10 +74,10 @@ class Simkl(Service):
 			},
 			headers={
 				"Authorization": f"Bearer {user.external_id["simkl"].token.access_token}",
-				"simkl_api_key": self._api_key,
+				"simkl-api-key": self._api_key,
 			},
 		)
-		logging.debug("Simkl response: %s", resp.json())
+		logging.info("Simkl response: %s %s", resp.status_code, resp.text)
 
 	def _to_simkl_status(self, status: Status):
 		match status:
