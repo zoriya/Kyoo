@@ -19,27 +19,27 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text.Json;
 using Kyoo.Abstractions.Models;
-using Newtonsoft.Json.Linq;
 
 namespace Kyoo.Models;
 
-public class Patch<T> : Dictionary<string, JToken>
+public class Patch<T> : Dictionary<string, JsonDocument>
 	where T : class, IResource
 {
-	public Guid? Id => this.GetValueOrDefault(nameof(IResource.Id))?.ToObject<Guid>();
+	public Guid? Id => this.GetValueOrDefault(nameof(IResource.Id))?.Deserialize<Guid>();
 
-	public string? Slug => this.GetValueOrDefault(nameof(IResource.Slug))?.ToObject<string>();
+	public string? Slug => this.GetValueOrDefault(nameof(IResource.Slug))?.Deserialize<string>();
 
 	public T Apply(T current)
 	{
-		foreach ((string property, JToken value) in this)
+		foreach ((string property, JsonDocument value) in this)
 		{
 			PropertyInfo prop = typeof(T).GetProperty(
 				property,
 				BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance
 			)!;
-			prop.SetValue(current, value.ToObject(prop.PropertyType));
+			prop.SetValue(current, value.Deserialize(prop.PropertyType));
 		}
 		return current;
 	}

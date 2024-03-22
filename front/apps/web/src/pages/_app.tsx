@@ -210,37 +210,40 @@ App.getInitialProps = async (ctx: AppContext) => {
 
 	if (typeof window !== "undefined") return { pageProps: superjson.serialize(appProps.pageProps) };
 
-	const getUrl = Component.getFetchUrls;
-	const getLayoutUrl =
-		Component.getLayout && "Layout" in Component.getLayout
-			? Component.getLayout.Layout.getFetchUrls
-			: Component.getLayout?.getFetchUrls;
-	const urls: QueryIdentifier[] = [
-		...(getUrl ? getUrl(ctx.router.query as any, items) : []),
-		...(getLayoutUrl ? getLayoutUrl(ctx.router.query as any, items) : []),
-		// always include server info for guest permissions.
-		{ path: ["info"], parser: ServerInfoP },
-	];
+	try {
+		const getUrl = Component.getFetchUrls;
+		const getLayoutUrl =
+			Component.getLayout && "Layout" in Component.getLayout
+				? Component.getLayout.Layout.getFetchUrls
+				: Component.getLayout?.getFetchUrls;
+		const urls: QueryIdentifier[] = [
+			...(getUrl ? getUrl(ctx.router.query as any, items) : []),
+			...(getLayoutUrl ? getLayoutUrl(ctx.router.query as any, items) : []),
+			// always include server info for guest permissions.
+			{ path: ["info"], parser: ServerInfoP },
+		];
 
-	setSsrApiUrl();
+		setSsrApiUrl();
 
-	const account = readCookie(ctx.ctx.req?.headers.cookie, "account", AccountP);
-	if (account) urls.push({ path: ["auth", "me"], parser: UserP });
-	const [authToken, token, error] = await getTokenWJ(account);
-	if (error) appProps.pageProps.ssrError = error;
-	else {
-		const client = (await fetchQuery(urls, authToken))!;
-		appProps.pageProps.queryState = dehydrate(client);
-		if (account) {
-			appProps.pageProps.token = token;
-			appProps.pageProps.account = {
-				...client.getQueryData(["auth", "me"]),
-				...account,
-			};
+		const account = readCookie(ctx.ctx.req?.headers.cookie, "account", AccountP);
+		if (account) urls.push({ path: ["auth", "me"], parser: UserP });
+		const [authToken, token, error] = await getTokenWJ(account);
+		if (error) appProps.pageProps.ssrError = error;
+		else {
+			const client = (await fetchQuery(urls, authToken))!;
+			appProps.pageProps.queryState = dehydrate(client);
+			if (account) {
+				appProps.pageProps.token = token;
+				appProps.pageProps.account = {
+					...client.getQueryData(["auth", "me"]),
+					...account,
+				};
+			}
 		}
+		appProps.pageProps.theme = readCookie(ctx.ctx.req?.headers.cookie, "theme") ?? "auto";
+	} catch (e) {
+		console.error("SSR error, disabling it.");
 	}
-	appProps.pageProps.theme = readCookie(ctx.ctx.req?.headers.cookie, "theme") ?? "auto";
-
 	return { pageProps: superjson.serialize(appProps.pageProps) };
 };
 

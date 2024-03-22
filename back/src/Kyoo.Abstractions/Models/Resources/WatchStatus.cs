@@ -17,6 +17,7 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Text.Json.Serialization;
 using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Abstractions.Models
@@ -56,25 +57,23 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the user that started watching this episode.
 		/// </summary>
-		[SerializeIgnore]
 		public Guid UserId { get; set; }
 
 		/// <summary>
 		/// The user that started watching this episode.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public User User { get; set; }
 
 		/// <summary>
 		/// The ID of the movie started.
 		/// </summary>
-		[SerializeIgnore]
 		public Guid MovieId { get; set; }
 
 		/// <summary>
 		/// The <see cref="Movie"/> started.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public Movie Movie { get; set; }
 
 		/// <inheritdoc/>
@@ -113,25 +112,23 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the user that started watching this episode.
 		/// </summary>
-		[SerializeIgnore]
 		public Guid UserId { get; set; }
 
 		/// <summary>
 		/// The user that started watching this episode.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public User User { get; set; }
 
 		/// <summary>
 		/// The ID of the episode started.
 		/// </summary>
-		[SerializeIgnore]
 		public Guid? EpisodeId { get; set; }
 
 		/// <summary>
 		/// The <see cref="Episode"/> started.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public Episode Episode { get; set; }
 
 		/// <inheritdoc/>
@@ -170,25 +167,23 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the user that started watching this episode.
 		/// </summary>
-		[SerializeIgnore]
 		public Guid UserId { get; set; }
 
 		/// <summary>
 		/// The user that started watching this episode.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public User User { get; set; }
 
 		/// <summary>
 		/// The ID of the show started.
 		/// </summary>
-		[SerializeIgnore]
 		public Guid ShowId { get; set; }
 
 		/// <summary>
 		/// The <see cref="Show"/> started.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public Show Show { get; set; }
 
 		/// <inheritdoc/>
@@ -212,7 +207,6 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the episode started.
 		/// </summary>
-		[SerializeIgnore]
 		public Guid? NextEpisodeId { get; set; }
 
 		/// <summary>

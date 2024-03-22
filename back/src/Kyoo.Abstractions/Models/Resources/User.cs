@@ -19,10 +19,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Kyoo.Abstractions.Controllers;
-using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Utils;
-using Newtonsoft.Json;
 
 namespace Kyoo.Abstractions.Models
 {
@@ -53,7 +52,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The user password (hashed, it can't be read like that). The hashing format is implementation defined.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public string? Password { get; set; }
 
 		/// <summary>

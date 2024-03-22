@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 
 namespace Kyoo.Utils
 {
@@ -34,7 +33,6 @@ namespace Kyoo.Utils
 		/// <param name="action">The action to execute is the list is empty</param>
 		/// <typeparam name="T">The type of items inside the list</typeparam>
 		/// <returns>The iterator proxied, there is no dual iterations.</returns>
-		[LinqTunnel]
 		public static IEnumerable<T> IfEmpty<T>(this IEnumerable<T> self, Action action)
 		{
 			static IEnumerable<T> Generator(IEnumerable<T> self, Action action)

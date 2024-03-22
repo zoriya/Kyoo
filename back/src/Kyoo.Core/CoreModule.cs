@@ -19,6 +19,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using AspNetCore.Proxy;
 using Autofac;
 using Kyoo.Abstractions;
@@ -30,10 +32,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using JsonOptions = Kyoo.Core.Api.JsonOptions;
 
 namespace Kyoo.Core
 {
@@ -66,7 +64,6 @@ namespace Kyoo.Core
 			builder.RegisterRepository<ShowRepository>();
 			builder.RegisterRepository<SeasonRepository>();
 			builder.RegisterRepository<EpisodeRepository>();
-			builder.RegisterRepository<PeopleRepository>();
 			builder.RegisterRepository<StudioRepository>();
 			builder.RegisterRepository<UserRepository>().As<IUserRepository>();
 			builder.RegisterRepository<NewsRepository>();
@@ -87,7 +84,6 @@ namespace Kyoo.Core
 		public void Configure(IServiceCollection services)
 		{
 			services.AddHttpContextAccessor();
-			services.AddTransient<IConfigureOptions<MvcNewtonsoftJsonOptions>, JsonOptions>();
 
 			services
 				.AddMvcCore(options =>
@@ -97,10 +93,14 @@ namespace Kyoo.Core
 					options.ModelBinderProviders.Insert(0, new IncludeBinder.Provider());
 					options.ModelBinderProviders.Insert(0, new FilterBinder.Provider());
 				})
-				.AddNewtonsoftJson(x =>
+				.AddJsonOptions(x =>
 				{
-					x.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
-					x.SerializerSettings.Converters.Add(new StringEnumConverter());
+					x.JsonSerializerOptions.TypeInfoResolver = new WithKindResolver()
+					{
+						Modifiers = { WithKindResolver.HandleLoadableFields }
+					};
+					x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+					x.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 				})
 				.AddDataAnnotations()
 				.AddControllersAsServices()

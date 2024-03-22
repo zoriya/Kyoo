@@ -21,11 +21,11 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Text.Json.Serialization;
 using EntityFrameworkCore.Projectables;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Utils;
-using Newtonsoft.Json;
 
 namespace Kyoo.Abstractions.Models
 {
@@ -119,7 +119,7 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public string? Trailer { get; set; }
 
-		[SerializeIgnore]
+		[JsonIgnore]
 		[Column("start_air")]
 		public DateTime? AirDate => StartAir;
 
@@ -129,7 +129,6 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the Studio that made this show.
 		/// </summary>
-		[SerializeIgnore]
 		public Guid? StudioId { get; set; }
 
 		/// <summary>
@@ -138,15 +137,10 @@ namespace Kyoo.Abstractions.Models
 		[LoadableRelation(nameof(StudioId))]
 		public Studio? Studio { get; set; }
 
-		// /// <summary>
-		// /// The list of people that made this show.
-		// /// </summary>
-		// [SerializeIgnore] public ICollection<PeopleRole>? People { get; set; }
-
 		/// <summary>
 		/// The different seasons in this show. If this is a movie, this list is always null or empty.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public ICollection<Season>? Seasons { get; set; }
 
 		/// <summary>
@@ -154,13 +148,13 @@ namespace Kyoo.Abstractions.Models
 		/// If this is a movie, there will be a unique episode (with the seasonNumber and episodeNumber set to null).
 		/// Having an episode is necessary to store metadata and tracks.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public ICollection<Episode>? Episodes { get; set; }
 
 		/// <summary>
 		/// The list of collections that contains this show.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public ICollection<Collection>? Collections { get; set; }
 
 		/// <summary>
@@ -213,7 +207,7 @@ namespace Kyoo.Abstractions.Models
 
 		private int _EpisodesCount => Episodes!.Count;
 
-		[SerializeIgnore]
+		[JsonIgnore]
 		public ICollection<ShowWatchStatus>? Watched { get; set; }
 
 		/// <summary>
@@ -232,11 +226,6 @@ namespace Kyoo.Abstractions.Models
 		/// <inheritdoc />
 		public void OnMerge(object merged)
 		{
-			// if (People != null)
-			// {
-			// 	foreach (PeopleRole link in People)
-			// 		link.Show = this;
-			// }
 			if (Seasons != null)
 			{
 				foreach (Season season in Seasons)

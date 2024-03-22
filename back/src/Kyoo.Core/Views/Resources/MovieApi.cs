@@ -43,40 +43,6 @@ namespace Kyoo.Core.Api
 	public class MovieApi(ILibraryManager libraryManager, IThumbnailsManager thumbs)
 		: TranscoderApi<Movie>(libraryManager.Movies, thumbs)
 	{
-		// /// <summary>
-		// /// Get staff
-		// /// </summary>
-		// /// <remarks>
-		// /// List staff members that made this show.
-		// /// </remarks>
-		// /// <param name="identifier">The ID or slug of the <see cref="Show"/>.</param>
-		// /// <param name="sortBy">A key to sort staff members by.</param>
-		// /// <param name="where">An optional list of filters.</param>
-		// /// <param name="pagination">The number of people to return.</param>
-		// /// <returns>A page of people.</returns>
-		// /// <response code="400">The filters or the sort parameters are invalid.</response>
-		// /// <response code="404">No show with the given ID or slug could be found.</response>
-		// [HttpGet("{identifier:id}/staff")]
-		// [HttpGet("{identifier:id}/people", Order = AlternativeRoute)]
-		// [PartialPermission(Kind.Read)]
-		// [ProducesResponseType(StatusCodes.Status200OK)]
-		// [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
-		// [ProducesResponseType(StatusCodes.Status404NotFound)]
-		// public async Task<ActionResult<Page<PeopleRole>>> GetPeople(Identifier identifier,
-		// 	[FromQuery] string sortBy,
-		// 	[FromQuery] Dictionary<string, string> where,
-		// 	[FromQuery] Pagination pagination)
-		// {
-		// 	Expression<Func<PeopleRole, bool>> whereQuery = ApiHelper.ParseWhere<PeopleRole>(where);
-		// 	Sort<PeopleRole> sort = Sort<PeopleRole>.From(sortBy);
-		//
-		// 	ICollection<PeopleRole> resources = await identifier.Match(
-		// 		id => _libraryManager.GetPeopleFromShow(id, whereQuery, sort, pagination),
-		// 		slug => _libraryManager.GetPeopleFromShow(slug, whereQuery, sort, pagination)
-		// 	);
-		// 	return Page(resources, pagination.Limit);
-		// }
-
 		/// <summary>
 		/// Get studio that made the show
 		/// </summary>

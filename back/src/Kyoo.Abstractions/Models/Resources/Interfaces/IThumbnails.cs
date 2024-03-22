@@ -20,8 +20,8 @@ using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using System.Text.Json.Serialization;
 using Kyoo.Abstractions.Models.Attributes;
-using Newtonsoft.Json;
 
 namespace Kyoo.Abstractions.Models
 {
