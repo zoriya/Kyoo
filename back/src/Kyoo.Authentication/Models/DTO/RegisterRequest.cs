@@ -21,57 +21,56 @@ using Kyoo.Abstractions.Models;
 using Kyoo.Utils;
 using BCryptNet = BCrypt.Net.BCrypt;
 
-namespace Kyoo.Authentication.Models.DTO
+namespace Kyoo.Authentication.Models.DTO;
+
+/// <summary>
+/// A model only used on register requests.
+/// </summary>
+public class RegisterRequest
 {
 	/// <summary>
-	/// A model only used on register requests.
+	/// The user email address
 	/// </summary>
-	public class RegisterRequest
+	[EmailAddress(ErrorMessage = "The email must be a valid email address")]
+	public string Email { get; set; }
+
+	/// <summary>
+	/// The user's username.
+	/// </summary>
+	[MinLength(4, ErrorMessage = "The username must have at least {1} characters")]
+	public string Username { get; set; }
+
+	/// <summary>
+	/// The user's password.
+	/// </summary>
+	[MinLength(4, ErrorMessage = "The password must have at least {1} characters")]
+	public string Password { get; set; }
+
+	/// <summary>
+	/// Initializes a new instance of the <see cref="RegisterRequest"/> class.
+	/// </summary>
+	/// <param name="email">The user email address.</param>
+	/// <param name="username">The user's username.</param>
+	/// <param name="password">The user's password.</param>
+	public RegisterRequest(string email, string username, string password)
 	{
-		/// <summary>
-		/// The user email address
-		/// </summary>
-		[EmailAddress(ErrorMessage = "The email must be a valid email address")]
-		public string Email { get; set; }
+		Email = email;
+		Username = username;
+		Password = password;
+	}
 
-		/// <summary>
-		/// The user's username.
-		/// </summary>
-		[MinLength(4, ErrorMessage = "The username must have at least {1} characters")]
-		public string Username { get; set; }
-
-		/// <summary>
-		/// The user's password.
-		/// </summary>
-		[MinLength(4, ErrorMessage = "The password must have at least {1} characters")]
-		public string Password { get; set; }
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="RegisterRequest"/> class.
-		/// </summary>
-		/// <param name="email">The user email address.</param>
-		/// <param name="username">The user's username.</param>
-		/// <param name="password">The user's password.</param>
-		public RegisterRequest(string email, string username, string password)
+	/// <summary>
+	/// Convert this register request to a new <see cref="User"/> class.
+	/// </summary>
+	/// <returns>A user representing this request.</returns>
+	public User ToUser()
+	{
+		return new User
 		{
-			Email = email;
-			Username = username;
-			Password = password;
-		}
-
-		/// <summary>
-		/// Convert this register request to a new <see cref="User"/> class.
-		/// </summary>
-		/// <returns>A user representing this request.</returns>
-		public User ToUser()
-		{
-			return new User
-			{
-				Slug = Utility.ToSlug(Username),
-				Username = Username,
-				Password = BCryptNet.HashPassword(Password),
-				Email = Email,
-			};
-		}
+			Slug = Utility.ToSlug(Username),
+			Username = Username,
+			Password = BCryptNet.HashPassword(Password),
+			Email = Email,
+		};
 	}
 }

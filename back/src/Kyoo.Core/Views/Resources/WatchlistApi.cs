@@ -29,44 +29,43 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 
-namespace Kyoo.Core.Api
+namespace Kyoo.Core.Api;
+
+/// <summary>
+/// List new items added to kyoo.
+/// </summary>
+[Route("watchlist")]
+[ApiController]
+[PartialPermission("LibraryItem")]
+[ApiDefinition("News", Group = ResourcesGroup)]
+[UserOnly]
+public class WatchlistApi(IWatchStatusRepository repository) : BaseApi
 {
 	/// <summary>
-	/// List new items added to kyoo.
+	/// Get all
 	/// </summary>
-	[Route("watchlist")]
-	[ApiController]
-	[PartialPermission("LibraryItem")]
-	[ApiDefinition("News", Group = ResourcesGroup)]
-	[UserOnly]
-	public class WatchlistApi(IWatchStatusRepository repository) : BaseApi
+	/// <remarks>
+	/// Get all resources that match the given filter.
+	/// </remarks>
+	/// <param name="filter">Filter the returned items.</param>
+	/// <param name="pagination">How many items per page should be returned, where should the page start...</param>
+	/// <param name="fields">The aditional fields to include in the result.</param>
+	/// <returns>A list of resources that match every filters.</returns>
+	/// <response code="400">Invalid filters or sort information.</response>
+	[HttpGet]
+	[PartialPermission(Kind.Read)]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+	public async Task<ActionResult<Page<IWatchlist>>> GetAll(
+		[FromQuery] Filter<IWatchlist>? filter,
+		[FromQuery] Pagination pagination,
+		[FromQuery] Include<IWatchlist>? fields
+	)
 	{
-		/// <summary>
-		/// Get all
-		/// </summary>
-		/// <remarks>
-		/// Get all resources that match the given filter.
-		/// </remarks>
-		/// <param name="filter">Filter the returned items.</param>
-		/// <param name="pagination">How many items per page should be returned, where should the page start...</param>
-		/// <param name="fields">The aditional fields to include in the result.</param>
-		/// <returns>A list of resources that match every filters.</returns>
-		/// <response code="400">Invalid filters or sort information.</response>
-		[HttpGet]
-		[PartialPermission(Kind.Read)]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
-		public async Task<ActionResult<Page<IWatchlist>>> GetAll(
-			[FromQuery] Filter<IWatchlist>? filter,
-			[FromQuery] Pagination pagination,
-			[FromQuery] Include<IWatchlist>? fields
-		)
-		{
-			if (User.GetId() == null)
-				throw new UnauthorizedException();
-			ICollection<IWatchlist> resources = await repository.GetAll(filter, fields, pagination);
+		if (User.GetId() == null)
+			throw new UnauthorizedException();
+		ICollection<IWatchlist> resources = await repository.GetAll(filter, fields, pagination);
 
-			return Page(resources, pagination.Limit);
-		}
+		return Page(resources, pagination.Limit);
 	}
 }

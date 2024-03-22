@@ -23,43 +23,42 @@ using System.Security.Claims;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Authentication.Models;
 
-namespace Kyoo.Authentication
+namespace Kyoo.Authentication;
+
+/// <summary>
+/// Extension methods.
+/// </summary>
+public static class Extensions
 {
 	/// <summary>
-	/// Extension methods.
+	/// Get the permissions of an user.
 	/// </summary>
-	public static class Extensions
+	/// <param name="user">The user</param>
+	/// <returns>The list of permissions</returns>
+	public static ICollection<string> GetPermissions(this ClaimsPrincipal user)
 	{
-		/// <summary>
-		/// Get the permissions of an user.
-		/// </summary>
-		/// <param name="user">The user</param>
-		/// <returns>The list of permissions</returns>
-		public static ICollection<string> GetPermissions(this ClaimsPrincipal user)
-		{
-			return user.Claims.FirstOrDefault(x => x.Type == Claims.Permissions)?.Value.Split(',')
-				?? Array.Empty<string>();
-		}
+		return user.Claims.FirstOrDefault(x => x.Type == Claims.Permissions)?.Value.Split(',')
+			?? Array.Empty<string>();
+	}
 
-		/// <summary>
-		/// Get the id of the current user or null if unlogged or invalid.
-		/// </summary>
-		/// <param name="user">The user.</param>
-		/// <returns>The id of the user or null.</returns>
-		public static Guid? GetId(this ClaimsPrincipal user)
-		{
-			Claim? value = user.FindFirst(Claims.Id);
-			if (Guid.TryParse(value?.Value, out Guid id))
-				return id;
-			return null;
-		}
+	/// <summary>
+	/// Get the id of the current user or null if unlogged or invalid.
+	/// </summary>
+	/// <param name="user">The user.</param>
+	/// <returns>The id of the user or null.</returns>
+	public static Guid? GetId(this ClaimsPrincipal user)
+	{
+		Claim? value = user.FindFirst(Claims.Id);
+		if (Guid.TryParse(value?.Value, out Guid id))
+			return id;
+		return null;
+	}
 
-		public static Guid GetIdOrThrow(this ClaimsPrincipal user)
-		{
-			Guid? ret = user.GetId();
-			if (ret == null)
-				throw new UnauthorizedException();
-			return ret.Value;
-		}
+	public static Guid GetIdOrThrow(this ClaimsPrincipal user)
+	{
+		Guid? ret = user.GetId();
+		if (ret == null)
+			throw new UnauthorizedException();
+		return ret.Value;
 	}
 }

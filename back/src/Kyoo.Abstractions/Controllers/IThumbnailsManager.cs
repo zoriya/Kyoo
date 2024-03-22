@@ -21,59 +21,58 @@ using System.IO;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Models;
 
-namespace Kyoo.Abstractions.Controllers
+namespace Kyoo.Abstractions.Controllers;
+
+/// <summary>
+/// Download images and retrieve the path of those images for a resource.
+/// </summary>
+public interface IThumbnailsManager
 {
 	/// <summary>
-	/// Download images and retrieve the path of those images for a resource.
+	/// Download images of a specified item.
+	/// If no images is available to download, do nothing and silently return.
 	/// </summary>
-	public interface IThumbnailsManager
-	{
-		/// <summary>
-		/// Download images of a specified item.
-		/// If no images is available to download, do nothing and silently return.
-		/// </summary>
-		/// <param name="item">
-		/// The item to cache images.
-		/// </param>
-		/// <typeparam name="T">The type of the item</typeparam>
-		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		Task DownloadImages<T>(T item)
-			where T : IThumbnails;
+	/// <param name="item">
+	/// The item to cache images.
+	/// </param>
+	/// <typeparam name="T">The type of the item</typeparam>
+	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+	Task DownloadImages<T>(T item)
+		where T : IThumbnails;
 
-		/// <summary>
-		/// Retrieve the local path of an image of the given item.
-		/// </summary>
-		/// <param name="item">The item to retrieve the poster from.</param>
-		/// <param name="image">The ID of the image.</param>
-		/// <param name="quality">The quality of the image</param>
-		/// <typeparam name="T">The type of the item</typeparam>
-		/// <returns>The path of the image for the given resource or null if it does not exists.</returns>
-		string GetImagePath<T>(T item, string image, ImageQuality quality)
-			where T : IThumbnails;
+	/// <summary>
+	/// Retrieve the local path of an image of the given item.
+	/// </summary>
+	/// <param name="item">The item to retrieve the poster from.</param>
+	/// <param name="image">The ID of the image.</param>
+	/// <param name="quality">The quality of the image</param>
+	/// <typeparam name="T">The type of the item</typeparam>
+	/// <returns>The path of the image for the given resource or null if it does not exists.</returns>
+	string GetImagePath<T>(T item, string image, ImageQuality quality)
+		where T : IThumbnails;
 
-		/// <summary>
-		/// Delete images associated with the item.
-		/// </summary>
-		/// <param name="item">
-		/// The item with cached images.
-		/// </param>
-		/// <typeparam name="T">The type of the item</typeparam>
-		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		Task DeleteImages<T>(T item)
-			where T : IThumbnails;
+	/// <summary>
+	/// Delete images associated with the item.
+	/// </summary>
+	/// <param name="item">
+	/// The item with cached images.
+	/// </param>
+	/// <typeparam name="T">The type of the item</typeparam>
+	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+	Task DeleteImages<T>(T item)
+		where T : IThumbnails;
 
-		/// <summary>
-		/// Set the user's profile picture
-		/// </summary>
-		/// <param name="userId">The id of the user. </param>
-		/// <returns>The byte stream of the image. Null if no image exist.</returns>
-		Task<Stream> GetUserImage(Guid userId);
+	/// <summary>
+	/// Set the user's profile picture
+	/// </summary>
+	/// <param name="userId">The id of the user. </param>
+	/// <returns>The byte stream of the image. Null if no image exist.</returns>
+	Task<Stream> GetUserImage(Guid userId);
 
-		/// <summary>
-		/// Set the user's profile picture
-		/// </summary>
-		/// <param name="userId">The id of the user. </param>
-		/// <param name="image">The byte stream of the image. Null to delete the image.</param>
-		Task SetUserImage(Guid userId, Stream? image);
-	}
+	/// <summary>
+	/// Set the user's profile picture
+	/// </summary>
+	/// <param name="userId">The id of the user. </param>
+	/// <param name="image">The byte stream of the image. Null to delete the image.</param>
+	Task SetUserImage(Guid userId, Stream? image);
 }

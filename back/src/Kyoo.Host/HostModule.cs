@@ -23,39 +23,38 @@ using Kyoo.Abstractions.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Serilog;
 
-namespace Kyoo.Host
+namespace Kyoo.Host;
+
+/// <summary>
+/// A module that registers host controllers and other needed things.
+/// </summary>
+public class HostModule : IPlugin
 {
+	/// <inheritdoc />
+	public string Name => "Host";
+
 	/// <summary>
-	/// A module that registers host controllers and other needed things.
+	/// The plugin manager that loaded all plugins.
 	/// </summary>
-	public class HostModule : IPlugin
+	private readonly IPluginManager _plugins;
+
+	/// <summary>
+	/// Create a new <see cref="HostModule"/>.
+	/// </summary>
+	/// <param name="plugins">The plugin manager that loaded all plugins.</param>
+	public HostModule(IPluginManager plugins)
 	{
-		/// <inheritdoc />
-		public string Name => "Host";
-
-		/// <summary>
-		/// The plugin manager that loaded all plugins.
-		/// </summary>
-		private readonly IPluginManager _plugins;
-
-		/// <summary>
-		/// Create a new <see cref="HostModule"/>.
-		/// </summary>
-		/// <param name="plugins">The plugin manager that loaded all plugins.</param>
-		public HostModule(IPluginManager plugins)
-		{
-			_plugins = plugins;
-		}
-
-		/// <inheritdoc />
-		public void Configure(ContainerBuilder builder)
-		{
-			builder.RegisterModule<AttributedMetadataModule>();
-			builder.RegisterInstance(_plugins).As<IPluginManager>().ExternallyOwned();
-		}
-
-		/// <inheritdoc />
-		public IEnumerable<IStartupAction> ConfigureSteps =>
-			new[] { SA.New<IApplicationBuilder>(app => app.UseSerilogRequestLogging(), SA.Before) };
+		_plugins = plugins;
 	}
+
+	/// <inheritdoc />
+	public void Configure(ContainerBuilder builder)
+	{
+		builder.RegisterModule<AttributedMetadataModule>();
+		builder.RegisterInstance(_plugins).As<IPluginManager>().ExternallyOwned();
+	}
+
+	/// <inheritdoc />
+	public IEnumerable<IStartupAction> ConfigureSteps =>
+		new[] { SA.New<IApplicationBuilder>(app => app.UseSerilogRequestLogging(), SA.Before) };
 }

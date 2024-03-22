@@ -20,23 +20,22 @@ using Kyoo.Abstractions.Models.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace Kyoo.Core.Controllers
+namespace Kyoo.Core.Controllers;
+
+/// <summary>
+/// The route constraint that goes with the <see cref="Identifier"/>.
+/// </summary>
+public class IdentifierRouteConstraint : IRouteConstraint
 {
-	/// <summary>
-	/// The route constraint that goes with the <see cref="Identifier"/>.
-	/// </summary>
-	public class IdentifierRouteConstraint : IRouteConstraint
+	/// <inheritdoc />
+	public bool Match(
+		HttpContext? httpContext,
+		IRouter? route,
+		string routeKey,
+		RouteValueDictionary values,
+		RouteDirection routeDirection
+	)
 	{
-		/// <inheritdoc />
-		public bool Match(
-			HttpContext? httpContext,
-			IRouter? route,
-			string routeKey,
-			RouteValueDictionary values,
-			RouteDirection routeDirection
-		)
-		{
-			return values.ContainsKey(routeKey);
-		}
+		return values.ContainsKey(routeKey);
 	}
 }

@@ -23,69 +23,68 @@ using System.Text.Json.Serialization;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Utils;
 
-namespace Kyoo.Abstractions.Models
+namespace Kyoo.Abstractions.Models;
+
+/// <summary>
+/// A class representing collections of <see cref="Show"/>.
+/// </summary>
+public class Collection : IQuery, IResource, IMetadata, IThumbnails, IAddedDate, ILibraryItem
 {
+	public static Sort DefaultSort => new Sort<Collection>.By(nameof(Collection.Name));
+
+	/// <inheritdoc />
+	public Guid Id { get; set; }
+
+	/// <inheritdoc />
+	[MaxLength(256)]
+	public string Slug { get; set; }
+
 	/// <summary>
-	/// A class representing collections of <see cref="Show"/>.
+	/// The name of this collection.
 	/// </summary>
-	public class Collection : IQuery, IResource, IMetadata, IThumbnails, IAddedDate, ILibraryItem
+	public string Name { get; set; }
+
+	/// <summary>
+	/// The description of this collection.
+	/// </summary>
+	public string? Overview { get; set; }
+
+	/// <inheritdoc />
+	public DateTime AddedDate { get; set; }
+
+	/// <inheritdoc />
+	public Image? Poster { get; set; }
+
+	/// <inheritdoc />
+	public Image? Thumbnail { get; set; }
+
+	/// <inheritdoc />
+	public Image? Logo { get; set; }
+
+	/// <summary>
+	/// The list of movies contained in this collection.
+	/// </summary>
+	[JsonIgnore]
+	public ICollection<Movie>? Movies { get; set; }
+
+	/// <summary>
+	/// The list of shows contained in this collection.
+	/// </summary>
+	[JsonIgnore]
+	public ICollection<Show>? Shows { get; set; }
+
+	/// <inheritdoc />
+	public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
+
+	public Collection() { }
+
+	[JsonConstructor]
+	public Collection(string name)
 	{
-		public static Sort DefaultSort => new Sort<Collection>.By(nameof(Collection.Name));
-
-		/// <inheritdoc />
-		public Guid Id { get; set; }
-
-		/// <inheritdoc />
-		[MaxLength(256)]
-		public string Slug { get; set; }
-
-		/// <summary>
-		/// The name of this collection.
-		/// </summary>
-		public string Name { get; set; }
-
-		/// <summary>
-		/// The description of this collection.
-		/// </summary>
-		public string? Overview { get; set; }
-
-		/// <inheritdoc />
-		public DateTime AddedDate { get; set; }
-
-		/// <inheritdoc />
-		public Image? Poster { get; set; }
-
-		/// <inheritdoc />
-		public Image? Thumbnail { get; set; }
-
-		/// <inheritdoc />
-		public Image? Logo { get; set; }
-
-		/// <summary>
-		/// The list of movies contained in this collection.
-		/// </summary>
-		[JsonIgnore]
-		public ICollection<Movie>? Movies { get; set; }
-
-		/// <summary>
-		/// The list of shows contained in this collection.
-		/// </summary>
-		[JsonIgnore]
-		public ICollection<Show>? Shows { get; set; }
-
-		/// <inheritdoc />
-		public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
-
-		public Collection() { }
-
-		[JsonConstructor]
-		public Collection(string name)
+		if (name != null)
 		{
-			if (name != null)
-			{
-				Slug = Utility.ToSlug(name);
-				Name = name;
-			}
+			Slug = Utility.ToSlug(name);
+			Name = name;
 		}
 	}
 }

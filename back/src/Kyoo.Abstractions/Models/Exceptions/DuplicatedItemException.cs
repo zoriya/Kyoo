@@ -19,35 +19,34 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Kyoo.Abstractions.Models.Exceptions
+namespace Kyoo.Abstractions.Models.Exceptions;
+
+/// <summary>
+/// An exception raised when an item already exists in the database.
+/// </summary>
+[Serializable]
+public class DuplicatedItemException : Exception
 {
 	/// <summary>
-	/// An exception raised when an item already exists in the database.
+	/// The existing object.
 	/// </summary>
-	[Serializable]
-	public class DuplicatedItemException : Exception
+	public object? Existing { get; }
+
+	/// <summary>
+	/// Create a new <see cref="DuplicatedItemException"/> with the default message.
+	/// </summary>
+	/// <param name="existing">The existing object.</param>
+	public DuplicatedItemException(object? existing = null)
+		: base("Already exists in the database.")
 	{
-		/// <summary>
-		/// The existing object.
-		/// </summary>
-		public object? Existing { get; }
-
-		/// <summary>
-		/// Create a new <see cref="DuplicatedItemException"/> with the default message.
-		/// </summary>
-		/// <param name="existing">The existing object.</param>
-		public DuplicatedItemException(object? existing = null)
-			: base("Already exists in the database.")
-		{
-			Existing = existing;
-		}
-
-		/// <summary>
-		/// The serialization constructor.
-		/// </summary>
-		/// <param name="info">Serialization infos</param>
-		/// <param name="context">The serialization context</param>
-		protected DuplicatedItemException(SerializationInfo info, StreamingContext context)
-			: base(info, context) { }
+		Existing = existing;
 	}
+
+	/// <summary>
+	/// The serialization constructor.
+	/// </summary>
+	/// <param name="info">Serialization infos</param>
+	/// <param name="context">The serialization context</param>
+	protected DuplicatedItemException(SerializationInfo info, StreamingContext context)
+		: base(info, context) { }
 }

@@ -16,32 +16,31 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-namespace Kyoo.Authentication.Models.DTO
+namespace Kyoo.Authentication.Models.DTO;
+
+/// <summary>
+/// A model only used on login requests.
+/// </summary>
+public class LoginRequest
 {
 	/// <summary>
-	/// A model only used on login requests.
+	/// The user's username.
 	/// </summary>
-	public class LoginRequest
+	public string Username { get; set; }
+
+	/// <summary>
+	/// The user's password.
+	/// </summary>
+	public string Password { get; set; }
+
+	/// <summary>
+	/// Initializes a new instance of the <see cref="LoginRequest"/> class.
+	/// </summary>
+	/// <param name="username">The user's username.</param>
+	/// <param name="password">The user's password.</param>
+	public LoginRequest(string username, string password)
 	{
-		/// <summary>
-		/// The user's username.
-		/// </summary>
-		public string Username { get; set; }
-
-		/// <summary>
-		/// The user's password.
-		/// </summary>
-		public string Password { get; set; }
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="LoginRequest"/> class.
-		/// </summary>
-		/// <param name="username">The user's username.</param>
-		/// <param name="password">The user's password.</param>
-		public LoginRequest(string username, string password)
-		{
-			Username = username;
-			Password = password;
-		}
+		Username = username;
+		Password = password;
 	}
 }

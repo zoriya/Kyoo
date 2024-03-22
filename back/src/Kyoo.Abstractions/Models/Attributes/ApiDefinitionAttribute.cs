@@ -18,35 +18,34 @@
 
 using System;
 
-namespace Kyoo.Abstractions.Models.Attributes
+namespace Kyoo.Abstractions.Models.Attributes;
+
+/// <summary>
+/// An attribute to specify on apis to specify it's documentation's name and category.
+/// If this is applied on a method, the specified method will be exploded from the controller's page and be
+/// included on the specified tag page.
+/// </summary>
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+public class ApiDefinitionAttribute : Attribute
 {
 	/// <summary>
-	/// An attribute to specify on apis to specify it's documentation's name and category.
-	/// If this is applied on a method, the specified method will be exploded from the controller's page and be
-	/// included on the specified tag page.
+	/// The public name of this api.
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-	public class ApiDefinitionAttribute : Attribute
+	public string Name { get; }
+
+	/// <summary>
+	/// The name of the group in witch this API is. You can also specify a custom sort order using the following
+	/// format: <code>order:name</code>. Everything before the first <c>:</c> will be removed but kept for
+	/// th alphabetical ordering.
+	/// </summary>
+	public string? Group { get; set; }
+
+	/// <summary>
+	/// Create a new <see cref="ApiDefinitionAttribute"/>.
+	/// </summary>
+	/// <param name="name">The name of the api that will be used on the documentation page.</param>
+	public ApiDefinitionAttribute(string name)
 	{
-		/// <summary>
-		/// The public name of this api.
-		/// </summary>
-		public string Name { get; }
-
-		/// <summary>
-		/// The name of the group in witch this API is. You can also specify a custom sort order using the following
-		/// format: <code>order:name</code>. Everything before the first <c>:</c> will be removed but kept for
-		/// th alphabetical ordering.
-		/// </summary>
-		public string? Group { get; set; }
-
-		/// <summary>
-		/// Create a new <see cref="ApiDefinitionAttribute"/>.
-		/// </summary>
-		/// <param name="name">The name of the api that will be used on the documentation page.</param>
-		public ApiDefinitionAttribute(string name)
-		{
-			Name = name;
-		}
+		Name = name;
 	}
 }

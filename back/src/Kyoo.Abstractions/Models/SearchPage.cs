@@ -18,37 +18,36 @@
 
 using System.Collections.Generic;
 
-namespace Kyoo.Abstractions.Models
+namespace Kyoo.Abstractions.Models;
+
+/// <summary>
+/// Results of a search request.
+/// </summary>
+/// <typeparam name="T">The search item's type.</typeparam>
+public class SearchPage<T> : Page<T>
+	where T : IResource
 {
-	/// <summary>
-	/// Results of a search request.
-	/// </summary>
-	/// <typeparam name="T">The search item's type.</typeparam>
-	public class SearchPage<T> : Page<T>
-		where T : IResource
+	public SearchPage(
+		SearchResult result,
+		string @this,
+		string? previous,
+		string? next,
+		string first
+	)
+		: base(result.Items, @this, previous, next, first)
 	{
-		public SearchPage(
-			SearchResult result,
-			string @this,
-			string? previous,
-			string? next,
-			string first
-		)
-			: base(result.Items, @this, previous, next, first)
-		{
-			Query = result.Query;
-		}
+		Query = result.Query;
+	}
 
-		/// <summary>
-		/// The query of the search request.
-		/// </summary>
-		public string? Query { get; init; }
+	/// <summary>
+	/// The query of the search request.
+	/// </summary>
+	public string? Query { get; init; }
 
-		public class SearchResult
-		{
-			public string? Query { get; set; }
+	public class SearchResult
+	{
+		public string? Query { get; set; }
 
-			public ICollection<T> Items { get; set; }
-		}
+		public ICollection<T> Items { get; set; }
 	}
 }

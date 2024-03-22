@@ -16,31 +16,30 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-namespace Kyoo.Authentication.Models
+namespace Kyoo.Authentication.Models;
+
+/// <summary>
+/// The main authentication options.
+/// </summary>
+public class AuthenticationOption
 {
 	/// <summary>
-	/// The main authentication options.
+	/// The path to get this option from the root configuration.
 	/// </summary>
-	public class AuthenticationOption
-	{
-		/// <summary>
-		/// The path to get this option from the root configuration.
-		/// </summary>
-		public const string Path = "authentication";
+	public const string Path = "authentication";
 
-		/// <summary>
-		/// The default jwt secret.
-		/// </summary>
-		public const string DefaultSecret = "4c@mraGB!KRfF@kpS8739y9FcHemKxBsqqxLbdR?";
+	/// <summary>
+	/// The default jwt secret.
+	/// </summary>
+	public const string DefaultSecret = "4c@mraGB!KRfF@kpS8739y9FcHemKxBsqqxLbdR?";
 
-		/// <summary>
-		/// The secret used to encrypt the jwt.
-		/// </summary>
-		public string Secret { get; set; } = DefaultSecret;
+	/// <summary>
+	/// The secret used to encrypt the jwt.
+	/// </summary>
+	public string Secret { get; set; } = DefaultSecret;
 
-		/// <summary>
-		/// Options for permissions
-		/// </summary>
-		public PermissionOption Permissions { get; set; } = new();
-	}
+	/// <summary>
+	/// Options for permissions
+	/// </summary>
+	public PermissionOption Permissions { get; set; } = new();
 }

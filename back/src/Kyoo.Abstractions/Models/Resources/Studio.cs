@@ -23,59 +23,58 @@ using System.Text.Json.Serialization;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Utils;
 
-namespace Kyoo.Abstractions.Models
+namespace Kyoo.Abstractions.Models;
+
+/// <summary>
+/// A studio that make shows.
+/// </summary>
+public class Studio : IQuery, IResource, IMetadata
 {
+	public static Sort DefaultSort => new Sort<Studio>.By(x => x.Name);
+
+	/// <inheritdoc />
+	public Guid Id { get; set; }
+
+	/// <inheritdoc />
+	[MaxLength(256)]
+	public string Slug { get; set; }
+
 	/// <summary>
-	/// A studio that make shows.
+	/// The name of this studio.
 	/// </summary>
-	public class Studio : IQuery, IResource, IMetadata
+	public string Name { get; set; }
+
+	/// <summary>
+	/// The list of shows that are made by this studio.
+	/// </summary>
+	[JsonIgnore]
+	public ICollection<Show>? Shows { get; set; }
+
+	/// <summary>
+	/// The list of movies that are made by this studio.
+	/// </summary>
+	[JsonIgnore]
+	public ICollection<Movie>? Movies { get; set; }
+
+	/// <inheritdoc />
+	public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
+
+	/// <summary>
+	/// Create a new, empty, <see cref="Studio"/>.
+	/// </summary>
+	public Studio() { }
+
+	/// <summary>
+	/// Create a new <see cref="Studio"/> with a specific name, the slug is calculated automatically.
+	/// </summary>
+	/// <param name="name">The name of the studio.</param>
+	[JsonConstructor]
+	public Studio(string name)
 	{
-		public static Sort DefaultSort => new Sort<Studio>.By(x => x.Name);
-
-		/// <inheritdoc />
-		public Guid Id { get; set; }
-
-		/// <inheritdoc />
-		[MaxLength(256)]
-		public string Slug { get; set; }
-
-		/// <summary>
-		/// The name of this studio.
-		/// </summary>
-		public string Name { get; set; }
-
-		/// <summary>
-		/// The list of shows that are made by this studio.
-		/// </summary>
-		[JsonIgnore]
-		public ICollection<Show>? Shows { get; set; }
-
-		/// <summary>
-		/// The list of movies that are made by this studio.
-		/// </summary>
-		[JsonIgnore]
-		public ICollection<Movie>? Movies { get; set; }
-
-		/// <inheritdoc />
-		public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
-
-		/// <summary>
-		/// Create a new, empty, <see cref="Studio"/>.
-		/// </summary>
-		public Studio() { }
-
-		/// <summary>
-		/// Create a new <see cref="Studio"/> with a specific name, the slug is calculated automatically.
-		/// </summary>
-		/// <param name="name">The name of the studio.</param>
-		[JsonConstructor]
-		public Studio(string name)
+		if (name != null)
 		{
-			if (name != null)
-			{
-				Slug = Utility.ToSlug(name);
-				Name = name;
-			}
+			Slug = Utility.ToSlug(name);
+			Name = name;
 		}
 	}
 }

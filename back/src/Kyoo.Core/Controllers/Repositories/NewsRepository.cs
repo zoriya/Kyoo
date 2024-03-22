@@ -22,43 +22,42 @@ using System.Data.Common;
 using System.IO;
 using Kyoo.Abstractions.Models;
 
-namespace Kyoo.Core.Controllers
+namespace Kyoo.Core.Controllers;
+
+/// <summary>
+/// A local repository to handle shows
+/// </summary>
+public class NewsRepository : DapperRepository<INews>
 {
-	/// <summary>
-	/// A local repository to handle shows
-	/// </summary>
-	public class NewsRepository : DapperRepository<INews>
-	{
-		// language=PostgreSQL
-		protected override FormattableString Sql =>
-			$"""
+	// language=PostgreSQL
+	protected override FormattableString Sql =>
+		$"""
+			select
+				e.*, -- Episode as e
+				m.*
+				/* includes */
+			from
+				episodes as e
+			full outer join (
 				select
-					e.*, -- Episode as e
-					m.*
-					/* includes */
+					* -- Movie
 				from
-					episodes as e
-				full outer join (
-					select
-						* -- Movie
-					from
-						movies
-				) as m on false
-				""";
+					movies
+			) as m on false
+			""";
 
-		protected override Dictionary<string, Type> Config =>
-			new() { { "e", typeof(Episode) }, { "m", typeof(Movie) }, };
+	protected override Dictionary<string, Type> Config =>
+		new() { { "e", typeof(Episode) }, { "m", typeof(Movie) }, };
 
-		protected override INews Mapper(List<object?> items)
-		{
-			if (items[0] is Episode episode && episode.Id != Guid.Empty)
-				return episode;
-			if (items[1] is Movie movie && movie.Id != Guid.Empty)
-				return movie;
-			throw new InvalidDataException();
-		}
-
-		public NewsRepository(DbConnection database, SqlVariableContext context)
-			: base(database, context) { }
+	protected override INews Mapper(List<object?> items)
+	{
+		if (items[0] is Episode episode && episode.Id != Guid.Empty)
+			return episode;
+		if (items[1] is Movie movie && movie.Id != Guid.Empty)
+			return movie;
+		throw new InvalidDataException();
 	}
+
+	public NewsRepository(DbConnection database, SqlVariableContext context)
+		: base(database, context) { }
 }

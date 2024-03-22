@@ -19,42 +19,38 @@
 using System;
 using System.Linq;
 
-namespace Kyoo.Abstractions.Models.Utils
+namespace Kyoo.Abstractions.Models.Utils;
+
+/// <summary>
+/// The list of errors that where made in the request.
+/// </summary>
+public class RequestError
 {
 	/// <summary>
 	/// The list of errors that where made in the request.
 	/// </summary>
-	public class RequestError
+	/// <example><c>["InvalidFilter: no field 'startYear' on a collection"]</c></example>
+	public string[] Errors { get; set; }
+
+	/// <summary>
+	/// Create a new <see cref="RequestError"/> with one error.
+	/// </summary>
+	/// <param name="error">The error to specify in the response.</param>
+	public RequestError(string error)
 	{
-		/// <summary>
-		/// The list of errors that where made in the request.
-		/// </summary>
-		/// <example><c>["InvalidFilter: no field 'startYear' on a collection"]</c></example>
-		public string[] Errors { get; set; }
+		if (error == null)
+			throw new ArgumentNullException(nameof(error));
+		Errors = new[] { error };
+	}
 
-		/// <summary>
-		/// Create a new <see cref="RequestError"/> with one error.
-		/// </summary>
-		/// <param name="error">The error to specify in the response.</param>
-		public RequestError(string error)
-		{
-			if (error == null)
-				throw new ArgumentNullException(nameof(error));
-			Errors = new[] { error };
-		}
-
-		/// <summary>
-		/// Create a new <see cref="RequestError"/> with multiple errors.
-		/// </summary>
-		/// <param name="errors">The errors to specify in the response.</param>
-		public RequestError(string[] errors)
-		{
-			if (errors == null || !errors.Any())
-				throw new ArgumentException(
-					"Errors must be non null and not empty",
-					nameof(errors)
-				);
-			Errors = errors;
-		}
+	/// <summary>
+	/// Create a new <see cref="RequestError"/> with multiple errors.
+	/// </summary>
+	/// <param name="errors">The errors to specify in the response.</param>
+	public RequestError(string[] errors)
+	{
+		if (errors == null || !errors.Any())
+			throw new ArgumentException("Errors must be non null and not empty", nameof(errors));
+		Errors = errors;
 	}
 }

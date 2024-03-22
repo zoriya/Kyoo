@@ -36,167 +36,163 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Kyoo.Host
+namespace Kyoo.Host;
+
+/// <summary>
+/// The Startup class is used to configure the AspNet's webhost.
+/// </summary>
+public class PluginsStartup
 {
 	/// <summary>
-	/// The Startup class is used to configure the AspNet's webhost.
+	/// A plugin manager used to load plugins and allow them to configure services / asp net.
 	/// </summary>
-	public class PluginsStartup
+	private readonly IPluginManager _plugins;
+
+	/// <summary>
+	/// The plugin that adds controllers and tasks specific to this host.
+	/// </summary>
+	private readonly IPlugin _hostModule;
+
+	/// <summary>
+	/// Created from the DI container, those services are needed to load information and instantiate plugins.s
+	/// </summary>
+	/// <param name="plugins">The plugin manager to use to load new plugins and configure the host.</param>
+	public PluginsStartup(IPluginManager plugins)
+	{
+		_plugins = plugins;
+		_hostModule = new HostModule(_plugins);
+		_plugins.LoadPlugins(
+			typeof(CoreModule),
+			typeof(AuthenticationModule),
+			typeof(PostgresModule),
+			typeof(MeilisearchModule),
+			typeof(SwaggerModule)
+		);
+	}
+
+	/// <summary>
+	/// Create a new <see cref="PluginsStartup"/> from a webhost.
+	/// This is meant to be used from <see cref="WebHostBuilderExtensions.UseStartup"/>.
+	/// </summary>
+	/// <param name="host">The context of the web host.</param>
+	/// <param name="logger">
+	/// The logger factory used to log while the application is setting itself up.
+	/// </param>
+	/// <returns>A new <see cref="PluginsStartup"/>.</returns>
+	public static PluginsStartup FromWebHost(WebHostBuilderContext host, ILoggerFactory logger)
+	{
+		HostServiceProvider hostProvider = new(host.HostingEnvironment, host.Configuration, logger);
+		PluginManager plugins = new(hostProvider, logger.CreateLogger<PluginManager>());
+		return new PluginsStartup(plugins);
+	}
+
+	/// <summary>
+	/// Configure the services context via the <see cref="PluginManager"/>.
+	/// </summary>
+	/// <param name="services">The service collection to fill.</param>
+	public void ConfigureServices(IServiceCollection services)
+	{
+		foreach (Assembly assembly in _plugins.GetAllPlugins().Select(x => x.GetType().Assembly))
+			services.AddMvcCore().AddApplicationPart(assembly);
+
+		_hostModule.Configure(services);
+		foreach (IPlugin plugin in _plugins.GetAllPlugins())
+			plugin.Configure(services);
+	}
+
+	/// <summary>
+	/// Configure the autofac container via the <see cref="PluginManager"/>.
+	/// </summary>
+	/// <param name="builder">The builder to configure.</param>
+	public void ConfigureContainer(ContainerBuilder builder)
+	{
+		_hostModule.Configure(builder);
+		foreach (IPlugin plugin in _plugins.GetAllPlugins())
+			plugin.Configure(builder);
+	}
+
+	/// <summary>
+	/// Configure the asp net host.
+	/// </summary>
+	/// <param name="app">The asp net host to configure</param>
+	/// <param name="container">An autofac container used to create a new scope to configure asp-net.</param>
+	public void Configure(IApplicationBuilder app, ILifetimeScope container)
+	{
+		IEnumerable<IStartupAction> steps = _plugins
+			.GetAllPlugins()
+			.Append(_hostModule)
+			.SelectMany(x => x.ConfigureSteps)
+			.OrderByDescending(x => x.Priority);
+
+		using ILifetimeScope scope = container.BeginLifetimeScope(x =>
+			x.RegisterInstance(app).SingleInstance().ExternallyOwned()
+		);
+		IServiceProvider provider = scope.Resolve<IServiceProvider>();
+		foreach (IStartupAction step in steps)
+			step.Run(provider);
+	}
+
+	/// <summary>
+	/// A simple host service provider used to activate plugins instance.
+	/// The same services as a generic host are available and an <see cref="ILoggerFactory"/> has been added.
+	/// </summary>
+	private class HostServiceProvider : IServiceProvider
 	{
 		/// <summary>
-		/// A plugin manager used to load plugins and allow them to configure services / asp net.
+		/// The host environment that could be used by plugins to configure themself.
 		/// </summary>
-		private readonly IPluginManager _plugins;
+		private readonly IWebHostEnvironment _hostEnvironment;
 
 		/// <summary>
-		/// The plugin that adds controllers and tasks specific to this host.
+		/// The configuration context.
 		/// </summary>
-		private readonly IPlugin _hostModule;
+		private readonly IConfiguration _configuration;
 
 		/// <summary>
-		/// Created from the DI container, those services are needed to load information and instantiate plugins.s
+		/// A logger factory used to create a logger for the plugin manager.
 		/// </summary>
-		/// <param name="plugins">The plugin manager to use to load new plugins and configure the host.</param>
-		public PluginsStartup(IPluginManager plugins)
-		{
-			_plugins = plugins;
-			_hostModule = new HostModule(_plugins);
-			_plugins.LoadPlugins(
-				typeof(CoreModule),
-				typeof(AuthenticationModule),
-				typeof(PostgresModule),
-				typeof(MeilisearchModule),
-				typeof(SwaggerModule)
-			);
-		}
+		private readonly ILoggerFactory _loggerFactory;
 
 		/// <summary>
-		/// Create a new <see cref="PluginsStartup"/> from a webhost.
-		/// This is meant to be used from <see cref="WebHostBuilderExtensions.UseStartup"/>.
+		/// Create a new <see cref="HostServiceProvider"/> that will return given services when asked.
 		/// </summary>
-		/// <param name="host">The context of the web host.</param>
-		/// <param name="logger">
-		/// The logger factory used to log while the application is setting itself up.
+		/// <param name="hostEnvironment">
+		/// The host environment that could be used by plugins to configure themself.
 		/// </param>
-		/// <returns>A new <see cref="PluginsStartup"/>.</returns>
-		public static PluginsStartup FromWebHost(WebHostBuilderContext host, ILoggerFactory logger)
+		/// <param name="configuration">The configuration context</param>
+		/// <param name="loggerFactory">A logger factory used to create a logger for the plugin manager.</param>
+		public HostServiceProvider(
+			IWebHostEnvironment hostEnvironment,
+			IConfiguration configuration,
+			ILoggerFactory loggerFactory
+		)
 		{
-			HostServiceProvider hostProvider =
-				new(host.HostingEnvironment, host.Configuration, logger);
-			PluginManager plugins = new(hostProvider, logger.CreateLogger<PluginManager>());
-			return new PluginsStartup(plugins);
+			_hostEnvironment = hostEnvironment;
+			_configuration = configuration;
+			_loggerFactory = loggerFactory;
 		}
 
-		/// <summary>
-		/// Configure the services context via the <see cref="PluginManager"/>.
-		/// </summary>
-		/// <param name="services">The service collection to fill.</param>
-		public void ConfigureServices(IServiceCollection services)
+		/// <inheritdoc />
+		public object GetService(Type serviceType)
 		{
-			foreach (
-				Assembly assembly in _plugins.GetAllPlugins().Select(x => x.GetType().Assembly)
+			if (
+				serviceType == typeof(IWebHostEnvironment)
+				|| serviceType == typeof(IHostEnvironment)
 			)
-				services.AddMvcCore().AddApplicationPart(assembly);
-
-			_hostModule.Configure(services);
-			foreach (IPlugin plugin in _plugins.GetAllPlugins())
-				plugin.Configure(services);
-		}
-
-		/// <summary>
-		/// Configure the autofac container via the <see cref="PluginManager"/>.
-		/// </summary>
-		/// <param name="builder">The builder to configure.</param>
-		public void ConfigureContainer(ContainerBuilder builder)
-		{
-			_hostModule.Configure(builder);
-			foreach (IPlugin plugin in _plugins.GetAllPlugins())
-				plugin.Configure(builder);
-		}
-
-		/// <summary>
-		/// Configure the asp net host.
-		/// </summary>
-		/// <param name="app">The asp net host to configure</param>
-		/// <param name="container">An autofac container used to create a new scope to configure asp-net.</param>
-		public void Configure(IApplicationBuilder app, ILifetimeScope container)
-		{
-			IEnumerable<IStartupAction> steps = _plugins
-				.GetAllPlugins()
-				.Append(_hostModule)
-				.SelectMany(x => x.ConfigureSteps)
-				.OrderByDescending(x => x.Priority);
-
-			using ILifetimeScope scope = container.BeginLifetimeScope(x =>
-				x.RegisterInstance(app).SingleInstance().ExternallyOwned()
-			);
-			IServiceProvider provider = scope.Resolve<IServiceProvider>();
-			foreach (IStartupAction step in steps)
-				step.Run(provider);
-		}
-
-		/// <summary>
-		/// A simple host service provider used to activate plugins instance.
-		/// The same services as a generic host are available and an <see cref="ILoggerFactory"/> has been added.
-		/// </summary>
-		private class HostServiceProvider : IServiceProvider
-		{
-			/// <summary>
-			/// The host environment that could be used by plugins to configure themself.
-			/// </summary>
-			private readonly IWebHostEnvironment _hostEnvironment;
-
-			/// <summary>
-			/// The configuration context.
-			/// </summary>
-			private readonly IConfiguration _configuration;
-
-			/// <summary>
-			/// A logger factory used to create a logger for the plugin manager.
-			/// </summary>
-			private readonly ILoggerFactory _loggerFactory;
-
-			/// <summary>
-			/// Create a new <see cref="HostServiceProvider"/> that will return given services when asked.
-			/// </summary>
-			/// <param name="hostEnvironment">
-			/// The host environment that could be used by plugins to configure themself.
-			/// </param>
-			/// <param name="configuration">The configuration context</param>
-			/// <param name="loggerFactory">A logger factory used to create a logger for the plugin manager.</param>
-			public HostServiceProvider(
-				IWebHostEnvironment hostEnvironment,
-				IConfiguration configuration,
-				ILoggerFactory loggerFactory
-			)
+				return _hostEnvironment;
+			if (serviceType == typeof(IConfiguration))
+				return _configuration;
+			if (serviceType.GetGenericTypeDefinition() == typeof(ILogger<>))
 			{
-				_hostEnvironment = hostEnvironment;
-				_configuration = configuration;
-				_loggerFactory = loggerFactory;
+				return Utility.RunGenericMethod<object>(
+					typeof(LoggerFactoryExtensions),
+					nameof(LoggerFactoryExtensions.CreateLogger),
+					serviceType.GetGenericArguments().First(),
+					_loggerFactory
+				);
 			}
 
-			/// <inheritdoc />
-			public object GetService(Type serviceType)
-			{
-				if (
-					serviceType == typeof(IWebHostEnvironment)
-					|| serviceType == typeof(IHostEnvironment)
-				)
-					return _hostEnvironment;
-				if (serviceType == typeof(IConfiguration))
-					return _configuration;
-				if (serviceType.GetGenericTypeDefinition() == typeof(ILogger<>))
-				{
-					return Utility.RunGenericMethod<object>(
-						typeof(LoggerFactoryExtensions),
-						nameof(LoggerFactoryExtensions.CreateLogger),
-						serviceType.GetGenericArguments().First(),
-						_loggerFactory
-					);
-				}
-
-				return null;
-			}
+			return null;
 		}
 	}
 }

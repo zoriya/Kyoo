@@ -18,16 +18,15 @@
 
 using System.Collections.Generic;
 
-namespace Kyoo.Abstractions.Models
+namespace Kyoo.Abstractions.Models;
+
+/// <summary>
+/// An interface applied to resources containing external metadata.
+/// </summary>
+public interface IMetadata
 {
 	/// <summary>
-	/// An interface applied to resources containing external metadata.
+	/// The link to metadata providers that this show has. See <see cref="MetadataId"/> for more information.
 	/// </summary>
-	public interface IMetadata
-	{
-		/// <summary>
-		/// The link to metadata providers that this show has. See <see cref="MetadataId"/> for more information.
-		/// </summary>
-		public Dictionary<string, MetadataId> ExternalId { get; set; }
-	}
+	public Dictionary<string, MetadataId> ExternalId { get; set; }
 }

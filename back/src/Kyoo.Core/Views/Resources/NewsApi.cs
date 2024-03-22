@@ -23,19 +23,18 @@ using Kyoo.Abstractions.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 
-namespace Kyoo.Core.Api
+namespace Kyoo.Core.Api;
+
+/// <summary>
+/// List new items added to kyoo.
+/// </summary>
+[Route("news")]
+[Route("new", Order = AlternativeRoute)]
+[ApiController]
+[PartialPermission("LibraryItem")]
+[ApiDefinition("News", Group = ResourcesGroup)]
+public class NewsApi : CrudThumbsApi<INews>
 {
-	/// <summary>
-	/// List new items added to kyoo.
-	/// </summary>
-	[Route("news")]
-	[Route("new", Order = AlternativeRoute)]
-	[ApiController]
-	[PartialPermission("LibraryItem")]
-	[ApiDefinition("News", Group = ResourcesGroup)]
-	public class NewsApi : CrudThumbsApi<INews>
-	{
-		public NewsApi(IRepository<INews> news, IThumbnailsManager thumbs)
-			: base(news, thumbs) { }
-	}
+	public NewsApi(IRepository<INews> news, IThumbnailsManager thumbs)
+		: base(news, thumbs) { }
 }

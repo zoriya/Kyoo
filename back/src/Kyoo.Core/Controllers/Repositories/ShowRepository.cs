@@ -26,85 +26,84 @@ using Kyoo.Postgresql;
 using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
 
-namespace Kyoo.Core.Controllers
+namespace Kyoo.Core.Controllers;
+
+/// <summary>
+/// A local repository to handle shows
+/// </summary>
+public class ShowRepository : LocalRepository<Show>
 {
 	/// <summary>
-	/// A local repository to handle shows
+	/// The database handle
 	/// </summary>
-	public class ShowRepository : LocalRepository<Show>
+	private readonly DatabaseContext _database;
+
+	/// <summary>
+	/// A studio repository to handle creation/validation of related studios.
+	/// </summary>
+	private readonly IRepository<Studio> _studios;
+
+	public ShowRepository(
+		DatabaseContext database,
+		IRepository<Studio> studios,
+		IThumbnailsManager thumbs
+	)
+		: base(database, thumbs)
 	{
-		/// <summary>
-		/// The database handle
-		/// </summary>
-		private readonly DatabaseContext _database;
+		_database = database;
+		_studios = studios;
+	}
 
-		/// <summary>
-		/// A studio repository to handle creation/validation of related studios.
-		/// </summary>
-		private readonly IRepository<Studio> _studios;
+	/// <inheritdoc />
+	public override async Task<ICollection<Show>> Search(
+		string query,
+		Include<Show>? include = default
+	)
+	{
+		return await AddIncludes(_database.Shows, include)
+			.Where(x => EF.Functions.ILike(x.Name + " " + x.Slug, $"%{query}%"))
+			.Take(20)
+			.ToListAsync();
+	}
 
-		public ShowRepository(
-			DatabaseContext database,
-			IRepository<Studio> studios,
-			IThumbnailsManager thumbs
-		)
-			: base(database, thumbs)
+	/// <inheritdoc />
+	public override async Task<Show> Create(Show obj)
+	{
+		await base.Create(obj);
+		_database.Entry(obj).State = EntityState.Added;
+		await _database.SaveChangesAsync(() => Get(obj.Slug));
+		await IRepository<Show>.OnResourceCreated(obj);
+		return obj;
+	}
+
+	/// <inheritdoc />
+	protected override async Task Validate(Show resource)
+	{
+		await base.Validate(resource);
+		if (resource.Studio != null)
 		{
-			_database = database;
-			_studios = studios;
+			resource.Studio = await _studios.CreateIfNotExists(resource.Studio);
+			resource.StudioId = resource.Studio.Id;
 		}
+	}
 
-		/// <inheritdoc />
-		public override async Task<ICollection<Show>> Search(
-			string query,
-			Include<Show>? include = default
-		)
+	/// <inheritdoc />
+	protected override async Task EditRelations(Show resource, Show changed)
+	{
+		await Validate(changed);
+
+		if (changed.Studio != null || changed.StudioId == null)
 		{
-			return await AddIncludes(_database.Shows, include)
-				.Where(x => EF.Functions.ILike(x.Name + " " + x.Slug, $"%{query}%"))
-				.Take(20)
-				.ToListAsync();
+			await Database.Entry(resource).Reference(x => x.Studio).LoadAsync();
+			resource.Studio = changed.Studio;
 		}
+	}
 
-		/// <inheritdoc />
-		public override async Task<Show> Create(Show obj)
-		{
-			await base.Create(obj);
-			_database.Entry(obj).State = EntityState.Added;
-			await _database.SaveChangesAsync(() => Get(obj.Slug));
-			await IRepository<Show>.OnResourceCreated(obj);
-			return obj;
-		}
-
-		/// <inheritdoc />
-		protected override async Task Validate(Show resource)
-		{
-			await base.Validate(resource);
-			if (resource.Studio != null)
-			{
-				resource.Studio = await _studios.CreateIfNotExists(resource.Studio);
-				resource.StudioId = resource.Studio.Id;
-			}
-		}
-
-		/// <inheritdoc />
-		protected override async Task EditRelations(Show resource, Show changed)
-		{
-			await Validate(changed);
-
-			if (changed.Studio != null || changed.StudioId == null)
-			{
-				await Database.Entry(resource).Reference(x => x.Studio).LoadAsync();
-				resource.Studio = changed.Studio;
-			}
-		}
-
-		/// <inheritdoc />
-		public override async Task Delete(Show obj)
-		{
-			_database.Remove(obj);
-			await _database.SaveChangesAsync();
-			await base.Delete(obj);
-		}
+	/// <inheritdoc />
+	public override async Task Delete(Show obj)
+	{
+		_database.Remove(obj);
+		await _database.SaveChangesAsync();
+		await base.Delete(obj);
 	}
 }

@@ -23,35 +23,34 @@ using Kyoo.Abstractions.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 
-namespace Kyoo.Core.Api
+namespace Kyoo.Core.Api;
+
+/// <summary>
+/// Endpoint for items that are not part of a specific library.
+/// An item can ether represent a collection or a show.
+/// </summary>
+[Route("items")]
+[Route("item", Order = AlternativeRoute)]
+[ApiController]
+[PartialPermission("LibraryItem")]
+[ApiDefinition("Items", Group = ResourcesGroup)]
+public class LibraryItemApi : CrudThumbsApi<ILibraryItem>
 {
 	/// <summary>
-	/// Endpoint for items that are not part of a specific library.
-	/// An item can ether represent a collection or a show.
+	/// The library item repository used to modify or retrieve information in the data store.
 	/// </summary>
-	[Route("items")]
-	[Route("item", Order = AlternativeRoute)]
-	[ApiController]
-	[PartialPermission("LibraryItem")]
-	[ApiDefinition("Items", Group = ResourcesGroup)]
-	public class LibraryItemApi : CrudThumbsApi<ILibraryItem>
-	{
-		/// <summary>
-		/// The library item repository used to modify or retrieve information in the data store.
-		/// </summary>
-		private readonly IRepository<ILibraryItem> _libraryItems;
+	private readonly IRepository<ILibraryItem> _libraryItems;
 
-		/// <summary>
-		/// Create a new <see cref="LibraryItemApi"/>.
-		/// </summary>
-		/// <param name="libraryItems">
-		/// The library item repository used to modify or retrieve information in the data store.
-		/// </param>
-		/// <param name="thumbs">Thumbnail manager to retrieve images.</param>
-		public LibraryItemApi(IRepository<ILibraryItem> libraryItems, IThumbnailsManager thumbs)
-			: base(libraryItems, thumbs)
-		{
-			_libraryItems = libraryItems;
-		}
+	/// <summary>
+	/// Create a new <see cref="LibraryItemApi"/>.
+	/// </summary>
+	/// <param name="libraryItems">
+	/// The library item repository used to modify or retrieve information in the data store.
+	/// </param>
+	/// <param name="thumbs">Thumbnail manager to retrieve images.</param>
+	public LibraryItemApi(IRepository<ILibraryItem> libraryItems, IThumbnailsManager thumbs)
+		: base(libraryItems, thumbs)
+	{
+		_libraryItems = libraryItems;
 	}
 }

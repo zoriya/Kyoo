@@ -32,158 +32,151 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Kyoo.Authentication
+namespace Kyoo.Authentication;
+
+/// <summary>
+/// A module that enable OpenID authentication for Kyoo.
+/// </summary>
+/// <remarks>
+/// Create a new authentication module instance and use the given configuration.
+/// </remarks>
+public class AuthenticationModule(
+	IConfiguration configuration,
+	ILogger<AuthenticationModule> logger
+) : IPlugin
 {
+	/// <inheritdoc />
+	public string Name => "Authentication";
+
 	/// <summary>
-	/// A module that enable OpenID authentication for Kyoo.
+	/// The configuration to use.
 	/// </summary>
-	/// <remarks>
-	/// Create a new authentication module instance and use the given configuration.
-	/// </remarks>
-	public class AuthenticationModule(
-		IConfiguration configuration,
-		ILogger<AuthenticationModule> logger
-	) : IPlugin
+	private readonly IConfiguration _configuration = configuration;
+
+	/// <inheritdoc />
+	public void Configure(ContainerBuilder builder)
 	{
-		/// <inheritdoc />
-		public string Name => "Authentication";
+		builder.RegisterType<PermissionValidator>().As<IPermissionValidator>().SingleInstance();
+		builder.RegisterType<TokenController>().As<ITokenController>().SingleInstance();
+	}
 
-		/// <summary>
-		/// The configuration to use.
-		/// </summary>
-		private readonly IConfiguration _configuration = configuration;
-
-		/// <inheritdoc />
-		public void Configure(ContainerBuilder builder)
-		{
-			builder.RegisterType<PermissionValidator>().As<IPermissionValidator>().SingleInstance();
-			builder.RegisterType<TokenController>().As<ITokenController>().SingleInstance();
-		}
-
-		/// <inheritdoc />
-		public void Configure(IServiceCollection services)
-		{
-			string secret = _configuration.GetValue(
-				"AUTHENTICATION_SECRET",
-				AuthenticationOption.DefaultSecret
-			)!;
-			PermissionOption options =
-				new()
-				{
-					Default = _configuration
-						.GetValue("UNLOGGED_PERMISSIONS", "")!
-						.Split(',')
-						.Where(x => x.Length > 0)
-						.ToArray(),
-					NewUser = _configuration
-						.GetValue("DEFAULT_PERMISSIONS", "overall.read,overall.play")!
-						.Split(','),
-					RequireVerification = _configuration.GetValue(
-						"REQUIRE_ACCOUNT_VERIFICATION",
-						true
-					),
-					PublicUrl =
-						_configuration.GetValue<string?>("PUBLIC_URL") ?? "http://localhost:8901",
-					ApiKeys = _configuration.GetValue("KYOO_APIKEYS", string.Empty)!.Split(','),
-					OIDC = _configuration
-						.AsEnumerable()
-						.Where((pair) => pair.Key.StartsWith("OIDC_"))
-						.Aggregate(
-							new Dictionary<string, OidcProvider>(),
-							(acc, val) =>
+	/// <inheritdoc />
+	public void Configure(IServiceCollection services)
+	{
+		string secret = _configuration.GetValue(
+			"AUTHENTICATION_SECRET",
+			AuthenticationOption.DefaultSecret
+		)!;
+		PermissionOption options =
+			new()
+			{
+				Default = _configuration
+					.GetValue("UNLOGGED_PERMISSIONS", "")!
+					.Split(',')
+					.Where(x => x.Length > 0)
+					.ToArray(),
+				NewUser = _configuration
+					.GetValue("DEFAULT_PERMISSIONS", "overall.read,overall.play")!
+					.Split(','),
+				RequireVerification = _configuration.GetValue("REQUIRE_ACCOUNT_VERIFICATION", true),
+				PublicUrl =
+					_configuration.GetValue<string?>("PUBLIC_URL") ?? "http://localhost:8901",
+				ApiKeys = _configuration.GetValue("KYOO_APIKEYS", string.Empty)!.Split(','),
+				OIDC = _configuration
+					.AsEnumerable()
+					.Where((pair) => pair.Key.StartsWith("OIDC_"))
+					.Aggregate(
+						new Dictionary<string, OidcProvider>(),
+						(acc, val) =>
+						{
+							if (val.Value is null)
+								return acc;
+							if (val.Key.Split("_") is not ["OIDC", string provider, string key])
 							{
-								if (val.Value is null)
-									return acc;
-								if (val.Key.Split("_") is not ["OIDC", string provider, string key])
-								{
-									logger.LogError("Invalid oidc config value: {Key}", val.Key);
-									return acc;
-								}
-								provider = provider.ToLowerInvariant();
-								key = key.ToLowerInvariant();
-
-								if (!acc.ContainsKey(provider))
-									acc.Add(provider, new(provider));
-								switch (key)
-								{
-									case "clientid":
-										acc[provider].ClientId = val.Value;
-										break;
-									case "secret":
-										acc[provider].Secret = val.Value;
-										break;
-									case "scope":
-										acc[provider].Scope = val.Value;
-										break;
-									case "authorization":
-										acc[provider].AuthorizationUrl = val.Value;
-										break;
-									case "token":
-										acc[provider].TokenUrl = val.Value;
-										break;
-									case "userinfo":
-									case "profile":
-										acc[provider].ProfileUrl = val.Value;
-										break;
-									case "name":
-										acc[provider].DisplayName = val.Value;
-										break;
-									case "logo":
-										acc[provider].LogoUrl = val.Value;
-										break;
-									default:
-										logger.LogError("Invalid oidc config value: {Key}", key);
-										return acc;
-								}
+								logger.LogError("Invalid oidc config value: {Key}", val.Key);
 								return acc;
 							}
-						),
-				};
-			services.AddSingleton(options);
-			services.AddSingleton(
-				new AuthenticationOption() { Secret = secret, Permissions = options, }
-			);
+							provider = provider.ToLowerInvariant();
+							key = key.ToLowerInvariant();
 
-			services
-				.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-				.AddJwtBearer(options =>
-				{
-					options.Events = new()
-					{
-						OnMessageReceived = (ctx) =>
-						{
-							string prefix = "Bearer ";
-							if (
-								ctx.Request.Headers.TryGetValue(
-									"Authorization",
-									out StringValues val
-								)
-								&& val.ToString() is string auth
-								&& auth.StartsWith(prefix)
-							)
+							if (!acc.ContainsKey(provider))
+								acc.Add(provider, new(provider));
+							switch (key)
 							{
-								ctx.Token ??= auth[prefix.Length..];
+								case "clientid":
+									acc[provider].ClientId = val.Value;
+									break;
+								case "secret":
+									acc[provider].Secret = val.Value;
+									break;
+								case "scope":
+									acc[provider].Scope = val.Value;
+									break;
+								case "authorization":
+									acc[provider].AuthorizationUrl = val.Value;
+									break;
+								case "token":
+									acc[provider].TokenUrl = val.Value;
+									break;
+								case "userinfo":
+								case "profile":
+									acc[provider].ProfileUrl = val.Value;
+									break;
+								case "name":
+									acc[provider].DisplayName = val.Value;
+									break;
+								case "logo":
+									acc[provider].LogoUrl = val.Value;
+									break;
+								default:
+									logger.LogError("Invalid oidc config value: {Key}", key);
+									return acc;
 							}
-							ctx.Token ??= ctx.Request.Cookies["X-Bearer"];
-							return Task.CompletedTask;
+							return acc;
 						}
-					};
-					options.TokenValidationParameters = new TokenValidationParameters
-					{
-						ValidateIssuer = false,
-						ValidateAudience = false,
-						ValidateLifetime = true,
-						ValidateIssuerSigningKey = true,
-						IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret))
-					};
-				});
-		}
-
-		/// <inheritdoc />
-		public IEnumerable<IStartupAction> ConfigureSteps =>
-			new IStartupAction[]
-			{
-				SA.New<IApplicationBuilder>(app => app.UseAuthentication(), SA.Authentication),
+					),
 			};
+		services.AddSingleton(options);
+		services.AddSingleton(
+			new AuthenticationOption() { Secret = secret, Permissions = options, }
+		);
+
+		services
+			.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+			.AddJwtBearer(options =>
+			{
+				options.Events = new()
+				{
+					OnMessageReceived = (ctx) =>
+					{
+						string prefix = "Bearer ";
+						if (
+							ctx.Request.Headers.TryGetValue("Authorization", out StringValues val)
+							&& val.ToString() is string auth
+							&& auth.StartsWith(prefix)
+						)
+						{
+							ctx.Token ??= auth[prefix.Length..];
+						}
+						ctx.Token ??= ctx.Request.Cookies["X-Bearer"];
+						return Task.CompletedTask;
+					}
+				};
+				options.TokenValidationParameters = new TokenValidationParameters
+				{
+					ValidateIssuer = false,
+					ValidateAudience = false,
+					ValidateLifetime = true,
+					ValidateIssuerSigningKey = true,
+					IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret))
+				};
+			});
 	}
+
+	/// <inheritdoc />
+	public IEnumerable<IStartupAction> ConfigureSteps =>
+		new IStartupAction[]
+		{
+			SA.New<IApplicationBuilder>(app => app.UseAuthentication(), SA.Authentication),
+		};
 }

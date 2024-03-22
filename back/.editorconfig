@@ -16,6 +16,8 @@ dotnet_diagnostic.IDE0055.severity = none
 dotnet_diagnostic.IDE0058.severity = none
 dotnet_diagnostic.IDE0130.severity = none
 
+# Convert to file-scoped namespace
+csharp_style_namespace_declarations = file_scoped:warning
 # Sort using and Import directives with System.* appearing first
 dotnet_sort_system_directives_first = true
 csharp_using_directive_placement = outside_namespace:warning
