@@ -18,10 +18,8 @@
 
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using Kyoo.Abstractions.Models;
 using static System.Text.Json.JsonNamingPolicy;
@@ -30,13 +28,6 @@ namespace Kyoo.Core.Api;
 
 public class PolymorphicTypeResolver : DefaultJsonTypeInfoResolver
 {
-	private static readonly IList<JsonDerivedType> _types = AppDomain
-		.CurrentDomain.GetAssemblies()
-		.SelectMany(s => s.GetTypes())
-		.Where(p => p.IsAssignableTo(typeof(IResource)) && p.IsClass)
-		.Select(x => new JsonDerivedType(x, CamelCase.ConvertName(x.Name)))
-		.ToList();
-
 	public override JsonTypeInfo GetTypeInfo(Type type, JsonSerializerOptions options)
 	{
 		JsonTypeInfo jsonTypeInfo = base.GetTypeInfo(type, options);
@@ -50,13 +41,14 @@ public class PolymorphicTypeResolver : DefaultJsonTypeInfoResolver
 			{
 				TypeDiscriminatorPropertyName = "kind",
 				IgnoreUnrecognizedTypeDiscriminators = true,
-				UnknownDerivedTypeHandling =
-					JsonUnknownDerivedTypeHandling.FallBackToNearestAncestor,
-				DerivedTypes = { },
+				DerivedTypes =
+				{
+					new JsonDerivedType(
+						jsonTypeInfo.Type,
+						CamelCase.ConvertName(jsonTypeInfo.Type.Name)
+					),
+				},
 			};
-			Console.WriteLine(string.Join(",", _types.Select(x => x.DerivedType.Name)));
-			foreach (JsonDerivedType derived in _types)
-				jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(derived);
 		}
 
 		return jsonTypeInfo;
