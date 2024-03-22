@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using JetBrains.Annotations;
 using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Utils
@@ -44,7 +43,6 @@ namespace Kyoo.Utils
 		/// A dictionary with the missing elements of <paramref name="second"/>
 		/// set to those of <paramref name="first"/>.
 		/// </returns>
-		[ContractAnnotation("first:notnull => notnull; second:notnull => notnull", true)]
 		public static IDictionary<T, T2>? CompleteDictionaries<T, T2>(
 			IDictionary<T, T2>? first,
 			IDictionary<T, T2>? second,
@@ -87,11 +85,7 @@ namespace Kyoo.Utils
 		/// </param>
 		/// <typeparam name="T">Fields of T will be completed</typeparam>
 		/// <returns><paramref name="first"/></returns>
-		public static T Complete<T>(
-			T first,
-			T? second,
-			[InstantHandle] Func<PropertyInfo, bool>? where = null
-		)
+		public static T Complete<T>(T first, T? second, Func<PropertyInfo, bool>? where = null)
 		{
 			if (second == null)
 				return first;

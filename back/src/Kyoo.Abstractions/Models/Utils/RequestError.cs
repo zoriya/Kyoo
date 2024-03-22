@@ -18,7 +18,6 @@
 
 using System;
 using System.Linq;
-using JetBrains.Annotations;
 
 namespace Kyoo.Abstractions.Models.Utils
 {

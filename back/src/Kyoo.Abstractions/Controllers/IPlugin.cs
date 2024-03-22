@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using Autofac;
-using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Abstractions.Controllers
@@ -31,7 +30,6 @@ namespace Kyoo.Abstractions.Controllers
 	/// You can inject services in the IPlugin constructor.
 	/// You should only inject well known services like an ILogger, IConfiguration or IWebHostEnvironment.
 	/// </remarks>
-	[UsedImplicitly(ImplicitUseTargetFlags.WithInheritors)]
 	public interface IPlugin
 	{
 		/// <summary>

@@ -22,10 +22,8 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using JetBrains.Annotations;
 
 namespace Kyoo.Utils
 {
@@ -232,7 +230,6 @@ namespace Kyoo.Utils
 		/// </param>
 		/// <exception cref="ArgumentException">No method match the given constraints.</exception>
 		/// <returns>The method handle of the matching method.</returns>
-		[PublicAPI]
 		public static MethodInfo GetMethod(
 			Type type,
 			BindingFlags flag,
