@@ -12,7 +12,6 @@ COPY src/Kyoo.Host/Kyoo.Host.csproj src/Kyoo.Host/Kyoo.Host.csproj
 COPY src/Kyoo.Postgresql/Kyoo.Postgresql.csproj src/Kyoo.Postgresql/Kyoo.Postgresql.csproj
 COPY src/Kyoo.Meilisearch/Kyoo.Meilisearch.csproj src/Kyoo.Meilisearch/Kyoo.Meilisearch.csproj
 COPY src/Kyoo.Swagger/Kyoo.Swagger.csproj src/Kyoo.Swagger/Kyoo.Swagger.csproj
-COPY tests/Kyoo.Tests/Kyoo.Tests.csproj tests/Kyoo.Tests/Kyoo.Tests.csproj
 RUN dotnet restore
 
 WORKDIR /kyoo

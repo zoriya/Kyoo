@@ -17,7 +17,6 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Threading.Tasks;
-using Kyoo.Host;
 using Microsoft.AspNetCore.Hosting;
 
 namespace Kyoo.Host
