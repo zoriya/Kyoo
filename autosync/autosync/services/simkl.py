@@ -47,6 +47,10 @@ class Simkl(Service):
 									"number": resource.season_number,
 									"episodes": [{"number": resource.episode_number}],
 								},
+								{
+									"number": 1,
+									"episodes": [{"number": resource.absolute_number}],
+								},
 							],
 						}
 					]
@@ -104,13 +108,8 @@ class Simkl(Service):
 				return None
 
 	def _map_external_ids(self, ids: dict[str, MetadataID]):
-		return {
-			# "simkl": int(ids["simkl"].data_id) if "simkl" in ids else None,
-			# "mal": int(ids["mal"].data_id) if "mal" in ids else None,
-			# "tvdb": int(ids["tvdb"].data_id) if "tvdb" in ids else None,
-			"imdb": ids["imdb"].data_id if "imdb" in ids else None,
-			# "anidb": int(ids["anidb"].data_id) if "anidb" in ids else None,
+		return {service: id.data_id for service, id in ids.items()} | {
 			"tmdb": int(ids["themoviedatabase"].data_id)
 			if "themoviedatabase" in ids
-			else None,
+			else None
 		}
