@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using Kyoo.Abstractions.Models;
@@ -35,7 +36,26 @@ public class WithKindResolver : DefaultJsonTypeInfoResolver
 	{
 		JsonTypeInfo jsonTypeInfo = base.GetTypeInfo(type, options);
 
-		if (
+		if (jsonTypeInfo.Type.GetCustomAttribute<OneOfAttribute>() != null)
+		{
+			jsonTypeInfo.PolymorphismOptions = new()
+			{
+				TypeDiscriminatorPropertyName = "kind",
+				IgnoreUnrecognizedTypeDiscriminators = true,
+				DerivedTypes = { },
+			};
+			IEnumerable<Type> derived = AppDomain
+				.CurrentDomain.GetAssemblies()
+				.SelectMany(s => s.GetTypes())
+				.Where(p => type.IsAssignableFrom(p) && p.IsClass);
+			foreach (Type der in derived)
+			{
+				jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(
+					new JsonDerivedType(der, CamelCase.ConvertName(der.Name))
+				);
+			}
+		}
+		else if (
 			jsonTypeInfo.Type.IsAssignableTo(typeof(IResource))
 			&& jsonTypeInfo.Properties.All(x => x.Name != "kind")
 		)
