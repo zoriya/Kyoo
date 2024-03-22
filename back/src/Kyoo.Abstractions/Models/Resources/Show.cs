@@ -129,7 +129,6 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the Studio that made this show.
 		/// </summary>
-		[JsonIgnore]
 		public Guid? StudioId { get; set; }
 
 		/// <summary>

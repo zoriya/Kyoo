@@ -57,7 +57,6 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the user that started watching this episode.
 		/// </summary>
-		[SerializeIgnore]
 		public Guid UserId { get; set; }
 
 		/// <summary>
@@ -69,7 +68,6 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the movie started.
 		/// </summary>
-		[SerializeIgnore]
 		public Guid MovieId { get; set; }
 
 		/// <summary>
@@ -114,7 +112,6 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the user that started watching this episode.
 		/// </summary>
-		[SerializeIgnore]
 		public Guid UserId { get; set; }
 
 		/// <summary>
@@ -126,7 +123,6 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the episode started.
 		/// </summary>
-		[SerializeIgnore]
 		public Guid? EpisodeId { get; set; }
 
 		/// <summary>
@@ -171,7 +167,6 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the user that started watching this episode.
 		/// </summary>
-		[SerializeIgnore]
 		public Guid UserId { get; set; }
 
 		/// <summary>
@@ -183,7 +178,6 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the show started.
 		/// </summary>
-		[SerializeIgnore]
 		public Guid ShowId { get; set; }
 
 		/// <summary>
@@ -213,7 +207,6 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the episode started.
 		/// </summary>
-		[SerializeIgnore]
 		public Guid? NextEpisodeId { get; set; }
 
 		/// <summary>

@@ -26,7 +26,7 @@ using static System.Text.Json.JsonNamingPolicy;
 
 namespace Kyoo.Core.Api;
 
-public class PolymorphicTypeResolver : DefaultJsonTypeInfoResolver
+public class WithKindResolver : DefaultJsonTypeInfoResolver
 {
 	public override JsonTypeInfo GetTypeInfo(Type type, JsonSerializerOptions options)
 	{
