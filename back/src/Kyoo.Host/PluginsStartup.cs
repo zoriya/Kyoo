@@ -136,42 +136,12 @@ public class PluginsStartup
 	/// A simple host service provider used to activate plugins instance.
 	/// The same services as a generic host are available and an <see cref="ILoggerFactory"/> has been added.
 	/// </summary>
-	private class HostServiceProvider : IServiceProvider
+	private class HostServiceProvider(
+		IWebHostEnvironment hostEnvironment,
+		IConfiguration configuration,
+		ILoggerFactory loggerFactory
+	) : IServiceProvider
 	{
-		/// <summary>
-		/// The host environment that could be used by plugins to configure themself.
-		/// </summary>
-		private readonly IWebHostEnvironment _hostEnvironment;
-
-		/// <summary>
-		/// The configuration context.
-		/// </summary>
-		private readonly IConfiguration _configuration;
-
-		/// <summary>
-		/// A logger factory used to create a logger for the plugin manager.
-		/// </summary>
-		private readonly ILoggerFactory _loggerFactory;
-
-		/// <summary>
-		/// Create a new <see cref="HostServiceProvider"/> that will return given services when asked.
-		/// </summary>
-		/// <param name="hostEnvironment">
-		/// The host environment that could be used by plugins to configure themself.
-		/// </param>
-		/// <param name="configuration">The configuration context</param>
-		/// <param name="loggerFactory">A logger factory used to create a logger for the plugin manager.</param>
-		public HostServiceProvider(
-			IWebHostEnvironment hostEnvironment,
-			IConfiguration configuration,
-			ILoggerFactory loggerFactory
-		)
-		{
-			_hostEnvironment = hostEnvironment;
-			_configuration = configuration;
-			_loggerFactory = loggerFactory;
-		}
-
 		/// <inheritdoc />
 		public object GetService(Type serviceType)
 		{
@@ -179,20 +149,45 @@ public class PluginsStartup
 				serviceType == typeof(IWebHostEnvironment)
 				|| serviceType == typeof(IHostEnvironment)
 			)
-				return _hostEnvironment;
+				return hostEnvironment;
 			if (serviceType == typeof(IConfiguration))
-				return _configuration;
-			if (serviceType.GetGenericTypeDefinition() == typeof(ILogger<>))
+				return configuration;
+			if (serviceType == typeof(IServiceProviderIsService))
+				return new ProviderIsService();
+			if (
+				serviceType.IsGenericType
+				&& serviceType.GetGenericTypeDefinition() == typeof(ILogger<>)
+			)
 			{
 				return Utility.RunGenericMethod<object>(
 					typeof(LoggerFactoryExtensions),
 					nameof(LoggerFactoryExtensions.CreateLogger),
 					serviceType.GetGenericArguments().First(),
-					_loggerFactory
+					loggerFactory
 				);
 			}
 
-			return null;
+			throw new ArgumentException(
+				$"{serviceType.Name} is not available in configuration stpe"
+			);
+		}
+
+		public class ProviderIsService : IServiceProviderIsService
+		{
+			public bool IsService(Type serviceType)
+			{
+				Type[] supported =
+				[
+					typeof(IWebHostEnvironment),
+					typeof(IHostEnvironment),
+					typeof(IConfiguration),
+					typeof(IServiceProviderIsService),
+				];
+				if (supported.Contains(serviceType))
+					return true;
+				return serviceType.IsGenericType
+					&& serviceType.GetGenericTypeDefinition() == typeof(ILogger<>);
+			}
 		}
 	}
 }
