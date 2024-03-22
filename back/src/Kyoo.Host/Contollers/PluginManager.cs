@@ -23,73 +23,70 @@ using Kyoo.Abstractions.Controllers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Kyoo.Host.Controllers
+namespace Kyoo.Host.Controllers;
+
+/// <summary>
+/// An implementation of <see cref="IPluginManager"/>.
+/// This is used to load plugins and retrieve information from them.
+/// </summary>
+public class PluginManager : IPluginManager
 {
 	/// <summary>
-	/// An implementation of <see cref="IPluginManager"/>.
-	/// This is used to load plugins and retrieve information from them.
+	/// The service provider. It allow plugin's activation.
 	/// </summary>
-	public class PluginManager : IPluginManager
+	private readonly IServiceProvider _provider;
+
+	/// <summary>
+	/// The logger used by this class.
+	/// </summary>
+	private readonly ILogger<PluginManager> _logger;
+
+	/// <summary>
+	/// The list of plugins that are currently loaded.
+	/// </summary>
+	private readonly List<IPlugin> _plugins = new();
+
+	/// <summary>
+	/// Create a new <see cref="PluginManager"/> instance.
+	/// </summary>
+	/// <param name="provider">A service container to allow initialization of plugins</param>
+	/// <param name="logger">The logger used by this class.</param>
+	public PluginManager(IServiceProvider provider, ILogger<PluginManager> logger)
 	{
-		/// <summary>
-		/// The service provider. It allow plugin's activation.
-		/// </summary>
-		private readonly IServiceProvider _provider;
+		_provider = provider;
+		_logger = logger;
+	}
 
-		/// <summary>
-		/// The logger used by this class.
-		/// </summary>
-		private readonly ILogger<PluginManager> _logger;
+	/// <inheritdoc />
+	public T GetPlugin<T>(string name)
+	{
+		return (T)_plugins?.FirstOrDefault(x => x.Name == name && x is T);
+	}
 
-		/// <summary>
-		/// The list of plugins that are currently loaded.
-		/// </summary>
-		private readonly List<IPlugin> _plugins = new();
+	/// <inheritdoc />
+	public ICollection<T> GetPlugins<T>()
+	{
+		return _plugins?.OfType<T>().ToArray();
+	}
 
-		/// <summary>
-		/// Create a new <see cref="PluginManager"/> instance.
-		/// </summary>
-		/// <param name="provider">A service container to allow initialization of plugins</param>
-		/// <param name="logger">The logger used by this class.</param>
-		public PluginManager(IServiceProvider provider, ILogger<PluginManager> logger)
-		{
-			_provider = provider;
-			_logger = logger;
-		}
+	/// <inheritdoc />
+	public ICollection<IPlugin> GetAllPlugins()
+	{
+		return _plugins;
+	}
 
-		/// <inheritdoc />
-		public T GetPlugin<T>(string name)
-		{
-			return (T)_plugins?.FirstOrDefault(x => x.Name == name && x is T);
-		}
+	/// <inheritdoc />
+	public void LoadPlugins(ICollection<IPlugin> plugins)
+	{
+		_plugins.AddRange(plugins);
+		_logger.LogInformation("Modules enabled: {Plugins}", _plugins.Select(x => x.Name));
+	}
 
-		/// <inheritdoc />
-		public ICollection<T> GetPlugins<T>()
-		{
-			return _plugins?.OfType<T>().ToArray();
-		}
-
-		/// <inheritdoc />
-		public ICollection<IPlugin> GetAllPlugins()
-		{
-			return _plugins;
-		}
-
-		/// <inheritdoc />
-		public void LoadPlugins(ICollection<IPlugin> plugins)
-		{
-			_plugins.AddRange(plugins);
-			_logger.LogInformation("Modules enabled: {Plugins}", _plugins.Select(x => x.Name));
-		}
-
-		/// <inheritdoc />
-		public void LoadPlugins(params Type[] plugins)
-		{
-			LoadPlugins(
-				plugins
-					.Select(x => (IPlugin)ActivatorUtilities.CreateInstance(_provider, x))
-					.ToArray()
-			);
-		}
+	/// <inheritdoc />
+	public void LoadPlugins(params Type[] plugins)
+	{
+		LoadPlugins(
+			plugins.Select(x => (IPlugin)ActivatorUtilities.CreateInstance(_provider, x)).ToArray()
+		);
 	}
 }

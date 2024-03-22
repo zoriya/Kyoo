@@ -19,18 +19,17 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Kyoo.Abstractions.Models.Exceptions
+namespace Kyoo.Abstractions.Models.Exceptions;
+
+[Serializable]
+public class UnauthorizedException : Exception
 {
-	[Serializable]
-	public class UnauthorizedException : Exception
-	{
-		public UnauthorizedException()
-			: base("User not authenticated or token invalid.") { }
+	public UnauthorizedException()
+		: base("User not authenticated or token invalid.") { }
 
-		public UnauthorizedException(string message)
-			: base(message) { }
+	public UnauthorizedException(string message)
+		: base(message) { }
 
-		protected UnauthorizedException(SerializationInfo info, StreamingContext context)
-			: base(info, context) { }
-	}
+	protected UnauthorizedException(SerializationInfo info, StreamingContext context)
+		: base(info, context) { }
 }

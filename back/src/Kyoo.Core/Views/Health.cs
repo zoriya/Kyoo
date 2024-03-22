@@ -22,54 +22,53 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace Kyoo.Core.Api
+namespace Kyoo.Core.Api;
+
+/// <summary>
+/// An API endpoint to check the health.
+/// </summary>
+[Route("health")]
+[ApiController]
+[ApiDefinition("Health")]
+public class Health : BaseApi
 {
+	private readonly HealthCheckService _healthCheckService;
+
 	/// <summary>
-	/// An API endpoint to check the health.
+	/// Create a new <see cref="Health"/>.
 	/// </summary>
-	[Route("health")]
-	[ApiController]
-	[ApiDefinition("Health")]
-	public class Health : BaseApi
+	/// <param name="healthCheckService">The service to check health.</param>
+	public Health(HealthCheckService healthCheckService)
 	{
-		private readonly HealthCheckService _healthCheckService;
-
-		/// <summary>
-		/// Create a new <see cref="Health"/>.
-		/// </summary>
-		/// <param name="healthCheckService">The service to check health.</param>
-		public Health(HealthCheckService healthCheckService)
-		{
-			_healthCheckService = healthCheckService;
-		}
-
-		/// <summary>
-		/// Check if the api is ready to accept requests.
-		/// </summary>
-		/// <returns>A status indicating the health of the api.</returns>
-		[HttpGet]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-		public async Task<IActionResult> CheckHealth()
-		{
-			IHeaderDictionary headers = HttpContext.Response.Headers;
-			headers.CacheControl = "no-store, no-cache";
-			headers.Pragma = "no-cache";
-			headers.Expires = "Thu, 01 Jan 1970 00:00:00 GMT";
-
-			HealthReport result = await _healthCheckService.CheckHealthAsync();
-			return result.Status switch
-			{
-				HealthStatus.Healthy => Ok(new HealthResult("Healthy")),
-				HealthStatus.Unhealthy => Ok(new HealthResult("Unstable")),
-				HealthStatus.Degraded => StatusCode(StatusCodes.Status503ServiceUnavailable),
-				_ => StatusCode(StatusCodes.Status500InternalServerError),
-			};
-		}
-
-		/// <summary>
-		/// The result of a health operation.
-		/// </summary>
-		public record HealthResult(string Status);
+		_healthCheckService = healthCheckService;
 	}
+
+	/// <summary>
+	/// Check if the api is ready to accept requests.
+	/// </summary>
+	/// <returns>A status indicating the health of the api.</returns>
+	[HttpGet]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+	public async Task<IActionResult> CheckHealth()
+	{
+		IHeaderDictionary headers = HttpContext.Response.Headers;
+		headers.CacheControl = "no-store, no-cache";
+		headers.Pragma = "no-cache";
+		headers.Expires = "Thu, 01 Jan 1970 00:00:00 GMT";
+
+		HealthReport result = await _healthCheckService.CheckHealthAsync();
+		return result.Status switch
+		{
+			HealthStatus.Healthy => Ok(new HealthResult("Healthy")),
+			HealthStatus.Unhealthy => Ok(new HealthResult("Unstable")),
+			HealthStatus.Degraded => StatusCode(StatusCodes.Status503ServiceUnavailable),
+			_ => StatusCode(StatusCodes.Status500InternalServerError),
+		};
+	}
+
+	/// <summary>
+	/// The result of a health operation.
+	/// </summary>
+	public record HealthResult(string Status);
 }

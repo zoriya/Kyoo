@@ -24,45 +24,44 @@ using Kyoo.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 
-namespace Kyoo.Swagger
+namespace Kyoo.Swagger;
+
+/// <summary>
+/// A filter that change <see cref="ProducesResponseTypeAttribute"/>'s
+/// <see cref="ProducesResponseTypeAttribute.Type"/> that where set to <see cref="ActionResult{T}"/> to the
+/// return type of the method.
+/// </summary>
+/// <remarks>
+/// This is only useful when the return type of the method is a generics type and that can't be specified in the
+/// attribute directly (since attributes don't support generics). This should not be used otherwise.
+/// </remarks>
+public class GenericResponseProvider : IApplicationModelProvider
 {
-	/// <summary>
-	/// A filter that change <see cref="ProducesResponseTypeAttribute"/>'s
-	/// <see cref="ProducesResponseTypeAttribute.Type"/> that where set to <see cref="ActionResult{T}"/> to the
-	/// return type of the method.
-	/// </summary>
-	/// <remarks>
-	/// This is only useful when the return type of the method is a generics type and that can't be specified in the
-	/// attribute directly (since attributes don't support generics). This should not be used otherwise.
-	/// </remarks>
-	public class GenericResponseProvider : IApplicationModelProvider
+	/// <inheritdoc />
+	public int Order => -1;
+
+	/// <inheritdoc />
+	public void OnProvidersExecuted(ApplicationModelProviderContext context) { }
+
+	/// <inheritdoc />
+	public void OnProvidersExecuting(ApplicationModelProviderContext context)
 	{
-		/// <inheritdoc />
-		public int Order => -1;
-
-		/// <inheritdoc />
-		public void OnProvidersExecuted(ApplicationModelProviderContext context) { }
-
-		/// <inheritdoc />
-		public void OnProvidersExecuting(ApplicationModelProviderContext context)
+		foreach (ActionModel action in context.Result.Controllers.SelectMany(x => x.Actions))
 		{
-			foreach (ActionModel action in context.Result.Controllers.SelectMany(x => x.Actions))
+			IEnumerable<ProducesResponseTypeAttribute> responses = action
+				.Filters.OfType<ProducesResponseTypeAttribute>()
+				.Where(x => x.Type == typeof(ActionResult<>));
+			foreach (ProducesResponseTypeAttribute response in responses)
 			{
-				IEnumerable<ProducesResponseTypeAttribute> responses = action
-					.Filters.OfType<ProducesResponseTypeAttribute>()
-					.Where(x => x.Type == typeof(ActionResult<>));
-				foreach (ProducesResponseTypeAttribute response in responses)
-				{
-					Type type = action.ActionMethod.ReturnType;
-					type =
-						Utility.GetGenericDefinition(type, typeof(Task<>))?.GetGenericArguments()[0]
-						?? type;
-					type =
-						Utility
-							.GetGenericDefinition(type, typeof(ActionResult<>))
-							?.GetGenericArguments()[0] ?? type;
-					response.Type = type;
-				}
+				Type type = action.ActionMethod.ReturnType;
+				type =
+					Utility.GetGenericDefinition(type, typeof(Task<>))?.GetGenericArguments()[0]
+					?? type;
+				type =
+					Utility
+						.GetGenericDefinition(type, typeof(ActionResult<>))
+						?.GetGenericArguments()[0] ?? type;
+				response.Type = type;
 			}
 		}
 	}

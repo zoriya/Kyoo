@@ -22,45 +22,44 @@ using Kyoo.Swagger.Models;
 using NSwag;
 using NSwag.Generation.AspNetCore;
 
-namespace Kyoo.Swagger
+namespace Kyoo.Swagger;
+
+/// <summary>
+/// A class to sort apis.
+/// </summary>
+public static class ApiSorter
 {
 	/// <summary>
-	/// A class to sort apis.
+	/// Sort apis by alphabetical orders.
 	/// </summary>
-	public static class ApiSorter
+	/// <param name="options">The swagger settings to update.</param>
+	public static void SortApis(this AspNetCoreOpenApiDocumentGeneratorSettings options)
 	{
-		/// <summary>
-		/// Sort apis by alphabetical orders.
-		/// </summary>
-		/// <param name="options">The swagger settings to update.</param>
-		public static void SortApis(this AspNetCoreOpenApiDocumentGeneratorSettings options)
+		options.PostProcess += postProcess =>
 		{
-			options.PostProcess += postProcess =>
-			{
-				// We can't reorder items by assigning the sorted value to the Paths variable since it has no setter.
-				List<KeyValuePair<string, OpenApiPathItem>> sorted = postProcess
-					.Paths.OrderBy(x => x.Key)
-					.ToList();
-				postProcess.Paths.Clear();
-				foreach ((string key, OpenApiPathItem value) in sorted)
-					postProcess.Paths.Add(key, value);
-			};
+			// We can't reorder items by assigning the sorted value to the Paths variable since it has no setter.
+			List<KeyValuePair<string, OpenApiPathItem>> sorted = postProcess
+				.Paths.OrderBy(x => x.Key)
+				.ToList();
+			postProcess.Paths.Clear();
+			foreach ((string key, OpenApiPathItem value) in sorted)
+				postProcess.Paths.Add(key, value);
+		};
 
-			options.PostProcess += postProcess =>
-			{
-				if (!postProcess.ExtensionData.TryGetValue("x-tagGroups", out object list))
-					return;
-				List<TagGroups> tagGroups = (List<TagGroups>)list;
-				postProcess.ExtensionData["x-tagGroups"] = tagGroups
-					.OrderBy(x => x.Name)
-					.Select(x =>
-					{
-						x.Name = x.Name[(x.Name.IndexOf(':') + 1)..];
-						x.Tags = x.Tags.OrderBy(y => y).ToList();
-						return x;
-					})
-					.ToList();
-			};
-		}
+		options.PostProcess += postProcess =>
+		{
+			if (!postProcess.ExtensionData.TryGetValue("x-tagGroups", out object list))
+				return;
+			List<TagGroups> tagGroups = (List<TagGroups>)list;
+			postProcess.ExtensionData["x-tagGroups"] = tagGroups
+				.OrderBy(x => x.Name)
+				.Select(x =>
+				{
+					x.Name = x.Name[(x.Name.IndexOf(':') + 1)..];
+					x.Tags = x.Tags.OrderBy(y => y).ToList();
+					return x;
+				})
+				.ToList();
+		};
 	}
 }

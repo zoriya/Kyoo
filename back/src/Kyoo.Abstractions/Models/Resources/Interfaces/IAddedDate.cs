@@ -18,16 +18,15 @@
 
 using System;
 
-namespace Kyoo.Abstractions.Models
+namespace Kyoo.Abstractions.Models;
+
+/// <summary>
+/// An interface applied to resources.
+/// </summary>
+public interface IAddedDate
 {
 	/// <summary>
-	/// An interface applied to resources.
+	/// The date at which this resource was added to kyoo.
 	/// </summary>
-	public interface IAddedDate
-	{
-		/// <summary>
-		/// The date at which this resource was added to kyoo.
-		/// </summary>
-		public DateTime AddedDate { get; set; }
-	}
+	public DateTime AddedDate { get; set; }
 }

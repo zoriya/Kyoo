@@ -28,69 +28,68 @@ using Kyoo.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Kyoo.Core.Api
-{
-	/// <summary>
-	/// Proxy to other services
-	/// </summary>
-	[ApiController]
-	[Obsolete("Use /episode/id/master.m3u8 or routes like that")]
-	public class ProxyApi(ILibraryManager library) : Controller
-	{
-		private Task _Proxy(string route, (string path, string route) info)
-		{
-			HttpProxyOptions proxyOptions = HttpProxyOptionsBuilder
-				.Instance.WithBeforeSend(
-					(ctx, req) =>
-					{
-						req.Headers.Add("X-Path", info.path);
-						req.Headers.Add("X-Route", info.route);
-						return Task.CompletedTask;
-					}
-				)
-				.WithHandleFailure(
-					async (context, exception) =>
-					{
-						context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
-						await context.Response.WriteAsJsonAsync(
-							new RequestError("Service unavailable")
-						);
-					}
-				)
-				.Build();
-			return this.HttpProxyAsync($"http://transcoder:7666/{route}", proxyOptions);
-		}
+namespace Kyoo.Core.Api;
 
-		/// <summary>
-		/// Transcoder proxy
-		/// </summary>
-		/// <remarks>
-		/// Simply proxy requests to the transcoder
-		/// </remarks>
-		/// <param name="rest">The path of the transcoder.</param>
-		/// <returns>The return value of the transcoder.</returns>
-		[Route("video/{type}/{id:id}/{**rest}")]
-		[Permission("video", Kind.Read)]
-		[Obsolete("Use /episode/id/master.m3u8 or routes like that")]
-		public async Task Proxy(
-			string type,
-			Identifier id,
-			string rest,
-			[FromQuery] Dictionary<string, string> query
-		)
-		{
-			string path = await (
-				type is "movie" or "movies"
-					? id.Match(
-						async id => (await library.Movies.Get(id)).Path,
-						async slug => (await library.Movies.Get(slug)).Path
-					)
-					: id.Match(
-						async id => (await library.Episodes.Get(id)).Path,
-						async slug => (await library.Episodes.Get(slug)).Path
-					)
-			);
-			await _Proxy(rest + query.ToQueryString(), (path, $"{type}/{id}"));
-		}
+/// <summary>
+/// Proxy to other services
+/// </summary>
+[ApiController]
+[Obsolete("Use /episode/id/master.m3u8 or routes like that")]
+public class ProxyApi(ILibraryManager library) : Controller
+{
+	private Task _Proxy(string route, (string path, string route) info)
+	{
+		HttpProxyOptions proxyOptions = HttpProxyOptionsBuilder
+			.Instance.WithBeforeSend(
+				(ctx, req) =>
+				{
+					req.Headers.Add("X-Path", info.path);
+					req.Headers.Add("X-Route", info.route);
+					return Task.CompletedTask;
+				}
+			)
+			.WithHandleFailure(
+				async (context, exception) =>
+				{
+					context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+					await context.Response.WriteAsJsonAsync(
+						new RequestError("Service unavailable")
+					);
+				}
+			)
+			.Build();
+		return this.HttpProxyAsync($"http://transcoder:7666/{route}", proxyOptions);
+	}
+
+	/// <summary>
+	/// Transcoder proxy
+	/// </summary>
+	/// <remarks>
+	/// Simply proxy requests to the transcoder
+	/// </remarks>
+	/// <param name="rest">The path of the transcoder.</param>
+	/// <returns>The return value of the transcoder.</returns>
+	[Route("video/{type}/{id:id}/{**rest}")]
+	[Permission("video", Kind.Read)]
+	[Obsolete("Use /episode/id/master.m3u8 or routes like that")]
+	public async Task Proxy(
+		string type,
+		Identifier id,
+		string rest,
+		[FromQuery] Dictionary<string, string> query
+	)
+	{
+		string path = await (
+			type is "movie" or "movies"
+				? id.Match(
+					async id => (await library.Movies.Get(id)).Path,
+					async slug => (await library.Movies.Get(slug)).Path
+				)
+				: id.Match(
+					async id => (await library.Episodes.Get(id)).Path,
+					async slug => (await library.Episodes.Get(slug)).Path
+				)
+		);
+		await _Proxy(rest + query.ToQueryString(), (path, $"{type}/{id}"));
 	}
 }

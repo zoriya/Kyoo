@@ -18,14 +18,13 @@
 
 using System;
 
-namespace Kyoo.Abstractions.Models.Permissions
+namespace Kyoo.Abstractions.Models.Permissions;
+
+/// <summary>
+/// The annotated route can only be accessed by a logged in user.
+/// </summary>
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
+public class UserOnlyAttribute : Attribute
 {
-	/// <summary>
-	/// The annotated route can only be accessed by a logged in user.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
-	public class UserOnlyAttribute : Attribute
-	{
-		// TODO: Implement a Filter Attribute to make this work. For now, this attribute is only useful as documentation.
-	}
+	// TODO: Implement a Filter Attribute to make this work. For now, this attribute is only useful as documentation.
 }

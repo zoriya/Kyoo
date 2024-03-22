@@ -20,23 +20,22 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using NSwag;
 
-namespace Kyoo.Swagger.Models
+namespace Kyoo.Swagger.Models;
+
+/// <summary>
+/// A class representing a group of tags in the <see cref="OpenApiDocument"/>
+/// </summary>
+public class TagGroups
 {
 	/// <summary>
-	/// A class representing a group of tags in the <see cref="OpenApiDocument"/>
+	/// The name of the tag group.
 	/// </summary>
-	public class TagGroups
-	{
-		/// <summary>
-		/// The name of the tag group.
-		/// </summary>
-		[JsonProperty(PropertyName = "name")]
-		public string Name { get; set; }
+	[JsonProperty(PropertyName = "name")]
+	public string Name { get; set; }
 
-		/// <summary>
-		/// The list of tags in this group.
-		/// </summary>
-		[JsonProperty(PropertyName = "tags")]
-		public List<string> Tags { get; set; }
-	}
+	/// <summary>
+	/// The list of tags in this group.
+	/// </summary>
+	[JsonProperty(PropertyName = "tags")]
+	public List<string> Tags { get; set; }
 }

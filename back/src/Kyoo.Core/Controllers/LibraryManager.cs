@@ -20,87 +20,86 @@ using System.Linq;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 
-namespace Kyoo.Core.Controllers
+namespace Kyoo.Core.Controllers;
+
+/// <summary>
+/// An class to interact with the database. Every repository is mapped through here.
+/// </summary>
+public class LibraryManager : ILibraryManager
 {
-	/// <summary>
-	/// An class to interact with the database. Every repository is mapped through here.
-	/// </summary>
-	public class LibraryManager : ILibraryManager
+	private readonly IBaseRepository[] _repositories;
+
+	public LibraryManager(
+		IRepository<ILibraryItem> libraryItemRepository,
+		IRepository<INews> newsRepository,
+		IWatchStatusRepository watchStatusRepository,
+		IRepository<Collection> collectionRepository,
+		IRepository<Movie> movieRepository,
+		IRepository<Show> showRepository,
+		IRepository<Season> seasonRepository,
+		IRepository<Episode> episodeRepository,
+		IRepository<Studio> studioRepository,
+		IRepository<User> userRepository
+	)
 	{
-		private readonly IBaseRepository[] _repositories;
+		LibraryItems = libraryItemRepository;
+		News = newsRepository;
+		WatchStatus = watchStatusRepository;
+		Collections = collectionRepository;
+		Movies = movieRepository;
+		Shows = showRepository;
+		Seasons = seasonRepository;
+		Episodes = episodeRepository;
+		Studios = studioRepository;
+		Users = userRepository;
 
-		public LibraryManager(
-			IRepository<ILibraryItem> libraryItemRepository,
-			IRepository<INews> newsRepository,
-			IWatchStatusRepository watchStatusRepository,
-			IRepository<Collection> collectionRepository,
-			IRepository<Movie> movieRepository,
-			IRepository<Show> showRepository,
-			IRepository<Season> seasonRepository,
-			IRepository<Episode> episodeRepository,
-			IRepository<Studio> studioRepository,
-			IRepository<User> userRepository
-		)
+		_repositories = new IBaseRepository[]
 		{
-			LibraryItems = libraryItemRepository;
-			News = newsRepository;
-			WatchStatus = watchStatusRepository;
-			Collections = collectionRepository;
-			Movies = movieRepository;
-			Shows = showRepository;
-			Seasons = seasonRepository;
-			Episodes = episodeRepository;
-			Studios = studioRepository;
-			Users = userRepository;
+			LibraryItems,
+			News,
+			Collections,
+			Movies,
+			Shows,
+			Seasons,
+			Episodes,
+			Studios,
+			Users
+		};
+	}
 
-			_repositories = new IBaseRepository[]
-			{
-				LibraryItems,
-				News,
-				Collections,
-				Movies,
-				Shows,
-				Seasons,
-				Episodes,
-				Studios,
-				Users
-			};
-		}
+	/// <inheritdoc />
+	public IRepository<ILibraryItem> LibraryItems { get; }
 
-		/// <inheritdoc />
-		public IRepository<ILibraryItem> LibraryItems { get; }
+	/// <inheritdoc />
+	public IRepository<INews> News { get; }
 
-		/// <inheritdoc />
-		public IRepository<INews> News { get; }
+	/// <inheritdoc />
+	public IWatchStatusRepository WatchStatus { get; }
 
-		/// <inheritdoc />
-		public IWatchStatusRepository WatchStatus { get; }
+	/// <inheritdoc />
+	public IRepository<Collection> Collections { get; }
 
-		/// <inheritdoc />
-		public IRepository<Collection> Collections { get; }
+	/// <inheritdoc />
+	public IRepository<Movie> Movies { get; }
 
-		/// <inheritdoc />
-		public IRepository<Movie> Movies { get; }
+	/// <inheritdoc />
+	public IRepository<Show> Shows { get; }
 
-		/// <inheritdoc />
-		public IRepository<Show> Shows { get; }
+	/// <inheritdoc />
+	public IRepository<Season> Seasons { get; }
 
-		/// <inheritdoc />
-		public IRepository<Season> Seasons { get; }
+	/// <inheritdoc />
+	public IRepository<Episode> Episodes { get; }
 
-		/// <inheritdoc />
-		public IRepository<Episode> Episodes { get; }
+	/// <inheritdoc />
+	public IRepository<Studio> Studios { get; }
 
-		/// <inheritdoc />
-		public IRepository<Studio> Studios { get; }
+	/// <inheritdoc />
+	public IRepository<User> Users { get; }
 
-		/// <inheritdoc />
-		public IRepository<User> Users { get; }
-
-		public IRepository<T> Repository<T>()
-			where T : IResource, IQuery
-		{
-			return (IRepository<T>)_repositories.First(x => x.RepositoryType == typeof(T));
-		}
+	public IRepository<T> Repository<T>()
+		where T : IResource, IQuery
+	{
+		return (IRepository<T>)_repositories.First(x => x.RepositoryType == typeof(T));
 	}
 }

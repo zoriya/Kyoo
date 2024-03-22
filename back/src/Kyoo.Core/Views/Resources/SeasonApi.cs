@@ -28,108 +28,104 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 
-namespace Kyoo.Core.Api
+namespace Kyoo.Core.Api;
+
+/// <summary>
+/// Information about one or multiple <see cref="Season"/>.
+/// </summary>
+[Route("seasons")]
+[Route("season", Order = AlternativeRoute)]
+[ApiController]
+[PartialPermission(nameof(Season))]
+[ApiDefinition("Seasons", Group = ResourcesGroup)]
+public class SeasonApi : CrudThumbsApi<Season>
 {
 	/// <summary>
-	/// Information about one or multiple <see cref="Season"/>.
+	/// The library manager used to modify or retrieve information in the data store.
 	/// </summary>
-	[Route("seasons")]
-	[Route("season", Order = AlternativeRoute)]
-	[ApiController]
-	[PartialPermission(nameof(Season))]
-	[ApiDefinition("Seasons", Group = ResourcesGroup)]
-	public class SeasonApi : CrudThumbsApi<Season>
+	private readonly ILibraryManager _libraryManager;
+
+	/// <summary>
+	/// Create a new <see cref="SeasonApi"/>.
+	/// </summary>
+	/// <param name="libraryManager">
+	/// The library manager used to modify or retrieve information in the data store.
+	/// </param>
+	/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
+	public SeasonApi(ILibraryManager libraryManager, IThumbnailsManager thumbs)
+		: base(libraryManager.Seasons, thumbs)
 	{
-		/// <summary>
-		/// The library manager used to modify or retrieve information in the data store.
-		/// </summary>
-		private readonly ILibraryManager _libraryManager;
+		_libraryManager = libraryManager;
+	}
 
-		/// <summary>
-		/// Create a new <see cref="SeasonApi"/>.
-		/// </summary>
-		/// <param name="libraryManager">
-		/// The library manager used to modify or retrieve information in the data store.
-		/// </param>
-		/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
-		public SeasonApi(ILibraryManager libraryManager, IThumbnailsManager thumbs)
-			: base(libraryManager.Seasons, thumbs)
-		{
-			_libraryManager = libraryManager;
-		}
+	/// <summary>
+	/// Get episodes in the season
+	/// </summary>
+	/// <remarks>
+	/// List the episodes that are part of the specified season.
+	/// </remarks>
+	/// <param name="identifier">The ID or slug of the <see cref="Season"/>.</param>
+	/// <param name="sortBy">A key to sort episodes by.</param>
+	/// <param name="filter">An optional list of filters.</param>
+	/// <param name="pagination">The number of episodes to return.</param>
+	/// <param name="fields">The aditional fields to include in the result.</param>
+	/// <returns>A page of episodes.</returns>
+	/// <response code="400">The filters or the sort parameters are invalid.</response>
+	/// <response code="404">No season with the given ID or slug could be found.</response>
+	[HttpGet("{identifier:id}/episodes")]
+	[HttpGet("{identifier:id}/episode", Order = AlternativeRoute)]
+	[PartialPermission(Kind.Read)]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	public async Task<ActionResult<Page<Episode>>> GetEpisode(
+		Identifier identifier,
+		[FromQuery] Sort<Episode> sortBy,
+		[FromQuery] Filter<Episode>? filter,
+		[FromQuery] Pagination pagination,
+		[FromQuery] Include<Episode> fields
+	)
+	{
+		ICollection<Episode> resources = await _libraryManager.Episodes.GetAll(
+			Filter.And(filter, identifier.Matcher<Episode>(x => x.SeasonId, x => x.Season!.Slug)),
+			sortBy,
+			fields,
+			pagination
+		);
 
-		/// <summary>
-		/// Get episodes in the season
-		/// </summary>
-		/// <remarks>
-		/// List the episodes that are part of the specified season.
-		/// </remarks>
-		/// <param name="identifier">The ID or slug of the <see cref="Season"/>.</param>
-		/// <param name="sortBy">A key to sort episodes by.</param>
-		/// <param name="filter">An optional list of filters.</param>
-		/// <param name="pagination">The number of episodes to return.</param>
-		/// <param name="fields">The aditional fields to include in the result.</param>
-		/// <returns>A page of episodes.</returns>
-		/// <response code="400">The filters or the sort parameters are invalid.</response>
-		/// <response code="404">No season with the given ID or slug could be found.</response>
-		[HttpGet("{identifier:id}/episodes")]
-		[HttpGet("{identifier:id}/episode", Order = AlternativeRoute)]
-		[PartialPermission(Kind.Read)]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
-		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Page<Episode>>> GetEpisode(
-			Identifier identifier,
-			[FromQuery] Sort<Episode> sortBy,
-			[FromQuery] Filter<Episode>? filter,
-			[FromQuery] Pagination pagination,
-			[FromQuery] Include<Episode> fields
+		if (
+			!resources.Any()
+			&& await _libraryManager.Seasons.GetOrDefault(identifier.IsSame<Season>()) == null
 		)
-		{
-			ICollection<Episode> resources = await _libraryManager.Episodes.GetAll(
-				Filter.And(
-					filter,
-					identifier.Matcher<Episode>(x => x.SeasonId, x => x.Season!.Slug)
-				),
-				sortBy,
-				fields,
-				pagination
-			);
+			return NotFound();
+		return Page(resources, pagination.Limit);
+	}
 
-			if (
-				!resources.Any()
-				&& await _libraryManager.Seasons.GetOrDefault(identifier.IsSame<Season>()) == null
-			)
-				return NotFound();
-			return Page(resources, pagination.Limit);
-		}
-
-		/// <summary>
-		/// Get season's show
-		/// </summary>
-		/// <remarks>
-		/// Get the show that this season is part of.
-		/// </remarks>
-		/// <param name="identifier">The ID or slug of the <see cref="Season"/>.</param>
-		/// <param name="fields">The aditional fields to include in the result.</param>
-		/// <returns>The show that contains this season.</returns>
-		/// <response code="404">No season with the given ID or slug could be found.</response>
-		[HttpGet("{identifier:id}/show")]
-		[PartialPermission(Kind.Read)]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Show>> GetShow(
-			Identifier identifier,
-			[FromQuery] Include<Show> fields
-		)
-		{
-			Show? ret = await _libraryManager.Shows.GetOrDefault(
-				identifier.IsContainedIn<Show, Season>(x => x.Seasons!),
-				fields
-			);
-			if (ret == null)
-				return NotFound();
-			return ret;
-		}
+	/// <summary>
+	/// Get season's show
+	/// </summary>
+	/// <remarks>
+	/// Get the show that this season is part of.
+	/// </remarks>
+	/// <param name="identifier">The ID or slug of the <see cref="Season"/>.</param>
+	/// <param name="fields">The aditional fields to include in the result.</param>
+	/// <returns>The show that contains this season.</returns>
+	/// <response code="404">No season with the given ID or slug could be found.</response>
+	[HttpGet("{identifier:id}/show")]
+	[PartialPermission(Kind.Read)]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	public async Task<ActionResult<Show>> GetShow(
+		Identifier identifier,
+		[FromQuery] Include<Show> fields
+	)
+	{
+		Show? ret = await _libraryManager.Shows.GetOrDefault(
+			identifier.IsContainedIn<Show, Season>(x => x.Seasons!),
+			fields
+		);
+		if (ret == null)
+			return NotFound();
+		return ret;
 	}
 }

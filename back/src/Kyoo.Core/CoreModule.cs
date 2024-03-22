@@ -33,116 +33,115 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Kyoo.Core
+namespace Kyoo.Core;
+
+/// <summary>
+/// The core module containing default implementations
+/// </summary>
+public class CoreModule : IPlugin
 {
 	/// <summary>
-	/// The core module containing default implementations
+	/// A service provider to access services in static context (in events for example).
 	/// </summary>
-	public class CoreModule : IPlugin
+	/// <remarks>Don't forget to create a scope.</remarks>
+	public static IServiceProvider Services { get; set; }
+
+	/// <inheritdoc />
+	public string Name => "Core";
+
+	/// <inheritdoc />
+	public void Configure(ContainerBuilder builder)
 	{
-		/// <summary>
-		/// A service provider to access services in static context (in events for example).
-		/// </summary>
-		/// <remarks>Don't forget to create a scope.</remarks>
-		public static IServiceProvider Services { get; set; }
+		builder
+			.RegisterType<ThumbnailsManager>()
+			.As<IThumbnailsManager>()
+			.InstancePerLifetimeScope();
+		builder.RegisterType<LibraryManager>().As<ILibraryManager>().InstancePerLifetimeScope();
 
-		/// <inheritdoc />
-		public string Name => "Core";
-
-		/// <inheritdoc />
-		public void Configure(ContainerBuilder builder)
-		{
-			builder
-				.RegisterType<ThumbnailsManager>()
-				.As<IThumbnailsManager>()
-				.InstancePerLifetimeScope();
-			builder.RegisterType<LibraryManager>().As<ILibraryManager>().InstancePerLifetimeScope();
-
-			builder.RegisterRepository<LibraryItemRepository>();
-			builder.RegisterRepository<CollectionRepository>();
-			builder.RegisterRepository<MovieRepository>();
-			builder.RegisterRepository<ShowRepository>();
-			builder.RegisterRepository<SeasonRepository>();
-			builder.RegisterRepository<EpisodeRepository>();
-			builder.RegisterRepository<StudioRepository>();
-			builder.RegisterRepository<UserRepository>().As<IUserRepository>();
-			builder.RegisterRepository<NewsRepository>();
-			builder
-				.RegisterType<WatchStatusRepository>()
-				.As<IWatchStatusRepository>()
-				.AsSelf()
-				.InstancePerLifetimeScope();
-			builder
-				.RegisterType<IssueRepository>()
-				.As<IIssueRepository>()
-				.AsSelf()
-				.InstancePerLifetimeScope();
-			builder.RegisterType<SqlVariableContext>().InstancePerLifetimeScope();
-		}
-
-		/// <inheritdoc />
-		public void Configure(IServiceCollection services)
-		{
-			services.AddHttpContextAccessor();
-
-			services
-				.AddMvcCore(options =>
-				{
-					options.Filters.Add<ExceptionFilter>();
-					options.ModelBinderProviders.Insert(0, new SortBinder.Provider());
-					options.ModelBinderProviders.Insert(0, new IncludeBinder.Provider());
-					options.ModelBinderProviders.Insert(0, new FilterBinder.Provider());
-				})
-				.AddJsonOptions(x =>
-				{
-					x.JsonSerializerOptions.TypeInfoResolver = new WithKindResolver()
-					{
-						Modifiers = { WithKindResolver.HandleLoadableFields }
-					};
-					x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-					x.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-				})
-				.AddDataAnnotations()
-				.AddControllersAsServices()
-				.AddApiExplorer()
-				.ConfigureApiBehaviorOptions(options =>
-				{
-					options.SuppressMapClientErrors = true;
-					options.InvalidModelStateResponseFactory = ctx =>
-					{
-						string[] errors = ctx
-							.ModelState.SelectMany(x => x.Value!.Errors)
-							.Select(x => x.ErrorMessage)
-							.ToArray();
-						return new BadRequestObjectResult(new RequestError(errors));
-					};
-				});
-
-			services.Configure<RouteOptions>(x =>
-			{
-				x.ConstraintMap.Add("id", typeof(IdentifierRouteConstraint));
-			});
-
-			services.AddResponseCompression(x =>
-			{
-				x.EnableForHttps = true;
-			});
-
-			services.AddProxies();
-			services.AddHttpClient();
-		}
-
-		/// <inheritdoc />
-		public IEnumerable<IStartupAction> ConfigureSteps =>
-			new IStartupAction[]
-			{
-				SA.New<IApplicationBuilder>(app => app.UseHsts(), SA.Before),
-				SA.New<IApplicationBuilder>(app => app.UseResponseCompression(), SA.Routing + 1),
-				SA.New<IApplicationBuilder>(app => app.UseRouting(), SA.Routing),
-				SA.New<IApplicationBuilder>(
-					app => app.UseEndpoints(x => x.MapControllers()),
-					SA.Endpoint
-				)
-			};
+		builder.RegisterRepository<LibraryItemRepository>();
+		builder.RegisterRepository<CollectionRepository>();
+		builder.RegisterRepository<MovieRepository>();
+		builder.RegisterRepository<ShowRepository>();
+		builder.RegisterRepository<SeasonRepository>();
+		builder.RegisterRepository<EpisodeRepository>();
+		builder.RegisterRepository<StudioRepository>();
+		builder.RegisterRepository<UserRepository>().As<IUserRepository>();
+		builder.RegisterRepository<NewsRepository>();
+		builder
+			.RegisterType<WatchStatusRepository>()
+			.As<IWatchStatusRepository>()
+			.AsSelf()
+			.InstancePerLifetimeScope();
+		builder
+			.RegisterType<IssueRepository>()
+			.As<IIssueRepository>()
+			.AsSelf()
+			.InstancePerLifetimeScope();
+		builder.RegisterType<SqlVariableContext>().InstancePerLifetimeScope();
 	}
+
+	/// <inheritdoc />
+	public void Configure(IServiceCollection services)
+	{
+		services.AddHttpContextAccessor();
+
+		services
+			.AddMvcCore(options =>
+			{
+				options.Filters.Add<ExceptionFilter>();
+				options.ModelBinderProviders.Insert(0, new SortBinder.Provider());
+				options.ModelBinderProviders.Insert(0, new IncludeBinder.Provider());
+				options.ModelBinderProviders.Insert(0, new FilterBinder.Provider());
+			})
+			.AddJsonOptions(x =>
+			{
+				x.JsonSerializerOptions.TypeInfoResolver = new WithKindResolver()
+				{
+					Modifiers = { WithKindResolver.HandleLoadableFields }
+				};
+				x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+				x.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+			})
+			.AddDataAnnotations()
+			.AddControllersAsServices()
+			.AddApiExplorer()
+			.ConfigureApiBehaviorOptions(options =>
+			{
+				options.SuppressMapClientErrors = true;
+				options.InvalidModelStateResponseFactory = ctx =>
+				{
+					string[] errors = ctx
+						.ModelState.SelectMany(x => x.Value!.Errors)
+						.Select(x => x.ErrorMessage)
+						.ToArray();
+					return new BadRequestObjectResult(new RequestError(errors));
+				};
+			});
+
+		services.Configure<RouteOptions>(x =>
+		{
+			x.ConstraintMap.Add("id", typeof(IdentifierRouteConstraint));
+		});
+
+		services.AddResponseCompression(x =>
+		{
+			x.EnableForHttps = true;
+		});
+
+		services.AddProxies();
+		services.AddHttpClient();
+	}
+
+	/// <inheritdoc />
+	public IEnumerable<IStartupAction> ConfigureSteps =>
+		new IStartupAction[]
+		{
+			SA.New<IApplicationBuilder>(app => app.UseHsts(), SA.Before),
+			SA.New<IApplicationBuilder>(app => app.UseResponseCompression(), SA.Routing + 1),
+			SA.New<IApplicationBuilder>(app => app.UseRouting(), SA.Routing),
+			SA.New<IApplicationBuilder>(
+				app => app.UseEndpoints(x => x.MapControllers()),
+				SA.Endpoint
+			)
+		};
 }

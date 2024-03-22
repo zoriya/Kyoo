@@ -23,95 +23,94 @@ using System.Text.Json.Serialization;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Utils;
 
-namespace Kyoo.Abstractions.Models
+namespace Kyoo.Abstractions.Models;
+
+/// <summary>
+/// A single user of the app.
+/// </summary>
+public class User : IQuery, IResource, IAddedDate
 {
+	public static Sort DefaultSort => new Sort<User>.By(x => x.Username);
+
+	/// <inheritdoc />
+	public Guid Id { get; set; }
+
+	/// <inheritdoc />
+	[MaxLength(256)]
+	public string Slug { get; set; }
+
 	/// <summary>
-	/// A single user of the app.
+	/// A username displayed to the user.
 	/// </summary>
-	public class User : IQuery, IResource, IAddedDate
+	public string Username { get; set; }
+
+	/// <summary>
+	/// The user email address.
+	/// </summary>
+	public string Email { get; set; }
+
+	/// <summary>
+	/// The user password (hashed, it can't be read like that). The hashing format is implementation defined.
+	/// </summary>
+	[JsonIgnore]
+	public string? Password { get; set; }
+
+	/// <summary>
+	/// Does the user can sign-in with a password or only via oidc?
+	/// </summary>
+	public bool HasPassword => Password != null;
+
+	/// <summary>
+	/// The list of permissions of the user. The format of this is implementation dependent.
+	/// </summary>
+	public string[] Permissions { get; set; } = Array.Empty<string>();
+
+	/// <inheritdoc />
+	public DateTime AddedDate { get; set; }
+
+	/// <summary>
+	/// User settings
+	/// </summary>
+	public Dictionary<string, string> Settings { get; set; } = new();
+
+	/// <summary>
+	/// User accounts on other services.
+	/// </summary>
+	public Dictionary<string, ExternalToken> ExternalId { get; set; } = new();
+
+	public User() { }
+
+	[JsonConstructor]
+	public User(string username)
 	{
-		public static Sort DefaultSort => new Sort<User>.By(x => x.Username);
-
-		/// <inheritdoc />
-		public Guid Id { get; set; }
-
-		/// <inheritdoc />
-		[MaxLength(256)]
-		public string Slug { get; set; }
-
-		/// <summary>
-		/// A username displayed to the user.
-		/// </summary>
-		public string Username { get; set; }
-
-		/// <summary>
-		/// The user email address.
-		/// </summary>
-		public string Email { get; set; }
-
-		/// <summary>
-		/// The user password (hashed, it can't be read like that). The hashing format is implementation defined.
-		/// </summary>
-		[JsonIgnore]
-		public string? Password { get; set; }
-
-		/// <summary>
-		/// Does the user can sign-in with a password or only via oidc?
-		/// </summary>
-		public bool HasPassword => Password != null;
-
-		/// <summary>
-		/// The list of permissions of the user. The format of this is implementation dependent.
-		/// </summary>
-		public string[] Permissions { get; set; } = Array.Empty<string>();
-
-		/// <inheritdoc />
-		public DateTime AddedDate { get; set; }
-
-		/// <summary>
-		/// User settings
-		/// </summary>
-		public Dictionary<string, string> Settings { get; set; } = new();
-
-		/// <summary>
-		/// User accounts on other services.
-		/// </summary>
-		public Dictionary<string, ExternalToken> ExternalId { get; set; } = new();
-
-		public User() { }
-
-		[JsonConstructor]
-		public User(string username)
+		if (username != null)
 		{
-			if (username != null)
-			{
-				Slug = Utility.ToSlug(username);
-				Username = username;
-			}
+			Slug = Utility.ToSlug(username);
+			Username = username;
 		}
 	}
+}
 
-	public class ExternalToken
-	{
-		/// <summary>
-		/// The id of this user on the external service.
-		/// </summary>
-		public string Id { get; set; }
+public class ExternalToken
+{
+	/// <summary>
+	/// The id of this user on the external service.
+	/// </summary>
+	public string Id { get; set; }
 
-		/// <summary>
-		/// The username on the external service.
-		/// </summary>
-		public string Username { get; set; }
+	/// <summary>
+	/// The username on the external service.
+	/// </summary>
+	public string Username { get; set; }
 
-		/// <summary>
-		/// The link to the user profile on this website. Null if it does not exist.
-		/// </summary>
-		public string? ProfileUrl { get; set; }
+	/// <summary>
+	/// The link to the user profile on this website. Null if it does not exist.
+	/// </summary>
+	public string? ProfileUrl { get; set; }
 
-		/// <summary>
-		/// A jwt token used to interact with the service.
-		/// Do not forget to refresh it when using it if necessary.
-		/// </summary>
-		public JwtToken Token { get; set; }
-	}
+	/// <summary>
+	/// A jwt token used to interact with the service.
+	/// Do not forget to refresh it when using it if necessary.
+	/// </summary>
+	public JwtToken Token { get; set; }
 }

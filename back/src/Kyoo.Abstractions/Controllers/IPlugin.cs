@@ -21,46 +21,45 @@ using System.Collections.Generic;
 using Autofac;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Kyoo.Abstractions.Controllers
+namespace Kyoo.Abstractions.Controllers;
+
+/// <summary>
+/// A common interface used to discord plugins
+/// </summary>
+/// <remarks>
+/// You can inject services in the IPlugin constructor.
+/// You should only inject well known services like an ILogger, IConfiguration or IWebHostEnvironment.
+/// </remarks>
+public interface IPlugin
 {
 	/// <summary>
-	/// A common interface used to discord plugins
+	/// The name of the plugin
 	/// </summary>
-	/// <remarks>
-	/// You can inject services in the IPlugin constructor.
-	/// You should only inject well known services like an ILogger, IConfiguration or IWebHostEnvironment.
-	/// </remarks>
-	public interface IPlugin
+	string Name { get; }
+
+	/// <summary>
+	/// An optional configuration step to allow a plugin to change asp net configurations.
+	/// </summary>
+	/// <seealso cref="SA"/>
+	IEnumerable<IStartupAction> ConfigureSteps => ArraySegment<IStartupAction>.Empty;
+
+	/// <summary>
+	/// A configure method that will be run on plugin's startup.
+	/// </summary>
+	/// <param name="builder">The autofac service container to register services.</param>
+	void Configure(ContainerBuilder builder)
 	{
-		/// <summary>
-		/// The name of the plugin
-		/// </summary>
-		string Name { get; }
+		// Skipped
+	}
 
-		/// <summary>
-		/// An optional configuration step to allow a plugin to change asp net configurations.
-		/// </summary>
-		/// <seealso cref="SA"/>
-		IEnumerable<IStartupAction> ConfigureSteps => ArraySegment<IStartupAction>.Empty;
-
-		/// <summary>
-		/// A configure method that will be run on plugin's startup.
-		/// </summary>
-		/// <param name="builder">The autofac service container to register services.</param>
-		void Configure(ContainerBuilder builder)
-		{
-			// Skipped
-		}
-
-		/// <summary>
-		/// A configure method that will be run on plugin's startup.
-		/// This is available for libraries that build upon a <see cref="IServiceCollection"/>, for more precise
-		/// configuration use <see cref="Configure(Autofac.ContainerBuilder)"/>.
-		/// </summary>
-		/// <param name="services">A service container to register new services.</param>
-		void Configure(IServiceCollection services)
-		{
-			// Skipped
-		}
+	/// <summary>
+	/// A configure method that will be run on plugin's startup.
+	/// This is available for libraries that build upon a <see cref="IServiceCollection"/>, for more precise
+	/// configuration use <see cref="Configure(Autofac.ContainerBuilder)"/>.
+	/// </summary>
+	/// <param name="services">A service container to register new services.</param>
+	void Configure(IServiceCollection services)
+	{
+		// Skipped
 	}
 }

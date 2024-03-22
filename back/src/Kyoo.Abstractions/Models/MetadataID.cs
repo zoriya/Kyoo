@@ -16,21 +16,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-namespace Kyoo.Abstractions.Models
+namespace Kyoo.Abstractions.Models;
+
+/// <summary>
+/// ID and link of an item on an external provider.
+/// </summary>
+public class MetadataId
 {
 	/// <summary>
-	/// ID and link of an item on an external provider.
+	/// The ID of the resource on the external provider.
 	/// </summary>
-	public class MetadataId
-	{
-		/// <summary>
-		/// The ID of the resource on the external provider.
-		/// </summary>
-		public string DataId { get; set; }
+	public string DataId { get; set; }
 
-		/// <summary>
-		/// The URL of the resource on the external provider.
-		/// </summary>
-		public string? Link { get; set; }
-	}
+	/// <summary>
+	/// The URL of the resource on the external provider.
+	/// </summary>
+	public string? Link { get; set; }
 }

@@ -24,171 +24,166 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using static System.Text.Json.JsonNamingPolicy;
 
-namespace Kyoo.Meiliseach
+namespace Kyoo.Meiliseach;
+
+public class MeilisearchModule : IPlugin
 {
-	public class MeilisearchModule : IPlugin
+	/// <inheritdoc />
+	public string Name => "Meilisearch";
+
+	private readonly IConfiguration _configuration;
+
+	public static Dictionary<string, Settings> IndexSettings =>
+		new()
+		{
+			{
+				"items",
+				new Settings()
+				{
+					SearchableAttributes = new[]
+					{
+						CamelCase.ConvertName(nameof(Movie.Name)),
+						CamelCase.ConvertName(nameof(Movie.Slug)),
+						CamelCase.ConvertName(nameof(Movie.Aliases)),
+						CamelCase.ConvertName(nameof(Movie.Path)),
+						CamelCase.ConvertName(nameof(Movie.Tags)),
+						CamelCase.ConvertName(nameof(Movie.Overview)),
+					},
+					FilterableAttributes = new[]
+					{
+						CamelCase.ConvertName(nameof(Movie.Genres)),
+						CamelCase.ConvertName(nameof(Movie.Status)),
+						CamelCase.ConvertName(nameof(Movie.AirDate)),
+						CamelCase.ConvertName(nameof(Movie.StudioId)),
+						"kind"
+					},
+					SortableAttributes = new[]
+					{
+						CamelCase.ConvertName(nameof(Movie.AirDate)),
+						CamelCase.ConvertName(nameof(Movie.AddedDate)),
+						CamelCase.ConvertName(nameof(Movie.Rating)),
+						CamelCase.ConvertName(nameof(Movie.Runtime)),
+					},
+					DisplayedAttributes = new[] { CamelCase.ConvertName(nameof(Movie.Id)), "kind" },
+					RankingRules = new[]
+					{
+						"words",
+						"typo",
+						"proximity",
+						"attribute",
+						"sort",
+						"exactness",
+						$"{CamelCase.ConvertName(nameof(Movie.Rating))}:desc",
+					}
+					// TODO: Add stopwords
+				}
+			},
+			{
+				nameof(Episode),
+				new Settings()
+				{
+					SearchableAttributes = new[]
+					{
+						CamelCase.ConvertName(nameof(Episode.Name)),
+						CamelCase.ConvertName(nameof(Episode.Overview)),
+						CamelCase.ConvertName(nameof(Episode.Slug)),
+						CamelCase.ConvertName(nameof(Episode.Path)),
+					},
+					FilterableAttributes = new[]
+					{
+						CamelCase.ConvertName(nameof(Episode.SeasonNumber)),
+					},
+					SortableAttributes = new[]
+					{
+						CamelCase.ConvertName(nameof(Episode.ReleaseDate)),
+						CamelCase.ConvertName(nameof(Episode.AddedDate)),
+						CamelCase.ConvertName(nameof(Episode.SeasonNumber)),
+						CamelCase.ConvertName(nameof(Episode.EpisodeNumber)),
+						CamelCase.ConvertName(nameof(Episode.AbsoluteNumber)),
+					},
+					DisplayedAttributes = new[] { CamelCase.ConvertName(nameof(Episode.Id)), },
+					// TODO: Add stopwords
+				}
+			},
+			{
+				nameof(Studio),
+				new Settings()
+				{
+					SearchableAttributes = new[]
+					{
+						CamelCase.ConvertName(nameof(Studio.Name)),
+						CamelCase.ConvertName(nameof(Studio.Slug)),
+					},
+					FilterableAttributes = Array.Empty<string>(),
+					SortableAttributes = Array.Empty<string>(),
+					DisplayedAttributes = new[] { CamelCase.ConvertName(nameof(Studio.Id)), },
+					// TODO: Add stopwords
+				}
+			},
+		};
+
+	public MeilisearchModule(IConfiguration configuration)
 	{
-		/// <inheritdoc />
-		public string Name => "Meilisearch";
+		_configuration = configuration;
+	}
 
-		private readonly IConfiguration _configuration;
+	/// <summary>
+	/// Init meilisearch indexes.
+	/// </summary>
+	/// <param name="provider">The service list to retrieve the meilisearch client</param>
+	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+	public static async Task Initialize(IServiceProvider provider)
+	{
+		MeilisearchClient client = provider.GetRequiredService<MeilisearchClient>();
 
-		public static Dictionary<string, Settings> IndexSettings =>
-			new()
-			{
-				{
-					"items",
-					new Settings()
-					{
-						SearchableAttributes = new[]
-						{
-							CamelCase.ConvertName(nameof(Movie.Name)),
-							CamelCase.ConvertName(nameof(Movie.Slug)),
-							CamelCase.ConvertName(nameof(Movie.Aliases)),
-							CamelCase.ConvertName(nameof(Movie.Path)),
-							CamelCase.ConvertName(nameof(Movie.Tags)),
-							CamelCase.ConvertName(nameof(Movie.Overview)),
-						},
-						FilterableAttributes = new[]
-						{
-							CamelCase.ConvertName(nameof(Movie.Genres)),
-							CamelCase.ConvertName(nameof(Movie.Status)),
-							CamelCase.ConvertName(nameof(Movie.AirDate)),
-							CamelCase.ConvertName(nameof(Movie.StudioId)),
-							"kind"
-						},
-						SortableAttributes = new[]
-						{
-							CamelCase.ConvertName(nameof(Movie.AirDate)),
-							CamelCase.ConvertName(nameof(Movie.AddedDate)),
-							CamelCase.ConvertName(nameof(Movie.Rating)),
-							CamelCase.ConvertName(nameof(Movie.Runtime)),
-						},
-						DisplayedAttributes = new[]
-						{
-							CamelCase.ConvertName(nameof(Movie.Id)),
-							"kind"
-						},
-						RankingRules = new[]
-						{
-							"words",
-							"typo",
-							"proximity",
-							"attribute",
-							"sort",
-							"exactness",
-							$"{CamelCase.ConvertName(nameof(Movie.Rating))}:desc",
-						}
-						// TODO: Add stopwords
-					}
-				},
-				{
-					nameof(Episode),
-					new Settings()
-					{
-						SearchableAttributes = new[]
-						{
-							CamelCase.ConvertName(nameof(Episode.Name)),
-							CamelCase.ConvertName(nameof(Episode.Overview)),
-							CamelCase.ConvertName(nameof(Episode.Slug)),
-							CamelCase.ConvertName(nameof(Episode.Path)),
-						},
-						FilterableAttributes = new[]
-						{
-							CamelCase.ConvertName(nameof(Episode.SeasonNumber)),
-						},
-						SortableAttributes = new[]
-						{
-							CamelCase.ConvertName(nameof(Episode.ReleaseDate)),
-							CamelCase.ConvertName(nameof(Episode.AddedDate)),
-							CamelCase.ConvertName(nameof(Episode.SeasonNumber)),
-							CamelCase.ConvertName(nameof(Episode.EpisodeNumber)),
-							CamelCase.ConvertName(nameof(Episode.AbsoluteNumber)),
-						},
-						DisplayedAttributes = new[] { CamelCase.ConvertName(nameof(Episode.Id)), },
-						// TODO: Add stopwords
-					}
-				},
-				{
-					nameof(Studio),
-					new Settings()
-					{
-						SearchableAttributes = new[]
-						{
-							CamelCase.ConvertName(nameof(Studio.Name)),
-							CamelCase.ConvertName(nameof(Studio.Slug)),
-						},
-						FilterableAttributes = Array.Empty<string>(),
-						SortableAttributes = Array.Empty<string>(),
-						DisplayedAttributes = new[] { CamelCase.ConvertName(nameof(Studio.Id)), },
-						// TODO: Add stopwords
-					}
-				},
-			};
+		await _CreateIndex(client, "items", true);
+		await _CreateIndex(client, nameof(Episode), false);
+		await _CreateIndex(client, nameof(Studio), false);
 
-		public MeilisearchModule(IConfiguration configuration)
+		IndexStats info = await client.Index("items").GetStatsAsync();
+		// If there is no documents in meilisearch, if a db exist and is not empty, add items to meilisearch.
+		if (info.NumberOfDocuments == 0)
 		{
-			_configuration = configuration;
+			ILibraryManager database = provider.GetRequiredService<ILibraryManager>();
+			MeiliSync search = provider.GetRequiredService<MeiliSync>();
+
+			// This is a naive implementation that absolutly does not care about performances.
+			// This will run only once on users that already had a database when they upgrade.
+			foreach (Movie movie in await database.Movies.GetAll(limit: 0))
+				await search.CreateOrUpdate("items", movie, nameof(Movie));
+			foreach (Show show in await database.Shows.GetAll(limit: 0))
+				await search.CreateOrUpdate("items", show, nameof(Show));
+			foreach (Collection collection in await database.Collections.GetAll(limit: 0))
+				await search.CreateOrUpdate("items", collection, nameof(Collection));
+			foreach (Episode episode in await database.Episodes.GetAll(limit: 0))
+				await search.CreateOrUpdate(nameof(Episode), episode);
+			foreach (Studio studio in await database.Studios.GetAll(limit: 0))
+				await search.CreateOrUpdate(nameof(Studio), studio);
 		}
+	}
 
-		/// <summary>
-		/// Init meilisearch indexes.
-		/// </summary>
-		/// <param name="provider">The service list to retrieve the meilisearch client</param>
-		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		public static async Task Initialize(IServiceProvider provider)
-		{
-			MeilisearchClient client = provider.GetRequiredService<MeilisearchClient>();
+	private static async Task _CreateIndex(MeilisearchClient client, string index, bool hasKind)
+	{
+		TaskInfo task = await client.CreateIndexAsync(
+			index,
+			hasKind ? "ref" : CamelCase.ConvertName(nameof(IResource.Id))
+		);
+		await client.WaitForTaskAsync(task.TaskUid);
+		await client.Index(index).UpdateSettingsAsync(IndexSettings[index]);
+	}
 
-			await _CreateIndex(client, "items", true);
-			await _CreateIndex(client, nameof(Episode), false);
-			await _CreateIndex(client, nameof(Studio), false);
-
-			IndexStats info = await client.Index("items").GetStatsAsync();
-			// If there is no documents in meilisearch, if a db exist and is not empty, add items to meilisearch.
-			if (info.NumberOfDocuments == 0)
-			{
-				ILibraryManager database = provider.GetRequiredService<ILibraryManager>();
-				MeiliSync search = provider.GetRequiredService<MeiliSync>();
-
-				// This is a naive implementation that absolutly does not care about performances.
-				// This will run only once on users that already had a database when they upgrade.
-				foreach (Movie movie in await database.Movies.GetAll(limit: 0))
-					await search.CreateOrUpdate("items", movie, nameof(Movie));
-				foreach (Show show in await database.Shows.GetAll(limit: 0))
-					await search.CreateOrUpdate("items", show, nameof(Show));
-				foreach (Collection collection in await database.Collections.GetAll(limit: 0))
-					await search.CreateOrUpdate("items", collection, nameof(Collection));
-				foreach (Episode episode in await database.Episodes.GetAll(limit: 0))
-					await search.CreateOrUpdate(nameof(Episode), episode);
-				foreach (Studio studio in await database.Studios.GetAll(limit: 0))
-					await search.CreateOrUpdate(nameof(Studio), studio);
-			}
-		}
-
-		private static async Task _CreateIndex(MeilisearchClient client, string index, bool hasKind)
-		{
-			TaskInfo task = await client.CreateIndexAsync(
-				index,
-				hasKind ? "ref" : CamelCase.ConvertName(nameof(IResource.Id))
-			);
-			await client.WaitForTaskAsync(task.TaskUid);
-			await client.Index(index).UpdateSettingsAsync(IndexSettings[index]);
-		}
-
-		/// <inheritdoc />
-		public void Configure(ContainerBuilder builder)
-		{
-			builder
-				.RegisterInstance(
-					new MeilisearchClient(
-						_configuration.GetValue("MEILI_HOST", "http://meilisearch:7700"),
-						_configuration.GetValue<string?>("MEILI_MASTER_KEY")
-					)
+	/// <inheritdoc />
+	public void Configure(ContainerBuilder builder)
+	{
+		builder
+			.RegisterInstance(
+				new MeilisearchClient(
+					_configuration.GetValue("MEILI_HOST", "http://meilisearch:7700"),
+					_configuration.GetValue<string?>("MEILI_MASTER_KEY")
 				)
-				.SingleInstance();
-			builder.RegisterType<MeiliSync>().AsSelf().SingleInstance().AutoActivate();
-			builder.RegisterType<SearchManager>().As<ISearchManager>().InstancePerLifetimeScope();
-		}
+			)
+			.SingleInstance();
+		builder.RegisterType<MeiliSync>().AsSelf().SingleInstance().AutoActivate();
+		builder.RegisterType<SearchManager>().As<ISearchManager>().InstancePerLifetimeScope();
 	}
 }

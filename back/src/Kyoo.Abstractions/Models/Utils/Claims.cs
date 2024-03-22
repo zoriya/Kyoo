@@ -16,41 +16,40 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-namespace Kyoo.Authentication.Models
+namespace Kyoo.Authentication.Models;
+
+/// <summary>
+/// List of well known claims of kyoo
+/// </summary>
+public static class Claims
 {
 	/// <summary>
-	/// List of well known claims of kyoo
+	/// The id of the user
 	/// </summary>
-	public static class Claims
-	{
-		/// <summary>
-		/// The id of the user
-		/// </summary>
-		public static string Id => "id";
+	public static string Id => "id";
 
-		/// <summary>
-		/// The name of the user
-		/// </summary>
-		public static string Name => "name";
+	/// <summary>
+	/// The name of the user
+	/// </summary>
+	public static string Name => "name";
 
-		/// <summary>
-		/// The email of the user.
-		/// </summary>
-		public static string Email => "email";
+	/// <summary>
+	/// The email of the user.
+	/// </summary>
+	public static string Email => "email";
 
-		/// <summary>
-		/// The list of permissions that the user has.
-		/// </summary>
-		public static string Permissions => "permissions";
+	/// <summary>
+	/// The list of permissions that the user has.
+	/// </summary>
+	public static string Permissions => "permissions";
 
-		/// <summary>
-		/// The type of the token (either "access" or "refresh").
-		/// </summary>
-		public static string Type => "type";
+	/// <summary>
+	/// The type of the token (either "access" or "refresh").
+	/// </summary>
+	public static string Type => "type";
 
-		/// <summary>
-		/// A guid used to identify a specific refresh token. This is only useful for the server to revokate tokens.
-		/// </summary>
-		public static string Guid => "guid";
-	}
+	/// <summary>
+	/// A guid used to identify a specific refresh token. This is only useful for the server to revokate tokens.
+	/// </summary>
+	public static string Guid => "guid";
 }

@@ -16,30 +16,29 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-namespace Kyoo.Abstractions.Models
+namespace Kyoo.Abstractions.Models;
+
+/// <summary>
+/// A genre that allow one to specify categories for shows.
+/// </summary>
+public enum Genre
 {
-	/// <summary>
-	/// A genre that allow one to specify categories for shows.
-	/// </summary>
-	public enum Genre
-	{
-		Action,
-		Adventure,
-		Animation,
-		Comedy,
-		Crime,
-		Documentary,
-		Drama,
-		Family,
-		Fantasy,
-		History,
-		Horror,
-		Music,
-		Mystery,
-		Romance,
-		ScienceFiction,
-		Thriller,
-		War,
-		Western,
-	}
+	Action,
+	Adventure,
+	Animation,
+	Comedy,
+	Crime,
+	Documentary,
+	Drama,
+	Family,
+	Fantasy,
+	History,
+	Horror,
+	Music,
+	Mystery,
+	Romance,
+	ScienceFiction,
+	Thriller,
+	War,
+	Western,
 }

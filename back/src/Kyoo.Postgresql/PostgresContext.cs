@@ -25,114 +25,113 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Npgsql;
 
-namespace Kyoo.Postgresql
+namespace Kyoo.Postgresql;
+
+/// <summary>
+/// A postgresql implementation of <see cref="DatabaseContext"/>.
+/// </summary>
+public class PostgresContext : DatabaseContext
 {
 	/// <summary>
-	/// A postgresql implementation of <see cref="DatabaseContext"/>.
+	/// Is this instance in debug mode?
 	/// </summary>
-	public class PostgresContext : DatabaseContext
+	private readonly bool _debugMode;
+
+	/// <summary>
+	/// Should the configure step be skipped? This is used when the database is created via DbContextOptions.
+	/// </summary>
+	private readonly bool _skipConfigure;
+
+	// TODO: This needs ot be updated but ef-core still does not offer a way to use this.
+	[Obsolete]
+	static PostgresContext()
 	{
-		/// <summary>
-		/// Is this instance in debug mode?
-		/// </summary>
-		private readonly bool _debugMode;
+		NpgsqlConnection.GlobalTypeMapper.MapEnum<Status>();
+		NpgsqlConnection.GlobalTypeMapper.MapEnum<Genre>();
+		NpgsqlConnection.GlobalTypeMapper.MapEnum<WatchStatus>();
+	}
 
-		/// <summary>
-		/// Should the configure step be skipped? This is used when the database is created via DbContextOptions.
-		/// </summary>
-		private readonly bool _skipConfigure;
+	/// <summary>
+	/// Design time constructor (dotnet ef migrations add). Do not use
+	/// </summary>
+	public PostgresContext()
+		: base(null!) { }
 
-		// TODO: This needs ot be updated but ef-core still does not offer a way to use this.
-		[Obsolete]
-		static PostgresContext()
+	public PostgresContext(DbContextOptions options, IHttpContextAccessor accessor)
+		: base(options, accessor)
+	{
+		_skipConfigure = true;
+	}
+
+	public PostgresContext(string connection, bool debugMode, IHttpContextAccessor accessor)
+		: base(accessor)
+	{
+		_debugMode = debugMode;
+	}
+
+	/// <summary>
+	/// Set connection information for this database context
+	/// </summary>
+	/// <param name="optionsBuilder">An option builder to fill.</param>
+	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+	{
+		if (!_skipConfigure)
 		{
-			NpgsqlConnection.GlobalTypeMapper.MapEnum<Status>();
-			NpgsqlConnection.GlobalTypeMapper.MapEnum<Genre>();
-			NpgsqlConnection.GlobalTypeMapper.MapEnum<WatchStatus>();
+			optionsBuilder.UseNpgsql();
+			if (_debugMode)
+				optionsBuilder.EnableDetailedErrors().EnableSensitiveDataLogging();
 		}
 
-		/// <summary>
-		/// Design time constructor (dotnet ef migrations add). Do not use
-		/// </summary>
-		public PostgresContext()
-			: base(null!) { }
+		optionsBuilder.UseSnakeCaseNamingConvention();
+		base.OnConfiguring(optionsBuilder);
+	}
 
-		public PostgresContext(DbContextOptions options, IHttpContextAccessor accessor)
-			: base(options, accessor)
-		{
-			_skipConfigure = true;
-		}
+	/// <summary>
+	/// Set database parameters to support every types of Kyoo.
+	/// </summary>
+	/// <param name="modelBuilder">The database's model builder.</param>
+	protected override void OnModelCreating(ModelBuilder modelBuilder)
+	{
+		modelBuilder.HasPostgresEnum<Status>();
+		modelBuilder.HasPostgresEnum<Genre>();
+		modelBuilder.HasPostgresEnum<WatchStatus>();
 
-		public PostgresContext(string connection, bool debugMode, IHttpContextAccessor accessor)
-			: base(accessor)
-		{
-			_debugMode = debugMode;
-		}
+		modelBuilder
+			.HasDbFunction(typeof(DatabaseContext).GetMethod(nameof(MD5))!)
+			.HasTranslation(args => new SqlFunctionExpression(
+				"md5",
+				args,
+				nullable: true,
+				argumentsPropagateNullability: new[] { false },
+				type: args[0].Type,
+				typeMapping: args[0].TypeMapping
+			));
 
-		/// <summary>
-		/// Set connection information for this database context
-		/// </summary>
-		/// <param name="optionsBuilder">An option builder to fill.</param>
-		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-		{
-			if (!_skipConfigure)
+		base.OnModelCreating(modelBuilder);
+	}
+
+	/// <inheritdoc />
+	protected override string LinkName<T, T2>()
+	{
+		SnakeCaseNameRewriter rewriter = new(CultureInfo.InvariantCulture);
+		return rewriter.RewriteName("Link" + typeof(T).Name + typeof(T2).Name);
+	}
+
+	/// <inheritdoc />
+	protected override string LinkNameFk<T>()
+	{
+		SnakeCaseNameRewriter rewriter = new(CultureInfo.InvariantCulture);
+		return rewriter.RewriteName(typeof(T).Name + "ID");
+	}
+
+	/// <inheritdoc />
+	protected override bool IsDuplicateException(Exception ex)
+	{
+		return ex.InnerException
+			is PostgresException
 			{
-				optionsBuilder.UseNpgsql();
-				if (_debugMode)
-					optionsBuilder.EnableDetailedErrors().EnableSensitiveDataLogging();
-			}
-
-			optionsBuilder.UseSnakeCaseNamingConvention();
-			base.OnConfiguring(optionsBuilder);
-		}
-
-		/// <summary>
-		/// Set database parameters to support every types of Kyoo.
-		/// </summary>
-		/// <param name="modelBuilder">The database's model builder.</param>
-		protected override void OnModelCreating(ModelBuilder modelBuilder)
-		{
-			modelBuilder.HasPostgresEnum<Status>();
-			modelBuilder.HasPostgresEnum<Genre>();
-			modelBuilder.HasPostgresEnum<WatchStatus>();
-
-			modelBuilder
-				.HasDbFunction(typeof(DatabaseContext).GetMethod(nameof(MD5))!)
-				.HasTranslation(args => new SqlFunctionExpression(
-					"md5",
-					args,
-					nullable: true,
-					argumentsPropagateNullability: new[] { false },
-					type: args[0].Type,
-					typeMapping: args[0].TypeMapping
-				));
-
-			base.OnModelCreating(modelBuilder);
-		}
-
-		/// <inheritdoc />
-		protected override string LinkName<T, T2>()
-		{
-			SnakeCaseNameRewriter rewriter = new(CultureInfo.InvariantCulture);
-			return rewriter.RewriteName("Link" + typeof(T).Name + typeof(T2).Name);
-		}
-
-		/// <inheritdoc />
-		protected override string LinkNameFk<T>()
-		{
-			SnakeCaseNameRewriter rewriter = new(CultureInfo.InvariantCulture);
-			return rewriter.RewriteName(typeof(T).Name + "ID");
-		}
-
-		/// <inheritdoc />
-		protected override bool IsDuplicateException(Exception ex)
-		{
-			return ex.InnerException
-				is PostgresException
-				{
-					SqlState: PostgresErrorCodes.UniqueViolation
-						or PostgresErrorCodes.ForeignKeyViolation
-				};
-		}
+				SqlState: PostgresErrorCodes.UniqueViolation
+					or PostgresErrorCodes.ForeignKeyViolation
+			};
 	}
 }

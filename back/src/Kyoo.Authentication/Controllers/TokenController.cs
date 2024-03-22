@@ -27,109 +27,108 @@ using Kyoo.Abstractions.Models;
 using Kyoo.Authentication.Models;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Kyoo.Authentication
+namespace Kyoo.Authentication;
+
+/// <summary>
+/// The service that controls jwt creation and validation.
+/// </summary>
+public class TokenController : ITokenController
 {
 	/// <summary>
-	/// The service that controls jwt creation and validation.
+	/// The options that this controller will use.
 	/// </summary>
-	public class TokenController : ITokenController
+	private readonly AuthenticationOption _options;
+
+	/// <summary>
+	/// Create a new <see cref="TokenController"/>.
+	/// </summary>
+	/// <param name="options">The options that this controller will use.</param>
+	public TokenController(AuthenticationOption options)
 	{
-		/// <summary>
-		/// The options that this controller will use.
-		/// </summary>
-		private readonly AuthenticationOption _options;
+		_options = options;
+	}
 
-		/// <summary>
-		/// Create a new <see cref="TokenController"/>.
-		/// </summary>
-		/// <param name="options">The options that this controller will use.</param>
-		public TokenController(AuthenticationOption options)
-		{
-			_options = options;
-		}
+	/// <inheritdoc />
+	public string CreateAccessToken(User user, out TimeSpan expireIn)
+	{
+		expireIn = new TimeSpan(1, 0, 0);
 
-		/// <inheritdoc />
-		public string CreateAccessToken(User user, out TimeSpan expireIn)
-		{
-			expireIn = new TimeSpan(1, 0, 0);
+		SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_options.Secret));
+		SigningCredentials credential = new(key, SecurityAlgorithms.HmacSha256Signature);
+		string permissions =
+			user.Permissions != null ? string.Join(',', user.Permissions) : string.Empty;
+		List<Claim> claims =
+			new()
+			{
+				new Claim(Claims.Id, user.Id.ToString()),
+				new Claim(Claims.Name, user.Username),
+				new Claim(Claims.Permissions, permissions),
+				new Claim(Claims.Type, "access")
+			};
+		if (user.Email != null)
+			claims.Add(new Claim(Claims.Email, user.Email));
+		JwtSecurityToken token =
+			new(
+				signingCredentials: credential,
+				claims: claims,
+				expires: DateTime.UtcNow.Add(expireIn)
+			);
+		return new JwtSecurityTokenHandler().WriteToken(token);
+	}
 
-			SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_options.Secret));
-			SigningCredentials credential = new(key, SecurityAlgorithms.HmacSha256Signature);
-			string permissions =
-				user.Permissions != null ? string.Join(',', user.Permissions) : string.Empty;
-			List<Claim> claims =
-				new()
+	/// <inheritdoc />
+	public Task<string> CreateRefreshToken(User user)
+	{
+		SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_options.Secret));
+		SigningCredentials credential = new(key, SecurityAlgorithms.HmacSha256Signature);
+		JwtSecurityToken token =
+			new(
+				signingCredentials: credential,
+				claims: new[]
 				{
 					new Claim(Claims.Id, user.Id.ToString()),
-					new Claim(Claims.Name, user.Username),
-					new Claim(Claims.Permissions, permissions),
-					new Claim(Claims.Type, "access")
-				};
-			if (user.Email != null)
-				claims.Add(new Claim(Claims.Email, user.Email));
-			JwtSecurityToken token =
-				new(
-					signingCredentials: credential,
-					claims: claims,
-					expires: DateTime.UtcNow.Add(expireIn)
-				);
-			return new JwtSecurityTokenHandler().WriteToken(token);
-		}
+					new Claim(Claims.Guid, Guid.NewGuid().ToString()),
+					new Claim(Claims.Type, "refresh")
+				},
+				expires: DateTime.UtcNow.AddYears(1)
+			);
+		// TODO: refresh keys are unique (thanks to the guid) but we could store them in DB to invalidate them if requested by the user.
+		return Task.FromResult(new JwtSecurityTokenHandler().WriteToken(token));
+	}
 
-		/// <inheritdoc />
-		public Task<string> CreateRefreshToken(User user)
+	/// <inheritdoc />
+	public Guid GetRefreshTokenUserID(string refreshToken)
+	{
+		SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_options.Secret));
+		JwtSecurityTokenHandler tokenHandler = new();
+		ClaimsPrincipal principal;
+		try
 		{
-			SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_options.Secret));
-			SigningCredentials credential = new(key, SecurityAlgorithms.HmacSha256Signature);
-			JwtSecurityToken token =
-				new(
-					signingCredentials: credential,
-					claims: new[]
-					{
-						new Claim(Claims.Id, user.Id.ToString()),
-						new Claim(Claims.Guid, Guid.NewGuid().ToString()),
-						new Claim(Claims.Type, "refresh")
-					},
-					expires: DateTime.UtcNow.AddYears(1)
-				);
-			// TODO: refresh keys are unique (thanks to the guid) but we could store them in DB to invalidate them if requested by the user.
-			return Task.FromResult(new JwtSecurityTokenHandler().WriteToken(token));
+			principal = tokenHandler.ValidateToken(
+				refreshToken,
+				new TokenValidationParameters
+				{
+					ValidateIssuer = false,
+					ValidateAudience = false,
+					ValidateIssuerSigningKey = true,
+					ValidateLifetime = true,
+					IssuerSigningKey = key
+				},
+				out SecurityToken _
+			);
 		}
-
-		/// <inheritdoc />
-		public Guid GetRefreshTokenUserID(string refreshToken)
+		catch (Exception)
 		{
-			SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_options.Secret));
-			JwtSecurityTokenHandler tokenHandler = new();
-			ClaimsPrincipal principal;
-			try
-			{
-				principal = tokenHandler.ValidateToken(
-					refreshToken,
-					new TokenValidationParameters
-					{
-						ValidateIssuer = false,
-						ValidateAudience = false,
-						ValidateIssuerSigningKey = true,
-						ValidateLifetime = true,
-						IssuerSigningKey = key
-					},
-					out SecurityToken _
-				);
-			}
-			catch (Exception)
-			{
-				throw new SecurityTokenException("Invalid refresh token");
-			}
-
-			if (principal.Claims.First(x => x.Type == Claims.Type).Value != "refresh")
-				throw new SecurityTokenException(
-					"Invalid token type. The token should be a refresh token."
-				);
-			Claim identifier = principal.Claims.First(x => x.Type == Claims.Id);
-			if (Guid.TryParse(identifier.Value, out Guid id))
-				return id;
-			throw new SecurityTokenException("Token not associated to any user.");
+			throw new SecurityTokenException("Invalid refresh token");
 		}
+
+		if (principal.Claims.First(x => x.Type == Claims.Type).Value != "refresh")
+			throw new SecurityTokenException(
+				"Invalid token type. The token should be a refresh token."
+			);
+		Claim identifier = principal.Claims.First(x => x.Type == Claims.Id);
+		if (Guid.TryParse(identifier.Value, out Guid id))
+			return id;
+		throw new SecurityTokenException("Token not associated to any user.");
 	}
 }

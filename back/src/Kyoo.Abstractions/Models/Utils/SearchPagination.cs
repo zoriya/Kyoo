@@ -16,21 +16,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-namespace Kyoo.Abstractions.Controllers
+namespace Kyoo.Abstractions.Controllers;
+
+/// <summary>
+/// Information about the pagination. How many items should be displayed and where to start.
+/// </summary>
+public class SearchPagination
 {
 	/// <summary>
-	/// Information about the pagination. How many items should be displayed and where to start.
+	/// The count of items to return.
 	/// </summary>
-	public class SearchPagination
-	{
-		/// <summary>
-		/// The count of items to return.
-		/// </summary>
-		public int Limit { get; set; } = 50;
+	public int Limit { get; set; } = 50;
 
-		/// <summary>
-		/// Where to start? How many items to skip?
-		/// </summary>
-		public int? Skip { get; set; }
-	}
+	/// <summary>
+	/// Where to start? How many items to skip?
+	/// </summary>
+	public int? Skip { get; set; }
 }

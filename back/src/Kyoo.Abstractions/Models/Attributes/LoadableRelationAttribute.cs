@@ -18,37 +18,36 @@
 
 using System;
 
-namespace Kyoo.Abstractions.Models.Attributes
+namespace Kyoo.Abstractions.Models.Attributes;
+
+/// <summary>
+/// The targeted relation can be loaded.
+/// </summary>
+[AttributeUsage(AttributeTargets.Property)]
+public class LoadableRelationAttribute : Attribute
 {
 	/// <summary>
-	/// The targeted relation can be loaded.
+	/// The name of the field containing the related resource's ID.
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Property)]
-	public class LoadableRelationAttribute : Attribute
+	public string? RelationID { get; }
+
+	public string? Sql { get; set; }
+
+	public string? On { get; set; }
+
+	public string? Projected { get; set; }
+
+	/// <summary>
+	/// Create a new <see cref="LoadableRelationAttribute"/>.
+	/// </summary>
+	public LoadableRelationAttribute() { }
+
+	/// <summary>
+	/// Create a new <see cref="LoadableRelationAttribute"/> with a baking relationID field.
+	/// </summary>
+	/// <param name="relationID">The name of the RelationID field.</param>
+	public LoadableRelationAttribute(string relationID)
 	{
-		/// <summary>
-		/// The name of the field containing the related resource's ID.
-		/// </summary>
-		public string? RelationID { get; }
-
-		public string? Sql { get; set; }
-
-		public string? On { get; set; }
-
-		public string? Projected { get; set; }
-
-		/// <summary>
-		/// Create a new <see cref="LoadableRelationAttribute"/>.
-		/// </summary>
-		public LoadableRelationAttribute() { }
-
-		/// <summary>
-		/// Create a new <see cref="LoadableRelationAttribute"/> with a baking relationID field.
-		/// </summary>
-		/// <param name="relationID">The name of the RelationID field.</param>
-		public LoadableRelationAttribute(string relationID)
-		{
-			RelationID = relationID;
-		}
+		RelationID = relationID;
 	}
 }

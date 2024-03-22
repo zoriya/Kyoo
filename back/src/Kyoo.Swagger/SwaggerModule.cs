@@ -29,103 +29,102 @@ using NSwag;
 using NSwag.Generation.AspNetCore;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 
-namespace Kyoo.Swagger
+namespace Kyoo.Swagger;
+
+/// <summary>
+/// A module to enable a swagger interface and an OpenAPI endpoint to document Kyoo.
+/// </summary>
+public class SwaggerModule : IPlugin
 {
-	/// <summary>
-	/// A module to enable a swagger interface and an OpenAPI endpoint to document Kyoo.
-	/// </summary>
-	public class SwaggerModule : IPlugin
+	/// <inheritdoc />
+	public string Name => "Swagger";
+
+	/// <inheritdoc />
+	public void Configure(IServiceCollection services)
 	{
-		/// <inheritdoc />
-		public string Name => "Swagger";
-
-		/// <inheritdoc />
-		public void Configure(IServiceCollection services)
+		services.AddTransient<IApplicationModelProvider, GenericResponseProvider>();
+		services.AddOpenApiDocument(document =>
 		{
-			services.AddTransient<IApplicationModelProvider, GenericResponseProvider>();
-			services.AddOpenApiDocument(document =>
+			document.Title = "Kyoo API";
+			// TODO use a real multi-line description in markdown.
+			document.Description = "The Kyoo's public API";
+			document.Version = Assembly.GetExecutingAssembly().GetName().Version!.ToString(3);
+			document.DocumentName = "v1";
+			document.UseControllerSummaryAsTagDescription = true;
+			document.GenerateExamples = true;
+			document.PostProcess = options =>
 			{
-				document.Title = "Kyoo API";
-				// TODO use a real multi-line description in markdown.
-				document.Description = "The Kyoo's public API";
-				document.Version = Assembly.GetExecutingAssembly().GetName().Version!.ToString(3);
-				document.DocumentName = "v1";
-				document.UseControllerSummaryAsTagDescription = true;
-				document.GenerateExamples = true;
-				document.PostProcess = options =>
+				options.Info.Contact = new OpenApiContact
 				{
-					options.Info.Contact = new OpenApiContact
-					{
-						Name = "Kyoo's github",
-						Url = "https://github.com/zoriya/Kyoo"
-					};
-					options.Info.License = new OpenApiLicense
-					{
-						Name = "GPL-3.0-or-later",
-						Url = "https://github.com/zoriya/Kyoo/blob/master/LICENSE"
-					};
-
-					options.Info.ExtensionData ??= new Dictionary<string, object>();
-					options.Info.ExtensionData["x-logo"] = new
-					{
-						url = "/banner.png",
-						backgroundColor = "#FFFFFF",
-						altText = "Kyoo's logo"
-					};
+					Name = "Kyoo's github",
+					Url = "https://github.com/zoriya/Kyoo"
 				};
-				document.UseApiTags();
-				document.SortApis();
-				document.AddOperationFilter(x =>
+				options.Info.License = new OpenApiLicense
 				{
-					if (x is AspNetCoreOperationProcessorContext ctx)
-						return ctx.ApiDescription.ActionDescriptor.AttributeRouteInfo?.Order
-							!= AlternativeRoute;
-					return true;
-				});
-				document.SchemaGenerator.Settings.TypeMappers.Add(
-					new PrimitiveTypeMapper(
-						typeof(Identifier),
-						x =>
-						{
-							x.IsNullableRaw = false;
-							x.Type = JsonObjectType.String | JsonObjectType.Integer;
-						}
-					)
-				);
+					Name = "GPL-3.0-or-later",
+					Url = "https://github.com/zoriya/Kyoo/blob/master/LICENSE"
+				};
 
-				document.AddSecurity(
-					nameof(Kyoo),
-					new OpenApiSecurityScheme
-					{
-						Type = OpenApiSecuritySchemeType.Http,
-						Scheme = "Bearer",
-						BearerFormat = "JWT",
-						Description = "The user's bearer"
-					}
-				);
-				document.OperationProcessors.Add(new OperationPermissionProcessor());
-			});
-		}
-
-		/// <inheritdoc />
-		public IEnumerable<IStartupAction> ConfigureSteps =>
-			new IStartupAction[]
-			{
-				SA.New<IApplicationBuilder>(app => app.UseOpenApi(), SA.Before + 1),
-				SA.New<IApplicationBuilder>(
-					app =>
-						app.UseReDoc(x =>
-						{
-							x.Path = "/doc";
-							x.TransformToExternalPath = (internalUiRoute, _) =>
-								"/api" + internalUiRoute;
-							x.AdditionalSettings["theme"] = new
-							{
-								colors = new { primary = new { main = "#e13e13" } }
-							};
-						}),
-					SA.Before
-				)
+				options.Info.ExtensionData ??= new Dictionary<string, object>();
+				options.Info.ExtensionData["x-logo"] = new
+				{
+					url = "/banner.png",
+					backgroundColor = "#FFFFFF",
+					altText = "Kyoo's logo"
+				};
 			};
+			document.UseApiTags();
+			document.SortApis();
+			document.AddOperationFilter(x =>
+			{
+				if (x is AspNetCoreOperationProcessorContext ctx)
+					return ctx.ApiDescription.ActionDescriptor.AttributeRouteInfo?.Order
+						!= AlternativeRoute;
+				return true;
+			});
+			document.SchemaGenerator.Settings.TypeMappers.Add(
+				new PrimitiveTypeMapper(
+					typeof(Identifier),
+					x =>
+					{
+						x.IsNullableRaw = false;
+						x.Type = JsonObjectType.String | JsonObjectType.Integer;
+					}
+				)
+			);
+
+			document.AddSecurity(
+				nameof(Kyoo),
+				new OpenApiSecurityScheme
+				{
+					Type = OpenApiSecuritySchemeType.Http,
+					Scheme = "Bearer",
+					BearerFormat = "JWT",
+					Description = "The user's bearer"
+				}
+			);
+			document.OperationProcessors.Add(new OperationPermissionProcessor());
+		});
 	}
+
+	/// <inheritdoc />
+	public IEnumerable<IStartupAction> ConfigureSteps =>
+		new IStartupAction[]
+		{
+			SA.New<IApplicationBuilder>(app => app.UseOpenApi(), SA.Before + 1),
+			SA.New<IApplicationBuilder>(
+				app =>
+					app.UseReDoc(x =>
+					{
+						x.Path = "/doc";
+						x.TransformToExternalPath = (internalUiRoute, _) =>
+							"/api" + internalUiRoute;
+						x.AdditionalSettings["theme"] = new
+						{
+							colors = new { primary = new { main = "#e13e13" } }
+						};
+					}),
+				SA.Before
+			)
+		};
 }

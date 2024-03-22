@@ -19,53 +19,52 @@
 using System;
 using System.Collections.Generic;
 
-namespace Kyoo.Utils
+namespace Kyoo.Utils;
+
+/// <summary>
+/// A set of extensions class for enumerable.
+/// </summary>
+public static class EnumerableExtensions
 {
 	/// <summary>
-	/// A set of extensions class for enumerable.
+	/// If the enumerable is empty, execute an action.
 	/// </summary>
-	public static class EnumerableExtensions
+	/// <param name="self">The enumerable to check</param>
+	/// <param name="action">The action to execute is the list is empty</param>
+	/// <typeparam name="T">The type of items inside the list</typeparam>
+	/// <returns>The iterator proxied, there is no dual iterations.</returns>
+	public static IEnumerable<T> IfEmpty<T>(this IEnumerable<T> self, Action action)
 	{
-		/// <summary>
-		/// If the enumerable is empty, execute an action.
-		/// </summary>
-		/// <param name="self">The enumerable to check</param>
-		/// <param name="action">The action to execute is the list is empty</param>
-		/// <typeparam name="T">The type of items inside the list</typeparam>
-		/// <returns>The iterator proxied, there is no dual iterations.</returns>
-		public static IEnumerable<T> IfEmpty<T>(this IEnumerable<T> self, Action action)
+		static IEnumerable<T> Generator(IEnumerable<T> self, Action action)
 		{
-			static IEnumerable<T> Generator(IEnumerable<T> self, Action action)
+			using IEnumerator<T> enumerator = self.GetEnumerator();
+
+			if (!enumerator.MoveNext())
 			{
-				using IEnumerator<T> enumerator = self.GetEnumerator();
-
-				if (!enumerator.MoveNext())
-				{
-					action();
-					yield break;
-				}
-
-				do
-				{
-					yield return enumerator.Current;
-				} while (enumerator.MoveNext());
+				action();
+				yield break;
 			}
 
-			return Generator(self, action);
+			do
+			{
+				yield return enumerator.Current;
+			} while (enumerator.MoveNext());
 		}
 
-		/// <summary>
-		/// A foreach used as a function with a little specificity: the list can be null.
-		/// </summary>
-		/// <param name="self">The list to enumerate. If this is null, the function result in a no-op</param>
-		/// <param name="action">The action to execute for each arguments</param>
-		/// <typeparam name="T">The type of items in the list</typeparam>
-		public static void ForEach<T>(this IEnumerable<T>? self, Action<T> action)
-		{
-			if (self == null)
-				return;
-			foreach (T i in self)
-				action(i);
-		}
+		return Generator(self, action);
+	}
+
+	/// <summary>
+	/// A foreach used as a function with a little specificity: the list can be null.
+	/// </summary>
+	/// <param name="self">The list to enumerate. If this is null, the function result in a no-op</param>
+	/// <param name="action">The action to execute for each arguments</param>
+	/// <typeparam name="T">The type of items in the list</typeparam>
+	public static void ForEach<T>(this IEnumerable<T>? self, Action<T> action)
+	{
+		if (self == null)
+			return;
+		foreach (T i in self)
+			action(i);
 	}
 }

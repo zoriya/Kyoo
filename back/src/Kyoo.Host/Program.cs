@@ -19,31 +19,30 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 
-namespace Kyoo.Host
+namespace Kyoo.Host;
+
+/// <summary>
+/// Program entrypoint.
+/// </summary>
+public static class Program
 {
 	/// <summary>
-	/// Program entrypoint.
+	/// The string representation of the environment used in <see cref="IWebHostEnvironment"/>.
 	/// </summary>
-	public static class Program
-	{
-		/// <summary>
-		/// The string representation of the environment used in <see cref="IWebHostEnvironment"/>.
-		/// </summary>
 #if DEBUG
-		private const string Environment = "Development";
+	private const string Environment = "Development";
 #else
-		private const string Environment = "Production";
+	private const string Environment = "Production";
 #endif
 
-		/// <summary>
-		/// Main function of the program
-		/// </summary>
-		/// <param name="args">Command line arguments</param>
-		/// <returns>A <see cref="Task"/> representing the lifetime of the program.</returns>
-		public static Task Main(string[] args)
-		{
-			Application application = new(Environment);
-			return application.Start(args);
-		}
+	/// <summary>
+	/// Main function of the program
+	/// </summary>
+	/// <param name="args">Command line arguments</param>
+	/// <returns>A <see cref="Task"/> representing the lifetime of the program.</returns>
+	public static Task Main(string[] args)
+	{
+		Application application = new(Environment);
+		return application.Start(args);
 	}
 }

@@ -16,21 +16,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-namespace Kyoo.Abstractions.Models
+namespace Kyoo.Abstractions.Models;
+
+/// <summary>
+/// The links to see a movie or an episode.
+/// </summary>
+public class VideoLinks
 {
 	/// <summary>
-	/// The links to see a movie or an episode.
+	/// The direct link to the unprocessed video (pristine quality).
 	/// </summary>
-	public class VideoLinks
-	{
-		/// <summary>
-		/// The direct link to the unprocessed video (pristine quality).
-		/// </summary>
-		public string Direct { get; set; }
+	public string Direct { get; set; }
 
-		/// <summary>
-		/// The link to an HLS master playlist containing all qualities available for this video.
-		/// </summary>
-		public string Hls { get; set; }
-	}
+	/// <summary>
+	/// The link to an HLS master playlist containing all qualities available for this video.
+	/// </summary>
+	public string Hls { get; set; }
 }

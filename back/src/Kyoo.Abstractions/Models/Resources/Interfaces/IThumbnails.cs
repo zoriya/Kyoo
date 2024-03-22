@@ -23,105 +23,101 @@ using System.Globalization;
 using System.Text.Json.Serialization;
 using Kyoo.Abstractions.Models.Attributes;
 
-namespace Kyoo.Abstractions.Models
+namespace Kyoo.Abstractions.Models;
+
+/// <summary>
+/// An interface representing items that contains images (like posters, thumbnails, logo, banners...)
+/// </summary>
+public interface IThumbnails
 {
 	/// <summary>
-	/// An interface representing items that contains images (like posters, thumbnails, logo, banners...)
+	/// A poster is a 2/3 format image with the cover of the resource.
 	/// </summary>
-	public interface IThumbnails
-	{
-		/// <summary>
-		/// A poster is a 2/3 format image with the cover of the resource.
-		/// </summary>
-		public Image? Poster { get; set; }
-
-		/// <summary>
-		/// A thumbnail is a 16/9 format image, it could ether be used as a background or as a preview but it usually
-		/// is not an official image.
-		/// </summary>
-		public Image? Thumbnail { get; set; }
-
-		/// <summary>
-		/// A logo is a small image representing the resource.
-		/// </summary>
-		public Image? Logo { get; set; }
-	}
-
-	[TypeConverter(typeof(ImageConvertor))]
-	[SqlFirstColumn(nameof(Source))]
-	public class Image
-	{
-		/// <summary>
-		/// The original image from another server.
-		/// </summary>
-		public string Source { get; set; }
-
-		/// <summary>
-		/// A hash to display as placeholder while the image is loading.
-		/// </summary>
-		[MaxLength(32)]
-		public string Blurhash { get; set; }
-
-		public Image() { }
-
-		[JsonConstructor]
-		public Image(string source, string? blurhash = null)
-		{
-			Source = source;
-			Blurhash = blurhash ?? "000000";
-		}
-
-		public class ImageConvertor : TypeConverter
-		{
-			/// <inheritdoc />
-			public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
-			{
-				if (sourceType == typeof(string))
-					return true;
-				return base.CanConvertFrom(context, sourceType);
-			}
-
-			/// <inheritdoc />
-			public override object ConvertFrom(
-				ITypeDescriptorContext? context,
-				CultureInfo? culture,
-				object value
-			)
-			{
-				if (value is not string source)
-					return base.ConvertFrom(context, culture, value)!;
-				return new Image(source);
-			}
-
-			/// <inheritdoc />
-			public override bool CanConvertTo(
-				ITypeDescriptorContext? context,
-				Type? destinationType
-			)
-			{
-				return false;
-			}
-		}
-	}
+	public Image? Poster { get; set; }
 
 	/// <summary>
-	/// The quality of an image
+	/// A thumbnail is a 16/9 format image, it could ether be used as a background or as a preview but it usually
+	/// is not an official image.
 	/// </summary>
-	public enum ImageQuality
+	public Image? Thumbnail { get; set; }
+
+	/// <summary>
+	/// A logo is a small image representing the resource.
+	/// </summary>
+	public Image? Logo { get; set; }
+}
+
+[TypeConverter(typeof(ImageConvertor))]
+[SqlFirstColumn(nameof(Source))]
+public class Image
+{
+	/// <summary>
+	/// The original image from another server.
+	/// </summary>
+	public string Source { get; set; }
+
+	/// <summary>
+	/// A hash to display as placeholder while the image is loading.
+	/// </summary>
+	[MaxLength(32)]
+	public string Blurhash { get; set; }
+
+	public Image() { }
+
+	[JsonConstructor]
+	public Image(string source, string? blurhash = null)
 	{
-		/// <summary>
-		/// Small
-		/// </summary>
-		Low,
-
-		/// <summary>
-		/// Medium
-		/// </summary>
-		Medium,
-
-		/// <summary>
-		/// Large
-		/// </summary>
-		High,
+		Source = source;
+		Blurhash = blurhash ?? "000000";
 	}
+
+	public class ImageConvertor : TypeConverter
+	{
+		/// <inheritdoc />
+		public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
+		{
+			if (sourceType == typeof(string))
+				return true;
+			return base.CanConvertFrom(context, sourceType);
+		}
+
+		/// <inheritdoc />
+		public override object ConvertFrom(
+			ITypeDescriptorContext? context,
+			CultureInfo? culture,
+			object value
+		)
+		{
+			if (value is not string source)
+				return base.ConvertFrom(context, culture, value)!;
+			return new Image(source);
+		}
+
+		/// <inheritdoc />
+		public override bool CanConvertTo(ITypeDescriptorContext? context, Type? destinationType)
+		{
+			return false;
+		}
+	}
+}
+
+/// <summary>
+/// The quality of an image
+/// </summary>
+public enum ImageQuality
+{
+	/// <summary>
+	/// Small
+	/// </summary>
+	Low,
+
+	/// <summary>
+	/// Medium
+	/// </summary>
+	Medium,
+
+	/// <summary>
+	/// Large
+	/// </summary>
+	High,
 }

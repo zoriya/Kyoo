@@ -25,103 +25,102 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Utils;
 
-namespace Kyoo.Core.Controllers
+namespace Kyoo.Core.Controllers;
+
+/// <summary>
+/// A local repository to handle library items.
+/// </summary>
+public class LibraryItemRepository : DapperRepository<ILibraryItem>
 {
-	/// <summary>
-	/// A local repository to handle library items.
-	/// </summary>
-	public class LibraryItemRepository : DapperRepository<ILibraryItem>
+	// language=PostgreSQL
+	protected override FormattableString Sql =>
+		$"""
+			select
+				s.*, -- Show as s
+				m.*,
+				c.*
+				/* includes */
+			from
+				shows as s
+				full outer join (
+				select
+					* -- Movie
+				from
+					movies) as m on false
+				full outer join(
+					select
+						c.* -- Collection as c
+					from
+						collections as c
+					left join link_collection_show as ls on ls.collection_id = c.id
+					left join link_collection_movie as lm on lm.collection_id = c.id
+					group by c.id
+					having count(*) > 1
+				) as c on false
+			""";
+
+	protected override Dictionary<string, Type> Config =>
+		new()
+		{
+			{ "s", typeof(Show) },
+			{ "m", typeof(Movie) },
+			{ "c", typeof(Collection) }
+		};
+
+	protected override ILibraryItem Mapper(List<object?> items)
+	{
+		if (items[0] is Show show && show.Id != Guid.Empty)
+			return show;
+		if (items[1] is Movie movie && movie.Id != Guid.Empty)
+			return movie;
+		if (items[2] is Collection collection && collection.Id != Guid.Empty)
+			return collection;
+		throw new InvalidDataException();
+	}
+
+	public LibraryItemRepository(DbConnection database, SqlVariableContext context)
+		: base(database, context) { }
+
+	public async Task<ICollection<ILibraryItem>> GetAllOfCollection(
+		Guid collectionId,
+		Filter<ILibraryItem>? filter = default,
+		Sort<ILibraryItem>? sort = default,
+		Include<ILibraryItem>? include = default,
+		Pagination? limit = default
+	)
 	{
 		// language=PostgreSQL
-		protected override FormattableString Sql =>
-			$"""
+		FormattableString sql = $"""
+			select
+				s.*,
+				m.*
+				/* includes */
+			from (
 				select
-					s.*, -- Show as s
-					m.*,
-					c.*
-					/* includes */
+					* -- Show
 				from
-					shows as s
-					full outer join (
-					select
-						* -- Movie
-					from
-						movies) as m on false
-					full outer join(
-						select
-							c.* -- Collection as c
-						from
-							collections as c
-						left join link_collection_show as ls on ls.collection_id = c.id
-						left join link_collection_movie as lm on lm.collection_id = c.id
-						group by c.id
-						having count(*) > 1
-					) as c on false
-				""";
-
-		protected override Dictionary<string, Type> Config =>
-			new()
-			{
-				{ "s", typeof(Show) },
-				{ "m", typeof(Movie) },
-				{ "c", typeof(Collection) }
-			};
-
-		protected override ILibraryItem Mapper(List<object?> items)
-		{
-			if (items[0] is Show show && show.Id != Guid.Empty)
-				return show;
-			if (items[1] is Movie movie && movie.Id != Guid.Empty)
-				return movie;
-			if (items[2] is Collection collection && collection.Id != Guid.Empty)
-				return collection;
-			throw new InvalidDataException();
-		}
-
-		public LibraryItemRepository(DbConnection database, SqlVariableContext context)
-			: base(database, context) { }
-
-		public async Task<ICollection<ILibraryItem>> GetAllOfCollection(
-			Guid collectionId,
-			Filter<ILibraryItem>? filter = default,
-			Sort<ILibraryItem>? sort = default,
-			Include<ILibraryItem>? include = default,
-			Pagination? limit = default
-		)
-		{
-			// language=PostgreSQL
-			FormattableString sql = $"""
+					shows
+				inner join link_collection_show as ls on ls.show_id = id and ls.collection_id = {collectionId}
+			) as s
+			full outer join (
 				select
-					s.*,
-					m.*
-					/* includes */
-				from (
-					select
-						* -- Show
-					from
-						shows
-					inner join link_collection_show as ls on ls.show_id = id and ls.collection_id = {collectionId}
-				) as s
-				full outer join (
-					select
-						* -- Movie
-					from
-						movies
-					inner join link_collection_movie as lm on lm.movie_id = id and lm.collection_id = {collectionId}
-				) as m on false
-				""";
+					* -- Movie
+				from
+					movies
+				inner join link_collection_movie as lm on lm.movie_id = id and lm.collection_id = {collectionId}
+			) as m on false
+			""";
 
-			return await Database.Query<ILibraryItem>(
-				sql,
-				new() { { "s", typeof(Show) }, { "m", typeof(Movie) }, },
-				Mapper,
-				(id) => Get(id),
-				Context,
-				include,
-				filter,
-				sort ?? new Sort<ILibraryItem>.Default(),
-				limit ?? new()
-			);
-		}
+		return await Database.Query<ILibraryItem>(
+			sql,
+			new() { { "s", typeof(Show) }, { "m", typeof(Movie) }, },
+			Mapper,
+			(id) => Get(id),
+			Context,
+			include,
+			filter,
+			sort ?? new Sort<ILibraryItem>.Default(),
+			limit ?? new()
+		);
 	}
 }
