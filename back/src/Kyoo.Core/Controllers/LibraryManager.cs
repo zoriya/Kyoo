@@ -38,7 +38,6 @@ namespace Kyoo.Core.Controllers
 			IRepository<Show> showRepository,
 			IRepository<Season> seasonRepository,
 			IRepository<Episode> episodeRepository,
-			IRepository<People> peopleRepository,
 			IRepository<Studio> studioRepository,
 			IRepository<User> userRepository
 		)
@@ -51,7 +50,6 @@ namespace Kyoo.Core.Controllers
 			Shows = showRepository;
 			Seasons = seasonRepository;
 			Episodes = episodeRepository;
-			People = peopleRepository;
 			Studios = studioRepository;
 			Users = userRepository;
 
@@ -64,7 +62,6 @@ namespace Kyoo.Core.Controllers
 				Shows,
 				Seasons,
 				Episodes,
-				People,
 				Studios,
 				Users
 			};
@@ -93,9 +90,6 @@ namespace Kyoo.Core.Controllers
 
 		/// <inheritdoc />
 		public IRepository<Episode> Episodes { get; }
-
-		/// <inheritdoc />
-		public IRepository<People> People { get; }
 
 		/// <inheritdoc />
 		public IRepository<Studio> Studios { get; }

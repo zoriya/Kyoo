@@ -36,7 +36,6 @@ namespace Kyoo.Abstractions.Models
 		: IQuery,
 			IResource,
 			IMetadata,
-			IOnMerge,
 			IThumbnails,
 			IAddedDate,
 			ILibraryItem,
@@ -147,11 +146,6 @@ namespace Kyoo.Abstractions.Models
 		[LoadableRelation(nameof(StudioId))]
 		public Studio? Studio { get; set; }
 
-		// /// <summary>
-		// /// The list of people that made this show.
-		// /// </summary>
-		// [SerializeIgnore] public ICollection<PeopleRole>? People { get; set; }
-
 		/// <summary>
 		/// The list of collections that contains this show.
 		/// </summary>
@@ -179,16 +173,6 @@ namespace Kyoo.Abstractions.Models
 
 		// There is a global query filter to filter by user so we just need to do single.
 		private MovieWatchStatus? _WatchStatus => Watched!.FirstOrDefault();
-
-		/// <inheritdoc />
-		public void OnMerge(object merged)
-		{
-			// if (People != null)
-			// {
-			// 	foreach (PeopleRole link in People)
-			// 		link.Movie = this;
-			// }
-		}
 
 		public Movie() { }
 

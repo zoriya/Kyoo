@@ -66,7 +66,6 @@ namespace Kyoo.Core
 			builder.RegisterRepository<ShowRepository>();
 			builder.RegisterRepository<SeasonRepository>();
 			builder.RegisterRepository<EpisodeRepository>();
-			builder.RegisterRepository<PeopleRepository>();
 			builder.RegisterRepository<StudioRepository>();
 			builder.RegisterRepository<UserRepository>().As<IUserRepository>();
 			builder.RegisterRepository<NewsRepository>();

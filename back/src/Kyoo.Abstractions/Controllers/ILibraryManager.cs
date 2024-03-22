@@ -69,11 +69,6 @@ namespace Kyoo.Abstractions.Controllers
 		IRepository<Episode> Episodes { get; }
 
 		/// <summary>
-		/// The repository that handle people.
-		/// </summary>
-		IRepository<People> People { get; }
-
-		/// <summary>
 		/// The repository that handle studios.
 		/// </summary>
 		IRepository<Studio> Studios { get; }

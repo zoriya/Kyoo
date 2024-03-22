@@ -78,11 +78,6 @@ namespace Kyoo.Postgresql
 		/// </summary>
 		public DbSet<Episode> Episodes { get; set; }
 
-		// /// <summary>
-		// /// All people of Kyoo. See <see cref="People"/>.
-		// /// </summary>
-		// public DbSet<People> People { get; set; }
-
 		/// <summary>
 		/// All studios of Kyoo. See <see cref="Studio"/>.
 		/// </summary>
@@ -92,11 +87,6 @@ namespace Kyoo.Postgresql
 		/// The list of registered users.
 		/// </summary>
 		public DbSet<User> Users { get; set; }
-
-		// /// <summary>
-		// /// All people's role. See <see cref="PeopleRole"/>.
-		// /// </summary>
-		// public DbSet<PeopleRole> PeopleRoles { get; set; }
 
 		public DbSet<MovieWatchStatus> MovieWatchStatus { get; set; }
 
@@ -275,8 +265,6 @@ namespace Kyoo.Postgresql
 				.Ignore(x => x.PreviousEpisode)
 				.Ignore(x => x.NextEpisode);
 
-			// modelBuilder.Entity<PeopleRole>()
-			// 	.Ignore(x => x.ForPeople);
 			modelBuilder
 				.Entity<Show>()
 				.HasMany(x => x.Seasons)
@@ -312,14 +300,12 @@ namespace Kyoo.Postgresql
 			_HasMetadata<Show>(modelBuilder);
 			_HasMetadata<Season>(modelBuilder);
 			_HasMetadata<Episode>(modelBuilder);
-			// _HasMetadata<People>(modelBuilder);
 			_HasMetadata<Studio>(modelBuilder);
 
 			_HasImages<Collection>(modelBuilder);
 			_HasImages<Movie>(modelBuilder);
 			_HasImages<Show>(modelBuilder);
 			_HasImages<Season>(modelBuilder);
-			// _HasImages<People>(modelBuilder);
 			_HasImages<Episode>(modelBuilder);
 
 			_HasAddedDate<Collection>(modelBuilder);
@@ -382,9 +368,6 @@ namespace Kyoo.Postgresql
 			modelBuilder.Entity<Episode>().Ignore(x => x.WatchStatus);
 
 			modelBuilder.Entity<Collection>().HasIndex(x => x.Slug).IsUnique();
-			// modelBuilder.Entity<People>()
-			// 	.HasIndex(x => x.Slug)
-			// 	.IsUnique();
 			modelBuilder.Entity<Movie>().HasIndex(x => x.Slug).IsUnique();
 			modelBuilder.Entity<Show>().HasIndex(x => x.Slug).IsUnique();
 			modelBuilder.Entity<Studio>().HasIndex(x => x.Slug).IsUnique();
