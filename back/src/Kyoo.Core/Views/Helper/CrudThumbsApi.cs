@@ -74,10 +74,10 @@ public class CrudThumbsApi<T> : CrudApi<T>
 		if (!identifier.Match(id => false, slug => slug == "random"))
 		{
 			// Allow clients to cache the image for 6 month.
-			Response.Headers.Add("Cache-Control", $"public, max-age={60 * 60 * 24 * 31 * 6}");
+			Response.Headers.CacheControl = $"public, max-age={60 * 60 * 24 * 31 * 6}";
 		}
 		else
-			Response.Headers.Add("Cache-Control", $"public, no-store");
+			Response.Headers.CacheControl = $"public, no-store";
 		return PhysicalFile(Path.GetFullPath(path), "image/webp", true);
 	}
 

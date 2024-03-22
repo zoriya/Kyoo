@@ -17,7 +17,6 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Runtime.Serialization;
 
 namespace Kyoo.Abstractions.Models.Exceptions;
 
@@ -29,7 +28,4 @@ public class UnauthorizedException : Exception
 
 	public UnauthorizedException(string message)
 		: base(message) { }
-
-	protected UnauthorizedException(SerializationInfo info, StreamingContext context)
-		: base(info, context) { }
 }

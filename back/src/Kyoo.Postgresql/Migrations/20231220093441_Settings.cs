@@ -2,27 +2,26 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Kyoo.Postgresql.Migrations
+namespace Kyoo.Postgresql.Migrations;
+
+/// <inheritdoc />
+public partial class Settings : Migration
 {
 	/// <inheritdoc />
-	public partial class Settings : Migration
+	protected override void Up(MigrationBuilder migrationBuilder)
 	{
-		/// <inheritdoc />
-		protected override void Up(MigrationBuilder migrationBuilder)
-		{
-			migrationBuilder.AddColumn<string>(
-				name: "settings",
-				table: "users",
-				type: "json",
-				nullable: false,
-				defaultValue: "{}"
-			);
-		}
+		migrationBuilder.AddColumn<string>(
+			name: "settings",
+			table: "users",
+			type: "json",
+			nullable: false,
+			defaultValue: "{}"
+		);
+	}
 
-		/// <inheritdoc />
-		protected override void Down(MigrationBuilder migrationBuilder)
-		{
-			migrationBuilder.DropColumn(name: "settings", table: "users");
-		}
+	/// <inheritdoc />
+	protected override void Down(MigrationBuilder migrationBuilder)
+	{
+		migrationBuilder.DropColumn(name: "settings", table: "users");
 	}
 }

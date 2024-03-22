@@ -17,7 +17,6 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Runtime.Serialization;
 
 namespace Kyoo.Abstractions.Models.Exceptions;
 
@@ -39,12 +38,4 @@ public class ItemNotFoundException : Exception
 	/// <param name="message">The message of the exception</param>
 	public ItemNotFoundException(string message)
 		: base(message) { }
-
-	/// <summary>
-	/// The serialization constructor
-	/// </summary>
-	/// <param name="info">Serialization infos</param>
-	/// <param name="context">The serialization context</param>
-	protected ItemNotFoundException(SerializationInfo info, StreamingContext context)
-		: base(info, context) { }
 }

@@ -446,7 +446,7 @@ public class AuthApi(
 	{
 		Stream img = await thumbs.GetUserImage(User.GetIdOrThrow());
 		// Allow clients to cache the image for 6 month.
-		Response.Headers.Add("Cache-Control", $"public, max-age={60 * 60 * 24 * 31 * 6}");
+		Response.Headers.CacheControl = $"public, max-age={60 * 60 * 24 * 31 * 6}";
 		return File(img, "image/webp", true);
 	}
 
