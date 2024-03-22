@@ -73,11 +73,6 @@ namespace Kyoo.Core.Api
 					return fields.Contains(member.Name);
 				};
 			}
-
-			if (member.GetCustomAttribute<SerializeIgnoreAttribute>() != null)
-				property.ShouldSerialize = _ => false;
-			if (member.GetCustomAttribute<DeserializeIgnoreAttribute>() != null)
-				property.ShouldDeserialize = _ => false;
 			return property;
 		}
 
@@ -111,16 +106,9 @@ namespace Kyoo.Core.Api
 			return properties;
 		}
 
-		public class FixedValueProvider : IValueProvider
+		public class FixedValueProvider(object value) : IValueProvider
 		{
-			private readonly object _value;
-
-			public FixedValueProvider(object value)
-			{
-				_value = value;
-			}
-
-			public object GetValue(object target) => _value;
+			public object GetValue(object target) => value;
 
 			public void SetValue(object target, object? value) =>
 				throw new NotImplementedException();

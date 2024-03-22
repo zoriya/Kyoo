@@ -21,11 +21,11 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Text.Json.Serialization;
 using EntityFrameworkCore.Projectables;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Utils;
-using Newtonsoft.Json;
 
 namespace Kyoo.Abstractions.Models
 {
@@ -119,11 +119,11 @@ namespace Kyoo.Abstractions.Models
 		/// <inheritdoc />
 		public Image? Logo { get; set; }
 
-		[SerializeIgnore]
+		[JsonIgnore]
 		[Column("air_date")]
 		public DateTime? StartAir => AirDate;
 
-		[SerializeIgnore]
+		[JsonIgnore]
 		[Column("air_date")]
 		public DateTime? EndAir => AirDate;
 
@@ -138,7 +138,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the Studio that made this show.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public Guid? StudioId { get; set; }
 
 		/// <summary>
@@ -155,7 +155,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The list of collections that contains this show.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public ICollection<Collection>? Collections { get; set; }
 
 		/// <summary>
@@ -164,7 +164,7 @@ namespace Kyoo.Abstractions.Models
 		public VideoLinks Links =>
 			new() { Direct = $"/movie/{Slug}/direct", Hls = $"/movie/{Slug}/master.m3u8", };
 
-		[SerializeIgnore]
+		[JsonIgnore]
 		public ICollection<MovieWatchStatus>? Watched { get; set; }
 
 		/// <summary>

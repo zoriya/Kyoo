@@ -50,7 +50,6 @@ namespace Kyoo.Core.Api
 			options.SerializerSettings.ContractResolver = new JsonSerializerContract(
 				_httpContextAccessor
 			);
-			options.SerializerSettings.Converters.Add(new PeopleRoleConverter());
 		}
 	}
 }

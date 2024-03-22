@@ -19,10 +19,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Kyoo.Abstractions.Controllers;
-using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Utils;
-using Newtonsoft.Json;
 
 namespace Kyoo.Abstractions.Models
 {
@@ -65,13 +64,13 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The list of movies contained in this collection.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public ICollection<Movie>? Movies { get; set; }
 
 		/// <summary>
 		/// The list of shows contained in this collection.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public ICollection<Show>? Shows { get; set; }
 
 		/// <inheritdoc />

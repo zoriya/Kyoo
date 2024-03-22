@@ -20,10 +20,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Kyoo.Abstractions.Controllers;
-using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Utils;
-using Newtonsoft.Json;
 
 namespace Kyoo.Abstractions.Models
 {
@@ -62,7 +61,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The list of roles this person has played in. See <see cref="PeopleRole"/> for more information.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public ICollection<PeopleRole>? Roles { get; set; }
 
 		public People() { }

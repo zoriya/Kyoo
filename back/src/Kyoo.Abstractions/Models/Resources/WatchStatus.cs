@@ -17,6 +17,7 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Text.Json.Serialization;
 using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Abstractions.Models
@@ -62,7 +63,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The user that started watching this episode.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public User User { get; set; }
 
 		/// <summary>
@@ -74,7 +75,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The <see cref="Movie"/> started.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public Movie Movie { get; set; }
 
 		/// <inheritdoc/>
@@ -119,7 +120,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The user that started watching this episode.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public User User { get; set; }
 
 		/// <summary>
@@ -131,7 +132,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The <see cref="Episode"/> started.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public Episode Episode { get; set; }
 
 		/// <inheritdoc/>
@@ -176,7 +177,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The user that started watching this episode.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public User User { get; set; }
 
 		/// <summary>
@@ -188,7 +189,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The <see cref="Show"/> started.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public Show Show { get; set; }
 
 		/// <inheritdoc/>

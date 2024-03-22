@@ -20,9 +20,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using EntityFrameworkCore.Projectables;
-using JetBrains.Annotations;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
 
@@ -49,8 +49,6 @@ namespace Kyoo.Abstractions.Models
 					return $"{ShowId}-s{SeasonNumber}";
 				return $"{ShowSlug ?? Show?.Slug}-s{SeasonNumber}";
 			}
-			[UsedImplicitly]
-			[NotNull]
 			private set
 			{
 				Match match = Regex.Match(value, @"(?<show>.+)-s(?<season>\d+)");
@@ -67,7 +65,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The slug of the Show that contain this episode. If this is not set, this season is ill-formed.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public string? ShowSlug { private get; set; }
 
 		/// <summary>
@@ -124,7 +122,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The list of episodes that this season contains.
 		/// </summary>
-		[SerializeIgnore]
+		[JsonIgnore]
 		public ICollection<Episode>? Episodes { get; set; }
 
 		/// <summary>
