@@ -95,8 +95,11 @@ namespace Kyoo.Core
 				})
 				.AddJsonOptions(x =>
 				{
+					x.JsonSerializerOptions.TypeInfoResolver = new WithKindResolver()
+					{
+						Modifiers = { WithKindResolver.HandleLoadableFields }
+					};
 					x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-					x.JsonSerializerOptions.TypeInfoResolver = new WithKindResolver();
 					x.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 				})
 				.AddDataAnnotations()

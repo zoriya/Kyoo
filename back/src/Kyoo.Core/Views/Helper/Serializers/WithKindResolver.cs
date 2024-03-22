@@ -18,10 +18,13 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Attributes;
+using Microsoft.AspNetCore.Http;
 using static System.Text.Json.JsonNamingPolicy;
 
 namespace Kyoo.Core.Api;
@@ -52,5 +55,25 @@ public class WithKindResolver : DefaultJsonTypeInfoResolver
 		}
 
 		return jsonTypeInfo;
+	}
+
+	private static readonly IHttpContextAccessor _accessor = new HttpContextAccessor();
+
+	public static void HandleLoadableFields(JsonTypeInfo info)
+	{
+		foreach (JsonPropertyInfo prop in info.Properties)
+		{
+			object[] attributes =
+				prop.AttributeProvider?.GetCustomAttributes(typeof(LoadableRelationAttribute), true)
+				?? Array.Empty<object>();
+			if (attributes.FirstOrDefault() is not LoadableRelationAttribute relation)
+				continue;
+			prop.ShouldSerialize = (_, _) =>
+			{
+				if (_accessor?.HttpContext?.Items["fields"] is not ICollection<string> fields)
+					return false;
+				return fields.Contains(prop.Name, StringComparer.InvariantCultureIgnoreCase);
+			};
+		}
 	}
 }
