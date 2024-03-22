@@ -18,7 +18,6 @@
 
 using System;
 using System.Text.Json.Serialization;
-using Newtonsoft.Json;
 
 namespace Kyoo.Abstractions.Models;
 
@@ -36,21 +35,18 @@ public class JwtToken(string accessToken, string refreshToken, TimeSpan expireIn
 	/// <summary>
 	/// The type of this token (always a Bearer).
 	/// </summary>
-	[JsonProperty("token_type")]
 	[JsonPropertyName("token_type")]
 	public string TokenType => "Bearer";
 
 	/// <summary>
 	/// The access token used to authorize requests.
 	/// </summary>
-	[JsonProperty("access_token")]
 	[JsonPropertyName("access_token")]
 	public string AccessToken { get; set; } = accessToken;
 
 	/// <summary>
 	/// The refresh token used to retrieve a new access/refresh token when the access token has expired.
 	/// </summary>
-	[JsonProperty("refresh_token")]
 	[JsonPropertyName("refresh_token")]
 	public string RefreshToken { get; set; } = refreshToken;
 
@@ -58,14 +54,12 @@ public class JwtToken(string accessToken, string refreshToken, TimeSpan expireIn
 	/// When the access token will expire. After this time, the refresh token should be used to retrieve.
 	/// a new token.cs
 	/// </summary>
-	[JsonProperty("expire_in")]
 	[JsonPropertyName("expire_in")]
 	public TimeSpan ExpireIn => ExpireAt.Subtract(DateTime.UtcNow);
 
 	/// <summary>
 	/// The exact date at which the access token will expire.
 	/// </summary>
-	[JsonProperty("expire_at")]
 	[JsonPropertyName("expire_at")]
 	public DateTime ExpireAt { get; set; } = DateTime.UtcNow + expireIn;
 }

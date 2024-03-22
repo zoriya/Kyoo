@@ -17,7 +17,7 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Data;
-using Newtonsoft.Json;
+using System.Text.Json;
 using Npgsql;
 using NpgsqlTypes;
 using static Dapper.SqlMapper;
@@ -30,13 +30,13 @@ public class JsonTypeHandler<T> : TypeHandler<T>
 	public override T? Parse(object value)
 	{
 		if (value is string str)
-			return JsonConvert.DeserializeObject<T>(str);
+			return JsonSerializer.Deserialize<T>(str);
 		return default;
 	}
 
 	public override void SetValue(IDbDataParameter parameter, T? value)
 	{
-		parameter.Value = JsonConvert.SerializeObject(value);
+		parameter.Value = JsonSerializer.Serialize(value);
 		((NpgsqlParameter)parameter).NpgsqlDbType = NpgsqlDbType.Jsonb;
 	}
 }
