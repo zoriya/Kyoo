@@ -18,6 +18,7 @@
 
 using System.Text;
 using System.Text.Json;
+using Kyoo.Utils;
 
 namespace Kyoo.RabbitMq;
 
@@ -34,6 +35,6 @@ public class Message<T>
 
 	public byte[] AsBytes()
 	{
-		return Encoding.UTF8.GetBytes(JsonSerializer.Serialize(this));
+		return Encoding.UTF8.GetBytes(JsonSerializer.Serialize(this, Utility.JsonOptions));
 	}
 }

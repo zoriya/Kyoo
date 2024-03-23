@@ -28,6 +28,7 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Core.Api;
 using Kyoo.Core.Controllers;
+using Kyoo.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
@@ -95,9 +96,9 @@ public class CoreModule : IPlugin
 			})
 			.AddJsonOptions(x =>
 			{
-				x.JsonSerializerOptions.TypeInfoResolver = new WithKindResolver()
+				x.JsonSerializerOptions.TypeInfoResolver = new JsonKindResolver()
 				{
-					Modifiers = { WithKindResolver.HandleLoadableFields }
+					Modifiers = { IncludeBinder.HandleLoadableFields }
 				};
 				x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 				x.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;

@@ -17,9 +17,14 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
+using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Utils;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 
@@ -46,6 +51,26 @@ public class IncludeBinder : IModelBinder
 		catch (TargetInvocationException ex)
 		{
 			throw ex.InnerException!;
+		}
+	}
+
+	private static readonly IHttpContextAccessor _accessor = new HttpContextAccessor();
+
+	public static void HandleLoadableFields(JsonTypeInfo info)
+	{
+		foreach (JsonPropertyInfo prop in info.Properties)
+		{
+			object[] attributes =
+				prop.AttributeProvider?.GetCustomAttributes(typeof(LoadableRelationAttribute), true)
+				?? [];
+			if (attributes.FirstOrDefault() is not LoadableRelationAttribute relation)
+				continue;
+			prop.ShouldSerialize = (_, _) =>
+			{
+				if (_accessor?.HttpContext?.Items["fields"] is not ICollection<string> fields)
+					return false;
+				return fields.Contains(prop.Name, StringComparer.InvariantCultureIgnoreCase);
+			};
 		}
 	}
 

@@ -28,9 +28,9 @@ using Kyoo.Abstractions.Models.Attributes;
 using Microsoft.AspNetCore.Http;
 using static System.Text.Json.JsonNamingPolicy;
 
-namespace Kyoo.Core.Api;
+namespace Kyoo.Utils;
 
-public class WithKindResolver : DefaultJsonTypeInfoResolver
+public class JsonKindResolver : DefaultJsonTypeInfoResolver
 {
 	public override JsonTypeInfo GetTypeInfo(Type type, JsonSerializerOptions options)
 	{
@@ -75,25 +75,5 @@ public class WithKindResolver : DefaultJsonTypeInfoResolver
 		}
 
 		return jsonTypeInfo;
-	}
-
-	private static readonly IHttpContextAccessor _accessor = new HttpContextAccessor();
-
-	public static void HandleLoadableFields(JsonTypeInfo info)
-	{
-		foreach (JsonPropertyInfo prop in info.Properties)
-		{
-			object[] attributes =
-				prop.AttributeProvider?.GetCustomAttributes(typeof(LoadableRelationAttribute), true)
-				?? Array.Empty<object>();
-			if (attributes.FirstOrDefault() is not LoadableRelationAttribute relation)
-				continue;
-			prop.ShouldSerialize = (_, _) =>
-			{
-				if (_accessor?.HttpContext?.Items["fields"] is not ICollection<string> fields)
-					return false;
-				return fields.Contains(prop.Name, StringComparer.InvariantCultureIgnoreCase);
-			};
-		}
 	}
 }
