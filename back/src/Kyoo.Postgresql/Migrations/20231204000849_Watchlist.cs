@@ -65,10 +65,7 @@ public partial class Watchlist : Migration
 			},
 			constraints: table =>
 			{
-				table.PrimaryKey(
-					"pk_episode_watch_status",
-					x => new { x.user_id, x.episode_id }
-				);
+				table.PrimaryKey("pk_episode_watch_status", x => new { x.user_id, x.episode_id });
 				table.ForeignKey(
 					name: "fk_episode_watch_status_episodes_episode_id",
 					column: x => x.episode_id,

@@ -153,10 +153,7 @@ public partial class Initial : Migration
 				status = table.Column<Status>(type: "status", nullable: false),
 				rating = table.Column<int>(type: "integer", nullable: false),
 				runtime = table.Column<int>(type: "integer", nullable: false),
-				air_date = table.Column<DateTime>(
-					type: "timestamp with time zone",
-					nullable: true
-				),
+				air_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
 				added_date = table.Column<DateTime>(
 					type: "timestamp with time zone",
 					nullable: false,
@@ -219,10 +216,7 @@ public partial class Initial : Migration
 					type: "timestamp with time zone",
 					nullable: true
 				),
-				end_air = table.Column<DateTime>(
-					type: "timestamp with time zone",
-					nullable: true
-				),
+				end_air = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
 				added_date = table.Column<DateTime>(
 					type: "timestamp with time zone",
 					nullable: false,
@@ -346,10 +340,7 @@ public partial class Initial : Migration
 					nullable: false,
 					defaultValueSql: "now() at time zone 'utc'"
 				),
-				end_date = table.Column<DateTime>(
-					type: "timestamp with time zone",
-					nullable: true
-				),
+				end_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
 				poster_source = table.Column<string>(type: "text", nullable: true),
 				poster_blurhash = table.Column<string>(
 					type: "character varying(32)",

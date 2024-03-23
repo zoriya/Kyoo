@@ -24,7 +24,8 @@ namespace Kyoo.Abstractions.Models.Exceptions;
 /// An exception raised when an item already exists in the database.
 /// </summary>
 [Serializable]
-public class DuplicatedItemException(object? existing = null) : Exception("Already exists in the database.")
+public class DuplicatedItemException(object? existing = null)
+	: Exception("Already exists in the database.")
 {
 	/// <summary>
 	/// The existing object.

@@ -6,14 +6,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AspNetCore.Proxy" Version="4.4.0" />
+		<PackageReference Include="AspNetCore.Proxy" Version="4.5.0" />
 		<PackageReference Include="Blurhash.SkiaSharp" Version="2.0.0" />
-		<PackageReference Include="Dapper" Version="2.1.24" />
-		<PackageReference Include="InterpolatedSql.Dapper" Version="2.1.0" />
-		<PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" Version="7.0.0" />
-		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.9" />
-		<PackageReference Include="SkiaSharp" Version="2.88.6" />
-		<PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.88.6" />
+		<PackageReference Include="Dapper" Version="2.1.35" />
+		<PackageReference Include="InterpolatedSql.Dapper" Version="2.3.0" />
+		<PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" Version="8.0.0" />
+		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
+		<PackageReference Include="SkiaSharp" Version="2.88.7" />
+		<PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.88.7" />
 	</ItemGroup>
 
 	<ItemGroup>
