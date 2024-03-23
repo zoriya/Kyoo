@@ -77,7 +77,12 @@ public class WatchStatusRepository(
 				.Select(x => x.UserId)
 				.ToListAsync();
 			foreach (Guid userId in users)
-				await repo._SetShowStatus(ep.ShowId, userId, WatchStatus.Watching, true);
+				await repo._SetShowStatus(
+					ep.ShowId,
+					userId,
+					WatchStatus.Watching,
+					newEpisode: true
+				);
 		};
 	}
 
@@ -316,7 +321,8 @@ public class WatchStatusRepository(
 		Guid showId,
 		Guid userId,
 		WatchStatus status,
-		bool newEpisode = false
+		bool newEpisode = false,
+		bool skipStatusUpdate = false
 	)
 	{
 		int unseenEpisodeCount =
@@ -427,18 +433,21 @@ public class WatchStatusRepository(
 			.ShowWatchStatus.Upsert(ret)
 			.UpdateIf(x => status != Watching || x.Status != Completed || newEpisode)
 			.RunAsync();
-		await IWatchStatusRepository.OnShowStatusChanged(
-			new()
-			{
-				User = await users.Get(ret.UserId),
-				Resource = await shows.Get(ret.ShowId),
-				Status = ret.Status,
-				WatchedTime = ret.WatchedTime,
-				WatchedPercent = ret.WatchedPercent,
-				AddedDate = ret.AddedDate,
-				PlayedDate = ret.PlayedDate,
-			}
-		);
+		if (!skipStatusUpdate)
+		{
+			await IWatchStatusRepository.OnShowStatusChanged(
+				new()
+				{
+					User = await users.Get(ret.UserId),
+					Resource = await shows.Get(ret.ShowId),
+					Status = ret.Status,
+					WatchedTime = ret.WatchedTime,
+					WatchedPercent = ret.WatchedPercent,
+					AddedDate = ret.AddedDate,
+					PlayedDate = ret.PlayedDate,
+				}
+			);
+		}
 		return ret;
 	}
 
@@ -532,7 +541,7 @@ public class WatchStatusRepository(
 				PlayedDate = ret.PlayedDate,
 			}
 		);
-		await SetShowStatus(episode.ShowId, userId, WatchStatus.Watching);
+		await _SetShowStatus(episode.ShowId, userId, WatchStatus.Watching, skipStatusUpdate: true);
 		return ret;
 	}
 
