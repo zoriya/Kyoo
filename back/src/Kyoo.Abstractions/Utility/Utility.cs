@@ -42,7 +42,6 @@ public static class Utility
 			PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
 		};
 
-
 	/// <summary>
 	/// Convert a string to snake case. Stollen from
 	/// https://github.com/efcore/EFCore.NamingConventions/blob/main/EFCore.NamingConventions/Internal/SnakeCaseNameRewriter.cs
