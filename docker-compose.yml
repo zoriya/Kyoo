@@ -1,5 +1,3 @@
-version: "3.8"
-
 x-transcoder: &transcoder-base
   build: ./transcoder
   networks:
@@ -25,6 +23,8 @@ services:
         condition: service_healthy
       meilisearch:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     volumes:
       - kyoo:/kyoo
 
@@ -46,6 +46,15 @@ services:
       - KYOO_URL=${KYOO_URL:-http://back:5000}
     volumes:
       - ${LIBRARY_ROOT}:/video:ro
+
+  autosync:
+    build: ./autosync
+    restart: on-failure
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    env_file:
+      - ./.env
 
   transcoder:
     <<: *transcoder-base
@@ -119,9 +128,24 @@ services:
       - .env
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--spider", "http://localhost:7700/health"]
-      interval: 10s
+      interval: 30s
       timeout: 5s
       retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-alpine
+    restart: on-failure
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - 5672:5672
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
 
 volumes:
   kyoo:

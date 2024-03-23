@@ -1,0 +1,3 @@
+pika
+requests
+dataclasses-json

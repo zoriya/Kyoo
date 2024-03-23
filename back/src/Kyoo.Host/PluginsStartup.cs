@@ -27,6 +27,7 @@ using Kyoo.Core;
 using Kyoo.Host.Controllers;
 using Kyoo.Meiliseach;
 using Kyoo.Postgresql;
+using Kyoo.RabbitMq;
 using Kyoo.Swagger;
 using Kyoo.Utils;
 using Microsoft.AspNetCore.Builder;
@@ -66,6 +67,7 @@ public class PluginsStartup
 			typeof(AuthenticationModule),
 			typeof(PostgresModule),
 			typeof(MeilisearchModule),
+			typeof(RabbitMqModule),
 			typeof(SwaggerModule)
 		);
 	}

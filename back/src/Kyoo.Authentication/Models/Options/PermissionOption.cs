@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Kyoo.Abstractions.Models.Permissions;
+using Kyoo.Authentication.Models.DTO;
 
 namespace Kyoo.Authentication.Models;
 
@@ -72,10 +73,19 @@ public class OidcProvider
 	public string? LogoUrl { get; set; }
 	public string AuthorizationUrl { get; set; }
 	public string TokenUrl { get; set; }
+
+	/// <summary>
+	/// Some token endpoints do net respect the spec and require a json body instead of a form url encoded.
+	/// </summary>
+	public bool TokenUseJsonBody { get; set; }
+
 	public string ProfileUrl { get; set; }
 	public string? Scope { get; set; }
 	public string ClientId { get; set; }
 	public string Secret { get; set; }
+
+	public Func<JwtProfile, string?>? GetProfileUrl { get; init; }
+	public Func<OidcProvider, Dictionary<string, string>>? GetExtraHeaders { get; init; }
 
 	public bool Enabled =>
 		AuthorizationUrl != null
@@ -97,6 +107,9 @@ public class OidcProvider
 			Scope = KnownProviders[provider].Scope;
 			ClientId = KnownProviders[provider].ClientId;
 			Secret = KnownProviders[provider].Secret;
+			TokenUseJsonBody = KnownProviders[provider].TokenUseJsonBody;
+			GetProfileUrl = KnownProviders[provider].GetProfileUrl;
+			GetExtraHeaders = KnownProviders[provider].GetExtraHeaders;
 		}
 	}
 
@@ -120,6 +133,20 @@ public class OidcProvider
 				TokenUrl = "https://discord.com/api/oauth2/token",
 				ProfileUrl = "https://discord.com/api/users/@me",
 				Scope = "email+identify",
-			}
+			},
+			["simkl"] = new("simkl")
+			{
+				DisplayName = "Simkl",
+				LogoUrl = "https://logo.clearbit.com/simkl.com",
+				AuthorizationUrl = "https://simkl.com/oauth/authorize",
+				TokenUrl = "https://api.simkl.com/oauth/token",
+				ProfileUrl = "https://api.simkl.com/users/settings",
+				// does not seems to have scopes
+				Scope = null,
+				TokenUseJsonBody = true,
+				GetProfileUrl = (profile) => $"https://simkl.com/{profile.Sub}/dashboard/",
+				GetExtraHeaders = (OidcProvider self) =>
+					new() { ["simkl-api-key"] = self.ClientId },
+			},
 		};
 }

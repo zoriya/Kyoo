@@ -11,6 +11,7 @@ COPY src/Kyoo.Core/Kyoo.Core.csproj src/Kyoo.Core/Kyoo.Core.csproj
 COPY src/Kyoo.Host/Kyoo.Host.csproj src/Kyoo.Host/Kyoo.Host.csproj
 COPY src/Kyoo.Postgresql/Kyoo.Postgresql.csproj src/Kyoo.Postgresql/Kyoo.Postgresql.csproj
 COPY src/Kyoo.Meilisearch/Kyoo.Meilisearch.csproj src/Kyoo.Meilisearch/Kyoo.Meilisearch.csproj
+COPY src/Kyoo.RabbitMq/Kyoo.RabbitMq.csproj src/Kyoo.RabbitMq/Kyoo.RabbitMq.csproj
 COPY src/Kyoo.Swagger/Kyoo.Swagger.csproj src/Kyoo.Swagger/Kyoo.Swagger.csproj
 RUN dotnet restore -a $TARGETARCH
 

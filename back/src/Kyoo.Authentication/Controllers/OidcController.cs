@@ -22,6 +22,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -46,21 +47,18 @@ public class OidcController(
 			Encoding.UTF8.GetBytes($"{prov.ClientId}:{prov.Secret}")
 		);
 		client.DefaultRequestHeaders.Add("Authorization", $"Basic {auth}");
-
-		HttpResponseMessage resp = await client.PostAsync(
-			prov.TokenUrl,
-			new FormUrlEncodedContent(
-				new Dictionary<string, string>()
-				{
-					["code"] = code,
-					["client_id"] = prov.ClientId,
-					["client_secret"] = prov.Secret,
-					["redirect_uri"] =
-						$"{options.PublicUrl.TrimEnd('/')}/api/auth/logged/{provider}",
-					["grant_type"] = "authorization_code",
-				}
-			)
-		);
+		Dictionary<string, string> data =
+			new()
+			{
+				["code"] = code,
+				["client_id"] = prov.ClientId,
+				["client_secret"] = prov.Secret,
+				["redirect_uri"] = $"{options.PublicUrl.TrimEnd('/')}/api/auth/logged/{provider}",
+				["grant_type"] = "authorization_code",
+			};
+		HttpResponseMessage resp = prov.TokenUseJsonBody
+			? await client.PostAsJsonAsync(prov.TokenUrl, data)
+			: await client.PostAsync(prov.TokenUrl, new FormUrlEncodedContent(data));
 		if (!resp.IsSuccessStatusCode)
 			throw new ValidationException(
 				$"Invalid code or configuration. {resp.StatusCode}: {await resp.Content.ReadAsStringAsync()}"
@@ -71,22 +69,36 @@ public class OidcController(
 
 		client.DefaultRequestHeaders.Remove("Authorization");
 		client.DefaultRequestHeaders.Add("Authorization", $"{token.TokenType} {token.AccessToken}");
+		Dictionary<string, string>? extraHeaders = prov.GetExtraHeaders?.Invoke(prov);
+		if (extraHeaders is not null)
+		{
+			foreach ((string key, string value) in extraHeaders)
+				client.DefaultRequestHeaders.Add(key, value);
+		}
+
 		JwtProfile? profile = await client.GetFromJsonAsync<JwtProfile>(prov.ProfileUrl);
 		if (profile is null || profile.Sub is null)
-			throw new ValidationException("Missing sub on user object");
-		ExternalToken extToken = new() { Id = profile.Sub, Token = token, };
+			throw new ValidationException(
+				$"Missing sub on user object. Got: {JsonSerializer.Serialize(profile)}"
+			);
+		ExternalToken extToken =
+			new()
+			{
+				Id = profile.Sub,
+				Token = token,
+				ProfileUrl = prov.GetProfileUrl?.Invoke(profile),
+			};
 		User newUser = new();
 		if (profile.Email is not null)
 			newUser.Email = profile.Email;
-		string? username = profile.Username ?? profile.Name;
-		if (username is null)
+		if (profile.Username is null)
 		{
 			throw new ValidationException(
 				$"Could not find a username for the user. You may need to add more scopes. Fields: {string.Join(',', profile.Extra)}"
 			);
 		}
-		extToken.Username = username;
-		newUser.Username = username;
+		extToken.Username = profile.Username;
+		newUser.Username = profile.Username;
 		newUser.Slug = Utils.Utility.ToSlug(newUser.Username);
 		newUser.ExternalId.Add(provider, extToken);
 		return (newUser, extToken);

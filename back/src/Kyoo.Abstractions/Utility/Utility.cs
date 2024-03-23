@@ -23,6 +23,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
 namespace Kyoo.Utils;
@@ -32,6 +34,14 @@ namespace Kyoo.Utils;
 /// </summary>
 public static class Utility
 {
+	public static readonly JsonSerializerOptions JsonOptions =
+		new()
+		{
+			TypeInfoResolver = new JsonKindResolver(),
+			Converters = { new JsonStringEnumConverter() },
+			PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+		};
+
 	/// <summary>
 	/// Convert a string to snake case. Stollen from
 	/// https://github.com/efcore/EFCore.NamingConventions/blob/main/EFCore.NamingConventions/Internal/SnakeCaseNameRewriter.cs

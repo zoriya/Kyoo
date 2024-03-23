@@ -39,11 +39,8 @@ jobs:
         run: yarn lint && yarn format
 
   scanner:
-    name: "Lint scanner"
+    name: "Lint scanner/autosync"
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./scanner
     steps:
       - uses: actions/checkout@v4
 
