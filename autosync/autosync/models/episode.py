@@ -6,6 +6,7 @@ from autosync.models.show import Show
 
 from .metadataid import MetadataID
 
+
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class Episode:
