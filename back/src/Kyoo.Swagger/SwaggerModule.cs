@@ -51,7 +51,6 @@ public class SwaggerModule : IPlugin
 			document.Version = Assembly.GetExecutingAssembly().GetName().Version!.ToString(3);
 			document.DocumentName = "v1";
 			document.UseControllerSummaryAsTagDescription = true;
-			document.GenerateExamples = true;
 			document.PostProcess = options =>
 			{
 				options.Info.Contact = new OpenApiContact
@@ -82,7 +81,7 @@ public class SwaggerModule : IPlugin
 						!= AlternativeRoute;
 				return true;
 			});
-			document.SchemaGenerator.Settings.TypeMappers.Add(
+			document.SchemaSettings.TypeMappers.Add(
 				new PrimitiveTypeMapper(
 					typeof(Identifier),
 					x =>

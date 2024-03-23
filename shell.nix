@@ -8,8 +8,8 @@
     ]);
   dotnet = with pkgs.dotnetCorePackages;
     combinePackages [
-      sdk_7_0
-      aspnetcore_7_0
+      sdk_8_0
+      aspnetcore_8_0
       aspnetcore_6_0
     ];
 in
