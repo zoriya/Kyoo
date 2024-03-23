@@ -1,5 +1,3 @@
-version: "3.8"
-
 x-transcoder: &transcoder-base
   image: zoriya/kyoo_transcoder:edge
   networks:
