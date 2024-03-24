@@ -24,7 +24,6 @@ declare module "react-native-video" {
 	interface ReactVideoProps {
 		fonts?: string[];
 		subtitles?: Subtitle[];
-		onPlayPause: (isPlaying: boolean) => void;
 		onMediaUnsupported?: () => void;
 	}
 	export type VideoProps = Omit<ReactVideoProps, "source"> & {

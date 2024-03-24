@@ -115,7 +115,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 		onProgress,
 		onError,
 		onEnd,
-		onPlayPause,
+		onPlaybackStateChanged,
 		onMediaUnsupported,
 		fonts,
 	},
@@ -234,8 +234,8 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 			onLoadedMetadata={() => {
 				if (source.startPosition) setProgress(source.startPosition / 1000);
 			}}
-			onPlay={() => onPlayPause?.call(null, true)}
-			onPause={() => onPlayPause?.call(null, false)}
+			onPlay={() => onPlaybackStateChanged?.({ isPlaying: true })}
+			onPause={() => onPlaybackStateChanged?.({ isPlaying: false })}
 			onEnded={onEnd}
 			{...css({ width: "100%", height: "100%", objectFit: "contain" })}
 		/>

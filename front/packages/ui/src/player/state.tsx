@@ -220,7 +220,7 @@ export const Video = memo(function Video({
 			onLoad={(info) => {
 				setDuration(info.duration);
 			}}
-			onPlayPause={setPlay}
+			onPlaybackStateChanged={(state) => setPlay(state.isPlaying)}
 			fonts={fonts}
 			subtitles={subtitles}
 			onMediaUnsupported={() => {
