@@ -9,13 +9,12 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/zoriya/go-mediainfo"
 )
 
 type MediaInfo struct {
-	// closed if the mediainfo is ready for read. open otherwise
-	ready <-chan struct{}
 	// The sha1 of the video file.
 	Sha string `json:"sha"`
 	/// The internal path of the video file.
@@ -177,37 +176,38 @@ var SubtitleExtensions = map[string]string{
 	"vtt":    "vtt",
 }
 
-var infos = NewCMap[string, *MediaInfo]()
+type MICache struct {
+	info  *MediaInfo
+	ready sync.WaitGroup
+}
+
+var infos = NewCMap[string, *MICache]()
 
 func GetInfo(path string, sha string, route string) (*MediaInfo, error) {
 	var err error
 
-	ret, _ := infos.GetOrCreate(sha, func() *MediaInfo {
-		readyChan := make(chan struct{})
-		mi := &MediaInfo{
-			Sha:   sha,
-			ready: readyChan,
-		}
+	ret, _ := infos.GetOrCreate(sha, func() *MICache {
+		mi := &MICache{info: &MediaInfo{Sha: sha}}
+		mi.ready.Add(1)
 		go func() {
 			save_path := fmt.Sprintf("%s/%s/info.json", Settings.Metadata, sha)
-			if err := getSavedInfo(save_path, mi); err == nil {
+			if err := getSavedInfo(save_path, mi.info); err == nil {
 				log.Printf("Using mediainfo cache on filesystem for %s", path)
-				close(readyChan)
+				mi.ready.Done()
 				return
 			}
 
 			var val *MediaInfo
 			val, err = getInfo(path, route)
-			*mi = *val
-			mi.ready = readyChan
-			mi.Sha = sha
-			close(readyChan)
-			saveInfo(save_path, mi)
+			*mi.info = *val
+			mi.info.Sha = sha
+			mi.ready.Done()
+			saveInfo(save_path, mi.info)
 		}()
 		return mi
 	})
-	<-ret.ready
-	return ret, err
+	ret.ready.Wait()
+	return ret.info, err
 }
 
 func getSavedInfo[T any](save_path string, mi *T) error {
