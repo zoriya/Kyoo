@@ -103,13 +103,18 @@ const Video = forwardRef<VideoRef, VideoProps>(function Video(
 					onLoad?.(info);
 				}}
 				onBuffer={onBuffer}
-				onError={onMediaUnsupported}
+				onError={(error) => {
+					console.error(error);
+					if (mode === PlayMode.Direct) onMediaUnsupported?.();
+					else onError?.(error);
+				}}
 				selectedVideoTrack={
 					video === -1
 						? { type: SelectedVideoTrackType.AUDO }
 						: { type: SelectedVideoTrackType.RESOLUTION, value: video }
 				}
-				selectedAudioTrack={{ type: SelectedTrackType.INDEX, value: audio.index }}
+				// when video file is invalid, audio is undefined
+				selectedAudioTrack={{ type: SelectedTrackType.INDEX, value: audio?.index ?? 0 }}
 				textTracks={subtitles?.map((x) => ({
 					type: MimeTypes.get(x.codec) as any,
 					uri: x.link!,

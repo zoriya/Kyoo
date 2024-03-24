@@ -182,7 +182,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 		if (!hls) return;
 		const update = () => {
 			if (!hls) return;
-			hls.audioTrack = audio.index;
+			hls.audioTrack = audio?.index ?? 0;
 		};
 		update();
 		hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, update);
