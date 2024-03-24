@@ -97,7 +97,7 @@ public class Season : IQuery, IResource, IMetadata, IThumbnails, IAddedDate
 	/// <summary>
 	/// The starting air date of this season.
 	/// </summary>
-	public DateTime? StartDate { get; set; }
+	public DateOnly? StartDate { get; set; }
 
 	/// <inheritdoc />
 	public DateTime AddedDate { get; set; }
@@ -105,7 +105,7 @@ public class Season : IQuery, IResource, IMetadata, IThumbnails, IAddedDate
 	/// <summary>
 	/// The ending date of this season.
 	/// </summary>
-	public DateTime? EndDate { get; set; }
+	public DateOnly? EndDate { get; set; }
 
 	/// <inheritdoc />
 	public Image? Poster { get; set; }

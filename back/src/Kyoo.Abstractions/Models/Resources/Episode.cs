@@ -151,7 +151,7 @@ public class Episode : IQuery, IResource, IMetadata, IThumbnails, IAddedDate, IN
 	/// <summary>
 	/// The release date of this episode. It can be null if unknown.
 	/// </summary>
-	public DateTime? ReleaseDate { get; set; }
+	public DateOnly? ReleaseDate { get; set; }
 
 	/// <inheritdoc />
 	public DateTime AddedDate { get; set; }

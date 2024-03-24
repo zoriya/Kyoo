@@ -94,13 +94,13 @@ public class Show
 	/// <summary>
 	/// The date this show started airing. It can be null if this is unknown.
 	/// </summary>
-	public DateTime? StartAir { get; set; }
+	public DateOnly? StartAir { get; set; }
 
 	/// <summary>
 	/// The date this show finished airing.
 	/// It can also be null if this is unknown.
 	/// </summary>
-	public DateTime? EndAir { get; set; }
+	public DateOnly? EndAir { get; set; }
 
 	/// <inheritdoc />
 	public DateTime AddedDate { get; set; }
@@ -121,7 +121,7 @@ public class Show
 
 	[JsonIgnore]
 	[Column("start_air")]
-	public DateTime? AirDate => StartAir;
+	public DateOnly? AirDate => StartAir;
 
 	/// <inheritdoc />
 	public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
