@@ -63,8 +63,12 @@ public class JwtProfile
 		{
 			if (value is null)
 				return;
+			// trakt store their name there (they also store name but that's not the same).
+			Username ??= value["username"]?.ToString();
 			// simkl store their name there.
 			Username ??= value["name"]?.ToString();
+
+			Sub ??= value["ids"]?["uuid"]?.ToString();
 		}
 	}
 

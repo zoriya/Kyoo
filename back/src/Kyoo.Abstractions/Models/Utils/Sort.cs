@@ -102,7 +102,11 @@ public record Sort<T> : Sort
 			return new Conglomerate(sortBy.Split(',').Select(x => From(x, seed)).ToArray());
 
 		if (sortBy.StartsWith("random:"))
-			return new Random(uint.Parse(sortBy["random:".Length..]));
+		{
+			if (uint.TryParse(sortBy["random:".Length..], out uint sseed))
+				return new Random(sseed);
+			throw new ValidationException("Invalid random seed specified. Expected a number.");
+		}
 
 		string key = sortBy.Contains(':') ? sortBy[..sortBy.IndexOf(':')] : sortBy;
 		string? order = sortBy.Contains(':') ? sortBy[(sortBy.IndexOf(':') + 1)..] : null;
