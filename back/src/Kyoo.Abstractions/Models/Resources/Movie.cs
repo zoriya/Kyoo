@@ -104,7 +104,7 @@ public class Movie
 	/// <summary>
 	/// The date this movie aired.
 	/// </summary>
-	public DateTime? AirDate { get; set; }
+	public DateOnly? AirDate { get; set; }
 
 	/// <inheritdoc />
 	public DateTime AddedDate { get; set; }
@@ -120,11 +120,11 @@ public class Movie
 
 	[JsonIgnore]
 	[Column("air_date")]
-	public DateTime? StartAir => AirDate;
+	public DateOnly? StartAir => AirDate;
 
 	[JsonIgnore]
 	[Column("air_date")]
-	public DateTime? EndAir => AirDate;
+	public DateOnly? EndAir => AirDate;
 
 	/// <summary>
 	/// A video of a few minutes that tease the content.

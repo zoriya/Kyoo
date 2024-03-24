@@ -20,6 +20,7 @@ using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Kyoo.Abstractions.Models.Attributes;
 
@@ -47,7 +48,7 @@ public interface IThumbnails
 	public Image? Logo { get; set; }
 }
 
-[TypeConverter(typeof(ImageConvertor))]
+[JsonConverter(typeof(ImageConvertor))]
 [SqlFirstColumn(nameof(Source))]
 public class Image
 {
@@ -71,32 +72,32 @@ public class Image
 		Blurhash = blurhash ?? "000000";
 	}
 
-	public class ImageConvertor : TypeConverter
+	public class ImageConvertor : JsonConverter<Image>
 	{
 		/// <inheritdoc />
-		public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
-		{
-			if (sourceType == typeof(string))
-				return true;
-			return base.CanConvertFrom(context, sourceType);
-		}
-
-		/// <inheritdoc />
-		public override object ConvertFrom(
-			ITypeDescriptorContext? context,
-			CultureInfo? culture,
-			object value
+		public override Image? Read(
+			ref Utf8JsonReader reader,
+			Type typeToConvert,
+			JsonSerializerOptions options
 		)
 		{
-			if (value is not string source)
-				return base.ConvertFrom(context, culture, value)!;
-			return new Image(source);
+			if (reader.TokenType == JsonTokenType.String && reader.GetString() is string source)
+				return new Image(source);
+			using JsonDocument document = JsonDocument.ParseValue(ref reader);
+			return document.RootElement.Deserialize<Image>();
 		}
 
 		/// <inheritdoc />
-		public override bool CanConvertTo(ITypeDescriptorContext? context, Type? destinationType)
+		public override void Write(
+			Utf8JsonWriter writer,
+			Image value,
+			JsonSerializerOptions options
+		)
 		{
-			return false;
+			writer.WriteStartObject();
+			writer.WriteString("source", value.Source);
+			writer.WriteString("blurhash", value.Blurhash);
+			writer.WriteEndObject();
 		}
 	}
 }

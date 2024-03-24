@@ -15,14 +15,17 @@ type Keyframe struct {
 	Keyframes   []float64
 	CanTransmux bool
 	IsDone      bool
-	mutex       sync.RWMutex
-	ready       sync.WaitGroup
-	listeners   []func(keyframes []float64)
+	info        *KeyframeInfo
+}
+type KeyframeInfo struct {
+	mutex     sync.RWMutex
+	ready     sync.WaitGroup
+	listeners []func(keyframes []float64)
 }
 
 func (kf *Keyframe) Get(idx int32) float64 {
-	kf.mutex.RLock()
-	defer kf.mutex.RUnlock()
+	kf.info.mutex.RLock()
+	defer kf.info.mutex.RUnlock()
 	return kf.Keyframes[idx]
 }
 
@@ -30,8 +33,8 @@ func (kf *Keyframe) Slice(start int32, end int32) []float64 {
 	if end <= start {
 		return []float64{}
 	}
-	kf.mutex.RLock()
-	defer kf.mutex.RUnlock()
+	kf.info.mutex.RLock()
+	defer kf.info.mutex.RUnlock()
 	ref := kf.Keyframes[start:end]
 	ret := make([]float64, end-start)
 	copy(ret, ref)
@@ -39,24 +42,24 @@ func (kf *Keyframe) Slice(start int32, end int32) []float64 {
 }
 
 func (kf *Keyframe) Length() (int32, bool) {
-	kf.mutex.RLock()
-	defer kf.mutex.RUnlock()
+	kf.info.mutex.RLock()
+	defer kf.info.mutex.RUnlock()
 	return int32(len(kf.Keyframes)), kf.IsDone
 }
 
 func (kf *Keyframe) add(values []float64) {
-	kf.mutex.Lock()
-	defer kf.mutex.Unlock()
+	kf.info.mutex.Lock()
+	defer kf.info.mutex.Unlock()
 	kf.Keyframes = append(kf.Keyframes, values...)
-	for _, listener := range kf.listeners {
+	for _, listener := range kf.info.listeners {
 		listener(kf.Keyframes)
 	}
 }
 
 func (kf *Keyframe) AddListener(callback func(keyframes []float64)) {
-	kf.mutex.Lock()
-	defer kf.mutex.Unlock()
-	kf.listeners = append(kf.listeners, callback)
+	kf.info.mutex.Lock()
+	defer kf.info.mutex.Unlock()
+	kf.info.listeners = append(kf.info.listeners, callback)
 }
 
 var keyframes = NewCMap[string, *Keyframe]()
@@ -66,13 +69,14 @@ func GetKeyframes(sha string, path string) *Keyframe {
 		kf := &Keyframe{
 			Sha:    sha,
 			IsDone: false,
+			info:   &KeyframeInfo{},
 		}
-		kf.ready.Add(1)
+		kf.info.ready.Add(1)
 		go func() {
 			save_path := fmt.Sprintf("%s/%s/keyframes.json", Settings.Metadata, sha)
 			if err := getSavedInfo(save_path, kf); err == nil {
 				log.Printf("Using keyframes cache on filesystem for %s", path)
-				kf.ready.Done()
+				kf.info.ready.Done()
 				return
 			}
 
@@ -83,7 +87,7 @@ func GetKeyframes(sha string, path string) *Keyframe {
 		}()
 		return kf
 	})
-	ret.ready.Wait()
+	ret.info.ready.Wait()
 	return ret
 }
 
@@ -154,7 +158,7 @@ func getKeyframes(path string, kf *Keyframe) error {
 		if len(ret) == max {
 			kf.add(ret)
 			if done == 0 {
-				kf.ready.Done()
+				kf.info.ready.Done()
 			} else if done >= 500 {
 				max = 500
 			}
@@ -165,7 +169,7 @@ func getKeyframes(path string, kf *Keyframe) error {
 	}
 	kf.add(ret)
 	if done == 0 {
-		kf.ready.Done()
+		kf.info.ready.Done()
 	}
 	kf.IsDone = true
 	return nil

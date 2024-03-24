@@ -115,7 +115,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 		onProgress,
 		onError,
 		onEnd,
-		onPlayPause,
+		onPlaybackStateChanged,
 		onMediaUnsupported,
 		fonts,
 	},
@@ -182,7 +182,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 		if (!hls) return;
 		const update = () => {
 			if (!hls) return;
-			hls.audioTrack = audio.index;
+			hls.audioTrack = audio?.index ?? 0;
 		};
 		update();
 		hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, update);
@@ -234,9 +234,8 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 			onLoadedMetadata={() => {
 				if (source.startPosition) setProgress(source.startPosition / 1000);
 			}}
-			// BUG: If this is enabled, switching to fullscreen or opening a menu make a play/pause loop until firefox crash.
-			// onPlay={() => onPlayPause?.call(null, true)}
-			// onPause={() => onPlayPause?.call(null, false)}
+			onPlay={() => onPlaybackStateChanged?.({ isPlaying: true })}
+			onPause={() => onPlaybackStateChanged?.({ isPlaying: false })}
 			onEnded={onEnd}
 			{...css({ width: "100%", height: "100%", objectFit: "contain" })}
 		/>

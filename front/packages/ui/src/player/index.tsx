@@ -157,11 +157,11 @@ export const Player = ({
 						if (!data) return;
 						if (data.type === "movie")
 							router.replace(`/movie/${data.slug}`, undefined, {
-								experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
+								experimental: { nativeBehavior: "stack-replace", isNestedNavigator: true },
 							});
 						else
 							router.replace(next ?? `/show/${data.show!.slug}`, undefined, {
-								experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
+								experimental: { nativeBehavior: "stack-replace", isNestedNavigator: true },
 							});
 					}}
 					{...css(StyleSheet.absoluteFillObject)}

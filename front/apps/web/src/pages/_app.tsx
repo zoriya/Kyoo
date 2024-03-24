@@ -55,7 +55,7 @@ import arrayShuffle from "array-shuffle";
 import { Tooltip } from "react-tooltip";
 import { getCurrentAccount, readCookie, updateAccount } from "@kyoo/models/src/account-internal";
 import { PortalProvider } from "@gorhom/portal";
-import { ConnectionError, ErrorContext } from "@kyoo/ui";
+import { ConnectionError } from "@kyoo/ui";
 
 const font = Poppins({ weight: ["300", "400", "900"], subsets: ["latin"], display: "swap" });
 
@@ -136,17 +136,7 @@ const WithLayout = ({ Component, ...props }: { Component: ComponentType }) => {
 	const layoutInfo = (Component as QueryPage).getLayout ?? (({ page }) => page);
 	const { Layout, props: layoutProps } =
 		typeof layoutInfo === "function" ? { Layout: layoutInfo, props: {} } : layoutInfo;
-	return (
-		<Layout
-			page={
-				<ErrorContext>
-					<Component {...props} />
-				</ErrorContext>
-			}
-			randomItems={[]}
-			{...layoutProps}
-		/>
-	);
+	return <Layout page={<Component {...props} />} randomItems={[]} {...layoutProps} />;
 };
 
 const App = ({ Component, pageProps }: AppProps) => {

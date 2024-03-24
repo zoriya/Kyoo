@@ -335,7 +335,7 @@ export const EpisodeLine = ({
 						{isLoading || <P numberOfLines={descriptionExpanded ? undefined : 3}>{overview}</P>}
 					</Skeleton>
 					<IconButton
-						{...css(["more"])}
+						{...css(["more", Platform.OS !== "web" && { opacity: 1 }])}
 						icon={descriptionExpanded ? ExpandLess : ExpandMore}
 						{...tooltip(t(descriptionExpanded ? "misc.collapse" : "misc.expand"))}
 						onPress={(e) => {

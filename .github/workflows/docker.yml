@@ -24,6 +24,9 @@ jobs:
           - context: ./scanner
             label: scanner
             image: zoriya/kyoo_scanner
+          - context: ./autosync
+            label: autosync
+            image: zoriya/kyoo_autosync
           - context: ./transcoder
             label: transcoder
             image: zoriya/kyoo_transcoder
