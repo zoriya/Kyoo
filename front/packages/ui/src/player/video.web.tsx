@@ -234,9 +234,8 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 			onLoadedMetadata={() => {
 				if (source.startPosition) setProgress(source.startPosition / 1000);
 			}}
-			// BUG: If this is enabled, switching to fullscreen or opening a menu make a play/pause loop until firefox crash.
-			// onPlay={() => onPlayPause?.call(null, true)}
-			// onPause={() => onPlayPause?.call(null, false)}
+			onPlay={() => onPlayPause?.call(null, true)}
+			onPause={() => onPlayPause?.call(null, false)}
 			onEnded={onEnd}
 			{...css({ width: "100%", height: "100%", objectFit: "contain" })}
 		/>
