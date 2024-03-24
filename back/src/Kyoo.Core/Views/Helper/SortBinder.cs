@@ -43,7 +43,7 @@ public class SortBinder : IModelBinder
 		{
 			object sort = bindingContext
 				.ModelType.GetMethod(nameof(Sort<Movie>.From))!
-				.Invoke(null, new object?[] { sortBy.FirstValue, seed })!;
+				.Invoke(null, [sortBy.FirstValue, seed])!;
 			bindingContext.Result = ModelBindingResult.Success(sort);
 			bindingContext.HttpContext.Items["seed"] = seed;
 			return Task.CompletedTask;
