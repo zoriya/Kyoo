@@ -49,7 +49,7 @@ export const A = ({
 				replace
 					? {
 							nativeBehavior: "stack-replace",
-							isNestedNavigator: false,
+							isNestedNavigator: true,
 						}
 					: undefined
 			}
@@ -105,7 +105,7 @@ export const Link = ({
 	const linkProps = useLink({
 		href: href ?? "#",
 		replace,
-		experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
+		experimental: { nativeBehavior: "stack-replace", isNestedNavigator: true },
 	});
 	// @ts-ignore Missing hrefAttrs type definition.
 	linkProps.hrefAttrs = { ...linkProps.hrefAttrs, target };

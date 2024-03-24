@@ -46,7 +46,7 @@ export const LoginPage: QueryPage<{ apiUrl?: string; error?: string }> = ({
 	useEffect(() => {
 		if (!apiUrl && Platform.OS !== "web")
 			router.replace("/server-url", undefined, {
-				experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
+				experimental: { nativeBehavior: "stack-replace", isNestedNavigator: true },
 			});
 	}, [apiUrl, router]);
 
@@ -74,7 +74,7 @@ export const LoginPage: QueryPage<{ apiUrl?: string; error?: string }> = ({
 					setError(error);
 					if (error) return;
 					router.replace("/", undefined, {
-						experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
+						experimental: { nativeBehavior: "stack-replace", isNestedNavigator: true },
 					});
 				}}
 				{...css({
