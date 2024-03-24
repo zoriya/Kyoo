@@ -148,5 +148,19 @@ public class OidcProvider
 				GetExtraHeaders = (OidcProvider self) =>
 					new() { ["simkl-api-key"] = self.ClientId },
 			},
+			["trakt"] = new("trakt")
+			{
+				DisplayName = "Trakt",
+				LogoUrl = "https://logo.clearbit.com/trakt.tv",
+				AuthorizationUrl = "https://api.trakt.tv/oauth/authorize",
+				TokenUrl = "https://api.trakt.tv/oauth/token",
+				ProfileUrl = "https://api.trakt.tv/users/settings",
+				// does not seems to have scopes
+				Scope = null,
+				TokenUseJsonBody = true,
+				GetProfileUrl = (profile) => $"https://trakt.tv/users/{profile.Username}",
+				GetExtraHeaders = (OidcProvider self) =>
+					new() { ["trakt-api-key"] = self.ClientId, ["trakt-api-version"] = "2", },
+			},
 		};
 }
