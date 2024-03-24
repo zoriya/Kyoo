@@ -21,6 +21,7 @@
 import { ZodTypeAny, z } from "zod";
 import { Account, AccountP } from "./accounts";
 import { MMKV } from "react-native-mmkv";
+import { Platform } from "react-native";
 
 export const storage = new MMKV();
 
@@ -32,6 +33,13 @@ const readAccounts = () => {
 
 const writeAccounts = (accounts: Account[]) => {
 	storage.set("accounts", JSON.stringify(accounts));
+	if (Platform.OS === "web") {
+		const selected = accounts.find((x) => x.selected);
+		if (!selected) return;
+		setCookie("account", selected);
+		// cookie used for images and videos since we can't add Authorization headers in img or video tags.
+		setCookie("X-Bearer", selected?.token.access_token);
+	}
 };
 
 export const setCookie = (key: string, val?: unknown) => {
