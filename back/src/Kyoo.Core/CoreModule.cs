@@ -101,7 +101,6 @@ public class CoreModule : IPlugin
 					Modifiers = { IncludeBinder.HandleLoadableFields }
 				};
 				x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-				x.JsonSerializerOptions.Converters.Add(new TypeConverterJsonAdapter());
 				x.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 			})
 			.AddDataAnnotations()
