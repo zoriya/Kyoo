@@ -38,7 +38,7 @@ public static class Utility
 		new()
 		{
 			TypeInfoResolver = new JsonKindResolver(),
-			Converters = { new JsonStringEnumConverter() },
+			Converters = { new JsonStringEnumConverter(), new TypeConverterJsonAdapter() },
 			PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
 		};
 
