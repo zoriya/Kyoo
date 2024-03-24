@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, createContext, useContext, useEffect, useMemo, useRef } from "react";
+import { ReactNode, createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { ServerInfoP, User, UserP } from "./resources";
 import { z } from "zod";
 import { zdate } from "./utils";
@@ -69,7 +69,8 @@ export const ConnectionErrorContext = createContext<{
 	error: KyooErrors | null;
 	loading: boolean;
 	retry?: () => void;
-}>({ error: null, loading: true });
+	setError: (error: KyooErrors) => void;
+}>({ error: null, loading: true, setError: () => {} });
 
 /* eslint-disable react-hooks/rules-of-hooks */
 export const AccountProvider = ({
@@ -96,6 +97,7 @@ export const AccountProvider = ({
 						retry: () => {
 							queryClient.resetQueries({ queryKey: ["auth", "me"] });
 						},
+						setError: () => {},
 					}}
 				>
 					{children}
@@ -156,15 +158,18 @@ export const AccountProvider = ({
 		}
 	}, [selected, queryClient]);
 
+	const [permissionError, setPermissionError] = useState<KyooErrors | null>(null);
+
 	return (
 		<AccountContext.Provider value={accounts}>
 			<ConnectionErrorContext.Provider
 				value={{
-					error: selected ? initialSsrError.current ?? user.error : null,
+					error: selected ? initialSsrError.current ?? user.error ?? permissionError : null,
 					loading: user.isLoading,
 					retry: () => {
 						queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
 					},
+					setError: setPermissionError,
 				}}
 			>
 				{children}

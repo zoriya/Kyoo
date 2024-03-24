@@ -18,13 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { KyooErrors, useAccount } from "@kyoo/models";
-import { Button, Icon, Link, P, ts } from "@kyoo/primitives";
+import { P } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import { rem, useYoshiki } from "yoshiki/native";
-import { ErrorView } from "./error";
-import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
+import { useYoshiki } from "yoshiki/native";
 
 export const Unauthorized = ({ missing }: { missing: string[] }) => {
 	const { t } = useTranslation();
@@ -40,34 +37,6 @@ export const Unauthorized = ({ missing }: { missing: string[] }) => {
 			})}
 		>
 			<P>{t("errors.unauthorized", { permission: missing?.join(", ") })}</P>
-		</View>
-	);
-};
-
-export const PermissionError = ({ error }: { error: KyooErrors }) => {
-	const { t } = useTranslation();
-	const { css } = useYoshiki();
-	const account = useAccount();
-
-	if (!account) {
-		return (
-			<View
-				{...css({ flexGrow: 1, flexShrink: 1, justifyContent: "center", alignItems: "center" })}
-			>
-				<P>{t("errors.needAccount")}</P>
-				<Button
-					as={Link}
-					href={"/register"}
-					text={t("login.register")}
-					licon={<Icon icon={Register} {...css({ marginRight: ts(2) })} />}
-				/>
-			</View>
-		);
-	}
-	if (account.isVerified) return <ErrorView error={error} noBubble />;
-	return (
-		<View {...css({ flexGrow: 1, flexShrink: 1, justifyContent: "center", alignItems: "center" })}>
-			<P>{t("errors.needVerification")}</P>
 		</View>
 	);
 };

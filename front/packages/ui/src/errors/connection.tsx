@@ -18,21 +18,49 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ConnectionErrorContext } from "@kyoo/models";
-import { Button, H1, P, ts } from "@kyoo/primitives";
+import { ConnectionErrorContext, useAccount } from "@kyoo/models";
+import { Button, H1, Icon, Link, P, ts } from "@kyoo/primitives";
 import { useRouter } from "solito/router";
 import { useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 import { DefaultLayout } from "../layout";
+import { ErrorView } from "./error";
+import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
 
 export const ConnectionError = () => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 	const router = useRouter();
 	const { error, retry } = useContext(ConnectionErrorContext);
+	const account = useAccount();
 
+	if (error && (error.status === 401 || error.status == 403)) {
+		if (!account) {
+			return (
+				<View
+					{...css({ flexGrow: 1, flexShrink: 1, justifyContent: "center", alignItems: "center" })}
+				>
+					<P>{t("errors.needAccount")}</P>
+					<Button
+						as={Link}
+						href={"/register"}
+						text={t("login.register")}
+						licon={<Icon icon={Register} {...css({ marginRight: ts(2) })} />}
+					/>
+				</View>
+			);
+		}
+		if (account.isVerified) return <ErrorView error={error} noBubble />;
+		return (
+			<View
+				{...css({ flexGrow: 1, flexShrink: 1, justifyContent: "center", alignItems: "center" })}
+			>
+				<P>{t("errors.needVerification")}</P>
+			</View>
+		);
+	}
 	return (
 		<View {...css({ padding: ts(2) })}>
 			<H1 {...css({ textAlign: "center" })}>{t("errors.connection")}</H1>

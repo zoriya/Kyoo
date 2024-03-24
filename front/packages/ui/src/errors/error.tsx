@@ -18,19 +18,11 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { KyooErrors, useAccount } from "@kyoo/models";
+import { ConnectionErrorContext, KyooErrors } from "@kyoo/models";
 import { P } from "@kyoo/primitives";
-import {
-	ReactElement,
-	createContext,
-	useContext,
-	useEffect,
-	useLayoutEffect,
-	useState,
-} from "react";
+import { useContext, useLayoutEffect } from "react";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
-import { PermissionError } from "./unauthorized";
 
 export const ErrorView = ({
 	error,
@@ -40,7 +32,7 @@ export const ErrorView = ({
 	noBubble?: boolean;
 }) => {
 	const { css } = useYoshiki();
-	const setError = useErrorContext();
+	const { setError } = useContext(ConnectionErrorContext);
 
 	useLayoutEffect(() => {
 		// if this is a permission error, make it go up the tree to have a whole page login screen.
@@ -64,23 +56,4 @@ export const ErrorView = ({
 			))}
 		</View>
 	);
-};
-
-const ErrorCtx = createContext<(val: KyooErrors | null) => void>(null!);
-
-export const ErrorContext = ({ children }: { children: ReactElement }) => {
-	const [error, setError] = useState<KyooErrors | null>(null);
-	const account = useAccount();
-
-	useEffect(() => {
-		setError(null);
-	}, [account, children]);
-
-	if (error && (error.status === 401 || error.status === 403))
-		return <PermissionError error={error} />;
-	if (error) return <ErrorView error={error} noBubble />;
-	return <ErrorCtx.Provider value={setError}>{children}</ErrorCtx.Provider>;
-};
-export const useErrorContext = () => {
-	return useContext(ErrorCtx);
 };
