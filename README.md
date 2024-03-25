@@ -29,6 +29,8 @@ Welcome to Kyoo, the next-generation open-source media browser that redefines yo
 
 - **Enhanced Subtitle Support:** Kyoo goes beyond the basics with enhanced subtitle support, including SSA/ASS formats and customizable fonts.
 
+- **OIDC and Scrubbing Support:** Login with your favorites services (Google, Discord or any OIDC compliant service) and automatically mark episodes as watched on linked services (SIMKL and soon others).
+
 ## 🌟 Philosophy: Setup Once, Enjoy Forever
 
 Kyoo's philosophy revolves around simplicity. Set it up once, forget about configuration hassles. Once installed, your library undergoes automatic scanning, adding new episodes or movies as soon as they're moved into your library's folder. No need for a specific file structure or meticulously renamed files – Kyoo does the right thing™.
