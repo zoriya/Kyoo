@@ -1,0 +1,12 @@
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 as builder
+ARG TARGETARCH
+WORKDIR /kyoo
+
+COPY .config/dotnet-tools.json .config/dotnet-tools.json
+RUN dotnet tool restore
+COPY . .
+RUN dotnet ef migrations bundle --self-contained -f -o /app/migrate -p src/Kyoo.Postgresql --verbose
+
+FROM alpine
+COPY --from=builder /app /app
+ENTRYPOINT ["/app/migrate"]
