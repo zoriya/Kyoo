@@ -103,7 +103,6 @@ public class Application
 
 		await using (AsyncServiceScope scope = host.Services.CreateAsyncScope())
 		{
-			PostgresModule.Initialize(scope.ServiceProvider);
 			await MeilisearchModule.Initialize(scope.ServiceProvider);
 		}
 
