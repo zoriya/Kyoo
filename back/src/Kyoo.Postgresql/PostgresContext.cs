@@ -24,6 +24,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Npgsql;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using Dapper;
+using InterpolatedSql.SqlBuilders;
+using Kyoo.Postgresql.Utils;
+using Kyoo.Utils;
 
 namespace Kyoo.Postgresql;
 
@@ -41,15 +47,6 @@ public class PostgresContext : DatabaseContext
 	/// Should the configure step be skipped? This is used when the database is created via DbContextOptions.
 	/// </summary>
 	private readonly bool _skipConfigure;
-
-	// TODO: This needs ot be updated but ef-core still does not offer a way to use this.
-	[Obsolete]
-	static PostgresContext()
-	{
-		NpgsqlConnection.GlobalTypeMapper.MapEnum<Status>();
-		NpgsqlConnection.GlobalTypeMapper.MapEnum<Genre>();
-		NpgsqlConnection.GlobalTypeMapper.MapEnum<WatchStatus>();
-	}
 
 	/// <summary>
 	/// Design time constructor (dotnet ef migrations add). Do not use
@@ -102,10 +99,45 @@ public class PostgresContext : DatabaseContext
 				"md5",
 				args,
 				nullable: true,
-				argumentsPropagateNullability: new[] { false },
+				argumentsPropagateNullability: [false],
 				type: args[0].Type,
 				typeMapping: args[0].TypeMapping
 			));
+
+
+		SqlMapper.TypeMapProvider = (type) =>
+		{
+			return new CustomPropertyTypeMap(
+				type,
+				(type, name) =>
+				{
+					string newName = Regex.Replace(
+						name,
+						"(^|_)([a-z])",
+						(match) => match.Groups[2].Value.ToUpperInvariant()
+					);
+					// TODO: Add images handling here (name: poster_source, newName: PosterSource) should set Poster.Source
+					return type.GetProperty(newName)!;
+				}
+			);
+		};
+		SqlMapper.AddTypeHandler(
+			typeof(Dictionary<string, MetadataId>),
+			new JsonTypeHandler<Dictionary<string, MetadataId>>()
+		);
+		SqlMapper.AddTypeHandler(
+			typeof(Dictionary<string, string>),
+			new JsonTypeHandler<Dictionary<string, string>>()
+		);
+		SqlMapper.AddTypeHandler(
+			typeof(Dictionary<string, ExternalToken>),
+			new JsonTypeHandler<Dictionary<string, ExternalToken>>()
+		);
+		SqlMapper.AddTypeHandler(typeof(List<string>), new ListTypeHandler<string>());
+		SqlMapper.AddTypeHandler(typeof(List<Genre>), new ListTypeHandler<Genre>());
+		SqlMapper.AddTypeHandler(typeof(Wrapper), new Wrapper.Handler());
+		InterpolatedSqlBuilderOptions.DefaultOptions.ReuseIdenticalParameters = true;
+		InterpolatedSqlBuilderOptions.DefaultOptions.AutoFixSingleQuotes = false;
 
 		base.OnModelCreating(modelBuilder);
 	}
