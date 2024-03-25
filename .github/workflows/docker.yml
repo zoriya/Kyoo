@@ -7,6 +7,7 @@ on:
     tags:
       - v*
   pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
@@ -73,7 +74,7 @@ jobs:
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v5
-        if: steps.filter.outputs.should_run == 'true'
+        if: steps.filter.outputs.should_run == 'true' || github.event_name == 'workflow_dispatch'
         with:
           context: ${{matrix.context}}
           platforms: linux/amd64,linux/arm64
