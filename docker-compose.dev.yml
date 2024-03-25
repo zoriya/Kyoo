@@ -35,10 +35,23 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
     volumes:
       - ./back:/app
       - /app/out/
       - kyoo:/kyoo
+
+  migrations:
+    build:
+      context: ./back
+      dockerfile: Dockerfile.migrations
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./.env
 
   front:
     build:
