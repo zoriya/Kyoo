@@ -17,8 +17,8 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Data.Common;
-using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -56,7 +56,7 @@ public class PostgresModule(IConfiguration configuration, IWebHostEnvironment en
 		dsBuilder.MapEnum<Status>();
 		dsBuilder.MapEnum<Genre>();
 		dsBuilder.MapEnum<WatchStatus>();
-		var dataSource = dsBuilder.Build();
+		NpgsqlDataSource dataSource = dsBuilder.Build();
 
 		services.AddDbContext<DatabaseContext, PostgresContext>(
 			x =>
@@ -67,7 +67,9 @@ public class PostgresModule(IConfiguration configuration, IWebHostEnvironment en
 			},
 			ServiceLifetime.Transient
 		);
-		services.AddTransient<DbConnection>((_) => new NpgsqlConnection(builder.ConnectionString));
+		services.AddTransient(
+			(services) => services.GetRequiredService<DatabaseContext>().Database.GetDbConnection()
+		);
 
 		services.AddHealthChecks().AddDbContextCheck<DatabaseContext>();
 	}
