@@ -26,12 +26,10 @@ using static System.Text.Json.JsonNamingPolicy;
 
 namespace Kyoo.Meiliseach;
 
-public class MeilisearchModule : IPlugin
+public class MeilisearchModule(IConfiguration configuration) : IPlugin
 {
 	/// <inheritdoc />
 	public string Name => "Meilisearch";
-
-	private readonly IConfiguration _configuration;
 
 	public static Dictionary<string, Settings> IndexSettings =>
 		new()
@@ -122,11 +120,6 @@ public class MeilisearchModule : IPlugin
 			},
 		};
 
-	public MeilisearchModule(IConfiguration configuration)
-	{
-		_configuration = configuration;
-	}
-
 	/// <summary>
 	/// Init meilisearch indexes.
 	/// </summary>
@@ -139,27 +132,6 @@ public class MeilisearchModule : IPlugin
 		await _CreateIndex(client, "items", true);
 		await _CreateIndex(client, nameof(Episode), false);
 		await _CreateIndex(client, nameof(Studio), false);
-
-		IndexStats info = await client.Index("items").GetStatsAsync();
-		// If there is no documents in meilisearch, if a db exist and is not empty, add items to meilisearch.
-		if (info.NumberOfDocuments == 0)
-		{
-			ILibraryManager database = provider.GetRequiredService<ILibraryManager>();
-			MeiliSync search = provider.GetRequiredService<MeiliSync>();
-
-			// This is a naive implementation that absolutly does not care about performances.
-			// This will run only once on users that already had a database when they upgrade.
-			foreach (Movie movie in await database.Movies.GetAll(limit: 0))
-				await search.CreateOrUpdate("items", movie, nameof(Movie));
-			foreach (Show show in await database.Shows.GetAll(limit: 0))
-				await search.CreateOrUpdate("items", show, nameof(Show));
-			foreach (Collection collection in await database.Collections.GetAll(limit: 0))
-				await search.CreateOrUpdate("items", collection, nameof(Collection));
-			foreach (Episode episode in await database.Episodes.GetAll(limit: 0))
-				await search.CreateOrUpdate(nameof(Episode), episode);
-			foreach (Studio studio in await database.Studios.GetAll(limit: 0))
-				await search.CreateOrUpdate(nameof(Studio), studio);
-		}
 	}
 
 	private static async Task _CreateIndex(MeilisearchClient client, string index, bool hasKind)
@@ -178,8 +150,8 @@ public class MeilisearchModule : IPlugin
 		builder
 			.RegisterInstance(
 				new MeilisearchClient(
-					_configuration.GetValue("MEILI_HOST", "http://meilisearch:7700"),
-					_configuration.GetValue<string?>("MEILI_MASTER_KEY")
+					configuration.GetValue("MEILI_HOST", "http://meilisearch:7700"),
+					configuration.GetValue<string?>("MEILI_MASTER_KEY")
 				)
 			)
 			.SingleInstance();
