@@ -26,8 +26,16 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
     volumes:
       - kyoo:/kyoo
+
+  migrations:
+    image: zoriya/kyoo_migrations:edge
+    restart: "no"
+    env_file:
+      - ./.env
 
   front:
     image: zoriya/kyoo_front:edge
