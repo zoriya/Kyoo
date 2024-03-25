@@ -7,6 +7,7 @@ RUN dotnet tool restore
 COPY . .
 RUN dotnet ef migrations bundle --self-contained -f -o /app/migrate -p src/Kyoo.Postgresql --verbose
 
-FROM alpine
-COPY --from=builder /app /app
-ENTRYPOINT ["/app/migrate"]
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0
+COPY --from=builder /app/migrate /app/migrate
+
+ENTRYPOINT /app/migrate --connection "USER ID=${POSTGRES_USER};PASSWORD=${POSTGRES_PASSWORD};SERVER=postgres;PORT=5432;DATABASE=${POSTGRES_DB};"

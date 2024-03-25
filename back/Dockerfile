@@ -19,7 +19,7 @@ COPY . .
 ARG VERSION
 RUN dotnet publish -a $TARGETARCH --no-restore -c Release -o /app "-p:Version=${VERSION:-"0.0.0-dev"}" src/Kyoo.Host
 
-FROM mcr.microsoft.com/dotnet/aspnet:7.0
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 RUN apt-get update && apt-get install -y curl
 COPY --from=builder /app /app
 
