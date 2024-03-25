@@ -34,6 +34,9 @@ services:
   migrations:
     image: zoriya/kyoo_migrations:edge
     restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
     env_file:
       - ./.env
 
