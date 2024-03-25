@@ -24,11 +24,6 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<BaseIntermediateOutputPath>$(MsBuildThisFileDirectory)/../out/obj/$(MSBuildProjectName)</BaseIntermediateOutputPath>
-		<BaseOutputPath>$(MsBuildThisFileDirectory)/../out/bin/$(MSBuildProjectName)</BaseOutputPath>
-	</PropertyGroup>
-
-	<PropertyGroup>
 		<CheckCodingStyle Condition="$(CheckCodingStyle) == ''">true</CheckCodingStyle>
 	</PropertyGroup>
 
