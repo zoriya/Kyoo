@@ -17,18 +17,32 @@ jobs:
       matrix:
         include:
           - context: ./back
+            dockerfile: Dockerfile
             label: back
             image: zoriya/kyoo_back
+
+          - context: ./back
+            dockerfile: Dockerfile.migrations
+            label: migrations
+            image: zoriya/kyoo_migrations
+
           - context: ./front
+            dockerfile: Dockerfile
             label: front
             image: zoriya/kyoo_front
+
           - context: ./scanner
+            dockerfile: Dockerfile
             label: scanner
             image: zoriya/kyoo_scanner
+
           - context: ./autosync
+            dockerfile: Dockerfile
             label: autosync
             image: zoriya/kyoo_autosync
+
           - context: ./transcoder
+            dockerfile: Dockerfile
             label: transcoder
             image: zoriya/kyoo_transcoder
     name: Build ${{matrix.label}}
@@ -77,6 +91,7 @@ jobs:
         if: steps.filter.outputs.should_run == 'true' || github.event_name == 'workflow_dispatch'
         with:
           context: ${{matrix.context}}
+          file: ${{matrix.context}}/${{matrix.dockerfile}}
           platforms: linux/amd64,linux/arm64
           build-args: |
             VERSION=0.0.0
