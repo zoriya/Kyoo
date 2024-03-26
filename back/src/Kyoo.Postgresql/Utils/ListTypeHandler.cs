@@ -29,7 +29,7 @@ public class ListTypeHandler<T> : SqlMapper.TypeHandler<List<T>>
 	public override List<T> Parse(object value)
 	{
 		T[] typedValue = (T[])value; // looks like Dapper did not indicate the property type to Npgsql, so it defaults to string[] (default CLR type for text[] PostgreSQL type)
-		return typedValue?.ToList() ?? new();
+		return typedValue?.ToList() ?? [];
 	}
 
 	public override void SetValue(IDbDataParameter parameter, List<T>? value)

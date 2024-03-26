@@ -52,14 +52,15 @@ export const ConnectionError = () => {
 				</View>
 			);
 		}
-		if (account.isVerified) return <ErrorView error={error} noBubble />;
-		return (
-			<View
-				{...css({ flexGrow: 1, flexShrink: 1, justifyContent: "center", alignItems: "center" })}
-			>
-				<P>{t("errors.needVerification")}</P>
-			</View>
-		);
+		if (!account.isVerified) {
+			return (
+				<View
+					{...css({ flexGrow: 1, flexShrink: 1, justifyContent: "center", alignItems: "center" })}
+				>
+					<P>{t("errors.needVerification")}</P>
+				</View>
+			);
+		}
 	}
 	return (
 		<View {...css({ padding: ts(2) })}>

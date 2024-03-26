@@ -16,16 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
 using System.Data.Common;
-using System.Text.RegularExpressions;
-using Dapper;
-using InterpolatedSql.SqlBuilders;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
-using Kyoo.Postgresql.Utils;
-using Kyoo.Utils;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -43,43 +36,6 @@ public class PostgresModule(IConfiguration configuration, IWebHostEnvironment en
 	/// <inheritdoc />
 	public string Name => "Postgresql";
 
-	static PostgresModule()
-	{
-		SqlMapper.TypeMapProvider = (type) =>
-		{
-			return new CustomPropertyTypeMap(
-				type,
-				(type, name) =>
-				{
-					string newName = Regex.Replace(
-						name,
-						"(^|_)([a-z])",
-						(match) => match.Groups[2].Value.ToUpperInvariant()
-					);
-					// TODO: Add images handling here (name: poster_source, newName: PosterSource) should set Poster.Source
-					return type.GetProperty(newName)!;
-				}
-			);
-		};
-		SqlMapper.AddTypeHandler(
-			typeof(Dictionary<string, MetadataId>),
-			new JsonTypeHandler<Dictionary<string, MetadataId>>()
-		);
-		SqlMapper.AddTypeHandler(
-			typeof(Dictionary<string, string>),
-			new JsonTypeHandler<Dictionary<string, string>>()
-		);
-		SqlMapper.AddTypeHandler(
-			typeof(Dictionary<string, ExternalToken>),
-			new JsonTypeHandler<Dictionary<string, ExternalToken>>()
-		);
-		SqlMapper.AddTypeHandler(typeof(List<string>), new ListTypeHandler<string>());
-		SqlMapper.AddTypeHandler(typeof(List<Genre>), new ListTypeHandler<Genre>());
-		SqlMapper.AddTypeHandler(typeof(Wrapper), new Wrapper.Handler());
-		InterpolatedSqlBuilderOptions.DefaultOptions.ReuseIdenticalParameters = true;
-		InterpolatedSqlBuilderOptions.DefaultOptions.AutoFixSingleQuotes = false;
-	}
-
 	/// <inheritdoc />
 	public void Configure(IServiceCollection services)
 	{
@@ -96,16 +52,24 @@ public class PostgresModule(IConfiguration configuration, IWebHostEnvironment en
 				["TIMEOUT"] = "30"
 			};
 
+		NpgsqlDataSourceBuilder dsBuilder = new(builder.ConnectionString);
+		dsBuilder.MapEnum<Status>();
+		dsBuilder.MapEnum<Genre>();
+		dsBuilder.MapEnum<WatchStatus>();
+		NpgsqlDataSource dataSource = dsBuilder.Build();
+
 		services.AddDbContext<DatabaseContext, PostgresContext>(
 			x =>
 			{
-				x.UseNpgsql(builder.ConnectionString).UseProjectables();
+				x.UseNpgsql(dataSource).UseProjectables();
 				if (environment.IsDevelopment())
 					x.EnableDetailedErrors().EnableSensitiveDataLogging();
 			},
 			ServiceLifetime.Transient
 		);
-		services.AddTransient<DbConnection>((_) => new NpgsqlConnection(builder.ConnectionString));
+		services.AddTransient(
+			(services) => services.GetRequiredService<DatabaseContext>().Database.GetDbConnection()
+		);
 
 		services.AddHealthChecks().AddDbContextCheck<DatabaseContext>();
 	}

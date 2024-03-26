@@ -79,12 +79,12 @@ public class Movie
 	/// <summary>
 	/// A list of tags that match this movie.
 	/// </summary>
-	public string[] Tags { get; set; } = Array.Empty<string>();
+	public string[] Tags { get; set; } = [];
 
 	/// <summary>
 	/// The list of genres (themes) this show has.
 	/// </summary>
-	public Genre[] Genres { get; set; } = Array.Empty<Genre>();
+	public List<Genre> Genres { get; set; } = [];
 
 	/// <summary>
 	/// Is this show airing, not aired yet or finished?
