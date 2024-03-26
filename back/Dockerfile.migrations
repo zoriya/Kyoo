@@ -20,7 +20,7 @@ RUN dotnet restore -a $TARGETARCH
 
 COPY . .
 RUN dotnet build
-RUN dotnet ef migrations bundle --no-build --self-contained -f -o /app/migrate -p src/Kyoo.Postgresql --verbose
+RUN dotnet ef migrations bundle --no-build --self-contained -r linux-${TARGETARCH} -f -o /app/migrate -p src/Kyoo.Postgresql --verbose
 
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0
 COPY --from=builder /app/migrate /app/migrate
