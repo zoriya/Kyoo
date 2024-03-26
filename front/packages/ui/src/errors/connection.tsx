@@ -26,7 +26,6 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 import { DefaultLayout } from "../layout";
-import { ErrorView } from "./error";
 import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
 
 export const ConnectionError = () => {
