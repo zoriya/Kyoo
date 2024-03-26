@@ -196,8 +196,8 @@ public abstract record Filter<T> : Filter
 			{
 				return (
 					from lq in Parse.Char('"').Or(Parse.Char('\''))
-					from str in Parse.AnyChar.Where(x => x is not '"' and not '\'').Many().Text()
-					from rq in Parse.Char('"').Or(Parse.Char('\''))
+					from str in Parse.AnyChar.Where(x => x != lq).Many().Text()
+					from rq in Parse.Char(lq)
 					select str
 				).Or(Parse.LetterOrDigit.Many().Text());
 			}
