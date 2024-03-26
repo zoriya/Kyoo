@@ -17,19 +17,19 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Text.RegularExpressions;
+using Dapper;
 using EFCore.NamingConventions.Internal;
+using InterpolatedSql.SqlBuilders;
 using Kyoo.Abstractions.Models;
+using Kyoo.Postgresql.Utils;
+using Kyoo.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Npgsql;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using Dapper;
-using InterpolatedSql.SqlBuilders;
-using Kyoo.Postgresql.Utils;
-using Kyoo.Utils;
 
 namespace Kyoo.Postgresql;
 
@@ -103,7 +103,6 @@ public class PostgresContext : DatabaseContext
 				type: args[0].Type,
 				typeMapping: args[0].TypeMapping
 			));
-
 
 		SqlMapper.TypeMapProvider = (type) =>
 		{
