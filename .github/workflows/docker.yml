@@ -70,7 +70,7 @@ jobs:
 
       - name: Check if a package should be pushed
         run: |
-          echo "SHOULD_PUSH=$([ "${GITHUB_REF##*/}" == "master" ] || [ "${GITHUB_REF##*/}" == "next" ] && echo "true" || echo "false")" >> $GITHUB_ENV
+          echo "SHOULD_PUSH=$([ "${GITHUB_REF##*/}" == "master" ] || [ "${GITHUB_REF##*/}" == "next" ] || [ "${GITHUB_REF_TYPE}" == "tag" ] && echo "true" || echo "false")" >> $GITHUB_ENV
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -88,7 +88,7 @@ jobs:
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v5
-        if: steps.filter.outputs.should_run == 'true' || github.event_name == 'workflow_dispatch'
+        if: steps.filter.outputs.should_run == 'true' || github.event_name == 'workflow_dispatch' || startsWith(github.event.ref, 'refs/tags/v')
         with:
           context: ${{matrix.context}}
           file: ${{matrix.context}}/${{matrix.dockerfile}}
