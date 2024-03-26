@@ -60,7 +60,7 @@ services:
       - ${LIBRARY_ROOT}:/video:ro
 
   autosync:
-    build: ./autosync
+    image: zoriya/kyoo_autosync:latest
     restart: on-failure
     depends_on:
       rabbitmq:
