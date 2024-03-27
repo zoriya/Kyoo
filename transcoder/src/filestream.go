@@ -87,7 +87,7 @@ func (fs *FileStream) GetMaster() string {
 		}
 		aspectRatio := float32(fs.Info.Video.Width) / float32(fs.Info.Video.Height)
 		for _, quality := range Qualities {
-			if quality.Height() < fs.Info.Video.Quality.Height() && quality.AverageBitrate() < fs.Info.Video.Bitrate {
+			if quality.Height() < fs.Info.Video.Quality.Height() {
 				master += "#EXT-X-STREAM-INF:"
 				master += fmt.Sprintf("AVERAGE-BANDWIDTH=%d,", quality.AverageBitrate())
 				master += fmt.Sprintf("BANDWIDTH=%d,", quality.MaxBitrate())
