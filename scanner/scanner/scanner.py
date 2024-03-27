@@ -7,6 +7,7 @@ import re
 from aiohttp import ClientSession
 from pathlib import Path
 from typing import List, Literal, Any
+from urllib.parse import quote
 from providers.provider import Provider, ProviderError
 from providers.types.collection import Collection
 from providers.types.show import Show
@@ -273,7 +274,7 @@ class Scanner:
 
 		if type is None or type == "movie":
 			async with self._client.delete(
-				f'{self._url}/movies?filter=path eq "{path}"',
+				f'{self._url}/movies?filter=path eq "{quote(path)}"',
 				headers={"X-API-Key": self._api_key},
 			) as r:
 				if not r.ok:
@@ -282,7 +283,7 @@ class Scanner:
 
 		if type is None or type == "episode":
 			async with self._client.delete(
-				f'{self._url}/episodes?filter=path eq "{path}"',
+				f'{self._url}/episodes?filter=path eq "{quote(path)}"',
 				headers={"X-API-Key": self._api_key},
 			) as r:
 				if not r.ok:
@@ -292,6 +293,6 @@ class Scanner:
 		if path in self.issues:
 			self.issues = filter(lambda x: x != path, self.issues)
 			await self._client.delete(
-				f'{self._url}/issues?filter=domain eq scanner and cause eq "{path}"',
+				f'{self._url}/issues?filter=domain eq scanner and cause eq "{quote(path)}"',
 				headers={"X-API-Key": self._api_key},
 			)
