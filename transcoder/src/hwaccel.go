@@ -29,6 +29,8 @@ func DetectHardwareAccel() HwAccelT {
 				// this is on by default and inserts keyframes where we don't want to (it also breaks force_key_frames)
 				// we disable it to prevents whole scenes from behing removed due to the -f segment failing to find the corresonding keyframe
 				"-sc_threshold", "0",
+				// force 8bits output (by default it keeps the same as the source but 10bits is not playable on some devices)
+				"-pix_fmt", "yuv420p",
 			},
 			// we could put :force_original_aspect_ratio=decrease:force_divisible_by=2 here but we already calculate a correct width and
 			// aspect ratio in our code so there is no need.
@@ -48,6 +50,8 @@ func DetectHardwareAccel() HwAccelT {
 				"-preset", preset,
 				// the exivalent of -sc_threshold on nvidia.
 				"-no-scenecut", "1",
+				// force 8bits output (by default it keeps the same as the source but 10bits is not playable on some devices)
+				"-pix_fmt", "yuv420p",
 			},
 			// if the decode goes into system memory, we need to prepend the filters with "hwupload_cuda".
 			// since we use hwaccel_output_format, decoded data stays in gpu memory so we must not specify it (it errors)
@@ -64,12 +68,22 @@ func DetectHardwareAccel() HwAccelT {
 			EncodeFlags: []string{
 				// h264_vaapi does not have any preset or scenecut flags.
 				"-c:v", "h264_vaapi",
-				// if the hardware decoder could not work and fallbacked to soft decode, we need to instruct ffmpeg to
-				// upload back frames to gpu space (after converting them)
-				// see https://trac.ffmpeg.org/wiki/Hardware/VAAPI#Encoding for more info
-				// "-vf", "format=nv12|vaapi,hwupload",
 			},
-			ScaleFilter: "scale_vaapi=%d:%d",
+			// if the hardware decoder could not work and fallbacked to soft decode, we need to instruct ffmpeg to
+			// upload back frames to gpu space (after converting them)
+			// see https://trac.ffmpeg.org/wiki/Hardware/VAAPI#Encoding for more info
+			// we also need to force the format to be nv12 since 10bits is not supported via hwaccel.
+			// this filter is equivalent to this pseudocode:
+			// if (vaapi) {
+			//   hwupload, passthrough, keep vaapi as is
+			//   convert whatever to nv12 on GPU
+			// } else {
+			//   convert whatever to nv12 on CPU
+			//   hwupload to vaapi(nv12)
+			//   convert whatever to nv12 on GPU // scale_vaapi doesn't support passthrough option, so it has to make a copy
+			// }
+			// See https://www.reddit.com/r/ffmpeg/comments/1bqn60w/hardware_accelerated_decoding_without_hwdownload/ for more info
+			ScaleFilter: "format=nv12|vaapi,hwupload,scale_vaapi=%d:%d:format=nv12",
 		}
 	case "qsv", "intel":
 		return HwAccelT{

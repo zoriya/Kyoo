@@ -74,25 +74,35 @@ func (fs *FileStream) GetMaster() string {
 				break
 			}
 		}
-		// TODO: also check if the codec is valid in a hls before putting transmux
-		if true {
+		// original stream
+		{
 			bitrate := float64(fs.Info.Video.Bitrate)
 			master += "#EXT-X-STREAM-INF:"
 			master += fmt.Sprintf("AVERAGE-BANDWIDTH=%d,", int(math.Min(bitrate*0.8, float64(transmux_quality.AverageBitrate()))))
 			master += fmt.Sprintf("BANDWIDTH=%d,", int(math.Min(bitrate, float64(transmux_quality.MaxBitrate()))))
 			master += fmt.Sprintf("RESOLUTION=%dx%d,", fs.Info.Video.Width, fs.Info.Video.Height)
+			if fs.Info.Video.MimeCodec != nil {
+				master += fmt.Sprintf("CODECS=\"%s\",", *fs.Info.Video.MimeCodec)
+			}
 			master += "AUDIO=\"audio\","
 			master += "CLOSED-CAPTIONS=NONE\n"
 			master += fmt.Sprintf("./%s/index.m3u8\n", Original)
 		}
+
 		aspectRatio := float32(fs.Info.Video.Width) / float32(fs.Info.Video.Height)
+		transmux_codec := "avc1.640028"
+
 		for _, quality := range Qualities {
-			if quality.Height() < fs.Info.Video.Quality.Height() && quality.AverageBitrate() < fs.Info.Video.Bitrate {
+			same_codec := fs.Info.Video.MimeCodec != nil && *fs.Info.Video.MimeCodec == transmux_codec
+			inc_lvl := quality.Height() < fs.Info.Video.Quality.Height() ||
+				(quality.Height() == fs.Info.Video.Quality.Height() && !same_codec)
+
+			if inc_lvl {
 				master += "#EXT-X-STREAM-INF:"
 				master += fmt.Sprintf("AVERAGE-BANDWIDTH=%d,", quality.AverageBitrate())
 				master += fmt.Sprintf("BANDWIDTH=%d,", quality.MaxBitrate())
 				master += fmt.Sprintf("RESOLUTION=%dx%d,", int(aspectRatio*float32(quality.Height())+0.5), quality.Height())
-				master += "CODECS=\"avc1.640028\","
+				master += fmt.Sprintf("CODECS=\"%s\",", transmux_codec)
 				master += "AUDIO=\"audio\","
 				master += "CLOSED-CAPTIONS=NONE\n"
 				master += fmt.Sprintf("./%s/index.m3u8\n", quality)

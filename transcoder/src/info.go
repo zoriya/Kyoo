@@ -42,8 +42,10 @@ type MediaInfo struct {
 }
 
 type Video struct {
-	/// The codec of this stream (defined as the RFC 6381).
+	/// The human readable codec name.
 	Codec string `json:"codec"`
+	/// The codec of this stream (defined as the RFC 6381).
+	MimeCodec *string `json:"mimeCodec"`
 	/// The language of this stream (as a ISO-639-2 language code)
 	Language *string `json:"language"`
 	/// The max quality of this video track.
@@ -63,8 +65,10 @@ type Audio struct {
 	Title *string `json:"title"`
 	/// The language of this stream (as a ISO-639-2 language code)
 	Language *string `json:"language"`
-	/// The codec of this stream.
+	/// The human readable codec name.
 	Codec string `json:"codec"`
+	/// The codec of this stream (defined as the RFC 6381).
+	MimeCodec *string `json:"mimeCodec"`
 	/// Is this stream the default one of it's type?
 	IsDefault bool `json:"isDefault"`
 	/// Is this stream tagged as forced? (useful only for subtitles)
@@ -263,28 +267,28 @@ func getInfo(path string, route string) (*MediaInfo, error) {
 		Container: OrNull(mi.Parameter(mediainfo.StreamGeneral, 0, "Format")),
 		Videos: Map(make([]Video, ParseUint(mi.Parameter(mediainfo.StreamVideo, 0, "StreamCount"))), func(_ Video, i int) Video {
 			return Video{
-				// This codec is not in the right format (does not include bitdepth...).
-				Codec:    mi.Parameter(mediainfo.StreamVideo, 0, "Format"),
-				Language: OrNull(mi.Parameter(mediainfo.StreamVideo, 0, "Language")),
-				Quality:  QualityFromHeight(ParseUint(mi.Parameter(mediainfo.StreamVideo, 0, "Height"))),
-				Width:    ParseUint(mi.Parameter(mediainfo.StreamVideo, 0, "Width")),
-				Height:   ParseUint(mi.Parameter(mediainfo.StreamVideo, 0, "Height")),
+				Codec:     mi.Parameter(mediainfo.StreamVideo, i, "Format"),
+				MimeCodec: GetMimeCodec(mi, mediainfo.StreamVideo, i),
+				Language:  OrNull(mi.Parameter(mediainfo.StreamVideo, i, "Language")),
+				Quality:   QualityFromHeight(ParseUint(mi.Parameter(mediainfo.StreamVideo, i, "Height"))),
+				Width:     ParseUint(mi.Parameter(mediainfo.StreamVideo, i, "Width")),
+				Height:    ParseUint(mi.Parameter(mediainfo.StreamVideo, i, "Height")),
 				Bitrate: ParseUint(
 					Or(
-						mi.Parameter(mediainfo.StreamVideo, 0, "BitRate"),
-						mi.Parameter(mediainfo.StreamVideo, 0, "OverallBitRate"),
-						mi.Parameter(mediainfo.StreamVideo, 0, "BitRate_Nominal"),
+						mi.Parameter(mediainfo.StreamVideo, i, "BitRate"),
+						mi.Parameter(mediainfo.StreamVideo, i, "OverallBitRate"),
+						mi.Parameter(mediainfo.StreamVideo, i, "BitRate_Nominal"),
 					),
 				),
 			}
 		}),
 		Audios: Map(make([]Audio, ParseUint(mi.Parameter(mediainfo.StreamAudio, 0, "StreamCount"))), func(_ Audio, i int) Audio {
 			return Audio{
-				Index:    uint32(i),
-				Title:    OrNull(mi.Parameter(mediainfo.StreamAudio, i, "Title")),
-				Language: OrNull(mi.Parameter(mediainfo.StreamAudio, i, "Language")),
-				// TODO: format is invalid. Channels count missing...
+				Index:     uint32(i),
+				Title:     OrNull(mi.Parameter(mediainfo.StreamAudio, i, "Title")),
+				Language:  OrNull(mi.Parameter(mediainfo.StreamAudio, i, "Language")),
 				Codec:     mi.Parameter(mediainfo.StreamAudio, i, "Format"),
+				MimeCodec: GetMimeCodec(mi, mediainfo.StreamAudio, i),
 				IsDefault: mi.Parameter(mediainfo.StreamAudio, i, "Default") == "Yes",
 				IsForced:  mi.Parameter(mediainfo.StreamAudio, i, "Forced") == "Yes",
 			}
