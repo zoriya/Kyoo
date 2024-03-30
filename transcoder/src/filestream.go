@@ -81,6 +81,9 @@ func (fs *FileStream) GetMaster() string {
 			master += fmt.Sprintf("AVERAGE-BANDWIDTH=%d,", int(math.Min(bitrate*0.8, float64(transmux_quality.AverageBitrate()))))
 			master += fmt.Sprintf("BANDWIDTH=%d,", int(math.Min(bitrate, float64(transmux_quality.MaxBitrate()))))
 			master += fmt.Sprintf("RESOLUTION=%dx%d,", fs.Info.Video.Width, fs.Info.Video.Height)
+			if fs.Info.Video.MimeCodec != nil {
+				master += fmt.Sprintf("CODECS=\"%s\",", *fs.Info.Video.MimeCodec)
+			}
 			master += "AUDIO=\"audio\","
 			master += "CLOSED-CAPTIONS=NONE\n"
 			master += fmt.Sprintf("./%s/index.m3u8\n", Original)
