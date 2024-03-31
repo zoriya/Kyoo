@@ -25,6 +25,7 @@ import { Blurhash } from "react-native-blurhash";
 import { percent, useYoshiki } from "yoshiki/native";
 import { Props, ImageLayout } from "./base-image";
 import { Skeleton } from "../skeleton";
+import { getCurrentToken } from "@kyoo/models";
 
 export const Image = ({
 	src,
@@ -60,6 +61,7 @@ export const Image = ({
 	}
 
 	quality ??= "high";
+	const token = getCurrentToken();
 	return (
 		<View {...css([layout, border], props)}>
 			{state !== "finished" && (
@@ -72,6 +74,11 @@ export const Image = ({
 			<FastImage
 				source={{
 					uri: src[quality],
+					headers: token
+						? {
+								Authorization: token,
+							}
+						: {},
 					priority: FastImage.priority[quality === "medium" ? "normal" : quality],
 				}}
 				accessibilityLabel={alt}
