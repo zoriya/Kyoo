@@ -32,15 +32,12 @@ namespace Kyoo.Core.Controllers;
 /// <summary>
 /// A local repository to handle episodes.
 /// </summary>
-public class EpisodeRepository : LocalRepository<Episode>
+public class EpisodeRepository(
+	DatabaseContext database,
+	IRepository<Show> shows,
+	IThumbnailsManager thumbs
+) : LocalRepository<Episode>(database, thumbs)
 {
-	/// <summary>
-	/// The database handle
-	/// </summary>
-	private readonly DatabaseContext _database;
-
-	private readonly IRepository<Show> _shows;
-
 	static EpisodeRepository()
 	{
 		// Edit episode slugs when the show's slug changes.
@@ -61,30 +58,13 @@ public class EpisodeRepository : LocalRepository<Episode>
 		};
 	}
 
-	/// <summary>
-	/// Create a new <see cref="EpisodeRepository"/>.
-	/// </summary>
-	/// <param name="database">The database handle to use.</param>
-	/// <param name="shows">A show repository</param>
-	/// <param name="thumbs">The thumbnail manager used to store images.</param>
-	public EpisodeRepository(
-		DatabaseContext database,
-		IRepository<Show> shows,
-		IThumbnailsManager thumbs
-	)
-		: base(database, thumbs)
-	{
-		_database = database;
-		_shows = shows;
-	}
-
 	/// <inheritdoc />
 	public override async Task<ICollection<Episode>> Search(
 		string query,
 		Include<Episode>? include = default
 	)
 	{
-		return await AddIncludes(_database.Episodes, include)
+		return await AddIncludes(database.Episodes, include)
 			.Where(x => EF.Functions.ILike(x.Name!, $"%{query}%"))
 			.Take(20)
 			.ToListAsync();
@@ -93,12 +73,12 @@ public class EpisodeRepository : LocalRepository<Episode>
 	protected override Task<Episode?> GetDuplicated(Episode item)
 	{
 		if (item is { SeasonNumber: not null, EpisodeNumber: not null })
-			return _database.Episodes.FirstOrDefaultAsync(x =>
+			return database.Episodes.FirstOrDefaultAsync(x =>
 				x.ShowId == item.ShowId
 				&& x.SeasonNumber == item.SeasonNumber
 				&& x.EpisodeNumber == item.EpisodeNumber
 			);
-		return _database.Episodes.FirstOrDefaultAsync(x =>
+		return database.Episodes.FirstOrDefaultAsync(x =>
 			x.ShowId == item.ShowId && x.AbsoluteNumber == item.AbsoluteNumber
 		);
 	}
@@ -106,11 +86,10 @@ public class EpisodeRepository : LocalRepository<Episode>
 	/// <inheritdoc />
 	public override async Task<Episode> Create(Episode obj)
 	{
-		obj.ShowSlug =
-			obj.Show?.Slug ?? (await _database.Shows.FirstAsync(x => x.Id == obj.ShowId)).Slug;
+		obj.ShowSlug = obj.Show?.Slug ?? (await shows.Get(obj.ShowId)).Slug;
 		await base.Create(obj);
-		_database.Entry(obj).State = EntityState.Added;
-		await _database.SaveChangesAsync(() => GetDuplicated(obj));
+		database.Entry(obj).State = EntityState.Added;
+		await database.SaveChangesAsync(() => GetDuplicated(obj));
 		await IRepository<Episode>.OnResourceCreated(obj);
 		return obj;
 	}
@@ -132,7 +111,7 @@ public class EpisodeRepository : LocalRepository<Episode>
 		}
 		if (resource.SeasonId == null && resource.SeasonNumber != null)
 		{
-			resource.Season = await _database.Seasons.FirstOrDefaultAsync(x =>
+			resource.Season = await database.Seasons.FirstOrDefaultAsync(x =>
 				x.ShowId == resource.ShowId && x.SeasonNumber == resource.SeasonNumber
 			);
 		}
@@ -141,14 +120,14 @@ public class EpisodeRepository : LocalRepository<Episode>
 	/// <inheritdoc />
 	public override async Task Delete(Episode obj)
 	{
-		int epCount = await _database
+		int epCount = await database
 			.Episodes.Where(x => x.ShowId == obj.ShowId)
 			.Take(2)
 			.CountAsync();
-		_database.Entry(obj).State = EntityState.Deleted;
-		await _database.SaveChangesAsync();
+		database.Entry(obj).State = EntityState.Deleted;
+		await database.SaveChangesAsync();
 		await base.Delete(obj);
 		if (epCount == 1)
-			await _shows.Delete(obj.ShowId);
+			await shows.Delete(obj.ShowId);
 	}
 }
