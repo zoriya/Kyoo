@@ -174,17 +174,19 @@ export const QualitiesMenu = (props: CustomMenu) => {
 			/>
 			{/* TODO: Support video tracks when the play mode is not hls. */}
 			{/* @ts-expect-error They forgot to type this. */}
-			{info?.videoTracks.map((x) => (
-				<Menu.Item
-					key={x.height}
-					label={`${x.height}p`}
-					selected={video === x.height}
-					onSelect={() => {
-						setPlayMode(PlayMode.Hls);
-						setVideo(x.height);
-					}}
-				/>
-			))}
+			{info?.videoTracks
+				.sort((a: any, b: any) => b.height - a.height)
+				.map((x: any, i: number) => (
+					<Menu.Item
+						key={i}
+						label={`${x.height}p`}
+						selected={video === x.height}
+						onSelect={() => {
+							setPlayMode(PlayMode.Hls);
+							setVideo(x.height);
+						}}
+					/>
+				))}
 		</Menu>
 	);
 };
