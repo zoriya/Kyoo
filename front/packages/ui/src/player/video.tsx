@@ -33,7 +33,7 @@ declare module "react-native-video" {
 
 export * from "react-native-video";
 
-import { Audio, Subtitle, getToken } from "@kyoo/models";
+import { Audio, Subtitle, getToken, useToken } from "@kyoo/models";
 import { IconButton, Menu } from "@kyoo/primitives";
 import { ComponentProps, forwardRef, useEffect, useRef } from "react";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
@@ -67,19 +67,12 @@ const Video = forwardRef<VideoRef, VideoProps>(function Video(
 	ref,
 ) {
 	const { css } = useYoshiki();
-	const token = useRef<string | null>(null);
+	const token = useToken();
 	const setInfo = useSetAtom(infoAtom);
 	const [video, setVideo] = useAtom(videoAtom);
 	const audio = useAtomValue(audioAtom);
 	const subtitle = useAtomValue(subtitleAtom);
 	const mode = useAtomValue(playModeAtom);
-
-	useEffect(() => {
-		async function run() {
-			token.current = await getToken();
-		}
-		run();
-	}, [source]);
 
 	useEffect(() => {
 		if (mode === PlayMode.Hls) setVideo(-1);
@@ -92,7 +85,7 @@ const Video = forwardRef<VideoRef, VideoProps>(function Video(
 				source={{
 					...source,
 					headers: {
-						Authorization: `Bearer: ${token.current}`,
+						...(token ? { Authorization: token } : {}),
 						"X-CLIENT-ID": clientId,
 					},
 				}}

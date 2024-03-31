@@ -24,6 +24,7 @@ import { Account, Token, TokenP, getCurrentApiUrl } from "./accounts";
 import { UserP } from "./resources";
 import { addAccount, getCurrentAccount, removeAccounts, updateAccount } from "./account-internal";
 import { Platform } from "react-native";
+import { useEffect, useRef, useState } from "react";
 
 type Result<A, B> =
 	| { ok: true; value: A; error?: undefined }
@@ -136,6 +137,31 @@ export const getTokenWJ = async (
 };
 
 export const getToken = async (): Promise<string | null> => (await getTokenWJ())[0];
+
+export const useToken = () => {
+	const account = getCurrentAccount();
+	const refresher = useRef<NodeJS.Timeout | null>(null);
+	const [token, setToken] = useState(
+		account ? `${account.token.token_type} ${account.token.access_token}` : null,
+	);
+
+	useEffect(() => {
+		async function run() {
+			const nToken = await getTokenWJ();
+			setToken(nToken[0]);
+			if (refresher.current) clearTimeout(refresher.current);
+			if (nToken[1])
+				refresher.current = setTimeout(run, nToken[1].expire_at.getTime() - Date.now());
+		}
+		run();
+		return () => {
+			if (refresher.current) clearTimeout(refresher.current);
+		};
+	}, [account]);
+
+	if (!token) return null;
+	return token;
+};
 
 export const logout = () => {
 	removeAccounts((x) => x.selected);
