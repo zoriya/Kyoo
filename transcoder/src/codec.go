@@ -2,7 +2,6 @@ package src
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/zoriya/go-mediainfo"
@@ -20,7 +19,6 @@ func GetMimeCodec(mi *mediainfo.File, kind mediainfo.StreamKind, i int) *string 
 		mi.Parameter(kind, i, "Format"),
 	)
 
-	log.Printf("codec: %s", codec)
 	switch codec {
 	case "video/H264", "AVC":
 		ret := "avc1"
@@ -41,7 +39,6 @@ func GetMimeCodec(mi *mediainfo.File, kind mediainfo.StreamKind, i int) *string 
 
 		// level format is l3.1 for level 31
 		level := ParseFloat(info[1][1:])
-		log.Printf("%s %s %f", format, info[1], level)
 		ret += fmt.Sprintf("%02x", int(level*10))
 		return &ret
 
