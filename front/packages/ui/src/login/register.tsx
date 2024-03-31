@@ -45,7 +45,7 @@ export const RegisterPage: QueryPage<{ apiUrl?: string }> = ({ apiUrl }) => {
 	useEffect(() => {
 		if (!apiUrl && Platform.OS !== "web")
 			router.replace("/server-url", undefined, {
-				experimental: { nativeBehavior: "stack-replace", isNestedNavigator: true },
+				experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
 			});
 	}, [apiUrl, router]);
 
@@ -85,7 +85,7 @@ export const RegisterPage: QueryPage<{ apiUrl?: string }> = ({ apiUrl }) => {
 					setError(error);
 					if (error) return;
 					router.replace("/", undefined, {
-						experimental: { nativeBehavior: "stack-replace", isNestedNavigator: true },
+						experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
 					});
 				}}
 				{...css({

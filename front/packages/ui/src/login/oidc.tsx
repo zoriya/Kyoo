@@ -106,7 +106,7 @@ export const OidcCallbackPage: QueryPage<{
 
 		function onError(error: string) {
 			router.replace({ pathname: "/login", query: { error, apiUrl } }, undefined, {
-				experimental: { nativeBehavior: "stack-replace", isNestedNavigator: true },
+				experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
 			});
 		}
 		async function run() {
@@ -114,7 +114,7 @@ export const OidcCallbackPage: QueryPage<{
 			if (loginError) onError(loginError);
 			else {
 				router.replace("/", undefined, {
-					experimental: { nativeBehavior: "stack-replace", isNestedNavigator: true },
+					experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
 				});
 			}
 		}
