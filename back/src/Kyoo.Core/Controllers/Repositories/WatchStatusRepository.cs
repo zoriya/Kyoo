@@ -489,7 +489,7 @@ public class WatchStatusRepository(
 		int? percent
 	)
 	{
-		Episode episode = await database.Episodes.FirstAsync(x => x.Id == episodeId);
+		Episode episode = await episodes.Get(episodeId);
 
 		if (percent == null && watchedTime != null && episode.Runtime > 0)
 			percent = (int)Math.Round(watchedTime.Value / (episode.Runtime.Value * 60f) * 100f);

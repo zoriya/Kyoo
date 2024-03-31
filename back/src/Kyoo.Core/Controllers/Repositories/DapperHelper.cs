@@ -431,20 +431,13 @@ public static class DapperHelper
 	}
 }
 
-public class SqlVariableContext
+public class SqlVariableContext(IHttpContextAccessor accessor)
 {
-	private readonly IHttpContextAccessor _accessor;
-
-	public SqlVariableContext(IHttpContextAccessor accessor)
-	{
-		_accessor = accessor;
-	}
-
 	public object? ReadVar(string var)
 	{
 		return var switch
 		{
-			"current_user" => _accessor.HttpContext?.User.GetId(),
+			"current_user" => accessor.HttpContext?.User.GetId(),
 			_ => throw new ArgumentException($"Invalid sql variable name: {var}")
 		};
 	}
