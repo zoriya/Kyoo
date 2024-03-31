@@ -138,6 +138,11 @@ export const getTokenWJ = async (
 
 export const getToken = async (): Promise<string | null> => (await getTokenWJ())[0];
 
+export const getCurrentToken = () => {
+	const account = getCurrentAccount();
+	return account ? `${account.token.token_type} ${account.token.access_token}` : null;
+};
+
 export const useToken = () => {
 	const account = getCurrentAccount();
 	const refresher = useRef<NodeJS.Timeout | null>(null);
