@@ -36,27 +36,6 @@ func DetectHardwareAccel() HwAccelT {
 			// aspect ratio in our code so there is no need.
 			ScaleFilter: "scale=%d:%d",
 		}
-	case "nvidia":
-		return HwAccelT{
-			Name: "nvidia",
-			DecodeFlags: []string{
-				"-hwaccel", "cuda",
-				// this flag prevents data to go from gpu space to cpu space
-				// it forces the whole dec/enc to be on the gpu. We want that.
-				"-hwaccel_output_format", "cuda",
-			},
-			EncodeFlags: []string{
-				"-c:v", "h264_nvenc",
-				"-preset", preset,
-				// the exivalent of -sc_threshold on nvidia.
-				"-no-scenecut", "1",
-				// force 8bits output (by default it keeps the same as the source but 10bits is not playable on some devices)
-				"-pix_fmt", "yuv420p",
-			},
-			// if the decode goes into system memory, we need to prepend the filters with "hwupload_cuda".
-			// since we use hwaccel_output_format, decoded data stays in gpu memory so we must not specify it (it errors)
-			ScaleFilter: "scale_cuda=%d:%d",
-		}
 	case "vaapi":
 		return HwAccelT{
 			Name: name,
@@ -90,14 +69,33 @@ func DetectHardwareAccel() HwAccelT {
 			Name: name,
 			DecodeFlags: []string{
 				"-hwaccel", "qsv",
-				// "-qsv_device", GetEnvOr("GOCODER_QSV_RENDERER", "/dev/dri/renderD128"),
+				"-qsv_device", GetEnvOr("GOCODER_QSV_RENDERER", "/dev/dri/renderD128"),
 				"-hwaccel_output_format", "qsv",
 			},
 			EncodeFlags: []string{
 				"-c:v", "h264_qsv",
 				"-preset", preset,
 			},
-			ScaleFilter: "scale_qsv=%d:%d",
+			// see note on ScaleFilter of the vaapi HwAccel, this is the same filter but adapted to qsv
+			ScaleFilter: "format=nv12|qsv,hwupload,scale_qsv=%d:%d:format=nv12",
+		}
+	case "nvidia":
+		return HwAccelT{
+			Name: "nvidia",
+			DecodeFlags: []string{
+				"-hwaccel", "cuda",
+				// this flag prevents data to go from gpu space to cpu space
+				// it forces the whole dec/enc to be on the gpu. We want that.
+				"-hwaccel_output_format", "cuda",
+			},
+			EncodeFlags: []string{
+				"-c:v", "h264_nvenc",
+				"-preset", preset,
+				// the exivalent of -sc_threshold on nvidia.
+				"-no-scenecut", "1",
+			},
+			// see note on ScaleFilter of the vaapi HwAccel, this is the same filter but adapted to cuda
+			ScaleFilter: "format=nv12|cuda,hwupload,scale_cuda=%d:%d:format=nv12",
 		}
 	default:
 		log.Printf("No hardware accelerator named: %s", name)
