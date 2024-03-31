@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -90,10 +91,12 @@ func (fs *FileStream) GetMaster() string {
 		}
 
 		aspectRatio := float32(fs.Info.Video.Width) / float32(fs.Info.Video.Height)
-		transmux_codec := "avc1.640028"
+		// codec is the prefix + the level, the level is not part of the codec we want to compare for the same_codec check bellow
+		transmux_prefix := "avc1.6400"
+		transmux_codec := transmux_prefix + "28"
 
 		for _, quality := range Qualities {
-			same_codec := fs.Info.Video.MimeCodec != nil && *fs.Info.Video.MimeCodec == transmux_codec
+			same_codec := fs.Info.Video.MimeCodec != nil && strings.HasPrefix(*fs.Info.Video.MimeCodec, transmux_prefix)
 			inc_lvl := quality.Height() < fs.Info.Video.Quality.Height() ||
 				(quality.Height() == fs.Info.Video.Quality.Height() && !same_codec)
 
