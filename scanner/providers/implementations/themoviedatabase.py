@@ -56,11 +56,30 @@ class TheMovieDatabase(Provider):
 			53: Genre.THRILLER,
 			10752: Genre.WAR,
 			37: Genre.WESTERN,
+			10759: [Genre.ACTION, Genre.ADVENTURE],
+			10762: Genre.KIDS,
+			10763: Genre.NEWS,
+			10764: Genre.REALITY,
+			10765: [Genre.SCIENCE_FICTION, Genre.FANTASY],
+			10766: Genre.SOAP,
+			10767: Genre.TALK,
+			10768: [Genre.WAR, Genre.POLITICS],
 		}
 
 	@property
 	def name(self) -> str:
 		return "themoviedatabase"
+
+	def process_genres(self, genres) -> list[Genre]:
+		def flatten(x: Genre | list[Genre]) -> list[Genre]:
+			if isinstance(x, list):
+				return [j for i in x for j in flatten(i)]
+			return [x]
+		return flatten([
+			self.genre_map[x["id"]]
+			for x in genres
+			if x["id"] in self.genre_map
+		])
 
 	def get_languages(self, *args):
 		return self._languages + list(args)
@@ -154,11 +173,7 @@ class TheMovieDatabase(Provider):
 				rating=round(float(movie["vote_average"]) * 10),
 				runtime=int(movie["runtime"]) if movie["runtime"] is not None else None,
 				studios=[self.to_studio(x) for x in movie["production_companies"]],
-				genres=[
-					self.genre_map[x["id"]]
-					for x in movie["genres"]
-					if x["id"] in self.genre_map
-				],
+				genres=self.process_genres(movie["genres"]),
 				external_id=(
 					{
 						self.name: MetadataID(
@@ -260,11 +275,7 @@ class TheMovieDatabase(Provider):
 				else ShowStatus.FINISHED,
 				rating=round(float(show["vote_average"]) * 10),
 				studios=[self.to_studio(x) for x in show["production_companies"]],
-				genres=[
-					self.genre_map[x["id"]]
-					for x in show["genres"]
-					if x["id"] in self.genre_map
-				],
+				genres=self.process_genres(show["genres"]),
 				external_id={
 					self.name: MetadataID(
 						show["id"], f"https://www.themoviedb.org/tv/{show['id']}"

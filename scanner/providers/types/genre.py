@@ -20,6 +20,12 @@ class Genre(str, Enum):
 	THRILLER = "Thriller"
 	WAR = "War"
 	WESTERN = "Western"
+	KIDS = "Kids"
+	NEWS = "News"
+	REALITY = "Reality"
+	SOAP = "Soap"
+	TALK = "Talk"
+	POLITICS = "Politics"
 
 	def to_kyoo(self):
 		return self.value
