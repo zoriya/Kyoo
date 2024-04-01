@@ -36,7 +36,7 @@ import { useRouter } from "solito/router";
 import { useSetAtom } from "jotai";
 import { useYoshiki } from "yoshiki/native";
 import { Back, Hover, LoadingIndicator } from "./components/hover";
-import { fullscreenAtom, Video } from "./state";
+import { durationAtom, fullscreenAtom, Video } from "./state";
 import { episodeDisplayNumber } from "../details/episode";
 import { useVideoKeyboard } from "./keyboard";
 import { MediaSessionManager } from "./media-session";
@@ -103,6 +103,11 @@ export const Player = ({
 			if (!document.location.href.includes("/watch")) setFullscreen(false);
 		};
 	}, [setFullscreen]);
+
+	const setDuration = useSetAtom(durationAtom);
+	useEffect(() => {
+		setDuration(info?.durationSeconds);
+	}, [info, setDuration]);
 
 	if (error || infoError || playbackError)
 		return (
