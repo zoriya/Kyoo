@@ -62,6 +62,7 @@ export const FormPage = ({
 			{...css({
 				flexDirection: "row",
 				flexGrow: 1,
+				flexShrink: 1,
 				backgroundColor: (theme) => theme.dark.background,
 			})}
 		>
