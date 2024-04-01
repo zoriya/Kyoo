@@ -3,6 +3,7 @@
 		<AssemblyName>Kyoo.Core</AssemblyName>
 		<RootNamespace>Kyoo.Core</RootNamespace>
 		<OutputType>Exe</OutputType>
+		<AssemblyName>kyoo</AssemblyName>
 		<!-- Limit the number of threads, the default is to not limit so scanning the library
 		     create way too many of them and slows the whole server. -->
 		<ThreadPoolMaxThreads>50</ThreadPoolMaxThreads>
@@ -22,6 +23,10 @@
 		<PackageReference Include="Serilog.Sinks.SyslogMessages" Version="3.0.1" />
 		<PackageReference Include="SkiaSharp" Version="2.88.7" />
 		<PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.88.7" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.3">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 	</ItemGroup>
 
 	<ItemGroup>

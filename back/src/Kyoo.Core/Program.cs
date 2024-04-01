@@ -29,7 +29,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 using Serilog.Templates;
@@ -38,7 +37,7 @@ using Serilog.Templates.Themes;
 #if DEBUG
 const string EnvironmentName = "Development";
 #else
-		const string EnvironmentName = "Production";
+const string EnvironmentName = "Production";
 #endif
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(
@@ -72,13 +71,10 @@ AppDomain.CurrentDomain.UnhandledException += (_, ex) =>
 	Log.Fatal(ex.ExceptionObject as Exception, "Unhandled exception");
 builder.Host.UseSerilog();
 
-
-// Set current directory, used by thumbnails for example.
-string path = Path.GetFullPath(builder.Configuration.GetValue("DATADIR", "/kyoo")!);
-if (!Directory.Exists(path))
-	Directory.CreateDirectory(path);
-Environment.CurrentDirectory = path;
-Log.Information("Data directory: {DataDirectory}", Environment.CurrentDirectory);
+builder
+	.Services.AddMvcCore()
+	.AddApplicationPart(typeof(CoreModule).Assembly)
+	.AddApplicationPart(typeof(AuthenticationModule).Assembly);
 
 builder.Services.ConfigureMvc();
 builder.Services.ConfigureOpenApi();
@@ -96,6 +92,13 @@ app.UseResponseCompression();
 app.UseRouting();
 app.UseAuthentication();
 app.MapControllers();
+
+// Set current directory, used by thumbnails for example.
+string path = Path.GetFullPath(builder.Configuration.GetValue("DATADIR", "/kyoo")!);
+if (!Directory.Exists(path))
+	Directory.CreateDirectory(path);
+Environment.CurrentDirectory = path;
+Log.Information("Data directory: {DataDirectory}", Environment.CurrentDirectory);
 
 // Activate services that always run in the background
 app.Services.GetRequiredService<MeiliSync>();

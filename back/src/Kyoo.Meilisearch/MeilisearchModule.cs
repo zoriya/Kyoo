@@ -16,6 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Meilisearch;
@@ -151,7 +154,7 @@ public static class MeilisearchModule
 					builder.Configuration.GetValue<string?>("MEILI_MASTER_KEY")
 				)
 			);
-		builder.Services.AddSingleton<ISearchManager, SearchManager>();
+		builder.Services.AddScoped<ISearchManager, SearchManager>();
 		builder.Services.AddSingleton<MeiliSync>();
 	}
 }

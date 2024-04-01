@@ -33,38 +33,15 @@ using Npgsql;
 
 namespace Kyoo.Postgresql;
 
-public class PostgresContext : DatabaseContext
+public class PostgresContext(DbContextOptions options, IHttpContextAccessor accessor)
+	: DatabaseContext(options, accessor)
 {
-	/// <summary>
-	/// Should the configure step be skipped? This is used when the database is created via DbContextOptions.
-	/// </summary>
-	private readonly bool _skipConfigure;
-
-	public PostgresContext(DbContextOptions options, IHttpContextAccessor accessor)
-		: base(options, accessor)
-	{
-		_skipConfigure = true;
-	}
-
-	/// <summary>
-	/// Set connection information for this database context
-	/// </summary>
-	/// <param name="optionsBuilder">An option builder to fill.</param>
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{
-		if (!_skipConfigure)
-		{
-			optionsBuilder.UseNpgsql();
-		}
-
 		optionsBuilder.UseSnakeCaseNamingConvention();
 		base.OnConfiguring(optionsBuilder);
 	}
 
-	/// <summary>
-	/// Set database parameters to support every types of Kyoo.
-	/// </summary>
-	/// <param name="modelBuilder">The database's model builder.</param>
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		modelBuilder.HasPostgresEnum<Status>();
