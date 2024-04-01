@@ -1,6 +1,7 @@
 package src
 
 import (
+	"cmp"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -167,7 +168,7 @@ func OrNull(str string) *string {
 	return &str
 }
 
-func Max(x, y uint32) uint32 {
+func Max[T cmp.Ordered](x, y T) T {
 	if x < y {
 		return y
 	}
