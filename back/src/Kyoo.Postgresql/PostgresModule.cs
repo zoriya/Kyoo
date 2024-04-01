@@ -30,16 +30,16 @@ namespace Kyoo.Postgresql;
 
 public static class PostgresModule
 {
-	public static void ConfigurePostgres(this WebApplicationBuilder builder)
+	public static NpgsqlDataSource CreateDataSource(IConfiguration configuration)
 	{
 		DbConnectionStringBuilder conBuilder =
 			new()
 			{
-				["USER ID"] = builder.Configuration.GetValue("POSTGRES_USER", "KyooUser"),
-				["PASSWORD"] = builder.Configuration.GetValue("POSTGRES_PASSWORD", "KyooPassword"),
-				["SERVER"] = builder.Configuration.GetValue("POSTGRES_SERVER", "db"),
-				["PORT"] = builder.Configuration.GetValue("POSTGRES_PORT", "5432"),
-				["DATABASE"] = builder.Configuration.GetValue("POSTGRES_DB", "kyooDB"),
+				["USER ID"] = configuration.GetValue("POSTGRES_USER", "KyooUser"),
+				["PASSWORD"] = configuration.GetValue("POSTGRES_PASSWORD", "KyooPassword"),
+				["SERVER"] = configuration.GetValue("POSTGRES_SERVER", "db"),
+				["PORT"] = configuration.GetValue("POSTGRES_PORT", "5432"),
+				["DATABASE"] = configuration.GetValue("POSTGRES_DB", "kyooDB"),
 				["POOLING"] = "true",
 				["MAXPOOLSIZE"] = "95",
 				["TIMEOUT"] = "30"
@@ -49,7 +49,12 @@ public static class PostgresModule
 		dsBuilder.MapEnum<Status>();
 		dsBuilder.MapEnum<Genre>();
 		dsBuilder.MapEnum<WatchStatus>();
-		NpgsqlDataSource dataSource = dsBuilder.Build();
+		return dsBuilder.Build();
+	}
+
+	public static void ConfigurePostgres(this WebApplicationBuilder builder)
+	{
+		NpgsqlDataSource dataSource = CreateDataSource(builder.Configuration);
 
 		builder.Services.AddDbContext<DatabaseContext, PostgresContext>(
 			x =>

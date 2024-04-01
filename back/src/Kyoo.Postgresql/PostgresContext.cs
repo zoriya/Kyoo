@@ -28,7 +28,9 @@ using Kyoo.Postgresql.Utils;
 using Kyoo.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+using Microsoft.Extensions.Configuration;
 using Npgsql;
 
 namespace Kyoo.Postgresql;
@@ -119,5 +121,17 @@ public class PostgresContext(DbContextOptions options, IHttpContextAccessor acce
 				SqlState: PostgresErrorCodes.UniqueViolation
 					or PostgresErrorCodes.ForeignKeyViolation
 			};
+	}
+}
+
+public class PostgresContextBuilder : IDesignTimeDbContextFactory<PostgresContext>
+{
+	public PostgresContext CreateDbContext(string[] args)
+	{
+		NpgsqlDataSource dataSource = PostgresModule.CreateDataSource(new ConfigurationManager());
+		DbContextOptionsBuilder builder = new();
+		builder.UseNpgsql(dataSource);
+
+		return new PostgresContext(builder.Options, null!);
 	}
 }
