@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Autofac;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Authentication.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
