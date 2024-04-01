@@ -119,7 +119,6 @@ export const Video = memo(function Video({
 	const setPrivateProgress = useSetAtom(privateProgressAtom);
 	const setPublicProgress = useSetAtom(publicProgressAtom);
 	const setBuffered = useSetAtom(bufferedAtom);
-	const setDuration = useSetAtom(durationAtom);
 	useEffect(() => {
 		ref.current?.seek(publicProgress);
 	}, [publicProgress]);
@@ -216,9 +215,6 @@ export const Video = memo(function Video({
 			onProgress={(progress) => {
 				setPrivateProgress(progress.currentTime);
 				setBuffered(progress.playableDuration);
-			}}
-			onLoad={(info) => {
-				setDuration(info.duration);
 			}}
 			onPlaybackStateChanged={(state) => setPlay(state.isPlaying)}
 			fonts={fonts}

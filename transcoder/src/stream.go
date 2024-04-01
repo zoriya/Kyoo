@@ -68,7 +68,7 @@ func NewStream(file *FileStream, handle StreamHandle, ret *Stream) {
 	ret.heads = make([]Head, 0)
 
 	length, is_done := file.Keyframes.Length()
-	ret.segments = make([]Segment, length, 2000)
+	ret.segments = make([]Segment, length, max(length, 2000))
 	for seg := range ret.segments {
 		ret.segments[seg].channel = make(chan struct{})
 	}

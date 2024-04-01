@@ -167,13 +167,6 @@ func OrNull(str string) *string {
 	return &str
 }
 
-func Max(x, y uint32) uint32 {
-	if x < y {
-		return y
-	}
-	return x
-}
-
 var SubtitleExtensions = map[string]string{
 	"subrip": "srt",
 	"ass":    "ass",
@@ -315,7 +308,7 @@ func getInfo(path string, route string) (*MediaInfo, error) {
 				Link:      link,
 			}
 		}),
-		Chapters: Map(make([]Chapter, Max(chapters_end-chapters_begin, 1)-1), func(_ Chapter, i int) Chapter {
+		Chapters: Map(make([]Chapter, max(chapters_end-chapters_begin, 1)-1), func(_ Chapter, i int) Chapter {
 			return Chapter{
 				StartTime: ParseTime(mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoName)),
 				// +1 is safe, the value at chapters_end contains the right duration
