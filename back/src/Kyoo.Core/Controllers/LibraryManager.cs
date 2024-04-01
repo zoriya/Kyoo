@@ -53,8 +53,8 @@ public class LibraryManager : ILibraryManager
 		Studios = studioRepository;
 		Users = userRepository;
 
-		_repositories = new IBaseRepository[]
-		{
+		_repositories =
+		[
 			LibraryItems,
 			News,
 			Collections,
@@ -64,7 +64,7 @@ public class LibraryManager : ILibraryManager
 			Episodes,
 			Studios,
 			Users
-		};
+		];
 	}
 
 	/// <inheritdoc />

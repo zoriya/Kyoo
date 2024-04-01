@@ -33,37 +33,17 @@ using Npgsql;
 
 namespace Kyoo.Postgresql;
 
-/// <summary>
-/// A postgresql implementation of <see cref="DatabaseContext"/>.
-/// </summary>
 public class PostgresContext : DatabaseContext
 {
-	/// <summary>
-	/// Is this instance in debug mode?
-	/// </summary>
-	private readonly bool _debugMode;
-
 	/// <summary>
 	/// Should the configure step be skipped? This is used when the database is created via DbContextOptions.
 	/// </summary>
 	private readonly bool _skipConfigure;
 
-	/// <summary>
-	/// Design time constructor (dotnet ef migrations add). Do not use
-	/// </summary>
-	public PostgresContext()
-		: base(null!) { }
-
 	public PostgresContext(DbContextOptions options, IHttpContextAccessor accessor)
 		: base(options, accessor)
 	{
 		_skipConfigure = true;
-	}
-
-	public PostgresContext(string connection, bool debugMode, IHttpContextAccessor accessor)
-		: base(accessor)
-	{
-		_debugMode = debugMode;
 	}
 
 	/// <summary>
@@ -75,8 +55,6 @@ public class PostgresContext : DatabaseContext
 		if (!_skipConfigure)
 		{
 			optionsBuilder.UseNpgsql();
-			if (_debugMode)
-				optionsBuilder.EnableDetailedErrors().EnableSensitiveDataLogging();
 		}
 
 		optionsBuilder.UseSnakeCaseNamingConvention();

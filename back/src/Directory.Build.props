@@ -2,6 +2,7 @@
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<LangVersion>default</LangVersion>
+		<Nullable>enable</Nullable>
 		<Company>Kyoo</Company>
 		<Authors>Kyoo</Authors>
 		<Copyright>Copyright (c) Kyoo</Copyright>

@@ -2,6 +2,7 @@
 	<PropertyGroup>
 		<AssemblyName>Kyoo.Swagger</AssemblyName>
 		<RootNamespace>Kyoo.Swagger</RootNamespace>
+		<Nullable>disable</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>

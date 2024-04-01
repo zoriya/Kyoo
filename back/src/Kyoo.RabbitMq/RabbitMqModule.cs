@@ -16,39 +16,30 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using Autofac;
-using Kyoo.Abstractions.Controllers;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 
 namespace Kyoo.RabbitMq;
 
-public class RabbitMqModule(IConfiguration configuration) : IPlugin
+public static class RabbitMqModule
 {
-	/// <inheritdoc />
-	public string Name => "RabbitMq";
-
-	/// <inheritdoc />
-	public void Configure(ContainerBuilder builder)
+	public static void ConfigureRabbitMq(this WebApplicationBuilder builder)
 	{
-		builder
-			.Register(
-				(_) =>
+		builder.Services.AddSingleton(_ =>
+		{
+			ConnectionFactory factory =
+				new()
 				{
-					ConnectionFactory factory =
-						new()
-						{
-							UserName = configuration.GetValue("RABBITMQ_DEFAULT_USER", "guest"),
-							Password = configuration.GetValue("RABBITMQ_DEFAULT_PASS", "guest"),
-							HostName = configuration.GetValue("RABBITMQ_HOST", "rabbitmq"),
-							Port = 5672,
-						};
+					UserName = builder.Configuration.GetValue("RABBITMQ_DEFAULT_USER", "guest"),
+					Password = builder.Configuration.GetValue("RABBITMQ_DEFAULT_PASS", "guest"),
+					HostName = builder.Configuration.GetValue("RABBITMQ_HOST", "rabbitmq"),
+					Port = 5672,
+				};
 
-					return factory.CreateConnection();
-				}
-			)
-			.AsSelf()
-			.SingleInstance();
-		builder.RegisterType<RabbitProducer>().AsSelf().SingleInstance().AutoActivate();
+			return factory.CreateConnection();
+		});
+		builder.Services.AddSingleton<RabbitProducer>();
 	}
 }

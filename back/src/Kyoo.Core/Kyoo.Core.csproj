@@ -2,7 +2,10 @@
 	<PropertyGroup>
 		<AssemblyName>Kyoo.Core</AssemblyName>
 		<RootNamespace>Kyoo.Core</RootNamespace>
-		<Nullable>enable</Nullable>
+		<OutputType>Exe</OutputType>
+		<!-- Limit the number of threads, the default is to not limit so scanning the library
+		     create way too many of them and slows the whole server. -->
+		<ThreadPoolMaxThreads>50</ThreadPoolMaxThreads>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -12,6 +15,11 @@
 		<PackageReference Include="InterpolatedSql.Dapper" Version="2.3.0" />
 		<PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" Version="8.0.0" />
 		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
+		<PackageReference Include="Serilog" Version="3.1.1" />
+		<PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
+		<PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
+		<PackageReference Include="Serilog.Expressions" Version="4.0.0" />
+		<PackageReference Include="Serilog.Sinks.SyslogMessages" Version="3.0.1" />
 		<PackageReference Include="SkiaSharp" Version="2.88.7" />
 		<PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.88.7" />
 	</ItemGroup>
@@ -19,6 +27,9 @@
 	<ItemGroup>
 		<ProjectReference Include="../Kyoo.Abstractions/Kyoo.Abstractions.csproj" />
 		<ProjectReference Include="../Kyoo.Postgresql/Kyoo.Postgresql.csproj" />
+		<ProjectReference Include="../Kyoo.Meilisearch/Kyoo.Meilisearch.csproj" />
+		<ProjectReference Include="../Kyoo.RabbitMq/Kyoo.RabbitMq.csproj" />
 		<ProjectReference Include="../Kyoo.Authentication/Kyoo.Authentication.csproj" />
+		<ProjectReference Include="../Kyoo.Swagger/Kyoo.Swagger.csproj" />
 	</ItemGroup>
 </Project>
