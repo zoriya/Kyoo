@@ -5,6 +5,7 @@ using Kyoo.Abstractions.Models;
 using Kyoo.Postgresql;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -13,21 +14,63 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Kyoo.Postgresql.Migrations
 {
 	[DbContext(typeof(PostgresContext))]
-	partial class PostgresContextModelSnapshot : ModelSnapshot
+	[Migration("20240401213942_AddGenres")]
+	partial class AddGenres
 	{
-		protected override void BuildModel(ModelBuilder modelBuilder)
+		/// <inheritdoc />
+		protected override void BuildTargetModel(ModelBuilder modelBuilder)
 		{
 #pragma warning disable 612, 618
 			modelBuilder
 				.HasAnnotation("ProductVersion", "8.0.3")
 				.HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-			NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "genre", new[] { "action", "adventure", "animation", "comedy", "crime", "documentary", "drama", "family", "fantasy", "history", "horror", "music", "mystery", "romance", "science_fiction", "thriller", "war", "western", "kids", "news", "reality", "soap", "talk", "politics" });
-			NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "status", new[] { "unknown", "finished", "airing", "planned" });
-			NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "watch_status", new[] { "completed", "watching", "droped", "planned", "deleted" });
+			NpgsqlModelBuilderExtensions.HasPostgresEnum(
+				modelBuilder,
+				"genre",
+				new[]
+				{
+					"action",
+					"adventure",
+					"animation",
+					"comedy",
+					"crime",
+					"documentary",
+					"drama",
+					"family",
+					"fantasy",
+					"history",
+					"horror",
+					"music",
+					"mystery",
+					"romance",
+					"science_fiction",
+					"thriller",
+					"war",
+					"western",
+					"kids",
+					"news",
+					"reality",
+					"soap",
+					"talk",
+					"politics"
+				}
+			);
+			NpgsqlModelBuilderExtensions.HasPostgresEnum(
+				modelBuilder,
+				"status",
+				new[] { "unknown", "finished", "airing", "planned" }
+			);
+			NpgsqlModelBuilderExtensions.HasPostgresEnum(
+				modelBuilder,
+				"watch_status",
+				new[] { "completed", "watching", "droped", "planned", "deleted" }
+			);
 			NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.Collection", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.Collection",
+				b =>
 				{
 					b.Property<Guid>("Id")
 						.ValueGeneratedOnAdd()
@@ -50,9 +93,7 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnType("text")
 						.HasColumnName("name");
 
-					b.Property<string>("Overview")
-						.HasColumnType("text")
-						.HasColumnName("overview");
+					b.Property<string>("Overview").HasColumnType("text").HasColumnName("overview");
 
 					b.Property<string>("Slug")
 						.IsRequired()
@@ -60,17 +101,17 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnType("character varying(256)")
 						.HasColumnName("slug");
 
-					b.HasKey("Id")
-						.HasName("pk_collections");
+					b.HasKey("Id").HasName("pk_collections");
 
-					b.HasIndex("Slug")
-						.IsUnique()
-						.HasDatabaseName("ix_collections_slug");
+					b.HasIndex("Slug").IsUnique().HasDatabaseName("ix_collections_slug");
 
 					b.ToTable("collections", (string)null);
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.Episode", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.Episode",
+				b =>
 				{
 					b.Property<Guid>("Id")
 						.ValueGeneratedOnAdd()
@@ -96,13 +137,9 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnType("json")
 						.HasColumnName("external_id");
 
-					b.Property<string>("Name")
-						.HasColumnType("text")
-						.HasColumnName("name");
+					b.Property<string>("Name").HasColumnType("text").HasColumnName("name");
 
-					b.Property<string>("Overview")
-						.HasColumnType("text")
-						.HasColumnName("overview");
+					b.Property<string>("Overview").HasColumnType("text").HasColumnName("overview");
 
 					b.Property<string>("Path")
 						.IsRequired()
@@ -113,21 +150,15 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnType("date")
 						.HasColumnName("release_date");
 
-					b.Property<int?>("Runtime")
-						.HasColumnType("integer")
-						.HasColumnName("runtime");
+					b.Property<int?>("Runtime").HasColumnType("integer").HasColumnName("runtime");
 
-					b.Property<Guid?>("SeasonId")
-						.HasColumnType("uuid")
-						.HasColumnName("season_id");
+					b.Property<Guid?>("SeasonId").HasColumnType("uuid").HasColumnName("season_id");
 
 					b.Property<int?>("SeasonNumber")
 						.HasColumnType("integer")
 						.HasColumnName("season_number");
 
-					b.Property<Guid>("ShowId")
-						.HasColumnType("uuid")
-						.HasColumnName("show_id");
+					b.Property<Guid>("ShowId").HasColumnType("uuid").HasColumnName("show_id");
 
 					b.Property<string>("Slug")
 						.IsRequired()
@@ -135,28 +166,27 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnType("character varying(256)")
 						.HasColumnName("slug");
 
-					b.HasKey("Id")
-						.HasName("pk_episodes");
+					b.HasKey("Id").HasName("pk_episodes");
 
-					b.HasIndex("SeasonId")
-						.HasDatabaseName("ix_episodes_season_id");
+					b.HasIndex("SeasonId").HasDatabaseName("ix_episodes_season_id");
 
-					b.HasIndex("Slug")
-						.IsUnique()
-						.HasDatabaseName("ix_episodes_slug");
+					b.HasIndex("Slug").IsUnique().HasDatabaseName("ix_episodes_slug");
 
 					b.HasIndex("ShowId", "SeasonNumber", "EpisodeNumber", "AbsoluteNumber")
 						.IsUnique()
-						.HasDatabaseName("ix_episodes_show_id_season_number_episode_number_absolute_numb");
+						.HasDatabaseName(
+							"ix_episodes_show_id_season_number_episode_number_absolute_numb"
+						);
 
 					b.ToTable("episodes", (string)null);
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.EpisodeWatchStatus", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.EpisodeWatchStatus",
+				b =>
 				{
-					b.Property<Guid>("UserId")
-						.HasColumnType("uuid")
-						.HasColumnName("user_id");
+					b.Property<Guid>("UserId").HasColumnType("uuid").HasColumnName("user_id");
 
 					b.Property<Guid?>("EpisodeId")
 						.HasColumnType("uuid")
@@ -184,24 +214,21 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnType("integer")
 						.HasColumnName("watched_time");
 
-					b.HasKey("UserId", "EpisodeId")
-						.HasName("pk_episode_watch_status");
+					b.HasKey("UserId", "EpisodeId").HasName("pk_episode_watch_status");
 
-					b.HasIndex("EpisodeId")
-						.HasDatabaseName("ix_episode_watch_status_episode_id");
+					b.HasIndex("EpisodeId").HasDatabaseName("ix_episode_watch_status_episode_id");
 
 					b.ToTable("episode_watch_status", (string)null);
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.Issue", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.Issue",
+				b =>
 				{
-					b.Property<string>("Domain")
-						.HasColumnType("text")
-						.HasColumnName("domain");
+					b.Property<string>("Domain").HasColumnType("text").HasColumnName("domain");
 
-					b.Property<string>("Cause")
-						.HasColumnType("text")
-						.HasColumnName("cause");
+					b.Property<string>("Cause").HasColumnType("text").HasColumnName("cause");
 
 					b.Property<DateTime>("AddedDate")
 						.ValueGeneratedOnAdd()
@@ -219,13 +246,15 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnType("text")
 						.HasColumnName("reason");
 
-					b.HasKey("Domain", "Cause")
-						.HasName("pk_issues");
+					b.HasKey("Domain", "Cause").HasName("pk_issues");
 
 					b.ToTable("issues", (string)null);
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.Movie", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.Movie",
+				b =>
 				{
 					b.Property<Guid>("Id")
 						.ValueGeneratedOnAdd()
@@ -262,22 +291,16 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnType("text")
 						.HasColumnName("name");
 
-					b.Property<string>("Overview")
-						.HasColumnType("text")
-						.HasColumnName("overview");
+					b.Property<string>("Overview").HasColumnType("text").HasColumnName("overview");
 
 					b.Property<string>("Path")
 						.IsRequired()
 						.HasColumnType("text")
 						.HasColumnName("path");
 
-					b.Property<int>("Rating")
-						.HasColumnType("integer")
-						.HasColumnName("rating");
+					b.Property<int>("Rating").HasColumnType("integer").HasColumnName("rating");
 
-					b.Property<int?>("Runtime")
-						.HasColumnType("integer")
-						.HasColumnName("runtime");
+					b.Property<int?>("Runtime").HasColumnType("integer").HasColumnName("runtime");
 
 					b.Property<string>("Slug")
 						.IsRequired()
@@ -285,49 +308,36 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnType("character varying(256)")
 						.HasColumnName("slug");
 
-					b.Property<Status>("Status")
-						.HasColumnType("status")
-						.HasColumnName("status");
+					b.Property<Status>("Status").HasColumnType("status").HasColumnName("status");
 
-					b.Property<Guid?>("StudioId")
-						.HasColumnType("uuid")
-						.HasColumnName("studio_id");
+					b.Property<Guid?>("StudioId").HasColumnType("uuid").HasColumnName("studio_id");
 
-					b.Property<string>("Tagline")
-						.HasColumnType("text")
-						.HasColumnName("tagline");
+					b.Property<string>("Tagline").HasColumnType("text").HasColumnName("tagline");
 
 					b.Property<string[]>("Tags")
 						.IsRequired()
 						.HasColumnType("text[]")
 						.HasColumnName("tags");
 
-					b.Property<string>("Trailer")
-						.HasColumnType("text")
-						.HasColumnName("trailer");
+					b.Property<string>("Trailer").HasColumnType("text").HasColumnName("trailer");
 
-					b.HasKey("Id")
-						.HasName("pk_movies");
+					b.HasKey("Id").HasName("pk_movies");
 
-					b.HasIndex("Slug")
-						.IsUnique()
-						.HasDatabaseName("ix_movies_slug");
+					b.HasIndex("Slug").IsUnique().HasDatabaseName("ix_movies_slug");
 
-					b.HasIndex("StudioId")
-						.HasDatabaseName("ix_movies_studio_id");
+					b.HasIndex("StudioId").HasDatabaseName("ix_movies_studio_id");
 
 					b.ToTable("movies", (string)null);
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.MovieWatchStatus", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.MovieWatchStatus",
+				b =>
 				{
-					b.Property<Guid>("UserId")
-						.HasColumnType("uuid")
-						.HasColumnName("user_id");
+					b.Property<Guid>("UserId").HasColumnType("uuid").HasColumnName("user_id");
 
-					b.Property<Guid>("MovieId")
-						.HasColumnType("uuid")
-						.HasColumnName("movie_id");
+					b.Property<Guid>("MovieId").HasColumnType("uuid").HasColumnName("movie_id");
 
 					b.Property<DateTime>("AddedDate")
 						.ValueGeneratedOnAdd()
@@ -351,16 +361,17 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnType("integer")
 						.HasColumnName("watched_time");
 
-					b.HasKey("UserId", "MovieId")
-						.HasName("pk_movie_watch_status");
+					b.HasKey("UserId", "MovieId").HasName("pk_movie_watch_status");
 
-					b.HasIndex("MovieId")
-						.HasDatabaseName("ix_movie_watch_status_movie_id");
+					b.HasIndex("MovieId").HasDatabaseName("ix_movie_watch_status_movie_id");
 
 					b.ToTable("movie_watch_status", (string)null);
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.Season", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.Season",
+				b =>
 				{
 					b.Property<Guid>("Id")
 						.ValueGeneratedOnAdd()
@@ -382,21 +393,15 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnType("json")
 						.HasColumnName("external_id");
 
-					b.Property<string>("Name")
-						.HasColumnType("text")
-						.HasColumnName("name");
+					b.Property<string>("Name").HasColumnType("text").HasColumnName("name");
 
-					b.Property<string>("Overview")
-						.HasColumnType("text")
-						.HasColumnName("overview");
+					b.Property<string>("Overview").HasColumnType("text").HasColumnName("overview");
 
 					b.Property<int>("SeasonNumber")
 						.HasColumnType("integer")
 						.HasColumnName("season_number");
 
-					b.Property<Guid>("ShowId")
-						.HasColumnType("uuid")
-						.HasColumnName("show_id");
+					b.Property<Guid>("ShowId").HasColumnType("uuid").HasColumnName("show_id");
 
 					b.Property<string>("Slug")
 						.IsRequired()
@@ -408,21 +413,21 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnType("date")
 						.HasColumnName("start_date");
 
-					b.HasKey("Id")
-						.HasName("pk_seasons");
+					b.HasKey("Id").HasName("pk_seasons");
 
-					b.HasIndex("Slug")
-						.IsUnique()
-						.HasDatabaseName("ix_seasons_slug");
+					b.HasIndex("Slug").IsUnique().HasDatabaseName("ix_seasons_slug");
 
 					b.HasIndex("ShowId", "SeasonNumber")
 						.IsUnique()
 						.HasDatabaseName("ix_seasons_show_id_season_number");
 
 					b.ToTable("seasons", (string)null);
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.Show", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.Show",
+				b =>
 				{
 					b.Property<Guid>("Id")
 						.ValueGeneratedOnAdd()
@@ -440,9 +445,7 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnType("text[]")
 						.HasColumnName("aliases");
 
-					b.Property<DateOnly?>("EndAir")
-						.HasColumnType("date")
-						.HasColumnName("end_air");
+					b.Property<DateOnly?>("EndAir").HasColumnType("date").HasColumnName("end_air");
 
 					b.Property<string>("ExternalId")
 						.IsRequired()
@@ -459,13 +462,9 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnType("text")
 						.HasColumnName("name");
 
-					b.Property<string>("Overview")
-						.HasColumnType("text")
-						.HasColumnName("overview");
+					b.Property<string>("Overview").HasColumnType("text").HasColumnName("overview");
 
-					b.Property<int>("Rating")
-						.HasColumnType("integer")
-						.HasColumnName("rating");
+					b.Property<int>("Rating").HasColumnType("integer").HasColumnName("rating");
 
 					b.Property<string>("Slug")
 						.IsRequired()
@@ -477,49 +476,36 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnType("date")
 						.HasColumnName("start_air");
 
-					b.Property<Status>("Status")
-						.HasColumnType("status")
-						.HasColumnName("status");
+					b.Property<Status>("Status").HasColumnType("status").HasColumnName("status");
 
-					b.Property<Guid?>("StudioId")
-						.HasColumnType("uuid")
-						.HasColumnName("studio_id");
+					b.Property<Guid?>("StudioId").HasColumnType("uuid").HasColumnName("studio_id");
 
-					b.Property<string>("Tagline")
-						.HasColumnType("text")
-						.HasColumnName("tagline");
+					b.Property<string>("Tagline").HasColumnType("text").HasColumnName("tagline");
 
 					b.Property<List<string>>("Tags")
 						.IsRequired()
 						.HasColumnType("text[]")
 						.HasColumnName("tags");
 
-					b.Property<string>("Trailer")
-						.HasColumnType("text")
-						.HasColumnName("trailer");
+					b.Property<string>("Trailer").HasColumnType("text").HasColumnName("trailer");
 
-					b.HasKey("Id")
-						.HasName("pk_shows");
+					b.HasKey("Id").HasName("pk_shows");
 
-					b.HasIndex("Slug")
-						.IsUnique()
-						.HasDatabaseName("ix_shows_slug");
+					b.HasIndex("Slug").IsUnique().HasDatabaseName("ix_shows_slug");
 
-					b.HasIndex("StudioId")
-						.HasDatabaseName("ix_shows_studio_id");
+					b.HasIndex("StudioId").HasDatabaseName("ix_shows_studio_id");
 
 					b.ToTable("shows", (string)null);
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.ShowWatchStatus", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.ShowWatchStatus",
+				b =>
 				{
-					b.Property<Guid>("UserId")
-						.HasColumnType("uuid")
-						.HasColumnName("user_id");
+					b.Property<Guid>("UserId").HasColumnType("uuid").HasColumnName("user_id");
 
-					b.Property<Guid>("ShowId")
-						.HasColumnType("uuid")
-						.HasColumnName("show_id");
+					b.Property<Guid>("ShowId").HasColumnType("uuid").HasColumnName("show_id");
 
 					b.Property<DateTime>("AddedDate")
 						.ValueGeneratedOnAdd()
@@ -551,19 +537,20 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnType("integer")
 						.HasColumnName("watched_time");
 
-					b.HasKey("UserId", "ShowId")
-						.HasName("pk_show_watch_status");
+					b.HasKey("UserId", "ShowId").HasName("pk_show_watch_status");
 
 					b.HasIndex("NextEpisodeId")
 						.HasDatabaseName("ix_show_watch_status_next_episode_id");
 
-					b.HasIndex("ShowId")
-						.HasDatabaseName("ix_show_watch_status_show_id");
+					b.HasIndex("ShowId").HasDatabaseName("ix_show_watch_status_show_id");
 
 					b.ToTable("show_watch_status", (string)null);
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.Studio", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.Studio",
+				b =>
 				{
 					b.Property<Guid>("Id")
 						.ValueGeneratedOnAdd()
@@ -586,17 +573,17 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnType("character varying(256)")
 						.HasColumnName("slug");
 
-					b.HasKey("Id")
-						.HasName("pk_studios");
+					b.HasKey("Id").HasName("pk_studios");
 
-					b.HasIndex("Slug")
-						.IsUnique()
-						.HasDatabaseName("ix_studios_slug");
+					b.HasIndex("Slug").IsUnique().HasDatabaseName("ix_studios_slug");
 
 					b.ToTable("studios", (string)null);
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.User", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.User",
+				b =>
 				{
 					b.Property<Guid>("Id")
 						.ValueGeneratedOnAdd()
@@ -619,9 +606,7 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnType("json")
 						.HasColumnName("external_id");
 
-					b.Property<string>("Password")
-						.HasColumnType("text")
-						.HasColumnName("password");
+					b.Property<string>("Password").HasColumnType("text").HasColumnName("password");
 
 					b.Property<string[]>("Permissions")
 						.IsRequired()
@@ -644,61 +629,60 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnType("text")
 						.HasColumnName("username");
 
-					b.HasKey("Id")
-						.HasName("pk_users");
+					b.HasKey("Id").HasName("pk_users");
 
-					b.HasIndex("Slug")
-						.IsUnique()
-						.HasDatabaseName("ix_users_slug");
+					b.HasIndex("Slug").IsUnique().HasDatabaseName("ix_users_slug");
 
-					b.HasIndex("Username")
-						.IsUnique()
-						.HasDatabaseName("ix_users_username");
+					b.HasIndex("Username").IsUnique().HasDatabaseName("ix_users_username");
 
 					b.ToTable("users", (string)null);
-				});
+				}
+			);
 
-			modelBuilder.Entity("link_collection_movie", b =>
+			modelBuilder.Entity(
+				"link_collection_movie",
+				b =>
 				{
 					b.Property<Guid>("collection_id")
 						.HasColumnType("uuid")
 						.HasColumnName("collection_id");
 
-					b.Property<Guid>("movie_id")
-						.HasColumnType("uuid")
-						.HasColumnName("movie_id");
+					b.Property<Guid>("movie_id").HasColumnType("uuid").HasColumnName("movie_id");
 
-					b.HasKey("collection_id", "movie_id")
-						.HasName("pk_link_collection_movie");
+					b.HasKey("collection_id", "movie_id").HasName("pk_link_collection_movie");
 
-					b.HasIndex("movie_id")
-						.HasDatabaseName("ix_link_collection_movie_movie_id");
+					b.HasIndex("movie_id").HasDatabaseName("ix_link_collection_movie_movie_id");
 
 					b.ToTable("link_collection_movie", (string)null);
-				});
+				}
+			);
 
-			modelBuilder.Entity("link_collection_show", b =>
+			modelBuilder.Entity(
+				"link_collection_show",
+				b =>
 				{
 					b.Property<Guid>("collection_id")
 						.HasColumnType("uuid")
 						.HasColumnName("collection_id");
 
-					b.Property<Guid>("show_id")
-						.HasColumnType("uuid")
-						.HasColumnName("show_id");
+					b.Property<Guid>("show_id").HasColumnType("uuid").HasColumnName("show_id");
 
-					b.HasKey("collection_id", "show_id")
-						.HasName("pk_link_collection_show");
+					b.HasKey("collection_id", "show_id").HasName("pk_link_collection_show");
 
-					b.HasIndex("show_id")
-						.HasDatabaseName("ix_link_collection_show_show_id");
+					b.HasIndex("show_id").HasDatabaseName("ix_link_collection_show_show_id");
 
 					b.ToTable("link_collection_show", (string)null);
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.Collection", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.Collection",
+				b =>
 				{
-					b.OwnsOne("Kyoo.Abstractions.Models.Image", "Logo", b1 =>
+					b.OwnsOne(
+						"Kyoo.Abstractions.Models.Image",
+						"Logo",
+						b1 =>
 						{
 							b1.Property<Guid>("CollectionId")
 								.HasColumnType("uuid")
@@ -722,9 +706,13 @@ namespace Kyoo.Postgresql.Migrations
 							b1.WithOwner()
 								.HasForeignKey("CollectionId")
 								.HasConstraintName("fk_collections_collections_id");
-						});
+						}
+					);
 
-					b.OwnsOne("Kyoo.Abstractions.Models.Image", "Poster", b1 =>
+					b.OwnsOne(
+						"Kyoo.Abstractions.Models.Image",
+						"Poster",
+						b1 =>
 						{
 							b1.Property<Guid>("CollectionId")
 								.HasColumnType("uuid")
@@ -748,9 +736,13 @@ namespace Kyoo.Postgresql.Migrations
 							b1.WithOwner()
 								.HasForeignKey("CollectionId")
 								.HasConstraintName("fk_collections_collections_id");
-						});
+						}
+					);
 
-					b.OwnsOne("Kyoo.Abstractions.Models.Image", "Thumbnail", b1 =>
+					b.OwnsOne(
+						"Kyoo.Abstractions.Models.Image",
+						"Thumbnail",
+						b1 =>
 						{
 							b1.Property<Guid>("CollectionId")
 								.HasColumnType("uuid")
@@ -774,16 +766,20 @@ namespace Kyoo.Postgresql.Migrations
 							b1.WithOwner()
 								.HasForeignKey("CollectionId")
 								.HasConstraintName("fk_collections_collections_id");
-						});
+						}
+					);
 
 					b.Navigation("Logo");
 
 					b.Navigation("Poster");
 
 					b.Navigation("Thumbnail");
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.Episode", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.Episode",
+				b =>
 				{
 					b.HasOne("Kyoo.Abstractions.Models.Season", "Season")
 						.WithMany("Episodes")
@@ -798,7 +794,10 @@ namespace Kyoo.Postgresql.Migrations
 						.IsRequired()
 						.HasConstraintName("fk_episodes_shows_show_id");
 
-					b.OwnsOne("Kyoo.Abstractions.Models.Image", "Logo", b1 =>
+					b.OwnsOne(
+						"Kyoo.Abstractions.Models.Image",
+						"Logo",
+						b1 =>
 						{
 							b1.Property<Guid>("EpisodeId")
 								.HasColumnType("uuid")
@@ -822,9 +821,13 @@ namespace Kyoo.Postgresql.Migrations
 							b1.WithOwner()
 								.HasForeignKey("EpisodeId")
 								.HasConstraintName("fk_episodes_episodes_id");
-						});
+						}
+					);
 
-					b.OwnsOne("Kyoo.Abstractions.Models.Image", "Poster", b1 =>
+					b.OwnsOne(
+						"Kyoo.Abstractions.Models.Image",
+						"Poster",
+						b1 =>
 						{
 							b1.Property<Guid>("EpisodeId")
 								.HasColumnType("uuid")
@@ -848,9 +851,13 @@ namespace Kyoo.Postgresql.Migrations
 							b1.WithOwner()
 								.HasForeignKey("EpisodeId")
 								.HasConstraintName("fk_episodes_episodes_id");
-						});
+						}
+					);
 
-					b.OwnsOne("Kyoo.Abstractions.Models.Image", "Thumbnail", b1 =>
+					b.OwnsOne(
+						"Kyoo.Abstractions.Models.Image",
+						"Thumbnail",
+						b1 =>
 						{
 							b1.Property<Guid>("EpisodeId")
 								.HasColumnType("uuid")
@@ -874,7 +881,8 @@ namespace Kyoo.Postgresql.Migrations
 							b1.WithOwner()
 								.HasForeignKey("EpisodeId")
 								.HasConstraintName("fk_episodes_episodes_id");
-						});
+						}
+					);
 
 					b.Navigation("Logo");
 
@@ -885,9 +893,12 @@ namespace Kyoo.Postgresql.Migrations
 					b.Navigation("Show");
 
 					b.Navigation("Thumbnail");
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.EpisodeWatchStatus", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.EpisodeWatchStatus",
+				b =>
 				{
 					b.HasOne("Kyoo.Abstractions.Models.Episode", "Episode")
 						.WithMany("Watched")
@@ -906,9 +917,12 @@ namespace Kyoo.Postgresql.Migrations
 					b.Navigation("Episode");
 
 					b.Navigation("User");
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.Movie", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.Movie",
+				b =>
 				{
 					b.HasOne("Kyoo.Abstractions.Models.Studio", "Studio")
 						.WithMany("Movies")
@@ -916,11 +930,12 @@ namespace Kyoo.Postgresql.Migrations
 						.OnDelete(DeleteBehavior.SetNull)
 						.HasConstraintName("fk_movies_studios_studio_id");
 
-					b.OwnsOne("Kyoo.Abstractions.Models.Image", "Logo", b1 =>
+					b.OwnsOne(
+						"Kyoo.Abstractions.Models.Image",
+						"Logo",
+						b1 =>
 						{
-							b1.Property<Guid>("MovieId")
-								.HasColumnType("uuid")
-								.HasColumnName("id");
+							b1.Property<Guid>("MovieId").HasColumnType("uuid").HasColumnName("id");
 
 							b1.Property<string>("Blurhash")
 								.IsRequired()
@@ -940,13 +955,15 @@ namespace Kyoo.Postgresql.Migrations
 							b1.WithOwner()
 								.HasForeignKey("MovieId")
 								.HasConstraintName("fk_movies_movies_id");
-						});
+						}
+					);
 
-					b.OwnsOne("Kyoo.Abstractions.Models.Image", "Poster", b1 =>
+					b.OwnsOne(
+						"Kyoo.Abstractions.Models.Image",
+						"Poster",
+						b1 =>
 						{
-							b1.Property<Guid>("MovieId")
-								.HasColumnType("uuid")
-								.HasColumnName("id");
+							b1.Property<Guid>("MovieId").HasColumnType("uuid").HasColumnName("id");
 
 							b1.Property<string>("Blurhash")
 								.IsRequired()
@@ -966,13 +983,15 @@ namespace Kyoo.Postgresql.Migrations
 							b1.WithOwner()
 								.HasForeignKey("MovieId")
 								.HasConstraintName("fk_movies_movies_id");
-						});
+						}
+					);
 
-					b.OwnsOne("Kyoo.Abstractions.Models.Image", "Thumbnail", b1 =>
+					b.OwnsOne(
+						"Kyoo.Abstractions.Models.Image",
+						"Thumbnail",
+						b1 =>
 						{
-							b1.Property<Guid>("MovieId")
-								.HasColumnType("uuid")
-								.HasColumnName("id");
+							b1.Property<Guid>("MovieId").HasColumnType("uuid").HasColumnName("id");
 
 							b1.Property<string>("Blurhash")
 								.IsRequired()
@@ -992,7 +1011,8 @@ namespace Kyoo.Postgresql.Migrations
 							b1.WithOwner()
 								.HasForeignKey("MovieId")
 								.HasConstraintName("fk_movies_movies_id");
-						});
+						}
+					);
 
 					b.Navigation("Logo");
 
@@ -1001,9 +1021,12 @@ namespace Kyoo.Postgresql.Migrations
 					b.Navigation("Studio");
 
 					b.Navigation("Thumbnail");
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.MovieWatchStatus", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.MovieWatchStatus",
+				b =>
 				{
 					b.HasOne("Kyoo.Abstractions.Models.Movie", "Movie")
 						.WithMany("Watched")
@@ -1022,9 +1045,12 @@ namespace Kyoo.Postgresql.Migrations
 					b.Navigation("Movie");
 
 					b.Navigation("User");
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.Season", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.Season",
+				b =>
 				{
 					b.HasOne("Kyoo.Abstractions.Models.Show", "Show")
 						.WithMany("Seasons")
@@ -1033,11 +1059,12 @@ namespace Kyoo.Postgresql.Migrations
 						.IsRequired()
 						.HasConstraintName("fk_seasons_shows_show_id");
 
-					b.OwnsOne("Kyoo.Abstractions.Models.Image", "Logo", b1 =>
+					b.OwnsOne(
+						"Kyoo.Abstractions.Models.Image",
+						"Logo",
+						b1 =>
 						{
-							b1.Property<Guid>("SeasonId")
-								.HasColumnType("uuid")
-								.HasColumnName("id");
+							b1.Property<Guid>("SeasonId").HasColumnType("uuid").HasColumnName("id");
 
 							b1.Property<string>("Blurhash")
 								.IsRequired()
@@ -1057,13 +1084,15 @@ namespace Kyoo.Postgresql.Migrations
 							b1.WithOwner()
 								.HasForeignKey("SeasonId")
 								.HasConstraintName("fk_seasons_seasons_id");
-						});
+						}
+					);
 
-					b.OwnsOne("Kyoo.Abstractions.Models.Image", "Poster", b1 =>
+					b.OwnsOne(
+						"Kyoo.Abstractions.Models.Image",
+						"Poster",
+						b1 =>
 						{
-							b1.Property<Guid>("SeasonId")
-								.HasColumnType("uuid")
-								.HasColumnName("id");
+							b1.Property<Guid>("SeasonId").HasColumnType("uuid").HasColumnName("id");
 
 							b1.Property<string>("Blurhash")
 								.IsRequired()
@@ -1083,13 +1112,15 @@ namespace Kyoo.Postgresql.Migrations
 							b1.WithOwner()
 								.HasForeignKey("SeasonId")
 								.HasConstraintName("fk_seasons_seasons_id");
-						});
+						}
+					);
 
-					b.OwnsOne("Kyoo.Abstractions.Models.Image", "Thumbnail", b1 =>
+					b.OwnsOne(
+						"Kyoo.Abstractions.Models.Image",
+						"Thumbnail",
+						b1 =>
 						{
-							b1.Property<Guid>("SeasonId")
-								.HasColumnType("uuid")
-								.HasColumnName("id");
+							b1.Property<Guid>("SeasonId").HasColumnType("uuid").HasColumnName("id");
 
 							b1.Property<string>("Blurhash")
 								.IsRequired()
@@ -1109,7 +1140,8 @@ namespace Kyoo.Postgresql.Migrations
 							b1.WithOwner()
 								.HasForeignKey("SeasonId")
 								.HasConstraintName("fk_seasons_seasons_id");
-						});
+						}
+					);
 
 					b.Navigation("Logo");
 
@@ -1118,9 +1150,12 @@ namespace Kyoo.Postgresql.Migrations
 					b.Navigation("Show");
 
 					b.Navigation("Thumbnail");
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.Show", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.Show",
+				b =>
 				{
 					b.HasOne("Kyoo.Abstractions.Models.Studio", "Studio")
 						.WithMany("Shows")
@@ -1128,11 +1163,12 @@ namespace Kyoo.Postgresql.Migrations
 						.OnDelete(DeleteBehavior.SetNull)
 						.HasConstraintName("fk_shows_studios_studio_id");
 
-					b.OwnsOne("Kyoo.Abstractions.Models.Image", "Logo", b1 =>
+					b.OwnsOne(
+						"Kyoo.Abstractions.Models.Image",
+						"Logo",
+						b1 =>
 						{
-							b1.Property<Guid>("ShowId")
-								.HasColumnType("uuid")
-								.HasColumnName("id");
+							b1.Property<Guid>("ShowId").HasColumnType("uuid").HasColumnName("id");
 
 							b1.Property<string>("Blurhash")
 								.IsRequired()
@@ -1152,13 +1188,15 @@ namespace Kyoo.Postgresql.Migrations
 							b1.WithOwner()
 								.HasForeignKey("ShowId")
 								.HasConstraintName("fk_shows_shows_id");
-						});
+						}
+					);
 
-					b.OwnsOne("Kyoo.Abstractions.Models.Image", "Poster", b1 =>
+					b.OwnsOne(
+						"Kyoo.Abstractions.Models.Image",
+						"Poster",
+						b1 =>
 						{
-							b1.Property<Guid>("ShowId")
-								.HasColumnType("uuid")
-								.HasColumnName("id");
+							b1.Property<Guid>("ShowId").HasColumnType("uuid").HasColumnName("id");
 
 							b1.Property<string>("Blurhash")
 								.IsRequired()
@@ -1178,13 +1216,15 @@ namespace Kyoo.Postgresql.Migrations
 							b1.WithOwner()
 								.HasForeignKey("ShowId")
 								.HasConstraintName("fk_shows_shows_id");
-						});
+						}
+					);
 
-					b.OwnsOne("Kyoo.Abstractions.Models.Image", "Thumbnail", b1 =>
+					b.OwnsOne(
+						"Kyoo.Abstractions.Models.Image",
+						"Thumbnail",
+						b1 =>
 						{
-							b1.Property<Guid>("ShowId")
-								.HasColumnType("uuid")
-								.HasColumnName("id");
+							b1.Property<Guid>("ShowId").HasColumnType("uuid").HasColumnName("id");
 
 							b1.Property<string>("Blurhash")
 								.IsRequired()
@@ -1204,7 +1244,8 @@ namespace Kyoo.Postgresql.Migrations
 							b1.WithOwner()
 								.HasForeignKey("ShowId")
 								.HasConstraintName("fk_shows_shows_id");
-						});
+						}
+					);
 
 					b.Navigation("Logo");
 
@@ -1213,9 +1254,12 @@ namespace Kyoo.Postgresql.Migrations
 					b.Navigation("Studio");
 
 					b.Navigation("Thumbnail");
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.ShowWatchStatus", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.ShowWatchStatus",
+				b =>
 				{
 					b.HasOne("Kyoo.Abstractions.Models.Episode", "NextEpisode")
 						.WithMany()
@@ -1242,9 +1286,12 @@ namespace Kyoo.Postgresql.Migrations
 					b.Navigation("Show");
 
 					b.Navigation("User");
-				});
+				}
+			);
 
-			modelBuilder.Entity("link_collection_movie", b =>
+			modelBuilder.Entity(
+				"link_collection_movie",
+				b =>
 				{
 					b.HasOne("Kyoo.Abstractions.Models.Collection", null)
 						.WithMany()
@@ -1259,9 +1306,12 @@ namespace Kyoo.Postgresql.Migrations
 						.OnDelete(DeleteBehavior.Cascade)
 						.IsRequired()
 						.HasConstraintName("fk_link_collection_movie_movies_movie_id");
-				});
+				}
+			);
 
-			modelBuilder.Entity("link_collection_show", b =>
+			modelBuilder.Entity(
+				"link_collection_show",
+				b =>
 				{
 					b.HasOne("Kyoo.Abstractions.Models.Collection", null)
 						.WithMany()
@@ -1276,38 +1326,54 @@ namespace Kyoo.Postgresql.Migrations
 						.OnDelete(DeleteBehavior.Cascade)
 						.IsRequired()
 						.HasConstraintName("fk_link_collection_show_shows_show_id");
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.Episode", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.Episode",
+				b =>
 				{
 					b.Navigation("Watched");
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.Movie", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.Movie",
+				b =>
 				{
 					b.Navigation("Watched");
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.Season", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.Season",
+				b =>
 				{
 					b.Navigation("Episodes");
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.Show", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.Show",
+				b =>
 				{
 					b.Navigation("Episodes");
 
 					b.Navigation("Seasons");
 
 					b.Navigation("Watched");
-				});
+				}
+			);
 
-			modelBuilder.Entity("Kyoo.Abstractions.Models.Studio", b =>
+			modelBuilder.Entity(
+				"Kyoo.Abstractions.Models.Studio",
+				b =>
 				{
 					b.Navigation("Movies");
 
 					b.Navigation("Shows");
-				});
+				}
+			);
 #pragma warning restore 612, 618
 		}
 	}
