@@ -3,11 +3,9 @@
 		<Title>Kyoo.Abstractions</Title>
 		<Description>Base package to create plugins for Kyoo.</Description>
 		<RootNamespace>Kyoo.Abstractions</RootNamespace>
-		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Autofac" Version="8.0.0" />
 		<PackageReference Include="Dapper" Version="2.1.37" />
 		<PackageReference Include="EntityFrameworkCore.Projectables" Version="4.1.4-prebeta" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />

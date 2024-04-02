@@ -8,7 +8,6 @@ COPY src/Directory.Build.props src/Directory.Build.props
 COPY src/Kyoo.Authentication/Kyoo.Authentication.csproj src/Kyoo.Authentication/Kyoo.Authentication.csproj
 COPY src/Kyoo.Abstractions/Kyoo.Abstractions.csproj src/Kyoo.Abstractions/Kyoo.Abstractions.csproj
 COPY src/Kyoo.Core/Kyoo.Core.csproj src/Kyoo.Core/Kyoo.Core.csproj
-COPY src/Kyoo.Host/Kyoo.Host.csproj src/Kyoo.Host/Kyoo.Host.csproj
 COPY src/Kyoo.Postgresql/Kyoo.Postgresql.csproj src/Kyoo.Postgresql/Kyoo.Postgresql.csproj
 COPY src/Kyoo.Meilisearch/Kyoo.Meilisearch.csproj src/Kyoo.Meilisearch/Kyoo.Meilisearch.csproj
 COPY src/Kyoo.RabbitMq/Kyoo.RabbitMq.csproj src/Kyoo.RabbitMq/Kyoo.RabbitMq.csproj
@@ -20,4 +19,4 @@ EXPOSE 5000
 ENV DOTNET_USE_POLLING_FILE_WATCHER 1
 # HEALTHCHECK --interval=5s CMD curl --fail http://localhost:5000/health || exit
 HEALTHCHECK CMD true
-ENTRYPOINT ["dotnet", "watch", "--non-interactive", "run", "--no-restore", "--project", "/app/src/Kyoo.Host"]
+ENTRYPOINT ["dotnet", "watch", "--non-interactive", "run", "--no-restore", "--project", "/app/src/Kyoo.Core"]

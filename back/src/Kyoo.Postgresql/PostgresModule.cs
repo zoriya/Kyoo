@@ -17,8 +17,8 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Data.Common;
-using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -28,18 +28,11 @@ using Npgsql;
 
 namespace Kyoo.Postgresql;
 
-/// <summary>
-/// A module to add postgresql capacity to the app.
-/// </summary>
-public class PostgresModule(IConfiguration configuration, IWebHostEnvironment environment) : IPlugin
+public static class PostgresModule
 {
-	/// <inheritdoc />
-	public string Name => "Postgresql";
-
-	/// <inheritdoc />
-	public void Configure(IServiceCollection services)
+	public static NpgsqlDataSource CreateDataSource(IConfiguration configuration)
 	{
-		DbConnectionStringBuilder builder =
+		DbConnectionStringBuilder conBuilder =
 			new()
 			{
 				["USER ID"] = configuration.GetValue("POSTGRES_USER", "KyooUser"),
@@ -52,25 +45,30 @@ public class PostgresModule(IConfiguration configuration, IWebHostEnvironment en
 				["TIMEOUT"] = "30"
 			};
 
-		NpgsqlDataSourceBuilder dsBuilder = new(builder.ConnectionString);
+		NpgsqlDataSourceBuilder dsBuilder = new(conBuilder.ConnectionString);
 		dsBuilder.MapEnum<Status>();
 		dsBuilder.MapEnum<Genre>();
 		dsBuilder.MapEnum<WatchStatus>();
-		NpgsqlDataSource dataSource = dsBuilder.Build();
+		return dsBuilder.Build();
+	}
 
-		services.AddDbContext<DatabaseContext, PostgresContext>(
+	public static void ConfigurePostgres(this WebApplicationBuilder builder)
+	{
+		NpgsqlDataSource dataSource = CreateDataSource(builder.Configuration);
+
+		builder.Services.AddDbContext<DatabaseContext, PostgresContext>(
 			x =>
 			{
 				x.UseNpgsql(dataSource).UseProjectables();
-				if (environment.IsDevelopment())
+				if (builder.Environment.IsDevelopment())
 					x.EnableDetailedErrors().EnableSensitiveDataLogging();
 			},
 			ServiceLifetime.Transient
 		);
-		services.AddTransient(
+		builder.Services.AddTransient(
 			(services) => services.GetRequiredService<DatabaseContext>().Database.GetDbConnection()
 		);
 
-		services.AddHealthChecks().AddDbContextCheck<DatabaseContext>();
+		builder.Services.AddHealthChecks().AddDbContextCheck<DatabaseContext>();
 	}
 }

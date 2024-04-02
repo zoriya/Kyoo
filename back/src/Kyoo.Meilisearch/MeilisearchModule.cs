@@ -16,21 +16,21 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using Autofac;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Meilisearch;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using static System.Text.Json.JsonNamingPolicy;
 
 namespace Kyoo.Meiliseach;
 
-public class MeilisearchModule(IConfiguration configuration) : IPlugin
+public static class MeilisearchModule
 {
-	/// <inheritdoc />
-	public string Name => "Meilisearch";
-
 	public static Dictionary<string, Settings> IndexSettings =>
 		new()
 		{
@@ -145,17 +145,15 @@ public class MeilisearchModule(IConfiguration configuration) : IPlugin
 	}
 
 	/// <inheritdoc />
-	public void Configure(ContainerBuilder builder)
+	public static void ConfigureMeilisearch(this WebApplicationBuilder builder)
 	{
-		builder
-			.RegisterInstance(
-				new MeilisearchClient(
-					configuration.GetValue("MEILI_HOST", "http://meilisearch:7700"),
-					configuration.GetValue<string?>("MEILI_MASTER_KEY")
-				)
+		builder.Services.AddSingleton(
+			new MeilisearchClient(
+				builder.Configuration.GetValue("MEILI_HOST", "http://meilisearch:7700"),
+				builder.Configuration.GetValue<string?>("MEILI_MASTER_KEY")
 			)
-			.SingleInstance();
-		builder.RegisterType<MeiliSync>().AsSelf().SingleInstance().AutoActivate();
-		builder.RegisterType<SearchManager>().As<ISearchManager>().InstancePerLifetimeScope();
+		);
+		builder.Services.AddScoped<ISearchManager, SearchManager>();
+		builder.Services.AddSingleton<MeiliSync>();
 	}
 }

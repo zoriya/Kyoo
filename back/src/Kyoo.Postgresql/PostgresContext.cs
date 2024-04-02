@@ -28,65 +28,22 @@ using Kyoo.Postgresql.Utils;
 using Kyoo.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+using Microsoft.Extensions.Configuration;
 using Npgsql;
 
 namespace Kyoo.Postgresql;
 
-/// <summary>
-/// A postgresql implementation of <see cref="DatabaseContext"/>.
-/// </summary>
-public class PostgresContext : DatabaseContext
+public class PostgresContext(DbContextOptions options, IHttpContextAccessor accessor)
+	: DatabaseContext(options, accessor)
 {
-	/// <summary>
-	/// Is this instance in debug mode?
-	/// </summary>
-	private readonly bool _debugMode;
-
-	/// <summary>
-	/// Should the configure step be skipped? This is used when the database is created via DbContextOptions.
-	/// </summary>
-	private readonly bool _skipConfigure;
-
-	/// <summary>
-	/// Design time constructor (dotnet ef migrations add). Do not use
-	/// </summary>
-	public PostgresContext()
-		: base(null!) { }
-
-	public PostgresContext(DbContextOptions options, IHttpContextAccessor accessor)
-		: base(options, accessor)
-	{
-		_skipConfigure = true;
-	}
-
-	public PostgresContext(string connection, bool debugMode, IHttpContextAccessor accessor)
-		: base(accessor)
-	{
-		_debugMode = debugMode;
-	}
-
-	/// <summary>
-	/// Set connection information for this database context
-	/// </summary>
-	/// <param name="optionsBuilder">An option builder to fill.</param>
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{
-		if (!_skipConfigure)
-		{
-			optionsBuilder.UseNpgsql();
-			if (_debugMode)
-				optionsBuilder.EnableDetailedErrors().EnableSensitiveDataLogging();
-		}
-
 		optionsBuilder.UseSnakeCaseNamingConvention();
 		base.OnConfiguring(optionsBuilder);
 	}
 
-	/// <summary>
-	/// Set database parameters to support every types of Kyoo.
-	/// </summary>
-	/// <param name="modelBuilder">The database's model builder.</param>
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		modelBuilder.HasPostgresEnum<Status>();
@@ -164,5 +121,17 @@ public class PostgresContext : DatabaseContext
 				SqlState: PostgresErrorCodes.UniqueViolation
 					or PostgresErrorCodes.ForeignKeyViolation
 			};
+	}
+}
+
+public class PostgresContextBuilder : IDesignTimeDbContextFactory<PostgresContext>
+{
+	public PostgresContext CreateDbContext(string[] args)
+	{
+		NpgsqlDataSource dataSource = PostgresModule.CreateDataSource(new ConfigurationManager());
+		DbContextOptionsBuilder builder = new();
+		builder.UseNpgsql(dataSource);
+
+		return new PostgresContext(builder.Options, null!);
 	}
 }

@@ -42,7 +42,7 @@ public class ThumbnailsManager(
 	Lazy<IRepository<User>> users
 ) : IThumbnailsManager
 {
-	private static readonly Dictionary<string, TaskCompletionSource<object>> _downloading = new();
+	private static readonly Dictionary<string, TaskCompletionSource<object>> _downloading = [];
 
 	private static async Task _WriteTo(SKBitmap bitmap, string path, int quality)
 	{

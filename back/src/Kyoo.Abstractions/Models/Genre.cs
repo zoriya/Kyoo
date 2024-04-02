@@ -41,4 +41,10 @@ public enum Genre
 	Thriller,
 	War,
 	Western,
+	Kids,
+	News,
+	Reality,
+	Soap,
+	Talk,
+	Politics,
 }

@@ -17,29 +17,15 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using AspNetCore.Proxy;
-using Autofac;
-using Kyoo.Abstractions;
 using Kyoo.Abstractions.Controllers;
-using Kyoo.Abstractions.Models.Utils;
-using Kyoo.Core.Api;
+using Kyoo.Abstractions.Models;
 using Kyoo.Core.Controllers;
-using Kyoo.Utils;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Core;
 
-/// <summary>
-/// The core module containing default implementations
-/// </summary>
-public class CoreModule : IPlugin
+public static class CoreModule
 {
 	/// <summary>
 	/// A service provider to access services in static context (in events for example).
@@ -47,102 +33,32 @@ public class CoreModule : IPlugin
 	/// <remarks>Don't forget to create a scope.</remarks>
 	public static IServiceProvider Services { get; set; }
 
-	/// <inheritdoc />
-	public string Name => "Core";
-
-	/// <inheritdoc />
-	public void Configure(ContainerBuilder builder)
+	public static void AddRepository<T, TRepo>(this IServiceCollection services)
+		where T : IResource
+		where TRepo : class, IRepository<T>
 	{
-		builder
-			.RegisterType<ThumbnailsManager>()
-			.As<IThumbnailsManager>()
-			.InstancePerLifetimeScope();
-		builder.RegisterType<LibraryManager>().As<ILibraryManager>().InstancePerLifetimeScope();
-
-		builder.RegisterRepository<LibraryItemRepository>();
-		builder.RegisterRepository<CollectionRepository>();
-		builder.RegisterRepository<MovieRepository>();
-		builder.RegisterRepository<ShowRepository>();
-		builder.RegisterRepository<SeasonRepository>();
-		builder.RegisterRepository<EpisodeRepository>();
-		builder.RegisterRepository<StudioRepository>();
-		builder.RegisterRepository<UserRepository>().As<IUserRepository>();
-		builder.RegisterRepository<NewsRepository>();
-		builder
-			.RegisterType<WatchStatusRepository>()
-			.As<IWatchStatusRepository>()
-			.AsSelf()
-			.InstancePerLifetimeScope();
-		builder
-			.RegisterType<IssueRepository>()
-			.As<IIssueRepository>()
-			.AsSelf()
-			.InstancePerLifetimeScope();
-		builder.RegisterType<SqlVariableContext>().InstancePerLifetimeScope();
+		services.AddScoped<TRepo>();
+		services.AddScoped<IRepository<T>>(x => x.GetRequiredService<TRepo>());
+		services.AddScoped<Lazy<IRepository<T>>>(x => new(() => x.GetRequiredService<TRepo>()));
 	}
 
-	/// <inheritdoc />
-	public void Configure(IServiceCollection services)
+	public static void ConfigureKyoo(this WebApplicationBuilder builder)
 	{
-		services.AddHttpContextAccessor();
+		builder.Services.AddScoped<IThumbnailsManager, ThumbnailsManager>();
+		builder.Services.AddScoped<ILibraryManager, LibraryManager>();
 
-		services
-			.AddMvcCore(options =>
-			{
-				options.Filters.Add<ExceptionFilter>();
-				options.ModelBinderProviders.Insert(0, new SortBinder.Provider());
-				options.ModelBinderProviders.Insert(0, new IncludeBinder.Provider());
-				options.ModelBinderProviders.Insert(0, new FilterBinder.Provider());
-			})
-			.AddJsonOptions(x =>
-			{
-				x.JsonSerializerOptions.TypeInfoResolver = new JsonKindResolver()
-				{
-					Modifiers = { IncludeBinder.HandleLoadableFields }
-				};
-				x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-				x.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-			})
-			.AddDataAnnotations()
-			.AddControllersAsServices()
-			.AddApiExplorer()
-			.ConfigureApiBehaviorOptions(options =>
-			{
-				options.SuppressMapClientErrors = true;
-				options.InvalidModelStateResponseFactory = ctx =>
-				{
-					string[] errors = ctx
-						.ModelState.SelectMany(x => x.Value!.Errors)
-						.Select(x => x.ErrorMessage)
-						.ToArray();
-					return new BadRequestObjectResult(new RequestError(errors));
-				};
-			});
-
-		services.Configure<RouteOptions>(x =>
-		{
-			x.ConstraintMap.Add("id", typeof(IdentifierRouteConstraint));
-		});
-
-		services.AddResponseCompression(x =>
-		{
-			x.EnableForHttps = true;
-		});
-
-		services.AddProxies();
-		services.AddHttpClient();
+		builder.Services.AddRepository<ILibraryItem, LibraryItemRepository>();
+		builder.Services.AddRepository<Collection, CollectionRepository>();
+		builder.Services.AddRepository<Movie, MovieRepository>();
+		builder.Services.AddRepository<Show, ShowRepository>();
+		builder.Services.AddRepository<Season, SeasonRepository>();
+		builder.Services.AddRepository<Episode, EpisodeRepository>();
+		builder.Services.AddRepository<Studio, StudioRepository>();
+		builder.Services.AddRepository<INews, NewsRepository>();
+		builder.Services.AddRepository<User, UserRepository>();
+		builder.Services.AddScoped<IUserRepository>(x => x.GetRequiredService<UserRepository>());
+		builder.Services.AddScoped<IWatchStatusRepository, WatchStatusRepository>();
+		builder.Services.AddScoped<IIssueRepository, IssueRepository>();
+		builder.Services.AddScoped<SqlVariableContext>();
 	}
-
-	/// <inheritdoc />
-	public IEnumerable<IStartupAction> ConfigureSteps =>
-		new IStartupAction[]
-		{
-			SA.New<IApplicationBuilder>(app => app.UseHsts(), SA.Before),
-			SA.New<IApplicationBuilder>(app => app.UseResponseCompression(), SA.Routing + 1),
-			SA.New<IApplicationBuilder>(app => app.UseRouting(), SA.Routing),
-			SA.New<IApplicationBuilder>(
-				app => app.UseEndpoints(x => x.MapControllers()),
-				SA.Endpoint
-			)
-		};
 }
