@@ -75,11 +75,10 @@ class TheMovieDatabase(Provider):
 			if isinstance(x, list):
 				return [j for i in x for j in flatten(i)]
 			return [x]
-		return flatten([
-			self.genre_map[x["id"]]
-			for x in genres
-			if x["id"] in self.genre_map
-		])
+
+		return flatten(
+			[self.genre_map[x["id"]] for x in genres if x["id"] in self.genre_map]
+		)
 
 	def get_languages(self, *args):
 		return self._languages + list(args)

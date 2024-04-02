@@ -112,10 +112,7 @@ public partial class UseDateOnly : Migration
 				"action,adventure,animation,comedy,crime,documentary,drama,family,fantasy,history,horror,music,mystery,romance,science_fiction,thriller,war,western"
 			)
 			.OldAnnotation("Npgsql:Enum:status", "unknown,finished,airing,planned")
-			.OldAnnotation(
-				"Npgsql:Enum:watch_status",
-				"completed,watching,droped,planned,deleted"
-			);
+			.OldAnnotation("Npgsql:Enum:watch_status", "completed,watching,droped,planned,deleted");
 
 		migrationBuilder.AlterColumn<DateTime>(
 			name: "start_air",

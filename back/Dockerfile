@@ -16,7 +16,7 @@ RUN dotnet restore -a $TARGETARCH
 
 COPY . .
 ARG VERSION
-RUN dotnet publish -a $TARGETARCH --no-restore -c Release -o /app "-p:Version=${VERSION:-"0.0.0-dev"}" src/Kyoo.Host
+RUN dotnet publish -a $TARGETARCH --no-restore -c Release -o /app "-p:Version=${VERSION:-"0.0.0-dev"}" src/Kyoo.Core
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 RUN apt-get update && apt-get install -y curl

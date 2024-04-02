@@ -23,10 +23,7 @@ public partial class AddGenres : Migration
 				"action,adventure,animation,comedy,crime,documentary,drama,family,fantasy,history,horror,music,mystery,romance,science_fiction,thriller,war,western"
 			)
 			.OldAnnotation("Npgsql:Enum:status", "unknown,finished,airing,planned")
-			.OldAnnotation(
-				"Npgsql:Enum:watch_status",
-				"completed,watching,droped,planned,deleted"
-			);
+			.OldAnnotation("Npgsql:Enum:watch_status", "completed,watching,droped,planned,deleted");
 	}
 
 	/// <inheritdoc />
@@ -45,9 +42,6 @@ public partial class AddGenres : Migration
 				"action,adventure,animation,comedy,crime,documentary,drama,family,fantasy,history,horror,music,mystery,romance,science_fiction,thriller,war,western,kids,news,reality,soap,talk,politics"
 			)
 			.OldAnnotation("Npgsql:Enum:status", "unknown,finished,airing,planned")
-			.OldAnnotation(
-				"Npgsql:Enum:watch_status",
-				"completed,watching,droped,planned,deleted"
-			);
+			.OldAnnotation("Npgsql:Enum:watch_status", "completed,watching,droped,planned,deleted");
 	}
 }

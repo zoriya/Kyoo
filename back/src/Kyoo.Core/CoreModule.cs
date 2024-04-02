@@ -34,7 +34,7 @@ public static class CoreModule
 	public static IServiceProvider Services { get; set; }
 
 	public static void AddRepository<T, TRepo>(this IServiceCollection services)
-		where T:IResource
+		where T : IResource
 		where TRepo : class, IRepository<T>
 	{
 		services.AddScoped<TRepo>();

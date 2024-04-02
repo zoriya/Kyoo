@@ -147,13 +147,12 @@ public static class MeilisearchModule
 	/// <inheritdoc />
 	public static void ConfigureMeilisearch(this WebApplicationBuilder builder)
 	{
-		builder
-			.Services.AddSingleton(
-				new MeilisearchClient(
-					builder.Configuration.GetValue("MEILI_HOST", "http://meilisearch:7700"),
-					builder.Configuration.GetValue<string?>("MEILI_MASTER_KEY")
-				)
-			);
+		builder.Services.AddSingleton(
+			new MeilisearchClient(
+				builder.Configuration.GetValue("MEILI_HOST", "http://meilisearch:7700"),
+				builder.Configuration.GetValue<string?>("MEILI_MASTER_KEY")
+			)
+		);
 		builder.Services.AddScoped<ISearchManager, SearchManager>();
 		builder.Services.AddSingleton<MeiliSync>();
 	}
