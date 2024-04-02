@@ -82,6 +82,7 @@ builder.ConfigureKyoo();
 builder.ConfigureAuthentication();
 builder.ConfigurePostgres();
 builder.ConfigureMeilisearch();
+builder.ConfigureRabbitMq();
 
 WebApplication app = builder.Build();
 CoreModule.Services = app.Services;
