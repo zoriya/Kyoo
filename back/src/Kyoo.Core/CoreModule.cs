@@ -20,7 +20,6 @@ using System;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Core.Controllers;
-using Kyoo.Core.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -39,7 +38,8 @@ public static class CoreModule
 		where TRepo : class, IRepository<T>
 	{
 		services.AddScoped<TRepo>();
-		services.AddScoped<IRepository<T>>(x => x.GetRequiredService<TRepo>()).AllowLazy();
+		services.AddScoped<IRepository<T>>(x => x.GetRequiredService<TRepo>());
+		services.AddScoped<Lazy<IRepository<T>>>(x => new(() => x.GetRequiredService<TRepo>()));
 	}
 
 	public static void ConfigureKyoo(this WebApplicationBuilder builder)
