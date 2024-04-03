@@ -160,25 +160,32 @@ func (ts *Stream) run(start int32) error {
 	start_ref := float64(0)
 	start_segment := start
 	if start != 0 {
+		// we always take on segment before the current one, for different reasons for audio/video:
+		//  - Audio: we need context before the starting point, without that ffmpeg doesnt know what to do and leave ~100ms of silence
+		//  - Video: if a segment is really short (between 20 and 100ms), the padding given in the else block bellow is not enough and
+		// the previous segment is played another time. the -segment_times is way more precise so it does not do the same with this one
+		start_segment = start - 1
 		if ts.handle.getFlags()&AudioF != 0 {
-			// when segmenting audio, we need -ss to have the context before the start time
-			// without it, the cut loses a bit of audio (audio gap of ~100ms)
-			start_segment = start - 1
-		}
-		// the param for the -ss takes the keyframe before the specificed time
-		// (if the specified time is a keyframe, it either takes that keyframe or the one before)
-		// to prevent this weird behavior, we specify a bit after the keyframe that interest us
-		if start_segment+1 == length {
-			start_ref = (ts.file.Keyframes.Get(start_segment) + float64(ts.file.Info.Duration)) / 2
+			start_ref = ts.file.Keyframes.Get(start_segment)
 		} else {
-			start_ref = (ts.file.Keyframes.Get(start_segment) + ts.file.Keyframes.Get(start_segment+1)) / 2
+			// the param for the -ss takes the keyframe before the specificed time
+			// (if the specified time is a keyframe, it either takes that keyframe or the one before)
+			// to prevent this weird behavior, we specify a bit after the keyframe that interest us
+
+			// this can't be used with audio since we need to have context before the start-time
+			// without this context, the cut loses a bit of audio (audio gap of ~100ms)
+			if start_segment+1 == length {
+				start_ref = (ts.file.Keyframes.Get(start_segment) + float64(ts.file.Info.Duration)) / 2
+			} else {
+				start_ref = (ts.file.Keyframes.Get(start_segment) + ts.file.Keyframes.Get(start_segment+1)) / 2
+			}
 		}
 	}
 	end_padding := int32(1)
 	if end == length {
 		end_padding = 0
 	}
-	segments := ts.file.Keyframes.Slice(start+1, end+end_padding)
+	segments := ts.file.Keyframes.Slice(start_segment+1, end+end_padding)
 	if len(segments) == 0 {
 		// we can't leave that empty else ffmpeg errors out.
 		segments = []float64{9999999}
@@ -194,7 +201,9 @@ func (ts *Stream) run(start int32) error {
 		"-nostats", "-hide_banner", "-loglevel", "warning",
 	}
 
-	args = append(args, Settings.HwAccel.DecodeFlags...)
+	if ts.handle.getFlags()&VideoF != 0 {
+		args = append(args, Settings.HwAccel.DecodeFlags...)
+	}
 
 	if start_ref != 0 {
 		if ts.handle.getFlags()&VideoF != 0 {
@@ -237,7 +246,10 @@ func (ts *Stream) run(start int32) error {
 	args = append(args,
 		"-f", "segment",
 		// needed for rounding issues when forcing keyframes
-		"-segment_time_delta", "0.2",
+		// recommanded value is 1/(2*frame_rate), which for a 24fps is ~0.021
+		// we take a little bit more than that to be extra safe but too much can be harmfull
+		// when segments are short (can make the video repeat itself)
+		"-segment_time_delta", "0.05",
 		"-segment_format", "mpegts",
 		"-segment_times", toSegmentStr(Map(segments, func(seg float64, _ int) float64 {
 			// segment_times want durations, not timestamps so we must substract the -ss param
@@ -247,7 +259,7 @@ func (ts *Stream) run(start int32) error {
 		})),
 		"-segment_list_type", "flat",
 		"-segment_list", "pipe:1",
-		"-segment_start_number", fmt.Sprint(start),
+		"-segment_start_number", fmt.Sprint(start_segment),
 		outpath,
 	)
 
