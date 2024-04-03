@@ -57,7 +57,10 @@ public static class CoreModule
 		builder.Services.AddRepository<INews, NewsRepository>();
 		builder.Services.AddRepository<User, UserRepository>();
 		builder.Services.AddScoped<IUserRepository>(x => x.GetRequiredService<UserRepository>());
-		builder.Services.AddScoped<IWatchStatusRepository, WatchStatusRepository>();
+		builder.Services.AddScoped<WatchStatusRepository>();
+		builder.Services.AddScoped<IWatchStatusRepository>(x =>
+			x.GetRequiredService<WatchStatusRepository>()
+		);
 		builder.Services.AddScoped<IIssueRepository, IssueRepository>();
 		builder.Services.AddScoped<SqlVariableContext>();
 	}
