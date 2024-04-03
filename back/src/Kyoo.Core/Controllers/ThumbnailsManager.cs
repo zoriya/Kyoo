@@ -179,8 +179,8 @@ public class ThumbnailsManager(
 		string directory = item switch
 		{
 			IResource res
-				=> Path.Combine("./metadata", item.GetType().Name.ToLowerInvariant(), res.Slug),
-			_ => Path.Combine("./metadata", typeof(T).Name.ToLowerInvariant())
+				=> Path.Combine("/metadata", item.GetType().Name.ToLowerInvariant(), res.Slug),
+			_ => Path.Combine("/metadata", typeof(T).Name.ToLowerInvariant())
 		};
 		Directory.CreateDirectory(directory);
 		return Path.Combine(directory, image);

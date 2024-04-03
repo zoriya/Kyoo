@@ -34,27 +34,10 @@ namespace Kyoo.Core.Api;
 /// </summary>
 /// <typeparam name="T">The type of resource to make CRUD and thumbnails apis for.</typeparam>
 [ApiController]
-public class CrudThumbsApi<T> : CrudApi<T>
+public class CrudThumbsApi<T>(IRepository<T> repository, IThumbnailsManager thumbs)
+	: CrudApi<T>(repository)
 	where T : class, IResource, IThumbnails, IQuery
 {
-	/// <summary>
-	/// The thumbnail manager used to retrieve images paths.
-	/// </summary>
-	private readonly IThumbnailsManager _thumbs;
-
-	/// <summary>
-	/// Create a new <see cref="CrudThumbsApi{T}"/> that handles crud requests and thumbnails.
-	/// </summary>
-	/// <param name="repository">
-	/// The repository to use as a baking store for the type <typeparamref name="T"/>.
-	/// </param>
-	/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
-	public CrudThumbsApi(IRepository<T> repository, IThumbnailsManager thumbs)
-		: base(repository)
-	{
-		_thumbs = thumbs;
-	}
-
 	private async Task<IActionResult> _GetImage(
 		Identifier identifier,
 		string image,
@@ -67,7 +50,7 @@ public class CrudThumbsApi<T> : CrudApi<T>
 		);
 		if (resource == null)
 			return NotFound();
-		string path = _thumbs.GetImagePath(resource, image, quality ?? ImageQuality.High);
+		string path = thumbs.GetImagePath(resource, image, quality ?? ImageQuality.High);
 		if (!System.IO.File.Exists(path))
 			return NotFound();
 
