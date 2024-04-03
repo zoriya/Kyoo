@@ -20,7 +20,7 @@ func NewVideoStream(file *FileStream, quality Quality) *VideoStream {
 
 func (vs *VideoStream) getFlags() Flags {
 	if vs.quality == Original {
-		return VideoF & Transmux
+		return VideoF | Transmux
 	}
 	return VideoF
 }
