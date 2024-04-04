@@ -114,11 +114,11 @@ static void MoveAll(DirectoryInfo source, DirectoryInfo target)
 
 try
 {
-	string oldDir = "/kyoo/metadata";
+	string oldDir = "/kyoo/kyoo_datadir/metadata";
 	if (Path.Exists(oldDir))
 	{
 		MoveAll(new DirectoryInfo(oldDir), new DirectoryInfo("/metadata"));
-		Log.Information("Old metadata directory migrated.");
+		Log.Warning("Old metadata directory migrated.");
 	}
 }
 catch (Exception ex)
