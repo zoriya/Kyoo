@@ -11,6 +11,8 @@ Welcome to Kyoo, the next-generation open-source media browser that redefines yo
 - **[API Documentation](https://kyoo.zoriya.dev/api/doc):** Dive into our comprehensive API documentation to explore advanced functionalities.
 - **[Contributing](./CONTRIBUTING.md):** Feel free to open issues, submit pull requests, and contribute to making Kyoo even better.
 
+[![](https://discord.com/api/guilds/1216460898139635753/widget.png?style=banner2)](https://discord.gg/zpA74Qpvj5)
+
 ## 🚀 Features
 
 - **Dynamic Transcoding:** Transcode your media to any quality, change on the fly with auto quality, and seek effortlessly without waiting for the transcoder.
