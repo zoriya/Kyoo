@@ -70,7 +70,7 @@ services:
 
   transcoder:
     <<: *transcoder-base
-    profiles: ['']
+    profiles: ['', 'cpu']
 
   transcoder-nvidia:
     <<: *transcoder-base
