@@ -1,8 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:base"
-  ],
+  "extends": ["config:base", "docker:pinDigests"],
+  "minimumReleaseAge": "5 days",
   "postUpdateOptions": [
     "gomodTidy",
     "gomodUpdateImportPaths"
