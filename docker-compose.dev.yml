@@ -168,7 +168,7 @@ services:
     env_file:
       - .env
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--spider", "http://localhost:7700/health"]
+      test: ["CMD", "wget", "--no-verbose", "--spider", "http://meilisearch:7700/health"]
       interval: 30s
       timeout: 5s
       retries: 5
