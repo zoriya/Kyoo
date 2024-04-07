@@ -2,3 +2,4 @@ guessit
 aiohttp
 jsons
 watchfiles
+aio-pika

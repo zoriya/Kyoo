@@ -1,3 +1,6 @@
+from providers.kyoo_client import KyooClient
+
+
 async def main():
 	import asyncio
 	import os
@@ -9,7 +12,6 @@ async def main():
 	from aiohttp import ClientSession
 	from providers.utils import format_date, ProviderError
 	from .scanner import Scanner
-	from .monitor import monitor
 
 	path = os.environ.get("SCANNER_LIBRARY_ROOT", "/video")
 	languages = os.environ.get("LIBRARY_LANGUAGES")
@@ -37,11 +39,9 @@ async def main():
 			*args, key_transformer=jsons.KEY_TRANSFORMER_CAMELCASE, **kwargs
 		),
 	) as client:
+		kyoo = KyooClient(client, api_key=api_key)
+		provider = 
 		try:
-			scanner = Scanner(client, languages=languages.split(","), api_key=api_key)
-			await asyncio.gather(
-				monitor(path, scanner),
-				scanner.scan(path),
-			)
+			scanner = Scanner(kyoo, languages=languages.split(","), api_key=api_key)
 		except ProviderError as e:
 			logging.error(e)
