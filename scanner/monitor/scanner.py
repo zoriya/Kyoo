@@ -8,6 +8,9 @@ async def scan(path: str):
 	self.issues = await self.get_issues()
 	videos = [str(p) for p in Path(path).rglob("*") if p.is_file()]
 	deleted = [x for x in self.registered if x not in videos]
+		# if path in self.registered or self._ignore_pattern.match(path):
+		# 	return
+		#
 
 		# try:
 		# 	self._ignore_pattern = re.compile(

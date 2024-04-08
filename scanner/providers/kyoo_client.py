@@ -1,31 +1,37 @@
-from datetime import timedelta
 import os
-import asyncio
 import logging
 import jsons
-import re
 from aiohttp import ClientSession
-from pathlib import Path
 from typing import List, Literal, Any
 from urllib.parse import quote
-from providers.provider import Provider, ProviderError
-from providers.types.collection import Collection
-from providers.types.show import Show
-from providers.types.episode import Episode, PartialShow
-from providers.types.season import Season
 
 
 class KyooClient:
-	def __init__(
-		self, client: ClientSession, *, api_key: str
-	) -> None:
-		self._client = client
-		self._api_key = api_key
+	def __init__(self) -> None:
+		self._api_key = os.environ.get("KYOO_APIKEY")
+		if not self._api_key:
+			self._api_key = os.environ.get("KYOO_APIKEYS")
+			if not self._api_key:
+				print("Missing environment variable 'KYOO_APIKEY'.")
+				exit(2)
+			self._api_key = self._api_key.split(",")[0]
+
 		self._url = os.environ.get("KYOO_URL", "http://back:5000")
 
+	async def __aenter__(self):
+		jsons.set_serializer(lambda x, **_: format_date(x), Optional[date | int])  # type: ignore
+		self.client = ClientSession(
+			json_serialize=lambda *args, **kwargs: jsons.dumps(
+				*args, key_transformer=jsons.KEY_TRANSFORMER_CAMELCASE, **kwargs
+			),
+		)
+		return self
+
+	async def __aexit__(self, exc_type, exc_value, exc_tb):
+		await self.client.close()
 
 	async def get_issues(self) -> List[str]:
-		async with self._client.get(
+		async with self.client.get(
 			f"{self._url}/issues",
 			params={"limit": 0},
 			headers={"X-API-Key": self._api_key},
@@ -34,10 +40,23 @@ class KyooClient:
 			ret = await r.json()
 			return [x["cause"] for x in ret if x["domain"] == "scanner"]
 
+	async def create_issue(self, path: str, issue: str, extra: dict | None = None):
+		await self.client.post(
+			f"{self._url}/issues",
+			json={"domain": "scanner", "cause": path, "reason": issue, "extra": extra},
+			headers={"X-API-Key": self._api_key},
+		)
+
+	async def delete_issue(self, path: str):
+		await self.client.delete(
+			f'{self._url}/issues?filter=domain eq scanner and cause eq "{path}"',
+			headers={"X-API-Key": self._api_key},
+		)
+
 	async def link_collection(
 		self, collection: str, type: Literal["movie"] | Literal["show"], id: str
 	):
-		async with self._client.put(
+		async with self.client.put(
 			f"{self._url}/collections/{collection}/{type}/{id}",
 			headers={"X-API-Key": self._api_key},
 		) as r:
@@ -56,7 +75,7 @@ class KyooClient:
 				jdkwargs={"indent": 4},
 			),
 		)
-		async with self._client.post(
+		async with self.client.post(
 			f"{self._url}/{path}",
 			json=data,
 			headers={"X-API-Key": self._api_key},
@@ -85,13 +104,12 @@ class KyooClient:
 	async def delete(
 		self,
 		path: str,
-		type: Literal["episode", "movie", "issue"] | None = None,
+		type: Literal["episode", "movie"] | None = None,
 	):
 		logging.info("Deleting %s", path)
-		self.registered = filter(lambda x: x != path, self.registered)
 
 		if type is None or type == "movie":
-			async with self._client.delete(
+			async with self.client.delete(
 				f'{self._url}/movies?filter=path eq "{quote(path)}"',
 				headers={"X-API-Key": self._api_key},
 			) as r:
@@ -100,7 +118,7 @@ class KyooClient:
 					r.raise_for_status()
 
 		if type is None or type == "episode":
-			async with self._client.delete(
+			async with self.client.delete(
 				f'{self._url}/episodes?filter=path eq "{quote(path)}"',
 				headers={"X-API-Key": self._api_key},
 			) as r:
@@ -108,10 +126,4 @@ class KyooClient:
 					logging.error(f"Request error: {await r.text()}")
 					r.raise_for_status()
 
-		if path in self.issues:
-			self.issues = filter(lambda x: x != path, self.issues)
-			await self._client.delete(
-				f'{self._url}/issues?filter=domain eq scanner and cause eq "{quote(path)}"',
-				headers={"X-API-Key": self._api_key},
-			)
-
+		await self.delete_issue(path)

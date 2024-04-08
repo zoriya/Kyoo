@@ -1,7 +1,7 @@
 import os
 from aiohttp import ClientSession
 from abc import abstractmethod, abstractproperty
-from typing import Optional, TypeVar
+from typing import Optional, Self
 
 from providers.implementations.thexem import TheXem
 from providers.utils import ProviderError
@@ -13,14 +13,13 @@ from .types.movie import Movie
 from .types.collection import Collection
 
 
-Self = TypeVar("Self", bound="Provider")
-
-
 class Provider:
 	@classmethod
-	def get_all(
-		cls: type[Self], client: ClientSession, languages: list[str]
-	) -> tuple[list[Self], TheXem]:
+	def get_all(cls, client: ClientSession) -> tuple[Self, TheXem]:
+		languages = os.environ.get("LIBRARY_LANGUAGES")
+		if not languages:
+			print("Missing environment variable 'LIBRARY_LANGUAGES'.")
+			exit(2)
 		providers = []
 
 		from providers.idmapper import IdMapper
@@ -44,7 +43,7 @@ class Provider:
 
 		idmapper.init(tmdb=tmdb, language=languages[0])
 
-		return providers, xem
+		return next(providers), xem
 
 	@abstractproperty
 	def name(self) -> str:

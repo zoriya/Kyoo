@@ -1,47 +1,18 @@
-from providers.kyoo_client import KyooClient
-
-
 async def main():
-	import asyncio
-	import os
 	import logging
 	import sys
-	import jsons
-	from datetime import date
-	from typing import Optional
-	from aiohttp import ClientSession
-	from providers.utils import format_date, ProviderError
+	from providers.provider import Provider
+	from providers.kyoo_client import KyooClient
 	from .scanner import Scanner
+	from .subscriber import Subscriber
 
-	path = os.environ.get("SCANNER_LIBRARY_ROOT", "/video")
-	languages = os.environ.get("LIBRARY_LANGUAGES")
-	if not languages:
-		print("Missing environment variable 'LIBRARY_LANGUAGES'.")
-		exit(2)
-	api_key = os.environ.get("KYOO_APIKEY")
-	if not api_key:
-		api_key = os.environ.get("KYOO_APIKEYS")
-		if not api_key:
-			print("Missing environment variable 'KYOO_APIKEY'.")
-			exit(2)
-		api_key = api_key.split(",")[0]
-
+	logging.basicConfig(level=logging.INFO)
 	if len(sys.argv) > 1 and sys.argv[1] == "-v":
-		logging.basicConfig(level=logging.INFO)
-	if len(sys.argv) > 1 and sys.argv[1] == "-vv":
 		logging.basicConfig(level=logging.DEBUG)
 	logging.getLogger("watchfiles").setLevel(logging.WARNING)
 	logging.getLogger("rebulk").setLevel(logging.WARNING)
 
-	jsons.set_serializer(lambda x, **_: format_date(x), Optional[date | int])  # type: ignore
-	async with ClientSession(
-		json_serialize=lambda *args, **kwargs: jsons.dumps(
-			*args, key_transformer=jsons.KEY_TRANSFORMER_CAMELCASE, **kwargs
-		),
-	) as client:
-		kyoo = KyooClient(client, api_key=api_key)
-		provider = 
-		try:
-			scanner = Scanner(kyoo, languages=languages.split(","), api_key=api_key)
-		except ProviderError as e:
-			logging.error(e)
+	async with KyooClient() as kyoo, Subscriber() as sub:
+		provider, xem = Provider.get_all(kyoo.client)
+		scanner = Scanner(kyoo, provider, xem)
+		await sub.listen(scanner)

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from dataclasses_json import dataclass_json, LetterCase
+from dataclasses_json import DataClassJsonMixin, dataclass_json, LetterCase
 
 from autosync.models.episode import Episode
 from autosync.models.movie import Movie
@@ -17,7 +17,7 @@ class WatchStatusMessage(WatchStatus):
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
-class Message:
+class Message(DataClassJsonMixin):
 	action: str
 	type: str
 	value: WatchStatusMessage

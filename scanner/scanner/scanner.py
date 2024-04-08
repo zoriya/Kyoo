@@ -9,7 +9,6 @@ from providers.types.episode import Episode, PartialShow
 from providers.types.season import Season
 from providers.kyoo_client import KyooClient
 from .parser.guess import guessit
-from .utils import handle_errors
 from .cache import cache, exec_as_cache, make_key
 
 
@@ -23,11 +22,30 @@ class Scanner:
 		self._show_cache = {}
 		self._season_cache = {}
 
-	@handle_errors
+	async def delete(self, path: str):
+		try:
+			await self._client.delete(path)
+			return True
+		except Exception as e:
+			logging.exception("Unhandled error", exc_info=e)
+			return False
+
 	async def identify(self, path: str):
-		# if path in self.registered or self._ignore_pattern.match(path):
-		# 	return
-		#
+		try:
+			await self.identify(path)
+			await self._client.delete_issue(path)
+		except ProviderError as e:
+			logging.error(e)
+			await self._client.create_issue(path, str(e))
+		except Exception as e:
+			logging.exception("Unhandled error", exc_info=e)
+			await self._client.create_issue(
+				path, "Unknown error", {"type": type(e).__name__, "message": str(e)}
+			)
+			return False
+		return True
+
+	async def _identify(self, path: str):
 		raw = guessit(path, xem_titles=await self._xem.get_expected_titles())
 
 		if "mimetype" not in raw or not raw["mimetype"].startswith("video"):
