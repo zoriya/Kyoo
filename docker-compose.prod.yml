@@ -1,5 +1,5 @@
 x-transcoder: &transcoder-base
-  image: zoriya/kyoo_transcoder:latest
+  image: zoriya/kyoo_transcoder:latest@sha256:d082d64f911d0a8d877e9e491abf7a26d596350931351431ff24f7a04fef395f
   networks:
     default:
       aliases:
@@ -14,7 +14,7 @@ x-transcoder: &transcoder-base
 
 services:
   back:
-    image: zoriya/kyoo_back:latest
+    image: zoriya/kyoo_back:latest@sha256:25cb67f15cfd16a14b23d0f2b88d6677287c85713e95b0e9a62f1ee260d2d769
     restart: unless-stopped
     cpus: 1.5
     env_file:
@@ -32,7 +32,7 @@ services:
       - kyoo:/kyoo
 
   migrations:
-    image: zoriya/kyoo_migrations:latest
+    image: zoriya/kyoo_migrations:latest@sha256:957bac82794df5367f707f23217bc1afcb7fa23980b12ffc8c0d73b70c909279
     restart: "no"
     depends_on:
       postgres:
@@ -41,13 +41,13 @@ services:
       - ./.env
 
   front:
-    image: zoriya/kyoo_front:latest
+    image: zoriya/kyoo_front:latest@sha256:e5c810e2403308a5d9fd8a92a381e213fb16b3bf04e92f1866f1e113504a429e
     restart: unless-stopped
     environment:
       - KYOO_URL=${KYOO_URL:-http://back:5000}
 
   scanner:
-    image: zoriya/kyoo_scanner:latest
+    image: zoriya/kyoo_scanner:latest@sha256:fd6c5861c8245ef6bbbc5b3dc015eed958f211d3aa335b6ca38fe06214b3d21d
     restart: unless-stopped
     depends_on:
       back:
@@ -60,7 +60,7 @@ services:
       - ${LIBRARY_ROOT}:/video:ro
 
   autosync:
-    image: zoriya/kyoo_autosync:latest
+    image: zoriya/kyoo_autosync:latest@sha256:4a8c40b0bae7d64afe38476e2508c659ffb72b159c9b816821e7ab7bbf59f897
     restart: on-failure
     depends_on:
       rabbitmq:
@@ -102,7 +102,7 @@ services:
     profiles: ['qsv']
 
   ingress:
-    image: nginx
+    image: nginx@sha256:6db391d1c0cfb30588ba0bf72ea999404f2764febf0f1f196acd5867ac7efa7e
     restart: unless-stopped
     environment:
       - PORT=8901
@@ -117,7 +117,7 @@ services:
       - "8901:8901"
 
   postgres:
-    image: postgres:15
+    image: postgres:15@sha256:ea40a028dd42740d6cff34135ff6b3119ff7ce0ed60120d992216456b5987fe7
     restart: unless-stopped
     env_file:
       - ./.env
@@ -130,7 +130,7 @@ services:
       retries: 5
 
   meilisearch:
-    image: getmeili/meilisearch:v1.4
+    image: getmeili/meilisearch:v1.4@sha256:7d3478f908c69c3d4fc46d4fce54cd88cca21167705e4144b70089ece3008198
     restart: unless-stopped
     volumes:
       - search:/meili_data
@@ -145,7 +145,7 @@ services:
       retries: 5
 
   rabbitmq:
-    image: rabbitmq:3-alpine
+    image: rabbitmq:3-alpine@sha256:cd1b0e16575fd9885a03f2ae3b7d0fb4ee77b215a1127cf086397f7a55e8912b
     restart: on-failure
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}

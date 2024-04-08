@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 as builder
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0@sha256:249a78aa4ce22ab872d0dff0490a6389e7bc087d2c080c4ffc7569b49cf0e23b as builder
 ARG TARGETARCH
 WORKDIR /kyoo
 
@@ -21,7 +21,7 @@ COPY . .
 RUN dotnet build
 RUN dotnet ef migrations bundle --no-build --self-contained -r linux-${TARGETARCH} -f -o /app/migrate -p src/Kyoo.Postgresql --verbose
 
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0@sha256:10c1b411627093b7e72f35a1a875334c0c21c87bcc6bd49d2e6d736b338b5801
 COPY --from=builder /app/migrate /app/migrate
 
 ENTRYPOINT /app/migrate --connection "USER ID=${POSTGRES_USER};PASSWORD=${POSTGRES_PASSWORD};SERVER=${POSTGRES_SERVER};PORT=${POSTGRES_PORT};DATABASE=${POSTGRES_DB};"

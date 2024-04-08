@@ -127,7 +127,7 @@ services:
     profiles: ['qsv']
 
   ingress:
-    image: nginx
+    image: nginx@sha256:6db391d1c0cfb30588ba0bf72ea999404f2764febf0f1f196acd5867ac7efa7e
     restart: on-failure
     environment:
       - PORT=8901
@@ -139,7 +139,7 @@ services:
       - "8901:8901"
 
   postgres:
-    image: postgres:15
+    image: postgres:15@sha256:ea40a028dd42740d6cff34135ff6b3119ff7ce0ed60120d992216456b5987fe7
     restart: on-failure
     env_file:
       - ./.env
@@ -157,7 +157,7 @@ services:
       retries: 5
 
   meilisearch:
-    image: getmeili/meilisearch:v1.4
+    image: getmeili/meilisearch:v1.4@sha256:7d3478f908c69c3d4fc46d4fce54cd88cca21167705e4144b70089ece3008198
     restart: on-failure
     ports:
       - "7700:7700"
@@ -174,7 +174,7 @@ services:
       retries: 5
 
   rabbitmq:
-    image: rabbitmq:3-management-alpine
+    image: rabbitmq:3-management-alpine@sha256:3c86ac786fbe1269414ba86b9f43d614189cab090c043b32858dba1f3d3377c2
     restart: on-failure
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}

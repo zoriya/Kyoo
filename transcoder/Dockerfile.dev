@@ -2,7 +2,7 @@
 # https://packages.debian.org/bookworm/ffmpeg for version tracking
 # FROM golang:1.21
 # trixie's golang is also 1.21
-FROM debian:trixie-slim
+FROM debian:trixie-slim@sha256:09dd559ab7f61df3bfb5daa5e1ec6066e87c9b0baee5b2e6dc932e194d303155
 # those were copied from https://github.com/docker-library/golang/blob/master/Dockerfile-linux.template
 ENV GOTOOLCHAIN=local
 ENV GOPATH /go

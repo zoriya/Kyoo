@@ -1,5 +1,5 @@
 # FROM golang:1.21 as build
-FROM debian:trixie-slim as build
+FROM debian:trixie-slim@sha256:09dd559ab7f61df3bfb5daa5e1ec6066e87c9b0baee5b2e6dc932e194d303155 as build
 # those were copied from https://github.com/docker-library/golang/blob/master/Dockerfile-linux.template
 ENV GOTOOLCHAIN=local
 ENV GOPATH /go
@@ -32,7 +32,7 @@ RUN go build -o ./transcoder
 # debian is required for nvidia hardware acceleration
 # we use trixie (debian's testing because ffmpeg on latest is v5 and we need v6)
 # https://packages.debian.org/bookworm/ffmpeg for version tracking
-FROM debian:trixie-slim
+FROM debian:trixie-slim@sha256:09dd559ab7f61df3bfb5daa5e1ec6066e87c9b0baee5b2e6dc932e194d303155
 
 # read target arch from buildx or default to amd64 if using legacy builder.
 ARG TARGETARCH
