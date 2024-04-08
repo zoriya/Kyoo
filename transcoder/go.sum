@@ -22,8 +22,8 @@ github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyC
 github.com/valyala/fasttemplate v1.2.2 h1:lxLXG0uE3Qnshl9QyaK6XJxMXlQZELvChBOCmQD0Loo=
 github.com/valyala/fasttemplate v1.2.2/go.mod h1:KHLXt3tVN2HBp8eijSv/kGJopbvo7S+qRAEEKiv+SiQ=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
-github.com/zoriya/go-mediainfo v0.0.0-20240113000440-36f500affcfd h1:AOdEpcmYJkmIW4I76TQim6LT4+9duYTdXNgkQsPHpuA=
-github.com/zoriya/go-mediainfo v0.0.0-20240113000440-36f500affcfd/go.mod h1:jzun1oQGoJSh65g1XKaolTmjd6HW/34WHH7VMdJdbvM=
+github.com/zoriya/go-mediainfo v0.0.0-20240113011752-07018f07efae h1:Xmtcb/GrG1jcLxC3cDFwdAM1oV7fLNBcN3h3YL+gN6g=
+github.com/zoriya/go-mediainfo v0.0.0-20240113011752-07018f07efae/go.mod h1:jzun1oQGoJSh65g1XKaolTmjd6HW/34WHH7VMdJdbvM=
 gitlab.com/opennota/screengen v1.0.2 h1:GxYTJdAPEzmg5v5CV4dgn45JVW+EcXXAvCxhE7w6UDw=
 gitlab.com/opennota/screengen v1.0.2/go.mod h1:4kED4yriw2zslwYmXFCa5qCvEKwleBA7l5OE+d94NTU=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
