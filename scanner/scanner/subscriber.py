@@ -49,4 +49,7 @@ class Subscriber:
 				else:
 					await message.nack(requeue=False)
 
-		await self._queue.consume(on_message, no_ack=True)
+		# Allow up to 20 scan requests to run in parallel on the same listener.
+		# Since most work is calling API not doing that is a waste.
+		await self._channel.set_qos(prefetch_count=20)
+		await self._queue.consume(on_message)
