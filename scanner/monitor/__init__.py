@@ -14,5 +14,5 @@ async def main():
 		path = os.environ.get("SCANNER_LIBRARY_ROOT", "/video")
 		await asyncio.gather(
 			monitor(path, publisher),
-			scan(path),
+			scan(path, publisher, client),
 		)

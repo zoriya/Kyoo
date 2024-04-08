@@ -30,15 +30,26 @@ class KyooClient:
 	async def __aexit__(self, exc_type, exc_value, exc_tb):
 		await self.client.close()
 
-	async def get_issues(self) -> List[str]:
+	async def get_registered_paths(self) -> List[str]:
+		paths = None
 		async with self.client.get(
-			f"{self._url}/issues",
+			f"{self._url}/episodes",
 			params={"limit": 0},
 			headers={"X-API-Key": self._api_key},
 		) as r:
 			r.raise_for_status()
 			ret = await r.json()
-			return [x["cause"] for x in ret if x["domain"] == "scanner"]
+			paths = list(x["path"] for x in ret["items"])
+
+		async with self.client.get(
+			f"{self._url}/movies",
+			params={"limit": 0},
+			headers={"X-API-Key": self._api_key},
+		) as r:
+			r.raise_for_status()
+			ret = await r.json()
+			paths += list(x["path"] for x in ret["items"])
+		return paths
 
 	async def create_issue(self, path: str, issue: str, extra: dict | None = None):
 		await self.client.post(
