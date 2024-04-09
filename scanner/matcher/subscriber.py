@@ -11,6 +11,7 @@ from matcher.matcher import Matcher
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class Message(DataClassJsonMixin):
 	action: Literal["scan", "delete"]
@@ -54,4 +55,3 @@ class Subscriber:
 		await self._channel.set_qos(prefetch_count=20)
 		await self._queue.consume(on_message)
 		await asyncio.Future()
-
