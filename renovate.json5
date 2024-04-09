@@ -11,7 +11,7 @@
     },
     {
       "matchDatasources": ["docker"],
-      "matchPackagePatterns": ["postgresql"],
+      "matchPackagePatterns": ["postgres"],
       "allowedVersions": "<16"
     }
   ],
