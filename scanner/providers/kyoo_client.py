@@ -57,17 +57,28 @@ class KyooClient:
 		return paths
 
 	async def create_issue(self, path: str, issue: str, extra: dict | None = None):
-		await self.client.post(
+		async with self.client.post(
 			f"{self._url}/issues",
-			json={"domain": "scanner", "cause": path, "reason": issue, "extra": extra},
+			json={
+				"domain": "scanner",
+				"cause": path,
+				"reason": issue,
+				"extra": extra if extra is not None else {},
+			},
 			headers={"X-API-Key": self._api_key},
-		)
+		) as r:
+			if not r.ok:
+				logger.error(f"Request error: {await r.text()}")
+				r.raise_for_status()
 
 	async def delete_issue(self, path: str):
-		await self.client.delete(
+		async with self.client.delete(
 			f'{self._url}/issues?filter=domain eq scanner and cause eq "{path}"',
 			headers={"X-API-Key": self._api_key},
-		)
+		) as r:
+			if not r.ok:
+				logger.error(f"Request error: {await r.text()}")
+				r.raise_for_status()
 
 	async def link_collection(
 		self, collection: str, type: Literal["movie"] | Literal["show"], id: str
