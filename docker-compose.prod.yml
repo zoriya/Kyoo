@@ -59,6 +59,18 @@ services:
     volumes:
       - ${LIBRARY_ROOT}:/video:ro
 
+  matcher:
+    image: zoriya/kyoo_scanner:latest
+    command: matcher
+    restart: unless-stopped
+    depends_on:
+      back:
+        condition: service_healthy
+    env_file:
+      - ./.env
+    environment:
+      - KYOO_URL=${KYOO_URL:-http://back:5000}
+
   autosync:
     image: zoriya/kyoo_autosync:latest
     restart: on-failure
