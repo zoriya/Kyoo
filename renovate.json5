@@ -3,6 +3,18 @@
   "extends": ["config:recommended", ":disableRateLimiting"],
   "minimumReleaseAge": "5 days",
   "ignorePaths": ["**/front/**"],
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackagePatterns": ["meilisearch"],
+      "allowedVersions": "<1.5"
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackagePatterns": ["postgresql"],
+      "allowedVersions": "<16"
+    }
+  ],
   "postUpdateOptions": [
     "gomodTidy",
     "gomodUpdateImportPaths"
