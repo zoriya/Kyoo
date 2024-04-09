@@ -2,7 +2,6 @@ import os
 import re
 import asyncio
 from logging import getLogger
-from pathlib import Path
 
 from monitor.publisher import Publisher
 from providers.kyoo_client import KyooClient
@@ -20,7 +19,9 @@ async def scan(path: str, publisher: Publisher, client: KyooClient):
 		logger.error(f"Invalid ignore pattern. Ignoring. Error: {e}")
 
 	registered = await client.get_registered_paths()
-	videos = [str(p) for p in Path(path).rglob("*") if p.is_file()]
+	videos = [
+		os.path.join(dir, file) for dir, _, files in os.walk(path) for file in files
+	]
 	to_register = [
 		p for p in videos if p not in registered and not ignore_pattern.match(p)
 	]
