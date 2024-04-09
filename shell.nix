@@ -6,6 +6,7 @@
       jsons
       watchfiles
       pika
+      aio-pika
       requests
       dataclasses-json
     ]);

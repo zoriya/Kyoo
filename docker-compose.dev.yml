@@ -84,6 +84,18 @@ services:
     volumes:
       - ${LIBRARY_ROOT}:/video:ro
 
+  matcher:
+    build: ./scanner
+    command: matcher
+    restart: on-failure
+    depends_on:
+      back:
+        condition: service_healthy
+    env_file:
+      - ./.env
+    environment:
+      - KYOO_URL=${KYOO_URL:-http://back:5000}
+
   autosync:
     build: ./autosync
     restart: on-failure

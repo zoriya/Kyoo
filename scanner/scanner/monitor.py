@@ -1,22 +1,19 @@
-import logging
+from logging import getLogger
 from watchfiles import awatch, Change
-from .utils import ProviderError
-from .scanner import Scanner
+
+from .publisher import Publisher
+
+logger = getLogger(__name__)
 
 
-async def monitor(path: str, scanner: Scanner):
+async def monitor(path: str, publisher: Publisher):
 	async for changes in awatch(path):
 		for event, file in changes:
-			try:
-				if event == Change.added:
-					await scanner.identify(file)
-				elif event == Change.deleted:
-					await scanner.delete(file)
-				elif event == Change.modified:
-					pass
-				else:
-					print(f"Change {event} occured for file {file}")
-			except ProviderError as e:
-				logging.error(str(e))
-			except Exception as e:
-				logging.exception("Unhandled error", exc_info=e)
+			if event == Change.added:
+				await publisher.add(file)
+			elif event == Change.deleted:
+				await publisher.delete(file)
+			elif event == Change.modified:
+				pass
+			else:
+				logger.info(f"Change {event} occured for file {file}")

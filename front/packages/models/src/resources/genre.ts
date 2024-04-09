@@ -37,4 +37,10 @@ export enum Genre {
 	Thriller = "Thriller",
 	War = "War",
 	Western = "Western",
+	Kids = "Kids",
+	News = "News",
+	Reality = "Reality",
+	Soap = "Soap",
+	Talk = "Talk",
+	Politics = "Politics",
 }

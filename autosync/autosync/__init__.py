@@ -35,7 +35,7 @@ def on_message(
 	body: bytes,
 ):
 	try:
-		message = Message.from_json(body)  # type: Message
+		message = Message.from_json(body)
 		service.update(message.value.user, message.value.resource, message.value)
 	except Exception as e:
 		logging.exception("Error processing message.", exc_info=e)
