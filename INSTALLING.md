@@ -2,7 +2,7 @@
 
 1. Install docker & docker-compose
 2. Download the
-   [`docker-compose.yml`](https://raw.githubusercontent.com/zoriya/Kyoo/master/docker-compose.prod.yml),
+   [`docker-compose.yml`](https://github.com/zoriya/kyoo/releases/latest/download/docker-compose.yml),
    [`nginx.conf.template`](https://raw.githubusercontent.com/zoriya/Kyoo/master/nginx.conf.template) and
    [`.env`](https://raw.githubusercontent.com/zoriya/Kyoo/master/.env.example) files
 3. Fill the `.env` file with your configuration options (and an API Key from [themoviedb.org](https://www.themoviedb.org/))
@@ -22,7 +22,7 @@ Those files can be put in any directory of your choice.
 
 Those 3 files are:
 
-- A `docker-compose.yml` (simply copy docker-compose.prod.yml from [here](https://raw.githubusercontent.com/zoriya/Kyoo/master/docker-compose.prod.yml)).
+- A `docker-compose.yml` (simply download docker-compose.yml from [the latest release](https://github.com/zoriya/kyoo/releases/latest/download/docker-compose.yml)).
 - A `nginx.conf.template` copied from [here](https://raw.githubusercontent.com/zoriya/Kyoo/master/nginx.conf.template).
 - A `.env` file that you will need to **fill**. Look at the example [.env.example](https://raw.githubusercontent.com/zoriya/Kyoo/master/.env.example)
 
@@ -49,9 +49,6 @@ unsure that your `.env` contains all the options specified in the updated `.env.
 
 After that, you will need to update Kyoo's services. For that, open a terminal in the configuration's directory and run
 the command `docker-compose pull`. You are now ready to restart Kyoo, you can run `docker-compose up -d`.
-
-You can also enable automatic updates via an external tool like [watchtower](https://containrrr.dev/watchtower/).
-TLDR: `docker run -d --name watchtower -e WATCHTOWER_CLEANUP=true -e WATCHTOWER_POLL_INTERVAL=86400 -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower`
 
 # Uninstalling
 
