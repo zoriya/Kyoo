@@ -1,10 +1,10 @@
 x-transcoder: &transcoder-base
-  image: zoriya/kyoo_transcoder:latest
+  build: ./transcoder
   networks:
     default:
       aliases:
         - transcoder
-  restart: unless-stopped
+  restart: on-failure
   env_file:
     - ./.env
   volumes:
@@ -14,9 +14,8 @@ x-transcoder: &transcoder-base
 
 services:
   back:
-    image: zoriya/kyoo_back:latest
-    restart: unless-stopped
-    cpus: 1.5
+    build: ./back
+    restart: on-failure
     env_file:
       - ./.env
     depends_on:
@@ -32,7 +31,9 @@ services:
       - kyoo:/kyoo
 
   migrations:
-    image: zoriya/kyoo_migrations:latest
+    build:
+      context: ./back
+      dockerfile: Dockerfile.migrations
     restart: "no"
     depends_on:
       postgres:
@@ -41,14 +42,14 @@ services:
       - ./.env
 
   front:
-    image: zoriya/kyoo_front:latest
-    restart: unless-stopped
+    build: ./front
+    restart: on-failure
     environment:
       - KYOO_URL=${KYOO_URL:-http://back:5000}
 
   scanner:
-    image: zoriya/kyoo_scanner:latest
-    restart: unless-stopped
+    build: ./scanner
+    restart: on-failure
     depends_on:
       back:
         condition: service_healthy
@@ -60,7 +61,7 @@ services:
       - ${LIBRARY_ROOT}:/video:ro
 
   matcher:
-    image: zoriya/kyoo_scanner:latest
+    build: ./scanner
     command: matcher
     restart: unless-stopped
     depends_on:
@@ -72,7 +73,7 @@ services:
       - KYOO_URL=${KYOO_URL:-http://back:5000}
 
   autosync:
-    image: zoriya/kyoo_autosync:latest
+    build: ./autosync
     restart: on-failure
     depends_on:
       rabbitmq:
@@ -115,7 +116,7 @@ services:
 
   ingress:
     image: nginx
-    restart: unless-stopped
+    restart: on-failure
     environment:
       - PORT=8901
       - FRONT_URL=http://front:8901
@@ -130,7 +131,7 @@ services:
 
   postgres:
     image: postgres:15
-    restart: unless-stopped
+    restart: on-failure
     env_file:
       - ./.env
     volumes:
@@ -143,7 +144,7 @@ services:
 
   meilisearch:
     image: getmeili/meilisearch:v1.4
-    restart: unless-stopped
+    restart: on-failure
     volumes:
       - search:/meili_data
     environment:
