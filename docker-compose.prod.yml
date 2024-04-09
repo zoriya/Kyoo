@@ -117,7 +117,7 @@ services:
       - "8901:8901"
 
   postgres:
-    image: postgres:15
+    image: postgres:16
     restart: unless-stopped
     env_file:
       - ./.env
