@@ -43,7 +43,7 @@ class Provider:
 
 		idmapper.init(tmdb=tmdb, language=languages[0])
 
-		return next(providers), xem
+		return next(iter(providers)), xem
 
 	@abstractproperty
 	def name(self) -> str:

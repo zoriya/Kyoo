@@ -1,18 +1,18 @@
 async def main():
+	import asyncio
+	import os
 	import logging
-	import sys
-	from providers.provider import Provider
+	from .monitor import monitor
+	from .scanner import scan
+	from .publisher import Publisher
 	from providers.kyoo_client import KyooClient
-	from .scanner import Scanner
-	from .subscriber import Subscriber
 
 	logging.basicConfig(level=logging.INFO)
-	if len(sys.argv) > 1 and sys.argv[1] == "-v":
-		logging.basicConfig(level=logging.DEBUG)
 	logging.getLogger("watchfiles").setLevel(logging.WARNING)
-	logging.getLogger("rebulk").setLevel(logging.WARNING)
 
-	async with KyooClient() as kyoo, Subscriber() as sub:
-		provider, xem = Provider.get_all(kyoo.client)
-		scanner = Scanner(kyoo, provider, xem)
-		await sub.listen(scanner)
+	async with Publisher() as publisher, KyooClient() as client:
+		path = os.environ.get("SCANNER_LIBRARY_ROOT", "/video")
+		await asyncio.gather(
+			monitor(path, publisher),
+			scan(path, publisher, client),
+		)

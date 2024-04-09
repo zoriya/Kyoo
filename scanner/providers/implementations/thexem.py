@@ -5,7 +5,7 @@ from aiohttp import ClientSession
 from datetime import timedelta
 
 from providers.utils import ProviderError
-from scanner.cache import cache
+from matcher.cache import cache
 
 
 def clean(s: str):

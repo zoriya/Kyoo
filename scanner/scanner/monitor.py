@@ -1,7 +1,7 @@
 from logging import getLogger
 from watchfiles import awatch, Change
 
-from monitor.publisher import Publisher
+from .publisher import Publisher
 
 logger = getLogger(__name__)
 

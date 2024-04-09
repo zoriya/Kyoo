@@ -8,7 +8,7 @@ from itertools import accumulate, zip_longest
 from providers.idmapper import IdMapper
 from providers.implementations.thexem import TheXem
 from providers.utils import ProviderError
-from scanner.cache import cache
+from matcher.cache import cache
 
 from ..provider import Provider
 from ..types.movie import Movie, MovieTranslation, Status as MovieStatus

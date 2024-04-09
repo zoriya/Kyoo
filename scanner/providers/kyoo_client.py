@@ -2,8 +2,11 @@ import os
 import logging
 import jsons
 from aiohttp import ClientSession
-from typing import List, Literal, Any
+from datetime import date
+from typing import List, Literal, Any, Optional
 from urllib.parse import quote
+
+from .utils import format_date
 
 
 class KyooClient:
@@ -19,7 +22,7 @@ class KyooClient:
 		self._url = os.environ.get("KYOO_URL", "http://back:5000")
 
 	async def __aenter__(self):
-		jsons.set_serializer(lambda x, **_: format_date(x), Optional[date | int])  # type: ignore
+		jsons.set_serializer(lambda x, **_: format_date(x), type[Optional[date | int]])
 		self.client = ClientSession(
 			json_serialize=lambda *args, **kwargs: jsons.dumps(
 				*args, key_transformer=jsons.KEY_TRANSFORMER_CAMELCASE, **kwargs

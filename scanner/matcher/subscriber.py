@@ -6,13 +6,13 @@ import logging
 from aio_pika import connect_robust
 from aio_pika.abc import AbstractIncomingMessage
 
-from scanner.scanner import Scanner
+from matcher.matcher import Matcher
 
 logger = logging.getLogger(__name__)
 
 @dataclass
 class Message(DataClassJsonMixin):
-	action: Literal["scan"] | Literal["delete"]
+	action: Literal["scan", "delete"]
 	path: str
 
 
@@ -32,7 +32,7 @@ class Subscriber:
 	async def __aexit__(self, exc_type, exc_value, exc_tb):
 		await self._con.close()
 
-	async def listen(self, scanner: Scanner):
+	async def listen(self, scanner: Matcher):
 		async def on_message(message: AbstractIncomingMessage):
 			async with message.process():
 				msg = Message.from_json(message.body)
