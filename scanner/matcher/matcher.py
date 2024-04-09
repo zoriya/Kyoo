@@ -1,6 +1,6 @@
 from datetime import timedelta
 import asyncio
-import logging
+from logging import getLogger
 from providers.implementations.thexem import TheXem
 from providers.provider import Provider, ProviderError
 from providers.types.collection import Collection
@@ -10,6 +10,8 @@ from providers.types.season import Season
 from providers.kyoo_client import KyooClient
 from .parser.guess import guessit
 from .cache import cache, exec_as_cache, make_key
+
+logger = getLogger(__name__)
 
 
 class Matcher:
@@ -27,7 +29,7 @@ class Matcher:
 			await self._client.delete(path)
 			return True
 		except Exception as e:
-			logging.exception("Unhandled error", exc_info=e)
+			logger.exception("Unhandled error", exc_info=e)
 			return False
 
 	async def identify(self, path: str):
@@ -35,10 +37,10 @@ class Matcher:
 			await self.identify(path)
 			await self._client.delete_issue(path)
 		except ProviderError as e:
-			logging.error(e)
+			logger.error(e)
 			await self._client.create_issue(path, str(e))
 		except Exception as e:
-			logging.exception("Unhandled error", exc_info=e)
+			logger.exception("Unhandled error", exc_info=e)
 			await self._client.create_issue(
 				path, "Unknown error", {"type": type(e).__name__, "message": str(e)}
 			)
@@ -63,12 +65,12 @@ class Matcher:
 				f"Multi-episodes files are not yet supported (for {path})"
 			)
 
-		logging.info("Identied %s: %s", path, raw)
+		logger.info("Identied %s: %s", path, raw)
 
 		if raw["type"] == "movie":
 			movie = await self._provider.identify_movie(raw["title"], raw.get("year"))
 			movie.path = str(path)
-			logging.debug("Got movie: %s", movie)
+			logger.debug("Got movie: %s", movie)
 			movie_id = await self._client.post("movies", data=movie.to_kyoo())
 
 			if any(movie.collections):
@@ -87,7 +89,7 @@ class Matcher:
 				year=raw.get("year"),
 			)
 			episode.path = str(path)
-			logging.debug("Got episode: %s", episode)
+			logger.debug("Got episode: %s", episode)
 			episode.show_id = await self.create_or_get_show(episode)
 
 			if episode.season_number is not None:
@@ -96,7 +98,7 @@ class Matcher:
 				)
 			await self._client.post("episodes", data=episode.to_kyoo())
 		else:
-			logging.warn("Unknown video file type: %s", raw["type"])
+			logger.warn("Unknown video file type: %s", raw["type"])
 
 	async def create_or_get_collection(self, collection: Collection) -> str:
 		@cache(ttl=timedelta(days=1), cache=self._collection_cache)
@@ -107,7 +109,7 @@ class Matcher:
 				if not any(collection.translations.keys())
 				else collection
 			)
-			logging.debug("Got collection: %s", new_collection)
+			logger.debug("Got collection: %s", new_collection)
 			return await self._client.post("collection", data=new_collection.to_kyoo())
 
 		# The parameter is only used as a key for the cache.
@@ -126,7 +128,7 @@ class Matcher:
 				else episode.show
 			)
 			# TODO: collections
-			logging.debug("Got show: %s", episode)
+			logger.debug("Got show: %s", episode)
 			ret = await self._client.post("show", data=show.to_kyoo())
 
 			async def create_season(season: Season, id: str):
@@ -134,7 +136,7 @@ class Matcher:
 					season.show_id = id
 					return await self._client.post("seasons", data=season.to_kyoo())
 				except Exception as e:
-					logging.exception("Unhandled error create a season", exc_info=e)
+					logger.exception("Unhandled error create a season", exc_info=e)
 
 			season_tasks = map(
 				lambda s: exec_as_cache(

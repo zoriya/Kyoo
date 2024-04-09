@@ -1,7 +1,7 @@
 import asyncio
-import logging
 from aiohttp import ClientSession
 from datetime import datetime, timedelta
+from logging import getLogger
 from typing import Awaitable, Callable, Dict, List, Optional, Any, TypeVar
 from itertools import accumulate, zip_longest
 
@@ -19,6 +19,8 @@ from ..types.genre import Genre
 from ..types.metadataid import MetadataID
 from ..types.show import Show, ShowTranslation, Status as ShowStatus
 from ..types.collection import Collection, CollectionTranslation
+
+logger = getLogger(__name__)
 
 
 class TheMovieDatabase(Provider):
@@ -158,7 +160,7 @@ class TheMovieDatabase(Provider):
 					"append_to_response": "alternative_titles,videos,credits,keywords,images",
 				},
 			)
-			logging.debug("TMDb responded: %s", movie)
+			logger.debug("TMDb responded: %s", movie)
 
 			ret = Movie(
 				original_language=movie["original_language"],
@@ -256,7 +258,7 @@ class TheMovieDatabase(Provider):
 					"append_to_response": "alternative_titles,videos,credits,keywords,images,external_ids",
 				},
 			)
-			logging.debug("TMDb responded: %s", show)
+			logger.debug("TMDb responded: %s", show)
 
 			ret = Show(
 				original_language=show["original_language"],
@@ -427,7 +429,7 @@ class TheMovieDatabase(Provider):
 
 			if self.name in ret.external_id:
 				return ret
-			logging.warn(
+			logger.warn(
 				"Could not map xem exception to themoviedb, searching instead for %s",
 				new_name,
 			)
@@ -473,7 +475,7 @@ class TheMovieDatabase(Provider):
 				else None
 			)
 			if tvdb_id is None:
-				logging.info(
+				logger.info(
 					"Tvdb could not be found, trying xem name lookup for %s", name
 				)
 				_, tvdb_id = await self._xem.get_show_override("tvdb", old_name)
@@ -518,7 +520,7 @@ class TheMovieDatabase(Provider):
 					},
 					not_found_fail=f"Could not find episode {episode_nbr} of season {season} of serie {name} (absolute: {absolute})",
 				)
-			logging.debug("TMDb responded: %s", episode)
+			logger.debug("TMDb responded: %s", episode)
 
 			ret = Episode(
 				show=show,
@@ -616,7 +618,7 @@ class TheMovieDatabase(Provider):
 			grp = next(iter(group["groups"]), None)
 			return grp["episodes"] if grp else None
 		except Exception as e:
-			logging.exception(
+			logger.exception(
 				"Could not retrieve absolute ordering information", exc_info=e
 			)
 			return None
@@ -697,7 +699,7 @@ class TheMovieDatabase(Provider):
 					"language": lng,
 				},
 			)
-			logging.debug("TMDb responded: %s", collection)
+			logger.debug("TMDb responded: %s", collection)
 
 			ret = Collection(
 				external_id={

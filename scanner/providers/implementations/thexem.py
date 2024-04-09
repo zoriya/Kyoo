@@ -1,11 +1,13 @@
 import re
-import logging
 from typing import Dict, List, Literal
 from aiohttp import ClientSession
+from logging import getLogger
 from datetime import timedelta
 
 from providers.utils import ProviderError
 from matcher.cache import cache
+
+logger = getLogger(__name__)
 
 
 def clean(s: str):
@@ -28,7 +30,7 @@ class TheXem:
 	async def get_map(
 		self, provider: Literal["tvdb"] | Literal["anidb"]
 	) -> Dict[str, List[Dict[str, int]]]:
-		logging.info("Fetching data from thexem for %s", provider)
+		logger.info("Fetching data from thexem for %s", provider)
 		async with self._client.get(
 			f"{self.base}/map/allNames",
 			params={
@@ -40,7 +42,7 @@ class TheXem:
 			r.raise_for_status()
 			ret = await r.json()
 			if "data" not in ret or ret["result"] == "failure":
-				logging.error("Could not fetch xem metadata. Error: %s", ret["message"])
+				logger.error("Could not fetch xem metadata. Error: %s", ret["message"])
 				raise ProviderError("Could not fetch xem metadata")
 			return ret["data"]
 
@@ -53,7 +55,7 @@ class TheXem:
 			Dict[Literal["season"] | Literal["episode"] | Literal["absolute"], int],
 		]
 	]:
-		logging.info("Fetching from thexem the map of %s (%s)", id, provider)
+		logger.info("Fetching from thexem the map of %s (%s)", id, provider)
 		async with self._client.get(
 			f"{self.base}/map/all",
 			params={
@@ -64,7 +66,7 @@ class TheXem:
 			r.raise_for_status()
 			ret = await r.json()
 			if "data" not in ret or ret["result"] == "failure":
-				logging.error("Could not fetch xem mapping. Error: %s", ret["message"])
+				logger.error("Could not fetch xem mapping. Error: %s", ret["message"])
 				return []
 			return ret["data"]
 
@@ -111,7 +113,7 @@ class TheXem:
 		if master_season is None or master_season == -1:
 			return [None, None, episode]
 
-		logging.info(
+		logger.info(
 			"Fount xem override for show %s, ep %d. Master season: %d",
 			show_name,
 			episode,
@@ -130,7 +132,7 @@ class TheXem:
 			None,
 		)
 		if ep is None:
-			logging.warning(
+			logger.warning(
 				"Could not get xem mapping for show %s, falling back to identifier mapping.",
 				show_name,
 			)

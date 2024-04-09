@@ -1,12 +1,14 @@
 import os
-import logging
 import jsons
 from aiohttp import ClientSession
 from datetime import date
+from logging import getLogger
 from typing import List, Literal, Any, Optional
 from urllib.parse import quote
 
 from .utils import format_date
+
+logger = getLogger(__name__)
 
 
 class KyooClient:
@@ -76,11 +78,11 @@ class KyooClient:
 		) as r:
 			# Allow 409 and continue as if it worked.
 			if not r.ok and r.status != 409:
-				logging.error(f"Request error: {await r.text()}")
+				logger.error(f"Request error: {await r.text()}")
 				r.raise_for_status()
 
 	async def post(self, path: str, *, data: dict[str, Any]) -> str:
-		logging.debug(
+		logger.debug(
 			"Sending %s: %s",
 			path,
 			jsons.dumps(
@@ -96,7 +98,7 @@ class KyooClient:
 		) as r:
 			# Allow 409 and continue as if it worked.
 			if not r.ok and r.status != 409:
-				logging.error(f"Request error: {await r.text()}")
+				logger.error(f"Request error: {await r.text()}")
 				r.raise_for_status()
 			ret = await r.json()
 
@@ -107,7 +109,7 @@ class KyooClient:
 					and ret["airDate"][:4] != str(data["air_date"].year)
 				)
 			):
-				logging.info(
+				logger.info(
 					f"Found a {path} with the same slug ({ret['slug']}) and a different date, using the date as part of the slug"
 				)
 				year = (data["start_air"] if path == "movie" else data["air_date"]).year
@@ -120,7 +122,7 @@ class KyooClient:
 		path: str,
 		type: Literal["episode", "movie"] | None = None,
 	):
-		logging.info("Deleting %s", path)
+		logger.info("Deleting %s", path)
 
 		if type is None or type == "movie":
 			async with self.client.delete(
@@ -128,7 +130,7 @@ class KyooClient:
 				headers={"X-API-Key": self._api_key},
 			) as r:
 				if not r.ok:
-					logging.error(f"Request error: {await r.text()}")
+					logger.error(f"Request error: {await r.text()}")
 					r.raise_for_status()
 
 		if type is None or type == "episode":
@@ -137,7 +139,7 @@ class KyooClient:
 				headers={"X-API-Key": self._api_key},
 			) as r:
 				if not r.ok:
-					logging.error(f"Request error: {await r.text()}")
+					logger.error(f"Request error: {await r.text()}")
 					r.raise_for_status()
 
 		await self.delete_issue(path)

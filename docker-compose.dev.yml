@@ -86,7 +86,7 @@ services:
 
   matcher:
     build: ./scanner
-    command: "matcher"
+    command: matcher
     restart: on-failure
     depends_on:
       back:
