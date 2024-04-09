@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
 import asyncio
-import matcher
+import scanner
 
-asyncio.run(matcher.main())
+asyncio.run(scanner.main())

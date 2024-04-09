@@ -1,3 +1,4 @@
+import asyncio
 from dataclasses import dataclass
 from dataclasses_json import DataClassJsonMixin
 from typing import Literal
@@ -34,22 +35,23 @@ class Subscriber:
 
 	async def listen(self, scanner: Matcher):
 		async def on_message(message: AbstractIncomingMessage):
-			async with message.process():
-				msg = Message.from_json(message.body)
-				ack = False
-				match msg.action:
-					case "scan":
-						ack = await scanner.identify(msg.path)
-					case "delete":
-						ack = await scanner.delete(msg.path)
-					case _:
-						logger.error(f"Invalid action: {msg.action}")
-				if ack:
-					await message.ack()
-				else:
-					await message.nack(requeue=False)
+			msg = Message.from_json(message.body)
+			ack = False
+			match msg.action:
+				case "scan":
+					ack = await scanner.identify(msg.path)
+				case "delete":
+					ack = await scanner.delete(msg.path)
+				case _:
+					logger.error(f"Invalid action: {msg.action}")
+			if ack:
+				await message.ack()
+			else:
+				await message.reject()
 
 		# Allow up to 20 scan requests to run in parallel on the same listener.
 		# Since most work is calling API not doing that is a waste.
 		await self._channel.set_qos(prefetch_count=20)
 		await self._queue.consume(on_message)
+		await asyncio.Future()
+

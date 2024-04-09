@@ -26,7 +26,7 @@ logger = getLogger(__name__)
 class TheMovieDatabase(Provider):
 	def __init__(
 		self,
-		languages,
+		languages: list[str],
 		client: ClientSession,
 		api_key: str,
 		xem: TheXem,

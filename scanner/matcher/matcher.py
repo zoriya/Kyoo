@@ -34,7 +34,7 @@ class Matcher:
 
 	async def identify(self, path: str):
 		try:
-			await self.identify(path)
+			await self._identify(path)
 			await self._client.delete_issue(path)
 		except ProviderError as e:
 			logger.error(e)

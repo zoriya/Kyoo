@@ -20,6 +20,7 @@ class Provider:
 		if not languages:
 			print("Missing environment variable 'LIBRARY_LANGUAGES'.")
 			exit(2)
+		languages = languages.split(",")
 		providers = []
 
 		from providers.idmapper import IdMapper
