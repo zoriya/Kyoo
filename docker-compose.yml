@@ -17,6 +17,8 @@ services:
     image: zoriya/kyoo_back:latest
     restart: unless-stopped
     cpus: 1.5
+    environment:
+      - TRANSCODER_URL=${TRANSCODER_URL:-http://transcoder:7666}
     env_file:
       - ./.env
     depends_on:

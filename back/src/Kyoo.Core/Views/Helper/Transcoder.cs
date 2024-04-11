@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Threading.Tasks;
 using AspNetCore.Proxy;
 using AspNetCore.Proxy.Options;
@@ -27,6 +28,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Core.Api;
+
+public static class Transcoder
+{
+	public static string TranscoderUrl =
+		Environment.GetEnvironmentVariable("TRANSCODER_URL") ?? "http://transcoder:7666";
+}
 
 public abstract class TranscoderApi<T>(IRepository<T> repository, IThumbnailsManager thumbs)
 	: CrudThumbsApi<T>(repository, thumbs)
@@ -53,7 +60,7 @@ public abstract class TranscoderApi<T>(IRepository<T> repository, IThumbnailsMan
 				}
 			)
 			.Build();
-		return this.HttpProxyAsync($"http://transcoder:7666{route}", proxyOptions);
+		return this.HttpProxyAsync($"{Transcoder.TranscoderUrl}{route}", proxyOptions);
 	}
 
 	protected abstract Task<(string path, string route)> GetPath(Identifier identifier);
