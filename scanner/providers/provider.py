@@ -51,7 +51,22 @@ class Provider:
 		raise NotImplementedError
 
 	@abstractmethod
-	async def identify_movie(self, name: str, year: Optional[int]) -> Movie:
+	async def search_movie(self, name: str, year: Optional[int]) -> Movie:
+		raise NotImplementedError
+
+	@abstractmethod
+	async def search_episode(
+		self,
+		name: str,
+		season: Optional[int],
+		episode_nbr: Optional[int],
+		absolute: Optional[int],
+		year: Optional[int],
+	) -> Episode:
+		raise NotImplementedError
+
+	@abstractmethod
+	async def identify_movie(self, movie_id: str) -> Movie:
 		raise NotImplementedError
 
 	@abstractmethod
@@ -63,14 +78,11 @@ class Provider:
 		raise NotImplementedError
 
 	@abstractmethod
-	async def identify_episode(
-		self,
-		name: str,
-		season: Optional[int],
-		episode_nbr: Optional[int],
-		absolute: Optional[int],
-		year: Optional[int],
-	) -> Episode:
+	async def identify_episode(self, show_id: str, season_number: int, episode_number: int) -> Episode:
+		raise NotImplementedError
+
+	@abstractmethod
+	async def identify_absolute(self, show_id: str, absolute_number: int) -> Episode:
 		raise NotImplementedError
 
 	@abstractmethod

@@ -142,7 +142,7 @@ class TheMovieDatabase(Provider):
 			},
 		)
 
-	async def identify_movie(self, name: str, year: Optional[int]) -> Movie:
+	async def search_movie(self, name: str, year: Optional[int]) -> Movie:
 		search_results = (
 			await self.get("search/movie", params={"query": name, "year": year})
 		)["results"]
@@ -150,6 +150,9 @@ class TheMovieDatabase(Provider):
 			raise ProviderError(f"No result for a movie named: {name}")
 		search = self.get_best_result(search_results, name, year)
 		movie_id = search["id"]
+		return await self.identify_movie(search["id"])
+
+	async def identify_movie(self, movie_id: str) -> Movie:
 		languages = self.get_languages(search["original_language"])
 
 		async def for_language(lng: str) -> Movie:
@@ -449,7 +452,7 @@ class TheMovieDatabase(Provider):
 			},
 		)
 
-	async def identify_episode(
+	async def search_episode(
 		self,
 		name: str,
 		season: Optional[int],
@@ -458,11 +461,9 @@ class TheMovieDatabase(Provider):
 		year: Optional[int],
 	) -> Episode:
 		show = await self.search_show(name, year)
-		languages = self.get_languages(show.original_language)
 		# Keep it for xem overrides of season/episode
 		old_name = name
 		name = show.name
-		show_id = show.external_id[self.name].data_id
 
 		# Handle weird season names overrides from thexem.
 		# For example when name is "Jojo's bizzare adventure - Stone Ocean", with season None,
@@ -503,6 +504,15 @@ class TheMovieDatabase(Provider):
 
 		if absolute is None:
 			absolute = await self.get_absolute_number(show_id, season, episode_nbr)
+		return await self._identify_episode(show, season, episode_nbr)
+
+
+	async def identify_episode(self, show_id: str, season_number: int, episode_number: int) -> Episode:
+		...
+
+
+	async def _identify_episode(self, show: PartialShow, season: int, episode_nbr: int, absolute: int) -> Episode:
+		show_id = show.external_id[self.name].data_id
 
 		async def for_language(lng: str) -> Episode:
 			try:
@@ -518,7 +528,7 @@ class TheMovieDatabase(Provider):
 					params={
 						"language": lng,
 					},
-					not_found_fail=f"Could not find episode {episode_nbr} of season {season} of serie {name} (absolute: {absolute})",
+					not_found_fail=f"Could not find episode {episode_nbr} of season {season} of serie {show.name} (absolute: {absolute})",
 				)
 			logger.debug("TMDb responded: %s", episode)
 
@@ -550,7 +560,9 @@ class TheMovieDatabase(Provider):
 			ret.translations = {lng: translation}
 			return ret
 
+		languages = self.get_languages(show.original_language)
 		return await self.process_translations(for_language, languages)
+
 
 	def get_best_result(
 		self, search_results: List[Any], name: str, year: Optional[int]

@@ -68,7 +68,7 @@ class Matcher:
 		logger.info("Identied %s: %s", path, raw)
 
 		if raw["type"] == "movie":
-			movie = await self._provider.identify_movie(raw["title"], raw.get("year"))
+			movie = await self._provider.search_movie(raw["title"], raw.get("year"))
 			movie.path = str(path)
 			logger.debug("Got movie: %s", movie)
 			movie_id = await self._client.post("movies", data=movie.to_kyoo())
@@ -81,7 +81,7 @@ class Matcher:
 					*(self._client.link_collection(x, "movie", movie_id) for x in ids)
 				)
 		elif raw["type"] == "episode":
-			episode = await self._provider.identify_episode(
+			episode = await self._provider.search_episode(
 				raw["title"],
 				season=raw.get("season"),
 				episode_nbr=raw.get("episode"),
