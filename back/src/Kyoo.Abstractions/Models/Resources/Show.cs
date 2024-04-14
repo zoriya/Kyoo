@@ -39,6 +39,7 @@ public class Show
 		IOnMerge,
 		IThumbnails,
 		IAddedDate,
+		IRefreshable,
 		ILibraryItem,
 		IWatchlist
 {
@@ -125,6 +126,9 @@ public class Show
 
 	/// <inheritdoc />
 	public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
+
+	/// <inheritdoc />
+	public DateTime? NextMetadataRefresh { get; set; }
 
 	/// <summary>
 	/// The ID of the Studio that made this show.

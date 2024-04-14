@@ -33,3 +33,29 @@ public class MetadataId
 	/// </summary>
 	public string? Link { get; set; }
 }
+
+/// <summary>
+/// ID informations about an episode.
+/// </summary>
+public class EpisodeId
+{
+	/// <summary>
+	/// The Id of the show on the metadata database.
+	/// </summary>
+	public string ShowId { get; set; }
+
+	/// <summary>
+	/// The season number or null if absolute numbering is used in this database.
+	/// </summary>
+	public int? Season { get; set; }
+
+	/// <summary>
+	/// The episode number or absolute number if Season is null.
+	/// </summary>
+	public int Episode { get; set; }
+
+	/// <summary>
+	/// The URL of the resource on the external provider.
+	/// </summary>
+	public string? Link { get; set; }
+}

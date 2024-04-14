@@ -31,7 +31,7 @@ namespace Kyoo.Abstractions.Models;
 /// <summary>
 /// A class to represent a single show's episode.
 /// </summary>
-public class Episode : IQuery, IResource, IMetadata, IThumbnails, IAddedDate, INews
+public class Episode : IQuery, IResource, IThumbnails, IAddedDate, IRefreshable, INews
 {
 	// Use absolute numbers by default and fallback to season/episodes if it does not exists.
 	public static Sort DefaultSort =>
@@ -166,7 +166,10 @@ public class Episode : IQuery, IResource, IMetadata, IThumbnails, IAddedDate, IN
 	public Image? Logo { get; set; }
 
 	/// <inheritdoc />
-	public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
+	public Dictionary<string, EpisodeId> ExternalId { get; set; } = [];
+
+	/// <inheritdoc />
+	public DateTime? NextMetadataRefresh { get; set; }
 
 	/// <summary>
 	/// The previous episode that should be seen before viewing this one.
