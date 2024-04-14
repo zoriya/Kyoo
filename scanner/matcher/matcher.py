@@ -1,7 +1,6 @@
 from datetime import timedelta
 import asyncio
 from logging import getLogger
-from providers.implementations.thexem import TheXem
 from providers.provider import Provider, ProviderError
 from providers.types.collection import Collection
 from providers.types.show import Show
@@ -15,10 +14,9 @@ logger = getLogger(__name__)
 
 
 class Matcher:
-	def __init__(self, client: KyooClient, provider: Provider, xem: TheXem) -> None:
+	def __init__(self, client: KyooClient, provider: Provider) -> None:
 		self._client = client
 		self._provider = provider
-		self._xem = xem
 
 		self._collection_cache = {}
 		self._show_cache = {}
@@ -48,7 +46,7 @@ class Matcher:
 		return True
 
 	async def _identify(self, path: str):
-		raw = guessit(path, xem_titles=await self._xem.get_expected_titles())
+		raw = guessit(path, xem_titles=await self._provider.get_expected_titles())
 
 		if "mimetype" not in raw or not raw["mimetype"].startswith("video"):
 			return

@@ -30,8 +30,8 @@ class EpisodeTranslation:
 @dataclass
 class Episode:
 	show: Show | PartialShow
-	season_number: Optional[int]
-	episode_number: Optional[int]
+	season_number: int
+	episode_number: int
 	absolute_number: int
 	runtime: Optional[int]
 	release_date: Optional[date | int]
