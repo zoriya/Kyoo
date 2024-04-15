@@ -229,7 +229,9 @@ class TheXem(Provider):
 	async def identify_season(self, show_id: str, season: int) -> Season:
 		return await self._base.identify_season(show_id, season)
 
-	async def identify_episode(self, show_id: str, season: Optional[int], episode_nbr: int, absolute: int) -> Episode:
+	async def identify_episode(
+		self, show_id: str, season: Optional[int], episode_nbr: int, absolute: int
+	) -> Episode:
 		return await self._base.identify_episode(show_id, season, episode_nbr, absolute)
 
 	async def identify_collection(self, provider_id: str) -> Collection:

@@ -220,7 +220,8 @@ public abstract class DatabaseContext : DbContext
 		where T : class, IRefreshable
 	{
 		// schedule a refresh soon since metadata can change frequently for recently added items ond online databases
-		builder.Entity<T>()
+		builder
+			.Entity<T>()
 			.Property(x => x.NextMetadataRefresh)
 			.HasDefaultValueSql("now() at time zone 'utc' + interval '2 hours'")
 			.ValueGeneratedOnAdd();

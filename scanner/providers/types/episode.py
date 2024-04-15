@@ -13,6 +13,7 @@ class PartialShow:
 	original_language: Optional[str]
 	external_id: dict[str, MetadataID]
 
+
 @dataclass
 class EpisodeID:
 	show_id: str
