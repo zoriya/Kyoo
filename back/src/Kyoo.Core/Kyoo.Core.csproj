@@ -12,7 +12,7 @@
 	<ItemGroup>
 		<PackageReference Include="AspNetCore.Proxy" Version="4.5.0" />
 		<PackageReference Include="Blurhash.SkiaSharp" Version="2.0.0" />
-		<PackageReference Include="Dapper" Version="2.1.42" />
+		<PackageReference Include="Dapper" Version="2.1.44" />
 		<PackageReference Include="InterpolatedSql.Dapper" Version="2.3.0" />
 		<PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" Version="8.0.0" />
 		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
