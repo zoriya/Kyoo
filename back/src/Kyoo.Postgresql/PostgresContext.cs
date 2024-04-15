@@ -83,6 +83,10 @@ public class PostgresContext(DbContextOptions options, IHttpContextAccessor acce
 			new JsonTypeHandler<Dictionary<string, MetadataId>>()
 		);
 		SqlMapper.AddTypeHandler(
+			typeof(Dictionary<string, EpisodeId>),
+			new JsonTypeHandler<Dictionary<string, EpisodeId>>()
+		);
+		SqlMapper.AddTypeHandler(
 			typeof(Dictionary<string, string>),
 			new JsonTypeHandler<Dictionary<string, string>>()
 		);

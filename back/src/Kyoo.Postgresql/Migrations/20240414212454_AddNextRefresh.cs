@@ -54,11 +54,17 @@ public partial class AddNextRefresh : Migration
 		// language=PostgreSQL
 		migrationBuilder.Sql(
 			"""
-			update episodes as e set external_id = jsonb_build_object(
-				'ShowId', e.show_id,
-				'SeasonNumber', e.season_number,
-				'EpisodeNumber', e.episode_number,
-				'Link', null
+			update episodes as e set external_id = (
+				SELECT jsonb_build_object(
+					'themoviedatabase', jsonb_build_object(
+						'ShowId', s.external_id->'themoviedatabase'->'DataId',
+						'Season', e.season_number,
+						'Episode', e.episode_number,
+						'Link', null
+					)
+				)
+				FROM shows AS s
+				WHERE s.id = e.show_id
 			);
 			"""
 		);
