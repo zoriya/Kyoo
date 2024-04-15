@@ -31,7 +31,7 @@ namespace Kyoo.Abstractions.Models;
 /// <summary>
 /// A season of a <see cref="Show"/>.
 /// </summary>
-public class Season : IQuery, IResource, IMetadata, IThumbnails, IAddedDate
+public class Season : IQuery, IResource, IMetadata, IThumbnails, IAddedDate, IRefreshable
 {
 	public static Sort DefaultSort => new Sort<Season>.By(x => x.SeasonNumber);
 
@@ -118,6 +118,9 @@ public class Season : IQuery, IResource, IMetadata, IThumbnails, IAddedDate
 
 	/// <inheritdoc />
 	public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
+
+	/// <inheritdoc />
+	public DateTime? NextMetadataRefresh { get; set; }
 
 	/// <summary>
 	/// The list of episodes that this season contains.

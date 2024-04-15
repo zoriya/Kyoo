@@ -13,6 +13,6 @@ async def main():
 	logging.getLogger("rebulk").setLevel(logging.WARNING)
 
 	async with KyooClient() as kyoo, Subscriber() as sub:
-		provider, xem = Provider.get_all(kyoo.client)
-		scanner = Matcher(kyoo, provider, xem)
+		provider = Provider.get_default(kyoo.client)
+		scanner = Matcher(kyoo, provider)
 		await sub.listen(scanner)

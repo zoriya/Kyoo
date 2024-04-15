@@ -35,14 +35,14 @@ def guessit(name: str, *, xem_titles: List[str] = []):
 if __name__ == "__main__":
 	import sys
 	import json
-	from providers.implementations.thexem import TheXem
+	from providers.implementations.thexem import TheXemClient
 	from guessit.jsonutils import GuessitEncoder
 	from aiohttp import ClientSession
 	import asyncio
 
 	async def main():
 		async with ClientSession() as client:
-			xem = TheXem(client)
+			xem = TheXemClient(client)
 
 			ret = guessit(sys.argv[1], xem_titles=await xem.get_expected_titles())
 			print(json.dumps(ret, cls=GuessitEncoder, indent=4))

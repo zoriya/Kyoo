@@ -3,8 +3,15 @@ from typing import Dict, List, Literal
 from aiohttp import ClientSession
 from logging import getLogger
 from datetime import timedelta
+from typing import Optional
 
-from providers.utils import ProviderError
+from ..provider import Provider
+from ..utils import ProviderError
+from ..types.collection import Collection
+from ..types.movie import Movie
+from ..types.show import Show
+from ..types.season import Season
+from ..types.episode import Episode
 from matcher.cache import cache
 
 logger = getLogger(__name__)
@@ -21,7 +28,7 @@ def clean(s: str):
 	return s
 
 
-class TheXem:
+class TheXemClient:
 	def __init__(self, client: ClientSession) -> None:
 		self._client = client
 		self.base = "https://thexem.info"
@@ -155,3 +162,77 @@ class TheXem:
 			for y in x[1:]:
 				titles.extend(clean(name) for name in y.keys())
 		return titles
+
+
+class TheXem(Provider):
+	def __init__(self, client: ClientSession, base: Provider) -> None:
+		super().__init__()
+		self._client = TheXemClient(client)
+		self._base = base
+
+	@property
+	def name(self) -> str:
+		# Use the base name for id lookup on the matcher.
+		return self._base.name
+
+	async def get_expected_titles(self) -> list[str]:
+		return await self._client.get_expected_titles()
+
+	async def search_movie(self, name: str, year: Optional[int]) -> Movie:
+		return await self._base.search_movie(name, year)
+
+	async def search_episode(
+		self,
+		name: str,
+		season: Optional[int],
+		episode_nbr: Optional[int],
+		absolute: Optional[int],
+		year: Optional[int],
+	) -> Episode:
+		"""
+		Handle weird season names overrides from thexem.
+		For example when name is "Jojo's bizzare adventure - Stone Ocean", with season None,
+		We want something like season 6 ep 3.
+		"""
+		new_name, tvdb_id = await self._client.get_show_override("tvdb", name)
+
+		if new_name is None:
+			return await self._base.search_episode(
+				name, season, episode_nbr, absolute, year
+			)
+
+		if season is None and absolute is not None:
+			if tvdb_id is not None:
+				(
+					tvdb_season,
+					tvdb_episode,
+					absolute,
+				) = await self._client.get_episode_override(
+					"tvdb", tvdb_id, name, absolute
+				)
+				# Most of the time, tvdb absolute and tmdb absolute are in sync so we use that as our souce of truth.
+				# tvdb_season/episode are not in sync with tmdb so we discard those and use our usual absolute order fetching.
+				if self._base == "tvdb":
+					return await self._base.search_episode(
+						new_name, tvdb_season, tvdb_episode, absolute, year
+					)
+		return await self._base.search_episode(
+			new_name, season, episode_nbr, absolute, year
+		)
+
+	async def identify_movie(self, movie_id: str) -> Movie:
+		return await self._base.identify_movie(movie_id)
+
+	async def identify_show(self, show_id: str) -> Show:
+		return await self._base.identify_show(show_id)
+
+	async def identify_season(self, show_id: str, season: int) -> Season:
+		return await self._base.identify_season(show_id, season)
+
+	async def identify_episode(
+		self, show_id: str, season: Optional[int], episode_nbr: int, absolute: int
+	) -> Episode:
+		return await self._base.identify_episode(show_id, season, episode_nbr, absolute)
+
+	async def identify_collection(self, provider_id: str) -> Collection:
+		return await self._base.identify_collection(provider_id)

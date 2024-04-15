@@ -16,16 +16,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using Kyoo.Abstractions.Controllers;
-using Kyoo.Abstractions.Models.Attributes;
+using System;
 
 namespace Kyoo.Abstractions.Models;
 
-/// <summary>
-/// A show, a movie or a collection.
-/// </summary>
-[OneOf(Types = [typeof(Episode), typeof(Movie)])]
-public interface INews : IResource, IThumbnails, IAddedDate, IQuery
+public interface IRefreshable
 {
-	static Sort IQuery.DefaultSort => new Sort<INews>.By(nameof(AddedDate), true);
+	/// <summary>
+	/// The date of the next metadata refresh. Null if auto-refresh is disabled.
+	/// </summary>
+	public DateTime? NextMetadataRefresh { get; set; }
 }

@@ -40,6 +40,7 @@ public class PostgresContext(DbContextOptions options, IHttpContextAccessor acce
 {
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{
+		optionsBuilder.UseProjectables();
 		optionsBuilder.UseSnakeCaseNamingConvention();
 		base.OnConfiguring(optionsBuilder);
 	}
@@ -80,6 +81,10 @@ public class PostgresContext(DbContextOptions options, IHttpContextAccessor acce
 		SqlMapper.AddTypeHandler(
 			typeof(Dictionary<string, MetadataId>),
 			new JsonTypeHandler<Dictionary<string, MetadataId>>()
+		);
+		SqlMapper.AddTypeHandler(
+			typeof(Dictionary<string, EpisodeId>),
+			new JsonTypeHandler<Dictionary<string, EpisodeId>>()
 		);
 		SqlMapper.AddTypeHandler(
 			typeof(Dictionary<string, string>),
@@ -128,7 +133,11 @@ public class PostgresContextBuilder : IDesignTimeDbContextFactory<PostgresContex
 {
 	public PostgresContext CreateDbContext(string[] args)
 	{
-		NpgsqlDataSource dataSource = PostgresModule.CreateDataSource(new ConfigurationManager());
+		IConfigurationRoot config = new ConfigurationBuilder()
+			.AddEnvironmentVariables()
+			.AddCommandLine(args)
+			.Build();
+		NpgsqlDataSource dataSource = PostgresModule.CreateDataSource(config);
 		DbContextOptionsBuilder builder = new();
 		builder.UseNpgsql(dataSource);
 

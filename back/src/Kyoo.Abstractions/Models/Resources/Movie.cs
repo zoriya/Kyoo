@@ -38,6 +38,7 @@ public class Movie
 		IMetadata,
 		IThumbnails,
 		IAddedDate,
+		IRefreshable,
 		ILibraryItem,
 		INews,
 		IWatchlist
@@ -133,6 +134,9 @@ public class Movie
 
 	/// <inheritdoc />
 	public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
+
+	/// <inheritdoc />
+	public DateTime? NextMetadataRefresh { get; set; }
 
 	/// <summary>
 	/// The ID of the Studio that made this show.

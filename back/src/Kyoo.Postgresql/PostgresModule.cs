@@ -37,7 +37,7 @@ public static class PostgresModule
 			{
 				["USER ID"] = configuration.GetValue("POSTGRES_USER", "KyooUser"),
 				["PASSWORD"] = configuration.GetValue("POSTGRES_PASSWORD", "KyooPassword"),
-				["SERVER"] = configuration.GetValue("POSTGRES_SERVER", "db"),
+				["SERVER"] = configuration.GetValue("POSTGRES_SERVER", "postgres"),
 				["PORT"] = configuration.GetValue("POSTGRES_PORT", "5432"),
 				["DATABASE"] = configuration.GetValue("POSTGRES_DB", "kyooDB"),
 				["POOLING"] = "true",
@@ -55,11 +55,10 @@ public static class PostgresModule
 	public static void ConfigurePostgres(this WebApplicationBuilder builder)
 	{
 		NpgsqlDataSource dataSource = CreateDataSource(builder.Configuration);
-
 		builder.Services.AddDbContext<DatabaseContext, PostgresContext>(
 			x =>
 			{
-				x.UseNpgsql(dataSource).UseProjectables();
+				x.UseNpgsql(dataSource);
 				if (builder.Environment.IsDevelopment())
 					x.EnableDetailedErrors().EnableSensitiveDataLogging();
 			},

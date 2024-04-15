@@ -5,15 +5,13 @@ from logging import getLogger
 from typing import Awaitable, Callable, Dict, List, Optional, Any, TypeVar
 from itertools import accumulate, zip_longest
 
-from providers.idmapper import IdMapper
-from providers.implementations.thexem import TheXem
 from providers.utils import ProviderError
 from matcher.cache import cache
 
 from ..provider import Provider
 from ..types.movie import Movie, MovieTranslation, Status as MovieStatus
 from ..types.season import Season, SeasonTranslation
-from ..types.episode import Episode, EpisodeTranslation, PartialShow
+from ..types.episode import Episode, EpisodeTranslation, PartialShow, EpisodeID
 from ..types.studio import Studio
 from ..types.genre import Genre
 from ..types.metadataid import MetadataID
@@ -29,14 +27,10 @@ class TheMovieDatabase(Provider):
 		languages: list[str],
 		client: ClientSession,
 		api_key: str,
-		xem: TheXem,
-		idmapper: IdMapper,
 	) -> None:
 		super().__init__()
 		self._languages = languages
 		self._client = client
-		self._xem = xem
-		self._idmapper = idmapper
 		self.base = "https://api.themoviedb.org/3"
 		self.api_key = api_key
 		self.genre_map = {
@@ -142,15 +136,17 @@ class TheMovieDatabase(Provider):
 			},
 		)
 
-	async def identify_movie(self, name: str, year: Optional[int]) -> Movie:
+	async def search_movie(self, name: str, year: Optional[int]) -> Movie:
 		search_results = (
 			await self.get("search/movie", params={"query": name, "year": year})
 		)["results"]
 		if len(search_results) == 0:
 			raise ProviderError(f"No result for a movie named: {name}")
 		search = self.get_best_result(search_results, name, year)
-		movie_id = search["id"]
-		languages = self.get_languages(search["original_language"])
+		return await self.identify_movie(search["id"])
+
+	async def identify_movie(self, movie_id: str) -> Movie:
+		languages = self.get_languages()
 
 		async def for_language(lng: str) -> Movie:
 			movie = await self.get(
@@ -216,7 +212,7 @@ class TheMovieDatabase(Provider):
 					movie["images"]["posters"]
 					+ (
 						[{"file_path": movie["poster_path"]}]
-						if lng == search["original_language"]
+						if lng == movie["original_language"]
 						else []
 					)
 				),
@@ -225,7 +221,7 @@ class TheMovieDatabase(Provider):
 					movie["images"]["backdrops"]
 					+ (
 						[{"file_path": movie["backdrop_path"]}]
-						if lng == search["original_language"]
+						if lng == movie["original_language"]
 						else []
 					)
 				),
@@ -239,8 +235,13 @@ class TheMovieDatabase(Provider):
 			return ret
 
 		ret = await self.process_translations(for_language, languages)
-		# If we have more external_ids freely available, add them.
-		ret.external_id = await self._idmapper.get_movie(ret.external_id)
+		if (
+			ret.original_language is not None
+			and ret.original_language not in ret.translations
+		):
+			ret.translations[ret.original_language] = (
+				await for_language(ret.original_language)
+			).translations[ret.original_language]
 		return ret
 
 	@cache(ttl=timedelta(days=1))
@@ -362,8 +363,6 @@ class TheMovieDatabase(Provider):
 			ret.translations[ret.original_language] = (
 				await for_language(ret.original_language)
 			).translations[ret.original_language]
-		# If we have more external_ids freely available, add them.
-		ret.external_id = await self._idmapper.get_show(ret.external_id)
 		return ret
 
 	def to_season(
@@ -396,13 +395,13 @@ class TheMovieDatabase(Provider):
 			},
 		)
 
-	async def identify_season(self, show_id: str, season_number: int) -> Season:
+	async def identify_season(self, show_id: str, season: int) -> Season:
 		# We already get seasons info in the identify_show and chances are this gets cached already
 		show = await self.identify_show(show_id)
-		ret = next((x for x in show.seasons if x.season_number == season_number), None)
+		ret = next((x for x in show.seasons if x.season_number == season), None)
 		if ret is None:
 			raise ProviderError(
-				f"Could not find season {season_number} for show {show.to_kyoo()['name']}"
+				f"Could not find season {season} for show {show.to_kyoo()['name']}"
 			)
 		return ret
 
@@ -413,29 +412,7 @@ class TheMovieDatabase(Provider):
 		)["results"]
 
 		if len(search_results) == 0:
-			(new_name, tvdbid) = await self._xem.get_show_override("tvdb", name)
-			if new_name is None or tvdbid is None or name.lower() == new_name.lower():
-				raise ProviderError(f"No result for a tv show named: {name}")
-			ret = PartialShow(
-				name=new_name,
-				original_language=None,
-				external_id={
-					"tvdb": MetadataID(tvdbid, link=None),
-				},
-			)
-			ret.external_id = await self._idmapper.get_show(
-				ret.external_id, required=[self.name]
-			)
-
-			if self.name in ret.external_id:
-				return ret
-			logger.warn(
-				"Could not map xem exception to themoviedb, searching instead for %s",
-				new_name,
-			)
-			nret = await self.search_show(new_name, year)
-			nret.external_id = {**ret.external_id, **nret.external_id}
-			return nret
+			raise ProviderError(f"No result for a tv show named: {name}")
 
 		search = self.get_best_result(search_results, name, year)
 		show_id = search["id"]
@@ -449,7 +426,7 @@ class TheMovieDatabase(Provider):
 			},
 		)
 
-	async def identify_episode(
+	async def search_episode(
 		self,
 		name: str,
 		season: Optional[int],
@@ -458,38 +435,7 @@ class TheMovieDatabase(Provider):
 		year: Optional[int],
 	) -> Episode:
 		show = await self.search_show(name, year)
-		languages = self.get_languages(show.original_language)
-		# Keep it for xem overrides of season/episode
-		old_name = name
-		name = show.name
 		show_id = show.external_id[self.name].data_id
-
-		# Handle weird season names overrides from thexem.
-		# For example when name is "Jojo's bizzare adventure - Stone Ocean", with season None,
-		# We want something like season 6 ep 3.
-		if season is None and absolute is not None:
-			ids = await self._idmapper.get_show(show.external_id, required=["tvdb"])
-			tvdb_id = (
-				ids["tvdb"].data_id
-				if "tvdb" in ids and ids["tvdb"] is not None
-				else None
-			)
-			if tvdb_id is None:
-				logger.info(
-					"Tvdb could not be found, trying xem name lookup for %s", name
-				)
-				_, tvdb_id = await self._xem.get_show_override("tvdb", old_name)
-			if tvdb_id is not None:
-				(
-					tvdb_season,
-					tvdb_episode,
-					absolute,
-				) = await self._xem.get_episode_override(
-					"tvdb", tvdb_id, old_name, absolute
-				)
-				# Most of the time, tvdb absolute and tmdb absolute are in think so we use that as our souce of truth.
-				# tvdb_season/episode are not in sync with tmdb so we discard those and use our usual absolute order fetching.
-				(_, _) = tvdb_season, tvdb_episode
 
 		if absolute is not None and (season is None or episode_nbr is None):
 			(season, episode_nbr) = await self.get_episode_from_absolute(
@@ -498,12 +444,16 @@ class TheMovieDatabase(Provider):
 
 		if season is None or episode_nbr is None:
 			raise ProviderError(
-				f"Could not guess season or episode number of the episode {name} {season}-{episode_nbr} ({absolute})",
+				f"Could not guess season or episode number of the episode {show.name} {season}-{episode_nbr} ({absolute})",
 			)
 
 		if absolute is None:
 			absolute = await self.get_absolute_number(show_id, season, episode_nbr)
+		return await self.identify_episode(show_id, season, episode_nbr, absolute)
 
+	async def identify_episode(
+		self, show_id: str, season: Optional[int], episode_nbr: int, absolute: int
+	) -> Episode:
 		async def for_language(lng: str) -> Episode:
 			try:
 				episode = await self.get(
@@ -518,12 +468,20 @@ class TheMovieDatabase(Provider):
 					params={
 						"language": lng,
 					},
-					not_found_fail=f"Could not find episode {episode_nbr} of season {season} of serie {name} (absolute: {absolute})",
+					not_found_fail=f"Could not find episode {episode_nbr} of season {season} of serie {show_id} (absolute: {absolute})",
 				)
 			logger.debug("TMDb responded: %s", episode)
 
 			ret = Episode(
-				show=show,
+				show=PartialShow(
+					name=show_id,
+					original_language=None,
+					external_id={
+						self.name: MetadataID(
+							show_id, f"https://www.themoviedb.org/tv/{show_id}"
+						)
+					},
+				),
 				season_number=episode["season_number"],
 				episode_number=episode["episode_number"],
 				absolute_number=absolute,
@@ -537,8 +495,10 @@ class TheMovieDatabase(Provider):
 				if "still_path" in episode and episode["still_path"] is not None
 				else None,
 				external_id={
-					self.name: MetadataID(
-						episode["id"],
+					self.name: EpisodeID(
+						show_id,
+						episode["season_number"],
+						episode["episode_number"],
 						f"https://www.themoviedb.org/tv/{show_id}/season/{episode['season_number']}/episode/{episode['episode_number']}",
 					),
 				},
@@ -550,7 +510,7 @@ class TheMovieDatabase(Provider):
 			ret.translations = {lng: translation}
 			return ret
 
-		return await self.process_translations(for_language, languages)
+		return await self.process_translations(for_language, self.get_languages())
 
 	def get_best_result(
 		self, search_results: List[Any], name: str, year: Optional[int]
@@ -654,7 +614,9 @@ class TheMovieDatabase(Provider):
 			(seasons_nbrs[0], absolute),
 		)
 
-	async def get_absolute_number(self, show_id: str, season: int, episode_nbr: int):
+	async def get_absolute_number(
+		self, show_id: str, season: int, episode_nbr: int
+	) -> int:
 		absgrp = await self.get_absolute_order(show_id)
 		if absgrp is None:
 			# We assume that each season should be played in order with no special episodes.
@@ -684,7 +646,9 @@ class TheMovieDatabase(Provider):
 			(x["episode_number"] for x in absgrp if x["season_number"] == season), None
 		)
 		if start is None or start <= episode_nbr:
-			return None
+			raise ProviderError(
+				f"Could not guess absolute number of episode {show_id} s{season} e{episode_nbr}"
+			)
 		# add back the continuous number (imagine the user has one piece S21e31
 		# but tmdb registered it as S21E831 since S21's first ep is 800
 		return await self.get_absolute_number(show_id, season, episode_nbr + start)

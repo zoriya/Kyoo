@@ -59,4 +59,4 @@ ENV NVIDIA_VISIBLE_DEVICES="all"
 ENV NVIDIA_DRIVER_CAPABILITIES="all"
 
 EXPOSE 7666
-CMD ./transcoder
+CMD ["./transcoder"]

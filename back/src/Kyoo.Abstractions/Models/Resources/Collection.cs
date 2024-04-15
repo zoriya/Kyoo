@@ -28,7 +28,14 @@ namespace Kyoo.Abstractions.Models;
 /// <summary>
 /// A class representing collections of <see cref="Show"/>.
 /// </summary>
-public class Collection : IQuery, IResource, IMetadata, IThumbnails, IAddedDate, ILibraryItem
+public class Collection
+	: IQuery,
+		IResource,
+		IMetadata,
+		IThumbnails,
+		IAddedDate,
+		IRefreshable,
+		ILibraryItem
 {
 	public static Sort DefaultSort => new Sort<Collection>.By(nameof(Collection.Name));
 
@@ -75,6 +82,9 @@ public class Collection : IQuery, IResource, IMetadata, IThumbnails, IAddedDate,
 
 	/// <inheritdoc />
 	public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
+
+	/// <inheritdoc />
+	public DateTime? NextMetadataRefresh { get; set; }
 
 	public Collection() { }
 

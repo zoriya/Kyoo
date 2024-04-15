@@ -15,6 +15,14 @@ class PartialShow:
 
 
 @dataclass
+class EpisodeID:
+	show_id: str
+	season: Optional[int]
+	episode: int
+	link: str
+
+
+@dataclass
 class EpisodeTranslation:
 	name: str
 	overview: Optional[str]
@@ -23,13 +31,13 @@ class EpisodeTranslation:
 @dataclass
 class Episode:
 	show: Show | PartialShow
-	season_number: Optional[int]
-	episode_number: Optional[int]
-	absolute_number: Optional[int]
+	season_number: int
+	episode_number: int
+	absolute_number: int
 	runtime: Optional[int]
 	release_date: Optional[date | int]
 	thumbnail: Optional[str]
-	external_id: dict[str, MetadataID]
+	external_id: dict[str, EpisodeID]
 
 	path: Optional[str] = None
 	show_id: Optional[str] = None

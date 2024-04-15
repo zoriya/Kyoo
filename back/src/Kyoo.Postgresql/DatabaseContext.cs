@@ -157,21 +157,11 @@ public abstract class DatabaseContext : DbContext
 		optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 	}
 
-	private static ValueComparer<Dictionary<string, T>> _GetComparer<T>()
-	{
-		return new(
-			(c1, c2) => c1!.SequenceEqual(c2!),
-			c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode()))
-		);
-	}
-
-	/// <summary>
-	/// Build the metadata model for the given type.
-	/// </summary>
-	/// <param name="modelBuilder">The database model builder</param>
-	/// <typeparam name="T">The type to add metadata to.</typeparam>
-	private static void _HasMetadata<T>(ModelBuilder modelBuilder)
-		where T : class, IMetadata
+	private static void _HasJson<T, TVal>(
+		ModelBuilder builder,
+		Expression<Func<T, Dictionary<string, TVal>>> property
+	)
+		where T : class
 	{
 		// TODO: Waiting for https://github.com/dotnet/efcore/issues/29825
 		// modelBuilder.Entity<T>()
@@ -179,22 +169,33 @@ public abstract class DatabaseContext : DbContext
 		// 	{
 		// 		x.ToJson();
 		// 	});
-		modelBuilder
+		builder
 			.Entity<T>()
-			.Property(x => x.ExternalId)
+			.Property(property)
 			.HasConversion(
 				v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
 				v =>
-					JsonSerializer.Deserialize<Dictionary<string, MetadataId>>(
+					JsonSerializer.Deserialize<Dictionary<string, TVal>>(
 						v,
 						(JsonSerializerOptions?)null
 					)!
 			)
 			.HasColumnType("json");
-		modelBuilder
+		builder
 			.Entity<T>()
-			.Property(x => x.ExternalId)
-			.Metadata.SetValueComparer(_GetComparer<MetadataId>());
+			.Property(property)
+			.Metadata.SetValueComparer(
+				new ValueComparer<Dictionary<string, TVal>>(
+					(c1, c2) => c1!.SequenceEqual(c2!),
+					c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode()))
+				)
+			);
+	}
+
+	private static void _HasMetadata<T>(ModelBuilder modelBuilder)
+		where T : class, IMetadata
+	{
+		_HasJson<T, MetadataId>(modelBuilder, x => x.ExternalId);
 	}
 
 	private static void _HasImages<T>(ModelBuilder modelBuilder)
@@ -212,6 +213,17 @@ public abstract class DatabaseContext : DbContext
 			.Entity<T>()
 			.Property(x => x.AddedDate)
 			.HasDefaultValueSql("now() at time zone 'utc'")
+			.ValueGeneratedOnAdd();
+	}
+
+	private static void _HasRefreshDate<T>(ModelBuilder builder)
+		where T : class, IRefreshable
+	{
+		// schedule a refresh soon since metadata can change frequently for recently added items ond online databases
+		builder
+			.Entity<T>()
+			.Property(x => x.NextMetadataRefresh)
+			.HasDefaultValueSql("now() at time zone 'utc' + interval '2 hours'")
 			.ValueGeneratedOnAdd();
 	}
 
@@ -296,8 +308,8 @@ public abstract class DatabaseContext : DbContext
 		_HasMetadata<Movie>(modelBuilder);
 		_HasMetadata<Show>(modelBuilder);
 		_HasMetadata<Season>(modelBuilder);
-		_HasMetadata<Episode>(modelBuilder);
 		_HasMetadata<Studio>(modelBuilder);
+		_HasJson<Episode, EpisodeId>(modelBuilder, x => x.ExternalId);
 
 		_HasImages<Collection>(modelBuilder);
 		_HasImages<Movie>(modelBuilder);
@@ -312,6 +324,12 @@ public abstract class DatabaseContext : DbContext
 		_HasAddedDate<Episode>(modelBuilder);
 		_HasAddedDate<User>(modelBuilder);
 		_HasAddedDate<Issue>(modelBuilder);
+
+		_HasRefreshDate<Collection>(modelBuilder);
+		_HasRefreshDate<Movie>(modelBuilder);
+		_HasRefreshDate<Show>(modelBuilder);
+		_HasRefreshDate<Season>(modelBuilder);
+		_HasRefreshDate<Episode>(modelBuilder);
 
 		modelBuilder
 			.Entity<MovieWatchStatus>()
@@ -389,62 +407,9 @@ public abstract class DatabaseContext : DbContext
 
 		modelBuilder.Entity<Issue>().HasKey(x => new { x.Domain, x.Cause });
 
-		// TODO: Waiting for https://github.com/dotnet/efcore/issues/29825
-		// modelBuilder.Entity<T>()
-		// 	.OwnsOne(x => x.ExternalId, x =>
-		// 	{
-		// 		x.ToJson();
-		// 	});
-		modelBuilder
-			.Entity<User>()
-			.Property(x => x.Settings)
-			.HasConversion(
-				v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-				v =>
-					JsonSerializer.Deserialize<Dictionary<string, string>>(
-						v,
-						(JsonSerializerOptions?)null
-					)!
-			)
-			.HasColumnType("json");
-		modelBuilder
-			.Entity<User>()
-			.Property(x => x.Settings)
-			.Metadata.SetValueComparer(_GetComparer<string>());
-
-		modelBuilder
-			.Entity<User>()
-			.Property(x => x.ExternalId)
-			.HasConversion(
-				v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-				v =>
-					JsonSerializer.Deserialize<Dictionary<string, ExternalToken>>(
-						v,
-						(JsonSerializerOptions?)null
-					)!
-			)
-			.HasColumnType("json");
-		modelBuilder
-			.Entity<User>()
-			.Property(x => x.ExternalId)
-			.Metadata.SetValueComparer(_GetComparer<ExternalToken>());
-
-		modelBuilder
-			.Entity<Issue>()
-			.Property(x => x.Extra)
-			.HasConversion(
-				v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-				v =>
-					JsonSerializer.Deserialize<Dictionary<string, object>>(
-						v,
-						(JsonSerializerOptions?)null
-					)!
-			)
-			.HasColumnType("json");
-		modelBuilder
-			.Entity<Issue>()
-			.Property(x => x.Extra)
-			.Metadata.SetValueComparer(_GetComparer<object>());
+		_HasJson<User, string>(modelBuilder, x => x.Settings);
+		_HasJson<User, ExternalToken>(modelBuilder, x => x.ExternalId);
+		_HasJson<Issue, object>(modelBuilder, x => x.Extra);
 	}
 
 	/// <summary>

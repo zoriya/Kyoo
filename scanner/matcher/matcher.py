@@ -1,7 +1,6 @@
 from datetime import timedelta
 import asyncio
 from logging import getLogger
-from providers.implementations.thexem import TheXem
 from providers.provider import Provider, ProviderError
 from providers.types.collection import Collection
 from providers.types.show import Show
@@ -15,10 +14,9 @@ logger = getLogger(__name__)
 
 
 class Matcher:
-	def __init__(self, client: KyooClient, provider: Provider, xem: TheXem) -> None:
+	def __init__(self, client: KyooClient, provider: Provider) -> None:
 		self._client = client
 		self._provider = provider
-		self._xem = xem
 
 		self._collection_cache = {}
 		self._show_cache = {}
@@ -48,7 +46,7 @@ class Matcher:
 		return True
 
 	async def _identify(self, path: str):
-		raw = guessit(path, xem_titles=await self._xem.get_expected_titles())
+		raw = guessit(path, xem_titles=await self._provider.get_expected_titles())
 
 		if "mimetype" not in raw or not raw["mimetype"].startswith("video"):
 			return
@@ -68,7 +66,7 @@ class Matcher:
 		logger.info("Identied %s: %s", path, raw)
 
 		if raw["type"] == "movie":
-			movie = await self._provider.identify_movie(raw["title"], raw.get("year"))
+			movie = await self._provider.search_movie(raw["title"], raw.get("year"))
 			movie.path = str(path)
 			logger.debug("Got movie: %s", movie)
 			movie_id = await self._client.post("movies", data=movie.to_kyoo())
@@ -81,7 +79,7 @@ class Matcher:
 					*(self._client.link_collection(x, "movie", movie_id) for x in ids)
 				)
 		elif raw["type"] == "episode":
-			episode = await self._provider.identify_episode(
+			episode = await self._provider.search_episode(
 				raw["title"],
 				season=raw.get("season"),
 				episode_nbr=raw.get("episode"),
