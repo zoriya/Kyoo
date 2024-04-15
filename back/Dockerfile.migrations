@@ -24,4 +24,4 @@ RUN dotnet ef migrations bundle --no-build --self-contained -r linux-${TARGETARC
 FROM mcr.microsoft.com/dotnet/runtime-deps:8.0
 COPY --from=builder /app/migrate /app/migrate
 
-ENTRYPOINT /app/migrate --connection "USER ID=${POSTGRES_USER};PASSWORD=${POSTGRES_PASSWORD};SERVER=${POSTGRES_SERVER};PORT=${POSTGRES_PORT};DATABASE=${POSTGRES_DB};"
+ENTRYPOINT ["/app/migrate"]

@@ -40,6 +40,7 @@ public class PostgresContext(DbContextOptions options, IHttpContextAccessor acce
 {
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{
+		optionsBuilder.UseProjectables();
 		optionsBuilder.UseSnakeCaseNamingConvention();
 		base.OnConfiguring(optionsBuilder);
 	}
@@ -128,7 +129,11 @@ public class PostgresContextBuilder : IDesignTimeDbContextFactory<PostgresContex
 {
 	public PostgresContext CreateDbContext(string[] args)
 	{
-		NpgsqlDataSource dataSource = PostgresModule.CreateDataSource(new ConfigurationManager());
+		IConfigurationRoot config = new ConfigurationBuilder()
+			.AddEnvironmentVariables()
+			.AddCommandLine(args)
+			.Build();
+		NpgsqlDataSource dataSource = PostgresModule.CreateDataSource(config);
 		DbContextOptionsBuilder builder = new();
 		builder.UseNpgsql(dataSource);
 
