@@ -6,7 +6,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Dapper" Version="2.1.42" />
+		<PackageReference Include="Dapper" Version="2.1.44" />
 		<PackageReference Include="EntityFrameworkCore.Projectables" Version="4.1.4-prebeta" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />

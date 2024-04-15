@@ -5,7 +5,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Dapper" Version="2.1.42" />
+		<PackageReference Include="Dapper" Version="2.1.44" />
 		<PackageReference Include="EFCore.NamingConventions" Version="8.0.3" />
 		<PackageReference Include="EntityFrameworkCore.Projectables" Version="4.1.4-prebeta" />
 		<PackageReference Include="InterpolatedSql.Dapper" Version="2.3.0" />
