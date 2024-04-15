@@ -3,7 +3,6 @@ from aiohttp import ClientSession
 from abc import abstractmethod, abstractproperty
 from typing import Optional
 
-from providers.implementations.thexem import TheXem
 from providers.utils import ProviderError
 
 from .types.show import Show
@@ -34,6 +33,8 @@ class Provider:
 			raise ProviderError(
 				"No provider configured. You probably forgot to specify an API Key"
 			)
+
+		from providers.implementations.thexem import TheXem
 
 		provider = next(iter(providers))
 		return TheXem(client, provider)
@@ -70,7 +71,9 @@ class Provider:
 		raise NotImplementedError
 
 	@abstractmethod
-	async def identify_episode(self, show_id: str, season: Optional[int], episode_nbr: int, absolute: int) -> Episode:
+	async def identify_episode(
+		self, show_id: str, season: Optional[int], episode_nbr: int, absolute: int
+	) -> Episode:
 		raise NotImplementedError
 
 	@abstractmethod

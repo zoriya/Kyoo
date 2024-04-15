@@ -5,13 +5,13 @@ from logging import getLogger
 from datetime import timedelta
 from typing import Optional
 
-from providers.provider import Provider
-from providers.utils import ProviderError
-from providers.types.collection import Collection
-from providers.types.movie import Movie
-from providers.types.show import Show
-from providers.types.season import Season
-from providers.types.episode import Episode
+from ..provider import Provider
+from ..utils import ProviderError
+from ..types.collection import Collection
+from ..types.movie import Movie
+from ..types.show import Show
+from ..types.season import Season
+from ..types.episode import Episode
 from matcher.cache import cache
 
 logger = getLogger(__name__)
@@ -172,7 +172,8 @@ class TheXem(Provider):
 
 	@property
 	def name(self) -> str:
-		return "TheXem"
+		# Use the base name for id lookup on the matcher.
+		return self._base.name
 
 	async def get_expected_titles(self) -> list[str]:
 		return await self._client.get_expected_titles()
