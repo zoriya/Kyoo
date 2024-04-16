@@ -49,6 +49,7 @@ import "@formatjs/intl-displaynames/locale-data/fr";
 // TODO: use a backend to load jsons.
 import en from "../../../translations/en.json";
 import fr from "../../../translations/fr.json";
+import zh from "../../../translations/zh.json";
 import { useTheme } from "yoshiki/native";
 import NetInfo from "@react-native-community/netinfo";
 import { onlineManager } from "@tanstack/react-query";
@@ -83,6 +84,7 @@ i18next.use(initReactI18next).init({
 	resources: {
 		en: { translation: en },
 		fr: { translation: fr },
+		zh: { translation: zh },
 	},
 });
 
