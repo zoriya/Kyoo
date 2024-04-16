@@ -25,6 +25,7 @@ import { AppContext, AppInitialProps, type AppProps } from "next/app";
 
 import en from "../../../translations/en.json";
 import fr from "../../../translations/fr.json";
+import zh from "../../../translations/zh.json";
 
 export const withTranslations = (
 	AppToTranslate: ComponentType<AppProps> & {
@@ -66,6 +67,7 @@ export const withTranslations = (
 		const resources = {
 			en: { translation: en },
 			fr: { translation: fr },
+			zh: { translation: zh },
 		};
 		await i18n.init({
 			...commonOptions,
