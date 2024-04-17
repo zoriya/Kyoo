@@ -1,7 +1,6 @@
 import asyncio
-from dataclasses import dataclass
-from dataclasses_json import DataClassJsonMixin
-from typing import Literal
+from typing import Union
+from msgspec import Struct, json
 import os
 import logging
 from aio_pika import connect_robust
@@ -11,12 +10,19 @@ from matcher.matcher import Matcher
 
 logger = logging.getLogger(__name__)
 
+class Message(Struct, tag_field="action", tag=str.lower):
+	pass
 
-@dataclass
-class Message(DataClassJsonMixin):
-	action: Literal["scan", "delete"]
+class Scan(Message):
 	path: str
 
+class Delete(Message):
+	path: str
+
+class Identify(Message):
+	pass
+
+decoder = json.Decoder(Union[Scan, Delete, Identify])
 
 class Subscriber:
 	QUEUE = "scanner"
@@ -36,13 +42,15 @@ class Subscriber:
 
 	async def listen(self, scanner: Matcher):
 		async def on_message(message: AbstractIncomingMessage):
-			msg = Message.from_json(message.body)
+			msg = decoder.decode(message.body)
 			ack = False
-			match msg.action:
-				case "scan":
-					ack = await scanner.identify(msg.path)
-				case "delete":
-					ack = await scanner.delete(msg.path)
+			match msg:
+				case Scan(path):
+					ack = await scanner.identify(path)
+				case Delete(path):
+					ack = await scanner.delete(path)
+				# case Identify():
+				# 	ack = await scanner.delete(msg.path)
 				case _:
 					logger.error(f"Invalid action: {msg.action}")
 			if ack:
