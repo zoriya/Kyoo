@@ -43,20 +43,24 @@ class Subscriber:
 
 	async def listen(self, scanner: Matcher):
 		async def on_message(message: AbstractIncomingMessage):
-			msg = decoder.decode(message.body)
-			ack = False
-			match msg:
-				case Scan(path):
-					ack = await scanner.identify(path)
-				case Delete(path):
-					ack = await scanner.delete(path)
-				case Refresh(kind, id):
-					ack = await scanner.refresh(kind, id)
-				case _:
-					logger.error(f"Invalid action: {msg.action}")
-			if ack:
-				await message.ack()
-			else:
+			try:
+				msg = decoder.decode(message.body)
+				ack = False
+				match msg:
+					case Scan(path):
+						ack = await scanner.identify(path)
+					case Delete(path):
+						ack = await scanner.delete(path)
+					case Refresh(kind, id):
+						ack = await scanner.refresh(kind, id)
+					case _:
+						logger.error(f"Invalid action: {msg.action}")
+				if ack:
+					await message.ack()
+				else:
+					await message.reject()
+			except Exception as e:
+				logger.exception("Unhandled error", exc_info=e)
 				await message.reject()
 
 		# Allow up to 20 scan requests to run in parallel on the same listener.

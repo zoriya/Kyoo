@@ -171,6 +171,33 @@ public class CrudApi<T> : BaseApi
 	}
 
 	/// <summary>
+	/// Edit
+	/// </summary>
+	/// <remarks>
+	/// Edit an item. If the ID is specified it will be used to identify the resource.
+	/// If not, the slug will be used to identify it.
+	/// </remarks>
+	/// <param name="identifier">The id or slug of the resource.</param>
+	/// <param name="resource">The resource to edit.</param>
+	/// <returns>The edited resource.</returns>
+	/// <response code="400">The resource in the request body is invalid.</response>
+	/// <response code="404">No item found with the specified ID (or slug).</response>
+	[HttpPut("{identifier:id}")]
+	[PartialPermission(Kind.Write)]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	public async Task<ActionResult<T>> Edit(Identifier identifier, [FromBody] T resource)
+	{
+		Guid id = await identifier.Match(
+			id => Task.FromResult(id),
+			async slug => (await Repository.Get(slug)).Id
+		);
+		resource.Id = id;
+		return await Repository.Edit(resource);
+	}
+
+	/// <summary>
 	/// Patch
 	/// </summary>
 	/// <remarks>

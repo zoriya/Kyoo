@@ -177,7 +177,7 @@ class KyooClient:
 				jdkwargs={"indent": 4},
 			),
 		)
-		async with self.client.post(
+		async with self.client.put(
 			f"{self._url}/{path}",
 			json=data,
 			headers={"X-API-Key": self._api_key},
