@@ -154,3 +154,35 @@ class KyooClient:
 					r.raise_for_status()
 
 		await self.delete_issue(path)
+
+	async def get(
+		self, kind: Literal["movie", "show", "season", "episode", "collection"], id: str
+	):
+		async with self.client.get(
+			f"{self._url}/{kind}/{id}",
+			headers={"X-API-Key": self._api_key},
+		) as r:
+			if not r.ok:
+				logger.error(f"Request error: {await r.text()}")
+				r.raise_for_status()
+			return await r.json()
+
+	async def put(self, path: str, *, data: dict[str, Any]):
+		logger.debug(
+			"Sending %s: %s",
+			path,
+			jsons.dumps(
+				data,
+				key_transformer=jsons.KEY_TRANSFORMER_CAMELCASE,
+				jdkwargs={"indent": 4},
+			),
+		)
+		async with self.client.post(
+			f"{self._url}/{path}",
+			json=data,
+			headers={"X-API-Key": self._api_key},
+		) as r:
+			# Allow 409 and continue as if it worked.
+			if not r.ok and r.status != 409:
+				logger.error(f"Request error: {await r.text()}")
+				r.raise_for_status()

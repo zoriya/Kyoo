@@ -1,5 +1,5 @@
 import asyncio
-from typing import Union
+from typing import Union, Literal
 from msgspec import Struct, json
 import os
 import logging
@@ -19,10 +19,11 @@ class Scan(Message):
 class Delete(Message):
 	path: str
 
-class Identify(Message):
-	pass
+class Refresh(Message):
+	kind: Literal["collection", "show", "movie", "season", "episode"]
+	id: str
 
-decoder = json.Decoder(Union[Scan, Delete, Identify])
+decoder = json.Decoder(Union[Scan, Delete, Refresh])
 
 class Subscriber:
 	QUEUE = "scanner"
@@ -49,8 +50,8 @@ class Subscriber:
 					ack = await scanner.identify(path)
 				case Delete(path):
 					ack = await scanner.delete(path)
-				# case Identify():
-				# 	ack = await scanner.delete(msg.path)
+				case Refresh(kind, id):
+					ack = await scanner.refresh(kind, id)
 				case _:
 					logger.error(f"Invalid action: {msg.action}")
 			if ack:

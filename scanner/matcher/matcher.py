@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Literal
 import asyncio
 from logging import getLogger
 from providers.provider import Provider, ProviderError
@@ -165,3 +166,30 @@ class Matcher:
 			return await self._client.post("seasons", data=season.to_kyoo())
 
 		return await create_season(show_id, season_number)
+
+	async def refresh(
+		self,
+		kind: Literal["collection", "movie", "episode", "show", "season"],
+		kyoo_id: str,
+	):
+		identify_table = {
+			"collection": lambda _, id: self._provider.identify_collection(
+				id["dataId"]
+			),
+			"movie": lambda _, id: self._provider.identify_movie(id["dataId"]),
+			"show": lambda _, id: self._provider.identify_show(id["dataId"]),
+			"season": lambda season, id: self._provider.identify_season(
+				id["dataId"], season["seasonNumber"]
+			),
+			"episode": lambda episode, id: self._provider.identify_episode(
+				id["showId"], id["season"], id["episode"], episode["absoluteNumber"]
+			),
+		}
+		current = await self._client.get(kind, kyoo_id)
+		if self._provider.name not in current["externalId"]:
+			logger.error(f"Could not refresh metadata of {kind}/{kyoo_id}. Missisg provider id.")
+			return False
+		provider_id = current["externalId"][self._provider.name]
+		new_value = await identify_table[kind](current, provider_id)
+		await self._client.put(f"{kind}/{kyoo_id}", data=new_value.to_kyoo())
+		return True
