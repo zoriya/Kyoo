@@ -29,7 +29,7 @@ namespace Kyoo.Core.Controllers;
 /// <summary>
 /// A local repository to handle studios
 /// </summary>
-public class StudioRepository(DatabaseContext database) : LocalRepository<Studio>(database)
+public class StudioRepository(DatabaseContext database) : GenericRepository<Studio>(database)
 {
 	/// <inheritdoc />
 	public override async Task<ICollection<Studio>> Search(

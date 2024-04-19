@@ -31,7 +31,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Core.Controllers;
 
-public class SeasonRepository(DatabaseContext database) : LocalRepository<Season>(database)
+public class SeasonRepository(DatabaseContext database) : GenericRepository<Season>(database)
 {
 	static SeasonRepository()
 	{

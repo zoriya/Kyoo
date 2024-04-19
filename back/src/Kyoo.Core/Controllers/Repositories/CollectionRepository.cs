@@ -31,7 +31,7 @@ namespace Kyoo.Core.Controllers;
 /// <summary>
 /// A local repository to handle collections
 /// </summary>
-public class CollectionRepository(DatabaseContext database) : LocalRepository<Collection>(database)
+public class CollectionRepository(DatabaseContext database) : GenericRepository<Collection>(database)
 {
 	/// <inheritdoc />
 	public override async Task<ICollection<Collection>> Search(

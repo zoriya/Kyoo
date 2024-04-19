@@ -28,7 +28,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kyoo.Core.Controllers;
 
 public class ShowRepository(DatabaseContext database, IRepository<Studio> studios)
-	: LocalRepository<Show>(database)
+	: GenericRepository<Show>(database)
 {
 	/// <inheritdoc />
 	public override async Task<ICollection<Show>> Search(

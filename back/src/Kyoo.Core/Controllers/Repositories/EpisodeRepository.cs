@@ -33,7 +33,7 @@ namespace Kyoo.Core.Controllers;
 /// A local repository to handle episodes.
 /// </summary>
 public class EpisodeRepository(DatabaseContext database, IRepository<Show> shows)
-	: LocalRepository<Episode>(database)
+	: GenericRepository<Episode>(database)
 {
 	static EpisodeRepository()
 	{

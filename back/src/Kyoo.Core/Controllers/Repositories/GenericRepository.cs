@@ -33,7 +33,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Core.Controllers;
 
-public abstract class LocalRepository<T>(DatabaseContext database) : IRepository<T>
+public abstract class GenericRepository<T>(DatabaseContext database) : IRepository<T>
 	where T : class, IResource, IQuery
 {
 	public DatabaseContext Database => database;

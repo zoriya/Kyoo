@@ -41,7 +41,7 @@ public class UserRepository(
 	DbConnection db,
 	SqlVariableContext context,
 	PermissionOption options
-) : LocalRepository<User>(database), IUserRepository
+) : GenericRepository<User>(database), IUserRepository
 {
 	/// <inheritdoc />
 	public override async Task<ICollection<User>> Search(

@@ -28,7 +28,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kyoo.Core.Controllers;
 
 public class MovieRepository(DatabaseContext database, IRepository<Studio> studios)
-	: LocalRepository<Movie>(database)
+	: GenericRepository<Movie>(database)
 {
 	/// <inheritdoc />
 	public override async Task<ICollection<Movie>> Search(
