@@ -20,7 +20,7 @@
 
 import { z } from "zod";
 import { zdate } from "../utils";
-import { withImages, ResourceP, imageFn } from "../traits";
+import { ImagesP, ResourceP, imageFn } from "../traits";
 import { Genre } from "./genre";
 import { StudioP } from "./studio";
 import { Status } from "./show";
@@ -28,8 +28,9 @@ import { CollectionP } from "./collection";
 import { MetadataP } from "./metadata";
 import { WatchStatusP } from "./watch-status";
 
-export const MovieP = withImages(
-	ResourceP("movie").extend({
+export const MovieP = ResourceP("movie")
+	.merge(ImagesP)
+	.extend({
 		/**
 		 * The title of this movie.
 		 */
@@ -104,8 +105,7 @@ export const MovieP = withImages(
 		 * Metadata of what an user as started/planned to watch.
 		 */
 		watchStatus: WatchStatusP.optional().nullable(),
-	}),
-)
+	})
 	.transform((x) => ({
 		...x,
 		runtime: x.runtime === 0 ? null : x.runtime,

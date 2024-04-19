@@ -20,11 +20,12 @@
 
 import { z } from "zod";
 import { zdate } from "../utils";
-import { withImages, imageFn } from "../traits";
+import { ImagesP, imageFn } from "../traits";
 import { ResourceP } from "../traits/resource";
 
-export const BaseEpisodeP = withImages(
-	ResourceP("episode").extend({
+export const BaseEpisodeP = ResourceP("episode")
+	.merge(ImagesP)
+	.extend({
 		/**
 		 * The season in witch this episode is in.
 		 */
@@ -71,8 +72,7 @@ export const BaseEpisodeP = withImages(
 		 * The id of the show containing this episode
 		 */
 		showId: z.string(),
-	}),
-)
+	})
 	.transform((x) => ({
 		...x,
 		runtime: x.runtime === 0 ? null : x.runtime,
