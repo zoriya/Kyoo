@@ -94,6 +94,7 @@ public class PostgresContext(DbContextOptions options, IHttpContextAccessor acce
 			typeof(Dictionary<string, ExternalToken>),
 			new JsonTypeHandler<Dictionary<string, ExternalToken>>()
 		);
+		SqlMapper.AddTypeHandler(typeof(Image), new JsonTypeHandler<Image>());
 		SqlMapper.AddTypeHandler(typeof(List<string>), new ListTypeHandler<string>());
 		SqlMapper.AddTypeHandler(typeof(List<Genre>), new ListTypeHandler<Genre>());
 		SqlMapper.AddTypeHandler(typeof(Wrapper), new Wrapper.Handler());

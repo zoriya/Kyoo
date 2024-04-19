@@ -17,12 +17,9 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Abstractions.Models;
 
@@ -49,9 +46,13 @@ public interface IThumbnails
 }
 
 [JsonConverter(typeof(ImageConvertor))]
-[SqlFirstColumn(nameof(Source))]
 public class Image
 {
+	/// <summary>
+	/// A unique identifier for the image. Used for proper http caches.
+	/// </summary>
+	public Guid Id { get; set; }
+
 	/// <summary>
 	/// The original image from another server.
 	/// </summary>
@@ -62,6 +63,21 @@ public class Image
 	/// </summary>
 	[MaxLength(32)]
 	public string Blurhash { get; set; }
+
+	/// <summary>
+	/// The url to access the image in low quality.
+	/// </summary>
+	public string Low => $"/thumbnails/{Id}?quality=low";
+
+	/// <summary>
+	/// The url to access the image in medium quality.
+	/// </summary>
+	public string Medium => $"/thumbnails/{Id}?quality=medium";
+
+	/// <summary>
+	/// The url to access the image in high quality.
+	/// </summary>
+	public string High => $"/thumbnails/{Id}?quality=high";
 
 	public Image() { }
 
@@ -97,6 +113,9 @@ public class Image
 			writer.WriteStartObject();
 			writer.WriteString("source", value.Source);
 			writer.WriteString("blurhash", value.Blurhash);
+			writer.WriteString("low", value.Low);
+			writer.WriteString("medium", value.Medium);
+			writer.WriteString("high", value.High);
 			writer.WriteEndObject();
 		}
 	}

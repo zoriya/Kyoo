@@ -67,7 +67,7 @@ public class LibraryItemRepository : DapperRepository<ILibraryItem>
 			{ "c", typeof(Collection) }
 		};
 
-	protected override ILibraryItem Mapper(List<object?> items)
+	protected override ILibraryItem Mapper(IList<object?> items)
 	{
 		if (items[0] is Show show && show.Id != Guid.Empty)
 			return show;

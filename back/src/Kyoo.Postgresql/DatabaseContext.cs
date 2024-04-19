@@ -201,9 +201,9 @@ public abstract class DatabaseContext : DbContext
 	private static void _HasImages<T>(ModelBuilder modelBuilder)
 		where T : class, IThumbnails
 	{
-		modelBuilder.Entity<T>().OwnsOne(x => x.Poster);
-		modelBuilder.Entity<T>().OwnsOne(x => x.Thumbnail);
-		modelBuilder.Entity<T>().OwnsOne(x => x.Logo);
+		modelBuilder.Entity<T>().OwnsOne(x => x.Poster, x => x.ToJson());
+		modelBuilder.Entity<T>().OwnsOne(x => x.Thumbnail, x => x.ToJson());
+		modelBuilder.Entity<T>().OwnsOne(x => x.Logo, x => x.ToJson());
 	}
 
 	private static void _HasAddedDate<T>(ModelBuilder modelBuilder)

@@ -135,7 +135,7 @@ public class WatchStatusRepository(
 			{ "_mw", typeof(MovieWatchStatus) },
 		};
 
-	protected IWatchlist Mapper(List<object?> items)
+	protected IWatchlist Mapper(IList<object?> items)
 	{
 		if (items[0] is Show show && show.Id != Guid.Empty)
 		{
