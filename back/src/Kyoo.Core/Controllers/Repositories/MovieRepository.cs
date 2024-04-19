@@ -27,52 +27,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Core.Controllers;
 
-/// <summary>
-/// A local repository to handle shows
-/// </summary>
-public class MovieRepository : LocalRepository<Movie>
+public class MovieRepository(DatabaseContext database, IRepository<Studio> studios)
+	: LocalRepository<Movie>(database)
 {
-	/// <summary>
-	/// The database handle
-	/// </summary>
-	private readonly DatabaseContext _database;
-
-	/// <summary>
-	/// A studio repository to handle creation/validation of related studios.
-	/// </summary>
-	private readonly IRepository<Studio> _studios;
-
-	public MovieRepository(
-		DatabaseContext database,
-		IRepository<Studio> studios,
-		IThumbnailsManager thumbs
-	)
-		: base(database, thumbs)
-	{
-		_database = database;
-		_studios = studios;
-	}
-
 	/// <inheritdoc />
 	public override async Task<ICollection<Movie>> Search(
 		string query,
 		Include<Movie>? include = default
 	)
 	{
-		return await AddIncludes(_database.Movies, include)
+		return await AddIncludes(Database.Movies, include)
 			.Where(x => EF.Functions.ILike(x.Name + " " + x.Slug, $"%{query}%"))
 			.Take(20)
 			.ToListAsync();
-	}
-
-	/// <inheritdoc />
-	public override async Task<Movie> Create(Movie obj)
-	{
-		await base.Create(obj);
-		_database.Entry(obj).State = EntityState.Added;
-		await _database.SaveChangesAsync(() => Get(obj.Slug));
-		await IRepository<Movie>.OnResourceCreated(obj);
-		return obj;
 	}
 
 	/// <inheritdoc />
@@ -81,28 +48,8 @@ public class MovieRepository : LocalRepository<Movie>
 		await base.Validate(resource);
 		if (resource.Studio != null)
 		{
-			resource.Studio = await _studios.CreateIfNotExists(resource.Studio);
+			resource.Studio = await studios.CreateIfNotExists(resource.Studio);
 			resource.StudioId = resource.Studio.Id;
 		}
-	}
-
-	/// <inheritdoc />
-	protected override async Task EditRelations(Movie resource, Movie changed)
-	{
-		await Validate(changed);
-
-		if (changed.Studio != null || changed.StudioId == null)
-		{
-			await Database.Entry(resource).Reference(x => x.Studio).LoadAsync();
-			resource.Studio = changed.Studio;
-		}
-	}
-
-	/// <inheritdoc />
-	public override async Task Delete(Movie obj)
-	{
-		_database.Remove(obj);
-		await _database.SaveChangesAsync();
-		await base.Delete(obj);
 	}
 }

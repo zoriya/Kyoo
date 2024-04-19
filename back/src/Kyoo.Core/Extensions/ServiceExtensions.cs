@@ -16,9 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AspNetCore.Proxy;

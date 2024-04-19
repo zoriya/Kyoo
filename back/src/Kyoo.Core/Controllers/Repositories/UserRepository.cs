@@ -40,9 +40,8 @@ public class UserRepository(
 	DatabaseContext database,
 	DbConnection db,
 	SqlVariableContext context,
-	IThumbnailsManager thumbs,
 	PermissionOption options
-) : LocalRepository<User>(database, thumbs), IUserRepository
+) : LocalRepository<User>(database), IUserRepository
 {
 	/// <inheritdoc />
 	public override async Task<ICollection<User>> Search(
@@ -50,7 +49,7 @@ public class UserRepository(
 		Include<User>? include = default
 	)
 	{
-		return await AddIncludes(database.Users, include)
+		return await AddIncludes(Database.Users, include)
 			.Where(x => EF.Functions.ILike(x.Username, $"%{query}%"))
 			.Take(20)
 			.ToListAsync();
@@ -60,26 +59,14 @@ public class UserRepository(
 	public override async Task<User> Create(User obj)
 	{
 		// If no users exists, the new one will be an admin. Give it every permissions.
-		if (!await database.Users.AnyAsync())
+		if (!await Database.Users.AnyAsync())
 			obj.Permissions = PermissionOption.Admin;
 		else if (!options.RequireVerification)
 			obj.Permissions = options.NewUser;
 		else
 			obj.Permissions = Array.Empty<string>();
 
-		await base.Create(obj);
-		database.Entry(obj).State = EntityState.Added;
-		await database.SaveChangesAsync(() => Get(obj.Slug));
-		await IRepository<User>.OnResourceCreated(obj);
-		return obj;
-	}
-
-	/// <inheritdoc />
-	public override async Task Delete(User obj)
-	{
-		database.Entry(obj).State = EntityState.Deleted;
-		await database.SaveChangesAsync();
-		await base.Delete(obj);
+		return await base.Create(obj);
 	}
 
 	public Task<User?> GetByExternalId(string provider, string id)
@@ -109,8 +96,8 @@ public class UserRepository(
 		User user = await GetWithTracking(userId);
 		user.ExternalId[provider] = token;
 		// without that, the change tracker does not find the modification. /shrug
-		database.Entry(user).Property(x => x.ExternalId).IsModified = true;
-		await database.SaveChangesAsync();
+		Database.Entry(user).Property(x => x.ExternalId).IsModified = true;
+		await Database.SaveChangesAsync();
 		return user;
 	}
 
@@ -119,8 +106,8 @@ public class UserRepository(
 		User user = await GetWithTracking(userId);
 		user.ExternalId.Remove(provider);
 		// without that, the change tracker does not find the modification. /shrug
-		database.Entry(user).Property(x => x.ExternalId).IsModified = true;
-		await database.SaveChangesAsync();
+		Database.Entry(user).Property(x => x.ExternalId).IsModified = true;
+		await Database.SaveChangesAsync();
 		return user;
 	}
 }
