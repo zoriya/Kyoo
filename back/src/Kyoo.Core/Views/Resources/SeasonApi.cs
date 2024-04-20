@@ -38,26 +38,9 @@ namespace Kyoo.Core.Api;
 [ApiController]
 [PartialPermission(nameof(Season))]
 [ApiDefinition("Seasons", Group = ResourcesGroup)]
-public class SeasonApi : CrudThumbsApi<Season>
+public class SeasonApi(ILibraryManager libraryManager)
+	: CrudThumbsApi<Season>(libraryManager.Seasons)
 {
-	/// <summary>
-	/// The library manager used to modify or retrieve information in the data store.
-	/// </summary>
-	private readonly ILibraryManager _libraryManager;
-
-	/// <summary>
-	/// Create a new <see cref="SeasonApi"/>.
-	/// </summary>
-	/// <param name="libraryManager">
-	/// The library manager used to modify or retrieve information in the data store.
-	/// </param>
-	/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
-	public SeasonApi(ILibraryManager libraryManager, IThumbnailsManager thumbs)
-		: base(libraryManager.Seasons, thumbs)
-	{
-		_libraryManager = libraryManager;
-	}
-
 	/// <summary>
 	/// Get episodes in the season
 	/// </summary>
@@ -86,7 +69,7 @@ public class SeasonApi : CrudThumbsApi<Season>
 		[FromQuery] Include<Episode> fields
 	)
 	{
-		ICollection<Episode> resources = await _libraryManager.Episodes.GetAll(
+		ICollection<Episode> resources = await libraryManager.Episodes.GetAll(
 			Filter.And(filter, identifier.Matcher<Episode>(x => x.SeasonId, x => x.Season!.Slug)),
 			sortBy,
 			fields,
@@ -95,7 +78,7 @@ public class SeasonApi : CrudThumbsApi<Season>
 
 		if (
 			!resources.Any()
-			&& await _libraryManager.Seasons.GetOrDefault(identifier.IsSame<Season>()) == null
+			&& await libraryManager.Seasons.GetOrDefault(identifier.IsSame<Season>()) == null
 		)
 			return NotFound();
 		return Page(resources, pagination.Limit);
@@ -120,7 +103,7 @@ public class SeasonApi : CrudThumbsApi<Season>
 		[FromQuery] Include<Show> fields
 	)
 	{
-		Show? ret = await _libraryManager.Shows.GetOrDefault(
+		Show? ret = await libraryManager.Shows.GetOrDefault(
 			identifier.IsContainedIn<Show, Season>(x => x.Seasons!),
 			fields
 		);

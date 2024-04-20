@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System.IO;
+using System;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -28,14 +28,8 @@ using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Core.Api;
 
-/// <summary>
-/// A base class to handle CRUD operations and services thumbnails for
-/// a specific resource type <typeparamref name="T"/>.
-/// </summary>
-/// <typeparam name="T">The type of resource to make CRUD and thumbnails apis for.</typeparam>
 [ApiController]
-public class CrudThumbsApi<T>(IRepository<T> repository, IThumbnailsManager thumbs)
-	: CrudApi<T>(repository)
+public class CrudThumbsApi<T>(IRepository<T> repository) : CrudApi<T>(repository)
 	where T : class, IResource, IThumbnails, IQuery
 {
 	private async Task<IActionResult> _GetImage(
@@ -50,18 +44,18 @@ public class CrudThumbsApi<T>(IRepository<T> repository, IThumbnailsManager thum
 		);
 		if (resource == null)
 			return NotFound();
-		string path = thumbs.GetImagePath(resource, image, quality ?? ImageQuality.High);
-		if (!System.IO.File.Exists(path))
+
+		Image? img = image switch
+		{
+			"poster" => resource.Poster,
+			"thumbnail" => resource.Thumbnail,
+			"logo" => resource.Logo,
+			_ => throw new ArgumentException(nameof(image)),
+		};
+		if (img is null)
 			return NotFound();
 
-		if (!identifier.Match(id => false, slug => slug == "random"))
-		{
-			// Allow clients to cache the image for 6 month.
-			Response.Headers.CacheControl = $"public, max-age={60 * 60 * 24 * 31 * 6}";
-		}
-		else
-			Response.Headers.CacheControl = $"public, no-store";
-		return PhysicalFile(Path.GetFullPath(path), "image/webp", true);
+		return Redirect($"/thumbnails/{img.Id}");
 	}
 
 	/// <summary>
@@ -78,7 +72,7 @@ public class CrudThumbsApi<T>(IRepository<T> repository, IThumbnailsManager thum
 	/// </response>
 	[HttpGet("{identifier:id}/poster")]
 	[PartialPermission(Kind.Read)]
-	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status302Found)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public Task<IActionResult> GetPoster(Identifier identifier, [FromQuery] ImageQuality? quality)
 	{
@@ -99,7 +93,7 @@ public class CrudThumbsApi<T>(IRepository<T> repository, IThumbnailsManager thum
 	/// </response>
 	[HttpGet("{identifier:id}/logo")]
 	[PartialPermission(Kind.Read)]
-	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status302Found)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public Task<IActionResult> GetLogo(Identifier identifier, [FromQuery] ImageQuality? quality)
 	{
@@ -120,6 +114,8 @@ public class CrudThumbsApi<T>(IRepository<T> repository, IThumbnailsManager thum
 	/// </response>
 	[HttpGet("{identifier:id}/thumbnail")]
 	[HttpGet("{identifier:id}/backdrop", Order = AlternativeRoute)]
+	[ProducesResponseType(StatusCodes.Status302Found)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public Task<IActionResult> GetBackdrop(Identifier identifier, [FromQuery] ImageQuality? quality)
 	{
 		return _GetImage(identifier, "thumbnail", quality);

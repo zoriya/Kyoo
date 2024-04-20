@@ -40,25 +40,13 @@ namespace Kyoo.Core.Api;
 [ApiController]
 [PartialPermission(nameof(Collection))]
 [ApiDefinition("Collections", Group = ResourcesGroup)]
-public class CollectionApi : CrudThumbsApi<Collection>
+public class CollectionApi(
+	IRepository<Movie> movies,
+	IRepository<Show> shows,
+	CollectionRepository collections,
+	LibraryItemRepository items
+) : CrudThumbsApi<Collection>(collections)
 {
-	private readonly ILibraryManager _libraryManager;
-	private readonly CollectionRepository _collections;
-	private readonly LibraryItemRepository _items;
-
-	public CollectionApi(
-		ILibraryManager libraryManager,
-		CollectionRepository collections,
-		LibraryItemRepository items,
-		IThumbnailsManager thumbs
-	)
-		: base(libraryManager.Collections, thumbs)
-	{
-		_libraryManager = libraryManager;
-		_collections = collections;
-		_items = items;
-	}
-
 	/// <summary>
 	/// Add a movie
 	/// </summary>
@@ -79,14 +67,14 @@ public class CollectionApi : CrudThumbsApi<Collection>
 	public async Task<ActionResult> AddMovie(Identifier identifier, Identifier movie)
 	{
 		Guid collectionId = await identifier.Match(
-			async id => (await _libraryManager.Collections.Get(id)).Id,
-			async slug => (await _libraryManager.Collections.Get(slug)).Id
+			async id => (await collections.Get(id)).Id,
+			async slug => (await collections.Get(slug)).Id
 		);
 		Guid movieId = await movie.Match(
-			async id => (await _libraryManager.Movies.Get(id)).Id,
-			async slug => (await _libraryManager.Movies.Get(slug)).Id
+			async id => (await movies.Get(id)).Id,
+			async slug => (await movies.Get(slug)).Id
 		);
-		await _collections.AddMovie(collectionId, movieId);
+		await collections.AddMovie(collectionId, movieId);
 		return NoContent();
 	}
 
@@ -110,14 +98,14 @@ public class CollectionApi : CrudThumbsApi<Collection>
 	public async Task<ActionResult> AddShow(Identifier identifier, Identifier show)
 	{
 		Guid collectionId = await identifier.Match(
-			async id => (await _libraryManager.Collections.Get(id)).Id,
-			async slug => (await _libraryManager.Collections.Get(slug)).Id
+			async id => (await collections.Get(id)).Id,
+			async slug => (await collections.Get(slug)).Id
 		);
 		Guid showId = await show.Match(
-			async id => (await _libraryManager.Shows.Get(id)).Id,
-			async slug => (await _libraryManager.Shows.Get(slug)).Id
+			async id => (await shows.Get(id)).Id,
+			async slug => (await shows.Get(slug)).Id
 		);
-		await _collections.AddShow(collectionId, showId);
+		await collections.AddShow(collectionId, showId);
 		return NoContent();
 	}
 
@@ -151,9 +139,9 @@ public class CollectionApi : CrudThumbsApi<Collection>
 	{
 		Guid collectionId = await identifier.Match(
 			id => Task.FromResult(id),
-			async slug => (await _libraryManager.Collections.Get(slug)).Id
+			async slug => (await collections.Get(slug)).Id
 		);
-		ICollection<ILibraryItem> resources = await _items.GetAllOfCollection(
+		ICollection<ILibraryItem> resources = await items.GetAllOfCollection(
 			collectionId,
 			filter,
 			sortBy == new Sort<ILibraryItem>.Default()
@@ -165,8 +153,7 @@ public class CollectionApi : CrudThumbsApi<Collection>
 
 		if (
 			!resources.Any()
-			&& await _libraryManager.Collections.GetOrDefault(identifier.IsSame<Collection>())
-				== null
+			&& await collections.GetOrDefault(identifier.IsSame<Collection>()) == null
 		)
 			return NotFound();
 		return Page(resources, pagination.Limit);
@@ -200,7 +187,7 @@ public class CollectionApi : CrudThumbsApi<Collection>
 		[FromQuery] Include<Show>? fields
 	)
 	{
-		ICollection<Show> resources = await _libraryManager.Shows.GetAll(
+		ICollection<Show> resources = await shows.GetAll(
 			Filter.And(filter, identifier.IsContainedIn<Show, Collection>(x => x.Collections)),
 			sortBy == new Sort<Show>.Default() ? new Sort<Show>.By(x => x.AirDate) : sortBy,
 			fields,
@@ -209,8 +196,7 @@ public class CollectionApi : CrudThumbsApi<Collection>
 
 		if (
 			!resources.Any()
-			&& await _libraryManager.Collections.GetOrDefault(identifier.IsSame<Collection>())
-				== null
+			&& await collections.GetOrDefault(identifier.IsSame<Collection>()) == null
 		)
 			return NotFound();
 		return Page(resources, pagination.Limit);
@@ -244,7 +230,7 @@ public class CollectionApi : CrudThumbsApi<Collection>
 		[FromQuery] Include<Movie>? fields
 	)
 	{
-		ICollection<Movie> resources = await _libraryManager.Movies.GetAll(
+		ICollection<Movie> resources = await movies.GetAll(
 			Filter.And(filter, identifier.IsContainedIn<Movie, Collection>(x => x.Collections)),
 			sortBy == new Sort<Movie>.Default() ? new Sort<Movie>.By(x => x.AirDate) : sortBy,
 			fields,
@@ -253,8 +239,7 @@ public class CollectionApi : CrudThumbsApi<Collection>
 
 		if (
 			!resources.Any()
-			&& await _libraryManager.Collections.GetOrDefault(identifier.IsSame<Collection>())
-				== null
+			&& await collections.GetOrDefault(identifier.IsSame<Collection>()) == null
 		)
 			return NotFound();
 		return Page(resources, pagination.Limit);

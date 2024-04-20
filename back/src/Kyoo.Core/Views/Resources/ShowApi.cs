@@ -40,26 +40,8 @@ namespace Kyoo.Core.Api;
 [ApiController]
 [PartialPermission(nameof(Show))]
 [ApiDefinition("Shows", Group = ResourcesGroup)]
-public class ShowApi : CrudThumbsApi<Show>
+public class ShowApi(ILibraryManager libraryManager) : CrudThumbsApi<Show>(libraryManager.Shows)
 {
-	/// <summary>
-	/// The library manager used to modify or retrieve information in the data store.
-	/// </summary>
-	private readonly ILibraryManager _libraryManager;
-
-	/// <summary>
-	/// Create a new <see cref="ShowApi"/>.
-	/// </summary>
-	/// <param name="libraryManager">
-	/// The library manager used to modify or retrieve information about the data store.
-	/// </param>
-	/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
-	public ShowApi(ILibraryManager libraryManager, IThumbnailsManager thumbs)
-		: base(libraryManager.Shows, thumbs)
-	{
-		_libraryManager = libraryManager;
-	}
-
 	/// <summary>
 	/// Get seasons of this show
 	/// </summary>
@@ -88,7 +70,7 @@ public class ShowApi : CrudThumbsApi<Show>
 		[FromQuery] Include<Season> fields
 	)
 	{
-		ICollection<Season> resources = await _libraryManager.Seasons.GetAll(
+		ICollection<Season> resources = await libraryManager.Seasons.GetAll(
 			Filter.And(filter, identifier.Matcher<Season>(x => x.ShowId, x => x.Show!.Slug)),
 			sortBy,
 			fields,
@@ -97,7 +79,7 @@ public class ShowApi : CrudThumbsApi<Show>
 
 		if (
 			!resources.Any()
-			&& await _libraryManager.Shows.GetOrDefault(identifier.IsSame<Show>()) == null
+			&& await libraryManager.Shows.GetOrDefault(identifier.IsSame<Show>()) == null
 		)
 			return NotFound();
 		return Page(resources, pagination.Limit);
@@ -131,7 +113,7 @@ public class ShowApi : CrudThumbsApi<Show>
 		[FromQuery] Include<Episode> fields
 	)
 	{
-		ICollection<Episode> resources = await _libraryManager.Episodes.GetAll(
+		ICollection<Episode> resources = await libraryManager.Episodes.GetAll(
 			Filter.And(filter, identifier.Matcher<Episode>(x => x.ShowId, x => x.Show!.Slug)),
 			sortBy,
 			fields,
@@ -140,7 +122,7 @@ public class ShowApi : CrudThumbsApi<Show>
 
 		if (
 			!resources.Any()
-			&& await _libraryManager.Shows.GetOrDefault(identifier.IsSame<Show>()) == null
+			&& await libraryManager.Shows.GetOrDefault(identifier.IsSame<Show>()) == null
 		)
 			return NotFound();
 		return Page(resources, pagination.Limit);
@@ -165,7 +147,7 @@ public class ShowApi : CrudThumbsApi<Show>
 		[FromQuery] Include<Studio> fields
 	)
 	{
-		return await _libraryManager.Studios.Get(
+		return await libraryManager.Studios.Get(
 			identifier.IsContainedIn<Studio, Show>(x => x.Shows!),
 			fields
 		);
@@ -199,7 +181,7 @@ public class ShowApi : CrudThumbsApi<Show>
 		[FromQuery] Include<Collection> fields
 	)
 	{
-		ICollection<Collection> resources = await _libraryManager.Collections.GetAll(
+		ICollection<Collection> resources = await libraryManager.Collections.GetAll(
 			Filter.And(filter, identifier.IsContainedIn<Collection, Show>(x => x.Shows!)),
 			sortBy,
 			fields,
@@ -208,7 +190,7 @@ public class ShowApi : CrudThumbsApi<Show>
 
 		if (
 			!resources.Any()
-			&& await _libraryManager.Shows.GetOrDefault(identifier.IsSame<Show>()) == null
+			&& await libraryManager.Shows.GetOrDefault(identifier.IsSame<Show>()) == null
 		)
 			return NotFound();
 		return Page(resources, pagination.Limit);
@@ -233,9 +215,9 @@ public class ShowApi : CrudThumbsApi<Show>
 	{
 		Guid id = await identifier.Match(
 			id => Task.FromResult(id),
-			async slug => (await _libraryManager.Shows.Get(slug)).Id
+			async slug => (await libraryManager.Shows.Get(slug)).Id
 		);
-		return await _libraryManager.WatchStatus.GetShowStatus(id, User.GetIdOrThrow());
+		return await libraryManager.WatchStatus.GetShowStatus(id, User.GetIdOrThrow());
 	}
 
 	/// <summary>
@@ -260,9 +242,9 @@ public class ShowApi : CrudThumbsApi<Show>
 	{
 		Guid id = await identifier.Match(
 			id => Task.FromResult(id),
-			async slug => (await _libraryManager.Shows.Get(slug)).Id
+			async slug => (await libraryManager.Shows.Get(slug)).Id
 		);
-		return await _libraryManager.WatchStatus.SetShowStatus(id, User.GetIdOrThrow(), status);
+		return await libraryManager.WatchStatus.SetShowStatus(id, User.GetIdOrThrow(), status);
 	}
 
 	/// <summary>
@@ -283,8 +265,8 @@ public class ShowApi : CrudThumbsApi<Show>
 	{
 		Guid id = await identifier.Match(
 			id => Task.FromResult(id),
-			async slug => (await _libraryManager.Shows.Get(slug)).Id
+			async slug => (await libraryManager.Shows.Get(slug)).Id
 		);
-		await _libraryManager.WatchStatus.DeleteShowStatus(id, User.GetIdOrThrow());
+		await libraryManager.WatchStatus.DeleteShowStatus(id, User.GetIdOrThrow());
 	}
 }

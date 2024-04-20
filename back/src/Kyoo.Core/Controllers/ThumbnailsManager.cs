@@ -42,8 +42,6 @@ public class ThumbnailsManager(
 	Lazy<IRepository<User>> users
 ) : IThumbnailsManager
 {
-	private static readonly Dictionary<string, TaskCompletionSource<object>> _downloading = [];
-
 	private static async Task _WriteTo(SKBitmap bitmap, string path, int quality)
 	{
 		SKData data = bitmap.Encode(SKEncodedImageFormat.Webp, quality);
@@ -52,12 +50,16 @@ public class ThumbnailsManager(
 		await reader.CopyToAsync(file);
 	}
 
-	private async Task _DownloadImage(Image? image, string localPath, string what)
+	private async Task _DownloadImage(Image? image, string what)
 	{
 		if (image == null)
 			return;
 		try
 		{
+			if (image.Id == Guid.Empty)
+				image.Id = new Guid();
+			string localPath = $"/metadata/{image.Id}";
+
 			logger.LogInformation("Downloading image {What}", what);
 
 			HttpClient client = clientFactory.CreateClient();
@@ -119,86 +121,24 @@ public class ThumbnailsManager(
 	{
 		string name = item is IResource res ? res.Slug : "???";
 
-		string posterPath =
-			$"{_GetBaseImagePath(item, "poster")}.{ImageQuality.High.ToString().ToLowerInvariant()}.webp";
-		bool duplicated = false;
-		TaskCompletionSource<object>? sync = null;
-		try
-		{
-			lock (_downloading)
-			{
-				if (_downloading.ContainsKey(posterPath))
-				{
-					duplicated = true;
-					sync = _downloading.GetValueOrDefault(posterPath);
-				}
-				else
-				{
-					sync = new();
-					_downloading.Add(posterPath, sync);
-				}
-			}
-			if (duplicated)
-			{
-				object? dup = sync != null ? await sync.Task : null;
-				if (dup != null)
-					throw new DuplicatedItemException(dup);
-			}
-
-			await _DownloadImage(
-				item.Poster,
-				_GetBaseImagePath(item, "poster"),
-				$"The poster of {name}"
-			);
-			await _DownloadImage(
-				item.Thumbnail,
-				_GetBaseImagePath(item, "thumbnail"),
-				$"The poster of {name}"
-			);
-			await _DownloadImage(
-				item.Logo,
-				_GetBaseImagePath(item, "logo"),
-				$"The poster of {name}"
-			);
-		}
-		finally
-		{
-			if (!duplicated)
-			{
-				lock (_downloading)
-				{
-					_downloading.Remove(posterPath);
-					sync!.SetResult(item);
-				}
-			}
-		}
-	}
-
-	private static string _GetBaseImagePath<T>(T item, string image)
-	{
-		string directory = item switch
-		{
-			IResource res
-				=> Path.Combine("/metadata", item.GetType().Name.ToLowerInvariant(), res.Slug),
-			_ => Path.Combine("/metadata", typeof(T).Name.ToLowerInvariant())
-		};
-		Directory.CreateDirectory(directory);
-		return Path.Combine(directory, image);
+		await _DownloadImage(item.Poster, $"The poster of {name}");
+		await _DownloadImage(item.Thumbnail, $"The thumbnail of {name}");
+		await _DownloadImage(item.Logo, $"The logo of {name}");
 	}
 
 	/// <inheritdoc />
-	public string GetImagePath<T>(T item, string image, ImageQuality quality)
-		where T : IThumbnails
+	public string GetImagePath(Guid imageId, ImageQuality quality)
 	{
-		return $"{_GetBaseImagePath(item, image)}.{quality.ToString().ToLowerInvariant()}.webp";
+		return $"/metadata/{imageId}.{quality.ToString().ToLowerInvariant()}.webp";
 	}
 
 	/// <inheritdoc />
 	public Task DeleteImages<T>(T item)
 		where T : IThumbnails
 	{
-		IEnumerable<string> images = new[] { "poster", "thumbnail", "logo" }
-			.SelectMany(x => _GetBaseImagePath(item, x))
+		IEnumerable<string> images = new[] {item.Poster?.Id, item.Thumbnail?.Id, item.Logo?.Id}
+			.Where(x => x is not null)
+			.SelectMany(x => $"/metadata/{x}")
 			.SelectMany(x =>
 				new[]
 				{

@@ -35,8 +35,7 @@ public static class Transcoder
 		Environment.GetEnvironmentVariable("TRANSCODER_URL") ?? "http://transcoder:7666";
 }
 
-public abstract class TranscoderApi<T>(IRepository<T> repository, IThumbnailsManager thumbs)
-	: CrudThumbsApi<T>(repository, thumbs)
+public abstract class TranscoderApi<T>(IRepository<T> repository) : CrudThumbsApi<T>(repository)
 	where T : class, IResource, IThumbnails, IQuery
 {
 	private Task _Proxy(string route, (string path, string route) info)
