@@ -88,6 +88,7 @@ public class Image
 		Blurhash = blurhash ?? "000000";
 	}
 
+	//
 	public class ImageConvertor : JsonConverter<Image>
 	{
 		/// <inheritdoc />
@@ -100,7 +101,13 @@ public class Image
 			if (reader.TokenType == JsonTokenType.String && reader.GetString() is string source)
 				return new Image(source);
 			using JsonDocument document = JsonDocument.ParseValue(ref reader);
-			return document.RootElement.Deserialize<Image>();
+			string? src = document.RootElement.GetProperty("Source").GetString();
+			string? blurhash = document.RootElement.GetProperty("Blurhash").GetString();
+			Guid? id = document.RootElement.GetProperty("Id").GetGuid();
+			return new Image(src ?? string.Empty, blurhash)
+			{
+				Id = id ?? Guid.Empty
+			};
 		}
 
 		/// <inheritdoc />

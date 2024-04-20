@@ -23,7 +23,6 @@ using System.Linq.Expressions;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Authentication;
@@ -33,13 +32,6 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Kyoo.Postgresql;
 
-/// <summary>
-/// The database handle used for all local repositories.
-/// This is an abstract class. It is meant to be implemented by plugins. This allow the core to be database agnostic.
-/// </summary>
-/// <remarks>
-/// It should not be used directly, to access the database use a <see cref="ILibraryManager"/> or repositories.
-/// </remarks>
 public abstract class DatabaseContext : DbContext
 {
 	private readonly IHttpContextAccessor _accessor;
@@ -53,39 +45,18 @@ public abstract class DatabaseContext : DbContext
 
 	public Guid? CurrentUserId => _accessor.HttpContext?.User.GetId();
 
-	/// <summary>
-	/// All collections of Kyoo. See <see cref="Collection"/>.
-	/// </summary>
 	public DbSet<Collection> Collections { get; set; }
 
-	/// <summary>
-	/// All movies of Kyoo. See <see cref="Movie"/>.
-	/// </summary>
 	public DbSet<Movie> Movies { get; set; }
 
-	/// <summary>
-	/// All shows of Kyoo. See <see cref="Show"/>.
-	/// </summary>
 	public DbSet<Show> Shows { get; set; }
 
-	/// <summary>
-	/// All seasons of Kyoo. See <see cref="Season"/>.
-	/// </summary>
 	public DbSet<Season> Seasons { get; set; }
 
-	/// <summary>
-	/// All episodes of Kyoo. See <see cref="Episode"/>.
-	/// </summary>
 	public DbSet<Episode> Episodes { get; set; }
 
-	/// <summary>
-	/// All studios of Kyoo. See <see cref="Studio"/>.
-	/// </summary>
 	public DbSet<Studio> Studios { get; set; }
 
-	/// <summary>
-	/// The list of registered users.
-	/// </summary>
 	public DbSet<User> Users { get; set; }
 
 	public DbSet<MovieWatchStatus> MovieWatchStatus { get; set; }
@@ -129,28 +100,13 @@ public abstract class DatabaseContext : DbContext
 		_accessor = accessor;
 	}
 
-	/// <summary>
-	/// Get the name of the link table of the two given types.
-	/// </summary>
-	/// <typeparam name="T">The owner type of the relation</typeparam>
-	/// <typeparam name="T2">The child type of the relation</typeparam>
-	/// <returns>The name of the table containing the links.</returns>
 	protected abstract string LinkName<T, T2>()
 		where T : IResource
 		where T2 : IResource;
 
-	/// <summary>
-	/// Get the name of a link's foreign key.
-	/// </summary>
-	/// <typeparam name="T">The type that will be accessible via the navigation</typeparam>
-	/// <returns>The name of the foreign key for the given resource.</returns>
 	protected abstract string LinkNameFk<T>()
 		where T : IResource;
 
-	/// <summary>
-	/// Set basic configurations (like preventing query tracking)
-	/// </summary>
-	/// <param name="optionsBuilder">An option builder to fill.</param>
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{
 		base.OnConfiguring(optionsBuilder);
@@ -227,15 +183,6 @@ public abstract class DatabaseContext : DbContext
 			.ValueGeneratedOnAdd();
 	}
 
-	/// <summary>
-	/// Create a many to many relationship between the two entities.
-	/// The resulting relationship will have an available <see cref="AddLinks{T1,T2}"/> method.
-	/// </summary>
-	/// <param name="modelBuilder">The database model builder</param>
-	/// <param name="firstNavigation">The first navigation expression from T to T2</param>
-	/// <param name="secondNavigation">The second navigation expression from T2 to T</param>
-	/// <typeparam name="T">The owning type of the relationship</typeparam>
-	/// <typeparam name="T2">The owned type of the relationship</typeparam>
 	private void _HasManyToMany<T, T2>(
 		ModelBuilder modelBuilder,
 		Expression<Func<T, IEnumerable<T2>?>> firstNavigation,
@@ -263,10 +210,6 @@ public abstract class DatabaseContext : DbContext
 			);
 	}
 
-	/// <summary>
-	/// Set database parameters to support every types of Kyoo.
-	/// </summary>
-	/// <param name="modelBuilder">The database's model builder.</param>
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		base.OnModelCreating(modelBuilder);
@@ -412,28 +355,6 @@ public abstract class DatabaseContext : DbContext
 		_HasJson<Issue, object>(modelBuilder, x => x.Extra);
 	}
 
-	/// <summary>
-	/// Return a new or an in cache temporary object wih the same ID as the one given
-	/// </summary>
-	/// <param name="model">If a resource with the same ID is found in the database, it will be used.
-	/// <paramref name="model"/> will be used otherwise</param>
-	/// <typeparam name="T">The type of the resource</typeparam>
-	/// <returns>A resource that is now tracked by this context.</returns>
-	public T GetTemporaryObject<T>(T model)
-		where T : class, IResource
-	{
-		T? tmp = Set<T>().Local.FirstOrDefault(x => x.Id == model.Id);
-		if (tmp != null)
-			return tmp;
-		Entry(model).State = EntityState.Unchanged;
-		return model;
-	}
-
-	/// <summary>
-	/// Save changes that are applied to this context.
-	/// </summary>
-	/// <exception cref="DuplicatedItemException">A duplicated item has been found.</exception>
-	/// <returns>The number of state entries written to the database.</returns>
 	public override int SaveChanges()
 	{
 		try
@@ -449,13 +370,6 @@ public abstract class DatabaseContext : DbContext
 		}
 	}
 
-	/// <summary>
-	/// Save changes that are applied to this context.
-	/// </summary>
-	/// <param name="acceptAllChangesOnSuccess">Indicates whether AcceptAllChanges() is called after the changes
-	/// have been sent successfully to the database.</param>
-	/// <exception cref="DuplicatedItemException">A duplicated item has been found.</exception>
-	/// <returns>The number of state entries written to the database.</returns>
 	public override int SaveChanges(bool acceptAllChangesOnSuccess)
 	{
 		try
@@ -471,14 +385,6 @@ public abstract class DatabaseContext : DbContext
 		}
 	}
 
-	/// <summary>
-	/// Save changes that are applied to this context.
-	/// </summary>
-	/// <param name="acceptAllChangesOnSuccess">Indicates whether AcceptAllChanges() is called after the changes
-	/// have been sent successfully to the database.</param>
-	/// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete</param>
-	/// <exception cref="DuplicatedItemException">A duplicated item has been found.</exception>
-	/// <returns>The number of state entries written to the database.</returns>
 	public override async Task<int> SaveChangesAsync(
 		bool acceptAllChangesOnSuccess,
 		CancellationToken cancellationToken = default
@@ -497,12 +403,6 @@ public abstract class DatabaseContext : DbContext
 		}
 	}
 
-	/// <summary>
-	/// Save changes that are applied to this context.
-	/// </summary>
-	/// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete</param>
-	/// <exception cref="DuplicatedItemException">A duplicated item has been found.</exception>
-	/// <returns>The number of state entries written to the database.</returns>
 	public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
 	{
 		try
@@ -518,14 +418,6 @@ public abstract class DatabaseContext : DbContext
 		}
 	}
 
-	/// <summary>
-	/// Save changes that are applied to this context.
-	/// </summary>
-	/// <param name="getExisting">How to retrieve the conflicting item.</param>
-	/// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete</param>
-	/// <exception cref="DuplicatedItemException">A duplicated item has been found.</exception>
-	/// <typeparam name="T">The type of the potential duplicate (this is unused).</typeparam>
-	/// <returns>The number of state entries written to the database.</returns>
 	public async Task<int> SaveChangesAsync<T>(
 		Func<Task<T>> getExisting,
 		CancellationToken cancellationToken = default
@@ -548,12 +440,6 @@ public abstract class DatabaseContext : DbContext
 		}
 	}
 
-	/// <summary>
-	/// Save changes if no duplicates are found. If one is found, no change are saved but the current changes are no discarded.
-	/// The current context will still hold those invalid changes.
-	/// </summary>
-	/// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete</param>
-	/// <returns>The number of state entries written to the database or -1 if a duplicate exist.</returns>
 	public async Task<int> SaveIfNoDuplicates(CancellationToken cancellationToken = default)
 	{
 		try
@@ -566,30 +452,14 @@ public abstract class DatabaseContext : DbContext
 		}
 	}
 
-	/// <summary>
-	/// Return the first resource with the given slug that is currently tracked by this context.
-	/// This allow one to limit redundant calls to <see cref="IRepository{T}.CreateIfNotExists"/> during the
-	/// same transaction and prevent fails from EF when two same entities are being tracked.
-	/// </summary>
-	/// <param name="slug">The slug of the resource to check</param>
-	/// <typeparam name="T">The type of entity to check</typeparam>
-	/// <returns>The local entity representing the resource with the given slug if it exists or null.</returns>
 	public T? LocalEntity<T>(string slug)
 		where T : class, IResource
 	{
 		return ChangeTracker.Entries<T>().FirstOrDefault(x => x.Entity.Slug == slug)?.Entity;
 	}
 
-	/// <summary>
-	/// Check if the exception is a duplicated exception.
-	/// </summary>
-	/// <param name="ex">The exception to check</param>
-	/// <returns>True if the exception is a duplicate exception. False otherwise</returns>
 	protected abstract bool IsDuplicateException(Exception ex);
 
-	/// <summary>
-	/// Delete every changes that are on this context.
-	/// </summary>
 	public void DiscardChanges()
 	{
 		foreach (
