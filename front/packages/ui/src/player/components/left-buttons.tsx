@@ -208,7 +208,7 @@ export const toTimerString = (timer?: number, duration?: number) => {
 		return "??:??";
 	const h = Math.floor(timer / 3600);
 	const min = Math.floor((timer / 60) % 60);
-	const sec = Math.round(timer % 60);
+	const sec = Math.floor(timer % 60);
 	const fmt = (n: number) => n.toString().padStart(2, "0");
 
 	if (duration >= 3600) return `${fmt(h)}:${fmt(min)}:${fmt(sec)}`;
