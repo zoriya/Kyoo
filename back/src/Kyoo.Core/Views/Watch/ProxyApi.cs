@@ -58,7 +58,7 @@ public class ProxyApi(ILibraryManager library) : Controller
 				}
 			)
 			.Build();
-		return this.HttpProxyAsync($"http://transcoder:7666/{route}", proxyOptions);
+		return this.HttpProxyAsync($"{Transcoder.TranscoderUrl}{route}", proxyOptions);
 	}
 
 	/// <summary>

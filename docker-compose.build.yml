@@ -16,6 +16,8 @@ services:
   back:
     build: ./back
     restart: on-failure
+    environment:
+      - TRANSCODER_URL=${TRANSCODER_URL:-http://transcoder:7666}
     env_file:
       - ./.env
     depends_on:
