@@ -28,6 +28,11 @@
 		<CheckCodingStyle Condition="$(CheckCodingStyle) == ''">true</CheckCodingStyle>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<BaseIntermediateOutputPath>$(MsBuildThisFileDirectory)/../out/obj/$(MSBuildProjectName)</BaseIntermediateOutputPath>
+		<BaseOutputPath>$(MsBuildThisFileDirectory)/../out/bin/$(MSBuildProjectName)</BaseOutputPath>
+	</PropertyGroup>
+
 	<ItemGroup Condition="$(CheckCodingStyle) == true">
 		<None Include="$(MSBuildThisFileDirectory)../.editorconfig" Link=".editorconfig" Visible="false" />
 	</ItemGroup>
