@@ -72,20 +72,15 @@ public class EpisodeRepository(
 	}
 
 	/// <inheritdoc />
-	public override async Task<Episode> Create(Episode obj)
-	{
-		// Set it for the OnResourceCreated event and the return value.
-		obj.ShowSlug = obj.Show?.Slug ?? (await shows.Get(obj.ShowId)).Slug;
-		return await base.Create(obj);
-	}
-
-	/// <inheritdoc />
 	protected override async Task Validate(Episode resource)
 	{
 		await base.Validate(resource);
 		resource.Show = null;
 		if (resource.ShowId == Guid.Empty)
 			throw new ValidationException("Missing show id");
+		// This is storred in db so it needs to be set before every create/edit (and before events)
+		resource.ShowSlug = (await shows.Get(resource.ShowId)).Slug;
+
 		resource.Season = null;
 		if (resource.SeasonId == null && resource.SeasonNumber != null)
 		{

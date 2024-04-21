@@ -31,8 +31,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Core.Controllers;
 
-public class SeasonRepository(DatabaseContext database, IThumbnailsManager thumbnails)
-	: GenericRepository<Season>(database)
+public class SeasonRepository(
+	DatabaseContext database,
+	IRepository<Show> shows,
+	IThumbnailsManager thumbnails
+) : GenericRepository<Season>(database)
 {
 	static SeasonRepository()
 	{
@@ -67,22 +70,14 @@ public class SeasonRepository(DatabaseContext database, IThumbnailsManager thumb
 	}
 
 	/// <inheritdoc/>
-	public override async Task<Season> Create(Season obj)
-	{
-		// Set it for the OnResourceCreated event and the return value.
-		obj.ShowSlug =
-			(await Database.Shows.FirstOrDefaultAsync(x => x.Id == obj.ShowId))?.Slug
-			?? throw new ItemNotFoundException($"No show found with ID {obj.ShowId}");
-		return await base.Create(obj);
-	}
-
-	/// <inheritdoc/>
 	protected override async Task Validate(Season resource)
 	{
 		await base.Validate(resource);
 		resource.Show = null;
 		if (resource.ShowId == Guid.Empty)
 			throw new ValidationException("Missing show id");
+		// This is storred in db so it needs to be set before every create/edit (and before events)
+		resource.ShowSlug = (await shows.Get(resource.ShowId)).Slug;
 		await thumbnails.DownloadImages(resource);
 	}
 }
