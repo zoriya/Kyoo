@@ -30,7 +30,7 @@ services:
       migrations:
         condition: service_completed_successfully
     volumes:
-      - kyoo:/kyoo
+      - kyoo:/metadata
 
   migrations:
     build:

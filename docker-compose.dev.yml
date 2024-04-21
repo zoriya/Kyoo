@@ -42,7 +42,7 @@ services:
     volumes:
       - ./back:/app
       - /app/out/
-      - kyoo:/kyoo
+      - kyoo:/metadata
 
   migrations:
     build:
