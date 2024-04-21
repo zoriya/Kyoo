@@ -56,4 +56,5 @@ public static class Constants
 	/// A group name for <see cref="ApiDefinitionAttribute"/>. It should be used for endpoints used by admins.
 	/// </summary>
 	public const string AdminGroup = "4:Admin";
+	public const string OtherGroup = "5:Other";
 }
