@@ -57,17 +57,7 @@ public class ThumbnailsManager(
 		try
 		{
 			if (image.Id == Guid.Empty)
-			{
-				using MD5 md5 = MD5.Create();
-				image.Id = new Guid(md5.ComputeHash(Encoding.UTF8.GetBytes(image.Source)));
-			}
-
-			if (
-				File.Exists(GetImagePath(image.Id, ImageQuality.High))
-				&& File.Exists(GetImagePath(image.Id, ImageQuality.Medium))
-				&& File.Exists(GetImagePath(image.Id, ImageQuality.Low))
-			)
-				return;
+				image.Id = Guid.NewGuid();
 
 			logger.LogInformation("Downloading image {What}", what);
 
