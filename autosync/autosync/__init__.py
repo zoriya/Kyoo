@@ -46,6 +46,7 @@ def main():
 	connection = pika.BlockingConnection(
 		pika.ConnectionParameters(
 			host=os.environ.get("RABBITMQ_HOST", "rabbitmq"),
+			port=os.environ.get("RABBITMQ_PORT", 5672),
 			credentials=pika.credentials.PlainCredentials(
 				os.environ.get("RABBITMQ_DEFAULT_USER", "guest"),
 				os.environ.get("RABBITMQ_DEFAULT_PASS", "guest"),

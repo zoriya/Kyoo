@@ -10,20 +10,26 @@ from matcher.matcher import Matcher
 
 logger = logging.getLogger(__name__)
 
+
 class Message(Struct, tag_field="action", tag=str.lower):
 	pass
+
 
 class Scan(Message):
 	path: str
 
+
 class Delete(Message):
 	path: str
+
 
 class Refresh(Message):
 	kind: Literal["collection", "show", "movie", "season", "episode"]
 	id: str
 
+
 decoder = json.Decoder(Union[Scan, Delete, Refresh])
+
 
 class Subscriber:
 	QUEUE = "scanner"
@@ -31,6 +37,7 @@ class Subscriber:
 	async def __aenter__(self):
 		self._con = await connect_robust(
 			host=os.environ.get("RABBITMQ_HOST", "rabbitmq"),
+			port=int(os.environ.get("RABBITMQ_PORT", "5672")),
 			login=os.environ.get("RABBITMQ_DEFAULT_USER", "guest"),
 			password=os.environ.get("RABBITMQ_DEFAULT_PASS", "guest"),
 		)
