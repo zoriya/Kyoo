@@ -57,8 +57,17 @@ public class ThumbnailsManager(
 		try
 		{
 			if (image.Id == Guid.Empty)
-				image.Id = new Guid();
-			string localPath = $"/metadata/{image.Id}";
+			{
+				using MD5 md5 = MD5.Create();
+				image.Id = new Guid(md5.ComputeHash(Encoding.UTF8.GetBytes(image.Source)));
+			}
+
+			if (
+				File.Exists(GetImagePath(image.Id, ImageQuality.High))
+				&& File.Exists(GetImagePath(image.Id, ImageQuality.Medium))
+				&& File.Exists(GetImagePath(image.Id, ImageQuality.Low))
+			)
+				return;
 
 			logger.LogInformation("Downloading image {What}", what);
 
@@ -81,31 +90,19 @@ public class ThumbnailsManager(
 				new SKSizeI(original.Width, original.Height),
 				SKFilterQuality.High
 			);
-			await _WriteTo(
-				original,
-				$"{localPath}.{ImageQuality.High.ToString().ToLowerInvariant()}.webp",
-				90
-			);
+			await _WriteTo(original, GetImagePath(image.Id, ImageQuality.High), 90);
 
 			using SKBitmap medium = high.Resize(
 				new SKSizeI((int)(high.Width / 1.5), (int)(high.Height / 1.5)),
 				SKFilterQuality.Medium
 			);
-			await _WriteTo(
-				medium,
-				$"{localPath}.{ImageQuality.Medium.ToString().ToLowerInvariant()}.webp",
-				75
-			);
+			await _WriteTo(medium, GetImagePath(image.Id, ImageQuality.Medium), 75);
 
 			using SKBitmap low = medium.Resize(
 				new SKSizeI(original.Width / 2, original.Height / 2),
 				SKFilterQuality.Low
 			);
-			await _WriteTo(
-				low,
-				$"{localPath}.{ImageQuality.Low.ToString().ToLowerInvariant()}.webp",
-				50
-			);
+			await _WriteTo(low, GetImagePath(image.Id, ImageQuality.Low), 50);
 
 			image.Blurhash = Blurhasher.Encode(low, 4, 3);
 		}
@@ -136,7 +133,7 @@ public class ThumbnailsManager(
 	public Task DeleteImages<T>(T item)
 		where T : IThumbnails
 	{
-		IEnumerable<string> images = new[] {item.Poster?.Id, item.Thumbnail?.Id, item.Logo?.Id}
+		IEnumerable<string> images = new[] { item.Poster?.Id, item.Thumbnail?.Id, item.Logo?.Id }
 			.Where(x => x is not null)
 			.SelectMany(x => $"/metadata/{x}")
 			.SelectMany(x =>

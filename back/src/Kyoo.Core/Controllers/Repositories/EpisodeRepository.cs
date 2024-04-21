@@ -32,7 +32,7 @@ namespace Kyoo.Core.Controllers;
 /// <summary>
 /// A local repository to handle episodes.
 /// </summary>
-public class EpisodeRepository(DatabaseContext database, IRepository<Show> shows)
+public class EpisodeRepository(DatabaseContext database, IRepository<Show> shows, IThumbnailsManager thumbnails)
 	: GenericRepository<Episode>(database)
 {
 	static EpisodeRepository()
@@ -96,6 +96,7 @@ public class EpisodeRepository(DatabaseContext database, IRepository<Show> shows
 				x.ShowId == resource.ShowId && x.SeasonNumber == resource.SeasonNumber
 			);
 		}
+		await thumbnails.DownloadImages(resource);
 	}
 
 	/// <inheritdoc />

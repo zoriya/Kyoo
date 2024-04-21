@@ -31,7 +31,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Core.Controllers;
 
-public class SeasonRepository(DatabaseContext database) : GenericRepository<Season>(database)
+public class SeasonRepository(DatabaseContext database, IThumbnailsManager thumbnails)
+	: GenericRepository<Season>(database)
 {
 	static SeasonRepository()
 	{
@@ -90,5 +91,6 @@ public class SeasonRepository(DatabaseContext database) : GenericRepository<Seas
 			}
 			resource.ShowId = resource.Show.Id;
 		}
+		await thumbnails.DownloadImages(resource);
 	}
 }

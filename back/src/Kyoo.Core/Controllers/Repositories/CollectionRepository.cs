@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Postgresql;
@@ -30,7 +31,8 @@ namespace Kyoo.Core.Controllers;
 /// <summary>
 /// A local repository to handle collections
 /// </summary>
-public class CollectionRepository(DatabaseContext database) : GenericRepository<Collection>(database)
+public class CollectionRepository(DatabaseContext database, IThumbnailsManager thumbnails)
+	: GenericRepository<Collection>(database)
 {
 	/// <inheritdoc />
 	public override async Task<ICollection<Collection>> Search(
@@ -51,6 +53,7 @@ public class CollectionRepository(DatabaseContext database) : GenericRepository<
 
 		if (string.IsNullOrEmpty(resource.Name))
 			throw new ArgumentException("The collection's name must be set and not empty");
+		await thumbnails.DownloadImages(resource);
 	}
 
 	public async Task AddMovie(Guid id, Guid movieId)

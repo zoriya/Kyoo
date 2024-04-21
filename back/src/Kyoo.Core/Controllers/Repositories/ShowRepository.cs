@@ -27,8 +27,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Core.Controllers;
 
-public class ShowRepository(DatabaseContext database, IRepository<Studio> studios)
-	: GenericRepository<Show>(database)
+public class ShowRepository(
+	DatabaseContext database,
+	IRepository<Studio> studios,
+	IThumbnailsManager thumbnails
+) : GenericRepository<Show>(database)
 {
 	/// <inheritdoc />
 	public override async Task<ICollection<Show>> Search(
@@ -51,5 +54,6 @@ public class ShowRepository(DatabaseContext database, IRepository<Studio> studio
 			resource.Studio = await studios.CreateIfNotExists(resource.Studio);
 			resource.StudioId = resource.Studio.Id;
 		}
+		await thumbnails.DownloadImages(resource);
 	}
 }
