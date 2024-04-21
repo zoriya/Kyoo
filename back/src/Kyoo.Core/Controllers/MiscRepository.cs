@@ -27,6 +27,7 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Postgresql;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Core.Controllers;
 
@@ -36,6 +37,12 @@ public class MiscRepository(
 	IThumbnailsManager thumbnails
 )
 {
+	public static async Task DownloadMissingImages(IServiceProvider services)
+	{
+		await using AsyncServiceScope scope = services.CreateAsyncScope();
+		await scope.ServiceProvider.GetRequiredService<MiscRepository>().DownloadMissingImages();
+	}
+
 	private async Task<ICollection<Image>> _GetAllImages()
 	{
 		string GetSql(string type) =>
@@ -60,11 +67,12 @@ public class MiscRepository(
 	public async Task DownloadMissingImages()
 	{
 		ICollection<Image> images = await _GetAllImages();
-		await Task.WhenAll(
-			images
-				.Where(x => !File.Exists(thumbnails.GetImagePath(x.Id, ImageQuality.Low)))
-				.Select(x => thumbnails.DownloadImage(x, x.Id.ToString()))
-		);
+		IEnumerable<Task> tasks = images
+			.Where(x => !File.Exists(thumbnails.GetImagePath(x.Id, ImageQuality.Low)))
+			.Select(x => thumbnails.DownloadImage(x, x.Id.ToString()));
+		// Chunk tasks to prevent http timouts
+		foreach (IEnumerable<Task> batch in tasks.Chunk(30))
+			await Task.WhenAll(batch);
 	}
 
 	public async Task<ICollection<string>> GetRegisteredPaths()

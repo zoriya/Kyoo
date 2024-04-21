@@ -95,7 +95,8 @@ app.Services.GetRequiredService<RabbitProducer>();
 await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
 {
 	await MeilisearchModule.Initialize(scope.ServiceProvider);
-	await scope.ServiceProvider.GetRequiredService<MiscRepository>().DownloadMissingImages();
 }
+// The methods takes care of creating a scope and will download images on the background.
+_ = MiscRepository.DownloadMissingImages(app.Services);
 
-app.Run(Environment.GetEnvironmentVariable("KYOO_BIND_URL") ?? "http://*:5000");
+await app.RunAsync(Environment.GetEnvironmentVariable("KYOO_BIND_URL") ?? "http://*:5000");
