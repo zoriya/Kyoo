@@ -104,10 +104,7 @@ public class Image
 			string? src = document.RootElement.GetProperty("Source").GetString();
 			string? blurhash = document.RootElement.GetProperty("Blurhash").GetString();
 			Guid? id = document.RootElement.GetProperty("Id").GetGuid();
-			return new Image(src ?? string.Empty, blurhash)
-			{
-				Id = id ?? Guid.Empty
-			};
+			return new Image(src ?? string.Empty, blurhash) { Id = id ?? Guid.Empty };
 		}
 
 		/// <inheritdoc />

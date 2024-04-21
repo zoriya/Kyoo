@@ -9,23 +9,27 @@ namespace Kyoo.Postgresql.Migrations
 	{
 		private void MigrateImage(MigrationBuilder migrationBuilder, string table, string type)
 		{
-			migrationBuilder.Sql($"""
-				update {table} as r set {type} = json_build_object(
-					'Id', gen_random_uuid(),
-					'Source', r.{type}_source,
-					'Blurhash', r.{type}_blurhash
-				)
-				where r.{type}_source is not null
-			""");
+			migrationBuilder.Sql(
+				$"""
+					update {table} as r set {type} = json_build_object(
+						'Id', gen_random_uuid(),
+						'Source', r.{type}_source,
+						'Blurhash', r.{type}_blurhash
+					)
+					where r.{type}_source is not null
+				"""
+			);
 		}
 
 		private void UnMigrateImage(MigrationBuilder migrationBuilder, string table, string type)
 		{
-			migrationBuilder.Sql($"""
-				update {table} as r
-				set {type}_source = r.{type}->>'Source',
-				    {type}_blurhash = r.{type}->>'Blurhash'
-			""");
+			migrationBuilder.Sql(
+				$"""
+					update {table} as r
+					set {type}_source = r.{type}->>'Source',
+					    {type}_blurhash = r.{type}->>'Blurhash'
+				"""
+			);
 		}
 
 		/// <inheritdoc />

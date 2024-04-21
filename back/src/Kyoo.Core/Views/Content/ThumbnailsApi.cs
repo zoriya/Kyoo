@@ -65,4 +65,3 @@ public class ThumbnailsApi(IThumbnailsManager thumbs) : BaseApi
 		return PhysicalFile(Path.GetFullPath(path), "image/webp", true);
 	}
 }
-

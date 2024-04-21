@@ -40,8 +40,7 @@ namespace Kyoo.Core.Api;
 [ApiController]
 [PartialPermission(nameof(Show))]
 [ApiDefinition("Shows", Group = ResourcesGroup)]
-public class MovieApi(ILibraryManager libraryManager)
-	: TranscoderApi<Movie>(libraryManager.Movies)
+public class MovieApi(ILibraryManager libraryManager) : TranscoderApi<Movie>(libraryManager.Movies)
 {
 	/// <summary>
 	/// Get studio that made the show

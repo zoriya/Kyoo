@@ -96,6 +96,7 @@ await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
 {
 	await MeilisearchModule.Initialize(scope.ServiceProvider);
 }
+
 // The methods takes care of creating a scope and will download images on the background.
 _ = MiscRepository.DownloadMissingImages(app.Services);
 

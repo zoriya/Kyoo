@@ -187,7 +187,9 @@ class Matcher:
 		}
 		current = await self._client.get(kind, kyoo_id)
 		if self._provider.name not in current["externalId"]:
-			logger.error(f"Could not refresh metadata of {kind}/{kyoo_id}. Missisg provider id.")
+			logger.error(
+				f"Could not refresh metadata of {kind}/{kyoo_id}. Missisg provider id."
+			)
 			return False
 		provider_id = current["externalId"][self._provider.name]
 		new_value = await identify_table[kind](current, provider_id)
