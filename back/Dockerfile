@@ -22,7 +22,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 RUN apt-get update && apt-get install -y curl
 COPY --from=builder /app /app
 
-WORKDIR /kyoo
+WORKDIR /app
 EXPOSE 5000
 # The back can take a long time to start if meilisearch is initializing
 HEALTHCHECK --interval=5s --retries=15 CMD curl --fail http://localhost:5000/health || exit

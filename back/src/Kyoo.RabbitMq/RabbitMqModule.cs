@@ -35,7 +35,7 @@ public static class RabbitMqModule
 					UserName = builder.Configuration.GetValue("RABBITMQ_DEFAULT_USER", "guest"),
 					Password = builder.Configuration.GetValue("RABBITMQ_DEFAULT_PASS", "guest"),
 					HostName = builder.Configuration.GetValue("RABBITMQ_HOST", "rabbitmq"),
-					Port = 5672,
+					Port = builder.Configuration.GetValue("RABBITMQ_Port", 5672),
 				};
 
 			return factory.CreateConnection();

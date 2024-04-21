@@ -56,7 +56,7 @@ class Simkl(Service):
 					]
 				},
 				headers={
-					"Authorization": f"Bearer {user.external_id["simkl"].token.access_token}",
+					"Authorization": f"Bearer {user.external_id['simkl'].token.access_token}",
 					"simkl-api-key": self._api_key,
 				},
 			)
@@ -85,7 +85,7 @@ class Simkl(Service):
 				]
 			},
 			headers={
-				"Authorization": f"Bearer {user.external_id["simkl"].token.access_token}",
+				"Authorization": f"Bearer {user.external_id['simkl'].token.access_token}",
 				"simkl-api-key": self._api_key,
 			},
 		)

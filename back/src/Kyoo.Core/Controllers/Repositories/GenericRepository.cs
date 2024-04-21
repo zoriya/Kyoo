@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -29,38 +30,14 @@ using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Postgresql;
-using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Core.Controllers;
 
-/// <summary>
-/// A base class to create repositories using Entity Framework.
-/// </summary>
-/// <typeparam name="T">The type of this repository</typeparam>
-public abstract class LocalRepository<T> : IRepository<T>
+public abstract class GenericRepository<T>(DatabaseContext database) : IRepository<T>
 	where T : class, IResource, IQuery
 {
-	/// <summary>
-	/// The Entity Framework's Database handle.
-	/// </summary>
-	protected DbContext Database { get; }
-
-	/// <summary>
-	/// The thumbnail manager used to store images.
-	/// </summary>
-	private readonly IThumbnailsManager _thumbs;
-
-	/// <summary>
-	/// Create a new base <see cref="LocalRepository{T}"/> with the given database handle.
-	/// </summary>
-	/// <param name="database">A database connection to load resources of type <typeparamref name="T"/></param>
-	/// <param name="thumbs">The thumbnail manager used to store images.</param>
-	protected LocalRepository(DbContext database, IThumbnailsManager thumbs)
-	{
-		Database = database;
-		_thumbs = thumbs;
-	}
+	public DatabaseContext Database => database;
 
 	/// <inheritdoc/>
 	public Type RepositoryType => typeof(T);
@@ -127,12 +104,6 @@ public abstract class LocalRepository<T> : IRepository<T>
 		return query;
 	}
 
-	/// <summary>
-	/// Get a resource from it's ID and make the <see cref="Database"/> instance track it.
-	/// </summary>
-	/// <param name="id">The ID of the resource</param>
-	/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-	/// <returns>The tracked resource with the given ID</returns>
 	protected virtual async Task<T> GetWithTracking(Guid id)
 	{
 		T? ret = await Database.Set<T>().AsTracking().FirstOrDefaultAsync(x => x.Id == id);
@@ -172,11 +143,6 @@ public abstract class LocalRepository<T> : IRepository<T>
 		if (ret == null)
 			throw new ItemNotFoundException($"No {typeof(T).Name} found with the given predicate.");
 		return ret;
-	}
-
-	protected virtual Task<T?> GetDuplicated(T item)
-	{
-		return GetOrDefault(item.Slug);
 	}
 
 	/// <inheritdoc />
@@ -303,26 +269,9 @@ public abstract class LocalRepository<T> : IRepository<T>
 	public virtual async Task<T> Create(T obj)
 	{
 		await Validate(obj);
-		if (obj is IThumbnails thumbs)
-		{
-			try
-			{
-				await _thumbs.DownloadImages(thumbs);
-			}
-			catch (DuplicatedItemException e) when (e.Existing is null)
-			{
-				throw new DuplicatedItemException(await GetDuplicated(obj));
-			}
-			if (thumbs.Poster != null)
-				Database.Entry(thumbs).Reference(x => x.Poster).TargetEntry!.State =
-					EntityState.Added;
-			if (thumbs.Thumbnail != null)
-				Database.Entry(thumbs).Reference(x => x.Thumbnail).TargetEntry!.State =
-					EntityState.Added;
-			if (thumbs.Logo != null)
-				Database.Entry(thumbs).Reference(x => x.Logo).TargetEntry!.State =
-					EntityState.Added;
-		}
+		Database.Add(obj);
+		await Database.SaveChangesAsync(() => Get(obj.Slug));
+		await IRepository<T>.OnResourceCreated(obj);
 		return obj;
 	}
 
@@ -346,27 +295,11 @@ public abstract class LocalRepository<T> : IRepository<T>
 	/// <inheritdoc/>
 	public virtual async Task<T> Edit(T edited)
 	{
-		bool lazyLoading = Database.ChangeTracker.LazyLoadingEnabled;
-		Database.ChangeTracker.LazyLoadingEnabled = false;
-		try
-		{
-			T old = await GetWithTracking(edited.Id);
-
-			Merger.Complete(
-				old,
-				edited,
-				x => x.GetCustomAttribute<LoadableRelationAttribute>() == null
-			);
-			await EditRelations(old, edited);
-			await Database.SaveChangesAsync();
-			await IRepository<T>.OnResourceEdited(old);
-			return old;
-		}
-		finally
-		{
-			Database.ChangeTracker.LazyLoadingEnabled = lazyLoading;
-			Database.ChangeTracker.Clear();
-		}
+		await Validate(edited);
+		Database.Update(edited);
+		await Database.SaveChangesAsync();
+		await IRepository<T>.OnResourceEdited(edited);
+		return edited;
 	}
 
 	/// <inheritdoc/>
@@ -391,39 +324,9 @@ public abstract class LocalRepository<T> : IRepository<T>
 		}
 	}
 
-	/// <summary>
-	/// An overridable method to edit relation of a resource.
-	/// </summary>
-	/// <param name="resource">
-	/// The non edited resource
-	/// </param>
-	/// <param name="changed">
-	/// The new version of <paramref name="resource"/>.
-	/// This item will be saved on the database and replace <paramref name="resource"/>
-	/// </param>
-	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-	protected virtual Task EditRelations(T resource, T changed)
-	{
-		if (resource is IThumbnails thumbs && changed is IThumbnails chng)
-		{
-			Database.Entry(thumbs).Reference(x => x.Poster).IsModified =
-				thumbs.Poster != chng.Poster;
-			Database.Entry(thumbs).Reference(x => x.Thumbnail).IsModified =
-				thumbs.Thumbnail != chng.Thumbnail;
-			Database.Entry(thumbs).Reference(x => x.Logo).IsModified = thumbs.Logo != chng.Logo;
-		}
-		return Validate(resource);
-	}
-
-	/// <summary>
-	/// A method called just before saving a new resource to the database.
-	/// It is also called on the default implementation of <see cref="EditRelations"/>
-	/// </summary>
-	/// <param name="resource">The resource that will be saved</param>
-	/// <exception cref="ArgumentException">
+	/// <exception cref="ValidationException">
 	/// You can throw this if the resource is illegal and should not be saved.
 	/// </exception>
-	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 	protected virtual Task Validate(T resource)
 	{
 		if (
@@ -432,26 +335,9 @@ public abstract class LocalRepository<T> : IRepository<T>
 		)
 			return Task.CompletedTask;
 		if (string.IsNullOrEmpty(resource.Slug))
-			throw new ArgumentException("Resource can't have null as a slug.");
-		if (int.TryParse(resource.Slug, out int _) || resource.Slug == "random")
-		{
-			try
-			{
-				MethodInfo? setter = typeof(T).GetProperty(nameof(resource.Slug))!.GetSetMethod();
-				if (setter != null)
-					setter.Invoke(resource, new object[] { resource.Slug + '!' });
-				else
-					throw new ArgumentException(
-						"Resources slug can't be number only or the literal \"random\"."
-					);
-			}
-			catch
-			{
-				throw new ArgumentException(
-					"Resources slug can't be number only or the literal \"random\"."
-				);
-			}
-		}
+			throw new ValidationException("Resource can't have null as a slug.");
+		if (resource.Slug == "random")
+			throw new ValidationException("Resources slug can't be the literal \"random\".");
 		return Task.CompletedTask;
 	}
 
@@ -470,18 +356,20 @@ public abstract class LocalRepository<T> : IRepository<T>
 	}
 
 	/// <inheritdoc/>
-	public virtual Task Delete(T obj)
+	public virtual async Task Delete(T obj)
 	{
-		IRepository<T>.OnResourceDeleted(obj);
-		if (obj is IThumbnails thumbs)
-			return _thumbs.DeleteImages(thumbs);
-		return Task.CompletedTask;
+		await Database.Set<T>().Where(x => x.Id == obj.Id).ExecuteDeleteAsync();
+		await IRepository<T>.OnResourceDeleted(obj);
 	}
 
 	/// <inheritdoc/>
-	public async Task DeleteAll(Filter<T> filter)
+	public virtual async Task DeleteAll(Filter<T> filter)
 	{
-		foreach (T resource in await GetAll(filter))
-			await Delete(resource);
+		ICollection<T> items = await GetAll(filter);
+		Guid[] ids = items.Select(x => x.Id).ToArray();
+		await Database.Set<T>().Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+
+		foreach (T resource in items)
+			await IRepository<T>.OnResourceDeleted(resource);
 	}
 }

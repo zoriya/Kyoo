@@ -30,7 +30,8 @@ namespace Kyoo.Core.Controllers;
 /// <summary>
 /// A local repository to handle library items.
 /// </summary>
-public class LibraryItemRepository : DapperRepository<ILibraryItem>
+public class LibraryItemRepository(DbConnection database, SqlVariableContext context)
+	: DapperRepository<ILibraryItem>(database, context)
 {
 	// language=PostgreSQL
 	protected override FormattableString Sql =>
@@ -67,7 +68,7 @@ public class LibraryItemRepository : DapperRepository<ILibraryItem>
 			{ "c", typeof(Collection) }
 		};
 
-	protected override ILibraryItem Mapper(List<object?> items)
+	protected override ILibraryItem Mapper(IList<object?> items)
 	{
 		if (items[0] is Show show && show.Id != Guid.Empty)
 			return show;
@@ -77,9 +78,6 @@ public class LibraryItemRepository : DapperRepository<ILibraryItem>
 			return collection;
 		throw new InvalidDataException();
 	}
-
-	public LibraryItemRepository(DbConnection database, SqlVariableContext context)
-		: base(database, context) { }
 
 	public async Task<ICollection<ILibraryItem>> GetAllOfCollection(
 		Guid collectionId,

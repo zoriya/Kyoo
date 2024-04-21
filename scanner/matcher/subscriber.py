@@ -1,7 +1,6 @@
 import asyncio
-from dataclasses import dataclass
-from dataclasses_json import DataClassJsonMixin
-from typing import Literal
+from typing import Union, Literal
+from msgspec import Struct, json
 import os
 import logging
 from aio_pika import connect_robust
@@ -12,10 +11,24 @@ from matcher.matcher import Matcher
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class Message(DataClassJsonMixin):
-	action: Literal["scan", "delete"]
+class Message(Struct, tag_field="action", tag=str.lower):
+	pass
+
+
+class Scan(Message):
 	path: str
+
+
+class Delete(Message):
+	path: str
+
+
+class Refresh(Message):
+	kind: Literal["collection", "show", "movie", "season", "episode"]
+	id: str
+
+
+decoder = json.Decoder(Union[Scan, Delete, Refresh])
 
 
 class Subscriber:
@@ -24,6 +37,7 @@ class Subscriber:
 	async def __aenter__(self):
 		self._con = await connect_robust(
 			host=os.environ.get("RABBITMQ_HOST", "rabbitmq"),
+			port=int(os.environ.get("RABBITMQ_PORT", "5672")),
 			login=os.environ.get("RABBITMQ_DEFAULT_USER", "guest"),
 			password=os.environ.get("RABBITMQ_DEFAULT_PASS", "guest"),
 		)
@@ -36,18 +50,24 @@ class Subscriber:
 
 	async def listen(self, scanner: Matcher):
 		async def on_message(message: AbstractIncomingMessage):
-			msg = Message.from_json(message.body)
-			ack = False
-			match msg.action:
-				case "scan":
-					ack = await scanner.identify(msg.path)
-				case "delete":
-					ack = await scanner.delete(msg.path)
-				case _:
-					logger.error(f"Invalid action: {msg.action}")
-			if ack:
-				await message.ack()
-			else:
+			try:
+				msg = decoder.decode(message.body)
+				ack = False
+				match msg:
+					case Scan(path):
+						ack = await scanner.identify(path)
+					case Delete(path):
+						ack = await scanner.delete(path)
+					case Refresh(kind, id):
+						ack = await scanner.refresh(kind, id)
+					case _:
+						logger.error(f"Invalid action: {msg.action}")
+				if ack:
+					await message.ack()
+				else:
+					await message.reject()
+			except Exception as e:
+				logger.exception("Unhandled error", exc_info=e)
 				await message.reject()
 
 		# Allow up to 20 scan requests to run in parallel on the same listener.

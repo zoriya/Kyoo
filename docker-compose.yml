@@ -31,7 +31,7 @@ services:
       migrations:
         condition: service_completed_successfully
     volumes:
-      - kyoo:/kyoo
+      - kyoo:/metadata
 
   migrations:
     image: zoriya/kyoo_migrations:latest

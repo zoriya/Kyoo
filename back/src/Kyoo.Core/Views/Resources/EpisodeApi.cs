@@ -38,8 +38,8 @@ namespace Kyoo.Core.Api;
 [ApiController]
 [PartialPermission(nameof(Episode))]
 [ApiDefinition("Episodes", Group = ResourcesGroup)]
-public class EpisodeApi(ILibraryManager libraryManager, IThumbnailsManager thumbnails)
-	: TranscoderApi<Episode>(libraryManager.Episodes, thumbnails)
+public class EpisodeApi(ILibraryManager libraryManager)
+	: TranscoderApi<Episode>(libraryManager.Episodes)
 {
 	/// <summary>
 	/// Get episode's show

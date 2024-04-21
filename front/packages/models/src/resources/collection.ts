@@ -19,10 +19,11 @@
  */
 
 import { z } from "zod";
-import { withImages, ResourceP } from "../traits";
+import { ImagesP, ResourceP } from "../traits";
 
-export const CollectionP = withImages(
-	ResourceP("collection").extend({
+export const CollectionP = ResourceP("collection")
+	.merge(ImagesP)
+	.extend({
 		/**
 		 * The title of this collection.
 		 */
@@ -31,11 +32,11 @@ export const CollectionP = withImages(
 		 * The summary of this show.
 		 */
 		overview: z.string().nullable(),
-	}),
-).transform((x) => ({
-	...x,
-	href: `/collection/${x.slug}`,
-}));
+	})
+	.transform((x) => ({
+		...x,
+		href: `/collection/${x.slug}`,
+	}));
 
 /**
  * A class representing collections of show or movies.

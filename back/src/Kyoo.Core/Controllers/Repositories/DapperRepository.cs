@@ -37,7 +37,7 @@ public abstract class DapperRepository<T> : IRepository<T>
 
 	protected abstract Dictionary<string, Type> Config { get; }
 
-	protected abstract T Mapper(List<object?> items);
+	protected abstract T Mapper(IList<object?> items);
 
 	protected DbConnection Database { get; init; }
 

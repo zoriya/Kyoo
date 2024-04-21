@@ -30,19 +30,8 @@ namespace Kyoo.Core.Api;
 [Route("health")]
 [ApiController]
 [ApiDefinition("Health")]
-public class Health : BaseApi
+public class Health(HealthCheckService healthCheckService) : BaseApi
 {
-	private readonly HealthCheckService _healthCheckService;
-
-	/// <summary>
-	/// Create a new <see cref="Health"/>.
-	/// </summary>
-	/// <param name="healthCheckService">The service to check health.</param>
-	public Health(HealthCheckService healthCheckService)
-	{
-		_healthCheckService = healthCheckService;
-	}
-
 	/// <summary>
 	/// Check if the api is ready to accept requests.
 	/// </summary>
@@ -57,7 +46,7 @@ public class Health : BaseApi
 		headers.Pragma = "no-cache";
 		headers.Expires = "Thu, 01 Jan 1970 00:00:00 GMT";
 
-		HealthReport result = await _healthCheckService.CheckHealthAsync();
+		HealthReport result = await healthCheckService.CheckHealthAsync();
 		return result.Status switch
 		{
 			HealthStatus.Healthy => Ok(new HealthResult("Healthy")),

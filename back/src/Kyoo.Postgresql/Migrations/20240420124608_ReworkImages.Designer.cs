@@ -2,20 +2,20 @@
 using System;
 using System.Collections.Generic;
 using Kyoo.Abstractions.Models;
-using Kyoo.Postgresql;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace Kyoo.Postgresql.Migrations
 {
 	[DbContext(typeof(PostgresContext))]
-	partial class PostgresContextModelSnapshot : ModelSnapshot
+	[Migration("20240420124608_ReworkImages")]
+	partial class ReworkImages
 	{
-		protected override void BuildModel(ModelBuilder modelBuilder)
+		/// <inheritdoc />
+		protected override void BuildTargetModel(ModelBuilder modelBuilder)
 		{
 #pragma warning disable 612, 618
 			modelBuilder

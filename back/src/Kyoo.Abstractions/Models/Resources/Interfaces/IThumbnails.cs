@@ -17,12 +17,9 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Abstractions.Models;
 
@@ -49,9 +46,13 @@ public interface IThumbnails
 }
 
 [JsonConverter(typeof(ImageConvertor))]
-[SqlFirstColumn(nameof(Source))]
 public class Image
 {
+	/// <summary>
+	/// A unique identifier for the image. Used for proper http caches.
+	/// </summary>
+	public Guid Id { get; set; }
+
 	/// <summary>
 	/// The original image from another server.
 	/// </summary>
@@ -63,6 +64,21 @@ public class Image
 	[MaxLength(32)]
 	public string Blurhash { get; set; }
 
+	/// <summary>
+	/// The url to access the image in low quality.
+	/// </summary>
+	public string Low => $"/thumbnails/{Id}?quality=low";
+
+	/// <summary>
+	/// The url to access the image in medium quality.
+	/// </summary>
+	public string Medium => $"/thumbnails/{Id}?quality=medium";
+
+	/// <summary>
+	/// The url to access the image in high quality.
+	/// </summary>
+	public string High => $"/thumbnails/{Id}?quality=high";
+
 	public Image() { }
 
 	[JsonConstructor]
@@ -72,6 +88,7 @@ public class Image
 		Blurhash = blurhash ?? "000000";
 	}
 
+	//
 	public class ImageConvertor : JsonConverter<Image>
 	{
 		/// <inheritdoc />
@@ -84,7 +101,10 @@ public class Image
 			if (reader.TokenType == JsonTokenType.String && reader.GetString() is string source)
 				return new Image(source);
 			using JsonDocument document = JsonDocument.ParseValue(ref reader);
-			return document.RootElement.Deserialize<Image>();
+			string? src = document.RootElement.GetProperty("Source").GetString();
+			string? blurhash = document.RootElement.GetProperty("Blurhash").GetString();
+			Guid? id = document.RootElement.GetProperty("Id").GetGuid();
+			return new Image(src ?? string.Empty, blurhash) { Id = id ?? Guid.Empty };
 		}
 
 		/// <inheritdoc />
@@ -97,6 +117,9 @@ public class Image
 			writer.WriteStartObject();
 			writer.WriteString("source", value.Source);
 			writer.WriteString("blurhash", value.Blurhash);
+			writer.WriteString("low", value.Low);
+			writer.WriteString("medium", value.Medium);
+			writer.WriteString("high", value.High);
 			writer.WriteEndObject();
 		}
 	}

@@ -16,13 +16,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AspNetCore.Proxy;
 using Kyoo.Abstractions.Models.Utils;
+using Kyoo.Authentication;
 using Kyoo.Core.Api;
 using Kyoo.Core.Controllers;
 using Kyoo.Utils;
@@ -47,6 +46,8 @@ public static class ServiceExtensions
 				options.ModelBinderProviders.Insert(0, new IncludeBinder.Provider());
 				options.ModelBinderProviders.Insert(0, new FilterBinder.Provider());
 			})
+			.AddApplicationPart(typeof(CoreModule).Assembly)
+			.AddApplicationPart(typeof(AuthenticationModule).Assembly)
 			.AddJsonOptions(x =>
 			{
 				x.JsonSerializerOptions.TypeInfoResolver = new JsonKindResolver()

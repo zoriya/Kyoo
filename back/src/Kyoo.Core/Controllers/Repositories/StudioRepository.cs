@@ -19,11 +19,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Postgresql;
-using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Core.Controllers;
@@ -31,51 +29,17 @@ namespace Kyoo.Core.Controllers;
 /// <summary>
 /// A local repository to handle studios
 /// </summary>
-public class StudioRepository : LocalRepository<Studio>
+public class StudioRepository(DatabaseContext database) : GenericRepository<Studio>(database)
 {
-	/// <summary>
-	/// The database handle
-	/// </summary>
-	private readonly DatabaseContext _database;
-
-	/// <summary>
-	/// Create a new <see cref="StudioRepository"/>.
-	/// </summary>
-	/// <param name="database">The database handle</param>
-	/// <param name="thumbs">The thumbnail manager used to store images.</param>
-	public StudioRepository(DatabaseContext database, IThumbnailsManager thumbs)
-		: base(database, thumbs)
-	{
-		_database = database;
-	}
-
 	/// <inheritdoc />
 	public override async Task<ICollection<Studio>> Search(
 		string query,
 		Include<Studio>? include = default
 	)
 	{
-		return await AddIncludes(_database.Studios, include)
+		return await AddIncludes(Database.Studios, include)
 			.Where(x => EF.Functions.ILike(x.Name, $"%{query}%"))
 			.Take(20)
 			.ToListAsync();
-	}
-
-	/// <inheritdoc />
-	public override async Task<Studio> Create(Studio obj)
-	{
-		await base.Create(obj);
-		_database.Entry(obj).State = EntityState.Added;
-		await _database.SaveChangesAsync(() => Get(obj.Slug));
-		await IRepository<Studio>.OnResourceCreated(obj);
-		return obj;
-	}
-
-	/// <inheritdoc />
-	public override async Task Delete(Studio obj)
-	{
-		_database.Entry(obj).State = EntityState.Deleted;
-		await _database.SaveChangesAsync();
-		await base.Delete(obj);
 	}
 }

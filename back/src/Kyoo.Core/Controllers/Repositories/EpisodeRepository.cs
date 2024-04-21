@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
@@ -35,8 +36,8 @@ namespace Kyoo.Core.Controllers;
 public class EpisodeRepository(
 	DatabaseContext database,
 	IRepository<Show> shows,
-	IThumbnailsManager thumbs
-) : LocalRepository<Episode>(database, thumbs)
+	IThumbnailsManager thumbnails
+) : GenericRepository<Episode>(database)
 {
 	static EpisodeRepository()
 	{
@@ -64,70 +65,77 @@ public class EpisodeRepository(
 		Include<Episode>? include = default
 	)
 	{
-		return await AddIncludes(database.Episodes, include)
+		return await AddIncludes(Database.Episodes, include)
 			.Where(x => EF.Functions.ILike(x.Name!, $"%{query}%"))
 			.Take(20)
 			.ToListAsync();
 	}
 
-	protected override Task<Episode?> GetDuplicated(Episode item)
-	{
-		if (item is { SeasonNumber: not null, EpisodeNumber: not null })
-			return database.Episodes.FirstOrDefaultAsync(x =>
-				x.ShowId == item.ShowId
-				&& x.SeasonNumber == item.SeasonNumber
-				&& x.EpisodeNumber == item.EpisodeNumber
-			);
-		return database.Episodes.FirstOrDefaultAsync(x =>
-			x.ShowId == item.ShowId && x.AbsoluteNumber == item.AbsoluteNumber
-		);
-	}
-
 	/// <inheritdoc />
 	public override async Task<Episode> Create(Episode obj)
 	{
+		// Set it for the OnResourceCreated event and the return value.
 		obj.ShowSlug = obj.Show?.Slug ?? (await shows.Get(obj.ShowId)).Slug;
-		await base.Create(obj);
-		database.Entry(obj).State = EntityState.Added;
-		await database.SaveChangesAsync(() => GetDuplicated(obj));
-		await IRepository<Episode>.OnResourceCreated(obj);
-		return obj;
+		return await base.Create(obj);
 	}
 
 	/// <inheritdoc />
 	protected override async Task Validate(Episode resource)
 	{
 		await base.Validate(resource);
+		resource.Show = null;
 		if (resource.ShowId == Guid.Empty)
-		{
-			if (resource.Show == null)
-			{
-				throw new ArgumentException(
-					$"Can't store an episode not related "
-						+ $"to any show (showID: {resource.ShowId})."
-				);
-			}
-			resource.ShowId = resource.Show.Id;
-		}
+			throw new ValidationException("Missing show id");
+		resource.Season = null;
 		if (resource.SeasonId == null && resource.SeasonNumber != null)
 		{
-			resource.Season = await database.Seasons.FirstOrDefaultAsync(x =>
-				x.ShowId == resource.ShowId && x.SeasonNumber == resource.SeasonNumber
-			);
+			resource.SeasonId = await Database
+				.Seasons.Where(x =>
+					x.ShowId == resource.ShowId && x.SeasonNumber == resource.SeasonNumber
+				)
+				.Select(x => x.Id)
+				.FirstOrDefaultAsync();
 		}
+		await thumbnails.DownloadImages(resource);
 	}
 
 	/// <inheritdoc />
 	public override async Task Delete(Episode obj)
 	{
-		int epCount = await database
+		int epCount = await Database
 			.Episodes.Where(x => x.ShowId == obj.ShowId)
 			.Take(2)
 			.CountAsync();
-		database.Entry(obj).State = EntityState.Deleted;
-		await database.SaveChangesAsync();
-		await base.Delete(obj);
 		if (epCount == 1)
 			await shows.Delete(obj.ShowId);
+		else
+			await base.Delete(obj);
+	}
+
+	/// <inheritdoc/>
+	public override async Task DeleteAll(Filter<Episode> filter)
+	{
+		ICollection<Episode> items = await GetAll(filter);
+		Guid[] ids = items.Select(x => x.Id).ToArray();
+
+		await Database.Set<Episode>().Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+		foreach (Episode resource in items)
+			await IRepository<Episode>.OnResourceDeleted(resource);
+
+		Guid[] showIds = await Database
+			.Set<Episode>()
+			.Where(filter.ToEfLambda())
+			.Select(x => x.Show!)
+			.Where(x => !x.Episodes!.Any())
+			.Select(x => x.Id)
+			.ToArrayAsync();
+
+		if (!showIds.Any())
+			return;
+
+		Filter<Show>[] showFilters = showIds
+			.Select(x => new Filter<Show>.Eq(nameof(Show.Id), x))
+			.ToArray();
+		await shows.DeleteAll(Filter.Or(showFilters)!);
 	}
 }

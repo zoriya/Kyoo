@@ -252,7 +252,7 @@ public static class DapperHelper
 		this IDbConnection db,
 		FormattableString command,
 		Dictionary<string, Type> config,
-		Func<List<object?>, T> mapper,
+		Func<IList<object?>, T> mapper,
 		Func<Guid, Task<T>> get,
 		SqlVariableContext context,
 		Include<T>? include,
@@ -327,23 +327,6 @@ public static class DapperHelper
 					? ExpendProjections(typeV, prefix, include)
 					: null;
 
-				if (typeV.IsAssignableTo(typeof(IThumbnails)))
-				{
-					string posterProj = string.Join(
-						", ",
-						new[] { "poster", "thumbnail", "logo" }.Select(x =>
-							$"{prefix}{x}_source as source, {prefix}{x}_blurhash as blurhash"
-						)
-					);
-					projection = string.IsNullOrEmpty(projection)
-						? posterProj
-						: $"{projection}, {posterProj}";
-					types.InsertRange(
-						types.IndexOf(typeV) + 1,
-						Enumerable.Repeat(typeof(Image), 3)
-					);
-				}
-
 				if (string.IsNullOrEmpty(projection))
 					return leadingComa;
 				return $", {projection}{leadingComa}";
@@ -355,19 +338,7 @@ public static class DapperHelper
 			types.ToArray(),
 			items =>
 			{
-				List<object?> nItems = new(items.Length);
-				for (int i = 0; i < items.Length; i++)
-				{
-					if (types[i] == typeof(Image))
-						continue;
-					nItems.Add(items[i]);
-					if (items[i] is not IThumbnails thumbs)
-						continue;
-					thumbs.Poster = items[++i] as Image;
-					thumbs.Thumbnail = items[++i] as Image;
-					thumbs.Logo = items[++i] as Image;
-				}
-				return mapIncludes(mapper(nItems), nItems.Skip(config.Count));
+				return mapIncludes(mapper(items), items.Skip(config.Count));
 			},
 			ParametersDictionary.LoadFrom(cmd),
 			splitOn: string.Join(
@@ -384,7 +355,7 @@ public static class DapperHelper
 		this IDbConnection db,
 		FormattableString command,
 		Dictionary<string, Type> config,
-		Func<List<object?>, T> mapper,
+		Func<IList<object?>, T> mapper,
 		SqlVariableContext context,
 		Include<T>? include,
 		Filter<T>? filter,

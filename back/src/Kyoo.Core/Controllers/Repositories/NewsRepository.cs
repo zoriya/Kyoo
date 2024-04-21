@@ -49,7 +49,7 @@ public class NewsRepository : DapperRepository<INews>
 	protected override Dictionary<string, Type> Config =>
 		new() { { "e", typeof(Episode) }, { "m", typeof(Movie) }, };
 
-	protected override INews Mapper(List<object?> items)
+	protected override INews Mapper(IList<object?> items)
 	{
 		if (items[0] is Episode episode && episode.Id != Guid.Empty)
 			return episode;

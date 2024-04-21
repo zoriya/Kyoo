@@ -19,7 +19,7 @@
  */
 
 import { Platform } from "react-native";
-import { ZodObject, ZodRawShape, z } from "zod";
+import { z } from "zod";
 import { lastUsedUrl } from "..";
 
 export const imageFn = (url: string) =>
@@ -28,9 +28,12 @@ export const imageFn = (url: string) =>
 export const Img = z.object({
 	source: z.string(),
 	blurhash: z.string(),
+	low: z.string().transform(imageFn),
+	medium: z.string().transform(imageFn),
+	high: z.string().transform(imageFn),
 });
 
-const ImagesP = z.object({
+export const ImagesP = z.object({
 	/**
 	 * An url to the poster of this resource. If this resource does not have an image, the link will
 	 * be null. If the kyoo's instance is not capable of handling this kind of image for the specific
@@ -53,28 +56,7 @@ const ImagesP = z.object({
 	logo: Img.nullable(),
 });
 
-const addQualities = (x: object | null | undefined, href: string) => {
-	if (x === null) return null;
-	return {
-		...x,
-		low: imageFn(`${href}?quality=low`),
-		medium: imageFn(`${href}?quality=medium`),
-		high: imageFn(`${href}?quality=high`),
-	};
-};
-
-export const withImages = <T extends ZodRawShape>(parser: ZodObject<T>) => {
-	return parser.merge(ImagesP).transform((x) => {
-		return {
-			...x,
-			poster: addQualities(x.poster, `/${x.kind}/${x.slug}/poster`),
-			thumbnail: addQualities(x.thumbnail, `/${x.kind}/${x.slug}/thumbnail`),
-			logo: addQualities(x.logo, `/${x.kind}/${x.slug}/logo`),
-		};
-	});
-};
-
 /**
  * Base traits for items that has image resources.
  */
-export type KyooImage = z.infer<typeof Img> & { low: string; medium: string; high: string };
+export type KyooImage = z.infer<typeof Img>;

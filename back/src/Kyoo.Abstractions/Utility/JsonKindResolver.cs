@@ -25,7 +25,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
-using Microsoft.AspNetCore.Http;
 using static System.Text.Json.JsonNamingPolicy;
 
 namespace Kyoo.Utils;

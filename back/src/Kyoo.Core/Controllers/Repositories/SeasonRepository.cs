@@ -31,16 +31,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Core.Controllers;
 
-/// <summary>
-/// A local repository to handle seasons.
-/// </summary>
-public class SeasonRepository : LocalRepository<Season>
+public class SeasonRepository(DatabaseContext database, IThumbnailsManager thumbnails)
+	: GenericRepository<Season>(database)
 {
-	/// <summary>
-	/// The database handle
-	/// </summary>
-	private readonly DatabaseContext _database;
-
 	static SeasonRepository()
 	{
 		// Edit seasons slugs when the show's slug changes.
@@ -61,31 +54,13 @@ public class SeasonRepository : LocalRepository<Season>
 		};
 	}
 
-	/// <summary>
-	/// Create a new <see cref="SeasonRepository"/>.
-	/// </summary>
-	/// <param name="database">The database handle that will be used</param>
-	/// <param name="thumbs">The thumbnail manager used to store images.</param>
-	public SeasonRepository(DatabaseContext database, IThumbnailsManager thumbs)
-		: base(database, thumbs)
-	{
-		_database = database;
-	}
-
-	protected override Task<Season?> GetDuplicated(Season item)
-	{
-		return _database.Seasons.FirstOrDefaultAsync(x =>
-			x.ShowId == item.ShowId && x.SeasonNumber == item.SeasonNumber
-		);
-	}
-
 	/// <inheritdoc/>
 	public override async Task<ICollection<Season>> Search(
 		string query,
 		Include<Season>? include = default
 	)
 	{
-		return await AddIncludes(_database.Seasons, include)
+		return await AddIncludes(Database.Seasons, include)
 			.Where(x => EF.Functions.ILike(x.Name!, $"%{query}%"))
 			.Take(20)
 			.ToListAsync();
@@ -94,38 +69,20 @@ public class SeasonRepository : LocalRepository<Season>
 	/// <inheritdoc/>
 	public override async Task<Season> Create(Season obj)
 	{
-		await base.Create(obj);
+		// Set it for the OnResourceCreated event and the return value.
 		obj.ShowSlug =
-			(await _database.Shows.FirstOrDefaultAsync(x => x.Id == obj.ShowId))?.Slug
+			(await Database.Shows.FirstOrDefaultAsync(x => x.Id == obj.ShowId))?.Slug
 			?? throw new ItemNotFoundException($"No show found with ID {obj.ShowId}");
-		_database.Entry(obj).State = EntityState.Added;
-		await _database.SaveChangesAsync(() => GetDuplicated(obj));
-		await IRepository<Season>.OnResourceCreated(obj);
-		return obj;
+		return await base.Create(obj);
 	}
 
 	/// <inheritdoc/>
 	protected override async Task Validate(Season resource)
 	{
 		await base.Validate(resource);
+		resource.Show = null;
 		if (resource.ShowId == Guid.Empty)
-		{
-			if (resource.Show == null)
-			{
-				throw new ValidationException(
-					$"Can't store a season not related to any show "
-						+ $"(showID: {resource.ShowId})."
-				);
-			}
-			resource.ShowId = resource.Show.Id;
-		}
-	}
-
-	/// <inheritdoc/>
-	public override async Task Delete(Season obj)
-	{
-		_database.Remove(obj);
-		await _database.SaveChangesAsync();
-		await base.Delete(obj);
+			throw new ValidationException("Missing show id");
+		await thumbnails.DownloadImages(resource);
 	}
 }

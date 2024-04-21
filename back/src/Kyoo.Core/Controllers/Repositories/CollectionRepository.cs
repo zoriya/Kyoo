@@ -31,44 +31,19 @@ namespace Kyoo.Core.Controllers;
 /// <summary>
 /// A local repository to handle collections
 /// </summary>
-public class CollectionRepository : LocalRepository<Collection>
+public class CollectionRepository(DatabaseContext database, IThumbnailsManager thumbnails)
+	: GenericRepository<Collection>(database)
 {
-	/// <summary>
-	/// The database handle
-	/// </summary>
-	private readonly DatabaseContext _database;
-
-	/// <summary>
-	/// Create a new <see cref="CollectionRepository"/>.
-	/// </summary>
-	/// <param name="database">The database handle to use</param>
-	/// <param name="thumbs">The thumbnail manager used to store images.</param>
-	public CollectionRepository(DatabaseContext database, IThumbnailsManager thumbs)
-		: base(database, thumbs)
-	{
-		_database = database;
-	}
-
 	/// <inheritdoc />
 	public override async Task<ICollection<Collection>> Search(
 		string query,
 		Include<Collection>? include = default
 	)
 	{
-		return await AddIncludes(_database.Collections, include)
+		return await AddIncludes(Database.Collections, include)
 			.Where(x => EF.Functions.ILike(x.Name + " " + x.Slug, $"%{query}%"))
 			.Take(20)
 			.ToListAsync();
-	}
-
-	/// <inheritdoc />
-	public override async Task<Collection> Create(Collection obj)
-	{
-		await base.Create(obj);
-		_database.Entry(obj).State = EntityState.Added;
-		await _database.SaveChangesAsync(() => Get(obj.Slug));
-		await IRepository<Collection>.OnResourceCreated(obj);
-		return obj;
 	}
 
 	/// <inheritdoc />
@@ -78,25 +53,18 @@ public class CollectionRepository : LocalRepository<Collection>
 
 		if (string.IsNullOrEmpty(resource.Name))
 			throw new ArgumentException("The collection's name must be set and not empty");
+		await thumbnails.DownloadImages(resource);
 	}
 
 	public async Task AddMovie(Guid id, Guid movieId)
 	{
-		_database.AddLinks<Collection, Movie>(id, movieId);
-		await _database.SaveChangesAsync();
+		Database.AddLinks<Collection, Movie>(id, movieId);
+		await Database.SaveChangesAsync();
 	}
 
 	public async Task AddShow(Guid id, Guid showId)
 	{
-		_database.AddLinks<Collection, Show>(id, showId);
-		await _database.SaveChangesAsync();
-	}
-
-	/// <inheritdoc />
-	public override async Task Delete(Collection obj)
-	{
-		_database.Entry(obj).State = EntityState.Deleted;
-		await _database.SaveChangesAsync();
-		await base.Delete(obj);
+		Database.AddLinks<Collection, Show>(id, showId);
+		await Database.SaveChangesAsync();
 	}
 }

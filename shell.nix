@@ -9,6 +9,7 @@
       aio-pika
       requests
       dataclasses-json
+      msgspec
     ]);
   dotnet = with pkgs.dotnetCorePackages;
     combinePackages [

@@ -14,5 +14,5 @@ async def main():
 
 	async with KyooClient() as kyoo, Subscriber() as sub:
 		provider = Provider.get_default(kyoo.client)
-		scanner = Matcher(kyoo, provider)
-		await sub.listen(scanner)
+		matcher = Matcher(kyoo, provider)
+		await sub.listen(matcher)

@@ -16,26 +16,30 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.IO;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Permissions;
+using Kyoo.Core.Controllers;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
-namespace Kyoo.Abstractions.Controllers;
+namespace Kyoo.Core.Api;
 
-public interface IThumbnailsManager
+/// <summary>
+/// Private APIs only used for other services. Can change at any time without notice.
+/// </summary>
+[ApiController]
+[Permission(nameof(Misc), Kind.Read, Group = Group.Admin)]
+public class Misc(MiscRepository repo) : BaseApi
 {
-	Task DownloadImages<T>(T item)
-		where T : IThumbnails;
-
-	Task DownloadImage(Image? image, string what);
-
-	string GetImagePath(Guid imageId, ImageQuality quality);
-
-	Task DeleteImages<T>(T item)
-		where T : IThumbnails;
-
-	Task<Stream> GetUserImage(Guid userId);
-
-	Task SetUserImage(Guid userId, Stream? image);
+	/// <summary>
+	/// List all registered paths.
+	/// </summary>
+	/// <returns>The list of paths known to Kyoo.</returns>
+	[HttpGet("/paths")]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	public Task<ICollection<string>> GetAllPaths()
+	{
+		return repo.GetRegisteredPaths();
+	}
 }

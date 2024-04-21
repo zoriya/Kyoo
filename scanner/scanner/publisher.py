@@ -9,6 +9,7 @@ class Publisher:
 	async def __aenter__(self):
 		self._con = await connect_robust(
 			host=os.environ.get("RABBITMQ_HOST", "rabbitmq"),
+			port=int(os.environ.get("RABBITMQ_PORT", "5672")),
 			login=os.environ.get("RABBITMQ_DEFAULT_USER", "guest"),
 			password=os.environ.get("RABBITMQ_DEFAULT_PASS", "guest"),
 		)

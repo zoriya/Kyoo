@@ -21,59 +21,48 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Postgresql;
-using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Core.Controllers;
 
-/// <summary>
-/// A local repository to handle shows
-/// </summary>
-public class ShowRepository : LocalRepository<Show>
+public class ShowRepository(
+	DatabaseContext database,
+	IRepository<Studio> studios,
+	IThumbnailsManager thumbnails
+) : GenericRepository<Show>(database)
 {
-	/// <summary>
-	/// The database handle
-	/// </summary>
-	private readonly DatabaseContext _database;
-
-	/// <summary>
-	/// A studio repository to handle creation/validation of related studios.
-	/// </summary>
-	private readonly IRepository<Studio> _studios;
-
-	public ShowRepository(
-		DatabaseContext database,
-		IRepository<Studio> studios,
-		IThumbnailsManager thumbs
-	)
-		: base(database, thumbs)
-	{
-		_database = database;
-		_studios = studios;
-	}
-
 	/// <inheritdoc />
 	public override async Task<ICollection<Show>> Search(
 		string query,
 		Include<Show>? include = default
 	)
 	{
-		return await AddIncludes(_database.Shows, include)
+		return await AddIncludes(Database.Shows, include)
 			.Where(x => EF.Functions.ILike(x.Name + " " + x.Slug, $"%{query}%"))
 			.Take(20)
 			.ToListAsync();
 	}
 
 	/// <inheritdoc />
-	public override async Task<Show> Create(Show obj)
+	public override Task<Show> Create(Show obj)
 	{
-		await base.Create(obj);
-		_database.Entry(obj).State = EntityState.Added;
-		await _database.SaveChangesAsync(() => Get(obj.Slug));
-		await IRepository<Show>.OnResourceCreated(obj);
-		return obj;
+		try
+		{
+			return base.Create(obj);
+		}
+		catch (DuplicatedItemException ex)
+			when (ex.Existing is Show existing
+				&& existing.Slug == obj.Slug
+				&& obj.StartAir is not null
+				&& existing.StartAir?.Year != obj.StartAir?.Year
+			)
+		{
+			obj.Slug = $"{obj.Slug}-{obj.AirDate!.Value.Year}";
+			return base.Create(obj);
+		}
 	}
 
 	/// <inheritdoc />
@@ -82,28 +71,9 @@ public class ShowRepository : LocalRepository<Show>
 		await base.Validate(resource);
 		if (resource.Studio != null)
 		{
-			resource.Studio = await _studios.CreateIfNotExists(resource.Studio);
-			resource.StudioId = resource.Studio.Id;
+			resource.StudioId = (await studios.CreateIfNotExists(resource.Studio)).Id;
+			resource.Studio = null;
 		}
-	}
-
-	/// <inheritdoc />
-	protected override async Task EditRelations(Show resource, Show changed)
-	{
-		await Validate(changed);
-
-		if (changed.Studio != null || changed.StudioId == null)
-		{
-			await Database.Entry(resource).Reference(x => x.Studio).LoadAsync();
-			resource.Studio = changed.Studio;
-		}
-	}
-
-	/// <inheritdoc />
-	public override async Task Delete(Show obj)
-	{
-		_database.Remove(obj);
-		await _database.SaveChangesAsync();
-		await base.Delete(obj);
+		await thumbnails.DownloadImages(resource);
 	}
 }
