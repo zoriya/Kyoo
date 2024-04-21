@@ -20,13 +20,23 @@ using System;
 using System.IO;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Core.Api;
 
+/// <summary>
+/// Retrive images.
+/// </summary>
 [ApiController]
+[Route("thumbnails")]
+[Route("images", Order = AlternativeRoute)]
+[Route("image", Order = AlternativeRoute)]
+[Permission(nameof(Image), Kind.Read, Group = Group.Overall)]
+[ApiDefinition("Images", Group = OtherGroup)]
 public class ThumbnailsApi(IThumbnailsManager thumbs) : BaseApi
 {
 	/// <summary>
@@ -41,8 +51,7 @@ public class ThumbnailsApi(IThumbnailsManager thumbs) : BaseApi
 	/// <response code="404">
 	/// The image does not exists on kyoo.
 	/// </response>
-	[HttpGet("{identifier:id}/poster")]
-	[PartialPermission(Kind.Read)]
+	[HttpGet("{id:guid}")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	public IActionResult GetPoster(Guid id, [FromQuery] ImageQuality? quality)
