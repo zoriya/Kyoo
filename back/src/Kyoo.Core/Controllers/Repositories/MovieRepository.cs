@@ -71,8 +71,8 @@ public class MovieRepository(
 		await base.Validate(resource);
 		if (resource.Studio != null)
 		{
-			resource.Studio = await studios.CreateIfNotExists(resource.Studio);
-			resource.StudioId = resource.Studio.Id;
+			resource.StudioId = (await studios.CreateIfNotExists(resource.Studio)).Id;
+			resource.Studio = null;
 		}
 		await thumbnails.DownloadImages(resource);
 	}

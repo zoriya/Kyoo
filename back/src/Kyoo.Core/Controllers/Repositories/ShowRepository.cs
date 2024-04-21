@@ -60,7 +60,7 @@ public class ShowRepository(
 				&& existing.StartAir?.Year != obj.StartAir?.Year
 			)
 		{
-			obj.Slug = $"{obj.Slug}-{obj.StartAir!.Value.Year}";
+			obj.Slug = $"{obj.Slug}-{obj.AirDate!.Value.Year}";
 			return base.Create(obj);
 		}
 	}
@@ -71,8 +71,8 @@ public class ShowRepository(
 		await base.Validate(resource);
 		if (resource.Studio != null)
 		{
-			resource.Studio = await studios.CreateIfNotExists(resource.Studio);
-			resource.StudioId = resource.Studio.Id;
+			resource.StudioId = (await studios.CreateIfNotExists(resource.Studio)).Id;
+			resource.Studio = null;
 		}
 		await thumbnails.DownloadImages(resource);
 	}

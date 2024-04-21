@@ -80,17 +80,9 @@ public class SeasonRepository(DatabaseContext database, IThumbnailsManager thumb
 	protected override async Task Validate(Season resource)
 	{
 		await base.Validate(resource);
+		resource.Show = null;
 		if (resource.ShowId == Guid.Empty)
-		{
-			if (resource.Show == null)
-			{
-				throw new ValidationException(
-					$"Can't store a season not related to any show "
-						+ $"(showID: {resource.ShowId})."
-				);
-			}
-			resource.ShowId = resource.Show.Id;
-		}
+			throw new ValidationException("Missing show id");
 		await thumbnails.DownloadImages(resource);
 	}
 }

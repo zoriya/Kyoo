@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
@@ -79,22 +80,15 @@ public class EpisodeRepository(DatabaseContext database, IRepository<Show> shows
 	protected override async Task Validate(Episode resource)
 	{
 		await base.Validate(resource);
+		resource.Show = null;
 		if (resource.ShowId == Guid.Empty)
-		{
-			if (resource.Show == null)
-			{
-				throw new ArgumentException(
-					$"Can't store an episode not related "
-						+ $"to any show (showID: {resource.ShowId})."
-				);
-			}
-			resource.ShowId = resource.Show.Id;
-		}
+			throw new ValidationException("Missing show id");
+		resource.Season = null;
 		if (resource.SeasonId == null && resource.SeasonNumber != null)
 		{
-			resource.Season = await Database.Seasons.FirstOrDefaultAsync(x =>
+			resource.SeasonId = await Database.Seasons.Where(x =>
 				x.ShowId == resource.ShowId && x.SeasonNumber == resource.SeasonNumber
-			);
+			).Select(x => x.Id).FirstOrDefaultAsync();
 		}
 		await thumbnails.DownloadImages(resource);
 	}

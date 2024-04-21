@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -268,7 +269,7 @@ public abstract class GenericRepository<T>(DatabaseContext database) : IReposito
 	public virtual async Task<T> Create(T obj)
 	{
 		await Validate(obj);
-		Database.Entry(obj).State = EntityState.Added;
+		Database.Add(obj);
 		await Database.SaveChangesAsync(() => Get(obj.Slug));
 		await IRepository<T>.OnResourceCreated(obj);
 		return obj;
@@ -295,7 +296,7 @@ public abstract class GenericRepository<T>(DatabaseContext database) : IReposito
 	public virtual async Task<T> Edit(T edited)
 	{
 		await Validate(edited);
-		Database.Entry(edited).State = EntityState.Modified;
+		Database.Update(edited);
 		await Database.SaveChangesAsync();
 		await IRepository<T>.OnResourceEdited(edited);
 		return edited;
@@ -323,7 +324,7 @@ public abstract class GenericRepository<T>(DatabaseContext database) : IReposito
 		}
 	}
 
-	/// <exception cref="ArgumentException">
+	/// <exception cref="ValidationException">
 	/// You can throw this if the resource is illegal and should not be saved.
 	/// </exception>
 	protected virtual Task Validate(T resource)
@@ -334,9 +335,9 @@ public abstract class GenericRepository<T>(DatabaseContext database) : IReposito
 		)
 			return Task.CompletedTask;
 		if (string.IsNullOrEmpty(resource.Slug))
-			throw new ArgumentException("Resource can't have null as a slug.");
+			throw new ValidationException("Resource can't have null as a slug.");
 		if (resource.Slug == "random")
-			throw new ArgumentException("Resources slug can't be the literal \"random\".");
+			throw new ValidationException("Resources slug can't be the literal \"random\".");
 		return Task.CompletedTask;
 	}
 
