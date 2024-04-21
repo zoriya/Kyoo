@@ -297,6 +297,8 @@ public abstract class GenericRepository<T>(DatabaseContext database) : IReposito
 	{
 		await Validate(edited);
 		Database.Update(edited);
+		if (edited is IAddedDate date)
+			Database.Entry(date).Property(p => p.AddedDate).IsModified = false;
 		await Database.SaveChangesAsync();
 		await IRepository<T>.OnResourceEdited(edited);
 		return edited;
@@ -305,23 +307,15 @@ public abstract class GenericRepository<T>(DatabaseContext database) : IReposito
 	/// <inheritdoc/>
 	public virtual async Task<T> Patch(Guid id, Func<T, T> patch)
 	{
-		bool lazyLoading = Database.ChangeTracker.LazyLoadingEnabled;
-		Database.ChangeTracker.LazyLoadingEnabled = false;
-		try
-		{
-			T resource = await GetWithTracking(id);
+		T resource = await GetWithTracking(id);
 
-			resource = patch(resource);
+		resource = patch(resource);
+		if (resource is IAddedDate date)
+			Database.Entry(date).Property(p => p.AddedDate).IsModified = false;
 
-			await Database.SaveChangesAsync();
-			await IRepository<T>.OnResourceEdited(resource);
-			return resource;
-		}
-		finally
-		{
-			Database.ChangeTracker.LazyLoadingEnabled = lazyLoading;
-			Database.ChangeTracker.Clear();
-		}
+		await Database.SaveChangesAsync();
+		await IRepository<T>.OnResourceEdited(resource);
+		return resource;
 	}
 
 	/// <exception cref="ValidationException">
