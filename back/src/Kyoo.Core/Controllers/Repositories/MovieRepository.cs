@@ -21,6 +21,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Postgresql;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +44,25 @@ public class MovieRepository(
 			.Where(x => EF.Functions.ILike(x.Name + " " + x.Slug, $"%{query}%"))
 			.Take(20)
 			.ToListAsync();
+	}
+
+	/// <inheritdoc />
+	public override Task<Movie> Create(Movie obj)
+	{
+		try
+		{
+			return base.Create(obj);
+		}
+		catch (DuplicatedItemException ex)
+			when (ex.Existing is Movie existing
+				&& existing.Slug == obj.Slug
+				&& obj.AirDate is not null
+				&& existing.AirDate?.Year != obj.AirDate?.Year
+			)
+		{
+			obj.Slug = $"{obj.Slug}-{obj.AirDate!.Value.Year}";
+			return base.Create(obj);
+		}
 	}
 
 	/// <inheritdoc />

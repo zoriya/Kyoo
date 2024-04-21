@@ -112,20 +112,6 @@ class KyooClient:
 				logger.error(f"Request error: {await r.text()}")
 				r.raise_for_status()
 			ret = await r.json()
-
-			if r.status == 409 and (
-				(path == "shows" and ret["startAir"][:4] != str(data["start_air"].year))
-				or (
-					path == "movies"
-					and ret["airDate"][:4] != str(data["air_date"].year)
-				)
-			):
-				logger.info(
-					f"Found a {path} with the same slug ({ret['slug']}) and a different date, using the date as part of the slug"
-				)
-				year = (data["start_air"] if path == "movie" else data["air_date"]).year
-				data["slug"] = f"{ret['slug']}-{year}"
-				return await self.post(path, data=data)
 			return ret["id"]
 
 	async def delete(

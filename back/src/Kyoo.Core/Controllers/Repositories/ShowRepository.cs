@@ -21,6 +21,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Postgresql;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +44,25 @@ public class ShowRepository(
 			.Where(x => EF.Functions.ILike(x.Name + " " + x.Slug, $"%{query}%"))
 			.Take(20)
 			.ToListAsync();
+	}
+
+	/// <inheritdoc />
+	public override Task<Show> Create(Show obj)
+	{
+		try
+		{
+			return base.Create(obj);
+		}
+		catch (DuplicatedItemException ex)
+			when (ex.Existing is Show existing
+				&& existing.Slug == obj.Slug
+				&& obj.StartAir is not null
+				&& existing.StartAir?.Year != obj.StartAir?.Year
+			)
+		{
+			obj.Slug = $"{obj.Slug}-{obj.StartAir!.Value.Year}";
+			return base.Create(obj);
+		}
 	}
 
 	/// <inheritdoc />
