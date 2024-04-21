@@ -50,7 +50,7 @@ public class ThumbnailsManager(
 		await reader.CopyToAsync(file);
 	}
 
-	private async Task _DownloadImage(Image? image, string what)
+	public async Task DownloadImage(Image? image, string what)
 	{
 		if (image == null)
 			return;
@@ -108,9 +108,9 @@ public class ThumbnailsManager(
 	{
 		string name = item is IResource res ? res.Slug : "???";
 
-		await _DownloadImage(item.Poster, $"The poster of {name}");
-		await _DownloadImage(item.Thumbnail, $"The thumbnail of {name}");
-		await _DownloadImage(item.Logo, $"The logo of {name}");
+		await DownloadImage(item.Poster, $"The poster of {name}");
+		await DownloadImage(item.Thumbnail, $"The thumbnail of {name}");
+		await DownloadImage(item.Logo, $"The logo of {name}");
 	}
 
 	/// <inheritdoc />

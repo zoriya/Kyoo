@@ -19,6 +19,7 @@
 using System;
 using Kyoo.Authentication;
 using Kyoo.Core;
+using Kyoo.Core.Controllers;
 using Kyoo.Core.Extensions;
 using Kyoo.Meiliseach;
 using Kyoo.Postgresql;
@@ -69,11 +70,6 @@ AppDomain.CurrentDomain.UnhandledException += (_, ex) =>
 	Log.Fatal(ex.ExceptionObject as Exception, "Unhandled exception");
 builder.Host.UseSerilog();
 
-builder
-	.Services.AddMvcCore()
-	.AddApplicationPart(typeof(CoreModule).Assembly)
-	.AddApplicationPart(typeof(AuthenticationModule).Assembly);
-
 builder.Services.ConfigureMvc();
 builder.Services.ConfigureOpenApi();
 builder.ConfigureKyoo();
@@ -99,6 +95,7 @@ app.Services.GetRequiredService<RabbitProducer>();
 await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
 {
 	await MeilisearchModule.Initialize(scope.ServiceProvider);
+	await scope.ServiceProvider.GetRequiredService<MiscRepository>().DownloadMissingImages();
 }
 
 app.Run(Environment.GetEnvironmentVariable("KYOO_BIND_URL") ?? "http://*:5000");

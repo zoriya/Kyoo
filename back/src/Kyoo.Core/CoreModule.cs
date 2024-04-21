@@ -63,5 +63,6 @@ public static class CoreModule
 		);
 		builder.Services.AddScoped<IIssueRepository, IssueRepository>();
 		builder.Services.AddScoped<SqlVariableContext>();
+		builder.Services.AddScoped<MiscRepository>();
 	}
 }

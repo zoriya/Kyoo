@@ -28,6 +28,8 @@ public interface IThumbnailsManager
 	Task DownloadImages<T>(T item)
 		where T : IThumbnails;
 
+	Task DownloadImage(Image? image, string what);
+
 	string GetImagePath(Guid imageId, ImageQuality quality);
 
 	Task DeleteImages<T>(T item)

@@ -14,7 +14,7 @@ COPY src/Kyoo.RabbitMq/Kyoo.RabbitMq.csproj src/Kyoo.RabbitMq/Kyoo.RabbitMq.cspr
 COPY src/Kyoo.Swagger/Kyoo.Swagger.csproj src/Kyoo.Swagger/Kyoo.Swagger.csproj
 RUN dotnet restore
 
-WORKDIR /kyoo
+WORKDIR /app
 EXPOSE 5000
 ENV DOTNET_USE_POLLING_FILE_WATCHER 1
 # HEALTHCHECK --interval=5s CMD curl --fail http://localhost:5000/health || exit
