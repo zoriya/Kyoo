@@ -55,7 +55,8 @@ public class CrudThumbsApi<T>(IRepository<T> repository) : CrudApi<T>(repository
 		if (img is null)
 			return NotFound();
 
-		return Redirect($"/thumbnails/{img.Id}");
+		// TODO: Remove the /api and use a proxy rewrite instead.
+		return Redirect($"/api/thumbnails/{img.Id}");
 	}
 
 	/// <summary>
