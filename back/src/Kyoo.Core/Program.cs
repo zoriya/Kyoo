@@ -17,7 +17,6 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.IO;
 using Kyoo.Authentication;
 using Kyoo.Core;
 using Kyoo.Core.Extensions;
@@ -92,42 +91,6 @@ app.UseResponseCompression();
 app.UseRouting();
 app.UseAuthentication();
 app.MapControllers();
-
-// TODO: wait 4.5.0 and delete this
-static void MoveAll(DirectoryInfo source, DirectoryInfo target)
-{
-	if (source.FullName == target.FullName)
-		return;
-
-	Directory.CreateDirectory(target.FullName);
-
-	foreach (FileInfo fi in source.GetFiles())
-		fi.MoveTo(Path.Combine(target.ToString(), fi.Name), true);
-
-	foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
-	{
-		DirectoryInfo nextTargetSubDir = target.CreateSubdirectory(diSourceSubDir.Name);
-		MoveAll(diSourceSubDir, nextTargetSubDir);
-	}
-	Directory.Delete(source.FullName);
-}
-
-try
-{
-	string oldDir = "/kyoo/kyoo_datadir/metadata";
-	if (Path.Exists(oldDir))
-	{
-		MoveAll(new DirectoryInfo(oldDir), new DirectoryInfo("/metadata"));
-		Log.Warning("Old metadata directory migrated.");
-	}
-}
-catch (Exception ex)
-{
-	Log.Fatal(
-		ex,
-		"Unhandled error while trying to migrate old metadata images to new directory. Giving up and continuing normal startup."
-	);
-}
 
 // Activate services that always run in the background
 app.Services.GetRequiredService<MeiliSync>();
