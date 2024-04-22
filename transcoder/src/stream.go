@@ -246,7 +246,7 @@ func (ts *Stream) run(start int32) error {
 	args = append(args,
 		"-f", "segment",
 		// needed for rounding issues when forcing keyframes
-		// recommanded value is 1/(2*frame_rate), which for a 24fps is ~0.021
+		// recommended value is 1/(2*frame_rate), which for a 24fps is ~0.021
 		// we take a little bit more than that to be extra safe but too much can be harmfull
 		// when segments are short (can make the video repeat itself)
 		"-segment_time_delta", "0.05",

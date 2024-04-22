@@ -36,7 +36,7 @@ import { Platform, View, ViewProps } from "react-native";
 import { Fetch } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
 import { DefaultLayout } from "../layout";
-import { ItemDetails } from "../home/recommanded";
+import { ItemDetails } from "../home/recommended";
 import { SvgWave } from "../details/show";
 import { ItemGrid } from "../browse/grid";
 
