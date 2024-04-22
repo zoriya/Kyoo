@@ -81,7 +81,7 @@ export const ItemDetails = ({
 	unseenEpisodesCount: number | null;
 }>) => {
 	const [moreOpened, setMoreOpened] = useState(false);
-	const { css } = useYoshiki("recommanded-card");
+	const { css } = useYoshiki("recommended-card");
 	const { t } = useTranslation();
 
 	return (
@@ -238,15 +238,15 @@ ItemDetails.layout = {
 	gap: ts(8),
 } satisfies Layout;
 
-export const Recommanded = () => {
+export const Recommended = () => {
 	const { t } = useTranslation();
 	const { css } = useYoshiki();
 
 	return (
 		<View {...css({ marginX: ItemGrid.layout.gap, marginTop: ItemGrid.layout.gap })}>
-			<H3 {...css({ pX: ts(0.5) })}>{t("home.recommanded")}</H3>
+			<H3 {...css({ pX: ts(0.5) })}>{t("home.recommended")}</H3>
 			<InfiniteFetch
-				query={Recommanded.query()}
+				query={Recommended.query()}
 				layout={ItemDetails.layout}
 				placeholderCount={6}
 				fetchMore={false}
@@ -279,7 +279,7 @@ export const Recommanded = () => {
 	);
 };
 
-Recommanded.query = (): QueryIdentifier<LibraryItem> => ({
+Recommended.query = (): QueryIdentifier<LibraryItem> => ({
 	parser: LibraryItemP,
 	infinite: true,
 	path: ["items"],

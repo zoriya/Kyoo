@@ -28,15 +28,15 @@ import { useTranslation } from "react-i18next";
 import { ItemGrid } from "../browse/grid";
 import { itemMap } from "../browse";
 
-export const VerticalRecommanded = () => {
+export const VerticalRecommended = () => {
 	const { t } = useTranslation();
 	const { css } = useYoshiki();
 
 	return (
 		<View {...css({ marginY: ItemGrid.layout.gap })}>
-			<H3 {...css({ mX: ItemGrid.layout.gap })}>{t("home.recommanded")}</H3>
+			<H3 {...css({ mX: ItemGrid.layout.gap })}>{t("home.recommended")}</H3>
 			<InfiniteFetch
-				query={VerticalRecommanded.query()}
+				query={VerticalRecommended.query()}
 				placeholderCount={3}
 				layout={{ ...ItemList.layout, layout: "vertical" }}
 				fetchMore={false}
@@ -48,7 +48,7 @@ export const VerticalRecommanded = () => {
 	);
 };
 
-VerticalRecommanded.query = (): QueryIdentifier<LibraryItem> => ({
+VerticalRecommended.query = (): QueryIdentifier<LibraryItem> => ({
 	parser: LibraryItemP,
 	infinite: true,
 	path: ["items"],

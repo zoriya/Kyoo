@@ -24,8 +24,8 @@ import { Header } from "./header";
 import { DefaultLayout } from "../layout";
 import { RefreshControl, ScrollView } from "react-native";
 import { GenreGrid } from "./genre";
-import { Recommanded } from "./recommanded";
-import { VerticalRecommanded } from "./vertical";
+import { Recommended } from "./recommended";
+import { VerticalRecommended } from "./vertical";
 import { NewsList } from "./news";
 import { WatchlistList } from "./watchlist";
 import { useQueryClient } from "@tanstack/react-query";
@@ -76,13 +76,13 @@ export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
 				.map((x) => (
 					<GenreGrid key={x} genre={x} />
 				))}
-			<Recommanded />
+			<Recommended />
 			{randomItems
 				.filter((_, i) => i >= 2 && i < 6)
 				.map((x) => (
 					<GenreGrid key={x} genre={x} />
 				))}
-			<VerticalRecommanded />
+			<VerticalRecommended />
 			{/*
 				TODO: Lazy load those items
 				{randomItems.filter((_, i) => i >= 6).map((x) => <GenreGrid key={x} genre={x} />)}
@@ -100,6 +100,6 @@ HomePage.getFetchUrls = (_, randomItems) => [
 	WatchlistList.query(),
 	NewsList.query(),
 	...randomItems.filter((_, i) => i < 6).map((x) => GenreGrid.query(x)),
-	Recommanded.query(),
-	VerticalRecommanded.query(),
+	Recommended.query(),
+	VerticalRecommended.query(),
 ];
