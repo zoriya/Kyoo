@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -41,6 +42,29 @@ namespace Kyoo.Core.Api;
 public class SeasonApi(ILibraryManager libraryManager)
 	: CrudThumbsApi<Season>(libraryManager.Seasons)
 {
+	/// <summary>
+	/// Refresh
+	/// </summary>
+	/// <remarks>
+	/// Ask a metadata refresh.
+	/// </remarks>
+	/// <param name="identifier">The ID or slug of the <see cref="Season"/>.</param>
+	/// <returns>Nothing</returns>
+	/// <response code="404">No episode with the given ID or slug could be found.</response>
+	[HttpPost("{identifier:id}/refresh")]
+	[PartialPermission(Kind.Write)]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	public async Task<ActionResult> Refresh(Identifier identifier, [FromServices] IScanner scanner)
+	{
+		Guid id = await identifier.Match(
+			id => Task.FromResult(id),
+			async slug => (await libraryManager.Seasons.Get(slug)).Id
+		);
+		await scanner.SendRefreshRequest(nameof(Season), id);
+		return NoContent();
+	}
+
 	/// <summary>
 	/// Get episodes in the season
 	/// </summary>
