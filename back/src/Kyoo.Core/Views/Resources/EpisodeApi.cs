@@ -42,6 +42,29 @@ public class EpisodeApi(ILibraryManager libraryManager)
 	: TranscoderApi<Episode>(libraryManager.Episodes)
 {
 	/// <summary>
+	/// Refresh
+	/// </summary>
+	/// <remarks>
+	/// Ask a metadata refresh.
+	/// </remarks>
+	/// <param name="identifier">The ID or slug of the <see cref="Episode"/>.</param>
+	/// <returns>Nothing</returns>
+	/// <response code="404">No episode with the given ID or slug could be found.</response>
+	[HttpPost("{identifier:id}/refresh")]
+	[PartialPermission(Kind.Write)]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	public async Task<ActionResult> Refresh(Identifier identifier, [FromServices] IScanner scanner)
+	{
+		Guid id = await identifier.Match(
+			id => Task.FromResult(id),
+			async slug => (await libraryManager.Episodes.Get(slug)).Id
+		);
+		await scanner.SendRefreshRequest(nameof(Episode), id);
+		return NoContent();
+	}
+
+	/// <summary>
 	/// Get episode's show
 	/// </summary>
 	/// <remarks>
