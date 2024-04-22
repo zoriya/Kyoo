@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Models;
 using Kyoo.Authentication.Models;
@@ -29,31 +28,14 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Kyoo.Authentication;
 
-/// <summary>
-/// The service that controls jwt creation and validation.
-/// </summary>
-public class TokenController : ITokenController
+public class TokenController(ServerOptions options) : ITokenController
 {
-	/// <summary>
-	/// The options that this controller will use.
-	/// </summary>
-	private readonly AuthenticationOption _options;
-
-	/// <summary>
-	/// Create a new <see cref="TokenController"/>.
-	/// </summary>
-	/// <param name="options">The options that this controller will use.</param>
-	public TokenController(AuthenticationOption options)
-	{
-		_options = options;
-	}
-
 	/// <inheritdoc />
 	public string CreateAccessToken(User user, out TimeSpan expireIn)
 	{
 		expireIn = new TimeSpan(1, 0, 0);
 
-		SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_options.Secret));
+		SymmetricSecurityKey key = new(options.Secret);
 		SigningCredentials credential = new(key, SecurityAlgorithms.HmacSha256Signature);
 		string permissions =
 			user.Permissions != null ? string.Join(',', user.Permissions) : string.Empty;
@@ -79,7 +61,7 @@ public class TokenController : ITokenController
 	/// <inheritdoc />
 	public Task<string> CreateRefreshToken(User user)
 	{
-		SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_options.Secret));
+		SymmetricSecurityKey key = new(options.Secret);
 		SigningCredentials credential = new(key, SecurityAlgorithms.HmacSha256Signature);
 		JwtSecurityToken token =
 			new(
@@ -99,7 +81,7 @@ public class TokenController : ITokenController
 	/// <inheritdoc />
 	public Guid GetRefreshTokenUserID(string refreshToken)
 	{
-		SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_options.Secret));
+		SymmetricSecurityKey key = new(options.Secret);
 		JwtSecurityTokenHandler tokenHandler = new();
 		ClaimsPrincipal principal;
 		try

@@ -17,9 +17,11 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Linq;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Core.Controllers;
+using Kyoo.Postgresql;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -64,5 +66,11 @@ public static class CoreModule
 		builder.Services.AddScoped<IIssueRepository, IssueRepository>();
 		builder.Services.AddScoped<SqlVariableContext>();
 		builder.Services.AddScoped<MiscRepository>();
+
+		builder.Services.AddSingleton<ServerOptions>(x => {
+			using var scope = x.CreateScope();
+			var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+			return db.Set<ServerOptions>().Single();
+		});
 	}
 }

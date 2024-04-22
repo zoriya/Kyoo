@@ -66,6 +66,7 @@ public abstract class DatabaseContext : DbContext
 	public DbSet<EpisodeWatchStatus> EpisodeWatchStatus { get; set; }
 
 	public DbSet<Issue> Issues { get; set; }
+	public DbSet<ServerOptions> Options { get; set; }
 
 	/// <summary>
 	/// Add a many to many link between two resources.
