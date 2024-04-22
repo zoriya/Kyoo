@@ -23,7 +23,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
-using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Postgresql;
 using Microsoft.EntityFrameworkCore;
@@ -78,6 +77,7 @@ public class SeasonRepository(
 			throw new ValidationException("Missing show id");
 		// This is storred in db so it needs to be set before every create/edit (and before events)
 		resource.ShowSlug = (await shows.Get(resource.ShowId)).Slug;
+		resource.NextMetadataRefresh ??= IRefreshable.ComputeNextRefreshDate(resource.StartDate);
 		await thumbnails.DownloadImages(resource);
 	}
 }

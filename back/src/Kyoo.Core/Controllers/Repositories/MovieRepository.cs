@@ -74,6 +74,7 @@ public class MovieRepository(
 			resource.StudioId = (await studios.CreateIfNotExists(resource.Studio)).Id;
 			resource.Studio = null;
 		}
+		resource.NextMetadataRefresh ??= IRefreshable.ComputeNextRefreshDate(resource.AirDate);
 		await thumbnails.DownloadImages(resource);
 	}
 }

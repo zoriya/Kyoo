@@ -26,4 +26,18 @@ public interface IRefreshable
 	/// The date of the next metadata refresh. Null if auto-refresh is disabled.
 	/// </summary>
 	public DateTime? NextMetadataRefresh { get; set; }
+
+	public static DateTime ComputeNextRefreshDate(DateOnly? airDate)
+	{
+		if (airDate is null)
+			return DateTime.UtcNow.AddDays(1);
+
+		int days = airDate.Value.DayNumber - DateOnly.FromDateTime(DateTime.UtcNow).DayNumber;
+		return days switch
+		{
+			<= 7 => DateTime.UtcNow.AddDays(1),
+			<= 21 => DateTime.UtcNow.AddDays(5),
+			_ => DateTime.UtcNow.AddMonths(2)
+		};
+	}
 }
