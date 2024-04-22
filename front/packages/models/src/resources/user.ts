@@ -82,7 +82,7 @@ export const UserP = ResourceP("user")
 		...x,
 		logo: imageFn(`/user/${x.slug}/logo`),
 		isVerified: x.permissions.length > 0,
-		isAdmin: x.permissions?.includes("admin.write")
+		isAdmin: x.permissions?.includes("admin.write"),
 	}));
 
 export type User = z.infer<typeof UserP>;

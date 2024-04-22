@@ -62,10 +62,14 @@ public class ScannerProducer : IScanner
 
 	public Task SendRefreshRequest(string kind, Guid id)
 	{
-		var message = new { Action = "refresh", Kind = kind.ToLowerInvariant(), Id = id };
+		var message = new
+		{
+			Action = "refresh",
+			Kind = kind.ToLowerInvariant(),
+			Id = id
+		};
 		var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message, Utility.JsonOptions));
 		_channel.BasicPublish("", routingKey: "scanner", body: body);
 		return Task.CompletedTask;
 	}
 }
-
