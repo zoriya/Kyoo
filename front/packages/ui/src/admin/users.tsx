@@ -178,7 +178,7 @@ export const UserList = () => {
 						id={user.id}
 						username={user.username}
 						avatar={user.logo}
-						isAdmin={user.permissions?.includes("admin.write")}
+						isAdmin={user.isAdmin}
 						isVerified={user.isVerified}
 					/>
 				)}

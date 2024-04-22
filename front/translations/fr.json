@@ -6,6 +6,7 @@
 		"info": "Voir plus",
 		"none": "Aucun episode",
 		"watchlistLogin": "Pour suivre ce que vous avez regardé ou prévoyez de regarder, vous devez vous connecter.",
+		"refreshMetadata": "Actualiser les métadonnées",
 		"episodeMore": {
 			"goToShow": "Aller a la serie",
 			"download": "Télécharger",
