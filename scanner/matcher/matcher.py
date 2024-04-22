@@ -172,23 +172,36 @@ class Matcher:
 		kind: Literal["collection", "movie", "episode", "show", "season"],
 		kyoo_id: str,
 	):
+		async def id_season(season: dict, id: dict):
+			ret = await self._provider.identify_season(
+				id["dataId"], season["seasonNumber"]
+			)
+			ret.show_id = season["showId"]
+			return ret
+
+		async def id_episode(episode: dict, id: dict):
+			ret = await self._provider.identify_episode(
+				id["showId"], id["season"], id["episode"], episode["absoluteNumber"]
+			)
+			ret.show_id = episode["showId"]
+			ret.season_id = episode["seasonId"]
+			ret.path = episode["path"]
+			return ret
+
 		identify_table = {
 			"collection": lambda _, id: self._provider.identify_collection(
 				id["dataId"]
 			),
 			"movie": lambda _, id: self._provider.identify_movie(id["dataId"]),
 			"show": lambda _, id: self._provider.identify_show(id["dataId"]),
-			"season": lambda season, id: self._provider.identify_season(
-				id["dataId"], season["seasonNumber"]
-			),
-			"episode": lambda episode, id: self._provider.identify_episode(
-				id["showId"], id["season"], id["episode"], episode["absoluteNumber"]
-			),
+			"season": id_season,
+			"episode": id_episode,
 		}
+
 		current = await self._client.get(kind, kyoo_id)
 		if self._provider.name not in current["externalId"]:
 			logger.error(
-				f"Could not refresh metadata of {kind}/{kyoo_id}. Missisg provider id."
+				f"Could not refresh metadata of {kind}/{kyoo_id}. Missing provider id."
 			)
 			return False
 		provider_id = current["externalId"][self._provider.name]

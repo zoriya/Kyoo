@@ -19,65 +19,165 @@
  */
 
 import {
+	Genre,
+	KyooImage,
 	Movie,
 	QueryIdentifier,
 	Show,
-	getDisplayDate,
-	Genre,
 	Studio,
-	KyooImage,
+	getDisplayDate,
+	queryFn,
+	useAccount,
 } from "@kyoo/models";
+import { WatchStatusV } from "@kyoo/models/src/resources/watch-status";
 import {
+	A,
+	Chip,
 	Container,
+	DottedSeparator,
 	H1,
-	ImageBackground,
-	Skeleton,
-	Poster,
-	P,
-	tooltip,
-	Link,
+	H2,
+	HR,
+	Head,
 	IconButton,
 	IconFab,
-	Head,
-	HR,
-	H2,
-	UL,
+	ImageBackground,
 	LI,
-	A,
+	Link,
+	Menu,
+	P,
+	Poster,
+	Skeleton,
+	UL,
+	capitalize,
+	tooltip,
 	ts,
-	Chip,
-	DottedSeparator,
 	usePopup,
 } from "@kyoo/primitives";
-import { Fragment } from "react";
-import { useTranslation } from "react-i18next";
+import Refresh from "@material-symbols/svg-400/rounded/autorenew.svg";
+import Download from "@material-symbols/svg-400/rounded/download.svg";
+import MoreHoriz from "@material-symbols/svg-400/rounded/more_horiz.svg";
 import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
-import { ImageStyle, Platform, View } from "react-native";
-import {
-	Theme,
-	md,
-	px,
-	min,
-	max,
-	em,
-	percent,
-	rem,
-	vh,
-	useYoshiki,
-	Stylable,
-} from "yoshiki/native";
-import { Fetch } from "../fetch";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg";
-import { Rating } from "../components/rating";
-import { displayRuntime } from "./episode";
-import { WatchListInfo } from "../components/watchlist-info";
-import { WatchStatusV } from "@kyoo/models/src/resources/watch-status";
-import { capitalize } from "@kyoo/primitives";
-import { ShowWatchStatusCard } from "./show";
-import Download from "@material-symbols/svg-400/rounded/download.svg";
-import { useDownloader } from "../downloads";
+import { useMutation } from "@tanstack/react-query";
+import { Fragment } from "react";
+import { useTranslation } from "react-i18next";
+import { ImageStyle, Platform, View } from "react-native";
+import {
+	Stylable,
+	Theme,
+	em,
+	max,
+	md,
+	min,
+	percent,
+	px,
+	rem,
+	useYoshiki,
+	vh,
+} from "yoshiki/native";
 import { MediaInfoPopup } from "../components/media-info";
+import { Rating } from "../components/rating";
+import { WatchListInfo } from "../components/watchlist-info";
+import { useDownloader } from "../downloads";
+import { Fetch } from "../fetch";
+import { displayRuntime } from "./episode";
+import { ShowWatchStatusCard } from "./show";
+
+const ButtonList = ({
+	playHref,
+	trailerUrl,
+	watchStatus,
+	type,
+	slug,
+}: {
+	type: "movie" | "show" | "collection";
+	slug?: string;
+	playHref?: string | null;
+	trailerUrl?: string | null;
+	watchStatus?: WatchStatusV | null;
+}) => {
+	const account = useAccount();
+	const { css, theme } = useYoshiki();
+	const { t } = useTranslation();
+	const downloader = useDownloader();
+	const [setPopup, close] = usePopup();
+
+	const metadataRefreshMutation = useMutation({
+		mutationFn: () =>
+			queryFn({
+				path: [type, slug, "refresh"],
+				method: "POST",
+			}),
+	});
+
+	return (
+		<View {...css({ flexDirection: "row", alignItems: "center", justifyContent: "center" })}>
+			{playHref !== null && (
+				<IconFab
+					icon={PlayArrow}
+					as={Link}
+					href={playHref}
+					color={{ xs: theme.user.colors.black, md: theme.colors.black }}
+					{...css({
+						bg: theme.user.accent,
+						fover: { self: { bg: theme.user.accent } },
+					})}
+					{...tooltip(t("show.play"))}
+				/>
+			)}
+			{trailerUrl && (
+				<IconButton
+					icon={Theaters}
+					as={Link}
+					href={trailerUrl}
+					target="_blank"
+					color={{ xs: theme.user.contrast, md: theme.colors.white }}
+					{...tooltip(t("show.trailer"))}
+				/>
+			)}
+			{watchStatus !== undefined && type !== "collection" && slug && (
+				<WatchListInfo
+					type={type}
+					slug={slug}
+					status={watchStatus}
+					color={{ xs: theme.user.contrast, md: theme.colors.white }}
+				/>
+			)}
+			{((type === "movie" && slug) || account?.isAdmin === true) && (
+				<Menu Trigger={IconButton} icon={MoreHoriz} {...tooltip(t("misc.more"))}>
+					{type === "movie" && slug && (
+						<>
+							<Menu.Item
+								icon={Download}
+								onSelect={() => downloader(type, slug)}
+								label={t("home.episodeMore.download")}
+							/>
+							<Menu.Item
+								icon={MovieInfo}
+								label={t("home.episodeMore.mediainfo")}
+								onSelect={() =>
+									setPopup(<MediaInfoPopup mediaType={"movie"} mediaSlug={slug!} close={close} />)
+								}
+							/>
+						</>
+					)}
+					{account?.isAdmin === true && (
+						<>
+							{type === "movie" && <HR />}
+							<Menu.Item
+								label={t("home.refreshMetadata")}
+								icon={Refresh}
+								onSelect={() => metadataRefreshMutation.mutate()}
+							/>
+						</>
+					)}
+				</Menu>
+			)}
+		</View>
+	);
+};
 
 export const TitleLine = ({
 	isLoading,
@@ -111,8 +211,6 @@ export const TitleLine = ({
 } & Stylable) => {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
-	const downloader = useDownloader();
-	const [setPopup, close] = usePopup();
 
 	return (
 		<Container
@@ -221,60 +319,13 @@ export const TitleLine = ({
 							justifyContent: "center",
 						})}
 					>
-						<View
-							{...css({ flexDirection: "row", alignItems: "center", justifyContent: "center" })}
-						>
-							{playHref !== null && (
-								<IconFab
-									icon={PlayArrow}
-									as={Link}
-									href={playHref}
-									color={{ xs: theme.user.colors.black, md: theme.colors.black }}
-									{...css({
-										bg: theme.user.accent,
-										fover: { self: { bg: theme.user.accent } },
-									})}
-									{...tooltip(t("show.play"))}
-								/>
-							)}
-							{trailerUrl && (
-								<IconButton
-									icon={Theaters}
-									as={Link}
-									href={trailerUrl}
-									target="_blank"
-									color={{ xs: theme.user.contrast, md: theme.colors.white }}
-									{...tooltip(t("show.trailer"))}
-								/>
-							)}
-							{watchStatus !== undefined && type !== "collection" && slug && (
-								<WatchListInfo
-									type={type}
-									slug={slug}
-									status={watchStatus}
-									color={{ xs: theme.user.contrast, md: theme.colors.white }}
-								/>
-							)}
-							{type === "movie" && slug && (
-								<>
-									<IconButton
-										icon={Download}
-										onPress={() => downloader(type, slug)}
-										color={{ xs: theme.user.contrast, md: theme.colors.white }}
-										{...tooltip(t("home.episodeMore.download"))}
-									/>
-									<IconButton
-										icon={MovieInfo}
-										color={{ xs: theme.user.contrast, md: theme.colors.white }}
-										onPress={() =>
-											setPopup(
-												<MediaInfoPopup mediaType={"movie"} mediaSlug={slug!} close={close} />,
-											)
-										}
-									/>
-								</>
-							)}
-						</View>
+						<ButtonList
+							type={type}
+							slug={slug}
+							playHref={playHref}
+							trailerUrl={trailerUrl}
+							watchStatus={watchStatus}
+						/>
 						<View
 							{...css({ flexDirection: "row", alignItems: "center", justifyContent: "center" })}
 						>

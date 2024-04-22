@@ -53,6 +53,7 @@ public class CollectionRepository(DatabaseContext database, IThumbnailsManager t
 
 		if (string.IsNullOrEmpty(resource.Name))
 			throw new ArgumentException("The collection's name must be set and not empty");
+		resource.NextMetadataRefresh ??= DateTime.UtcNow.AddMonths(2);
 		await thumbnails.DownloadImages(resource);
 	}
 

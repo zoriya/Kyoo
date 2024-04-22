@@ -74,6 +74,7 @@ public class ShowRepository(
 			resource.StudioId = (await studios.CreateIfNotExists(resource.Studio)).Id;
 			resource.Studio = null;
 		}
+		resource.NextMetadataRefresh ??= IRefreshable.ComputeNextRefreshDate(resource.StartAir);
 		await thumbnails.DownloadImages(resource);
 	}
 }

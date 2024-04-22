@@ -18,20 +18,21 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { IconButton, Menu, tooltip, usePopup } from "@kyoo/primitives";
-import { ComponentProps, ReactElement, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
-import Info from "@material-symbols/svg-400/rounded/info.svg";
-import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
-import Download from "@material-symbols/svg-400/rounded/download.svg";
 import { WatchStatusV, queryFn, useAccount } from "@kyoo/models";
+import { HR, IconButton, Menu, tooltip, usePopup } from "@kyoo/primitives";
+import Refresh from "@material-symbols/svg-400/rounded/autorenew.svg";
+import Download from "@material-symbols/svg-400/rounded/download.svg";
+import Info from "@material-symbols/svg-400/rounded/info.svg";
+import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
+import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { watchListIcon } from "./watchlist-info";
-import { useDownloader } from "../downloads";
+import { ComponentProps } from "react";
+import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 import { useYoshiki } from "yoshiki/native";
+import { useDownloader } from "../downloads";
 import { MediaInfoPopup } from "./media-info";
+import { watchListIcon } from "./watchlist-info";
 
 export const EpisodesContext = ({
 	type = "episode",
@@ -61,6 +62,14 @@ export const EpisodesContext = ({
 				method: newStatus ? "POST" : "DELETE",
 			}),
 		onSettled: async () => await queryClient.invalidateQueries({ queryKey: [type, slug] }),
+	});
+
+	const metadataRefreshMutation = useMutation({
+		mutationFn: () =>
+			queryFn({
+				path: [type, slug, "refresh"],
+				method: "POST",
+			}),
 	});
 
 	return (
@@ -111,6 +120,16 @@ export const EpisodesContext = ({
 							onSelect={() =>
 								setPopup(<MediaInfoPopup mediaType={type} mediaSlug={slug} close={close} />)
 							}
+						/>
+					</>
+				)}
+				{account?.isAdmin === true && (
+					<>
+						<HR />
+						<Menu.Item
+							label={t("home.refreshMetadata")}
+							icon={Refresh}
+							onSelect={() => metadataRefreshMutation.mutate()}
 						/>
 					</>
 				)}

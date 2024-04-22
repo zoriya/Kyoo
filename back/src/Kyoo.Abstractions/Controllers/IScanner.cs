@@ -17,27 +17,11 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Threading.Tasks;
 
-namespace Kyoo.Abstractions.Models;
+namespace Kyoo.Abstractions.Controllers;
 
-public interface IRefreshable
+public interface IScanner
 {
-	/// <summary>
-	/// The date of the next metadata refresh. Null if auto-refresh is disabled.
-	/// </summary>
-	public DateTime? NextMetadataRefresh { get; set; }
-
-	public static DateTime ComputeNextRefreshDate(DateOnly? airDate)
-	{
-		if (airDate is null)
-			return DateTime.UtcNow.AddDays(1);
-
-		int days = airDate.Value.DayNumber - DateOnly.FromDateTime(DateTime.UtcNow).DayNumber;
-		return days switch
-		{
-			<= 7 => DateTime.UtcNow.AddDays(1),
-			<= 21 => DateTime.UtcNow.AddDays(5),
-			_ => DateTime.UtcNow.AddMonths(2)
-		};
-	}
+	Task SendRefreshRequest(string kind, Guid id);
 }

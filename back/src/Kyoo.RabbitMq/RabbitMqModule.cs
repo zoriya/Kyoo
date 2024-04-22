@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using Kyoo.Abstractions.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,5 +42,6 @@ public static class RabbitMqModule
 			return factory.CreateConnection();
 		});
 		builder.Services.AddSingleton<RabbitProducer>();
+		builder.Services.AddSingleton<IScanner, ScannerProducer>();
 	}
 }

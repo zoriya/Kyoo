@@ -38,10 +38,33 @@ namespace Kyoo.Core.Api;
 [Route("movies")]
 [Route("movie", Order = AlternativeRoute)]
 [ApiController]
-[PartialPermission(nameof(Show))]
-[ApiDefinition("Shows", Group = ResourcesGroup)]
+[PartialPermission(nameof(Movie))]
+[ApiDefinition("Movie", Group = ResourcesGroup)]
 public class MovieApi(ILibraryManager libraryManager) : TranscoderApi<Movie>(libraryManager.Movies)
 {
+	/// <summary>
+	/// Refresh
+	/// </summary>
+	/// <remarks>
+	/// Ask a metadata refresh.
+	/// </remarks>
+	/// <param name="identifier">The ID or slug of the <see cref="Movie"/>.</param>
+	/// <returns>Nothing</returns>
+	/// <response code="404">No episode with the given ID or slug could be found.</response>
+	[HttpPost("{identifier:id}/refresh")]
+	[PartialPermission(Kind.Write)]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	public async Task<ActionResult> Refresh(Identifier identifier, [FromServices] IScanner scanner)
+	{
+		Guid id = await identifier.Match(
+			id => Task.FromResult(id),
+			async slug => (await libraryManager.Movies.Get(slug)).Id
+		);
+		await scanner.SendRefreshRequest(nameof(Movie), id);
+		return NoContent();
+	}
+
 	/// <summary>
 	/// Get studio that made the show
 	/// </summary>
