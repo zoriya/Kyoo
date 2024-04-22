@@ -91,6 +91,16 @@ public class EpisodeRepository(
 				.Select(x => x.Id)
 				.FirstOrDefaultAsync();
 		}
+
+		// Refresh metadata every day if the item aired this week, refresh every two mounts otherwise
+		if (
+			resource.ReleaseDate is not DateOnly date
+			|| (date.DayNumber - DateOnly.FromDateTime(DateTime.UtcNow).DayNumber) < 7
+		)
+			resource.NextMetadataRefresh = DateTime.UtcNow.AddDays(1);
+		else
+			resource.NextMetadataRefresh = DateTime.UtcNow.AddMonths(2);
+
 		await thumbnails.DownloadImages(resource);
 	}
 
