@@ -18,7 +18,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Authentication.Models;
@@ -110,7 +109,8 @@ public static class AuthenticationModule
 					),
 			};
 		builder.Services.AddSingleton(options);
-		var secret = builder.Configuration.GetValue<byte[]>("AUTHENTICATION_SECRET")!;
+
+		byte[] secret = builder.Configuration.GetValue<byte[]>("AUTHENTICATION_SECRET")!;
 		builder.Services.AddSingleton(new AuthenticationOption() { Secret = secret });
 
 		builder

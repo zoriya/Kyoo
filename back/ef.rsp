@@ -1,2 +1,4 @@
 --project
 src/Kyoo.Postgresql
+--msbuildprojectextensionspath
+out/obj/Kyoo.Postgresql
