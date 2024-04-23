@@ -72,9 +72,11 @@ builder.Host.UseSerilog();
 
 builder.Services.ConfigureMvc();
 builder.Services.ConfigureOpenApi();
+
+// configure postgres first to allow other services to depend on db config
+builder.ConfigurePostgres();
 builder.ConfigureKyoo();
 builder.ConfigureAuthentication();
-builder.ConfigurePostgres();
 builder.ConfigureMeilisearch();
 builder.ConfigureRabbitMq();
 

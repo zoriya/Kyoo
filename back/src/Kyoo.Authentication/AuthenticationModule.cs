@@ -18,7 +18,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Authentication.Models;
@@ -36,10 +35,6 @@ public static class AuthenticationModule
 {
 	public static void ConfigureAuthentication(this WebApplicationBuilder builder)
 	{
-		string secret = builder.Configuration.GetValue(
-			"AUTHENTICATION_SECRET",
-			AuthenticationOption.DefaultSecret
-		)!;
 		PermissionOption options =
 			new()
 			{
@@ -114,9 +109,9 @@ public static class AuthenticationModule
 					),
 			};
 		builder.Services.AddSingleton(options);
-		builder.Services.AddSingleton(
-			new AuthenticationOption() { Secret = secret, Permissions = options, }
-		);
+
+		byte[] secret = builder.Configuration.GetValue<byte[]>("AUTHENTICATION_SECRET")!;
+		builder.Services.AddSingleton(new AuthenticationOption() { Secret = secret });
 
 		builder
 			.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -145,7 +140,7 @@ public static class AuthenticationModule
 					ValidateAudience = false,
 					ValidateLifetime = true,
 					ValidateIssuerSigningKey = true,
-					IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret))
+					IssuerSigningKey = new SymmetricSecurityKey(secret)
 				};
 			});
 

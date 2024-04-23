@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Data.Common;
 using Kyoo.Abstractions.Models;
 using Microsoft.AspNetCore.Builder;
@@ -69,5 +70,14 @@ public static class PostgresModule
 		);
 
 		builder.Services.AddHealthChecks().AddDbContextCheck<DatabaseContext>();
+		builder.Configuration.AddDbConfigurationProvider(x => x.UseNpgsql(dataSource));
+	}
+
+	private static void AddDbConfigurationProvider(
+		this IConfigurationBuilder builder,
+		Action<DbContextOptionsBuilder> action
+	)
+	{
+		builder.Add(new DbConfigurationSource(action));
 	}
 }
