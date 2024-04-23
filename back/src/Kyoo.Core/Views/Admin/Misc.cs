@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Models.Permissions;
@@ -41,5 +42,17 @@ public class Misc(MiscRepository repo) : BaseApi
 	public Task<ICollection<string>> GetAllPaths()
 	{
 		return repo.GetRegisteredPaths();
+	}
+
+	/// <summary>
+	/// List items to refresh.
+	/// </summary>
+	/// <param name="date">The upper limit for the refresh date.</param>
+	/// <returns>The items that should be refreshed before the given date</returns>
+	[HttpGet("/refreshables")]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	public Task<ICollection<RefreshableItem>> GetAllPaths([FromQuery] DateTime? date)
+	{
+		return repo.GetRefreshableItems(date ?? DateTime.UtcNow);
 	}
 }

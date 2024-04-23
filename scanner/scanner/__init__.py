@@ -4,6 +4,7 @@ async def main():
 	import logging
 	from .monitor import monitor
 	from .scanner import scan
+	from .refresher import refresh
 	from .publisher import Publisher
 	from providers.kyoo_client import KyooClient
 
@@ -15,4 +16,5 @@ async def main():
 		await asyncio.gather(
 			monitor(path, publisher),
 			scan(path, publisher, client),
+			refresh(publisher, client),
 		)

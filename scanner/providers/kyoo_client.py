@@ -128,11 +128,9 @@ class KyooClient:
 
 		await self.delete_issue(path)
 
-	async def get(
-		self, kind: Literal["movie", "show", "season", "episode", "collection"], id: str
-	):
+	async def get(self, path: str):
 		async with self.client.get(
-			f"{self._url}/{kind}/{id}",
+			f"{self._url}/{path}",
 			headers={"X-API-Key": self._api_key},
 		) as r:
 			if not r.ok:

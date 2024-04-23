@@ -1,6 +1,7 @@
 import os
 from guessit.jsonutils import json
 from aio_pika import Message, connect_robust
+from typing import Literal
 
 
 class Publisher:
@@ -31,3 +32,11 @@ class Publisher:
 
 	async def delete(self, path: str):
 		await self._publish({"action": "delete", "path": path})
+
+	async def refresh(
+		self,
+		kind: Literal["collection", "show", "movie", "season", "episode"],
+		id: str,
+		**_kwargs,
+	):
+		await self._publish({"action": "refresh", "kind": kind, "id": id})
