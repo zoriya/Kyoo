@@ -16,9 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-namespace Kyoo.Abstractions.Models;
+namespace Kyoo.Authentication.Models;
 
-public class ServerOptions
+public class AuthenticationOption
 {
-	public byte[] Secret { get; }
+	public byte[] Secret { get; set; }
 }

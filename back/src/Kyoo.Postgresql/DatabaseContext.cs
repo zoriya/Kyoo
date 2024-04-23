@@ -66,7 +66,8 @@ public abstract class DatabaseContext : DbContext
 	public DbSet<EpisodeWatchStatus> EpisodeWatchStatus { get; set; }
 
 	public DbSet<Issue> Issues { get; set; }
-	public DbSet<ServerOptions> Options { get; set; }
+
+	public DbSet<ServerOption> Options { get; set; }
 
 	/// <summary>
 	/// Add a many to many link between two resources.
@@ -354,6 +355,8 @@ public abstract class DatabaseContext : DbContext
 		_HasJson<User, string>(modelBuilder, x => x.Settings);
 		_HasJson<User, ExternalToken>(modelBuilder, x => x.ExternalId);
 		_HasJson<Issue, object>(modelBuilder, x => x.Extra);
+
+		modelBuilder.Entity<ServerOption>().HasKey(x => x.Key);
 	}
 
 	public override int SaveChanges()

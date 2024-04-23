@@ -66,11 +66,5 @@ public static class CoreModule
 		builder.Services.AddScoped<IIssueRepository, IssueRepository>();
 		builder.Services.AddScoped<SqlVariableContext>();
 		builder.Services.AddScoped<MiscRepository>();
-
-		builder.Services.AddSingleton<ServerOptions>(x => {
-			using var scope = x.CreateScope();
-			var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
-			return db.Set<ServerOptions>().Single();
-		});
 	}
 }

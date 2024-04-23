@@ -28,7 +28,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Kyoo.Authentication;
 
-public class TokenController(ServerOptions options) : ITokenController
+public class TokenController(AuthenticationOption options) : ITokenController
 {
 	/// <inheritdoc />
 	public string CreateAccessToken(User user, out TimeSpan expireIn)
