@@ -24,12 +24,14 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using Blurhash.SkiaSharp;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Exceptions;
 using Microsoft.Extensions.Logging;
 using SkiaSharp;
+using SKSvg = SkiaSharp.Extended.Svg.SKSvg;
 
 namespace Kyoo.Core.Controllers;
 
@@ -50,6 +52,27 @@ public class ThumbnailsManager(
 		await reader.CopyToAsync(file);
 	}
 
+	private SKBitmap _SKBitmapFrom(Stream reader, bool isSvg)
+	{
+		if (isSvg)
+		{
+			SKSvg svg = new();
+			svg.Load(reader);
+			SKBitmap bitmap = new((int)svg.CanvasSize.Width, (int)svg.CanvasSize.Height);
+			using SKCanvas canvas = new(bitmap);
+			canvas.DrawPicture(svg.Picture);
+			return bitmap;
+		}
+
+		using SKCodec codec = SKCodec.Create(reader);
+		if (codec == null)
+			throw new NotSupportedException("Unsupported codec");
+
+		SKImageInfo info = codec.Info;
+		info.ColorType = SKColorType.Rgba8888;
+		return SKBitmap.Decode(codec, info);
+	}
+
 	public async Task DownloadImage(Image? image, string what)
 	{
 		if (image == null)
@@ -65,16 +88,10 @@ public class ThumbnailsManager(
 			HttpResponseMessage response = await client.GetAsync(image.Source);
 			response.EnsureSuccessStatusCode();
 			await using Stream reader = await response.Content.ReadAsStreamAsync();
-			using SKCodec codec = SKCodec.Create(reader);
-			if (codec == null)
-			{
-				logger.LogError("Unsupported codec for {What}", what);
-				return;
-			}
-
-			SKImageInfo info = codec.Info;
-			info.ColorType = SKColorType.Rgba8888;
-			using SKBitmap original = SKBitmap.Decode(codec, info);
+			using SKBitmap original = _SKBitmapFrom(
+				reader,
+				isSvg: response.Content.Headers.ContentType?.MediaType?.Contains("svg") == true
+			);
 
 			using SKBitmap high = original.Resize(
 				new SKSizeI(original.Width, original.Height),
