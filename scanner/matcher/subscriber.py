@@ -2,13 +2,13 @@ import asyncio
 from typing import Union, Literal
 from msgspec import Struct, json
 import os
-import logging
+from logging import getLogger
 from aio_pika import connect_robust
 from aio_pika.abc import AbstractIncomingMessage
 
 from matcher.matcher import Matcher
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 class Message(Struct, tag_field="action", tag=str.lower):

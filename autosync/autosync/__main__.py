@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+
+import asyncio
 import autosync
 
-autosync.main()
+asyncio.run(autosync.main())

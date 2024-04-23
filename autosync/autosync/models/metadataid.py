@@ -1,10 +1,14 @@
-from dataclasses import dataclass
-from dataclasses_json import dataclass_json, LetterCase
+from msgspec import Struct
 from typing import Optional
 
 
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass
-class MetadataID:
+class MetadataID(Struct, rename="camel"):
 	data_id: str
+	link: Optional[str]
+
+
+class EpisodeID(Struct, rename="camel"):
+	show_id: str
+	season: Optional[int]
+	episode: int
 	link: Optional[str]

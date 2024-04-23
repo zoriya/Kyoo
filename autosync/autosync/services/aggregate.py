@@ -1,4 +1,4 @@
-import logging
+from logging import getLogger
 from autosync.services.service import Service
 from ..models.user import User
 from ..models.show import Show
@@ -6,11 +6,13 @@ from ..models.movie import Movie
 from ..models.episode import Episode
 from ..models.watch_status import WatchStatus
 
+logger = getLogger(__name__)
+
 
 class Aggregate(Service):
 	def __init__(self, services: list[Service]):
 		self._services = [x for x in services if x.enabled]
-		logging.info("Autosync enabled with %s", [x.name for x in self._services])
+		logger.info("Autosync enabled with %s", [x.name for x in self._services])
 
 	@property
 	def name(self) -> str:
@@ -21,6 +23,6 @@ class Aggregate(Service):
 			try:
 				service.update(user, resource, status)
 			except Exception as e:
-				logging.exception(
+				logger.exception(
 					"Unhandled error on autosync %s:", service.name, exc_info=e
 				)

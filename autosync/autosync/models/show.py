@@ -1,18 +1,14 @@
-from typing import Literal, Optional
-from datetime import datetime
-from dataclasses import dataclass
-from dataclasses_json import dataclass_json, LetterCase
+from typing import Optional
+from datetime import date
+from msgspec import Struct
 
 from .metadataid import MetadataID
 
 
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass
-class Show:
+class Show(Struct, rename="camel", tag_field="kind", tag="show"):
 	name: str
-	start_air: Optional[datetime]
+	start_air: Optional[date]
 	external_id: dict[str, MetadataID]
-	kind: Literal["show"]
 
 	@property
 	def year(self):

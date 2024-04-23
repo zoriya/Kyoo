@@ -1,8 +1,8 @@
 from datetime import datetime
-from dataclasses import dataclass
-from dataclasses_json import dataclass_json, LetterCase
 from typing import Optional
 from enum import Enum
+
+from msgspec import Struct
 
 
 class Status(str, Enum):
@@ -13,9 +13,7 @@ class Status(str, Enum):
 	DELETED = "Deleted"
 
 
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass
-class WatchStatus:
+class WatchStatus(Struct, rename="camel"):
 	added_date: datetime
 	played_date: Optional[datetime]
 	status: Status

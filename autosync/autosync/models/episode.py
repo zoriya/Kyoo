@@ -1,18 +1,12 @@
-from typing import Literal
-from dataclasses import dataclass
-from dataclasses_json import dataclass_json, LetterCase
-
+from msgspec import Struct
 from autosync.models.show import Show
 
-from .metadataid import MetadataID
+from .metadataid import EpisodeID
 
 
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass
-class Episode:
-	external_id: dict[str, MetadataID]
+class Episode(Struct, rename="camel", tag_field="kind", tag="episode"):
+	external_id: dict[str, EpisodeID]
 	show: Show
 	season_number: int
 	episode_number: int
 	absolute_number: int
-	kind: Literal["episode"]
