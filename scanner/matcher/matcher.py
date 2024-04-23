@@ -198,7 +198,7 @@ class Matcher:
 			"episode": id_episode,
 		}
 
-		current = await self._client.get(kind, kyoo_id)
+		current = await self._client.get(f"{kind}/{kyoo_id}")
 		if self._provider.name not in current["externalId"]:
 			logger.error(
 				f"Could not refresh metadata of {kind}/{kyoo_id}. Missing provider id."
