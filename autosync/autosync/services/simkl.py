@@ -1,6 +1,6 @@
 import os
 import requests
-import logging
+from logging import getLogger
 from autosync.models.metadataid import MetadataID
 
 from autosync.services.service import Service
@@ -9,6 +9,8 @@ from ..models.show import Show
 from ..models.movie import Movie
 from ..models.episode import Episode
 from ..models.watch_status import WatchStatus, Status
+
+logger = getLogger(__name__)
 
 
 class Simkl(Service):
@@ -29,7 +31,7 @@ class Simkl(Service):
 
 		watch_date = status.played_date or status.added_date
 
-		if resource.kind == "episode":
+		if isinstance(resource, Episode):
 			if status.status != Status.COMPLETED:
 				return
 
@@ -60,10 +62,10 @@ class Simkl(Service):
 					"simkl-api-key": self._api_key,
 				},
 			)
-			logging.info("Simkl response: %s %s", resp.status_code, resp.text)
+			logger.info("Simkl response: %s %s", resp.status_code, resp.text)
 			return
 
-		category = "movies" if resource.kind == "movie" else "shows"
+		category = "movies" if isinstance(resource, Movie) else "shows"
 
 		simkl_status = self._map_status(status.status)
 		if simkl_status is None:
@@ -89,7 +91,7 @@ class Simkl(Service):
 				"simkl-api-key": self._api_key,
 			},
 		)
-		logging.info("Simkl response: %s %s", resp.status_code, resp.text)
+		logger.info("Simkl response: %s %s", resp.status_code, resp.text)
 
 	def _map_status(self, status: Status):
 		match status:

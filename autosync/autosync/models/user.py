@@ -1,31 +1,23 @@
-from datetime import datetime, time
-from dataclasses import dataclass
-from dataclasses_json import dataclass_json, LetterCase
+from msgspec import Struct
+from datetime import datetime
 from typing import Optional
 
 
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass
-class JwtToken:
+class JwtToken(Struct):
 	token_type: str
 	access_token: str
 	refresh_token: Optional[str]
-	expire_in: time
 	expire_at: datetime
 
 
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass
-class ExternalToken:
+class ExternalToken(Struct, rename="camel"):
 	id: str
 	username: str
-	profileUrl: Optional[str]
+	profile_url: Optional[str]
 	token: JwtToken
 
 
-@dataclass_json(letter_case=LetterCase.CAMEL)
-@dataclass
-class User:
+class User(Struct, rename="camel", tag_field="kind", tag="user"):
 	id: str
 	username: str
 	email: str
