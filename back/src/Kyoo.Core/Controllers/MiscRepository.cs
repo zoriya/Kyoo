@@ -28,6 +28,7 @@ using Kyoo.Abstractions.Models;
 using Kyoo.Postgresql;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using static System.Text.Json.JsonNamingPolicy;
 
 namespace Kyoo.Core.Controllers;
 
@@ -82,4 +83,38 @@ public class MiscRepository(
 			.Concat(context.Movies.Select(x => x.Path))
 			.ToListAsync();
 	}
+
+	public async Task<ICollection<RefreshableItem>> GetRefreshableItems(DateTime end)
+	{
+		IQueryable<RefreshableItem> GetItems<T>()
+			where T : class, IResource, IRefreshable
+		{
+			return context
+				.Set<T>()
+				.Select(x => new RefreshableItem
+				{
+					Kind = CamelCase.ConvertName(typeof(T).Name),
+					Id = x.Id,
+					RefreshDate = x.NextMetadataRefresh!.Value
+				});
+		}
+
+		return await GetItems<Show>()
+			.Concat(GetItems<Movie>())
+			.Concat(GetItems<Season>())
+			.Concat(GetItems<Episode>())
+			.Concat(GetItems<Collection>())
+			.Where(x => x.RefreshDate <= end)
+			.OrderBy(x => x.RefreshDate)
+			.ToListAsync();
+	}
+}
+
+public class RefreshableItem
+{
+	public string Kind { get; set; }
+
+	public Guid Id { get; set; }
+
+	public DateTime RefreshDate { get; set; }
 }
