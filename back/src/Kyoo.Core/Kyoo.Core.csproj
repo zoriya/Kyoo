@@ -27,6 +27,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="SkiaSharp.Svg" Version="1.60.0" />
 	</ItemGroup>
 
 	<ItemGroup>
