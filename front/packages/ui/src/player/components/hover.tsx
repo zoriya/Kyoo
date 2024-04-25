@@ -265,7 +265,7 @@ export const HoverTouch = ({ children, ...props }: { children: ReactNode }) => {
 
 	const onAnyPress = (e: { pointerType: string; x: number }) => {
 		touch.current.count++;
-		if (touch.current.count == 2) {
+		if (touch.current.count >= 2) {
 			onDoublePress(e);
 			clearTimeout(touch.current.timeout);
 		} else {
