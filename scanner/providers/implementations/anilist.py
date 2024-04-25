@@ -33,6 +33,27 @@ class AniList(Provider):
 		self._client = client
 		self.base = "https://graphql.anilist.co"
 		self.api_key = api_key
+		self._genre_map = {
+			"Action": Genre.ACTION,
+			"Adventure": Genre.ADVENTURE,
+			"Comedy": Genre.COMEDY,
+			"Drama": Genre.DRAMA,
+			"Ecchi": None,
+			"Fantasy": Genre.FANTASY,
+			"Hentai": None,
+			"Horror": Genre.HORROR,
+			"Mahou Shoujo": None,
+			"Mecha": None,
+			"Music": Genre.MUSIC,
+			"Mystery": Genre.MYSTERY,
+			"Psychological": None,
+			"Romance": Genre.ROMANCE,
+			"Sci-Fi": Genre.SCIENCE_FICTION,
+			"Slice of Life": None,
+			"Sports": None,
+			"Supernatural": None,
+			"Thriller": Genre.THRILLER,
+		}
 
 	@property
 	def name(self) -> str:
@@ -45,10 +66,10 @@ class AniList(Provider):
 			r.raise_for_status()
 			return await r.json()
 
-	async def queryAnime(self, id: Optional[str], search: Optional[str]) -> Show:
+	async def query_anime(self, id: Optional[str], search: Optional[str]) -> Show:
 		query = """
 		{
-		  Media(id: $id, search: $search, type: ANIME) {
+		  Media(id: $id, search: $search, type: ANIME, format_not: MOVIE) {
 		    id
 		    idMal
 		    title {
@@ -122,6 +143,11 @@ class AniList(Provider):
 						x["name"]
 						for x in ret["tags"]
 						if not x["isMediaSpoiler"] and not x["isGeneralSpoiler"]
+					]
+					+ [
+						x
+						for x in ret["genres"]
+						if x not in self._genre_map or self._genre_map[x] is None
 					],
 					posters=[ret["coverImage"]["extraLarge"]],
 					logos=[],
@@ -147,9 +173,22 @@ class AniList(Provider):
 			if ret["status"] == "FINISHED"
 			else ShowStatus.AIRING,
 			rating=ret["averageScore"],
-			# TODO: fill that
-			studios=[],
-			genres=[],
-			external_id={},
+			genres=[self._genre_map[x] for x in ret["genres"] if x in self._genre_map],
+			studios=[
+				Studio(
+					name=x["name"],
+					external_id={
+						self.name: MetadataID(x["id"], x["siteUrl"]),
+					},
+				)
+				for x in ret["studios"]["nodes"]
+			],
+			external_id={
+				self.name: MetadataID(ret["id"], ret["siteUrl"]),
+				"mal": MetadataID(
+					ret["idMal"], f"https://myanimelist.net/anime/{ret['idMal']}"
+				),
+				# TODO: add anidb id (needed for xem lookup and scrubbing)
+			},
 			seasons=[],
 		)
