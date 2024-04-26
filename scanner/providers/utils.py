@@ -18,19 +18,22 @@ def format_date(date: date | int | None) -> str | None:
 
 def select_image(
 	self: Movie | Show,
-	type: Literal["posters"] | Literal["thumbnails"] | Literal["logos"],
+	kind: Literal["posters"] | Literal["thumbnails"] | Literal["logos"],
 ) -> str | None:
 	# For now, the API of kyoo only support one language so we remove the others.
 	default_language = os.environ["LIBRARY_LANGUAGES"].split(",")[0]
 	return next(
 		chain(
 			(
-				getattr(self.translations[self.original_language], type)
+				getattr(self.translations[self.original_language], kind)
 				if self.original_language
+				and self.original_language in self.translations
 				else []
 			),
-			getattr(self.translations[default_language], type),
-			*(getattr(x, type) for x in self.translations.values()),
+			getattr(self.translations[default_language], kind)
+			if default_language in self.translations
+			else [],
+			*(getattr(x, kind) for x in self.translations.values()),
 		),
 		None,
 	)
