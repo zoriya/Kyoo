@@ -19,7 +19,7 @@ class Season:
 	season_number: int
 	# This is not used by kyoo, this is just used internaly by the TMDB provider.
 	# maybe this should be moved?
-	episodes_count: int
+	episodes_count: Optional[int]
 	start_air: Optional[date | int] = None
 	end_air: Optional[date | int] = None
 	external_id: dict[str, MetadataID] = field(default_factory=dict)
