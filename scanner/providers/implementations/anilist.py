@@ -192,3 +192,143 @@ class AniList(Provider):
 			},
 			seasons=[],
 		)
+
+	async def query_movie(
+		self,
+		*,
+		id: Optional[str] = None,
+		search: Optional[str] = None,
+		year: Optional[int] = None,
+	) -> Movie:
+		query = """
+		{
+		  Media(id: $id, search: $search, type: ANIME, format: MOVIE, seasonYear: $year) {
+		    title {
+		      romaji
+		      english
+		      native
+		    }
+		    description(asHtml: false)
+			status
+		    startDate {
+		      year
+		      month
+		      day
+		    }
+		    countryOfOrigin
+		    trailer {
+		      id
+		      site
+		    }
+		    coverImage {
+		      extraLarge
+		    }
+		    bannerImage
+		    genres
+		    synonyms
+		    averageScore
+		    tags {
+		      name
+		      isMediaSpoiler
+		      isGeneralSpoiler
+		    }
+		    studios(isMain: true) {
+		      nodes {
+		        id
+		        name
+		        siteUrl
+		      }
+		    }
+		  }
+		}
+		"""
+		ret = await self.get(query, id=id, search=search)
+		return Movie(
+			translations={
+				"en": MovieTranslation(
+					name=ret["titles"]["romaji"],
+					tagline=None,
+					# TODO: unmarkdown the desc
+					overview=ret["description"],
+					# TODO: add spoiler tags
+					tags=[
+						x["name"]
+						for x in ret["tags"]
+						if not x["isMediaSpoiler"] and not x["isGeneralSpoiler"]
+					]
+					+ [
+						x
+						for x in ret["genres"]
+						if x not in self._genre_map or self._genre_map[x] is None
+					],
+					posters=[ret["coverImage"]["extraLarge"]],
+					logos=[],
+					thumbnails=[],
+					trailers=[f"https://youtube.com/watch?q={ret['trailer']['id']}"]
+					if ret["trailer"]["site"] == "youtube"
+					else [],
+				)
+			},
+			original_language=ret["countryOfOrigin"],
+			aliases=[ret["titles"]["english"], ret["titles"]["native"]],
+			air_date=date(
+				year=ret["startDate"]["year"],
+				month=ret["startDate"]["month"],
+				day=ret["startDate"]["day"],
+			),
+			status=MovieStatus.FINISHED
+			if ret["status"] == "FINISHED"
+			else MovieStatus.PLANNED,
+			rating=ret["averageScore"],
+			runtime=ret["runtime"],
+			genres=[self._genre_map[x] for x in ret["genres"] if x in self._genre_map],
+			studios=[
+				Studio(
+					name=x["name"],
+					external_id={
+						self.name: MetadataID(x["id"], x["siteUrl"]),
+					},
+				)
+				for x in ret["studios"]["nodes"]
+			],
+			external_id={
+				self.name: MetadataID(ret["id"], ret["siteUrl"]),
+				"mal": MetadataID(
+					ret["idMal"], f"https://myanimelist.net/anime/{ret['idMal']}"
+				),
+				# TODO: add anidb id (needed for xem lookup and scrubbing)
+			},
+		)
+
+	async def search_movie(self, name: str, year: Optional[int]) -> Movie:
+		return await self.query_movie(search=name, year=year)
+
+	async def search_episode(
+		self,
+		name: str,
+		season: Optional[int],
+		episode_nbr: Optional[int],
+		absolute: Optional[int],
+		year: Optional[int],
+	) -> Episode:
+		raise NotImplementedError
+
+	async def identify_movie(self, movie_id: str) -> Movie:
+		return await self.query_movie(id=movie_id)
+
+	async def identify_show(self, show_id: str) -> Show:
+		raise NotImplementedError
+
+	async def identify_season(self, show_id: str, season: int) -> Season:
+		raise NotImplementedError
+
+	async def identify_episode(
+		self, show_id: str, season: Optional[int], episode_nbr: int, absolute: int
+	) -> Episode:
+		raise NotImplementedError
+
+	async def identify_collection(self, provider_id: str) -> Collection:
+		raise NotImplementedError
+
+	async def get_expected_titles(self) -> list[str]:
+		return []
