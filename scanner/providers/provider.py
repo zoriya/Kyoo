@@ -22,12 +22,16 @@ class Provider:
 		languages = languages.split(",")
 		providers = []
 
+		from providers.implementations.anilist import AniList
+		return AniList(client)
+
 		from providers.implementations.themoviedatabase import TheMovieDatabase
 
 		tmdb = os.environ.get("THEMOVIEDB_APIKEY") or TheMovieDatabase.DEFAULT_API_KEY
 		if tmdb != "disabled":
 			tmdb = TheMovieDatabase(languages, client, tmdb)
 			providers.append(tmdb)
+
 
 		if not any(providers):
 			raise ProviderError(

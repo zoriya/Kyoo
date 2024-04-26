@@ -11,7 +11,7 @@ from matcher.cache import cache
 from ..provider import Provider
 from ..types.movie import Movie, MovieTranslation, Status as MovieStatus
 from ..types.season import Season, SeasonTranslation
-from ..types.episode import Episode, EpisodeTranslation, PartialShow, EpisodeID
+from ..types.episode import Episode, EpisodeTranslation, EpisodeID
 from ..types.studio import Studio
 from ..types.genre import Genre
 from ..types.metadataid import MetadataID
@@ -24,15 +24,11 @@ logger = getLogger(__name__)
 class AniList(Provider):
 	def __init__(
 		self,
-		languages: list[str],
 		client: ClientSession,
-		api_key: str,
 	) -> None:
 		super().__init__()
-		self._languages = languages
 		self._client = client
 		self.base = "https://graphql.anilist.co"
-		self.api_key = api_key
 		self._genre_map = {
 			"Action": Genre.ACTION,
 			"Adventure": Genre.ADVENTURE,
@@ -59,18 +55,37 @@ class AniList(Provider):
 	def name(self) -> str:
 		return "anilist"
 
-	async def get(self, query: str, **variables: Optional[str]):
+	async def get(self, query: str, not_found: str, **variables: Optional[str | int]):
+		logger.error(variables)
 		async with self._client.post(
-			self.base, json={"query": query, "variables": variables}
+			self.base,
+			json={
+				"query": query,
+				"variables": {k: v for (k, v) in variables.items() if v is not None},
+			},
 		) as r:
+			if r.status == 404:
+				raise ProviderError(not_found)
+			ret = await r.json()
+			logger.error(ret)
 			r.raise_for_status()
-			return await r.json()
+			if "errors" in ret:
+				logger.error(ret)
+				raise Exception(ret["errors"])
+			return ret["data"]
 
-	async def query_anime(self, id: Optional[str], search: Optional[str]) -> Show:
+	async def query_anime(
+		self,
+		*,
+		id: Optional[str] = None,
+		search: Optional[str] = None,
+		year: Optional[int] = None,
+	) -> Show:
 		query = """
-		{
-		  Media(id: $id, search: $search, type: ANIME, format_not: MOVIE) {
+		query SearchAnime($id: Int, $search: String, $year: Int) {
+		  Media(id: $id, search: $search, type: ANIME, format_not: MOVIE, seasonYear: $year) {
 		    id
+			siteUrl
 		    idMal
 		    title {
 		      romaji
@@ -130,11 +145,18 @@ class AniList(Provider):
 		  }
 		}
 		"""
-		ret = await self.get(query, id=id, search=search)
+		q = await self.get(
+			query,
+			id=id,
+			search=search,
+			year=year,
+			not_found=f"Could not find the show {id or ''}{search or ''}",
+		)
+		ret = q["Media"]
 		return Show(
 			translations={
 				"en": ShowTranslation(
-					name=ret["titles"]["romaji"],
+					name=ret["title"]["romaji"],
 					tagline=None,
 					# TODO: unmarkdown the desc
 					overview=ret["description"],
@@ -153,12 +175,13 @@ class AniList(Provider):
 					logos=[],
 					thumbnails=[],
 					trailers=[f"https://youtube.com/watch?q={ret['trailer']['id']}"]
-					if ret["trailer"]["site"] == "youtube"
+					if ret["trailer"] is not None
+					and ret["trailer"]["site"] == "youtube"
 					else [],
 				)
 			},
 			original_language=ret["countryOfOrigin"],
-			aliases=[ret["titles"]["english"], ret["titles"]["native"]],
+			aliases=[ret["title"]["english"], ret["title"]["native"]],
 			start_air=date(
 				year=ret["startDate"]["year"],
 				month=ret["startDate"]["month"],
@@ -168,7 +191,9 @@ class AniList(Provider):
 				year=ret["endDate"]["year"],
 				month=ret["endDate"]["month"],
 				day=ret["endDate"]["day"],
-			),
+			)
+			if ret["endDate"]["year"] is not None
+			else None,
 			status=ShowStatus.FINISHED
 			if ret["status"] == "FINISHED"
 			else ShowStatus.AIRING,
@@ -201,8 +226,11 @@ class AniList(Provider):
 		year: Optional[int] = None,
 	) -> Movie:
 		query = """
-		{
+		query SearchMovie($id: Int, $search: String, $year: Int) {
 		  Media(id: $id, search: $search, type: ANIME, format: MOVIE, seasonYear: $year) {
+		    id
+			siteUrl
+		    idMal
 		    title {
 		      romaji
 		      english
@@ -242,11 +270,18 @@ class AniList(Provider):
 		  }
 		}
 		"""
-		ret = await self.get(query, id=id, search=search)
+		q = await self.get(
+			query,
+			id=id,
+			search=search,
+			year=year,
+			not_found=f"No movie found for {id or ''}{search or ''}",
+		)
+		ret = q["Media"]
 		return Movie(
 			translations={
 				"en": MovieTranslation(
-					name=ret["titles"]["romaji"],
+					name=ret["title"]["romaji"],
 					tagline=None,
 					# TODO: unmarkdown the desc
 					overview=ret["description"],
@@ -265,12 +300,13 @@ class AniList(Provider):
 					logos=[],
 					thumbnails=[],
 					trailers=[f"https://youtube.com/watch?q={ret['trailer']['id']}"]
-					if ret["trailer"]["site"] == "youtube"
+					if ret["trailer"] is not None
+					and ret["trailer"]["site"] == "youtube"
 					else [],
 				)
 			},
 			original_language=ret["countryOfOrigin"],
-			aliases=[ret["titles"]["english"], ret["titles"]["native"]],
+			aliases=[ret["title"]["english"], ret["title"]["native"]],
 			air_date=date(
 				year=ret["startDate"]["year"],
 				month=ret["startDate"]["month"],
@@ -311,13 +347,35 @@ class AniList(Provider):
 		absolute: Optional[int],
 		year: Optional[int],
 	) -> Episode:
-		raise NotImplementedError
+		absolute = absolute or episode_nbr
+		if absolute is None:
+			raise ProviderError(
+				f"Could not guess episode number of the episode {name} {season}-{episode_nbr} ({absolute})"
+			)
+
+		show = await self.query_anime(search=name, year=year)
+
+		return Episode(
+			show=show,
+			season_number=1,
+			episode_number=absolute,
+			absolute_number=absolute,
+			runtime=None,
+			release_date=None,
+			thumbnail=None,
+			external_id={
+				self.name: EpisodeID(
+					show.external_id[self.name].data_id, None, absolute, None
+				),
+				"mal": EpisodeID(show.external_id["mal"].data_id, None, absolute, None),
+			},
+		)
 
 	async def identify_movie(self, movie_id: str) -> Movie:
 		return await self.query_movie(id=movie_id)
 
 	async def identify_show(self, show_id: str) -> Show:
-		raise NotImplementedError
+		return await self.query_anime(id=show_id)
 
 	async def identify_season(self, show_id: str, season: int) -> Season:
 		raise NotImplementedError
@@ -329,6 +387,3 @@ class AniList(Provider):
 
 	async def identify_collection(self, provider_id: str) -> Collection:
 		raise NotImplementedError
-
-	async def get_expected_titles(self) -> list[str]:
-		return []
