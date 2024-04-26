@@ -23,6 +23,7 @@ class Provider:
 		providers = []
 
 		from providers.implementations.anilist import AniList
+
 		return AniList(client)
 
 		from providers.implementations.themoviedatabase import TheMovieDatabase
@@ -31,7 +32,6 @@ class Provider:
 		if tmdb != "disabled":
 			tmdb = TheMovieDatabase(languages, client, tmdb)
 			providers.append(tmdb)
-
 
 		if not any(providers):
 			raise ProviderError(

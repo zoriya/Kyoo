@@ -1,6 +1,6 @@
 import asyncio
 from aiohttp import ClientSession
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from logging import getLogger
 from typing import Optional
 
@@ -15,7 +15,7 @@ from ..types.studio import Studio
 from ..types.genre import Genre
 from ..types.metadataid import MetadataID
 from ..types.show import Show, ShowTranslation, Status as ShowStatus
-from ..types.collection import Collection, CollectionTranslation
+from ..types.collection import Collection
 
 logger = getLogger(__name__)
 
@@ -68,7 +68,16 @@ class AniList(Provider):
 				if r.status == 404:
 					raise ProviderError(not_found)
 				if r.status == 429:
-					await asyncio.sleep(float(r.headers["Retry-After"]))
+					logger.error(r.headers)
+					if "Retry-After" in r.headers:
+						await asyncio.sleep(float(r.headers["Retry-After"]))
+					elif "X-RateLimit-Reset" in r.headers:
+						reset = datetime.fromtimestamp(
+							float(r.headers["X-RateLimit-Reset"])
+						)
+						await asyncio.sleep((reset - datetime.now()).total_seconds())
+					else:
+						await asyncio.sleep(60)
 					continue
 				ret = await r.json()
 				logger.error(ret)
@@ -90,7 +99,7 @@ class AniList(Provider):
 		query SearchAnime($id: Int, $search: String, $year: Int) {
 		  Media(id: $id, search: $search, type: ANIME, format_not: MOVIE, seasonYear: $year) {
 		    id
-			siteUrl
+		    siteUrl
 		    idMal
 		    title {
 		      romaji
@@ -98,8 +107,8 @@ class AniList(Provider):
 		      native
 		    }
 		    description(asHtml: false)
-			status
-			episodes
+		    status
+		    episodes
 		    startDate {
 		      year
 		      month
@@ -187,24 +196,34 @@ class AniList(Provider):
 				)
 			},
 			original_language=ret["countryOfOrigin"],
-			aliases=[ret["title"]["english"], ret["title"]["native"]],
+			aliases=[
+				x
+				for x in [ret["title"]["english"], ret["title"]["native"]]
+				if x is not None
+			],
 			start_air=date(
 				year=ret["startDate"]["year"],
-				month=ret["startDate"]["month"],
-				day=ret["startDate"]["day"],
-			),
+				month=ret["startDate"]["month"] or 1,
+				day=ret["startDate"]["day"] or 1,
+			)
+			if ret["startDate"] is not None
+			else None,
 			end_air=date(
 				year=ret["endDate"]["year"],
-				month=ret["endDate"]["month"],
-				day=ret["endDate"]["day"],
+				month=ret["endDate"]["month"] or 1,
+				day=ret["endDate"]["day"] or 1,
 			)
 			if ret["endDate"]["year"] is not None
 			else None,
 			status=ShowStatus.FINISHED
 			if ret["status"] == "FINISHED"
 			else ShowStatus.AIRING,
-			rating=ret["averageScore"],
-			genres=[self._genre_map[x] for x in ret["genres"] if x in self._genre_map],
+			rating=ret["averageScore"] or 0,
+			genres=[
+				self._genre_map[x]
+				for x in ret["genres"]
+				if x in self._genre_map and self._genre_map[x] is not None
+			],
 			studios=[
 				Studio(
 					name=x["name"],
@@ -216,11 +235,17 @@ class AniList(Provider):
 			],
 			external_id={
 				self.name: MetadataID(ret["id"], ret["siteUrl"]),
-				"mal": MetadataID(
-					ret["idMal"], f"https://myanimelist.net/anime/{ret['idMal']}"
-				),
-				# TODO: add anidb id (needed for xem lookup and scrubbing)
-			},
+			}
+			| (
+				{
+					"mal": MetadataID(
+						ret["idMal"], f"https://myanimelist.net/anime/{ret['idMal']}"
+					)
+				}
+				if ret["idMal"] is not None
+				else {}
+			),
+			# TODO: add anidb id (needed for xem lookup and scrubbing)
 			seasons=[],
 		)
 		show.seasons.append(
@@ -255,7 +280,7 @@ class AniList(Provider):
 		query SearchMovie($id: Int, $search: String, $year: Int) {
 		  Media(id: $id, search: $search, type: ANIME, format: MOVIE, seasonYear: $year) {
 		    id
-			siteUrl
+		    siteUrl
 		    idMal
 		    title {
 		      romaji
@@ -263,7 +288,8 @@ class AniList(Provider):
 		      native
 		    }
 		    description(asHtml: false)
-			status
+		    status
+		    duration
 		    startDate {
 		      year
 		      month
@@ -332,18 +358,28 @@ class AniList(Provider):
 				)
 			},
 			original_language=ret["countryOfOrigin"],
-			aliases=[ret["title"]["english"], ret["title"]["native"]],
+			aliases=[
+				x
+				for x in [ret["title"]["english"], ret["title"]["native"]]
+				if x is not None
+			],
 			air_date=date(
 				year=ret["startDate"]["year"],
-				month=ret["startDate"]["month"],
-				day=ret["startDate"]["day"],
-			),
+				month=ret["startDate"]["month"] or 1,
+				day=ret["startDate"]["day"] or 1,
+			)
+			if ret["startDate"] is not None
+			else None,
 			status=MovieStatus.FINISHED
 			if ret["status"] == "FINISHED"
 			else MovieStatus.PLANNED,
-			rating=ret["averageScore"],
-			runtime=ret["runtime"],
-			genres=[self._genre_map[x] for x in ret["genres"] if x in self._genre_map],
+			rating=ret["averageScore"] or 0,
+			runtime=ret["duration"],
+			genres=[
+				self._genre_map[x]
+				for x in ret["genres"]
+				if x in self._genre_map and self._genre_map[x] is not None
+			],
 			studios=[
 				Studio(
 					name=x["name"],
@@ -355,11 +391,17 @@ class AniList(Provider):
 			],
 			external_id={
 				self.name: MetadataID(ret["id"], ret["siteUrl"]),
-				"mal": MetadataID(
-					ret["idMal"], f"https://myanimelist.net/anime/{ret['idMal']}"
-				),
-				# TODO: add anidb id (needed for xem lookup and scrubbing)
-			},
+			}
+			| (
+				{
+					"mal": MetadataID(
+						ret["idMal"], f"https://myanimelist.net/anime/{ret['idMal']}"
+					),
+					# TODO: add anidb id (needed for xem lookup and scrubbing)
+				}
+				if ret["idMal"] is not None
+				else {}
+			),
 		)
 
 	async def search_movie(self, name: str, year: Optional[int]) -> Movie:
@@ -393,7 +435,21 @@ class AniList(Provider):
 				self.name: EpisodeID(
 					show.external_id[self.name].data_id, None, absolute, None
 				),
-				"mal": EpisodeID(show.external_id["mal"].data_id, None, absolute, None),
+			}
+			| (
+				{
+					"mal": EpisodeID(
+						show.external_id["mal"].data_id, None, absolute, None
+					),
+				}
+				if "mal" in show.external_id
+				else {}
+			),
+			translations={
+				"en": EpisodeTranslation(
+					name=f"Episode {absolute}",
+					overview=None,
+				),
 			},
 		)
 

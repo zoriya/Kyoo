@@ -33,6 +33,7 @@ class Season:
 		return {
 			**asdict(self),
 			**asdict(self.translations[default_language]),
+			"episodes_count": 0,
 			"poster": next(iter(self.translations[default_language].posters), None),
 			"thumbnail": next(
 				iter(self.translations[default_language].thumbnails), None
