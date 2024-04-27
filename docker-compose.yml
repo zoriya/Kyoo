@@ -7,6 +7,8 @@ x-transcoder: &transcoder-base
   restart: unless-stopped
   env_file:
     - ./.env
+  environment:
+    - GOCODER_PREFIX=/video
   volumes:
     - ${LIBRARY_ROOT}:/video:ro
     - ${CACHE_ROOT}:/cache
@@ -94,6 +96,7 @@ services:
           devices:
             - capabilities: [gpu]
     environment:
+      - GOCODER_PREFIX=/video
       - GOCODER_HWACCEL=nvidia
     profiles: ['nvidia']
 
@@ -102,6 +105,7 @@ services:
     devices:
       - /dev/dri:/dev/dri
     environment:
+      - GOCODER_PREFIX=/video
       - GOCODER_HWACCEL=vaapi
       - GOCODER_VAAPI_RENDERER=${GOCODER_VAAPI_RENDERER:-/dev/dri/renderD128}
     profiles: ['vaapi']
@@ -111,6 +115,7 @@ services:
     devices:
       - /dev/dri:/dev/dri
     environment:
+      - GOCODER_PREFIX=/video
       - GOCODER_HWACCEL=qsv
       - GOCODER_VAAPI_RENDERER=${GOCODER_VAAPI_RENDERER:-/dev/dri/renderD128}
     profiles: ['qsv']

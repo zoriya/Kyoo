@@ -11,9 +11,10 @@ func GetEnvOr(env string, def string) string {
 }
 
 type SettingsT struct {
-	Outpath  string
-	Metadata string
-	HwAccel  HwAccelT
+	Outpath     string
+	Metadata    string
+	RoutePrefix string
+	HwAccel     HwAccelT
 }
 
 type HwAccelT struct {
@@ -24,7 +25,8 @@ type HwAccelT struct {
 }
 
 var Settings = SettingsT{
-	Outpath:  GetEnvOr("GOCODER_CACHE_ROOT", "/cache"),
-	Metadata: GetEnvOr("GOCODER_METADATA_ROOT", "/metadata"),
-	HwAccel:  DetectHardwareAccel(),
+	Outpath:     GetEnvOr("GOCODER_CACHE_ROOT", "/cache"),
+	Metadata:    GetEnvOr("GOCODER_METADATA_ROOT", "/metadata"),
+	RoutePrefix: GetEnvOr("GOCODER_PREFIX", ""),
+	HwAccel:     DetectHardwareAccel(),
 }

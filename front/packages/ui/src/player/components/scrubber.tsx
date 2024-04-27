@@ -68,7 +68,7 @@ export const useScrubber = (url: string) => {
 			ret[i] = {
 				from: parseTs(times[0]),
 				to: parseTs(times[1]),
-				url: imageFn("/video/" + url[0]),
+				url: imageFn(url[0]),
 				x: xywh[0],
 				y: xywh[1],
 				width: xywh[2],
