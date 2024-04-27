@@ -17,6 +17,7 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Text;
 using System.Threading.Tasks;
 using AspNetCore.Proxy;
 using AspNetCore.Proxy.Options;
@@ -29,27 +30,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Core.Api;
 
-public static class Transcoder
-{
-	public static string TranscoderUrl =
-		Environment.GetEnvironmentVariable("TRANSCODER_URL") ?? "http://transcoder:7666";
-}
-
 public abstract class TranscoderApi<T>(IRepository<T> repository) : CrudThumbsApi<T>(repository)
 	where T : class, IResource, IThumbnails, IQuery
 {
-	private Task _Proxy(string route, (string path, string route) info)
+	private Task _Proxy(string route)
 	{
 		HttpProxyOptions proxyOptions = HttpProxyOptionsBuilder
-			.Instance.WithBeforeSend(
-				(ctx, req) =>
-				{
-					req.Headers.Add("X-Path", info.path);
-					req.Headers.Add("X-Route", info.route);
-					return Task.CompletedTask;
-				}
-			)
-			.WithHandleFailure(
+			.Instance.WithHandleFailure(
 				async (context, exception) =>
 				{
 					context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
@@ -59,10 +46,16 @@ public abstract class TranscoderApi<T>(IRepository<T> repository) : CrudThumbsAp
 				}
 			)
 			.Build();
-		return this.HttpProxyAsync($"{Transcoder.TranscoderUrl}{route}", proxyOptions);
+		return this.HttpProxyAsync($"{VideoApi.TranscoderUrl}/{route}", proxyOptions);
 	}
 
-	protected abstract Task<(string path, string route)> GetPath(Identifier identifier);
+	protected abstract Task<string> GetPath(Identifier identifier);
+
+	private async Task<string> _GetPath64(Identifier identifier)
+	{
+		string path = await GetPath(identifier);
+		return Convert.ToBase64String(Encoding.UTF8.GetBytes(path));
+	}
 
 	/// <summary>
 	/// Direct stream
@@ -76,11 +69,12 @@ public abstract class TranscoderApi<T>(IRepository<T> repository) : CrudThumbsAp
 	/// <response code="404">No episode with the given ID or slug could be found.</response>
 	[HttpGet("{identifier:id}/direct")]
 	[PartialPermission(Kind.Play)]
-	[ProducesResponseType(StatusCodes.Status206PartialContent)]
+	[ProducesResponseType(StatusCodes.Status302Found)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	public async Task GetDirectStream(Identifier identifier)
+	public async Task<IActionResult> GetDirectStream(Identifier identifier)
 	{
-		await _Proxy("/direct", await GetPath(identifier));
+		// TODO: Remove the /api and use a proxy rewrite instead.
+		return Redirect($"/api/video/{await _GetPath64(identifier)}/direct");
 	}
 
 	/// <summary>
@@ -96,39 +90,12 @@ public abstract class TranscoderApi<T>(IRepository<T> repository) : CrudThumbsAp
 	/// <response code="404">No episode with the given ID or slug could be found.</response>
 	[HttpGet("{identifier:id}/master.m3u8")]
 	[PartialPermission(Kind.Play)]
-	[ProducesResponseType(StatusCodes.Status206PartialContent)]
+	[ProducesResponseType(StatusCodes.Status302Found)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	public async Task GetMaster(Identifier identifier)
+	public async Task<IActionResult> GetMaster(Identifier identifier)
 	{
-		await _Proxy("/master.m3u8", await GetPath(identifier));
-	}
-
-	[HttpGet("{identifier:id}/{quality}/index.m3u8")]
-	[PartialPermission(Kind.Play)]
-	public async Task GetVideoIndex(Identifier identifier, string quality)
-	{
-		await _Proxy($"/{quality}/index.m3u8", await GetPath(identifier));
-	}
-
-	[HttpGet("{identifier:id}/{quality}/{segment}")]
-	[PartialPermission(Kind.Play)]
-	public async Task GetVideoSegment(Identifier identifier, string quality, string segment)
-	{
-		await _Proxy($"/{quality}/{segment}", await GetPath(identifier));
-	}
-
-	[HttpGet("{identifier:id}/audio/{audio}/index.m3u8")]
-	[PartialPermission(Kind.Play)]
-	public async Task GetAudioIndex(Identifier identifier, string audio)
-	{
-		await _Proxy($"/audio/{audio}/index.m3u8", await GetPath(identifier));
-	}
-
-	[HttpGet("{identifier:id}/audio/{audio}/{segment}")]
-	[PartialPermission(Kind.Play)]
-	public async Task GetAudioSegment(Identifier identifier, string audio, string segment)
-	{
-		await _Proxy($"/audio/{audio}/{segment}", await GetPath(identifier));
+		// TODO: Remove the /api and use a proxy rewrite instead.
+		return Redirect($"/api/video/{await _GetPath64(identifier)}/master.m3u8");
 	}
 
 	/// <summary>
@@ -144,7 +111,7 @@ public abstract class TranscoderApi<T>(IRepository<T> repository) : CrudThumbsAp
 	[PartialPermission(Kind.Read)]
 	public async Task GetInfo(Identifier identifier)
 	{
-		await _Proxy("/info", await GetPath(identifier));
+		await _Proxy($"{await _GetPath64(identifier)}/info");
 	}
 
 	/// <summary>
@@ -160,7 +127,7 @@ public abstract class TranscoderApi<T>(IRepository<T> repository) : CrudThumbsAp
 	[PartialPermission(Kind.Read)]
 	public async Task GetThumbnails(Identifier identifier)
 	{
-		await _Proxy("/thumbnails.png", await GetPath(identifier));
+		await _Proxy($"{await _GetPath64(identifier)}/thumbnails.png");
 	}
 
 	/// <summary>
@@ -177,6 +144,6 @@ public abstract class TranscoderApi<T>(IRepository<T> repository) : CrudThumbsAp
 	[PartialPermission(Kind.Read)]
 	public async Task GetThumbnailsVtt(Identifier identifier)
 	{
-		await _Proxy("/thumbnails.vtt", await GetPath(identifier));
+		await _Proxy($"{await _GetPath64(identifier)}/thumbnails.vtt");
 	}
 }
