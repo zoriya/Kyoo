@@ -1,30 +1,60 @@
 package main
 
 import (
+	"crypto/sha1"
+	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/zoriya/kyoo/transcoder/src"
 )
 
-var client = &http.Client{Timeout: 10 * time.Second}
+var safe_path = src.GetEnvOr("GOCODER_SAFE_PATH", "/video")
 
-type Item struct {
-	Path string `json:"path"`
-}
+// Encode the version in the hash path to update cached values.
+// Older versions won't be deleted (needed to allow multiples versions of the transcoder to run at the same time)
+// If the version changes a lot, we might want to automatically delete older versions.
+var version = "v1."
 
-func GetPath(c echo.Context) (string, error) {
-	key := c.Request().Header.Get("X-Path")
+func GetPath(c echo.Context) (string, string, error) {
+	key := c.Param("path")
 	if key == "" {
-		return "", echo.NewHTTPError(http.StatusBadRequest, "Missing resouce path. You need to set the X-Path header.")
+		return "", "", echo.NewHTTPError(http.StatusBadRequest, "Missing resouce path.")
 	}
-	return key, nil
+	pathb, err := base64.StdEncoding.DecodeString(key)
+	if err != nil {
+		return "", "", echo.NewHTTPError(http.StatusBadRequest, "Invalid path. Should be base64 encoded.")
+	}
+	path := string(pathb)
+	if !filepath.IsAbs(path) {
+		return "", "", echo.NewHTTPError(http.StatusBadRequest, "Absolute path required.")
+	}
+	if !strings.HasPrefix(path, safe_path) {
+		return "", "", echo.NewHTTPError(http.StatusBadRequest, "Selected path is not marked as safe.")
+	}
+	hash, err := getHash(path)
+	if err != nil {
+		return "", "", echo.NewHTTPError(http.StatusNotFound, "File does not exist")
+	}
+
+	return path, hash, nil
 }
 
-func GetRoute(c echo.Context) string {
-	return c.Request().Header.Get("X-Route")
+func getHash(path string) (string, error) {
+	info, err := os.Stat(path)
+	if err != nil {
+		return "", err
+	}
+	h := sha1.New()
+	h.Write([]byte(path))
+	h.Write([]byte(info.ModTime().String()))
+	sha := hex.EncodeToString(h.Sum(nil))
+	return version + sha, nil
 }
 
 func SanitizePath(path string) error {

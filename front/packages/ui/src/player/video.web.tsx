@@ -359,7 +359,7 @@ export const AudiosMenu = ({
 			{hls.audioTracks.map((x, i) => (
 				<Menu.Item
 					key={i.toString()}
-					label={audios?.[i].displayName ?? x.name}
+					label={audios?.[i]?.displayName ?? x.name}
 					selected={hls!.audioTrack === i}
 					onSelect={() => setAudio(audios?.[i] ?? ({ index: i } as any))}
 				/>

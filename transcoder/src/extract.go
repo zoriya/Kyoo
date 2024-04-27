@@ -9,7 +9,7 @@ import (
 
 var extracted = NewCMap[string, <-chan struct{}]()
 
-func Extract(path string, sha string, route string) (<-chan struct{}, error) {
+func Extract(path string, sha string) (<-chan struct{}, error) {
 	ret := make(chan struct{})
 	existing, created := extracted.GetOrSet(sha, ret)
 	if !created {
@@ -18,7 +18,7 @@ func Extract(path string, sha string, route string) (<-chan struct{}, error) {
 
 	go func() {
 		defer printExecTime("Starting extraction of %s", path)()
-		info, err := GetInfo(path, sha, route)
+		info, err := GetInfo(path, sha)
 		if err != nil {
 			extracted.Remove(sha)
 			close(ret)

@@ -19,7 +19,7 @@ type FileStream struct {
 	audios    CMap[int32, *AudioStream]
 }
 
-func NewFileStream(path string, sha string, route string) *FileStream {
+func NewFileStream(path string, sha string) *FileStream {
 	ret := &FileStream{
 		Path:   path,
 		Out:    fmt.Sprintf("%s/%s", Settings.Outpath, sha),
@@ -30,7 +30,7 @@ func NewFileStream(path string, sha string, route string) *FileStream {
 	ret.ready.Add(1)
 	go func() {
 		defer ret.ready.Done()
-		info, err := GetInfo(path, sha, route)
+		info, err := GetInfo(path, sha)
 		ret.Info = info
 		if err != nil {
 			ret.err = err

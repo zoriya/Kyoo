@@ -1,6 +1,7 @@
 package src
 
 import (
+	"encoding/base64"
 	"fmt"
 	"image"
 	"image/color"
@@ -27,14 +28,14 @@ type Thumbnail struct {
 
 var thumbnails = NewCMap[string, *Thumbnail]()
 
-func ExtractThumbnail(path string, route string, sha string) (string, error) {
+func ExtractThumbnail(path string, sha string) (string, error) {
 	ret, _ := thumbnails.GetOrCreate(sha, func() *Thumbnail {
 		ret := &Thumbnail{
 			path: fmt.Sprintf("%s/%s", Settings.Metadata, sha),
 		}
 		ret.ready.Add(1)
 		go func() {
-			extractThumbnail(path, ret.path, fmt.Sprintf("%s/thumbnails.png", route))
+			extractThumbnail(path, ret.path)
 			ret.ready.Done()
 		}()
 		return ret
@@ -43,7 +44,7 @@ func ExtractThumbnail(path string, route string, sha string) (string, error) {
 	return ret.path, nil
 }
 
-func extractThumbnail(path string, out string, name string) error {
+func extractThumbnail(path string, out string) error {
 	defer printExecTime("extracting thumbnails for %s", path)()
 	os.MkdirAll(out, 0o755)
 	sprite_path := fmt.Sprintf("%s/sprite.png", out)
@@ -97,10 +98,11 @@ func extractThumbnail(path string, out string, name string) error {
 		timestamps := ts
 		ts += interval
 		vtt += fmt.Sprintf(
-			"%s --> %s\n%s#xywh=%d,%d,%d,%d\n\n",
+			"%s --> %s\n%s/%s/thumbnails.png#xywh=%d,%d,%d,%d\n\n",
 			tsToVttTime(timestamps),
 			tsToVttTime(ts),
-			name,
+			Settings.RoutePrefix,
+			base64.StdEncoding.EncodeToString([]byte(path)),
 			x,
 			y,
 			width,

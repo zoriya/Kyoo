@@ -210,12 +210,12 @@ public class EpisodeApi(ILibraryManager libraryManager)
 		await libraryManager.WatchStatus.DeleteEpisodeStatus(id, User.GetIdOrThrow());
 	}
 
-	protected override async Task<(string path, string route)> GetPath(Identifier identifier)
+	protected override async Task<string> GetPath(Identifier identifier)
 	{
 		string path = await identifier.Match(
 			async id => (await Repository.Get(id)).Path,
 			async slug => (await Repository.Get(slug)).Path
 		);
-		return (path, $"/episodes/{identifier}");
+		return path;
 	}
 }

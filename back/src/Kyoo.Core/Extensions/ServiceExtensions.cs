@@ -76,6 +76,7 @@ public static class ServiceExtensions
 		services.Configure<RouteOptions>(x =>
 		{
 			x.ConstraintMap.Add("id", typeof(IdentifierRouteConstraint));
+			x.ConstraintMap.Add("base64", typeof(Base64RouteConstraint));
 		});
 
 		services.AddResponseCompression(x =>

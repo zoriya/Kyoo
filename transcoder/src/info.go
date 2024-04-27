@@ -1,6 +1,7 @@
 package src
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -180,7 +181,7 @@ type MICache struct {
 
 var infos = NewCMap[string, *MICache]()
 
-func GetInfo(path string, sha string, route string) (*MediaInfo, error) {
+func GetInfo(path string, sha string) (*MediaInfo, error) {
 	var err error
 
 	ret, _ := infos.GetOrCreate(sha, func() *MICache {
@@ -195,7 +196,7 @@ func GetInfo(path string, sha string, route string) (*MediaInfo, error) {
 			}
 
 			var val *MediaInfo
-			val, err = getInfo(path, route)
+			val, err = getInfo(path)
 			*mi.info = *val
 			mi.info.Sha = sha
 			mi.ready.Done()
@@ -231,7 +232,7 @@ func saveInfo[T any](save_path string, mi *T) error {
 	return os.WriteFile(save_path, content, 0o644)
 }
 
-func getInfo(path string, route string) (*MediaInfo, error) {
+func getInfo(path string) (*MediaInfo, error) {
 	defer printExecTime("mediainfo for %s", path)()
 
 	mi, err := mediainfo.Open(path)
@@ -294,7 +295,7 @@ func getInfo(path string, route string) (*MediaInfo, error) {
 			extension := OrNull(SubtitleExtensions[format])
 			var link *string
 			if extension != nil {
-				x := fmt.Sprintf("%s/subtitle/%d.%s", route, i, *extension)
+				x := fmt.Sprintf("%s/%s/subtitle/%d.%s", Settings.RoutePrefix, base64.StdEncoding.EncodeToString([]byte(path)), i, *extension)
 				link = &x
 			}
 			return Subtitle{
@@ -319,7 +320,7 @@ func getInfo(path string, route string) (*MediaInfo, error) {
 		Fonts: Map(
 			attachments,
 			func(font string, _ int) string {
-				return fmt.Sprintf("%s/attachment/%s", route, font)
+				return fmt.Sprintf("%s/%s/attachment/%s", Settings.RoutePrefix, base64.StdEncoding.EncodeToString([]byte(path)), font)
 			}),
 	}
 	if len(ret.Videos) > 0 {

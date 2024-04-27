@@ -33,14 +33,10 @@ func NewTranscoder() (*Transcoder, error) {
 	return ret, nil
 }
 
-func (t *Transcoder) getFileStream(path string, route string) (*FileStream, error) {
+func (t *Transcoder) getFileStream(path string, sha string) (*FileStream, error) {
 	var err error
 	ret, _ := t.streams.GetOrCreate(path, func() *FileStream {
-		sha, err := GetHash(path)
-		if err != nil {
-			return nil
-		}
-		return NewFileStream(path, sha, route)
+		return NewFileStream(path, sha)
 	})
 	ret.ready.Wait()
 	if err != nil || ret.err != nil {
@@ -50,8 +46,8 @@ func (t *Transcoder) getFileStream(path string, route string) (*FileStream, erro
 	return ret, nil
 }
 
-func (t *Transcoder) GetMaster(path string, client string, route string) (string, error) {
-	stream, err := t.getFileStream(path, route)
+func (t *Transcoder) GetMaster(path string, client string, sha string) (string, error) {
+	stream, err := t.getFileStream(path, sha)
 	if err != nil {
 		return "", err
 	}
@@ -69,9 +65,9 @@ func (t *Transcoder) GetVideoIndex(
 	path string,
 	quality Quality,
 	client string,
-	route string,
+	sha string,
 ) (string, error) {
-	stream, err := t.getFileStream(path, route)
+	stream, err := t.getFileStream(path, sha)
 	if err != nil {
 		return "", err
 	}
@@ -89,9 +85,9 @@ func (t *Transcoder) GetAudioIndex(
 	path string,
 	audio int32,
 	client string,
-	route string,
+	sha string,
 ) (string, error) {
-	stream, err := t.getFileStream(path, route)
+	stream, err := t.getFileStream(path, sha)
 	if err != nil {
 		return "", err
 	}
@@ -109,9 +105,9 @@ func (t *Transcoder) GetVideoSegment(
 	quality Quality,
 	segment int32,
 	client string,
-	route string,
+	sha string,
 ) (string, error) {
-	stream, err := t.getFileStream(path, route)
+	stream, err := t.getFileStream(path, sha)
 	if err != nil {
 		return "", err
 	}
@@ -130,9 +126,9 @@ func (t *Transcoder) GetAudioSegment(
 	audio int32,
 	segment int32,
 	client string,
-	route string,
+	sha string,
 ) (string, error) {
-	stream, err := t.getFileStream(path, route)
+	stream, err := t.getFileStream(path, sha)
 	if err != nil {
 		return "", err
 	}
