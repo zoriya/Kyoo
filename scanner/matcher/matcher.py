@@ -59,7 +59,7 @@ class Matcher:
 
 		title = raw.get("title")
 		if isinstance(title, list):
-			pass
+			title = title[0]
 		if not isinstance(title, str):
 			raise ProviderError(f"Could not guess title, found: {title}")
 
