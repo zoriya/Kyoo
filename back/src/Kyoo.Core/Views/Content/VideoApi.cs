@@ -119,4 +119,18 @@ public class VideoApi : Controller
 	{
 		await _Proxy($"{path}/subtitle/{name}");
 	}
+
+	[HttpGet("{path:base64}/thumbnails.png")]
+	[PartialPermission(Kind.Read)]
+	public async Task GetThumbnails(string path)
+	{
+		await _Proxy($"{path}/thumbnails.png");
+	}
+
+	[HttpGet("{path:base64}/thumbnails.vtt")]
+	[PartialPermission(Kind.Read)]
+	public async Task GetThumbnailsVtt(string path)
+	{
+		await _Proxy($"{path}/thumbnails.vtt");
+	}
 }
