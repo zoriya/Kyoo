@@ -60,7 +60,7 @@ class KyooClient:
 
 	async def delete_issue(self, path: str):
 		async with self.client.delete(
-			f'{self._url}/issues?filter=domain eq scanner and cause eq "{path}"',
+			f'{self._url}/issues?filter=domain eq scanner and cause eq "{quote(path)}"',
 			headers={"X-API-Key": self._api_key},
 		) as r:
 			if not r.ok:
