@@ -54,7 +54,7 @@ class UnlistTitles(Rule):
 	consequence = [RemoveMatch, AppendMatch]
 
 	def when(self, matches: Matches, context) -> Any:
-		titles: List[Match] = matches.named("title")  # type: ignore
+		titles: List[Match] = matches.named("title", lambda x: x.tagged("title"))  # type: ignore
 
 		if not titles or len(titles) <= 1:
 			return
