@@ -253,3 +253,42 @@ class XemFixup(Rule):
 
 		if clean(new_title.value) in context["xem_titles"]:
 			return [[title, nmatch[0]], [new_title]]
+
+
+class SeasonYearDedup(Rule):
+	"""Remove "season" when it's the same as "year"
+
+	Example: "One Piece (1999) 152.mkv"
+	Default:
+	```json
+	{
+		"title": "One Piece",
+		"year": 1999,
+		"season": 1999,
+		"episode": 152,
+		"container": "mkv",
+		"mimetype": "video/x-matroska",
+		"type": "episode"
+	}
+	```
+	Expected:
+	```json
+	{
+		"title": "One Piece",
+		"year": 1999,
+		"episode": 152,
+		"container": "mkv",
+		"mimetype": "video/x-matroska",
+		"type": "episode"
+	}
+	```
+	"""
+
+	priority = POST_PROCESS
+	consequence = [RemoveMatch]
+
+	def when(self, matches: Matches, context) -> Any:
+		season: List[Match] = matches.named("season")  # type: ignore
+		year: List[Match] = matches.named("year")  # type: ignore
+		if len(season) == 1 and len(year) == 1 and season[0].value == year[0].value:
+			return [season]
