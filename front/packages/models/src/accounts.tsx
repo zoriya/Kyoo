@@ -141,14 +141,14 @@ export const AccountProvider = ({
 	}, [selected, user]);
 
 	const queryClient = useQueryClient();
-	const oldSelectedId = useRef<string | undefined>(selected?.id);
+	const oldSelectedToken = useRef<string | undefined>(selected?.token.access_token);
 	useEffect(() => {
 		// if the user change account (or connect/disconnect), reset query cache.
-		if (selected?.id !== oldSelectedId.current) {
+		if (selected?.token.access_token !== oldSelectedToken.current) {
 			initialSsrError.current = undefined;
 			queryClient.resetQueries();
 		}
-		oldSelectedId.current = selected?.id;
+		oldSelectedToken.current = selected?.token.access_token;
 
 		// update cookies for ssr (needs to contains token, theme, language...)
 		if (Platform.OS === "web") {
