@@ -1,5 +1,5 @@
 {pkgs ? import <nixpkgs> {}}: let
-  python = pkgs.python311.withPackages (ps:
+  python = pkgs.python312.withPackages (ps:
     with ps; [
       guessit
       aiohttp
