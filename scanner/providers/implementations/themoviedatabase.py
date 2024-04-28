@@ -562,6 +562,8 @@ class TheMovieDatabase(Provider):
 		try:
 			groups = await self.get(f"tv/{show_id}/episode_groups")
 			ep_count = max((x["episode_count"] for x in groups["results"]), default=0)
+			if ep_count == 0:
+				return None
 			# Filter only absolute groups that contains at least 75% of all episodes (to skip non maintained absolute ordering)
 			group_id = next(
 				(
@@ -575,8 +577,7 @@ class TheMovieDatabase(Provider):
 			if group_id is None:
 				return None
 			group = await self.get(f"tv/episode_group/{group_id}")
-			grp = next(iter(group["groups"]), None)
-			return grp["episodes"] if grp else None
+			return [ep for grp in group["groups"] for ep in grp["episodes"]]
 		except Exception as e:
 			logger.exception(
 				"Could not retrieve absolute ordering information", exc_info=e
