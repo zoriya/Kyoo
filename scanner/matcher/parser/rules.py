@@ -1,11 +1,74 @@
 # Read that for examples/rules: https://github.com/pymedusa/Medusa/blob/master/medusa/name_parser/rules/rules.py
 
+from logging import getLogger
 from typing import Any, List, Optional, cast
 from rebulk import Rule, RemoveMatch, AppendMatch, POST_PROCESS
 from rebulk.match import Matches, Match
 from copy import copy
 
 from providers.implementations.thexem import clean
+
+logger = getLogger(__name__)
+
+
+class UnlistTitles(Rule):
+	"""Join titles to a single string instead of a list
+
+	Example: '/media/series/Demon Slayer - Kimetsu no Yaiba/Season 4/Demon Slayer - Kimetsu no Yaiba - S04E10 - Love Hashira Mitsuri Kanroji WEBDL-1080p.mkv'
+	Default:
+	```json
+	 {
+		"title": [
+			"Demon Slayer",
+			"Kimetsu no Yaiba"
+		],
+		"season": 4,
+		"episode_title": "Demon Slayer",
+		"alternative_title": "Kimetsu no Yaiba",
+		"episode": 10,
+		"source": "Web",
+		"screen_size": "1080p",
+		"container": "mkv",
+		"mimetype": "video/x-matroska",
+		"type": "episode"
+	}
+	```
+	Expected:
+	```json
+	{
+		"title": "Demon Slayer - Kimetsu no Yaiba",
+		"season": 4,
+		"episode_title": "Demon Slayer",
+		"alternative_title": "Kimetsu no Yaiba",
+		"episode": 10,
+		"source": "Web",
+		"screen_size": "1080p",
+		"container": "mkv",
+		"mimetype": "video/x-matroska",
+		"type": "episode"
+	}
+	```
+	"""
+
+	priority = POST_PROCESS
+	consequence = [RemoveMatch, AppendMatch]
+
+	def when(self, matches: Matches, context) -> Any:
+		titles: List[Match] = matches.named("title")  # type: ignore
+
+		if not titles or len(titles) <= 1:
+			return
+
+		title = copy(titles[0])
+		for nmatch in titles[1:]:
+			# Check if titles are next to each other, if they are not ignore it.
+			next: List[Match] = matches.next(title)  # type: ignore
+			if not next or next[0] != nmatch:
+				logger.warn(f"Ignoring potential part of title: {nmatch.value}")
+				continue
+			title.end = nmatch.end
+
+		return [titles, [title]]
 
 
 class EpisodeTitlePromotion(Rule):
@@ -15,19 +78,19 @@ class EpisodeTitlePromotion(Rule):
 	Default:
 	```json
 	{
-	        "release_group": "Erai-raws",
-	        "title": "Youkoso Jitsuryoku Shijou Shugi no Kyoushitsu e",
-	        "season": 3,
-	        "episode_title": "05",
+		"release_group": "Erai-raws",
+		"title": "Youkoso Jitsuryoku Shijou Shugi no Kyoushitsu e",
+		"season": 3,
+		"episode_title": "05",
 	}
 	```
 	Expected:
 	```json
 	{
-	        "release_group": "Erai-raws",
-	        "title": "Youkoso Jitsuryoku Shijou Shugi no Kyoushitsu e",
-	        "season": 3,
-	        "episode": 5,
+		"release_group": "Erai-raws",
+		"title": "Youkoso Jitsuryoku Shijou Shugi no Kyoushitsu e",
+		"season": 3,
+		"episode": 5,
 	}
 	```
 	"""
@@ -58,22 +121,22 @@ class TitleNumberFixup(Rule):
 	Default:
 	```json
 	{
-	        "release_group": "Erai-raws",
-	        "title": "Zom",
-	        "episode": [
-	                100,
-	                1
-	        ],
-	        "episode_title": "Zombie ni Naru made ni Shitai",
+		"release_group": "Erai-raws",
+		"title": "Zom",
+		"episode": [
+				100,
+				1
+		],
+		"episode_title": "Zombie ni Naru made ni Shitai",
 	}
 	```
 	Expected:
 	```json
 	{
-	        "release_group": "Erai-raws",
-	        "title": "Zom 100",
-	        "episode": 1,
-	        "episode_title": "Zombie ni Naru made ni Shitai 100 no Koto",
+		"release_group": "Erai-raws",
+		"title": "Zom 100",
+		"episode": 1,
+		"episode_title": "Zombie ni Naru made ni Shitai 100 no Koto",
 	}
 	```
 	"""
@@ -126,24 +189,24 @@ class MultipleSeasonRule(Rule):
 	Default:
 	```json
 	{
-	        "title": "Spy x Family",
-	        "season": [
-	                2,
-	                3,
-	                4,
-	                5,
-	                6,
-	                7,
-	                8
-	        ],
+		"title": "Spy x Family",
+		"season": [
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8
+		],
 	}
 	```
 	Expected:
 	```json
 	{
-	        "title": "Spy x Family",
-	        "season": 2,
-	        "episode": 8,
+		"title": "Spy x Family",
+		"season": 2,
+		"episode": 8,
 	}
 	```
 	"""
@@ -198,16 +261,16 @@ class XemFixup(Rule):
 	Default:
 	```json
 	{
-	        "title": "JoJo's Bizarre Adventure",
-	        "alternative_title": "Diamond is Unbreakable",
-	        "episode": 12,
+		"title": "JoJo's Bizarre Adventure",
+		"alternative_title": "Diamond is Unbreakable",
+		"episode": 12,
 	}
 	```
 	Expected:
 	```json
 	{
-	        "title": "JoJo's Bizarre Adventure - Diamond is Unbreakable",
-	        "episode": 12,
+		"title": "JoJo's Bizarre Adventure - Diamond is Unbreakable",
+		"episode": 12,
 	}
 	```
 
@@ -216,16 +279,16 @@ class XemFixup(Rule):
 	Default:
 	```json
 	{
-	        "title": "Owarimonogatari",
-	        "season": 2,
-	        "episode": 15
+		"title": "Owarimonogatari",
+		"season": 2,
+		"episode": 15
 	}
 	```
 	Expected:
 	```json
 	{
-	        "title": "Owarimonogatari S2",
-	        "episode": 15
+		"title": "Owarimonogatari S2",
+		"episode": 15
 	}
 	```
 	"""

@@ -55,8 +55,6 @@ class Matcher:
 		logger.info("Identied %s: %s", path, raw)
 
 		title = raw.get("title")
-		if isinstance(title, list):
-			title = title[0]
 		if not isinstance(title, str):
 			raise ProviderError(f"Could not guess title, found: {title}")
 
