@@ -51,15 +51,10 @@ class Matcher:
 
 		if "mimetype" not in raw or not raw["mimetype"].startswith("video"):
 			return
-		# Remove seasons in "One Piece (1999) 152.mkv" for example
-		if raw.get("season") == raw.get("year") and "season" in raw:
-			del raw["season"]
 
 		logger.info("Identied %s: %s", path, raw)
 
 		title = raw.get("title")
-		if isinstance(title, list):
-			title = title[0]
 		if not isinstance(title, str):
 			raise ProviderError(f"Could not guess title, found: {title}")
 

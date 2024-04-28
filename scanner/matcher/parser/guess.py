@@ -7,7 +7,7 @@ if __name__ == "__main__":
 	sys.path.append(str(Path(f"{__file__}/../../..").resolve()))
 
 from guessit.api import default_api
-from typing import cast, List
+from typing import cast, List, Any
 from rebulk import Rebulk
 
 try:
@@ -20,14 +20,15 @@ rblk = cast(Rebulk, default_api.rebulk)
 rblk.rules(rules)
 
 
-def guessit(name: str, *, xem_titles: List[str] = []):
+def guessit(name: str, *, xem_titles: List[str] = [], extra_flags: dict[str, Any] = {}):
 	return default_api.guessit(
 		name,
 		{
 			"episode_prefer_number": True,
 			"excludes": "language",
 			"xem_titles": xem_titles,
-		},
+		}
+		| extra_flags,
 	)
 
 
@@ -44,7 +45,11 @@ if __name__ == "__main__":
 		async with ClientSession() as client:
 			xem = TheXemClient(client)
 
-			ret = guessit(sys.argv[1], xem_titles=await xem.get_expected_titles())
+			ret = guessit(
+				sys.argv[1],
+				xem_titles=await xem.get_expected_titles(),
+				# extra_flags={"advanced": True},
+			)
 			print(json.dumps(ret, cls=GuessitEncoder, indent=4))
 
 	asyncio.run(main())
