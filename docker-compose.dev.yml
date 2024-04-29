@@ -155,7 +155,7 @@ services:
     profiles: ['qsv']
 
   traefik:
-    image: traefik:v2.11
+    image: traefik:v3.0
     command:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
