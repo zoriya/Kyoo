@@ -43,19 +43,27 @@ public class OidcController(
 
 		HttpClient client = clientFactory.CreateClient();
 
-		string auth = Convert.ToBase64String(
-			Encoding.UTF8.GetBytes($"{prov.ClientId}:{prov.Secret}")
-		);
-		client.DefaultRequestHeaders.Add("Authorization", $"Basic {auth}");
 		Dictionary<string, string> data =
 			new()
 			{
 				["code"] = code,
-				["client_id"] = prov.ClientId,
-				["client_secret"] = prov.Secret,
 				["redirect_uri"] = $"{options.PublicUrl.TrimEnd('/')}/api/auth/logged/{provider}",
 				["grant_type"] = "authorization_code",
 			};
+
+		if (prov.ClientAuthMethod == AuthMethod.ClientSecretBasic)
+		{
+			string auth = Convert.ToBase64String(
+				Encoding.UTF8.GetBytes($"{prov.ClientId}:{prov.Secret}")
+			);
+			client.DefaultRequestHeaders.Add("Authorization", $"Basic {auth}");
+		}
+		else if (prov.ClientAuthMethod == AuthMethod.ClientSecretPost)
+		{
+			data["client_id"] = prov.ClientId;
+			data["client_secret"] = prov.Secret;
+		}
+
 		HttpResponseMessage resp = prov.TokenUseJsonBody
 			? await client.PostAsJsonAsync(prov.TokenUrl, data)
 			: await client.PostAsync(prov.TokenUrl, new FormUrlEncodedContent(data));

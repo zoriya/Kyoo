@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -99,6 +100,20 @@ public static class AuthenticationModule
 									break;
 								case "logo":
 									acc[provider].LogoUrl = val.Value;
+									break;
+								case "clientauthmethod":
+								case "authmethod":
+								case "auth":
+								case "method":
+									if (!Enum.TryParse(val.Value, out AuthMethod method))
+									{
+										Log.Error(
+											"Invalid AuthMethod value: {AuthMethod}. Ignoring.",
+											val.Value
+										);
+										break;
+									}
+									acc[provider].ClientAuthMethod = method;
 									break;
 								default:
 									Log.Error("Invalid oidc config value: {Key}", key);
