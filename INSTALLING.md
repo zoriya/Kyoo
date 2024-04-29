@@ -2,8 +2,7 @@
 
 1. Install docker & docker-compose
 2. Download the
-   [`docker-compose.yml`](https://github.com/zoriya/kyoo/releases/latest/download/docker-compose.yml),
-   [`nginx.conf.template`](https://raw.githubusercontent.com/zoriya/Kyoo/master/nginx.conf.template) and
+   [`docker-compose.yml`](https://github.com/zoriya/kyoo/releases/latest/download/docker-compose.yml) and
    [`.env`](https://raw.githubusercontent.com/zoriya/Kyoo/master/.env.example) files
 3. Fill the `.env` file with your configuration options (and an API Key from [themoviedb.org](https://www.themoviedb.org/))
 4. Look at [Hardware Acceleration section](#Hardware-Acceleration) if you need it
@@ -17,18 +16,16 @@ To install Kyoo, you need docker and docker-compose. Those can be installed from
 or [Windows](https://docs.docker.com/desktop/install/windows-install/). Docker is used to run each services of Kyoo in
 an isolated environment with all the dependencies they need.
 
-Kyoo also needs 3 files to work properly. Two of them can simply be copy-pasted from this repository, the other needs to be filled in with your configurations.
+Kyoo also needs 2 files to work properly. The first should be downloaded from the latest release artificat, the other needs to be filled in with your configurations.
 Those files can be put in any directory of your choice.
 
-Those 3 files are:
+Those files are:
 
 - A `docker-compose.yml` (simply download docker-compose.yml from [the latest release](https://github.com/zoriya/kyoo/releases/latest/download/docker-compose.yml)).
-- A `nginx.conf.template` copied from [here](https://raw.githubusercontent.com/zoriya/Kyoo/master/nginx.conf.template).
 - A `.env` file that you will need to **fill**. Look at the example [.env.example](https://raw.githubusercontent.com/zoriya/Kyoo/master/.env.example)
 
 > If you want an explanation of what are those files, you can read the following:
 > The `docker-compose.yml` file describes the different services of Kyoo, where they should be downloaded and their start order. \
-> The `nignx.conf.template` file describes which service will be called when accessing the URL of Kyoo. \
 > The `.env` file contains all the configuration options that the services in `docker-compose.yml` will read.
 
 To retrieve metadata, Kyoo will need to communicate with an external service. For now, that is `the movie database`.
@@ -44,7 +41,7 @@ Congratulation, everything is now ready to use Kyoo. You can navigate to `http:/
 
 # Updating
 
-Updating Kyoo is exactly the same as installing it. Get an updated version of the `docker-compose.yml` and `nginx.conf.template` files and
+Updating Kyoo is exactly the same as installing it. Get an updated version of the `docker-compose.yml` file and
 unsure that your `.env` contains all the options specified in the updated `.env.example` file.
 
 After that, you will need to update Kyoo's services. For that, open a terminal in the configuration's directory and run
