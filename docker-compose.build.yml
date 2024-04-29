@@ -136,7 +136,7 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entryPoints.web.address=:8901"
-      - "--log.level=DEBUG"
+      - "--accesslog=true"
     ports:
       - "8901:8901"
     volumes:
