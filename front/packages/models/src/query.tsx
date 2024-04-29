@@ -64,6 +64,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 		)
 		.filter((x) => x)
 		.join("/")
+		.replace("//", "/")
 		.replace("/?", "?");
 	let resp;
 	try {
