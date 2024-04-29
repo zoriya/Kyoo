@@ -62,7 +62,7 @@ public class MiscRepository(
 		}.Select(x => GetSql(x));
 		string sql = string.Join(" union all ", queries);
 		IEnumerable<Image?> ret = await database.QueryAsync<Image?>(sql);
-		return ret.Where(x => x != null).ToArray() as Image[];
+		return ret.ToArray() as Image[];
 	}
 
 	public async Task DownloadMissingImages()

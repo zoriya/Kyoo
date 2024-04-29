@@ -24,7 +24,6 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml;
 using Blurhash.SkiaSharp;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -80,7 +79,11 @@ public class ThumbnailsManager(
 		try
 		{
 			if (image.Id == Guid.Empty)
-				image.Id = Guid.NewGuid();
+			{
+				// Ensure stable ids to prevent duplicated images being stored on the fs.
+				using MD5 md5 = MD5.Create();
+				image.Id = new Guid(md5.ComputeHash(Encoding.UTF8.GetBytes(image.Source)));
+			}
 
 			logger.LogInformation("Downloading image {What}", what);
 
