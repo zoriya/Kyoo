@@ -33,6 +33,12 @@ services:
         condition: service_completed_successfully
     volumes:
       - kyoo:/metadata
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=PathPrefix(`/api/`)"
+      - "traefik.http.routers.api.middlewares=api-sp"
+      - "traefik.http.middlewares.api-sp.stripprefix.prefixes=/api"
+      - "traefik.http.middlewares.api-sp.stripprefix.forceSlash=false"
 
   migrations:
     build:
@@ -50,6 +56,9 @@ services:
     restart: on-failure
     environment:
       - KYOO_URL=${KYOO_URL:-http://back:5000}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.front.rule=PathPrefix(`/`)"
 
   scanner:
     build: ./scanner
@@ -121,20 +130,17 @@ services:
       - GOCODER_VAAPI_RENDERER=${GOCODER_VAAPI_RENDERER:-/dev/dri/renderD128}
     profiles: ['qsv']
 
-  ingress:
-    image: nginx
-    restart: on-failure
-    environment:
-      - PORT=8901
-      - FRONT_URL=http://front:8901
-      - BACK_URL=${KYOO_URL:-http://back:5000}
-    volumes:
-      - ./nginx.conf.template:/etc/nginx/templates/kyoo.conf.template:ro
-    depends_on:
-      - back
-      - front
+  traefik:
+    image: traefik:v2.11
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.web.address=:8901"
+      - "--log.level=DEBUG"
     ports:
       - "8901:8901"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
   postgres:
     image: postgres:15
