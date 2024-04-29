@@ -1,5 +1,5 @@
 x-transcoder: &transcoder-base
-  image: zoriya/kyoo_transcoder:edge
+  image: ghcr.io/zoriya/kyoo_transcoder:edge
   networks:
     default:
       aliases:
@@ -16,7 +16,7 @@ x-transcoder: &transcoder-base
 
 services:
   back:
-    image: zoriya/kyoo_back:edge
+    image: ghcr.io/zoriya/kyoo_back:edge
     restart: unless-stopped
     cpus: 1.5
     environment:
@@ -36,7 +36,7 @@ services:
       - kyoo:/metadata
 
   migrations:
-    image: zoriya/kyoo_migrations:edge
+    image: ghcr.io/zoriya/kyoo_migrations:edge
     restart: "no"
     depends_on:
       postgres:
@@ -45,13 +45,13 @@ services:
       - ./.env
 
   front:
-    image: zoriya/kyoo_front:edge
+    image: ghcr.io/zoriya/kyoo_front:edge
     restart: unless-stopped
     environment:
       - KYOO_URL=${KYOO_URL:-http://back:5000}
 
   scanner:
-    image: zoriya/kyoo_scanner:edge
+    image: ghcr.io/zoriya/kyoo_scanner:edge
     restart: unless-stopped
     depends_on:
       back:
@@ -64,7 +64,7 @@ services:
       - ${LIBRARY_ROOT}:/video:ro
 
   matcher:
-    image: zoriya/kyoo_scanner:edge
+    image: ghcr.io/zoriya/kyoo_scanner:edge
     command: matcher
     restart: unless-stopped
     depends_on:
@@ -76,7 +76,7 @@ services:
       - KYOO_URL=${KYOO_URL:-http://back:5000}
 
   autosync:
-    image: zoriya/kyoo_autosync:edge
+    image: ghcr.io/zoriya/kyoo_autosync:edge
     restart: on-failure
     depends_on:
       rabbitmq:
