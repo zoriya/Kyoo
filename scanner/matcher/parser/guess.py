@@ -45,10 +45,11 @@ if __name__ == "__main__":
 		async with ClientSession() as client:
 			xem = TheXemClient(client)
 
+			advanced = any(x == "-a" for x in sys.argv)
 			ret = guessit(
 				sys.argv[1],
 				xem_titles=await xem.get_expected_titles(),
-				# extra_flags={"advanced": True},
+				extra_flags={"advanced": advanced},
 			)
 			print(json.dumps(ret, cls=GuessitEncoder, indent=4))
 

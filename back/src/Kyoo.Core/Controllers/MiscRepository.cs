@@ -84,6 +84,27 @@ public class MiscRepository(
 			.ToListAsync();
 	}
 
+	public async Task<int> DeletePath(string path, bool recurse)
+	{
+		// Make sure to include a path separator to prevents deletions from things like:
+		// DeletePath("/video/abc", true) -> /video/abdc (should not be deleted)
+		string dirPath = path.EndsWith("/") ? path : $"{path}/";
+
+		int count = await context
+			.Episodes.Where(x => x.Path == path || (recurse && x.Path.StartsWith(dirPath)))
+			.ExecuteDeleteAsync();
+		count += await context
+			.Movies.Where(x => x.Path == path || (recurse && x.Path.StartsWith(dirPath)))
+			.ExecuteDeleteAsync();
+		await context
+			.Issues.Where(x =>
+				x.Domain == "scanner"
+				&& (x.Cause == path || (recurse && x.Cause.StartsWith(dirPath)))
+			)
+			.ExecuteDeleteAsync();
+		return count;
+	}
+
 	public async Task<ICollection<RefreshableItem>> GetRefreshableItems(DateTime end)
 	{
 		IQueryable<RefreshableItem> GetItems<T>()
