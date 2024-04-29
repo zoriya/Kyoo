@@ -67,6 +67,13 @@ public class PermissionOption
 	public Dictionary<string, OidcProvider> OIDC { get; set; }
 }
 
+public enum AuthMethod
+{
+	ClientSecretBasic,
+	ClientSecretPost,
+	None,
+}
+
 public class OidcProvider
 {
 	public string DisplayName { get; set; }
@@ -78,6 +85,11 @@ public class OidcProvider
 	/// Some token endpoints do net respect the spec and require a json body instead of a form url encoded.
 	/// </summary>
 	public bool TokenUseJsonBody { get; set; }
+
+	/// <summary>
+	/// The OIDC spec allows multiples ways of authorizing the client.
+	/// </summary>
+	public AuthMethod ClientAuthMethod { get; set; } = AuthMethod.ClientSecretBasic;
 
 	public string ProfileUrl { get; set; }
 	public string? Scope { get; set; }
@@ -108,6 +120,7 @@ public class OidcProvider
 			ClientId = KnownProviders[provider].ClientId;
 			Secret = KnownProviders[provider].Secret;
 			TokenUseJsonBody = KnownProviders[provider].TokenUseJsonBody;
+			ClientAuthMethod = KnownProviders[provider].ClientAuthMethod;
 			GetProfileUrl = KnownProviders[provider].GetProfileUrl;
 			GetExtraHeaders = KnownProviders[provider].GetExtraHeaders;
 		}
@@ -144,6 +157,7 @@ public class OidcProvider
 				// does not seems to have scopes
 				Scope = null,
 				TokenUseJsonBody = true,
+				ClientAuthMethod = AuthMethod.ClientSecretPost,
 				GetProfileUrl = (profile) => $"https://simkl.com/{profile.Sub}/dashboard/",
 				GetExtraHeaders = (OidcProvider self) =>
 					new() { ["simkl-api-key"] = self.ClientId },
