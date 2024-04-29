@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set correct versions
-        run: sed "s/edge/${{ github.ref_name }}" -i docker-compose.yml
+        run: sed "s/edge/${{ github.ref_name }}/" -i docker-compose.yml
 
       - uses: actions/upload-artifact@v4
         with:
