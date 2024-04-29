@@ -108,7 +108,7 @@ class KyooClient:
 		logger.info("Deleting %s", path)
 
 		async with self.client.delete(
-			f'{self._url}/paths?recursive=true&path={quote(path)}',
+			f"{self._url}/paths?recursive=true&path={quote(path)}",
 			headers={"X-API-Key": self._api_key},
 		) as r:
 			if not r.ok:

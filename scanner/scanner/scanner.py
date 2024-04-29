@@ -9,7 +9,9 @@ from providers.kyoo_client import KyooClient
 logger = getLogger(__name__)
 
 
-async def scan(path: str, publisher: Publisher, client: KyooClient, remove_deleted = False):
+async def scan(
+	path: str, publisher: Publisher, client: KyooClient, remove_deleted=False
+):
 	logger.info("Starting the scan. It can take some times...")
 	ignore_pattern = None
 	try:
@@ -35,4 +37,3 @@ async def scan(path: str, publisher: Publisher, client: KyooClient, remove_delet
 
 	await asyncio.gather(*map(publisher.add, to_register))
 	logger.info(f"Scan finished for {path}.")
-
