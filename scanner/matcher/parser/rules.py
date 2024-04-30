@@ -106,6 +106,11 @@ class EpisodeTitlePromotion(Rule):
 		if not ep_title:
 			return
 
+		# Do not promote an episode title if there is already a know episode number
+		ep_nbr: List[Match] = matches.named("episode")  # type: ignore
+		if ep_nbr and len(ep_nbr) > 0:
+			return
+
 		to_remove = [match for match in ep_title if str(match.value).isdecimal()]
 		to_add = []
 		for tmatch in to_remove:
