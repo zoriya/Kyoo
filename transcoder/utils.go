@@ -30,7 +30,7 @@ func GetPath(c echo.Context) (string, string, error) {
 	if err != nil {
 		return "", "", echo.NewHTTPError(http.StatusBadRequest, "Invalid path. Should be base64 encoded.")
 	}
-	path := string(pathb)
+	path := filepath.Clean(string(pathb))
 	if !filepath.IsAbs(path) {
 		return "", "", echo.NewHTTPError(http.StatusBadRequest, "Absolute path required.")
 	}
