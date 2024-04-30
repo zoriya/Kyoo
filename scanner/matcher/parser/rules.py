@@ -54,21 +54,26 @@ class UnlistTitles(Rule):
 	consequence = [RemoveMatch, AppendMatch]
 
 	def when(self, matches: Matches, context) -> Any:
-		titles: List[Match] = matches.named("title", lambda x: x.tagged("title"))  # type: ignore
+		fileparts: List[Match] = matches.markers.named("path")  # type: ignore
 
-		if not titles or len(titles) <= 1:
-			return
+		for part in fileparts:
+			titles: List[Match] = matches.range(
+				part.start, part.end, lambda x: x.name == "title"
+			)  # type: ignore
 
-		title = copy(titles[0])
-		for nmatch in titles[1:]:
-			# Check if titles are next to each other, if they are not ignore it.
-			next: List[Match] = matches.next(title)  # type: ignore
-			if not next or next[0] != nmatch:
-				logger.warn(f"Ignoring potential part of title: {nmatch.value}")
+			if not titles or len(titles) <= 1:
 				continue
-			title.end = nmatch.end
 
-		return [titles, [title]]
+			title = copy(titles[0])
+			for nmatch in titles[1:]:
+				# Check if titles are next to each other, if they are not ignore it.
+				next: List[Match] = matches.next(title)  # type: ignore
+				if not next or next[0] != nmatch:
+					logger.warn(f"Ignoring potential part of title: {nmatch.value}")
+					continue
+				title.end = nmatch.end
+
+			return [titles, [title]]
 
 
 class EpisodeTitlePromotion(Rule):
@@ -101,6 +106,11 @@ class EpisodeTitlePromotion(Rule):
 	def when(self, matches: Matches, context) -> Any:
 		ep_title: List[Match] = matches.named("episode_title")  # type: ignore
 		if not ep_title:
+			return
+
+		# Do not promote an episode title if there is already a know episode number
+		ep_nbr: List[Match] = matches.named("episode")  # type: ignore
+		if ep_nbr and len(ep_nbr) > 0:
 			return
 
 		to_remove = [match for match in ep_title if str(match.value).isdecimal()]
