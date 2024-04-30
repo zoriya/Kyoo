@@ -57,7 +57,9 @@ class UnlistTitles(Rule):
 		fileparts: List[Match] = matches.markers.named("path")  # type: ignore
 
 		for part in fileparts:
-			titles: List[Match] = matches.range(part.start, part.end, lambda x: x.name == "title")  # type: ignore
+			titles: List[Match] = matches.range(
+				part.start, part.end, lambda x: x.name == "title"
+			)  # type: ignore
 
 			if not titles or len(titles) <= 1:
 				continue
