@@ -52,7 +52,7 @@ export const Scanner = () => {
 					licon={<Icon icon={Scan} {...css({ marginX: ts(1) })} />}
 					text={t("admin.scanner.scan")}
 					onPress={() => metadataRefreshMutation.mutate()}
-					{...css({ marginBottom: ts(2), })}
+					{...css({ marginBottom: ts(2) })}
 				/>
 			}
 		>
