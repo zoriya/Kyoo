@@ -141,14 +141,20 @@ export const AccountProvider = ({
 	}, [selected, user]);
 
 	const queryClient = useQueryClient();
-	const oldSelectedToken = useRef<string | undefined>(selected?.token.access_token);
+	const oldSelected = useRef<{ id: string; token: string } | null>(
+		selected ? { id: selected.id, token: selected.token.access_token } : null,
+	);
+	const userIsError = user.isError;
 	useEffect(() => {
 		// if the user change account (or connect/disconnect), reset query cache.
-		if (selected?.token.access_token !== oldSelectedToken.current) {
+		if (
+			selected?.id != oldSelected.current?.id ||
+			(userIsError && selected?.token.access_token !== oldSelected.current?.token)
+		) {
 			initialSsrError.current = undefined;
 			queryClient.resetQueries();
 		}
-		oldSelectedToken.current = selected?.token.access_token;
+		oldSelected.current = selected ? { id: selected.id, token: selected.token.access_token } : null;
 
 		// update cookies for ssr (needs to contains token, theme, language...)
 		if (Platform.OS === "web") {
@@ -156,7 +162,7 @@ export const AccountProvider = ({
 			// cookie used for images and videos since we can't add Authorization headers in img or video tags.
 			setCookie("X-Bearer", selected?.token.access_token);
 		}
-	}, [selected, queryClient]);
+	}, [selected, queryClient, userIsError]);
 
 	const [permissionError, setPermissionError] = useState<KyooErrors | null>(null);
 
