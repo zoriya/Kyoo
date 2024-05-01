@@ -157,7 +157,7 @@ class TitleNumberFixup(Rule):
 	def when(self, matches: Matches, context) -> Any:
 		episodes: List[Match] = matches.named("episode")  # type: ignore
 
-		if len(episodes) < 2:
+		if len(episodes) < 2 or all(x.value == episodes[0].value for x in episodes):
 			return
 
 		to_remove = []
@@ -169,24 +169,25 @@ class TitleNumberFixup(Rule):
 				continue
 
 			# do not fixup if there was a - or any separator between the title and the episode number
-			holes = matches.holes(title.end, episode.start)
+			holes: List[Match] = matches.holes(title.end, episode.start)  # type: ignore
 			if holes:
 				continue
 
 			to_remove.extend([title, episode])
 			new_title = copy(title)
 			new_title.end = episode.end
-			new_title.value = f"{title.value} {episode.value}"
 
-			# If an hole was created to parse the episode at the current pos, merge it back into the title
-			holes = matches.holes(episode.end)
-			if holes and holes[0].start == episode.end:
-				val: str = holes[0].value
-				if "-" in val:
-					val, *_ = val.split("-")
-					val = val.rstrip()
-				new_title.value = f"{new_title.value}{val}"
-				new_title.end += len(val)
+			nmatch: List[Match] = matches.next(episode)  # type: ignore
+			if nmatch:
+				end = (
+					nmatch[0].initiator.start
+					if isinstance(nmatch[0].initiator, Match)
+					else nmatch[0].start
+				)
+				# If an hole was created to parse the episode at the current pos, merge it back into the title
+				holes: List[Match] = matches.holes(start=episode.end, end=end)  # type: ignore
+				if holes and holes[0].start == episode.end:
+					new_title.end = holes[0].end
 
 			to_add.append(new_title)
 		return [to_remove, to_add]
@@ -357,7 +358,9 @@ class SeasonYearDedup(Rule):
 	```
 	"""
 
-	priority = POST_PROCESS
+	# This rules does the opposite of the YearSeason rule of guessit (with POST_PROCESS priority)
+	# To overide it, we need the -1. (rule: https://github.com/guessit-io/guessit/blob/develop/guessit/rules/processors.py#L195)
+	priority = POST_PROCESS - 1
 	consequence = [RemoveMatch]
 
 	def when(self, matches: Matches, context) -> Any:

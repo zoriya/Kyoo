@@ -197,6 +197,11 @@ class Matcher:
 		kind: Literal["collection", "movie", "episode", "show", "season"],
 		kyoo_id: str,
 	):
+		async def id_movie(movie: dict, id: dict):
+			ret = await self._provider.identify_movie(id["dataId"])
+			ret.path = movie["path"]
+			return ret
+
 		async def id_season(season: dict, id: dict):
 			ret = await self._provider.identify_season(
 				id["dataId"], season["seasonNumber"]
@@ -217,7 +222,7 @@ class Matcher:
 			"collection": lambda _, id: self._provider.identify_collection(
 				id["dataId"]
 			),
-			"movie": lambda _, id: self._provider.identify_movie(id["dataId"]),
+			"movie": id_movie,
 			"show": lambda _, id: self._provider.identify_show(id["dataId"]),
 			"season": id_season,
 			"episode": id_episode,

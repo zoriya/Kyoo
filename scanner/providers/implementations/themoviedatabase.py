@@ -559,6 +559,7 @@ class TheMovieDatabase(Provider):
 		absolute-ordered group and return it
 		"""
 
+		show = await self.identify_show(show_id)
 		try:
 			groups = await self.get(f"tv/{show_id}/episode_groups")
 			ep_count = max((x["episode_count"] for x in groups["results"]), default=0)
@@ -577,7 +578,22 @@ class TheMovieDatabase(Provider):
 			if group_id is None:
 				return None
 			group = await self.get(f"tv/episode_group/{group_id}")
-			return [ep for grp in group["groups"] for ep in grp["episodes"]]
+			absgrp = [ep for grp in group["groups"] for ep in grp["episodes"]]
+			logger.warn(
+				f"Incomplete absolute group for show {show_id}. Filling missing values by assuming season/episode order is ascending"
+			)
+			complete_abs = absgrp + [
+				{"season_number": s.season_number, "episode_number": e}
+				for s in show.seasons
+				# ignore specials not specified in the absgrp
+				if s.season_number > 0
+				for e in range(1, s.episodes_count)
+				if not any(
+					x["season_number"] == s.season_number and x["episode_number"] == e
+					for x in absgrp
+				)
+			]
+			return complete_abs
 		except Exception as e:
 			logger.exception(
 				"Could not retrieve absolute ordering information", exc_info=e
@@ -642,17 +658,17 @@ class TheMovieDatabase(Provider):
 		if absolute is not None:
 			return absolute
 		# assume we use tmdb weird absolute by default (for example, One Piece S21E800, the first
-		# episode of S21 si not reset to 0 but keep increasing so it can be 800
+		# episode of S21 is not reset to 0 but keep increasing so it can be 800
 		start = next(
 			(x["episode_number"] for x in absgrp if x["season_number"] == season), None
 		)
-		if start is None or start <= episode_nbr:
-			raise ProviderError(
-				f"Could not guess absolute number of episode {show_id} s{season} e{episode_nbr}"
-			)
-		# add back the continuous number (imagine the user has one piece S21e31
-		# but tmdb registered it as S21E831 since S21's first ep is 800
-		return await self.get_absolute_number(show_id, season, episode_nbr + start)
+		if start is not None and start <= episode_nbr:
+			# add back the continuous number (imagine the user has one piece S21e31
+			# but tmdb registered it as S21E831 since S21's first ep is 800
+			return await self.get_absolute_number(show_id, season, episode_nbr + start)
+		raise ProviderError(
+			f"Could not guess absolute number of episode {show_id} s{season} e{episode_nbr}"
+		)
 
 	async def identify_collection(self, provider_id: str) -> Collection:
 		languages = self.get_languages()
