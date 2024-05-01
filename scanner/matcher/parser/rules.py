@@ -357,7 +357,9 @@ class SeasonYearDedup(Rule):
 	```
 	"""
 
-	priority = POST_PROCESS
+	# This rules does the opposite of the YearSeason rule of guessit (with POST_PROCESS priority)
+	# To overide it, we need the -1. (rule: https://github.com/guessit-io/guessit/blob/develop/guessit/rules/processors.py#L195)
+	priority = POST_PROCESS - 1
 	consequence = [RemoveMatch]
 
 	def when(self, matches: Matches, context) -> Any:
