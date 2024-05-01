@@ -23,5 +23,6 @@ namespace Kyoo.Abstractions.Controllers;
 
 public interface IScanner
 {
+	Task SendRescanRequest();
 	Task SendRefreshRequest(string kind, Guid id);
 }

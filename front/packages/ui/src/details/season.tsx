@@ -166,7 +166,7 @@ EpisodeList.query = (
 	parser: EpisodeP,
 	path: ["show", slug, "episode"],
 	params: {
-		seasonNumber: season ? `gte:${season}` : undefined,
+		filter: season ? `seasonNumber gte ${season}` : undefined,
 		fields: ["watchStatus"],
 	},
 	infinite: {

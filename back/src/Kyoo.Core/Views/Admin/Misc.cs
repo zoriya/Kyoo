@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Core.Controllers;
 using Microsoft.AspNetCore.Http;
@@ -62,6 +63,22 @@ public class Misc(MiscRepository repo) : BaseApi
 	)
 	{
 		await repo.DeletePath(path, recursive);
+		return NoContent();
+	}
+
+	/// <summary>
+	/// Rescan library
+	/// </summary>
+	/// <remark>
+	/// Trigger a complete library rescan
+	/// </remark>
+	/// <returns>Nothing</returns>
+	[HttpPost("/rescan")]
+	[PartialPermission(Kind.Write)]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	public async Task<IActionResult> RescanLibrary([FromServices] IScanner scanner)
+	{
+		await scanner.SendRescanRequest();
 		return NoContent();
 	}
 

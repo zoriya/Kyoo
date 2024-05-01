@@ -1,10 +1,11 @@
 import asyncio
 from typing import Union, Literal
 from msgspec import Struct, json
-import os
 from logging import getLogger
-from aio_pika import connect_robust
 from aio_pika.abc import AbstractIncomingMessage
+
+from scanner.publisher import Publisher
+from scanner.scanner import scan
 
 from matcher.matcher import Matcher
 
@@ -28,38 +29,29 @@ class Refresh(Message):
 	id: str
 
 
-decoder = json.Decoder(Union[Scan, Delete, Refresh])
+class Rescan(Message):
+	pass
 
 
-class Subscriber:
-	QUEUE = "scanner"
+decoder = json.Decoder(Union[Scan, Delete, Refresh, Rescan])
 
-	async def __aenter__(self):
-		self._con = await connect_robust(
-			host=os.environ.get("RABBITMQ_HOST", "rabbitmq"),
-			port=int(os.environ.get("RABBITMQ_PORT", "5672")),
-			login=os.environ.get("RABBITMQ_DEFAULT_USER", "guest"),
-			password=os.environ.get("RABBITMQ_DEFAULT_PASS", "guest"),
-		)
-		self._channel = await self._con.channel()
-		self._queue = await self._channel.declare_queue(self.QUEUE)
-		return self
 
-	async def __aexit__(self, exc_type, exc_value, exc_tb):
-		await self._con.close()
-
-	async def listen(self, scanner: Matcher):
+class Subscriber(Publisher):
+	async def listen(self, matcher: Matcher):
 		async def on_message(message: AbstractIncomingMessage):
 			try:
 				msg = decoder.decode(message.body)
 				ack = False
 				match msg:
 					case Scan(path):
-						ack = await scanner.identify(path)
+						ack = await matcher.identify(path)
 					case Delete(path):
-						ack = await scanner.delete(path)
+						ack = await matcher.delete(path)
 					case Refresh(kind, id):
-						ack = await scanner.refresh(kind, id)
+						ack = await matcher.refresh(kind, id)
+					case Rescan():
+						await scan(None, self, matcher._client)
+						ack = True
 					case _:
 						logger.error(f"Invalid action: {msg.action}")
 				if ack:

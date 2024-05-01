@@ -1,6 +1,7 @@
 import os
 import re
 import asyncio
+from typing import Optional
 from logging import getLogger
 
 from .publisher import Publisher
@@ -10,8 +11,10 @@ logger = getLogger(__name__)
 
 
 async def scan(
-	path: str, publisher: Publisher, client: KyooClient, remove_deleted=False
+	path_: Optional[str], publisher: Publisher, client: KyooClient, remove_deleted=False
 ):
+	path = path_ or os.environ.get("SCANNER_LIBRARY_ROOT", "/video")
+
 	logger.info("Starting the scan. It can take some times...")
 	ignore_pattern = None
 	try:
@@ -34,6 +37,11 @@ async def scan(
 			await asyncio.gather(*map(publisher.delete, deleted))
 		elif len(deleted) > 0:
 			logger.warning("All video files are unavailable. Check your disks.")
+
+		issues = await client.get_issues()
+		for x in issues:
+			if x not in videos:
+				await client.delete_issue(x)
 
 	await asyncio.gather(*map(publisher.add, to_register))
 	logger.info(f"Scan finished for {path}.")

@@ -18,24 +18,44 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Issue, IssueP, QueryIdentifier, useFetch } from "@kyoo/models";
+import { Issue, IssueP, QueryIdentifier, queryFn, useFetch } from "@kyoo/models";
 import { useTranslation } from "react-i18next";
 import { SettingsContainer } from "../settings/base";
-import { Icon, P, Skeleton, tooltip, ts } from "@kyoo/primitives";
+import { Button, Icon, P, Skeleton, tooltip, ts } from "@kyoo/primitives";
 import { ErrorView } from "../errors";
 import { z } from "zod";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 
 import Info from "@material-symbols/svg-400/outlined/info.svg";
+import Scan from "@material-symbols/svg-400/outlined/sensors.svg";
+import { useMutation } from "@tanstack/react-query";
 
 export const Scanner = () => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 	const { data, error } = useFetch(Scanner.query());
 
+	const metadataRefreshMutation = useMutation({
+		mutationFn: () =>
+			queryFn({
+				path: ["rescan"],
+				method: "POST",
+			}),
+	});
+
 	return (
-		<SettingsContainer title={t("admin.scanner.label")}>
+		<SettingsContainer
+			title={t("admin.scanner.label")}
+			extraTop={
+				<Button
+					licon={<Icon icon={Scan} {...css({ marginX: ts(1) })} />}
+					text={t("admin.scanner.scan")}
+					onPress={() => metadataRefreshMutation.mutate()}
+					{...css({ marginBottom: ts(2) })}
+				/>
+			}
+		>
 			<>
 				{error != null ? (
 					<ErrorView error={error} />
