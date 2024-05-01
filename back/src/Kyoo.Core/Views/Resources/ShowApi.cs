@@ -50,7 +50,7 @@ public class ShowApi(ILibraryManager libraryManager) : CrudThumbsApi<Show>(libra
 	/// </remarks>
 	/// <param name="identifier">The ID or slug of the <see cref="Show"/>.</param>
 	/// <returns>Nothing</returns>
-	/// <response code="404">No episode with the given ID or slug could be found.</response>
+	/// <response code="404">No show with the given ID or slug could be found.</response>
 	[HttpPost("{identifier:id}/refresh")]
 	[PartialPermission(Kind.Write)]
 	[ProducesResponseType(StatusCodes.Status204NoContent)]
