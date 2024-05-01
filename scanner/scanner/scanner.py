@@ -35,5 +35,10 @@ async def scan(
 		elif len(deleted) > 0:
 			logger.warning("All video files are unavailable. Check your disks.")
 
+		issues = await client.get_issues()
+		for x in issues:
+			if x not in videos:
+				await client.delete_issue(x)
+
 	await asyncio.gather(*map(publisher.add, to_register))
 	logger.info(f"Scan finished for {path}.")

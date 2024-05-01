@@ -58,6 +58,16 @@ class KyooClient:
 				logger.error(f"Request error: {await r.text()}")
 				r.raise_for_status()
 
+	async def get_issues(self) -> List[str]:
+		async with self.client.get(
+			f"{self._url}/issues",
+			params={"limit": 0},
+			headers={"X-API-Key": self._api_key},
+		) as r:
+			r.raise_for_status()
+			ret = await r.json()
+			return [x["cause"] for x in ret if x["domain"] == "scanner"]
+
 	async def delete_issue(self, path: str):
 		async with self.client.delete(
 			f'{self._url}/issues?filter=domain eq scanner and cause eq "{quote(path)}"',
