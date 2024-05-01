@@ -237,6 +237,7 @@
 		},
 		"scanner": {
 			"label": "Scanner",
+			"scan": "Trigger library scan",
 			"empty": "No issue found. All your items are registered."
 		}
 	}

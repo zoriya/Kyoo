@@ -88,17 +88,20 @@ export const SettingsContainer = ({
 	children,
 	title,
 	extra,
+	extraTop,
 	...props
 }: {
 	children: ReactElement | (ReactElement | Falsy)[] | Falsy;
 	title: string;
 	extra?: ReactElement;
+	extraTop?: ReactElement;
 }) => {
 	const { css } = useYoshiki();
 
 	return (
 		<Container {...props}>
 			<H1 {...css({ fontSize: rem(2) })}>{title}</H1>
+			{extraTop}
 			<SwitchVariant>
 				{({ css }) => (
 					<View

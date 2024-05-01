@@ -237,6 +237,7 @@
 		},
 		"scanner": {
 			"label": "Scanner",
+			"scan": "Déclencher le scan de la bibliothèque",
 			"empty": "Aucun problème trouvé. Toutes vos vidéos sont enregistrés."
 		}
 	}
