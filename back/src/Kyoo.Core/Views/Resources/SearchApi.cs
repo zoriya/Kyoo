@@ -34,7 +34,7 @@ namespace Kyoo.Core.Api;
 /// </summary>
 [Route("search")]
 [ApiController]
-[ApiDefinition("Search", Group = ResourcesGroup)]
+[ApiDefinition("Search", Group = OtherGroup)]
 public class SearchApi : BaseApi
 {
 	private readonly ISearchManager _searchManager;
@@ -60,7 +60,7 @@ public class SearchApi : BaseApi
 	[HttpGet("collections")]
 	[HttpGet("collection", Order = AlternativeRoute)]
 	[Permission(nameof(Collection), Kind.Read)]
-	[ApiDefinition("Collections")]
+	[ApiDefinition("Collections", Group = ResourcesGroup)]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	public async Task<SearchPage<Collection>> SearchCollections(
 		[FromQuery] string? q,
@@ -86,7 +86,7 @@ public class SearchApi : BaseApi
 	[HttpGet("shows")]
 	[HttpGet("show", Order = AlternativeRoute)]
 	[Permission(nameof(Show), Kind.Read)]
-	[ApiDefinition("Show")]
+	[ApiDefinition("Shows", Group = ResourcesGroup)]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	public async Task<SearchPage<Show>> SearchShows(
 		[FromQuery] string? q,
@@ -112,7 +112,7 @@ public class SearchApi : BaseApi
 	[HttpGet("movies")]
 	[HttpGet("movie", Order = AlternativeRoute)]
 	[Permission(nameof(Movie), Kind.Read)]
-	[ApiDefinition("Movie")]
+	[ApiDefinition("Movies", Group = ResourcesGroup)]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	public async Task<SearchPage<Movie>> SearchMovies(
 		[FromQuery] string? q,
@@ -138,7 +138,7 @@ public class SearchApi : BaseApi
 	[HttpGet("items")]
 	[HttpGet("item", Order = AlternativeRoute)]
 	[Permission(nameof(ILibraryItem), Kind.Read)]
-	[ApiDefinition("Item")]
+	[ApiDefinition("Items", Group = ResourcesGroup)]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	public async Task<SearchPage<ILibraryItem>> SearchItems(
 		[FromQuery] string? q,
@@ -164,7 +164,7 @@ public class SearchApi : BaseApi
 	[HttpGet("episodes")]
 	[HttpGet("episode", Order = AlternativeRoute)]
 	[Permission(nameof(Episode), Kind.Read)]
-	[ApiDefinition("Episodes")]
+	[ApiDefinition("Episodes", Group = ResourcesGroup)]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	public async Task<SearchPage<Episode>> SearchEpisodes(
 		[FromQuery] string? q,
@@ -190,7 +190,7 @@ public class SearchApi : BaseApi
 	[HttpGet("studios")]
 	[HttpGet("studio", Order = AlternativeRoute)]
 	[Permission(nameof(Studio), Kind.Read)]
-	[ApiDefinition("Studios")]
+	[ApiDefinition("Studios", Group = MetadataGroup)]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	public async Task<SearchPage<Studio>> SearchStudios(
 		[FromQuery] string? q,
