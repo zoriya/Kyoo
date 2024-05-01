@@ -32,12 +32,12 @@ using static Kyoo.Abstractions.Models.Utils.Constants;
 namespace Kyoo.Core.Api;
 
 /// <summary>
-/// List new items added to kyoo.
+/// List times on the user's watchlist
 /// </summary>
 [Route("watchlist")]
 [ApiController]
-[PartialPermission("LibraryItem")]
-[ApiDefinition("News", Group = ResourcesGroup)]
+[PartialPermission("Watchlist")]
+[ApiDefinition("Watchlist", Group = ResourcesGroup)]
 [UserOnly]
 public class WatchlistApi(IWatchStatusRepository repository) : BaseApi
 {
@@ -45,7 +45,7 @@ public class WatchlistApi(IWatchStatusRepository repository) : BaseApi
 	/// Get all
 	/// </summary>
 	/// <remarks>
-	/// Get all resources that match the given filter.
+	/// Get all resources in the user's watchlist
 	/// </remarks>
 	/// <param name="filter">Filter the returned items.</param>
 	/// <param name="pagination">How many items per page should be returned, where should the page start...</param>
