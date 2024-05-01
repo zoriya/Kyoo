@@ -144,6 +144,9 @@ export const AccountProvider = ({
 	const oldSelected = useRef<{ id: string; token: string } | null>(
 		selected ? { id: selected.id, token: selected.token.access_token } : null,
 	);
+
+	const [permissionError, setPermissionError] = useState<KyooErrors | null>(null);
+
 	const userIsError = user.isError;
 	useEffect(() => {
 		// if the user change account (or connect/disconnect), reset query cache.
@@ -152,6 +155,7 @@ export const AccountProvider = ({
 			(userIsError && selected?.token.access_token !== oldSelected.current?.token)
 		) {
 			initialSsrError.current = undefined;
+			setPermissionError(null);
 			queryClient.resetQueries();
 		}
 		oldSelected.current = selected ? { id: selected.id, token: selected.token.access_token } : null;
@@ -163,8 +167,6 @@ export const AccountProvider = ({
 			setCookie("X-Bearer", selected?.token.access_token);
 		}
 	}, [selected, queryClient, userIsError]);
-
-	const [permissionError, setPermissionError] = useState<KyooErrors | null>(null);
 
 	return (
 		<AccountContext.Provider value={accounts}>
