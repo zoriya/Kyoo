@@ -662,13 +662,13 @@ class TheMovieDatabase(Provider):
 		start = next(
 			(x["episode_number"] for x in absgrp if x["season_number"] == season), None
 		)
-		if start is not None and start <= episode_nbr:
-			# add back the continuous number (imagine the user has one piece S21e31
-			# but tmdb registered it as S21E831 since S21's first ep is 800
-			return await self.get_absolute_number(show_id, season, episode_nbr + start)
-		raise ProviderError(
-			f"Could not guess absolute number of episode {show_id} s{season} e{episode_nbr}"
-		)
+		if start is None or start <= episode_nbr:
+			raise ProviderError(
+				f"Could not guess absolute number of episode {show_id} s{season} e{episode_nbr}"
+			)
+		# add back the continuous number (imagine the user has one piece S21e31
+		# but tmdb registered it as S21E831 since S21's first ep is 800
+		return await self.get_absolute_number(show_id, season, episode_nbr + start)
 
 	async def identify_collection(self, provider_id: str) -> Collection:
 		languages = self.get_languages()
