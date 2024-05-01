@@ -317,7 +317,7 @@ public abstract record Filter<T> : Filter
 		);
 
 		public static readonly Parser<Filter<T>> Ge = _GetOperationParser(
-			Parse.IgnoreCase("ge").Or(Parse.String(">=")).Token(),
+			Parse.IgnoreCase("ge").Or(Parse.IgnoreCase("gte")).Or(Parse.String(">=")).Token(),
 			(property, value) => new Ge(property, value)
 		);
 
@@ -327,7 +327,7 @@ public abstract record Filter<T> : Filter
 		);
 
 		public static readonly Parser<Filter<T>> Le = _GetOperationParser(
-			Parse.IgnoreCase("le").Or(Parse.String("<=")).Token(),
+			Parse.IgnoreCase("le").Or(Parse.IgnoreCase("lte")).Or(Parse.String("<=")).Token(),
 			(property, value) => new Le(property, value)
 		);
 
