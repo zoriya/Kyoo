@@ -50,7 +50,7 @@ class Subscriber(Publisher):
 					case Refresh(kind, id):
 						ack = await matcher.refresh(kind, id)
 					case Rescan():
-						await scan(None, self, matcher._client)
+						await scan(None, self, matcher._client, remove_deleted=True)
 						ack = True
 					case _:
 						logger.error(f"Invalid action: {msg.action}")
