@@ -533,10 +533,10 @@ class TheMovieDatabase(Provider):
 			(
 				x
 				for x in results
-				if ("name" in x and x["name"] == name)
-				or ("title" in x and x["title"] == name)
+				if ("name" in x and x["name"].casefold() == name.casefold())
+				or ("title" in x and x["title"].casefold() == name.casefold())
 			),
-			key=lambda x: x["popularity"],
+			key=lambda x: (x["vote_count"], x["popularity"]),
 			reverse=True,
 		)
 		if res:
