@@ -1,41 +1,52 @@
 # <img width="24px" src="./icons/icon-256x256.png" alt=""> Kyoo
 
-Welcome to Kyoo, the next-generation open-source media browser that redefines your streaming experience. Designed from the ground up, Kyoo stands out as a powerful alternative to Plex and Jellyfin. Unleash the full potential of your media library with cutting-edge features and a commitment to being free and open-source.
+Kyoo is a self-hosted media server focused on video content (Movies, Series & Anime). It is an alternative to Jellyfin or Plex.
+
+It aims to have a low amount of maintenance needed (no folder structure required nor manual metadata edits). Media not being scanned correctly (even with weird names) is considered a bug.
+
+Kyoo does not have a plugin system and aim to have every features built-in (see [#Features](#-features) for the list).
 
 ![Kyoo in Action](https://raw.githubusercontent.com/zoriya/kyoo/screens/home.png)
 
 ## 🌐 Getting Started
 
-- **[Installation](./INSTALLING.md):** Set up Kyoo effortlessly to enjoy seamless streaming of your favorite movies, TV shows, or anime.
-- **[Join the discord](https://discord.gg/E6Apw3aFaA):** Join our Discord community for discussions and support
-- **[API Documentation](https://kyoo.zoriya.dev/api/doc):** Dive into our comprehensive API documentation to explore advanced functionalities.
-- **[Contributing](./CONTRIBUTING.md):** Feel free to open issues, submit pull requests, and contribute to making Kyoo even better.
+- **[Installation](./INSTALLING.md):** Basic installation guidelines, how to start Kyoo, enable OIDC or hardware transcoding.
+- **[Join the discord](https://discord.gg/E6Apw3aFaA):** Ask questions, talk about the development, feature you might want or bugs you might encounter.
+- **[API Documentation](https://kyoo.zoriya.dev/api/doc):** The API to integrate Kyoo with other services, if you have any questions, please ask on github or discord!
+- **[Contributing](./CONTRIBUTING.md):** Feel free to open issues, submit pull requests, and contribute to making Kyoo even better. We need you!
 
 [![](https://discord.com/api/guilds/1216460898139635753/widget.png?style=banner2)](https://discord.gg/zpA74Qpvj5)
 
 ## 🚀 Features
 
-- **Dynamic Transcoding:** Transcode your media to any quality, change on the fly with auto quality, and seek effortlessly without waiting for the transcoder.
-  
-- **Auto Watch History:** Enjoy automatic watch history with continue watching, allowing you to quickly resume your series or discover new episodes.
+- **Dynamic Transcoding:** Transcode your media to any quality, change on the fly with auto quality, and seek instantly without waiting for the transcoder.
 
-- **Intelligent Metadata Retrieval:** Experience smart metadata retrieval, even for oddly named files, thanks to the power of guessit and themoviedb. It even uses thexem for enhanced anime handling.
+- **Video Preview Thumbnails:** Simply hover the video's progress bar and see a preview of the video.
 
-- **Cross-Platform Access:** Access Kyoo on Android and web clients, ensuring your media is at your fingertips wherever you go.
+- **Meilisearch-Powered Search:** Advanced, typo-resilient search system powered by Meilisearch.
 
-- **Meilisearch-Powered Search:** Utilize our advanced, typo-resilient search system powered by Meilisearch for lightning-fast results.
+- **OIDC Connection:** Connect using any OIDC compliant service (Google, Discord, Authelia, you name it).
 
-- **Fast Scrubbing Support:** Navigate your media effortlessly with fast scrubbing support, enhancing your control over playback.
+- **Watch List Scrubbing Support:** Your watch list is automatically synced to connected services (SIMKL and soon others [#351](https://github.com/zoriya/Kyoo/issues/351), [#352](https://github.com/zoriya/Kyoo/issues/352)). No need to manually mark episodes as watched.
 
-- **Download and Offline Support:** Enjoy the freedom to download and watch offline, with the watch history seamlessly updating when you reconnect.
+- **Download and Offline Support:** Download videos to watch them without internet access, you progress will automatically be synced next time your devices goes online.
 
-- **Enhanced Subtitle Support:** Kyoo goes beyond the basics with enhanced subtitle support, including SSA/ASS formats and customizable fonts.
+- **Enhanced Subtitle Support:** Subtitles are important, Kyoo supports SSA/ASS and uses the video's embedded fonts when available.
 
-- **OIDC and Scrubbing Support:** Login with your favorites services (Google, Discord or any OIDC compliant service) and automatically mark episodes as watched on linked services (SIMKL and soon others).
+- **Anime Name Parsing**: While there are still some issues (see [#466](https://github.com/zoriya/Kyoo/issues/466)), Kyoo will match weird anime names (like `[Some-Stuffs] Jojo's Bizarre Adventure Stone Ocean 24 (1920x1080 Blu-Ray Opus) [2750810F].mkv`) without issue.
 
-## 🌟 Philosophy: Setup Once, Enjoy Forever
+- **Cloud Native:** Still an ongoing effort (see [#357](https://github.com/zoriya/Kyoo/issues/357)) but Kyoo is made with the idea that it could run distributed or standalone, on an RPI or on huge home-datacenters.
 
-Kyoo's philosophy revolves around simplicity. Set it up once, forget about configuration hassles. Once installed, your library undergoes automatic scanning, adding new episodes or movies as soon as they're moved into your library's folder. No need for a specific file structure or meticulously renamed files – Kyoo does the right thing™.
+## 📺 Clients
+
+Clients is a bit part of media servers but for now, Kyoo's focus is on features. Only a web version and an android apps are available for now. The front is written with react-native (expo) so adapting for others platform is possible. Here is a rough roadmap of clients supports:
+- Today: Web & Android
+- End of 2024: Chromecast support
+- Summer 2025: Android TV app
+
+Apple devices are not planned for now because I do not own any of their device, and it requires $100/year.
+
+If you would like to have a client sooner or on devices not listed on the roadmap, come hang on the discord and consider contributing to Kyoo.
 
 ## 📜 Why another media-browser?
 
@@ -61,6 +72,13 @@ Curious to see Kyoo in action? Check out our live demo featuring copyright-free 
 
 ![List](https://raw.githubusercontent.com/zoriya/kyoo/screens/list.png)
 
-<p align="center"><img src="https://raw.githubusercontent.com/zoriya/kyoo/screens/android-movie.png" alt="Android Movie" width="350"></p>
-
+<p align="center">
+	<img
+		src="https://raw.githubusercontent.com/zoriya/kyoo/screens/android-movie.png"
+		alt="Android Movie"
+		width="350"
+	/>
+</p>
 Ready to elevate your streaming experience? Dive into Kyoo now! 🎬🎉
+
+<!-- vim: set wrap: -->
