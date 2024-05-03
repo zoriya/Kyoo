@@ -533,10 +533,10 @@ class TheMovieDatabase(Provider):
 			(
 				x
 				for x in results
-				if ("name" in x and x["name"] == name)
-				or ("title" in x and x["title"] == name)
+				if ("name" in x and x["name"].casefold() == name.casefold())
+				or ("title" in x and x["title"].casefold() == name.casefold())
 			),
-			key=lambda x: x["popularity"],
+			key=lambda x: (x["vote_count"], x["popularity"]),
 			reverse=True,
 		)
 		if res:
@@ -579,9 +579,17 @@ class TheMovieDatabase(Provider):
 				return None
 			group = await self.get(f"tv/episode_group/{group_id}")
 			absgrp = [ep for grp in group["groups"] for ep in grp["episodes"]]
-			logger.warn(
-				f"Incomplete absolute group for show {show_id}. Filling missing values by assuming season/episode order is ascending"
-			)
+			season_starts = [
+				next(
+					(
+						x["episode_number"]
+						for x in absgrp
+						if x["season_number"] == s.season_number
+					),
+					1,
+				)
+				for s in show.seasons
+			]
 			complete_abs = absgrp + [
 				{"season_number": s.season_number, "episode_number": e}
 				for s in show.seasons
@@ -589,10 +597,19 @@ class TheMovieDatabase(Provider):
 				if s.season_number > 0
 				for e in range(1, s.episodes_count)
 				if not any(
-					x["season_number"] == s.season_number and x["episode_number"] == e
+					x["season_number"] == s.season_number
+					and (
+						x["episode_number"] == e
+						# take into account weird absolute (for example one piece, episodes are not reset to 1 when the season starts)
+						or x["episode_number"] == season_starts[s.season_number - 1] + e
+					)
 					for x in absgrp
 				)
 			]
+			if len(complete_abs) != len(absgrp):
+				logger.warn(
+					f"Incomplete absolute group for show {show_id}. Filling missing values by assuming season/episode order is ascending"
+				)
 			return complete_abs
 		except Exception as e:
 			logger.exception(
