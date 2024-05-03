@@ -1,25 +1,22 @@
-import os
+import asyncio
 from guessit.jsonutils import json
-from aio_pika import Message, connect_robust
+from aio_pika import Message
+from aio_pika.abc import AbstractIncomingMessage
+from logging import getLogger
 from typing import Literal
 
+from providers.rabbit_base import RabbitBase
 
-class Publisher:
-	QUEUE = "scanner"
+logger = getLogger(__name__)
+
+
+class Publisher(RabbitBase):
+	QUEUE_RESCAN = "scanner.rescan"
 
 	async def __aenter__(self):
-		self._con = await connect_robust(
-			host=os.environ.get("RABBITMQ_HOST", "rabbitmq"),
-			port=int(os.environ.get("RABBITMQ_PORT", "5672")),
-			login=os.environ.get("RABBITMQ_DEFAULT_USER", "guest"),
-			password=os.environ.get("RABBITMQ_DEFAULT_PASS", "guest"),
-		)
-		self._channel = await self._con.channel()
-		self._queue = await self._channel.declare_queue(self.QUEUE)
+		await super().__aenter__()
+		self._queue = await self._channel.declare_queue(self.QUEUE_RESCAN)
 		return self
-
-	async def __aexit__(self, exc_type, exc_value, exc_tb):
-		await self._con.close()
 
 	async def _publish(self, data: dict):
 		await self._channel.default_exchange.publish(
@@ -40,3 +37,15 @@ class Publisher:
 		**_kwargs,
 	):
 		await self._publish({"action": "refresh", "kind": kind, "id": id})
+
+	async def listen(self, scan):
+		async def on_message(message: AbstractIncomingMessage):
+			try:
+				await scan()
+				await message.ack()
+			except Exception as e:
+				logger.exception("Unhandled error", exc_info=e)
+				await message.reject()
+
+		await self._queue.consume(on_message)
+		await asyncio.Future()

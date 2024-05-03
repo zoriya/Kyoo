@@ -32,19 +32,20 @@ public class ScannerProducer : IScanner
 	{
 		_channel = rabbitConnection.CreateModel();
 		_channel.QueueDeclare("scanner", exclusive: false, autoDelete: false);
+		_channel.QueueDeclare("scanner.rescan", exclusive: false, autoDelete: false);
 	}
 
-	private Task _Publish<T>(T message)
+	private Task _Publish<T>(T message, string queue = "scanner")
 	{
 		var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message, Utility.JsonOptions));
-		_channel.BasicPublish("", routingKey: "scanner", body: body);
+		_channel.BasicPublish("", routingKey: queue, body: body);
 		return Task.CompletedTask;
 	}
 
 	public Task SendRescanRequest()
 	{
 		var message = new { Action = "rescan", };
-		return _Publish(message);
+		return _Publish(message, queue: "scanner.rescan");
 	}
 
 	public Task SendRefreshRequest(string kind, Guid id)

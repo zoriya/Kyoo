@@ -4,9 +4,7 @@ from msgspec import Struct, json
 from logging import getLogger
 from aio_pika.abc import AbstractIncomingMessage
 
-from scanner.publisher import Publisher
-from scanner.scanner import scan
-
+from providers.rabbit_base import RabbitBase
 from matcher.matcher import Matcher
 
 logger = getLogger(__name__)
@@ -29,14 +27,10 @@ class Refresh(Message):
 	id: str
 
 
-class Rescan(Message):
-	pass
+decoder = json.Decoder(Union[Scan, Delete, Refresh])
 
 
-decoder = json.Decoder(Union[Scan, Delete, Refresh, Rescan])
-
-
-class Subscriber(Publisher):
+class Subscriber(RabbitBase):
 	async def listen(self, matcher: Matcher):
 		async def on_message(message: AbstractIncomingMessage):
 			try:
@@ -49,9 +43,6 @@ class Subscriber(Publisher):
 						ack = await matcher.delete(path)
 					case Refresh(kind, id):
 						ack = await matcher.refresh(kind, id)
-					case Rescan():
-						await scan(None, self, matcher._client, remove_deleted=True)
-						ack = True
 					case _:
 						logger.error(f"Invalid action: {msg.action}")
 				if ack:
