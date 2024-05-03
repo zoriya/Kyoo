@@ -33,7 +33,7 @@ Kyoo does not have a plugin system and aim to have every features built-in (see 
 
 - **Enhanced Subtitle Support:** Subtitles are important, Kyoo supports SSA/ASS and uses the video's embedded fonts when available.
 
-- **Anime Name Parsing**: While there are still some issues (see [#466](https://github.com/zoriya/Kyoo/issues/466)), Kyoo will match weird anime names (like `[Some-Stuffs] Jojo's Bizarre Adventure Stone Ocean 24 (1920x1080 Blu-Ray Opus) [2750810F].mkv`) without issue.
+- **Anime Name Parsing**: While there are still some issues (see [#466](https://github.com/zoriya/Kyoo/issues/466), Kyoo will match weird anime names (like `[Some-Stuffs] Jojo's Bizarre Adventure Stone Ocean 24 (1920x1080 Blu-Ray Opus) [2750810F].mkv`) without issue.
 
 - **Cloud Native:** Still an ongoing effort (see [#357](https://github.com/zoriya/Kyoo/issues/357)) but Kyoo is made with the idea that it could run distributed or standalone, on an RPI or on huge home-datacenters.
 
