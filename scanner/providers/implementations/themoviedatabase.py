@@ -578,7 +578,11 @@ class TheMovieDatabase(Provider):
 			if group_id is None:
 				return None
 			group = await self.get(f"tv/episode_group/{group_id}")
-			absgrp = [ep for grp in group["groups"] for ep in grp["episodes"]]
+			absgrp = [
+				ep
+				for grp in sorted(group["groups"], key=lambda x: x["order"])
+				for ep in sorted(grp["episodes"], key=lambda x: x["order"])
+			]
 			season_starts = [
 				next(
 					(
