@@ -1,6 +1,7 @@
 package src
 
 import (
+	"cmp"
 	"fmt"
 	"strings"
 
@@ -14,7 +15,7 @@ import (
 //
 // this code is addapted from https://github.com/jellyfin/jellyfin/blob/master/Jellyfin.Api/Helpers/HlsCodecStringHelpers.cs
 func GetMimeCodec(mi *mediainfo.File, kind mediainfo.StreamKind, i int) *string {
-	codec := Or(
+	codec := cmp.Or(
 		mi.Parameter(kind, i, "InternetMediaType"),
 		mi.Parameter(kind, i, "Format"),
 	)
