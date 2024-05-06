@@ -1,6 +1,7 @@
 package src
 
 import (
+	"cmp"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -140,19 +141,6 @@ func ParseTime(str string) float32 {
 	return (hours*60.+minutes)*60. + seconds + ms/1000.
 }
 
-// Stolen from the cmp.Or code that is not yet released
-// Or returns the first of its arguments that is not equal to the zero value.
-// If no argument is non-zero, it returns the zero value.
-func Or[T comparable](vals ...T) T {
-	var zero T
-	for _, val := range vals {
-		if val != zero {
-			return val
-		}
-	}
-	return zero
-}
-
 func Map[T, U any](ts []T, f func(T, int) U) []U {
 	us := make([]U, len(ts))
 	for i := range ts {
@@ -268,7 +256,7 @@ func getInfo(path string) (*MediaInfo, error) {
 				Width:     ParseUint(mi.Parameter(mediainfo.StreamVideo, i, "Width")),
 				Height:    ParseUint(mi.Parameter(mediainfo.StreamVideo, i, "Height")),
 				Bitrate: ParseUint(
-					Or(
+					cmp.Or(
 						mi.Parameter(mediainfo.StreamVideo, i, "BitRate"),
 						mi.Parameter(mediainfo.StreamVideo, i, "OverallBitRate"),
 						mi.Parameter(mediainfo.StreamVideo, i, "BitRate_Nominal"),

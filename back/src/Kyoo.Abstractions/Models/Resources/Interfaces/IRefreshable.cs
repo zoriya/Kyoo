@@ -27,16 +27,13 @@ public interface IRefreshable
 	/// </summary>
 	public DateTime? NextMetadataRefresh { get; set; }
 
-	public static DateTime ComputeNextRefreshDate(DateOnly? airDate)
+	public static DateTime ComputeNextRefreshDate(DateOnly airDate)
 	{
-		if (airDate is null)
-			return DateTime.UtcNow.AddDays(1);
-
-		int days = airDate.Value.DayNumber - DateOnly.FromDateTime(DateTime.UtcNow).DayNumber;
+		int days = DateOnly.FromDateTime(DateTime.UtcNow).DayNumber - airDate.DayNumber;
 		return days switch
 		{
-			<= 7 => DateTime.UtcNow.AddDays(1),
-			<= 21 => DateTime.UtcNow.AddDays(5),
+			<= 4 => DateTime.UtcNow.AddDays(1),
+			<= 21 => DateTime.UtcNow.AddDays(14),
 			_ => DateTime.UtcNow.AddMonths(2)
 		};
 	}

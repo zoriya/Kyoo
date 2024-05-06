@@ -92,7 +92,9 @@ public class EpisodeRepository(
 				.FirstOrDefaultAsync();
 		}
 
-		resource.NextMetadataRefresh ??= IRefreshable.ComputeNextRefreshDate(resource.ReleaseDate);
+		resource.NextMetadataRefresh ??= IRefreshable.ComputeNextRefreshDate(
+			resource.ReleaseDate ?? DateOnly.FromDateTime(resource.AddedDate)
+		);
 		await thumbnails.DownloadImages(resource);
 	}
 
