@@ -377,7 +377,7 @@ class TheMovieDatabase(Provider):
 			end_air=None,
 			external_id={
 				self.name: MetadataID(
-					season["id"],
+					show_id,
 					f"https://www.themoviedb.org/tv/{show_id}/season/{season['season_number']}",
 				)
 			},
