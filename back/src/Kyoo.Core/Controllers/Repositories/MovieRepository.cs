@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -74,7 +75,9 @@ public class MovieRepository(
 			resource.StudioId = (await studios.CreateIfNotExists(resource.Studio)).Id;
 			resource.Studio = null;
 		}
-		resource.NextMetadataRefresh ??= IRefreshable.ComputeNextRefreshDate(resource.AirDate);
+		resource.NextMetadataRefresh ??= IRefreshable.ComputeNextRefreshDate(
+			resource.AirDate ?? DateOnly.FromDateTime(resource.AddedDate)
+		);
 		await thumbnails.DownloadImages(resource);
 	}
 }

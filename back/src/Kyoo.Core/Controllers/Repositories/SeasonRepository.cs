@@ -77,7 +77,9 @@ public class SeasonRepository(
 			throw new ValidationException("Missing show id");
 		// This is storred in db so it needs to be set before every create/edit (and before events)
 		resource.ShowSlug = (await shows.Get(resource.ShowId)).Slug;
-		resource.NextMetadataRefresh ??= IRefreshable.ComputeNextRefreshDate(resource.StartDate);
+		resource.NextMetadataRefresh ??= IRefreshable.ComputeNextRefreshDate(
+			resource.StartDate ?? DateOnly.FromDateTime(resource.AddedDate)
+		);
 		await thumbnails.DownloadImages(resource);
 	}
 }
