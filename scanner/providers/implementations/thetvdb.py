@@ -1,7 +1,8 @@
-from datetime import timedelta
+import asyncio
+from datetime import timedelta, datetime
 from aiohttp import ClientSession
 from logging import getLogger
-from typing import Optional, Any
+from typing import Optional, Any, Literal
 
 from matcher.cache import cache
 
@@ -33,6 +34,12 @@ class TVDB(Provider):
 		self._pin = pin
 		self._languages = languages
 
+	def two_to_three_lang(self, lang: str) -> str:
+		return lang
+
+	def three_to_two_lang(self, lang: str) -> str:
+		return lang
+
 	@cache(ttl=timedelta(days=30))
 	async def login(self) -> str:
 		async with self._client.post(
@@ -45,15 +52,16 @@ class TVDB(Provider):
 
 	async def get(
 		self,
-		path: str,
+		path: Optional[str] = None,
 		*,
+		fullPath: Optional[str] = None,
 		params: dict[str, Any] = {},
 		not_found_fail: Optional[str] = None,
 	):
 		token = await self.login()
 		params = {k: v for k, v in params.items() if v is not None}
 		async with self._client.get(
-			f"{self.base}/{path}",
+			fullPath or f"{self.base}/{path}",
 			params={"api_key": self._api_key, **params},
 			headers={"Authorization": f"Bearer {token}"},
 		) as r:
@@ -65,6 +73,30 @@ class TVDB(Provider):
 	@property
 	def name(self) -> str:
 		return "tvdb"
+
+	async def search_show(self, name: str, year: Optional[int]) -> Show:
+		pass
+
+	@cache(ttl=timedelta(days=1))
+	async def get_episodes(
+		self,
+		show_id: str,
+		order: Literal["default", "absolute"],
+		language: Optional[str] = None,
+	):
+		path = f"/series/{show_id}/episodes/{order}"
+		if language is not None:
+			path += f"/{language}"
+		ret = await self.get(
+			path, not_found_fail=f"Could not find show with id {show_id}"
+		)
+		episodes = ret["data"]["episodes"]
+		next = ret["links"]["next"]
+		while next != None:
+			ret = await self.get(fullPath=next)
+			next = ret["links"]["next"]
+			episodes += ret["data"]
+		return episodes
 
 	async def search_episode(
 		self,
@@ -85,4 +117,77 @@ class TVDB(Provider):
 		episode_nbr: Optional[int],
 		absolute: Optional[int],
 	) -> Episode:
-		return await self.get(f"")
+		flang, slang, *olang = [*self._languages, None]
+		episodes = await self.get_episodes(show_id, order="default", language=flang)
+		show = episodes["data"]
+		ret = next(
+			filter(
+				(lambda x: x["seasonNumber"] == 1 and x["number"] == absolute)
+				if absolute is not None
+				else (
+					lambda x: x["seasonNumber"] == season and x["number"] == episode_nbr
+				),
+				episodes["episodes"],
+			),
+			None,
+		)
+		if ret == None:
+			raise ProviderError(
+				f"Could not retrive episode {show['name']} s{season}e{episode_nbr}, absolute {absolute}"
+			)
+		absolutes = await self.get_episodes(
+			show_id, order="absolute", language=slang or flang
+		)
+		abs = next(filter(lambda x: x["id"] == ret["id"], absolutes["episodes"]))
+
+		otrans = await asyncio.gather(
+			*(
+				self.get_episodes(show_id, order="default", language=lang)
+				for lang in olang
+				if lang is not None
+			)
+		)
+		translations = {
+			lang: EpisodeTranslation(
+				name=val["name"],
+				overview=val["overview"],
+			)
+			for (lang, val) in zip(
+				self._languages,
+				[
+					ret,
+					abs,
+					*(
+						next(x for x in e["episodes"] if x["id"] == ret["id"])
+						for e in otrans
+					),
+				],
+			)
+		}
+
+		return Episode(
+			show=PartialShow(
+				name=show["name"],
+				original_language=self.three_to_two_lang(show["originalLanguage"]),
+				external_id={
+					self.name: MetadataID(
+						show_id, f"https://thetvdb.com/series/{show['slug']}"
+					),
+				},
+			),
+			season_number=ret["seasonNumber"],
+			episode_number=ret["number"],
+			absolute_number=abs["number"],
+			runtime=ret["runtime"],
+			release_date=datetime.strptime(ret["aired"], "%Y-%m-%d").date(),
+			thumbnail=f"https://artworks.thetvdb.com{ret['image']}",
+			external_id={
+				self.name: EpisodeID(
+					show_id,
+					ret["seasonNumber"],
+					ret["number"],
+					f"https://thetvdb.com/series/{show_id}/episodes/{ret['id']}",
+				),
+			},
+			translations=translations,
+		)
