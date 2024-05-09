@@ -276,7 +276,7 @@ class TVDB(Provider):
 		}
 		return Show(
 			original_language=ret["originalLanguage"],
-			aliases=[],
+			aliases=[x["name"] for x in ret["aliases"]],
 			start_air=datetime.strptime(ret["firstAired"], "%Y-%m-%d").date(),
 			end_air=datetime.strptime(ret["lastAired"], "%Y-%m-%d").date(),
 			status=ShowStatus.FINISHED
