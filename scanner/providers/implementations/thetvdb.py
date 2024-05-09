@@ -240,9 +240,40 @@ class TVDB(Provider):
 			*(
 				self.get(f"/series/{show_id}/translations/{lang}")
 				for lang in self._languages
-				if lang != ret["original_language"]
+				if lang != ret["originalLanguage"]
 			)
 		)
+		trans = {
+			lang: ShowTranslation(
+				name=x["name"],
+				tagline=None,
+				tags=[],
+				overview=x["overview"],
+				posters=[
+					i["image"]
+					for i in x["artworks"]
+					if i["type"] == 2
+					and (i["language"] == lang or i["language"] is None)
+				],
+				logos=[
+					i["image"]
+					for i in x["artworks"]
+					if i["type"] == 5
+					and (i["language"] == lang or i["language"] is None)
+				],
+				thumbnails=[
+					i["image"]
+					for i in x["artworks"]
+					if i["type"] == 3
+					and (i["language"] == lang or i["language"] is None)
+				],
+				trailers=[x["url"] for t in ret["trailers"] if t["language"] == lang],
+			)
+			for (lang, x) in [
+				(ret["originalLanguage"], ret),
+				*zip(self._languages, translations),
+			]
+		}
 		return Show(
 			original_language=ret["originalLanguage"],
 			aliases=[],
@@ -289,6 +320,7 @@ class TVDB(Provider):
 				lambda x: f"https://www.imdb.com/title/{x}",
 				"IMDB",
 			),
+			translations=trans,
 			seasons=[],
 		)
 
