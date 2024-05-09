@@ -48,6 +48,12 @@ Apple devices are not planned for now because I do not own any of their device, 
 
 If you would like to have a client sooner or on devices not listed on the roadmap, come hang on the discord and consider contributing to Kyoo.
 
+## 📖 Translations
+
+If Kyoo is not available on your language, you can use [weblate](https://hosted.weblate.org/engage/kyoo/) to add translations easily.
+
+[![Translation status](https://hosted.weblate.org/widget/kyoo/kyoo/multi-auto.svg)](https://hosted.weblate.org/engage/kyoo/)
+
 ## 📜 Why another media-browser?
 
 From a technical standpoint, both Jellyfin and Plex lean on SQLite and confine everything within a single container, Kyoo takes a different route. We're not afraid to bring in additional containers when it makes sense – whether for specialized features like Meilisearch powering our search system or for scalability, as seen with our transcoder.
