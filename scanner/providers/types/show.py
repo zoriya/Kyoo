@@ -38,7 +38,7 @@ class Show:
 	start_air: Optional[date | int]
 	end_air: Optional[date | int]
 	status: Status
-	rating: int
+	rating: Optional[int]
 	studios: list[Studio]
 	genres: list[Genre]
 	seasons: list[Season]

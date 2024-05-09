@@ -1,8 +1,9 @@
 import asyncio
 from datetime import timedelta, datetime
+from math import e
 from aiohttp import ClientSession
 from logging import getLogger
-from typing import Optional, Any, Literal
+from typing import Optional, Any, Literal, Callable
 
 from matcher.cache import cache
 
@@ -33,6 +34,43 @@ class TVDB(Provider):
 		self._api_key = api_key
 		self._pin = pin
 		self._languages = languages
+		self._genre_map = {
+			"soap": Genre.SOAP,
+			"science-fiction": Genre.SCIENCE_FICTION,
+			"reality": Genre.REALITY,
+			"news": Genre.NEWS,
+			"mini-series": None,
+			"horror": Genre.HORROR,
+			"home-and-garden": None,
+			"game-show": None,
+			"food": None,
+			"fantasy": Genre.FANTASY,
+			"family": Genre.FAMILY,
+			"drama": Genre.DRAMA,
+			"documentary": Genre.DOCUMENTARY,
+			"crime": Genre.CRIME,
+			"comedy": Genre.COMEDY,
+			"children": Genre.KIDS,
+			"animation": Genre.ANIMATION,
+			"adventure": Genre.ADVENTURE,
+			"action": Genre.ACTION,
+			"sport": None,
+			"suspense": None,
+			"talk-show": Genre.TALK,
+			"thriller": Genre.THRILLER,
+			"travel": None,
+			"western": Genre.WESTERN,
+			"anime": Genre.ANIMATION,
+			"romance": Genre.ROMANCE,
+			"musical": Genre.MUSIC,
+			"podcast": None,
+			"mystery": Genre.MYSTERY,
+			"indie": None,
+			"history": Genre.HISTORY,
+			"war": Genre.WAR,
+			"martial-arts": None,
+			"awards-show": None,
+		}
 
 	def two_to_three_lang(self, lang: str) -> str:
 		return lang
@@ -75,7 +113,8 @@ class TVDB(Provider):
 		return "tvdb"
 
 	async def search_show(self, name: str, year: Optional[int]) -> Show:
-		pass
+		show_id = ""
+		return await self.identify_show(show_id)
 
 	@cache(ttl=timedelta(days=1))
 	async def get_episodes(
@@ -191,3 +230,72 @@ class TVDB(Provider):
 			},
 			translations=translations,
 		)
+
+	async def identify_show(self, show_id: str) -> Show:
+		ret = await self.get(
+			f"series/{show_id}/extended",
+			not_found_fail=f"Could not find show with id {show_id}",
+		)
+		translations = await asyncio.gather(
+			*(
+				self.get(f"/series/{show_id}/translations/{lang}")
+				for lang in self._languages
+				if lang != ret["original_language"]
+			)
+		)
+		return Show(
+			original_language=ret["originalLanguage"],
+			aliases=[],
+			start_air=datetime.strptime(ret["firstAired"], "%Y-%m-%d").date(),
+			end_air=datetime.strptime(ret["lastAired"], "%Y-%m-%d").date(),
+			status=ShowStatus.FINISHED
+			if ret["status"]["name"] == "Ended"
+			else ShowStatus.AIRING
+			if ret["status"]["name"] == "Continuing"
+			else ShowStatus.PLANNED,
+			rating=None,
+			studios=[
+				Studio(
+					name=x["name"],
+					logos=[],
+					external_id={
+						self.name: MetadataID(
+							x["id"], f"https://thetvdb.com/companies/{x['slug']}"
+						)
+					},
+				)
+				for x in ret["companies"]
+				if x["companyType"]["companyTypeName"] == "Studio"
+			],
+			genres=[
+				self._genre_map[x["slug"]]
+				for x in ret["genres"]
+				if self._genre_map[x["slug"]] is not None
+			],
+			external_id={
+				self.name: MetadataID(
+					ret["id"], f"https://thetvdb.com/series/{ret['slug']}"
+				),
+			}
+			| self.process_remote_id(
+				ret["remoteIds"],
+				"themoviedatabase",
+				lambda x: f"https://www.themoviedb.org/tv/{x}",
+				"TheMovieDB.com",
+			)
+			| self.process_remote_id(
+				ret["remoteIds"],
+				"imdb",
+				lambda x: f"https://www.imdb.com/title/{x}",
+				"IMDB",
+			),
+			seasons=[],
+		)
+
+	def process_remote_id(
+		self, ids: dict, name: str, link: Callable[[str], str], tvdb_name: str
+	) -> dict:
+		id = next((x["id"] for x in ids if x["sourceName"] == tvdb_name), None)
+		if id is None:
+			return {}
+		return {name: MetadataID(id, link(id))}
