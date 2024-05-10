@@ -26,7 +26,7 @@ import ExpandMore from "@material-symbols/svg-400/rounded/expand_more-fill.svg";
 import ExpandLess from "@material-symbols/svg-400/rounded/expand_less-fill.svg";
 import { ContrastArea, SwitchVariant } from "./themes";
 import { InternalTriger, YoshikiProvider } from "./menu.web";
-import { Theme, px, useYoshiki as useNativeYoshiki } from "yoshiki/native";
+import { type Theme, px, useYoshiki as useNativeYoshiki } from "yoshiki/native";
 import { useYoshiki } from "yoshiki";
 import { PressableFeedback } from "./links";
 import { P } from "./text";

@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { LibraryItem, LibraryItemP, QueryIdentifier, QueryPage } from "@kyoo/models";
+import { type LibraryItem, LibraryItemP, type QueryIdentifier, type QueryPage } from "@kyoo/models";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { createParam } from "solito";

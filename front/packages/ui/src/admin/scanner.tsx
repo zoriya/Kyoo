@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Issue, IssueP, QueryIdentifier, queryFn, useFetch } from "@kyoo/models";
+import { type Issue, IssueP, type QueryIdentifier, queryFn, useFetch } from "@kyoo/models";
 import { useTranslation } from "react-i18next";
 import { SettingsContainer } from "../settings/base";
 import { Button, Icon, P, Skeleton, tooltip, ts } from "@kyoo/primitives";

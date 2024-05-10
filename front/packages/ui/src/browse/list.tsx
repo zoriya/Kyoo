@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { KyooImage, WatchStatusV } from "@kyoo/models";
+import type { KyooImage, WatchStatusV } from "@kyoo/models";
 import {
 	Link,
 	P,
@@ -33,7 +33,7 @@ import {
 import { useState } from "react";
 import { Platform, View } from "react-native";
 import { percent, px, rem, useYoshiki } from "yoshiki/native";
-import { Layout, WithLoading } from "../fetch";
+import type { Layout, WithLoading } from "../fetch";
 import { ItemWatchStatus } from "./grid";
 import { ItemContext } from "../components/context-menus";
 

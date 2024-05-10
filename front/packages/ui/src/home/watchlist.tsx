@@ -18,7 +18,13 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { QueryIdentifier, Watchlist, WatchlistP, getDisplayDate, useAccount } from "@kyoo/models";
+import {
+	type QueryIdentifier,
+	type Watchlist,
+	WatchlistP,
+	getDisplayDate,
+	useAccount,
+} from "@kyoo/models";
 import { useYoshiki } from "yoshiki/native";
 import { ItemGrid } from "../browse/grid";
 import { InfiniteFetch } from "../fetch-infinite";

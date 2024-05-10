@@ -31,7 +31,7 @@ import VolumeMute from "@material-symbols/svg-400/rounded/volume_mute-fill.svg";
 import VolumeDown from "@material-symbols/svg-400/rounded/volume_down-fill.svg";
 import VolumeUp from "@material-symbols/svg-400/rounded/volume_up-fill.svg";
 import { durationAtom, mutedAtom, playAtom, progressAtom, volumeAtom } from "../state";
-import { Stylable, px, useYoshiki } from "yoshiki/native";
+import { type Stylable, px, useYoshiki } from "yoshiki/native";
 import { HoverTouch, hoverAtom } from "./hover";
 
 export const LeftButtons = ({

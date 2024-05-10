@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { login, QueryPage } from "@kyoo/models";
+import { login, type QueryPage } from "@kyoo/models";
 import { Button, P, Input, ts, H1, A } from "@kyoo/primitives";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";

@@ -19,17 +19,17 @@
  */
 
 import {
-	Episode,
+	type Episode,
 	EpisodeP,
-	Movie,
+	type Movie,
 	MovieP,
-	QueryIdentifier,
-	WatchInfo,
+	type QueryIdentifier,
+	type WatchInfo,
 	WatchInfoP,
 	useFetch,
 } from "@kyoo/models";
 import { Head } from "@kyoo/primitives";
-import { useState, useEffect, ComponentProps } from "react";
+import { useState, useEffect, type ComponentProps } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "solito/router";

@@ -35,9 +35,9 @@ import {
 	ts,
 	useIsTouch,
 } from "@kyoo/primitives";
-import { Chapter, KyooImage, Subtitle, Audio } from "@kyoo/models";
+import type { Chapter, KyooImage, Subtitle, Audio } from "@kyoo/models";
 import { useAtomValue, useSetAtom, useAtom } from "jotai";
-import { ImageStyle, Platform, Pressable, View, ViewProps } from "react-native";
+import { type ImageStyle, Platform, Pressable, View, type ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
 import { percent, rem, useYoshiki } from "yoshiki/native";
 import { useRouter } from "solito/router";
@@ -52,7 +52,7 @@ import {
 	playAtom,
 	progressAtom,
 } from "../state";
-import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { atom } from "jotai";
 import { BottomScrubber, ScrubberTooltip } from "./scrubber";
 

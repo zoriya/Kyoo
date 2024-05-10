@@ -18,8 +18,8 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ComponentType } from "react";
-import { View, ViewProps } from "react-native";
+import type { ComponentType } from "react";
+import { View, type ViewProps } from "react-native";
 import { percent, px, useYoshiki } from "yoshiki/native";
 
 export const Container = <AsProps = ViewProps>({

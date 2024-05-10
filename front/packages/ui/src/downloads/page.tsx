@@ -18,9 +18,9 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { State, downloadAtom } from "./state";
+import { type State, downloadAtom } from "./state";
 import { FlashList } from "@shopify/flash-list";
-import { ImageStyle, View } from "react-native";
+import { type ImageStyle, View } from "react-native";
 import {
 	Alert,
 	H6,
@@ -38,8 +38,8 @@ import { EpisodeLine, displayRuntime, episodeDisplayNumber } from "../details/ep
 import { useTranslation } from "react-i18next";
 import { EmptyView } from "../fetch";
 import { percent, useYoshiki } from "yoshiki/native";
-import { KyooImage } from "@kyoo/models";
-import { Atom, useAtomValue } from "jotai";
+import type { KyooImage } from "@kyoo/models";
+import { type Atom, useAtomValue } from "jotai";
 import DownloadForOffline from "@material-symbols/svg-400/rounded/download_for_offline.svg";
 import Downloading from "@material-symbols/svg-400/rounded/downloading.svg";
 import ErrorIcon from "@material-symbols/svg-400/rounded/error.svg";

@@ -21,7 +21,7 @@
 import { LinearGradient as LG } from "expo-linear-gradient";
 import { AnimatePresence, motify, MotiView } from "moti";
 import { useState } from "react";
-import { Platform, View, ViewProps } from "react-native";
+import { Platform, View, type ViewProps } from "react-native";
 import { px, rem, useYoshiki, percent, em } from "yoshiki/native";
 import { hiddenIfNoJs } from "./utils/nojs";
 

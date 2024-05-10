@@ -19,7 +19,7 @@
  */
 
 import { IconButton, Menu, tooltip } from "@kyoo/primitives";
-import { ComponentProps } from "react";
+import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import BookmarkAdd from "@material-symbols/svg-400/rounded/bookmark_add.svg";
 import Bookmark from "@material-symbols/svg-400/rounded/bookmark-fill.svg";

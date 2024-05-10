@@ -19,9 +19,9 @@
  */
 
 import { useState } from "react";
-import { ImageStyle, View, ViewStyle } from "react-native";
+import { type ImageStyle, View, type ViewStyle } from "react-native";
 import { useYoshiki } from "yoshiki/native";
-import { Props, ImageLayout } from "./base-image";
+import type { Props, ImageLayout } from "./base-image";
 import { BlurhashContainer } from "./blurhash.web";
 import { Skeleton } from "../skeleton";
 import NextImage from "next/image";

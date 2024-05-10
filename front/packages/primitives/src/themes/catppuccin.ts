@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ThemeBuilder } from "./theme";
+import type { ThemeBuilder } from "./theme";
 
 // Ref: https://github.com/catppuccin/catppuccin
 export const catppuccin: ThemeBuilder = {

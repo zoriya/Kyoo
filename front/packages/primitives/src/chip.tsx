@@ -18,11 +18,11 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { px, rem, Theme, useYoshiki } from "yoshiki/native";
+import { px, rem, type Theme, useYoshiki } from "yoshiki/native";
 import { Link } from "./links";
 import { P } from "./text";
 import { capitalize, ts } from "./utils";
-import { TextProps } from "react-native";
+import type { TextProps } from "react-native";
 import { Skeleton } from "./skeleton";
 
 export const Chip = ({

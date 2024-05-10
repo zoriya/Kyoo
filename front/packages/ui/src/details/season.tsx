@@ -19,10 +19,10 @@
  */
 
 import {
-	Episode,
+	type Episode,
 	EpisodeP,
-	QueryIdentifier,
-	Season,
+	type QueryIdentifier,
+	type Season,
 	SeasonP,
 	useInfiniteFetch,
 } from "@kyoo/models";
@@ -32,7 +32,7 @@ import { View } from "react-native";
 import { InfiniteFetch } from "../fetch-infinite";
 import { episodeDisplayNumber, EpisodeLine } from "./episode";
 import { useTranslation } from "react-i18next";
-import { ComponentType } from "react";
+import type { ComponentType } from "react";
 import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
 
 type SeasonProcessed = Season & { href: string };

@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { News, NewsP, QueryIdentifier, getDisplayDate } from "@kyoo/models";
+import { type News, NewsP, type QueryIdentifier, getDisplayDate } from "@kyoo/models";
 import { ItemGrid } from "../browse/grid";
 import { InfiniteFetch } from "../fetch-infinite";
 import { useTranslation } from "react-i18next";

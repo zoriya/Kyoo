@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Subtitle } from "@kyoo/models";
+import type { Subtitle } from "@kyoo/models";
 import { atom, useSetAtom } from "jotai";
 import { useRouter } from "solito/router";
 import { useEffect } from "react";

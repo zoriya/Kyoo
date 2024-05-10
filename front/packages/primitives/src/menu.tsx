@@ -21,10 +21,10 @@
 import { Portal } from "@gorhom/portal";
 import { ScrollView } from "moti";
 import {
-	ComponentType,
+	type ComponentType,
 	createContext,
-	ReactElement,
-	ReactNode,
+	type ReactElement,
+	type ReactNode,
 	useContext,
 	useEffect,
 	useRef,
@@ -41,7 +41,7 @@ import { ContrastArea, SwitchVariant } from "./themes";
 import { ts } from "./utils";
 import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
 import { useRouter } from "solito/router";
-import { SvgProps } from "react-native-svg";
+import type { SvgProps } from "react-native-svg";
 
 const MenuContext = createContext<((open: boolean) => void) | undefined>(undefined);
 

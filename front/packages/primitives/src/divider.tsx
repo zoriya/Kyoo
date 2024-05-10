@@ -19,7 +19,7 @@
  */
 
 import { HR as EHR } from "@expo/html-elements";
-import { px, Stylable, useYoshiki } from "yoshiki/native";
+import { px, type Stylable, useYoshiki } from "yoshiki/native";
 import { ts } from "./utils";
 
 export const HR = ({

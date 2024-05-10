@@ -18,8 +18,8 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ComponentType, ComponentProps } from "react";
-import { Platform, Text, TextProps, TextStyle, StyleProp } from "react-native";
+import type { ComponentType, ComponentProps } from "react";
+import { Platform, Text, type TextProps, type TextStyle, type StyleProp } from "react-native";
 import { percent, rem, useYoshiki } from "yoshiki/native";
 import {
 	H1 as EH1,

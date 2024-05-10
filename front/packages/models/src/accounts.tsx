@@ -18,8 +18,16 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { ServerInfoP, User, UserP } from "./resources";
+import {
+	type ReactNode,
+	createContext,
+	useContext,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
+import { ServerInfoP, type User, UserP } from "./resources";
 import { z } from "zod";
 import { zdate } from "./utils";
 import { removeAccounts, setCookie, updateAccount } from "./account-internal";
@@ -28,7 +36,7 @@ import { Platform } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { atom, getDefaultStore, useAtomValue, useSetAtom } from "jotai";
 import { useFetch } from "./query";
-import { KyooErrors } from "./kyoo-errors";
+import type { KyooErrors } from "./kyoo-errors";
 
 export const TokenP = z.object({
 	token_type: z.literal("Bearer"),

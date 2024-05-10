@@ -37,15 +37,15 @@ import {
 	createQueryClient,
 	fetchQuery,
 	getTokenWJ,
-	QueryIdentifier,
-	QueryPage,
+	type QueryIdentifier,
+	type QueryPage,
 	ServerInfoP,
 	setSsrApiUrl,
 	UserP,
 	useUserTheme,
 } from "@kyoo/models";
-import { ComponentType, useContext, useState } from "react";
-import NextApp, { AppContext, type AppProps } from "next/app";
+import { type ComponentType, useContext, useState } from "react";
+import NextApp, { type AppContext, type AppProps } from "next/app";
 import { Poppins } from "next/font/google";
 import { useTheme, useMobileHover, useStyleRegistry, StyleRegistryProvider } from "yoshiki/web";
 import superjson from "superjson";

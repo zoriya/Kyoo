@@ -18,10 +18,17 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Account, KyooErrors, deleteAccount, logout, queryFn, useAccount } from "@kyoo/models";
+import {
+	type Account,
+	type KyooErrors,
+	deleteAccount,
+	logout,
+	queryFn,
+	useAccount,
+} from "@kyoo/models";
 import { Alert, Avatar, Button, H1, Icon, Input, P, Popup, ts, usePopup } from "@kyoo/primitives";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ComponentProps, useState } from "react";
+import { type ComponentProps, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { rem, useYoshiki } from "yoshiki/native";

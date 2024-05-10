@@ -19,16 +19,16 @@
  */
 
 import {
-	QueryIdentifier,
-	QueryPage,
-	LibraryItem,
+	type QueryIdentifier,
+	type QueryPage,
+	type LibraryItem,
 	LibraryItemP,
 	getDisplayDate,
 } from "@kyoo/models";
-import { ComponentProps, useState } from "react";
+import { type ComponentProps, useState } from "react";
 import { createParam } from "solito";
 import { DefaultLayout } from "../layout";
-import { WithLoading } from "../fetch";
+import type { WithLoading } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
 import { ItemGrid } from "./grid";
 import { ItemList } from "./list";

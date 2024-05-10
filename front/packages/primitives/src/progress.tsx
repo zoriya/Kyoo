@@ -20,7 +20,7 @@
 
 import { ActivityIndicator, Platform, View } from "react-native";
 import { Circle, Svg } from "react-native-svg";
-import { px, Stylable, useYoshiki } from "yoshiki/native";
+import { px, type Stylable, useYoshiki } from "yoshiki/native";
 
 export const CircularProgress = ({
 	size = 48,

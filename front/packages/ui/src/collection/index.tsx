@@ -19,12 +19,12 @@
  */
 
 import {
-	Collection,
+	type Collection,
 	CollectionP,
-	LibraryItem,
+	type LibraryItem,
 	LibraryItemP,
-	QueryIdentifier,
-	QueryPage,
+	type QueryIdentifier,
+	type QueryPage,
 	getDisplayDate,
 } from "@kyoo/models";
 import { Header as ShowHeader, TitleLine } from "../details/header";
@@ -32,7 +32,7 @@ import { Container, Head, ImageBackground, P, Skeleton, ts, usePageStyle } from 
 import { percent, px, useYoshiki } from "yoshiki/native";
 import { useTranslation } from "react-i18next";
 import { forwardRef } from "react";
-import { Platform, View, ViewProps } from "react-native";
+import { Platform, View, type ViewProps } from "react-native";
 import { Fetch } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
 import { DefaultLayout } from "../layout";

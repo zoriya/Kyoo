@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React from "react";
+import type React from "react";
 import "react-native";
 
 declare module "react-native" {

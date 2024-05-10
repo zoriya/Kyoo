@@ -18,10 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { KyooImage } from "@kyoo/models";
-import { ReactElement } from "react";
-import { ImageStyle } from "react-native";
-import { YoshikiStyle } from "yoshiki/src/type";
+import type { KyooImage } from "@kyoo/models";
+import type { ReactElement } from "react";
+import type { ImageStyle } from "react-native";
+import type { YoshikiStyle } from "yoshiki/src/type";
 
 export type YoshikiEnhanced<Style> = Style extends any
 	? {

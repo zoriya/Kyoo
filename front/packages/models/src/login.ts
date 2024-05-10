@@ -19,8 +19,8 @@
  */
 
 import { queryFn } from "./query";
-import { KyooErrors } from "./kyoo-errors";
-import { Account, Token, TokenP, getCurrentApiUrl } from "./accounts";
+import type { KyooErrors } from "./kyoo-errors";
+import { type Account, type Token, TokenP, getCurrentApiUrl } from "./accounts";
 import { UserP } from "./resources";
 import { addAccount, getCurrentAccount, removeAccounts, updateAccount } from "./account-internal";
 import { Platform } from "react-native";

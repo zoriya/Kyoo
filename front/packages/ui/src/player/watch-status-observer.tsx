@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { MutationParam, WatchStatusV, useAccount } from "@kyoo/models";
+import { type MutationParam, WatchStatusV, useAccount } from "@kyoo/models";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useCallback } from "react";
 import { useAtomValue } from "jotai";

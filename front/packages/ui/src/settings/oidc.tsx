@@ -19,8 +19,8 @@
  */
 
 import {
-	QueryIdentifier,
-	ServerInfo,
+	type QueryIdentifier,
+	type ServerInfo,
 	ServerInfoP,
 	queryFn,
 	useAccount,

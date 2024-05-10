@@ -18,12 +18,12 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ComponentType, ForwardedRef, ReactElement, forwardRef } from "react";
-import { Theme, useYoshiki } from "yoshiki/native";
+import { type ComponentType, type ForwardedRef, type ReactElement, forwardRef } from "react";
+import { type Theme, useYoshiki } from "yoshiki/native";
 import { PressableFeedback } from "./links";
 import { P } from "./text";
 import { ts } from "./utils";
-import { Falsy, PressableProps, View } from "react-native";
+import { type Falsy, type PressableProps, View } from "react-native";
 
 export const Button = forwardRef(function Button<AsProps = PressableProps>(
 	{

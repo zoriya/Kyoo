@@ -18,14 +18,14 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ImageStyle, View, ViewProps, ViewStyle } from "react-native";
-import { Props, ImageLayout, YoshikiEnhanced } from "./base-image";
-import { Image } from "./image";
-import { ComponentProps, ComponentType, ReactNode } from "react";
-import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
-import { ContrastArea } from "../themes";
+import { LinearGradient, type LinearGradientProps } from "expo-linear-gradient";
+import type { ComponentProps, ComponentType, ReactNode } from "react";
+import { type ImageStyle, View, type ViewProps, type ViewStyle } from "react-native";
 import { percent } from "yoshiki/native";
 import { imageBorderRadius } from "../constants";
+import { ContrastArea } from "../themes";
+import type { ImageLayout, Props, YoshikiEnhanced } from "./base-image";
+import { Image } from "./image";
 
 export { Sprite } from "./sprite";
 export { BlurhashContainer } from "./blurhash";

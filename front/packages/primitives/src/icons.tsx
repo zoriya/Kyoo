@@ -18,13 +18,14 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { ComponentProps, ComponentType, ForwardedRef, forwardRef } from "react";
-import { Platform, PressableProps } from "react-native";
-import { SvgProps } from "react-native-svg";
-import { YoshikiStyle } from "yoshiki";
-import { px, Stylable, Theme, useYoshiki } from "yoshiki/native";
+import type React from "react";
+import { type ComponentProps, type ComponentType, type ForwardedRef, forwardRef } from "react";
+import { Platform, type PressableProps } from "react-native";
+import type { SvgProps } from "react-native-svg";
+import type { YoshikiStyle } from "yoshiki";
+import { px, type Stylable, type Theme, useYoshiki } from "yoshiki/native";
 import { PressableFeedback } from "./links";
-import { Breakpoint, focusReset, ts } from "./utils";
+import { type Breakpoint, focusReset, ts } from "./utils";
 import { P } from "./text";
 
 declare module "react" {

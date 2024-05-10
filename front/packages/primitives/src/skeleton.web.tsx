@@ -19,7 +19,7 @@
  */
 
 import { LinearGradient } from "expo-linear-gradient";
-import { View, ViewProps } from "react-native";
+import { View, type ViewProps } from "react-native";
 import { px, rem, useYoshiki, percent, em } from "yoshiki/native";
 import { hiddenIfNoJs } from "./utils/nojs";
 

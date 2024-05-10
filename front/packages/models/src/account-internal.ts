@@ -18,8 +18,8 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ZodTypeAny, z } from "zod";
-import { Account, AccountP } from "./accounts";
+import { type ZodTypeAny, z } from "zod";
+import { type Account, AccountP } from "./accounts";
 import { MMKV } from "react-native-mmkv";
 import { Platform } from "react-native";
 

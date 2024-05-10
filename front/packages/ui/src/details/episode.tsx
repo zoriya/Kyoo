@@ -23,7 +23,7 @@ import {
 	H6,
 	IconButton,
 	ImageBackground,
-	ImageProps,
+	type ImageProps,
 	important,
 	Link,
 	P,
@@ -33,10 +33,10 @@ import {
 	ts,
 } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
-import { ImageStyle, Platform, PressableProps, View } from "react-native";
-import { Layout, WithLoading } from "../fetch";
-import { percent, rem, Stylable, Theme, useYoshiki } from "yoshiki/native";
-import { KyooImage, WatchStatusV } from "@kyoo/models";
+import { type ImageStyle, Platform, type PressableProps, View } from "react-native";
+import type { Layout, WithLoading } from "../fetch";
+import { percent, rem, type Stylable, type Theme, useYoshiki } from "yoshiki/native";
+import { type KyooImage, WatchStatusV } from "@kyoo/models";
 import { ItemProgress } from "../browse/grid";
 import { EpisodesContext } from "../components/context-menus";
 import { useState } from "react";

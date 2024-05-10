@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { LibraryItem, LibraryItemP, QueryIdentifier } from "@kyoo/models";
+import { type LibraryItem, LibraryItemP, type QueryIdentifier } from "@kyoo/models";
 import { H3 } from "@kyoo/primitives";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";

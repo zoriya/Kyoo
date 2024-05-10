@@ -18,10 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ComponentType, useMemo } from "react";
-import i18next, { InitOptions } from "i18next";
+import { type ComponentType, useMemo } from "react";
+import i18next, { type InitOptions } from "i18next";
 import { I18nextProvider } from "react-i18next";
-import { AppContext, AppInitialProps, type AppProps } from "next/app";
+import type { AppContext, AppInitialProps, AppProps } from "next/app";
 
 import en from "../../../translations/en.json";
 import fr from "../../../translations/fr.json";

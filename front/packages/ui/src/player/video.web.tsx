@@ -18,22 +18,22 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { getToken, Subtitle, Audio } from "@kyoo/models";
+import { getToken, type Subtitle, type Audio } from "@kyoo/models";
 import {
 	forwardRef,
-	RefObject,
+	type RefObject,
 	useEffect,
 	useImperativeHandle,
 	useLayoutEffect,
 	useRef,
-	ComponentProps,
+	type ComponentProps,
 } from "react";
-import { VideoProps } from "react-native-video";
+import type { VideoProps } from "react-native-video";
 import { useAtomValue, useSetAtom, useAtom } from "jotai";
 import { useForceRerender, useYoshiki } from "yoshiki";
 import Jassub from "jassub";
 import { audioAtom, playAtom, PlayMode, playModeAtom, progressAtom, subtitleAtom } from "./state";
-import Hls, { Level, LoadPolicy } from "hls.js";
+import Hls, { type Level, type LoadPolicy } from "hls.js";
 import { useTranslation } from "react-i18next";
 import { Menu, tooltip } from "@kyoo/primitives";
 import toVttBlob from "srt-webvtt";

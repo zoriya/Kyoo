@@ -19,12 +19,12 @@
  */
 
 import {
-	Genre,
-	KyooImage,
-	LibraryItem,
+	type Genre,
+	type KyooImage,
+	type LibraryItem,
 	LibraryItemP,
-	QueryIdentifier,
-	WatchStatusV,
+	type QueryIdentifier,
+	type WatchStatusV,
 	getDisplayDate,
 } from "@kyoo/models";
 import {
@@ -43,8 +43,8 @@ import {
 } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
-import { Theme, calc, percent, px, rem, useYoshiki } from "yoshiki/native";
-import { Layout, WithLoading } from "../fetch";
+import { type Theme, calc, percent, px, rem, useYoshiki } from "yoshiki/native";
+import type { Layout, WithLoading } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import { ItemGrid, ItemWatchStatus } from "../browse/grid";

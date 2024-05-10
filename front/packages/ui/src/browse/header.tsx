@@ -39,7 +39,7 @@ import ArrowUpward from "@material-symbols/svg-400/rounded/arrow_upward.svg";
 import ArrowDownward from "@material-symbols/svg-400/rounded/arrow_downward.svg";
 import { Layout, SearchSort, SortOrd } from "./types";
 import { forwardRef } from "react";
-import { View, PressableProps } from "react-native";
+import { View, type PressableProps } from "react-native";
 
 const SortTrigger = forwardRef<View, PressableProps & { sortKey: string }>(function SortTrigger(
 	{ sortKey, ...props },

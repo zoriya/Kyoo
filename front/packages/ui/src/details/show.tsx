@@ -18,13 +18,19 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { QueryIdentifier, QueryPage, Show, ShowP, ShowWatchStatus } from "@kyoo/models";
-import { Platform, View, ViewProps } from "react-native";
+import {
+	type QueryIdentifier,
+	type QueryPage,
+	type Show,
+	ShowP,
+	type ShowWatchStatus,
+} from "@kyoo/models";
+import { Platform, View, type ViewProps } from "react-native";
 import { percent, useYoshiki } from "yoshiki/native";
 import { DefaultLayout } from "../layout";
 import { EpisodeList, SeasonHeader } from "./season";
 import { Header } from "./header";
-import Svg, { Path, SvgProps } from "react-native-svg";
+import Svg, { Path, type SvgProps } from "react-native-svg";
 import { Container, H2, SwitchVariant, focusReset, ts } from "@kyoo/primitives";
 import { forwardRef, useState } from "react";
 import { DetailsCollections } from "./collection";

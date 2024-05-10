@@ -19,9 +19,9 @@
  */
 
 import {
-	QueryIdentifier,
-	QueryPage,
-	ServerInfo,
+	type QueryIdentifier,
+	type QueryPage,
+	type ServerInfo,
 	ServerInfoP,
 	oidcLogin,
 	useFetch,

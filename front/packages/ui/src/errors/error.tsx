@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ConnectionErrorContext, KyooErrors } from "@kyoo/models";
+import { ConnectionErrorContext, type KyooErrors } from "@kyoo/models";
 import { P } from "@kyoo/primitives";
 import { useContext, useLayoutEffect } from "react";
 import { View } from "react-native";

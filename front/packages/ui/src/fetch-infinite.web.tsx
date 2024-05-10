@@ -18,20 +18,20 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
+import { type Page, type QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { HR } from "@kyoo/primitives";
 import {
-	ComponentProps,
-	ComponentType,
+	type ComponentProps,
+	type ComponentType,
 	Fragment,
 	isValidElement,
-	ReactElement,
+	type ReactElement,
 	useCallback,
 	useEffect,
 	useRef,
 } from "react";
-import { Stylable, nativeStyleToCss, useYoshiki, ysMap } from "yoshiki";
-import { EmptyView, Layout, WithLoading, addHeader } from "./fetch";
+import { type Stylable, nativeStyleToCss, useYoshiki, ysMap } from "yoshiki";
+import { EmptyView, type Layout, type WithLoading, addHeader } from "./fetch";
 import { ErrorView } from "./errors";
 import type { ContentStyle } from "@shopify/flash-list";
 

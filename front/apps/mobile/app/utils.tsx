@@ -19,12 +19,12 @@
  */
 
 import { Stack, useLocalSearchParams } from "expo-router";
-import { ComponentType, useEffect } from "react";
-import { StatusBar, StatusBarProps } from "react-native";
+import { type ComponentType, useEffect } from "react";
+import { StatusBar, type StatusBarProps } from "react-native";
 import * as ScreenOrientation from "expo-screen-orientation";
 import * as NavigationBar from "expo-navigation-bar";
 import arrayShuffle from "array-shuffle";
-import { QueryPage, useHasPermission } from "@kyoo/models";
+import { type QueryPage, useHasPermission } from "@kyoo/models";
 import { Unauthorized } from "@kyoo/ui";
 
 const FullscreenProvider = () => {

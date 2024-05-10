@@ -19,11 +19,11 @@
  */
 
 import { useState } from "react";
-import { FlexStyle, ImageStyle, View, ViewStyle } from "react-native";
+import { type FlexStyle, type ImageStyle, View, type ViewStyle } from "react-native";
 import FastImage from "react-native-fast-image";
 import { Blurhash } from "react-native-blurhash";
 import { percent, useYoshiki } from "yoshiki/native";
-import { Props, ImageLayout } from "./base-image";
+import type { Props, ImageLayout } from "./base-image";
 import { Skeleton } from "../skeleton";
 import { getCurrentToken } from "@kyoo/models";
 

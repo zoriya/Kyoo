@@ -19,9 +19,15 @@
  */
 
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { ComponentProps, ComponentType, forwardRef, ReactElement, ReactNode } from "react";
+import {
+	type ComponentProps,
+	type ComponentType,
+	forwardRef,
+	type ReactElement,
+	type ReactNode,
+} from "react";
 import Link from "next/link";
-import { PressableProps } from "react-native";
+import type { PressableProps } from "react-native";
 import { useYoshiki } from "yoshiki/web";
 import { useYoshiki as useNativeYoshiki } from "yoshiki/native";
 import { P } from "./text";
@@ -29,7 +35,7 @@ import { ContrastArea, SwitchVariant } from "./themes";
 import { Icon } from "./icons";
 import Dot from "@material-symbols/svg-400/rounded/fiber_manual_record-fill.svg";
 import { focusReset, ts } from "./utils";
-import { SvgProps } from "react-native-svg";
+import type { SvgProps } from "react-native-svg";
 
 type YoshikiFunc<T> = (props: ReturnType<typeof useYoshiki>) => T;
 export const YoshikiProvider = ({ children }: { children: YoshikiFunc<ReactNode> }) => {

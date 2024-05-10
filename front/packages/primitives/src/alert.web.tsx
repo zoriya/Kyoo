@@ -20,7 +20,7 @@
 
 // Stolen from https://github.com/necolas/react-native-web/issues/1026#issuecomment-1458279681
 
-import { type AlertButton, type AlertOptions } from "react-native";
+import type { AlertButton, AlertOptions } from "react-native";
 import Swal, { type SweetAlertIcon } from "sweetalert2";
 
 // biome-ignore lint/complexity/noStaticOnlyClass: Compatibility with rn

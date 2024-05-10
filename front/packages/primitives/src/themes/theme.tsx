@@ -18,9 +18,9 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ReactNode } from "react";
-import { Property } from "csstype";
-import { Theme, ThemeProvider, useAutomaticTheme } from "yoshiki";
+import type { ReactNode } from "react";
+import type { Property } from "csstype";
+import { type Theme, ThemeProvider, useAutomaticTheme } from "yoshiki";
 import { useTheme, useYoshiki } from "yoshiki/native";
 import "yoshiki";
 import "yoshiki/native";

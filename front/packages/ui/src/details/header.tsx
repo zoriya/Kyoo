@@ -19,17 +19,17 @@
  */
 
 import {
-	Genre,
-	KyooImage,
-	Movie,
-	QueryIdentifier,
-	Show,
-	Studio,
+	type Genre,
+	type KyooImage,
+	type Movie,
+	type QueryIdentifier,
+	type Show,
+	type Studio,
 	getDisplayDate,
 	queryFn,
 	useAccount,
 } from "@kyoo/models";
-import { WatchStatusV } from "@kyoo/models/src/resources/watch-status";
+import type { WatchStatusV } from "@kyoo/models/src/resources/watch-status";
 import {
 	A,
 	Chip,
@@ -63,10 +63,10 @@ import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg";
 import { useMutation } from "@tanstack/react-query";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
-import { ImageStyle, Platform, View } from "react-native";
+import { type ImageStyle, Platform, View } from "react-native";
 import {
-	Stylable,
-	Theme,
+	type Stylable,
+	type Theme,
 	em,
 	max,
 	md,

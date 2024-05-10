@@ -8,7 +8,7 @@
 		"lineEnding": "lf",
 		"lineWidth": 100,
 		"attributePosition": "auto",
-		"ignore": ["**/.yarn/**", "**/.next/**", "**/.expo/**"]
+		"ignore": ["**/.yarn/**", "**/.next/**", "**/.expo/**", "**/next-env.d.ts"]
 	},
 	"organizeImports": {
 		"enabled": true
@@ -19,7 +19,6 @@
 			"recommended": true,
 			"style": {
 				"noNonNullAssertion": "off",
-				"useImportType": "off",
 				"noParameterAssign": "off",
 				"useEnumInitializers": "off"
 			},
@@ -34,7 +33,7 @@
 				"noBannedTypes": "off"
 			}
 		},
-		"ignore": ["**/.yarn/**", "**/.next/**", "**/.expo/**"]
+		"ignore": ["**/.yarn/**", "**/.next/**", "**/.expo/**", "**/next-env.d.ts"]
 	},
 	"javascript": {
 		"formatter": {

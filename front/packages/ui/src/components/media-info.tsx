@@ -18,7 +18,13 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Audio, QueryIdentifier, Subtitle, WatchInfo, WatchInfoP } from "@kyoo/models";
+import {
+	type Audio,
+	type QueryIdentifier,
+	type Subtitle,
+	type WatchInfo,
+	WatchInfoP,
+} from "@kyoo/models";
 import { Button, HR, P, Popup, Skeleton } from "@kyoo/primitives";
 import { Fetch } from "../fetch";
 import { useTranslation } from "react-i18next";

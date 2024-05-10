@@ -18,11 +18,11 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { forwardRef, ReactNode, useState } from "react";
-import { TextInput, TextInputProps, View, ViewStyle } from "react-native";
-import { px, Theme, useYoshiki } from "yoshiki/native";
+import { forwardRef, type ReactNode, useState } from "react";
+import { TextInput, type TextInputProps, View, type ViewStyle } from "react-native";
+import { px, type Theme, useYoshiki } from "yoshiki/native";
 import { focusReset, ts } from "./utils";
-import { YoshikiEnhanced } from "./image/base-image";
+import type { YoshikiEnhanced } from "./image/base-image";
 
 export const Input = forwardRef<
 	TextInput,

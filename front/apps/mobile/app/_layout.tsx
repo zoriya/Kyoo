@@ -36,7 +36,7 @@ import {
 	Poppins_400Regular,
 	Poppins_900Black,
 } from "@expo-google-fonts/poppins";
-import { ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { useColorScheme } from "react-native";
 import { initReactI18next } from "react-i18next";
 import { ThemeProvider as RNThemeProvider } from "@react-navigation/native";

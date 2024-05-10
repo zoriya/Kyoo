@@ -18,16 +18,16 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ComponentType, ReactElement } from "react";
+import type { ComponentType, ReactElement } from "react";
 import {
 	QueryClient,
-	QueryFunctionContext,
+	type QueryFunctionContext,
 	useInfiniteQuery,
 	useQuery,
 } from "@tanstack/react-query";
-import { z } from "zod";
-import { KyooErrors } from "./kyoo-errors";
-import { Page, Paged } from "./page";
+import type { z } from "zod";
+import type { KyooErrors } from "./kyoo-errors";
+import { type Page, Paged } from "./page";
 import { getToken, getTokenWJ } from "./login";
 import { getCurrentApiUrl } from ".";
 

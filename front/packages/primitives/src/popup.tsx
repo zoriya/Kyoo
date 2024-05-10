@@ -18,10 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
 import { Container } from "./container";
 import { usePortal } from "@gorhom/portal";
-import { ContrastArea, SwitchVariant, YoshikiFunc } from "./themes";
+import { ContrastArea, SwitchVariant, type YoshikiFunc } from "./themes";
 import { View, ScrollView } from "react-native";
 import { imageBorderRadius } from "./constants";
 import { px, vh } from "yoshiki/native";

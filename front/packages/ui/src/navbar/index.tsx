@@ -32,10 +32,10 @@ import {
 	HR,
 	Link,
 } from "@kyoo/primitives";
-import { Platform, TextInput, View, ViewProps } from "react-native";
+import { Platform, type TextInput, View, type ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "solito/router";
-import { Stylable, useYoshiki } from "yoshiki/native";
+import { type Stylable, useYoshiki } from "yoshiki/native";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import Login from "@material-symbols/svg-400/rounded/login.svg";
 import Register from "@material-symbols/svg-400/rounded/app_registration.svg";

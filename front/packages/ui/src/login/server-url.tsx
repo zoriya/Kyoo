@@ -18,13 +18,19 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { QueryIdentifier, QueryPage, ServerInfo, ServerInfoP, useFetch } from "@kyoo/models";
+import {
+	type QueryIdentifier,
+	type QueryPage,
+	type ServerInfo,
+	ServerInfoP,
+	useFetch,
+} from "@kyoo/models";
 import { Button, P, Link, Input, ts, H1, HR } from "@kyoo/primitives";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ImageBackground, Platform, View } from "react-native";
 import { useRouter } from "solito/router";
-import { Theme, percent, useYoshiki } from "yoshiki/native";
+import { type Theme, percent, useYoshiki } from "yoshiki/native";
 import { DefaultLayout } from "../layout";
 
 export const cleanApiUrl = (apiUrl: string) => {

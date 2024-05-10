@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { QueryPage, useAccount } from "@kyoo/models";
+import { type QueryPage, useAccount } from "@kyoo/models";
 import { ts } from "@kyoo/primitives";
 import { ScrollView } from "react-native";
 import { DefaultLayout } from "../layout";

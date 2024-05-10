@@ -19,7 +19,7 @@
  */
 
 import { Avatar, Link, P, Skeleton, SubP } from "@kyoo/primitives";
-import { Stylable, useYoshiki } from "yoshiki/native";
+import { type Stylable, useYoshiki } from "yoshiki/native";
 
 export const PersonAvatar = ({
 	slug,

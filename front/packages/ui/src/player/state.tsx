@@ -18,11 +18,19 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Audio, Episode, Subtitle, getLocalSetting, useAccount } from "@kyoo/models";
+import { type Audio, type Episode, type Subtitle, getLocalSetting, useAccount } from "@kyoo/models";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useAtomCallback } from "jotai/utils";
-import { ElementRef, memo, useEffect, useLayoutEffect, useRef, useState, useCallback } from "react";
-import NativeVideo, { VideoProps } from "./video";
+import {
+	type ElementRef,
+	memo,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useState,
+	useCallback,
+} from "react";
+import NativeVideo, { type VideoProps } from "./video";
 import { Platform } from "react-native";
 import { useSnackbar } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";

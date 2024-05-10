@@ -18,12 +18,12 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { QueryIdentifier, User, UserP, queryFn } from "@kyoo/models";
+import { type QueryIdentifier, type User, UserP, queryFn } from "@kyoo/models";
 import { Alert, Avatar, Icon, IconButton, Menu, P, Skeleton, tooltip, ts } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { px, useYoshiki } from "yoshiki/native";
-import { Layout, WithLoading } from "../fetch";
+import type { Layout, WithLoading } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
 import { SettingsContainer } from "../settings/base";
 

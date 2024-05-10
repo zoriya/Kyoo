@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Genre, QueryPage, toQueryKey } from "@kyoo/models";
+import { Genre, type QueryPage, toQueryKey } from "@kyoo/models";
 import { Fetch } from "../fetch";
 import { Header } from "./header";
 import { DefaultLayout } from "../layout";

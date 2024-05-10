@@ -33,14 +33,14 @@ declare module "react-native-video" {
 
 export * from "react-native-video";
 
-import { Audio, Subtitle, useToken } from "@kyoo/models";
-import { IconButton, Menu } from "@kyoo/primitives";
-import { ComponentProps, forwardRef, useEffect } from "react";
+import { type Audio, type Subtitle, useToken } from "@kyoo/models";
+import { type IconButton, Menu } from "@kyoo/primitives";
+import { type ComponentProps, forwardRef, useEffect } from "react";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import NativeVideo, {
-	VideoRef,
-	OnLoadData,
-	VideoProps,
+	type VideoRef,
+	type OnLoadData,
+	type VideoProps,
 	SelectedTrackType,
 	SelectedVideoTrackType,
 } from "react-native-video";

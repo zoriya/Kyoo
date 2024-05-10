@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { KyooImage, WatchStatusV } from "@kyoo/models";
+import { type KyooImage, WatchStatusV } from "@kyoo/models";
 import {
 	Link,
 	Skeleton,
@@ -30,9 +30,9 @@ import {
 	Icon,
 	important,
 } from "@kyoo/primitives";
-import { ImageStyle, Platform, View } from "react-native";
-import { max, percent, px, rem, Stylable, Theme, useYoshiki } from "yoshiki/native";
-import { Layout, WithLoading } from "../fetch";
+import { type ImageStyle, Platform, View } from "react-native";
+import { max, percent, px, rem, type Stylable, type Theme, useYoshiki } from "yoshiki/native";
+import type { Layout, WithLoading } from "../fetch";
 import Done from "@material-symbols/svg-400/rounded/done-fill.svg";
 import { ItemContext } from "../components/context-menus";
 import { useState } from "react";

@@ -19,7 +19,7 @@
  */
 
 import { AppRegistry } from "react-native";
-import { Html, Main, Head, NextScript, DocumentContext } from "next/document";
+import { Html, Main, Head, NextScript, type DocumentContext } from "next/document";
 import { createStyleRegistry, StyleRegistryProvider } from "yoshiki/web";
 
 export const style = `

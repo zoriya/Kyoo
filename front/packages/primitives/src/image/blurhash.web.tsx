@@ -20,8 +20,8 @@
 
 import { decode } from "blurhash";
 import {
-	HTMLAttributes,
-	ReactElement,
+	type HTMLAttributes,
+	type ReactElement,
 	forwardRef,
 	useImperativeHandle,
 	useLayoutEffect,

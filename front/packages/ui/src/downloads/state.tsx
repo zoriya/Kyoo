@@ -23,24 +23,24 @@ import RNBackgroundDownloader, {
 } from "@kesha-antonov/react-native-background-downloader";
 import { deleteAsync } from "expo-file-system";
 import {
-	Account,
-	Episode,
+	type Account,
+	type Episode,
 	EpisodeP,
-	Movie,
+	type Movie,
 	MovieP,
-	QueryIdentifier,
-	WatchInfo,
+	type QueryIdentifier,
+	type WatchInfo,
 	WatchInfoP,
 	queryFn,
 	toQueryKey,
 } from "@kyoo/models";
 import { Player } from "../player";
-import { atom, useSetAtom, PrimitiveAtom, useStore } from "jotai";
+import { atom, useSetAtom, type PrimitiveAtom, useStore } from "jotai";
 import { getCurrentAccount, storage } from "@kyoo/models/src/account-internal";
-import { ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect } from "react";
 import { ToastAndroid } from "react-native";
-import { QueryClient, useQueryClient } from "@tanstack/react-query";
-import { Router } from "expo-router/build/types";
+import { type QueryClient, useQueryClient } from "@tanstack/react-query";
+import type { Router } from "expo-router/build/types";
 import { z } from "zod";
 
 export type State = {

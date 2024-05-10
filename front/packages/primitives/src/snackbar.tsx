@@ -19,7 +19,7 @@
  */
 
 import { usePortal } from "@gorhom/portal";
-import { ReactElement, createContext, useCallback, useContext, useRef } from "react";
+import { type ReactElement, createContext, useCallback, useContext, useRef } from "react";
 import { ContrastArea, SwitchVariant } from "./themes";
 import { P } from "./text";
 import { View } from "react-native";

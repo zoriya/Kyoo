@@ -19,7 +19,7 @@
  */
 
 import { Platform } from "react-native";
-import { Movie, Show } from "./resources";
+import type { Movie, Show } from "./resources";
 import { z } from "zod";
 import { useMMKVString } from "react-native-mmkv";
 import { storage } from "./account-internal";

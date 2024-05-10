@@ -18,10 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { useFetch, QueryIdentifier, imageFn, Chapter } from "@kyoo/models";
+import { useFetch, type QueryIdentifier, imageFn, type Chapter } from "@kyoo/models";
 import { Sprite, P, imageBorderRadius, ts } from "@kyoo/primitives";
 import { View, Platform } from "react-native";
-import { percent, useYoshiki, px, Theme, useForceRerender } from "yoshiki/native";
+import { percent, useYoshiki, px, type Theme, useForceRerender } from "yoshiki/native";
 import { useMemo } from "react";
 import { useAtomValue } from "jotai";
 import { durationAtom } from "../state";
