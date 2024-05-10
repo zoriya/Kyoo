@@ -18,10 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import type { ReactElement } from "react";
-import { Navbar } from "./navbar";
-import { useYoshiki, vw } from "yoshiki/native";
 import { Main } from "@kyoo/primitives";
+import type { ReactElement } from "react";
+import { useYoshiki, vw } from "yoshiki/native";
+import { Navbar } from "./navbar";
 
 export const DefaultLayout = ({
 	page,

@@ -18,14 +18,14 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import NextImage from "next/image";
 import { useState } from "react";
 import { type ImageStyle, View, type ViewStyle } from "react-native";
 import { useYoshiki } from "yoshiki/native";
-import type { Props, ImageLayout } from "./base-image";
-import { BlurhashContainer } from "./blurhash.web";
-import { Skeleton } from "../skeleton";
-import NextImage from "next/image";
 import { imageBorderRadius } from "../constants";
+import { Skeleton } from "../skeleton";
+import type { ImageLayout, Props } from "./base-image";
+import { BlurhashContainer } from "./blurhash.web";
 
 export const Image = ({
 	src,

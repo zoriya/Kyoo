@@ -35,8 +35,12 @@ export * from "react-native-video";
 
 import { type Audio, type Subtitle, useToken } from "@kyoo/models";
 import { type IconButton, Menu } from "@kyoo/primitives";
-import { type ComponentProps, forwardRef, useEffect } from "react";
+import "@kyoo/primitives/src/types.d.ts";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { type ComponentProps, forwardRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { View } from "react-native";
+import uuid from "react-native-uuid";
 import NativeVideo, {
 	type VideoRef,
 	type OnLoadData,
@@ -44,12 +48,8 @@ import NativeVideo, {
 	SelectedTrackType,
 	SelectedVideoTrackType,
 } from "react-native-video";
-import { useTranslation } from "react-i18next";
-import { PlayMode, audioAtom, playModeAtom, subtitleAtom } from "./state";
-import uuid from "react-native-uuid";
-import { View } from "react-native";
-import "@kyoo/primitives/src/types.d.ts";
 import { useYoshiki } from "yoshiki/native";
+import { PlayMode, audioAtom, playModeAtom, subtitleAtom } from "./state";
 
 const MimeTypes: Map<string, string> = new Map([
 	["subrip", "application/x-subrip"],

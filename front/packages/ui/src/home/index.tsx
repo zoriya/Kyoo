@@ -19,17 +19,17 @@
  */
 
 import { Genre, type QueryPage, toQueryKey } from "@kyoo/models";
-import { Fetch } from "../fetch";
-import { Header } from "./header";
-import { DefaultLayout } from "../layout";
-import { RefreshControl, ScrollView } from "react-native";
-import { GenreGrid } from "./genre";
-import { Recommended } from "./recommended";
-import { VerticalRecommended } from "./vertical";
-import { NewsList } from "./news";
-import { WatchlistList } from "./watchlist";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { RefreshControl, ScrollView } from "react-native";
+import { Fetch } from "../fetch";
+import { DefaultLayout } from "../layout";
+import { GenreGrid } from "./genre";
+import { Header } from "./header";
+import { NewsList } from "./news";
+import { Recommended } from "./recommended";
+import { VerticalRecommended } from "./vertical";
+import { WatchlistList } from "./watchlist";
 
 export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
 	const queryClient = useQueryClient();

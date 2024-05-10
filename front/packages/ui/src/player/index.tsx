@@ -29,19 +29,19 @@ import {
 	useFetch,
 } from "@kyoo/models";
 import { Head } from "@kyoo/primitives";
-import { useState, useEffect, type ComponentProps } from "react";
-import { Platform, StyleSheet, View } from "react-native";
-import { useTranslation } from "react-i18next";
-import { useRouter } from "solito/router";
 import { useSetAtom } from "jotai";
+import { type ComponentProps, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Platform, StyleSheet, View } from "react-native";
+import { useRouter } from "solito/router";
 import { useYoshiki } from "yoshiki/native";
-import { Back, Hover, LoadingIndicator } from "./components/hover";
-import { durationAtom, fullscreenAtom, Video } from "./state";
 import { episodeDisplayNumber } from "../details/episode";
+import { ErrorView } from "../errors";
+import { Back, Hover, LoadingIndicator } from "./components/hover";
 import { useVideoKeyboard } from "./keyboard";
 import { MediaSessionManager } from "./media-session";
+import { Video, durationAtom, fullscreenAtom } from "./state";
 import { WatchStatusObserver } from "./watch-status-observer";
-import { ErrorView } from "../errors";
 
 type Item = (Movie & { type: "movie" }) | (Episode & { type: "episode" });
 

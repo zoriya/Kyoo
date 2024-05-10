@@ -21,9 +21,9 @@
 import { imageFn } from "@kyoo/models";
 import { ts } from "@kyoo/primitives";
 import type { ReactNode } from "react";
-import { ScrollView, ImageBackground, type ImageProps, Platform, View } from "react-native";
+import { ImageBackground, type ImageProps, Platform, ScrollView, View } from "react-native";
 import Svg, { type SvgProps, Path } from "react-native-svg";
-import { min, px, type Stylable, useYoshiki, vh } from "yoshiki/native";
+import { type Stylable, min, px, useYoshiki, vh } from "yoshiki/native";
 
 const SvgBlob = (props: SvgProps) => {
 	const { css, theme } = useYoshiki();

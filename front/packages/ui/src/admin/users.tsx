@@ -29,10 +29,10 @@ import { SettingsContainer } from "../settings/base";
 
 import UserI from "@material-symbols/svg-400/rounded/account_circle.svg";
 import Delete from "@material-symbols/svg-400/rounded/delete.svg";
-import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
-import Verifed from "@material-symbols/svg-400/rounded/verified_user.svg";
 import Unverifed from "@material-symbols/svg-400/rounded/gpp_bad.svg";
+import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
 import Admin from "@material-symbols/svg-400/rounded/shield_person.svg";
+import Verifed from "@material-symbols/svg-400/rounded/verified_user.svg";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const UserGrid = ({

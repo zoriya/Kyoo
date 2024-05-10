@@ -19,9 +19,9 @@
  */
 
 import { type WatchInfo, getCurrentApiUrl, queryFn, toQueryKey } from "@kyoo/models";
-import { Player } from "../player";
 import { getCurrentAccount } from "@kyoo/models/src/account-internal";
 import type { ReactNode } from "react";
+import { Player } from "../player";
 
 export const useDownloader = () => {
 	return async (type: "episode" | "movie", slug: string) => {

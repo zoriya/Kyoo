@@ -18,13 +18,13 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { queryFn } from "./query";
-import type { KyooErrors } from "./kyoo-errors";
-import { type Account, type Token, TokenP, getCurrentApiUrl } from "./accounts";
-import { UserP } from "./resources";
-import { addAccount, getCurrentAccount, removeAccounts, updateAccount } from "./account-internal";
-import { Platform } from "react-native";
 import { useEffect, useRef, useState } from "react";
+import { Platform } from "react-native";
+import { addAccount, getCurrentAccount, removeAccounts, updateAccount } from "./account-internal";
+import { type Account, type Token, TokenP, getCurrentApiUrl } from "./accounts";
+import type { KyooErrors } from "./kyoo-errors";
+import { queryFn } from "./query";
+import { UserP } from "./resources";
 
 type Result<A, B> =
 	| { ok: true; value: A; error?: undefined }

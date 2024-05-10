@@ -19,18 +19,18 @@
  */
 
 import { type Page, type QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
-import { useBreakpointMap, HR } from "@kyoo/primitives";
+import { HR, useBreakpointMap } from "@kyoo/primitives";
 import { type ContentStyle, FlashList } from "@shopify/flash-list";
 import {
 	type ComponentProps,
 	type ComponentType,
-	isValidElement,
 	type ReactElement,
+	isValidElement,
 	useRef,
 } from "react";
-import { EmptyView, type Layout, OfflineView, type WithLoading, addHeader } from "./fetch";
-import { ErrorView } from "./errors";
 import { FlatList, View, type ViewStyle } from "react-native";
+import { ErrorView } from "./errors";
+import { EmptyView, type Layout, OfflineView, type WithLoading, addHeader } from "./fetch";
 
 const emulateGap = (
 	layout: "grid" | "vertical" | "horizontal",

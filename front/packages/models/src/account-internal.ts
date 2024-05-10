@@ -18,10 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { Platform } from "react-native";
+import { MMKV } from "react-native-mmkv";
 import { type ZodTypeAny, z } from "zod";
 import { type Account, AccountP } from "./accounts";
-import { MMKV } from "react-native-mmkv";
-import { Platform } from "react-native";
 
 export const storage = new MMKV();
 

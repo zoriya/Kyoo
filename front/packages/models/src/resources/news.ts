@@ -19,8 +19,8 @@
  */
 
 import { z } from "zod";
-import { MovieP } from "./movie";
 import { EpisodeP } from "./episode";
+import { MovieP } from "./movie";
 
 export const NewsP = z.union([
 	/*

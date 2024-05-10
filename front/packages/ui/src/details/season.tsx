@@ -26,14 +26,14 @@ import {
 	SeasonP,
 	useInfiniteFetch,
 } from "@kyoo/models";
-import { Skeleton, H6, HR, P, ts, Menu, IconButton, tooltip, usePageStyle } from "@kyoo/primitives";
-import { rem, useYoshiki } from "yoshiki/native";
-import { View } from "react-native";
-import { InfiniteFetch } from "../fetch-infinite";
-import { episodeDisplayNumber, EpisodeLine } from "./episode";
-import { useTranslation } from "react-i18next";
-import type { ComponentType } from "react";
+import { H6, HR, IconButton, Menu, P, Skeleton, tooltip, ts, usePageStyle } from "@kyoo/primitives";
 import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
+import type { ComponentType } from "react";
+import { useTranslation } from "react-i18next";
+import { View } from "react-native";
+import { rem, useYoshiki } from "yoshiki/native";
+import { InfiniteFetch } from "../fetch-infinite";
+import { EpisodeLine, episodeDisplayNumber } from "./episode";
 
 type SeasonProcessed = Season & { href: string };
 

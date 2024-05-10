@@ -18,14 +18,14 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { getCurrentToken } from "@kyoo/models";
 import { useState } from "react";
 import { type FlexStyle, type ImageStyle, View, type ViewStyle } from "react-native";
-import FastImage from "react-native-fast-image";
 import { Blurhash } from "react-native-blurhash";
+import FastImage from "react-native-fast-image";
 import { percent, useYoshiki } from "yoshiki/native";
-import type { Props, ImageLayout } from "./base-image";
 import { Skeleton } from "../skeleton";
-import { getCurrentToken } from "@kyoo/models";
+import type { ImageLayout, Props } from "./base-image";
 
 export const Image = ({
 	src,

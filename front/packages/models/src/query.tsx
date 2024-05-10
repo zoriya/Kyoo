@@ -18,18 +18,18 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import type { ComponentType, ReactElement } from "react";
 import {
 	QueryClient,
 	type QueryFunctionContext,
 	useInfiniteQuery,
 	useQuery,
 } from "@tanstack/react-query";
+import type { ComponentType, ReactElement } from "react";
 import type { z } from "zod";
-import type { KyooErrors } from "./kyoo-errors";
-import { type Page, Paged } from "./page";
-import { getToken, getTokenWJ } from "./login";
 import { getCurrentApiUrl } from ".";
+import type { KyooErrors } from "./kyoo-errors";
+import { getToken, getTokenWJ } from "./login";
+import { type Page, Paged } from "./page";
 
 export let lastUsedUrl: string = null!;
 

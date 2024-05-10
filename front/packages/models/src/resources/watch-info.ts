@@ -18,9 +18,9 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import i18next from "i18next";
 import { z } from "zod";
 import { imageFn } from "../traits";
-import i18next from "i18next";
 import { QualityP } from "./quality";
 
 const getDisplayName = (sub: Track) => {

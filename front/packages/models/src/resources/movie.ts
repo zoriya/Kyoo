@@ -19,13 +19,13 @@
  */
 
 import { z } from "zod";
-import { zdate } from "../utils";
 import { ImagesP, ResourceP, imageFn } from "../traits";
-import { Genre } from "./genre";
-import { StudioP } from "./studio";
-import { Status } from "./show";
+import { zdate } from "../utils";
 import { CollectionP } from "./collection";
+import { Genre } from "./genre";
 import { MetadataP } from "./metadata";
+import { Status } from "./show";
+import { StudioP } from "./studio";
 import { WatchStatusP } from "./watch-status";
 
 export const MovieP = ResourceP("movie")

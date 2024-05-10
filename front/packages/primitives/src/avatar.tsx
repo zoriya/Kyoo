@@ -18,12 +18,12 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { View, type ViewStyle, Image, type ImageProps } from "react-native";
-import { useYoshiki, px, type Stylable } from "yoshiki/native";
+import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
+import { type ComponentType, type RefAttributes, forwardRef } from "react";
+import { Image, type ImageProps, View, type ViewStyle } from "react-native";
+import { type Stylable, px, useYoshiki } from "yoshiki/native";
 import { Icon } from "./icons";
 import { P } from "./text";
-import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
-import { type ComponentType, forwardRef, type RefAttributes } from "react";
 
 const stringToColor = (string: string) => {
 	let hash = 0;

@@ -18,25 +18,25 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { getToken, type Subtitle, type Audio } from "@kyoo/models";
+import { type Audio, type Subtitle, getToken } from "@kyoo/models";
+import { Menu, tooltip } from "@kyoo/primitives";
+import Hls, { type Level, type LoadPolicy } from "hls.js";
+import Jassub from "jassub";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
-	forwardRef,
+	type ComponentProps,
 	type RefObject,
+	forwardRef,
 	useEffect,
 	useImperativeHandle,
 	useLayoutEffect,
 	useRef,
-	type ComponentProps,
 } from "react";
-import type { VideoProps } from "react-native-video";
-import { useAtomValue, useSetAtom, useAtom } from "jotai";
-import { useForceRerender, useYoshiki } from "yoshiki";
-import Jassub from "jassub";
-import { audioAtom, playAtom, PlayMode, playModeAtom, progressAtom, subtitleAtom } from "./state";
-import Hls, { type Level, type LoadPolicy } from "hls.js";
 import { useTranslation } from "react-i18next";
-import { Menu, tooltip } from "@kyoo/primitives";
+import type { VideoProps } from "react-native-video";
 import toVttBlob from "srt-webvtt";
+import { useForceRerender, useYoshiki } from "yoshiki";
+import { PlayMode, audioAtom, playAtom, playModeAtom, progressAtom, subtitleAtom } from "./state";
 
 let hls: Hls | null = null;
 

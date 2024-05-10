@@ -26,11 +26,11 @@ import {
 	WatchInfoP,
 } from "@kyoo/models";
 import { Button, HR, P, Popup, Skeleton } from "@kyoo/primitives";
-import { Fetch } from "../fetch";
+import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
-import { Fragment } from "react";
+import { Fetch } from "../fetch";
 
 const MediaInfoTable = ({
 	mediaInfo: { path, video, container, audios, subtitles, duration, size },

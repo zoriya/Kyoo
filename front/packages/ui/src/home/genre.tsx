@@ -27,12 +27,12 @@ import {
 } from "@kyoo/models";
 import { H3, ts } from "@kyoo/primitives";
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
+import { itemMap } from "../browse";
 import { ItemGrid } from "../browse/grid";
 import { InfiniteFetchList } from "../fetch-infinite";
-import { useTranslation } from "react-i18next";
-import { itemMap } from "../browse";
 
 export const Header = ({ title }: { title: string }) => {
 	const { css } = useYoshiki();

@@ -20,8 +20,9 @@
 
 import type { Subtitle } from "@kyoo/models";
 import { atom, useSetAtom } from "jotai";
-import { useRouter } from "solito/router";
 import { useEffect } from "react";
+import { Platform } from "react-native";
+import { useRouter } from "solito/router";
 import {
 	durationAtom,
 	fullscreenAtom,
@@ -31,7 +32,6 @@ import {
 	subtitleAtom,
 	volumeAtom,
 } from "./state";
-import { Platform } from "react-native";
 
 type Action =
 	| { type: "play" }

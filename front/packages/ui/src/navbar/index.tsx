@@ -20,31 +20,31 @@
 
 import { logout, useAccount, useAccounts, useHasPermission } from "@kyoo/models";
 import {
-	Input,
-	IconButton,
-	Header,
-	Avatar,
 	A,
-	tooltip,
-	ts,
+	Avatar,
+	HR,
+	Header,
+	IconButton,
+	Input,
+	Link,
 	Menu,
 	PressableFeedback,
-	HR,
-	Link,
+	tooltip,
+	ts,
 } from "@kyoo/primitives";
-import { Platform, type TextInput, View, type ViewProps } from "react-native";
+import Admin from "@material-symbols/svg-400/rounded/admin_panel_settings.svg";
+import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
+import Login from "@material-symbols/svg-400/rounded/login.svg";
+import Logout from "@material-symbols/svg-400/rounded/logout.svg";
+import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
+import Settings from "@material-symbols/svg-400/rounded/settings.svg";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Platform, type TextInput, View, type ViewProps } from "react-native";
 import { useRouter } from "solito/router";
 import { type Stylable, useYoshiki } from "yoshiki/native";
-import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
-import Login from "@material-symbols/svg-400/rounded/login.svg";
-import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
-import Logout from "@material-symbols/svg-400/rounded/logout.svg";
-import Admin from "@material-symbols/svg-400/rounded/admin_panel_settings.svg";
-import Settings from "@material-symbols/svg-400/rounded/settings.svg";
-import { KyooLongLogo } from "./icon";
-import { forwardRef, useEffect, useRef, useState } from "react";
 import { AdminPage } from "../admin";
+import { KyooLongLogo } from "./icon";
 
 export const NavbarTitle = (props: Stylable & { onLayout?: ViewProps["onLayout"] }) => {
 	const { t } = useTranslation();

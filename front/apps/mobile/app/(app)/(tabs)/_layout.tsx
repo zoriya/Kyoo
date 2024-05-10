@@ -19,10 +19,10 @@
  */
 
 import { Icon } from "@kyoo/primitives";
-import { Tabs } from "expo-router";
-import Home from "@material-symbols/svg-400/rounded/home-fill.svg";
 import Browse from "@material-symbols/svg-400/rounded/browse-fill.svg";
 import Downloading from "@material-symbols/svg-400/rounded/downloading-fill.svg";
+import Home from "@material-symbols/svg-400/rounded/home-fill.svg";
+import { Tabs } from "expo-router";
 
 export default function TabsLayout() {
 	return (

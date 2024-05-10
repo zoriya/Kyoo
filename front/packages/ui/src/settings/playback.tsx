@@ -18,16 +18,16 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Select } from "@kyoo/primitives";
 import { useLocalSetting } from "@kyoo/models";
-import { useTranslation } from "react-i18next";
+import { Select } from "@kyoo/primitives";
 import { useSetAtom } from "jotai";
-import { Preference, SettingsContainer, useSetting } from "./base";
+import { useTranslation } from "react-i18next";
 import { PlayMode, playModeAtom } from "../player/state";
+import { Preference, SettingsContainer, useSetting } from "./base";
 
+import SubtitleLanguage from "@material-symbols/svg-400/rounded/closed_caption-fill.svg";
 import PlayModeI from "@material-symbols/svg-400/rounded/display_settings-fill.svg";
 import AudioLanguage from "@material-symbols/svg-400/rounded/music_note-fill.svg";
-import SubtitleLanguage from "@material-symbols/svg-400/rounded/closed_caption-fill.svg";
 
 // I gave up on finding a way to retrive this using the Intl api (probably does not exist)
 // Simply copy pasted the list of languages from https://www.localeplanet.com/api/codelist.json

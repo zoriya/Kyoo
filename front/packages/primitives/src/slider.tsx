@@ -20,9 +20,9 @@
 
 import { useRef, useState } from "react";
 import { type GestureResponderEvent, Platform, View } from "react-native";
-import { px, percent, Stylable, useYoshiki } from "yoshiki/native";
-import { focusReset } from "./utils";
 import type { ViewProps } from "react-native-svg/lib/typescript/fabric/utils";
+import { Stylable, percent, px, useYoshiki } from "yoshiki/native";
+import { focusReset } from "./utils";
 
 export const Slider = ({
 	progress,

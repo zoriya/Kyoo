@@ -20,42 +20,42 @@
 
 import "../polyfill";
 
-import { HydrationBoundary, QueryClientProvider, dehydrate } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import {
-	HiddenIfNoJs,
-	TouchOnlyCss,
-	SkeletonCss,
-	ThemeSelector,
-	SnackbarProvider,
-} from "@kyoo/primitives";
-import { WebTooltip } from "@kyoo/primitives/src/tooltip.web";
+import { PortalProvider } from "@gorhom/portal";
 import {
 	AccountP,
 	AccountProvider,
 	ConnectionErrorContext,
-	createQueryClient,
-	fetchQuery,
-	getTokenWJ,
 	type QueryIdentifier,
 	type QueryPage,
 	ServerInfoP,
-	setSsrApiUrl,
 	UserP,
+	createQueryClient,
+	fetchQuery,
+	getTokenWJ,
+	setSsrApiUrl,
 	useUserTheme,
 } from "@kyoo/models";
-import { type ComponentType, useContext, useState } from "react";
+import { getCurrentAccount, readCookie, updateAccount } from "@kyoo/models/src/account-internal";
+import {
+	HiddenIfNoJs,
+	SkeletonCss,
+	SnackbarProvider,
+	ThemeSelector,
+	TouchOnlyCss,
+} from "@kyoo/primitives";
+import { WebTooltip } from "@kyoo/primitives/src/tooltip.web";
+import { ConnectionError } from "@kyoo/ui";
+import { HydrationBoundary, QueryClientProvider, dehydrate } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import arrayShuffle from "array-shuffle";
 import NextApp, { type AppContext, type AppProps } from "next/app";
 import { Poppins } from "next/font/google";
-import { useTheme, useMobileHover, useStyleRegistry, StyleRegistryProvider } from "yoshiki/web";
-import superjson from "superjson";
 import Head from "next/head";
-import { withTranslations } from "../i18n";
-import arrayShuffle from "array-shuffle";
+import { type ComponentType, useContext, useState } from "react";
 import { Tooltip } from "react-tooltip";
-import { getCurrentAccount, readCookie, updateAccount } from "@kyoo/models/src/account-internal";
-import { PortalProvider } from "@gorhom/portal";
-import { ConnectionError } from "@kyoo/ui";
+import superjson from "superjson";
+import { StyleRegistryProvider, useMobileHover, useStyleRegistry, useTheme } from "yoshiki/web";
+import { withTranslations } from "../i18n";
 
 const font = Poppins({ weight: ["300", "400", "900"], subsets: ["latin"], display: "swap" });
 

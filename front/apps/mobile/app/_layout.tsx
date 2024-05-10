@@ -20,39 +20,39 @@
 
 import "react-native-reanimated";
 
-import { PortalProvider } from "@gorhom/portal";
-import { SnackbarProvider, ThemeSelector } from "@kyoo/primitives";
-import { DownloadProvider } from "@kyoo/ui";
-import { AccountProvider, createQueryClient, storage, useUserTheme } from "@kyoo/models";
-import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
-import i18next from "i18next";
-import { Slot } from "expo-router";
-import { getLocales } from "expo-localization";
-import * as SplashScreen from "expo-splash-screen";
 import {
-	useFonts,
 	Poppins_300Light,
 	Poppins_400Regular,
 	Poppins_900Black,
+	useFonts,
 } from "@expo-google-fonts/poppins";
-import { type ReactNode, useEffect, useState } from "react";
-import { useColorScheme } from "react-native";
-import { initReactI18next } from "react-i18next";
-import { ThemeProvider as RNThemeProvider } from "@react-navigation/native";
-import "intl-pluralrules";
-import "@formatjs/intl-locale/polyfill";
-import "@formatjs/intl-displaynames/polyfill";
 import "@formatjs/intl-displaynames/locale-data/en";
 import "@formatjs/intl-displaynames/locale-data/fr";
+import "@formatjs/intl-displaynames/polyfill";
+import "@formatjs/intl-locale/polyfill";
+import { PortalProvider } from "@gorhom/portal";
+import { AccountProvider, createQueryClient, storage, useUserTheme } from "@kyoo/models";
+import { SnackbarProvider, ThemeSelector } from "@kyoo/primitives";
+import { DownloadProvider } from "@kyoo/ui";
+import { ThemeProvider as RNThemeProvider } from "@react-navigation/native";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { getLocales } from "expo-localization";
+import { Slot } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import i18next from "i18next";
+import "intl-pluralrules";
+import { type ReactNode, useEffect, useState } from "react";
+import { initReactI18next } from "react-i18next";
+import { useColorScheme } from "react-native";
 
+import NetInfo from "@react-native-community/netinfo";
+import { onlineManager } from "@tanstack/react-query";
+import { useTheme } from "yoshiki/native";
 // TODO: use a backend to load jsons.
 import en from "../../../translations/en.json";
 import fr from "../../../translations/fr.json";
 import zh from "../../../translations/zh.json";
-import { useTheme } from "yoshiki/native";
-import NetInfo from "@react-native-community/netinfo";
-import { onlineManager } from "@tanstack/react-query";
 
 onlineManager.setEventListener((setOnline) => {
 	return NetInfo.addEventListener((state) => {

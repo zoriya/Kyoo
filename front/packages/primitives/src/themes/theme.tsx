@@ -18,14 +18,14 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import type { ReactNode } from "react";
 import type { Property } from "csstype";
+import type { ReactNode } from "react";
+import { Platform } from "react-native";
 import { type Theme, ThemeProvider, useAutomaticTheme } from "yoshiki";
-import { useTheme, useYoshiki } from "yoshiki/native";
 import "yoshiki";
+import { useTheme, useYoshiki } from "yoshiki/native";
 import "yoshiki/native";
 import { catppuccin } from "./catppuccin";
-import { Platform } from "react-native";
 
 type FontList = Partial<
 	Record<

@@ -19,21 +19,21 @@
  */
 
 import {
-	type QueryIdentifier,
-	type QueryPage,
 	type LibraryItem,
 	LibraryItemP,
+	type QueryIdentifier,
+	type QueryPage,
 	getDisplayDate,
 } from "@kyoo/models";
 import { type ComponentProps, useState } from "react";
 import { createParam } from "solito";
-import { DefaultLayout } from "../layout";
 import type { WithLoading } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
+import { DefaultLayout } from "../layout";
 import { ItemGrid } from "./grid";
-import { ItemList } from "./list";
-import { SortBy, SortOrd, Layout } from "./types";
 import { BrowseSettings } from "./header";
+import { ItemList } from "./list";
+import { Layout, SortBy, SortOrd } from "./types";
 
 const { useParam } = createParam<{ sortBy?: string }>();
 

@@ -18,20 +18,20 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
+import ExpandLess from "@material-symbols/svg-400/rounded/expand_less-fill.svg";
+import ExpandMore from "@material-symbols/svg-400/rounded/expand_more-fill.svg";
 import * as RSelect from "@radix-ui/react-select";
 import { forwardRef } from "react";
-import { Icon } from "./icons";
-import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
-import ExpandMore from "@material-symbols/svg-400/rounded/expand_more-fill.svg";
-import ExpandLess from "@material-symbols/svg-400/rounded/expand_less-fill.svg";
-import { ContrastArea, SwitchVariant } from "./themes";
-import { InternalTriger, YoshikiProvider } from "./menu.web";
-import { type Theme, px, useYoshiki as useNativeYoshiki } from "yoshiki/native";
-import { useYoshiki } from "yoshiki";
-import { PressableFeedback } from "./links";
-import { P } from "./text";
-import { focusReset, ts } from "./utils";
 import { View } from "react-native";
+import { useYoshiki } from "yoshiki";
+import { type Theme, px, useYoshiki as useNativeYoshiki } from "yoshiki/native";
+import { Icon } from "./icons";
+import { PressableFeedback } from "./links";
+import { InternalTriger, YoshikiProvider } from "./menu.web";
+import { P } from "./text";
+import { ContrastArea, SwitchVariant } from "./themes";
+import { focusReset, ts } from "./utils";
 
 export const Select = ({
 	label,

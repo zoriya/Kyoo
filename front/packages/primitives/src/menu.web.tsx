@@ -18,24 +18,24 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import Dot from "@material-symbols/svg-400/rounded/fiber_manual_record-fill.svg";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import Link from "next/link";
 import {
 	type ComponentProps,
 	type ComponentType,
-	forwardRef,
 	type ReactElement,
 	type ReactNode,
+	forwardRef,
 } from "react";
-import Link from "next/link";
 import type { PressableProps } from "react-native";
-import { useYoshiki } from "yoshiki/web";
+import type { SvgProps } from "react-native-svg";
 import { useYoshiki as useNativeYoshiki } from "yoshiki/native";
+import { useYoshiki } from "yoshiki/web";
+import { Icon } from "./icons";
 import { P } from "./text";
 import { ContrastArea, SwitchVariant } from "./themes";
-import { Icon } from "./icons";
-import Dot from "@material-symbols/svg-400/rounded/fiber_manual_record-fill.svg";
 import { focusReset, ts } from "./utils";
-import type { SvgProps } from "react-native-svg";
 
 type YoshikiFunc<T> = (props: ReturnType<typeof useYoshiki>) => T;
 export const YoshikiProvider = ({ children }: { children: YoshikiFunc<ReactNode> }) => {

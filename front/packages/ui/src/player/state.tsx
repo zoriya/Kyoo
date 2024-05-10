@@ -19,21 +19,21 @@
  */
 
 import { type Audio, type Episode, type Subtitle, getLocalSetting, useAccount } from "@kyoo/models";
+import { useSnackbar } from "@kyoo/primitives";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useAtomCallback } from "jotai/utils";
 import {
 	type ElementRef,
 	memo,
+	useCallback,
 	useEffect,
 	useLayoutEffect,
 	useRef,
 	useState,
-	useCallback,
 } from "react";
-import NativeVideo, { type VideoProps } from "./video";
-import { Platform } from "react-native";
-import { useSnackbar } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
+import { Platform } from "react-native";
+import NativeVideo, { type VideoProps } from "./video";
 
 export const playAtom = atom(true);
 export const loadAtom = atom(false);

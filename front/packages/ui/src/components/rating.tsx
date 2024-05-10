@@ -19,8 +19,8 @@
  */
 
 import { type Breakpoint, Icon, P, Skeleton, ts } from "@kyoo/primitives";
-import { View } from "react-native";
 import Star from "@material-symbols/svg-400/rounded/star-fill.svg";
+import { View } from "react-native";
 import { rem, useYoshiki } from "yoshiki/native";
 
 export const Rating = ({ rating, color }: { rating?: number; color: Breakpoint<string> }) => {

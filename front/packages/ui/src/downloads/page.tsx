@@ -18,9 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { type State, downloadAtom } from "./state";
-import { FlashList } from "@shopify/flash-list";
-import { type ImageStyle, View } from "react-native";
+import type { KyooImage } from "@kyoo/models";
 import {
 	Alert,
 	H6,
@@ -34,17 +32,19 @@ import {
 	ts,
 	usePageStyle,
 } from "@kyoo/primitives";
-import { EpisodeLine, displayRuntime, episodeDisplayNumber } from "../details/episode";
-import { useTranslation } from "react-i18next";
-import { EmptyView } from "../fetch";
-import { percent, useYoshiki } from "yoshiki/native";
-import type { KyooImage } from "@kyoo/models";
-import { type Atom, useAtomValue } from "jotai";
 import DownloadForOffline from "@material-symbols/svg-400/rounded/download_for_offline.svg";
 import Downloading from "@material-symbols/svg-400/rounded/downloading.svg";
 import ErrorIcon from "@material-symbols/svg-400/rounded/error.svg";
 import NotStarted from "@material-symbols/svg-400/rounded/not_started.svg";
+import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
+import { type Atom, useAtomValue } from "jotai";
+import { useTranslation } from "react-i18next";
+import { type ImageStyle, View } from "react-native";
+import { percent, useYoshiki } from "yoshiki/native";
+import { EpisodeLine, displayRuntime, episodeDisplayNumber } from "../details/episode";
+import { EmptyView } from "../fetch";
+import { type State, downloadAtom } from "./state";
 
 const DownloadedItem = ({
 	name,

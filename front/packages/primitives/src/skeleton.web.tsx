@@ -20,7 +20,7 @@
 
 import { LinearGradient } from "expo-linear-gradient";
 import { View, type ViewProps } from "react-native";
-import { px, rem, useYoshiki, percent, em } from "yoshiki/native";
+import { em, percent, px, rem, useYoshiki } from "yoshiki/native";
 import { hiddenIfNoJs } from "./utils/nojs";
 
 export const SkeletonCss = () => (

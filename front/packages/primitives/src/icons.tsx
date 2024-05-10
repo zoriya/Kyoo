@@ -23,10 +23,10 @@ import { type ComponentProps, type ComponentType, type ForwardedRef, forwardRef 
 import { Platform, type PressableProps } from "react-native";
 import type { SvgProps } from "react-native-svg";
 import type { YoshikiStyle } from "yoshiki";
-import { px, type Stylable, type Theme, useYoshiki } from "yoshiki/native";
+import { type Stylable, type Theme, px, useYoshiki } from "yoshiki/native";
 import { PressableFeedback } from "./links";
-import { type Breakpoint, focusReset, ts } from "./utils";
 import { P } from "./text";
+import { type Breakpoint, focusReset, ts } from "./utils";
 
 declare module "react" {
 	function forwardRef<T, P = {}>(

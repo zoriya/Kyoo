@@ -20,22 +20,22 @@
 
 import type { KyooImage, WatchStatusV } from "@kyoo/models";
 import {
+	Heading,
+	ImageBackground,
 	Link,
 	P,
-	Skeleton,
-	ts,
-	ImageBackground,
-	Heading,
 	PosterBackground,
+	Skeleton,
 	imageBorderRadius,
 	important,
+	ts,
 } from "@kyoo/primitives";
 import { useState } from "react";
 import { Platform, View } from "react-native";
 import { percent, px, rem, useYoshiki } from "yoshiki/native";
+import { ItemContext } from "../components/context-menus";
 import type { Layout, WithLoading } from "../fetch";
 import { ItemWatchStatus } from "./grid";
-import { ItemContext } from "../components/context-menus";
 
 export const ItemList = ({
 	href,

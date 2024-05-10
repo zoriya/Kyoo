@@ -18,16 +18,16 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { useFetch, type QueryIdentifier, imageFn, type Chapter } from "@kyoo/models";
-import { Sprite, P, imageBorderRadius, ts } from "@kyoo/primitives";
-import { View, Platform } from "react-native";
-import { percent, useYoshiki, px, type Theme, useForceRerender } from "yoshiki/native";
-import { useMemo } from "react";
+import { type Chapter, type QueryIdentifier, imageFn, useFetch } from "@kyoo/models";
+import { P, Sprite, imageBorderRadius, ts } from "@kyoo/primitives";
 import { useAtomValue } from "jotai";
-import { durationAtom } from "../state";
-import { toTimerString } from "./left-buttons";
-import { seekProgressAtom } from "./hover";
+import { useMemo } from "react";
+import { Platform, View } from "react-native";
+import { type Theme, percent, px, useForceRerender, useYoshiki } from "yoshiki/native";
 import { ErrorView } from "../../errors";
+import { durationAtom } from "../state";
+import { seekProgressAtom } from "./hover";
+import { toTimerString } from "./left-buttons";
 
 type Thumb = {
 	from: number;

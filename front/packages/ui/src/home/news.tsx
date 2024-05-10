@@ -19,12 +19,12 @@
  */
 
 import { type News, NewsP, type QueryIdentifier, getDisplayDate } from "@kyoo/models";
-import { ItemGrid } from "../browse/grid";
-import { InfiniteFetch } from "../fetch-infinite";
 import { useTranslation } from "react-i18next";
-import { Header } from "./genre";
-import { EpisodeBox, episodeDisplayNumber } from "../details/episode";
 import { useYoshiki } from "yoshiki/native";
+import { ItemGrid } from "../browse/grid";
+import { EpisodeBox, episodeDisplayNumber } from "../details/episode";
+import { InfiniteFetch } from "../fetch-infinite";
+import { Header } from "./genre";
 
 export const NewsList = () => {
 	const { t } = useTranslation();

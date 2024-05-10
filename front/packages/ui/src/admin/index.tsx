@@ -22,8 +22,8 @@ import type { QueryPage } from "@kyoo/models";
 import { ts } from "@kyoo/primitives";
 import { ScrollView } from "react-native";
 import { DefaultLayout } from "../layout";
-import { UserList } from "./users";
 import { Scanner } from "./scanner";
+import { UserList } from "./users";
 
 export const AdminPage: QueryPage = () => {
 	return (

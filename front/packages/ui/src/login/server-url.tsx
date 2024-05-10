@@ -25,7 +25,7 @@ import {
 	ServerInfoP,
 	useFetch,
 } from "@kyoo/models";
-import { Button, P, Link, Input, ts, H1, HR } from "@kyoo/primitives";
+import { Button, H1, HR, Input, Link, P, ts } from "@kyoo/primitives";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ImageBackground, Platform, View } from "react-native";

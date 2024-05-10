@@ -20,20 +20,20 @@
 
 import { type Page, type QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { HR } from "@kyoo/primitives";
+import type { ContentStyle } from "@shopify/flash-list";
 import {
 	type ComponentProps,
 	type ComponentType,
 	Fragment,
-	isValidElement,
 	type ReactElement,
+	isValidElement,
 	useCallback,
 	useEffect,
 	useRef,
 } from "react";
 import { type Stylable, nativeStyleToCss, useYoshiki, ysMap } from "yoshiki";
-import { EmptyView, type Layout, type WithLoading, addHeader } from "./fetch";
 import { ErrorView } from "./errors";
-import type { ContentStyle } from "@shopify/flash-list";
+import { EmptyView, type Layout, type WithLoading, addHeader } from "./fetch";
 
 const InfiniteScroll = <Props,>({
 	children,

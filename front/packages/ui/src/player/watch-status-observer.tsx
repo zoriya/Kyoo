@@ -20,9 +20,9 @@
 
 import { type MutationParam, WatchStatusV, useAccount } from "@kyoo/models";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useCallback } from "react";
 import { useAtomValue } from "jotai";
 import { useAtomCallback } from "jotai/utils";
+import { useCallback, useEffect } from "react";
 import { playAtom, progressAtom } from "./state";
 
 export const WatchStatusObserver = ({

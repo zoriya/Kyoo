@@ -24,8 +24,8 @@ import { ScrollView } from "react-native";
 import { DefaultLayout } from "../layout";
 import { AccountSettings } from "./account";
 import { About, GeneralSettings } from "./general";
-import { PlaybackSettings } from "./playback";
 import { OidcSettings } from "./oidc";
+import { PlaybackSettings } from "./playback";
 
 export const SettingsPage: QueryPage = () => {
 	const account = useAccount();

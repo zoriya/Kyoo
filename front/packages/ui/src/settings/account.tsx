@@ -28,18 +28,18 @@ import {
 } from "@kyoo/models";
 import { Alert, Avatar, Button, H1, Icon, Input, P, Popup, ts, usePopup } from "@kyoo/primitives";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import * as ImagePicker from "expo-image-picker";
 import { type ComponentProps, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { rem, useYoshiki } from "yoshiki/native";
-import * as ImagePicker from "expo-image-picker";
 import { PasswordInput } from "../login/password-input";
 import { Preference, SettingsContainer } from "./base";
 
 import Username from "@material-symbols/svg-400/outlined/badge.svg";
-import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
 import Mail from "@material-symbols/svg-400/outlined/mail.svg";
 import Password from "@material-symbols/svg-400/outlined/password.svg";
+import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
 import Delete from "@material-symbols/svg-400/rounded/delete.svg";
 import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 

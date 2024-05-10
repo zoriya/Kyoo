@@ -19,8 +19,8 @@
  */
 
 import { z } from "zod";
-import { zdate } from "../utils";
 import { ImagesP, ResourceP } from "../traits";
+import { zdate } from "../utils";
 
 export const SeasonP = ResourceP("season").merge(ImagesP).extend({
 	/**

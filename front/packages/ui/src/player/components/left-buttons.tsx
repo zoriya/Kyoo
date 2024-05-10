@@ -19,19 +19,19 @@
  */
 
 import { IconButton, Link, P, Slider, noTouch, tooltip, touchOnly, ts } from "@kyoo/primitives";
+import Pause from "@material-symbols/svg-400/rounded/pause-fill.svg";
+import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
+import SkipNext from "@material-symbols/svg-400/rounded/skip_next-fill.svg";
+import SkipPrevious from "@material-symbols/svg-400/rounded/skip_previous-fill.svg";
+import VolumeDown from "@material-symbols/svg-400/rounded/volume_down-fill.svg";
+import VolumeMute from "@material-symbols/svg-400/rounded/volume_mute-fill.svg";
+import VolumeOff from "@material-symbols/svg-400/rounded/volume_off-fill.svg";
+import VolumeUp from "@material-symbols/svg-400/rounded/volume_up-fill.svg";
 import { useAtom, useAtomValue } from "jotai";
 import { useTranslation } from "react-i18next";
 import { Platform, View } from "react-native";
-import SkipPrevious from "@material-symbols/svg-400/rounded/skip_previous-fill.svg";
-import SkipNext from "@material-symbols/svg-400/rounded/skip_next-fill.svg";
-import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
-import Pause from "@material-symbols/svg-400/rounded/pause-fill.svg";
-import VolumeOff from "@material-symbols/svg-400/rounded/volume_off-fill.svg";
-import VolumeMute from "@material-symbols/svg-400/rounded/volume_mute-fill.svg";
-import VolumeDown from "@material-symbols/svg-400/rounded/volume_down-fill.svg";
-import VolumeUp from "@material-symbols/svg-400/rounded/volume_up-fill.svg";
-import { durationAtom, mutedAtom, playAtom, progressAtom, volumeAtom } from "../state";
 import { type Stylable, px, useYoshiki } from "yoshiki/native";
+import { durationAtom, mutedAtom, playAtom, progressAtom, volumeAtom } from "../state";
 import { HoverTouch, hoverAtom } from "./hover";
 
 export const LeftButtons = ({

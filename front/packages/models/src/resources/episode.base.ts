@@ -19,9 +19,9 @@
  */
 
 import { z } from "zod";
-import { zdate } from "../utils";
 import { ImagesP, imageFn } from "../traits";
 import { ResourceP } from "../traits/resource";
+import { zdate } from "../utils";
 
 export const BaseEpisodeP = ResourceP("episode")
 	.merge(ImagesP)

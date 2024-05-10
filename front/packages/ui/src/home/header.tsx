@@ -31,13 +31,13 @@ import {
 	tooltip,
 	ts,
 } from "@kyoo/primitives";
+import Info from "@material-symbols/svg-400/rounded/info.svg";
+import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
+import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { percent, rem, useYoshiki } from "yoshiki/native";
-import type { WithLoading } from "../fetch";
 import { Header as DetailsHeader } from "../details/header";
-import { useTranslation } from "react-i18next";
-import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
-import Info from "@material-symbols/svg-400/rounded/info.svg";
+import type { WithLoading } from "../fetch";
 
 export const Header = ({
 	isLoading,
