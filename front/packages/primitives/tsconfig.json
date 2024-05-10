@@ -18,9 +18,9 @@
 		"incremental": true,
 		"baseUrl": ".",
 		"paths": {
-			"~/*": ["src/*"],
-		},
+			"~/*": ["src/*"]
+		}
 	},
 	"include": ["**/*.ts", "**/*.tsx"],
-	"exclude": ["node_modules"],
+	"exclude": ["node_modules"]
 }

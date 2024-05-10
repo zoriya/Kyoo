@@ -35,7 +35,7 @@ export * from "react-native-video";
 
 import { Audio, Subtitle, useToken } from "@kyoo/models";
 import { IconButton, Menu } from "@kyoo/primitives";
-import { ComponentProps, forwardRef, useEffect, } from "react";
+import { ComponentProps, forwardRef, useEffect } from "react";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import NativeVideo, {
 	VideoRef,

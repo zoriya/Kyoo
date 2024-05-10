@@ -22,7 +22,7 @@ import { ComponentType } from "react";
 import { View, ViewProps } from "react-native";
 import { percent, px, useYoshiki } from "yoshiki/native";
 
-export const Container = <AsProps = ViewProps,>({
+export const Container = <AsProps = ViewProps>({
 	as,
 	...props
 }: { as?: ComponentType<AsProps> } & AsProps) => {

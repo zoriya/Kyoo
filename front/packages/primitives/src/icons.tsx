@@ -109,7 +109,7 @@ export const IconButton = forwardRef(function IconButton<AsProps = PressableProp
 	);
 });
 
-export const IconFab = <AsProps = PressableProps,>(
+export const IconFab = <AsProps = PressableProps>(
 	props: ComponentProps<typeof IconButton<AsProps>>,
 ) => {
 	const { css, theme } = useYoshiki();

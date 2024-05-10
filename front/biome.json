@@ -8,11 +8,7 @@
 		"lineEnding": "lf",
 		"lineWidth": 100,
 		"attributePosition": "auto",
-		"ignore": [
-			"**/.yarn/**",
-			"**/.next/**",
-			"**/.expo/**"
-		]
+		"ignore": ["**/.yarn/**", "**/.next/**", "**/.expo/**"]
 	},
 	"organizeImports": {
 		"enabled": true
@@ -38,11 +34,7 @@
 				"noBannedTypes": "off"
 			}
 		},
-		"ignore": [
-			"**/.yarn/**",
-			"**/.next/**",
-			"**/.expo/**"
-		]
+		"ignore": ["**/.yarn/**", "**/.next/**", "**/.expo/**"]
 	},
 	"javascript": {
 		"formatter": {

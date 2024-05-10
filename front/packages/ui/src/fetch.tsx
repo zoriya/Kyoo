@@ -37,7 +37,7 @@ export type WithLoading<Item> =
 	| (Item & { isLoading: false })
 	| (Partial<Item> & { isLoading: true });
 
-const isPage = <T = unknown,>(obj: unknown): obj is Page<T> =>
+const isPage = <T = unknown>(obj: unknown): obj is Page<T> =>
 	(typeof obj === "object" && obj && "items" in obj) || false;
 
 export const Fetch = <Data,>({

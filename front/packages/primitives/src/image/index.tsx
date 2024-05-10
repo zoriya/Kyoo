@@ -55,7 +55,7 @@ export const PosterBackground = ({
 	/>
 );
 
-export const ImageBackground = <AsProps = ViewProps,>({
+export const ImageBackground = <AsProps = ViewProps>({
 	src,
 	alt,
 	quality,
