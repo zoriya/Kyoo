@@ -1711,6 +1711,97 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@biomejs/biome@npm:1.7.3":
+  version: 1.7.3
+  resolution: "@biomejs/biome@npm:1.7.3"
+  dependencies:
+    "@biomejs/cli-darwin-arm64": 1.7.3
+    "@biomejs/cli-darwin-x64": 1.7.3
+    "@biomejs/cli-linux-arm64": 1.7.3
+    "@biomejs/cli-linux-arm64-musl": 1.7.3
+    "@biomejs/cli-linux-x64": 1.7.3
+    "@biomejs/cli-linux-x64-musl": 1.7.3
+    "@biomejs/cli-win32-arm64": 1.7.3
+    "@biomejs/cli-win32-x64": 1.7.3
+  dependenciesMeta:
+    "@biomejs/cli-darwin-arm64":
+      optional: true
+    "@biomejs/cli-darwin-x64":
+      optional: true
+    "@biomejs/cli-linux-arm64":
+      optional: true
+    "@biomejs/cli-linux-arm64-musl":
+      optional: true
+    "@biomejs/cli-linux-x64":
+      optional: true
+    "@biomejs/cli-linux-x64-musl":
+      optional: true
+    "@biomejs/cli-win32-arm64":
+      optional: true
+    "@biomejs/cli-win32-x64":
+      optional: true
+  bin:
+    biome: bin/biome
+  checksum: ad6a6585f1d6fcb9c060319c614b4437d715637ecedbe5f4d45f170f0532894654e7cf5c80420da38c8c626d76fef4b6334c7ee85e6c790bd5ad4f7aa49c5182
+  languageName: node
+  linkType: hard
+
+"@biomejs/cli-darwin-arm64@npm:1.7.3":
+  version: 1.7.3
+  resolution: "@biomejs/cli-darwin-arm64@npm:1.7.3"
+  conditions: os=darwin & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@biomejs/cli-darwin-x64@npm:1.7.3":
+  version: 1.7.3
+  resolution: "@biomejs/cli-darwin-x64@npm:1.7.3"
+  conditions: os=darwin & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@biomejs/cli-linux-arm64-musl@npm:1.7.3":
+  version: 1.7.3
+  resolution: "@biomejs/cli-linux-arm64-musl@npm:1.7.3"
+  conditions: os=linux & cpu=arm64 & libc=musl
+  languageName: node
+  linkType: hard
+
+"@biomejs/cli-linux-arm64@npm:1.7.3":
+  version: 1.7.3
+  resolution: "@biomejs/cli-linux-arm64@npm:1.7.3"
+  conditions: os=linux & cpu=arm64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"@biomejs/cli-linux-x64-musl@npm:1.7.3":
+  version: 1.7.3
+  resolution: "@biomejs/cli-linux-x64-musl@npm:1.7.3"
+  conditions: os=linux & cpu=x64 & libc=musl
+  languageName: node
+  linkType: hard
+
+"@biomejs/cli-linux-x64@npm:1.7.3":
+  version: 1.7.3
+  resolution: "@biomejs/cli-linux-x64@npm:1.7.3"
+  conditions: os=linux & cpu=x64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"@biomejs/cli-win32-arm64@npm:1.7.3":
+  version: 1.7.3
+  resolution: "@biomejs/cli-win32-arm64@npm:1.7.3"
+  conditions: os=win32 & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@biomejs/cli-win32-x64@npm:1.7.3":
+  version: 1.7.3
+  resolution: "@biomejs/cli-win32-x64@npm:1.7.3"
+  conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
 "@emotion/is-prop-valid@npm:^0.8.2":
   version: 0.8.8
   resolution: "@emotion/is-prop-valid@npm:0.8.8"
@@ -6950,17 +7041,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-prettier@npm:^9.1.0":
-  version: 9.1.0
-  resolution: "eslint-config-prettier@npm:9.1.0"
-  peerDependencies:
-    eslint: ">=7.0.0"
-  bin:
-    eslint-config-prettier: bin/cli.js
-  checksum: 9229b768c879f500ee54ca05925f31b0c0bafff3d9f5521f98ff05127356de78c81deb9365c86a5ec4efa990cb72b74df8612ae15965b14136044c73e1f6a907
-  languageName: node
-  linkType: hard
-
 "eslint-import-resolver-node@npm:^0.3.6, eslint-import-resolver-node@npm:^0.3.9":
   version: 0.3.9
   resolution: "eslint-import-resolver-node@npm:0.3.9"
@@ -6999,15 +7079,6 @@ __metadata:
     eslint:
       optional: true
   checksum: 74c6dfea7641ebcfe174be61168541a11a14aa8d72e515f5f09af55cd0d0862686104b0524aa4b8e0ce66418a44aa38a94d2588743db5fd07a6b49ffd16921d2
-  languageName: node
-  linkType: hard
-
-"eslint-plugin-header@npm:^3.1.1":
-  version: 3.1.1
-  resolution: "eslint-plugin-header@npm:3.1.1"
-  peerDependencies:
-    eslint: ">=7.7.0"
-  checksum: 2353e4ba011be81d5c27fbd79929e18dce118d7673a2f717b1ac5a0bceb33e06ec9a7c80a01dddc5804df75e2cc8eb475d268cd1abef5eab5088ede62e5ad246
   languageName: node
   linkType: hard
 
@@ -7126,7 +7197,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:8.56.0, eslint@npm:^8.56.0":
+"eslint@npm:^8.56.0":
   version: 8.56.0
   resolution: "eslint@npm:8.56.0"
   dependencies:
@@ -9577,11 +9648,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "kyoo@workspace:."
   dependencies:
-    eslint: 8.56.0
-    eslint-config-next: 14.1.0
-    eslint-config-prettier: ^9.1.0
-    eslint-plugin-header: ^3.1.1
-    prettier: ^3.2.4
+    "@biomejs/biome": 1.7.3
     typescript: 5.3.3
   languageName: unknown
   linkType: soft
@@ -11375,15 +11442,6 @@ __metadata:
   version: 1.2.1
   resolution: "prelude-ls@npm:1.2.1"
   checksum: cd192ec0d0a8e4c6da3bb80e4f62afe336df3f76271ac6deb0e6a36187133b6073a19e9727a1ff108cd8b9982e4768850d413baa71214dd80c7979617dca827a
-  languageName: node
-  linkType: hard
-
-"prettier@npm:^3.2.4":
-  version: 3.2.4
-  resolution: "prettier@npm:3.2.4"
-  bin:
-    prettier: bin/prettier.cjs
-  checksum: 6ec9385a836e0b9bac549e585101c086d1521c31d7b882d5c8bb7d7646da0693da5f31f4fff6dc080710e5e2d34c85e6fb2f8766876b3645c8be2f33b9c3d1a3
   languageName: node
   linkType: hard
 

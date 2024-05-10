@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":disableRateLimiting"],
+  "extends": ["config:recommended", ":disableRateLimiting", "regexManagers:biomeVersions"],
   "minimumReleaseAge": "5 days",
   "ignorePaths": ["**/front/**"],
   "packageRules": [

@@ -21,17 +21,8 @@
 		"apps/*",
 		"packages/*"
 	],
-	"prettier": {
-		"useTabs": true,
-		"printWidth": 100,
-		"trailingComma": "all"
-	},
 	"devDependencies": {
-		"eslint": "8.56.0",
-		"eslint-config-next": "14.1.0",
-		"eslint-config-prettier": "^9.1.0",
-		"eslint-plugin-header": "^3.1.1",
-		"prettier": "^3.2.4",
+		"@biomejs/biome": "1.7.3",
 		"typescript": "5.3.3"
 	},
 	"packageManager": "yarn@3.2.4"
