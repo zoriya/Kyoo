@@ -1,244 +1,244 @@
 {
     "home": {
-        "recommended": "",
-        "news": "",
-        "watchlist": "",
-        "info": "",
-        "none": "",
-        "watchlistLogin": "",
-        "refreshMetadata": "",
+        "recommended": "Рекомендації",
+        "news": "Новинки",
+        "watchlist": "Продовжити перегляд",
+        "info": "Більше",
+        "none": "Епізоди відсутні",
+        "watchlistLogin": "Для відслідковування історії переглядів чи планів на майбутне необхідно увійти.",
+        "refreshMetadata": "Оновити метадані",
         "episodeMore": {
-            "goToShow": "",
-            "download": "",
-            "mediainfo": ""
+            "goToShow": "Перейти до серіалу",
+            "download": "Завантажити",
+            "mediainfo": "Переглянути інформацію про файл"
         }
     },
     "show": {
-        "play": "",
-        "trailer": "",
-        "studio": "",
-        "genre": "",
-        "genre-none": "",
-        "staff": "",
-        "staff-none": "",
-        "noOverview": "",
-        "episode-none": "",
-        "episodeNoMetadata": "",
-        "tags": "",
-        "links": "",
-        "jumpToSeason": "",
-        "partOf": "",
-        "watchlistAdd": "",
-        "watchlistEdit": "",
-        "watchlistRemove": "",
-        "watchlistLogin": "",
+        "play": "Відтворити",
+        "trailer": "Відтворити трейлер",
+        "studio": "Студія",
+        "genre": "Жанри",
+        "genre-none": "Жанри відсутні",
+        "staff": "Команда",
+        "staff-none": "Команда невідома",
+        "noOverview": "Немає огляду",
+        "episode-none": "В цьому сезоні нема епізодів",
+        "episodeNoMetadata": "Метадані недоступні",
+        "tags": "Теги",
+        "links": "Посилання",
+        "jumpToSeason": "Перейти до сезону",
+        "partOf": "Частина",
+        "watchlistAdd": "Додати в список очікування",
+        "watchlistEdit": "Змінити статус перегляду",
+        "watchlistRemove": "Відмітити як не переглянуте",
+        "watchlistLogin": "Увійти для зберігання в списку переглядів",
         "watchlistMark": {
-            "completed": "",
-            "planned": "",
-            "watching": "",
-            "droped": "",
-            "null": ""
+            "completed": "Відмітити як завершене",
+            "planned": "Відмітити як заплановане",
+            "watching": "Відмітити як переглядаю",
+            "droped": "Відмітити як покинуте",
+            "null": "Відмітити як не почате"
         },
-        "nextUp": ""
+        "nextUp": "Наступне"
     },
     "browse": {
-        "sortby": "",
-        "sortby-tt": "",
+        "sortby": "Сортувати за {{key}}",
+        "sortby-tt": "Сортування",
         "sortkey": {
-            "relevance": "",
-            "name": "",
-            "airDate": "",
-            "startAir": "",
-            "endAir": "",
-            "addedDate": "",
-            "rating": ""
+            "relevance": "Актуальність",
+            "name": "Ім'я",
+            "airDate": "Дата виходу",
+            "startAir": "Початок виходу",
+            "endAir": "Кінець виходу",
+            "addedDate": "Дата додавання",
+            "rating": "Рейтинг"
         },
         "sortord": {
-            "asc": "",
-            "desc": ""
+            "asc": "за зростанням",
+            "desc": "за спаданням"
         },
-        "switchToGrid": "",
-        "switchToList": ""
+        "switchToGrid": "Перейти в режим сітки",
+        "switchToList": "Перейти в режим списку"
     },
     "misc": {
-        "settings": "",
-        "prev-page": "",
-        "next-page": "",
-        "delete": "",
-        "cancel": "",
-        "more": "",
-        "expand": "",
-        "collapse": "",
-        "edit": "",
-        "or": "",
-        "loading": ""
+        "settings": "Налаштування",
+        "prev-page": "Попередня сторінка",
+        "next-page": "Наступна сторінка",
+        "delete": "Видалити",
+        "cancel": "Скасувати",
+        "more": "Більше",
+        "expand": "Розгорнути",
+        "collapse": "Згорнути",
+        "edit": "Редагувати",
+        "or": "АБО",
+        "loading": "Завантаження"
     },
     "navbar": {
-        "home": "",
-        "browse": "",
-        "search": "",
-        "login": "",
-        "admin": ""
+        "home": "Додому",
+        "browse": "Перегляд",
+        "search": "Пошук",
+        "login": "Вхід",
+        "admin": "Сторінка адміністратора"
     },
     "settings": {
         "general": {
-            "label": "",
+            "label": "Загальні налаштування",
             "theme": {
-                "label": "",
-                "description": "",
-                "auto": "",
-                "light": "",
-                "dark": ""
+                "label": "Тема",
+                "description": "Встановіть тема для вашого додатку",
+                "auto": "Системна",
+                "light": "Світла",
+                "dark": "Темна"
             },
             "language": {
-                "label": "",
-                "description": "",
-                "system": ""
+                "label": "Мова",
+                "description": "Встановіть мову для вашого додатку",
+                "system": "Системна"
             }
         },
         "playback": {
-            "label": "",
+            "label": "Відтворення",
             "playmode": {
-                "label": "",
-                "description": ""
+                "label": "Відтворення за замовчуванням",
+                "description": "Режим відтворення за умовчанням, який використовується в цьому клієнті. \"Нативне\" є легшим для сервера, але не дозволяє автоматично змінювати якість"
             },
             "audioLanguage": {
-                "label": "",
-                "description": ""
+                "label": "Мова аудіо",
+                "description": "Мова аудіо за замовчуванням, яка використовується під час відтворення відео з кількома аудіо"
             },
             "subtitleLanguage": {
-                "label": "",
-                "description": "",
-                "none": ""
+                "label": "Мова субтитрів",
+                "description": "Мова за замовчуванням для субтитрів",
+                "none": "Ніяка"
             }
         },
         "account": {
-            "label": "",
+            "label": "Акаунт",
             "username": {
-                "label": ""
+                "label": "Нікнейм"
             },
             "avatar": {
-                "label": "",
-                "description": ""
+                "label": "Аватар",
+                "description": "Змінити іконку профіля"
             },
             "email": {
-                "label": ""
+                "label": "Email"
             },
             "password": {
-                "label": "",
-                "description": "",
-                "oldPassword": "",
-                "newPassword": ""
+                "label": "Пароль",
+                "description": "Змінити пароль",
+                "oldPassword": "Старий пароль",
+                "newPassword": "Новий пароль"
             }
         },
         "oidc": {
-            "label": "",
-            "connected": "",
-            "not-connected": "",
-            "open-profile": "",
-            "link": "",
-            "delete": ""
+            "label": "Пов’язані акаунти",
+            "connected": "Підключено як {{username}}.",
+            "not-connected": "Відключено",
+            "open-profile": "Відкрити ваш {{provider}} профіль",
+            "link": "Посилання",
+            "delete": "Відключити ваш kyoo акаунт від {{provider}}"
         },
         "about": {
-            "label": "",
+            "label": "Інформація",
             "android-app": {
-                "label": "",
-                "description": ""
+                "label": "Android додаток",
+                "description": "Завантажити додаток android"
             },
             "git": {
-                "label": "",
-                "description": ""
+                "label": "Github",
+                "description": "Відкрити github репозиторій де можна переглянути код kyoo"
             }
         }
     },
     "player": {
-        "back": "",
-        "previous": "",
-        "next": "",
-        "play": "",
-        "pause": "",
-        "mute": "",
-        "volume": "",
-        "quality": "",
-        "audios": "",
-        "subtitles": "",
-        "subtitle-none": "",
-        "fullscreen": "",
-        "direct": "",
-        "transmux": "",
-        "auto": "",
-        "notInPristine": "",
-        "unsupportedError": ""
+        "back": "Назад",
+        "previous": "Попередній епізод",
+        "next": "Наступний епізод",
+        "play": "Відтворити",
+        "pause": "Пауза",
+        "mute": "Вимкнути звук",
+        "volume": "Гучність",
+        "quality": "Якість",
+        "audios": "Аудіо",
+        "subtitles": "Субтитри",
+        "subtitle-none": "Відсутні",
+        "fullscreen": "Повноекранний режим",
+        "direct": "Нативне",
+        "transmux": "Оригінальне",
+        "auto": "Автоматично",
+        "notInPristine": "Недоступно в нативному",
+        "unsupportedError": "Відео кодек не підтримується, триває перекодування..."
     },
     "search": {
-        "empty": ""
+        "empty": "Результатів не знайдено. Спробуйте інший запит."
     },
     "login": {
-        "login": "",
-        "register": "",
-        "guest": "",
-        "guest-forbidden": "",
-        "via": "",
-        "add-account": "",
-        "logout": "",
-        "server": "",
-        "email": "",
-        "username": "",
-        "password": "",
-        "confirm": "",
-        "or-register": "",
-        "or-login": "",
-        "password-no-match": "",
-        "delete": "",
-        "delete-confirmation": ""
+        "login": "Увійти",
+        "register": "Рєестрація",
+        "guest": "Продовжити як гість",
+        "guest-forbidden": "Цей екземпляр kyoo не дозволяє використання гостьових акаунтів",
+        "via": "Продовжити із {{provider}}",
+        "add-account": "Додати акаунт",
+        "logout": "Вийти",
+        "server": "Адреса серверу",
+        "email": "Email",
+        "username": "Нікнейм",
+        "password": "Пароль",
+        "confirm": "Підтвердження пароля",
+        "or-register": "Немає акаунта? <1>Рєестрація</1>.",
+        "or-login": "Є акаунт? <1>Увійти</1>.",
+        "password-no-match": "Пароль не підходить.",
+        "delete": "Видалити акаунт",
+        "delete-confirmation": "Ця дія не може бути скасована. Ви впевнені?"
     },
     "downloads": {
-        "empty": "",
-        "error": "",
-        "delete": "",
-        "deleteMessage": "",
-        "pause": "",
-        "resume": "",
-        "retry": ""
+        "empty": "Ще нічого не завантажено, почніть переглядати улюблені серії",
+        "error": "Помилка: {{error}}",
+        "delete": "Видалити",
+        "deleteMessage": "Чи ви впевнені що хочете видалити це із локального сховища?",
+        "pause": "Пауза",
+        "resume": "Поновити",
+        "retry": "Повторити"
     },
     "errors": {
-        "connection": "",
-        "connection-tips": "",
-        "unknown": "",
-        "try-again": "",
-        "re-login": "",
-        "offline": "",
-        "unauthorized": "",
-        "needVerification": "",
-        "needAccount": ""
+        "connection": "Неможливо підключитись до сервера kyoo",
+        "connection-tips": "Поради щодо усунення несправностей:\n - Ви підключені до Інтернет?\n - Чи ваш сервер kyoo онлайн?\n - Ваш акаунт був заблокований?",
+        "unknown": "Невідома помилка",
+        "try-again": "Спробувати ще",
+        "re-login": "Перезайти",
+        "offline": "Ви не підключені до Інтернет. Будь ласка спробуйте пізніше.",
+        "unauthorized": "У вас відсутне право {{permission}} для перегляду цієї сторінки.",
+        "needVerification": "Перш ніж ви зможете користуванись вашим акаунтом, ваш обліковий запис має бути підтверджено адміністратором сервера.",
+        "needAccount": "Ця сторінка не може бути відвідана в гостьовому режимі. Вам необхідно створити або увійти в акаунт."
     },
     "mediainfo": {
-        "file": "",
-        "container": "",
-        "video": "",
-        "audio": "",
-        "subtitles": "",
-        "forced": "",
-        "default": "",
-        "duration": "",
-        "size": "",
-        "novideo": "",
-        "nocontainer": ""
+        "file": "Файл",
+        "container": "Контейнер",
+        "video": "Відео",
+        "audio": "Аудіо",
+        "subtitles": "Субтитри",
+        "forced": "Примусово",
+        "default": "За замовчуванням",
+        "duration": "Тривалість",
+        "size": "Розмір",
+        "novideo": "Відео відсутне",
+        "nocontainer": "Недійсний контейнер"
     },
     "admin": {
         "users": {
-            "label": "",
-            "adminUser": "",
-            "regularUser": "",
-            "set-permissions": "",
-            "delete": "",
-            "unverifed": "",
-            "verify": ""
+            "label": "Користувачі",
+            "adminUser": "Адміністратор",
+            "regularUser": "Користувач",
+            "set-permissions": "Встановити права",
+            "delete": "Видалити користувача",
+            "unverifed": "Не підтверджений",
+            "verify": "Підтвердити користувача"
         },
         "scanner": {
-            "label": "",
-            "scan": "",
-            "empty": ""
+            "label": "Сканер",
+            "scan": "Запустити сканування бібліотеки",
+            "empty": "Проблеми не знайдено. Усі ваші серії зареєстровані."
         }
     }
 }
