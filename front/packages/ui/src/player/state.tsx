@@ -143,22 +143,24 @@ export const Video = memo(function Video({
 	const account = useAccount();
 	const defaultSubLanguage = account?.settings.subtitleLanguage;
 	const setSubtitle = useSetAtom(subtitleAtom);
+
+	// When the video change, try to persist the subtitle language.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Also include the player ref, it can be initalised after the subtitles.
 	useEffect(() => {
 		if (!subtitles) return;
 		setSubtitle((subtitle) => {
 			const subRet = subtitle ? subtitles.find((x) => x.language === subtitle.language) : null;
 			if (subRet) return subRet;
 			if (!defaultSubLanguage) return null;
-			if (defaultSubLanguage == "default") return subtitles.find((x) => x.isDefault) ?? null;
+			if (defaultSubLanguage === "default") return subtitles.find((x) => x.isDefault) ?? null;
 			return subtitles.find((x) => x.language === defaultSubLanguage) ?? null;
 		});
-		// When the video change, try to persist the subtitle language.
-		// Also include the player ref, it can be initalised after the subtitles.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [subtitles, setSubtitle, defaultSubLanguage, ref.current]);
 
 	const defaultAudioLanguage = account?.settings.audioLanguage ?? "default";
 	const setAudio = useSetAtom(audioAtom);
+	// When the video change, try to persist the subtitle language.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Also include the player ref, it can be initalised after the subtitles.
 	useEffect(() => {
 		if (!audios) return;
 		setAudio((audio) => {
@@ -172,9 +174,6 @@ export const Video = memo(function Video({
 			}
 			return audios.find((x) => x.isDefault) ?? audios[0];
 		});
-		// When the video change, try to persist the subtitle language.
-		// Also include the player ref, it can be initalised after the subtitles.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [audios, setAudio, defaultAudioLanguage, ref.current]);
 
 	const volume = useAtomValue(volumeAtom);
@@ -225,7 +224,7 @@ export const Video = memo(function Video({
 					label: t("player.unsupportedError"),
 					duration: 3,
 				});
-				if (mode == PlayMode.Direct) setPlayMode(PlayMode.Hls);
+				if (mode === PlayMode.Direct) setPlayMode(PlayMode.Hls);
 			}}
 		/>
 	);

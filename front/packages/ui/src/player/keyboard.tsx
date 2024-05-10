@@ -68,7 +68,7 @@ export const reducerAtom = atom(null, (get, set, action: Action) => {
 		case "volume":
 			set(volumeAtom, Math.max(0, Math.min(get(volumeAtom) + action.value, 100)));
 			break;
-		case "subtitle":
+		case "subtitle": {
 			const subtitle = get(subtitleAtom);
 			const index = subtitle ? action.subtitles.findIndex((x) => x.index === subtitle.index) : -1;
 			set(
@@ -76,6 +76,7 @@ export const reducerAtom = atom(null, (get, set, action: Action) => {
 				index === -1 ? null : action.subtitles[(index + 1) % action.subtitles.length],
 			);
 			break;
+		}
 	}
 });
 

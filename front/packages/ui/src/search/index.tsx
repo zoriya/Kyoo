@@ -44,7 +44,7 @@ const query = (
 	params: {
 		q: query,
 		sortBy:
-			sortKey && sortKey != SearchSort.Relevance ? `${sortKey}:${sortOrd ?? "asc"}` : undefined,
+			sortKey && sortKey !== SearchSort.Relevance ? `${sortKey}:${sortOrd ?? "asc"}` : undefined,
 	},
 });
 

@@ -111,7 +111,7 @@ export const ImageBackground = <AsProps = ViewProps,>({
 								forcedLoading={forcedLoading}
 								alt={alt!}
 								layout={{ width: percent(100), height: percent(100) }}
-								Error={hideLoad ? null : undefined}
+								Err={hideLoad ? null : undefined}
 								{...(css([{ borderWidth: 0, borderRadius: 0 }, imageStyle]) as {
 									style: ImageStyle;
 								})}

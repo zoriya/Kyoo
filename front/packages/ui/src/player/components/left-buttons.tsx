@@ -168,7 +168,7 @@ const VolumeSlider = () => {
 		>
 			<IconButton
 				icon={
-					isMuted || volume == 0
+					isMuted || volume === 0
 						? VolumeOff
 						: volume < 25
 							? VolumeMute
@@ -204,7 +204,12 @@ const ProgressText = (props: Stylable) => {
 
 export const toTimerString = (timer?: number, duration?: number) => {
 	if (!duration) duration = timer;
-	if (timer === undefined || duration === undefined || isNaN(duration) || isNaN(timer))
+	if (
+		timer === undefined ||
+		duration === undefined ||
+		Number.isNaN(duration) ||
+		Number.isNaN(timer)
+	)
 		return "??:??";
 	const h = Math.floor(timer / 3600);
 	const min = Math.floor((timer / 60) % 60);

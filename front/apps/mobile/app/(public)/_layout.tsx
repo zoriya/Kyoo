@@ -30,7 +30,7 @@ export default function PublicLayout() {
 	const { error } = useContext(ConnectionErrorContext);
 	const oldAccount = useRef<Account | null>(account);
 
-	if (account && !error && account != oldAccount.current) return <Redirect href="/" />;
+	if (account && !error && account !== oldAccount.current) return <Redirect href="/" />;
 	oldAccount.current = account;
 
 	return (

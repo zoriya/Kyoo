@@ -33,7 +33,7 @@ export const Image = ({
 	alt,
 	forcedLoading = false,
 	layout,
-	Error,
+	Err,
 	...props
 }: Props & { style?: ImageStyle } & { layout: ImageLayout }) => {
 	const { css } = useYoshiki();
@@ -53,8 +53,8 @@ export const Image = ({
 
 	if (forcedLoading) return <Skeleton variant="custom" {...css([layout, border], props)} />;
 	if (!src || state === "errored") {
-		return Error !== undefined ? (
-			Error
+		return Err !== undefined ? (
+			Err
 		) : (
 			<View {...css([{ bg: (theme) => theme.overlay0 }, layout, border], props)} />
 		);

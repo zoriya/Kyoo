@@ -23,6 +23,7 @@
 import { type AlertButton, type AlertOptions } from "react-native";
 import Swal, { type SweetAlertIcon } from "sweetalert2";
 
+// biome-ignore lint/complexity/noStaticOnlyClass: Compatibility with rn
 export class Alert {
 	static alert(
 		title: string,

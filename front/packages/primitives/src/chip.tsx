@@ -49,7 +49,7 @@ export const Chip = ({
 
 	textProps ??= {};
 
-	const sizeMult = size == "medium" ? 1 : size == "small" ? 0.5 : 1.5;
+	const sizeMult = size === "medium" ? 1 : size === "small" ? 0.5 : 1.5;
 
 	return (
 		<Link

@@ -40,18 +40,15 @@ export const withTranslations = (
 	};
 
 	const AppWithTranslations = (props: AppProps) => {
-		const li18n = useMemo(
-			() =>
-				typeof window === "undefined"
-					? i18n
-					: (i18next.init({
-							...commonOptions,
-							lng: props.pageProps.__lang,
-							resources: props.pageProps.__resources,
-						}),
-						i18next),
-			[props.pageProps.__lang, props.pageProps.__resources],
-		);
+		const li18n = useMemo(() => {
+			if (typeof window === "undefined") return i18n;
+			i18next.init({
+				...commonOptions,
+				lng: props.pageProps.__lang,
+				resources: props.pageProps.__resources,
+			});
+			return i18next;
+		}, [props.pageProps.__lang, props.pageProps.__resources]);
 
 		return (
 			<I18nextProvider i18n={li18n}>

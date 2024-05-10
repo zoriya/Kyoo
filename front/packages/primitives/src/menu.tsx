@@ -66,7 +66,6 @@ const Menu = <AsProps,>({
 	const insets = useSafeAreaInsets();
 	const alreadyRendered = useRef(false);
 	const [isOpen, setOpen] =
-		// eslint-disable-next-line react-hooks/rules-of-hooks
 		outerOpen !== undefined && outerSetOpen ? [outerOpen, outerSetOpen] : useState(false);
 
 	// deos the same as a useMemo but for props.

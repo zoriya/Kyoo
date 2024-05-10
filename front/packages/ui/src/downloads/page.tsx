@@ -42,7 +42,7 @@ import { KyooImage } from "@kyoo/models";
 import { Atom, useAtomValue } from "jotai";
 import DownloadForOffline from "@material-symbols/svg-400/rounded/download_for_offline.svg";
 import Downloading from "@material-symbols/svg-400/rounded/downloading.svg";
-import Error from "@material-symbols/svg-400/rounded/error.svg";
+import ErrorIcon from "@material-symbols/svg-400/rounded/error.svg";
 import NotStarted from "@material-symbols/svg-400/rounded/not_started.svg";
 import { useRouter } from "expo-router";
 
@@ -126,6 +126,7 @@ const DownloadedItem = ({
 				})}
 			>
 				<View {...css({ flexGrow: 1, flexShrink: 1 })}>
+					{/* biome-ignore lint/a11y/useValidAriaValues: use h6 for style only */}
 					<H6 aria-level={undefined} {...css([{ flexShrink: 1 }, "title"])}>
 						{name ?? t("show.episodeNoMetadata")}
 					</H6>
@@ -193,10 +194,9 @@ const downloadIcon = (status: State["status"]) => {
 		case "DOWNLOADING":
 			return Downloading;
 		case "FAILED":
-			return Error;
+			return ErrorIcon;
 		case "PAUSED":
 		case "STOPPED":
-		default:
 			return NotStarted;
 	}
 };

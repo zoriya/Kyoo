@@ -41,7 +41,12 @@ type Thumb = {
 
 const parseTs = (time: string) => {
 	const times = time.split(":");
-	return (parseInt(times[0]) * 3600 + parseInt(times[1]) * 60 + parseFloat(times[2])) * 1000;
+	return (
+		(Number.parseInt(times[0]) * 3600 +
+			Number.parseInt(times[1]) * 60 +
+			Number.parseFloat(times[2])) *
+		1000
+	);
 };
 
 export const useScrubber = (url: string) => {
@@ -64,7 +69,7 @@ export const useScrubber = (url: string) => {
 		for (let i = 0; i < ret.length; i++) {
 			const times = lines[i * 2].split(" --> ");
 			const url = lines[i * 2 + 1].split("#xywh=");
-			const xywh = url[1].split(",").map((x) => parseInt(x));
+			const xywh = url[1].split(",").map((x) => Number.parseInt(x));
 			ret[i] = {
 				from: parseTs(times[0]),
 				to: parseTs(times[1]),
@@ -164,7 +169,7 @@ export const BottomScrubber = ({ url, chapters }: { url: string; chapters?: Chap
 		<View {...css({ overflow: "hidden" })}>
 			<View
 				{...(Platform.OS === "web"
-					? css({ transform: `translateX(50%)` })
+					? css({ transform: "translateX(50%)" })
 					: {
 							// react-native does not support translateX by percentage so we simulate it
 							style: { transform: [{ translateX: scrubberWidth / 2 }] },

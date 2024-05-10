@@ -24,10 +24,18 @@
 			"style": {
 				"noNonNullAssertion": "off",
 				"useImportType": "off",
-				"noParameterAssign": "off"
+				"noParameterAssign": "off",
+				"useEnumInitializers": "off"
 			},
 			"suspicious": {
-				"noExplicitAny": "off"
+				"noExplicitAny": "off",
+				"noArrayIndexKey": "off"
+			},
+			"security": {
+				"noDangerouslySetInnerHtml": "off"
+			},
+			"complexity": {
+				"noBannedTypes": "off"
 			}
 		},
 		"ignore": [

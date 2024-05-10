@@ -295,6 +295,7 @@ export const EpisodeLine = ({
 				>
 					<Skeleton>
 						{isLoading || (
+							// biome-ignore lint/a11y/useValidAriaValues: simply use H6 for the style but keep a P
 							<H6 aria-level={undefined} {...css([{ flexShrink: 1 }, "title"])}>
 								{[displayNumber, name ?? t("show.episodeNoMetadata")].join(" · ")}
 							</H6>

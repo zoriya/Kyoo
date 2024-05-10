@@ -124,13 +124,11 @@ export const Player = ({
 					title={
 						data.type === "movie"
 							? data.name
-							: data.show!.name +
-								" " +
-								episodeDisplayNumber({
+							: `${data.show!.name} ${episodeDisplayNumber({
 									seasonNumber: data.seasonNumber,
 									episodeNumber: data.episodeNumber,
 									absoluteNumber: data.absoluteNumber,
-								})
+								})}`
 					}
 					description={data.overview}
 				/>

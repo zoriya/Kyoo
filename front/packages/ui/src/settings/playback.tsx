@@ -31,7 +31,7 @@ import SubtitleLanguage from "@material-symbols/svg-400/rounded/closed_caption-f
 
 // I gave up on finding a way to retrive this using the Intl api (probably does not exist)
 // Simply copy pasted the list of languages from https://www.localeplanet.com/api/codelist.json
-// prettier-ignore
+// biome-ignore format: way too long
 const allLanguages = ["af", "agq", "ak", "am", "ar", "as", "asa", "ast", "az", "bas", "be", "bem", "bez", "bg", "bm", "bn", "bo", "br", "brx", "bs", "ca", "ccp", "ce", "cgg", "chr", "ckb", "cs", "cy", "da", "dav", "de", "dje", "dsb", "dua", "dyo", "dz", "ebu", "ee", "el", "en", "eo", "es", "et", "eu", "ewo", "fa", "ff", "fi", "fil", "fo", "fr", "fur", "fy", "ga", "gd", "gl", "gsw", "gu", "guz", "gv", "ha", "haw", "he", "hi", "hr", "hsb", "hu", "hy", "id", "ig", "ii", "is", "it", "ja", "jgo", "jmc", "ka", "kab", "kam", "kde", "kea", "khq", "ki", "kk", "kkj", "kl", "kln", "km", "kn", "ko", "kok", "ks", "ksb", "ksf", "ksh", "kw", "ky", "lag", "lb", "lg", "lkt", "ln", "lo", "lrc", "lt", "lu", "luo", "luy", "lv", "mas", "mer", "mfe", "mg", "mgh", "mgo", "mk", "ml", "mn", "mr", "ms", "mt", "mua", "my", "mzn", "naq", "nb", "nd", "nds", "ne", "nl", "nmg", "nn", "nnh", "nus", "nyn", "om", "or", "os", "pa", "pl", "ps", "pt", "qu", "rm", "rn", "ro", "rof", "ru", "rw", "rwk", "sah", "saq", "sbp", "se", "seh", "ses", "sg", "shi", "si", "sk", "sl", "smn", "sn", "so", "sq", "sr", "sv", "sw", "ta", "te", "teo", "tg", "th", "ti", "to", "tr", "tt", "twq", "tzm", "ug", "uk", "ur", "uz", "vai", "vi", "vun", "wae", "wo", "xog", "yav", "yi", "yo", "yue", "zgh", "zh", "zu",];
 
 export const PlaybackSettings = () => {

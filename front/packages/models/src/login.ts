@@ -94,7 +94,7 @@ let running: ReturnType<typeof getTokenWJ> | null = null;
 
 export const getTokenWJ = async (
 	acc?: Account | null,
-	forceRefresh: boolean = false,
+	forceRefresh = false,
 ): Promise<readonly [string, Token, null] | readonly [null, null, KyooErrors | null]> => {
 	if (acc === undefined) acc = getCurrentAccount();
 	if (!acc) return [null, null, null] as const;
@@ -150,6 +150,7 @@ export const useToken = () => {
 		account ? `${account.token.token_type} ${account.token.access_token}` : null,
 	);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Refresh token when account change
 	useEffect(() => {
 		async function run() {
 			const nToken = await getTokenWJ();

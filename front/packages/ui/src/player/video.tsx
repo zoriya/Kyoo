@@ -33,9 +33,9 @@ declare module "react-native-video" {
 
 export * from "react-native-video";
 
-import { Audio, Subtitle, getToken, useToken } from "@kyoo/models";
+import { Audio, Subtitle, useToken } from "@kyoo/models";
 import { IconButton, Menu } from "@kyoo/primitives";
-import { ComponentProps, forwardRef, useEffect, useRef } from "react";
+import { ComponentProps, forwardRef, useEffect, } from "react";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import NativeVideo, {
 	VideoRef,
@@ -160,13 +160,13 @@ export const QualitiesMenu = (props: CustomMenu) => {
 		<Menu {...props}>
 			<Menu.Item
 				label={t("player.direct")}
-				selected={mode == PlayMode.Direct}
+				selected={mode === PlayMode.Direct}
 				onSelect={() => setPlayMode(PlayMode.Direct)}
 			/>
 			<Menu.Item
 				// TODO: Display the currently selected quality (impossible with rn-video right now)
 				label={t("player.auto")}
-				selected={video === -1 && mode == PlayMode.Hls}
+				selected={video === -1 && mode === PlayMode.Hls}
 				onSelect={() => {
 					setPlayMode(PlayMode.Hls);
 					setVideo(-1);

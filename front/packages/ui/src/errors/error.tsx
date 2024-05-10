@@ -36,7 +36,7 @@ export const ErrorView = ({
 
 	useLayoutEffect(() => {
 		// if this is a permission error, make it go up the tree to have a whole page login screen.
-		if (!noBubble && (error.status === 401 || error.status == 403)) setError(error);
+		if (!noBubble && (error.status === 401 || error.status === 403)) setError(error);
 	}, [error, noBubble, setError]);
 	console.log(error);
 	return (

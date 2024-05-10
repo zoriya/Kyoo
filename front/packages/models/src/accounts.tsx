@@ -72,7 +72,6 @@ export const ConnectionErrorContext = createContext<{
 	setError: (error: KyooErrors) => void;
 }>({ error: null, loading: true, setError: () => {} });
 
-/* eslint-disable react-hooks/rules-of-hooks */
 export const AccountProvider = ({
 	children,
 	ssrAccount,
@@ -115,7 +114,7 @@ export const AccountProvider = ({
 			acc?.map((account) => ({
 				...account,
 				select: () => updateAccount(account.id, { ...account, selected: true }),
-				remove: () => removeAccounts((x) => x.id == x.id),
+				remove: () => removeAccounts((x) => x.id === account.id),
 			})) ?? [],
 		[acc],
 	);
@@ -151,6 +150,7 @@ export const AccountProvider = ({
 	useEffect(() => {
 		// if the user change account (or connect/disconnect), reset query cache.
 		if (
+			// biome-ignore lint/suspicious/noDoubleEquals: id can be an id, null or undefined
 			selected?.id != oldSelected.current?.id ||
 			(userIsError && selected?.token.access_token !== oldSelected.current?.token)
 		) {

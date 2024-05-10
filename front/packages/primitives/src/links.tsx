@@ -22,7 +22,7 @@ import { forwardRef, ReactNode } from "react";
 import { Platform, Pressable, TextProps, View, PressableProps, Linking } from "react-native";
 import { TextLink, useLink } from "solito/link";
 import { useTheme, useYoshiki } from "yoshiki/native";
-import type { UrlObject } from "url";
+import type { UrlObject } from "node:url";
 import { alpha } from "./themes";
 import { parseNextPath } from "solito/router";
 

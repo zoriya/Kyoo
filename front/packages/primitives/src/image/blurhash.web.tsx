@@ -22,17 +22,14 @@ import { decode } from "blurhash";
 import {
 	HTMLAttributes,
 	ReactElement,
-	createElement,
 	forwardRef,
-	useEffect,
 	useImperativeHandle,
 	useLayoutEffect,
 	useRef,
 	useState,
 } from "react";
 import { useYoshiki } from "yoshiki";
-import { Stylable, nativeStyleToCss } from "yoshiki/native";
-import { StyleList, processStyleList } from "yoshiki/src/type";
+import { nativeStyleToCss } from "yoshiki/native";
 
 // The blurhashToUrl has been stolen from https://gist.github.com/mattiaz9/53cb67040fa135cb395b1d015a200aff
 export function blurHashToDataURL(hash: string | undefined): string | undefined {
@@ -53,7 +50,7 @@ function parsePixels(pixels: Uint8ClampedArray, width: number, height: number) {
 		typeof Buffer !== "undefined"
 			? Buffer.from(getPngArray(pngString)).toString("base64")
 			: btoa(pngString);
-	return "data:image/png;base64," + dataURL;
+	return `data:image/png;base64,${dataURL}`;
 }
 
 function getPngArray(pngString: string) {
@@ -70,6 +67,7 @@ function generatePng(width: number, height: number, rgbaString: string) {
 	const SIGNATURE = String.fromCharCode(137, 80, 78, 71, 13, 10, 26, 10);
 	const NO_FILTER = String.fromCharCode(0);
 
+	// biome-ignore lint: not gonna fix stackowerflow code that works
 	let n, c, k;
 
 	// make crc table
@@ -89,7 +87,9 @@ function generatePng(width: number, height: number, rgbaString: string) {
 	function inflateStore(data: string) {
 		const MAX_STORE_LENGTH = 65535;
 		let storeBuffer = "";
+		// biome-ignore lint: not gonna fix stackowerflow code that works
 		let remaining;
+		// biome-ignore lint: not gonna fix stackowerflow code that works
 		let blockType;
 
 		for (let i = 0; i < data.length; i += MAX_STORE_LENGTH) {
@@ -113,7 +113,7 @@ function generatePng(width: number, height: number, rgbaString: string) {
 	}
 
 	function adler32(data: string) {
-		let MOD_ADLER = 65521;
+		const MOD_ADLER = 65521;
 		let a = 1;
 		let b = 0;
 
@@ -179,7 +179,7 @@ function generatePng(width: number, height: number, rgbaString: string) {
 	const IHDR = createIHDR(width, height);
 
 	let scanlines = "";
-	let scanline;
+	let scanline: string;
 
 	for (let y = 0; y < rgbaString.length; y += width * 4) {
 		scanline = NO_FILTER;

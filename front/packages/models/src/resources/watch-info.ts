@@ -196,8 +196,9 @@ export const WatchInfoP = z
 
 // from https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable-string
 const humanFileSize = (size: number): string => {
-	var i = size == 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
+	const i = size === 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
 	// @ts-ignore I'm not gonna fix stackoverflow's working code.
+	// biome-ignore lint: same as above
 	return (size / Math.pow(1024, i)).toFixed(2) * 1 + " " + ["B", "kB", "MB", "GB", "TB"][i];
 };
 

@@ -35,7 +35,7 @@ export const ConnectionError = () => {
 	const { error, retry } = useContext(ConnectionErrorContext);
 	const account = useAccount();
 
-	if (error && (error.status === 401 || error.status == 403)) {
+	if (error && (error.status === 401 || error.status === 403)) {
 		if (!account) {
 			return (
 				<View

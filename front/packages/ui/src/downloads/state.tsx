@@ -38,7 +38,7 @@ import { Player } from "../player";
 import { atom, useSetAtom, PrimitiveAtom, useStore } from "jotai";
 import { getCurrentAccount, storage } from "@kyoo/models/src/account-internal";
 import { ReactNode, useEffect } from "react";
-import { Platform, ToastAndroid } from "react-native";
+import { ToastAndroid } from "react-native";
 import { QueryClient, useQueryClient } from "@tanstack/react-query";
 import { Router } from "expo-router/build/types";
 import { z } from "zod";
@@ -257,7 +257,7 @@ export const DownloadProvider = ({ children }: { children: ReactNode }) => {
 			const dls: { data: Episode | Movie; info: WatchInfo; path: string; state: State }[] =
 				JSON.parse(storage.getString("downloads") ?? "[]");
 			const downloads = dls.map((dl) => {
-				const t = tasks.find((x) => x.id == dl.data.id);
+				const t = tasks.find((x) => x.id === dl.data.id);
 				if (t) return setupDownloadTask(dl, t, store, queryClient);
 
 				const stateAtom = atom({

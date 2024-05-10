@@ -33,7 +33,7 @@ export type Props = {
 	src?: KyooImage | null;
 	quality: "low" | "medium" | "high";
 	alt?: string;
-	Error?: ReactElement | null;
+	Err?: ReactElement | null;
 	forcedLoading?: boolean;
 };
 

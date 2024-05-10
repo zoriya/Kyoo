@@ -24,7 +24,6 @@ import { Platform } from "react-native";
 
 export const useUserTheme = (ssrTheme?: "light" | "dark" | "auto") => {
 	if (Platform.OS === "web" && typeof window === "undefined" && ssrTheme) return ssrTheme;
-	// eslint-disable-next-line react-hooks/rules-of-hooks
 	const [value] = useMMKVString("theme", storage);
 	if (!value) return "auto";
 	return value as "light" | "dark" | "auto";

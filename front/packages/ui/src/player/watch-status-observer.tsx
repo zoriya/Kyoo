@@ -42,7 +42,7 @@ export const WatchStatusObserver = ({
 			await queryClient.invalidateQueries({ queryKey: [type === "episode" ? "show" : type, slug] }),
 	});
 	const mutate = useCallback(
-		(seconds: number) =>
+		(type: string, slug: string, seconds: number) =>
 			_mutate({
 				method: "POST",
 				path: [type, slug, "watchStatus"],
@@ -52,7 +52,7 @@ export const WatchStatusObserver = ({
 					percent: Math.round((seconds / duration) * 100),
 				},
 			}),
-		[_mutate, type, slug, duration],
+		[_mutate, duration],
 	);
 	const readProgress = useAtomCallback(
 		useCallback((get) => {
@@ -65,19 +65,20 @@ export const WatchStatusObserver = ({
 	useEffect(() => {
 		if (!account) return;
 		const timer = setInterval(() => {
-			mutate(readProgress());
+			mutate(type, slug, readProgress());
 		}, 10_000);
 		return () => {
 			clearInterval(timer);
-			mutate(readProgress());
+			mutate(type, slug, readProgress());
 		};
 	}, [account, type, slug, readProgress, mutate]);
 
 	// update watch status when play status change (and on mount).
 	const isPlaying = useAtomValue(playAtom);
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Include isPlaying
 	useEffect(() => {
 		if (!account) return;
-		mutate(readProgress());
+		mutate(type, slug, readProgress());
 	}, [account, type, slug, isPlaying, readProgress, mutate]);
 	return null;
 };

@@ -29,9 +29,9 @@ import { DefaultLayout } from "../layout";
 
 export const cleanApiUrl = (apiUrl: string) => {
 	if (Platform.OS === "web") return undefined;
-	if (!/https?:\/\//.test(apiUrl)) apiUrl = "http://" + apiUrl;
+	if (!/https?:\/\//.test(apiUrl)) apiUrl = `http://${apiUrl}`;
 	apiUrl = apiUrl.replace(/\/$/, "");
-	return apiUrl + "/api";
+	return `${apiUrl}/api`;
 };
 
 const query: QueryIdentifier<ServerInfo> = {

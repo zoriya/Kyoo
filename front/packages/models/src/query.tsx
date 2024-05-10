@@ -66,7 +66,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 		.join("/")
 		.replace("//", "/")
 		.replace("/?", "?");
-	let resp;
+	let resp: Response;
 	try {
 		resp = await fetch(path, {
 			method: context.method,
@@ -97,11 +97,11 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 	if (resp.status === 403 && iToken === undefined && token) {
 		const [newToken, _, error] = await getTokenWJ(undefined, true);
 		if (newToken) return await queryFn(context, type, newToken);
-		else console.error("refresh error while retrying a forbidden", error);
+		console.error("refresh error while retrying a forbidden", error);
 	}
 	if (!resp.ok) {
 		const error = await resp.text();
-		let data;
+		let data: Record<string, any>;
 		try {
 			data = JSON.parse(error);
 		} catch (e) {
@@ -122,7 +122,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 
 	if ("plainText" in context && context.plainText) return (await resp.text()) as unknown;
 
-	let data;
+	let data: Record<string, any>;
 	try {
 		data = await resp.json();
 	} catch (e) {
@@ -204,11 +204,10 @@ export const toQueryKey = (query: {
 		query.options?.apiUrl,
 		...query.path,
 		query.params
-			? "?" +
-				Object.entries(query.params)
+			? `?${Object.entries(query.params)
 					.filter(([_, v]) => v !== undefined)
 					.map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(",") : v}`)
-					.join("&")
+					.join("&")}`
 			: null,
 	].filter((x) => x);
 };
@@ -267,12 +266,11 @@ export const fetchQuery = async (queries: QueryIdentifier[], authToken?: string 
 					queryFn: (ctx) => queryFn(ctx, Paged(query.parser), authToken),
 					initialPageParam: undefined,
 				});
-			} else {
-				return client.prefetchQuery({
-					queryKey: toQueryKey(query),
-					queryFn: (ctx) => queryFn(ctx, query.parser, authToken),
-				});
 			}
+			return client.prefetchQuery({
+				queryKey: toQueryKey(query),
+				queryFn: (ctx) => queryFn(ctx, query.parser, authToken),
+			});
 		}),
 	);
 	return client;

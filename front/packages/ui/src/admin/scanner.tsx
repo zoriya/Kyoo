@@ -82,7 +82,7 @@ export const Scanner = () => {
 						</View>
 					))
 				)}
-				{data != null && data.length == 0 && <P>{t("admin.scanner.empty")}</P>}
+				{data != null && data.length === 0 && <P>{t("admin.scanner.empty")}</P>}
 			</>
 		</SettingsContainer>
 	);

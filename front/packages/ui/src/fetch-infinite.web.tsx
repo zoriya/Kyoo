@@ -78,6 +78,7 @@ const InfiniteScroll = <Props,>({
 
 	// Automatically trigger a scroll check on start and after a fetch end in case the user is already
 	// at the bottom of the page or if there is no scroll bar (ultrawide or something like that)
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Check for scroll pause after fetch ends
 	useEffect(() => {
 		onScroll();
 	}, [isFetching, onScroll]);
@@ -92,13 +93,13 @@ const InfiniteScroll = <Props,>({
 						// the as any is due to differencies between css types of native and web (already accounted for in yoshiki)
 						gridGap: layout.gap as any,
 					},
-					layout.layout == "vertical" && {
+					layout.layout === "vertical" && {
 						gridTemplateColumns: "1fr",
 						alignItems: "stretch",
 						overflowY: "auto",
 						paddingY: layout.gap as any,
 					},
-					layout.layout == "horizontal" && {
+					layout.layout === "horizontal" && {
 						alignItems: "stretch",
 						overflowX: "auto",
 						overflowY: "hidden",

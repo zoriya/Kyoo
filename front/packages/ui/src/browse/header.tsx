@@ -121,14 +121,14 @@ export const BrowseSettings = ({
 				<IconButton
 					icon={GridView}
 					onPress={() => setLayout(Layout.Grid)}
-					color={layout == Layout.Grid ? theme.accent : undefined}
+					color={layout === Layout.Grid ? theme.accent : undefined}
 					{...tooltip(t("browse.switchToGrid"))}
 					{...css({ padding: ts(0.5), marginY: "auto" })}
 				/>
 				<IconButton
 					icon={ViewList}
 					onPress={() => setLayout(Layout.List)}
-					color={layout == Layout.List ? theme.accent : undefined}
+					color={layout === Layout.List ? theme.accent : undefined}
 					{...tooltip(t("browse.switchToList"))}
 					{...css({ padding: ts(0.5), marginY: "auto" })}
 				/>
