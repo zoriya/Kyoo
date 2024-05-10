@@ -20,8 +20,8 @@
 
 // Stolen from https://github.com/necolas/react-native-web/issues/1026#issuecomment-1458279681
 
-import { Alert as RNAlert, type AlertOptions, type AlertButton } from "react-native";
-import { type SweetAlertIcon } from "sweetalert2";
+import { type AlertButton, type AlertOptions, Alert as RNAlert } from "react-native";
+import type { SweetAlertIcon } from "sweetalert2";
 
 export interface ExtendedAlertStatic {
 	alert: (

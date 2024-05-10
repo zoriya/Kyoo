@@ -21,27 +21,27 @@
 import RNBackgroundDownloader, {
 	type DownloadTask,
 } from "@kesha-antonov/react-native-background-downloader";
-import { deleteAsync } from "expo-file-system";
 import {
-	Account,
-	Episode,
+	type Account,
+	type Episode,
 	EpisodeP,
-	Movie,
+	type Movie,
 	MovieP,
-	QueryIdentifier,
-	WatchInfo,
+	type QueryIdentifier,
+	type WatchInfo,
 	WatchInfoP,
 	queryFn,
 	toQueryKey,
 } from "@kyoo/models";
-import { Player } from "../player";
-import { atom, useSetAtom, PrimitiveAtom, useStore } from "jotai";
 import { getCurrentAccount, storage } from "@kyoo/models/src/account-internal";
-import { ReactNode, useEffect } from "react";
-import { Platform, ToastAndroid } from "react-native";
-import { QueryClient, useQueryClient } from "@tanstack/react-query";
-import { Router } from "expo-router/build/types";
+import { type QueryClient, useQueryClient } from "@tanstack/react-query";
+import { deleteAsync } from "expo-file-system";
+import type { Router } from "expo-router/build/types";
+import { type PrimitiveAtom, atom, useSetAtom, useStore } from "jotai";
+import { type ReactNode, useEffect } from "react";
+import { ToastAndroid } from "react-native";
 import { z } from "zod";
+import { Player } from "../player";
 
 export type State = {
 	status: "DOWNLOADING" | "PAUSED" | "DONE" | "FAILED" | "STOPPED";
@@ -257,7 +257,7 @@ export const DownloadProvider = ({ children }: { children: ReactNode }) => {
 			const dls: { data: Episode | Movie; info: WatchInfo; path: string; state: State }[] =
 				JSON.parse(storage.getString("downloads") ?? "[]");
 			const downloads = dls.map((dl) => {
-				const t = tasks.find((x) => x.id == dl.data.id);
+				const t = tasks.find((x) => x.id === dl.data.id);
 				if (t) return setupDownloadTask(dl, t, store, queryClient);
 
 				const stateAtom = atom({

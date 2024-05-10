@@ -18,22 +18,22 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
+import { type Page, type QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { HR } from "@kyoo/primitives";
+import type { ContentStyle } from "@shopify/flash-list";
 import {
-	ComponentProps,
-	ComponentType,
+	type ComponentProps,
+	type ComponentType,
 	Fragment,
+	type ReactElement,
 	isValidElement,
-	ReactElement,
 	useCallback,
 	useEffect,
 	useRef,
 } from "react";
-import { Stylable, nativeStyleToCss, useYoshiki, ysMap } from "yoshiki";
-import { EmptyView, Layout, WithLoading, addHeader } from "./fetch";
+import { type Stylable, nativeStyleToCss, useYoshiki, ysMap } from "yoshiki";
 import { ErrorView } from "./errors";
-import type { ContentStyle } from "@shopify/flash-list";
+import { EmptyView, type Layout, type WithLoading, addHeader } from "./fetch";
 
 const InfiniteScroll = <Props,>({
 	children,
@@ -78,6 +78,7 @@ const InfiniteScroll = <Props,>({
 
 	// Automatically trigger a scroll check on start and after a fetch end in case the user is already
 	// at the bottom of the page or if there is no scroll bar (ultrawide or something like that)
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Check for scroll pause after fetch ends
 	useEffect(() => {
 		onScroll();
 	}, [isFetching, onScroll]);
@@ -92,13 +93,13 @@ const InfiniteScroll = <Props,>({
 						// the as any is due to differencies between css types of native and web (already accounted for in yoshiki)
 						gridGap: layout.gap as any,
 					},
-					layout.layout == "vertical" && {
+					layout.layout === "vertical" && {
 						gridTemplateColumns: "1fr",
 						alignItems: "stretch",
 						overflowY: "auto",
 						paddingY: layout.gap as any,
 					},
-					layout.layout == "horizontal" && {
+					layout.layout === "horizontal" && {
 						alignItems: "stretch",
 						overflowX: "auto",
 						overflowY: "hidden",

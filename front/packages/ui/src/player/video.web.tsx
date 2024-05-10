@@ -18,25 +18,25 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { getToken, Subtitle, Audio } from "@kyoo/models";
+import { type Audio, type Subtitle, getToken } from "@kyoo/models";
+import { Menu, tooltip } from "@kyoo/primitives";
+import Hls, { type Level, type LoadPolicy } from "hls.js";
+import Jassub from "jassub";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
+	type ComponentProps,
+	type RefObject,
 	forwardRef,
-	RefObject,
 	useEffect,
 	useImperativeHandle,
 	useLayoutEffect,
 	useRef,
-	ComponentProps,
 } from "react";
-import { VideoProps } from "react-native-video";
-import { useAtomValue, useSetAtom, useAtom } from "jotai";
-import { useForceRerender, useYoshiki } from "yoshiki";
-import Jassub from "jassub";
-import { audioAtom, playAtom, PlayMode, playModeAtom, progressAtom, subtitleAtom } from "./state";
-import Hls, { Level, LoadPolicy } from "hls.js";
 import { useTranslation } from "react-i18next";
-import { Menu, tooltip } from "@kyoo/primitives";
+import type { VideoProps } from "react-native-video";
 import toVttBlob from "srt-webvtt";
+import { useForceRerender, useYoshiki } from "yoshiki";
+import { PlayMode, audioAtom, playAtom, playModeAtom, progressAtom, subtitleAtom } from "./state";
 
 let hls: Hls | null = null;
 
@@ -47,13 +47,13 @@ function uuidv4(): string {
 	);
 }
 
-let client_id = typeof window === "undefined" ? "ssr" : uuidv4();
+const client_id = typeof window === "undefined" ? "ssr" : uuidv4();
 
 const initHls = (): Hls => {
 	if (hls !== null) return hls;
 	const loadPolicy: LoadPolicy = {
 		default: {
-			maxTimeToFirstByteMs: Infinity,
+			maxTimeToFirstByteMs: Number.POSITIVE_INFINITY,
 			maxLoadTimeMs: 60_000,
 			timeoutRetry: {
 				maxNumRetry: 2,
@@ -74,14 +74,14 @@ const initHls = (): Hls => {
 			xhr.setRequestHeader("X-CLIENT-ID", client_id);
 		},
 		autoStartLoad: false,
-		startLevel: Infinity,
+		startLevel: Number.POSITIVE_INFINITY,
 		abrEwmaDefaultEstimate: 35_000_000,
 		abrEwmaDefaultEstimateMax: 50_000_000,
 		// debug: true,
 		lowLatencyMode: false,
 		fragLoadPolicy: {
 			default: {
-				maxTimeToFirstByteMs: Infinity,
+				maxTimeToFirstByteMs: Number.POSITIVE_INFINITY,
 				maxLoadTimeMs: 60_000,
 				timeoutRetry: {
 					maxNumRetry: 5,
@@ -148,6 +148,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 	const subtitle = useAtomValue(subtitleAtom);
 	useSubtitle(ref, subtitle, fonts);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: onError changes should not restart the playback.
 	useLayoutEffect(() => {
 		if (!ref?.current || !source.uri) return;
 		if (!hls || oldHls.current !== source.hls) {
@@ -172,12 +173,11 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 				});
 			});
 		}
-		// onError changes should not restart the playback.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [source.uri, source.hls]);
 
 	const mode = useAtomValue(playModeAtom);
 	const audio = useAtomValue(audioAtom);
+	// biome-ignore lint/correctness/useExhaustiveDependencies: also change when the mode change
 	useEffect(() => {
 		if (!hls) return;
 		const update = () => {
@@ -389,12 +389,12 @@ export const QualitiesMenu = (props: ComponentProps<typeof Menu>) => {
 		<Menu {...props}>
 			<Menu.Item
 				label={t("player.direct")}
-				selected={hls === null || mode == PlayMode.Direct}
+				selected={hls === null || mode === PlayMode.Direct}
 				onSelect={() => setPlayMode(PlayMode.Direct)}
 			/>
 			<Menu.Item
 				label={
-					hls != null && hls.autoLevelEnabled && hls.currentLevel >= 0
+					hls?.autoLevelEnabled && hls.currentLevel >= 0
 						? `${t("player.auto")} (${levelName(hls.levels[hls.currentLevel], true)})`
 						: t("player.auto")
 				}

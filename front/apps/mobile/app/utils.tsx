@@ -18,14 +18,14 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Stack, useLocalSearchParams } from "expo-router";
-import { ComponentType, useEffect } from "react";
-import { StatusBar, StatusBarProps } from "react-native";
-import * as ScreenOrientation from "expo-screen-orientation";
-import * as NavigationBar from "expo-navigation-bar";
-import arrayShuffle from "array-shuffle";
-import { QueryPage, useHasPermission } from "@kyoo/models";
+import { type QueryPage, useHasPermission } from "@kyoo/models";
 import { Unauthorized } from "@kyoo/ui";
+import arrayShuffle from "array-shuffle";
+import * as NavigationBar from "expo-navigation-bar";
+import { Stack, useLocalSearchParams } from "expo-router";
+import * as ScreenOrientation from "expo-screen-orientation";
+import { type ComponentType, useEffect } from "react";
+import { StatusBar, type StatusBarProps } from "react-native";
 
 const FullscreenProvider = () => {
 	useEffect(() => {

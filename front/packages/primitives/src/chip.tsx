@@ -18,12 +18,12 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { px, rem, Theme, useYoshiki } from "yoshiki/native";
+import type { TextProps } from "react-native";
+import { type Theme, px, rem, useYoshiki } from "yoshiki/native";
 import { Link } from "./links";
+import { Skeleton } from "./skeleton";
 import { P } from "./text";
 import { capitalize, ts } from "./utils";
-import { TextProps } from "react-native";
-import { Skeleton } from "./skeleton";
 
 export const Chip = ({
 	color,
@@ -49,7 +49,7 @@ export const Chip = ({
 
 	textProps ??= {};
 
-	const sizeMult = size == "medium" ? 1 : size == "small" ? 0.5 : 1.5;
+	const sizeMult = size === "medium" ? 1 : size === "small" ? 0.5 : 1.5;
 
 	return (
 		<Link

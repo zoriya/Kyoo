@@ -18,16 +18,16 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { useFetch, QueryIdentifier, imageFn, Chapter } from "@kyoo/models";
-import { Sprite, P, imageBorderRadius, ts } from "@kyoo/primitives";
-import { View, Platform } from "react-native";
-import { percent, useYoshiki, px, Theme, useForceRerender } from "yoshiki/native";
-import { useMemo } from "react";
+import { type Chapter, type QueryIdentifier, imageFn, useFetch } from "@kyoo/models";
+import { P, Sprite, imageBorderRadius, ts } from "@kyoo/primitives";
 import { useAtomValue } from "jotai";
-import { durationAtom } from "../state";
-import { toTimerString } from "./left-buttons";
-import { seekProgressAtom } from "./hover";
+import { useMemo } from "react";
+import { Platform, View } from "react-native";
+import { type Theme, percent, px, useForceRerender, useYoshiki } from "yoshiki/native";
 import { ErrorView } from "../../errors";
+import { durationAtom } from "../state";
+import { seekProgressAtom } from "./hover";
+import { toTimerString } from "./left-buttons";
 
 type Thumb = {
 	from: number;
@@ -41,7 +41,12 @@ type Thumb = {
 
 const parseTs = (time: string) => {
 	const times = time.split(":");
-	return (parseInt(times[0]) * 3600 + parseInt(times[1]) * 60 + parseFloat(times[2])) * 1000;
+	return (
+		(Number.parseInt(times[0]) * 3600 +
+			Number.parseInt(times[1]) * 60 +
+			Number.parseFloat(times[2])) *
+		1000
+	);
 };
 
 export const useScrubber = (url: string) => {
@@ -64,7 +69,7 @@ export const useScrubber = (url: string) => {
 		for (let i = 0; i < ret.length; i++) {
 			const times = lines[i * 2].split(" --> ");
 			const url = lines[i * 2 + 1].split("#xywh=");
-			const xywh = url[1].split(",").map((x) => parseInt(x));
+			const xywh = url[1].split(",").map((x) => Number.parseInt(x));
 			ret[i] = {
 				from: parseTs(times[0]),
 				to: parseTs(times[1]),
@@ -164,7 +169,7 @@ export const BottomScrubber = ({ url, chapters }: { url: string; chapters?: Chap
 		<View {...css({ overflow: "hidden" })}>
 			<View
 				{...(Platform.OS === "web"
-					? css({ transform: `translateX(50%)` })
+					? css({ transform: "translateX(50%)" })
 					: {
 							// react-native does not support translateX by percentage so we simulate it
 							style: { transform: [{ translateX: scrubberWidth / 2 }] },

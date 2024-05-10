@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Svg, { SvgProps, Path } from "react-native-svg";
+import Svg, { type SvgProps, Path } from "react-native-svg";
 
 /* export const KyooLogo = (props: SvgProps) => ( */
 /* 	<Svg viewBox="0 0 128 128" {...props}> */

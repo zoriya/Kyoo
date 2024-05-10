@@ -18,14 +18,14 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { useState } from "react";
-import { ImageStyle, View, ViewStyle } from "react-native";
-import { useYoshiki } from "yoshiki/native";
-import { Props, ImageLayout } from "./base-image";
-import { BlurhashContainer } from "./blurhash.web";
-import { Skeleton } from "../skeleton";
 import NextImage from "next/image";
+import { useState } from "react";
+import { type ImageStyle, View, type ViewStyle } from "react-native";
+import { useYoshiki } from "yoshiki/native";
 import { imageBorderRadius } from "../constants";
+import { Skeleton } from "../skeleton";
+import type { ImageLayout, Props } from "./base-image";
+import { BlurhashContainer } from "./blurhash.web";
 
 export const Image = ({
 	src,
@@ -33,7 +33,7 @@ export const Image = ({
 	alt,
 	forcedLoading = false,
 	layout,
-	Error,
+	Err,
 	...props
 }: Props & { style?: ImageStyle } & { layout: ImageLayout }) => {
 	const { css } = useYoshiki();
@@ -45,8 +45,8 @@ export const Image = ({
 
 	if (forcedLoading) return <Skeleton variant="custom" {...css([layout, border], props)} />;
 	if (!src || state === "errored") {
-		return Error !== undefined ? (
-			Error
+		return Err !== undefined ? (
+			Err
 		) : (
 			<View {...css([{ bg: (theme) => theme.overlay0 }, layout, border], props)} />
 		);

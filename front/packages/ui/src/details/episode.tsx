@@ -18,30 +18,30 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { type KyooImage, WatchStatusV } from "@kyoo/models";
 import {
-	focusReset,
 	H6,
 	IconButton,
 	ImageBackground,
-	ImageProps,
-	important,
+	type ImageProps,
 	Link,
 	P,
 	Skeleton,
 	SubP,
+	focusReset,
+	important,
 	tooltip,
 	ts,
 } from "@kyoo/primitives";
+import ExpandLess from "@material-symbols/svg-400/rounded/expand_less-fill.svg";
+import ExpandMore from "@material-symbols/svg-400/rounded/expand_more-fill.svg";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ImageStyle, Platform, PressableProps, View } from "react-native";
-import { Layout, WithLoading } from "../fetch";
-import { percent, rem, Stylable, Theme, useYoshiki } from "yoshiki/native";
-import { KyooImage, WatchStatusV } from "@kyoo/models";
+import { type ImageStyle, Platform, type PressableProps, View } from "react-native";
+import { type Stylable, type Theme, percent, rem, useYoshiki } from "yoshiki/native";
 import { ItemProgress } from "../browse/grid";
 import { EpisodesContext } from "../components/context-menus";
-import { useState } from "react";
-import ExpandMore from "@material-symbols/svg-400/rounded/expand_more-fill.svg";
-import ExpandLess from "@material-symbols/svg-400/rounded/expand_less-fill.svg";
+import type { Layout, WithLoading } from "../fetch";
 
 export const episodeDisplayNumber = (
 	episode: {
@@ -295,6 +295,7 @@ export const EpisodeLine = ({
 				>
 					<Skeleton>
 						{isLoading || (
+							// biome-ignore lint/a11y/useValidAriaValues: simply use H6 for the style but keep a P
 							<H6 aria-level={undefined} {...css([{ flexShrink: 1 }, "title"])}>
 								{[displayNumber, name ?? t("show.episodeNoMetadata")].join(" · ")}
 							</H6>

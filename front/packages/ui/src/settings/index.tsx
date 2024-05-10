@@ -18,14 +18,14 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { QueryPage, useAccount } from "@kyoo/models";
+import { type QueryPage, useAccount } from "@kyoo/models";
 import { ts } from "@kyoo/primitives";
 import { ScrollView } from "react-native";
 import { DefaultLayout } from "../layout";
 import { AccountSettings } from "./account";
 import { About, GeneralSettings } from "./general";
-import { PlaybackSettings } from "./playback";
 import { OidcSettings } from "./oidc";
+import { PlaybackSettings } from "./playback";
 
 export const SettingsPage: QueryPage = () => {
 	const account = useAccount();

@@ -18,13 +18,13 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, useCallback, useEffect, useState } from "react";
-import { Container } from "./container";
 import { usePortal } from "@gorhom/portal";
-import { ContrastArea, SwitchVariant, YoshikiFunc } from "./themes";
-import { View, ScrollView } from "react-native";
-import { imageBorderRadius } from "./constants";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
+import { ScrollView, View } from "react-native";
 import { px, vh } from "yoshiki/native";
+import { imageBorderRadius } from "./constants";
+import { Container } from "./container";
+import { ContrastArea, SwitchVariant, type YoshikiFunc } from "./themes";
 import { ts } from "./utils";
 
 export const Popup = ({ children, ...props }: { children: ReactNode | YoshikiFunc<ReactNode> }) => {

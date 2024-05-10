@@ -20,42 +20,42 @@
 
 import "../polyfill";
 
-import { HydrationBoundary, QueryClientProvider, dehydrate } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import {
-	HiddenIfNoJs,
-	TouchOnlyCss,
-	SkeletonCss,
-	ThemeSelector,
-	SnackbarProvider,
-} from "@kyoo/primitives";
-import { WebTooltip } from "@kyoo/primitives/src/tooltip.web";
+import { PortalProvider } from "@gorhom/portal";
 import {
 	AccountP,
 	AccountProvider,
 	ConnectionErrorContext,
+	type QueryIdentifier,
+	type QueryPage,
+	ServerInfoP,
+	UserP,
 	createQueryClient,
 	fetchQuery,
 	getTokenWJ,
-	QueryIdentifier,
-	QueryPage,
-	ServerInfoP,
 	setSsrApiUrl,
-	UserP,
 	useUserTheme,
 } from "@kyoo/models";
-import { ComponentType, useContext, useState } from "react";
-import NextApp, { AppContext, type AppProps } from "next/app";
-import { Poppins } from "next/font/google";
-import { useTheme, useMobileHover, useStyleRegistry, StyleRegistryProvider } from "yoshiki/web";
-import superjson from "superjson";
-import Head from "next/head";
-import { withTranslations } from "../i18n";
-import arrayShuffle from "array-shuffle";
-import { Tooltip } from "react-tooltip";
 import { getCurrentAccount, readCookie, updateAccount } from "@kyoo/models/src/account-internal";
-import { PortalProvider } from "@gorhom/portal";
+import {
+	HiddenIfNoJs,
+	SkeletonCss,
+	SnackbarProvider,
+	ThemeSelector,
+	TouchOnlyCss,
+} from "@kyoo/primitives";
+import { WebTooltip } from "@kyoo/primitives/src/tooltip.web";
 import { ConnectionError } from "@kyoo/ui";
+import { HydrationBoundary, QueryClientProvider, dehydrate } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import arrayShuffle from "array-shuffle";
+import NextApp, { type AppContext, type AppProps } from "next/app";
+import { Poppins } from "next/font/google";
+import Head from "next/head";
+import { type ComponentType, useContext, useState } from "react";
+import { Tooltip } from "react-tooltip";
+import superjson from "superjson";
+import { StyleRegistryProvider, useMobileHover, useStyleRegistry, useTheme } from "yoshiki/web";
+import { withTranslations } from "../i18n";
 
 const font = Poppins({ weight: ["300", "400", "900"], subsets: ["latin"], display: "swap" });
 
@@ -114,7 +114,6 @@ const GlobalCssTheme = () => {
 
 const YoshikiDebug = ({ children }: { children: JSX.Element }) => {
 	if (typeof window === "undefined") return children;
-	// eslint-disable-next-line react-hooks/rules-of-hooks
 	const registry = useStyleRegistry();
 	return <StyleRegistryProvider registry={registry}>{children}</StyleRegistryProvider>;
 };

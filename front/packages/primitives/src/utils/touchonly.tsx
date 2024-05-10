@@ -19,7 +19,7 @@
  */
 
 import { useEffect } from "react";
-import { Platform, ViewProps } from "react-native";
+import { Platform, type ViewProps } from "react-native";
 
 export const TouchOnlyCss = () => {
 	return (

@@ -18,9 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { State, downloadAtom } from "./state";
-import { FlashList } from "@shopify/flash-list";
-import { ImageStyle, View } from "react-native";
+import type { KyooImage } from "@kyoo/models";
 import {
 	Alert,
 	H6,
@@ -34,17 +32,19 @@ import {
 	ts,
 	usePageStyle,
 } from "@kyoo/primitives";
-import { EpisodeLine, displayRuntime, episodeDisplayNumber } from "../details/episode";
-import { useTranslation } from "react-i18next";
-import { EmptyView } from "../fetch";
-import { percent, useYoshiki } from "yoshiki/native";
-import { KyooImage } from "@kyoo/models";
-import { Atom, useAtomValue } from "jotai";
 import DownloadForOffline from "@material-symbols/svg-400/rounded/download_for_offline.svg";
 import Downloading from "@material-symbols/svg-400/rounded/downloading.svg";
-import Error from "@material-symbols/svg-400/rounded/error.svg";
+import ErrorIcon from "@material-symbols/svg-400/rounded/error.svg";
 import NotStarted from "@material-symbols/svg-400/rounded/not_started.svg";
+import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
+import { type Atom, useAtomValue } from "jotai";
+import { useTranslation } from "react-i18next";
+import { type ImageStyle, View } from "react-native";
+import { percent, useYoshiki } from "yoshiki/native";
+import { EpisodeLine, displayRuntime, episodeDisplayNumber } from "../details/episode";
+import { EmptyView } from "../fetch";
+import { type State, downloadAtom } from "./state";
 
 const DownloadedItem = ({
 	name,
@@ -126,6 +126,7 @@ const DownloadedItem = ({
 				})}
 			>
 				<View {...css({ flexGrow: 1, flexShrink: 1 })}>
+					{/* biome-ignore lint/a11y/useValidAriaValues: use h6 for style only */}
 					<H6 aria-level={undefined} {...css([{ flexShrink: 1 }, "title"])}>
 						{name ?? t("show.episodeNoMetadata")}
 					</H6>
@@ -193,10 +194,9 @@ const downloadIcon = (status: State["status"]) => {
 		case "DOWNLOADING":
 			return Downloading;
 		case "FAILED":
-			return Error;
+			return ErrorIcon;
 		case "PAUSED":
 		case "STOPPED":
-		default:
 			return NotStarted;
 	}
 };

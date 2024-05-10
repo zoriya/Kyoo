@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Account, ConnectionErrorContext, useAccount } from "@kyoo/models";
+import { type Account, ConnectionErrorContext, useAccount } from "@kyoo/models";
 import { NavbarProfile, NavbarTitle } from "@kyoo/ui";
 import { Redirect, Stack } from "expo-router";
 import { useContext, useRef } from "react";
@@ -30,7 +30,7 @@ export default function PublicLayout() {
 	const { error } = useContext(ConnectionErrorContext);
 	const oldAccount = useRef<Account | null>(account);
 
-	if (account && !error && account != oldAccount.current) return <Redirect href="/" />;
+	if (account && !error && account !== oldAccount.current) return <Redirect href="/" />;
 	oldAccount.current = account;
 
 	return (

@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { KyooImage, LibraryItem, LibraryItemP, QueryIdentifier } from "@kyoo/models";
+import { type KyooImage, type LibraryItem, LibraryItemP, type QueryIdentifier } from "@kyoo/models";
 import {
 	H1,
 	H2,
@@ -31,13 +31,13 @@ import {
 	tooltip,
 	ts,
 } from "@kyoo/primitives";
+import Info from "@material-symbols/svg-400/rounded/info.svg";
+import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
+import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { percent, rem, useYoshiki } from "yoshiki/native";
-import { WithLoading } from "../fetch";
 import { Header as DetailsHeader } from "../details/header";
-import { useTranslation } from "react-i18next";
-import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
-import Info from "@material-symbols/svg-400/rounded/info.svg";
+import type { WithLoading } from "../fetch";
 
 export const Header = ({
 	isLoading,

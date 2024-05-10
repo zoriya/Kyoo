@@ -18,10 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ReactElement } from "react";
+import type { ReactElement } from "react";
 import { View } from "react-native";
 import { Blurhash } from "react-native-blurhash";
-import { Stylable, useYoshiki } from "yoshiki/native";
+import { type Stylable, useYoshiki } from "yoshiki/native";
 
 export const BlurhashContainer = ({
 	blurhash,

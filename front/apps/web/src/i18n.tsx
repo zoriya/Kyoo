@@ -18,10 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ComponentType, useMemo } from "react";
-import i18next, { InitOptions } from "i18next";
+import i18next, { type InitOptions } from "i18next";
+import type { AppContext, AppInitialProps, AppProps } from "next/app";
+import { type ComponentType, useMemo } from "react";
 import { I18nextProvider } from "react-i18next";
-import { AppContext, AppInitialProps, type AppProps } from "next/app";
 
 import en from "../../../translations/en.json";
 import fr from "../../../translations/fr.json";
@@ -40,18 +40,15 @@ export const withTranslations = (
 	};
 
 	const AppWithTranslations = (props: AppProps) => {
-		const li18n = useMemo(
-			() =>
-				typeof window === "undefined"
-					? i18n
-					: (i18next.init({
-							...commonOptions,
-							lng: props.pageProps.__lang,
-							resources: props.pageProps.__resources,
-						}),
-						i18next),
-			[props.pageProps.__lang, props.pageProps.__resources],
-		);
+		const li18n = useMemo(() => {
+			if (typeof window === "undefined") return i18n;
+			i18next.init({
+				...commonOptions,
+				lng: props.pageProps.__lang,
+				resources: props.pageProps.__resources,
+			});
+			return i18next;
+		}, [props.pageProps.__lang, props.pageProps.__resources]);
 
 		return (
 			<I18nextProvider i18n={li18n}>

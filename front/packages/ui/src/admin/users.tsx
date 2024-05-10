@@ -18,21 +18,21 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { QueryIdentifier, User, UserP, queryFn } from "@kyoo/models";
+import { type QueryIdentifier, type User, UserP, queryFn } from "@kyoo/models";
 import { Alert, Avatar, Icon, IconButton, Menu, P, Skeleton, tooltip, ts } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { px, useYoshiki } from "yoshiki/native";
-import { Layout, WithLoading } from "../fetch";
+import type { Layout, WithLoading } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
 import { SettingsContainer } from "../settings/base";
 
 import UserI from "@material-symbols/svg-400/rounded/account_circle.svg";
 import Delete from "@material-symbols/svg-400/rounded/delete.svg";
-import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
-import Verifed from "@material-symbols/svg-400/rounded/verified_user.svg";
 import Unverifed from "@material-symbols/svg-400/rounded/gpp_bad.svg";
+import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
 import Admin from "@material-symbols/svg-400/rounded/shield_person.svg";
+import Verifed from "@material-symbols/svg-400/rounded/verified_user.svg";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const UserGrid = ({

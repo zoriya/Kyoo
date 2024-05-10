@@ -18,13 +18,12 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { Platform } from "react-native";
 import { useMMKVString } from "react-native-mmkv";
 import { setCookie, storage } from "./account-internal";
-import { Platform } from "react-native";
 
 export const useUserTheme = (ssrTheme?: "light" | "dark" | "auto") => {
 	if (Platform.OS === "web" && typeof window === "undefined" && ssrTheme) return ssrTheme;
-	// eslint-disable-next-line react-hooks/rules-of-hooks
 	const [value] = useMMKVString("theme", storage);
 	if (!value) return "auto";
 	return value as "light" | "dark" | "auto";

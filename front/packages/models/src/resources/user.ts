@@ -19,8 +19,8 @@
  */
 
 import { z } from "zod";
-import { ResourceP } from "../traits/resource";
 import { imageFn } from "../traits/images";
+import { ResourceP } from "../traits/resource";
 
 export const UserP = ResourceP("user")
 	.extend({

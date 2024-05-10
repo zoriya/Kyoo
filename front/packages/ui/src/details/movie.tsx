@@ -18,13 +18,13 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Movie, MovieP, QueryIdentifier, QueryPage } from "@kyoo/models";
+import { type Movie, MovieP, type QueryIdentifier, type QueryPage } from "@kyoo/models";
+import { usePageStyle } from "@kyoo/primitives";
 import { Platform, ScrollView } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 import { DefaultLayout } from "../layout";
-import { Header } from "./header";
 import { DetailsCollections } from "./collection";
-import { usePageStyle } from "@kyoo/primitives";
+import { Header } from "./header";
 
 const query = (slug: string): QueryIdentifier<Movie> => ({
 	parser: MovieP,

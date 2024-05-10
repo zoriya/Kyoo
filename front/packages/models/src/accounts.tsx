@@ -18,17 +18,25 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { ServerInfoP, User, UserP } from "./resources";
-import { z } from "zod";
-import { zdate } from "./utils";
-import { removeAccounts, setCookie, updateAccount } from "./account-internal";
-import { useMMKVString } from "react-native-mmkv";
-import { Platform } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { atom, getDefaultStore, useAtomValue, useSetAtom } from "jotai";
+import {
+	type ReactNode,
+	createContext,
+	useContext,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
+import { Platform } from "react-native";
+import { useMMKVString } from "react-native-mmkv";
+import { z } from "zod";
+import { removeAccounts, setCookie, updateAccount } from "./account-internal";
+import type { KyooErrors } from "./kyoo-errors";
 import { useFetch } from "./query";
-import { KyooErrors } from "./kyoo-errors";
+import { ServerInfoP, type User, UserP } from "./resources";
+import { zdate } from "./utils";
 
 export const TokenP = z.object({
 	token_type: z.literal("Bearer"),
@@ -72,7 +80,6 @@ export const ConnectionErrorContext = createContext<{
 	setError: (error: KyooErrors) => void;
 }>({ error: null, loading: true, setError: () => {} });
 
-/* eslint-disable react-hooks/rules-of-hooks */
 export const AccountProvider = ({
 	children,
 	ssrAccount,
@@ -115,7 +122,7 @@ export const AccountProvider = ({
 			acc?.map((account) => ({
 				...account,
 				select: () => updateAccount(account.id, { ...account, selected: true }),
-				remove: () => removeAccounts((x) => x.id == x.id),
+				remove: () => removeAccounts((x) => x.id === account.id),
 			})) ?? [],
 		[acc],
 	);
@@ -151,6 +158,7 @@ export const AccountProvider = ({
 	useEffect(() => {
 		// if the user change account (or connect/disconnect), reset query cache.
 		if (
+			// biome-ignore lint/suspicious/noDoubleEquals: id can be an id, null or undefined
 			selected?.id != oldSelected.current?.id ||
 			(userIsError && selected?.token.access_token !== oldSelected.current?.token)
 		) {

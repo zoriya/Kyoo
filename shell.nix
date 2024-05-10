@@ -34,9 +34,8 @@ in
       libmediainfo
       ffmpeg-full
       postgresql_15
-      eslint_d
-      prettierd
       pgformatter
+      biome
     ];
 
     DOTNET_ROOT = "${dotnet}";

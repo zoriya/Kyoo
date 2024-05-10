@@ -29,17 +29,17 @@ import {
 	tooltip,
 	ts,
 } from "@kyoo/primitives";
-import { useTranslation } from "react-i18next";
-import { useYoshiki } from "yoshiki/native";
-import Style from "@material-symbols/svg-400/rounded/style.svg";
-import GridView from "@material-symbols/svg-400/rounded/grid_view.svg";
-import ViewList from "@material-symbols/svg-400/rounded/view_list.svg";
-import Sort from "@material-symbols/svg-400/rounded/sort.svg";
-import ArrowUpward from "@material-symbols/svg-400/rounded/arrow_upward.svg";
 import ArrowDownward from "@material-symbols/svg-400/rounded/arrow_downward.svg";
-import { Layout, SearchSort, SortOrd } from "./types";
+import ArrowUpward from "@material-symbols/svg-400/rounded/arrow_upward.svg";
+import GridView from "@material-symbols/svg-400/rounded/grid_view.svg";
+import Sort from "@material-symbols/svg-400/rounded/sort.svg";
+import Style from "@material-symbols/svg-400/rounded/style.svg";
+import ViewList from "@material-symbols/svg-400/rounded/view_list.svg";
 import { forwardRef } from "react";
-import { View, PressableProps } from "react-native";
+import { useTranslation } from "react-i18next";
+import { type PressableProps, View } from "react-native";
+import { useYoshiki } from "yoshiki/native";
+import { Layout, SearchSort, SortOrd } from "./types";
 
 const SortTrigger = forwardRef<View, PressableProps & { sortKey: string }>(function SortTrigger(
 	{ sortKey, ...props },
@@ -121,14 +121,14 @@ export const BrowseSettings = ({
 				<IconButton
 					icon={GridView}
 					onPress={() => setLayout(Layout.Grid)}
-					color={layout == Layout.Grid ? theme.accent : undefined}
+					color={layout === Layout.Grid ? theme.accent : undefined}
 					{...tooltip(t("browse.switchToGrid"))}
 					{...css({ padding: ts(0.5), marginY: "auto" })}
 				/>
 				<IconButton
 					icon={ViewList}
 					onPress={() => setLayout(Layout.List)}
-					color={layout == Layout.List ? theme.accent : undefined}
+					color={layout === Layout.List ? theme.accent : undefined}
 					{...tooltip(t("browse.switchToList"))}
 					{...css({ padding: ts(0.5), marginY: "auto" })}
 				/>

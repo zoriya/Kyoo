@@ -19,12 +19,12 @@
  */
 
 import { z } from "zod";
-import { zdate } from "../utils";
 import { ImagesP, ResourceP } from "../traits";
-import { Genre } from "./genre";
-import { StudioP } from "./studio";
+import { zdate } from "../utils";
 import { BaseEpisodeP } from "./episode.base";
+import { Genre } from "./genre";
 import { MetadataP } from "./metadata";
+import { StudioP } from "./studio";
 import { ShowWatchStatusP } from "./watch-status";
 
 /**

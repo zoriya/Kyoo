@@ -33,23 +33,23 @@ declare module "react-native-video" {
 
 export * from "react-native-video";
 
-import { Audio, Subtitle, getToken, useToken } from "@kyoo/models";
-import { IconButton, Menu } from "@kyoo/primitives";
-import { ComponentProps, forwardRef, useEffect, useRef } from "react";
+import { type Audio, type Subtitle, useToken } from "@kyoo/models";
+import { type IconButton, Menu } from "@kyoo/primitives";
+import "@kyoo/primitives/src/types.d.ts";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { type ComponentProps, forwardRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { View } from "react-native";
+import uuid from "react-native-uuid";
 import NativeVideo, {
-	VideoRef,
-	OnLoadData,
-	VideoProps,
+	type VideoRef,
+	type OnLoadData,
+	type VideoProps,
 	SelectedTrackType,
 	SelectedVideoTrackType,
 } from "react-native-video";
-import { useTranslation } from "react-i18next";
-import { PlayMode, audioAtom, playModeAtom, subtitleAtom } from "./state";
-import uuid from "react-native-uuid";
-import { View } from "react-native";
-import "@kyoo/primitives/src/types.d.ts";
 import { useYoshiki } from "yoshiki/native";
+import { PlayMode, audioAtom, playModeAtom, subtitleAtom } from "./state";
 
 const MimeTypes: Map<string, string> = new Map([
 	["subrip", "application/x-subrip"],
@@ -160,13 +160,13 @@ export const QualitiesMenu = (props: CustomMenu) => {
 		<Menu {...props}>
 			<Menu.Item
 				label={t("player.direct")}
-				selected={mode == PlayMode.Direct}
+				selected={mode === PlayMode.Direct}
 				onSelect={() => setPlayMode(PlayMode.Direct)}
 			/>
 			<Menu.Item
 				// TODO: Display the currently selected quality (impossible with rn-video right now)
 				label={t("player.auto")}
-				selected={video === -1 && mode == PlayMode.Hls}
+				selected={video === -1 && mode === PlayMode.Hls}
 				onSelect={() => {
 					setPlayMode(PlayMode.Hls);
 					setVideo(-1);

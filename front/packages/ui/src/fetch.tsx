@@ -18,9 +18,9 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Page, QueryIdentifier, useFetch } from "@kyoo/models";
-import { Breakpoint, P } from "@kyoo/primitives";
-import { ComponentType, ReactElement, isValidElement } from "react";
+import { type Page, type QueryIdentifier, useFetch } from "@kyoo/models";
+import { type Breakpoint, P } from "@kyoo/primitives";
+import { type ComponentType, type ReactElement, isValidElement } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
@@ -37,7 +37,7 @@ export type WithLoading<Item> =
 	| (Item & { isLoading: false })
 	| (Partial<Item> & { isLoading: true });
 
-const isPage = <T = unknown,>(obj: unknown): obj is Page<T> =>
+const isPage = <T = unknown>(obj: unknown): obj is Page<T> =>
 	(typeof obj === "object" && obj && "items" in obj) || false;
 
 export const Fetch = <Data,>({

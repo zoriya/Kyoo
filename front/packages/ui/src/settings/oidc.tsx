@@ -19,8 +19,8 @@
  */
 
 import {
-	QueryIdentifier,
-	ServerInfo,
+	type QueryIdentifier,
+	type ServerInfo,
 	ServerInfoP,
 	queryFn,
 	useAccount,
@@ -34,8 +34,8 @@ import { ErrorView } from "../errors";
 import { Preference, SettingsContainer } from "./base";
 
 import Badge from "@material-symbols/svg-400/outlined/badge.svg";
-import OpenProfile from "@material-symbols/svg-400/outlined/open_in_new.svg";
 import Remove from "@material-symbols/svg-400/outlined/close.svg";
+import OpenProfile from "@material-symbols/svg-400/outlined/open_in_new.svg";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const OidcSettings = () => {

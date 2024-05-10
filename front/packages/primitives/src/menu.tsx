@@ -19,29 +19,29 @@
  */
 
 import { Portal } from "@gorhom/portal";
+import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
+import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
 import { ScrollView } from "moti";
 import {
-	ComponentType,
+	type ComponentType,
+	type ReactElement,
+	type ReactNode,
 	createContext,
-	ReactElement,
-	ReactNode,
 	useContext,
 	useEffect,
 	useRef,
 	useState,
 } from "react";
-import { StyleSheet, Pressable, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import type { SvgProps } from "react-native-svg";
+import { useRouter } from "solito/router";
 import { percent, px, sm, useYoshiki, vh, xl } from "yoshiki/native";
-import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
 import { Icon, IconButton } from "./icons";
 import { PressableFeedback } from "./links";
 import { P } from "./text";
 import { ContrastArea, SwitchVariant } from "./themes";
 import { ts } from "./utils";
-import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
-import { useRouter } from "solito/router";
-import { SvgProps } from "react-native-svg";
 
 const MenuContext = createContext<((open: boolean) => void) | undefined>(undefined);
 
@@ -66,7 +66,6 @@ const Menu = <AsProps,>({
 	const insets = useSafeAreaInsets();
 	const alreadyRendered = useRef(false);
 	const [isOpen, setOpen] =
-		// eslint-disable-next-line react-hooks/rules-of-hooks
 		outerOpen !== undefined && outerSetOpen ? [outerOpen, outerSetOpen] : useState(false);
 
 	// deos the same as a useMemo but for props.

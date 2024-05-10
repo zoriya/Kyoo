@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ConnectionErrorContext, KyooErrors } from "@kyoo/models";
+import { ConnectionErrorContext, type KyooErrors } from "@kyoo/models";
 import { P } from "@kyoo/primitives";
 import { useContext, useLayoutEffect } from "react";
 import { View } from "react-native";
@@ -36,7 +36,7 @@ export const ErrorView = ({
 
 	useLayoutEffect(() => {
 		// if this is a permission error, make it go up the tree to have a whole page login screen.
-		if (!noBubble && (error.status === 401 || error.status == 403)) setError(error);
+		if (!noBubble && (error.status === 401 || error.status === 403)) setError(error);
 	}, [error, noBubble, setError]);
 	console.log(error);
 	return (

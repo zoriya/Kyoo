@@ -18,32 +18,32 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import type { Audio, Chapter, KyooImage, Subtitle } from "@kyoo/models";
 import {
-	alpha,
 	CircularProgress,
 	ContrastArea,
 	H1,
 	H2,
 	IconButton,
-	imageBorderRadius,
 	Poster,
 	PressableFeedback,
 	Skeleton,
 	Slider,
 	Tooltip,
+	alpha,
+	imageBorderRadius,
 	tooltip,
 	ts,
 	useIsTouch,
 } from "@kyoo/primitives";
-import { Chapter, KyooImage, Subtitle, Audio } from "@kyoo/models";
-import { useAtomValue, useSetAtom, useAtom } from "jotai";
-import { ImageStyle, Platform, Pressable, View, ViewProps } from "react-native";
-import { useTranslation } from "react-i18next";
-import { percent, rem, useYoshiki } from "yoshiki/native";
-import { useRouter } from "solito/router";
 import ArrowBack from "@material-symbols/svg-400/rounded/arrow_back-fill.svg";
-import { LeftButtons, TouchControls } from "./left-buttons";
-import { RightButtons } from "./right-buttons";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { atom } from "jotai";
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { type ImageStyle, Platform, Pressable, View, type ViewProps } from "react-native";
+import { useRouter } from "solito/router";
+import { percent, rem, useYoshiki } from "yoshiki/native";
 import {
 	bufferedAtom,
 	durationAtom,
@@ -52,8 +52,8 @@ import {
 	playAtom,
 	progressAtom,
 } from "../state";
-import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
-import { atom } from "jotai";
+import { LeftButtons, TouchControls } from "./left-buttons";
+import { RightButtons } from "./right-buttons";
 import { BottomScrubber, ScrubberTooltip } from "./scrubber";
 
 const hoverReasonAtom = atom({

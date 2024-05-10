@@ -18,13 +18,13 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { queryFn } from "./query";
-import { KyooErrors } from "./kyoo-errors";
-import { Account, Token, TokenP, getCurrentApiUrl } from "./accounts";
-import { UserP } from "./resources";
-import { addAccount, getCurrentAccount, removeAccounts, updateAccount } from "./account-internal";
-import { Platform } from "react-native";
 import { useEffect, useRef, useState } from "react";
+import { Platform } from "react-native";
+import { addAccount, getCurrentAccount, removeAccounts, updateAccount } from "./account-internal";
+import { type Account, type Token, TokenP, getCurrentApiUrl } from "./accounts";
+import type { KyooErrors } from "./kyoo-errors";
+import { queryFn } from "./query";
+import { UserP } from "./resources";
 
 type Result<A, B> =
 	| { ok: true; value: A; error?: undefined }
@@ -94,7 +94,7 @@ let running: ReturnType<typeof getTokenWJ> | null = null;
 
 export const getTokenWJ = async (
 	acc?: Account | null,
-	forceRefresh: boolean = false,
+	forceRefresh = false,
 ): Promise<readonly [string, Token, null] | readonly [null, null, KyooErrors | null]> => {
 	if (acc === undefined) acc = getCurrentAccount();
 	if (!acc) return [null, null, null] as const;
@@ -150,6 +150,7 @@ export const useToken = () => {
 		account ? `${account.token.token_type} ${account.token.access_token}` : null,
 	);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Refresh token when account change
 	useEffect(() => {
 		async function run() {
 			const nToken = await getTokenWJ();

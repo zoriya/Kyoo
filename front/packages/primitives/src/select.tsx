@@ -18,10 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Icon } from "./icons";
 import ExpandMore from "@material-symbols/svg-400/rounded/expand_more-fill.svg";
-import { Menu } from "./menu";
 import { Button } from "./button";
+import { Icon } from "./icons";
+import { Menu } from "./menu";
 
 export const Select = <Value extends string>({
 	label,

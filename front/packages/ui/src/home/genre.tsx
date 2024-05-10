@@ -18,15 +18,21 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Genre, LibraryItem, LibraryItemP, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
+import {
+	type Genre,
+	type LibraryItem,
+	LibraryItemP,
+	type QueryIdentifier,
+	useInfiniteFetch,
+} from "@kyoo/models";
 import { H3, ts } from "@kyoo/primitives";
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
+import { itemMap } from "../browse";
 import { ItemGrid } from "../browse/grid";
 import { InfiniteFetchList } from "../fetch-infinite";
-import { useTranslation } from "react-i18next";
-import { itemMap } from "../browse";
 
 export const Header = ({ title }: { title: string }) => {
 	const { css } = useYoshiki();

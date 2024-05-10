@@ -18,9 +18,9 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { type DocumentContext, Head, Html, Main, NextScript } from "next/document";
 import { AppRegistry } from "react-native";
-import { Html, Main, Head, NextScript, DocumentContext } from "next/document";
-import { createStyleRegistry, StyleRegistryProvider } from "yoshiki/web";
+import { StyleRegistryProvider, createStyleRegistry } from "yoshiki/web";
 
 export const style = `
 /**

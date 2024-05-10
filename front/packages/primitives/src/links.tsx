@@ -18,13 +18,20 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { forwardRef, ReactNode } from "react";
-import { Platform, Pressable, TextProps, View, PressableProps, Linking } from "react-native";
+import type { UrlObject } from "node:url";
+import { type ReactNode, forwardRef } from "react";
+import {
+	Linking,
+	Platform,
+	Pressable,
+	type PressableProps,
+	type TextProps,
+	type View,
+} from "react-native";
 import { TextLink, useLink } from "solito/link";
-import { useTheme, useYoshiki } from "yoshiki/native";
-import type { UrlObject } from "url";
-import { alpha } from "./themes";
 import { parseNextPath } from "solito/router";
+import { useTheme, useYoshiki } from "yoshiki/native";
+import { alpha } from "./themes";
 
 export const A = ({
 	href,

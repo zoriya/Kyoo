@@ -18,10 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { WatchInfo, getCurrentApiUrl, queryFn, toQueryKey } from "@kyoo/models";
-import { Player } from "../player";
+import { type WatchInfo, getCurrentApiUrl, queryFn, toQueryKey } from "@kyoo/models";
 import { getCurrentAccount } from "@kyoo/models/src/account-internal";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
+import { Player } from "../player";
 
 export const useDownloader = () => {
 	return async (type: "episode" | "movie", slug: string) => {

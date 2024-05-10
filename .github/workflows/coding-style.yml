@@ -25,18 +25,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
         with:
-          node-version: 18.x
-          cache: yarn
-          cache-dependency-path: front/yarn.lock
+          version: latest
 
-      - name: Install dependencies
-        run: yarn install --immutable
-
-      - name: Lint
-        run: yarn lint && yarn format
+      - name: Run Biome
+        run: biome ci .
 
   scanner:
     name: "Lint scanner/autosync"

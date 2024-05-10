@@ -18,21 +18,28 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Account, KyooErrors, deleteAccount, logout, queryFn, useAccount } from "@kyoo/models";
+import {
+	type Account,
+	type KyooErrors,
+	deleteAccount,
+	logout,
+	queryFn,
+	useAccount,
+} from "@kyoo/models";
 import { Alert, Avatar, Button, H1, Icon, Input, P, Popup, ts, usePopup } from "@kyoo/primitives";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ComponentProps, useState } from "react";
+import * as ImagePicker from "expo-image-picker";
+import { type ComponentProps, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { rem, useYoshiki } from "yoshiki/native";
-import * as ImagePicker from "expo-image-picker";
 import { PasswordInput } from "../login/password-input";
 import { Preference, SettingsContainer } from "./base";
 
 import Username from "@material-symbols/svg-400/outlined/badge.svg";
-import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
 import Mail from "@material-symbols/svg-400/outlined/mail.svg";
 import Password from "@material-symbols/svg-400/outlined/password.svg";
+import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
 import Delete from "@material-symbols/svg-400/rounded/delete.svg";
 import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 
@@ -40,7 +47,7 @@ function dataURItoBlob(dataURI: string) {
 	const byteString = atob(dataURI.split(",")[1]);
 	const ab = new ArrayBuffer(byteString.length);
 	const ia = new Uint8Array(ab);
-	for (var i = 0; i < byteString.length; i++) {
+	for (let i = 0; i < byteString.length; i++) {
 		ia[i] = byteString.charCodeAt(i);
 	}
 	return new Blob([ab], { type: "image/jpeg" });

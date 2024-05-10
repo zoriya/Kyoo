@@ -42,9 +42,6 @@ const config = {
 		icon: "./assets/icon.png",
 		userInterfaceStyle: "automatic",
 		splash,
-		updates: {
-			fallbackToCacheTimeout: 0,
-		},
 		assetBundlePatterns: ["**/*"],
 		ios: {
 			supportsTablet: true,
@@ -59,6 +56,7 @@ const config = {
 		},
 		updates: {
 			url: "https://u.expo.dev/55de6b52-c649-4a15-9a45-569ff5ed036c",
+			fallbackToCacheTimeout: 0,
 		},
 		runtimeVersion: {
 			policy: "sdkVersion",

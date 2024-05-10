@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-const path = require("path");
+const path = require("node:path");
 const CopyPlugin = require("copy-webpack-plugin");
 const DefinePlugin = require("webpack").DefinePlugin;
 

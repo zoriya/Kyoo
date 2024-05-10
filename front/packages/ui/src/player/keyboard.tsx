@@ -18,10 +18,11 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Subtitle } from "@kyoo/models";
+import type { Subtitle } from "@kyoo/models";
 import { atom, useSetAtom } from "jotai";
-import { useRouter } from "solito/router";
 import { useEffect } from "react";
+import { Platform } from "react-native";
+import { useRouter } from "solito/router";
 import {
 	durationAtom,
 	fullscreenAtom,
@@ -31,7 +32,6 @@ import {
 	subtitleAtom,
 	volumeAtom,
 } from "./state";
-import { Platform } from "react-native";
 
 type Action =
 	| { type: "play" }
@@ -68,7 +68,7 @@ export const reducerAtom = atom(null, (get, set, action: Action) => {
 		case "volume":
 			set(volumeAtom, Math.max(0, Math.min(get(volumeAtom) + action.value, 100)));
 			break;
-		case "subtitle":
+		case "subtitle": {
 			const subtitle = get(subtitleAtom);
 			const index = subtitle ? action.subtitles.findIndex((x) => x.index === subtitle.index) : -1;
 			set(
@@ -76,6 +76,7 @@ export const reducerAtom = atom(null, (get, set, action: Action) => {
 				index === -1 ? null : action.subtitles[(index + 1) % action.subtitles.length],
 			);
 			break;
+		}
 	}
 });
 

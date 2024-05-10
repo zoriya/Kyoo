@@ -19,19 +19,19 @@
  */
 
 import {
-	QueryIdentifier,
-	QueryPage,
-	ServerInfo,
+	type QueryIdentifier,
+	type QueryPage,
+	type ServerInfo,
 	ServerInfoP,
 	oidcLogin,
 	useFetch,
 } from "@kyoo/models";
 import { Button, HR, Link, P, Skeleton, ts } from "@kyoo/primitives";
-import { View, ImageBackground } from "react-native";
-import { percent, rem, useYoshiki } from "yoshiki/native";
-import { useTranslation } from "react-i18next";
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
+import { ImageBackground, View } from "react-native";
 import { useRouter } from "solito/router";
+import { percent, rem, useYoshiki } from "yoshiki/native";
 import { ErrorView } from "../errors";
 
 export const OidcLogin = ({ apiUrl }: { apiUrl?: string }) => {

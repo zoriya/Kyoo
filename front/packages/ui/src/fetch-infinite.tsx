@@ -18,13 +18,19 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
-import { useBreakpointMap, HR } from "@kyoo/primitives";
-import { ContentStyle, FlashList } from "@shopify/flash-list";
-import { ComponentProps, ComponentType, isValidElement, ReactElement, useRef } from "react";
-import { EmptyView, Layout, OfflineView, WithLoading, addHeader } from "./fetch";
+import { type Page, type QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
+import { HR, useBreakpointMap } from "@kyoo/primitives";
+import { type ContentStyle, FlashList } from "@shopify/flash-list";
+import {
+	type ComponentProps,
+	type ComponentType,
+	type ReactElement,
+	isValidElement,
+	useRef,
+} from "react";
+import { FlatList, View, type ViewStyle } from "react-native";
 import { ErrorView } from "./errors";
-import { FlatList, View, ViewStyle } from "react-native";
+import { EmptyView, type Layout, OfflineView, type WithLoading, addHeader } from "./fetch";
 
 const emulateGap = (
 	layout: "grid" | "vertical" | "horizontal",

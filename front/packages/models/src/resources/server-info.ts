@@ -18,9 +18,9 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { Platform } from "react-native";
 import { z } from "zod";
 import { imageFn } from "..";
-import { Platform } from "react-native";
 
 export const OidcInfoP = z.object({
 	/*

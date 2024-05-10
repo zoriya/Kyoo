@@ -18,10 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { QueryPage, useHasPermission } from "@kyoo/models";
+import { type QueryPage, useHasPermission } from "@kyoo/models";
 import { Unauthorized } from "@kyoo/ui";
 import { useRouter } from "next/router";
-import { ComponentType } from "react";
+import type { ComponentType } from "react";
 
 export const withRoute = <Props,>(
 	Component: ComponentType<Props>,

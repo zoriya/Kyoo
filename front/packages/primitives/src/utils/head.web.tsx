@@ -31,7 +31,7 @@ export const Head = ({
 }) => {
 	return (
 		<NextHead>
-			{title && <title>{title + " - Kyoo"}</title>}
+			{title && <title>{`${title} - Kyoo`}</title>}
 			{description && <meta name="description" content={description} />}
 			{image && <meta property="og:image" content={image} />}
 		</NextHead>

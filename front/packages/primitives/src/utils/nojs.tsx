@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ViewProps } from "react-native";
+import type { ViewProps } from "react-native";
 
 export const hiddenIfNoJs: ViewProps = { style: { $$css: true, noJs: "noJsHidden" } as any };
 

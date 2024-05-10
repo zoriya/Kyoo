@@ -18,10 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ZodTypeAny, z } from "zod";
-import { Account, AccountP } from "./accounts";
-import { MMKV } from "react-native-mmkv";
 import { Platform } from "react-native";
+import { MMKV } from "react-native-mmkv";
+import { type ZodTypeAny, z } from "zod";
+import { type Account, AccountP } from "./accounts";
 
 export const storage = new MMKV();
 
@@ -49,8 +49,8 @@ export const setCookie = (key: string, val?: unknown) => {
 	const d = new Date();
 	// A year
 	d.setTime(d.getTime() + 365 * 24 * 60 * 60 * 1000);
-	const expires = value ? "expires=" + d.toUTCString() : "expires=Thu, 01 Jan 1970 00:00:01 GMT";
-	document.cookie = key + "=" + value + ";" + expires + ";path=/;samesite=strict";
+	const expires = value ? `expires=${d.toUTCString()}` : "expires=Thu, 01 Jan 1970 00:00:01 GMT";
+	document.cookie = `${key}=${value};${expires};path=/;samesite=strict`;
 	return null;
 };
 
@@ -65,10 +65,10 @@ export const readCookie = <T extends ZodTypeAny>(
 	const ca = decodedCookie.split(";");
 	for (let i = 0; i < ca.length; i++) {
 		let c = ca[i];
-		while (c.charAt(0) == " ") {
+		while (c.charAt(0) === " ") {
 			c = c.substring(1);
 		}
-		if (c.indexOf(name) == 0) {
+		if (c.indexOf(name) === 0) {
 			const str = c.substring(name.length, c.length);
 			return parser ? parser.parse(JSON.parse(str)) : str;
 		}
@@ -85,7 +85,7 @@ export const addAccount = (account: Account) => {
 	const accounts = readAccounts();
 
 	// Prevent the user from adding the same account twice.
-	if (accounts.find((x) => x.id == account.id)) {
+	if (accounts.find((x) => x.id === account.id)) {
 		updateAccount(account.id, account);
 		return;
 	}
@@ -106,7 +106,7 @@ export const removeAccounts = (filter: (acc: Account) => boolean) => {
 
 export const updateAccount = (id: string, account: Account) => {
 	const accounts = readAccounts();
-	const idx = accounts.findIndex((x) => x.id == id);
+	const idx = accounts.findIndex((x) => x.id === id);
 	if (idx === -1) return;
 
 	const selected = account.selected;

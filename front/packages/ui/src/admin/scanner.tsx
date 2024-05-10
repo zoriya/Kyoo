@@ -18,14 +18,14 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Issue, IssueP, QueryIdentifier, queryFn, useFetch } from "@kyoo/models";
-import { useTranslation } from "react-i18next";
-import { SettingsContainer } from "../settings/base";
+import { type Issue, IssueP, type QueryIdentifier, queryFn, useFetch } from "@kyoo/models";
 import { Button, Icon, P, Skeleton, tooltip, ts } from "@kyoo/primitives";
-import { ErrorView } from "../errors";
-import { z } from "zod";
+import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
+import { z } from "zod";
+import { ErrorView } from "../errors";
+import { SettingsContainer } from "../settings/base";
 
 import Info from "@material-symbols/svg-400/outlined/info.svg";
 import Scan from "@material-symbols/svg-400/outlined/sensors.svg";
@@ -82,7 +82,7 @@ export const Scanner = () => {
 						</View>
 					))
 				)}
-				{data != null && data.length == 0 && <P>{t("admin.scanner.empty")}</P>}
+				{data != null && data.length === 0 && <P>{t("admin.scanner.empty")}</P>}
 			</>
 		</SettingsContainer>
 	);

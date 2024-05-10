@@ -18,14 +18,14 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { useState } from "react";
-import { FlexStyle, ImageStyle, View, ViewStyle } from "react-native";
-import FastImage from "react-native-fast-image";
-import { Blurhash } from "react-native-blurhash";
-import { percent, useYoshiki } from "yoshiki/native";
-import { Props, ImageLayout } from "./base-image";
-import { Skeleton } from "../skeleton";
 import { getCurrentToken } from "@kyoo/models";
+import { useState } from "react";
+import { type FlexStyle, type ImageStyle, View, type ViewStyle } from "react-native";
+import { Blurhash } from "react-native-blurhash";
+import FastImage from "react-native-fast-image";
+import { percent, useYoshiki } from "yoshiki/native";
+import { Skeleton } from "../skeleton";
+import type { ImageLayout, Props } from "./base-image";
 
 export const Image = ({
 	src,
@@ -33,7 +33,7 @@ export const Image = ({
 	alt,
 	forcedLoading = false,
 	layout,
-	Error,
+	Err,
 	...props
 }: Props & { style?: ImageStyle } & { layout: ImageLayout }) => {
 	const { css } = useYoshiki();
@@ -53,8 +53,8 @@ export const Image = ({
 
 	if (forcedLoading) return <Skeleton variant="custom" {...css([layout, border], props)} />;
 	if (!src || state === "errored") {
-		return Error !== undefined ? (
-			Error
+		return Err !== undefined ? (
+			Err
 		) : (
 			<View {...css([{ bg: (theme) => theme.overlay0 }, layout, border], props)} />
 		);

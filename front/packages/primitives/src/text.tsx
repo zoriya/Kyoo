@@ -18,9 +18,6 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ComponentType, ComponentProps } from "react";
-import { Platform, Text, TextProps, TextStyle, StyleProp } from "react-native";
-import { percent, rem, useYoshiki } from "yoshiki/native";
 import {
 	H1 as EH1,
 	H2 as EH2,
@@ -30,6 +27,9 @@ import {
 	H6 as EH6,
 	P as EP,
 } from "@expo/html-elements";
+import type { ComponentProps, ComponentType } from "react";
+import { Platform, type StyleProp, Text, type TextProps, type TextStyle } from "react-native";
+import { percent, rem, useYoshiki } from "yoshiki/native";
 import { ts } from "./utils/spacing";
 
 const styleText = (

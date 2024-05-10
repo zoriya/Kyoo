@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { User, queryFn, useAccount } from "@kyoo/models";
+import { type User, queryFn, useAccount } from "@kyoo/models";
 import {
 	Container,
 	H1,
@@ -31,8 +31,8 @@ import {
 	ts,
 } from "@kyoo/primitives";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Children, ReactElement, ReactNode } from "react";
-import { Falsy, View } from "react-native";
+import { Children, type ReactElement, type ReactNode } from "react";
+import { type Falsy, View } from "react-native";
 import { px, rem, useYoshiki } from "yoshiki/native";
 
 export const Preference = ({

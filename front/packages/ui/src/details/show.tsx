@@ -18,18 +18,24 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { QueryIdentifier, QueryPage, Show, ShowP, ShowWatchStatus } from "@kyoo/models";
-import { Platform, View, ViewProps } from "react-native";
-import { percent, useYoshiki } from "yoshiki/native";
-import { DefaultLayout } from "../layout";
-import { EpisodeList, SeasonHeader } from "./season";
-import { Header } from "./header";
-import Svg, { Path, SvgProps } from "react-native-svg";
+import {
+	type QueryIdentifier,
+	type QueryPage,
+	type Show,
+	ShowP,
+	type ShowWatchStatus,
+} from "@kyoo/models";
 import { Container, H2, SwitchVariant, focusReset, ts } from "@kyoo/primitives";
 import { forwardRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Platform, View, type ViewProps } from "react-native";
+import Svg, { Path, type SvgProps } from "react-native-svg";
+import { percent, useYoshiki } from "yoshiki/native";
+import { DefaultLayout } from "../layout";
 import { DetailsCollections } from "./collection";
 import { EpisodeLine, episodeDisplayNumber } from "./episode";
-import { useTranslation } from "react-i18next";
+import { Header } from "./header";
+import { EpisodeList, SeasonHeader } from "./season";
 
 export const SvgWave = (props: SvgProps) => {
 	const { css } = useYoshiki();

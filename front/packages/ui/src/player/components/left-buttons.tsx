@@ -19,19 +19,19 @@
  */
 
 import { IconButton, Link, P, Slider, noTouch, tooltip, touchOnly, ts } from "@kyoo/primitives";
+import Pause from "@material-symbols/svg-400/rounded/pause-fill.svg";
+import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
+import SkipNext from "@material-symbols/svg-400/rounded/skip_next-fill.svg";
+import SkipPrevious from "@material-symbols/svg-400/rounded/skip_previous-fill.svg";
+import VolumeDown from "@material-symbols/svg-400/rounded/volume_down-fill.svg";
+import VolumeMute from "@material-symbols/svg-400/rounded/volume_mute-fill.svg";
+import VolumeOff from "@material-symbols/svg-400/rounded/volume_off-fill.svg";
+import VolumeUp from "@material-symbols/svg-400/rounded/volume_up-fill.svg";
 import { useAtom, useAtomValue } from "jotai";
 import { useTranslation } from "react-i18next";
 import { Platform, View } from "react-native";
-import SkipPrevious from "@material-symbols/svg-400/rounded/skip_previous-fill.svg";
-import SkipNext from "@material-symbols/svg-400/rounded/skip_next-fill.svg";
-import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
-import Pause from "@material-symbols/svg-400/rounded/pause-fill.svg";
-import VolumeOff from "@material-symbols/svg-400/rounded/volume_off-fill.svg";
-import VolumeMute from "@material-symbols/svg-400/rounded/volume_mute-fill.svg";
-import VolumeDown from "@material-symbols/svg-400/rounded/volume_down-fill.svg";
-import VolumeUp from "@material-symbols/svg-400/rounded/volume_up-fill.svg";
+import { type Stylable, px, useYoshiki } from "yoshiki/native";
 import { durationAtom, mutedAtom, playAtom, progressAtom, volumeAtom } from "../state";
-import { Stylable, px, useYoshiki } from "yoshiki/native";
 import { HoverTouch, hoverAtom } from "./hover";
 
 export const LeftButtons = ({
@@ -168,7 +168,7 @@ const VolumeSlider = () => {
 		>
 			<IconButton
 				icon={
-					isMuted || volume == 0
+					isMuted || volume === 0
 						? VolumeOff
 						: volume < 25
 							? VolumeMute
@@ -204,7 +204,12 @@ const ProgressText = (props: Stylable) => {
 
 export const toTimerString = (timer?: number, duration?: number) => {
 	if (!duration) duration = timer;
-	if (timer === undefined || duration === undefined || isNaN(duration) || isNaN(timer))
+	if (
+		timer === undefined ||
+		duration === undefined ||
+		Number.isNaN(duration) ||
+		Number.isNaN(timer)
+	)
 		return "??:??";
 	const h = Math.floor(timer / 3600);
 	const min = Math.floor((timer / 60) % 60);

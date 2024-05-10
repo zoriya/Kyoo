@@ -19,10 +19,10 @@
  */
 
 import { Platform } from "react-native";
-import { Movie, Show } from "./resources";
-import { z } from "zod";
 import { useMMKVString } from "react-native-mmkv";
+import { z } from "zod";
 import { storage } from "./account-internal";
+import type { Movie, Show } from "./resources";
 
 export const zdate = z.coerce.date;
 
@@ -38,7 +38,8 @@ export const getDisplayDate = (data: Show | Movie) => {
 			return startAir.getFullYear().toString();
 		}
 		return startAir.getFullYear() + (endAir ? ` - ${endAir.getFullYear()}` : "");
-	} else if (airDate) {
+	}
+	if (airDate) {
 		return airDate.getFullYear().toString();
 	}
 };

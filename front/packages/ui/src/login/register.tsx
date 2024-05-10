@@ -18,18 +18,18 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { login, QueryPage } from "@kyoo/models";
-import { Button, P, Input, ts, H1, A } from "@kyoo/primitives";
+import { type QueryPage, login } from "@kyoo/models";
+import { A, Button, H1, Input, P, ts } from "@kyoo/primitives";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Trans } from "react-i18next";
+import { Platform } from "react-native";
 import { useRouter } from "solito/router";
 import { percent, px, useYoshiki } from "yoshiki/native";
 import { DefaultLayout } from "../layout";
 import { FormPage } from "./form";
-import { PasswordInput } from "./password-input";
 import { OidcLogin } from "./oidc";
-import { Platform } from "react-native";
+import { PasswordInput } from "./password-input";
 
 export const RegisterPage: QueryPage<{ apiUrl?: string }> = ({ apiUrl }) => {
 	const [email, setEmail] = useState("");

@@ -19,7 +19,7 @@
  */
 
 const { getDefaultConfig } = require("expo/metro-config");
-const path = require("path");
+const path = require("node:path");
 
 const projectRoot = __dirname;
 const defaultConfig = getDefaultConfig(projectRoot);

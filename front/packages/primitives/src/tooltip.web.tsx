@@ -18,9 +18,9 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Theme } from "yoshiki/native";
-import { Tooltip as RTooltip } from "react-tooltip";
 import { forwardRef } from "react";
+import { Tooltip as RTooltip } from "react-tooltip";
+import type { Theme } from "yoshiki/native";
 import { ContrastArea } from "./themes";
 
 export const tooltip = (tooltip: string, up?: boolean) => ({

@@ -18,15 +18,21 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { QueryIdentifier, Watchlist, WatchlistP, getDisplayDate, useAccount } from "@kyoo/models";
+import {
+	type QueryIdentifier,
+	type Watchlist,
+	WatchlistP,
+	getDisplayDate,
+	useAccount,
+} from "@kyoo/models";
+import { Button, P, ts } from "@kyoo/primitives";
+import { useTranslation } from "react-i18next";
+import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 import { ItemGrid } from "../browse/grid";
-import { InfiniteFetch } from "../fetch-infinite";
-import { useTranslation } from "react-i18next";
-import { Header } from "./genre";
 import { EpisodeBox, episodeDisplayNumber } from "../details/episode";
-import { View } from "react-native";
-import { Button, P, ts } from "@kyoo/primitives";
+import { InfiniteFetch } from "../fetch-infinite";
+import { Header } from "./genre";
 
 export const WatchlistList = () => {
 	const { t } = useTranslation();

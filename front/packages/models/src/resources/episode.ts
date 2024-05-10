@@ -19,8 +19,8 @@
  */
 
 import { z } from "zod";
-import { ShowP } from "./show";
 import { BaseEpisodeP } from "./episode.base";
+import { ShowP } from "./show";
 import { WatchStatusP } from "./watch-status";
 
 export const EpisodeP = BaseEpisodeP.and(
