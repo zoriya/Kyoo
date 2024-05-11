@@ -310,21 +310,7 @@ func getInfo(path string) (*MediaInfo, error) {
 				Link:      link,
 			}
 		}),
-		Chapters: Filter(Map(make([]Chapter, max(chapters_end-chapters_begin, 1)-1), func(_ Chapter, i int) Chapter {
-			startTime := mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoName)
-			// We expect `startTime` to be something like `00:00:00`
-			if len(startTime) > 0 && !unicode.IsDigit(rune(startTime[0])) {
-				return Chapter{}
-			}
-			return Chapter{
-				StartTime: ParseTime(startTime),
-				// +1 is safe, the value at chapters_end contains the right duration
-				EndTime: ParseTime(mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i+1, mediainfo.InfoName)),
-				Name:    mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoText),
-			}
-		}), func(chapter Chapter, i int) bool {
-			return chapter != Chapter{}
-		}),
+		Chapters: getChapters(chapters_begin, chapters_end, mi),
 		Fonts: Map(
 			attachments,
 			func(font string, _ int) string {
@@ -353,4 +339,34 @@ func getInfo(path string) (*MediaInfo, error) {
 		ret.Video = &ret.Videos[0]
 	}
 	return &ret, nil
+}
+
+func chapterTimeIsValid(chapterTime string) bool {
+	return len(chapterTime) > 0 && unicode.IsDigit(rune(chapterTime[0]))
+}
+
+func getChapters(chapters_begin uint32, chapters_end uint32, mi *mediainfo.File) []Chapter {
+	chapterCount := max(chapters_end-chapters_begin, 1) - 1
+	chapterIterationCount := chapterCount
+
+	for i := uint32(0); i < chapterIterationCount; i++ {
+		startTime := mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin+i), mediainfo.InfoName)
+		if !chapterTimeIsValid(startTime) {
+			chapterIterationCount = chapterIterationCount + 1
+		}
+	}
+	return Filter(Map(make([]Chapter, chapterIterationCount), func(_ Chapter, i int) Chapter {
+		startTime := mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoName)
+		if !chapterTimeIsValid(startTime) {
+			return Chapter{}
+		}
+		return Chapter{
+			StartTime: ParseTime(startTime),
+			// +1 is safe, the value at chapters_end contains the right duration
+			EndTime: ParseTime(mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i+1, mediainfo.InfoName)),
+			Name:    mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoText),
+		}
+	}), func(chapter Chapter, i int) bool {
+		return chapter != Chapter{}
+	})
 }
