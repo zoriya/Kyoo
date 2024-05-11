@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"unicode"
 
 	"github.com/zoriya/go-mediainfo"
 )
@@ -150,6 +151,15 @@ func Map[T, U any](ts []T, f func(T, int) U) []U {
 		us[i] = f(ts[i], i)
 	}
 	return us
+}
+
+func Filter[T any](ss []T, test func(T, int) bool) (ret []T) {
+	for i, s := range ss {
+		if test(s, i) {
+			ret = append(ret, s)
+		}
+	}
+	return
 }
 
 func OrNull(str string) *string {
@@ -300,13 +310,20 @@ func getInfo(path string) (*MediaInfo, error) {
 				Link:      link,
 			}
 		}),
-		Chapters: Map(make([]Chapter, max(chapters_end-chapters_begin, 1)-1), func(_ Chapter, i int) Chapter {
+		Chapters: Filter(Map(make([]Chapter, max(chapters_end-chapters_begin, 1)-1), func(_ Chapter, i int) Chapter {
+			startTime := mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoName)
+			// We expect `startTime` to be something like `00:00:00`
+			if len(startTime) > 0 && !unicode.IsDigit(rune(startTime[0])) {
+				return Chapter{}
+			}
 			return Chapter{
-				StartTime: ParseTime(mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoName)),
+				StartTime: ParseTime(startTime),
 				// +1 is safe, the value at chapters_end contains the right duration
 				EndTime: ParseTime(mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i+1, mediainfo.InfoName)),
 				Name:    mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoText),
 			}
+		}), func(chapter Chapter, i int) bool {
+			return chapter != Chapter{}
 		}),
 		Fonts: Map(
 			attachments,
