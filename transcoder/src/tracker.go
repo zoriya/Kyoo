@@ -26,10 +26,11 @@ type Tracker struct {
 
 func NewTracker(t *Transcoder) *Tracker {
 	ret := &Tracker{
-		clients:    make(map[string]ClientInfo),
-		visitDate:  make(map[string]time.Time),
-		lastUsage:  make(map[string]time.Time),
-		transcoder: t,
+		clients:       make(map[string]ClientInfo),
+		visitDate:     make(map[string]time.Time),
+		lastUsage:     make(map[string]time.Time),
+		deletedStream: make(chan string),
+		transcoder:    t,
 	}
 	go ret.start()
 	return ret
@@ -94,6 +95,8 @@ func (t *Tracker) start() {
 				}
 
 				info := t.clients[client]
+				delete(t.clients, client)
+				delete(t.visitDate, client)
 
 				if !t.KillStreamIfDead(info.path) {
 					audio_cleanup := info.audio != -1 && t.KillAudioIfDead(info.path, info.audio)
@@ -102,9 +105,6 @@ func (t *Tracker) start() {
 						t.KillOrphanedHeads(info.path, info.quality, info.audio)
 					}
 				}
-
-				delete(t.clients, client)
-				delete(t.visitDate, client)
 			}
 		case path := <-t.deletedStream:
 			t.DestroyStreamIfOld(path)
