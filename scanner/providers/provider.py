@@ -1,3 +1,4 @@
+from logging import getLogger
 import os
 from aiohttp import ClientSession
 from abc import abstractmethod, abstractproperty
@@ -10,6 +11,8 @@ from .types.season import Season
 from .types.episode import Episode
 from .types.movie import Movie
 from .types.collection import Collection
+
+logger = getLogger(__name__)
 
 
 class Provider:
@@ -29,6 +32,14 @@ class Provider:
 			tmdb = TheMovieDatabase(languages, client, tmdb)
 			providers.append(tmdb)
 
+		from providers.implementations.thetvdb import TVDB
+
+		tvdb = os.environ.get("TVDB_APIKEY") or TVDB.DEFAULT_API_KEY
+		if tvdb != "disabled":
+			pin = os.environ.get("TVDB_PIN") or None
+			tvdb = TVDB(client, tvdb, pin, languages)
+			providers.append(tvdb)
+
 		if not any(providers):
 			raise ProviderError(
 				"No provider configured. You probably forgot to specify an API Key"
@@ -37,6 +48,7 @@ class Provider:
 		from providers.implementations.thexem import TheXem
 
 		provider = next(iter(providers))
+		logger.info(f"Starting with provider: {provider.name}")
 		return TheXem(client, provider)
 
 	@abstractproperty
