@@ -120,10 +120,9 @@ class TVDB(Provider):
 	async def get_episodes(
 		self,
 		show_id: str,
-		order: Literal["default", "absolute"],
 		language: Optional[str] = None,
 	):
-		path = f"/series/{show_id}/episodes/{order}"
+		path = f"/series/{show_id}/episodes/default"
 		if language is not None:
 			path += f"/{language}"
 		ret = await self.get(
@@ -156,8 +155,8 @@ class TVDB(Provider):
 		episode_nbr: Optional[int],
 		absolute: Optional[int],
 	) -> Episode:
-		flang, slang, *olang = [*self._languages, None]
-		episodes = await self.get_episodes(show_id, order="default", language=flang)
+		flang, *olang = self._languages
+		episodes = await self.get_episodes(show_id, language=flang)
 		show = episodes["data"]
 		ret = next(
 			filter(
@@ -174,17 +173,9 @@ class TVDB(Provider):
 			raise ProviderError(
 				f"Could not retrive episode {show['name']} s{season}e{episode_nbr}, absolute {absolute}"
 			)
-		absolutes = await self.get_episodes(
-			show_id, order="absolute", language=slang or flang
-		)
-		abs = next(filter(lambda x: x["id"] == ret["id"], absolutes["episodes"]))
 
 		otrans = await asyncio.gather(
-			*(
-				self.get_episodes(show_id, order="default", language=lang)
-				for lang in olang
-				if lang is not None
-			)
+			*(self.get_episodes(show_id, language=lang) for lang in olang)
 		)
 		translations = {
 			lang: EpisodeTranslation(
@@ -195,7 +186,6 @@ class TVDB(Provider):
 				self._languages,
 				[
 					ret,
-					abs,
 					*(
 						next(x for x in e["episodes"] if x["id"] == ret["id"])
 						for e in otrans
@@ -216,7 +206,7 @@ class TVDB(Provider):
 			),
 			season_number=ret["seasonNumber"],
 			episode_number=ret["number"],
-			absolute_number=abs["number"],
+			absolute_number=ret["absoluteNumber"],
 			runtime=ret["runtime"],
 			release_date=datetime.strptime(ret["aired"], "%Y-%m-%d").date(),
 			thumbnail=f"https://artworks.thetvdb.com{ret['image']}",
