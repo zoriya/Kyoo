@@ -173,6 +173,10 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 				});
 			});
 		}
+		return () => {
+			if (hls) hls.destroy();
+			hls = null;
+		};
 	}, [source.uri, source.hls]);
 
 	const mode = useAtomValue(playModeAtom);
@@ -348,7 +352,7 @@ export const AudiosMenu = ({
 	useEffect(() => {
 		if (!hls) return;
 		hls.on(Hls.Events.AUDIO_TRACK_LOADED, rerender);
-		return () => hls!.off(Hls.Events.AUDIO_TRACK_LOADED, rerender);
+		return () => hls?.off(Hls.Events.AUDIO_TRACK_LOADED, rerender);
 	});
 
 	if (!hls) return <Menu {...props} disabled {...tooltip(t("player.notInPristine"))} />;
@@ -376,7 +380,7 @@ export const QualitiesMenu = (props: ComponentProps<typeof Menu>) => {
 	useEffect(() => {
 		if (!hls) return;
 		hls.on(Hls.Events.LEVEL_SWITCHED, rerender);
-		return () => hls!.off(Hls.Events.LEVEL_SWITCHED, rerender);
+		return () => hls?.off(Hls.Events.LEVEL_SWITCHED, rerender);
 	});
 
 	const levelName = (label: Level, auto?: boolean): string => {
