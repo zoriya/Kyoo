@@ -50,7 +50,7 @@ function uuidv4(): string {
 const client_id = typeof window === "undefined" ? "ssr" : uuidv4();
 
 const initHls = (): Hls => {
-	if (hls !== null) return hls;
+	if (hls) hls.destroy();
 	const loadPolicy: LoadPolicy = {
 		default: {
 			maxTimeToFirstByteMs: Number.POSITIVE_INFINITY,
@@ -104,10 +104,7 @@ const initHls = (): Hls => {
 	return hls;
 };
 
-const Video = forwardRef<
-	{ seek: (value: number) => void; canPlay: (codec: string) => boolean },
-	VideoProps
->(function Video(
+const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function Video(
 	{
 		source,
 		paused,
@@ -161,8 +158,6 @@ const Video = forwardRef<
 		if (!ref?.current || !source.uri) return;
 		if (!hls || oldHls.current !== source.hls) {
 			// Reinit the hls player when we change track.
-			if (hls) hls.destroy();
-			hls = null;
 			hls = initHls();
 			hls.loadSource(source.hls!);
 			oldHls.current = source.hls;
@@ -181,11 +176,15 @@ const Video = forwardRef<
 				});
 			});
 		}
+	}, [source.uri, source.hls]);
+
+	useEffect(() => {
 		return () => {
+			console.log("hls cleanup")
 			if (hls) hls.destroy();
 			hls = null;
 		};
-	}, [source.uri, source.hls]);
+	}, []);
 
 	const mode = useAtomValue(playModeAtom);
 	const audio = useAtomValue(audioAtom);
@@ -255,6 +254,12 @@ const Video = forwardRef<
 });
 
 export default Video;
+
+export const canPlay = (codec: string) => {
+	const videos = document.getElementsByTagName("video");
+	const video = videos.item(0) ?? document.createElement("video");
+	return !!video.canPlayType(codec);
+};
 
 const useSubtitle = (
 	player: RefObject<HTMLVideoElement>,
@@ -385,11 +390,12 @@ export const QualitiesMenu = (props: ComponentProps<typeof Menu>) => {
 	const [mode, setPlayMode] = useAtom(playModeAtom);
 	const rerender = useForceRerender();
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Inculde hls in dependency array
 	useEffect(() => {
 		if (!hls) return;
 		hls.on(Hls.Events.LEVEL_SWITCHED, rerender);
 		return () => hls?.off(Hls.Events.LEVEL_SWITCHED, rerender);
-	});
+	}, [hls]);
 
 	const levelName = (label: Level, auto?: boolean): string => {
 		const height = `${label.height}p`;

@@ -42,7 +42,8 @@ export const WatchStatusObserver = ({
 			await queryClient.invalidateQueries({ queryKey: [type === "episode" ? "show" : type, slug] }),
 	});
 	const mutate = useCallback(
-		(type: string, slug: string, seconds: number) =>
+		(type: string, slug: string, seconds: number) => {
+			if (seconds < 0 || duration <= 0) return;
 			_mutate({
 				method: "POST",
 				path: [type, slug, "watchStatus"],
@@ -51,7 +52,8 @@ export const WatchStatusObserver = ({
 					watchedTime: Math.round(seconds),
 					percent: Math.round((seconds / duration) * 100),
 				},
-			}),
+			});
+		},
 		[_mutate, duration],
 	);
 	const readProgress = useAtomCallback(

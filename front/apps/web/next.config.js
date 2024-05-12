@@ -29,7 +29,8 @@ const suboctopus = path.resolve(path.dirname(require.resolve("jassub")), "../dis
  */
 const nextConfig = {
 	swcMinify: true,
-	reactStrictMode: true,
+	// can't be true since we would run hls cleanup twice and run on race conditions
+	reactStrictMode: false,
 	output: "standalone",
 	webpack: (config) => {
 		config.plugins = [

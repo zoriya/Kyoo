@@ -29,10 +29,6 @@ declare module "react-native-video" {
 	export type VideoProps = Omit<ReactVideoProps, "source"> & {
 		source: { uri: string; hls: string | null; startPosition?: number };
 	};
-
-	interface VideoRef {
-		canPlay?: (codec: string) => boolean;
-	}
 }
 
 export * from "react-native-video";
@@ -132,6 +128,9 @@ const Video = forwardRef<VideoRef, VideoProps>(function Video(
 });
 
 export default Video;
+
+// mobile should be able to play everything
+export const canPlay = (codec: string) => true;
 
 type CustomMenu = ComponentProps<typeof Menu<ComponentProps<typeof IconButton>>>;
 export const AudiosMenu = ({ audios, ...props }: CustomMenu & { audios?: Audio[] }) => {
