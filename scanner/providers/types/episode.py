@@ -19,7 +19,7 @@ class EpisodeID:
 	show_id: str
 	season: Optional[int]
 	episode: int
-	link: str
+	link: Optional[str]
 
 
 @dataclass
