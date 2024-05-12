@@ -104,7 +104,10 @@ const initHls = (): Hls => {
 	return hls;
 };
 
-const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function Video(
+const Video = forwardRef<
+	{ seek: (value: number) => void; canPlay: (codec: string) => boolean },
+	VideoProps
+>(function Video(
 	{
 		source,
 		paused,
@@ -124,12 +127,18 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 	const ref = useRef<HTMLVideoElement>(null);
 	const oldHls = useRef<string | null>(null);
 	const { css } = useYoshiki();
+	const errorHandler = useRef<typeof onError>(onError);
+	errorHandler.current = onError;
 
 	useImperativeHandle(
 		forwaredRef,
 		() => ({
 			seek: (value: number) => {
 				if (ref.current) ref.current.currentTime = value;
+			},
+			canPlay: (codec: string) => {
+				if (!ref.current) return false;
+				return !!ref.current.canPlayType(codec);
 			},
 		}),
 		[],
@@ -148,7 +157,6 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 	const subtitle = useAtomValue(subtitleAtom);
 	useSubtitle(ref, subtitle, fonts);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: onError changes should not restart the playback.
 	useLayoutEffect(() => {
 		if (!ref?.current || !source.uri) return;
 		if (!hls || oldHls.current !== source.hls) {
@@ -168,7 +176,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 			hls.on(Hls.Events.ERROR, (_, d) => {
 				if (!d.fatal || !hls?.media) return;
 				console.warn("Hls error", d);
-				onError?.call(null, {
+				errorHandler.current?.({
 					error: { errorString: d.reason ?? d.error?.message ?? "Unknown hls error" },
 				});
 			});

@@ -153,6 +153,7 @@ export const Player = ({
 					links={data?.links}
 					audios={info?.audios}
 					subtitles={info?.subtitles}
+					codec={info?.mimeCodec}
 					setError={setPlaybackError}
 					fonts={info?.fonts}
 					startTime={startTime}

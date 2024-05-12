@@ -55,10 +55,7 @@ export const PlaybackSettings = () => {
 				<Select
 					label={t("settings.playback.playmode.label")}
 					value={playMode}
-					onValueChange={(value) => {
-						setDefaultPlayMode(value);
-						setCurrentPlayMode(value === "direct" ? PlayMode.Direct : PlayMode.Hls);
-					}}
+					onValueChange={(value) => setDefaultPlayMode(value)}
 					values={["direct", "auto"]}
 					getLabel={(key) => t(`player.${key}`)}
 				/>

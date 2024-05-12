@@ -29,6 +29,10 @@ declare module "react-native-video" {
 	export type VideoProps = Omit<ReactVideoProps, "source"> & {
 		source: { uri: string; hls: string | null; startPosition?: number };
 	};
+
+	interface VideoRef {
+		canPlay?: (codec: string) => boolean;
+	}
 }
 
 export * from "react-native-video";
