@@ -4,6 +4,7 @@ from urllib.parse import urlencode
 from aiohttp import ClientSession
 from logging import getLogger
 from typing import Optional, Any, Callable, OrderedDict
+from langcodes import Language
 
 from matcher.cache import cache
 
@@ -33,7 +34,9 @@ class TVDB(Provider):
 		self.base = "https://api4.thetvdb.com/v4"
 		self._api_key = api_key
 		self._pin = pin
-		self._languages = languages
+		# tvdb use three letter codes for languages
+		# (with the terminology code as in 'fra' and not the biblographic code as in 'fre')
+		self._languages = [Language.get(lang).to_alpha3() for lang in languages]
 		self._genre_map = {
 			"soap": Genre.SOAP,
 			"science-fiction": Genre.SCIENCE_FICTION,
@@ -72,11 +75,8 @@ class TVDB(Provider):
 			"awards-show": None,
 		}
 
-	def two_to_three_lang(self, lang: str) -> str:
-		return lang
-
-	def three_to_two_lang(self, lang: str) -> str:
-		return lang
+	def normalize_lang(self, lang: str) -> str:
+		return str(Language.get(lang))
 
 	@cache(ttl=timedelta(days=30))
 	async def login(self) -> str:
@@ -186,7 +186,7 @@ class TVDB(Provider):
 			*(self.get_episodes(show_id, language=lang) for lang in olang)
 		)
 		translations = {
-			lang: EpisodeTranslation(
+			self.normalize_lang(lang): EpisodeTranslation(
 				name=val["name"],
 				overview=val["overview"],
 			)
@@ -202,7 +202,7 @@ class TVDB(Provider):
 		return Episode(
 			show=PartialShow(
 				name=show["name"],
-				original_language=self.three_to_two_lang(show["originalLanguage"]),
+				original_language=self.normalize_lang(show["originalLanguage"]),
 				external_id={
 					self.name: MetadataID(
 						show_id, f"https://thetvdb.com/series/{show['slug']}"
@@ -242,7 +242,7 @@ class TVDB(Provider):
 			)
 		)
 		trans = {
-			lang: ShowTranslation(
+			self.normalize_lang(lang): ShowTranslation(
 				name=x["name"],
 				tagline=None,
 				tags=[],
@@ -273,7 +273,7 @@ class TVDB(Provider):
 			]
 		}
 		return Show(
-			original_language=ret["originalLanguage"],
+			original_language=self.normalize_lang(ret["originalLanguage"]),
 			aliases=[x["name"] for x in ret["aliases"]],
 			start_air=datetime.strptime(ret["firstAired"], "%Y-%m-%d").date(),
 			end_air=datetime.strptime(ret["lastAired"], "%Y-%m-%d").date(),
@@ -363,7 +363,9 @@ class TVDB(Provider):
 			)
 
 		trans = await asyncio.gather(*(process_translation(x) for x in self._languages))
-		translations = {lang: tl for lang, tl in zip(self._languages, trans)}
+		translations = {
+			self.normalize_lang(lang): tl for lang, tl in zip(self._languages, trans)
+		}
 
 		return Season(
 			season_number=info["data"]["number"],
