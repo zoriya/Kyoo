@@ -1,21 +1,19 @@
 import asyncio
 from datetime import timedelta, datetime
-from math import e
+from urllib.parse import urlencode
 from aiohttp import ClientSession
 from logging import getLogger
-from typing import Optional, Any, Literal, Callable
+from typing import Optional, Any, Callable, OrderedDict
 
 from matcher.cache import cache
 
 from ..provider import Provider, ProviderError
-from ..types.movie import Movie, MovieTranslation, Status as MovieStatus
 from ..types.season import Season, SeasonTranslation
 from ..types.episode import Episode, EpisodeTranslation, PartialShow, EpisodeID
 from ..types.studio import Studio
 from ..types.genre import Genre
 from ..types.metadataid import MetadataID
 from ..types.show import Show, ShowTranslation, Status as ShowStatus
-from ..types.collection import Collection, CollectionTranslation
 
 logger = getLogger(__name__)
 
@@ -112,9 +110,14 @@ class TVDB(Provider):
 	def name(self) -> str:
 		return "tvdb"
 
-	async def search_show(self, name: str, year: Optional[int]) -> Show:
-		show_id = ""
-		return await self.identify_show(show_id)
+	async def search_show(self, name: str, year: Optional[int]) -> str:
+		query = OrderedDict(
+			query=name,
+			year=year,
+			type="series",
+		)
+		ret = await self.get(f"search?{urlencode(query)}")
+		return ret["data"][0]["tvdb_id"]
 
 	@cache(ttl=timedelta(days=1))
 	async def get_episodes(
@@ -144,8 +147,7 @@ class TVDB(Provider):
 		absolute: Optional[int],
 		year: Optional[int],
 	) -> Episode:
-		show = await self.search_show(name, year)
-		show_id = show.external_id[self.name].data_id
+		show_id = await self.search_show(name, year)
 		return await self.identify_episode(show_id, season, episode_nbr, absolute)
 
 	async def identify_episode(
