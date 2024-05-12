@@ -1,12 +1,12 @@
 {
     "home": {
-        "recommended": "",
+        "recommended": "Polecane",
         "news": "",
-        "watchlist": "",
-        "info": "",
-        "none": "",
-        "watchlistLogin": "",
-        "refreshMetadata": "",
+        "watchlist": "Kontynuuj oglądanie",
+        "info": "Zobacz więcej",
+        "none": "Brak odcinków",
+        "watchlistLogin": "Żeby śledzić co było oglądane albo co planujesz oglądać musisz się zalogować.",
+        "refreshMetadata": "Odśwież metadane",
         "episodeMore": {
             "goToShow": "",
             "download": "",
@@ -14,15 +14,15 @@
         }
     },
     "show": {
-        "play": "",
-        "trailer": "",
+        "play": "Odtwórz",
+        "trailer": "Odtwórz zwiastun",
         "studio": "",
         "genre": "",
         "genre-none": "",
         "staff": "",
         "staff-none": "",
         "noOverview": "",
-        "episode-none": "",
+        "episode-none": "Brak odcinków w tym sezonie",
         "episodeNoMetadata": "",
         "tags": "",
         "links": "",
@@ -147,7 +147,7 @@
             },
             "git": {
                 "label": "",
-                "description": ""
+                "description": "Otwórz repozytorium github gdzie możesz przejrzeć kod kyoo"
             }
         }
     },
@@ -163,7 +163,7 @@
         "audios": "",
         "subtitles": "",
         "subtitle-none": "",
-        "fullscreen": "",
+        "fullscreen": "Pełny ekran",
         "direct": "",
         "transmux": "",
         "auto": "",
@@ -175,21 +175,21 @@
     },
     "login": {
         "login": "",
-        "register": "",
-        "guest": "",
-        "guest-forbidden": "",
-        "via": "",
-        "add-account": "",
-        "logout": "",
-        "server": "",
-        "email": "",
-        "username": "",
-        "password": "",
-        "confirm": "",
+        "register": "Zarejestruj",
+        "guest": "Kontynuuj jako gość",
+        "guest-forbidden": "Ta instancja kyoo nie zezwala na korzystanie jako gość",
+        "via": "Kontynuuj z {{provider}}",
+        "add-account": "Dodaj konto",
+        "logout": "Wyloguj",
+        "server": "Adres serwera",
+        "email": "Email",
+        "username": "Nazwa użytkownika",
+        "password": "Hasło",
+        "confirm": "Powtórz hasło",
         "or-register": "",
         "or-login": "",
         "password-no-match": "",
-        "delete": "",
+        "delete": "Usuń konto",
         "delete-confirmation": ""
     },
     "downloads": {
@@ -204,9 +204,9 @@
     "errors": {
         "connection": "",
         "connection-tips": "",
-        "unknown": "",
-        "try-again": "",
-        "re-login": "",
+        "unknown": "Nieznany błąd",
+        "try-again": "Spróbuj ponownie",
+        "re-login": "Zaloguj się ponownie",
         "offline": "",
         "unauthorized": "",
         "needVerification": "",
