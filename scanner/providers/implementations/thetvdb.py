@@ -123,6 +123,10 @@ class TVDB(Provider):
 			type="series",
 		)
 		ret = await self.get(f"search?{urlencode(query)}")
+		if not any(ret["data"]):
+			raise ProviderError(
+				f"No serie found with the name {name} in the year {year} (on tvdb)"
+			)
 		return ret["data"][0]["tvdb_id"]
 
 	@cache(ttl=timedelta(days=1))
@@ -233,45 +237,47 @@ class TVDB(Provider):
 			not_found_fail=f"Could not find show with id {show_id}",
 		)
 		logger.debug("TVDB responded: %s", ret)
-		ret = ret["data"]
 		translations = await asyncio.gather(
 			*(
 				self.get(f"series/{show_id}/translations/{lang}")
 				for lang in self._languages
-				if lang != ret["originalLanguage"]
+				if lang != ret["data"]["originalLanguage"]
 			)
 		)
 		trans = {
 			self.normalize_lang(lang): ShowTranslation(
-				name=x["name"],
+				name=x["data"]["name"],
 				tagline=None,
 				tags=[],
-				overview=x["overview"],
+				overview=x["data"]["overview"],
 				posters=[
 					i["image"]
-					for i in x["artworks"]
+					for i in ret["data"]["artworks"]
 					if i["type"] == 2
 					and (i["language"] == lang or i["language"] is None)
 				],
 				logos=[
 					i["image"]
-					for i in x["artworks"]
+					for i in ret["data"]["artworks"]
 					if i["type"] == 5
 					and (i["language"] == lang or i["language"] is None)
 				],
 				thumbnails=[
 					i["image"]
-					for i in x["artworks"]
+					for i in ret["data"]["artworks"]
 					if i["type"] == 3
 					and (i["language"] == lang or i["language"] is None)
 				],
-				trailers=[x["url"] for t in ret["trailers"] if t["language"] == lang],
+				trailers=[
+					t["url"] for t in ret["data"]["trailers"] if t["language"] == lang
+				],
 			)
 			for (lang, x) in [
-				(ret["originalLanguage"], ret),
+				(ret["data"]["originalLanguage"], ret),
 				*zip(self._languages, translations),
 			]
 		}
+		ret = ret["data"]
 		return Show(
 			original_language=self.normalize_lang(ret["originalLanguage"]),
 			aliases=[x["name"] for x in ret["aliases"]],
@@ -342,9 +348,11 @@ class TVDB(Provider):
 			f"seasons/{season_id}/extended",
 			not_found_fail=f"Invalid season id {season_id}",
 		)
+		logger.debug("TVDB send season (%s) data %s", season_id, info)
 
 		async def process_translation(lang: str) -> SeasonTranslation:
 			data = await self.get(f"seasons/{season_id}/translations/{lang}")
+			logger.debug("TVDB send season (%s) translations (%s) data %s", season_id, lang, data)
 			return SeasonTranslation(
 				name=data["data"]["name"],
 				overview=data["data"]["overview"],
