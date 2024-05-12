@@ -133,10 +133,6 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 			seek: (value: number) => {
 				if (ref.current) ref.current.currentTime = value;
 			},
-			canPlay: (codec: string) => {
-				if (!ref.current) return false;
-				return !!ref.current.canPlayType(codec);
-			},
 		}),
 		[],
 	);
@@ -180,7 +176,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 
 	useEffect(() => {
 		return () => {
-			console.log("hls cleanup")
+			console.log("hls cleanup");
 			if (hls) hls.destroy();
 			hls = null;
 		};
@@ -256,6 +252,10 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 export default Video;
 
 export const canPlay = (codec: string) => {
+	// most chrome based browser (and safari I think) supports matroska but reports they do not.
+	// for those browsers, only check the codecs and not the container.
+	if (navigator.userAgent.search("Firefox") === -1)
+		codec = codec.replace("video/x-matroska", "video/mp4");
 	const videos = document.getElementsByTagName("video");
 	const video = videos.item(0) ?? document.createElement("video");
 	return !!video.canPlayType(codec);
