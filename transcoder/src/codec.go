@@ -3,6 +3,7 @@ package src
 import (
 	"cmp"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/zoriya/go-mediainfo"
@@ -118,11 +119,16 @@ func GetMimeCodec(mi *mediainfo.File, kind mediainfo.StreamKind, i int) *string 
 		ret := "mp4a.a5"
 		return &ret
 
+	case "audio/eac3", "E-AC-3":
+		ret := "mp4a.a6"
+		return &ret
+
 	case "audio/x-flac", "FLAC":
 		ret := "fLaC"
 		return &ret
 
 	default:
+		log.Printf("No known mime format for: %s", codec)
 		return nil
 	}
 }
