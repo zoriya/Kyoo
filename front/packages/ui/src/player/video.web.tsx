@@ -393,6 +393,8 @@ export const QualitiesMenu = (props: ComponentProps<typeof Menu>) => {
 	// biome-ignore lint/correctness/useExhaustiveDependencies: Inculde hls in dependency array
 	useEffect(() => {
 		if (!hls) return;
+		// Also rerender when hls instance changes
+		rerender();
 		hls.on(Hls.Events.LEVEL_SWITCHED, rerender);
 		return () => hls?.off(Hls.Events.LEVEL_SWITCHED, rerender);
 	}, [hls]);
