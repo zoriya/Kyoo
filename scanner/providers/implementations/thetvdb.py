@@ -311,7 +311,9 @@ class TVDB(Provider):
 				"IMDB",
 			),
 			translations=trans,
-			seasons=[],
+			seasons=await asyncio.gather(
+				*(self.identify_season(x["id"], x["number"]) for x in ret["seasons"])
+			),
 		)
 
 	def process_remote_id(
@@ -321,3 +323,46 @@ class TVDB(Provider):
 		if id is None:
 			return {}
 		return {name: MetadataID(id, link(id))}
+
+	async def identify_season(self, show_id: str, season: int) -> Season:
+		"""
+		for tvdb, we don't save show_id but the season_id so we don't need to read `season`
+		"""
+		season_id = show_id
+		info = await self.get(
+			f"seasons/{season_id}/extended",
+			not_found_fail=f"Invalid season id {season_id}",
+		)
+
+		async def process_translation(lang: str) -> SeasonTranslation:
+			data = await self.get(f"seasons/{season_id}/translations/{lang}")
+			return SeasonTranslation(
+				name=data["data"]["name"],
+				overview=data["data"]["overview"],
+				posters=[
+					i["image"]
+					for i in data["data"]["artworks"]
+					if i["type"] == 7
+					and (i["language"] == lang or i["language"] is None)
+				],
+				thumbnails=[
+					i["image"]
+					for i in data["data"]["artworks"]
+					if i["type"] == 8
+					and (i["language"] == lang or i["language"] is None)
+				],
+			)
+
+		trans = await asyncio.gather(*(process_translation(x) for x in self._languages))
+		translations = {lang: tl for lang, tl in zip(self._languages, trans)}
+
+		return Season(
+			season_number=info["data"]["number"],
+			episodes_count=len(info["data"]["episodes"]),
+			start_air=min(x["aired"] for x in info["data"]["episodes"]),
+			end_air=max(x["aired"] for x in info["data"]["episodes"]),
+			external_id={
+				self.name: MetadataID(season_id, None),
+			},
+			translations=translations,
+		)
