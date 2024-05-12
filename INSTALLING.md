@@ -4,7 +4,7 @@
 2. Download the
    [`docker-compose.yml`](https://github.com/zoriya/kyoo/releases/latest/download/docker-compose.yml) and
    [`.env`](https://raw.githubusercontent.com/zoriya/Kyoo/master/.env.example) files
-3. Fill the `.env` file with your configuration options (and an API Key from [themoviedb.org](https://www.themoviedb.org/))
+3. Fill the `.env` file with your configuration options
 4. Look at [Hardware Acceleration section](#Hardware-Acceleration) if you need it
 5. Run `docker compose up -d` and see kyoo at `http://localhost:8901`
 
@@ -16,7 +16,7 @@ To install Kyoo, you need docker and docker-compose. Those can be installed from
 or [Windows](https://docs.docker.com/desktop/install/windows-install/). Docker is used to run each services of Kyoo in
 an isolated environment with all the dependencies they need.
 
-Kyoo also needs 2 files to work properly. The first should be downloaded from the latest release artificat, the other needs to be filled in with your configurations.
+Kyoo also needs 2 files to work properly. The first should be downloaded from the latest release artifact, the other needs to be filled in with your configurations.
 Those files can be put in any directory of your choice.
 
 Those files are:
@@ -27,10 +27,6 @@ Those files are:
 > If you want an explanation of what are those files, you can read the following:
 > The `docker-compose.yml` file describes the different services of Kyoo, where they should be downloaded and their start order. \
 > The `.env` file contains all the configuration options that the services in `docker-compose.yml` will read.
-
-To retrieve metadata, Kyoo will need to communicate with an external service. For now, that is `the movie database`.
-For this purpose, you will need to get an API Key. For that, go to [themoviedb.org](https://www.themoviedb.org/) and create an account, then
-go [here](https://www.themoviedb.org/settings/api) and copy the `API Key (v3 auth)`, paste it after the `THEMOVIEDB_APIKEY=` on the `.env` file.
 
 If you need hardware acceleration, look at [Hardware Acceleration section](#Hardware-Acceleration) if you need it
 

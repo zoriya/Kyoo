@@ -24,8 +24,8 @@ class Provider:
 
 		from providers.implementations.themoviedatabase import TheMovieDatabase
 
-		tmdb = os.environ.get("THEMOVIEDB_APIKEY")
-		if tmdb:
+		tmdb = os.environ.get("THEMOVIEDB_APIKEY") or TheMovieDatabase.DEFAULT_API_KEY
+		if tmdb != "disabled":
 			tmdb = TheMovieDatabase(languages, client, tmdb)
 			providers.append(tmdb)
 

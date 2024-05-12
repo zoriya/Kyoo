@@ -22,6 +22,8 @@ logger = getLogger(__name__)
 
 
 class TheMovieDatabase(Provider):
+	DEFAULT_API_KEY = "c9f328a01011b28f22483717395fc3fa"
+
 	def __init__(
 		self,
 		languages: list[str],
