@@ -150,6 +150,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 	const subtitle = useAtomValue(subtitleAtom);
 	useSubtitle(ref, subtitle, fonts);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: do not restart on startPosition change
 	useLayoutEffect(() => {
 		if (!ref?.current || !source.uri) return;
 		if (!hls || oldHls.current !== source.hls) {

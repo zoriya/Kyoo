@@ -8,7 +8,7 @@
 		"lineEnding": "lf",
 		"lineWidth": 100,
 		"attributePosition": "auto",
-		"ignore": ["**/.yarn/**", "**/.next/**", "**/.expo/**", "**/next-env.d.ts"]
+		"ignore": ["**/.yarn/**", "**/.next/**", "**/.expo/**", "**/next-env.d.ts", "**/back/**"]
 	},
 	"organizeImports": {
 		"enabled": true
@@ -33,7 +33,7 @@
 				"noBannedTypes": "off"
 			}
 		},
-		"ignore": ["**/.yarn/**", "**/.next/**", "**/.expo/**", "**/next-env.d.ts"]
+		"ignore": ["**/.yarn/**", "**/.next/**", "**/.expo/**", "**/next-env.d.ts", "**/back/**"]
 	},
 	"javascript": {
 		"formatter": {
