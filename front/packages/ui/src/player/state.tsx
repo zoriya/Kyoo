@@ -33,7 +33,7 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
-import NativeVideo, { type VideoProps } from "./video";
+import NativeVideo, { canPlay, type VideoProps } from "./video";
 
 export const playAtom = atom(true);
 export const loadAtom = atom(false);
@@ -100,6 +100,7 @@ export const Video = memo(function Video({
 	links,
 	subtitles,
 	audios,
+	codec,
 	setError,
 	fonts,
 	startTime: startTimeP,
@@ -108,6 +109,7 @@ export const Video = memo(function Video({
 	links?: Episode["links"];
 	subtitles?: Subtitle[];
 	audios?: Audio[];
+	codec?: string;
 	setError: (error: string | undefined) => void;
 	fonts?: string[];
 	startTime?: number | null;
@@ -132,21 +134,31 @@ export const Video = memo(function Video({
 	}, [publicProgress]);
 
 	const getProgress = useAtomCallback(useCallback((get) => get(progressAtom), []));
-	const oldLinks = useRef<typeof links | null>(null);
-	useLayoutEffect(() => {
+	useEffect(() => {
 		// Reset the state when a new video is loaded.
-		setSource((mode === PlayMode.Direct ? links?.direct : links?.hls) ?? null);
-		setLoad(true);
-		if (oldLinks.current !== links) {
-			setPrivateProgress(startTime.current ?? 0);
-			setPublicProgress(startTime.current ?? 0);
-		} else {
-			// keep current time when changing between direct and hls.
-			startTime.current = getProgress();
+
+		let newMode = getLocalSetting("playmode", "direct") !== "auto" ? PlayMode.Direct : PlayMode.Hls;
+		// Only allow direct play if the device supports it
+		if (newMode === PlayMode.Direct && codec && !canPlay(codec)) {
+			console.log(`Browser can't natively play ${codec}, switching to hls stream.`);
+			newMode = PlayMode.Hls;
 		}
-		oldLinks.current = links;
+		setPlayMode(newMode);
+
+		setSource((newMode === PlayMode.Direct ? links?.direct : links?.hls) ?? null);
+		setLoad(true);
+		setPrivateProgress(startTime.current ?? 0);
+		setPublicProgress(startTime.current ?? 0);
 		setPlay(true);
-	}, [mode, links, setLoad, setPrivateProgress, setPublicProgress, setPlay, getProgress]);
+	}, [links, codec, setLoad, setPrivateProgress, setPublicProgress, setPlay, setPlayMode]);
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: do not change source when links change, this is done above
+	useEffect(() => {
+		setSource((mode === PlayMode.Direct ? links?.direct : links?.hls) ?? null);
+		// keep current time when changing between direct and hls.
+		startTime.current = getProgress();
+		setPlay(true);
+	}, [mode, getProgress, setPlay]);
 
 	const account = useAccount();
 	const defaultSubLanguage = account?.settings.subtitleLanguage;

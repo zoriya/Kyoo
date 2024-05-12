@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"mime"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -23,6 +24,8 @@ type MediaInfo struct {
 	Path string `json:"path"`
 	/// The extension currently used to store this video file
 	Extension string `json:"extension"`
+	/// The whole mimetype (defined as the RFC 6381). ex: `video/mp4; codecs="avc1.640028, mp4a.40.2"`
+	MimeCodec *string `json:"mimeCodec"`
 	/// The file size of the video file.
 	Size uint64 `json:"size"`
 	/// The length of the media in seconds.
@@ -311,6 +314,24 @@ func getInfo(path string) (*MediaInfo, error) {
 				return fmt.Sprintf("%s/%s/attachment/%s", Settings.RoutePrefix, base64.StdEncoding.EncodeToString([]byte(path)), font)
 			}),
 	}
+	var codecs []string
+	if len(ret.Videos) > 0 && ret.Videos[0].MimeCodec != nil {
+		codecs = append(codecs, *ret.Videos[0].MimeCodec)
+	}
+	if len(ret.Audios) > 0 && ret.Audios[0].MimeCodec != nil {
+		codecs = append(codecs, *ret.Audios[0].MimeCodec)
+	}
+	container := mime.TypeByExtension(fmt.Sprintf(".%s", ret.Extension))
+	if container != "" {
+		if len(codecs) > 0 {
+			codecs_str := strings.Join(codecs, ", ")
+			mime := fmt.Sprintf("%s; codecs=\"%s\"", container, codecs_str)
+			ret.MimeCodec = &mime
+		} else {
+			ret.MimeCodec = &container
+		}
+	}
+
 	if len(ret.Videos) > 0 {
 		ret.Video = &ret.Videos[0]
 	}

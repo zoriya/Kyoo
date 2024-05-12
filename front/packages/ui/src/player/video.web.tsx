@@ -50,7 +50,7 @@ function uuidv4(): string {
 const client_id = typeof window === "undefined" ? "ssr" : uuidv4();
 
 const initHls = (): Hls => {
-	if (hls !== null) return hls;
+	if (hls) hls.destroy();
 	const loadPolicy: LoadPolicy = {
 		default: {
 			maxTimeToFirstByteMs: Number.POSITIVE_INFINITY,
@@ -124,6 +124,8 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 	const ref = useRef<HTMLVideoElement>(null);
 	const oldHls = useRef<string | null>(null);
 	const { css } = useYoshiki();
+	const errorHandler = useRef<typeof onError>(onError);
+	errorHandler.current = onError;
 
 	useImperativeHandle(
 		forwaredRef,
@@ -148,13 +150,11 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 	const subtitle = useAtomValue(subtitleAtom);
 	useSubtitle(ref, subtitle, fonts);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: onError changes should not restart the playback.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: do not restart on startPosition change
 	useLayoutEffect(() => {
 		if (!ref?.current || !source.uri) return;
 		if (!hls || oldHls.current !== source.hls) {
 			// Reinit the hls player when we change track.
-			if (hls) hls.destroy();
-			hls = null;
 			hls = initHls();
 			hls.loadSource(source.hls!);
 			oldHls.current = source.hls;
@@ -168,12 +168,20 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 			hls.on(Hls.Events.ERROR, (_, d) => {
 				if (!d.fatal || !hls?.media) return;
 				console.warn("Hls error", d);
-				onError?.call(null, {
+				errorHandler.current?.({
 					error: { errorString: d.reason ?? d.error?.message ?? "Unknown hls error" },
 				});
 			});
 		}
 	}, [source.uri, source.hls]);
+
+	useEffect(() => {
+		return () => {
+			console.log("hls cleanup");
+			if (hls) hls.destroy();
+			hls = null;
+		};
+	}, []);
 
 	const mode = useAtomValue(playModeAtom);
 	const audio = useAtomValue(audioAtom);
@@ -243,6 +251,16 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 });
 
 export default Video;
+
+export const canPlay = (codec: string) => {
+	// most chrome based browser (and safari I think) supports matroska but reports they do not.
+	// for those browsers, only check the codecs and not the container.
+	if (navigator.userAgent.search("Firefox") === -1)
+		codec = codec.replace("video/x-matroska", "video/mp4");
+	const videos = document.getElementsByTagName("video");
+	const video = videos.item(0) ?? document.createElement("video");
+	return !!video.canPlayType(codec);
+};
 
 const useSubtitle = (
 	player: RefObject<HTMLVideoElement>,
@@ -348,7 +366,7 @@ export const AudiosMenu = ({
 	useEffect(() => {
 		if (!hls) return;
 		hls.on(Hls.Events.AUDIO_TRACK_LOADED, rerender);
-		return () => hls!.off(Hls.Events.AUDIO_TRACK_LOADED, rerender);
+		return () => hls?.off(Hls.Events.AUDIO_TRACK_LOADED, rerender);
 	});
 
 	if (!hls) return <Menu {...props} disabled {...tooltip(t("player.notInPristine"))} />;
@@ -373,11 +391,14 @@ export const QualitiesMenu = (props: ComponentProps<typeof Menu>) => {
 	const [mode, setPlayMode] = useAtom(playModeAtom);
 	const rerender = useForceRerender();
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Inculde hls in dependency array
 	useEffect(() => {
 		if (!hls) return;
+		// Also rerender when hls instance changes
+		rerender();
 		hls.on(Hls.Events.LEVEL_SWITCHED, rerender);
-		return () => hls!.off(Hls.Events.LEVEL_SWITCHED, rerender);
-	});
+		return () => hls?.off(Hls.Events.LEVEL_SWITCHED, rerender);
+	}, [hls]);
 
 	const levelName = (label: Level, auto?: boolean): string => {
 		const height = `${label.height}p`;

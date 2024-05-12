@@ -150,6 +150,11 @@ export const WatchInfoP = z
 		 */
 		extension: z.string(),
 		/**
+		 * The whole mimetype (defined as the RFC 6381).
+		 * ex: `video/mp4; codecs="avc1.640028, mp4a.40.2"`
+		 */
+		mimeCodec: z.string(),
+		/**
 		 * The file size of the video file.
 		 */
 		size: z.number(),
