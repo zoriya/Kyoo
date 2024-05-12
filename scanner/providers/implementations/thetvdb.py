@@ -19,16 +19,18 @@ logger = getLogger(__name__)
 
 
 class TVDB(Provider):
+	DEFAULT_API_KEY = "3732560f-08b7-41db-9d9a-2966b4d90c10"
+
 	def __init__(
 		self,
 		client: ClientSession,
 		api_key: str,
-		pin: str,
+		pin: Optional[str],
 		languages: list[str],
 	) -> None:
 		super().__init__()
 		self._client = client
-		self.base = "https://api4.thetvdb.com/v4/"
+		self.base = "https://api4.thetvdb.com/v4"
 		self._api_key = api_key
 		self._pin = pin
 		self._languages = languages
@@ -80,7 +82,10 @@ class TVDB(Provider):
 	async def login(self) -> str:
 		async with self._client.post(
 			f"{self.base}/login",
-			json={"apikey": self._api_key, "pin": self._pin},
+			json={
+				"apikey": self._api_key,
+			}
+			| ({"pin": self._pin} if self._pin else {}),
 		) as r:
 			r.raise_for_status()
 			ret = await r.json()
@@ -110,6 +115,7 @@ class TVDB(Provider):
 	def name(self) -> str:
 		return "tvdb"
 
+	@cache(ttl=timedelta(days=1))
 	async def search_show(self, name: str, year: Optional[int]) -> str:
 		query = OrderedDict(
 			query=name,
@@ -125,7 +131,7 @@ class TVDB(Provider):
 		show_id: str,
 		language: Optional[str] = None,
 	):
-		path = f"/series/{show_id}/episodes/default"
+		path = f"series/{show_id}/episodes/default"
 		if language is not None:
 			path += f"/{language}"
 		ret = await self.get(
@@ -136,8 +142,8 @@ class TVDB(Provider):
 		while next != None:
 			ret = await self.get(fullPath=next)
 			next = ret["links"]["next"]
-			episodes += ret["data"]
-		return episodes
+			episodes += ret["data"]["episodes"]
+		return episodes, ret["data"]
 
 	async def search_episode(
 		self,
@@ -150,6 +156,7 @@ class TVDB(Provider):
 		show_id = await self.search_show(name, year)
 		return await self.identify_episode(show_id, season, episode_nbr, absolute)
 
+	@cache(ttl=timedelta(days=1))
 	async def identify_episode(
 		self,
 		show_id: str,
@@ -158,8 +165,7 @@ class TVDB(Provider):
 		absolute: Optional[int],
 	) -> Episode:
 		flang, *olang = self._languages
-		episodes = await self.get_episodes(show_id, language=flang)
-		show = episodes["data"]
+		episodes, show = await self.get_episodes(show_id, language=flang)
 		ret = next(
 			filter(
 				(lambda x: x["seasonNumber"] == 1 and x["number"] == absolute)
@@ -167,7 +173,7 @@ class TVDB(Provider):
 				else (
 					lambda x: x["seasonNumber"] == season and x["number"] == episode_nbr
 				),
-				episodes["episodes"],
+				episodes,
 			),
 			None,
 		)
@@ -188,10 +194,7 @@ class TVDB(Provider):
 				self._languages,
 				[
 					ret,
-					*(
-						next(x for x in e["episodes"] if x["id"] == ret["id"])
-						for e in otrans
-					),
+					*(next(x for x in e[0] if x["id"] == ret["id"]) for e in otrans),
 				],
 			)
 		}
@@ -223,14 +226,17 @@ class TVDB(Provider):
 			translations=translations,
 		)
 
+	@cache(ttl=timedelta(days=1))
 	async def identify_show(self, show_id: str) -> Show:
 		ret = await self.get(
 			f"series/{show_id}/extended",
 			not_found_fail=f"Could not find show with id {show_id}",
 		)
+		logger.debug("TVDB responded: %s", ret)
+		ret = ret["data"]
 		translations = await asyncio.gather(
 			*(
-				self.get(f"/series/{show_id}/translations/{lang}")
+				self.get(f"series/{show_id}/translations/{lang}")
 				for lang in self._languages
 				if lang != ret["originalLanguage"]
 			)
@@ -326,6 +332,7 @@ class TVDB(Provider):
 			return {}
 		return {name: MetadataID(id, link(id))}
 
+	@cache(ttl=timedelta(days=1))
 	async def identify_season(self, show_id: str, season: int) -> Season:
 		"""
 		for tvdb, we don't save show_id but the season_id so we don't need to read `season`
