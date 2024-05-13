@@ -144,11 +144,14 @@ class TVDB(Provider):
 	async def get_episodes(
 		self,
 		show_id: str,
-		language: str,
+		language: Optional[str] = None,
 	):
 		try:
+			path = f"series/{show_id}/episodes/default"
+			if language is not None:
+				path += "/{language}"
 			ret = await self.get(
-				f"series/{show_id}/episodes/default/{language}",
+				path,
 				not_found_fail=f"Could not find show with id {show_id}",
 			)
 			episodes = ret["data"]["episodes"]
@@ -192,6 +195,10 @@ class TVDB(Provider):
 				f"Could not retrive episode {show['name']} s{season}e{episode_nbr}, absolute {absolute}"
 			)
 
+		languages = self._languages
+		if show["originalLanguage"] not in languages:
+			languages = [*self._languages, show["originalLanguage"]]
+			translations.append(await self.get_episodes(show_id))
 		trans = [
 			(
 				next((ep for ep in el[0] if ep["id"] == ret["id"]), None)
@@ -201,12 +208,12 @@ class TVDB(Provider):
 			for el in translations
 		]
 
-		translations = {
+		ep_trans = {
 			self.normalize_lang(lang): EpisodeTranslation(
 				name=val["name"],
 				overview=val["overview"],
 			)
-			for lang, val in zip(self._languages, trans)
+			for lang, val in zip(languages, trans)
 			if val is not None
 		}
 
@@ -234,7 +241,7 @@ class TVDB(Provider):
 					f"https://thetvdb.com/series/{show_id}/episodes/{ret['id']}",
 				),
 			},
-			translations=translations,
+			translations=ep_trans,
 		)
 
 	@cache(ttl=timedelta(days=1))
@@ -246,7 +253,11 @@ class TVDB(Provider):
 		logger.debug("TVDB responded: %s", ret)
 
 		async def process_translation(lang: str) -> Optional[ShowTranslation]:
-			data = await self.get(f"series/{show_id}/translations/{lang}")
+			data = (
+				await self.get(f"series/{show_id}/translations/{lang}")
+				if lang is not ret["orginalLanguage"]
+				else ret
+			)
 			return ShowTranslation(
 				name=data["data"]["name"],
 				tagline=None,
@@ -275,8 +286,13 @@ class TVDB(Provider):
 				],
 			)
 
+		languages = (
+			[*self._languages, ret["originalLanguage"]]
+			if ret["originalLanguage"] not in self._languages
+			else self._languages
+		)
 		translations = await asyncio.gather(
-			*(process_translation(lang) for lang in self._languages)
+			*(process_translation(lang) for lang in languages)
 		)
 		trans = {
 			self.normalize_lang(lang): ts
