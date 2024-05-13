@@ -46,8 +46,10 @@ class Subscriber(RabbitBase):
 					case _:
 						logger.error(f"Invalid action: {msg.action}")
 				if ack:
+					logger.info("finished processing %s", msg)
 					await message.ack()
 				else:
+					logger.warn("failed to process %s", msg)
 					await message.reject()
 			except Exception as e:
 				logger.exception("Unhandled error", exc_info=e)

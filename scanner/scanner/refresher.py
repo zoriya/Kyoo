@@ -13,4 +13,6 @@ async def refresh(publisher: Publisher, client: KyooClient):
 		# Check for updates every 4 hours
 		await asyncio.sleep(60 * 60 * 4)
 		todo = await client.get("refreshables")
+		logger.info("Refreshing %d items", len(todo))
 		await asyncio.gather(*(publisher.refresh(**x) for x in todo))
+		logger.info("Refresh finish. Will check for new items to refresh in 4 hours")
