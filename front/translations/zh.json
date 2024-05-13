@@ -10,7 +10,8 @@
 			"goToShow": "转到节目",
 			"download": "下载",
 			"mediainfo": "查看文件信息"
-		}
+		},
+		"refreshMetadata": "刷新元数据"
 	},
 	"show": {
 		"play": "播放",
@@ -236,7 +237,8 @@
 		},
 		"scanner": {
 			"label": "扫描器",
-			"empty": "未发现问题。所有项目均已注册。"
+			"empty": "未发现问题。所有项目均已注册。",
+			"scan": "触发媒体库扫描"
 		}
 	}
 }
