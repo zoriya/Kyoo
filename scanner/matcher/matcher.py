@@ -87,6 +87,7 @@ class Matcher:
 
 	async def search_movie(self, title: str, year: Optional[int], path: str):
 		movie = await self._provider.search_movie(title, year)
+		movie.file_title = title
 		movie.path = path
 		logger.debug("Got movie: %s", movie)
 		movie_id = await self._client.post("movies", data=movie.to_kyoo())
