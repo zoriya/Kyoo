@@ -1,8 +1,9 @@
-import os
 from dataclasses import asdict, dataclass, field
 from datetime import date
 from typing import Optional
 from enum import Enum
+
+from providers.utils import select_translation, select_image
 
 from .genre import Genre
 from .studio import Studio
@@ -20,14 +21,14 @@ class Status(str, Enum):
 @dataclass
 class ShowTranslation:
 	name: str
-	tagline: Optional[str]
-	tags: list[str]
-	overview: Optional[str]
+	tagline: Optional[str] = None
+	tags: list[str] = []
+	overview: Optional[str] = None
 
-	posters: list[str]
-	logos: list[str]
-	trailers: list[str]
-	thumbnails: list[str]
+	posters: list[str] = []
+	logos: list[str] = []
+	trailers: list[str] = []
+	thumbnails: list[str] = []
 
 
 @dataclass
@@ -46,20 +47,21 @@ class Show:
 	external_id: dict[str, MetadataID]
 
 	translations: dict[str, ShowTranslation] = field(default_factory=dict)
+	# The title of this show according to it's filename (None only for ease of use in providers)
+	file_title: Optional[str] = None
 
 	def to_kyoo(self):
-		from providers.utils import select_image
-
-		# For now, the API of kyoo only support one language so we remove the others.
-		default_language = os.environ["LIBRARY_LANGUAGES"].split(",")[0]
+		trans = select_translation(self) or ShowTranslation(name=self.file_title or "")
 		return {
 			**asdict(self),
-			**asdict(self.translations[default_language]),
+			**asdict(trans),
+			"rating": self.rating or 0,
 			"studio": next((x.to_kyoo() for x in self.studios), None),
 			"seasons": None,
 			"poster": select_image(self, "posters"),
 			"thumbnail": select_image(self, "thumbnails"),
 			"logo": select_image(self, "logos"),
-			"trailer": next(iter(self.translations[default_language].trailers), None),
+			"trailer": next(iter(trans.trailers), None),
 			"genres": [x.to_kyoo() for x in self.genres],
+			"file_title": None,
 		}
