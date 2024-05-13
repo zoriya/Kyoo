@@ -153,15 +153,6 @@ func Map[T, U any](ts []T, f func(T, int) U) []U {
 	return us
 }
 
-func Filter[T any](ss []T, test func(T, int) bool) (ret []T) {
-	for i, s := range ss {
-		if test(s, i) {
-			ret = append(ret, s)
-		}
-	}
-	return
-}
-
 func OrNull(str string) *string {
 	if str == "" {
 		return nil
@@ -349,30 +340,32 @@ func chapterTimeIsValid(chapterTime string) bool {
 func getChapters(chapters_begin uint32, chapters_end uint32, mi *mediainfo.File, duration float32) []Chapter {
 	chapterCount := max(chapters_end-chapters_begin, 1)
 	chapterIterationCount := chapterCount
+	chapters := make([]Chapter, chapterCount)
+	chapterIndex := 0
 
-	for i := uint32(0); i < chapterIterationCount; i++ {
-		startTime := mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin+i), mediainfo.InfoName)
-		if !chapterTimeIsValid(startTime) {
-			chapterIterationCount = chapterIterationCount + 1
-		}
-	}
-	return Filter(Map(make([]Chapter, chapterIterationCount), func(_ Chapter, i int) Chapter {
-		startTime := mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoName)
-		if !chapterTimeIsValid(startTime) {
-			return Chapter{}
-		}
-		// +1 is safe, the value at chapters_end contains the right duration
+	for i := 0; i < int(chapterIterationCount); i++ {
+		rawStartTime := mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoName)
 		rawEndTime := mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i+1, mediainfo.InfoName)
-		parsedEndTime := duration
-		if chapterTimeIsValid(rawEndTime) {
-			parsedEndTime = ParseTime(rawEndTime)
+		// If true, this "chapter" is invalid. We skip it
+		if !chapterTimeIsValid(rawStartTime) {
+			chapterIterationCount = chapterIterationCount + 1
+			continue
 		}
-		return Chapter{
-			StartTime: ParseTime(startTime),
-			EndTime:   parsedEndTime,
+		var endTime float32
+		// If this fails, we probably are at the end of the video
+		// Since there would be no following chapter,
+		// we defacto set the end time to the end of the video (i.e. its duration)
+		if chapterTimeIsValid(rawEndTime) {
+			endTime = ParseTime(rawEndTime)
+		} else {
+			endTime = duration
+		}
+		chapters[chapterIndex] = Chapter{
+			StartTime: ParseTime(rawStartTime),
+			EndTime:   endTime,
 			Name:      mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoText),
 		}
-	}), func(chapter Chapter, i int) bool {
-		return chapter != Chapter{}
-	})
+		chapterIndex++
+	}
+	return chapters
 }
