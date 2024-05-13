@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"unicode"
 
 	"github.com/zoriya/go-mediainfo"
 )
@@ -242,13 +243,14 @@ func getInfo(path string) (*MediaInfo, error) {
 
 	// fmt.Printf("%s", mi.Option("info_parameters", ""))
 
+	// duration in seconds
+	duration := ParseFloat(mi.Parameter(mediainfo.StreamGeneral, 0, "Duration")) / 1000
 	ret := MediaInfo{
 		Path: path,
 		// Remove leading .
 		Extension: filepath.Ext(path)[1:],
 		Size:      ParseUint64(mi.Parameter(mediainfo.StreamGeneral, 0, "FileSize")),
-		// convert ms to seconds
-		Duration:  ParseFloat(mi.Parameter(mediainfo.StreamGeneral, 0, "Duration")) / 1000,
+		Duration:  duration,
 		Container: OrNull(mi.Parameter(mediainfo.StreamGeneral, 0, "Format")),
 		Videos: Map(make([]Video, ParseUint(mi.Parameter(mediainfo.StreamVideo, 0, "StreamCount"))), func(_ Video, i int) Video {
 			return Video{
@@ -300,14 +302,7 @@ func getInfo(path string) (*MediaInfo, error) {
 				Link:      link,
 			}
 		}),
-		Chapters: Map(make([]Chapter, max(chapters_end-chapters_begin, 1)-1), func(_ Chapter, i int) Chapter {
-			return Chapter{
-				StartTime: ParseTime(mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoName)),
-				// +1 is safe, the value at chapters_end contains the right duration
-				EndTime: ParseTime(mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i+1, mediainfo.InfoName)),
-				Name:    mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoText),
-			}
-		}),
+		Chapters: getChapters(chapters_begin, chapters_end, mi, duration),
 		Fonts: Map(
 			attachments,
 			func(font string, _ int) string {
@@ -336,4 +331,41 @@ func getInfo(path string) (*MediaInfo, error) {
 		ret.Video = &ret.Videos[0]
 	}
 	return &ret, nil
+}
+
+func chapterTimeIsValid(chapterTime string) bool {
+	return len(chapterTime) > 0 && unicode.IsDigit(rune(chapterTime[0]))
+}
+
+func getChapters(chapters_begin uint32, chapters_end uint32, mi *mediainfo.File, duration float32) []Chapter {
+	chapterCount := max(chapters_end-chapters_begin, 1)
+	chapterIterationCount := chapterCount
+	chapters := make([]Chapter, chapterCount)
+	chapterIndex := 0
+
+	for i := 0; i < int(chapterIterationCount); i++ {
+		rawStartTime := mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoName)
+		rawEndTime := mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i+1, mediainfo.InfoName)
+		// If true, this "chapter" is invalid. We skip it
+		if !chapterTimeIsValid(rawStartTime) {
+			chapterIterationCount = chapterIterationCount + 1
+			continue
+		}
+		var endTime float32
+		// If this fails, we probably are at the end of the video
+		// Since there would be no following chapter,
+		// we defacto set the end time to the end of the video (i.e. its duration)
+		if chapterTimeIsValid(rawEndTime) {
+			endTime = ParseTime(rawEndTime)
+		} else {
+			endTime = duration
+		}
+		chapters[chapterIndex] = Chapter{
+			StartTime: ParseTime(rawStartTime),
+			EndTime:   endTime,
+			Name:      mi.GetI(mediainfo.StreamMenu, 0, int(chapters_begin)+i, mediainfo.InfoText),
+		}
+		chapterIndex++
+	}
+	return chapters
 }
