@@ -129,26 +129,6 @@ class TVDB(Provider):
 			)
 		return ret["data"][0]["tvdb_id"]
 
-	@cache(ttl=timedelta(days=1))
-	async def get_episodes(
-		self,
-		show_id: str,
-		language: Optional[str] = None,
-	):
-		path = f"series/{show_id}/episodes/default"
-		if language is not None:
-			path += f"/{language}"
-		ret = await self.get(
-			path, not_found_fail=f"Could not find show with id {show_id}"
-		)
-		episodes = ret["data"]["episodes"]
-		next = ret["links"]["next"]
-		while next != None:
-			ret = await self.get(fullPath=next)
-			next = ret["links"]["next"]
-			episodes += ret["data"]["episodes"]
-		return episodes, ret["data"]
-
 	async def search_episode(
 		self,
 		name: str,
@@ -161,6 +141,27 @@ class TVDB(Provider):
 		return await self.identify_episode(show_id, season, episode_nbr, absolute)
 
 	@cache(ttl=timedelta(days=1))
+	async def get_episodes(
+		self,
+		show_id: str,
+		language: str,
+	):
+		try:
+			ret = await self.get(
+				f"series/{show_id}/episodes/default/{language}",
+				not_found_fail=f"Could not find show with id {show_id}",
+			)
+			episodes = ret["data"]["episodes"]
+			next = ret["links"]["next"]
+			while next != None:
+				ret = await self.get(fullPath=next)
+				next = ret["links"]["next"]
+				episodes += ret["data"]["episodes"]
+			return episodes, ret["data"]
+		except ProviderError:
+			return None
+
+	@cache(ttl=timedelta(days=1))
 	async def identify_episode(
 		self,
 		show_id: str,
@@ -168,8 +169,13 @@ class TVDB(Provider):
 		episode_nbr: Optional[int],
 		absolute: Optional[int],
 	) -> Episode:
-		flang, *olang = self._languages
-		episodes, show = await self.get_episodes(show_id, language=flang)
+		translations = await asyncio.gather(
+			*(self.get_episodes(show_id, language=lang) for lang in self._languages)
+		)
+		episodes, show = next((x for x in translations if x is not None), (None, None))
+		if episodes is None or show is None:
+			raise ProviderError(f"Could not get episodes for show with id {show_id}")
+
 		ret = next(
 			filter(
 				(lambda x: x["seasonNumber"] == 1 and x["number"] == absolute)
@@ -186,21 +192,22 @@ class TVDB(Provider):
 				f"Could not retrive episode {show['name']} s{season}e{episode_nbr}, absolute {absolute}"
 			)
 
-		otrans = await asyncio.gather(
-			*(self.get_episodes(show_id, language=lang) for lang in olang)
-		)
+		trans = [
+			(
+				next((ep for ep in el[0] if ep["id"] == ret["id"]), None)
+				if el is not None
+				else None
+			)
+			for el in translations
+		]
+
 		translations = {
 			self.normalize_lang(lang): EpisodeTranslation(
 				name=val["name"],
 				overview=val["overview"],
 			)
-			for (lang, val) in zip(
-				self._languages,
-				[
-					ret,
-					*(next(x for x in e[0] if x["id"] == ret["id"]) for e in otrans),
-				],
-			)
+			for lang, val in zip(self._languages, trans)
+			if val is not None
 		}
 
 		return Episode(
@@ -237,19 +244,14 @@ class TVDB(Provider):
 			not_found_fail=f"Could not find show with id {show_id}",
 		)
 		logger.debug("TVDB responded: %s", ret)
-		translations = await asyncio.gather(
-			*(
-				self.get(f"series/{show_id}/translations/{lang}")
-				for lang in self._languages
-				if lang != ret["data"]["originalLanguage"]
-			)
-		)
-		trans = {
-			self.normalize_lang(lang): ShowTranslation(
-				name=x["data"]["name"],
+
+		async def process_translation(lang: str) -> Optional[ShowTranslation]:
+			data = await self.get(f"series/{show_id}/translations/{lang}")
+			return ShowTranslation(
+				name=data["data"]["name"],
 				tagline=None,
 				tags=[],
-				overview=x["data"]["overview"],
+				overview=data["data"]["overview"],
 				posters=[
 					i["image"]
 					for i in ret["data"]["artworks"]
@@ -272,10 +274,14 @@ class TVDB(Provider):
 					t["url"] for t in ret["data"]["trailers"] if t["language"] == lang
 				],
 			)
-			for (lang, x) in [
-				(ret["data"]["originalLanguage"], ret),
-				*zip(self._languages, translations),
-			]
+
+		translations = await asyncio.gather(
+			*(process_translation(lang) for lang in self._languages)
+		)
+		trans = {
+			self.normalize_lang(lang): ts
+			for (lang, ts) in zip(self._languages, translations)
+			if ts is not None
 		}
 		ret = ret["data"]
 		return Show(
@@ -340,9 +346,7 @@ class TVDB(Provider):
 
 	@cache(ttl=timedelta(days=1))
 	async def identify_season(self, show_id: str, season: int) -> Season:
-		"""
-		for tvdb, we don't save show_id but the season_id so we don't need to read `season`
-		"""
+		# for tvdb, we don't save show_id but the season_id so we don't need to read `season`
 		season_id = show_id
 		info = await self.get(
 			f"seasons/{season_id}/extended",
@@ -350,29 +354,42 @@ class TVDB(Provider):
 		)
 		logger.debug("TVDB send season (%s) data %s", season_id, info)
 
-		async def process_translation(lang: str) -> SeasonTranslation:
-			data = await self.get(f"seasons/{season_id}/translations/{lang}")
-			logger.debug("TVDB send season (%s) translations (%s) data %s", season_id, lang, data)
-			return SeasonTranslation(
-				name=data["data"]["name"],
-				overview=data["data"]["overview"],
-				posters=[
-					i["image"]
-					for i in data["data"]["artworks"]
-					if i["type"] == 7
-					and (i["language"] == lang or i["language"] is None)
-				],
-				thumbnails=[
-					i["image"]
-					for i in data["data"]["artworks"]
-					if i["type"] == 8
-					and (i["language"] == lang or i["language"] is None)
-				],
-			)
+		async def process_translation(lang: str) -> Optional[SeasonTranslation]:
+			try:
+				data = await self.get(
+					f"seasons/{season_id}/translations/{lang}",
+					not_found_fail="Season translation not found",
+				)
+				logger.debug(
+					"TVDB send season (%s) translations (%s) data %s",
+					season_id,
+					lang,
+					data,
+				)
+				return SeasonTranslation(
+					name=data["data"]["name"],
+					overview=data["data"]["overview"],
+					posters=[
+						i["image"]
+						for i in data["data"]["artworks"]
+						if i["type"] == 7
+						and (i["language"] == lang or i["language"] is None)
+					],
+					thumbnails=[
+						i["image"]
+						for i in data["data"]["artworks"]
+						if i["type"] == 8
+						and (i["language"] == lang or i["language"] is None)
+					],
+				)
+			except ProviderError:
+				return None
 
 		trans = await asyncio.gather(*(process_translation(x) for x in self._languages))
 		translations = {
-			self.normalize_lang(lang): tl for lang, tl in zip(self._languages, trans)
+			self.normalize_lang(lang): tl
+			for lang, tl in zip(self._languages, trans)
+			if tl is not None
 		}
 
 		return Season(
