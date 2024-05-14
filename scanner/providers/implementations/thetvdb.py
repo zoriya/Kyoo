@@ -255,7 +255,7 @@ class TVDB(Provider):
 		async def process_translation(lang: str) -> Optional[ShowTranslation]:
 			data = (
 				await self.get(f"series/{show_id}/translations/{lang}")
-				if lang is not ret["orginalLanguage"]
+				if lang is not ret["data"]["originalLanguage"]
 				else ret
 			)
 			return ShowTranslation(
@@ -287,8 +287,8 @@ class TVDB(Provider):
 			)
 
 		languages = (
-			[*self._languages, ret["originalLanguage"]]
-			if ret["originalLanguage"] not in self._languages
+			[*self._languages, ret["data"]["originalLanguage"]]
+			if ret["data"]["originalLanguage"] not in self._languages
 			else self._languages
 		)
 		translations = await asyncio.gather(
