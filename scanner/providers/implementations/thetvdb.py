@@ -383,17 +383,17 @@ class TVDB(Provider):
 					data,
 				)
 				return SeasonTranslation(
-					name=data["data"]["name"],
-					overview=data["data"]["overview"],
+					name=data["data"].get("name"),
+					overview=data["data"].get("overview"),
 					posters=[
 						i["image"]
-						for i in info["data"]["artworks"]
+						for i in info["data"]["artwork"]
 						if i["type"] == 7
 						and (i["language"] == lang or i["language"] is None)
 					],
 					thumbnails=[
 						i["image"]
-						for i in info["data"]["artworks"]
+						for i in info["data"]["artwork"]
 						if i["type"] == 8
 						and (i["language"] == lang or i["language"] is None)
 					],
