@@ -290,7 +290,7 @@ class TVDB(Provider):
 		)
 		trans = {
 			normalize_lang(lang): ts
-			for (lang, ts) in zip(self._languages, translations)
+			for (lang, ts) in zip(languages, translations)
 			if ts is not None
 		}
 		ret = ret["data"]
