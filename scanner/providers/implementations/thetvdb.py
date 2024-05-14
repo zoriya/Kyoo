@@ -411,8 +411,22 @@ class TVDB(Provider):
 		return Season(
 			season_number=info["data"]["number"],
 			episodes_count=len(info["data"]["episodes"]),
-			start_air=min(x["aired"] for x in info["data"]["episodes"]),
-			end_air=max(x["aired"] for x in info["data"]["episodes"]),
+			start_air=min(
+				(
+					x["aired"]
+					for x in info["data"]["episodes"]
+					if x["aired"] is not None
+				),
+				default=None,
+			),
+			end_air=max(
+				(
+					x["aired"]
+					for x in info["data"]["episodes"]
+					if x["aired"] is not None
+				),
+				default=None,
+			),
 			external_id={
 				self.name: MetadataID(season_id, None),
 			},
