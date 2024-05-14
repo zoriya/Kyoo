@@ -22,13 +22,13 @@ class Status(str, Enum):
 class ShowTranslation:
 	name: str
 	tagline: Optional[str] = None
-	tags: list[str] = []
+	tags: list[str] = field(default_factory=list)
 	overview: Optional[str] = None
 
-	posters: list[str] = []
-	logos: list[str] = []
-	trailers: list[str] = []
-	thumbnails: list[str] = []
+	posters: list[str] = field(default_factory=list)
+	logos: list[str] = field(default_factory=list)
+	trailers: list[str] = field(default_factory=list)
+	thumbnails: list[str] = field(default_factory=list)
 
 
 @dataclass

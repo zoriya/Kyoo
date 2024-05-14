@@ -3,13 +3,14 @@ from __future__ import annotations
 import os
 from datetime import date
 
-from typing import Literal, Any
+from typing import TYPE_CHECKING, Literal, Any
 
-from providers.types.movie import Movie
-from providers.types.show import Show
-from providers.types.season import Season
-from providers.types.episode import Episode
-from providers.types.collection import Collection
+if TYPE_CHECKING:
+	from providers.types.movie import Movie
+	from providers.types.show import Show
+	from providers.types.season import Season
+	from providers.types.episode import Episode
+	from providers.types.collection import Collection
 
 type Resource = Movie | Show | Season | Episode | Collection
 
@@ -27,6 +28,9 @@ default_languages = os.environ["LIBRARY_LANGUAGES"].split(",")
 
 
 def select_translation(value: Resource, *, prefer_orginal=False) -> Any:
+	from providers.types.movie import Movie
+	from providers.types.show import Show
+
 	if (
 		prefer_orginal
 		and (isinstance(value, Movie) or isinstance(value, Show))
