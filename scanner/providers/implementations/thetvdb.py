@@ -9,6 +9,7 @@ from langcodes import Language
 from matcher.cache import cache
 
 from ..provider import Provider, ProviderError
+from ..utils import normalize_lang
 from ..types.season import Season, SeasonTranslation
 from ..types.episode import Episode, EpisodeTranslation, PartialShow, EpisodeID
 from ..types.studio import Studio
@@ -74,9 +75,6 @@ class TVDB(Provider):
 			"martial-arts": None,
 			"awards-show": None,
 		}
-
-	def normalize_lang(self, lang: str) -> str:
-		return str(Language.get(lang))
 
 	@cache(ttl=timedelta(days=30))
 	async def login(self) -> str:
@@ -149,7 +147,7 @@ class TVDB(Provider):
 		try:
 			path = f"series/{show_id}/episodes/default"
 			if language is not None:
-				path += "/{language}"
+				path += f"/{language}"
 			ret = await self.get(
 				path,
 				not_found_fail=f"Could not find show with id {show_id}",
@@ -195,10 +193,6 @@ class TVDB(Provider):
 				f"Could not retrive episode {show['name']} s{season}e{episode_nbr}, absolute {absolute}"
 			)
 
-		languages = self._languages
-		if show["originalLanguage"] not in languages:
-			languages = [*self._languages, show["originalLanguage"]]
-			translations.append(await self.get_episodes(show_id))
 		trans = [
 			(
 				next((ep for ep in el[0] if ep["id"] == ret["id"]), None)
@@ -209,18 +203,18 @@ class TVDB(Provider):
 		]
 
 		ep_trans = {
-			self.normalize_lang(lang): EpisodeTranslation(
+			normalize_lang(lang): EpisodeTranslation(
 				name=val["name"],
 				overview=val["overview"],
 			)
-			for lang, val in zip(languages, trans)
+			for lang, val in zip(self._languages, trans)
 			if val is not None
 		}
 
 		return Episode(
 			show=PartialShow(
 				name=show["name"],
-				original_language=self.normalize_lang(show["originalLanguage"]),
+				original_language=normalize_lang(show["originalLanguage"]),
 				external_id={
 					self.name: MetadataID(
 						show_id, f"https://thetvdb.com/series/{show['slug']}"
@@ -295,13 +289,13 @@ class TVDB(Provider):
 			*(process_translation(lang) for lang in languages)
 		)
 		trans = {
-			self.normalize_lang(lang): ts
+			normalize_lang(lang): ts
 			for (lang, ts) in zip(self._languages, translations)
 			if ts is not None
 		}
 		ret = ret["data"]
 		return Show(
-			original_language=self.normalize_lang(ret["originalLanguage"]),
+			original_language=normalize_lang(ret["originalLanguage"]),
 			aliases=[x["name"] for x in ret["aliases"]],
 			start_air=datetime.strptime(ret["firstAired"], "%Y-%m-%d").date(),
 			end_air=datetime.strptime(ret["lastAired"], "%Y-%m-%d").date(),
@@ -403,7 +397,7 @@ class TVDB(Provider):
 
 		trans = await asyncio.gather(*(process_translation(x) for x in self._languages))
 		translations = {
-			self.normalize_lang(lang): tl
+			normalize_lang(lang): tl
 			for lang, tl in zip(self._languages, trans)
 			if tl is not None
 		}
