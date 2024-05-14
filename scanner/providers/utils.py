@@ -58,7 +58,7 @@ def select_translation(
 
 def select_image(
 	value: Movie | Show | Season | Collection,
-	kind: Literal["posters"] | Literal["thumbnails"] | Literal["logos"],
+	kind: Literal["posters", "thumbnails", "logos", "trailers"],
 ) -> str | None:
 	return next(
 		chain(

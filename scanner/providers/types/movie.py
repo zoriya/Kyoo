@@ -58,7 +58,7 @@ class Movie:
 			"poster": select_image(self, "posters"),
 			"thumbnail": select_image(self, "thumbnails"),
 			"logo": select_image(self, "logos"),
-			"trailer": next(iter(trans.trailers), None),
+			"trailer": select_image(self, "trailers"),
 			"studio": next((x.to_kyoo() for x in self.studios), None),
 			"genres": [x.to_kyoo() for x in self.genres],
 			"collections": None,

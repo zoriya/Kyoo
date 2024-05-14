@@ -61,7 +61,7 @@ class Show:
 			"poster": select_image(self, "posters"),
 			"thumbnail": select_image(self, "thumbnails"),
 			"logo": select_image(self, "logos"),
-			"trailer": next(iter(trans.trailers), None),
+			"trailer": select_image(self, "trailers"),
 			"genres": [x.to_kyoo() for x in self.genres],
 			"file_title": None,
 		}
