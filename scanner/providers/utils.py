@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from datetime import date
 from itertools import chain
+from langcodes import Language
 from typing import TYPE_CHECKING, Literal, Any, Optional
 
 if TYPE_CHECKING:
@@ -19,6 +20,10 @@ def format_date(date: date | int | None) -> str | None:
 	if isinstance(date, int):
 		return f"{date}-01-01"
 	return date.isoformat()
+
+
+def normalize_lang(lang: str) -> str:
+	return str(Language.get(lang))
 
 
 # For now, the API of kyoo only support one language so we remove the others.

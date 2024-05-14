@@ -4,3 +4,4 @@ jsons
 watchfiles
 aio-pika
 msgspec
+langcodes

@@ -111,7 +111,7 @@ class Matcher:
 		episode = await self._provider.search_episode(
 			title,
 			season=season,
-			episode_nbr=episode_nbr,
+			episode_nbr=episode_nbr if season is not None else None,
 			absolute=episode_nbr if season is None else None,
 			year=year,
 		)

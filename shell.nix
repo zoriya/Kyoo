@@ -10,6 +10,7 @@
       requests
       dataclasses-json
       msgspec
+      langcodes
     ]);
   dotnet = with pkgs.dotnetCorePackages;
     combinePackages [
