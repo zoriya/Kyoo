@@ -387,13 +387,13 @@ class TVDB(Provider):
 					overview=data["data"]["overview"],
 					posters=[
 						i["image"]
-						for i in data["data"]["artworks"]
+						for i in info["data"]["artworks"]
 						if i["type"] == 7
 						and (i["language"] == lang or i["language"] is None)
 					],
 					thumbnails=[
 						i["image"]
-						for i in data["data"]["artworks"]
+						for i in info["data"]["artworks"]
 						if i["type"] == 8
 						and (i["language"] == lang or i["language"] is None)
 					],
