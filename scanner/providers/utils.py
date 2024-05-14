@@ -3,10 +3,15 @@ from __future__ import annotations
 import os
 from datetime import date
 
-from typing import Literal
+from typing import Literal, Any
 
 from providers.types.movie import Movie
 from providers.types.show import Show
+from providers.types.season import Season
+from providers.types.episode import Episode
+from providers.types.collection import Collection
+
+type Resource = Movie | Show | Season | Episode | Collection
 
 
 def format_date(date: date | int | None) -> str | None:
@@ -21,9 +26,10 @@ def format_date(date: date | int | None) -> str | None:
 default_languages = os.environ["LIBRARY_LANGUAGES"].split(",")
 
 
-def select_translation(value: Movie | Show, *, prefer_orginal=False):
+def select_translation(value: Resource, *, prefer_orginal=False) -> Any:
 	if (
 		prefer_orginal
+		and (isinstance(value, Movie) or isinstance(value, Show))
 		and value.original_language
 		and value.original_language in value.translations
 	):
@@ -35,7 +41,7 @@ def select_translation(value: Movie | Show, *, prefer_orginal=False):
 
 
 def select_image(
-	value: Movie | Show,
+	value: Resource,
 	kind: Literal["posters"] | Literal["thumbnails"] | Literal["logos"],
 ) -> str | None:
 	trans = select_translation(value, prefer_orginal=True) or next(
