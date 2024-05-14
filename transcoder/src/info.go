@@ -338,7 +338,7 @@ func chapterTimeIsValid(chapterTime string) bool {
 }
 
 func getChapters(chapters_begin uint32, chapters_end uint32, mi *mediainfo.File, duration float32) []Chapter {
-	chapterCount := max(chapters_end-chapters_begin, 1)
+	chapterCount := max(chapters_end-chapters_begin, 0)
 	chapterIterationCount := chapterCount
 	chapters := make([]Chapter, chapterCount)
 	chapterIndex := 0
