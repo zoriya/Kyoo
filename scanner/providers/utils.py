@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import os
 from datetime import date
-
-from typing import TYPE_CHECKING, Literal, Any
+from itertools import chain
+from typing import TYPE_CHECKING, Literal, Any, Optional
 
 if TYPE_CHECKING:
 	from providers.types.movie import Movie
@@ -11,8 +11,6 @@ if TYPE_CHECKING:
 	from providers.types.season import Season
 	from providers.types.episode import Episode
 	from providers.types.collection import Collection
-
-type Resource = Movie | Show | Season | Episode | Collection
 
 
 def format_date(date: date | int | None) -> str | None:
@@ -27,7 +25,11 @@ def format_date(date: date | int | None) -> str | None:
 default_languages = os.environ["LIBRARY_LANGUAGES"].split(",")
 
 
-def select_translation(value: Resource, *, prefer_orginal=False) -> Any:
+def sort_translations(
+	value: Movie | Show | Season | Episode | Collection,
+	*,
+	prefer_orginal=False,
+):
 	from providers.types.movie import Movie
 	from providers.types.show import Show
 
@@ -37,23 +39,31 @@ def select_translation(value: Resource, *, prefer_orginal=False) -> Any:
 		and value.original_language
 		and value.original_language in value.translations
 	):
-		return value.translations[value.original_language]
+		yield value.translations[value.original_language]
 	for lang in default_languages:
 		if lang in value.translations:
-			return value.translations[lang]
-	return None
+			yield value.translations[lang]
+
+
+def select_translation(
+	value: Movie | Show | Season | Episode | Collection, *, prefer_orginal=False
+) -> Optional[Any]:
+	return next(sort_translations(value, prefer_orginal=prefer_orginal), None)
 
 
 def select_image(
-	value: Resource,
+	value: Movie | Show | Season | Collection,
 	kind: Literal["posters"] | Literal["thumbnails"] | Literal["logos"],
 ) -> str | None:
-	trans = select_translation(value, prefer_orginal=True) or next(
-		iter(value.translations.values()), None
+	return next(
+		chain(
+			*(
+				getattr(trans, kind)
+				for trans in sort_translations(value, prefer_orginal=True)
+			)
+		),
+		None,
 	)
-	if trans is None:
-		return None
-	return getattr(trans, kind)
 
 
 class ProviderError(RuntimeError):
