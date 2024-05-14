@@ -1,11 +1,16 @@
+from __future__ import annotations
+
 import os
 from datetime import date
 from itertools import chain
+from typing import TYPE_CHECKING, Literal, Any, Optional
 
-from typing import Literal
-
-from providers.types.movie import Movie
-from providers.types.show import Show
+if TYPE_CHECKING:
+	from providers.types.movie import Movie
+	from providers.types.show import Show
+	from providers.types.season import Season
+	from providers.types.episode import Episode
+	from providers.types.collection import Collection
 
 
 def format_date(date: date | int | None) -> str | None:
@@ -16,21 +21,46 @@ def format_date(date: date | int | None) -> str | None:
 	return date.isoformat()
 
 
+# For now, the API of kyoo only support one language so we remove the others.
+default_languages = os.environ["LIBRARY_LANGUAGES"].split(",")
+
+
+def sort_translations(
+	value: Movie | Show | Season | Episode | Collection,
+	*,
+	prefer_orginal=False,
+):
+	from providers.types.movie import Movie
+	from providers.types.show import Show
+
+	if (
+		prefer_orginal
+		and (isinstance(value, Movie) or isinstance(value, Show))
+		and value.original_language
+		and value.original_language in value.translations
+	):
+		yield value.translations[value.original_language]
+	for lang in default_languages:
+		if lang in value.translations:
+			yield value.translations[lang]
+
+
+def select_translation(
+	value: Movie | Show | Season | Episode | Collection, *, prefer_orginal=False
+) -> Optional[Any]:
+	return next(sort_translations(value, prefer_orginal=prefer_orginal), None)
+
+
 def select_image(
-	self: Movie | Show,
-	type: Literal["posters"] | Literal["thumbnails"] | Literal["logos"],
+	value: Movie | Show | Season | Collection,
+	kind: Literal["posters"] | Literal["thumbnails"] | Literal["logos"],
 ) -> str | None:
-	# For now, the API of kyoo only support one language so we remove the others.
-	default_language = os.environ["LIBRARY_LANGUAGES"].split(",")[0]
 	return next(
 		chain(
-			(
-				getattr(self.translations[self.original_language], type)
-				if self.original_language
-				else []
-			),
-			getattr(self.translations[default_language], type),
-			*(getattr(x, type) for x in self.translations.values()),
+			*(
+				getattr(trans, kind)
+				for trans in sort_translations(value, prefer_orginal=True)
+			)
 		),
 		None,
 	)

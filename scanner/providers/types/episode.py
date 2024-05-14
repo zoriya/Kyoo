@@ -1,7 +1,8 @@
-import os
 from datetime import date
 from dataclasses import dataclass, field, asdict
 from typing import Optional
+
+from providers.utils import select_translation
 
 from .show import Show
 from .metadataid import MetadataID
@@ -24,8 +25,8 @@ class EpisodeID:
 
 @dataclass
 class EpisodeTranslation:
-	name: str
-	overview: Optional[str]
+	name: Optional[str]
+	overview: Optional[str] = None
 
 
 @dataclass
@@ -45,10 +46,9 @@ class Episode:
 	translations: dict[str, EpisodeTranslation] = field(default_factory=dict)
 
 	def to_kyoo(self):
-		# For now, the API of kyoo only support one language so we remove the others.
-		default_language = os.environ["LIBRARY_LANGUAGES"].split(",")[0]
+		trans = select_translation(self) or EpisodeTranslation("")
 		return {
 			**asdict(self),
-			**asdict(self.translations[default_language]),
+			**asdict(trans),
 			"show": None,
 		}

@@ -1,6 +1,7 @@
-import os
 from dataclasses import asdict, dataclass, field
 from typing import Optional
+
+from providers.utils import ProviderError, select_translation, select_image
 
 from .metadataid import MetadataID
 
@@ -20,14 +21,15 @@ class Collection:
 	translations: dict[str, CollectionTranslation] = field(default_factory=dict)
 
 	def to_kyoo(self):
-		# For now, the API of kyoo only support one language so we remove the others.
-		default_language = os.environ["LIBRARY_LANGUAGES"].split(",")[0]
+		trans = select_translation(self)
+		if trans is None:
+			raise ProviderError(
+				"Could not find translations for the collection. Aborting"
+			)
 		return {
 			**asdict(self),
-			**asdict(self.translations[default_language]),
-			"poster": next(iter(self.translations[default_language].posters), None),
-			"thumbnail": next(
-				iter(self.translations[default_language].thumbnails), None
-			),
-			"logo": next(iter(self.translations[default_language].logos), None),
+			**asdict(trans),
+			"poster": select_image(self, "posters"),
+			"thumbnail": select_image(self, "thumbnails"),
+			"logo": select_image(self, "logos"),
 		}
