@@ -12,7 +12,7 @@ async def monitor(path: str, publisher: Publisher, client: KyooClient):
 	ignore_pattern = get_ignore_pattern()
 	async for changes in awatch(path, ignore_permission_denied=True):
 		for event, file in changes:
-			if ignore_pattern.match(file):
+			if ignore_pattern and ignore_pattern.match(file):
 				logger.info(
 					"Ignoring event %s for file %s (due to IGNORE_PATTERN)", event, file
 				)
