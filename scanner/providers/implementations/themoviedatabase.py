@@ -601,7 +601,7 @@ class TheMovieDatabase(Provider):
 				for s in show.seasons
 				# ignore specials not specified in the absgrp
 				if s.season_number > 0
-				for e in range(1, s.episodes_count)
+				for e in range(1, s.episodes_count + 1)
 				if not any(
 					x["season_number"] == s.season_number
 					and (
