@@ -27,7 +27,9 @@ import { useTheme, useYoshiki } from "yoshiki/native";
 import "yoshiki/native";
 import { catppuccin } from "./catppuccin";
 
-type FontList = Partial<Record<Exclude<TextStyle["fontWeight"], null | undefined>, string>>;
+type FontList = Partial<
+	Record<Exclude<TextStyle["fontWeight"], null | undefined | number>, string>
+>;
 
 type Mode = {
 	mode: "light" | "dark" | "auto";

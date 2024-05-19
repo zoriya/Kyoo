@@ -295,6 +295,7 @@ export const HoverTouch = ({ children, ...props }: { children: ReactNode }) => {
 				playerWidth.current = e.nativeEvent.layout.width;
 			}}
 			{...css(
+				// @ts-expect-error Web only property (cursor: unset)
 				{
 					flexDirection: "row",
 					justifyContent: "center",
@@ -304,7 +305,6 @@ export const HoverTouch = ({ children, ...props }: { children: ReactNode }) => {
 					left: 0,
 					right: 0,
 					bottom: 0,
-					// @ts-expect-error Web only property
 					cursor: hover ? "unset" : "none",
 				},
 				props,

@@ -157,7 +157,7 @@ export const AccountProvider = ({
 		if (user.id !== selectedRef.current.id) return;
 		const nUser = { ...selectedRef.current, ...user };
 		updateAccount(nUser.id, nUser);
-	}, [user]);
+	}, [user, userIsSuccess, userIsPlaceholder]);
 
 	const queryClient = useQueryClient();
 	const oldSelected = useRef<{ id: string; token: string } | null>(

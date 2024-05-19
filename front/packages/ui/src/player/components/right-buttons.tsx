@@ -31,6 +31,7 @@ import { Platform, View } from "react-native";
 import { type Stylable, useYoshiki } from "yoshiki/native";
 import { fullscreenAtom, subtitleAtom } from "../state";
 import { AudiosMenu, QualitiesMenu } from "../video";
+import { useDisplayName } from "../../utils";
 
 export const RightButtons = ({
 	audios,
@@ -48,6 +49,7 @@ export const RightButtons = ({
 } & Stylable) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
+	const getDisplayName = useDisplayName();
 	const [isFullscreen, setFullscreen] = useAtom(fullscreenAtom);
 	const [selectedSubtitle, setSubtitle] = useAtom(subtitleAtom);
 
@@ -72,7 +74,7 @@ export const RightButtons = ({
 					{subtitles.map((x) => (
 						<Menu.Item
 							key={x.index}
-							label={x.link ? x.displayName : `${x.displayName} (${x.codec})`}
+							label={x.link ? getDisplayName(x) : `${getDisplayName(x)} (${x.codec})`}
 							selected={selectedSubtitle === x}
 							disabled={!x.link}
 							onSelect={() => setSubtitle(x)}
