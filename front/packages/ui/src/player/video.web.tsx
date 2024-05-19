@@ -37,8 +37,8 @@ import type { VideoProps } from "react-native-video";
 import toVttBlob from "srt-webvtt";
 import { useForceRerender, useYoshiki } from "yoshiki";
 import { useDisplayName } from "../utils";
-import { PlayMode, audioAtom, playAtom, playModeAtom, progressAtom, subtitleAtom } from "./state";
 import { MediaSessionManager } from "./media-session";
+import { PlayMode, audioAtom, playAtom, playModeAtom, progressAtom, subtitleAtom } from "./state";
 
 let hls: Hls | null = null;
 
