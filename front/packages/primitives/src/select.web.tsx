@@ -19,8 +19,8 @@
  */
 
 import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
-import ExpandLess from "@material-symbols/svg-400/rounded/expand_less-fill.svg";
-import ExpandMore from "@material-symbols/svg-400/rounded/expand_more-fill.svg";
+import ExpandLess from "@material-symbols/svg-400/rounded/keyboard_arrow_up-fill.svg";
+import ExpandMore from "@material-symbols/svg-400/rounded/keyboard_arrow_down-fill.svg";
 import * as RSelect from "@radix-ui/react-select";
 import { forwardRef } from "react";
 import { View } from "react-native";

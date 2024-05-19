@@ -61,7 +61,7 @@ export const withTranslations = (
 			fallbackLng: ctx.router.defaultLocale || "en",
 		});
 		props.pageProps.__lang = lng;
-		props.pageProps.__resources = resources;
+		// props.pageProps.__resources = resources;
 		return props;
 	};
 
