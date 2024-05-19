@@ -33,6 +33,11 @@ import { type Page, Paged } from "./page";
 
 export let lastUsedUrl: string = null!;
 
+const cleanSlash = (str: string | null) => {
+	if (!str) return null;
+	return str.replace(/^\/|\/$/g, "");
+};
+
 export const queryFn = async <Parser extends z.ZodTypeAny>(
 	context: {
 		apiUrl?: string | null;
@@ -54,17 +59,16 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 	lastUsedUrl = url!;
 
 	const token = iToken === undefined && context.authenticated !== false ? await getToken() : iToken;
-	const path = [url]
+	const path = [cleanSlash(url)]
 		.concat(
 			"path" in context
 				? (context.path as string[])
 				: "pageParam" in context && context.pageParam
-					? [context.pageParam as string]
+					? [cleanSlash(context.pageParam as string)]
 					: (context.queryKey as string[]),
 		)
 		.filter((x) => x)
 		.join("/")
-		.replace("//", "/")
 		.replace("/?", "?");
 	let resp: Response;
 	try {
