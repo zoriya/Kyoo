@@ -22,6 +22,7 @@ import i18next, { type InitOptions } from "i18next";
 import type { AppContext, AppInitialProps, AppProps } from "next/app";
 import { type ComponentType, useMemo } from "react";
 import { I18nextProvider } from "react-i18next";
+import resources from "../../../translations";
 
 export const withTranslations = (
 	AppToTranslate: ComponentType<AppProps> & {
@@ -33,6 +34,7 @@ export const withTranslations = (
 		interpolation: {
 			escapeValue: false,
 		},
+		resources,
 	};
 
 	const AppWithTranslations = (props: AppProps) => {
@@ -41,10 +43,9 @@ export const withTranslations = (
 			i18next.init({
 				...commonOptions,
 				lng: props.pageProps.__lang,
-				resources: props.pageProps.__resources,
 			});
 			return i18next;
-		}, [props.pageProps.__lang, props.pageProps.__resources]);
+		}, [props.pageProps.__lang]);
 
 		return (
 			<I18nextProvider i18n={li18n}>
@@ -61,7 +62,6 @@ export const withTranslations = (
 			fallbackLng: ctx.router.defaultLocale || "en",
 		});
 		props.pageProps.__lang = lng;
-		// props.pageProps.__resources = resources;
 		return props;
 	};
 

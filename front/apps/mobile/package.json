@@ -45,7 +45,6 @@
 		"expo-status-bar": "~1.12.1",
 		"expo-updates": "~0.25.14",
 		"i18next": "^23.11.4",
-		"i18next-resources-to-backend": "^1.2.1",
 		"intl-pluralrules": "^2.0.1",
 		"moti": "^0.29.0",
 		"react": "18.2.0",

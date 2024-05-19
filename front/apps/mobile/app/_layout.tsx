@@ -41,11 +41,11 @@ import { getLocales } from "expo-localization";
 import { Slot } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import i18next from "i18next";
-import resourceToBackend from "i18next-resources-to-backend";
 import "intl-pluralrules";
 import { type ReactNode, useEffect, useState } from "react";
 import { initReactI18next } from "react-i18next";
 import { useColorScheme } from "react-native";
+import resources from "../../../translations";
 
 import NetInfo from "@react-native-community/netinfo";
 import { onlineManager } from "@tanstack/react-query";
@@ -72,16 +72,14 @@ const clientStorage = {
 
 export const clientPersister = createSyncStoragePersister({ storage: clientStorage });
 
-i18next
-	.use(initReactI18next)
-	.use(resourceToBackend((lang: string) => require(`../../../translations/${lang}.json`)))
-	.init({
-		interpolation: {
-			escapeValue: false,
-		},
-		fallbackLng: "en",
-		lng: getLocales()[0].languageCode ?? "en",
-	});
+i18next.use(initReactI18next).init({
+	interpolation: {
+		escapeValue: false,
+	},
+	fallbackLng: "en",
+	lng: getLocales()[0].languageCode ?? "en",
+	resources,
+});
 
 const NavigationThemeProvider = ({ children }: { children: ReactNode }) => {
 	const theme = useTheme();

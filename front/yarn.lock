@@ -8822,15 +8822,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next-resources-to-backend@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "i18next-resources-to-backend@npm:1.2.1"
-  dependencies:
-    "@babel/runtime": ^7.23.2
-  checksum: a2f338c4eec8d5ba09846ae1abdd23afb72086f6395d6160c748d010c82f5c28c30133f6487f0fd3a65e710231d7750b324785f15cac4baf6d24b33227840341
-  languageName: node
-  linkType: hard
-
 "i18next@npm:^23.11.4":
   version: 23.11.4
   resolution: "i18next@npm:23.11.4"
@@ -10471,7 +10462,6 @@ __metadata:
     expo-status-bar: ~1.12.1
     expo-updates: ~0.25.14
     i18next: ^23.11.4
-    i18next-resources-to-backend: ^1.2.1
     intl-pluralrules: ^2.0.1
     moti: ^0.29.0
     react: 18.2.0
