@@ -46,7 +46,7 @@ export const withTranslations = (
 				fallbackLng: "en",
 			});
 			return i18next;
-		}, [props.pageProps.__lang, props.pageProps.__fallbackLng]);
+		}, [props.pageProps.__lang]);
 
 		return (
 			<I18nextProvider i18n={li18n}>
