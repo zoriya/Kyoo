@@ -20,7 +20,7 @@
 
 import type { Property } from "csstype";
 import type { ReactNode } from "react";
-import { Platform } from "react-native";
+import { Platform, type TextStyle } from "react-native";
 import { type Theme, ThemeProvider, useAutomaticTheme } from "yoshiki";
 import "yoshiki";
 import { useTheme, useYoshiki } from "yoshiki/native";
@@ -28,10 +28,7 @@ import "yoshiki/native";
 import { catppuccin } from "./catppuccin";
 
 type FontList = Partial<
-	Record<
-		"normal" | "bold" | "100" | "200" | "300" | "400" | "500" | "600" | "700" | "800" | "900",
-		string
-	>
+	Record<Exclude<TextStyle["fontWeight"], null | undefined | number>, string>
 >;
 
 type Mode = {
@@ -150,7 +147,7 @@ export const ThemeSelector = ({
 }) => {
 	const newTheme = selectMode({ ...catppuccin, font }, theme);
 
-	return <ThemeProvider theme={newTheme}>{children}</ThemeProvider>;
+	return <ThemeProvider theme={newTheme}>{children as any}</ThemeProvider>;
 };
 
 export type YoshikiFunc<T> = (props: ReturnType<typeof useYoshiki>) => T;
@@ -165,7 +162,11 @@ export const SwitchVariant = ({ children }: { children: ReactNode | YoshikiFunc<
 
 	return (
 		<ThemeProvider theme={switchVariant(theme)}>
-			{typeof children === "function" ? <YoshikiProvider>{children}</YoshikiProvider> : children}
+			{typeof children === "function" ? (
+				<YoshikiProvider>{children}</YoshikiProvider>
+			) : (
+				(children as any)
+			)}
 		</ThemeProvider>
 	);
 };
@@ -197,7 +198,11 @@ export const ContrastArea = ({
 					: theme
 			}
 		>
-			{typeof children === "function" ? <YoshikiProvider>{children}</YoshikiProvider> : children}
+			{typeof children === "function" ? (
+				<YoshikiProvider>{children}</YoshikiProvider>
+			) : (
+				(children as any)
+			)}
 		</ThemeProvider>
 	);
 };

@@ -30,7 +30,7 @@ import {
 	important,
 	ts,
 } from "@kyoo/primitives";
-import Done from "@material-symbols/svg-400/rounded/done-fill.svg";
+import Done from "@material-symbols/svg-400/rounded/check-fill.svg";
 import { useState } from "react";
 import { type ImageStyle, Platform, View } from "react-native";
 import { type Stylable, type Theme, max, percent, px, rem, useYoshiki } from "yoshiki/native";

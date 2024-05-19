@@ -133,19 +133,31 @@ export const AccountProvider = ({
 		setApiUrl(selected?.apiUrl ?? defaultApiUrl);
 	}, [selected, setApiUrl]);
 
-	const user = useFetch({
+	const {
+		isSuccess: userIsSuccess,
+		isError: userIsError,
+		isLoading: userIsLoading,
+		isPlaceholderData: userIsPlaceholder,
+		data: user,
+		error: userError,
+	} = useFetch({
 		path: ["auth", "me"],
 		parser: UserP,
 		placeholderData: selected as User,
 		enabled: !!selected,
 	});
+	// Use a ref here because we don't want the effect to trigger when the selected
+	// value has changed, only when the fetch result changed
+	// If we trigger the effect when the selected value change, we enter an infinite render loop
+	const selectedRef = useRef(selected);
+	selectedRef.current = selected;
 	useEffect(() => {
-		if (!selected || !user.isSuccess || user.isPlaceholderData) return;
+		if (!selectedRef.current || !userIsSuccess || userIsPlaceholder) return;
 		// The id is different when user is stale data, we need to wait for the use effect to invalidate the query.
-		if (user.data.id !== selected.id) return;
-		const nUser = { ...selected, ...user.data };
-		if (!Object.is(selected, nUser)) updateAccount(nUser.id, nUser);
-	}, [selected, user]);
+		if (user.id !== selectedRef.current.id) return;
+		const nUser = { ...selectedRef.current, ...user };
+		updateAccount(nUser.id, nUser);
+	}, [user, userIsSuccess, userIsPlaceholder]);
 
 	const queryClient = useQueryClient();
 	const oldSelected = useRef<{ id: string; token: string } | null>(
@@ -154,7 +166,6 @@ export const AccountProvider = ({
 
 	const [permissionError, setPermissionError] = useState<KyooErrors | null>(null);
 
-	const userIsError = user.isError;
 	useEffect(() => {
 		// if the user change account (or connect/disconnect), reset query cache.
 		if (
@@ -180,8 +191,8 @@ export const AccountProvider = ({
 		<AccountContext.Provider value={accounts}>
 			<ConnectionErrorContext.Provider
 				value={{
-					error: (selected ? initialSsrError.current ?? user.error : null) ?? permissionError,
-					loading: user.isLoading,
+					error: (selected ? initialSsrError.current ?? userError : null) ?? permissionError,
+					loading: userIsLoading,
 					retry: () => {
 						queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
 					},

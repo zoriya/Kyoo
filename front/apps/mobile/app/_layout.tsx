@@ -26,10 +26,6 @@ import {
 	Poppins_900Black,
 	useFonts,
 } from "@expo-google-fonts/poppins";
-import "@formatjs/intl-displaynames/locale-data/en";
-import "@formatjs/intl-displaynames/locale-data/fr";
-import "@formatjs/intl-displaynames/polyfill";
-import "@formatjs/intl-locale/polyfill";
 import { PortalProvider } from "@gorhom/portal";
 import { AccountProvider, createQueryClient, storage, useUserTheme } from "@kyoo/models";
 import { SnackbarProvider, ThemeSelector } from "@kyoo/primitives";
@@ -45,14 +41,11 @@ import "intl-pluralrules";
 import { type ReactNode, useEffect, useState } from "react";
 import { initReactI18next } from "react-i18next";
 import { useColorScheme } from "react-native";
+import resources from "../../../translations";
 
 import NetInfo from "@react-native-community/netinfo";
 import { onlineManager } from "@tanstack/react-query";
 import { useTheme } from "yoshiki/native";
-// TODO: use a backend to load jsons.
-import en from "../../../translations/en.json";
-import fr from "../../../translations/fr.json";
-import zh from "../../../translations/zh.json";
 
 onlineManager.setEventListener((setOnline) => {
 	return NetInfo.addEventListener((state) => {
@@ -81,11 +74,7 @@ i18next.use(initReactI18next).init({
 	},
 	fallbackLng: "en",
 	lng: getLocales()[0].languageCode ?? "en",
-	resources: {
-		en: { translation: en },
-		fr: { translation: fr },
-		zh: { translation: zh },
-	},
+	resources,
 });
 
 const NavigationThemeProvider = ({ children }: { children: ReactNode }) => {

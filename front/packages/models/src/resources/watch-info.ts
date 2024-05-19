@@ -18,20 +18,9 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import i18next from "i18next";
 import { z } from "zod";
 import { imageFn } from "../traits";
 import { QualityP } from "./quality";
-
-const getDisplayName = (sub: Track) => {
-	const languageNames = new Intl.DisplayNames([i18next.language ?? "en"], { type: "language" });
-	const lng = sub.language ? languageNames.of(sub.language) : undefined;
-
-	if (lng && sub.title && sub.title !== lng) return `${lng} - ${sub.title}`;
-	if (lng) return lng;
-	if (sub.title) return sub.title;
-	return `Unknown (${sub.index})`;
-};
 
 /**
  * A Video track
@@ -97,10 +86,7 @@ export const TrackP = z.object({
 });
 export type Track = z.infer<typeof TrackP>;
 
-export const AudioP = TrackP.transform((x) => ({
-	...x,
-	displayName: getDisplayName(x),
-}));
+export const AudioP = TrackP;
 export type Audio = z.infer<typeof AudioP>;
 
 export const SubtitleP = TrackP.extend({
@@ -108,10 +94,7 @@ export const SubtitleP = TrackP.extend({
 	 * The url of this track (only if this is a subtitle)..
 	 */
 	link: z.string().transform(imageFn).nullable(),
-}).transform((x) => ({
-	...x,
-	displayName: getDisplayName(x),
-}));
+});
 export type Subtitle = z.infer<typeof SubtitleP>;
 
 export const ChapterP = z.object({

@@ -31,16 +31,19 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 import { Fetch } from "../fetch";
+import { useDisplayName } from "../utils";
 
 const MediaInfoTable = ({
 	mediaInfo: { path, video, container, audios, subtitles, duration, size },
 }: {
 	mediaInfo: Partial<WatchInfo>;
 }) => {
+	const getDisplayName = useDisplayName();
 	const { t } = useTranslation();
 	const { css } = useYoshiki();
+
 	const formatBitrate = (b: number) => `${(b / 1000000).toFixed(2)} Mbps`;
-	const formatTrackTable = (trackTable: (Audio | Subtitle)[], s: string) => {
+	const formatTrackTable = (trackTable: (Audio | Subtitle)[], type: "subtitles" | "audio") => {
 		if (trackTable.length === 0) {
 			return undefined;
 		}
@@ -48,15 +51,16 @@ const MediaInfoTable = ({
 		return trackTable.reduce(
 			(collected, audioTrack, index) => {
 				// If there is only one track, we do not need to show an index
-				collected[singleTrack ? t(s) : `${t(s)} ${index + 1}`] = [
-					audioTrack.displayName,
-					// Only show it if there is more than one track
-					audioTrack.isDefault && !singleTrack ? t("mediainfo.default") : undefined,
-					audioTrack.isForced ? t("mediainfo.forced") : undefined,
-					audioTrack.codec,
-				]
-					.filter((x) => x !== undefined)
-					.join(" - ");
+				collected[singleTrack ? t(`mediainfo.${type}`) : `${t(`mediainfo.${type}`)} ${index + 1}`] =
+					[
+						getDisplayName(audioTrack),
+						// Only show it if there is more than one track
+						audioTrack.isDefault && !singleTrack ? t("mediainfo.default") : undefined,
+						audioTrack.isForced ? t("mediainfo.forced") : undefined,
+						audioTrack.codec,
+					]
+						.filter((x) => x !== undefined)
+						.join(" - ");
 				return collected;
 			},
 			{} as Record<string, string | undefined>,
@@ -81,10 +85,10 @@ const MediaInfoTable = ({
 			},
 			audios === undefined
 				? { [t("mediainfo.audio")]: undefined }
-				: formatTrackTable(audios, "mediainfo.audio"),
+				: formatTrackTable(audios, "audio"),
 			subtitles === undefined
 				? { [t("mediainfo.subtitles")]: undefined }
-				: formatTrackTable(subtitles, "mediainfo.subtitles"),
+				: formatTrackTable(subtitles, "subtitles"),
 		] as const
 	).filter((x) => x !== undefined) as Record<string, string | undefined>[];
 	return (

@@ -33,8 +33,8 @@ import {
 	tooltip,
 	ts,
 } from "@kyoo/primitives";
-import ExpandLess from "@material-symbols/svg-400/rounded/expand_less-fill.svg";
-import ExpandMore from "@material-symbols/svg-400/rounded/expand_more-fill.svg";
+import ExpandMore from "@material-symbols/svg-400/rounded/keyboard_arrow_down-fill.svg";
+import ExpandLess from "@material-symbols/svg-400/rounded/keyboard_arrow_up-fill.svg";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { type ImageStyle, Platform, type PressableProps, View } from "react-native";

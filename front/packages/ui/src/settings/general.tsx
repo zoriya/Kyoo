@@ -28,14 +28,12 @@ import Language from "@material-symbols/svg-400/outlined/language.svg";
 
 import Android from "@material-symbols/svg-400/rounded/android.svg";
 import Public from "@material-symbols/svg-400/rounded/public.svg";
+import { useLanguageName } from "../utils";
 
 export const GeneralSettings = () => {
 	const { t, i18n } = useTranslation();
 	const theme = useUserTheme("auto");
-	const languages = new Intl.DisplayNames([i18n.language ?? "en"], {
-		type: "language",
-		languageDisplay: "standard",
-	});
+	const getLanguageName = useLanguageName();
 
 	return (
 		<SettingsContainer title={t("settings.general.label")}>
@@ -65,7 +63,7 @@ export const GeneralSettings = () => {
 					}
 					values={["system", ...Object.keys(i18n.options.resources!)]}
 					getLabel={(key) =>
-						key === "system" ? t("settings.general.language.system") : languages.of(key) ?? key
+						key === "system" ? t("settings.general.language.system") : getLanguageName(key) ?? key
 					}
 				/>
 			</Preference>

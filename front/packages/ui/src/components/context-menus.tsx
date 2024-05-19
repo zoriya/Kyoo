@@ -95,7 +95,7 @@ export const EpisodesContext = ({
 					{Object.values(WatchStatusV).map((x) => (
 						<Menu.Item
 							key={x}
-							label={t(`show.watchlistMark.${x.toLowerCase()}`)}
+							label={t(`show.watchlistMark.${x.toLowerCase() as Lowercase<WatchStatusV>}`)}
 							onSelect={() => mutation.mutate(x)}
 							selected={x === status}
 						/>

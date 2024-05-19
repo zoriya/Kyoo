@@ -36,6 +36,8 @@ import { useTranslation } from "react-i18next";
 import type { VideoProps } from "react-native-video";
 import toVttBlob from "srt-webvtt";
 import { useForceRerender, useYoshiki } from "yoshiki";
+import { useDisplayName } from "../utils";
+import { MediaSessionManager } from "./media-session";
 import { PlayMode, audioAtom, playAtom, playModeAtom, progressAtom, subtitleAtom } from "./state";
 
 let hls: Hls | null = null;
@@ -207,46 +209,49 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 	const setProgress = useSetAtom(progressAtom);
 
 	return (
-		<video
-			ref={ref}
-			src={source.uri}
-			muted={muted}
-			autoPlay={!paused}
-			controls={false}
-			playsInline
-			onCanPlay={() => onBuffer?.call(null, { isBuffering: false })}
-			onWaiting={() => onBuffer?.call(null, { isBuffering: true })}
-			onDurationChange={() => {
-				if (!ref.current) return;
-				onLoad?.call(null, { duration: ref.current.duration } as any);
-			}}
-			onTimeUpdate={() => {
-				if (!ref.current) return;
-				onProgress?.call(null, {
-					currentTime: ref.current.currentTime,
-					playableDuration: ref.current.buffered.length
-						? ref.current.buffered.end(ref.current.buffered.length - 1)
-						: 0,
-					seekableDuration: 0,
-				});
-			}}
-			onError={() => {
-				if (ref?.current?.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED)
-					onMediaUnsupported?.call(undefined);
-				else {
-					onError?.call(null, {
-						error: { errorString: ref.current?.error?.message ?? "Unknown error" },
+		<>
+			<MediaSessionManager {...source.metadata} />
+			<video
+				ref={ref}
+				src={source.uri}
+				muted={muted}
+				autoPlay={!paused}
+				controls={false}
+				playsInline
+				onCanPlay={() => onBuffer?.call(null, { isBuffering: false })}
+				onWaiting={() => onBuffer?.call(null, { isBuffering: true })}
+				onDurationChange={() => {
+					if (!ref.current) return;
+					onLoad?.call(null, { duration: ref.current.duration } as any);
+				}}
+				onTimeUpdate={() => {
+					if (!ref.current) return;
+					onProgress?.call(null, {
+						currentTime: ref.current.currentTime,
+						playableDuration: ref.current.buffered.length
+							? ref.current.buffered.end(ref.current.buffered.length - 1)
+							: 0,
+						seekableDuration: 0,
 					});
-				}
-			}}
-			onLoadedMetadata={() => {
-				if (source.startPosition) setProgress(source.startPosition / 1000);
-			}}
-			onPlay={() => onPlaybackStateChanged?.({ isPlaying: true })}
-			onPause={() => onPlaybackStateChanged?.({ isPlaying: false })}
-			onEnded={onEnd}
-			{...css({ width: "100%", height: "100%", objectFit: "contain" })}
-		/>
+				}}
+				onError={() => {
+					if (ref?.current?.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED)
+						onMediaUnsupported?.call(undefined);
+					else {
+						onError?.call(null, {
+							error: { errorString: ref.current?.error?.message ?? "Unknown error" },
+						});
+					}
+				}}
+				onLoadedMetadata={() => {
+					if (source.startPosition) setProgress(source.startPosition / 1000);
+				}}
+				onPlay={() => onPlaybackStateChanged?.({ isPlaying: true })}
+				onPause={() => onPlaybackStateChanged?.({ isPlaying: false })}
+				onEnded={onEnd}
+				{...css({ width: "100%", height: "100%", objectFit: "contain" })}
+			/>
+		</>
 	);
 });
 
@@ -292,7 +297,7 @@ const useSubtitle = (
 			const addSubtitle = async () => {
 				const track: HTMLTrackElement = htmlTrack.current ?? document.createElement("track");
 				track.kind = "subtitles";
-				track.label = value.displayName;
+				track.label = value.title ?? value.language ?? "Subtitle";
 				if (value.language) track.srclang = value.language;
 				track.src = value.codec === "subrip" ? await toWebVtt(value.link!) : value.link!;
 				track.className = "subtitle_container";
@@ -360,6 +365,7 @@ export const AudiosMenu = ({
 	const { t } = useTranslation();
 	const rerender = useForceRerender();
 	const [_, setAudio] = useAtom(audioAtom);
+	const getDisplayName = useDisplayName();
 	// force rerender when mode changes
 	useAtomValue(playModeAtom);
 
@@ -377,7 +383,7 @@ export const AudiosMenu = ({
 			{hls.audioTracks.map((x, i) => (
 				<Menu.Item
 					key={i.toString()}
-					label={audios?.[i]?.displayName ?? x.name}
+					label={audios ? getDisplayName(audios[i]) : x.name}
 					selected={hls!.audioTrack === i}
 					onSelect={() => setAudio(audios?.[i] ?? ({ index: i } as any))}
 				/>

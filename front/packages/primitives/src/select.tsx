@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import ExpandMore from "@material-symbols/svg-400/rounded/expand_more-fill.svg";
+import ExpandMore from "@material-symbols/svg-400/rounded/keyboard_arrow_down-fill.svg";
 import { Button } from "./button";
 import { Icon } from "./icons";
 import { Menu } from "./menu";

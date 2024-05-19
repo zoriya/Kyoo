@@ -36,15 +36,17 @@ import {
 import { getCurrentAccount, storage } from "@kyoo/models/src/account-internal";
 import { type QueryClient, useQueryClient } from "@tanstack/react-query";
 import { deleteAsync } from "expo-file-system";
-import type { Router } from "expo-router/build/types";
+import type { useRouter } from "expo-router";
 import { type PrimitiveAtom, atom, useSetAtom, useStore } from "jotai";
 import { type ReactNode, useEffect } from "react";
 import { ToastAndroid } from "react-native";
 import { z } from "zod";
 import { Player } from "../player";
 
+type Router = ReturnType<typeof useRouter>;
+
 export type State = {
-	status: "DOWNLOADING" | "PAUSED" | "DONE" | "FAILED" | "STOPPED";
+	status: "DOWNLOADING" | "PAUSED" | "DONE" | "FAILED" | "STOPPED" | "PENDING";
 	progress: number | null;
 	size: number;
 	availableSize: number;
@@ -190,7 +192,7 @@ const download = (
 		headers: {
 			Authorization: account.token.access_token,
 		},
-		showNotification: true,
+		isNotificationVisible: true,
 		// TODO: Implement only wifi
 		// network: Network.ALL,
 	});
