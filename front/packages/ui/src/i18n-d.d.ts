@@ -24,6 +24,6 @@ import type en from "../../../translations/en.json";
 declare module "i18next" {
 	interface CustomTypeOptions {
 		returnNull: false;
-		resources: { translations: typeof en };
+		resources: { translation: typeof en };
 	}
 }

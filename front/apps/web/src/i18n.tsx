@@ -43,9 +43,10 @@ export const withTranslations = (
 			i18next.init({
 				...commonOptions,
 				lng: props.pageProps.__lang,
+				fallbackLng: "en",
 			});
 			return i18next;
-		}, [props.pageProps.__lang]);
+		}, [props.pageProps.__lang, props.pageProps.__fallbackLng]);
 
 		return (
 			<I18nextProvider i18n={li18n}>
@@ -59,7 +60,7 @@ export const withTranslations = (
 		await i18n.init({
 			...commonOptions,
 			lng,
-			fallbackLng: ctx.router.defaultLocale || "en",
+			fallbackLng: "en",
 		});
 		props.pageProps.__lang = lng;
 		return props;
