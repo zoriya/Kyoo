@@ -1,244 +1,44 @@
 {
-	"home": {
-		"recommended": "Polecane",
-		"news": "",
-		"watchlist": "Kontynuuj oglądanie",
-		"info": "Zobacz więcej",
-		"none": "Brak odcinków",
-		"watchlistLogin": "Żeby śledzić co było oglądane albo co planujesz oglądać musisz się zalogować.",
-		"refreshMetadata": "Odśwież metadane",
-		"episodeMore": {
-			"goToShow": "",
-			"download": "",
-			"mediainfo": ""
-		}
-	},
-	"show": {
-		"play": "Odtwórz",
-		"trailer": "Odtwórz zwiastun",
-		"studio": "",
-		"genre": "",
-		"genre-none": "",
-		"staff": "",
-		"staff-none": "",
-		"noOverview": "",
-		"episode-none": "Brak odcinków w tym sezonie",
-		"episodeNoMetadata": "",
-		"tags": "",
-		"links": "",
-		"jumpToSeason": "",
-		"partOf": "",
-		"watchlistAdd": "",
-		"watchlistEdit": "",
-		"watchlistRemove": "",
-		"watchlistLogin": "",
-		"watchlistMark": {
-			"completed": "",
-			"planned": "",
-			"watching": "",
-			"droped": "",
-			"null": ""
-		},
-		"nextUp": ""
-	},
-	"browse": {
-		"sortby": "",
-		"sortby-tt": "",
-		"sortkey": {
-			"relevance": "",
-			"name": "",
-			"airDate": "",
-			"startAir": "",
-			"endAir": "",
-			"addedDate": "",
-			"rating": ""
-		},
-		"sortord": {
-			"asc": "",
-			"desc": ""
-		},
-		"switchToGrid": "",
-		"switchToList": ""
-	},
-	"misc": {
-		"settings": "",
-		"prev-page": "",
-		"next-page": "",
-		"delete": "",
-		"cancel": "",
-		"more": "",
-		"expand": "",
-		"collapse": "",
-		"edit": "",
-		"or": "",
-		"loading": ""
-	},
-	"navbar": {
-		"home": "",
-		"browse": "",
-		"search": "",
-		"login": "",
-		"admin": ""
-	},
-	"settings": {
-		"general": {
-			"label": "",
-			"theme": {
-				"label": "",
-				"description": "",
-				"auto": "",
-				"light": "",
-				"dark": ""
-			},
-			"language": {
-				"label": "",
-				"description": "",
-				"system": ""
-			}
-		},
-		"playback": {
-			"label": "",
-			"playmode": {
-				"label": "",
-				"description": ""
-			},
-			"audioLanguage": {
-				"label": "",
-				"description": ""
-			},
-			"subtitleLanguage": {
-				"label": "",
-				"description": "",
-				"none": ""
-			}
-		},
-		"account": {
-			"label": "",
-			"username": {
-				"label": ""
-			},
-			"avatar": {
-				"label": "",
-				"description": ""
-			},
-			"email": {
-				"label": ""
-			},
-			"password": {
-				"label": "",
-				"description": "",
-				"oldPassword": "",
-				"newPassword": ""
-			}
-		},
-		"oidc": {
-			"label": "",
-			"connected": "",
-			"not-connected": "",
-			"open-profile": "",
-			"link": "",
-			"delete": ""
-		},
-		"about": {
-			"label": "",
-			"android-app": {
-				"label": "",
-				"description": ""
-			},
-			"git": {
-				"label": "",
-				"description": "Otwórz repozytorium github gdzie możesz przejrzeć kod kyoo"
-			}
-		}
-	},
-	"player": {
-		"back": "",
-		"previous": "",
-		"next": "",
-		"play": "",
-		"pause": "",
-		"mute": "",
-		"volume": "",
-		"quality": "",
-		"audios": "",
-		"subtitles": "",
-		"subtitle-none": "",
-		"fullscreen": "Pełny ekran",
-		"direct": "",
-		"transmux": "",
-		"auto": "",
-		"notInPristine": "",
-		"unsupportedError": ""
-	},
-	"search": {
-		"empty": ""
-	},
-	"login": {
-		"login": "",
-		"register": "Zarejestruj",
-		"guest": "Kontynuuj jako gość",
-		"guest-forbidden": "Ta instancja kyoo nie zezwala na korzystanie jako gość",
-		"via": "Kontynuuj z {{provider}}",
-		"add-account": "Dodaj konto",
-		"logout": "Wyloguj",
-		"server": "Adres serwera",
-		"email": "Email",
-		"username": "Nazwa użytkownika",
-		"password": "Hasło",
-		"confirm": "Powtórz hasło",
-		"or-register": "",
-		"or-login": "",
-		"password-no-match": "",
-		"delete": "Usuń konto",
-		"delete-confirmation": ""
-	},
-	"downloads": {
-		"empty": "",
-		"error": "",
-		"delete": "",
-		"deleteMessage": "",
-		"pause": "",
-		"resume": "",
-		"retry": ""
-	},
-	"errors": {
-		"connection": "",
-		"connection-tips": "",
-		"unknown": "Nieznany błąd",
-		"try-again": "Spróbuj ponownie",
-		"re-login": "Zaloguj się ponownie",
-		"offline": "",
-		"unauthorized": "",
-		"needVerification": "",
-		"needAccount": ""
-	},
-	"mediainfo": {
-		"file": "",
-		"container": "",
-		"video": "",
-		"audio": "",
-		"subtitles": "",
-		"forced": "",
-		"default": "",
-		"duration": "",
-		"size": "",
-		"novideo": "",
-		"nocontainer": ""
-	},
-	"admin": {
-		"users": {
-			"label": "",
-			"adminUser": "",
-			"regularUser": "",
-			"set-permissions": "",
-			"delete": "",
-			"unverifed": "",
-			"verify": ""
-		},
-		"scanner": {
-			"label": "",
-			"scan": "",
-			"empty": ""
-		}
-	}
+				"home": {
+								"recommended": "Polecane",
+								"watchlist": "Kontynuuj oglądanie",
+								"info": "Zobacz więcej",
+								"none": "Brak odcinków",
+								"watchlistLogin": "Żeby śledzić co było oglądane albo co planujesz oglądać musisz się zalogować.",
+								"refreshMetadata": "Odśwież metadane"
+				},
+				"show": {
+								"play": "Odtwórz",
+								"trailer": "Odtwórz zwiastun",
+								"episode-none": "Brak odcinków w tym sezonie"
+				},
+				"settings": {
+								"about": {
+												"git": {
+																"description": "Otwórz repozytorium github gdzie możesz przejrzeć kod kyoo"
+												}
+								}
+				},
+				"player": {
+								"fullscreen": "Pełny ekran"
+				},
+				"login": {
+								"register": "Zarejestruj",
+								"guest": "Kontynuuj jako gość",
+								"guest-forbidden": "Ta instancja kyoo nie zezwala na korzystanie jako gość",
+								"via": "Kontynuuj z {{provider}}",
+								"add-account": "Dodaj konto",
+								"logout": "Wyloguj",
+								"server": "Adres serwera",
+								"email": "Email",
+								"username": "Nazwa użytkownika",
+								"password": "Hasło",
+								"confirm": "Powtórz hasło",
+								"delete": "Usuń konto"
+				},
+				"errors": {
+								"unknown": "Nieznany błąd",
+								"try-again": "Spróbuj ponownie",
+								"re-login": "Zaloguj się ponownie"
+				}
 }
