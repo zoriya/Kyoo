@@ -119,6 +119,13 @@ func getKeyframes(path string, kf *Keyframe) error {
 	ret := make([]float64, 0, 1000)
 	max := 100
 	done := 0
+	// sometimes, videos can start at a timing greater than 0:00. We need to take that into account
+	// and only list keyframes that come after the start of the video (without that, our segments count
+	// mismatch and we can have the same segment twice on the stream).
+	//
+	// We can't hardcode the first keyframe at 0 because the transcoder needs to reference durations of segments
+	// To handle this edge case, when we fetch the segment n0, no seeking is done but duration is computed from the
+	// first keyframe (instead of 0)
 	for scanner.Scan() {
 		frame := scanner.Text()
 		if frame == "" {
@@ -143,16 +150,6 @@ func getKeyframes(path string, kf *Keyframe) error {
 		// the segment time and decide to cut at a random keyframe. Having every keyframe
 		// handled as a segment prevents that.
 
-		if done == 0 && len(ret) == 0 {
-			// sometimes, videos can start at a timing greater than 0:00. We need to take that into account
-			// and only list keyframes that come after the start of the video (without that, our segments count
-			// mismatch and we can have the same segment twice on the stream).
-
-			// we hardcode 0 as the first keyframe (even if this is fake) because it makes the code way easier to follow.
-			// this value is actually never sent to ffmpeg anyways.
-			ret = append(ret, 0)
-			continue
-		}
 		ret = append(ret, fpts)
 
 		if len(ret) == max {
