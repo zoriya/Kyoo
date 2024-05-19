@@ -38,6 +38,7 @@ import toVttBlob from "srt-webvtt";
 import { useForceRerender, useYoshiki } from "yoshiki";
 import { useDisplayName } from "../utils";
 import { PlayMode, audioAtom, playAtom, playModeAtom, progressAtom, subtitleAtom } from "./state";
+import { MediaSessionManager } from "./media-session";
 
 let hls: Hls | null = null;
 
@@ -208,46 +209,49 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 	const setProgress = useSetAtom(progressAtom);
 
 	return (
-		<video
-			ref={ref}
-			src={source.uri}
-			muted={muted}
-			autoPlay={!paused}
-			controls={false}
-			playsInline
-			onCanPlay={() => onBuffer?.call(null, { isBuffering: false })}
-			onWaiting={() => onBuffer?.call(null, { isBuffering: true })}
-			onDurationChange={() => {
-				if (!ref.current) return;
-				onLoad?.call(null, { duration: ref.current.duration } as any);
-			}}
-			onTimeUpdate={() => {
-				if (!ref.current) return;
-				onProgress?.call(null, {
-					currentTime: ref.current.currentTime,
-					playableDuration: ref.current.buffered.length
-						? ref.current.buffered.end(ref.current.buffered.length - 1)
-						: 0,
-					seekableDuration: 0,
-				});
-			}}
-			onError={() => {
-				if (ref?.current?.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED)
-					onMediaUnsupported?.call(undefined);
-				else {
-					onError?.call(null, {
-						error: { errorString: ref.current?.error?.message ?? "Unknown error" },
+		<>
+			<MediaSessionManager {...source.metadata} />
+			<video
+				ref={ref}
+				src={source.uri}
+				muted={muted}
+				autoPlay={!paused}
+				controls={false}
+				playsInline
+				onCanPlay={() => onBuffer?.call(null, { isBuffering: false })}
+				onWaiting={() => onBuffer?.call(null, { isBuffering: true })}
+				onDurationChange={() => {
+					if (!ref.current) return;
+					onLoad?.call(null, { duration: ref.current.duration } as any);
+				}}
+				onTimeUpdate={() => {
+					if (!ref.current) return;
+					onProgress?.call(null, {
+						currentTime: ref.current.currentTime,
+						playableDuration: ref.current.buffered.length
+							? ref.current.buffered.end(ref.current.buffered.length - 1)
+							: 0,
+						seekableDuration: 0,
 					});
-				}
-			}}
-			onLoadedMetadata={() => {
-				if (source.startPosition) setProgress(source.startPosition / 1000);
-			}}
-			onPlay={() => onPlaybackStateChanged?.({ isPlaying: true })}
-			onPause={() => onPlaybackStateChanged?.({ isPlaying: false })}
-			onEnded={onEnd}
-			{...css({ width: "100%", height: "100%", objectFit: "contain" })}
-		/>
+				}}
+				onError={() => {
+					if (ref?.current?.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED)
+						onMediaUnsupported?.call(undefined);
+					else {
+						onError?.call(null, {
+							error: { errorString: ref.current?.error?.message ?? "Unknown error" },
+						});
+					}
+				}}
+				onLoadedMetadata={() => {
+					if (source.startPosition) setProgress(source.startPosition / 1000);
+				}}
+				onPlay={() => onPlaybackStateChanged?.({ isPlaying: true })}
+				onPause={() => onPlaybackStateChanged?.({ isPlaying: false })}
+				onEnded={onEnd}
+				{...css({ width: "100%", height: "100%", objectFit: "contain" })}
+			/>
+		</>
 	);
 });
 

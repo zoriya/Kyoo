@@ -19,6 +19,7 @@
  */
 
 import "react-native-video";
+import type { ReactVideoSourceProperties } from "react-native-video";
 
 declare module "react-native-video" {
 	interface ReactVideoProps {
@@ -27,7 +28,7 @@ declare module "react-native-video" {
 		onMediaUnsupported?: () => void;
 	}
 	export type VideoProps = Omit<ReactVideoProps, "source"> & {
-		source: { uri: string; hls: string | null; startPosition?: number };
+		source: ReactVideoSourceProperties & { hls: string | null };
 	};
 }
 
@@ -120,7 +121,7 @@ const Video = forwardRef<VideoRef, VideoProps>(function Video(
 								type: SelectedTrackType.INDEX,
 								value: subtitles?.indexOf(subtitle),
 							}
-						: { type: SelectedTrackType.DISABLED }
+						: { type: SelectedTrackType.DISABLED, value: "" }
 				}
 				{...props}
 			/>

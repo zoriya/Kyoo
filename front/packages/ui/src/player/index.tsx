@@ -39,7 +39,6 @@ import { episodeDisplayNumber } from "../details/episode";
 import { ErrorView } from "../errors";
 import { Back, Hover, LoadingIndicator } from "./components/hover";
 import { useVideoKeyboard } from "./keyboard";
-import { MediaSessionManager } from "./media-session";
 import { Video, durationAtom, fullscreenAtom } from "./state";
 import { WatchStatusObserver } from "./watch-status-observer";
 
@@ -90,6 +89,15 @@ export const Player = ({
 		data && data.type === "episode" && data.nextEpisode
 			? `/watch/${data.nextEpisode.slug}?t=0`
 			: undefined;
+	const title =
+		data &&
+		(data.type === "movie"
+			? data.name
+			: `${data.show!.name} ${episodeDisplayNumber({
+					seasonNumber: data.seasonNumber,
+					episodeNumber: data.episodeNumber,
+					absoluteNumber: data.absoluteNumber,
+				})}`);
 
 	useVideoKeyboard(info?.subtitles, info?.fonts, previous, next);
 
@@ -119,26 +127,7 @@ export const Player = ({
 
 	return (
 		<>
-			{data && (
-				<Head
-					title={
-						data.type === "movie"
-							? data.name
-							: `${data.show!.name} ${episodeDisplayNumber({
-									seasonNumber: data.seasonNumber,
-									episodeNumber: data.episodeNumber,
-									absoluteNumber: data.absoluteNumber,
-								})}`
-					}
-					description={data.overview}
-				/>
-			)}
-			<MediaSessionManager
-				title={data?.name ?? t("show.episodeNoMetadata")}
-				image={data?.thumbnail?.high}
-				next={next}
-				previous={previous}
-			/>
+			<Head title={title} description={data?.overview} />
 			{data && info && (
 				<WatchStatusObserver type={type} slug={data.slug} duration={info.durationSeconds} />
 			)}
@@ -150,6 +139,13 @@ export const Player = ({
 				})}
 			>
 				<Video
+					metadata={{
+						title: title ?? t("show.episodeNoMetadata"),
+						description: data?.overview ?? undefined,
+						imageUri: data?.thumbnail?.high,
+						next: next,
+						previous: previous,
+					}}
 					links={data?.links}
 					audios={info?.audios}
 					subtitles={info?.subtitles}

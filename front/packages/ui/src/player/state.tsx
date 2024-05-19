@@ -104,6 +104,7 @@ export const Video = memo(function Video({
 	setError,
 	fonts,
 	startTime: startTimeP,
+	metadata,
 	...props
 }: {
 	links?: Episode["links"];
@@ -113,6 +114,13 @@ export const Video = memo(function Video({
 	setError: (error: string | undefined) => void;
 	fonts?: string[];
 	startTime?: number | null;
+	metadata: {
+		title?: string;
+		description?: string;
+		imageUri?: string;
+		previous?: string;
+		next?: string;
+	};
 } & Partial<VideoProps>) {
 	const ref = useRef<ElementRef<typeof NativeVideo> | null>(null);
 	const [isPlaying, setPlay] = useAtom(playAtom);
@@ -220,8 +228,12 @@ export const Video = memo(function Video({
 			source={{
 				uri: source,
 				startPosition: startTime.current ? startTime.current * 1000 : undefined,
+				metadata: metadata,
 				...links,
 			}}
+			showNotificationControls
+			playInBackground
+			playWhenInactive
 			paused={!isPlaying}
 			muted={isMuted}
 			volume={volume}
