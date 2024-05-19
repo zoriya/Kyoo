@@ -23,10 +23,6 @@ import type { AppContext, AppInitialProps, AppProps } from "next/app";
 import { type ComponentType, useMemo } from "react";
 import { I18nextProvider } from "react-i18next";
 
-import en from "../../../translations/en.json";
-import fr from "../../../translations/fr.json";
-import zh from "../../../translations/zh.json";
-
 export const withTranslations = (
 	AppToTranslate: ComponentType<AppProps> & {
 		getInitialProps: (ctx: AppContext) => Promise<AppInitialProps>;
@@ -59,18 +55,10 @@ export const withTranslations = (
 	AppWithTranslations.getInitialProps = async (ctx: AppContext) => {
 		const props: AppInitialProps = await AppToTranslate.getInitialProps(ctx);
 		const lng = ctx.router.locale || ctx.router.defaultLocale || "en";
-		// TODO: use a backend to fetch only the needed translations.
-		// TODO: use a different backend on the client and fetch needed translations.
-		const resources = {
-			en: { translation: en },
-			fr: { translation: fr },
-			zh: { translation: zh },
-		};
 		await i18n.init({
 			...commonOptions,
 			lng,
 			fallbackLng: ctx.router.defaultLocale || "en",
-			resources,
 		});
 		props.pageProps.__lang = lng;
 		props.pageProps.__resources = resources;
