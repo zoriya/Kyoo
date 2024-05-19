@@ -147,7 +147,7 @@ export const ThemeSelector = ({
 }) => {
 	const newTheme = selectMode({ ...catppuccin, font }, theme);
 
-	return <ThemeProvider theme={newTheme}>{children}</ThemeProvider>;
+	return <ThemeProvider theme={newTheme}>{children as any}</ThemeProvider>;
 };
 
 export type YoshikiFunc<T> = (props: ReturnType<typeof useYoshiki>) => T;
@@ -162,7 +162,11 @@ export const SwitchVariant = ({ children }: { children: ReactNode | YoshikiFunc<
 
 	return (
 		<ThemeProvider theme={switchVariant(theme)}>
-			{typeof children === "function" ? <YoshikiProvider>{children}</YoshikiProvider> : children}
+			{typeof children === "function" ? (
+				<YoshikiProvider>{children}</YoshikiProvider>
+			) : (
+				(children as any)
+			)}
 		</ThemeProvider>
 	);
 };
@@ -194,7 +198,11 @@ export const ContrastArea = ({
 					: theme
 			}
 		>
-			{typeof children === "function" ? <YoshikiProvider>{children}</YoshikiProvider> : children}
+			{typeof children === "function" ? (
+				<YoshikiProvider>{children}</YoshikiProvider>
+			) : (
+				(children as any)
+			)}
 		</ThemeProvider>
 	);
 };

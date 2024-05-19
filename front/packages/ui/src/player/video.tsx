@@ -49,6 +49,7 @@ import NativeVideo, {
 	SelectedVideoTrackType,
 } from "react-native-video";
 import { useYoshiki } from "yoshiki/native";
+import { useDisplayName } from "../utils";
 import { PlayMode, audioAtom, playModeAtom, subtitleAtom } from "./state";
 
 const MimeTypes: Map<string, string> = new Map([
@@ -102,7 +103,7 @@ const Video = forwardRef<VideoRef, VideoProps>(function Video(
 				}}
 				selectedVideoTrack={
 					video === -1
-						? { type: SelectedVideoTrackType.AUDO }
+						? { type: SelectedVideoTrackType.AUTO }
 						: { type: SelectedVideoTrackType.RESOLUTION, value: video }
 				}
 				// when video file is invalid, audio is undefined
@@ -130,12 +131,13 @@ const Video = forwardRef<VideoRef, VideoProps>(function Video(
 export default Video;
 
 // mobile should be able to play everything
-export const canPlay = (codec: string) => true;
+export const canPlay = (_codec: string) => true;
 
 type CustomMenu = ComponentProps<typeof Menu<ComponentProps<typeof IconButton>>>;
 export const AudiosMenu = ({ audios, ...props }: CustomMenu & { audios?: Audio[] }) => {
 	const info = useAtomValue(infoAtom);
 	const [audio, setAudio] = useAtom(audioAtom);
+	const getDisplayName = useDisplayName();
 
 	if (!info || info.audioTracks.length < 2) return null;
 
@@ -144,7 +146,7 @@ export const AudiosMenu = ({ audios, ...props }: CustomMenu & { audios?: Audio[]
 			{info.audioTracks.map((x) => (
 				<Menu.Item
 					key={x.index}
-					label={audios?.[x.index].displayName ?? x.title ?? x.language ?? "Unknown"}
+					label={audios ? getDisplayName(audios[x.index]) : x.title ?? x.language ?? "Unknown"}
 					selected={audio!.index === x.index}
 					onSelect={() => setAudio(x as any)}
 				/>

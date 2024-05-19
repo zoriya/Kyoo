@@ -6,7 +6,6 @@
 	"packageManager": "yarn@3.2.4",
 	"devDependencies": {
 		"@gorhom/portal": "^1.0.14",
-		"@types/react": "18.3.2",
 		"typescript": "^5.4.5"
 	},
 	"peerDependencies": {

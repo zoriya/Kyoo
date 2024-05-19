@@ -10,7 +10,6 @@
 	"devDependencies": {
 		"@gorhom/portal": "^1.0.14",
 		"@shopify/flash-list": "^1.6.4",
-		"@types/react": "18.3.2",
 		"react-native-uuid": "^2.0.2",
 		"typescript": "^5.4.5"
 	},

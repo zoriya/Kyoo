@@ -36,6 +36,7 @@ import { useTranslation } from "react-i18next";
 import type { VideoProps } from "react-native-video";
 import toVttBlob from "srt-webvtt";
 import { useForceRerender, useYoshiki } from "yoshiki";
+import { useDisplayName } from "../utils";
 import { PlayMode, audioAtom, playAtom, playModeAtom, progressAtom, subtitleAtom } from "./state";
 
 let hls: Hls | null = null;
@@ -360,6 +361,7 @@ export const AudiosMenu = ({
 	const { t } = useTranslation();
 	const rerender = useForceRerender();
 	const [_, setAudio] = useAtom(audioAtom);
+	const getDisplayName = useDisplayName();
 	// force rerender when mode changes
 	useAtomValue(playModeAtom);
 
@@ -377,7 +379,7 @@ export const AudiosMenu = ({
 			{hls.audioTracks.map((x, i) => (
 				<Menu.Item
 					key={i.toString()}
-					label={audios?.[i]?.displayName ?? x.name}
+					label={audios ? getDisplayName(audios[i]) : x.name}
 					selected={hls!.audioTrack === i}
 					onSelect={() => setAudio(audios?.[i] ?? ({ index: i } as any))}
 				/>
