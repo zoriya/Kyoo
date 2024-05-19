@@ -1,12 +1,15 @@
 import type { Track } from "@kyoo/models";
-import { useTranslation } from "react-i18next";
+import intl from "langmap";
+
+export const useLanguageName = () => {
+	return (lang: string) => intl[lang]?.nativeName;
+};
 
 export const useDisplayName = () => {
-	const { i18n } = useTranslation();
+	const getLanguageName = useLanguageName();
 
 	return (sub: Track) => {
-		const languageNames = new Intl.DisplayNames([i18n.language ?? "en"], { type: "language" });
-		const lng = sub.language ? languageNames.of(sub.language) : undefined;
+		const lng = sub.language ? getLanguageName(sub.language) : null;
 
 		if (lng && sub.title && sub.title !== lng) return `${lng} - ${sub.title}`;
 		if (lng) return lng;

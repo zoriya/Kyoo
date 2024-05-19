@@ -5,11 +5,13 @@
 	"packageManager": "yarn@3.2.4",
 	"dependencies": {
 		"@kyoo/models": "workspace:^",
-		"@kyoo/primitives": "workspace:^"
+		"@kyoo/primitives": "workspace:^",
+		"langmap": "^0.0.16"
 	},
 	"devDependencies": {
 		"@gorhom/portal": "^1.0.14",
 		"@shopify/flash-list": "^1.6.4",
+		"@types/langmap": "^0.0.3",
 		"react-native-uuid": "^2.0.2",
 		"typescript": "^5.4.5"
 	},

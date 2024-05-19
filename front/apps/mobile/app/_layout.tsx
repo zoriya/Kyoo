@@ -26,10 +26,6 @@ import {
 	Poppins_900Black,
 	useFonts,
 } from "@expo-google-fonts/poppins";
-import "@formatjs/intl-displaynames/locale-data/en";
-import "@formatjs/intl-displaynames/locale-data/fr";
-import "@formatjs/intl-displaynames/polyfill";
-import "@formatjs/intl-locale/polyfill";
 import { PortalProvider } from "@gorhom/portal";
 import { AccountProvider, createQueryClient, storage, useUserTheme } from "@kyoo/models";
 import { SnackbarProvider, ThemeSelector } from "@kyoo/primitives";

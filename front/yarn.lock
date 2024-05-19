@@ -3333,8 +3333,10 @@ __metadata:
     "@kyoo/models": "workspace:^"
     "@kyoo/primitives": "workspace:^"
     "@shopify/flash-list": ^1.6.4
+    "@types/langmap": ^0.0.3
     expo-file-system: ^17.0.1
     expo-router: ^3.5.14
+    langmap: ^0.0.16
     react-native-uuid: ^2.0.2
     typescript: ^5.4.5
   peerDependencies:
@@ -5258,6 +5260,13 @@ __metadata:
   version: 7.0.15
   resolution: "@types/json-schema@npm:7.0.15"
   checksum: 97ed0cb44d4070aecea772b7b2e2ed971e10c81ec87dd4ecc160322ffa55ff330dace1793489540e3e318d90942064bb697cc0f8989391797792d919737b3b98
+  languageName: node
+  linkType: hard
+
+"@types/langmap@npm:^0.0.3":
+  version: 0.0.3
+  resolution: "@types/langmap@npm:0.0.3"
+  checksum: 20a38ed78a48d38ba51782d3683b3302d3cf919c601f3b23dafc8e955037887726088007e9ead4a95927927ac67bb255ff39a17c22a1ba3012fa30dd1a796e0a
   languageName: node
   linkType: hard
 
@@ -9610,6 +9619,13 @@ __metadata:
     typescript: 5.4.5
   languageName: unknown
   linkType: soft
+
+"langmap@npm:^0.0.16":
+  version: 0.0.16
+  resolution: "langmap@npm:0.0.16"
+  checksum: ea409e502ede3492f2161e79c59394e6642d34706fdcae7a5df2116eda2110aa53b94f11282fc354f3fe5832f9e8783572471b3e28dd05899b1efe442122b7cc
+  languageName: node
+  linkType: hard
 
 "leven@npm:^3.1.0":
   version: 3.1.0

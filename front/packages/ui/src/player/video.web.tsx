@@ -293,7 +293,7 @@ const useSubtitle = (
 			const addSubtitle = async () => {
 				const track: HTMLTrackElement = htmlTrack.current ?? document.createElement("track");
 				track.kind = "subtitles";
-				track.label = value.displayName;
+				track.label = value.title ?? value.language ?? "Subtitle";
 				if (value.language) track.srclang = value.language;
 				track.src = value.codec === "subrip" ? await toWebVtt(value.link!) : value.link!;
 				track.className = "subtitle_container";
