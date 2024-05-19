@@ -68,7 +68,7 @@ const Menu = <AsProps,>({
 	const [isOpen, setOpen] =
 		outerOpen !== undefined && outerSetOpen ? [outerOpen, outerSetOpen] : useState(false);
 
-	// deos the same as a useMemo but for props.
+	// does the same as a useMemo but for props.
 	const memoRef = useRef({ onMenuOpen, onMenuClose });
 	memoRef.current = { onMenuOpen, onMenuClose };
 	useEffect(() => {

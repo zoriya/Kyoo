@@ -20,19 +20,14 @@
 
 import type { Property } from "csstype";
 import type { ReactNode } from "react";
-import { Platform } from "react-native";
+import { Platform, type TextStyle } from "react-native";
 import { type Theme, ThemeProvider, useAutomaticTheme } from "yoshiki";
 import "yoshiki";
 import { useTheme, useYoshiki } from "yoshiki/native";
 import "yoshiki/native";
 import { catppuccin } from "./catppuccin";
 
-type FontList = Partial<
-	Record<
-		"normal" | "bold" | "100" | "200" | "300" | "400" | "500" | "600" | "700" | "800" | "900",
-		string
-	>
->;
+type FontList = Partial<Record<Exclude<TextStyle["fontWeight"], null | undefined>, string>>;
 
 type Mode = {
 	mode: "light" | "dark" | "auto";
