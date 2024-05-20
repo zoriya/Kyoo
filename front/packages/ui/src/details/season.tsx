@@ -150,7 +150,7 @@ export const EpisodeList = <Props,>({
 			divider
 			Header={Header}
 			headerProps={headerProps}
-			getItemType={(item) => (item.firstOfSeason ? "withHeader" : "normal")}
+			getItemType={(item) => (!item || item.firstOfSeason ? "withHeader" : "normal")}
 			contentContainerStyle={pageStyle}
 			placeholderCount={5}
 			Render={({ item }) => {

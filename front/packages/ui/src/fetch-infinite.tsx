@@ -30,7 +30,7 @@ import {
 } from "react";
 import { FlatList, View, type ViewStyle } from "react-native";
 import { ErrorView } from "./errors";
-import { EmptyView, type Layout, OfflineView, type WithLoading, addHeader } from "./fetch";
+import { EmptyView, type Layout, OfflineView, addHeader } from "./fetch";
 
 const emulateGap = (
 	layout: "grid" | "vertical" | "horizontal",
@@ -90,7 +90,7 @@ export const InfiniteFetchList = <Data, Props, _, Kind extends number | string>(
 	divider?: boolean | ComponentType;
 	Header?: ComponentType<Props & { children: JSX.Element }> | ReactElement;
 	headerProps?: Props;
-	getItemType?: (item: WithLoading<Data>, index: number) => Kind;
+	getItemType?: (item: Data | null, index: number) => Kind;
 	getItemSize?: (kind: Kind) => number;
 	fetchMore?: boolean;
 	nested?: boolean;
@@ -139,7 +139,7 @@ export const InfiniteFetchList = <Data, Props, _, Kind extends number | string>(
 			)}
 			data={data}
 			horizontal={layout.layout === "horizontal"}
-			keyExtractor={(item: any) => item.id}
+			keyExtractor={(item: any, index) => (item ? item.id : index)}
 			numColumns={layout.layout === "horizontal" ? 1 : numColumns}
 			estimatedItemSize={size}
 			onEndReached={fetchMore ? fetchNextPage : undefined}

@@ -36,7 +36,7 @@ export const NewsList = () => {
 			<InfiniteFetch
 				query={NewsList.query()}
 				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
-				getItemType={(x, i) => (x.kind === "movie" || (x.isLoading && i % 2) ? "movie" : "episode")}
+				getItemType={(x, i) => (x?.kind === "movie" || (!x && i % 2) ? "movie" : "episode")}
 				getItemSize={(kind) => (kind === "episode" ? 2 : 1)}
 				empty={t("home.none")}
 				Render={({ item }) => {

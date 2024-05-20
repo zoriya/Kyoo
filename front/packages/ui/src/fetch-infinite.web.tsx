@@ -33,7 +33,7 @@ import {
 } from "react";
 import { type Stylable, nativeStyleToCss, useYoshiki, ysMap } from "yoshiki";
 import { ErrorView } from "./errors";
-import { EmptyView, type Layout, type WithLoading, addHeader } from "./fetch";
+import { EmptyView, type Layout, addHeader } from "./fetch";
 
 const InfiniteScroll = <Props,>({
 	children,
@@ -167,7 +167,7 @@ export const InfiniteFetchList = <Data, _, HeaderProps, Kind extends number | st
 	divider?: boolean | ComponentType;
 	Header?: ComponentType<{ children: JSX.Element } & HeaderProps> | ReactElement;
 	headerProps: HeaderProps;
-	getItemType?: (item: WithLoading<Data>, index: number) => Kind;
+	getItemType?: (item: Data | null, index: number) => Kind;
 	getItemSize?: (kind: Kind) => number;
 	fetchMore?: boolean;
 	contentContainerStyle?: ContentStyle;

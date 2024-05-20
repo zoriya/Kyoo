@@ -62,9 +62,7 @@ export const WatchlistList = () => {
 				query={WatchlistList.query()}
 				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
 				getItemType={(x, i) =>
-					(x.kind === "show" && x.watchStatus?.nextEpisode) || (x.isLoading && i % 2)
-						? "episode"
-						: "item"
+					(x?.kind === "show" && x.watchStatus?.nextEpisode) || (!x && i % 2) ? "episode" : "item"
 				}
 				getItemSize={(kind) => (kind === "episode" ? 2 : 1)}
 				empty={t("home.none")}
