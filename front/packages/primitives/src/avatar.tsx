@@ -24,6 +24,7 @@ import { Image, type ImageProps, View, type ViewStyle } from "react-native";
 import { type Stylable, px, useYoshiki } from "yoshiki/native";
 import { Icon } from "./icons";
 import { P } from "./text";
+import { Skeleton } from "./skeleton";
 
 const stringToColor = (string: string) => {
 	let hash = 0;
@@ -40,7 +41,7 @@ const stringToColor = (string: string) => {
 	return color;
 };
 
-export const Avatar = forwardRef<
+const AvatarC = forwardRef<
 	View,
 	{
 		src?: string;
@@ -48,12 +49,11 @@ export const Avatar = forwardRef<
 		size?: number;
 		placeholder?: string;
 		color?: string;
-		isLoading?: boolean;
 		fill?: boolean;
 		as?: ComponentType<{ style?: ViewStyle } & RefAttributes<View>>;
 	} & Stylable
->(function Avatar(
-	{ src, alt, size = px(24), color, placeholder, isLoading = false, fill = false, as, ...props },
+>(function AvatarI(
+	{ src, alt, size = px(24), color, placeholder, fill = false, as, ...props },
 	ref,
 ) {
 	const { css, theme } = useYoshiki();
@@ -106,3 +106,22 @@ export const Avatar = forwardRef<
 		</Container>
 	);
 });
+
+const AvatarLoader = ({ size = px(24), ...props }: { size?: number }) => {
+	const { css } = useYoshiki();
+
+	return (
+		<Skeleton
+			variant="round"
+			{...css(
+				{
+					height: size,
+					width: size,
+				},
+				props,
+			)}
+		/>
+	);
+};
+
+export const Avatar = { ...AvatarC, Loader: AvatarLoader };

@@ -23,7 +23,7 @@ import { Alert, Avatar, Icon, IconButton, Menu, P, Skeleton, tooltip, ts } from 
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { px, useYoshiki } from "yoshiki/native";
-import type { Layout, WithLoading } from "../fetch";
+import type { Layout } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
 import { SettingsContainer } from "../settings/base";
 
@@ -36,20 +36,19 @@ import Verifed from "@material-symbols/svg-400/rounded/verified_user.svg";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const UserGrid = ({
-	isLoading,
 	id,
 	username,
 	avatar,
 	isAdmin,
 	isVerified,
 	...props
-}: WithLoading<{
+}: {
 	id: string;
 	username: string;
 	avatar: string;
 	isAdmin: boolean;
 	isVerified: boolean;
-}>) => {
+}) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 	const queryClient = useQueryClient();
@@ -66,11 +65,10 @@ export const UserGrid = ({
 	return (
 		<View {...css({ alignItems: "center" }, props)}>
 			<Avatar src={avatar} alt={username} placeholder={username} size={UserGrid.layout.size} fill />
-			<View {...css({ flexDirection: "row" })}>
+			<View {...css({ flexDirection: "row", alignItems: "center" })}>
 				<Icon
 					icon={!isVerified ? Unverifed : isAdmin ? Admin : UserI}
 					{...css({
-						alignSelf: "center",
 						m: ts(1),
 					})}
 					{...tooltip(
@@ -83,9 +81,7 @@ export const UserGrid = ({
 						),
 					)}
 				/>
-				<Skeleton>
-					<P>{username}</P>
-				</Skeleton>
+				<P>{username}</P>
 				<Menu Trigger={IconButton} icon={MoreVert} {...tooltip(t("misc.more"))}>
 					{!isVerified && (
 						<Menu.Item
@@ -159,6 +155,21 @@ export const UserGrid = ({
 	);
 };
 
+UserGrid.Loader = (props: object) => {
+	const { css } = useYoshiki();
+
+	return (
+		<View {...css({ alignItems: "center" }, props)}>
+			<Avatar.Loader size={UserGrid.layout.size} />
+			<View {...css({ flexDirection: "row", alignItems: "center", flexShrink: 1, flexGrow: 1 })}>
+				<Icon icon={UserI} {...css({ m: ts(1) })} />
+				<Skeleton {...css({ flexGrow: 1, width: ts(8) })} />
+				<IconButton icon={MoreVert} disabled />
+			</View>
+		</View>
+	);
+};
+
 UserGrid.layout = {
 	size: px(150),
 	numColumns: { xs: 2, sm: 3, md: 5, lg: 6, xl: 7 },
@@ -171,18 +182,20 @@ export const UserList = () => {
 
 	return (
 		<SettingsContainer title={t("admin.users.label")}>
-			<InfiniteFetch query={UserList.query()} layout={UserGrid.layout}>
-				{(user) => (
+			<InfiniteFetch
+				query={UserList.query()}
+				layout={UserGrid.layout}
+				Render={({ item }) => (
 					<UserGrid
-						isLoading={user.isLoading as any}
-						id={user.id}
-						username={user.username}
-						avatar={user.logo}
-						isAdmin={user.isAdmin}
-						isVerified={user.isVerified}
+						id={item.id}
+						username={item.username}
+						avatar={item.logo}
+						isAdmin={item.isAdmin}
+						isVerified={item.isVerified}
 					/>
 				)}
-			</InfiniteFetch>
+				Loader={UserGrid.Loader}
+			/>
 		</SettingsContainer>
 	);
 };
