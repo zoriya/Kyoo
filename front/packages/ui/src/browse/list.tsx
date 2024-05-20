@@ -24,6 +24,7 @@ import {
 	ImageBackground,
 	Link,
 	P,
+	Poster,
 	PosterBackground,
 	Skeleton,
 	imageBorderRadius,
@@ -32,9 +33,10 @@ import {
 } from "@kyoo/primitives";
 import { useState } from "react";
 import { Platform, View } from "react-native";
+import type { Stylable } from "yoshiki";
 import { percent, px, rem, useYoshiki } from "yoshiki/native";
 import { ItemContext } from "../components/context-menus";
-import type { Layout, WithLoading } from "../fetch";
+import type { Layout } from "../fetch";
 import { ItemWatchStatus } from "./grid";
 
 export const ItemList = ({
@@ -45,22 +47,21 @@ export const ItemList = ({
 	subtitle,
 	thumbnail,
 	poster,
-	isLoading,
 	watchStatus,
 	unseenEpisodesCount,
 	...props
-}: WithLoading<{
+}: {
 	href: string;
 	slug: string;
 	type: "movie" | "show" | "collection";
 	name: string;
-	subtitle?: string;
-	poster?: KyooImage | null;
-	thumbnail?: KyooImage | null;
+	subtitle: string | null;
+	poster: KyooImage | null;
+	thumbnail: KyooImage | null;
 	watchStatus: WatchStatusV | null;
 	unseenEpisodesCount: number | null;
-}>) => {
-	const { css } = useYoshiki();
+}) => {
+	const { css } = useYoshiki("line");
 	const [moreOpened, setMoreOpened] = useState(false);
 
 	return (
@@ -114,25 +115,21 @@ export const ItemList = ({
 						justifyContent: "center",
 					})}
 				>
-					<Skeleton {...css({ height: rem(2), alignSelf: "center" })}>
-						{isLoading || (
-							<Heading
-								{...css([
-									"title",
-									{
-										textAlign: "center",
-										fontSize: rem(2),
-										letterSpacing: rem(0.002),
-										fontWeight: "900",
-										textTransform: "uppercase",
-									},
-								])}
-							>
-								{name}
-							</Heading>
-						)}
-					</Skeleton>
-					{slug && watchStatus !== undefined && type && type !== "collection" && (
+					<Heading
+						{...css([
+							"title",
+							{
+								textAlign: "center",
+								fontSize: rem(2),
+								letterSpacing: rem(0.002),
+								fontWeight: "900",
+								textTransform: "uppercase",
+							},
+						])}
+					>
+						{name}
+					</Heading>
+					{type !== "collection" && (
 						<ItemContext
 							type={type}
 							slug={slug}
@@ -151,31 +148,55 @@ export const ItemList = ({
 						/>
 					)}
 				</View>
-				{(isLoading || subtitle) && (
-					<Skeleton {...css({ width: rem(5), alignSelf: "center" })}>
-						{isLoading || (
-							<P
-								{...css({
-									textAlign: "center",
-									marginRight: ts(4),
-								})}
-							>
-								{subtitle}
-							</P>
-						)}
-					</Skeleton>
+				{subtitle && (
+					<P
+						{...css({
+							textAlign: "center",
+							marginRight: ts(4),
+						})}
+					>
+						{subtitle}
+					</P>
 				)}
 			</View>
-			<PosterBackground
-				src={poster}
-				alt=""
-				quality="low"
-				forcedLoading={isLoading}
-				layout={{ height: percent(80) }}
-			>
+			<PosterBackground src={poster} alt="" quality="low" layout={{ height: percent(80) }}>
 				<ItemWatchStatus watchStatus={watchStatus} unseenEpisodesCount={unseenEpisodesCount} />
 			</PosterBackground>
 		</ImageBackground>
+	);
+};
+
+ItemList.Loader = (props: object) => {
+	const { css } = useYoshiki();
+
+	return (
+		<View
+			{...css(
+				{
+					alignItems: "center",
+					justifyContent: "space-evenly",
+					flexDirection: "row",
+					height: ItemList.layout.size,
+					borderRadius: px(imageBorderRadius),
+					overflow: "hidden",
+					bg: (theme) => theme.dark.background,
+					marginX: ItemList.layout.gap,
+				},
+				props,
+			)}
+		>
+			<View
+				{...css({
+					width: { xs: "50%", lg: "30%" },
+					flexDirection: "column",
+					justifyContent: "center",
+				})}
+			>
+				<Skeleton {...css({ height: rem(2), alignSelf: "center" })} />
+				<Skeleton {...css({ width: rem(5), alignSelf: "center" })} />
+			</View>
+			<Poster.Loader layout={{ height: percent(80) }} />
+		</View>
 	);
 };
 

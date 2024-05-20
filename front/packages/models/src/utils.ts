@@ -42,6 +42,7 @@ export const getDisplayDate = (data: Show | Movie) => {
 	if (airDate) {
 		return airDate.getFullYear().toString();
 	}
+	return null;
 };
 
 export const useLocalSetting = (setting: string, def: string) => {

@@ -53,7 +53,7 @@ const mapData = (
 	if (!data) return { isLoading: true };
 	return {
 		isLoading: false,
-		name: data.type === "movie" ? data.name : `${episodeDisplayNumber(data, "")} ${data.name}`,
+		name: data.type === "movie" ? data.name : `${episodeDisplayNumber(data)} ${data.name}`,
 		showName: data.type === "movie" ? data.name! : data.show!.name,
 		poster: data.type === "movie" ? data.poster : data.show!.poster,
 		subtitles: info?.subtitles,

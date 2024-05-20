@@ -195,6 +195,7 @@ const downloadIcon = (status: State["status"]) => {
 			return Downloading;
 		case "FAILED":
 			return ErrorIcon;
+		case "PENDING":
 		case "PAUSED":
 		case "STOPPED":
 			return NotStarted;

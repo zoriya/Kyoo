@@ -26,7 +26,7 @@ import {
 	SeasonP,
 	useInfiniteFetch,
 } from "@kyoo/models";
-import { H6, HR, IconButton, Menu, P, Skeleton, tooltip, ts, usePageStyle } from "@kyoo/primitives";
+import { H2, HR, IconButton, Menu, P, Skeleton, tooltip, ts, usePageStyle } from "@kyoo/primitives";
 import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
 import type { ComponentType } from "react";
 import { useTranslation } from "react-i18next";
@@ -38,14 +38,12 @@ import { EpisodeLine, episodeDisplayNumber } from "./episode";
 type SeasonProcessed = Season & { href: string };
 
 export const SeasonHeader = ({
-	isLoading,
 	seasonNumber,
 	name,
 	seasons,
 }: {
-	isLoading: boolean;
-	seasonNumber?: number;
-	name?: string;
+	seasonNumber: number;
+	name: string | null;
 	seasons?: SeasonProcessed[];
 }) => {
 	const { css } = useYoshiki();
@@ -63,25 +61,49 @@ export const SeasonHeader = ({
 						fontSize: rem(1.5),
 					})}
 				>
-					{isLoading ? <Skeleton variant="filltext" /> : seasonNumber}
+					{seasonNumber}
 				</P>
-				<H6
-					aria-level={2}
-					{...css({ marginX: ts(1), fontSize: rem(1.5), flexGrow: 1, flexShrink: 1 })}
-				>
-					{isLoading ? <Skeleton /> : name}
-				</H6>
+				<H2 {...css({ marginX: ts(1), fontSize: rem(1.5), flexGrow: 1, flexShrink: 1 })}>
+					{name ?? t("show.season", { number: seasonNumber })}
+				</H2>
 				<Menu Trigger={IconButton} icon={MenuIcon} {...tooltip(t("show.jumpToSeason"))}>
 					{seasons
 						?.filter((x) => x.episodesCount > 0)
 						.map((x) => (
 							<Menu.Item
 								key={x.seasonNumber}
-								label={`${x.seasonNumber}: ${x.name} (${x.episodesCount})`}
+								label={`${x.seasonNumber}: ${
+									x.name ?? t("show.season", { number: x.seasonNumber })
+								} (${x.episodesCount})`}
 								href={x.href}
 							/>
 						))}
 				</Menu>
+			</View>
+			<HR />
+		</View>
+	);
+};
+
+SeasonHeader.Loader = () => {
+	const { css } = useYoshiki();
+
+	return (
+		<View>
+			<View {...css({ flexDirection: "row", marginX: ts(1), justifyContent: "space-between" })}>
+				<View {...css({ flexDirection: "row", alignItems: "center" })}>
+					<Skeleton
+						variant="custom"
+						{...css({
+							width: rem(4),
+							flexShrink: 0,
+							marginX: ts(1),
+							height: rem(1.5),
+						})}
+					/>
+					<Skeleton {...css({ marginX: ts(1), width: rem(12), height: rem(2) })} />
+				</View>
+				<IconButton icon={MenuIcon} disabled />
 			</View>
 			<HR />
 		</View>
@@ -128,34 +150,39 @@ export const EpisodeList = <Props,>({
 			divider
 			Header={Header}
 			headerProps={headerProps}
-			getItemType={(item) => (item.firstOfSeason ? "withHeader" : "normal")}
+			getItemType={(item) => (!item || item.firstOfSeason ? "withHeader" : "normal")}
 			contentContainerStyle={pageStyle}
-		>
-			{(item) => {
+			placeholderCount={5}
+			Render={({ item }) => {
 				const sea = item?.firstOfSeason
 					? seasons?.find((x) => x.seasonNumber === item.seasonNumber)
 					: null;
 				return (
 					<>
-						{item.firstOfSeason && (
-							<SeasonHeader
-								isLoading={!sea}
-								name={sea?.name}
-								seasonNumber={sea?.seasonNumber}
-								seasons={seasons}
-							/>
-						)}
+						{item.firstOfSeason &&
+							(sea ? (
+								<SeasonHeader name={sea.name} seasonNumber={sea.seasonNumber} seasons={seasons} />
+							) : (
+								<SeasonHeader.Loader />
+							))}
 						<EpisodeLine
 							{...item}
+							// Don't display "Go to show"
 							showSlug={null}
-							displayNumber={item.isLoading ? undefined! : episodeDisplayNumber(item)!}
+							displayNumber={episodeDisplayNumber(item)}
 							watchedPercent={item.watchStatus?.watchedPercent ?? null}
 							watchedStatus={item.watchStatus?.status ?? null}
 						/>
 					</>
 				);
 			}}
-		</InfiniteFetch>
+			Loader={({ index }) => (
+				<>
+					{index === 0 && <SeasonHeader.Loader />}
+					<EpisodeLine.Loader />
+				</>
+			)}
+		/>
 	);
 };
 

@@ -33,6 +33,7 @@ import {
 	IconFab,
 	Link,
 	P,
+	Poster,
 	PosterBackground,
 	Skeleton,
 	SubP,
@@ -48,11 +49,10 @@ import { ScrollView, View } from "react-native";
 import { type Theme, calc, percent, px, rem, useYoshiki } from "yoshiki/native";
 import { ItemGrid, ItemWatchStatus } from "../browse/grid";
 import { ItemContext } from "../components/context-menus";
-import type { Layout, WithLoading } from "../fetch";
+import type { Layout } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
 
 export const ItemDetails = ({
-	isLoading,
 	slug,
 	type,
 	name,
@@ -66,12 +66,12 @@ export const ItemDetails = ({
 	watchStatus,
 	unseenEpisodesCount,
 	...props
-}: WithLoading<{
+}: {
 	slug: string;
 	type: "movie" | "show" | "collection";
 	name: string;
 	tagline: string | null;
-	subtitle: string;
+	subtitle: string | null;
 	poster: KyooImage | null;
 	genres: Genre[] | null;
 	overview: string | null;
@@ -79,7 +79,7 @@ export const ItemDetails = ({
 	playHref: string | null;
 	watchStatus: WatchStatusV | null;
 	unseenEpisodesCount: number | null;
-}>) => {
+}) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 	const { css } = useYoshiki("recommended-card");
 	const { t } = useTranslation();
@@ -124,7 +124,6 @@ export const ItemDetails = ({
 					src={poster}
 					alt=""
 					quality="low"
-					forcedLoading={isLoading}
 					layout={{ height: percent(100) }}
 					style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
 				>
@@ -138,18 +137,8 @@ export const ItemDetails = ({
 							p: ts(1),
 						})}
 					>
-						<Skeleton {...css({ width: percent(100) })}>
-							{isLoading || (
-								<P {...css([{ m: 0, color: (theme: Theme) => theme.colors.white }, "title"])}>
-									{name}
-								</P>
-							)}
-						</Skeleton>
-						{(subtitle || isLoading) && (
-							<Skeleton {...css({ height: rem(0.8) })}>
-								{isLoading || <SubP {...css({ m: 0 })}>{subtitle}</SubP>}
-							</Skeleton>
-						)}
+						<P {...css([{ m: 0, color: (theme: Theme) => theme.colors.white }, "title"])}>{name}</P>
+						{subtitle && <SubP {...css({ m: 0 })}>{subtitle}</SubP>}
 					</View>
 					<ItemWatchStatus watchStatus={watchStatus} unseenEpisodesCount={unseenEpisodesCount} />
 				</PosterBackground>
@@ -163,7 +152,7 @@ export const ItemDetails = ({
 							alignContent: "flex-start",
 						})}
 					>
-						{slug && type && type !== "collection" && watchStatus !== undefined && (
+						{type !== "collection" && (
 							<ItemContext
 								type={type}
 								slug={slug}
@@ -173,18 +162,10 @@ export const ItemDetails = ({
 								force
 							/>
 						)}
-						{(isLoading || tagline) && (
-							<Skeleton {...css({ m: ts(1), marginVertical: ts(2) })}>
-								{isLoading || <P {...css({ p: ts(1) })}>{tagline}</P>}
-							</Skeleton>
-						)}
+						{tagline && <P {...css({ p: ts(1) })}>{tagline}</P>}
 					</View>
 					<ScrollView {...css({ pX: ts(1) })}>
-						<Skeleton lines={5} {...css({ height: rem(0.8) })}>
-							{isLoading || (
-								<SubP {...css({ textAlign: "justify" })}>{overview ?? t("show.noOverview")}</SubP>
-							)}
-						</Skeleton>
+						<SubP {...css({ textAlign: "justify" })}>{overview ?? t("show.noOverview")}</SubP>
 					</ScrollView>
 				</View>
 			</Link>
@@ -209,9 +190,9 @@ export const ItemDetails = ({
 					height: px(50),
 				})}
 			>
-				{(isLoading || genres) && (
+				{genres && (
 					<ScrollView horizontal contentContainerStyle={{ alignItems: "center" }}>
-						{(genres || [...Array(3)])?.map((x, i) => (
+						{genres.map((x, i) => (
 							<Chip key={x ?? i} label={x} size="small" {...css({ mX: ts(0.5) })} />
 						))}
 					</ScrollView>
@@ -226,6 +207,65 @@ export const ItemDetails = ({
 						{...css({ fover: { self: { transform: "scale(1.2)" as any, mX: ts(0.5) } } })}
 					/>
 				)}
+			</View>
+		</View>
+	);
+};
+
+ItemDetails.Loader = (props: object) => {
+	const { css } = useYoshiki();
+
+	return (
+		<View
+			{...css(
+				{
+					height: ItemDetails.layout.size,
+					flexDirection: "row",
+					bg: (theme) => theme.variant.background,
+					borderRadius: calc(px(imageBorderRadius), "+", ts(0.25)),
+					overflow: "hidden",
+					borderColor: (theme) => theme.background,
+					borderWidth: ts(0.25),
+					borderStyle: "solid",
+				},
+				props,
+			)}
+		>
+			<Poster.Loader
+				layout={{ height: percent(100) }}
+				{...css({ borderTopRightRadius: 0, borderBottomRightRadius: 0 })}
+			>
+				<View
+					{...css({
+						bg: (theme) => theme.darkOverlay,
+						position: "absolute",
+						left: 0,
+						right: 0,
+						bottom: 0,
+						p: ts(1),
+					})}
+				>
+					<Skeleton {...css({ width: percent(100) })} />
+					<Skeleton {...css({ height: rem(0.8) })} />
+				</View>
+			</Poster.Loader>
+			<View {...css({ flexShrink: 1, flexGrow: 1 })}>
+				<View {...css({ flexGrow: 1, flexShrink: 1, pX: ts(1) })}>
+					<Skeleton {...css({ marginVertical: ts(2) })} />
+					<Skeleton lines={5} {...css({ height: rem(0.8) })} />
+				</View>
+				<View
+					{...css({
+						bg: (theme) => theme.themeOverlay,
+						pX: 4,
+						height: px(50),
+						flexDirection: "row",
+						alignItems: "center",
+					})}
+				>
+					<Chip.Loader size="small" {...css({ mX: ts(0.5) })} />
+					<Chip.Loader size="small" {...css({ mX: ts(0.5) })} />
+				</View>
 			</View>
 		</View>
 	);
@@ -252,29 +292,28 @@ export const Recommended = () => {
 				fetchMore={false}
 				nested
 				contentContainerStyle={{ padding: 0, paddingHorizontal: 0 }}
-			>
-				{(x) => (
+				Render={({ item }) => (
 					<ItemDetails
-						isLoading={x.isLoading as any}
-						slug={x.slug}
-						type={x.kind}
-						name={x.name}
-						tagline={"tagline" in x ? x.tagline : null}
-						overview={x.overview}
-						poster={x.poster}
-						subtitle={x.kind !== "collection" && !x.isLoading ? getDisplayDate(x) : undefined}
-						genres={"genres" in x ? x.genres : null}
-						href={x.href}
-						playHref={x.kind !== "collection" && !x.isLoading ? x.playHref : undefined}
-						watchStatus={
-							!x.isLoading && x.kind !== "collection" ? x.watchStatus?.status ?? null : null
-						}
+						slug={item.slug}
+						type={item.kind}
+						name={item.name}
+						tagline={"tagline" in item ? item.tagline : null}
+						overview={item.overview}
+						poster={item.poster}
+						subtitle={item.kind !== "collection" ? getDisplayDate(item) : null}
+						genres={"genres" in item ? item.genres : null}
+						href={item.href}
+						playHref={item.kind !== "collection" ? item.playHref : null}
+						watchStatus={(item.kind !== "collection" && item.watchStatus?.status) || null}
 						unseenEpisodesCount={
-							x.kind === "show" ? x.watchStatus?.unseenEpisodesCount ?? x.episodesCount! : null
+							item.kind === "show"
+								? item.watchStatus?.unseenEpisodesCount ?? item.episodesCount!
+								: null
 						}
 					/>
 				)}
-			</InfiniteFetch>
+				Loader={ItemDetails.Loader}
+			/>
 		</View>
 	);
 };

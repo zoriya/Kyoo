@@ -77,9 +77,9 @@ export const SearchPage: QueryPage<{ q?: string }> = ({ q }) => {
 				/>
 			}
 			contentContainerStyle={pageStyle}
-		>
-			{(item) => <LayoutComponent {...itemMap(item)} />}
-		</InfiniteFetch>
+			Render={({ item }) => <LayoutComponent {...itemMap(item)} />}
+			Loader={LayoutComponent.Loader}
+		/>
 	);
 };
 

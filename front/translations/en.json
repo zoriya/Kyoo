@@ -39,7 +39,8 @@
 			"droped": "Mark as dropped",
 			"null": "Mark as not seen"
 		},
-		"nextUp": "Next up"
+		"nextUp": "Next up",
+		"season": "Season {{number}}"
 	},
 	"browse": {
 		"sortby": "Sort by {{key}}",

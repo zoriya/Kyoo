@@ -36,41 +36,43 @@ export const NewsList = () => {
 			<InfiniteFetch
 				query={NewsList.query()}
 				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
-				getItemType={(x, i) => (x.kind === "movie" || (x.isLoading && i % 2) ? "movie" : "episode")}
+				getItemType={(x, i) => (x?.kind === "movie" || (!x && i % 2) ? "movie" : "episode")}
 				getItemSize={(kind) => (kind === "episode" ? 2 : 1)}
 				empty={t("home.none")}
-			>
-				{(x, i) =>
-					x.kind === "movie" || (x.isLoading && i % 2) ? (
+				Render={({ item }) => {
+					if (item.kind === "episode") {
+						return (
+							<EpisodeBox
+								slug={item.slug}
+								showSlug={item.show!.slug}
+								name={`${item.show!.name} ${episodeDisplayNumber(item)}`}
+								overview={item.name}
+								thumbnail={item.thumbnail}
+								href={item.href}
+								watchedPercent={item.watchStatus?.watchedPercent || null}
+								watchedStatus={item.watchStatus?.status || null}
+								// TODO: Move this into the ItemList (using getItemSize)
+								// @ts-expect-error This is a web only property
+								{...css({ gridColumnEnd: "span 2" })}
+							/>
+						);
+					}
+					return (
 						<ItemGrid
-							isLoading={x.isLoading as any}
-							href={x.href}
-							slug={x.slug}
-							name={x.name!}
-							subtitle={!x.isLoading ? getDisplayDate(x) : undefined}
-							poster={x.poster}
-							watchStatus={x.watchStatus?.status || null}
-							watchPercent={x.watchStatus?.watchedPercent || null}
+							href={item.href}
+							slug={item.slug}
+							name={item.name!}
+							subtitle={getDisplayDate(item)}
+							poster={item.poster}
+							watchStatus={item.watchStatus?.status || null}
+							watchPercent={item.watchStatus?.watchedPercent || null}
+							unseenEpisodesCount={null}
 							type={"movie"}
 						/>
-					) : (
-						<EpisodeBox
-							isLoading={x.isLoading as any}
-							slug={x.slug}
-							showSlug={x.kind === "episode" ? x.show!.slug : null}
-							name={x.kind === "episode" ? `${x.show!.name} ${episodeDisplayNumber(x)}` : undefined}
-							overview={x.name}
-							thumbnail={x.thumbnail}
-							href={x.href}
-							watchedPercent={x.watchStatus?.watchedPercent || null}
-							watchedStatus={x.watchStatus?.status || null}
-							// TODO: Move this into the ItemList (using getItemSize)
-							// @ts-expect-error This is a web only property
-							{...css({ gridColumnEnd: "span 2" })}
-						/>
-					)
-				}
-			</InfiniteFetch>
+					);
+				}}
+				Loader={({ index }) => (index % 2 ? <EpisodeBox.Loader /> : <ItemGrid.Loader />)}
+			/>
 		</>
 	);
 };

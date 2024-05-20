@@ -19,7 +19,7 @@
  */
 
 import { LinearGradient, type LinearGradientProps } from "expo-linear-gradient";
-import type { ComponentProps, ComponentType, ReactNode } from "react";
+import type { ComponentProps, ComponentType, ReactElement, ReactNode } from "react";
 import { type ImageStyle, View, type ViewProps, type ViewStyle } from "react-native";
 import { percent } from "yoshiki/native";
 import { imageBorderRadius } from "../constants";
@@ -38,6 +38,14 @@ export const Poster = ({
 }: Props & { style?: ImageStyle } & {
 	layout: YoshikiEnhanced<{ width: ImageStyle["width"] } | { height: ImageStyle["height"] }>;
 }) => <Image alt={alt!} layout={{ aspectRatio: 2 / 3, ...layout }} {...props} />;
+
+Poster.Loader = ({
+	layout,
+	...props
+}: {
+	children?: ReactElement;
+	layout: YoshikiEnhanced<{ width: ImageStyle["width"] } | { height: ImageStyle["height"] }>;
+}) => <Image.Loader layout={{ aspectRatio: 2 / 3, ...layout }} {...props} />;
 
 export const PosterBackground = ({
 	alt,
@@ -86,7 +94,7 @@ export const ImageBackground = <AsProps = ViewProps>({
 			{({ css, theme }) => (
 				<Container
 					{...(css(
-						[layout, !hideLoad && { borderRadius: imageBorderRadius, overflow: "hidden" }],
+						[layout, { borderRadius: imageBorderRadius, overflow: "hidden" }],
 						asProps,
 					) as AsProps)}
 				>

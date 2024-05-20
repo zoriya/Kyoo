@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { type Page, type QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
+import { type QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { HR, useBreakpointMap } from "@kyoo/primitives";
 import { type ContentStyle, FlashList } from "@shopify/flash-list";
 import {
@@ -30,7 +30,7 @@ import {
 } from "react";
 import { FlatList, View, type ViewStyle } from "react-native";
 import { ErrorView } from "./errors";
-import { EmptyView, type Layout, OfflineView, type WithLoading, addHeader } from "./fetch";
+import { EmptyView, type Layout, OfflineView, addHeader } from "./fetch";
 
 const emulateGap = (
 	layout: "grid" | "vertical" | "horizontal",
@@ -65,7 +65,8 @@ export const InfiniteFetchList = <Data, Props, _, Kind extends number | string>(
 	query,
 	placeholderCount = 2,
 	incremental = false,
-	children,
+	Render,
+	Loader,
 	layout,
 	empty,
 	divider = false,
@@ -82,16 +83,14 @@ export const InfiniteFetchList = <Data, Props, _, Kind extends number | string>(
 	placeholderCount?: number;
 	layout: Layout;
 	horizontal?: boolean;
-	children: (
-		item: Data extends Page<infer Item> ? WithLoading<Item> : WithLoading<Data>,
-		i: number,
-	) => ReactElement | null;
+	Render: (props: { item: Data; index: number }) => ReactElement | null;
+	Loader: (props: { index: number }) => ReactElement | null;
 	empty?: string | JSX.Element;
 	incremental?: boolean;
 	divider?: boolean | ComponentType;
 	Header?: ComponentType<Props & { children: JSX.Element }> | ReactElement;
 	headerProps?: Props;
-	getItemType?: (item: WithLoading<Data>, index: number) => Kind;
+	getItemType?: (item: Data | null, index: number) => Kind;
 	getItemSize?: (kind: Kind) => number;
 	fetchMore?: boolean;
 	nested?: boolean;
@@ -111,9 +110,7 @@ export const InfiniteFetchList = <Data, Props, _, Kind extends number | string>(
 
 	if (incremental) items ??= oldItems.current;
 	const count = items ? numColumns - (items.length % numColumns) : placeholderCount;
-	const placeholders = [...Array(count === 0 ? numColumns : count)].map(
-		(_, i) => ({ id: `gen${i}`, isLoading: true }) as Data,
-	);
+	const placeholders = [...Array(count === 0 ? numColumns : count)].fill(null);
 	const data = isFetching || !items ? [...(items || []), ...placeholders] : items;
 
 	const List = nested ? (FlatList as unknown as typeof FlashList) : FlashList;
@@ -137,12 +134,12 @@ export const InfiniteFetchList = <Data, Props, _, Kind extends number | string>(
 						},
 					]}
 				>
-					{children({ isLoading: false, ...item } as any, index)}
+					{item ? <Render index={index} item={item} /> : <Loader index={index} />}
 				</View>
 			)}
 			data={data}
 			horizontal={layout.layout === "horizontal"}
-			keyExtractor={(item: any) => item.id}
+			keyExtractor={(item: any, index) => (item ? item.id : index)}
 			numColumns={layout.layout === "horizontal" ? 1 : numColumns}
 			estimatedItemSize={size}
 			onEndReached={fetchMore ? fetchNextPage : undefined}

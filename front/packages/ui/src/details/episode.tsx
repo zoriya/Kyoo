@@ -22,6 +22,7 @@ import { type KyooImage, WatchStatusV } from "@kyoo/models";
 import {
 	H6,
 	IconButton,
+	Image,
 	ImageBackground,
 	type ImageProps,
 	Link,
@@ -41,20 +42,17 @@ import { type ImageStyle, Platform, type PressableProps, View } from "react-nati
 import { type Stylable, type Theme, percent, rem, useYoshiki } from "yoshiki/native";
 import { ItemProgress } from "../browse/grid";
 import { EpisodesContext } from "../components/context-menus";
-import type { Layout, WithLoading } from "../fetch";
+import type { Layout } from "../fetch";
 
-export const episodeDisplayNumber = (
-	episode: {
-		seasonNumber?: number | null;
-		episodeNumber?: number | null;
-		absoluteNumber?: number | null;
-	},
-	def?: string,
-) => {
+export const episodeDisplayNumber = (episode: {
+	seasonNumber?: number | null;
+	episodeNumber?: number | null;
+	absoluteNumber?: number | null;
+}) => {
 	if (typeof episode.seasonNumber === "number" && typeof episode.episodeNumber === "number")
 		return `S${episode.seasonNumber}:E${episode.episodeNumber}`;
 	if (episode.absoluteNumber) return episode.absoluteNumber.toString();
-	return def;
+	return "??";
 };
 
 export const displayRuntime = (runtime: number | null) => {
@@ -69,23 +67,21 @@ export const EpisodeBox = ({
 	name,
 	overview,
 	thumbnail,
-	isLoading,
 	href,
 	watchedPercent,
 	watchedStatus,
 	...props
-}: Stylable &
-	WithLoading<{
-		slug: string;
-		// if show slug is null, disable "Go to show" in the context menu
-		showSlug: string | null;
-		name: string | null;
-		overview: string | null;
-		href: string;
-		thumbnail?: ImageProps["src"] | null;
-		watchedPercent: number | null;
-		watchedStatus: WatchStatusV | null;
-	}>) => {
+}: Stylable & {
+	slug: string;
+	// if show slug is null, disable "Go to show" in the context menu
+	showSlug: string | null;
+	name: string | null;
+	overview: string | null;
+	href: string;
+	thumbnail?: ImageProps["src"] | null;
+	watchedPercent: number | null;
+	watchedStatus: WatchStatusV | null;
+}) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 	const { css } = useYoshiki("episodebox");
 	const { t } = useTranslation();
@@ -128,55 +124,62 @@ export const EpisodeBox = ({
 				quality="low"
 				alt=""
 				gradient={false}
-				hideLoad={false}
-				forcedLoading={isLoading}
 				layout={{ width: percent(100), aspectRatio: 16 / 9 }}
 				{...(css("poster") as any)}
 			>
 				{(watchedPercent || watchedStatus === WatchStatusV.Completed) && (
 					<ItemProgress watchPercent={watchedPercent ?? 100} />
 				)}
-				{slug && watchedStatus !== undefined && (
-					<EpisodesContext
-						slug={slug}
-						showSlug={showSlug}
-						status={watchedStatus}
-						isOpen={moreOpened}
-						setOpen={(v) => setMoreOpened(v)}
-						{...css([
-							{
-								position: "absolute",
-								top: 0,
-								right: 0,
-								bg: (theme) => theme.darkOverlay,
-							},
-							"more",
-							Platform.OS === "web" && moreOpened && { display: important("flex") },
-						])}
-					/>
-				)}
+				<EpisodesContext
+					slug={slug}
+					showSlug={showSlug}
+					status={watchedStatus}
+					isOpen={moreOpened}
+					setOpen={(v) => setMoreOpened(v)}
+					{...css([
+						{
+							position: "absolute",
+							top: 0,
+							right: 0,
+							bg: (theme) => theme.darkOverlay,
+						},
+						"more",
+						Platform.OS === "web" && moreOpened && { display: important("flex") },
+					])}
+				/>
 			</ImageBackground>
-			<Skeleton {...css({ width: percent(50) })}>
-				{isLoading || (
-					<P {...css([{ marginY: 0, textAlign: "center" }, "title"])}>
-						{name ?? t("show.episodeNoMetadata")}
-					</P>
-				)}
-			</Skeleton>
-			<Skeleton {...css({ width: percent(75), height: rem(0.8) })}>
-				{isLoading || (
-					<SubP
-						numberOfLines={3}
-						{...css({
-							marginTop: 0,
-							textAlign: "center",
-						})}
-					>
-						{overview}
-					</SubP>
-				)}
-			</Skeleton>
+			<P {...css([{ marginY: 0, textAlign: "center" }, "title"])}>
+				{name ?? t("show.episodeNoMetadata")}
+			</P>
+			<SubP
+				numberOfLines={3}
+				{...css({
+					marginTop: 0,
+					textAlign: "center",
+				})}
+			>
+				{overview}
+			</SubP>
 		</Link>
+	);
+};
+
+EpisodeBox.Loader = (props: Stylable) => {
+	const { css } = useYoshiki();
+
+	return (
+		<View
+			{...css(
+				{
+					alignItems: "center",
+				},
+				props,
+			)}
+		>
+			<Image.Loader layout={{ width: percent(100), aspectRatio: 16 / 9 }} />
+			<Skeleton {...css({ width: percent(50) })} />
+			<Skeleton {...css({ width: percent(75), height: rem(0.8) })} />
+		</View>
 	);
 };
 
@@ -187,7 +190,6 @@ export const EpisodeLine = ({
 	name,
 	thumbnail,
 	overview,
-	isLoading,
 	id,
 	absoluteNumber,
 	episodeNumber,
@@ -198,7 +200,7 @@ export const EpisodeLine = ({
 	watchedStatus,
 	href,
 	...props
-}: WithLoading<{
+}: {
 	id: string;
 	slug: string;
 	// if show slug is null, disable "Go to show" in the context menu
@@ -215,8 +217,7 @@ export const EpisodeLine = ({
 	watchedPercent: number | null;
 	watchedStatus: WatchStatusV | null;
 	href: string;
-}> &
-	PressableProps &
+} & PressableProps &
 	Stylable) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 	const [descriptionExpanded, setDescriptionExpanded] = useState(false);
@@ -254,7 +255,6 @@ export const EpisodeLine = ({
 				quality="low"
 				alt=""
 				gradient={false}
-				hideLoad={false}
 				layout={{
 					width: percent(18),
 					aspectRatio: 16 / 9,
@@ -293,48 +293,36 @@ export const EpisodeLine = ({
 						justifyContent: "space-between",
 					})}
 				>
-					<Skeleton>
-						{isLoading || (
-							// biome-ignore lint/a11y/useValidAriaValues: simply use H6 for the style but keep a P
-							<H6 aria-level={undefined} {...css([{ flexShrink: 1 }, "title"])}>
-								{[displayNumber, name ?? t("show.episodeNoMetadata")].join(" · ")}
-							</H6>
-						)}
-					</Skeleton>
+					{/* biome-ignore lint/a11y/useValidAriaValues: simply use H6 for the style but keep a P */}
+					<H6 aria-level={undefined} {...css([{ flexShrink: 1 }, "title"])}>
+						{[displayNumber, name ?? t("show.episodeNoMetadata")].join(" · ")}
+					</H6>
 					<View {...css({ flexDirection: "row", alignItems: "center" })}>
-						<Skeleton>
-							{isLoading || (
-								<SubP>
-									{/* Source https://www.i18next.com/translation-function/formatting#datetime */}
-									{[
-										releaseDate ? t("{{val, datetime}}", { val: releaseDate }) : null,
-										displayRuntime(runtime),
-									]
-										.filter((item) => item != null)
-										.join(" · ")}
-								</SubP>
-							)}
-						</Skeleton>
-						{slug && watchedStatus !== undefined && (
-							<EpisodesContext
-								slug={slug}
-								showSlug={showSlug}
-								status={watchedStatus}
-								isOpen={moreOpened}
-								setOpen={(v) => setMoreOpened(v)}
-								{...css([
-									"more",
-									{ display: "flex", marginLeft: ts(3) },
-									Platform.OS === "web" && moreOpened && { display: important("flex") },
-								])}
-							/>
-						)}
+						<SubP>
+							{[
+								// @ts-ignore Source https://www.i18next.com/translation-function/formatting#datetime
+								releaseDate ? t("{{val, datetime}}", { val: releaseDate }) : null,
+								displayRuntime(runtime),
+							]
+								.filter((item) => item != null)
+								.join(" · ")}
+						</SubP>
+						<EpisodesContext
+							slug={slug}
+							showSlug={showSlug}
+							status={watchedStatus}
+							isOpen={moreOpened}
+							setOpen={(v) => setMoreOpened(v)}
+							{...css([
+								"more",
+								{ display: "flex", marginLeft: ts(3) },
+								Platform.OS === "web" && moreOpened && { display: important("flex") },
+							])}
+						/>
 					</View>
 				</View>
-				<View {...css({ flexDirection: "row" })}>
-					<Skeleton>
-						{isLoading || <P numberOfLines={descriptionExpanded ? undefined : 3}>{overview}</P>}
-					</Skeleton>
+				<View {...css({ flexDirection: "row", justifyContent: "space-between" })}>
+					<P numberOfLines={descriptionExpanded ? undefined : 3}>{overview}</P>
 					<IconButton
 						{...css(["more", Platform.OS !== "web" && { opacity: 1 }])}
 						icon={descriptionExpanded ? ExpandLess : ExpandMore}
@@ -349,6 +337,45 @@ export const EpisodeLine = ({
 		</Link>
 	);
 };
+
+EpisodeLine.Loader = (props: Stylable) => {
+	const { css } = useYoshiki();
+
+	return (
+		<View
+			{...css(
+				{
+					alignItems: "center",
+					flexDirection: "row",
+				},
+				props,
+			)}
+		>
+			<Image.Loader
+				layout={{
+					width: percent(18),
+					aspectRatio: 16 / 9,
+				}}
+				{...css({ flexShrink: 0, m: ts(1) })}
+			/>
+			<View {...css({ flexGrow: 1, flexShrink: 1, m: ts(1) })}>
+				<View
+					{...css({
+						flexGrow: 1,
+						flexShrink: 1,
+						flexDirection: "row",
+						justifyContent: "space-between",
+					})}
+				>
+					<Skeleton {...css({ width: percent(30) })} />
+					<Skeleton {...css({ width: percent(15) })} />
+				</View>
+				<Skeleton />
+			</View>
+		</View>
+	);
+};
+
 EpisodeLine.layout = {
 	numColumns: 1,
 	size: 100,

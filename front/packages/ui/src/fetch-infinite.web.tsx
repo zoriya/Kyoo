@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { type Page, type QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
+import { type QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { HR } from "@kyoo/primitives";
 import type { ContentStyle } from "@shopify/flash-list";
 import {
@@ -33,7 +33,7 @@ import {
 } from "react";
 import { type Stylable, nativeStyleToCss, useYoshiki, ysMap } from "yoshiki";
 import { ErrorView } from "./errors";
-import { EmptyView, type Layout, type WithLoading, addHeader } from "./fetch";
+import { EmptyView, type Layout, addHeader } from "./fetch";
 
 const InfiniteScroll = <Props,>({
 	children,
@@ -145,7 +145,7 @@ export const InfiniteFetchList = <Data, _, HeaderProps, Kind extends number | st
 	query,
 	incremental = false,
 	placeholderCount = 2,
-	children,
+	Render,
 	layout,
 	empty,
 	divider: Divider = false,
@@ -154,21 +154,20 @@ export const InfiniteFetchList = <Data, _, HeaderProps, Kind extends number | st
 	getItemType,
 	getItemSize,
 	nested,
+	Loader,
 	...props
 }: {
 	query: ReturnType<typeof useInfiniteFetch<_, Data>>;
 	incremental?: boolean;
 	placeholderCount?: number;
 	layout: Layout;
-	children: (
-		item: Data extends Page<infer Item> ? WithLoading<Item> : WithLoading<Data>,
-		i: number,
-	) => ReactElement | null;
+	Render: (props: { item: Data; index: number }) => ReactElement | null;
+	Loader: (props: { index: number }) => ReactElement | null;
 	empty?: string | JSX.Element;
 	divider?: boolean | ComponentType;
 	Header?: ComponentType<{ children: JSX.Element } & HeaderProps> | ReactElement;
 	headerProps: HeaderProps;
-	getItemType?: (item: WithLoading<Data>, index: number) => Kind;
+	getItemType?: (item: Data | null, index: number) => Kind;
 	getItemSize?: (kind: Kind) => number;
 	fetchMore?: boolean;
 	contentContainerStyle?: ContentStyle;
@@ -193,7 +192,7 @@ export const InfiniteFetchList = <Data, _, HeaderProps, Kind extends number | st
 			loader={[...Array(placeholderCount)].map((_, i) => (
 				<Fragment key={i.toString()}>
 					{Divider && i !== 0 && (Divider === true ? <HR /> : <Divider />)}
-					{children({ isLoading: true } as any, i)}
+					<Loader index={i} />
 				</Fragment>
 			))}
 			Header={Header}
@@ -203,7 +202,7 @@ export const InfiniteFetchList = <Data, _, HeaderProps, Kind extends number | st
 			{(items ?? oldItems.current)?.map((item, i) => (
 				<Fragment key={(item as any).id}>
 					{Divider && i !== 0 && (Divider === true ? <HR /> : <Divider />)}
-					{children({ ...item, isLoading: false } as any, i)}
+					<Render item={item} index={i} />
 				</Fragment>
 			))}
 		</InfiniteScroll>
