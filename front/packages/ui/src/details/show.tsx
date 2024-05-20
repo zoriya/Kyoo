@@ -79,12 +79,11 @@ export const ShowWatchStatusCard = ({ watchedPercent, status, nextEpisode }: Sho
 				>
 					<H2 {...css({ marginLeft: ts(2) })}>{t("show.nextUp")}</H2>
 					<EpisodeLine
-						isLoading={false}
 						{...nextEpisode}
 						showSlug={null}
 						watchedPercent={watchedPercent || null}
 						watchedStatus={status || null}
-						displayNumber={episodeDisplayNumber(nextEpisode, "???")!}
+						displayNumber={episodeDisplayNumber(nextEpisode)}
 						onHoverIn={() => setFocus(true)}
 						onHoverOut={() => setFocus(false)}
 						onFocus={() => setFocus(true)}

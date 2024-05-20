@@ -32,6 +32,7 @@ import {
 	important,
 	tooltip,
 	ts,
+	Image,
 } from "@kyoo/primitives";
 import ExpandMore from "@material-symbols/svg-400/rounded/keyboard_arrow_down-fill.svg";
 import ExpandLess from "@material-symbols/svg-400/rounded/keyboard_arrow_up-fill.svg";
@@ -43,18 +44,15 @@ import { ItemProgress } from "../browse/grid";
 import { EpisodesContext } from "../components/context-menus";
 import type { Layout, WithLoading } from "../fetch";
 
-export const episodeDisplayNumber = (
-	episode: {
-		seasonNumber?: number | null;
-		episodeNumber?: number | null;
-		absoluteNumber?: number | null;
-	},
-	def?: string,
-) => {
+export const episodeDisplayNumber = (episode: {
+	seasonNumber?: number | null;
+	episodeNumber?: number | null;
+	absoluteNumber?: number | null;
+}) => {
 	if (typeof episode.seasonNumber === "number" && typeof episode.episodeNumber === "number")
 		return `S${episode.seasonNumber}:E${episode.episodeNumber}`;
 	if (episode.absoluteNumber) return episode.absoluteNumber.toString();
-	return def;
+	return "??";
 };
 
 export const displayRuntime = (runtime: number | null) => {
@@ -187,7 +185,6 @@ export const EpisodeLine = ({
 	name,
 	thumbnail,
 	overview,
-	isLoading,
 	id,
 	absoluteNumber,
 	episodeNumber,
@@ -198,7 +195,7 @@ export const EpisodeLine = ({
 	watchedStatus,
 	href,
 	...props
-}: WithLoading<{
+}: {
 	id: string;
 	slug: string;
 	// if show slug is null, disable "Go to show" in the context menu
@@ -215,8 +212,7 @@ export const EpisodeLine = ({
 	watchedPercent: number | null;
 	watchedStatus: WatchStatusV | null;
 	href: string;
-}> &
-	PressableProps &
+} & PressableProps &
 	Stylable) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 	const [descriptionExpanded, setDescriptionExpanded] = useState(false);
@@ -254,7 +250,6 @@ export const EpisodeLine = ({
 				quality="low"
 				alt=""
 				gradient={false}
-				hideLoad={false}
 				layout={{
 					width: percent(18),
 					aspectRatio: 16 / 9,
@@ -293,48 +288,36 @@ export const EpisodeLine = ({
 						justifyContent: "space-between",
 					})}
 				>
-					<Skeleton>
-						{isLoading || (
-							// biome-ignore lint/a11y/useValidAriaValues: simply use H6 for the style but keep a P
-							<H6 aria-level={undefined} {...css([{ flexShrink: 1 }, "title"])}>
-								{[displayNumber, name ?? t("show.episodeNoMetadata")].join(" · ")}
-							</H6>
-						)}
-					</Skeleton>
+					{/* biome-ignore lint/a11y/useValidAriaValues: simply use H6 for the style but keep a P */}
+					<H6 aria-level={undefined} {...css([{ flexShrink: 1 }, "title"])}>
+						{[displayNumber, name ?? t("show.episodeNoMetadata")].join(" · ")}
+					</H6>
 					<View {...css({ flexDirection: "row", alignItems: "center" })}>
-						<Skeleton>
-							{isLoading || (
-								<SubP>
-									{/* Source https://www.i18next.com/translation-function/formatting#datetime */}
-									{[
-										releaseDate ? t("{{val, datetime}}", { val: releaseDate }) : null,
-										displayRuntime(runtime),
-									]
-										.filter((item) => item != null)
-										.join(" · ")}
-								</SubP>
-							)}
-						</Skeleton>
-						{slug && watchedStatus !== undefined && (
-							<EpisodesContext
-								slug={slug}
-								showSlug={showSlug}
-								status={watchedStatus}
-								isOpen={moreOpened}
-								setOpen={(v) => setMoreOpened(v)}
-								{...css([
-									"more",
-									{ display: "flex", marginLeft: ts(3) },
-									Platform.OS === "web" && moreOpened && { display: important("flex") },
-								])}
-							/>
-						)}
+						<SubP>
+							{[
+								// @ts-ignore Source https://www.i18next.com/translation-function/formatting#datetime
+								releaseDate ? t("{{val, datetime}}", { val: releaseDate }) : null,
+								displayRuntime(runtime),
+							]
+								.filter((item) => item != null)
+								.join(" · ")}
+						</SubP>
+						<EpisodesContext
+							slug={slug}
+							showSlug={showSlug}
+							status={watchedStatus}
+							isOpen={moreOpened}
+							setOpen={(v) => setMoreOpened(v)}
+							{...css([
+								"more",
+								{ display: "flex", marginLeft: ts(3) },
+								Platform.OS === "web" && moreOpened && { display: important("flex") },
+							])}
+						/>
 					</View>
 				</View>
-				<View {...css({ flexDirection: "row" })}>
-					<Skeleton>
-						{isLoading || <P numberOfLines={descriptionExpanded ? undefined : 3}>{overview}</P>}
-					</Skeleton>
+				<View {...css({ flexDirection: "row", justifyContent: "space-between" })}>
+					<P numberOfLines={descriptionExpanded ? undefined : 3}>{overview}</P>
 					<IconButton
 						{...css(["more", Platform.OS !== "web" && { opacity: 1 }])}
 						icon={descriptionExpanded ? ExpandLess : ExpandMore}
@@ -349,6 +332,45 @@ export const EpisodeLine = ({
 		</Link>
 	);
 };
+
+EpisodeLine.Loader = (props: Stylable) => {
+	const { css } = useYoshiki();
+
+	return (
+		<View
+			{...css(
+				{
+					alignItems: "center",
+					flexDirection: "row",
+				},
+				props,
+			)}
+		>
+			<Image.Loader
+				layout={{
+					width: percent(18),
+					aspectRatio: 16 / 9,
+				}}
+				{...css({ flexShrink: 0, m: ts(1) })}
+			/>
+			<View {...css({ flexGrow: 1, flexShrink: 1, m: ts(1) })}>
+				<View
+					{...css({
+						flexGrow: 1,
+						flexShrink: 1,
+						flexDirection: "row",
+						justifyContent: "space-between",
+					})}
+				>
+					<Skeleton {...css({ width: percent(30) })} />
+					<Skeleton {...css({ width: percent(15) })} />
+				</View>
+				<Skeleton />
+			</View>
+		</View>
+	);
+};
+
 EpisodeLine.layout = {
 	numColumns: 1,
 	size: 100,
