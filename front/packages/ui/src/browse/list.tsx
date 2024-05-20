@@ -37,7 +37,7 @@ import { percent, px, rem, useYoshiki } from "yoshiki/native";
 import { ItemContext } from "../components/context-menus";
 import type { Layout } from "../fetch";
 import { ItemWatchStatus } from "./grid";
-import { Stylable } from "yoshiki";
+import type { Stylable } from "yoshiki";
 
 export const ItemList = ({
 	href,
@@ -166,7 +166,7 @@ export const ItemList = ({
 	);
 };
 
-ItemList.Loader = (props: Stylable) => {
+ItemList.Loader = (props: object) => {
 	const { css } = useYoshiki();
 
 	return (

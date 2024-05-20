@@ -26,18 +26,7 @@ import {
 	SeasonP,
 	useInfiniteFetch,
 } from "@kyoo/models";
-import {
-	H2,
-	H6,
-	HR,
-	IconButton,
-	Menu,
-	P,
-	Skeleton,
-	tooltip,
-	ts,
-	usePageStyle,
-} from "@kyoo/primitives";
+import { H2, HR, IconButton, Menu, P, Skeleton, tooltip, ts, usePageStyle } from "@kyoo/primitives";
 import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
 import type { ComponentType } from "react";
 import { useTranslation } from "react-i18next";

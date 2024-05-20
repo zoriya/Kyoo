@@ -39,55 +39,10 @@ export const WatchlistList = () => {
 	const { css } = useYoshiki();
 	const account = useAccount();
 
-	return (
-		<>
-			<Header title={t("home.watchlist")} />
-			{account ? (
-				<InfiniteFetch
-					query={WatchlistList.query()}
-					layout={{ ...ItemGrid.layout, layout: "horizontal" }}
-					getItemType={(x, i) =>
-						(x.kind === "show" && x.watchStatus?.nextEpisode) || (x.isLoading && i % 2)
-							? "episode"
-							: "item"
-					}
-					getItemSize={(kind) => (kind === "episode" ? 2 : 1)}
-					empty={t("home.none")}
-				>
-					{(x, i) => {
-						const episode = x.kind === "show" ? x.watchStatus?.nextEpisode : null;
-						return (x.kind === "show" && x.watchStatus?.nextEpisode) || (x.isLoading && i % 2) ? (
-							<EpisodeBox
-								isLoading={x.isLoading as any}
-								slug={episode?.slug}
-								showSlug={x.slug}
-								name={episode ? `${x.name} ${episodeDisplayNumber(episode)}` : undefined}
-								overview={episode?.name}
-								thumbnail={episode?.thumbnail ?? x.thumbnail}
-								href={episode?.href}
-								watchedPercent={x.watchStatus?.watchedPercent || null}
-								watchedStatus={x.watchStatus?.status || null}
-								// TODO: Move this into the ItemList (using getItemSize)
-								// @ts-expect-error This is a web only property
-								{...css({ gridColumnEnd: "span 2" })}
-							/>
-						) : (
-							<ItemGrid
-								isLoading={x.isLoading as any}
-								href={x.href}
-								slug={x.slug}
-								name={x.name!}
-								subtitle={!x.isLoading ? getDisplayDate(x) : undefined}
-								poster={x.poster}
-								watchStatus={x.watchStatus?.status || null}
-								watchPercent={x.watchStatus?.watchedPercent || null}
-								unseenEpisodesCount={x.kind === "show" ? x.watchStatus?.unseenEpisodesCount : null}
-								type={x.kind}
-							/>
-						);
-					}}
-				</InfiniteFetch>
-			) : (
+	if (!account) {
+		return (
+			<>
+				<Header title={t("home.watchlist")} />
 				<View {...css({ justifyContent: "center", alignItems: "center" })}>
 					<P>{t("home.watchlistLogin")}</P>
 					<Button
@@ -96,7 +51,60 @@ export const WatchlistList = () => {
 						{...css({ minWidth: ts(24), margin: ts(2) })}
 					/>
 				</View>
-			)}
+			</>
+		);
+	}
+
+	return (
+		<>
+			<Header title={t("home.watchlist")} />
+			<InfiniteFetch
+				query={WatchlistList.query()}
+				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
+				getItemType={(x, i) =>
+					(x.kind === "show" && x.watchStatus?.nextEpisode) || (x.isLoading && i % 2)
+						? "episode"
+						: "item"
+				}
+				getItemSize={(kind) => (kind === "episode" ? 2 : 1)}
+				empty={t("home.none")}
+				Render={({ item }) => {
+					const episode = item.kind === "show" ? item.watchStatus?.nextEpisode : null;
+					if (episode) {
+						return (
+							<EpisodeBox
+								slug={episode.slug}
+								showSlug={item.slug}
+								name={`${item.name} ${episodeDisplayNumber(episode)}`}
+								overview={episode.name}
+								thumbnail={episode.thumbnail ?? item.thumbnail}
+								href={episode.href}
+								watchedPercent={item.watchStatus?.watchedPercent || null}
+								watchedStatus={item.watchStatus?.status || null}
+								// TODO: Move this into the ItemList (using getItemSize)
+								// @ts-expect-error This is a web only property
+								{...css({ gridColumnEnd: "span 2" })}
+							/>
+						);
+					}
+					return (
+						<ItemGrid
+							href={item.href}
+							slug={item.slug}
+							name={item.name!}
+							subtitle={getDisplayDate(item)}
+							poster={item.poster}
+							watchStatus={item.watchStatus?.status || null}
+							watchPercent={item.watchStatus?.watchedPercent || null}
+							unseenEpisodesCount={
+								(item.kind === "show" && item.watchStatus?.unseenEpisodesCount) || null
+							}
+							type={item.kind}
+						/>
+					);
+				}}
+				Loader={({ index }) => (index % 2 ? <EpisodeBox.Loader /> : <ItemGrid.Loader />)}
+			/>
 		</>
 	);
 };

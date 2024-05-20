@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { type Page, type QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
+import { type QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { HR } from "@kyoo/primitives";
 import type { ContentStyle } from "@shopify/flash-list";
 import {

@@ -41,9 +41,9 @@ export const VerticalRecommended = () => {
 				layout={{ ...ItemList.layout, layout: "vertical" }}
 				fetchMore={false}
 				nested
-			>
-				{(x, i) => <ItemList key={x.id ?? i} {...itemMap(x)} />}
-			</InfiniteFetch>
+				Render={({ item }) => <ItemList {...itemMap(item)} />}
+				Loader={() => <ItemList.Loader />}
+			/>
 		</View>
 	);
 };

@@ -75,13 +75,9 @@ export const GenreGrid = ({ genre }: { genre: Genre }) => {
 				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
 				placeholderCount={2}
 				empty={displayEmpty.current ? t("home.none") : undefined}
-			>
-				{(x, i) => {
-					// only display empty list if a loading as been displayed (not durring ssr)
-					if (x.isLoading) displayEmpty.current = true;
-					return <ItemGrid key={x.id ?? i} {...itemMap(x)} />;
-				}}
-			</InfiniteFetchList>
+				Render={({ item }) => <ItemGrid {...itemMap(item)} />}
+				Loader={ItemGrid.Loader}
+			/>
 		</>
 	);
 };

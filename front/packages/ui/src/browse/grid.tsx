@@ -213,7 +213,7 @@ export const ItemGrid = ({
 	);
 };
 
-ItemGrid.Loader = (props: Stylable) => {
+ItemGrid.Loader = (props: object) => {
 	const { css } = useYoshiki();
 
 	return (

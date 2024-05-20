@@ -42,7 +42,7 @@ import { type ImageStyle, Platform, type PressableProps, View } from "react-nati
 import { type Stylable, type Theme, percent, rem, useYoshiki } from "yoshiki/native";
 import { ItemProgress } from "../browse/grid";
 import { EpisodesContext } from "../components/context-menus";
-import type { Layout, WithLoading } from "../fetch";
+import type { Layout } from "../fetch";
 
 export const episodeDisplayNumber = (episode: {
 	seasonNumber?: number | null;
@@ -67,23 +67,21 @@ export const EpisodeBox = ({
 	name,
 	overview,
 	thumbnail,
-	isLoading,
 	href,
 	watchedPercent,
 	watchedStatus,
 	...props
-}: Stylable &
-	WithLoading<{
-		slug: string;
-		// if show slug is null, disable "Go to show" in the context menu
-		showSlug: string | null;
-		name: string | null;
-		overview: string | null;
-		href: string;
-		thumbnail?: ImageProps["src"] | null;
-		watchedPercent: number | null;
-		watchedStatus: WatchStatusV | null;
-	}>) => {
+}: Stylable & {
+	slug: string;
+	// if show slug is null, disable "Go to show" in the context menu
+	showSlug: string | null;
+	name: string | null;
+	overview: string | null;
+	href: string;
+	thumbnail?: ImageProps["src"] | null;
+	watchedPercent: number | null;
+	watchedStatus: WatchStatusV | null;
+}) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 	const { css } = useYoshiki("episodebox");
 	const { t } = useTranslation();
@@ -126,55 +124,69 @@ export const EpisodeBox = ({
 				quality="low"
 				alt=""
 				gradient={false}
-				hideLoad={false}
-				forcedLoading={isLoading}
 				layout={{ width: percent(100), aspectRatio: 16 / 9 }}
 				{...(css("poster") as any)}
 			>
 				{(watchedPercent || watchedStatus === WatchStatusV.Completed) && (
 					<ItemProgress watchPercent={watchedPercent ?? 100} />
 				)}
-				{slug && watchedStatus !== undefined && (
-					<EpisodesContext
-						slug={slug}
-						showSlug={showSlug}
-						status={watchedStatus}
-						isOpen={moreOpened}
-						setOpen={(v) => setMoreOpened(v)}
-						{...css([
-							{
-								position: "absolute",
-								top: 0,
-								right: 0,
-								bg: (theme) => theme.darkOverlay,
-							},
-							"more",
-							Platform.OS === "web" && moreOpened && { display: important("flex") },
-						])}
-					/>
-				)}
+				<EpisodesContext
+					slug={slug}
+					showSlug={showSlug}
+					status={watchedStatus}
+					isOpen={moreOpened}
+					setOpen={(v) => setMoreOpened(v)}
+					{...css([
+						{
+							position: "absolute",
+							top: 0,
+							right: 0,
+							bg: (theme) => theme.darkOverlay,
+						},
+						"more",
+						Platform.OS === "web" && moreOpened && { display: important("flex") },
+					])}
+				/>
 			</ImageBackground>
-			<Skeleton {...css({ width: percent(50) })}>
-				{isLoading || (
-					<P {...css([{ marginY: 0, textAlign: "center" }, "title"])}>
-						{name ?? t("show.episodeNoMetadata")}
-					</P>
-				)}
-			</Skeleton>
-			<Skeleton {...css({ width: percent(75), height: rem(0.8) })}>
-				{isLoading || (
-					<SubP
-						numberOfLines={3}
-						{...css({
-							marginTop: 0,
-							textAlign: "center",
-						})}
-					>
-						{overview}
-					</SubP>
-				)}
-			</Skeleton>
+			<P {...css([{ marginY: 0, textAlign: "center" }, "title"])}>
+				{name ?? t("show.episodeNoMetadata")}
+			</P>
+			<SubP
+				numberOfLines={3}
+				{...css({
+					marginTop: 0,
+					textAlign: "center",
+				})}
+			>
+				{overview}
+			</SubP>
 		</Link>
+	);
+};
+
+EpisodeBox.Loader = (props: Stylable) => {
+	const { css } = useYoshiki();
+
+	return (
+		<View
+			{...css(
+				{
+					alignItems: "center",
+				},
+				props,
+			)}
+		>
+			<Image.Loader
+				layout={{ width: percent(100), aspectRatio: 16 / 9 }}
+				{...css({
+					borderColor: (theme) => theme.background,
+					borderWidth: ts(0.5),
+					borderStyle: "solid",
+				})}
+			/>
+			<Skeleton {...css({ width: percent(50) })} />
+			<Skeleton {...css({ width: percent(75), height: rem(0.8) })} />
+		</View>
 	);
 };
 
