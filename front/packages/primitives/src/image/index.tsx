@@ -94,7 +94,7 @@ export const ImageBackground = <AsProps = ViewProps>({
 			{({ css, theme }) => (
 				<Container
 					{...(css(
-						[layout, !hideLoad && { borderRadius: imageBorderRadius, overflow: "hidden" }],
+						[layout, { borderRadius: imageBorderRadius, overflow: "hidden" }],
 						asProps,
 					) as AsProps)}
 				>

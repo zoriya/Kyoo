@@ -227,14 +227,7 @@ ItemGrid.Loader = (props: object) => {
 				props,
 			)}
 		>
-			<Poster.Loader
-				layout={{ width: percent(100) }}
-				{...css({
-					borderColor: (theme) => theme.background,
-					borderWidth: ts(0.5),
-					borderStyle: "solid",
-				})}
-			/>
+			<Poster.Loader layout={{ width: percent(100) }} />
 			<Skeleton />
 			<Skeleton {...css({ width: percent(50) })} />
 		</View>

@@ -176,14 +176,7 @@ EpisodeBox.Loader = (props: Stylable) => {
 				props,
 			)}
 		>
-			<Image.Loader
-				layout={{ width: percent(100), aspectRatio: 16 / 9 }}
-				{...css({
-					borderColor: (theme) => theme.background,
-					borderWidth: ts(0.5),
-					borderStyle: "solid",
-				})}
-			/>
+			<Image.Loader layout={{ width: percent(100), aspectRatio: 16 / 9 }} />
 			<Skeleton {...css({ width: percent(50) })} />
 			<Skeleton {...css({ width: percent(75), height: rem(0.8) })} />
 		</View>
