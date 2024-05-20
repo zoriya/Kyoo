@@ -22,6 +22,7 @@ import { type KyooImage, WatchStatusV } from "@kyoo/models";
 import {
 	H6,
 	IconButton,
+	Image,
 	ImageBackground,
 	type ImageProps,
 	Link,
@@ -32,7 +33,6 @@ import {
 	important,
 	tooltip,
 	ts,
-	Image,
 } from "@kyoo/primitives";
 import ExpandMore from "@material-symbols/svg-400/rounded/keyboard_arrow_down-fill.svg";
 import ExpandLess from "@material-symbols/svg-400/rounded/keyboard_arrow_up-fill.svg";

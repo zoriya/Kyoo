@@ -33,11 +33,11 @@ import {
 } from "@kyoo/primitives";
 import { useState } from "react";
 import { Platform, View } from "react-native";
+import type { Stylable } from "yoshiki";
 import { percent, px, rem, useYoshiki } from "yoshiki/native";
 import { ItemContext } from "../components/context-menus";
 import type { Layout } from "../fetch";
 import { ItemWatchStatus } from "./grid";
-import type { Stylable } from "yoshiki";
 
 export const ItemList = ({
 	href,

@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { View, type TextProps } from "react-native";
+import { type TextProps, View } from "react-native";
 import { type Theme, px, rem, useYoshiki } from "yoshiki/native";
 import { Link } from "./links";
 import { Skeleton } from "./skeleton";

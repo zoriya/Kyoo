@@ -19,7 +19,7 @@
  */
 
 import { getCurrentToken } from "@kyoo/models";
-import { ReactElement, useState } from "react";
+import { type ReactElement, useState } from "react";
 import { type FlexStyle, type ImageStyle, View, type ViewStyle } from "react-native";
 import { Blurhash } from "react-native-blurhash";
 import FastImage from "react-native-fast-image";

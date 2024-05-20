@@ -43,7 +43,7 @@ Poster.Loader = ({
 	layout,
 	...props
 }: {
-		children?: ReactElement;
+	children?: ReactElement;
 	layout: YoshikiEnhanced<{ width: ImageStyle["width"] } | { height: ImageStyle["height"] }>;
 }) => <Image.Loader layout={{ aspectRatio: 2 / 3, ...layout }} {...props} />;
 

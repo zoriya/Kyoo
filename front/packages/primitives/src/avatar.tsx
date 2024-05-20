@@ -23,8 +23,8 @@ import { type ComponentType, type RefAttributes, forwardRef } from "react";
 import { Image, type ImageProps, View, type ViewStyle } from "react-native";
 import { type Stylable, px, useYoshiki } from "yoshiki/native";
 import { Icon } from "./icons";
-import { P } from "./text";
 import { Skeleton } from "./skeleton";
+import { P } from "./text";
 
 const stringToColor = (string: string) => {
 	let hash = 0;
@@ -124,4 +124,4 @@ const AvatarLoader = ({ size = px(24), ...props }: { size?: number }) => {
 	);
 };
 
-export const Avatar = { ...AvatarC, Loader: AvatarLoader };
+export const Avatar = Object.assign(AvatarC, { Loader: AvatarLoader });

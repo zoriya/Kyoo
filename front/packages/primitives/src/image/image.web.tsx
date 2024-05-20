@@ -19,7 +19,7 @@
  */
 
 import NextImage from "next/image";
-import { ReactElement, useState } from "react";
+import { type ReactElement, useState } from "react";
 import { type ImageStyle, View, type ViewStyle } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 import { imageBorderRadius } from "../constants";
@@ -74,7 +74,7 @@ export const Image = ({
 	);
 };
 
-Image.Loader = ({ layout, ...props }: { layout: ImageLayout, children?: ReactElement }) => {
+Image.Loader = ({ layout, ...props }: { layout: ImageLayout; children?: ReactElement }) => {
 	const { css } = useYoshiki();
 	const border = { borderRadius: 6, overflow: "hidden" } satisfies ViewStyle;
 
