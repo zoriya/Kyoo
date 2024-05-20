@@ -73,3 +73,10 @@ export const Image = ({
 		</BlurhashContainer>
 	);
 };
+
+Image.Loader = ({ layout, ...props }: { layout: ImageLayout }) => {
+	const { css } = useYoshiki();
+	const border = { borderRadius: 6, overflow: "hidden" } satisfies ViewStyle;
+
+	return <Skeleton variant="custom" {...css([layout, border], props)} />;
+};

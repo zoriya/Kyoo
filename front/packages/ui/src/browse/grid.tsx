@@ -23,6 +23,7 @@ import {
 	Icon,
 	Link,
 	P,
+	Poster,
 	PosterBackground,
 	Skeleton,
 	SubP,
@@ -35,7 +36,7 @@ import { useState } from "react";
 import { type ImageStyle, Platform, View } from "react-native";
 import { type Stylable, type Theme, max, percent, px, rem, useYoshiki } from "yoshiki/native";
 import { ItemContext } from "../components/context-menus";
-import type { Layout, WithLoading } from "../fetch";
+import type { Layout } from "../fetch";
 
 export const ItemWatchStatus = ({
 	watchStatus,
@@ -113,23 +114,21 @@ export const ItemGrid = ({
 	type,
 	subtitle,
 	poster,
-	isLoading,
 	watchStatus,
 	watchPercent,
 	unseenEpisodesCount,
 	...props
-}: WithLoading<{
+}: {
 	href: string;
 	slug: string;
 	name: string;
-	subtitle?: string;
-	poster?: KyooImage | null;
+	subtitle: string | null;
+	poster: KyooImage | null;
 	watchStatus: WatchStatusV | null;
 	watchPercent: number | null;
 	type: "movie" | "show" | "collection";
 	unseenEpisodesCount: number | null;
-}> &
-	Stylable<"text">) => {
+} & Stylable<"text">) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 	const { css } = useYoshiki("grid");
 
@@ -172,13 +171,12 @@ export const ItemGrid = ({
 				src={poster}
 				alt={name}
 				quality="low"
-				forcedLoading={isLoading}
 				layout={{ width: percent(100) }}
 				{...(css("poster") as { style: ImageStyle })}
 			>
 				<ItemWatchStatus watchStatus={watchStatus} unseenEpisodesCount={unseenEpisodesCount} />
 				{type === "movie" && watchPercent && <ItemProgress watchPercent={watchPercent} />}
-				{slug && watchStatus !== undefined && type && type !== "collection" && (
+				{type !== "collection" && (
 					<ItemContext
 						type={type}
 						slug={slug}
@@ -198,31 +196,48 @@ export const ItemGrid = ({
 					/>
 				)}
 			</PosterBackground>
-			<Skeleton>
-				{isLoading || (
-					<P
-						numberOfLines={subtitle ? 1 : 2}
-						{...css([{ marginY: 0, textAlign: "center" }, "title"])}
-					>
-						{name}
-					</P>
-				)}
-			</Skeleton>
-			{(isLoading || subtitle) && (
-				<Skeleton {...css({ width: percent(50) })}>
-					{isLoading || (
-						<SubP
-							{...css({
-								marginTop: 0,
-								textAlign: "center",
-							})}
-						>
-							{subtitle}
-						</SubP>
-					)}
-				</Skeleton>
+			<P numberOfLines={subtitle ? 1 : 2} {...css([{ marginY: 0, textAlign: "center" }, "title"])}>
+				{name}
+			</P>
+			{subtitle && (
+				<SubP
+					{...css({
+						marginTop: 0,
+						textAlign: "center",
+					})}
+				>
+					{subtitle}
+				</SubP>
 			)}
 		</Link>
+	);
+};
+
+ItemGrid.Loader = (props: Stylable) => {
+	const { css } = useYoshiki();
+
+	return (
+		<View
+			{...css(
+				{
+					flexDirection: "column",
+					alignItems: "center",
+					width: percent(100),
+				},
+				props,
+			)}
+		>
+			<Poster.Loader
+				layout={{ width: percent(100) }}
+				{...css({
+					borderColor: (theme) => theme.background,
+					borderWidth: ts(0.5),
+					borderStyle: "solid",
+				})}
+			/>
+			<Skeleton />
+			<Skeleton {...css({ width: percent(50) })} />
+		</View>
 	);
 };
 

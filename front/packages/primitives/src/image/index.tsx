@@ -39,6 +39,13 @@ export const Poster = ({
 	layout: YoshikiEnhanced<{ width: ImageStyle["width"] } | { height: ImageStyle["height"] }>;
 }) => <Image alt={alt!} layout={{ aspectRatio: 2 / 3, ...layout }} {...props} />;
 
+Poster.Loader = ({
+	layout,
+	...props
+}: {
+	layout: YoshikiEnhanced<{ width: ImageStyle["width"] } | { height: ImageStyle["height"] }>;
+}) => <Image.Loader layout={{ aspectRatio: 2 / 3, ...layout }} {...props} />;
+
 export const PosterBackground = ({
 	alt,
 	layout,
