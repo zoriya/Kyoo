@@ -65,7 +65,8 @@ export const InfiniteFetchList = <Data, Props, _, Kind extends number | string>(
 	query,
 	placeholderCount = 2,
 	incremental = false,
-	children,
+	Render,
+	Loader,
 	layout,
 	empty,
 	divider = false,
@@ -82,10 +83,8 @@ export const InfiniteFetchList = <Data, Props, _, Kind extends number | string>(
 	placeholderCount?: number;
 	layout: Layout;
 	horizontal?: boolean;
-	children: (
-		item: Data extends Page<infer Item> ? WithLoading<Item> : WithLoading<Data>,
-		i: number,
-	) => ReactElement | null;
+	Render: (props: { item: Data; index: number }) => ReactElement | null;
+	Loader: (props: { index: number }) => ReactElement | null;
 	empty?: string | JSX.Element;
 	incremental?: boolean;
 	divider?: boolean | ComponentType;
@@ -111,9 +110,7 @@ export const InfiniteFetchList = <Data, Props, _, Kind extends number | string>(
 
 	if (incremental) items ??= oldItems.current;
 	const count = items ? numColumns - (items.length % numColumns) : placeholderCount;
-	const placeholders = [...Array(count === 0 ? numColumns : count)].map(
-		(_, i) => ({ id: `gen${i}`, isLoading: true }) as Data,
-	);
+	const placeholders = [...Array(count === 0 ? numColumns : count)].fill(null);
 	const data = isFetching || !items ? [...(items || []), ...placeholders] : items;
 
 	const List = nested ? (FlatList as unknown as typeof FlashList) : FlashList;
@@ -137,7 +134,7 @@ export const InfiniteFetchList = <Data, Props, _, Kind extends number | string>(
 						},
 					]}
 				>
-					{children({ isLoading: false, ...item } as any, index)}
+					{item ? <Render index={index} item={item} /> : <Loader index={index} />}
 				</View>
 			)}
 			data={data}
