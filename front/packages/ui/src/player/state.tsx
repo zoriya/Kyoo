@@ -177,7 +177,11 @@ export const Video = memo(function Video({
 	useEffect(() => {
 		if (!subtitles) return;
 		setSubtitle((subtitle) => {
-			const subRet = subtitle ? subtitles.find((x) => x.language === subtitle.language) : null;
+			const subRet = subtitle
+				? subtitles.find(
+						(x) => x.language === subtitle.language && x.isForced === subtitle.isForced,
+					)
+				: null;
 			if (subRet) return subRet;
 			if (!defaultSubLanguage) return null;
 			if (defaultSubLanguage === "default") return subtitles.find((x) => x.isDefault) ?? null;

@@ -274,6 +274,7 @@ const useSubtitle = (
 ) => {
 	const htmlTrack = useRef<HTMLTrackElement | null>();
 	const subOcto = useRef<Jassub | null>();
+	const mode = useAtom(playModeAtom);
 
 	useEffect(() => {
 		if (!player.current) return;
@@ -334,7 +335,9 @@ const useSubtitle = (
 				subOcto.current.setTrackByUrl(value.link);
 			}
 		}
-	}, [player, value, fonts]);
+		// also include mode because srt get's disabled when the mode change (no idea why)
+		mode;
+	}, [player.current, value, fonts, mode]);
 	useEffect(() => {
 		return () => {
 			if (subOcto.current) subOcto.current.destroy();

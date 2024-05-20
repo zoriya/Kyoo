@@ -25,7 +25,7 @@ import { percent, px } from "yoshiki/native";
 import { Button } from "./button";
 import { imageBorderRadius } from "./constants";
 import { P } from "./text";
-import { ContrastArea, SwitchVariant } from "./themes";
+import { SwitchVariant } from "./themes";
 import { ts } from "./utils";
 
 export type Snackbar = {
