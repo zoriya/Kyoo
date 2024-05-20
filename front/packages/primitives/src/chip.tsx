@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import type { TextProps } from "react-native";
+import { View, type TextProps } from "react-native";
 import { type Theme, px, rem, useYoshiki } from "yoshiki/native";
 import { Link } from "./links";
 import { Skeleton } from "./skeleton";
@@ -63,6 +63,7 @@ export const Chip = ({
 						pX: ts(2.5 * sizeMult),
 						borderRadius: ts(3),
 						overflow: "hidden",
+						justifyContent: "center",
 					},
 					outline && {
 						borderColor: color ?? ((theme: Theme) => theme.accent),
@@ -100,5 +101,42 @@ export const Chip = ({
 				{label ? capitalize(label) : <Skeleton {...css({ width: rem(3) })} />}
 			</P>
 		</Link>
+	);
+};
+
+Chip.Loader = ({
+	color,
+	size = "medium",
+	outline = false,
+	...props
+}: { color?: string; size?: "small" | "medium" | "large"; outline?: boolean }) => {
+	const { css } = useYoshiki();
+	const sizeMult = size === "medium" ? 1 : size === "small" ? 0.5 : 1.5;
+
+	return (
+		<View
+			{...css(
+				[
+					{
+						pY: ts(1 * sizeMult),
+						pX: ts(2.5 * sizeMult),
+						borderRadius: ts(3),
+						overflow: "hidden",
+						justifyContent: "center",
+					},
+					outline && {
+						borderColor: color ?? ((theme: Theme) => theme.accent),
+						borderStyle: "solid",
+						borderWidth: px(1),
+					},
+					!outline && {
+						bg: color ?? ((theme: Theme) => theme.accent),
+					},
+				],
+				props,
+			)}
+		>
+			<Skeleton {...css({ width: rem(3) })} />
+		</View>
 	);
 };

@@ -19,7 +19,7 @@
  */
 
 import { getCurrentToken } from "@kyoo/models";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 import { type FlexStyle, type ImageStyle, View, type ViewStyle } from "react-native";
 import { Blurhash } from "react-native-blurhash";
 import FastImage from "react-native-fast-image";
@@ -94,9 +94,9 @@ export const Image = ({
 	);
 };
 
-Image.Loader = ({ layout, ...props }: { layout: ImageLayout }) => {
+Image.Loader = ({ layout, ...props }: { layout: ImageLayout; children?: ReactElement }) => {
 	const { css } = useYoshiki();
 	const border = { borderRadius: 6, overflow: "hidden" } satisfies ViewStyle;
 
-	return <Skeleton variant="custom" {...css([layout, border], props)} />;
+	return <Skeleton variant="custom" show {...css([layout, border], props)} />;
 };

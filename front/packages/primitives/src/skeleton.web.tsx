@@ -21,7 +21,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { View, type ViewProps } from "react-native";
 import { em, percent, px, rem, useYoshiki } from "yoshiki/native";
-import { hiddenIfNoJs } from "./utils/nojs";
 
 export const SkeletonCss = () => (
 	<style jsx global>{`
@@ -90,33 +89,29 @@ export const Skeleton = ({
 				props,
 			)}
 		>
-			{children}
 			{(forcedShow || !children || children === true) &&
 				[...Array(lines)].map((_, i) => (
 					<View
 						key={`skeleton_${i}`}
-						{...css(
-							[
-								{
-									bg: (theme) => theme.overlay0,
-								},
-								lines === 1 && {
-									position: "absolute",
-									top: 0,
-									bottom: 0,
-									left: 0,
-									right: 0,
-								},
-								lines !== 1 && {
-									width: i === lines - 1 ? percent(40) : percent(100),
-									height: rem(1.2),
-									marginBottom: rem(0.5),
-									overflow: "hidden",
-									borderRadius: px(6),
-								},
-							],
-							hiddenIfNoJs,
-						)}
+						{...css([
+							{
+								bg: (theme) => theme.overlay0,
+							},
+							lines === 1 && {
+								position: "absolute",
+								top: 0,
+								bottom: 0,
+								left: 0,
+								right: 0,
+							},
+							lines !== 1 && {
+								width: i === lines - 1 ? percent(40) : percent(100),
+								height: rem(1.2),
+								marginBottom: rem(0.5),
+								overflow: "hidden",
+								borderRadius: px(6),
+							},
+						])}
 					>
 						<LinearGradient
 							start={{ x: 0, y: 0.5 }}
@@ -137,6 +132,7 @@ export const Skeleton = ({
 						/>
 					</View>
 				))}
+			{children}
 		</View>
 	);
 };
