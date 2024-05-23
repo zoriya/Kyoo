@@ -74,7 +74,7 @@ i18next.use(initReactI18next).init({
 	},
 	returnEmptyString: false,
 	fallbackLng: "en",
-	lng: getLocales()[0].languageCode ?? "en",
+	lng: storage.getString("language") ?? getLocales()[0].languageCode ?? "en",
 	resources,
 });
 

@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { setUserTheme, useUserTheme } from "@kyoo/models";
+import { setUserTheme, storeData, useUserTheme } from "@kyoo/models";
 import { Link, Select } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { Preference, SettingsContainer } from "./base";
@@ -34,6 +34,15 @@ export const GeneralSettings = () => {
 	const { t, i18n } = useTranslation();
 	const theme = useUserTheme("auto");
 	const getLanguageName = useLanguageName();
+
+	const changeLanguage = (lang: string) => {
+		if (lang === "system") {
+			i18n.changeLanguage(i18n.options.lng as string);
+			return
+		}
+		storeData("language", lang);
+		i18n.changeLanguage(lang);
+	};
 
 	return (
 		<SettingsContainer title={t("settings.general.label")}>
@@ -58,9 +67,7 @@ export const GeneralSettings = () => {
 				<Select
 					label={t("settings.general.language.label")}
 					value={i18n.resolvedLanguage!}
-					onValueChange={(value) =>
-						i18n.changeLanguage(value !== "system" ? value : (i18n.options.lng as string))
-					}
+					onValueChange={(value) => changeLanguage(value)}
 					values={["system", ...Object.keys(i18n.options.resources!)]}
 					getLabel={(key) =>
 						key === "system" ? t("settings.general.language.system") : getLanguageName(key) ?? key

@@ -23,6 +23,7 @@ import type { AppContext, AppInitialProps, AppProps } from "next/app";
 import { type ComponentType, useState } from "react";
 import { I18nextProvider } from "react-i18next";
 import resources from "../../../translations";
+import { readCookie } from "@kyoo/models/src/account-internal";
 
 export const withTranslations = (
 	AppToTranslate: ComponentType<AppProps> & {
@@ -57,7 +58,11 @@ export const withTranslations = (
 	};
 	AppWithTranslations.getInitialProps = async (ctx: AppContext) => {
 		const props: AppInitialProps = await AppToTranslate.getInitialProps(ctx);
-		const lng = ctx.router.locale || ctx.router.defaultLocale || "en";
+		const lng =
+			readCookie(ctx.ctx.req?.headers.cookie, "language") ||
+			ctx.router.locale ||
+			ctx.router.defaultLocale ||
+			"en";
 		await i18n.init({
 			...commonOptions,
 			lng,
