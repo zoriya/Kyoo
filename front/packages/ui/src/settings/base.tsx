@@ -33,7 +33,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Children, type ReactElement, type ReactNode } from "react";
 import { type Falsy, View } from "react-native";
-import { px, rem, useYoshiki } from "yoshiki/native";
+import { percent, px, rem, useYoshiki } from "yoshiki/native";
 
 export const Preference = ({
 	customIcon,
@@ -79,7 +79,18 @@ export const Preference = ({
 					<SubP>{description}</SubP>
 				</View>
 			</View>
-			<View {...css({ marginX: ts(2), flexDirection: "row", gap: ts(1) })}>{children}</View>
+			<View
+				{...css({
+					marginX: ts(2),
+					flexDirection: "row",
+					justifyContent: "flex-end",
+					gap: ts(1),
+					maxWidth: percent(50),
+					flexWrap: "wrap",
+				})}
+			>
+				{children}
+			</View>
 		</View>
 	);
 };
