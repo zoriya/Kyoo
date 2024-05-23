@@ -1,1 +1,6 @@
-{}
+{
+	"home": {
+		"recommended": "test",
+		"news": "test"
+	}
+}
