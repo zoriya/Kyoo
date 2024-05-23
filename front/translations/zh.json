@@ -39,7 +39,8 @@
 			"droped": "标记为已放弃",
 			"null": "标记为未观看"
 		},
-		"nextUp": "下一集"
+		"nextUp": "下一集",
+		"season": "第{{number}}季"
 	},
 	"browse": {
 		"sortby": "按{{key}}排序",
