@@ -429,7 +429,7 @@ const Description = ({
 						{isLoading ? (
 							<Skeleton {...css({ width: rem(5) })} />
 						) : (
-							<A href={`/genres/${genre.toLowerCase()}`}>{genre}</A>
+							<A href={`/genres/${genre.toLowerCase()}`}>{t(`genres.${genre}`)}</A>
 						)}
 					</Fragment>
 				))}
@@ -481,7 +481,7 @@ const Description = ({
 								{isLoading ? (
 									<Skeleton {...css({ marginBottom: 0 })} />
 								) : (
-									<A href={`/genres/${genre.toLowerCase()}`}>{genre}</A>
+									<A href={`/genres/${genre.toLowerCase()}`}>{t(`genres.${genre}`)}</A>
 								)}
 							</LI>
 						))}

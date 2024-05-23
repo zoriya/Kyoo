@@ -26,4 +26,8 @@ declare module "i18next" {
 		returnNull: false;
 		resources: { translation: typeof en };
 	}
+
+	interface i18n {
+		systemLanguage: string;
+	}
 }

@@ -69,7 +69,9 @@ export const GenreGrid = ({ genre }: { genre: Genre }) => {
 
 	return (
 		<>
-			{(displayEmpty.current || query.items?.length !== 0) && <Header title={genre} />}
+			{(displayEmpty.current || query.items?.length !== 0) && (
+				<Header title={t(`genres.${genre}`)} />
+			)}
 			<InfiniteFetchList
 				query={query}
 				layout={{ ...ItemGrid.layout, layout: "horizontal" }}

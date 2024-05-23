@@ -29,7 +29,16 @@ export const useUserTheme = (ssrTheme?: "light" | "dark" | "auto") => {
 	return value as "light" | "dark" | "auto";
 };
 
+export const storeData = (key: string, value: string | number | boolean) => {
+	storage.set(key, value);
+	if (Platform.OS === "web") setCookie(key, value);
+};
+
+export const deleteData = (key: string) => {
+	storage.delete(key);
+	if (Platform.OS === "web") setCookie(key, undefined);
+};
+
 export const setUserTheme = (theme: "light" | "dark" | "auto") => {
-	storage.set("theme", theme);
-	if (Platform.OS === "web") setCookie("theme", theme);
+	storeData("theme", theme);
 };

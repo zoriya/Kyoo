@@ -18,9 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { readCookie } from "@kyoo/models/src/account-internal";
 import i18next, { type InitOptions } from "i18next";
 import type { AppContext, AppInitialProps, AppProps } from "next/app";
-import { type ComponentType, useMemo } from "react";
+import { type ComponentType, useState } from "react";
 import { I18nextProvider } from "react-i18next";
 import resources from "../../../translations";
 
@@ -34,19 +35,21 @@ export const withTranslations = (
 		interpolation: {
 			escapeValue: false,
 		},
+		returnEmptyString: false,
+		fallbackLng: "en",
 		resources,
 	};
 
 	const AppWithTranslations = (props: AppProps) => {
-		const li18n = useMemo(() => {
+		const [li18n] = useState(() => {
 			if (typeof window === "undefined") return i18n;
 			i18next.init({
 				...commonOptions,
 				lng: props.pageProps.__lang,
-				fallbackLng: "en",
 			});
+			i18next.systemLanguage = props.pageProps.__sysLang;
 			return i18next;
-		}, [props.pageProps.__lang]);
+		});
 
 		return (
 			<I18nextProvider i18n={li18n}>
@@ -56,13 +59,15 @@ export const withTranslations = (
 	};
 	AppWithTranslations.getInitialProps = async (ctx: AppContext) => {
 		const props: AppInitialProps = await AppToTranslate.getInitialProps(ctx);
-		const lng = ctx.router.locale || ctx.router.defaultLocale || "en";
+		const sysLng = ctx.router.locale || ctx.router.defaultLocale || "en";
+		const lng = readCookie(ctx.ctx.req?.headers.cookie, "language") || sysLng;
 		await i18n.init({
 			...commonOptions,
 			lng,
-			fallbackLng: "en",
 		});
+		i18n.systemLanguage = sysLng;
 		props.pageProps.__lang = lng;
+		props.pageProps.__sysLang = sysLng;
 		return props;
 	};
 

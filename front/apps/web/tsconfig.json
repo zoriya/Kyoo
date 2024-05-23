@@ -19,6 +19,6 @@
 			"~/*": ["src/*"]
 		}
 	},
-	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "../../packages/ui/src/i18n-d.d.ts"],
 	"exclude": ["node_modules"]
 }

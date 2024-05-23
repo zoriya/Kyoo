@@ -193,7 +193,7 @@ export const ItemDetails = ({
 				{genres && (
 					<ScrollView horizontal contentContainerStyle={{ alignItems: "center" }}>
 						{genres.map((x, i) => (
-							<Chip key={x ?? i} label={x} size="small" {...css({ mX: ts(0.5) })} />
+							<Chip key={x ?? i} label={t(`genres.${x}`)} size="small" {...css({ mX: ts(0.5) })} />
 						))}
 					</ScrollView>
 				)}
