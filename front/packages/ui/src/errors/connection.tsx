@@ -64,7 +64,7 @@ export const ConnectionError = () => {
 	return (
 		<View {...css({ padding: ts(2) })}>
 			<H1 {...css({ textAlign: "center" })}>{t("errors.connection")}</H1>
-			<P>{error?.errors[0] ?? t("error.unknown")}</P>
+			<P>{error?.errors[0] ?? t("errors.unknown")}</P>
 			<P>{t("errors.connection-tips")}</P>
 			<Button onPress={retry} text={t("errors.try-again")} {...css({ m: ts(1) })} />
 			<Button

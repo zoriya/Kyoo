@@ -55,7 +55,7 @@ const SortTrigger = forwardRef<View, PressableProps & { sortKey: string }>(funct
 			{...tooltip(t("browse.sortby-tt"))}
 		>
 			<Icon icon={Sort} {...css({ paddingX: ts(0.5) })} />
-			<P>{t(`browse.sortkey.${sortKey}`)}</P>
+			<P>{t(`browse.sortkey.${sortKey}` as any)}</P>
 		</PressableFeedback>
 	);
 });
@@ -102,7 +102,7 @@ export const BrowseSettings = ({
 					{availableSorts.map((x) => (
 						<Menu.Item
 							key={x}
-							label={t(`browse.sortkey.${x}`)}
+							label={t(`browse.sortkey.${x}` as any)}
 							selected={sortKey === x}
 							icon={
 								x !== SearchSort.Relevance
