@@ -20,7 +20,7 @@
 
 import i18next, { type InitOptions } from "i18next";
 import type { AppContext, AppInitialProps, AppProps } from "next/app";
-import { type ComponentType, useMemo } from "react";
+import { type ComponentType, useState } from "react";
 import { I18nextProvider } from "react-i18next";
 import resources from "../../../translations";
 
@@ -40,14 +40,14 @@ export const withTranslations = (
 	};
 
 	const AppWithTranslations = (props: AppProps) => {
-		const li18n = useMemo(() => {
+		const [li18n] = useState(() => {
 			if (typeof window === "undefined") return i18n;
 			i18next.init({
 				...commonOptions,
 				lng: props.pageProps.__lang,
 			});
 			return i18next;
-		}, [props.pageProps.__lang]);
+		});
 
 		return (
 			<I18nextProvider i18n={li18n}>
