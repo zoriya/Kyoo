@@ -68,15 +68,18 @@ const clientStorage = {
 
 export const clientPersister = createSyncStoragePersister({ storage: clientStorage });
 
+const sysLang = getLocales()[0].languageCode ?? "en";
 i18next.use(initReactI18next).init({
 	interpolation: {
 		escapeValue: false,
 	},
 	returnEmptyString: false,
 	fallbackLng: "en",
-	lng: storage.getString("language") ?? getLocales()[0].languageCode ?? "en",
+	lng: storage.getString("language") ?? sysLang,
 	resources,
 });
+// @ts-expect-error Manually added value
+i18next.systemLanguage = sysLang;
 
 const NavigationThemeProvider = ({ children }: { children: ReactNode }) => {
 	const theme = useTheme();
