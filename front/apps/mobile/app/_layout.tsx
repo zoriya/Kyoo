@@ -72,6 +72,7 @@ i18next.use(initReactI18next).init({
 	interpolation: {
 		escapeValue: false,
 	},
+	returnEmptyString: false,
 	fallbackLng: "en",
 	lng: getLocales()[0].languageCode ?? "en",
 	resources,
