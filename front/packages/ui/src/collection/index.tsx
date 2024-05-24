@@ -27,7 +27,15 @@ import {
 	type QueryPage,
 	getDisplayDate,
 } from "@kyoo/models";
-import { Container, Head, ImageBackground, P, Skeleton, ts, usePageStyle } from "@kyoo/primitives";
+import {
+	Container,
+	GradientImageBackground,
+	Head,
+	P,
+	Skeleton,
+	ts,
+	usePageStyle,
+} from "@kyoo/primitives";
 import { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, View, type ViewProps } from "react-native";
@@ -50,7 +58,7 @@ const Header = ({ slug }: { slug: string }) => {
 				<>
 					<Head title={data?.name} description={data?.overview} image={data?.thumbnail?.high} />
 
-					<ImageBackground
+					<GradientImageBackground
 						src={data?.thumbnail}
 						quality="high"
 						alt=""
@@ -70,7 +78,7 @@ const Header = ({ slug }: { slug: string }) => {
 							studio={null}
 							{...css(ShowHeader.childStyle)}
 						/>
-					</ImageBackground>
+					</GradientImageBackground>
 
 					<Container
 						{...css({

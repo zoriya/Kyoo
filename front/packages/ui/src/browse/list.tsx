@@ -20,8 +20,8 @@
 
 import type { KyooImage, WatchStatusV } from "@kyoo/models";
 import {
+	GradientImageBackground,
 	Heading,
-	ImageBackground,
 	Link,
 	P,
 	Poster,
@@ -33,7 +33,6 @@ import {
 } from "@kyoo/primitives";
 import { useState } from "react";
 import { Platform, View } from "react-native";
-import type { Stylable } from "yoshiki";
 import { percent, px, rem, useYoshiki } from "yoshiki/native";
 import { ItemContext } from "../components/context-menus";
 import type { Layout } from "../fetch";
@@ -65,19 +64,13 @@ export const ItemList = ({
 	const [moreOpened, setMoreOpened] = useState(false);
 
 	return (
-		<ImageBackground
+		<GradientImageBackground
 			src={thumbnail}
 			alt={name}
 			quality="medium"
 			as={Link}
 			href={moreOpened ? undefined : href}
 			onLongPress={() => setMoreOpened(true)}
-			containerStyle={{
-				borderRadius: px(imageBorderRadius),
-			}}
-			imageStyle={{
-				borderRadius: px(imageBorderRadius),
-			}}
 			{...css(
 				{
 					alignItems: "center",
@@ -162,7 +155,7 @@ export const ItemList = ({
 			<PosterBackground src={poster} alt="" quality="low" layout={{ height: percent(80) }}>
 				<ItemWatchStatus watchStatus={watchStatus} unseenEpisodesCount={unseenEpisodesCount} />
 			</PosterBackground>
-		</ImageBackground>
+		</GradientImageBackground>
 	);
 };
 
