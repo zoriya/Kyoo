@@ -30,6 +30,7 @@ import {
 	Skeleton,
 	SubP,
 	focusReset,
+	imageBorderRadius,
 	important,
 	tooltip,
 	ts,
@@ -98,6 +99,7 @@ export const EpisodeBox = ({
 							borderColor: (theme) => theme.background,
 							borderWidth: ts(0.5),
 							borderStyle: "solid",
+							borderRadius: imageBorderRadius,
 						},
 						more: {
 							opacity: 0,
@@ -123,9 +125,8 @@ export const EpisodeBox = ({
 				src={thumbnail}
 				quality="low"
 				alt=""
-				gradient={false}
 				layout={{ width: percent(100), aspectRatio: 16 / 9 }}
-				{...(css("poster") as any)}
+				{...css("poster")}
 			>
 				{(watchedPercent || watchedStatus === WatchStatusV.Completed) && (
 					<ItemProgress watchPercent={watchedPercent ?? 100} />
@@ -254,12 +255,11 @@ export const EpisodeLine = ({
 				src={thumbnail}
 				quality="low"
 				alt=""
-				gradient={false}
 				layout={{
 					width: percent(18),
 					aspectRatio: 16 / 9,
 				}}
-				{...(css({ flexShrink: 0, m: ts(1) }) as { style: ImageStyle })}
+				{...css({ flexShrink: 0, m: ts(1) })}
 			>
 				{(watchedPercent || watchedStatus === WatchStatusV.Completed) && (
 					<>

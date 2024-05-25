@@ -25,7 +25,7 @@ import { useYoshiki } from "yoshiki/native";
 import { imageBorderRadius } from "../constants";
 import { Skeleton } from "../skeleton";
 import type { ImageLayout, Props } from "./base-image";
-import { BlurhashContainer } from "./blurhash.web";
+import { BlurhashContainer, useRenderType } from "./blurhash.web";
 
 export const Image = ({
 	src,
@@ -54,18 +54,25 @@ export const Image = ({
 
 	return (
 		<BlurhashContainer blurhash={src.blurhash} {...css([layout, border], props)}>
-			<NextImage
-				src={src[quality ?? "high"]}
-				priority={quality === "high"}
-				alt={alt!}
-				fill={true}
+			<img
 				style={{
+					position: "absolute",
+					inset: 0,
+					width: "100%",
+					height: "100%",
+					color: "transparent",
 					objectFit: "cover",
 					opacity: state === "loading" ? 0 : 1,
 					transition: "opacity .2s ease-out",
 				}}
-				// Don't use next's server to reprocess images, they are already optimized by kyoo.
-				unoptimized={true}
+				// It's intended to keep `loading` before `src` because React updates
+				// props in order which causes Safari/Firefox to not lazy load properly.
+				// See https://github.com/facebook/react/issues/25883
+				loading={quality === "high" ? "eager" : "lazy"}
+				decoding="async"
+				fetchpriority={quality === "high" ? "high" : undefined}
+				src={src[quality ?? "high"]}
+				alt={alt!}
 				onLoad={() => setState("finished")}
 				onError={() => setState("errored")}
 				suppressHydrationWarning

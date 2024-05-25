@@ -35,13 +35,13 @@ import {
 	Chip,
 	Container,
 	DottedSeparator,
+	GradientImageBackground,
 	H1,
 	H2,
 	HR,
 	Head,
 	IconButton,
 	IconFab,
-	ImageBackground,
 	LI,
 	Link,
 	Menu,
@@ -509,7 +509,7 @@ export const Header = ({
 			{({ isLoading, ...data }) => (
 				<>
 					<Head title={data?.name} description={data?.overview} image={data?.thumbnail?.high} />
-					<ImageBackground
+					<GradientImageBackground
 						src={data?.thumbnail}
 						quality="high"
 						alt=""
@@ -531,7 +531,7 @@ export const Header = ({
 							watchStatus={data?.watchStatus?.status ?? null}
 							{...css(Header.childStyle)}
 						/>
-					</ImageBackground>
+					</GradientImageBackground>
 					<Description
 						isLoading={isLoading}
 						overview={data?.overview}

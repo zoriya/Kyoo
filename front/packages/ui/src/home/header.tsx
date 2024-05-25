@@ -20,6 +20,7 @@
 
 import { type KyooImage, type LibraryItem, LibraryItemP, type QueryIdentifier } from "@kyoo/models";
 import {
+	GradientImageBackground,
 	H1,
 	H2,
 	IconButton,
@@ -60,7 +61,7 @@ export const Header = ({
 	const { t } = useTranslation();
 
 	return (
-		<ImageBackground
+		<GradientImageBackground
 			src={thumbnail}
 			alt=""
 			quality="high"
@@ -108,7 +109,7 @@ export const Header = ({
 					)}
 				</Skeleton>
 			</View>
-		</ImageBackground>
+		</GradientImageBackground>
 	);
 };
 

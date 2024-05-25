@@ -86,13 +86,11 @@ const DownloadedItem = ({
 				src={image}
 				quality="low"
 				alt=""
-				gradient={false}
-				hideLoad={false}
 				layout={{
 					width: percent(25),
 					aspectRatio: kind === "episode" ? 16 / 9 : 2 / 3,
 				}}
-				{...(css({ flexShrink: 0, m: ts(1) }) as { style: ImageStyle })}
+				{...css({ flexShrink: 0, m: ts(1) })}
 			>
 				{/* {(watchedPercent || watchedStatus === WatchStatusV.Completed) && ( */}
 				{/* 	<> */}
