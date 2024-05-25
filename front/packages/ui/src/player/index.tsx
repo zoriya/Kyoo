@@ -200,3 +200,5 @@ Player.getFetchUrls = ({ slug, type }: { slug: string; type: "episode" | "movie"
 	Player.query(type, slug),
 	Player.infoQuery(type, slug),
 ];
+
+Player.requiredPermissions = ["overall.play"];
