@@ -276,6 +276,18 @@ const BlurhashDiv = forwardRef<
 	);
 });
 
+export const useRenderType = () => {
+	const [renderType, setRenderType] = useState<"ssr" | "hydratation" | "client">(
+		typeof window === "undefined" ? "ssr" : "hydratation",
+	);
+
+	useLayoutEffect(() => {
+		setRenderType("client");
+	}, []);
+
+	return renderType;
+};
+
 export const BlurhashContainer = ({
 	blurhash,
 	children,
@@ -285,15 +297,7 @@ export const BlurhashContainer = ({
 	children?: ReactElement | ReactElement[];
 }) => {
 	const { css } = useYoshiki();
-	const ref = useRef<HTMLCanvasElement & HTMLDivElement>(null);
-	const [renderType, setRenderType] = useState<"ssr" | "hydratation" | "client">(
-		typeof window === "undefined" ? "ssr" : "hydratation",
-	);
-
-	useLayoutEffect(() => {
-		// If the html is empty, it was not SSRed.
-		if (ref.current?.innerHTML === "") setRenderType("client");
-	}, []);
+	const renderType = useRenderType();
 
 	return (
 		<div
@@ -307,10 +311,10 @@ export const BlurhashContainer = ({
 				nativeStyleToCss(props),
 			)}
 		>
-			{renderType === "ssr" && <BlurhashDiv ref={ref} blurhash={blurhash} />}
-			{renderType === "client" && <BlurhashCanvas ref={ref} blurhash={blurhash} />}
+			{renderType === "ssr" && <BlurhashDiv blurhash={blurhash} />}
+			{renderType === "client" && <BlurhashCanvas blurhash={blurhash} />}
 			{renderType === "hydratation" && (
-				<div ref={ref} dangerouslySetInnerHTML={{ __html: "" }} suppressHydrationWarning />
+				<div dangerouslySetInnerHTML={{ __html: "" }} suppressHydrationWarning />
 			)}
 			{children}
 		</div>
