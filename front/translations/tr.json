@@ -39,7 +39,8 @@
 			"droped": "İzlemeyi bıraktınız olarak işaretleyin",
 			"null": "İzlenmedi olarak işaretleyin"
 		},
-		"nextUp": "Sonraki"
+		"nextUp": "Sonraki",
+		"season": "{{number}}. Sezon"
 	},
 	"browse": {
 		"sortby": "{{key}} göre sırala",
@@ -240,5 +241,31 @@
 			"scan": "Kütüphane taraması başlat",
 			"empty": "Herhangi bir sorun bulunamadı. Tüm öğeleriniz kaydedilmiştir."
 		}
+	},
+	"genres": {
+		"Adventure": "Macera",
+		"Comedy": "Komedi",
+		"Crime": "Suç",
+		"Documentary": "Belgesel",
+		"Drama": "Dram",
+		"Family": "Aile",
+		"Fantasy": "Fantezi",
+		"Horror": "Korku",
+		"Music": "Müzikal",
+		"Mystery": "Gizem",
+		"Romance": "Romantik",
+		"ScienceFiction": "Bilim Kurgu",
+		"Thriller": "Gerilim",
+		"War": "Savaş",
+		"Western": "Kovboy",
+		"Kids": "Çocuk",
+		"News": "Haber",
+		"Reality": "Reality",
+		"Soap": "Melodrama",
+		"Talk": "Söyleşi",
+		"Action": "Aksiyon",
+		"Animation": "Animasyon",
+		"History": "Tarih",
+		"Politics": "Siyaset"
 	}
 }
