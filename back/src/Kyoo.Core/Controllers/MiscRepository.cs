@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 using Dapper;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Authentication.Models;
 using Kyoo.Postgresql;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -128,6 +129,15 @@ public class MiscRepository(
 			.Where(x => x.RefreshDate <= end)
 			.OrderBy(x => x.RefreshDate)
 			.ToListAsync();
+	}
+
+	public async Task<SetupStep> GetSetupStep()
+	{
+		bool hasUser = await context.Users.AnyAsync();
+		if (!hasUser)
+			return SetupStep.MissingAdminAccount;
+		bool hasItem = await context.Movies.AnyAsync() || await context.Shows.AnyAsync();
+		return hasItem ? SetupStep.Done : SetupStep.NoVideoFound;
 	}
 }
 
