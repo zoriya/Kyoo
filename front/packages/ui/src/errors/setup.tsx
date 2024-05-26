@@ -1,12 +1,12 @@
-import { SetupStep, type QueryPage } from "@kyoo/models";
-import { Button, Icon, Link, P, ts } from "@kyoo/primitives";
-import { useTranslation } from "react-i18next";
 import { Main } from "@expo/html-elements";
-import { useYoshiki } from "yoshiki/native";
+import { type QueryPage, SetupStep } from "@kyoo/models";
+import { Button, Icon, Link, P, ts } from "@kyoo/primitives";
 import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
-import { Navbar, NavbarProfile } from "../navbar";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useRouter } from "solito/router";
+import { useYoshiki } from "yoshiki/native";
+import { Navbar, NavbarProfile } from "../navbar";
 import { KyooLongLogo } from "../navbar/icon";
 
 export const SetupPage: QueryPage<{ step: SetupStep }> = ({ step }) => {

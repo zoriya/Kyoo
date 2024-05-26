@@ -27,16 +27,16 @@ import {
 	ConnectionErrorContext,
 	type QueryIdentifier,
 	type QueryPage,
+	type ServerInfo,
 	ServerInfoP,
+	SetupStep,
 	UserP,
 	createQueryClient,
 	fetchQuery,
 	getTokenWJ,
 	setSsrApiUrl,
-	useUserTheme,
-	SetupStep,
-	type ServerInfo,
 	useFetch,
+	useUserTheme,
 } from "@kyoo/models";
 import { getCurrentAccount, readCookie, updateAccount } from "@kyoo/models/src/account-internal";
 import {
@@ -54,12 +54,12 @@ import arrayShuffle from "array-shuffle";
 import NextApp, { type AppContext, type AppProps } from "next/app";
 import { Poppins } from "next/font/google";
 import Head from "next/head";
-import { type ComponentType, useContext, useState, useEffect } from "react";
+import { type NextRouter, useRouter } from "next/router";
+import { type ComponentType, useContext, useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import superjson from "superjson";
 import { StyleRegistryProvider, useMobileHover, useStyleRegistry, useTheme } from "yoshiki/web";
 import { withTranslations } from "../i18n";
-import { NextRouter, useRouter } from "next/router";
 
 const font = Poppins({ weight: ["300", "400", "900"], subsets: ["latin"], display: "swap" });
 

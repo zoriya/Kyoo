@@ -38,11 +38,11 @@ import Login from "@material-symbols/svg-400/rounded/login.svg";
 import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import Settings from "@material-symbols/svg-400/rounded/settings.svg";
-import { ReactElement, forwardRef, useEffect, useRef, useState } from "react";
+import { type ReactElement, forwardRef, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, type TextInput, View, type ViewProps } from "react-native";
 import { useRouter } from "solito/router";
-import { type Stylable, useYoshiki, percent } from "yoshiki/native";
+import { type Stylable, percent, useYoshiki } from "yoshiki/native";
 import { AdminPage } from "../admin";
 import { KyooLongLogo } from "./icon";
 
