@@ -18,8 +18,10 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Authentication.Models;
+using Kyoo.Core.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 
@@ -31,9 +33,9 @@ namespace Kyoo.Authentication.Views;
 [ApiController]
 [Route("info")]
 [ApiDefinition("Info", Group = UsersGroup)]
-public class InfoApi(PermissionOption options) : ControllerBase
+public class InfoApi(PermissionOption options, MiscRepository info) : ControllerBase
 {
-	public ActionResult<ServerInfo> GetInfo()
+	public async Task<ActionResult<ServerInfo>> GetInfo()
 	{
 		return Ok(
 			new ServerInfo()
@@ -48,6 +50,7 @@ public class InfoApi(PermissionOption options) : ControllerBase
 						new() { DisplayName = x.Value.DisplayName, LogoUrl = x.Value.LogoUrl, }
 					))
 					.ToDictionary(x => x.Key, x => x.Value),
+				SetupStatus = await info.GetSetupStep(),
 			}
 		);
 	}

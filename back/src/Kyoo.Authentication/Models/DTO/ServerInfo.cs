@@ -46,6 +46,11 @@ public class ServerInfo
 	/// The list of permissions available for the guest account.
 	/// </summary>
 	public List<string> GuestPermissions { get; set; }
+
+	/// <summary>
+	/// Check if kyoo's setup is finished.
+	/// </summary>
+	public SetupStep SetupStatus { get; set; }
 }
 
 public class OidcInfo
@@ -59,4 +64,25 @@ public class OidcInfo
 	/// A url returing a square logo for this provider.
 	/// </summary>
 	public string? LogoUrl { get; set; }
+}
+
+/// <summary>
+/// Check if kyoo's setup is finished.
+/// </summary>
+public enum SetupStep
+{
+	/// <summary>
+	/// No admin account exists, create an account before exposing kyoo to the internet!
+	/// </summary>
+	MissingAdminAccount,
+
+	/// <summary>
+	/// No video was registered on kyoo, have you configured the rigth library path?
+	/// </summary>
+	NoVideoFound,
+
+	/// <summary>
+	/// Setup finished!
+	/// </summary>
+	Done,
 }

@@ -27,12 +27,15 @@ import {
 	ConnectionErrorContext,
 	type QueryIdentifier,
 	type QueryPage,
+	type ServerInfo,
 	ServerInfoP,
+	SetupStep,
 	UserP,
 	createQueryClient,
 	fetchQuery,
 	getTokenWJ,
 	setSsrApiUrl,
+	useFetch,
 	useUserTheme,
 } from "@kyoo/models";
 import { getCurrentAccount, readCookie, updateAccount } from "@kyoo/models/src/account-internal";
@@ -51,7 +54,8 @@ import arrayShuffle from "array-shuffle";
 import NextApp, { type AppContext, type AppProps } from "next/app";
 import { Poppins } from "next/font/google";
 import Head from "next/head";
-import { type ComponentType, useContext, useState } from "react";
+import { type NextRouter, useRouter } from "next/router";
+import { type ComponentType, useContext, useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import superjson from "superjson";
 import { StyleRegistryProvider, useMobileHover, useStyleRegistry, useTheme } from "yoshiki/web";
@@ -131,6 +135,28 @@ const ConnectionErrorVerifier = ({
 	return <WithLayout Component={ConnectionError} />;
 };
 
+const SetupChecker = () => {
+	const { data } = useFetch({ path: ["info"], parser: ServerInfoP });
+	const router = useRouter();
+
+	const step = data?.setupStatus;
+
+	useEffect(() => {
+		if (!step) return;
+		if (step !== SetupStep.Done && !SetupChecker.isRouteAllowed(router, step))
+			router.push(`/setup?step=${step}`);
+		if (step === SetupStep.Done && router.route === "/setup") router.replace("/");
+	}, [router.route, step, router]);
+
+	return null;
+};
+
+SetupChecker.isRouteAllowed = (router: NextRouter, step: SetupStep) =>
+	(router.route === "/setup" && router.query.step === step) ||
+	router.route === "/register" ||
+	router.route.startsWith("/login") ||
+	router.route === "/settings";
+
 const WithLayout = ({ Component, ...props }: { Component: ComponentType }) => {
 	const layoutInfo = (Component as QueryPage).getLayout ?? (({ page }) => page);
 	const { Layout, props: layoutProps } =
@@ -176,6 +202,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 											/>
 										</ConnectionErrorVerifier>
 										<Tooltip id="tooltip" positionStrategy={"fixed"} />
+										<SetupChecker />
 									</SnackbarProvider>
 								</PortalProvider>
 							</ThemeSelector>
@@ -214,22 +241,36 @@ App.getInitialProps = async (ctx: AppContext) => {
 
 		setSsrApiUrl();
 
+		appProps.pageProps.theme = readCookie(ctx.ctx.req?.headers.cookie, "theme") ?? "auto";
+
 		const account = readCookie(ctx.ctx.req?.headers.cookie, "account", AccountP);
 		if (account) urls.push({ path: ["auth", "me"], parser: UserP });
 		const [authToken, token, error] = await getTokenWJ(account);
 		if (error) appProps.pageProps.ssrError = error;
-		else {
-			const client = (await fetchQuery(urls, authToken))!;
-			appProps.pageProps.queryState = dehydrate(client);
-			if (account) {
-				appProps.pageProps.token = token;
-				appProps.pageProps.account = {
-					...client.getQueryData(["auth", "me"]),
-					...account,
-				};
-			}
+		const client = (await fetchQuery(urls, authToken))!;
+		appProps.pageProps.queryState = dehydrate(client);
+		if (account) {
+			appProps.pageProps.token = token;
+			appProps.pageProps.account = {
+				...client.getQueryData(["auth", "me"]),
+				...account,
+			};
 		}
-		appProps.pageProps.theme = readCookie(ctx.ctx.req?.headers.cookie, "theme") ?? "auto";
+
+		const info = client.getQueryData<ServerInfo>(["info"]);
+		if (
+			info!.setupStatus !== SetupStep.Done &&
+			!SetupChecker.isRouteAllowed(ctx.router, info!.setupStatus)
+		) {
+			ctx.ctx.res!.writeHead(307, { Location: `/setup?step=${info!.setupStatus}` });
+			ctx.ctx.res!.end();
+			return {} as any;
+		}
+		if (info!.setupStatus === SetupStep.Done && ctx.router.route === "/setup") {
+			ctx.ctx.res!.writeHead(307, { Location: "/" });
+			ctx.ctx.res!.end();
+			return {} as any;
+		}
 	} catch (e) {
 		console.error("SSR error, disabling it.");
 	}
