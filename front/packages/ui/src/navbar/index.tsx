@@ -38,7 +38,7 @@ import Login from "@material-symbols/svg-400/rounded/login.svg";
 import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import Settings from "@material-symbols/svg-400/rounded/settings.svg";
-import { forwardRef, useEffect, useRef, useState } from "react";
+import { ReactElement, forwardRef, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, type TextInput, View, type ViewProps } from "react-native";
 import { useRouter } from "solito/router";
@@ -168,7 +168,11 @@ export const NavbarRight = () => {
 	);
 };
 
-export const Navbar = (props: Stylable) => {
+export const Navbar = ({
+	left,
+	right,
+	...props
+}: { left?: ReactElement | null; right?: ReactElement | null }) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 
@@ -197,16 +201,20 @@ export const Navbar = (props: Stylable) => {
 		>
 			<View {...css({ flexDirection: "row", alignItems: "center" })}>
 				<NavbarTitle {...css({ marginX: ts(2) })} />
-				<A
-					href="/browse"
-					{...css({
-						textTransform: "uppercase",
-						fontWeight: "bold",
-						color: (theme) => theme.contrast,
-					})}
-				>
-					{t("navbar.browse")}
-				</A>
+				{left !== undefined ? (
+					left
+				) : (
+					<A
+						href="/browse"
+						{...css({
+							textTransform: "uppercase",
+							fontWeight: "bold",
+							color: (theme) => theme.contrast,
+						})}
+					>
+						{t("navbar.browse")}
+					</A>
+				)}
 			</View>
 			<View
 				{...css({
@@ -217,7 +225,7 @@ export const Navbar = (props: Stylable) => {
 					marginX: ts(2),
 				})}
 			/>
-			<NavbarRight />
+			{right !== undefined ? right : <NavbarRight />}
 		</Header>
 	);
 };

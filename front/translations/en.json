@@ -237,7 +237,11 @@
 		"offline": "You are not connected to internet. Try again later.",
 		"unauthorized": "You are missing the permissions {{permission}} to access this page.",
 		"needVerification": "Your account needs to be verified by your server administrator before you can use it.",
-		"needAccount": "This page can't be accessed in guest mode. You need to create an account or login."
+		"needAccount": "This page can't be accessed in guest mode. You need to create an account or login.",
+		"setup": {
+			"MissingAdminAccount": "No admin account has been created yet. Please register to create one.",
+			"NoVideoFound": "No video was found yet. Add movies or series inside your library's folder for them to show here!"
+		}
 	},
 	"mediainfo": {
 		"file": "File",

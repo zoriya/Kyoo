@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./error";
-export * from "./unauthorized";
-export * from "./connection";
-export * from "./setup";
+import { SetupPage } from "@kyoo/ui";
+import { withRoute } from "~/router";
+
+export default withRoute(SetupPage);

@@ -50,7 +50,7 @@ public class InfoApi(PermissionOption options, MiscRepository info) : Controller
 						new() { DisplayName = x.Value.DisplayName, LogoUrl = x.Value.LogoUrl, }
 					))
 					.ToDictionary(x => x.Key, x => x.Value),
-				SetupStatus = await info.GetSetupStep()
+				SetupStatus = await info.GetSetupStep(),
 			}
 		);
 	}
