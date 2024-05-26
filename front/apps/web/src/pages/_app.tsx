@@ -35,7 +35,8 @@ import {
 	setSsrApiUrl,
 	useUserTheme,
 	SetupStep,
-	ServerInfo,
+	type ServerInfo,
+	useFetch,
 } from "@kyoo/models";
 import { getCurrentAccount, readCookie, updateAccount } from "@kyoo/models/src/account-internal";
 import {
@@ -53,13 +54,12 @@ import arrayShuffle from "array-shuffle";
 import NextApp, { type AppContext, type AppProps } from "next/app";
 import { Poppins } from "next/font/google";
 import Head from "next/head";
-import { type ComponentType, useContext, useState } from "react";
+import { type ComponentType, useContext, useState, useEffect } from "react";
 import { Tooltip } from "react-tooltip";
 import superjson from "superjson";
 import { StyleRegistryProvider, useMobileHover, useStyleRegistry, useTheme } from "yoshiki/web";
 import { withTranslations } from "../i18n";
-import { redirect } from "next/navigation";
-import { NextResponse } from "next/server";
+import { NextRouter, useRouter } from "next/router";
 
 const font = Poppins({ weight: ["300", "400", "900"], subsets: ["latin"], display: "swap" });
 
@@ -135,6 +135,27 @@ const ConnectionErrorVerifier = ({
 	return <WithLayout Component={ConnectionError} />;
 };
 
+const SetupChecker = () => {
+	const { data } = useFetch({ path: ["info"], parser: ServerInfoP });
+	const router = useRouter();
+
+	const step = data?.setupStatus;
+
+	useEffect(() => {
+		if (!step) return;
+		if (step !== SetupStep.Done && !SetupChecker.isRouteAllowed(router, step))
+			router.push(`/setup?step=${step}`);
+	}, [router.route, step, router]);
+
+	return null;
+};
+
+SetupChecker.isRouteAllowed = (router: NextRouter, step: SetupStep) =>
+	(router.route === "/setup" && router.query.step === step) ||
+	router.route === "/register" ||
+	router.route.startsWith("/login") ||
+	router.route === "/settings";
+
 const WithLayout = ({ Component, ...props }: { Component: ComponentType }) => {
 	const layoutInfo = (Component as QueryPage).getLayout ?? (({ page }) => page);
 	const { Layout, props: layoutProps } =
@@ -180,6 +201,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 											/>
 										</ConnectionErrorVerifier>
 										<Tooltip id="tooltip" positionStrategy={"fixed"} />
+										<SetupChecker />
 									</SnackbarProvider>
 								</PortalProvider>
 							</ThemeSelector>
@@ -237,12 +259,7 @@ App.getInitialProps = async (ctx: AppContext) => {
 		const info = client.getQueryData<ServerInfo>(["info"]);
 		if (
 			info!.setupStatus !== SetupStep.Done &&
-			!(
-				(ctx.router.route === "/setup" && ctx.router.query.step === info!.setupStatus) ||
-				ctx.router.route === "/register" ||
-				ctx.router.route === "/login" ||
-				ctx.router.route === "/settings"
-			)
+			!SetupChecker.isRouteAllowed(ctx.router, info!.setupStatus)
 		) {
 			ctx.ctx.res!.writeHead(307, { Location: `/setup?step=${info!.setupStatus}` });
 			ctx.ctx.res!.end();
