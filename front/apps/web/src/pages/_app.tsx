@@ -145,6 +145,7 @@ const SetupChecker = () => {
 		if (!step) return;
 		if (step !== SetupStep.Done && !SetupChecker.isRouteAllowed(router, step))
 			router.push(`/setup?step=${step}`);
+		if (step === SetupStep.Done && router.route === "/setup") router.replace("/");
 	}, [router.route, step, router]);
 
 	return null;
