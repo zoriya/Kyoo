@@ -266,6 +266,11 @@ App.getInitialProps = async (ctx: AppContext) => {
 			ctx.ctx.res!.end();
 			return {} as any;
 		}
+		if (info!.setupStatus === SetupStep.Done && ctx.router.route === "/setup") {
+			ctx.ctx.res!.writeHead(307, { Location: "/" });
+			ctx.ctx.res!.end();
+			return {} as any;
+		}
 	} catch (e) {
 		console.error("SSR error, disabling it.");
 	}
