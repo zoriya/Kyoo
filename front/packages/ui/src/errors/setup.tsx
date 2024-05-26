@@ -5,27 +5,39 @@ import { Main } from "@expo/html-elements";
 import { useYoshiki } from "yoshiki/native";
 import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
 import { Navbar, NavbarProfile } from "../navbar";
+import { useEffect } from "react";
+import { useRouter } from "solito/router";
 
-export const SetupPage: QueryPage<{ step: Exclude<SetupStep, SetupStep.Done> }> = ({ step }) => {
+export const SetupPage: QueryPage<{ step: SetupStep }> = ({ step }) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
+	const router = useRouter();
+	const isValid = Object.values(SetupStep).includes(step) && step !== SetupStep.Done;
+
+	useEffect(() => {
+		if (!isValid) router.replace("/");
+	}, [isValid, router]);
+
+	if (!isValid) return <P>Loading...</P>;
 
 	return (
-		<>
-			<Navbar left={null} right={<NavbarProfile />} />
-			<Main
-				{...css({ flexGrow: 1, flexShrink: 1, justifyContent: "center", alignItems: "center" })}
-			>
-				<P>{t(`errors.setup.${step}`)}</P>
-				{step === SetupStep.MissingAdminAccount && (
-					<Button
-						as={Link}
-						href={"/register"}
-						text={t("login.register")}
-						licon={<Icon icon={Register} {...css({ marginRight: ts(2) })} />}
-					/>
-				)}
-			</Main>
-		</>
+		<Main {...css({ flexGrow: 1, flexShrink: 1, justifyContent: "center", alignItems: "center" })}>
+			<P>{t(`errors.setup.${step}`)}</P>
+			{step === SetupStep.MissingAdminAccount && (
+				<Button
+					as={Link}
+					href={"/register"}
+					text={t("login.register")}
+					licon={<Icon icon={Register} {...css({ marginRight: ts(2) })} />}
+				/>
+			)}
+		</Main>
 	);
 };
+
+SetupPage.getLayout = ({ page }) => (
+	<>
+		<Navbar left={null} right={<NavbarProfile />} />
+		{page}
+	</>
+);

@@ -172,7 +172,7 @@ export const Navbar = ({
 	left,
 	right,
 	...props
-}: { left?: ReactElement | null; right?: ReactElement | null }) => {
+}: { left?: ReactElement | null; right?: ReactElement | null } & Stylable) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 
