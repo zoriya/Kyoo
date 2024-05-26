@@ -42,15 +42,21 @@ import { ReactElement, forwardRef, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, type TextInput, View, type ViewProps } from "react-native";
 import { useRouter } from "solito/router";
-import { type Stylable, useYoshiki } from "yoshiki/native";
+import { type Stylable, useYoshiki, percent } from "yoshiki/native";
 import { AdminPage } from "../admin";
 import { KyooLongLogo } from "./icon";
 
 export const NavbarTitle = (props: Stylable & { onLayout?: ViewProps["onLayout"] }) => {
 	const { t } = useTranslation();
+	const { css } = useYoshiki();
 
 	return (
-		<A href="/" aria-label={t("navbar.home")} {...tooltip(t("navbar.home"))} {...props}>
+		<A
+			href="/"
+			aria-label={t("navbar.home")}
+			{...tooltip(t("navbar.home"))}
+			{...css({ fontSize: 0 }, props)}
+		>
 			<KyooLongLogo />
 		</A>
 	);
@@ -199,21 +205,23 @@ export const Navbar = ({
 				props,
 			)}
 		>
-			<View {...css({ flexDirection: "row", alignItems: "center" })}>
-				<NavbarTitle {...css({ marginX: ts(2) })} />
+			<View {...css({ flexDirection: "row", alignItems: "center", height: percent(100) })}>
 				{left !== undefined ? (
 					left
 				) : (
-					<A
-						href="/browse"
-						{...css({
-							textTransform: "uppercase",
-							fontWeight: "bold",
-							color: (theme) => theme.contrast,
-						})}
-					>
-						{t("navbar.browse")}
-					</A>
+					<>
+						<NavbarTitle {...css({ marginX: ts(2) })} />
+						<A
+							href="/browse"
+							{...css({
+								textTransform: "uppercase",
+								fontWeight: "bold",
+								color: (theme) => theme.contrast,
+							})}
+						>
+							{t("navbar.browse")}
+						</A>
+					</>
 				)}
 			</View>
 			<View

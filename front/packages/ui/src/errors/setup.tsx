@@ -7,6 +7,7 @@ import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
 import { Navbar, NavbarProfile } from "../navbar";
 import { useEffect } from "react";
 import { useRouter } from "solito/router";
+import { KyooLongLogo } from "../navbar/icon";
 
 export const SetupPage: QueryPage<{ step: SetupStep }> = ({ step }) => {
 	const { css } = useYoshiki();
@@ -35,9 +36,13 @@ export const SetupPage: QueryPage<{ step: SetupStep }> = ({ step }) => {
 	);
 };
 
-SetupPage.getLayout = ({ page }) => (
-	<>
-		<Navbar left={null} right={<NavbarProfile />} />
-		{page}
-	</>
-);
+SetupPage.getLayout = ({ page }) => {
+	const { css } = useYoshiki();
+
+	return (
+		<>
+			<Navbar left={<KyooLongLogo {...css({ marginX: ts(2) })} />} right={<NavbarProfile />} />
+			{page}
+		</>
+	);
+};
