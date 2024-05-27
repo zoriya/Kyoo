@@ -5,8 +5,8 @@
 	"sideEffects": false,
 	"scripts": {
 		"dev": "expo start",
-		"android": "expo start --android",
-		"ios": "expo start --ios",
+		"android": "expo run:android",
+		"ios": "expo run:ios",
 		"web": "expo start --web",
 		"build": "eas build --profile production --platform android --non-interactive --auto-submit",
 		"build:apk": "eas build --profile preview --platform android --non-interactive --json",

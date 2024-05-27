@@ -79,8 +79,19 @@ const config: ExpoConfig = {
 const withForegroundService = (c: ExpoConfig): ExpoConfig => {
 	return withAndroidManifest(c, async (config) => {
 		const manifest = config.modResults.manifest;
-		console.log(manifest);
-		// manifest.application!.push();
+		manifest.application![0].service ??= [];
+		manifest.application![0].service.push({
+			$: {
+				"android:name": "com.brentvatne.exoplayer.VideoPlaybackService",
+				"android:exported": "false",
+				"android:foregroundServiceType": "mediaPlayback",
+			},
+			"intent-filter": [
+				{
+					action: [{ $: { "android:name": "androidx.media3.session.MediaSessionService" } }],
+				},
+			],
+		});
 		return config;
 	});
 };
