@@ -50,39 +50,6 @@ export const SkeletonCss = () => (
 	`}</style>
 );
 
-const AnimatedGradient = memo(
-	function Gradient({ color, width }: { color: string; width: SharedValue<number> }) {
-		const mult = useSharedValue(-1);
-		const animated = useAnimatedStyle(() => ({
-			transform: [
-				{
-					translateX: width.value * mult.value,
-				},
-			],
-		}));
-
-		useEffect(() => {
-			mult.value = withRepeat(withDelay(800, withTiming(1, { duration: 800 })), 0);
-		});
-
-		return (
-			<LinearGradient
-				start={{ x: 0, y: 0.5 }}
-				end={{ x: 1, y: 0.5 }}
-				colors={["transparent", color, "transparent"]}
-				style={[
-					StyleSheet.absoluteFillObject,
-					{ transform: [{ translateX: -width.value }] },
-					animated,
-				]}
-			/>
-		);
-	},
-	function propsAreEqual(prev, next) {
-		return prev.color === next.color;
-	},
-);
-
 export const Skeleton = ({
 	children,
 	show: forcedShow,
@@ -96,7 +63,19 @@ export const Skeleton = ({
 	variant?: "text" | "header" | "round" | "custom" | "fill" | "filltext";
 }) => {
 	const { css, theme } = useYoshiki();
-	const width = useSharedValue(0);
+	const width = useSharedValue(-900);
+	const mult = useSharedValue(-1);
+	const animated = useAnimatedStyle(() => ({
+		transform: [
+			{
+				translateX: width.value * mult.value,
+			},
+		],
+	}));
+
+	useEffect(() => {
+		mult.value = withRepeat(withDelay(800, withTiming(1, { duration: 800 })), 0);
+	});
 
 	if (forcedShow === undefined && children && children !== true) return <>{children}</>;
 
@@ -165,7 +144,16 @@ export const Skeleton = ({
 							},
 						])}
 					>
-						<AnimatedGradient color={theme.overlay1} width={width} />
+						<LinearGradient
+							start={{ x: 0, y: 0.5 }}
+							end={{ x: 1, y: 0.5 }}
+							colors={["transparent", theme.overlay1, "transparent"]}
+							style={[
+								StyleSheet.absoluteFillObject,
+								{ transform: [{ translateX: -width.value }] },
+								animated,
+							]}
+						/>
 					</View>
 				))}
 			{children}
