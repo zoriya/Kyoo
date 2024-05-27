@@ -90,6 +90,7 @@ export const Header = ({
 					)}
 					<IconButton
 						icon={Info}
+						as={Link}
 						aria-label={t("home.info")}
 						href={infoLink ?? "#"}
 						{...tooltip(t("home.info"))}

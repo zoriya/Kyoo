@@ -179,7 +179,6 @@ export const QualitiesMenu = (props: CustomMenu) => {
 				}}
 			/>
 			{/* TODO: Support video tracks when the play mode is not hls. */}
-			{/* @ts-expect-error They forgot to type this. */}
 			{info?.videoTracks
 				.sort((a: any, b: any) => b.height - a.height)
 				.map((x: any, i: number) => (

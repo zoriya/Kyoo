@@ -211,6 +211,12 @@ public class AuthApi(
 		User? user = await users.GetOrDefault(
 			new Filter<User>.Eq(nameof(Abstractions.Models.User.Username), request.Username)
 		);
+		if (user != null && user.Password == null)
+			return Forbid(
+				new RequestError(
+					"This account was registerd via oidc. Please login via oidc or add a password to your account in the settings first"
+				)
+			);
 		if (user == null || !BCryptNet.Verify(request.Password, user.Password))
 			return Forbid(new RequestError("The user and password does not match."));
 
