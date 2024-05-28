@@ -33,7 +33,7 @@
 		"next": "14.2.3",
 		"next-translate": "^2.6.2",
 		"raf": "^3.4.1",
-		"react": "18.3.1",
+		"react": "18.2.0",
 		"react-dom": "18.3.1",
 		"react-i18next": "^14.1.2",
 		"react-native-reanimated": "3.11.0",

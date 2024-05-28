@@ -5428,16 +5428,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:~18.2.79":
-  version: 18.2.79
-  resolution: "@types/react@npm:18.2.79"
-  dependencies:
-    "@types/prop-types": "*"
-    csstype: ^3.0.2
-  checksum: 85aa96e0e88725c84d8fc5f04f10a4da6a1f507dde33557ac9cc211414756867721264bfefd9e02bae1288ce2905351d949b652b931e734ea24519ee5c625138
-  languageName: node
-  linkType: hard
-
 "@types/scheduler@npm:*":
   version: 0.16.8
   resolution: "@types/scheduler@npm:0.16.8"
@@ -9701,7 +9691,6 @@ __metadata:
   resolution: "kyoo@workspace:."
   dependencies:
     "@biomejs/biome": 1.7.3
-    "@types/react": ~18.2.79
     typescript: 5.4.5
   languageName: unknown
   linkType: soft
@@ -11997,15 +11986,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:18.3.1":
-  version: 18.3.1
-  resolution: "react@npm:18.3.1"
-  dependencies:
-    loose-envify: ^1.1.0
-  checksum: a27bcfa8ff7c15a1e50244ad0d0c1cb2ad4375eeffefd266a64889beea6f6b64c4966c9b37d14ee32d6c9fcd5aa6ba183b6988167ab4d127d13e7cb5b386a376
-  languageName: node
-  linkType: hard
-
 "readable-stream@npm:^3.4.0":
   version: 3.6.2
   resolution: "readable-stream@npm:3.6.2"
@@ -13864,7 +13844,7 @@ __metadata:
     next: 14.2.3
     next-translate: ^2.6.2
     raf: ^3.4.1
-    react: 18.3.1
+    react: 18.2.0
     react-dom: 18.3.1
     react-i18next: ^14.1.2
     react-native: 0.74.1
