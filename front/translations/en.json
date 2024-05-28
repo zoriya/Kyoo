@@ -103,6 +103,7 @@
 	"navbar": {
 		"home": "Home",
 		"browse": "Browse",
+		"download": "Download",
 		"search": "Search",
 		"login": "Login",
 		"admin": "Admin panel"
