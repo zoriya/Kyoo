@@ -204,14 +204,18 @@
 	},
 	"errors": {
 		"connection": "Kyoo sunucusuna bağlanılamadı",
-		"connection-tips": "Sorun giderme ipuçları:\n - İnternete bağlı mısınız?\n - Kyoo sunucunuz çevrim içi mi?\n - Hesabınız engellendi mi?",
+		"connection-tips": "Sorun giderme ipuçları:\n- İnternete bağlı mısınız?\n- Kyoo sunucunuz çevrim içi mi?\n- Hesabınız engellendi mi?",
 		"unknown": "Bilinmeyen hata",
 		"try-again": "Tekrar dene",
 		"re-login": "Yeniden oturum aç",
 		"offline": "Şu anda internete bağlı değilsiniz. Lütfen daha sonra tekrar deneyiniz.",
 		"unauthorized": "Bu sayfaya erişmek için gerekli olan {{permission}} iznine sahip değilsiniz.",
 		"needVerification": "Hesabınızın kullanılabilir olması için öncelikle sunucu yöneticisi tarafından onaylanması gerekmektedir.",
-		"needAccount": "Bu sayfaya misafir modundayken erişemezsiniz. Bir hesap oluşturmanız ya da oturum açmanız gerekmektedir."
+		"needAccount": "Bu sayfaya misafir modundayken erişemezsiniz. Bir hesap oluşturmanız ya da oturum açmanız gerekmektedir.",
+		"setup": {
+			"MissingAdminAccount": "Henüz herhangi bir yönetici hesabı oluşturulmadı. Lütfen oluşturmak için kaydolun.",
+			"NoVideoFound": "Henüz herhangi bir içerik bulunamadı. İçeriklerinizin gözükmesi için kütüphane klasörünüze film ya da dizi ekleyin!"
+		}
 	},
 	"mediainfo": {
 		"file": "Dosya",
