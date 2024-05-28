@@ -2,5 +2,11 @@
 	"extends": "expo/tsconfig.base",
 	"compilerOptions": {
 		"strict": true
-	}
+	},
+	"include": [
+		"**/*.ts",
+		"**/*.tsx",
+		"../../packages/ui/src/i18n-d.d.ts",
+		"../../packages/ui/src/svg.d.ts"
+	]
 }
