@@ -179,7 +179,7 @@ class TVDB(Provider):
 
 		ret = next(
 			filter(
-				(lambda x: x["seasonNumber"] == 1 and x["number"] == absolute)
+				(lambda x: x["absoluteNumber"] == absolute)
 				if absolute is not None
 				else (
 					lambda x: x["seasonNumber"] == season and x["number"] == episode_nbr
