@@ -5,3 +5,4 @@ watchfiles
 aio-pika
 msgspec
 langcodes
+xmltodict

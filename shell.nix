@@ -11,6 +11,7 @@
       dataclasses-json
       msgspec
       langcodes
+      xmltodict
     ]);
   dotnet = with pkgs.dotnetCorePackages;
     combinePackages [
