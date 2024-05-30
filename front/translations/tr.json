@@ -79,7 +79,8 @@
 		"browse": "Keşfet",
 		"search": "Ara",
 		"login": "Oturum Aç",
-		"admin": "Yönetici Paneli"
+		"admin": "Yönetici Paneli",
+		"download": "İndirilenler"
 	},
 	"settings": {
 		"general": {
