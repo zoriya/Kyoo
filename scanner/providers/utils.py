@@ -27,7 +27,7 @@ def normalize_lang(lang: str) -> str:
 
 
 # For now, the API of kyoo only support one language so we remove the others.
-default_languages = os.environ["LIBRARY_LANGUAGES"].split(",")
+default_languages = os.environ.get("LIBRARY_LANGUAGES", "").split(",")
 
 
 def sort_translations(
