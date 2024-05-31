@@ -547,7 +547,7 @@ class TheMovieDatabase(Provider):
 			# Ignore totally unpopular shows or unknown ones.
 			# sorted is stable and False<True so doing this puts baddly rated items at the end of the list.
 			results = sorted(
-				results, key=lambda x: x["vote_count"] < 10 or x["popularity"] < 5
+				results, key=lambda x: x["vote_count"] < 5 or x["popularity"] < 5
 			)
 
 		return results[0]
