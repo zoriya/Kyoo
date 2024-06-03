@@ -583,6 +583,8 @@ class TheMovieDatabase(Provider):
 			absgrp = [
 				ep
 				for grp in sorted(group["groups"], key=lambda x: x["order"])
+				# Some shows include specials as the first absolute group (like TenSura)
+				if grp["name"] != "Specials"
 				for ep in sorted(grp["episodes"], key=lambda x: x["order"])
 			]
 			season_starts = [
