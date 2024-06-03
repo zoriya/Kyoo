@@ -26,7 +26,7 @@ def guessit(name: str, *, xem_titles: List[str] = [], extra_flags: dict[str, Any
 		{
 			"episode_prefer_number": True,
 			"excludes": "language",
-			"xem_titles": xem_titles,
+			"expected_title": xem_titles,
 		}
 		| extra_flags,
 	)

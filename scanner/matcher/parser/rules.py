@@ -6,8 +6,6 @@ from rebulk import Rule, RemoveMatch, AppendMatch, POST_PROCESS
 from rebulk.match import Matches, Match
 from copy import copy
 
-from providers.implementations.thexem import clean
-
 logger = getLogger(__name__)
 
 
@@ -74,123 +72,6 @@ class UnlistTitles(Rule):
 				title.end = nmatch.end
 
 			return [titles, [title]]
-
-
-class EpisodeTitlePromotion(Rule):
-	"""Promote "episode_title" to "episode" when the title is in fact the episode number
-
-	Example: '[Erai-raws] Youkoso Jitsuryoku Shijou Shugi no Kyoushitsu e S3 - 05 [1080p][Multiple Subtitle][0DDEAFCD].mkv'
-	Default:
-	```json
-	{
-		"release_group": "Erai-raws",
-		"title": "Youkoso Jitsuryoku Shijou Shugi no Kyoushitsu e",
-		"season": 3,
-		"episode_title": "05",
-	}
-	```
-	Expected:
-	```json
-	{
-		"release_group": "Erai-raws",
-		"title": "Youkoso Jitsuryoku Shijou Shugi no Kyoushitsu e",
-		"season": 3,
-		"episode": 5,
-	}
-	```
-	"""
-
-	priority = POST_PROCESS
-	consequence = [RemoveMatch, AppendMatch]
-
-	def when(self, matches: Matches, context) -> Any:
-		ep_title: List[Match] = matches.named("episode_title")  # type: ignore
-		if not ep_title:
-			return
-
-		# Do not promote an episode title if there is already a know episode number
-		ep_nbr: List[Match] = matches.named("episode")  # type: ignore
-		if ep_nbr and len(ep_nbr) > 0:
-			return
-
-		to_remove = [match for match in ep_title if str(match.value).isdecimal()]
-		to_add = []
-		for tmatch in to_remove:
-			match = copy(tmatch)
-			match.name = "episode"
-			match.value = int(str(tmatch.value))
-			to_add.append(match)
-		return [to_remove, to_add]
-
-
-class TitleNumberFixup(Rule):
-	"""Fix titles having numbers in them
-
-	Example: '[Erai-raws] Zom 100 - Zombie ni Naru made ni Shitai 100 no Koto - 01 [1080p][Multiple Subtitle][8AFBB298].mkv'
-	     (or '[SubsPlease] Mob Psycho 100 Season 3 - 12 (1080p) [E5058D7B].mkv')
-	Default:
-	```json
-	{
-		"release_group": "Erai-raws",
-		"title": "Zom",
-		"episode": [
-				100,
-				1
-		],
-		"episode_title": "Zombie ni Naru made ni Shitai",
-	}
-	```
-	Expected:
-	```json
-	{
-		"release_group": "Erai-raws",
-		"title": "Zom 100",
-		"episode": 1,
-		"episode_title": "Zombie ni Naru made ni Shitai 100 no Koto",
-	}
-	```
-	"""
-
-	priority = POST_PROCESS
-	consequence = [RemoveMatch, AppendMatch]
-
-	def when(self, matches: Matches, context) -> Any:
-		episodes: List[Match] = matches.named("episode")  # type: ignore
-
-		if len(episodes) < 2 or all(x.value == episodes[0].value for x in episodes):
-			return
-
-		to_remove = []
-		to_add = []
-		for episode in episodes:
-			prevs: List[Match] = matches.previous(episode)  # type: ignore
-			title = prevs[0] if prevs and prevs[0].tagged("title") else None
-			if not title:
-				continue
-
-			# do not fixup if there was a - or any separator between the title and the episode number
-			holes: List[Match] = matches.holes(title.end, episode.start)  # type: ignore
-			if holes:
-				continue
-
-			to_remove.extend([title, episode])
-			new_title = copy(title)
-			new_title.end = episode.end
-
-			nmatch: List[Match] = matches.next(episode)  # type: ignore
-			if nmatch:
-				end = (
-					nmatch[0].initiator.start
-					if isinstance(nmatch[0].initiator, Match)
-					else nmatch[0].start
-				)
-				# If an hole was created to parse the episode at the current pos, merge it back into the title
-				holes: List[Match] = matches.holes(start=episode.end, end=end)  # type: ignore
-				if holes and holes[0].start == episode.end:
-					new_title.end = holes[0].end
-
-			to_add.append(new_title)
-		return [to_remove, to_add]
 
 
 class MultipleSeasonRule(Rule):
@@ -265,70 +146,6 @@ class MultipleSeasonRule(Rule):
 		return [to_remove, to_add]
 
 
-class XemFixup(Rule):
-	"""Fix both alternate names and seasons that are known on the xem but parsed differently by guessit
-
-	Example: "JoJo's Bizarre Adventure - Diamond is Unbreakable - 12.mkv"
-	Default:
-	```json
-	{
-		"title": "JoJo's Bizarre Adventure",
-		"alternative_title": "Diamond is Unbreakable",
-		"episode": 12,
-	}
-	```
-	Expected:
-	```json
-	{
-		"title": "JoJo's Bizarre Adventure - Diamond is Unbreakable",
-		"episode": 12,
-	}
-	```
-
-	Or
-	Example: 'Owarimonogatari S2 E15.mkv'
-	Default:
-	```json
-	{
-		"title": "Owarimonogatari",
-		"season": 2,
-		"episode": 15
-	}
-	```
-	Expected:
-	```json
-	{
-		"title": "Owarimonogatari S2",
-		"episode": 15
-	}
-	```
-	"""
-
-	priority = POST_PROCESS
-	consequence = [RemoveMatch, AppendMatch]
-
-	def when(self, matches: Matches, context) -> Any:
-		titles: List[Match] = matches.named("title", lambda m: m.tagged("title"))  # type: ignore
-
-		if not titles or not context["xem_titles"]:
-			return
-		title = titles[0]
-
-		nmatch: List[Match] = matches.next(title)  # type: ignore
-		if not nmatch or not (nmatch[0].tagged("title") or nmatch[0].named("season")):
-			return
-
-		holes: List[Match] = matches.holes(title.end, nmatch[0].start)  # type: ignore
-		hole = " ".join(f" {h.value}" if h.value != "-" else " - " for h in holes)
-
-		new_title = copy(title)
-		new_title.end = nmatch[0].end
-		new_title.value = f"{title.value}{hole}{nmatch[0].value}"
-
-		if clean(new_title.value) in context["xem_titles"]:
-			return [[title, nmatch[0]], [new_title]]
-
-
 class SeasonYearDedup(Rule):
 	"""Remove "season" when it's the same as "year"
 
@@ -361,10 +178,10 @@ class SeasonYearDedup(Rule):
 	# This rules does the opposite of the YearSeason rule of guessit (with POST_PROCESS priority)
 	# To overide it, we need the -1. (rule: https://github.com/guessit-io/guessit/blob/develop/guessit/rules/processors.py#L195)
 	priority = POST_PROCESS - 1
-	consequence = [RemoveMatch]
+	consequence = RemoveMatch
 
 	def when(self, matches: Matches, context) -> Any:
 		season: List[Match] = matches.named("season")  # type: ignore
 		year: List[Match] = matches.named("year")  # type: ignore
 		if len(season) == 1 and len(year) == 1 and season[0].value == year[0].value:
-			return [season]
+			return season
