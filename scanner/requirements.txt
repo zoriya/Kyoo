@@ -1,4 +1,4 @@
-guessit
+guessit@git+https://github.com/zoriya/guessit
 aiohttp
 jsons
 watchfiles
