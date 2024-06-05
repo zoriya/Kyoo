@@ -84,12 +84,12 @@ class AnimeList(Provider):
 		if absolute is not None:
 			serie = await self._get_info(name, year, kind="serie")
 			if serie:
-				(season, episode_nbr) = self.get_episode_info(serie, absolute)
+				(season, episode_nbr, absolute) = self.get_episode_info(serie, absolute)
 				ret = await self._tvdb.identify_episode(
 					serie.tvdbid,
 					season,
 					episode_nbr,
-					None,
+					absolute,
 				)
 				# TODO: Add anidb id in ret.external_id
 				return ret
