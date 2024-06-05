@@ -79,7 +79,8 @@
 		"browse": "浏览",
 		"search": "搜索",
 		"login": "登录",
-		"admin": "管理员面板"
+		"admin": "管理员面板",
+		"download": "下载"
 	},
 	"settings": {
 		"general": {
@@ -211,7 +212,11 @@
 		"offline": "您未连接到互联网。请稍后重试。",
 		"unauthorized": "您缺少访问此页面所需的权限 {{permission}}。",
 		"needVerification": "您的帐户需要服务器管理员验证才能使用。",
-		"needAccount": "无法以访客模式访问此页面。您需要创建一个帐户或登录。"
+		"needAccount": "无法以访客模式访问此页面。您需要创建一个帐户或登录。",
+		"setup": {
+			"MissingAdminAccount": "尚未创建管理员帐户。请注册一个。",
+			"NoVideoFound": "未找到任何视频。将电影或连续剧添加到媒体库的文件夹中，以便在此处显示!"
+		}
 	},
 	"mediainfo": {
 		"file": "文件",
@@ -241,5 +246,31 @@
 			"empty": "未发现问题。所有项目均已注册。",
 			"scan": "触发媒体库扫描"
 		}
+	},
+	"genres": {
+		"Action": "动作片",
+		"Adventure": "冒险",
+		"Animation": "动漫",
+		"Comedy": "喜剧片",
+		"Crime": "犯罪片",
+		"Documentary": "纪录片",
+		"Drama": "戏剧",
+		"Family": "家庭",
+		"Fantasy": "奇幻",
+		"History": "历史",
+		"Horror": "恐怖",
+		"Music": "音乐",
+		"Mystery": "悬疑",
+		"Romance": "浪漫",
+		"ScienceFiction": "科幻",
+		"Thriller": "惊悚",
+		"War": "战争",
+		"Western": "西部",
+		"Kids": "儿童",
+		"News": "新闻",
+		"Reality": "现实",
+		"Soap": "肥皂剧",
+		"Talk": "访谈",
+		"Politics": "政治"
 	}
 }
