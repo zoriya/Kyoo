@@ -32,9 +32,9 @@ import { DefaultLayout } from "../layout";
 import { ItemGrid } from "./grid";
 import { BrowseSettings } from "./header";
 import { ItemList } from "./list";
-import { Layout, SortBy, SortOrd } from "./types";
+import {Layout, MediaTypes, SortBy, SortOrd} from "./types";
 
-const { useParam } = createParam<{ sortBy?: string }>();
+const { useParam } = createParam<{ sortBy?: string, mediaType?: string }>();
 
 export const itemMap = (
 	item: LibraryItem,
@@ -52,27 +52,30 @@ export const itemMap = (
 		item.kind === "show" ? item.watchStatus?.unseenEpisodesCount ?? item.episodesCount! : null,
 });
 
-const query = (sortKey?: SortBy, sortOrd?: SortOrd): QueryIdentifier<LibraryItem> => ({
+const query = (sortKey?: SortBy, sortOrd?: SortOrd, mediaTypeKey?: string): QueryIdentifier<LibraryItem> => ({
 	parser: LibraryItemP,
 	path: ["items"],
 	infinite: true,
 	params: {
 		sortBy: sortKey ? `${sortKey}:${sortOrd ?? "asc"}` : "name:asc",
+		filter: mediaTypeKey && mediaTypeKey !== "none" ? `kind eq ${mediaTypeKey}` : undefined,
 		fields: ["watchStatus", "episodesCount"],
 	},
 });
 
 export const BrowsePage: QueryPage = () => {
 	const [sort, setSort] = useParam("sortBy");
+	const [mediaTypeKey, setMediaTypeKey] = useParam("mediaType");
 	const sortKey = (sort?.split(":")[0] as SortBy) || SortBy.Name;
 	const sortOrd = (sort?.split(":")[1] as SortOrd) || SortOrd.Asc;
+	const mediaType = mediaTypeKey !== undefined ? MediaTypes.find(t => t.key === mediaTypeKey) : undefined;
 	const [layout, setLayout] = useState(Layout.Grid);
 
 	const LayoutComponent = layout === Layout.Grid ? ItemGrid : ItemList;
 
 	return (
 		<InfiniteFetch
-			query={query(sortKey, sortOrd)}
+			query={query(sortKey, sortOrd, mediaTypeKey)}
 			layout={LayoutComponent.layout}
 			Header={
 				<BrowseSettings
@@ -81,6 +84,11 @@ export const BrowsePage: QueryPage = () => {
 					sortOrd={sortOrd}
 					setSort={(key, ord) => {
 						setSort(`${key}:${ord}`);
+					}}
+					mediaType={mediaType}
+					availableMediaTypes={MediaTypes}
+					setMediaType={(mediaType) => {
+						setMediaTypeKey(mediaType?.key);
 					}}
 					layout={layout}
 					setLayout={setLayout}

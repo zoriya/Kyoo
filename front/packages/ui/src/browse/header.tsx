@@ -34,12 +34,14 @@ import ArrowUpward from "@material-symbols/svg-400/rounded/arrow_upward.svg";
 import GridView from "@material-symbols/svg-400/rounded/grid_view.svg";
 import Sort from "@material-symbols/svg-400/rounded/sort.svg";
 import Style from "@material-symbols/svg-400/rounded/style.svg";
+import FilterList from "@material-symbols/svg-400/rounded/filter_list.svg";
 import ViewList from "@material-symbols/svg-400/rounded/view_list.svg";
-import { forwardRef } from "react";
+import {type ComponentType, forwardRef} from "react";
 import { useTranslation } from "react-i18next";
 import { type PressableProps, View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
-import { Layout, SearchSort, SortOrd } from "./types";
+import {AllMediaTypes, Layout, SearchSort, SortOrd} from "./types";
+import type {SvgProps} from "react-native-svg";
 
 const SortTrigger = forwardRef<View, PressableProps & { sortKey: string }>(function SortTrigger(
 	{ sortKey, ...props },
@@ -60,11 +62,38 @@ const SortTrigger = forwardRef<View, PressableProps & { sortKey: string }>(funct
 	);
 });
 
+const MediaTypeTrigger = forwardRef<View, PressableProps & { mediaType?: MediaType }>(function MediaTypeTrigger(
+	{ mediaType, ...props },
+	ref,
+) {
+	const { css } = useYoshiki();
+	const { t } = useTranslation();
+	const labelKey = mediaType ? `browse.mediatypekey.${mediaType.key}` : "browse.mediatypelabel";
+	return (
+		<PressableFeedback
+			ref={ref}
+			{...css({ flexDirection: "row", alignItems: "center" }, props as any)}
+			{...tooltip(t("browse.mediatype-tt"))}
+		>
+			<Icon icon={mediaType?.icon ?? FilterList} {...css({ paddingX: ts(0.5) })} />
+			<P>{t(labelKey as any)}</P>
+		</PressableFeedback>
+	);
+});
+
+export interface MediaType {
+	key: string;
+	icon: ComponentType<SvgProps>;
+}
+
 export const BrowseSettings = ({
 	availableSorts,
 	sortKey,
 	sortOrd,
 	setSort,
+	availableMediaTypes,
+	mediaType,
+	setMediaType,
 	layout,
 	setLayout,
 }: {
@@ -72,6 +101,9 @@ export const BrowseSettings = ({
 	sortKey: string;
 	sortOrd: SortOrd;
 	setSort: (sort: string, ord: SortOrd) => void;
+	availableMediaTypes: MediaType[];
+	mediaType?: MediaType;
+	setMediaType: (mediaType?: MediaType) => void;
 	layout: Layout;
 	setLayout: (layout: Layout) => void;
 }) => {
@@ -81,58 +113,91 @@ export const BrowseSettings = ({
 	// TODO: implement filters in the front.
 
 	return (
-		<View
-			{...css({
-				flexDirection: "row-reverse",
-				alignItems: "center",
-				marginX: ts(4),
-				marginY: ts(1),
-			})}
-		>
-			{filters.length !== 0 && (
-				<View {...css({ flexGrow: 1, flexDirection: "row", alignItems: "center" })}>
-					<Icon icon={Style} {...css({ marginX: ts(1) })} />
-					{filters.map((x) => (
-						<Chip key={x} label={x} />
-					))}
+		<>
+			<View
+				{...css({
+					flexDirection: "row-reverse",
+					alignItems: "center",
+					marginX: ts(4),
+					marginY: ts(1),
+				})}
+			>
+				<View {...css({ flexDirection: "row" })}>
+					<Menu Trigger={SortTrigger} sortKey={sortKey}>
+						{availableSorts.map((x) => (
+							<Menu.Item
+								key={x}
+								label={t(`browse.sortkey.${x}` as any)}
+								selected={sortKey === x}
+								icon={
+									x !== SearchSort.Relevance
+										? sortOrd === SortOrd.Asc
+											? ArrowUpward
+											: ArrowDownward
+										: undefined
+								}
+								onSelect={() =>
+									setSort(x, sortKey === x && sortOrd === SortOrd.Asc ? SortOrd.Desc : SortOrd.Asc)
+								}
+							/>
+						))}
+					</Menu>
+					<HR orientation="vertical" />
+					<IconButton
+						icon={GridView}
+						onPress={() => setLayout(Layout.Grid)}
+						color={layout === Layout.Grid ? theme.accent : undefined}
+						{...tooltip(t("browse.switchToGrid"))}
+						{...css({ padding: ts(0.5), marginY: "auto" })}
+					/>
+					<IconButton
+						icon={ViewList}
+						onPress={() => setLayout(Layout.List)}
+						color={layout === Layout.List ? theme.accent : undefined}
+						{...tooltip(t("browse.switchToList"))}
+						{...css({ padding: ts(0.5), marginY: "auto" })}
+					/>
 				</View>
-			)}
-			<View {...css({ flexDirection: "row" })}>
-				<Menu Trigger={SortTrigger} sortKey={sortKey}>
-					{availableSorts.map((x) => (
-						<Menu.Item
-							key={x}
-							label={t(`browse.sortkey.${x}` as any)}
-							selected={sortKey === x}
-							icon={
-								x !== SearchSort.Relevance
-									? sortOrd === SortOrd.Asc
-										? ArrowUpward
-										: ArrowDownward
-									: undefined
-							}
-							onSelect={() =>
-								setSort(x, sortKey === x && sortOrd === SortOrd.Asc ? SortOrd.Desc : SortOrd.Asc)
-							}
-						/>
-					))}
-				</Menu>
-				<HR orientation="vertical" />
-				<IconButton
-					icon={GridView}
-					onPress={() => setLayout(Layout.Grid)}
-					color={layout === Layout.Grid ? theme.accent : undefined}
-					{...tooltip(t("browse.switchToGrid"))}
-					{...css({ padding: ts(0.5), marginY: "auto" })}
-				/>
-				<IconButton
-					icon={ViewList}
-					onPress={() => setLayout(Layout.List)}
-					color={layout === Layout.List ? theme.accent : undefined}
-					{...tooltip(t("browse.switchToList"))}
-					{...css({ padding: ts(0.5), marginY: "auto" })}
-				/>
+				<View {...css({ flexGrow: 1, flexDirection: "row", alignItems: "center" })}>
+					<Menu Trigger={MediaTypeTrigger} mediaType={mediaType}>
+						{availableMediaTypes.map((x) => (
+							<Menu.Item
+								key={x.key}
+								label={t(`browse.mediatypekey.${x.key}` as any)}
+								selected={mediaType === x}
+								icon={x.icon}
+								onSelect={() => {
+									if (mediaType === x || x === AllMediaTypes) {
+										setMediaType(undefined)
+									} else {
+										setMediaType(x)
+									}
+								}}
+							/>
+						))}
+					</Menu>
+				</View>
 			</View>
-		</View>
+			<View
+				{...css({
+					flexDirection: "row-reverse",
+					alignItems: "center",
+					marginX: ts(4),
+					marginY: ts(1),
+					zIndex: 1,
+				})}
+			>
+				{filters.length !== 0 && (
+					<View {...css({ flexGrow: 1, flexDirection: "row", alignItems: "center" })}>
+						{/*<Icon icon={Style} {...css({ marginX: ts(1) })} />*/}
+						{filters.map((x) => (
+							<div style={{paddingRight: ".25rem"}}>
+								<Chip key={x} label={x} size={"small"} />
+							</div>
+						))}
+					</View>
+				)}
+			</View>
+		</>
 	);
 };

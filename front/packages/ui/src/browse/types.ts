@@ -18,6 +18,12 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {MediaType} from "./header";
+import Collection from "@material-symbols/svg-400/rounded/collections_bookmark.svg";
+import TV from "@material-symbols/svg-400/rounded/tv.svg";
+import Movie from "@material-symbols/svg-400/rounded/movie.svg";
+import All from "@material-symbols/svg-400/rounded/view_headline.svg";
+
 export enum SortBy {
 	Name = "name",
 	StartAir = "startAir",
@@ -42,3 +48,24 @@ export enum Layout {
 	Grid,
 	List,
 }
+
+export const AllMediaTypes: MediaType = {
+	key: "all",
+	icon: All
+}
+
+export const MediaTypes: MediaType[] = [
+	AllMediaTypes,
+	{
+		key: "movie",
+		icon: Movie
+	},
+	{
+		key: "show",
+		icon: TV,
+	},
+	{
+		key: "collection",
+		icon: Collection
+	}
+];
