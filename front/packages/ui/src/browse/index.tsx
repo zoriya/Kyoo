@@ -85,7 +85,7 @@ const getMediaTypeFromParam = (mediaTypeParam?: string): MediaType => {
 
 export const BrowsePage: QueryPage = () => {
 	const [sort, setSort] = useParam("sortBy");
-	const [mediaTypeParam, setMediaTypeKey] = useParam("mediaType");
+	const [mediaTypeParam, setMediaTypeParam] = useParam("mediaType");
 	const sortKey = (sort?.split(":")[0] as SortBy) || SortBy.Name;
 	const sortOrd = (sort?.split(":")[1] as SortOrd) || SortOrd.Asc;
 	const [layout, setLayout] = useState(Layout.Grid);
@@ -108,7 +108,7 @@ export const BrowsePage: QueryPage = () => {
 					mediaType={mediaType}
 					availableMediaTypes={MediaTypes}
 					setMediaType={(mediaType) => {
-						setMediaTypeKey(mediaType.key);
+						setMediaTypeParam(mediaType.key);
 					}}
 					layout={layout}
 					setLayout={setLayout}
