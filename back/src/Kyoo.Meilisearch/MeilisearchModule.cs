@@ -49,6 +49,8 @@ public static class MeilisearchModule
 						CamelCase.ConvertName(nameof(Movie.Genres)),
 						CamelCase.ConvertName(nameof(Movie.Status)),
 						CamelCase.ConvertName(nameof(Movie.AirDate)),
+						CamelCase.ConvertName(nameof(Show.StartAir)),
+						CamelCase.ConvertName(nameof(Show.EndAir)),
 						CamelCase.ConvertName(nameof(Movie.StudioId)),
 						"kind"
 					},
