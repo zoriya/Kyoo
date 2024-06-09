@@ -22,8 +22,8 @@ import Collection from "@material-symbols/svg-400/rounded/collections_bookmark.s
 import TV from "@material-symbols/svg-400/rounded/tv.svg";
 import Movie from "@material-symbols/svg-400/rounded/movie.svg";
 import All from "@material-symbols/svg-400/rounded/view_headline.svg";
-import type {ComponentType} from "react";
-import type {SvgProps} from "react-native-svg";
+import type { ComponentType } from "react";
+import type { SvgProps } from "react-native-svg";
 
 export enum SortBy {
 	Name = "name",
@@ -50,7 +50,7 @@ export enum Layout {
 	List,
 }
 
-export enum MediaTypeKey{
+export enum MediaTypeKey {
 	All = "all",
 	Movie = "movie",
 	Show = "show",
@@ -64,14 +64,14 @@ export interface MediaType {
 
 export const MediaTypeAll: MediaType = {
 	key: MediaTypeKey.All,
-	icon: All
-}
+	icon: All,
+};
 
 export const MediaTypes: MediaType[] = [
 	MediaTypeAll,
 	{
 		key: MediaTypeKey.Movie,
-		icon: Movie
+		icon: Movie,
 	},
 	{
 		key: MediaTypeKey.Show,
@@ -79,6 +79,6 @@ export const MediaTypes: MediaType[] = [
 	},
 	{
 		key: MediaTypeKey.Collection,
-		icon: Collection
-	}
+		icon: Collection,
+	},
 ];

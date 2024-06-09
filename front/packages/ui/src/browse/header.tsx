@@ -18,27 +18,18 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-	HR,
-	Icon,
-	IconButton,
-	Menu,
-	P,
-	PressableFeedback,
-	tooltip,
-	ts,
-} from "@kyoo/primitives";
+import { HR, Icon, IconButton, Menu, P, PressableFeedback, tooltip, ts } from "@kyoo/primitives";
 import ArrowDownward from "@material-symbols/svg-400/rounded/arrow_downward.svg";
 import ArrowUpward from "@material-symbols/svg-400/rounded/arrow_upward.svg";
 import GridView from "@material-symbols/svg-400/rounded/grid_view.svg";
 import Sort from "@material-symbols/svg-400/rounded/sort.svg";
 import FilterList from "@material-symbols/svg-400/rounded/filter_list.svg";
 import ViewList from "@material-symbols/svg-400/rounded/view_list.svg";
-import {forwardRef} from "react";
+import { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
 import { type PressableProps, View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
-import {Layout, MediaType, MediaTypeAll, SearchSort, SortOrd} from "./types";
+import { Layout, MediaType, MediaTypeAll, SearchSort, SortOrd } from "./types";
 
 const SortTrigger = forwardRef<View, PressableProps & { sortKey: string }>(function SortTrigger(
 	{ sortKey, ...props },
@@ -59,24 +50,24 @@ const SortTrigger = forwardRef<View, PressableProps & { sortKey: string }>(funct
 	);
 });
 
-const MediaTypeTrigger = forwardRef<View, PressableProps & { mediaType: MediaType }>(function MediaTypeTrigger(
-	{ mediaType, ...props },
-	ref,
-) {
-	const { css } = useYoshiki();
-	const { t } = useTranslation();
-	const labelKey = mediaType !== MediaTypeAll ? `browse.mediatypekey.${mediaType.key}` : "browse.mediatypelabel";
-	return (
-		<PressableFeedback
-			ref={ref}
-			{...css({ flexDirection: "row", alignItems: "center" }, props as any)}
-			{...tooltip(t("browse.mediatype-tt"))}
-		>
-			<Icon icon={mediaType?.icon ?? FilterList} {...css({ paddingX: ts(0.5) })} />
-			<P>{t(labelKey as any)}</P>
-		</PressableFeedback>
-	);
-});
+const MediaTypeTrigger = forwardRef<View, PressableProps & { mediaType: MediaType }>(
+	function MediaTypeTrigger({ mediaType, ...props }, ref) {
+		const { css } = useYoshiki();
+		const { t } = useTranslation();
+		const labelKey =
+			mediaType !== MediaTypeAll ? `browse.mediatypekey.${mediaType.key}` : "browse.mediatypelabel";
+		return (
+			<PressableFeedback
+				ref={ref}
+				{...css({ flexDirection: "row", alignItems: "center" }, props as any)}
+				{...tooltip(t("browse.mediatype-tt"))}
+			>
+				<Icon icon={mediaType?.icon ?? FilterList} {...css({ paddingX: ts(0.5) })} />
+				<P>{t(labelKey as any)}</P>
+			</PressableFeedback>
+		);
+	},
+);
 
 export const BrowseSettings = ({
 	availableSorts,

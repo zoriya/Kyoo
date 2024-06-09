@@ -32,9 +32,17 @@ import { DefaultLayout } from "../layout";
 import { ItemGrid } from "./grid";
 import { BrowseSettings } from "./header";
 import { ItemList } from "./list";
-import {MediaTypeAll, Layout, MediaTypes, SortBy, SortOrd, MediaTypeKey, MediaType} from "./types";
+import {
+	MediaTypeAll,
+	Layout,
+	MediaTypes,
+	SortBy,
+	SortOrd,
+	MediaTypeKey,
+	MediaType,
+} from "./types";
 
-const { useParam } = createParam<{ sortBy?: string, mediaType?: string }>();
+const { useParam } = createParam<{ sortBy?: string; mediaType?: string }>();
 
 export const itemMap = (
 	item: LibraryItem,
@@ -52,9 +60,13 @@ export const itemMap = (
 		item.kind === "show" ? item.watchStatus?.unseenEpisodesCount ?? item.episodesCount! : null,
 });
 
-const query = (mediaType: MediaType, sortKey?: SortBy, sortOrd?: SortOrd): QueryIdentifier<LibraryItem> => {
+const query = (
+	mediaType: MediaType,
+	sortKey?: SortBy,
+	sortOrd?: SortOrd,
+): QueryIdentifier<LibraryItem> => {
 	const filter = mediaType !== MediaTypeAll ? `kind eq ${mediaType.key}` : undefined;
-	return ({
+	return {
 		parser: LibraryItemP,
 		path: ["items"],
 		infinite: true,
@@ -63,13 +75,13 @@ const query = (mediaType: MediaType, sortKey?: SortBy, sortOrd?: SortOrd): Query
 			filter,
 			fields: ["watchStatus", "episodesCount"],
 		},
-	});
-}
+	};
+};
 
 const getMediaTypeFromParam = (mediaTypeParam?: string): MediaType => {
-	const mediaTypeKey = mediaTypeParam as MediaTypeKey || MediaTypeKey.All;
-	return MediaTypes.find(t => t.key === mediaTypeKey) ?? MediaTypeAll;
-}
+	const mediaTypeKey = (mediaTypeParam as MediaTypeKey) || MediaTypeKey.All;
+	return MediaTypes.find((t) => t.key === mediaTypeKey) ?? MediaTypeAll;
+};
 
 export const BrowsePage: QueryPage = () => {
 	const [sort, setSort] = useParam("sortBy");
@@ -112,7 +124,5 @@ BrowsePage.getLayout = DefaultLayout;
 
 BrowsePage.getFetchUrls = ({ mediaType, sortBy }) => {
 	const mediaTypeObj = getMediaTypeFromParam(mediaType);
-	return[
-		query(mediaTypeObj, sortBy?.split("-")[0] as SortBy, sortBy?.split("-")[1] as SortOrd),
-	];
-}
+	return [query(mediaTypeObj, sortBy?.split("-")[0] as SortBy, sortBy?.split("-")[1] as SortOrd)];
+};
