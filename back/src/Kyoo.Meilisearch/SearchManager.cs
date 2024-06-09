@@ -99,11 +99,12 @@ public class SearchManager : ISearchManager
 	public Task<SearchPage<ILibraryItem>.SearchResult> SearchItems(
 		string? query,
 		Sort<ILibraryItem> sortBy,
+		Filter<ILibraryItem>? filter,
 		SearchPagination pagination,
 		Include<ILibraryItem>? include = default
 	)
 	{
-		return _Search("items", query, null, sortBy, pagination, include);
+		return _Search("items", query, filter.CreateMeilisearchFilter(), sortBy, pagination, include);
 	}
 
 	/// <inheritdoc/>
@@ -143,22 +144,24 @@ public class SearchManager : ISearchManager
 	public Task<SearchPage<Episode>.SearchResult> SearchEpisodes(
 		string? query,
 		Sort<Episode> sortBy,
+		Filter<Episode>? filter,
 		SearchPagination pagination,
 		Include<Episode>? include = default
 	)
 	{
-		return _Search(nameof(Episode), query, null, sortBy, pagination, include);
+		return _Search(nameof(Episode), query, filter.CreateMeilisearchFilter(), sortBy, pagination, include);
 	}
 
 	/// <inheritdoc/>
 	public Task<SearchPage<Studio>.SearchResult> SearchStudios(
 		string? query,
 		Sort<Studio> sortBy,
+		Filter<Studio>? filter,
 		SearchPagination pagination,
 		Include<Studio>? include = default
 	)
 	{
-		return _Search(nameof(Studio), query, null, sortBy, pagination, include);
+		return _Search(nameof(Studio), query, filter.CreateMeilisearchFilter(), sortBy, pagination, include);
 	}
 
 	private class IdResource

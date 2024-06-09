@@ -44,7 +44,7 @@ public class SearchApi : BaseApi
 		_searchManager = searchManager;
 	}
 
-	// TODO: add filters and facets
+	// TODO: add facets
 
 	/// <summary>
 	/// Search collections
@@ -143,11 +143,12 @@ public class SearchApi : BaseApi
 	public async Task<SearchPage<ILibraryItem>> SearchItems(
 		[FromQuery] string? q,
 		[FromQuery] Sort<ILibraryItem> sortBy,
+		[FromQuery] Filter<ILibraryItem>? filter,
 		[FromQuery] SearchPagination pagination,
 		[FromQuery] Include<ILibraryItem> fields
 	)
 	{
-		return SearchPage(await _searchManager.SearchItems(q, sortBy, pagination, fields));
+		return SearchPage(await _searchManager.SearchItems(q, sortBy, filter, pagination, fields));
 	}
 
 	/// <summary>
@@ -169,11 +170,12 @@ public class SearchApi : BaseApi
 	public async Task<SearchPage<Episode>> SearchEpisodes(
 		[FromQuery] string? q,
 		[FromQuery] Sort<Episode> sortBy,
+		[FromQuery] Filter<Episode>? filter,
 		[FromQuery] SearchPagination pagination,
 		[FromQuery] Include<Episode> fields
 	)
 	{
-		return SearchPage(await _searchManager.SearchEpisodes(q, sortBy, pagination, fields));
+		return SearchPage(await _searchManager.SearchEpisodes(q, sortBy, filter, pagination, fields));
 	}
 
 	/// <summary>
@@ -195,10 +197,11 @@ public class SearchApi : BaseApi
 	public async Task<SearchPage<Studio>> SearchStudios(
 		[FromQuery] string? q,
 		[FromQuery] Sort<Studio> sortBy,
+		[FromQuery] Filter<Studio>? filter,
 		[FromQuery] SearchPagination pagination,
 		[FromQuery] Include<Studio> fields
 	)
 	{
-		return SearchPage(await _searchManager.SearchStudios(q, sortBy, pagination, fields));
+		return SearchPage(await _searchManager.SearchStudios(q, sortBy, filter, pagination, fields));
 	}
 }
