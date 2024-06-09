@@ -14,6 +14,7 @@ type SettingsT struct {
 	Outpath     string
 	Metadata    string
 	RoutePrefix string
+	SafePath    string
 	HwAccel     HwAccelT
 }
 
@@ -28,5 +29,6 @@ var Settings = SettingsT{
 	Outpath:     GetEnvOr("GOCODER_CACHE_ROOT", "/cache"),
 	Metadata:    GetEnvOr("GOCODER_METADATA_ROOT", "/metadata"),
 	RoutePrefix: GetEnvOr("GOCODER_PREFIX", ""),
+	SafePath:    GetEnvOr("GOCODER_SAFE_PATH", "/video"),
 	HwAccel:     DetectHardwareAccel(),
 }
