@@ -29,7 +29,7 @@ import { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
 import { type PressableProps, View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
-import { Layout, MediaType, MediaTypeAll, SearchSort, SortOrd } from "./types";
+import { Layout, type MediaType, MediaTypeAll, SearchSort, SortOrd } from "./types";
 
 const SortTrigger = forwardRef<View, PressableProps & { sortKey: string }>(function SortTrigger(
 	{ sortKey, ...props },

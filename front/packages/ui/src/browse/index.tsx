@@ -39,7 +39,7 @@ import {
 	SortBy,
 	SortOrd,
 	MediaTypeKey,
-	MediaType,
+	type MediaType,
 } from "./types";
 
 const { useParam } = createParam<{ sortBy?: string; mediaType?: string }>();
