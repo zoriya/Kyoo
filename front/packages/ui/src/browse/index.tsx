@@ -62,7 +62,7 @@ export const itemMap = (
 
 export const createFilterString = (mediaType: MediaType): string | undefined => {
 	return mediaType !== MediaTypeAll ? `kind eq ${mediaType.key}` : undefined;
-}
+};
 
 const query = (
 	mediaType: MediaType,

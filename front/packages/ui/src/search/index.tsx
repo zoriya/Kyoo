@@ -23,15 +23,15 @@ import { usePageStyle } from "@kyoo/primitives";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { createParam } from "solito";
-import {createFilterString, getMediaTypeFromParam, itemMap} from "../browse";
+import { createFilterString, getMediaTypeFromParam, itemMap } from "../browse";
 import { ItemGrid } from "../browse/grid";
 import { BrowseSettings } from "../browse/header";
 import { ItemList } from "../browse/list";
-import {Layout, type MediaType, MediaTypes, SearchSort, SortOrd} from "../browse/types";
+import { Layout, type MediaType, MediaTypes, SearchSort, SortOrd } from "../browse/types";
 import { InfiniteFetch } from "../fetch-infinite";
 import { DefaultLayout } from "../layout";
 
-const { useParam } = createParam<{ sortBy?: string, mediaType?: string }>();
+const { useParam } = createParam<{ sortBy?: string; mediaType?: string }>();
 
 const query = (
 	mediaType: MediaType,
@@ -99,4 +99,4 @@ SearchPage.getFetchUrls = ({ q, sortBy, mediaType }) => {
 	return [
 		query(mediaTypeObj, q, sortBy?.split("-")[0] as SearchSort, sortBy?.split("-")[1] as SortOrd),
 	];
-}
+};
