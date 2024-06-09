@@ -109,8 +109,6 @@ export const BrowseSettings = ({
 }) => {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
-	const filters: string[] = [];
-	// TODO: implement filters in the front.
 
 	return (
 		<>
@@ -177,26 +175,6 @@ export const BrowseSettings = ({
 						))}
 					</Menu>
 				</View>
-			</View>
-			<View
-				{...css({
-					flexDirection: "row-reverse",
-					alignItems: "center",
-					marginX: ts(4),
-					marginY: ts(1),
-					zIndex: 1,
-				})}
-			>
-				{filters.length !== 0 && (
-					<View {...css({ flexGrow: 1, flexDirection: "row", alignItems: "center" })}>
-						{/*<Icon icon={Style} {...css({ marginX: ts(1) })} />*/}
-						{filters.map((x) => (
-							<div style={{paddingRight: ".25rem"}}>
-								<Chip key={x} label={x} size={"small"} />
-							</div>
-						))}
-					</View>
-				)}
 			</View>
 		</>
 	);
