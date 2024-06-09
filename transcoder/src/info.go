@@ -189,8 +189,10 @@ func GetInfo(path string, sha string) (*MediaInfo, error) {
 
 			var val *MediaInfo
 			val, err = getInfo(path)
-			*mi.info = *val
-			mi.info.Sha = sha
+			if err == nil {
+				*mi.info = *val
+				mi.info.Sha = sha
+			}
 			mi.ready.Done()
 			saveInfo(save_path, mi.info)
 		}()
