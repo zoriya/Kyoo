@@ -104,7 +104,14 @@ public class SearchManager : ISearchManager
 		Include<ILibraryItem>? include = default
 	)
 	{
-		return _Search("items", query, filter.CreateMeilisearchFilter(), sortBy, pagination, include);
+		return _Search(
+			"items",
+			query,
+			filter.CreateMeilisearchFilter(),
+			sortBy,
+			pagination,
+			include
+		);
 	}
 
 	/// <inheritdoc/>
@@ -149,7 +156,14 @@ public class SearchManager : ISearchManager
 		Include<Episode>? include = default
 	)
 	{
-		return _Search(nameof(Episode), query, filter.CreateMeilisearchFilter(), sortBy, pagination, include);
+		return _Search(
+			nameof(Episode),
+			query,
+			filter.CreateMeilisearchFilter(),
+			sortBy,
+			pagination,
+			include
+		);
 	}
 
 	/// <inheritdoc/>
@@ -161,7 +175,14 @@ public class SearchManager : ISearchManager
 		Include<Studio>? include = default
 	)
 	{
-		return _Search(nameof(Studio), query, filter.CreateMeilisearchFilter(), sortBy, pagination, include);
+		return _Search(
+			nameof(Studio),
+			query,
+			filter.CreateMeilisearchFilter(),
+			sortBy,
+			pagination,
+			include
+		);
 	}
 
 	private class IdResource

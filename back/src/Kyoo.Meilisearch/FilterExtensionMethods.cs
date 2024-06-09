@@ -9,8 +9,10 @@ public static class FilterExtensionMethods
 	{
 		return filter switch
 		{
-			Filter<T>.And and => $"({and.First.CreateMeilisearchFilter()}) AND ({and.Second.CreateMeilisearchFilter()})",
-			Filter<T>.Or or => $"({or.First.CreateMeilisearchFilter()}) OR ({or.Second.CreateMeilisearchFilter()})",
+			Filter<T>.And and
+				=> $"({and.First.CreateMeilisearchFilter()}) AND ({and.Second.CreateMeilisearchFilter()})",
+			Filter<T>.Or or
+				=> $"({or.First.CreateMeilisearchFilter()}) OR ({or.Second.CreateMeilisearchFilter()})",
 			Filter<T>.Gt gt => $"{gt.Property} > {gt.Value}",
 			Filter<T>.Lt lt => $"{lt.Property} < {lt.Value}",
 			Filter<T>.Ge ge => $"{ge.Property} >= {ge.Value}",
@@ -19,7 +21,8 @@ public static class FilterExtensionMethods
 			Filter<T>.Has has => $"{has.Property} = {has.Value}",
 			Filter<T>.Ne ne => $"{ne.Property} != {ne.Value}",
 			Filter<T>.Not not => $"NOT ({not.Filter.CreateMeilisearchFilter()})",
-			Filter<T>.CmpRandom => throw new ValidationException("Random comparison is not supported."),
+			Filter<T>.CmpRandom
+				=> throw new ValidationException("Random comparison is not supported."),
 			_ => null
 		};
 	}

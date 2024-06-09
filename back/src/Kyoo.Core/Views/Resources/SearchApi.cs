@@ -175,7 +175,9 @@ public class SearchApi : BaseApi
 		[FromQuery] Include<Episode> fields
 	)
 	{
-		return SearchPage(await _searchManager.SearchEpisodes(q, sortBy, filter, pagination, fields));
+		return SearchPage(
+			await _searchManager.SearchEpisodes(q, sortBy, filter, pagination, fields)
+		);
 	}
 
 	/// <summary>
@@ -202,6 +204,8 @@ public class SearchApi : BaseApi
 		[FromQuery] Include<Studio> fields
 	)
 	{
-		return SearchPage(await _searchManager.SearchStudios(q, sortBy, filter, pagination, fields));
+		return SearchPage(
+			await _searchManager.SearchStudios(q, sortBy, filter, pagination, fields)
+		);
 	}
 }
