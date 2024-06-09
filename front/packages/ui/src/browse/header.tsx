@@ -19,7 +19,6 @@
  */
 
 import {
-	Chip,
 	HR,
 	Icon,
 	IconButton,
@@ -33,15 +32,13 @@ import ArrowDownward from "@material-symbols/svg-400/rounded/arrow_downward.svg"
 import ArrowUpward from "@material-symbols/svg-400/rounded/arrow_upward.svg";
 import GridView from "@material-symbols/svg-400/rounded/grid_view.svg";
 import Sort from "@material-symbols/svg-400/rounded/sort.svg";
-import Style from "@material-symbols/svg-400/rounded/style.svg";
 import FilterList from "@material-symbols/svg-400/rounded/filter_list.svg";
 import ViewList from "@material-symbols/svg-400/rounded/view_list.svg";
-import {type ComponentType, forwardRef} from "react";
+import {forwardRef} from "react";
 import { useTranslation } from "react-i18next";
 import { type PressableProps, View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
-import {AllMediaTypes, Layout, SearchSort, SortOrd} from "./types";
-import type {SvgProps} from "react-native-svg";
+import {Layout, MediaType, MediaTypeAll, SearchSort, SortOrd} from "./types";
 
 const SortTrigger = forwardRef<View, PressableProps & { sortKey: string }>(function SortTrigger(
 	{ sortKey, ...props },
@@ -62,13 +59,13 @@ const SortTrigger = forwardRef<View, PressableProps & { sortKey: string }>(funct
 	);
 });
 
-const MediaTypeTrigger = forwardRef<View, PressableProps & { mediaType?: MediaType }>(function MediaTypeTrigger(
+const MediaTypeTrigger = forwardRef<View, PressableProps & { mediaType: MediaType }>(function MediaTypeTrigger(
 	{ mediaType, ...props },
 	ref,
 ) {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
-	const labelKey = mediaType ? `browse.mediatypekey.${mediaType.key}` : "browse.mediatypelabel";
+	const labelKey = mediaType !== MediaTypeAll ? `browse.mediatypekey.${mediaType.key}` : "browse.mediatypelabel";
 	return (
 		<PressableFeedback
 			ref={ref}
@@ -80,11 +77,6 @@ const MediaTypeTrigger = forwardRef<View, PressableProps & { mediaType?: MediaTy
 		</PressableFeedback>
 	);
 });
-
-export interface MediaType {
-	key: string;
-	icon: ComponentType<SvgProps>;
-}
 
 export const BrowseSettings = ({
 	availableSorts,
@@ -102,8 +94,8 @@ export const BrowseSettings = ({
 	sortOrd: SortOrd;
 	setSort: (sort: string, ord: SortOrd) => void;
 	availableMediaTypes: MediaType[];
-	mediaType?: MediaType;
-	setMediaType: (mediaType?: MediaType) => void;
+	mediaType: MediaType;
+	setMediaType: (mediaType: MediaType) => void;
 	layout: Layout;
 	setLayout: (layout: Layout) => void;
 }) => {
@@ -164,13 +156,7 @@ export const BrowseSettings = ({
 								label={t(`browse.mediatypekey.${x.key}` as any)}
 								selected={mediaType === x}
 								icon={x.icon}
-								onSelect={() => {
-									if (mediaType === x || x === AllMediaTypes) {
-										setMediaType(undefined)
-									} else {
-										setMediaType(x)
-									}
-								}}
+								onSelect={() => setMediaType(x)}
 							/>
 						))}
 					</Menu>

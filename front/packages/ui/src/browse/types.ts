@@ -18,11 +18,12 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {MediaType} from "./header";
 import Collection from "@material-symbols/svg-400/rounded/collections_bookmark.svg";
 import TV from "@material-symbols/svg-400/rounded/tv.svg";
 import Movie from "@material-symbols/svg-400/rounded/movie.svg";
 import All from "@material-symbols/svg-400/rounded/view_headline.svg";
+import type {ComponentType} from "react";
+import type {SvgProps} from "react-native-svg";
 
 export enum SortBy {
 	Name = "name",
@@ -49,23 +50,35 @@ export enum Layout {
 	List,
 }
 
-export const AllMediaTypes: MediaType = {
-	key: "all",
+export enum MediaTypeKey{
+	All = "all",
+	Movie = "movie",
+	Show = "show",
+	Collection = "collection",
+}
+
+export interface MediaType {
+	key: MediaTypeKey;
+	icon: ComponentType<SvgProps>;
+}
+
+export const MediaTypeAll: MediaType = {
+	key: MediaTypeKey.All,
 	icon: All
 }
 
 export const MediaTypes: MediaType[] = [
-	AllMediaTypes,
+	MediaTypeAll,
 	{
-		key: "movie",
+		key: MediaTypeKey.Movie,
 		icon: Movie
 	},
 	{
-		key: "show",
+		key: MediaTypeKey.Show,
 		icon: TV,
 	},
 	{
-		key: "collection",
+		key: MediaTypeKey.Collection,
 		icon: Collection
 	}
 ];
