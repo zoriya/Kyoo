@@ -56,13 +56,14 @@ const MediaTypeTrigger = forwardRef<View, PressableProps & { mediaType: MediaTyp
 		const { t } = useTranslation();
 		const labelKey =
 			mediaType !== MediaTypeAll ? `browse.mediatypekey.${mediaType.key}` : "browse.mediatypelabel";
+		const icon = mediaType !== MediaTypeAll ? mediaType?.icon ?? FilterList : FilterList;
 		return (
 			<PressableFeedback
 				ref={ref}
 				{...css({ flexDirection: "row", alignItems: "center" }, props as any)}
 				{...tooltip(t("browse.mediatype-tt"))}
 			>
-				<Icon icon={mediaType?.icon ?? FilterList} {...css({ paddingX: ts(0.5) })} />
+				<Icon icon={icon} {...css({ paddingX: ts(0.5) })} />
 				<P>{t(labelKey as any)}</P>
 			</PressableFeedback>
 		);
