@@ -60,25 +60,28 @@ export const itemMap = (
 		item.kind === "show" ? item.watchStatus?.unseenEpisodesCount ?? item.episodesCount! : null,
 });
 
+export const createFilterString = (mediaType: MediaType): string | undefined => {
+	return mediaType !== MediaTypeAll ? `kind eq ${mediaType.key}` : undefined;
+}
+
 const query = (
 	mediaType: MediaType,
 	sortKey?: SortBy,
 	sortOrd?: SortOrd,
 ): QueryIdentifier<LibraryItem> => {
-	const filter = mediaType !== MediaTypeAll ? `kind eq ${mediaType.key}` : undefined;
 	return {
 		parser: LibraryItemP,
 		path: ["items"],
 		infinite: true,
 		params: {
 			sortBy: sortKey ? `${sortKey}:${sortOrd ?? "asc"}` : "name:asc",
-			filter,
+			filter: createFilterString(mediaType),
 			fields: ["watchStatus", "episodesCount"],
 		},
 	};
 };
 
-const getMediaTypeFromParam = (mediaTypeParam?: string): MediaType => {
+export const getMediaTypeFromParam = (mediaTypeParam?: string): MediaType => {
 	const mediaTypeKey = (mediaTypeParam as MediaTypeKey) || MediaTypeKey.All;
 	return MediaTypes.find((t) => t.key === mediaTypeKey) ?? MediaTypeAll;
 };
