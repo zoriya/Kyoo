@@ -31,7 +31,7 @@ internal static class FilterExtensionMethods
 
 	private static string CreateBasicFilterString(string property, string @operator, object? value)
 	{
-		return $"{CamelCase.ConvertName(property)} {@operator} {value.InMeilisearchFormat()}";
+		return $"{CamelCase.ConvertName(property)} {@operator} {value.InMeilsearchFilterFormat()}";
 	}
 
 	private static object? InMeilsearchFilterFormat(this object? value)
