@@ -1,4 +1,3 @@
-using System.Collections;
 using System.ComponentModel.DataAnnotations;
 using Kyoo.Abstractions.Models.Utils;
 using static System.Text.Json.JsonNamingPolicy;
@@ -46,22 +45,7 @@ internal static class FilterExtensionMethods
 		};
 	}
 
-	public static object? InMeilisearchFormat(this object? value)
-	{
-		return value switch
-		{
-			null => null,
-			string => value,
-			Enum => value.ToString(),
-			IEnumerable enumerable
-				=> enumerable.Cast<object>().Select(InMeilisearchFormat).ToArray(),
-			DateTimeOffset dateTime => dateTime.ToUnixTimeSeconds(),
-			DateOnly date => date.ToUnixTimeSeconds(),
-			_ => value
-		};
-	}
-
-	private static long ToUnixTimeSeconds(this DateOnly date)
+	public static long ToUnixTimeSeconds(this DateOnly date)
 	{
 		return new DateTimeOffset(date.ToDateTime(new TimeOnly())).ToUnixTimeSeconds();
 	}
