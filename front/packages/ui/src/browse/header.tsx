@@ -95,65 +95,63 @@ export const BrowseSettings = ({
 	const { t } = useTranslation();
 
 	return (
-		<>
-			<View
-				{...css({
-					flexDirection: "row-reverse",
-					alignItems: "center",
-					marginX: ts(4),
-					marginY: ts(1),
-				})}
-			>
-				<View {...css({ flexDirection: "row" })}>
-					<Menu Trigger={SortTrigger} sortKey={sortKey}>
-						{availableSorts.map((x) => (
-							<Menu.Item
-								key={x}
-								label={t(`browse.sortkey.${x}` as any)}
-								selected={sortKey === x}
-								icon={
-									x !== SearchSort.Relevance
-										? sortOrd === SortOrd.Asc
-											? ArrowUpward
-											: ArrowDownward
-										: undefined
-								}
-								onSelect={() =>
-									setSort(x, sortKey === x && sortOrd === SortOrd.Asc ? SortOrd.Desc : SortOrd.Asc)
-								}
-							/>
-						))}
-					</Menu>
-					<HR orientation="vertical" />
-					<IconButton
-						icon={GridView}
-						onPress={() => setLayout(Layout.Grid)}
-						color={layout === Layout.Grid ? theme.accent : undefined}
-						{...tooltip(t("browse.switchToGrid"))}
-						{...css({ padding: ts(0.5), marginY: "auto" })}
-					/>
-					<IconButton
-						icon={ViewList}
-						onPress={() => setLayout(Layout.List)}
-						color={layout === Layout.List ? theme.accent : undefined}
-						{...tooltip(t("browse.switchToList"))}
-						{...css({ padding: ts(0.5), marginY: "auto" })}
-					/>
-				</View>
-				<View {...css({ flexGrow: 1, flexDirection: "row", alignItems: "center" })}>
-					<Menu Trigger={MediaTypeTrigger} mediaType={mediaType}>
-						{availableMediaTypes.map((x) => (
-							<Menu.Item
-								key={x.key}
-								label={t(`browse.mediatypekey.${x.key}` as any)}
-								selected={mediaType === x}
-								icon={x.icon}
-								onSelect={() => setMediaType(x)}
-							/>
-						))}
-					</Menu>
-				</View>
+		<View
+			{...css({
+				flexDirection: "row-reverse",
+				alignItems: "center",
+				marginX: ts(4),
+				marginY: ts(1),
+			})}
+		>
+			<View {...css({ flexDirection: "row" })}>
+				<Menu Trigger={SortTrigger} sortKey={sortKey}>
+					{availableSorts.map((x) => (
+						<Menu.Item
+							key={x}
+							label={t(`browse.sortkey.${x}` as any)}
+							selected={sortKey === x}
+							icon={
+								x !== SearchSort.Relevance
+									? sortOrd === SortOrd.Asc
+										? ArrowUpward
+										: ArrowDownward
+									: undefined
+							}
+							onSelect={() =>
+								setSort(x, sortKey === x && sortOrd === SortOrd.Asc ? SortOrd.Desc : SortOrd.Asc)
+							}
+						/>
+					))}
+				</Menu>
+				<HR orientation="vertical" />
+				<IconButton
+					icon={GridView}
+					onPress={() => setLayout(Layout.Grid)}
+					color={layout === Layout.Grid ? theme.accent : undefined}
+					{...tooltip(t("browse.switchToGrid"))}
+					{...css({ padding: ts(0.5), marginY: "auto" })}
+				/>
+				<IconButton
+					icon={ViewList}
+					onPress={() => setLayout(Layout.List)}
+					color={layout === Layout.List ? theme.accent : undefined}
+					{...tooltip(t("browse.switchToList"))}
+					{...css({ padding: ts(0.5), marginY: "auto" })}
+				/>
 			</View>
-		</>
+			<View {...css({ flexGrow: 1, flexDirection: "row", alignItems: "center" })}>
+				<Menu Trigger={MediaTypeTrigger} mediaType={mediaType}>
+					{availableMediaTypes.map((x) => (
+						<Menu.Item
+							key={x.key}
+							label={t(`browse.mediatypekey.${x.key}` as any)}
+							selected={mediaType === x}
+							icon={x.icon}
+							onSelect={() => setMediaType(x)}
+						/>
+					))}
+				</Menu>
+			</View>
+		</View>
 	);
 };
