@@ -19,8 +19,8 @@
  */
 
 import Collection from "@material-symbols/svg-400/rounded/collections_bookmark.svg";
-import TV from "@material-symbols/svg-400/rounded/tv.svg";
 import Movie from "@material-symbols/svg-400/rounded/movie.svg";
+import TV from "@material-symbols/svg-400/rounded/tv.svg";
 import All from "@material-symbols/svg-400/rounded/view_headline.svg";
 import type { ComponentType } from "react";
 import type { SvgProps } from "react-native-svg";

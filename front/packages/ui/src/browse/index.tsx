@@ -33,13 +33,13 @@ import { ItemGrid } from "./grid";
 import { BrowseSettings } from "./header";
 import { ItemList } from "./list";
 import {
-	MediaTypeAll,
 	Layout,
+	type MediaType,
+	MediaTypeAll,
+	MediaTypeKey,
 	MediaTypes,
 	SortBy,
 	SortOrd,
-	MediaTypeKey,
-	type MediaType,
 } from "./types";
 
 const { useParam } = createParam<{ sortBy?: string; mediaType?: string }>();

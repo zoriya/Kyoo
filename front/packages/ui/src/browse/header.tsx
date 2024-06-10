@@ -21,9 +21,9 @@
 import { HR, Icon, IconButton, Menu, P, PressableFeedback, tooltip, ts } from "@kyoo/primitives";
 import ArrowDownward from "@material-symbols/svg-400/rounded/arrow_downward.svg";
 import ArrowUpward from "@material-symbols/svg-400/rounded/arrow_upward.svg";
+import FilterList from "@material-symbols/svg-400/rounded/filter_list.svg";
 import GridView from "@material-symbols/svg-400/rounded/grid_view.svg";
 import Sort from "@material-symbols/svg-400/rounded/sort.svg";
-import FilterList from "@material-symbols/svg-400/rounded/filter_list.svg";
 import ViewList from "@material-symbols/svg-400/rounded/view_list.svg";
 import { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
