@@ -65,11 +65,12 @@ public class SearchApi : BaseApi
 	public async Task<SearchPage<Collection>> SearchCollections(
 		[FromQuery] string? q,
 		[FromQuery] Sort<Collection> sortBy,
+		[FromQuery] Filter<ILibraryItem>? filter,
 		[FromQuery] SearchPagination pagination,
 		[FromQuery] Include<Collection> fields
 	)
 	{
-		return SearchPage(await _searchManager.SearchCollections(q, sortBy, pagination, fields));
+		return SearchPage(await _searchManager.SearchCollections(q, sortBy, filter, pagination, fields));
 	}
 
 	/// <summary>
@@ -91,11 +92,12 @@ public class SearchApi : BaseApi
 	public async Task<SearchPage<Show>> SearchShows(
 		[FromQuery] string? q,
 		[FromQuery] Sort<Show> sortBy,
+		[FromQuery] Filter<ILibraryItem>? filter,
 		[FromQuery] SearchPagination pagination,
 		[FromQuery] Include<Show> fields
 	)
 	{
-		return SearchPage(await _searchManager.SearchShows(q, sortBy, pagination, fields));
+		return SearchPage(await _searchManager.SearchShows(q, sortBy, filter, pagination, fields));
 	}
 
 	/// <summary>
@@ -117,11 +119,12 @@ public class SearchApi : BaseApi
 	public async Task<SearchPage<Movie>> SearchMovies(
 		[FromQuery] string? q,
 		[FromQuery] Sort<Movie> sortBy,
+		[FromQuery] Filter<ILibraryItem>? filter,
 		[FromQuery] SearchPagination pagination,
 		[FromQuery] Include<Movie> fields
 	)
 	{
-		return SearchPage(await _searchManager.SearchMovies(q, sortBy, pagination, fields));
+		return SearchPage(await _searchManager.SearchMovies(q, sortBy, filter, pagination, fields));
 	}
 
 	/// <summary>
