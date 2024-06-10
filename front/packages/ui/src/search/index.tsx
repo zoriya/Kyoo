@@ -60,7 +60,6 @@ export const SearchPage: QueryPage<{ q?: string }> = ({ q }) => {
 	const [layout, setLayout] = useState(Layout.Grid);
 
 	const mediaType = getMediaTypeFromParam(mediaTypeParam);
-	console.log("search: mediaType", mediaType);
 	const LayoutComponent = layout === Layout.Grid ? ItemGrid : ItemList;
 
 	return (
