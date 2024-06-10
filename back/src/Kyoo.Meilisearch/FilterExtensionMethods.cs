@@ -15,18 +15,23 @@ internal static class FilterExtensionMethods
 				=> $"({and.First.CreateMeilisearchFilter()}) AND ({and.Second.CreateMeilisearchFilter()})",
 			Filter<T>.Or or
 				=> $"({or.First.CreateMeilisearchFilter()}) OR ({or.Second.CreateMeilisearchFilter()})",
-			Filter<T>.Gt gt => $"{CamelCase.ConvertName(gt.Property)} > {gt.Value.InMeilsearchFilterFormat()}",
-			Filter<T>.Lt lt => $"{CamelCase.ConvertName(lt.Property)} < {lt.Value.InMeilsearchFilterFormat()}",
-			Filter<T>.Ge ge => $"{CamelCase.ConvertName(ge.Property)} >= {ge.Value.InMeilsearchFilterFormat()}",
-			Filter<T>.Le le => $"{CamelCase.ConvertName(le.Property)} <= {le.Value.InMeilsearchFilterFormat()}",
-			Filter<T>.Eq eq => $"{CamelCase.ConvertName(eq.Property)} = {eq.Value.InMeilsearchFilterFormat()}",
-			Filter<T>.Has has => $"{CamelCase.ConvertName(has.Property)} = {has.Value.InMeilsearchFilterFormat()}",
-			Filter<T>.Ne ne => $"{CamelCase.ConvertName(ne.Property)} != {ne.Value.InMeilsearchFilterFormat()}",
+			Filter<T>.Gt gt => CreateBasicFilterString(gt.Property, ">", gt.Value),
+			Filter<T>.Lt lt => CreateBasicFilterString(lt.Property, "<", lt.Value),
+			Filter<T>.Ge ge => CreateBasicFilterString(ge.Property, ">=", ge.Value),
+			Filter<T>.Le le => CreateBasicFilterString(le.Property, "<=", le.Value),
+			Filter<T>.Eq eq => CreateBasicFilterString(eq.Property, "=", eq.Value),
+			Filter<T>.Has has => CreateBasicFilterString(has.Property, "=", has.Value),
+			Filter<T>.Ne ne => CreateBasicFilterString(ne.Property, "!=", ne.Value),
 			Filter<T>.Not not => $"NOT ({not.Filter.CreateMeilisearchFilter()})",
 			Filter<T>.CmpRandom
 				=> throw new ValidationException("Random comparison is not supported."),
 			_ => null
 		};
+	}
+
+	private static string CreateBasicFilterString(string property, string @operator, object? value)
+	{
+		return $"{CamelCase.ConvertName(property)} {@operator} {value.InMeilisearchFormat()}";
 	}
 
 	private static object? InMeilsearchFilterFormat(this object? value)
