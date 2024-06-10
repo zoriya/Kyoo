@@ -60,7 +60,10 @@ public class MeiliSync
 			var dictionary = (IDictionary<string, object?>)expando;
 
 			foreach (PropertyInfo property in item.GetType().GetProperties())
-				dictionary.Add(CamelCase.ConvertName(property.Name), property.GetValue(item).InMeilisearchFormat());
+				dictionary.Add(
+					CamelCase.ConvertName(property.Name),
+					property.GetValue(item).InMeilisearchFormat()
+				);
 			dictionary.Add("ref", $"{kind}-{item.Id}");
 			expando.kind = kind;
 			return _client.Index(index).AddDocumentsAsync(new[] { expando });

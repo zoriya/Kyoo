@@ -70,7 +70,9 @@ public class SearchApi : BaseApi
 		[FromQuery] Include<Collection> fields
 	)
 	{
-		return SearchPage(await _searchManager.SearchCollections(q, sortBy, filter, pagination, fields));
+		return SearchPage(
+			await _searchManager.SearchCollections(q, sortBy, filter, pagination, fields)
+		);
 	}
 
 	/// <summary>

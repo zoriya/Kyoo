@@ -53,7 +53,8 @@ internal static class FilterExtensionMethods
 			null => null,
 			string => value,
 			Enum => value.ToString(),
-			IEnumerable enumerable => enumerable.Cast<object>().Select(InMeilisearchFormat).ToArray(),
+			IEnumerable enumerable
+				=> enumerable.Cast<object>().Select(InMeilisearchFormat).ToArray(),
 			DateTimeOffset dateTime => dateTime.ToUnixTimeSeconds(),
 			DateOnly date => date.ToUnixTimeSeconds(),
 			_ => value

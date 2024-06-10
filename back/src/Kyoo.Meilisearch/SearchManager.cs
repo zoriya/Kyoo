@@ -123,7 +123,14 @@ public class SearchManager : ISearchManager
 		Include<Movie>? include = default
 	)
 	{
-		return _Search("items", query, _CreateMediaTypeFilter<Movie>(filter), sortBy, pagination, include);
+		return _Search(
+			"items",
+			query,
+			_CreateMediaTypeFilter<Movie>(filter),
+			sortBy,
+			pagination,
+			include
+		);
 	}
 
 	/// <inheritdoc/>
@@ -135,7 +142,14 @@ public class SearchManager : ISearchManager
 		Include<Show>? include = default
 	)
 	{
-		return _Search("items", query, _CreateMediaTypeFilter<Show>(filter), sortBy, pagination, include);
+		return _Search(
+			"items",
+			query,
+			_CreateMediaTypeFilter<Show>(filter),
+			sortBy,
+			pagination,
+			include
+		);
 	}
 
 	/// <inheritdoc/>
@@ -147,7 +161,14 @@ public class SearchManager : ISearchManager
 		Include<Collection>? include = default
 	)
 	{
-		return _Search("items", query, _CreateMediaTypeFilter<Collection>(filter), sortBy, pagination, include);
+		return _Search(
+			"items",
+			query,
+			_CreateMediaTypeFilter<Collection>(filter),
+			sortBy,
+			pagination,
+			include
+		);
 	}
 
 	/// <inheritdoc/>
@@ -188,7 +209,8 @@ public class SearchManager : ISearchManager
 		);
 	}
 
-	private string _CreateMediaTypeFilter<T>(Filter<ILibraryItem>? filter) where T : ILibraryItem
+	private string _CreateMediaTypeFilter<T>(Filter<ILibraryItem>? filter)
+		where T : ILibraryItem
 	{
 		string filterString = $"kind = {typeof(T).Name}";
 		if (filter is not null)
