@@ -38,7 +38,7 @@ internal static class FilterExtensionMethods
 		return value switch
 		{
 			null => null,
-			string s => s.Any(char.IsWhiteSpace) ? $"\\\"{s}\\\"" : s,
+			string s => s.Any(char.IsWhiteSpace) ? $"\"{s.Replace("\"", "\\\"")}\"" : s,
 			DateTimeOffset dateTime => dateTime.ToUnixTimeSeconds(),
 			DateOnly date => date.ToUnixTimeSeconds(),
 			_ => value
