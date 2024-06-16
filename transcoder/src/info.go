@@ -248,7 +248,7 @@ func saveInfo[T any](save_path string, mi *T) error {
 func getInfo(path string) (*MediaInfo, error) {
 	defer printExecTime("mediainfo for %s", path)()
 
-	ctx, cancelFn := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancelFn := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancelFn()
 
 	mi, err := ffprobe.ProbeURL(ctx, path)

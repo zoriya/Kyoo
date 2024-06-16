@@ -35,7 +35,7 @@ func GetMimeCodec(stream *ffprobe.Stream) *string {
 		ret += fmt.Sprintf("%02x", stream.Level)
 		return &ret
 
-	case "h265":
+	case "h265", "hevc":
 		// The h265 syntax is a bit of a mystery at the time this comment was written.
 		// This is what I've found through various sources:
 		// FORMAT: [codecTag].[profile].[constraint?].L[level * 30].[UNKNOWN]
@@ -95,15 +95,15 @@ func GetMimeCodec(stream *ffprobe.Stream) *string {
 		ret := "Opus"
 		return &ret
 
-	case "ac-3":
+	case "ac3":
 		ret := "mp4a.a5"
 		return &ret
 
-	case "eac3", "E-AC-3":
+	case "eac3":
 		ret := "mp4a.a6"
 		return &ret
 
-	case "x-flac", "FLAC":
+	case "flac":
 		ret := "fLaC"
 		return &ret
 
