@@ -14,8 +14,6 @@ import (
 	"github.com/zoriya/kyoo/transcoder/src"
 )
 
-var safe_path = src.GetEnvOr("GOCODER_SAFE_PATH", "/video")
-
 // Encode the version in the hash path to update cached values.
 // Older versions won't be deleted (needed to allow multiples versions of the transcoder to run at the same time)
 // If the version changes a lot, we might want to automatically delete older versions.
@@ -34,7 +32,7 @@ func GetPath(c echo.Context) (string, string, error) {
 	if !filepath.IsAbs(path) {
 		return "", "", echo.NewHTTPError(http.StatusBadRequest, "Absolute path required.")
 	}
-	if !strings.HasPrefix(path, safe_path) {
+	if !strings.HasPrefix(path, src.Settings.SafePath) {
 		return "", "", echo.NewHTTPError(http.StatusBadRequest, "Selected path is not marked as safe.")
 	}
 	hash, err := getHash(path)

@@ -32,7 +32,6 @@ in
       go
       wgo
       mediainfo
-      libmediainfo
       ffmpeg-full
       postgresql_15
       pgformatter
