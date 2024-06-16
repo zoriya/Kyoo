@@ -49,6 +49,8 @@ public static class MeilisearchModule
 						CamelCase.ConvertName(nameof(Movie.Genres)),
 						CamelCase.ConvertName(nameof(Movie.Status)),
 						CamelCase.ConvertName(nameof(Movie.AirDate)),
+						CamelCase.ConvertName(nameof(Show.StartAir)),
+						CamelCase.ConvertName(nameof(Show.EndAir)),
 						CamelCase.ConvertName(nameof(Movie.StudioId)),
 						"kind"
 					},
@@ -117,11 +119,6 @@ public static class MeilisearchModule
 			},
 		};
 
-	/// <summary>
-	/// Init meilisearch indexes.
-	/// </summary>
-	/// <param name="provider">The service list to retrieve the meilisearch client</param>
-	/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 	public static async Task Initialize(IServiceProvider provider)
 	{
 		MeilisearchClient client = provider.GetRequiredService<MeilisearchClient>();
@@ -129,6 +126,13 @@ public static class MeilisearchModule
 		await _CreateIndex(client, "items", true);
 		await _CreateIndex(client, nameof(Episode), false);
 		await _CreateIndex(client, nameof(Studio), false);
+	}
+
+	public static async Task SyncDatabase(IServiceProvider provider)
+	{
+		await using AsyncServiceScope scope = provider.CreateAsyncScope();
+		ILibraryManager database = scope.ServiceProvider.GetRequiredService<ILibraryManager>();
+		await scope.ServiceProvider.GetRequiredService<MeiliSync>().SyncEverything(database);
 	}
 
 	private static async Task _CreateIndex(MeilisearchClient client, string index, bool hasKind)

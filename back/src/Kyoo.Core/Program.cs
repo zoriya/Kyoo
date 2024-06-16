@@ -17,6 +17,7 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using Kyoo.Abstractions.Controllers;
 using Kyoo.Authentication;
 using Kyoo.Core;
 using Kyoo.Core.Controllers;
@@ -27,6 +28,7 @@ using Kyoo.RabbitMq;
 using Kyoo.Swagger;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Events;
@@ -94,12 +96,17 @@ app.MapControllers();
 app.Services.GetRequiredService<MeiliSync>();
 app.Services.GetRequiredService<RabbitProducer>();
 
-await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
+// Only run sync on the main instance
+if (app.Configuration.GetValue("RUN_MIGRATIONS", true))
 {
-	await MeilisearchModule.Initialize(scope.ServiceProvider);
-}
+	await using (AsyncServiceScope scope = app.Services.CreateAsyncScope())
+	{
+		await MeilisearchModule.Initialize(app.Services);
+	}
 
-// The methods takes care of creating a scope and will download images on the background.
-_ = MiscRepository.DownloadMissingImages(app.Services);
+	// The methods takes care of creating a scope and will download images on the background.
+	_ = MeilisearchModule.SyncDatabase(app.Services);
+	_ = MiscRepository.DownloadMissingImages(app.Services);
+}
 
 await app.RunAsync(Environment.GetEnvironmentVariable("KYOO_BIND_URL") ?? "http://*:5000");

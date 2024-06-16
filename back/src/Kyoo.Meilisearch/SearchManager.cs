@@ -99,66 +99,125 @@ public class SearchManager : ISearchManager
 	public Task<SearchPage<ILibraryItem>.SearchResult> SearchItems(
 		string? query,
 		Sort<ILibraryItem> sortBy,
+		Filter<ILibraryItem>? filter,
 		SearchPagination pagination,
 		Include<ILibraryItem>? include = default
 	)
 	{
-		return _Search("items", query, null, sortBy, pagination, include);
+		return _Search(
+			"items",
+			query,
+			filter.CreateMeilisearchFilter(),
+			sortBy,
+			pagination,
+			include
+		);
 	}
 
 	/// <inheritdoc/>
 	public Task<SearchPage<Movie>.SearchResult> SearchMovies(
 		string? query,
 		Sort<Movie> sortBy,
+		Filter<ILibraryItem>? filter,
 		SearchPagination pagination,
 		Include<Movie>? include = default
 	)
 	{
-		return _Search("items", query, $"kind = {nameof(Movie)}", sortBy, pagination, include);
+		return _Search(
+			"items",
+			query,
+			_CreateMediaTypeFilter<Movie>(filter),
+			sortBy,
+			pagination,
+			include
+		);
 	}
 
 	/// <inheritdoc/>
 	public Task<SearchPage<Show>.SearchResult> SearchShows(
 		string? query,
 		Sort<Show> sortBy,
+		Filter<ILibraryItem>? filter,
 		SearchPagination pagination,
 		Include<Show>? include = default
 	)
 	{
-		return _Search("items", query, $"kind = {nameof(Show)}", sortBy, pagination, include);
+		return _Search(
+			"items",
+			query,
+			_CreateMediaTypeFilter<Show>(filter),
+			sortBy,
+			pagination,
+			include
+		);
 	}
 
 	/// <inheritdoc/>
 	public Task<SearchPage<Collection>.SearchResult> SearchCollections(
 		string? query,
 		Sort<Collection> sortBy,
+		Filter<ILibraryItem>? filter,
 		SearchPagination pagination,
 		Include<Collection>? include = default
 	)
 	{
-		return _Search("items", query, $"kind = {nameof(Collection)}", sortBy, pagination, include);
+		return _Search(
+			"items",
+			query,
+			_CreateMediaTypeFilter<Collection>(filter),
+			sortBy,
+			pagination,
+			include
+		);
 	}
 
 	/// <inheritdoc/>
 	public Task<SearchPage<Episode>.SearchResult> SearchEpisodes(
 		string? query,
 		Sort<Episode> sortBy,
+		Filter<Episode>? filter,
 		SearchPagination pagination,
 		Include<Episode>? include = default
 	)
 	{
-		return _Search(nameof(Episode), query, null, sortBy, pagination, include);
+		return _Search(
+			nameof(Episode),
+			query,
+			filter.CreateMeilisearchFilter(),
+			sortBy,
+			pagination,
+			include
+		);
 	}
 
 	/// <inheritdoc/>
 	public Task<SearchPage<Studio>.SearchResult> SearchStudios(
 		string? query,
 		Sort<Studio> sortBy,
+		Filter<Studio>? filter,
 		SearchPagination pagination,
 		Include<Studio>? include = default
 	)
 	{
-		return _Search(nameof(Studio), query, null, sortBy, pagination, include);
+		return _Search(
+			nameof(Studio),
+			query,
+			filter.CreateMeilisearchFilter(),
+			sortBy,
+			pagination,
+			include
+		);
+	}
+
+	private string _CreateMediaTypeFilter<T>(Filter<ILibraryItem>? filter)
+		where T : ILibraryItem
+	{
+		string filterString = $"kind = {typeof(T).Name}";
+		if (filter is not null)
+		{
+			filterString += $" AND ({filter.CreateMeilisearchFilter()})";
+		}
+		return filterString;
 	}
 
 	private class IdResource

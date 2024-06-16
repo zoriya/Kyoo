@@ -38,6 +38,7 @@ public interface ISearchManager
 	public Task<SearchPage<ILibraryItem>.SearchResult> SearchItems(
 		string? query,
 		Sort<ILibraryItem> sortBy,
+		Filter<ILibraryItem>? filter,
 		SearchPagination pagination,
 		Include<ILibraryItem>? include = default
 	);
@@ -53,6 +54,7 @@ public interface ISearchManager
 	public Task<SearchPage<Movie>.SearchResult> SearchMovies(
 		string? query,
 		Sort<Movie> sortBy,
+		Filter<ILibraryItem>? filter,
 		SearchPagination pagination,
 		Include<Movie>? include = default
 	);
@@ -68,6 +70,7 @@ public interface ISearchManager
 	public Task<SearchPage<Show>.SearchResult> SearchShows(
 		string? query,
 		Sort<Show> sortBy,
+		Filter<ILibraryItem>? filter,
 		SearchPagination pagination,
 		Include<Show>? include = default
 	);
@@ -83,6 +86,7 @@ public interface ISearchManager
 	public Task<SearchPage<Collection>.SearchResult> SearchCollections(
 		string? query,
 		Sort<Collection> sortBy,
+		Filter<ILibraryItem>? filter,
 		SearchPagination pagination,
 		Include<Collection>? include = default
 	);
@@ -98,6 +102,7 @@ public interface ISearchManager
 	public Task<SearchPage<Episode>.SearchResult> SearchEpisodes(
 		string? query,
 		Sort<Episode> sortBy,
+		Filter<Episode>? filter,
 		SearchPagination pagination,
 		Include<Episode>? include = default
 	);
@@ -113,6 +118,7 @@ public interface ISearchManager
 	public Task<SearchPage<Studio>.SearchResult> SearchStudios(
 		string? query,
 		Sort<Studio> sortBy,
+		Filter<Studio>? filter,
 		SearchPagination pagination,
 		Include<Studio>? include = default
 	);

@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections;
 using System.Dynamic;
 using System.Reflection;
 using Kyoo.Abstractions.Controllers;
@@ -60,7 +61,10 @@ public class MeiliSync
 			var dictionary = (IDictionary<string, object?>)expando;
 
 			foreach (PropertyInfo property in item.GetType().GetProperties())
-				dictionary.Add(CamelCase.ConvertName(property.Name), property.GetValue(item));
+				dictionary.Add(
+					CamelCase.ConvertName(property.Name),
+					ConvertToMeilisearchFormat(property.GetValue(item))
+				);
 			dictionary.Add("ref", $"{kind}-{item.Id}");
 			expando.kind = kind;
 			return _client.Index(index).AddDocumentsAsync(new[] { expando });
@@ -75,5 +79,34 @@ public class MeiliSync
 			return _client.Index(index).DeleteOneDocumentAsync($"{kind}/{id}");
 		}
 		return _client.Index(index).DeleteOneDocumentAsync(id.ToString());
+	}
+
+	private object? ConvertToMeilisearchFormat(object? value)
+	{
+		return value switch
+		{
+			null => null,
+			string => value,
+			Enum => value.ToString(),
+			IEnumerable enumerable
+				=> enumerable.Cast<object>().Select(ConvertToMeilisearchFormat).ToArray(),
+			DateTimeOffset dateTime => dateTime.ToUnixTimeSeconds(),
+			DateOnly date => date.ToUnixTimeSeconds(),
+			_ => value
+		};
+	}
+
+	public async Task SyncEverything(ILibraryManager database)
+	{
+		foreach (Movie movie in await database.Movies.GetAll(limit: 0))
+			await CreateOrUpdate("items", movie, nameof(Movie));
+		foreach (Show show in await database.Shows.GetAll(limit: 0))
+			await CreateOrUpdate("items", show, nameof(Show));
+		foreach (Collection collection in await database.Collections.GetAll(limit: 0))
+			await CreateOrUpdate("items", collection, nameof(Collection));
+		foreach (Episode episode in await database.Episodes.GetAll(limit: 0))
+			await CreateOrUpdate(nameof(Episode), episode);
+		foreach (Studio studio in await database.Studios.GetAll(limit: 0))
+			await CreateOrUpdate(nameof(Studio), studio);
 	}
 }
