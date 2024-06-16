@@ -20,6 +20,7 @@
 	<ItemGroup>
 		<ProjectReference Include="../Kyoo.Abstractions/Kyoo.Abstractions.csproj" />
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+		<ProjectReference Include="..\Kyoo.Meilisearch\Kyoo.Meilisearch.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

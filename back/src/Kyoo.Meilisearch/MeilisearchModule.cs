@@ -153,4 +153,12 @@ public static class MeilisearchModule
 		builder.Services.AddScoped<ISearchManager, SearchManager>();
 		builder.Services.AddSingleton<MeiliSync>();
 	}
+
+	public static MeilisearchClient CreateMeilisearchClient()
+	{
+		return new MeilisearchClient(
+			Environment.GetEnvironmentVariable("MEILI_HOST") ?? "http://meilisearch:7700",
+			Environment.GetEnvironmentVariable("MEILI_MASTER_KEY")
+		);
+	}
 }
