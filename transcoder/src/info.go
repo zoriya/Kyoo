@@ -1,6 +1,7 @@
 package src
 
 import (
+	"cmp"
 	"context"
 	"encoding/base64"
 	"encoding/json"
@@ -199,11 +200,11 @@ func GetInfo(path string, sha string) (*MediaInfo, error) {
 		mi.ready.Add(1)
 		go func() {
 			save_path := fmt.Sprintf("%s/%s/info.json", Settings.Metadata, sha)
-			// if err := getSavedInfo(save_path, mi.info); err == nil {
+			if err := getSavedInfo(save_path, mi.info); err == nil {
 				log.Printf("Using mediainfo cache on filesystem for %s", path)
-			// 	mi.ready.Done()
-			// 	return
-			// }
+				mi.ready.Done()
+				return
+			}
 
 			var val *MediaInfo
 			val, err = getInfo(path)
@@ -271,7 +272,9 @@ func getInfo(path string) (*MediaInfo, error) {
 				Quality:   QualityFromHeight(uint32(stream.Height)),
 				Width:     uint32(stream.Width),
 				Height:    uint32(stream.Height),
-				Bitrate:   ParseUint(stream.BitRate),
+				// ffmpeg does not report bitrate in mkv files, fallback to bitrate of the whole container
+				// (bigger than the result since it contains audio and other videos but better than nothing).
+				Bitrate: ParseUint(cmp.Or(stream.BitRate, mi.Format.BitRate)),
 			}
 		}),
 		Audios: MapStream(mi.Streams, ffprobe.StreamAudio, func(stream *ffprobe.Stream, i uint32) Audio {
