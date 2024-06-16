@@ -18,28 +18,18 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-	Chip,
-	HR,
-	Icon,
-	IconButton,
-	Menu,
-	P,
-	PressableFeedback,
-	tooltip,
-	ts,
-} from "@kyoo/primitives";
+import { HR, Icon, IconButton, Menu, P, PressableFeedback, tooltip, ts } from "@kyoo/primitives";
 import ArrowDownward from "@material-symbols/svg-400/rounded/arrow_downward.svg";
 import ArrowUpward from "@material-symbols/svg-400/rounded/arrow_upward.svg";
+import FilterList from "@material-symbols/svg-400/rounded/filter_list.svg";
 import GridView from "@material-symbols/svg-400/rounded/grid_view.svg";
 import Sort from "@material-symbols/svg-400/rounded/sort.svg";
-import Style from "@material-symbols/svg-400/rounded/style.svg";
 import ViewList from "@material-symbols/svg-400/rounded/view_list.svg";
 import { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
 import { type PressableProps, View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
-import { Layout, SearchSort, SortOrd } from "./types";
+import { Layout, type MediaType, MediaTypeAll, SearchSort, SortOrd } from "./types";
 
 const SortTrigger = forwardRef<View, PressableProps & { sortKey: string }>(function SortTrigger(
 	{ sortKey, ...props },
@@ -60,11 +50,34 @@ const SortTrigger = forwardRef<View, PressableProps & { sortKey: string }>(funct
 	);
 });
 
+const MediaTypeTrigger = forwardRef<View, PressableProps & { mediaType: MediaType }>(
+	function MediaTypeTrigger({ mediaType, ...props }, ref) {
+		const { css } = useYoshiki();
+		const { t } = useTranslation();
+		const labelKey =
+			mediaType !== MediaTypeAll ? `browse.mediatypekey.${mediaType.key}` : "browse.mediatypelabel";
+		const icon = mediaType !== MediaTypeAll ? mediaType?.icon ?? FilterList : FilterList;
+		return (
+			<PressableFeedback
+				ref={ref}
+				{...css({ flexDirection: "row", alignItems: "center" }, props as any)}
+				{...tooltip(t("browse.mediatype-tt"))}
+			>
+				<Icon icon={icon} {...css({ paddingX: ts(0.5) })} />
+				<P>{t(labelKey as any)}</P>
+			</PressableFeedback>
+		);
+	},
+);
+
 export const BrowseSettings = ({
 	availableSorts,
 	sortKey,
 	sortOrd,
 	setSort,
+	availableMediaTypes,
+	mediaType,
+	setMediaType,
 	layout,
 	setLayout,
 }: {
@@ -72,13 +85,14 @@ export const BrowseSettings = ({
 	sortKey: string;
 	sortOrd: SortOrd;
 	setSort: (sort: string, ord: SortOrd) => void;
+	availableMediaTypes: MediaType[];
+	mediaType: MediaType;
+	setMediaType: (mediaType: MediaType) => void;
 	layout: Layout;
 	setLayout: (layout: Layout) => void;
 }) => {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
-	const filters: string[] = [];
-	// TODO: implement filters in the front.
 
 	return (
 		<View
@@ -89,14 +103,6 @@ export const BrowseSettings = ({
 				marginY: ts(1),
 			})}
 		>
-			{filters.length !== 0 && (
-				<View {...css({ flexGrow: 1, flexDirection: "row", alignItems: "center" })}>
-					<Icon icon={Style} {...css({ marginX: ts(1) })} />
-					{filters.map((x) => (
-						<Chip key={x} label={x} />
-					))}
-				</View>
-			)}
 			<View {...css({ flexDirection: "row" })}>
 				<Menu Trigger={SortTrigger} sortKey={sortKey}>
 					{availableSorts.map((x) => (
@@ -132,6 +138,19 @@ export const BrowseSettings = ({
 					{...tooltip(t("browse.switchToList"))}
 					{...css({ padding: ts(0.5), marginY: "auto" })}
 				/>
+			</View>
+			<View {...css({ flexGrow: 1, flexDirection: "row", alignItems: "center" })}>
+				<Menu Trigger={MediaTypeTrigger} mediaType={mediaType}>
+					{availableMediaTypes.map((x) => (
+						<Menu.Item
+							key={x.key}
+							label={t(`browse.mediatypekey.${x.key}` as any)}
+							selected={mediaType === x}
+							icon={x.icon}
+							onSelect={() => setMediaType(x)}
+						/>
+					))}
+				</Menu>
 			</View>
 		</View>
 	);

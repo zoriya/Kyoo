@@ -43,6 +43,14 @@
 		"season": "Season {{number}}"
 	},
 	"browse": {
+		"mediatypekey": {
+			"all": "All",
+			"movie": "Movies",
+			"show": "Series",
+			"collection": "Collection"
+		},
+		"mediatype-tt": "Media Type",
+		"mediatypelabel": "Media Type",
 		"sortby": "Sort by {{key}}",
 		"sortby-tt": "Sort by",
 		"sortkey": {

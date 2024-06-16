@@ -32,9 +32,17 @@ import { DefaultLayout } from "../layout";
 import { ItemGrid } from "./grid";
 import { BrowseSettings } from "./header";
 import { ItemList } from "./list";
-import { Layout, SortBy, SortOrd } from "./types";
+import {
+	Layout,
+	type MediaType,
+	MediaTypeAll,
+	MediaTypeKey,
+	MediaTypes,
+	SortBy,
+	SortOrd,
+} from "./types";
 
-const { useParam } = createParam<{ sortBy?: string }>();
+const { useParam } = createParam<{ sortBy?: string; mediaType?: string }>();
 
 export const itemMap = (
 	item: LibraryItem,
@@ -52,27 +60,45 @@ export const itemMap = (
 		item.kind === "show" ? item.watchStatus?.unseenEpisodesCount ?? item.episodesCount! : null,
 });
 
-const query = (sortKey?: SortBy, sortOrd?: SortOrd): QueryIdentifier<LibraryItem> => ({
-	parser: LibraryItemP,
-	path: ["items"],
-	infinite: true,
-	params: {
-		sortBy: sortKey ? `${sortKey}:${sortOrd ?? "asc"}` : "name:asc",
-		fields: ["watchStatus", "episodesCount"],
-	},
-});
+export const createFilterString = (mediaType: MediaType): string | undefined => {
+	return mediaType !== MediaTypeAll ? `kind eq ${mediaType.key}` : undefined;
+};
+
+const query = (
+	mediaType: MediaType,
+	sortKey?: SortBy,
+	sortOrd?: SortOrd,
+): QueryIdentifier<LibraryItem> => {
+	return {
+		parser: LibraryItemP,
+		path: ["items"],
+		infinite: true,
+		params: {
+			sortBy: sortKey ? `${sortKey}:${sortOrd ?? "asc"}` : "name:asc",
+			filter: createFilterString(mediaType),
+			fields: ["watchStatus", "episodesCount"],
+		},
+	};
+};
+
+export const getMediaTypeFromParam = (mediaTypeParam?: string): MediaType => {
+	const mediaTypeKey = (mediaTypeParam as MediaTypeKey) || MediaTypeKey.All;
+	return MediaTypes.find((t) => t.key === mediaTypeKey) ?? MediaTypeAll;
+};
 
 export const BrowsePage: QueryPage = () => {
 	const [sort, setSort] = useParam("sortBy");
+	const [mediaTypeParam, setMediaTypeParam] = useParam("mediaType");
 	const sortKey = (sort?.split(":")[0] as SortBy) || SortBy.Name;
 	const sortOrd = (sort?.split(":")[1] as SortOrd) || SortOrd.Asc;
 	const [layout, setLayout] = useState(Layout.Grid);
 
+	const mediaType = getMediaTypeFromParam(mediaTypeParam);
 	const LayoutComponent = layout === Layout.Grid ? ItemGrid : ItemList;
 
 	return (
 		<InfiniteFetch
-			query={query(sortKey, sortOrd)}
+			query={query(mediaType, sortKey, sortOrd)}
 			layout={LayoutComponent.layout}
 			Header={
 				<BrowseSettings
@@ -81,6 +107,11 @@ export const BrowsePage: QueryPage = () => {
 					sortOrd={sortOrd}
 					setSort={(key, ord) => {
 						setSort(`${key}:${ord}`);
+					}}
+					mediaType={mediaType}
+					availableMediaTypes={MediaTypes}
+					setMediaType={(mediaType) => {
+						setMediaTypeParam(mediaType.key);
 					}}
 					layout={layout}
 					setLayout={setLayout}
@@ -94,6 +125,7 @@ export const BrowsePage: QueryPage = () => {
 
 BrowsePage.getLayout = DefaultLayout;
 
-BrowsePage.getFetchUrls = ({ sortBy }) => [
-	query(sortBy?.split("-")[0] as SortBy, sortBy?.split("-")[1] as SortOrd),
-];
+BrowsePage.getFetchUrls = ({ mediaType, sortBy }) => {
+	const mediaTypeObj = getMediaTypeFromParam(mediaType);
+	return [query(mediaTypeObj, sortBy?.split("-")[0] as SortBy, sortBy?.split("-")[1] as SortOrd)];
+};
