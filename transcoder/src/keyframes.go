@@ -2,6 +2,7 @@ package src
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"log"
 	"os/exec"
@@ -26,6 +27,9 @@ type KeyframeInfo struct {
 func (kf *Keyframe) Get(idx int32) float64 {
 	kf.info.mutex.RLock()
 	defer kf.info.mutex.RUnlock()
+	if len(kf.Keyframes) == 0 {
+		return float64(idx * 2)
+	}
 	return kf.Keyframes[idx]
 }
 
@@ -135,6 +139,10 @@ func getKeyframes(path string, kf *Keyframe) error {
 		x := strings.Split(frame, ",")
 		pts, flags := x[0], x[1]
 
+		// true if there is no keyframes (e.g. in a file w/o video track)
+		if pts == "N/A" {
+			break
+		}
 		// Only take keyframes
 		if flags[0] != 'K' {
 			continue
@@ -164,10 +172,46 @@ func getKeyframes(path string, kf *Keyframe) error {
 			ret = ret[:0]
 		}
 	}
+	if len(ret) == 0 {
+		duration, err := getFileDuration(path)
+		if err != nil {
+			return err
+		}
+		ret = make([]float64, 0, int((duration/2)+1))
+		for segmentTime := float64(0); segmentTime < duration; segmentTime += 2 {
+			ret = append(ret, segmentTime)
+		}
+	}
 	kf.add(ret)
 	if done == 0 {
 		kf.info.ready.Done()
 	}
 	kf.IsDone = true
 	return nil
+}
+
+func getFileDuration(path string) (float64, error) {
+	cmd := exec.Command(
+		"ffprobe",
+		"-loglevel", "error",
+		"-show_entries", "format=duration",
+		"-of", "default=noprint_wrappers=1:nokey=1",
+		path,
+	)
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return -1, err
+	}
+	err = cmd.Start()
+	if err != nil {
+		return -1, err
+	}
+
+	scanner := bufio.NewScanner(stdout)
+	if !scanner.Scan() {
+		return -1, errors.New("Could not get file duration from ffprobe.")
+	}
+	frame := scanner.Text()
+	return strconv.ParseFloat(frame, 64)
+
 }
