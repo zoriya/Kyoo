@@ -15,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"golang.org/x/text/language"
 	"gopkg.in/vansante/go-ffprobe.v2"
 )
 
@@ -33,7 +34,7 @@ type MediaInfo struct {
 	Duration float32 `json:"duration"`
 	/// The container of the video file of this episode.
 	Container *string `json:"container"`
-	/// The video codec and infromations.
+	/// The video codec and informations.
 	Video *Video `json:"video"`
 	/// The list of videos if there are multiples.
 	Videos []Video `json:"videos"`
@@ -69,7 +70,7 @@ type Audio struct {
 	Index uint32 `json:"index"`
 	/// The title of the stream.
 	Title *string `json:"title"`
-	/// The language of this stream (as a ISO-639-2 language code)
+	/// The language of this stream (as a IETF-BCP-47 language code)
 	Language *string `json:"language"`
 	/// The human readable codec name.
 	Codec string `json:"codec"`
@@ -86,7 +87,7 @@ type Subtitle struct {
 	Index uint32 `json:"index"`
 	/// The title of the stream.
 	Title *string `json:"title"`
-	/// The language of this stream (as a ISO-639-2 language code)
+	/// The language of this stream (as a IETF-BCP-47 language code)
 	Language *string `json:"language"`
 	/// The codec of this stream.
 	Codec string `json:"codec"`
@@ -165,6 +166,13 @@ func MapStream[T any](streams []*ffprobe.Stream, kind ffprobe.StreamType, mapper
 
 func OrNull(str string) *string {
 	if str == "" {
+		return nil
+	}
+	return &str
+}
+
+func NullIfUnd(str string) *string {
+	if str == "und" {
 		return nil
 	}
 	return &str
@@ -255,10 +263,11 @@ func getInfo(path string) (*MediaInfo, error) {
 		Duration:  float32(mi.Format.DurationSeconds),
 		Container: OrNull(mi.Format.FormatName),
 		Videos: MapStream(mi.Streams, ffprobe.StreamVideo, func(stream *ffprobe.Stream, i uint32) Video {
+			lang, _ := language.Parse(stream.Tags.Language)
 			return Video{
 				Codec:     stream.CodecName,
 				MimeCodec: GetMimeCodec(stream),
-				Language:  OrNull(stream.Tags.Language),
+				Language:  NullIfUnd(lang.String()),
 				Quality:   QualityFromHeight(uint32(stream.Height)),
 				Width:     uint32(stream.Width),
 				Height:    uint32(stream.Height),
@@ -266,10 +275,11 @@ func getInfo(path string) (*MediaInfo, error) {
 			}
 		}),
 		Audios: MapStream(mi.Streams, ffprobe.StreamAudio, func(stream *ffprobe.Stream, i uint32) Audio {
+			lang, _ := language.Parse(stream.Tags.Language)
 			return Audio{
 				Index:     i,
 				Title:     OrNull(stream.Tags.Title),
-				Language:  OrNull(stream.Tags.Language),
+				Language:  NullIfUnd(lang.String()),
 				Codec:     stream.CodecName,
 				MimeCodec: GetMimeCodec(stream),
 				IsDefault: stream.Disposition.Default != 0,
@@ -283,10 +293,11 @@ func getInfo(path string) (*MediaInfo, error) {
 				x := fmt.Sprintf("%s/%s/subtitle/%d.%s", Settings.RoutePrefix, base64.StdEncoding.EncodeToString([]byte(path)), i, *extension)
 				link = &x
 			}
+			lang, _ := language.Parse(stream.Tags.Language)
 			return Subtitle{
 				Index:     uint32(i),
 				Title:     OrNull(stream.Tags.Title),
-				Language:  OrNull(stream.Tags.Language),
+				Language:  NullIfUnd(lang.String()),
 				Codec:     stream.CodecName,
 				Extension: extension,
 				IsDefault: stream.Disposition.Default != 0,
