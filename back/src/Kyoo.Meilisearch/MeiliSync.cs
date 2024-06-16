@@ -95,4 +95,18 @@ public class MeiliSync
 			_ => value
 		};
 	}
+
+	public async Task SyncEverything(ILibraryManager database)
+	{
+		foreach (Movie movie in await database.Movies.GetAll(limit: 0))
+			await CreateOrUpdate("items", movie, nameof(Movie));
+		foreach (Show show in await database.Shows.GetAll(limit: 0))
+			await CreateOrUpdate("items", show, nameof(Show));
+		foreach (Collection collection in await database.Collections.GetAll(limit: 0))
+			await CreateOrUpdate("items", collection, nameof(Collection));
+		foreach (Episode episode in await database.Episodes.GetAll(limit: 0))
+			await CreateOrUpdate(nameof(Episode), episode);
+		foreach (Studio studio in await database.Studios.GetAll(limit: 0))
+			await CreateOrUpdate(nameof(Studio), studio);
+	}
 }
