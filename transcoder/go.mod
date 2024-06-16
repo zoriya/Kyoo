@@ -12,7 +12,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	github.com/zoriya/go-mediainfo v0.0.0-20240113011752-07018f07efae
+	github.com/zoriya/go-mediainfo v0.0.0-20240608233011-f0c86de5931d
 	gitlab.com/opennota/screengen v1.0.2
 	golang.org/x/crypto v0.22.0 // indirect
 	golang.org/x/net v0.24.0 // indirect
