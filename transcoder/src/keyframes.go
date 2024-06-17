@@ -2,7 +2,6 @@ package src
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"log"
 	"os/exec"
@@ -27,9 +26,6 @@ type KeyframeInfo struct {
 func (kf *Keyframe) Get(idx int32) float64 {
 	kf.info.mutex.RLock()
 	defer kf.info.mutex.RUnlock()
-	if len(kf.Keyframes) == 0 {
-		return float64(idx * 2)
-	}
 	return kf.Keyframes[idx]
 }
 
@@ -84,7 +80,7 @@ func GetKeyframes(sha string, path string) *Keyframe {
 				return
 			}
 
-			err := getKeyframes(path, kf)
+			err := getKeyframes(path, kf, sha)
 			if err == nil {
 				saveInfo(save_path, kf)
 			}
@@ -95,7 +91,7 @@ func GetKeyframes(sha string, path string) *Keyframe {
 	return ret
 }
 
-func getKeyframes(path string, kf *Keyframe) error {
+func getKeyframes(path string, kf *Keyframe, sha string) error {
 	defer printExecTime("ffprobe analysis for %s", path)()
 	// run ffprobe to return all IFrames, IFrames are points where we can split the video in segments.
 	// We ask ffprobe to return the time of each frame and it's flags
@@ -172,15 +168,13 @@ func getKeyframes(path string, kf *Keyframe) error {
 			ret = ret[:0]
 		}
 	}
-	if len(ret) == 0 {
-		duration, err := getFileDuration(path)
+	// If there is less than 2 (i.e. equals 0 or 1 (it happens for audio files with poster))
+	if len(ret) < 2 {
+		dummy, err := getDummyKeyframes(path, sha)
 		if err != nil {
 			return err
 		}
-		ret = make([]float64, 0, int((duration/2)+1))
-		for segmentTime := float64(0); segmentTime < duration; segmentTime += 2 {
-			ret = append(ret, segmentTime)
-		}
+		ret = dummy
 	}
 	kf.add(ret)
 	if done == 0 {
@@ -190,28 +184,16 @@ func getKeyframes(path string, kf *Keyframe) error {
 	return nil
 }
 
-func getFileDuration(path string) (float64, error) {
-	cmd := exec.Command(
-		"ffprobe",
-		"-loglevel", "error",
-		"-show_entries", "format=duration",
-		"-of", "default=noprint_wrappers=1:nokey=1",
-		path,
-	)
-	stdout, err := cmd.StdoutPipe()
+func getDummyKeyframes(path string, sha string) ([]float64, error) {
+	dummyKeyframeDuration := float64(2)
+	info, err := GetInfo(path, sha)
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
-	err = cmd.Start()
-	if err != nil {
-		return -1, err
+	segmentCount := int((float64(info.Duration) / dummyKeyframeDuration) + 1)
+	ret := make([]float64, segmentCount)
+	for segmentIndex := 0; segmentIndex < segmentCount; segmentIndex += 1 {
+		ret[segmentIndex] = float64(segmentIndex) * dummyKeyframeDuration
 	}
-
-	scanner := bufio.NewScanner(stdout)
-	if !scanner.Scan() {
-		return -1, errors.New("Could not get file duration from ffprobe.")
-	}
-	frame := scanner.Text()
-	return strconv.ParseFloat(frame, 64)
-
+	return ret, nil
 }
