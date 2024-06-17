@@ -72,7 +72,7 @@ func GetClientId(c echo.Context) (string, error) {
 
 func ParseSegment(segment string) (int32, error) {
 	var ret int32
-	_, err := fmt.Sscanf(segment, "segment-%d.ts", &ret)
+	_, err := fmt.Sscanf(segment, "segment-%d.m4s", &ret)
 	if err != nil {
 		return 0, echo.NewHTTPError(http.StatusBadRequest, "Could not parse segment.")
 	}

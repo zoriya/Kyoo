@@ -34,12 +34,12 @@ type Stream struct {
 	file     *FileStream
 	segments []Segment
 	heads    []Head
-	// the lock used for the the heads
+	// the lock used for the heads
 	lock sync.RWMutex
 }
 
 type Segment struct {
-	// channel open if the segment is not ready. closed if ready.
+	// channel open if the segment is not ready. Closed if ready.
 	// one can check if segment 1 is open by doing:
 	//
 	//  ts.isSegmentReady(1).
@@ -119,8 +119,8 @@ func toSegmentStr(segments []float64) string {
 func (ts *Stream) run(start int32) error {
 	// Start the transcode up to the 100th segment (or less)
 	length, is_done := ts.file.Keyframes.Length()
-	end := min(start+100, length)
-	// if keyframes analysys is not finished, always have a 1-segment padding
+	end := min(start+4, length)
+	// if keyframes analysis is not finished, always have a 1-segment padding
 	// for the extra segment needed for precise split (look comment before -to flag)
 	if !is_done {
 		end -= 2
@@ -156,19 +156,19 @@ func (ts *Stream) run(start int32) error {
 
 	// Include both the start and end delimiter because -ss and -to are not accurate
 	// Having an extra segment allows us to cut precisely the segments we want with the
-	// -f segment that does cut the begining and the end at the keyframe like asked
+	// -f segment that does cut the beginning and the end at the keyframe like asked
 	start_ref := float64(0)
 	start_segment := start
 	if start != 0 {
 		// we always take on segment before the current one, for different reasons for audio/video:
-		//  - Audio: we need context before the starting point, without that ffmpeg doesnt know what to do and leave ~100ms of silence
+		//  - Audio: we need context before the starting point, without that ffmpeg doesn't know what to do and leave ~100ms of silence
 		//  - Video: if a segment is really short (between 20 and 100ms), the padding given in the else block bellow is not enough and
-		// the previous segment is played another time. the -segment_times is way more precise so it does not do the same with this one
+		// the previous segment is played another time. The -segment_times is way more precise so it does not do the same with this one
 		start_segment = start - 1
 		if ts.handle.getFlags()&AudioF != 0 {
 			start_ref = ts.file.Keyframes.Get(start_segment)
 		} else {
-			// the param for the -ss takes the keyframe before the specificed time
+			// the param for the -ss takes the keyframe before the specified time
 			// (if the specified time is a keyframe, it either takes that keyframe or the one before)
 			// to prevent this weird behavior, we specify a bit after the keyframe that interest us
 
@@ -222,7 +222,7 @@ func (ts *Stream) run(start int32) error {
 		end_ref := ts.file.Keyframes.Get(end + 1)
 		// it seems that the -to is confused when -ss seek before the given time (because it searches for a keyframe)
 		// add back the time that would be lost otherwise
-		// this only appens when -to is before -i but having -to after -i gave a bug (not sure, don't remember)
+		// this only happen when -to is before -i but having -to after -i gave a bug (not sure, don't remember)
 		end_ref += start_ref - ts.file.Keyframes.Get(start_segment)
 		args = append(args,
 			"-to", fmt.Sprintf("%.6f", end_ref),
@@ -247,12 +247,13 @@ func (ts *Stream) run(start int32) error {
 		"-f", "segment",
 		// needed for rounding issues when forcing keyframes
 		// recommended value is 1/(2*frame_rate), which for a 24fps is ~0.021
-		// we take a little bit more than that to be extra safe but too much can be harmfull
+		// we take a little bit more than that to be extra safe but too much can be harmful
 		// when segments are short (can make the video repeat itself)
 		"-segment_time_delta", "0.05",
-		"-segment_format", "mpegts",
+		"-segment_format", "mp4",
+		"-segment_format_options", "movflags=dash",
 		"-segment_times", toSegmentStr(Map(segments, func(seg float64, _ int) float64 {
-			// segment_times want durations, not timestamps so we must substract the -ss param
+			// segment_times want durations, not timestamps so we must subtract the -ss param
 			// since we give a greater value to -ss to prevent wrong seeks but -segment_times
 			// needs precise segments, we use the keyframe we want to seek to as a reference.
 			return seg - ts.file.Keyframes.Get(start_segment)
@@ -292,7 +293,7 @@ func (ts *Stream) run(start int32) error {
 
 			if segment < start {
 				// This happen because we use -f segments for accurate cutting (since -ss is not)
-				// check comment at begining of function for more info
+				// check comment at beginning of function for more info
 				continue
 			}
 			ts.lock.Lock()
@@ -307,7 +308,7 @@ func (ts *Stream) run(start int32) error {
 				ts.segments[segment].encoder = encoder_id
 				close(ts.segments[segment].channel)
 				if segment == end-1 {
-					// file finished, ffmped will finish soon on it's own
+					// file finished, ffmpeg will finish soon on it's own
 					should_stop = true
 				} else if ts.isSegmentReady(segment + 1) {
 					cmd.Process.Signal(os.Interrupt)
@@ -333,7 +334,7 @@ func (ts *Stream) run(start int32) error {
 		if exiterr, ok := err.(*exec.ExitError); ok && exiterr.ExitCode() == 255 {
 			log.Printf("ffmpeg %d was killed by us", encoder_id)
 		} else if err != nil {
-			log.Printf("ffmpeg %d occured an error: %s: %s", encoder_id, err, stderr.String())
+			log.Printf("ffmpeg %d occurred an error: %s: %s", encoder_id, err, stderr.String())
 		} else {
 			log.Printf("ffmpeg %d finished successfully", encoder_id)
 		}
@@ -351,7 +352,7 @@ func (ts *Stream) GetIndex() (string, error) {
 	// playlist type is event since we can append to the list if Keyframe.IsDone is false.
 	// start time offset makes the stream start at 0s instead of ~3segments from the end (requires version 6 of hls)
 	index := `#EXTM3U
-#EXT-X-VERSION:6
+#EXT-X-VERSION:7
 #EXT-X-PLAYLIST-TYPE:EVENT
 #EXT-X-START:TIME-OFFSET=0
 #EXT-X-TARGETDURATION:4
@@ -362,13 +363,13 @@ func (ts *Stream) GetIndex() (string, error) {
 
 	for segment := int32(0); segment < length-1; segment++ {
 		index += fmt.Sprintf("#EXTINF:%.6f\n", ts.file.Keyframes.Get(segment+1)-ts.file.Keyframes.Get(segment))
-		index += fmt.Sprintf("segment-%d.ts\n", segment)
+		index += fmt.Sprintf("segment-%d.m4s\n", segment)
 	}
 	// do not forget to add the last segment between the last keyframe and the end of the file
-	// if the keyframes extraction is not done, do not bother to add it, it will be retrived on the next index retrival
+	// if the keyframes extraction is not done, do not bother to add it, it will be retrieval on the next index retrieval
 	if is_done {
 		index += fmt.Sprintf("#EXTINF:%.6f\n", float64(ts.file.Info.Duration)-ts.file.Keyframes.Get(length-1))
-		index += fmt.Sprintf("segment-%d.ts\n", length-1)
+		index += fmt.Sprintf("segment-%d.m4s\n", length-1)
 		index += `#EXT-X-ENDLIST`
 	}
 	return index, nil
@@ -395,19 +396,19 @@ func (ts *Stream) GetSegment(segment int32) (string, error) {
 	if !ready {
 		// Only start a new encode if there is too big a distance between the current encoder and the segment.
 		if distance > 60 || !is_scheduled {
-			log.Printf("Creating new head for %d since closest head is %fs aways", segment, distance)
+			log.Printf("Creating new head for %d since closest head is %fs away", segment, distance)
 			err := ts.run(segment)
 			if err != nil {
 				return "", err
 			}
 		} else {
-			log.Printf("Waiting for segment %d since encoder head is %fs aways", segment, distance)
+			log.Printf("Waiting for segment %d since encoder head is %fs away", segment, distance)
 		}
 
 		select {
 		case <-readyChan:
 		case <-time.After(60 * time.Second):
-			return "", errors.New("could not retrive the selected segment (timeout)")
+			return "", errors.New("could not retrieve the selected segment (timeout)")
 		}
 	}
 	ts.prerareNextSegements(segment)
@@ -428,7 +429,7 @@ func (ts *Stream) prerareNextSegements(segment int32) {
 			continue
 		}
 		// only start encode for segments not planned (getMinEncoderDistance returns Inf for them)
-		// or if they are 60s away (asume 5s per segments)
+		// or if they are 60s away (assume 5s per segments)
 		if ts.getMinEncoderDistance(i) < 60+(5*float64(i-segment)) {
 			continue
 		}
