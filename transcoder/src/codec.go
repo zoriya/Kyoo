@@ -91,6 +91,10 @@ func GetMimeCodec(stream *ffprobe.Stream) *string {
 
 		return &ret
 
+	case "mp3":
+		ret := "mp4a.40.34"
+		return &ret
+
 	case "opus":
 		ret := "Opus"
 		return &ret
@@ -105,6 +109,10 @@ func GetMimeCodec(stream *ffprobe.Stream) *string {
 
 	case "flac":
 		ret := "fLaC"
+		return &ret
+
+	case "alac":
+		ret := "alac"
 		return &ret
 
 	default:
