@@ -98,8 +98,8 @@ Ideally this would be per component drill down, instead of global
         }
 
         Container_Boundary(scanner, "scanner") {
-          Component(scanner_c2, "kyoo_scanner", "python, python3.12", "matcher. no clue")
-          Component(scanner_c1, "kyoo_scanner", "python, python3.12", "no clue")
+          Component(scanner_c2, "kyoo_scanner", "python, python3.12", "matcher")
+          Component(scanner_c1, "kyoo_scanner", "python, python3.12", "scanner")
           ComponentQueue(scanner_q1, "scanner", "RabbitMQ, Queue", "")
         }
 
@@ -142,14 +142,12 @@ Ideally this would be per component drill down, instead of global
 
   Rel(frontend_c1, backend_c2, "")
 
-  Rel(scanner_c1, content_c1, "Fetch media metadata")
-  Rel(scanner_c1, scanner_q1, "consumes")
+  Rel(scanner_c1, scanner_q1, "produces")
   Rel(scanner_c2, content_c1, "Fetch media metadata")
   Rel(scanner_c2, backend_c2, "Pushes media metadata")
-  Rel(scanner_c2, scanner_q1, "produces")
+  Rel(scanner_c2, scanner_q1, "consumes")
   Rel(scanner_c2, sharem_q2, "consumes")
   Rel(scanner_c1, media_c1, "")
-  Rel(scanner_c2, media_c1, "")
 
   Rel(transcoder_c1, media_c1, "")
   Rel(transcoder_c1, transcoder_c2, "")
