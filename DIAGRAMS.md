@@ -100,7 +100,7 @@ Ideally this would be per component drill down, instead of global
         Container_Boundary(scanner, "scanner") {
           Component(scanner_c2, "kyoo_scanner", "python, python3.12", "matcher. no clue")
           Component(scanner_c1, "kyoo_scanner", "python, python3.12", "no clue")
-          ComponentQueue(scanner_q1, "scanner", "RabbitMQ", "")
+          ComponentQueue(scanner_q1, "scanner", "RabbitMQ, Queue", "")
         }
 
         Container_Boundary(transcoder, "transcoder") {
