@@ -29,6 +29,12 @@ func Extract(path string, sha string) (<-chan struct{}, error) {
 		os.MkdirAll(attachment_path, 0o644)
 		os.MkdirAll(subs_path, 0o755)
 
+		// If there is no subtitles, there is nothing to extract (also fonts would be useless).
+		if len(info.Subtitles) == 0 {
+			close(ret)
+			return
+		}
+
 		cmd := exec.Command(
 			"ffmpeg",
 			"-dump_attachment:t", "",
