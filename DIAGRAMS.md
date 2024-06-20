@@ -49,7 +49,6 @@ C4 stands for Context, Container, Component, Code.
       Rel(backend, media, "")
       Rel(backend, transcoder, "")
       Rel(autosync, sharem, "")
-      Rel(autosync, media, "")
       Rel(autosync, tracker, "")
       Rel(scanner, sharem, "")
       Rel(scanner, media, "")
@@ -138,7 +137,6 @@ Ideally this would be per component drill down, instead of global
   Rel(backend_c2, media_c1, "")
   Rel(backend_c2, transcoder_c1, "")
 
-  Rel(autosync_c1, media_c1, "")
   Rel(autosync_c1, tracker_c1, "")
   Rel(autosync_c1, sharem_q1, "consumes")
 
