@@ -179,7 +179,7 @@ C4Component
   Container_Boundary(scanner, "scanner") {
     Component(scanner_c2, "kyoo_scanner", "python, python3.12", "matcher")
   }
-  Container_Boundary(emb, "embessage") {
+  Container_Boundary(emb, "emb") {
     ComponentQueue(emb_q2, "scanner.rescan", "RabbitMQ, Queue", "")
     ComponentQueue(emb_e2, "events.resource", "RabbitMQ, Exchange", "unused")
     ComponentQueue(emb_e1, "events.watched", "RabbitMQ, Exchange", "")
