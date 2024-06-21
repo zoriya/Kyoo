@@ -159,6 +159,26 @@ Messaging is middleware.  EnterpriseMessageBus is for any messaging handled betw
   Rel(autosync_c1, tracker_c1, "updates")
 ```
 
+## Front
+```mermaid
+  C4Component
+  title Component Diagram
+  UpdateLayoutConfig($c4ShapeInRow="4", $c4BoundaryInRow="2")
+
+  Person(user, "User")
+
+  Container_Boundary(frontend, "frontend") {
+    Component(frontend_c1, "kyoo_front", "typescript, node.js", "Static Content")
+  }
+
+  Container_Boundary(backend, "back") {
+    Component(backend_c2, "kyoo_back", "C#, .NET 8.0", "API Backend")
+  }
+
+  Rel(frontend_c1, backend_c2, "ssr")
+  Rel(user, frontend_c1, "")
+```
+
 ## Scanner
 ```mermaid
   C4Component
@@ -180,9 +200,6 @@ Messaging is middleware.  EnterpriseMessageBus is for any messaging handled betw
   Container_Boundary(emb, "emb") {
     ComponentQueue(emb_q2, "scanner.rescan", "RabbitMQ, Queue", "")
   }
-
-
-
 
   Container_Boundary(content, "ContentDatabase") {
     Component_Ext(content_c1, "ContentProvider", "API", "tmdb or tvdb")
