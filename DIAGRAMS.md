@@ -118,9 +118,9 @@ Messaging is middleware.  EnterpriseMessageBus is for any messaging handled betw
     Rel(backend, emb, "")
     Rel(backend, media, "")
     Rel(backend, transcoder, "")
-    Rel_Back(autosync, emb, "")
+    Rel(autosync, emb, "")
     Rel(autosync, tracker, "")
-    Rel_Back(scanner, emb, "")
+    Rel(scanner, emb, "")
     Rel(scanner, backend, "")
     Rel(scanner, media, "")
     Rel(scanner, content, "")
@@ -159,6 +159,68 @@ Messaging is middleware.  EnterpriseMessageBus is for any messaging handled betw
   Rel(autosync_c1, tracker_c1, "updates")
 ```
 
+## Back
+```mermaid
+  C4Component
+  title Component Diagram
+  UpdateLayoutConfig($c4ShapeInRow="4", $c4BoundaryInRow="3")
+
+  Person(user, "User")
+
+  Container_Boundary(backend, "backend") {
+    Component(backend_c1, "kyoo_migrations", "C#, .NET 8.0", "Postgres Migration")
+    ComponentDb(backend_db2, "search", "Meilisearch", "search resource")
+    Component(backend_c3, "BackendMetadata", "Volume", "Persistent. Distributed Metadata")
+    ComponentDb(backend_db1, "backend", "Postgres", "user data and session state")
+    Component(backend_c2, "kyoo_back", "C#, .NET 8.0", "API Backend")
+  }
+
+  Container_Boundary(media, "MediaLibrary") {
+    Component_Ext(media_c1, "MediaShare", "Volume", "Read Only")
+  }
+
+  Container_Boundary(transcoder, "transcoder") {
+    Component(transcoder_c1, "kyoo_transcoder", "go, go", "Video Transcoder")
+  }
+
+  Container_Boundary(scanner, "scanner") {
+    Component(scanner_c2, "kyoo_scanner", "python, python3.12", "matcher")
+  }
+
+  Container_Boundary(emb, "embessage") {
+    ComponentQueue(emb_q2, "scanner.rescan", "RabbitMQ, Queue", "")
+    ComponentQueue(emb_e2, "events.resource", "RabbitMQ, Exchange", "unused")
+    ComponentQueue(emb_e1, "events.watched", "RabbitMQ, Exchange", "")
+    ComponentQueue(emb_q1, "autosync", "RabbitMQ, Queue", "")
+  }
+
+  Container_Boundary(autosync, "autosync") {
+    Component(autosync_c1, "kyoo_autosync", "python, python3.12", "")
+  }
+
+
+
+  Rel(user, backend_c2, "")
+
+  Rel(backend_c1, backend_db1, "")
+
+  Rel(backend_c2, backend_db1, "")
+  Rel(backend_c2, backend_db2, "")
+  Rel(backend_c2, media_c1, "")
+  Rel(backend_c2, transcoder_c1, "")
+  Rel(backend_c2, backend_c3, "")
+
+  Rel(backend_c2, emb_q2, "produces")
+  Rel(backend_c2, emb_e1, "produces")
+  Rel(backend_c2, emb_e2, "produces")
+
+  Rel(emb_e1, emb_q1, "bound")
+
+  Rel(autosync_c1, emb_q1, "consumes")
+
+  Rel(scanner_c2, emb_q2, "consumes")
+```
+
 ## Front
 ```mermaid
   C4Component
@@ -193,8 +255,6 @@ Messaging is middleware.  EnterpriseMessageBus is for any messaging handled betw
     Component(scanner_c1, "kyoo_scanner", "python, python3.12", "scanner")
     ComponentQueue(scanner_q1, "scanner", "RabbitMQ, Queue", "")
     Component(scanner_c2, "kyoo_scanner", "python, python3.12", "matcher")
-    
-    
   }
 
   Container_Boundary(emb, "emb") {
@@ -242,101 +302,4 @@ Messaging is middleware.  EnterpriseMessageBus is for any messaging handled betw
   Rel(transcoder_c1, transcoder_c2, "")
   Rel(transcoder_c1, transcoder_c3, "")
   Rel(backend_c2, transcoder_c1, "")
-```
-
-## OLD
-Ideally this would be per component drill down, instead of global
-```mermaid
-    C4Component
-
-      title Component diagram for Kyoo
-      UpdateLayoutConfig($c4ShapeInRow="4", $c4BoundaryInRow="2")
-
-      Person(user, "User")
-
-      System_Boundary(s1, "Kyoo") {
-
-        Container_Boundary(backend, "backend") {
-          ComponentDb(backend_db2, "search", "Meilisearch", "search resource")
-          Component(backend_c2, "kyoo_back", "C#, .NET 8.0", "API Backend")
-          Component(backend_c3, "BackendMetadata", "Volume", "Persistent. Distributed Metadata")
-          Component(backend_c1, "kyoo_migrations", "C#, .NET 8.0", "Postgres Migration")
-          ComponentDb(backend_db1, "backend", "Postgres", "user data and session state")
-        }
-
-        Container_Boundary(frontend, "frontend") {
-          Component(frontend_c1, "kyoo_front", "typescript, node.js", "Static Content")
-        }
-
-        Container_Boundary(sharem, "sharemessage") {
-          ComponentQueue(sharem_e1, "events.watched", "RabbitMQ, Exchange", "")
-          ComponentQueue(sharem_e2, "events.resource", "RabbitMQ, Exchange", "")
-          ComponentQueue(sharem_q1, "autosync", "RabbitMQ, Queue", "")
-          ComponentQueue(sharem_q2, "scanner.rescan", "RabbitMQ, Queue", "")
-        }
-
-        Container_Boundary(autosync, "autosync") {
-          Component(autosync_c1, "kyoo_autosync", "python, python3.12", "")
-        }
-
-        Container_Boundary(scanner, "scanner") {
-          Component(scanner_c2, "kyoo_scanner", "python, python3.12", "matcher")
-          Component(scanner_c1, "kyoo_scanner", "python, python3.12", "scanner")
-          ComponentQueue(scanner_q1, "scanner", "RabbitMQ, Queue", "")
-        }
-
-        Container_Boundary(transcoder, "transcoder") {
-          Component(transcoder_c1, "kyoo_transcoder", "go, go", "Video Transcoder")
-          Component(transcoder_c2, "TranscodeMetadata", "Volume", "Persistent. Distributed Metadata")
-          Component(transcoder_c3, "TranscodeCache", "Volume", "Volatile. Local cache")
-        }
-
-
-      }
-  
-  Container_Boundary(media, "MediaLibrary") {
-    Component_Ext(media_c1, "MediaShare", "Volume", "Read Only")
-  }
-
-  Container_Boundary(content, "ContentDatabase") {
-    Component_Ext(content_c1, "ContentProvider", "API", "tmdb or tvdb")
-  }
-
-  Container_Boundary(tracker, "ActivityTracker") {
-    Component_Ext(tracker_c1, "TrackerProvider", "API", "simkl")
-  }
-
-  Rel(user, frontend_c1, "")
-  Rel(user, backend_c2, "")
-
-  Rel(backend_c1, backend_db1, "Managed schema")
-  Rel(backend_c2, backend_db1, "")
-  Rel(backend_c2, backend_db2, "")
-  Rel(backend_c2, sharem_q2, "produces")
-  Rel(backend_c2, sharem_e1, "produces")
-  Rel(backend_c2, sharem_e2, "produces")
-  Rel(backend_c2, backend_c3, "")
-  Rel(backend_c2, media_c1, "")
-  Rel(backend_c2, transcoder_c1, "")
-
-  Rel(autosync_c1, tracker_c1, "")
-  Rel(autosync_c1, sharem_q1, "consumes")
-
-  Rel(frontend_c1, backend_c2, "")
-
-  Rel(scanner_c1, scanner_q1, "produces")
-  Rel(scanner_c2, content_c1, "Fetch media metadata")
-  Rel(scanner_c2, backend_c2, "Pushes media metadata")
-  Rel(scanner_c2, scanner_q1, "consumes")
-  Rel(scanner_c2, sharem_q2, "consumes")
-  Rel(scanner_c1, media_c1, "")
-
-  Rel(transcoder_c1, media_c1, "")
-  Rel(transcoder_c1, transcoder_c2, "")
-  Rel(transcoder_c1, transcoder_c3, "")
-
-  Rel(sharem_e1, sharem_q1, "bound")
-
-  BiRel(backend_c2, scanner_c1, "Request/Push media metadata")
-
 ```
