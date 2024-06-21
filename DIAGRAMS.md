@@ -187,9 +187,9 @@ C4Component
   }
   Container_Boundary(emb, "emb") {
     ComponentQueue(emb_e1, "events.watched", "RabbitMQ, Exchange", "")
-    ComponentQueue(emb_e2, "events.resource", "RabbitMQ, Exchange", "unused")
-    ComponentQueue(emb_q1, "autosync", "RabbitMQ, Queue", "")
     ComponentQueue(emb_q2, "scanner.rescan", "RabbitMQ, Queue", "")
+    ComponentQueue(emb_q1, "autosync", "RabbitMQ, Queue", "")
+    ComponentQueue(emb_e2, "events.resource", "RabbitMQ, Exchange", "unused")
   }
 
   Container_Boundary(scanner, "scanner") {
@@ -214,7 +214,7 @@ C4Component
   Rel(backend_c2, emb_e2, "produces")
   Rel(emb_e1, emb_q1, "bound")
   Rel_Back(autosync_c1, emb_q1, "consumes")
-  Rel_Back(scanner_c2, emb_q2, "consumes")
+  Rel_Back(scanner_c1, emb_q2, "consumes")
   Rel(scanner_c1, backend_c2, "")
   Rel(scanner_c2, backend_c2, "")
   Rel(frontend_c1, backend_c2, "")
@@ -242,30 +242,35 @@ C4Component
 ### Scanner
 ```mermaid
 C4Component
-  UpdateLayoutConfig($c4ShapeInRow="1", $c4BoundaryInRow="3")
+  UpdateLayoutConfig($c4ShapeInRow="5", $c4BoundaryInRow="3")
   
   title Component Diagram for Scanner
 
   Container_Boundary(media, "MediaLibrary") {
     Component_Ext(media_c1, "MediaShare", "Volume", "Read Only")
   }
-  Container_Boundary(scanner, "scanner") {
-    Component(scanner_c1, "kyoo_scanner", "python, python3.12", "scanner")
-    ComponentQueue(scanner_q1, "scanner", "RabbitMQ, Queue", "")
-    Component(scanner_c2, "kyoo_scanner", "python, python3.12", "matcher")
-  }
-  Container_Boundary(emb, "emb") {
-    ComponentQueue(emb_q2, "scanner.rescan", "RabbitMQ, Queue", "")
-  }
+
   Container_Boundary(content, "ContentDatabase") {
     Component_Ext(content_c1, "ContentProvider", "API", "tmdb or tvdb")
   }
+
+  Container_Boundary(scanner, "scanner") {
+    Component(scanner_c2, "kyoo_scanner", "python, python3.12", "matcher")
+    ComponentQueue(scanner_q1, "scanner", "RabbitMQ, Queue", "")
+    Component(scanner_c1, "kyoo_scanner", "python, python3.12", "scanner")
+  }
+
+  Container_Boundary(emb, "emb") {
+    ComponentQueue(emb_q2, "scanner.rescan", "RabbitMQ, Queue", "")
+  }
+
   Container_Boundary(backend, "back") {
     Component(backend_c2, "kyoo_back", "C#, .NET 8.0", "API Backend")
   }
 
   Rel(scanner_c1, scanner_q1, "produces")
   Rel(scanner_c1, media_c1, "watches")
+  Rel(scanner_c1, backend_c2, "Fetch existing scans")
   Rel(scanner_c2, content_c1, "Fetch media data")
   Rel(scanner_c2, backend_c2, "Pushes media data")
   Rel_Back(scanner_c2, scanner_q1, "consumes")
