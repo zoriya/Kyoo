@@ -218,6 +218,32 @@ Messaging is middleware.  EnterpriseMessageBus is for any messaging handled betw
   Rel(backend_c2, emb_q2, "produces")
 ```
 
+## Transcoder
+```mermaid
+  C4Component
+  title Component Diagram
+  UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="2")
+
+  Container_Boundary(transcoder, "transcoder") {
+    Component(transcoder_c2, "TranscodeMetadata", "Volume", "Persistent. Distributed Metadata")
+    Component(transcoder_c1, "kyoo_transcoder", "go, go", "Video Transcoder")
+    Component(transcoder_c3, "TranscodeCache", "Volume", "Volatile. Local cache")
+  }
+
+  Container_Boundary(media, "MediaLibrary") {
+    Component_Ext(media_c1, "MediaShare", "Volume", "Read Only")
+  }
+
+  Container_Boundary(backend, "back") {
+    Component(backend_c2, "kyoo_back", "C#, .NET 8.0", "API Backend")
+  }
+
+  Rel(transcoder_c1, media_c1, "mounts")
+  Rel(transcoder_c1, transcoder_c2, "")
+  Rel(transcoder_c1, transcoder_c3, "")
+  Rel(backend_c2, transcoder_c1, "")
+```
+
 ## OLD
 Ideally this would be per component drill down, instead of global
 ```mermaid
