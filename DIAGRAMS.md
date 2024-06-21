@@ -129,6 +129,81 @@ Messaging is middleware.  EnterpriseMessageBus is for any messaging handled betw
 
 
 # Component
+# Component
+
+## Autosync
+```mermaid
+  C4Component
+  title Component Diagram
+  UpdateLayoutConfig($c4ShapeInRow="4", $c4BoundaryInRow="2")
+  
+  Container_Boundary(autosync, "autosync") {
+    Component(autosync_c1, "kyoo_autosync", "python, python3.12", "")
+  }
+
+  Container_Boundary(emb, "emb") {
+    ComponentQueue(emb_q1, "autosync", "RabbitMQ, Queue", "")
+    ComponentQueue(emb_e1, "events.watched", "RabbitMQ, Exchange", "")
+    
+  }
+
+  Container_Boundary(tracker, "ActivityTracker") {
+    Component_Ext(tracker_c1, "TrackerProvider", "API", "simkl")
+  }
+
+  Container_Boundary(backend, "back") {
+    Component(backend_c2, "kyoo_back", "C#, .NET 8.0", "API Backend")
+  }
+
+  Rel(emb_e1, emb_q1, "bound")
+  Rel(autosync_c1, emb_q1, "consumes")
+  Rel(backend_c2, emb_e1, "produces")
+  Rel(autosync_c1, tracker_c1, "updates")
+```
+
+## Scanner
+```mermaid
+  C4Component
+  title Component Diagram
+  UpdateLayoutConfig($c4ShapeInRow="1", $c4BoundaryInRow="3")
+
+  Container_Boundary(media, "MediaLibrary") {
+    Component_Ext(media_c1, "MediaShare", "Volume", "Read Only")
+  }
+
+  Container_Boundary(scanner, "scanner") {
+    Component(scanner_c1, "kyoo_scanner", "python, python3.12", "scanner")
+    ComponentQueue(scanner_q1, "scanner", "RabbitMQ, Queue", "")
+    Component(scanner_c2, "kyoo_scanner", "python, python3.12", "matcher")
+    
+    
+  }
+
+  Container_Boundary(emb, "emb") {
+    ComponentQueue(emb_q2, "scanner.rescan", "RabbitMQ, Queue", "")
+  }
+
+
+
+
+  Container_Boundary(content, "ContentDatabase") {
+    Component_Ext(content_c1, "ContentProvider", "API", "tmdb or tvdb")
+  }
+  Container_Boundary(backend, "back") {
+    Component(backend_c2, "kyoo_back", "C#, .NET 8.0", "API Backend")
+  }
+
+
+  Rel(scanner_c1, scanner_q1, "produces")
+  Rel(scanner_c1, media_c1, "watches")
+  Rel(scanner_c2, content_c1, "Fetch media data")
+  Rel(scanner_c2, backend_c2, "Pushes media data")
+  Rel(scanner_c2, scanner_q1, "consumes")
+  Rel(scanner_c2, emb_q2, "consumes")
+  Rel(backend_c2, emb_q2, "produces")
+```
+
+## OLD
 Ideally this would be per component drill down, instead of global
 ```mermaid
     C4Component
