@@ -91,7 +91,7 @@ C4Context
 Messaging is middleware.  EnterpriseMessageBus is for any messaging handled between different projects.
 ```mermaid
 C4Container
-  UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+  UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="3")
 
   title Container diagram for Kyoo System
 
@@ -99,15 +99,19 @@ C4Container
   System_Boundary(internal, "Kyoo") {
     Container(frontend, "front/")
     Container(backend, "back/")
-    Container(transcoder, "transcoder/")
-    Container(autosync, "autosync/")
     ContainerQueue(emb, "emb", "", "EnterpriseMessageBus")
-    Container(scanner, "scanner/")        
+    Container(transcoder, "transcoder/")
+    Container(scanner, "scanner/")
+    Container(autosync, "autosync/")
   }
-  System_Boundary(external, "External") {
+  System_Boundary(external, "") {
+    System_Ext(content, "ContentDatabase", "")
+  }
+  System_Boundary(external2, "") {
     System_Ext(tracker, "ActivityTracker", "")
+  }
+  System_Boundary(external3, "") {
     System_Ext(media, "MediaLibrary", "")
-    System_Ext(content, "ContentDatabase", "") 
   }
 
   Rel(user, frontend, "")
