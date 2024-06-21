@@ -120,9 +120,9 @@ C4Container
   Rel(backend, emb, "")
   Rel(backend, media, "")
   Rel(backend, transcoder, "")
-  Rel(autosync, emb, "")
+  Rel_Back(autosync, emb, "")
   Rel(autosync, tracker, "")
-  Rel(scanner, emb, "")
+  Rel_Back(scanner, emb, "")
   Rel(scanner, backend, "")
   Rel(scanner, media, "")
   Rel(scanner, content, "")
@@ -173,9 +173,9 @@ C4Component
   }
   Container_Boundary(backend, "back") {
     Component(backend_c1, "kyoo_migrations", "C#, .NET 8.0", "Postgres Migration")
-    ComponentDb(backend_db2, "search", "Meilisearch", "search resource")
-    Component(backend_c3, "BackendMetadata", "Volume", "Persistent. Distributed Metadata")
     ComponentDb(backend_db1, "backend", "Postgres", "user data and session state")
+    Component(backend_c3, "BackendMetadata", "Volume", "Persistent. Distributed Metadata")
+    ComponentDb(backend_db2, "search", "Meilisearch", "search resource")
     Component(backend_c2, "kyoo_back", "C#, .NET 8.0", "API Backend")
   }
 
