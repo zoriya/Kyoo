@@ -154,7 +154,7 @@ C4Component
   }
 
   Rel(emb_e1, emb_q1, "bound")
-  Rel(autosync_c1, emb_q1, "consumes")
+  Rel_Back(autosync_c1, emb_q1, "consumes")
   Rel(backend_c2, emb_e1, "produces")
   Rel(autosync_c1, tracker_c1, "updates")
 ```
@@ -213,8 +213,8 @@ C4Component
   Rel(backend_c2, emb_e1, "produces")
   Rel(backend_c2, emb_e2, "produces")
   Rel(emb_e1, emb_q1, "bound")
-  Rel(autosync_c1, emb_q1, "consumes")
-  Rel(scanner_c2, emb_q2, "consumes")
+  Rel_Back(autosync_c1, emb_q1, "consumes")
+  Rel_Back(scanner_c2, emb_q2, "consumes")
   Rel(scanner_c1, backend_c2, "")
   Rel(scanner_c2, backend_c2, "")
   Rel(frontend_c1, backend_c2, "")
@@ -268,8 +268,8 @@ C4Component
   Rel(scanner_c1, media_c1, "watches")
   Rel(scanner_c2, content_c1, "Fetch media data")
   Rel(scanner_c2, backend_c2, "Pushes media data")
-  Rel(scanner_c2, scanner_q1, "consumes")
-  Rel(scanner_c2, emb_q2, "consumes")
+  Rel_Back(scanner_c2, scanner_q1, "consumes")
+  Rel_Back(scanner_c1, emb_q2, "consumes")
   Rel(backend_c2, emb_q2, "produces")
 ```
 
