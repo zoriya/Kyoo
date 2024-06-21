@@ -99,9 +99,9 @@ C4Container
   System_Boundary(internal, "Kyoo") {
     Container(frontend, "front/")
     Container(backend, "back/")
-    ContainerQueue(emb, "emb", "", "EnterpriseMessageBus")
     Container(transcoder, "transcoder/")
     Container(scanner, "scanner/")
+    ContainerQueue(emb, "emb", "", "EnterpriseMessageBus")
     Container(autosync, "autosync/")
   }
   System_Boundary(external, "") {
