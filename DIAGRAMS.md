@@ -163,6 +163,10 @@ C4Component
   title Component Diagram for Back
 
   Person(user, "User")
+
+  Container_Boundary(frontend, "front") {
+    Component(frontend_c1, "kyoo_front", "typescript, node.js", "Static Content")
+  }
   Container_Boundary(backend, "back") {
     Component(backend_c1, "kyoo_migrations", "C#, .NET 8.0", "Postgres Migration")
     ComponentDb(backend_db2, "search", "Meilisearch", "search resource")
@@ -170,24 +174,29 @@ C4Component
     ComponentDb(backend_db1, "backend", "Postgres", "user data and session state")
     Component(backend_c2, "kyoo_back", "C#, .NET 8.0", "API Backend")
   }
+
   Container_Boundary(media, "MediaLibrary") {
     Component_Ext(media_c1, "MediaShare", "Volume", "Read Only")
   }
   Container_Boundary(transcoder, "transcoder") {
     Component(transcoder_c1, "kyoo_transcoder", "go, go", "Video Transcoder")
   }
+  Container_Boundary(emb, "emb") {
+    ComponentQueue(emb_e1, "events.watched", "RabbitMQ, Exchange", "")
+    ComponentQueue(emb_e2, "events.resource", "RabbitMQ, Exchange", "unused")
+    ComponentQueue(emb_q1, "autosync", "RabbitMQ, Queue", "")
+    ComponentQueue(emb_q2, "scanner.rescan", "RabbitMQ, Queue", "")
+  }
+
   Container_Boundary(scanner, "scanner") {
+    Component(scanner_c1, "kyoo_scanner", "python, python3.12", "scanner")
     Component(scanner_c2, "kyoo_scanner", "python, python3.12", "matcher")
   }
-  Container_Boundary(emb, "emb") {
-    ComponentQueue(emb_q2, "scanner.rescan", "RabbitMQ, Queue", "")
-    ComponentQueue(emb_e2, "events.resource", "RabbitMQ, Exchange", "unused")
-    ComponentQueue(emb_e1, "events.watched", "RabbitMQ, Exchange", "")
-    ComponentQueue(emb_q1, "autosync", "RabbitMQ, Queue", "")
-  }
+
   Container_Boundary(autosync, "autosync") {
     Component(autosync_c1, "kyoo_autosync", "python, python3.12", "")
   }
+
 
   Rel(user, backend_c2, "")
   Rel(backend_c1, backend_db1, "")
@@ -202,6 +211,9 @@ C4Component
   Rel(emb_e1, emb_q1, "bound")
   Rel(autosync_c1, emb_q1, "consumes")
   Rel(scanner_c2, emb_q2, "consumes")
+  Rel(scanner_c1, backend_c2, "")
+  Rel(scanner_c2, backend_c2, "")
+  Rel(frontend_c1, backend_c2, "")
 ```
 
 ## Front
