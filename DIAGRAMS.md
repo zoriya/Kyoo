@@ -130,8 +130,8 @@ C4Container
 ```
 
 
-# Component
-## Autosync
+## Component
+### Autosync
 ```mermaid
 C4Component
   UpdateLayoutConfig($c4ShapeInRow="4", $c4BoundaryInRow="2")
@@ -159,7 +159,7 @@ C4Component
   Rel(autosync_c1, tracker_c1, "updates")
 ```
 
-## Back
+### Back
 ```mermaid
 C4Component
   UpdateLayoutConfig($c4ShapeInRow="4", $c4BoundaryInRow="3")
@@ -220,7 +220,7 @@ C4Component
   Rel(frontend_c1, backend_c2, "")
 ```
 
-## Front
+### Front
 ```mermaid
 C4Component
   UpdateLayoutConfig($c4ShapeInRow="4", $c4BoundaryInRow="2")
@@ -239,7 +239,7 @@ C4Component
   Rel(user, frontend_c1, "")
 ```
 
-## Scanner
+### Scanner
 ```mermaid
 C4Component
   UpdateLayoutConfig($c4ShapeInRow="1", $c4BoundaryInRow="3")
@@ -273,7 +273,7 @@ C4Component
   Rel(backend_c2, emb_q2, "produces")
 ```
 
-## Transcoder
+### Transcoder
 ```mermaid
 C4Component
   UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="2")
