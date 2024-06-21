@@ -129,8 +129,6 @@ Messaging is middleware.  EnterpriseMessageBus is for any messaging handled betw
 
 
 # Component
-# Component
-
 ## Autosync
 ```mermaid
   C4Component
