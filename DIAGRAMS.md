@@ -70,85 +70,81 @@ Diagrams that focus on capturing project from a high level point of view. Contex
 
 ## Context
 ```mermaid
-    C4Context
+C4Context
+  UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="2")  
+  
+  title Context Diagram for Kyoo
+  
+  Person(user, "User")
+  System(kyoo, "Kyoo", "")
+  System_Ext(media, "MediaLibrary", "")
+  System_Ext(content, "ContentDatabase", "")
+  System_Ext(tracker, "ActivityTracker", "")
 
-      title Context diagram for Kyoo System
-      Person(user, "User")
-
-      System(kyoo, "Kyoo", "")
-      System_Ext(media, "MediaLibrary", "")
-      System_Ext(content, "ContentDatabase", "")
-      System_Ext(tracker, "ActivityTracker", "")
-
-      Rel(user, kyoo, "")
-      Rel(kyoo, content, "")
-      Rel(kyoo, media, "")
-      Rel(kyoo, tracker, "")
-    UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="2")
+  Rel(user, kyoo, "")
+  Rel(kyoo, content, "")
+  Rel(kyoo, media, "")
+  Rel(kyoo, tracker, "")
 ```
 
 ## Container
 Messaging is middleware.  EnterpriseMessageBus is for any messaging handled between different projects.
 ```mermaid
-  C4Container
+C4Container
   UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+
   title Container diagram for Kyoo System
-    Person(user, "User")
 
-    System_Boundary(internal, "Kyoo") {
-      Container(frontend, "front/")
-      Container(backend, "back/")
-      Container(transcoder, "transcoder/")
+  Person(user, "User")
+  System_Boundary(internal, "Kyoo") {
+    Container(frontend, "front/")
+    Container(backend, "back/")
+    Container(transcoder, "transcoder/")
+    Container(autosync, "autosync/")
+    ContainerQueue(emb, "emb", "", "EnterpriseMessageBus")
+    Container(scanner, "scanner/")        
+  }
+  System_Boundary(external, "External") {
+    System_Ext(tracker, "ActivityTracker", "")
+    System_Ext(media, "MediaLibrary", "")
+    System_Ext(content, "ContentDatabase", "") 
+  }
 
-      Container(autosync, "autosync/")
-      ContainerQueue(emb, "emb", "", "EnterpriseMessageBus")
-      Container(scanner, "scanner/")        
-    }
-
-    System_Boundary(external, "External") {
-      System_Ext(tracker, "ActivityTracker", "")
-      System_Ext(media, "MediaLibrary", "")
-      System_Ext(content, "ContentDatabase", "")
-      
-    }
-
-    Rel(user, frontend, "")
-    Rel(user, backend, "")
-    Rel(frontend, backend, "")
-    Rel(backend, emb, "")
-    Rel(backend, media, "")
-    Rel(backend, transcoder, "")
-    Rel(autosync, emb, "")
-    Rel(autosync, tracker, "")
-    Rel(scanner, emb, "")
-    Rel(scanner, backend, "")
-    Rel(scanner, media, "")
-    Rel(scanner, content, "")
-    Rel(transcoder, media, "")
+  Rel(user, frontend, "")
+  Rel(user, backend, "")
+  Rel(frontend, backend, "")
+  Rel(backend, emb, "")
+  Rel(backend, media, "")
+  Rel(backend, transcoder, "")
+  Rel(autosync, emb, "")
+  Rel(autosync, tracker, "")
+  Rel(scanner, emb, "")
+  Rel(scanner, backend, "")
+  Rel(scanner, media, "")
+  Rel(scanner, content, "")
+  Rel(transcoder, media, "")
 ```
 
 
 # Component
 ## Autosync
 ```mermaid
-  C4Component
-  title Component Diagram
+C4Component
   UpdateLayoutConfig($c4ShapeInRow="4", $c4BoundaryInRow="2")
+  
+  title Component Diagram for Autosync
   
   Container_Boundary(autosync, "autosync") {
     Component(autosync_c1, "kyoo_autosync", "python, python3.12", "")
   }
-
   Container_Boundary(emb, "emb") {
     ComponentQueue(emb_q1, "autosync", "RabbitMQ, Queue", "")
     ComponentQueue(emb_e1, "events.watched", "RabbitMQ, Exchange", "")
     
   }
-
   Container_Boundary(tracker, "ActivityTracker") {
     Component_Ext(tracker_c1, "TrackerProvider", "API", "simkl")
   }
-
   Container_Boundary(backend, "back") {
     Component(backend_c2, "kyoo_back", "C#, .NET 8.0", "API Backend")
   }
@@ -161,78 +157,64 @@ Messaging is middleware.  EnterpriseMessageBus is for any messaging handled betw
 
 ## Back
 ```mermaid
-  C4Component
-  title Component Diagram
+C4Component
   UpdateLayoutConfig($c4ShapeInRow="4", $c4BoundaryInRow="3")
+  
+  title Component Diagram for Back
 
   Person(user, "User")
-
-  Container_Boundary(backend, "backend") {
+  Container_Boundary(backend, "back") {
     Component(backend_c1, "kyoo_migrations", "C#, .NET 8.0", "Postgres Migration")
     ComponentDb(backend_db2, "search", "Meilisearch", "search resource")
     Component(backend_c3, "BackendMetadata", "Volume", "Persistent. Distributed Metadata")
     ComponentDb(backend_db1, "backend", "Postgres", "user data and session state")
     Component(backend_c2, "kyoo_back", "C#, .NET 8.0", "API Backend")
   }
-
   Container_Boundary(media, "MediaLibrary") {
     Component_Ext(media_c1, "MediaShare", "Volume", "Read Only")
   }
-
   Container_Boundary(transcoder, "transcoder") {
     Component(transcoder_c1, "kyoo_transcoder", "go, go", "Video Transcoder")
   }
-
   Container_Boundary(scanner, "scanner") {
     Component(scanner_c2, "kyoo_scanner", "python, python3.12", "matcher")
   }
-
   Container_Boundary(emb, "embessage") {
     ComponentQueue(emb_q2, "scanner.rescan", "RabbitMQ, Queue", "")
     ComponentQueue(emb_e2, "events.resource", "RabbitMQ, Exchange", "unused")
     ComponentQueue(emb_e1, "events.watched", "RabbitMQ, Exchange", "")
     ComponentQueue(emb_q1, "autosync", "RabbitMQ, Queue", "")
   }
-
   Container_Boundary(autosync, "autosync") {
     Component(autosync_c1, "kyoo_autosync", "python, python3.12", "")
   }
 
-
-
   Rel(user, backend_c2, "")
-
   Rel(backend_c1, backend_db1, "")
-
   Rel(backend_c2, backend_db1, "")
   Rel(backend_c2, backend_db2, "")
   Rel(backend_c2, media_c1, "")
   Rel(backend_c2, transcoder_c1, "")
   Rel(backend_c2, backend_c3, "")
-
   Rel(backend_c2, emb_q2, "produces")
   Rel(backend_c2, emb_e1, "produces")
   Rel(backend_c2, emb_e2, "produces")
-
   Rel(emb_e1, emb_q1, "bound")
-
   Rel(autosync_c1, emb_q1, "consumes")
-
   Rel(scanner_c2, emb_q2, "consumes")
 ```
 
 ## Front
 ```mermaid
-  C4Component
-  title Component Diagram
+C4Component
   UpdateLayoutConfig($c4ShapeInRow="4", $c4BoundaryInRow="2")
 
-  Person(user, "User")
+  title Component Diagram for Front
 
-  Container_Boundary(frontend, "frontend") {
+  Person(user, "User")
+  Container_Boundary(frontend, "front") {
     Component(frontend_c1, "kyoo_front", "typescript, node.js", "Static Content")
   }
-
   Container_Boundary(backend, "back") {
     Component(backend_c2, "kyoo_back", "C#, .NET 8.0", "API Backend")
   }
@@ -243,31 +225,28 @@ Messaging is middleware.  EnterpriseMessageBus is for any messaging handled betw
 
 ## Scanner
 ```mermaid
-  C4Component
-  title Component Diagram
+C4Component
   UpdateLayoutConfig($c4ShapeInRow="1", $c4BoundaryInRow="3")
+  
+  title Component Diagram for Scanner
 
   Container_Boundary(media, "MediaLibrary") {
     Component_Ext(media_c1, "MediaShare", "Volume", "Read Only")
   }
-
   Container_Boundary(scanner, "scanner") {
     Component(scanner_c1, "kyoo_scanner", "python, python3.12", "scanner")
     ComponentQueue(scanner_q1, "scanner", "RabbitMQ, Queue", "")
     Component(scanner_c2, "kyoo_scanner", "python, python3.12", "matcher")
   }
-
   Container_Boundary(emb, "emb") {
     ComponentQueue(emb_q2, "scanner.rescan", "RabbitMQ, Queue", "")
   }
-
   Container_Boundary(content, "ContentDatabase") {
     Component_Ext(content_c1, "ContentProvider", "API", "tmdb or tvdb")
   }
   Container_Boundary(backend, "back") {
     Component(backend_c2, "kyoo_back", "C#, .NET 8.0", "API Backend")
   }
-
 
   Rel(scanner_c1, scanner_q1, "produces")
   Rel(scanner_c1, media_c1, "watches")
@@ -280,20 +259,19 @@ Messaging is middleware.  EnterpriseMessageBus is for any messaging handled betw
 
 ## Transcoder
 ```mermaid
-  C4Component
-  title Component Diagram
+C4Component
   UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="2")
+  
+  title Component Diagram for Transcoder
 
   Container_Boundary(transcoder, "transcoder") {
     Component(transcoder_c2, "TranscodeMetadata", "Volume", "Persistent. Distributed Metadata")
     Component(transcoder_c1, "kyoo_transcoder", "go, go", "Video Transcoder")
     Component(transcoder_c3, "TranscodeCache", "Volume", "Volatile. Local cache")
   }
-
   Container_Boundary(media, "MediaLibrary") {
     Component_Ext(media_c1, "MediaShare", "Volume", "Read Only")
   }
-
   Container_Boundary(backend, "back") {
     Component(backend_c2, "kyoo_back", "C#, .NET 8.0", "API Backend")
   }
