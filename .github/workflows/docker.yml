@@ -100,7 +100,7 @@ jobs:
 
       - name: Build and push
         id: docker_build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         if: steps.filter.outputs.should_run == 'true' || github.event_name == 'workflow_dispatch' || startsWith(github.event.ref, 'refs/tags/v')
         with:
           context: ${{matrix.context}}
