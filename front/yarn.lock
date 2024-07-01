@@ -3323,12 +3323,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@kesha-antonov/react-native-background-downloader@npm:^3.1.3":
+"@kesha-antonov/react-native-background-downloader@HyopeR/react-native-background-downloader":
   version: 3.1.3
-  resolution: "@kesha-antonov/react-native-background-downloader@npm:3.1.3"
+  resolution: "@kesha-antonov/react-native-background-downloader@https://github.com/HyopeR/react-native-background-downloader.git#commit=df9ceb15e0a157b9baeef04fea2dfb1afed7ac99"
   peerDependencies:
     react-native: ">=0.57.0"
-  checksum: 930c6384a3ea701c714d547b955f7e487c9c820073be48ebd96b4018a542ce1adc74475e2bbbf8b26b0b6773b9e71b52018c0f7e190d9bd13705096399a72e35
+  checksum: 5be267225ed375fcd26f8eda8bd1ca5f83fa9a511e565540a2e3439399b43c694cf82d5ab4aca58167798d08522b2fa83bed895c75cc7e23af3cd92e8d987f81
   languageName: node
   linkType: hard
 
@@ -3415,7 +3415,7 @@ __metadata:
   resolution: "@kyoo/ui@workspace:packages/ui"
   dependencies:
     "@gorhom/portal": ^1.0.14
-    "@kesha-antonov/react-native-background-downloader": ^3.1.3
+    "@kesha-antonov/react-native-background-downloader": HyopeR/react-native-background-downloader
     "@kyoo/models": "workspace:^"
     "@kyoo/primitives": "workspace:^"
     "@shopify/flash-list": ^1.6.4
@@ -10513,7 +10513,7 @@ __metadata:
     "@formatjs/intl-displaynames": ^6.6.8
     "@formatjs/intl-locale": ^4.0.0
     "@gorhom/portal": ^1.0.14
-    "@kesha-antonov/react-native-background-downloader": ^3.1.3
+    "@kesha-antonov/react-native-background-downloader": HyopeR/react-native-background-downloader
     "@kyoo/ui": "workspace:^"
     "@material-symbols/svg-400": ^0.18.0
     "@react-native-community/netinfo": 11.3.1

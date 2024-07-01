@@ -218,6 +218,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 				autoPlay={!paused}
 				controls={false}
 				playsInline
+				disableDisconnectError
 				onCanPlay={() => onBuffer?.call(null, { isBuffering: false })}
 				onWaiting={() => onBuffer?.call(null, { isBuffering: true })}
 				onDurationChange={() => {

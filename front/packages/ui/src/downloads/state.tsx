@@ -186,6 +186,9 @@ const download = (
 	const path = `${RNBackgroundDownloader.directories.documents}/${slug}-${id}.${extension}`;
 	const task = RNBackgroundDownloader.download({
 		id: id,
+		metadata: {
+
+		},
 		// TODO: support variant qualities
 		url: `${account.apiUrl}/${type}/${slug}/direct`,
 		destination: path,
