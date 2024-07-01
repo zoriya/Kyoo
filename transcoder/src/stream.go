@@ -251,7 +251,7 @@ func (ts *Stream) run(start int32) error {
 		// when segments are short (can make the video repeat itself)
 		"-segment_time_delta", "0.05",
 		"-segment_format", "mp4",
-		"-segment_format_options", "movflags=dash",
+		"-segment_format_options", "movflags=frag_keyframe+empty_moov+omit_tfhd_offset+faststart",
 		"-segment_times", toSegmentStr(Map(segments, func(seg float64, _ int) float64 {
 			// segment_times want durations, not timestamps so we must subtract the -ss param
 			// since we give a greater value to -ss to prevent wrong seeks but -segment_times
