@@ -267,8 +267,7 @@ func (ts *Stream) run(start int32) error {
 	args = append(args, ts.handle.getTranscodeArgs(toSegmentStr(segments))...)
 	args = append(args,
 		"-f", "hls",
-		// Cut at every keyframes.
-		"-hls_time", "0",
+		"-hls_time", fmt.Sprint(OptimalFragmentDuration),
 		"-start_number", fmt.Sprint(start_segment),
 		"-hls_segment_type", "fmp4",
 		"-hls_fmp4_init_filename", fmt.Sprintf("%s/init.mp4", outpath),
@@ -302,7 +301,7 @@ func (ts *Stream) run(start int32) error {
 		scanner := bufio.NewScanner(stdout)
 		format := ts.handle.getSegmentName()
 		should_stop := false
-		is_init_ready:= false
+		is_init_ready := false
 
 		for scanner.Scan() {
 			line := scanner.Text()
@@ -361,7 +360,7 @@ func (ts *Stream) run(start int32) error {
 
 	go func() {
 		err := cmd.Wait()
-		if exiterr, ok := err.(*exec.ExitError); ok && exiterr.ExitCode() == 255 {
+		if exiterr, ok := err.(*exec.ExitError); ok && (exiterr.ExitCode() == 255 || exiterr.ExitCode() == -1) {
 			log.Printf("ffmpeg %d was killed by us", encoder_id)
 		} else if err != nil {
 			log.Printf("ffmpeg %d occurred an error: %v: %s", encoder_id, err, stderr.String())
@@ -385,11 +384,11 @@ func (ts *Stream) GetIndex() (string, error) {
 #EXT-X-VERSION:7
 #EXT-X-PLAYLIST-TYPE:EVENT
 #EXT-X-START:TIME-OFFSET=0
-#EXT-X-TARGETDURATION:4
 #EXT-X-MEDIA-SEQUENCE:0
 #EXT-X-INDEPENDENT-SEGMENTS
 #EXT-X-MAP:URI="init.mp4"
 `
+	index += fmt.Sprintf("#EXT-X-TARGETDURATION:%d\n", int(OptimalFragmentDuration))
 	length, is_done := ts.file.Keyframes.Length()
 
 	for segment := int32(0); segment < length-1; segment++ {

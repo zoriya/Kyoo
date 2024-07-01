@@ -4,11 +4,15 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"math"
 	"os/exec"
 	"strconv"
 	"strings"
 	"sync"
 )
+
+// In seconds, the spec recomands 6 but since we don't control keyframes we go over more often than not.
+const OptimalFragmentDuration = float64(5)
 
 type Keyframe struct {
 	Sha         string
@@ -97,7 +101,7 @@ func GetKeyframes(sha string, path string) *Keyframe {
 }
 
 func getKeyframes(path string, kf *Keyframe, sha string) error {
-	defer printExecTime("ffprobe analysis for %s", path)()
+	defer printExecTime("keyframe extraction for %s", path)()
 	// run ffprobe to return all IFrames, IFrames are points where we can split the video in segments.
 	// We ask ffprobe to return the time of each frame and it's flags
 	// We could ask it to return only i-frames (keyframes) with the -skip_frame nokey but using it is extremly slow
@@ -123,6 +127,7 @@ func getKeyframes(path string, kf *Keyframe, sha string) error {
 
 	ret := make([]float64, 0, 1000)
 	max := 100
+	last_frame := math.Inf(-1)
 	done := 0
 	// sometimes, videos can start at a timing greater than 0:00. We need to take that into account
 	// and only list keyframes that come after the start of the video (without that, our segments count
@@ -154,12 +159,14 @@ func getKeyframes(path string, kf *Keyframe, sha string) error {
 			return err
 		}
 
-		// Before, we wanted to only save keyframes with at least 3s betweens
-		// to prevent segments of 0.2s but sometimes, the -f segment muxer discards
-		// the segment time and decide to cut at a random keyframe. Having every keyframe
-		// handled as a segment prevents that.
+		// The -f hls encoder decides to not cut at every keyframes (even if we ask it to) when they are too close by.
+		// Instead we can cut every X seconds at the next keyframe, we'll use that as a marker.
+		if fpts < (last_frame+OptimalFragmentDuration) {
+			continue
+		}
 
 		ret = append(ret, fpts)
+		last_frame = fpts
 
 		if len(ret) == max {
 			kf.add(ret)
@@ -190,7 +197,7 @@ func getKeyframes(path string, kf *Keyframe, sha string) error {
 }
 
 func getDummyKeyframes(path string, sha string) ([]float64, error) {
-	dummyKeyframeDuration := float64(2)
+	dummyKeyframeDuration := OptimalFragmentDuration
 	info, err := GetInfo(path, sha)
 	if err != nil {
 		return nil, err
