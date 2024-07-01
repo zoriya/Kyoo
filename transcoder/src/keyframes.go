@@ -35,7 +35,12 @@ func (kf *Keyframe) Slice(start int32, end int32) []float64 {
 	}
 	kf.info.mutex.RLock()
 	defer kf.info.mutex.RUnlock()
+
 	ref := kf.Keyframes[start:end]
+	if kf.IsDone {
+		return ref
+	}
+	// make a copy since we will continue to mutate the array.
 	ret := make([]float64, end-start)
 	copy(ret, ref)
 	return ret
