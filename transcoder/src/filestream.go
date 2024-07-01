@@ -114,24 +114,24 @@ func (fs *FileStream) GetMaster() string {
 			}
 		}
 	}
-	for _, audio := range fs.Info.Audios {
-		master += "#EXT-X-MEDIA:TYPE=AUDIO,"
-		master += "GROUP-ID=\"audio\","
-		if audio.Language != nil {
-			master += fmt.Sprintf("LANGUAGE=\"%s\",", *audio.Language)
-		}
-		if audio.Title != nil {
-			master += fmt.Sprintf("NAME=\"%s\",", *audio.Title)
-		} else if audio.Language != nil {
-			master += fmt.Sprintf("NAME=\"%s\",", *audio.Language)
-		} else {
-			master += fmt.Sprintf("NAME=\"Audio %d\",", audio.Index)
-		}
-		if audio.IsDefault {
-			master += "DEFAULT=YES,"
-		}
-		master += fmt.Sprintf("URI=\"./audio/%d/index.m3u8\"\n", audio.Index)
-	}
+	// for _, audio := range fs.Info.Audios {
+	// 	master += "#EXT-X-MEDIA:TYPE=AUDIO,"
+	// 	master += "GROUP-ID=\"audio\","
+	// 	if audio.Language != nil {
+	// 		master += fmt.Sprintf("LANGUAGE=\"%s\",", *audio.Language)
+	// 	}
+	// 	if audio.Title != nil {
+	// 		master += fmt.Sprintf("NAME=\"%s\",", *audio.Title)
+	// 	} else if audio.Language != nil {
+	// 		master += fmt.Sprintf("NAME=\"%s\",", *audio.Language)
+	// 	} else {
+	// 		master += fmt.Sprintf("NAME=\"Audio %d\",", audio.Index)
+	// 	}
+	// 	if audio.IsDefault {
+	// 		master += "DEFAULT=YES,"
+	// 	}
+	// 	master += fmt.Sprintf("URI=\"./audio/%d/index.m3u8\"\n", audio.Index)
+	// }
 	return master
 }
 

@@ -18,8 +18,8 @@ func NewAudioStream(file *FileStream, idx int32) *AudioStream {
 	return ret
 }
 
-func (as *AudioStream) getOutPath(encoder_id int) string {
-	return fmt.Sprintf("%s/segment-a%d-%d-%%d.m4s", as.file.Out, as.index, encoder_id)
+func (as *AudioStream) getSegmentName() string {
+	return fmt.Sprintf("segment-a-%d-%%d.m4s", as.index)
 }
 
 func (as *AudioStream) getFlags() Flags {
