@@ -232,7 +232,7 @@ func (ts *Stream) run(start int32) error {
 		"-i", ts.file.Path,
 		// this makes behaviors consistent between soft and hardware decodes.
 		// this also means that after a -ss 50, the output video will start at 50s
-		"-start_at_zero",
+		// "-start_at_zero",
 		// for hls streams, -copyts is mandatory
 		"-copyts",
 		// this makes output file start at 0s instead of a random delay + the -ss value
@@ -251,7 +251,8 @@ func (ts *Stream) run(start int32) error {
 		// when segments are short (can make the video repeat itself)
 		"-segment_time_delta", "0.05",
 		"-segment_format", "mp4",
-		"-segment_format_options", "movflags=frag_keyframe+empty_moov+omit_tfhd_offset+faststart",
+		"-segment_format_options", "movflags=frag_keyframe+empty_moov+omit_tfhd_offset",
+		"-output_ts_offset", fmt.Sprint(ts.file.Keyframes.Get(start_segment)),
 		"-segment_times", toSegmentStr(Map(segments, func(seg float64, _ int) float64 {
 			// segment_times want durations, not timestamps so we must subtract the -ss param
 			// since we give a greater value to -ss to prevent wrong seeks but -segment_times
