@@ -1,6 +1,6 @@
 module github.com/zoriya/kyoo/transcoder
 
-go 1.21
+go 1.22
 
 require github.com/labstack/echo/v4 v4.12.0 // direct
 

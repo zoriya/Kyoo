@@ -109,7 +109,7 @@ func (h *Handler) GetAudioIndex(c echo.Context) error {
 //
 // Retrieve a chunk of a transmuxed video.
 //
-// Path: /:path/:quality/segments-:chunk.ts
+// Path: /:path/:quality/segments-:chunk.m4s
 func (h *Handler) GetVideoSegment(c echo.Context) error {
 	quality, err := src.QualityFromString(c.Param("quality"))
 	if err != nil {
@@ -139,7 +139,7 @@ func (h *Handler) GetVideoSegment(c echo.Context) error {
 //
 // Retrieve a chunk of a transcoded audio.
 //
-// Path: /:path/audio/:audio/segments-:chunk.ts
+// Path: /:path/audio/:audio/segments-:chunk.m4s
 func (h *Handler) GetAudioSegment(c echo.Context) error {
 	audio, err := strconv.ParseInt(c.Param("audio"), 10, 32)
 	if err != nil {

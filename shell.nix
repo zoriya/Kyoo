@@ -32,6 +32,7 @@ in
       go
       wgo
       mediainfo
+      bento4
       ffmpeg-full
       postgresql_15
       pgformatter
