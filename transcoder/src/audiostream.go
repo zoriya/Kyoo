@@ -36,3 +36,29 @@ func (as *AudioStream) getTranscodeArgs(segments string) []string {
 		"-b:a", "128k",
 	}
 }
+
+func (ts *AudioStream) GetIndex() (string, error) {
+	index := `#EXTM3U
+#EXT-X-VERSION:7
+#EXT-X-PLAYLIST-TYPE:EVENT
+#EXT-X-START:TIME-OFFSET=0
+#EXT-X-MEDIA-SEQUENCE:0
+#EXT-X-INDEPENDENT-SEGMENTS
+#EXT-X-MAP:URI="init.mp4"
+`
+	index += fmt.Sprintf("#EXT-X-TARGETDURATION:%d\n", int(OptimalFragmentDuration)+1)
+
+	count := int32((float64(ts.file.Info.Duration) / OptimalFragmentDuration))
+	for segment := int32(0); segment < count; segment++ {
+		index += fmt.Sprintf("#EXTINF:%.6f\n", OptimalFragmentDuration)
+		index += fmt.Sprintf("segment-%d.m4s\n", segment)
+	}
+
+	last_ts := float64(count) * OptimalFragmentDuration
+	if last_ts > 0 {
+		index += fmt.Sprintf("#EXTINF:%.6f\n", float64(ts.file.Info.Duration)-last_ts)
+		index += fmt.Sprintf("segment-%d.m4s\n", count)
+	}
+	index += `#EXT-X-ENDLIST`
+	return index, nil
+}
