@@ -89,7 +89,7 @@ func (fs *FileStream) GetMaster() string {
 			}
 			master += "AUDIO=\"audio\","
 			master += "CLOSED-CAPTIONS=NONE\n"
-			master += fmt.Sprintf("./%s/index.m3u8\n", Original)
+			master += fmt.Sprintf("%s/index.m3u8\n", Original)
 		}
 
 		aspectRatio := float32(fs.Info.Video.Width) / float32(fs.Info.Video.Height)
@@ -110,7 +110,7 @@ func (fs *FileStream) GetMaster() string {
 				master += fmt.Sprintf("CODECS=\"%s\",", transmux_codec)
 				master += "AUDIO=\"audio\","
 				master += "CLOSED-CAPTIONS=NONE\n"
-				master += fmt.Sprintf("./%s/index.m3u8\n", quality)
+				master += fmt.Sprintf("%s/index.m3u8\n", quality)
 			}
 		}
 	}
@@ -130,7 +130,7 @@ func (fs *FileStream) GetMaster() string {
 		if audio.IsDefault {
 			master += "DEFAULT=YES,"
 		}
-		master += fmt.Sprintf("URI=\"./audio/%d/index.m3u8\"\n", audio.Index)
+		master += fmt.Sprintf("URI=\"audio/%d/index.m3u8\"\n", audio.Index)
 	}
 	return master
 }

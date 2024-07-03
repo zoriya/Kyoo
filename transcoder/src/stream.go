@@ -24,10 +24,16 @@ const (
 
 type StreamHandle interface {
 	getTranscodeArgs(segments string) []string
-	getSegmentName() string
+	getIdentifier() string
 	getFlags() Flags
 	GetIndex() (string, error)
 }
+
+// First %d is encoder_id, second %d is segment number (escaped for ffmpeg)
+const (
+	SegmentNameFormat = "%d-segment-%%d.m4s"
+	InitNameFormat    = "%d-init.mp4"
+)
 
 type Stream struct {
 	handle   StreamHandle
@@ -213,8 +219,7 @@ func (ts *Stream) run(start int32) error {
 		segments = []float64{9999999}
 	}
 
-	outpath := fmt.Sprintf("%s/%d", ts.file.Out, encoder_id)
-	fmt.Print(outpath)
+	outpath := fmt.Sprintf("%s/%s", ts.file.Out, ts.handle.getIdentifier())
 	err := os.MkdirAll(outpath, 0o755)
 	if err != nil {
 		return err
@@ -271,8 +276,8 @@ func (ts *Stream) run(start int32) error {
 		"-hls_time", fmt.Sprint(OptimalFragmentDuration),
 		"-start_number", fmt.Sprint(start_segment),
 		"-hls_segment_type", "fmp4",
-		"-hls_fmp4_init_filename", fmt.Sprintf("%s/init.mp4", outpath),
-		"-hls_segment_filename", fmt.Sprintf("%s/%s", outpath, ts.handle.getSegmentName()),
+		"-hls_fmp4_init_filename", fmt.Sprintf("%s/%s", outpath, fmt.Sprintf(InitNameFormat, encoder_id)),
+		"-hls_segment_filename", fmt.Sprintf("%s/%s", outpath, fmt.Sprintf(SegmentNameFormat, encoder_id)),
 		// Make the playlist easier to parse in our program by only outputing 1 segment and no endlist marker
 		// anyways this list is only read once and we generate our own.
 		"-hls_list_size", "1",
@@ -300,7 +305,7 @@ func (ts *Stream) run(start int32) error {
 
 	go func() {
 		scanner := bufio.NewScanner(stdout)
-		format := ts.handle.getSegmentName()
+		format := fmt.Sprintf(SegmentNameFormat, encoder_id)
 		should_stop := false
 		is_init_ready := false
 
@@ -383,10 +388,10 @@ func (ts *Stream) GetInit() (string, error) {
 	select {
 	case <-ts.init.channel:
 		return fmt.Sprintf(
-			"%s/%d/%s",
+			"%s/%s/%s",
 			ts.file.Out,
-			ts.init.encoder,
-			"init.mp4",
+			ts.handle.getIdentifier(),
+			fmt.Sprintf(InitNameFormat, ts.init.encoder),
 		), nil
 	case <-time.After(60 * time.Second):
 		return "", errors.New("could not retrieve the selected segment (timeout)")
@@ -436,10 +441,13 @@ func (ts *Stream) GetSegment(segment int32) (string, error) {
 	}
 	ts.prerareNextSegements(segment)
 	return fmt.Sprintf(
-		"%s/%d/%s",
+		"%s/%s/%s",
 		ts.file.Out,
-		ts.segments[segment].encoder,
-		fmt.Sprintf(ts.handle.getSegmentName(), segment),
+		ts.handle.getIdentifier(),
+		fmt.Sprintf(
+			fmt.Sprintf(SegmentNameFormat, ts.segments[segment].encoder),
+			segment,
+		),
 	), nil
 }
 

@@ -25,8 +25,8 @@ func (vs *VideoStream) getFlags() Flags {
 	return VideoF
 }
 
-func (vs *VideoStream) getSegmentName() string {
-	return fmt.Sprintf("segment-%s-%%d.m4s", vs.quality)
+func (vs *VideoStream) getIdentifier() string {
+	return fmt.Sprintf("%s", vs.quality)
 }
 
 func closestMultiple(n int32, x int32) int32 {
