@@ -1,16 +1,16 @@
 {
 	"home": {
-		"recommended": "",
-		"news": "",
-		"watchlist": "",
-		"info": "",
-		"none": "",
-		"watchlistLogin": "",
-		"refreshMetadata": "",
+		"recommended": "ശുപാർശ ചെയ്ത",
+		"news": "വാർത്ത",
+		"watchlist": "കാണുന്നത് തുടരുക",
+		"info": "കൂടുതൽ കാണുക",
+		"none": "എപ്പിസോഡുകളൊന്നുമില്ല",
+		"watchlistLogin": "നിങ്ങൾ കണ്ടതിൻ്റെ ട്രാക്ക് സൂക്ഷിക്കുന്നതിനോ കാണാൻ പ്ലാൻ ചെയ്യുന്നതിനോ, നിങ്ങൾ ലോഗിൻ ചെയ്യേണ്ടതുണ്ട്.",
+		"refreshMetadata": "മെറ്റാഡാറ്റ പുതുക്കുക",
 		"episodeMore": {
 			"goToShow": "",
-			"download": "",
-			"mediainfo": ""
+			"download": "ഡൗൺലോഡ്",
+			"mediainfo": "ഫയൽ വിവരം കാണുക"
 		}
 	},
 	"show": {
