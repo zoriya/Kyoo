@@ -219,6 +219,7 @@ matcher:
       # workaround until dedicated image is created
       repository: ghcr.io/zoriya/kyoo_scanner
       tag: ~
+  # matcher does not support multiple replicas
   replicaCount: 1
   podLabels: {}
   deploymentAnnotations: {}
