@@ -259,7 +259,7 @@ export const EpisodeLine = ({
 					width: percent(18),
 					aspectRatio: 16 / 9,
 				}}
-				{...css({ flexShrink: 0, m: ts(1) })}
+				{...css({ flexShrink: 0, m: ts(1), borderRadius: imageBorderRadius })}
 			>
 				{(watchedPercent || watchedStatus === WatchStatusV.Completed) && (
 					<>

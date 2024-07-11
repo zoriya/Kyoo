@@ -59,7 +59,15 @@
 			"desc": "azalan"
 		},
 		"switchToGrid": "Izgara görünümüne geç",
-		"switchToList": "Liste görünümüne geç"
+		"switchToList": "Liste görünümüne geç",
+		"mediatypekey": {
+			"collection": "Koleksiyonlar",
+			"show": "Diziler",
+			"all": "Hepsi",
+			"movie": "Filmler"
+		},
+		"mediatype-tt": "İçeriğin Türü",
+		"mediatypelabel": "İçeriğin Türü"
 	},
 	"misc": {
 		"settings": "Ayarlar",

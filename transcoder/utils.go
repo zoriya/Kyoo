@@ -24,9 +24,9 @@ func GetPath(c echo.Context) (string, string, error) {
 	if key == "" {
 		return "", "", echo.NewHTTPError(http.StatusBadRequest, "Missing resouce path.")
 	}
-	pathb, err := base64.StdEncoding.DecodeString(key)
+	pathb, err := base64.RawURLEncoding.DecodeString(key)
 	if err != nil {
-		return "", "", echo.NewHTTPError(http.StatusBadRequest, "Invalid path. Should be base64 encoded.")
+		return "", "", echo.NewHTTPError(http.StatusBadRequest, "Invalid path. Should be base64url (without padding) encoded.")
 	}
 	path := filepath.Clean(string(pathb))
 	if !filepath.IsAbs(path) {

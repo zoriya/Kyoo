@@ -27,6 +27,7 @@ using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace Kyoo.Core.Api;
 
@@ -54,7 +55,7 @@ public abstract class TranscoderApi<T>(IRepository<T> repository) : CrudThumbsAp
 	private async Task<string> _GetPath64(Identifier identifier)
 	{
 		string path = await GetPath(identifier);
-		return Convert.ToBase64String(Encoding.UTF8.GetBytes(path));
+		return WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(path));
 	}
 
 	/// <summary>
