@@ -1,0 +1,284 @@
+{
+	"home": {
+		"recommended": "ശുപാർശ ചെയ്ത",
+		"news": "വാർത്ത",
+		"watchlist": "കാണുന്നത് തുടരുക",
+		"info": "കൂടുതൽ കാണുക",
+		"none": "എപ്പിസോഡുകളൊന്നുമില്ല",
+		"watchlistLogin": "നിങ്ങൾ കണ്ടതിൻ്റെ ട്രാക്ക് സൂക്ഷിക്കുന്നതിനോ കാണാൻ പ്ലാൻ ചെയ്യുന്നതിനോ, നിങ്ങൾ ലോഗിൻ ചെയ്യേണ്ടതുണ്ട്.",
+		"refreshMetadata": "മെറ്റാഡാറ്റ പുതുക്കുക",
+		"episodeMore": {
+			"goToShow": "",
+			"download": "ഡൗൺലോഡ്",
+			"mediainfo": "ഫയൽ വിവരം കാണുക"
+		}
+	},
+	"show": {
+		"play": "",
+		"trailer": "",
+		"studio": "",
+		"genre": "",
+		"genre-none": "",
+		"staff": "",
+		"staff-none": "",
+		"noOverview": "",
+		"episode-none": "",
+		"episodeNoMetadata": "",
+		"tags": "",
+		"links": "",
+		"jumpToSeason": "",
+		"partOf": "",
+		"watchlistAdd": "",
+		"watchlistEdit": "",
+		"watchlistRemove": "",
+		"watchlistLogin": "",
+		"watchlistMark": {
+			"completed": "",
+			"planned": "",
+			"watching": "",
+			"droped": "",
+			"null": ""
+		},
+		"nextUp": "",
+		"season": ""
+	},
+	"browse": {
+		"mediatypekey": {
+			"all": "",
+			"movie": "",
+			"show": "",
+			"collection": ""
+		},
+		"mediatype-tt": "",
+		"mediatypelabel": "",
+		"sortby": "",
+		"sortby-tt": "",
+		"sortkey": {
+			"relevance": "",
+			"name": "",
+			"airDate": "",
+			"startAir": "",
+			"endAir": "",
+			"addedDate": "",
+			"rating": ""
+		},
+		"sortord": {
+			"asc": "",
+			"desc": ""
+		},
+		"switchToGrid": "",
+		"switchToList": ""
+	},
+	"genres": {
+		"Action": "",
+		"Adventure": "",
+		"Animation": "",
+		"Comedy": "",
+		"Crime": "",
+		"Documentary": "",
+		"Drama": "",
+		"Family": "",
+		"Fantasy": "",
+		"History": "",
+		"Horror": "",
+		"Music": "",
+		"Mystery": "",
+		"Romance": "",
+		"ScienceFiction": "",
+		"Thriller": "",
+		"War": "",
+		"Western": "",
+		"Kids": "",
+		"News": "",
+		"Reality": "",
+		"Soap": "",
+		"Talk": "",
+		"Politics": ""
+	},
+	"misc": {
+		"settings": "",
+		"prev-page": "",
+		"next-page": "",
+		"delete": "",
+		"cancel": "",
+		"more": "",
+		"expand": "",
+		"collapse": "",
+		"edit": "",
+		"or": "",
+		"loading": ""
+	},
+	"navbar": {
+		"home": "",
+		"browse": "",
+		"download": "",
+		"search": "",
+		"login": "",
+		"admin": ""
+	},
+	"settings": {
+		"general": {
+			"label": "",
+			"theme": {
+				"label": "",
+				"description": "",
+				"auto": "",
+				"light": "",
+				"dark": ""
+			},
+			"language": {
+				"label": "",
+				"description": "",
+				"system": ""
+			}
+		},
+		"playback": {
+			"label": "",
+			"playmode": {
+				"label": "",
+				"description": ""
+			},
+			"audioLanguage": {
+				"label": "",
+				"description": ""
+			},
+			"subtitleLanguage": {
+				"label": "",
+				"description": "",
+				"none": ""
+			}
+		},
+		"account": {
+			"label": "",
+			"username": {
+				"label": ""
+			},
+			"avatar": {
+				"label": "",
+				"description": ""
+			},
+			"email": {
+				"label": ""
+			},
+			"password": {
+				"label": "",
+				"description": "",
+				"oldPassword": "",
+				"newPassword": ""
+			}
+		},
+		"oidc": {
+			"label": "",
+			"connected": "",
+			"not-connected": "",
+			"open-profile": "",
+			"link": "",
+			"delete": ""
+		},
+		"about": {
+			"label": "",
+			"android-app": {
+				"label": "",
+				"description": ""
+			},
+			"git": {
+				"label": "",
+				"description": ""
+			}
+		}
+	},
+	"player": {
+		"back": "",
+		"previous": "",
+		"next": "",
+		"play": "",
+		"pause": "",
+		"mute": "",
+		"volume": "",
+		"quality": "",
+		"audios": "",
+		"subtitles": "",
+		"subtitle-none": "",
+		"fullscreen": "",
+		"direct": "",
+		"transmux": "",
+		"auto": "",
+		"notInPristine": "",
+		"unsupportedError": ""
+	},
+	"search": {
+		"empty": ""
+	},
+	"login": {
+		"login": "",
+		"register": "",
+		"guest": "",
+		"guest-forbidden": "",
+		"via": "",
+		"add-account": "",
+		"logout": "",
+		"server": "",
+		"email": "",
+		"username": "",
+		"password": "",
+		"confirm": "",
+		"or-register": "",
+		"or-login": "",
+		"password-no-match": "",
+		"delete": "",
+		"delete-confirmation": ""
+	},
+	"downloads": {
+		"empty": "",
+		"error": "",
+		"delete": "",
+		"deleteMessage": "",
+		"pause": "",
+		"resume": "",
+		"retry": ""
+	},
+	"errors": {
+		"connection": "",
+		"connection-tips": "",
+		"unknown": "",
+		"try-again": "",
+		"re-login": "",
+		"offline": "",
+		"unauthorized": "",
+		"needVerification": "",
+		"needAccount": "",
+		"setup": {
+			"MissingAdminAccount": "",
+			"NoVideoFound": ""
+		}
+	},
+	"mediainfo": {
+		"file": "",
+		"container": "",
+		"video": "",
+		"audio": "",
+		"subtitles": "",
+		"forced": "",
+		"default": "",
+		"duration": "",
+		"size": "",
+		"novideo": "",
+		"nocontainer": ""
+	},
+	"admin": {
+		"users": {
+			"label": "",
+			"adminUser": "",
+			"regularUser": "",
+			"set-permissions": "",
+			"delete": "",
+			"unverifed": "",
+			"verify": ""
+		},
+		"scanner": {
+			"label": "",
+			"scan": "",
+			"empty": ""
+		}
+	}
+}
