@@ -1,0 +1,129 @@
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: kyoo
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kyoo
+  namespace: argocd
+spec:
+  destination:
+    namespace: kyoo
+    server: https://kubernetes.default.svc
+  project: homelab
+  source:
+    path: chart/
+    repoURL: https://github.com/acelinkio/Kyoo.git
+    targetRevision: feature/helmchart
+    helm:
+      valuesObject:
+        kyoo:
+          address: https://kyoo.acelink.io
+        meilisearch:
+          enabled: true
+        postgresql:
+          enabled: true
+        rabbitmq:
+          enabled: true
+        extraObjects:
+          - apiVersion: v1
+            kind: Secret
+            metadata:
+              name: bigsecret
+            type: Opaque
+            stringData:
+              kyoo_apikeys: yHXWGsjfjE6sy6UxavqmTUYxgCFYek
+              tmdb_apikey: ""
+              MEILI_MASTER_KEY: barkLike8SuperDucks
+              postgres_user: kyoo_back
+              postgres_password: watchSomething4me
+              rabbitmq_user: kyoo_all
+              rabbitmq_password: youAreAmazing2
+              rabbitmq_cookie: mmmGoodCookie
+          - kind: PersistentVolumeClaim
+            apiVersion: v1
+            metadata:
+              name: back-storage
+            spec:
+              accessModes:
+                - "ReadWriteMany"
+              resources:
+                requests:
+                  storage: "3Gi"
+          - kind: PersistentVolumeClaim
+            apiVersion: v1
+            metadata:
+              name: media
+            spec:
+              accessModes:
+                - "ReadWriteMany"
+              resources:
+                requests:
+                  storage: "3Gi"
+          - kind: PersistentVolumeClaim
+            apiVersion: v1
+            metadata:
+              name: transcoder-storage
+            spec:
+              accessModes:
+                - "ReadWriteMany"
+              resources:
+                requests:
+                  storage: "3Gi"
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: kyoo
+  namespace: kyoo
+  annotations:
+    external-dns.custom/type: private
+spec:
+  endpoints:
+    - dnsName: kyoo.acelink.io
+      recordType: CNAME
+      targets:
+        - intgw.acelink.io
+      providerSpecific:
+        - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
+          value: "false"
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: kyoo
+  namespace: kyoo
+spec:
+  parentRefs:
+  - name: internal
+    namespace: gateway
+    sectionName: https
+  - name: external
+    namespace: gateway
+    sectionName: https
+  hostnames:
+  - "kyoo.acelink.io"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /api
+    backendRefs:
+    - name: kyoo-back
+      port: 5000
+    filters:
+      - type: URLRewrite
+        urlRewrite:
+          path:
+            type: ReplacePrefixMatch
+            replacePrefixMatch: /
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: kyoo-front
+      port: 8901

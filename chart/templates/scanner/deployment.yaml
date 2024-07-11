@@ -58,11 +58,6 @@ spec:
               value: http://{{ include "kyoo.back.fullname" . }}:5000
             - name: LIBRARY_LANGUAGES
               value: {{ .Values.kyoo.languages }}
-            - name: THEMOVIEDB_APIKEY
-              valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.contentdatabase.provider.tmdb.apikeyKey }}
-                  name: {{ .Values.contentdatabase.provider.tmdb.existingSecret }}
             - name: RABBITMQ_HOST
               value: {{ .Values.global.rabbitmq.host }}
             - name: RABBITMQ_PORT
