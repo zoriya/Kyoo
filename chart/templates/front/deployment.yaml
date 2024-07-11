@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  {{- with (mergeOverwrite (deepCopy .Values.global.deploymentAnnotations) .Values.front.deploymentAnnotations) }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
+  name: {{ include "kyoo.front.fullname" . }}
+  labels:
+    {{- include "kyoo.labels" (dict "context" . "component" .Values.front.name "name" .Values.front.name) | nindent 4 }}
+spec:
+  replicas: {{ .Values.front.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "kyoo.selectorLabels" (dict "context" . "name" .Values.front.name) | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- with (mergeOverwrite (deepCopy .Values.global.podAnnotations) .Values.front.podAnnotations) }}
+        {{- range $key, $value := . }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+        {{- end }}
+      labels:
+        {{- include "kyoo.labels" (dict "context" . "component" .Values.front.name "name" .Values.front.name) | nindent 8 }}
+        {{- with (mergeOverwrite (deepCopy .Values.global.podLabels) .Values.front.podLabels) }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.front.imagePullSecrets | default .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.global.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "kyoo.front.serviceAccountName" . }}
+      containers:
+        - name: main
+          image: {{ .Values.front.kyoo_front.image.repository | default (printf "%s/kyoo_front" .Values.global.image.repositoryBase) }}:{{ default (include "kyoo.defaultTag" .) .Values.front.kyoo_front.image.tag }}
+          imagePullPolicy: {{ default .Values.global.image.imagePullPolicy }}
+          args:
+            {{- with .Values.front.kyoo_front.extraArgs }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          env:
+            - name: KYOO_URL
+              value: http://{{ include "kyoo.back.fullname" . }}:5000
+            {{- with (concat .Values.global.extraEnv .Values.front.kyoo_front.extraEnv) }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: main
+              containerPort: 8901
+              protocol: TCP
+          {{- with .Values.front.kyoo_front.livenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.front.kyoo_front.livenessProbe | nindent 12 }}
+          {{- end }}
+          {{- with .Values.front.kyoo_front.readinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.front.kyoo_front.readinessProbe | nindent 12 }}
+          {{- end }}
+          {{- with .Values.front.kyoo_front.resources }}
+          resources:
+            {{- toYaml .Values.front.kyoo_front.resources | nindent 12 }}
+          {{- end }}
+          {{- with .Values.front.kyoo_front.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.front.kyoo_front.extraVolumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        {{- with .Values.front.kyoo_front.extraContainers }}
+          {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+      {{- with .Values.front.extraInitContainers }}
+      initContainers:
+        {{- tpl (toYaml .) $ | nindent 6 }}
+      {{- end }}
+      {{- with .Values.front.extraVolumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

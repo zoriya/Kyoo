@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  {{- with (mergeOverwrite (deepCopy .Values.global.deploymentAnnotations) .Values.scanner.deploymentAnnotations) }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
+  name: {{ include "kyoo.scanner.fullname" . }}
+  labels:
+    {{- include "kyoo.labels" (dict "context" . "component" .Values.scanner.name "name" .Values.scanner.name) | nindent 4 }}
+spec:
+  replicas: {{ .Values.scanner.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "kyoo.selectorLabels" (dict "context" . "name" .Values.scanner.name) | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- with (mergeOverwrite (deepCopy .Values.global.podAnnotations) .Values.scanner.podAnnotations) }}
+        {{- range $key, $value := . }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+        {{- end }}
+      labels:
+        {{- include "kyoo.labels" (dict "context" . "component" .Values.scanner.name "name" .Values.scanner.name) | nindent 8 }}
+        {{- with (mergeOverwrite (deepCopy .Values.global.podLabels) .Values.scanner.podLabels) }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.scanner.imagePullSecrets | default .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.global.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "kyoo.scanner.serviceAccountName" . }}
+      containers:
+        - name: main
+          image: {{ .Values.scanner.kyoo_scanner.image.repository | default (printf "%s/kyoo_scanner" .Values.global.image.repositoryBase) }}:{{ default (include "kyoo.defaultTag" .) .Values.scanner.kyoo_scanner.image.tag }}
+          imagePullPolicy: {{ default .Values.global.image.imagePullPolicy }}
+          args:
+            {{- with .Values.scanner.kyoo_scanner.extraArgs }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          env:
+            - name: SCANNER_LIBRARY_ROOT
+              value: /data
+            - name: KYOO_APIKEYS
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.kyoo.apikey.apikeyKey }}
+                  name: {{ .Values.kyoo.apikey.existingSecret }}
+            - name: KYOO_URL
+              value: http://{{ include "kyoo.back.fullname" . }}:5000
+            - name: LIBRARY_LANGUAGES
+              value: {{ .Values.kyoo.languages }}
+            - name: THEMOVIEDB_APIKEY
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.contentdatabase.provider.tmdb.apikeyKey }}
+                  name: {{ .Values.contentdatabase.provider.tmdb.existingSecret }}
+            - name: RABBITMQ_HOST
+              value: {{ .Values.global.rabbitmq.host }}
+            - name: RABBITMQ_PORT
+              value: "{{ .Values.global.rabbitmq.port }}"
+            - name: RABBITMQ_DEFAULT_USER
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.global.rabbitmq.kyoo_scanner.userKey }}
+                  name: {{ .Values.global.rabbitmq.kyoo_scanner.existingSecret }}
+            - name: RABBITMQ_DEFAULT_PASS
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.global.rabbitmq.kyoo_scanner.passwordKey }}
+                  name: {{ .Values.global.rabbitmq.kyoo_scanner.existingSecret }}
+            {{- with (concat .Values.global.extraEnv .Values.scanner.kyoo_scanner.extraEnv) }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: main
+              containerPort: 80
+              protocol: TCP
+          {{- with .Values.scanner.kyoo_scanner.livenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.scanner.kyoo_scanner.livenessProbe | nindent 12 }}
+          {{- end }}
+          {{- with .Values.scanner.kyoo_scanner.readinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.scanner.kyoo_scanner.readinessProbe | nindent 12 }}
+          {{- end }}
+          {{- with .Values.scanner.kyoo_scanner.resources }}
+          resources:
+            {{- toYaml .Values.scanner.kyoo_scanner.resources | nindent 12 }}
+          {{- end }}
+          {{- with .Values.scanner.kyoo_scanner.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            {{- with .Values.media.volumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.scanner.kyoo_scanner.extraVolumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+        {{- with .Values.scanner.kyoo_scanner.extraContainers }}
+          {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+      {{- with .Values.scanner.extraInitContainers }}
+      initContainers:
+        {{- tpl (toYaml .) $ | nindent 6 }}
+      {{- end }}
+      volumes:
+        {{- with .Values.media.volumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.scanner.extraVolumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}

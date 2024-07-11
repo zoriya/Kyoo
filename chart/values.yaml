@@ -1,0 +1,359 @@
+# Default values for kyoo.
+global:
+  image:
+    repositoryBase: "ghcr.io/zoriya"
+    tag: ""
+    imagePullPolicy: IfNotPresent
+  imagePullSecrets: []
+  deploymentAnnotations: {}
+  podAnnotations: {}
+  podLabels: {}
+  extraEnv: []
+
+  meilisearch:
+    proto: http
+    host: kyoo-meilisearch
+    port: 7700
+    #infra is only used by subchart deployment
+    infra:
+      # DOES NOT SUPPORT SPECIFYING KEY.  MUST BE NAMED `MEILI_MASTER_KEY`
+      existingSecret: bigsecret
+    kyoo_back:
+      masterkeyKey: MEILI_MASTER_KEY
+      existingSecret: bigsecret
+  postgres:
+    host: kyoo-postgresql
+    port: 5432
+    database: kyoo_back
+    #infra is only used by subchart deployment
+    infra:
+      # admin user is postgres
+      # default user is the database name
+      passwordKey: postgres_password
+      existingSecret: bigsecret
+    kyoo_migrations:
+      userKey: postgres_user
+      passwordKey: postgres_password
+      existingSecret: bigsecret
+    kyoo_back:
+      userKey: postgres_user
+      passwordKey: postgres_password
+      existingSecret: bigsecret
+  rabbitmq:
+    host: kyoo-rabbitmq
+    port: 5672
+    # vhost is not used yet
+    # vhost: ""
+    #infra is only used by subchart deployment
+    infra:
+      # user must be manually aligned via rabbitmq.auth.user
+      passwordKey: rabbitmq_password
+      keyErlangCookie: rabbitmq_cookie
+      existingSecret: bigsecret
+    kyoo_autosync:
+      userKey: rabbitmq_user
+      passwordKey: rabbitmq_password
+      existingSecret: bigsecret
+    kyoo_back:
+      userKey: rabbitmq_user
+      passwordKey: rabbitmq_password
+      existingSecret: bigsecret
+    kyoo_matcher:
+      userKey: rabbitmq_user
+      passwordKey: rabbitmq_password
+      existingSecret: bigsecret
+    kyoo_scanner:
+      userKey: rabbitmq_user
+      passwordKey: rabbitmq_password
+      existingSecret: bigsecret
+
+kyoo:
+  address: "https://kyoo.mydomain.com"
+  unloggedPermissions: "overall.read,overall.play"
+  languages: "en"
+  apikey:
+    existingSecret: bigsecret
+    apikeyKey: kyoo_apikeys
+
+media:
+  volumes:
+    - name: media
+      persistentVolumeClaim:
+        claimName: media
+  # mounts should always be mounted to /data
+  volumeMounts:
+    - mountPath: /data
+      name: media
+      subPath: media
+
+contentdatabase:
+  provider:
+    tmdb:
+      apikeyKey: tmdb_apikey
+      existingSecret: bigsecret
+
+autosync:
+  name: autosync
+  kyoo_autosync:
+    livenessProbe: {}
+    readinessProbe: {}
+    resources: {}
+    containerSecurityContext: {}
+    extraVolumeMounts: []
+    extraArgs: []
+    extraEnv: []
+    image:
+      repository: ~
+      tag: ~
+  replicaCount: 1
+  podLabels: {}
+  deploymentAnnotations: {}
+  podAnnotations: {}
+  imagePullSecrets: []
+  service:
+    annotations: {}
+    labels: {}
+    type: ClusterIP
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    name: ~
+  extraContainers: []
+  extraInitContainers: []
+  extraVolumes: []
+
+back:
+  name: back
+  kyoo_migrations:
+    livenessProbe: {}
+    readinessProbe: {}
+    resources: {}
+    containerSecurityContext: {}
+    extraVolumeMounts: []
+    extraArgs: []
+    extraEnv: []
+    image:
+      repository: ~
+      tag: ~
+  kyoo_back:
+    livenessProbe: {}
+    readinessProbe: {}
+    resources: {}
+    containerSecurityContext: {}
+    extraVolumeMounts: []
+    extraArgs: []
+    extraEnv: []
+    image:
+      repository: ~
+      tag: ~
+    volumeMounts:
+      - mountPath: /metadata
+        name: back-storage
+  volumes:
+    - name: back-storage
+      persistentVolumeClaim:
+        claimName: back-storage
+  replicaCount: 1
+  podLabels: {}
+  deploymentAnnotations: {}
+  podAnnotations: {}
+  imagePullSecrets: []
+  service:
+    annotations: {}
+    labels: {}
+    type: ClusterIP
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    name: ~
+  extraContainers: []
+  extraInitContainers: []
+  extraVolumes: []
+
+front:
+  name: front
+  kyoo_front:
+    livenessProbe: {}
+    readinessProbe: {}
+    resources: {}
+    containerSecurityContext: {}
+    extraVolumeMounts: []
+    extraArgs: []
+    extraEnv: []
+    image:
+      repository: ~
+      tag: ~
+  replicaCount: 1
+  podLabels: {}
+  deploymentAnnotations: {}
+  podAnnotations: {}
+  imagePullSecrets: []
+  service:
+    annotations: {}
+    labels: {}
+    type: ClusterIP
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    name: ~
+  extraContainers: []
+  extraInitContainers: []
+  extraVolumes: []
+
+matcher:
+  name: matcher
+  kyoo_matcher:
+    livenessProbe: {}
+    readinessProbe: {}
+    resources: {}
+    containerSecurityContext: {}
+    extraVolumeMounts: []
+    # workaround until dedicated image is created
+    extraArgs: 
+      - matcher
+    extraEnv: []
+    image:
+      # workaround until dedicated image is created
+      repository: ghcr.io/zoriya/kyoo_scanner
+      tag: ~
+  replicaCount: 1
+  podLabels: {}
+  deploymentAnnotations: {}
+  podAnnotations: {}
+  imagePullSecrets: []
+  service:
+    annotations: {}
+    labels: {}
+    type: ClusterIP
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    name: ~
+  extraContainers: []
+  extraInitContainers: []
+  extraVolumes: []
+
+scanner:
+  name: scanner
+  kyoo_scanner:
+    livenessProbe: {}
+    readinessProbe: {}
+    resources: {}
+    containerSecurityContext: {}
+    extraVolumeMounts: []
+    extraArgs: []
+    extraEnv: []
+    image:
+      repository: ~
+      tag: ~
+  replicaCount: 1
+  podLabels: {}
+  deploymentAnnotations: {}
+  podAnnotations: {}
+  imagePullSecrets: []
+  service:
+    annotations: {}
+    labels: {}
+    type: ClusterIP
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    name: ~
+  extraContainers: []
+  extraInitContainers: []
+  extraVolumes: []
+
+transcoder:
+  name: transcoder
+  kyoo_transcoder:
+    livenessProbe: {}
+    readinessProbe: {}
+    resources: {}
+    containerSecurityContext: {}
+    extraVolumeMounts: []
+    extraArgs: []
+    extraEnv: []
+    image:
+      repository: ~
+      tag: ~
+    volumeMounts:
+      - mountPath: /metadata
+        name: transcoder-storage
+      - mountPath: /cache
+        name: cache
+  volumes:
+    - name: transcoder-storage
+      persistentVolumeClaim:
+        claimName: transcoder-storage
+    - name: cache
+      emptyDir: {}
+  replicaCount: 1
+  podLabels: {}
+  deploymentAnnotations: {}
+  podAnnotations: {}
+  imagePullSecrets: []
+  service:
+    annotations: {}
+    labels: {}
+    type: ClusterIP
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    name: ~
+  extraContainers: []
+  extraInitContainers: []
+  extraVolumes: []
+
+# subchart settings
+meilisearch:
+  enabled: false
+  environment:
+    MEILI_ENV: production
+  auth:
+    # DOES NOT SUPPORT SPECIFYING KEY.  MUST BE NAMED `MEILI_MASTER_KEY`
+    existingMasterKeySecret: "{{ .Values.global.meilisearch.infra.existingSecret }}"
+  persistence:
+    enabled: true
+    size: 3Gi
+    # upstream set to -, disabling dynamic provisioning
+    # https://github.com/meilisearch/meilisearch-kubernetes/pull/235
+    storageClass: ~
+
+# subchart settings
+postgresql:
+  enabled: false
+  auth:
+    # this does not read from a secret.  not sure how to map
+    # just manually make the same
+    username: "kyoo_back"
+    database: "{{ .Values.global.postgres.database }}"
+    existingSecret: "{{ .Values.global.postgres.infra.existingSecret }}"
+    secretKeys:
+      adminPasswordKey: "{{ .Values.global.postgres.infra.passwordKey }}"
+      userPasswordKey: "{{ .Values.global.postgres.infra.passwordKey }}"
+  primary:
+    persistence:
+      size: 3Gi
+
+# subchart settings
+rabbitmq:
+  enabled: false
+  auth:
+    # this does not read from a secret.  not sure how to map
+    # just manually make the same
+    username: kyoo_all
+    existingPasswordSecret: "{{ .Values.global.rabbitmq.infra.existingSecret }}"
+    existingSecretPasswordKey: "{{ .Values.global.rabbitmq.infra.passwordKey }}"
+    existingErlangSecret: "{{ .Values.global.rabbitmq.infra.existingSecret }}"
+    existingSecretErlangKey: "{{ .Values.global.rabbitmq.infra.keyErlangCookie }}"
+
+# create extraObjects
+# create secret bigsecret
+# create pvc for each object
+extraObjects: []

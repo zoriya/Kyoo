@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.scanner.service.annotations }}
+  annotations:
+  {{- range $key, $value := .Values.scanner.service.annotations }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}
+  name: {{ include "kyoo.scanner.fullname" . }}
+  labels:
+    {{- include "kyoo.labels" (dict "context" . "component" .Values.scanner.name "name" .Values.scanner.name) | nindent 4 }}
+    {{- with .Values.scanner.service.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ .Values.scanner.service.type }}
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: main
+  selector:
+    {{- include "kyoo.selectorLabels" (dict "context" . "name" .Values.scanner.name) | nindent 4 }}
