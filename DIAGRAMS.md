@@ -99,9 +99,9 @@ C4Container
   System_Boundary(internal, "Kyoo") {
     Container(frontend, "front/")
     Container(backend, "back/")
+    ContainerQueue(emb, "emb", "", "EnterpriseMessageBus")
     Container(transcoder, "transcoder/")
     Container(scanner, "scanner/")
-    ContainerQueue(emb, "emb", "", "EnterpriseMessageBus")
     Container(autosync, "autosync/")
   }
   System_Boundary(external, "") {
@@ -118,7 +118,6 @@ C4Container
   Rel(user, backend, "")
   Rel(frontend, backend, "")
   Rel(backend, emb, "")
-  Rel(backend, media, "")
   Rel(backend, transcoder, "")
   Rel_Back(autosync, emb, "")
   Rel(autosync, tracker, "")
@@ -162,7 +161,7 @@ C4Component
 ### Back
 ```mermaid
 C4Component
-  UpdateLayoutConfig($c4ShapeInRow="4", $c4BoundaryInRow="3")
+  UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="3")
   
   title Component Diagram for Back
 
@@ -179,22 +178,21 @@ C4Component
     Component(backend_c2, "kyoo_back", "C#, .NET 8.0", "API Backend")
   }
 
-  Container_Boundary(media, "MediaLibrary") {
-    Component_Ext(media_c1, "MediaShare", "Volume", "Read Only")
+  Container_Boundary(emb, "emb") {
+    ComponentQueue(emb_e2, "events.resource", "RabbitMQ, Exchange", "unused")
+    ComponentQueue(emb_q2, "scanner.rescan", "RabbitMQ, Queue", "")
+    ComponentQueue(emb_e1, "events.watched", "RabbitMQ, Exchange", "")
+    ComponentQueue(emb_q1, "autosync", "RabbitMQ, Queue", "")
   }
+
   Container_Boundary(transcoder, "transcoder") {
     Component(transcoder_c1, "kyoo_transcoder", "go, go", "Video Transcoder")
   }
-  Container_Boundary(emb, "emb") {
-    ComponentQueue(emb_e1, "events.watched", "RabbitMQ, Exchange", "")
-    ComponentQueue(emb_q2, "scanner.rescan", "RabbitMQ, Queue", "")
-    ComponentQueue(emb_q1, "autosync", "RabbitMQ, Queue", "")
-    ComponentQueue(emb_e2, "events.resource", "RabbitMQ, Exchange", "unused")
-  }
+
 
   Container_Boundary(scanner, "scanner") {
-    Component(scanner_c1, "kyoo_scanner", "python, python3.12", "scanner")
     Component(scanner_c2, "kyoo_scanner", "python, python3.12", "matcher")
+    Component(scanner_c1, "kyoo_scanner", "python, python3.12", "scanner")
   }
 
   Container_Boundary(autosync, "autosync") {
@@ -206,7 +204,6 @@ C4Component
   Rel(backend_c1, backend_db1, "")
   Rel(backend_c2, backend_db1, "")
   Rel(backend_c2, backend_db2, "")
-  Rel(backend_c2, media_c1, "")
   Rel(backend_c2, transcoder_c1, "")
   Rel(backend_c2, backend_c3, "")
   Rel(backend_c2, emb_q2, "produces")
