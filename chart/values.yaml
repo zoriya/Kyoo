@@ -250,6 +250,7 @@ scanner:
     image:
       repository: ~
       tag: ~
+  # scanner does not support multiple replicas
   replicaCount: 1
   podLabels: {}
   deploymentAnnotations: {}

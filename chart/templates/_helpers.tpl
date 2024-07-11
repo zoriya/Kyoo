@@ -2,7 +2,7 @@
 Create kyoo autosync name
 */}}
 {{- define "kyoo.autosync.fullname" -}}
-{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.autosync.name | trunc 52 | trimSuffix "-" -}}
+{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.autosync.name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -20,7 +20,7 @@ Create the name of the autosync service account to use
 Create kyoo back name
 */}}
 {{- define "kyoo.back.fullname" -}}
-{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.back.name | trunc 52 | trimSuffix "-" -}}
+{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.back.name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -38,7 +38,7 @@ Create the name of the back service account to use
 Create kyoo front name
 */}}
 {{- define "kyoo.front.fullname" -}}
-{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.front.name | trunc 52 | trimSuffix "-" -}}
+{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.front.name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -56,7 +56,7 @@ Create the name of the front service account to use
 Create kyoo matcher name
 */}}
 {{- define "kyoo.matcher.fullname" -}}
-{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.matcher.name | trunc 52 | trimSuffix "-" -}}
+{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.matcher.name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -74,7 +74,7 @@ Create the name of the matcher service account to use
 Create kyoo scanner name
 */}}
 {{- define "kyoo.scanner.fullname" -}}
-{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.scanner.name | trunc 52 | trimSuffix "-" -}}
+{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.scanner.name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -92,7 +92,7 @@ Create the name of the scanner service account to use
 Create kyoo transcoder name
 */}}
 {{- define "kyoo.transcoder.fullname" -}}
-{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.transcoder.name | trunc 52 | trimSuffix "-" -}}
+{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.transcoder.name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
