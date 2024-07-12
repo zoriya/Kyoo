@@ -1,4 +1,5 @@
 # Diagrams
+These diagrams are created with Mermaid and rendered locally.  For the best experience, please use a browser.
 
 # Project Structure
 Kyoo is a monorepo that consists of several projects each in their own directory.  Diagram below shows an outline of kyoo, projects, and artifacts.
@@ -255,12 +256,12 @@ C4Component
     Component(scanner_c1, "kyoo_scanner", "python, python3.12", "scanner")
   }
 
-  Container_Boundary(emb, "emb") {
-    ComponentQueue(emb_q2, "scanner.rescan", "RabbitMQ, Queue", "")
-  }
-
   Container_Boundary(backend, "back") {
     Component(backend_c2, "kyoo_back", "C#, .NET 8.0", "API Backend")
+  }
+
+  Container_Boundary(emb, "emb") {
+    ComponentQueue(emb_q2, "scanner.rescan", "RabbitMQ, Queue", "")
   }
 
   Rel(scanner_c1, scanner_q1, "produces")
