@@ -171,18 +171,18 @@ C4Component
     Component(frontend_c1, "kyoo_front", "typescript, node.js", "Static Content")
   }
   Container_Boundary(backend, "back") {
-    Component(backend_c1, "kyoo_migrations", "C#, .NET 8.0", "Postgres Migration")
-    ComponentDb(backend_db1, "backend", "Postgres", "user data and session state")
-    Component(backend_c3, "BackendMetadata", "Volume", "Persistent. Distributed Metadata")
     ComponentDb(backend_db2, "search", "Meilisearch", "search resource")
+    Component(backend_c3, "BackendMetadata", "Volume", "Persistent. Distributed Metadata")
+    ComponentDb(backend_db1, "backend", "Postgres", "user data and session state")
+    Component(backend_c1, "kyoo_migrations", "C#, .NET 8.0", "Postgres Migration")
     Component(backend_c2, "kyoo_back", "C#, .NET 8.0", "API Backend")
   }
 
   Container_Boundary(emb, "emb") {
-    ComponentQueue(emb_e2, "events.resource", "RabbitMQ, Exchange", "unused")
-    ComponentQueue(emb_q2, "scanner.rescan", "RabbitMQ, Queue", "")
     ComponentQueue(emb_e1, "events.watched", "RabbitMQ, Exchange", "")
     ComponentQueue(emb_q1, "autosync", "RabbitMQ, Queue", "")
+    ComponentQueue(emb_q2, "scanner.rescan", "RabbitMQ, Queue", "")
+    ComponentQueue(emb_e2, "events.resource", "RabbitMQ, Exchange", "unused")
   }
 
   Container_Boundary(scanner, "scanner") {
@@ -190,17 +190,13 @@ C4Component
     Component(scanner_c1, "kyoo_scanner", "python, python3.12", "scanner")
   }
 
-  Container_Boundary(transcoder, "transcoder") {
-    Component(transcoder_c1, "kyoo_transcoder", "go, go", "Video Transcoder")
-  }
-
-
-
-
   Container_Boundary(autosync, "autosync") {
     Component(autosync_c1, "kyoo_autosync", "python, python3.12", "")
   }
 
+  Container_Boundary(transcoder, "transcoder") {
+    Component(transcoder_c1, "kyoo_transcoder", "go, go", "Video Transcoder")
+  }
 
   Rel(user, backend_c2, "")
   Rel(backend_c1, backend_db1, "")
