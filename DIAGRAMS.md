@@ -161,7 +161,7 @@ C4Component
 ### Back
 ```mermaid
 C4Component
-  UpdateLayoutConfig($c4ShapeInRow="4", $c4BoundaryInRow="3")
+  UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="3")
   
   title Component Diagram for Back
 
