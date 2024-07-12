@@ -161,7 +161,7 @@ C4Component
 ### Back
 ```mermaid
 C4Component
-  UpdateLayoutConfig($c4ShapeInRow="2", $c4BoundaryInRow="3")
+  UpdateLayoutConfig($c4ShapeInRow="5", $c4BoundaryInRow="2")
   
   title Component Diagram for Back
 
@@ -185,15 +185,17 @@ C4Component
     ComponentQueue(emb_q1, "autosync", "RabbitMQ, Queue", "")
   }
 
+  Container_Boundary(scanner, "scanner") {
+    Component(scanner_c2, "kyoo_scanner", "python, python3.12", "matcher")
+    Component(scanner_c1, "kyoo_scanner", "python, python3.12", "scanner")
+  }
+
   Container_Boundary(transcoder, "transcoder") {
     Component(transcoder_c1, "kyoo_transcoder", "go, go", "Video Transcoder")
   }
 
 
-  Container_Boundary(scanner, "scanner") {
-    Component(scanner_c2, "kyoo_scanner", "python, python3.12", "matcher")
-    Component(scanner_c1, "kyoo_scanner", "python, python3.12", "scanner")
-  }
+
 
   Container_Boundary(autosync, "autosync") {
     Component(autosync_c1, "kyoo_autosync", "python, python3.12", "")
