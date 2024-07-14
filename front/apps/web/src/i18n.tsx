@@ -47,7 +47,7 @@ export const withTranslations = (
 				...commonOptions,
 				lng: props.pageProps.__lang,
 			});
-			i18next.systemLanguage = props.pageProps.__sysLang;
+			i18next.systemLanguage = props.pageProps?.__sysLang;
 			return i18next;
 		});
 
@@ -66,6 +66,7 @@ export const withTranslations = (
 			lng,
 		});
 		i18n.systemLanguage = sysLng;
+		props.pageProps ??= {};
 		props.pageProps.__lang = lng;
 		props.pageProps.__sysLang = sysLng;
 		return props;
