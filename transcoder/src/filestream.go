@@ -68,7 +68,10 @@ func (fs *FileStream) Destroy() {
 }
 
 func (fs *FileStream) GetMaster() string {
-	master := "#EXTM3U\n"
+	master := `#EXTM3U
+#EXT-X-VERSION:7
+#EXT-X-INDEPENDENT-SEGMENTS
+`
 	if fs.Info.Video != nil {
 		var transmux_quality Quality
 		for _, quality := range Qualities {

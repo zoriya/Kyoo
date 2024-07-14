@@ -271,6 +271,15 @@ func (ts *Stream) run(start int32) error {
 		"-muxdelay", "0",
 	)
 	args = append(args, ts.handle.getTranscodeArgs(toSegmentStr(segments))...)
+
+	if start_ref != 0 {
+		args = append(args,
+			// We need to add frag_discout to the movflags to get ffmpeg to calculate the correct presentation time otherwise players get lost.
+			// Since we can't append to movflags but only override them, we also copy the default hls w/ fmp4 movflags
+			// Initial flags from: https://github.com/FFmpeg/FFmpeg/blob/master/libavformat/hlsenc.c#L934C32-L934C72
+			"-hls_segment_options", "movflags=frag_custom+dash+delay_moov+frag_discont",
+		)
+	}
 	args = append(args,
 		"-f", "hls",
 		"-hls_time", fmt.Sprint(OptimalFragmentDuration),

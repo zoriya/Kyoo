@@ -17,7 +17,6 @@ const OptimalFragmentDuration = float64(5)
 type Keyframe struct {
 	Sha         string
 	Keyframes   []float64
-	CanTransmux bool
 	IsDone      bool
 	info        *KeyframeInfo
 }
