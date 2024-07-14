@@ -110,10 +110,6 @@ autosync:
   deploymentAnnotations: {}
   podAnnotations: {}
   imagePullSecrets: []
-  service:
-    annotations: {}
-    labels: {}
-    type: ClusterIP
   serviceAccount:
     create: true
     automount: true
@@ -225,10 +221,6 @@ matcher:
   deploymentAnnotations: {}
   podAnnotations: {}
   imagePullSecrets: []
-  service:
-    annotations: {}
-    labels: {}
-    type: ClusterIP
   serviceAccount:
     create: true
     automount: true
@@ -257,10 +249,6 @@ scanner:
   deploymentAnnotations: {}
   podAnnotations: {}
   imagePullSecrets: []
-  service:
-    annotations: {}
-    labels: {}
-    type: ClusterIP
   serviceAccount:
     create: true
     automount: true

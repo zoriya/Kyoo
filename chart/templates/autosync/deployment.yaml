@@ -64,10 +64,6 @@ spec:
             {{- with (concat .Values.global.extraEnv .Values.autosync.kyoo_autosync.extraEnv) }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
-          ports:
-            - name: main
-              containerPort: 80
-              protocol: TCP
           {{- with .Values.autosync.kyoo_autosync.livenessProbe }}
           livenessProbe:
             {{- toYaml .Values.autosync.kyoo_autosync.livenessProbe | nindent 12 }}
