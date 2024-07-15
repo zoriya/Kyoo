@@ -30,7 +30,7 @@ type MediaInfo struct {
 	/// The whole mimetype (defined as the RFC 6381). ex: `video/mp4; codecs="avc1.640028, mp4a.40.2"`
 	MimeCodec *string `json:"mimeCodec"`
 	/// The file size of the video file.
-	Size uint64 `json:"size"`
+	Size int64 `json:"size"`
 	/// The length of the media in seconds.
 	Duration float32 `json:"duration"`
 	/// The container of the video file of this episode.
@@ -129,8 +129,8 @@ func ParseUint(str string) uint32 {
 	return uint32(i)
 }
 
-func ParseUint64(str string) uint64 {
-	i, err := strconv.ParseUint(str, 10, 64)
+func ParseInt64(str string) int64 {
+	i, err := strconv.ParseInt(str, 10, 64)
 	if err != nil {
 		println(str)
 		return 0
@@ -260,7 +260,7 @@ func getInfo(path string) (*MediaInfo, error) {
 		Path: path,
 		// Remove leading .
 		Extension: filepath.Ext(path)[1:],
-		Size:      ParseUint64(mi.Format.Size),
+		Size:      ParseInt64(mi.Format.Size),
 		Duration:  float32(mi.Format.DurationSeconds),
 		Container: OrNull(mi.Format.FormatName),
 		Videos: MapStream(mi.Streams, ffprobe.StreamVideo, func(stream *ffprobe.Stream, i uint32) Video {

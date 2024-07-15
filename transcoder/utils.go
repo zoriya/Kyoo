@@ -52,7 +52,7 @@ func getHash(path string) (string, error) {
 	h.Write([]byte(path))
 	h.Write([]byte(info.ModTime().String()))
 	sha := hex.EncodeToString(h.Sum(nil))
-	return version + sha, nil
+	return sha, nil
 }
 
 func SanitizePath(path string) error {
