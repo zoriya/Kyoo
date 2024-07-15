@@ -54,6 +54,8 @@ type Video struct {
 	Codec string `json:"codec"`
 	/// The codec of this stream (defined as the RFC 6381).
 	MimeCodec *string `json:"mimeCodec"`
+	/// The title of the stream.
+	Title *string `json:"title"`
 	/// The language of this stream (as a ISO-639-2 language code)
 	Language *string `json:"language"`
 	/// The max quality of this video track.
@@ -268,6 +270,7 @@ func getInfo(path string) (*MediaInfo, error) {
 			return Video{
 				Codec:     stream.CodecName,
 				MimeCodec: GetMimeCodec(stream),
+				Title:     OrNull(stream.Tags.Title),
 				Language:  NullIfUnd(lang.String()),
 				Quality:   QualityFromHeight(uint32(stream.Height)),
 				Width:     uint32(stream.Width),
