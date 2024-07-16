@@ -59,7 +59,15 @@
 			"desc": "降序"
 		},
 		"switchToGrid": "切换到网格视图",
-		"switchToList": "切换到列表视图"
+		"switchToList": "切换到列表视图",
+		"mediatypekey": {
+			"all": "全部",
+			"movie": "电影",
+			"show": "系列",
+			"collection": "集合"
+		},
+		"mediatype-tt": "媒体类型",
+		"mediatypelabel": "媒体类型"
 	},
 	"misc": {
 		"settings": "设置",
