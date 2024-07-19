@@ -19,7 +19,7 @@
 		"studio": "Studio",
 		"genre": "Genres",
 		"genre-none": "Aucun genres",
-		"staff": "Staff",
+		"staff": "Équipe",
 		"staff-none": "Aucun membre du staff connu",
 		"noOverview": "Aucune description disponible",
 		"episode-none": "Il n'y a pas d'épisodes dans cette saison",
@@ -40,7 +40,7 @@
 			"null": "Marquer comme non vu"
 		},
 		"nextUp": "Continuer",
-		"season": "saison {{number}}"
+		"season": "Saison {{number}}"
 	},
 	"browse": {
 		"sortby": "Trier par {{key}}",
@@ -62,9 +62,9 @@
 		"switchToList": "Passer en vue liste",
 		"mediatypekey": {
 			"show": "Séries",
-			"collection": "collection",
+			"collection": "Collection",
 			"movie": "Films",
-			"all": "tous"
+			"all": "Tous"
 		},
 		"mediatype-tt": "Type de média",
 		"mediatypelabel": "Type de média"
@@ -178,7 +178,7 @@
 		"transmux": "Original",
 		"auto": "Auto",
 		"notInPristine": "Non disponible en pristine",
-		"unsupportedError": "Video codec not supported, transcoding in progress..."
+		"unsupportedError": "Le codec vidéo n'est pas pris en charge, transcode en cours…"
 	},
 	"search": {
 		"empty": "Aucun résultat trouvé. Essayer avec une autre recherche."
@@ -260,24 +260,24 @@
 		"Adventure": "Aventure",
 		"Comedy": "Comédie",
 		"Documentary": "Documentaire",
-		"Drama": "drama",
+		"Drama": "Drama",
 		"Family": "Famille",
-		"Fantasy": "monde fantastique",
-		"History": "histoire",
+		"Fantasy": "Fantastique",
+		"History": "Histoire",
 		"Crime": "Scène de crime",
 		"Horror": "Horreur",
 		"Music": "Musique",
-		"Mystery": "mystère",
-		"Romance": "romance",
-		"ScienceFiction": "science fiction",
+		"Mystery": "Mystère",
+		"Romance": "Romance",
+		"ScienceFiction": "Science-fiction",
 		"War": "Guerre",
 		"Kids": "Jeunesse",
-		"Thriller": "Thriller (film à suspense)",
-		"Western": "western",
+		"Thriller": "Thriller",
+		"Western": "Western",
 		"Politics": "Politique",
-		"Soap": "soap",
+		"Soap": "Soap",
 		"Talk": "Talkshow",
-		"Animation": "animation",
+		"Animation": "Animation",
 		"News": "Actualité",
 		"Reality": "Télé-réalité"
 	}
