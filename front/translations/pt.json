@@ -1,10 +1,10 @@
 {
 	"home": {
-		"recommended": "",
-		"news": "",
-		"watchlist": "",
-		"info": "",
-		"none": "",
+		"recommended": "Recomendados",
+		"news": "Notícias",
+		"watchlist": "Continue assistindo",
+		"info": "Veja mais",
+		"none": "Nenhum episódio",
 		"watchlistLogin": "",
 		"refreshMetadata": "",
 		"episodeMore": {
