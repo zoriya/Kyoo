@@ -6,7 +6,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="NSwag.AspNetCore" Version="14.0.8" />
+		<PackageReference Include="NSwag.AspNetCore" Version="14.1.0" />
 		<ProjectReference Include="../Kyoo.Abstractions/Kyoo.Abstractions.csproj" />
 	</ItemGroup>
 </Project>
