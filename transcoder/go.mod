@@ -1,8 +1,11 @@
 module github.com/zoriya/kyoo/transcoder
 
-go 1.21
+go 1.22
 
-require github.com/labstack/echo/v4 v4.12.0 // direct
+require (
+	github.com/jmoiron/sqlx v1.4.0
+	github.com/labstack/echo/v4 v4.12.0
+)
 
 require (
 	github.com/disintegration/imaging v1.6.2
@@ -17,7 +20,9 @@ require (
 	golang.org/x/image v0.10.0 // indirect
 	golang.org/x/net v0.24.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/text v0.14.0
 	golang.org/x/time v0.5.0 // indirect
 	gopkg.in/vansante/go-ffprobe.v2 v2.2.0
 )
+
+replace github.com/jmoiron/sqlx v1.4.0 => github.com/kmpm/sqlx v1.3.5-0.20220614102404-845a9a7f1301
