@@ -34,12 +34,11 @@ func NewTranscoder() (*Transcoder, error) {
 }
 
 func (t *Transcoder) getFileStream(path string, sha string) (*FileStream, error) {
-	var err error
-	ret, _ := t.streams.GetOrCreate(path, func() *FileStream {
+	ret, _ := t.streams.GetOrCreate(sha, func() *FileStream {
 		return NewFileStream(path, sha)
 	})
 	ret.ready.Wait()
-	if err != nil || ret.err != nil {
+	if ret.err != nil {
 		t.streams.Remove(path)
 		return nil, ret.err
 	}
