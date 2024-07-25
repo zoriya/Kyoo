@@ -14,11 +14,6 @@ import (
 	"github.com/zoriya/kyoo/transcoder/src"
 )
 
-// Encode the version in the hash path to update cached values.
-// Older versions won't be deleted (needed to allow multiples versions of the transcoder to run at the same time)
-// If the version changes a lot, we might want to automatically delete older versions.
-var version = "v3-"
-
 func GetPath(c echo.Context) (string, string, error) {
 	key := c.Param("path")
 	if key == "" {
