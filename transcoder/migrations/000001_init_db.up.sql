@@ -8,11 +8,11 @@ create table info(
 	size bigint not null,
 	duration real not null,
 	container varchar(256),
-	fonts text[],
-	ver_ffprobe integer,
-	ver_extract integer,
-	ver_thumbs integer,
-	ver_keyframes integer
+	fonts text[] not null,
+	ver_info integer not null,
+	ver_extract integer not null,
+	ver_thumbs integer not null,
+	ver_keyframes integer not null
 );
 
 create table videos(
