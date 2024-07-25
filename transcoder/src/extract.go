@@ -26,7 +26,7 @@ func Extract(path string, sha string) (<-chan struct{}, error) {
 		}
 		attachment_path := fmt.Sprintf("%s/%s/att", Settings.Metadata, sha)
 		subs_path := fmt.Sprintf("%s/%s/sub", Settings.Metadata, sha)
-		os.MkdirAll(attachment_path, 0o644)
+		os.MkdirAll(attachment_path, 0o755)
 		os.MkdirAll(subs_path, 0o755)
 
 		// If there is no subtitles, there is nothing to extract (also fonts would be useless).
