@@ -1,0 +1,284 @@
+{
+	"home": {
+		"recommended": "Recomendados",
+		"news": "Notícias",
+		"watchlist": "Continue assistindo",
+		"info": "Veja mais",
+		"none": "Nenhum episódio",
+		"watchlistLogin": "Para salvar o que você assistiu ou planeja assistir, é necessário fazer login.",
+		"refreshMetadata": "Atualizar metadados",
+		"episodeMore": {
+			"goToShow": "",
+			"download": "Baixar",
+			"mediainfo": "Veja informação do arquivo"
+		}
+	},
+	"show": {
+		"play": "Reproduzir",
+		"trailer": "Reproduzir Trailer",
+		"studio": "Estúdio",
+		"genre": "Gêneros",
+		"genre-none": "Nenhum gênero",
+		"staff": "Staff",
+		"staff-none": "A staff é desconhecida",
+		"noOverview": "Resumo indisponível",
+		"episode-none": "Nenhum episódio nessa temporada",
+		"episodeNoMetadata": "Metadado indisponível",
+		"tags": "",
+		"links": "",
+		"jumpToSeason": "Pular para temporada",
+		"partOf": "Parte de",
+		"watchlistAdd": "",
+		"watchlistEdit": "",
+		"watchlistRemove": "Marque como não assistido",
+		"watchlistLogin": "Faça login para adicionar a sua lista",
+		"watchlistMark": {
+			"completed": "Marque como assistido",
+			"planned": "Marque como planejado",
+			"watching": "Marque como assistindo",
+			"droped": "Marque como desistido",
+			"null": "Marque como não assistido"
+		},
+		"nextUp": "Próximo",
+		"season": "Temporada {{number}}"
+	},
+	"browse": {
+		"mediatypekey": {
+			"all": "Todos",
+			"movie": "Filmes",
+			"show": "Séries",
+			"collection": "Coleção"
+		},
+		"mediatype-tt": "Tipo de mídia",
+		"mediatypelabel": "Tipo de mídia",
+		"sortby": "Ordenar por {{key}}",
+		"sortby-tt": "Ordenar por",
+		"sortkey": {
+			"relevance": "Relevância",
+			"name": "Nome",
+			"airDate": "Data de transmissão",
+			"startAir": "",
+			"endAir": "",
+			"addedDate": "Adicionado na data",
+			"rating": "Avaliações"
+		},
+		"sortord": {
+			"asc": "crescente",
+			"desc": "decrescente"
+		},
+		"switchToGrid": "Mudara para visualização em grade",
+		"switchToList": "Mudara para visualização de lista"
+	},
+	"genres": {
+		"Action": "Ação",
+		"Adventure": "Aventura",
+		"Animation": "Animação",
+		"Comedy": "Comédia",
+		"Crime": "",
+		"Documentary": "Documentário",
+		"Drama": "",
+		"Family": "Família",
+		"Fantasy": "Fantasia",
+		"History": "História",
+		"Horror": "Terror",
+		"Music": "Música",
+		"Mystery": "Mistério",
+		"Romance": "",
+		"ScienceFiction": "Ficção cientifica",
+		"Thriller": "",
+		"War": "Guerra",
+		"Western": "",
+		"Kids": "Infantil",
+		"News": "Notícias",
+		"Reality": "Realidade",
+		"Soap": "",
+		"Talk": "",
+		"Politics": "Política"
+	},
+	"misc": {
+		"settings": "Configurações",
+		"prev-page": "Pagina anterior",
+		"next-page": "Próxima pagina",
+		"delete": "Deletar",
+		"cancel": "Cancelar",
+		"more": "Mais",
+		"expand": "Expandir",
+		"collapse": "",
+		"edit": "Editar",
+		"or": "OU",
+		"loading": "Carregando"
+	},
+	"navbar": {
+		"home": "",
+		"browse": "Navegar",
+		"download": "Baixar",
+		"search": "Pesquisar",
+		"login": "",
+		"admin": "Painel de admin"
+	},
+	"settings": {
+		"general": {
+			"label": "Geral",
+			"theme": {
+				"label": "Tema",
+				"description": "",
+				"auto": "Sistema",
+				"light": "",
+				"dark": ""
+			},
+			"language": {
+				"label": "",
+				"description": "",
+				"system": ""
+			}
+		},
+		"playback": {
+			"label": "",
+			"playmode": {
+				"label": "",
+				"description": ""
+			},
+			"audioLanguage": {
+				"label": "",
+				"description": ""
+			},
+			"subtitleLanguage": {
+				"label": "",
+				"description": "",
+				"none": ""
+			}
+		},
+		"account": {
+			"label": "",
+			"username": {
+				"label": ""
+			},
+			"avatar": {
+				"label": "",
+				"description": ""
+			},
+			"email": {
+				"label": ""
+			},
+			"password": {
+				"label": "",
+				"description": "",
+				"oldPassword": "",
+				"newPassword": ""
+			}
+		},
+		"oidc": {
+			"label": "",
+			"connected": "",
+			"not-connected": "",
+			"open-profile": "",
+			"link": "",
+			"delete": ""
+		},
+		"about": {
+			"label": "",
+			"android-app": {
+				"label": "",
+				"description": ""
+			},
+			"git": {
+				"label": "",
+				"description": ""
+			}
+		}
+	},
+	"player": {
+		"back": "",
+		"previous": "",
+		"next": "",
+		"play": "",
+		"pause": "",
+		"mute": "",
+		"volume": "",
+		"quality": "",
+		"audios": "",
+		"subtitles": "",
+		"subtitle-none": "",
+		"fullscreen": "",
+		"direct": "",
+		"transmux": "",
+		"auto": "",
+		"notInPristine": "",
+		"unsupportedError": ""
+	},
+	"search": {
+		"empty": ""
+	},
+	"login": {
+		"login": "",
+		"register": "",
+		"guest": "",
+		"guest-forbidden": "",
+		"via": "",
+		"add-account": "",
+		"logout": "",
+		"server": "",
+		"email": "",
+		"username": "",
+		"password": "",
+		"confirm": "",
+		"or-register": "",
+		"or-login": "",
+		"password-no-match": "",
+		"delete": "",
+		"delete-confirmation": ""
+	},
+	"downloads": {
+		"empty": "",
+		"error": "",
+		"delete": "",
+		"deleteMessage": "",
+		"pause": "",
+		"resume": "",
+		"retry": ""
+	},
+	"errors": {
+		"connection": "",
+		"connection-tips": "",
+		"unknown": "",
+		"try-again": "",
+		"re-login": "",
+		"offline": "",
+		"unauthorized": "",
+		"needVerification": "",
+		"needAccount": "",
+		"setup": {
+			"MissingAdminAccount": "",
+			"NoVideoFound": ""
+		}
+	},
+	"mediainfo": {
+		"file": "",
+		"container": "",
+		"video": "",
+		"audio": "",
+		"subtitles": "",
+		"forced": "",
+		"default": "",
+		"duration": "",
+		"size": "",
+		"novideo": "",
+		"nocontainer": ""
+	},
+	"admin": {
+		"users": {
+			"label": "",
+			"adminUser": "",
+			"regularUser": "",
+			"set-permissions": "",
+			"delete": "",
+			"unverifed": "",
+			"verify": ""
+		},
+		"scanner": {
+			"label": "",
+			"scan": "",
+			"empty": ""
+		}
+	}
+}
