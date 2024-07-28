@@ -6,6 +6,7 @@ import (
 
 type MetadataService struct {
 	database *sqlx.DB
+	lock     *RunLock[string, *MediaInfo]
 }
 
 func (s MetadataService) GetMetadata(path string, sha string) (*MediaInfo, error) {
@@ -28,10 +29,13 @@ func (s MetadataService) GetMetadata(path string, sha string) (*MediaInfo, error
 		if err = rows.Err(); err != nil {
 			return nil, err
 		}
-		// TODO: retrieve mediainfo from file + store them in db.
-		return &ret, nil
+		return s.storeFreshMetadata(path, sha)
 	}
 	rows.StructScan(ret)
+
+	if ret.Versions.Info != InfoVersion {
+		return s.storeFreshMetadata(path, sha)
+	}
 
 	rows.NextResultSet()
 	for rows.Next() {
@@ -62,4 +66,57 @@ func (s MetadataService) GetMetadata(path string, sha string) (*MediaInfo, error
 	}
 
 	return &ret, nil
+}
+
+func (s MetadataService) storeFreshMetadata(path string, sha string) (*MediaInfo, error) {
+	get_running, set := s.lock.Start(sha)
+	if get_running != nil {
+		return get_running()
+	}
+
+	ret, err := RetriveMediaInfo(path, sha)
+	if err != nil {
+		return set(nil, err)
+	}
+
+	tx := s.database.MustBegin()
+	tx.NamedExec(
+		`insert into info(sha, path, extension, mime_codec, size, duration, container, fonts, ver_info)
+		values (:sha, :path, :extension, :mime_codec, :size, :duration, :container, :fonts, :ver_info)`,
+		ret,
+	)
+	for _, video := range ret.Videos {
+		tx.NamedExec(
+			`insert into videos(sha, idx, title, language, codec, mime_codec, width, height, bitrate)
+			values (:sha, :idx, :title, :language, :codec, :mime_codec, :width, :height, :bitrate)`,
+			video,
+		)
+	}
+	for _, audio := range ret.Audios {
+		tx.NamedExec(
+			`insert into audios(sha, idx, title, language, codec, mime_codec, is_default)
+			values (:sha, :idx, :title, :language, :codec, :mime_codec, :is_default)`,
+			audio,
+		)
+	}
+	for _, subtitle := range ret.Subtitles {
+		tx.NamedExec(
+			`insert into subtitles(sha, idx, title, language, codec, extension, is_default, is_forced, is_external, path)
+			values (:sha, :idx, :title, :language, :codec, :extension, :is_default, :is_forced, :is_external, :path)`,
+			subtitle,
+		)
+	}
+	for _, chapter := range ret.Chapters {
+		tx.NamedExec(
+			`insert into chapters(sha, start_time, end_time, name, type)
+			values (:sha, :start_time, :end_time, :name, :type)`,
+			chapter,
+		)
+	}
+	err = tx.Commit()
+	if err != nil {
+		return set(ret, err)
+	}
+
+	return set(ret, nil)
 }

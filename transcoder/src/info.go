@@ -100,7 +100,7 @@ type Audio struct {
 
 type Subtitle struct {
 	/// The index of this track on the media.
-	Index uint32 `json:"index" db:"idx"`
+	Index *uint32 `json:"index" db:"idx"`
 	/// The title of the stream.
 	Title *string `json:"title"`
 	/// The language of this stream (as a IETF-BCP-47 language code)
@@ -336,8 +336,9 @@ func RetriveMediaInfo(path string, sha string) (*MediaInfo, error) {
 				path = fmt.Sprintf("%s/%s/sub/%d.%s", Settings.Metadata, sha, i, extension)
 			}
 			lang, _ := language.Parse(stream.Tags.Language)
+			idx := uint32(i)
 			return Subtitle{
-				Index:     uint32(i),
+				Index:     &idx,
 				Title:     OrNull(stream.Tags.Title),
 				Language:  NullIfUnd(lang.String()),
 				Codec:     stream.CodecName,
