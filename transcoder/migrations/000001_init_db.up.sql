@@ -59,7 +59,7 @@ create table subtitles(
 	path varchar(4096)
 );
 
-create type chapter_type as enum('content', 'recap', 'intro', 'credits');
+create type chapter_type as enum('content', 'recap', 'intro', 'credits', 'preview');
 
 create table chapters(
 	sha varchar(20) not null references info(sha) on delete cascade,

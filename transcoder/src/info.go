@@ -4,16 +4,11 @@ import (
 	"cmp"
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
-	"io"
-	"log"
 	"mime"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"golang.org/x/text/language"
@@ -140,6 +135,7 @@ const (
 	Recap   ChapterType = "recap"
 	Intro   ChapterType = "intro"
 	Credits ChapterType = "credits"
+	Preview ChapterType = "preview"
 )
 
 func ParseFloat(str string) float32 {
@@ -213,66 +209,6 @@ var SubtitleExtensions = map[string]string{
 	"subrip": "srt",
 	"ass":    "ass",
 	"vtt":    "vtt",
-}
-
-type MICache struct {
-	info  *MediaInfo
-	ready sync.WaitGroup
-}
-
-var infos = NewCMap[string, *MICache]()
-
-func GetInfo(path string, sha string) (*MediaInfo, error) {
-	var err error
-
-	ret, _ := infos.GetOrCreate(sha, func() *MICache {
-		mi := &MICache{info: &MediaInfo{Sha: sha}}
-		mi.ready.Add(1)
-		go func() {
-			save_path := fmt.Sprintf("%s/%s/info.json", Settings.Metadata, sha)
-			if err := getSavedInfo(save_path, mi.info); err == nil {
-				log.Printf("Using mediainfo cache on filesystem for %s", path)
-				mi.ready.Done()
-				return
-			}
-
-			var val *MediaInfo
-			val, err = RetriveMediaInfo(path, sha)
-			if err == nil {
-				*mi.info = *val
-				mi.info.Sha = sha
-			}
-			mi.ready.Done()
-			saveInfo(save_path, mi.info)
-		}()
-		return mi
-	})
-	ret.ready.Wait()
-	return ret.info, err
-}
-
-func getSavedInfo[T any](save_path string, mi *T) error {
-	saved_file, err := os.Open(save_path)
-	if err != nil {
-		return err
-	}
-	saved, err := io.ReadAll(saved_file)
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal([]byte(saved), mi)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func saveInfo[T any](save_path string, mi *T) error {
-	content, err := json.Marshal(*mi)
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(save_path, content, 0o644)
 }
 
 func RetriveMediaInfo(path string, sha string) (*MediaInfo, error) {
