@@ -8,6 +8,7 @@ type MetadataService struct {
 	database  *sqlx.DB
 	lock      *RunLock[string, *MediaInfo]
 	thumbLock *RunLock[string, interface{}]
+	extractLock *RunLock[string, interface{}]
 }
 
 func (s MetadataService) GetMetadata(path string, sha string) (*MediaInfo, error) {
@@ -18,6 +19,9 @@ func (s MetadataService) GetMetadata(path string, sha string) (*MediaInfo, error
 
 	if ret.Versions.Thumbs < ThumbsVersion {
 		go s.ExtractThumbs(path, sha)
+	}
+	if ret.Versions.Extract < ExtractVersion {
+		go s.ExtractSubs(ret)
 	}
 
 	return ret, nil

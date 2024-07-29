@@ -189,7 +189,7 @@ func (h *Handler) GetInfo(c echo.Context) error {
 //
 // Path: /:path/attachment/:name
 func (h *Handler) GetAttachment(c echo.Context) error {
-	path, sha, err := GetPath(c)
+	_, sha, err := GetPath(c)
 	if err != nil {
 		return err
 	}
@@ -197,12 +197,6 @@ func (h *Handler) GetAttachment(c echo.Context) error {
 	if err := SanitizePath(name); err != nil {
 		return err
 	}
-
-	wait, err := src.Extract(path, sha)
-	if err != nil {
-		return err
-	}
-	<-wait
 
 	ret := fmt.Sprintf("%s/%s/att/%s", src.Settings.Metadata, sha, name)
 	return c.File(ret)
@@ -214,7 +208,7 @@ func (h *Handler) GetAttachment(c echo.Context) error {
 //
 // Path: /:path/subtitle/:name
 func (h *Handler) GetSubtitle(c echo.Context) error {
-	path, sha, err := GetPath(c)
+	_, sha, err := GetPath(c)
 	if err != nil {
 		return err
 	}
@@ -222,12 +216,6 @@ func (h *Handler) GetSubtitle(c echo.Context) error {
 	if err := SanitizePath(name); err != nil {
 		return err
 	}
-
-	wait, err := src.Extract(path, sha)
-	if err != nil {
-		return err
-	}
-	<-wait
 
 	ret := fmt.Sprintf("%s/%s/sub/%s", src.Settings.Metadata, sha, name)
 	return c.File(ret)
