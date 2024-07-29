@@ -176,13 +176,10 @@ func (h *Handler) GetInfo(c echo.Context) error {
 		return err
 	}
 
-	ret, err := src.GetInfo(path, sha)
+	ret, err := h.metadata.GetMetadata(path, sha)
 	if err != nil {
 		return err
 	}
-	// Run extractors to have them in cache
-	src.Extract(ret.Path, sha)
-	go src.ExtractThumbnail(ret.Path, sha)
 	return c.JSON(http.StatusOK, ret)
 }
 
@@ -246,13 +243,12 @@ func (h *Handler) GetThumbnails(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
-	out, err := src.ExtractThumbnail(path, sha)
+	sprite, _, err := h.metadata.GetThumb(path, sha)
 	if err != nil {
 		return err
 	}
 
-	return c.File(fmt.Sprintf("%s/sprite.png", out))
+	return c.File(sprite)
 }
 
 // Get thumbnail vtt
@@ -266,17 +262,17 @@ func (h *Handler) GetThumbnailsVtt(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
-	out, err := src.ExtractThumbnail(path, sha)
+	_, vtt, err := h.metadata.GetThumb(path, sha)
 	if err != nil {
 		return err
 	}
 
-	return c.File(fmt.Sprintf("%s/sprite.vtt", out))
+	return c.File(vtt)
 }
 
 type Handler struct {
 	transcoder *src.Transcoder
+	metadata   src.MetadataService
 }
 
 func main() {

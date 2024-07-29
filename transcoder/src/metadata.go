@@ -5,11 +5,25 @@ import (
 )
 
 type MetadataService struct {
-	database *sqlx.DB
-	lock     *RunLock[string, *MediaInfo]
+	database  *sqlx.DB
+	lock      *RunLock[string, *MediaInfo]
+	thumbLock *RunLock[string, interface{}]
 }
 
 func (s MetadataService) GetMetadata(path string, sha string) (*MediaInfo, error) {
+	ret, err := s.getMetadata(path, sha)
+	if err != nil {
+		return nil, err
+	}
+
+	if ret.Versions.Thumbs < ThumbsVersion {
+		go s.ExtractThumbs(path, sha)
+	}
+
+	return ret, nil
+}
+
+func (s MetadataService) getMetadata(path string, sha string) (*MediaInfo, error) {
 	var ret MediaInfo
 	rows, err := s.database.Queryx(`
 		select * from info as i where i.sha=$1;
