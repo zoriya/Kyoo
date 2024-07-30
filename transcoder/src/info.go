@@ -76,6 +76,9 @@ type Video struct {
 	Height uint32 `json:"height"`
 	/// The average bitrate of the video in bytes/s
 	Bitrate uint32 `json:"bitrate"`
+
+	/// Keyframes of this video
+	Keyframes *Keyframe `json:"-"`
 }
 
 type Audio struct {
@@ -91,6 +94,9 @@ type Audio struct {
 	MimeCodec *string `json:"mimeCodec" db:"mime_codec"`
 	/// Is this stream the default one of it's type?
 	IsDefault bool `json:"isDefault" db:"is_default"`
+
+	/// Keyframes of this video
+	Keyframes *Keyframe `json:"-"`
 }
 
 type Subtitle struct {

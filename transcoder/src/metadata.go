@@ -5,10 +5,11 @@ import (
 )
 
 type MetadataService struct {
-	database  *sqlx.DB
-	lock      *RunLock[string, *MediaInfo]
-	thumbLock *RunLock[string, interface{}]
-	extractLock *RunLock[string, interface{}]
+	database     *sqlx.DB
+	lock         *RunLock[string, *MediaInfo]
+	thumbLock    *RunLock[string, interface{}]
+	extractLock  *RunLock[string, interface{}]
+	keyframeLock *RunLock[KeyframeKey, *Keyframe]
 }
 
 func (s MetadataService) GetMetadata(path string, sha string) (*MediaInfo, error) {
@@ -22,6 +23,23 @@ func (s MetadataService) GetMetadata(path string, sha string) (*MediaInfo, error
 	}
 	if ret.Versions.Extract < ExtractVersion {
 		go s.ExtractSubs(ret)
+	}
+	if ret.Versions.Keyframes < KeyframeVersion && ret.Versions.Keyframes != 0 {
+		for _, video := range ret.Videos {
+			video.Keyframes = nil
+		}
+		for _, audio := range ret.Audios {
+			audio.Keyframes = nil
+		}
+		s.database.NamedExec(`
+			update videos set keyframes = nil where sha = :sha;
+			update audios set keyframes = nil where sha = :sha;
+			update info set ver_keyframes = 0 where sha = :sha;
+			`,
+			map[string]interface{}{
+				"sha": sha,
+			},
+		)
 	}
 
 	return ret, nil
