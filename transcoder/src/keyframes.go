@@ -2,6 +2,8 @@ package src
 
 import (
 	"bufio"
+	"database/sql/driver"
+	"errors"
 	"fmt"
 	"log"
 	"os/exec"
@@ -10,16 +12,15 @@ import (
 	"sync"
 )
 
+const KeyframeVersion = 1
+
 type Keyframe struct {
-	Sha         string
-	Keyframes   []float64
-	CanTransmux bool
-	IsDone      bool
-	info        *KeyframeInfo
+	Keyframes []float64
+	IsDone    bool
+	info      *KeyframeInfo
 }
 type KeyframeInfo struct {
 	mutex     sync.RWMutex
-	ready     sync.WaitGroup
 	listeners []func(keyframes []float64)
 }
 
@@ -62,37 +63,86 @@ func (kf *Keyframe) AddListener(callback func(keyframes []float64)) {
 	kf.info.listeners = append(kf.info.listeners, callback)
 }
 
-var keyframes = NewCMap[string, *Keyframe]()
-
-func GetKeyframes(sha string, path string) *Keyframe {
-	ret, _ := keyframes.GetOrCreate(sha, func() *Keyframe {
-		kf := &Keyframe{
-			Sha:    sha,
-			IsDone: false,
-			info:   &KeyframeInfo{},
-		}
-		kf.info.ready.Add(1)
-		go func() {
-			save_path := fmt.Sprintf("%s/%s/keyframes.json", Settings.Metadata, sha)
-			if err := getSavedInfo(save_path, kf); err == nil {
-				log.Printf("Using keyframes cache on filesystem for %s", path)
-				kf.info.ready.Done()
-				return
-			}
-
-			err := getKeyframes(path, kf, sha)
-			if err == nil {
-				saveInfo(save_path, kf)
-			}
-		}()
-		return kf
-	})
-	ret.info.ready.Wait()
-	return ret
+func (kf *Keyframe) Value() (driver.Value, error) {
+	return driver.Value(kf.Keyframes), nil
 }
 
-func getKeyframes(path string, kf *Keyframe, sha string) error {
-	defer printExecTime("ffprobe analysis for %s", path)()
+func (kf *Keyframe) Scan(src interface{}) error {
+	switch src.(type) {
+	case []float64:
+		kf.Keyframes = src.([]float64)
+		kf.IsDone = true
+		kf.info = &KeyframeInfo{}
+	default:
+		return errors.New("incompatible type for keyframe in database")
+	}
+	return nil
+}
+
+type KeyframeKey struct {
+	Sha     string
+	IsVideo bool
+	Index   int
+}
+
+func (s *MetadataService) GetKeyframe(info *MediaInfo, isVideo bool, idx int) (*Keyframe, error) {
+	get_running, set := s.keyframeLock.Start(KeyframeKey{
+		Sha:     info.Sha,
+		IsVideo: isVideo,
+		Index:   idx,
+	})
+	if get_running != nil {
+		return get_running()
+	}
+
+	kf := &Keyframe{
+		IsDone: false,
+		info:   &KeyframeInfo{},
+	}
+
+	var ready sync.WaitGroup
+	var err error
+	ready.Add(1)
+	go func() {
+		var table string
+		if isVideo {
+			table = "videos"
+			err = getVideoKeyframes(info.Path, idx, kf, &ready)
+		} else {
+			table = "audios"
+			err = getAudioKeyframes(info, idx, kf, &ready)
+		}
+
+		if err != nil {
+			log.Printf("Couldn't retrive keyframes for %s %s %d: %v", info.Path, table, idx, err)
+			return
+		}
+
+		_, err = s.database.NamedExec(
+			fmt.Sprint(
+				`update %s set keyframes = :keyframes, ver_keyframes = :version where sha = :sha and idx = :idx`,
+				table,
+			),
+			map[string]interface{}{
+				"sha":       info.Sha,
+				"idx":       idx,
+				"keyframes": kf.Keyframes,
+				"version":   KeyframeVersion,
+			},
+		)
+		if err != nil {
+			log.Printf("Couldn't store keyframes on database: %v", err)
+		}
+	}()
+	ready.Wait()
+	return set(kf, err)
+}
+
+// Retrive video's keyframes and store them inside the kf var.
+// Returns when all key frames are retrived (or an error occurs)
+// ready.Done() is called when more than 100 are retrived (or extraction is done)
+func getVideoKeyframes(path string, video_idx int, kf *Keyframe, ready *sync.WaitGroup) error {
+	defer printExecTime("ffprobe keyframe analysis for %s video n%d", path, video_idx)()
 	// run ffprobe to return all IFrames, IFrames are points where we can split the video in segments.
 	// We ask ffprobe to return the time of each frame and it's flags
 	// We could ask it to return only i-frames (keyframes) with the -skip_frame nokey but using it is extremly slow
@@ -100,7 +150,7 @@ func getKeyframes(path string, kf *Keyframe, sha string) error {
 	cmd := exec.Command(
 		"ffprobe",
 		"-loglevel", "error",
-		"-select_streams", "v:0",
+		"-select_streams", fmt.Sprint("V:%d", video_idx),
 		"-show_entries", "packet=pts_time,flags",
 		"-of", "csv=print_section=0",
 		path,
@@ -159,7 +209,7 @@ func getKeyframes(path string, kf *Keyframe, sha string) error {
 		if len(ret) == max {
 			kf.add(ret)
 			if done == 0 {
-				kf.info.ready.Done()
+				ready.Done()
 			} else if done >= 500 {
 				max = 500
 			}
@@ -168,32 +218,23 @@ func getKeyframes(path string, kf *Keyframe, sha string) error {
 			ret = ret[:0]
 		}
 	}
-	// If there is less than 2 (i.e. equals 0 or 1 (it happens for audio files with poster))
-	if len(ret) < 2 {
-		dummy, err := getDummyKeyframes(path, sha)
-		if err != nil {
-			return err
-		}
-		ret = dummy
-	}
 	kf.add(ret)
 	if done == 0 {
-		kf.info.ready.Done()
+		ready.Done()
 	}
 	kf.IsDone = true
 	return nil
 }
 
-func getDummyKeyframes(path string, sha string) ([]float64, error) {
-	dummyKeyframeDuration := float64(2)
-	info, err := GetInfo(path, sha)
-	if err != nil {
-		return nil, err
-	}
+func getAudioKeyframes(info *MediaInfo, audio_idx int, kf *Keyframe, ready *sync.WaitGroup) error {
+	dummyKeyframeDuration := float64(4)
 	segmentCount := int((float64(info.Duration) / dummyKeyframeDuration) + 1)
-	ret := make([]float64, segmentCount)
+	kf.Keyframes = make([]float64, segmentCount)
 	for segmentIndex := 0; segmentIndex < segmentCount; segmentIndex += 1 {
-		ret[segmentIndex] = float64(segmentIndex) * dummyKeyframeDuration
+		kf.Keyframes[segmentIndex] = float64(segmentIndex) * dummyKeyframeDuration
 	}
-	return ret, nil
+
+	ready.Done()
+	kf.IsDone = true
+	return nil
 }
