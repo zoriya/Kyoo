@@ -260,7 +260,7 @@ func (h *Handler) GetThumbnailsVtt(c echo.Context) error {
 
 type Handler struct {
 	transcoder *src.Transcoder
-	metadata   src.MetadataService
+	metadata   *src.MetadataService
 }
 
 func main() {
@@ -268,13 +268,19 @@ func main() {
 	e.Use(middleware.Logger())
 	e.HTTPErrorHandler = ErrorHandler
 
-	transcoder, err := src.NewTranscoder()
+	metadata, err := src.NewMetadataService()
+	if err != nil {
+		e.Logger.Fatal(err)
+		return
+	}
+	transcoder, err := src.NewTranscoder(metadata)
 	if err != nil {
 		e.Logger.Fatal(err)
 		return
 	}
 	h := Handler{
 		transcoder: transcoder,
+		metadata:   metadata,
 	}
 
 	e.GET("/:path/direct", DirectStream)

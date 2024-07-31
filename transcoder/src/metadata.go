@@ -12,6 +12,10 @@ type MetadataService struct {
 	keyframeLock *RunLock[KeyframeKey, *Keyframe]
 }
 
+func NewMetadataService() (*MetadataService, error) {
+	return &MetadataService{}, nil
+}
+
 func (s MetadataService) GetMetadata(path string, sha string) (*MediaInfo, error) {
 	ret, err := s.getMetadata(path, sha)
 	if err != nil {

@@ -30,10 +30,12 @@ type StreamHandle interface {
 }
 
 type Stream struct {
-	handle   StreamHandle
-	file     *FileStream
-	segments []Segment
-	heads    []Head
+	handle    StreamHandle
+	ready     sync.WaitGroup
+	file      *FileStream
+	keyframes *Keyframe
+	segments  []Segment
+	heads     []Head
 	// the lock used for the the heads
 	lock sync.RWMutex
 }
@@ -62,19 +64,20 @@ var DeletedHead = Head{
 	command: nil,
 }
 
-func NewStream(file *FileStream, handle StreamHandle, ret *Stream) {
+func NewStream(file *FileStream, keyframes *Keyframe, handle StreamHandle, ret *Stream) {
 	ret.handle = handle
 	ret.file = file
+	ret.keyframes = keyframes
 	ret.heads = make([]Head, 0)
 
-	length, is_done := file.Keyframes.Length()
+	length, is_done := keyframes.Length()
 	ret.segments = make([]Segment, length, max(length, 2000))
 	for seg := range ret.segments {
 		ret.segments[seg].channel = make(chan struct{})
 	}
 
 	if !is_done {
-		file.Keyframes.AddListener(func(keyframes []float64) {
+		keyframes.AddListener(func(keyframes []float64) {
 			ret.lock.Lock()
 			defer ret.lock.Unlock()
 			old_length := len(ret.segments)

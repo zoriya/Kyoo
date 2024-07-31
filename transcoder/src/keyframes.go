@@ -20,6 +20,7 @@ type Keyframe struct {
 	info      *KeyframeInfo
 }
 type KeyframeInfo struct {
+	ready     sync.WaitGroup
 	mutex     sync.RWMutex
 	listeners []func(keyframes []float64)
 }
@@ -82,10 +83,10 @@ func (kf *Keyframe) Scan(src interface{}) error {
 type KeyframeKey struct {
 	Sha     string
 	IsVideo bool
-	Index   int
+	Index   int32
 }
 
-func (s *MetadataService) GetKeyframe(info *MediaInfo, isVideo bool, idx int) (*Keyframe, error) {
+func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx int32) (*Keyframe, error) {
 	get_running, set := s.keyframeLock.Start(KeyframeKey{
 		Sha:     info.Sha,
 		IsVideo: isVideo,
@@ -99,18 +100,17 @@ func (s *MetadataService) GetKeyframe(info *MediaInfo, isVideo bool, idx int) (*
 		IsDone: false,
 		info:   &KeyframeInfo{},
 	}
+	kf.info.ready.Add(1)
 
-	var ready sync.WaitGroup
 	var err error
-	ready.Add(1)
 	go func() {
 		var table string
 		if isVideo {
 			table = "videos"
-			err = getVideoKeyframes(info.Path, idx, kf, &ready)
+			err = getVideoKeyframes(info.Path, idx, kf)
 		} else {
 			table = "audios"
-			err = getAudioKeyframes(info, idx, kf, &ready)
+			err = getAudioKeyframes(info, idx, kf)
 		}
 
 		if err != nil {
@@ -134,14 +134,13 @@ func (s *MetadataService) GetKeyframe(info *MediaInfo, isVideo bool, idx int) (*
 			log.Printf("Couldn't store keyframes on database: %v", err)
 		}
 	}()
-	ready.Wait()
 	return set(kf, err)
 }
 
 // Retrive video's keyframes and store them inside the kf var.
 // Returns when all key frames are retrived (or an error occurs)
-// ready.Done() is called when more than 100 are retrived (or extraction is done)
-func getVideoKeyframes(path string, video_idx int, kf *Keyframe, ready *sync.WaitGroup) error {
+// info.ready.Done() is called when more than 100 are retrived (or extraction is done)
+func getVideoKeyframes(path string, video_idx int32, kf *Keyframe) error {
 	defer printExecTime("ffprobe keyframe analysis for %s video n%d", path, video_idx)()
 	// run ffprobe to return all IFrames, IFrames are points where we can split the video in segments.
 	// We ask ffprobe to return the time of each frame and it's flags
@@ -209,7 +208,7 @@ func getVideoKeyframes(path string, video_idx int, kf *Keyframe, ready *sync.Wai
 		if len(ret) == max {
 			kf.add(ret)
 			if done == 0 {
-				ready.Done()
+				kf.info.ready.Done()
 			} else if done >= 500 {
 				max = 500
 			}
@@ -220,13 +219,14 @@ func getVideoKeyframes(path string, video_idx int, kf *Keyframe, ready *sync.Wai
 	}
 	kf.add(ret)
 	if done == 0 {
-		ready.Done()
+		kf.info.ready.Done()
 	}
 	kf.IsDone = true
 	return nil
 }
 
-func getAudioKeyframes(info *MediaInfo, audio_idx int, kf *Keyframe, ready *sync.WaitGroup) error {
+// we can pretty much cut audio at any point so no need to get specific frames, just cut every 4s
+func getAudioKeyframes(info *MediaInfo, audio_idx int32, kf *Keyframe) error {
 	dummyKeyframeDuration := float64(4)
 	segmentCount := int((float64(info.Duration) / dummyKeyframeDuration) + 1)
 	kf.Keyframes = make([]float64, segmentCount)
@@ -234,7 +234,7 @@ func getAudioKeyframes(info *MediaInfo, audio_idx int, kf *Keyframe, ready *sync
 		kf.Keyframes[segmentIndex] = float64(segmentIndex) * dummyKeyframeDuration
 	}
 
-	ready.Done()
+	kf.info.ready.Done()
 	kf.IsDone = true
 	return nil
 }
