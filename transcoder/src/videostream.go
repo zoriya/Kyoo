@@ -7,15 +7,28 @@ import (
 
 type VideoStream struct {
 	Stream
+	idx     int32
 	quality Quality
 }
 
-func NewVideoStream(file *FileStream, quality Quality) *VideoStream {
-	log.Printf("Creating a new video stream for %s in quality %s", file.Path, quality)
+func (t *Transcoder) NewVideoStream(file *FileStream, idx int32, quality Quality) (*VideoStream, error) {
+	log.Printf(
+		"Creating a new video stream for %s (n %d) in quality %s",
+		file.Info.Path,
+		idx,
+		quality,
+	)
+
+	keyframes, err := t.metadataService.GetKeyframes(file.Info, true, idx)
+	if err != nil {
+		return nil, err
+	}
+
 	ret := new(VideoStream)
+	ret.idx = idx
 	ret.quality = quality
-	NewStream(file, ret, &ret.Stream)
-	return ret
+	NewStream(file, keyframes, ret, &ret.Stream)
+	return ret, nil
 }
 
 func (vs *VideoStream) getFlags() Flags {
@@ -41,7 +54,7 @@ func closestMultiple(n int32, x int32) int32 {
 
 func (vs *VideoStream) getTranscodeArgs(segments string) []string {
 	args := []string{
-		"-map", "0:V:0",
+		"-map", fmt.Sprint("0:V:%d", vs.idx),
 	}
 
 	if vs.quality == Original {

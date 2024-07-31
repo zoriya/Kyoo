@@ -10,38 +10,36 @@ import (
 )
 
 type FileStream struct {
-	ready     sync.WaitGroup
-	err       error
-	Path      string
-	Out       string
-	Keyframes *Keyframe
-	Info      *MediaInfo
-	videos    CMap[Quality, *VideoStream]
-	audios    CMap[int32, *AudioStream]
+	transcoder *Transcoder
+	ready      sync.WaitGroup
+	err        error
+	Out        string
+	Info       *MediaInfo
+	videos     CMap[VideoKey, *VideoStream]
+	audios     CMap[int32, *AudioStream]
 }
 
-func NewFileStream(path string, sha string) *FileStream {
+type VideoKey struct {
+	idx     int32
+	quality Quality
+}
+
+func (t *Transcoder) newFileStream(path string, sha string) *FileStream {
 	ret := &FileStream{
-		Path:   path,
-		Out:    fmt.Sprintf("%s/%s", Settings.Outpath, sha),
-		videos: NewCMap[Quality, *VideoStream](),
-		audios: NewCMap[int32, *AudioStream](),
+		transcoder: t,
+		Out:        fmt.Sprintf("%s/%s", Settings.Outpath, sha),
+		videos:     NewCMap[VideoKey, *VideoStream](),
+		audios:     NewCMap[int32, *AudioStream](),
 	}
 
 	ret.ready.Add(1)
 	go func() {
 		defer ret.ready.Done()
-		info, err := GetInfo(path, sha)
+		info, err := t.metadataService.GetMetadata(path, sha)
 		ret.Info = info
 		if err != nil {
 			ret.err = err
 		}
-	}()
-
-	ret.ready.Add(1)
-	go func() {
-		defer ret.ready.Done()
-		ret.Keyframes = GetKeyframes(sha, path)
 	}()
 
 	return ret
@@ -62,7 +60,7 @@ func (fs *FileStream) Kill() {
 }
 
 func (fs *FileStream) Destroy() {
-	log.Printf("Removing all transcode cache files for %s", fs.Path)
+	log.Printf("Removing all transcode cache files for %s", fs.Info.Path)
 	fs.Kill()
 	_ = os.RemoveAll(fs.Out)
 }
@@ -135,36 +133,64 @@ func (fs *FileStream) GetMaster() string {
 	return master
 }
 
-func (fs *FileStream) getVideoStream(quality Quality) *VideoStream {
-	stream, _ := fs.videos.GetOrCreate(quality, func() *VideoStream {
-		return NewVideoStream(fs, quality)
+func (fs *FileStream) getVideoStream(idx int32, quality Quality) (*VideoStream, error) {
+	var err error
+	stream, _ := fs.videos.GetOrCreate(VideoKey{idx, quality}, func() *VideoStream {
+		var ret *VideoStream
+		ret, err = fs.transcoder.NewVideoStream(fs, idx, quality)
+		return ret
 	})
-	return stream
+	if err != nil {
+		fs.videos.Remove(VideoKey{idx, quality})
+		return nil, err
+	}
+	stream.ready.Wait()
+	return stream, nil
 }
 
-func (fs *FileStream) GetVideoIndex(quality Quality) (string, error) {
-	stream := fs.getVideoStream(quality)
+func (fs *FileStream) GetVideoIndex(idx int32, quality Quality) (string, error) {
+	stream, err := fs.getVideoStream(idx, quality)
+	if err != nil {
+		return "", err
+	}
 	return stream.GetIndex()
 }
 
-func (fs *FileStream) GetVideoSegment(quality Quality, segment int32) (string, error) {
-	stream := fs.getVideoStream(quality)
+func (fs *FileStream) GetVideoSegment(idx int32, quality Quality, segment int32) (string, error) {
+	stream, err := fs.getVideoStream(idx, quality)
+	if err != nil {
+		return "", err
+	}
 	return stream.GetSegment(segment)
 }
 
-func (fs *FileStream) getAudioStream(audio int32) *AudioStream {
+func (fs *FileStream) getAudioStream(audio int32) (*AudioStream, error) {
+	var err error
 	stream, _ := fs.audios.GetOrCreate(audio, func() *AudioStream {
-		return NewAudioStream(fs, audio)
+		var ret *AudioStream
+		ret, err = fs.transcoder.NewAudioStream(fs, audio)
+		return ret
 	})
-	return stream
+	if err != nil {
+		fs.audios.Remove(audio)
+		return nil, err
+	}
+	stream.ready.Wait()
+	return stream, nil
 }
 
 func (fs *FileStream) GetAudioIndex(audio int32) (string, error) {
-	stream := fs.getAudioStream(audio)
+	stream, err := fs.getAudioStream(audio)
+	if err != nil {
+		return "", nil
+	}
 	return stream.GetIndex()
 }
 
 func (fs *FileStream) GetAudioSegment(audio int32, segment int32) (string, error) {
-	stream := fs.getAudioStream(audio)
+	stream, err := fs.getAudioStream(audio)
+	if err != nil {
+		return "", nil
+	}
 	return stream.GetSegment(segment)
 }

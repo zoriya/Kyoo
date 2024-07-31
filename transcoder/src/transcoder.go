@@ -7,12 +7,13 @@ import (
 
 type Transcoder struct {
 	// All file streams currently running, index is file path
-	streams    CMap[string, *FileStream]
-	clientChan chan ClientInfo
-	tracker    *Tracker
+	streams         CMap[string, *FileStream]
+	clientChan      chan ClientInfo
+	tracker         *Tracker
+	metadataService *MetadataService
 }
 
-func NewTranscoder() (*Transcoder, error) {
+func NewTranscoder(metadata *MetadataService) (*Transcoder, error) {
 	out := Settings.Outpath
 	dir, err := os.ReadDir(out)
 	if err != nil {
@@ -26,8 +27,9 @@ func NewTranscoder() (*Transcoder, error) {
 	}
 
 	ret := &Transcoder{
-		streams:    NewCMap[string, *FileStream](),
-		clientChan: make(chan ClientInfo, 10),
+		streams:         NewCMap[string, *FileStream](),
+		clientChan:      make(chan ClientInfo, 10),
+		metadataService: metadata,
 	}
 	ret.tracker = NewTracker(ret)
 	return ret, nil
@@ -35,7 +37,7 @@ func NewTranscoder() (*Transcoder, error) {
 
 func (t *Transcoder) getFileStream(path string, sha string) (*FileStream, error) {
 	ret, _ := t.streams.GetOrCreate(sha, func() *FileStream {
-		return NewFileStream(path, sha)
+		return t.newFileStream(path, sha)
 	})
 	ret.ready.Wait()
 	if ret.err != nil {
