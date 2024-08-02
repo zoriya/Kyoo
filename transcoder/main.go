@@ -55,8 +55,12 @@ func (h *Handler) GetMaster(c echo.Context) error {
 // This route can take a few seconds to respond since it will way for at least one segment to be
 // available.
 //
-// Path: /:path/:quality/index.m3u8
+// Path: /:path/:video/:quality/index.m3u8
 func (h *Handler) GetVideoIndex(c echo.Context) error {
+	video, err := strconv.ParseInt(c.Param("video"), 10, 32)
+	if err != nil {
+		return err
+	}
 	quality, err := src.QualityFromString(c.Param("quality"))
 	if err != nil {
 		return err
@@ -70,7 +74,7 @@ func (h *Handler) GetVideoIndex(c echo.Context) error {
 		return err
 	}
 
-	ret, err := h.transcoder.GetVideoIndex(path, quality, client, sha)
+	ret, err := h.transcoder.GetVideoIndex(path, int32(video), quality, client, sha)
 	if err != nil {
 		return err
 	}
@@ -109,8 +113,12 @@ func (h *Handler) GetAudioIndex(c echo.Context) error {
 //
 // Retrieve a chunk of a transmuxed video.
 //
-// Path: /:path/:quality/segments-:chunk.ts
+// Path: /:path/:video/:quality/segments-:chunk.ts
 func (h *Handler) GetVideoSegment(c echo.Context) error {
+	video, err := strconv.ParseInt(c.Param("video"), 10, 32)
+	if err != nil {
+		return err
+	}
 	quality, err := src.QualityFromString(c.Param("quality"))
 	if err != nil {
 		return err
@@ -128,7 +136,14 @@ func (h *Handler) GetVideoSegment(c echo.Context) error {
 		return err
 	}
 
-	ret, err := h.transcoder.GetVideoSegment(path, quality, segment, client, sha)
+	ret, err := h.transcoder.GetVideoSegment(
+		path,
+		int32(video),
+		quality,
+		segment,
+		client,
+		sha,
+	)
 	if err != nil {
 		return err
 	}
@@ -285,7 +300,7 @@ func main() {
 
 	e.GET("/:path/direct", DirectStream)
 	e.GET("/:path/master.m3u8", h.GetMaster)
-	e.GET("/:path/:quality/index.m3u8", h.GetVideoIndex)
+	e.GET("/:path/:video/:quality/index.m3u8", h.GetVideoIndex)
 	e.GET("/:path/audio/:audio/index.m3u8", h.GetAudioIndex)
 	e.GET("/:path/:quality/:chunk", h.GetVideoSegment)
 	e.GET("/:path/audio/:audio/:chunk", h.GetAudioSegment)
