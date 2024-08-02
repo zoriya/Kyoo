@@ -8,7 +8,7 @@
 		"watchlistLogin": "Para salvar o que você assistiu ou planeja assistir, é necessário fazer login.",
 		"refreshMetadata": "Atualizar metadados",
 		"episodeMore": {
-			"goToShow": "",
+			"goToShow": "Ir para série",
 			"download": "Baixar",
 			"mediainfo": "Veja informação do arquivo"
 		}
@@ -24,12 +24,12 @@
 		"noOverview": "Resumo indisponível",
 		"episode-none": "Nenhum episódio nessa temporada",
 		"episodeNoMetadata": "Metadado indisponível",
-		"tags": "",
-		"links": "",
+		"tags": "Tags",
+		"links": "Links",
 		"jumpToSeason": "Pular para temporada",
 		"partOf": "Parte de",
-		"watchlistAdd": "",
-		"watchlistEdit": "",
+		"watchlistAdd": "Adicionar a lista de desejos",
+		"watchlistEdit": "Editar status de visto",
 		"watchlistRemove": "Marque como não assistido",
 		"watchlistLogin": "Faça login para adicionar a sua lista",
 		"watchlistMark": {
@@ -57,8 +57,8 @@
 			"relevance": "Relevância",
 			"name": "Nome",
 			"airDate": "Data de transmissão",
-			"startAir": "",
-			"endAir": "",
+			"startAir": "Data de início",
+			"endAir": "Data de finalização",
 			"addedDate": "Adicionado na data",
 			"rating": "Avaliações"
 		},
@@ -74,24 +74,24 @@
 		"Adventure": "Aventura",
 		"Animation": "Animação",
 		"Comedy": "Comédia",
-		"Crime": "",
+		"Crime": "Crime",
 		"Documentary": "Documentário",
-		"Drama": "",
+		"Drama": "Drama",
 		"Family": "Família",
 		"Fantasy": "Fantasia",
 		"History": "História",
 		"Horror": "Terror",
 		"Music": "Música",
 		"Mystery": "Mistério",
-		"Romance": "",
+		"Romance": "Romance",
 		"ScienceFiction": "Ficção cientifica",
-		"Thriller": "",
+		"Thriller": "Suspense",
 		"War": "Guerra",
-		"Western": "",
+		"Western": "Faroeste",
 		"Kids": "Infantil",
 		"News": "Notícias",
 		"Reality": "Realidade",
-		"Soap": "",
+		"Soap": "Novela",
 		"Talk": "",
 		"Politics": "Política"
 	},
@@ -103,17 +103,17 @@
 		"cancel": "Cancelar",
 		"more": "Mais",
 		"expand": "Expandir",
-		"collapse": "",
+		"collapse": "Recolher",
 		"edit": "Editar",
 		"or": "OU",
 		"loading": "Carregando"
 	},
 	"navbar": {
-		"home": "",
+		"home": "Início",
 		"browse": "Navegar",
 		"download": "Baixar",
 		"search": "Pesquisar",
-		"login": "",
+		"login": "Entrar",
 		"admin": "Painel de admin"
 	},
 	"settings": {
@@ -121,164 +121,164 @@
 			"label": "Geral",
 			"theme": {
 				"label": "Tema",
-				"description": "",
+				"description": "Defina o tema da sua aplicação",
 				"auto": "Sistema",
-				"light": "",
-				"dark": ""
+				"light": "Claro",
+				"dark": "Escuro"
 			},
 			"language": {
-				"label": "",
-				"description": "",
-				"system": ""
+				"label": "Linguagem",
+				"description": "Defina o idioma da sua aplicação",
+				"system": "Sistema"
 			}
 		},
 		"playback": {
-			"label": "",
+			"label": "Reprodução",
 			"playmode": {
-				"label": "",
-				"description": ""
+				"label": "Modo de reprodução padrão",
+				"description": "O modo de reprodução padrão usado neste cliente. Puro é mais leve mas não permite mudanças de qualidade automáticas"
 			},
 			"audioLanguage": {
-				"label": "",
-				"description": ""
+				"label": "Idioma do áudio",
+				"description": "O idioma de áudio padrão usado ao reproduzir vídeos multi-linguagem"
 			},
 			"subtitleLanguage": {
-				"label": "",
-				"description": "",
-				"none": ""
+				"label": "Idioma das legendas",
+				"description": "O idioma padrão usado nas legendas",
+				"none": "Nenhum"
 			}
 		},
 		"account": {
-			"label": "",
+			"label": "Conta",
 			"username": {
-				"label": ""
+				"label": "Usuário"
 			},
 			"avatar": {
-				"label": "",
-				"description": ""
+				"label": "Foto",
+				"description": "Mude seu ícone de perfil"
 			},
 			"email": {
-				"label": ""
+				"label": "Email"
 			},
 			"password": {
-				"label": "",
-				"description": "",
-				"oldPassword": "",
-				"newPassword": ""
+				"label": "Senha",
+				"description": "Mude sua senha",
+				"oldPassword": "Senha antiga",
+				"newPassword": "Nova senha"
 			}
 		},
 		"oidc": {
-			"label": "",
-			"connected": "",
-			"not-connected": "",
-			"open-profile": "",
-			"link": "",
-			"delete": ""
+			"label": "Contas vinculadas",
+			"connected": "Conectado como {{username}}.",
+			"not-connected": "Desconectado",
+			"open-profile": "Abre seu perfil em {{provider}}",
+			"link": "Link",
+			"delete": "Desvincule sua conta kyoo's do provedor {{provider}}"
 		},
 		"about": {
-			"label": "",
+			"label": "Sobre",
 			"android-app": {
-				"label": "",
-				"description": ""
+				"label": "Aplicativo Android",
+				"description": "Baixe o aplicativo Android"
 			},
 			"git": {
-				"label": "",
-				"description": ""
+				"label": "Github",
+				"description": "Abre o repositório no GitHub onde é possivel acessar o código do kyoo"
 			}
 		}
 	},
 	"player": {
-		"back": "",
-		"previous": "",
-		"next": "",
-		"play": "",
-		"pause": "",
-		"mute": "",
-		"volume": "",
-		"quality": "",
-		"audios": "",
-		"subtitles": "",
-		"subtitle-none": "",
-		"fullscreen": "",
-		"direct": "",
-		"transmux": "",
-		"auto": "",
-		"notInPristine": "",
-		"unsupportedError": ""
+		"back": "Voltar",
+		"previous": "Episódio anterior",
+		"next": "Próximo episódio",
+		"play": "Reproduzir",
+		"pause": "Pausar",
+		"mute": "Mutar",
+		"volume": "Volume",
+		"quality": "Qualidade",
+		"audios": "Áudio",
+		"subtitles": "Legendas",
+		"subtitle-none": "Nenhum",
+		"fullscreen": "Tela cheia",
+		"direct": "Puro",
+		"transmux": "Original",
+		"auto": "Automático",
+		"notInPristine": "Indisponível no \"Puro\"",
+		"unsupportedError": "Codec de vídeo não suportado, transcodificando..."
 	},
 	"search": {
-		"empty": ""
+		"empty": "Nenhum resultado encontrado. Tente algo diferente."
 	},
 	"login": {
-		"login": "",
-		"register": "",
-		"guest": "",
-		"guest-forbidden": "",
-		"via": "",
-		"add-account": "",
-		"logout": "",
-		"server": "",
-		"email": "",
-		"username": "",
-		"password": "",
-		"confirm": "",
-		"or-register": "",
-		"or-login": "",
-		"password-no-match": "",
-		"delete": "",
-		"delete-confirmation": ""
+		"login": "Entrar",
+		"register": "Registrar",
+		"guest": "Continuar como visitante",
+		"guest-forbidden": "Essa instância kyoo não permite visitantes.",
+		"via": "Continuar com {{provider}}",
+		"add-account": "Adicionar conta",
+		"logout": "Sair",
+		"server": "Endereço do servidor",
+		"email": "E-mail",
+		"username": "Usuário",
+		"password": "Senha",
+		"confirm": "Confirmar senha",
+		"or-register": "Não tem uma conta? <1>Registre-se</1>.",
+		"or-login": "Já possui uma conta? <1>Entre</1>.",
+		"password-no-match": "Senhas não coincidem.",
+		"delete": "Apagar sua conta",
+		"delete-confirmation": "Esta ação não pode ser revertida. Tem certeza?"
 	},
 	"downloads": {
-		"empty": "",
-		"error": "",
-		"delete": "",
-		"deleteMessage": "",
-		"pause": "",
-		"resume": "",
-		"retry": ""
+		"empty": "Nada baixado ainda, comece a explorar algo que lhe interesse",
+		"error": "Erro: {{error}}",
+		"delete": "Remover item",
+		"deleteMessage": "Você deseja remover este item do seu armazenamento local?",
+		"pause": "Pausar",
+		"resume": "Retomar",
+		"retry": "Tentar novamente"
 	},
 	"errors": {
-		"connection": "",
-		"connection-tips": "",
-		"unknown": "",
-		"try-again": "",
-		"re-login": "",
-		"offline": "",
-		"unauthorized": "",
-		"needVerification": "",
-		"needAccount": "",
+		"connection": "Não foi possível se conectar com servidor kyoo",
+		"connection-tips": "Dicas de solução:\n- Você está conectado a internet?\n- Seu servidor kyoo está online?\n- Sua conta foi banida?",
+		"unknown": "Erro desconhecido",
+		"try-again": "Tente novamente",
+		"re-login": "Entrar novamente",
+		"offline": "Você não está conectado a internet. Tente novamente mais tarde.",
+		"unauthorized": "Você não possui as permissões {{permission}} para acessar esta página.",
+		"needVerification": "Sua conta precisa ser verificada pelo administrador antes que você possa usá-la.",
+		"needAccount": "Esta página não pode ser acessada em modo visitante. Voce precisa criar uma conta ou entrar.",
 		"setup": {
-			"MissingAdminAccount": "",
-			"NoVideoFound": ""
+			"MissingAdminAccount": "Nenhuma conta adminisitrativa foi criada ainda. Por favor registre-se para criá-la.",
+			"NoVideoFound": "Nenhum vídeo encontrado. Adicione filmes ou séries na sua biblioteca para que eles apareçam aqui!"
 		}
 	},
 	"mediainfo": {
-		"file": "",
-		"container": "",
-		"video": "",
-		"audio": "",
-		"subtitles": "",
-		"forced": "",
-		"default": "",
-		"duration": "",
-		"size": "",
-		"novideo": "",
-		"nocontainer": ""
+		"file": "Arquivo",
+		"container": "Contêiner",
+		"video": "Vídeo",
+		"audio": "Áudio",
+		"subtitles": "Legendas",
+		"forced": "Forçado",
+		"default": "Padrão",
+		"duration": "Duração",
+		"size": "Tamanho",
+		"novideo": "Sem vídeo",
+		"nocontainer": "Contêiner inválido"
 	},
 	"admin": {
 		"users": {
-			"label": "",
-			"adminUser": "",
-			"regularUser": "",
-			"set-permissions": "",
-			"delete": "",
-			"unverifed": "",
-			"verify": ""
+			"label": "Usuários",
+			"adminUser": "Administrador",
+			"regularUser": "Usuário",
+			"set-permissions": "Definir permissões",
+			"delete": "Remover usuário",
+			"unverifed": "Não verificado",
+			"verify": "Verificar usuário"
 		},
 		"scanner": {
-			"label": "",
-			"scan": "",
-			"empty": ""
+			"label": "Escanear",
+			"scan": "Iniciar escaneamento de mídia",
+			"empty": "Nenhum problema encontrado. Todos os seus itens estão registrados."
 		}
 	}
 }
