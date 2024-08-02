@@ -6,11 +6,12 @@ import (
 )
 
 type ClientInfo struct {
-	client  string
-	path    string
-	quality *Quality
-	audio   int32
-	head    int32
+	client string
+	path   string
+	video  *VideoKey
+	audio  int32
+	vhead  int32
+	ahead  int32
 }
 
 type Tracker struct {
@@ -56,14 +57,17 @@ func (t *Tracker) start() {
 			old, ok := t.clients[info.client]
 			// First fixup the info. Most routes ruturn partial infos
 			if ok && old.path == info.path {
-				if info.quality == nil {
-					info.quality = old.quality
+				if info.video == nil {
+					info.video = old.video
 				}
 				if info.audio == -1 {
 					info.audio = old.audio
 				}
-				if info.head == -1 {
-					info.head = old.head
+				if info.vhead == -1 {
+					info.vhead = old.vhead
+				}
+				if info.ahead == -1 {
+					info.ahead = old.ahead
 				}
 			}
 
@@ -76,11 +80,14 @@ func (t *Tracker) start() {
 				if old.audio != info.audio && old.audio != -1 {
 					t.KillAudioIfDead(old.path, old.audio)
 				}
-				if old.quality != info.quality && old.quality != nil {
-					t.KillQualityIfDead(old.path, *old.quality)
+				if old.video != info.video && old.video != nil {
+					t.KillVideoIfDead(old.path, *old.video)
 				}
-				if old.head != -1 && Abs(info.head-old.head) > 100 {
-					t.KillOrphanedHeads(old.path, old.quality, old.audio)
+				if old.vhead != -1 && Abs(info.vhead-old.vhead) > 100 {
+					t.KillOrphanedHeads(old.path, old.video, -1)
+				}
+				if old.ahead != -1 && Abs(info.ahead-old.ahead) > 100 {
+					t.KillOrphanedHeads(old.path, nil, old.audio)
 				}
 			} else if ok {
 				t.KillStreamIfDead(old.path)
@@ -100,9 +107,9 @@ func (t *Tracker) start() {
 
 				if !t.KillStreamIfDead(info.path) {
 					audio_cleanup := info.audio != -1 && t.KillAudioIfDead(info.path, info.audio)
-					video_cleanup := info.quality != nil && t.KillQualityIfDead(info.path, *info.quality)
+					video_cleanup := info.video != nil && t.KillVideoIfDead(info.path, *info.video)
 					if !audio_cleanup || !video_cleanup {
-						t.KillOrphanedHeads(info.path, info.quality, info.audio)
+						t.KillOrphanedHeads(info.path, info.video, info.audio)
 					}
 				}
 			}
@@ -163,19 +170,19 @@ func (t *Tracker) KillAudioIfDead(path string, audio int32) bool {
 	return true
 }
 
-func (t *Tracker) KillQualityIfDead(path string, quality Quality) bool {
+func (t *Tracker) KillVideoIfDead(path string, video VideoKey) bool {
 	for _, stream := range t.clients {
-		if stream.path == path && stream.quality != nil && *stream.quality == quality {
+		if stream.path == path && stream.video != nil && *stream.video == video {
 			return false
 		}
 	}
-	log.Printf("Nobody is watching quality %s of %s. Killing it", quality, path)
+	log.Printf("Nobody is watching %s video %d quality %s. Killing it", path, video.idx, video.quality)
 
 	stream, ok := t.transcoder.streams.Get(path)
 	if !ok {
 		return false
 	}
-	vstream, vok := stream.videos.Get(quality)
+	vstream, vok := stream.videos.Get(video)
 	if !vok {
 		return false
 	}
@@ -183,27 +190,27 @@ func (t *Tracker) KillQualityIfDead(path string, quality Quality) bool {
 	return true
 }
 
-func (t *Tracker) KillOrphanedHeads(path string, quality *Quality, audio int32) {
+func (t *Tracker) KillOrphanedHeads(path string, video *VideoKey, audio int32) {
 	stream, ok := t.transcoder.streams.Get(path)
 	if !ok {
 		return
 	}
 
-	if quality != nil {
-		vstream, vok := stream.videos.Get(*quality)
+	if video != nil {
+		vstream, vok := stream.videos.Get(*video)
 		if vok {
-			t.killOrphanedeheads(&vstream.Stream)
+			t.killOrphanedeheads(&vstream.Stream, true)
 		}
 	}
 	if audio != -1 {
 		astream, aok := stream.audios.Get(audio)
 		if aok {
-			t.killOrphanedeheads(&astream.Stream)
+			t.killOrphanedeheads(&astream.Stream, false)
 		}
 	}
 }
 
-func (t *Tracker) killOrphanedeheads(stream *Stream) {
+func (t *Tracker) killOrphanedeheads(stream *Stream, is_video bool) {
 	stream.lock.Lock()
 	defer stream.lock.Unlock()
 
@@ -214,13 +221,14 @@ func (t *Tracker) killOrphanedeheads(stream *Stream) {
 
 		distance := int32(99999)
 		for _, info := range t.clients {
-			if info.head == -1 {
-				continue
+			ihead := info.vhead
+			if is_video {
+				ihead = info.ahead
 			}
-			distance = min(Abs(info.head-head.segment), distance)
+			distance = min(Abs(ihead-head.segment), distance)
 		}
 		if distance > 20 {
-			log.Printf("Killing orphaned head %s %d", stream.file.Path, encoder_id)
+			log.Printf("Killing orphaned head %s %d", stream.file.Info.Path, encoder_id)
 			stream.KillHead(encoder_id)
 		}
 	}

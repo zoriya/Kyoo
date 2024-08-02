@@ -53,17 +53,19 @@ func (t *Transcoder) GetMaster(path string, client string, sha string) (string, 
 		return "", err
 	}
 	t.clientChan <- ClientInfo{
-		client:  client,
-		path:    path,
-		quality: nil,
-		audio:   -1,
-		head:    -1,
+		client: client,
+		path:   path,
+		video:  nil,
+		audio:  -1,
+		vhead:  -1,
+		ahead:  -1,
 	}
 	return stream.GetMaster(), nil
 }
 
 func (t *Transcoder) GetVideoIndex(
 	path string,
+	video int32,
 	quality Quality,
 	client string,
 	sha string,
@@ -73,13 +75,14 @@ func (t *Transcoder) GetVideoIndex(
 		return "", err
 	}
 	t.clientChan <- ClientInfo{
-		client:  client,
-		path:    path,
-		quality: &quality,
-		audio:   -1,
-		head:    -1,
+		client: client,
+		path:   path,
+		video:  &VideoKey{video, quality},
+		audio:  -1,
+		vhead:  -1,
+		ahead:  -1,
 	}
-	return stream.GetVideoIndex(quality)
+	return stream.GetVideoIndex(video, quality)
 }
 
 func (t *Transcoder) GetAudioIndex(
@@ -96,13 +99,15 @@ func (t *Transcoder) GetAudioIndex(
 		client: client,
 		path:   path,
 		audio:  audio,
-		head:   -1,
+		vhead:  -1,
+		ahead:  -1,
 	}
 	return stream.GetAudioIndex(audio)
 }
 
 func (t *Transcoder) GetVideoSegment(
 	path string,
+	video int32,
 	quality Quality,
 	segment int32,
 	client string,
@@ -113,13 +118,14 @@ func (t *Transcoder) GetVideoSegment(
 		return "", err
 	}
 	t.clientChan <- ClientInfo{
-		client:  client,
-		path:    path,
-		quality: &quality,
-		audio:   -1,
-		head:    segment,
+		client: client,
+		path:   path,
+		video:  &VideoKey{video, quality},
+		vhead:  segment,
+		audio:  -1,
+		ahead:  -1,
 	}
-	return stream.GetVideoSegment(quality, segment)
+	return stream.GetVideoSegment(video, quality, segment)
 }
 
 func (t *Transcoder) GetAudioSegment(
@@ -137,7 +143,8 @@ func (t *Transcoder) GetAudioSegment(
 		client: client,
 		path:   path,
 		audio:  audio,
-		head:   segment,
+		ahead:  segment,
+		vhead:  -1,
 	}
 	return stream.GetAudioSegment(audio, segment)
 }
