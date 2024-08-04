@@ -11,7 +11,7 @@ var extracted = NewCMap[string, <-chan struct{}]()
 
 const ExtractVersion = 1
 
-func (s MetadataService) ExtractSubs(info *MediaInfo) (interface{}, error) {
+func (s *MetadataService) ExtractSubs(info *MediaInfo) (interface{}, error) {
 	get_running, set := s.extractLock.Start(info.Sha)
 	if get_running != nil {
 		return get_running()
