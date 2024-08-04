@@ -21,13 +21,7 @@ func (s *MetadataService) ExtractSubs(info *MediaInfo) (interface{}, error) {
 	if err != nil {
 		return set(nil, err)
 	}
-	_, err = s.database.NamedExec(
-		`update info set ver_extract = :version where sha = :sha`,
-		map[string]interface{}{
-			"sha":     info.Sha,
-			"version": ExtractVersion,
-		},
-	)
+	_, err = s.database.Exec(`update info set ver_extract = $2 where sha = $1`, info.Sha, ExtractVersion)
 	return set(nil, err)
 }
 

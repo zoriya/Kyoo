@@ -18,10 +18,10 @@ import (
 const InfoVersion = 1
 
 type Versions struct {
-	Info      int32 `db:"ver_info"`
-	Extract   int32 `db:"ver_extract"`
-	Thumbs    int32 `db:"ver_thumbs"`
-	Keyframes int32 `db:"ver_keyframes"`
+	Info      int32
+	Extract   int32
+	Thumbs    int32
+	Keyframes int32
 }
 
 type MediaInfo struct {
@@ -32,7 +32,7 @@ type MediaInfo struct {
 	/// The extension currently used to store this video file
 	Extension string `json:"extension"`
 	/// The whole mimetype (defined as the RFC 6381). ex: `video/mp4; codecs="avc1.640028, mp4a.40.2"`
-	MimeCodec *string `json:"mimeCodec" db:"mime_codec"`
+	MimeCodec *string `json:"mimeCodec"`
 	/// The file size of the video file.
 	Size int64 `json:"size"`
 	/// The length of the media in seconds.
@@ -59,7 +59,7 @@ type MediaInfo struct {
 
 type Video struct {
 	/// The index of this track on the media.
-	Index uint32 `json:"index" db:"idx"`
+	Index uint32 `json:"index"`
 	/// The title of the stream.
 	Title *string `json:"title"`
 	/// The language of this stream (as a ISO-639-2 language code)
@@ -67,7 +67,7 @@ type Video struct {
 	/// The human readable codec name.
 	Codec string `json:"codec"`
 	/// The codec of this stream (defined as the RFC 6381).
-	MimeCodec *string `json:"mimeCodec" db:"mime_codec"`
+	MimeCodec *string `json:"mimeCodec"`
 	/// The max quality of this video track.
 	Quality Quality `json:"quality"`
 	/// The width of the video stream
@@ -83,7 +83,7 @@ type Video struct {
 
 type Audio struct {
 	/// The index of this track on the media.
-	Index uint32 `json:"index" db:"idx"`
+	Index uint32 `json:"index"`
 	/// The title of the stream.
 	Title *string `json:"title"`
 	/// The language of this stream (as a IETF-BCP-47 language code)
@@ -91,9 +91,9 @@ type Audio struct {
 	/// The human readable codec name.
 	Codec string `json:"codec"`
 	/// The codec of this stream (defined as the RFC 6381).
-	MimeCodec *string `json:"mimeCodec" db:"mime_codec"`
+	MimeCodec *string `json:"mimeCodec"`
 	/// Is this stream the default one of it's type?
-	IsDefault bool `json:"isDefault" db:"is_default"`
+	IsDefault bool `json:"isDefault"`
 
 	/// Keyframes of this video
 	Keyframes *Keyframe `json:"-"`
@@ -101,7 +101,7 @@ type Audio struct {
 
 type Subtitle struct {
 	/// The index of this track on the media.
-	Index *uint32 `json:"index" db:"idx"`
+	Index *uint32 `json:"index"`
 	/// The title of the stream.
 	Title *string `json:"title"`
 	/// The language of this stream (as a IETF-BCP-47 language code)
@@ -111,11 +111,11 @@ type Subtitle struct {
 	/// The extension for the codec.
 	Extension *string `json:"extension"`
 	/// Is this stream the default one of it's type?
-	IsDefault bool `json:"isDefault" db:"is_default"`
+	IsDefault bool `json:"isDefault"`
 	/// Is this stream tagged as forced?
-	IsForced bool `json:"isForced" db:"is_forced"`
+	IsForced bool `json:"isForced"`
 	/// Is this an external subtitle (as in stored in a different file)
-	IsExternal bool `json:"isExternal" db:"is_external"`
+	IsExternal bool `json:"isExternal"`
 	/// Where the subtitle is stored (either in library if IsExternal is true or in transcoder cache if false)
 	/// Null if the subtitle can't be extracted (unsupported format)
 	Path *string `json:"path"`
@@ -125,9 +125,9 @@ type Subtitle struct {
 
 type Chapter struct {
 	/// The start time of the chapter (in second from the start of the episode).
-	StartTime float32 `json:"startTime" db:"start_time"`
+	StartTime float32 `json:"startTime"`
 	/// The end time of the chapter (in second from the start of the episode).
-	EndTime float32 `json:"endTime" db:"end_time"`
+	EndTime float32 `json:"endTime"`
 	/// The name of this chapter. This should be a human-readable name that could be presented to the user.
 	Name string `json:"name"`
 	/// The type value is used to mark special chapters (openning/credits...)

@@ -68,13 +68,7 @@ func (s *MetadataService) ExtractThumbs(path string, sha string) (interface{}, e
 	if err != nil {
 		return set(nil, err)
 	}
-	_, err = s.database.NamedExec(
-		`update info set ver_thumbs = :version where sha = :sha`,
-		map[string]interface{}{
-			"sha":     sha,
-			"version": ThumbsVersion,
-		},
-	)
+	_, err = s.database.Exec(`update info set ver_thumbs = $2 where sha = $1`, sha, ThumbsVersion)
 	return set(nil, err)
 }
 
