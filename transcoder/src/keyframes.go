@@ -118,17 +118,15 @@ func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx int32)
 			return
 		}
 
-		_, err = s.database.NamedExec(
+		_, err = s.database.Exec(
 			fmt.Sprint(
-				`update %s set keyframes = :keyframes, ver_keyframes = :version where sha = :sha and idx = :idx`,
+				`update %s set keyframes = $3, ver_keyframes = $4 where sha = $1 and idx = $2`,
 				table,
 			),
-			map[string]interface{}{
-				"sha":       info.Sha,
-				"idx":       idx,
-				"keyframes": kf.Keyframes,
-				"version":   KeyframeVersion,
-			},
+			info.Sha,
+			idx,
+			kf.Keyframes,
+			KeyframeVersion,
 		)
 		if err != nil {
 			log.Printf("Couldn't store keyframes on database: %v", err)

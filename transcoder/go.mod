@@ -4,7 +4,6 @@ go 1.22
 
 require (
 	github.com/golang-migrate/migrate/v4 v4.17.1
-	github.com/jmoiron/sqlx v1.4.0
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/lib/pq v1.10.9
 	gopkg.in/vansante/go-ffprobe.v2 v2.2.0
@@ -29,5 +28,3 @@ require (
 	golang.org/x/text v0.14.0
 	golang.org/x/time v0.5.0 // indirect
 )
-
-replace github.com/jmoiron/sqlx v1.4.0 => github.com/kmpm/sqlx v1.3.5-0.20220614102404-845a9a7f1301

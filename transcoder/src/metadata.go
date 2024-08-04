@@ -1,6 +1,8 @@
 package src
 
 import (
+	"database/sql"
+	"encoding/base64"
 	"fmt"
 	"net/url"
 	"os"
@@ -8,12 +10,11 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
 type MetadataService struct {
-	database     *sqlx.DB
+	database     *sql.DB
 	lock         RunLock[string, *MediaInfo]
 	thumbLock    RunLock[string, interface{}]
 	extractLock  RunLock[string, interface{}]
@@ -29,25 +30,25 @@ func NewMetadataService() (*MetadataService, error) {
 		url.QueryEscape(os.Getenv("POSTGRES_PORT")),
 		url.QueryEscape(os.Getenv("POSTGRES_DB")),
 	)
-	db, err := sqlx.Open("postgres", con)
+	db, err := sql.Open("postgres", con)
 	if err != nil {
 		return nil, err
 	}
 
-	db.MustExec("create schema if not exists gocoder")
+	_, err = db.Exec("create schema if not exists gocoder")
+	if err != nil {
+		return nil, err
+	}
 
-	driver, err := postgres.WithInstance(db.DB, &postgres.Config{})
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		return nil, err
 	}
-	m, err := migrate.NewWithDatabaseInstance("file://./migrations", "postgres", driver)
+	m, err := migrate.NewWithDatabaseInstance("file://migrations", "postgres", driver)
 	if err != nil {
 		return nil, err
 	}
-	err = m.Up()
-	if err != nil {
-		return nil, err
-	}
+	m.Up()
 
 	return &MetadataService{
 		database:     db,
@@ -77,15 +78,17 @@ func (s *MetadataService) GetMetadata(path string, sha string) (*MediaInfo, erro
 		for _, audio := range ret.Audios {
 			audio.Keyframes = nil
 		}
-		s.database.NamedExec(`
-			update videos set keyframes = nil where sha = :sha;
-			update audios set keyframes = nil where sha = :sha;
-			update info set ver_keyframes = 0 where sha = :sha;
-			`,
-			map[string]interface{}{
-				"sha": sha,
-			},
-		)
+		tx, err := s.database.Begin()
+		if err != nil {
+			return nil, err
+		}
+		tx.Exec(`update videos set keyframes = nil where sha = $1`, sha)
+		tx.Exec(`update audios set keyframes = nil where sha = $1`, sha)
+		tx.Exec(`update info set ver_keyframes = 0 where sha = $1`, sha)
+		err = tx.Commit()
+		if err != nil {
+			fmt.Printf("error deleteing old keyframes from database: %v", err)
+		}
 	}
 
 	return ret, nil
@@ -93,58 +96,100 @@ func (s *MetadataService) GetMetadata(path string, sha string) (*MediaInfo, erro
 
 func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, error) {
 	var ret MediaInfo
-	rows, err := s.database.Queryx(`
-		select * from info as i where i.sha=$1;
-		select * from videos as v where v.sha=$1;
-		select * from audios as a where a.sha=$1;
-		select * from subtitles as s where s.sha=$1;
-		select * from chapters as c where c.sha=$1;
-		`,
+	err := s.database.QueryRow(
+		`select i.sha, i.path, i.extension, i.mime_codec, i.size, i.duration, i.container,
+		i.fonts, i.ver_info, i.ver_extract, i.ver_thumbs, i.ver_keyframes
+		from info as i where i.sha=$1`,
+		sha,
+	).Scan(
+		ret.Sha, ret.Path, ret.Extension, ret.MimeCodec, ret.Size, ret.Duration, ret.Container,
+		ret.Fonts, ret.Versions.Info, ret.Versions.Extract, ret.Versions.Thumbs, ret.Versions.Keyframes,
+	)
+
+	if err == sql.ErrNoRows || (ret.Versions.Info < InfoVersion && ret.Versions.Info != 0) {
+		return s.storeFreshMetadata(path, sha)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := s.database.Query(
+		`select v.idx, v.title, v.language, v.codec, v.mime_codec, v.width, v.height, v.bitrate, v.keyframes
+		from videos as v where v.sha=$1`,
 		sha,
 	)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-
-	if !rows.Next() {
-		if err = rows.Err(); err != nil {
+	for rows.Next() {
+		var v Video
+		err := rows.Scan(v.Index, v.Title, v.Language, v.Codec, v.MimeCodec, v.Width, v.Height, v.Bitrate, v.Keyframes)
+		if err != nil {
 			return nil, err
 		}
-		return s.storeFreshMetadata(path, sha)
-	}
-	rows.StructScan(ret)
-
-	if ret.Versions.Info != InfoVersion {
-		return s.storeFreshMetadata(path, sha)
+		v.Quality = QualityFromHeight(v.Height)
+		ret.Videos = append(ret.Videos, v)
 	}
 
-	rows.NextResultSet()
+	rows, err = s.database.Query(
+		`select a.idx, a.title, a.language, a.codec, a.mime_codec, a.is_default, a.keyframes
+		from audios as a where a.sha=$1`,
+		sha,
+	)
+	if err != nil {
+		return nil, err
+	}
 	for rows.Next() {
-		var video Video
-		rows.StructScan(video)
-		ret.Videos = append(ret.Videos, video)
+		var a Audio
+		err := rows.Scan(a.Index, a.Title, a.Language, a.Codec, a.MimeCodec, a.IsDefault, a.Keyframes)
+		if err != nil {
+			return nil, err
+		}
+		ret.Audios = append(ret.Audios, a)
 	}
 
-	rows.NextResultSet()
+	rows, err = s.database.Query(
+		`select s.idx, s.title, s.language, s.codec, s.extension, s.is_default, s.is_forced, s.is_external, s.path
+		from subtitles as s where s.sha=$1`,
+		sha,
+	)
+	if err != nil {
+		return nil, err
+	}
 	for rows.Next() {
-		var audio Audio
-		rows.StructScan(audio)
-		ret.Audios = append(ret.Audios, audio)
+		var s Subtitle
+		err := rows.Scan(s.Index, s.Title, s.Language, s.Codec, s.Extension, s.IsDefault, s.IsForced, s.IsExternal, s.Path)
+		if err != nil {
+			return nil, err
+		}
+		if s.Extension != nil {
+			link := fmt.Sprintf(
+				"%s/%s/subtitle/%d.%s",
+				Settings.RoutePrefix,
+				base64.StdEncoding.EncodeToString([]byte(ret.Path)),
+				s.Index,
+				*s.Extension,
+			)
+			s.Link = &link
+		}
+		ret.Subtitles = append(ret.Subtitles, s)
 	}
 
-	rows.NextResultSet()
-	for rows.Next() {
-		var subtitle Subtitle
-		rows.StructScan(subtitle)
-		ret.Subtitles = append(ret.Subtitles, subtitle)
+	rows, err = s.database.Query(
+		`select c.start_time, c.end_time, c.name, c.type
+		from chapters as c where c.sha=$1`,
+		sha,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	rows.NextResultSet()
 	for rows.Next() {
-		var chapter Chapter
-		rows.StructScan(chapter)
-		ret.Chapters = append(ret.Chapters, chapter)
+		var c Chapter
+		err := rows.Scan(c.StartTime, c.EndTime, c.Name, c.Type)
+		if err != nil {
+			return nil, err
+		}
+		ret.Chapters = append(ret.Chapters, c)
 	}
 
 	return &ret, nil
@@ -161,38 +206,38 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 		return set(nil, err)
 	}
 
-	tx := s.database.MustBegin()
-	tx.NamedExec(
+	tx, err := s.database.Begin()
+	tx.Exec(
 		`insert into info(sha, path, extension, mime_codec, size, duration, container, fonts, ver_info)
-		values (:sha, :path, :extension, :mime_codec, :size, :duration, :container, :fonts, :ver_info)`,
-		ret,
+		values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+		ret.Sha, ret.Path, ret.Extension, ret.MimeCodec, ret.Size, ret.Duration, ret.Container, ret.Fonts, ret.Versions.Info,
 	)
-	for _, video := range ret.Videos {
-		tx.NamedExec(
+	for _, v := range ret.Videos {
+		tx.Exec(
 			`insert into videos(sha, idx, title, language, codec, mime_codec, width, height, bitrate)
-			values (:sha, :idx, :title, :language, :codec, :mime_codec, :width, :height, :bitrate)`,
-			video,
+			values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+			ret.Sha, v.Index, v.Title, v.Language, v.Codec, v.MimeCodec, v.Width, v.Height, v.Bitrate,
 		)
 	}
-	for _, audio := range ret.Audios {
-		tx.NamedExec(
+	for _, a := range ret.Audios {
+		tx.Exec(
 			`insert into audios(sha, idx, title, language, codec, mime_codec, is_default)
-			values (:sha, :idx, :title, :language, :codec, :mime_codec, :is_default)`,
-			audio,
+			values ($1, $2, $3, $4, $5, $6, $7)`,
+			ret.Sha, a.Index, a.Title, a.Language, a.Codec, a.MimeCodec, a.IsDefault,
 		)
 	}
-	for _, subtitle := range ret.Subtitles {
-		tx.NamedExec(
+	for _, s := range ret.Subtitles {
+		tx.Exec(
 			`insert into subtitles(sha, idx, title, language, codec, extension, is_default, is_forced, is_external, path)
-			values (:sha, :idx, :title, :language, :codec, :extension, :is_default, :is_forced, :is_external, :path)`,
-			subtitle,
+			values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+			ret.Sha, s.Index, s.Title, s.Language, s.Codec, s.Extension, s.IsDefault, s.IsForced, s.IsExternal, s.Path,
 		)
 	}
-	for _, chapter := range ret.Chapters {
-		tx.NamedExec(
+	for _, c := range ret.Chapters {
+		tx.Exec(
 			`insert into chapters(sha, start_time, end_time, name, type)
-			values (:sha, :start_time, :end_time, :name, :type)`,
-			chapter,
+			values ($1, $2, $3, $4, $5)`,
+			ret.Sha, c.StartTime, c.EndTime, c.Name, c.Type,
 		)
 	}
 	err = tx.Commit()
