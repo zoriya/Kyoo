@@ -43,7 +43,7 @@ func getThumbVttPath(sha string) string {
 	return fmt.Sprintf("%s/%s/thumbs-v%d.vtt", Settings.Metadata, sha, ThumbsVersion)
 }
 
-func (s MetadataService) GetThumb(path string, sha string) (string, string, error) {
+func (s *MetadataService) GetThumb(path string, sha string) (string, string, error) {
 	sprite_path := getThumbPath(sha)
 	vtt_path := getThumbVttPath(sha)
 
@@ -58,7 +58,7 @@ func (s MetadataService) GetThumb(path string, sha string) (string, string, erro
 	return sprite_path, vtt_path, nil
 }
 
-func (s MetadataService) ExtractThumbs(path string, sha string) (interface{}, error) {
+func (s *MetadataService) ExtractThumbs(path string, sha string) (interface{}, error) {
 	get_running, set := s.thumbLock.Start(sha)
 	if get_running != nil {
 		return get_running()

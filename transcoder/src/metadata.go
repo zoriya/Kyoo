@@ -1,22 +1,64 @@
 package src
 
 import (
+	"fmt"
+	"net/url"
+	"os"
+
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
 type MetadataService struct {
 	database     *sqlx.DB
-	lock         *RunLock[string, *MediaInfo]
-	thumbLock    *RunLock[string, interface{}]
-	extractLock  *RunLock[string, interface{}]
-	keyframeLock *RunLock[KeyframeKey, *Keyframe]
+	lock         RunLock[string, *MediaInfo]
+	thumbLock    RunLock[string, interface{}]
+	extractLock  RunLock[string, interface{}]
+	keyframeLock RunLock[KeyframeKey, *Keyframe]
 }
 
 func NewMetadataService() (*MetadataService, error) {
-	return &MetadataService{}, nil
+	con := fmt.Sprintf(
+		"postgresql://%v:%v@%v:%v/%v?application_name=gocoder&search_path=gocoder&sslmode=disable",
+		url.QueryEscape(os.Getenv("POSTGRES_USER")),
+		url.QueryEscape(os.Getenv("POSTGRES_PASSWORD")),
+		url.QueryEscape(os.Getenv("POSTGRES_SERVER")),
+		url.QueryEscape(os.Getenv("POSTGRES_PORT")),
+		url.QueryEscape(os.Getenv("POSTGRES_DB")),
+	)
+	db, err := sqlx.Open("postgres", con)
+	if err != nil {
+		return nil, err
+	}
+
+	db.MustExec("create schema if not exists gocoder")
+
+	driver, err := postgres.WithInstance(db.DB, &postgres.Config{})
+	if err != nil {
+		return nil, err
+	}
+	m, err := migrate.NewWithDatabaseInstance("file://./migrations", "postgres", driver)
+	if err != nil {
+		return nil, err
+	}
+	err = m.Up()
+	if err != nil {
+		return nil, err
+	}
+
+	return &MetadataService{
+		database:     db,
+		lock:         NewRunLock[string, *MediaInfo](),
+		thumbLock:    NewRunLock[string, interface{}](),
+		extractLock:  NewRunLock[string, interface{}](),
+		keyframeLock: NewRunLock[KeyframeKey, *Keyframe](),
+	}, nil
 }
 
-func (s MetadataService) GetMetadata(path string, sha string) (*MediaInfo, error) {
+func (s *MetadataService) GetMetadata(path string, sha string) (*MediaInfo, error) {
 	ret, err := s.getMetadata(path, sha)
 	if err != nil {
 		return nil, err
@@ -49,7 +91,7 @@ func (s MetadataService) GetMetadata(path string, sha string) (*MediaInfo, error
 	return ret, nil
 }
 
-func (s MetadataService) getMetadata(path string, sha string) (*MediaInfo, error) {
+func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, error) {
 	var ret MediaInfo
 	rows, err := s.database.Queryx(`
 		select * from info as i where i.sha=$1;
@@ -108,7 +150,7 @@ func (s MetadataService) getMetadata(path string, sha string) (*MediaInfo, error
 	return &ret, nil
 }
 
-func (s MetadataService) storeFreshMetadata(path string, sha string) (*MediaInfo, error) {
+func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInfo, error) {
 	get_running, set := s.lock.Start(sha)
 	if get_running != nil {
 		return get_running()
