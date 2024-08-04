@@ -53,7 +53,7 @@ create table subtitles(
 	language varchar(256),
 	codec varchar(256) not null,
 	extension varchar(16),
-	is_defaut boolean not null,
+	is_default boolean not null,
 	is_forced boolean not null,
 	is_external boolean not null,
 	path varchar(4096)

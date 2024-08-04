@@ -10,6 +10,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 )
 
@@ -96,6 +97,7 @@ func (s *MetadataService) GetMetadata(path string, sha string) (*MediaInfo, erro
 
 func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, error) {
 	var ret MediaInfo
+	var fonts pq.StringArray
 	err := s.database.QueryRow(
 		`select i.sha, i.path, i.extension, i.mime_codec, i.size, i.duration, i.container,
 		i.fonts, i.ver_info, i.ver_extract, i.ver_thumbs, i.ver_keyframes
@@ -103,8 +105,9 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 		sha,
 	).Scan(
 		ret.Sha, ret.Path, ret.Extension, ret.MimeCodec, ret.Size, ret.Duration, ret.Container,
-		ret.Fonts, ret.Versions.Info, ret.Versions.Extract, ret.Versions.Thumbs, ret.Versions.Keyframes,
+		fonts, ret.Versions.Info, ret.Versions.Extract, ret.Versions.Thumbs, ret.Versions.Keyframes,
 	)
+	ret.Fonts = fonts
 
 	if err == sql.ErrNoRows || (ret.Versions.Info < InfoVersion && ret.Versions.Info != 0) {
 		return s.storeFreshMetadata(path, sha)
@@ -207,10 +210,12 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 	}
 
 	tx, err := s.database.Begin()
-	tx.Exec(
-		`insert into info(sha, path, extension, mime_codec, size, duration, container, fonts, ver_info)
-		values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-		ret.Sha, ret.Path, ret.Extension, ret.MimeCodec, ret.Size, ret.Duration, ret.Container, ret.Fonts, ret.Versions.Info,
+	_, err = tx.Exec(
+		`insert into info(sha, path, extension, mime_codec, size, duration, container,
+		fonts, ver_info, ver_extract, ver_thumbs, ver_keyframes)
+		values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+		ret.Sha, ret.Path, ret.Extension, ret.MimeCodec, ret.Size, ret.Duration, ret.Container,
+		pq.Array(ret.Fonts), ret.Versions.Info, ret.Versions.Extract, ret.Versions.Thumbs, ret.Versions.Keyframes,
 	)
 	for _, v := range ret.Videos {
 		tx.Exec(
