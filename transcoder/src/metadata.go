@@ -104,8 +104,8 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 		from info as i where i.sha=$1`,
 		sha,
 	).Scan(
-		ret.Sha, ret.Path, ret.Extension, ret.MimeCodec, ret.Size, ret.Duration, ret.Container,
-		fonts, ret.Versions.Info, ret.Versions.Extract, ret.Versions.Thumbs, ret.Versions.Keyframes,
+		&ret.Sha, &ret.Path, &ret.Extension, &ret.MimeCodec, &ret.Size, &ret.Duration, &ret.Container,
+		&fonts, &ret.Versions.Info, &ret.Versions.Extract, &ret.Versions.Thumbs, &ret.Versions.Keyframes,
 	)
 	ret.Fonts = fonts
 
@@ -126,7 +126,7 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 	}
 	for rows.Next() {
 		var v Video
-		err := rows.Scan(v.Index, v.Title, v.Language, v.Codec, v.MimeCodec, v.Width, v.Height, v.Bitrate, v.Keyframes)
+		err := rows.Scan(&v.Index, &v.Title, &v.Language, &v.Codec, &v.MimeCodec, &v.Width, &v.Height, &v.Bitrate, &v.Keyframes)
 		if err != nil {
 			return nil, err
 		}
@@ -144,7 +144,7 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 	}
 	for rows.Next() {
 		var a Audio
-		err := rows.Scan(a.Index, a.Title, a.Language, a.Codec, a.MimeCodec, a.IsDefault, a.Keyframes)
+		err := rows.Scan(&a.Index, &a.Title, &a.Language, &a.Codec, &a.MimeCodec, &a.IsDefault, &a.Keyframes)
 		if err != nil {
 			return nil, err
 		}
@@ -161,7 +161,7 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 	}
 	for rows.Next() {
 		var s Subtitle
-		err := rows.Scan(s.Index, s.Title, s.Language, s.Codec, s.Extension, s.IsDefault, s.IsForced, s.IsExternal, s.Path)
+		err := rows.Scan(&s.Index, &s.Title, &s.Language, &s.Codec, &s.Extension, &s.IsDefault, &s.IsForced, &s.IsExternal, &s.Path)
 		if err != nil {
 			return nil, err
 		}
@@ -188,7 +188,7 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 	}
 	for rows.Next() {
 		var c Chapter
-		err := rows.Scan(c.StartTime, c.EndTime, c.Name, c.Type)
+		err := rows.Scan(&c.StartTime, c.EndTime, c.Name, c.Type)
 		if err != nil {
 			return nil, err
 		}
