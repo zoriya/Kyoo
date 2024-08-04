@@ -1,7 +1,7 @@
 begin;
 
 create table info(
-	sha varchar(20) not null primary key,
+	sha varchar(40) not null primary key,
 	path varchar(4096) not null unique,
 	extension varchar(16),
 	mime_codec varchar(1024),
@@ -16,7 +16,7 @@ create table info(
 );
 
 create table videos(
-	sha varchar(20) not null references info(sha) on delete cascade,
+	sha varchar(40) not null references info(sha) on delete cascade,
 	idx integer not null,
 	title varchar(1024),
 	language varchar(256),
@@ -32,7 +32,7 @@ create table videos(
 );
 
 create table audios(
-	sha varchar(20) not null references info(sha) on delete cascade,
+	sha varchar(40) not null references info(sha) on delete cascade,
 	idx integer not null,
 	title varchar(1024),
 	language varchar(256),
@@ -46,7 +46,7 @@ create table audios(
 );
 
 create table subtitles(
-	sha varchar(20) not null references info(sha) on delete cascade,
+	sha varchar(40) not null references info(sha) on delete cascade,
 	-- Can be null when is_external is true
 	idx integer,
 	title varchar(1024),
@@ -62,7 +62,7 @@ create table subtitles(
 create type chapter_type as enum('content', 'recap', 'intro', 'credits', 'preview');
 
 create table chapters(
-	sha varchar(20) not null references info(sha) on delete cascade,
+	sha varchar(40) not null references info(sha) on delete cascade,
 	start_time real not null,
 	end_time real not null,
 	name varchar(1024),
