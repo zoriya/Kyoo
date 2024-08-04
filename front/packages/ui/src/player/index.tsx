@@ -81,6 +81,10 @@ export const Player = ({
 	const [playbackError, setPlaybackError] = useState<string | undefined>(undefined);
 	const { data, error } = useFetch(Player.query(type, slug));
 	const { data: info, error: infoError } = useFetch(Player.infoQuery(type, slug));
+	const image =
+		data && data.type === "episode"
+			? data.show?.poster ?? data?.thumbnail
+			: data?.thumbnail;
 	const previous =
 		data && data.type === "episode" && data.previousEpisode
 			? `/watch/${data.previousEpisode.slug}?t=0`
@@ -142,7 +146,7 @@ export const Player = ({
 					metadata={{
 						title: title ?? t("show.episodeNoMetadata"),
 						description: data?.overview ?? undefined,
-						imageUri: data?.thumbnail?.high,
+						imageUri: image?.medium,
 						next: next,
 						previous: previous,
 					}}
