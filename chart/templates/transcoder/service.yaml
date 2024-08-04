@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.transcoder.service.annotations }}
+  annotations:
+  {{- range $key, $value := .Values.transcoder.service.annotations }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}
+  name: {{ include "kyoo.transcoder.fullname" . }}
+  labels:
+    {{- include "kyoo.labels" (dict "context" . "component" .Values.transcoder.name "name" .Values.transcoder.name) | nindent 4 }}
+    {{- with .Values.transcoder.service.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ .Values.transcoder.service.type }}
+  ports:
+    - port: 7666
+      targetPort: 7666
+      protocol: TCP
+      name: main
+  selector:
+    {{- include "kyoo.selectorLabels" (dict "context" . "name" .Values.transcoder.name) | nindent 4 }}

@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.front.service.annotations }}
+  annotations:
+  {{- range $key, $value := .Values.front.service.annotations }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}
+  name: {{ include "kyoo.front.fullname" . }}
+  labels:
+    {{- include "kyoo.labels" (dict "context" . "component" .Values.front.name "name" .Values.front.name) | nindent 4 }}
+    {{- with .Values.front.service.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ .Values.front.service.type }}
+  ports:
+    - port: 8901
+      targetPort: 8901
+      protocol: TCP
+      name: main
+  selector:
+    {{- include "kyoo.selectorLabels" (dict "context" . "name" .Values.front.name) | nindent 4 }}
