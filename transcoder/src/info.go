@@ -40,7 +40,7 @@ type MediaInfo struct {
 	/// The container of the video file of this episode.
 	Container *string `json:"container"`
 	/// Version of the metadata. This can be used to invalidate older metadata from db if the extraction code has changed.
-	Versions Versions
+	Versions Versions `json:"versions"`
 
 	// TODO: remove this
 	Video *Video
