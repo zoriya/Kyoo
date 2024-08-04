@@ -26,11 +26,13 @@ import { durationAtom, playAtom, progressAtom } from "./state";
 
 export const MediaSessionManager = ({
 	title,
+	subtitle,
 	imageUri,
 	previous,
 	next,
 }: {
 	title?: string;
+	subtitle?: string;
 	imageUri?: string | null;
 	previous?: string;
 	next?: string;
@@ -45,9 +47,10 @@ export const MediaSessionManager = ({
 		if (!("mediaSession" in navigator)) return;
 		navigator.mediaSession.metadata = new MediaMetadata({
 			title: title,
+			album: subtitle,
 			artwork: imageUri ? [{ src: imageUri }] : undefined,
 		});
-	}, [title, imageUri]);
+	}, [title, subtitle, imageUri]);
 
 	useEffect(() => {
 		if (!("mediaSession" in navigator)) return;

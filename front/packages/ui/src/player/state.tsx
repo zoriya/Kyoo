@@ -116,6 +116,7 @@ export const Video = memo(function Video({
 	startTime?: number | null;
 	metadata: {
 		title?: string;
+		subtitle?: string;
 		description?: string;
 		imageUri?: string;
 		previous?: string;
