@@ -169,7 +169,7 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 			link := fmt.Sprintf(
 				"%s/%s/subtitle/%d.%s",
 				Settings.RoutePrefix,
-				base64.StdEncoding.EncodeToString([]byte(ret.Path)),
+				base64.RawURLEncoding.EncodeToString([]byte(ret.Path)),
 				s.Index,
 				*s.Extension,
 			)

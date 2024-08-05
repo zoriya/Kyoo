@@ -274,8 +274,8 @@ func RetriveMediaInfo(path string, sha string) (*MediaInfo, error) {
 			var link string
 			var path string
 			if extension != nil {
-				link = fmt.Sprintf("%s/%s/subtitle/%d.%s", Settings.RoutePrefix, base64.StdEncoding.EncodeToString([]byte(path)), i, *extension)
-				path = fmt.Sprintf("%s/%s/sub/%d.%s", Settings.Metadata, sha, i, extension)
+				link = fmt.Sprintf("%s/%s/subtitle/%d.%s", Settings.RoutePrefix, base64.RawURLEncoding.EncodeToString([]byte(path)), i, *extension)
+				path = fmt.Sprintf("%s/%s/sub/%d.%s", Settings.Metadata, sha, i, *extension)
 			}
 			lang, _ := language.Parse(stream.Tags.Language)
 			idx := uint32(i)
@@ -302,7 +302,7 @@ func RetriveMediaInfo(path string, sha string) (*MediaInfo, error) {
 		}),
 		Fonts: MapStream(mi.Streams, ffprobe.StreamAttachment, func(stream *ffprobe.Stream, i uint32) string {
 			font, _ := stream.TagList.GetString("filename")
-			return fmt.Sprintf("%s/%s/attachment/%s", Settings.RoutePrefix, base64.StdEncoding.EncodeToString([]byte(path)), font)
+			return fmt.Sprintf("%s/%s/attachment/%s", Settings.RoutePrefix, base64.RawURLEncoding.EncodeToString([]byte(path)), font)
 		}),
 	}
 	var codecs []string
