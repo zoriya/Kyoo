@@ -210,24 +210,64 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 	}
 
 	tx, err := s.database.Begin()
-	_, err = tx.Exec(
-		`insert into info(sha, path, extension, mime_codec, size, duration, container,
-		fonts, ver_info, ver_extract, ver_thumbs, ver_keyframes)
-		values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+	_, err = tx.Exec(`
+		do language plpgsql
+		$$
+		begin
+			insert into info(sha, path, extension, mime_codec, size, duration, container,
+			fonts, ver_info, ver_extract, ver_thumbs, ver_keyframes)
+			values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);
+			return;
+		exception when unique_violation then
+			update info set
+				sha = $1,
+				path = $2,
+				extension = $3,
+				mime_codec = $4,
+				size = $5,
+				duration = $6,
+				container = $7,
+				fonts = $8,
+				ver_info = $9
+			where sha = $1 or path = $2;
+		end;
+		$$;
+		`,
+		// on conflict do not update versions of extract/thumbs/keyframes
 		ret.Sha, ret.Path, ret.Extension, ret.MimeCodec, ret.Size, ret.Duration, ret.Container,
 		pq.Array(ret.Fonts), ret.Versions.Info, ret.Versions.Extract, ret.Versions.Thumbs, ret.Versions.Keyframes,
 	)
 	for _, v := range ret.Videos {
 		tx.Exec(
 			`insert into videos(sha, idx, title, language, codec, mime_codec, width, height, bitrate)
-			values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+			values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+			on conflict (sha, idx) do update set
+				sha = excluded.sha,
+				idx = excluded.idx,
+				title = excluded.title,
+				language = excluded.language,
+				codec = excluded.codec,
+				mime_codec = excluded.mime_codec,
+				width = excluded.width,
+				height = excluded.height,
+				bitrate = excluded.bitrate
+			`,
 			ret.Sha, v.Index, v.Title, v.Language, v.Codec, v.MimeCodec, v.Width, v.Height, v.Bitrate,
 		)
 	}
 	for _, a := range ret.Audios {
 		tx.Exec(
 			`insert into audios(sha, idx, title, language, codec, mime_codec, is_default)
-			values ($1, $2, $3, $4, $5, $6, $7)`,
+			values ($1, $2, $3, $4, $5, $6, $7)
+			on conflict (sha, idx) do update set
+				sha = excluded.sha,
+				idx = excluded.idx,
+				title = excluded.title,
+				language = excluded.language,
+				codec = excluded.codec,
+				mime_codec = excluded.mime_codec,
+				is_default = excluded.is_default
+			`,
 			ret.Sha, a.Index, a.Title, a.Language, a.Codec, a.MimeCodec, a.IsDefault,
 		)
 	}
@@ -241,7 +281,14 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 	for _, c := range ret.Chapters {
 		tx.Exec(
 			`insert into chapters(sha, start_time, end_time, name, type)
-			values ($1, $2, $3, $4, $5)`,
+			values ($1, $2, $3, $4, $5)
+			on conflict (sha, start_time) do update set
+				sha = excluded.sha,
+				start_time = excluded.start_time,
+				end_time = excluded.end_time,
+				name = excluded.name,
+				type = excluded.type
+			`,
 			ret.Sha, c.StartTime, c.EndTime, c.Name, c.Type,
 		)
 	}
