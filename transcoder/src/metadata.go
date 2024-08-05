@@ -210,8 +210,7 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 	}
 
 	tx, err := s.database.Begin()
-	// TODO: return versions values on update
-	_, err = tx.Exec(`
+	err = tx.QueryRow(`
 		insert into info(sha, path, extension, mime_codec, size, duration, container,
 		fonts, ver_info, ver_extract, ver_thumbs, ver_keyframes)
 		values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
@@ -225,12 +224,12 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 			container = excluded.container,
 			fonts = excluded.fonts,
 			ver_info = excluded.ver_info
+		returning ver_extract, ver_thumbs, ver_keyframes
 		`,
 		// on conflict do not update versions of extract/thumbs/keyframes
 		ret.Sha, ret.Path, ret.Extension, ret.MimeCodec, ret.Size, ret.Duration, ret.Container,
 		pq.Array(ret.Fonts), ret.Versions.Info, ret.Versions.Extract, ret.Versions.Thumbs, ret.Versions.Keyframes,
-	)
-	fmt.Printf("err: %v", err)
+	).Scan(&ret.Versions.Extract, &ret.Versions.Thumbs, &ret.Versions.Keyframes)
 	for _, v := range ret.Videos {
 		tx.Exec(
 			`insert into videos(sha, idx, title, language, codec, mime_codec, width, height, bitrate)
