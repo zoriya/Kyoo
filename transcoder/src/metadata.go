@@ -210,33 +210,27 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 	}
 
 	tx, err := s.database.Begin()
+	// TODO: return versions values on update
 	_, err = tx.Exec(`
-		do language plpgsql
-		$$
-		begin
-			insert into info(sha, path, extension, mime_codec, size, duration, container,
-			fonts, ver_info, ver_extract, ver_thumbs, ver_keyframes)
-			values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);
-			return;
-		exception when unique_violation then
-			update info set
-				sha = $1,
-				path = $2,
-				extension = $3,
-				mime_codec = $4,
-				size = $5,
-				duration = $6,
-				container = $7,
-				fonts = $8,
-				ver_info = $9
-			where sha = $1 or path = $2;
-		end;
-		$$;
+		insert into info(sha, path, extension, mime_codec, size, duration, container,
+		fonts, ver_info, ver_extract, ver_thumbs, ver_keyframes)
+		values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+		on conflict (path) do update set
+			sha = excluded.sha,
+			path = excluded.path,
+			extension = excluded.extension,
+			mime_codec = excluded.mime_codec,
+			size = excluded.size,
+			duration = excluded.duration,
+			container = excluded.container,
+			fonts = excluded.fonts,
+			ver_info = excluded.ver_info
 		`,
 		// on conflict do not update versions of extract/thumbs/keyframes
 		ret.Sha, ret.Path, ret.Extension, ret.MimeCodec, ret.Size, ret.Duration, ret.Container,
 		pq.Array(ret.Fonts), ret.Versions.Info, ret.Versions.Extract, ret.Versions.Thumbs, ret.Versions.Keyframes,
 	)
+	fmt.Printf("err: %v", err)
 	for _, v := range ret.Videos {
 		tx.Exec(
 			`insert into videos(sha, idx, title, language, codec, mime_codec, width, height, bitrate)
