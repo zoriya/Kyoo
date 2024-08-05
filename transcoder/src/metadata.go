@@ -170,7 +170,7 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 				"%s/%s/subtitle/%d.%s",
 				Settings.RoutePrefix,
 				base64.RawURLEncoding.EncodeToString([]byte(ret.Path)),
-				s.Index,
+				*s.Index,
 				*s.Extension,
 			)
 			s.Link = &link
@@ -231,8 +231,8 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 		pq.Array(ret.Fonts), ret.Versions.Info, ret.Versions.Extract, ret.Versions.Thumbs, ret.Versions.Keyframes,
 	).Scan(&ret.Versions.Extract, &ret.Versions.Thumbs, &ret.Versions.Keyframes)
 	for _, v := range ret.Videos {
-		tx.Exec(
-			`insert into videos(sha, idx, title, language, codec, mime_codec, width, height, bitrate)
+		tx.Exec(`
+			insert into videos(sha, idx, title, language, codec, mime_codec, width, height, bitrate)
 			values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 			on conflict (sha, idx) do update set
 				sha = excluded.sha,
@@ -249,8 +249,8 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 		)
 	}
 	for _, a := range ret.Audios {
-		tx.Exec(
-			`insert into audios(sha, idx, title, language, codec, mime_codec, is_default)
+		tx.Exec(`
+			insert into audios(sha, idx, title, language, codec, mime_codec, is_default)
 			values ($1, $2, $3, $4, $5, $6, $7)
 			on conflict (sha, idx) do update set
 				sha = excluded.sha,
@@ -265,15 +265,27 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 		)
 	}
 	for _, s := range ret.Subtitles {
-		tx.Exec(
-			`insert into subtitles(sha, idx, title, language, codec, extension, is_default, is_forced, is_external, path)
-			values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+		tx.Exec(`
+			insert into subtitles(sha, idx, title, language, codec, extension, is_default, is_forced, is_external, path)
+			values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+			on conflict (sha, idx, path) do update set
+				sha = excluded.sha,
+				idx = excluded.idx,
+				title = excluded.title,
+				language = excluded.language,
+				codec = excluded.codec,
+				extension = excluded.extension,
+				is_default = excluded.is_default,
+				is_forced = excluded.is_forced,
+				is_external = excluded.is_external,
+				path = excluded.path
+			`,
 			ret.Sha, s.Index, s.Title, s.Language, s.Codec, s.Extension, s.IsDefault, s.IsForced, s.IsExternal, s.Path,
 		)
 	}
 	for _, c := range ret.Chapters {
-		tx.Exec(
-			`insert into chapters(sha, start_time, end_time, name, type)
+		tx.Exec(`
+			insert into chapters(sha, start_time, end_time, name, type)
 			values ($1, $2, $3, $4, $5)
 			on conflict (sha, start_time) do update set
 				sha = excluded.sha,
