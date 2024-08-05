@@ -26,7 +26,7 @@ func (s *MetadataService) ExtractSubs(info *MediaInfo) (interface{}, error) {
 }
 
 func extractSubs(info *MediaInfo) error {
-	defer printExecTime("Starting extraction of %s", info.Path)()
+	defer printExecTime("extraction of %s", info.Path)()
 
 	attachment_path := fmt.Sprintf("%s/%s/att", Settings.Metadata, info.Sha)
 	subs_path := fmt.Sprintf("%s/%s/sub", Settings.Metadata, info.Sha)
@@ -52,9 +52,9 @@ func extractSubs(info *MediaInfo) error {
 		if ext := sub.Extension; ext != nil {
 			cmd.Args = append(
 				cmd.Args,
-				"-map", fmt.Sprintf("0:s:%d", sub.Index),
+				"-map", fmt.Sprintf("0:s:%d", *sub.Index),
 				"-c:s", "copy",
-				fmt.Sprintf("%s/%d.%s", subs_path, sub.Index, *ext),
+				fmt.Sprintf("%s/%d.%s", subs_path, *sub.Index, *ext),
 			)
 		}
 	}
