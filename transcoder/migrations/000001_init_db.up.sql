@@ -67,6 +67,8 @@ create table chapters(
 	end_time real not null,
 	name varchar(1024),
 	type chapter_type
+
+	constraint chapter_pk primary key (sha, start_time)
 );
 
 commit;
