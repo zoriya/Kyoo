@@ -57,6 +57,8 @@ create table subtitles(
 	is_forced boolean not null,
 	is_external boolean not null,
 	path varchar(4096)
+
+	constraint subtitle_pk primary key (sha, idx, path)
 );
 
 create type chapter_type as enum('content', 'recap', 'intro', 'credits', 'preview');
