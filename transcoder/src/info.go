@@ -272,10 +272,10 @@ func RetriveMediaInfo(path string, sha string) (*MediaInfo, error) {
 		Subtitles: MapStream(mi.Streams, ffprobe.StreamSubtitle, func(stream *ffprobe.Stream, i uint32) Subtitle {
 			extension := OrNull(SubtitleExtensions[stream.CodecName])
 			var link string
-			var path string
+			var spath string
 			if extension != nil {
 				link = fmt.Sprintf("%s/%s/subtitle/%d.%s", Settings.RoutePrefix, base64.RawURLEncoding.EncodeToString([]byte(path)), i, *extension)
-				path = fmt.Sprintf("%s/%s/sub/%d.%s", Settings.Metadata, sha, i, *extension)
+				spath = fmt.Sprintf("%s/%s/sub/%d.%s", Settings.Metadata, sha, i, *extension)
 			}
 			lang, _ := language.Parse(stream.Tags.Language)
 			idx := uint32(i)
@@ -288,7 +288,7 @@ func RetriveMediaInfo(path string, sha string) (*MediaInfo, error) {
 				IsDefault: stream.Disposition.Default != 0,
 				IsForced:  stream.Disposition.Forced != 0,
 				Link:      &link,
-				Path:      &path,
+				Path:      &spath,
 			}
 		}),
 		Chapters: Map(mi.Chapters, func(c *ffprobe.Chapter, _ int) Chapter {
