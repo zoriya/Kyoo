@@ -44,18 +44,11 @@ func getThumbVttPath(sha string) string {
 }
 
 func (s *MetadataService) GetThumb(path string, sha string) (string, string, error) {
-	sprite_path := getThumbPath(sha)
-	vtt_path := getThumbVttPath(sha)
-
-	if _, err := os.Stat(sprite_path); err == nil {
-		return sprite_path, vtt_path, nil
-	}
-
 	_, err := s.ExtractThumbs(path, sha)
 	if err != nil {
 		return "", "", err
 	}
-	return sprite_path, vtt_path, nil
+	return getThumbPath(sha), getThumbVttPath(sha), nil
 }
 
 func (s *MetadataService) ExtractThumbs(path string, sha string) (interface{}, error) {
@@ -76,6 +69,10 @@ func extractThumbnail(path string, sha string) error {
 	defer printExecTime("extracting thumbnails for %s", path)()
 
 	os.MkdirAll(fmt.Sprintf("%s/%s", Settings.Metadata), 0o755)
+
+	if _, err := os.Stat(getThumbPath(sha)); err == nil {
+		return nil
+	}
 
 	gen, err := screengen.NewGenerator(path)
 	if err != nil {
