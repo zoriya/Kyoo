@@ -18,10 +18,10 @@ import (
 const InfoVersion = 1
 
 type Versions struct {
-	Info      int32
-	Extract   int32
-	Thumbs    int32
-	Keyframes int32
+	Info      int32 `json:"info"`
+	Extract   int32 `json:"extract"`
+	Thumbs    int32 `json:"thumbs"`
+	Keyframes int32 `json:"keyframes"`
 }
 
 type MediaInfo struct {
@@ -41,9 +41,6 @@ type MediaInfo struct {
 	Container *string `json:"container"`
 	/// Version of the metadata. This can be used to invalidate older metadata from db if the extraction code has changed.
 	Versions Versions `json:"versions"`
-
-	// TODO: remove this
-	Video *Video
 
 	/// The list of videos if there are multiples.
 	Videos []Video `json:"videos"`
@@ -76,6 +73,8 @@ type Video struct {
 	Height uint32 `json:"height"`
 	/// The average bitrate of the video in bytes/s
 	Bitrate uint32 `json:"bitrate"`
+	/// Is this stream the default one of it's type?
+	IsDefault bool `json:"isDefault"`
 
 	/// Keyframes of this video
 	Keyframes *Keyframe `json:"-"`
@@ -92,6 +91,8 @@ type Audio struct {
 	Codec string `json:"codec"`
 	/// The codec of this stream (defined as the RFC 6381).
 	MimeCodec *string `json:"mimeCodec"`
+	/// The average bitrate of the audio in bytes/s
+	Bitrate uint32 `json:"bitrate"`
 	/// Is this stream the default one of it's type?
 	IsDefault bool `json:"isDefault"`
 
@@ -256,6 +257,7 @@ func RetriveMediaInfo(path string, sha string) (*MediaInfo, error) {
 				// ffmpeg does not report bitrate in mkv files, fallback to bitrate of the whole container
 				// (bigger than the result since it contains audio and other videos but better than nothing).
 				Bitrate: ParseUint(cmp.Or(stream.BitRate, mi.Format.BitRate)),
+				IsDefault: stream.Disposition.Default != 0,
 			}
 		}),
 		Audios: MapStream(mi.Streams, ffprobe.StreamAudio, func(stream *ffprobe.Stream, i uint32) Audio {
@@ -266,6 +268,7 @@ func RetriveMediaInfo(path string, sha string) (*MediaInfo, error) {
 				Language:  NullIfUnd(lang.String()),
 				Codec:     stream.CodecName,
 				MimeCodec: GetMimeCodec(stream),
+				Bitrate: ParseUint(cmp.Or(stream.BitRate, mi.Format.BitRate)),
 				IsDefault: stream.Disposition.Default != 0,
 			}
 		}),

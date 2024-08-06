@@ -25,6 +25,7 @@ create table videos(
 	width integer not null,
 	height integer not null,
 	bitrate integer not null,
+	is_default boolean not null,
 
 	keyframes double precision[],
 
@@ -38,6 +39,7 @@ create table audios(
 	language varchar(256),
 	codec varchar(256) not null,
 	mime_codec varchar(256),
+	bitrate integer not null,
 	is_default boolean not null,
 
 	keyframes double precision[],
