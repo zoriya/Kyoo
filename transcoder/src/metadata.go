@@ -117,7 +117,7 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 	}
 
 	rows, err := s.database.Query(
-		`select v.idx, v.title, v.language, v.codec, v.mime_codec, v.width, v.height, v.bitrate, v.keyframes
+		`select v.idx, v.title, v.language, v.codec, v.mime_codec, v.width, v.height, v.bitrate, v.is_default, v.keyframes
 		from videos as v where v.sha=$1`,
 		sha,
 	)
@@ -126,7 +126,7 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 	}
 	for rows.Next() {
 		var v Video
-		err := rows.Scan(&v.Index, &v.Title, &v.Language, &v.Codec, &v.MimeCodec, &v.Width, &v.Height, &v.Bitrate, &v.Keyframes)
+		err := rows.Scan(&v.Index, &v.Title, &v.Language, &v.Codec, &v.MimeCodec, &v.Width, &v.Height, &v.Bitrate, &v.IsDefault, &v.Keyframes)
 		if err != nil {
 			return nil, err
 		}
@@ -135,7 +135,7 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 	}
 
 	rows, err = s.database.Query(
-		`select a.idx, a.title, a.language, a.codec, a.mime_codec, a.is_default, a.keyframes
+		`select a.idx, a.title, a.language, a.codec, a.mime_codec, a.bitrate, a.is_default, a.keyframes
 		from audios as a where a.sha=$1`,
 		sha,
 	)
@@ -144,7 +144,7 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 	}
 	for rows.Next() {
 		var a Audio
-		err := rows.Scan(&a.Index, &a.Title, &a.Language, &a.Codec, &a.MimeCodec, &a.IsDefault, &a.Keyframes)
+		err := rows.Scan(&a.Index, &a.Title, &a.Language, &a.Codec, &a.MimeCodec, &a.Bitrate, &a.IsDefault, &a.Keyframes)
 		if err != nil {
 			return nil, err
 		}
@@ -232,8 +232,8 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 	).Scan(&ret.Versions.Extract, &ret.Versions.Thumbs, &ret.Versions.Keyframes)
 	for _, v := range ret.Videos {
 		tx.Exec(`
-			insert into videos(sha, idx, title, language, codec, mime_codec, width, height, bitrate)
-			values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+			insert into videos(sha, idx, title, language, codec, mime_codec, width, height, is_default, bitrate)
+			values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 			on conflict (sha, idx) do update set
 				sha = excluded.sha,
 				idx = excluded.idx,
@@ -243,15 +243,16 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 				mime_codec = excluded.mime_codec,
 				width = excluded.width,
 				height = excluded.height,
+				is_default = excluded.is_default,
 				bitrate = excluded.bitrate
 			`,
-			ret.Sha, v.Index, v.Title, v.Language, v.Codec, v.MimeCodec, v.Width, v.Height, v.Bitrate,
+			ret.Sha, v.Index, v.Title, v.Language, v.Codec, v.MimeCodec, v.Width, v.Height, v.IsDefault, v.Bitrate,
 		)
 	}
 	for _, a := range ret.Audios {
 		tx.Exec(`
-			insert into audios(sha, idx, title, language, codec, mime_codec, is_default)
-			values ($1, $2, $3, $4, $5, $6, $7)
+			insert into audios(sha, idx, title, language, codec, mime_codec, is_default, bitrate)
+			values ($1, $2, $3, $4, $5, $6, $7, $8)
 			on conflict (sha, idx) do update set
 				sha = excluded.sha,
 				idx = excluded.idx,
@@ -259,9 +260,10 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 				language = excluded.language,
 				codec = excluded.codec,
 				mime_codec = excluded.mime_codec,
-				is_default = excluded.is_default
+				is_default = excluded.is_default,
+				bitrate = excluded.bitrate
 			`,
-			ret.Sha, a.Index, a.Title, a.Language, a.Codec, a.MimeCodec, a.IsDefault,
+			ret.Sha, a.Index, a.Title, a.Language, a.Codec, a.MimeCodec, a.IsDefault, a.Bitrate,
 		)
 	}
 	for _, s := range ret.Subtitles {
