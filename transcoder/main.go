@@ -74,7 +74,7 @@ func (h *Handler) GetVideoIndex(c echo.Context) error {
 		return err
 	}
 
-	ret, err := h.transcoder.GetVideoIndex(path, int32(video), quality, client, sha)
+	ret, err := h.transcoder.GetVideoIndex(path, uint32(video), quality, client, sha)
 	if err != nil {
 		return err
 	}
@@ -102,7 +102,7 @@ func (h *Handler) GetAudioIndex(c echo.Context) error {
 		return err
 	}
 
-	ret, err := h.transcoder.GetAudioIndex(path, int32(audio), client, sha)
+	ret, err := h.transcoder.GetAudioIndex(path, uint32(audio), client, sha)
 	if err != nil {
 		return err
 	}
@@ -138,7 +138,7 @@ func (h *Handler) GetVideoSegment(c echo.Context) error {
 
 	ret, err := h.transcoder.GetVideoSegment(
 		path,
-		int32(video),
+		uint32(video),
 		quality,
 		segment,
 		client,
@@ -173,7 +173,7 @@ func (h *Handler) GetAudioSegment(c echo.Context) error {
 		return err
 	}
 
-	ret, err := h.transcoder.GetAudioSegment(path, int32(audio), segment, client, sha)
+	ret, err := h.transcoder.GetAudioSegment(path, uint32(audio), segment, client, sha)
 	if err != nil {
 		return err
 	}

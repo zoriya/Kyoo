@@ -9,7 +9,7 @@ type ClientInfo struct {
 	client string
 	path   string
 	video  *VideoKey
-	audio  int32
+	audio  *uint32
 	vhead  int32
 	ahead  int32
 }
@@ -60,7 +60,7 @@ func (t *Tracker) start() {
 				if info.video == nil {
 					info.video = old.video
 				}
-				if info.audio == -1 {
+				if info.audio == nil {
 					info.audio = old.audio
 				}
 				if info.vhead == -1 {
@@ -77,14 +77,14 @@ func (t *Tracker) start() {
 
 			// now that the new info is stored and fixed, kill old streams
 			if ok && old.path == info.path {
-				if old.audio != info.audio && old.audio != -1 {
-					t.KillAudioIfDead(old.path, old.audio)
+				if old.audio != info.audio && old.audio != nil {
+					t.KillAudioIfDead(old.path, *old.audio)
 				}
 				if old.video != info.video && old.video != nil {
 					t.KillVideoIfDead(old.path, *old.video)
 				}
 				if old.vhead != -1 && Abs(info.vhead-old.vhead) > 100 {
-					t.KillOrphanedHeads(old.path, old.video, -1)
+					t.KillOrphanedHeads(old.path, old.video, nil)
 				}
 				if old.ahead != -1 && Abs(info.ahead-old.ahead) > 100 {
 					t.KillOrphanedHeads(old.path, nil, old.audio)
@@ -106,7 +106,7 @@ func (t *Tracker) start() {
 				delete(t.visitDate, client)
 
 				if !t.KillStreamIfDead(info.path) {
-					audio_cleanup := info.audio != -1 && t.KillAudioIfDead(info.path, info.audio)
+					audio_cleanup := info.audio != nil && t.KillAudioIfDead(info.path, *info.audio)
 					video_cleanup := info.video != nil && t.KillVideoIfDead(info.path, *info.video)
 					if !audio_cleanup || !video_cleanup {
 						t.KillOrphanedHeads(info.path, info.video, info.audio)
@@ -150,9 +150,9 @@ func (t *Tracker) DestroyStreamIfOld(path string) {
 	stream.Destroy()
 }
 
-func (t *Tracker) KillAudioIfDead(path string, audio int32) bool {
+func (t *Tracker) KillAudioIfDead(path string, audio uint32) bool {
 	for _, stream := range t.clients {
-		if stream.path == path && stream.audio == audio {
+		if stream.path == path && stream.audio != nil && *stream.audio == audio {
 			return false
 		}
 	}
@@ -190,7 +190,7 @@ func (t *Tracker) KillVideoIfDead(path string, video VideoKey) bool {
 	return true
 }
 
-func (t *Tracker) KillOrphanedHeads(path string, video *VideoKey, audio int32) {
+func (t *Tracker) KillOrphanedHeads(path string, video *VideoKey, audio *uint32) {
 	stream, ok := t.transcoder.streams.Get(path)
 	if !ok {
 		return
@@ -202,8 +202,8 @@ func (t *Tracker) KillOrphanedHeads(path string, video *VideoKey, audio int32) {
 			t.killOrphanedeheads(&vstream.Stream, true)
 		}
 	}
-	if audio != -1 {
-		astream, aok := stream.audios.Get(audio)
+	if audio != nil {
+		astream, aok := stream.audios.Get(*audio)
 		if aok {
 			t.killOrphanedeheads(&astream.Stream, false)
 		}

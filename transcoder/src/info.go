@@ -65,8 +65,6 @@ type Video struct {
 	Codec string `json:"codec"`
 	/// The codec of this stream (defined as the RFC 6381).
 	MimeCodec *string `json:"mimeCodec"`
-	/// The max quality of this video track.
-	Quality Quality `json:"quality"`
 	/// The width of the video stream
 	Width uint32 `json:"width"`
 	/// The height of the video stream
@@ -251,12 +249,11 @@ func RetriveMediaInfo(path string, sha string) (*MediaInfo, error) {
 				MimeCodec: GetMimeCodec(stream),
 				Title:     OrNull(stream.Tags.Title),
 				Language:  NullIfUnd(lang.String()),
-				Quality:   QualityFromHeight(uint32(stream.Height)),
 				Width:     uint32(stream.Width),
 				Height:    uint32(stream.Height),
 				// ffmpeg does not report bitrate in mkv files, fallback to bitrate of the whole container
 				// (bigger than the result since it contains audio and other videos but better than nothing).
-				Bitrate: ParseUint(cmp.Or(stream.BitRate, mi.Format.BitRate)),
+				Bitrate:   ParseUint(cmp.Or(stream.BitRate, mi.Format.BitRate)),
 				IsDefault: stream.Disposition.Default != 0,
 			}
 		}),
@@ -268,7 +265,7 @@ func RetriveMediaInfo(path string, sha string) (*MediaInfo, error) {
 				Language:  NullIfUnd(lang.String()),
 				Codec:     stream.CodecName,
 				MimeCodec: GetMimeCodec(stream),
-				Bitrate: ParseUint(cmp.Or(stream.BitRate, mi.Format.BitRate)),
+				Bitrate:   ParseUint(cmp.Or(stream.BitRate, mi.Format.BitRate)),
 				IsDefault: stream.Disposition.Default != 0,
 			}
 		}),
@@ -324,10 +321,6 @@ func RetriveMediaInfo(path string, sha string) (*MediaInfo, error) {
 		} else {
 			ret.MimeCodec = &container
 		}
-	}
-
-	if len(ret.Videos) > 0 {
-		ret.Video = &ret.Videos[0]
 	}
 	return &ret, nil
 }

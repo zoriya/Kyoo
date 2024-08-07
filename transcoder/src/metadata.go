@@ -130,7 +130,6 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 		if err != nil {
 			return nil, err
 		}
-		v.Quality = QualityFromHeight(v.Height)
 		ret.Videos = append(ret.Videos, v)
 	}
 
