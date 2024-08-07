@@ -42,6 +42,9 @@ type MediaInfo struct {
 	/// Version of the metadata. This can be used to invalidate older metadata from db if the extraction code has changed.
 	Versions Versions `json:"versions"`
 
+	// TODO: remove on next major
+	Video Video `json:"video"`
+
 	/// The list of videos if there are multiples.
 	Videos []Video `json:"videos"`
 	/// The list of audio tracks.
@@ -96,6 +99,9 @@ type Audio struct {
 
 	/// Keyframes of this video
 	Keyframes *Keyframe `json:"-"`
+
+	//TODO: remove this in next major
+	IsForced bool `json:"isForced"`
 }
 
 type Subtitle struct {
@@ -317,6 +323,9 @@ func RetriveMediaInfo(path string, sha string) (*MediaInfo, error) {
 		} else {
 			ret.MimeCodec = &container
 		}
+	}
+	if len(ret.Videos) > 0 {
+		ret.Video = ret.Videos[0]
 	}
 	return &ret, nil
 }
