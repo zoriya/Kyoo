@@ -64,6 +64,7 @@ export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
 						tagline={"tagline" in x ? x.tagline : null}
 						overview={x.overview}
 						thumbnail={x.thumbnail}
+						logo={x.logo}
 						link={x.kind !== "collection" && !x.isLoading ? x.playHref : undefined}
 						infoLink={x.href}
 					/>

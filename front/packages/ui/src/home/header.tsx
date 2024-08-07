@@ -25,9 +25,9 @@ import {
 	H2,
 	IconButton,
 	IconFab,
-	ImageBackground,
 	Link,
 	P,
+	Poster,
 	Skeleton,
 	tooltip,
 	ts,
@@ -35,7 +35,7 @@ import {
 import Info from "@material-symbols/svg-400/rounded/info.svg";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
+import { Image, ImageProps, View } from "react-native";
 import { percent, rem, useYoshiki } from "yoshiki/native";
 import { Header as DetailsHeader } from "../details/header";
 import type { WithLoading } from "../fetch";
@@ -44,6 +44,7 @@ export const Header = ({
 	isLoading,
 	name,
 	thumbnail,
+	logo,
 	overview,
 	tagline,
 	link,
@@ -52,6 +53,7 @@ export const Header = ({
 }: WithLoading<{
 	name: string;
 	thumbnail: KyooImage | null;
+	logo: KyooImage | null;
 	overview: string | null;
 	tagline: string | null;
 	link: string | null;
@@ -59,6 +61,7 @@ export const Header = ({
 }>) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
+	console.log(logo);
 
 	return (
 		<GradientImageBackground
@@ -68,14 +71,37 @@ export const Header = ({
 			{...css(DetailsHeader.containerStyle, props)}
 		>
 			<View
-				{...css({ width: { md: percent(70) }, position: "absolute", bottom: 0, margin: ts(2) })}
+				{...css({
+					width: { xs: percent(70), md: percent(70) },
+					position: "absolute",
+					bottom: 0,
+					margin: ts(2),
+				})}
 			>
 				<Skeleton {...css({ width: rem(8), height: rem(2.5) })}>
-					{isLoading || (
-						<H1 numberOfLines={4} {...css({ fontSize: { xs: rem(2), sm: rem(3) } })}>
-							{name}
-						</H1>
-					)}
+					{isLoading ||
+						(logo != null ? (
+							<View
+								{...css({
+									width: { xs: percent(100), md: percent(50), lg: percent(40) },
+									aspectRatio: 3,
+								})}
+							>
+								<Image
+									resizeMode="contain"
+									defaultSource={{ uri: logo.medium }}
+									source={{ uri: logo.medium }}
+									alt={name}
+									{...(css({
+										flex: 1,
+									}) as ImageProps)}
+								/>
+							</View>
+						) : (
+							<H1 numberOfLines={4} {...css({ fontSize: { xs: rem(2), sm: rem(3) } })}>
+								{name}
+							</H1>
+						))}
 				</Skeleton>
 				<View {...css({ flexDirection: "row", alignItems: "center" })}>
 					{link !== null && (
@@ -97,7 +123,11 @@ export const Header = ({
 						{...css({ marginRight: ts(2) })}
 					/>
 					<Skeleton
-						{...css({ width: rem(25), height: rem(2), display: { xs: "none", sm: "flex" } })}
+						{...css({
+							width: rem(25),
+							height: rem(2),
+							display: { xs: "none", sm: "flex" },
+						})}
 					>
 						{isLoading || <H2 {...css({ display: { xs: "none", sm: "flex" } })}>{tagline}</H2>}
 					</Skeleton>
