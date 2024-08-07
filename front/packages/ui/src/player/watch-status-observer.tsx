@@ -19,7 +19,7 @@
  */
 
 import { type MutationParam, WatchStatusV, useAccount } from "@kyoo/models";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
 import { useAtomCallback } from "jotai/utils";
 import { useCallback, useEffect } from "react";
@@ -35,11 +35,11 @@ export const WatchStatusObserver = ({
 	duration: number;
 }) => {
 	const account = useAccount();
-	const queryClient = useQueryClient();
+	// const queryClient = useQueryClient();
 	const { mutate: _mutate } = useMutation<unknown, Error, MutationParam>({
 		mutationKey: [type, slug, "watchStatus"],
-		onSettled: async () =>
-			await queryClient.invalidateQueries({ queryKey: [type === "episode" ? "show" : type, slug] }),
+		// onSettled: async () =>
+		// 	await queryClient.invalidateQueries({ queryKey: [type === "episode" ? "show" : type, slug] }),
 	});
 	const mutate = useCallback(
 		(type: string, slug: string, seconds: number) => {
