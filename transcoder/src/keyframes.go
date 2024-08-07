@@ -2,14 +2,14 @@ package src
 
 import (
 	"bufio"
-	"database/sql/driver"
-	"errors"
 	"fmt"
 	"log"
 	"os/exec"
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/lib/pq"
 )
 
 const KeyframeVersion = 1
@@ -64,19 +64,15 @@ func (kf *Keyframe) AddListener(callback func(keyframes []float64)) {
 	kf.info.listeners = append(kf.info.listeners, callback)
 }
 
-func (kf *Keyframe) Value() (driver.Value, error) {
-	return driver.Value(kf.Keyframes), nil
-}
-
 func (kf *Keyframe) Scan(src interface{}) error {
-	switch src.(type) {
-	case []float64:
-		kf.Keyframes = src.([]float64)
-		kf.IsDone = true
-		kf.info = &KeyframeInfo{}
-	default:
-		return errors.New("incompatible type for keyframe in database")
+	var arr pq.Float64Array
+	err := arr.Scan(src)
+	if err != nil {
+		return err
 	}
+	kf.Keyframes = arr
+	kf.IsDone = true
+	kf.info = &KeyframeInfo{}
 	return nil
 }
 
@@ -102,9 +98,9 @@ func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx uint32
 	}
 	kf.info.ready.Add(1)
 
-	var err error
 	go func() {
 		var table string
+		var err error
 		if isVideo {
 			table = "videos"
 			err = getVideoKeyframes(info.Path, idx, kf)
@@ -118,21 +114,20 @@ func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx uint32
 			return
 		}
 
-		_, err = s.database.Exec(
-			fmt.Sprint(
-				`update %s set keyframes = $3, ver_keyframes = $4 where sha = $1 and idx = $2`,
-				table,
-			),
+		tx, _ := s.database.Begin()
+		tx.Exec(
+			fmt.Sprintf(`update %s set keyframes = $3 where sha = $1 and idx = $2`, table),
 			info.Sha,
 			idx,
-			kf.Keyframes,
-			KeyframeVersion,
+			pq.Array(kf.Keyframes),
 		)
+		tx.Exec(`update info set ver_keyframes = $2 where sha = $1`, info.Sha, KeyframeVersion)
+		err = tx.Commit()
 		if err != nil {
 			log.Printf("Couldn't store keyframes on database: %v", err)
 		}
 	}()
-	return set(kf, err)
+	return set(kf, nil)
 }
 
 // Retrive video's keyframes and store them inside the kf var.
@@ -216,10 +211,10 @@ func getVideoKeyframes(path string, video_idx uint32, kf *Keyframe) error {
 		}
 	}
 	kf.add(ret)
+	kf.IsDone = true
 	if done == 0 {
 		kf.info.ready.Done()
 	}
-	kf.IsDone = true
 	return nil
 }
 
@@ -232,7 +227,7 @@ func getAudioKeyframes(info *MediaInfo, audio_idx uint32, kf *Keyframe) error {
 		kf.Keyframes[segmentIndex] = float64(segmentIndex) * dummyKeyframeDuration
 	}
 
-	kf.info.ready.Done()
 	kf.IsDone = true
+	kf.info.ready.Done()
 	return nil
 }
