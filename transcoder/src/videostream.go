@@ -25,8 +25,8 @@ func (vs *VideoStream) getFlags() Flags {
 	return VideoF
 }
 
-func (vs *VideoStream) getOutPath(encoder_id int) string {
-	return fmt.Sprintf("%s/segment-%s-%d-%%d.ts", vs.file.Out, vs.quality, encoder_id)
+func (vs *VideoStream) getIdentifier() string {
+	return fmt.Sprintf("%s", vs.quality)
 }
 
 func closestMultiple(n int32, x int32) int32 {
@@ -71,4 +71,32 @@ func (vs *VideoStream) getTranscodeArgs(segments string) []string {
 		"-strict", "-2",
 	)
 	return args
+}
+
+func (ts *VideoStream) GetIndex() (string, error) {
+	// playlist type is event since we can append to the list if Keyframe.IsDone is false.
+	// start time offset makes the stream start at 0s instead of ~3segments from the end (requires version 6 of hls)
+	index := `#EXTM3U
+#EXT-X-VERSION:7
+#EXT-X-PLAYLIST-TYPE:EVENT
+#EXT-X-START:TIME-OFFSET=0
+#EXT-X-MEDIA-SEQUENCE:0
+#EXT-X-INDEPENDENT-SEGMENTS
+#EXT-X-MAP:URI="init.mp4"
+`
+	index += fmt.Sprintf("#EXT-X-TARGETDURATION:%d\n", int(OptimalFragmentDuration)+1)
+	length, is_done := ts.file.Keyframes.Length()
+
+	for segment := int32(0); segment < length-1; segment++ {
+		index += fmt.Sprintf("#EXTINF:%.6f\n", ts.file.Keyframes.Get(segment+1)-ts.file.Keyframes.Get(segment))
+		index += fmt.Sprintf("segment-%d.m4s\n", segment)
+	}
+	// do not forget to add the last segment between the last keyframe and the end of the file
+	// if the keyframes extraction is not done, do not bother to add it, it will be retrieval on the next index retrieval
+	if is_done {
+		index += fmt.Sprintf("#EXTINF:%.6f\n", float64(ts.file.Info.Duration)-ts.file.Keyframes.Get(length-1))
+		index += fmt.Sprintf("segment-%d.m4s\n", length-1)
+		index += `#EXT-X-ENDLIST`
+	}
+	return index, nil
 }

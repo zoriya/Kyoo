@@ -239,6 +239,7 @@ export const Video = memo(function Video({
 			showNotificationControls
 			playInBackground
 			playWhenInactive
+			disableDisconnectError
 			paused={!isPlaying}
 			muted={isMuted}
 			volume={volume}

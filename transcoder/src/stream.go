@@ -8,7 +8,6 @@ import (
 	"math"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"slices"
 	"strings"
 	"sync"
@@ -25,21 +24,30 @@ const (
 
 type StreamHandle interface {
 	getTranscodeArgs(segments string) []string
-	getOutPath(encoder_id int) string
+	getIdentifier() string
 	getFlags() Flags
+	GetIndex() (string, error)
 }
+
+// First %d is encoder_id, second %d is segment number (escaped for ffmpeg)
+const (
+	SegmentNameFormat = "%d-segment-%%d.m4s"
+	InitNameFormat    = "%d-init.mp4"
+)
 
 type Stream struct {
 	handle   StreamHandle
 	file     *FileStream
 	segments []Segment
-	heads    []Head
-	// the lock used for the the heads
+	// An init.mp4 reference. Only one exists per stream
+	init  Segment
+	heads []Head
+	// the lock used for the heads
 	lock sync.RWMutex
 }
 
 type Segment struct {
-	// channel open if the segment is not ready. closed if ready.
+	// channel open if the segment is not ready. Closed if ready.
 	// one can check if segment 1 is open by doing:
 	//
 	//  ts.isSegmentReady(1).
@@ -67,11 +75,16 @@ func NewStream(file *FileStream, handle StreamHandle, ret *Stream) {
 	ret.file = file
 	ret.heads = make([]Head, 0)
 
+	ret.init.channel = make(chan struct{})
+
 	length, is_done := file.Keyframes.Length()
 	ret.segments = make([]Segment, length, max(length, 2000))
 	for seg := range ret.segments {
 		ret.segments[seg].channel = make(chan struct{})
 	}
+
+	// Try to encode asap, the client will first require the init.mp4 anyways so we can't know where to start.
+	ret.run(0)
 
 	if !is_done {
 		file.Keyframes.AddListener(func(keyframes []float64) {
@@ -86,7 +99,22 @@ func NewStream(file *FileStream, handle StreamHandle, ret *Stream) {
 			for seg := old_length; seg < len(keyframes); seg++ {
 				ret.segments[seg].channel = make(chan struct{})
 			}
+
+			// if we still haven't created the init.mp4 create it now.
+			if len(ret.heads) == 0 {
+				ret.run(0)
+			}
 		})
+	}
+}
+
+func (ts *Stream) isInitReady() bool {
+	select {
+	case <-ts.init.channel:
+		// if the channel returned, it means it was closed
+		return true
+	default:
+		return false
 	}
 }
 
@@ -119,8 +147,8 @@ func toSegmentStr(segments []float64) string {
 func (ts *Stream) run(start int32) error {
 	// Start the transcode up to the 100th segment (or less)
 	length, is_done := ts.file.Keyframes.Length()
-	end := min(start+100, length)
-	// if keyframes analysys is not finished, always have a 1-segment padding
+	end := min(start+4, length)
+	// if keyframes analysis is not finished, always have a 1-segment padding
 	// for the extra segment needed for precise split (look comment before -to flag)
 	if !is_done {
 		end -= 2
@@ -156,19 +184,19 @@ func (ts *Stream) run(start int32) error {
 
 	// Include both the start and end delimiter because -ss and -to are not accurate
 	// Having an extra segment allows us to cut precisely the segments we want with the
-	// -f segment that does cut the begining and the end at the keyframe like asked
+	// -f segment that does cut the beginning and the end at the keyframe like asked
 	start_ref := float64(0)
 	start_segment := start
 	if start != 0 {
 		// we always take on segment before the current one, for different reasons for audio/video:
-		//  - Audio: we need context before the starting point, without that ffmpeg doesnt know what to do and leave ~100ms of silence
+		//  - Audio: we need context before the starting point, without that ffmpeg doesn't know what to do and leave ~100ms of silence
 		//  - Video: if a segment is really short (between 20 and 100ms), the padding given in the else block bellow is not enough and
-		// the previous segment is played another time. the -segment_times is way more precise so it does not do the same with this one
+		// the previous segment is played another time. The -segment_times is way more precise so it does not do the same with this one
 		start_segment = start - 1
 		if ts.handle.getFlags()&AudioF != 0 {
 			start_ref = ts.file.Keyframes.Get(start_segment)
 		} else {
-			// the param for the -ss takes the keyframe before the specificed time
+			// the param for the -ss takes the keyframe before the specified time
 			// (if the specified time is a keyframe, it either takes that keyframe or the one before)
 			// to prevent this weird behavior, we specify a bit after the keyframe that interest us
 
@@ -181,8 +209,8 @@ func (ts *Stream) run(start int32) error {
 			}
 		}
 	}
-	end_padding := int32(1)
-	if end == length {
+	end_padding := int32(2)
+	if end == length+1 {
 		end_padding = 0
 	}
 	segments := ts.file.Keyframes.Slice(start_segment+1, end+end_padding)
@@ -191,8 +219,8 @@ func (ts *Stream) run(start int32) error {
 		segments = []float64{9999999}
 	}
 
-	outpath := ts.handle.getOutPath(encoder_id)
-	err := os.MkdirAll(filepath.Dir(outpath), 0o755)
+	outpath := fmt.Sprintf("%s/%s", ts.file.Out, ts.handle.getIdentifier())
+	err := os.MkdirAll(outpath, 0o755)
 	if err != nil {
 		return err
 	}
@@ -222,7 +250,7 @@ func (ts *Stream) run(start int32) error {
 		end_ref := ts.file.Keyframes.Get(end + 1)
 		// it seems that the -to is confused when -ss seek before the given time (because it searches for a keyframe)
 		// add back the time that would be lost otherwise
-		// this only appens when -to is before -i but having -to after -i gave a bug (not sure, don't remember)
+		// this only happen when -to is before -i but having -to after -i gave a bug (not sure, don't remember)
 		end_ref += start_ref - ts.file.Keyframes.Get(start_segment)
 		args = append(args,
 			"-to", fmt.Sprintf("%.6f", end_ref),
@@ -243,24 +271,27 @@ func (ts *Stream) run(start int32) error {
 		"-muxdelay", "0",
 	)
 	args = append(args, ts.handle.getTranscodeArgs(toSegmentStr(segments))...)
+
+	if start_ref != 0 {
+		args = append(args,
+			// We need to add frag_discout to the movflags to get ffmpeg to calculate the correct presentation time otherwise players get lost.
+			// Since we can't append to movflags but only override them, we also copy the default hls w/ fmp4 movflags
+			// Initial flags from: https://github.com/FFmpeg/FFmpeg/blob/master/libavformat/hlsenc.c#L934C32-L934C72
+			"-hls_segment_options", "movflags=frag_custom+dash+delay_moov+frag_discont",
+		)
+	}
 	args = append(args,
-		"-f", "segment",
-		// needed for rounding issues when forcing keyframes
-		// recommended value is 1/(2*frame_rate), which for a 24fps is ~0.021
-		// we take a little bit more than that to be extra safe but too much can be harmfull
-		// when segments are short (can make the video repeat itself)
-		"-segment_time_delta", "0.05",
-		"-segment_format", "mpegts",
-		"-segment_times", toSegmentStr(Map(segments, func(seg float64, _ int) float64 {
-			// segment_times want durations, not timestamps so we must substract the -ss param
-			// since we give a greater value to -ss to prevent wrong seeks but -segment_times
-			// needs precise segments, we use the keyframe we want to seek to as a reference.
-			return seg - ts.file.Keyframes.Get(start_segment)
-		})),
-		"-segment_list_type", "flat",
-		"-segment_list", "pipe:1",
-		"-segment_start_number", fmt.Sprint(start_segment),
-		outpath,
+		"-f", "hls",
+		"-hls_time", fmt.Sprint(OptimalFragmentDuration),
+		"-start_number", fmt.Sprint(start_segment),
+		"-hls_segment_type", "fmp4",
+		"-hls_fmp4_init_filename", fmt.Sprintf("%s/%s", outpath, fmt.Sprintf(InitNameFormat, encoder_id)),
+		"-hls_segment_filename", fmt.Sprintf("%s/%s", outpath, fmt.Sprintf(SegmentNameFormat, encoder_id)),
+		// Make the playlist easier to parse in our program by only outputing 1 segment and no endlist marker
+		// anyways this list is only read once and we generate our own.
+		"-hls_list_size", "1",
+		"-hls_flags", "omit_endlist",
+		"-",
 	)
 
 	cmd := exec.Command("ffmpeg", args...)
@@ -283,35 +314,49 @@ func (ts *Stream) run(start int32) error {
 
 	go func() {
 		scanner := bufio.NewScanner(stdout)
-		format := filepath.Base(outpath)
+		format := fmt.Sprintf(SegmentNameFormat, encoder_id)
 		should_stop := false
+		is_init_ready := false
 
 		for scanner.Scan() {
+			line := scanner.Text()
+			// ignore m3u8 infos, we only want to know when segments are ready.
+			if line[0] == '#' {
+				continue
+			}
+
 			var segment int32
 			_, _ = fmt.Sscanf(scanner.Text(), format, &segment)
 
 			if segment < start {
 				// This happen because we use -f segments for accurate cutting (since -ss is not)
-				// check comment at begining of function for more info
+				// check comment at beginning of function for more info
 				continue
 			}
 			ts.lock.Lock()
+
+			if !is_init_ready && !ts.isInitReady() {
+				ts.init.encoder = encoder_id
+				close(ts.init.channel)
+				is_init_ready = true
+			}
+
 			ts.heads[encoder_id].segment = segment
 			log.Printf("Segment %d got ready (%d)", segment, encoder_id)
 			if ts.isSegmentReady(segment) {
 				// the current segment is already marked at done so another process has already gone up to here.
 				cmd.Process.Signal(os.Interrupt)
-				log.Printf("Killing ffmpeg because segment %d is already ready", segment)
+				log.Printf("Killing ffmpeg %d because segment %d is already ready", encoder_id, segment)
 				should_stop = true
 			} else {
 				ts.segments[segment].encoder = encoder_id
 				close(ts.segments[segment].channel)
 				if segment == end-1 {
-					// file finished, ffmped will finish soon on it's own
+					// file finished, ffmpeg will finish soon on it's own
 					should_stop = true
 				} else if ts.isSegmentReady(segment + 1) {
 					cmd.Process.Signal(os.Interrupt)
-					log.Printf("Killing ffmpeg because next segment %d is ready", segment)
+					log.Printf("Killing ffmpeg %d because next segment %d is ready", encoder_id, segment)
 					should_stop = true
 				}
 			}
@@ -330,12 +375,12 @@ func (ts *Stream) run(start int32) error {
 
 	go func() {
 		err := cmd.Wait()
-		if exiterr, ok := err.(*exec.ExitError); ok && exiterr.ExitCode() == 255 {
+		if exiterr, ok := err.(*exec.ExitError); ok && (exiterr.ExitCode() == 255 || exiterr.ExitCode() == -1) {
 			log.Printf("ffmpeg %d was killed by us", encoder_id)
 		} else if err != nil {
-			log.Printf("ffmpeg %d occured an error: %s: %s", encoder_id, err, stderr.String())
+			log.Printf("ffmpeg %d occurred an error: %v: %s", encoder_id, err, stderr.String())
 		} else {
-			log.Printf("ffmpeg %d finished successfully", encoder_id)
+			log.Printf("ffmpeg %d finished successfully, last segment: %d", encoder_id, ts.heads[encoder_id].segment)
 		}
 
 		ts.lock.Lock()
@@ -347,34 +392,27 @@ func (ts *Stream) run(start int32) error {
 	return nil
 }
 
-func (ts *Stream) GetIndex() (string, error) {
-	// playlist type is event since we can append to the list if Keyframe.IsDone is false.
-	// start time offset makes the stream start at 0s instead of ~3segments from the end (requires version 6 of hls)
-	index := `#EXTM3U
-#EXT-X-VERSION:6
-#EXT-X-PLAYLIST-TYPE:EVENT
-#EXT-X-START:TIME-OFFSET=0
-#EXT-X-TARGETDURATION:4
-#EXT-X-MEDIA-SEQUENCE:0
-#EXT-X-INDEPENDENT-SEGMENTS
-`
-	length, is_done := ts.file.Keyframes.Length()
-
-	for segment := int32(0); segment < length-1; segment++ {
-		index += fmt.Sprintf("#EXTINF:%.6f\n", ts.file.Keyframes.Get(segment+1)-ts.file.Keyframes.Get(segment))
-		index += fmt.Sprintf("segment-%d.ts\n", segment)
+func (ts *Stream) GetInit() (string, error) {
+	// No need to lock, the channel won't change.
+	select {
+	case <-ts.init.channel:
+		return fmt.Sprintf(
+			"%s/%s/%s",
+			ts.file.Out,
+			ts.handle.getIdentifier(),
+			fmt.Sprintf(InitNameFormat, ts.init.encoder),
+		), nil
+	case <-time.After(60 * time.Second):
+		return "", errors.New("could not retrieve the selected segment (timeout)")
 	}
-	// do not forget to add the last segment between the last keyframe and the end of the file
-	// if the keyframes extraction is not done, do not bother to add it, it will be retrived on the next index retrival
-	if is_done {
-		index += fmt.Sprintf("#EXTINF:%.6f\n", float64(ts.file.Info.Duration)-ts.file.Keyframes.Get(length-1))
-		index += fmt.Sprintf("segment-%d.ts\n", length-1)
-		index += `#EXT-X-ENDLIST`
-	}
-	return index, nil
 }
 
 func (ts *Stream) GetSegment(segment int32) (string, error) {
+	// I was too lazy to put this appart.
+	if segment == -1 {
+		return ts.GetInit()
+	}
+
 	ts.lock.RLock()
 	ready := ts.isSegmentReady(segment)
 	// we want to calculate distance in the same lock else it can be funky
@@ -395,23 +433,31 @@ func (ts *Stream) GetSegment(segment int32) (string, error) {
 	if !ready {
 		// Only start a new encode if there is too big a distance between the current encoder and the segment.
 		if distance > 60 || !is_scheduled {
-			log.Printf("Creating new head for %d since closest head is %fs aways", segment, distance)
+			log.Printf("Creating new head for %d since closest head is %fs away", segment, distance)
 			err := ts.run(segment)
 			if err != nil {
 				return "", err
 			}
 		} else {
-			log.Printf("Waiting for segment %d since encoder head is %fs aways", segment, distance)
+			log.Printf("Waiting for segment %d since encoder head is %fs away", segment, distance)
 		}
 
 		select {
 		case <-readyChan:
 		case <-time.After(60 * time.Second):
-			return "", errors.New("could not retrive the selected segment (timeout)")
+			return "", errors.New("could not retrieve the selected segment (timeout)")
 		}
 	}
 	ts.prerareNextSegements(segment)
-	return fmt.Sprintf(ts.handle.getOutPath(ts.segments[segment].encoder), segment), nil
+	return fmt.Sprintf(
+		"%s/%s/%s",
+		ts.file.Out,
+		ts.handle.getIdentifier(),
+		fmt.Sprintf(
+			fmt.Sprintf(SegmentNameFormat, ts.segments[segment].encoder),
+			segment,
+		),
+	), nil
 }
 
 func (ts *Stream) prerareNextSegements(segment int32) {
@@ -428,7 +474,7 @@ func (ts *Stream) prerareNextSegements(segment int32) {
 			continue
 		}
 		// only start encode for segments not planned (getMinEncoderDistance returns Inf for them)
-		// or if they are 60s away (asume 5s per segments)
+		// or if they are 60s away (assume 5s per segments)
 		if ts.getMinEncoderDistance(i) < 60+(5*float64(i-segment)) {
 			continue
 		}
