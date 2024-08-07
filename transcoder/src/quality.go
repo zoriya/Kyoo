@@ -110,10 +110,10 @@ func (q Quality) Height() uint32 {
 	panic("Invalid quality value")
 }
 
-func QualityFromHeight(height uint32) Quality {
+func (video *Video) Quality() Quality {
 	qualities := Qualities
 	for _, quality := range qualities {
-		if quality.Height() >= height {
+		if quality.Height() >= video.Height || quality.AverageBitrate() >= video.Bitrate {
 			return quality
 		}
 	}

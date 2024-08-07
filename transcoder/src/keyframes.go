@@ -83,10 +83,10 @@ func (kf *Keyframe) Scan(src interface{}) error {
 type KeyframeKey struct {
 	Sha     string
 	IsVideo bool
-	Index   int32
+	Index   uint32
 }
 
-func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx int32) (*Keyframe, error) {
+func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx uint32) (*Keyframe, error) {
 	get_running, set := s.keyframeLock.Start(KeyframeKey{
 		Sha:     info.Sha,
 		IsVideo: isVideo,
@@ -138,7 +138,7 @@ func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx int32)
 // Retrive video's keyframes and store them inside the kf var.
 // Returns when all key frames are retrived (or an error occurs)
 // info.ready.Done() is called when more than 100 are retrived (or extraction is done)
-func getVideoKeyframes(path string, video_idx int32, kf *Keyframe) error {
+func getVideoKeyframes(path string, video_idx uint32, kf *Keyframe) error {
 	defer printExecTime("ffprobe keyframe analysis for %s video n%d", path, video_idx)()
 	// run ffprobe to return all IFrames, IFrames are points where we can split the video in segments.
 	// We ask ffprobe to return the time of each frame and it's flags
@@ -224,7 +224,7 @@ func getVideoKeyframes(path string, video_idx int32, kf *Keyframe) error {
 }
 
 // we can pretty much cut audio at any point so no need to get specific frames, just cut every 4s
-func getAudioKeyframes(info *MediaInfo, audio_idx int32, kf *Keyframe) error {
+func getAudioKeyframes(info *MediaInfo, audio_idx uint32, kf *Keyframe) error {
 	dummyKeyframeDuration := float64(4)
 	segmentCount := int((float64(info.Duration) / dummyKeyframeDuration) + 1)
 	kf.Keyframes = make([]float64, segmentCount)

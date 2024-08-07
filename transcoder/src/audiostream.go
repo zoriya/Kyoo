@@ -7,10 +7,10 @@ import (
 
 type AudioStream struct {
 	Stream
-	index int32
+	index uint32
 }
 
-func (t *Transcoder) NewAudioStream(file *FileStream, idx int32) (*AudioStream, error) {
+func (t *Transcoder) NewAudioStream(file *FileStream, idx uint32) (*AudioStream, error) {
 	log.Printf("Creating a audio stream %d for %s", idx, file.Info.Path)
 
 	keyframes, err := t.metadataService.GetKeyframes(file.Info, false, idx)
