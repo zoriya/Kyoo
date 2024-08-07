@@ -115,8 +115,7 @@ type Subtitle struct {
 	IsForced bool `json:"isForced"`
 	/// Is this an external subtitle (as in stored in a different file)
 	IsExternal bool `json:"isExternal"`
-	/// Where the subtitle is stored (either in library if IsExternal is true or in transcoder cache if false)
-	/// Null if the subtitle can't be extracted (unsupported format)
+	/// Where the subtitle is stored (null if stored inside the video)
 	Path *string `json:"path"`
 	/// The link to access this subtitle.
 	Link *string `json:"link"`
@@ -272,10 +271,8 @@ func RetriveMediaInfo(path string, sha string) (*MediaInfo, error) {
 		Subtitles: MapStream(mi.Streams, ffprobe.StreamSubtitle, func(stream *ffprobe.Stream, i uint32) Subtitle {
 			extension := OrNull(SubtitleExtensions[stream.CodecName])
 			var link string
-			var spath string
 			if extension != nil {
 				link = fmt.Sprintf("%s/%s/subtitle/%d.%s", Settings.RoutePrefix, base64.RawURLEncoding.EncodeToString([]byte(path)), i, *extension)
-				spath = fmt.Sprintf("%s/%s/sub/%d.%s", Settings.Metadata, sha, i, *extension)
 			}
 			lang, _ := language.Parse(stream.Tags.Language)
 			idx := uint32(i)
@@ -288,7 +285,6 @@ func RetriveMediaInfo(path string, sha string) (*MediaInfo, error) {
 				IsDefault: stream.Disposition.Default != 0,
 				IsForced:  stream.Disposition.Forced != 0,
 				Link:      &link,
-				Path:      &spath,
 			}
 		}),
 		Chapters: Map(mi.Chapters, func(c *ffprobe.Chapter, _ int) Chapter {

@@ -151,7 +151,7 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 	}
 
 	rows, err = s.database.Query(
-		`select s.idx, s.title, s.language, s.codec, s.extension, s.is_default, s.is_forced, s.is_external, s.path
+		`select s.idx, s.title, s.language, s.codec, s.extension, s.is_default, s.is_forced
 		from subtitles as s where s.sha=$1`,
 		sha,
 	)
@@ -160,7 +160,7 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 	}
 	for rows.Next() {
 		var s Subtitle
-		err := rows.Scan(&s.Index, &s.Title, &s.Language, &s.Codec, &s.Extension, &s.IsDefault, &s.IsForced, &s.IsExternal, &s.Path)
+		err := rows.Scan(&s.Index, &s.Title, &s.Language, &s.Codec, &s.Extension, &s.IsDefault, &s.IsForced)
 		if err != nil {
 			return nil, err
 		}
@@ -267,9 +267,9 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 	}
 	for _, s := range ret.Subtitles {
 		tx.Exec(`
-			insert into subtitles(sha, idx, title, language, codec, extension, is_default, is_forced, is_external, path)
-			values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-			on conflict (sha, idx, path) do update set
+			insert into subtitles(sha, idx, title, language, codec, extension, is_default, is_forced)
+			values ($1, $2, $3, $4, $5, $6, $7, $8)
+			on conflict (sha, idx) do update set
 				sha = excluded.sha,
 				idx = excluded.idx,
 				title = excluded.title,
@@ -277,11 +277,9 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 				codec = excluded.codec,
 				extension = excluded.extension,
 				is_default = excluded.is_default,
-				is_forced = excluded.is_forced,
-				is_external = excluded.is_external,
-				path = excluded.path
+				is_forced = excluded.is_forced
 			`,
-			ret.Sha, s.Index, s.Title, s.Language, s.Codec, s.Extension, s.IsDefault, s.IsForced, s.IsExternal, s.Path,
+			ret.Sha, s.Index, s.Title, s.Language, s.Codec, s.Extension, s.IsDefault, s.IsForced,
 		)
 	}
 	for _, c := range ret.Chapters {
