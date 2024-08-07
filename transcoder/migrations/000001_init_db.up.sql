@@ -49,7 +49,6 @@ create table audios(
 
 create table subtitles(
 	sha varchar(40) not null references info(sha) on delete cascade,
-	-- Can be null when is_external is true
 	idx integer not null,
 	title varchar(1024),
 	language varchar(256),
@@ -68,7 +67,7 @@ create table chapters(
 	start_time real not null,
 	end_time real not null,
 	name varchar(1024),
-	type chapter_type
+	type chapter_type,
 
 	constraint chapter_pk primary key (sha, start_time)
 );
