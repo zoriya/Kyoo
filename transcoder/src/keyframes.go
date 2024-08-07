@@ -121,6 +121,7 @@ func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx uint32
 			return
 		}
 
+		kf.info.ready.Wait()
 		tx, _ := s.database.Begin()
 		tx.Exec(
 			fmt.Sprintf(`update %s set keyframes = $3 where sha = $1 and idx = $2`, table),
@@ -149,7 +150,7 @@ func getVideoKeyframes(path string, video_idx uint32, kf *Keyframe) error {
 	cmd := exec.Command(
 		"ffprobe",
 		"-loglevel", "error",
-		"-select_streams", fmt.Sprint("V:%d", video_idx),
+		"-select_streams", fmt.Sprintf("V:%d", video_idx),
 		"-show_entries", "packet=pts_time,flags",
 		"-of", "csv=print_section=0",
 		path,
@@ -166,7 +167,7 @@ func getVideoKeyframes(path string, video_idx uint32, kf *Keyframe) error {
 	scanner := bufio.NewScanner(stdout)
 
 	ret := make([]float64, 0, 1000)
-	max := 100
+	limit := 100
 	done := 0
 	// sometimes, videos can start at a timing greater than 0:00. We need to take that into account
 	// and only list keyframes that come after the start of the video (without that, our segments count
@@ -205,14 +206,14 @@ func getVideoKeyframes(path string, video_idx uint32, kf *Keyframe) error {
 
 		ret = append(ret, fpts)
 
-		if len(ret) == max {
+		if len(ret) == limit {
 			kf.add(ret)
 			if done == 0 {
 				kf.info.ready.Done()
 			} else if done >= 500 {
-				max = 500
+				limit = 500
 			}
-			done += max
+			done += limit
 			// clear the array without reallocing it
 			ret = ret[:0]
 		}
