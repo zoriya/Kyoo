@@ -187,13 +187,16 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 	}
 	for rows.Next() {
 		var c Chapter
-		err := rows.Scan(&c.StartTime, c.EndTime, c.Name, c.Type)
+		err := rows.Scan(&c.StartTime, &c.EndTime, &c.Name, &c.Type)
 		if err != nil {
 			return nil, err
 		}
 		ret.Chapters = append(ret.Chapters, c)
 	}
 
+	if len(ret.Videos) > 0 {
+		ret.Video = ret.Videos[0]
+	}
 	return &ret, nil
 }
 
