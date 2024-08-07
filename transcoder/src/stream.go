@@ -31,6 +31,7 @@ type StreamHandle interface {
 
 type Stream struct {
 	handle    StreamHandle
+	ready     sync.WaitGroup
 	file      *FileStream
 	keyframes *Keyframe
 	segments  []Segment
@@ -69,6 +70,7 @@ func NewStream(file *FileStream, keyframes *Keyframe, handle StreamHandle, ret *
 	ret.keyframes = keyframes
 	ret.heads = make([]Head, 0)
 
+	ret.ready.Add(1)
 	go func() {
 		keyframes.info.ready.Wait()
 
@@ -93,6 +95,7 @@ func NewStream(file *FileStream, keyframes *Keyframe, handle StreamHandle, ret *
 				}
 			})
 		}
+		ret.ready.Done()
 	}()
 }
 

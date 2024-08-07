@@ -179,7 +179,7 @@ func (fs *FileStream) getVideoStream(idx uint32, quality Quality) (*VideoStream,
 		ret, _ := fs.transcoder.NewVideoStream(fs, idx, quality)
 		return ret
 	})
-	stream.keyframes.info.ready.Wait()
+	stream.ready.Wait()
 	return stream, nil
 }
 
@@ -204,7 +204,7 @@ func (fs *FileStream) getAudioStream(audio uint32) (*AudioStream, error) {
 		ret, _ := fs.transcoder.NewAudioStream(fs, audio)
 		return ret
 	})
-	stream.keyframes.info.ready.Wait()
+	stream.ready.Wait()
 	return stream, nil
 }
 

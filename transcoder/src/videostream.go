@@ -60,7 +60,7 @@ func closestMultiple(n int32, x int32) int32 {
 
 func (vs *VideoStream) getTranscodeArgs(segments string) []string {
 	args := []string{
-		"-map", fmt.Sprint("0:V:%d", vs.video.Index),
+		"-map", fmt.Sprintf("0:V:%d", vs.video.Index),
 	}
 
 	if vs.quality == Original {
