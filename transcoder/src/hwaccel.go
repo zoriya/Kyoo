@@ -18,7 +18,7 @@ func DetectHardwareAccel() HwAccelT {
 	preset := GetEnvOr("GOCODER_PRESET", "fast")
 
 	switch name {
-	case "disabled":
+	case "disabled", "cpu":
 		return HwAccelT{
 			Name:        "disabled",
 			DecodeFlags: []string{},
