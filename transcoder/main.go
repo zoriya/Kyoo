@@ -302,7 +302,7 @@ func main() {
 	e.GET("/:path/master.m3u8", h.GetMaster)
 	e.GET("/:path/:video/:quality/index.m3u8", h.GetVideoIndex)
 	e.GET("/:path/audio/:audio/index.m3u8", h.GetAudioIndex)
-	e.GET("/:path/:quality/:chunk", h.GetVideoSegment)
+	e.GET("/:path/:video/:quality/:chunk", h.GetVideoSegment)
 	e.GET("/:path/audio/:audio/:chunk", h.GetAudioSegment)
 	e.GET("/:path/info", h.GetInfo)
 	e.GET("/:path/thumbnails.png", h.GetThumbnails)
