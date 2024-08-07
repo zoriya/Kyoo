@@ -83,6 +83,13 @@ type KeyframeKey struct {
 }
 
 func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx uint32) (*Keyframe, error) {
+	if isVideo && info.Videos[idx].Keyframes != nil {
+		return info.Videos[idx].Keyframes, nil
+	}
+	if !isVideo && info.Audios[idx].Keyframes != nil {
+		return info.Audios[idx].Keyframes, nil
+	}
+
 	get_running, set := s.keyframeLock.Start(KeyframeKey{
 		Sha:     info.Sha,
 		IsVideo: isVideo,
