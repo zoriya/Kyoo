@@ -31,7 +31,6 @@ type StreamHandle interface {
 
 type Stream struct {
 	handle    StreamHandle
-	ready     sync.WaitGroup
 	file      *FileStream
 	keyframes *Keyframe
 	segments  []Segment
@@ -70,27 +69,31 @@ func NewStream(file *FileStream, keyframes *Keyframe, handle StreamHandle, ret *
 	ret.keyframes = keyframes
 	ret.heads = make([]Head, 0)
 
-	length, is_done := keyframes.Length()
-	ret.segments = make([]Segment, length, max(length, 2000))
-	for seg := range ret.segments {
-		ret.segments[seg].channel = make(chan struct{})
-	}
+	go func() {
+		keyframes.info.ready.Wait()
 
-	if !is_done {
-		keyframes.AddListener(func(keyframes []float64) {
-			ret.lock.Lock()
-			defer ret.lock.Unlock()
-			old_length := len(ret.segments)
-			if cap(ret.segments) > len(keyframes) {
-				ret.segments = ret.segments[:len(keyframes)]
-			} else {
-				ret.segments = append(ret.segments, make([]Segment, len(keyframes)-old_length)...)
-			}
-			for seg := old_length; seg < len(keyframes); seg++ {
-				ret.segments[seg].channel = make(chan struct{})
-			}
-		})
-	}
+		length, is_done := keyframes.Length()
+		ret.segments = make([]Segment, length, max(length, 2000))
+		for seg := range ret.segments {
+			ret.segments[seg].channel = make(chan struct{})
+		}
+
+		if !is_done {
+			keyframes.AddListener(func(keyframes []float64) {
+				ret.lock.Lock()
+				defer ret.lock.Unlock()
+				old_length := len(ret.segments)
+				if cap(ret.segments) > len(keyframes) {
+					ret.segments = ret.segments[:len(keyframes)]
+				} else {
+					ret.segments = append(ret.segments, make([]Segment, len(keyframes)-old_length)...)
+				}
+				for seg := old_length; seg < len(keyframes); seg++ {
+					ret.segments[seg].channel = make(chan struct{})
+				}
+			})
+		}
+	}()
 }
 
 // Remember to lock before calling this.
