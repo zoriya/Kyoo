@@ -50,17 +50,15 @@ create table audios(
 create table subtitles(
 	sha varchar(40) not null references info(sha) on delete cascade,
 	-- Can be null when is_external is true
-	idx integer,
+	idx integer not null,
 	title varchar(1024),
 	language varchar(256),
 	codec varchar(256) not null,
 	extension varchar(16),
 	is_default boolean not null,
 	is_forced boolean not null,
-	is_external boolean not null,
-	path varchar(4096)
 
-	constraint subtitle_pk primary key (sha, idx, path)
+	constraint subtitle_pk primary key (sha, idx)
 );
 
 create type chapter_type as enum('content', 'recap', 'intro', 'credits', 'preview');
