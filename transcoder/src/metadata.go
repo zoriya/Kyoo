@@ -108,6 +108,10 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 		&fonts, &ret.Versions.Info, &ret.Versions.Extract, &ret.Versions.Thumbs, &ret.Versions.Keyframes,
 	)
 	ret.Fonts = fonts
+	ret.Videos = make([]Video, 0)
+	ret.Audios = make([]Audio, 0)
+	ret.Subtitles = make([]Subtitle, 0)
+	ret.Chapters = make([]Chapter, 0)
 
 	if err == sql.ErrNoRows || (ret.Versions.Info < InfoVersion && ret.Versions.Info != 0) {
 		return s.storeFreshMetadata(path, sha)
