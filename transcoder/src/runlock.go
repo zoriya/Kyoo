@@ -61,3 +61,21 @@ func (r *RunLock[K, V]) Start(key K) (func() (V, error), func(val V, err error) 
 		return val, err
 	}
 }
+
+func (r *RunLock[K, V]) WaitFor(key K) (V, error) {
+	r.lock.Lock()
+	task, ok := r.running[key]
+
+	if !ok {
+		r.lock.Unlock()
+		var val V
+		return val, nil
+	}
+
+	ret := make(chan Result[V])
+	task.listeners = append(task.listeners, ret)
+
+	r.lock.Unlock()
+	res := <-ret
+	return res.ok, res.err
+}
