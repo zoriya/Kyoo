@@ -6,7 +6,7 @@ import (
 )
 
 type Transcoder struct {
-	// All file streams currently running, index is file path
+	// All file streams currently running, index is sha
 	streams         CMap[string, *FileStream]
 	clientChan      chan ClientInfo
 	tracker         *Tracker
@@ -54,6 +54,7 @@ func (t *Transcoder) GetMaster(path string, client string, sha string) (string, 
 	}
 	t.clientChan <- ClientInfo{
 		client: client,
+		sha:    sha,
 		path:   path,
 		video:  nil,
 		audio:  nil,
@@ -76,6 +77,7 @@ func (t *Transcoder) GetVideoIndex(
 	}
 	t.clientChan <- ClientInfo{
 		client: client,
+		sha:    sha,
 		path:   path,
 		video:  &VideoKey{video, quality},
 		audio:  nil,
@@ -97,6 +99,7 @@ func (t *Transcoder) GetAudioIndex(
 	}
 	t.clientChan <- ClientInfo{
 		client: client,
+		sha:    sha,
 		path:   path,
 		audio:  &audio,
 		vhead:  -1,
@@ -119,6 +122,7 @@ func (t *Transcoder) GetVideoSegment(
 	}
 	t.clientChan <- ClientInfo{
 		client: client,
+		sha:    sha,
 		path:   path,
 		video:  &VideoKey{video, quality},
 		vhead:  segment,
@@ -141,6 +145,7 @@ func (t *Transcoder) GetAudioSegment(
 	}
 	t.clientChan <- ClientInfo{
 		client: client,
+		sha:    sha,
 		path:   path,
 		audio:  &audio,
 		ahead:  segment,

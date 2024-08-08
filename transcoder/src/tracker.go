@@ -7,6 +7,7 @@ import (
 
 type ClientInfo struct {
 	client string
+	sha    string
 	path   string
 	video  *VideoKey
 	audio  *uint32
@@ -19,7 +20,7 @@ type Tracker struct {
 	clients map[string]ClientInfo
 	// key: client_id
 	visitDate map[string]time.Time
-	// key: path
+	// key: sha
 	lastUsage     map[string]time.Time
 	transcoder    *Transcoder
 	deletedStream chan string
@@ -56,7 +57,7 @@ func (t *Tracker) start() {
 
 			old, ok := t.clients[info.client]
 			// First fixup the info. Most routes ruturn partial infos
-			if ok && old.path == info.path {
+			if ok && old.sha == info.sha {
 				if info.video == nil {
 					info.video = old.video
 				}
@@ -73,24 +74,24 @@ func (t *Tracker) start() {
 
 			t.clients[info.client] = info
 			t.visitDate[info.client] = time.Now()
-			t.lastUsage[info.path] = time.Now()
+			t.lastUsage[info.sha] = time.Now()
 
 			// now that the new info is stored and fixed, kill old streams
-			if ok && old.path == info.path {
-				if old.audio != info.audio && old.audio != nil {
-					t.KillAudioIfDead(old.path, *old.audio)
+			if ok && old.sha == info.sha {
+				if old.audio != nil && (info.audio == nil || *info.audio != *old.audio) {
+					t.KillAudioIfDead(old.sha, old.path, *old.audio)
 				}
-				if old.video != info.video && old.video != nil {
-					t.KillVideoIfDead(old.path, *old.video)
+				if old.video != nil && (info.video == nil || *info.video != *old.video) {
+					t.KillVideoIfDead(old.sha, old.path, *old.video)
 				}
 				if old.vhead != -1 && Abs(info.vhead-old.vhead) > 100 {
-					t.KillOrphanedHeads(old.path, old.video, nil)
+					t.KillOrphanedHeads(old.sha, old.video, nil)
 				}
 				if old.ahead != -1 && Abs(info.ahead-old.ahead) > 100 {
-					t.KillOrphanedHeads(old.path, nil, old.audio)
+					t.KillOrphanedHeads(old.sha, nil, old.audio)
 				}
 			} else if ok {
-				t.KillStreamIfDead(old.path)
+				t.KillStreamIfDead(old.sha, old.path)
 			}
 
 		case <-timer:
@@ -105,11 +106,11 @@ func (t *Tracker) start() {
 				delete(t.clients, client)
 				delete(t.visitDate, client)
 
-				if !t.KillStreamIfDead(info.path) {
-					audio_cleanup := info.audio != nil && t.KillAudioIfDead(info.path, *info.audio)
-					video_cleanup := info.video != nil && t.KillVideoIfDead(info.path, *info.video)
+				if !t.KillStreamIfDead(info.sha, info.path) {
+					audio_cleanup := info.audio != nil && t.KillAudioIfDead(info.sha, info.path, *info.audio)
+					video_cleanup := info.video != nil && t.KillVideoIfDead(info.sha, info.path, *info.video)
 					if !audio_cleanup || !video_cleanup {
-						t.KillOrphanedHeads(info.path, info.video, info.audio)
+						t.KillOrphanedHeads(info.sha, info.video, info.audio)
 					}
 				}
 			}
@@ -119,46 +120,46 @@ func (t *Tracker) start() {
 	}
 }
 
-func (t *Tracker) KillStreamIfDead(path string) bool {
+func (t *Tracker) KillStreamIfDead(sha string, path string) bool {
 	for _, stream := range t.clients {
-		if stream.path == path {
+		if stream.sha == sha {
 			return false
 		}
 	}
 	log.Printf("Nobody is watching %s. Killing it", path)
 
-	stream, ok := t.transcoder.streams.Get(path)
+	stream, ok := t.transcoder.streams.Get(sha)
 	if !ok {
 		return false
 	}
 	stream.Kill()
 	go func() {
 		time.Sleep(4 * time.Hour)
-		t.deletedStream <- path
+		t.deletedStream <- sha
 	}()
 	return true
 }
 
-func (t *Tracker) DestroyStreamIfOld(path string) {
-	if time.Since(t.lastUsage[path]) < 4*time.Hour {
+func (t *Tracker) DestroyStreamIfOld(sha string) {
+	if time.Since(t.lastUsage[sha]) < 4*time.Hour {
 		return
 	}
-	stream, ok := t.transcoder.streams.GetAndRemove(path)
+	stream, ok := t.transcoder.streams.GetAndRemove(sha)
 	if !ok {
 		return
 	}
 	stream.Destroy()
 }
 
-func (t *Tracker) KillAudioIfDead(path string, audio uint32) bool {
+func (t *Tracker) KillAudioIfDead(sha string, path string, audio uint32) bool {
 	for _, stream := range t.clients {
-		if stream.path == path && stream.audio != nil && *stream.audio == audio {
+		if stream.sha == sha && stream.audio != nil && *stream.audio == audio {
 			return false
 		}
 	}
 	log.Printf("Nobody is listening audio %d of %s. Killing it", audio, path)
 
-	stream, ok := t.transcoder.streams.Get(path)
+	stream, ok := t.transcoder.streams.Get(sha)
 	if !ok {
 		return false
 	}
@@ -170,15 +171,15 @@ func (t *Tracker) KillAudioIfDead(path string, audio uint32) bool {
 	return true
 }
 
-func (t *Tracker) KillVideoIfDead(path string, video VideoKey) bool {
+func (t *Tracker) KillVideoIfDead(sha string, path string, video VideoKey) bool {
 	for _, stream := range t.clients {
-		if stream.path == path && stream.video != nil && *stream.video == video {
+		if stream.sha == sha && stream.video != nil && *stream.video == video {
 			return false
 		}
 	}
 	log.Printf("Nobody is watching %s video %d quality %s. Killing it", path, video.idx, video.quality)
 
-	stream, ok := t.transcoder.streams.Get(path)
+	stream, ok := t.transcoder.streams.Get(sha)
 	if !ok {
 		return false
 	}
@@ -190,8 +191,8 @@ func (t *Tracker) KillVideoIfDead(path string, video VideoKey) bool {
 	return true
 }
 
-func (t *Tracker) KillOrphanedHeads(path string, video *VideoKey, audio *uint32) {
-	stream, ok := t.transcoder.streams.Get(path)
+func (t *Tracker) KillOrphanedHeads(sha string, video *VideoKey, audio *uint32) {
+	stream, ok := t.transcoder.streams.Get(sha)
 	if !ok {
 		return
 	}
@@ -221,9 +222,9 @@ func (t *Tracker) killOrphanedeheads(stream *Stream, is_video bool) {
 
 		distance := int32(99999)
 		for _, info := range t.clients {
-			ihead := info.vhead
+			ihead := info.ahead
 			if is_video {
-				ihead = info.ahead
+				ihead = info.vhead
 			}
 			distance = min(Abs(ihead-head.segment), distance)
 		}
