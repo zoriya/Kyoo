@@ -69,6 +69,16 @@ public class VideoApi : Controller
 		await _Proxy($"{path}/direct");
 	}
 
+	[HttpGet("{path:base64}/direct/{identifier}")]
+	[PartialPermission(Kind.Play)]
+	[ProducesResponseType(StatusCodes.Status206PartialContent)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	public async Task GetDirectStream(string path, string identifier)
+	{
+		await _Proxy($"{path}/direct/{identifier}");
+	}
+
+
 	[HttpGet("{path:base64}/master.m3u8")]
 	[PartialPermission(Kind.Play)]
 	[ProducesResponseType(StatusCodes.Status206PartialContent)]
