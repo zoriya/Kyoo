@@ -3,6 +3,7 @@ package src
 import (
 	"encoding/base64"
 	"fmt"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -14,17 +15,23 @@ var separator = regexp.MustCompile(`[\s.]+`)
 
 func (mi *MediaInfo) SearchExternalSubtitles() error {
 	base_path := strings.TrimSuffix(mi.Path, filepath.Ext(mi.Path))
-	matches, err := filepath.Glob(fmt.Sprintf("%s*", base_path))
+	dir, err := os.ReadDir(filepath.Dir(mi.Path))
 	if err != nil {
 		return err
 	}
 
 outer:
-	for _, match := range matches {
+	for _, entry := range dir {
+		match := filepath.Join(filepath.Dir(mi.Path), entry.Name())
+		if entry.IsDir() || !strings.HasPrefix(match, base_path) {
+			continue
+		}
+
 		for codec, ext := range SubtitleExtensions {
 			if strings.HasSuffix(match, ext) {
 				link := fmt.Sprintf(
-					"%s/direct/%s",
+					"%s/%s/direct/%s",
+					Settings.RoutePrefix,
 					base64.RawURLEncoding.EncodeToString([]byte(match)),
 					filepath.Base(match),
 				)
