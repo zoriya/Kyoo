@@ -7,8 +7,6 @@ import (
 	"os/exec"
 )
 
-var extracted = NewCMap[string, <-chan struct{}]()
-
 const ExtractVersion = 1
 
 func (s *MetadataService) ExtractSubs(info *MediaInfo) (interface{}, error) {
@@ -23,6 +21,18 @@ func (s *MetadataService) ExtractSubs(info *MediaInfo) (interface{}, error) {
 	}
 	_, err = s.database.Exec(`update info set ver_extract = $2 where sha = $1`, info.Sha, ExtractVersion)
 	return set(nil, err)
+}
+
+func (s *MetadataService) GetAttachmentPath(sha string, is_sub bool, name string) (string, error) {
+	_, err := s.extractLock.WaitFor(sha)
+	if err != nil {
+		return "", err
+	}
+	dir := "att"
+	if is_sub {
+		dir = "sub"
+	}
+	return fmt.Sprintf("%s/%s/%s/%s", Settings.Metadata, sha, dir, name), nil
 }
 
 func extractSubs(info *MediaInfo) error {

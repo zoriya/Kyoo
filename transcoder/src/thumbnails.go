@@ -27,8 +27,6 @@ type Thumbnail struct {
 	path  string
 }
 
-var thumbnails = NewCMap[string, *Thumbnail]()
-
 const ThumbsVersion = 1
 
 func getThumbGlob(sha string) string {
