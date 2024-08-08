@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -194,6 +195,10 @@ func (h *Handler) GetInfo(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	err = ret.SearchExternalSubtitles()
+	if err != nil {
+		fmt.Printf("Couldn't find external subtitles: %v", err)
+	}
 	return c.JSON(http.StatusOK, ret)
 }
 
@@ -304,6 +309,7 @@ func main() {
 	}
 
 	e.GET("/:path/direct", DirectStream)
+	e.GET("/:path/direct/:identifier", DirectStream)
 	e.GET("/:path/master.m3u8", h.GetMaster)
 	e.GET("/:path/:video/:quality/index.m3u8", h.GetVideoIndex)
 	e.GET("/:path/audio/:audio/index.m3u8", h.GetAudioIndex)
