@@ -19,6 +19,7 @@
  */
 
 import {
+	type Video,
 	type Audio,
 	type QueryIdentifier,
 	type Subtitle,
@@ -33,8 +34,10 @@ import { useYoshiki } from "yoshiki/native";
 import { Fetch } from "../fetch";
 import { useDisplayName } from "../utils";
 
+const formatBitrate = (b: number) => `${(b / 1000000).toFixed(2)} Mbps`;
+
 const MediaInfoTable = ({
-	mediaInfo: { path, video, container, audios, subtitles, duration, size },
+	mediaInfo: { path, videos, container, audios, subtitles, duration, size },
 }: {
 	mediaInfo: Partial<WatchInfo>;
 }) => {
@@ -42,25 +45,48 @@ const MediaInfoTable = ({
 	const { t } = useTranslation();
 	const { css } = useYoshiki();
 
-	const formatBitrate = (b: number) => `${(b / 1000000).toFixed(2)} Mbps`;
 	const formatTrackTable = (trackTable: (Audio | Subtitle)[], type: "subtitles" | "audio") => {
 		if (trackTable.length === 0) {
 			return undefined;
 		}
 		const singleTrack = trackTable.length === 1;
 		return trackTable.reduce(
-			(collected, audioTrack, index) => {
+			(collected, track, index) => {
 				// If there is only one track, we do not need to show an index
 				collected[singleTrack ? t(`mediainfo.${type}`) : `${t(`mediainfo.${type}`)} ${index + 1}`] =
 					[
-						getDisplayName(audioTrack),
+						getDisplayName(track),
 						// Only show it if there is more than one track
-						audioTrack.isDefault && !singleTrack ? t("mediainfo.default") : undefined,
-						audioTrack.isForced ? t("mediainfo.forced") : undefined,
-						audioTrack.codec,
+						track.isDefault && !singleTrack ? t("mediainfo.default") : undefined,
+						track.isForced ? t("mediainfo.forced") : undefined,
+						"isExternal" in track && track.isExternal ? t("mediainfo.external") : undefined,
+						track.codec,
 					]
 						.filter((x) => x !== undefined)
 						.join(" - ");
+				return collected;
+			},
+			{} as Record<string, string | undefined>,
+		);
+	};
+	const formatVideoTable = (trackTable: Video[]) => {
+		if (trackTable.length === 0) {
+			return { [t("mediainfo.video")]: t("mediainfo.novideo") };
+		}
+		const singleTrack = trackTable.length === 1;
+		return trackTable.reduce(
+			(collected, video, index) => {
+				// If there is only one track, we do not need to show an index
+				collected[singleTrack ? t("mediainfo.video") : `${t("mediainfo.video")} ${index + 1}`] = [
+					getDisplayName(video),
+					`${video.width}x${video.height} (${video.quality})`,
+					formatBitrate(video.bitrate),
+					// Only show it if there is more than one track
+					video.isDefault && !singleTrack ? t("mediainfo.default") : undefined,
+					video.codec,
+				]
+					.filter((x) => x !== undefined)
+					.join(" - ");
 				return collected;
 			},
 			{} as Record<string, string | undefined>,
@@ -74,15 +100,7 @@ const MediaInfoTable = ({
 				[t("mediainfo.duration")]: duration,
 				[t("mediainfo.size")]: size,
 			},
-			{
-				[t("mediainfo.video")]: video
-					? `${video.width}x${video.height} (${video.quality}) - ${formatBitrate(
-							video.bitrate,
-						)} - ${video.codec}`
-					: video === null
-						? t("mediainfo.novideo")
-						: undefined,
-			},
+			videos === undefined ? { [t("mediainfo.video")]: undefined } : formatVideoTable(videos),
 			audios === undefined
 				? { [t("mediainfo.audio")]: undefined }
 				: formatTrackTable(audios, "audio"),
