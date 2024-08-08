@@ -22,6 +22,10 @@ Projects using gocoder:
 - [Blee](https://github.com/Arthi-chaud/Blee)
 - Add your own?
 
+## How does this work?
+
+I did a blog post explaining the core idea, you can find it at [zoriya.dev/blogs/transcoder](https://zoriya.dev/blogs/transcoder).
+
 ## TODO:
 - Add a swagger
 - Add configurable JWT authorization (v5 of kyoo)

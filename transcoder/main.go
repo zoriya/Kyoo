@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -213,7 +212,10 @@ func (h *Handler) GetAttachment(c echo.Context) error {
 		return err
 	}
 
-	ret := fmt.Sprintf("%s/%s/att/%s", src.Settings.Metadata, sha, name)
+	ret, err := h.metadata.GetAttachmentPath(sha, false, name)
+	if err != nil {
+		return err
+	}
 	return c.File(ret)
 }
 
@@ -232,7 +234,10 @@ func (h *Handler) GetSubtitle(c echo.Context) error {
 		return err
 	}
 
-	ret := fmt.Sprintf("%s/%s/sub/%s", src.Settings.Metadata, sha, name)
+	ret, err := h.metadata.GetAttachmentPath(sha, true, name)
+	if err != nil {
+		return err
+	}
 	return c.File(ret)
 }
 
