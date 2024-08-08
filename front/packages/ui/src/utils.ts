@@ -14,6 +14,7 @@ export const useDisplayName = () => {
 		if (lng && sub.title && sub.title !== lng) return `${lng} - ${sub.title}`;
 		if (lng) return lng;
 		if (sub.title) return sub.title;
-		return `Unknown (${sub.index})`;
+		if (sub.index !== null) return `Unknown (${sub.index})`;
+		return "Unknown";
 	};
 };

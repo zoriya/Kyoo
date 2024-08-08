@@ -23,14 +23,42 @@ import { imageFn } from "../traits";
 import { QualityP } from "./quality";
 
 /**
- * A Video track
+ * A audio or subtitle track.
  */
-export const VideoP = z.object({
+export const TrackP = z.object({
 	/**
-	 * The Codec of the Video Track.
-	 * E.g. "AVC"
+	 * The index of this track on the episode.
+	 * NOTE: external subtitles can have a null index
+	 */
+	index: z.number().nullable(),
+	/**
+	 * The title of the stream.
+	 */
+	title: z.string().nullable(),
+	/**
+	 * The language of this stream (as a ISO-639-2 language code)
+	 */
+	language: z.string().nullable(),
+	/**
+	 * The codec of this stream.
 	 */
 	codec: z.string(),
+	/**
+	 * Is this stream the default one of it's type?
+	 */
+	isDefault: z.boolean(),
+	/**
+	 * Is this stream tagged as forced?
+	 * NOTE: not available for videos
+	 */
+	isForced: z.boolean().optional(),
+});
+export type Track = z.infer<typeof TrackP>;
+
+/**
+ * A Video track
+ */
+export const VideoP = TrackP.extend({
 	/**
 	 * The Quality of the Video
 	 * E.g. "1080p"
@@ -55,37 +83,6 @@ export const VideoP = z.object({
 
 export type Video = z.infer<typeof VideoP>;
 
-/**
- * A audio or subtitle track.
- */
-export const TrackP = z.object({
-	/**
-	 * The index of this track on the episode.
-	 */
-	index: z.number(),
-	/**
-	 * The title of the stream.
-	 */
-	title: z.string().nullable(),
-	/**
-	 * The language of this stream (as a ISO-639-2 language code)
-	 */
-	language: z.string().nullable(),
-	/**
-	 * The codec of this stream.
-	 */
-	codec: z.string(),
-	/**
-	 * Is this stream the default one of it's type?
-	 */
-	isDefault: z.boolean(),
-	/**
-	 * Is this stream tagged as forced?
-	 */
-	isForced: z.boolean(),
-});
-export type Track = z.infer<typeof TrackP>;
-
 export const AudioP = TrackP;
 export type Audio = z.infer<typeof AudioP>;
 
@@ -94,6 +91,10 @@ export const SubtitleP = TrackP.extend({
 	 * The url of this track (only if this is a subtitle)..
 	 */
 	link: z.string().transform(imageFn).nullable(),
+	/*
+	 * Is this an external subtitle (as in stored in a different file)
+	 */
+	isExternal: z.boolean(),
 });
 export type Subtitle = z.infer<typeof SubtitleP>;
 
@@ -152,7 +153,7 @@ export const WatchInfoP = z
 		/**
 		 * The video track.
 		 */
-		video: VideoP.nullable(),
+		videos: z.array(VideoP),
 		/**
 		 * The list of audio tracks.
 		 */
