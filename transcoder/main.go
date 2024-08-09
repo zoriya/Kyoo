@@ -195,6 +195,10 @@ func (h *Handler) GetInfo(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	err = ret.SearchExternalSubtitles()
+	if err != nil {
+		fmt.Printf("Couldn't find external subtitles: %v", err)
+	}
 	return c.JSON(http.StatusOK, ret)
 }
 
@@ -213,7 +217,10 @@ func (h *Handler) GetAttachment(c echo.Context) error {
 		return err
 	}
 
-	ret := fmt.Sprintf("%s/%s/att/%s", src.Settings.Metadata, sha, name)
+	ret, err := h.metadata.GetAttachmentPath(sha, false, name)
+	if err != nil {
+		return err
+	}
 	return c.File(ret)
 }
 
@@ -232,7 +239,10 @@ func (h *Handler) GetSubtitle(c echo.Context) error {
 		return err
 	}
 
-	ret := fmt.Sprintf("%s/%s/sub/%s", src.Settings.Metadata, sha, name)
+	ret, err := h.metadata.GetAttachmentPath(sha, true, name)
+	if err != nil {
+		return err
+	}
 	return c.File(ret)
 }
 
@@ -299,6 +309,7 @@ func main() {
 	}
 
 	e.GET("/:path/direct", DirectStream)
+	e.GET("/:path/direct/:identifier", DirectStream)
 	e.GET("/:path/master.m3u8", h.GetMaster)
 	e.GET("/:path/:video/:quality/index.m3u8", h.GetVideoIndex)
 	e.GET("/:path/audio/:audio/index.m3u8", h.GetAudioIndex)

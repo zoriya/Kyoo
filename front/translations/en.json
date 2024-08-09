@@ -260,6 +260,7 @@
 		"subtitles": "Subtitles",
 		"forced": "Forced",
 		"default": "Default",
+		"external": "External",
 		"duration": "Duration",
 		"size": "Size",
 		"novideo": "No video",
