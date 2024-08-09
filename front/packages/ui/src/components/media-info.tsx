@@ -19,10 +19,10 @@
  */
 
 import {
-	type Video,
 	type Audio,
 	type QueryIdentifier,
 	type Subtitle,
+	type Video,
 	type WatchInfo,
 	WatchInfoP,
 } from "@kyoo/models";
