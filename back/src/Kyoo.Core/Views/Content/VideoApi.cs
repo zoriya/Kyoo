@@ -78,7 +78,6 @@ public class VideoApi : Controller
 		await _Proxy($"{path}/direct/{identifier}");
 	}
 
-
 	[HttpGet("{path:base64}/master.m3u8")]
 	[PartialPermission(Kind.Play)]
 	[ProducesResponseType(StatusCodes.Status206PartialContent)]
