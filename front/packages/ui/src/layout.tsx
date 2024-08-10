@@ -19,6 +19,7 @@
  */
 
 import { Main } from "@kyoo/primitives";
+import { LinearGradient } from "expo-linear-gradient";
 import type { ReactElement } from "react";
 import { useYoshiki, vw } from "yoshiki/native";
 import { Navbar } from "./navbar";
@@ -30,8 +31,7 @@ export const DefaultLayout = ({
 	page: ReactElement;
 	transparent?: boolean;
 }) => {
-	const { css } = useYoshiki();
-
+	const { css, theme } = useYoshiki();
 	return (
 		<>
 			<Navbar
@@ -45,6 +45,22 @@ export const DefaultLayout = ({
 						shadowOpacity: 0,
 					},
 				)}
+				background={
+					transparent ? (
+						<LinearGradient
+							start={{ x: 0, y: 0.25 }}
+							end={{ x: 0, y: 1 }}
+							colors={[theme.themeOverlay, "transparent"]}
+							{...css({
+								height: "100%",
+								position: "absolute",
+								top: 0,
+								left: 0,
+								right: 0,
+							})}
+						/>
+					) : undefined
+				}
 			/>
 			<Main
 				{...css({

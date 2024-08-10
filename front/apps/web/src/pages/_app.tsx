@@ -201,7 +201,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 												{...props}
 											/>
 										</ConnectionErrorVerifier>
-										<Tooltip id="tooltip" positionStrategy={"fixed"} />
+										<Tooltip id="tooltip" style={{ zIndex: 10 }} positionStrategy={"fixed"} />
 										<SetupChecker />
 									</SnackbarProvider>
 								</PortalProvider>
