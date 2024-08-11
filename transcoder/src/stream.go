@@ -255,23 +255,24 @@ func (ts *Stream) run(start int32) error {
 	)
 	args = append(args, ts.handle.getTranscodeArgs(toSegmentStr(segments))...)
 	args = append(args,
-		"-f", "segment",
-		// needed for rounding issues when forcing keyframes
-		// recommended value is 1/(2*frame_rate), which for a 24fps is ~0.021
-		// we take a little bit more than that to be extra safe but too much can be harmfull
-		// when segments are short (can make the video repeat itself)
-		"-segment_time_delta", "0.05",
-		"-segment_format", "mpegts",
-		"-segment_times", toSegmentStr(Map(segments, func(seg float64, _ int) float64 {
-			// segment_times want durations, not timestamps so we must substract the -ss param
-			// since we give a greater value to -ss to prevent wrong seeks but -segment_times
-			// needs precise segments, we use the keyframe we want to seek to as a reference.
-			return seg - ts.keyframes.Get(start_segment)
-		})),
-		"-segment_list_type", "flat",
-		"-segment_list", "pipe:1",
-		"-segment_start_number", fmt.Sprint(start_segment),
-		outpath,
+		"-f", "hls",
+		// we can't list cut times w/ hls but
+		//  - -hls_time will be cut on the next key frame after the time has passed
+		//  - we specify keyframes in transcode with -force_key_frames
+		//  - we know keyframes time of the transmux stream
+		// to unsure we don't have issues, the keyframe retriver needs to ignore
+		// sequentials keyframes closer than OptimalFragmentDuration.
+		//
+		// audio is simpler since we always cut at OptimalFragmentDuration
+		"-hls_time", fmt.Sprint(OptimalFragmentDuration),
+		"-start_number", fmt.Sprint(start_segment),
+		"-hls_segment_type", "mpegts",
+		"-hls_segment_filename", fmt.Sprintf("%s/%s", outpath, fmt.Sprintf(SegmentNameFormat, encoder_id)),
+		// Make the playlist easier to parse in our program by only outputing 1 segment and no endlist marker
+		// anyways this list is only read once and we generate our own.
+		"-hls_list_size", "1",
+		"-hls_flags", "omit_endlist",
+		"-",
 	)
 
 	cmd := exec.Command("ffmpeg", args...)
@@ -298,8 +299,14 @@ func (ts *Stream) run(start int32) error {
 		should_stop := false
 
 		for scanner.Scan() {
+			line := scanner.Text()
+			// ignore m3u8 infos, we only want to know when segments are ready.
+			if line[0] == '#' {
+				continue
+			}
+
 			var segment int32
-			_, _ = fmt.Sscanf(scanner.Text(), format, &segment)
+			_, _ = fmt.Sscanf(line, format, &segment)
 
 			if segment < start {
 				// This happen because we use -f segments for accurate cutting (since -ss is not)
