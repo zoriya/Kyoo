@@ -83,8 +83,8 @@ func (s *MetadataService) GetMetadata(path string, sha string) (*MediaInfo, erro
 		if err != nil {
 			return nil, err
 		}
-		tx.Exec(`update videos set keyframes = nil where sha = $1`, sha)
-		tx.Exec(`update audios set keyframes = nil where sha = $1`, sha)
+		tx.Exec(`update videos set keyframes = null where sha = $1`, sha)
+		tx.Exec(`update audios set keyframes = null where sha = $1`, sha)
 		tx.Exec(`update info set ver_keyframes = 0 where sha = $1`, sha)
 		err = tx.Commit()
 		if err != nil {
