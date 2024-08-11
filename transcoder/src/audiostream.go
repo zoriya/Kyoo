@@ -24,8 +24,8 @@ func (t *Transcoder) NewAudioStream(file *FileStream, idx uint32) (*AudioStream,
 	return ret, nil
 }
 
-func (as *AudioStream) getOutPath(encoder_id int) string {
-	return fmt.Sprintf("%s/segment-a%d-%d-%%d.ts", as.file.Out, as.index, encoder_id)
+func (as *AudioStream) getIdentifier() string {
+	return fmt.Sprintf("a%d", as.index)
 }
 
 func (as *AudioStream) getFlags() Flags {

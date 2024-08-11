@@ -8,7 +8,6 @@ import (
 	"math"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"slices"
 	"strings"
 	"sync"
@@ -23,9 +22,12 @@ const (
 	Transmux Flags = 1 << 3
 )
 
+// First %d is encoder_id, second %d is segment number (escaped for ffmpeg)
+const SegmentNameFormat = "%d-segment-%%d.ts"
+
 type StreamHandle interface {
 	getTranscodeArgs(segments string) []string
-	getOutPath(encoder_id int) string
+	getIdentifier() string
 	getFlags() Flags
 }
 
@@ -200,8 +202,8 @@ func (ts *Stream) run(start int32) error {
 		segments = []float64{9999999}
 	}
 
-	outpath := ts.handle.getOutPath(encoder_id)
-	err := os.MkdirAll(filepath.Dir(outpath), 0o755)
+	outpath := fmt.Sprintf("%s/%s", ts.file.Out, ts.handle.getIdentifier())
+	err := os.MkdirAll(outpath, 0o755)
 	if err != nil {
 		return err
 	}
@@ -292,7 +294,7 @@ func (ts *Stream) run(start int32) error {
 
 	go func() {
 		scanner := bufio.NewScanner(stdout)
-		format := filepath.Base(outpath)
+		format := fmt.Sprintf(SegmentNameFormat, encoder_id)
 		should_stop := false
 
 		for scanner.Scan() {
@@ -310,7 +312,7 @@ func (ts *Stream) run(start int32) error {
 			if ts.isSegmentReady(segment) {
 				// the current segment is already marked at done so another process has already gone up to here.
 				cmd.Process.Signal(os.Interrupt)
-				log.Printf("Killing ffmpeg because segment %d is already ready", segment)
+				log.Printf("Killing ffmpeg %s-%d because segment %d is already ready", ts.handle.getIdentifier(), encoder_id, segment)
 				should_stop = true
 			} else {
 				ts.segments[segment].encoder = encoder_id
@@ -320,7 +322,7 @@ func (ts *Stream) run(start int32) error {
 					should_stop = true
 				} else if ts.isSegmentReady(segment + 1) {
 					cmd.Process.Signal(os.Interrupt)
-					log.Printf("Killing ffmpeg because next segment %d is ready", segment)
+					log.Printf("Killing ffmpeg %s-%d because next segment %d is ready", ts.handle.getIdentifier(), encoder_id, segment)
 					should_stop = true
 				}
 			}
@@ -340,11 +342,11 @@ func (ts *Stream) run(start int32) error {
 	go func() {
 		err := cmd.Wait()
 		if exiterr, ok := err.(*exec.ExitError); ok && exiterr.ExitCode() == 255 {
-			log.Printf("ffmpeg %d was killed by us", encoder_id)
+			log.Printf("ffmpeg %s-%d was killed by us", ts.handle.getIdentifier(), encoder_id)
 		} else if err != nil {
-			log.Printf("ffmpeg %d occured an error: %s: %s", encoder_id, err, stderr.String())
+			log.Printf("ffmpeg %s-%d occured an error: %s: %s", ts.handle.getIdentifier(), encoder_id, err, stderr.String())
 		} else {
-			log.Printf("ffmpeg %d finished successfully", encoder_id)
+			log.Printf("ffmpeg %s-%d finished successfully", ts.handle.getIdentifier(), encoder_id)
 		}
 
 		ts.lock.Lock()
@@ -420,7 +422,15 @@ func (ts *Stream) GetSegment(segment int32) (string, error) {
 		}
 	}
 	ts.prerareNextSegements(segment)
-	return fmt.Sprintf(ts.handle.getOutPath(ts.segments[segment].encoder), segment), nil
+	return fmt.Sprintf(
+		"%s/%s/%s",
+		ts.file.Out,
+		ts.handle.getIdentifier(),
+		fmt.Sprintf(
+			fmt.Sprintf(SegmentNameFormat, ts.segments[segment].encoder),
+			segment,
+		),
+	), nil
 }
 
 func (ts *Stream) prerareNextSegements(segment int32) {
