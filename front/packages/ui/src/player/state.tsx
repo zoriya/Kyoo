@@ -20,7 +20,7 @@
 
 import { type Audio, type Episode, type Subtitle, getLocalSetting, useAccount } from "@kyoo/models";
 import { useSnackbar } from "@kyoo/primitives";
-import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { atom, useAtom, useAtomValue, useSetAtom, getDefaultStore } from "jotai";
 import { useAtomCallback } from "jotai/utils";
 import {
 	type ElementRef,
@@ -239,6 +239,7 @@ export const Video = memo(function Video({
 			showNotificationControls
 			playInBackground
 			playWhenInactive
+			disableDisconnectError
 			paused={!isPlaying}
 			muted={isMuted}
 			volume={volume}
@@ -252,7 +253,10 @@ export const Video = memo(function Video({
 				setPrivateProgress(progress.currentTime);
 				setBuffered(progress.playableDuration);
 			}}
-			onPlaybackStateChanged={(state) => setPlay(state.isPlaying)}
+			onPlaybackStateChanged={(state) => {
+				if (state.isSeeking || getDefaultStore().get(loadAtom)) return;
+				setPlay(state.isPlaying);
+			}}
 			fonts={fonts}
 			subtitles={subtitles}
 			onMediaUnsupported={() => {
