@@ -15,10 +15,7 @@
 		"format": "biome format .",
 		"format:fix": "biome format . --write"
 	},
-	"workspaces": [
-		"apps/*",
-		"packages/*"
-	],
+	"workspaces": ["apps/*", "packages/*"],
 	"devDependencies": {
 		"@biomejs/biome": "1.8.3",
 		"typescript": "5.5.4"

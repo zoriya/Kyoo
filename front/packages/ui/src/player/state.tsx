@@ -20,7 +20,7 @@
 
 import { type Audio, type Episode, type Subtitle, getLocalSetting, useAccount } from "@kyoo/models";
 import { useSnackbar } from "@kyoo/primitives";
-import { atom, useAtom, useAtomValue, useSetAtom, getDefaultStore } from "jotai";
+import { atom, getDefaultStore, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useAtomCallback } from "jotai/utils";
 import {
 	type ElementRef,
@@ -33,7 +33,7 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
-import NativeVideo, { canPlay, VideoMetadata, type VideoProps } from "./video";
+import NativeVideo, { canPlay, type VideoMetadata, type VideoProps } from "./video";
 
 export const playAtom = atom(true);
 export const loadAtom = atom(false);

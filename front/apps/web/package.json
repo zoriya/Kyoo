@@ -2,9 +2,7 @@
 	"name": "web",
 	"version": "0.1.0",
 	"private": true,
-	"sideEffects": [
-		"./src/polyfill.ts"
-	],
+	"sideEffects": ["./src/polyfill.ts"],
 	"scripts": {
 		"dev": "next dev",
 		"build": "next build",
