@@ -33,7 +33,7 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
-import NativeVideo, { canPlay, type VideoProps } from "./video";
+import NativeVideo, { canPlay, VideoMetadata, type VideoProps } from "./video";
 
 export const playAtom = atom(true);
 export const loadAtom = atom(false);
@@ -114,14 +114,7 @@ export const Video = memo(function Video({
 	setError: (error: string | undefined) => void;
 	fonts?: string[];
 	startTime?: number | null;
-	metadata: {
-		title?: string;
-		subtitle?: string;
-		description?: string;
-		imageUri?: string;
-		previous?: string;
-		next?: string;
-	};
+	metadata: VideoMetadata & { next?: string; previous?: string };
 } & Partial<VideoProps>) {
 	const ref = useRef<ElementRef<typeof NativeVideo> | null>(null);
 	const [isPlaying, setPlay] = useAtom(playAtom);
