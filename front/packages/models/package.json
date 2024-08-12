@@ -6,7 +6,7 @@
 	"packageManager": "yarn@3.2.4",
 	"devDependencies": {
 		"react-native-mmkv": "^2.12.2",
-		"typescript": "^5.4.5"
+		"typescript": "^5.5.4"
 	},
 	"peerDependencies": {
 		"@tanstack/react-query": "*",
