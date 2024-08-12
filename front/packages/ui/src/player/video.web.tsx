@@ -246,8 +246,8 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 				onLoadedMetadata={() => {
 					if (source.startPosition) setProgress(source.startPosition / 1000);
 				}}
-				onPlay={() => onPlaybackStateChanged?.({ isPlaying: true })}
-				onPause={() => onPlaybackStateChanged?.({ isPlaying: false })}
+				onPlay={() => onPlaybackStateChanged?.({ isPlaying: true, isSeeking: false })}
+				onPause={() => onPlaybackStateChanged?.({ isPlaying: false, isSeeking: false })}
 				onEnded={onEnd}
 				{...css({ width: "100%", height: "100%", objectFit: "contain" })}
 			/>
