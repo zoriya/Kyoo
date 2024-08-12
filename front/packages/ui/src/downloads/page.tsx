@@ -40,7 +40,7 @@ import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
 import { type Atom, useAtomValue } from "jotai";
 import { useTranslation } from "react-i18next";
-import { type ImageStyle, View } from "react-native";
+import { View } from "react-native";
 import { percent, useYoshiki } from "yoshiki/native";
 import { EpisodeLine, displayRuntime, episodeDisplayNumber } from "../details/episode";
 import { EmptyView } from "../fetch";

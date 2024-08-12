@@ -146,7 +146,7 @@ export const Player = ({
 				<Video
 					metadata={{
 						title: title ?? t("show.episodeNoMetadata"),
-						subtitle: subtitle ?? undefined,
+						artist: subtitle ?? undefined,
 						description: data?.overview ?? undefined,
 						imageUri: image?.medium,
 						next: next,

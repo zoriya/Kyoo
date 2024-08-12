@@ -51,8 +51,14 @@ const nextConfig = {
 			alias: {
 				...config.resolve.alias,
 				"react-native$": "react-native-web",
-				"react-native/Libraries/Image/AssetRegistry$":
-					"react-native-web/dist/modules/AssetRegistry",
+				// "react-native/Libraries/Image/AssetRegistry$":
+				// 	"react-native-web/dist/modules/AssetRegistry",
+				"react-native/Libraries/EventEmitter/RCTDeviceEventEmitter$":
+					"react-native-web/dist/vendor/react-native/NativeEventEmitter/RCTDeviceEventEmitter",
+				"react-native/Libraries/vendor/emitter/EventEmitter$":
+					"react-native-web/dist/vendor/react-native/emitter/EventEmitter",
+				"react-native/Libraries/EventEmitter/NativeEventEmitter$":
+					"react-native-web/dist/vendor/react-native/NativeEventEmitter",
 			},
 			extensions: [".web.ts", ".web.tsx", ".web.js", ".web.jsx", ...config.resolve.extensions],
 		};
@@ -94,6 +100,7 @@ const nextConfig = {
 		"@kyoo/ui",
 		"@kyoo/primitives",
 		"@kyoo/models",
+		"@react-native/assets-registry",
 		"solito",
 		"react-native",
 		"react-native-web",

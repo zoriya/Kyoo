@@ -56,10 +56,6 @@ const config: ExpoConfig = {
 			backgroundColor: "#eff1f5",
 		},
 		splash,
-		permissions: [
-			"android.permission.FOREGROUND_SERVICE",
-			"android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
-		],
 	},
 	updates: {
 		url: "https://u.expo.dev/55de6b52-c649-4a15-9a45-569ff5ed036c",
@@ -73,27 +69,16 @@ const config: ExpoConfig = {
 			projectId: "55de6b52-c649-4a15-9a45-569ff5ed036c",
 		},
 	},
-	plugins: ["expo-build-properties", "expo-localization"],
-};
-
-const withForegroundService = (c: ExpoConfig): ExpoConfig => {
-	return withAndroidManifest(c, async (config) => {
-		const manifest = config.modResults.manifest;
-		manifest.application![0].service ??= [];
-		manifest.application![0].service.push({
-			$: {
-				"android:name": "com.brentvatne.exoplayer.VideoPlaybackService",
-				"android:exported": "false",
-				"android:foregroundServiceType": "mediaPlayback",
+	plugins: [
+		"expo-build-properties",
+		"expo-localization",
+		[
+			"react-native-video",
+			{
+				enableNotificationControls: true,
 			},
-			"intent-filter": [
-				{
-					action: [{ $: { "android:name": "androidx.media3.session.MediaSessionService" } }],
-				},
-			],
-		});
-		return config;
-	});
+		],
+	],
 };
 
-export default withForegroundService(config);
+export default config;
