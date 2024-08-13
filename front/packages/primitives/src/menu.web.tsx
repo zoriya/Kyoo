@@ -157,6 +157,12 @@ const MenuItem = forwardRef<
 			<style jsx global>{`
 				[data-highlighted] {
 					background: ${theme.variant.accent};
+					svg {
+						fill: ${theme.alternate.contrast};
+					}
+					div {
+						color: ${theme.alternate.contrast};
+					}
 				}
 			`}</style>
 			<Item
