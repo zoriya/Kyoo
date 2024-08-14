@@ -24,6 +24,8 @@ global:
   postgres:
     #infra is only used by subchart deployment
     infra:
+      # subchart does not accept this global value in one place
+      # if updating be sure to also update postgresql.auth.username
       user: kyoo_all
       passwordKey: postgres_password
       existingSecret: bigsecret
@@ -327,8 +329,8 @@ meilisearch:
 postgresql:
   enabled: false
   auth:
-    # create a user
-    username: "{{ .Values.global.postgres.infra.user }}"
+    # username is unable to reference global value
+    username: kyoo_all 
     existingSecret: "{{ .Values.global.postgres.infra.existingSecret }}"
     secretKeys:
       # set the postgres user password to the same as our user
