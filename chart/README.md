@@ -47,7 +47,7 @@ extraObjects:
       #RESOURCES
       # meilisearch does not allow mapping their key in yet.
       MEILI_MASTER_KEY: barkLike8SuperDucks
-      postgres_user: kyoo_back
+      postgres_user: kyoo_all
       postgres_password: watchSomething4me
       rabbitmq_user: kyoo_all
       rabbitmq_password: youAreAmazing2

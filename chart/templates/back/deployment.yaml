@@ -50,19 +50,19 @@ spec:
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.postgres.kyoo_migrations.userKey }}
-                  name: {{ .Values.global.postgres.kyoo_migrations.existingSecret }}
+                  key: {{ .Values.global.postgres.kyoo_back.kyoo_migrations.userKey }}
+                  name: {{ .Values.global.postgres.kyoo_back.kyoo_migrations.existingSecret }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.postgres.kyoo_migrations.passwordKey }}
-                  name: {{ .Values.global.postgres.kyoo_migrations.existingSecret }}
+                  key: {{ .Values.global.postgres.kyoo_back.kyoo_migrations.passwordKey }}
+                  name: {{ .Values.global.postgres.kyoo_back.kyoo_migrations.existingSecret }}
             - name: POSTGRES_DB
-              value: {{ .Values.global.postgres.database }}
+              value: {{ .Values.global.postgres.kyoo_back.database }}
             - name: POSTGRES_SERVER
-              value: {{ .Values.global.postgres.host }}
+              value: {{ .Values.global.postgres.kyoo_back.host }}
             - name: POSTGRES_PORT
-              value: "{{ .Values.global.postgres.port }}"
+              value: "{{ .Values.global.postgres.kyoo_back.port }}"
         {{- with .Values.back.extraInitContainers }}
           {{- tpl (toYaml .) $ | nindent 6 }}
         {{- end }}
@@ -89,19 +89,19 @@ spec:
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.postgres.kyoo_back.userKey }}
-                  name: {{ .Values.global.postgres.kyoo_back.existingSecret }}
+                  key: {{ .Values.global.postgres.kyoo_back.kyoo_back.userKey }}
+                  name: {{ .Values.global.postgres.kyoo_back.kyoo_back.existingSecret }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.postgres.kyoo_back.passwordKey }}
-                  name: {{ .Values.global.postgres.kyoo_back.existingSecret }}
+                  key: {{ .Values.global.postgres.kyoo_back.kyoo_back.passwordKey }}
+                  name: {{ .Values.global.postgres.kyoo_back.kyoo_back.existingSecret }}
             - name: POSTGRES_DB
-              value: {{ .Values.global.postgres.database }}
+              value: {{ .Values.global.postgres.kyoo_back.database }}
             - name: POSTGRES_SERVER
-              value: {{ .Values.global.postgres.host }}
+              value: {{ .Values.global.postgres.kyoo_back.host }}
             - name: POSTGRES_PORT
-              value: "{{ .Values.global.postgres.port }}"
+              value: "{{ .Values.global.postgres.kyoo_back.port }}"
             - name: RABBITMQ_DEFAULT_USER
               valueFrom:
                 secretKeyRef:

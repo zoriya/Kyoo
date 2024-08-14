@@ -22,23 +22,31 @@ global:
       masterkeyKey: MEILI_MASTER_KEY
       existingSecret: bigsecret
   postgres:
-    host: kyoo-postgresql
-    port: 5432
-    database: kyoo_back
     #infra is only used by subchart deployment
     infra:
-      # admin user is postgres
-      # default user is the database name
-      passwordKey: postgres_password
-      existingSecret: bigsecret
-    kyoo_migrations:
-      userKey: postgres_user
+      user: kyoo_all
       passwordKey: postgres_password
       existingSecret: bigsecret
     kyoo_back:
-      userKey: postgres_user
-      passwordKey: postgres_password
-      existingSecret: bigsecret
+      host: kyoo-postgresql
+      port: 5432
+      database: kyoo_back
+      kyoo_migrations:
+        userKey: postgres_user
+        passwordKey: postgres_password
+        existingSecret: bigsecret
+      kyoo_back:
+        userKey: postgres_user
+        passwordKey: postgres_password
+        existingSecret: bigsecret
+    kyoo_transcoder:
+      host: kyoo-postgresql
+      port: 5432
+      database: kyoo_transcoder
+      kyoo_transcoder:
+        userKey: postgres_user
+        passwordKey: postgres_password
+        existingSecret: bigsecret
   rabbitmq:
     host: kyoo-rabbitmq
     port: 5672
@@ -319,15 +327,31 @@ meilisearch:
 postgresql:
   enabled: false
   auth:
-    # this does not read from a secret.  not sure how to map
-    # just manually make the same
-    username: "kyoo_back"
-    database: "{{ .Values.global.postgres.database }}"
+    # create a user
+    username: "{{ .Values.global.postgres.infra.user }}"
     existingSecret: "{{ .Values.global.postgres.infra.existingSecret }}"
     secretKeys:
+      # set the postgres user password to the same as our user
       adminPasswordKey: "{{ .Values.global.postgres.infra.passwordKey }}"
       userPasswordKey: "{{ .Values.global.postgres.infra.passwordKey }}"
   primary:
+    # create databases, schemas, and set search_path
+    initdb:
+      scripts:
+        # kyoo_back still requires public schema
+        # https://github.com/zoriya/Kyoo/issues/536
+        kyoo_back.sql: |
+          CREATE DATABASE {{ .Values.global.postgres.kyoo_back.database }} WITH OWNER {{ .Values.global.postgres.infra.user }}; 
+          \connect {{ .Values.global.postgres.kyoo_back.database }};
+          CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
+        kyoo_transcoder.sql: |
+          CREATE DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} WITH OWNER {{ .Values.global.postgres.infra.user }};
+          \connect {{ .Values.global.postgres.kyoo_transcoder.database }};
+          REVOKE ALL ON SCHEMA public FROM PUBLIC;
+          CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
+        user.sql: |
+          ALTER ROLE {{ .Values.global.postgres.infra.user }} IN DATABASE {{ .Values.global.postgres.kyoo_back.database }} SET search_path TO "$user", public;
+          ALTER ROLE {{ .Values.global.postgres.infra.user }} IN DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} SET search_path TO "$user", data;
     persistence:
       size: 3Gi
 
