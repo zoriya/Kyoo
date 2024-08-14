@@ -350,8 +350,10 @@ postgresql:
           REVOKE ALL ON SCHEMA public FROM PUBLIC;
           CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
         user.sql: |
-          ALTER ROLE {{ .Values.global.postgres.infra.user }} IN DATABASE {{ .Values.global.postgres.kyoo_back.database }} SET search_path TO "$user", public;
-          ALTER ROLE {{ .Values.global.postgres.infra.user }} IN DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} SET search_path TO "$user", data;
+          ALTER ROLE {{ .Values.global.postgres.infra.user }} 
+          IN DATABASE {{ .Values.global.postgres.kyoo_back.database }} SET search_path TO "$user", public;
+          ALTER ROLE {{ .Values.global.postgres.infra.user }} 
+          IN DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} SET search_path TO "$user", data;
     persistence:
       size: 3Gi
 
