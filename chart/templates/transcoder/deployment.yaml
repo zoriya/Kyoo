@@ -59,6 +59,22 @@ spec:
               value: /video
             - name: GOCODER_SAFE_PATH
               value: /data
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.userKey }}
+                  name: {{ .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.existingSecret }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.passwordKey }}
+                  name: {{ .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.existingSecret }}
+            - name: POSTGRES_DB
+              value: {{ .Values.global.postgres.kyoo_transcoder.database }}
+            - name: POSTGRES_SERVER
+              value: {{ .Values.global.postgres.kyoo_transcoder.host }}
+            - name: POSTGRES_PORT
+              value: "{{ .Values.global.postgres.kyoo_transcoder.port }}"
             {{- with (concat .Values.global.extraEnv .Values.transcoder.kyoo_transcoder.extraEnv) }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
