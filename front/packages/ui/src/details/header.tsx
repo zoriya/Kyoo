@@ -329,7 +329,7 @@ export const TitleLine = ({
 						<View
 							{...css({ flexDirection: "row", alignItems: "center", justifyContent: "center" })}
 						>
-							{rating !== null && (
+							{rating !== null && rating !== 0 && (
 								<>
 									<DottedSeparator
 										{...css({ color: { xs: theme.user.contrast, md: theme.colors.white } })}

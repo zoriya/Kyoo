@@ -20,7 +20,7 @@
 
 import { type Audio, type Episode, type Subtitle, getLocalSetting, useAccount } from "@kyoo/models";
 import { useSnackbar } from "@kyoo/primitives";
-import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { atom, getDefaultStore, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useAtomCallback } from "jotai/utils";
 import {
 	type ElementRef,
@@ -33,7 +33,7 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
-import NativeVideo, { canPlay, type VideoProps } from "./video";
+import NativeVideo, { canPlay, type VideoMetadata, type VideoProps } from "./video";
 
 export const playAtom = atom(true);
 export const loadAtom = atom(false);
@@ -114,13 +114,7 @@ export const Video = memo(function Video({
 	setError: (error: string | undefined) => void;
 	fonts?: string[];
 	startTime?: number | null;
-	metadata: {
-		title?: string;
-		description?: string;
-		imageUri?: string;
-		previous?: string;
-		next?: string;
-	};
+	metadata: VideoMetadata & { next?: string; previous?: string };
 } & Partial<VideoProps>) {
 	const ref = useRef<ElementRef<typeof NativeVideo> | null>(null);
 	const [isPlaying, setPlay] = useAtom(playAtom);
@@ -238,6 +232,7 @@ export const Video = memo(function Video({
 			showNotificationControls
 			playInBackground
 			playWhenInactive
+			disableDisconnectError
 			paused={!isPlaying}
 			muted={isMuted}
 			volume={volume}
@@ -251,7 +246,10 @@ export const Video = memo(function Video({
 				setPrivateProgress(progress.currentTime);
 				setBuffered(progress.playableDuration);
 			}}
-			onPlaybackStateChanged={(state) => setPlay(state.isPlaying)}
+			onPlaybackStateChanged={(state) => {
+				if (state.isSeeking || getDefaultStore().get(loadAtom)) return;
+				setPlay(state.isPlaying);
+			}}
 			fonts={fonts}
 			subtitles={subtitles}
 			onMediaUnsupported={() => {

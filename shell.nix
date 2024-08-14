@@ -37,6 +37,7 @@ in
       pgformatter
       biome
       kubernetes-helm
+      go-migrate
     ];
 
     DOTNET_ROOT = "${dotnet}";

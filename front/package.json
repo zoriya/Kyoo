@@ -17,8 +17,8 @@
 	},
 	"workspaces": ["apps/*", "packages/*"],
 	"devDependencies": {
-		"@biomejs/biome": "1.7.3",
-		"typescript": "5.4.5"
+		"@biomejs/biome": "1.8.3",
+		"typescript": "5.5.4"
 	},
 	"packageManager": "yarn@3.2.4"
 }

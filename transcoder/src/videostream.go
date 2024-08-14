@@ -7,15 +7,34 @@ import (
 
 type VideoStream struct {
 	Stream
+	video   *Video
 	quality Quality
 }
 
-func NewVideoStream(file *FileStream, quality Quality) *VideoStream {
-	log.Printf("Creating a new video stream for %s in quality %s", file.Path, quality)
+func (t *Transcoder) NewVideoStream(file *FileStream, idx uint32, quality Quality) (*VideoStream, error) {
+	log.Printf(
+		"Creating a new video stream for %s (n %d) in quality %s",
+		file.Info.Path,
+		idx,
+		quality,
+	)
+
+	keyframes, err := t.metadataService.GetKeyframes(file.Info, true, idx)
+	if err != nil {
+		return nil, err
+	}
+
 	ret := new(VideoStream)
 	ret.quality = quality
-	NewStream(file, ret, &ret.Stream)
-	return ret
+	for _, video := range file.Info.Videos {
+		if video.Index == idx {
+			ret.video = &video
+			break
+		}
+	}
+
+	NewStream(file, keyframes, ret, &ret.Stream)
+	return ret, nil
 }
 
 func (vs *VideoStream) getFlags() Flags {
@@ -41,7 +60,7 @@ func closestMultiple(n int32, x int32) int32 {
 
 func (vs *VideoStream) getTranscodeArgs(segments string) []string {
 	args := []string{
-		"-map", "0:V:0",
+		"-map", fmt.Sprintf("0:V:%d", vs.video.Index),
 	}
 
 	if vs.quality == Original {
@@ -52,7 +71,7 @@ func (vs *VideoStream) getTranscodeArgs(segments string) []string {
 	}
 
 	args = append(args, Settings.HwAccel.EncodeFlags...)
-	width := int32(float64(vs.quality.Height()) / float64(vs.file.Info.Video.Height) * float64(vs.file.Info.Video.Width))
+	width := int32(float64(vs.quality.Height()) / float64(vs.video.Height) * float64(vs.video.Width))
 	// force a width that is a multiple of two else some apps behave badly.
 	width = closestMultiple(width, 2)
 	args = append(args,

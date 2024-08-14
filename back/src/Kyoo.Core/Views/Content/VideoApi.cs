@@ -69,6 +69,15 @@ public class VideoApi : Controller
 		await _Proxy($"{path}/direct");
 	}
 
+	[HttpGet("{path:base64}/direct/{identifier}")]
+	[PartialPermission(Kind.Play)]
+	[ProducesResponseType(StatusCodes.Status206PartialContent)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	public async Task GetDirectStream(string path, string identifier)
+	{
+		await _Proxy($"{path}/direct/{identifier}");
+	}
+
 	[HttpGet("{path:base64}/master.m3u8")]
 	[PartialPermission(Kind.Play)]
 	[ProducesResponseType(StatusCodes.Status206PartialContent)]
@@ -78,18 +87,18 @@ public class VideoApi : Controller
 		await _Proxy($"{path}/master.m3u8");
 	}
 
-	[HttpGet("{path:base64}/{quality}/index.m3u8")]
+	[HttpGet("{path:base64}/{video:int}/{quality}/index.m3u8")]
 	[PartialPermission(Kind.Play)]
-	public async Task GetVideoIndex(string path, string quality)
+	public async Task GetVideoIndex(string path, int video, string quality)
 	{
-		await _Proxy($"{path}/{quality}/index.m3u8");
+		await _Proxy($"{path}/{video}/{quality}/index.m3u8");
 	}
 
-	[HttpGet("{path:base64}/{quality}/{segment}")]
+	[HttpGet("{path:base64}/{video:int}/{quality}/{segment}")]
 	[PartialPermission(Kind.Play)]
-	public async Task GetVideoSegment(string path, string quality, string segment)
+	public async Task GetVideoSegment(string path, int video, string quality, string segment)
 	{
-		await _Proxy($"{path}/{quality}/{segment}");
+		await _Proxy($"{path}/{video}/{quality}/{segment}");
 	}
 
 	[HttpGet("{path:base64}/audio/{audio}/index.m3u8")]

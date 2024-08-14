@@ -55,8 +55,12 @@ func (h *Handler) GetMaster(c echo.Context) error {
 // This route can take a few seconds to respond since it will way for at least one segment to be
 // available.
 //
-// Path: /:path/:quality/index.m3u8
+// Path: /:path/:video/:quality/index.m3u8
 func (h *Handler) GetVideoIndex(c echo.Context) error {
+	video, err := strconv.ParseInt(c.Param("video"), 10, 32)
+	if err != nil {
+		return err
+	}
 	quality, err := src.QualityFromString(c.Param("quality"))
 	if err != nil {
 		return err
@@ -70,7 +74,7 @@ func (h *Handler) GetVideoIndex(c echo.Context) error {
 		return err
 	}
 
-	ret, err := h.transcoder.GetVideoIndex(path, quality, client, sha)
+	ret, err := h.transcoder.GetVideoIndex(path, uint32(video), quality, client, sha)
 	if err != nil {
 		return err
 	}
@@ -98,7 +102,7 @@ func (h *Handler) GetAudioIndex(c echo.Context) error {
 		return err
 	}
 
-	ret, err := h.transcoder.GetAudioIndex(path, int32(audio), client, sha)
+	ret, err := h.transcoder.GetAudioIndex(path, uint32(audio), client, sha)
 	if err != nil {
 		return err
 	}
@@ -109,8 +113,12 @@ func (h *Handler) GetAudioIndex(c echo.Context) error {
 //
 // Retrieve a chunk of a transmuxed video.
 //
-// Path: /:path/:quality/segments-:chunk.ts
+// Path: /:path/:video/:quality/segments-:chunk.ts
 func (h *Handler) GetVideoSegment(c echo.Context) error {
+	video, err := strconv.ParseInt(c.Param("video"), 10, 32)
+	if err != nil {
+		return err
+	}
 	quality, err := src.QualityFromString(c.Param("quality"))
 	if err != nil {
 		return err
@@ -128,7 +136,14 @@ func (h *Handler) GetVideoSegment(c echo.Context) error {
 		return err
 	}
 
-	ret, err := h.transcoder.GetVideoSegment(path, quality, segment, client, sha)
+	ret, err := h.transcoder.GetVideoSegment(
+		path,
+		uint32(video),
+		quality,
+		segment,
+		client,
+		sha,
+	)
 	if err != nil {
 		return err
 	}
@@ -158,7 +173,7 @@ func (h *Handler) GetAudioSegment(c echo.Context) error {
 		return err
 	}
 
-	ret, err := h.transcoder.GetAudioSegment(path, int32(audio), segment, client, sha)
+	ret, err := h.transcoder.GetAudioSegment(path, uint32(audio), segment, client, sha)
 	if err != nil {
 		return err
 	}
@@ -176,13 +191,14 @@ func (h *Handler) GetInfo(c echo.Context) error {
 		return err
 	}
 
-	ret, err := src.GetInfo(path, sha)
+	ret, err := h.metadata.GetMetadata(path, sha)
 	if err != nil {
 		return err
 	}
-	// Run extractors to have them in cache
-	src.Extract(ret.Path, sha)
-	go src.ExtractThumbnail(ret.Path, sha)
+	err = ret.SearchExternalSubtitles()
+	if err != nil {
+		fmt.Printf("Couldn't find external subtitles: %v", err)
+	}
 	return c.JSON(http.StatusOK, ret)
 }
 
@@ -192,7 +208,7 @@ func (h *Handler) GetInfo(c echo.Context) error {
 //
 // Path: /:path/attachment/:name
 func (h *Handler) GetAttachment(c echo.Context) error {
-	path, sha, err := GetPath(c)
+	_, sha, err := GetPath(c)
 	if err != nil {
 		return err
 	}
@@ -201,13 +217,10 @@ func (h *Handler) GetAttachment(c echo.Context) error {
 		return err
 	}
 
-	wait, err := src.Extract(path, sha)
+	ret, err := h.metadata.GetAttachmentPath(sha, false, name)
 	if err != nil {
 		return err
 	}
-	<-wait
-
-	ret := fmt.Sprintf("%s/%s/att/%s", src.Settings.Metadata, sha, name)
 	return c.File(ret)
 }
 
@@ -217,7 +230,7 @@ func (h *Handler) GetAttachment(c echo.Context) error {
 //
 // Path: /:path/subtitle/:name
 func (h *Handler) GetSubtitle(c echo.Context) error {
-	path, sha, err := GetPath(c)
+	_, sha, err := GetPath(c)
 	if err != nil {
 		return err
 	}
@@ -226,13 +239,10 @@ func (h *Handler) GetSubtitle(c echo.Context) error {
 		return err
 	}
 
-	wait, err := src.Extract(path, sha)
+	ret, err := h.metadata.GetAttachmentPath(sha, true, name)
 	if err != nil {
 		return err
 	}
-	<-wait
-
-	ret := fmt.Sprintf("%s/%s/sub/%s", src.Settings.Metadata, sha, name)
 	return c.File(ret)
 }
 
@@ -246,13 +256,12 @@ func (h *Handler) GetThumbnails(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
-	out, err := src.ExtractThumbnail(path, sha)
+	sprite, _, err := h.metadata.GetThumb(path, sha)
 	if err != nil {
 		return err
 	}
 
-	return c.File(fmt.Sprintf("%s/sprite.png", out))
+	return c.File(sprite)
 }
 
 // Get thumbnail vtt
@@ -266,17 +275,17 @@ func (h *Handler) GetThumbnailsVtt(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
-	out, err := src.ExtractThumbnail(path, sha)
+	_, vtt, err := h.metadata.GetThumb(path, sha)
 	if err != nil {
 		return err
 	}
 
-	return c.File(fmt.Sprintf("%s/sprite.vtt", out))
+	return c.File(vtt)
 }
 
 type Handler struct {
 	transcoder *src.Transcoder
+	metadata   *src.MetadataService
 }
 
 func main() {
@@ -284,20 +293,27 @@ func main() {
 	e.Use(middleware.Logger())
 	e.HTTPErrorHandler = ErrorHandler
 
-	transcoder, err := src.NewTranscoder()
+	metadata, err := src.NewMetadataService()
+	if err != nil {
+		e.Logger.Fatal(err)
+		return
+	}
+	transcoder, err := src.NewTranscoder(metadata)
 	if err != nil {
 		e.Logger.Fatal(err)
 		return
 	}
 	h := Handler{
 		transcoder: transcoder,
+		metadata:   metadata,
 	}
 
 	e.GET("/:path/direct", DirectStream)
+	e.GET("/:path/direct/:identifier", DirectStream)
 	e.GET("/:path/master.m3u8", h.GetMaster)
-	e.GET("/:path/:quality/index.m3u8", h.GetVideoIndex)
+	e.GET("/:path/:video/:quality/index.m3u8", h.GetVideoIndex)
 	e.GET("/:path/audio/:audio/index.m3u8", h.GetAudioIndex)
-	e.GET("/:path/:quality/:chunk", h.GetVideoSegment)
+	e.GET("/:path/:video/:quality/:chunk", h.GetVideoSegment)
 	e.GET("/:path/audio/:audio/:chunk", h.GetAudioSegment)
 	e.GET("/:path/info", h.GetInfo)
 	e.GET("/:path/thumbnails.png", h.GetThumbnails)

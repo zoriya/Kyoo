@@ -65,6 +65,17 @@ const mapData = (
 	};
 };
 
+const formatTitleMetadata = (item: Item) => {
+	if (item.type === "movie") {
+		return item.name;
+	}
+	return `${item.name} (${episodeDisplayNumber({
+		seasonNumber: item.seasonNumber,
+		episodeNumber: item.episodeNumber,
+		absoluteNumber: item.absoluteNumber,
+	})})`;
+};
+
 export const Player = ({
 	slug,
 	type,
@@ -81,6 +92,7 @@ export const Player = ({
 	const [playbackError, setPlaybackError] = useState<string | undefined>(undefined);
 	const { data, error } = useFetch(Player.query(type, slug));
 	const { data: info, error: infoError } = useFetch(Player.infoQuery(type, slug));
+	const image = data && data.type === "episode" ? data.show?.poster ?? data?.poster : data?.poster;
 	const previous =
 		data && data.type === "episode" && data.previousEpisode
 			? `/watch/${data.previousEpisode.slug}?t=0`
@@ -89,15 +101,8 @@ export const Player = ({
 		data && data.type === "episode" && data.nextEpisode
 			? `/watch/${data.nextEpisode.slug}?t=0`
 			: undefined;
-	const title =
-		data &&
-		(data.type === "movie"
-			? data.name
-			: `${data.show!.name} ${episodeDisplayNumber({
-					seasonNumber: data.seasonNumber,
-					episodeNumber: data.episodeNumber,
-					absoluteNumber: data.absoluteNumber,
-				})}`);
+	const title = data && formatTitleMetadata(data);
+	const subtitle = data && data.type === "episode" ? data.show?.name : undefined;
 
 	useVideoKeyboard(info?.subtitles, info?.fonts, previous, next);
 
@@ -141,8 +146,9 @@ export const Player = ({
 				<Video
 					metadata={{
 						title: title ?? t("show.episodeNoMetadata"),
+						artist: subtitle ?? undefined,
 						description: data?.overview ?? undefined,
-						imageUri: data?.thumbnail?.high,
+						imageUri: image?.medium,
 						next: next,
 						previous: previous,
 					}}

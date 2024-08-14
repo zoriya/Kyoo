@@ -7,15 +7,21 @@ import (
 
 type AudioStream struct {
 	Stream
-	index int32
+	index uint32
 }
 
-func NewAudioStream(file *FileStream, idx int32) *AudioStream {
-	log.Printf("Creating a audio stream %d for %s", idx, file.Path)
+func (t *Transcoder) NewAudioStream(file *FileStream, idx uint32) (*AudioStream, error) {
+	log.Printf("Creating a audio stream %d for %s", idx, file.Info.Path)
+
+	keyframes, err := t.metadataService.GetKeyframes(file.Info, false, idx)
+	if err != nil {
+		return nil, err
+	}
+
 	ret := new(AudioStream)
 	ret.index = idx
-	NewStream(file, ret, &ret.Stream)
-	return ret
+	NewStream(file, keyframes, ret, &ret.Stream)
+	return ret, nil
 }
 
 func (as *AudioStream) getOutPath(encoder_id int) string {

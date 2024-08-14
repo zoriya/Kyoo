@@ -8,6 +8,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/disintegration/imaging"
@@ -26,31 +27,48 @@ type Thumbnail struct {
 	path  string
 }
 
-var thumbnails = NewCMap[string, *Thumbnail]()
+const ThumbsVersion = 1
 
-func ExtractThumbnail(path string, sha string) (string, error) {
-	ret, _ := thumbnails.GetOrCreate(sha, func() *Thumbnail {
-		ret := &Thumbnail{
-			path: fmt.Sprintf("%s/%s", Settings.Metadata, sha),
-		}
-		ret.ready.Add(1)
-		go func() {
-			extractThumbnail(path, ret.path)
-			ret.ready.Done()
-		}()
-		return ret
-	})
-	ret.ready.Wait()
-	return ret.path, nil
+func getThumbGlob(sha string) string {
+	return fmt.Sprintf("%s/%s/thumbs-v*.*", Settings.Metadata, sha)
 }
 
-func extractThumbnail(path string, out string) error {
-	defer printExecTime("extracting thumbnails for %s", path)()
-	os.MkdirAll(out, 0o755)
-	sprite_path := fmt.Sprintf("%s/sprite.png", out)
-	vtt_path := fmt.Sprintf("%s/sprite.vtt", out)
+func getThumbPath(sha string) string {
+	return fmt.Sprintf("%s/%s/thumbs-v%d.png", Settings.Metadata, sha, ThumbsVersion)
+}
 
-	if _, err := os.Stat(sprite_path); err == nil {
+func getThumbVttPath(sha string) string {
+	return fmt.Sprintf("%s/%s/thumbs-v%d.vtt", Settings.Metadata, sha, ThumbsVersion)
+}
+
+func (s *MetadataService) GetThumb(path string, sha string) (string, string, error) {
+	_, err := s.ExtractThumbs(path, sha)
+	if err != nil {
+		return "", "", err
+	}
+	return getThumbPath(sha), getThumbVttPath(sha), nil
+}
+
+func (s *MetadataService) ExtractThumbs(path string, sha string) (interface{}, error) {
+	get_running, set := s.thumbLock.Start(sha)
+	if get_running != nil {
+		return get_running()
+	}
+
+	err := extractThumbnail(path, sha)
+	if err != nil {
+		return set(nil, err)
+	}
+	_, err = s.database.Exec(`update info set ver_thumbs = $2 where sha = $1`, sha, ThumbsVersion)
+	return set(nil, err)
+}
+
+func extractThumbnail(path string, sha string) error {
+	defer printExecTime("extracting thumbnails for %s", path)()
+
+	os.MkdirAll(fmt.Sprintf("%s/%s", Settings.Metadata), 0o755)
+
+	if _, err := os.Stat(getThumbPath(sha)); err == nil {
 		return nil
 	}
 
@@ -102,7 +120,7 @@ func extractThumbnail(path string, out string) error {
 			tsToVttTime(timestamps),
 			tsToVttTime(ts),
 			Settings.RoutePrefix,
-			base64.StdEncoding.EncodeToString([]byte(path)),
+			base64.RawURLEncoding.EncodeToString([]byte(path)),
 			x,
 			y,
 			width,
@@ -110,11 +128,20 @@ func extractThumbnail(path string, out string) error {
 		)
 	}
 
-	err = os.WriteFile(vtt_path, []byte(vtt), 0o644)
+	// Cleanup old versions of thumbnails
+	files, err := filepath.Glob(getThumbGlob(sha))
+	if err == nil {
+		for _, f := range files {
+			// ignore errors
+			os.Remove(f)
+		}
+	}
+
+	err = os.WriteFile(getThumbVttPath(sha), []byte(vtt), 0o644)
 	if err != nil {
 		return err
 	}
-	err = imaging.Save(sprite, sprite_path)
+	err = imaging.Save(sprite, getThumbPath(sha))
 	if err != nil {
 		return err
 	}

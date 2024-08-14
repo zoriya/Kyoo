@@ -10,38 +10,36 @@ import (
 )
 
 type FileStream struct {
-	ready     sync.WaitGroup
-	err       error
-	Path      string
-	Out       string
-	Keyframes *Keyframe
-	Info      *MediaInfo
-	videos    CMap[Quality, *VideoStream]
-	audios    CMap[int32, *AudioStream]
+	transcoder *Transcoder
+	ready      sync.WaitGroup
+	err        error
+	Out        string
+	Info       *MediaInfo
+	videos     CMap[VideoKey, *VideoStream]
+	audios     CMap[uint32, *AudioStream]
 }
 
-func NewFileStream(path string, sha string) *FileStream {
+type VideoKey struct {
+	idx     uint32
+	quality Quality
+}
+
+func (t *Transcoder) newFileStream(path string, sha string) *FileStream {
 	ret := &FileStream{
-		Path:   path,
-		Out:    fmt.Sprintf("%s/%s", Settings.Outpath, sha),
-		videos: NewCMap[Quality, *VideoStream](),
-		audios: NewCMap[int32, *AudioStream](),
+		transcoder: t,
+		Out:        fmt.Sprintf("%s/%s", Settings.Outpath, sha),
+		videos:     NewCMap[VideoKey, *VideoStream](),
+		audios:     NewCMap[uint32, *AudioStream](),
 	}
 
 	ret.ready.Add(1)
 	go func() {
 		defer ret.ready.Done()
-		info, err := GetInfo(path, sha)
+		info, err := t.metadataService.GetMetadata(path, sha)
 		ret.Info = info
 		if err != nil {
 			ret.err = err
 		}
-	}()
-
-	ret.ready.Add(1)
-	go func() {
-		defer ret.ready.Done()
-		ret.Keyframes = GetKeyframes(sha, path)
 	}()
 
 	return ret
@@ -62,58 +60,15 @@ func (fs *FileStream) Kill() {
 }
 
 func (fs *FileStream) Destroy() {
-	log.Printf("Removing all transcode cache files for %s", fs.Path)
+	log.Printf("Removing all transcode cache files for %s", fs.Info.Path)
 	fs.Kill()
 	_ = os.RemoveAll(fs.Out)
 }
 
 func (fs *FileStream) GetMaster() string {
 	master := "#EXTM3U\n"
-	if fs.Info.Video != nil {
-		var transmux_quality Quality
-		for _, quality := range Qualities {
-			if quality.Height() >= fs.Info.Video.Quality.Height() || quality.AverageBitrate() >= fs.Info.Video.Bitrate {
-				transmux_quality = quality
-				break
-			}
-		}
-		// original stream
-		{
-			bitrate := float64(fs.Info.Video.Bitrate)
-			master += "#EXT-X-STREAM-INF:"
-			master += fmt.Sprintf("AVERAGE-BANDWIDTH=%d,", int(math.Min(bitrate*0.8, float64(transmux_quality.AverageBitrate()))))
-			master += fmt.Sprintf("BANDWIDTH=%d,", int(math.Min(bitrate, float64(transmux_quality.MaxBitrate()))))
-			master += fmt.Sprintf("RESOLUTION=%dx%d,", fs.Info.Video.Width, fs.Info.Video.Height)
-			if fs.Info.Video.MimeCodec != nil {
-				master += fmt.Sprintf("CODECS=\"%s\",", *fs.Info.Video.MimeCodec)
-			}
-			master += "AUDIO=\"audio\","
-			master += "CLOSED-CAPTIONS=NONE\n"
-			master += fmt.Sprintf("./%s/index.m3u8\n", Original)
-		}
 
-		aspectRatio := float32(fs.Info.Video.Width) / float32(fs.Info.Video.Height)
-		// codec is the prefix + the level, the level is not part of the codec we want to compare for the same_codec check bellow
-		transmux_prefix := "avc1.6400"
-		transmux_codec := transmux_prefix + "28"
-
-		for _, quality := range Qualities {
-			same_codec := fs.Info.Video.MimeCodec != nil && strings.HasPrefix(*fs.Info.Video.MimeCodec, transmux_prefix)
-			inc_lvl := quality.Height() < fs.Info.Video.Quality.Height() ||
-				(quality.Height() == fs.Info.Video.Quality.Height() && !same_codec)
-
-			if inc_lvl {
-				master += "#EXT-X-STREAM-INF:"
-				master += fmt.Sprintf("AVERAGE-BANDWIDTH=%d,", quality.AverageBitrate())
-				master += fmt.Sprintf("BANDWIDTH=%d,", quality.MaxBitrate())
-				master += fmt.Sprintf("RESOLUTION=%dx%d,", int(aspectRatio*float32(quality.Height())+0.5), quality.Height())
-				master += fmt.Sprintf("CODECS=\"%s\",", transmux_codec)
-				master += "AUDIO=\"audio\","
-				master += "CLOSED-CAPTIONS=NONE\n"
-				master += fmt.Sprintf("./%s/index.m3u8\n", quality)
-			}
-		}
-	}
+	// TODO: support multiples audio qualities (and original)
 	for _, audio := range fs.Info.Audios {
 		master += "#EXT-X-MEDIA:TYPE=AUDIO,"
 		master += "GROUP-ID=\"audio\","
@@ -130,41 +85,141 @@ func (fs *FileStream) GetMaster() string {
 		if audio.IsDefault {
 			master += "DEFAULT=YES,"
 		}
-		master += fmt.Sprintf("URI=\"./audio/%d/index.m3u8\"\n", audio.Index)
+		master += "CHANNELS=\"2\","
+		master += fmt.Sprintf("URI=\"audio/%d/index.m3u8\"\n", audio.Index)
 	}
+	master += "\n"
+
+	// codec is the prefix + the level, the level is not part of the codec we want to compare for the same_codec check bellow
+	transmux_prefix := "avc1.6400"
+	transmux_codec := transmux_prefix + "28"
+	audio_codec := "mp4a.40.2"
+
+	var def_video *Video
+	for _, video := range fs.Info.Videos {
+		if video.IsDefault {
+			def_video = &video
+			break
+		}
+	}
+	if def_video == nil && len(fs.Info.Videos) > 0 {
+		def_video = &fs.Info.Videos[0]
+	}
+
+	if def_video != nil {
+		qualities := Filter(Qualities, func(quality Quality) bool {
+			same_codec := def_video.MimeCodec != nil && strings.HasPrefix(*def_video.MimeCodec, transmux_prefix)
+			return quality.Height() < def_video.Height ||
+				(quality.Height() == def_video.Height && !same_codec)
+		})
+		qualities = append(qualities, Original)
+
+		for _, quality := range qualities {
+			for _, video := range fs.Info.Videos {
+				master += "#EXT-X-MEDIA:TYPE=VIDEO,"
+				master += fmt.Sprintf("GROUP-ID=\"%s\",", quality)
+				if video.Language != nil {
+					master += fmt.Sprintf("LANGUAGE=\"%s\",", *video.Language)
+				}
+				if video.Title != nil {
+					master += fmt.Sprintf("NAME=\"%s\",", *video.Title)
+				} else if video.Language != nil {
+					master += fmt.Sprintf("NAME=\"%s\",", *video.Language)
+				} else {
+					master += fmt.Sprintf("NAME=\"Video %d\",", video.Index)
+				}
+				if video == *def_video {
+					master += "DEFAULT=YES\n"
+				} else {
+					master += fmt.Sprintf("URI=\"%d/%s/index.m3u8\"\n", video.Index, quality)
+				}
+			}
+		}
+		master += "\n"
+
+		// original stream
+		{
+			bitrate := float64(def_video.Bitrate)
+			master += "#EXT-X-STREAM-INF:"
+			master += fmt.Sprintf("AVERAGE-BANDWIDTH=%d,", int(math.Min(bitrate*0.8, float64(def_video.Quality().AverageBitrate()))))
+			master += fmt.Sprintf("BANDWIDTH=%d,", int(math.Min(bitrate, float64(def_video.Quality().MaxBitrate()))))
+			master += fmt.Sprintf("RESOLUTION=%dx%d,", def_video.Width, def_video.Height)
+			if def_video.MimeCodec != nil {
+				master += fmt.Sprintf("CODECS=\"%s\",", strings.Join([]string{*def_video.MimeCodec, audio_codec}, ","))
+			}
+			master += "AUDIO=\"audio\","
+			master += "CLOSED-CAPTIONS=NONE\n"
+			master += fmt.Sprintf("%d/%s/index.m3u8\n", def_video.Index, Original)
+		}
+
+		aspectRatio := float32(def_video.Width) / float32(def_video.Height)
+
+		for i, quality := range qualities {
+			if i == len(qualities)-1 {
+				// skip the original stream that already got handled
+				continue
+			}
+
+			master += "#EXT-X-STREAM-INF:"
+			master += fmt.Sprintf("AVERAGE-BANDWIDTH=%d,", quality.AverageBitrate())
+			master += fmt.Sprintf("BANDWIDTH=%d,", quality.MaxBitrate())
+			master += fmt.Sprintf("RESOLUTION=%dx%d,", int(aspectRatio*float32(quality.Height())+0.5), quality.Height())
+			master += fmt.Sprintf("CODECS=\"%s\",", strings.Join([]string{transmux_codec, audio_codec}, ","))
+			master += "AUDIO=\"audio\","
+			master += "CLOSED-CAPTIONS=NONE\n"
+			master += fmt.Sprintf("%d/%s/index.m3u8\n", def_video.Index, quality)
+		}
+	}
+
 	return master
 }
 
-func (fs *FileStream) getVideoStream(quality Quality) *VideoStream {
-	stream, _ := fs.videos.GetOrCreate(quality, func() *VideoStream {
-		return NewVideoStream(fs, quality)
+func (fs *FileStream) getVideoStream(idx uint32, quality Quality) (*VideoStream, error) {
+	stream, _ := fs.videos.GetOrCreate(VideoKey{idx, quality}, func() *VideoStream {
+		ret, _ := fs.transcoder.NewVideoStream(fs, idx, quality)
+		return ret
 	})
-	return stream
+	stream.ready.Wait()
+	return stream, nil
 }
 
-func (fs *FileStream) GetVideoIndex(quality Quality) (string, error) {
-	stream := fs.getVideoStream(quality)
+func (fs *FileStream) GetVideoIndex(idx uint32, quality Quality) (string, error) {
+	stream, err := fs.getVideoStream(idx, quality)
+	if err != nil {
+		return "", err
+	}
 	return stream.GetIndex()
 }
 
-func (fs *FileStream) GetVideoSegment(quality Quality, segment int32) (string, error) {
-	stream := fs.getVideoStream(quality)
+func (fs *FileStream) GetVideoSegment(idx uint32, quality Quality, segment int32) (string, error) {
+	stream, err := fs.getVideoStream(idx, quality)
+	if err != nil {
+		return "", err
+	}
 	return stream.GetSegment(segment)
 }
 
-func (fs *FileStream) getAudioStream(audio int32) *AudioStream {
+func (fs *FileStream) getAudioStream(audio uint32) (*AudioStream, error) {
 	stream, _ := fs.audios.GetOrCreate(audio, func() *AudioStream {
-		return NewAudioStream(fs, audio)
+		ret, _ := fs.transcoder.NewAudioStream(fs, audio)
+		return ret
 	})
-	return stream
+	stream.ready.Wait()
+	return stream, nil
 }
 
-func (fs *FileStream) GetAudioIndex(audio int32) (string, error) {
-	stream := fs.getAudioStream(audio)
+func (fs *FileStream) GetAudioIndex(audio uint32) (string, error) {
+	stream, err := fs.getAudioStream(audio)
+	if err != nil {
+		return "", nil
+	}
 	return stream.GetIndex()
 }
 
-func (fs *FileStream) GetAudioSegment(audio int32, segment int32) (string, error) {
-	stream := fs.getAudioStream(audio)
+func (fs *FileStream) GetAudioSegment(audio uint32, segment int32) (string, error) {
+	stream, err := fs.getAudioStream(audio)
+	if err != nil {
+		return "", nil
+	}
 	return stream.GetSegment(segment)
 }

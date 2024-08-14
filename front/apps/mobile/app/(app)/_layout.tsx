@@ -40,6 +40,8 @@ export default function SignGuard() {
 		<Stack
 			screenOptions={{
 				navigationBarColor: "transparent",
+				// @ts-expect-error Not yet available. Waiting for expo-router update.
+				navigationBarTranslucent: true,
 				headerTitle: () => <NavbarTitle />,
 				headerRight: () => <NavbarRight />,
 				contentStyle: {

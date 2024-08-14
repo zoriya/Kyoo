@@ -201,7 +201,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 												{...props}
 											/>
 										</ConnectionErrorVerifier>
-										<Tooltip id="tooltip" positionStrategy={"fixed"} />
+										<Tooltip id="tooltip" style={{ zIndex: 10 }} positionStrategy={"fixed"} />
 										<SetupChecker />
 									</SnackbarProvider>
 								</PortalProvider>
@@ -264,12 +264,12 @@ App.getInitialProps = async (ctx: AppContext) => {
 		) {
 			ctx.ctx.res!.writeHead(307, { Location: `/setup?step=${info!.setupStatus}` });
 			ctx.ctx.res!.end();
-			return {} as any;
+			return { pageProps: {} };
 		}
 		if (info!.setupStatus === SetupStep.Done && ctx.router.route === "/setup") {
 			ctx.ctx.res!.writeHead(307, { Location: "/" });
 			ctx.ctx.res!.end();
-			return {} as any;
+			return { pageProps: {} };
 		}
 	} catch (e) {
 		console.error("SSR error, disabling it.");

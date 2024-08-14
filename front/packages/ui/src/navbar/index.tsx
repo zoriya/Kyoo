@@ -85,8 +85,8 @@ const SearchBar = forwardRef<TextInput, Stylable>(function SearchBar(props, ref)
 				setQuery(q);
 			}}
 			placeholder={t("navbar.search")}
-			placeholderTextColor={theme.colors.white}
-			containerStyle={{ height: ts(4), flexShrink: 1, borderColor: (theme) => theme.colors.white }}
+			placeholderTextColor={theme.contrast}
+			containerStyle={{ height: ts(4), flexShrink: 1, borderColor: (theme) => theme.contrast }}
 			{...tooltip(t("navbar.search"))}
 			{...props}
 		/>
@@ -177,9 +177,14 @@ export const NavbarRight = () => {
 export const Navbar = ({
 	left,
 	right,
+	background,
 	...props
-}: { left?: ReactElement | null; right?: ReactElement | null } & Stylable) => {
-	const { css } = useYoshiki();
+}: {
+	left?: ReactElement | null;
+	right?: ReactElement | null;
+	background?: ReactElement;
+} & Stylable) => {
+	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 
 	return (
@@ -205,6 +210,7 @@ export const Navbar = ({
 				props,
 			)}
 		>
+			{background}
 			<View {...css({ flexDirection: "row", alignItems: "center", height: percent(100) })}>
 				{left !== undefined ? (
 					left

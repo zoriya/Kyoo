@@ -11,8 +11,8 @@ COPY packages/models/package.json packages/models/package.json
 RUN yarn --immutable
 
 COPY . .
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
 RUN yarn build:web
 
 
@@ -25,8 +25,8 @@ COPY --from=builder /app/apps/web/.next/static ./.next/static/
 COPY --from=builder /app/apps/web/public ./public
 
 EXPOSE 8901
-ENV PORT 8901
+ENV PORT=8901
 
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
 CMD ["node", "server.js"]

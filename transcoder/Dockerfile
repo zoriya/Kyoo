@@ -1,4 +1,4 @@
-# FROM golang:1.21 as build
+# FROM golang:1.22 as build
 FROM debian:trixie-slim as build
 # those were copied from https://github.com/docker-library/golang/blob/master/Dockerfile-linux.template
 ENV GOTOOLCHAIN=local
@@ -53,6 +53,7 @@ RUN set -x && apt-get update \
 
 WORKDIR /app
 COPY --from=build /app/transcoder /app/transcoder
+COPY ./migrations /app/migrations
 
 # flags for nvidia acceleration on docker < 25.0
 ENV NVIDIA_VISIBLE_DEVICES="all"

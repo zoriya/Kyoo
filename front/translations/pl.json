@@ -147,12 +147,24 @@
 		"delete": "Usuń konto",
 		"login": "Zaloguj się",
 		"or-register": "Nie masz konta? <1>Register</1>.",
-		"or-login": "Posiadasz konto? <1>Log in</1>."
+		"or-login": "Posiadasz konto? <1>Log in</1>.",
+		"password-no-match": "Hasła nie są takie same.",
+		"delete-confirmation": "Ta akcja nie może zostać cofnięta. Napewno chcesz to zrobić?"
 	},
 	"errors": {
 		"unknown": "Nieznany błąd",
 		"try-again": "Spróbuj ponownie",
-		"re-login": "Zaloguj się ponownie"
+		"re-login": "Zaloguj się ponownie",
+		"unauthorized": "Brakuje ci uprawnień {{permission}} aby otworzyć tę stronę.",
+		"setup": {
+			"MissingAdminAccount": "Konto administratora nie zostało jeszcze stworzone. Zarejestruj się aby je stworzyć.",
+			"NoVideoFound": "Żaden film nie został jeszcze znaleziony. Dodaj filmy lub seriale do twojego folderu biblioteki aby je tu wyświetlić!"
+		},
+		"offline": "Brak połączenia z internetem. Spróbuj ponownie później.",
+		"connection": "Nie udało się połączyć z serwerami kyoo",
+		"connection-tips": "Wskazówki dotyczące rozwiązywania problemów:\n- Czy masz połączenie z Internetem?\n- Czy serwer kyoo jest online?\n- Czy twoje konto zostało zablokowane?",
+		"needVerification": "Twoje konto musi zostać zweryfikowane przez administratora twojego serweru, zanim będziesz mógł go używać.",
+		"needAccount": "Aby odwiedzić tę stronę musisz zalogować się lub stworzyć konto."
 	},
 	"browse": {
 		"sortkey": {
@@ -171,7 +183,15 @@
 		"switchToGrid": "Widok siatki",
 		"switchToList": "Widok listy",
 		"sortby-tt": "Sortuj",
-		"sortby": "Sortuj według {{key}}"
+		"sortby": "Sortuj według {{key}}",
+		"mediatypekey": {
+			"all": "Wszystko",
+			"movie": "Filmy",
+			"show": "Seriale",
+			"collection": "Kolekcja"
+		},
+		"mediatype-tt": "Typ",
+		"mediatypelabel": "Typ"
 	},
 	"misc": {
 		"more": "Więcej",
@@ -220,6 +240,43 @@
 		"browse": "Przeglądaj",
 		"search": "Wyszukaj",
 		"login": "Zaloguj się",
-		"admin": "Panel Administratora"
+		"admin": "Panel Administratora",
+		"download": "Pobierz"
+	},
+	"downloads": {
+		"delete": "Usuń",
+		"empty": "Nic jeszcze nie pobrano, zacznij przeglądać w celu znalezienia czegoś, co Ci się podoba",
+		"deleteMessage": "Chcesz usunąć ten element z lokalnej pamięci?",
+		"pause": "Zatrzymaj",
+		"resume": "Wznów",
+		"retry": "Ponów",
+		"error": "Błąd:{{error}}"
+	},
+	"mediainfo": {
+		"audio": "Audio",
+		"subtitles": "Napisy",
+		"default": "Domyślne",
+		"duration": "Czas trwania",
+		"size": "Rozmiar",
+		"novideo": "Brak filmu",
+		"forced": "Wymuszony",
+		"video": "Wideo",
+		"file": "Plik"
+	},
+	"admin": {
+		"users": {
+			"adminUser": "Administrator",
+			"regularUser": "Użytkownik",
+			"set-permissions": "Nadawanie uprawnień",
+			"delete": "Usuń użytkownika",
+			"unverifed": "Niezweryfikowany",
+			"verify": "Zweryfikuj użytkownika",
+			"label": "Użytkownicy"
+		},
+		"scanner": {
+			"label": "Skaner",
+			"scan": "Wywołaj skanowanie biblioteki",
+			"empty": "Nie znaleziono błędów. Wszystkie elementy są zarejestrowane."
+		}
 	}
 }

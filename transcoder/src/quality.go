@@ -28,8 +28,7 @@ func QualityFromString(str string) (Quality, error) {
 		return Original, nil
 	}
 
-	qualities := Qualities
-	for _, quality := range qualities {
+	for _, quality := range Qualities {
 		if string(quality) == str {
 			return quality, nil
 		}
@@ -110,10 +109,9 @@ func (q Quality) Height() uint32 {
 	panic("Invalid quality value")
 }
 
-func QualityFromHeight(height uint32) Quality {
-	qualities := Qualities
-	for _, quality := range qualities {
-		if quality.Height() >= height {
+func (video *Video) Quality() Quality {
+	for _, quality := range Qualities {
+		if quality.Height() >= video.Height || quality.AverageBitrate() >= video.Bitrate {
 			return quality
 		}
 	}

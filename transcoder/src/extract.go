@@ -7,62 +7,73 @@ import (
 	"os/exec"
 )
 
-var extracted = NewCMap[string, <-chan struct{}]()
+const ExtractVersion = 1
 
-func Extract(path string, sha string) (<-chan struct{}, error) {
-	ret := make(chan struct{})
-	existing, created := extracted.GetOrSet(sha, ret)
-	if !created {
-		return existing, nil
+func (s *MetadataService) ExtractSubs(info *MediaInfo) (interface{}, error) {
+	get_running, set := s.extractLock.Start(info.Sha)
+	if get_running != nil {
+		return get_running()
 	}
 
-	go func() {
-		defer printExecTime("Starting extraction of %s", path)()
-		info, err := GetInfo(path, sha)
-		if err != nil {
-			extracted.Remove(sha)
-			close(ret)
-			return
-		}
-		attachment_path := fmt.Sprintf("%s/%s/att", Settings.Metadata, sha)
-		subs_path := fmt.Sprintf("%s/%s/sub", Settings.Metadata, sha)
-		os.MkdirAll(attachment_path, 0o644)
-		os.MkdirAll(subs_path, 0o755)
+	err := extractSubs(info)
+	if err != nil {
+		return set(nil, err)
+	}
+	_, err = s.database.Exec(`update info set ver_extract = $2 where sha = $1`, info.Sha, ExtractVersion)
+	return set(nil, err)
+}
 
-		// If there is no subtitles, there is nothing to extract (also fonts would be useless).
-		if len(info.Subtitles) == 0 {
-			close(ret)
-			return
-		}
+func (s *MetadataService) GetAttachmentPath(sha string, is_sub bool, name string) (string, error) {
+	_, err := s.extractLock.WaitFor(sha)
+	if err != nil {
+		return "", err
+	}
+	dir := "att"
+	if is_sub {
+		dir = "sub"
+	}
+	return fmt.Sprintf("%s/%s/%s/%s", Settings.Metadata, sha, dir, name), nil
+}
 
-		cmd := exec.Command(
-			"ffmpeg",
-			"-dump_attachment:t", "",
-			// override old attachments
-			"-y",
-			"-i", path,
-		)
-		cmd.Dir = attachment_path
+func extractSubs(info *MediaInfo) error {
+	defer printExecTime("extraction of %s", info.Path)()
 
-		for _, sub := range info.Subtitles {
-			if ext := sub.Extension; ext != nil {
-				cmd.Args = append(
-					cmd.Args,
-					"-map", fmt.Sprintf("0:s:%d", sub.Index),
-					"-c:s", "copy",
-					fmt.Sprintf("%s/%d.%s", subs_path, sub.Index, *ext),
-				)
-			}
-		}
-		log.Printf("Starting extraction with the command: %s", cmd)
-		cmd.Stdout = nil
-		err = cmd.Run()
-		if err != nil {
-			extracted.Remove(sha)
-			fmt.Println("Error starting ffmpeg extract:", err)
-		}
-		close(ret)
-	}()
+	attachment_path := fmt.Sprintf("%s/%s/att", Settings.Metadata, info.Sha)
+	subs_path := fmt.Sprintf("%s/%s/sub", Settings.Metadata, info.Sha)
 
-	return ret, nil
+	os.MkdirAll(attachment_path, 0o755)
+	os.MkdirAll(subs_path, 0o755)
+
+	// If there is no subtitles, there is nothing to extract (also fonts would be useless).
+	if len(info.Subtitles) == 0 {
+		return nil
+	}
+
+	cmd := exec.Command(
+		"ffmpeg",
+		"-dump_attachment:t", "",
+		// override old attachments
+		"-y",
+		"-i", info.Path,
+	)
+	cmd.Dir = attachment_path
+
+	for _, sub := range info.Subtitles {
+		if ext := sub.Extension; ext != nil {
+			cmd.Args = append(
+				cmd.Args,
+				"-map", fmt.Sprintf("0:s:%d", *sub.Index),
+				"-c:s", "copy",
+				fmt.Sprintf("%s/%d.%s", subs_path, *sub.Index, *ext),
+			)
+		}
+	}
+	log.Printf("Starting extraction with the command: %s", cmd)
+	cmd.Stdout = nil
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println("Error starting ffmpeg extract:", err)
+		return err
+	}
+	return nil
 }
