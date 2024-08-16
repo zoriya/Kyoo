@@ -370,8 +370,7 @@ postgresql:
 rabbitmq:
   enabled: false
   auth:
-    # this does not read from a secret.  not sure how to map
-    # just manually make the same
+    # this will not read from a secret. just manually make the same
     username: kyoo_all
     existingPasswordSecret: "{{ .Values.global.rabbitmq.infra.existingSecret }}"
     existingSecretPasswordKey: "{{ .Values.global.rabbitmq.infra.passwordKey }}"
