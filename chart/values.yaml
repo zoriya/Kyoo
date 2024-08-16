@@ -109,6 +109,15 @@ contentdatabase:
     pinKey: tvdb_pin
     existingSecret: bigsecret
 
+ingress:
+  enabled: false
+  ingressClassName: ~
+  annotations: {}
+  extraAnnotations: {}
+  host: kyoo.mydomain.com
+  tls: false
+  tlsSecret: ~
+
 autosync:
   name: autosync
   kyoo_autosync:

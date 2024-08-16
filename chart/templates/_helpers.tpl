@@ -1,4 +1,11 @@
 {{/*
+Create kyoo ingress name
+*/}}
+{{- define "kyoo.ingress.fullname" -}}
+{{- printf "%s-%s" (include "kyoo.fullname" .) "ingress" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
 Create kyoo autosync name
 */}}
 {{- define "kyoo.autosync.fullname" -}}
