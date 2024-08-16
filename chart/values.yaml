@@ -102,12 +102,10 @@ media:
 contentdatabase:
   # TheMovieDB
   tmdb:
-    enabled: true
     apikeyKey: tmdb_apikey
     existingSecret: bigsecret
   # TVDatabase
   tvdb:
-    enabled: true
     apikeyKey: tvdb_apikey
     pinKey: tvdb_pin
     existingSecret: bigsecret
