@@ -48,9 +48,9 @@ spec:
             {{- end }}
           env:
             - name: GOCODER_HWACCEL
-              value: disabled
+              value: {{ .Values.kyoo.transcoderAcceleration }}
             - name: GOCODER_PRESET
-              value: fast
+              value: {{ .Values.kyoo.transcoderPreset }}
             - name: GOCODER_CACHE_ROOT
               value: /cache
             - name: GOCODER_METADATA_ROOT
