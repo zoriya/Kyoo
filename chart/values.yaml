@@ -97,10 +97,17 @@ media:
       subPath: media
 
 contentdatabase:
-  provider:
-    tmdb:
-      apikeyKey: tmdb_apikey
-      existingSecret: bigsecret
+  # TheMovieDB
+  tmdb:
+    enabled: true
+    apikeyKey: tmdb_apikey
+    existingSecret: bigsecret
+  # TVDatabase
+  tvdb:
+    enabled: true
+    apikeyKey: tvdb_apikey
+    pinKey: tvdb_pin
+    existingSecret: bigsecret
 
 autosync:
   name: autosync

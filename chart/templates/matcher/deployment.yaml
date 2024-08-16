@@ -59,8 +59,18 @@ spec:
             - name: THEMOVIEDB_APIKEY
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.contentdatabase.provider.tmdb.apikeyKey }}
-                  name: {{ .Values.contentdatabase.provider.tmdb.existingSecret }}
+                  key: {{ .Values.contentdatabase.tmdb.apikeyKey }}
+                  name: {{ .Values.contentdatabase.tmdb.existingSecret }}
+            - name: TVDB_APIKEY
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.contentdatabase.tvdb.apikeyKey }}
+                  name: {{ .Values.contentdatabase.tvdb.existingSecret }}
+            - name: TVDB_PIN
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.contentdatabase.tvdb.pinKey }}
+                  name: {{ .Values.contentdatabase.tvdb.existingSecret }}
             - name: RABBITMQ_HOST
               value: {{ .Values.global.rabbitmq.host }}
             - name: RABBITMQ_PORT

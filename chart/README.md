@@ -44,6 +44,8 @@ extraObjects:
       # Keep those empty to use kyoo's default api key. You can also specify a custom API key if you want.
       # go to https://www.themoviedb.org/settings/api and copy the api key (not the read access token, the api key)
       tmdb_apikey: ""
+      tvdb_apikey: ""
+      tvdb_pin: ""
       #RESOURCES
       # meilisearch does not allow mapping their key in yet.
       MEILI_MASTER_KEY: barkLike8SuperDucks
