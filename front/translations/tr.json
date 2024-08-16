@@ -237,7 +237,8 @@
 		"duration": "Uzunluk",
 		"size": "Boyut",
 		"novideo": "Video yok",
-		"nocontainer": "Geçersiz kapsayıcı"
+		"nocontainer": "Geçersiz kapsayıcı",
+		"external": "Harici"
 	},
 	"admin": {
 		"users": {
