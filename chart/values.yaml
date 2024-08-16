@@ -82,6 +82,7 @@ kyoo:
   requireAccountVerification: true
   defaultPermissions: "overall.read,overall.play"
   unloggedPermissions: ""
+  libraryIgnorePattern: ".*/[dD]ownloads?/.*"
   languages: "en"
   apikey:
     existingSecret: bigsecret

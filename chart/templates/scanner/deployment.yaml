@@ -49,6 +49,8 @@ spec:
           env:
             - name: SCANNER_LIBRARY_ROOT
               value: /data
+            - name: LIBRARY_IGNORE_PATTERN
+              value: "{{ .Values.kyoo.libraryIgnorePattern }}"
             - name: KYOO_APIKEYS
               valueFrom:
                 secretKeyRef:
