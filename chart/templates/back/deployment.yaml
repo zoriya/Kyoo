@@ -79,6 +79,10 @@ spec:
               value: http://{{ include "kyoo.transcoder.fullname" . }}:7666
             - name: PUBLIC_URL
               value: {{ .Values.kyoo.address }}
+            - name: REQUIRE_ACCOUNT_VERIFICATION
+              value: {{ .Values.kyoo.requireAccountVerification }}
+            - name: DEFAULT_PERMISSIONS
+              value: {{ .Values.kyoo.defaultPermissions }}
             - name: UNLOGGED_PERMISSIONS
               value: {{ .Values.kyoo.unloggedPermissions }}
             - name: KYOO_APIKEYS

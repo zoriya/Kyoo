@@ -79,7 +79,9 @@ global:
 
 kyoo:
   address: "https://kyoo.mydomain.com"
-  unloggedPermissions: "overall.read,overall.play"
+  requireAccountVerification: true
+  defaultPermissions: "overall.read,overall.play"
+  unloggedPermissions: ""
   languages: "en"
   apikey:
     existingSecret: bigsecret
