@@ -9,18 +9,6 @@ helm upgrade kyoo . --install --values myvalues.yaml
 ```
 `myvaules.yaml` content
 ```yaml
-# If the helm release has another name other than kyoo
-# subchart resources will be named $releasename-$resource
-
-# have seen other charts use "{{ .Release.Name }}-postgresql", but having issues
-
-# global:
-#   meilisearch:
-#     host: kyoo-meilisearch
-#   rabbitmq:
-#     host: kyoo-rabbitmq
-#   postgres:
-#     host: kyoo-postgresql
 kyoo:
   address: https://kyoo.mydomain.com
 meilisearch:
