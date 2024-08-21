@@ -24,21 +24,28 @@ type MetadataService struct {
 
 func NewMetadataService() (*MetadataService, error) {
 	con := fmt.Sprintf(
-		"postgresql://%v:%v@%v:%v/%v?application_name=gocoder&search_path=gocoder&sslmode=disable",
+		"postgresql://%v:%v@%v:%v/%v?application_name=gocoder&sslmode=disable",
 		url.QueryEscape(os.Getenv("POSTGRES_USER")),
 		url.QueryEscape(os.Getenv("POSTGRES_PASSWORD")),
 		url.QueryEscape(os.Getenv("POSTGRES_SERVER")),
 		url.QueryEscape(os.Getenv("POSTGRES_PORT")),
 		url.QueryEscape(os.Getenv("POSTGRES_DB")),
 	)
+	schema := GetEnvOr("POSTGRES_SCHEMA", "gocoder")
+	if schema != "disabled" {
+		con = fmt.Sprintf("%s&search_path=%s", con, url.QueryEscape(schema))
+	}
 	db, err := sql.Open("postgres", con)
 	if err != nil {
+		fmt.Printf("Could not connect to database, check your env variables!")
 		return nil, err
 	}
 
-	_, err = db.Exec("create schema if not exists gocoder")
-	if err != nil {
-		return nil, err
+	if schema != "disabled" {
+		_, err = db.Exec(fmt.Sprintf("create schema if not exists %s", schema))
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
