@@ -157,6 +157,8 @@ func getVideoKeyframes(path string, video_idx uint32, kf *Keyframe) error {
 		"-loglevel", "error",
 		"-select_streams", fmt.Sprintf("V:%d", video_idx),
 		"-show_entries", "packet=pts_time,flags",
+		// some avi files don't have pts, we use this to ask ffmpeg to generate them (it uses the dts under the hood)
+		"-fflags", "+genpts",
 		"-of", "csv=print_section=0",
 		path,
 	)
