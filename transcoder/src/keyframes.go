@@ -191,6 +191,8 @@ func getVideoKeyframes(path string, video_idx uint32, kf *Keyframe) error {
 		pts, flags := x[0], x[1]
 
 		// true if there is no keyframes (e.g. in a file w/o video track)
+		// can also happen if a video has more packets than frames (so the last packet
+		// is emtpy and has a N/A pts)
 		if pts == "N/A" {
 			break
 		}
