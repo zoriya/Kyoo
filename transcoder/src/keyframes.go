@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"math"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -12,7 +13,10 @@ import (
 	"github.com/lib/pq"
 )
 
-const KeyframeVersion = 1
+const KeyframeVersion = 2
+
+// In seconds, the spec recomands 6 but since we don't control keyframes we go over more often than not.
+const OptimalFragmentDuration = float64(5)
 
 type Keyframe struct {
 	Keyframes []float64
@@ -175,6 +179,7 @@ func getVideoKeyframes(path string, video_idx uint32, kf *Keyframe) error {
 
 	ret := make([]float64, 0, 1000)
 	limit := 100
+	last_frame := math.Inf(-1)
 	done := 0
 	// sometimes, videos can start at a timing greater than 0:00. We need to take that into account
 	// and only list keyframes that come after the start of the video (without that, our segments count
@@ -183,6 +188,9 @@ func getVideoKeyframes(path string, video_idx uint32, kf *Keyframe) error {
 	// We can't hardcode the first keyframe at 0 because the transcoder needs to reference durations of segments
 	// To handle this edge case, when we fetch the segment n0, no seeking is done but duration is computed from the
 	// first keyframe (instead of 0)
+	//
+	// since we switched to -f hls, duration is not computed anymore so we could hardcode the first timestamp at 0 but
+	// not changing it is easier.
 	for scanner.Scan() {
 		frame := scanner.Text()
 		if frame == "" {
@@ -208,12 +216,18 @@ func getVideoKeyframes(path string, video_idx uint32, kf *Keyframe) error {
 			return err
 		}
 
-		// Before, we wanted to only save keyframes with at least 3s betweens
-		// to prevent segments of 0.2s but sometimes, the -f segment muxer discards
-		// the segment time and decide to cut at a random keyframe. Having every keyframe
-		// handled as a segment prevents that.
+		// The -f hls encoder will cut at the next keyframe found every X seconds.
+		// To be sure there is no mismatch between what -f hls outputs and what we think segments are, we need to make
+		// sure every keyframes is at least `OptimalFragmentDuration` away from the next.
+		//
+		// Note that this handling was not possible with the -f segment muxer, since if sometimes doesn't care about the
+		// -segment_times option and outputed segments of 0.2s. With -f segment, we needed to cut at every keyframe.
+		if fpts < (last_frame + OptimalFragmentDuration) {
+			continue
+		}
 
 		ret = append(ret, fpts)
+		last_frame = fpts
 
 		if len(ret) == limit {
 			kf.add(ret)
@@ -235,13 +249,12 @@ func getVideoKeyframes(path string, video_idx uint32, kf *Keyframe) error {
 	return nil
 }
 
-// we can pretty much cut audio at any point so no need to get specific frames, just cut every 4s
+// we can pretty much cut audio at any point so no need to get specific frames, just cut every `OptimalFragmentDuration` seconds
 func getAudioKeyframes(info *MediaInfo, audio_idx uint32, kf *Keyframe) error {
-	dummyKeyframeDuration := float64(4)
-	segmentCount := int((float64(info.Duration) / dummyKeyframeDuration) + 1)
+	segmentCount := int((float64(info.Duration) / OptimalFragmentDuration) + 1)
 	kf.Keyframes = make([]float64, segmentCount)
 	for segmentIndex := 0; segmentIndex < segmentCount; segmentIndex += 1 {
-		kf.Keyframes[segmentIndex] = float64(segmentIndex) * dummyKeyframeDuration
+		kf.Keyframes[segmentIndex] = float64(segmentIndex) * OptimalFragmentDuration
 	}
 
 	kf.IsDone = true

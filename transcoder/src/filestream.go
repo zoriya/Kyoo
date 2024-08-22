@@ -66,7 +66,7 @@ func (fs *FileStream) Destroy() {
 }
 
 func (fs *FileStream) GetMaster() string {
-	master := "#EXTM3U\n"
+	master := "#EXTM3U"
 
 	// TODO: support multiples audio qualities (and original)
 	for _, audio := range fs.Info.Audios {
