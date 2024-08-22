@@ -1,9 +1,9 @@
 # FROM golang:1.22 as build
-FROM debian:trixie-slim as build
+FROM debian:trixie-slim AS build
 # those were copied from https://github.com/docker-library/golang/blob/master/Dockerfile-linux.template
 ENV GOTOOLCHAIN=local
-ENV GOPATH /go
-ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
+ENV GOPATH=/go
+ENV PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
 RUN set -eux; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \

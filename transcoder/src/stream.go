@@ -238,6 +238,11 @@ func (ts *Stream) run(start int32) error {
 		)
 	}
 	args = append(args,
+		// some avi files are missing pts, using this flag makes ffmpeg use dts as pts and prevents an error with
+		// -c:v copy. Only issue: pts is sometime wrong (+1fps than expected) and this leads to some clients refusing
+		// to play the file (they just switch back to the previous quality).
+		// since this is better than errorring or not supporting transmux at all, i'll keep it here for now.
+		"-fflags", "+genpts",
 		"-i", ts.file.Info.Path,
 		// this makes behaviors consistent between soft and hardware decodes.
 		// this also means that after a -ss 50, the output video will start at 50s
