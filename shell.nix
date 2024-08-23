@@ -38,6 +38,7 @@ in
       biome
       kubernetes-helm
       go-migrate
+      sqlc
     ];
 
     DOTNET_ROOT = "${dotnet}";
