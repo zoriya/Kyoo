@@ -5,5 +5,11 @@ sql:
     schema: "sql/migrations"
     gen:
       go:
-        package: "db"
-        out: "db"
+        package: "dbc"
+        out: "dbc"
+        overrides:
+        - db_type: "timestampz"
+          go_type:
+            import: "time"
+            type: "Time"
+

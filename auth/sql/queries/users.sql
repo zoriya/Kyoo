@@ -1,24 +1,37 @@
 -- name: GetAllUsers :many
 select
-	*
+	u.*,
 from
-	users
+	users as u
 order by
-	created_date
+	id
 limit $1;
 
--- name: GetUser :one
+-- name: GetAllUsersAfter :many
 select
 	*
 from
 	users
 where
+	id >= sqlc.arg(after_id)
+order by
+	id
+limit $1;
+
+-- name: GetUser :one
+select
+	sqlc.embed(users),
+	sql.embed(oidc_handle)
+from
+	users as u
+	left join oidc_handle as h on u.id = h.user_id
+where
 	id = $1
 limit 1;
 
 -- name: CreateUser :one
-insert into users(username, email, password, external_handle, claims)
-	values ($1, $2, $3, $4, $5)
+insert into users(username, email, password, claims)
+	values (?, ?, ?, ?)
 returning
 	*;
 
@@ -26,19 +39,18 @@ returning
 update
 	users
 set
-	username = $2,
-	email = $3,
-	password = $4,
-	external_handle = $5,
-	claims = $6
+	username = ?,
+	email = ?,
+	password = ?,
+	claims = ?
 where
-	id = $1
+	id = ?
 returning
 	*;
 
 -- name: DeleteUser :one
 delete from users
-where id = $1
+where id = ?
 returning
 	*;
 
