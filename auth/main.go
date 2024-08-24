@@ -9,6 +9,7 @@ import (
 
 	"github.com/zoriya/kyoo/keibi/dbc"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/golang-migrate/migrate"
 	"github.com/golang-migrate/migrate/database/postgres"
 	"github.com/labstack/echo/v4"
@@ -28,6 +29,17 @@ func ErrorHandler(err error, c echo.Context) {
 	c.JSON(code, struct {
 		Errors []string `json:"errors"`
 	}{Errors: []string{message}})
+}
+
+type Validator struct {
+	validator *validator.Validate
+}
+
+func (v *Validator) Validate(i interface{}) error {
+	if err := v.validator.Struct(i); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return nil
 }
 
 func OpenDatabase() (*sql.DB, error) {
@@ -79,9 +91,10 @@ type Handler struct {
 func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
+	e.Validator = &Validator{validator: validator.New(validator.WithRequiredStructEnabled())}
 	e.HTTPErrorHandler = ErrorHandler
 
-	db, err := OpenDatabase();
+	db, err := OpenDatabase()
 	if err != nil {
 		e.Logger.Fatal(err)
 		return
