@@ -1,17 +1,22 @@
 package main
 
 import (
-	"database/sql"
+	"context"
+	"errors"
 	"fmt"
 	"net/http"
-	"net/url"
 	"os"
+	"strconv"
 
 	"github.com/zoriya/kyoo/keibi/dbc"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/golang-migrate/migrate"
-	"github.com/golang-migrate/migrate/database/postgres"
+	"github.com/golang-migrate/migrate/v4"
+	pgxd "github.com/golang-migrate/migrate/v4/database/pgx/v5"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -42,36 +47,51 @@ func (v *Validator) Validate(i interface{}) error {
 	return nil
 }
 
-func OpenDatabase() (*sql.DB, error) {
-	con := fmt.Sprintf(
-		"postgresql://%v:%v@%v:%v/%v?application_name=gocoder&sslmode=disable",
-		url.QueryEscape(os.Getenv("POSTGRES_USER")),
-		url.QueryEscape(os.Getenv("POSTGRES_PASSWORD")),
-		url.QueryEscape(os.Getenv("POSTGRES_SERVER")),
-		url.QueryEscape(os.Getenv("POSTGRES_PORT")),
-		url.QueryEscape(os.Getenv("POSTGRES_DB")),
-	)
+func OpenDatabase() (*pgxpool.Pool, error) {
+	ctx := context.Background()
+
+	port, err := strconv.ParseUint(os.Getenv("POSTGRES_PORT"), 10, 16)
+	if err != nil {
+		return nil, errors.New("invalid postgres port specified")
+	}
+	conf := pgxpool.Config{
+		ConnConfig: &pgx.ConnConfig{
+			Config: pgconn.Config{
+				Host:      os.Getenv("POSTGRES_SERVER"),
+				Port:      uint16(port),
+				Database:  os.Getenv("POSTGRES_DB"),
+				User:      os.Getenv("POSTGRES_USER"),
+				Password:  os.Getenv("POSTGRES_PASSWORD"),
+				TLSConfig: nil,
+				RuntimeParams: map[string]string{
+					"application_name": "keibi",
+				},
+			},
+		},
+	}
 	schema := os.Getenv("POSTGRES_SCHEMA")
 	if schema == "" {
 		schema = "keibi"
 	}
 	if schema != "disabled" {
-		con = fmt.Sprintf("%s&search_path=%s", con, url.QueryEscape(schema))
+		conf.ConnConfig.Config.RuntimeParams["search_path"] = schema
 	}
-	db, err := sql.Open("postgres", con)
+
+	db, err := pgxpool.NewWithConfig(ctx, &conf)
 	if err != nil {
 		fmt.Printf("Could not connect to database, check your env variables!")
 		return nil, err
 	}
+	defer db.Close()
 
 	if schema != "disabled" {
-		_, err = db.Exec(fmt.Sprintf("create schema if not exists %s", schema))
+		_, err = db.Exec(ctx, fmt.Sprintf("create schema if not exists %s", schema))
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	driver, err := pgxd.WithInstance(stdlib.OpenDBFromPool(db), &pgxd.Config{})
 	if err != nil {
 		return nil, err
 	}
@@ -86,6 +106,7 @@ func OpenDatabase() (*sql.DB, error) {
 
 type Handler struct {
 	db *dbc.Queries
+	config *Configuration
 }
 
 func main() {

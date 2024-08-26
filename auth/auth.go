@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"net/http"
 
 	"github.com/alexedwards/argon2id"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/zoriya/kyoo/keibi/dbc"
 )
@@ -36,15 +36,30 @@ func (h *Handler) Register(c echo.Context) error {
 		return echo.NewHTTPError(400, "Invalid password")
 	}
 
-	user, err := h.db.CreateUser(context.Background(), dbc.CreateUserParams{
-		Username:       req.Username,
-		Email:          req.Email,
-		Password:       sql.NullString{},
-		ExternalHandle: []byte{},
-		Claims:         []byte{},
+	duser, err := h.db.CreateUser(context.Background(), dbc.CreateUserParams{
+		Username: req.Username,
+		Email:    req.Email,
+		Password: &pass,
+		// TODO: Use configured value.
+		Claims: []byte{},
 	})
 	if err != nil {
 		return echo.NewHTTPError(409, "Email or username already taken")
 	}
-	return h.CreateToken(c, &user)
+	user := MapDbUser(&duser)
+	return createToken(c, &user)
+}
+
+func createToken(c echo.Context, user *User) error {
+	claims := &jwt.RegisteredClaims{
+		Subject: user.ID.String(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	t, err := token.SignedString(h.jwtSecret)
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"token": t,
+	})
 }

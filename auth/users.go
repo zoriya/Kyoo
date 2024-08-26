@@ -24,6 +24,17 @@ type OidcHandle struct {
 	ProfileUrl *string `json:"profileUrl"`
 }
 
+func MapDbUser(user *dbc.User) User {
+	return User{
+		ID:          user.ID,
+		Username:    user.Username,
+		Email:       user.Email,
+		CreatedDate: user.CreatedDate,
+		LastSeen:    user.LastSeen,
+		Oidc:        nil,
+	}
+}
+
 func (h *Handler) ListUsers(c echo.Context) error {
 	ctx := context.Background()
 	limit := int32(20)
@@ -50,14 +61,7 @@ func (h *Handler) ListUsers(c echo.Context) error {
 
 	var ret []User
 	for _, user := range users {
-		ret = append(ret, User{
-			ID:          user.ID,
-			Username:    user.Username,
-			Email:       user.Email,
-			CreatedDate: user.CreatedDate,
-			LastSeen:    user.LastSeen,
-			Oidc:        nil,
-		})
+		ret = append(ret, MapDbUser(&user))
 	}
 	return c.JSON(200, ret)
 }
