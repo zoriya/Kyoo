@@ -124,6 +124,12 @@ func main() {
 	h := Handler{
 		db: dbc.New(db),
 	}
+	conf, err := LoadConfiguration(h.db)
+	if err != nil {
+		e.Logger.Fatal("Could not load configuration: %v", err)
+		return
+	}
+	h.config = conf
 
 	e.GET("/users", h.ListUsers)
 

@@ -40,22 +40,21 @@ func (h *Handler) Register(c echo.Context) error {
 		Username: req.Username,
 		Email:    req.Email,
 		Password: &pass,
-		// TODO: Use configured value.
-		Claims: []byte{},
+		Claims:   h.config.DefaultClaims,
 	})
 	if err != nil {
 		return echo.NewHTTPError(409, "Email or username already taken")
 	}
 	user := MapDbUser(&duser)
-	return createToken(c, &user)
+	return h.createToken(c, &user)
 }
 
-func createToken(c echo.Context, user *User) error {
+func (h *Handler) createToken(c echo.Context, user *User) error {
 	claims := &jwt.RegisteredClaims{
 		Subject: user.ID.String(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	t, err := token.SignedString(h.jwtSecret)
+	t, err := token.SignedString(h.config.JwtSecret)
 	if err != nil {
 		return err
 	}
