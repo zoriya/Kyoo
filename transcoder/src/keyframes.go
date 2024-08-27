@@ -2,6 +2,7 @@ package src
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"log"
 	"os/exec"
@@ -12,7 +13,7 @@ import (
 	"github.com/lib/pq"
 )
 
-const KeyframeVersion = 1
+const KeyframeVersion = 2
 
 type Keyframe struct {
 	Keyframes []float64
@@ -237,8 +238,58 @@ func getVideoKeyframes(path string, video_idx uint32, kf *Keyframe) error {
 
 // we can pretty much cut audio at any point so no need to get specific frames, just cut every 4s
 func getAudioKeyframes(info *MediaInfo, audio_idx uint32, kf *Keyframe) error {
+	defer printExecTime("ffprobe keyframe analysis for %s audio n%d", info.Path, audio_idx)()
+	// Format's duration CAN be different than audio's duration. To make sure we do not
+	// miss a segment or make one more, we need to check the audio's duration.
+	//
+	// Some formats DO NOT contain this metadata, we need to manually fetch it from the packets.
+	//
+	// We could use the same command to retrieve all packets and know when we can cut PRECISELY
+	// but since packets always contain only a few ms we don't need this precision.
+	cmd := exec.Command(
+		"ffprobe",
+		"-select_streams", fmt.Sprintf("a:%d", audio_idx),
+		"-show_entries", "packet=pts_time",
+		// some avi files don't have pts, we use this to ask ffmpeg to generate them (it uses the dts under the hood)
+		"-fflags", "+genpts",
+		// We use a read_interval LARGER than the file (at least we estimate)
+		// This allows us to only decode the LAST packets
+		"-read_intervals", fmt.Sprintf("%f", info.Duration+10_000),
+		"-of", "csv=print_section=0",
+		info.Path,
+	)
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
+	err = cmd.Start()
+	if err != nil {
+		return err
+	}
+
+	scanner := bufio.NewScanner(stdout)
+	var duration float64
+	for scanner.Scan() {
+		pts := scanner.Text()
+		if pts == "" || pts == "N/A" {
+			continue
+		}
+
+		duration, err = strconv.ParseFloat(pts, 64)
+		if err != nil {
+			return err
+		}
+
+	}
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+	if duration <= 0 {
+		return errors.New("could not find audio's duration")
+	}
+
 	dummyKeyframeDuration := float64(4)
-	segmentCount := int((float64(info.Duration) / dummyKeyframeDuration) + 1)
+	segmentCount := int((duration / dummyKeyframeDuration) + 1)
 	kf.Keyframes = make([]float64, segmentCount)
 	for segmentIndex := 0; segmentIndex < segmentCount; segmentIndex += 1 {
 		kf.Keyframes[segmentIndex] = float64(segmentIndex) * dummyKeyframeDuration
