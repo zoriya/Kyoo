@@ -13,7 +13,7 @@ import (
 	"github.com/lib/pq"
 )
 
-const KeyframeVersion = 2
+const KeyframeVersion = 1
 
 type Keyframe struct {
 	Keyframes []float64
@@ -123,7 +123,7 @@ func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx uint32
 		}
 
 		if err != nil {
-			log.Printf("Couldn't retrive keyframes for %s %s %d: %v", info.Path, table, idx, err)
+			log.Printf("Couldn't retrieve keyframes for %s %s %d: %v", info.Path, table, idx, err)
 			return
 		}
 
@@ -236,13 +236,32 @@ func getVideoKeyframes(path string, video_idx uint32, kf *Keyframe) error {
 	return nil
 }
 
+const DummyKeyframeDuration = float64(4)
+
 // we can pretty much cut audio at any point so no need to get specific frames, just cut every 4s
 func getAudioKeyframes(info *MediaInfo, audio_idx uint32, kf *Keyframe) error {
 	defer printExecTime("ffprobe keyframe analysis for %s audio n%d", info.Path, audio_idx)()
 	// Format's duration CAN be different than audio's duration. To make sure we do not
 	// miss a segment or make one more, we need to check the audio's duration.
 	//
-	// Some formats DO NOT contain this metadata, we need to manually fetch it from the packets.
+	// Since fetching the duration requires reading packets and is SLOW, we start by generating
+	// keyframes until a reasonably safe point of the file (if the format has a 20min duration, audio
+	// probably has a close duration).
+	// You can read why duration retrieval is slow on the comment below.
+	safe_duration := info.Duration - 20
+	segment_count := int((safe_duration / DummyKeyframeDuration) + 1)
+	if segment_count > 0 {
+		kf.Keyframes = make([]float64, segment_count)
+		for i := 0; i < segment_count; i += 1 {
+			kf.Keyframes[i] = float64(i) * DummyKeyframeDuration
+		}
+		kf.info.ready.Done()
+	} else {
+		segment_count = 0
+	}
+
+	// Some formats DO NOT contain a duration metadata, we need to manually fetch it
+	// from the packets.
 	//
 	// We could use the same command to retrieve all packets and know when we can cut PRECISELY
 	// but since packets always contain only a few ms we don't need this precision.
@@ -288,14 +307,18 @@ func getAudioKeyframes(info *MediaInfo, audio_idx uint32, kf *Keyframe) error {
 		return errors.New("could not find audio's duration")
 	}
 
-	dummyKeyframeDuration := float64(4)
-	segmentCount := int((duration / dummyKeyframeDuration) + 1)
-	kf.Keyframes = make([]float64, segmentCount)
-	for segmentIndex := 0; segmentIndex < segmentCount; segmentIndex += 1 {
-		kf.Keyframes[segmentIndex] = float64(segmentIndex) * dummyKeyframeDuration
+	new_seg_count := int((duration / DummyKeyframeDuration) + 1)
+	if new_seg_count > segment_count {
+		new_segments := make([]float64, new_seg_count-segment_count)
+		for i := segment_count; i < new_seg_count; i += 1 {
+			new_segments[i-segment_count] = float64(i) * DummyKeyframeDuration
+		}
+		kf.add(new_segments)
+		if segment_count == 0 {
+			kf.info.ready.Done()
+		}
 	}
 
 	kf.IsDone = true
-	kf.info.ready.Done()
 	return nil
 }

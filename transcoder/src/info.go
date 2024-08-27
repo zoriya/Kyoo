@@ -36,7 +36,7 @@ type MediaInfo struct {
 	/// The file size of the video file.
 	Size int64 `json:"size"`
 	/// The length of the media in seconds.
-	Duration float32 `json:"duration"`
+	Duration float64 `json:"duration"`
 	/// The container of the video file of this episode.
 	Container *string `json:"container"`
 	/// Version of the metadata. This can be used to invalidate older metadata from db if the extraction code has changed.
@@ -238,7 +238,7 @@ func RetriveMediaInfo(path string, sha string) (*MediaInfo, error) {
 		// Remove leading .
 		Extension: filepath.Ext(path)[1:],
 		Size:      ParseInt64(mi.Format.Size),
-		Duration:  float32(mi.Format.DurationSeconds),
+		Duration:  mi.Format.DurationSeconds,
 		Container: OrNull(mi.Format.FormatName),
 		Versions: Versions{
 			Info:      InfoVersion,
