@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"golang.org/x/text/language"
@@ -55,6 +56,9 @@ type MediaInfo struct {
 	Fonts []string `json:"fonts"`
 	/// The list of chapters. See Chapter for more information.
 	Chapters []Chapter `json:"chapters"`
+
+	/// lock used to read/set keyframes of video/audio
+	lock sync.Mutex
 }
 
 type Video struct {

@@ -89,11 +89,17 @@ type KeyframeKey struct {
 }
 
 func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx uint32) (*Keyframe, error) {
+	info.lock.Lock()
+	var ret *Keyframe
 	if isVideo && info.Videos[idx].Keyframes != nil {
-		return info.Videos[idx].Keyframes, nil
+		ret = info.Videos[idx].Keyframes
 	}
 	if !isVideo && info.Audios[idx].Keyframes != nil {
-		return info.Audios[idx].Keyframes, nil
+		ret = info.Audios[idx].Keyframes
+	}
+	info.lock.Unlock()
+	if ret != nil {
+		return ret, nil
 	}
 
 	get_running, set := s.keyframeLock.Start(KeyframeKey{
@@ -110,6 +116,14 @@ func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx uint32
 		info:   &KeyframeInfo{},
 	}
 	kf.info.ready.Add(1)
+
+	info.lock.Lock()
+	if isVideo {
+		info.Videos[idx].Keyframes = kf
+	} else {
+		info.Audios[idx].Keyframes = kf
+	}
+	info.lock.Unlock()
 
 	go func() {
 		var table string
