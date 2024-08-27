@@ -2,6 +2,7 @@ package src
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"log"
 	"os/exec"
@@ -88,11 +89,17 @@ type KeyframeKey struct {
 }
 
 func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx uint32) (*Keyframe, error) {
+	info.lock.Lock()
+	var ret *Keyframe
 	if isVideo && info.Videos[idx].Keyframes != nil {
-		return info.Videos[idx].Keyframes, nil
+		ret = info.Videos[idx].Keyframes
 	}
 	if !isVideo && info.Audios[idx].Keyframes != nil {
-		return info.Audios[idx].Keyframes, nil
+		ret = info.Audios[idx].Keyframes
+	}
+	info.lock.Unlock()
+	if ret != nil {
+		return ret, nil
 	}
 
 	get_running, set := s.keyframeLock.Start(KeyframeKey{
@@ -110,6 +117,14 @@ func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx uint32
 	}
 	kf.info.ready.Add(1)
 
+	info.lock.Lock()
+	if isVideo {
+		info.Videos[idx].Keyframes = kf
+	} else {
+		info.Audios[idx].Keyframes = kf
+	}
+	info.lock.Unlock()
+
 	go func() {
 		var table string
 		var err error
@@ -122,7 +137,7 @@ func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx uint32
 		}
 
 		if err != nil {
-			log.Printf("Couldn't retrive keyframes for %s %s %d: %v", info.Path, table, idx, err)
+			log.Printf("Couldn't retrieve keyframes for %s %s %d: %v", info.Path, table, idx, err)
 			return
 		}
 
@@ -235,16 +250,89 @@ func getVideoKeyframes(path string, video_idx uint32, kf *Keyframe) error {
 	return nil
 }
 
+const DummyKeyframeDuration = float64(4)
+
 // we can pretty much cut audio at any point so no need to get specific frames, just cut every 4s
 func getAudioKeyframes(info *MediaInfo, audio_idx uint32, kf *Keyframe) error {
-	dummyKeyframeDuration := float64(4)
-	segmentCount := int((float64(info.Duration) / dummyKeyframeDuration) + 1)
-	kf.Keyframes = make([]float64, segmentCount)
-	for segmentIndex := 0; segmentIndex < segmentCount; segmentIndex += 1 {
-		kf.Keyframes[segmentIndex] = float64(segmentIndex) * dummyKeyframeDuration
+	defer printExecTime("ffprobe keyframe analysis for %s audio n%d", info.Path, audio_idx)()
+	// Format's duration CAN be different than audio's duration. To make sure we do not
+	// miss a segment or make one more, we need to check the audio's duration.
+	//
+	// Since fetching the duration requires reading packets and is SLOW, we start by generating
+	// keyframes until a reasonably safe point of the file (if the format has a 20min duration, audio
+	// probably has a close duration).
+	// You can read why duration retrieval is slow on the comment below.
+	safe_duration := info.Duration - 20
+	segment_count := int((safe_duration / DummyKeyframeDuration) + 1)
+	if segment_count > 0 {
+		kf.Keyframes = make([]float64, segment_count)
+		for i := 0; i < segment_count; i += 1 {
+			kf.Keyframes[i] = float64(i) * DummyKeyframeDuration
+		}
+		kf.info.ready.Done()
+	} else {
+		segment_count = 0
+	}
+
+	// Some formats DO NOT contain a duration metadata, we need to manually fetch it
+	// from the packets.
+	//
+	// We could use the same command to retrieve all packets and know when we can cut PRECISELY
+	// but since packets always contain only a few ms we don't need this precision.
+	cmd := exec.Command(
+		"ffprobe",
+		"-select_streams", fmt.Sprintf("a:%d", audio_idx),
+		"-show_entries", "packet=pts_time",
+		// some avi files don't have pts, we use this to ask ffmpeg to generate them (it uses the dts under the hood)
+		"-fflags", "+genpts",
+		// We use a read_interval LARGER than the file (at least we estimate)
+		// This allows us to only decode the LAST packets
+		"-read_intervals", fmt.Sprintf("%f", info.Duration+10_000),
+		"-of", "csv=print_section=0",
+		info.Path,
+	)
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
+	err = cmd.Start()
+	if err != nil {
+		return err
+	}
+
+	scanner := bufio.NewScanner(stdout)
+	var duration float64
+	for scanner.Scan() {
+		pts := scanner.Text()
+		if pts == "" || pts == "N/A" {
+			continue
+		}
+
+		duration, err = strconv.ParseFloat(pts, 64)
+		if err != nil {
+			return err
+		}
+
+	}
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+	if duration <= 0 {
+		return errors.New("could not find audio's duration")
+	}
+
+	new_seg_count := int((duration / DummyKeyframeDuration) + 1)
+	if new_seg_count > segment_count {
+		new_segments := make([]float64, new_seg_count-segment_count)
+		for i := segment_count; i < new_seg_count; i += 1 {
+			new_segments[i-segment_count] = float64(i) * DummyKeyframeDuration
+		}
+		kf.add(new_segments)
+		if segment_count == 0 {
+			kf.info.ready.Done()
+		}
 	}
 
 	kf.IsDone = true
-	kf.info.ready.Done()
 	return nil
 }
