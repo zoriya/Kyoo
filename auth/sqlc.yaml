@@ -19,5 +19,10 @@ sql:
           go_type:
             import: "github.com/google/uuid"
             type: "UUID"
+        - column: "users.claims"
+          go_type:
+            import: "github.com/golang-jwt/jwt/v5"
+            package: "jwt"
+            type: "MapClaims"
 
 

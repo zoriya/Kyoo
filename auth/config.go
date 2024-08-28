@@ -5,12 +5,14 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/zoriya/kyoo/keibi/dbc"
 )
 
 type Configuration struct {
 	JwtSecret     []byte
-	DefaultClaims []byte
+	Issuer        string
+	DefaultClaims jwt.MapClaims
 }
 
 const (

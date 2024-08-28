@@ -132,6 +132,7 @@ func main() {
 	h.config = conf
 
 	e.GET("/users", h.ListUsers)
+	e.POST("/users", h.Register)
 
 	e.Logger.Fatal(e.Start(":4568"))
 }
