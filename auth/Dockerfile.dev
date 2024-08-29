@@ -1,0 +1,16 @@
+FROM golang:1.23 AS build
+WORKDIR /app
+
+RUN go install github.com/bokwoon95/wgo@latest
+RUN go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+RUN go install github.com/swaggo/swag/cmd/swag@latest
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+# COPY sqlc.yaml ./
+# COPY sql/ ./
+# RUN sqlc generate
+
+EXPOSE 4568
+CMD ["wgo", "run", "-race", "."]
