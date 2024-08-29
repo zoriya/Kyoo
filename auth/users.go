@@ -102,5 +102,5 @@ func (h *Handler) Register(c echo.Context) error {
 		return echo.NewHTTPError(409, "Email or username already taken")
 	}
 	user := MapDbUser(&duser)
-	return h.createToken(c, &user)
+	return h.createSession(c, &user)
 }

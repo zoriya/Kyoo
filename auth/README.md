@@ -17,20 +17,25 @@
 
 ### Lifecycle
 
-```
-`/login` { login, password } -> token
-`/login/$provider` { redirectUrl, tenant? } -> redirect
-`/register` { email, username, password } -> token
-`/logout` w/ optional `?session=id`
+
+Login:
+
+`POST /session { login, password } -> token`
+`GET  /login/$provider { redirectUrl, tenant? } -> redirect`
+
+Register:
+`POST /users { email, username, password } -> token`
+
+Logout
+`DELETE /session` w/ optional `?session=id`
 `/jwt` retrieve a jwt from an opaque token (also update last online value for session & user)
-```
 
 ### Profiles
 
 ```
 Get `/users` -> user[]
-Get/Put/Patch/Delete `/users/$username` (or /users/me) -> user
-Get/Post/Delete `/users/$username/logo` (or /users/me/logo) -> png
+Get/Put/Patch/Delete `/users/$id` (or /users/me) -> user
+Get/Post/Delete `/users/$id/logo` (or /users/me/logo) -> png
 ```
 
 Put/Patch of a user can edit the password if the `oldPassword` value is set and valid (or the user has the `users.password` permission).\
@@ -41,10 +46,15 @@ Put/Patch can edit custom claims (roles & permissons for example) if the user ha
 Read others requires `users.read` permission.\
 Write/Delete requires `users.write` permission (if it's not your account).
 
+
+POST /users is how you register.
+
 ### Sessions
 
-Get `/sessions` list all of your active sessions (and devices)
-(can then use `/logout?session=id`)
+GET `/sessions` list all of your active sessions (and devices)
+POST `/sessions` is how you login
+Delete `/sessions` (or `/sessions/$id`) is how you logout
+GET `/users/$id/sessions` can be used by admins to list others session
 
 ### Api keys
 

@@ -1,12 +1,17 @@
 package main
 
 import (
+	"cmp"
+	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"maps"
 	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
+	"github.com/zoriya/kyoo/keibi/dbc"
 )
 
 type LoginDto struct {
@@ -14,8 +19,30 @@ type LoginDto struct {
 	Password string `json:"password" validate:"required"`
 }
 
-func (h *Handler) createToken(c echo.Context, user *User) error {
-	return nil
+func (h *Handler) createSession(c echo.Context, user *User) error {
+	ctx := context.Background()
+
+	id := make([]byte, 64)
+	_, err := rand.Read(id)
+	if err != nil {
+		return err
+	}
+
+	dev := cmp.Or(c.Param("device"), c.Request().Header.Get("User-Agent"))
+	device := &dev
+	if dev == "" {
+		device = nil
+	}
+
+	session, err := h.db.CreateSession(ctx, dbc.CreateSessionParams{
+		ID:     base64.StdEncoding.EncodeToString(id),
+		UserID: user.ID,
+		Device: device,
+	})
+	if err != nil {
+		return err
+	}
+	return c.JSON(201, session)
 }
 
 func (h *Handler) CreateJwt(c echo.Context, user *User) error {
