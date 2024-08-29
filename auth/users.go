@@ -15,7 +15,7 @@ import (
 type User struct {
 	ID          uuid.UUID             `json:"id"`
 	Username    string                `json:"username"`
-	Email       string                `json:"email"`
+	Email       string                `json:"email" format:"email"`
 	CreatedDate time.Time             `json:"createdDate"`
 	LastSeen    time.Time             `json:"lastSeen"`
 	Claims      jwt.MapClaims         `json:"claims"`
@@ -25,12 +25,12 @@ type User struct {
 type OidcHandle struct {
 	Id         string  `json:"id"`
 	Username   string  `json:"username"`
-	ProfileUrl *string `json:"profileUrl"`
+	ProfileUrl *string `json:"profileUrl" format:"url"`
 }
 
 type RegisterDto struct {
 	Username string `json:"username" validate:"required"`
-	Email    string `json:"email" validate:"required,email"`
+	Email    string `json:"email" validate:"required,email" format:"email"`
 	Password string `json:"password" validate:"required"`
 }
 
@@ -46,6 +46,15 @@ func MapDbUser(user *dbc.User) User {
 	}
 }
 
+// @Summary      List all users
+// @Description  List all users existing in this instance.
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        afterId   query      uuid  false  "used for pagination."
+// @Success      200  {object}  User[]
+// @Failure      400  {object}  problem.Problem
+// @Router       /users [get]
 func (h *Handler) ListUsers(c echo.Context) error {
 	ctx := context.Background()
 	limit := int32(20)
@@ -74,9 +83,20 @@ func (h *Handler) ListUsers(c echo.Context) error {
 	for _, user := range users {
 		ret = append(ret, MapDbUser(&user))
 	}
+	// TODO: switch to a Page
 	return c.JSON(200, ret)
 }
 
+// @Summary      Register
+// @Description  Register as a new user and open a session for it
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        device   query   uuid         false  "The device the created session will be used on"
+// @Param        user     body    RegisterDto  false  "Registration informations"
+// @Success      201  {object}  dbc.Session
+// @Failure      400  {object}  problem.Problem
+// @Router /users [post]
 func (h *Handler) Register(c echo.Context) error {
 	var req RegisterDto
 	err := c.Bind(&req)

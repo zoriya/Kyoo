@@ -8,7 +8,9 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/otaxhu/problem"
 	"github.com/zoriya/kyoo/keibi/dbc"
+	_ "github.com/zoriya/kyoo/keibi/docs"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-migrate/migrate/v4"
@@ -19,21 +21,25 @@ import (
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/swaggo/echo-swagger"
 )
 
 func ErrorHandler(err error, c echo.Context) {
 	code := http.StatusInternalServerError
 	var message string
+
 	if he, ok := err.(*echo.HTTPError); ok {
 		code = he.Code
 		message = fmt.Sprint(he.Message)
 	} else {
 		c.Logger().Error(err)
-		message = "Internal server error"
 	}
-	c.JSON(code, struct {
-		Errors []string `json:"errors"`
-	}{Errors: []string{message}})
+
+	ret := problem.NewDefault(code)
+	if message != "" {
+		ret.Detail = message
+	}
+	c.JSON(code, ret)
 }
 
 type Validator struct {
@@ -74,7 +80,7 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 		schema = "keibi"
 	}
 	if schema != "disabled" {
-		conf.ConnConfig.Config.RuntimeParams["search_path"] = schema
+		conf.ConnConfig.RuntimeParams["search_path"] = schema
 	}
 
 	db, err := pgxpool.NewWithConfig(ctx, &conf)
@@ -105,10 +111,22 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 }
 
 type Handler struct {
-	db *dbc.Queries
+	db     *dbc.Queries
 	config *Configuration
 }
 
+// @title Keibi - Kyoo's auth
+// @version 1.0
+// @description Auth system made for kyoo.
+
+// @contact.name Repository
+// @contact.url https://github.com/zoriya/kyoo
+
+// @license.name  GPL-3.0
+// @license.url https://www.gnu.org/licenses/gpl-3.0.en.html
+
+// @host kyoo.zoriya.dev
+// @BasePath /auth
 func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
@@ -133,6 +151,7 @@ func main() {
 
 	e.GET("/users", h.ListUsers)
 	e.POST("/users", h.Register)
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	e.Logger.Fatal(e.Start(":4568"))
 }

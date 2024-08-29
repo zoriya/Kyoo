@@ -39,6 +39,7 @@ in
       kubernetes-helm
       go-migrate
       sqlc
+      go-swag
     ];
 
     DOTNET_ROOT = "${dotnet}";
