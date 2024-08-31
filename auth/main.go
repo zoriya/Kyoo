@@ -15,8 +15,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-migrate/migrate/v4"
 	pgxd "github.com/golang-migrate/migrate/v4/database/pgx/v5"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgconn"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/labstack/echo/v4"
@@ -60,30 +59,26 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 	if err != nil {
 		return nil, errors.New("invalid postgres port specified")
 	}
-	conf := pgxpool.Config{
-		ConnConfig: &pgx.ConnConfig{
-			Config: pgconn.Config{
-				Host:      os.Getenv("POSTGRES_SERVER"),
-				Port:      uint16(port),
-				Database:  os.Getenv("POSTGRES_DB"),
-				User:      os.Getenv("POSTGRES_USER"),
-				Password:  os.Getenv("POSTGRES_PASSWORD"),
-				TLSConfig: nil,
-				RuntimeParams: map[string]string{
-					"application_name": "keibi",
-				},
-			},
-		},
+
+	config, _ := pgxpool.ParseConfig("")
+	config.ConnConfig.Host = os.Getenv("POSTGRES_SERVER")
+	config.ConnConfig.Port = uint16(port)
+	config.ConnConfig.Database = os.Getenv("POSTGRES_DB")
+	config.ConnConfig.User = os.Getenv("POSTGRES_USER")
+	config.ConnConfig.Password = os.Getenv("POSTGRES_PASSWORD")
+	config.ConnConfig.TLSConfig = nil
+	config.ConnConfig.RuntimeParams = map[string]string{
+		"application_name": "keibi",
 	}
 	schema := os.Getenv("POSTGRES_SCHEMA")
 	if schema == "" {
 		schema = "keibi"
 	}
 	if schema != "disabled" {
-		conf.ConnConfig.RuntimeParams["search_path"] = schema
+		config.ConnConfig.RuntimeParams["search_path"] = schema
 	}
 
-	db, err := pgxpool.NewWithConfig(ctx, &conf)
+	db, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
 		fmt.Printf("Could not connect to database, check your env variables!")
 		return nil, err
@@ -97,7 +92,10 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 		}
 	}
 
-	driver, err := pgxd.WithInstance(stdlib.OpenDBFromPool(db), &pgxd.Config{})
+	dbi := stdlib.OpenDBFromPool(db)
+	defer dbi.Close()
+
+	driver, err := pgxd.WithInstance(dbi, &pgxd.Config{})
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +105,7 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 	}
 	m.Up()
 
-	return db, nil
+	return db, err
 }
 
 type Handler struct {
@@ -135,7 +133,7 @@ func main() {
 
 	db, err := OpenDatabase()
 	if err != nil {
-		e.Logger.Fatal(err)
+		e.Logger.Fatal("Could not open databse: %v", err)
 		return
 	}
 
