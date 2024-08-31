@@ -55,6 +55,6 @@
 		"copy-webpack-plugin": "^12.0.2",
 		"react-native": "0.74.5",
 		"typescript": "^5.5.4",
-		"webpack": "^5.93.0"
+		"webpack": "^5.94.0"
 	}
 }
