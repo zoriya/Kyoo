@@ -7,8 +7,8 @@ create table users(
 	password text,
 	claims jsonb not null,
 
-	created_date timestampz not null default now()::timestampz,
-	last_seen timestampz not null default now()::timestampz
+	created_date timestamptz not null default now()::timestamptz,
+	last_seen timestamptz not null default now()::timestamptz
 );
 
 create table oidc_handle(
@@ -21,7 +21,7 @@ create table oidc_handle(
 
 	access_token text,
 	refresh_token text,
-	expire_at timestampz,
+	expire_at timestamptz,
 
 	constraint oidc_handle_pk primary key (user_id, provider)
 );

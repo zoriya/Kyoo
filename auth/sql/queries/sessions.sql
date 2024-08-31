@@ -12,7 +12,7 @@ limit 1;
 update
 	sessions
 set
-	last_used = now()::timestampz
+	last_used = now()::timestamptz
 where
 	id = $1;
 
