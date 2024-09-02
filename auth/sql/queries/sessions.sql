@@ -1,11 +1,11 @@
--- name: GetUserFromSession :one
+-- name: GetUserFromToken :one
 select
 	u.*
 from
 	users as u
 	left join sessions as s on u.id = s.user_id
 where
-	s.id = $1
+	s.token = $1
 limit 1;
 
 -- name: TouchSession :exec
@@ -27,7 +27,7 @@ order by
 	last_used;
 
 -- name: CreateSession :one
-insert into sessions(id, user_id, device)
+insert into sessions(token, user_id, device)
 	values ($1, $2, $3)
 returning
 	*;
@@ -35,6 +35,12 @@ returning
 -- name: DeleteSession :one
 delete from sessions
 where id = $1
+returning
+	*;
+
+-- name: DeleteSessionByToken :one
+delete from sessions
+where token = $1
 returning
 	*;
 

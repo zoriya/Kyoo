@@ -16,7 +16,9 @@ import (
 )
 
 type LoginDto struct {
+	// Either the email or the username.
 	Login    string `json:"login" validate:"required"`
+	// Password of the account.
 	Password string `json:"password" validate:"required"`
 }
 
@@ -25,12 +27,13 @@ type LoginDto struct {
 // @Tags         sessions
 // @Accept       json
 // @Produce      json
-// @Param        device   query   uuid         false  "The device the created session will be used on"
-// @Param        user     body    LoginDto  false  "Account informations"
-// @Success      201  {object}  dbc.Session
-// @Failure      400  {object}  problem.Problem "Invalid login body"
-// @Failure      400  {object}  problem.Problem "Invalid password"
-// @Failure      404  {object}  problem.Problem "Account does not exists"
+// @Param        device  query   string    false  "The device the created session will be used on"
+// @Param        login   body    LoginDto  false  "Account informations"
+// @Success      201  {object}   dbc.Session
+// @Failure      400  {object}   problem.Problem "Invalid login body"
+// @Failure      403  {object}   problem.Problem "Invalid password"
+// @Failure      404  {object}   problem.Problem "Account does not exists"
+// @Failure      422  {object}   problem.Problem "User does not have a password (registered via oidc, please login via oidc)"
 // @Router /sessions [post]
 func (h *Handler) Login(c echo.Context) error {
 	var req LoginDto
@@ -47,7 +50,7 @@ func (h *Handler) Login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "No account exists with the specified email or username.")
 	}
 	if dbuser.Password == nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Can't login with password, this account was created with OIDC.")
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, "Can't login with password, this account was created with OIDC.")
 	}
 
 	match, err := argon2id.ComparePasswordAndHash(req.Password, *dbuser.Password)
@@ -55,7 +58,7 @@ func (h *Handler) Login(c echo.Context) error {
 		return err
 	}
 	if !match {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid password")
+		return echo.NewHTTPError(http.StatusForbidden, "Invalid password")
 	}
 
 	user := MapDbUser(&dbuser)
@@ -88,9 +91,20 @@ func (h *Handler) createSession(c echo.Context, user *User) error {
 	return c.JSON(201, session)
 }
 
+// @Summary      Get JWT
+// @Description  Convert a session token to a short lived JWT.
+// @Tags         sessions
+// @Accept       json
+// @Produce      json
+// @Param        user     body    LoginDto  false  "Account informations"
+// @Success      200  {object}  dbc.Session
+// @Failure      400  {object}  problem.Problem "Invalid login body"
+// @Failure      400  {object}  problem.Problem "Invalid password"
+// @Failure      404  {object}  problem.Problem "Account does not exists"
+// @Router /jwt [get]
 func (h *Handler) CreateJwt(c echo.Context, user *User) error {
 	claims := maps.Clone(user.Claims)
-	claims["sub"] = user.ID.String()
+	claims["sub"] = user.Id.String()
 	claims["iss"] = h.config.Issuer
 	claims["exp"] = &jwt.NumericDate{
 		Time: time.Now().UTC().Add(time.Hour),
