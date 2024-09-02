@@ -29,7 +29,7 @@ type OidcHandle struct {
 }
 
 type RegisterDto struct {
-	Username string `json:"username" validate:"required"`
+	Username string `json:"username" validate:"required,excludes=@"`
 	Email    string `json:"email" validate:"required,email" format:"email"`
 	Password string `json:"password" validate:"required"`
 }
@@ -51,7 +51,7 @@ func MapDbUser(user *dbc.User) User {
 // @Tags         users
 // @Accept       json
 // @Produce      json
-// @Param        afterId   query      uuid  false  "used for pagination."
+// @Param        afterId   query      string  false  "used for pagination." Format(uuid)
 // @Success      200  {object}  User[]
 // @Failure      400  {object}  problem.Problem
 // @Router       /users [get]
@@ -95,7 +95,8 @@ func (h *Handler) ListUsers(c echo.Context) error {
 // @Param        device   query   uuid         false  "The device the created session will be used on"
 // @Param        user     body    RegisterDto  false  "Registration informations"
 // @Success      201  {object}  dbc.Session
-// @Failure      400  {object}  problem.Problem
+// @Failure      400  {object}  problem.Problem "Invalid register body"
+// @Success      409  {object}  problem.Problem "Duplicated email or username"
 // @Router /users [post]
 func (h *Handler) Register(c echo.Context) error {
 	var req RegisterDto
@@ -109,7 +110,7 @@ func (h *Handler) Register(c echo.Context) error {
 
 	pass, err := argon2id.CreateHash(req.Password, argon2id.DefaultParams)
 	if err != nil {
-		return echo.NewHTTPError(400, "Invalid password")
+		return err
 	}
 
 	duser, err := h.db.CreateUser(context.Background(), dbc.CreateUserParams{

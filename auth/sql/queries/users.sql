@@ -18,7 +18,7 @@ order by
 	id
 limit $1;
 
--- name: GetUser :one
+-- name: GetUser :many
 select
 	sqlc.embed(u),
 	sqlc.embed(h)
@@ -26,7 +26,16 @@ from
 	users as u
 	left join oidc_handle as h on u.id = h.user_id
 where
-	u.id = $1
+	u.id = $1;
+
+-- name: GetUserByLogin :one
+select
+	*
+from
+	users
+where
+	email = sqlc.arg(login)
+	or username = sqlc.arg(login)
 limit 1;
 
 -- name: CreateUser :one

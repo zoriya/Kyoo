@@ -83,7 +83,6 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 		fmt.Printf("Could not connect to database, check your env variables!")
 		return nil, err
 	}
-	defer db.Close()
 
 	if schema != "disabled" {
 		_, err = db.Exec(ctx, fmt.Sprintf("create schema if not exists %s", schema))
@@ -92,6 +91,7 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 		}
 	}
 
+	fmt.Println("Migrating database")
 	dbi := stdlib.OpenDBFromPool(db)
 	defer dbi.Close()
 
@@ -104,8 +104,9 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 		return nil, err
 	}
 	m.Up()
+	fmt.Println("Migrating finished")
 
-	return db, err
+	return db, nil
 }
 
 type Handler struct {
@@ -149,6 +150,9 @@ func main() {
 
 	e.GET("/users", h.ListUsers)
 	e.POST("/users", h.Register)
+
+	e.POST("/session", h.Login)
+
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	e.Logger.Fatal(e.Start(":4568"))

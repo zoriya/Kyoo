@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/alexedwards/argon2id"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/zoriya/kyoo/keibi/dbc"
@@ -17,6 +18,48 @@ import (
 type LoginDto struct {
 	Login    string `json:"login" validate:"required"`
 	Password string `json:"password" validate:"required"`
+}
+
+// @Summary      Login
+// @Description  Login to your account and open a session
+// @Tags         sessions
+// @Accept       json
+// @Produce      json
+// @Param        device   query   uuid         false  "The device the created session will be used on"
+// @Param        user     body    LoginDto  false  "Account informations"
+// @Success      201  {object}  dbc.Session
+// @Failure      400  {object}  problem.Problem "Invalid login body"
+// @Failure      400  {object}  problem.Problem "Invalid password"
+// @Failure      404  {object}  problem.Problem "Account does not exists"
+// @Router /sessions [post]
+func (h *Handler) Login(c echo.Context) error {
+	var req LoginDto
+	err := c.Bind(&req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	if err = c.Validate(&req); err != nil {
+		return err
+	}
+
+	dbuser, err := h.db.GetUserByLogin(context.Background(), req.Login)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "No account exists with the specified email or username.")
+	}
+	if dbuser.Password == nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Can't login with password, this account was created with OIDC.")
+	}
+
+	match, err := argon2id.ComparePasswordAndHash(req.Password, *dbuser.Password)
+	if err != nil {
+		return err
+	}
+	if !match {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid password")
+	}
+
+	user := MapDbUser(&dbuser)
+	return h.createSession(c, &user)
 }
 
 func (h *Handler) createSession(c echo.Context, user *User) error {

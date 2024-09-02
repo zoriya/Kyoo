@@ -1,1 +1,2 @@
 replace jwt.MapClaims map[string]string
+replace uuid.UUID string
