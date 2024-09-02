@@ -78,8 +78,8 @@ func (h *Handler) createSession(c echo.Context, user *User) error {
 	}
 
 	session, err := h.db.CreateSession(ctx, dbc.CreateSessionParams{
-		ID:     base64.StdEncoding.EncodeToString(id),
-		UserID: user.ID,
+		Token:  base64.StdEncoding.EncodeToString(id),
+		UserID: user.Id,
 		Device: device,
 	})
 	if err != nil {
