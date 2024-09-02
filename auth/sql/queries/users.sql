@@ -38,6 +38,14 @@ where
 	or username = sqlc.arg(login)
 limit 1;
 
+-- name: TouchUser :exec
+update
+	users
+set
+	last_used = now()::timestamptz
+where
+	id = $1;
+
 -- name: CreateUser :one
 insert into users(username, email, password, claims)
 	values ($1, $2, $3, $4)

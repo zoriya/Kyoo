@@ -1,9 +1,9 @@
 -- name: GetUserFromToken :one
 select
-	u.*
+	s.id, s.last_used, sqlc.embed(u)
 from
 	users as u
-	left join sessions as s on u.id = s.user_id
+	inner join sessions as s on u.id = s.user_id
 where
 	s.token = $1
 limit 1;

@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/zoriya/kyoo/keibi/dbc"
@@ -13,6 +14,7 @@ type Configuration struct {
 	JwtSecret     []byte
 	Issuer        string
 	DefaultClaims jwt.MapClaims
+	ExpirationDelay time.Duration
 }
 
 const (

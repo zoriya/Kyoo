@@ -126,6 +126,10 @@ type Handler struct {
 
 // @host kyoo.zoriya.dev
 // @BasePath /auth
+
+// @securityDefinitions.apiKey Token
+// @in header
+// @name Authorization
 func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
@@ -151,6 +155,7 @@ func main() {
 	e.GET("/users", h.ListUsers)
 	e.POST("/users", h.Register)
 
+	e.GET("/jwt", h.CreateJwt)
 	e.POST("/session", h.Login)
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)

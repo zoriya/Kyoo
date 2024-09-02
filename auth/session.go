@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"maps"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/alexedwards/argon2id"
@@ -17,7 +18,7 @@ import (
 
 type LoginDto struct {
 	// Either the email or the username.
-	Login    string `json:"login" validate:"required"`
+	Login string `json:"login" validate:"required"`
 	// Password of the account.
 	Password string `json:"password" validate:"required"`
 }
@@ -82,7 +83,7 @@ func (h *Handler) createSession(c echo.Context, user *User) error {
 
 	session, err := h.db.CreateSession(ctx, dbc.CreateSessionParams{
 		Token:  base64.StdEncoding.EncodeToString(id),
-		UserID: user.Id,
+		UserId: user.Id,
 		Device: device,
 	})
 	if err != nil {
@@ -91,20 +92,43 @@ func (h *Handler) createSession(c echo.Context, user *User) error {
 	return c.JSON(201, session)
 }
 
+type Jwt struct {
+	// The jwt token you can use for all authorized call to either keibi or other services.
+	Token string `json:"token"`
+}
+
 // @Summary      Get JWT
 // @Description  Convert a session token to a short lived JWT.
 // @Tags         sessions
 // @Accept       json
 // @Produce      json
-// @Param        user     body    LoginDto  false  "Account informations"
-// @Success      200  {object}  dbc.Session
-// @Failure      400  {object}  problem.Problem "Invalid login body"
-// @Failure      400  {object}  problem.Problem "Invalid password"
-// @Failure      404  {object}  problem.Problem "Account does not exists"
+// @Security     Token
+// @Success      200  {object}  Jwt
+// @Failure      401  {object}  problem.Problem "Missing session token"
+// @Failure      403  {object}  problem.Problem "Invalid session token (or expired)"
 // @Router /jwt [get]
-func (h *Handler) CreateJwt(c echo.Context, user *User) error {
-	claims := maps.Clone(user.Claims)
-	claims["sub"] = user.Id.String()
+func (h *Handler) CreateJwt(c echo.Context) error {
+	auth := c.Request().Header.Get("Authorization")
+	if !strings.HasPrefix(auth, "Bearer ") {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Missing session token")
+	}
+	token := auth[len("Bearer "):]
+
+	session, err := h.db.GetUserFromToken(context.Background(), token)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusForbidden, "Invalid token")
+	}
+	if session.LastUsed.Add(h.config.ExpirationDelay).Compare(time.Now().UTC()) < 0 {
+		return echo.NewHTTPError(http.StatusForbidden, "Token has expired")
+	}
+
+	go func() {
+		h.db.TouchSession(context.Background(), session.Id)
+		h.db.TouchUser(context.Background(), session.User.Id)
+	}()
+
+	claims := maps.Clone(session.User.Claims)
+	claims["sub"] = session.User.Id.String()
 	claims["iss"] = h.config.Issuer
 	claims["exp"] = &jwt.NumericDate{
 		Time: time.Now().UTC().Add(time.Hour),
@@ -112,12 +136,12 @@ func (h *Handler) CreateJwt(c echo.Context, user *User) error {
 	claims["iss"] = &jwt.NumericDate{
 		Time: time.Now().UTC(),
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	t, err := token.SignedString(h.config.JwtSecret)
+	jwt := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	t, err := jwt.SignedString(h.config.JwtSecret)
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, echo.Map{
-		"token": t,
+	return c.JSON(http.StatusOK, Jwt{
+		Token: t,
 	})
 }

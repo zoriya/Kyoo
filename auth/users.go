@@ -49,7 +49,7 @@ type RegisterDto struct {
 
 func MapDbUser(user *dbc.User) User {
 	return User{
-		Id:          user.ID,
+		Id:          user.Id,
 		Username:    user.Username,
 		Email:       user.Email,
 		CreatedDate: user.CreatedDate,
@@ -84,7 +84,7 @@ func (h *Handler) ListUsers(c echo.Context) error {
 		}
 		users, err = h.db.GetAllUsersAfter(ctx, dbc.GetAllUsersAfterParams{
 			Limit:   limit,
-			AfterID: uid,
+			AfterId: uid,
 		})
 	}
 
