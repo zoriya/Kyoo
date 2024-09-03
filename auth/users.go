@@ -78,12 +78,16 @@ func MapOidc(oidc *dbc.OidcHandle) OidcHandle {
 // @Failure      400  {object}  problem.Problem "Invalid after id"
 // @Router       /users [get]
 func (h *Handler) ListUsers(c echo.Context) error {
+	err := CheckPermission(c, []string{"user.read"})
+	if err != nil {
+		return err
+	}
+
 	ctx := context.Background()
 	limit := int32(20)
 	id := c.Param("afterId")
 
 	var users []dbc.User
-	var err error
 	if id == "" {
 		users, err = h.db.GetAllUsers(ctx, limit)
 	} else {
@@ -107,6 +111,38 @@ func (h *Handler) ListUsers(c echo.Context) error {
 	}
 	// TODO: switch to a Page
 	return c.JSON(200, ret)
+}
+
+// @Summary      Get user
+// @Description  Get informations about a user from it's id
+// @Tags         users
+// @Produce      json
+// @Security     Jwt[users.read]
+// @Param        id   path      string    true  "The id of the user" Format(uuid)
+// @Success      200  {object}  User
+// @Failure      404  {object}  problem.Problem "No user with the given id found"
+// @Router /users/{id} [get]
+func (h *Handler) GetUser(c echo.Context) error {
+	err := CheckPermission(c, []string{"user.read"})
+	if err != nil {
+		return err
+	}
+
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return echo.NewHTTPError(400, "Invalid id")
+	}
+	dbuser, err := h.db.GetUser(context.Background(), id)
+	if err != nil {
+		return err
+	}
+
+	user := MapDbUser(&dbuser[0].User)
+	for _, oidc := range dbuser {
+		user.Oidc[oidc.OidcHandle.Provider] = MapOidc(&oidc.OidcHandle)
+	}
+
+	return c.JSON(200, user)
 }
 
 // @Summary      Get me
@@ -134,22 +170,6 @@ func (h *Handler) GetMe(c echo.Context) error {
 	}
 
 	return c.JSON(200, user)
-}
-
-func GetCurrentUserId(c echo.Context) (uuid.UUID, error) {
-	user := c.Get("user").(*jwt.Token)
-	if user == nil {
-		return uuid.UUID{}, echo.NewHTTPError(401, "Unauthorized")
-	}
-	sub, err := user.Claims.GetSubject()
-	if err != nil {
-		return uuid.UUID{}, echo.NewHTTPError(403, "Could not retrive subject")
-	}
-	ret, err := uuid.Parse(sub)
-	if err != nil {
-		return uuid.UUID{}, echo.NewHTTPError(403, "Invalid id")
-	}
-	return ret, nil
 }
 
 // @Summary      Register

@@ -163,6 +163,8 @@ func main() {
 	}))
 
 	r.GET("/users", h.ListUsers)
+	r.GET("/users/:id", h.GetUser)
+	r.GET("/users/me", h.GetMe)
 	e.POST("/users", h.Register)
 
 	e.POST("/sessions", h.Login)
