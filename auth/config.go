@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"crypto/rand"
-	"encoding/base64"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -11,14 +13,15 @@ import (
 )
 
 type Configuration struct {
-	JwtSecret     []byte
-	Issuer        string
-	DefaultClaims jwt.MapClaims
+	JwtPrivateKey   *rsa.PrivateKey
+	JwtPublicKey    *rsa.PublicKey
+	Issuer          string
+	DefaultClaims   jwt.MapClaims
 	ExpirationDelay time.Duration
 }
 
 const (
-	JwtSecret = "jwt_secret"
+	JwtPrivateKey = "jwt_private_key"
 )
 
 func LoadConfiguration(db *dbc.Queries) (*Configuration, error) {
@@ -32,22 +35,34 @@ func LoadConfiguration(db *dbc.Queries) (*Configuration, error) {
 
 	for _, conf := range confs {
 		switch conf.Key {
-		case JwtSecret:
-			secret, err := base64.StdEncoding.DecodeString(conf.Value)
+		case JwtPrivateKey:
+			block, _ := pem.Decode([]byte(conf.Value))
+			key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 			if err != nil {
 				return nil, err
 			}
-			ret.JwtSecret = secret
+			ret.JwtPrivateKey = key
+			ret.JwtPublicKey = &key.PublicKey
 		}
 	}
 
-	if ret.JwtSecret == nil {
-		ret.JwtSecret = make([]byte, 128)
-		rand.Read(ret.JwtSecret)
+	if ret.JwtPrivateKey == nil {
+		ret.JwtPrivateKey, err = rsa.GenerateKey(rand.Reader, 4096)
+		if err != nil {
+			return nil, err
+		}
+		ret.JwtPublicKey = &ret.JwtPrivateKey.PublicKey
+
+		pemd := pem.EncodeToMemory(
+			&pem.Block{
+				Type:  "RSA PRIVATE KEY",
+				Bytes: x509.MarshalPKCS1PrivateKey(ret.JwtPrivateKey),
+			},
+		)
 
 		_, err := db.SaveConfig(ctx, dbc.SaveConfigParams{
-			Key:   JwtSecret,
-			Value: base64.StdEncoding.EncodeToString(ret.JwtSecret),
+			Key:   JwtPrivateKey,
+			Value: string(pemd),
 		})
 		if err != nil {
 			return nil, err

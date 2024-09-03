@@ -100,7 +100,6 @@ type Jwt struct {
 // @Summary      Get JWT
 // @Description  Convert a session token to a short lived JWT.
 // @Tags         sessions
-// @Accept       json
 // @Produce      json
 // @Security     Token
 // @Success      200  {object}  Jwt
@@ -129,6 +128,7 @@ func (h *Handler) CreateJwt(c echo.Context) error {
 
 	claims := maps.Clone(session.User.Claims)
 	claims["sub"] = session.User.Id.String()
+	claims["sid"] = session.Id.String()
 	claims["iss"] = h.config.Issuer
 	claims["exp"] = &jwt.NumericDate{
 		Time: time.Now().UTC().Add(time.Hour),
@@ -136,8 +136,8 @@ func (h *Handler) CreateJwt(c echo.Context) error {
 	claims["iss"] = &jwt.NumericDate{
 		Time: time.Now().UTC(),
 	}
-	jwt := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	t, err := jwt.SignedString(h.config.JwtSecret)
+	jwt := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	t, err := jwt.SignedString(h.config.JwtPrivateKey)
 	if err != nil {
 		return err
 	}
