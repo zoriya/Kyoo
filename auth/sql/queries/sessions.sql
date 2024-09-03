@@ -1,6 +1,8 @@
 -- name: GetUserFromToken :one
 select
-	s.id, s.last_used, sqlc.embed(u)
+	s.id,
+	s.last_used,
+	sqlc.embed(u)
 from
 	users as u
 	inner join sessions as s on u.id = s.user_id
@@ -35,12 +37,7 @@ returning
 -- name: DeleteSession :one
 delete from sessions
 where id = $1
-returning
-	*;
-
--- name: DeleteSessionByToken :one
-delete from sessions
-where token = $1
+	and user_id = $2
 returning
 	*;
 

@@ -18,6 +18,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
+	"github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/swaggo/echo-swagger"
@@ -130,6 +131,10 @@ type Handler struct {
 // @securityDefinitions.apiKey Token
 // @in header
 // @name Authorization
+
+// @securityDefinitions.apiKey Jwt
+// @in header
+// @name Authorization
 func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
@@ -152,11 +157,19 @@ func main() {
 	}
 	h.config = conf
 
-	e.GET("/users", h.ListUsers)
+	r := e.Group("")
+	r.Use(echojwt.WithConfig(echojwt.Config{
+		SigningKey: h.config.JwtPublicKey,
+	}))
+
+	r.GET("/users", h.ListUsers)
 	e.POST("/users", h.Register)
 
+	e.POST("/sessions", h.Login)
+	r.DELETE("/sessions", h.Logout)
+	r.DELETE("/sessions/:id", h.Logout)
+
 	e.GET("/jwt", h.CreateJwt)
-	e.POST("/session", h.Login)
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 

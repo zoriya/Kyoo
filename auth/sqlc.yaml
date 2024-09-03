@@ -10,6 +10,7 @@ sql:
         out: "dbc"
         emit_pointers_for_null_types: true
         emit_json_tags: true
+        json_tags_case_style: camel
         initialisms: []
         overrides:
         - db_type: "timestamptz"

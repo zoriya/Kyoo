@@ -14,26 +14,26 @@ import (
 
 type User struct {
 	// Id of the user.
-	Id          uuid.UUID             `json:"id"`
+	Id uuid.UUID `json:"id"`
 	// Username of the user. Can be used as a login.
-	Username    string                `json:"username"`
+	Username string `json:"username"`
 	// Email of the user. Can be used as a login.
-	Email       string                `json:"email" format:"email"`
+	Email string `json:"email" format:"email"`
 	// When was this account created?
-	CreatedDate time.Time             `json:"createdDate"`
+	CreatedDate time.Time `json:"createdDate"`
 	// When was the last time this account made any authorized request?
-	LastSeen    time.Time             `json:"lastSeen"`
+	LastSeen time.Time `json:"lastSeen"`
 	// List of custom claims JWT created via get /jwt will have
-	Claims      jwt.MapClaims         `json:"claims"`
+	Claims jwt.MapClaims `json:"claims"`
 	// List of other login method available for this user. Access tokens wont be returned here.
-	Oidc        map[string]OidcHandle `json:"oidc,omitempty"`
+	Oidc map[string]OidcHandle `json:"oidc,omitempty"`
 }
 
 type OidcHandle struct {
 	// Id of this oidc handle.
-	Id         string  `json:"id"`
+	Id string `json:"id"`
 	// Username of the user on the external service.
-	Username   string  `json:"username"`
+	Username string `json:"username"`
 	// Link to the profile of the user on the external service. Null if unknown or irrelevant.
 	ProfileUrl *string `json:"profileUrl" format:"url"`
 }
@@ -42,7 +42,7 @@ type RegisterDto struct {
 	// Username of the new account, can't contain @ signs. Can be used for login.
 	Username string `json:"username" validate:"required,excludes=@"`
 	// Valid email that could be used for forgotten password requests. Can be used for login.
-	Email    string `json:"email" validate:"required,email" format:"email"`
+	Email string `json:"email" validate:"required,email" format:"email"`
 	// Password to use.
 	Password string `json:"password" validate:"required"`
 }
@@ -59,11 +59,20 @@ func MapDbUser(user *dbc.User) User {
 	}
 }
 
+func MapOidc(oidc *dbc.OidcHandle) OidcHandle {
+	return OidcHandle{
+		Id:         oidc.Id,
+		Username:   oidc.Username,
+		ProfileUrl: oidc.ProfileUrl,
+	}
+}
+
 // @Summary      List all users
 // @Description  List all users existing in this instance.
 // @Tags         users
 // @Accept       json
 // @Produce      json
+// @Security     Jwt[users.read]
 // @Param        afterId   query      string  false  "used for pagination." Format(uuid)
 // @Success      200  {object}  User[]
 // @Failure      400  {object}  problem.Problem "Invalid after id"
@@ -98,6 +107,49 @@ func (h *Handler) ListUsers(c echo.Context) error {
 	}
 	// TODO: switch to a Page
 	return c.JSON(200, ret)
+}
+
+// @Summary      Get me
+// @Description  Get informations about the currently connected user
+// @Tags         users
+// @Produce      json
+// @Security     Jwt
+// @Success      200  {object}  User
+// @Failure      401  {object}  problem.Problem "Missing jwt token"
+// @Failure      403  {object}  problem.Problem "Invalid jwt token (or expired)"
+// @Router /users/me [get]
+func (h *Handler) GetMe(c echo.Context) error {
+	id, err := GetCurrentUserId(c)
+	if err != nil {
+		return err
+	}
+	dbuser, err := h.db.GetUser(context.Background(), id)
+	if err != nil {
+		return err
+	}
+
+	user := MapDbUser(&dbuser[0].User)
+	for _, oidc := range dbuser {
+		user.Oidc[oidc.OidcHandle.Provider] = MapOidc(&oidc.OidcHandle)
+	}
+
+	return c.JSON(200, user)
+}
+
+func GetCurrentUserId(c echo.Context) (uuid.UUID, error) {
+	user := c.Get("user").(*jwt.Token)
+	if user == nil {
+		return uuid.UUID{}, echo.NewHTTPError(401, "Unauthorized")
+	}
+	sub, err := user.Claims.GetSubject()
+	if err != nil {
+		return uuid.UUID{}, echo.NewHTTPError(403, "Could not retrive subject")
+	}
+	ret, err := uuid.Parse(sub)
+	if err != nil {
+		return uuid.UUID{}, echo.NewHTTPError(403, "Invalid id")
+	}
+	return ret, nil
 }
 
 // @Summary      Register

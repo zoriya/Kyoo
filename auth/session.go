@@ -12,9 +12,30 @@ import (
 
 	"github.com/alexedwards/argon2id"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/zoriya/kyoo/keibi/dbc"
 )
+
+type Session struct {
+	// Unique id of this session. Can be used for calls to DELETE
+	Id uuid.UUID `json:"id"`
+	// When was the session first opened
+	CreatedDate time.Time `json:"createdDate"`
+	// Last date this session was used to access a service.
+	LastUsed time.Time `json:"lastUsed"`
+	// Device that created the session.
+	Device *string `json:"device"`
+}
+
+func MapSession(ses *dbc.Session) Session {
+	return Session{
+		Id:          ses.Id,
+		CreatedDate: ses.CreatedDate,
+		LastUsed:    ses.LastUsed,
+		Device:      ses.Device,
+	}
+}
 
 type LoginDto struct {
 	// Either the email or the username.
@@ -144,4 +165,46 @@ func (h *Handler) CreateJwt(c echo.Context) error {
 	return c.JSON(http.StatusOK, Jwt{
 		Token: t,
 	})
+}
+
+// @Summary      Logout
+// @Description  Delete a session and logout
+// @Tags         sessions
+// @Produce      json
+// @Security     Jwt
+// @Param        id   path      string    true  "The id of the session to delete" Format(uuid)
+// @Success      200  {object}  Session
+// @Failure      400  {object}  problem.Problem "Invalid session id"
+// @Failure      401  {object}  problem.Problem "Missing jwt token"
+// @Failure      403  {object}  problem.Problem "Invalid jwt token (or expired)"
+// @Failure      404  {object}  problem.Problem "Session not found with specified id (if not using the /current route)"
+// @Router /sessions/{id} [delete]
+// @Router /sessions/current [delete]
+func (h *Handler) Logout(c echo.Context) error {
+	uid, err := GetCurrentUserId(c)
+	if err != nil {
+		return err
+	}
+
+	session := c.Param("id")
+	if session == "" {
+		sid, ok := c.Get("user").(*jwt.Token).Claims.(jwt.MapClaims)["sid"]
+		if !ok {
+			return echo.NewHTTPError(400, "Missing session id")
+		}
+		session = sid.(string)
+	}
+	sid, err := uuid.Parse(session)
+	if err != nil {
+		return echo.NewHTTPError(400, "Invalid session id")
+	}
+
+	ret, err := h.db.DeleteSession(context.Background(), dbc.DeleteSessionParams{
+		Id:     sid,
+		UserId: uid,
+	})
+	if err != nil {
+		return echo.NewHTTPError(404, "Session not found with specified id")
+	}
+	return c.JSON(200, MapSession(&ret))
 }
