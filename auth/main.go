@@ -165,6 +165,8 @@ func main() {
 	r.GET("/users", h.ListUsers)
 	r.GET("/users/:id", h.GetUser)
 	r.GET("/users/me", h.GetMe)
+	r.DELETE("/users/:id", h.DeleteUser)
+	r.DELETE("/users/me", h.DeleteSelf)
 	e.POST("/users", h.Register)
 
 	e.POST("/sessions", h.Login)
@@ -172,6 +174,7 @@ func main() {
 	r.DELETE("/sessions/:id", h.Logout)
 
 	e.GET("/jwt", h.CreateJwt)
+	e.GET("/info", h.GetInfo)
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 

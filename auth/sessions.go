@@ -5,9 +5,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
-	"maps"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/alexedwards/argon2id"
@@ -111,60 +109,6 @@ func (h *Handler) createSession(c echo.Context, user *User) error {
 		return err
 	}
 	return c.JSON(201, session)
-}
-
-type Jwt struct {
-	// The jwt token you can use for all authorized call to either keibi or other services.
-	Token string `json:"token"`
-}
-
-// @Summary      Get JWT
-// @Description  Convert a session token to a short lived JWT.
-// @Tags         sessions
-// @Produce      json
-// @Security     Token
-// @Success      200  {object}  Jwt
-// @Failure      401  {object}  problem.Problem "Missing session token"
-// @Failure      403  {object}  problem.Problem "Invalid session token (or expired)"
-// @Router /jwt [get]
-func (h *Handler) CreateJwt(c echo.Context) error {
-	auth := c.Request().Header.Get("Authorization")
-	if !strings.HasPrefix(auth, "Bearer ") {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Missing session token")
-	}
-	token := auth[len("Bearer "):]
-
-	session, err := h.db.GetUserFromToken(context.Background(), token)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusForbidden, "Invalid token")
-	}
-	if session.LastUsed.Add(h.config.ExpirationDelay).Compare(time.Now().UTC()) < 0 {
-		return echo.NewHTTPError(http.StatusForbidden, "Token has expired")
-	}
-
-	go func() {
-		h.db.TouchSession(context.Background(), session.Id)
-		h.db.TouchUser(context.Background(), session.User.Id)
-	}()
-
-	claims := maps.Clone(session.User.Claims)
-	claims["sub"] = session.User.Id.String()
-	claims["sid"] = session.Id.String()
-	claims["iss"] = h.config.Issuer
-	claims["exp"] = &jwt.NumericDate{
-		Time: time.Now().UTC().Add(time.Hour),
-	}
-	claims["iss"] = &jwt.NumericDate{
-		Time: time.Now().UTC(),
-	}
-	jwt := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-	t, err := jwt.SignedString(h.config.JwtPrivateKey)
-	if err != nil {
-		return err
-	}
-	return c.JSON(http.StatusOK, Jwt{
-		Token: t,
-	})
 }
 
 // @Summary      Logout
