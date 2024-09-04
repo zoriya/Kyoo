@@ -26,7 +26,7 @@ func GetCurrentUserId(c echo.Context) (uuid.UUID, error) {
 	return ret, nil
 }
 
-func CheckPremissions(c echo.Context, perms []string) error {
+func CheckPermissions(c echo.Context, perms []string) error {
 	token, ok := c.Get("user").(*jwt.Token)
 	if !ok {
 		return echo.NewHTTPError(401, "Not logged in")

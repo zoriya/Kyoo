@@ -78,7 +78,7 @@ func MapOidc(oidc *dbc.OidcHandle) OidcHandle {
 // @Failure      400  {object}  problem.Problem "Invalid after id"
 // @Router       /users [get]
 func (h *Handler) ListUsers(c echo.Context) error {
-	err := CheckPermission(c, []string{"user.read"})
+	err := CheckPermissions(c, []string{"user.read"})
 	if err != nil {
 		return err
 	}
@@ -123,7 +123,7 @@ func (h *Handler) ListUsers(c echo.Context) error {
 // @Failure      404  {object}  problem.Problem "No user with the given id found"
 // @Router /users/{id} [get]
 func (h *Handler) GetUser(c echo.Context) error {
-	err := CheckPermission(c, []string{"user.read"})
+	err := CheckPermissions(c, []string{"user.read"})
 	if err != nil {
 		return err
 	}
@@ -177,7 +177,7 @@ func (h *Handler) GetMe(c echo.Context) error {
 // @Tags         users
 // @Accept       json
 // @Produce      json
-// @Param        device   query   uuid         false  "The device the created session will be used on"
+// @Param        device   query   string         false  "The device the created session will be used on"
 // @Param        user     body    RegisterDto  false  "Registration informations"
 // @Success      201  {object}  dbc.Session
 // @Failure      400  {object}  problem.Problem "Invalid register body"
@@ -209,4 +209,49 @@ func (h *Handler) Register(c echo.Context) error {
 	}
 	user := MapDbUser(&duser)
 	return h.createSession(c, &user)
+}
+
+// @Summary      Delete user
+// @Description  Delete an account and all it's sessions.
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Security     Jwt[users.delete]
+// @Param        id   path      string  false  "User id of the user to delete" Format(uuid)
+// @Success      200  {object}  User
+// @Failure      404  {object}  problem.Problem "Invalid id format"
+// @Failure      404  {object}  problem.Problem "Invalid user id"
+// @Router /users/{id} [delete]
+func (h *Handler) DeleteUser(c echo.Context) error {
+	uid, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return echo.NewHTTPError(400, "Invalid id given: not an uuid")
+	}
+
+	ret, err := h.db.DeleteUser(context.Background(), uid)
+	if err != nil {
+		return echo.NewHTTPError(404, "No user found with given id")
+	}
+	return c.JSON(200, MapDbUser(&ret))
+}
+
+// @Summary      Delete self
+// @Description  Delete your account and all your sessions
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Security     Jwt
+// @Success      200  {object}  User
+// @Router /users/me [delete]
+func (h *Handler) DeleteSelf(c echo.Context) error {
+	uid, err := GetCurrentUserId(c)
+	if err != nil {
+		return err
+	}
+
+	ret, err := h.db.DeleteUser(context.Background(), uid)
+	if err != nil {
+		return echo.NewHTTPError(403, "Invalid token, user already deleted.")
+	}
+	return c.JSON(200, MapDbUser(&ret))
 }
