@@ -40,6 +40,7 @@ in
       go-migrate
       sqlc
       go-swag
+      robotframework-tidy
     ];
 
     DOTNET_ROOT = "${dotnet}";
