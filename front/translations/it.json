@@ -1,54 +1,54 @@
 {
 	"home": {
-		"recommended": "",
+		"recommended": "Raccomandati",
 		"news": "",
-		"watchlist": "",
+		"watchlist": "Continua a guardare",
 		"info": "",
-		"none": "",
+		"none": "Nessun episodio",
 		"watchlistLogin": "",
-		"refreshMetadata": "",
+		"refreshMetadata": "Aggiorna metadata",
 		"episodeMore": {
-			"goToShow": "",
+			"goToShow": "Vai allo show",
 			"download": "",
 			"mediainfo": ""
 		}
 	},
 	"show": {
-		"play": "",
-		"trailer": "",
+		"play": "Riproduci",
+		"trailer": "Riproduci Trailer",
 		"studio": "",
-		"genre": "",
-		"genre-none": "",
+		"genre": "Generi",
+		"genre-none": "Nessun genere",
 		"staff": "",
 		"staff-none": "",
 		"noOverview": "",
-		"episode-none": "",
+		"episode-none": "Non ci sono episodi in questa stagione",
 		"episodeNoMetadata": "",
 		"tags": "",
-		"links": "",
+		"links": "Link",
 		"jumpToSeason": "",
 		"partOf": "",
 		"watchlistAdd": "",
 		"watchlistEdit": "",
-		"watchlistRemove": "",
+		"watchlistRemove": "Segna come non visto",
 		"watchlistLogin": "",
 		"watchlistMark": {
-			"completed": "",
+			"completed": "Segna come completato",
 			"planned": "",
 			"watching": "",
 			"droped": "",
-			"null": ""
+			"null": "Segna come non visto"
 		},
-		"nextUp": "",
-		"season": ""
+		"nextUp": "Prossimo",
+		"season": "Stagione {{number}}"
 	},
 	"browse": {
-		"sortby": "",
-		"sortby-tt": "",
+		"sortby": "Ordina per {{key}}",
+		"sortby-tt": "Ordina per",
 		"sortkey": {
 			"relevance": "",
-			"name": "",
-			"airDate": "",
+			"name": "Nome",
+			"airDate": "Data di trasmissione",
 			"startAir": "",
 			"endAir": "",
 			"addedDate": "",
@@ -59,46 +59,52 @@
 			"desc": ""
 		},
 		"switchToGrid": "",
-		"switchToList": ""
+		"switchToList": "",
+		"mediatypekey": {
+			"all": "Tutti",
+			"movie": "Film",
+			"show": "Serie TV",
+			"collection": "Collezione"
+		}
 	},
 	"misc": {
-		"settings": "",
-		"prev-page": "",
-		"next-page": "",
-		"delete": "",
-		"cancel": "",
-		"more": "",
-		"expand": "",
+		"settings": "Impostazioni",
+		"prev-page": "Pagina precedente",
+		"next-page": "Pagina successiva",
+		"delete": "Elimina",
+		"cancel": "Annulla",
+		"more": "Di più",
+		"expand": "Espandi",
 		"collapse": "",
-		"edit": "",
+		"edit": "Modifica",
 		"or": "",
-		"loading": ""
+		"loading": "Caricamento"
 	},
 	"navbar": {
-		"home": "",
-		"browse": "",
-		"search": "",
-		"login": "",
-		"admin": ""
+		"home": "Home",
+		"browse": "Cerca",
+		"search": "Ricerca",
+		"login": "Login",
+		"admin": "Pannello amministratore"
 	},
 	"settings": {
 		"general": {
-			"label": "",
+			"label": "Generale",
 			"theme": {
-				"label": "",
-				"description": "",
-				"auto": "",
-				"light": "",
-				"dark": ""
+				"label": "Tema",
+				"description": "Imposta il tema della tua applicazione",
+				"auto": "Sistema",
+				"light": "Chiaro",
+				"dark": "Scuro"
 			},
 			"language": {
-				"label": "",
-				"description": "",
-				"system": ""
+				"label": "Lingua",
+				"description": "Imposta la lingua della tua applicazione",
+				"system": "Sistema"
 			}
 		},
 		"playback": {
-			"label": "",
+			"label": "Riproduzione",
 			"playmode": {
 				"label": "",
 				"description": ""
@@ -241,5 +247,22 @@
 			"scan": "",
 			"empty": ""
 		}
+	},
+	"genres": {
+		"Mystery": "Mistero",
+		"Kids": "Bambini",
+		"Western": "Western",
+		"History": "Storico",
+		"Romance": "Romantico",
+		"ScienceFiction": "Fantascienza",
+		"Thriller": "Thriller",
+		"War": "Guerra",
+		"Animation": "Animazione",
+		"Action": "Azione",
+		"Adventure": "Avventura",
+		"Comedy": "Commedia",
+		"Crime": "Criminale",
+		"Documentary": "Documentario",
+		"Drama": "Drammatico"
 	}
 }
