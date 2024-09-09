@@ -1,24 +1,24 @@
 {
 	"home": {
-		"recommended": "",
-		"news": "",
-		"watchlist": "",
-		"info": "",
-		"none": "",
-		"watchlistLogin": "",
-		"refreshMetadata": "",
+		"recommended": "Recomendado",
+		"news": "Noticias",
+		"watchlist": "Continuar viendo",
+		"info": "Ver mas",
+		"none": "Sin episodios",
+		"watchlistLogin": "Para mantener lo que ha visto o planea ver, necesita iniciar sesión.",
+		"refreshMetadata": "Refrescar metadata",
 		"episodeMore": {
-			"goToShow": "",
-			"download": "",
-			"mediainfo": ""
+			"goToShow": "Ir al show",
+			"download": "Descarga",
+			"mediainfo": "Ver información del archivo"
 		}
 	},
 	"show": {
-		"play": "",
-		"trailer": "",
-		"studio": "",
-		"genre": "",
-		"genre-none": "",
+		"play": "Reproducir",
+		"trailer": "Reproducir Trailer",
+		"studio": "Estudio",
+		"genre": "Generos",
+		"genre-none": "Sin generos",
 		"staff": "",
 		"staff-none": "",
 		"noOverview": "",
