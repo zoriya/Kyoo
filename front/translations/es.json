@@ -5,7 +5,7 @@
 		"watchlist": "Continuar viendo",
 		"info": "Ver mas",
 		"none": "Sin episodios",
-		"watchlistLogin": "Para mantener lo que ha visto o planea ver, necesita iniciar sesión.",
+		"watchlistLogin": "Para hacer un seguimiento de lo que has visto o piensas ver, tienes que iniciar sesión.",
 		"refreshMetadata": "Refrescar metadatos",
 		"episodeMore": {
 			"goToShow": "Ir al show",
@@ -19,7 +19,7 @@
 		"studio": "Estudio",
 		"genre": "Géneros",
 		"genre-none": "Sin géneros",
-		"staff": "",
+		"staff": "Equipo",
 		"staff-none": "",
 		"noOverview": "",
 		"episode-none": "",
