@@ -217,8 +217,8 @@
 		"via": "Continuar con {{provider}}",
 		"add-account": "Agregar cuenta",
 		"logout": "Desconectarse",
-		"server": "Dirección del Server",
-		"email": "Email",
+		"server": "Dirección del servidor",
+		"email": "Correo electrónico",
 		"username": "Usuario",
 		"password": "Contraseña",
 		"confirm": "Confirmar Contraseña",
@@ -235,14 +235,14 @@
 		"deleteMessage": "¿Quieres eliminar este elemento de tu almacenamiento local?",
 		"pause": "Pausa",
 		"resume": "Reanudar",
-		"retry": "Re intentar"
+		"retry": "Reintentar"
 	},
 	"errors": {
 		"connection": "No se pudo conectar al servidor de Kyoo",
 		"connection-tips": "Consejos de solución de problemas:\n    ¿Estás conectado a internet?\n    ¿Está en línea el servidor de Kyoo?\n    ¿Ha sido bloqueada tu cuenta?",
 		"unknown": "Error desconocido",
 		"try-again": "Intentar nuevamente",
-		"re-login": "Re iniciar sesión",
+		"re-login": "Reiniciar sesión",
 		"offline": "No estás conectado a internet. Intenta de nuevo más tarde.",
 		"unauthorized": "Faltan los permisos {{permission}} para acceder a esta página.",
 		"needVerification": "Tu cuenta debe ser verificada por el administrador del servidor antes de que puedas usarla.",
