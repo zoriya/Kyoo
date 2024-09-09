@@ -124,7 +124,7 @@
 				"description": "",
 				"auto": "",
 				"light": "",
-				"dark": ""
+				"dark": "Oscuro"
 			},
 			"language": {
 				"label": "",
@@ -139,11 +139,11 @@
 				"description": ""
 			},
 			"audioLanguage": {
-				"label": "",
-				"description": ""
+				"label": "Idioma de audio",
+				"description": "El idioma de audio predeterminado utilizado al reproducir videos con múltiples pistas de audio"
 			},
 			"subtitleLanguage": {
-				"label": "",
+				"label": "Idioma de subtítulos",
 				"description": "",
 				"none": ""
 			}
@@ -178,24 +178,24 @@
 		"about": {
 			"label": "",
 			"android-app": {
-				"label": "",
-				"description": ""
+				"label": "Aplicación de Android",
+				"description": "Descarga la aplicación de Android"
 			},
 			"git": {
-				"label": "",
-				"description": ""
+				"label": "Github",
+				"description": "Abre el repositorio de GitHub donde puedes explorar el código de Kyoo"
 			}
 		}
 	},
 	"player": {
-		"back": "",
-		"previous": "",
-		"next": "",
-		"play": "",
-		"pause": "",
-		"mute": "",
-		"volume": "",
-		"quality": "",
+		"back": "Atras",
+		"previous": "Episodio anterior",
+		"next": "Siguiente episodio",
+		"play": "Iniciar",
+		"pause": "Detener",
+		"mute": "Alternar silencio",
+		"volume": "Volumen",
+		"quality": "Calidad",
 		"audios": "Audio",
 		"subtitles": "Subtítulos",
 		"subtitle-none": "Ninguno",
