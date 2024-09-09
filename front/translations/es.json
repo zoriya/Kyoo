@@ -15,10 +15,10 @@
 	},
 	"show": {
 		"play": "Reproducir",
-		"trailer": "Reproducir Trailer",
+		"trailer": "Ver el tráiler",
 		"studio": "Estudio",
-		"genre": "Generos",
-		"genre-none": "Sin generos",
+		"genre": "Géneros",
+		"genre-none": "Sin géneros",
 		"staff": "",
 		"staff-none": "",
 		"noOverview": "",
