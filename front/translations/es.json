@@ -1,0 +1,285 @@
+{
+	"home": {
+		"recommended": "Recomendado",
+		"news": "Noticias",
+		"watchlist": "Continuar viendo",
+		"info": "Ver mas",
+		"none": "Sin episodios",
+		"watchlistLogin": "Para hacer un seguimiento de lo que has visto o piensas ver, tienes que iniciar sesión.",
+		"refreshMetadata": "Refrescar metadatos",
+		"episodeMore": {
+			"goToShow": "Ir al show",
+			"download": "Descarga",
+			"mediainfo": "Ver información del archivo"
+		}
+	},
+	"show": {
+		"play": "Reproducir",
+		"trailer": "Ver el tráiler",
+		"studio": "Estudio",
+		"genre": "Géneros",
+		"genre-none": "Sin géneros",
+		"staff": "Equipo",
+		"staff-none": "El equipo es desconocido",
+		"noOverview": "Resumen no disponible",
+		"episode-none": "No hay episodios en esta temporada",
+		"episodeNoMetadata": "Metadatos no disponibles",
+		"tags": "Etiquetas",
+		"links": "Enlaces",
+		"jumpToSeason": "Ir a temporada",
+		"partOf": "Parte de la",
+		"watchlistAdd": "Agregar a su lista de seguimiento",
+		"watchlistEdit": "Modificar el estado de visto",
+		"watchlistRemove": "Marcar como no visto",
+		"watchlistLogin": "Inicia sesión para añadir a tu lista de seguimiento",
+		"watchlistMark": {
+			"completed": "Marcar como completado",
+			"planned": "Marcar como planificado",
+			"watching": "Marcar como viendo",
+			"droped": "Marcar como descartado",
+			"null": "Marcar como no visto"
+		},
+		"nextUp": "Siguiente",
+		"season": "Temporada {{number}}"
+	},
+	"browse": {
+		"mediatypekey": {
+			"all": "Todo",
+			"movie": "Películas",
+			"show": "Programas de TV",
+			"collection": "Colección"
+		},
+		"mediatype-tt": "Tipos de medios",
+		"mediatypelabel": "Tipo de medio",
+		"sortby": "Ordenar por {{key}}",
+		"sortby-tt": "Ordenar por",
+		"sortkey": {
+			"relevance": "Relevancia",
+			"name": "Nombre",
+			"airDate": "Fecha de emisión",
+			"startAir": "Empieza emisión",
+			"endAir": "Finaliza emisión",
+			"addedDate": "Fecha de incorporación",
+			"rating": "Calificaciones"
+		},
+		"sortord": {
+			"asc": "ascendente",
+			"desc": "descendente"
+		},
+		"switchToGrid": "Cambiar a vista de cuadrícula",
+		"switchToList": "Cambiar a vista de lista"
+	},
+	"genres": {
+		"Action": "Acción",
+		"Adventure": "Aventura",
+		"Animation": "Animación",
+		"Comedy": "Comedia",
+		"Crime": "Crimen",
+		"Documentary": "Documental",
+		"Drama": "Drama",
+		"Family": "Familia",
+		"Fantasy": "Fantasía",
+		"History": "Historia",
+		"Horror": "Horror",
+		"Music": "Musica",
+		"Mystery": "Misterio",
+		"Romance": "Romance",
+		"ScienceFiction": "Ciencia ficción",
+		"Thriller": "Suspenso",
+		"War": "Bélica",
+		"Western": "Del oeste",
+		"Kids": "Niños",
+		"News": "Noticias",
+		"Reality": "Realidad",
+		"Soap": "Novela",
+		"Talk": "Entrevista",
+		"Politics": "Política"
+	},
+	"misc": {
+		"settings": "Ajustes",
+		"prev-page": "Pagina anterior",
+		"next-page": "Pagina siguiente",
+		"delete": "Eliminar",
+		"cancel": "Cancelar",
+		"more": "Mas",
+		"expand": "Agrandar",
+		"collapse": "Expandir",
+		"edit": "Modificar",
+		"or": "O",
+		"loading": "Cargando"
+	},
+	"navbar": {
+		"home": "Principal",
+		"browse": "Navegar",
+		"download": "Descargar",
+		"search": "Buscar",
+		"login": "Acceder",
+		"admin": "Panel de administración"
+	},
+	"settings": {
+		"general": {
+			"label": "General",
+			"theme": {
+				"label": "Tema",
+				"description": "Establece el tema de tu aplicación",
+				"auto": "Sistema",
+				"light": "Claro",
+				"dark": "Oscuro"
+			},
+			"language": {
+				"label": "Idioma",
+				"description": "Establecer el idioma de tu aplicación",
+				"system": "Sistema"
+			}
+		},
+		"playback": {
+			"label": "Reproducción",
+			"playmode": {
+				"label": "Modo de reproducción predeterminado",
+				"description": "El modo de reproducción predeterminado utilizado con este cliente. La calidad original requiere menos recursos en el servidor, pero no permite cambios automáticos de calidad"
+			},
+			"audioLanguage": {
+				"label": "Idioma del audio",
+				"description": "El idioma del audio predeterminado utilizado al reproducir videos con múltiples pistas de audio"
+			},
+			"subtitleLanguage": {
+				"label": "Idioma de los subtítulos",
+				"description": "Idioma de los subtítulos utilizado por defecto",
+				"none": "Ninguno"
+			}
+		},
+		"account": {
+			"label": "Cuenta",
+			"username": {
+				"label": "Nombre de usuario"
+			},
+			"avatar": {
+				"label": "Avatar",
+				"description": "Cambiar icono del perfil"
+			},
+			"email": {
+				"label": "Correo electrónico"
+			},
+			"password": {
+				"label": "Contraseña",
+				"description": "Cambiar tu contraseña",
+				"oldPassword": "Contraseña anterior",
+				"newPassword": "Contraseña nueva"
+			}
+		},
+		"oidc": {
+			"label": "Cuentas vinculadas",
+			"connected": "Conectad@ como {{username}}.",
+			"not-connected": "Desconectad@",
+			"open-profile": "Abre tu perfil de {{provider}}",
+			"link": "Enlace",
+			"delete": "Desvincula tu cuenta de kyoo con tu cuenta de {{provider}}"
+		},
+		"about": {
+			"label": "Acerca de",
+			"android-app": {
+				"label": "Aplicación de Android",
+				"description": "Descarga la aplicación de Android"
+			},
+			"git": {
+				"label": "Github",
+				"description": "Abre el repositorio de GitHub donde puedes explorar el código de Kyoo"
+			}
+		}
+	},
+	"player": {
+		"back": "Atrás",
+		"previous": "Episodio anterior",
+		"next": "Siguiente episodio",
+		"play": "Iniciar",
+		"pause": "Pausar",
+		"mute": "Alternar silencio",
+		"volume": "Volumen",
+		"quality": "Calidad",
+		"audios": "Audio",
+		"subtitles": "Subtítulos",
+		"subtitle-none": "Ninguno",
+		"fullscreen": "Pantalla completa",
+		"direct": "Prístino",
+		"transmux": "Original",
+		"auto": "Auto",
+		"notInPristine": "No disponible en prístino",
+		"unsupportedError": "Códec de video no compatible, transcodificación en progreso..."
+	},
+	"search": {
+		"empty": "Sin resultados. Intente otra búsqueda."
+	},
+	"login": {
+		"login": "Iniciar sesión",
+		"register": "Registrarse",
+		"guest": "Continuar como invitado",
+		"guest-forbidden": "Esta instancia de Kyoo no permite invitados.",
+		"via": "Continuar con {{provider}}",
+		"add-account": "Agregar cuenta",
+		"logout": "Desconectarse",
+		"server": "Dirección del servidor",
+		"email": "Correo electrónico",
+		"username": "Usuario",
+		"password": "Contraseña",
+		"confirm": "Confirmar Contraseña",
+		"or-register": "¿No tienes una cuenta? <1>Regístrate</1>.",
+		"or-login": "¿Ya tienes una cuenta? <1>Iniciar sesión</1>.",
+		"password-no-match": "La contraseña no coincide.",
+		"delete": "Elimine su cuenta",
+		"delete-confirmation": "Esta acción no se puede deshacer. ¿Está seguro?"
+	},
+	"downloads": {
+		"empty": "Nada descargado aún, empieza a buscar algo que te guste",
+		"error": "Error: {{error}}",
+		"delete": "Eliminar elemento",
+		"deleteMessage": "¿Quieres eliminar este elemento de tu almacenamiento local?",
+		"pause": "Pausa",
+		"resume": "Reanudar",
+		"retry": "Reintentar"
+	},
+	"errors": {
+		"connection": "No se pudo conectar al servidor de Kyoo",
+		"connection-tips": "Consejos para solucionar problemas:\n - ¿Estás conectado a Internet?\n - ¿Está en línea tu servidor de kyoo?\n - ¿Tu cuenta ha sido baneada?",
+		"unknown": "Error desconocido",
+		"try-again": "Intentar nuevamente",
+		"re-login": "Reiniciar sesión",
+		"offline": "No estás conectado a internet. Intenta de nuevo más tarde.",
+		"unauthorized": "Faltan los permisos {{permission}} para acceder a esta página.",
+		"needVerification": "Tu cuenta debe ser verificada por el administrador del servidor antes de que puedas usarla.",
+		"needAccount": "Esta página no se puede acceder en modo invitado. Necesitas crear una cuenta o iniciar sesión.",
+		"setup": {
+			"MissingAdminAccount": "Aún no se ha creado ninguna cuenta de administrador. Por favor, regístrate para crear una.",
+			"NoVideoFound": "No se encontró ningún video aún. ¡Añade películas o series dentro de la carpeta de tu biblioteca para que se muestren aquí!"
+		}
+	},
+	"mediainfo": {
+		"file": "Archivo",
+		"container": "Recipiente",
+		"video": "Video",
+		"audio": "Audio",
+		"subtitles": "Subtítulos",
+		"forced": "Forzado",
+		"default": "Predeterminado",
+		"external": "Externo",
+		"duration": "Duración",
+		"size": "Tamaño",
+		"novideo": "Sin vídeo",
+		"nocontainer": "Contenedor invalido"
+	},
+	"admin": {
+		"users": {
+			"label": "Usuarios",
+			"adminUser": "Administrador",
+			"regularUser": "Usuario",
+			"set-permissions": "Establecer permisos",
+			"delete": "Eliminar usuario",
+			"unverifed": "Sin verificar",
+			"verify": "Verificar usuario"
+		},
+		"scanner": {
+			"label": "Escáner",
+			"scan": "Iniciar escaneo de la biblioteca",
+			"empty": "No se encontraron problemas. Todos tus elementos están registrados."
+		}
+	}
+}
