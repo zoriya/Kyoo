@@ -79,6 +79,7 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 		config.ConnConfig.RuntimeParams["search_path"] = schema
 	}
 
+	fmt.Printf("Connecting to database with %v\n", config)
 	db, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
 		fmt.Printf("Could not connect to database, check your env variables!")
@@ -143,7 +144,7 @@ func main() {
 
 	db, err := OpenDatabase()
 	if err != nil {
-		e.Logger.Fatal("Could not open databse: %v", err)
+		e.Logger.Fatal("Could not open databse: ", err)
 		return
 	}
 
@@ -152,7 +153,7 @@ func main() {
 	}
 	conf, err := LoadConfiguration(h.db)
 	if err != nil {
-		e.Logger.Fatal("Could not load configuration: %v", err)
+		e.Logger.Fatal("Could not load configuration: ", err)
 		return
 	}
 	h.config = conf

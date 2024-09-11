@@ -1,7 +1,7 @@
 *** Settings ***
 Documentation       Tests of the /sessions route.
 
-Resource            ../auth.resource
+Resource            ./auth.resource
 
 
 *** Test Cases ***

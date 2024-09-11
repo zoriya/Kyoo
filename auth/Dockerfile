@@ -7,7 +7,8 @@ RUN go install github.com/swaggo/swag/cmd/swag@latest
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY sqlc.yaml sql ./
+COPY sqlc.yaml ./
+COPY sql ./sql
 RUN sqlc generate
 
 COPY . .

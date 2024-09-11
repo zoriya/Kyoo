@@ -2,7 +2,7 @@
 Documentation       Tests of the /users route.
 ...                 Ensures that the user can authenticate on kyoo.
 
-Resource            ../auth.resource
+Resource            ./auth.resource
 
 
 *** Test Cases ***
