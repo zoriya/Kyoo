@@ -26,6 +26,9 @@ class KyooClient:
 	async def __aenter__(self):
 		jsons.set_serializer(lambda x, **_: format_date(x), type[Optional[date | int]])
 		self.client = ClientSession(
+			headers={
+				"User-Agent": "kyoo",
+			},
 			json_serialize=lambda *args, **kwargs: jsons.dumps(
 				*args, key_transformer=jsons.KEY_TRANSFORMER_CAMELCASE, **kwargs
 			),
