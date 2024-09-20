@@ -178,7 +178,7 @@ export const CollectionPage: QueryPage<{ slug: string }> = ({ slug }) => {
 					watchStatus={(item.kind !== "collection" && item.watchStatus?.status) || null}
 					unseenEpisodesCount={
 						item.kind === "show"
-							? item.watchStatus?.unseenEpisodesCount ?? item.episodesCount!
+							? (item.watchStatus?.unseenEpisodesCount ?? item.episodesCount!)
 							: null
 					}
 					{...css({ marginX: ItemGrid.layout.gap })}

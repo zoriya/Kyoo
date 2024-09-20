@@ -92,7 +92,8 @@ export const Player = ({
 	const [playbackError, setPlaybackError] = useState<string | undefined>(undefined);
 	const { data, error } = useFetch(Player.query(type, slug));
 	const { data: info, error: infoError } = useFetch(Player.infoQuery(type, slug));
-	const image = data && data.type === "episode" ? data.show?.poster ?? data?.poster : data?.poster;
+	const image =
+		data && data.type === "episode" ? (data.show?.poster ?? data?.poster) : data?.poster;
 	const previous =
 		data && data.type === "episode" && data.previousEpisode
 			? `/watch/${data.previousEpisode.slug}?t=0`

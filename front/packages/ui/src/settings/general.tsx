@@ -71,7 +71,7 @@ export const GeneralSettings = () => {
 					onValueChange={(value) => changeLanguage(value)}
 					values={["system", ...Object.keys(i18n.options.resources!)]}
 					getLabel={(key) =>
-						key === "system" ? t("settings.general.language.system") : getLanguageName(key) ?? key
+						key === "system" ? t("settings.general.language.system") : (getLanguageName(key) ?? key)
 					}
 				/>
 			</Preference>
