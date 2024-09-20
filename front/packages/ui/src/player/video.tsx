@@ -147,7 +147,7 @@ export const AudiosMenu = ({ audios, ...props }: CustomMenu & { audios?: Audio[]
 			{info.audioTracks.map((x) => (
 				<Menu.Item
 					key={x.index}
-					label={audios ? getDisplayName(audios[x.index]) : x.title ?? x.language ?? "Unknown"}
+					label={audios ? getDisplayName(audios[x.index]) : (x.title ?? x.language ?? "Unknown")}
 					selected={audio!.index === x.index}
 					onSelect={() => setAudio(x as any)}
 				/>

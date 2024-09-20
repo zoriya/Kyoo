@@ -307,7 +307,7 @@ export const Recommended = () => {
 						watchStatus={(item.kind !== "collection" && item.watchStatus?.status) || null}
 						unseenEpisodesCount={
 							item.kind === "show"
-								? item.watchStatus?.unseenEpisodesCount ?? item.episodesCount!
+								? (item.watchStatus?.unseenEpisodesCount ?? item.episodesCount!)
 								: null
 						}
 					/>

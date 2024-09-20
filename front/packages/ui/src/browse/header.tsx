@@ -56,7 +56,7 @@ const MediaTypeTrigger = forwardRef<View, PressableProps & { mediaType: MediaTyp
 		const { t } = useTranslation();
 		const labelKey =
 			mediaType !== MediaTypeAll ? `browse.mediatypekey.${mediaType.key}` : "browse.mediatypelabel";
-		const icon = mediaType !== MediaTypeAll ? mediaType?.icon ?? FilterList : FilterList;
+		const icon = mediaType !== MediaTypeAll ? (mediaType?.icon ?? FilterList) : FilterList;
 		return (
 			<PressableFeedback
 				ref={ref}
