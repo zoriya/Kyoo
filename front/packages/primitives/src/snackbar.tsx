@@ -61,7 +61,8 @@ export const SnackbarProvider = ({ children }: { children: ReactElement | ReactE
 					return;
 				}
 
-				addPortal("snackbar", <Snackbar {...top} />);
+				const { key, ...props } = top;
+				addPortal("snackbar", <Snackbar key={key} {...props} />);
 				timeout.current = setTimeout(() => {
 					removePortal("snackbar");
 					updatePortal();

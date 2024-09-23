@@ -191,7 +191,7 @@ export const AccountProvider = ({
 		<AccountContext.Provider value={accounts}>
 			<ConnectionErrorContext.Provider
 				value={{
-					error: (selected ? initialSsrError.current ?? userError : null) ?? permissionError,
+					error: (selected ? (initialSsrError.current ?? userError) : null) ?? permissionError,
 					loading: userIsLoading,
 					retry: () => {
 						queryClient.invalidateQueries({ queryKey: ["auth", "me"] });

@@ -19,7 +19,7 @@
  */
 
 import Svg, { type SvgProps, Path } from "react-native-svg";
-import { useYoshiki } from "yoshiki";
+import { useYoshiki } from "yoshiki/native";
 
 /* export const KyooLogo = (props: SvgProps) => ( */
 /* 	<Svg viewBox="0 0 128 128" {...props}> */
