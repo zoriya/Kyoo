@@ -70,7 +70,7 @@ extraObjects:
       name: media
     spec:
       accessModes:
-        - "ReadWriteOnce"
+        - "ReadOnlyMany"
       resources:
         requests:
           storage: "3Gi"
