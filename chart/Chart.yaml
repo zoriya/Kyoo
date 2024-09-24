@@ -21,18 +21,18 @@ version: 0.1.0
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "4.6.0"
+appVersion: "4.7.0"
 
 dependencies:
 - condition: meilisearch.enabled
   name: meilisearch
   repository: https://meilisearch.github.io/meilisearch-kubernetes
-  version: 0.8.0
+  version: 0.10.1
 - condition: postgresql.enabled
   name: postgresql
   repository: https://charts.bitnami.com/bitnami
-  version: 15.5.14
+  version: 15.5.34
 - condition: rabbitmq.enabled
   name: rabbitmq
   repository: https://charts.bitnami.com/bitnami
-  version: 14.4.2
+  version: 15.0.0

@@ -346,9 +346,6 @@ meilisearch:
   persistence:
     enabled: true
     size: 3Gi
-    # upstream set to -, disabling dynamic provisioning
-    # https://github.com/meilisearch/meilisearch-kubernetes/pull/235
-    storageClass: ~
 
 # subchart settings
 postgresql:
