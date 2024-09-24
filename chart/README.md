@@ -3,7 +3,19 @@
 # Recomendations
 This helm chart includes subcharts for Meilisearch, Postgres, and RabbitMQ.  Those resources should be managed outside of this Helm release.
 
-# Example Deployment
+## Postgres
+Kyoo consists of multiple microservices.  Best practice is for each microservice to use its own database.  Kyoo workloads support best practices or sharing a single postgres database.  Please see the `POSTGRES_SCHEMA` setting for additional information.
+
+Strongly recomended to use a Kubernetes operator for managing Postgres.
+
+## Storage
+Kyoo currently uses storage volumes for media, backend-storage, and transcoder-storage.  Media content tends to consume a large amount of space and Kubernetes storage interfaces tend to replicate across nodes.  Consider hosting the data outside of Kubernetes or assigning one node to handle storage.
+
+Storage for backend and transcoder will eventually be moved into a datastore application.
+
+# Quickstart
+Below provides an example for deploying Kyoo and its dependencies.  This is a minimalist setup that is not intended for longterm use.  This approach uses a single Postgres instance and initializes mutliple databases.  
+
 ```sh
 helm upgrade kyoo . --install --values myvalues.yaml
 ```
