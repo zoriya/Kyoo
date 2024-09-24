@@ -161,9 +161,6 @@ spec:
           {{- tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
       volumes:
-        {{- with .Values.media.volumes }}
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
         {{- with .Values.back.volumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
