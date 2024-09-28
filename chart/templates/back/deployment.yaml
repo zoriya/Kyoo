@@ -127,6 +127,32 @@ spec:
                 secretKeyRef:
                   key: {{ .Values.global.meilisearch.kyoo_back.masterkeyKey }}
                   name: {{ .Values.global.meilisearch.kyoo_back.existingSecret }}
+            {{- if .Values.kyoo.oidc.enabled }}
+            - name: OIDC_SERVICE_NAME
+              value: {{ .Values.kyoo.oidc.name }}
+            - name: OIDC_SERVICE_LOGO
+              value: {{ .Values.kyoo.oidc.logo }}
+            - name: OIDC_SERVICE_CLIENTID
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.kyoo.oidc.clientIDkey }}
+                  name: {{ .Values.kyoo.oidc.existingSecret }}
+            - name: OIDC_SERVICE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.kyoo.oidc.clientSecretKey }}
+                  name: {{ .Values.kyoo.oidc.existingSecret }}
+            - name: OIDC_SERVICE_AUTHORIZATION
+              value: {{ .Values.kyoo.oidc.authorizationAddress }}
+            - name: OIDC_SERVICE_TOKEN
+              value: {{ .Values.kyoo.oidc.tokenAddress }}
+            - name: OIDC_SERVICE_PROFILE
+              value: {{ .Values.kyoo.oidc.profileAddress }}
+            - name: OIDC_SERVICE_SCOPE
+              value: {{ .Values.kyoo.oidc.scope }}
+            - name: OIDC_SERVICE_AUTHMETHOD
+              value: {{ .Values.kyoo.oidc.authMethod }}
+            {{- end }}
             {{- with (concat .Values.global.extraEnv .Values.back.kyoo_back.extraEnv) }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
