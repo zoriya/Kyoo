@@ -135,7 +135,7 @@ spec:
             - name: OIDC_SERVICE_CLIENTID
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.kyoo.oidc.clientIDkey }}
+                  key: {{ .Values.kyoo.oidc.clientIdKey }}
                   name: {{ .Values.kyoo.oidc.existingSecret }}
             - name: OIDC_SERVICE_SECRET
               valueFrom:

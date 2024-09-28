@@ -98,7 +98,7 @@ kyoo:
   oidc:
     enabled: false
     existingSecret: bigsecret
-    clientIDkey: clientID
+    clientIdKey: clientId
     clientSecretKey: clientSecret
     name: YourPrettyName
     logo: https://url-of-your-logo.com
