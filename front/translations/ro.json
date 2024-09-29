@@ -1,285 +1,285 @@
 {
 	"home": {
-		"recommended": "",
-		"news": "",
-		"watchlist": "",
-		"info": "",
-		"none": "",
-		"watchlistLogin": "",
-		"refreshMetadata": "",
+		"recommended": "Recomandat",
+		"news": "Ştiri",
+		"watchlist": "Continuați să vizionați",
+		"info": "Vezi mai multe",
+		"none": "Fara episoade",
+		"watchlistLogin": "Pentru a urmări ceea ce ați vizionat sau intenționați să vizionați, trebuie să vă autentificați.",
+		"refreshMetadata": "Actualizează metadatele",
 		"episodeMore": {
-			"goToShow": "",
-			"download": "",
-			"mediainfo": ""
+			"goToShow": "Du-te să arăți",
+			"download": "Descărcați",
+			"mediainfo": "Consultați informații despre fișier"
 		}
 	},
 	"show": {
-		"play": "",
-		"trailer": "",
-		"studio": "",
-		"genre": "",
-		"genre-none": "",
-		"staff": "",
-		"staff-none": "",
-		"noOverview": "",
-		"episode-none": "",
-		"episodeNoMetadata": "",
-		"tags": "",
-		"links": "",
-		"jumpToSeason": "",
-		"partOf": "",
-		"watchlistAdd": "",
-		"watchlistEdit": "",
-		"watchlistRemove": "",
-		"watchlistLogin": "",
+		"play": "Redați",
+		"trailer": "Redați trailerul",
+		"studio": "Studio",
+		"genre": "Genuri",
+		"genre-none": "Fără genuri",
+		"staff": "Personalul",
+		"staff-none": "Personalul este necunoscut",
+		"noOverview": "Nu este disponibilă o prezentare generală",
+		"episode-none": "Nu există episoade în acest sezon",
+		"episodeNoMetadata": "Nu există metadate disponibile",
+		"tags": "Tags",
+		"links": "Link-uri",
+		"jumpToSeason": "Treci la sezon",
+		"partOf": "O parte din",
+		"watchlistAdd": "Adaugă la planul tău la lista de urmărire",
+		"watchlistEdit": "Editați starea ceasului",
+		"watchlistRemove": "Marcați ca nevăzut",
+		"watchlistLogin": "Conectați-vă pentru a adăuga la lista dvs. de urmărire",
 		"watchlistMark": {
-			"completed": "",
-			"planned": "",
-			"watching": "",
-			"droped": "",
-			"null": ""
+			"completed": "Marcați ca finalizat",
+			"planned": "Marcați așa cum ați planificat",
+			"watching": "Marcați ca vizionare",
+			"droped": "Marcați ca scăpat",
+			"null": "Marcați ca nevăzut"
 		},
-		"nextUp": "",
-		"season": ""
+		"nextUp": "Urmează",
+		"season": "Sezonul {{number}}"
 	},
 	"browse": {
 		"mediatypekey": {
-			"all": "",
-			"movie": "",
-			"show": "",
-			"collection": ""
+			"all": "Toate",
+			"movie": "Filme",
+			"show": "Serie",
+			"collection": "Colecție"
 		},
-		"mediatype-tt": "",
-		"mediatypelabel": "",
-		"sortby": "",
-		"sortby-tt": "",
+		"mediatype-tt": "Tip media",
+		"mediatypelabel": "Tip media",
+		"sortby": "Sortați după {{key}}",
+		"sortby-tt": "Sortați după",
 		"sortkey": {
-			"relevance": "",
-			"name": "",
-			"airDate": "",
-			"startAir": "",
-			"endAir": "",
-			"addedDate": "",
-			"rating": ""
+			"relevance": "Relevanţă",
+			"name": "Nume",
+			"airDate": "Data de difuzare",
+			"startAir": "Începe aerul",
+			"endAir": "Sfârșit aerul",
+			"addedDate": "Data adăugată",
+			"rating": "Evaluări"
 		},
 		"sortord": {
-			"asc": "",
-			"desc": ""
+			"asc": "urca",
+			"desc": "cob"
 		},
-		"switchToGrid": "",
-		"switchToList": ""
+		"switchToGrid": "Comutați la vizualizarea grilă",
+		"switchToList": "Comutați la vizualizarea listă"
 	},
 	"genres": {
-		"Action": "",
-		"Adventure": "",
-		"Animation": "",
-		"Comedy": "",
-		"Crime": "",
-		"Documentary": "",
-		"Drama": "",
-		"Family": "",
-		"Fantasy": "",
-		"History": "",
-		"Horror": "",
-		"Music": "",
-		"Mystery": "",
-		"Romance": "",
-		"ScienceFiction": "",
-		"Thriller": "",
-		"War": "",
-		"Western": "",
-		"Kids": "",
-		"News": "",
-		"Reality": "",
-		"Soap": "",
-		"Talk": "",
-		"Politics": ""
+		"Action": "Acţiune",
+		"Adventure": "Aventură",
+		"Animation": "Animaţie",
+		"Comedy": "Comedie",
+		"Crime": "Crima",
+		"Documentary": "Documentar",
+		"Drama": "Dramă",
+		"Family": "Familial",
+		"Fantasy": "Fantezie",
+		"History": "Istorie",
+		"Horror": "Groază",
+		"Music": "Muzică",
+		"Mystery": "Mister",
+		"Romance": "Romantism",
+		"ScienceFiction": "Operă științifico-fantastică",
+		"Thriller": "Thriller",
+		"War": "Război",
+		"Western": "de vest",
+		"Kids": "Copii",
+		"News": "Ştiri",
+		"Reality": "Realitate",
+		"Soap": "Novela",
+		"Talk": "Vorbi",
+		"Politics": "Politică"
 	},
 	"misc": {
-		"settings": "",
-		"prev-page": "",
-		"next-page": "",
-		"delete": "",
-		"cancel": "",
-		"more": "",
-		"expand": "",
-		"collapse": "",
-		"edit": "",
-		"or": "",
-		"loading": ""
+		"settings": "Setări",
+		"prev-page": "Pagina anterioară",
+		"next-page": "Pagina următoare",
+		"delete": "Şterge",
+		"cancel": "Anulați",
+		"more": "Mai mult",
+		"expand": "Extinde",
+		"collapse": "Colaps",
+		"edit": "Edita",
+		"or": "SAU",
+		"loading": "Încărcare"
 	},
 	"navbar": {
-		"home": "",
-		"browse": "",
-		"download": "",
-		"search": "",
-		"login": "",
-		"admin": ""
+		"home": "Acasă",
+		"browse": "Navigați",
+		"download": "Descărcați",
+		"search": "Căutare",
+		"login": "Log in",
+		"admin": "Panoul de administrare"
 	},
 	"settings": {
 		"general": {
-			"label": "",
+			"label": "General",
 			"theme": {
-				"label": "",
-				"description": "",
-				"auto": "",
-				"light": "",
-				"dark": ""
+				"label": "Temă",
+				"description": "Setați tema aplicației dvs",
+				"auto": "Sistem",
+				"light": "Lumina",
+				"dark": "Întuneric"
 			},
 			"language": {
-				"label": "",
-				"description": "",
-				"system": ""
+				"label": "Limbă",
+				"description": "Setați limba aplicației",
+				"system": "Sistem"
 			}
 		},
 		"playback": {
-			"label": "",
+			"label": "Redare",
 			"playmode": {
-				"label": "",
-				"description": ""
+				"label": "Mod de redare implicit",
+				"description": "Modul de redare implicit utilizat pe acest client. Pristine este mai ușor pe server, dar nu permite modificări automate de calitate"
 			},
 			"audioLanguage": {
-				"label": "",
-				"description": ""
+				"label": "Limba audio",
+				"description": "Limba audio implicită utilizată la redarea videoclipurilor multi-audio"
 			},
 			"subtitleLanguage": {
-				"label": "",
-				"description": "",
-				"none": ""
+				"label": "Limba subtitrare",
+				"description": "Limba implicită de subtitrare utilizată",
+				"none": "Nici unul"
 			}
 		},
 		"account": {
-			"label": "",
+			"label": "Cont",
 			"username": {
-				"label": ""
+				"label": "Nume de utilizator"
 			},
 			"avatar": {
-				"label": "",
-				"description": ""
+				"label": "Avatar",
+				"description": "Schimbați pictograma profilului"
 			},
 			"email": {
-				"label": ""
+				"label": "E-mail"
 			},
 			"password": {
-				"label": "",
-				"description": "",
-				"oldPassword": "",
-				"newPassword": ""
+				"label": "Parolă",
+				"description": "Schimbați-vă parola",
+				"oldPassword": "Parola veche",
+				"newPassword": "Parolă Nouă"
 			}
 		},
 		"oidc": {
-			"label": "",
-			"connected": "",
-			"not-connected": "",
-			"open-profile": "",
-			"link": "",
-			"delete": ""
+			"label": "Conturi conectate",
+			"connected": "Conectat ca {{username}}.",
+			"not-connected": "Deconectat",
+			"open-profile": "Deschideți profilul {{provider}}",
+			"link": "Link",
+			"delete": "Deconectați contul dvs. kyoo de contul dvs. {{provider}}"
 		},
 		"about": {
-			"label": "",
+			"label": "Despre",
 			"android-app": {
-				"label": "",
-				"description": ""
+				"label": "Android app",
+				"description": "Descărcați aplicația pentru Android"
 			},
 			"git": {
-				"label": "",
-				"description": ""
+				"label": "Github",
+				"description": "Deschideți depozitul github unde puteți răsfoi codul kyoo"
 			}
 		}
 	},
 	"player": {
-		"back": "",
-		"previous": "",
-		"next": "",
-		"play": "",
-		"pause": "",
-		"mute": "",
-		"volume": "",
-		"quality": "",
-		"audios": "",
-		"subtitles": "",
-		"subtitle-none": "",
-		"fullscreen": "",
-		"direct": "",
-		"transmux": "",
-		"auto": "",
-		"notInPristine": "",
-		"unsupportedError": ""
+		"back": "Înapoi",
+		"previous": "Episodul anterior",
+		"next": "Următorul episod",
+		"play": "Redați",
+		"pause": "Pauză",
+		"mute": "Comutați sunetul",
+		"volume": "Volum",
+		"quality": "Calitate",
+		"audios": "Audio",
+		"subtitles": "Subtitrări",
+		"subtitle-none": "Nici unul",
+		"fullscreen": "Ecran complet",
+		"direct": "Curat",
+		"transmux": "Original",
+		"auto": "Auto",
+		"notInPristine": "Indisponibil în curat",
+		"unsupportedError": "Codecul video nu este acceptat, transcodare în curs..."
 	},
 	"search": {
-		"empty": ""
+		"empty": "Nu a fost găsit niciun rezultat. Încercați o altă interogare."
 	},
 	"login": {
-		"login": "",
-		"register": "",
-		"guest": "",
-		"guest-forbidden": "",
-		"via": "",
-		"add-account": "",
-		"logout": "",
-		"server": "",
-		"email": "",
-		"username": "",
-		"password": "",
-		"confirm": "",
-		"or-register": "",
-		"or-login": "",
-		"password-no-match": "",
-		"delete": "",
-		"delete-confirmation": ""
+		"login": "Log in",
+		"register": "Registru",
+		"guest": "Continuați ca invitat",
+		"guest-forbidden": "Această instanță de kyoo nu acceptă oaspeți.",
+		"via": "Continuați cu {{provider}}",
+		"add-account": "Adăugați cont",
+		"logout": "Deconectare",
+		"server": "Adresa serverului",
+		"email": "E-mail",
+		"username": "Nume de utilizator",
+		"password": "Parolă",
+		"confirm": "Confirmați parola",
+		"or-register": "Nu aveți cont? <1>Înregistrați-vă</1>.",
+		"or-login": "Ai deja un cont? <1>Conectați-vă</1>.",
+		"password-no-match": "Parolele nu se potrivesc.",
+		"delete": "Ștergeți contul dvs",
+		"delete-confirmation": "Această acțiune nu poate fi anulată. esti sigur?"
 	},
 	"downloads": {
-		"empty": "",
-		"error": "",
-		"delete": "",
-		"deleteMessage": "",
-		"pause": "",
-		"resume": "",
-		"retry": ""
+		"empty": "Nu a fost încă descărcat nimic, începeți să căutați ceva care vă place",
+		"error": "Eroare: {{error}}",
+		"delete": "Ștergeți elementul",
+		"deleteMessage": "Doriți să eliminați acest articol din spațiul de stocare local?",
+		"pause": "Pauză",
+		"resume": "Relua",
+		"retry": "Reîncercați"
 	},
 	"errors": {
-		"connection": "",
-		"connection-tips": "",
-		"unknown": "",
-		"try-again": "",
-		"re-login": "",
-		"offline": "",
-		"unauthorized": "",
-		"needVerification": "",
-		"needAccount": "",
+		"connection": "Nu s-a putut conecta la serverul kyoo",
+		"connection-tips": "Sfaturi de depanare:\n - Ești conectat la internet?\n - Serverul lui Kyoo este online?\n - Ți-a fost interzis contul?",
+		"unknown": "Eroare necunoscută",
+		"try-again": "Încearcă din nou",
+		"re-login": "Re autentificare",
+		"offline": "Nu sunteți conectat la internet. Încercați din nou mai târziu.",
+		"unauthorized": "Vă lipsesc permisiunile {{permission}} pentru a accesa această pagină.",
+		"needVerification": "Contul dvs. trebuie verificat de administratorul serverului înainte de a-l putea folosi.",
+		"needAccount": "Această pagină nu poate fi accesată în modul invitat. Trebuie să vă creați un cont sau să vă autentificați.",
 		"setup": {
-			"MissingAdminAccount": "",
-			"NoVideoFound": ""
+			"MissingAdminAccount": "Nu a fost creat încă niciun cont de administrator. Vă rugăm să vă înregistrați pentru a crea unul.",
+			"NoVideoFound": "Nu a fost găsit încă niciun videoclip. Adăugați filme sau seriale în dosarul bibliotecii dvs. pentru a le afișa aici!"
 		}
 	},
 	"mediainfo": {
-		"file": "",
-		"container": "",
-		"video": "",
-		"audio": "",
-		"subtitles": "",
-		"forced": "",
-		"default": "",
-		"external": "",
-		"duration": "",
-		"size": "",
-		"novideo": "",
-		"nocontainer": ""
+		"file": "Fişier",
+		"container": "Container",
+		"video": "Video",
+		"audio": "Audio",
+		"subtitles": "Subtitrări",
+		"forced": "Forţat",
+		"default": "Implicit",
+		"external": "Extern",
+		"duration": "Durată",
+		"size": "Dimensiune",
+		"novideo": "Fără video",
+		"nocontainer": "Container nevalid"
 	},
 	"admin": {
 		"users": {
-			"label": "",
-			"adminUser": "",
-			"regularUser": "",
-			"set-permissions": "",
-			"delete": "",
-			"unverifed": "",
-			"verify": ""
+			"label": "Utilizatori",
+			"adminUser": "Admin",
+			"regularUser": "Utilizator",
+			"set-permissions": "Setați permisiunile",
+			"delete": "Ștergeți utilizatorul",
+			"unverifed": "Neverificat",
+			"verify": "Verificați utilizatorul"
 		},
 		"scanner": {
-			"label": "",
-			"scan": "",
-			"empty": ""
+			"label": "Scanner",
+			"scan": "Declanșează scanarea bibliotecii",
+			"empty": "Nu a fost găsită nicio problemă. Toate articolele dvs. sunt înregistrate."
 		}
 	}
 }
