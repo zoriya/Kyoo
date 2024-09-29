@@ -15,7 +15,7 @@
 	},
 	"show": {
 		"play": "Lecture",
-		"trailer": "Jouer le trailer",
+		"trailer": "Lire la bande annonce",
 		"studio": "Studio",
 		"genre": "Genres",
 		"genre-none": "Aucun genres",
@@ -26,8 +26,8 @@
 		"episodeNoMetadata": "Aucune metadonnée disponible",
 		"tags": "Tags",
 		"links": "Liens",
-		"jumpToSeason": "Aller sur une saison",
-		"partOf": "Fait parti de",
+		"jumpToSeason": "Passer à la saison",
+		"partOf": "Fait partie de",
 		"watchlistAdd": "Ajouter à votre liste de visionnage",
 		"watchlistEdit": "Editer le status",
 		"watchlistRemove": "Marquer comme non vu",
@@ -234,14 +234,15 @@
 		"subtitles": "Sous titres",
 		"forced": "Forcé",
 		"default": "Par Défaut",
-		"duration": "Duration",
+		"duration": "Durée",
 		"size": "Taille",
 		"novideo": "Pas de video",
-		"nocontainer": "Conteneur invalide"
+		"nocontainer": "Conteneur invalide",
+		"external": "Externe"
 	},
 	"admin": {
 		"users": {
-			"label": "Comptes",
+			"label": "Utilisateurs",
 			"adminUser": "Admin",
 			"regularUser": "Utilisateur",
 			"set-permissions": "Definir les permissions",
