@@ -80,4 +80,3 @@ Login
     Should Be Equal As Strings    ${res["body"]}    ${me["body"]}
 
     [Teardown]    DELETE    /auth/me
-

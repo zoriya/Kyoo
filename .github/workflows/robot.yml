@@ -14,11 +14,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Pull images
-        run: |
-          cp .env.example .env
-          docker compose version
-          docker compose pull
+      - name: Robot cache
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+
+      - name: Install robot
+        run: pip install -r requirements.txt
 
       - name: Docker cache
         uses: satackey/action-docker-layer-caching@v0.0.11
@@ -26,18 +29,18 @@ jobs:
 
       - name: Start the service
         run: |
-          docker compose up -d back postgres traefik meilisearch --wait
+          cp .env.example .env
+          docker compose -f docker-compose.build.yml up -d auth postgres traefik --wait
 
       - name: Perform healthchecks
         run: |
           docker compose ps -a
           docker compose logs
-          wget --retry-connrefused --retry-on-http-error=502 http://localhost:8901/api/health || (docker compose logs && exit 1)
+          # wget --retry-connrefused --retry-on-http-error=502 http://localhost:8901/api/health || (docker compose logs && exit 1)
 
       - name: Run robot tests
         run: |
-          pip install -r back/tests/robot/requirements.txt
-          robot -d out back/tests/robot/
+          robot -d out $(find -type d -name robot)
 
       - name: Show logs
         if: failure()

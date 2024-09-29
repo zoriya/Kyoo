@@ -60,6 +60,23 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.front.rule=PathPrefix(`/`)"
 
+  auth:
+    build: ./auth
+    restart: on-failure
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.auth.rule=PathPrefix(`/auth/`)"
+      - "traefik.http.routers.auth.middlewares=auth-sp"
+      - "traefik.http.middlewares.auth-sp.stripprefix.prefixes=/auth"
+      - "traefik.http.middlewares.auth-sp.stripprefix.forceSlash=false"
+    profiles:
+      - "v5"
+
   scanner:
     build: ./scanner
     restart: on-failure

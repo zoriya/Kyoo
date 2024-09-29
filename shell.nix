@@ -11,6 +11,9 @@
       dataclasses-json
       msgspec
       langcodes
+
+      robotframework
+      # restinstance needs to be packaged
     ]);
   dotnet = with pkgs.dotnetCorePackages;
     combinePackages [
@@ -37,6 +40,9 @@ in
       pgformatter
       biome
       go-migrate
+      sqlc
+      go-swag
+      robotframework-tidy
     ];
 
     DOTNET_ROOT = "${dotnet}";
