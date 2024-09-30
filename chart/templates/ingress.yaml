@@ -1,0 +1,43 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "kyoo.fullname" . }}
+  labels: 
+    {{- include "kyoo.labels" (dict "context" . "component" "ingress" "name" "ingress") | nindent 4 }}
+  annotations:
+    {{- range $key, $value := .Values.ingress.annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+    {{- range $key, $value := .Values.ingress.extraAnnotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  {{- if .Values.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  {{- end }}
+  rules:
+  - host: {{ .Values.ingress.host }}
+    http:
+      paths:
+        - path: "/"
+          pathType: Prefix
+          backend:
+            service:
+              name: {{ include "kyoo.front.fullname" . }}
+              port:
+                number: 8901
+        - path: "/api"
+          pathType: Prefix
+          backend:
+            service:
+              name: {{ include "kyoo.back.fullname" . }}
+              port:
+                number: 5000
+{{- if .Values.ingress.tls }}
+  tls:
+  - hosts:
+    - {{ .Values.ingress.host }}
+    secretName: {{ .Values.ingress.tlsSecret }}
+{{- end }}
+{{- end }}

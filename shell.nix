@@ -36,6 +36,7 @@ in
       postgresql_15
       pgformatter
       biome
+      kubernetes-helm
       go-migrate
     ];
 

@@ -1,0 +1,195 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  {{- with (mergeOverwrite (deepCopy .Values.global.deploymentAnnotations) .Values.back.deploymentAnnotations) }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
+  name: {{ include "kyoo.back.fullname" . }}
+  labels:
+    {{- include "kyoo.labels" (dict "context" . "component" .Values.back.name "name" .Values.back.name) | nindent 4 }}
+spec:
+  replicas: {{ .Values.back.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "kyoo.selectorLabels" (dict "context" . "name" .Values.back.name) | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- with (mergeOverwrite (deepCopy .Values.global.podAnnotations) .Values.back.podAnnotations) }}
+        {{- range $key, $value := . }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+        {{- end }}
+      labels:
+        {{- include "kyoo.labels" (dict "context" . "component" .Values.back.name "name" .Values.back.name) | nindent 8 }}
+        {{- with (mergeOverwrite (deepCopy .Values.global.podLabels) .Values.back.podLabels) }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.back.imagePullSecrets | default .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.global.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "kyoo.back.serviceAccountName" . }}
+      initContainers:
+        - name: migrations
+          image: {{ .Values.back.kyoo_migrations.image.repository | default (printf "%s/kyoo_migrations" .Values.global.image.repositoryBase) }}:{{ default (include "kyoo.defaultTag" .) .Values.back.kyoo_migrations.image.tag }}
+          imagePullPolicy: {{ default .Values.global.image.imagePullPolicy }}
+          args:
+            {{- with .Values.back.kyoo_migrations.extraArgs }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.global.postgres.kyoo_back.kyoo_migrations.userKey }}
+                  name: {{ .Values.global.postgres.kyoo_back.kyoo_migrations.existingSecret }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.global.postgres.kyoo_back.kyoo_migrations.passwordKey }}
+                  name: {{ .Values.global.postgres.kyoo_back.kyoo_migrations.existingSecret }}
+            - name: POSTGRES_DB
+              value: {{ .Values.global.postgres.kyoo_back.database }}
+            - name: POSTGRES_SERVER
+              value: {{ .Values.global.postgres.kyoo_back.host }}
+            - name: POSTGRES_PORT
+              value: "{{ .Values.global.postgres.kyoo_back.port }}"
+        {{- with .Values.back.extraInitContainers }}
+          {{- tpl (toYaml .) $ | nindent 6 }}
+        {{- end }}
+      containers:
+        - name: main
+          image: {{ .Values.back.kyoo_back.image.repository | default (printf "%s/kyoo_back" .Values.global.image.repositoryBase) }}:{{ default (include "kyoo.defaultTag" .) .Values.back.kyoo_back.image.tag }}
+          imagePullPolicy: {{ default .Values.global.image.imagePullPolicy }}
+          args:
+            {{- with .Values.back.kyoo_back.extraArgs }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          env:
+            - name: TRANSCODER_URL
+              value: http://{{ include "kyoo.transcoder.fullname" . }}:7666
+            - name: PUBLIC_URL
+              value: {{ .Values.kyoo.address }}
+            - name: REQUIRE_ACCOUNT_VERIFICATION
+              value: "{{ .Values.kyoo.requireAccountVerification }}"
+            - name: DEFAULT_PERMISSIONS
+              value: {{ .Values.kyoo.defaultPermissions }}
+            - name: UNLOGGED_PERMISSIONS
+              value: "{{ .Values.kyoo.unloggedPermissions }}"
+            - name: KYOO_APIKEYS
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.kyoo.apikey.apikeyKey }}
+                  name: {{ .Values.kyoo.apikey.existingSecret }}
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.global.postgres.kyoo_back.kyoo_back.userKey }}
+                  name: {{ .Values.global.postgres.kyoo_back.kyoo_back.existingSecret }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.global.postgres.kyoo_back.kyoo_back.passwordKey }}
+                  name: {{ .Values.global.postgres.kyoo_back.kyoo_back.existingSecret }}
+            - name: POSTGRES_DB
+              value: {{ .Values.global.postgres.kyoo_back.database }}
+            - name: POSTGRES_SERVER
+              value: {{ .Values.global.postgres.kyoo_back.host }}
+            - name: POSTGRES_PORT
+              value: "{{ .Values.global.postgres.kyoo_back.port }}"
+            - name: RABBITMQ_DEFAULT_USER
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.global.rabbitmq.kyoo_back.userKey }}
+                  name: {{ .Values.global.rabbitmq.kyoo_back.existingSecret }}
+            - name: RABBITMQ_DEFAULT_PASS
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.global.rabbitmq.kyoo_back.passwordKey }}
+                  name: {{ .Values.global.rabbitmq.kyoo_back.existingSecret }}
+            - name: RABBITMQ_HOST
+              value: {{ .Values.global.rabbitmq.host }}
+            - name: RABBITMQ_PORT
+              value: "{{ .Values.global.rabbitmq.port }}"
+            - name: MEILI_HOST
+              value: "{{ .Values.global.meilisearch.proto }}://{{ .Values.global.meilisearch.host }}:{{ .Values.global.meilisearch.port }}"
+            - name: MEILI_MASTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.global.meilisearch.kyoo_back.masterkeyKey }}
+                  name: {{ .Values.global.meilisearch.kyoo_back.existingSecret }}
+            {{- if .Values.kyoo.oidc.enabled }}
+            - name: OIDC_SERVICE_NAME
+              value: {{ .Values.kyoo.oidc.name }}
+            - name: OIDC_SERVICE_LOGO
+              value: {{ .Values.kyoo.oidc.logo }}
+            - name: OIDC_SERVICE_CLIENTID
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.kyoo.oidc.clientIdKey }}
+                  name: {{ .Values.kyoo.oidc.existingSecret }}
+            - name: OIDC_SERVICE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.kyoo.oidc.clientSecretKey }}
+                  name: {{ .Values.kyoo.oidc.existingSecret }}
+            - name: OIDC_SERVICE_AUTHORIZATION
+              value: {{ .Values.kyoo.oidc.authorizationAddress }}
+            - name: OIDC_SERVICE_TOKEN
+              value: {{ .Values.kyoo.oidc.tokenAddress }}
+            - name: OIDC_SERVICE_PROFILE
+              value: {{ .Values.kyoo.oidc.profileAddress }}
+            - name: OIDC_SERVICE_SCOPE
+              value: {{ .Values.kyoo.oidc.scope }}
+            - name: OIDC_SERVICE_AUTHMETHOD
+              value: {{ .Values.kyoo.oidc.authMethod }}
+            {{- end }}
+            {{- with (concat .Values.global.extraEnv .Values.back.kyoo_back.extraEnv) }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: main
+              containerPort: 5000
+              protocol: TCP
+          {{- with .Values.back.kyoo_back.livenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.back.kyoo_back.livenessProbe | nindent 12 }}
+          {{- end }}
+          {{- with .Values.back.kyoo_back.readinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.back.kyoo_back.readinessProbe | nindent 12 }}
+          {{- end }}
+          {{- with .Values.back.kyoo_back.resources }}
+          resources:
+            {{- toYaml .Values.back.kyoo_back.resources | nindent 12 }}
+          {{- end }}
+          {{- with .Values.back.kyoo_back.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            {{- with .Values.back.kyoo_back.volumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.back.kyoo_back.extraVolumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+        {{- with .Values.back.kyoo_back.extraContainers }}
+          {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+      volumes:
+        {{- with .Values.back.volumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.back.extraVolumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
