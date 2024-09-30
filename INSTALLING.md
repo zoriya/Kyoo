@@ -33,7 +33,7 @@ If you need hardware acceleration, look at [Hardware Acceleration section](#Hard
 If you need custom volumes (because video directories are on different disks and you can't use raid, because you use network drives or another custom volume type), look at [Custom Volumes](#Custom-Volumes).
 
 The next and last step is actually starting Kyoo. To do that, open a terminal in the same directory as the 3 configurations files
-and run `docker-compose up -d`.
+and run `docker compose up -d`.
 
 Congratulation, everything is now ready to use Kyoo. You can navigate to `http://localhost:8901` on a web browser to see your instance of Kyoo.
 
@@ -43,11 +43,11 @@ Updating Kyoo is exactly the same as installing it. Get an updated version of th
 unsure that your `.env` contains all the options specified in the updated `.env.example` file.
 
 After that, you will need to update Kyoo's services. For that, open a terminal in the configuration's directory and run
-the command `docker-compose pull`. You are now ready to restart Kyoo, you can run `docker-compose up -d`.
+the command `docker compose pull`. You are now ready to restart Kyoo, you can run `docker compose up -d`.
 
 # Uninstalling
 
-To uninstall Kyoo, you need to open a terminal in the configuration's directory and run `docker-compose down`. This will
+To uninstall Kyoo, you need to open a terminal in the configuration's directory and run `docker compose down`. This will
 stop Kyoo's services. You can then remove the configuration files.
 
 # Hardware Acceleration
