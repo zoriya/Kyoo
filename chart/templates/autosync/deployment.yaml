@@ -48,9 +48,9 @@ spec:
             {{- end }}
           env:
             - name: RABBITMQ_HOST
-              value: {{ .Values.global.rabbitmq.host }}
+              value: {{ .Values.global.rabbitmq.host | quote }}
             - name: RABBITMQ_PORT
-              value: "{{ .Values.global.rabbitmq.port }}"
+              value: {{ .Values.global.rabbitmq.port | quote }}
             - name: RABBITMQ_DEFAULT_USER
               valueFrom:
                 secretKeyRef:

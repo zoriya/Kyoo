@@ -53,9 +53,9 @@ spec:
                   key: {{ .Values.kyoo.apikey.apikeyKey }}
                   name: {{ .Values.kyoo.apikey.existingSecret }}
             - name: KYOO_URL
-              value: http://{{ include "kyoo.back.fullname" . }}:5000
+              value: "http://{{ include "kyoo.back.fullname" . }}:5000"
             - name: LIBRARY_LANGUAGES
-              value: {{ .Values.kyoo.languages }}
+              value: {{ .Values.kyoo.languages | quote }}
             - name: THEMOVIEDB_APIKEY
               valueFrom:
                 secretKeyRef:
@@ -72,9 +72,9 @@ spec:
                   key: {{ .Values.contentdatabase.tvdb.pinKey }}
                   name: {{ .Values.contentdatabase.tvdb.existingSecret }}
             - name: RABBITMQ_HOST
-              value: {{ .Values.global.rabbitmq.host }}
+              value: {{ .Values.global.rabbitmq.host | quote }}
             - name: RABBITMQ_PORT
-              value: "{{ .Values.global.rabbitmq.port }}"
+              value: {{ .Values.global.rabbitmq.port | quote }}
             - name: RABBITMQ_DEFAULT_USER
               valueFrom:
                 secretKeyRef:

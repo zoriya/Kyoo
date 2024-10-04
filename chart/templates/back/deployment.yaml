@@ -76,15 +76,15 @@ spec:
             {{- end }}
           env:
             - name: TRANSCODER_URL
-              value: http://{{ include "kyoo.transcoder.fullname" . }}:7666
+              value: "http://{{ include "kyoo.transcoder.fullname" . }}:7666"
             - name: PUBLIC_URL
-              value: {{ .Values.kyoo.address }}
+              value: {{ .Values.kyoo.address | quote }}
             - name: REQUIRE_ACCOUNT_VERIFICATION
-              value: "{{ .Values.kyoo.requireAccountVerification }}"
+              value: {{ .Values.kyoo.requireAccountVerification | quote }}
             - name: DEFAULT_PERMISSIONS
-              value: {{ .Values.kyoo.defaultPermissions }}
+              value: {{ .Values.kyoo.defaultPermissions | quote }}
             - name: UNLOGGED_PERMISSIONS
-              value: "{{ .Values.kyoo.unloggedPermissions }}"
+              value: {{ .Values.kyoo.unloggedPermissions | quote}}
             - name: KYOO_APIKEYS
               valueFrom:
                 secretKeyRef:
@@ -103,9 +103,9 @@ spec:
             - name: POSTGRES_DB
               value: {{ .Values.global.postgres.kyoo_back.database }}
             - name: POSTGRES_SERVER
-              value: {{ .Values.global.postgres.kyoo_back.host }}
+              value: {{ .Values.global.postgres.kyoo_back.host | quote }}
             - name: POSTGRES_PORT
-              value: "{{ .Values.global.postgres.kyoo_back.port }}"
+              value: {{ .Values.global.postgres.kyoo_back.port | quote }}
             - name: RABBITMQ_DEFAULT_USER
               valueFrom:
                 secretKeyRef:
@@ -117,9 +117,9 @@ spec:
                   key: {{ .Values.global.rabbitmq.kyoo_back.passwordKey }}
                   name: {{ .Values.global.rabbitmq.kyoo_back.existingSecret }}
             - name: RABBITMQ_HOST
-              value: {{ .Values.global.rabbitmq.host }}
+              value: {{ .Values.global.rabbitmq.host | quote }}
             - name: RABBITMQ_PORT
-              value: "{{ .Values.global.rabbitmq.port }}"
+              value: {{ .Values.global.rabbitmq.port | quote }}
             - name: MEILI_HOST
               value: "{{ .Values.global.meilisearch.proto }}://{{ .Values.global.meilisearch.host }}:{{ .Values.global.meilisearch.port }}"
             - name: MEILI_MASTER_KEY
@@ -129,9 +129,9 @@ spec:
                   name: {{ .Values.global.meilisearch.kyoo_back.existingSecret }}
             {{- if .Values.kyoo.oidc.enabled }}
             - name: OIDC_SERVICE_NAME
-              value: {{ .Values.kyoo.oidc.name }}
+              value: {{ .Values.kyoo.oidc.name | quote }}
             - name: OIDC_SERVICE_LOGO
-              value: {{ .Values.kyoo.oidc.logo }}
+              value: {{ .Values.kyoo.oidc.logo | quote }}
             - name: OIDC_SERVICE_CLIENTID
               valueFrom:
                 secretKeyRef:
@@ -143,15 +143,15 @@ spec:
                   key: {{ .Values.kyoo.oidc.clientSecretKey }}
                   name: {{ .Values.kyoo.oidc.existingSecret }}
             - name: OIDC_SERVICE_AUTHORIZATION
-              value: {{ .Values.kyoo.oidc.authorizationAddress }}
+              value: {{ .Values.kyoo.oidc.authorizationAddress | quote }}
             - name: OIDC_SERVICE_TOKEN
-              value: {{ .Values.kyoo.oidc.tokenAddress }}
+              value: {{ .Values.kyoo.oidc.tokenAddress | quote }}
             - name: OIDC_SERVICE_PROFILE
-              value: {{ .Values.kyoo.oidc.profileAddress }}
+              value: {{ .Values.kyoo.oidc.profileAddress | quote }}
             - name: OIDC_SERVICE_SCOPE
-              value: {{ .Values.kyoo.oidc.scope }}
+              value: {{ .Values.kyoo.oidc.scope | quote }}
             - name: OIDC_SERVICE_AUTHMETHOD
-              value: {{ .Values.kyoo.oidc.authMethod }}
+              value: {{ .Values.kyoo.oidc.authMethod | quote }}
             {{- end }}
             {{- with (concat .Values.global.extraEnv .Values.back.kyoo_back.extraEnv) }}
               {{- toYaml . | nindent 12 }}
