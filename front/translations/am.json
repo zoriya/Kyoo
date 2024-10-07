@@ -1,11 +1,11 @@
 {
 	"home": {
 		"recommended": "",
-		"news": "",
-		"watchlist": "",
-		"info": "",
+		"news": "ዜና",
+		"watchlist": "መመልከቱን ይቀጥሉ",
+		"info": "ተጨማሪ ይመልከቱ",
 		"none": "",
-		"watchlistLogin": "",
+		"watchlistLogin": "ያዩትን ወይም ለማየት ያቀዱትን ነገሮች ለመከታተል፣ ወደ አካውንቶ መግባት አለብዎት።",
 		"refreshMetadata": "",
 		"episodeMore": {
 			"goToShow": "",
