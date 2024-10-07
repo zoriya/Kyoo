@@ -50,20 +50,20 @@ spec:
             - name: SCANNER_LIBRARY_ROOT
               value: /data
             - name: LIBRARY_IGNORE_PATTERN
-              value: "{{ .Values.kyoo.libraryIgnorePattern }}"
+              value: {{ .Values.kyoo.libraryIgnorePattern | quote }}
             - name: KYOO_APIKEYS
               valueFrom:
                 secretKeyRef:
                   key: {{ .Values.kyoo.apikey.apikeyKey }}
                   name: {{ .Values.kyoo.apikey.existingSecret }}
             - name: KYOO_URL
-              value: http://{{ include "kyoo.back.fullname" . }}:5000
+              value: "http://{{ include "kyoo.back.fullname" . }}:5000"
             - name: LIBRARY_LANGUAGES
-              value: {{ .Values.kyoo.languages }}
+              value: {{ .Values.kyoo.languages | quote }}
             - name: RABBITMQ_HOST
-              value: {{ .Values.global.rabbitmq.host }}
+              value: {{ .Values.global.rabbitmq.host | quote }}
             - name: RABBITMQ_PORT
-              value: "{{ .Values.global.rabbitmq.port }}"
+              value: {{ .Values.global.rabbitmq.port | quote }}
             - name: RABBITMQ_DEFAULT_USER
               valueFrom:
                 secretKeyRef:

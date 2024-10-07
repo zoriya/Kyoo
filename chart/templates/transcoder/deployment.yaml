@@ -48,17 +48,17 @@ spec:
             {{- end }}
           env:
             - name: GOCODER_HWACCEL
-              value: {{ .Values.kyoo.transcoderAcceleration }}
+              value: {{ .Values.kyoo.transcoderAcceleration | quote }}
             - name: GOCODER_PRESET
-              value: {{ .Values.kyoo.transcoderPreset }}
+              value: {{ .Values.kyoo.transcoderPreset | quote }}
             - name: GOCODER_CACHE_ROOT
-              value: /cache
+              value: "/cache"
             - name: GOCODER_METADATA_ROOT
-              value: /metadata
+              value: "/metadata"
             - name: GOCODER_PREFIX
-              value: /video
+              value: "/video"
             - name: GOCODER_SAFE_PATH
-              value: /data
+              value: "/data"
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
@@ -70,13 +70,13 @@ spec:
                   key: {{ .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.passwordKey }}
                   name: {{ .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.existingSecret }}
             - name: POSTGRES_DB
-              value: {{ .Values.global.postgres.kyoo_transcoder.database }}
+              value: {{ .Values.global.postgres.kyoo_transcoder.database | quote }}
             - name: POSTGRES_SERVER
-              value: {{ .Values.global.postgres.kyoo_transcoder.host }}
+              value: {{ .Values.global.postgres.kyoo_transcoder.host | quote }}
             - name: POSTGRES_PORT
-              value: "{{ .Values.global.postgres.kyoo_transcoder.port }}"
+              value: {{ .Values.global.postgres.kyoo_transcoder.port | quote }}
             - name: POSTGRES_SCHEMA
-              value: "{{ .Values.global.postgres.kyoo_transcoder.schema }}"
+              value: {{ .Values.global.postgres.kyoo_transcoder.schema | quote  }}
             {{- with (concat .Values.global.extraEnv .Values.transcoder.kyoo_transcoder.extraEnv) }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
