@@ -1,6 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended", ":disableRateLimiting"],
+  "schedule": ["on monday"],
   "minimumReleaseAge": "5 days",
   "ignorePaths": ["**/front/**"],
   "packageRules": [
