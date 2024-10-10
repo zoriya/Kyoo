@@ -1,0 +1,285 @@
+{
+	"home": {
+		"recommended": "",
+		"news": "ዜና",
+		"watchlist": "መመልከቱን ይቀጥሉ",
+		"info": "ተጨማሪ ይመልከቱ",
+		"none": "ክፍሎች የሉም",
+		"watchlistLogin": "ያዩትን ወይም ለማየት ያቀዱትን ነገሮች ለመከታተል፣ ወደ አካውንቶ መግባት አለብዎት።",
+		"refreshMetadata": "ሜታዳታውን ያድሱ",
+		"episodeMore": {
+			"goToShow": "ወደ ትዕይንቱ ይቀጥሉ",
+			"download": "ያውርዱ",
+			"mediainfo": "የፋይሉን መረጃ ይመልከቱ"
+		}
+	},
+	"show": {
+		"play": "ያጫውቱ",
+		"trailer": "ትሬለሩን አጫውት",
+		"studio": "ስቱዲዮ",
+		"genre": "ዘውግ",
+		"genre-none": "ዘውግ የለውም",
+		"staff": "ስታፍ",
+		"staff-none": "ሰራተኞቹ አይታወቁም",
+		"noOverview": "ምንም አጠቃላይ እይታ የለውም",
+		"episode-none": "ይህ ምዕራፍ ምንም ክፍሎች የሉትም",
+		"episodeNoMetadata": "ምንም ሜታዳታ የለም",
+		"tags": "መለያዎች",
+		"links": "ሊንኮች",
+		"jumpToSeason": "ወደ ምዕራፍ ይዝለሉ",
+		"partOf": "",
+		"watchlistAdd": "ለመመልከት ወዳቀዱት ዝርዝር ይጨምሩ",
+		"watchlistEdit": "",
+		"watchlistRemove": "አልተመለከትኩትም",
+		"watchlistLogin": "መመልከት ወደሚፈልጉት ዝርዝር ለመጨመር ወደ አካውንቶ ይግቡ",
+		"watchlistMark": {
+			"completed": "",
+			"planned": "",
+			"watching": "",
+			"droped": "",
+			"null": ""
+		},
+		"nextUp": "ቀጣይ",
+		"season": "ምዕራፍ {{number}}"
+	},
+	"browse": {
+		"mediatypekey": {
+			"all": "ሁሉም",
+			"movie": "ፊልሞች",
+			"show": "ተከታታይ ድራማ",
+			"collection": "ስብስብ"
+		},
+		"mediatype-tt": "የሚዲያ ዓይነት",
+		"mediatypelabel": "የሚዲያ ዓይነት",
+		"sortby": "በ{{key}} ደርድር",
+		"sortby-tt": "ደርድር",
+		"sortkey": {
+			"relevance": "ተገቢነት",
+			"name": "ስም",
+			"airDate": "የተለቀቀበት ቀን",
+			"startAir": "የጀመረበት ቀን",
+			"endAir": "ያለቀበት ቀን",
+			"addedDate": "የታከለበት ቀን",
+			"rating": "ግምገማዎች"
+		},
+		"sortord": {
+			"asc": "",
+			"desc": ""
+		},
+		"switchToGrid": "",
+		"switchToList": ""
+	},
+	"genres": {
+		"Action": "",
+		"Adventure": "",
+		"Animation": "",
+		"Comedy": "",
+		"Crime": "",
+		"Documentary": "",
+		"Drama": "",
+		"Family": "",
+		"Fantasy": "",
+		"History": "",
+		"Horror": "",
+		"Music": "",
+		"Mystery": "",
+		"Romance": "",
+		"ScienceFiction": "",
+		"Thriller": "",
+		"War": "",
+		"Western": "",
+		"Kids": "",
+		"News": "",
+		"Reality": "",
+		"Soap": "",
+		"Talk": "",
+		"Politics": ""
+	},
+	"misc": {
+		"settings": "",
+		"prev-page": "",
+		"next-page": "",
+		"delete": "",
+		"cancel": "",
+		"more": "",
+		"expand": "",
+		"collapse": "",
+		"edit": "",
+		"or": "",
+		"loading": ""
+	},
+	"navbar": {
+		"home": "",
+		"browse": "",
+		"download": "",
+		"search": "",
+		"login": "",
+		"admin": ""
+	},
+	"settings": {
+		"general": {
+			"label": "",
+			"theme": {
+				"label": "",
+				"description": "",
+				"auto": "",
+				"light": "",
+				"dark": ""
+			},
+			"language": {
+				"label": "",
+				"description": "",
+				"system": ""
+			}
+		},
+		"playback": {
+			"label": "",
+			"playmode": {
+				"label": "",
+				"description": ""
+			},
+			"audioLanguage": {
+				"label": "",
+				"description": ""
+			},
+			"subtitleLanguage": {
+				"label": "",
+				"description": "",
+				"none": ""
+			}
+		},
+		"account": {
+			"label": "",
+			"username": {
+				"label": ""
+			},
+			"avatar": {
+				"label": "",
+				"description": ""
+			},
+			"email": {
+				"label": ""
+			},
+			"password": {
+				"label": "",
+				"description": "",
+				"oldPassword": "",
+				"newPassword": ""
+			}
+		},
+		"oidc": {
+			"label": "",
+			"connected": "",
+			"not-connected": "",
+			"open-profile": "",
+			"link": "",
+			"delete": ""
+		},
+		"about": {
+			"label": "",
+			"android-app": {
+				"label": "",
+				"description": ""
+			},
+			"git": {
+				"label": "",
+				"description": ""
+			}
+		}
+	},
+	"player": {
+		"back": "",
+		"previous": "",
+		"next": "",
+		"play": "",
+		"pause": "",
+		"mute": "",
+		"volume": "",
+		"quality": "",
+		"audios": "",
+		"subtitles": "",
+		"subtitle-none": "",
+		"fullscreen": "",
+		"direct": "",
+		"transmux": "",
+		"auto": "",
+		"notInPristine": "",
+		"unsupportedError": ""
+	},
+	"search": {
+		"empty": ""
+	},
+	"login": {
+		"login": "",
+		"register": "",
+		"guest": "",
+		"guest-forbidden": "",
+		"via": "",
+		"add-account": "",
+		"logout": "",
+		"server": "",
+		"email": "",
+		"username": "",
+		"password": "",
+		"confirm": "",
+		"or-register": "",
+		"or-login": "",
+		"password-no-match": "",
+		"delete": "",
+		"delete-confirmation": ""
+	},
+	"downloads": {
+		"empty": "",
+		"error": "",
+		"delete": "",
+		"deleteMessage": "",
+		"pause": "",
+		"resume": "",
+		"retry": ""
+	},
+	"errors": {
+		"connection": "",
+		"connection-tips": "",
+		"unknown": "",
+		"try-again": "",
+		"re-login": "",
+		"offline": "",
+		"unauthorized": "",
+		"needVerification": "",
+		"needAccount": "",
+		"setup": {
+			"MissingAdminAccount": "",
+			"NoVideoFound": ""
+		}
+	},
+	"mediainfo": {
+		"file": "",
+		"container": "",
+		"video": "",
+		"audio": "",
+		"subtitles": "",
+		"forced": "",
+		"default": "",
+		"external": "",
+		"duration": "",
+		"size": "",
+		"novideo": "",
+		"nocontainer": ""
+	},
+	"admin": {
+		"users": {
+			"label": "",
+			"adminUser": "",
+			"regularUser": "",
+			"set-permissions": "",
+			"delete": "",
+			"unverifed": "",
+			"verify": ""
+		},
+		"scanner": {
+			"label": "",
+			"scan": "",
+			"empty": ""
+		}
+	}
+}
