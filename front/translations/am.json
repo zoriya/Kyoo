@@ -30,8 +30,8 @@
 		"partOf": "",
 		"watchlistAdd": "ለመመልከት ወዳቀዱት ዝርዝር ይጨምሩ",
 		"watchlistEdit": "",
-		"watchlistRemove": "",
-		"watchlistLogin": "",
+		"watchlistRemove": "አልተመለከትኩትም",
+		"watchlistLogin": "መመልከት ወደሚፈልጉት ዝርዝር ለመጨመር ወደ አካውንቶ ይግቡ",
 		"watchlistMark": {
 			"completed": "",
 			"planned": "",
@@ -39,28 +39,28 @@
 			"droped": "",
 			"null": ""
 		},
-		"nextUp": "",
-		"season": ""
+		"nextUp": "ቀጣይ",
+		"season": "ምዕራፍ {{number}}"
 	},
 	"browse": {
 		"mediatypekey": {
-			"all": "",
-			"movie": "",
-			"show": "",
-			"collection": ""
+			"all": "ሁሉም",
+			"movie": "ፊልሞች",
+			"show": "ተከታታይ ድራማ",
+			"collection": "ስብስብ"
 		},
-		"mediatype-tt": "",
-		"mediatypelabel": "",
-		"sortby": "",
-		"sortby-tt": "",
+		"mediatype-tt": "የሚዲያ ዓይነት",
+		"mediatypelabel": "የሚዲያ ዓይነት",
+		"sortby": "በ{{key}} ደርድር",
+		"sortby-tt": "ደርድር",
 		"sortkey": {
-			"relevance": "",
-			"name": "",
-			"airDate": "",
-			"startAir": "",
-			"endAir": "",
-			"addedDate": "",
-			"rating": ""
+			"relevance": "ተገቢነት",
+			"name": "ስም",
+			"airDate": "የተለቀቀበት ቀን",
+			"startAir": "የጀመረበት ቀን",
+			"endAir": "ያለቀበት ቀን",
+			"addedDate": "የታከለበት ቀን",
+			"rating": "ግምገማዎች"
 		},
 		"sortord": {
 			"asc": "",
