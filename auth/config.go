@@ -20,6 +20,12 @@ type Configuration struct {
 	ExpirationDelay time.Duration
 }
 
+var DefaultConfig = Configuration{
+	Issuer:          "kyoo",
+	DefaultClaims:   make(jwt.MapClaims),
+	ExpirationDelay: 30 * 24 * time.Hour,
+}
+
 const (
 	JwtPrivateKey = "jwt_private_key"
 )
@@ -31,7 +37,7 @@ func LoadConfiguration(db *dbc.Queries) (*Configuration, error) {
 		return nil, err
 	}
 
-	ret := Configuration{}
+	ret := DefaultConfig
 
 	for _, conf := range confs {
 		switch conf.Key {
