@@ -1,0 +1,36 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "sql/queries"
+    schema: "sql/migrations"
+    gen:
+      go:
+        package: "dbc"
+        sql_package: "pgx/v5"
+        out: "dbc"
+        emit_pointers_for_null_types: true
+        emit_json_tags: true
+        json_tags_case_style: camel
+        initialisms: []
+        overrides:
+        - db_type: "timestamptz"
+          go_type:
+            import: "time"
+            type: "Time"
+        - db_type: "timestamptz"
+          nullable: true
+          go_type:
+            import: "time"
+            type: "Time"
+            pointer: true
+        - db_type: "uuid"
+          go_type:
+            import: "github.com/google/uuid"
+            type: "UUID"
+        - column: "users.claims"
+          go_type:
+            import: "github.com/golang-jwt/jwt/v5"
+            package: "jwt"
+            type: "MapClaims"
+
+

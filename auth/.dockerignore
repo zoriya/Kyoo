@@ -1,0 +1,12 @@
+Dockerfile*
+*.md
+.dockerignore
+.gitignore
+.env*
+
+# generated via sqlc
+dbc/
+# genereated via swag
+docs/
+
+# vim: ft=gitignore
