@@ -20,8 +20,7 @@ jobs:
           python-version: '3.9'
           cache: 'pip'
 
-      - name: Install robot
-        run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt
 
       - name: Docker cache
         uses: satackey/action-docker-layer-caching@v0.0.11
@@ -30,7 +29,7 @@ jobs:
       - name: Start the service
         run: |
           cp .env.example .env
-          docker compose -f docker-compose.build.yml up -d auth postgres traefik --wait
+          docker compose --profile v5 -f docker-compose.build.yml up -d auth postgres traefik --wait
 
       - name: Perform healthchecks
         run: |
