@@ -5,7 +5,7 @@ select
 	sqlc.embed(u)
 from
 	users as u
-	inner join sessions as s on u.id = s.user_id
+	inner join sessions as s on u.pk = s.user_pk
 where
 	s.token = $1
 limit 1;
@@ -20,24 +20,26 @@ where
 
 -- name: GetUserSessions :many
 select
-	*
+	s.*
 from
-	sessions
+	sessions as s
+	inner join users as u on u.pk = s.user_pk
 where
-	user_id = $1
+	u.pk = $1
 order by
 	last_used;
 
 -- name: CreateSession :one
-insert into sessions(token, user_id, device)
+insert into sessions(token, user_pk, device)
 	values ($1, $2, $3)
 returning
 	*;
 
 -- name: DeleteSession :one
-delete from sessions
-where id = $1
-	and user_id = $2
+delete from sessions as s using users as u
+where s.user_pk = u.pk
+	and s.id = $1
+	and u.id = sqlc.arg(user_id)
 returning
-	*;
+	s.*;
 

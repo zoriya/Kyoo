@@ -1,7 +1,8 @@
 begin;
 
 create table users(
-	id uuid not null primary key,
+	pk serial primary key,
+	id uuid not null default gen_random_uuid(),
 	username varchar(256) not null unique,
 	email varchar(320) not null unique,
 	password text,
@@ -12,7 +13,7 @@ create table users(
 );
 
 create table oidc_handle(
-	user_id uuid not null references users(id) on delete cascade,
+	user_pk integer not null references users(pk) on delete cascade,
 	provider varchar(256) not null,
 
 	id text not null,
@@ -23,7 +24,7 @@ create table oidc_handle(
 	refresh_token text,
 	expire_at timestamptz,
 
-	constraint oidc_handle_pk primary key (user_id, provider)
+	constraint oidc_handle_pk primary key (user_pk, provider)
 );
 
 commit;

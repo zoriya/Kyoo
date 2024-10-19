@@ -21,10 +21,13 @@ limit $1;
 -- name: GetUser :many
 select
 	sqlc.embed(u),
-	sqlc.embed(h)
+	h.provider,
+	h.id,
+	h.username,
+	h.profile_url
 from
 	users as u
-	left join oidc_handle as h on u.id = h.user_id
+	left join oidc_handle as h on u.pk = h.user_pk
 where
 	u.id = $1;
 
