@@ -12,7 +12,7 @@
       msgspec
       langcodes
 
-      robotframework
+      # robotframework
       # restinstance needs to be packaged
     ]);
   dotnet = with pkgs.dotnetCorePackages;

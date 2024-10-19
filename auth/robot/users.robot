@@ -20,7 +20,7 @@ Register Duplicates
   [Documentation]  If two users tries to register with the same username, it fails
   Register  user-duplicate
   # We can't use the `Register` keyword because it assert for success
-  POST  /auth/register  {"username": "user-duplicate", "password": "pass", "email": "mail@zoriya.dev"}
+  POST  /users  {"username": "user-duplicate", "password": "pass", "email": "mail@zoriya.dev"}
   Output
   Integer  response status  409
   [Teardown]  DELETE  /users/me

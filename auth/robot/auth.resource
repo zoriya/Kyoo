@@ -8,10 +8,10 @@ Library             REST  http://localhost:8901/auth
 Login
   [Documentation]  Shortcut to login with the given username for future requests
   [Arguments]  ${username}
-  &{res}=  POST  /sessions  {"username": "${username}", "password": "password-${username}"}
+  &{res}=  POST  /sessions  {"login": "${username}", "password": "password-${username}"}
   Output
   Integer  response status  201
-  String  response body access_token
+  String  response body token
   ConvertToJwt  ${res.body.token}
 
 Register
@@ -29,11 +29,11 @@ ConvertToJwt
   [Documentation]  Convert a session token to a jwt and set it in the header
   [Arguments]  ${token}
   Set Headers  {"Authorization": "Bearer ${token}"}
-  ${res}=  GET  /jwt
+  &{res}=  GET  /jwt
   Output
   Integer  response status  200
   String  response body token
-  Set Headers  {"Authorization": "Bearer ${res.token}"}
+  Set Headers  {"Authorization": "Bearer ${res.body.token}"}
 
 Logout
   [Documentation]  Logout the current user, only the local client is affected.
