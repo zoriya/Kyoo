@@ -16,9 +16,10 @@ RUN swag init --parseDependency
 RUN CGO_ENABLED=0 GOOS=linux go build -o /keibi
 
 FROM gcr.io/distroless/base-debian11
-WORKDIR /
+WORKDIR /app
 EXPOSE 4568
 USER nonroot:nonroot
 
-COPY --from=build /keibi /keibi
-CMD ["/keibi"]
+COPY --from=build /keibi /app/keibi
+COPY sql ./sql
+CMD ["/app/keibi"]
