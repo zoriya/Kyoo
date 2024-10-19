@@ -48,6 +48,11 @@ jobs:
             dockerfile: Dockerfile
             label: transcoder
             image: zoriya/kyoo_transcoder
+
+          - context: ./auth
+            dockerfile: Dockerfile
+            label: auth
+            image: zoriya/kyoo_auth
     name: Build ${{matrix.label}}
     steps:
       - uses: actions/checkout@v4
