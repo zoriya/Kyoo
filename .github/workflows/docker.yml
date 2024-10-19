@@ -52,7 +52,7 @@ jobs:
           - context: ./auth
             dockerfile: Dockerfile
             label: auth
-            image: zoriya/kyoo_auth
+            image: zoriya/keibi
     name: Build ${{matrix.label}}
     steps:
       - uses: actions/checkout@v4
