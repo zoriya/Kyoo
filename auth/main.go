@@ -79,7 +79,6 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 		config.ConnConfig.RuntimeParams["search_path"] = schema
 	}
 
-	fmt.Printf("Connecting to database with %v\n", config)
 	db, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
 		fmt.Printf("Could not connect to database, check your env variables!")
@@ -160,6 +159,7 @@ func main() {
 
 	r := e.Group("")
 	r.Use(echojwt.WithConfig(echojwt.Config{
+		SigningMethod: "RS256",
 		SigningKey: h.config.JwtPublicKey,
 	}))
 
