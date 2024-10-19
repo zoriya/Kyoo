@@ -1,0 +1,17 @@
+{
+	"name": "api",
+	"version": "1.0.50",
+	"scripts": {
+		"dev": "bun --watch src/index.ts",
+		"build": "bun build src/index.ts --target bun --outdir ./dist",
+		"start": "NODE_ENV=production bun dist/index.js",
+		"test": "bun test"
+	},
+	"dependencies": {
+		"elysia": "latest"
+	},
+	"devDependencies": {
+		"bun-types": "latest"
+	},
+	"module": "src/index.js"
+}
