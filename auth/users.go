@@ -8,11 +8,15 @@ import (
 	"github.com/alexedwards/argon2id"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/zoriya/kyoo/keibi/dbc"
 )
 
 type User struct {
+	// Primary key in database
+	Pk int32 `json:"-"`
 	// Id of the user.
 	Id uuid.UUID `json:"id"`
 	// Username of the user. Can be used as a login.
@@ -49,6 +53,7 @@ type RegisterDto struct {
 
 func MapDbUser(user *dbc.User) User {
 	return User{
+		Pk:          user.Pk,
 		Id:          user.Id,
 		Username:    user.Username,
 		Email:       user.Email,
@@ -59,10 +64,10 @@ func MapDbUser(user *dbc.User) User {
 	}
 }
 
-func MapOidc(oidc *dbc.OidcHandle) OidcHandle {
+func MapOidc(oidc *dbc.GetUserRow) OidcHandle {
 	return OidcHandle{
-		Id:         oidc.Id,
-		Username:   oidc.Username,
+		Id:         *oidc.Id,
+		Username:   *oidc.Username,
 		ProfileUrl: oidc.ProfileUrl,
 	}
 }
@@ -139,7 +144,9 @@ func (h *Handler) GetUser(c echo.Context) error {
 
 	user := MapDbUser(&dbuser[0].User)
 	for _, oidc := range dbuser {
-		user.Oidc[oidc.OidcHandle.Provider] = MapOidc(&oidc.OidcHandle)
+		if oidc.Provider != nil {
+			user.Oidc[*oidc.Provider] = MapOidc(&oidc)
+		}
 	}
 
 	return c.JSON(200, user)
@@ -166,7 +173,9 @@ func (h *Handler) GetMe(c echo.Context) error {
 
 	user := MapDbUser(&dbuser[0].User)
 	for _, oidc := range dbuser {
-		user.Oidc[oidc.OidcHandle.Provider] = MapOidc(&oidc.OidcHandle)
+		if oidc.Provider != nil {
+			user.Oidc[*oidc.Provider] = MapOidc(&oidc)
+		}
 	}
 
 	return c.JSON(200, user)
@@ -204,8 +213,10 @@ func (h *Handler) Register(c echo.Context) error {
 		Password: &pass,
 		Claims:   h.config.DefaultClaims,
 	})
-	if err != nil {
+	if ErrIs(err, pgerrcode.UniqueViolation) {
 		return echo.NewHTTPError(409, "Email or username already taken")
+	} else if err != nil {
+		return err
 	}
 	user := MapDbUser(&duser)
 	return h.createSession(c, &user)
@@ -229,8 +240,10 @@ func (h *Handler) DeleteUser(c echo.Context) error {
 	}
 
 	ret, err := h.db.DeleteUser(context.Background(), uid)
-	if err != nil {
+	if err == pgx.ErrNoRows {
 		return echo.NewHTTPError(404, "No user found with given id")
+	} else if err != nil {
+		return err
 	}
 	return c.JSON(200, MapDbUser(&ret))
 }
@@ -250,8 +263,10 @@ func (h *Handler) DeleteSelf(c echo.Context) error {
 	}
 
 	ret, err := h.db.DeleteUser(context.Background(), uid)
-	if err != nil {
+	if err == pgx.ErrNoRows {
 		return echo.NewHTTPError(403, "Invalid token, user already deleted.")
+	} else if err != nil {
+		return err
 	}
 	return c.JSON(200, MapDbUser(&ret))
 }

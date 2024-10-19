@@ -1,12 +1,14 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/labstack/echo/v4"
 )
 
@@ -59,4 +61,13 @@ func CheckPermissions(c echo.Context, perms []string) error {
 		)
 	}
 	return nil
+}
+
+func ErrIs(err error, code string) bool {
+	var pgerr *pgconn.PgError
+
+	if !errors.As(err, &pgerr) {
+		return false
+	}
+	return pgerr.Code == code
 }

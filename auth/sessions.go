@@ -11,6 +11,7 @@ import (
 	"github.com/alexedwards/argon2id"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/zoriya/kyoo/keibi/dbc"
 )
@@ -102,7 +103,7 @@ func (h *Handler) createSession(c echo.Context, user *User) error {
 
 	session, err := h.db.CreateSession(ctx, dbc.CreateSessionParams{
 		Token:  base64.StdEncoding.EncodeToString(id),
-		UserId: user.Id,
+		UserPk: user.Pk,
 		Device: device,
 	})
 	if err != nil {
@@ -131,7 +132,7 @@ func (h *Handler) Logout(c echo.Context) error {
 	}
 
 	session := c.Param("id")
-	if session == "" {
+	if session == "current" {
 		sid, ok := c.Get("user").(*jwt.Token).Claims.(jwt.MapClaims)["sid"]
 		if !ok {
 			return echo.NewHTTPError(400, "Missing session id")
@@ -147,8 +148,10 @@ func (h *Handler) Logout(c echo.Context) error {
 		Id:     sid,
 		UserId: uid,
 	})
-	if err != nil {
+	if err == pgx.ErrNoRows {
 		return echo.NewHTTPError(404, "Session not found with specified id")
+	} else if err != nil {
+		return err
 	}
 	return c.JSON(200, MapSession(&ret))
 }
