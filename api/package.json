@@ -8,9 +8,13 @@
 		"test": "bun test"
 	},
 	"dependencies": {
-		"elysia": "latest"
+		"@elysiajs/swagger": "^1.1.5",
+		"drizzle-orm": "^0.35.3",
+		"elysia": "latest",
+		"pg": "^8.13.1"
 	},
 	"devDependencies": {
+		"@types/pg": "^8.11.10",
 		"bun-types": "latest"
 	},
 	"module": "src/index.js"
