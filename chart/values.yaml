@@ -1,3 +1,6 @@
+# Kyoo consists of multiple services, please view diagrams for additional context
+# https://github.com/zoriya/Kyoo/blob/master/DIAGRAMS.md
+
 # global configures shared microservices and subcharts settings
 global:
   image:
@@ -131,7 +134,7 @@ kyoo:
     scope: "email openid profile"
     authMethod: ClientSecretBasic
 
-# configures workloads that need to access media resources
+# configures workloads that require access to media
 media:
   # specifies the volumes to use
   volumes:
@@ -147,6 +150,7 @@ media:
   # note that this should align with .media.volumeMounts[].mountPath
   baseMountPath: "/data"
 
+# configures workloads that require access to contentdatabase
 contentdatabase:
   # TheMovieDB
   tmdb:
@@ -158,17 +162,10 @@ contentdatabase:
     pinKey: tvdb_pin
     existingSecret: bigsecret
 
-ingress:
-  enabled: false
-  ingressClassName: ~
-  annotations: {}
-  extraAnnotations: {}
-  host: kyoo.mydomain.com
-  tls: false
-  tlsSecret: ~
-
+# autosync deployment configuration
 autosync:
   name: autosync
+  # kyoo_autosync container configuration
   kyoo_autosync:
     livenessProbe: {}
     readinessProbe: {}
@@ -194,8 +191,10 @@ autosync:
   extraInitContainers: []
   extraVolumes: []
 
+# back deployment configuration
 back:
   name: back
+  # kyoo_migrations init container configuration
   kyoo_migrations:
     livenessProbe: {}
     readinessProbe: {}
@@ -207,6 +206,7 @@ back:
     image:
       repository: ~
       tag: ~
+  # kyoo_back container configuration
   kyoo_back:
     livenessProbe: {}
     readinessProbe: {}
@@ -243,8 +243,10 @@ back:
   extraInitContainers: []
   extraVolumes: []
 
+# front deployment configuration
 front:
   name: front
+  # kyoo_front container configuration
   kyoo_front:
     livenessProbe: {}
     readinessProbe: {}
@@ -274,20 +276,23 @@ front:
   extraInitContainers: []
   extraVolumes: []
 
+# matcher deployment configuration
 matcher:
   name: matcher
+  # kyoo_matcher container configuration
   kyoo_matcher:
     livenessProbe: {}
     readinessProbe: {}
     resources: {}
     containerSecurityContext: {}
     extraVolumeMounts: []
-    # workaround until dedicated image is created
+    # kyoo_matcher uses the same image as kyoo_scanner
+    # requires an additional argument to function as matcher
     extraArgs:
       - matcher
     extraEnv: []
     image:
-      # workaround until dedicated image is created
+      # kyoo_matcher uses the same image as kyoo_scanner
       repository: ghcr.io/zoriya/kyoo_scanner
       tag: ~
   # matcher does not support multiple replicas
@@ -305,8 +310,10 @@ matcher:
   extraInitContainers: []
   extraVolumes: []
 
+# scanner deployment configuration
 scanner:
   name: scanner
+  # kyoo_scanner container configuration
   kyoo_scanner:
     livenessProbe: {}
     readinessProbe: {}
@@ -333,8 +340,10 @@ scanner:
   extraInitContainers: []
   extraVolumes: []
 
+# scanner deployment configuration
 transcoder:
   name: transcoder
+  # kyoo_transcoder container configuration
   kyoo_transcoder:
     livenessProbe: {}
     readinessProbe: {}
@@ -375,13 +384,23 @@ transcoder:
   extraInitContainers: []
   extraVolumes: []
 
+ingress:
+  enabled: false
+  ingressClassName: ~
+  annotations: {}
+  extraAnnotations: {}
+  host: kyoo.mydomain.com
+  tls: false
+  tlsSecret: ~
+
 # subchart settings
 meilisearch:
   enabled: false
   environment:
     MEILI_ENV: production
   auth:
-    # DOES NOT SUPPORT SPECIFYING KEY.  MUST BE NAMED `MEILI_MASTER_KEY`
+    # subchart does not support specifying keyname.
+    # key must be named `MEILI_MASTER_KEY`
     existingMasterKeySecret: "{{ .Values.global.meilisearch.infra.existingSecret }}"
   persistence:
     enabled: true
@@ -391,7 +410,8 @@ meilisearch:
 postgresql:
   enabled: false
   auth:
-    # username is unable to reference global value
+    # default user to be created by postgres subchart
+    # subchart is unable to consume a secret for specifying user
     username: kyoo_all
     existingSecret: "{{ .Values.global.postgres.infra.existingSecret }}"
     secretKeys:
@@ -425,7 +445,8 @@ postgresql:
 rabbitmq:
   enabled: false
   auth:
-    # this will not read from a secret. just manually make the same
+    # default user to be created by rabbitmq subchart
+    # subchart is unable to consume a secret for specifying user
     username: kyoo_all
     existingPasswordSecret: "{{ .Values.global.rabbitmq.infra.existingSecret }}"
     existingSecretPasswordKey: "{{ .Values.global.rabbitmq.infra.passwordKey }}"
