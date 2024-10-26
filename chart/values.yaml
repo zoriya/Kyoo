@@ -1,4 +1,4 @@
-# Default values for kyoo.
+# global configures shared microservices and subcharts settings
 global:
   image:
     repositoryBase: "ghcr.io/zoriya"
@@ -10,37 +10,47 @@ global:
   podLabels: {}
   extraEnv: []
 
+  # kyoo connectivity & subchart settings for meilisearch
+  # subchart configuration can be found at .meilisearch
   meilisearch:
     proto: http
     host: kyoo-meilisearch
     port: 7700
-    #infra is only used by subchart deployment
+    # subchart specific settings
     infra:
-      # DOES NOT SUPPORT SPECIFYING KEY.  MUST BE NAMED `MEILI_MASTER_KEY`
+      # subchart does not support specifying keyname.
+      # key must be named `MEILI_MASTER_KEY`
       existingSecret: bigsecret
+    # kyoo_back workload specific settings
     kyoo_back:
       masterkeyKey: MEILI_MASTER_KEY
       existingSecret: bigsecret
+  # kyoo connectivity & subchart settings for postgres
+  # subchart configuration can be found at .postgresql
   postgres:
-    #infra is only used by subchart deployment
+    # subchart specific settings
     infra:
       # subchart does not accept this global value in one place
-      # if updating be sure to also update postgresql.auth.username
+      # if updating be sure to also update .postgresql.auth.username
       user: kyoo_all
       passwordKey: postgres_password
       existingSecret: bigsecret
+    # kyoo settings for connecting to kyoo_back database
     kyoo_back:
       host: kyoo-postgresql
       port: 5432
       database: kyoo_back
+      # kyoo_migrations workload specific settings
       kyoo_migrations:
         userKey: postgres_user
         passwordKey: postgres_password
         existingSecret: bigsecret
+      # kyoo_back workload specific settings
       kyoo_back:
         userKey: postgres_user
         passwordKey: postgres_password
         existingSecret: bigsecret
+    # kyoo settings for connecting to kyoo_transcoder database
     kyoo_transcoder:
       host: kyoo-postgresql
       port: 5432
@@ -48,33 +58,40 @@ global:
       # POSTGRES_SCHEMA disabled means application will not create the schema
       # and will instead use the user's search path
       schema: disabled
+      # kyoo_transcoder workload specific settings
       kyoo_transcoder:
         userKey: postgres_user
         passwordKey: postgres_password
         existingSecret: bigsecret
+  # kyoo connectivity & subchart settings for rabbitmq
+  # subchart configuration can be found at .rabbitmq
   rabbitmq:
     host: kyoo-rabbitmq
     port: 5672
-    # vhost is not used yet
+    # vhost is not used yet https://github.com/zoriya/Kyoo/issues/537
     # vhost: ""
-    #infra is only used by subchart deployment
+    # subchart specific settings
     infra:
       # user must be manually aligned via rabbitmq.auth.user
       passwordKey: rabbitmq_password
       keyErlangCookie: rabbitmq_cookie
       existingSecret: bigsecret
+    # kyoo_autosync workload specific settings
     kyoo_autosync:
       userKey: rabbitmq_user
       passwordKey: rabbitmq_password
       existingSecret: bigsecret
+    # kyoo_back workload specific settings
     kyoo_back:
       userKey: rabbitmq_user
       passwordKey: rabbitmq_password
       existingSecret: bigsecret
+    # kyoo_matcher workload specific settings
     kyoo_matcher:
       userKey: rabbitmq_user
       passwordKey: rabbitmq_password
       existingSecret: bigsecret
+    # kyoo_scanner workload specific settings
     kyoo_scanner:
       userKey: rabbitmq_user
       passwordKey: rabbitmq_password
@@ -255,7 +272,7 @@ matcher:
     containerSecurityContext: {}
     extraVolumeMounts: []
     # workaround until dedicated image is created
-    extraArgs: 
+    extraArgs:
       - matcher
     extraEnv: []
     image:
@@ -364,7 +381,7 @@ postgresql:
   enabled: false
   auth:
     # username is unable to reference global value
-    username: kyoo_all 
+    username: kyoo_all
     existingSecret: "{{ .Values.global.postgres.infra.existingSecret }}"
     secretKeys:
       # set the postgres user password to the same as our user
