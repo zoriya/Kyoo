@@ -58,7 +58,7 @@ spec:
             - name: GOCODER_PREFIX
               value: "/video"
             - name: GOCODER_SAFE_PATH
-              value: "/data"
+              value: {{ .Values.media.baseMountPath | quote }}
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:

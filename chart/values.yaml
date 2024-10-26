@@ -97,11 +97,17 @@ global:
       passwordKey: rabbitmq_password
       existingSecret: bigsecret
 
+# kyoo application settings
 kyoo:
+  # The url you can use to reach your kyoo instance. This is used during oidc to redirect users to your instance.
   address: "https://kyoo.mydomain.com"
+  # If this is true, new accounts wont have any permissions before you approve them in your admin dashboard.
   requireAccountVerification: true
+  # Specify permissions of new accounts.
   defaultPermissions: "overall.read,overall.play"
+  # Specify permissions of guest accounts, default is no permissions.
   unloggedPermissions: ""
+  # A pattern (regex) to ignore video files.
   libraryIgnorePattern: ".*/[dD]ownloads?/.*"
   languages: "en"
   # hardware acceleration profile (valid values: disabled, vaapi, qsv, nvidia)
@@ -125,16 +131,21 @@ kyoo:
     scope: "email openid profile"
     authMethod: ClientSecretBasic
 
+# configures workloads that need to access media resources
 media:
+  # specifies the volumes to use
   volumes:
     - name: media
       persistentVolumeClaim:
         claimName: media
-  # mounts should always be mounted to /data
+  # specifies where to mount the volumes
+  # note that this should align with .media.baseMountPath
   volumeMounts:
     - mountPath: /data
       name: media
-      subPath: media
+  # configures kyoo workloads to search
+  # note that this should align with .media.volumeMounts[].mountPath
+  baseMountPath: "/data"
 
 contentdatabase:
   # TheMovieDB

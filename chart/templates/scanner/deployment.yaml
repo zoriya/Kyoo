@@ -48,7 +48,7 @@ spec:
             {{- end }}
           env:
             - name: SCANNER_LIBRARY_ROOT
-              value: /data
+              value: {{ .Values.media.baseMountPath | quote }}
             - name: LIBRARY_IGNORE_PATTERN
               value: {{ .Values.kyoo.libraryIgnorePattern | quote }}
             - name: KYOO_APIKEYS
