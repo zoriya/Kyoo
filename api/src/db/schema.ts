@@ -4,17 +4,25 @@ import {
 	date,
 	integer,
 	jsonb,
-	pgEnum,
-	pgTable,
+	pgSchema,
 	primaryKey,
 	text,
+	timestamp,
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
 
-export const entryType = pgEnum("entry_type", ["unknown", "episode", "movie", "special", "extra"]);
+const schema = pgSchema("kyoo");
 
-export const entries = pgTable(
+export const entryType = schema.enum("entry_type", [
+	"unknown",
+	"episode",
+	"movie",
+	"special",
+	"extra",
+]);
+
+export const entries = schema.table(
 	"entries",
 	{
 		pk: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -28,7 +36,7 @@ export const entries = pgTable(
 		airDate: date(),
 		runtime: integer(),
 		thumbnails: jsonb(),
-		nextRefresh: date(),
+		nextRefresh: timestamp({ withTimezone: true }),
 		externalId: jsonb().notNull().default({}),
 	},
 	(t) => ({
@@ -37,12 +45,12 @@ export const entries = pgTable(
 	}),
 );
 
-export const entriesTranslation = pgTable(
+export const entriesTranslation = schema.table(
 	"entries_translation",
 	{
 		pk: integer()
 			.notNull()
-			.references(() => entries.id),
+			.references(() => entries.pk, { onDelete: "cascade" }),
 		language: varchar({ length: 255 }).notNull(),
 		name: text(),
 		description: text(),
