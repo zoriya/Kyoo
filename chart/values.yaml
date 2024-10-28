@@ -1,4 +1,7 @@
-# Default values for kyoo.
+# Kyoo consists of multiple services, please view diagrams for additional context
+# https://github.com/zoriya/Kyoo/blob/master/DIAGRAMS.md
+
+# global configures shared microservices and subcharts settings
 global:
   image:
     repositoryBase: "ghcr.io/zoriya"
@@ -10,37 +13,47 @@ global:
   podLabels: {}
   extraEnv: []
 
+  # kyoo connectivity & subchart settings for meilisearch
+  # subchart configuration can be found at .meilisearch
   meilisearch:
     proto: http
     host: kyoo-meilisearch
     port: 7700
-    #infra is only used by subchart deployment
+    # subchart specific settings
     infra:
-      # DOES NOT SUPPORT SPECIFYING KEY.  MUST BE NAMED `MEILI_MASTER_KEY`
+      # subchart does not support specifying keyname.
+      # key must be named `MEILI_MASTER_KEY`
       existingSecret: bigsecret
+    # kyoo_back workload specific settings
     kyoo_back:
       masterkeyKey: MEILI_MASTER_KEY
       existingSecret: bigsecret
+  # kyoo connectivity & subchart settings for postgres
+  # subchart configuration can be found at .postgresql
   postgres:
-    #infra is only used by subchart deployment
+    # subchart specific settings
     infra:
       # subchart does not accept this global value in one place
-      # if updating be sure to also update postgresql.auth.username
+      # if updating be sure to also update .postgresql.auth.username
       user: kyoo_all
       passwordKey: postgres_password
       existingSecret: bigsecret
+    # kyoo settings for connecting to kyoo_back database
     kyoo_back:
       host: kyoo-postgresql
       port: 5432
       database: kyoo_back
+      # kyoo_migrations workload specific settings
       kyoo_migrations:
         userKey: postgres_user
         passwordKey: postgres_password
         existingSecret: bigsecret
+      # kyoo_back workload specific settings
       kyoo_back:
         userKey: postgres_user
         passwordKey: postgres_password
         existingSecret: bigsecret
+    # kyoo settings for connecting to kyoo_transcoder database
     kyoo_transcoder:
       host: kyoo-postgresql
       port: 5432
@@ -48,43 +61,56 @@ global:
       # POSTGRES_SCHEMA disabled means application will not create the schema
       # and will instead use the user's search path
       schema: disabled
+      # kyoo_transcoder workload specific settings
       kyoo_transcoder:
         userKey: postgres_user
         passwordKey: postgres_password
         existingSecret: bigsecret
+  # kyoo connectivity & subchart settings for rabbitmq
+  # subchart configuration can be found at .rabbitmq
   rabbitmq:
     host: kyoo-rabbitmq
     port: 5672
-    # vhost is not used yet
+    # vhost is not used yet https://github.com/zoriya/Kyoo/issues/537
     # vhost: ""
-    #infra is only used by subchart deployment
+    # subchart specific settings
     infra:
       # user must be manually aligned via rabbitmq.auth.user
       passwordKey: rabbitmq_password
       keyErlangCookie: rabbitmq_cookie
       existingSecret: bigsecret
+    # kyoo_autosync workload specific settings
     kyoo_autosync:
       userKey: rabbitmq_user
       passwordKey: rabbitmq_password
       existingSecret: bigsecret
+    # kyoo_back workload specific settings
     kyoo_back:
       userKey: rabbitmq_user
       passwordKey: rabbitmq_password
       existingSecret: bigsecret
+    # kyoo_matcher workload specific settings
     kyoo_matcher:
       userKey: rabbitmq_user
       passwordKey: rabbitmq_password
       existingSecret: bigsecret
+    # kyoo_scanner workload specific settings
     kyoo_scanner:
       userKey: rabbitmq_user
       passwordKey: rabbitmq_password
       existingSecret: bigsecret
 
+# kyoo application settings
 kyoo:
+  # The url you can use to reach your kyoo instance. This is used during oidc to redirect users to your instance.
   address: "https://kyoo.mydomain.com"
+  # If this is true, new accounts wont have any permissions before you approve them in your admin dashboard.
   requireAccountVerification: true
+  # Specify permissions of new accounts.
   defaultPermissions: "overall.read,overall.play"
+  # Specify permissions of guest accounts, default is no permissions.
   unloggedPermissions: ""
+  # A pattern (regex) to ignore video files.
   libraryIgnorePattern: ".*/[dD]ownloads?/.*"
   languages: "en"
   # hardware acceleration profile (valid values: disabled, vaapi, qsv, nvidia)
@@ -108,17 +134,23 @@ kyoo:
     scope: "email openid profile"
     authMethod: ClientSecretBasic
 
+# configures workloads that require access to media
 media:
+  # specifies the volumes to use
   volumes:
     - name: media
       persistentVolumeClaim:
         claimName: media
-  # mounts should always be mounted to /data
+  # specifies where to mount the volumes
+  # note that this should align with .media.baseMountPath
   volumeMounts:
     - mountPath: /data
       name: media
-      subPath: media
+  # configures kyoo workloads to search
+  # note that this should align with .media.volumeMounts[].mountPath
+  baseMountPath: "/data"
 
+# configures workloads that require access to contentdatabase
 contentdatabase:
   # TheMovieDB
   tmdb:
@@ -130,17 +162,10 @@ contentdatabase:
     pinKey: tvdb_pin
     existingSecret: bigsecret
 
-ingress:
-  enabled: false
-  ingressClassName: ~
-  annotations: {}
-  extraAnnotations: {}
-  host: kyoo.mydomain.com
-  tls: false
-  tlsSecret: ~
-
+# autosync deployment configuration
 autosync:
   name: autosync
+  # kyoo_autosync container configuration
   kyoo_autosync:
     livenessProbe: {}
     readinessProbe: {}
@@ -166,8 +191,10 @@ autosync:
   extraInitContainers: []
   extraVolumes: []
 
+# back deployment configuration
 back:
   name: back
+  # kyoo_migrations init container configuration
   kyoo_migrations:
     livenessProbe: {}
     readinessProbe: {}
@@ -179,6 +206,7 @@ back:
     image:
       repository: ~
       tag: ~
+  # kyoo_back container configuration
   kyoo_back:
     livenessProbe: {}
     readinessProbe: {}
@@ -215,8 +243,10 @@ back:
   extraInitContainers: []
   extraVolumes: []
 
+# front deployment configuration
 front:
   name: front
+  # kyoo_front container configuration
   kyoo_front:
     livenessProbe: {}
     readinessProbe: {}
@@ -246,20 +276,23 @@ front:
   extraInitContainers: []
   extraVolumes: []
 
+# matcher deployment configuration
 matcher:
   name: matcher
+  # kyoo_matcher container configuration
   kyoo_matcher:
     livenessProbe: {}
     readinessProbe: {}
     resources: {}
     containerSecurityContext: {}
     extraVolumeMounts: []
-    # workaround until dedicated image is created
-    extraArgs: 
+    # kyoo_matcher uses the same image as kyoo_scanner
+    # requires an additional argument to function as matcher
+    extraArgs:
       - matcher
     extraEnv: []
     image:
-      # workaround until dedicated image is created
+      # kyoo_matcher uses the same image as kyoo_scanner
       repository: ghcr.io/zoriya/kyoo_scanner
       tag: ~
   # matcher does not support multiple replicas
@@ -277,8 +310,10 @@ matcher:
   extraInitContainers: []
   extraVolumes: []
 
+# scanner deployment configuration
 scanner:
   name: scanner
+  # kyoo_scanner container configuration
   kyoo_scanner:
     livenessProbe: {}
     readinessProbe: {}
@@ -305,8 +340,10 @@ scanner:
   extraInitContainers: []
   extraVolumes: []
 
+# scanner deployment configuration
 transcoder:
   name: transcoder
+  # kyoo_transcoder container configuration
   kyoo_transcoder:
     livenessProbe: {}
     readinessProbe: {}
@@ -347,13 +384,23 @@ transcoder:
   extraInitContainers: []
   extraVolumes: []
 
+ingress:
+  enabled: false
+  ingressClassName: ~
+  annotations: {}
+  extraAnnotations: {}
+  host: kyoo.mydomain.com
+  tls: false
+  tlsSecret: ~
+
 # subchart settings
 meilisearch:
   enabled: false
   environment:
     MEILI_ENV: production
   auth:
-    # DOES NOT SUPPORT SPECIFYING KEY.  MUST BE NAMED `MEILI_MASTER_KEY`
+    # subchart does not support specifying keyname.
+    # key must be named `MEILI_MASTER_KEY`
     existingMasterKeySecret: "{{ .Values.global.meilisearch.infra.existingSecret }}"
   persistence:
     enabled: true
@@ -363,8 +410,9 @@ meilisearch:
 postgresql:
   enabled: false
   auth:
-    # username is unable to reference global value
-    username: kyoo_all 
+    # default user to be created by postgres subchart
+    # subchart is unable to consume a secret for specifying user
+    username: kyoo_all
     existingSecret: "{{ .Values.global.postgres.infra.existingSecret }}"
     secretKeys:
       # set the postgres user password to the same as our user
@@ -397,7 +445,8 @@ postgresql:
 rabbitmq:
   enabled: false
   auth:
-    # this will not read from a secret. just manually make the same
+    # default user to be created by rabbitmq subchart
+    # subchart is unable to consume a secret for specifying user
     username: kyoo_all
     existingPasswordSecret: "{{ .Values.global.rabbitmq.infra.existingSecret }}"
     existingSecretPasswordKey: "{{ .Values.global.rabbitmq.infra.passwordKey }}"
