@@ -53,6 +53,10 @@ func (v *Validator) Validate(i interface{}) error {
 	return nil
 }
 
+func (h *Handler) CheckHealth(c echo.Context) error {
+	return c.JSON(200, struct{ Status string }{Status: "healthy"})
+}
+
 func OpenDatabase() (*pgxpool.Pool, error) {
 	ctx := context.Background()
 
@@ -160,8 +164,10 @@ func main() {
 	r := e.Group("")
 	r.Use(echojwt.WithConfig(echojwt.Config{
 		SigningMethod: "RS256",
-		SigningKey: h.config.JwtPublicKey,
+		SigningKey:    h.config.JwtPublicKey,
 	}))
+
+	e.GET("/health", h.CheckHealth)
 
 	r.GET("/users", h.ListUsers)
 	r.GET("/users/:id", h.GetUser)

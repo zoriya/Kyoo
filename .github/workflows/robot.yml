@@ -35,7 +35,7 @@ jobs:
         run: |
           docker compose ps -a
           docker compose logs
-          # wget --retry-connrefused --retry-on-http-error=502 http://localhost:8901/api/health || (docker compose logs && exit 1)
+          wget --retry-connrefused --retry-on-http-error=502 http://localhost:8901/auth/health
 
       - name: Run robot tests
         run: |
@@ -43,7 +43,9 @@ jobs:
 
       - name: Show logs
         if: failure()
-        run: docker compose logs
+        run: |
+          docker compose --profile v5 -f docker-compose.build.yml ps -a
+          docker compose --profile v5 -f docker-compose.build.yml logs
 
       - uses: actions/upload-artifact@v4
         with:
