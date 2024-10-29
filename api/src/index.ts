@@ -1,14 +1,7 @@
 import { Elysia } from "elysia";
 import { swagger } from "@elysiajs/swagger";
-import { drizzle } from "drizzle-orm/node-postgres";
+import { db } from "./db";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
-
-if (!process.env.DATABASE_URL) {
-	console.error("Missing `DATABASE_URL` environment variable. Exiting");
-	process.exit(1);
-}
-
-const db = drizzle(process.env.DATABASE_URL);
 
 await migrate(db, { migrationsFolder: "" });
 

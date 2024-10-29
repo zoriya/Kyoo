@@ -1,8 +1,12 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 
-const db = drizzle({
+export const db = drizzle({
 	connection: {
-		connectionString: process.env.DATABASE_URL!,
+		user: process.env.POSTGRES_USER ?? "kyoo",
+		password: process.env.POSTGRES_PASSWORD ?? "password",
+		database: process.env.POSTGRES_DB ?? "kyooDB",
+		host: process.env.POSTGRES_SERVER ?? "postgres",
+		port: Number(process.env.POSTGRES_PORT) || 5432,
 		ssl: true,
 	},
 	casing: "snake_case",
