@@ -22,4 +22,5 @@ USER nonroot:nonroot
 
 COPY --from=build /keibi /app/keibi
 COPY sql ./sql
+
 CMD ["/app/keibi"]

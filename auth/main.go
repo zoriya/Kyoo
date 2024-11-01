@@ -53,28 +53,37 @@ func (v *Validator) Validate(i interface{}) error {
 	return nil
 }
 
+func (h *Handler) CheckHealth(c echo.Context) error {
+	return c.JSON(200, struct{ Status string }{Status: "healthy"})
+}
+
+func GetenvOr(env string, def string) string {
+	out := os.Getenv(env)
+	if out == "" {
+		return def
+	}
+	return out
+}
+
 func OpenDatabase() (*pgxpool.Pool, error) {
 	ctx := context.Background()
 
-	port, err := strconv.ParseUint(os.Getenv("POSTGRES_PORT"), 10, 16)
+	port, err := strconv.ParseUint(GetenvOr("POSTGRES_PORT", "5432"), 10, 16)
 	if err != nil {
 		return nil, errors.New("invalid postgres port specified")
 	}
 
 	config, _ := pgxpool.ParseConfig("")
-	config.ConnConfig.Host = os.Getenv("POSTGRES_SERVER")
+	config.ConnConfig.Host = GetenvOr("POSTGRES_SERVER", "postgres")
 	config.ConnConfig.Port = uint16(port)
-	config.ConnConfig.Database = os.Getenv("POSTGRES_DB")
-	config.ConnConfig.User = os.Getenv("POSTGRES_USER")
-	config.ConnConfig.Password = os.Getenv("POSTGRES_PASSWORD")
+	config.ConnConfig.Database = GetenvOr("POSTGRES_DB", "kyoo")
+	config.ConnConfig.User = GetenvOr("POSTGRES_USER", "kyoo")
+	config.ConnConfig.Password = GetenvOr("POSTGRES_PASSWORD", "password")
 	config.ConnConfig.TLSConfig = nil
 	config.ConnConfig.RuntimeParams = map[string]string{
 		"application_name": "keibi",
 	}
-	schema := os.Getenv("POSTGRES_SCHEMA")
-	if schema == "" {
-		schema = "keibi"
-	}
+	schema := GetenvOr("POSTGRES_SCHEMA", "keibi")
 	if schema != "disabled" {
 		config.ConnConfig.RuntimeParams["search_path"] = schema
 	}
@@ -160,8 +169,10 @@ func main() {
 	r := e.Group("")
 	r.Use(echojwt.WithConfig(echojwt.Config{
 		SigningMethod: "RS256",
-		SigningKey: h.config.JwtPublicKey,
+		SigningKey:    h.config.JwtPublicKey,
 	}))
+
+	e.GET("/health", h.CheckHealth)
 
 	r.GET("/users", h.ListUsers)
 	r.GET("/users/:id", h.GetUser)
