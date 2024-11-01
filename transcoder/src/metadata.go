@@ -223,26 +223,18 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 	}
 
 	tx, err := s.database.Begin()
-	err = tx.QueryRow(`
+	// it needs to be a delete instead of a on conflict do update because we want to trigger delete casquade for
+	// videos/audios & co.
+	tx.Exec(`delete from info where path = $1`, path)
+	tx.Exec(`
 		insert into info(sha, path, extension, mime_codec, size, duration, container,
 		fonts, ver_info, ver_extract, ver_thumbs, ver_keyframes)
 		values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-		on conflict (path) do update set
-			sha = excluded.sha,
-			path = excluded.path,
-			extension = excluded.extension,
-			mime_codec = excluded.mime_codec,
-			size = excluded.size,
-			duration = excluded.duration,
-			container = excluded.container,
-			fonts = excluded.fonts,
-			ver_info = excluded.ver_info
-		returning ver_extract, ver_thumbs, ver_keyframes
 		`,
 		// on conflict do not update versions of extract/thumbs/keyframes
 		ret.Sha, ret.Path, ret.Extension, ret.MimeCodec, ret.Size, ret.Duration, ret.Container,
 		pq.Array(ret.Fonts), ret.Versions.Info, ret.Versions.Extract, ret.Versions.Thumbs, ret.Versions.Keyframes,
-	).Scan(&ret.Versions.Extract, &ret.Versions.Thumbs, &ret.Versions.Keyframes)
+	)
 	for _, v := range ret.Videos {
 		tx.Exec(`
 			insert into videos(sha, idx, title, language, codec, mime_codec, width, height, is_default, bitrate)
