@@ -1,6 +1,12 @@
+import * as entries from "./schema/entries";
+import * as shows from "./schema/shows";
 import { drizzle } from "drizzle-orm/node-postgres";
 
 export const db = drizzle({
+	schema: {
+		...entries,
+		...shows,
+	},
 	connection: {
 		user: process.env.POSTGRES_USER ?? "kyoo",
 		password: process.env.POSTGRES_PASSWORD ?? "password",
