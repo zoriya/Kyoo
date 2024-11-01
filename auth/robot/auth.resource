@@ -1,7 +1,7 @@
 *** Settings ***
 Documentation       Common things to handle rest requests
 
-Library             REST  http://localhost:8901/auth
+Library             REST  http://localhost:4568
 
 
 *** Keywords ***

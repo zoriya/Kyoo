@@ -9,43 +9,55 @@ on:
 
 jobs:
   test:
-    name: Run Robot Tests
+    name: Robot tests Auth
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        ports:
+         - "5432:5432"
     steps:
       - uses: actions/checkout@v4
 
       - name: Robot cache
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: '3.9'
           cache: 'pip'
 
       - run: pip install -r requirements.txt
 
-      - name: Docker cache
-        uses: satackey/action-docker-layer-caching@v0.0.11
-        continue-on-error: true
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '^1.22.5'
+          cache-dependency-path: ./auth/go.sum
 
-      - name: Start the service
+      - name: Install dependencies
+        working-directory: ./auth
         run: |
-          cp .env.example .env
-          docker compose --profile v5 -f docker-compose.build.yml up -d auth postgres traefik --wait --build
+          go mod download
+          go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+          go install github.com/swaggo/swag/cmd/swag@latest
 
-      - name: Perform healthchecks
+      - name: Build
+        working-directory: ./auth
         run: |
-          docker compose ps -a
-          docker compose logs
-          wget --retry-connrefused --retry-on-http-error=502 http://localhost:8901/auth/health
+          sqlc generate
+          swag init --parseDependency
+          go build -o ./keibi
 
       - name: Run robot tests
+        working-directory: ./auth
         run: |
-          robot -d out $(find -type d -name robot)
+          ./keibi # > logs &
+          wget --retry-connrefused --retry-on-http-error=502 http://localhost:4568/health
+          robot -d out robot
+        env:
+         POSTGRES_SERVER: localhost
 
       - name: Show logs
         if: failure()
-        run: |
-          docker compose --profile v5 -f docker-compose.build.yml ps -a
-          docker compose --profile v5 -f docker-compose.build.yml logs
+        run: cat logs
 
       - uses: actions/upload-artifact@v4
         with:
