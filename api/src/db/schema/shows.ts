@@ -11,10 +11,15 @@ import {
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
-import { language, schema } from "./utils";
+import { externalid, image, language, schema } from "./utils";
 
 export const showKind = schema.enum("show_kind", ["serie", "movie"]);
-export const showStatus = schema.enum("show_status", ["unknown", "finished", "airing", "planned"]);
+export const showStatus = schema.enum("show_status", [
+	"unknown",
+	"finished",
+	"airing",
+	"planned",
+]);
 export const genres = schema.enum("genres", [
 	"action",
 	"adventure",
@@ -51,17 +56,20 @@ export const shows = schema.table(
 		genres: genres().array().notNull(),
 		rating: smallint(),
 		status: showStatus().notNull(),
-		startAir: date(),
-		endAir: date(),
+		startAir: date({ mode: "date" }),
+		endAir: date({ mode: "date" }),
 		originalLanguage: language(),
 
-		externalId: jsonb().notNull().default({}),
+		externalId: externalid(),
 
-		createdAt: timestamp({ withTimezone: true }).defaultNow(),
-		nextRefresh: timestamp({ withTimezone: true }),
+		createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+		nextRefresh: timestamp({ withTimezone: true }).notNull(),
 	},
 	(t) => ({
-		ratingValid: check("ratingValid", sql`0 <= ${t.rating} && ${t.rating} <= 100`),
+		ratingValid: check(
+			"ratingValid",
+			sql`0 <= ${t.rating} && ${t.rating} <= 100`,
+		),
 	}),
 );
 
@@ -78,10 +86,10 @@ export const showTranslations = schema.table(
 		aliases: text().array().notNull(),
 		tags: text().array().notNull(),
 		trailerUrl: text(),
-		poster: jsonb(),
-		thumbnail: jsonb(),
-		banner: jsonb(),
-		logo: jsonb(),
+		poster: image(),
+		thumbnail: image(),
+		banner: image(),
+		logo: image(),
 	},
 	(t) => ({
 		pk: primaryKey({ columns: [t.pk, t.language] }),

@@ -10,7 +10,7 @@ import {
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
-import { language, schema } from "./utils";
+import { image, language, schema } from "./utils";
 
 export const entryType = schema.enum("entry_type", [
 	"unknown",
@@ -33,7 +33,7 @@ export const entries = schema.table(
 		type: entryType().notNull(),
 		airDate: date(),
 		runtime: integer(),
-		thumbnails: jsonb(),
+		thumbnails: image(),
 
 		externalId: jsonb().notNull().default({}),
 

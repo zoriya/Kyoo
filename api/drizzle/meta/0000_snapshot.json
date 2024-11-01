@@ -1,204 +1,187 @@
 {
-  "id": "362abc74-1487-46ff-bfe2-203ea699f19e",
-  "prevId": "00000000-0000-0000-0000-000000000000",
-  "version": "7",
-  "dialect": "postgresql",
-  "tables": {
-    "kyoo.entries": {
-      "name": "entries",
-      "schema": "kyoo",
-      "columns": {
-        "pk": {
-          "name": "pk",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "identity": {
-            "type": "always",
-            "name": "entries_pk_seq",
-            "schema": "kyoo",
-            "increment": "1",
-            "startWith": "1",
-            "minValue": "1",
-            "maxValue": "2147483647",
-            "cache": "1",
-            "cycle": false
-          }
-        },
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "slug": {
-          "name": "slug",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "order": {
-          "name": "order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "seasonNumber": {
-          "name": "seasonNumber",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "episodeNumber": {
-          "name": "episodeNumber",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "type": {
-          "name": "type",
-          "type": "entry_type",
-          "typeSchema": "kyoo",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "airDate": {
-          "name": "airDate",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "runtime": {
-          "name": "runtime",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "thumbnails": {
-          "name": "thumbnails",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "nextRefresh": {
-          "name": "nextRefresh",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "externalId": {
-          "name": "externalId",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "entries_id_unique": {
-          "name": "entries_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "id"
-          ]
-        },
-        "entries_slug_unique": {
-          "name": "entries_slug_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
-        }
-      },
-      "checkConstraints": {
-        "orderPositive": {
-          "name": "orderPositive",
-          "value": "\"entries\".\"order\" >= 0"
-        }
-      }
-    },
-    "kyoo.entries_translation": {
-      "name": "entries_translation",
-      "schema": "kyoo",
-      "columns": {
-        "pk": {
-          "name": "pk",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "language": {
-          "name": "language",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "entries_translation_pk_entries_pk_fk": {
-          "name": "entries_translation_pk_entries_pk_fk",
-          "tableFrom": "entries_translation",
-          "tableTo": "entries",
-          "schemaTo": "kyoo",
-          "columnsFrom": [
-            "pk"
-          ],
-          "columnsTo": [
-            "pk"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "entries_translation_pk_language_pk": {
-          "name": "entries_translation_pk_language_pk",
-          "columns": [
-            "pk",
-            "language"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    }
-  },
-  "enums": {
-    "kyoo.entry_type": {
-      "name": "entry_type",
-      "schema": "kyoo",
-      "values": [
-        "unknown",
-        "episode",
-        "movie",
-        "special",
-        "extra"
-      ]
-    }
-  },
-  "schemas": {},
-  "sequences": {},
-  "views": {},
-  "_meta": {
-    "columns": {},
-    "schemas": {},
-    "tables": {}
-  }
+	"id": "362abc74-1487-46ff-bfe2-203ea699f19e",
+	"prevId": "00000000-0000-0000-0000-000000000000",
+	"version": "7",
+	"dialect": "postgresql",
+	"tables": {
+		"kyoo.entries": {
+			"name": "entries",
+			"schema": "kyoo",
+			"columns": {
+				"pk": {
+					"name": "pk",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true,
+					"identity": {
+						"type": "always",
+						"name": "entries_pk_seq",
+						"schema": "kyoo",
+						"increment": "1",
+						"startWith": "1",
+						"minValue": "1",
+						"maxValue": "2147483647",
+						"cache": "1",
+						"cycle": false
+					}
+				},
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"slug": {
+					"name": "slug",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"order": {
+					"name": "order",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"seasonNumber": {
+					"name": "seasonNumber",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"episodeNumber": {
+					"name": "episodeNumber",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"type": {
+					"name": "type",
+					"type": "entry_type",
+					"typeSchema": "kyoo",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"airDate": {
+					"name": "airDate",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"runtime": {
+					"name": "runtime",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"thumbnails": {
+					"name": "thumbnails",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"nextRefresh": {
+					"name": "nextRefresh",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"externalId": {
+					"name": "externalId",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'{}'::jsonb"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"entries_id_unique": {
+					"name": "entries_id_unique",
+					"nullsNotDistinct": false,
+					"columns": ["id"]
+				},
+				"entries_slug_unique": {
+					"name": "entries_slug_unique",
+					"nullsNotDistinct": false,
+					"columns": ["slug"]
+				}
+			},
+			"checkConstraints": {
+				"orderPositive": {
+					"name": "orderPositive",
+					"value": "\"entries\".\"order\" >= 0"
+				}
+			}
+		},
+		"kyoo.entries_translation": {
+			"name": "entries_translation",
+			"schema": "kyoo",
+			"columns": {
+				"pk": {
+					"name": "pk",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"language": {
+					"name": "language",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"description": {
+					"name": "description",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"entries_translation_pk_entries_pk_fk": {
+					"name": "entries_translation_pk_entries_pk_fk",
+					"tableFrom": "entries_translation",
+					"tableTo": "entries",
+					"schemaTo": "kyoo",
+					"columnsFrom": ["pk"],
+					"columnsTo": ["pk"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {
+				"entries_translation_pk_language_pk": {
+					"name": "entries_translation_pk_language_pk",
+					"columns": ["pk", "language"]
+				}
+			},
+			"uniqueConstraints": {},
+			"checkConstraints": {}
+		}
+	},
+	"enums": {
+		"kyoo.entry_type": {
+			"name": "entry_type",
+			"schema": "kyoo",
+			"values": ["unknown", "episode", "movie", "special", "extra"]
+		}
+	},
+	"schemas": {},
+	"sequences": {},
+	"views": {},
+	"_meta": {
+		"columns": {},
+		"schemas": {},
+		"tables": {}
+	}
 }

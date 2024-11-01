@@ -1,6 +1,6 @@
 {
-	"id": "0f48a319-94fe-4bcc-b63c-28ce280abc9a",
-	"prevId": "362abc74-1487-46ff-bfe2-203ea699f19e",
+	"id": "1948acaf-7a29-4521-988d-439653779e39",
+	"prevId": "0f48a319-94fe-4bcc-b63c-28ce280abc9a",
 	"version": "7",
 	"dialect": "postgresql",
 	"tables": {
@@ -363,14 +363,14 @@
 					"name": "createdAt",
 					"type": "timestamp with time zone",
 					"primaryKey": false,
-					"notNull": false,
+					"notNull": true,
 					"default": "now()"
 				},
 				"nextRefresh": {
 					"name": "nextRefresh",
 					"type": "timestamp with time zone",
 					"primaryKey": false,
-					"notNull": false
+					"notNull": true
 				}
 			},
 			"indexes": {},
