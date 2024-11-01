@@ -57,7 +57,7 @@ export const shows = schema.table(
 
 		externalId: jsonb().notNull().default({}),
 
-		createdAt: timestamp({ withTimezone: true }),
+		createdAt: timestamp({ withTimezone: true }).defaultNow(),
 		nextRefresh: timestamp({ withTimezone: true }),
 	},
 	(t) => ({

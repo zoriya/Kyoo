@@ -34,8 +34,11 @@ export const entries = schema.table(
 		airDate: date(),
 		runtime: integer(),
 		thumbnails: jsonb(),
-		nextRefresh: timestamp({ withTimezone: true }),
+
 		externalId: jsonb().notNull().default({}),
+
+		createdAt: timestamp({ withTimezone: true }).defaultNow(),
+		nextRefresh: timestamp({ withTimezone: true }),
 	},
 	(t) => ({
 		// episodeKey: unique().on(t.showId, t.seasonNumber, t.episodeNumber),
