@@ -4,15 +4,13 @@ import {
 	date,
 	integer,
 	jsonb,
-	pgSchema,
 	primaryKey,
 	text,
 	timestamp,
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
-
-const schema = pgSchema("kyoo");
+import { language, schema } from "./utils";
 
 export const entryType = schema.enum("entry_type", [
 	"unknown",
@@ -51,7 +49,7 @@ export const entriesTranslation = schema.table(
 		pk: integer()
 			.notNull()
 			.references(() => entries.pk, { onDelete: "cascade" }),
-		language: varchar({ length: 255 }).notNull(),
+		language: language().notNull(),
 		name: text(),
 		description: text(),
 	},
