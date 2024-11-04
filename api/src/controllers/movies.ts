@@ -2,10 +2,17 @@ import { Elysia, t } from "elysia";
 import { Movie } from "../models/movie";
 import { db } from "../db";
 import { shows, showTranslations } from "../db/schema/shows";
-import { eq, and, sql, or, inArray } from "drizzle-orm";
+import { eq, and, sql, or, inArray, getTableColumns } from "drizzle-orm";
+
+const { pk: _, kind, startAir, endAir, ...moviesCol } = getTableColumns(shows);
+const { pk, language, ...translationsCol } = getTableColumns(showTranslations);
 
 const findMovie = db
-	.select()
+	.select({
+		...moviesCol,
+		airDate: startAir,
+		...translationsCol,
+	})
 	.from(shows)
 	.innerJoin(
 		db
@@ -50,9 +57,5 @@ export const movies = new Elysia({ prefix: "/movies" })
 	.get("/:id", async ({ params: { id }, error }) => {
 		const ret = await findMovie.execute({ id });
 		if (ret.length !== 1) return error(404, {});
-		return {
-			...ret[0].shows,
-			...ret[0].t,
-			airDate: ret[0].shows.startAir,
-		};
+		return ret[0];
 	});
