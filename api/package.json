@@ -8,6 +8,7 @@
 		"test": "bun test"
 	},
 	"dependencies": {
+		"@elysiajs/jwt": "^1.1.1",
 		"@elysiajs/swagger": "^1.1.5",
 		"drizzle-kit": "^0.26.2",
 		"drizzle-orm": "^0.35.3",
