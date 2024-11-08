@@ -1,5 +1,3 @@
-CREATE SCHEMA "kyoo";
---> statement-breakpoint
 CREATE TYPE "kyoo"."entry_type" AS ENUM('unknown', 'episode', 'movie', 'special', 'extra');--> statement-breakpoint
 CREATE TYPE "kyoo"."genres" AS ENUM('action', 'adventure', 'animation', 'comedy', 'crime', 'documentary', 'drama', 'family', 'fantasy', 'history', 'horror', 'music', 'mystery', 'romance', 'science-fiction', 'thriller', 'war', 'western', 'kids', 'reality', 'politics', 'soap', 'talk');--> statement-breakpoint
 CREATE TYPE "kyoo"."show_kind" AS ENUM('serie', 'movie');--> statement-breakpoint
@@ -8,7 +6,7 @@ CREATE TABLE IF NOT EXISTS "kyoo"."entries" (
 	"pk" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "kyoo"."entries_pk_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"id" uuid DEFAULT gen_random_uuid() NOT NULL,
 	"slug" varchar(255) NOT NULL,
-	"show_id" integer,
+	"show_pk" integer,
 	"order" integer NOT NULL,
 	"season_number" integer,
 	"episode_number" integer,
@@ -21,7 +19,7 @@ CREATE TABLE IF NOT EXISTS "kyoo"."entries" (
 	"next_refresh" timestamp with time zone,
 	CONSTRAINT "entries_id_unique" UNIQUE("id"),
 	CONSTRAINT "entries_slug_unique" UNIQUE("slug"),
-	CONSTRAINT "entries_showId_seasonNumber_episodeNumber_unique" UNIQUE("show_id","season_number","episode_number"),
+	CONSTRAINT "entries_showPk_seasonNumber_episodeNumber_unique" UNIQUE("show_pk","season_number","episode_number"),
 	CONSTRAINT "order_positive" CHECK ("entries"."order" >= 0)
 );
 --> statement-breakpoint
@@ -54,7 +52,7 @@ CREATE TABLE IF NOT EXISTS "kyoo"."shows" (
 	"id" uuid DEFAULT gen_random_uuid() NOT NULL,
 	"slug" varchar(255) NOT NULL,
 	"kind" "kyoo"."show_kind" NOT NULL,
-	"genres" "genres"[] NOT NULL,
+	"genres" "kyoo"."genres"[] NOT NULL,
 	"rating" smallint,
 	"runtime" integer,
 	"status" "kyoo"."show_status" NOT NULL,
@@ -86,7 +84,7 @@ CREATE TABLE IF NOT EXISTS "kyoo"."videos" (
 );
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "kyoo"."entries" ADD CONSTRAINT "entries_show_id_shows_id_fk" FOREIGN KEY ("show_id") REFERENCES "kyoo"."shows"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "kyoo"."entries" ADD CONSTRAINT "entries_show_pk_shows_pk_fk" FOREIGN KEY ("show_pk") REFERENCES "kyoo"."shows"("pk") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

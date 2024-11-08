@@ -28,7 +28,7 @@ export const entries = schema.table(
 		pk: integer().primaryKey().generatedAlwaysAsIdentity(),
 		id: uuid().notNull().unique().defaultRandom(),
 		slug: varchar({ length: 255 }).notNull().unique(),
-		showId: integer().references(() => shows.id, { onDelete: "cascade" }),
+		showPk: integer().references(() => shows.pk, { onDelete: "cascade" }),
 		order: integer().notNull(),
 		seasonNumber: integer(),
 		episodeNumber: integer(),
@@ -43,7 +43,7 @@ export const entries = schema.table(
 		nextRefresh: timestamp({ withTimezone: true, mode: "string" }),
 	},
 	(t) => [
-		unique().on(t.showId, t.seasonNumber, t.episodeNumber),
+		unique().on(t.showPk, t.seasonNumber, t.episodeNumber),
 		check("order_positive", sql`${t.order} >= 0`),
 	],
 );

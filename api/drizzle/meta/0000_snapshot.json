@@ -1,5 +1,5 @@
 {
-	"id": "88c55813-3ceb-468d-b010-c2b8f7fa875e",
+	"id": "82560792-5f4a-4723-9543-808719ade682",
 	"prevId": "00000000-0000-0000-0000-000000000000",
 	"version": "7",
 	"dialect": "postgresql",
@@ -38,8 +38,8 @@
 					"primaryKey": false,
 					"notNull": true
 				},
-				"show_id": {
-					"name": "show_id",
+				"show_pk": {
+					"name": "show_pk",
 					"type": "integer",
 					"primaryKey": false,
 					"notNull": false
@@ -110,13 +110,13 @@
 			},
 			"indexes": {},
 			"foreignKeys": {
-				"entries_show_id_shows_id_fk": {
-					"name": "entries_show_id_shows_id_fk",
+				"entries_show_pk_shows_pk_fk": {
+					"name": "entries_show_pk_shows_pk_fk",
 					"tableFrom": "entries",
 					"tableTo": "shows",
 					"schemaTo": "kyoo",
-					"columnsFrom": ["show_id"],
-					"columnsTo": ["id"],
+					"columnsFrom": ["show_pk"],
+					"columnsTo": ["pk"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
@@ -133,10 +133,10 @@
 					"nullsNotDistinct": false,
 					"columns": ["slug"]
 				},
-				"entries_showId_seasonNumber_episodeNumber_unique": {
-					"name": "entries_showId_seasonNumber_episodeNumber_unique",
+				"entries_showPk_seasonNumber_episodeNumber_unique": {
+					"name": "entries_showPk_seasonNumber_episodeNumber_unique",
 					"nullsNotDistinct": false,
-					"columns": ["show_id", "season_number", "episode_number"]
+					"columns": ["show_pk", "season_number", "episode_number"]
 				}
 			},
 			"policies": {},
