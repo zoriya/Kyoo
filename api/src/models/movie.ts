@@ -2,6 +2,7 @@ import { t } from "elysia";
 import { Genre, ShowStatus } from "./show";
 import { Image } from "./image";
 import { ExternalId } from "./external-id";
+import { bubble } from "./examples";
 
 export const Movie = t.Object({
 	id: t.String({ format: "uuid" }),
@@ -34,9 +35,4 @@ export const Movie = t.Object({
 
 export type Movie = typeof Movie.static;
 
-// Movie.examples = [{
-// 	slug: "bubble",
-// 	title: "Bubble",
-// 	tagline: "Is she a calamity or a blessing?",
-// 	description: " In an abandoned Tokyo overrun by bubbles and gravitational abnormalities, one gifted young man has a fateful meeting with a mysterious girl. ",
-// }]
+Movie.examples = [bubble.movie];
