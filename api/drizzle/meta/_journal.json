@@ -5,29 +5,8 @@
 		{
 			"idx": 0,
 			"version": "7",
-			"when": 1730060281406,
+			"when": 1731105447005,
 			"tag": "0000_init",
-			"breakpoints": true
-		},
-		{
-			"idx": 1,
-			"version": "7",
-			"when": 1730477283024,
-			"tag": "0001_shows",
-			"breakpoints": true
-		},
-		{
-			"idx": 2,
-			"version": "7",
-			"when": 1730487641214,
-			"tag": "0002_shows",
-			"breakpoints": true
-		},
-		{
-			"idx": 3,
-			"version": "7",
-			"when": 1731101306525,
-			"tag": "0003_runtime",
 			"breakpoints": true
 		}
 	]

@@ -1,5 +1,5 @@
 {
-	"id": "362abc74-1487-46ff-bfe2-203ea699f19e",
+	"id": "88c55813-3ceb-468d-b010-c2b8f7fa875e",
 	"prevId": "00000000-0000-0000-0000-000000000000",
 	"version": "7",
 	"dialect": "postgresql",
@@ -38,20 +38,26 @@
 					"primaryKey": false,
 					"notNull": true
 				},
+				"show_id": {
+					"name": "show_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
 				"order": {
 					"name": "order",
 					"type": "integer",
 					"primaryKey": false,
 					"notNull": true
 				},
-				"seasonNumber": {
-					"name": "seasonNumber",
+				"season_number": {
+					"name": "season_number",
 					"type": "integer",
 					"primaryKey": false,
 					"notNull": false
 				},
-				"episodeNumber": {
-					"name": "episodeNumber",
+				"episode_number": {
+					"name": "episode_number",
 					"type": "integer",
 					"primaryKey": false,
 					"notNull": false
@@ -63,8 +69,8 @@
 					"primaryKey": false,
 					"notNull": true
 				},
-				"airDate": {
-					"name": "airDate",
+				"air_date": {
+					"name": "air_date",
 					"type": "date",
 					"primaryKey": false,
 					"notNull": false
@@ -81,22 +87,40 @@
 					"primaryKey": false,
 					"notNull": false
 				},
-				"nextRefresh": {
-					"name": "nextRefresh",
-					"type": "timestamp with time zone",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"externalId": {
-					"name": "externalId",
+				"external_id": {
+					"name": "external_id",
 					"type": "jsonb",
 					"primaryKey": false,
 					"notNull": true,
 					"default": "'{}'::jsonb"
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				},
+				"next_refresh": {
+					"name": "next_refresh",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
 				}
 			},
 			"indexes": {},
-			"foreignKeys": {},
+			"foreignKeys": {
+				"entries_show_id_shows_id_fk": {
+					"name": "entries_show_id_shows_id_fk",
+					"tableFrom": "entries",
+					"tableTo": "shows",
+					"schemaTo": "kyoo",
+					"columnsFrom": ["show_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {
 				"entries_id_unique": {
@@ -108,14 +132,21 @@
 					"name": "entries_slug_unique",
 					"nullsNotDistinct": false,
 					"columns": ["slug"]
+				},
+				"entries_showId_seasonNumber_episodeNumber_unique": {
+					"name": "entries_showId_seasonNumber_episodeNumber_unique",
+					"nullsNotDistinct": false,
+					"columns": ["show_id", "season_number", "episode_number"]
 				}
 			},
+			"policies": {},
 			"checkConstraints": {
-				"orderPositive": {
-					"name": "orderPositive",
+				"order_positive": {
+					"name": "order_positive",
 					"value": "\"entries\".\"order\" >= 0"
 				}
-			}
+			},
+			"isRLSEnabled": false
 		},
 		"kyoo.entries_translation": {
 			"name": "entries_translation",
@@ -166,7 +197,335 @@
 				}
 			},
 			"uniqueConstraints": {},
-			"checkConstraints": {}
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"kyoo.show_translations": {
+			"name": "show_translations",
+			"schema": "kyoo",
+			"columns": {
+				"pk": {
+					"name": "pk",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"language": {
+					"name": "language",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"description": {
+					"name": "description",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"tagline": {
+					"name": "tagline",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"aliases": {
+					"name": "aliases",
+					"type": "text[]",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"tags": {
+					"name": "tags",
+					"type": "text[]",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"trailer_url": {
+					"name": "trailer_url",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"poster": {
+					"name": "poster",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"thumbnail": {
+					"name": "thumbnail",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"banner": {
+					"name": "banner",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"logo": {
+					"name": "logo",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"show_translations_pk_shows_pk_fk": {
+					"name": "show_translations_pk_shows_pk_fk",
+					"tableFrom": "show_translations",
+					"tableTo": "shows",
+					"schemaTo": "kyoo",
+					"columnsFrom": ["pk"],
+					"columnsTo": ["pk"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {
+				"show_translations_pk_language_pk": {
+					"name": "show_translations_pk_language_pk",
+					"columns": ["pk", "language"]
+				}
+			},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"kyoo.shows": {
+			"name": "shows",
+			"schema": "kyoo",
+			"columns": {
+				"pk": {
+					"name": "pk",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true,
+					"identity": {
+						"type": "always",
+						"name": "shows_pk_seq",
+						"schema": "kyoo",
+						"increment": "1",
+						"startWith": "1",
+						"minValue": "1",
+						"maxValue": "2147483647",
+						"cache": "1",
+						"cycle": false
+					}
+				},
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"slug": {
+					"name": "slug",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"kind": {
+					"name": "kind",
+					"type": "show_kind",
+					"typeSchema": "kyoo",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"genres": {
+					"name": "genres",
+					"type": "genres[]",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"rating": {
+					"name": "rating",
+					"type": "smallint",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"runtime": {
+					"name": "runtime",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"status": {
+					"name": "status",
+					"type": "show_status",
+					"typeSchema": "kyoo",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"start_air": {
+					"name": "start_air",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"end_air": {
+					"name": "end_air",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"original_language": {
+					"name": "original_language",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"external_id": {
+					"name": "external_id",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'{}'::jsonb"
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"next_refresh": {
+					"name": "next_refresh",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"shows_id_unique": {
+					"name": "shows_id_unique",
+					"nullsNotDistinct": false,
+					"columns": ["id"]
+				},
+				"shows_slug_unique": {
+					"name": "shows_slug_unique",
+					"nullsNotDistinct": false,
+					"columns": ["slug"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {
+				"rating_valid": {
+					"name": "rating_valid",
+					"value": "\"shows\".\"rating\" between 0 and 100"
+				},
+				"runtime_valid": {
+					"name": "runtime_valid",
+					"value": "\"shows\".\"runtime\" >= 0"
+				}
+			},
+			"isRLSEnabled": false
+		},
+		"kyoo.videos": {
+			"name": "videos",
+			"schema": "kyoo",
+			"columns": {
+				"pk": {
+					"name": "pk",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true,
+					"identity": {
+						"type": "always",
+						"name": "videos_pk_seq",
+						"schema": "kyoo",
+						"increment": "1",
+						"startWith": "1",
+						"minValue": "1",
+						"maxValue": "2147483647",
+						"cache": "1",
+						"cycle": false
+					}
+				},
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"path": {
+					"name": "path",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"rendering": {
+					"name": "rendering",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"part": {
+					"name": "part",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"version": {
+					"name": "version",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"videos_id_unique": {
+					"name": "videos_id_unique",
+					"nullsNotDistinct": false,
+					"columns": ["id"]
+				},
+				"videos_path_unique": {
+					"name": "videos_path_unique",
+					"nullsNotDistinct": false,
+					"columns": ["path"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {
+				"rendering_pos": {
+					"name": "rendering_pos",
+					"value": "\"videos\".\"rendering\" >= 0"
+				},
+				"part_pos": {
+					"name": "part_pos",
+					"value": "\"videos\".\"part\" >= 0"
+				},
+				"version_pos": {
+					"name": "version_pos",
+					"value": "\"videos\".\"version\" >= 0"
+				}
+			},
+			"isRLSEnabled": false
 		}
 	},
 	"enums": {
@@ -174,10 +533,53 @@
 			"name": "entry_type",
 			"schema": "kyoo",
 			"values": ["unknown", "episode", "movie", "special", "extra"]
+		},
+		"kyoo.genres": {
+			"name": "genres",
+			"schema": "kyoo",
+			"values": [
+				"action",
+				"adventure",
+				"animation",
+				"comedy",
+				"crime",
+				"documentary",
+				"drama",
+				"family",
+				"fantasy",
+				"history",
+				"horror",
+				"music",
+				"mystery",
+				"romance",
+				"science-fiction",
+				"thriller",
+				"war",
+				"western",
+				"kids",
+				"reality",
+				"politics",
+				"soap",
+				"talk"
+			]
+		},
+		"kyoo.show_kind": {
+			"name": "show_kind",
+			"schema": "kyoo",
+			"values": ["serie", "movie"]
+		},
+		"kyoo.show_status": {
+			"name": "show_status",
+			"schema": "kyoo",
+			"values": ["unknown", "finished", "airing", "planned"]
 		}
 	},
-	"schemas": {},
+	"schemas": {
+		"kyoo": "kyoo"
+	},
 	"sequences": {},
+	"roles": {},
+	"policies": {},
 	"views": {},
 	"_meta": {
 		"columns": {},
