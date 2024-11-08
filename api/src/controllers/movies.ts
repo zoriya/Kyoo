@@ -2,34 +2,35 @@ import { Elysia, t } from "elysia";
 import { Movie } from "../models/movie";
 import { db } from "../db";
 import { shows, showTranslations } from "../db/schema/shows";
-import { eq, and, sql, or, inArray, getTableColumns } from "drizzle-orm";
+import { eq, and, sql, or, inArray } from "drizzle-orm";
+import { getColumns } from "../db/schema/utils";
 
-const { pk: _, kind, startAir, endAir, ...moviesCol } = getTableColumns(shows);
-const { pk, language, ...translationsCol } = getTableColumns(showTranslations);
+const translations = db
+	.selectDistinctOn([showTranslations.language])
+	.from(showTranslations)
+	.where(
+		or(
+			inArray(showTranslations.language, sql.placeholder("langs")),
+			eq(showTranslations.language, shows.originalLanguage),
+		),
+	)
+	.orderBy(
+		sql`array_position(${showTranslations.language}, ${sql.placeholder("langs")})`,
+	)
+	.as("t");
+
+const { pk: _, kind, startAir, endAir, ...moviesCol } = getColumns(shows);
+const { pk, language, ...translationsCol } = getColumns(translations);
+
 
 const findMovie = db
 	.select({
 		...moviesCol,
 		airDate: startAir,
-		...translationsCol,
+		translations: translationsCol,
 	})
 	.from(shows)
-	.innerJoin(
-		db
-			.selectDistinctOn([showTranslations.language])
-			.from(showTranslations)
-			.where(
-				or(
-					inArray(showTranslations.language, sql.placeholder("langs")),
-					eq(showTranslations.language, shows.originalLanguage),
-				),
-			)
-			.orderBy(
-				sql`array_position(${showTranslations.language}, ${sql.placeholder("langs")})`,
-			)
-			.as("t"),
-		eq(shows.pk, showTranslations.pk),
-	)
+	.innerJoin(translations, eq(shows.pk, translations.pk))
 	.where(
 		and(
 			eq(shows.kind, "movie"),
