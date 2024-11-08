@@ -15,6 +15,7 @@ export const Movie = t.Object({
 	genres: t.Array(Genre),
 	rating: t.Nullable(t.Number({ minimum: 0, maximum: 100 })),
 	status: ShowStatus,
+	runtime: t.Nullable(t.Number({ minimum: 0 })),
 
 	airDate: t.Nullable(t.Date()),
 	originalLanguage: t.Nullable(t.String()),

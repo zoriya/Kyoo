@@ -3,7 +3,6 @@ import {
 	check,
 	date,
 	integer,
-	jsonb,
 	primaryKey,
 	smallint,
 	text,
@@ -55,6 +54,7 @@ export const shows = schema.table(
 		kind: showKind().notNull(),
 		genres: genres().array().notNull(),
 		rating: smallint(),
+		runtime: integer(),
 		status: showStatus().notNull(),
 		startAir: date({ mode: "date" }),
 		endAir: date({ mode: "date" }),
@@ -70,6 +70,7 @@ export const shows = schema.table(
 			"ratingValid",
 			sql`0 <= ${t.rating} && ${t.rating} <= 100`,
 		),
+		runtimeValid: check("runtimeValid", sql`0 <= ${t.runtime}`),
 	}),
 );
 
