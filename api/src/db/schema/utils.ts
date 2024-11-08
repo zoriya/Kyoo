@@ -5,7 +5,7 @@ export const schema = pgSchema("kyoo");
 export const language = () => varchar({ length: 255 });
 
 export const image = () =>
-	jsonb().$type<{ source: string; blurhash: string }>();
+	jsonb().$type<{ id: string; source: string; blurhash: string }>();
 
 export const externalid = () =>
 	jsonb()
