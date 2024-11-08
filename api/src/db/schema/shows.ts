@@ -56,14 +56,16 @@ export const shows = schema.table(
 		rating: smallint(),
 		runtime: integer(),
 		status: showStatus().notNull(),
-		startAir: date({ mode: "date" }),
-		endAir: date({ mode: "date" }),
+		startAir: date(),
+		endAir: date(),
 		originalLanguage: language(),
 
 		externalId: externalid(),
 
-		createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-		nextRefresh: timestamp({ withTimezone: true }).notNull(),
+		createdAt: timestamp({ withTimezone: true, mode: "string" })
+			.notNull()
+			.defaultNow(),
+		nextRefresh: timestamp({ withTimezone: true, mode: "string" }).notNull(),
 	},
 	(t) => ({
 		ratingValid: check(

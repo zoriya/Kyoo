@@ -17,18 +17,17 @@ export const Movie = t.Object({
 	status: ShowStatus,
 	runtime: t.Nullable(t.Number({ minimum: 0 })),
 
-	airDate: t.Nullable(t.Date()),
+	airDate: t.Nullable(t.String({ format: "date" })),
 	originalLanguage: t.Nullable(t.String()),
 
-	trailerUrl: t.Nullable(t.String()),
 	poster: t.Nullable(Image),
 	thumbnail: t.Nullable(Image),
 	banner: t.Nullable(Image),
 	logo: t.Nullable(Image),
+	trailerUrl: t.Nullable(t.String()),
 
-	// this is a datetime, not just a date.
-	createdAt: t.Date(),
-	nextRefresh: t.Date(),
+	createdAt: t.String({ format: "date-time" }),
+	nextRefresh: t.String({ format: "date-time" }),
 
 	externalId: ExternalId,
 });
