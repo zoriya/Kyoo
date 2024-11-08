@@ -67,13 +67,10 @@ export const shows = schema.table(
 			.defaultNow(),
 		nextRefresh: timestamp({ withTimezone: true, mode: "string" }).notNull(),
 	},
-	(t) => ({
-		ratingValid: check(
-			"ratingValid",
-			sql`${t.rating} between 0 and 100`,
-		),
-		runtimeValid: check("runtimeValid", sql`0 <= ${t.runtime}`),
-	}),
+	(t) => [
+		check("rating_valid", sql`${t.rating} between 0 and 100`),
+		check("runtime_valid", sql`${t.runtime} >= 0`),
+	],
 );
 
 export const showTranslations = schema.table(
@@ -94,7 +91,5 @@ export const showTranslations = schema.table(
 		banner: image(),
 		logo: image(),
 	},
-	(t) => ({
-		pk: primaryKey({ columns: [t.pk, t.language] }),
-	}),
+	(t) => [primaryKey({ columns: [t.pk, t.language] })],
 );

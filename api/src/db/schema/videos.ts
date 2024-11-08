@@ -14,9 +14,9 @@ export const videos = schema.table(
 
 		createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 	},
-	(t) => ({
-		ratingValid: check("renderingPos", sql`0 <= ${t.rendering}`),
-		partValid: check("partPos", sql`0 <= ${t.part}`),
-		versionValid: check("versionPos", sql`0 <= ${t.version}`),
-	}),
+	(t) => [
+		check("rendering_pos", sql`${t.rendering} >= 0`),
+		check("part_pos", sql`${t.part} >= 0`),
+		check("version_pos", sql`${t.version} >= 0`),
+	],
 );

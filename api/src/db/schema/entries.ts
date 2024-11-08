@@ -7,10 +7,12 @@ import {
 	primaryKey,
 	text,
 	timestamp,
+	unique,
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
 import { image, language, schema } from "./utils";
+import { shows } from "./shows";
 
 export const entryType = schema.enum("entry_type", [
 	"unknown",
@@ -26,7 +28,7 @@ export const entries = schema.table(
 		pk: integer().primaryKey().generatedAlwaysAsIdentity(),
 		id: uuid().notNull().unique().defaultRandom(),
 		slug: varchar({ length: 255 }).notNull().unique(),
-		// showId: integer().references(() => show.id),
+		showId: integer().references(() => shows.id, { onDelete: "cascade" }),
 		order: integer().notNull(),
 		seasonNumber: integer(),
 		episodeNumber: integer(),
@@ -40,10 +42,10 @@ export const entries = schema.table(
 		createdAt: timestamp({ withTimezone: true, mode: "string" }).defaultNow(),
 		nextRefresh: timestamp({ withTimezone: true, mode: "string" }),
 	},
-	(t) => ({
-		// episodeKey: unique().on(t.showId, t.seasonNumber, t.episodeNumber),
-		orderPositive: check("orderPositive", sql`${t.order} >= 0`),
-	}),
+	(t) => [
+		unique().on(t.showId, t.seasonNumber, t.episodeNumber),
+		check("order_positive", sql`${t.order} >= 0`),
+	],
 );
 
 export const entriesTranslation = schema.table(
@@ -56,7 +58,5 @@ export const entriesTranslation = schema.table(
 		name: text(),
 		description: text(),
 	},
-	(t) => ({
-		pk: primaryKey({ columns: [t.pk, t.language] }),
-	}),
+	(t) => [primaryKey({ columns: [t.pk, t.language] })],
 );
