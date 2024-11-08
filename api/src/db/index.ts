@@ -15,7 +15,7 @@ export const db = drizzle({
 		database: process.env.POSTGRES_DB ?? "kyooDB",
 		host: process.env.POSTGRES_SERVER ?? "postgres",
 		port: Number(process.env.POSTGRES_PORT) || 5432,
-		ssl: true,
+		ssl: false,
 	},
 	casing: "snake_case",
 });

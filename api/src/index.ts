@@ -5,18 +5,25 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { movies } from "./controllers/movies";
 import jwt from "@elysiajs/jwt";
 
-await migrate(db, { migrationsFolder: "" });
+await migrate(db, { migrationsSchema: "kyoo", migrationsFolder: "./drizzle" });
+
+if (process.env.SEED) {
+}
 
 let secret = process.env.JWT_SECRET;
 if (!secret) {
 	const auth = process.env.AUTH_SERVER ?? "http://auth:4568";
-	const ret = await fetch(`${auth}/info`);
-	const info = await ret.json();
-	secret = info.publicKey;
+	try {
+		const ret = await fetch(`${auth}/info`);
+		const info = await ret.json();
+		secret = info.publicKey;
+	} catch (error) {
+		console.error(`Can't access auth server at ${auth}:\n${error}`);
+	}
 }
 
 if (!secret) {
-	console.error("missing jwt secret or auth server. exiting");
+	console.error("Missing jwt secret or auth server. exiting");
 	process.exit(1);
 }
 

@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS "kyoo"."shows" (
 	"id" uuid DEFAULT gen_random_uuid() NOT NULL,
 	"slug" varchar(255) NOT NULL,
 	"kind" "kyoo"."show_kind" NOT NULL,
-	"genres" genres[] NOT NULL,
+	"genres" "kyoo"."genres"[] NOT NULL,
 	"rating" smallint,
 	"status" "kyoo"."show_status" NOT NULL,
 	"startAir" date,
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS "kyoo"."shows" (
 	"nextRefresh" timestamp with time zone,
 	CONSTRAINT "shows_id_unique" UNIQUE("id"),
 	CONSTRAINT "shows_slug_unique" UNIQUE("slug"),
-	CONSTRAINT "ratingValid" CHECK (0 <= "shows"."rating" && "shows"."rating" <= 100)
+	CONSTRAINT "ratingValid" CHECK ("shows"."rating" between 0 and 100)
 );
 --> statement-breakpoint
 ALTER TABLE "kyoo"."entries" ADD COLUMN "createdAt" timestamp with time zone DEFAULT now();--> statement-breakpoint

@@ -70,7 +70,7 @@ export const shows = schema.table(
 	(t) => ({
 		ratingValid: check(
 			"ratingValid",
-			sql`0 <= ${t.rating} && ${t.rating} <= 100`,
+			sql`${t.rating} between 0 and 100`,
 		),
 		runtimeValid: check("runtimeValid", sql`0 <= ${t.runtime}`),
 	}),

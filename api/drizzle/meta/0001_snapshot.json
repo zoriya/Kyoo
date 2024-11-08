@@ -391,7 +391,7 @@
 			"checkConstraints": {
 				"ratingValid": {
 					"name": "ratingValid",
-					"value": "0 <= \"shows\".\"rating\" && \"shows\".\"rating\" <= 100"
+					"value": "\"shows\".\"rating\" between 0 and 100"
 				}
 			}
 		}
