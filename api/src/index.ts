@@ -4,6 +4,7 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Elysia } from "elysia";
 import { entries } from "./controllers/entries";
 import { movies } from "./controllers/movies";
+import { seasons } from "./controllers/seasons";
 import { series } from "./controllers/series";
 import { videos } from "./controllers/videos";
 import { db } from "./db";
@@ -37,6 +38,7 @@ const app = new Elysia()
 	.use(movies)
 	.use(series)
 	.use(entries)
+	.use(seasons)
 	.use(videos)
 	.listen(3000);
 
