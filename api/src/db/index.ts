@@ -1,5 +1,6 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import * as entries from "./schema/entries";
+import * as seasons from "./schema/seasons";
 import * as shows from "./schema/shows";
 import * as videos from "./schema/videos";
 
@@ -7,6 +8,7 @@ export const db = drizzle({
 	schema: {
 		...entries,
 		...shows,
+		...seasons,
 		...videos,
 	},
 	connection: {
