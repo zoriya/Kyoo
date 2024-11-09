@@ -2,6 +2,7 @@ import jwt from "@elysiajs/jwt";
 import { swagger } from "@elysiajs/swagger";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Elysia } from "elysia";
+import { entries } from "./controllers/entries";
 import { movies } from "./controllers/movies";
 import { series } from "./controllers/series";
 import { videos } from "./controllers/videos";
@@ -35,6 +36,7 @@ const app = new Elysia()
 	.get("/", () => "Hello Elysia")
 	.use(movies)
 	.use(series)
+	.use(entries)
 	.use(videos)
 	.listen(3000);
 

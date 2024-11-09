@@ -3,7 +3,7 @@ import { Image } from "./utils/image";
 import { ExternalId, EpisodeId } from "./utils/external-id";
 import { comment } from "../utils";
 
-export const Entry = t.Object({
+const BaseEntry = t.Object({
 	id: t.String({ format: "uuid" }),
 	slug: t.String(),
 	serieId: t.String({ format: "uuid" }),
@@ -19,8 +19,8 @@ export const Entry = t.Object({
 	nextRefresh: t.String({ format: "date-time" }),
 });
 
-export const Episode = t.Union([
-	Entry,
+export const Episode = t.Intersect([
+	BaseEntry,
 	t.Object({
 		kind: t.Literal("episode"),
 		seasonId: t.String({ format: "uuid" }),
@@ -32,9 +32,9 @@ export const Episode = t.Union([
 ]);
 export type Episode = typeof Episode.static;
 
-export const MovieEntry = t.Union(
+export const MovieEntry = t.Intersect(
 	[
-		Entry,
+		BaseEntry,
 		t.Object({
 			kind: t.Literal("movie"),
 			order: t.Number({
@@ -53,9 +53,9 @@ export const MovieEntry = t.Union(
 );
 export type MovieEntry = typeof MovieEntry.static;
 
-export const Special = t.Union(
+export const Special = t.Intersect(
 	[
-		Entry,
+		BaseEntry,
 		t.Object({
 			kind: t.Literal("special"),
 			order: t.Number({
@@ -75,9 +75,9 @@ export const Special = t.Union(
 );
 export type Special = typeof Special.static;
 
-export const Extra = t.Union(
+export const Extra = t.Intersect(
 	[
-		Entry,
+		BaseEntry,
 		t.Object({
 			kind: t.Literal("extra"),
 			number: t.Number({ minimum: 1 }),
@@ -94,9 +94,9 @@ export const Extra = t.Union(
 );
 export type Extra = typeof Extra.static;
 
-export const Video = t.Union(
+export const UnknownEntry = t.Intersect(
 	[
-		t.Omit(Entry, ["serieId", "airDate"]),
+		t.Omit(BaseEntry, ["serieId", "airDate", "description"]),
 		t.Object({
 			kind: t.Literal("unknown"),
 		}),
@@ -108,4 +108,7 @@ export const Video = t.Union(
 		`,
 	},
 );
-export type Video = typeof Video.static;
+export type UnknownEntry = typeof UnknownEntry.static;
+
+export const Entry = t.Union([Episode, MovieEntry, Special]);
+export type Entry = typeof Entry.static;
