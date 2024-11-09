@@ -1,7 +1,7 @@
 import { t } from "elysia";
-import { Genre } from "./show";
-import { Image } from "./image";
-import { ExternalId } from "./external-id";
+import { Genre } from "./utils/genres";
+import { Image } from "./utils/image";
+import { ExternalId } from "./utils/external-id";
 import { bubble, registerExamples } from "./examples";
 import { comment } from "../utils";
 
