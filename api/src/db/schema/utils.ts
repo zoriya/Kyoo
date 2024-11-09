@@ -23,20 +23,6 @@ export const language = () => varchar({ length: 255 });
 export const image = () =>
 	jsonb().$type<{ id: string; source: string; blurhash: string }>();
 
-export const externalid = () =>
-	jsonb()
-		.$type<
-			Record<
-				string,
-				{
-					dataId: string;
-					link: string | null;
-				}
-			>
-		>()
-		.notNull()
-		.default({});
-
 // https://github.com/sindresorhus/type-fest/blob/main/source/simplify.d.ts#L58
 type Simplify<T> = {[KeyType in keyof T]: T[KeyType]} & {};
 

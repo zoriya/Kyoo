@@ -3,6 +3,7 @@ import {
 	check,
 	date,
 	integer,
+	jsonb,
 	primaryKey,
 	smallint,
 	text,
@@ -10,7 +11,7 @@ import {
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
-import { externalid, image, language, schema } from "./utils";
+import { image, language, schema } from "./utils";
 
 export const showKind = schema.enum("show_kind", ["serie", "movie"]);
 export const showStatus = schema.enum("show_status", [
@@ -44,6 +45,20 @@ export const genres = schema.enum("genres", [
 	"soap",
 	"talk",
 ]);
+
+export const externalid = () =>
+	jsonb()
+		.$type<
+			Record<
+				string,
+				{
+					dataId: string;
+					link: string | null;
+				}
+			>
+		>()
+		.notNull()
+		.default({});
 
 export const shows = schema.table(
 	"shows",

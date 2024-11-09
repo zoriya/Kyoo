@@ -22,6 +22,28 @@ export const entryType = schema.enum("entry_type", [
 	"extra",
 ]);
 
+export const entryid = () =>
+	jsonb()
+		.$type<
+			Record<
+				string,
+				| {
+						// used for movies
+						dataId: string;
+						link: string | null;
+				  }
+				| {
+						// used for episodes, specials & extra
+						serieId: string;
+						season: number | null;
+						episode: number;
+						link: string | null;
+				  }
+			>
+		>()
+		.notNull()
+		.default({});
+
 export const entries = schema.table(
 	"entries",
 	{
@@ -37,7 +59,7 @@ export const entries = schema.table(
 		runtime: integer(),
 		thumbnails: image(),
 
-		externalId: jsonb().notNull().default({}),
+		externalId: entryid(),
 
 		createdAt: timestamp({ withTimezone: true, mode: "string" }).defaultNow(),
 		nextRefresh: timestamp({ withTimezone: true, mode: "string" }),
