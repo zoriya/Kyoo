@@ -2,7 +2,8 @@ import { t } from "elysia";
 import { Genre, ShowStatus } from "./show";
 import { Image } from "./image";
 import { ExternalId } from "./external-id";
-import { bubble } from "./examples";
+import { bubble, registerExamples } from "./examples";
+import { comment } from "../utils";
 
 export const Movie = t.Object({
 	id: t.String({ format: "uuid" }),
@@ -19,7 +20,15 @@ export const Movie = t.Object({
 	runtime: t.Nullable(t.Number({ minimum: 0 })),
 
 	airDate: t.Nullable(t.String({ format: "date" })),
-	originalLanguage: t.Nullable(t.String()),
+	originalLanguage: t.Nullable(
+		t.String({
+			description: comment`
+				The language code this movie was made in.
+				This is a BCP 47 language code (the IETF Best Current Practices on Tags for Identifying Languages).
+				BCP 47 is also known as RFC 5646. It subsumes ISO 639 and is backward compatible with it.
+			`,
+		}),
+	),
 
 	poster: t.Nullable(Image),
 	thumbnail: t.Nullable(Image),
@@ -35,4 +44,4 @@ export const Movie = t.Object({
 
 export type Movie = typeof Movie.static;
 
-Movie.examples = [bubble.movie];
+registerExamples(Movie, bubble.movie);
