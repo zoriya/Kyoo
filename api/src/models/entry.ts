@@ -6,7 +6,6 @@ import { comment } from "../utils";
 const BaseEntry = t.Object({
 	id: t.String({ format: "uuid" }),
 	slug: t.String(),
-	serieId: t.String({ format: "uuid" }),
 	name: t.Nullable(t.String()),
 	description: t.Nullable(t.String()),
 	airDate: t.Nullable(t.String({ format: "data" })),
@@ -23,7 +22,6 @@ export const Episode = t.Intersect([
 	BaseEntry,
 	t.Object({
 		kind: t.Literal("episode"),
-		seasonId: t.String({ format: "uuid" }),
 		order: t.Number({ minimum: 1, description: "Absolute playback order." }),
 		seasonNumber: t.Number(),
 		episodeNumber: t.Number(),
@@ -108,7 +106,7 @@ export type Extra = typeof Extra.static;
 
 export const UnknownEntry = t.Intersect(
 	[
-		t.Omit(BaseEntry, ["serieId", "airDate", "description"]),
+		t.Omit(BaseEntry, ["airDate", "description"]),
 		t.Object({
 			kind: t.Literal("unknown"),
 		}),
