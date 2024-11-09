@@ -1,22 +1,4 @@
-import type { TSchema } from "elysia";
-import type { CompleteVideo } from "./video";
-
-export const registerExamples = <T extends TSchema>(
-	schema: T,
-	...examples: (T["static"] | undefined)[]
-) => {
-	for (const example of examples) {
-		if (!example) continue;
-		for (const [key, val] of Object.entries(example)) {
-			const prop = schema.properties[
-				key as keyof typeof schema.properties
-			] as TSchema;
-			if (!prop) continue;
-			prop.examples ??= [];
-			prop.examples.push(val);
-		}
-	}
-};
+import type { CompleteVideo } from "../video";
 
 export const bubble: CompleteVideo = {
 	id: "0934da28-4a49-404e-920b-a150404a3b6d",

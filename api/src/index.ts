@@ -3,6 +3,7 @@ import { swagger } from "@elysiajs/swagger";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Elysia } from "elysia";
 import { movies } from "./controllers/movies";
+import { series } from "./controllers/series";
 import { videos } from "./controllers/videos";
 import { db } from "./db";
 
@@ -33,6 +34,7 @@ const app = new Elysia()
 	.use(swagger())
 	.get("/", () => "Hello Elysia")
 	.use(movies)
+	.use(series)
 	.use(videos)
 	.listen(3000);
 

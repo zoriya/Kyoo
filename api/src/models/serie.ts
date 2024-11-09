@@ -2,13 +2,18 @@ import { t } from "elysia";
 import { Genre } from "./show";
 import { Image } from "./image";
 import { ExternalId } from "./external-id";
-import { bubble, registerExamples } from "./examples";
+import { madeInAbyss , registerExamples } from "./examples";
 import { comment } from "../utils";
 
-export const MovieStatus = t.UnionEnum(["unknown", "finished", "planned"]);
-export type MovieStatus = typeof MovieStatus.static;
+export const SerieStatus = t.UnionEnum([
+	"unknown",
+	"finished",
+	"airing",
+	"planned",
+]);
+export type SerieStatus = typeof SerieStatus.static;
 
-export const Movie = t.Object({
+export const Serie = t.Object({
 	id: t.String({ format: "uuid" }),
 	slug: t.String(),
 	name: t.String(),
@@ -19,12 +24,16 @@ export const Movie = t.Object({
 
 	genres: t.Array(Genre),
 	rating: t.Nullable(t.Number({ minimum: 0, maximum: 100 })),
-	status: MovieStatus,
+	status: SerieStatus,
 	runtime: t.Nullable(
-		t.Number({ minimum: 0, description: "Runtime of the movie in minutes." }),
+		t.Number({
+			minimum: 0,
+			description: "Average runtime of all episodes (in minutes.)",
+		}),
 	),
 
-	airDate: t.Nullable(t.String({ format: "date" })),
+	startAir: t.Nullable(t.String({ format: "date" })),
+	endAir: t.Nullable(t.String({ format: "date" })),
 	originalLanguage: t.Nullable(
 		t.String({
 			description: comment`
@@ -47,6 +56,6 @@ export const Movie = t.Object({
 	externalId: ExternalId,
 });
 
-export type Movie = typeof Movie.static;
+export type Serie = typeof Serie.static;
 
-registerExamples(Movie, bubble.movie);
+registerExamples(Serie, madeInAbyss);
