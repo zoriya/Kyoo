@@ -57,7 +57,6 @@ export const seasonTranslation = schema.table(
 		description: text(),
 		poster: image(),
 		thumbnail: image(),
-		logo: image(),
 		banner: image(),
 	},
 	(t) => [primaryKey({ columns: [t.pk, t.language] })],

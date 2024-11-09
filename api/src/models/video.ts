@@ -36,21 +36,4 @@ export const Video = t.Object({
 
 export type Video = typeof Video.static;
 
-registerExamples(Video, bubble);
-
-export const CompleteVideo = t.Intersect([
-	Video,
-	t.Union([
-		t.Object({
-			movie: Movie,
-			episodes: t.Optional(t.Never()),
-		}),
-		t.Object({
-			// TODO: implement that
-			episodes: t.Array(t.Object({})),
-			movie: t.Optional(t.Never()),
-		}),
-	]),
-]);
-
-export type CompleteVideo = typeof CompleteVideo.static;
+registerExamples(Video, ...bubble.videos);

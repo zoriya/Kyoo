@@ -49,4 +49,4 @@ export const Movie = t.Object({
 
 export type Movie = typeof Movie.static;
 
-registerExamples(Movie, bubble.movie);
+registerExamples(Movie, bubble);

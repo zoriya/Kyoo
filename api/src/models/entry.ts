@@ -2,6 +2,7 @@ import { t } from "elysia";
 import { Image } from "./utils/image";
 import { ExternalId, EpisodeId } from "./utils/external-id";
 import { comment } from "../utils";
+import { madeInAbyss, registerExamples } from "./examples";
 
 const BaseEntry = t.Object({
 	id: t.String({ format: "uuid" }),
@@ -14,7 +15,7 @@ const BaseEntry = t.Object({
 	),
 	thumbnail: t.Nullable(Image),
 
-	createtAt: t.String({ format: "date-time" }),
+	createdAt: t.String({ format: "date-time" }),
 	nextRefresh: t.String({ format: "date-time" }),
 });
 
@@ -32,13 +33,15 @@ export type Episode = typeof Episode.static;
 
 export const MovieEntry = t.Intersect(
 	[
-		BaseEntry,
+		t.Omit(BaseEntry, ["thumbnail"]),
 		t.Object({
 			kind: t.Literal("movie"),
 			order: t.Number({
 				minimum: 1,
 				description: "Absolute playback order. Can be mixed with episodes.",
 			}),
+			tagline: t.String(),
+			poster: BaseEntry.properties.thumbnail,
 			externalId: ExternalId,
 		}),
 	],
@@ -80,7 +83,6 @@ export const ExtraType = t.UnionEnum([
 	"behind-the-scenes",
 	"deleted-scenes",
 	"bloopers",
-	"mini-story",
 ]);
 export type ExtraType = typeof ExtraType.static;
 
@@ -88,9 +90,7 @@ export const Extra = t.Intersect(
 	[
 		BaseEntry,
 		t.Object({
-			kind: t.Literal("extra"),
-			number: t.Number({ minimum: 1 }),
-			extraType: ExtraType,
+			kind: ExtraType,
 			// not sure about this id type
 			externalId: EpisodeId,
 		}),
@@ -122,3 +122,17 @@ export type UnknownEntry = typeof UnknownEntry.static;
 
 export const Entry = t.Union([Episode, MovieEntry, Special]);
 export type Entry = typeof Entry.static;
+
+registerExamples(
+	Episode,
+	...madeInAbyss.entries.filter((x) => x.kind === "episode"),
+);
+registerExamples(
+	MovieEntry,
+	...madeInAbyss.entries.filter((x) => x.kind === "movie"),
+);
+registerExamples(
+	Special,
+	...madeInAbyss.entries.filter((x) => x.kind === "special"),
+);
+registerExamples(Extra, ...madeInAbyss.extras);

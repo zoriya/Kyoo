@@ -79,6 +79,7 @@ export const entriesTranslation = schema.table(
 		language: language().notNull(),
 		name: text(),
 		description: text(),
+		tagline: text(),
 	},
 	(t) => [primaryKey({ columns: [t.pk, t.language] })],
 );

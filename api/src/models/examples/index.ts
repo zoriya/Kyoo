@@ -6,7 +6,13 @@ export const registerExamples = <T extends TSchema>(
 ) => {
 	if ("anyOf" in schema) {
 		for (const union of schema.anyOf) {
-			registerExamples(union, examples);
+			registerExamples(union, ...examples);
+		}
+		return;
+	}
+	if ("allOf" in schema) {
+		for (const intersec of schema.allOf) {
+			registerExamples(intersec, ...examples);
 		}
 		return;
 	}
