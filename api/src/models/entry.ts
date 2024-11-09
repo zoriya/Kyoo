@@ -75,12 +75,24 @@ export const Special = t.Intersect(
 );
 export type Special = typeof Special.static;
 
+export const ExtraType = t.UnionEnum([
+	"other",
+	"trailers",
+	"interview",
+	"behind-the-scenes",
+	"deleted-scenes",
+	"bloopers",
+	"mini-story",
+]);
+export type ExtraType = typeof ExtraType.static;
+
 export const Extra = t.Intersect(
 	[
 		BaseEntry,
 		t.Object({
 			kind: t.Literal("extra"),
 			number: t.Number({ minimum: 1 }),
+			extraType: ExtraType,
 			// not sure about this id type
 			externalId: EpisodeId,
 		}),
