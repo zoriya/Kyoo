@@ -237,7 +237,8 @@
 		"duration": "时长",
 		"size": "大小",
 		"novideo": "无视频",
-		"nocontainer": "无效容器"
+		"nocontainer": "无效容器",
+		"external": "外部"
 	},
 	"admin": {
 		"users": {
