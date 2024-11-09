@@ -29,7 +29,7 @@ export const entries = schema.table(
 		id: uuid().notNull().unique().defaultRandom(),
 		slug: varchar({ length: 255 }).notNull().unique(),
 		showPk: integer().references(() => shows.pk, { onDelete: "cascade" }),
-		order: integer().notNull(),
+		order: integer(),
 		seasonNumber: integer(),
 		episodeNumber: integer(),
 		type: entryType().notNull(),
