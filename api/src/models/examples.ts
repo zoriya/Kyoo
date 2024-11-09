@@ -20,9 +20,10 @@ export const registerExamples = <T extends TSchema>(
 
 export const bubble: CompleteVideo = {
 	id: "0934da28-4a49-404e-920b-a150404a3b6d",
+	slug: "bubble",
 	path: "/video/Bubble/Bubble (2022).mkv",
-	rendering: 0,
-	part: 0,
+	rendering: "459429fa062adeebedcc2bb04b9965de0262bfa453369783132d261be79021bd",
+	part: null,
 	version: 1,
 	createdAt: "2023-11-29T11:42:06.030838Z",
 	movie: {
