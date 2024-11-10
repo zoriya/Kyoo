@@ -1,20 +1,20 @@
 {
 	"home": {
 		"recommended": "Recomendados",
-		"news": "Notícias",
+		"news": "Novidades",
 		"watchlist": "Continue assistindo",
 		"info": "Veja mais",
 		"none": "Nenhum episódio",
-		"watchlistLogin": "",
-		"refreshMetadata": "",
+		"watchlistLogin": "Para acompanhar o que você está assistindo, é necessário fazer login.",
+		"refreshMetadata": "Recarregar metadados",
 		"episodeMore": {
-			"goToShow": "",
-			"download": "",
-			"mediainfo": ""
+			"goToShow": "Ir para o show",
+			"download": "Baixar",
+			"mediainfo": "Informações da mídia"
 		}
 	},
 	"show": {
-		"play": "",
+		"play": "Reproduzir",
 		"trailer": "",
 		"studio": "",
 		"genre": "",
