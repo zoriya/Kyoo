@@ -1,7 +1,7 @@
 {
 	"home": {
 		"recommended": "Recomendados",
-		"news": "Notícias",
+		"news": "Novidades",
 		"watchlist": "Continue assistindo",
 		"info": "Veja mais",
 		"none": "Nenhum episódio",
@@ -10,7 +10,7 @@
 		"episodeMore": {
 			"goToShow": "Ir para série",
 			"download": "Baixar",
-			"mediainfo": "Veja informação do arquivo"
+			"mediainfo": "Informações do arquivo"
 		}
 	},
 	"show": {
@@ -19,8 +19,8 @@
 		"studio": "Estúdio",
 		"genre": "Gêneros",
 		"genre-none": "Nenhum gênero",
-		"staff": "Staff",
-		"staff-none": "A staff é desconhecida",
+		"staff": "Equipe",
+		"staff-none": "A equipe é desconhecida",
 		"noOverview": "Resumo indisponível",
 		"episode-none": "Nenhum episódio nessa temporada",
 		"episodeNoMetadata": "Metadado indisponível",
@@ -92,7 +92,7 @@
 		"News": "Notícias",
 		"Reality": "Realidade",
 		"Soap": "Novela",
-		"Talk": "",
+		"Talk": "Entrevista",
 		"Politics": "Política"
 	},
 	"misc": {
@@ -263,7 +263,8 @@
 		"duration": "Duração",
 		"size": "Tamanho",
 		"novideo": "Sem vídeo",
-		"nocontainer": "Contêiner inválido"
+		"nocontainer": "Contêiner inválido",
+		"external": "Externo"
 	},
 	"admin": {
 		"users": {
