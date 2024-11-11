@@ -18,18 +18,15 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { useLocalSetting } from "@kyoo/models";
-import { Select } from "@kyoo/primitives";
-import { useTranslation } from "react-i18next";
+import { languageCodes, useLanguageName } from "../utils";
 import { Preference, SettingsContainer, useSetting } from "./base";
 
+import { useLocalSetting } from "@kyoo/models";
+import { Select } from "@kyoo/primitives";
 import SubtitleLanguage from "@material-symbols/svg-400/rounded/closed_caption-fill.svg";
 import PlayModeI from "@material-symbols/svg-400/rounded/display_settings-fill.svg";
 import AudioLanguage from "@material-symbols/svg-400/rounded/music_note-fill.svg";
-import intl from "langmap";
-import { useLanguageName } from "../utils";
-
-const allLanguages = Object.keys(intl).filter((x) => !x.includes("-") && !x.includes("@"));
+import { useTranslation } from "react-i18next";
 
 export const PlaybackSettings = () => {
 	const { t } = useTranslation();
@@ -62,7 +59,7 @@ export const PlaybackSettings = () => {
 					label={t("settings.playback.audioLanguage.label")}
 					value={audio}
 					onValueChange={(value) => setAudio(value)}
-					values={["default", ...allLanguages]}
+					values={["default", ...languageCodes]}
 					getLabel={(key) =>
 						key === "default" ? t("mediainfo.default") : (getLanguageName(key) ?? key)
 					}
@@ -77,7 +74,7 @@ export const PlaybackSettings = () => {
 					label={t("settings.playback.subtitleLanguage.label")}
 					value={subtitle ?? "none"}
 					onValueChange={(value) => setSubtitle(value === "none" ? null : value)}
-					values={["none", "default", ...allLanguages]}
+					values={["none", "default", ...languageCodes]}
 					getLabel={(key) =>
 						key === "none"
 							? t("settings.playback.subtitleLanguage.none")
