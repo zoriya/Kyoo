@@ -196,11 +196,13 @@ class TheMovieDatabase(Provider):
 		languages = self.get_languages()
 
 		async def for_language(lng: str) -> Movie:
+			lng_iso639_1 = lng.split("-").pop(0)
 			movie = await self.get(
 				f"movie/{movie_id}",
 				params={
 					"language": lng,
 					"append_to_response": "alternative_titles,videos,credits,keywords,images",
+					"include_image_language": f"{lng},{lng_iso639_1},null",
 				},
 			)
 			logger.debug("TMDb responded: %s", movie)
@@ -250,7 +252,6 @@ class TheMovieDatabase(Provider):
 				else [],
 				# TODO: Add cast information
 			)
-			lng_iso639_1 = lng.split("-").pop(0)
 			translation = MovieTranslation(
 				name=movie["title"],
 				tagline=movie["tagline"] if movie["tagline"] else None,
@@ -290,11 +291,15 @@ class TheMovieDatabase(Provider):
 		languages = self.get_languages()
 
 		async def for_language(lng: str) -> Show:
+			# ISO 639-1 (eg. "en") is required as TMDB does not support fetching images
+			# by ISO 639-2 + ISO 3166-1 alpha-2 (eg. "en-US")
+			lng_iso639_1 = lng.split("-").pop(0)
 			show = await self.get(
 				f"tv/{show_id}",
 				params={
 					"language": lng,
 					"append_to_response": "alternative_titles,videos,credits,keywords,images,external_ids",
+					"include_image_language": f"{lng},{lng_iso639_1},null",
 				},
 			)
 			logger.debug("TMDb responded: %s", show)
@@ -342,7 +347,6 @@ class TheMovieDatabase(Provider):
 				],
 				# TODO: Add cast information
 			)
-			lng_iso639_1 = lng.split("-").pop(0)
 			translation = ShowTranslation(
 				name=show["name"],
 				tagline=show["tagline"] if show["tagline"] else None,
