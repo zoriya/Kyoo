@@ -196,7 +196,7 @@ class TheMovieDatabase(Provider):
 				params={
 					"language": lng,
 					"append_to_response": "alternative_titles,videos,credits,keywords,images",
-					"include_image_language": f"{get_iso_639_1_codes().join(',')},null",
+					"include_image_language": f"{lng_iso639_1},{get_iso_639_1_codes().join(',')},null",
 				},
 			)
 			logger.debug("TMDb responded: %s", movie)
@@ -293,7 +293,7 @@ class TheMovieDatabase(Provider):
 				params={
 					"language": lng,
 					"append_to_response": "alternative_titles,videos,credits,keywords,images,external_ids",
-					"include_image_language": f"{get_iso_639_1_codes().join(',')},null",
+					"include_image_language": f"{lng_iso639_1},{get_iso_639_1_codes().join(',')},null",
 				},
 			)
 			logger.debug("TMDb responded: %s", show)
