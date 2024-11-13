@@ -28,6 +28,7 @@ def normalize_lang(lang: str) -> str:
 
 # For now, the API of kyoo only support one language so we remove the others.
 default_languages = os.environ.get("LIBRARY_LANGUAGES", "").split(",")
+image_prefer_original_language = os.environ.get("IMAGE_PREFER_ORIGINAL_LANGUAGE", "false").lower() == "true"
 
 
 def sort_translations(
@@ -64,7 +65,7 @@ def select_image(
 		chain(
 			*(
 				getattr(trans, kind)
-				for trans in sort_translations(value, prefer_orginal=True)
+				for trans in sort_translations(value, prefer_orginal=image_prefer_original_language)
 			)
 		),
 		None,
