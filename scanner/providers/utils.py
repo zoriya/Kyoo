@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from datetime import date
 from itertools import chain
-from langcodes import Language
+from langcodes import Language, LANGUAGE_ALPHA3
 from typing import TYPE_CHECKING, Literal, Any, Optional
 
 if TYPE_CHECKING:
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 	from providers.types.collection import Collection
 
 def get_iso_639_1_codes() -> list[str]:
-	return [code for code in Language.all_codes() if len(code) == 2]
+	return [code for code in LANGUAGE_ALPHA3.keys() if len(code) == 2]
 
 def format_date(date: date | int | None) -> str | None:
 	if date is None:
