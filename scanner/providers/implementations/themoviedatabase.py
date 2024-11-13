@@ -145,7 +145,7 @@ class TheMovieDatabase(Provider):
 		Args:
 			item (dict): A dictionary containing item information, including images and language details.
 			lng (str): The preferred language code for the images in ISO 639-1 format.
-
+			key (str): The key to access the images in the item dictionary. (e.g. "posters", "backdrops", "logos")
 		Returns:
 			list: A list of images, prioritized by localization, original language, and any available image.
 		"""
