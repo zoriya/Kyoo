@@ -149,8 +149,6 @@ class TheMovieDatabase(Provider):
 		Returns:
 			list: A list of images, prioritized by localization, original language, and any available image.
 		"""
-		print(f"Trying to get best image for {item['title']} in {lng}")
-		print(f"All available languageCodes: {map(lambda x: x['iso_639_1'], item['images'][key])}")
 		# Order images by size and vote average
 		item["images"][key] = sorted(
 			item["images"][key],
@@ -246,17 +244,18 @@ class TheMovieDatabase(Provider):
 				else [],
 				# TODO: Add cast information
 			)
+			lng_iso639_1 = lng.split("-").pop(0)
 			translation = MovieTranslation(
 				name=movie["title"],
 				tagline=movie["tagline"] if movie["tagline"] else None,
 				tags=list(map(lambda x: x["name"], movie["keywords"]["keywords"])),
 				overview=movie["overview"],
 				posters=self.get_image(
-					self.get_best_image(movie, lng, "posters")
+					self.get_best_image(movie, lng_iso639_1, "posters")
 				),
-				logos=self.get_image(self.get_best_image(movie, lng, "logos")),
+				logos=self.get_image(self.get_best_image(movie, lng_iso639_1, "logos")),
 				thumbnails=self.get_image(
-					self.get_best_image(movie, lng, "backdrops")
+					self.get_best_image(movie, lng_iso639_1, "backdrops")
 				),
 				trailers=[
 					f"https://www.youtube.com/watch?v={x['key']}"
@@ -337,17 +336,18 @@ class TheMovieDatabase(Provider):
 				],
 				# TODO: Add cast information
 			)
+			lng_iso639_1 = lng.split("-").pop(0)
 			translation = ShowTranslation(
 				name=show["name"],
 				tagline=show["tagline"] if show["tagline"] else None,
 				tags=list(map(lambda x: x["name"], show["keywords"]["results"])),
 				overview=show["overview"],
 				posters=self.get_image(
-					self.get_best_image(show, lng, "posters")
+					self.get_best_image(show, lng_iso639_1, "posters")
 				),
-				logos=self.get_image(self.get_best_image(show, lng, "logos")),
+				logos=self.get_image(self.get_best_image(show, lng_iso639_1, "logos")),
 				thumbnails=self.get_image(
-					self.get_best_image(show, lng, "backdrops")
+					self.get_best_image(show, lng_iso639_1, "backdrops")
 				),
 				trailers=[
 					f"https://www.youtube.com/watch?v={x['key']}"
