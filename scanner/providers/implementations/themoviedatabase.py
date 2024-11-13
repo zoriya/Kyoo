@@ -149,6 +149,15 @@ class TheMovieDatabase(Provider):
 		Returns:
 			list: A list of images, prioritized by localization, original language, and any available image.
 		"""
+		print(f"Trying to get best image for {item['title']} in {lng}")
+		print(f"All available languageCodes: {map(lambda x: x['iso_639_1'], item['images'][key])}")
+		# Order images by size and vote average
+		item["images"][key] = sorted(
+			item["images"][key],
+			key=lambda x: (x.get("width", 0), x.get("vote_average", 0)),
+			reverse=True,
+		)
+
 		# Step 1: Try to get localized images
 		localized_images = [
 			image
