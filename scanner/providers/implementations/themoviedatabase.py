@@ -5,7 +5,7 @@ from logging import getLogger
 from typing import Awaitable, Callable, Dict, List, Optional, Any, TypeVar
 from itertools import accumulate, zip_longest
 
-from providers.utils import ProviderError
+from providers.utils import ProviderError, get_iso_639_1_codes
 from matcher.cache import cache
 
 from ..provider import Provider
@@ -149,8 +149,6 @@ class TheMovieDatabase(Provider):
 		Returns:
 			list: A list of images, prioritized by localization, original language, and any available image.
 		"""
-		print(f"Trying to get best image for {item['title']} in {lng}")
-		print(f"All available languageCodes: {list(map(lambda x: x['iso_639_1'], item['images'][key]))}")
 		# Order images by size and vote average
 		item["images"][key] = sorted(
 			item["images"][key],
@@ -165,11 +163,8 @@ class TheMovieDatabase(Provider):
 			if image.get("iso_639_1") == lng
 		]
 
-		print(f"Localized images: {localized_images}")
-
 		# Step 2: If no localized images, try images in the original language
 		if not localized_images:
-			print(f"Could not find localized images for {lng}, trying original language")
 			localized_images = [
 				image
 				for image in item["images"][key]
@@ -178,7 +173,6 @@ class TheMovieDatabase(Provider):
 
 		# Step 3: If still no images, use any available images
 		if not localized_images:
-			print(f"Could not find images for {lng} or original language, using any available")
 			localized_images = item["images"][key]
 
 		return localized_images
@@ -202,7 +196,7 @@ class TheMovieDatabase(Provider):
 				params={
 					"language": lng,
 					"append_to_response": "alternative_titles,videos,credits,keywords,images",
-					"include_image_language": f"{lng},{lng_iso639_1},null",
+					"include_image_language": f"{get_iso_639_1_codes().join(',')},null",
 				},
 			)
 			logger.debug("TMDb responded: %s", movie)
@@ -299,7 +293,7 @@ class TheMovieDatabase(Provider):
 				params={
 					"language": lng,
 					"append_to_response": "alternative_titles,videos,credits,keywords,images,external_ids",
-					"include_image_language": f"{lng},{lng_iso639_1},null",
+					"include_image_language": f"{get_iso_639_1_codes().join(',')},null",
 				},
 			)
 			logger.debug("TMDb responded: %s", show)

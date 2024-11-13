@@ -13,6 +13,8 @@ if TYPE_CHECKING:
 	from providers.types.episode import Episode
 	from providers.types.collection import Collection
 
+def get_iso_639_1_codes() -> list[str]:
+	return [code for code in Language.all_codes() if len(code) == 2]
 
 def format_date(date: date | int | None) -> str | None:
 	if date is None:
@@ -28,7 +30,7 @@ def normalize_lang(lang: str) -> str:
 
 # For now, the API of kyoo only support one language so we remove the others.
 default_languages = os.environ.get("LIBRARY_LANGUAGES", "").split(",")
-image_prefer_original_language = os.environ.get("IMAGE_PREFER_ORIGINAL_LANGUAGE", "false").lower() == "true"
+media_prefer_original_language = os.environ.get("MEDIA_PREFER_ORIGINAL_LANGUAGE", "false").lower() == "true"
 
 
 def sort_translations(
@@ -65,7 +67,7 @@ def select_image(
 		chain(
 			*(
 				getattr(trans, kind)
-				for trans in sort_translations(value, prefer_orginal=image_prefer_original_language)
+				for trans in sort_translations(value, prefer_orginal=media_prefer_original_language)
 			)
 		),
 		None,
