@@ -138,6 +138,38 @@ class TheMovieDatabase(Provider):
 			},
 		)
 
+	def get_best_image(self, item, lng, key):
+		"""
+		Retrieves the best available images for a item based on localization.
+
+		Args:
+			item (dict): A dictionary containing item information, including images and language details.
+			lng (str): The preferred language code for the images in ISO 639-1 format.
+
+		Returns:
+			list: A list of images, prioritized by localization, original language, and any available image.
+		"""
+		# Step 1: Try to get localized images
+		localized_images = [
+			image
+			for image in item["images"][key]
+			if image.get("iso_639_1") == lng
+		]
+
+		# Step 2: If no localized images, try images in the original language
+		if not localized_images:
+			localized_images = [
+				image
+				for image in item["images"][key]
+				if image.get("iso_639_1") == item["original_language"]
+			]
+
+		# Step 3: If still no images, use any available images
+		if not localized_images:
+			localized_images = item["images"][key]
+
+		return localized_images
+
 	async def search_movie(self, name: str, year: Optional[int]) -> Movie:
 		search_results = (
 			await self.get("search/movie", params={"query": name, "year": year})
@@ -211,21 +243,11 @@ class TheMovieDatabase(Provider):
 				tags=list(map(lambda x: x["name"], movie["keywords"]["keywords"])),
 				overview=movie["overview"],
 				posters=self.get_image(
-					movie["images"]["posters"]
-					+ (
-						[{"file_path": movie["poster_path"]}]
-						if lng == movie["original_language"]
-						else []
-					)
+					self.get_best_image(movie, lng, "posters")
 				),
-				logos=self.get_image(movie["images"]["logos"]),
+				logos=self.get_image(self.get_best_image(movie, lng, "logos")),
 				thumbnails=self.get_image(
-					movie["images"]["backdrops"]
-					+ (
-						[{"file_path": movie["backdrop_path"]}]
-						if lng == movie["original_language"]
-						else []
-					)
+					self.get_best_image(movie, lng, "backdrops")
 				),
 				trailers=[
 					f"https://www.youtube.com/watch?v={x['key']}"
@@ -312,21 +334,11 @@ class TheMovieDatabase(Provider):
 				tags=list(map(lambda x: x["name"], show["keywords"]["results"])),
 				overview=show["overview"],
 				posters=self.get_image(
-					show["images"]["posters"]
-					+ (
-						[{"file_path": show["poster_path"]}]
-						if lng == show["original_language"]
-						else []
-					)
+					self.get_best_image(show, lng, "posters")
 				),
-				logos=self.get_image(show["images"]["logos"]),
+				logos=self.get_image(self.get_best_image(show, lng, "logos")),
 				thumbnails=self.get_image(
-					show["images"]["backdrops"]
-					+ (
-						[{"file_path": show["backdrop_path"]}]
-						if lng == show["original_language"]
-						else []
-					)
+					self.get_best_image(show, lng, "backdrops")
 				),
 				trailers=[
 					f"https://www.youtube.com/watch?v={x['key']}"
