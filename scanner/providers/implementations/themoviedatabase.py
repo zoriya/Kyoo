@@ -149,6 +149,8 @@ class TheMovieDatabase(Provider):
 		Returns:
 			list: A list of images, prioritized by localization, original language, and any available image.
 		"""
+		print(f"Trying to get best image for {item['title']} in {lng}")
+		print(f"All available languageCodes: {list(map(lambda x: x['iso_639_1'], item['images'][key]))}")
 		# Order images by size and vote average
 		item["images"][key] = sorted(
 			item["images"][key],
@@ -163,8 +165,11 @@ class TheMovieDatabase(Provider):
 			if image.get("iso_639_1") == lng
 		]
 
+		print(f"Localized images: {localized_images}")
+
 		# Step 2: If no localized images, try images in the original language
 		if not localized_images:
+			print(f"Could not find localized images for {lng}, trying original language")
 			localized_images = [
 				image
 				for image in item["images"][key]
@@ -173,6 +178,7 @@ class TheMovieDatabase(Provider):
 
 		# Step 3: If still no images, use any available images
 		if not localized_images:
+			print(f"Could not find images for {lng} or original language, using any available")
 			localized_images = item["images"][key]
 
 		return localized_images
