@@ -193,7 +193,7 @@ class TheMovieDatabase(Provider):
 				reverse=True,
 			)
 
-		return localized_images
+		return self.get_image(localized_images)
 
 	async def search_movie(self, name: str, year: Optional[int]) -> Movie:
 		search_results = (
@@ -268,13 +268,9 @@ class TheMovieDatabase(Provider):
 				tagline=movie["tagline"] if movie["tagline"] else None,
 				tags=list(map(lambda x: x["name"], movie["keywords"]["keywords"])),
 				overview=movie["overview"],
-				posters=self.get_image(
-					await self.get_best_image(movie, lng, "posters")
-				),
-				logos=self.get_image(await self.get_best_image(movie, lng, "logos")),
-				thumbnails=self.get_image(
-					await self.get_best_image(movie, lng, "backdrops")
-				),
+				posters=(await self.get_best_image(movie, lng, "posters")),
+				logos=(await self.get_best_image(movie, lng, "logos")),
+				thumbnails=(await self.get_best_image(movie, lng, "backdrops")),
 				trailers=[
 					f"https://www.youtube.com/watch?v={x['key']}"
 					for x in movie["videos"]["results"]
@@ -361,13 +357,9 @@ class TheMovieDatabase(Provider):
 				tagline=show["tagline"] if show["tagline"] else None,
 				tags=list(map(lambda x: x["name"], show["keywords"]["results"])),
 				overview=show["overview"],
-				posters=self.get_image(
-					await self.get_best_image(show, lng, "posters")
-				),
-				logos=self.get_image(await self.get_best_image(show, lng, "logos")),
-				thumbnails=self.get_image(
-					await self.get_best_image(show, lng, "backdrops")
-				),
+				posters=(await self.get_best_image(show, lng, "posters")),
+				logos=(await self.get_best_image(show, lng, "logos")),
+				thumbnails=(await self.get_best_image(show, lng, "backdrops")),
 				trailers=[
 					f"https://www.youtube.com/watch?v={x['key']}"
 					for x in show["videos"]["results"]
