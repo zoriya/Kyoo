@@ -204,7 +204,7 @@ class TheMovieDatabase(Provider):
 		search = self.get_best_result(search_results, name, year)
 		return await self.identify_movie(search["id"], original_language=search["original_language"])
 
-	async def identify_movie(self, movie_id: str, original_language: Optional[str]) -> Movie:
+	async def identify_movie(self, movie_id: str, original_language: Optional[str] = "null") -> Movie:
 		languages = self.get_languages()
 
 		async def for_language(lng: Language) -> Movie:
