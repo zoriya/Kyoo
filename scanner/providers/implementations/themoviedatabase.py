@@ -102,7 +102,8 @@ class TheMovieDatabase(Provider):
 
 	def merge_translations(self, host, translations, *, languages: list[Language]):
 		host.translations = {
-			k.to_tag(): v.translations[k.to_tag()] for k, v in zip(languages, translations)
+			k.to_tag(): v.translations[k.to_tag()]
+			for k, v in zip(languages, translations)
 		}
 		return host
 
@@ -202,9 +203,13 @@ class TheMovieDatabase(Provider):
 		if len(search_results) == 0:
 			raise ProviderError(f"No result for a movie named: {name}")
 		search = self.get_best_result(search_results, name, year)
-		return await self.identify_movie(search["id"], original_language=search["original_language"])
+		return await self.identify_movie(
+			search["id"], original_language=search["original_language"]
+		)
 
-	async def identify_movie(self, movie_id: str, original_language: Optional[str] = "null") -> Movie:
+	async def identify_movie(
+		self, movie_id: str, original_language: Optional[str] = "null"
+	) -> Movie:
 		languages = self.get_languages()
 
 		async def for_language(lng: Language) -> Movie:
