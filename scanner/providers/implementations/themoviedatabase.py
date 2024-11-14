@@ -180,7 +180,7 @@ class TheMovieDatabase(Provider):
 		# Although doing another API call is not ideal, this would only be called very rarely.
 		if not localized_images:
 			logger.debug(
-				"No images found for %s %s. Calling TMDB images API.",
+				"[Fallback] No images found for %s %s. Calling TMDB images API.",
 				item["media_type"],
 				item["id"],
 			)
