@@ -153,7 +153,7 @@ class TheMovieDatabase(Provider):
 		# Order images by size and vote average
 		item["images"][key] = sorted(
 			item["images"][key],
-			key=lambda x: (x.get("width", 0), x.get("vote_average", 0)),
+			key=lambda x: (x.get("vote_average", 0), x.get("width", 0)),
 			reverse=True,
 		)
 
@@ -189,7 +189,7 @@ class TheMovieDatabase(Provider):
 			)
 			localized_images = sorted(
 				images[key],
-				key=lambda x: (x.get("width", 0), x.get("vote_average", 0)),
+				key=lambda x: x.get("vote_average", 0),
 				reverse=True,
 			)
 
@@ -216,6 +216,7 @@ class TheMovieDatabase(Provider):
 					"include_image_language": f"{lng.language},null,{original_language}",
 				},
 			)
+			movie["media_type"] = "movie"
 			logger.debug("TMDb responded: %s", movie)
 
 			ret = Movie(
@@ -307,6 +308,7 @@ class TheMovieDatabase(Provider):
 					"include_image_language": f"{lng.language},null,en",
 				},
 			)
+			show["media_type"] = "tv"
 			logger.debug("TMDb responded: %s", show)
 
 			ret = Show(
