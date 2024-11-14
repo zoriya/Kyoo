@@ -5,7 +5,7 @@ from logging import getLogger
 from typing import Awaitable, Callable, Dict, List, Optional, Any, TypeVar
 from itertools import accumulate, zip_longest
 
-from providers.utils import ProviderError, get_iso_639_1_codes
+from providers.utils import ProviderError
 from matcher.cache import cache
 
 from ..provider import Provider
@@ -184,9 +184,9 @@ class TheMovieDatabase(Provider):
 		if len(search_results) == 0:
 			raise ProviderError(f"No result for a movie named: {name}")
 		search = self.get_best_result(search_results, name, year)
-		return await self.identify_movie(search["id"])
+		return await self.identify_movie(search["id"], original_language=search["original_language"])
 
-	async def identify_movie(self, movie_id: str) -> Movie:
+	async def identify_movie(self, movie_id: str, original_language: str) -> Movie:
 		languages = self.get_languages()
 
 		async def for_language(lng: str) -> Movie:
@@ -196,7 +196,7 @@ class TheMovieDatabase(Provider):
 				params={
 					"language": lng,
 					"append_to_response": "alternative_titles,videos,credits,keywords,images",
-					"include_image_language": f"{lng_iso639_1},{','.join(get_iso_639_1_codes())},null",
+					"include_image_language": f"{lng_iso639_1},null,{original_language}",
 				},
 			)
 			logger.debug("TMDb responded: %s", movie)
@@ -293,7 +293,7 @@ class TheMovieDatabase(Provider):
 				params={
 					"language": lng,
 					"append_to_response": "alternative_titles,videos,credits,keywords,images,external_ids",
-					"include_image_language": f"{lng_iso639_1},{','.join(get_iso_639_1_codes())},null",
+					"include_image_language": f"{lng_iso639_1},null,en",
 				},
 			)
 			logger.debug("TMDb responded: %s", show)
