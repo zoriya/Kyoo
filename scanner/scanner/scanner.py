@@ -25,17 +25,25 @@ async def scan(
 	path_: Optional[str], publisher: Publisher, client: KyooClient, remove_deleted=False
 ):
 	path = path_ or os.environ.get("SCANNER_LIBRARY_ROOT", "/video")
-
-	logger.info("Starting the scan. It can take some times...")
+	logger.info("Starting the scan. It can take some time...")
 	ignore_pattern = get_ignore_pattern()
 
 	registered = await client.get_registered_paths()
-	videos = [
-		os.path.join(dir, file) for dir, _, files in os.walk(path) for file in files
-	]
-	if ignore_pattern is not None:
-		logger.info(f"Ignoring with pattern {ignore_pattern}")
-		videos = [p for p in videos if not ignore_pattern.match(p)]
+	videos = []
+
+	for dirpath, dirnames, files in os.walk(path):
+		# Skip directories with a `.ignore` file
+		if ".ignore" in files:
+			dirnames.clear()  # Prevents os.walk from descending into this directory
+			continue
+
+		for file in files:
+			file_path = os.path.join(dirpath, file)
+			# Apply ignore pattern, if any
+			if ignore_pattern and ignore_pattern.match(file_path):
+				continue
+			videos.append(file_path)
+
 	to_register = [p for p in videos if p not in registered]
 
 	if remove_deleted:
