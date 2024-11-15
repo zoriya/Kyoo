@@ -3,12 +3,11 @@
 		"target": "ES2021",
 		"module": "ES2022",
 		"moduleResolution": "node",
-		"types": [
-			"bun-types"
-		],
+		"types": ["bun-types"],
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"strict": true,
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		"noErrorTruncation": true
 	}
 }
