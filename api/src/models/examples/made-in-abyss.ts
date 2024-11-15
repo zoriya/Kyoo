@@ -1,15 +1,6 @@
-import type { Entry, Extra } from "../entry";
-import type { Season } from "../season";
-import type { Serie } from "../serie";
-import type { Video } from "../video";
+import type { SeedSerie } from "../seed";
 
-type CompleteSerie = Serie & {
-	seasons: Season[];
-	entries: (Entry & { videos: Video[] })[];
-	extras: (Extra & { video: Video })[];
-};
-
-export const madeInAbyss: CompleteSerie = {
+export const madeInAbyss: SeedSerie = {
 	id: "04bcf2ac-3c09-42f6-8357-b003798f9562",
 	slug: "made-in-abyss",
 	name: "Made in Abyss",

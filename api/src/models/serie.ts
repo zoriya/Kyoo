@@ -2,8 +2,10 @@ import { t } from "elysia";
 import { Genre } from "./utils/genres";
 import { Image } from "./utils/image";
 import { ExternalId } from "./utils/external-id";
-import { madeInAbyss , registerExamples } from "./examples";
-import { comment } from "../utils";
+import { madeInAbyss, registerExamples } from "./examples";
+import { Resource } from "./utils/resource";
+import { Language } from "./utils/language";
+import { SeedSeason } from "./season";
 
 export const SerieStatus = t.UnionEnum([
 	"unknown",
@@ -13,15 +15,7 @@ export const SerieStatus = t.UnionEnum([
 ]);
 export type SerieStatus = typeof SerieStatus.static;
 
-export const Serie = t.Object({
-	id: t.String({ format: "uuid" }),
-	slug: t.String(),
-	name: t.String(),
-	description: t.Nullable(t.String()),
-	tagline: t.Nullable(t.String()),
-	aliases: t.Array(t.String()),
-	tags: t.Array(t.String()),
-
+export const BaseSerie = t.Object({
 	genres: t.Array(Genre),
 	rating: t.Nullable(t.Number({ minimum: 0, maximum: 100 })),
 	status: SerieStatus,
@@ -35,20 +29,10 @@ export const Serie = t.Object({
 	startAir: t.Nullable(t.String({ format: "date" })),
 	endAir: t.Nullable(t.String({ format: "date" })),
 	originalLanguage: t.Nullable(
-		t.String({
-			description: comment`
-				The language code this movie was made in.
-				This is a BCP 47 language code (the IETF Best Current Practices on Tags for Identifying Languages).
-				BCP 47 is also known as RFC 5646. It subsumes ISO 639 and is backward compatible with it.
-			`,
+		Language({
+			description: "The language code this serie was made in.",
 		}),
 	),
-
-	poster: t.Nullable(Image),
-	thumbnail: t.Nullable(Image),
-	banner: t.Nullable(Image),
-	logo: t.Nullable(Image),
-	trailerUrl: t.Nullable(t.String()),
 
 	createdAt: t.String({ format: "date-time" }),
 	nextRefresh: t.String({ format: "date-time" }),
@@ -56,6 +40,31 @@ export const Serie = t.Object({
 	externalId: ExternalId,
 });
 
+export const SerieTranslation = t.Object({
+	name: t.String(),
+	description: t.Nullable(t.String()),
+	tagline: t.Nullable(t.String()),
+	aliases: t.Array(t.String()),
+	tags: t.Array(t.String()),
+
+	poster: t.Nullable(Image),
+	thumbnail: t.Nullable(Image),
+	banner: t.Nullable(Image),
+	logo: t.Nullable(Image),
+	trailerUrl: t.Nullable(t.String()),
+});
+export type SerieTranslation = typeof SerieTranslation.static;
+
+export const Serie = t.Intersect([Resource, BaseSerie, SerieTranslation]);
 export type Serie = typeof Serie.static;
 
-registerExamples(Serie, madeInAbyss);
+export const SeedSerie = t.Intersect([
+	BaseSerie,
+	t.Object({
+		translations: t.Record(Language(), SerieTranslation, { minProperties: 1 }),
+		seasons: t.Array(SeedSeason),
+		// entries: t.Array(SeedEntry),
+		// extras: t.Optional(t.Array(SeedExtra)),
+	}),
+]);
+export type SeedSerie = typeof SeedSerie.static;
