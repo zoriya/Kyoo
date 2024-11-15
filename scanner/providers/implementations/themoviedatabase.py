@@ -742,6 +742,8 @@ class TheMovieDatabase(Provider):
 				f"collection/{provider_id}",
 				params={
 					"language": lng.to_tag(),
+					"append_to_response": "images",
+					"include_image_language": f"{lng.language},null,en",
 				},
 			)
 			logger.debug("TMDb responded: %s", collection)
@@ -757,13 +759,9 @@ class TheMovieDatabase(Provider):
 			translation = CollectionTranslation(
 				name=collection["name"],
 				overview=collection["overview"],
-				posters=[
-					f"https://image.tmdb.org/t/p/original{collection['poster_path']}"
-				],
+				posters=self.get_best_image(collection, lng, "posters"),
 				logos=[],
-				thumbnails=[
-					f"https://image.tmdb.org/t/p/original{collection['backdrop_path']}"
-				],
+				thumbnails=self.get_best_image(collection, lng, "backdrops"),
 			)
 			ret.translations = {lng.to_tag(): translation}
 			return ret
