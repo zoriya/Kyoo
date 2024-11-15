@@ -1,43 +1,43 @@
-import type { Movie } from "../movie";
-import type { Video } from "../video";
+import type { SeedMovie } from "../movie";
 
-type CompleteMovie = Movie & { videos: Video[] };
-
-export const bubble: CompleteMovie = {
-	id: "008f0b42-61b8-4155-857a-cbe5f40dd35d",
+export const bubble: SeedMovie = {
 	slug: "bubble",
-	name: "Bubble",
-	tagline: "Is she a calamity or a blessing?",
-	description:
-		"In an abandoned Tokyo overrun by bubbles and gravitational abnormalities, one gifted young man has a fateful meeting with a mysterious girl.",
-	aliases: ["Baburu", "バブル：2022", "Bubble"],
-	tags: ["adolescence", "disaster", "battle", "gravity", "anime"],
+	translations: {
+		en: {
+			name: "Bubble",
+			tagline: "Is she a calamity or a blessing?",
+			description:
+				"In an abandoned Tokyo overrun by bubbles and gravitational abnormalities, one gifted young man has a fateful meeting with a mysterious girl.",
+			aliases: ["Baburu", "バブル：2022", "Bubble"],
+			tags: ["adolescence", "disaster", "battle", "gravity", "anime"],
+			poster: {
+				id: "befdc7dd-2a67-0704-92af-90d49eee0315",
+				source:
+					"https://image.tmdb.org/t/p/original/65dad96VE8FJPEdrAkhdsuWMWH9.jpg",
+				blurhash: "LFC@2F;K$%xZ5?W.MwNF0iD~MxR:",
+			},
+			thumbnail: {
+				id: "b29908f3-a64d-ae98-923b-18bf7995ab04",
+				source:
+					"https://image.tmdb.org/t/p/original/a8Q2g0g7XzAF6gcB8qgn37ccb9Y.jpg",
+				blurhash: "LpH3afE1XAveyGS7t6V[R4xZn+S6",
+			},
+			banner: null,
+			logo: {
+				id: "3357fad0-de40-4ca5-15e6-eb065d35be86",
+				source:
+					"https://image.tmdb.org/t/p/original/ihIs7fayAmZieMlMQbs6TWM77uf.png",
+				blurhash: "LMDc5#MwE0,sTKE0R*S~4mxunhb_",
+			},
+			trailerUrl: "https://www.youtube.com/watch?v=vs7zsyIZkMM",
+		},
+	},
 	genres: ["animation", "adventure", "science-fiction", "fantasy"],
 	rating: 74,
 	status: "finished",
 	runtime: 101,
 	airDate: "2022-02-14",
 	originalLanguage: "ja",
-	poster: {
-		id: "befdc7dd-2a67-0704-92af-90d49eee0315",
-		source:
-			"https://image.tmdb.org/t/p/original/65dad96VE8FJPEdrAkhdsuWMWH9.jpg",
-		blurhash: "LFC@2F;K$%xZ5?W.MwNF0iD~MxR:",
-	},
-	thumbnail: {
-		id: "b29908f3-a64d-ae98-923b-18bf7995ab04",
-		source:
-			"https://image.tmdb.org/t/p/original/a8Q2g0g7XzAF6gcB8qgn37ccb9Y.jpg",
-		blurhash: "LpH3afE1XAveyGS7t6V[R4xZn+S6",
-	},
-	banner: null,
-	logo: {
-		id: "3357fad0-de40-4ca5-15e6-eb065d35be86",
-		source:
-			"https://image.tmdb.org/t/p/original/ihIs7fayAmZieMlMQbs6TWM77uf.png",
-		blurhash: "LMDc5#MwE0,sTKE0R*S~4mxunhb_",
-	},
-	trailerUrl: "https://www.youtube.com/watch?v=vs7zsyIZkMM",
 	createdAt: "2023-11-29T11:42:06.030838Z",
 	nextRefresh: "2025-01-07T22:40:59.960952Z",
 	externalId: {
