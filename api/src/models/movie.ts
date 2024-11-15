@@ -1,22 +1,17 @@
 import { t } from "elysia";
-import { Genre } from "./utils/genres";
-import { Image } from "./utils/image";
-import { ExternalId } from "./utils/external-id";
-import { bubble, registerExamples } from "./examples";
-import { comment } from "../utils";
+import {
+	ExternalId,
+	Genre,
+	Image,
+	Language,
+	Resource,
+} from "./utils";
+import { Video } from "./video";
 
 export const MovieStatus = t.UnionEnum(["unknown", "finished", "planned"]);
 export type MovieStatus = typeof MovieStatus.static;
 
-export const Movie = t.Object({
-	id: t.String({ format: "uuid" }),
-	slug: t.String(),
-	name: t.String(),
-	description: t.Nullable(t.String()),
-	tagline: t.Nullable(t.String()),
-	aliases: t.Array(t.String()),
-	tags: t.Array(t.String()),
-
+export const BaseMovie = t.Object({
 	genres: t.Array(Genre),
 	rating: t.Nullable(t.Number({ minimum: 0, maximum: 100 })),
 	status: MovieStatus,
@@ -26,27 +21,50 @@ export const Movie = t.Object({
 
 	airDate: t.Nullable(t.String({ format: "date" })),
 	originalLanguage: t.Nullable(
-		t.String({
-			description: comment`
-				The language code this movie was made in.
-				This is a BCP 47 language code (the IETF Best Current Practices on Tags for Identifying Languages).
-				BCP 47 is also known as RFC 5646. It subsumes ISO 639 and is backward compatible with it.
-			`,
+		Language({
+			description: "The language code this movie was made in.",
 		}),
 	),
-
-	poster: t.Nullable(Image),
-	thumbnail: t.Nullable(Image),
-	banner: t.Nullable(Image),
-	logo: t.Nullable(Image),
-	trailerUrl: t.Nullable(t.String()),
 
 	createdAt: t.String({ format: "date-time" }),
 	nextRefresh: t.String({ format: "date-time" }),
 
 	externalId: ExternalId,
 });
+export type BaseMovie = typeof BaseMovie.static;
 
+export const MovieTranslation = t.Object({
+	name: t.String(),
+	description: t.Nullable(t.String()),
+	tagline: t.Nullable(t.String()),
+	aliases: t.Array(t.String()),
+	tags: t.Array(t.String()),
+
+	poster: t.Nullable(Image),
+	thumbnail: t.Nullable(Image),
+	banner: t.Nullable(Image),
+	logo: t.Nullable(Image),
+	trailerUrl: t.Nullable(t.String()),
+});
+export type MovieTranslation = typeof MovieTranslation.static;
+
+export const Movie = t.Intersect([
+	Resource,
+	BaseMovie,
+	t.Ref(MovieTranslation),
+]);
 export type Movie = typeof Movie.static;
 
-registerExamples(Movie, bubble);
+export const SeedMovie = t.Intersect([
+	BaseMovie,
+	t.Object({
+		slug: t.String({ format: "slug" }),
+		image: t.Ref("image"),
+		toto: t.Ref("mt"),
+		translations: t.Record(t.String(), t.Ref("mt"), {
+			minProperties: 1,
+		}),
+		videos: t.Optional(t.Array(t.Ref(Video))),
+	}),
+]);
+export type SeedMovie = typeof SeedMovie.static;
