@@ -172,7 +172,7 @@ class TheMovieDatabase(Provider):
 			localized_images = [
 				image
 				for image in item["images"][key]
-				if image.get("iso_639_1") == item["original_language"]
+				if image.get("iso_639_1") == item.get("original_language")
 			]
 
 		# Step 3: If still no images, use any available images
