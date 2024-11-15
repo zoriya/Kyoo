@@ -140,7 +140,7 @@ class TheMovieDatabase(Provider):
 			},
 		)
 
-	async def get_best_image(self, item, lng, key):
+	def get_best_image(self, item: dict[str, Any], lng: Language, key: str) -> list[dict]:
 		"""
 		Retrieves the best available images for a item based on localization.
 
@@ -177,24 +177,22 @@ class TheMovieDatabase(Provider):
 		if not localized_images:
 			localized_images = item["images"][key]
 
-		# Corner case: If there are no images at all, call TMDB images API.
-		# Although doing another API call is not ideal, this would only be called very rarely.
+		# Step 4: If there are no images at all, fallback to _path attribute.
 		if not localized_images:
-			logger.debug(
-				"[Fallback] No images found for %s %s. Calling TMDB images API.",
-				item["media_type"],
-				item["id"],
-			)
-			images = await self.get(
-				f"{item['media_type']}/{item['id']}/images",
-			)
-			localized_images = sorted(
-				images[key],
-				key=lambda x: x.get("vote_average", 0),
-				reverse=True,
-			)
+			localized_images = self._get_image_fallback(item, key)
 
 		return self.get_image(localized_images)
+
+	def _get_image_fallback(self, item: dict[str, Any], key: str) -> list[dict]:
+		"""
+		Fallback to _path attribute if there are no images available in the images list.
+		"""
+		if key == "posters":
+			return [{"file_path": item.get("poster_path")}]
+		elif key == "backdrops":
+			return [{"file_path": item.get("backdrop_path")}]
+
+		return []
 
 	async def search_movie(self, name: str, year: Optional[int]) -> Movie:
 		search_results = (
@@ -208,7 +206,7 @@ class TheMovieDatabase(Provider):
 		)
 
 	async def identify_movie(
-		self, movie_id: str, original_language: Optional[str] = "null"
+		self, movie_id: str, original_language: Optional[Language] = None
 	) -> Movie:
 		languages = self.get_languages()
 
@@ -218,10 +216,9 @@ class TheMovieDatabase(Provider):
 				params={
 					"language": lng.to_tag(),
 					"append_to_response": "alternative_titles,videos,credits,keywords,images",
-					"include_image_language": f"{lng.language},null,{original_language}",
+					"include_image_language": f"{lng.language},null,{original_language.language if original_language else ""}",
 				},
 			)
-			movie["media_type"] = "movie"
 			logger.debug("TMDb responded: %s", movie)
 
 			ret = Movie(
@@ -274,9 +271,9 @@ class TheMovieDatabase(Provider):
 				tagline=movie["tagline"] if movie["tagline"] else None,
 				tags=list(map(lambda x: x["name"], movie["keywords"]["keywords"])),
 				overview=movie["overview"],
-				posters=(await self.get_best_image(movie, lng, "posters")),
-				logos=(await self.get_best_image(movie, lng, "logos")),
-				thumbnails=(await self.get_best_image(movie, lng, "backdrops")),
+				posters=self.get_best_image(movie, lng, "posters"),
+				logos=self.get_best_image(movie, lng, "logos"),
+				thumbnails=self.get_best_image(movie, lng, "backdrops"),
 				trailers=[
 					f"https://www.youtube.com/watch?v={x['key']}"
 					for x in movie["videos"]["results"]
@@ -313,7 +310,6 @@ class TheMovieDatabase(Provider):
 					"include_image_language": f"{lng.language},null,en",
 				},
 			)
-			show["media_type"] = "tv"
 			logger.debug("TMDb responded: %s", show)
 
 			ret = Show(
@@ -364,9 +360,9 @@ class TheMovieDatabase(Provider):
 				tagline=show["tagline"] if show["tagline"] else None,
 				tags=list(map(lambda x: x["name"], show["keywords"]["results"])),
 				overview=show["overview"],
-				posters=(await self.get_best_image(show, lng, "posters")),
-				logos=(await self.get_best_image(show, lng, "logos")),
-				thumbnails=(await self.get_best_image(show, lng, "backdrops")),
+				posters=self.get_best_image(show, lng, "posters"),
+				logos=self.get_best_image(show, lng, "logos"),
+				thumbnails=self.get_best_image(show, lng, "backdrops"),
 				trailers=[
 					f"https://www.youtube.com/watch?v={x['key']}"
 					for x in show["videos"]["results"]
