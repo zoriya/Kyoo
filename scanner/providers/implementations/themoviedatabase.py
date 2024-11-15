@@ -140,7 +140,9 @@ class TheMovieDatabase(Provider):
 			},
 		)
 
-	def get_best_image(self, item: dict[str, Any], lng: Language, key: str) -> list[dict]:
+	def get_best_image(
+		self, item: dict[str, Any], lng: Language, key: str
+	) -> list[dict]:
 		"""
 		Retrieves the best available images for a item based on localization.
 
