@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
 	check,
 	integer,
+	jsonb,
 	text,
 	timestamp,
 	uuid,
@@ -19,6 +20,7 @@ export const videos = schema.table(
 		rendering: text().notNull(),
 		part: integer(),
 		version: integer().notNull().default(1),
+		guess: jsonb().notNull().default({}),
 
 		createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 	},
