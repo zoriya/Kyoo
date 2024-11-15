@@ -80,7 +80,9 @@ export const entriesTranslation = schema.table(
 		language: language().notNull(),
 		name: text(),
 		description: text(),
+		// those two are only used if kind === "movie"
 		tagline: text(),
+		poster: image(),
 	},
 	(t) => [primaryKey({ columns: [t.pk, t.language] })],
 );
