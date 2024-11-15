@@ -201,8 +201,9 @@ class TheMovieDatabase(Provider):
 		if len(search_results) == 0:
 			raise ProviderError(f"No result for a movie named: {name}")
 		search = self.get_best_result(search_results, name, year)
+		original_language = Language.get(search["original_language"])
 		return await self.identify_movie(
-			search["id"], original_language=search["original_language"]
+			search["id"], original_language=original_language
 		)
 
 	async def identify_movie(
