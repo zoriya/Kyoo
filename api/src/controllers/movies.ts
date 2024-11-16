@@ -1,9 +1,10 @@
 import { Elysia, t } from "elysia";
-import { Movie } from "../models/movie";
+import { Movie, MovieTranslation } from "../models/movie";
 import { db } from "../db";
 import { shows, showTranslations } from "../db/schema/shows";
 import { eq, and, sql, or, inArray } from "drizzle-orm";
 import { getColumns } from "../db/schema/utils";
+import { bubble } from "../models/examples";
 
 const translations = db
 	.selectDistinctOn([showTranslations.language])
@@ -21,7 +22,6 @@ const translations = db
 
 const { pk: _, kind, startAir, endAir, ...moviesCol } = getColumns(shows);
 const { pk, language, ...translationsCol } = getColumns(translations);
-
 
 const findMovie = db
 	.select({
@@ -47,16 +47,29 @@ const findMovie = db
 export const movies = new Elysia({ prefix: "/movies" })
 	.model({
 		movie: Movie,
+		"movie-translation": MovieTranslation,
 		error: t.Object({}),
 	})
 	.guard({
 		params: t.Object({
-			id: t.String(),
+			id: t.String({
+				description: "The id or slug of the movie to retrieve",
+				examples: [bubble.slug],
+			}),
 		}),
 		response: { 200: "movie", 404: "error" },
+		tags: ["Movies"],
 	})
-	.get("/:id", async ({ params: { id }, error }) => {
-		const ret = await findMovie.execute({ id });
-		if (ret.length !== 1) return error(404, {});
-		return ret[0];
-	});
+	.get(
+		"/:id",
+		async ({ params: { id }, error }) => {
+			const ret = await findMovie.execute({ id });
+			if (ret.length !== 1) return error(404, {});
+			return ret[0];
+		},
+		{
+			detail: {
+				description: "Get a movie by id or slug",
+			},
+		},
+	);
