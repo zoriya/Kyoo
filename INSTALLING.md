@@ -119,3 +119,7 @@ For example, if your library is split into multiples paths you can edit the `vol
 You can also edit the volume definition to use advanced volume drivers if you need to access smb or network drives. Mounting a drive into your filesystem and binding it in this volume section is also a valid choice (especially for fuse filesystems like cloud drives for example).
 
 Don't forget to **also edit the scanner's volumes** if you edit the transcoder's volume.
+
+# OpenID Connect
+
+Kyoo supports OpenID Connect (OIDC) for authentication. Please refer to the [OIDC.md](OIDC.md) file for more information.
