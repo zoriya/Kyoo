@@ -12,6 +12,6 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
 		<PackageReference Include="Sprache" Version="2.3.1" />
-		<PackageReference Include="System.ComponentModel.Composition" Version="8.0.0" />
+		<PackageReference Include="System.ComponentModel.Composition" Version="9.0.0" />
 	</ItemGroup>
 </Project>
