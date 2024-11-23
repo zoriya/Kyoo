@@ -1,9 +1,9 @@
 import type { TSchema } from "elysia";
-import { KindGuard } from "@sinclair/typebox"
+import { KindGuard } from "@sinclair/typebox";
 
 export const registerExamples = <T extends TSchema>(
 	schema: T,
-	...examples: (T["static"] | undefined)[]
+	...examples: (Partial<T["static"] >| undefined)[]
 ) => {
 	if (KindGuard.IsUnion(schema)) {
 		for (const union of schema.anyOf) {

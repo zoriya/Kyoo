@@ -100,11 +100,11 @@ export const showTranslations = schema.table(
 		tagline: text(),
 		aliases: text().array().notNull(),
 		tags: text().array().notNull(),
-		trailerUrl: text(),
 		poster: image(),
 		thumbnail: image(),
 		banner: image(),
 		logo: image(),
+		trailerUrl: text(),
 	},
 	(t) => [primaryKey({ columns: [t.pk, t.language] })],
 );

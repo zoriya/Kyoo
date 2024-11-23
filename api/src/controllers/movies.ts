@@ -44,7 +44,7 @@ const findMovie = db
 	.limit(1)
 	.prepare("findMovie");
 
-export const movies = new Elysia({ prefix: "/movies" })
+export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 	.model({
 		movie: Movie,
 		"movie-translation": MovieTranslation,
@@ -58,7 +58,6 @@ export const movies = new Elysia({ prefix: "/movies" })
 			}),
 		}),
 		response: { 200: "movie", 404: "error" },
-		tags: ["Movies"],
 	})
 	.get(
 		"/:id",

@@ -10,25 +10,12 @@ export const bubble: SeedMovie = {
 				"In an abandoned Tokyo overrun by bubbles and gravitational abnormalities, one gifted young man has a fateful meeting with a mysterious girl.",
 			aliases: ["Baburu", "バブル：2022", "Bubble"],
 			tags: ["adolescence", "disaster", "battle", "gravity", "anime"],
-			poster: {
-				id: "befdc7dd-2a67-0704-92af-90d49eee0315",
-				source:
-					"https://image.tmdb.org/t/p/original/65dad96VE8FJPEdrAkhdsuWMWH9.jpg",
-				blurhash: "LFC@2F;K$%xZ5?W.MwNF0iD~MxR:",
-			},
-			thumbnail: {
-				id: "b29908f3-a64d-ae98-923b-18bf7995ab04",
-				source:
-					"https://image.tmdb.org/t/p/original/a8Q2g0g7XzAF6gcB8qgn37ccb9Y.jpg",
-				blurhash: "LpH3afE1XAveyGS7t6V[R4xZn+S6",
-			},
+			poster:
+				"https://image.tmdb.org/t/p/original/65dad96VE8FJPEdrAkhdsuWMWH9.jpg",
+			thumbnail:
+				"https://image.tmdb.org/t/p/original/a8Q2g0g7XzAF6gcB8qgn37ccb9Y.jpg",
 			banner: null,
-			logo: {
-				id: "3357fad0-de40-4ca5-15e6-eb065d35be86",
-				source:
-					"https://image.tmdb.org/t/p/original/ihIs7fayAmZieMlMQbs6TWM77uf.png",
-				blurhash: "LMDc5#MwE0,sTKE0R*S~4mxunhb_",
-			},
+			logo: "https://image.tmdb.org/t/p/original/ihIs7fayAmZieMlMQbs6TWM77uf.png",
 			trailerUrl: "https://www.youtube.com/watch?v=vs7zsyIZkMM",
 		},
 	},
@@ -38,8 +25,6 @@ export const bubble: SeedMovie = {
 	runtime: 101,
 	airDate: "2022-02-14",
 	originalLanguage: "ja",
-	createdAt: "2023-11-29T11:42:06.030838Z",
-	nextRefresh: "2025-01-07T22:40:59.960952Z",
 	externalId: {
 		themoviedatabase: {
 			dataId: "912598",
@@ -52,14 +37,33 @@ export const bubble: SeedMovie = {
 	},
 	videos: [
 		{
-			id: "0934da28-4a49-404e-920b-a150404a3b6d",
-			slug: "bubble",
 			path: "/video/Bubble/Bubble (2022).mkv",
 			rendering:
 				"459429fa062adeebedcc2bb04b9965de0262bfa453369783132d261be79021bd",
 			part: null,
 			version: 1,
-			createdAt: "2023-11-29T11:42:06.030838Z",
 		},
 	],
+};
+
+export const bubbleImages = {
+	poster: {
+		id: "befdc7dd-2a67-0704-92af-90d49eee0315",
+		source:
+			"https://image.tmdb.org/t/p/original/65dad96VE8FJPEdrAkhdsuWMWH9.jpg",
+		blurhash: "LFC@2F;K$%xZ5?W.MwNF0iD~MxR:",
+	},
+	thumbnail: {
+		id: "b29908f3-a64d-ae98-923b-18bf7995ab04",
+		source:
+			"https://image.tmdb.org/t/p/original/a8Q2g0g7XzAF6gcB8qgn37ccb9Y.jpg",
+		blurhash: "LpH3afE1XAveyGS7t6V[R4xZn+S6",
+	},
+	banner: null,
+	logo: {
+		id: "3357fad0-de40-4ca5-15e6-eb065d35be86",
+		source:
+			"https://image.tmdb.org/t/p/original/ihIs7fayAmZieMlMQbs6TWM77uf.png",
+		blurhash: "LMDc5#MwE0,sTKE0R*S~4mxunhb_",
+	},
 };

@@ -1,19 +1,15 @@
 import { t } from "elysia";
-import {
-	ExternalId,
-	Genre,
-	Image,
-	Language,
-	Resource,
-	SeedImage,
-} from "./utils";
+import { ExternalId, Genre, Image, Language, SeedImage } from "./utils";
 import { SeedVideo } from "./video";
 import { bubble, registerExamples } from "./examples";
+import { bubbleImages } from "./examples/bubble";
 
 export const MovieStatus = t.UnionEnum(["unknown", "finished", "planned"]);
 export type MovieStatus = typeof MovieStatus.static;
 
 const BaseMovie = t.Object({
+	id: t.String({ format: "uuid" }),
+	slug: t.String({ format: "slug" }),
 	genres: t.Array(Genre),
 	rating: t.Nullable(t.Number({ minimum: 0, maximum: 100 })),
 	status: MovieStatus,
@@ -33,6 +29,7 @@ const BaseMovie = t.Object({
 
 	externalId: ExternalId,
 });
+
 export const MovieTranslation = t.Object({
 	name: t.String(),
 	description: t.Nullable(t.String()),
@@ -48,13 +45,12 @@ export const MovieTranslation = t.Object({
 });
 export type MovieTranslation = typeof MovieTranslation.static;
 
-export const Movie = t.Intersect([Resource, MovieTranslation, BaseMovie]);
+export const Movie = t.Intersect([BaseMovie, MovieTranslation]);
 export type Movie = typeof Movie.static;
 
 export const SeedMovie = t.Intersect([
-	t.Omit(BaseMovie, ["createdAt", "nextRefresh"]),
+	t.Omit(BaseMovie, ["id", "createdAt", "nextRefresh"]),
 	t.Object({
-		slug: t.String({ format: "slug" }),
 		translations: t.Record(
 			Language(),
 			t.Intersect([
@@ -75,4 +71,9 @@ export const SeedMovie = t.Intersect([
 ]);
 export type SeedMovie = typeof SeedMovie.static;
 
+registerExamples(Movie, {
+	...bubble,
+	...bubble.translations.en,
+	...bubbleImages,
+});
 registerExamples(SeedMovie, bubble);

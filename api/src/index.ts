@@ -58,7 +58,7 @@ const app = new Elysia()
 						description: "Kyoo's demo server",
 					},
 				],
-				tags: [{ name: "Movies", description: "Routes about movies" }],
+				tags: [{ name: "movies", description: "Routes about movies" }],
 			},
 		}),
 	)
