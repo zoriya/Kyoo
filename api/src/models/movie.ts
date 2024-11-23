@@ -5,13 +5,15 @@ import {
 	Image,
 	Language,
 	Resource,
+	SeedImage,
 } from "./utils";
-import { Video } from "./video";
+import { SeedVideo } from "./video";
+import { bubble, registerExamples } from "./examples";
 
 export const MovieStatus = t.UnionEnum(["unknown", "finished", "planned"]);
 export type MovieStatus = typeof MovieStatus.static;
 
-export const BaseMovie = t.Object({
+const BaseMovie = t.Object({
 	genres: t.Array(Genre),
 	rating: t.Nullable(t.Number({ minimum: 0, maximum: 100 })),
 	status: MovieStatus,
@@ -31,8 +33,6 @@ export const BaseMovie = t.Object({
 
 	externalId: ExternalId,
 });
-export type BaseMovie = typeof BaseMovie.static;
-
 export const MovieTranslation = t.Object({
 	name: t.String(),
 	description: t.Nullable(t.String()),
@@ -48,23 +48,31 @@ export const MovieTranslation = t.Object({
 });
 export type MovieTranslation = typeof MovieTranslation.static;
 
-export const Movie = t.Intersect([
-	Resource,
-	BaseMovie,
-	t.Ref(MovieTranslation),
-]);
+export const Movie = t.Intersect([Resource, MovieTranslation, BaseMovie]);
 export type Movie = typeof Movie.static;
 
 export const SeedMovie = t.Intersect([
-	BaseMovie,
+	t.Omit(BaseMovie, ["createdAt", "nextRefresh"]),
 	t.Object({
 		slug: t.String({ format: "slug" }),
-		image: t.Ref("image"),
-		toto: t.Ref("mt"),
-		translations: t.Record(t.String(), t.Ref("mt"), {
-			minProperties: 1,
-		}),
-		videos: t.Optional(t.Array(t.Ref(Video))),
+		translations: t.Record(
+			Language(),
+			t.Intersect([
+				t.Omit(MovieTranslation, ["poster", "thumbnail", "banner", "logo"]),
+				t.Object({
+					poster: t.Nullable(SeedImage),
+					thumbnail: t.Nullable(SeedImage),
+					banner: t.Nullable(SeedImage),
+					logo: t.Nullable(SeedImage),
+				}),
+			]),
+			{
+				minProperties: 1,
+			},
+		),
+		videos: t.Optional(t.Array(SeedVideo)),
 	}),
 ]);
 export type SeedMovie = typeof SeedMovie.static;
+
+registerExamples(SeedMovie, bubble);

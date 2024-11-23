@@ -6,3 +6,5 @@ export const Image = t.Object({
 	blurhash: t.String(),
 });
 export type Image = typeof Image.static;
+
+export const SeedImage = t.String({ format: "uri" });
