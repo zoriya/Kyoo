@@ -1,4 +1,15 @@
 import type { SeedMovie } from "../movie";
+import type { Video } from "../video";
+
+export const bubbleVideo: Video = {
+	id: "3cd436ee-01ff-4f45-ba98-62aabeb22f25",
+	slug: "bubble",
+	path: "/video/Bubble/Bubble (2022).mkv",
+	rendering: "459429fa062adeebedcc2bb04b9965de0262bfa453369783132d261be79021bd",
+	part: null,
+	version: 1,
+	createdAt: "2024-11-23T15:01:24.968Z",
+};
 
 export const bubble: SeedMovie = {
 	slug: "bubble",
@@ -35,15 +46,7 @@ export const bubble: SeedMovie = {
 			link: "https://www.imdb.com/title/tt16360006",
 		},
 	},
-	videos: [
-		{
-			path: "/video/Bubble/Bubble (2022).mkv",
-			rendering:
-				"459429fa062adeebedcc2bb04b9965de0262bfa453369783132d261be79021bd",
-			part: null,
-			version: 1,
-		},
-	],
+	videos: [bubbleVideo.id],
 };
 
 export const bubbleImages = {

@@ -30,5 +30,5 @@ export const registerExamples = <T extends TSchema>(
 	}
 };
 
-export { bubble } from "./bubble";
-export { madeInAbyss } from "./made-in-abyss";
+export * from "./bubble";
+export * from "./made-in-abyss";

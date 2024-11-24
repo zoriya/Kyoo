@@ -66,7 +66,7 @@ export const SeedMovie = t.Intersect([
 				minProperties: 1,
 			},
 		),
-		videos: t.Optional(t.Array(SeedVideo)),
+		videos: t.Optional(t.Array(t.String({ format: "uuid" }))),
 	}),
 ]);
 export type SeedMovie = typeof SeedMovie.static;

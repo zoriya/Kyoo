@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import { comment } from "../utils";
+import { registerExamples, bubbleVideo  } from "./examples";
 
 export const Video = t.Object({
 	id: t.String({ format: "uuid" }),
@@ -31,10 +32,7 @@ export const Video = t.Object({
 
 	createdAt: t.String({ format: "date-time" }),
 });
-
 export type Video = typeof Video.static;
+registerExamples(Video, bubbleVideo);
 
-export const SeedVideo = t.Union([
-	t.Omit(Video, ["id", "slug", "createdAt"]),
-	t.String({ format: "uuid" }),
-]);
+export const SeedVideo = t.Omit(Video, ["id", "slug", "createdAt"]);
