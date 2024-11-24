@@ -23,7 +23,7 @@ export const entryType = schema.enum("entry_type", [
 	"extra",
 ]);
 
-export const entryid = () =>
+export const entry_extid = () =>
 	jsonb()
 		.$type<
 			Record<
@@ -60,7 +60,7 @@ export const entries = schema.table(
 		runtime: integer(),
 		thumbnails: image(),
 
-		externalId: entryid(),
+		externalId: entry_extid(),
 
 		createdAt: timestamp({ withTimezone: true, mode: "string" }).defaultNow(),
 		nextRefresh: timestamp({ withTimezone: true, mode: "string" }),
@@ -71,8 +71,8 @@ export const entries = schema.table(
 	],
 );
 
-export const entriesTranslation = schema.table(
-	"entries_translation",
+export const entryTranslations = schema.table(
+	"entry_translations",
 	{
 		pk: integer()
 			.notNull()

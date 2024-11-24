@@ -15,14 +15,16 @@ export const videos = schema.table(
 	{
 		pk: integer().primaryKey().generatedAlwaysAsIdentity(),
 		id: uuid().notNull().unique().defaultRandom(),
-		slug: varchar({ length: 255 }).notNull().unique(),
+		slug: varchar({ length: 255 }).unique(),
 		path: text().notNull().unique(),
 		rendering: text().notNull(),
 		part: integer(),
 		version: integer().notNull().default(1),
 		guess: jsonb().notNull().default({}),
 
-		createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+		createdAt: timestamp({ withTimezone: true, mode: "string" })
+			.notNull()
+			.defaultNow(),
 	},
 	(t) => [
 		check("part_pos", sql`${t.part} >= 0`),

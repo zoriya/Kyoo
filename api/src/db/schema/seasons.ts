@@ -12,7 +12,7 @@ import {
 import { image, language, schema } from "./utils";
 import { shows } from "./shows";
 
-export const entryid = () =>
+export const season_extid = () =>
 	jsonb()
 		.$type<
 			Record<
@@ -38,7 +38,7 @@ export const seasons = schema.table(
 		startAir: date(),
 		endAir: date(),
 
-		externalId: entryid(),
+		externalId: season_extid(),
 
 		createdAt: timestamp({ withTimezone: true, mode: "string" }).defaultNow(),
 		nextRefresh: timestamp({ withTimezone: true, mode: "string" }),
@@ -47,7 +47,7 @@ export const seasons = schema.table(
 );
 
 export const seasonTranslation = schema.table(
-	"season_translation",
+	"season_translations",
 	{
 		pk: integer()
 			.notNull()
