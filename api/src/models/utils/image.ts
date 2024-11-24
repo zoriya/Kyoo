@@ -1,7 +1,7 @@
 import { t } from "elysia";
 
 export const Image = t.Object({
-	id: t.String({ format: "uuid" }),
+	id: t.String(),
 	source: t.String({ format: "uri" }),
 	blurhash: t.String(),
 });
