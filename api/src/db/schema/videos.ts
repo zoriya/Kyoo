@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
 	check,
 	integer,
@@ -7,8 +7,10 @@ import {
 	timestamp,
 	uuid,
 	varchar,
+	primaryKey,
 } from "drizzle-orm/pg-core";
 import { schema } from "./utils";
+import { entries } from "./entries";
 
 export const videos = schema.table(
 	"videos",
@@ -30,4 +32,17 @@ export const videos = schema.table(
 		check("part_pos", sql`${t.part} >= 0`),
 		check("version_pos", sql`${t.version} >= 0`),
 	],
+);
+
+export const entryVideoJointure = schema.table(
+	"entry_video_jointure",
+	{
+		entry: integer()
+			.notNull()
+			.references(() => entries.pk, { onDelete: "cascade" }),
+		video: integer()
+			.notNull()
+			.references(() => videos.pk, { onDelete: "cascade" }),
+	},
+	(t) => [primaryKey({ columns: [t.entry, t.video] })],
 );
