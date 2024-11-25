@@ -2,19 +2,22 @@ import { db } from "~/db";
 import {
 	entries,
 	entryTranslations,
+	entryVideoJointure,
 	shows,
 	showTranslations,
+	videos,
 } from "~/db/schema";
 import type { SeedMovie } from "~/models/movie";
 import { processOptImage } from "./images";
 import { guessNextRefresh } from "./refresh";
+import { count, eq, inArray, sql } from "drizzle-orm";
 
 type Show = typeof shows.$inferInsert;
 type ShowTrans = typeof showTranslations.$inferInsert;
 type Entry = typeof entries.$inferInsert;
 
 export const seedMovie = async (seed: SeedMovie) => {
-	const { translations, videos, ...bMovie } = seed;
+	const { translations, videos: vids, ...bMovie } = seed;
 
 	const ret = await db.transaction(async (tx) => {
 		const movie: Show = {
@@ -55,10 +58,54 @@ export const seedMovie = async (seed: SeedMovie) => {
 		return { ...ret, entry: entry.pk };
 	});
 
-	// TODO: insert entry-video links
-	// await db.transaction(async tx => {
-	// 	await tx.insert(videos).values(videos);
-	// });
+	if (vids) {
+		await db.transaction(async (tx) => {
+			const pks = await tx
+				.insert(entryVideoJointure)
+				.select(
+					tx
+						.select({
+							entry: sql<number>`${ret.entry}`.as("entry"),
+							video: videos.pk,
+						})
+						.from(videos)
+						.where(inArray(videos.id, vids)),
+				)
+				.onConflictDoNothing()
+				.returning({ pk: entryVideoJointure.video });
+
+
+			const toto = tx
+								.select({ count: count(videos.rendering) })
+								.from(videos)
+								.innerJoin(
+									entryVideoJointure,
+									eq(videos.pk, entryVideoJointure.video),
+								)
+								.where(entryVideoJointure.entry, "");
+
+			return await tx
+				.update(videos)
+				.set({
+					slug: sql<string>`
+						concat(
+							${entries.slug},
+							case when ${videos.part} <> null then concat("-p", ${videos.part}) else "" end,
+							case when ${videos.version} <> 1 then concat("-v", ${videos.version}) else "" end,
+							${}
+						)
+					`,
+				})
+				.from(entries)
+				.where(
+					inArray(
+						videos.pk,
+						pks.map((x) => x.pk),
+					),
+				)
+				.returning({ id: videos.id, slug: videos.slug });
+		});
+	}
 
 	return ret.id;
 };
