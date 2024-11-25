@@ -58,7 +58,16 @@ const app = new Elysia()
 						description: "Kyoo's demo server",
 					},
 				],
-				tags: [{ name: "movies", description: "Routes about movies" }],
+				tags: [
+					{ name: "movies", description: "Routes about movies" },
+					{
+						name: "videos",
+						description: comment`
+							Used by the scanner internally to list & create videos.
+							Can be used for administration or third party apps.
+						`,
+					},
+				],
 			},
 		}),
 	)
