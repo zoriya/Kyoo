@@ -1,4 +1,4 @@
-import { relations, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import {
 	check,
 	integer,
@@ -17,7 +17,6 @@ export const videos = schema.table(
 	{
 		pk: integer().primaryKey().generatedAlwaysAsIdentity(),
 		id: uuid().notNull().unique().defaultRandom(),
-		slug: varchar({ length: 255 }).unique(),
 		path: text().notNull().unique(),
 		rendering: text().notNull(),
 		part: integer(),
@@ -43,6 +42,7 @@ export const entryVideoJointure = schema.table(
 		video: integer()
 			.notNull()
 			.references(() => videos.pk, { onDelete: "cascade" }),
+		slug: varchar({ length: 255 }).notNull().unique(),
 	},
 	(t) => [primaryKey({ columns: [t.entry, t.video] })],
 );
