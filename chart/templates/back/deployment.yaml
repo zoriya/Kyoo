@@ -127,32 +127,32 @@ spec:
                 secretKeyRef:
                   key: {{ .Values.global.meilisearch.kyoo_back.masterkeyKey }}
                   name: {{ .Values.global.meilisearch.kyoo_back.existingSecret }}
-            {{- range $key, $value := .Values.kyoo.oidc_providers }}
-            {{- if $value.enabled }}
-            - name: OIDC_{{ $key | upper }}_NAME
-              value: {{ $key | quote }}
-            - name: OIDC_{{ $key | upper }}_LOGO
-              value: {{ $value.logo | quote }}
-            - name: OIDC_{{ $key | upper }}_CLIENTID
+            {{- range $index, $provider := .Values.kyoo.oidc_providers }}
+            {{- if $provider.enabled }}
+            - name: OIDC_{{ $provider.name | upper }}_NAME
+              value: {{ $provider.name | quote }}
+            - name: OIDC_{{ $provider.name | upper }}_LOGO
+              value: {{ $provider.logo | quote }}
+            - name: OIDC_{{ $provider.name | upper }}_CLIENTID
               valueFrom:
                 secretKeyRef:
-                  key: {{ $value.clientIdKey }}
-                  name: {{ $value.existingSecret }}
-            - name: OIDC_{{ $key | upper }}_SECRET
+                  key: {{ $provider.clientIdKey }}
+                  name: {{ $provider.existingSecret }}
+            - name: OIDC_{{ $provider.name | upper }}_SECRET
               valueFrom:
                 secretKeyRef:
-                  key: {{ $value.clientSecretKey }}
-                  name: {{ $value.existingSecret }}
-            - name: OIDC_{{ $key | upper }}_AUTHORIZATION
-              value: {{ $value.authorizationAddress | quote }}
-            - name: OIDC_{{ $key | upper }}_TOKEN
-              value: {{ $value.tokenAddress | quote }}
-            - name: OIDC_{{ $key | upper }}_PROFILE
-              value: {{ $value.profileAddress | quote }}
-            - name: OIDC_{{ $key | upper }}_SCOPE
-              value: {{ $value.scope | quote }}
-            - name: OIDC_{{ $key | upper }}_AUTHMETHOD
-              value: {{ $value.authMethod | quote }}
+                  key: {{ $provider.clientSecretKey }}
+                  name: {{ $provider.existingSecret }}
+            - name: OIDC_{{ $provider.name | upper }}_AUTHORIZATION
+              value: {{ $provider.authorizationAddress | quote }}
+            - name: OIDC_{{ $provider.name | upper }}_TOKEN
+              value: {{ $provider.tokenAddress | quote }}
+            - name: OIDC_{{ $provider.name | upper }}_PROFILE
+              value: {{ $provider.profileAddress | quote }}
+            - name: OIDC_{{ $provider.name | upper }}_SCOPE
+              value: {{ $provider.scope | quote }}
+            - name: OIDC_{{ $provider.name | upper }}_AUTHMETHOD
+              value: {{ $provider.authMethod | default "ClientSecretBasic" | quote }}
             {{- end }}
             {{- end }}
             {{- with (concat .Values.global.extraEnv .Values.back.kyoo_back.extraEnv) }}

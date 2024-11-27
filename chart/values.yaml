@@ -122,9 +122,8 @@ kyoo:
     existingSecret: bigsecret
     apikeyKey: kyoo_apikeys
   oidc_providers:
-    # this map of maps is iterated over to create oidc providers
-    example:
-      enabled: enabled
+    - name: example
+      enabled: false
       existingSecret: bigsecret
       clientIdKey: clientId
       clientSecretKey: clientSecret
