@@ -128,7 +128,6 @@ spec:
                   key: {{ .Values.global.meilisearch.kyoo_back.masterkeyKey }}
                   name: {{ .Values.global.meilisearch.kyoo_back.existingSecret }}
             {{- range $index, $provider := .Values.kyoo.oidc_providers }}
-            {{- if $provider.enabled }}
             - name: OIDC_{{ $provider.name | upper }}_NAME
               value: {{ $provider.name | quote }}
             - name: OIDC_{{ $provider.name | upper }}_LOGO
@@ -153,7 +152,6 @@ spec:
               value: {{ $provider.scope | quote }}
             - name: OIDC_{{ $provider.name | upper }}_AUTHMETHOD
               value: {{ $provider.authMethod | default "ClientSecretBasic" | quote }}
-            {{- end }}
             {{- end }}
             {{- with (concat .Values.global.extraEnv .Values.back.kyoo_back.extraEnv) }}
               {{- toYaml . | nindent 12 }}

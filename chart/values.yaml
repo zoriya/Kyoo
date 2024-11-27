@@ -121,18 +121,19 @@ kyoo:
   apikey:
     existingSecret: bigsecret
     apikeyKey: kyoo_apikeys
-  oidc_providers:
-    - name: example
-      enabled: false
-      existingSecret: bigsecret
-      clientIdKey: clientId
-      clientSecretKey: clientSecret
-      logo: https://url-of-your-logo.com
-      authorizationAddress: https://url-of-the-authorization-endpoint-of-the-oidc-service.com/auth
-      tokenAddress: https://url-of-the-token-endpoint-of-the-oidc-service.com/token
-      profileAddress: https://url-of-the-profile-endpoint-of-the-oidc-service.com/userinfo
-      scope: "email openid profile"
-      authMethod: ClientSecretBasic
+  # oidc_providers is a list of oidc providers that you want to use for authentication.
+  # see the example below for how to configure an oidc provider.
+  oidc_providers: []
+    # - name: example
+    #   existingSecret: bigsecret
+    #   clientIdKey: clientId
+    #   clientSecretKey: clientSecret
+    #   logo: https://url-of-your-logo.com
+    #   authorizationAddress: https://url-of-the-authorization-endpoint-of-the-oidc-service.com/auth
+    #   tokenAddress: https://url-of-the-token-endpoint-of-the-oidc-service.com/token
+    #   profileAddress: https://url-of-the-profile-endpoint-of-the-oidc-service.com/userinfo
+    #   scope: "email openid profile"
+    #   authMethod: ClientSecretBasic
 
 # configures workloads that require access to media
 media:
