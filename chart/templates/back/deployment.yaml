@@ -127,31 +127,33 @@ spec:
                 secretKeyRef:
                   key: {{ .Values.global.meilisearch.kyoo_back.masterkeyKey }}
                   name: {{ .Values.global.meilisearch.kyoo_back.existingSecret }}
-            {{- if .Values.kyoo.oidc.enabled }}
-            - name: OIDC_SERVICE_NAME
-              value: {{ .Values.kyoo.oidc.name | quote }}
-            - name: OIDC_SERVICE_LOGO
-              value: {{ .Values.kyoo.oidc.logo | quote }}
-            - name: OIDC_SERVICE_CLIENTID
+            {{- range $key, $value := .Values.kyoo.oidc_providers }}
+            {{- if $value.enabled }}
+            - name: OIDC_{{ $key | upper }}_NAME
+              value: {{ $key | quote }}
+            - name: OIDC_{{ $key | upper }}_LOGO
+              value: {{ $value.logo | quote }}
+            - name: OIDC_{{ $key | upper }}_CLIENTID
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.kyoo.oidc.clientIdKey }}
-                  name: {{ .Values.kyoo.oidc.existingSecret }}
-            - name: OIDC_SERVICE_SECRET
+                  key: {{ $value.clientIdKey }}
+                  name: {{ $value.existingSecret }}
+            - name: OIDC_{{ $key | upper }}_SECRET
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.kyoo.oidc.clientSecretKey }}
-                  name: {{ .Values.kyoo.oidc.existingSecret }}
-            - name: OIDC_SERVICE_AUTHORIZATION
-              value: {{ .Values.kyoo.oidc.authorizationAddress | quote }}
-            - name: OIDC_SERVICE_TOKEN
-              value: {{ .Values.kyoo.oidc.tokenAddress | quote }}
-            - name: OIDC_SERVICE_PROFILE
-              value: {{ .Values.kyoo.oidc.profileAddress | quote }}
-            - name: OIDC_SERVICE_SCOPE
-              value: {{ .Values.kyoo.oidc.scope | quote }}
-            - name: OIDC_SERVICE_AUTHMETHOD
-              value: {{ .Values.kyoo.oidc.authMethod | quote }}
+                  key: {{ $value.clientSecretKey }}
+                  name: {{ $value.existingSecret }}
+            - name: OIDC_{{ $key | upper }}_AUTHORIZATION
+              value: {{ $value.authorizationAddress | quote }}
+            - name: OIDC_{{ $key | upper }}_TOKEN
+              value: {{ $value.tokenAddress | quote }}
+            - name: OIDC_{{ $key | upper }}_PROFILE
+              value: {{ $value.profileAddress | quote }}
+            - name: OIDC_{{ $key | upper }}_SCOPE
+              value: {{ $value.scope | quote }}
+            - name: OIDC_{{ $key | upper }}_AUTHMETHOD
+              value: {{ $value.authMethod | quote }}
+            {{- end }}
             {{- end }}
             {{- with (concat .Values.global.extraEnv .Values.back.kyoo_back.extraEnv) }}
               {{- toYaml . | nindent 12 }}
