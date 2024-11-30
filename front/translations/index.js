@@ -4,6 +4,7 @@ import es from "./es";
 import fr from "./fr";
 import it from "./it";
 import ko from "./ko";
+import nl from "./nl";
 import pl from "./pl";
 import pt_br from "./pt_br";
 import ro from "./ro";
@@ -19,6 +20,7 @@ export default {
 	fr: { translation: fr },
 	it: { translation: it },
 	ko: { translation: ko },
+	nl: { translation: nl },
 	pl: { translation: pl },
 	"pt-BR": { translation: pt_br },
 	ro: { translation: ro },

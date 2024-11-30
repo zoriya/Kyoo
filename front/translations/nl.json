@@ -1,0 +1,285 @@
+{
+	"home": {
+		"recommended": "Aangeraden",
+		"news": "Nieuws",
+		"watchlist": "Verder kijken",
+		"info": "Meer weten",
+		"none": "Geen afleveringen",
+		"watchlistLogin": "Om bij te houden wat je kijkt, of nog wil kijken moet je inloggen.",
+		"refreshMetadata": "Ververs metadata",
+		"episodeMore": {
+			"goToShow": "Ga naar programma",
+			"download": "Download",
+			"mediainfo": "Zie bestandsinformatie"
+		}
+	},
+	"show": {
+		"play": "Speel af",
+		"trailer": "Speel trailer af",
+		"studio": "Studio",
+		"genre": "Genres",
+		"genre-none": "Geen genres",
+		"staff": "Personeel",
+		"staff-none": "Het personeel is onbekend",
+		"noOverview": "Geen overview beschikbaar",
+		"episode-none": "Er zijn geen afleveringen in dit seizoen",
+		"episodeNoMetadata": "Geen metadata beschikbaar",
+		"tags": "Tags",
+		"links": "Links",
+		"jumpToSeason": "Spring naar seizoen",
+		"partOf": "Onderdeel van",
+		"watchlistAdd": "Voeg toe aan je kijklijst",
+		"watchlistEdit": "Wijzig kijkstatus",
+		"watchlistRemove": "Markeer als ongezien",
+		"watchlistLogin": "Login om aan je kijklijst toe te voegen",
+		"watchlistMark": {
+			"completed": "Markeer als afgekeken",
+			"planned": "Markeer als gepland",
+			"watching": "Markeer als \"aan het kijken\"",
+			"droped": "Markeer als gestopt",
+			"null": "Markeer als ongekeken"
+		},
+		"nextUp": "Volgende",
+		"season": "Seizoen {{number}}"
+	},
+	"browse": {
+		"mediatypekey": {
+			"all": "Alle",
+			"movie": "Film",
+			"show": "Serie",
+			"collection": "Verzameling"
+		},
+		"mediatype-tt": "Mediatype",
+		"mediatypelabel": "Mediatype",
+		"sortby": "Sorteer op {{key}}",
+		"sortby-tt": "Sorteer op",
+		"sortkey": {
+			"relevance": "Relevantie",
+			"name": "Naam",
+			"airDate": "Datum eerste vertoning",
+			"startAir": "Startdatum",
+			"endAir": "Einddatum",
+			"addedDate": "Datum toegevoegd",
+			"rating": "Beoordelingen"
+		},
+		"sortord": {
+			"asc": "oplopend",
+			"desc": "aflopend"
+		},
+		"switchToGrid": "Wissel naar tabelweergave",
+		"switchToList": "Wissel naar lijstweergave"
+	},
+	"genres": {
+		"Action": "Actie",
+		"Adventure": "Aventuur",
+		"Animation": "Animatie",
+		"Comedy": "Komedie",
+		"Crime": "Crime",
+		"Documentary": "Documantaire",
+		"Drama": "Drama",
+		"Family": "Famillie",
+		"Fantasy": "Fantasie",
+		"History": "Geschiedenis",
+		"Horror": "Horror",
+		"Music": "Muziek",
+		"Mystery": "Mysterie",
+		"Romance": "Romantiek",
+		"ScienceFiction": "Science Fiction",
+		"Thriller": "",
+		"War": "Oorlog",
+		"Western": "Western",
+		"Kids": "Kinderen",
+		"News": "Nieuws",
+		"Reality": "",
+		"Soap": "Soap",
+		"Talk": "Talk",
+		"Politics": "Politiek"
+	},
+	"misc": {
+		"settings": "Instellingen",
+		"prev-page": "Vorige pagina",
+		"next-page": "Volgende pagina",
+		"delete": "Verwijder",
+		"cancel": "Cancel",
+		"more": "Meer",
+		"expand": "Klap uit",
+		"collapse": "Klap in",
+		"edit": "Wijzig",
+		"or": "OF",
+		"loading": "Laden"
+	},
+	"navbar": {
+		"home": "Thuis",
+		"browse": "Blader",
+		"download": "Download",
+		"search": "Zoek",
+		"login": "Login",
+		"admin": "Administratiepaneel"
+	},
+	"settings": {
+		"general": {
+			"label": "Algemeen",
+			"theme": {
+				"label": "Thema",
+				"description": "Zet het thema van je applicatie",
+				"auto": "Systeem",
+				"light": "Licht",
+				"dark": "Donker"
+			},
+			"language": {
+				"label": "Taal",
+				"description": "Zet de taal van je applicatie",
+				"system": "Systeem"
+			}
+		},
+		"playback": {
+			"label": "Terugspelen",
+			"playmode": {
+				"label": "Standaard afspeelmodus",
+				"description": "De standaard afspeelmodus voor deze client. Pristine is lichter op de server maar ondersteunt geen automatische kwaliteitsverandering"
+			},
+			"audioLanguage": {
+				"label": "Audio taal",
+				"description": "De standaard taal die gebruikt wordt wanneer meertalige videos afgespeeld worden"
+			},
+			"subtitleLanguage": {
+				"label": "Ondertitelingstaal",
+				"description": "De standaard taal die gebruikt wordt voor ondertiteling",
+				"none": "Geen"
+			}
+		},
+		"account": {
+			"label": "Profiel",
+			"username": {
+				"label": "Gebruikersnaam"
+			},
+			"avatar": {
+				"label": "Avatar",
+				"description": "Verander je profielfoto"
+			},
+			"email": {
+				"label": "Email"
+			},
+			"password": {
+				"label": "Wachtwoord",
+				"description": "Verander je wachtwoord",
+				"oldPassword": "Oud wachtwoord",
+				"newPassword": "Nieuw wachtwoord"
+			}
+		},
+		"oidc": {
+			"label": "Gekoppelde accounts",
+			"connected": "Verbonden als {{username}}.",
+			"not-connected": "Niet verbonden",
+			"open-profile": "Open je {{provider}} profiel",
+			"link": "Link",
+			"delete": "Ontkoppel je kyoo account van je {{provider}} account"
+		},
+		"about": {
+			"label": "Over",
+			"android-app": {
+				"label": "Android app",
+				"description": "Download de android app"
+			},
+			"git": {
+				"label": "GitHub",
+				"description": "Open de GitHub repository waar je de code van kyoo kan doorzoeken"
+			}
+		}
+	},
+	"player": {
+		"back": "Terug",
+		"previous": "Vorige aflevering",
+		"next": "Volgende aflevering",
+		"play": "Speel",
+		"pause": "Pauzeer",
+		"mute": "Mute",
+		"volume": "Volume",
+		"quality": "Kwaliteit",
+		"audios": "Audio",
+		"subtitles": "Ondertiteling",
+		"subtitle-none": "Geen",
+		"fullscreen": "Volledig scherm",
+		"direct": "Pristine",
+		"transmux": "Origineel",
+		"auto": "Automatisch",
+		"notInPristine": "Niet beschikbaar in pristine",
+		"unsupportedError": "Video codec niet ondersteund, transcoding is bezig..."
+	},
+	"search": {
+		"empty": "Geen resultaat gevonden, probeer een andere zoekopdracht."
+	},
+	"login": {
+		"login": "Log in",
+		"register": "Registreer",
+		"guest": "Ga verder als gast",
+		"guest-forbidden": "Deze kyoo-instantie staat geen gasten toe.",
+		"via": "Ga verder met {{provider}}",
+		"add-account": "Voeg account toe",
+		"logout": "Log uit",
+		"server": "Server Adres",
+		"email": "Email",
+		"username": "Gebruikersnaam",
+		"password": "Wachtwoord",
+		"confirm": "Bevestig Wachtwoord",
+		"or-register": "Nog geen account? <1>Registreer</1>.",
+		"or-login": "Heb je al een account? <1>Log in</1>.",
+		"password-no-match": "Wachtwoorden komen niet overeen.",
+		"delete": "Verwijder je account",
+		"delete-confirmation": "Deze actie kan niet teruggedraaid worden. Weet je het zeker?"
+	},
+	"downloads": {
+		"empty": "Nog niets gedownload, blader om iets te vinden wat je leuk vind",
+		"error": "Fout:{{error}}",
+		"delete": "Verwijder item",
+		"deleteMessage": "Wil je dit bestand verwijderen van je lokale opslag?",
+		"pause": "Pauzeer",
+		"resume": "Hervat",
+		"retry": "Probeer opnieuw"
+	},
+	"errors": {
+		"connection": "Kan niet verbinden met de kyoo server",
+		"connection-tips": "Foutoplossings tips:\n. - Ben je verbonden met het internet?\n. - Is je kyoo server online?\n. - Is je account verbannen?",
+		"unknown": "Onbekende fout",
+		"try-again": "Probeer opnieuw",
+		"re-login": "Log opnieuw in",
+		"offline": "Je bent niet verbonden met het internet, probeer later opnieuw.",
+		"unauthorized": "Je hebt niet de authorisatie {{permission}} om deze pagina te bekijken.",
+		"needVerification": "Je account moet bevestigd worden door de server administrator voordat je het kan gebruiken.",
+		"needAccount": "Deze pagina is niet toegankelijk in gastmodus. Je moet een account aanmaken of inloggen.",
+		"setup": {
+			"MissingAdminAccount": "Geen administratoraccount bestaat. Registreer om er een aan te maken.",
+			"NoVideoFound": "Er is nog geen video gevonden. Voeg films of seriers toe aan je bibliotheek om ze hier te zien!"
+		}
+	},
+	"mediainfo": {
+		"file": "Bestand",
+		"container": "",
+		"video": "Video",
+		"audio": "Audio",
+		"subtitles": "Ondertiteling",
+		"forced": "Geforceerd",
+		"default": "Standaard",
+		"external": "Extern",
+		"duration": "Duratie",
+		"size": "Grootte",
+		"novideo": "Geen Video",
+		"nocontainer": ""
+	},
+	"admin": {
+		"users": {
+			"label": "Gebruikers",
+			"adminUser": "Administrator",
+			"regularUser": "Gebruiker",
+			"set-permissions": "Zet authorisaties",
+			"delete": "Verwijder gebruiker",
+			"unverifed": "Niet bevestigd",
+			"verify": "Bevestig gebruiker"
+		},
+		"scanner": {
+			"label": "Scanner",
+			"scan": "Trigger bibliotheek scan",
+			"empty": "Geen fouten gevonden. Al je items zijn geregistreerd."
+		}
+	}
+}
