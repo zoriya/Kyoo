@@ -10,9 +10,10 @@ import {
 import type { SeedMovie } from "~/models/movie";
 import { processOptImage } from "./images";
 import { guessNextRefresh } from "./refresh";
-import { inArray, sql } from "drizzle-orm";
+import { eq, getTableColumns, inArray, sql } from "drizzle-orm";
 import { t } from "elysia";
 import { Resource } from "~/models/utils";
+import { conflictUpdateAllExcept } from "~/db/schema/utils";
 
 type Show = typeof shows.$inferInsert;
 type ShowTrans = typeof showTranslations.$inferInsert;
@@ -41,12 +42,9 @@ export const seedMovie = async (
 			.values(movie)
 			.onConflictDoUpdate({
 				target: shows.slug,
-				// we actually don't want to update anything, but we want to return the existing row.
-				// using a conflict update with a where false locks the database and ensure we don't have race conditions.
-				// it WONT work if we use triggers or need to handle conflicts on multiples collumns
-				// see https://stackoverflow.com/questions/34708509/how-to-use-returning-with-on-conflict-in-postgresql for more
-				set: { id: sql`excluded.id` },
-				setWhere: sql`false`,
+				set: conflictUpdateAllExcept(shows, ["pk", "id", "slug", "createdAt"]),
+				// if year is different, this is not an update but a conflict (ex: dune-1984 vs dune-2021)
+				setWhere: sql`date_part('year', ${shows.startAir}) = date_part('year', excluded."start_air")`,
 			})
 			.returning({
 				pk: shows.pk,
@@ -54,11 +52,18 @@ export const seedMovie = async (
 				slug: shows.slug,
 				startAir: shows.startAir,
 				// https://stackoverflow.com/questions/39058213/differentiate-inserted-and-updated-rows-in-upsert-using-system-columns/39204667#39204667
-				conflict: sql`xmax = 0`.as("conflict"),
+				updated: sql`(xmax = 0)`.as("updated"),
+				xmin: sql`xmin`,
+				xmax: sql`xmax`,
+				created: shows.createdAt,
 			});
-		if (ret.conflict) {
+		// TODO: the `updated` bool is always false :c
+		console.log(`slug: ${ret.slug}, updated: ${ret.updated}`);
+		console.log(ret)
+		if (ret.updated) {
+			console.log("Updated!");
 			if (getYear(ret.startAir) === getYear(movie.startAir)) {
-				return
+				return;
 			}
 		}
 
