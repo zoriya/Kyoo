@@ -39,7 +39,28 @@ export const seedMovie = async (
 		const [ret] = await tx
 			.insert(shows)
 			.values(movie)
-			.returning({ pk: shows.pk, id: shows.id, slug: shows.slug });
+			.onConflictDoUpdate({
+				target: shows.slug,
+				// we actually don't want to update anything, but we want to return the existing row.
+				// using a conflict update with a where false locks the database and ensure we don't have race conditions.
+				// it WONT work if we use triggers or need to handle conflicts on multiples collumns
+				// see https://stackoverflow.com/questions/34708509/how-to-use-returning-with-on-conflict-in-postgresql for more
+				set: { id: sql`excluded.id` },
+				setWhere: sql`false`,
+			})
+			.returning({
+				pk: shows.pk,
+				id: shows.id,
+				slug: shows.slug,
+				startAir: shows.startAir,
+				// https://stackoverflow.com/questions/39058213/differentiate-inserted-and-updated-rows-in-upsert-using-system-columns/39204667#39204667
+				conflict: sql`xmax = 0`.as("conflict"),
+			});
+		if (ret.conflict) {
+			if (getYear(ret.startAir) === getYear(movie.startAir)) {
+				return
+			}
+		}
 
 		// even if never shown to the user, a movie still has an entry.
 		const movieEntry: Entry = { type: "movie", ...bMovie };
@@ -102,3 +123,8 @@ export const seedMovie = async (
 		videos: retVideos,
 	};
 };
+
+function getYear(date?: string | null) {
+	if (!date) return null;
+	return new Date(date).getUTCFullYear();
+}

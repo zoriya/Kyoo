@@ -16,3 +16,16 @@ export const EntryTranslation = t.Object({
 	name: t.Nullable(t.String()),
 	description: t.Nullable(t.String()),
 });
+
+
+// export const SeedEntry = t.Intersect([
+// 	Entry,
+// 	t.Object({ videos: t.Optional(t.Array(Video)) }),
+// ]);
+// export type SeedEntry = typeof SeedEntry.static;
+//
+// export const SeedExtra = t.Intersect([
+// 	Extra,
+// 	t.Object({ video: t.Optional(Video) }),
+// ]);
+// export type SeedExtra = typeof SeedExtra.static;
