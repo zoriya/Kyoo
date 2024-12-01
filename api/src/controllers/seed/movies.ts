@@ -1,3 +1,5 @@
+import { inArray, sql } from "drizzle-orm";
+import { t } from "elysia";
 import { db } from "~/db";
 import {
 	entries,
@@ -7,13 +9,11 @@ import {
 	showTranslations,
 	videos,
 } from "~/db/schema";
+import { conflictUpdateAllExcept } from "~/db/schema/utils";
 import type { SeedMovie } from "~/models/movie";
+import { Resource } from "~/models/utils";
 import { processOptImage } from "./images";
 import { guessNextRefresh } from "./refresh";
-import { eq, getTableColumns, inArray, sql } from "drizzle-orm";
-import { t } from "elysia";
-import { Resource } from "~/models/utils";
-import { conflictUpdateAllExcept } from "~/db/schema/utils";
 
 type Show = typeof shows.$inferInsert;
 type ShowTrans = typeof showTranslations.$inferInsert;
@@ -21,7 +21,9 @@ type Entry = typeof entries.$inferInsert;
 
 export const SeedMovieResponse = t.Intersect([
 	Resource,
-	t.Object({ videos: t.Array(Resource) }),
+	t.Object({
+		videos: t.Array(t.Object({ slug: t.String({ format: "slug" }) })),
+	}),
 ]);
 export type SeedMovieResponse = typeof SeedMovieResponse.static;
 
@@ -52,19 +54,14 @@ export const seedMovie = async (
 				slug: shows.slug,
 				startAir: shows.startAir,
 				// https://stackoverflow.com/questions/39058213/differentiate-inserted-and-updated-rows-in-upsert-using-system-columns/39204667#39204667
-				updated: sql`(xmax = 0)`.as("updated"),
-				xmin: sql`xmin`,
-				xmax: sql`xmax`,
-				created: shows.createdAt,
+				updated: sql<boolean>`(xmax <> 0)`.as("updated"),
 			});
-		// TODO: the `updated` bool is always false :c
-		console.log(`slug: ${ret.slug}, updated: ${ret.updated}`);
-		console.log(ret)
 		if (ret.updated) {
-			console.log("Updated!");
-			if (getYear(ret.startAir) === getYear(movie.startAir)) {
-				return;
-			}
+			// TODO: if updated, differenciates updates with conflicts.
+			// if the start year is different or external ids, it's a conflict.
+			// if (getYear(ret.startAir) === getYear(movie.startAir)) {
+			// 	return;
+			// }
 		}
 
 		// even if never shown to the user, a movie still has an entry.
@@ -72,6 +69,15 @@ export const seedMovie = async (
 		const [entry] = await tx
 			.insert(entries)
 			.values(movieEntry)
+			.onConflictDoUpdate({
+				target: entries.slug,
+				set: conflictUpdateAllExcept(entries, [
+					"pk",
+					"id",
+					"slug",
+					"createdAt",
+				]),
+			})
 			.returning({ pk: entries.pk });
 
 		const trans: ShowTrans[] = await Promise.all(
@@ -86,40 +92,50 @@ export const seedMovie = async (
 				banner: await processOptImage(tr.banner),
 			})),
 		);
-		await tx.insert(showTranslations).values(trans);
+		await tx
+			.insert(showTranslations)
+			.values(trans)
+			.onConflictDoUpdate({
+				target: [showTranslations.pk, showTranslations.language],
+				set: conflictUpdateAllExcept(showTranslations, ["pk", "language"]),
+			});
 
 		const entryTrans = trans.map((x) => ({ ...x, pk: entry.pk }));
-		await tx.insert(entryTranslations).values(entryTrans);
+		await tx
+			.insert(entryTranslations)
+			.values(entryTrans)
+			.onConflictDoUpdate({
+				target: [entryTranslations.pk, entryTranslations.language],
+				set: conflictUpdateAllExcept(entryTranslations, ["pk", "language"]),
+			});
 
 		return { ...ret, entry: entry.pk };
 	});
 
-	let retVideos: { id: string; slug: string }[] = [];
+	let retVideos: { slug: string }[] = [];
 	if (vids) {
-		retVideos = await db.transaction(async (tx) => {
-			return await tx
-				.insert(entryVideoJointure)
-				.select(
-					tx
-						.select({
-							entry: sql<number>`${ret.entry}`.as("entry"),
-							video: videos.pk,
-							// TODO: do not add rendering if all videos of the entry have the same rendering
-							slug: sql<string>`
+		retVideos = await db
+			.insert(entryVideoJointure)
+			.select(
+				db
+					.select({
+						entry: sql<number>`${ret.entry}`.as("entry"),
+						video: videos.pk,
+						// TODO: do not add rendering if all videos of the entry have the same rendering
+						slug: sql<string>`
 								concat(
-									${entries.slug},
-									case when ${videos.part} <> null then concat("-p", ${videos.part}) else "" end,
-									case when ${videos.version} <> 1 then concat("-v", ${videos.version}) else "" end,
-									"-", ${videos.rendering}
+									${ret.slug}::text,
+									case when ${videos.part} <> null then concat('-p', ${videos.part}) else '' end,
+									case when ${videos.version} <> 1 then concat('-v', ${videos.version}) else '' end,
+									'-', ${videos.rendering}
 								)
 							`.as("slug"),
-						})
-						.from(videos)
-						.where(inArray(videos.id, vids)),
-				)
-				.onConflictDoNothing()
-				.returning({ id: videos.id, slug: entryVideoJointure.slug });
-		});
+					})
+					.from(videos)
+					.where(inArray(videos.id, vids)),
+			)
+			.onConflictDoNothing()
+			.returning({ slug: entryVideoJointure.slug });
 	}
 
 	return {
