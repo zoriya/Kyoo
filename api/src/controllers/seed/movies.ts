@@ -11,7 +11,6 @@ import {
 } from "~/db/schema";
 import { conflictUpdateAllExcept } from "~/db/schema/utils";
 import type { SeedMovie } from "~/models/movie";
-import { Resource } from "~/models/utils";
 import { processOptImage } from "./images";
 import { guessNextRefresh } from "./refresh";
 
@@ -19,17 +18,18 @@ type Show = typeof shows.$inferInsert;
 type ShowTrans = typeof showTranslations.$inferInsert;
 type Entry = typeof entries.$inferInsert;
 
-export const SeedMovieResponse = t.Intersect([
-	Resource,
-	t.Object({
-		videos: t.Array(t.Object({ slug: t.String({ format: "slug" }) })),
-	}),
-]);
+export const SeedMovieResponse = t.Object({
+	id: t.String({ format: "uuid" }),
+	slug: t.String({ format: "slug", examples: ["bubble"] }),
+	videos: t.Array(
+		t.Object({ slug: t.String({ format: "slug", examples: ["bubble-v2"] }) }),
+	),
+});
 export type SeedMovieResponse = typeof SeedMovieResponse.static;
 
 export const seedMovie = async (
 	seed: SeedMovie,
-): Promise<SeedMovieResponse> => {
+): Promise<SeedMovieResponse & { status: "created" | "updated" }> => {
 	const { translations, videos: vids, ...bMovie } = seed;
 
 	const ret = await db.transaction(async (tx) => {
@@ -139,6 +139,7 @@ export const seedMovie = async (
 	}
 
 	return {
+		status: ret.updated ? "updated" : "created",
 		id: ret.id,
 		slug: ret.slug,
 		videos: retVideos,

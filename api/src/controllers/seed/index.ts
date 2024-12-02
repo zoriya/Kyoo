@@ -11,12 +11,24 @@ export const seed = new Elysia()
 	})
 	.post(
 		"/movies",
-		async ({ body }) => {
-			return await seedMovie(body);
+		async ({ body, error }) => {
+			const { status, ...ret } = await seedMovie(body);
+			return error(status === "created" ? 201 : 200, ret);
 		},
 		{
 			body: "seed-movie",
-			response: { 200: "seed-movie-response", 400: "error" },
-			tags: ["movies"],
+			response: {
+				200: {
+					...SeedMovieResponse,
+					description: "Existing movie edited/updated.",
+				},
+				201: { ...SeedMovieResponse, description: "Created a new movie." },
+				400: "error",
+			},
+			detail: {
+				tags: ["movies"],
+				description:
+					"Create a movie & all related metadata. Can also link videos.",
+			},
 		},
 	);

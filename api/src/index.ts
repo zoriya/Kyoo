@@ -73,7 +73,6 @@ const app = new Elysia()
 			},
 		}),
 	)
-	.get("/", () => "Hello Elysia")
 	.model({ image: Image })
 	.use(movies)
 	.use(series)
