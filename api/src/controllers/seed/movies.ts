@@ -4,7 +4,7 @@ import { db } from "~/db";
 import {
 	entries,
 	entryTranslations,
-	entryVideoJointure,
+	entryVideoJointure as evj,
 	shows,
 	showTranslations,
 	videos,
@@ -115,7 +115,7 @@ export const seedMovie = async (
 	let retVideos: { slug: string }[] = [];
 	if (vids) {
 		retVideos = await db
-			.insert(entryVideoJointure)
+			.insert(evj)
 			.select(
 				db
 					.select({
@@ -126,16 +126,16 @@ export const seedMovie = async (
 								concat(
 									${ret.slug}::text,
 									case when ${videos.part} <> null then concat('-p', ${videos.part}) else '' end,
-									case when ${videos.version} <> 1 then concat('-v', ${videos.version}) else '' end,
-									'-', ${videos.rendering}
+									case when ${videos.version} <> 1 then concat('-v', ${videos.version}) else '' end
 								)
 							`.as("slug"),
+						// case when (select count(1) from ${evj} where ${evj.entry} = ${ret.entry}) <> 0 then concat('-', ${videos.rendering}) else '' end
 					})
 					.from(videos)
 					.where(inArray(videos.id, vids)),
 			)
 			.onConflictDoNothing()
-			.returning({ slug: entryVideoJointure.slug });
+			.returning({ slug: evj.slug });
 	}
 
 	return {

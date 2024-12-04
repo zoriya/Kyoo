@@ -1,12 +1,114 @@
 import { afterAll, beforeAll, describe, expect, it, test } from "bun:test";
-import { inArray } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import Elysia from "elysia";
 import { seed } from "~/controllers/seed";
 import { db } from "~/db";
-import { shows, videos } from "~/db/schema";
+import { shows, showTranslations, videos } from "~/db/schema";
 import { dune, duneVideo } from "~/models/examples/dune-2021";
+import type { SeedMovie } from "~/models/movie";
 
 const app = new Elysia().use(seed);
+const createMovie = async (movie: SeedMovie) => {
+	const resp = await app.handle(
+		new Request("http://localhost/movies", {
+			method: "POST",
+			body: JSON.stringify(movie),
+			headers: {
+				"Content-Type": "application/json",
+			},
+		}),
+	);
+	const body = await resp.json();
+	return [resp, body] as const;
+};
+
+function expectStatus(resp: Response, body: object) {
+	const matcher = expect({ ...body, status: resp.status });
+	return {
+		toBe: (status: number) => {
+			matcher.toMatchObject({ status: status });
+		},
+	};
+}
+
+describe("Movie seeding", () => {
+	it("Can create a movie", async () => {
+		// create video beforehand to test linking
+		await db.insert(videos).values(duneVideo);
+
+		const [resp, body] = await createMovie(dune);
+		expectStatus(resp, body).toBe(201);
+		expect(body.id).toBeString();
+		expect(body.slug).toBe("dune");
+		expect(body.videos).toContainEqual({ slug: "dune" });
+	});
+
+	it("Update existing movie", async () => {
+		// confirm that db is in the correct state (from previous tests)
+		const [existing] = await db
+			.select()
+			.from(shows)
+			.where(eq(shows.slug, dune.slug))
+			.limit(1);
+		expect(existing).toMatchObject({ slug: dune.slug, startAir: dune.airDate });
+
+		const [resp, body] = await createMovie({
+			...dune,
+			airDate: "2159-12-09",
+			translations: {
+				...dune.translations,
+				en: { ...dune.translations.en, description: "edited translation" },
+				fr: {
+					name: "dune-but-in-french",
+					description: null,
+					tagline: null,
+					aliases: [],
+					tags: [],
+					poster: null,
+					thumbnail: null,
+					banner: null,
+					logo: null,
+					trailerUrl: null,
+				},
+			},
+		});
+		const [edited] = await db
+			.select()
+			.from(shows)
+			.where(eq(shows.slug, dune.slug))
+			.limit(1);
+		const translations = await db
+			.select()
+			.from(showTranslations)
+			.where(eq(showTranslations.pk, edited.pk));
+
+		expectStatus(resp, body).toBe(200);
+		expect(body.id).toBeString();
+		expect(body.slug).toBe("dune");
+		expect(body.videos).toBe([]);
+		expect(edited.startAir).toBe("2159-12-09");
+		expect(edited.status).toBe(dune.status);
+		expect(translations).toMatchObject({
+			language: "en",
+			name: dune.translations.en.name,
+			description: "edited translation",
+		});
+		expect(translations).toMatchObject({
+			language: "fr",
+			name: "dune-but-in-french",
+			description: null,
+		});
+	});
+
+	test.todo("Conflicting slug auto-correct", async () => {});
+	test.todo("Conflict in slug+year fails", async () => {});
+	test.todo("Missing videos send info", async () => {});
+	test.todo("Schema error", async () => {});
+	test.todo("Invalid translation name", async () => {});
+	test.todo("Create correct video slug (version)", async () => {});
+	test.todo("Create correct video slug (part)", async () => {});
+	test.todo("Create correct video slug (rendering)", async () => {});
+});
 
 const cleanup = async () => {
 	await db.delete(shows).where(inArray(shows.slug, [dune.slug]));
@@ -15,36 +117,3 @@ const cleanup = async () => {
 // cleanup db beforehand to unsure tests are consistent
 beforeAll(cleanup);
 afterAll(cleanup);
-
-describe("Movie seeding", () => {
-	it("Can create a movie", async () => {
-		// create video beforehand to test linking
-		await db.insert(videos).values(duneVideo);
-
-		const resp = await app.handle(
-			new Request("http://localhost/movies", {
-				method: "POST",
-				body: JSON.stringify(dune),
-				headers: {
-					"Content-Type": "application/json",
-				},
-			}),
-		);
-		const body = await resp.json();
-
-		expect(resp.status).toBe(201);
-		expect(body.id).toBeString();
-		expect(body.slug).toBe("dune");
-		expect(body.videos).toContain({ slug: "dune" });
-	});
-
-	test.todo("Conflicting slug auto-correct", async () => {});
-	test.todo("Conflict in slug+year fails", async () => {});
-	test.todo("Missing videos send info", async () => {});
-	test.todo("Schema error", async () => {});
-	test.todo("Invalid translation name", async () => {});
-	test.todo("Update existing movie", async () => {});
-	test.todo("Create correct video slug (version)", async () => {});
-	test.todo("Create correct video slug (part)", async () => {});
-	test.todo("Create correct video slug (rendering)", async () => {});
-});
