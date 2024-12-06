@@ -1,0 +1,28 @@
+import { FormatRegistry } from "@sinclair/typebox";
+import { t } from "elysia";
+import { comment } from "../../utils";
+
+FormatRegistry.Set("language", (lang) => {
+	try {
+		const normalized = new Intl.Locale(lang).baseName;
+		// TODO: we should actually replace the locale with normalized if we managed to parse it but transforms aren't working
+		return lang === normalized;
+	} catch {
+		return false;
+	}
+});
+
+type StringProps = NonNullable<Parameters<typeof t.String>[0]>;
+
+// TODO: format validation doesn't work in record's key. We should have a proper way to check that.
+export const Language = (props?: StringProps) =>
+	t.String({
+		format: "language",
+		description: comment`
+			${props?.description ?? ""}
+			This is a BCP 47 language code (the IETF Best Current Practices on Tags for Identifying Languages).
+			BCP 47 is also known as RFC 5646. It subsumes ISO 639 and is backward compatible with it.
+		`,
+		error: "Expected a valid (and NORMALIZED) bcp-47 language code.",
+		...props,
+	});
