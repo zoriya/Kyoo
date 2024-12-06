@@ -1,4 +1,4 @@
-import { inArray, sql } from "drizzle-orm";
+import { inArray, sql, eq } from "drizzle-orm";
 import { t } from "elysia";
 import { db } from "~/db";
 import {
@@ -29,7 +29,9 @@ export type SeedMovieResponse = typeof SeedMovieResponse.static;
 
 export const seedMovie = async (
 	seed: SeedMovie,
-): Promise<SeedMovieResponse & { status: "created" | "updated" }> => {
+): Promise<
+	SeedMovieResponse & { status: "Created" | "OK" | "Conflict" }
+> => {
 	const { translations, videos: vids, ...bMovie } = seed;
 
 	const ret = await db.transaction(async (tx) => {
@@ -39,29 +41,57 @@ export const seedMovie = async (
 			nextRefresh: guessNextRefresh(bMovie.airDate ?? new Date()),
 			...bMovie,
 		};
-		const [ret] = await tx
-			.insert(shows)
-			.values(movie)
-			.onConflictDoUpdate({
-				target: shows.slug,
-				set: conflictUpdateAllExcept(shows, ["pk", "id", "slug", "createdAt"]),
-				// if year is different, this is not an update but a conflict (ex: dune-1984 vs dune-2021)
-				setWhere: sql`date_part('year', ${shows.startAir}) = date_part('year', excluded."start_air")`,
-			})
-			.returning({
-				pk: shows.pk,
-				id: shows.id,
-				slug: shows.slug,
-				startAir: shows.startAir,
-				// https://stackoverflow.com/questions/39058213/differentiate-inserted-and-updated-rows-in-upsert-using-system-columns/39204667#39204667
-				updated: sql<boolean>`(xmax <> 0)`.as("updated"),
-			});
-		if (ret.updated) {
-			// TODO: if updated, differenciates updates with conflicts.
-			// if the start year is different or external ids, it's a conflict.
-			// if (getYear(ret.startAir) === getYear(movie.startAir)) {
-			// 	return;
-			// }
+
+		const insert = () =>
+			tx
+				.insert(shows)
+				.values(movie)
+				.onConflictDoUpdate({
+					target: shows.slug,
+					set: conflictUpdateAllExcept(shows, [
+						"pk",
+						"id",
+						"slug",
+						"createdAt",
+					]),
+					// if year is different, this is not an update but a conflict (ex: dune-1984 vs dune-2021)
+					setWhere: sql`date_part('year', ${shows.startAir}) = date_part('year', excluded."start_air")`,
+				})
+				.returning({
+					pk: shows.pk,
+					id: shows.id,
+					slug: shows.slug,
+					// https://stackoverflow.com/questions/39058213/differentiate-inserted-and-updated-rows-in-upsert-using-system-columns/39204667#39204667
+					updated: sql<boolean>`(xmax <> 0)`.as("updated"),
+				});
+		let [ret] = await insert();
+		if (!ret) {
+			// ret is undefined when the conflict's where return false (meaning we have
+			// a conflicting slug but a different air year.
+			// try to insert adding the year at the end of the slug.
+			if (
+				movie.startAir &&
+				!movie.slug.endsWith(`${getYear(movie.startAir)}`)
+			) {
+				movie.slug = `${movie.slug}-${getYear(movie.startAir)}`;
+				[ret] = await insert();
+			}
+
+			// if at this point ret is still undefined, we could not reconciliate.
+			// simply bail and let the caller handle this.
+			if (!ret) {
+				const [{ id }] = await db
+					.select({ id: shows.id })
+					.from(shows)
+					.where(eq(shows.slug, movie.slug))
+					.limit(1);
+				return {
+					status: "Conflict" as const,
+					id,
+					slug: movie.slug,
+					videos: [],
+				};
+			}
 		}
 
 		// even if never shown to the user, a movie still has an entry.
@@ -112,6 +142,8 @@ export const seedMovie = async (
 		return { ...ret, entry: entry.pk };
 	});
 
+	if (ret.status === "Conflict") return ret;
+
 	let retVideos: { slug: string }[] = [];
 	if (vids) {
 		retVideos = await db
@@ -139,14 +171,13 @@ export const seedMovie = async (
 	}
 
 	return {
-		status: ret.updated ? "updated" : "created",
+		status: ret.updated ? "Ok" : "Created",
 		id: ret.id,
 		slug: ret.slug,
 		videos: retVideos,
 	};
 };
 
-function getYear(date?: string | null) {
-	if (!date) return null;
+function getYear(date: string) {
 	return new Date(date).getUTCFullYear();
 }

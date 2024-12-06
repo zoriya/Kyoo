@@ -1,6 +1,8 @@
 import Elysia, { t } from "elysia";
 import { Movie, SeedMovie } from "~/models/movie";
 import { seedMovie, SeedMovieResponse } from "./movies";
+import { Resource } from "~/models/utils";
+import { comment } from "~/utils";
 
 export const seed = new Elysia()
 	.model({
@@ -13,7 +15,7 @@ export const seed = new Elysia()
 		"/movies",
 		async ({ body, error }) => {
 			const { status, ...ret } = await seedMovie(body);
-			return error(status === "created" ? 201 : 200, ret);
+			return error(status, ret);
 		},
 		{
 			body: "seed-movie",
@@ -24,6 +26,13 @@ export const seed = new Elysia()
 				},
 				201: { ...SeedMovieResponse, description: "Created a new movie." },
 				400: "error",
+				409: {
+					...Resource,
+					description: comment`
+						A movie with the same slug but a different air date already exists.
+						Change the slug and re-run the request.
+					`,
+				},
 			},
 			detail: {
 				tags: ["movies"],

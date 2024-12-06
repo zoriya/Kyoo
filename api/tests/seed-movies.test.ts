@@ -54,7 +54,7 @@ describe("Movie seeding", () => {
 
 		const [resp, body] = await createMovie({
 			...dune,
-			airDate: "2159-12-09",
+			runtime: 200_000,
 			translations: {
 				...dune.translations,
 				en: { ...dune.translations.en, description: "edited translation" },
@@ -85,23 +85,49 @@ describe("Movie seeding", () => {
 		expectStatus(resp, body).toBe(200);
 		expect(body.id).toBeString();
 		expect(body.slug).toBe("dune");
-		expect(body.videos).toBe([]);
-		expect(edited.startAir).toBe("2159-12-09");
+		expect(body.videos).toBeArrayOfSize(0);
+		expect(edited.runtime).toBe(200_000);
 		expect(edited.status).toBe(dune.status);
-		expect(translations).toMatchObject({
-			language: "en",
+		expect(translations.find((x) => x.language === "en")).toMatchObject({
 			name: dune.translations.en.name,
 			description: "edited translation",
 		});
-		expect(translations).toMatchObject({
-			language: "fr",
+		expect(translations.find((x) => x.language === "fr")).toMatchObject({
 			name: "dune-but-in-french",
 			description: null,
 		});
 	});
 
-	test.todo("Conflicting slug auto-correct", async () => {});
-	test.todo("Conflict in slug+year fails", async () => {});
+	it("Conflicting slug auto-correct", async () => {
+		// confirm that db is in the correct state (from previous tests)
+		const [existing] = await db
+			.select()
+			.from(shows)
+			.where(eq(shows.slug, dune.slug))
+			.limit(1);
+		expect(existing).toMatchObject({ slug: dune.slug, startAir: dune.airDate });
+
+		const [resp, body] = await createMovie({ ...dune, airDate: "2158-12-13" });
+		expectStatus(resp, body).toBe(200);
+		expect(body.id).toBeString();
+		expect(body.slug).toBe("dune-2158");
+	});
+
+	it("Conflict in slug w/out year fails", async () => {
+		// confirm that db is in the correct state (from conflict auto-correct test)
+		const [existing] = await db
+			.select()
+			.from(shows)
+			.where(eq(shows.slug, dune.slug))
+			.limit(1);
+		expect(existing).toMatchObject({ slug: dune.slug, startAir: dune.airDate });
+
+		const [resp, body] = await createMovie({ ...dune, airDate: null });
+		expectStatus(resp, body).toBe(409);
+		expect(body.id).toBe(existing.id);
+		expect(body.slug).toBe(existing.slug);
+	});
+
 	test.todo("Missing videos send info", async () => {});
 	test.todo("Schema error", async () => {});
 	test.todo("Invalid translation name", async () => {});
