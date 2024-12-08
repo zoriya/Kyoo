@@ -128,9 +128,35 @@ describe("Movie seeding", () => {
 		expect(body.slug).toBe(existing.slug);
 	});
 
-	test.todo("Missing videos send info", async () => {});
-	test.todo("Schema error", async () => {});
-	test.todo("Invalid translation name", async () => {});
+	it("Missing videos send info", async () => {
+		const vid = "a0ddf0ce-3258-4452-a670-aff36c76d524";
+		const [existing] = await db
+			.select()
+			.from(videos)
+			.where(eq(videos.id, vid))
+			.limit(1);
+		expect(existing).toBeUndefined();
+
+		const [resp, body] = await createMovie({
+			...dune,
+			videos: [vid],
+		});
+
+		expectStatus(resp, body).toBe(200);
+		expect(body.videos).toBeArrayOfSize(0);
+	});
+
+	it("Schema error (missing fields)", async () => {
+		const [resp, body] = await createMovie({
+			name: "dune",
+		} as any);
+
+		expectStatus(resp, body).toBe(422);
+		expect(body.status).toBe(422);
+		expect(body.message).toBeString();
+		expect(body.details).toBeObject();
+		// TODO: handle additional fields too
+	});
 	test.todo("Create correct video slug (version)", async () => {});
 	test.todo("Create correct video slug (part)", async () => {});
 	test.todo("Create correct video slug (rendering)", async () => {});

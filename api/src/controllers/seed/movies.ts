@@ -171,7 +171,7 @@ export const seedMovie = async (
 	}
 
 	return {
-		status: ret.updated ? "Ok" : "Created",
+		status: ret.updated ? "OK" : "Created",
 		id: ret.id,
 		slug: ret.slug,
 		videos: retVideos,
