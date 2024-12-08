@@ -12,6 +12,7 @@ import { videos } from "./controllers/videos";
 import { db } from "./db";
 import { Image } from "./models/utils";
 import { comment } from "./utils";
+import { base } from "./base";
 
 await migrate(db, { migrationsSchema: "kyoo", migrationsFolder: "./drizzle" });
 
@@ -37,6 +38,7 @@ if (!secret) {
 }
 
 const app = new Elysia()
+	.use(base)
 	.use(jwt({ secret }))
 	.use(
 		swagger({

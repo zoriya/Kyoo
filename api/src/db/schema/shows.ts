@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
 	check,
 	date,
@@ -108,3 +108,14 @@ export const showTranslations = schema.table(
 	},
 	(t) => [primaryKey({ columns: [t.pk, t.language] })],
 );
+
+export const showsRelations = relations(shows, ({ many }) => ({
+	translations: many(showTranslations, { relationName: "showTranslations" }),
+}));
+export const showsTrRelations = relations(showTranslations, ({ one }) => ({
+	show: one(shows, {
+		relationName: "showTranslations",
+		fields: [showTranslations.pk],
+		references: [shows.pk],
+	}),
+}));

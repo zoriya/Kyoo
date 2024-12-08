@@ -1,13 +1,15 @@
 import { afterAll, beforeAll, describe, expect, it, test } from "bun:test";
 import { eq, inArray } from "drizzle-orm";
 import Elysia from "elysia";
+import { base } from "~/base";
 import { seed } from "~/controllers/seed";
 import { db } from "~/db";
 import { shows, showTranslations, videos } from "~/db/schema";
+import { bubble } from "~/models/examples";
 import { dune, duneVideo } from "~/models/examples/dune-2021";
 import type { SeedMovie } from "~/models/movie";
 
-const app = new Elysia().use(seed);
+const app = new Elysia().use(base).use(seed);
 const createMovie = async (movie: SeedMovie) => {
 	const resp = await app.handle(
 		new Request("http://localhost/movies", {
@@ -157,6 +159,65 @@ describe("Movie seeding", () => {
 		expect(body.details).toBeObject();
 		// TODO: handle additional fields too
 	});
+
+	it("Invalid translation name", async () => {
+		const [resp, body] = await createMovie({
+			...dune,
+			translations: {
+				...dune.translations,
+				test: {
+					name: "foo",
+					description: "bar",
+					tags: [],
+					aliases: [],
+					tagline: "toto",
+					banner: null,
+					poster: null,
+					thumbnail: null,
+					logo: null,
+					trailerUrl: null,
+				},
+			},
+		});
+
+		expectStatus(resp, body).toBe(400);
+		expect(body.status).toBe(400);
+		expect(body.message).toBe("Invalid translation name: 'test'.");
+	});
+
+	it("Correct translations casing.", async () => {
+		const [resp, body] = await createMovie({
+			...bubble,
+			slug: "casing-test",
+			translations: {
+				"en-us": {
+					name: "foo",
+					description: "bar",
+					tags: [],
+					aliases: [],
+					tagline: "toto",
+					banner: null,
+					poster: null,
+					thumbnail: null,
+					logo: null,
+					trailerUrl: null,
+				},
+			},
+		});
+
+		expect(resp.status).toBeWithin(200, 299);
+		expect(body.id).toBeString();
+		const ret = await db.query.shows.findFirst({
+			where: eq(shows.id, body.id),
+			with: { translations: true },
+		});
+		expect(ret!.translations).toBeArrayOfSize(1);
+		expect(ret!.translations[0]).toMatchObject({
+			language: "en-US",
+			name: "foo",
+		});
+	});
+
 	test.todo("Create correct video slug (version)", async () => {});
 	test.todo("Create correct video slug (part)", async () => {});
 	test.todo("Create correct video slug (rendering)", async () => {});

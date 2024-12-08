@@ -1,7 +1,7 @@
 import Elysia from "elysia";
 import { Movie, SeedMovie } from "~/models/movie";
 import { seedMovie, SeedMovieResponse } from "./movies";
-import { Resource } from "~/models/utils";
+import { Resource, validateTranslations } from "~/models/utils";
 import { comment } from "~/utils";
 import { KError } from "~/models/error";
 
@@ -14,6 +14,9 @@ export const seed = new Elysia()
 	.post(
 		"/movies",
 		async ({ body, error }) => {
+			const err = validateTranslations(body.translations);
+			if (err) return error(400, err);
+
 			const { status, ...ret } = await seedMovie(body);
 			return error(status, ret);
 		},

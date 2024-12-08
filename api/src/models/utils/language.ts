@@ -1,6 +1,28 @@
 import { FormatRegistry } from "@sinclair/typebox";
 import { t } from "elysia";
 import { comment } from "../../utils";
+import type { KError } from "../error";
+
+export const validateTranslations = <T extends object>(
+	translations: Record<string, T>,
+): KError | null => {
+	for (const lang of Object.keys(translations)) {
+		try {
+			const valid = new Intl.Locale(lang).baseName;
+			if (lang !== valid) {
+				translations[valid] = translations[lang];
+				delete translations[lang];
+			}
+		} catch (e) {
+			return {
+				status: 400,
+				message: `Invalid translation name: '${lang}'.`,
+				details: null,
+			};
+		}
+	}
+	return null;
+};
 
 FormatRegistry.Set("language", (lang) => {
 	try {
