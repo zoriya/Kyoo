@@ -37,7 +37,5 @@ jobs:
         mv *.tgz ../packaged-chart.tgz
 
     - name: Push Helm Chart to GHCR
-      env:
-        HELM_EXPERIMENTAL_OCI: 1
       run: |
         helm push packaged-chart.tgz oci://ghcr.io/${{ github.repository_owner }}/helm-charts
