@@ -24,16 +24,13 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Update Helm Dependencies
-      working-directory: chart
       run: |
-        helm dependency update
+        helm dependency update ./chart
 
     - name: Package Helm Chart
-      working-directory: chart
       run: |
         export tag=$(echo ${GITHUB_REF#refs/tags/} | sed 's/^v//')
         helm package ./chart --version $tag --app-version $tag
-        mv *.tgz ../packaged-chart.tgz
         env:
           GITHUB_REF: ${{ github.ref }}
 
