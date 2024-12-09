@@ -4,7 +4,7 @@ go 1.22
 
 require (
 	github.com/golang-migrate/migrate/v4 v4.17.1
-	github.com/labstack/echo/v4 v4.12.0
+	github.com/labstack/echo/v4 v4.13.0
 	github.com/lib/pq v1.10.9
 	gitlab.com/opennota/screengen v1.0.2
 	gopkg.in/vansante/go-ffprobe.v2 v2.2.0
@@ -12,7 +12,6 @@ require (
 
 require (
 	github.com/disintegration/imaging v1.6.2
-	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
