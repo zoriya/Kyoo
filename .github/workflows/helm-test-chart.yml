@@ -1,0 +1,45 @@
+name: Test Helm Chart
+
+on:
+  push:
+    branches:
+      - master
+      - next
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test-helm-chart:
+    name: Test Helm Chart
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Lint the Helm chart
+        run: |
+          helm lint ./chart
+
+      - name: Create Kind cluster
+        uses: helm/kind-action@v1
+
+      - name: Install Helm chart in Kind cluster (Dry Run)
+        run: |
+          helm dependency update ./chart
+          helm install test-release ./chart --dry-run --debug
+
+      - name: Deploy Helm chart to Kind cluster
+        run: |
+          helm install test-release ./chart
+
+      - name: Verify Helm release
+        run: |
+          kubectl get all
+
+      - name: Cleanup Kind cluster
+        run: |
+          kind delete cluster

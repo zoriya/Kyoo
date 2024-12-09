@@ -1,0 +1,39 @@
+name: Release Helm Chart
+on:
+  push:
+    tags:
+     - v*
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Helm
+      uses: azure/setup-helm@v4
+
+    - name: Log in to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Update Helm Dependencies
+      run: |
+        helm dependency update ./chart
+
+    - name: Package Helm Chart
+      run: |
+        export tag=$(echo ${GITHUB_REF#refs/tags/} | sed 's/^v//')
+        helm package ./chart --version $tag --app-version $tag
+        env:
+          GITHUB_REF: ${{ github.ref }}
+
+    - name: Push Helm Chart to GHCR
+      run: |
+        helm push packaged-chart.tgz oci://ghcr.io/${{ github.repository_owner }}/helm-charts
