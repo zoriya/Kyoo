@@ -144,12 +144,15 @@ services:
     profiles: ['', 'cpu']
 
   transcoder-nvidia:
-    <<: *transcoder-base
+    # <<: *transcoder-base
     deploy:
       resources:
         reservations:
           devices:
             - capabilities: [gpu]
+              driver: cdi
+              device_ids:
+                - nvidia.com/gpu=all
     environment:
       - GOCODER_PREFIX=/video
       - GOCODER_HWACCEL=nvidia

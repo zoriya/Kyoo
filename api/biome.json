@@ -1,0 +1,6 @@
+{
+	"extends": ["../biome.json"],
+	"formatter": {
+		"lineWidth": 80
+	}
+}

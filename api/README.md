@@ -98,7 +98,7 @@ erDiagram
         datetime next_refresh
         jsonb external_id
     }
-    
+
     season_translations {
         guid id PK,FK
         string language PK
@@ -107,17 +107,17 @@ erDiagram
         jsonb poster
         jsonb banner
         jsonb logo
-        jsonb thumbnail 
+        jsonb thumbnail
     }
     seasons ||--|{ season_translations : has
     seasons ||--o{ entries : has
     shows ||--|{ seasons : has
-     
+
     watched_shows {
         guid show_id PK, FK
         guid user_id PK, FK
         status status "completed|watching|droped|planned"
-        uint seen_entry_count "NN" 
+        uint seen_entry_count "NN"
     }
     shows ||--|{ watched_shows : has
 
@@ -129,7 +129,7 @@ erDiagram
         datetime played_date
     }
     entries ||--|{ watched_entries : has
-    
+
     roles {
         guid show_id PK, FK
         guid staff_id PK, FK
@@ -152,7 +152,7 @@ erDiagram
         datetime next_refresh
         jsonb external_id
     }
-    
+
     staff_translations {
         guid id PK,FK
         string language PK

@@ -1,0 +1,23 @@
+{
+	"name": "api",
+	"version": "1.0.50",
+	"scripts": {
+		"dev": "bun --watch src/index.ts",
+		"build": "bun build src/index.ts --target bun --outdir ./dist",
+		"start": "NODE_ENV=production bun dist/index.js",
+		"test": "bun test"
+	},
+	"dependencies": {
+		"@elysiajs/jwt": "^1.1.1",
+		"@elysiajs/swagger": "^1.1.6",
+		"drizzle-kit": "^0.28.1",
+		"drizzle-orm": "^0.36.4",
+		"elysia": "^1.1.25",
+		"pg": "^8.13.1"
+	},
+	"devDependencies": {
+		"@types/pg": "^8.11.10",
+		"bun-types": "^1.1.36"
+	},
+	"module": "src/index.js"
+}
