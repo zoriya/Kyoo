@@ -6,6 +6,7 @@ on:
       - master
       - next
   pull_request:
+  workflow_dispatch:
 
 jobs:
   test-helm-chart:
