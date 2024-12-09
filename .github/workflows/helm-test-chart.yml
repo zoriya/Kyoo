@@ -3,7 +3,8 @@ name: Test Helm Chart
 on:
   push:
     branches:
-      - main
+      - master
+      - next
   pull_request:
 
 jobs:
