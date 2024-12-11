@@ -6,7 +6,6 @@ import { entries } from "./controllers/entries";
 import { movies } from "./controllers/movies";
 import { seasons } from "./controllers/seasons";
 import { seed } from "./controllers/seed";
-import { seedTests } from "./controllers/seed/examples";
 import { series } from "./controllers/series";
 import { videos } from "./controllers/videos";
 import { db } from "./db";
@@ -15,10 +14,6 @@ import { comment } from "./utils";
 import { base } from "./base";
 
 await migrate(db, { migrationsSchema: "kyoo", migrationsFolder: "./drizzle" });
-
-if (process.env.SEED) {
-	await seedTests();
-}
 
 let secret = process.env.JWT_SECRET;
 if (!secret) {

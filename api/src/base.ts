@@ -10,5 +10,12 @@ export const base = new Elysia({ name: "base" })
 				details: error,
 			} as KError;
 		}
+		if (code === "INTERNAL_SERVER_ERROR") {
+			return {
+				status: 500,
+				message: error.message,
+				details: error,
+			} as KError;
+		}
 	})
 	.as("plugin");
