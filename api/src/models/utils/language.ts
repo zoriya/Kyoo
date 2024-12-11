@@ -48,3 +48,18 @@ export const Language = (props?: StringProps) =>
 		error: "Expected a valid (and NORMALIZED) bcp-47 language code.",
 		...props,
 	});
+
+export const processLanguages = (languages: string) => {
+	return languages
+		.split(",")
+		.map((x) => {
+			const [lang, q] = x.trim().split(";q=");
+			return [lang, q ? Number.parseFloat(q) : 1] as const;
+		})
+		.sort(([_, q1], [__, q2]) => q1 - q2)
+		.flatMap(([lang]) => {
+			const [base, spec] = lang.split("-");
+			if (spec) return [lang, base];
+			return [lang];
+		});
+};
