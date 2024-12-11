@@ -7,7 +7,7 @@ export const processImage = async (url: string): Promise<Image> => {
 	// TODO: download source, save it in multiples qualities & process blurhash
 
 	return {
-		id: hasher.digest().toString(),
+		id: hasher.digest().toString("hex"),
 		source: url,
 		blurhash: "",
 	};
