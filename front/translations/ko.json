@@ -52,7 +52,7 @@
 		"mediatype-tt": "미디어 타입",
 		"mediatypelabel": "미디어 타입",
 		"sortby": "{{key}} 기준으로 정렬",
-		"sortby-tt": "해당 기준으로 정렬:",
+		"sortby-tt": "해당 기준으로 정렬",
 		"sortkey": {
 			"relevance": "관련성",
 			"name": "이름",
