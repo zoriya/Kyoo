@@ -1,10 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  {{- with (mergeOverwrite (deepCopy .Values.global.deploymentAnnotations) .Values.back.deploymentAnnotations) }}
+  {{- if and (.Values.global.deploymentAnnotations) (.Values.back.deploymentAnnotations) }}
+    {{- with (mergeOverwrite (deepCopy .Values.global.deploymentAnnotations) .Values.back.deploymentAnnotations) }}
   annotations:
-    {{- range $key, $value := . }}
-    {{ $key }}: {{ $value | quote }}
+      {{- range $key, $value := . }}
+      {{ $key }}: {{ $value | quote }}
+      {{- end }}
     {{- end }}
   {{- end }}
   name: {{ include "kyoo.back.fullname" . }}
@@ -12,17 +14,21 @@ metadata:
     {{- include "kyoo.labels" (dict "context" . "component" .Values.back.name "name" .Values.back.name) | nindent 4 }}
 spec:
   replicas: {{ .Values.back.replicaCount }}
+  strategy:
+    {{- toYaml .Values.back.strategy | nindent 4 }}
   selector:
     matchLabels:
       {{- include "kyoo.selectorLabels" (dict "context" . "name" .Values.back.name) | nindent 6 }}
   template:
     metadata:
+      {{- if and (.Values.global.podAnnotations) (.Values.back.podAnnotations) }}
       annotations:
         {{- with (mergeOverwrite (deepCopy .Values.global.podAnnotations) .Values.back.podAnnotations) }}
         {{- range $key, $value := . }}
         {{ $key }}: {{ $value | quote }}
         {{- end }}
         {{- end }}
+      {{- end }}
       labels:
         {{- include "kyoo.labels" (dict "context" . "component" .Values.back.name "name" .Values.back.name) | nindent 8 }}
         {{- with (mergeOverwrite (deepCopy .Values.global.podLabels) .Values.back.podLabels) }}
@@ -33,7 +39,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.global.securityContext }}
+      {{- with .Values.back.kyoo_back.containerSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -42,10 +48,12 @@ spec:
         - name: migrations
           image: {{ .Values.back.kyoo_migrations.image.repository | default (printf "%s/kyoo_migrations" .Values.global.image.repositoryBase) }}:{{ default (include "kyoo.defaultTag" .) .Values.back.kyoo_migrations.image.tag }}
           imagePullPolicy: {{ default .Values.global.image.imagePullPolicy }}
+          {{- if .Values.back.kyoo_migrations.extraArgs }}
           args:
             {{- with .Values.back.kyoo_migrations.extraArgs }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
+          {{- end }}
           env:
             - name: POSTGRES_USER
               valueFrom:
@@ -70,10 +78,12 @@ spec:
         - name: main
           image: {{ .Values.back.kyoo_back.image.repository | default (printf "%s/kyoo_back" .Values.global.image.repositoryBase) }}:{{ default (include "kyoo.defaultTag" .) .Values.back.kyoo_back.image.tag }}
           imagePullPolicy: {{ default .Values.global.image.imagePullPolicy }}
+          {{- if .Values.back.kyoo_back.extraArgs }}
           args:
             {{- with .Values.back.kyoo_back.extraArgs }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
+          {{- end }}
           env:
             - name: TRANSCODER_URL
               value: "http://{{ include "kyoo.transcoder.fullname" . }}:7666"
@@ -86,10 +96,14 @@ spec:
             - name: UNLOGGED_PERMISSIONS
               value: {{ .Values.kyoo.unloggedPermissions | quote}}
             - name: KYOO_APIKEYS
+              {{- if .Values.kyoo.existingSecret.name }}
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.kyoo.apikey.apikeyKey }}
-                  name: {{ .Values.kyoo.apikey.existingSecret }}
+                  key: {{ .Values.kyoo.existingSecret.key }}
+                  name: {{ .Values.kyoo.existingSecret.name }}
+              {{- else }}
+              value: {{ .Values.kyoo.apikey }}
+              {{- end }}
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
@@ -109,24 +123,28 @@ spec:
             - name: RABBITMQ_DEFAULT_USER
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.rabbitmq.kyoo_back.userKey }}
-                  name: {{ .Values.global.rabbitmq.kyoo_back.existingSecret }}
+                  key: {{ .Values.rabbitmq.kyoo_back.userKey }}
+                  name: {{ .Values.rabbitmq.kyoo_back.existingSecret }}
             - name: RABBITMQ_DEFAULT_PASS
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.rabbitmq.kyoo_back.passwordKey }}
-                  name: {{ .Values.global.rabbitmq.kyoo_back.existingSecret }}
+                  key: {{ .Values.rabbitmq.kyoo_back.passwordKey }}
+                  name: {{ .Values.rabbitmq.kyoo_back.existingSecret }}
             - name: RABBITMQ_HOST
-              value: {{ .Values.global.rabbitmq.host | quote }}
+              value: {{ .Values.rabbitmq.host | quote }}
             - name: RABBITMQ_PORT
-              value: {{ .Values.global.rabbitmq.port | quote }}
+              value: {{ .Values.rabbitmq.port | quote }}
             - name: MEILI_HOST
-              value: "{{ .Values.global.meilisearch.proto }}://{{ .Values.global.meilisearch.host }}:{{ .Values.global.meilisearch.port }}"
+              value: "{{ .Values.meilisearch.proto }}://{{ .Values.meilisearch.host }}:{{ .Values.meilisearch.port }}"
             - name: MEILI_MASTER_KEY
+              {{- if .Values.meilisearch.existingSecret.name }}
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.meilisearch.kyoo_back.masterkeyKey }}
-                  name: {{ .Values.global.meilisearch.kyoo_back.existingSecret }}
+                  key: {{ .Values.meilisearch.existingSecret.key }}
+                  name: {{ .Values.meilisearch.existingSecret.name }}
+              {{- else }}
+              value: {{ .Values.meilisearch.masterkey }}
+              {{- end }}
             {{- range $index, $provider := .Values.kyoo.oidc_providers }}
             - name: OIDC_{{ $provider.name | upper }}_NAME
               value: {{ $provider.name | quote }}
@@ -177,19 +195,18 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
-            {{- with .Values.back.kyoo_back.volumeMounts }}
-              {{- toYaml . | nindent 12 }}
-            {{- end }}
+            - name: back
+              mountPath: {{ .Values.volumes.back.mountPath | quote }}
             {{- with .Values.back.kyoo_back.extraVolumeMounts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
-        {{- with .Values.back.kyoo_back.extraContainers }}
+        {{- with .Values.back.extraContainers }}
           {{- tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
       volumes:
-        {{- with .Values.back.volumes }}
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
+        - name: back
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-back
         {{- with .Values.back.extraVolumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}

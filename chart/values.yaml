@@ -12,22 +12,6 @@ global:
   podAnnotations: {}
   podLabels: {}
   extraEnv: []
-
-  # kyoo connectivity & subchart settings for meilisearch
-  # subchart configuration can be found at .meilisearch
-  meilisearch:
-    proto: http
-    host: kyoo-meilisearch
-    port: 7700
-    # subchart specific settings
-    infra:
-      # subchart does not support specifying keyname.
-      # key must be named `MEILI_MASTER_KEY`
-      existingSecret: bigsecret
-    # kyoo_back workload specific settings
-    kyoo_back:
-      masterkeyKey: MEILI_MASTER_KEY
-      existingSecret: bigsecret
   # kyoo connectivity & subchart settings for postgres
   # subchart configuration can be found at .postgresql
   postgres:
@@ -37,7 +21,7 @@ global:
       # if updating be sure to also update .postgresql.auth.username
       user: kyoo_all
       passwordKey: postgres_password
-      existingSecret: bigsecret
+      existingSecret: kyoo-secrets
     # kyoo settings for connecting to kyoo_back database
     kyoo_back:
       host: kyoo-postgresql
@@ -47,12 +31,12 @@ global:
       kyoo_migrations:
         userKey: postgres_user
         passwordKey: postgres_password
-        existingSecret: bigsecret
+        existingSecret: kyoo-secrets
       # kyoo_back workload specific settings
       kyoo_back:
         userKey: postgres_user
         passwordKey: postgres_password
-        existingSecret: bigsecret
+        existingSecret: kyoo-secrets
     # kyoo settings for connecting to kyoo_transcoder database
     kyoo_transcoder:
       host: kyoo-postgresql
@@ -65,7 +49,7 @@ global:
       kyoo_transcoder:
         userKey: postgres_user
         passwordKey: postgres_password
-        existingSecret: bigsecret
+        existingSecret: kyoo-secrets
   # kyoo connectivity & subchart settings for rabbitmq
   # subchart configuration can be found at .rabbitmq
   rabbitmq:
@@ -78,27 +62,27 @@ global:
       # user must be manually aligned via rabbitmq.auth.user
       passwordKey: rabbitmq_password
       keyErlangCookie: rabbitmq_cookie
-      existingSecret: bigsecret
+      existingSecret: kyoo-secrets
     # kyoo_autosync workload specific settings
     kyoo_autosync:
       userKey: rabbitmq_user
       passwordKey: rabbitmq_password
-      existingSecret: bigsecret
+      existingSecret: kyoo-secrets
     # kyoo_back workload specific settings
     kyoo_back:
       userKey: rabbitmq_user
       passwordKey: rabbitmq_password
-      existingSecret: bigsecret
+      existingSecret: kyoo-secrets
     # kyoo_matcher workload specific settings
     kyoo_matcher:
       userKey: rabbitmq_user
       passwordKey: rabbitmq_password
-      existingSecret: bigsecret
+      existingSecret: kyoo-secrets
     # kyoo_scanner workload specific settings
     kyoo_scanner:
       userKey: rabbitmq_user
       passwordKey: rabbitmq_password
-      existingSecret: bigsecret
+      existingSecret: kyoo-secrets
 
 # kyoo application settings
 kyoo:
@@ -118,9 +102,12 @@ kyoo:
   # the preset used during transcode. faster means worst quality, you can probably use a slower preset with hwaccels
   # warning: using vaapi hwaccel disable presets (they are not supported).
   transcoderPreset: fast
-  apikey:
-    existingSecret: bigsecret
-    apikeyKey: kyoo_apikeys
+  apikey: apikeyforkyoo
+  # Required only if you want to use an existing secret
+  # Otherwise, leave it empty
+  existingSecret:
+    name: ""
+    key: ""
   # oidc_providers is a list of oidc providers that you want to use for authentication.
   # see the example below for how to configure an oidc provider.
   oidc_providers: []
@@ -134,34 +121,88 @@ kyoo:
     #   profileAddress: https://url-of-the-profile-endpoint-of-the-oidc-service.com/userinfo
     #   scope: "email openid profile"
     #   authMethod: ClientSecretBasic
+  # configures workloads that require access to contentdatabase
+  contentdatabase:
+    # TheMovieDB
+    tmdb:
+      apikey: "your_tmdb_apikey"
+      # Only required if you want to use an existing secret
+      existingSecret:
+        name: ""
+        key: ""
 
-# configures workloads that require access to media
-media:
-  # specifies the volumes to use
-  volumes:
-    - name: media
-      persistentVolumeClaim:
-        claimName: media
-  # specifies where to mount the volumes
-  # note that this should align with .media.baseMountPath
-  volumeMounts:
-    - mountPath: /data
-      name: media
-  # configures kyoo workloads to search
-  # note that this should align with .media.volumeMounts[].mountPath
-  baseMountPath: "/data"
+    # TVDatabase
+    tvdb:
+      apikey: "your_tvdb_apikey"
+      pin: "your_tvdb_pin"
+      # Only required if you want to use an existing secret
+      existingSecret:
+        name: ""
+        keyPinKey: ""
+        keyApiKey: ""
 
-# configures workloads that require access to contentdatabase
-contentdatabase:
-  # TheMovieDB
-  tmdb:
-    apikeyKey: tmdb_apikey
-    existingSecret: bigsecret
-  # TVDatabase
-  tvdb:
-    apikeyKey: tvdb_apikey
-    pinKey: tvdb_pin
-    existingSecret: bigsecret
+  # Configure applications related to kyoo
+  # - meilisearch
+  # - postgresql
+  # - rabbitmq
+  # Please refer to the subchart settings for more information
+  secrets:
+    enabled: true
+    labels: {}
+    annotations: {}
+    # Secret to be used for kyoo
+    # Should match with : 
+    # - .Values.meilisearch.infra.existingSecret
+    # - .Values.postgres.infra.existingSecret
+    # - .Values.rabbitmq.infra.existingSecret
+    name: kyoo-secrets
+    data:
+      MEILI_MASTER_KEY: barkLike8SuperDucks
+      postgres_user: kyoo_all
+      postgres_password: watchSomething4me
+      rabbitmq_user: kyoo_all
+      rabbitmq_password: youAreAmazing2
+      rabbitmq_cookie: mmmGoodCookie
+
+volumes:
+  media:
+    # If you want to use an existing PVC, set the name here
+    # otherwise, leave it empty
+    existingClaim: ""
+    # The name of the volume
+    # It will be prefixed with the release name (e.g kyoo-media)
+    name: "media"
+    accessModes:
+      - "ReadOnlyMany"
+      # Some CSI drivers do not support ReadOnlyMany (e.g. longhorn)
+      # If you are using such a driver, you can change this to ReadWriteMany
+      # - "ReadWriteMany"
+    # -- If empty, will use the default storage class
+    storageClassName: ""
+    resources:
+      requests:
+        storage: "1Gi"
+    mountPath: "/data"
+    extraAnnotations: {}
+  back:
+    existingClaim: ""
+    accessModes:
+      - "ReadWriteOnce"
+    resources:
+      requests:
+        storage: "2Gi"
+    extraAnnotations: {}
+    mountPath: "/metadata"
+  transcoder: 
+    existingClaim: ""
+    accessModes:
+      - "ReadWriteOnce"
+    storageClassName: ""
+    resources:
+      requests:
+        storage: "3Gi"
+    extraAnnotations: {}
+    mountPath: "/metadata"
 
 # autosync deployment configuration
 autosync:
@@ -180,6 +221,8 @@ autosync:
       tag: ~
   replicaCount: 1
   podLabels: {}
+  strategy:
+    type: Recreate
   deploymentAnnotations: {}
   podAnnotations: {}
   imagePullSecrets: []
@@ -194,6 +237,7 @@ autosync:
 
 # back deployment configuration
 back:
+  # TODO : LIMIT/REQUESTS
   name: back
   # kyoo_migrations init container configuration
   kyoo_migrations:
@@ -219,15 +263,10 @@ back:
     image:
       repository: ~
       tag: ~
-    volumeMounts:
-      - mountPath: /metadata
-        name: back-storage
-  volumes:
-    - name: back-storage
-      persistentVolumeClaim:
-        claimName: back-storage
   replicaCount: 1
   podLabels: {}
+  strategy:
+    type: Recreate
   deploymentAnnotations: {}
   podAnnotations: {}
   imagePullSecrets: []
@@ -261,6 +300,8 @@ front:
       tag: ~
   replicaCount: 1
   podLabels: {}
+  strategy:
+    type: Recreate
   deploymentAnnotations: {}
   podAnnotations: {}
   imagePullSecrets: []
@@ -299,6 +340,8 @@ matcher:
   # matcher does not support multiple replicas
   replicaCount: 1
   podLabels: {}
+  strategy:
+    type: Recreate
   deploymentAnnotations: {}
   podAnnotations: {}
   imagePullSecrets: []
@@ -329,6 +372,8 @@ scanner:
   # scanner does not support multiple replicas
   replicaCount: 1
   podLabels: {}
+  strategy:
+    type: Recreate
   deploymentAnnotations: {}
   podAnnotations: {}
   imagePullSecrets: []
@@ -342,6 +387,7 @@ scanner:
   extraVolumes: []
 
 # scanner deployment configuration
+# TODO: Configure PodAutoscaler (HPA) for transcoder
 transcoder:
   name: transcoder
   # kyoo_transcoder container configuration
@@ -356,19 +402,10 @@ transcoder:
     image:
       repository: ~
       tag: ~
-    volumeMounts:
-      - mountPath: /metadata
-        name: transcoder-storage
-      - mountPath: /cache
-        name: cache
-  volumes:
-    - name: transcoder-storage
-      persistentVolumeClaim:
-        claimName: transcoder-storage
-    - name: cache
-      emptyDir: {}
   replicaCount: 1
   podLabels: {}
+  strategy:
+    type: Recreate
   deploymentAnnotations: {}
   podAnnotations: {}
   imagePullSecrets: []
@@ -394,31 +431,40 @@ ingress:
   tls: false
   tlsSecret: ~
 
-# subchart settings
 meilisearch:
-  enabled: false
+  enabled: true
   environment:
     MEILI_ENV: production
   auth:
     # subchart does not support specifying keyname.
     # key must be named `MEILI_MASTER_KEY`
-    existingMasterKeySecret: "{{ .Values.global.meilisearch.infra.existingSecret }}"
+    # Should match kyoo secrets name (.Values.kyoo.secrets.name)
+    existingMasterKeySecret: "kyoo-secrets"
   persistence:
     enabled: true
     size: 3Gi
+  # kyoo connectivity & subchart settings for meilisearch
+  # subchart configuration can be found at .meilisearch
+  proto: http
+  host: kyoo-meilisearch
+  port: 7700
+  masterkey: ""
+  existingSecret:
+    name: kyoo-secrets
+    key: MEILI_MASTER_KEY
 
 # subchart settings
 postgresql:
-  enabled: false
+  enabled: true
   auth:
     # default user to be created by postgres subchart
     # subchart is unable to consume a secret for specifying user
     username: kyoo_all
-    existingSecret: "{{ .Values.global.postgres.infra.existingSecret }}"
+    existingSecret: kyoo-secrets
     secretKeys:
-      # set the postgres user password to the same as our user
-      adminPasswordKey: "{{ .Values.global.postgres.infra.passwordKey }}"
-      userPasswordKey: "{{ .Values.global.postgres.infra.passwordKey }}"
+      # Should match with .Values.kyoo.secrets.stringData.postgres_password
+      adminPasswordKey: "postgres_password"
+      userPasswordKey: "postgres_password"
   primary:
     # create databases, schemas, and set search_path
     initdb:
@@ -443,18 +489,51 @@ postgresql:
       size: 3Gi
 
 # subchart settings
+# kyoo connectivity & subchart settings for rabbitmq
+# subchart configuration can be found at .rabbitmq
 rabbitmq:
-  enabled: false
+  enabled: true
+  host: kyoo-rabbitmq
+  port: 5672
+    # vhost is not used yet https://github.com/zoriya/Kyoo/issues/537
+    # vhost: ""
+    # subchart specific settings
+  infra:
+    # user must be manually aligned via rabbitmq.auth.user
+    passwordKey: rabbitmq_password
+    keyErlangCookie: rabbitmq_cookie
+    existingSecret: kyoo-secrets
+  # kyoo_autosync workload specific settings
+  kyoo_autosync:
+    userKey: rabbitmq_user
+    passwordKey: rabbitmq_password
+    existingSecret: kyoo-secrets
+  # kyoo_back workload specific settings
+  kyoo_back:
+    userKey: rabbitmq_user
+    passwordKey: rabbitmq_password
+    existingSecret: kyoo-secrets
+    # kyoo_matcher workload specific settings
+  kyoo_matcher:
+    userKey: rabbitmq_user
+    passwordKey: rabbitmq_password
+    existingSecret: kyoo-secrets
+  # kyoo_scanner workload specific settings
+  kyoo_scanner:
+    userKey: rabbitmq_user
+    passwordKey: rabbitmq_password
+    existingSecret: kyoo-secrets
   auth:
     # default user to be created by rabbitmq subchart
     # subchart is unable to consume a secret for specifying user
     username: kyoo_all
-    existingPasswordSecret: "{{ .Values.global.rabbitmq.infra.existingSecret }}"
-    existingSecretPasswordKey: "{{ .Values.global.rabbitmq.infra.passwordKey }}"
-    existingErlangSecret: "{{ .Values.global.rabbitmq.infra.existingSecret }}"
-    existingSecretErlangKey: "{{ .Values.global.rabbitmq.infra.keyErlangCookie }}"
+    # Should match with .Values.kyoo.secrets.name
+    existingPasswordSecret: kyoo-secrets
+    existingSecretPasswordKey: rabbitmq_password
+    existingErlangSecret: kyoo-secrets
+    existingSecretErlangKey: rabbitmq_cookie
 
 # create extraObjects
-# create secret bigsecret
-# create pvc for each object
+# Create external PVs (.e.g. NFS to read videos from a NAS)
+# Use only if you have a specific need not covered by the values above
 extraObjects: []

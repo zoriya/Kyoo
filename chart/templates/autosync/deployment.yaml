@@ -1,28 +1,37 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  {{- /*
+  To avoid having empty annotations, we check if both global and component annotations are set.
+  */}}
+  {{- if and (.Values.global.podAnnotations) (.Values.autosync.podAnnotations) }}
   {{- with (mergeOverwrite (deepCopy .Values.global.deploymentAnnotations) .Values.autosync.deploymentAnnotations) }}
   annotations:
     {{- range $key, $value := . }}
     {{ $key }}: {{ $value | quote }}
     {{- end }}
   {{- end }}
+  {{- end }}
   name: {{ include "kyoo.autosync.fullname" . }}
   labels:
     {{- include "kyoo.labels" (dict "context" . "component" .Values.autosync.name "name" .Values.autosync.name) | nindent 4 }}
 spec:
   replicas: {{ .Values.autosync.replicaCount }}
+  strategy:
+    {{- toYaml .Values.autosync.strategy | nindent 4 }}
   selector:
     matchLabels:
       {{- include "kyoo.selectorLabels" (dict "context" . "name" .Values.autosync.name) | nindent 6 }}
   template:
     metadata:
+      {{- if and (.Values.global.podAnnotations) (.Values.autosync.podAnnotations) }}
       annotations:
         {{- with (mergeOverwrite (deepCopy .Values.global.podAnnotations) .Values.autosync.podAnnotations) }}
-        {{- range $key, $value := . }}
-        {{ $key }}: {{ $value | quote }}
+          {{- range $key, $value := . }}
+          {{ $key }}: {{ $value | quote }}
+          {{- end }}
         {{- end }}
-        {{- end }}
+      {{- end }}
       labels:
         {{- include "kyoo.labels" (dict "context" . "component" .Values.autosync.name "name" .Values.autosync.name) | nindent 8 }}
         {{- with (mergeOverwrite (deepCopy .Values.global.podLabels) .Values.autosync.podLabels) }}
@@ -33,7 +42,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.global.securityContext }}
+      {{- with .Values.scanner.kyoo_scanner.containerSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -42,25 +51,27 @@ spec:
         - name: main
           image: {{ .Values.autosync.kyoo_autosync.image.repository | default (printf "%s/kyoo_autosync" .Values.global.image.repositoryBase) }}:{{ default (include "kyoo.defaultTag" .) .Values.autosync.kyoo_autosync.image.tag }}
           imagePullPolicy: {{ default .Values.global.image.imagePullPolicy }}
+          {{- if .Values.autosync.kyoo_autosync.extraArgs }}
           args:
             {{- with .Values.autosync.kyoo_autosync.extraArgs }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
+          {{- end }}
           env:
             - name: RABBITMQ_HOST
-              value: {{ .Values.global.rabbitmq.host | quote }}
+              value: {{ .Values.rabbitmq.host | quote }}
             - name: RABBITMQ_PORT
-              value: {{ .Values.global.rabbitmq.port | quote }}
+              value: {{ .Values.rabbitmq.port | quote }}
             - name: RABBITMQ_DEFAULT_USER
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.rabbitmq.kyoo_autosync.userKey }}
-                  name: {{ .Values.global.rabbitmq.kyoo_autosync.existingSecret }}
+                  key: {{ .Values.rabbitmq.kyoo_autosync.userKey }}
+                  name: {{ .Values.rabbitmq.kyoo_autosync.existingSecret }}
             - name: RABBITMQ_DEFAULT_PASS
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.rabbitmq.kyoo_autosync.passwordKey }}
-                  name: {{ .Values.global.rabbitmq.kyoo_autosync.existingSecret }}
+                  key: {{ .Values.rabbitmq.kyoo_autosync.passwordKey }}
+                  name: {{ .Values.rabbitmq.kyoo_autosync.existingSecret }}
             {{- with (concat .Values.global.extraEnv .Values.autosync.kyoo_autosync.extraEnv) }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -84,7 +95,7 @@ spec:
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-        {{- with .Values.autosync.kyoo_autosync.extraContainers }}
+        {{- with .Values.autosync.extraContainers }}
           {{- tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
       {{- with .Values.autosync.extraInitContainers }}

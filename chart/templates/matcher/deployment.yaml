@@ -1,10 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  {{- with (mergeOverwrite (deepCopy .Values.global.deploymentAnnotations) .Values.matcher.deploymentAnnotations) }}
+  {{- if and (.Values.global.podAnnotations) (.Values.matcher.deploymentAnnotations) }}
+    {{- with (mergeOverwrite (deepCopy .Values.global.deploymentAnnotations) .Values.matcher.deploymentAnnotations) }}
   annotations:
-    {{- range $key, $value := . }}
-    {{ $key }}: {{ $value | quote }}
+      {{- range $key, $value := . }}
+        {{ $key }}: {{ $value | quote }}
+      {{- end }}
     {{- end }}
   {{- end }}
   name: {{ include "kyoo.matcher.fullname" . }}
@@ -12,17 +14,21 @@ metadata:
     {{- include "kyoo.labels" (dict "context" . "component" .Values.matcher.name "name" .Values.matcher.name) | nindent 4 }}
 spec:
   replicas: {{ .Values.matcher.replicaCount }}
+  strategy:
+    {{- toYaml .Values.matcher.strategy | nindent 4 }}
   selector:
     matchLabels:
       {{- include "kyoo.selectorLabels" (dict "context" . "name" .Values.matcher.name) | nindent 6 }}
   template:
     metadata:
+      {{- if (and .Values.global.podAnnotations .Values.matcher.podAnnotations) }}
       annotations:
         {{- with (mergeOverwrite (deepCopy .Values.global.podAnnotations) .Values.matcher.podAnnotations) }}
-        {{- range $key, $value := . }}
-        {{ $key }}: {{ $value | quote }}
+          {{- range $key, $value := . }}
+          {{ $key }}: {{ $value | quote }}
+          {{- end }}
         {{- end }}
-        {{- end }}
+      {{- end }}
       labels:
         {{- include "kyoo.labels" (dict "context" . "component" .Values.matcher.name "name" .Values.matcher.name) | nindent 8 }}
         {{- with (mergeOverwrite (deepCopy .Values.global.podLabels) .Values.matcher.podLabels) }}
@@ -33,7 +39,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.global.securityContext }}
+      {{- with .Values.matcher.kyoo_matcher.containerSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -48,43 +54,58 @@ spec:
             {{- end }}
           env:
             - name: KYOO_APIKEYS
+              {{- if .Values.kyoo.existingSecret.name }}
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.kyoo.apikey.apikeyKey }}
-                  name: {{ .Values.kyoo.apikey.existingSecret }}
+                  key: {{ .Values.kyoo.existingSecret.key }}
+                  name: {{ .Values.kyoo.existingSecret.name }}
+              {{- else }}
+              value: {{ .Values.kyoo.apikey }}
+              {{- end }}
             - name: KYOO_URL
               value: "http://{{ include "kyoo.back.fullname" . }}:5000"
             - name: LIBRARY_LANGUAGES
               value: {{ .Values.kyoo.languages | quote }}
             - name: THEMOVIEDB_APIKEY
+              {{- if .Values.kyoo.contentdatabase.tmdb.existingSecret.name }}
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.contentdatabase.tmdb.apikeyKey }}
-                  name: {{ .Values.contentdatabase.tmdb.existingSecret }}
+                  key: {{ .Values.kyoo.contentdatabase.tmdb.existingSecret.key }}
+                  name: {{ .Values.kyoo.contentdatabase.tmdb.existingSecret.name }}
+              {{- else }}
+              value: {{ .Values.kyoo.contentdatabase.tmdb.apikey }}
+              {{- end }}
+              {{- if .Values.kyoo.contentdatabase.tvdb.existingSecret.name }}
             - name: TVDB_APIKEY
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.contentdatabase.tvdb.apikeyKey }}
-                  name: {{ .Values.contentdatabase.tvdb.existingSecret }}
+                  key: {{ .Values.kyoo.contentdatabase.tvdb.existingSecret.keyApiKey }}
+                  name: {{ .Values.kyoo.contentdatabase.tvdb.existingSecret.name }}
             - name: TVDB_PIN
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.contentdatabase.tvdb.pinKey }}
-                  name: {{ .Values.contentdatabase.tvdb.existingSecret }}
+                  key: {{ .Values.kyoo.contentdatabase.tvdb.existingSecret.keyPinKey }}
+                  name: {{ .Values.kyoo.contentdatabase.tvdb.existingSecret.keyApiKey }}
+              {{- else }}
+            - name: TVDB_APIKEY
+              value: {{ .Values.kyoo.contentdatabase.tvdb.apikey }}
+            - name: TVDB_PIN
+              value: {{ .Values.kyoo.contentdatabase.tvdb.pin }}
+              {{- end }}
             - name: RABBITMQ_HOST
-              value: {{ .Values.global.rabbitmq.host | quote }}
+              value: {{ .Values.rabbitmq.host | quote }}
             - name: RABBITMQ_PORT
-              value: {{ .Values.global.rabbitmq.port | quote }}
+              value: {{ .Values.rabbitmq.port | quote }}
             - name: RABBITMQ_DEFAULT_USER
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.rabbitmq.kyoo_matcher.userKey }}
-                  name: {{ .Values.global.rabbitmq.kyoo_matcher.existingSecret }}
+                  key: {{ .Values.rabbitmq.kyoo_matcher.userKey }}
+                  name: {{ .Values.rabbitmq.kyoo_matcher.existingSecret }}
             - name: RABBITMQ_DEFAULT_PASS
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.rabbitmq.kyoo_matcher.passwordKey }}
-                  name: {{ .Values.global.rabbitmq.kyoo_matcher.existingSecret }}
+                  key: {{ .Values.rabbitmq.kyoo_matcher.passwordKey }}
+                  name: {{ .Values.rabbitmq.kyoo_matcher.existingSecret }}
             {{- with (concat .Values.global.extraEnv .Values.matcher.kyoo_matcher.extraEnv) }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -108,7 +129,7 @@ spec:
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-        {{- with .Values.matcher.kyoo_matcher.extraContainers }}
+        {{- with .Values.matcher.extraContainers }}
           {{- tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
       {{- with .Values.matcher.extraInitContainers }}
