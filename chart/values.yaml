@@ -386,13 +386,26 @@ transcoder:
   extraVolumes: []
 
 ingress:
-  enabled: false
+  enabled: true
   ingressClassName: ~
   annotations: {}
   extraAnnotations: {}
   host: kyoo.mydomain.com
   tls: false
   tlsSecret: ~
+  # Route is the component that will route the traffic to the correct service
+  # It is a requirement for the ingress to work (since we have rewrites rules that can't be done with ingress alone)
+  # This component may be replaced by APIGateway support in the future
+  route:
+    replicaCount: 1
+    annotations: {}
+    labels: {}
+    enabled: true
+    image:
+      repository: haproxy
+      tag: latest
+    port: 80
+    serviceType: ClusterIP
 
 # subchart settings
 meilisearch:

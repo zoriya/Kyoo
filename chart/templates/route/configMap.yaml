@@ -1,0 +1,35 @@
+{{ if .Values.ingress.route.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{.Release.Name }}-route-config
+data:
+  haproxy.cfg: |
+    global
+        log stdout format raw local0
+        maxconn 4096
+
+    defaults
+        log global
+        mode http
+        option httplog
+        option dontlognull
+        timeout connect 5000ms
+        timeout client 50000ms
+        timeout server 50000ms
+
+    frontend http-in
+        bind *:80
+        acl is_api path_beg /api
+        use_backend backend-api if is_api
+        default_backend backend-front
+
+    backend backend-api
+        option http-server-close
+        http-request set-path %[path,regsub(^/api/,/)]
+        server kyoo-back {{ include "kyoo.back.fullname" . }}:5000 check
+
+    backend backend-front
+        option http-server-close
+        server kyoo-front {{ include "kyoo.front.fullname" . }}:8901 check
+{{ end }}

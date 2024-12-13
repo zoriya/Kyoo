@@ -1,0 +1,60 @@
+{{ if .Values.ingress.route.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-route
+  {{- if or (.Values.ingress.route.annotations) (.Values.global.deploymentAnnotations) }}
+  annotations:
+    {{- if .Values.ingress.route.annotations }}
+      {{- toYaml .Values.ingress.route.annotations | nindent 4 }}
+    {{- end }}
+    {{- if .Values.global.deploymentAnnotations }}
+      {{- toYaml .Values.global.deploymentAnnotations | nindent 4 }}
+    {{- end }}
+  {{- end }}
+  labels:
+    app: {{ .Release.Name }}-route
+    {{- if .Values.ingress.route.labels }}
+      {{- with .Values.ingress.route.labels }}
+        {{- toYaml . | nindent 4 }}
+      {{- end }}
+    {{- end }}
+spec:
+  replicas: {{ .Values.ingress.route.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-route
+      {{- if .Values.ingress.route.labels }}
+        {{- with .Values.ingress.route.labels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+  template:
+    metadata:
+      annotations:
+        {{- toYaml .Values.ingress.route.annotations | nindent 8 }} 
+        {{- if .Values.global.podAnnotations }}
+          {{- toYaml .Values.global.podAnnotations | nindent 8 }}
+        {{- end }}
+      labels:
+        app: {{ .Release.Name }}-route
+        {{- if .Values.ingress.route.labels }}
+          {{- with .Values.ingress.route.labels }}
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+        {{- end }}
+    spec:
+      containers:
+      - name: haproxy
+        image: {{ .Values.ingress.route.image.repository }}:{{ .Values.ingress.route.image.tag }}
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: haproxy-config
+          mountPath: /usr/local/etc/haproxy/haproxy.cfg
+          subPath: haproxy.cfg
+      volumes:
+      - name: haproxy-config
+        configMap:
+          name: {{ .Release.Name }}-route-config
+{{ end }}
