@@ -48,29 +48,44 @@ spec:
             {{- end }}
           env:
             - name: KYOO_APIKEYS
+            {{- if .Values.kyoo.apikey.existingSecret }}
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.kyoo.apikey.apikeyKey }}
+                  key:  {{ .Values.kyoo.apikey.apikeyKey }}
                   name: {{ .Values.kyoo.apikey.existingSecret }}
+            {{- else }}
+              value: {{ .Values.kyoo.apikey.value }}
+            {{- end }}
             - name: KYOO_URL
               value: "http://{{ include "kyoo.back.fullname" . }}:5000"
             - name: LIBRARY_LANGUAGES
               value: {{ .Values.kyoo.languages | quote }}
             - name: THEMOVIEDB_APIKEY
+              {{- if .Values.kyoo.contentdatabase.tmdb.existingSecret.name }}
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.contentdatabase.tmdb.apikeyKey }}
-                  name: {{ .Values.contentdatabase.tmdb.existingSecret }}
+                  key: {{ .Values.kyoo.contentdatabase.tmdb.existingSecret.key }}
+                  name: {{ .Values.kyoo.contentdatabase.tmdb.existingSecret.name }}
+              {{- else }}
+              value: {{ .Values.kyoo.contentdatabase.tmdb.apikey }}
+              {{- end }}
+              {{- if .Values.kyoo.contentdatabase.tvdb.existingSecret.name }}
             - name: TVDB_APIKEY
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.contentdatabase.tvdb.apikeyKey }}
-                  name: {{ .Values.contentdatabase.tvdb.existingSecret }}
+                  key: {{ .Values.kyoo.contentdatabase.tvdb.existingSecret.keyApiKey }}
+                  name: {{ .Values.kyoo.contentdatabase.tvdb.existingSecret.name }}
             - name: TVDB_PIN
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.contentdatabase.tvdb.pinKey }}
-                  name: {{ .Values.contentdatabase.tvdb.existingSecret }}
+                  key: {{ .Values.kyoo.contentdatabase.tvdb.existingSecret.keyPinKey }}
+                  name: {{ .Values.kyoo.contentdatabase.tvdb.existingSecret.keyApiKey }}
+              {{- else }}
+            - name: TVDB_APIKEY
+              value: {{ .Values.kyoo.contentdatabase.tvdb.apikey }}
+            - name: TVDB_PIN
+              value: {{ .Values.kyoo.contentdatabase.tvdb.pin }}
+              {{- end }}
             - name: RABBITMQ_HOST
               value: {{ .Values.global.rabbitmq.host | quote }}
             - name: RABBITMQ_PORT

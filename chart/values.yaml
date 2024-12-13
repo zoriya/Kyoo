@@ -23,11 +23,11 @@ global:
     infra:
       # subchart does not support specifying keyname.
       # key must be named `MEILI_MASTER_KEY`
-      existingSecret: bigsecret
+      existingSecret: kyoo-secrets
     # kyoo_back workload specific settings
     kyoo_back:
       masterkeyKey: MEILI_MASTER_KEY
-      existingSecret: bigsecret
+      existingSecret: kyoo-secrets
   # kyoo connectivity & subchart settings for postgres
   # subchart configuration can be found at .postgresql
   postgres:
@@ -37,7 +37,7 @@ global:
       # if updating be sure to also update .postgresql.auth.username
       user: kyoo_all
       passwordKey: postgres_password
-      existingSecret: bigsecret
+      existingSecret: kyoo-secrets
     # kyoo settings for connecting to kyoo_back database
     kyoo_back:
       host: kyoo-postgresql
@@ -47,12 +47,12 @@ global:
       kyoo_migrations:
         userKey: postgres_user
         passwordKey: postgres_password
-        existingSecret: bigsecret
+        existingSecret: kyoo-secrets
       # kyoo_back workload specific settings
       kyoo_back:
         userKey: postgres_user
         passwordKey: postgres_password
-        existingSecret: bigsecret
+        existingSecret: kyoo-secrets
     # kyoo settings for connecting to kyoo_transcoder database
     kyoo_transcoder:
       host: kyoo-postgresql
@@ -65,7 +65,8 @@ global:
       kyoo_transcoder:
         userKey: postgres_user
         passwordKey: postgres_password
-        existingSecret: bigsecret
+        existingSecret: kyoo-secrets
+
   # kyoo connectivity & subchart settings for rabbitmq
   # subchart configuration can be found at .rabbitmq
   rabbitmq:
@@ -78,27 +79,27 @@ global:
       # user must be manually aligned via rabbitmq.auth.user
       passwordKey: rabbitmq_password
       keyErlangCookie: rabbitmq_cookie
-      existingSecret: bigsecret
+      existingSecret: kyoo-secrets
     # kyoo_autosync workload specific settings
     kyoo_autosync:
       userKey: rabbitmq_user
       passwordKey: rabbitmq_password
-      existingSecret: bigsecret
+      existingSecret: kyoo-secrets
     # kyoo_back workload specific settings
     kyoo_back:
       userKey: rabbitmq_user
       passwordKey: rabbitmq_password
-      existingSecret: bigsecret
+      existingSecret: kyoo-secrets
     # kyoo_matcher workload specific settings
     kyoo_matcher:
       userKey: rabbitmq_user
       passwordKey: rabbitmq_password
-      existingSecret: bigsecret
+      existingSecret: kyoo-secrets
     # kyoo_scanner workload specific settings
     kyoo_scanner:
       userKey: rabbitmq_user
       passwordKey: rabbitmq_password
-      existingSecret: bigsecret
+      existingSecret: kyoo-secrets
 
 # kyoo application settings
 kyoo:
@@ -119,8 +120,9 @@ kyoo:
   # warning: using vaapi hwaccel disable presets (they are not supported).
   transcoderPreset: fast
   apikey:
-    existingSecret: bigsecret
-    apikeyKey: kyoo_apikeys
+    value: "your_apikey"
+    existingSecret: ""
+    apikeyKey: ""
   # oidc_providers is a list of oidc providers that you want to use for authentication.
   # see the example below for how to configure an oidc provider.
   oidc_providers: []
@@ -134,6 +136,50 @@ kyoo:
     #   profileAddress: https://url-of-the-profile-endpoint-of-the-oidc-service.com/userinfo
     #   scope: "email openid profile"
     #   authMethod: ClientSecretBasic
+  contentdatabase:
+    # TheMovieDB
+    tmdb:
+      apikey: "your_tmdb_apikey"
+      # Only required if you want to use an existing secret
+      existingSecret:
+        name: ""
+        key: ""
+    # TVDatabase
+    tvdb:
+      apikey: "your_tvdb_apikey"
+      pin: "your_tvdb_pin"
+      # Only required if you want to use an existing secret
+      existingSecret:
+        name: ""
+        keyPinKey: ""
+        keyApiKey: ""
+
+  secrets:
+    enabled: true
+    labels: {}
+    annotations: {}
+    # Secret to be used for kyoo
+    # Should match with : 
+    #  global.meilisearch.infra.existingSecret
+    #  global.meilisearch.infra.kyoo_back.existingSecret
+    #  global.postgres.infra.infra.existingSecret
+    #  global.postgres.kyoo_back.kyoo_migrations.existingSecret
+    #  global.postgres.kyoo_back.kyoo_back.existingSecret
+    #  global.postgres.kyoo_transcoder.kyoo_transcoder.existingSecret
+    #  global.rabbitmq.infra.existingSecret
+    #  global.rabbitmq.kyoo_autosync.existingSecret
+    #  global.rabbitmq.kyoo_back.existingSecret
+    #  global.rabbitmq.kyoo_matcher.existingSecret
+    #  global.rabbitmq.kyoo_scanner.existingSecret
+    #  kyoo.apikey.existingSecret
+    name: kyoo-secrets
+    data:
+      MEILI_MASTER_KEY: barkLike8SuperDucks
+      postgres_user: kyoo_all
+      postgres_password: watchSomething4me
+      rabbitmq_user: kyoo_all
+      rabbitmq_password: youAreAmazing2
+      rabbitmq_cookie: mmmGoodCookie
 
 # configures workloads that require access to media
 media:
@@ -150,18 +196,6 @@ media:
   # configures kyoo workloads to search
   # note that this should align with .media.volumeMounts[].mountPath
   baseMountPath: "/data"
-
-# configures workloads that require access to contentdatabase
-contentdatabase:
-  # TheMovieDB
-  tmdb:
-    apikeyKey: tmdb_apikey
-    existingSecret: bigsecret
-  # TVDatabase
-  tvdb:
-    apikeyKey: tvdb_apikey
-    pinKey: tvdb_pin
-    existingSecret: bigsecret
 
 # autosync deployment configuration
 autosync:
@@ -396,7 +430,7 @@ ingress:
 
 # subchart settings
 meilisearch:
-  enabled: false
+  enabled: true
   environment:
     MEILI_ENV: production
   auth:
@@ -409,16 +443,19 @@ meilisearch:
 
 # subchart settings
 postgresql:
-  enabled: false
+  enabled: true
+  persistence:
+    enabled: true
+    size: 8Gi
   auth:
     # default user to be created by postgres subchart
     # subchart is unable to consume a secret for specifying user
     username: kyoo_all
-    existingSecret: "{{ .Values.global.postgres.infra.existingSecret }}"
+    existingSecret: kyoo-secrets
     secretKeys:
-      # set the postgres user password to the same as our user
-      adminPasswordKey: "{{ .Values.global.postgres.infra.passwordKey }}"
-      userPasswordKey: "{{ .Values.global.postgres.infra.passwordKey }}"
+      # Should match with .Values.kyoo.secrets.stringData.postgres_password
+      adminPasswordKey: "postgres_password"
+      userPasswordKey: "postgres_password"      
   primary:
     # create databases, schemas, and set search_path
     initdb:
@@ -444,15 +481,16 @@ postgresql:
 
 # subchart settings
 rabbitmq:
-  enabled: false
+  enabled: true
   auth:
     # default user to be created by rabbitmq subchart
     # subchart is unable to consume a secret for specifying user
     username: kyoo_all
-    existingPasswordSecret: "{{ .Values.global.rabbitmq.infra.existingSecret }}"
-    existingSecretPasswordKey: "{{ .Values.global.rabbitmq.infra.passwordKey }}"
-    existingErlangSecret: "{{ .Values.global.rabbitmq.infra.existingSecret }}"
-    existingSecretErlangKey: "{{ .Values.global.rabbitmq.infra.keyErlangCookie }}"
+    # Should match with .Values.kyoo.secrets.name
+    existingPasswordSecret: kyoo-secrets
+    existingSecretPasswordKey: rabbitmq_password
+    existingErlangSecret: kyoo-secrets
+    existingSecretErlangKey: rabbitmq_cookie
 
 # create extraObjects
 # create secret bigsecret
