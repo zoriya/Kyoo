@@ -48,7 +48,7 @@ spec:
             {{- end }}
           env:
             - name: SCANNER_LIBRARY_ROOT
-              value: {{ .Values.media.baseMountPath | quote }}
+              value: {{ .Values.volumes.media.mountPath | quote }}
             - name: LIBRARY_IGNORE_PATTERN
               value: {{ .Values.kyoo.libraryIgnorePattern | quote }}
             - name: KYOO_APIKEYS
@@ -94,9 +94,8 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
-            {{- with .Values.media.volumeMounts }}
-              {{- toYaml . | nindent 12 }}
-            {{- end }}
+            - name: media
+              mountPath: {{ .Values.volumes.media.mountPath }}
             {{- with .Values.scanner.kyoo_scanner.extraVolumeMounts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -108,8 +107,12 @@ spec:
         {{- tpl (toYaml .) $ | nindent 6 }}
       {{- end }}
       volumes:
-        {{- with .Values.media.volumes }}
-          {{- toYaml . | nindent 8 }}
+        - name: media
+          persistentVolumeClaim:
+        {{- if .Values.volumes.media.existingClaim }}
+            claimName: {{ .Values.volumes.media.existingClaim }}
+        {{- else }}
+            claimName: {{ .Release.Name }}-media
         {{- end }}
         {{- with .Values.scanner.extraVolumes }}
           {{- toYaml . | nindent 8 }}
