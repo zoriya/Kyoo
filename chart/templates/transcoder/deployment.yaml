@@ -94,7 +94,7 @@ spec:
           {{- end }}
           {{- with .Values.transcoder.kyoo_transcoder.resources }}
           resources:
-            {{- toYaml .Values.transcoder.kyoo_transcoder.resources | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.transcoder.kyoo_transcoder.containerSecurityContext }}
           securityContext:
