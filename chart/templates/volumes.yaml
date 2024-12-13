@@ -1,0 +1,25 @@
+
+{{- range $key, $value := .Values.volumes }}
+  {{ if not $value.existingClaim }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $.Release.Name }}-{{ $key }}
+  {{- if $value.extraAnnotations }}
+  annotations:
+    {{- $value.extraAnnotations | toYaml | nindent 4 }}
+  {{- end }}
+  labels:
+    app.kubernetes.io/part-of: {{ $.Release.Namespace }}
+    app.kubernetes.io/version: {{ include "kyoo.versionLabelValue" .context }}
+spec:
+    accessModes:
+        {{- toYaml $value.accessModes | nindent 6 }}
+    {{- if $value.storageClassName }}
+    storageClassName: {{ $value.storageClassName }}
+    {{- end }}
+    resources:
+    {{- $value.resources | toYaml | nindent 6 }}
+---
+  {{- end }}
+{{- end }}

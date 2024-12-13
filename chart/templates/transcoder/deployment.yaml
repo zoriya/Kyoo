@@ -58,7 +58,7 @@ spec:
             - name: GOCODER_PREFIX
               value: "/video"
             - name: GOCODER_SAFE_PATH
-              value: {{ .Values.media.baseMountPath | quote }}
+              value: {{ .Values.volumes.media.mountPath | quote }}
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
@@ -101,12 +101,12 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
-            {{- with .Values.media.volumeMounts }}
-              {{- toYaml . | nindent 12 }}
-            {{- end }}
-            {{- with .Values.transcoder.kyoo_transcoder.volumeMounts }}
-              {{- toYaml . | nindent 12 }}
-            {{- end }}
+            - name: media
+              mountPath: {{ .Values.volumes.media.mountPath }}
+            - name: transcoder
+              mountPath: {{ .Values.volumes.transcoder.mountPath }}
+            - name: cache
+              mountPath: "/cache"
             {{- with .Values.transcoder.kyoo_transcoder.extraVolumeMounts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -118,12 +118,22 @@ spec:
         {{- tpl (toYaml .) $ | nindent 6 }}
       {{- end }}
       volumes:
-        {{- with .Values.media.volumes }}
-          {{- toYaml . | nindent 8 }}
+        - name: media
+          persistentVolumeClaim:
+        {{- if .Values.volumes.media.existingClaim }}
+            claimName: {{ .Values.volumes.media.existingClaim }}
+        {{- else }}
+            claimName: {{ .Release.Name }}-media
         {{- end }}
-        {{- with .Values.transcoder.volumes }}
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
+        - name: transcoder
+          persistentVolumeClaim:
+          {{- if .Values.volumes.transcoder.existingClaim }}
+            claimName: {{ .Values.volumes.transcoder.existingClaim }}
+          {{- else }}
+            claimName: {{ .Release.Name }}-transcoder
+          {{- end }}
+        - name: cache
+          emptyDir: {}
         {{- with .Values.transcoder.extraVolumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}

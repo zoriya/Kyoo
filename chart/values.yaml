@@ -135,21 +135,45 @@ kyoo:
     #   scope: "email openid profile"
     #   authMethod: ClientSecretBasic
 
-# configures workloads that require access to media
-media:
-  # specifies the volumes to use
-  volumes:
-    - name: media
-      persistentVolumeClaim:
-        claimName: media
-  # specifies where to mount the volumes
-  # note that this should align with .media.baseMountPath
-  volumeMounts:
-    - mountPath: /data
-      name: media
-  # configures kyoo workloads to search
-  # note that this should align with .media.volumeMounts[].mountPath
-  baseMountPath: "/data"
+volumes:
+  media:
+    # If you want to use an existing PVC, set the name here
+    # otherwise, leave it empty
+    existingClaim: ""
+    # The name of the volume
+    # It will be prefixed with the release name (e.g kyoo-media)
+    name: "media"
+    accessModes:
+      - "ReadOnlyMany"
+      # Some CSI drivers do not support ReadOnlyMany (e.g. longhorn)
+      # If you are using such a driver, you can change this to ReadWriteMany
+      # - "ReadWriteMany"
+    # -- If empty, will use the default storage class
+    storageClassName: ""
+    resources:
+      requests:
+        storage: "1Gi"
+    mountPath: "/data"
+    extraAnnotations: {}
+  back:
+    existingClaim: ""
+    accessModes:
+      - "ReadWriteOnce"
+    resources:
+      requests:
+        storage: "2Gi"
+    extraAnnotations: {}
+    mountPath: "/metadata"
+  transcoder: 
+    existingClaim: ""
+    accessModes:
+      - "ReadWriteOnce"
+    storageClassName: ""
+    resources:
+      requests:
+        storage: "3Gi"
+    extraAnnotations: {}
+    mountPath: "/metadata"
 
 # configures workloads that require access to contentdatabase
 contentdatabase:
@@ -219,13 +243,6 @@ back:
     image:
       repository: ~
       tag: ~
-    volumeMounts:
-      - mountPath: /metadata
-        name: back-storage
-  volumes:
-    - name: back-storage
-      persistentVolumeClaim:
-        claimName: back-storage
   replicaCount: 1
   podLabels: {}
   deploymentAnnotations: {}
@@ -356,17 +373,6 @@ transcoder:
     image:
       repository: ~
       tag: ~
-    volumeMounts:
-      - mountPath: /metadata
-        name: transcoder-storage
-      - mountPath: /cache
-        name: cache
-  volumes:
-    - name: transcoder-storage
-      persistentVolumeClaim:
-        claimName: transcoder-storage
-    - name: cache
-      emptyDir: {}
   replicaCount: 1
   podLabels: {}
   deploymentAnnotations: {}
