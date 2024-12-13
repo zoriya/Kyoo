@@ -121,7 +121,11 @@ spec:
       volumes:
         - name: media
           persistentVolumeClaim:
+        {{- if .Values.volumes.media.existingClaim }}
+            claimName: {{ .Values.volumes.media.existingClaim }}
+        {{- else }}
             claimName: {{ .Release.Name }}-media
+        {{- end }}
         {{- with .Values.scanner.extraVolumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
