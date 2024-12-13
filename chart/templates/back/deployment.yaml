@@ -162,15 +162,15 @@ spec:
               protocol: TCP
           {{- with .Values.back.kyoo_back.livenessProbe }}
           livenessProbe:
-            {{- toYaml .Values.back.kyoo_back.livenessProbe | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.back.kyoo_back.readinessProbe }}
           readinessProbe:
-            {{- toYaml .Values.back.kyoo_back.readinessProbe | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.back.kyoo_back.resources }}
           resources:
-            {{- toYaml .Values.back.kyoo_back.resources | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.back.kyoo_back.containerSecurityContext }}
           securityContext:

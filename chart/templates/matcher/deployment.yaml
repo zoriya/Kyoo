@@ -90,15 +90,15 @@ spec:
             {{- end }}
           {{- with .Values.matcher.kyoo_matcher.livenessProbe }}
           livenessProbe:
-            {{- toYaml .Values.matcher.kyoo_matcher.livenessProbe | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.matcher.kyoo_matcher.readinessProbe }}
           readinessProbe:
-            {{- toYaml .Values.matcher.kyoo_matcher.readinessProbe | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.matcher.kyoo_matcher.resources }}
           resources:
-            {{- toYaml .Values.matcher.kyoo_matcher.resources | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.matcher.kyoo_matcher.containerSecurityContext }}
           securityContext:

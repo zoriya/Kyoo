@@ -66,15 +66,15 @@ spec:
             {{- end }}
           {{- with .Values.autosync.kyoo_autosync.livenessProbe }}
           livenessProbe:
-            {{- toYaml .Values.autosync.kyoo_autosync.livenessProbe | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.autosync.kyoo_autosync.readinessProbe }}
           readinessProbe:
-            {{- toYaml .Values.autosync.kyoo_autosync.readinessProbe | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.autosync.kyoo_autosync.resources }}
           resources:
-            {{- toYaml .Values.autosync.kyoo_autosync.resources | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.autosync.kyoo_autosync.containerSecurityContext }}
           securityContext:
