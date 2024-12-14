@@ -86,15 +86,15 @@ spec:
               protocol: TCP
           {{- with .Values.transcoder.kyoo_transcoder.livenessProbe }}
           livenessProbe:
-            {{- toYaml .Values.transcoder.kyoo_transcoder.livenessProbe | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.transcoder.kyoo_transcoder.readinessProbe }}
           readinessProbe:
-            {{- toYaml .Values.transcoder.kyoo_transcoder.readinessProbe | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.transcoder.kyoo_transcoder.resources }}
           resources:
-            {{- toYaml .Values.transcoder.kyoo_transcoder.resources | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.transcoder.kyoo_transcoder.containerSecurityContext }}
           securityContext:

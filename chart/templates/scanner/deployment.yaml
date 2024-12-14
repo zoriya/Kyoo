@@ -79,15 +79,15 @@ spec:
             {{- end }}
           {{- with .Values.scanner.kyoo_scanner.livenessProbe }}
           livenessProbe:
-            {{- toYaml .Values.scanner.kyoo_scanner.livenessProbe | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.scanner.kyoo_scanner.readinessProbe }}
           readinessProbe:
-            {{- toYaml .Values.scanner.kyoo_scanner.readinessProbe | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.scanner.kyoo_scanner.resources }}
           resources:
-            {{- toYaml .Values.scanner.kyoo_scanner.resources | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.scanner.kyoo_scanner.containerSecurityContext }}
           securityContext:

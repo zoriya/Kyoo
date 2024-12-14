@@ -58,15 +58,15 @@ spec:
               protocol: TCP
           {{- with .Values.front.kyoo_front.livenessProbe }}
           livenessProbe:
-            {{- toYaml .Values.front.kyoo_front.livenessProbe | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.front.kyoo_front.readinessProbe }}
           readinessProbe:
-            {{- toYaml .Values.front.kyoo_front.readinessProbe | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.front.kyoo_front.resources }}
           resources:
-            {{- toYaml .Values.front.kyoo_front.resources | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.front.kyoo_front.containerSecurityContext }}
           securityContext:
