@@ -108,7 +108,7 @@ spec:
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-        {{- with .Values.matcher.kyoo_matcher.extraContainers }}
+        {{- with .Values.matcher.extraContainers }}
           {{- tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
       {{- with .Values.matcher.extraInitContainers }}
