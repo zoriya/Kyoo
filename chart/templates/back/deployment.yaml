@@ -183,7 +183,7 @@ spec:
             {{- with .Values.back.kyoo_back.extraVolumeMounts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
-        {{- with .Values.back.kyoo_back.extraContainers }}
+        {{- with .Values.back.extraContainers }}
           {{- tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
       volumes:

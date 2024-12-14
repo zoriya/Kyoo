@@ -100,7 +100,7 @@ spec:
             {{- with .Values.scanner.kyoo_scanner.extraVolumeMounts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
-        {{- with .Values.scanner.kyoo_scanner.extraContainers }}
+        {{- with .Values.scanner.extraContainers }}
           {{- tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
       {{- with .Values.scanner.extraInitContainers }}
