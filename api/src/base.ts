@@ -11,6 +11,7 @@ export const base = new Elysia({ name: "base" })
 			} as KError;
 		}
 		if (code === "INTERNAL_SERVER_ERROR") {
+			console.error(error);
 			return {
 				status: 500,
 				message: error.message,
