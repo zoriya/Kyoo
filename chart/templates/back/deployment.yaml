@@ -17,12 +17,12 @@ spec:
       {{- include "kyoo.selectorLabels" (dict "context" . "name" .Values.back.name) | nindent 6 }}
   template:
     metadata:
+      {{- with (mergeOverwrite (deepCopy .Values.global.podAnnotations) .Values.back.podAnnotations) }}
       annotations:
-        {{- with (mergeOverwrite (deepCopy .Values.global.podAnnotations) .Values.back.podAnnotations) }}
         {{- range $key, $value := . }}
         {{ $key }}: {{ $value | quote }}
         {{- end }}
-        {{- end }}
+      {{- end }}
       labels:
         {{- include "kyoo.labels" (dict "context" . "component" .Values.back.name "name" .Values.back.name) | nindent 8 }}
         {{- with (mergeOverwrite (deepCopy .Values.global.podLabels) .Values.back.podLabels) }}
