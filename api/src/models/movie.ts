@@ -1,6 +1,5 @@
 import { t } from "elysia";
 import { ExternalId, Genre, Image, Language, SeedImage } from "./utils";
-import { SeedVideo } from "./video";
 import { bubble, registerExamples } from "./examples";
 import { bubbleImages } from "./examples/bubble";
 
