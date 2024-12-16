@@ -52,7 +52,7 @@ class Matcher:
 		if "mimetype" not in raw or not raw["mimetype"].startswith("video"):
 			return
 
-		logger.info("Identied %s: %s", path, raw)
+		logger.info("Identified %s: %s", path, raw)
 
 		title = raw.get("title")
 		if not isinstance(title, str):
