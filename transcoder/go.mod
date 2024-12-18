@@ -7,7 +7,7 @@ require (
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/lib/pq v1.10.9
 	gitlab.com/opennota/screengen v1.0.2
-	gopkg.in/vansante/go-ffprobe.v2 v2.2.0
+	gopkg.in/vansante/go-ffprobe.v2 v2.2.1
 )
 
 require (
