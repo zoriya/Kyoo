@@ -71,12 +71,12 @@ const config: ExpoConfig = {
 	},
 	plugins: [
 		[
-			"expo-build-properties", 
+			"expo-build-properties",
 			{
 				android: {
-					usesCleartextTraffic: true
+					usesCleartextTraffic: true,
 				},
-			}
+			},
 		],
 		"expo-localization",
 		[
