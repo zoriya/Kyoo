@@ -55,7 +55,12 @@ export const LoginPage: QueryPage<{ apiUrl?: string; error?: string }> = ({
 			<H1>{t("login.login")}</H1>
 			<OidcLogin apiUrl={apiUrl} />
 			<P {...css({ paddingLeft: ts(1) })}>{t("login.username")}</P>
-			<Input autoComplete="username" variant="big" onChangeText={(value) => setUsername(value)} autoCapitalize='none'/>
+			<Input
+				autoComplete="username"
+				variant="big"
+				onChangeText={(value) => setUsername(value)}
+				autoCapitalize="none"
+			/>
 			<P {...css({ paddingLeft: ts(1) })}>{t("login.password")}</P>
 			<PasswordInput
 				autoComplete="password"
