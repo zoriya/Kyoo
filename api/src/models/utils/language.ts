@@ -49,7 +49,8 @@ export const Language = (props?: StringProps) =>
 		...props,
 	});
 
-export const processLanguages = (languages: string) => {
+export const processLanguages = (languages?: string) => {
+	if (!languages) return ["*"];
 	return languages
 		.split(",")
 		.map((x) => {

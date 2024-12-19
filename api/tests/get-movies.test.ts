@@ -9,13 +9,15 @@ import { shows } from "~/db/schema";
 import { bubble } from "~/models/examples";
 
 const app = new Elysia().use(base).use(movies);
-const getMovie = async (id: string, langs: string) => {
+const getMovie = async (id: string, langs?: string) => {
 	const resp = await app.handle(
 		new Request(`http://localhost/movies/${id}`, {
 			method: "GET",
-			headers: {
-				"Accept-Language": langs,
-			},
+			headers: langs
+				? {
+						"Accept-Language": langs,
+					}
+				: {},
 		}),
 	);
 	const body = await resp.json();
@@ -73,6 +75,16 @@ describe("Get movie", () => {
 	});
 	it("Use language fallback", async () => {
 		const [resp, body] = await getMovie(bubble.slug, "fr,ja,*");
+
+		expectStatus(resp, body).toBe(200);
+		expect(body).toMatchObject({
+			slug: bubble.slug,
+			name: bubble.translations.en.name,
+		});
+		expect(resp.headers.get("Content-Language")).toBe("en");
+	});
+	it("Works without accept-language header", async () => {
+		const [resp, body] = await getMovie(bubble.slug, undefined);
 
 		expectStatus(resp, body).toBe(200);
 		expect(body).toMatchObject({
