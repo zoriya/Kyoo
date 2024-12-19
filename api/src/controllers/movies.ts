@@ -89,34 +89,44 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 			},
 			params: t.Object({
 				id: t.String({
-					description: "The id or slug of the movie to retrieve",
-					examples: [bubble.slug],
+					description: "The id or slug of the movie to retrieve.",
+					example: bubble.slug,
 				}),
 			}),
 			headers: t.Object({
 				"accept-language": t.String({
 					default: "*",
-					examples: "en-us, ja;q=0.5",
+					example: "en-us, ja;q=0.5",
 					description: comment`
-					List of languages you want the data in.
-					This follows the Accept-Language offical specification
-					(https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language)
-				`,
+						List of languages you want the data in.
+						This follows the Accept-Language offical specification
+						(https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language).
+					`,
 				}),
 			}),
 			response: {
-				200: "movie",
+				200: { ...Movie, description: "Found" },
 				404: {
 					...KError,
 					description: "No movie found with the given id or slug.",
+					examples: [
+						{ status: 404, message: "Movie not found", details: undefined },
+					],
 				},
 				422: {
 					...KError,
 					description: comment`
-					The Accept-Language header can't be satisfied (all languages listed are
-					unavailable). Try with another languages or add * to the list of languages
-					to fallback to any language.
-				`,
+						The Accept-Language header can't be satisfied (all languages listed are
+						unavailable). Try with another languages or add * to the list of languages
+						to fallback to any language.
+					`,
+					examples: [
+						{
+							status: 422,
+							message: "Accept-Language header could not be satisfied.",
+							details: undefined,
+						},
+					],
 				},
 			},
 		},
