@@ -11,12 +11,11 @@ logger = getLogger(__name__)
 
 
 def get_ignore_pattern():
+	"""Compile ignore pattern from environment variable."""
 	try:
 		pattern = os.environ.get("LIBRARY_IGNORE_PATTERN")
-		if pattern:
-			return re.compile(pattern)
-		return None
-	except Exception as e:
+		return re.compile(pattern) if pattern else None
+	except re.error as e:
 		logger.error(f"Invalid ignore pattern. Ignoring. Error: {e}")
 		return None
 
@@ -25,32 +24,46 @@ async def scan(
 	path_: Optional[str], publisher: Publisher, client: KyooClient, remove_deleted=False
 ):
 	path = path_ or os.environ.get("SCANNER_LIBRARY_ROOT", "/video")
+	logger.info("Starting scan at %s. This may take some time...", path)
 
-	logger.info("Starting the scan. It can take some times...")
 	ignore_pattern = get_ignore_pattern()
+	if ignore_pattern:
+		logger.info(f"Applying ignore pattern: {ignore_pattern}")
 
-	registered = await client.get_registered_paths()
-	videos = [
-		os.path.join(dir, file) for dir, _, files in os.walk(path) for file in files
-	]
-	if ignore_pattern is not None:
-		logger.info(f"Ignoring with pattern {ignore_pattern}")
-		videos = [p for p in videos if not ignore_pattern.match(p)]
-	to_register = [p for p in videos if p not in registered]
+	registered = set(await client.get_registered_paths())
+	videos = set()
+
+	for dirpath, dirnames, files in os.walk(path):
+		# Skip directories with a `.ignore` file
+		if ".ignore" in files:
+			dirnames.clear()  # Prevents os.walk from descending into this directory
+			continue
+
+		for file in files:
+			file_path = os.path.join(dirpath, file)
+			# Apply ignore pattern, if any
+			if ignore_pattern and ignore_pattern.match(file_path):
+				continue
+			videos.add(file_path)
+
+	to_register = videos - registered
+	to_delete = registered - videos if remove_deleted else set()
+
+	if to_register:
+		logger.info("Found %d new files to register.", len(to_register))
+		await asyncio.gather(*[publisher.add(path) for path in to_register])
+
+	if to_delete:
+		logger.info("Removing %d stale files.", len(to_delete))
+		await asyncio.gather(*[publisher.delete(path) for path in to_delete])
 
 	if remove_deleted:
-		deleted = [x for x in registered if x not in videos]
-		logger.info("Found %d stale files to remove.", len(deleted))
-		if len(deleted) != len(registered):
-			await asyncio.gather(*map(publisher.delete, deleted))
-		elif len(deleted) > 0:
-			logger.warning("All video files are unavailable. Check your disks.")
+		issues = set(await client.get_issues())
+		issues_to_delete = issues - videos
+		if issues_to_delete:
+			logger.info("Removing %d stale issues.", len(issues_to_delete))
+			await asyncio.gather(
+				*[client.delete_issue(issue) for issue in issues_to_delete]
+			)
 
-		issues = await client.get_issues()
-		for x in issues:
-			if x not in videos:
-				await client.delete_issue(x)
-
-	logger.info("Found %d new files (counting non-video files)", len(to_register))
-	await asyncio.gather(*map(publisher.add, to_register))
 	logger.info("Scan finished for %s.", path)
