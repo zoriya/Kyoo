@@ -63,7 +63,7 @@ export const ServerUrlPage: QueryPage = () => {
 		>
 			<H1>{t("login.server")}</H1>
 			<View {...css({ justifyContent: "center" })}>
-				<Input variant="big" onChangeText={setApiUrl} />
+				<Input variant="big" onChangeText={setApiUrl} autoCorrect={false} autoCapitalize="none" />
 				{!data && (
 					<P {...css({ color: (theme: Theme) => theme.colors.red, alignSelf: "center" })}>
 						{error?.errors[0] ?? t("misc.loading")}

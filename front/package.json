@@ -11,7 +11,7 @@
 		"build:mobile:dev": "yarn workspace mobile build:dev",
 		"update": "yarn workspace mobile update",
 		"lint": "biome lint .",
-		"lint:fix": "biome lint . --apply",
+		"lint:fix": "biome lint . --write",
 		"format": "biome format .",
 		"format:fix": "biome format . --write"
 	},
