@@ -70,7 +70,14 @@ const config: ExpoConfig = {
 		},
 	},
 	plugins: [
-		"expo-build-properties",
+		[
+			"expo-build-properties", 
+			{
+				android: {
+					usesCleartextTraffic: true
+				},
+			}
+		],
 		"expo-localization",
 		[
 			"react-native-video",
