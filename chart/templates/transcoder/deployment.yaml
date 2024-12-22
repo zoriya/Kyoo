@@ -12,6 +12,10 @@ metadata:
     {{- include "kyoo.labels" (dict "context" . "component" .Values.transcoder.name "name" .Values.transcoder.name) | nindent 4 }}
 spec:
   replicas: {{ .Values.transcoder.replicaCount }}
+  {{- with .Values.transcoder.updateStrategy }}
+  strategy: 
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "kyoo.selectorLabels" (dict "context" . "name" .Values.transcoder.name) | nindent 6 }}

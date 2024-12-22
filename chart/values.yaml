@@ -179,6 +179,7 @@ autosync:
       repository: ~
       tag: ~
   replicaCount: 1
+  updateStrategy: ~
   podLabels: {}
   deploymentAnnotations: {}
   podAnnotations: {}
@@ -227,6 +228,9 @@ back:
       persistentVolumeClaim:
         claimName: back-storage
   replicaCount: 1
+  # default to recreate for better user experience with ReadWriteOnce volumes  
+  updateStrategy:
+    type: Recreate
   podLabels: {}
   deploymentAnnotations: {}
   podAnnotations: {}
@@ -260,6 +264,7 @@ front:
       repository: ~
       tag: ~
   replicaCount: 1
+  updateStrategy: ~
   podLabels: {}
   deploymentAnnotations: {}
   podAnnotations: {}
@@ -298,6 +303,7 @@ matcher:
       tag: ~
   # matcher does not support multiple replicas
   replicaCount: 1
+  updateStrategy: ~
   podLabels: {}
   deploymentAnnotations: {}
   podAnnotations: {}
@@ -328,6 +334,7 @@ scanner:
       tag: ~
   # scanner does not support multiple replicas
   replicaCount: 1
+  updateStrategy: ~
   podLabels: {}
   deploymentAnnotations: {}
   podAnnotations: {}
@@ -368,6 +375,9 @@ transcoder:
     - name: cache
       emptyDir: {}
   replicaCount: 1
+  # default to recreate for better user experience with ReadWriteOnce volumes  
+  updateStrategy:
+    type: Recreate
   podLabels: {}
   deploymentAnnotations: {}
   podAnnotations: {}
