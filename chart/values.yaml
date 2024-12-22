@@ -229,7 +229,8 @@ back:
         claimName: back-storage
   replicaCount: 1
   # default to recreate for better user experience with ReadWriteOnce volumes  
-  updateStrategy: Recreate
+  updateStrategy:
+    type: Recreate
   podLabels: {}
   deploymentAnnotations: {}
   podAnnotations: {}
@@ -375,7 +376,8 @@ transcoder:
       emptyDir: {}
   replicaCount: 1
   # default to recreate for better user experience with ReadWriteOnce volumes  
-  updateStrategy: Recreate
+  updateStrategy:
+    type: Recreate
   podLabels: {}
   deploymentAnnotations: {}
   podAnnotations: {}

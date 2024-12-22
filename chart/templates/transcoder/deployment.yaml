@@ -13,7 +13,8 @@ metadata:
 spec:
   replicas: {{ .Values.transcoder.replicaCount }}
   {{- with .Values.transcoder.updateStrategy }}
-  strategy: {{ . }}
+  strategy: 
+    {{- toYaml . | nindent 4 }}
   {{- end }}
   selector:
     matchLabels:
