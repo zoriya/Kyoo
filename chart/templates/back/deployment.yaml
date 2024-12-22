@@ -12,6 +12,9 @@ metadata:
     {{- include "kyoo.labels" (dict "context" . "component" .Values.back.name "name" .Values.back.name) | nindent 4 }}
 spec:
   replicas: {{ .Values.back.replicaCount }}
+  {{- with .Values.back.updateStrategy }}
+  strategy: {{ . }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "kyoo.selectorLabels" (dict "context" . "name" .Values.back.name) | nindent 6 }}
