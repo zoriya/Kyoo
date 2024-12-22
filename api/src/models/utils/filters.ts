@@ -99,15 +99,24 @@ export const operation = property
 	)
 	.expects("an operation");
 
-const expression = later<Expression>();
+// grammar:
+//
+// operation = property operator value
+// property = letter { letter }
+// operator = "eq" | "lt" | ...
+// value = ...
+//
+// expression = expr { binn expr }
+// expr =
+//   | "not" expr
+//   | "(" expression ")"
+//   | operation
+// bin = "and" | "or"
+//
+const expr = later<Expression>();
 
-const not = t(string("not")).pipe(
-	qthen(expression),
-	map((expression) => ({ type: "not" as const, expression })),
-);
-
-const andor = operation.pipe(
-	then(anyStringOf("and", "or").pipe(then(expression), many())),
+export const expression = expr.pipe(
+	then(t(anyStringOf("and", "or")).pipe(then(expr), many())),
 	map(([first, expr]) =>
 		expr.reduce<Expression>(
 			(lhs, [op, rhs]) => ({ type: op, lhs, rhs }),
@@ -116,11 +125,14 @@ const andor = operation.pipe(
 	),
 );
 
-expression.init(
-	not.pipe(or(operation, expression.pipe(or(andor), between("(", ")")))),
+const not = t(string("not")).pipe(
+	qthen(expr),
+	map((expression) => ({ type: "not" as const, expression })),
 );
 
-export const filterParser = andor.pipe(or(expression));
+const brackets = expression.pipe(between("(", ")"));
+
+expr.init(not.pipe(or(brackets, operation)));
 
 export const parseFilter = (
 	filter: string,
