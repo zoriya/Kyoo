@@ -177,6 +177,10 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
+            {{- if .Values.back.persistence.enabled }}
+            - name: backmetadata
+              mountPath: /metadata
+            {{- end }}
             {{- with .Values.back.kyoo_back.volumeMounts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -187,6 +191,17 @@ spec:
           {{- tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
       volumes:
+        {{- if .Values.back.persistence.enabled }}
+        {{- if .Values.back.persistence.existingClaim }}
+        - name: backmetadata
+          persistentVolumeClaim:
+            claimName: {{ .Values.back.persistence.existingClaim }}
+        {{- else }}
+        - name: backmetadata
+          persistentVolumeClaim:
+            claimName: {{ include "kyoo.backmetadata.fullname" . }}
+        {{- end }}
+        {{- end }}
         {{- with .Values.back.volumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}

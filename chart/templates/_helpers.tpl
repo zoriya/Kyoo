@@ -42,6 +42,14 @@ Create the name of the back service account to use
 {{- end -}}
 
 {{/*
+Create kyoo back-metadata name
+*/}}
+{{- define "kyoo.backmetadata.fullname" -}}
+{{- printf "%s-%s%s" (include "kyoo.fullname" .) .Values.back.name "metadata" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+
+{{/*
 Create kyoo front name
 */}}
 {{- define "kyoo.front.fullname" -}}
@@ -111,4 +119,11 @@ Create the name of the transcoder service account to use
 {{- else -}}
     {{ default "default" .Values.transcoder.serviceAccount.name }}
 {{- end -}}
+{{- end -}}
+
+{{/*
+Create kyoo transcoder-metadata name
+*/}}
+{{- define "kyoo.transcodermetadata.fullname" -}}
+{{- printf "%s-%s%s" (include "kyoo.fullname" .) .Values.transcoder.name "metadata" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
