@@ -13,7 +13,8 @@ metadata:
 spec:
   replicas: {{ .Values.autosync.replicaCount }}
   {{- with .Values.autosync.updateStrategy }}
-  strategy: {{ . }}
+  strategy: 
+    {{- toYaml . | nindent 4 }}
   {{- end }}
   selector:
     matchLabels:
