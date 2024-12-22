@@ -22,21 +22,16 @@ import {
 	between,
 	recover,
 } from "parjs/combinators";
-import type { KError } from "../error";
 
-export type Filter = {
-	[key: string]: any;
-};
-
-type Property = string;
-type Value =
+export type Property = string;
+export type Value =
 	| { type: "int"; value: number }
 	| { type: "float"; value: number }
 	| { type: "date"; value: string }
 	| { type: "string"; value: string }
 	| { type: "enum"; value: string };
-const operators = ["eq", "ne", "gt", "ge", "lt", "le", "has", "in"] as const;
-type Operator = (typeof operators)[number];
+const operators = ["eq", "ne", "gt", "ge", "lt", "le", "has"] as const;
+export type Operator = (typeof operators)[number];
 export type Expression =
 	| { type: "op"; operator: Operator; property: Property; value: Value }
 	| { type: "and"; lhs: Expression; rhs: Expression }
@@ -133,12 +128,3 @@ const not = t(string("not")).pipe(
 const brackets = expression.pipe(between("(", ")"));
 
 expr.init(not.pipe(or(brackets, operation)));
-
-export const parseFilter = (
-	filter: string,
-	config: Filter,
-): Expression | KError => {
-	const ret = expression.parse(filter);
-	if (ret.isOk) return ret.value;
-	return { status: 422, message: `Invalid filter: ${filter}.`, details: ret };
-};

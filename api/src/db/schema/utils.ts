@@ -19,7 +19,7 @@ import {
 import type { AnySQLiteSelect } from "drizzle-orm/sqlite-core";
 import type { WithSubquery } from "drizzle-orm/subquery";
 import { db } from "..";
-import { CasingCache } from "drizzle-orm/casing";
+import type { CasingCache } from "drizzle-orm/casing";
 
 export const schema = pgSchema("kyoo");
 

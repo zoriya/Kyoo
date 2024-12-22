@@ -1,14 +1,15 @@
 import { and, desc, eq, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { KError } from "~/models/error";
-import { isUuid, processLanguages } from "~/models/utils";
+import { Genre, isUuid, processLanguages } from "~/models/utils";
 import { comment, RemovePrefix } from "~/utils";
 import { db } from "../db";
 import { shows, showTranslations } from "../db/schema/shows";
 import { getColumns } from "../db/schema/utils";
 import { bubble } from "../models/examples";
-import { Movie, type MovieStatus, MovieTranslation } from "../models/movie";
+import { Movie, MovieStatus, MovieTranslation } from "../models/movie";
 import { Page } from "~/models/utils/page";
+import { type Filter, parseFilters } from "~/models/utils/filter-sql";
 
 // drizzle is bugged and doesn't allow js arrays to be used in raw sql.
 export function sqlarr(array: unknown[]) {
@@ -36,6 +37,20 @@ const getTranslationQuery = (languages: string[]) => {
 };
 
 const { pk: _, kind, startAir, endAir, ...moviesCol } = getColumns(shows);
+
+const movieFilters: Filter = {
+	genres: {
+		column: shows.genres,
+		type: "enum",
+		values: Genre.enum,
+		isArray: true,
+	},
+	rating: { column: shows.rating, type: "int" },
+	status: { column: shows.status, type: "enum", values: MovieStatus.enum },
+	runtime: { column: shows.runtime, type: "float" },
+	airDate: { column: shows.startAir, type: "date" },
+	originalLanguage: { column: shows.originalLanguage, type: "string" },
+};
 
 export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 	.model({
@@ -100,8 +115,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					example: "en-us, ja;q=0.5",
 					description: comment`
 						List of languages you want the data in.
-						This follows the Accept-Language offical specification
-						(https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language).
+						This follows the [Accept-Language offical specification](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language).
 					`,
 				}),
 			}),
@@ -135,7 +149,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 	.get(
 		"",
 		async ({
-			query: { limit, after, sort },
+			query: { limit, after, sort, filter },
 			headers: { "accept-language": languages },
 		}) => {
 			const langs = processLanguages(languages);
@@ -146,6 +160,9 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				if (key === "airDate") return { key: "startAir" as const, desc };
 				return { key, desc };
 			});
+			const filters = parseFilters(filter, movieFilters);
+
+			// TODO: Add sql indexes on order keys
 
 			const items = await db
 				.select({
@@ -156,6 +173,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				})
 				.from(shows)
 				.innerJoin(transQ, eq(shows.pk, transQ.pk))
+				.where(filters)
 				.orderBy(
 					...order.map((x) => (x.desc ? desc(shows[x.key]) : shows[x.key])),
 					shows.pk,
@@ -168,6 +186,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 			detail: { description: "Get all movies" },
 			query: t.Object({
 				sort: t.Array(
+					// TODO: Add random
 					t.UnionEnum([
 						"slug",
 						"-slug",
@@ -182,6 +201,18 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					]),
 					// TODO: support explode: true (allow sort=slug,-createdAt). needs a pr to elysia
 					{ explode: false, default: ["slug"] },
+				),
+				filter: t.Optional(
+					t.String({
+						description: comment`
+							Filters to apply to the query.
+							This is based on [odata's filter specification](https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionfilter).
+
+							Filters available: ${Object.keys(movieFilters).join(", ")}
+						`,
+						example:
+							"(rating gt 75 and genres has action) or status eq planned",
+					}),
 				),
 				limit: t.Integer({
 					minimum: 1,
@@ -205,10 +236,9 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					example: "en-us, ja;q=0.5",
 					description: comment`
 						List of languages you want the data in.
-						This follows the Accept-Language offical specification
-						(https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language).
+						This follows the [Accept-Language offical specification](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language).
 
-						In this request, * is always implied (if no language could satisfy the request, kyoo will use any language available).
+						In this request, * is always implied (if no language could satisfy the request, kyoo will use any language available.)
 					`,
 				}),
 			}),
