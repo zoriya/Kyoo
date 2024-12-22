@@ -123,4 +123,51 @@ describe("Parse filter", () => {
 			},
 		});
 	});
+	it("Handle or", () => {
+		const ret = parse(
+			"not rating lt 10 and rating lt 20 or (status eq finished and not status ne airing)",
+		);
+		expect(ret).toMatchObject({
+			ok: true,
+			value: {
+				type: "or",
+				lhs: {
+					type: "and",
+					lhs: {
+						type: "not",
+						expression: {
+							type: "op",
+							operator: "lt",
+							property: "rating",
+							value: { type: "int", value: 10 },
+						},
+					},
+					rhs: {
+						type: "op",
+						operator: "lt",
+						property: "rating",
+						value: { type: "int", value: 20 },
+					},
+				},
+				rhs: {
+					type: "and",
+					lhs: {
+						type: "op",
+						operator: "eq",
+						property: "status",
+						value: { type: "enum", value: "finished" },
+					},
+					rhs: {
+						type: "not",
+						expression: {
+							type: "op",
+							operator: "ne",
+							property: "status",
+							value: { type: "enum", value: "airing" },
+						},
+					},
+				},
+			},
+		});
+	});
 });
