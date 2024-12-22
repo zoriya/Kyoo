@@ -20,6 +20,7 @@ import {
 	qthen,
 	later,
 	between,
+	recover,
 } from "parjs/combinators";
 import type { KError } from "../error";
 
@@ -46,8 +47,8 @@ function t<T>(parser: Parjser<T>): Parjser<T> {
 	return parser.pipe(thenq(string(" ").pipe(many())));
 }
 
-const str = t(noCharOf(" ")).pipe(many1(), stringify()).expects("a string");
-const enumP = t(letter()).pipe(many1(), stringify()).expects("an enum value");
+const str = t(noCharOf(" ").pipe(many1(), stringify()).expects("a string"));
+const enumP = t(letter().pipe(many1(), stringify()).expects("an enum value"));
 
 const property = str.expects("a property");
 
@@ -58,26 +59,35 @@ const floatVal = t(
 const dateVal = t(
 	digit(10).pipe(
 		exactly(4),
+		stringify(),
 		thenq(string("-")),
 		then(
-			digit(10).pipe(exactly(2), thenq(string("-"))),
-			digit(10).pipe(exactly(2)),
+			digit(10).pipe(exactly(2), stringify(), thenq(string("-"))),
+			digit(10).pipe(exactly(2), stringify()),
 		),
 		map(([year, month, day]) => ({
 			type: "date" as const,
 			value: `${year}-${month}-${day}`,
 		})),
 	),
+).expects("a date");
+const strVal = str.pipe(
+	between('"'),
+	or(str.pipe(between("'"))),
+	map((s) => ({ type: "string" as const, value: s })),
 );
-const strVal = str.pipe(map((s) => ({ type: "string" as const, value: s })));
 const enumVal = enumP.pipe(map((e) => ({ type: "enum" as const, value: e })));
-const value = intVal
-	.pipe(or(floatVal, dateVal, strVal, enumVal))
+const value = dateVal
+	.pipe(
+		// until we get the `-` character, this could be an int or a float.
+		recover(() => ({ kind: "Soft" })),
+		or(intVal, floatVal, strVal, enumVal),
+	)
 	.expects("a valid value");
 
 const operator = t(anyStringOf(...operators)).expects("an operator");
 
-const operation = property
+export const operation = property
 	.pipe(
 		then(operator, value),
 		map(([property, operator, value]) => ({
@@ -89,7 +99,7 @@ const operation = property
 	)
 	.expects("an operation");
 
-export const expression = later<Expression>();
+const expression = later<Expression>();
 
 const not = t(string("not")).pipe(
 	qthen(expression),
@@ -109,6 +119,8 @@ const andor = operation.pipe(
 expression.init(
 	not.pipe(or(operation, expression.pipe(or(andor), between("(", ")")))),
 );
+
+export const filterParser = andor.pipe(or(expression));
 
 export const parseFilter = (
 	filter: string,
