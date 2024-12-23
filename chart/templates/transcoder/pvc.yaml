@@ -1,0 +1,25 @@
+{{- if and .Values.transcoder.persistence.enabled (not .Values.transcoder.persistence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "kyoo.transcodermetadata.fullname" . }}
+  labels:
+    {{- include "kyoo.labels" (dict "context" . "component" .Values.transcoder.name "name" .Values.transcoder.name) | nindent 4 }}
+  {{- with (mergeOverwrite (deepCopy .Values.global.persistentVolumeClaimAnnotations) .Values.transcoder.persistence.annotations) }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- range .Values.transcoder.persistence.accessModes }}
+    - {{ . }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.transcoder.persistence.size }}
+  {{- if .Values.transcoder.persistence.storageClass }}
+  storageClassName: {{ .Values.transcoder.persistence.storageClass }}
+  {{- end }}
+{{- end }}

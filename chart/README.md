@@ -57,30 +57,10 @@ extraObjects:
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
-      name: back-storage
-    spec:
-      accessModes:
-        - "ReadWriteOnce"
-      resources:
-        requests:
-          storage: "3Gi"
-  - kind: PersistentVolumeClaim
-    apiVersion: v1
-    metadata:
       name: media
     spec:
       accessModes:
         - "ReadOnlyMany"
-      resources:
-        requests:
-          storage: "3Gi"
-  - kind: PersistentVolumeClaim
-    apiVersion: v1
-    metadata:
-      name: transcoder-storage
-    spec:
-      accessModes:
-        - "ReadWriteOnce"
       resources:
         requests:
           storage: "3Gi"

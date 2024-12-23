@@ -9,6 +9,7 @@ global:
     imagePullPolicy: IfNotPresent
   imagePullSecrets: []
   deploymentAnnotations: {}
+  persistentVolumeClaimAnnotations: {}
   podAnnotations: {}
   podLabels: {}
   extraEnv: []
@@ -220,13 +221,8 @@ back:
     image:
       repository: ~
       tag: ~
-    volumeMounts:
-      - mountPath: /metadata
-        name: back-storage
-  volumes:
-    - name: back-storage
-      persistentVolumeClaim:
-        claimName: back-storage
+    volumeMounts: []
+  volumes: []
   replicaCount: 1
   # default to recreate for better user experience with ReadWriteOnce volumes  
   updateStrategy:
@@ -247,6 +243,16 @@ back:
   extraContainers: []
   extraInitContainers: []
   extraVolumes: []
+  # backmetadata
+  # user profile pictures
+  persistence:
+    enabled: true
+    size: 3Gi
+    annotations: {}
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+    existingClaim: ""
 
 # front deployment configuration
 front:
@@ -364,14 +370,9 @@ transcoder:
       repository: ~
       tag: ~
     volumeMounts:
-      - mountPath: /metadata
-        name: transcoder-storage
       - mountPath: /cache
         name: cache
   volumes:
-    - name: transcoder-storage
-      persistentVolumeClaim:
-        claimName: transcoder-storage
     - name: cache
       emptyDir: {}
   replicaCount: 1
@@ -394,6 +395,16 @@ transcoder:
   extraContainers: []
   extraInitContainers: []
   extraVolumes: []
+  # transcodermetadata
+  # thumbnail images & subtiles
+  persistence:
+    enabled: true
+    size: 3Gi
+    annotations: {}
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+    existingClaim: ""
 
 ingress:
   enabled: false

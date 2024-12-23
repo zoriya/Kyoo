@@ -108,6 +108,10 @@ spec:
             {{- with .Values.media.volumeMounts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
+            {{- if .Values.back.persistence.enabled }}
+            - name: transcodermetadata
+              mountPath: /metadata
+            {{- end }}
             {{- with .Values.transcoder.kyoo_transcoder.volumeMounts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -124,6 +128,17 @@ spec:
       volumes:
         {{- with .Values.media.volumes }}
           {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- if .Values.transcoder.persistence.enabled }}
+        {{- if .Values.transcoder.persistence.existingClaim }}
+        - name: transcodermetadata
+          persistentVolumeClaim:
+            claimName: {{ .Values.transcoder.persistence.existingClaim }}
+        {{- else }}
+        - name: transcodermetadata
+          persistentVolumeClaim:
+            claimName: {{ include "kyoo.transcodermetadata.fullname" . }}
+        {{- end }}
         {{- end }}
         {{- with .Values.transcoder.volumes }}
           {{- toYaml . | nindent 8 }}
