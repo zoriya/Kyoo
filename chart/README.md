@@ -69,16 +69,16 @@ values.yaml configuration
 global:
   meilisearch:
     kyoo_back:
-      host: kyoo-meilisearch.kyoo
+      host: kyoo-meilisearch.kyoo.svc.cluster.local
   postgres:
     # postgres instance information to connect to back's database
     kyoo_back:
-      host: cluster01.postgres
+      host: cluster01.postgres.svc.cluster.local
     # postgres instance information to connect to transcoder's database
     kyoo_transcoder:
-      host: cluster01.postgres
+      host: cluster01.postgres.svc.cluster.local
   rabbitmq:
-    host: cluster01.rabbitmq
+    host: cluster01.rabbitmq.svc.cluster.local
 kyoo:
   address: https://kyoo.mydomain.com
 # leverage NFS for media
@@ -88,10 +88,6 @@ media:
       nfs:
         server: mynasserver
         path: /spin0/media
-  volumeMounts:
-    - name: media
-      mountPath: /data
-      readOnly: true
 ```
 by default the chart expects to consume a Kubernetes secret named `bigsecret`.  That secret should look similar to:
 
