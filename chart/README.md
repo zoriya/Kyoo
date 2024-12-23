@@ -114,10 +114,6 @@ stringData:
 ```
 
 # Recomendations
-## Secret
-
-
-
 ## Postgres
 Kyoo consists of multiple microservices.  Best practice is for each microservice to use its own database.  Kyoo workloads support best practices or sharing a single postgres database.  Please see the `POSTGRES_SCHEMA` setting for additional information.  Strongly recomended to use a Kubernetes operator for managing Postgres.
 
