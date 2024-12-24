@@ -70,6 +70,7 @@ const config: ExpoConfig = {
 		},
 	},
 	plugins: [
+		"@react-native-tvos/config-tv",
 		[
 			"expo-build-properties",
 			{

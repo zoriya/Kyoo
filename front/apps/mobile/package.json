@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "expo start",
 		"android": "expo run:android",
+		"android:tv": "EXPO_TV=1 expo run:android",
 		"ios": "expo run:ios",
 		"web": "expo start --web",
 		"build": "eas build --profile production --platform android --non-interactive --auto-submit",
@@ -49,7 +50,7 @@
 		"moti": "^0.29.0",
 		"react": "18.3.1",
 		"react-i18next": "^15.0.1",
-		"react-native": "0.74.5",
+		"react-native": "npm:react-native-tvos@0.74.5-0",
 		"react-native-blurhash": "^2.0.3",
 		"react-native-fast-image": "^8.6.3",
 		"react-native-mmkv": "^2.12.2",
@@ -61,8 +62,16 @@
 		"react-native-video": "^6.4.3",
 		"yoshiki": "1.2.14"
 	},
+	"expo": {
+		"install": {
+			"exclude": [
+				"react-native"
+			]
+		}
+	},
 	"devDependencies": {
 		"@babel/core": "^7.25.2",
+		"@react-native-tvos/config-tv": "^0.1.1",
 		"react-native-svg-transformer": "^1.5.0",
 		"typescript": "~5.5.4"
 	},
