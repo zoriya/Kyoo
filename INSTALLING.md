@@ -120,6 +120,17 @@ You can also edit the volume definition to use advanced volume drivers if you ne
 
 Don't forget to **also edit the scanner's volumes** if you edit the transcoder's volume.
 
+# Ignoring Directories
+Kyoo supports excluding specific directories from scanning and monitoring by detecting the presence of an `.ignore` file. When a directory contains an `.ignore` file, Kyoo will recursively exclude that directory and all its contents from processing.
+
+## Example
+To exclude `/media/extras/**`, add an `.ignore` file:
+
+```bash
+touch /media/extras/.ignore
+```
+Kyoo will skip `/media/extras` and its contents in all future scans and monitoring events.
+
 # OpenID Connect
 
 Kyoo supports OpenID Connect (OIDC) for authentication. Please refer to the [OIDC.md](OIDC.md) file for more information.
