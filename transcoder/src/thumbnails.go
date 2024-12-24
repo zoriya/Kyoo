@@ -66,7 +66,7 @@ func (s *MetadataService) ExtractThumbs(path string, sha string) (interface{}, e
 func extractThumbnail(path string, sha string) error {
 	defer printExecTime("extracting thumbnails for %s", path)()
 
-	os.MkdirAll(fmt.Sprintf("%s/%s", Settings.Metadata), 0o755)
+	os.MkdirAll(fmt.Sprintf("%s/%s", Settings.Metadata, sha), 0o755)
 
 	if _, err := os.Stat(getThumbPath(sha)); err == nil {
 		return nil
