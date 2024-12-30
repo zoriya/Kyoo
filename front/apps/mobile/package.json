@@ -64,9 +64,7 @@
 	},
 	"expo": {
 		"install": {
-			"exclude": [
-				"react-native"
-			]
+			"exclude": ["react-native"]
 		}
 	},
 	"devDependencies": {
