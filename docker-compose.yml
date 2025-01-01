@@ -20,7 +20,8 @@ services:
     restart: unless-stopped
     cpus: 1.5
     environment:
-      - TRANSCODER_URL=${TRANSCODER_URL:-http://transcoder:7666}
+      - TRANSCODER_URL=${TRANSCODER_URL:-http://transcoder:7666/video}
+      - KYOO_PREFIX=/api
     env_file:
       - ./.env
     depends_on:
