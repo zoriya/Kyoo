@@ -9,7 +9,7 @@ import { getColumns } from "../db/schema/utils";
 import { bubble } from "../models/examples";
 import { Movie, MovieStatus, MovieTranslation } from "../models/movie";
 import { Page } from "~/models/utils/page";
-import { type Filter, parseFilters } from "~/models/utils/filter-sql";
+import { type Filter, parseFilters } from "~/models/utils/filters-sql";
 
 // drizzle is bugged and doesn't allow js arrays to be used in raw sql.
 export function sqlarr(array: unknown[]) {
