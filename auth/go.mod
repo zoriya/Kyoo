@@ -44,7 +44,7 @@ require (
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/opencontainers/image-spec v1.1.0 // indirect
 	github.com/swaggo/files/v2 v2.0.1 // indirect
-	github.com/swaggo/swag v1.16.3
+	github.com/swaggo/swag v1.16.4
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.53.0 // indirect
