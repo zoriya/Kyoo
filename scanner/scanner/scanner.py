@@ -49,13 +49,18 @@ async def scan(
 	to_register = videos - registered
 	to_delete = registered - videos if remove_deleted else set()
 
-	if to_register:
-		logger.info("Found %d new files to register.", len(to_register))
-		await asyncio.gather(*[publisher.add(path) for path in to_register])
+	if not any(to_register) and any(to_delete) and len(to_delete) == len(registered):
+		logger.warning("All video files are unavailable. Check your disks.")
+		return
 
+	# delete stale files before creating new ones to prevent potential conflicts
 	if to_delete:
 		logger.info("Removing %d stale files.", len(to_delete))
 		await asyncio.gather(*[publisher.delete(path) for path in to_delete])
+
+	if to_register:
+		logger.info("Found %d new files to register.", len(to_register))
+		await asyncio.gather(*[publisher.add(path) for path in to_register])
 
 	if remove_deleted:
 		issues = set(await client.get_issues())
