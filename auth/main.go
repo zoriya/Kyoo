@@ -35,10 +35,7 @@ func ErrorHandler(err error, c echo.Context) {
 		c.Logger().Error(err)
 	}
 
-	ret := problem.NewDefault(code)
-	if message != "" {
-		ret.Detail = message
-	}
+	ret := problem.NewMap(code, message)
 	c.JSON(code, ret)
 }
 

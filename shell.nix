@@ -19,7 +19,6 @@
     combinePackages [
       sdk_8_0
       aspnetcore_8_0
-      aspnetcore_6_0
     ];
 in
   pkgs.mkShell {
@@ -27,7 +26,6 @@ in
       nodejs-18_x
       nodePackages.yarn
       nodePackages.eas-cli
-      nodePackages.expo-cli
       dotnet
       csharpier
       python
