@@ -1,4 +1,4 @@
-# FROM golang:1.22 as build
+# FROM golang:1.23 as build
 FROM debian:trixie-slim AS build
 # those were copied from https://github.com/docker-library/golang/blob/master/Dockerfile-linux.template
 ENV GOTOOLCHAIN=local
@@ -18,6 +18,7 @@ RUN set -eux; \
 # https://github.com/golang/go/issues/54400
 ENV SSL_CERT_DIR=/etc/ssl/certs
 RUN update-ca-certificates
+
 RUN apt-get update \
 	&& apt-get install --no-install-recommends --no-install-suggests -y \
 	ffmpeg libavformat-dev libavutil-dev libswscale-dev \
