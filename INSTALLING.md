@@ -6,7 +6,7 @@
    [`.env`](https://raw.githubusercontent.com/zoriya/Kyoo/master/.env.example) files
 3. Fill the `.env` file with your configuration options
 4. Look at [Hardware Acceleration section](#Hardware-Acceleration) if you need it
-5. Look at [Custom Volumes](#Custom-Volumes) if you need it,
+5. Look at [FAQ](#FAQ) if you need it,
 6. Run `docker compose up -d` and see kyoo at `http://localhost:8901`
 
 # Installing
@@ -91,7 +91,9 @@ You can also add `COMPOSE_PROFILES=nvidia` to your `.env` instead of adding the 
 Note that most nvidia cards have an artificial limit on the number of encodes. You can confirm your card limit [here](https://developer.nvidia.com/video-encode-and-decode-gpu-support-matrix-new).
 This limit can also be removed by applying an [unofficial patch](https://github.com/keylase/nvidia-patch) to you driver.
 
-# Custom volumes
+# FAQ
+
+## Custom volumes
 
 To customize volumes, you can edit the `docker-compose.yml` manually.
 
@@ -120,6 +122,18 @@ You can also edit the volume definition to use advanced volume drivers if you ne
 
 Don't forget to **also edit the scanner's volumes** if you edit the transcoder's volume.
 
+## Ignoring Directories
+Kyoo supports excluding specific directories from scanning and monitoring by detecting the presence of a `.ignore` file. When a directory contains a `.ignore` file, Kyoo will recursively exclude that directory and all its contents from processing.
+
+Example:
+To exclude `/media/extras/**`, add a `.ignore` file:
+```bash
+touch /media/extras/.ignore
+```
+Kyoo will skip `/media/extras` and its contents in all future scans and monitoring events.
+
 # OpenID Connect
 
 Kyoo supports OpenID Connect (OIDC) for authentication. Please refer to the [OIDC.md](OIDC.md) file for more information.
+
+<!-- vim: set wrap: -->
