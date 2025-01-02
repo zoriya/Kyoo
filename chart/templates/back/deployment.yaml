@@ -80,7 +80,9 @@ spec:
             {{- end }}
           env:
             - name: TRANSCODER_URL
-              value: "http://{{ include "kyoo.transcoder.fullname" . }}:7666"
+              value: "http://{{ include "kyoo.transcoder.fullname" . }}:7666/video"
+            - name: KYOO_PREFIX
+              value: "/api"
             - name: PUBLIC_URL
               value: {{ .Values.kyoo.address | quote }}
             - name: REQUIRE_ACCOUNT_VERIFICATION
