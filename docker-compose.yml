@@ -38,9 +38,6 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=PathPrefix(`/api/`)"
-      - "traefik.http.routers.api.middlewares=api-sp"
-      - "traefik.http.middlewares.api-sp.stripprefix.prefixes=/api"
-      - "traefik.http.middlewares.api-sp.stripprefix.forceSlash=false"
 
   migrations:
     image: ghcr.io/zoriya/kyoo_migrations:edge
@@ -55,7 +52,7 @@ services:
     image: ghcr.io/zoriya/kyoo_front:edge
     restart: unless-stopped
     environment:
-      - KYOO_URL=${KYOO_URL:-http://back:5000}
+      - KYOO_URL=${KYOO_URL:-http://back:5000/api}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.front.rule=PathPrefix(`/`)"
@@ -69,7 +66,7 @@ services:
     env_file:
       - ./.env
     environment:
-      - KYOO_URL=${KYOO_URL:-http://back:5000}
+      - KYOO_URL=${KYOO_URL:-http://back:5000/api}
     volumes:
       - ${LIBRARY_ROOT}:/video:ro
 
@@ -83,7 +80,7 @@ services:
     env_file:
       - ./.env
     environment:
-      - KYOO_URL=${KYOO_URL:-http://back:5000}
+      - KYOO_URL=${KYOO_URL:-http://back:5000/api}
 
   autosync:
     image: ghcr.io/zoriya/kyoo_autosync:edge
