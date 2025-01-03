@@ -53,6 +53,8 @@ outer:
 						sub.IsDefault = true
 					case "forced":
 						sub.IsForced = true
+					case "hi", "sdh", "cc":
+						sub.IsHearingImpaired = true
 					default:
 						lang, err := language.Parse(flag)
 						if err == nil && lang != language.Und {
@@ -60,6 +62,11 @@ outer:
 							sub.Language = &lang
 						} else {
 							sub.Title = &flag
+						}
+						// if language is Hindi, remove hearing impaired flag
+						// ambiguity is solved but as a result we do not support HI for Hindi
+						if lang == language.Hindi {
+							sub.IsHearingImpaired = false
 						}
 					}
 				}

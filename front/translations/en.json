@@ -259,6 +259,7 @@
 		"audio": "Audio",
 		"subtitles": "Subtitles",
 		"forced": "Forced",
+		"hearing-impaired": "CC",
 		"default": "Default",
 		"external": "External",
 		"duration": "Duration",

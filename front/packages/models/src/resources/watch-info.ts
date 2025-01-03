@@ -18,9 +18,9 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { z } from "zod";
-import { imageFn } from "../traits";
 import { QualityP } from "./quality";
+import { imageFn } from "../traits";
+import { z } from "zod";
 
 /**
  * A audio or subtitle track.
@@ -95,6 +95,10 @@ export const SubtitleP = TrackP.extend({
 	 * Is this an external subtitle (as in stored in a different file)
 	 */
 	isExternal: z.boolean(),
+	/**
+	 * Is this a hearing impaired subtitle?
+	 */
+	isHearingImpaired: z.boolean(),
 });
 export type Subtitle = z.infer<typeof SubtitleP>;
 

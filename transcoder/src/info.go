@@ -123,6 +123,8 @@ type Subtitle struct {
 	IsDefault bool `json:"isDefault"`
 	/// Is this stream tagged as forced?
 	IsForced bool `json:"isForced"`
+	/// Is this stream tagged as hearing impaired?
+	IsHearingImpaired bool `json:"isHearingImpaired"`
 	/// Is this an external subtitle (as in stored in a different file)
 	IsExternal bool `json:"isExternal"`
 	/// Where the subtitle is stored (null if stored inside the video)

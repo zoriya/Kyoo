@@ -59,6 +59,7 @@ const MediaInfoTable = ({
 						// Only show it if there is more than one track
 						track.isDefault && !singleTrack ? t("mediainfo.default") : undefined,
 						track.isForced ? t("mediainfo.forced") : undefined,
+						track.isHearingImpaired ? t("mediainfo.hearing-impaired") : undefined,
 						"isExternal" in track && track.isExternal ? t("mediainfo.external") : undefined,
 						track.codec,
 					]
