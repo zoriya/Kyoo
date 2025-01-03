@@ -19,7 +19,8 @@ services:
     build: ./back
     restart: on-failure
     environment:
-      - TRANSCODER_URL=${TRANSCODER_URL:-http://transcoder:7666}
+      - TRANSCODER_URL=${TRANSCODER_URL:-http://transcoder:7666/video}
+      - KYOO_PREFIX=/api
     env_file:
       - ./.env
     depends_on:
@@ -36,9 +37,6 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=PathPrefix(`/api/`)"
-      - "traefik.http.routers.api.middlewares=api-sp"
-      - "traefik.http.middlewares.api-sp.stripprefix.prefixes=/api"
-      - "traefik.http.middlewares.api-sp.stripprefix.forceSlash=false"
 
   migrations:
     build:
@@ -55,7 +53,7 @@ services:
     build: ./front
     restart: on-failure
     environment:
-      - KYOO_URL=${KYOO_URL:-http://back:5000}
+      - KYOO_URL=${KYOO_URL:-http://back:5000/api}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.front.rule=PathPrefix(`/`)"
@@ -68,12 +66,11 @@ services:
         condition: service_healthy
     env_file:
       - ./.env
+    environment:
+      - KEIBI_PREFIX=/auth
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.auth.rule=PathPrefix(`/auth/`)"
-      - "traefik.http.routers.auth.middlewares=auth-sp"
-      - "traefik.http.middlewares.auth-sp.stripprefix.prefixes=/auth"
-      - "traefik.http.middlewares.auth-sp.stripprefix.forceSlash=false"
     profiles:
       - "v5"
 
@@ -86,7 +83,7 @@ services:
     env_file:
       - ./.env
     environment:
-      - KYOO_URL=${KYOO_URL:-http://back:5000}
+      - KYOO_URL=${KYOO_URL:-http://back:5000/api}
     volumes:
       - ${LIBRARY_ROOT}:/video:ro
 
@@ -100,7 +97,7 @@ services:
     env_file:
       - ./.env
     environment:
-      - KYOO_URL=${KYOO_URL:-http://back:5000}
+      - KYOO_URL=${KYOO_URL:-http://back:5000/api}
 
   autosync:
     build: ./autosync

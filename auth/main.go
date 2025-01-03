@@ -163,29 +163,30 @@ func main() {
 	}
 	h.config = conf
 
-	r := e.Group("")
+	g := e.Group(conf.Prefix)
+	r := e.Group(conf.Prefix)
 	r.Use(echojwt.WithConfig(echojwt.Config{
 		SigningMethod: "RS256",
 		SigningKey:    h.config.JwtPublicKey,
 	}))
 
-	e.GET("/health", h.CheckHealth)
+	g.GET("/health", h.CheckHealth)
 
 	r.GET("/users", h.ListUsers)
 	r.GET("/users/:id", h.GetUser)
 	r.GET("/users/me", h.GetMe)
 	r.DELETE("/users/:id", h.DeleteUser)
 	r.DELETE("/users/me", h.DeleteSelf)
-	e.POST("/users", h.Register)
+	g.POST("/users", h.Register)
 
-	e.POST("/sessions", h.Login)
+	g.POST("/sessions", h.Login)
 	r.DELETE("/sessions", h.Logout)
 	r.DELETE("/sessions/:id", h.Logout)
 
-	e.GET("/jwt", h.CreateJwt)
-	e.GET("/info", h.GetInfo)
+	g.GET("/jwt", h.CreateJwt)
+	g.GET("/info", h.GetInfo)
 
-	e.GET("/swagger/*", echoSwagger.WrapHandler)
+	g.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	e.Logger.Fatal(e.Start(":4568"))
 }

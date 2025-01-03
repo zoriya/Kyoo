@@ -17,7 +17,6 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using Kyoo.Abstractions.Controllers;
 using Kyoo.Authentication;
 using Kyoo.Core;
 using Kyoo.Core.Controllers;
@@ -28,6 +27,7 @@ using Kyoo.RabbitMq;
 using Kyoo.Swagger;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -85,6 +85,7 @@ builder.ConfigureRabbitMq();
 WebApplication app = builder.Build();
 CoreModule.Services = app.Services;
 
+app.UsePathBase(new PathString(builder.Configuration.GetValue("KYOO_PREFIX", "")));
 app.UseHsts();
 app.UseKyooOpenApi();
 app.UseResponseCompression();

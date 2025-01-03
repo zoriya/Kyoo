@@ -6,6 +6,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -13,6 +14,7 @@ import (
 )
 
 type Configuration struct {
+	Prefix          string
 	JwtPrivateKey   *rsa.PrivateKey
 	JwtPublicKey    *rsa.PublicKey
 	Issuer          string
@@ -51,6 +53,8 @@ func LoadConfiguration(db *dbc.Queries) (*Configuration, error) {
 			ret.JwtPublicKey = &key.PublicKey
 		}
 	}
+
+	ret.Prefix = os.Getenv("KEIBI_PREFIX")
 
 	if ret.JwtPrivateKey == nil {
 		ret.JwtPrivateKey, err = rsa.GenerateKey(rand.Reader, 4096)
