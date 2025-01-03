@@ -70,12 +70,16 @@ outer:
 				// "hi" by itself means a language code, but when combined with other lang flags it means Hearing Impaired.
 				// In case Hindi was not detected before, but "hi" is present, assume it is Hindi.
 				if sub.Language == nil {
+					hiCount := 0
 					for _, flag := range flags {
-						if flag == "hi" {
+						if strings.EqualFold(flag, "hi") {
+							hiCount++
 							langStr := language.Hindi.String()
 							sub.Language = &langStr
-							break
 						}
+					}
+					if hiCount == 1 {
+						sub.IsHearingImpaired = false
 					}
 				}
 
