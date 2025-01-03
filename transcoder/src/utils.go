@@ -25,3 +25,14 @@ func Filter[E any](s []E, f func(E) bool) []E {
 	}
 	return s2
 }
+
+// Count returns the number of elements in s that are equal to e.
+func Count[S []E, E comparable](s S, e E) int {
+	var n int
+	for _, v := range s {
+		if v == e {
+			n++
+		}
+	}
+	return n
+}

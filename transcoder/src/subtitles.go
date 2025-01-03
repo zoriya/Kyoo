@@ -43,12 +43,14 @@ outer:
 					Path:       &match,
 					Link:       &link,
 				}
-				flags := separator.Split(match[len(base_path):], -1)
+				flags_str := strings.ToLower(match[len(base_path):])
+				flags := separator.Split(flags_str, -1)
+
 				// remove extension from flags
 				flags = flags[:len(flags)-1]
 
 				for _, flag := range flags {
-					switch strings.ToLower(flag) {
+					switch flag {
 					case "default":
 						sub.IsDefault = true
 					case "forced":
@@ -70,13 +72,10 @@ outer:
 				// "hi" by itself means a language code, but when combined with other lang flags it means Hearing Impaired.
 				// In case Hindi was not detected before, but "hi" is present, assume it is Hindi.
 				if sub.Language == nil {
-					hiCount := 0
-					for _, flag := range flags {
-						if strings.EqualFold(flag, "hi") {
-							hiCount++
-							langStr := language.Hindi.String()
-							sub.Language = &langStr
-						}
+					hiCount := Count(flags, "hi")
+					if hiCount > 0 {
+						languageStr := language.Hindi.String()
+						sub.Language = &languageStr
 					}
 					if hiCount == 1 {
 						sub.IsHearingImpaired = false
