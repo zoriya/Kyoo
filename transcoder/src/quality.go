@@ -28,6 +28,9 @@ func QualityFromString(str string) (Quality, error) {
 	if str == string(Original) {
 		return Original, nil
 	}
+	if str == string(NoResize) {
+		return NoResize, nil
+	}
 
 	for _, quality := range Qualities {
 		if string(quality) == str {
