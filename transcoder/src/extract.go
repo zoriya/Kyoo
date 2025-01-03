@@ -60,6 +60,11 @@ func extractSubs(info *MediaInfo) error {
 
 	for _, sub := range info.Subtitles {
 		if ext := sub.Extension; ext != nil {
+			if sub.Index == nil {
+				log.Printf("Warn: subtitle on path %s has no index. Skipping extraction", subs_path)
+				log.Printf("Debug: %v", sub)
+				continue
+			}
 			cmd.Args = append(
 				cmd.Args,
 				"-map", fmt.Sprintf("0:s:%d", *sub.Index),
