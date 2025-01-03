@@ -36,8 +36,8 @@ export const useSubtitleName = () => {
 		if (sub.isExternal) attributes.push(t("mediainfo.external"));
 
 		return attributes.join(" - ");
-	}
-}
+	};
+};
 
 const seenNativeNames = new Set();
 
