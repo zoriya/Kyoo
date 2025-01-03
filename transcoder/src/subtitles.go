@@ -65,6 +65,15 @@ outer:
 						}
 					}
 				}
+
+				// Handle Hindi (hi) collision with Hearing Impaired (hi):
+				// "hi" by itself means a language code, but when combined with other lang flags it means Hearing Impaired.
+				// In case Hindi was not detected before, but "hi" is present, assume it is Hindi.
+				if sub.Language == nil && strings.Count(strings.Join(flags, " "), "hi") > 1 {
+					langStr := language.Hindi.String()
+					sub.Language = &langStr
+				}
+
 				mi.Subtitles = append(mi.Subtitles, sub)
 				continue outer
 			}
