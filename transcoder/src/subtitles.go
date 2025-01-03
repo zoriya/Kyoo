@@ -58,15 +58,10 @@ outer:
 					default:
 						lang, err := language.Parse(flag)
 						if err == nil && lang != language.Und {
-							lang := lang.String()
-							sub.Language = &lang
+							langStr := lang.String()
+							sub.Language = &langStr
 						} else {
 							sub.Title = &flag
-						}
-						// if language is Hindi, remove hearing impaired flag
-						// ambiguity is solved but as a result we do not support HI for Hindi
-						if lang == language.Hindi {
-							sub.IsHearingImpaired = false
 						}
 					}
 				}
