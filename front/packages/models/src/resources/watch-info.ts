@@ -18,9 +18,9 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { QualityP } from "./quality";
-import { imageFn } from "../traits";
 import { z } from "zod";
+import { imageFn } from "../traits";
+import { QualityP } from "./quality";
 
 /**
  * A audio or subtitle track.
