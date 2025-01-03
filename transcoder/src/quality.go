@@ -17,6 +17,7 @@ const (
 	P1440    Quality = "1440p"
 	P4k      Quality = "4k"
 	P8k      Quality = "8k"
+	NoResize Quality = "transcode"
 	Original Quality = "original"
 )
 
@@ -26,6 +27,9 @@ var Qualities = []Quality{P240, P360, P480, P720, P1080, P1440, P4k, P8k}
 func QualityFromString(str string) (Quality, error) {
 	if str == string(Original) {
 		return Original, nil
+	}
+	if str == string(NoResize) {
+		return NoResize, nil
 	}
 
 	for _, quality := range Qualities {

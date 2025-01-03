@@ -71,16 +71,30 @@ func (vs *VideoStream) getTranscodeArgs(segments string) []string {
 	}
 
 	args = append(args, Settings.HwAccel.EncodeFlags...)
-	width := int32(float64(vs.quality.Height()) / float64(vs.video.Height) * float64(vs.video.Width))
-	// force a width that is a multiple of two else some apps behave badly.
-	width = closestMultiple(width, 2)
+
+	quality := vs.quality
+	if vs.quality != NoResize {
+		width := int32(float64(vs.quality.Height()) / float64(vs.video.Height) * float64(vs.video.Width))
+		// force a width that is a multiple of two else some apps behave badly.
+		width = closestMultiple(width, 2)
+		args = append(args,
+			"-vf", fmt.Sprintf(Settings.HwAccel.ScaleFilter, width, vs.quality.Height()),
+		)
+	} else {
+		// NoResize doesn't have bitrate info, fallback to a know quality higher or equal.
+		for _, q := range Qualities {
+			if q.Height() >= vs.video.Height {
+				quality = q
+				break
+			}
+		}
+	}
 	args = append(args,
-		"-vf", fmt.Sprintf(Settings.HwAccel.ScaleFilter, width, vs.quality.Height()),
 		// Even less sure but bufsize are 5x the avergae bitrate since the average bitrate is only
 		// useful for hls segments.
-		"-bufsize", fmt.Sprint(vs.quality.MaxBitrate()*5),
-		"-b:v", fmt.Sprint(vs.quality.AverageBitrate()),
-		"-maxrate", fmt.Sprint(vs.quality.MaxBitrate()),
+		"-bufsize", fmt.Sprint(quality.MaxBitrate()*5),
+		"-b:v", fmt.Sprint(quality.AverageBitrate()),
+		"-maxrate", fmt.Sprint(quality.MaxBitrate()),
 		// Force segments to be split exactly on keyframes (only works when transcoding)
 		// forced-idr is needed to force keyframes to be an idr-frame (by default it can be any i frames)
 		// without this option, some hardware encoders uses others i-frames and the -f segment can't cut at them.
