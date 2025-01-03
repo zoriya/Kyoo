@@ -61,7 +61,7 @@ spec:
                   key: {{ .Values.kyoo.apikey.apikeyKey }}
                   name: {{ .Values.kyoo.apikey.existingSecret }}
             - name: KYOO_URL
-              value: "http://{{ include "kyoo.back.fullname" . }}:5000"
+              value: "http://{{ include "kyoo.back.fullname" . }}:5000/api"
             - name: LIBRARY_LANGUAGES
               value: {{ .Values.kyoo.languages | quote }}
             - name: RABBITMQ_HOST
