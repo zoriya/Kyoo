@@ -1,7 +1,6 @@
 package src
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -61,10 +60,8 @@ func extractSubs(info *MediaInfo) error {
 
 	for _, sub := range info.Subtitles {
 		if ext := sub.Extension; ext != nil {
-			if sub.Index == nil {
-				log.Printf("Warn: subtitle on path %s has no index. Skipping extraction", subs_path)
-				jsonSub, _ := json.Marshal(sub)
-				log.Printf("Debug: %s", &jsonSub)
+			if sub.IsExternal {
+				// skip extraction of external subtitles
 				continue
 			}
 			cmd.Args = append(
