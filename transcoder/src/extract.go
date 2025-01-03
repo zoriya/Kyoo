@@ -60,6 +60,10 @@ func extractSubs(info *MediaInfo) error {
 
 	for _, sub := range info.Subtitles {
 		if ext := sub.Extension; ext != nil {
+			if sub.IsExternal {
+				// skip extraction of external subtitles
+				continue
+			}
 			cmd.Args = append(
 				cmd.Args,
 				"-map", fmt.Sprintf("0:s:%d", *sub.Index),
