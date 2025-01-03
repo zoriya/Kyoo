@@ -265,7 +265,8 @@
 		"duration": "Duration",
 		"size": "Size",
 		"novideo": "No video",
-		"nocontainer": "Invalid container"
+		"nocontainer": "Invalid container",
+		"unknown": "Unknown"
 	},
 	"admin": {
 		"users": {

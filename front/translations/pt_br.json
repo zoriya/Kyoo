@@ -265,7 +265,8 @@
 		"size": "Tamanho",
 		"novideo": "Sem vídeo",
 		"nocontainer": "Contêiner inválido",
-		"external": "Externo"
+		"external": "Externo",
+		"unknown": "Desconhecido"
 	},
 	"admin": {
 		"users": {
