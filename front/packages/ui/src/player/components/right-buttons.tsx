@@ -29,7 +29,7 @@ import { useAtom } from "jotai";
 import { useTranslation } from "react-i18next";
 import { Platform, View } from "react-native";
 import { type Stylable, useYoshiki } from "yoshiki/native";
-import { useDisplayName, useSubtitleName } from "../../utils";
+import { useSubtitleName } from "../../utils";
 import { fullscreenAtom, subtitleAtom } from "../state";
 import { AudiosMenu, QualitiesMenu } from "../video";
 
@@ -49,7 +49,6 @@ export const RightButtons = ({
 } & Stylable) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
-	const getDisplayName = useDisplayName();
 	const getSubtitleName = useSubtitleName();
 	const [isFullscreen, setFullscreen] = useAtom(fullscreenAtom);
 	const [selectedSubtitle, setSubtitle] = useAtom(subtitleAtom);
