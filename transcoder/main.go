@@ -308,18 +308,19 @@ func main() {
 		metadata:   metadata,
 	}
 
-	e.GET("/:path/direct", DirectStream)
-	e.GET("/:path/direct/:identifier", DirectStream)
-	e.GET("/:path/master.m3u8", h.GetMaster)
-	e.GET("/:path/:video/:quality/index.m3u8", h.GetVideoIndex)
-	e.GET("/:path/audio/:audio/index.m3u8", h.GetAudioIndex)
-	e.GET("/:path/:video/:quality/:chunk", h.GetVideoSegment)
-	e.GET("/:path/audio/:audio/:chunk", h.GetAudioSegment)
-	e.GET("/:path/info", h.GetInfo)
-	e.GET("/:path/thumbnails.png", h.GetThumbnails)
-	e.GET("/:path/thumbnails.vtt", h.GetThumbnailsVtt)
-	e.GET("/:path/attachment/:name", h.GetAttachment)
-	e.GET("/:path/subtitle/:name", h.GetSubtitle)
+	g := e.Group(src.Settings.RoutePrefix)
+	g.GET("/:path/direct", DirectStream)
+	g.GET("/:path/direct/:identifier", DirectStream)
+	g.GET("/:path/master.m3u8", h.GetMaster)
+	g.GET("/:path/:video/:quality/index.m3u8", h.GetVideoIndex)
+	g.GET("/:path/audio/:audio/index.m3u8", h.GetAudioIndex)
+	g.GET("/:path/:video/:quality/:chunk", h.GetVideoSegment)
+	g.GET("/:path/audio/:audio/:chunk", h.GetAudioSegment)
+	g.GET("/:path/info", h.GetInfo)
+	g.GET("/:path/thumbnails.png", h.GetThumbnails)
+	g.GET("/:path/thumbnails.vtt", h.GetThumbnailsVtt)
+	g.GET("/:path/attachment/:name", h.GetAttachment)
+	g.GET("/:path/subtitle/:name", h.GetSubtitle)
 
 	e.Logger.Fatal(e.Start(":7666"))
 }
