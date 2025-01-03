@@ -141,7 +141,7 @@ services:
     profiles: ['', 'cpu']
 
   transcoder-nvidia:
-    <<: *transcoder-base
+    # <<: *transcoder-base
     deploy:
       resources:
         reservations:
