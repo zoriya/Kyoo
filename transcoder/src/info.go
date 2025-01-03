@@ -289,14 +289,15 @@ func RetriveMediaInfo(path string, sha string) (*MediaInfo, error) {
 			lang, _ := language.Parse(stream.Tags.Language)
 			idx := uint32(i)
 			return Subtitle{
-				Index:     &idx,
-				Title:     OrNull(stream.Tags.Title),
-				Language:  NullIfUnd(lang.String()),
-				Codec:     stream.CodecName,
-				Extension: extension,
-				IsDefault: stream.Disposition.Default != 0,
-				IsForced:  stream.Disposition.Forced != 0,
-				Link:      &link,
+				Index:             &idx,
+				Title:             OrNull(stream.Tags.Title),
+				Language:          NullIfUnd(lang.String()),
+				Codec:             stream.CodecName,
+				Extension:         extension,
+				IsDefault:         stream.Disposition.Default != 0,
+				IsForced:          stream.Disposition.Forced != 0,
+				IsHearingImpaired: stream.Disposition.HearingImpaired != 0,
+				Link:              &link,
 			}
 		}),
 		Chapters: Map(mi.Chapters, func(c *ffprobe.Chapter, _ int) Chapter {
