@@ -71,11 +71,16 @@ func (vs *VideoStream) getTranscodeArgs(segments string) []string {
 	}
 
 	args = append(args, Settings.HwAccel.EncodeFlags...)
-	width := int32(float64(vs.quality.Height()) / float64(vs.video.Height) * float64(vs.video.Width))
-	// force a width that is a multiple of two else some apps behave badly.
-	width = closestMultiple(width, 2)
+
+	if vs.quality != NoResize {
+		width := int32(float64(vs.quality.Height()) / float64(vs.video.Height) * float64(vs.video.Width))
+		// force a width that is a multiple of two else some apps behave badly.
+		width = closestMultiple(width, 2)
+		args = append(args,
+			"-vf", fmt.Sprintf(Settings.HwAccel.ScaleFilter, width, vs.quality.Height()),
+		)
+	}
 	args = append(args,
-		"-vf", fmt.Sprintf(Settings.HwAccel.ScaleFilter, width, vs.quality.Height()),
 		// Even less sure but bufsize are 5x the avergae bitrate since the average bitrate is only
 		// useful for hls segments.
 		"-bufsize", fmt.Sprint(vs.quality.MaxBitrate()*5),

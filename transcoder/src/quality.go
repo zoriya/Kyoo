@@ -17,6 +17,7 @@ const (
 	P1440    Quality = "1440p"
 	P4k      Quality = "4k"
 	P8k      Quality = "8k"
+	NoResize Quality = "transcode"
 	Original Quality = "original"
 )
 
