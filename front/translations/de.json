@@ -237,7 +237,8 @@
 		"duration": "Dauer",
 		"size": "Größe",
 		"novideo": "Kein Video",
-		"nocontainer": "Unzulässiger Container"
+		"nocontainer": "Unzulässiger Container",
+		"external": "Extern"
 	},
 	"admin": {
 		"users": {
