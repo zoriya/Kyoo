@@ -24,12 +24,13 @@ type MetadataService struct {
 
 func NewMetadataService() (*MetadataService, error) {
 	con := fmt.Sprintf(
-		"postgresql://%v:%v@%v:%v/%v?application_name=gocoder&sslmode=disable",
+		"postgresql://%v:%v@%v:%v/%v?application_name=gocoder&sslmode=%s",
 		url.QueryEscape(os.Getenv("POSTGRES_USER")),
 		url.QueryEscape(os.Getenv("POSTGRES_PASSWORD")),
 		url.QueryEscape(os.Getenv("POSTGRES_SERVER")),
 		url.QueryEscape(os.Getenv("POSTGRES_PORT")),
 		url.QueryEscape(os.Getenv("POSTGRES_DB")),
+		url.QueryEscape(GetEnvOr("POSTGRES_SSLMODE", "disable")),
 	)
 	schema := GetEnvOr("POSTGRES_SCHEMA", "gocoder")
 	if schema != "disabled" {
