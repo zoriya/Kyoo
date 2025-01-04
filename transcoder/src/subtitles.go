@@ -43,26 +43,45 @@ outer:
 					Path:       &match,
 					Link:       &link,
 				}
-				flags := separator.Split(match[len(base_path):], -1)
+				flags_str := strings.ToLower(match[len(base_path):])
+				flags := separator.Split(flags_str, -1)
+
 				// remove extension from flags
 				flags = flags[:len(flags)-1]
 
 				for _, flag := range flags {
-					switch strings.ToLower(flag) {
+					switch flag {
 					case "default":
 						sub.IsDefault = true
 					case "forced":
 						sub.IsForced = true
+					case "hi", "sdh", "cc":
+						sub.IsHearingImpaired = true
 					default:
 						lang, err := language.Parse(flag)
 						if err == nil && lang != language.Und {
-							lang := lang.String()
-							sub.Language = &lang
+							langStr := lang.String()
+							sub.Language = &langStr
 						} else {
 							sub.Title = &flag
 						}
 					}
 				}
+
+				// Handle Hindi (hi) collision with Hearing Impaired (hi):
+				// "hi" by itself means a language code, but when combined with other lang flags it means Hearing Impaired.
+				// In case Hindi was not detected before, but "hi" is present, assume it is Hindi.
+				if sub.Language == nil {
+					hiCount := Count(flags, "hi")
+					if hiCount > 0 {
+						languageStr := language.Hindi.String()
+						sub.Language = &languageStr
+					}
+					if hiCount == 1 {
+						sub.IsHearingImpaired = false
+					}
+				}
+
 				mi.Subtitles = append(mi.Subtitles, sub)
 				continue outer
 			}

@@ -95,6 +95,10 @@ export const SubtitleP = TrackP.extend({
 	 * Is this an external subtitle (as in stored in a different file)
 	 */
 	isExternal: z.boolean(),
+	/**
+	 * Is this a hearing impaired subtitle?
+	 */
+	isHearingImpaired: z.boolean(),
 });
 export type Subtitle = z.infer<typeof SubtitleP>;
 

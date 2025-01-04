@@ -259,12 +259,14 @@
 		"audio": "Audio",
 		"subtitles": "Subtitles",
 		"forced": "Forced",
+		"hearing-impaired": "CC",
 		"default": "Default",
 		"external": "External",
 		"duration": "Duration",
 		"size": "Size",
 		"novideo": "No video",
-		"nocontainer": "Invalid container"
+		"nocontainer": "Invalid container",
+		"unknown": "Unknown"
 	},
 	"admin": {
 		"users": {

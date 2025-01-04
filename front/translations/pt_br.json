@@ -259,12 +259,14 @@
 		"audio": "Áudio",
 		"subtitles": "Legendas",
 		"forced": "Forçado",
+		"hearing-impaired": "CC",
 		"default": "Padrão",
 		"duration": "Duração",
 		"size": "Tamanho",
 		"novideo": "Sem vídeo",
 		"nocontainer": "Contêiner inválido",
-		"external": "Externo"
+		"external": "Externo",
+		"unknown": "Desconhecido"
 	},
 	"admin": {
 		"users": {
