@@ -84,7 +84,7 @@ services:
 
   autosync:
     image: ghcr.io/zoriya/kyoo_autosync:edge
-    restart: on-failure
+    restart: unless-stopped
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -173,7 +173,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:4-alpine
-    restart: on-failure
+    restart: unless-stopped
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
