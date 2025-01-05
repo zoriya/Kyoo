@@ -1,0 +1,17 @@
+{
+	"expo": {
+		"name": "app",
+		"slug": "app",
+		"sdkVersion": "52.0.0",
+		"newArchEnabled": true,
+		"platforms": ["ios", "android"],
+		"plugins": ["vxrn/expo-plugin"],
+		"icon": "./public/icon-256x256.png",
+		"splash": {
+			"image": "./public/icon-256x256.png",
+			"resizeMode": "contain",
+			"backgroundColor": "#000000"
+		},
+		"ios": {}
+	}
+}
