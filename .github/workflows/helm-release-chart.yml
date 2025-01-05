@@ -31,8 +31,6 @@ jobs:
       run: |
         export tag=$(echo ${GITHUB_REF#refs/tags/} | sed 's/^v//')
         helm package ./chart --version $tag --app-version $tag
-        env:
-          GITHUB_REF: ${{ github.ref }}
 
     - name: Push Helm Chart to GHCR
       run: |
