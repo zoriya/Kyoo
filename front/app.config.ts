@@ -18,19 +18,17 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// import "ts-node/register"; // Add this to import TypeScript files
 import type { ExpoConfig } from "expo/config";
-import { withAndroidManifest } from "expo/config-plugins";
 
 const IS_DEV = process.env.APP_VARIANT === "development";
 
 // Defined outside the config because dark splashscreen needs to be platform specific.
 const splash = {
-	image: "./assets/icon.png",
+	image: "./public/icon-256x256.png",
 	resizeMode: "contain",
 	backgroundColor: "#eff1f5",
 	dark: {
-		image: "./assets/icon.png",
+		image: "./public/icon-256x256.png",
 		resizeMode: "contain",
 		backgroundColor: "#1e1e2e",
 	},
@@ -41,8 +39,11 @@ const config: ExpoConfig = {
 	slug: "kyoo",
 	scheme: "kyoo",
 	version: "1.0.0",
+	sdkVersion: "52.0.0",
+	newArchEnabled: true,
+	platforms: ["ios", "android"],
 	orientation: "default",
-	icon: "./assets/icon.png",
+	icon: "./public/icon-256x256.png",
 	userInterfaceStyle: "automatic",
 	splash,
 	assetBundlePatterns: ["**/*"],
@@ -52,7 +53,7 @@ const config: ExpoConfig = {
 	android: {
 		package: IS_DEV ? "dev.zoriya.kyoo.dev" : "dev.zoriya.kyoo",
 		adaptiveIcon: {
-			foregroundImage: "./assets/icon.png",
+			foregroundImage: "./public/icon-256x256.png",
 			backgroundColor: "#eff1f5",
 		},
 		splash,
@@ -64,12 +65,13 @@ const config: ExpoConfig = {
 	runtimeVersion: {
 		policy: "sdkVersion",
 	},
-	extra: {
-		eas: {
-			projectId: "55de6b52-c649-4a15-9a45-569ff5ed036c",
-		},
-	},
+	// extra: {
+	// 	eas: {
+	// 		projectId: "55de6b52-c649-4a15-9a45-569ff5ed036c",
+	// 	},
+	// },
 	plugins: [
+		"vxrn/expo-plugin",
 		[
 			"expo-build-properties",
 			{
@@ -79,12 +81,12 @@ const config: ExpoConfig = {
 			},
 		],
 		"expo-localization",
-		[
-			"react-native-video",
-			{
-				enableNotificationControls: true,
-			},
-		],
+		// [
+		// 	"react-native-video",
+		// 	{
+		// 		enableNotificationControls: true,
+		// 	},
+		// ],
 	],
 };
 
