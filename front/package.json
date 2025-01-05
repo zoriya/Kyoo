@@ -14,6 +14,8 @@
 	},
 	"dependencies": {
 		"expo": "~52.0.17",
+		"expo-build-properties": "^0.13.1",
+		"expo-localization": "^16.0.0",
 		"one": "1.1.385",
 		"react": "^18.3.1",
 		"react-native": "0.76.4",
