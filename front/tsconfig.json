@@ -3,7 +3,7 @@
 		"baseUrl": ".",
 		"paths": {
 			"~/*": [
-				"./*"
+				"./src/*"
 			]
 		},
 		"strict": true,
@@ -14,7 +14,7 @@
 		"preserveSymlinks": true,
 		"skipLibCheck": true,
 		"jsx": "react-jsx",
-		"noImplicitAny": false,
+		"forceConsistentCasingInFileNames": true,
 		"types": [
 			"node",
 			"react",
@@ -25,6 +25,10 @@
 			"esnext"
 		]
 	},
+	"include": [
+		"**/*.ts",
+		"**/*.tsx"
+	],
 	"exclude": [
 		"node_modules",
 		".expo",
