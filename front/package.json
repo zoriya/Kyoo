@@ -13,6 +13,7 @@
 		"format:fix": "biome format . --write"
 	},
 	"dependencies": {
+		"@tanstack/react-query": "^5.62.15",
 		"expo": "~52.0.17",
 		"expo-build-properties": "^0.13.1",
 		"expo-localization": "^16.0.0",
@@ -25,8 +26,11 @@
 		"react-native-web": "^0.19.12"
 	},
 	"devDependencies": {
-		"vite": "^6",
 		"@biomejs/biome": "1.9.4",
-		"typescript": "5.7.2"
+		"@tanstack/react-query-devtools": "^5.62.15",
+		"@types/react": "^19.0.2",
+		"@types/react-dom": "^19.0.2",
+		"typescript": "5.7.2",
+		"vite": "^6"
 	}
 }
