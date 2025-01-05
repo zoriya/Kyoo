@@ -238,7 +238,9 @@
 		"size": "Розмір",
 		"novideo": "Відео відсутне",
 		"nocontainer": "Недійсний контейнер",
-		"external": "Зовнішній"
+		"external": "Зовнішній",
+		"hearing-impaired": "CC",
+		"unknown": "Невідомо"
 	},
 	"admin": {
 		"users": {
