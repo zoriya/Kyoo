@@ -1,15 +1,19 @@
 import { and, desc, eq, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { KError } from "~/models/error";
-import { Genre, isUuid, processLanguages } from "~/models/utils";
-import { comment, RemovePrefix } from "~/utils";
+import {
+	type FilterDef,
+	Genre,
+	isUuid,
+	processLanguages,
+} from "~/models/utils";
+import { comment, type RemovePrefix } from "~/utils";
 import { db } from "../db";
 import { shows, showTranslations } from "../db/schema/shows";
 import { getColumns } from "../db/schema/utils";
 import { bubble } from "../models/examples";
 import { Movie, MovieStatus, MovieTranslation } from "../models/movie";
-import { Page } from "~/models/utils/page";
-import { type Filter, parseFilters } from "~/models/utils/filters-sql";
+import { Filter, type Page } from "~/models/utils";
 
 // drizzle is bugged and doesn't allow js arrays to be used in raw sql.
 export function sqlarr(array: unknown[]) {
@@ -38,7 +42,7 @@ const getTranslationQuery = (languages: string[]) => {
 
 const { pk: _, kind, startAir, endAir, ...moviesCol } = getColumns(shows);
 
-const movieFilters: Filter = {
+const movieFilters: FilterDef = {
 	genres: {
 		column: shows.genres,
 		type: "enum",
@@ -160,7 +164,6 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				if (key === "airDate") return { key: "startAir" as const, desc };
 				return { key, desc };
 			});
-			const filters = parseFilters(filter, movieFilters);
 
 			// TODO: Add sql indexes on order keys
 
@@ -173,7 +176,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				})
 				.from(shows)
 				.innerJoin(transQ, eq(shows.pk, transQ.pk))
-				.where(filters)
+				.where(filter)
 				.orderBy(
 					...order.map((x) => (x.desc ? desc(shows[x.key]) : shows[x.key])),
 					shows.pk,
@@ -202,18 +205,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					// TODO: support explode: true (allow sort=slug,-createdAt). needs a pr to elysia
 					{ explode: false, default: ["slug"] },
 				),
-				filter: t.Optional(
-					t.String({
-						description: comment`
-							Filters to apply to the query.
-							This is based on [odata's filter specification](https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionfilter).
-
-							Filters available: ${Object.keys(movieFilters).join(", ")}
-						`,
-						example:
-							"(rating gt 75 and genres has action) or status eq planned",
-					}),
-				),
+				filter: t.Optional(Filter({ def: movieFilters })),
 				limit: t.Integer({
 					minimum: 1,
 					maximum: 250,

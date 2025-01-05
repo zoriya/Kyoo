@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import type { ParjsFailure } from "parjs/internal";
-import { type Expression, expression } from "~/models/utils/filters";
+import { type Expression, expression } from "~/models/utils/filters/parser";
 
 function parse(
 	filter: string,

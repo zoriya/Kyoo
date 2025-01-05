@@ -6,3 +6,9 @@ export const KError = t.Object({
 	details: t.Optional(t.Any()),
 });
 export type KError = typeof KError.static;
+
+export class KErrorT extends Error {
+	constructor(message: string, details?: any) {
+		super(JSON.stringify({ code: "KError", status: 422, message, details }));
+	}
+}

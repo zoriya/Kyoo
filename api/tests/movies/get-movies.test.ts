@@ -23,6 +23,30 @@ const getMovie = async (id: string, langs?: string) => {
 	const body = await resp.json();
 	return [resp, body] as const;
 };
+const getMovies = async ({
+	langs,
+	...query
+}: { filter?: string; langs?: string }) => {
+	// const params = Object.entries(query).reduce(
+	// 	(acc, [param, value]) => `${param}=${value}&`,
+	// 	"?",
+	// );
+	const resp = await app.handle(
+		new Request(
+			`http://localhost/movies?${new URLSearchParams(query).toString()}`,
+			{
+				method: "GET",
+				headers: langs
+					? {
+							"Accept-Language": langs,
+						}
+					: {},
+			},
+		),
+	);
+	const body = await resp.json();
+	return [resp, body] as const;
+};
 
 let bubbleId = "";
 
@@ -92,6 +116,25 @@ describe("Get movie", () => {
 			name: bubble.translations.en.name,
 		});
 		expect(resp.headers.get("Content-Language")).toBe("en");
+	});
+});
+
+describe("Get all movies", () => {
+	it("Invalid filter params", async () => {
+		const [resp, body] = await getMovies({
+			filter: `slug eq ${bubble.slug}`,
+			langs: "en",
+		});
+
+		expectStatus(resp, body).toBe(422);
+		expect(body).toMatchObject({
+			status: 422,
+			message:
+				"Invalid property: slug.\nExpected one of genres, rating, status, runtime, airDate, originalLanguage.",
+			details: {
+				in: "slug eq bubble",
+			},
+		});
 	});
 });
 
