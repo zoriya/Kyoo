@@ -34,4 +34,4 @@ jobs:
 
     - name: Push Helm Chart to GHCR
       run: |
-        helm push packaged-chart.tgz oci://ghcr.io/${{ github.repository_owner }}/helm-charts
+        helm push kyoo-*.tgz oci://ghcr.io/${{ github.repository_owner }}/helm-charts
