@@ -110,7 +110,7 @@ spec:
             {{- with .Values.media.volumeMounts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
-            {{- if .Values.back.persistence.enabled }}
+            {{- if .Values.transcoder.persistence.enabled }}
             - name: transcodermetadata
               mountPath: /metadata
             {{- end }}
