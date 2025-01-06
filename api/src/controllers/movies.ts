@@ -1,20 +1,23 @@
 import { and, desc, eq, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { KError } from "~/models/error";
-import {
-	type FilterDef,
-	Genre,
-	isUuid,
-	processLanguages,
-} from "~/models/utils";
 import { comment } from "~/utils";
 import { db } from "../db";
 import { shows, showTranslations } from "../db/schema/shows";
 import { getColumns } from "../db/schema/utils";
 import { bubble } from "../models/examples";
 import { Movie, MovieStatus, MovieTranslation } from "../models/movie";
-import { Filter, type Page } from "~/models/utils";
-import { Sort } from "~/models/utils/sort";
+import {
+	Filter,
+	Sort,
+	type FilterDef,
+	Genre,
+	isUuid,
+	keysetPaginate,
+	processLanguages,
+	type Page,
+	createPage,
+} from "~/models/utils";
 
 // drizzle is bugged and doesn't allow js arrays to be used in raw sql.
 export function sqlarr(array: unknown[]) {
@@ -156,6 +159,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 		async ({
 			query: { limit, after, sort, filter },
 			headers: { "accept-language": languages },
+			request: { url },
 		}) => {
 			const langs = processLanguages(languages);
 			const [transQ, transCol] = getTranslationQuery(langs);
@@ -171,33 +175,24 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				})
 				.from(shows)
 				.innerJoin(transQ, eq(shows.pk, transQ.pk))
-				.where(filter)
+				.where(and(filter, keysetPaginate({ table: shows, after, sort })))
 				.orderBy(
 					...sort.map((x) => (x.desc ? desc(shows[x.key]) : shows[x.key])),
 					shows.pk,
 				)
 				.limit(limit);
 
-			return { items, next: "", prev: "", this: "" };
+			return createPage(items, { url, sort });
 		},
 		{
 			detail: { description: "Get all movies" },
 			query: t.Object({
-				sort: Sort(
-					[
-						"slug",
-						"rating",
-						"airDate",
-						"createdAt",
-						"nextRefresh",
-					],
-					{
-						// TODO: Add random
-						remap: { airDate: "startAir" },
-						default: ["slug"],
-						description: "How to sort the query",
-					},
-				),
+				sort: Sort(["slug", "rating", "airDate", "createdAt", "nextRefresh"], {
+					// TODO: Add random
+					remap: { airDate: "startAir" },
+					default: ["slug"],
+					description: "How to sort the query",
+				}),
 				filter: t.Optional(Filter({ def: movieFilters })),
 				limit: t.Integer({
 					minimum: 1,
@@ -207,7 +202,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				}),
 				after: t.Optional(
 					t.String({
-						format: "uuid",
+						format: "byte",
 						description: comment`
 							Id of the cursor in the pagination.
 							You can ignore this and only use the prev/next field in the response.

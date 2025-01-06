@@ -1,14 +1,14 @@
 import { t } from "elysia";
 
-type Sort<
+export type Sort<
 	T extends string[],
 	Remap extends Partial<Record<T[number], string>>,
 > = {
-	key: Exclude<T[number], keyof Remap> | Remap[keyof Remap];
+	key: Exclude<T[number], keyof Remap> | NonNullable<Remap[keyof Remap]>;
 	desc: boolean;
 }[];
 
-type NonEmptyArray<T> = [T, ...T[]];
+export type NonEmptyArray<T> = [T, ...T[]];
 
 export const Sort = <
 	const T extends NonEmptyArray<string>,
@@ -44,7 +44,7 @@ export const Sort = <
 			return sort.map((x) => {
 				const desc = x[0] === "-";
 				const key = (desc ? x.substring(1) : x) as T[number];
-				if (key in remap) return { key: remap[key], desc };
+				if (key in remap) return { key: remap[key]!, desc };
 				return { key: key as Exclude<typeof key, keyof Remap>, desc };
 			});
 		})

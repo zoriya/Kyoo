@@ -69,7 +69,7 @@ export function conflictUpdateAllExcept<
 
 	return updateColumns.reduce(
 		(acc, [colName, col]) => {
-			// @ts-ignore: drizzle internal
+			// @ts-expect-error: drizzle internal
 			const name = (db.dialect.casing as CasingCache).getColumnCasing(col);
 			acc[colName as keyof typeof acc] = sql.raw(`excluded."${name}"`);
 			return acc;
