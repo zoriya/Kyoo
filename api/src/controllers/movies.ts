@@ -7,13 +7,14 @@ import {
 	isUuid,
 	processLanguages,
 } from "~/models/utils";
-import { comment, type RemovePrefix } from "~/utils";
+import { comment } from "~/utils";
 import { db } from "../db";
 import { shows, showTranslations } from "../db/schema/shows";
 import { getColumns } from "../db/schema/utils";
 import { bubble } from "../models/examples";
 import { Movie, MovieStatus, MovieTranslation } from "../models/movie";
 import { Filter, type Page } from "~/models/utils";
+import { Sort } from "~/models/utils/sort";
 
 // drizzle is bugged and doesn't allow js arrays to be used in raw sql.
 export function sqlarr(array: unknown[]) {
@@ -158,15 +159,8 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 		}) => {
 			const langs = processLanguages(languages);
 			const [transQ, transCol] = getTranslationQuery(langs);
-			// TODO: move this to typebox transform
-			const order = sort.map((x) => {
-				const desc = x[0] === "-";
-				const key = (desc ? x.substring(1) : x) as RemovePrefix<typeof x, "-">;
-				if (key === "airDate") return { key: "startAir" as const, desc };
-				return { key, desc };
-			});
 
-			// TODO: Add sql indexes on order keys
+			// TODO: Add sql indexes on sort keys
 
 			const items = await db
 				.select({
@@ -179,7 +173,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				.innerJoin(transQ, eq(shows.pk, transQ.pk))
 				.where(filter)
 				.orderBy(
-					...order.map((x) => (x.desc ? desc(shows[x.key]) : shows[x.key])),
+					...sort.map((x) => (x.desc ? desc(shows[x.key]) : shows[x.key])),
 					shows.pk,
 				)
 				.limit(limit);
@@ -189,23 +183,17 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 		{
 			detail: { description: "Get all movies" },
 			query: t.Object({
-				sort: t.Array(
-					// TODO: Add random
-					t.UnionEnum([
+				sort: Sort(
+					[
 						"slug",
-						"-slug",
 						"rating",
-						"-rating",
 						"airDate",
-						"-airDate",
 						"createdAt",
-						"-createdAt",
 						"nextRefresh",
-						"-nextRefresh",
-					]),
-					// TODO: support explode: true (allow sort=slug,-createdAt). needs a pr to elysia
+					],
 					{
-						explode: false,
+						// TODO: Add random
+						remap: { airDate: "startAir" },
 						default: ["slug"],
 						description: "How to sort the query",
 					},
