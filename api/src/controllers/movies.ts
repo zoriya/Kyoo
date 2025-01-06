@@ -136,7 +136,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					...KError,
 					description: comment`
 						The Accept-Language header can't be satisfied (all languages listed are
-						unavailable). Try with another languages or add * to the list of languages
+						unavailable.) Try with another languages or add * to the list of languages
 						to fallback to any language.
 					`,
 					examples: [
@@ -158,6 +158,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 		}) => {
 			const langs = processLanguages(languages);
 			const [transQ, transCol] = getTranslationQuery(langs);
+			// TODO: move this to typebox transform
 			const order = sort.map((x) => {
 				const desc = x[0] === "-";
 				const key = (desc ? x.substring(1) : x) as RemovePrefix<typeof x, "-">;
@@ -203,7 +204,11 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 						"-nextRefresh",
 					]),
 					// TODO: support explode: true (allow sort=slug,-createdAt). needs a pr to elysia
-					{ explode: false, default: ["slug"] },
+					{
+						explode: false,
+						default: ["slug"],
+						description: "How to sort the query",
+					},
 				),
 				filter: t.Optional(Filter({ def: movieFilters })),
 				limit: t.Integer({

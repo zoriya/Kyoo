@@ -24,9 +24,9 @@ export const Filter = ({
 			t.String({
 				description: comment`
 					${description}
-					This is based on [odata's filter specification](https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionfilter).
 
-					Filters available: ${Object.keys(def).join(", ")}
+					This is based on [odata's filter specification](https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionfilter).
+					Filters available: ${Object.keys(def).join(", ")}.
 				`,
 				example: "(rating gt 75 and genres has action) or status eq planned",
 			}),

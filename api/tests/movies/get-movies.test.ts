@@ -130,7 +130,7 @@ describe("Get all movies", () => {
 		expect(body).toMatchObject({
 			status: 422,
 			message:
-				"Invalid property: slug.\nExpected one of genres, rating, status, runtime, airDate, originalLanguage.",
+				"Invalid property: slug. Expected one of genres, rating, status, runtime, airDate, originalLanguage.",
 			details: {
 				in: "slug eq bubble",
 			},
