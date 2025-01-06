@@ -3,6 +3,10 @@ import { eq, or, type Column, and, gt, lt } from "drizzle-orm";
 
 type Table<Name extends string> = Record<Name, Column>;
 
+type After = Record<string, string | number | boolean | undefined> & {
+	reverse?: boolean;
+};
+
 // Create a filter (where) expression on the query to skip everything before/after the referenceID.
 // The generalized expression for this in pseudocode is:
 //   (x > a) OR
@@ -27,7 +31,7 @@ export const keysetPaginate = <
 	sort: Sort<T, Remap>;
 }) => {
 	if (!after) return undefined;
-	const cursor: Record<string, string | number> = JSON.parse(
+	const { reverse, ...cursor }: After = JSON.parse(
 		Buffer.from(after, "base64").toString("utf-8"),
 	);
 
@@ -36,7 +40,7 @@ export const keysetPaginate = <
 	let where = undefined;
 	let previous = undefined;
 	for (const by of [...sort, { key: "pk" as const, desc: false }]) {
-		const cmp = by.desc ? lt : gt;
+		const cmp = by.desc !== reverse ? lt : gt;
 		where = or(where, and(previous, cmp(table[by.key], cursor[by.key])));
 		previous = and(previous, eq(table[by.key], cursor[by.key]));
 	}
@@ -44,4 +48,14 @@ export const keysetPaginate = <
 	return where;
 };
 
-
+export const generateAfter = (
+	cursor: any,
+	sort: Sort<any, any>,
+	reverse?: boolean,
+) => {
+	const ret: After = { reverse };
+	for (const by of sort) {
+		ret[by.key] = cursor[by.key];
+	}
+	return Buffer.from(JSON.stringify(ret), "utf-8").toString("base64");
+};

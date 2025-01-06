@@ -14,8 +14,8 @@ import {
 	Genre,
 	isUuid,
 	keysetPaginate,
+	Page,
 	processLanguages,
-	type Page,
 	createPage,
 } from "~/models/utils";
 
@@ -147,7 +147,6 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 						{
 							status: 422,
 							message: "Accept-Language header could not be satisfied.",
-							details: undefined,
 						},
 					],
 				},
@@ -222,21 +221,20 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					`,
 				}),
 			}),
-			// response: {
-			// 	200: Page(Movie, {
-			// 		description: "Paginated list of movies that match filters.",
-			// 	}),
-			// 	422: {
-			// 		...KError,
-			// 		description: "Invalid query parameters.",
-			// 		examples: [
-			// 			{
-			// 				status: 422,
-			// 				message: "Accept-Language header could not be satisfied.",
-			// 				details: undefined,
-			// 			},
-			// 		],
-			// 	},
-			// },
+			response: {
+				200: Page(Movie, {
+					description: "Paginated list of movies that match filters.",
+				}),
+				422: {
+					...KError,
+					description: "Invalid query parameters.",
+					examples: [
+						{
+							status: 422,
+							message: "Accept-Language header could not be satisfied.",
+						},
+					],
+				},
+			},
 		},
 	);
