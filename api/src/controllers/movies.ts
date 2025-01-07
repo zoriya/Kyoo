@@ -44,7 +44,8 @@ const getTranslationQuery = (languages: string[]) => {
 	return [query, col] as const;
 };
 
-const { pk: _, kind, startAir, endAir, ...moviesCol } = getColumns(shows);
+// we keep the pk for after handling. it will be removed by elysia's validators after.
+const { kind, startAir, endAir, ...moviesCol } = getColumns(shows);
 
 const movieFilters: FilterDef = {
 	genres: {
@@ -181,7 +182,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				)
 				.limit(limit);
 
-			return createPage(items, { url, sort });
+			return createPage(items, { url, sort, limit });
 		},
 		{
 			detail: { description: "Get all movies" },
@@ -201,7 +202,6 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				}),
 				after: t.Optional(
 					t.String({
-						format: "byte",
 						description: comment`
 							Id of the cursor in the pagination.
 							You can ignore this and only use the prev/next field in the response.

@@ -58,5 +58,8 @@ export const generateAfter = (
 		...sort.map((by) => cursor[by.key]),
 		cursor.pk,
 	];
-	return Buffer.from(JSON.stringify(ret), "utf-8").toString("base64");
+	return Buffer.from(JSON.stringify(ret), "utf-8").toString("base64url");
 };
+
+const reverseStart = Buffer.from("[true,", "utf-8").toString("base64url");
+export const isReverse = (x: string) => x.startsWith(reverseStart);

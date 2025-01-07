@@ -1,7 +1,7 @@
 import type { ObjectOptions } from "@sinclair/typebox";
 import { t, type TSchema } from "elysia";
 import type { Sort } from "./sort";
-import { generateAfter } from "./keyset-paginate";
+import { generateAfter, isReverse } from "./keyset-paginate";
 
 export const Page = <T extends TSchema>(schema: T, options?: ObjectOptions) =>
 	t.Object(
@@ -16,17 +16,27 @@ export const Page = <T extends TSchema>(schema: T, options?: ObjectOptions) =>
 
 export const createPage = <T>(
 	items: T[],
-	{ url, sort }: { url: string; sort: Sort<any, any> },
+	{ url, sort, limit }: { url: string; sort: Sort<any, any>; limit: number },
 ) => {
 	let prev: string | null = null;
 	let next: string | null = null;
-	const uri = new URL(url);
 
-	if (uri.searchParams.has("after")) {
+	const uri = new URL(url);
+	const after = uri.searchParams.get("after");
+	const reverse = after && isReverse(after) ? 1 : 0;
+
+	const has = [
+		// prev
+		items.length > 0 && after,
+		// next
+		items.length === limit && limit > 0,
+	];
+
+	if (has[0 + reverse]) {
 		uri.searchParams.set("after", generateAfter(items[0], sort, true));
 		prev = uri.toString();
 	}
-	if (items.length) {
+	if (has[1 - reverse]) {
 		uri.searchParams.set("after", generateAfter(items[items.length - 1], sort));
 		next = uri.toString();
 	}
