@@ -110,7 +110,7 @@
 			"label": "Oynatma",
 			"playmode": {
 				"label": "Varsayılan oynatma modu",
-				"description": "Bu istemcide kullanılacak olan varsayılan oynatma modu. Kaynak modu sunucuyu yormaz ama otomatik kalite değişimine de izin vermez."
+				"description": "Bu istemcide kullanılacak olan varsayılan oynatma modu. Kaynak modu sunucuyu yormaz ama otomatik kalite değişimine de izin vermez"
 			},
 			"audioLanguage": {
 				"label": "Ses dili",
@@ -187,7 +187,7 @@
 		"login": "Oturum Aç",
 		"register": "Kayıt Ol",
 		"guest": "Misafir olarak devam et",
-		"guest-forbidden": "Bu Kyoo sunucusu misafir kabul etmemektedir",
+		"guest-forbidden": "Bu Kyoo sunucusu misafir kabul etmemektedir.",
 		"via": "{{provider}} ile devam et",
 		"add-account": "Hesap ekle",
 		"logout": "Oturumu Kapat",
@@ -238,7 +238,9 @@
 		"size": "Boyut",
 		"novideo": "Video yok",
 		"nocontainer": "Geçersiz kapsayıcı",
-		"external": "Harici"
+		"external": "Harici",
+		"hearing-impaired": "CC",
+		"unknown": "Bilinmeyen"
 	},
 	"admin": {
 		"users": {
