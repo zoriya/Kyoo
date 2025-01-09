@@ -177,7 +177,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				.innerJoin(transQ, eq(shows.pk, transQ.pk))
 				.where(and(filter, keysetPaginate({ table: shows, after, sort })))
 				.orderBy(
-					...sort.map((x) => (x.desc ? desc(shows[x.key]) : shows[x.key])),
+					...sort.map((x) => (x.desc ? sql`${shows[x.key]} desc nulls last` : shows[x.key])),
 					shows.pk,
 				)
 				.limit(limit);
