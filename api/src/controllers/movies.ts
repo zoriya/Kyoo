@@ -24,8 +24,8 @@ export function sqlarr(array: unknown[]) {
 	return `{${array.map((item) => `"${item}"`).join(",")}}`;
 }
 
-const getTranslationQuery = (languages: string[]) => {
-	const fallback = languages.includes("*");
+const getTranslationQuery = (languages: string[], forceFallback = false) => {
+	const fallback = forceFallback || languages.includes("*");
 	const query = db
 		.selectDistinctOn([showTranslations.pk])
 		.from(showTranslations)
@@ -162,7 +162,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 			request: { url },
 		}) => {
 			const langs = processLanguages(languages);
-			const [transQ, transCol] = getTranslationQuery(langs);
+			const [transQ, transCol] = getTranslationQuery(langs, true);
 
 			// TODO: Add sql indexes on sort keys
 
@@ -231,7 +231,11 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					examples: [
 						{
 							status: 422,
-							message: "Accept-Language header could not be satisfied.",
+							message:
+								"Invalid property: slug. Expected one of genres, rating, status, runtime, airDate, originalLanguage.",
+							details: {
+								in: "slug eq bubble",
+							},
 						},
 					],
 				},
