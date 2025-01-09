@@ -110,7 +110,7 @@ describe("Movie seeding", () => {
 		expect(existing).toMatchObject({ slug: dune.slug, startAir: dune.airDate });
 
 		const [resp, body] = await createMovie({ ...dune, airDate: "2158-12-13" });
-		expectStatus(resp, body).toBe(200);
+		expectStatus(resp, body).toBe(201);
 		expect(body.id).toBeString();
 		expect(body.slug).toBe("dune-2158");
 	});
@@ -224,7 +224,7 @@ describe("Movie seeding", () => {
 });
 
 const cleanup = async () => {
-	await db.delete(shows).where(inArray(shows.slug, [dune.slug]));
+	await db.delete(shows).where(inArray(shows.slug, [dune.slug, "dune-2158"]));
 	await db.delete(videos).where(inArray(videos.id, [duneVideo.id]));
 };
 // cleanup db beforehand to unsure tests are consistent

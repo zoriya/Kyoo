@@ -78,23 +78,47 @@ describe("Get all movies", () => {
 
 		expectStatus(resp, body).toBe(422);
 		expect(body).toMatchObject({
-			details: expect.objectContaining( {
-				in: "slug eq gt bubble",
-			}),
+			details: expect.anything(),
 			message: "Invalid filter: slug eq gt bubble.",
 			status: 422,
 		});
 	});
-	it("Limit 1, default sort", async () => {
+	it("Limit 2, default sort", async () => {
 		const [resp, body] = await getMovies({
-			limit: 1,
+			limit: 2,
 			langs: "en",
 		});
 
 		expectStatus(resp, body).toBe(200);
 		expect(body).toMatchObject({
-			items: [bubble],
-			this: "",
+			items: [
+				expect.objectContaining({ slug: bubble.slug }),
+				expect.objectContaining({ slug: dune.slug }),
+			],
+			this: "http://localhost/movies?limit=2",
+			// we can't have the exact after since it contains the pk that changes with every tests.
+			next: expect.stringContaining(
+				"http://localhost/movies?limit=2&after=WyJkdW5lIiw0",
+			),
+		});
+	});
+	it("Limit 2, default sort, page 2", async () => {
+		let [resp, body] = await getMovies({
+			limit: 2,
+			langs: "en",
+		});
+		expectStatus(resp, body).toBe(200);
+
+		resp = await app.handle(new Request(body.next));
+		body = await resp.json();
+
+		expectStatus(resp, body).toBe(200);
+		expect(body).toMatchObject({
+			items: [expect.objectContaining({ slug: dune1984.slug })],
+			this: expect.stringContaining(
+				"http://localhost/movies?limit=2&after=WyJkdW5lIiw0",
+			),
+			next: null,
 		});
 	});
 });
