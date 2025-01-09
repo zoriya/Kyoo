@@ -5,6 +5,7 @@ export type Sort<
 	Remap extends Partial<Record<T[number], string>>,
 > = {
 	key: Exclude<T[number], keyof Remap> | NonNullable<Remap[keyof Remap]>;
+	remmapedKey?: keyof Remap;
 	desc: boolean;
 }[];
 
@@ -44,7 +45,7 @@ export const Sort = <
 			return sort.map((x) => {
 				const desc = x[0] === "-";
 				const key = (desc ? x.substring(1) : x) as T[number];
-				if (key in remap) return { key: remap[key]!, desc };
+				if (key in remap) return { key: remap[key]!, remmapedKey: key, desc };
 				return { key: key as Exclude<typeof key, keyof Remap>, desc };
 			});
 		})

@@ -49,6 +49,9 @@ export const keysetPaginate = <
 };
 
 export const generateAfter = (cursor: any, sort: Sort<any, any>) => {
-	const ret = [...sort.map((by) => cursor[by.key]), cursor.pk];
+	const ret = [
+		...sort.map((by) => cursor[by.remmapedKey ?? by.key]),
+		cursor.pk,
+	];
 	return Buffer.from(JSON.stringify(ret), "utf-8").toString("base64url");
 };

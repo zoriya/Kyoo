@@ -1,5 +1,4 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
-import { eq } from "drizzle-orm";
 import Elysia from "elysia";
 import { base } from "~/base";
 import { movies } from "~/controllers/movies";
@@ -18,7 +17,7 @@ const getMovies = async ({
 	filter?: string;
 	limit?: number;
 	after?: string;
-	sort?: string[];
+	sort?: string | string[];
 	langs?: string;
 }) => {
 	const params = new URLSearchParams();
@@ -98,7 +97,7 @@ describe("Get all movies", () => {
 			this: "http://localhost/movies?limit=2",
 			// we can't have the exact after since it contains the pk that changes with every tests.
 			next: expect.stringContaining(
-				"http://localhost/movies?limit=2&after=WyJkdW5lIiw0",
+				"http://localhost/movies?limit=2&after=WyJkdW5lIiw",
 			),
 		});
 	});
@@ -116,11 +115,43 @@ describe("Get all movies", () => {
 		expect(body).toMatchObject({
 			items: [expect.objectContaining({ slug: dune1984.slug })],
 			this: expect.stringContaining(
-				"http://localhost/movies?limit=2&after=WyJkdW5lIiw0",
+				"http://localhost/movies?limit=2&after=WyJkdW5lIiw",
 			),
 			next: null,
 		});
 	});
+	it("Limit 2, sort by dates desc, page 2", async () => {
+		let [resp, body] = await getMovies({
+			limit: 2,
+			sort: "-airDate",
+			langs: "en",
+		});
+		expectStatus(resp, body).toBe(200);
+
+		// we copy this due to https://github.com/oven-sh/bun/issues/3521
+		const next = body.next;
+		expect(body).toMatchObject({
+			items: [
+				expect.objectContaining({ slug: bubble.slug, airDate: bubble.airDate }),
+				expect.objectContaining({ slug: dune.slug, airDate: dune.airDate }),
+			],
+			this: "http://localhost/movies?limit=2&sort=-airDate",
+			next: expect.stringContaining(
+				"http://localhost/movies?limit=2&sort=-airDate&after=WyIyMDIxLTEwLTIyIiw",
+			),
+		});
+
+		resp = await app.handle(new Request(next));
+		body = await resp.json();
+
+		expectStatus(resp, body).toBe(200);
+		expect(body).toMatchObject({
+			items: [expect.objectContaining({ slug: dune1984.slug })],
+			this: next,
+			next: null,
+		});
+	});
+	// TODO: sort with an item that has null in it. We want it to always be last (in both asc & desc).
 });
 
 beforeAll(async () => {
