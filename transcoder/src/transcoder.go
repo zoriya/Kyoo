@@ -15,6 +15,7 @@ type Transcoder struct {
 
 func NewTranscoder(metadata *MetadataService) (*Transcoder, error) {
 	out := Settings.Outpath
+	os.MkdirAll(out, 0o755)
 	dir, err := os.ReadDir(out)
 	if err != nil {
 		return nil, err
