@@ -1,37 +1,11 @@
 import { afterAll, beforeAll, describe, expect, it, test } from "bun:test";
 import { eq, inArray } from "drizzle-orm";
-import Elysia from "elysia";
-import { base } from "~/base";
-import { seed } from "~/controllers/seed";
+import { expectStatus } from "tests/utils";
 import { db } from "~/db";
 import { shows, showTranslations, videos } from "~/db/schema";
 import { bubble } from "~/models/examples";
 import { dune, duneVideo } from "~/models/examples/dune-2021";
-import type { SeedMovie } from "~/models/movie";
-
-const app = new Elysia().use(base).use(seed);
-const createMovie = async (movie: SeedMovie) => {
-	const resp = await app.handle(
-		new Request("http://localhost/movies", {
-			method: "POST",
-			body: JSON.stringify(movie),
-			headers: {
-				"Content-Type": "application/json",
-			},
-		}),
-	);
-	const body = await resp.json();
-	return [resp, body] as const;
-};
-
-function expectStatus(resp: Response, body: object) {
-	const matcher = expect({ ...body, status: resp.status });
-	return {
-		toBe: (status: number) => {
-			matcher.toMatchObject({ status: status });
-		},
-	};
-}
+import { createMovie } from "./movies-helper";
 
 describe("Movie seeding", () => {
 	it("Can create a movie", async () => {

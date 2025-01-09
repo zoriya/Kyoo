@@ -1,56 +1,20 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
-import Elysia from "elysia";
-import { base } from "~/base";
-import { movies } from "~/controllers/movies";
+import { expectStatus } from "tests/utils";
 import { seedMovie } from "~/controllers/seed/movies";
 import { db } from "~/db";
 import { shows } from "~/db/schema";
 import { bubble } from "~/models/examples";
 import { dune1984 } from "~/models/examples/dune-1984";
 import { dune } from "~/models/examples/dune-2021";
+import { getMovies, movieApp } from "./movies-helper";
 
-const app = new Elysia().use(base).use(movies);
-const getMovies = async ({
-	langs,
-	...query
-}: {
-	filter?: string;
-	limit?: number;
-	after?: string;
-	sort?: string | string[];
-	langs?: string;
-}) => {
-	const params = new URLSearchParams();
-	for (const [key, value] of Object.entries(query)) {
-		if (!Array.isArray(value)) {
-			params.append(key, value.toString());
-			continue;
-		}
-		for (const v of value) params.append(key, v.toString());
-	}
-
-	const resp = await app.handle(
-		new Request(`http://localhost/movies?${params}`, {
-			method: "GET",
-			headers: langs
-				? {
-						"Accept-Language": langs,
-					}
-				: {},
-		}),
-	);
-	const body = await resp.json();
-	return [resp, body] as const;
-};
-
-function expectStatus(resp: Response, body: object) {
-	const matcher = expect({ ...body, status: resp.status });
-	return {
-		toBe: (status: number) => {
-			matcher.toMatchObject({ status: status });
-		},
-	};
-}
+beforeAll(async () => {
+	await db.delete(shows);
+	for (const movie of [bubble, dune1984, dune]) await seedMovie(movie);
+});
+afterAll(async () => {
+	await db.delete(shows);
+});
 
 describe("Get all movies", () => {
 	it("Invalid filter params", async () => {
@@ -108,7 +72,7 @@ describe("Get all movies", () => {
 		});
 		expectStatus(resp, body).toBe(200);
 
-		resp = await app.handle(new Request(body.next));
+		resp = await movieApp.handle(new Request(body.next));
 		body = await resp.json();
 
 		expectStatus(resp, body).toBe(200);
@@ -141,23 +105,19 @@ describe("Get all movies", () => {
 			),
 		});
 
-		resp = await app.handle(new Request(next));
+		resp = await movieApp.handle(new Request(next));
 		body = await resp.json();
 
 		expectStatus(resp, body).toBe(200);
 		expect(body).toMatchObject({
-			items: [expect.objectContaining({ slug: dune1984.slug })],
+			items: [
+				expect.objectContaining({
+					slug: dune1984.slug,
+					airDate: dune1984.airDate,
+				}),
+			],
 			this: next,
 			next: null,
 		});
 	});
-	// TODO: sort with an item that has null in it. We want it to always be last (in both asc & desc).
-});
-
-beforeAll(async () => {
-	await db.delete(shows);
-	for (const movie of [bubble, dune1984, dune]) await seedMovie(movie);
-});
-afterAll(async () => {
-	await db.delete(shows);
 });
