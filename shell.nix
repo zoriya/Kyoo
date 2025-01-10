@@ -42,6 +42,7 @@ in
       sqlc
       go-swag
       robotframework-tidy
+      bun
     ];
 
     DOTNET_ROOT = "${dotnet}";

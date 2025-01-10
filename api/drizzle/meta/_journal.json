@@ -1,0 +1,41 @@
+{
+	"version": "7",
+	"dialect": "postgresql",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "7",
+			"when": 1731105746157,
+			"tag": "0000_init",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1731149082556,
+			"tag": "0001_video",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1731165599920,
+			"tag": "0002_seasons",
+			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "7",
+			"when": 1731258712255,
+			"tag": "0003_order",
+			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "7",
+			"when": 1732738409330,
+			"tag": "0004_jointures",
+			"breakpoints": true
+		}
+	]
+}
