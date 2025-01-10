@@ -52,20 +52,17 @@ describe("with a null value", () => {
 	});
 
 	it("sort by dates desc with a null value", async () => {
-		console.log(
-			(
-				await getMovies({
-					sort: "-airDate",
-					langs: "en",
-				})
-			)[1].items,
-		);
 		let [resp, body] = await getMovies({
 			limit: 2,
 			sort: "-airDate",
 			langs: "en",
 		});
 		expectStatus(resp, body).toBe(200);
+
+		expect(body.items.map((x: any) => x.slug)).toMatchObject([
+			bubble.slug,
+			dune.slug,
+		]);
 
 		// we copy this due to https://github.com/oven-sh/bun/issues/3521
 		const next = body.next;
@@ -84,6 +81,10 @@ describe("with a null value", () => {
 		body = await resp.json();
 
 		expectStatus(resp, body).toBe(200);
+		expect(body.items.map((x: any) => x.slug)).toMatchObject([
+			dune1984.slug,
+			"no-air-date",
+		]);
 		expect(body).toMatchObject({
 			items: [
 				expect.objectContaining({
@@ -96,7 +97,7 @@ describe("with a null value", () => {
 				}),
 			],
 			this: next,
-			next: null,
+			next: expect.anything(),
 		});
 	});
 	it("sort by dates asc with a null value", async () => {
@@ -139,7 +140,7 @@ describe("with a null value", () => {
 				}),
 			],
 			this: next,
-			next: null,
+			next: expect.anything(),
 		});
 	});
 });

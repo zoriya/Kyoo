@@ -1,5 +1,5 @@
 import type { NonEmptyArray, Sort } from "./sort";
-import { eq, or, type Column, and, gt, lt } from "drizzle-orm";
+import { eq, or, type Column, and, gt, lt, isNull } from "drizzle-orm";
 
 type Table<Name extends string> = Record<Name, Column>;
 
@@ -41,8 +41,20 @@ export const keysetPaginate = <
 	let previous = undefined;
 	for (const [i, by] of [...sort, pkSort].entries()) {
 		const cmp = by.desc ? lt : gt;
-		where = or(where, and(previous, cmp(table[by.key], cursor[i])));
-		previous = and(previous, eq(table[by.key], cursor[i]));
+		where = or(
+			where,
+			and(
+				previous,
+				or(
+					cmp(table[by.key], cursor[i]),
+					!table[by.key].notNull ? isNull(table[by.key]) : undefined,
+				),
+			),
+		);
+		previous = and(
+			previous,
+			cursor[i] === null ? isNull(table[by.key]) : eq(table[by.key], cursor[i]),
+		);
 	}
 
 	return where;
