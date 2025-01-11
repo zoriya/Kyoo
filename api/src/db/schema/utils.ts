@@ -13,6 +13,7 @@ import type { CasingCache } from "drizzle-orm/casing";
 import type { AnyMySqlSelect } from "drizzle-orm/mysql-core";
 import {
 	type AnyPgSelect,
+	customType,
 	jsonb,
 	pgSchema,
 	varchar,
@@ -82,3 +83,10 @@ export function conflictUpdateAllExcept<
 export function sqlarr(array: unknown[]) {
 	return `{${array.map((item) => `"${item}"`).join(",")}}`;
 }
+
+// idk why they didn't implement this one
+export const tsvector = customType<{ data: string }>({
+	dataType() {
+		return "tsvector";
+	},
+});
