@@ -2,6 +2,7 @@ import { relations, sql } from "drizzle-orm";
 import {
 	check,
 	date,
+	index,
 	integer,
 	jsonb,
 	primaryKey,
@@ -85,6 +86,10 @@ export const shows = schema.table(
 	(t) => [
 		check("rating_valid", sql`${t.rating} between 0 and 100`),
 		check("runtime_valid", sql`${t.runtime} >= 0`),
+
+		index("kind").using("hash", t.kind),
+		index("rating").on(t.rating),
+		index("startAir").on(t.startAir),
 	],
 );
 
