@@ -249,7 +249,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 	.get(
 		"",
 		async ({
-			query: { limit, after, sort, filter, preferOriginal },
+			query: { limit, after, query, sort, filter, preferOriginal },
 			headers: { "accept-language": languages },
 			request: { url },
 		}) => {
@@ -295,8 +295,15 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					isAvailable: sql<boolean>`${videoQ.showPk} is not null`.as(
 						"isAvailable",
 					),
+					rank: sql<number>`ts_rank_cd(${transQ.search}, query)`.as("rank"),
 				})
 				.from(shows)
+				// TODO: change `simple` to `transQ.language`
+				// yes drizzle doesn't support crossJoin so we do a fullJoin on true T-T
+				.fullJoin(
+					sql`websearch_to_tsquery('simple', ${query}) as query`,
+					sql`true`,
+				)
 				.innerJoin(transQ, eq(shows.pk, transQ.pk))
 				.leftJoin(
 					showTranslations,
@@ -308,8 +315,15 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					),
 				)
 				.leftJoin(videoQ, eq(shows.pk, videoQ.showPk))
-				.where(and(filter, keysetPaginate({ table: shows, after, sort })))
+				.where(
+					and(
+						filter,
+						query ? sql`query @@ ${transQ.search}` : undefined,
+						keysetPaginate({ table: shows, after, sort }),
+					),
+				)
 				.orderBy(
+					...(query ? [sql`rank`] : []),
 					...(sort.random
 						? [sql`md5(${sort.random.seed} || ${shows.pk})`]
 						: []),
@@ -331,6 +345,14 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					description: "How to sort the query",
 				}),
 				filter: t.Optional(Filter({ def: movieFilters })),
+				query: t.Optional(
+					t.String({
+						description: comment`
+							Search query.
+							Searching automatically sort via relevance before the other sort parameters.
+						`,
+					}),
+				),
 				limit: t.Integer({
 					minimum: 1,
 					maximum: 250,
