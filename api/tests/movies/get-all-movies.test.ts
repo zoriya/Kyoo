@@ -126,7 +126,7 @@ describe("Get all movies", () => {
 		it("No limit, compare order with same seeds", async () => {
 			// First query
 			let [resp1, body1] = await getMovies({
-				random: 100,
+				sort: "random:100",
 			});
 			expectStatus(resp1, body1).toBe(200);
 			const items1: Movie[] = body1.items;
@@ -134,7 +134,7 @@ describe("Get all movies", () => {
 
 			// Second query
 			let [resp2, body2] = await getMovies({
-				random: 100,
+				sort: "random:100",
 			});
 			expectStatus(resp2, body2).toBe(200);
 			const items2: Movie[] = body2.items;
@@ -145,7 +145,7 @@ describe("Get all movies", () => {
 		it("No limit, compare order with different seeds", async () => {
 			// First query
 			let [resp1, body1] = await getMovies({
-				random: 100,
+				sort: "random:100",
 			});
 			expectStatus(resp1, body1).toBe(200);
 			const items1: Movie[] = body1.items;
@@ -153,14 +153,42 @@ describe("Get all movies", () => {
 
 			// Second query
 			let [resp2, body2] = await getMovies({
-				random: 1,
+				sort: "random:5",
 			});
 			expectStatus(resp2, body2).toBe(200);
 			const items2: Movie[] = body2.items;
 			const items2Ids = items2.map(({ id }) => id);
 
-			console.log(items1Ids, items2Ids);
 			expect(items1Ids).not.toEqual(items2Ids);
+		});
+
+		it("Limit 1, pages 1 and 2 ", async () => {
+			// First query fetches all
+			// use the result to know what is expected
+			let [resp, body] = await getMovies({
+				sort: "random:1234",
+			});
+			expectStatus(resp, body).toBe(200);
+			let items: Movie[] = body.items;
+			const expectedIds = items.map(({ id }) => id);
+
+			// Get First Page
+			[resp, body] = await getMovies({
+				sort: "random:1234",
+				limit: 1,
+			});
+			expectStatus(resp, body).toBe(200);
+			items = body.items;
+			expect(items.length).toBe(1);
+			expect(items[0].id).toBe(expectedIds[0]);
+			// Get Second Page
+			resp = await movieApp.handle(new Request(body.next));
+			body = await resp.json();
+
+			expectStatus(resp, body).toBe(200);
+			items = body.items;
+			expect(items.length).toBe(1);
+			expect(items[0].id).toBe(expectedIds[1]);
 		});
 	});
 });

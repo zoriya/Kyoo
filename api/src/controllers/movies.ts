@@ -157,13 +157,12 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 	.get(
 		"",
 		async ({
-			query: { limit, after, sort, filter, random },
+			query: { limit, after, sort, filter },
 			headers: { "accept-language": languages },
 			request: { url },
 		}) => {
 			const langs = processLanguages(languages);
 			const [transQ, transCol] = getTranslationQuery(langs, true);
-
 			// TODO: Add sql indexes on sort keys
 
 			const items = await db
@@ -177,10 +176,14 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				.innerJoin(transQ, eq(shows.pk, transQ.pk))
 				.where(and(filter, keysetPaginate({ table: shows, after, sort })))
 				.orderBy(
-					...(random !== undefined
-						? [sql`md5(${random} || ${shows.pk} )`]
+					...(sort.random !== undefined
+						? [
+								sort.random.desc
+									? sql`md5(${sort.random.seed} || ${shows.pk}) desc`
+									: sql`md5(${sort.random.seed} || ${shows.pk})`,
+							]
 						: []),
-					...sort.map((x) =>
+					...sort.sort.map((x) =>
 						x.desc ? sql`${shows[x.key]} desc nulls last` : shows[x.key],
 					),
 					shows.pk,
@@ -193,17 +196,10 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 			detail: { description: "Get all movies" },
 			query: t.Object({
 				sort: Sort(["slug", "rating", "airDate", "createdAt", "nextRefresh"], {
-					// TODO: Add random
 					remap: { airDate: "startAir" },
 					default: ["slug"],
 					description: "How to sort the query",
 				}),
-				random: t.Optional(
-					t.Integer({
-						minimum: 0,
-						description: "Seed to shuffle items",
-					}),
-				),
 				filter: t.Optional(Filter({ def: movieFilters })),
 				limit: t.Integer({
 					minimum: 1,
