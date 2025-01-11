@@ -7,6 +7,7 @@ import { bubble } from "~/models/examples";
 import { dune1984 } from "~/models/examples/dune-1984";
 import { dune } from "~/models/examples/dune-2021";
 import { getMovies, movieApp } from "./movies-helper";
+import { Movie } from "~/models/movie";
 
 beforeAll(async () => {
 	await db.delete(shows);
@@ -118,6 +119,48 @@ describe("Get all movies", () => {
 			],
 			this: next,
 			next: null,
+		});
+	});
+
+	describe("Random sort", () => {
+		it("No limit, compare order with same seeds", async () => {
+			// First query
+			let [resp1, body1] = await getMovies({
+				random: 100,
+			});
+			expectStatus(resp1, body1).toBe(200);
+			const items1: Movie[] = body1.items;
+			const items1Ids = items1.map(({ id }) => id);
+
+			// Second query
+			let [resp2, body2] = await getMovies({
+				random: 100,
+			});
+			expectStatus(resp2, body2).toBe(200);
+			const items2: Movie[] = body2.items;
+			const items2Ids = items2.map(({ id }) => id);
+
+			expect(items1Ids).toEqual(items2Ids);
+		});
+		it("No limit, compare order with different seeds", async () => {
+			// First query
+			let [resp1, body1] = await getMovies({
+				random: 100,
+			});
+			expectStatus(resp1, body1).toBe(200);
+			const items1: Movie[] = body1.items;
+			const items1Ids = items1.map(({ id }) => id);
+
+			// Second query
+			let [resp2, body2] = await getMovies({
+				random: 1,
+			});
+			expectStatus(resp2, body2).toBe(200);
+			const items2: Movie[] = body2.items;
+			const items2Ids = items2.map(({ id }) => id);
+
+			console.log(items1Ids, items2Ids);
+			expect(items1Ids).not.toEqual(items2Ids);
 		});
 	});
 });

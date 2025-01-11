@@ -1,4 +1,4 @@
-import { t } from "elysia";
+import { t, TSchema } from "elysia";
 
 export type Sort<
 	T extends string[],

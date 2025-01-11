@@ -157,7 +157,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 	.get(
 		"",
 		async ({
-			query: { limit, after, sort, filter },
+			query: { limit, after, sort, filter, random },
 			headers: { "accept-language": languages },
 			request: { url },
 		}) => {
@@ -177,7 +177,12 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				.innerJoin(transQ, eq(shows.pk, transQ.pk))
 				.where(and(filter, keysetPaginate({ table: shows, after, sort })))
 				.orderBy(
-					...sort.map((x) => (x.desc ? sql`${shows[x.key]} desc nulls last` : shows[x.key])),
+					...(random !== undefined
+						? [sql`md5(${random} || ${shows.pk} )`]
+						: []),
+					...sort.map((x) =>
+						x.desc ? sql`${shows[x.key]} desc nulls last` : shows[x.key],
+					),
 					shows.pk,
 				)
 				.limit(limit);
@@ -193,6 +198,12 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					default: ["slug"],
 					description: "How to sort the query",
 				}),
+				random: t.Optional(
+					t.Integer({
+						minimum: 0,
+						description: "Seed to shuffle items",
+					}),
+				),
 				filter: t.Optional(Filter({ def: movieFilters })),
 				limit: t.Integer({
 					minimum: 1,

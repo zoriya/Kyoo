@@ -30,6 +30,7 @@ export const getMovies = async ({
 	limit?: number;
 	after?: string;
 	sort?: string | string[];
+	random?: number;
 	langs?: string;
 }) => {
 	const resp = await movieApp.handle(

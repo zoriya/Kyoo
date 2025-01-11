@@ -20,5 +20,6 @@
 		"@types/pg": "^8.11.10",
 		"bun-types": "^1.1.42"
 	},
-	"module": "src/index.js"
+	"module": "src/index.js",
+	"packageManager": "yarn@1.22.21+sha1.1959a18351b811cdeedbd484a8f86c3cc3bbaf72"
 }
