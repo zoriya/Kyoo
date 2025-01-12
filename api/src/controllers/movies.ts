@@ -177,11 +177,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				.where(and(filter, keysetPaginate({ table: shows, after, sort })))
 				.orderBy(
 					...(sort.random !== undefined
-						? [
-								sort.random.desc
-									? sql`md5(${sort.random.seed} || ${shows.pk}) desc`
-									: sql`md5(${sort.random.seed} || ${shows.pk})`,
-							]
+						? [sql`md5(${sort.random.seed} || ${shows.pk})`]
 						: []),
 					...sort.sort.map((x) =>
 						x.desc ? sql`${shows[x.key]} desc nulls last` : shows[x.key],

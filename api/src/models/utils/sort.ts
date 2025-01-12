@@ -9,7 +9,7 @@ export type Sort<
 		remmapedKey?: keyof Remap;
 		desc: boolean;
 	}[];
-	random?: { desc: boolean; seed: number };
+	random?: { seed: number };
 };
 
 export type NonEmptyArray<T> = [T, ...T[]];
@@ -33,13 +33,11 @@ export const Sort = <
 		.Transform(
 			t.Array(
 				t.Union([
+					t.Literal("random"),
+					t.TemplateLiteral("random:${number}"),
 					t.UnionEnum([
 						...values,
 						...values.map((x: T[number]) => `-${x}` as const),
-					]),
-					t.Union([
-						t.TemplateLiteral("random:${number}"),
-						t.TemplateLiteral("-random:${number}"),
 					]),
 				]),
 				{
@@ -59,14 +57,12 @@ export const Sort = <
 				if (key == "random") {
 					random = {
 						seed: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
-						desc,
 					};
 					continue;
 				} else if (key.startsWith("random:")) {
 					const strSeed = key.replace("random:", "");
 					random = {
 						seed: parseInt(strSeed),
-						desc,
 					};
 					continue;
 				}
