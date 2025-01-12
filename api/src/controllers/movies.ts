@@ -95,14 +95,12 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				return error(404, {
 					status: 404,
 					message: "Movie not found",
-					details: undefined,
 				});
 			}
 			if (!ret.translation) {
 				return error(422, {
 					status: 422,
 					message: "Accept-Language header could not be satisfied.",
-					details: undefined,
 				});
 			}
 			set.headers["content-language"] = ret.translation.language;
@@ -211,7 +209,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				.innerJoin(transQ, eq(shows.pk, transQ.pk))
 				.where(and(filter, keysetPaginate({ table: shows, after, sort })))
 				.orderBy(
-					...(sort.random !== undefined
+					...(sort.random
 						? [sql`md5(${sort.random.seed} || ${shows.pk})`]
 						: []),
 					...sort.sort.map((x) =>
