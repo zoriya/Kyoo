@@ -49,36 +49,20 @@ export const Sort = <
 			),
 		)
 		.Decode((sort): Sort<T, Remap> => {
-			const sortItems: Sort<T, Remap>["sort"] = [];
-			let random: Sort<T, Remap>["random"] = undefined;
-			for (const x of sort) {
-				const desc = x[0] === "-";
-				const key = (desc ? x.substring(1) : x) as T[number];
-				if (key == "random") {
-					random = {
-						seed: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
-					};
-					continue;
-				} else if (key.startsWith("random:")) {
-					const strSeed = key.replace("random:", "");
-					random = {
-						seed: parseInt(strSeed),
-					};
-					continue;
-				}
-
-				if (key in remap) {
-					sortItems.push({ key: remap[key]!, remmapedKey: key, desc });
-				} else {
-					sortItems.push({
-						key: key as Exclude<typeof key, keyof Remap>,
-						desc,
-					});
-				}
+			const random = sort.find((x) => x.startsWith("random"));
+			if (random) {
+				const seed = random.includes(":")
+					? Number.parseInt(random.substring("random:".length))
+					: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+				return { random: { seed }, sort: [] };
 			}
 			return {
-				sort: sortItems,
-				random,
+				sort: sort.map((x) => {
+					const desc = x[0] === "-";
+					const key = (desc ? x.substring(1) : x) as T[number];
+					if (key in remap) return { key: remap[key]!, remmapedKey: key, desc };
+					return { key: key as Exclude<typeof key, keyof Remap>, desc };
+				}),
 			};
 		})
 		.Encode(() => {
