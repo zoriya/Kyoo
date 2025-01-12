@@ -1,5 +1,5 @@
 import { and, eq, sql } from "drizzle-orm";
-import { Elysia, t } from "elysia";
+import { Elysia, redirect, t } from "elysia";
 import { KError } from "~/models/error";
 import { comment } from "~/utils";
 import { db } from "../db";
@@ -149,6 +149,41 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 							status: 422,
 							message: "Accept-Language header could not be satisfied.",
 						},
+					],
+				},
+			},
+		},
+	)
+	.get(
+		"random",
+		async ({ error, redirect }) => {
+			const [id] = await db
+				.select({ id: shows.id })
+				.from(shows)
+				.where(eq(shows.kind, "movie"))
+				.orderBy(sql`random()`)
+				.limit(1);
+			if (!id)
+				return error(404, {
+					status: 404,
+					message: "No movies in the database",
+				});
+			return redirect(`/movies/${id}`);
+		},
+		{
+			detail: {
+				description: "Get a random movie",
+			},
+			response: {
+				302: t.Void({
+					description:
+						"Redirected to the [/movies/id](#tag/movies/GET/movies/{id}) route.",
+				}),
+				404: {
+					...KError,
+					description: "No movie found with the given id or slug.",
+					examples: [
+						{ status: 404, message: "Movie not found", details: undefined },
 					],
 				},
 			},
