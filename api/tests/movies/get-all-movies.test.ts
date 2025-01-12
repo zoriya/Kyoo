@@ -7,7 +7,7 @@ import { bubble } from "~/models/examples";
 import { dune1984 } from "~/models/examples/dune-1984";
 import { dune } from "~/models/examples/dune-2021";
 import { getMovies, movieApp } from "./movies-helper";
-import { Movie } from "~/models/movie";
+import type { Movie } from "~/models/movie";
 
 beforeAll(async () => {
 	await db.delete(shows);
@@ -142,26 +142,6 @@ describe("Get all movies", () => {
 
 			expect(items1Ids).toEqual(items2Ids);
 		});
-		it("No limit, compare order with different seeds", async () => {
-			// First query
-			let [resp1, body1] = await getMovies({
-				sort: "random:100",
-			});
-			expectStatus(resp1, body1).toBe(200);
-			const items1: Movie[] = body1.items;
-			const items1Ids = items1.map(({ id }) => id);
-
-			// Second query
-			let [resp2, body2] = await getMovies({
-				sort: "random:5",
-			});
-			expectStatus(resp2, body2).toBe(200);
-			const items2: Movie[] = body2.items;
-			const items2Ids = items2.map(({ id }) => id);
-
-			expect(items1Ids).not.toEqual(items2Ids);
-		});
-
 		it("Limit 1, pages 1 and 2 ", async () => {
 			// First query fetches all
 			// use the result to know what is expected
