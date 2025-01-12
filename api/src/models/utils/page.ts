@@ -18,12 +18,17 @@ export const createPage = <T>(
 	{ url, sort, limit }: { url: string; sort: Sort<any, any>; limit: number },
 ) => {
 	let next: string | null = null;
+	const uri = new URL(url);
+
+	if (sort.random) {
+		uri.searchParams.set("sort", `random:${sort.random.seed}`);
+		url = uri.toString();
+	}
 
 	// we can't know for sure if there's a next page when the current page is full.
 	// maybe the next page is empty, this is a bit weird but it allows us to handle pages
 	// without making a new request to the db so it's fine.
 	if (items.length === limit && limit > 0) {
-		const uri = new URL(url);
 		uri.searchParams.set("after", generateAfter(items[items.length - 1], sort));
 		next = uri.toString();
 	}

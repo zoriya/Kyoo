@@ -125,7 +125,7 @@ describe("Get all movies", () => {
 	describe("Random sort", () => {
 		it("No limit, compare order with same seeds", async () => {
 			// First query
-			let [resp1, body1] = await getMovies({
+			const [resp1, body1] = await getMovies({
 				sort: "random:100",
 			});
 			expectStatus(resp1, body1).toBe(200);
@@ -133,7 +133,7 @@ describe("Get all movies", () => {
 			const items1Ids = items1.map(({ id }) => id);
 
 			// Second query
-			let [resp2, body2] = await getMovies({
+			const [resp2, body2] = await getMovies({
 				sort: "random:100",
 			});
 			expectStatus(resp2, body2).toBe(200);
@@ -169,6 +169,22 @@ describe("Get all movies", () => {
 			items = body.items;
 			expect(items.length).toBe(1);
 			expect(items[0].id).toBe(expectedIds[1]);
+		});
+		it("Limit 1, pages 1 and 2, no seed ", async () => {
+			const [resp, body] = await getMovies({
+				sort: "random",
+				limit: 2,
+			});
+			expectStatus(resp, body).toBe(200);
+
+			const resp2 = await movieApp.handle(new Request(body.next));
+			const body2 = await resp2.json();
+			expectStatus(resp2, body).toBe(200);
+
+			expect(body2.items.length).toBe(1);
+			expect(body.items.map((x: Movie) => x.slug)).not.toContain(
+				body2.items[0].slug,
+			);
 		});
 	});
 });
