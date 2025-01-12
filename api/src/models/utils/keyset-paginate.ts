@@ -1,5 +1,5 @@
 import type { NonEmptyArray, Sort } from "./sort";
-import { eq, or, type Column, and, gt, lt, isNull } from "drizzle-orm";
+import { eq, or, type Column, and, gt, lt, isNull, sql } from "drizzle-orm";
 
 type Table<Name extends string> = Record<Name, Column>;
 
@@ -29,7 +29,7 @@ export const keysetPaginate = <
 	sort: Sort<T, Remap>;
 }) => {
 	if (!after) return undefined;
-	const cursor: After = JSON.parse(
+	let cursor: After = JSON.parse(
 		Buffer.from(after, "base64").toString("utf-8"),
 	);
 
@@ -39,6 +39,23 @@ export const keysetPaginate = <
 	// PERF: See https://use-the-index-luke.com/sql/partial-results/fetch-next-page#sb-equivalent-logic
 	let where = undefined;
 	let previous = undefined;
+
+	if (sort.random) {
+		const lastCursor = cursor.slice(-1)[0];
+		where = or(
+			where,
+			and(
+				previous,
+				gt(
+					sql`md5(${sort.random.seed} || ${table[pkSort.key]})`,
+					sql`md5(${sort.random.seed} || ${lastCursor})`,
+				),
+			),
+		);
+
+		previous = and(previous, eq(table[pkSort.key], lastCursor));
+		cursor = cursor.slice(1);
+	}
 	for (const [i, by] of [...sort.sort, pkSort].entries()) {
 		const cmp = by.desc ? lt : gt;
 		where = or(
@@ -62,6 +79,7 @@ export const keysetPaginate = <
 
 export const generateAfter = (cursor: any, sort: Sort<any, any>) => {
 	const ret = [
+		...(sort.random ? [`random:${sort.random.seed}`] : []),
 		...sort.sort.map((by) => cursor[by.remmapedKey ?? by.key]),
 		cursor.pk,
 	];

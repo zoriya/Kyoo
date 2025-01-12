@@ -1,4 +1,4 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { KError } from "~/models/error";
 import { comment } from "~/utils";
