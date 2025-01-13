@@ -30,17 +30,21 @@ export type SeedMovieResponse = typeof SeedMovieResponse.static;
 
 export const seedMovie = async (
 	seed: SeedMovie,
-): Promise<SeedMovieResponse & {
-	status: "Created" | "OK" | "Conflict";
-}> => {
-	const { translations, videos: vids, ...bMovie } = seed;
-
+): Promise<
+	| (SeedMovieResponse & { status: "Created" | "OK" | "Conflict" })
+	| { status: 422; message: string }
+> => {
 	if (seed.slug === "random") {
-		if (seed.airDate === null) {
-			throw new KErrorT("`random` is a reserved slug. Use something else.");
+		if (!seed.airDate) {
+			return {
+				status: 422,
+				message: "`random` is a reserved slug. Use something else.",
+			};
 		}
 		seed.slug = `random-${getYear(seed.airDate)}`;
 	}
+
+	const { translations, videos: vids, ...bMovie } = seed;
 
 	const ret = await db.transaction(async (tx) => {
 		const movie: Show = {

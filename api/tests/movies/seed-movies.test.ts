@@ -192,6 +192,16 @@ describe("Movie seeding", () => {
 		});
 	});
 
+	it("Refuses random as a slug", async () => {
+		const [resp, body] = await createMovie({ ...bubble, slug: "random", airDate: null });
+		expectStatus(resp, body).toBe(422);
+	});
+	it("Refuses random as a slug but fallback w/ airDate", async () => {
+		const [resp, body] = await createMovie({ ...bubble, slug: "random" });
+		expectStatus(resp, body).toBe(201);
+		expect(body.slug).toBe("random-2022");
+	});
+
 	test.todo("Create correct video slug (version)", async () => {});
 	test.todo("Create correct video slug (part)", async () => {});
 	test.todo("Create correct video slug (rendering)", async () => {});

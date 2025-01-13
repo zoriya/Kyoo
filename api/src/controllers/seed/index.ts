@@ -17,8 +17,9 @@ export const seed = new Elysia()
 			const err = validateTranslations(body.translations);
 			if (err) return error(400, err);
 
-			const { status, ...ret } = await seedMovie(body);
-			return error(status, ret);
+			const ret = await seedMovie(body);
+			if (ret.status === 422) return error(422, ret);
+			return error(ret.status, ret);
 		},
 		{
 			body: "seed-movie",
