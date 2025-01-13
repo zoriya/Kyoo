@@ -6,7 +6,9 @@ import { shows } from "~/db/schema";
 import { bubble } from "~/models/examples";
 import { dune1984 } from "~/models/examples/dune-1984";
 import { dune } from "~/models/examples/dune-2021";
-import { getMovies, movieApp } from "./movies-helper";
+import { getMovie, getMovies, movieApp } from "./movies-helper";
+import type { Movie } from "~/models/movie";
+import { isUuid } from "~/models/utils";
 
 beforeAll(async () => {
 	await db.delete(shows);
@@ -118,6 +120,83 @@ describe("Get all movies", () => {
 			],
 			this: next,
 			next: null,
+		});
+	});
+
+	describe("Random sort", () => {
+		it("No limit, compare order with same seeds", async () => {
+			// First query
+			const [resp1, body1] = await getMovies({
+				sort: "random:100",
+			});
+			expectStatus(resp1, body1).toBe(200);
+			const items1: Movie[] = body1.items;
+			const items1Ids = items1.map(({ id }) => id);
+
+			// Second query
+			const [resp2, body2] = await getMovies({
+				sort: "random:100",
+			});
+			expectStatus(resp2, body2).toBe(200);
+			const items2: Movie[] = body2.items;
+			const items2Ids = items2.map(({ id }) => id);
+
+			expect(items1Ids).toEqual(items2Ids);
+		});
+		it("Limit 1, pages 1 and 2 ", async () => {
+			// First query fetches all
+			// use the result to know what is expected
+			let [resp, body] = await getMovies({
+				sort: "random:1234",
+			});
+			expectStatus(resp, body).toBe(200);
+			let items: Movie[] = body.items;
+			const expectedIds = items.map(({ id }) => id);
+
+			// Get First Page
+			[resp, body] = await getMovies({
+				sort: "random:1234",
+				limit: 1,
+			});
+			expectStatus(resp, body).toBe(200);
+			items = body.items;
+			expect(items.length).toBe(1);
+			expect(items[0].id).toBe(expectedIds[0]);
+			// Get Second Page
+			resp = await movieApp.handle(new Request(body.next));
+			body = await resp.json();
+
+			expectStatus(resp, body).toBe(200);
+			items = body.items;
+			expect(items.length).toBe(1);
+			expect(items[0].id).toBe(expectedIds[1]);
+		});
+		it("Limit 1, pages 1 and 2, no seed ", async () => {
+			const [resp, body] = await getMovies({
+				sort: "random",
+				limit: 2,
+			});
+			expectStatus(resp, body).toBe(200);
+
+			const resp2 = await movieApp.handle(new Request(body.next));
+			const body2 = await resp2.json();
+			expectStatus(resp2, body).toBe(200);
+
+			expect(body2.items.length).toBe(1);
+			expect(body.items.map((x: Movie) => x.slug)).not.toContain(
+				body2.items[0].slug,
+			);
+		});
+
+		it("Get /random", async () => {
+			const resp = await movieApp.handle(
+				new Request("http://localhost/movies/random"),
+			);
+			expect(resp.status).toBe(302);
+			const location = resp.headers.get("location")!;
+			expect(location).toStartWith("/movies/");
+			const id = location.substring("/movies/".length);
+			expect(isUuid(id)).toBe(true);
 		});
 	});
 });

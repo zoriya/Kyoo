@@ -1,5 +1,5 @@
-import { and, desc, eq, sql } from "drizzle-orm";
-import { Elysia, t } from "elysia";
+import { and, eq, sql } from "drizzle-orm";
+import { Elysia, redirect, t } from "elysia";
 import { KError } from "~/models/error";
 import { comment } from "~/utils";
 import { db } from "../db";
@@ -95,14 +95,12 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				return error(404, {
 					status: 404,
 					message: "Movie not found",
-					details: undefined,
 				});
 			}
 			if (!ret.translation) {
 				return error(422, {
 					status: 422,
 					message: "Accept-Language header could not be satisfied.",
-					details: undefined,
 				});
 			}
 			set.headers["content-language"] = ret.translation.language;
@@ -155,6 +153,41 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 		},
 	)
 	.get(
+		"random",
+		async ({ error, redirect }) => {
+			const [movie] = await db
+				.select({ id: shows.id })
+				.from(shows)
+				.where(eq(shows.kind, "movie"))
+				.orderBy(sql`random()`)
+				.limit(1);
+			if (!movie)
+				return error(404, {
+					status: 404,
+					message: "No movies in the database",
+				});
+			return redirect(`/movies/${movie.id}`);
+		},
+		{
+			detail: {
+				description: "Get a random movie",
+			},
+			response: {
+				302: t.Void({
+					description:
+						"Redirected to the [/movies/{id}](#tag/movies/GET/movies/{id}) route.",
+				}),
+				404: {
+					...KError,
+					description: "No movie found with the given id or slug.",
+					examples: [
+						{ status: 404, message: "Movie not found", details: undefined },
+					],
+				},
+			},
+		},
+	)
+	.get(
 		"",
 		async ({
 			query: { limit, after, sort, filter },
@@ -163,7 +196,6 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 		}) => {
 			const langs = processLanguages(languages);
 			const [transQ, transCol] = getTranslationQuery(langs, true);
-
 			// TODO: Add sql indexes on sort keys
 
 			const items = await db
@@ -177,7 +209,12 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				.innerJoin(transQ, eq(shows.pk, transQ.pk))
 				.where(and(filter, keysetPaginate({ table: shows, after, sort })))
 				.orderBy(
-					...sort.map((x) => (x.desc ? sql`${shows[x.key]} desc nulls last` : shows[x.key])),
+					...(sort.random
+						? [sql`md5(${sort.random.seed} || ${shows.pk})`]
+						: []),
+					...sort.sort.map((x) =>
+						x.desc ? sql`${shows[x.key]} desc nulls last` : shows[x.key],
+					),
 					shows.pk,
 				)
 				.limit(limit);
@@ -188,7 +225,6 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 			detail: { description: "Get all movies" },
 			query: t.Object({
 				sort: Sort(["slug", "rating", "airDate", "createdAt", "nextRefresh"], {
-					// TODO: Add random
 					remap: { airDate: "startAir" },
 					default: ["slug"],
 					description: "How to sort the query",

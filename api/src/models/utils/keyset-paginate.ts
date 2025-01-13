@@ -1,5 +1,5 @@
 import type { NonEmptyArray, Sort } from "./sort";
-import { eq, or, type Column, and, gt, lt, isNull } from "drizzle-orm";
+import { eq, or, type Column, and, gt, lt, isNull, sql } from "drizzle-orm";
 
 type Table<Name extends string> = Record<Name, Column>;
 
@@ -24,7 +24,7 @@ export const keysetPaginate = <
 	sort,
 	after,
 }: {
-	table: Table<"pk" | Sort<T, Remap>[number]["key"]>;
+	table: Table<"pk" | Sort<T, Remap>["sort"][number]["key"]>;
 	after: string | undefined;
 	sort: Sort<T, Remap>;
 }) => {
@@ -35,11 +35,28 @@ export const keysetPaginate = <
 
 	const pkSort = { key: "pk" as const, desc: false };
 
+	if (sort.random) {
+		return or(
+			gt(
+				sql`md5(${sort.random.seed} || ${table[pkSort.key]})`,
+				sql`md5(${sort.random.seed} || ${cursor[0]})`,
+			),
+			and(
+				eq(
+					sql`md5(${sort.random.seed} || ${table[pkSort.key]})`,
+					sql`md5(${sort.random.seed} || ${cursor[0]})`,
+				),
+				gt(table[pkSort.key], cursor[0]),
+			),
+		);
+	}
+
 	// TODO: Add an outer query >= for perf
 	// PERF: See https://use-the-index-luke.com/sql/partial-results/fetch-next-page#sb-equivalent-logic
 	let where = undefined;
 	let previous = undefined;
-	for (const [i, by] of [...sort, pkSort].entries()) {
+
+	for (const [i, by] of [...sort.sort, pkSort].entries()) {
 		const cmp = by.desc ? lt : gt;
 		where = or(
 			where,
@@ -62,7 +79,7 @@ export const keysetPaginate = <
 
 export const generateAfter = (cursor: any, sort: Sort<any, any>) => {
 	const ret = [
-		...sort.map((by) => cursor[by.remmapedKey ?? by.key]),
+		...sort.sort.map((by) => cursor[by.remmapedKey ?? by.key]),
 		cursor.pk,
 	];
 	return Buffer.from(JSON.stringify(ret), "utf-8").toString("base64url");

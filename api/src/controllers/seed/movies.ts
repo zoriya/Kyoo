@@ -13,6 +13,7 @@ import { conflictUpdateAllExcept } from "~/db/schema/utils";
 import type { SeedMovie } from "~/models/movie";
 import { processOptImage } from "./images";
 import { guessNextRefresh } from "./refresh";
+import { KErrorT } from "~/models/error";
 
 type Show = typeof shows.$inferInsert;
 type ShowTrans = typeof showTranslations.$inferInsert;
@@ -30,8 +31,19 @@ export type SeedMovieResponse = typeof SeedMovieResponse.static;
 export const seedMovie = async (
 	seed: SeedMovie,
 ): Promise<
-	SeedMovieResponse & { status: "Created" | "OK" | "Conflict" }
+	| (SeedMovieResponse & { status: "Created" | "OK" | "Conflict" })
+	| { status: 422; message: string }
 > => {
+	if (seed.slug === "random") {
+		if (!seed.airDate) {
+			return {
+				status: 422,
+				message: "`random` is a reserved slug. Use something else.",
+			};
+		}
+		seed.slug = `random-${getYear(seed.airDate)}`;
+	}
+
 	const { translations, videos: vids, ...bMovie } = seed;
 
 	const ret = await db.transaction(async (tx) => {
