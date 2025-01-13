@@ -155,18 +155,18 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 	.get(
 		"random",
 		async ({ error, redirect }) => {
-			const [id] = await db
+			const [movie] = await db
 				.select({ id: shows.id })
 				.from(shows)
 				.where(eq(shows.kind, "movie"))
 				.orderBy(sql`random()`)
 				.limit(1);
-			if (!id)
+			if (!movie)
 				return error(404, {
 					status: 404,
 					message: "No movies in the database",
 				});
-			return redirect(`/movies/${id}`);
+			return redirect(`/movies/${movie.id}`);
 		},
 		{
 			detail: {
@@ -175,7 +175,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 			response: {
 				302: t.Void({
 					description:
-						"Redirected to the [/movies/id](#tag/movies/GET/movies/{id}) route.",
+						"Redirected to the [/movies/{id}](#tag/movies/GET/movies/{id}) route.",
 				}),
 				404: {
 					...KError,

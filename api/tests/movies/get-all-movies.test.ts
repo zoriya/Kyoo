@@ -6,8 +6,9 @@ import { shows } from "~/db/schema";
 import { bubble } from "~/models/examples";
 import { dune1984 } from "~/models/examples/dune-1984";
 import { dune } from "~/models/examples/dune-2021";
-import { getMovies, movieApp } from "./movies-helper";
+import { getMovie, getMovies, movieApp } from "./movies-helper";
 import type { Movie } from "~/models/movie";
+import { isUuid } from "~/models/utils";
 
 beforeAll(async () => {
 	await db.delete(shows);
@@ -185,6 +186,17 @@ describe("Get all movies", () => {
 			expect(body.items.map((x: Movie) => x.slug)).not.toContain(
 				body2.items[0].slug,
 			);
+		});
+
+		it("Get /random", async () => {
+			const resp = await movieApp.handle(
+				new Request("http://localhost/movies/random"),
+			);
+			expect(resp.status).toBe(302);
+			const location = resp.headers.get("location")!;
+			expect(location).toStartWith("/movies/");
+			const id = location.substring("/movies/".length);
+			expect(isUuid(id)).toBe(true);
 		});
 	});
 });
