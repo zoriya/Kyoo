@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it, test } from "bun:test";
-import { eq, inArray } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { expectStatus } from "tests/utils";
 import { db } from "~/db";
 import { shows, showTranslations, videos } from "~/db/schema";
@@ -154,8 +154,8 @@ describe("Movie seeding", () => {
 			},
 		});
 
-		expectStatus(resp, body).toBe(400);
-		expect(body.status).toBe(400);
+		expectStatus(resp, body).toBe(422);
+		expect(body.status).toBe(422);
 		expect(body.message).toBe("Invalid translation name: 'test'.");
 	});
 
@@ -163,6 +163,7 @@ describe("Movie seeding", () => {
 		const [resp, body] = await createMovie({
 			...bubble,
 			slug: "casing-test",
+			originalLanguage: "jp-jp",
 			translations: {
 				"en-us": {
 					name: "foo",
@@ -185,15 +186,32 @@ describe("Movie seeding", () => {
 			where: eq(shows.id, body.id),
 			with: { translations: true },
 		});
-		expect(ret!.translations).toBeArrayOfSize(1);
-		expect(ret!.translations[0]).toMatchObject({
-			language: "en-US",
-			name: "foo",
-		});
+		expect(ret!.originalLanguage).toBe("jp-JP");
+		expect(ret!.translations).toBeArrayOfSize(2);
+		expect(ret!.translations).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					language: "en-US",
+					name: "foo",
+				}),
+			]),
+		);
+		expect(ret!.translations).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					language: "en",
+					name: "foo",
+				}),
+			]),
+		);
 	});
 
 	it("Refuses random as a slug", async () => {
-		const [resp, body] = await createMovie({ ...bubble, slug: "random", airDate: null });
+		const [resp, body] = await createMovie({
+			...bubble,
+			slug: "random",
+			airDate: null,
+		});
 		expectStatus(resp, body).toBe(422);
 	});
 	it("Refuses random as a slug but fallback w/ airDate", async () => {
@@ -202,14 +220,87 @@ describe("Movie seeding", () => {
 		expect(body.slug).toBe("random-2022");
 	});
 
+	it("Handle fallback translations", async () => {
+		const [resp, body] = await createMovie({
+			...bubble,
+			slug: "bubble-translation-test",
+			translations: { "en-us": bubble.translations.en },
+		});
+		expectStatus(resp, body).toBe(201);
+
+		const ret = await db.query.shows.findFirst({
+			where: eq(shows.id, body.id),
+			with: { translations: true },
+		});
+		expect(ret!.translations).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					name: bubble.translations.en.name,
+					language: "en",
+				}),
+			]),
+		);
+		expect(ret!.translations).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					name: bubble.translations.en.name,
+					language: "en-US",
+				}),
+			]),
+		);
+	});
+	it("No fallback if explicit", async () => {
+		const [resp, body] = await createMovie({
+			...bubble,
+			slug: "bubble-translation-test-2",
+			translations: {
+				"en-us": bubble.translations.en,
+				"en-au": { ...bubble.translations.en, name: "australian thing" },
+				en: { ...bubble.translations.en, name: "Generic" },
+			},
+		});
+		expectStatus(resp, body).toBe(201);
+
+		const ret = await db.query.shows.findFirst({
+			where: eq(shows.id, body.id),
+			with: { translations: true },
+		});
+		expect(ret!.translations).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					name: bubble.translations.en.name,
+					language: "en-US",
+				}),
+			]),
+		);
+		expect(ret!.translations).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					name: "australian thing",
+					description: bubble.translations.en.description,
+					language: "en-AU",
+				}),
+			]),
+		);
+		expect(ret!.translations).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					name: "Generic",
+					description: bubble.translations.en.description,
+					language: "en",
+				}),
+			]),
+		);
+	});
+
 	test.todo("Create correct video slug (version)", async () => {});
 	test.todo("Create correct video slug (part)", async () => {});
 	test.todo("Create correct video slug (rendering)", async () => {});
 });
 
 const cleanup = async () => {
-	await db.delete(shows).where(inArray(shows.slug, [dune.slug, "dune-2158"]));
-	await db.delete(videos).where(inArray(videos.id, [duneVideo.id]));
+	await db.delete(shows);
+	await db.delete(videos);
 };
 // cleanup db beforehand to unsure tests are consistent
 beforeAll(cleanup);

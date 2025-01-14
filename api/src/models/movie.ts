@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { ExternalId, Genre, Image, Language, SeedImage } from "./utils";
+import { ExternalId, Genre, Image, Language, SeedImage, TranslationRecord } from "./utils";
 import { bubble, registerExamples } from "./examples";
 import { bubbleImages } from "./examples/bubble";
 
@@ -50,8 +50,7 @@ export type Movie = typeof Movie.static;
 export const SeedMovie = t.Intersect([
 	t.Omit(BaseMovie, ["id", "createdAt", "nextRefresh"]),
 	t.Object({
-		translations: t.Record(
-			Language(),
+		translations: TranslationRecord(
 			t.Intersect([
 				t.Omit(MovieTranslation, ["poster", "thumbnail", "banner", "logo"]),
 				t.Object({
@@ -61,9 +60,6 @@ export const SeedMovie = t.Intersect([
 					logo: t.Nullable(SeedImage),
 				}),
 			]),
-			{
-				minProperties: 1,
-			},
 		),
 		videos: t.Optional(t.Array(t.String({ format: "uuid" }))),
 	}),

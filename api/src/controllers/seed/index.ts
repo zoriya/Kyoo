@@ -1,7 +1,8 @@
 import Elysia from "elysia";
+import { Value } from "@sinclair/typebox/value";
 import { Movie, SeedMovie } from "~/models/movie";
 import { seedMovie, SeedMovieResponse } from "./movies";
-import { Resource, validateTranslations } from "~/models/utils";
+import { Resource } from "~/models/utils";
 import { comment } from "~/utils";
 import { KError } from "~/models/error";
 
@@ -14,8 +15,8 @@ export const seed = new Elysia()
 	.post(
 		"/movies",
 		async ({ body, error }) => {
-			const err = validateTranslations(body.translations);
-			if (err) return error(400, err);
+			// needed due to https://github.com/elysiajs/elysia/issues/671
+			body = Value.Decode(SeedMovie, body);
 
 			const ret = await seedMovie(body);
 			if (ret.status === 422) return error(422, ret);
@@ -29,7 +30,6 @@ export const seed = new Elysia()
 					description: "Existing movie edited/updated.",
 				},
 				201: { ...SeedMovieResponse, description: "Created a new movie." },
-				400: { ...KError, description: "Invalid translation name" },
 				409: {
 					...Resource,
 					description: comment`
