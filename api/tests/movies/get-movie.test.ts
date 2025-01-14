@@ -1,8 +1,5 @@
-import { afterAll, beforeAll, describe, expect, it } from "bun:test";
-import { eq } from "drizzle-orm";
+import { beforeAll, describe, expect, it } from "bun:test";
 import { seedMovie } from "~/controllers/seed/movies";
-import { db } from "~/db";
-import { shows } from "~/db/schema";
 import { bubble } from "~/models/examples";
 import { getMovie } from "./movies-helper";
 import { expectStatus } from "tests/utils";
@@ -11,10 +8,7 @@ let bubbleId = "";
 
 beforeAll(async () => {
 	const ret = await seedMovie(bubble);
-	bubbleId = ret.id;
-});
-afterAll(async () => {
-	await db.delete(shows).where(eq(shows.slug, bubble.slug));
+	if (ret.status !== 422) bubbleId = ret.id;
 });
 
 describe("Get movie", () => {
@@ -67,6 +61,16 @@ describe("Get movie", () => {
 	});
 	it("Works without accept-language header", async () => {
 		const [resp, body] = await getMovie(bubble.slug, undefined);
+
+		expectStatus(resp, body).toBe(200);
+		expect(body).toMatchObject({
+			slug: bubble.slug,
+			name: bubble.translations.en.name,
+		});
+		expect(resp.headers.get("Content-Language")).toBe("en");
+	});
+	it("Fallback if translations does not exist", async () => {
+		const [resp, body] = await getMovie(bubble.slug, "en-au");
 
 		expectStatus(resp, body).toBe(200);
 		expect(body).toMatchObject({
