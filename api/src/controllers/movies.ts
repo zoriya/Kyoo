@@ -1,5 +1,5 @@
 import { and, eq, sql } from "drizzle-orm";
-import { Elysia, redirect, t } from "elysia";
+import { Elysia, t } from "elysia";
 import { KError } from "~/models/error";
 import { comment } from "~/utils";
 import { db } from "../db";
@@ -9,6 +9,7 @@ import { bubble } from "../models/examples";
 import { Movie, MovieStatus, MovieTranslation } from "../models/movie";
 import {
 	Filter,
+	type Image,
 	Sort,
 	type FilterDef,
 	Genre,
@@ -190,13 +191,22 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 	.get(
 		"",
 		async ({
-			query: { limit, after, sort, filter },
+			query: { limit, after, sort, filter, preferOriginal },
 			headers: { "accept-language": languages },
 			request: { url },
 		}) => {
 			const langs = processLanguages(languages);
-			const [transQ, transCol] = getTranslationQuery(langs, true);
-			// TODO: Add sql indexes on sort keys
+
+			const transQ = db
+				.selectDistinctOn([showTranslations.pk])
+				.from(showTranslations)
+				.orderBy(
+					showTranslations.pk,
+					sql`array_position(${sqlarr(langs)}, ${showTranslations.language})`,
+				)
+				.as("t");
+			const { pk, poster, thumbnail, banner, logo, ...transCol } =
+				getColumns(transQ);
 
 			const items = await db
 				.select({
@@ -204,9 +214,22 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					...transCol,
 					status: sql<MovieStatus>`${moviesCol.status}`,
 					airDate: startAir,
+					poster: sql<Image>`coalese(${showTranslations.poster}, ${poster})`,
+					thumbnail: sql<Image>`coalese(${showTranslations.thumbnail}, ${thumbnail})`,
+					banner: sql<Image>`coalese(${showTranslations.banner}, ${banner})`,
+					logo: sql<Image>`coalese(${showTranslations.logo}, ${logo})`,
 				})
 				.from(shows)
 				.innerJoin(transQ, eq(shows.pk, transQ.pk))
+				.leftJoin(
+					showTranslations,
+					and(
+						eq(shows.pk, showTranslations.pk),
+						eq(showTranslations.language, shows.originalLanguage),
+						// TODO: check user's settings before fallbacking to false.
+						sql`coalese(${preferOriginal}, false)`,
+					),
+				)
 				.where(and(filter, keysetPaginate({ table: shows, after, sort })))
 				.orderBy(
 					...(sort.random
@@ -244,6 +267,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 						`,
 					}),
 				),
+				preferOriginal: t.Optional(t.Boolean()),
 			}),
 			headers: t.Object({
 				"accept-language": t.String({
