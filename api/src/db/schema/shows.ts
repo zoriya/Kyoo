@@ -109,13 +109,23 @@ export const showTranslations = schema.table(
 	(t) => [primaryKey({ columns: [t.pk, t.language] })],
 );
 
-export const showsRelations = relations(shows, ({ many }) => ({
+export const showsRelations = relations(shows, ({ many, one }) => ({
 	translations: many(showTranslations, { relationName: "showTranslations" }),
+	originalTranslation: one(showTranslations, {
+		relationName: "originalTranslation",
+		fields: [shows.pk, shows.originalLanguage],
+		references: [showTranslations.pk, showTranslations.language],
+	}),
 }));
 export const showsTrRelations = relations(showTranslations, ({ one }) => ({
 	show: one(shows, {
 		relationName: "showTranslations",
 		fields: [showTranslations.pk],
 		references: [shows.pk],
+	}),
+	originalTranslation: one(shows, {
+		relationName: "originalTranslation",
+		fields: [showTranslations.pk, showTranslations.language],
+		references: [shows.pk, shows.originalLanguage],
 	}),
 }));
