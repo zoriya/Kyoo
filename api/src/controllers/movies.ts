@@ -222,9 +222,10 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 			const { kind, startAir, endAir, ...moviesCol } = getColumns(shows);
 
 			const transQ = db
-				.select()
+				.selectDistinctOn([showTranslations.pk])
 				.from(showTranslations)
 				.orderBy(
+					showTranslations.pk,
 					sql`array_position(${sqlarr(langs)}, ${showTranslations.language})`,
 				)
 				.as("t");
