@@ -69,11 +69,28 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 						columns: {
 							pk: false,
 						},
-						where: eq(showTranslations.language, sql`any(${sqlarr(langs)})`),
+						where: !langs.includes("*")
+							? eq(showTranslations.language, sql`any(${sqlarr(langs)})`)
+							: undefined,
 						orderBy: [
 							sql`array_position(${sqlarr(langs)}, ${showTranslations.language})`,
 						],
 						limit: 1,
+					},
+					originalTranslation: {
+						columns: {
+							poster: true,
+							thumbnail: true,
+							banner: true,
+							logo: true,
+						},
+						extras: {
+							// TODO: also fallback on user settings (that's why i made a select here)
+							preferOriginal:
+								sql<boolean>`(select coalesce(${preferOriginal ?? null}::boolean, false))`.as(
+									"preferOriginal",
+								),
+						},
 					},
 				},
 			});
@@ -92,7 +109,13 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				});
 			}
 			set.headers["content-language"] = translation.language;
-			return { ...ret, ...translation };
+			return {
+				...ret,
+				...translation,
+				...(ret.originalTranslation?.preferOriginal
+					? ret.originalTranslation
+					: {}),
+			};
 		},
 		{
 			detail: {
