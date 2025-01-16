@@ -19,8 +19,22 @@ export const bubble: SeedMovie = {
 			tagline: "Is she a calamity or a blessing?",
 			description:
 				"In an abandoned Tokyo overrun by bubbles and gravitational abnormalities, one gifted young man has a fateful meeting with a mysterious girl.",
-			aliases: ["Baburu", "バブル：2022", "Bubble"],
+			aliases: ["Baburu", "Bubble"],
 			tags: ["adolescence", "disaster", "battle", "gravity", "anime"],
+			poster:
+				"https://image.tmdb.org/t/p/original/kk28Lk8oQBGjoHRGUCN2vxKb4O2.jpg",
+			thumbnail:
+				"https://image.tmdb.org/t/p/original/a8Q2g0g7XzAF6gcB8qgn37ccb9Y.jpg",
+			banner: null,
+			logo: null,
+			trailerUrl: "https://www.youtube.com/watch?v=vs7zsyIZkMM",
+		},
+		jp: {
+			name: "バブル：2022",
+			tagline: null,
+			description: null,
+			aliases: ["Baburu", "Bubble"],
+			tags: ["アニメ"],
 			poster:
 				"https://image.tmdb.org/t/p/original/65dad96VE8FJPEdrAkhdsuWMWH9.jpg",
 			thumbnail:

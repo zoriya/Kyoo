@@ -3,10 +3,10 @@ import { Elysia, t } from "elysia";
 import { KError } from "~/models/error";
 import { comment } from "~/utils";
 import { db } from "../db";
-import { shows, showTranslations } from "../db/schema/shows";
-import { getColumns } from "../db/schema/utils";
-import { bubble } from "../models/examples";
-import { Movie, MovieStatus, MovieTranslation } from "../models/movie";
+import { shows, showTranslations } from "~/db/schema";
+import { getColumns, sqlarr } from "~/db/schema/utils";
+import { bubble } from "~/models/examples";
+import { Movie, MovieStatus, MovieTranslation } from "~/models/movie";
 import {
 	Filter,
 	type Image,
@@ -19,34 +19,6 @@ import {
 	processLanguages,
 	createPage,
 } from "~/models/utils";
-
-// drizzle is bugged and doesn't allow js arrays to be used in raw sql.
-export function sqlarr(array: unknown[]) {
-	return `{${array.map((item) => `"${item}"`).join(",")}}`;
-}
-
-const getTranslationQuery = (languages: string[], forceFallback = false) => {
-	const fallback = forceFallback || languages.includes("*");
-	const query = db
-		.selectDistinctOn([showTranslations.pk])
-		.from(showTranslations)
-		.where(
-			fallback
-				? undefined
-				: eq(showTranslations.language, sql`any(${sqlarr(languages)})`),
-		)
-		.orderBy(
-			showTranslations.pk,
-			sql`array_position(${sqlarr(languages)}, ${showTranslations.language})`,
-		)
-		.as("t");
-
-	const { pk, ...col } = getColumns(query);
-	return [query, col] as const;
-};
-
-// we keep the pk for after handling. it will be removed by elysia's validators after.
-const { kind, startAir, endAir, ...moviesCol } = getColumns(shows);
 
 const movieFilters: FilterDef = {
 	genres: {
@@ -72,25 +44,39 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 		async ({
 			params: { id },
 			headers: { "accept-language": languages },
+			query: { preferOriginal },
 			error,
 			set,
 		}) => {
 			const langs = processLanguages(languages);
-			const [transQ, transCol] = getTranslationQuery(langs);
 
-			const idFilter = isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id);
-
-			const [ret] = await db
-				.select({
-					...moviesCol,
-					status: sql<MovieStatus>`${moviesCol.status}`,
-					airDate: startAir,
-					translation: transCol,
-				})
-				.from(shows)
-				.leftJoin(transQ, eq(shows.pk, transQ.pk))
-				.where(and(eq(shows.kind, "movie"), idFilter))
-				.limit(1);
+			const ret = await db.query.shows.findFirst({
+				columns: {
+					kind: false,
+					startAir: false,
+					endAir: false,
+				},
+				extras: {
+					airDate: sql<string>`${shows.startAir}`.as("airDate"),
+					status: sql<MovieStatus>`${shows.status}`.as("status"),
+				},
+				where: and(
+					eq(shows.kind, "movie"),
+					isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
+				),
+				with: {
+					translations: {
+						columns: {
+							pk: false,
+						},
+						where: eq(showTranslations.language, sql`any(${sqlarr(langs)})`),
+						orderBy: [
+							sql`array_position(${sqlarr(langs)}, ${showTranslations.language})`,
+						],
+						limit: 1,
+					},
+				},
+			});
 
 			if (!ret) {
 				return error(404, {
@@ -98,14 +84,15 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					message: "Movie not found",
 				});
 			}
-			if (!ret.translation) {
+			const translation = ret.translations[0];
+			if (!translation) {
 				return error(422, {
 					status: 422,
 					message: "Accept-Language header could not be satisfied.",
 				});
 			}
-			set.headers["content-language"] = ret.translation.language;
-			return { ...ret, ...ret.translation };
+			set.headers["content-language"] = translation.language;
+			return { ...ret, ...translation };
 		},
 		{
 			detail: {
@@ -116,6 +103,17 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					description: "The id or slug of the movie to retrieve.",
 					example: bubble.slug,
 				}),
+			}),
+			query: t.Object({
+				preferOriginal: t.Optional(
+					t.Boolean({
+						description: comment`
+							Prefer images in the original's language. If true, will return untranslated images instead of the translated ones.
+
+							If unspecified, kyoo will look at the current user's settings to decide what to do.
+						`,
+					}),
+				),
 			}),
 			headers: t.Object({
 				"accept-language": t.String({
@@ -197,11 +195,13 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 		}) => {
 			const langs = processLanguages(languages);
 
+			// we keep the pk for after handling. it will be removed by elysia's validators after.
+			const { kind, startAir, endAir, ...moviesCol } = getColumns(shows);
+
 			const transQ = db
-				.selectDistinctOn([showTranslations.pk])
+				.select()
 				.from(showTranslations)
 				.orderBy(
-					showTranslations.pk,
 					sql`array_position(${sqlarr(langs)}, ${showTranslations.language})`,
 				)
 				.as("t");
@@ -214,10 +214,10 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					...transCol,
 					status: sql<MovieStatus>`${moviesCol.status}`,
 					airDate: startAir,
-					poster: sql<Image>`coalese(${showTranslations.poster}, ${poster})`,
-					thumbnail: sql<Image>`coalese(${showTranslations.thumbnail}, ${thumbnail})`,
-					banner: sql<Image>`coalese(${showTranslations.banner}, ${banner})`,
-					logo: sql<Image>`coalese(${showTranslations.logo}, ${logo})`,
+					poster: sql<Image>`coalesce(${showTranslations.poster}, ${poster})`,
+					thumbnail: sql<Image>`coalesce(${showTranslations.thumbnail}, ${thumbnail})`,
+					banner: sql<Image>`coalesce(${showTranslations.banner}, ${banner})`,
+					logo: sql<Image>`coalesce(${showTranslations.logo}, ${logo})`,
 				})
 				.from(shows)
 				.innerJoin(transQ, eq(shows.pk, transQ.pk))
@@ -227,7 +227,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 						eq(shows.pk, showTranslations.pk),
 						eq(showTranslations.language, shows.originalLanguage),
 						// TODO: check user's settings before fallbacking to false.
-						sql`coalese(${preferOriginal}, false)`,
+						sql`coalesce(${preferOriginal ?? null}::boolean, false)`,
 					),
 				)
 				.where(and(filter, keysetPaginate({ table: shows, after, sort })))
@@ -267,7 +267,15 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 						`,
 					}),
 				),
-				preferOriginal: t.Optional(t.Boolean()),
+				preferOriginal: t.Optional(
+					t.Boolean({
+						description: comment`
+							Prefer images in the original's language. If true, will return untranslated images instead of the translated ones.
+
+							If unspecified, kyoo will look at the current user's settings to decide what to do.
+						`,
+					}),
+				),
 			}),
 			headers: t.Object({
 				"accept-language": t.String({

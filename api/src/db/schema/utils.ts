@@ -77,3 +77,8 @@ export function conflictUpdateAllExcept<
 		{} as Omit<Record<keyof T["_"]["columns"], SQL>, E[number]>,
 	);
 }
+
+// drizzle is bugged and doesn't allow js arrays to be used in raw sql.
+export function sqlarr(array: unknown[]) {
+	return `{${array.map((item) => `"${item}"`).join(",")}}`;
+}
