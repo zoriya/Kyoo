@@ -23,7 +23,10 @@ export const base = new Elysia({ name: "base" })
 				details: error,
 			} as KError;
 		}
-		console.error(code, error)
+		if (code === "NOT_FOUND") {
+			return error;
+		}
+		console.error(code, error);
 		return error;
 	})
 	.as("plugin");
