@@ -12,8 +12,17 @@ beforeAll(async () => {
 });
 
 describe("Get movie", () => {
+	it("Invalid slug", async () => {
+		const [resp, body] = await getMovie("sotneuhn", { langs: "en" });
+
+		expectStatus(resp, body).toBe(404);
+		expect(body).toMatchObject({
+			status: 404,
+			message: "Movie not found",
+		});
+	});
 	it("Retrive by slug", async () => {
-		const [resp, body] = await getMovie(bubble.slug, "en");
+		const [resp, body] = await getMovie(bubble.slug, { langs: "en" });
 
 		expectStatus(resp, body).toBe(200);
 		expect(body).toMatchObject({
@@ -22,7 +31,7 @@ describe("Get movie", () => {
 		});
 	});
 	it("Retrive by id", async () => {
-		const [resp, body] = await getMovie(bubbleId, "en");
+		const [resp, body] = await getMovie(bubbleId, { langs: "en" });
 
 		expectStatus(resp, body).toBe(200);
 		expect(body).toMatchObject({
@@ -32,7 +41,7 @@ describe("Get movie", () => {
 		});
 	});
 	it("Get non available translation", async () => {
-		const [resp, body] = await getMovie(bubble.slug, "fr");
+		const [resp, body] = await getMovie(bubble.slug, { langs: "fr" });
 
 		expectStatus(resp, body).toBe(422);
 		expect(body).toMatchObject({
@@ -40,7 +49,7 @@ describe("Get movie", () => {
 		});
 	});
 	it("Get first available language", async () => {
-		const [resp, body] = await getMovie(bubble.slug, "fr,en");
+		const [resp, body] = await getMovie(bubble.slug, { langs: "fr,en" });
 
 		expectStatus(resp, body).toBe(200);
 		expect(body).toMatchObject({
@@ -50,7 +59,7 @@ describe("Get movie", () => {
 		expect(resp.headers.get("Content-Language")).toBe("en");
 	});
 	it("Use language fallback", async () => {
-		const [resp, body] = await getMovie(bubble.slug, "fr,ja,*");
+		const [resp, body] = await getMovie(bubble.slug, { langs: "fr,pr,*" });
 
 		expectStatus(resp, body).toBe(200);
 		expect(body).toMatchObject({
@@ -60,7 +69,7 @@ describe("Get movie", () => {
 		expect(resp.headers.get("Content-Language")).toBe("en");
 	});
 	it("Works without accept-language header", async () => {
-		const [resp, body] = await getMovie(bubble.slug, undefined);
+		const [resp, body] = await getMovie(bubble.slug, { langs: undefined });
 
 		expectStatus(resp, body).toBe(200);
 		expect(body).toMatchObject({
@@ -70,12 +79,37 @@ describe("Get movie", () => {
 		expect(resp.headers.get("Content-Language")).toBe("en");
 	});
 	it("Fallback if translations does not exist", async () => {
-		const [resp, body] = await getMovie(bubble.slug, "en-au");
+		const [resp, body] = await getMovie(bubble.slug, { langs: "en-au" });
 
 		expectStatus(resp, body).toBe(200);
 		expect(body).toMatchObject({
 			slug: bubble.slug,
 			name: bubble.translations.en.name,
+		});
+		expect(resp.headers.get("Content-Language")).toBe("en");
+	});
+	it("Prefer original", async () => {
+		expect(bubble.translations.ja.logo).toBe(null);
+		expect(bubble.translations.en.logo).not.toBe(null);
+
+		const [resp, body] = await getMovie(bubble.slug, {
+			langs: "en-au",
+			preferOriginal: true,
+		});
+
+		expectStatus(resp, body).toBe(200);
+		expect(body).toMatchObject({
+			slug: bubble.slug,
+			name: bubble.translations.en.name,
+			poster: ({
+				source: bubble.translations.ja.poster,
+			}),
+			thumbnail: ({
+				source: bubble.translations.ja.thumbnail,
+			}),
+			banner: null,
+			// we fallback to the translated value when the original is null.
+			logo: ({ source: bubble.translations.en.logo }),
 		});
 		expect(resp.headers.get("Content-Language")).toBe("en");
 	});

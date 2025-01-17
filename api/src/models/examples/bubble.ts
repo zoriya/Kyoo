@@ -26,10 +26,10 @@ export const bubble: SeedMovie = {
 			thumbnail:
 				"https://image.tmdb.org/t/p/original/a8Q2g0g7XzAF6gcB8qgn37ccb9Y.jpg",
 			banner: null,
-			logo: null,
+			logo: "https://image.tmdb.org/t/p/original/ihIs7fayAmZieMlMQbs6TWM77uf.png",
 			trailerUrl: "https://www.youtube.com/watch?v=vs7zsyIZkMM",
 		},
-		jp: {
+		ja: {
 			name: "バブル：2022",
 			tagline: null,
 			description: null,
@@ -37,10 +37,9 @@ export const bubble: SeedMovie = {
 			tags: ["アニメ"],
 			poster:
 				"https://image.tmdb.org/t/p/original/65dad96VE8FJPEdrAkhdsuWMWH9.jpg",
-			thumbnail:
-				"https://image.tmdb.org/t/p/original/a8Q2g0g7XzAF6gcB8qgn37ccb9Y.jpg",
+			thumbnail: "https://image.tmdb.org/t/p/original/jp.jpg",
 			banner: null,
-			logo: "https://image.tmdb.org/t/p/original/ihIs7fayAmZieMlMQbs6TWM77uf.png",
+			logo: null,
 			trailerUrl: "https://www.youtube.com/watch?v=vs7zsyIZkMM",
 		},
 	},
