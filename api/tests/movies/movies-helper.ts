@@ -7,9 +7,12 @@ import type { SeedMovie } from "~/models/movie";
 
 export const movieApp = new Elysia().use(base).use(movies).use(seed);
 
-export const getMovie = async (id: string, langs?: string) => {
+export const getMovie = async (
+	id: string,
+	{ langs, ...query }: { langs?: string; preferOriginal?: boolean },
+) => {
 	const resp = await movieApp.handle(
-		new Request(`http://localhost/movies/${id}`, {
+		new Request(buildUrl(`movies/${id}`, query), {
 			method: "GET",
 			headers: langs
 				? {
@@ -48,7 +51,7 @@ export const getMovies = async ({
 
 export const createMovie = async (movie: SeedMovie) => {
 	const resp = await movieApp.handle(
-		new Request("http://localhost/movies", {
+		new Request(buildUrl("movies"), {
 			method: "POST",
 			body: JSON.stringify(movie),
 			headers: {

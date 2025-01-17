@@ -109,12 +109,16 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				});
 			}
 			set.headers["content-language"] = translation.language;
+			const ot = ret.originalTranslation;
 			return {
 				...ret,
 				...translation,
-				...(ret.originalTranslation?.preferOriginal
-					? ret.originalTranslation
-					: {}),
+				...(ot?.preferOriginal && {
+					...(ot.poster && { poster: ot.poster }),
+					...(ot.thumbnail && { thumbnail: ot.thumbnail }),
+					...(ot.banner && { banner: ot.banner }),
+					...(ot.logo && { logo: ot.logo }),
+				}),
 			};
 		},
 		{

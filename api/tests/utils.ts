@@ -1,5 +1,4 @@
 import { expect } from "bun:test";
-import Elysia from "elysia";
 
 export function expectStatus(resp: Response, body: object) {
 	const matcher = expect({ ...body, status: resp.status });
@@ -10,14 +9,18 @@ export function expectStatus(resp: Response, body: object) {
 	};
 }
 
-export const buildUrl = (route: string, query: Record<string, any>) => {
+export const buildUrl = (route: string, query?: Record<string, any>) => {
 	const params = new URLSearchParams();
-	for (const [key, value] of Object.entries(query)) {
-		if (!Array.isArray(value)) {
-			params.append(key, value.toString());
-			continue;
+	if (query) {
+		for (const [key, value] of Object.entries(query)) {
+			if (!Array.isArray(value)) {
+				params.append(key, value.toString());
+				continue;
+			}
+			for (const v of value) params.append(key, v.toString());
 		}
-		for (const v of value) params.append(key, v.toString());
 	}
-	return `http://localhost/${route}?${params}`;
+	return params.size
+		? `http://localhost/${route}?${params}`
+		: `http://localhost/${route}`;
 };
