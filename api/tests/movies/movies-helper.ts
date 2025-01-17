@@ -34,6 +34,7 @@ export const getMovies = async ({
 	after?: string;
 	sort?: string | string[];
 	langs?: string;
+	preferOriginal?: boolean;
 }) => {
 	const resp = await movieApp.handle(
 		new Request(buildUrl("movies", query), {

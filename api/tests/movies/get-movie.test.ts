@@ -101,15 +101,15 @@ describe("Get movie", () => {
 		expect(body).toMatchObject({
 			slug: bubble.slug,
 			name: bubble.translations.en.name,
-			poster: ({
+			poster: {
 				source: bubble.translations.ja.poster,
-			}),
-			thumbnail: ({
+			},
+			thumbnail: {
 				source: bubble.translations.ja.thumbnail,
-			}),
+			},
 			banner: null,
 			// we fallback to the translated value when the original is null.
-			logo: ({ source: bubble.translations.en.logo }),
+			logo: { source: bubble.translations.en.logo },
 		});
 		expect(resp.headers.get("Content-Language")).toBe("en");
 	});
