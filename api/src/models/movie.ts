@@ -9,6 +9,7 @@ import {
 } from "./utils";
 import { bubble, registerExamples } from "./examples";
 import { bubbleImages } from "./examples/bubble";
+import { Video } from "./video";
 
 export const MovieStatus = t.UnionEnum(["unknown", "finished", "planned"]);
 export type MovieStatus = typeof MovieStatus.static;
@@ -57,6 +58,15 @@ export const Movie = t.Intersect([
 	t.Object({ isAvailable: t.Boolean() }),
 ]);
 export type Movie = typeof Movie.static;
+
+export const FullMovie = t.Intersect([
+	Movie,
+	t.Object({
+		translations: t.Optional(TranslationRecord(MovieTranslation)),
+		videos: t.Optional(t.Array(Video)),
+	}),
+]);
+export type FullMovie = typeof FullMovie.static;
 
 export const SeedMovie = t.Intersect([
 	t.Omit(BaseMovie, ["id", "createdAt", "nextRefresh"]),

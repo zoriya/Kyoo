@@ -1,10 +1,15 @@
 import { t } from "elysia";
 
-export const KError = t.Object({
-	status: t.Integer(),
-	message: t.String(),
-	details: t.Optional(t.Any()),
-});
+export const KError = t.Object(
+	{
+		status: t.Integer(),
+		message: t.String(),
+		details: t.Optional(t.Any()),
+	},
+	{
+		examples: [{ status: 404, message: "Movie not found" }],
+	},
+);
 export type KError = typeof KError.static;
 
 export class KErrorT extends Error {

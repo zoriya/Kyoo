@@ -11,7 +11,12 @@ import {
 } from "~/db/schema";
 import { getColumns, sqlarr } from "~/db/schema/utils";
 import { bubble } from "~/models/examples";
-import { Movie, MovieStatus, MovieTranslation } from "~/models/movie";
+import {
+	FullMovie,
+	Movie,
+	MovieStatus,
+	MovieTranslation,
+} from "~/models/movie";
 import {
 	Filter,
 	type Image,
@@ -49,7 +54,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 		async ({
 			params: { id },
 			headers: { "accept-language": languages },
-			query: { preferOriginal },
+			query: { preferOriginal, with: relations },
 			error,
 			set,
 		}) => {
@@ -86,7 +91,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
 				),
 				with: {
-					translations: {
+					selectedTranslation: {
 						columns: {
 							pk: false,
 						},
@@ -113,6 +118,13 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 								),
 						},
 					},
+					...(relations.includes("translations") && {
+						translations: {
+							columns: {
+								pk: false,
+							},
+						},
+					}),
 				},
 			});
 
@@ -122,7 +134,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					message: "Movie not found",
 				});
 			}
-			const translation = ret.translations[0];
+			const translation = ret.selectedTranslation[0];
 			if (!translation) {
 				return error(422, {
 					status: 422,
@@ -139,6 +151,14 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					...(ot.thumbnail && { thumbnail: ot.thumbnail }),
 					...(ot.banner && { banner: ot.banner }),
 					...(ot.logo && { logo: ot.logo }),
+				}),
+				...(ret.translations && {
+					translations: Object.fromEntries(
+						ret.translations.map(
+							({ language, ...translation }) =>
+								[language, translation] as const,
+						),
+					),
 				}),
 			};
 		},
@@ -162,6 +182,10 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 						`,
 					}),
 				),
+				with: t.Array(t.UnionEnum(["translations", "videos"]), {
+					default: [],
+					description: "Include related resources in the response.",
+				}),
 			}),
 			headers: t.Object({
 				"accept-language": t.String({
@@ -174,13 +198,10 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				}),
 			}),
 			response: {
-				200: { ...Movie, description: "Found" },
+				200: { ...FullMovie, description: "Found" },
 				404: {
 					...KError,
 					description: "No movie found with the given id or slug.",
-					examples: [
-						{ status: 404, message: "Movie not found", details: undefined },
-					],
 				},
 				422: {
 					...KError,
@@ -189,12 +210,6 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 						unavailable.) Try with another languages or add * to the list of languages
 						to fallback to any language.
 					`,
-					examples: [
-						{
-							status: 422,
-							message: "Accept-Language header could not be satisfied.",
-						},
-					],
 				},
 			},
 		},
@@ -227,9 +242,6 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				404: {
 					...KError,
 					description: "No movie found with the given id or slug.",
-					examples: [
-						{ status: 404, message: "Movie not found", details: undefined },
-					],
 				},
 			},
 		},
@@ -362,16 +374,6 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				422: {
 					...KError,
 					description: "Invalid query parameters.",
-					examples: [
-						{
-							status: 422,
-							message:
-								"Invalid property: slug. Expected one of genres, rating, status, runtime, airDate, originalLanguage.",
-							details: {
-								in: "slug eq bubble",
-							},
-						},
-					],
 				},
 			},
 		},

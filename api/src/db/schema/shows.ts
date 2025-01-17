@@ -110,6 +110,9 @@ export const showTranslations = schema.table(
 );
 
 export const showsRelations = relations(shows, ({ many, one }) => ({
+	selectedTranslation: many(showTranslations, {
+		relationName: "selectedTranslation",
+	}),
 	translations: many(showTranslations, { relationName: "showTranslations" }),
 	originalTranslation: one(showTranslations, {
 		relationName: "originalTranslation",
@@ -120,6 +123,11 @@ export const showsRelations = relations(shows, ({ many, one }) => ({
 export const showsTrRelations = relations(showTranslations, ({ one }) => ({
 	show: one(shows, {
 		relationName: "showTranslations",
+		fields: [showTranslations.pk],
+		references: [shows.pk],
+	}),
+	selectedTranslation: one(shows, {
+		relationName: "selectedTranslation",
 		fields: [showTranslations.pk],
 		references: [shows.pk],
 	}),
