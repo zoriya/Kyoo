@@ -1,9 +1,14 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, exists, SQL, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { KError } from "~/models/error";
 import { comment } from "~/utils";
 import { db } from "../db";
-import { shows, showTranslations } from "~/db/schema";
+import {
+	entries,
+	entryVideoJointure as entryVideoJoint,
+	shows,
+	showTranslations,
+} from "~/db/schema";
 import { getColumns, sqlarr } from "~/db/schema/utils";
 import { bubble } from "~/models/examples";
 import { Movie, MovieStatus, MovieTranslation } from "~/models/movie";
@@ -59,6 +64,22 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				extras: {
 					airDate: sql<string>`${shows.startAir}`.as("airDate"),
 					status: sql<MovieStatus>`${shows.status}`.as("status"),
+					isAvailable: exists(
+						db
+							.select()
+							.from(entries)
+							.where(
+								and(
+									eq(shows.pk, entries.showPk),
+									exists(
+										db
+											.select()
+											.from(entryVideoJoint)
+											.where(eq(entries.pk, entryVideoJoint.entry)),
+									),
+								),
+							),
+					).as("isAvailable") as SQL.Aliased<boolean>,
 				},
 				where: and(
 					eq(shows.kind, "movie"),
@@ -236,6 +257,19 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 			const { pk, poster, thumbnail, banner, logo, ...transCol } =
 				getColumns(transQ);
 
+			const videoQ = db
+				.select({ showPk: entries.showPk })
+				.from(entries)
+				.where(
+					exists(
+						db
+							.select()
+							.from(entryVideoJoint)
+							.where(eq(entries.pk, entryVideoJoint.entry)),
+					),
+				)
+				.as("video");
+
 			const items = await db
 				.select({
 					...moviesCol,
@@ -246,6 +280,9 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					thumbnail: sql<Image>`coalesce(${showTranslations.thumbnail}, ${thumbnail})`,
 					banner: sql<Image>`coalesce(${showTranslations.banner}, ${banner})`,
 					logo: sql<Image>`coalesce(${showTranslations.logo}, ${logo})`,
+					isAvailable: sql<boolean>`${videoQ.showPk} is not null`.as(
+						"isAvailable",
+					),
 				})
 				.from(shows)
 				.innerJoin(transQ, eq(shows.pk, transQ.pk))
@@ -258,6 +295,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 						sql`coalesce(${preferOriginal ?? null}::boolean, false)`,
 					),
 				)
+				.leftJoin(videoQ, eq(shows.pk, videoQ.showPk))
 				.where(and(filter, keysetPaginate({ table: shows, after, sort })))
 				.orderBy(
 					...(sort.random

@@ -1,5 +1,12 @@
 import { t } from "elysia";
-import { ExternalId, Genre, Image, Language, SeedImage, TranslationRecord } from "./utils";
+import {
+	ExternalId,
+	Genre,
+	Image,
+	Language,
+	SeedImage,
+	TranslationRecord,
+} from "./utils";
 import { bubble, registerExamples } from "./examples";
 import { bubbleImages } from "./examples/bubble";
 
@@ -44,7 +51,11 @@ export const MovieTranslation = t.Object({
 });
 export type MovieTranslation = typeof MovieTranslation.static;
 
-export const Movie = t.Intersect([BaseMovie, MovieTranslation]);
+export const Movie = t.Intersect([
+	BaseMovie,
+	MovieTranslation,
+	t.Object({ isAvailable: t.Boolean() }),
+]);
 export type Movie = typeof Movie.static;
 
 export const SeedMovie = t.Intersect([
