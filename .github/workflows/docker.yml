@@ -29,6 +29,11 @@ jobs:
             label: migrations
             image: zoriya/kyoo_migrations
 
+          - context: ./api
+            dockerfile: Dockerfile
+            label: api
+            image: zoriya/kyoo_api
+
           - context: ./front
             dockerfile: Dockerfile
             label: front
