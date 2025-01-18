@@ -1,8 +1,8 @@
 import {
 	FormatRegistry,
-	StaticDecode,
-	TSchema,
-	TString,
+	type StaticDecode,
+	type TSchema,
+	type TString,
 } from "@sinclair/typebox";
 import { t } from "elysia";
 import { comment } from "../../utils";

@@ -1,8 +1,8 @@
 import { beforeAll, describe, expect, it } from "bun:test";
+import { expectStatus } from "tests/utils";
 import { seedMovie } from "~/controllers/seed/movies";
 import { bubble } from "~/models/examples";
 import { getMovie } from "./movies-helper";
-import { expectStatus } from "tests/utils";
 
 let bubbleId = "";
 

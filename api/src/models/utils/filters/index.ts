@@ -1,9 +1,9 @@
 import type { Column } from "drizzle-orm";
 import { t } from "elysia";
+import { KErrorT } from "~/models/error";
 import { comment } from "~/utils";
 import { expression } from "./parser";
 import { toDrizzle } from "./to-sql";
-import { KErrorT } from "~/models/error";
 
 export type FilterDef = {
 	[key: string]:

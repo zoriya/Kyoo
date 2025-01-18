@@ -1,14 +1,15 @@
 import {
-	is,
 	type ColumnsSelection,
+	type SQL,
 	type Subquery,
 	Table,
 	View,
 	ViewBaseConfig,
 	getTableColumns,
+	is,
 	sql,
-	SQL,
 } from "drizzle-orm";
+import type { CasingCache } from "drizzle-orm/casing";
 import type { AnyMySqlSelect } from "drizzle-orm/mysql-core";
 import {
 	type AnyPgSelect,
@@ -19,7 +20,6 @@ import {
 import type { AnySQLiteSelect } from "drizzle-orm/sqlite-core";
 import type { WithSubquery } from "drizzle-orm/subquery";
 import { db } from "..";
-import type { CasingCache } from "drizzle-orm/casing";
 
 export const schema = pgSchema("kyoo");
 

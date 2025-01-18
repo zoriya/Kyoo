@@ -1,11 +1,11 @@
 import { t } from "elysia";
+import { madeInAbyss, registerExamples } from "./examples";
+import { SeedSeason } from "./season";
+import { ExternalId } from "./utils/external-id";
 import { Genre } from "./utils/genres";
 import { Image } from "./utils/image";
-import { ExternalId } from "./utils/external-id";
-import { madeInAbyss, registerExamples } from "./examples";
-import { Resource } from "./utils/resource";
 import { Language } from "./utils/language";
-import { SeedSeason } from "./season";
+import { Resource } from "./utils/resource";
 
 export const SerieStatus = t.UnionEnum([
 	"unknown",

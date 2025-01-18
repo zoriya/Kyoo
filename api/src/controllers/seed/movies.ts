@@ -1,19 +1,19 @@
-import { inArray, sql, eq } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { t } from "elysia";
 import { db } from "~/db";
 import {
 	entries,
 	entryTranslations,
 	entryVideoJointure as evj,
-	shows,
 	showTranslations,
+	shows,
 	videos,
 } from "~/db/schema";
 import { conflictUpdateAllExcept } from "~/db/schema/utils";
+import { KErrorT } from "~/models/error";
 import type { SeedMovie } from "~/models/movie";
 import { processOptImage } from "./images";
 import { guessNextRefresh } from "./refresh";
-import { KErrorT } from "~/models/error";
 
 type Show = typeof shows.$inferInsert;
 type ShowTrans = typeof showTranslations.$inferInsert;

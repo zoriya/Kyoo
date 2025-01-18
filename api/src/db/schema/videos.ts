@@ -3,14 +3,14 @@ import {
 	check,
 	integer,
 	jsonb,
+	primaryKey,
 	text,
 	timestamp,
 	uuid,
 	varchar,
-	primaryKey,
 } from "drizzle-orm/pg-core";
-import { schema } from "./utils";
 import { entries } from "./entries";
+import { schema } from "./utils";
 
 export const videos = schema.table(
 	"videos",

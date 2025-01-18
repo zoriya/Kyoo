@@ -1,10 +1,10 @@
-import Elysia from "elysia";
 import { Value } from "@sinclair/typebox/value";
+import Elysia from "elysia";
+import { KError } from "~/models/error";
 import { Movie, SeedMovie } from "~/models/movie";
-import { seedMovie, SeedMovieResponse } from "./movies";
 import { Resource } from "~/models/utils";
 import { comment } from "~/utils";
-import { KError } from "~/models/error";
+import { SeedMovieResponse, seedMovie } from "./movies";
 
 export const seed = new Elysia()
 	.model({

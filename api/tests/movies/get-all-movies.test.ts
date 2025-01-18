@@ -6,9 +6,9 @@ import { shows } from "~/db/schema";
 import { bubble } from "~/models/examples";
 import { dune1984 } from "~/models/examples/dune-1984";
 import { dune } from "~/models/examples/dune-2021";
-import { getMovie, getMovies, movieApp } from "./movies-helper";
 import type { Movie } from "~/models/movie";
 import { isUuid } from "~/models/utils";
+import { getMovie, getMovies, movieApp } from "./movies-helper";
 
 beforeAll(async () => {
 	await db.delete(shows);

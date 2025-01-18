@@ -6,8 +6,8 @@ export const base = new Elysia({ name: "base" })
 		if (code === "VALIDATION") {
 			const details = JSON.parse(error.message);
 			if (details.code === "KError") {
-				delete details.code;
-				return details;
+				const { code, ...ret } = details;
+				return ret;
 			}
 			return {
 				status: error.status,

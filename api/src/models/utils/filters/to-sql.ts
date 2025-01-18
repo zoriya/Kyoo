@@ -1,4 +1,5 @@
 import {
+	type SQL,
 	and,
 	eq,
 	gt,
@@ -8,13 +9,12 @@ import {
 	ne,
 	not,
 	or,
-	type SQL,
 	sql,
 } from "drizzle-orm";
+import { KErrorT } from "~/models/error";
 import { comment } from "~/utils";
 import type { FilterDef } from "./index";
 import type { Expression, Operator } from "./parser";
-import { KErrorT } from "~/models/error";
 
 const opMap: Record<Operator, typeof eq> = {
 	eq: eq,

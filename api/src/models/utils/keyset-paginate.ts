@@ -1,5 +1,5 @@
+import { type Column, and, eq, gt, isNull, lt, or, sql } from "drizzle-orm";
 import type { NonEmptyArray, Sort } from "./sort";
-import { eq, or, type Column, and, gt, lt, isNull, sql } from "drizzle-orm";
 
 type Table<Name extends string> = Record<Name, Column>;
 

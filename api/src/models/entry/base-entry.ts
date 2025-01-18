@@ -17,7 +17,6 @@ export const EntryTranslation = t.Object({
 	description: t.Nullable(t.String()),
 });
 
-
 // export const SeedEntry = t.Intersect([
 // 	Entry,
 // 	t.Object({ videos: t.Optional(t.Array(Video)) }),

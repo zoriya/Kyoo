@@ -1,8 +1,8 @@
 import { t } from "elysia";
-import { Image } from "./utils/image";
 import { SeasonId } from "./utils/external-id";
-import { Resource } from "./utils/resource";
+import { Image } from "./utils/image";
 import { Language } from "./utils/language";
+import { Resource } from "./utils/resource";
 
 export const BaseSeason = t.Object({
 	seasonNumber: t.Number({ minimum: 1 }),

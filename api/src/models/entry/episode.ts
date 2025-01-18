@@ -1,7 +1,7 @@
 import { t } from "elysia";
-import { BaseEntry, EntryTranslation } from "./base-entry";
 import { EpisodeId } from "../utils/external-id";
 import { Resource } from "../utils/resource";
+import { BaseEntry, EntryTranslation } from "./base-entry";
 
 export const BaseEpisode = t.Intersect([
 	BaseEntry,
