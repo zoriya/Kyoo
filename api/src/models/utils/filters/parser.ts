@@ -1,26 +1,26 @@
 import {
+	type Parjser,
 	anyStringOf,
 	digit,
 	float,
 	int,
 	letter,
 	noCharOf,
-	type Parjser,
 	string,
 } from "parjs";
 import {
+	between,
 	exactly,
+	later,
 	many,
 	many1,
 	map,
 	or,
+	qthen,
+	recover,
 	stringify,
 	then,
 	thenq,
-	qthen,
-	later,
-	between,
-	recover,
 } from "parjs/combinators";
 
 export type Property = string;

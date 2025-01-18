@@ -2,6 +2,7 @@ import jwt from "@elysiajs/jwt";
 import { swagger } from "@elysiajs/swagger";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Elysia } from "elysia";
+import { base } from "./base";
 import { entries } from "./controllers/entries";
 import { movies } from "./controllers/movies";
 import { seasons } from "./controllers/seasons";
@@ -11,7 +12,6 @@ import { videos } from "./controllers/videos";
 import { db } from "./db";
 import { Image } from "./models/utils";
 import { comment } from "./utils";
-import { base } from "./base";
 
 await migrate(db, { migrationsSchema: "kyoo", migrationsFolder: "./drizzle" });
 

@@ -1,8 +1,8 @@
 import { t } from "elysia";
-import { BaseEntry, EntryTranslation } from "./base-entry";
-import { EpisodeId } from "../utils/external-id";
 import { comment } from "../../utils";
+import { EpisodeId } from "../utils/external-id";
 import { Resource } from "../utils/resource";
+import { BaseEntry, EntryTranslation } from "./base-entry";
 
 export const ExtraType = t.UnionEnum([
 	"other",
@@ -33,5 +33,3 @@ export const BaseExtra = t.Intersect(
 
 export const Extra = t.Intersect([Resource, BaseExtra, EntryTranslation]);
 export type Extra = typeof Extra.static;
-
-

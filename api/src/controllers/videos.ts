@@ -1,9 +1,9 @@
 import { Elysia, t } from "elysia";
-import { SeedVideo, Video } from "~/models/video";
 import { db } from "~/db";
 import { videos as videosT } from "~/db/schema";
-import { comment } from "~/utils";
 import { bubbleVideo } from "~/models/examples";
+import { SeedVideo, Video } from "~/models/video";
+import { comment } from "~/utils";
 
 const CreatedVideo = t.Object({
 	id: t.String({ format: "uuid" }),

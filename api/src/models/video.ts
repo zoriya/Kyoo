@@ -1,6 +1,6 @@
 import { t } from "elysia";
 import { comment } from "../utils";
-import { registerExamples, bubbleVideo  } from "./examples";
+import { bubbleVideo, registerExamples } from "./examples";
 
 export const Video = t.Object({
 	id: t.String({ format: "uuid" }),

@@ -1,7 +1,7 @@
 import type { ObjectOptions } from "@sinclair/typebox";
-import { t, type TSchema } from "elysia";
-import type { Sort } from "./sort";
+import { type TSchema, t } from "elysia";
 import { generateAfter } from "./keyset-paginate";
+import type { Sort } from "./sort";
 
 export const Page = <T extends TSchema>(schema: T, options?: ObjectOptions) =>
 	t.Object(

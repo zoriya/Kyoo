@@ -1,15 +1,13 @@
-import { and, eq, exists, SQL, sql } from "drizzle-orm";
+import { type SQL, and, eq, exists, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import { KError } from "~/models/error";
-import { comment } from "~/utils";
-import { db } from "../db";
 import {
 	entries,
 	entryVideoJointure as entryVideoJoint,
-	shows,
 	showTranslations,
+	shows,
 } from "~/db/schema";
 import { getColumns, sqlarr } from "~/db/schema/utils";
+import { KError } from "~/models/error";
 import { bubble } from "~/models/examples";
 import {
 	FullMovie,
@@ -19,16 +17,18 @@ import {
 } from "~/models/movie";
 import {
 	Filter,
-	type Image,
-	Sort,
 	type FilterDef,
 	Genre,
+	type Image,
+	Page,
+	Sort,
+	createPage,
 	isUuid,
 	keysetPaginate,
-	Page,
 	processLanguages,
-	createPage,
 } from "~/models/utils";
+import { comment } from "~/utils";
+import { db } from "../db";
 
 const movieFilters: FilterDef = {
 	genres: {

@@ -1,4 +1,6 @@
 import { t } from "elysia";
+import { bubble, registerExamples } from "./examples";
+import { bubbleImages } from "./examples/bubble";
 import {
 	ExternalId,
 	Genre,
@@ -7,8 +9,6 @@ import {
 	SeedImage,
 	TranslationRecord,
 } from "./utils";
-import { bubble, registerExamples } from "./examples";
-import { bubbleImages } from "./examples/bubble";
 import { Video } from "./video";
 
 export const MovieStatus = t.UnionEnum(["unknown", "finished", "planned"]);

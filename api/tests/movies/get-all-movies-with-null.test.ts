@@ -1,12 +1,12 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
+import { eq } from "drizzle-orm";
+import { expectStatus } from "tests/utils";
 import { seedMovie } from "~/controllers/seed/movies";
 import { db } from "~/db";
 import { shows } from "~/db/schema";
 import { bubble } from "~/models/examples";
 import { dune1984 } from "~/models/examples/dune-1984";
 import { dune } from "~/models/examples/dune-2021";
-import { eq } from "drizzle-orm";
-import { expectStatus } from "tests/utils";
 import { createMovie, getMovies, movieApp } from "./movies-helper";
 
 beforeAll(async () => {
