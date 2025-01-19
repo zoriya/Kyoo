@@ -116,10 +116,10 @@ export const showTranslations = schema.table(
 		// we'll also need to handle fallback when the language has no dict available on pg.
 		search: tsvector().generatedAlwaysAs((): SQL => sql`
 			setweight(to_tsvector('simple', ${showTranslations.name}), 'A') ||
-			setweight(to_tsvector('simple', array_to_string(${showTranslations.aliases}, ' ')), 'B') ||
-			setweight(to_tsvector('simple', array_to_string(${showTranslations.tags}, ' ')), 'C') ||
-			setweight(to_tsvector('simple', coalese(${showTranslations.tagline}, '')), 'D') ||
-			setweight(to_tsvector('simple', coalese(${showTranslations.description}, '')), 'D')
+			setweight(to_tsvector('simple', array_to_string_im(${showTranslations.aliases}, ' ')), 'B') ||
+			setweight(to_tsvector('simple', array_to_string_im(${showTranslations.tags}, ' ')), 'C') ||
+			setweight(to_tsvector('simple', coalesce(${showTranslations.tagline}, '')), 'D') ||
+			setweight(to_tsvector('simple', coalesce(${showTranslations.description}, '')), 'D')
 		`),
 	},
 	(t) => [
