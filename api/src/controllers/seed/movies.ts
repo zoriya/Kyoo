@@ -9,8 +9,7 @@ import {
 	shows,
 	videos,
 } from "~/db/schema";
-import { conflictUpdateAllExcept } from "~/db/schema/utils";
-import { KErrorT } from "~/models/error";
+import { conflictUpdateAllExcept } from "~/db/utils";
 import type { SeedMovie } from "~/models/movie";
 import { processOptImage } from "./images";
 import { guessNextRefresh } from "./refresh";
