@@ -295,15 +295,8 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					isAvailable: sql<boolean>`${videoQ.showPk} is not null`.as(
 						"isAvailable",
 					),
-					rank: sql<number>`ts_rank_cd(${transQ.search}, query)`.as("rank"),
 				})
 				.from(shows)
-				// TODO: change `simple` to `transQ.language`
-				// yes drizzle doesn't support crossJoin so we do a fullJoin on true T-T
-				.fullJoin(
-					sql`websearch_to_tsquery('simple', ${query}) as query`,
-					sql`true`,
-				)
 				.innerJoin(transQ, eq(shows.pk, transQ.pk))
 				.leftJoin(
 					showTranslations,
@@ -318,12 +311,14 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				.where(
 					and(
 						filter,
-						query ? sql`query @@ ${transQ.search}` : undefined,
+						query ? sql`${query}::text %> ${showTranslations.name}` : undefined,
 						keysetPaginate({ table: shows, after, sort }),
 					),
 				)
 				.orderBy(
-					...(query ? [sql`rank`] : []),
+					...(query
+						? [sql`word_similarity(${query}::text, ${showTranslations.name})`]
+						: []),
 					...(sort.random
 						? [sql`md5(${sort.random.seed} || ${shows.pk})`]
 						: []),
