@@ -1,42 +1,42 @@
 {
 	"home": {
 		"recommended": "Raccomandati",
-		"news": "",
+		"news": "Notizie",
 		"watchlist": "Continua a guardare",
-		"info": "",
+		"info": "Vedi altro",
 		"none": "Nessun episodio",
-		"watchlistLogin": "",
+		"watchlistLogin": "Per tener traccia di ciò che hai visto o vorresti vedere, è necessario effettuare il login",
 		"refreshMetadata": "Aggiorna metadata",
 		"episodeMore": {
 			"goToShow": "Vai allo show",
-			"download": "",
-			"mediainfo": ""
+			"download": "Scarica",
+			"mediainfo": "Consulta le info sul file"
 		}
 	},
 	"show": {
 		"play": "Riproduci",
 		"trailer": "Riproduci Trailer",
-		"studio": "",
+		"studio": "Studio",
 		"genre": "Generi",
 		"genre-none": "Nessun genere",
-		"staff": "",
-		"staff-none": "",
-		"noOverview": "",
+		"staff": "Staff",
+		"staff-none": "Staff sconosciuto",
+		"noOverview": "Nessuna panoramica disponibile",
 		"episode-none": "Non ci sono episodi in questa stagione",
-		"episodeNoMetadata": "",
-		"tags": "",
+		"episodeNoMetadata": "Nessun metadato disponibile",
+		"tags": "Tag",
 		"links": "Link",
-		"jumpToSeason": "",
-		"partOf": "",
-		"watchlistAdd": "",
-		"watchlistEdit": "",
+		"jumpToSeason": "Salta a stagione",
+		"partOf": "Parte di",
+		"watchlistAdd": "Aggiungi a \"Da vedere\"",
+		"watchlistEdit": "Modifica lo stato di visualizzazione",
 		"watchlistRemove": "Segna come non visto",
-		"watchlistLogin": "",
+		"watchlistLogin": "Accedi per aggiungere alla lista da vedere",
 		"watchlistMark": {
 			"completed": "Segna come completato",
-			"planned": "",
-			"watching": "",
-			"droped": "",
+			"planned": "Segna come pianificato",
+			"watching": "Segna come in visione",
+			"droped": "Segna come scartato",
 			"null": "Segna come non visto"
 		},
 		"nextUp": "Prossimo",
@@ -46,26 +46,28 @@
 		"sortby": "Ordina per {{key}}",
 		"sortby-tt": "Ordina per",
 		"sortkey": {
-			"relevance": "",
+			"relevance": "Pertinenza",
 			"name": "Nome",
 			"airDate": "Data di trasmissione",
 			"startAir": "",
 			"endAir": "",
 			"addedDate": "",
-			"rating": ""
+			"rating": "Valutazioni"
 		},
 		"sortord": {
 			"asc": "",
 			"desc": ""
 		},
-		"switchToGrid": "",
-		"switchToList": "",
+		"switchToGrid": "Passa a modalità griglia",
+		"switchToList": "Passa a modalità lista",
 		"mediatypekey": {
 			"all": "Tutti",
 			"movie": "Film",
 			"show": "Serie TV",
 			"collection": "Collezione"
-		}
+		},
+		"mediatype-tt": "Tipo di media",
+		"mediatypelabel": "Tipo di media"
 	},
 	"misc": {
 		"settings": "Impostazioni",
@@ -75,9 +77,9 @@
 		"cancel": "Annulla",
 		"more": "Di più",
 		"expand": "Espandi",
-		"collapse": "",
+		"collapse": "Collassa",
 		"edit": "Modifica",
-		"or": "",
+		"or": "O",
 		"loading": "Caricamento"
 	},
 	"navbar": {
@@ -85,7 +87,8 @@
 		"browse": "Cerca",
 		"search": "Ricerca",
 		"login": "Login",
-		"admin": "Pannello amministratore"
+		"admin": "Pannello amministratore",
+		"download": "Scarica"
 	},
 	"settings": {
 		"general": {
@@ -106,15 +109,15 @@
 		"playback": {
 			"label": "Riproduzione",
 			"playmode": {
-				"label": "",
+				"label": "Modalità di riproduzione predefinita",
 				"description": ""
 			},
 			"audioLanguage": {
-				"label": "",
-				"description": ""
+				"label": "Lingua audio",
+				"description": "La lingua predefinita nella riproduzione di un video multi-traccia"
 			},
 			"subtitleLanguage": {
-				"label": "",
+				"label": "Lingua dei sottotitoli",
 				"description": "",
 				"none": ""
 			}
@@ -263,6 +266,15 @@
 		"Comedy": "Commedia",
 		"Crime": "Criminale",
 		"Documentary": "Documentario",
-		"Drama": "Drammatico"
+		"Drama": "Drammatico",
+		"Family": "Per famiglie",
+		"Horror": "Orrore",
+		"Music": "Musica",
+		"News": "Notizie",
+		"Reality": "Reality",
+		"Soap": "Telenovela",
+		"Talk": "Talk Show",
+		"Politics": "Politica",
+		"Fantasy": "Fantasia"
 	}
 }
