@@ -7,5 +7,15 @@ export default {
 		// needed to fix ssr error of react-query
 		noExternal: true,
 	},
-	plugins: [one()],
+	plugins: [
+		one({
+			deps: {
+				"@expo/html-elements": {
+					"**/*.js": ["jsx"],
+				},
+				"inline-style-prefixer": "interop",
+				"inline-style-prefixer/**": "interop",
+			},
+		}),
+	],
 } satisfies UserConfig;
