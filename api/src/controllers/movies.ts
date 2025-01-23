@@ -26,6 +26,8 @@ import {
 	isUuid,
 	keysetPaginate,
 	processLanguages,
+	createPage,
+	sortToSql,
 } from "~/models/utils";
 import { comment } from "~/utils";
 import { db } from "../db";
@@ -282,6 +284,8 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				)
 				.as("video");
 
+			console.log(sort.isDefault)
+
 			const items = await db
 				.select({
 					...moviesCol,
@@ -316,15 +320,9 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					),
 				)
 				.orderBy(
-					...(query
+					...(query && sort.isDefault
 						? [sql`word_similarity(${query}::text, ${showTranslations.name})`]
-						: []),
-					...(sort.random
-						? [sql`md5(${sort.random.seed} || ${shows.pk})`]
-						: []),
-					...sort.sort.map((x) =>
-						x.desc ? sql`${shows[x.key]} desc nulls last` : shows[x.key],
-					),
+						: sortToSql(sort, shows)),
 					shows.pk,
 				)
 				.limit(limit);
@@ -337,7 +335,6 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				sort: Sort(["slug", "rating", "airDate", "createdAt", "nextRefresh"], {
 					remap: { airDate: "startAir" },
 					default: ["slug"],
-					description: "How to sort the query",
 				}),
 				filter: t.Optional(Filter({ def: movieFilters })),
 				query: t.Optional(

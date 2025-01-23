@@ -1,3 +1,5 @@
+import { sql } from "drizzle-orm";
+import type { PgColumn } from "drizzle-orm/pg-core";
 import { t } from "elysia";
 
 export type Sort<
@@ -10,6 +12,7 @@ export type Sort<
 		desc: boolean;
 	}[];
 	random?: { seed: number };
+	isDefault?: boolean;
 };
 
 export type NonEmptyArray<T> = [T, ...T[]];
@@ -25,7 +28,7 @@ export const Sort = <
 		remap,
 	}: {
 		default?: T[number][];
-		description: string;
+		description?: string;
 		remap: Remap;
 	},
 ) =>
@@ -49,6 +52,7 @@ export const Sort = <
 			),
 		)
 		.Decode((sort): Sort<T, Remap> => {
+			console.log(sort);
 			const random = sort.find((x) => x.startsWith("random"));
 			if (random) {
 				const seed = random.includes(":")
@@ -63,8 +67,26 @@ export const Sort = <
 					if (key in remap) return { key: remap[key]!, remmapedKey: key, desc };
 					return { key: key as Exclude<typeof key, keyof Remap>, desc };
 				}),
+				isDefault: "isDefault" in sort,
 			};
 		})
 		.Encode(() => {
 			throw new Error("Encode not supported for sort");
 		});
+
+type Table<Name extends string> = Record<Name, PgColumn>;
+
+export const sortToSql = <
+	T extends string[],
+	Remap extends Partial<Record<T[number], string>>,
+>(
+	sort: Sort<T, Remap>,
+	table: Table<Sort<T, Remap>["sort"][number]["key"] | "pk">,
+) => {
+	if (sort.random) {
+		return [sql`md5(${sort.random.seed} || ${table.pk})`];
+	}
+	return sort.sort.map((x) =>
+		x.desc ? sql`${table[x.key]} desc nulls last` : table[x.key],
+	);
+};
