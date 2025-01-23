@@ -22,10 +22,11 @@ type SettingsT struct {
 }
 
 type HwAccelT struct {
-	Name        string
-	DecodeFlags []string
-	EncodeFlags []string
-	ScaleFilter string
+	Name           string
+	DecodeFlags    []string
+	EncodeFlags    []string
+	NoResizeFilter string
+	ScaleFilter    string
 }
 
 var Settings = SettingsT{
