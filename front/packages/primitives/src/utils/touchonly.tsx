@@ -18,7 +18,6 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { useEffect } from "react";
 import { Platform, type ViewProps } from "react-native";
 
 export const TouchOnlyCss = () => {

@@ -19,12 +19,10 @@
  */
 
 import { LinearGradient as LG } from "expo-linear-gradient";
-import { memo, useEffect } from "react";
-import { Platform, StyleSheet, View, type ViewProps } from "react-native";
+import { useEffect } from "react";
+import { StyleSheet, View, type ViewProps } from "react-native";
 import Animated, {
-	SharedValue,
 	useAnimatedStyle,
-	useDerivedValue,
 	useSharedValue,
 	withDelay,
 	withRepeat,
