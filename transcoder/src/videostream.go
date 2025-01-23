@@ -81,6 +81,8 @@ func (vs *VideoStream) getTranscodeArgs(segments string) []string {
 			"-vf", fmt.Sprintf(Settings.HwAccel.ScaleFilter, width, vs.quality.Height()),
 		)
 	} else {
+		args = append(args, "-vf", Settings.HwAccel.NoResizeFilter)
+
 		// NoResize doesn't have bitrate info, fallback to a know quality higher or equal.
 		for _, q := range Qualities {
 			if q.Height() >= vs.video.Height {
@@ -90,7 +92,7 @@ func (vs *VideoStream) getTranscodeArgs(segments string) []string {
 		}
 	}
 	args = append(args,
-		// Even less sure but bufsize are 5x the avergae bitrate since the average bitrate is only
+		// Even less sure but bufsize are 5x the average bitrate since the average bitrate is only
 		// useful for hls segments.
 		"-bufsize", fmt.Sprint(quality.MaxBitrate()*5),
 		"-b:v", fmt.Sprint(quality.AverageBitrate()),
@@ -100,7 +102,7 @@ func (vs *VideoStream) getTranscodeArgs(segments string) []string {
 		// without this option, some hardware encoders uses others i-frames and the -f segment can't cut at them.
 		"-forced-idr", "1",
 		"-force_key_frames", segments,
-		// make ffmpeg globaly less buggy
+		// make ffmpeg globally less buggy
 		"-strict", "-2",
 	)
 	return args
