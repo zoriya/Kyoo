@@ -1,12 +1,14 @@
+import { prefix } from "inline-style-prefixer";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Slot } from "one";
 // import { Providers } from "~/providers";
-import { createStyleRegistry, StyleRegistryProvider, useTheme } from "yoshiki/web";
+// import { createStyleRegistry, StyleRegistryProvider, useTheme } from "yoshiki/web";
 // import { WebTooltip } from "@kyoo/primitives/src/tooltip.web";
 // import { HiddenIfNoJs, SkeletonCss, TouchOnlyCss } from "@kyoo/primitives";
 import { useServerHeadInsertion } from "one";
 
 const GlobalCssTheme = () => {
+	console.log(prefix("test"))
 	const theme = useTheme();
 	// TODO: add fonts here
 	// body {font-family: ${font.style.fontFamily};}
