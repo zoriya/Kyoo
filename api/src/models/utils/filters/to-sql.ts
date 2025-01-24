@@ -42,6 +42,11 @@ export const toDrizzle = (expr: Expression, config: FilterDef): SQL => {
 				);
 			}
 
+			if (expr.value.type === "enum" && prop.type === "string") {
+				// promote enum to string since this is legal
+				// but parser doesn't know if an enum should be a string
+				expr.value = { type: "string", value: expr.value.value };
+			}
 			if (prop.type !== expr.value.type) {
 				throw new KErrorT(
 					comment`

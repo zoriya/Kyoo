@@ -42,10 +42,9 @@ function t<T>(parser: Parjser<T>): Parjser<T> {
 	return parser.pipe(thenq(string(" ").pipe(many())));
 }
 
-const str = t(noCharOf(" ").pipe(many1(), stringify()).expects("a string"));
 const enumP = t(letter().pipe(many1(), stringify()).expects("an enum value"));
 
-const property = str.expects("a property");
+const property = t(letter().pipe(many1(), stringify())).expects("a property");
 
 const intVal = t(int().pipe(map((i) => ({ type: "int" as const, value: i }))));
 const floatVal = t(
@@ -66,9 +65,11 @@ const dateVal = t(
 		})),
 	),
 ).expects("a date");
-const strVal = str.pipe(
-	between('"'),
-	or(str.pipe(between("'"))),
+const strVal = t(noCharOf('"').pipe(many1(), stringify(), between('"'))).pipe(
+	or(
+		noCharOf("'").pipe(many1(), stringify(), between("'")),
+		noCharOf(" ").pipe(many1(), stringify()),
+	),
 	map((s) => ({ type: "string" as const, value: s })),
 );
 const enumVal = enumP.pipe(map((e) => ({ type: "enum" as const, value: e })));
@@ -76,7 +77,7 @@ const value = dateVal
 	.pipe(
 		// until we get the `-` character, this could be an int or a float.
 		recover(() => ({ kind: "Soft" })),
-		or(intVal, floatVal, strVal, enumVal),
+		or(intVal, floatVal, enumVal, strVal),
 	)
 	.expects("a valid value");
 
