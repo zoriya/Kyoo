@@ -280,7 +280,38 @@ describe("Get all movies", () => {
 		const [resp, body] = await getMovies({
 			limit: 2,
 			filter: "tags eq gravity",
-			preferOriginal: true,
+		});
+
+		expectStatus(resp, body).toBe(200);
+		expect(body.items).toBeArrayOfSize(1);
+		expect(body.items[0].slug).toBe(bubble.slug);
+	});
+});
+
+describe("search", () => {
+	it("Partial match", async () => {
+		const [resp, body] = await getMovies({
+			limit: 2,
+			query: "bub",
+		});
+
+		expectStatus(resp, body).toBe(200);
+		expect(body.items).toBeArrayOfSize(1);
+		expect(body.items[0].slug).toBe(bubble.slug);
+	});
+	it("Invalid search don't match", async () => {
+		const [resp, body] = await getMovies({
+			limit: 2,
+			query: "buboeuoeunhoeu",
+		});
+
+		expectStatus(resp, body).toBe(200);
+		expect(body.items).toBeArrayOfSize(0);
+	});
+	it("Typo match", async () => {
+		const [resp, body] = await getMovies({
+			limit: 2,
+			query: "bobble",
 		});
 
 		expectStatus(resp, body).toBe(200);
