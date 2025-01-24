@@ -51,7 +51,7 @@ export const TranslationRecord = <T extends TSchema>(
 					if (!(locale.language in translations))
 						translations[locale.language] = translations[lang];
 					// normalize locale names (caps, old values etc)
-					// we need to do this here because the record's key (Language)'s transform is not runned.
+					// we need to do this here because the record's key (Language)'s transform is not run.
 					// this is a limitation of typebox
 					if (lang !== locale.baseName) {
 						translations[locale.baseName] = translations[lang];
@@ -80,3 +80,21 @@ export const processLanguages = (languages?: string) => {
 			return [lang];
 		});
 };
+
+export const AcceptLanguage = ({
+	autoFallback = false,
+}: { autoFallback?: boolean } = {}) =>
+	t.String({
+		default: "*",
+		example: "en-us, ja;q=0.5",
+		description:
+			comment`
+			List of languages you want the data in.
+			This follows the [Accept-Language offical specification](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language).
+		` + autoFallback
+				? comment`
+
+			In this request, * is always implied (if no language could satisfy the request, kyoo will use any language available.)
+		`
+				: "",
+	});

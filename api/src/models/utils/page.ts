@@ -1,7 +1,7 @@
 import type { ObjectOptions } from "@sinclair/typebox";
 import { type TSchema, t } from "elysia";
 import { generateAfter } from "./keyset-paginate";
-import type { Sort } from "./sort";
+import type { NonEmptyArray, Sort } from "./sort";
 
 export const Page = <T extends TSchema>(schema: T, options?: ObjectOptions) =>
 	t.Object(
@@ -10,12 +10,19 @@ export const Page = <T extends TSchema>(schema: T, options?: ObjectOptions) =>
 			this: t.String({ format: "uri" }),
 			next: t.Nullable(t.String({ format: "uri" })),
 		},
-		options,
+		{
+			description: `Paginated list of ${schema.title} that match filters.`,
+			...options,
+		},
 	);
 
-export const createPage = <T>(
+export const createPage = <
+	T,
+	const ST extends NonEmptyArray<string>,
+	const Remap extends Partial<Record<ST[number], string>> = never,
+>(
 	items: T[],
-	{ url, sort, limit }: { url: string; sort: Sort<any, any>; limit: number },
+	{ url, sort, limit }: { url: string; sort: Sort<ST, Remap>; limit: number },
 ) => {
 	let next: string | null = null;
 	const uri = new URL(url);

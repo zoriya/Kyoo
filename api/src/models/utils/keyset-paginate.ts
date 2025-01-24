@@ -77,7 +77,13 @@ export const keysetPaginate = <
 	return where;
 };
 
-export const generateAfter = (cursor: any, sort: Sort<any, any>) => {
+export const generateAfter = <
+	const ST extends NonEmptyArray<string>,
+	const Remap extends Partial<Record<ST[number], string>> = never,
+>(
+	cursor: any,
+	sort: Sort<ST, Remap>,
+) => {
 	const ret = [
 		...sort.sort.map((by) => cursor[by.remmapedKey ?? by.key]),
 		cursor.pk,

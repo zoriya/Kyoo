@@ -16,6 +16,7 @@ import {
 	MovieTranslation,
 } from "~/models/movie";
 import {
+	AcceptLanguage,
 	Filter,
 	type FilterDef,
 	Genre,
@@ -28,8 +29,8 @@ import {
 	processLanguages,
 	sortToSql,
 } from "~/models/utils";
-import { comment } from "~/utils";
 import { db } from "../db";
+import { desc } from "~/models/utils/descriptions";
 
 const movieFilters: FilterDef = {
 	genres: {
@@ -180,13 +181,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 			}),
 			query: t.Object({
 				preferOriginal: t.Optional(
-					t.Boolean({
-						description: comment`
-							Prefer images in the original's language. If true, will return untranslated images instead of the translated ones.
-
-							If unspecified, kyoo will look at the current user's settings to decide what to do.
-						`,
-					}),
+					t.Boolean({ description: desc.preferOriginal }),
 				),
 				with: t.Array(t.UnionEnum(["translations", "videos"]), {
 					default: [],
@@ -194,14 +189,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				}),
 			}),
 			headers: t.Object({
-				"accept-language": t.String({
-					default: "*",
-					example: "en-us, ja;q=0.5",
-					description: comment`
-						List of languages you want the data in.
-						This follows the [Accept-Language offical specification](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language).
-					`,
-				}),
+				"accept-language": AcceptLanguage(),
 			}),
 			response: {
 				200: { ...FullMovie, description: "Found" },
@@ -209,14 +197,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					...KError,
 					description: "No movie found with the given id or slug.",
 				},
-				422: {
-					...KError,
-					description: comment`
-						The Accept-Language header can't be satisfied (all languages listed are
-						unavailable.) Try with another languages or add * to the list of languages
-						to fallback to any language.
-					`,
-				},
+				422: KError,
 			},
 		},
 	)
@@ -339,58 +320,26 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					default: ["slug"],
 				}),
 				filter: t.Optional(Filter({ def: movieFilters })),
-				query: t.Optional(
-					t.String({
-						description: comment`
-							Search query.
-							Searching automatically sort via relevance before the other sort parameters.
-						`,
-					}),
-				),
+				query: t.Optional(t.String({ description: desc.query })),
 				limit: t.Integer({
 					minimum: 1,
 					maximum: 250,
 					default: 50,
 					description: "Max page size.",
 				}),
-				after: t.Optional(
-					t.String({
-						description: comment`
-							Id of the cursor in the pagination.
-							You can ignore this and only use the prev/next field in the response.
-						`,
-					}),
-				),
+				after: t.Optional(t.String({ description: desc.after })),
 				preferOriginal: t.Optional(
 					t.Boolean({
-						description: comment`
-							Prefer images in the original's language. If true, will return untranslated images instead of the translated ones.
-
-							If unspecified, kyoo will look at the current user's settings to decide what to do.
-						`,
+						description: desc.preferOriginal,
 					}),
 				),
 			}),
 			headers: t.Object({
-				"accept-language": t.String({
-					default: "*",
-					example: "en-us, ja;q=0.5",
-					description: comment`
-						List of languages you want the data in.
-						This follows the [Accept-Language offical specification](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language).
-
-						In this request, * is always implied (if no language could satisfy the request, kyoo will use any language available.)
-					`,
-				}),
+				"accept-language": AcceptLanguage({ autoFallback: true }),
 			}),
 			response: {
-				200: Page(Movie, {
-					description: "Paginated list of movies that match filters.",
-				}),
-				422: {
-					...KError,
-					description: "Invalid query parameters.",
-				},
+				200: Page(Movie),
+				422: KError,
 			},
 		},
 	);

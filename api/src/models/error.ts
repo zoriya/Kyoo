@@ -7,6 +7,7 @@ export const KError = t.Object(
 		details: t.Optional(t.Any()),
 	},
 	{
+		description: "Invalid parameters.",
 		examples: [{ status: 404, message: "Movie not found" }],
 	},
 );

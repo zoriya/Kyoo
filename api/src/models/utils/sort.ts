@@ -18,7 +18,7 @@ export type NonEmptyArray<T> = [T, ...T[]];
 
 export const Sort = <
 	const T extends NonEmptyArray<string>,
-	const Remap extends Partial<Record<T[number], string>>,
+	const Remap extends Partial<Record<T[number], string>> = never,
 >(
 	values: T,
 	{
