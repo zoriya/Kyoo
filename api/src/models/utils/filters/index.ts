@@ -12,7 +12,12 @@ export type FilterDef = {
 				type: "int" | "float" | "date" | "string";
 				isArray?: boolean;
 		  }
-		| { column: Column | SQL; type: "enum"; values: string[]; isArray?: boolean };
+		| {
+				column: Column | SQL;
+				type: "enum";
+				values: string[];
+				isArray?: boolean;
+		  };
 };
 
 export const Filter = ({

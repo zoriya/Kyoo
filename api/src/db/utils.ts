@@ -1,20 +1,20 @@
 import {
-	is,
 	type ColumnsSelection,
+	type SQL,
 	type Subquery,
 	Table,
 	View,
 	ViewBaseConfig,
 	getTableColumns,
+	is,
 	sql,
-	type SQL,
 } from "drizzle-orm";
-import type { AnyPgSelect } from "drizzle-orm/pg-core";
+import type { CasingCache } from "drizzle-orm/casing";
 import type { AnyMySqlSelect } from "drizzle-orm/mysql-core";
+import type { AnyPgSelect } from "drizzle-orm/pg-core";
 import type { AnySQLiteSelect } from "drizzle-orm/sqlite-core";
 import type { WithSubquery } from "drizzle-orm/subquery";
 import { db } from "./index";
-import type { CasingCache } from "drizzle-orm/casing";
 
 // https://github.com/sindresorhus/type-fest/blob/main/source/simplify.d.ts#L58
 type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
