@@ -1,5 +1,5 @@
 {
-	"id": "8e9e90b8-5dbf-4e36-9615-5683c1c1c3e5",
+	"id": "1d98727c-290d-4491-8bb8-74390da0c021",
 	"prevId": "0d5d6d22-dc13-4f3d-9975-cb7b38f628d4",
 	"version": "7",
 	"dialect": "postgresql",
@@ -473,24 +473,29 @@
 					"type": "text",
 					"primaryKey": false,
 					"notNull": false
-				},
-				"search": {
-					"name": "search",
-					"type": "tsvector",
-					"primaryKey": false,
-					"notNull": false,
-					"generated": {
-						"as": "\n\t\t\tsetweight(to_tsvector('simple', \"kyoo\".\"show_translations\".\"name\"), 'A') ||\n\t\t\tsetweight(to_tsvector('simple', array_to_string(\"kyoo\".\"show_translations\".\"aliases\", ' ')), 'B') ||\n\t\t\tsetweight(to_tsvector('simple', array_to_string(\"kyoo\".\"show_translations\".\"tags\", ' ')), 'C') ||\n\t\t\tsetweight(to_tsvector('simple', coalesce(\"kyoo\".\"show_translations\".\"tagline\", '')), 'D') ||\n\t\t\tsetweight(to_tsvector('simple', coalesce(\"kyoo\".\"show_translations\".\"description\", '')), 'D')\n\t\t",
-						"type": "stored"
-					}
 				}
 			},
 			"indexes": {
-				"search": {
-					"name": "search",
+				"name_trgm": {
+					"name": "name_trgm",
 					"columns": [
 						{
-							"expression": "search",
+							"expression": "\"name\" gin_trgm_ops",
+							"asc": true,
+							"isExpression": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "gin",
+					"with": {}
+				},
+				"tags": {
+					"name": "tags",
+					"columns": [
+						{
+							"expression": "tags",
 							"isExpression": false,
 							"asc": true,
 							"nulls": "last"
@@ -498,7 +503,7 @@
 					],
 					"isUnique": false,
 					"concurrently": false,
-					"method": "gin",
+					"method": "btree",
 					"with": {}
 				}
 			},
