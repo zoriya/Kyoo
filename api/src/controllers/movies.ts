@@ -176,7 +176,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 			params: t.Object({
 				id: t.String({
 					description: "The id or slug of the movie to retrieve.",
-					example: bubble.slug,
+					examples: [bubble.slug],
 				}),
 			}),
 			query: t.Object({
