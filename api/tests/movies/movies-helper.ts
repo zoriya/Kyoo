@@ -33,6 +33,7 @@ export const getMovies = async ({
 	limit?: number;
 	after?: string;
 	sort?: string | string[];
+	query?: string;
 	langs?: string;
 	preferOriginal?: boolean;
 }) => {

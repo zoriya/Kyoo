@@ -1,6 +1,5 @@
 import jwt from "@elysiajs/jwt";
 import { swagger } from "@elysiajs/swagger";
-import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Elysia } from "elysia";
 import { base } from "./base";
 import { entries } from "./controllers/entries";
@@ -9,11 +8,11 @@ import { seasons } from "./controllers/seasons";
 import { seed } from "./controllers/seed";
 import { series } from "./controllers/series";
 import { videos } from "./controllers/videos";
-import { db } from "./db";
+import { migrate } from "./db";
 import { Image } from "./models/utils";
 import { comment } from "./utils";
 
-await migrate(db, { migrationsSchema: "kyoo", migrationsFolder: "./drizzle" });
+await migrate();
 
 let secret = process.env.JWT_SECRET;
 if (!secret) {

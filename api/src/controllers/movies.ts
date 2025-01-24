@@ -317,13 +317,13 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				.where(
 					and(
 						filter,
-						query ? sql`${query}::text %> ${showTranslations.name}` : undefined,
+						query ? sql`${transQ.name} %> ${query}::text` : undefined,
 						keysetPaginate({ table: shows, after, sort }),
 					),
 				)
 				.orderBy(
 					...(query
-						? [sql`word_similarity(${query}::text, ${showTranslations.name})`]
+						? [sql`word_similarity(${query}::text, ${transQ.name})`]
 						: sortToSql(sort, shows)),
 					shows.pk,
 				)
