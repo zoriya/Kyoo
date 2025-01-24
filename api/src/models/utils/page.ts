@@ -11,7 +11,7 @@ export const Page = <T extends TSchema>(schema: T, options?: ObjectOptions) =>
 			next: t.Nullable(t.String({ format: "uri" })),
 		},
 		{
-			description: `Paginated list of ${schema.title} that match filters.`,
+			description: "Paginated list that match filters.",
 			...options,
 		},
 	);

@@ -1,10 +1,10 @@
 import { t } from "elysia";
-import { madeInAbyss, registerExamples } from "./examples";
+import { bubbleImages, madeInAbyss, registerExamples } from "./examples";
 import { SeedSeason } from "./season";
 import { ExternalId } from "./utils/external-id";
 import { Genre } from "./utils/genres";
-import { Image } from "./utils/image";
-import { Language } from "./utils/language";
+import { Image, SeedImage } from "./utils/image";
+import { Language, TranslationRecord } from "./utils/language";
 import { Resource } from "./utils/resource";
 
 export const SerieStatus = t.UnionEnum([
@@ -55,16 +55,34 @@ export const SerieTranslation = t.Object({
 });
 export type SerieTranslation = typeof SerieTranslation.static;
 
-export const Serie = t.Intersect([Resource, BaseSerie, SerieTranslation]);
+export const Serie = t.Intersect([Resource, SerieTranslation, BaseSerie]);
 export type Serie = typeof Serie.static;
 
 export const SeedSerie = t.Intersect([
-	BaseSerie,
+	t.Omit(BaseSerie, ["createdAt", "nextRefresh"]),
 	t.Object({
-		translations: t.Record(Language(), SerieTranslation, { minProperties: 1 }),
+		slug: t.String({ format: "slug" }),
+		translations: TranslationRecord(
+			t.Intersect([
+				t.Omit(SerieTranslation, ["poster", "thumbnail", "banner", "logo"]),
+				t.Object({
+					poster: t.Nullable(SeedImage),
+					thumbnail: t.Nullable(SeedImage),
+					banner: t.Nullable(SeedImage),
+					logo: t.Nullable(SeedImage),
+				}),
+			]),
+		),
 		seasons: t.Array(SeedSeason),
 		// entries: t.Array(SeedEntry),
 		// extras: t.Optional(t.Array(SeedExtra)),
 	}),
 ]);
 export type SeedSerie = typeof SeedSerie.static;
+
+registerExamples(Serie, {
+	...madeInAbyss,
+	...madeInAbyss.translations.en,
+	...bubbleImages,
+});
+registerExamples(SeedSerie, madeInAbyss);

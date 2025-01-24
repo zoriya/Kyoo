@@ -6,6 +6,7 @@ import {
 	Genre,
 	Image,
 	Language,
+	Resource,
 	SeedImage,
 	TranslationRecord,
 } from "./utils";
@@ -15,8 +16,6 @@ export const MovieStatus = t.UnionEnum(["unknown", "finished", "planned"]);
 export type MovieStatus = typeof MovieStatus.static;
 
 const BaseMovie = t.Object({
-	id: t.String({ format: "uuid" }),
-	slug: t.String({ format: "slug" }),
 	genres: t.Array(Genre),
 	rating: t.Nullable(t.Number({ minimum: 0, maximum: 100 })),
 	status: MovieStatus,
@@ -53,8 +52,9 @@ export const MovieTranslation = t.Object({
 export type MovieTranslation = typeof MovieTranslation.static;
 
 export const Movie = t.Intersect([
-	BaseMovie,
+	Resource,
 	MovieTranslation,
+	BaseMovie,
 	t.Object({ isAvailable: t.Boolean() }),
 ]);
 export type Movie = typeof Movie.static;
@@ -69,8 +69,9 @@ export const FullMovie = t.Intersect([
 export type FullMovie = typeof FullMovie.static;
 
 export const SeedMovie = t.Intersect([
-	t.Omit(BaseMovie, ["id", "createdAt", "nextRefresh"]),
+	t.Omit(BaseMovie, ["createdAt", "nextRefresh"]),
 	t.Object({
+		slug: t.String({ format: "slug", examples: ["bubble"] }),
 		translations: TranslationRecord(
 			t.Intersect([
 				t.Omit(MovieTranslation, ["poster", "thumbnail", "banner", "logo"]),
@@ -92,4 +93,3 @@ registerExamples(Movie, {
 	...bubble.translations.en,
 	...bubbleImages,
 });
-registerExamples(SeedMovie, bubble);
