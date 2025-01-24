@@ -1,7 +1,7 @@
 import { t } from "elysia";
 import { SeasonId } from "./utils/external-id";
-import { Image } from "./utils/image";
-import { Language } from "./utils/language";
+import { Image, SeedImage } from "./utils/image";
+import { TranslationRecord } from "./utils/language";
 import { Resource } from "./utils/resource";
 
 export const BaseSeason = t.Object({
@@ -29,8 +29,18 @@ export const Season = t.Intersect([Resource, BaseSeason, SeasonTranslation]);
 export type Season = typeof Season.static;
 
 export const SeedSeason = t.Intersect([
-	BaseSeason,
+	t.Omit(BaseSeason, ["createdAt", "nextRefresh"]),
 	t.Object({
-		translations: t.Record(Language(), SeasonTranslation, { minPropreties: 1 }),
+		slug: t.String({ format: "slug" }),
+		translations: TranslationRecord(
+			t.Intersect([
+				t.Omit(SeasonTranslation, ["poster", "thumbnail", "banner"]),
+				t.Object({
+					poster: t.Nullable(SeedImage),
+					thumbnail: t.Nullable(SeedImage),
+					banner: t.Nullable(SeedImage),
+				}),
+			]),
+		),
 	}),
 ]);

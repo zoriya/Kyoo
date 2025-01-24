@@ -1,37 +1,47 @@
-import type { SeedSerie } from "../seed";
+import type { SeedSerie } from "~/models/serie";
 
-export const madeInAbyss: SeedSerie = {
-	id: "04bcf2ac-3c09-42f6-8357-b003798f9562",
+export const madeInAbyss = {
 	slug: "made-in-abyss",
-	name: "Made in Abyss",
-	tagline: "How far would you go… for the ones you love?",
-	aliases: [
-		"Made in Abyss: The Golden City of the Scorching Sun",
-		"Meidoinabisu",
-		"Meidoinabisu: Retsujitsu no ôgonkyô",
-	],
-	description:
-		"Located in the center of a remote island, the Abyss is the last unexplored region, a huge and treacherous fathomless hole inhabited by strange creatures where only the bravest adventurers descend in search of ancient relics. In the upper levels of the Abyss, Riko, a girl who dreams of becoming an explorer, stumbles upon a mysterious little boy.",
-	tags: [
-		"android",
-		"amnesia",
-		"post-apocalyptic future",
-		"exploration",
-		"friendship",
-		"mecha",
-		"survival",
-		"curse",
-		"tragedy",
-		"orphan",
-		"based on manga",
-		"robot",
-		"dark fantasy",
-		"seinen",
-		"anime",
-		"drastic change of life",
-		"fantasy",
-		"adventure",
-	],
+	translations: {
+		en: {
+			name: "Made in Abyss",
+			tagline: "How far would you go… for the ones you love?",
+			aliases: [
+				"Made in Abyss: The Golden City of the Scorching Sun",
+				"Meidoinabisu",
+				"Meidoinabisu: Retsujitsu no ôgonkyô",
+			],
+			description:
+				"Located in the center of a remote island, the Abyss is the last unexplored region, a huge and treacherous fathomless hole inhabited by strange creatures where only the bravest adventurers descend in search of ancient relics. In the upper levels of the Abyss, Riko, a girl who dreams of becoming an explorer, stumbles upon a mysterious little boy.",
+			tags: [
+				"android",
+				"amnesia",
+				"post-apocalyptic future",
+				"exploration",
+				"friendship",
+				"mecha",
+				"survival",
+				"curse",
+				"tragedy",
+				"orphan",
+				"based on manga",
+				"robot",
+				"dark fantasy",
+				"seinen",
+				"anime",
+				"drastic change of life",
+				"fantasy",
+				"adventure",
+			],
+			poster:
+				"https://image.tmdb.org/t/p/original/4Bh9qzB1Kau4RDaVQXVFdoJ0HcE.jpg",
+			thumbnail:
+				"https://image.tmdb.org/t/p/original/Df9XrvZFIeQfLKfu8evRmzvRsd.jpg",
+			logo: "https://image.tmdb.org/t/p/original/7hY3Q4GhkiYPBfn4UoVg0AO4Zgk.png",
+			banner: null,
+			trailerUrl: "https://www.youtube.com/watch?v=ePOyy6Wlk4s",
+		},
+	},
 	genres: [
 		"animation",
 		"drama",
@@ -46,26 +56,6 @@ export const madeInAbyss: SeedSerie = {
 	originalLanguage: "ja",
 	startAir: "2017-07-07",
 	endAir: "2022-09-28",
-	poster: {
-		id: "8205a20e-d91f-804c-3a84-4e4dc6202d66",
-		source:
-			"https://image.tmdb.org/t/p/original/4Bh9qzB1Kau4RDaVQXVFdoJ0HcE.jpg",
-		blurhash: "LZGlS3XTD%jE~Wf,SeV@%2o|WERj",
-	},
-	thumbnail: {
-		id: "819d816c-88f6-9f3a-b5e7-ce3daaffbac4",
-		source:
-			"https://image.tmdb.org/t/p/original/Df9XrvZFIeQfLKfu8evRmzvRsd.jpg",
-		blurhash: "LmJtk{kq~q%2bbWCxaV@.8RixuNG",
-	},
-	logo: {
-		id: "23cb7b06-8406-2288-8e40-08bfc16180b5",
-		source:
-			"https://image.tmdb.org/t/p/original/7hY3Q4GhkiYPBfn4UoVg0AO4Zgk.png",
-		blurhash: "LKGaa%M{0zbI#7$%bbofGGw^wcw{",
-	},
-	banner: null,
-	trailerUrl: "https://www.youtube.com/watch?v=ePOyy6Wlk4s",
 	externalId: {
 		themoviedatabase: {
 			dataId: "72636",
@@ -74,26 +64,23 @@ export const madeInAbyss: SeedSerie = {
 		imdb: { dataId: "tt7222086", link: "https://www.imdb.com/title/tt7222086" },
 		tvdb: { dataId: "326109", link: null },
 	},
-	createdAt: "2023-11-29T11:12:11.949503Z",
-	nextRefresh: "2025-01-07T11:42:50.948248Z",
 	seasons: [
 		{
-			id: "490aa312-53b9-43c2-845d-7cbf32642c98",
 			slug: "made-in-abyss-s1",
 			seasonNumber: 1,
-			name: "Season 1",
-			description:
-				"Within the depths of the Abyss, a girl named Riko stumbles upon a robot who looks like a young boy. Riko and her new friend descend into uncharted territory to unlock its mysteries, but what lies in wait for them in the darkness?",
+			translations: {
+				en: {
+					name: "Season 1",
+					description:
+						"Within the depths of the Abyss, a girl named Riko stumbles upon a robot who looks like a young boy. Riko and her new friend descend into uncharted territory to unlock its mysteries, but what lies in wait for them in the darkness?",
+					poster:
+						"https://image.tmdb.org/t/p/original/uVK3H8CgtrVgySFpdImvNXkN7RK.jpg",
+					thumbnail: null,
+					banner: null,
+				},
+			},
 			startAir: "2017-07-07",
 			endAir: "2017-09-29",
-			poster: {
-				id: "1c121a2b-d3a2-4ce8-e22a-79b13dde3f7d",
-				source:
-					"https://image.tmdb.org/t/p/original/uVK3H8CgtrVgySFpdImvNXkN7RK.jpg",
-				blurhash: "LYG9BNkrD%V?~WS5S1WA%LbubHV[",
-			},
-			thumbnail: null,
-			banner: null,
 			externalId: {
 				themoviedatabase: {
 					serieId: "72636",
@@ -101,26 +88,23 @@ export const madeInAbyss: SeedSerie = {
 					link: "https://www.themoviedb.org/tv/72636/season/1",
 				},
 			},
-			createdAt: "2023-11-29T11:12:13.008151Z",
-			nextRefresh: "2025-01-07T11:37:50.151836Z",
 		},
 		{
-			id: "135af9ae-a8eb-4110-a4e4-05eee49e2d76",
 			slug: "made-in-abyss-s2",
 			seasonNumber: 2,
-			name: "The Golden City of the Scorching Sun",
-			description:
-				"Set directly after the events of Made in Abyss: Dawn of the Deep Soul, the fifth installment of Made in Abyss covers the adventure of Reg, Riko and Nanachi in the Sixth Layer, The Capital of the Unreturned.",
+			translations: {
+				en: {
+					name: "The Golden City of the Scorching Sun",
+					description:
+						"Set directly after the events of Made in Abyss: Dawn of the Deep Soul, the fifth installment of Made in Abyss covers the adventure of Reg, Riko and Nanachi in the Sixth Layer, The Capital of the Unreturned.",
+					poster:
+						"https://image.tmdb.org/t/p/original/clC2erfUqIezhET67Gz9fcKD1L2.jpg",
+					thumbnail: null,
+					banner: null,
+				},
+			},
 			startAir: "2022-07-06",
 			endAir: "2022-09-28",
-			poster: {
-				id: "a03c57d7-4032-7d97-083a-9a6e51d5f1e7",
-				source:
-					"https://image.tmdb.org/t/p/original/clC2erfUqIezhET67Gz9fcKD1L2.jpg",
-				blurhash: "LpNTRGx]s9oz~WbJRPoft7RjV@a|",
-			},
-			thumbnail: null,
-			banner: null,
 			externalId: {
 				themoviedatabase: {
 					serieId: "72636",
@@ -128,8 +112,6 @@ export const madeInAbyss: SeedSerie = {
 					link: "https://www.themoviedb.org/tv/72636/season/2",
 				},
 			},
-			createdAt: "2023-11-29T11:12:13.630306Z",
-			nextRefresh: "2025-01-07T11:09:19.552971Z",
 		},
 	],
 	entries: [
@@ -337,4 +319,4 @@ export const madeInAbyss: SeedSerie = {
 			},
 		},
 	],
-};
+} satisfies SeedSerie;
