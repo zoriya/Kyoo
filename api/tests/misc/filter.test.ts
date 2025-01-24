@@ -170,4 +170,42 @@ describe("Parse filter", () => {
 			},
 		});
 	});
+	it('Handle eq with " string', () => {
+		const ret = parse('tags eq "magic armor"');
+		expect(ret).toMatchObject({
+			ok: true,
+			value: {
+				type: "op",
+				operator: "eq",
+				property: "tags",
+				value: { type: "string", value: "magic armor" },
+			},
+		});
+	});
+	it("Handle eq with ' string", () => {
+		const ret = parse("tags eq 'magic armor'");
+		expect(ret).toMatchObject({
+			ok: true,
+			value: {
+				type: "op",
+				operator: "eq",
+				property: "tags",
+				value: { type: "string", value: "magic armor" },
+			},
+		});
+	});
+
+	it("Handle eq with string, no quote", () => {
+		const ret = parse("tags eq magic");
+		expect(ret).toMatchObject({
+			ok: true,
+			value: {
+				type: "op",
+				operator: "eq",
+				property: "tags",
+				// this is parsed as enum but is handled afterwards
+				value: { type: "enum", value: "magic" },
+			},
+		});
+	});
 });
