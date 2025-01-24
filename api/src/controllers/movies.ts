@@ -6,7 +6,7 @@ import {
 	showTranslations,
 	shows,
 } from "~/db/schema";
-import { getColumns, sqlarr } from "~/db/schema/utils";
+import { getColumns, sqlarr } from "~/db/utils";
 import { KError } from "~/models/error";
 import { bubble } from "~/models/examples";
 import {
@@ -26,7 +26,6 @@ import {
 	isUuid,
 	keysetPaginate,
 	processLanguages,
-	createPage,
 	sortToSql,
 } from "~/models/utils";
 import { comment } from "~/utils";
@@ -323,7 +322,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					),
 				)
 				.orderBy(
-					...(query // && sort.isDefault
+					...(query
 						? [sql`word_similarity(${query}::text, ${showTranslations.name})`]
 						: sortToSql(sort, shows)),
 					shows.pk,

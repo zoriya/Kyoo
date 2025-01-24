@@ -12,7 +12,6 @@ export type Sort<
 		desc: boolean;
 	}[];
 	random?: { seed: number };
-	isDefault?: boolean;
 };
 
 export type NonEmptyArray<T> = [T, ...T[]];
@@ -29,19 +28,19 @@ export const Sort = <
 	}: {
 		default?: T[number][];
 		description?: string;
-		remap: Remap;
+		remap?: Remap;
 	},
 ) =>
 	t
 		.Transform(
 			t.Array(
 				t.Union([
-					t.Literal("random"),
-					t.TemplateLiteral("random:${number}"),
 					t.UnionEnum([
 						...values,
 						...values.map((x: T[number]) => `-${x}` as const),
+						"random",
 					]),
+					t.TemplateLiteral("random:${number}"),
 				]),
 				{
 					// TODO: support explode: true (allow sort=slug,-createdAt). needs a pr to elysia
@@ -63,10 +62,10 @@ export const Sort = <
 				sort: sort.map((x) => {
 					const desc = x[0] === "-";
 					const key = (desc ? x.substring(1) : x) as T[number];
-					if (key in remap) return { key: remap[key]!, remmapedKey: key, desc };
+					if (remap && key in remap)
+						return { key: remap[key]!, remmapedKey: key, desc };
 					return { key: key as Exclude<typeof key, keyof Remap>, desc };
 				}),
-				isDefault: "isDefault" in sort,
 			};
 		})
 		.Encode(() => {
