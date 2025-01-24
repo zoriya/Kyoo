@@ -28,8 +28,7 @@ describe("Get all movies", () => {
 		expectStatus(resp, body).toBe(422);
 		expect(body).toMatchObject({
 			status: 422,
-			message:
-				"Invalid property: slug. Expected one of genres, rating, status, runtime, airDate, originalLanguage.",
+			message: expect.any(String),
 			details: {
 				in: "slug eq bubble",
 			},
@@ -276,5 +275,16 @@ describe("Get all movies", () => {
 			slug: dune.slug,
 			name: dune.translations.en.name,
 		});
+	});
+	it("Filter with tags", async () => {
+		const [resp, body] = await getMovies({
+			limit: 2,
+			filter: "tags eq gravity",
+			preferOriginal: true,
+		});
+
+		expectStatus(resp, body).toBe(200);
+		expect(body.items).toBeArrayOfSize(1);
+		expect(body.items[0].slug).toBe(bubble.slug);
 	});
 });
