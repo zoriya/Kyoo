@@ -1,3 +1,5 @@
+create extension if not exists pg_trgm;
+
 CREATE INDEX "name_trgm" ON "kyoo"."show_translations" USING gin ("name" gin_trgm_ops);--> statement-breakpoint
 CREATE INDEX "tags" ON "kyoo"."show_translations" USING btree ("tags");--> statement-breakpoint
 CREATE INDEX "kind" ON "kyoo"."shows" USING hash ("kind");--> statement-breakpoint
