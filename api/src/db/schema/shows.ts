@@ -1,4 +1,4 @@
-import { relations, type SQL, sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
 	check,
 	date,
@@ -12,7 +12,7 @@ import {
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
-import { image, language, schema, tsvector } from "./utils";
+import { image, language, schema } from "./utils";
 
 export const showKind = schema.enum("show_kind", ["serie", "movie"]);
 export const showStatus = schema.enum("show_status", [
@@ -110,21 +110,11 @@ export const showTranslations = schema.table(
 		banner: image(),
 		logo: image(),
 		trailerUrl: text(),
-
-		// TODO: use a real language instead of simple here (we could use the `language` column but dic names
-		// are `english` and not `en`.)
-		// we'll also need to handle fallback when the language has no dict available on pg.
-		search: tsvector().generatedAlwaysAs((): SQL => sql`
-			setweight(to_tsvector('simple', ${showTranslations.name}), 'A') ||
-			setweight(to_tsvector('simple', array_to_string_im(${showTranslations.aliases}, ' ')), 'B') ||
-			setweight(to_tsvector('simple', array_to_string_im(${showTranslations.tags}, ' ')), 'C') ||
-			setweight(to_tsvector('simple', coalesce(${showTranslations.tagline}, '')), 'D') ||
-			setweight(to_tsvector('simple', coalesce(${showTranslations.description}, '')), 'D')
-		`),
 	},
 	(t) => [
 		primaryKey({ columns: [t.pk, t.language] }),
-		index("search").using("gin", t.search),
+		index("name_trgm").using("gin", sql`${t.name} gin_trgm_ops`),
+		index("tags").on(t.tags),
 	],
 );
 

@@ -52,7 +52,6 @@ export const Sort = <
 			),
 		)
 		.Decode((sort): Sort<T, Remap> => {
-			console.log(sort);
 			const random = sort.find((x) => x.startsWith("random"));
 			if (random) {
 				const seed = random.includes(":")

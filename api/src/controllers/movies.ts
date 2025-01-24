@@ -44,6 +44,11 @@ const movieFilters: FilterDef = {
 	runtime: { column: shows.runtime, type: "float" },
 	airDate: { column: shows.startAir, type: "date" },
 	originalLanguage: { column: shows.originalLanguage, type: "string" },
+	tags: {
+		column: sql.raw(`t.${showTranslations.tags.name}`),
+		type: "string",
+		isArray: true,
+	},
 };
 
 export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
@@ -284,8 +289,6 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				)
 				.as("video");
 
-			console.log(sort.isDefault)
-
 			const items = await db
 				.select({
 					...moviesCol,
@@ -320,7 +323,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					),
 				)
 				.orderBy(
-					...(query && sort.isDefault
+					...(query // && sort.isDefault
 						? [sql`word_similarity(${query}::text, ${showTranslations.name})`]
 						: sortToSql(sort, shows)),
 					shows.pk,
