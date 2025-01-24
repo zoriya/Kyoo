@@ -4,7 +4,7 @@ import { Elysia } from "elysia";
 import { base } from "./base";
 import { entries } from "./controllers/entries";
 import { movies } from "./controllers/movies";
-import { seasons } from "./controllers/seasons";
+import { seasonsH } from "./controllers/seasons";
 import { seed } from "./controllers/seed";
 import { series } from "./controllers/series";
 import { videos } from "./controllers/videos";
@@ -58,6 +58,7 @@ const app = new Elysia()
 				],
 				tags: [
 					{ name: "movies", description: "Routes about movies" },
+					{ name: "series", description: "Routes about series" },
 					{
 						name: "videos",
 						description: comment`
@@ -73,7 +74,7 @@ const app = new Elysia()
 	.use(movies)
 	.use(series)
 	.use(entries)
-	.use(seasons)
+	.use(seasonsH)
 	.use(videos)
 	.use(seed)
 	.listen(3000);
