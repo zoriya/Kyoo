@@ -1,5 +1,6 @@
 import {
 	date,
+	index,
 	integer,
 	jsonb,
 	primaryKey,
@@ -40,13 +41,18 @@ export const seasons = schema.table(
 
 		externalId: season_extid(),
 
-		createdAt: timestamp({ withTimezone: true, mode: "string" }).defaultNow(),
-		nextRefresh: timestamp({ withTimezone: true, mode: "string" }),
+		createdAt: timestamp({ withTimezone: true, mode: "string" })
+			.notNull()
+			.defaultNow(),
+		nextRefresh: timestamp({ withTimezone: true, mode: "string" }).notNull(),
 	},
-	(t) => [unique().on(t.showPk, t.seasonNumber)],
+	(t) => [
+		unique().on(t.showPk, t.seasonNumber),
+		index("show_fk").using("hash", t.showPk),
+	],
 );
 
-export const seasonTranslation = schema.table(
+export const seasonTranslations = schema.table(
 	"season_translations",
 	{
 		pk: integer()
