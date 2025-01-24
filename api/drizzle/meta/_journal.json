@@ -43,6 +43,13 @@
 			"when": 1737742695309,
 			"tag": "0005_trigram",
 			"breakpoints": true
+		},
+		{
+			"idx": 6,
+			"version": "7",
+			"when": 1737763164759,
+			"tag": "0006_seasons",
+			"breakpoints": true
 		}
 	]
 }
