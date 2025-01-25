@@ -4,11 +4,7 @@ on:
     branches:
       - master
       - next
-    paths:
-      - auth/**
   pull_request:
-    paths:
-      - auth/**
 
 
 jobs:
