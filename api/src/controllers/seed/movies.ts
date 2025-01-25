@@ -1,22 +1,18 @@
-import { eq, inArray, sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import { t } from "elysia";
 import { db } from "~/db";
 import {
-	entries,
+	type entries,
 	entryTranslations,
 	entryVideoJointure as evj,
-	showTranslations,
-	shows,
 	videos,
 } from "~/db/schema";
 import { conflictUpdateAllExcept } from "~/db/utils";
 import type { SeedMovie } from "~/models/movie";
-import { processOptImage } from "./images";
+import { getYear } from "~/utils";
+import { insertEntries } from "./insert/entries";
+import { insertShow } from "./insert/shows";
 import { guessNextRefresh } from "./refresh";
-
-type Show = typeof shows.$inferInsert;
-type ShowTrans = typeof showTranslations.$inferInsert;
-type Entry = typeof entries.$inferInsert;
 
 export const SeedMovieResponse = t.Object({
 	id: t.String({ format: "uuid" }),
@@ -30,7 +26,8 @@ export type SeedMovieResponse = typeof SeedMovieResponse.static;
 export const seedMovie = async (
 	seed: SeedMovie,
 ): Promise<
-	| (SeedMovieResponse & { status: "Created" | "OK" | "Conflict" })
+	| (SeedMovieResponse & { updated: boolean })
+	| { status: 409; id: string; slug: string }
 	| { status: 422; message: string }
 > => {
 	if (seed.slug === "random") {
@@ -44,116 +41,27 @@ export const seedMovie = async (
 	}
 
 	const { translations, videos: vids, ...bMovie } = seed;
+	const nextRefresh = guessNextRefresh(bMovie.airDate ?? new Date());
 
-	const ret = await db.transaction(async (tx) => {
-		const movie: Show = {
+	const ret = await insertShow(
+		{
 			kind: "movie",
 			startAir: bMovie.airDate,
-			nextRefresh: guessNextRefresh(bMovie.airDate ?? new Date()),
+			nextRefresh,
 			...bMovie,
-		};
+		},
+		translations,
+	);
+	if ("status" in ret) return ret;
 
-		const insert = () =>
-			tx
-				.insert(shows)
-				.values(movie)
-				.onConflictDoUpdate({
-					target: shows.slug,
-					set: conflictUpdateAllExcept(shows, [
-						"pk",
-						"id",
-						"slug",
-						"createdAt",
-					]),
-					// if year is different, this is not an update but a conflict (ex: dune-1984 vs dune-2021)
-					setWhere: sql`date_part('year', ${shows.startAir}) = date_part('year', excluded."start_air")`,
-				})
-				.returning({
-					pk: shows.pk,
-					id: shows.id,
-					slug: shows.slug,
-					// https://stackoverflow.com/questions/39058213/differentiate-inserted-and-updated-rows-in-upsert-using-system-columns/39204667#39204667
-					updated: sql<boolean>`(xmax <> 0)`.as("updated"),
-				});
-		let [ret] = await insert();
-		if (!ret) {
-			// ret is undefined when the conflict's where return false (meaning we have
-			// a conflicting slug but a different air year.
-			// try to insert adding the year at the end of the slug.
-			if (
-				movie.startAir &&
-				!movie.slug.endsWith(`${getYear(movie.startAir)}`)
-			) {
-				movie.slug = `${movie.slug}-${getYear(movie.startAir)}`;
-				[ret] = await insert();
-			}
-
-			// if at this point ret is still undefined, we could not reconciliate.
-			// simply bail and let the caller handle this.
-			if (!ret) {
-				const [{ id }] = await db
-					.select({ id: shows.id })
-					.from(shows)
-					.where(eq(shows.slug, movie.slug))
-					.limit(1);
-				return {
-					status: "Conflict" as const,
-					id,
-					slug: movie.slug,
-					videos: [],
-				};
-			}
-		}
-
-		// even if never shown to the user, a movie still has an entry.
-		const movieEntry: Entry = { type: "movie", ...bMovie };
-		const [entry] = await tx
-			.insert(entries)
-			.values(movieEntry)
-			.onConflictDoUpdate({
-				target: entries.slug,
-				set: conflictUpdateAllExcept(entries, [
-					"pk",
-					"id",
-					"slug",
-					"createdAt",
-				]),
-			})
-			.returning({ pk: entries.pk });
-
-		const trans: ShowTrans[] = await Promise.all(
-			Object.entries(translations).map(async ([lang, tr]) => ({
-				pk: ret.pk,
-				// TODO: normalize lang or error if invalid
-				language: lang,
-				...tr,
-				poster: await processOptImage(tr.poster),
-				thumbnail: await processOptImage(tr.thumbnail),
-				logo: await processOptImage(tr.logo),
-				banner: await processOptImage(tr.banner),
-			})),
-		);
-		await tx
-			.insert(showTranslations)
-			.values(trans)
-			.onConflictDoUpdate({
-				target: [showTranslations.pk, showTranslations.language],
-				set: conflictUpdateAllExcept(showTranslations, ["pk", "language"]),
-			});
-
-		const entryTrans = trans.map((x) => ({ ...x, pk: entry.pk }));
-		await tx
-			.insert(entryTranslations)
-			.values(entryTrans)
-			.onConflictDoUpdate({
-				target: [entryTranslations.pk, entryTranslations.language],
-				set: conflictUpdateAllExcept(entryTranslations, ["pk", "language"]),
-			});
-
-		return { ...ret, entry: entry.pk };
-	});
-
-	if (ret.status === "Conflict") return ret;
+	// even if never shown to the user, a movie still has an entry.
+	const [entry] = await insertEntries(ret.pk, [
+		{
+			kind: "movie",
+			nextRefresh,
+			...bMovie,
+		},
+	]);
 
 	let retVideos: { slug: string }[] = [];
 	if (vids) {
@@ -182,13 +90,9 @@ export const seedMovie = async (
 	}
 
 	return {
-		status: ret.updated ? "OK" : "Created",
+		updated: ret.updated,
 		id: ret.id,
 		slug: ret.slug,
 		videos: retVideos,
 	};
 };
-
-function getYear(date: string) {
-	return new Date(date).getUTCFullYear();
-}

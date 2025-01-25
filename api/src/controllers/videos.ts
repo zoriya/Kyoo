@@ -20,7 +20,7 @@ export const videos = new Elysia({ prefix: "/videos", tags: ["videos"] })
 		response: { 200: "video" },
 	})
 	.post(
-		"/",
+		"",
 		async ({ body }) => {
 			return await db
 				.insert(videosT)

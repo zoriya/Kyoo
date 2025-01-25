@@ -6,3 +6,7 @@ export const comment = (str: TemplateStringsArray, ...values: any[]) =>
 		.replace(/^[ \t]+/gm, "") // leading spaces
 		.replace(/([^\n])\n([^\n])/g, "$1 $2") // two lines to space separated line
 		.replace(/\n{2}/g, "\n"); // keep newline if there's an empty line
+
+export function getYear(date: string) {
+	return new Date(date).getUTCFullYear();
+}
