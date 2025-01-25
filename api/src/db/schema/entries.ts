@@ -51,11 +51,15 @@ export const entries = schema.table(
 		pk: integer().primaryKey().generatedAlwaysAsIdentity(),
 		id: uuid().notNull().unique().defaultRandom(),
 		slug: varchar({ length: 255 }).notNull().unique(),
-		showPk: integer().references(() => shows.pk, { onDelete: "cascade" }),
+		showPk: integer()
+			.notNull()
+			.references(() => shows.pk, { onDelete: "cascade" }),
 		order: real(),
 		seasonNumber: integer(),
 		episodeNumber: integer(),
-		type: entryType().notNull(),
+		kind: entryType().notNull(),
+		// only when kind=extra
+		extraKind: text(),
 		airDate: date(),
 		runtime: integer(),
 		thumbnails: image(),
