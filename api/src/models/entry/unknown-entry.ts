@@ -23,7 +23,7 @@ export const UnknownEntryTranslation = t.Omit(EntryTranslation, [
 ]);
 
 export const UnknownEntry = t.Intersect([
-	Resource,
+	Resource(),
 	BaseUnknownEntry,
 	UnknownEntryTranslation,
 ]);

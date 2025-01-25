@@ -1,8 +1,7 @@
 import { t } from "elysia";
 import { comment } from "../../utils";
-import { EpisodeId } from "../utils/external-id";
-import { Resource } from "../utils/resource";
 import { BaseEntry, EntryTranslation } from "./base-entry";
+import { EpisodeId, Resource, SeedImage, TranslationRecord } from "../utils";
 
 export const BaseSpecial = t.Intersect(
 	[
@@ -25,5 +24,16 @@ export const BaseSpecial = t.Intersect(
 	},
 );
 
-export const Special = t.Intersect([Resource, BaseSpecial, EntryTranslation]);
+export const Special = t.Intersect([Resource(), BaseSpecial, EntryTranslation]);
 export type Special = typeof Special.static;
+
+export const SeedSpecial = t.Intersect([
+	BaseSpecial,
+	t.Omit(BaseEntry, ["thumbnail", "createdAt", "nextRefresh"]),
+	t.Object({
+		thumbnail: t.Nullable(SeedImage),
+		translations: TranslationRecord(EntryTranslation),
+		videos: t.Optional(t.Array(t.String({ format: "uuid" }))),
+	}),
+]);
+export type SeedSpecial = typeof SeedSpecial.static;

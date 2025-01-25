@@ -31,5 +31,5 @@ export const BaseExtra = t.Intersect(
 	},
 );
 
-export const Extra = t.Intersect([Resource, BaseExtra, EntryTranslation]);
+export const Extra = t.Intersect([Resource(), BaseExtra, EntryTranslation]);
 export type Extra = typeof Extra.static;
