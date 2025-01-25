@@ -6,6 +6,7 @@ import { Genre } from "./utils/genres";
 import { Image, SeedImage } from "./utils/image";
 import { Language, TranslationRecord } from "./utils/language";
 import { Resource } from "./utils/resource";
+import { SeedEntry } from "./entry";
 
 export const SerieStatus = t.UnionEnum([
 	"unknown",
@@ -55,7 +56,7 @@ export const SerieTranslation = t.Object({
 });
 export type SerieTranslation = typeof SerieTranslation.static;
 
-export const Serie = t.Intersect([Resource, SerieTranslation, BaseSerie]);
+export const Serie = t.Intersect([Resource(), SerieTranslation, BaseSerie]);
 export type Serie = typeof Serie.static;
 
 export const SeedSerie = t.Intersect([
@@ -74,7 +75,7 @@ export const SeedSerie = t.Intersect([
 			]),
 		),
 		seasons: t.Array(SeedSeason),
-		// entries: t.Array(SeedEntry),
+		entries: t.Array(SeedEntry),
 		// extras: t.Optional(t.Array(SeedExtra)),
 	}),
 ]);
@@ -85,4 +86,3 @@ registerExamples(Serie, {
 	...madeInAbyss.translations.en,
 	...bubbleImages,
 });
-registerExamples(SeedSerie, madeInAbyss);

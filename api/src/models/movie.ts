@@ -52,7 +52,7 @@ export const MovieTranslation = t.Object({
 export type MovieTranslation = typeof MovieTranslation.static;
 
 export const Movie = t.Intersect([
-	Resource,
+	Resource(),
 	MovieTranslation,
 	BaseMovie,
 	t.Object({ isAvailable: t.Boolean() }),
