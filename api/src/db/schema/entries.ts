@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
 	check,
 	date,
@@ -14,6 +14,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { shows } from "./shows";
 import { image, language, schema } from "./utils";
+import { entryVideoJoin } from "./videos";
 
 export const entryType = schema.enum("entry_type", [
 	"unknown",
@@ -92,3 +93,16 @@ export const entryTranslations = schema.table(
 	},
 	(t) => [primaryKey({ columns: [t.pk, t.language] })],
 );
+
+export const entryRelations = relations(entries, ({ many }) => ({
+	translations: many(entryTranslations, { relationName: "entryTranslations" }),
+	evj: many(entryVideoJoin, { relationName: "evj_entry" }),
+}));
+
+export const entryTrRelations = relations(entryTranslations, ({ one }) => ({
+	entry: one(entries, {
+		relationName: "entryTranslations",
+		fields: [entryTranslations.pk],
+		references: [entries.pk],
+	}),
+}));

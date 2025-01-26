@@ -3,7 +3,7 @@ import { db } from "~/db";
 import {
 	entries,
 	entryTranslations,
-	entryVideoJoint as entryVideoJoin,
+	entryVideoJoin,
 	videos,
 } from "~/db/schema";
 import { conflictUpdateAllExcept, values } from "~/db/utils";
