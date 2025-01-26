@@ -1,6 +1,6 @@
 import { t } from "elysia";
+import { EpisodeId, Resource, SeedImage, TranslationRecord } from "../utils";
 import { BaseEntry, EntryTranslation } from "./base-entry";
-import { EpisodeId, SeedImage, TranslationRecord, Resource } from "../utils";
 
 export const BaseEpisode = t.Intersect([
 	BaseEntry,
@@ -17,8 +17,7 @@ export const Episode = t.Intersect([Resource(), BaseEpisode, EntryTranslation]);
 export type Episode = typeof Episode.static;
 
 export const SeedEpisode = t.Intersect([
-	BaseEpisode,
-	t.Omit(BaseEntry, ["thumbnail", "createdAt", "nextRefresh"]),
+	t.Omit(BaseEpisode, ["thumbnail", "createdAt", "nextRefresh"]),
 	t.Object({
 		thumbnail: t.Nullable(SeedImage),
 		translations: TranslationRecord(EntryTranslation),

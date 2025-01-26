@@ -45,8 +45,7 @@ export const MovieEntry = t.Intersect([
 export type MovieEntry = typeof MovieEntry.static;
 
 export const SeedMovieEntry = t.Intersect([
-	BaseMovieEntry,
-	t.Omit(BaseEntry, ["thumbnail", "createdAt", "nextRefresh"]),
+	t.Omit(BaseMovieEntry, ["thumbnail", "createdAt", "nextRefresh"]),
 	t.Object({
 		thumbnail: t.Nullable(SeedImage),
 		translations: TranslationRecord(

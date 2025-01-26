@@ -28,8 +28,7 @@ export const Special = t.Intersect([Resource(), BaseSpecial, EntryTranslation]);
 export type Special = typeof Special.static;
 
 export const SeedSpecial = t.Intersect([
-	BaseSpecial,
-	t.Omit(BaseEntry, ["thumbnail", "createdAt", "nextRefresh"]),
+	t.Omit(BaseSpecial, ["thumbnail", "createdAt", "nextRefresh"]),
 	t.Object({
 		thumbnail: t.Nullable(SeedImage),
 		translations: TranslationRecord(EntryTranslation),
