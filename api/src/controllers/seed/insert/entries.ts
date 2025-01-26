@@ -6,7 +6,7 @@ import {
 	entryVideoJoint as entryVideoJoin,
 	videos,
 } from "~/db/schema";
-import { conflictUpdateAllExcept } from "~/db/utils";
+import { conflictUpdateAllExcept, values } from "~/db/utils";
 import type { SeedEntry } from "~/models/entry";
 import { processOptImage } from "../images";
 import { guessNextRefresh } from "../refresh";
@@ -83,15 +83,15 @@ export const insertEntries = async (
 	const hasRenderingQ = db
 		.select()
 		.from(entryVideoJoin)
-		.where(eq(entryVideoJoin.entry, sql`vids.entryPk`));
+		.where(eq(entryVideoJoin.entry, sql`vids.entryPk::integer`));
 
 	const retVideos = await db
 		.insert(entryVideoJoin)
 		.select(
 			db
 				.select({
-					entry: sql<number>`vids.entryPk`.as("entry"),
-					video: videos.pk,
+					entry: sql<number>`vids.entryPk::integer`.as("entry"),
+					video: sql`${videos.pk}`.as("video"),
 					slug: sql<string>`
 						concat(
 							${show.slug}::text,
@@ -101,11 +101,14 @@ export const insertEntries = async (
 						)
 					`.as("slug"),
 				})
-				.from(sql`values(${vids}) as vids(videoId, entryPk)`)
-				.innerJoin(videos, eq(videos.id, sql`vids.videoId`)),
+				.from(values(vids).as("vids"))
+				.innerJoin(videos, eq(videos.id, sql`vids.videoId::uuid`)),
 		)
 		.onConflictDoNothing()
-		.returning({ slug: entryVideoJoin.slug, entryPk: sql`vids.entryPk` });
+		.returning({
+			slug: entryVideoJoin.slug,
+			entryPk: entryVideoJoin.entry,
+		});
 
 	return retEntries.map((entry) => ({
 		id: entry.id,

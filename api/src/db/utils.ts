@@ -70,3 +70,25 @@ export function conflictUpdateAllExcept<
 export function sqlarr(array: unknown[]) {
 	return `{${array.map((item) => `"${item}"`).join(",")}}`;
 }
+
+// TODO: upstream this
+// TODO: type values (everything is a `text` for now)
+export function values(items: Record<string, unknown>[]) {
+	const [firstProp, ...props] = Object.keys(items[0]);
+	const values = items
+		.map((x) => {
+			let ret = sql`(${x[firstProp]}`;
+			for (const val of props) {
+				ret = sql`${ret}, ${x[val]}`;
+			}
+			return sql`${ret})`;
+		})
+		.reduce((acc, x) => sql`${acc}, ${x}`);
+	const valueNames = [firstProp, ...props].join(", ");
+
+	return {
+		as: (name: string) => {
+			return sql`(values ${values}) as ${sql.raw(name)}(${sql.raw(valueNames)})`;
+		},
+	};
+}
