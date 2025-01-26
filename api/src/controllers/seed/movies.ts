@@ -43,7 +43,7 @@ export const seedMovie = async (
 	const { translations, videos: vids, ...bMovie } = seed;
 	const nextRefresh = guessNextRefresh(bMovie.airDate ?? new Date());
 
-	const ret = await insertShow(
+	const show = await insertShow(
 		{
 			kind: "movie",
 			startAir: bMovie.airDate,
@@ -52,12 +52,13 @@ export const seedMovie = async (
 		},
 		translations,
 	);
-	if ("status" in ret) return ret;
+	if ("status" in show) return show;
 
 	// even if never shown to the user, a movie still has an entry.
-	const [entry] = await insertEntries(ret.pk, [
+	const [entry] = await insertEntries(show, [
 		{
 			kind: "movie",
+			order: 1,
 			nextRefresh,
 			...bMovie,
 		},
@@ -70,12 +71,12 @@ export const seedMovie = async (
 			.select(
 				db
 					.select({
-						entry: sql<number>`${ret.entry}`.as("entry"),
+						entry: sql<number>`${show.entry}`.as("entry"),
 						video: videos.pk,
 						// TODO: do not add rendering if all videos of the entry have the same rendering
 						slug: sql<string>`
 								concat(
-									${ret.slug}::text,
+									${show.slug}::text,
 									case when ${videos.part} <> null then concat('-p', ${videos.part}) else '' end,
 									case when ${videos.version} <> 1 then concat('-v', ${videos.version}) else '' end
 								)
@@ -90,9 +91,9 @@ export const seedMovie = async (
 	}
 
 	return {
-		updated: ret.updated,
-		id: ret.id,
-		slug: ret.slug,
+		updated: show.updated,
+		id: show.id,
+		slug: show.slug,
 		videos: retVideos,
 	};
 };

@@ -3,6 +3,7 @@ import { db } from "~/db";
 import { showTranslations, shows } from "~/db/schema";
 import { conflictUpdateAllExcept } from "~/db/utils";
 import type { SeedMovie } from "~/models/movie";
+import type { SeedSerie } from "~/models/serie";
 import { getYear } from "~/utils";
 import { processOptImage } from "../images";
 
@@ -11,22 +12,22 @@ type ShowTrans = typeof showTranslations.$inferInsert;
 
 export const insertShow = async (
 	show: Show,
-	translations: SeedMovie["translations"],
+	translations: SeedMovie["translations"] | SeedSerie["translations"],
 ) => {
 	return await db.transaction(async (tx) => {
 		const ret = await insertBaseShow(tx, show);
 		if ("status" in ret) return ret;
 
-		const trans: ShowTrans[] = await Promise.all(
-			Object.entries(translations).map(async ([lang, tr]) => ({
+		const trans: ShowTrans[] = Object.entries(translations).map(
+			([lang, tr]) => ({
 				pk: ret.pk,
 				language: lang,
 				...tr,
-				poster: await processOptImage(tr.poster),
-				thumbnail: await processOptImage(tr.thumbnail),
-				logo: await processOptImage(tr.logo),
-				banner: await processOptImage(tr.banner),
-			})),
+				poster: processOptImage(tr.poster),
+				thumbnail: processOptImage(tr.thumbnail),
+				logo: processOptImage(tr.logo),
+				banner: processOptImage(tr.banner),
+			}),
 		);
 		await tx
 			.insert(showTranslations)

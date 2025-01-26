@@ -1,13 +1,19 @@
 import { t } from "elysia";
 import type { SeedSerie } from "~/models/serie";
 import { getYear } from "~/utils";
+import { insertEntries } from "./insert/entries";
 import { insertShow } from "./insert/shows";
 import { guessNextRefresh } from "./refresh";
-import { insertEntries } from "./insert/entries";
 
 export const SeedSerieResponse = t.Object({
 	id: t.String({ format: "uuid" }),
-	slug: t.String({ format: "slug", examples: ["bubble"] }),
+	slug: t.String({ format: "slug", examples: ["made-in-abyss"] }),
+	entries: t.Array(
+		t.Object({
+			id: t.String({ format: "uuid" }),
+			slug: t.String({ format: "slug", examples: ["made-in-abyss-s1e1"] }),
+		}),
+	),
 });
 export type SeedSerieResponse = typeof SeedSerieResponse.static;
 
@@ -31,7 +37,7 @@ export const seedSerie = async (
 	const { translations, seasons, entries, ...serie } = seed;
 	const nextRefresh = guessNextRefresh(serie.startAir ?? new Date());
 
-	const ret = await insertShow(
+	const show = await insertShow(
 		{
 			kind: "serie",
 			nextRefresh,
@@ -39,13 +45,14 @@ export const seedSerie = async (
 		},
 		translations,
 	);
-	if ("status" in ret) return ret;
+	if ("status" in show) return show;
 
-	const retEntries = await insertEntries(ret.pk, entries);
+	const retEntries = await insertEntries(show, entries);
 
 	return {
-		updated: ret.updated,
-		id: ret.id,
-		slug: ret.slug,
+		updated: show.updated,
+		id: show.id,
+		slug: show.slug,
+		entries: retEntries,
 	};
 };
