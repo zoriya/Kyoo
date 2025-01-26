@@ -21,12 +21,13 @@ export const videos = new Elysia({ prefix: "/videos", tags: ["videos"] })
 	})
 	.post(
 		"",
-		async ({ body }) => {
-			return await db
+		async ({ body, error }) => {
+			const ret = await db
 				.insert(videosT)
 				.values(body)
 				.onConflictDoNothing()
 				.returning({ id: videosT.id, path: videosT.path });
+			return error(201, ret);
 		},
 		{
 			body: t.Array(SeedVideo),

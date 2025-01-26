@@ -8,7 +8,7 @@ import { dune1984 } from "~/models/examples/dune-1984";
 import { dune } from "~/models/examples/dune-2021";
 import type { Movie } from "~/models/movie";
 import { isUuid } from "~/models/utils";
-import { getMovies, movieApp } from "./movies-helper";
+import { getMovies, app } from "../helper";
 
 beforeAll(async () => {
 	await db.delete(shows);
@@ -73,7 +73,7 @@ describe("Get all movies", () => {
 		});
 		expectStatus(resp, body).toBe(200);
 
-		resp = await movieApp.handle(new Request(body.next));
+		resp = await app.handle(new Request(body.next));
 		body = await resp.json();
 
 		expectStatus(resp, body).toBe(200);
@@ -106,7 +106,7 @@ describe("Get all movies", () => {
 			),
 		});
 
-		resp = await movieApp.handle(new Request(next));
+		resp = await app.handle(new Request(next));
 		body = await resp.json();
 
 		expectStatus(resp, body).toBe(200);
@@ -162,7 +162,7 @@ describe("Get all movies", () => {
 			expect(items.length).toBe(1);
 			expect(items[0].id).toBe(expectedIds[0]);
 			// Get Second Page
-			resp = await movieApp.handle(new Request(body.next));
+			resp = await app.handle(new Request(body.next));
 			body = await resp.json();
 
 			expectStatus(resp, body).toBe(200);
@@ -177,7 +177,7 @@ describe("Get all movies", () => {
 			});
 			expectStatus(resp, body).toBe(200);
 
-			const resp2 = await movieApp.handle(new Request(body.next));
+			const resp2 = await app.handle(new Request(body.next));
 			const body2 = await resp2.json();
 			expectStatus(resp2, body).toBe(200);
 
@@ -188,7 +188,7 @@ describe("Get all movies", () => {
 		});
 
 		it("Get /random", async () => {
-			const resp = await movieApp.handle(
+			const resp = await app.handle(
 				new Request("http://localhost/movies/random"),
 			);
 			expect(resp.status).toBe(302);

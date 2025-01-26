@@ -7,7 +7,7 @@ import { shows } from "~/db/schema";
 import { bubble } from "~/models/examples";
 import { dune1984 } from "~/models/examples/dune-1984";
 import { dune } from "~/models/examples/dune-2021";
-import { createMovie, getMovies, movieApp } from "./movies-helper";
+import { createMovie, getMovies, app } from "../helper";
 
 beforeAll(async () => {
 	await db.delete(shows);
@@ -77,7 +77,7 @@ describe("with a null value", () => {
 			),
 		});
 
-		resp = await movieApp.handle(new Request(next));
+		resp = await app.handle(new Request(next));
 		body = await resp.json();
 
 		expectStatus(resp, body).toBe(200);
@@ -124,7 +124,7 @@ describe("with a null value", () => {
 			),
 		});
 
-		resp = await movieApp.handle(new Request(next));
+		resp = await app.handle(new Request(next));
 		body = await resp.json();
 
 		expectStatus(resp, body).toBe(200);

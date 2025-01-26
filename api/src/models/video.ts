@@ -36,3 +36,4 @@ export type Video = typeof Video.static;
 registerExamples(Video, bubbleVideo);
 
 export const SeedVideo = t.Omit(Video, ["id", "slug", "createdAt"]);
+export type SeedVideo = typeof SeedVideo.static;
