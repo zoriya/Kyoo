@@ -13,6 +13,7 @@ import {
 	varchar,
 } from "drizzle-orm/pg-core";
 import { image, language, schema } from "./utils";
+import { entries } from "./entries";
 
 export const showKind = schema.enum("show_kind", ["serie", "movie"]);
 export const showStatus = schema.enum("show_status", [
@@ -128,6 +129,7 @@ export const showsRelations = relations(shows, ({ many, one }) => ({
 		fields: [shows.pk, shows.originalLanguage],
 		references: [showTranslations.pk, showTranslations.language],
 	}),
+	entries: many(entries, { relationName: "show_entries" }),
 }));
 export const showsTrRelations = relations(showTranslations, ({ one }) => ({
 	show: one(shows, {

@@ -95,7 +95,7 @@ export const insertEntries = async (
 					slug: sql<string>`
 						concat(
 							${show.slug}::text,
-							case when ${videos.part} <> null then ('-p' || ${videos.part}) else '' end,
+							case when ${videos.part} is not null then ('-p' || ${videos.part}) else '' end,
 							case when ${videos.version} <> 1 then ('-v' || ${videos.version}) else '' end,
 							case when exists(${hasRenderingQ}) then concat('-', ${videos.rendering}) else '' end
 						)

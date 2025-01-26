@@ -94,9 +94,14 @@ export const entryTranslations = schema.table(
 	(t) => [primaryKey({ columns: [t.pk, t.language] })],
 );
 
-export const entryRelations = relations(entries, ({ many }) => ({
+export const entryRelations = relations(entries, ({ one, many }) => ({
 	translations: many(entryTranslations, { relationName: "entryTranslations" }),
 	evj: many(entryVideoJoin, { relationName: "evj_entry" }),
+	show: one(shows, {
+		relationName: "show_entries",
+		fields: [entries.showPk],
+		references: [shows.pk],
+	}),
 }));
 
 export const entryTrRelations = relations(entryTranslations, ({ one }) => ({
