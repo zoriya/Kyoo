@@ -23,36 +23,20 @@ export const insertEntries = async (
 	show: { pk: number; slug: string },
 	items: SeedEntry[],
 ) => {
-	const vals = await Promise.all(
-		items.map(async (seed) => {
+	const retEntries = await db.transaction(async (tx) => {
+		const vals = items.map((seed) => {
 			const { translations, videos, ...entry } = seed;
 			return {
-				entry: {
-					...entry,
-					showPk: show.pk,
-					slug: generateSlug(show.slug, seed),
-					thumbnails: await processOptImage(seed.thumbnail),
-					nextRefresh: guessNextRefresh(entry.airDate ?? new Date()),
-				} satisfies EntryI,
-				translations: (await Promise.all(
-					Object.entries(translations).map(async ([lang, tr]) => ({
-						...tr,
-						language: lang,
-						poster:
-							seed.kind === "movie"
-								? await processOptImage(tr.poster)
-								: undefined,
-					})),
-				)) satisfies Omit<EntryTrans, "pk">[],
-				videos,
+				...entry,
+				showPk: show.pk,
+				slug: generateSlug(show.slug, seed),
+				thumbnails: processOptImage(seed.thumbnail),
+				nextRefresh: guessNextRefresh(entry.airDate ?? new Date()),
 			};
-		}),
-	);
-
-	return await db.transaction(async (tx) => {
+		});
 		const ret = await tx
 			.insert(entries)
-			.values(vals.map((x) => x.entry))
+			.values(vals)
 			.onConflictDoUpdate({
 				target: entries.slug,
 				set: conflictUpdateAllExcept(entries, [
@@ -63,20 +47,25 @@ export const insertEntries = async (
 					"createdAt",
 				]),
 			})
-			.returning({ pk: entries.pk });
+			.returning({ pk: entries.pk, id: entries.id, slug: entries.slug });
 
+		const trans = items.flatMap((seed, i) =>
+			Object.entries(seed.translations).map(([lang, tr]) => ({
+				// assumes ret is ordered like items.
+				pk: ret[i].pk,
+				language: lang,
+				...tr,
+			})),
+		);
 		await tx
 			.insert(entryTranslations)
-			.values(
-				vals.map((x, i) =>
-					x.translations.map((tr) => ({ ...tr, pk: ret[i].pk })),
-				),
-			)
+			.values(trans)
 			.onConflictDoUpdate({
 				target: [entryTranslations.pk, entryTranslations.language],
 				set: conflictUpdateAllExcept(entryTranslations, ["pk", "language"]),
 			});
 
-		return { ...ret, entry: entry.pk };
+		return ret;
 	});
+	return retEntries;
 };
