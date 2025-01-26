@@ -33,7 +33,7 @@ export const videos = schema.table(
 	],
 );
 
-export const entryVideoJointure = schema.table(
+export const entryVideoJoint = schema.table(
 	"entry_video_jointure",
 	{
 		entry: integer()

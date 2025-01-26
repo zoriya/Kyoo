@@ -1,13 +1,4 @@
-import { inArray, sql } from "drizzle-orm";
 import { t } from "elysia";
-import { db } from "~/db";
-import {
-	type entries,
-	entryTranslations,
-	entryVideoJointure as evj,
-	videos,
-} from "~/db/schema";
-import { conflictUpdateAllExcept } from "~/db/utils";
 import type { SeedMovie } from "~/models/movie";
 import { getYear } from "~/utils";
 import { insertEntries } from "./insert/entries";
@@ -40,7 +31,7 @@ export const seedMovie = async (
 		seed.slug = `random-${getYear(seed.airDate)}`;
 	}
 
-	const { translations, videos: vids, ...bMovie } = seed;
+	const { translations, videos, ...bMovie } = seed;
 	const nextRefresh = guessNextRefresh(bMovie.airDate ?? new Date());
 
 	const show = await insertShow(
@@ -57,43 +48,22 @@ export const seedMovie = async (
 	// even if never shown to the user, a movie still has an entry.
 	const [entry] = await insertEntries(show, [
 		{
+			...bMovie,
 			kind: "movie",
 			order: 1,
-			nextRefresh,
-			...bMovie,
+			thumbnail: (bMovie.originalLanguage
+				? translations[bMovie.originalLanguage]
+				: Object.values(translations)[0]
+			)?.thumbnail,
+			translations,
+			videos,
 		},
 	]);
-
-	let retVideos: { slug: string }[] = [];
-	if (vids) {
-		retVideos = await db
-			.insert(evj)
-			.select(
-				db
-					.select({
-						entry: sql<number>`${show.entry}`.as("entry"),
-						video: videos.pk,
-						// TODO: do not add rendering if all videos of the entry have the same rendering
-						slug: sql<string>`
-								concat(
-									${show.slug}::text,
-									case when ${videos.part} <> null then concat('-p', ${videos.part}) else '' end,
-									case when ${videos.version} <> 1 then concat('-v', ${videos.version}) else '' end
-								)
-							`.as("slug"),
-						// case when (select count(1) from ${evj} where ${evj.entry} = ${ret.entry}) <> 0 then concat('-', ${videos.rendering}) else '' end
-					})
-					.from(videos)
-					.where(inArray(videos.id, vids)),
-			)
-			.onConflictDoNothing()
-			.returning({ slug: evj.slug });
-	}
 
 	return {
 		updated: show.updated,
 		id: show.id,
 		slug: show.slug,
-		videos: retVideos,
+		videos: entry.videos,
 	};
 };

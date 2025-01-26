@@ -1,12 +1,15 @@
+import { eq, sql } from "drizzle-orm";
 import { db } from "~/db";
-import { entries, entryTranslations } from "~/db/schema";
+import {
+	entries,
+	entryTranslations,
+	entryVideoJoint as entryVideoJoin,
+	videos,
+} from "~/db/schema";
 import { conflictUpdateAllExcept } from "~/db/utils";
-import type { Entry, SeedEntry } from "~/models/entry";
+import type { SeedEntry } from "~/models/entry";
 import { processOptImage } from "../images";
 import { guessNextRefresh } from "../refresh";
-
-type EntryI = typeof entries.$inferInsert;
-type EntryTrans = typeof entryTranslations.$inferInsert;
 
 const generateSlug = (showSlug: string, entry: SeedEntry): string => {
 	switch (entry.kind) {
@@ -67,5 +70,46 @@ export const insertEntries = async (
 
 		return ret;
 	});
-	return retEntries;
+
+	const vids = items.flatMap(
+		(seed, i) =>
+			seed.videos?.map((x) => ({ videoId: x, entryPk: retEntries[i].pk })) ??
+			[],
+	);
+
+	if (vids.length === 0)
+		return retEntries.map((x) => ({ id: x.id, slug: x.slug, videos: [] }));
+
+	const hasRenderingQ = db
+		.select()
+		.from(entryVideoJoin)
+		.where(eq(entryVideoJoin.entry, sql`vids.entryPk`));
+
+	const retVideos = await db
+		.insert(entryVideoJoin)
+		.select(
+			db
+				.select({
+					entry: sql<number>`vids.entryPk`.as("entry"),
+					video: videos.pk,
+					slug: sql<string>`
+						concat(
+							${show.slug}::text,
+							case when ${videos.part} <> null then ('-p' || ${videos.part}) else '' end,
+							case when ${videos.version} <> 1 then ('-v' || ${videos.version}) else '' end,
+							case when exists(${hasRenderingQ}) then concat('-', ${videos.rendering}) else '' end
+						)
+					`.as("slug"),
+				})
+				.from(sql`values(${vids}) as vids(videoId, entryPk)`)
+				.innerJoin(videos, eq(videos.id, sql`vids.videoId`)),
+		)
+		.onConflictDoNothing()
+		.returning({ slug: entryVideoJoin.slug, entryPk: sql`vids.entryPk` });
+
+	return retEntries.map((entry) => ({
+		id: entry.id,
+		slug: entry.slug,
+		videos: retVideos.filter((x) => x.entryPk === entry.pk),
+	}));
 };

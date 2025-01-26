@@ -1,11 +1,6 @@
 import { type SQL, and, eq, exists, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import {
-	entries,
-	entryVideoJointure as entryVideoJoint,
-	showTranslations,
-	shows,
-} from "~/db/schema";
+import { entries, entryVideoJoint, showTranslations, shows } from "~/db/schema";
 import { getColumns, sqlarr } from "~/db/utils";
 import { KError } from "~/models/error";
 import { bubble } from "~/models/examples";

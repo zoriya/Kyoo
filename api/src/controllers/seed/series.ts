@@ -12,6 +12,14 @@ export const SeedSerieResponse = t.Object({
 		t.Object({
 			id: t.String({ format: "uuid" }),
 			slug: t.String({ format: "slug", examples: ["made-in-abyss-s1e1"] }),
+			videos: t.Array(
+				t.Object({
+					slug: t.String({
+						format: "slug",
+						examples: ["mode-in-abyss-s1e1v2"],
+					}),
+				}),
+			),
 		}),
 	),
 });
