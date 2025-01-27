@@ -1,4 +1,4 @@
-import { eq, sql } from "drizzle-orm";
+import { type SQL, eq, sql } from "drizzle-orm";
 import { db } from "~/db";
 import {
 	entries,
@@ -73,17 +73,15 @@ export const insertEntries = async (
 
 	const vids = items.flatMap(
 		(seed, i) =>
-			seed.videos?.map((x) => ({ videoId: x, entryPk: retEntries[i].pk })) ??
-			[],
+			seed.videos?.map((x) => ({
+				videoId: x,
+				entryPk: retEntries[i].pk,
+				needRendering: seed.videos!.length > 1,
+			})) ?? [],
 	);
 
 	if (vids.length === 0)
 		return retEntries.map((x) => ({ id: x.id, slug: x.slug, videos: [] }));
-
-	const hasRenderingQ = db
-		.select()
-		.from(entryVideoJoin)
-		.where(eq(entryVideoJoin.entry, sql`vids.entryPk::integer`));
 
 	const retVideos = await db
 		.insert(entryVideoJoin)
@@ -92,14 +90,10 @@ export const insertEntries = async (
 				.select({
 					entry: sql<number>`vids.entryPk::integer`.as("entry"),
 					video: sql`${videos.pk}`.as("video"),
-					slug: sql<string>`
-						concat(
-							${show.slug}::text,
-							case when ${videos.part} is not null then ('-p' || ${videos.part}) else '' end,
-							case when ${videos.version} <> 1 then ('-v' || ${videos.version}) else '' end,
-							case when exists(${hasRenderingQ}) then concat('-', ${videos.rendering}) else '' end
-						)
-					`.as("slug"),
+					slug: computeVideoSlug(
+						sql`${show.slug}::text`,
+						sql`vids.needRendering::boolean`,
+					),
 				})
 				.from(values(vids).as("vids"))
 				.innerJoin(videos, eq(videos.id, sql`vids.videoId::uuid`)),
@@ -116,3 +110,14 @@ export const insertEntries = async (
 		videos: retVideos.filter((x) => x.entryPk === entry.pk),
 	}));
 };
+
+export function computeVideoSlug(showSlug: SQL, needsRendering: SQL) {
+	return sql<string>`
+		concat(
+			${showSlug}::text,
+			case when ${videos.part} is not null then ('-p' || ${videos.part}) else '' end,
+			case when ${videos.version} <> 1 then ('-v' || ${videos.version}) else '' end,
+			case when ${needsRendering} then concat('-', ${videos.rendering}) else '' end
+		)
+	`.as("slug");
+}
