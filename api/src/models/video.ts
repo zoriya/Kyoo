@@ -36,22 +36,37 @@ export const Video = t.Object({
 	createdAt: t.String({ format: "date-time" }),
 
 	guess: t.Optional(
-		t.Object(
-			{
-				title: t.Optional(t.String()),
-				year: Guess(t.Integer()),
-				season: Guess(t.Integer()),
-				episode: Guess(t.Integer()),
-			},
-			{
-				additionalProperties: true,
-				description: comment`
-					Metadata guessed from the filename. Kyoo can use those informations to bypass
-					the scanner/metadata fetching and just register videos to movies/entries that already
-					exists. If Kyoo can't find a matching movie/entry, this information will be sent to
-					the scanner.
-				`,
-			},
+		t.Recursive((Self) =>
+			t.Object(
+				{
+					title: t.String(),
+					year: Guess(t.Integer()),
+					season: Guess(t.Integer()),
+					episode: Guess(t.Integer()),
+					// TODO: maybe replace "extra" with the `extraKind` value (aka behind-the-scene, trailer, etc)
+					type: t.Optional(t.UnionEnum(["episode", "movie", "extra"])),
+
+					from: t.String({
+						description: "Name of the tool that made the guess",
+					}),
+					history: t.Array(t.Omit(Self, ["history"]), {
+						default: [],
+						description: comment`
+							When another tool refines the guess or a user manually edit it, the history of the guesses
+							are kept in this \`history\` value.
+						`,
+					}),
+				},
+				{
+					additionalProperties: true,
+					description: comment`
+						Metadata guessed from the filename. Kyoo can use those informations to bypass
+						the scanner/metadata fetching and just register videos to movies/entries that already
+						exists. If Kyoo can't find a matching movie/entry, this information will be sent to
+						the scanner.
+					`,
+				},
+			),
 		),
 	),
 });
