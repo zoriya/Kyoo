@@ -5,7 +5,7 @@ import { db } from "~/db";
 import { showTranslations, shows, videos } from "~/db/schema";
 import { bubble } from "~/models/examples";
 import { dune, duneVideo } from "~/models/examples/dune-2021";
-import { createMovie, createVideo } from "../helper";
+import { createMovie, createVideo } from "../helpers";
 
 describe("Movie seeding", () => {
 	it("Can create a movie", async () => {

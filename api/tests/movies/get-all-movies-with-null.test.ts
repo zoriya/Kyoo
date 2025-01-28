@@ -6,7 +6,7 @@ import { shows } from "~/db/schema";
 import { bubble } from "~/models/examples";
 import { dune1984 } from "~/models/examples/dune-1984";
 import { dune } from "~/models/examples/dune-2021";
-import { app, createMovie, getMovies } from "../helper";
+import { app, createMovie, getMovies } from "../helpers";
 
 beforeAll(async () => {
 	await db.delete(shows);
@@ -14,7 +14,7 @@ beforeAll(async () => {
 });
 
 describe("with a null value", () => {
-	// Those before/after hooks are NOT scopped to the describe due to a bun bug
+	// Those before/after hooks are NOT scoped to the describe due to a bun bug
 	// instead we just make a new file for those /shrug
 	// see: https://github.com/oven-sh/bun/issues/5738
 	beforeAll(async () => {

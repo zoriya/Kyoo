@@ -1,15 +1,7 @@
 import jwt from "@elysiajs/jwt";
 import { swagger } from "@elysiajs/swagger";
-import { Elysia } from "elysia";
-import { base } from "./base";
-import { entries } from "./controllers/entries";
-import { movies } from "./controllers/movies";
-import { seasonsH } from "./controllers/seasons";
-import { seed } from "./controllers/seed";
-import { series } from "./controllers/series";
-import { videosH } from "./controllers/videos";
 import { migrate } from "./db";
-import { Image } from "./models/utils";
+import { app } from "./elysia";
 import { comment } from "./utils";
 
 await migrate();
@@ -31,8 +23,7 @@ if (!secret) {
 	process.exit(1);
 }
 
-const app = new Elysia()
-	.use(base)
+app
 	.use(jwt({ secret }))
 	.use(
 		swagger({
@@ -70,13 +61,6 @@ const app = new Elysia()
 			},
 		}),
 	)
-	.model({ image: Image })
-	.use(movies)
-	.use(series)
-	.use(entries)
-	.use(seasonsH)
-	.use(videosH)
-	.use(seed)
 	.listen(3000);
 
 console.log(`Api running at ${app.server?.hostname}:${app.server?.port}`);

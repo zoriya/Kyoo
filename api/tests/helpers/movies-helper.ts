@@ -1,19 +1,6 @@
-import Elysia from "elysia";
 import { buildUrl } from "tests/utils";
-import { base } from "~/base";
-import { movies } from "~/controllers/movies";
-import { seed } from "~/controllers/seed";
-import { series } from "~/controllers/series";
-import { videosH } from "~/controllers/videos";
+import { app } from "~/elysia";
 import type { SeedMovie } from "~/models/movie";
-import type { SeedVideo } from "~/models/video";
-
-export const app = new Elysia()
-	.use(base)
-	.use(movies)
-	.use(series)
-	.use(videosH)
-	.use(seed);
 
 export const getMovie = async (
 	id: string,
@@ -64,20 +51,6 @@ export const createMovie = async (movie: SeedMovie) => {
 		new Request(buildUrl("movies"), {
 			method: "POST",
 			body: JSON.stringify(movie),
-			headers: {
-				"Content-Type": "application/json",
-			},
-		}),
-	);
-	const body = await resp.json();
-	return [resp, body] as const;
-};
-
-export const createVideo = async (video: SeedVideo | SeedVideo[]) => {
-	const resp = await app.handle(
-		new Request(buildUrl("videos"), {
-			method: "POST",
-			body: JSON.stringify(Array.isArray(video) ? video : [video]),
 			headers: {
 				"Content-Type": "application/json",
 			},
