@@ -1,5 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from "bun:test";
-import { eq } from "drizzle-orm";
+import { beforeAll, describe, expect, it } from "bun:test";
 import { expectStatus } from "tests/utils";
 import { seedMovie } from "~/controllers/seed/movies";
 import { db } from "~/db";
@@ -7,14 +6,11 @@ import { shows } from "~/db/schema";
 import { bubble } from "~/models/examples";
 import { dune1984 } from "~/models/examples/dune-1984";
 import { dune } from "~/models/examples/dune-2021";
-import { createMovie, getMovies, app } from "../helper";
+import { app, createMovie, getMovies } from "../helper";
 
 beforeAll(async () => {
 	await db.delete(shows);
 	for (const movie of [bubble, dune1984, dune]) await seedMovie(movie);
-});
-afterAll(async () => {
-	await db.delete(shows);
 });
 
 describe("with a null value", () => {
@@ -46,9 +42,6 @@ describe("with a null value", () => {
 			originalLanguage: null,
 			externalId: {},
 		});
-	});
-	afterAll(async () => {
-		await db.delete(shows).where(eq(shows.slug, "no-air-date"));
 	});
 
 	it("sort by dates desc with a null value", async () => {

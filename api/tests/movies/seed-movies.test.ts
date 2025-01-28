@@ -1,14 +1,8 @@
-import { afterAll, beforeAll, describe, expect, it } from "bun:test";
+import { beforeAll, describe, expect, it } from "bun:test";
 import { eq } from "drizzle-orm";
 import { expectStatus } from "tests/utils";
 import { db } from "~/db";
-import {
-	entries,
-	entryVideoJoin,
-	showTranslations,
-	shows,
-	videos,
-} from "~/db/schema";
+import { showTranslations, shows, videos } from "~/db/schema";
 import { bubble } from "~/models/examples";
 import { dune, duneVideo } from "~/models/examples/dune-2021";
 import { createMovie, createVideo } from "../helper";
@@ -388,6 +382,7 @@ describe("Movie seeding", () => {
 			},
 		]);
 		expectStatus(vresp, video).toBe(201);
+		console.log(video);
 
 		const [resp, body] = await createMovie({
 			...bubble,
@@ -395,7 +390,7 @@ describe("Movie seeding", () => {
 			videos: [video[0].id, video[1].id],
 		});
 		expectStatus(resp, body).toBe(201);
-		console.log(body)
+		console.log(body);
 
 		const ret = await db.query.shows.findFirst({
 			where: eq(shows.id, body.id),
@@ -415,10 +410,7 @@ describe("Movie seeding", () => {
 
 const cleanup = async () => {
 	await db.delete(shows);
-	await db.delete(entries);
-	await db.delete(entryVideoJoin);
 	await db.delete(videos);
 };
 // cleanup db beforehand to unsure tests are consistent
 beforeAll(cleanup);
-afterAll(cleanup);

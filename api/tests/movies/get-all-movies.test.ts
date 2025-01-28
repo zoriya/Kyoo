@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from "bun:test";
+import { beforeAll, describe, expect, it } from "bun:test";
 import { expectStatus } from "tests/utils";
 import { seedMovie } from "~/controllers/seed/movies";
 import { db } from "~/db";
@@ -13,9 +13,6 @@ import { getMovies, app } from "../helper";
 beforeAll(async () => {
 	await db.delete(shows);
 	for (const movie of [bubble, dune1984, dune]) await seedMovie(movie);
-});
-afterAll(async () => {
-	await db.delete(shows);
 });
 
 describe("Get all movies", () => {

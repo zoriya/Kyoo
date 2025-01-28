@@ -8,7 +8,7 @@ let bubbleId = "";
 
 beforeAll(async () => {
 	const ret = await seedMovie(bubble);
-	if (ret.status !== 422) bubbleId = ret.id;
+	if (!("status" in ret)) bubbleId = ret.id;
 });
 
 describe("Get movie", () => {
