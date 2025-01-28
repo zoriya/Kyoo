@@ -81,10 +81,11 @@ export const insertEntries = async (
 
 	const vids = items.flatMap(
 		(seed, i) =>
-			seed.videos?.map((x) => ({
+			seed.videos?.map((x, j) => ({
 				videoId: x,
 				entryPk: retEntries[i].pk,
-				needRendering: seed.videos!.length > 1,
+				// The first video should not have a rendering.
+				needRendering: j && seed.videos!.length > 1,
 			})) ?? [],
 	);
 

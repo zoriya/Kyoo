@@ -382,7 +382,6 @@ describe("Movie seeding", () => {
 			},
 		]);
 		expectStatus(vresp, video).toBe(201);
-		console.log(video);
 
 		const [resp, body] = await createMovie({
 			...bubble,
@@ -390,7 +389,6 @@ describe("Movie seeding", () => {
 			videos: [video[0].id, video[1].id],
 		});
 		expectStatus(resp, body).toBe(201);
-		console.log(body);
 
 		const ret = await db.query.shows.findFirst({
 			where: eq(shows.id, body.id),
@@ -401,9 +399,8 @@ describe("Movie seeding", () => {
 		expect(ret!.entries[0].slug).toBe("bubble-rtest");
 		expect(ret!.entries[0].evj).toBeArrayOfSize(2);
 		expect(ret!.entries[0].evj).toContainValues([
-			{ slug: "bubble-rtest-oeunhtoeuth" },
-			{ slug: "bubble-rtest-aoeuaoeu" },
-			{ slug: "bubble-rtest" },
+			expect.objectContaining({ slug: "bubble-rtest" }),
+			expect.objectContaining({ slug: "bubble-rtest-aoeuaoeu" }),
 		]);
 	});
 });
