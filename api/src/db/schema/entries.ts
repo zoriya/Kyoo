@@ -95,7 +95,7 @@ export const entryTranslations = schema.table(
 );
 
 export const entryRelations = relations(entries, ({ one, many }) => ({
-	translations: many(entryTranslations, { relationName: "entryTranslations" }),
+	translations: many(entryTranslations, { relationName: "entry_translations" }),
 	evj: many(entryVideoJoin, { relationName: "evj_entry" }),
 	show: one(shows, {
 		relationName: "show_entries",
@@ -106,7 +106,7 @@ export const entryRelations = relations(entries, ({ one, many }) => ({
 
 export const entryTrRelations = relations(entryTranslations, ({ one }) => ({
 	entry: one(entries, {
-		relationName: "entryTranslations",
+		relationName: "entry_translations",
 		fields: [entryTranslations.pk],
 		references: [entries.pk],
 	}),
