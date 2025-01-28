@@ -34,7 +34,7 @@ export const videos = schema.table(
 );
 
 export const entryVideoJoin = schema.table(
-	"entry_video_jointure",
+	"entry_video_join",
 	{
 		entry: integer()
 			.notNull()

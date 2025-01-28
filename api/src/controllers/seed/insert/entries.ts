@@ -1,4 +1,4 @@
-import { type SQL, eq, sql } from "drizzle-orm";
+import { type Column, type SQL, eq, sql } from "drizzle-orm";
 import { db } from "~/db";
 import {
 	entries,
@@ -10,6 +10,8 @@ import { conflictUpdateAllExcept, values } from "~/db/utils";
 import type { SeedEntry } from "~/models/entry";
 import { processOptImage } from "../images";
 import { guessNextRefresh } from "../refresh";
+
+type EntryI = typeof entries.$inferInsert;
 
 const generateSlug = (showSlug: string, entry: SeedEntry): string => {
 	switch (entry.kind) {
@@ -27,14 +29,20 @@ export const insertEntries = async (
 	items: SeedEntry[],
 ) => {
 	const retEntries = await db.transaction(async (tx) => {
-		const vals = items.map((seed) => {
+		const vals: EntryI[] = items.map((seed) => {
 			const { translations, videos, ...entry } = seed;
 			return {
 				...entry,
 				showPk: show.pk,
 				slug: generateSlug(show.slug, seed),
-				thumbnails: processOptImage(seed.thumbnail),
+				thumbnail: processOptImage(seed.thumbnail),
 				nextRefresh: guessNextRefresh(entry.airDate ?? new Date()),
+				episodeNumber:
+					entry.kind === "episode"
+						? entry.episodeNumber
+						: entry.kind === "special"
+							? entry.number
+							: undefined,
 			};
 		});
 		const ret = await tx
@@ -111,10 +119,10 @@ export const insertEntries = async (
 	}));
 };
 
-export function computeVideoSlug(showSlug: SQL, needsRendering: SQL) {
+export function computeVideoSlug(showSlug: SQL | Column, needsRendering: SQL) {
 	return sql<string>`
 		concat(
-			${showSlug}::text,
+			${showSlug},
 			case when ${videos.part} is not null then ('-p' || ${videos.part}) else '' end,
 			case when ${videos.version} <> 1 then ('-v' || ${videos.version}) else '' end,
 			case when ${needsRendering} then concat('-', ${videos.rendering}) else '' end

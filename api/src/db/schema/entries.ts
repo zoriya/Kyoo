@@ -63,7 +63,7 @@ export const entries = schema.table(
 		extraKind: text(),
 		airDate: date(),
 		runtime: integer(),
-		thumbnails: image(),
+		thumbnail: image(),
 
 		externalId: entry_extid(),
 
