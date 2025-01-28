@@ -1,13 +1,13 @@
 import { t } from "elysia";
 import { comment } from "../../utils";
-import { BaseEntry, EntryTranslation } from "./base-entry";
 import {
-	Resource,
-	Image,
-	SeedImage,
 	ExternalId,
+	Image,
+	Resource,
+	SeedImage,
 	TranslationRecord,
 } from "../utils";
+import { BaseEntry, EntryTranslation } from "./base-entry";
 
 export const BaseMovieEntry = t.Intersect(
 	[
@@ -47,6 +47,7 @@ export type MovieEntry = typeof MovieEntry.static;
 export const SeedMovieEntry = t.Intersect([
 	t.Omit(BaseMovieEntry, ["thumbnail", "createdAt", "nextRefresh"]),
 	t.Object({
+		slug: t.Optional(t.String({ format: "slug" })),
 		thumbnail: t.Nullable(SeedImage),
 		translations: TranslationRecord(
 			t.Intersect([

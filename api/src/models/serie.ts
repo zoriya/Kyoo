@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { SeedEntry, SeedExtra } from "./entry";
 import { bubbleImages, madeInAbyss, registerExamples } from "./examples";
 import { SeedSeason } from "./season";
 import { ExternalId } from "./utils/external-id";
@@ -6,7 +7,6 @@ import { Genre } from "./utils/genres";
 import { Image, SeedImage } from "./utils/image";
 import { Language, TranslationRecord } from "./utils/language";
 import { Resource } from "./utils/resource";
-import { SeedEntry } from "./entry";
 
 export const SerieStatus = t.UnionEnum([
 	"unknown",
@@ -76,7 +76,7 @@ export const SeedSerie = t.Intersect([
 		),
 		seasons: t.Array(SeedSeason),
 		entries: t.Array(SeedEntry),
-		// extras: t.Optional(t.Array(SeedExtra)),
+		extras: t.Optional(t.Array(SeedExtra)),
 	}),
 ]);
 export type SeedSerie = typeof SeedSerie.static;

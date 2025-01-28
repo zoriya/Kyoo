@@ -1,26 +1,25 @@
 import { t } from "elysia";
-import { comment } from "../../utils";
-import { EpisodeId } from "../utils/external-id";
+import { comment } from "~/utils";
+import { SeedImage } from "../utils";
 import { Resource } from "../utils/resource";
-import { BaseEntry, EntryTranslation } from "./base-entry";
+import { BaseEntry } from "./base-entry";
 
 export const ExtraType = t.UnionEnum([
 	"other",
-	"trailers",
+	"trailer",
 	"interview",
-	"behind-the-scenes",
-	"deleted-scenes",
-	"bloopers",
+	"behind-the-scene",
+	"deleted-scene",
+	"blooper",
 ]);
 export type ExtraType = typeof ExtraType.static;
 
 export const BaseExtra = t.Intersect(
 	[
-		BaseEntry,
+		t.Omit(BaseEntry, ["nextRefresh", "airDate"]),
 		t.Object({
 			kind: ExtraType,
-			// not sure about this id type
-			externalId: EpisodeId,
+			name: t.String(),
 		}),
 	],
 	{
@@ -31,5 +30,14 @@ export const BaseExtra = t.Intersect(
 	},
 );
 
-export const Extra = t.Intersect([Resource(), BaseExtra, EntryTranslation]);
+export const Extra = t.Intersect([Resource(), BaseExtra]);
 export type Extra = typeof Extra.static;
+
+export const SeedExtra = t.Intersect([
+	t.Omit(BaseExtra, ["thumbnail", "createdAt"]),
+	t.Object({
+		thumbnail: t.Nullable(SeedImage),
+		videos: t.Optional(t.Array(t.String({ format: "uuid" }))),
+	}),
+]);
+export type SeedExtra = typeof SeedExtra.static;

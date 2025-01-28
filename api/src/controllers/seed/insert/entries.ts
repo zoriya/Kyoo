@@ -20,6 +20,7 @@ const generateSlug = (showSlug: string, entry: SeedEntry): string => {
 		case "special":
 			return `${showSlug}-sp${entry.number}`;
 		case "movie":
+			if (entry.slug) return entry.slug;
 			return entry.order === 1 ? showSlug : `${showSlug}-${entry.order}`;
 	}
 };
