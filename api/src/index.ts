@@ -7,7 +7,7 @@ import { movies } from "./controllers/movies";
 import { seasonsH } from "./controllers/seasons";
 import { seed } from "./controllers/seed";
 import { series } from "./controllers/series";
-import { videos } from "./controllers/videos";
+import { videosH } from "./controllers/videos";
 import { migrate } from "./db";
 import { Image } from "./models/utils";
 import { comment } from "./utils";
@@ -75,7 +75,7 @@ const app = new Elysia()
 	.use(series)
 	.use(entries)
 	.use(seasonsH)
-	.use(videos)
+	.use(videosH)
 	.use(seed)
 	.listen(3000);
 

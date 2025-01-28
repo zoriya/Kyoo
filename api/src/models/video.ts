@@ -2,9 +2,6 @@ import { type TSchema, t } from "elysia";
 import { comment } from "../utils";
 import { bubbleVideo, registerExamples } from "./examples";
 
-const Guess = <T extends TSchema>(schema: T) =>
-	t.Optional(t.Union([schema, t.Array(schema)]));
-
 export const Video = t.Object({
 	id: t.String({ format: "uuid" }),
 	slug: t.String({ format: "slug" }),
@@ -40,9 +37,9 @@ export const Video = t.Object({
 			t.Object(
 				{
 					title: t.String(),
-					year: Guess(t.Integer()),
-					season: Guess(t.Integer()),
-					episode: Guess(t.Integer()),
+					year: t.Array(t.Integer(), { default: [] }),
+					season: t.Array(t.Integer(), { default: [] }),
+					episode: t.Array(t.Integer(), { default: [] }),
 					// TODO: maybe replace "extra" with the `extraKind` value (aka behind-the-scene, trailer, etc)
 					type: t.Optional(t.UnionEnum(["episode", "movie", "extra"])),
 

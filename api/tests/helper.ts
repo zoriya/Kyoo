@@ -4,7 +4,7 @@ import { base } from "~/base";
 import { movies } from "~/controllers/movies";
 import { seed } from "~/controllers/seed";
 import { series } from "~/controllers/series";
-import { videos } from "~/controllers/videos";
+import { videosH } from "~/controllers/videos";
 import type { SeedMovie } from "~/models/movie";
 import type { SeedVideo } from "~/models/video";
 
@@ -12,7 +12,7 @@ export const app = new Elysia()
 	.use(base)
 	.use(movies)
 	.use(series)
-	.use(videos)
+	.use(videosH)
 	.use(seed);
 
 export const getMovie = async (
