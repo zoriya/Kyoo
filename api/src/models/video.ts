@@ -37,22 +37,24 @@ export const Video = t.Object({
 			t.Object(
 				{
 					title: t.String(),
-					year: t.Array(t.Integer(), { default: [] }),
-					season: t.Array(t.Integer(), { default: [] }),
-					episode: t.Array(t.Integer(), { default: [] }),
+					year: t.Optional(t.Array(t.Integer(), { default: [] })),
+					season: t.Optional(t.Array(t.Integer(), { default: [] })),
+					episode: t.Optional(t.Array(t.Integer(), { default: [] })),
 					// TODO: maybe replace "extra" with the `extraKind` value (aka behind-the-scene, trailer, etc)
 					type: t.Optional(t.UnionEnum(["episode", "movie", "extra"])),
 
 					from: t.String({
 						description: "Name of the tool that made the guess",
 					}),
-					history: t.Array(t.Omit(Self, ["history"]), {
-						default: [],
-						description: comment`
-							When another tool refines the guess or a user manually edit it, the history of the guesses
-							are kept in this \`history\` value.
-						`,
-					}),
+					history: t.Optional(
+						t.Array(t.Omit(Self, ["history"]), {
+							default: [],
+							description: comment`
+								When another tool refines the guess or a user manually edit it, the history of the guesses
+								are kept in this \`history\` value.
+							`,
+						}),
+					),
 				},
 				{
 					additionalProperties: true,

@@ -4,10 +4,17 @@ import { getYear } from "~/utils";
 import { insertEntries } from "./insert/entries";
 import { insertShow } from "./insert/shows";
 import { guessNextRefresh } from "./refresh";
+import { insertSeasons } from "./insert/seasons";
 
 export const SeedSerieResponse = t.Object({
 	id: t.String({ format: "uuid" }),
 	slug: t.String({ format: "slug", examples: ["made-in-abyss"] }),
+	seasons: t.Array(
+		t.Object({
+			id: t.String({ format: "uuid" }),
+			slug: t.String({ format: "slug", examples: ["made-in-abyss-s1"] }),
+		}),
+	),
 	entries: t.Array(
 		t.Object({
 			id: t.String({ format: "uuid" }),
@@ -55,12 +62,14 @@ export const seedSerie = async (
 	);
 	if ("status" in show) return show;
 
+	const retSeasons = await insertSeasons(show, seasons);
 	const retEntries = await insertEntries(show, entries);
 
 	return {
 		updated: show.updated,
 		id: show.id,
 		slug: show.slug,
+		seasons: retSeasons,
 		entries: retEntries,
 	};
 };

@@ -45,6 +45,7 @@ export const SeedSeason = t.Intersect([
 		),
 	}),
 ]);
+export type SeedSeason = typeof SeedSeason.static;
 
 registerExamples(Season, {
 	...madeInAbyss.seasons[0],

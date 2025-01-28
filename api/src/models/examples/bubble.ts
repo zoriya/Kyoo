@@ -1,5 +1,5 @@
-import type { SeedMovie } from "../movie";
-import type { Video } from "../video";
+import type { SeedMovie } from "~/models/movie";
+import type { Video } from "~/models/video";
 
 export const bubbleVideo: Video = {
 	id: "3cd436ee-01ff-4f45-ba98-62aabeb22f25",

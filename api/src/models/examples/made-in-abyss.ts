@@ -1,4 +1,22 @@
 import type { SeedSerie } from "~/models/serie";
+import type { Video } from "~/models/video";
+
+export const madeInAbyssVideo: Video = {
+	id: "3cd436ee-01ff-4f45-ba98-654282531234",
+	slug: "made-in-abyss-s1e1",
+	path: "/video/Made in abyss S01E01.mkv",
+	rendering: "459429fa062adeebedcc2bb04b9965de0262bfa453369783132d261be79021bd",
+	part: null,
+	version: 1,
+	guess: {
+		title: "Made in abyss",
+		season: [1],
+		episode: [1],
+		type: "episode",
+		from: "guessit",
+	},
+	createdAt: "2024-11-23T15:01:24.968Z",
+};
 
 export const madeInAbyss = {
 	slug: "made-in-abyss",
