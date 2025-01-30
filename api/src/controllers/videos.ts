@@ -42,6 +42,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 			return error(201, oldRet);
 
 			// TODO: this is a huge untested wip
+			// biome-ignore lint/correctness/noUnreachable: leave me alone
 			const vidsI = db.$with("vidsI").as(
 				db.insert(videos).values(body).onConflictDoNothing().returning({
 					pk: videos.pk,
