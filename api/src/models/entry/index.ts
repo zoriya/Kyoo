@@ -1,11 +1,11 @@
 import { t } from "elysia";
 import {
 	Episode,
-	SeedEpisode,
 	MovieEntry,
+	SeedEpisode,
 	SeedMovieEntry,
-	Special,
 	SeedSpecial,
+	Special,
 } from "../entry";
 
 export const Entry = t.Union([Episode, MovieEntry, Special]);

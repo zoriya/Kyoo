@@ -1,9 +1,9 @@
 import { t } from "elysia";
+import { bubbleImages, madeInAbyss, registerExamples } from "./examples";
 import { SeasonId } from "./utils/external-id";
 import { Image, SeedImage } from "./utils/image";
 import { TranslationRecord } from "./utils/language";
 import { Resource } from "./utils/resource";
-import { bubbleImages, madeInAbyss, registerExamples } from "./examples";
 
 export const BaseSeason = t.Object({
 	seasonNumber: t.Number({ minimum: 1 }),

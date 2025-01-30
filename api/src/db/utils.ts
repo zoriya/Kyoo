@@ -71,7 +71,7 @@ export function sqlarr(array: unknown[]) {
 	return `{${array.map((item) => `"${item}"`).join(",")}}`;
 }
 
-// TODO: upstream this
+// See https://github.com/drizzle-team/drizzle-orm/issues/4044
 // TODO: type values (everything is a `text` for now)
 export function values(items: Record<string, unknown>[]) {
 	const [firstProp, ...props] = Object.keys(items[0]);

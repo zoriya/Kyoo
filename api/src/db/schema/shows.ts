@@ -12,9 +12,9 @@ import {
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
-import { image, language, schema } from "./utils";
 import { entries } from "./entries";
 import { seasons } from "./seasons";
+import { image, language, schema } from "./utils";
 
 export const showKind = schema.enum("show_kind", ["serie", "movie"]);
 export const showStatus = schema.enum("show_status", [

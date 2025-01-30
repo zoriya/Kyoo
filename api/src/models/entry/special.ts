@@ -1,7 +1,7 @@
 import { t } from "elysia";
 import { comment } from "../../utils";
-import { BaseEntry, EntryTranslation } from "./base-entry";
 import { EpisodeId, Resource, SeedImage, TranslationRecord } from "../utils";
+import { BaseEntry, EntryTranslation } from "./base-entry";
 
 export const BaseSpecial = t.Intersect(
 	[
