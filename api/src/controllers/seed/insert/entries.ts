@@ -7,13 +7,26 @@ import {
 	videos,
 } from "~/db/schema";
 import { conflictUpdateAllExcept, values } from "~/db/utils";
-import type { SeedEntry } from "~/models/entry";
+import type { SeedEntry as SEntry, SeedExtra as SExtra } from "~/models/entry";
 import { processOptImage } from "../images";
 import { guessNextRefresh } from "../refresh";
 
+type SeedEntry = SEntry & {
+	video?: undefined;
+};
+type SeedExtra = Omit<SExtra, "kind"> & {
+	videos?: undefined;
+	translations?: undefined;
+	kind: "extra";
+	extraKind: SExtra["kind"];
+};
+
 type EntryI = typeof entries.$inferInsert;
 
-const generateSlug = (showSlug: string, entry: SeedEntry): string => {
+const generateSlug = (
+	showSlug: string,
+	entry: SeedEntry | SeedExtra,
+): string => {
 	switch (entry.kind) {
 		case "episode":
 			return `${showSlug}-s${entry.seasonNumber}e${entry.episodeNumber}`;
@@ -22,22 +35,29 @@ const generateSlug = (showSlug: string, entry: SeedEntry): string => {
 		case "movie":
 			if (entry.slug) return entry.slug;
 			return entry.order === 1 ? showSlug : `${showSlug}-${entry.order}`;
+		case "extra":
+			return entry.slug;
 	}
 };
 
 export const insertEntries = async (
 	show: { pk: number; slug: string },
-	items: SeedEntry[],
+	items: (SeedEntry | SeedExtra)[],
 ) => {
+	if (!items) return [];
+
 	const retEntries = await db.transaction(async (tx) => {
 		const vals: EntryI[] = items.map((seed) => {
-			const { translations, videos, ...entry } = seed;
+			const { translations, videos, video, ...entry } = seed;
 			return {
 				...entry,
 				showPk: show.pk,
 				slug: generateSlug(show.slug, seed),
 				thumbnail: processOptImage(seed.thumbnail),
-				nextRefresh: guessNextRefresh(entry.airDate ?? new Date()),
+				nextRefresh:
+					entry.kind !== "extra"
+						? guessNextRefresh(entry.airDate ?? new Date())
+						: guessNextRefresh(new Date()),
 				episodeNumber:
 					entry.kind === "episode"
 						? entry.episodeNumber
@@ -61,14 +81,25 @@ export const insertEntries = async (
 			})
 			.returning({ pk: entries.pk, id: entries.id, slug: entries.slug });
 
-		const trans = items.flatMap((seed, i) =>
-			Object.entries(seed.translations).map(([lang, tr]) => ({
+		const trans = items.flatMap((seed, i) => {
+			if (seed.kind === "extra") {
+				return {
+					pk: ret[i].pk,
+					// yeah we hardcode the language to extra because if we want to support
+					// translations one day it won't be awkward
+					language: "extra",
+					name: seed.name,
+					description: null,
+				};
+			}
+
+			return Object.entries(seed.translations).map(([lang, tr]) => ({
 				// assumes ret is ordered like items.
 				pk: ret[i].pk,
 				language: lang,
 				...tr,
-			})),
-		);
+			}));
+		});
 		await tx
 			.insert(entryTranslations)
 			.values(trans)
@@ -80,15 +111,22 @@ export const insertEntries = async (
 		return ret;
 	});
 
-	const vids = items.flatMap(
-		(seed, i) =>
-			seed.videos?.map((x, j) => ({
-				videoId: x,
+	const vids = items.flatMap((seed, i) => {
+		if (seed.kind === "extra") {
+			return {
+				videoId: seed.video,
 				entryPk: retEntries[i].pk,
-				// The first video should not have a rendering.
-				needRendering: j && seed.videos!.length > 1,
-			})) ?? [],
-	);
+				needRendering: false,
+			};
+		}
+		if (!seed.videos) return [];
+		return seed.videos.map((x, j) => ({
+			videoId: x,
+			entryPk: retEntries[i].pk,
+			// The first video should not have a rendering.
+			needRendering: j && seed.videos!.length > 1,
+		}));
+	});
 
 	if (vids.length === 0)
 		return retEntries.map((x) => ({ id: x.id, slug: x.slug, videos: [] }));

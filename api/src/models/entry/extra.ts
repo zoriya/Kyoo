@@ -36,8 +36,9 @@ export type Extra = typeof Extra.static;
 export const SeedExtra = t.Intersect([
 	t.Omit(BaseExtra, ["thumbnail", "createdAt"]),
 	t.Object({
+		slug: t.String({ format: "slug" }),
 		thumbnail: t.Nullable(SeedImage),
-		videos: t.Optional(t.Array(t.String({ format: "uuid" }))),
+		video: t.String({ format: "uuid" }),
 	}),
 ]);
 export type SeedExtra = typeof SeedExtra.static;

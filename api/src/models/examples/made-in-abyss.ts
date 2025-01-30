@@ -237,9 +237,11 @@ export const madeInAbyss = {
 	extras: [
 		{
 			kind: "behind-the-scene",
+			slug: "made-in-abyss-making-of",
 			name: "The Making of MADE IN ABYSS 01",
 			runtime: 17,
 			thumbnail: null,
+			video: "3cd436ee-01ff-4f45-ba98-654282531234",
 		},
 	],
 } satisfies SeedSerie;

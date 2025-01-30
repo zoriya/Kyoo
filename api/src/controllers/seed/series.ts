@@ -2,9 +2,9 @@ import { t } from "elysia";
 import type { SeedSerie } from "~/models/serie";
 import { getYear } from "~/utils";
 import { insertEntries } from "./insert/entries";
+import { insertSeasons } from "./insert/seasons";
 import { insertShow } from "./insert/shows";
 import { guessNextRefresh } from "./refresh";
-import { insertSeasons } from "./insert/seasons";
 
 export const SeedSerieResponse = t.Object({
 	id: t.String({ format: "uuid" }),
@@ -29,6 +29,12 @@ export const SeedSerieResponse = t.Object({
 			),
 		}),
 	),
+	extras: t.Array(
+		t.Object({
+			id: t.String({ format: "uuid" }),
+			slug: t.String({ format: "slug", examples: ["made-in-abyss-s1e1"] }),
+		}),
+	),
 });
 export type SeedSerieResponse = typeof SeedSerieResponse.static;
 
@@ -49,7 +55,7 @@ export const seedSerie = async (
 		seed.slug = `random-${getYear(seed.startAir)}`;
 	}
 
-	const { translations, seasons, entries, ...serie } = seed;
+	const { translations, seasons, entries, extras, ...serie } = seed;
 	const nextRefresh = guessNextRefresh(serie.startAir ?? new Date());
 
 	const show = await insertShow(
@@ -64,6 +70,10 @@ export const seedSerie = async (
 
 	const retSeasons = await insertSeasons(show, seasons);
 	const retEntries = await insertEntries(show, entries);
+	const retExtras = await insertEntries(
+		show,
+		(extras ?? []).map((x) => ({ ...x, kind: "extra", extraKind: x.kind })),
+	);
 
 	return {
 		updated: show.updated,
@@ -71,5 +81,6 @@ export const seedSerie = async (
 		slug: show.slug,
 		seasons: retSeasons,
 		entries: retEntries,
+		extras: retExtras,
 	};
 };

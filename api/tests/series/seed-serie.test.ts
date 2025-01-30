@@ -28,8 +28,8 @@ describe("Serie seeding", () => {
 		expect(ret!.seasons).toBeArrayOfSize(2);
 		expect(ret!.seasons[0].slug).toBe("made-in-abyss-s1");
 		expect(ret!.seasons[1].slug).toBe("made-in-abyss-s2");
-		// expect(ret!.entries).toBeArrayOfSize(
-		// 	madeInAbyss.entries.length + madeInAbyss.extras.length,
-		// );
+		expect(ret!.entries).toBeArrayOfSize(
+			madeInAbyss.entries.length + madeInAbyss.extras.length,
+		);
 	});
 });
