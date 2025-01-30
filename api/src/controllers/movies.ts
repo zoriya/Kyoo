@@ -1,11 +1,6 @@
 import { type SQL, and, eq, exists, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import {
-	entries,
-	entryVideoJointure as entryVideoJoint,
-	showTranslations,
-	shows,
-} from "~/db/schema";
+import { entries, entryVideoJoin, showTranslations, shows } from "~/db/schema";
 import { getColumns, sqlarr } from "~/db/utils";
 import { KError } from "~/models/error";
 import { bubble } from "~/models/examples";
@@ -86,8 +81,8 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 									exists(
 										db
 											.select()
-											.from(entryVideoJoint)
-											.where(eq(entries.pk, entryVideoJoint.entry)),
+											.from(entryVideoJoin)
+											.where(eq(entries.pk, entryVideoJoin.entry)),
 									),
 								),
 							),
@@ -263,8 +258,8 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					exists(
 						db
 							.select()
-							.from(entryVideoJoint)
-							.where(eq(entries.pk, entryVideoJoint.entry)),
+							.from(entryVideoJoin)
+							.where(eq(entries.pk, entryVideoJoin.entry)),
 					),
 				)
 				.as("video");

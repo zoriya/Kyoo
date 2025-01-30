@@ -1,11 +1,11 @@
-import { afterAll, beforeAll, describe, expect, it, test } from "bun:test";
+import { beforeAll, describe, expect, it } from "bun:test";
 import { eq } from "drizzle-orm";
 import { expectStatus } from "tests/utils";
 import { db } from "~/db";
 import { showTranslations, shows, videos } from "~/db/schema";
 import { bubble } from "~/models/examples";
 import { dune, duneVideo } from "~/models/examples/dune-2021";
-import { createMovie } from "./movies-helper";
+import { createMovie, createVideo } from "../helpers";
 
 describe("Movie seeding", () => {
 	it("Can create a movie", async () => {
@@ -293,9 +293,116 @@ describe("Movie seeding", () => {
 		);
 	});
 
-	test.todo("Create correct video slug (version)", async () => {});
-	test.todo("Create correct video slug (part)", async () => {});
-	test.todo("Create correct video slug (rendering)", async () => {});
+	it("Create correct video slug", async () => {
+		const [vresp, video] = await createVideo({
+			path: "/video/bubble.mkv",
+			part: null,
+			version: 1,
+			rendering: "oeunhtoeuth",
+		});
+		expectStatus(vresp, video).toBe(201);
+
+		const [resp, body] = await createMovie({
+			...bubble,
+			slug: "video-slug-test1",
+			videos: [video[0].id],
+		});
+		expectStatus(resp, body).toBe(201);
+
+		const ret = await db.query.videos.findFirst({
+			where: eq(videos.id, video[0].id),
+			with: { evj: { with: { entry: true } } },
+		});
+		expect(ret).not.toBe(undefined);
+		expect(ret!.evj).toBeArrayOfSize(1);
+		expect(ret!.evj[0].slug).toBe("video-slug-test1");
+	});
+
+	it("Create correct video slug (version)", async () => {
+		const [vresp, video] = await createVideo({
+			path: "/video/bubble2.mkv",
+			part: null,
+			version: 2,
+			rendering: "oeunhtoeuth",
+		});
+		expectStatus(vresp, video).toBe(201);
+
+		const [resp, body] = await createMovie({
+			...bubble,
+			slug: "bubble-vtest",
+			videos: [video[0].id],
+		});
+		expectStatus(resp, body).toBe(201);
+
+		const ret = await db.query.videos.findFirst({
+			where: eq(videos.id, video[0].id),
+			with: { evj: { with: { entry: true } } },
+		});
+		expect(ret).not.toBe(undefined);
+		expect(ret!.evj).toBeArrayOfSize(1);
+		expect(ret!.evj[0].slug).toBe("bubble-vtest-v2");
+	});
+	it("Create correct video slug (part)", async () => {
+		const [vresp, video] = await createVideo({
+			path: "/video/bubble5.mkv",
+			part: 1,
+			version: 2,
+			rendering: "oaoeueunhtoeuth",
+		});
+		expectStatus(vresp, video).toBe(201);
+
+		const [resp, body] = await createMovie({
+			...bubble,
+			slug: "bubble-ptest",
+			videos: [video[0].id],
+		});
+		expectStatus(resp, body).toBe(201);
+
+		const ret = await db.query.videos.findFirst({
+			where: eq(videos.id, video[0].id),
+			with: { evj: { with: { entry: true } } },
+		});
+		expect(ret).not.toBe(undefined);
+		expect(ret!.evj).toBeArrayOfSize(1);
+		expect(ret!.evj[0].slug).toBe("bubble-ptest-p1-v2");
+	});
+	it("Create correct video slug (rendering)", async () => {
+		const [vresp, video] = await createVideo([
+			{
+				path: "/video/bubble3.mkv",
+				part: null,
+				version: 1,
+				rendering: "oeunhtoeuth",
+			},
+			{
+				path: "/video/bubble4.mkv",
+				part: null,
+				version: 1,
+				rendering: "aoeuaoeu",
+			},
+		]);
+		expectStatus(vresp, video).toBe(201);
+
+		const [resp, body] = await createMovie({
+			...bubble,
+			slug: "bubble-rtest",
+			videos: [video[0].id, video[1].id],
+		});
+		expectStatus(resp, body).toBe(201);
+
+		const ret = await db.query.shows.findFirst({
+			where: eq(shows.id, body.id),
+			with: { entries: { with: { evj: { with: { entry: true } } } } },
+		});
+		expect(ret).not.toBe(undefined);
+		expect(ret!.entries).toBeArrayOfSize(1);
+		expect(ret!.entries[0].slug).toBe("bubble-rtest");
+		expect(ret!.entries[0].evj).toBeArrayOfSize(2);
+		expect(ret!.entries[0].evj).toContainValues([
+			expect.objectContaining({ slug: "bubble-rtest" }),
+			expect.objectContaining({ slug: "bubble-rtest-aoeuaoeu" }),
+		]);
+	});
 });
 
 const cleanup = async () => {
@@ -304,4 +411,3 @@ const cleanup = async () => {
 };
 // cleanup db beforehand to unsure tests are consistent
 beforeAll(cleanup);
-afterAll(cleanup);

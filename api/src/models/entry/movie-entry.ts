@@ -1,13 +1,17 @@
 import { t } from "elysia";
 import { comment } from "../../utils";
-import { ExternalId } from "../utils/external-id";
-import { Image } from "../utils/image";
-import { Resource } from "../utils/resource";
+import {
+	ExternalId,
+	Image,
+	Resource,
+	SeedImage,
+	TranslationRecord,
+} from "../utils";
 import { BaseEntry, EntryTranslation } from "./base-entry";
 
 export const BaseMovieEntry = t.Intersect(
 	[
-		t.Omit(BaseEntry, ["thumbnail"]),
+		BaseEntry,
 		t.Object({
 			kind: t.Literal("movie"),
 			order: t.Number({
@@ -29,13 +33,29 @@ export const MovieEntryTranslation = t.Intersect([
 	EntryTranslation,
 	t.Object({
 		tagline: t.Nullable(t.String()),
-		thumbnail: t.Nullable(Image),
+		poster: t.Nullable(Image),
 	}),
 ]);
 
 export const MovieEntry = t.Intersect([
-	Resource,
+	Resource(),
 	BaseMovieEntry,
 	MovieEntryTranslation,
 ]);
 export type MovieEntry = typeof MovieEntry.static;
+
+export const SeedMovieEntry = t.Intersect([
+	t.Omit(BaseMovieEntry, ["thumbnail", "createdAt", "nextRefresh"]),
+	t.Object({
+		slug: t.Optional(t.String({ format: "slug" })),
+		thumbnail: t.Nullable(SeedImage),
+		translations: TranslationRecord(
+			t.Intersect([
+				t.Omit(MovieEntryTranslation, ["poster"]),
+				t.Object({ poster: t.Nullable(SeedImage) }),
+			]),
+		),
+		videos: t.Optional(t.Array(t.String({ format: "uuid" }))),
+	}),
+]);
+export type SeedMovieEntry = typeof SeedMovieEntry.static;

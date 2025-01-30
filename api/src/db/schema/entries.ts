@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
 	check,
 	date,
@@ -14,6 +14,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { shows } from "./shows";
 import { image, language, schema } from "./utils";
+import { entryVideoJoin } from "./videos";
 
 export const entryType = schema.enum("entry_type", [
 	"unknown",
@@ -51,14 +52,18 @@ export const entries = schema.table(
 		pk: integer().primaryKey().generatedAlwaysAsIdentity(),
 		id: uuid().notNull().unique().defaultRandom(),
 		slug: varchar({ length: 255 }).notNull().unique(),
-		showPk: integer().references(() => shows.pk, { onDelete: "cascade" }),
+		showPk: integer()
+			.notNull()
+			.references(() => shows.pk, { onDelete: "cascade" }),
 		order: real(),
 		seasonNumber: integer(),
 		episodeNumber: integer(),
-		type: entryType().notNull(),
+		kind: entryType().notNull(),
+		// only when kind=extra
+		extraKind: text(),
 		airDate: date(),
 		runtime: integer(),
-		thumbnails: image(),
+		thumbnail: image(),
 
 		externalId: entry_extid(),
 
@@ -88,3 +93,21 @@ export const entryTranslations = schema.table(
 	},
 	(t) => [primaryKey({ columns: [t.pk, t.language] })],
 );
+
+export const entryRelations = relations(entries, ({ one, many }) => ({
+	translations: many(entryTranslations, { relationName: "entry_translations" }),
+	evj: many(entryVideoJoin, { relationName: "evj_entry" }),
+	show: one(shows, {
+		relationName: "show_entries",
+		fields: [entries.showPk],
+		references: [shows.pk],
+	}),
+}));
+
+export const entryTrRelations = relations(entryTranslations, ({ one }) => ({
+	entry: one(entries, {
+		relationName: "entry_translations",
+		fields: [entryTranslations.pk],
+		references: [entries.pk],
+	}),
+}));

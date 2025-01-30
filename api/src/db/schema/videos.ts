@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
 	check,
 	integer,
@@ -33,8 +33,8 @@ export const videos = schema.table(
 	],
 );
 
-export const entryVideoJointure = schema.table(
-	"entry_video_jointure",
+export const entryVideoJoin = schema.table(
+	"entry_video_join",
 	{
 		entry: integer()
 			.notNull()
@@ -46,3 +46,22 @@ export const entryVideoJointure = schema.table(
 	},
 	(t) => [primaryKey({ columns: [t.entry, t.video] })],
 );
+
+export const videosRelations = relations(videos, ({ many }) => ({
+	evj: many(entryVideoJoin, {
+		relationName: "evj_video",
+	}),
+}));
+
+export const evjRelations = relations(entryVideoJoin, ({ one }) => ({
+	video: one(videos, {
+		relationName: "evj_video",
+		fields: [entryVideoJoin.video],
+		references: [videos.pk],
+	}),
+	entry: one(entries, {
+		relationName: "evj_entry",
+		fields: [entryVideoJoin.entry],
+		references: [entries.pk],
+	}),
+}));

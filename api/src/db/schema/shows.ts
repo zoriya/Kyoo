@@ -12,6 +12,8 @@ import {
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
+import { entries } from "./entries";
+import { seasons } from "./seasons";
 import { image, language, schema } from "./utils";
 
 export const showKind = schema.enum("show_kind", ["serie", "movie"]);
@@ -120,28 +122,30 @@ export const showTranslations = schema.table(
 
 export const showsRelations = relations(shows, ({ many, one }) => ({
 	selectedTranslation: many(showTranslations, {
-		relationName: "selectedTranslation",
+		relationName: "selected_translation",
 	}),
-	translations: many(showTranslations, { relationName: "showTranslations" }),
+	translations: many(showTranslations, { relationName: "show_translations" }),
 	originalTranslation: one(showTranslations, {
-		relationName: "originalTranslation",
+		relationName: "original_translation",
 		fields: [shows.pk, shows.originalLanguage],
 		references: [showTranslations.pk, showTranslations.language],
 	}),
+	entries: many(entries, { relationName: "show_entries" }),
+	seasons: many(seasons, { relationName: "show_seasons" }),
 }));
 export const showsTrRelations = relations(showTranslations, ({ one }) => ({
 	show: one(shows, {
-		relationName: "showTranslations",
+		relationName: "show_translations",
 		fields: [showTranslations.pk],
 		references: [shows.pk],
 	}),
 	selectedTranslation: one(shows, {
-		relationName: "selectedTranslation",
+		relationName: "selected_translation",
 		fields: [showTranslations.pk],
 		references: [shows.pk],
 	}),
 	originalTranslation: one(shows, {
-		relationName: "originalTranslation",
+		relationName: "original_translation",
 		fields: [showTranslations.pk, showTranslations.language],
 		references: [shows.pk, shows.originalLanguage],
 	}),

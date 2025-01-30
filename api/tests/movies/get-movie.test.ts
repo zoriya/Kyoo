@@ -2,13 +2,13 @@ import { beforeAll, describe, expect, it } from "bun:test";
 import { expectStatus } from "tests/utils";
 import { seedMovie } from "~/controllers/seed/movies";
 import { bubble } from "~/models/examples";
-import { getMovie } from "./movies-helper";
+import { getMovie } from "../helpers";
 
 let bubbleId = "";
 
 beforeAll(async () => {
 	const ret = await seedMovie(bubble);
-	if (ret.status !== 422) bubbleId = ret.id;
+	if (!("status" in ret)) bubbleId = ret.id;
 });
 
 describe("Get movie", () => {

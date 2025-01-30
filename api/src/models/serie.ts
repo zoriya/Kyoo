@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { SeedEntry, SeedExtra } from "./entry";
 import { bubbleImages, madeInAbyss, registerExamples } from "./examples";
 import { SeedSeason } from "./season";
 import { ExternalId } from "./utils/external-id";
@@ -55,7 +56,7 @@ export const SerieTranslation = t.Object({
 });
 export type SerieTranslation = typeof SerieTranslation.static;
 
-export const Serie = t.Intersect([Resource, SerieTranslation, BaseSerie]);
+export const Serie = t.Intersect([Resource(), SerieTranslation, BaseSerie]);
 export type Serie = typeof Serie.static;
 
 export const SeedSerie = t.Intersect([
@@ -74,8 +75,8 @@ export const SeedSerie = t.Intersect([
 			]),
 		),
 		seasons: t.Array(SeedSeason),
-		// entries: t.Array(SeedEntry),
-		// extras: t.Optional(t.Array(SeedExtra)),
+		entries: t.Array(SeedEntry),
+		extras: t.Optional(t.Array(SeedExtra)),
 	}),
 ]);
 export type SeedSerie = typeof SeedSerie.static;
@@ -85,4 +86,3 @@ registerExamples(Serie, {
 	...madeInAbyss.translations.en,
 	...bubbleImages,
 });
-registerExamples(SeedSerie, madeInAbyss);

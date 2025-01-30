@@ -50,6 +50,20 @@
 			"when": 1737763164759,
 			"tag": "0006_seasons",
 			"breakpoints": true
+		},
+		{
+			"idx": 7,
+			"version": "7",
+			"when": 1737913931275,
+			"tag": "0007_entries",
+			"breakpoints": true
+		},
+		{
+			"idx": 8,
+			"version": "7",
+			"when": 1738064522937,
+			"tag": "0008_entries",
+			"breakpoints": true
 		}
 	]
 }

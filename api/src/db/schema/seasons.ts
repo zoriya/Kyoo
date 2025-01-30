@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
 	date,
 	index,
@@ -67,3 +68,22 @@ export const seasonTranslations = schema.table(
 	},
 	(t) => [primaryKey({ columns: [t.pk, t.language] })],
 );
+
+export const seasonRelations = relations(seasons, ({ one, many }) => ({
+	translations: many(seasonTranslations, {
+		relationName: "season_translations",
+	}),
+	show: one(shows, {
+		relationName: "show_seasons",
+		fields: [seasons.showPk],
+		references: [shows.pk],
+	}),
+}));
+
+export const seasonTrRelations = relations(seasonTranslations, ({ one }) => ({
+	season: one(seasons, {
+		relationName: "season_translation",
+		fields: [seasonTranslations.pk],
+		references: [seasons.pk],
+	}),
+}));
