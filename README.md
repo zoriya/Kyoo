@@ -39,14 +39,14 @@ Kyoo does not have a plugin system and aim to have every features built-in (see 
 
 ## 📺 Clients
 
-Kyoo currently supports Web clients & has an Andriod app.  Additional clients are being thought about.  Rough estimates:
-* Today: Web & Andriod
+Kyoo currently supports Web and Android clients, with additional platforms being thought about. Rough estimates:
+* Today: Web & Android
 * Spring 2025: Chromecast
 * Summer 2025: AndriodTV
 
-Apple devices are not planned at the moment as publishing requires a hardware purchase and yearly subscription fee (~$100).
+Don't see your client? Kyoo is focused on adding features but welcomes contributors! The frontend is built with React-Native and Expo. Come hang and develop with us on Discord.
 
-Don't see your client?  Kyoo focus is on adding features and open to contributions!  The frontend is written in react-native and expo.  Come hang and develop with us on Discord.
+Support for Apple devices (iOS, tvOS) is not currently planned due to buying hardware and yearly developer fee (~$100).
 
 ## 📖 Translations
 
