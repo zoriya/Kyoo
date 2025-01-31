@@ -35,18 +35,18 @@ Kyoo does not have a plugin system and aim to have every features built-in (see 
 
 - **Anime Name Parsing**: While there are still some issues (see [#466](https://github.com/zoriya/Kyoo/issues/466), Kyoo will match weird anime names (like `[Some-Stuffs] Jojo's Bizarre Adventure Stone Ocean 24 (1920x1080 Blu-Ray Opus) [2750810F].mkv`) without issue.
 
-- **Cloud Native:** Still an ongoing effort (see [#357](https://github.com/zoriya/Kyoo/issues/357)) but Kyoo is made with the idea that it could run distributed or standalone, on an RPI or on huge home-datacenters.
+- **Helm Chart:** Deploy Kyoo to your Kubernetes cluster today!  There is an official Helm chart.  Multiple replicas is a WIP!
 
 ## 📺 Clients
 
-Clients is a bit part of media servers but for now, Kyoo's focus is on features. Only a web version and an android apps are available for now. The front is written with react-native (expo) so adapting for others platform is possible. Here is a rough roadmap of clients supports:
-- Today: Web & Android
-- End of 2024: Chromecast support
-- Summer 2025: Android TV app
+Kyoo currently supports Web clients & has an Andriod app.  Additional clients are being thought about.  Rough estimates:
+* Today: Web & Andriod
+* Spring 2025: Chromecast
+* Summer 2025: AndriodTV
 
-Apple devices are not planned for now because I do not own any of their device, and it requires $100/year.
+Apple devices are not planned at the moment as publishing requires a hardware purchase and yearly subscription fee (~$100).
 
-If you would like to have a client sooner or on devices not listed on the roadmap, come hang on the discord and consider contributing to Kyoo.
+Don't see your client?  Kyoo focus is on adding features and open to contributions!  The frontend is written in react-native and expo.  Come hang and develop with us on Discord.
 
 ## 📖 Translations
 
