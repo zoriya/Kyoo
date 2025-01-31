@@ -1,18 +1,12 @@
 # Kyoo Helm Chart
 Kyoo consists of multiple interconnected workloads, leveraging a variety of technologies including Meilisearch, Postgres, and RabbitMQ.  This helm chart is designed to simplify configurations for basic setups while offering advanced customization options.  Naming and opinionation aims to follow structures described in [diagrams](../DIAGRAMS.md).
 
-## Subchart Support
-This chart includes subcharts for deploying Meilisearch, PostgreSQL, and RabbitMQ as a demonstration of how these resources can be configured. However, subcharts are frequently updated, and upgrades between versions are **NOT** supported.
-
-Deploying these resources independently of Kyoo ensures operational independence and long-term maintainability. This approach provides better control over versioning, lifecycle management, and the ability to apply updates or patches without impacting Kyoo's deployment.
-
-
 # Examples
 ## Quickstart
-Below provides an example for deploying Kyoo and its dependencies.  This is a minimalist setup that is not intended for longterm use.  This approach uses a single Postgres instance and initializes mutliple databases.
+Below provides an example for deploying Kyoo and its dependencies using subcharts.  This uses a single Postgres instance and initializes mutliple databases.
 
 ```sh
-helm upgrade kyoo . --install --values myvalues.yaml
+helm upgrade kyoo oci://ghcr.io/zoriya/helm-charts/kyoo --install --values myvalues.yaml
 ```
 `myvaules.yaml` content
 ```yaml
@@ -31,18 +25,7 @@ extraObjects:
       name: bigsecret
     type: Opaque
     stringData:
-      #KYOO
-      # The following value should be set to a random sequence of characters.
-      # You MUST change it when installing kyoo (for security)
-      # You can input multiple api keys separated by a ,
       kyoo_apikeys: yHXWGsjfjE6sy6UxavqmTUYxgCFYek
-      # Keep those empty to use kyoo's default api key. You can also specify a custom API key if you want.
-      # go to https://www.themoviedb.org/settings/api and copy the api key (not the read access token, the api key)
-      tmdb_apikey: ""
-      tvdb_apikey: ""
-      tvdb_pin: ""
-      #RESOURCES
-      # meilisearch does not allow mapping their key in yet.
       MEILI_MASTER_KEY: barkLike8SuperDucks
       postgres_user: kyoo_all
       postgres_password: watchSomething4me
@@ -69,19 +52,24 @@ values.yaml configuration
 global:
   meilisearch:
     kyoo_back:
-      host: kyoo-meilisearch.kyoo.svc.cluster.local
+      host: meilisearch
   postgres:
-    # postgres instance information to connect to back's database
     kyoo_back:
-      host: cluster01.postgres.svc.cluster.local
-    # postgres instance information to connect to transcoder's database
+      host: postgres
     kyoo_transcoder:
-      host: cluster01.postgres.svc.cluster.local
+      host: postgres
   rabbitmq:
-    host: cluster01.rabbitmq.svc.cluster.local
+    host: rabbitmq
+# specify hardware resources
+transcoder:
+  kyoo_transcoder:
+    resources:
+      limits:
+        nvidia.com/gpu: 1
 kyoo:
   address: https://kyoo.mydomain.com
-# leverage NFS for media
+  # specify hardware acceleration profile (valid values: disabled, vaapi, qsv, nvidia)
+  transcoderAcceleration: nvidia
 media:
   volumes:
     - name: media
@@ -109,9 +97,9 @@ stringData:
   rabbitmq_password: youAreAmazing2
 ```
 
-# Recomendations
+# Additional Notes
 ## Postgres
 Kyoo consists of multiple microservices.  Best practice is for each microservice to use its own database.  Kyoo workloads support best practices or sharing a single postgres database.  Please see the `POSTGRES_SCHEMA` setting for additional information.  Strongly recomended to use a Kubernetes operator for managing Postgres.
 
-## Media
-Media is condiered an read-only external resource for Kyoo.  Media content tends to consume a large amount of space and Kubernetes storage interfaces tend to replicate across nodes.  Consider hosting the data outside of Kubernetes or assigning one node to handle storage.
+## Subchart Support
+Subcharts are updated frequently and subject to changes.  This chart includes subcharts for deploying Meilisearch, PostgreSQL, and RabbitMQ.  Please consider hosting those independently of Kyoo to better handle versioning and lifecycle management.

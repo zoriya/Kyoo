@@ -142,7 +142,7 @@ kyoo:
 media:
   # specifies the volumes to use
   volumes:
-    # default volume configuration to allow for easier demo
+    # default volume configuration to allow for easier demo and testing
     # most setups will aim to leverage NFS to access media
     # - name: media
     #   nfs:
@@ -386,7 +386,7 @@ transcoder:
     - name: cache
       emptyDir: {}
   replicaCount: 1
-  # default to recreate for better user experience with ReadWriteOnce volumes  
+  # default to recreate for better user experience with ReadWriteOnce volumes & hardware resources
   updateStrategy:
     type: Recreate
   podLabels: {}
@@ -485,7 +485,5 @@ rabbitmq:
     existingErlangSecret: "{{ .Values.global.rabbitmq.infra.existingSecret }}"
     existingSecretErlangKey: "{{ .Values.global.rabbitmq.infra.keyErlangCookie }}"
 
-# create extraObjects
-# create secret bigsecret
-# create pvc for each object
+# allows for the creation of any additional kubernetes resources
 extraObjects: []

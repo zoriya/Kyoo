@@ -65,16 +65,19 @@ spec:
                 secretKeyRef:
                   key: {{ .Values.contentdatabase.tmdb.apikeyKey }}
                   name: {{ .Values.contentdatabase.tmdb.existingSecret }}
+                  optional: true
             - name: TVDB_APIKEY
               valueFrom:
                 secretKeyRef:
                   key: {{ .Values.contentdatabase.tvdb.apikeyKey }}
                   name: {{ .Values.contentdatabase.tvdb.existingSecret }}
+                  optional: true
             - name: TVDB_PIN
               valueFrom:
                 secretKeyRef:
                   key: {{ .Values.contentdatabase.tvdb.pinKey }}
                   name: {{ .Values.contentdatabase.tvdb.existingSecret }}
+                  optional: true
             - name: RABBITMQ_HOST
               value: {{ .Values.global.rabbitmq.host | quote }}
             - name: RABBITMQ_PORT
