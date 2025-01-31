@@ -18,12 +18,6 @@ postgresql:
   enabled: true
 rabbitmq:
   enabled: true
-media:
-  volumes:
-    - name: media
-      nfs:
-        server: mynasserver
-        path: /spin0/media
 extraObjects:
   - apiVersion: v1
     kind: Secret
@@ -38,6 +32,16 @@ extraObjects:
       rabbitmq_user: kyoo_all
       rabbitmq_password: youAreAmazing2
       rabbitmq_cookie: mmmGoodCookie
+  - kind: PersistentVolumeClaim
+    apiVersion: v1
+    metadata:
+      name: media
+    spec:
+      accessModes:
+        - "ReadOnlyMany"
+      resources:
+        requests:
+          storage: "3Gi"
 ```
 
 ## Common Setup

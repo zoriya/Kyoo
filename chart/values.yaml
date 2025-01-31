@@ -141,12 +141,16 @@ kyoo:
 # configures workloads that require access to media
 media:
   # specifies the volumes to use
-  volumes: []
+  volumes:
+    # default volume configuration to allow for easier demo and testing
     # most setups will aim to leverage NFS to access media
     # - name: media
     #   nfs:
     #     server: mynasserver.mydomain.com
     #     path: /spin0/media
+    - name: media
+      persistentVolumeClaim:
+        claimName: media
 
   # specifies where to mount the volumes
   # note that this should align with .media.baseMountPath
