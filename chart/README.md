@@ -76,6 +76,10 @@ media:
       nfs:
         server: mynasserver
         path: /spin0/media
+ingress:
+  enabled: true
+  host: kyoo.mydomain.com
+  tls: true
 ```
 by default the chart expects to consume a Kubernetes secret named `bigsecret`.  That secret should look similar to:
 
