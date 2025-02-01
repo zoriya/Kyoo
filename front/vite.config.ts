@@ -1,17 +1,10 @@
 import { one } from "one/vite";
-// Typed as UserConfig for handy autocomplete
 import type { UserConfig } from "vite";
 
 export default {
 	ssr: {
-		// needed to fix ssr error of react-query
-		// noExternal: true,
+		noExternal: ["@tanstack/react-query", "@tanstack/react-query-devtools"],
 	},
-	// optimizeDeps: {
-	// 	esbuildOptions: {
-	// 		jsx: "automatic",
-	// 	},
-	// },
 	plugins: [
 		one({
 			deps: {
@@ -24,10 +17,6 @@ export default {
 				yoshiki: {
 					"**/*.tsx": ["jsx"],
 				},
-				// yoshiki: "exclude",
-				// "yoshiki > inline-style-prefixer/**": "interop",
-				// "yoshiki > inline-style-prefixer": "interop",
-				// "yoshiki > inline-style-prefixer/lib": "interop",
 			},
 		}),
 	],

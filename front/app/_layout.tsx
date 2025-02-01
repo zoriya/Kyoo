@@ -81,10 +81,10 @@ export default function Layout() {
 
 			<body className="hoverEnabled">
 				<StyleRegistryProvider registry={registry}>
-					{/* <Providers> */}
-					<Slot />
-					{/* <ReactQueryDevtools initialIsOpen={false} /> */}
-					{/* </Providers> */}
+					<Providers>
+						<Slot />
+						<ReactQueryDevtools initialIsOpen={false} />
+					</Providers>
 				</StyleRegistryProvider>
 			</body>
 		</html>
