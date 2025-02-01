@@ -28,8 +28,7 @@
 		"react-native-reanimated": "~3.16.7",
 		"react-native-safe-area-context": "5.1.0",
 		"react-native-screens": "4.6.0",
-		"react-native-web": "^0.19.13",
-		"vite-plugin-commonjs": "^0.10.4"
+		"react-native-web": "^0.19.13"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
