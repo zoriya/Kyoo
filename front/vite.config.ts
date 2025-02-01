@@ -11,8 +11,6 @@ export default {
 				"@expo/html-elements": {
 					"**/*.js": ["jsx"],
 				},
-				"inline-style-prefixer": "interop",
-				"inline-style-prefixer/**": "interop",
 				"inline-style-prefixer/lib": "interop",
 				yoshiki: {
 					"**/*.tsx": ["jsx"],
