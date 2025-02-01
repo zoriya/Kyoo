@@ -1,59 +1,59 @@
-import { prefix } from "inline-style-prefixer";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { prefix } from "inline-style-prefixer/lib";
 import { Slot } from "one";
-// import { Providers } from "~/providers";
-// import { createStyleRegistry, StyleRegistryProvider, useTheme } from "yoshiki/web";
 // import { WebTooltip } from "@kyoo/primitives/src/tooltip.web";
 // import { HiddenIfNoJs, SkeletonCss, TouchOnlyCss } from "@kyoo/primitives";
 import { useServerHeadInsertion } from "one";
+import { StyleRegistryProvider, createStyleRegistry, useTheme } from "yoshiki/web";
+import { Providers } from "~/providers";
 
 const GlobalCssTheme = () => {
-	console.log(prefix("test"))
+	console.log(prefix("test"));
 	const theme = useTheme();
 	// TODO: add fonts here
 	// body {font-family: ${font.style.fontFamily};}
 	return (
 		<>
-			<style jsx global>{`
-				body {
-					margin: 0px;
-					padding: 0px;
-					overflow: "hidden";
-					background-color: ${theme.background};
-				}
-
-				*::-webkit-scrollbar {
-					height: 6px;
-					width: 6px;
-					background: transparent;
-				}
-
-				*::-webkit-scrollbar-thumb {
-					background-color: #999;
-					border-radius: 90px;
-				}
-				*:hover::-webkit-scrollbar-thumb {
-					background-color: rgb(134, 127, 127);
-				}
-
-				#__next {
-					height: 100vh;
-				}
-
-				.infinite-scroll-component__outerdiv {
-					width: 100%;
-					height: 100%;
-				}
-
-				::cue {
-					background-color: transparent;
-					text-shadow:
-						-1px -1px 0 #000,
-						1px -1px 0 #000,
-						-1px 1px 0 #000,
-						1px 1px 0 #000;
-				}
-			`}</style>
+			{/* <style jsx global>{` */}
+			{/* 	body { */}
+			{/* 		margin: 0px; */}
+			{/* 		padding: 0px; */}
+			{/* 		overflow: "hidden"; */}
+			{/* 		background-color: ${theme.background}; */}
+			{/* 	} */}
+			{/**/}
+			{/* 	*::-webkit-scrollbar { */}
+			{/* 		height: 6px; */}
+			{/* 		width: 6px; */}
+			{/* 		background: transparent; */}
+			{/* 	} */}
+			{/**/}
+			{/* 	*::-webkit-scrollbar-thumb { */}
+			{/* 		background-color: #999; */}
+			{/* 		border-radius: 90px; */}
+			{/* 	} */}
+			{/* 	*:hover::-webkit-scrollbar-thumb { */}
+			{/* 		background-color: rgb(134, 127, 127); */}
+			{/* 	} */}
+			{/**/}
+			{/* 	#__next { */}
+			{/* 		height: 100vh; */}
+			{/* 	} */}
+			{/**/}
+			{/* 	.infinite-scroll-component__outerdiv { */}
+			{/* 		width: 100%; */}
+			{/* 		height: 100%; */}
+			{/* 	} */}
+			{/**/}
+			{/* 	::cue { */}
+			{/* 		background-color: transparent; */}
+			{/* 		text-shadow: */}
+			{/* 			-1px -1px 0 #000, */}
+			{/* 			1px -1px 0 #000, */}
+			{/* 			-1px 1px 0 #000, */}
+			{/* 			1px 1px 0 #000; */}
+			{/* 	} */}
+			{/* `}</style> */}
 			{/* <WebTooltip theme={theme} /> */}
 			{/* <SkeletonCss /> */}
 			{/* <TouchOnlyCss /> */}
@@ -83,10 +83,10 @@ export default function Layout() {
 				</head>
 
 				<body className="hoverEnabled">
-					{/* <Providers> */}
+					<Providers>
 						<Slot />
 						<ReactQueryDevtools initialIsOpen={false} />
-					{/* </Providers> */}
+					</Providers>
 				</body>
 			</html>
 		</StyleRegistryProvider>

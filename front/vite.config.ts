@@ -1,6 +1,6 @@
+import { one } from "one/vite";
 // Typed as UserConfig for handy autocomplete
 import type { UserConfig } from "vite";
-import { one } from "one/vite";
 
 export default {
 	ssr: {
@@ -15,6 +15,8 @@ export default {
 				},
 				"inline-style-prefixer": "interop",
 				"inline-style-prefixer/**": "interop",
+				"inline-style-prefixer/lib": "interop",
+				yoshiki: "interop",
 			},
 		}),
 	],
