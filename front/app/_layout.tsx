@@ -1,5 +1,4 @@
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { prefix } from "inline-style-prefixer/lib";
 import { Slot } from "one";
 // import { WebTooltip } from "@kyoo/primitives/src/tooltip.web";
 // import { HiddenIfNoJs, SkeletonCss, TouchOnlyCss } from "@kyoo/primitives";
@@ -8,7 +7,6 @@ import { StyleRegistryProvider, createStyleRegistry, useTheme } from "yoshiki/we
 import { Providers } from "~/providers";
 
 const GlobalCssTheme = () => {
-	console.log(prefix("test"));
 	const theme = useTheme();
 	// TODO: add fonts here
 	// body {font-family: ${font.style.fontFamily};}
@@ -68,27 +66,27 @@ export default function Layout() {
 
 	// TODO: change this lang attr
 	return (
-		<StyleRegistryProvider registry={registry}>
-			<html lang="en-US">
-				<head>
-					<title>Kyoo</title>
-					<meta charSet="utf-8" />
-					<meta name="description" content="A portable and vast media library solution." />
-					<link rel="icon" type="image/png" sizes="16x16" href="/icon-16x16.png" />
-					<link rel="icon" type="image/png" sizes="32x32" href="/icon-32x32.png" />
-					<link rel="icon" type="image/png" sizes="64x64" href="/icon-64x64.png" />
-					<link rel="icon" type="image/png" sizes="128x128" href="/icon-128x128.png" />
-					<link rel="icon" type="image/png" sizes="256x256" href="/icon-256x256.png" />
-					<GlobalCssTheme />
-				</head>
+		<html lang="en-US">
+			<head>
+				<title>Kyoo</title>
+				<meta charSet="utf-8" />
+				<meta name="description" content="A portable and vast media library solution." />
+				<link rel="icon" type="image/png" sizes="16x16" href="/icon-16x16.png" />
+				<link rel="icon" type="image/png" sizes="32x32" href="/icon-32x32.png" />
+				<link rel="icon" type="image/png" sizes="64x64" href="/icon-64x64.png" />
+				<link rel="icon" type="image/png" sizes="128x128" href="/icon-128x128.png" />
+				<link rel="icon" type="image/png" sizes="256x256" href="/icon-256x256.png" />
+				{/* <GlobalCssTheme /> */}
+			</head>
 
-				<body className="hoverEnabled">
-					<Providers>
-						<Slot />
-						<ReactQueryDevtools initialIsOpen={false} />
-					</Providers>
-				</body>
-			</html>
-		</StyleRegistryProvider>
+			<body className="hoverEnabled">
+				<StyleRegistryProvider registry={registry}>
+					{/* <Providers> */}
+					<Slot />
+					{/* <ReactQueryDevtools initialIsOpen={false} /> */}
+					{/* </Providers> */}
+				</StyleRegistryProvider>
+			</body>
+		</html>
 	);
 }

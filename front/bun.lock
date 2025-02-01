@@ -18,7 +18,6 @@
         "react-native-safe-area-context": "5.1.0",
         "react-native-screens": "4.6.0",
         "react-native-web": "^0.19.13",
-        "vite-plugin-commonjs": "^0.10.4",
       },
       "devDependencies": {
         "@biomejs/biome": "1.9.4",
@@ -1683,8 +1682,6 @@
 
     "lru-cache": ["lru-cache@10.4.3", "", {}, "sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ=="],
 
-    "magic-string": ["magic-string@0.30.17", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.0" } }, "sha512-sNPKHvyjVf7gyjwS4xGTaW/mCnF8wnjtifKBEhxfZ7E/S8tQ0rssrwGNn6q8JH/ohItJfSQp9mBtQYuTlH5QnA=="],
-
     "make-dir": ["make-dir@2.1.0", "", { "dependencies": { "pify": "^4.0.1", "semver": "^5.6.0" } }, "sha512-LS9X+dc8KLxXCb8dni79fLIIUA5VyZoyjSMCwTluaXA0o27cCK0bhXkpgw+sTXVpPy/lSO57ilRixqk0vDmtRA=="],
 
     "makeerror": ["makeerror@1.0.12", "", { "dependencies": { "tmpl": "1.0.5" } }, "sha512-JmqCvUhmt43madlpFzG4BQzG2Z3m6tvQDNKdClZnO3VbIudJYmxsT0FNJMeiB2+JTSlTQTSbU8QdesVmwJcmLg=="],
@@ -2302,10 +2299,6 @@
     "vite-bundle-analyzer": ["vite-bundle-analyzer@0.9.4", "", { "dependencies": { "picocolors": "^1.0.0", "source-map": "^0.7.4" } }, "sha512-a/w4ShKQEbTe7wllLXI+3D8ELgRv7iHDuWEPaXokA+FhWBXJCdtOZYIvLzvnn8vxHf+7pm1c23AeGyW/0Ge0Yw=="],
 
     "vite-plugin-barrel": ["vite-plugin-barrel@0.4.1", "", { "dependencies": { "@swc/core": "1.7.26", "debug": "^4.3.4", "oxc-resolver": "1.9.3", "swc-plugin-barrel": "0.3.0" }, "peerDependencies": { "vite": "^5" } }, "sha512-79HEEzwmacSUjCHXEQcTRKA6I0QPMom+0nQRj/5eppDEKC1WFz2+m14wKrTxPmSeCe5MoCIitoJzrtDrj/YdRQ=="],
-
-    "vite-plugin-commonjs": ["vite-plugin-commonjs@0.10.4", "", { "dependencies": { "acorn": "^8.12.1", "magic-string": "^0.30.11", "vite-plugin-dynamic-import": "^1.6.0" } }, "sha512-eWQuvQKCcx0QYB5e5xfxBNjQKyrjEWZIR9UOkOV6JAgxVhtbZvCOF+FNC2ZijBJ3U3Px04ZMMyyMyFBVWIJ5+g=="],
-
-    "vite-plugin-dynamic-import": ["vite-plugin-dynamic-import@1.6.0", "", { "dependencies": { "acorn": "^8.12.1", "es-module-lexer": "^1.5.4", "fast-glob": "^3.3.2", "magic-string": "^0.30.11" } }, "sha512-TM0sz70wfzTIo9YCxVFwS8OA9lNREsh+0vMHGSkWDTZ7bgd1Yjs5RV8EgB634l/91IsXJReg0xtmuQqP0mf+rg=="],
 
     "vite-tsconfig-paths": ["vite-tsconfig-paths@5.1.4", "", { "dependencies": { "debug": "^4.1.1", "globrex": "^0.1.2", "tsconfck": "^3.0.3" }, "peerDependencies": { "vite": "*" }, "optionalPeers": ["vite"] }, "sha512-cYj0LRuLV2c2sMqhqhGpaO3LretdtMn/BVX4cPLanIZuwwrkVl+lK84E/miEXkCHWXuq65rhNN4rXsBcOB3S4w=="],
 
