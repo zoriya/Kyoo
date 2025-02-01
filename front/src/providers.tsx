@@ -1,7 +1,8 @@
-// import { useUserTheme } from "@kyoo/models";
-import { ThemeSelector } from "@kyoo/primitives";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ComponentType, type ReactNode, useState } from "react";
+// import { useUserTheme } from "@kyoo/models";
+// import { createQueryClient } from "@kyoo/models";
+import { ThemeSelector } from "~/primitives/theme";
 
 const QueryProvider = ({ children }: { children: ReactNode }) => {
 	// const [queryClient] = useState(() => createQueryClient());

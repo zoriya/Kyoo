@@ -1,57 +1,55 @@
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Slot } from "one";
-// import { WebTooltip } from "@kyoo/primitives/src/tooltip.web";
-// import { HiddenIfNoJs, SkeletonCss, TouchOnlyCss } from "@kyoo/primitives";
 import { useServerHeadInsertion } from "one";
 import { StyleRegistryProvider, createStyleRegistry, useTheme } from "yoshiki/web";
 import { Providers } from "~/providers";
 
 const GlobalCssTheme = () => {
-	const theme = useTheme();
+	// const theme = useTheme();
 	// TODO: add fonts here
 	// body {font-family: ${font.style.fontFamily};}
+	// background-color: ${theme.background};
 	return (
 		<>
-			{/* <style jsx global>{` */}
-			{/* 	body { */}
-			{/* 		margin: 0px; */}
-			{/* 		padding: 0px; */}
-			{/* 		overflow: "hidden"; */}
-			{/* 		background-color: ${theme.background}; */}
-			{/* 	} */}
-			{/**/}
-			{/* 	*::-webkit-scrollbar { */}
-			{/* 		height: 6px; */}
-			{/* 		width: 6px; */}
-			{/* 		background: transparent; */}
-			{/* 	} */}
-			{/**/}
-			{/* 	*::-webkit-scrollbar-thumb { */}
-			{/* 		background-color: #999; */}
-			{/* 		border-radius: 90px; */}
-			{/* 	} */}
-			{/* 	*:hover::-webkit-scrollbar-thumb { */}
-			{/* 		background-color: rgb(134, 127, 127); */}
-			{/* 	} */}
-			{/**/}
-			{/* 	#__next { */}
-			{/* 		height: 100vh; */}
-			{/* 	} */}
-			{/**/}
-			{/* 	.infinite-scroll-component__outerdiv { */}
-			{/* 		width: 100%; */}
-			{/* 		height: 100%; */}
-			{/* 	} */}
-			{/**/}
-			{/* 	::cue { */}
-			{/* 		background-color: transparent; */}
-			{/* 		text-shadow: */}
-			{/* 			-1px -1px 0 #000, */}
-			{/* 			1px -1px 0 #000, */}
-			{/* 			-1px 1px 0 #000, */}
-			{/* 			1px 1px 0 #000; */}
-			{/* 	} */}
-			{/* `}</style> */}
+			<style>{`
+				body {
+					margin: 0px;
+					padding: 0px;
+					overflow: "hidden";
+				}
+
+				*::-webkit-scrollbar {
+					height: 6px;
+					width: 6px;
+					background: transparent;
+				}
+
+				*::-webkit-scrollbar-thumb {
+					background-color: #999;
+					border-radius: 90px;
+				}
+				*:hover::-webkit-scrollbar-thumb {
+					background-color: rgb(134, 127, 127);
+				}
+
+				#__next {
+					height: 100vh;
+				}
+
+				.infinite-scroll-component__outerdiv {
+					width: 100%;
+					height: 100%;
+				}
+
+				::cue {
+					background-color: transparent;
+					text-shadow:
+						-1px -1px 0 #000,
+						1px -1px 0 #000,
+						-1px 1px 0 #000,
+						1px 1px 0 #000;
+				}
+			`}</style>
 			{/* <WebTooltip theme={theme} /> */}
 			{/* <SkeletonCss /> */}
 			{/* <TouchOnlyCss /> */}
@@ -76,7 +74,7 @@ export default function Layout() {
 				<link rel="icon" type="image/png" sizes="64x64" href="/icon-64x64.png" />
 				<link rel="icon" type="image/png" sizes="128x128" href="/icon-128x128.png" />
 				<link rel="icon" type="image/png" sizes="256x256" href="/icon-256x256.png" />
-				{/* <GlobalCssTheme /> */}
+				<GlobalCssTheme />
 			</head>
 
 			<body className="hoverEnabled">

@@ -12,10 +12,7 @@
 		"format": "biome format .",
 		"format:fix": "biome format . --write"
 	},
-	"workspaces": ["packages/*"],
 	"dependencies": {
-		"@kyoo/models": "workspace:*",
-		"@kyoo/primitives": "workspace:*",
 		"@tanstack/react-query": "^5.66.0",
 		"caniuse-api": "^3.0.0",
 		"expo": "~52.0.28",
