@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-import { entries } from "./controllers/entries";
+import { entriesH } from "./controllers/entries";
 import { movies } from "./controllers/movies";
 import { seasonsH } from "./controllers/seasons";
 import { seed } from "./controllers/seed";
@@ -42,7 +42,7 @@ export const app = new Elysia()
 	.use(base)
 	.use(movies)
 	.use(series)
-	.use(entries)
+	.use(entriesH)
 	.use(seasonsH)
 	.use(videosH)
 	.use(seed);
