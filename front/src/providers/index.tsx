@@ -1,8 +1,9 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
-import { createQueryClient } from "~/query";
 // import { useUserTheme } from "@kyoo/models";
 import { ThemeSelector } from "~/primitives/theme";
+import { createQueryClient } from "~/query";
+import { ErrorConsumer, ErrorProvider } from "./error-provider";
 
 const QueryProvider = ({ children }: { children: ReactNode }) => {
 	const [queryClient] = useState(() => createQueryClient());
@@ -23,7 +24,11 @@ const ThemeProvider = ({ children }: { children: ReactNode }) => {
 export const Providers = ({ children }: { children: ReactNode }) => {
 	return (
 		<QueryProvider>
-			<ThemeProvider>{children}</ThemeProvider>
+			<ThemeProvider>
+				<ErrorProvider>
+					<ErrorConsumer scope="root">{children}</ErrorConsumer>
+				</ErrorProvider>
+			</ThemeProvider>
 		</QueryProvider>
 	);
 };
