@@ -1,7 +1,7 @@
-import { Text, View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
-import { LibraryItem, LibraryItemP, type News, NewsP } from "~/models";
-import type { QueryIdentifier } from "~/query/index";
+import { type LibraryItem, LibraryItemP } from "~/models";
+import { P } from "~/primitives";
+import { Fetch, type QueryIdentifier } from "~/query";
 
 export async function loader() {
 	await prefetchQuery(Header.query());
@@ -12,15 +12,9 @@ export default function Header() {
 
 	return (
 		<Fetch
-			query={NewsList.query()}
-			layout={{ ...ItemGrid.layout, layout: "horizontal" }}
-			getItemType={(x, i) => (x?.kind === "movie" || (!x && i % 2) ? "movie" : "episode")}
-			getItemSize={(kind) => (kind === "episode" ? 2 : 1)}
-			empty={t("home.none")}
-			Render={({ item }) => {
-				<Text>{item.name}</Text>;
-			}}
-			Loader={({ index }) => (index % 2 ? <EpisodeBox.Loader /> : <ItemGrid.Loader />)}
+			query={Header.query()}
+			Render={({ name }) => <P {...css({ bg: "red" })}>{name}</P>}
+			Loader={() => <P>Loading</P>}
 		/>
 	);
 }

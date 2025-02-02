@@ -1,15 +1,7 @@
-import {
-	QueryClient,
-	type QueryFunctionContext,
-	useInfiniteQuery,
-	useQuery,
-} from "@tanstack/react-query";
-import type { ComponentType, ReactElement } from "react";
+import { QueryClient, useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { type ComponentType, type ReactElement, useContext } from "react";
 import type { z } from "zod";
 import { type KyooError, type Page, Paged } from "~/models";
-// import { getToken, getTokenWJ } from "./login";
-
-export let lastUsedUrl: string = null!;
 
 const cleanSlash = (str: string | null, keepFirst = false) => {
 	if (!str) return null;
@@ -17,41 +9,19 @@ const cleanSlash = (str: string | null, keepFirst = false) => {
 	return str.replace(/^\/|\/$/g, "");
 };
 
-export const queryFn = async <Parser extends z.ZodTypeAny>(
-	context: {
-		apiUrl?: string | null;
-		authenticated?: boolean;
-		method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-	} & (
-		| QueryFunctionContext
-		| ({
-				path: (string | false | undefined | null)[];
-				body?: object;
-				formData?: FormData;
-				plainText?: boolean;
-		  } & Partial<QueryFunctionContext>)
-	),
-	type?: Parser,
-	iToken?: string | null,
-): Promise<z.infer<Parser>> => {
-	const url = context.apiUrl && context.apiUrl.length > 0 ? context.apiUrl : getCurrentApiUrl();
-	lastUsedUrl = url!;
-
-	const token = iToken === undefined && context.authenticated !== false ? await getToken() : iToken;
-	const path = [cleanSlash(url, true)]
-		.concat(
-			"path" in context
-				? (context.path as string[])
-				: "pageParam" in context && context.pageParam
-					? [cleanSlash(context.pageParam as string)]
-					: (context.queryKey as string[]),
-		)
-		.filter((x) => x)
-		.join("/")
-		.replace("/?", "?");
+export const queryFn = async <Parser extends z.ZodTypeAny>(context: {
+	method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+	url: string;
+	body?: object;
+	formData?: FormData;
+	plainText?: boolean;
+	authToken: string | null;
+	parser?: Parser;
+	signal: AbortSignal;
+}): Promise<z.infer<Parser>> => {
 	let resp: Response;
 	try {
-		resp = await fetch(path, {
+		resp = await fetch(context.url, {
 			method: context.method,
 			body:
 				"body" in context && context.body
@@ -60,7 +30,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 						? context.formData
 						: undefined,
 			headers: {
-				...(token ? { Authorization: token } : {}),
+				...(context.authToken ? { Authorization: context.authToken } : {}),
 				...("body" in context ? { "Content-Type": "application/json" } : {}),
 			},
 			signal: context.signal,
@@ -68,19 +38,11 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 	} catch (e) {
 		if (typeof e === "object" && e && "name" in e && e.name === "AbortError")
 			throw { message: "Aborted", status: "aborted" } as KyooError;
-		console.log("Fetch error", e, path);
+		console.log("Fetch error", e, context.url);
 		throw { message: "Could not reach Kyoo's server.", status: "aborted" } as KyooError;
 	}
 	if (resp.status === 404) {
 		throw { message: "Resource not found.", status: 404 } as KyooError;
-	}
-	// If we got a forbidden, try to refresh the token
-	// if we got a token as an argument, it either means we already retried or we go one provided that's fresh
-	// so we can't retry either ways.
-	if (resp.status === 403 && iToken === undefined && token) {
-		const [newToken, _, error] = await getTokenWJ(undefined, true);
-		if (newToken) return await queryFn(context, type, newToken);
-		console.error("refresh error while retrying a forbidden", error);
 	}
 	if (!resp.ok) {
 		const error = await resp.text();
@@ -92,9 +54,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 		}
 		data.status = resp.status;
 		console.trace(
-			`Invalid response (${
-				"method" in context && context.method ? context.method : "GET"
-			} ${path}):`,
+			`Invalid response (${context.method ?? "GET"} ${context.url}):`,
 			data,
 			resp.status,
 		);
@@ -103,7 +63,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 
 	if (resp.status === 204) return null;
 
-	if ("plainText" in context && context.plainText) return (await resp.text()) as unknown;
+	if (context.plainText) return (await resp.text()) as unknown;
 
 	let data: Record<string, any>;
 	try {
@@ -112,10 +72,10 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 		console.error("Invalid json from kyoo", e);
 		throw { message: "Invalid response from kyoo", status: "json" } as KyooError;
 	}
-	if (!type) return data;
-	const parsed = await type.safeParseAsync(data);
+	if (!context.parser) return data;
+	const parsed = await context.parser.safeParseAsync(data);
 	if (!parsed.success) {
-		console.log("Path: ", path, " Response: ", resp.status, " Parse error: ", parsed.error);
+		console.log("Url: ", context.url, " Response: ", resp.status, " Parse error: ", parsed.error);
 		throw {
 			status: "parse",
 			message:
@@ -178,12 +138,12 @@ export type QueryPage<Props = {}, Items = unknown> = ComponentType<
 };
 
 export const toQueryKey = (query: {
+	apiUrl: string;
 	path: (string | undefined)[];
 	params?: { [query: string]: boolean | number | string | string[] | undefined };
-	options?: { apiUrl?: string | null };
 }) => {
 	return [
-		query.options?.apiUrl,
+		cleanSlash(query.apiUrl, true),
 		...query.path,
 		query.params
 			? `?${Object.entries(query.params)
@@ -195,30 +155,38 @@ export const toQueryKey = (query: {
 };
 
 export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
+	const { apiUrl, authToken } = useContext(QueryContext);
+	const key = toQueryKey({ apiUrl, path: query.path, params: query.params });
+
 	return useQuery<Data, KyooError>({
-		queryKey: toQueryKey(query),
+		queryKey: key,
 		queryFn: (ctx) =>
-			queryFn(
-				{
-					...ctx,
-					queryKey: toQueryKey({ ...query, options: {} }),
-					...query.options,
-				},
-				query.parser,
-			),
+			queryFn({
+				url: key.join("/").replace("/?", "?"),
+				parser: query.parser,
+				signal: ctx.signal,
+				authToken,
+				...query.options,
+			}),
 		placeholderData: query.placeholderData as any,
 		enabled: query.enabled,
 	});
 };
 
 export const useInfiniteFetch = <Data, Ret>(query: QueryIdentifier<Data, Ret>) => {
+	const { apiUrl, authToken } = useContext(QueryContext);
+	const key = toQueryKey({ apiUrl, path: query.path, params: query.params });
+
 	const ret = useInfiniteQuery<Page<Data>, KyooError>({
-		queryKey: toQueryKey(query),
+		queryKey: key,
 		queryFn: (ctx) =>
-			queryFn(
-				{ ...ctx, queryKey: toQueryKey({ ...query, options: {} }), ...query.options },
-				Paged(query.parser),
-			),
+			queryFn({
+				url: (ctx.pageParam as string) ?? key.join("/").replace("/?", "?"),
+				parser: Paged(query.parser),
+				signal: ctx.signal,
+				authToken,
+				...query.options,
+			}),
 		getNextPageParam: (page: Page<Data>) => page?.next || undefined,
 		initialPageParam: undefined,
 		placeholderData: query.placeholderData as any,
