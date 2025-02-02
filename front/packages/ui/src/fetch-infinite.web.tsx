@@ -32,7 +32,7 @@ import {
 	useRef,
 } from "react";
 import { type Stylable, nativeStyleToCss, useYoshiki, ysMap } from "yoshiki";
-import { ErrorView } from "./errors";
+import { ErrorView } from "../../../src/ui/errors";
 import { EmptyView, type Layout, addHeader } from "./fetch";
 
 const InfiniteScroll = <Props,>({

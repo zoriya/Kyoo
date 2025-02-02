@@ -18,7 +18,27 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./error";
-export * from "./unauthorized";
-export * from "./connection";
-export * from "./setup";
+import type { ReactElement } from "react";
+import type { ImageStyle } from "react-native";
+import type { YoshikiStyle } from "yoshiki/src/type";
+import type { KyooImage } from "~/models";
+
+export type YoshikiEnhanced<Style> = Style extends any
+	? {
+			[key in keyof Style]: YoshikiStyle<Style[key]>;
+		}
+	: never;
+
+export type Props = {
+	src?: KyooImage | null;
+	quality: "low" | "medium" | "high";
+	alt?: string;
+	Err?: ReactElement | null;
+	forcedLoading?: boolean;
+};
+
+export type ImageLayout = YoshikiEnhanced<
+	| { width: ImageStyle["width"]; height: ImageStyle["height"] }
+	| { width: ImageStyle["width"]; aspectRatio: ImageStyle["aspectRatio"] }
+	| { height: ImageStyle["height"]; aspectRatio: ImageStyle["aspectRatio"] }
+>;

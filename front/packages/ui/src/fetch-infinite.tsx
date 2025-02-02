@@ -29,7 +29,7 @@ import {
 	useRef,
 } from "react";
 import { FlatList, View, type ViewStyle } from "react-native";
-import { ErrorView } from "./errors";
+import { ErrorView } from "../../../src/ui/errors";
 import { EmptyView, type Layout, OfflineView, addHeader } from "./fetch";
 
 const emulateGap = (

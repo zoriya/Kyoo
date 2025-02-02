@@ -37,7 +37,7 @@ import {
 } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { type Theme, useYoshiki } from "yoshiki/native";
-import { ErrorView } from "../errors";
+import { ErrorView } from "../../../../src/ui/errors";
 
 export const PartOf = ({
 	name,
