@@ -1,23 +1,3 @@
-/*
- * Kyoo - A portable and vast media library solution.
- * Copyright (c) Kyoo.
- *
- * See AUTHORS.md and LICENSE file in the project root for full license information.
- *
- * Kyoo is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Kyoo is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
- */
-
 import { ConnectionErrorContext, useAccount } from "@kyoo/models";
 import { Button, H1, Icon, Link, P, ts } from "@kyoo/primitives";
 import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
@@ -26,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useRouter } from "solito/router";
 import { useYoshiki } from "yoshiki/native";
-import { DefaultLayout } from "../layout";
+import { DefaultLayout } from "../../../packages/ui/src/layout";
 
 export const ConnectionError = () => {
 	const { css } = useYoshiki();

@@ -29,4 +29,4 @@ export { ServerUrlPage, LoginPage, RegisterPage, OidcCallbackPage } from "./logi
 export { DownloadPage, DownloadProvider } from "./downloads";
 export { SettingsPage } from "./settings";
 export { AdminPage } from "./admin";
-export * from "./errors";
+export * from "../../../src/ui/errors";

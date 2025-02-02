@@ -1,3 +1,4 @@
+import { HydrationBoundary } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Slot } from "one";
 import { useServerHeadInsertion } from "one";
@@ -79,10 +80,12 @@ export default function Layout() {
 
 			<body className="hoverEnabled">
 				<StyleRegistryProvider registry={registry}>
-					<Providers>
-						<Slot />
-						<ReactQueryDevtools initialIsOpen={false} />
-					</Providers>
+					<HydrationBoundary state={queryState}>
+						<Providers>
+							<Slot />
+							<ReactQueryDevtools initialIsOpen={false} />
+						</Providers>
+					</HydrationBoundary>
 				</StyleRegistryProvider>
 			</body>
 		</html>
