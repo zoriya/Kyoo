@@ -1,6 +1,6 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
-import { createQueryClient } from "~/models/query";
+import { createQueryClient } from "~/query";
 // import { useUserTheme } from "@kyoo/models";
 import { ThemeSelector } from "~/primitives/theme";
 
