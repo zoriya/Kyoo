@@ -1,23 +1,3 @@
-/*
- * Kyoo - A portable and vast media library solution.
- * Copyright (c) Kyoo.
- *
- * See AUTHORS.md and LICENSE file in the project root for full license information.
- *
- * Kyoo is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Kyoo is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
- */
-
 import {
 	QueryClient,
 	type QueryFunctionContext,
@@ -26,9 +6,8 @@ import {
 } from "@tanstack/react-query";
 import type { ComponentType, ReactElement } from "react";
 import type { z } from "zod";
-import { getCurrentApiUrl } from ".";
-import type { KyooErrors } from "./kyoo-errors";
-import { getToken, getTokenWJ } from "./login";
+import type { KyooError } from "./kyoo-error";
+// import { getToken, getTokenWJ } from "./login";
 import { type Page, Paged } from "./page";
 
 export let lastUsedUrl: string = null!;
@@ -89,12 +68,12 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 		});
 	} catch (e) {
 		if (typeof e === "object" && e && "name" in e && e.name === "AbortError")
-			throw { errors: ["Aborted"] } as KyooErrors;
+			throw { message: "Aborted", status: "aborted" } as KyooError;
 		console.log("Fetch error", e, path);
-		throw { errors: ["Could not reach Kyoo's server."], status: "aborted" } as KyooErrors;
+		throw { message: "Could not reach Kyoo's server.", status: "aborted" } as KyooError;
 	}
 	if (resp.status === 404) {
-		throw { errors: ["Resource not found."], status: 404 } as KyooErrors;
+		throw { message: "Resource not found.", status: 404 } as KyooError;
 	}
 	// If we got a forbidden, try to refresh the token
 	// if we got a token as an argument, it either means we already retried or we go one provided that's fresh
@@ -110,7 +89,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 		try {
 			data = JSON.parse(error);
 		} catch (e) {
-			data = { errors: [error] } as KyooErrors;
+			data = { message: error } as KyooError;
 		}
 		data.status = resp.status;
 		console.trace(
@@ -120,7 +99,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 			data,
 			resp.status,
 		);
-		throw data as KyooErrors;
+		throw data as KyooError;
 	}
 
 	if (resp.status === 204) return null;
@@ -132,18 +111,17 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(
 		data = await resp.json();
 	} catch (e) {
 		console.error("Invalid json from kyoo", e);
-		throw { errors: ["Invalid response from kyoo"], status: "json" };
+		throw { message: "Invalid response from kyoo", status: "json" } as KyooError;
 	}
 	if (!type) return data;
 	const parsed = await type.safeParseAsync(data);
 	if (!parsed.success) {
 		console.log("Path: ", path, " Response: ", resp.status, " Parse error: ", parsed.error);
 		throw {
-			errors: [
-				"Invalid response from kyoo. Possible version mismatch between the server and the application.",
-			],
 			status: "parse",
-		} as KyooErrors;
+			message:
+				"Invalid response from kyoo. Possible version mismatch between the server and the application.",
+		} as KyooError;
 	}
 	return parsed.data;
 };
@@ -218,7 +196,7 @@ export const toQueryKey = (query: {
 };
 
 export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
-	return useQuery<Data, KyooErrors>({
+	return useQuery<Data, KyooError>({
 		queryKey: toQueryKey(query),
 		queryFn: (ctx) =>
 			queryFn(
@@ -235,7 +213,7 @@ export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 };
 
 export const useInfiniteFetch = <Data, Ret>(query: QueryIdentifier<Data, Ret>) => {
-	const ret = useInfiniteQuery<Page<Data>, KyooErrors>({
+	const ret = useInfiniteQuery<Page<Data>, KyooError>({
 		queryKey: toQueryKey(query),
 		queryFn: (ctx) =>
 			queryFn(
@@ -258,10 +236,6 @@ export const useInfiniteFetch = <Data, Ret>(query: QueryIdentifier<Data, Ret>) =
 };
 
 export const fetchQuery = async (queries: QueryIdentifier[], authToken?: string | null) => {
-	// we can't put this check in a function because we want build time optimizations
-	// see https://github.com/vercel/next.js/issues/5354 for details
-	if (typeof window !== "undefined") return null;
-
 	const client = createQueryClient();
 	await Promise.all(
 		queries.map((query) => {
