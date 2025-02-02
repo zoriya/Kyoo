@@ -21,11 +21,14 @@
 		"jotai": "^2.11.3",
 		"one": "1.1.426",
 		"react": "^19.0.0",
+		"react-i18next": "^15.4.0",
 		"react-native": "0.77.0",
 		"react-native-reanimated": "~3.16.7",
 		"react-native-safe-area-context": "5.1.0",
 		"react-native-screens": "4.6.0",
-		"react-native-web": "^0.19.13"
+		"react-native-web": "^0.19.13",
+		"yoshiki": "1.2.14",
+		"zod": "^3.24.1"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",

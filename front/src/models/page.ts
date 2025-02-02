@@ -44,3 +44,6 @@ export const Paged = <Item>(item: z.ZodType<Item>): z.ZodSchema<Page<Item>> =>
 		count: z.number(),
 		items: z.array(item),
 	});
+
+export const isPage = <T = unknown>(obj: unknown): obj is Page<T> =>
+	(typeof obj === "object" && obj && "items" in obj) || false;

@@ -82,7 +82,7 @@ NewsList.query = (): QueryIdentifier<News> => ({
 	infinite: true,
 	path: ["news"],
 	params: {
-		// Limit the inital numbers of items
+		// Limit the initial numbers of items
 		limit: 10,
 		fields: ["show", "watchStatus"],
 	},
