@@ -122,7 +122,9 @@ export type QueryIdentifier<T = unknown, Ret = T> = {
 
 	placeholderData?: T | (() => T);
 	enabled?: boolean;
-	options?: Partial<Parameters<typeof queryFn>[0]>;
+	options?: Partial<Parameters<typeof queryFn>[0]> & {
+		apiUrl?: string;
+	};
 };
 
 export type QueryPage<Props = {}, Items = unknown> = ComponentType<
