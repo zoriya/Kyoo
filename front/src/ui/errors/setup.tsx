@@ -6,8 +6,8 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "solito/router";
 import { useYoshiki } from "yoshiki/native";
-import { Navbar, NavbarProfile } from "../navbar";
-import { KyooLongLogo } from "../navbar/icon";
+import { Navbar, NavbarProfile } from "../../../packages/ui/src/navbar";
+import { KyooLongLogo } from "../../../packages/ui/src/navbar/icon";
 
 export const SetupPage: QueryPage<{ step: SetupStep }> = ({ step }) => {
 	const { css } = useYoshiki();
