@@ -6,9 +6,8 @@ import {
 } from "@tanstack/react-query";
 import type { ComponentType, ReactElement } from "react";
 import type { z } from "zod";
-import type { KyooError } from "./kyoo-error";
+import { type KyooError, type Page, Paged } from "~/models";
 // import { getToken, getTokenWJ } from "./login";
-import { type Page, Paged } from "./page";
 
 export let lastUsedUrl: string = null!;
 
