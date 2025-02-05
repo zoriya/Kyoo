@@ -19,11 +19,8 @@
  */
 
 import { Platform } from "react-native";
-import { MMKV } from "react-native-mmkv";
 import { type ZodTypeAny, z } from "zod";
 import { type Account, AccountP } from "./accounts";
-
-export const storage = new MMKV();
 
 const readAccounts = () => {
 	const acc = storage.getString("accounts");
@@ -40,40 +37,6 @@ const writeAccounts = (accounts: Account[]) => {
 		// cookie used for images and videos since we can't add Authorization headers in img or video tags.
 		setCookie("X-Bearer", selected?.token.access_token);
 	}
-};
-
-export const setCookie = (key: string, val?: unknown) => {
-	let value = typeof val !== "string" ? JSON.stringify(val) : val;
-	// Remove illegal values from json. There should not be one in the account anyways.
-	value = value?.replaceAll(";", "");
-	const d = new Date();
-	// A year
-	d.setTime(d.getTime() + 365 * 24 * 60 * 60 * 1000);
-	const expires = value ? `expires=${d.toUTCString()}` : "expires=Thu, 01 Jan 1970 00:00:01 GMT";
-	document.cookie = `${key}=${value};${expires};path=/;samesite=strict`;
-	return null;
-};
-
-export const readCookie = <T extends ZodTypeAny>(
-	cookies: string | undefined,
-	key: string,
-	parser?: T,
-) => {
-	if (!cookies) return null;
-	const name = `${key}=`;
-	const decodedCookie = decodeURIComponent(cookies);
-	const ca = decodedCookie.split(";");
-	for (let i = 0; i < ca.length; i++) {
-		let c = ca[i];
-		while (c.charAt(0) === " ") {
-			c = c.substring(1);
-		}
-		if (c.indexOf(name) === 0) {
-			const str = c.substring(name.length, c.length);
-			return parser ? parser.parse(JSON.parse(str)) : str;
-		}
-	}
-	return null;
 };
 
 export const getCurrentAccount = () => {
