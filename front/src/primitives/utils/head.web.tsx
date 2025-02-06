@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import NextHead from "next/head";
+// import NextHead from "next/head";
 
 export const Head = ({
 	title,

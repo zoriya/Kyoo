@@ -8,9 +8,9 @@ import { removeAccounts, updateAccount } from "./account-store";
 import { useSetError } from "./error-provider";
 import { useStoreValue } from "./settings";
 
-const AccountContext = createContext<{
+export const AccountContext = createContext<{
 	apiUrl: string;
-	authToken: Token | undefined;
+	authToken: Token | null;
 	selectedAccount?: Account;
 	accounts: (Account & { select: () => void; remove: () => void })[];
 }>(undefined!);
@@ -23,7 +23,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 		const acc = accounts.find((x) => x.selected);
 		return {
 			apiUrl: Platform.OS === "web" ? "/api" : acc?.apiUrl!,
-			authToken: acc?.token,
+			authToken: acc?.token ?? null,
 			selectedAccount: acc,
 			accounts: accounts.map((account) => ({
 				...account,

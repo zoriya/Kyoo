@@ -1,10 +1,10 @@
 import { useYoshiki } from "yoshiki/native";
 import { type LibraryItem, LibraryItemP } from "~/models";
 import { P } from "~/primitives";
-import { Fetch, type QueryIdentifier } from "~/query";
+import { Fetch, type QueryIdentifier, prefetch } from "~/query";
 
 export async function loader() {
-	await prefetchQuery(Header.query());
+	await prefetch(Header.query());
 }
 
 export default function Header() {

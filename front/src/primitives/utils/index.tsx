@@ -18,7 +18,6 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./breakpoints";
 export * from "./nojs";
 export * from "./head";
 export * from "./spacing";

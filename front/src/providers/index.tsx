@@ -3,8 +3,8 @@ import { type ReactNode, useState } from "react";
 // import { useUserTheme } from "@kyoo/models";
 import { ThemeSelector } from "~/primitives/theme";
 import { createQueryClient } from "~/query";
-import { ErrorConsumer, ErrorProvider } from "./error-provider";
 import { AccountProvider } from "./account-provider";
+import { ErrorConsumer, ErrorProvider } from "./error-provider";
 
 const QueryProvider = ({ children }: { children: ReactNode }) => {
 	const [queryClient] = useState(() => createQueryClient());

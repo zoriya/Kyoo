@@ -1,6 +1,6 @@
 import { HydrationBoundary } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { Slot } from "one";
+import { Slot, getServerData } from "one";
 import { useServerHeadInsertion } from "one";
 import { StyleRegistryProvider, createStyleRegistry, useTheme } from "yoshiki/web";
 import { Providers } from "~/providers";
@@ -62,6 +62,8 @@ const GlobalCssTheme = () => {
 export default function Layout() {
 	const registry = createStyleRegistry();
 	useServerHeadInsertion(() => registry.flushToComponent());
+
+	const queryState = getServerData("queryState");
 
 	// TODO: change this lang attr
 	return (
