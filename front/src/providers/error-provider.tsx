@@ -37,7 +37,11 @@ export const ErrorConsumer = ({ children, scope }: { children: ReactNode; scope:
 	const Handler = handler.view;
 	return <Handler {...(error as any)} />;
 };
-export const useSetError = () => {
-	const { setError } = useContext(ErrorContext);
-	return setError;
+export const useSetError = (key: string) => {
+	const { error, setError } = useContext(ErrorContext);
+	const set = (obj: Omit<Error, "key">) => setError({ key, ...obj });
+	const clearError = () => {
+		if (error?.key === key) setError(null);
+	};
+	return [set, clearError] as const;
 };
