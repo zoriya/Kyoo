@@ -4,6 +4,7 @@ import { type ReactNode, useState } from "react";
 import { ThemeSelector } from "~/primitives/theme";
 import { createQueryClient } from "~/query";
 import { ErrorConsumer, ErrorProvider } from "./error-provider";
+import { AccountProvider } from "./account-provider";
 
 const QueryProvider = ({ children }: { children: ReactNode }) => {
 	const [queryClient] = useState(() => createQueryClient());
@@ -26,7 +27,9 @@ export const Providers = ({ children }: { children: ReactNode }) => {
 		<QueryProvider>
 			<ThemeProvider>
 				<ErrorProvider>
-					<ErrorConsumer scope="root">{children}</ErrorConsumer>
+					<AccountProvider>
+						<ErrorConsumer scope="root">{children}</ErrorConsumer>
+					</AccountProvider>
 				</ErrorProvider>
 			</ThemeProvider>
 		</QueryProvider>
