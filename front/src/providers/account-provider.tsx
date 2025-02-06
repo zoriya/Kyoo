@@ -1,8 +1,11 @@
 import { type ReactNode, createContext, useEffect, useMemo } from "react";
 import { Platform } from "react-native";
-import { type Account, type Token, type User, UserP } from "~/models";
+import { z } from "zod";
+import { type Account, AccountP, type Token, type User, UserP } from "~/models";
 import { useFetch } from "~/query";
+import { removeAccounts, updateAccount } from "./account-store";
 import { useSetError } from "./error-provider";
+import { useStoreValue } from "./settings";
 
 const AccountContext = createContext<{
 	apiUrl: string;
@@ -31,22 +34,19 @@ export const AccountProvider = ({
 	}
 
 	const setError = useSetError();
-
-	const [accStr] = useMMKVString("accounts");
-	const accounts = accStr ? z.array(AccountP).parse(JSON.parse(accStr)) : null;
+	const accounts = useStoreValue("accounts", z.array(AccountP)) ?? [];
 
 	const ret = useMemo(() => {
 		const acc = accounts.find((x) => x.selected);
 		return {
-			apiUrl: acc.apiUrl,
-			authToken: acc.token,
+			apiUrl: Platform.OS === "web" ? "/api" : acc?.apiUrl,
+			authToken: acc?.token,
 			selectedAccount: acc,
-			accounts:
-				accounts?.map((account) => ({
-					...account,
-					select: () => updateAccount(account.id, { ...account, selected: true }),
-					remove: () => removeAccounts((x) => x.id === account.id),
-				})) ?? [],
+			accounts: accounts.map((account) => ({
+				...account,
+				select: () => updateAccount(account.id, { ...account, selected: true }),
+				remove: () => removeAccounts((x) => x.id === account.id),
+			})),
 		};
 	}, [accounts]);
 
@@ -62,10 +62,10 @@ export const AccountProvider = ({
 		path: ["auth", "me"],
 		parser: UserP,
 		placeholderData: ret.selectedAccount,
-		enabled: ret.selectedAccount,
+		enabled: !!ret.selectedAccount,
 		options: {
 			apiUrl: ret.apiUrl,
-			authToken: ret.authToken,
+			authToken: ret.authToken?.access_token,
 		},
 	});
 	// Use a ref here because we don't want the effect to trigger when the selected

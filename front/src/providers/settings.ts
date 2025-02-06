@@ -1,7 +1,7 @@
 import { MMKV, useMMKVString } from "react-native-mmkv";
-import type { ZodTypeAny } from "zod";
+import type { ZodTypeAny, z } from "zod";
 
-export const storage = new MMKV();
+const storage = new MMKV();
 
 function toBase64(utf8: string) {
 	if (typeof window !== "undefined") return window.btoa(utf8);
@@ -35,11 +35,21 @@ export const readCookie = <T extends ZodTypeAny>(
 	const ret = ca.find((x) => x.trimStart().startsWith(name));
 	if (ret === undefined) return undefined;
 	const str = fromBase64(ret.substring(name.length));
-	return parser ? parser.parse(JSON.parse(str)) : str;
+	return parser ? (parser.parse(JSON.parse(str)) as z.infer<T>) : str;
 };
 
-export const useStoreValue = <T extends ZodTypeAny>(key: string, parser?: T) => {
+export const useStoreValue = <T extends ZodTypeAny>(key: string, parser: T) => {
 	const [val] = useMMKVString(key);
-	if (!val) return val;
-	return parser ? parser.parse(JSON.parse(val)) : val;
+	if (val === undefined) return val;
+	return parser.parse(JSON.parse(val)) as z.infer<T>;
+};
+
+export const storeValue = (key: string, value: unknown) => {
+	storage.set(key, JSON.stringify(value));
+};
+
+export const readValue = <T extends ZodTypeAny>(key: string, parser: T) => {
+	const val = storage.getString(key);
+	if (val === undefined) return val;
+	return parser.parse(JSON.parse(val)) as z.infer<T>;
 };
