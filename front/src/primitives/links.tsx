@@ -28,10 +28,10 @@ import {
 	type TextProps,
 	type View,
 } from "react-native";
-import { TextLink, useLink } from "solito/link";
-import { parseNextPath } from "solito/router";
+// import { TextLink, useLink } from "solito/link";
+// import { parseNextPath } from "solito/router";
 import { useTheme, useYoshiki } from "yoshiki/native";
-import { alpha } from "./themes";
+import { alpha } from "./theme";
 
 export const A = ({
 	href,

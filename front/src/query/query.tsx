@@ -1,7 +1,9 @@
-import { QueryClient, useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { QueryClient, dehydrate, useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { setServerData } from "one";
 import { type ComponentType, type ReactElement, useContext } from "react";
 import type { z } from "zod";
 import { type KyooError, type Page, Paged } from "~/models";
+import { AccountContext } from "~/providers/account-provider";
 
 const cleanSlash = (str: string | null, keepFirst = false) => {
 	if (!str) return null;
@@ -30,7 +32,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(context: {
 						? context.formData
 						: undefined,
 			headers: {
-				...(context.authToken ? { Authorization: context.authToken } : {}),
+				...(context.authToken ? { Authorization: `Bearer ${context.authToken}` } : {}),
 				...("body" in context ? { "Content-Type": "application/json" } : {}),
 			},
 			signal: context.signal,
@@ -157,7 +159,7 @@ export const toQueryKey = (query: {
 };
 
 export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
-	const { apiUrl, authToken } = useContext(QueryContext);
+	const { apiUrl, authToken } = useContext(AccountContext);
 	const key = toQueryKey({ apiUrl, path: query.path, params: query.params });
 
 	return useQuery<Data, KyooError>({
@@ -167,7 +169,7 @@ export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 				url: key.join("/").replace("/?", "?"),
 				parser: query.parser,
 				signal: ctx.signal,
-				authToken,
+				authToken: authToken?.access_token ?? null,
 				...query.options,
 			}),
 		placeholderData: query.placeholderData as any,
@@ -176,7 +178,7 @@ export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 };
 
 export const useInfiniteFetch = <Data, Ret>(query: QueryIdentifier<Data, Ret>) => {
-	const { apiUrl, authToken } = useContext(QueryContext);
+	const { apiUrl, authToken } = useContext(AccountContext);
 	const key = toQueryKey({ apiUrl, path: query.path, params: query.params });
 
 	const ret = useInfiniteQuery<Page<Data>, KyooError>({
@@ -186,7 +188,7 @@ export const useInfiniteFetch = <Data, Ret>(query: QueryIdentifier<Data, Ret>) =
 				url: (ctx.pageParam as string) ?? key.join("/").replace("/?", "?"),
 				parser: Paged(query.parser),
 				signal: ctx.signal,
-				authToken,
+				authToken: authToken?.access_token ?? null,
 				...query.options,
 			}),
 		getNextPageParam: (page: Page<Data>) => page?.next || undefined,
@@ -204,22 +206,41 @@ export const useInfiniteFetch = <Data, Ret>(query: QueryIdentifier<Data, Ret>) =
 	};
 };
 
-export const fetchQuery = async (queries: QueryIdentifier[], authToken?: string | null) => {
+export const prefetch = async (...queries: QueryIdentifier[]) => {
 	const client = createQueryClient();
+	const authToken = undefined;
+
 	await Promise.all(
 		queries.map((query) => {
+			const key = toQueryKey({ apiUrl: "/api", path: query.path, params: query.params });
+
 			if (query.infinite) {
 				return client.prefetchInfiniteQuery({
-					queryKey: toQueryKey(query),
-					queryFn: (ctx) => queryFn(ctx, Paged(query.parser), authToken),
+					queryKey: key,
+					queryFn: (ctx) =>
+						queryFn({
+							url: key.join("/").replace("/?", "?"),
+							parser: Paged(query.parser),
+							signal: ctx.signal,
+							authToken: authToken?.access_token ?? null,
+							...query.options,
+						}),
 					initialPageParam: undefined,
 				});
 			}
 			return client.prefetchQuery({
-				queryKey: toQueryKey(query),
-				queryFn: (ctx) => queryFn(ctx, query.parser, authToken),
+				queryKey: key,
+				queryFn: (ctx) =>
+					queryFn({
+						url: key.join("/").replace("/?", "?"),
+						parser: query.parser,
+						signal: ctx.signal,
+						authToken: authToken?.access_token ?? null,
+						...query.options,
+					}),
 			});
 		}),
 	);
+	setServerData("queryState", dehydrate(client));
 	return client;
 };

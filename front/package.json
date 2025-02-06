@@ -14,6 +14,7 @@
 	},
 	"dependencies": {
 		"@expo/html-elements": "^0.11.2",
+		"@material-symbols/svg-400": "^0.28.1",
 		"@tanstack/react-query": "^5.66.0",
 		"caniuse-api": "^3.0.0",
 		"expo": "~52.0.28",
@@ -28,6 +29,7 @@
 		"react-native-reanimated": "~3.16.7",
 		"react-native-safe-area-context": "5.1.0",
 		"react-native-screens": "4.6.0",
+		"react-native-svg": "^15.11.1",
 		"react-native-web": "^0.19.13",
 		"yoshiki": "1.2.14",
 		"zod": "^3.24.1"
