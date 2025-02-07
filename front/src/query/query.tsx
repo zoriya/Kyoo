@@ -1,9 +1,9 @@
 import { QueryClient, dehydrate, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { setServerData } from "one";
-import { type ComponentType, type ReactElement, useContext } from "react";
+import { useContext } from "react";
 import type { z } from "zod";
 import { type KyooError, type Page, Paged } from "~/models";
-import { AccountContext } from "~/providers/account-provider";
+import { AccountContext, ssrApiUrl } from "~/providers/account-provider";
 
 const cleanSlash = (str: string | null, keepFirst = false) => {
 	if (!str) return null;
@@ -129,18 +129,6 @@ export type QueryIdentifier<T = unknown, Ret = T> = {
 	};
 };
 
-export type QueryPage<Props = {}, Items = unknown> = ComponentType<
-	Props & { randomItems: Items[] }
-> & {
-	getFetchUrls?: (route: { [key: string]: string }, randomItems: Items[]) => QueryIdentifier<any>[];
-	getLayout?:
-		| QueryPage<{ page: ReactElement }>
-		| { Layout: QueryPage<{ page: ReactElement }>; props: object };
-	requiredPermissions?: string[];
-	randomItems?: Items[];
-	isPublic?: boolean;
-};
-
 export const toQueryKey = (query: {
 	apiUrl: string;
 	path: (string | undefined)[];
@@ -212,7 +200,11 @@ export const prefetch = async (...queries: QueryIdentifier[]) => {
 
 	await Promise.all(
 		queries.map((query) => {
-			const key = toQueryKey({ apiUrl: "/api", path: query.path, params: query.params });
+			const key = toQueryKey({
+				apiUrl: ssrApiUrl,
+				path: query.path,
+				params: query.params,
+			});
 
 			if (query.infinite) {
 				return client.prefetchInfiniteQuery({

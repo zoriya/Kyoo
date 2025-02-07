@@ -1,3 +1,5 @@
+import { getServerData } from "one";
+import { Platform } from "react-native";
 import { MMKV, useMMKVString } from "react-native-mmkv";
 import type { ZodTypeAny, z } from "zod";
 
@@ -22,12 +24,9 @@ export const setCookie = (key: string, val?: unknown) => {
 	document.cookie = `${key}=${value};${expires};path=/;samesite=strict`;
 };
 
-export const readCookie = <T extends ZodTypeAny>(
-	cookies: string | undefined,
-	key: string,
-	parser?: T,
-) => {
-	if (!cookies) return undefined;
+export const readCookie = <T extends ZodTypeAny>(key: string, parser: T) => {
+	const cookies = getServerData("cookies");
+	console.log("cookies", cookies);
 	const decodedCookie = decodeURIComponent(cookies);
 	const ca = decodedCookie.split(";");
 
@@ -35,10 +34,13 @@ export const readCookie = <T extends ZodTypeAny>(
 	const ret = ca.find((x) => x.trimStart().startsWith(name));
 	if (ret === undefined) return undefined;
 	const str = fromBase64(ret.substring(name.length));
-	return parser ? (parser.parse(JSON.parse(str)) as z.infer<T>) : str;
+	return parser.parse(JSON.parse(str)) as z.infer<T>;
 };
 
 export const useStoreValue = <T extends ZodTypeAny>(key: string, parser: T) => {
+	if (Platform.OS === "web" && typeof window === "undefined") {
+		return readCookie(key, parser);
+	}
 	const [val] = useMMKVString(key);
 	if (val === undefined) return val;
 	return parser.parse(JSON.parse(val)) as z.infer<T>;
@@ -49,6 +51,9 @@ export const storeValue = (key: string, value: unknown) => {
 };
 
 export const readValue = <T extends ZodTypeAny>(key: string, parser: T) => {
+	if (Platform.OS === "web" && typeof window === "undefined") {
+		return readCookie(key, parser);
+	}
 	const val = storage.getString(key);
 	if (val === undefined) return val;
 	return parser.parse(JSON.parse(val)) as z.infer<T>;

@@ -39,7 +39,8 @@ export const ErrorConsumer = ({ children, scope }: { children: ReactNode; scope:
 };
 export const useSetError = (key: string) => {
 	const { error, setError } = useContext(ErrorContext);
-	const set = (obj: Omit<Error, "key">) => setError({ key, ...obj });
+	const set = ({ key: nKey, ...obj }: Error & { key?: Error["key"] }) =>
+		setError({ key: nKey ?? key, ...obj });
 	const clearError = () => {
 		if (error?.key === key) setError(null);
 	};

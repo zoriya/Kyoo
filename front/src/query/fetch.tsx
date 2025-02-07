@@ -13,7 +13,7 @@ export const Fetch = <Data,>({
 	Loader: () => ReactElement;
 }): JSX.Element | null => {
 	const { data, isPaused, error } = useFetch(query);
-	const setError = useSetError();
+	const [setError] = useSetError("fetch");
 
 	if (error) {
 		if (error.status === 401 || error.status === 403) {
