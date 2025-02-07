@@ -1,4 +1,4 @@
-import type { ReactElement } from "react";
+import { useLayoutEffect, type ReactElement } from "react";
 import { useSetError } from "~/providers/error-provider";
 import { ErrorView } from "~/ui/errors";
 import { type QueryIdentifier, useFetch } from "./query";
@@ -15,14 +15,17 @@ export const Fetch = <Data,>({
 	const { data, isPaused, error } = useFetch(query);
 	const [setError] = useSetError("fetch");
 
-	if (error) {
-		if (error.status === 401 || error.status === 403) {
+	useLayoutEffect(() => {
+		if (isPaused) {
+			setError({ key: "offline" });
+		}
+		if (error && (error.status === 401 || error.status === 403)) {
 			setError({ key: "unauthorized", error });
 		}
+	}, [error, isPaused]);
+
+	if (error) {
 		return <ErrorView error={error} />;
-	}
-	if (isPaused) {
-		setError({ key: "offline" });
 	}
 	if (!data) return <Loader />;
 	return <Render {...data} />;
