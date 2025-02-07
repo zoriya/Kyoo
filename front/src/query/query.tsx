@@ -1,9 +1,12 @@
 import { QueryClient, dehydrate, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { setServerData } from "one";
 import { useContext } from "react";
+import { Platform } from "react-native";
 import type { z } from "zod";
 import { type KyooError, type Page, Paged } from "~/models";
-import { AccountContext, ssrApiUrl } from "~/providers/account-provider";
+import { AccountContext } from "~/providers/account-provider";
+
+const ssrApiUrl = process.env.KYOO_URL ?? "http://back/api";
 
 const cleanSlash = (str: string | null, keepFirst = false) => {
 	if (!str) return null;
@@ -21,6 +24,8 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(context: {
 	parser?: Parser;
 	signal: AbortSignal;
 }): Promise<z.infer<Parser>> => {
+	if (Platform.OS === "web" && typeof window === "undefined" && context.url.startsWith("/api"))
+		context.url = `${ssrApiUrl}/${context.url.substring(4)}`;
 	let resp: Response;
 	try {
 		resp = await fetch(context.url, {
@@ -55,11 +60,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(context: {
 			data = { message: error } as KyooError;
 		}
 		data.status = resp.status;
-		console.trace(
-			`Invalid response (${context.method ?? "GET"} ${context.url}):`,
-			data,
-			resp.status,
-		);
+		console.log(`Invalid response (${context.method ?? "GET"} ${context.url}):`, data, resp.status);
 		throw data as KyooError;
 	}
 
@@ -199,39 +200,41 @@ export const prefetch = async (...queries: QueryIdentifier[]) => {
 	const authToken = undefined;
 
 	await Promise.all(
-		queries.map((query) => {
-			const key = toQueryKey({
-				apiUrl: ssrApiUrl,
-				path: query.path,
-				params: query.params,
-			});
+		queries
+			.filter((x) => x.enabled !== false)
+			.map((query) => {
+				const key = toQueryKey({
+					apiUrl: ssrApiUrl,
+					path: query.path,
+					params: query.params,
+				});
 
-			if (query.infinite) {
-				return client.prefetchInfiniteQuery({
+				if (query.infinite) {
+					return client.prefetchInfiniteQuery({
+						queryKey: key,
+						queryFn: (ctx) =>
+							queryFn({
+								url: key.join("/").replace("/?", "?"),
+								parser: Paged(query.parser),
+								signal: ctx.signal,
+								authToken: authToken?.access_token ?? null,
+								...query.options,
+							}),
+						initialPageParam: undefined,
+					});
+				}
+				return client.prefetchQuery({
 					queryKey: key,
 					queryFn: (ctx) =>
 						queryFn({
 							url: key.join("/").replace("/?", "?"),
-							parser: Paged(query.parser),
+							parser: query.parser,
 							signal: ctx.signal,
 							authToken: authToken?.access_token ?? null,
 							...query.options,
 						}),
-					initialPageParam: undefined,
 				});
-			}
-			return client.prefetchQuery({
-				queryKey: key,
-				queryFn: (ctx) =>
-					queryFn({
-						url: key.join("/").replace("/?", "?"),
-						parser: query.parser,
-						signal: ctx.signal,
-						authToken: authToken?.access_token ?? null,
-						...query.options,
-					}),
-			});
-		}),
+			}),
 	);
 	setServerData("queryState", dehydrate(client));
 	return client;

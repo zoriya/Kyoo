@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { type ReactNode, createContext, useEffect, useMemo, useRef } from "react";
+import { type ReactNode, createContext, useContext, useEffect, useMemo, useRef } from "react";
 import { Platform } from "react-native";
 import { z } from "zod";
 import { type Account, AccountP, type Token, UserP } from "~/models";
@@ -8,14 +8,12 @@ import { removeAccounts, updateAccount } from "./account-store";
 import { useSetError } from "./error-provider";
 import { useStoreValue } from "./settings";
 
-export const ssrApiUrl = process.env.KYOO_URL ?? "http://back/api";
-
 export const AccountContext = createContext<{
 	apiUrl: string;
 	authToken: Token | null;
 	selectedAccount: Account | null;
 	accounts: (Account & { select: () => void; remove: () => void })[];
-}>({ apiUrl: ssrApiUrl, authToken: null, selectedAccount: null, accounts: [] });
+}>({ apiUrl: "/api", authToken: null, selectedAccount: null, accounts: [] });
 
 export const AccountProvider = ({ children }: { children: ReactNode }) => {
 	const [setError, clearError] = useSetError("account");
@@ -26,7 +24,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 		return {
 			apiUrl: Platform.OS === "web" ? "/api" : acc?.apiUrl!,
 			authToken: acc?.token ?? null,
-			selectedAccount: acc,
+			selectedAccount: acc ?? null,
 			accounts: accounts.map((account) => ({
 				...account,
 				select: () => updateAccount(account.id, { ...account, selected: true }),
@@ -51,6 +49,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 			authToken: ret.authToken?.access_token,
 		},
 	});
+	console.log(user);
 	// Use a ref here because we don't want the effect to trigger when the selected
 	// value has changed, only when the fetch result changed
 	// If we trigger the effect when the selected value change, we enter an infinite render loop
@@ -59,7 +58,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 	useEffect(() => {
 		if (!selectedRef.current || !userIsSuccess || userIsPlaceholder) return;
 		// The id is different when user is stale data, we need to wait for the use effect to invalidate the query.
-		if (user.id !== selectedRef.current.id) return;
+		if (user?.id !== selectedRef.current.id) return;
 		const nUser = { ...selectedRef.current, ...user };
 		updateAccount(nUser.id, nUser);
 	}, [user, userIsSuccess, userIsPlaceholder]);
@@ -82,4 +81,9 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 	}, [selectedId, queryClient]);
 
 	return <AccountContext.Provider value={ret}>{children}</AccountContext.Provider>;
+};
+
+export const useAccount = () => {
+	const { selectedAccount } = useContext(AccountContext);
+	return selectedAccount;
 };
