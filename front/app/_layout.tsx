@@ -1,6 +1,5 @@
-import { HydrationBoundary } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { Slot, getServerData } from "one";
+import { Slot } from "one";
 import { useServerHeadInsertion } from "one";
 import { StyleRegistryProvider, createStyleRegistry, useTheme } from "yoshiki/web";
 import { Providers } from "~/providers";
@@ -63,8 +62,6 @@ export default function Layout() {
 	const registry = createStyleRegistry();
 	useServerHeadInsertion(() => registry.flushToComponent());
 
-	const queryState = getServerData("queryState");
-
 	// TODO: change this lang attr
 	return (
 		<html lang="en-US">
@@ -82,12 +79,10 @@ export default function Layout() {
 
 			<body className="hoverEnabled">
 				<StyleRegistryProvider registry={registry}>
-					<HydrationBoundary state={queryState}>
-						<Providers>
-							<Slot />
-							<ReactQueryDevtools initialIsOpen={false} />
-						</Providers>
-					</HydrationBoundary>
+					<Providers>
+						<Slot />
+						<ReactQueryDevtools initialIsOpen={false} />
+					</Providers>
 				</StyleRegistryProvider>
 			</body>
 		</html>

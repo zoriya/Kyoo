@@ -8,12 +8,14 @@ import { removeAccounts, updateAccount } from "./account-store";
 import { useSetError } from "./error-provider";
 import { useStoreValue } from "./settings";
 
+export const ssrApiUrl = process.env.KYOO_URL ?? "http://back/api";
+
 export const AccountContext = createContext<{
 	apiUrl: string;
 	authToken: Token | null;
-	selectedAccount?: Account;
+	selectedAccount: Account | null;
 	accounts: (Account & { select: () => void; remove: () => void })[];
-}>(undefined!);
+}>({ apiUrl: ssrApiUrl, authToken: null, selectedAccount: null, accounts: [] });
 
 export const AccountProvider = ({ children }: { children: ReactNode }) => {
 	const [setError, clearError] = useSetError("account");

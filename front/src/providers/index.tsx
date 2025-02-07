@@ -1,4 +1,5 @@
-import { QueryClientProvider } from "@tanstack/react-query";
+import { HydrationBoundary, QueryClientProvider } from "@tanstack/react-query";
+import { getServerData } from "one";
 import { type ReactNode, useState } from "react";
 // import { useUserTheme } from "@kyoo/models";
 import { ThemeSelector } from "~/primitives/theme";
@@ -8,7 +9,11 @@ import { ErrorConsumer, ErrorProvider } from "./error-provider";
 
 const QueryProvider = ({ children }: { children: ReactNode }) => {
 	const [queryClient] = useState(() => createQueryClient());
-	return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+	return (
+		<QueryClientProvider client={queryClient}>
+			<HydrationBoundary state={getServerData("queryState")}>{children}</HydrationBoundary>
+		</QueryClientProvider>
+	);
 };
 
 const ThemeProvider = ({ children }: { children: ReactNode }) => {
