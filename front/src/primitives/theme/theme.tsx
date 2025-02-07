@@ -1,9 +1,9 @@
 import type { Property } from "csstype";
 import type { ReactNode } from "react";
 import { Platform, type TextStyle } from "react-native";
-import { type Theme, ThemeProvider, useAutomaticTheme } from "yoshiki";
+import { type Theme, ThemeProvider as WebThemeProvider, useAutomaticTheme } from "yoshiki";
 import "yoshiki";
-import { useTheme, useYoshiki } from "yoshiki/native";
+import { ThemeProvider, useTheme, useYoshiki } from "yoshiki/native";
 import "yoshiki/native";
 import { catppuccin } from "./catppuccin";
 
@@ -127,7 +127,11 @@ export const ThemeSelector = ({
 }) => {
 	const newTheme = selectMode({ ...catppuccin, font }, theme);
 
-	return <ThemeProvider theme={newTheme}>{children as any}</ThemeProvider>;
+	return (
+		<ThemeProvider theme={newTheme}>
+			<WebThemeProvider theme={newTheme}>{children as any}</WebThemeProvider>
+		</ThemeProvider>
+	);
 };
 
 export type YoshikiFunc<T> = (props: ReturnType<typeof useYoshiki>) => T;
@@ -190,4 +194,3 @@ export const ContrastArea = ({
 export const alpha = (color: Property.Color, alpha: number) => {
 	return color + Math.round(alpha * 255).toString(16);
 };
-

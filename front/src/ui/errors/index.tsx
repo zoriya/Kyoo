@@ -2,7 +2,7 @@ import type { FC } from "react";
 import type { KyooError } from "~/models";
 import { ConnectionError } from "./connection";
 import { OfflineView } from "./offline";
-import { SetupPage } from "./setup";
+// import { SetupPage } from "./setup";
 import { Unauthorized } from "./unauthorized";
 
 export * from "./error";
@@ -15,7 +15,7 @@ export type ErrorHandler = {
 
 export const errorHandlers: Record<string, ErrorHandler> = {
 	unauthorized: { view: Unauthorized, forbid: "app" },
-	setup: { view: SetupPage, forbid: "setup" },
+	// setup: { view: SetupPage, forbid: "setup" },
 	connection: { view: ConnectionError },
 	offline: { view: OfflineView },
 };
