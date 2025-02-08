@@ -44,6 +44,8 @@
 		"vite-plugin-svgr": "^4.3.0"
 	},
 	"patchedDependencies": {
-		"yoshiki@1.2.14": "patches/yoshiki@1.2.14.patch"
+		"yoshiki@1.2.14": "patches/yoshiki@1.2.14.patch",
+		"react-native-svg@15.11.1": "patches/react-native-svg@15.11.1.patch",
+		"one@1.1.426": "patches/one@1.1.426.patch"
 	}
 }
