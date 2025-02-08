@@ -5,6 +5,8 @@ import { useYoshiki } from "yoshiki/native";
 import { Button, Icon, Link, P, ts } from "~/primitives";
 import { useAccount } from "~/providers/account-provider";
 
+console.log(Register);
+
 export const Unauthorized = ({ missing }: { missing: string[] }) => {
 	const { t } = useTranslation();
 	const { css } = useYoshiki();

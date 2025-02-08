@@ -1,0 +1,46 @@
+diff --git a/node_modules/react-native-svg/.bun-tag-55c72d773cdb59fb b/.bun-tag-55c72d773cdb59fb
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/lib/commonjs/utils/fetchData.js b/lib/commonjs/utils/fetchData.js
+index 207b2937d048ca9c22b58dd7be3641b5a7262274..385556e71e6bf0ea1c843c40065520131be59907 100644
+--- a/lib/commonjs/utils/fetchData.js
++++ b/lib/commonjs/utils/fetchData.js
+@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
+ });
+ exports.fetchText = fetchText;
+ var _reactNative = require("react-native");
+-var _buffer = require("buffer");
++
+ async function fetchText(uri) {
+   if (!uri) {
+     return null;
+@@ -23,7 +23,7 @@ const decodeBase64Image = uri => {
+   const splitContent = decoded.split(';')[1].split(',');
+   const dataType = splitContent[0];
+   const content = splitContent.slice(1).join(',');
+-  return _buffer.Buffer.from(content, dataType).toString('utf-8');
++  return Buffer.from(content, dataType).toString('utf-8');
+ };
+ function dataUriToXml(uri) {
+   try {
+diff --git a/lib/module/utils/fetchData.js b/lib/module/utils/fetchData.js
+index 12b68966cbcfd9a18cae66824dfe7aec60d14a80..3d2698c3a982e90b795c35c05cf5efb2910e02c9 100644
+--- a/lib/module/utils/fetchData.js
++++ b/lib/module/utils/fetchData.js
+@@ -1,5 +1,5 @@
+ import { Platform } from 'react-native';
+-import { Buffer } from 'buffer';
++
+ export async function fetchText(uri) {
+   if (!uri) {
+     return null;
+diff --git a/src/utils/fetchData.ts b/src/utils/fetchData.ts
+index d141be31c924bd1d3ec287ad4e291db018b4bb72..0dc3d95ca382151a45af41f8ed499d1403a1f65c 100644
+--- a/src/utils/fetchData.ts
++++ b/src/utils/fetchData.ts
+@@ -1,5 +1,4 @@
+ import { Platform } from 'react-native';
+-import { Buffer } from 'buffer';
+ 
+ export async function fetchText(uri?: string): Promise<string | null> {
+   if (!uri) {
