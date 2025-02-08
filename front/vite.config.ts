@@ -1,5 +1,6 @@
 import { one } from "one/vite";
 import type { UserConfig } from "vite";
+import svgr from "vite-plugin-svgr";
 
 export default {
 	ssr: {
@@ -25,6 +26,12 @@ export default {
 				yoshiki: {
 					"**/*.tsx": ["jsx"],
 				},
+			},
+		}),
+		svgr({
+			include: "**/*.svg",
+			svgrOptions: {
+				native: true,
 			},
 		}),
 	],
