@@ -1,6 +1,5 @@
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { Slot } from "one";
-import { useServerHeadInsertion } from "one";
+import { Slot, useServerHeadInsertion  } from "one";
 import { StyleRegistryProvider, createStyleRegistry } from "yoshiki/web";
 import { Providers } from "~/providers";
 

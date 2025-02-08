@@ -36,6 +36,8 @@
     },
   },
   "patchedDependencies": {
+    "one@1.1.426": "patches/one@1.1.426.patch",
+    "react-native-svg@15.11.1": "patches/react-native-svg@15.11.1.patch",
     "yoshiki@1.2.14": "patches/yoshiki@1.2.14.patch",
   },
   "packages": {
