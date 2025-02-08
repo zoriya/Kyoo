@@ -18,18 +18,16 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import type { UrlObject } from "node:url";
+import { useLinkTo } from "one";
 import { type ReactNode, forwardRef } from "react";
 import {
-	Linking,
 	Platform,
 	Pressable,
 	type PressableProps,
+	Text,
 	type TextProps,
 	type View,
 } from "react-native";
-// import { TextLink, useLink } from "solito/link";
-// import { parseNextPath } from "solito/router";
 import { useTheme, useYoshiki } from "yoshiki/native";
 import { alpha } from "./theme";
 
@@ -37,47 +35,30 @@ export const A = ({
 	href,
 	replace,
 	children,
-	target,
 	...props
 }: TextProps & {
-	href?: string | UrlObject | null;
+	href?: string | null;
 	target?: string;
 	replace?: boolean;
 	children: ReactNode;
 }) => {
 	const { css, theme } = useYoshiki();
+	const linkProps = useLinkTo({ href: href ?? "#", replace });
 
 	return (
-		<TextLink
-			href={href ?? ""}
-			target={target}
-			replace={replace as any}
-			experimental={
-				replace
-					? {
-							nativeBehavior: "stack-replace",
-							isNestedNavigator: true,
-						}
-					: undefined
-			}
-			textProps={css(
-				[
-					{
-						fontFamily: theme.font.normal,
-						color: theme.link,
-					},
-					{
-						userSelect: "text",
-					} as any,
-				],
+		<Text
+			{...linkProps}
+			{...css(
 				{
-					hrefAttrs: { target },
-					...props,
+					fontFamily: theme.font.normal,
+					color: theme.link,
+					userSelect: "text",
 				},
+				props,
 			)}
 		>
 			{children}
-		</TextLink>
+		</Text>
 	);
 };
 
@@ -102,20 +83,19 @@ export const PressableFeedback = forwardRef<View, PressableProps>(function Feedb
 });
 
 export const Link = ({
-	href: link,
+	href,
 	replace,
-	target,
 	children,
 	...props
-}: { href?: string | UrlObject | null; target?: string; replace?: boolean } & PressableProps) => {
-	const href = link && typeof link === "object" ? parseNextPath(link) : link;
-	const linkProps = useLink({
-		href: href ?? "#",
-		replace,
-		experimental: { nativeBehavior: "stack-replace", isNestedNavigator: true },
-	});
-	// @ts-ignore Missing hrefAttrs type definition.
-	linkProps.hrefAttrs = { ...linkProps.hrefAttrs, target };
+}: {
+	href?: string | null;
+	replace?: boolean;
+	download?: boolean;
+	target?: string;
+} & PressableProps) => {
+	const linkProps = useLinkTo({ href: href ?? "#", replace });
+
+	console.warn(children);
 	return (
 		<PressableFeedback
 			{...linkProps}
@@ -123,7 +103,6 @@ export const Link = ({
 			onPress={(e?: any) => {
 				props?.onPress?.(e);
 				if (e?.defaultPrevented) return;
-				if (Platform.OS !== "web" && href?.includes("://")) Linking.openURL(href);
 				else linkProps.onPress(e);
 			}}
 		>
