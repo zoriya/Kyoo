@@ -20,7 +20,7 @@ export const Unauthorized = ({ missing }: { missing: string[] }) => {
 					as={Link}
 					href={"/register"}
 					text={t("login.register")}
-					licon={<Icon icon={Register} {...css({ marginRight: ts(2) })} />}
+					// licon={<Icon icon={Register} {...css({ marginRight: ts(2) })} />}
 				/>
 			</View>
 		);
@@ -45,7 +45,7 @@ export const Unauthorized = ({ missing }: { missing: string[] }) => {
 				alignItems: "center",
 			})}
 		>
-			<P>{t("errors.unauthorized", { permission: missing?.join(", ") })}</P>
+			<P>{t("errors.unauthorized", { permission: missing?.join(", ") ?? "" })}</P>
 		</View>
 	);
 };
