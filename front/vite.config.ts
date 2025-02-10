@@ -6,6 +6,9 @@ export default {
 	ssr: {
 		noExternal: ["@tanstack/react-query", "@tanstack/react-query-devtools"],
 	},
+	esbuild: {
+		include: [/.tsx?$/],
+	},
 	plugins: [
 		one({
 			deps: {
