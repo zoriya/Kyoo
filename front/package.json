@@ -28,7 +28,7 @@
 		"react-native-mmkv": "^3.2.0",
 		"react-native-reanimated": "~3.16.7",
 		"react-native-screens": "4.6.0",
-		"react-native-svg": "^15.11.1",
+		"react-native-svg": "zoriya/react-native-svg#build",
 		"react-native-web": "^0.19.13",
 		"yoshiki": "1.2.14",
 		"zod": "^3.24.1"
@@ -44,7 +44,6 @@
 	},
 	"patchedDependencies": {
 		"yoshiki@1.2.14": "patches/yoshiki@1.2.14.patch",
-		"react-native-svg@15.11.1": "patches/react-native-svg@15.11.1.patch",
 		"one@1.1.437": "patches/one@1.1.437.patch"
 	}
 }
