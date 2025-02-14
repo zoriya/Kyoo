@@ -7,6 +7,7 @@ import { I18nextProvider } from "react-i18next";
 export const TranslationsProvider = ({ children }: { children: ReactNode }) => {
 	const val = useMemo(() => {
 		const i18n = i18next.createInstance();
+		// 	TODO: use https://github.com/i18next/i18next-browser-languageDetector
 		i18n.use(HttpApi).init<HttpBackendOptions>({
 			interpolation: {
 				escapeValue: false,

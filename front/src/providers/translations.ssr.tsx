@@ -12,6 +12,7 @@ export const supportedLanguages = readdirSync(
 export const TranslationsProvider = ({ children }: { children: ReactNode }) => {
 	const val = useMemo(() => {
 		const i18n = i18next.createInstance();
+		// 	TODO: make a real language detector
 		i18n.use(FsBackend).init<FsBackendOptions>({
 			interpolation: {
 				escapeValue: false,
