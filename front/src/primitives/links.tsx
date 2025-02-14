@@ -95,7 +95,6 @@ export const Link = ({
 } & PressableProps) => {
 	const linkProps = useLinkTo({ href: href ?? "#", replace });
 
-	console.warn(children);
 	return (
 		<PressableFeedback
 			{...linkProps}
