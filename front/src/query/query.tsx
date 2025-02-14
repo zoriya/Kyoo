@@ -4,7 +4,7 @@ import { useContext } from "react";
 import { Platform } from "react-native";
 import type { z } from "zod";
 import { type KyooError, type Page, Paged } from "~/models";
-import { AccountContext } from "~/providers/account-provider";
+import { AccountContext } from "~/providers/account-context";
 
 const ssrApiUrl = process.env.KYOO_URL ?? "http://back/api";
 

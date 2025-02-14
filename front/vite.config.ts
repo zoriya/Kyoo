@@ -1,7 +1,7 @@
+import { resolvePath } from "@vxrn/resolve";
 import { one } from "one/vite";
 import type { UserConfig } from "vite";
 import svgr from "vite-plugin-svgr";
-import { resolvePath } from '@vxrn/resolve'
 
 export default {
 	ssr: {
@@ -12,7 +12,9 @@ export default {
 	},
 	resolve: {
 		alias: {
-			'@react-native/assets-registry/registry': resolvePath('react-native-web/dist/modules/AssetRegistry/index.js'),
+			"@react-native/assets-registry/registry": resolvePath(
+				"react-native-web/dist/modules/AssetRegistry/index.js",
+			),
 		},
 	},
 	plugins: [
@@ -43,5 +45,6 @@ export default {
 				rewrite: (path) => path.replace(/^\/api/, ""),
 			},
 		},
+		allowedHosts: true,
 	},
 } satisfies UserConfig;

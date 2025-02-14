@@ -25,6 +25,13 @@ export const LoginPage: QueryPage<{ apiUrl?: string; error?: string }> = ({
 	const { t } = useTranslation();
 	const { css } = useYoshiki();
 
+	useEffect(() => {
+		if (!apiUrl && Platform.OS !== "web")
+			router.replace("/server-url", undefined, {
+				experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
+			});
+	}, [apiUrl, router]);
+
 	return (
 		<FormPage apiUrl={apiUrl}>
 			<H1>{t("login.login")}</H1>

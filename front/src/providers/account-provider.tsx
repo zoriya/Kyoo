@@ -1,19 +1,12 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { type ReactNode, createContext, useContext, useEffect, useMemo, useRef } from "react";
+import { type ReactNode, useContext, useEffect, useMemo, useRef } from "react";
 import { Platform } from "react-native";
 import { z } from "zod";
-import { type Account, AccountP, type Token, UserP } from "~/models";
+import { AccountP, UserP } from "~/models";
 import { useFetch } from "~/query";
 import { removeAccounts, updateAccount } from "./account-store";
 import { useSetError } from "./error-provider";
 import { useStoreValue } from "./settings";
-
-export const AccountContext = createContext<{
-	apiUrl: string;
-	authToken: Token | null;
-	selectedAccount: Account | null;
-	accounts: (Account & { select: () => void; remove: () => void })[];
-}>({ apiUrl: "/api", authToken: null, selectedAccount: null, accounts: [] });
 
 export const AccountProvider = ({ children }: { children: ReactNode }) => {
 	const [setError, clearError] = useSetError("account");
@@ -63,6 +56,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 		updateAccount(nUser.id, nUser);
 	}, [user, userIsSuccess, userIsPlaceholder]);
 
+	const queryClient = useQueryClient();
 	useEffect(() => {
 		if (!userError) return clearError();
 		setError({
@@ -71,11 +65,11 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 				queryClient.resetQueries();
 			},
 		});
-	}, [userError]);
+	}, [userError, queryClient, setError, clearError]);
 
-	const queryClient = useQueryClient();
 	const selectedId = ret.selectedAccount?.id;
 	useEffect(() => {
+		selectedId;
 		// if the user change account (or connect/disconnect), reset query cache.
 		queryClient.resetQueries();
 	}, [selectedId, queryClient]);
