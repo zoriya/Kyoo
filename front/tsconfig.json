@@ -11,6 +11,7 @@
 		"noEmit": true,
 		"module": "Preserve",
 		"moduleResolution": "Bundler",
+		"target": "ES2017",
 		"preserveSymlinks": true,
 		"skipLibCheck": true,
 		"jsx": "react-jsx",
