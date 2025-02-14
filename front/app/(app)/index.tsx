@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 import { type LibraryItem, LibraryItemP } from "~/models";
 import { P } from "~/primitives";
@@ -9,13 +11,17 @@ export async function loader() {
 
 export default function Header() {
 	const { css } = useYoshiki();
+	const { t } = useTranslation();
 
 	return (
-		<Fetch
-			query={Header.query()}
-			Render={({ name }) => <P {...css({ bg: "red" })}>{name}</P>}
-			Loader={() => <P>Loading</P>}
-		/>
+		<View>
+			<P>{t("home.recommended")}</P>
+			<Fetch
+				query={Header.query()}
+				Render={({ name }) => <P {...css({ bg: "red" })}>{name}</P>}
+				Loader={() => <P>Loading</P>}
+			/>
+		</View>
 	);
 }
 
