@@ -1,37 +1,10 @@
-/*
- * Kyoo - A portable and vast media library solution.
- * Copyright (c) Kyoo.
- *
- * See AUTHORS.md and LICENSE file in the project root for full license information.
- *
- * Kyoo is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Kyoo is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
- */
-
-import {
-	type QueryIdentifier,
-	type QueryPage,
-	type ServerInfo,
-	ServerInfoP,
-	useFetch,
-} from "@kyoo/models";
-import { Button, H1, HR, Input, Link, P, ts } from "@kyoo/primitives";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ImageBackground, Platform, View } from "react-native";
-import { useRouter } from "solito/router";
 import { type Theme, percent, useYoshiki } from "yoshiki/native";
-import { DefaultLayout } from "../layout";
+import { type ServerInfo, ServerInfoP } from "~/models";
+import { Button, H1, HR, Input, Link, P, ts } from "~/primitives";
+import { DefaultLayout } from "../../../packages/ui/src/layout";
 
 export const cleanApiUrl = (apiUrl: string) => {
 	if (Platform.OS === "web") return undefined;
