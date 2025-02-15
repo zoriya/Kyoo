@@ -1,5 +1,5 @@
 import { Slot } from "one";
-import { ErrorConsumer } from "~/providers/error-provider";
+import { ErrorConsumer } from "~/providers/error-consumer";
 
 export default function Layout() {
 	return (

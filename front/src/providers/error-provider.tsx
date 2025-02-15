@@ -8,7 +8,6 @@ import {
 	useState,
 } from "react";
 import type { KyooError } from "~/models";
-import { ErrorView, errorHandlers } from "~/ui/errors";
 
 type Error = {
 	key: string;
@@ -16,7 +15,7 @@ type Error = {
 	retry?: () => void;
 };
 
-const ErrorContext = createContext<Error | null>(null);
+export const ErrorContext = createContext<Error | null>(null);
 const ErrorSetterContext = createContext<{
 	setError: (error: Error | null) => void;
 	clearError: (key: string) => void;
@@ -45,16 +44,6 @@ export const ErrorProvider = ({ children }: { children: ReactNode }) => {
 	);
 };
 
-export const ErrorConsumer = ({ children, scope }: { children: ReactNode; scope: string }) => {
-	const error = useContext(ErrorContext);
-	if (!error) return children;
-
-	const handler = errorHandlers[error.key] ?? { view: ErrorView };
-	if (handler.forbid && handler.forbid !== scope) return children;
-	const Handler = handler.view;
-	const { key, ...val } = error;
-	return <Handler {...(val as any)} />;
-};
 export const useSetError = (key: string) => {
 	const { setError, clearError } = useContext(ErrorSetterContext);
 	const set = ({ key: nKey, ...obj }: Omit<Error, "key"> & { key?: Error["key"] }) =>
