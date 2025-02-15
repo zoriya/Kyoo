@@ -1,6 +1,6 @@
-import { useLayoutEffect, type ReactElement } from "react";
+import { type ReactElement, useLayoutEffect } from "react";
 import { useSetError } from "~/providers/error-provider";
-import { ErrorView } from "~/ui/errors";
+import { ErrorView } from "~/ui/errors/error";
 import { type QueryIdentifier, useFetch } from "./query";
 
 export const Fetch = <Data,>({

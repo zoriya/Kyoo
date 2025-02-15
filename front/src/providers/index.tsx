@@ -5,12 +5,9 @@ import { type ReactNode, useMemo, useState } from "react";
 import { ThemeSelector } from "~/primitives/theme";
 import { createQueryClient } from "~/query";
 import { AccountProvider } from "./account-provider";
-import { ErrorConsumer, ErrorProvider } from "./error-provider";
-
-const { TranslationsProvider } =
-	typeof window === "undefined"
-		? await import("./translations.ssr")
-		: await import("./translations");
+import { ErrorConsumer } from "./error-consumer";
+import { ErrorProvider } from "./error-provider";
+import { TranslationsProvider } from "./translations";
 
 const QueryProvider = ({ children }: { children: ReactNode }) => {
 	const [queryClient] = useState(() => createQueryClient());
