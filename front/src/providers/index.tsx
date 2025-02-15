@@ -9,6 +9,11 @@ import { ErrorConsumer } from "./error-consumer";
 import { ErrorProvider } from "./error-provider";
 import { TranslationsProvider } from "./translations";
 
+// const { TranslationsProvider } =
+// 	typeof window === "undefined"
+// 		? await import("./translations.ssr")
+// 		: await import("./translations");
+//
 const QueryProvider = ({ children }: { children: ReactNode }) => {
 	const [queryClient] = useState(() => createQueryClient());
 	return (
