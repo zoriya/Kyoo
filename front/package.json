@@ -6,6 +6,8 @@
 	"scripts": {
 		"dev": "one dev",
 		"build": "one build",
+		"apk": "eas build --profile preview --platform android --non-interactive --json",
+		"apk:dev": "eas build --profile development --platform android --non-interactive",
 		"serve": "one serve",
 		"lint": "biome lint .",
 		"lint:fix": "biome lint . --write",
@@ -40,6 +42,7 @@
 		"@tanstack/react-query-devtools": "^5.66.0",
 		"@types/react": "^19.0.8",
 		"@types/react-dom": "^19.0.3",
+		"expo-dev-client": "^5.0.12",
 		"typescript": "5.7.3",
 		"vite": "^6.1.0",
 		"vite-plugin-svgr": "^4.3.0"

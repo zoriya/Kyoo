@@ -1,23 +1,3 @@
-/*
- * Kyoo - A portable and vast media library solution.
- * Copyright (c) Kyoo.
- *
- * See AUTHORS.md and LICENSE file in the project root for full license information.
- *
- * Kyoo is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Kyoo is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
- */
-
 import type { ExpoConfig } from "expo/config";
 
 const IS_DEV = process.env.APP_VARIANT === "development";
@@ -34,7 +14,7 @@ const splash = {
 	},
 } as const;
 
-const config: ExpoConfig = {
+export const expo: ExpoConfig = {
 	name: IS_DEV ? "Kyoo Development" : "Kyoo",
 	slug: "kyoo",
 	scheme: "kyoo",
@@ -65,11 +45,11 @@ const config: ExpoConfig = {
 	runtimeVersion: {
 		policy: "sdkVersion",
 	},
-	// extra: {
-	// 	eas: {
-	// 		projectId: "55de6b52-c649-4a15-9a45-569ff5ed036c",
-	// 	},
-	// },
+	extra: {
+		eas: {
+			projectId: "55de6b52-c649-4a15-9a45-569ff5ed036c",
+		},
+	},
 	plugins: [
 		"vxrn/expo-plugin",
 		[
@@ -89,5 +69,3 @@ const config: ExpoConfig = {
 		// ],
 	],
 };
-
-export default config;
