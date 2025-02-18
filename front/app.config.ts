@@ -52,15 +52,15 @@ export const expo: ExpoConfig = {
 	},
 	plugins: [
 		"vxrn/expo-plugin",
-		[
-			"expo-build-properties",
-			{
-				android: {
-					usesCleartextTraffic: true,
-				},
-			},
-		],
-		"expo-localization",
+		// [
+		// 	"expo-build-properties",
+		// 	{
+		// 		android: {
+		// 			usesCleartextTraffic: true,
+		// 		},
+		// 	},
+		// ],
+		// "expo-localization",
 		// [
 		// 	"react-native-video",
 		// 	{
