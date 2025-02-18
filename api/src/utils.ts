@@ -10,3 +10,7 @@ export const comment = (str: TemplateStringsArray, ...values: any[]) =>
 export function getYear(date: string) {
 	return new Date(date).getUTCFullYear();
 }
+
+export type Prettify<T> = {
+	[K in keyof T]: Prettify<T[K]>;
+} & {};
