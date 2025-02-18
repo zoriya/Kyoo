@@ -9,10 +9,10 @@ import {
 } from "../entry";
 
 export const Entry = t.Union([Episode, MovieEntry, Special]);
-export type Entry = typeof Entry.static;
+export type Entry = Episode | MovieEntry | Special;
 
 export const SeedEntry = t.Union([SeedEpisode, SeedMovieEntry, SeedSpecial]);
-export type SeedEntry = typeof SeedEntry.static;
+export type SeedEntry = SeedEpisode | SeedMovieEntry | SeedSpecial;
 
 export * from "./episode";
 export * from "./movie-entry";
