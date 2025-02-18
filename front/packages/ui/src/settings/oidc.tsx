@@ -30,7 +30,7 @@ import { Button, IconButton, Link, Skeleton, tooltip, ts } from "@kyoo/primitive
 import { useTranslation } from "react-i18next";
 import { ImageBackground } from "react-native";
 import { rem, useYoshiki } from "yoshiki/native";
-import { ErrorView } from "../errors";
+import { ErrorView } from "../../../../src/ui/errors";
 import { Preference, SettingsContainer } from "./base";
 
 import Badge from "@material-symbols/svg-400/outlined/badge.svg";

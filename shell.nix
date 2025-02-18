@@ -23,9 +23,8 @@
 in
   pkgs.mkShell {
     packages = with pkgs; [
-      nodejs-18_x
-      nodePackages.yarn
-      nodePackages.eas-cli
+      nodejs
+      bun
       dotnet
       csharpier
       python
