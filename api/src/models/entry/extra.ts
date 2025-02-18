@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { comment } from "~/utils";
+import { type Prettify, comment } from "~/utils";
 import { SeedImage } from "../utils";
 import { Resource } from "../utils/resource";
 import { BaseEntry } from "./base-entry";
@@ -31,7 +31,7 @@ export const BaseExtra = t.Intersect(
 );
 
 export const Extra = t.Intersect([Resource(), BaseExtra]);
-export type Extra = typeof Extra.static;
+export type Extra = Prettify<typeof Extra.static>;
 
 export const SeedExtra = t.Intersect([
 	t.Omit(BaseExtra, ["thumbnail", "createdAt"]),
@@ -41,4 +41,4 @@ export const SeedExtra = t.Intersect([
 		video: t.String({ format: "uuid" }),
 	}),
 ]);
-export type SeedExtra = typeof SeedExtra.static;
+export type SeedExtra = Prettify<typeof SeedExtra.static>;

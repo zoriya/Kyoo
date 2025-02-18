@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { comment } from "../../utils";
+import { comment, Prettify } from "../../utils";
 import {
 	ExternalId,
 	Image,
@@ -42,7 +42,7 @@ export const MovieEntry = t.Intersect([
 	BaseMovieEntry,
 	MovieEntryTranslation,
 ]);
-export type MovieEntry = typeof MovieEntry.static;
+export type MovieEntry = Prettify<typeof MovieEntry.static>;
 
 export const SeedMovieEntry = t.Intersect([
 	t.Omit(BaseMovieEntry, ["thumbnail", "createdAt", "nextRefresh"]),
@@ -58,4 +58,4 @@ export const SeedMovieEntry = t.Intersect([
 		videos: t.Optional(t.Array(t.String({ format: "uuid" }))),
 	}),
 ]);
-export type SeedMovieEntry = typeof SeedMovieEntry.static;
+export type SeedMovieEntry = Prettify<typeof SeedMovieEntry.static>;
