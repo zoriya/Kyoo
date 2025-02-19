@@ -49,6 +49,10 @@ const extraFilters: FilterDef = {
 	runtime: { column: entries.runtime, type: "float" },
 };
 
+const unknownFilters: FilterDef = {
+	runtime: { column: entries.runtime, type: "float" },
+};
+
 const entrySort = Sort(
 	[
 		"order",
@@ -71,7 +75,7 @@ const extraSort = Sort(["slug", "name", "runtime", "createdAt"], {
 });
 
 async function getEntries(
-	serie: string,
+	serie: string | null,
 	{
 		after,
 		limit,
@@ -95,7 +99,7 @@ async function getEntries(
 			.where(
 				and(
 					eq(shows.kind, "serie"),
-					isUuid(serie) ? eq(shows.id, serie) : eq(shows.slug, serie),
+					isUuid(serie!) ? eq(shows.id, serie!) : eq(shows.slug, serie!),
 				),
 			)
 			.limit(1),
@@ -121,7 +125,7 @@ async function getEntries(
 		...entryCol
 	} = getColumns(entries);
 	return await db
-		.with(show)
+		.with(...(serie ? [show] : []))
 		.select({
 			...entryCol,
 			...transCol,
@@ -145,7 +149,7 @@ async function getEntries(
 		.innerJoin(transQ, eq(entries.pk, transQ.pk))
 		.where(
 			and(
-				eq(entries.showPk, show.pk),
+				serie ? eq(entries.showPk, show.pk) : undefined,
 				filter,
 				query ? sql`${transQ.name} %> ${query}::text` : undefined,
 				keysetPaginate({ table: entries, after, sort }),
@@ -270,6 +274,40 @@ export const entriesH = new Elysia()
 			},
 		},
 	)
-	.get("/unknowns/:id", () => "hello" as unknown as UnknownEntry, {
-		response: { 200: "unknown_entry" },
-	});
+	.get(
+		"/unknowns",
+		async ({
+			query: { limit, after, query, sort, filter },
+			request: { url },
+		}) => {
+			const items = (await getEntries(null, {
+				limit,
+				after,
+				query,
+				sort: sort as any,
+				filter: and(eq(entries.kind, "unknown"), filter),
+				languages: ["extra"],
+			})) as UnknownEntry[];
+
+			return createPage(items, { url, sort, limit });
+		},
+		{
+			detail: { description: "Get unknown/unmatch videos." },
+			query: t.Object({
+				sort: extraSort,
+				filter: t.Optional(Filter({ def: unknownFilters })),
+				query: t.Optional(t.String({ description: desc.query })),
+				limit: t.Integer({
+					minimum: 1,
+					maximum: 250,
+					default: 50,
+					description: "Max page size.",
+				}),
+				after: t.Optional(t.String({ description: desc.after })),
+			}),
+			response: {
+				200: Page(UnknownEntry),
+				422: KError,
+			},
+		},
+	);
