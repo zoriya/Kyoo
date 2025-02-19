@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { comment, Prettify } from "../../utils";
+import { type Prettify, comment } from "~/utils";
 import {
 	ExternalId,
 	Image,
