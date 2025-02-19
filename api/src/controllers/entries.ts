@@ -6,6 +6,7 @@ import { entries, entryTranslations, shows } from "~/db/schema";
 import { getColumns, sqlarr } from "~/db/utils";
 import {
 	Entry,
+	EntryKind,
 	Episode,
 	Extra,
 	ExtraType,
@@ -82,7 +83,7 @@ async function getEntries(
 		filter: SQL | undefined;
 		languages: string[];
 	},
-) {
+): Promise<(Entry | Extra | UnknownEntry)[]> {
 	const show = db.$with("serie").as(
 		db
 			.select({ pk: shows.pk })
@@ -104,13 +105,27 @@ async function getEntries(
 			sql`array_position(${sqlarr(languages)}, ${entryTranslations.language})`,
 		)
 		.as("t");
-	const { pk, ...transCol } = getColumns(transQ);
+	const { pk, name, ...transCol } = getColumns(transQ);
 
+	const { kind, externalId, order, seasonNumber, episodeNumber, extraKind, ...entryCol } = getColumns(entries);
 	return await db
 		.with(show)
 		.select({
-			...getColumns(entries),
+			...entryCol,
 			...transCol,
+			// specials don't have an `episodeNumber` but a `number` field.
+			number: sql<number>`${episodeNumber}`.as("order"),
+
+			// merge `extraKind` into `kind`
+			kind: sql<EntryKind>`case when ${kind} = 'extra' then ${extraKind} else ${kind} end`.as("kind"),
+			isExtra: sql<boolean>`${kind} = "extra"`.as("isExtra"),
+
+			// assign more restrained types to make typescript happy.
+			externalId: sql<any>`${externalId}`.as("externalId"),
+			order: sql<number>`${order}`.as("order"),
+			seasonNumber: sql<number>`${seasonNumber}`.as("order"),
+			episodeNumber: sql<number>`${episodeNumber}`.as("order"),
+			name: sql<string>`${name}`.as("name"),
 		})
 		.from(entries)
 		.innerJoin(transQ, eq(entries.pk, transQ.pk))
@@ -164,7 +179,8 @@ export const entriesH = new Elysia()
 					filter,
 				),
 				languages: langs,
-			});
+			}) as Entry[];
+
 			return createPage(items, { url, sort, limit });
 		},
 		{
