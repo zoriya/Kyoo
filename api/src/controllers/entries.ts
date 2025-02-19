@@ -6,7 +6,7 @@ import { entries, entryTranslations, shows } from "~/db/schema";
 import { getColumns, sqlarr } from "~/db/utils";
 import {
 	Entry,
-	EntryKind,
+	type EntryKind,
 	Episode,
 	Extra,
 	ExtraType,
@@ -66,6 +66,10 @@ const entrySort = Sort(
 	},
 );
 
+const extraSort = Sort(["slug", "name", "runtime", "createdAt"], {
+	default: ["slug"],
+});
+
 async function getEntries(
 	serie: string,
 	{
@@ -107,7 +111,15 @@ async function getEntries(
 		.as("t");
 	const { pk, name, ...transCol } = getColumns(transQ);
 
-	const { kind, externalId, order, seasonNumber, episodeNumber, extraKind, ...entryCol } = getColumns(entries);
+	const {
+		kind,
+		externalId,
+		order,
+		seasonNumber,
+		episodeNumber,
+		extraKind,
+		...entryCol
+	} = getColumns(entries);
 	return await db
 		.with(show)
 		.select({
@@ -117,7 +129,9 @@ async function getEntries(
 			number: sql<number>`${episodeNumber}`.as("order"),
 
 			// merge `extraKind` into `kind`
-			kind: sql<EntryKind>`case when ${kind} = 'extra' then ${extraKind} else ${kind} end`.as("kind"),
+			kind: sql<EntryKind>`case when ${kind} = 'extra' then ${extraKind} else ${kind} end`.as(
+				"kind",
+			),
 			isExtra: sql<boolean>`${kind} = "extra"`.as("isExtra"),
 
 			// assign more restrained types to make typescript happy.
@@ -168,7 +182,7 @@ export const entriesH = new Elysia()
 			request: { url },
 		}) => {
 			const langs = processLanguages(languages);
-			const items = await getEntries(id, {
+			const items = (await getEntries(id, {
 				limit,
 				after,
 				query,
@@ -179,7 +193,7 @@ export const entriesH = new Elysia()
 					filter,
 				),
 				languages: langs,
-			}) as Entry[];
+			})) as Entry[];
 
 			return createPage(items, { url, sort, limit });
 		},
@@ -212,9 +226,50 @@ export const entriesH = new Elysia()
 			},
 		},
 	)
-	.get("/extras/:id", () => "hello" as unknown as Extra, {
-		response: { 200: "extra" },
-	})
+	.get(
+		"/series/:id/extras",
+		async ({
+			params: { id },
+			query: { limit, after, query, sort, filter },
+			request: { url },
+		}) => {
+			const items = (await getEntries(id, {
+				limit,
+				after,
+				query,
+				sort: sort as any,
+				filter: and(eq(entries.kind, "extra"), filter),
+				languages: ["extra"],
+			})) as Extra[];
+
+			return createPage(items, { url, sort, limit });
+		},
+		{
+			detail: { description: "Get extras of a serie" },
+			path: t.Object({
+				id: t.String({
+					description: "The id or slug of the serie.",
+					examples: [madeInAbyss.slug],
+				}),
+			}),
+			query: t.Object({
+				sort: extraSort,
+				filter: t.Optional(Filter({ def: extraFilters })),
+				query: t.Optional(t.String({ description: desc.query })),
+				limit: t.Integer({
+					minimum: 1,
+					maximum: 250,
+					default: 50,
+					description: "Max page size.",
+				}),
+				after: t.Optional(t.String({ description: desc.after })),
+			}),
+			response: {
+				200: Page(Extra),
+				422: KError,
+			},
+		},
+	)
 	.get("/unknowns/:id", () => "hello" as unknown as UnknownEntry, {
 		response: { 200: "unknown_entry" },
 	});
