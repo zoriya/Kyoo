@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { comment } from "../../utils";
+import { type Prettify, comment } from "~/utils";
 import { Resource } from "../utils/resource";
 import { BaseEntry, EntryTranslation } from "./base-entry";
 
@@ -27,4 +27,4 @@ export const UnknownEntry = t.Intersect([
 	BaseUnknownEntry,
 	UnknownEntryTranslation,
 ]);
-export type UnknownEntry = typeof UnknownEntry.static;
+export type UnknownEntry = Prettify<typeof UnknownEntry.static>;
