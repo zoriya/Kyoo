@@ -1,4 +1,3 @@
-import { Value } from "@sinclair/typebox/value";
 import Elysia from "elysia";
 import { KError } from "~/models/error";
 import { SeedMovie } from "~/models/movie";
@@ -18,10 +17,7 @@ export const seed = new Elysia()
 	.post(
 		"/movies",
 		async ({ body, error }) => {
-			// needed due to https://github.com/elysiajs/elysia/issues/671
-			const movie = Value.Decode(SeedMovie, body) as SeedMovie;
-
-			const ret = await seedMovie(movie);
+			const ret = await seedMovie(body);
 			if ("status" in ret) return error(ret.status, ret as any);
 			return error(ret.updated ? 200 : 201, ret);
 		},
@@ -52,10 +48,7 @@ export const seed = new Elysia()
 	.post(
 		"/series",
 		async ({ body, error }) => {
-			// needed due to https://github.com/elysiajs/elysia/issues/671
-			const serie = Value.Decode(SeedSerie, body) as SeedSerie;
-
-			const ret = await seedSerie(serie);
+			const ret = await seedSerie(body);
 			if ("status" in ret) return error(ret.status, ret as any);
 			return error(ret.updated ? 200 : 201, ret);
 		},
