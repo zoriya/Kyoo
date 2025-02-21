@@ -1,0 +1,47 @@
+name: Tests
+on:
+  push:
+    branches:
+      - master
+      - next
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test api
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        ports:
+         - "5432:5432"
+        env:
+          POSTGRES_USER: kyoo
+          POSTGRES_PASSWORD: password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        working-directory: ./api
+        run: bun install --frozen-lockfile
+
+      - name: Test
+        working-directory: ./api
+        run: bun test
+        env:
+          JWT_SECRET: "TODO"
+          POSTGRES_SERVER: localhost
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: results
+          path: auth/out
+
+
