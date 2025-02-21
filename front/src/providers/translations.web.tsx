@@ -1,8 +1,4 @@
 import i18next from "i18next";
-import AsyncStorageBackend, {
-	type AsyncStorageBackendOptions,
-} from "i18next-async-storage-backend";
-import ChainedBackend, { type ChainedBackendOptions } from "i18next-chained-backend";
 import HttpApi, { type HttpBackendOptions } from "i18next-http-backend";
 import { getServerData } from "one";
 import { type ReactNode, useMemo } from "react";
@@ -11,7 +7,8 @@ import { I18nextProvider } from "react-i18next";
 export const TranslationsProvider = ({ children }: { children: ReactNode }) => {
 	const val = useMemo(() => {
 		const i18n = i18next.createInstance();
-		i18n.use(ChainedBackend).init<ChainedBackendOptions>({
+		// 	TODO: use https://github.com/i18next/i18next-browser-languageDetector
+		i18n.use(HttpApi).init<HttpBackendOptions>({
 			interpolation: {
 				escapeValue: false,
 			},
@@ -19,13 +16,9 @@ export const TranslationsProvider = ({ children }: { children: ReactNode }) => {
 			fallbackLng: "en",
 			load: "currentOnly",
 			supportedLngs: getServerData("supportedLngs"),
+			// we don't need to cache resources since we always get a fresh one from ssr
 			backend: {
-				backends: [AsyncStorageBackend, HttpApi],
-				backendOptions: [
-					{
-						loadPath: "/translations/{{lng}}.json",
-					} satisfies HttpBackendOptions,
-				],
+				loadPath: "/translations/{{lng}}.json",
 			},
 		});
 		i18n.services.resourceStore.data = getServerData("translations");

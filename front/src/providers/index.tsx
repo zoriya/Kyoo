@@ -7,7 +7,7 @@ import { createQueryClient } from "~/query";
 import { AccountProvider } from "./account-provider";
 import { ErrorConsumer } from "./error-consumer";
 import { ErrorProvider } from "./error-provider";
-import { TranslationsProvider } from "./translations";
+import { TranslationsProvider } from "./translations.web";
 
 // const { TranslationsProvider } =
 // 	typeof window === "undefined"

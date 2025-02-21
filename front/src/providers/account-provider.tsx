@@ -4,6 +4,7 @@ import { Platform } from "react-native";
 import { z } from "zod";
 import { AccountP, UserP } from "~/models";
 import { useFetch } from "~/query";
+import { AccountContext } from "./account-context";
 import { removeAccounts, updateAccount } from "./account-store";
 import { useSetError } from "./error-provider";
 import { useStoreValue } from "./settings";
