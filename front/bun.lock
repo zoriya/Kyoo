@@ -41,6 +41,7 @@
     },
   },
   "patchedDependencies": {
+    "one@1.1.445": "patches/one@1.1.445.patch",
     "yoshiki@1.2.14": "patches/yoshiki@1.2.14.patch",
   },
   "packages": {
