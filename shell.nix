@@ -25,7 +25,6 @@ in
     packages = with pkgs; [
       nodejs-18_x
       nodePackages.yarn
-      nodePackages.eas-cli
       dotnet
       csharpier
       python
