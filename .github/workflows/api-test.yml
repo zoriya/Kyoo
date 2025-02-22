@@ -38,10 +38,3 @@ jobs:
         env:
           JWT_SECRET: "TODO"
           POSTGRES_SERVER: localhost
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: results
-          path: auth/out
-
-
