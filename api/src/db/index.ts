@@ -21,6 +21,7 @@ export const migrate = async () => {
 	await db.execute(
 		sql.raw(`
 			create extension if not exists pg_trgm;
+			SET pg_trgm.word_similarity_threshold = 0.4;
 			ALTER DATABASE "${dbConfig.database}" SET pg_trgm.word_similarity_threshold = 0.4;
 		`),
 	);
@@ -28,4 +29,5 @@ export const migrate = async () => {
 		migrationsSchema: "kyoo",
 		migrationsFolder: "./drizzle",
 	});
+	console.log(`Database ${dbConfig.database} migrated!`);
 };

@@ -309,6 +309,7 @@ describe("search", () => {
 		const [resp, body] = await getMovies({
 			limit: 2,
 			query: "bobble",
+			langs: "en",
 		});
 
 		expectStatus(resp, body).toBe(200);
