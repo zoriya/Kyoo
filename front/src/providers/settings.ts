@@ -3,7 +3,7 @@ import { Platform } from "react-native";
 import { MMKV, useMMKVString } from "react-native-mmkv";
 import type { ZodTypeAny, z } from "zod";
 
-const storage = new MMKV();
+export const storage = new MMKV();
 
 function toBase64(utf8: string) {
 	if (typeof window !== "undefined") return window.btoa(utf8);
