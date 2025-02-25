@@ -1,5 +1,6 @@
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { Slot, useServerHeadInsertion  } from "one";
+import { Slot, useServerHeadInsertion } from "one";
+import { Platform } from "react-native";
 import { StyleRegistryProvider, createStyleRegistry } from "yoshiki/web";
 import { Providers } from "~/providers";
 
@@ -80,7 +81,7 @@ export default function Layout() {
 				<StyleRegistryProvider registry={registry}>
 					<Providers>
 						<Slot />
-						<ReactQueryDevtools initialIsOpen={false} />
+						{Platform.OS === "web" && <ReactQueryDevtools initialIsOpen={false} />}
 					</Providers>
 				</StyleRegistryProvider>
 			</body>
