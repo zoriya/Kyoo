@@ -43,7 +43,6 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 			authToken: ret.authToken?.access_token,
 		},
 	});
-	console.log(user);
 	// Use a ref here because we don't want the effect to trigger when the selected
 	// value has changed, only when the fetch result changed
 	// If we trigger the effect when the selected value change, we enter an infinite render loop
