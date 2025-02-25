@@ -1,6 +1,7 @@
 import { resolvePath } from "@vxrn/resolve";
 import { one } from "one/vite";
 import type { UserConfig } from "vite";
+import compileTime from "vite-plugin-compile-time";
 import svgr from "vite-plugin-svgr";
 
 export default {
@@ -35,6 +36,7 @@ export default {
 				native: true,
 			},
 		}),
+		compileTime(),
 	],
 	server: {
 		proxy: {
