@@ -1,5 +1,5 @@
 import { createMiddleware, setServerData } from "one";
-import { supportedLanguages } from "~/providers/translations.ssr";
+import { supportedLanguages } from "~/providers/translations.web.ssr";
 
 export default createMiddleware(({ request, next }) => {
 	const systemLanguage = request.headers

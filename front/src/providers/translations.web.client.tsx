@@ -1,32 +1,27 @@
-import * as fs from "expo-file-system";
 import i18next from "i18next";
+import HttpApi, { type HttpBackendOptions } from "i18next-http-backend";
+import { getServerData } from "one";
 import { type ReactNode, useMemo } from "react";
 import { I18nextProvider } from "react-i18next";
-
-export const supportedLanguages = (
-	await fs.readDirectoryAsync(`${fs.bundleDirectory}/translations/`)
-).map((x) => x.replace(".json", ""));
-
-class Backend {
-	static type = "backend" as const;
-
-	async read(language: string, _namespace: string) {
-		return await fs.readAsStringAsync(`${fs.bundleDirectory}/translations/${language}.json`);
-	}
-}
 
 export const TranslationsProvider = ({ children }: { children: ReactNode }) => {
 	const val = useMemo(() => {
 		const i18n = i18next.createInstance();
-		i18n.use(Backend).init({
+		// 	TODO: use https://github.com/i18next/i18next-browser-languageDetector
+		i18n.use(HttpApi).init<HttpBackendOptions>({
 			interpolation: {
 				escapeValue: false,
 			},
 			returnEmptyString: false,
 			fallbackLng: "en",
 			load: "currentOnly",
-			supportedLngs: supportedLanguages,
+			supportedLngs: getServerData("supportedLngs"),
+			// we don't need to cache resources since we always get a fresh one from ssr
+			backend: {
+				loadPath: "/translations/{{lng}}.json",
+			},
 		});
+		i18n.services.resourceStore.data = getServerData("translations");
 		return i18n;
 	}, []);
 	return <I18nextProvider i18n={val}>{children}</I18nextProvider>;
