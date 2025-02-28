@@ -20,6 +20,9 @@ export default {
 	},
 	plugins: [
 		one({
+			web: {
+				defaultRenderMode: "ssr",
+			},
 			deps: {
 				"@expo/html-elements": {
 					"**/*.js": ["jsx"],
