@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "bun:test";
-import { getEntries, getExtras } from "tests/helpers";
+import { getEntries, getExtras, getUnknowns } from "tests/helpers";
 import { expectStatus } from "tests/utils";
 import { seedSerie } from "~/controllers/seed/series";
 import { madeInAbyss } from "~/models/examples";

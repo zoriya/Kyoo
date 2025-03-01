@@ -21,7 +21,7 @@ export const BaseExtra = t.Intersect(
 			kind: ExtraType,
 			name: t.String(),
 		}),
-		t.Omit(BaseEntry, ["nextRefresh", "airDate"]),
+		t.Omit(BaseEntry(), ["nextRefresh", "airDate"]),
 	],
 	{
 		description: comment`
