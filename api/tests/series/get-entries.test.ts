@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "bun:test";
-import { getEntries, getExtras } from "tests/helpers";
+import { getEntries, getExtras, getUnknowns } from "tests/helpers";
 import { expectStatus } from "tests/utils";
 import { seedSerie } from "~/controllers/seed/series";
 import { madeInAbyss } from "~/models/examples";
@@ -41,6 +41,15 @@ describe("Get extra", () => {
 	});
 	it("Default sort order", async () => {
 		const [resp, body] = await getExtras(madeInAbyss.slug, {});
+
+		expectStatus(resp, body).toBe(200);
+		expect(body.items).toBeArrayOfSize(madeInAbyss.extras.length);
+	});
+});
+
+describe("Get unknowns", () => {
+	it("Default sort order", async () => {
+		const [resp, body] = await getUnknowns({});
 
 		expectStatus(resp, body).toBe(200);
 		expect(body.items).toBeArrayOfSize(madeInAbyss.extras.length);

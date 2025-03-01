@@ -342,6 +342,6 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				200: Page(UnknownEntry),
 				422: KError,
 			},
-			tags: [],
+			tags: ["videos"],
 		},
 	);

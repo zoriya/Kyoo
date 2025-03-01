@@ -1,14 +1,16 @@
 import { t } from "elysia";
 import { type Prettify, comment } from "~/utils";
+import { bubbleImages, registerExamples } from "../examples";
+import { youtubeExample } from "../examples/others";
 import { Resource } from "../utils/resource";
 import { BaseEntry, EntryTranslation } from "./base-entry";
 
 export const BaseUnknownEntry = t.Intersect(
 	[
-		t.Omit(BaseEntry, ["airDate"]),
 		t.Object({
 			kind: t.Literal("unknown"),
 		}),
+		t.Omit(BaseEntry(), ["airDate"]),
 	],
 	{
 		description: comment`
@@ -18,13 +20,15 @@ export const BaseUnknownEntry = t.Intersect(
 	},
 );
 
-export const UnknownEntryTranslation = t.Omit(EntryTranslation, [
+export const UnknownEntryTranslation = t.Omit(EntryTranslation(), [
 	"description",
 ]);
 
 export const UnknownEntry = t.Intersect([
 	Resource(),
-	BaseUnknownEntry,
 	UnknownEntryTranslation,
+	BaseUnknownEntry,
 ]);
 export type UnknownEntry = Prettify<typeof UnknownEntry.static>;
+
+registerExamples(UnknownEntry, { ...youtubeExample, ...bubbleImages });

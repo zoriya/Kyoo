@@ -12,17 +12,17 @@ export const BaseEpisode = t.Intersect([
 		episodeNumber: t.Integer(),
 		externalId: EpisodeId,
 	}),
-	BaseEntry,
+	BaseEntry(),
 ]);
 
-export const Episode = t.Intersect([Resource(), EntryTranslation, BaseEpisode]);
+export const Episode = t.Intersect([Resource(), EntryTranslation(), BaseEpisode]);
 export type Episode = Prettify<typeof Episode.static>;
 
 export const SeedEpisode = t.Intersect([
 	t.Omit(BaseEpisode, ["thumbnail", "createdAt", "nextRefresh"]),
 	t.Object({
 		thumbnail: t.Nullable(SeedImage),
-		translations: TranslationRecord(EntryTranslation),
+		translations: TranslationRecord(EntryTranslation()),
 		videos: t.Optional(t.Array(t.String({ format: "uuid" }))),
 	}),
 ]);

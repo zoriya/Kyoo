@@ -20,7 +20,7 @@ export const BaseMovieEntry = t.Intersect(
 			}),
 			externalId: ExternalId,
 		}),
-		BaseEntry,
+		BaseEntry(),
 	],
 	{
 		description: comment`
@@ -31,7 +31,7 @@ export const BaseMovieEntry = t.Intersect(
 );
 
 export const MovieEntryTranslation = t.Intersect([
-	EntryTranslation,
+	EntryTranslation(),
 	t.Object({
 		tagline: t.Nullable(t.String()),
 		poster: t.Nullable(Image),
