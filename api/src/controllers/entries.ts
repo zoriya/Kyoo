@@ -250,10 +250,10 @@ export const entriesH = new Elysia({ tags: ["series"] })
 		},
 		{
 			detail: { description: "Get extras of a serie" },
-			path: t.Object({
+			params: t.Object({
 				id: t.String({
 					description: "The id or slug of the serie.",
-					examples: [madeInAbyss.slug],
+					example: madeInAbyss.slug,
 				}),
 			}),
 			query: t.Object({

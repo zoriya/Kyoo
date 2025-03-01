@@ -2,10 +2,10 @@ import { t } from "elysia";
 import { type Prettify, comment } from "~/utils";
 import { EpisodeId, Resource, SeedImage, TranslationRecord } from "../utils";
 import { BaseEntry, EntryTranslation } from "./base-entry";
+import { bubbleImages, madeInAbyss, registerExamples } from "../examples";
 
 export const BaseSpecial = t.Intersect(
 	[
-		BaseEntry,
 		t.Object({
 			kind: t.Literal("special"),
 			order: t.Number({
@@ -15,6 +15,7 @@ export const BaseSpecial = t.Intersect(
 			number: t.Number({ minimum: 1 }),
 			externalId: EpisodeId,
 		}),
+		BaseEntry,
 	],
 	{
 		description: comment`
@@ -24,7 +25,7 @@ export const BaseSpecial = t.Intersect(
 	},
 );
 
-export const Special = t.Intersect([Resource(), BaseSpecial, EntryTranslation]);
+export const Special = t.Intersect([Resource(), EntryTranslation, BaseSpecial]);
 export type Special = Prettify<typeof Special.static>;
 
 export const SeedSpecial = t.Intersect([
@@ -36,3 +37,11 @@ export const SeedSpecial = t.Intersect([
 	}),
 ]);
 export type SeedSpecial = Prettify<typeof SeedSpecial.static>;
+
+const ep = madeInAbyss.entries.find((x) => x.kind === "special")!;
+registerExamples(Special, {
+	...ep,
+	...ep.translations.en,
+	...bubbleImages,
+	slug: `${madeInAbyss.slug}-sp3`
+});

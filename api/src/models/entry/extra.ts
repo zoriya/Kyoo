@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import { type Prettify, comment } from "~/utils";
+import { madeInAbyss, registerExamples } from "../examples";
 import { SeedImage } from "../utils";
 import { Resource } from "../utils/resource";
 import { BaseEntry } from "./base-entry";
@@ -16,11 +17,11 @@ export type ExtraType = typeof ExtraType.static;
 
 export const BaseExtra = t.Intersect(
 	[
-		t.Omit(BaseEntry, ["nextRefresh", "airDate"]),
 		t.Object({
 			kind: ExtraType,
 			name: t.String(),
 		}),
+		t.Omit(BaseEntry, ["nextRefresh", "airDate"]),
 	],
 	{
 		description: comment`
@@ -42,3 +43,5 @@ export const SeedExtra = t.Intersect([
 	}),
 ]);
 export type SeedExtra = Prettify<typeof SeedExtra.static>;
+
+registerExamples(Extra, madeInAbyss.extras[0]);
