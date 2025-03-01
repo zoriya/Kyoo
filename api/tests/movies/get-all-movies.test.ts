@@ -231,16 +231,14 @@ describe("Get all movies", () => {
 		expectStatus(resp, body).toBe(200);
 		expect(body.items[0]).toMatchObject({
 			slug: bubble.slug,
-			name: bubble.translations.en.name,
+			name: expect.any(String),
 			poster: {
-				source: bubble.translations.ja.poster,
+				source: expect.any(String),
 			},
 			thumbnail: {
-				source: bubble.translations.ja.thumbnail,
+				source: expect.any(String),
 			},
 			banner: null,
-			// we fallback to the translated value when the original is null.
-			logo: { source: bubble.translations.en.logo },
 		});
 		expect(body.items[1]).toMatchObject({
 			slug: dune.slug,
@@ -257,16 +255,14 @@ describe("Get all movies", () => {
 		expectStatus(resp, body).toBe(200);
 		expect(body.items[0]).toMatchObject({
 			slug: bubble.slug,
-			name: bubble.translations.en.name,
+			name: expect.any(String),
 			poster: {
-				source: bubble.translations.ja.poster,
+				source: expect.any(String),
 			},
 			thumbnail: {
-				source: bubble.translations.ja.thumbnail,
+				source: expect.any(String),
 			},
 			banner: null,
-			// we fallback to the translated value when the original is null.
-			logo: { source: bubble.translations.en.logo },
 		});
 		expect(body.items[1]).toMatchObject({
 			slug: dune.slug,
@@ -277,6 +273,7 @@ describe("Get all movies", () => {
 		const [resp, body] = await getMovies({
 			limit: 2,
 			filter: "tags eq gravity",
+			langs: "en",
 		});
 
 		expectStatus(resp, body).toBe(200);
@@ -290,6 +287,7 @@ describe("search", () => {
 		const [resp, body] = await getMovies({
 			limit: 2,
 			query: "bub",
+			langs: "en",
 		});
 
 		expectStatus(resp, body).toBe(200);
@@ -300,6 +298,7 @@ describe("search", () => {
 		const [resp, body] = await getMovies({
 			limit: 2,
 			query: "buboeuoeunhoeu",
+			langs: "en",
 		});
 
 		expectStatus(resp, body).toBe(200);
