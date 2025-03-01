@@ -8,8 +8,8 @@ export const BaseEpisode = t.Intersect([
 	t.Object({
 		kind: t.Literal("episode"),
 		order: t.Number({ minimum: 1, description: "Absolute playback order." }),
-		seasonNumber: t.Number(),
-		episodeNumber: t.Number(),
+		seasonNumber: t.Integer(),
+		episodeNumber: t.Integer(),
 		externalId: EpisodeId,
 	}),
 	BaseEntry,
