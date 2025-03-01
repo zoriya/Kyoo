@@ -16,6 +16,35 @@ export const createSerie = async (serie: SeedSerie) => {
 	return [resp, body] as const;
 };
 
+export const getSeasons = async (
+	serie: string,
+	{
+		langs,
+		...opts
+	}: {
+		filter?: string;
+		limit?: number;
+		after?: string;
+		sort?: string | string[];
+		query?: string;
+		langs?: string;
+		preferOriginal?: boolean;
+	},
+) => {
+	const resp = await app.handle(
+		new Request(buildUrl(`series/${serie}/seasons`, opts), {
+			method: "GET",
+			headers: langs
+				? {
+						"Accept-Language": langs,
+					}
+				: {},
+		}),
+	);
+	const body = await resp.json();
+	return [resp, body] as const;
+};
+
 export const getEntries = async (
 	serie: string,
 	{
