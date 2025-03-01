@@ -73,3 +73,38 @@ export const getEntries = async (
 	const body = await resp.json();
 	return [resp, body] as const;
 };
+
+export const getExtras = async (
+	serie: string,
+	opts: {
+		filter?: string;
+		limit?: number;
+		after?: string;
+		sort?: string | string[];
+		query?: string;
+	},
+) => {
+	const resp = await app.handle(
+		new Request(buildUrl(`series/${serie}/extras`, opts), {
+			method: "GET",
+		}),
+	);
+	const body = await resp.json();
+	return [resp, body] as const;
+};
+
+export const getUnknowns = async (opts: {
+	filter?: string;
+	limit?: number;
+	after?: string;
+	sort?: string | string[];
+	query?: string;
+}) => {
+	const resp = await app.handle(
+		new Request(buildUrl(`unknowns`, opts), {
+			method: "GET",
+		}),
+	);
+	const body = await resp.json();
+	return [resp, body] as const;
+};
