@@ -14,7 +14,7 @@ export const Video = t.Object({
 		`,
 	}),
 	part: t.Nullable(
-		t.Number({
+		t.Integer({
 			minimum: 0,
 			description: comment`
 				If the episode/movie is split into multiples files, the \`part\` field can be used to order them.
@@ -23,7 +23,7 @@ export const Video = t.Object({
 			`,
 		}),
 	),
-	version: t.Number({
+	version: t.Integer({
 		minimum: 0,
 		default: 1,
 		description:

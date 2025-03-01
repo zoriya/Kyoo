@@ -12,7 +12,7 @@ export const BaseSpecial = t.Intersect(
 				minimum: 1,
 				description: "Absolute playback order. Can be mixed with episodes.",
 			}),
-			number: t.Number({ minimum: 1 }),
+			number: t.Integer({ minimum: 1 }),
 			externalId: EpisodeId,
 		}),
 		BaseEntry,

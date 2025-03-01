@@ -18,7 +18,7 @@ export type MovieStatus = typeof MovieStatus.static;
 
 const BaseMovie = t.Object({
 	genres: t.Array(Genre),
-	rating: t.Nullable(t.Number({ minimum: 0, maximum: 100 })),
+	rating: t.Nullable(t.Integer({ minimum: 0, maximum: 100 })),
 	status: MovieStatus,
 	runtime: t.Nullable(
 		t.Number({ minimum: 0, description: "Runtime of the movie in minutes." }),
