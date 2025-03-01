@@ -38,21 +38,27 @@ export const seasonsH = new Elysia({ tags: ["series"] })
 			query: { limit, after, query, sort, filter },
 			headers: { "accept-language": languages },
 			request: { url },
+			error,
 		}) => {
 			const langs = processLanguages(languages);
 
-			const show = db.$with("serie").as(
-				db
-					.select({ pk: shows.pk })
-					.from(shows)
-					.where(
-						and(
-							eq(shows.kind, "serie"),
-							isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
-						),
-					)
-					.limit(1),
-			);
+			const [serie] = await db
+				.select({ pk: shows.pk })
+				.from(shows)
+				.where(
+					and(
+						eq(shows.kind, "serie"),
+						isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
+					),
+				)
+				.limit(1);
+
+			if (!serie) {
+				return error(404, {
+					status: 404,
+					message: `No serie with the id or slug: '${id}'.`,
+				});
+			}
 
 			const transQ = db
 				.selectDistinctOn([seasonTranslations.pk])
@@ -65,7 +71,6 @@ export const seasonsH = new Elysia({ tags: ["series"] })
 			const { pk, ...transCol } = getColumns(transQ);
 
 			const items = await db
-				.with(show)
 				.select({
 					...getColumns(seasons),
 					...transCol,
@@ -74,7 +79,7 @@ export const seasonsH = new Elysia({ tags: ["series"] })
 				.innerJoin(transQ, eq(seasons.pk, transQ.pk))
 				.where(
 					and(
-						eq(seasons.showPk, show.pk),
+						eq(seasons.showPk, serie.pk),
 						filter,
 						query ? sql`${transQ.name} %> ${query}::text` : undefined,
 						keysetPaginate({ table: seasons, after, sort }),
@@ -92,10 +97,10 @@ export const seasonsH = new Elysia({ tags: ["series"] })
 		},
 		{
 			detail: { description: "Get seasons of a serie" },
-			path: t.Object({
+			params: t.Object({
 				id: t.String({
 					description: "The id or slug of the serie.",
-					examples: [madeInAbyss.slug],
+					example: madeInAbyss.slug,
 				}),
 			}),
 			query: t.Object({
@@ -117,6 +122,10 @@ export const seasonsH = new Elysia({ tags: ["series"] })
 			}),
 			response: {
 				200: Page(Season),
+				404: {
+					...KError,
+					description: "No serie found with the given id or slug.",
+				},
 				422: KError,
 			},
 		},
