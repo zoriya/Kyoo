@@ -1,10 +1,15 @@
-import { describe, expect, it } from "bun:test";
+import { beforeAll, describe, expect, it } from "bun:test";
 import { eq } from "drizzle-orm";
 import { expectStatus } from "tests/utils";
 import { db } from "~/db";
 import { seasons, shows, videos } from "~/db/schema";
 import { madeInAbyss, madeInAbyssVideo } from "~/models/examples";
 import { createSerie } from "../helpers";
+
+beforeAll(async () => {
+	await db.delete(shows);
+	await db.delete(videos);
+});
 
 describe("Serie seeding", () => {
 	it("Can create a serie with seasons and episodes", async () => {
@@ -69,6 +74,7 @@ describe("Serie seeding", () => {
 				{
 					language: "en",
 					...movie.translations.en,
+					poster: { source: movie.translations.en.poster },
 				},
 			],
 		});

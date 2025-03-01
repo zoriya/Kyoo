@@ -1,12 +1,15 @@
 import { beforeAll, describe, expect, it } from "bun:test";
 import { expectStatus } from "tests/utils";
 import { seedMovie } from "~/controllers/seed/movies";
+import { db } from "~/db";
+import { shows } from "~/db/schema";
 import { bubble } from "~/models/examples";
 import { getMovie } from "../helpers";
 
 let bubbleId = "";
 
 beforeAll(async () => {
+	await db.delete(shows);
 	const ret = await seedMovie(bubble);
 	if (!("status" in ret)) bubbleId = ret.id;
 });

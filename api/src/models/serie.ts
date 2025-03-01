@@ -18,7 +18,7 @@ export type SerieStatus = typeof SerieStatus.static;
 
 export const BaseSerie = t.Object({
 	genres: t.Array(Genre),
-	rating: t.Nullable(t.Number({ minimum: 0, maximum: 100 })),
+	rating: t.Nullable(t.Integer({ minimum: 0, maximum: 100 })),
 	status: SerieStatus,
 	runtime: t.Nullable(
 		t.Number({

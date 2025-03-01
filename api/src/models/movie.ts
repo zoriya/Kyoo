@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import type { Prettify } from "~/utils";
 import { bubble, registerExamples } from "./examples";
 import { bubbleImages } from "./examples/bubble";
 import {
@@ -17,7 +18,7 @@ export type MovieStatus = typeof MovieStatus.static;
 
 const BaseMovie = t.Object({
 	genres: t.Array(Genre),
-	rating: t.Nullable(t.Number({ minimum: 0, maximum: 100 })),
+	rating: t.Nullable(t.Integer({ minimum: 0, maximum: 100 })),
 	status: MovieStatus,
 	runtime: t.Nullable(
 		t.Number({ minimum: 0, description: "Runtime of the movie in minutes." }),
@@ -57,7 +58,7 @@ export const Movie = t.Intersect([
 	BaseMovie,
 	t.Object({ isAvailable: t.Boolean() }),
 ]);
-export type Movie = typeof Movie.static;
+export type Movie = Prettify<typeof Movie.static>;
 
 export const FullMovie = t.Intersect([
 	Movie,
@@ -86,7 +87,7 @@ export const SeedMovie = t.Intersect([
 		videos: t.Optional(t.Array(t.String({ format: "uuid" }))),
 	}),
 ]);
-export type SeedMovie = typeof SeedMovie.static;
+export type SeedMovie = Prettify<typeof SeedMovie.static>;
 
 registerExamples(Movie, {
 	...bubble,

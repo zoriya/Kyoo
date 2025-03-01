@@ -22,6 +22,7 @@ export const Language = (props?: NonNullable<Parameters<typeof t.String>[0]>) =>
 					BCP 47 is also known as RFC 5646. It subsumes ISO 639 and is backward compatible with it.
 				`,
 				error: "Expected a valid (and NORMALIZED) bcp-47 language code.",
+				examples: ["en-US"],
 				...props,
 			}),
 		)
@@ -39,9 +40,15 @@ export const TranslationRecord = <T extends TSchema>(
 	props?: Parameters<typeof t.Record<TString, T>>[2],
 ) =>
 	t
-		.Transform(t.Record(t.String(), values, { minPropreties: 1, ...props }))
-		// @ts-expect-error idk why the translations type can't get resolved so it's a pain to work
-		// with without casting it
+		.Transform(
+			t.Record(
+				t.String({
+					examples: ["en-US"],
+				}),
+				values,
+				{ minPropreties: 1, ...props },
+			),
+		)
 		.Decode((translations: Record<string, StaticDecode<T>>) => {
 			for (const lang of Object.keys(translations)) {
 				try {
@@ -91,10 +98,11 @@ export const AcceptLanguage = ({
 			comment`
 			List of languages you want the data in.
 			This follows the [Accept-Language offical specification](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language).
-		` + autoFallback
+		` +
+			(autoFallback
 				? comment`
 
 			In this request, * is always implied (if no language could satisfy the request, kyoo will use any language available.)
 		`
-				: "",
+				: ""),
 	});

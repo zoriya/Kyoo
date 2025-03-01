@@ -20,11 +20,11 @@ export const EpisodeId = t.Record(
 			`,
 		}),
 		season: t.Nullable(
-			t.Number({
+			t.Integer({
 				description: "Null if the external website uses absolute numbering.",
 			}),
 		),
-		episode: t.Number(),
+		episode: t.Integer(),
 		link: t.Nullable(t.String({ format: "uri" })),
 	}),
 );
@@ -39,7 +39,7 @@ export const SeasonId = t.Record(
 				We store the serie's id because episode id are rarely stable.
 			`,
 		}),
-		season: t.Number(),
+		season: t.Integer(),
 		link: t.Nullable(t.String({ format: "uri" })),
 	}),
 );

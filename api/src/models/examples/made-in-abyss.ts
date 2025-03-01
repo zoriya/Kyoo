@@ -84,7 +84,6 @@ export const madeInAbyss = {
 	},
 	seasons: [
 		{
-			slug: "made-in-abyss-s1",
 			seasonNumber: 1,
 			translations: {
 				en: {
@@ -108,7 +107,6 @@ export const madeInAbyss = {
 			},
 		},
 		{
-			slug: "made-in-abyss-s2",
 			seasonNumber: 2,
 			translations: {
 				en: {

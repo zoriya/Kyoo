@@ -1,5 +1,6 @@
 import { t } from "elysia";
-import { comment } from "../../utils";
+import { type Prettify, comment } from "~/utils";
+import { bubbleImages, madeInAbyss, registerExamples } from "../examples";
 import {
 	ExternalId,
 	Image,
@@ -11,7 +12,6 @@ import { BaseEntry, EntryTranslation } from "./base-entry";
 
 export const BaseMovieEntry = t.Intersect(
 	[
-		BaseEntry,
 		t.Object({
 			kind: t.Literal("movie"),
 			order: t.Number({
@@ -20,6 +20,7 @@ export const BaseMovieEntry = t.Intersect(
 			}),
 			externalId: ExternalId,
 		}),
+		BaseEntry(),
 	],
 	{
 		description: comment`
@@ -30,7 +31,7 @@ export const BaseMovieEntry = t.Intersect(
 );
 
 export const MovieEntryTranslation = t.Intersect([
-	EntryTranslation,
+	EntryTranslation(),
 	t.Object({
 		tagline: t.Nullable(t.String()),
 		poster: t.Nullable(Image),
@@ -39,10 +40,10 @@ export const MovieEntryTranslation = t.Intersect([
 
 export const MovieEntry = t.Intersect([
 	Resource(),
-	BaseMovieEntry,
 	MovieEntryTranslation,
+	BaseMovieEntry,
 ]);
-export type MovieEntry = typeof MovieEntry.static;
+export type MovieEntry = Prettify<typeof MovieEntry.static>;
 
 export const SeedMovieEntry = t.Intersect([
 	t.Omit(BaseMovieEntry, ["thumbnail", "createdAt", "nextRefresh"]),
@@ -58,4 +59,11 @@ export const SeedMovieEntry = t.Intersect([
 		videos: t.Optional(t.Array(t.String({ format: "uuid" }))),
 	}),
 ]);
-export type SeedMovieEntry = typeof SeedMovieEntry.static;
+export type SeedMovieEntry = Prettify<typeof SeedMovieEntry.static>;
+
+const ep = madeInAbyss.entries.find((x) => x.kind === "movie")!;
+registerExamples(MovieEntry, {
+	...ep,
+	...ep.translations.en,
+	...bubbleImages,
+});

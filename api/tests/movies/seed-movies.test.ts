@@ -7,6 +7,11 @@ import { bubble } from "~/models/examples";
 import { dune, duneVideo } from "~/models/examples/dune-2021";
 import { createMovie, createVideo } from "../helpers";
 
+beforeAll(async () => {
+	await db.delete(shows);
+	await db.delete(videos);
+});
+
 describe("Movie seeding", () => {
 	it("Can create a movie", async () => {
 		// create video beforehand to test linking
@@ -404,10 +409,3 @@ describe("Movie seeding", () => {
 		]);
 	});
 });
-
-const cleanup = async () => {
-	await db.delete(shows);
-	await db.delete(videos);
-};
-// cleanup db beforehand to unsure tests are consistent
-beforeAll(cleanup);
