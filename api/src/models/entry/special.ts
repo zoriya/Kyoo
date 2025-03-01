@@ -15,7 +15,7 @@ export const BaseSpecial = t.Intersect(
 			number: t.Integer({ minimum: 1 }),
 			externalId: EpisodeId,
 		}),
-		BaseEntry,
+		BaseEntry(),
 	],
 	{
 		description: comment`
@@ -25,14 +25,14 @@ export const BaseSpecial = t.Intersect(
 	},
 );
 
-export const Special = t.Intersect([Resource(), EntryTranslation, BaseSpecial]);
+export const Special = t.Intersect([Resource(), EntryTranslation(), BaseSpecial]);
 export type Special = Prettify<typeof Special.static>;
 
 export const SeedSpecial = t.Intersect([
 	t.Omit(BaseSpecial, ["thumbnail", "createdAt", "nextRefresh"]),
 	t.Object({
 		thumbnail: t.Nullable(SeedImage),
-		translations: TranslationRecord(EntryTranslation),
+		translations: TranslationRecord(EntryTranslation()),
 		videos: t.Optional(t.Array(t.String({ format: "uuid" }))),
 	}),
 ]);
