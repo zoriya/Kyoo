@@ -1,9 +1,9 @@
 import { Elysia } from "elysia";
 import { entriesH } from "./controllers/entries";
-import { movies } from "./controllers/movies";
 import { seasonsH } from "./controllers/seasons";
 import { seed } from "./controllers/seed";
-import { series } from "./controllers/series";
+import { movies } from "./controllers/shows/movies";
+import { series } from "./controllers/shows/series";
 import { videosH } from "./controllers/videos";
 
 import type { KError } from "./models/error";
