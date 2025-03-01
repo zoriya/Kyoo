@@ -7,6 +7,8 @@ import { Genre } from "./utils/genres";
 import { Image, SeedImage } from "./utils/image";
 import { Language, TranslationRecord } from "./utils/language";
 import { Resource } from "./utils/resource";
+import { Prettify } from "~/utils";
+import { SeedCollection } from "./collections";
 
 export const SerieStatus = t.UnionEnum([
 	"unknown",
@@ -57,7 +59,7 @@ export const SerieTranslation = t.Object({
 export type SerieTranslation = typeof SerieTranslation.static;
 
 export const Serie = t.Intersect([Resource(), SerieTranslation, BaseSerie]);
-export type Serie = typeof Serie.static;
+export type Serie = Prettify<typeof Serie.static>;
 
 export const SeedSerie = t.Intersect([
 	t.Omit(BaseSerie, ["createdAt", "nextRefresh"]),
@@ -77,6 +79,7 @@ export const SeedSerie = t.Intersect([
 		seasons: t.Array(SeedSeason),
 		entries: t.Array(SeedEntry),
 		extras: t.Optional(t.Array(SeedExtra)),
+		collection: t.Optional(SeedCollection),
 	}),
 ]);
 export type SeedSerie = typeof SeedSerie.static;

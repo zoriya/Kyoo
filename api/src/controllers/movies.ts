@@ -1,5 +1,6 @@
 import { type SQL, and, eq, exists, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
+import { db } from "~/db";
 import { entries, entryVideoJoin, showTranslations, shows } from "~/db/schema";
 import { getColumns, sqlarr } from "~/db/utils";
 import { KError } from "~/models/error";
@@ -25,7 +26,6 @@ import {
 	sortToSql,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
-import { db } from "../db";
 
 const movieFilters: FilterDef = {
 	genres: {

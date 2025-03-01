@@ -12,6 +12,7 @@ import {
 	TranslationRecord,
 } from "./utils";
 import { Video } from "./video";
+import { SeedCollection } from "./collections";
 
 export const MovieStatus = t.UnionEnum(["unknown", "finished", "planned"]);
 export type MovieStatus = typeof MovieStatus.static;
@@ -85,6 +86,7 @@ export const SeedMovie = t.Intersect([
 			]),
 		),
 		videos: t.Optional(t.Array(t.String({ format: "uuid" }))),
+		collection: t.Optional(SeedCollection),
 	}),
 ]);
 export type SeedMovie = Prettify<typeof SeedMovie.static>;
