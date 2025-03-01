@@ -1,8 +1,8 @@
 import { t } from "elysia";
 import { type Prettify, comment } from "~/utils";
+import { bubbleImages, madeInAbyss, registerExamples } from "../examples";
 import { EpisodeId, Resource, SeedImage, TranslationRecord } from "../utils";
 import { BaseEntry, EntryTranslation } from "./base-entry";
-import { bubbleImages, madeInAbyss, registerExamples } from "../examples";
 
 export const BaseSpecial = t.Intersect(
 	[
@@ -43,5 +43,5 @@ registerExamples(Special, {
 	...ep,
 	...ep.translations.en,
 	...bubbleImages,
-	slug: `${madeInAbyss.slug}-sp3`
+	slug: `${madeInAbyss.slug}-sp3`,
 });
