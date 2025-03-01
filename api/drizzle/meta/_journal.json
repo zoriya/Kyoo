@@ -64,6 +64,13 @@
 			"when": 1738064522937,
 			"tag": "0008_entries",
 			"breakpoints": true
+		},
+		{
+			"idx": 9,
+			"version": "7",
+			"when": 1740872363604,
+			"tag": "0009_collections",
+			"breakpoints": true
 		}
 	]
 }

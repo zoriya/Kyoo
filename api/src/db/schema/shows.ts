@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import {
+	type AnyPgColumn,
 	check,
 	date,
 	index,
@@ -16,7 +17,11 @@ import { entries } from "./entries";
 import { seasons } from "./seasons";
 import { image, language, schema } from "./utils";
 
-export const showKind = schema.enum("show_kind", ["serie", "movie"]);
+export const showKind = schema.enum("show_kind", [
+	"serie",
+	"movie",
+	"collection",
+]);
 export const showStatus = schema.enum("show_status", [
 	"unknown",
 	"finished",
@@ -77,6 +82,10 @@ export const shows = schema.table(
 		startAir: date(),
 		endAir: date(),
 		originalLanguage: language(),
+
+		collectionPk: integer().references((): AnyPgColumn => shows.pk, {
+			onDelete: "set null",
+		}),
 
 		externalId: externalid(),
 
