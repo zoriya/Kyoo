@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import type { Prettify } from "~/utils";
 import { bubbleImages, madeInAbyss, registerExamples } from "./examples";
 import { SeasonId } from "./utils/external-id";
 import { Image, SeedImage } from "./utils/image";
@@ -26,13 +27,12 @@ export const SeasonTranslation = t.Object({
 });
 export type SeasonTranslation = typeof SeasonTranslation.static;
 
-export const Season = t.Intersect([Resource(), BaseSeason, SeasonTranslation]);
+export const Season = t.Intersect([Resource(), SeasonTranslation, BaseSeason]);
 export type Season = typeof Season.static;
 
 export const SeedSeason = t.Intersect([
 	t.Omit(BaseSeason, ["createdAt", "nextRefresh"]),
 	t.Object({
-		slug: t.String({ format: "slug", examples: ["made-in-abyss-s1"] }),
 		translations: TranslationRecord(
 			t.Intersect([
 				t.Omit(SeasonTranslation, ["poster", "thumbnail", "banner"]),
@@ -45,10 +45,11 @@ export const SeedSeason = t.Intersect([
 		),
 	}),
 ]);
-export type SeedSeason = typeof SeedSeason.static;
+export type SeedSeason = Prettify<typeof SeedSeason.static>;
 
 registerExamples(Season, {
 	...madeInAbyss.seasons[0],
 	...madeInAbyss.seasons[0].translations.en,
 	...bubbleImages,
+	slug: `${madeInAbyss.slug}-s1`,
 });

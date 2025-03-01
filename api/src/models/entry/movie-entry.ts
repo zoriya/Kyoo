@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import { type Prettify, comment } from "~/utils";
+import { bubbleImages, madeInAbyss, registerExamples } from "../examples";
 import {
 	ExternalId,
 	Image,
@@ -11,7 +12,6 @@ import { BaseEntry, EntryTranslation } from "./base-entry";
 
 export const BaseMovieEntry = t.Intersect(
 	[
-		BaseEntry,
 		t.Object({
 			kind: t.Literal("movie"),
 			order: t.Number({
@@ -20,6 +20,7 @@ export const BaseMovieEntry = t.Intersect(
 			}),
 			externalId: ExternalId,
 		}),
+		BaseEntry,
 	],
 	{
 		description: comment`
@@ -39,8 +40,8 @@ export const MovieEntryTranslation = t.Intersect([
 
 export const MovieEntry = t.Intersect([
 	Resource(),
-	BaseMovieEntry,
 	MovieEntryTranslation,
+	BaseMovieEntry,
 ]);
 export type MovieEntry = Prettify<typeof MovieEntry.static>;
 
@@ -59,3 +60,10 @@ export const SeedMovieEntry = t.Intersect([
 	}),
 ]);
 export type SeedMovieEntry = Prettify<typeof SeedMovieEntry.static>;
+
+const ep = madeInAbyss.entries.find((x) => x.kind === "movie")!;
+registerExamples(MovieEntry, {
+	...ep,
+	...ep.translations.en,
+	...bubbleImages,
+});
