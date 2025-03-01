@@ -74,37 +74,21 @@ const extraSort = Sort(["slug", "name", "runtime", "createdAt"], {
 	default: ["slug"],
 });
 
-async function getEntries(
-	serie: string | null,
-	{
-		after,
-		limit,
-		query,
-		sort,
-		filter,
-		languages,
-	}: {
-		after: string | undefined;
-		limit: number;
-		query: string | undefined;
-		sort: StaticDecode<typeof entrySort>;
-		filter: SQL | undefined;
-		languages: string[];
-	},
-): Promise<(Entry | Extra | UnknownEntry)[]> {
-	const show = db.$with("serie").as(
-		db
-			.select({ pk: shows.pk })
-			.from(shows)
-			.where(
-				and(
-					eq(shows.kind, "serie"),
-					isUuid(serie!) ? eq(shows.id, serie!) : eq(shows.slug, serie!),
-				),
-			)
-			.limit(1),
-	);
-
+async function getEntries({
+	after,
+	limit,
+	query,
+	sort,
+	filter,
+	languages,
+}: {
+	after: string | undefined;
+	limit: number;
+	query: string | undefined;
+	sort: StaticDecode<typeof entrySort>;
+	filter: SQL | undefined;
+	languages: string[];
+}): Promise<(Entry | Extra | UnknownEntry)[]> {
 	const transQ = db
 		.selectDistinctOn([entryTranslations.pk])
 		.from(entryTranslations)
@@ -125,7 +109,6 @@ async function getEntries(
 		...entryCol
 	} = getColumns(entries);
 	return await db
-		.with(...(serie ? [show] : []))
 		.select({
 			...entryCol,
 			...transCol,
@@ -133,10 +116,10 @@ async function getEntries(
 			number: sql<number>`${episodeNumber}`.as("order"),
 
 			// merge `extraKind` into `kind`
-			kind: sql<EntryKind>`case when ${kind} = 'extra' then ${extraKind} else ${kind} end`.as(
+			kind: sql<EntryKind>`case when ${kind} = 'extra' then ${extraKind} else ${kind}::text end`.as(
 				"kind",
 			),
-			isExtra: sql<boolean>`${kind} = "extra"`.as("isExtra"),
+			isExtra: sql<boolean>`${kind} = 'extra'`.as("isExtra"),
 
 			// assign more restrained types to make typescript happy.
 			externalId: sql<any>`${externalId}`.as("externalId"),
@@ -149,7 +132,6 @@ async function getEntries(
 		.innerJoin(transQ, eq(entries.pk, transQ.pk))
 		.where(
 			and(
-				serie ? eq(entries.showPk, show.pk) : undefined,
 				filter,
 				query ? sql`${transQ.name} %> ${query}::text` : undefined,
 				keysetPaginate({ table: entries, after, sort }),
@@ -184,14 +166,34 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			query: { limit, after, query, sort, filter },
 			headers: { "accept-language": languages },
 			request: { url },
+			error,
 		}) => {
+			const [serie] = await db
+				.select({ pk: shows.pk })
+				.from(shows)
+				.where(
+					and(
+						eq(shows.kind, "serie"),
+						isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
+					),
+				)
+				.limit(1);
+
+			if (!serie) {
+				return error(404, {
+					status: 404,
+					message: `No serie with the id or slug: '${id}'.`,
+				});
+			}
+
 			const langs = processLanguages(languages);
-			const items = (await getEntries(id, {
+			const items = (await getEntries({
 				limit,
 				after,
 				query,
 				sort,
 				filter: and(
+					eq(entries.showPk, serie.pk),
 					ne(entries.kind, "extra"),
 					ne(entries.kind, "unknown"),
 					filter,
@@ -226,6 +228,10 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			}),
 			response: {
 				200: Page(Entry),
+				404: {
+					...KError,
+					description: "No serie found with the given id or slug.",
+				},
 				422: KError,
 			},
 		},
@@ -236,13 +242,36 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			params: { id },
 			query: { limit, after, query, sort, filter },
 			request: { url },
+			error,
 		}) => {
-			const items = (await getEntries(id, {
+			const [serie] = await db
+				.select({ pk: shows.pk })
+				.from(shows)
+				.where(
+					and(
+						eq(shows.kind, "serie"),
+						isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
+					),
+				)
+				.limit(1);
+
+			if (!serie) {
+				return error(404, {
+					status: 404,
+					message: `No serie with the id or slug: '${id}'.`,
+				});
+			}
+
+			const items = (await getEntries({
 				limit,
 				after,
 				query,
 				sort: sort as any,
-				filter: and(eq(entries.kind, "extra"), filter),
+				filter: and(
+					eq(entries.showPk, serie.pk),
+					eq(entries.kind, "extra"),
+					filter,
+				),
 				languages: ["extra"],
 			})) as Extra[];
 
@@ -270,6 +299,10 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			}),
 			response: {
 				200: Page(Extra),
+				404: {
+					...KError,
+					description: "No serie found with the given id or slug.",
+				},
 				422: KError,
 			},
 		},
@@ -280,7 +313,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			query: { limit, after, query, sort, filter },
 			request: { url },
 		}) => {
-			const items = (await getEntries(null, {
+			const items = (await getEntries({
 				limit,
 				after,
 				query,
