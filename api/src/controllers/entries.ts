@@ -164,7 +164,7 @@ async function getEntries(
 		.limit(limit);
 }
 
-export const entriesH = new Elysia()
+export const entriesH = new Elysia({ tags: ["series"] })
 	.model({
 		episode: Episode,
 		movie_entry: MovieEntry,
@@ -203,10 +203,10 @@ export const entriesH = new Elysia()
 		},
 		{
 			detail: { description: "Get entries of a serie" },
-			path: t.Object({
+			params: t.Object({
 				id: t.String({
 					description: "The id or slug of the serie.",
-					examples: [madeInAbyss.slug],
+					example: madeInAbyss.slug,
 				}),
 			}),
 			query: t.Object({
@@ -309,5 +309,6 @@ export const entriesH = new Elysia()
 				200: Page(UnknownEntry),
 				422: KError,
 			},
+			tags: [],
 		},
 	);
