@@ -10,16 +10,16 @@
 	},
 	"dependencies": {
 		"@elysiajs/jwt": "^1.2.0",
-		"@elysiajs/swagger": "zoriya/elysia-swagger#build",
+		"@elysiajs/swagger": "^1.2.2",
 		"drizzle-kit": "^0.30.4",
 		"drizzle-orm": "0.39.0",
-		"elysia": "^1.2.21",
+		"elysia": "^1.2.23",
 		"parjs": "^1.3.9",
 		"pg": "^8.13.3"
 	},
 	"devDependencies": {
 		"@types/pg": "^8.11.11",
-		"bun-types": "^1.2.3"
+		"bun-types": "^1.2.4"
 	},
 	"module": "src/index.js"
 }
