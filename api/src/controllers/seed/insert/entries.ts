@@ -90,6 +90,7 @@ export const insertEntries = async (
 					language: "extra",
 					name: seed.name,
 					description: null,
+					poster: undefined,
 				};
 			}
 
@@ -98,6 +99,10 @@ export const insertEntries = async (
 				pk: ret[i].pk,
 				language: lang,
 				...tr,
+				poster:
+					seed.kind === "movie"
+						? processOptImage((tr as any).poster)
+						: undefined,
 			}));
 		});
 		await tx
