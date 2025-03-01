@@ -1,4 +1,5 @@
 import {
+	type BinaryOperator,
 	type SQL,
 	and,
 	eq,
@@ -16,7 +17,7 @@ import { comment } from "~/utils";
 import type { FilterDef } from "./index";
 import type { Expression, Operator } from "./parser";
 
-const opMap: Record<Operator, typeof eq> = {
+const opMap: Record<Operator, BinaryOperator> = {
 	eq: eq,
 	ne: ne,
 	gt: gt,

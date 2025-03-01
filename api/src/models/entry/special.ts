@@ -25,7 +25,11 @@ export const BaseSpecial = t.Intersect(
 	},
 );
 
-export const Special = t.Intersect([Resource(), EntryTranslation(), BaseSpecial]);
+export const Special = t.Intersect([
+	Resource(),
+	EntryTranslation(),
+	BaseSpecial,
+]);
 export type Special = Prettify<typeof Special.static>;
 
 export const SeedSpecial = t.Intersect([
