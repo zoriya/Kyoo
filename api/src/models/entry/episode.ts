@@ -15,7 +15,11 @@ export const BaseEpisode = t.Intersect([
 	BaseEntry(),
 ]);
 
-export const Episode = t.Intersect([Resource(), EntryTranslation(), BaseEpisode]);
+export const Episode = t.Intersect([
+	Resource(),
+	EntryTranslation(),
+	BaseEpisode,
+]);
 export type Episode = Prettify<typeof Episode.static>;
 
 export const SeedEpisode = t.Intersect([

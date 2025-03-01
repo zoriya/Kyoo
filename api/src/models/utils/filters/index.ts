@@ -1,4 +1,4 @@
-import type { Column, SQL } from "drizzle-orm";
+import type { Column, SQL, SQLWrapper } from "drizzle-orm";
 import { t } from "elysia";
 import { KErrorT } from "~/models/error";
 import { comment } from "~/utils";
@@ -8,7 +8,7 @@ import { toDrizzle } from "./to-sql";
 export type FilterDef = {
 	[key: string]:
 		| {
-				column: Column | SQL;
+				column: Column | SQLWrapper;
 				type: "int" | "float" | "date" | "string";
 				isArray?: boolean;
 		  }

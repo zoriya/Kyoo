@@ -101,7 +101,7 @@ export const getUnknowns = async (opts: {
 	query?: string;
 }) => {
 	const resp = await app.handle(
-		new Request(buildUrl(`unknowns`, opts), {
+		new Request(buildUrl("unknowns", opts), {
 			method: "GET",
 		}),
 	);

@@ -16,7 +16,8 @@ export const BaseEntry = () =>
 		nextRefresh: t.String({ format: "date-time" }),
 	});
 
-export const EntryTranslation = () => t.Object({
-	name: t.Nullable(t.String()),
-	description: t.Nullable(t.String()),
-});
+export const EntryTranslation = () =>
+	t.Object({
+		name: t.Nullable(t.String()),
+		description: t.Nullable(t.String()),
+	});
