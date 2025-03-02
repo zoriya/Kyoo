@@ -18,6 +18,7 @@ export const duneCollection: SeedCollection = {
 			logo: "https://image.tmdb.org/t/p/original/5nDsd3u1c6kDphbtIqkHseLg7HL.png",
 		},
 	},
+	originalLanguage: "en",
 	genres: ["adventure", "science-fiction"],
 	rating: 80,
 	externalId: {

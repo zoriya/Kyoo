@@ -1,11 +1,11 @@
 import { Elysia } from "elysia";
 import { entriesH } from "./controllers/entries";
-import { movies } from "./controllers/movies";
 import { seasonsH } from "./controllers/seasons";
 import { seed } from "./controllers/seed";
-import { series } from "./controllers/series";
+import { collections } from "./controllers/shows/collections";
+import { movies } from "./controllers/shows/movies";
+import { series } from "./controllers/shows/series";
 import { videosH } from "./controllers/videos";
-
 import type { KError } from "./models/error";
 
 export const base = new Elysia({ name: "base" })
@@ -42,6 +42,7 @@ export const app = new Elysia()
 	.use(base)
 	.use(movies)
 	.use(series)
+	.use(collections)
 	.use(entriesH)
 	.use(seasonsH)
 	.use(videosH)

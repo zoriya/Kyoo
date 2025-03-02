@@ -1,5 +1,5 @@
 import { Elysia, t } from "elysia";
-import { Serie } from "../models/serie";
+import { Serie } from "~/models/serie";
 
 export const series = new Elysia({ prefix: "/series" })
 	.model({
