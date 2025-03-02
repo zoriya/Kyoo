@@ -184,6 +184,7 @@ export async function getShow(
 	const show = {
 		...ret,
 		...translation,
+		kind: ret.kind as any,
 		...(ot?.preferOriginal && {
 			...(ot.poster && { poster: ot.poster }),
 			...(ot.thumbnail && { thumbnail: ot.thumbnail }),
