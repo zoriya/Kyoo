@@ -98,22 +98,31 @@ erDiagram
 	seasons ||--o{ entries : has
 	shows ||--|{ seasons : has
 
+	users {
+		guid id PK
+	}
+
 	watched_shows {
 		guid show_id PK, FK
 		guid user_id PK, FK
-		status status "completed|watching|droped|planned"
+		status status "completed|watching|dropped|planned"
 		uint seen_entry_count "NN"
+		guid next_entry FK
 	}
 	shows ||--|{ watched_shows : has
+	users ||--|{ watched_shows : has
+	watched_shows ||--|o entries : next_entry
 
-	watched_entries {
-		guid entry_id PK, FK
-		guid user_id PK, FK
+	history {
+		int id PK
+		guid entry_id FK
+		guid user_id FK
 		uint time "in seconds, null of finished"
 		uint progress "NN, from 0 to 100"
 		datetime played_date
 	}
-	entries ||--|{ watched_entries : has
+	entries ||--|{ history : part_of
+	users ||--|{ history : has
 
 	roles {
 		guid show_id PK, FK
