@@ -1,7 +1,13 @@
 import { t } from "elysia";
 import type { Prettify } from "~/utils";
 import { bubbleImages, madeInAbyss, registerExamples } from "../examples";
-import { EpisodeId, Resource, SeedImage, TranslationRecord } from "../utils";
+import {
+	DbMetadata,
+	EpisodeId,
+	Resource,
+	SeedImage,
+	TranslationRecord,
+} from "../utils";
 import { BaseEntry, EntryTranslation } from "./base-entry";
 
 export const BaseEpisode = t.Intersect([
@@ -19,11 +25,12 @@ export const Episode = t.Intersect([
 	Resource(),
 	EntryTranslation(),
 	BaseEpisode,
+	DbMetadata,
 ]);
 export type Episode = Prettify<typeof Episode.static>;
 
 export const SeedEpisode = t.Intersect([
-	t.Omit(BaseEpisode, ["thumbnail", "createdAt", "nextRefresh"]),
+	t.Omit(BaseEpisode, ["thumbnail", "nextRefresh"]),
 	t.Object({
 		thumbnail: t.Nullable(SeedImage),
 		translations: TranslationRecord(EntryTranslation()),
