@@ -57,7 +57,7 @@ export const Movie = t.Intersect([
 	Resource(),
 	MovieTranslation,
 	BaseMovie,
-	t.Object({ isAvailable: t.Boolean() }),
+	// t.Object({ isAvailable: t.Boolean() }),
 ]);
 export type Movie = Prettify<typeof Movie.static>;
 

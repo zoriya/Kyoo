@@ -2,49 +2,25 @@ import { type SQL, and, eq, exists, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "~/db";
 import { entries, entryVideoJoin, showTranslations, shows } from "~/db/schema";
-import { getColumns, sqlarr } from "~/db/utils";
+import { sqlarr } from "~/db/utils";
 import { KError } from "~/models/error";
 import { bubble } from "~/models/examples";
 import {
 	FullMovie,
 	Movie,
-	MovieStatus,
+	type MovieStatus,
 	MovieTranslation,
 } from "~/models/movie";
 import {
 	AcceptLanguage,
 	Filter,
-	type FilterDef,
-	Genre,
-	type Image,
 	Page,
-	Sort,
 	createPage,
 	isUuid,
-	keysetPaginate,
 	processLanguages,
-	sortToSql,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
-
-const movieFilters: FilterDef = {
-	genres: {
-		column: shows.genres,
-		type: "enum",
-		values: Genre.enum,
-		isArray: true,
-	},
-	rating: { column: shows.rating, type: "int" },
-	status: { column: shows.status, type: "enum", values: MovieStatus.enum },
-	runtime: { column: shows.runtime, type: "float" },
-	airDate: { column: shows.startAir, type: "date" },
-	originalLanguage: { column: shows.originalLanguage, type: "string" },
-	tags: {
-		column: sql.raw(`t.${showTranslations.tags.name}`),
-		type: "string",
-		isArray: true,
-	},
-};
+import { getShows, showFilters, showSort } from "./shows";
 
 export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 	.model({
@@ -236,85 +212,22 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 			request: { url },
 		}) => {
 			const langs = processLanguages(languages);
-
-			// we keep the pk for after handling. it will be removed by elysia's validators after.
-			const { kind, startAir, endAir, ...moviesCol } = getColumns(shows);
-
-			const transQ = db
-				.selectDistinctOn([showTranslations.pk])
-				.from(showTranslations)
-				.orderBy(
-					showTranslations.pk,
-					sql`array_position(${sqlarr(langs)}, ${showTranslations.language})`,
-				)
-				.as("t");
-			const { pk, poster, thumbnail, banner, logo, ...transCol } =
-				getColumns(transQ);
-
-			const videoQ = db
-				.select({ showPk: entries.showPk })
-				.from(entries)
-				.where(
-					exists(
-						db
-							.select()
-							.from(entryVideoJoin)
-							.where(eq(entries.pk, entryVideoJoin.entry)),
-					),
-				)
-				.as("video");
-
-			const items = await db
-				.select({
-					...moviesCol,
-					...transCol,
-					status: sql<MovieStatus>`${moviesCol.status}`,
-					airDate: startAir,
-					poster: sql<Image>`coalesce(${showTranslations.poster}, ${poster})`,
-					thumbnail: sql<Image>`coalesce(${showTranslations.thumbnail}, ${thumbnail})`,
-					banner: sql<Image>`coalesce(${showTranslations.banner}, ${banner})`,
-					logo: sql<Image>`coalesce(${showTranslations.logo}, ${logo})`,
-					isAvailable: sql<boolean>`${videoQ.showPk} is not null`.as(
-						"isAvailable",
-					),
-				})
-				.from(shows)
-				.innerJoin(transQ, eq(shows.pk, transQ.pk))
-				.leftJoin(
-					showTranslations,
-					and(
-						eq(shows.pk, showTranslations.pk),
-						eq(showTranslations.language, shows.originalLanguage),
-						// TODO: check user's settings before fallbacking to false.
-						sql`coalesce(${preferOriginal ?? null}::boolean, false)`,
-					),
-				)
-				.leftJoin(videoQ, eq(shows.pk, videoQ.showPk))
-				.where(
-					and(
-						filter,
-						query ? sql`${transQ.name} %> ${query}::text` : undefined,
-						keysetPaginate({ table: shows, after, sort }),
-					),
-				)
-				.orderBy(
-					...(query
-						? [sql`word_similarity(${query}::text, ${transQ.name})`]
-						: sortToSql(sort, shows)),
-					shows.pk,
-				)
-				.limit(limit);
-
+			const items = await getShows({
+				limit,
+				after,
+				query,
+				sort,
+				filter: and(eq(shows.kind, "movie"), filter),
+				languages: langs,
+				preferOriginal,
+			});
 			return createPage(items, { url, sort, limit });
 		},
 		{
 			detail: { description: "Get all movies" },
 			query: t.Object({
-				sort: Sort(["slug", "rating", "airDate", "createdAt", "nextRefresh"], {
-					remap: { airDate: "startAir" },
-					default: ["slug"],
-				}),
-				filter: t.Optional(Filter({ def: movieFilters })),
+				sort: showSort,
+				filter: t.Optional(Filter({ def: showFilters })),
 				query: t.Optional(t.String({ description: desc.query })),
 				limit: t.Integer({
 					minimum: 1,
