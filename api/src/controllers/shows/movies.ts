@@ -1,4 +1,4 @@
-import { type SQL, and, eq, exists, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "~/db";
 import { shows } from "~/db/schema";
@@ -87,7 +87,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 		"random",
 		async ({ error, redirect }) => {
 			const [movie] = await db
-				.select({ id: shows.id })
+				.select({ slug: shows.slug })
 				.from(shows)
 				.where(eq(shows.kind, "movie"))
 				.orderBy(sql`random()`)
@@ -97,7 +97,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					status: 404,
 					message: "No movies in the database.",
 				});
-			return redirect(`/movies/${movie.id}`);
+			return redirect(`/movies/${movie.slug}`);
 		},
 		{
 			detail: {

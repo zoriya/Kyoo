@@ -191,8 +191,6 @@ describe("Get all movies", () => {
 			expect(resp.status).toBe(302);
 			const location = resp.headers.get("location")!;
 			expect(location).toStartWith("/movies/");
-			const id = location.substring("/movies/".length);
-			expect(isUuid(id)).toBe(true);
 		});
 	});
 	it("Limit 2, fallback lang, prefer original", async () => {

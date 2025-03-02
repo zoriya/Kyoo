@@ -48,6 +48,11 @@ app
 					},
 				],
 				tags: [
+					{
+						name: "shows",
+						description:
+							"Routes to list movies, series & collections at the same time",
+					},
 					{ name: "movies", description: "Routes about movies" },
 					{ name: "series", description: "Routes about series" },
 					{ name: "collections", description: "Routes about collections" },

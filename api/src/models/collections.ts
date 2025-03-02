@@ -12,6 +12,7 @@ import {
 } from "./utils";
 
 const BaseCollection = t.Object({
+	kind: t.Literal("collection"),
 	genres: t.Array(Genre),
 	rating: t.Nullable(t.Integer({ minimum: 0, maximum: 100 })),
 	startAir: t.Nullable(
@@ -67,7 +68,13 @@ export const FullCollection = t.Intersect([
 export type FullCollection = Prettify<typeof FullCollection.static>;
 
 export const SeedCollection = t.Intersect([
-	t.Omit(BaseCollection, ["startAir", "endAir", "createdAt", "nextRefresh"]),
+	t.Omit(BaseCollection, [
+		"kind",
+		"startAir",
+		"endAir",
+		"createdAt",
+		"nextRefresh",
+	]),
 	t.Object({
 		slug: t.String({ format: "slug" }),
 		translations: TranslationRecord(

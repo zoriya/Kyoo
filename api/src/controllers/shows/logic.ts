@@ -86,6 +86,7 @@ export async function getShows({
 			// movie columns (status is only a typescript hint)
 			status: sql<MovieStatus>`${shows.status}`,
 			airDate: shows.startAir,
+			kind: sql<any>`${shows.kind}`,
 
 			poster: sql<Image>`coalesce(${showTranslations.poster}, ${poster})`,
 			thumbnail: sql<Image>`coalesce(${showTranslations.thumbnail}, ${thumbnail})`,

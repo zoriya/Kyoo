@@ -18,6 +18,7 @@ export const MovieStatus = t.UnionEnum(["unknown", "finished", "planned"]);
 export type MovieStatus = typeof MovieStatus.static;
 
 const BaseMovie = t.Object({
+	kind: t.Literal("movie"),
 	genres: t.Array(Genre),
 	rating: t.Nullable(t.Integer({ minimum: 0, maximum: 100 })),
 	status: MovieStatus,
@@ -71,7 +72,7 @@ export const FullMovie = t.Intersect([
 export type FullMovie = Prettify<typeof FullMovie.static>;
 
 export const SeedMovie = t.Intersect([
-	t.Omit(BaseMovie, ["createdAt", "nextRefresh"]),
+	t.Omit(BaseMovie, ["kind", "createdAt", "nextRefresh"]),
 	t.Object({
 		slug: t.String({ format: "slug", examples: ["bubble"] }),
 		translations: TranslationRecord(
