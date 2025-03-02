@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import type { Prettify } from "elysia/dist/types";
+import { bubbleImages, duneCollection, registerExamples } from "./examples";
 import {
 	ExternalId,
 	Genre,
@@ -74,3 +75,9 @@ export const SeedCollection = t.Intersect([
 	}),
 ]);
 export type SeedCollection = Prettify<typeof SeedCollection.static>;
+
+registerExamples(Collection, {
+	...duneCollection,
+	...duneCollection.translations.en,
+	...bubbleImages,
+});
