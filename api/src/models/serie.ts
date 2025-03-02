@@ -1,4 +1,6 @@
 import { t } from "elysia";
+import type { Prettify } from "~/utils";
+import { SeedCollection } from "./collections";
 import { SeedEntry, SeedExtra } from "./entry";
 import { bubbleImages, madeInAbyss, registerExamples } from "./examples";
 import { SeedSeason } from "./season";
@@ -7,8 +9,6 @@ import { Genre } from "./utils/genres";
 import { Image, SeedImage } from "./utils/image";
 import { Language, TranslationRecord } from "./utils/language";
 import { Resource } from "./utils/resource";
-import { Prettify } from "~/utils";
-import { SeedCollection } from "./collections";
 
 export const SerieStatus = t.UnionEnum([
 	"unknown",

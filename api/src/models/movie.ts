@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import type { Prettify } from "~/utils";
+import { SeedCollection } from "./collections";
 import { bubble, registerExamples } from "./examples";
 import { bubbleImages } from "./examples/bubble";
 import {
@@ -12,7 +13,6 @@ import {
 	TranslationRecord,
 } from "./utils";
 import { Video } from "./video";
-import { SeedCollection } from "./collections";
 
 export const MovieStatus = t.UnionEnum(["unknown", "finished", "planned"]);
 export type MovieStatus = typeof MovieStatus.static;
