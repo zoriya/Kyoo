@@ -1,26 +1,19 @@
 import { type SQL, and, eq, exists, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "~/db";
-import { entries, entryVideoJoin, showTranslations, shows } from "~/db/schema";
-import { sqlarr } from "~/db/utils";
+import { shows } from "~/db/schema";
 import { KError } from "~/models/error";
 import { bubble } from "~/models/examples";
-import {
-	FullMovie,
-	Movie,
-	type MovieStatus,
-	MovieTranslation,
-} from "~/models/movie";
+import { FullMovie, Movie, MovieTranslation } from "~/models/movie";
 import {
 	AcceptLanguage,
 	Filter,
 	Page,
 	createPage,
-	isUuid,
 	processLanguages,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
-import { getShows, showFilters, showSort } from "./shows";
+import { getShow, getShows, showFilters, showSort } from "./shows";
 
 export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 	.model({
@@ -37,108 +30,26 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 			set,
 		}) => {
 			const langs = processLanguages(languages);
-
-			const ret = await db.query.shows.findFirst({
-				columns: {
-					kind: false,
-					startAir: false,
-					endAir: false,
-				},
-				extras: {
-					airDate: sql<string>`${shows.startAir}`.as("airDate"),
-					status: sql<MovieStatus>`${shows.status}`.as("status"),
-					isAvailable: exists(
-						db
-							.select()
-							.from(entries)
-							.where(
-								and(
-									eq(shows.pk, entries.showPk),
-									exists(
-										db
-											.select()
-											.from(entryVideoJoin)
-											.where(eq(entries.pk, entryVideoJoin.entry)),
-									),
-								),
-							),
-					).as("isAvailable") as SQL.Aliased<boolean>,
-				},
-				where: and(
-					eq(shows.kind, "movie"),
-					isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
-				),
-				with: {
-					selectedTranslation: {
-						columns: {
-							pk: false,
-						},
-						where: !langs.includes("*")
-							? eq(showTranslations.language, sql`any(${sqlarr(langs)})`)
-							: undefined,
-						orderBy: [
-							sql`array_position(${sqlarr(langs)}, ${showTranslations.language})`,
-						],
-						limit: 1,
-					},
-					originalTranslation: {
-						columns: {
-							poster: true,
-							thumbnail: true,
-							banner: true,
-							logo: true,
-						},
-						extras: {
-							// TODO: also fallback on user settings (that's why i made a select here)
-							preferOriginal:
-								sql<boolean>`(select coalesce(${preferOriginal ?? null}::boolean, false))`.as(
-									"preferOriginal",
-								),
-						},
-					},
-					...(relations.includes("translations") && {
-						translations: {
-							columns: {
-								pk: false,
-							},
-						},
-					}),
-				},
+			const ret = await getShow(id, {
+				languages: langs,
+				preferOriginal,
+				relations,
+				filters: eq(shows.kind, "movie"),
 			});
-
 			if (!ret) {
 				return error(404, {
 					status: 404,
 					message: "Movie not found",
 				});
 			}
-			const translation = ret.selectedTranslation[0];
-			if (!translation) {
+			if (!ret.language) {
 				return error(422, {
 					status: 422,
 					message: "Accept-Language header could not be satisfied.",
 				});
 			}
-			set.headers["content-language"] = translation.language;
-			const ot = ret.originalTranslation;
-			return {
-				...ret,
-				...translation,
-				...(ot?.preferOriginal && {
-					...(ot.poster && { poster: ot.poster }),
-					...(ot.thumbnail && { thumbnail: ot.thumbnail }),
-					...(ot.banner && { banner: ot.banner }),
-					...(ot.logo && { logo: ot.logo }),
-				}),
-				...(ret.translations && {
-					translations: Object.fromEntries(
-						ret.translations.map(
-							({ language, ...translation }) =>
-								[language, translation] as const,
-						),
-					),
-				}),
-			};
+			set.headers["content-language"] = ret.language;
+			return ret.show;
 		},
 		{
 			detail: {

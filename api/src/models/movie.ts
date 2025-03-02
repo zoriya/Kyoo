@@ -68,7 +68,7 @@ export const FullMovie = t.Intersect([
 		videos: t.Optional(t.Array(Video)),
 	}),
 ]);
-export type FullMovie = typeof FullMovie.static;
+export type FullMovie = Prettify<typeof FullMovie.static>;
 
 export const SeedMovie = t.Intersect([
 	t.Omit(BaseMovie, ["createdAt", "nextRefresh"]),

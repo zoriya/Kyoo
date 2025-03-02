@@ -10,6 +10,7 @@ import {
 	Genre,
 	type Image,
 	Sort,
+	isUuid,
 	keysetPaginate,
 	sortToSql,
 } from "~/models/utils";
@@ -116,4 +117,85 @@ export async function getShows({
 			shows.pk,
 		)
 		.limit(limit);
+}
+
+export async function getShow(
+	id: string,
+	{
+		languages,
+		preferOriginal,
+		relations,
+		filters,
+	}: {
+		languages: string[];
+		preferOriginal: boolean | undefined;
+		relations: ("translations" | "videos")[];
+		filters: SQL | undefined;
+	},
+) {
+	const ret = await db.query.shows.findFirst({
+		extras: {
+			airDate: sql<string>`${shows.startAir}`.as("airDate"),
+			status: sql<MovieStatus>`${shows.status}`.as("status"),
+		},
+		where: and(isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id), filters),
+		with: {
+			selectedTranslation: {
+				columns: {
+					pk: false,
+				},
+				where: !languages.includes("*")
+					? eq(showTranslations.language, sql`any(${sqlarr(languages)})`)
+					: undefined,
+				orderBy: [
+					sql`array_position(${sqlarr(languages)}, ${showTranslations.language})`,
+				],
+				limit: 1,
+			},
+			originalTranslation: {
+				columns: {
+					poster: true,
+					thumbnail: true,
+					banner: true,
+					logo: true,
+				},
+				extras: {
+					// TODO: also fallback on user settings (that's why i made a select here)
+					preferOriginal:
+						sql<boolean>`(select coalesce(${preferOriginal ?? null}::boolean, false))`.as(
+							"preferOriginal",
+						),
+				},
+			},
+			...(relations.includes("translations") && {
+				translations: {
+					columns: {
+						pk: false,
+					},
+				},
+			}),
+		},
+	});
+	if (!ret) return null;
+	const translation = ret.selectedTranslation[0];
+	if (!translation) return { show: null, language: null };
+	const ot = ret.originalTranslation;
+	const show = {
+		...ret,
+		...translation,
+		...(ot?.preferOriginal && {
+			...(ot.poster && { poster: ot.poster }),
+			...(ot.thumbnail && { thumbnail: ot.thumbnail }),
+			...(ot.banner && { banner: ot.banner }),
+			...(ot.logo && { logo: ot.logo }),
+		}),
+		...(ret.translations && {
+			translations: Object.fromEntries(
+				ret.translations.map(
+					({ language, ...translation }) => [language, translation] as const,
+				),
+			),
+		}),
+	};
+	return { show, language: translation.language };
 }

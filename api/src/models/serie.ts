@@ -61,6 +61,14 @@ export type SerieTranslation = typeof SerieTranslation.static;
 export const Serie = t.Intersect([Resource(), SerieTranslation, BaseSerie]);
 export type Serie = Prettify<typeof Serie.static>;
 
+export const FullSerie = t.Intersect([
+	Serie,
+	t.Object({
+		translations: t.Optional(TranslationRecord(SerieTranslation)),
+	}),
+]);
+export type FullMovie = Prettify<typeof FullSerie.static>;
+
 export const SeedSerie = t.Intersect([
 	t.Omit(BaseSerie, ["createdAt", "nextRefresh"]),
 	t.Object({
