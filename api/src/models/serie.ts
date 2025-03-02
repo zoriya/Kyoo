@@ -19,6 +19,7 @@ export const SerieStatus = t.UnionEnum([
 export type SerieStatus = typeof SerieStatus.static;
 
 export const BaseSerie = t.Object({
+	kind: t.Literal("serie"),
 	genres: t.Array(Genre),
 	rating: t.Nullable(t.Integer({ minimum: 0, maximum: 100 })),
 	status: SerieStatus,
@@ -70,7 +71,7 @@ export const FullSerie = t.Intersect([
 export type FullMovie = Prettify<typeof FullSerie.static>;
 
 export const SeedSerie = t.Intersect([
-	t.Omit(BaseSerie, ["createdAt", "nextRefresh"]),
+	t.Omit(BaseSerie, ["kind", "createdAt", "nextRefresh"]),
 	t.Object({
 		slug: t.String({ format: "slug" }),
 		translations: TranslationRecord(

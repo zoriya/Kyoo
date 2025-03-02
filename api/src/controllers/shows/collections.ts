@@ -96,7 +96,7 @@ export const collections = new Elysia({
 		"random",
 		async ({ error, redirect }) => {
 			const [serie] = await db
-				.select({ id: shows.id })
+				.select({ slug: shows.slug })
 				.from(shows)
 				.where(eq(shows.kind, "collection"))
 				.orderBy(sql`random()`)
@@ -106,7 +106,7 @@ export const collections = new Elysia({
 					status: 404,
 					message: "No collection in the database.",
 				});
-			return redirect(`/collections/${serie.id}`);
+			return redirect(`/collections/${serie.slug}`);
 		},
 		{
 			detail: {

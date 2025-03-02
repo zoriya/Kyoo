@@ -87,7 +87,7 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 		"random",
 		async ({ error, redirect }) => {
 			const [serie] = await db
-				.select({ id: shows.id })
+				.select({ slug: shows.slug })
 				.from(shows)
 				.where(eq(shows.kind, "serie"))
 				.orderBy(sql`random()`)
@@ -97,7 +97,7 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 					status: 404,
 					message: "No series in the database.",
 				});
-			return redirect(`/series/${serie.id}`);
+			return redirect(`/series/${serie.slug}`);
 		},
 		{
 			detail: {
