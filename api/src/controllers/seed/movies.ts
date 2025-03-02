@@ -4,8 +4,8 @@ import { getYear } from "~/utils";
 import { insertCollection } from "./insert/collection";
 import { insertEntries } from "./insert/entries";
 import { insertShow } from "./insert/shows";
-import { guessNextRefresh } from "./refresh";
 import { insertStudios } from "./insert/studios";
+import { guessNextRefresh } from "./refresh";
 
 export const SeedMovieResponse = t.Object({
 	id: t.String({ format: "uuid" }),
