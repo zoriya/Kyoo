@@ -50,6 +50,7 @@ app
 				tags: [
 					{ name: "movies", description: "Routes about movies" },
 					{ name: "series", description: "Routes about series" },
+					{ name: "collections", description: "Routes about collections" },
 					{
 						name: "videos",
 						description: comment`
