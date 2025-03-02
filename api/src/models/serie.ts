@@ -4,6 +4,7 @@ import { SeedCollection } from "./collections";
 import { SeedEntry, SeedExtra } from "./entry";
 import { bubbleImages, madeInAbyss, registerExamples } from "./examples";
 import { SeedSeason } from "./season";
+import { SeedStudio } from "./studio";
 import { ExternalId } from "./utils/external-id";
 import { Genre } from "./utils/genres";
 import { Image, SeedImage } from "./utils/image";
@@ -18,7 +19,7 @@ export const SerieStatus = t.UnionEnum([
 ]);
 export type SerieStatus = typeof SerieStatus.static;
 
-export const BaseSerie = t.Object({
+const BaseSerie = t.Object({
 	kind: t.Literal("serie"),
 	genres: t.Array(Genre),
 	rating: t.Nullable(t.Integer({ minimum: 0, maximum: 100 })),
@@ -89,6 +90,7 @@ export const SeedSerie = t.Intersect([
 		entries: t.Array(SeedEntry),
 		extras: t.Optional(t.Array(SeedExtra)),
 		collection: t.Optional(SeedCollection),
+		studios: t.Array(SeedStudio),
 	}),
 ]);
 export type SeedSerie = typeof SeedSerie.static;

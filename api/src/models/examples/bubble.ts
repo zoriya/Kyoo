@@ -9,6 +9,7 @@ export const bubbleVideo: Video = {
 	part: null,
 	version: 1,
 	createdAt: "2024-11-23T15:01:24.968Z",
+	updatedAt: "2024-11-23T15:01:24.968Z",
 };
 
 export const bubble: SeedMovie = {
@@ -60,6 +61,7 @@ export const bubble: SeedMovie = {
 		},
 	},
 	videos: [bubbleVideo.id],
+	studios: [],
 };
 
 export const bubbleImages = {

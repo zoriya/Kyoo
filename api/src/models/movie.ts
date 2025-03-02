@@ -3,6 +3,7 @@ import type { Prettify } from "~/utils";
 import { SeedCollection } from "./collections";
 import { bubble, registerExamples } from "./examples";
 import { bubbleImages } from "./examples/bubble";
+import { SeedStudio } from "./studio";
 import {
 	ExternalId,
 	Genre,
@@ -88,6 +89,7 @@ export const SeedMovie = t.Intersect([
 		),
 		videos: t.Optional(t.Array(t.String({ format: "uuid" }))),
 		collection: t.Optional(SeedCollection),
+		studios: t.Array(SeedStudio),
 	}),
 ]);
 export type SeedMovie = Prettify<typeof SeedMovie.static>;

@@ -1,4 +1,4 @@
-import { type TSchema, t } from "elysia";
+import { t } from "elysia";
 import { comment } from "../utils";
 import { bubbleVideo, registerExamples } from "./examples";
 
