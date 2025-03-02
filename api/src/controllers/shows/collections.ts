@@ -10,6 +10,8 @@ import {
 import { KError } from "~/models/error";
 import { duneCollection } from "~/models/examples";
 import { Movie } from "~/models/movie";
+import { Serie } from "~/models/serie";
+import { Show } from "~/models/show";
 import {
 	AcceptLanguage,
 	Filter,
@@ -324,7 +326,7 @@ export const collections = new Elysia({
 				"accept-language": AcceptLanguage({ autoFallback: true }),
 			}),
 			response: {
-				200: Page(Movie),
+				200: Page(Serie),
 				404: {
 					...KError,
 					description: "No collection found with the given id or slug.",
@@ -401,7 +403,7 @@ export const collections = new Elysia({
 				"accept-language": AcceptLanguage({ autoFallback: true }),
 			}),
 			response: {
-				200: Page(Movie),
+				200: Page(Show),
 				404: {
 					...KError,
 					description: "No collection found with the given id or slug.",
