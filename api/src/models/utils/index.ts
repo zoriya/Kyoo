@@ -7,3 +7,4 @@ export * from "./filters";
 export * from "./page";
 export * from "./sort";
 export * from "./keyset-paginate";
+export * from "./db-metadata";

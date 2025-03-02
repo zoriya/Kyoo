@@ -5,11 +5,16 @@ import { SeedEntry, SeedExtra } from "./entry";
 import { bubbleImages, madeInAbyss, registerExamples } from "./examples";
 import { SeedSeason } from "./season";
 import { SeedStudio } from "./studio";
-import { ExternalId } from "./utils/external-id";
-import { Genre } from "./utils/genres";
-import { Image, SeedImage } from "./utils/image";
-import { Language, TranslationRecord } from "./utils/language";
-import { Resource } from "./utils/resource";
+import {
+	DbMetadata,
+	ExternalId,
+	Genre,
+	Image,
+	Language,
+	Resource,
+	SeedImage,
+	TranslationRecord,
+} from "./utils";
 
 export const SerieStatus = t.UnionEnum([
 	"unknown",
@@ -39,7 +44,6 @@ const BaseSerie = t.Object({
 		}),
 	),
 
-	createdAt: t.String({ format: "date-time" }),
 	nextRefresh: t.String({ format: "date-time" }),
 
 	externalId: ExternalId,
@@ -60,7 +64,12 @@ export const SerieTranslation = t.Object({
 });
 export type SerieTranslation = typeof SerieTranslation.static;
 
-export const Serie = t.Intersect([Resource(), SerieTranslation, BaseSerie]);
+export const Serie = t.Intersect([
+	Resource(),
+	SerieTranslation,
+	BaseSerie,
+	DbMetadata,
+]);
 export type Serie = Prettify<typeof Serie.static>;
 
 export const FullSerie = t.Intersect([
@@ -72,7 +81,7 @@ export const FullSerie = t.Intersect([
 export type FullMovie = Prettify<typeof FullSerie.static>;
 
 export const SeedSerie = t.Intersect([
-	t.Omit(BaseSerie, ["kind", "createdAt", "nextRefresh"]),
+	t.Omit(BaseSerie, ["kind", "nextRefresh"]),
 	t.Object({
 		slug: t.String({ format: "slug" }),
 		translations: TranslationRecord(

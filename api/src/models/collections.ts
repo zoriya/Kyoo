@@ -2,6 +2,7 @@ import { t } from "elysia";
 import type { Prettify } from "elysia/dist/types";
 import { bubbleImages, duneCollection, registerExamples } from "./examples";
 import {
+	DbMetadata,
 	ExternalId,
 	Genre,
 	Image,
@@ -33,7 +34,6 @@ const BaseCollection = t.Object({
 		}),
 	),
 
-	createdAt: t.String({ format: "date-time" }),
 	nextRefresh: t.String({ format: "date-time" }),
 
 	externalId: ExternalId,
@@ -56,6 +56,7 @@ export const Collection = t.Intersect([
 	Resource(),
 	CollectionTranslation,
 	BaseCollection,
+	DbMetadata,
 ]);
 export type Collection = Prettify<typeof Collection.static>;
 
@@ -68,13 +69,7 @@ export const FullCollection = t.Intersect([
 export type FullCollection = Prettify<typeof FullCollection.static>;
 
 export const SeedCollection = t.Intersect([
-	t.Omit(BaseCollection, [
-		"kind",
-		"startAir",
-		"endAir",
-		"createdAt",
-		"nextRefresh",
-	]),
+	t.Omit(BaseCollection, ["kind", "startAir", "endAir", "nextRefresh"]),
 	t.Object({
 		slug: t.String({ format: "slug" }),
 		translations: TranslationRecord(

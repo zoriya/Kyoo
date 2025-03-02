@@ -1,10 +1,10 @@
 import { t } from "elysia";
 import type { Prettify } from "~/utils";
 import { SeedCollection } from "./collections";
-import { bubble, registerExamples } from "./examples";
-import { bubbleImages } from "./examples/bubble";
+import { bubble, bubbleImages, registerExamples } from "./examples";
 import { SeedStudio } from "./studio";
 import {
+	DbMetadata,
 	ExternalId,
 	Genre,
 	Image,
@@ -34,7 +34,6 @@ const BaseMovie = t.Object({
 		}),
 	),
 
-	createdAt: t.String({ format: "date-time" }),
 	nextRefresh: t.String({ format: "date-time" }),
 
 	externalId: ExternalId,
@@ -59,6 +58,7 @@ export const Movie = t.Intersect([
 	Resource(),
 	MovieTranslation,
 	BaseMovie,
+	DbMetadata,
 	// t.Object({ isAvailable: t.Boolean() }),
 ]);
 export type Movie = Prettify<typeof Movie.static>;
@@ -73,7 +73,7 @@ export const FullMovie = t.Intersect([
 export type FullMovie = Prettify<typeof FullMovie.static>;
 
 export const SeedMovie = t.Intersect([
-	t.Omit(BaseMovie, ["kind", "createdAt", "nextRefresh"]),
+	t.Omit(BaseMovie, ["kind", "nextRefresh"]),
 	t.Object({
 		slug: t.String({ format: "slug", examples: ["bubble"] }),
 		translations: TranslationRecord(

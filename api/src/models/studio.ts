@@ -1,12 +1,10 @@
 import { t } from "elysia";
 import type { Prettify } from "elysia/dist/types";
 import { madeInAbyss, registerExamples } from "./examples";
-import { ExternalId, Resource, TranslationRecord } from "./utils";
+import { DbMetadata, ExternalId, Resource, TranslationRecord } from "./utils";
 import { Image, SeedImage } from "./utils/image";
 
 const BaseStudio = t.Object({
-	createdAt: t.String({ format: "date-time" }),
-
 	externalId: ExternalId,
 });
 
@@ -15,11 +13,16 @@ export const StudioTranslation = t.Object({
 	logo: t.Nullable(Image),
 });
 
-export const Studio = t.Intersect([Resource(), StudioTranslation, BaseStudio]);
+export const Studio = t.Intersect([
+	Resource(),
+	StudioTranslation,
+	BaseStudio,
+	DbMetadata,
+]);
 export type Studio = Prettify<typeof Studio.static>;
 
 export const SeedStudio = t.Intersect([
-	t.Omit(BaseStudio, ["createdAt"]),
+	BaseStudio,
 	t.Object({
 		slug: t.String({ format: "slug" }),
 		translations: TranslationRecord(
