@@ -1,6 +1,7 @@
 import { t } from "elysia";
 import type { SeedMovie } from "~/models/movie";
 import { getYear } from "~/utils";
+import { insertCollection } from "./insert/collection";
 import { insertEntries } from "./insert/entries";
 import { insertShow } from "./insert/shows";
 import { guessNextRefresh } from "./refresh";
@@ -10,6 +11,12 @@ export const SeedMovieResponse = t.Object({
 	slug: t.String({ format: "slug", examples: ["bubble"] }),
 	videos: t.Array(
 		t.Object({ slug: t.String({ format: "slug", examples: ["bubble-v2"] }) }),
+	),
+	collection: t.Nullable(
+		t.Object({
+			id: t.String({ format: "uuid" }),
+			slug: t.String({ format: "slug", examples: ["sawano-collection"] }),
+		}),
 	),
 });
 export type SeedMovieResponse = typeof SeedMovieResponse.static;
@@ -31,14 +38,21 @@ export const seedMovie = async (
 		seed.slug = `random-${getYear(seed.airDate)}`;
 	}
 
-	const { translations, videos, ...bMovie } = seed;
+	const { translations, videos, collection, ...bMovie } = seed;
 	const nextRefresh = guessNextRefresh(bMovie.airDate ?? new Date());
+
+	const col = await insertCollection(collection, {
+		kind: "movie",
+		nextRefresh,
+		...seed,
+	});
 
 	const show = await insertShow(
 		{
 			kind: "movie",
 			startAir: bMovie.airDate,
 			nextRefresh,
+			collectionPk: col?.pk,
 			...bMovie,
 		},
 		translations,
@@ -65,5 +79,6 @@ export const seedMovie = async (
 		id: show.id,
 		slug: show.slug,
 		videos: entry.videos,
+		collection: col,
 	};
 };

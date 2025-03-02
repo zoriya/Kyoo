@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import type { Prettify } from "~/utils";
+import { SeedCollection } from "./collections";
 import { bubble, registerExamples } from "./examples";
 import { bubbleImages } from "./examples/bubble";
 import {
@@ -85,6 +86,7 @@ export const SeedMovie = t.Intersect([
 			]),
 		),
 		videos: t.Optional(t.Array(t.String({ format: "uuid" }))),
+		collection: t.Optional(SeedCollection),
 	}),
 ]);
 export type SeedMovie = Prettify<typeof SeedMovie.static>;

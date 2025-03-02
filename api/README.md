@@ -8,7 +8,7 @@ The many-to-many relation between entries (episodes/movies) & videos is NOT a mi
 erDiagram
     shows {
         guid id PK
-        kind kind "serie|movie"
+        kind kind "serie|movie|collection"
         string(128) slug UK
         genre[] genres
         int rating "From 0 to 100"
@@ -20,6 +20,7 @@ erDiagram
         jsonb external_id
         guid studio_id FK
         string original_language
+		guid collection_id FK
     }
     show_translations {
         guid id PK, FK
@@ -37,6 +38,7 @@ erDiagram
     }
     shows ||--|{ show_translations : has
     shows |o--|| entries : has
+    shows |o--|| shows : has_collection
 
     entries {
         guid id PK
@@ -69,23 +71,6 @@ erDiagram
         uint version "max version is preferred rendering"
     }
     video }|--|{ entries : for
-
-    collections {
-        guid id PK
-        string(256) slug UK
-        datetime added_date
-        datetime next_refresh
-    }
-
-    collection_translations {
-        guid id PK, FK
-        string language PK
-        string name "NN"
-        jsonb poster
-        jsonb thumbnail
-    }
-    collections ||--|{ collection_translations : has
-    collections |o--|{ shows : has
 
     seasons {
         guid id PK

@@ -1,5 +1,5 @@
-import type { SeedMovie } from "../movie";
-import type { Video } from "../video";
+import type { SeedMovie } from "~/models/movie";
+import type { Video } from "~/models/video";
 
 export const duneVideo: Video = {
 	id: "c9a0d02e-6b8e-4ac1-b431-45b022ec0708",
@@ -38,8 +38,8 @@ export const dune: SeedMovie = {
 	originalLanguage: "en",
 	externalId: {
 		themoviedatabase: {
-			dataId: "496243",
-			link: "https://www.themoviedb.org/movie/496243",
+			dataId: "438631",
+			link: "https://www.themoviedb.org/movie/438631-dune",
 		},
 		imdb: {
 			dataId: "tt1160419",
