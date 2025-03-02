@@ -25,7 +25,7 @@ export const studios = schema.table("studios", {
 		.$onUpdate(() => sql`now()`),
 });
 
-export const studio_translations = schema.table(
+export const studioTranslations = schema.table(
 	"studio_translations",
 	{
 		pk: integer()

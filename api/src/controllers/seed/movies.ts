@@ -5,6 +5,7 @@ import { insertCollection } from "./insert/collection";
 import { insertEntries } from "./insert/entries";
 import { insertShow } from "./insert/shows";
 import { guessNextRefresh } from "./refresh";
+import { insertStudios } from "./insert/studios";
 
 export const SeedMovieResponse = t.Object({
 	id: t.String({ format: "uuid" }),
@@ -16,6 +17,12 @@ export const SeedMovieResponse = t.Object({
 		t.Object({
 			id: t.String({ format: "uuid" }),
 			slug: t.String({ format: "slug", examples: ["sawano-collection"] }),
+		}),
+	),
+	studios: t.Array(
+		t.Object({
+			id: t.String({ format: "uuid" }),
+			slug: t.String({ format: "slug", examples: ["disney"] }),
 		}),
 	),
 });
@@ -38,7 +45,7 @@ export const seedMovie = async (
 		seed.slug = `random-${getYear(seed.airDate)}`;
 	}
 
-	const { translations, videos, collection, ...bMovie } = seed;
+	const { translations, videos, collection, studios, ...bMovie } = seed;
 	const nextRefresh = guessNextRefresh(bMovie.airDate ?? new Date());
 
 	const col = await insertCollection(collection, {
@@ -74,11 +81,14 @@ export const seedMovie = async (
 		},
 	]);
 
+	const retStudios = await insertStudios(studios, show.pk);
+
 	return {
 		updated: show.updated,
 		id: show.id,
 		slug: show.slug,
 		videos: entry.videos,
 		collection: col,
+		studios: retStudios,
 	};
 };
