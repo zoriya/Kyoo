@@ -68,7 +68,11 @@ export const seedSerie = async (
 	const { translations, seasons, entries, extras, collection, ...serie } = seed;
 	const nextRefresh = guessNextRefresh(serie.startAir ?? new Date());
 
-	const col = await insertCollection(collection);
+	const col = await insertCollection(collection, {
+		kind: "serie",
+		nextRefresh,
+		...seed,
+	});
 
 	const show = await insertShow(
 		{

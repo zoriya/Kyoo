@@ -41,7 +41,11 @@ export const seedMovie = async (
 	const { translations, videos, collection, ...bMovie } = seed;
 	const nextRefresh = guessNextRefresh(bMovie.airDate ?? new Date());
 
-	const col = await insertCollection(collection);
+	const col = await insertCollection(collection, {
+		kind: "movie",
+		nextRefresh,
+		...seed,
+	});
 
 	const show = await insertShow(
 		{
