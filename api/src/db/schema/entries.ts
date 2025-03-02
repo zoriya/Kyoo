@@ -2,6 +2,7 @@ import { relations, sql } from "drizzle-orm";
 import {
 	check,
 	date,
+	index,
 	integer,
 	jsonb,
 	primaryKey,
@@ -70,11 +71,17 @@ export const entries = schema.table(
 		createdAt: timestamp({ withTimezone: true, mode: "string" })
 			.notNull()
 			.defaultNow(),
+		updatedAt: timestamp({ withTimezone: true, mode: "string" })
+			.notNull()
+			.$onUpdate(() => sql`now()`),
 		nextRefresh: timestamp({ withTimezone: true, mode: "string" }).notNull(),
 	},
 	(t) => [
 		unique().on(t.showPk, t.seasonNumber, t.episodeNumber),
 		check("order_positive", sql`${t.order} >= 0`),
+
+		index("entry_kind").using("hash", t.kind),
+		index("entry_order").on(t.order),
 	],
 );
 
@@ -91,7 +98,10 @@ export const entryTranslations = schema.table(
 		tagline: text(),
 		poster: image(),
 	},
-	(t) => [primaryKey({ columns: [t.pk, t.language] })],
+	(t) => [
+		primaryKey({ columns: [t.pk, t.language] }),
+		index("entry_name_trgm").using("gin", sql`${t.name} gin_trgm_ops`),
+	],
 );
 
 export const entryRelations = relations(entries, ({ one, many }) => ({

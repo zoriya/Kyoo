@@ -26,6 +26,9 @@ export const videos = schema.table(
 		createdAt: timestamp({ withTimezone: true, mode: "string" })
 			.notNull()
 			.defaultNow(),
+		updatedAt: timestamp({ withTimezone: true, mode: "string" })
+			.notNull()
+			.$onUpdate(() => sql`now()`),
 	},
 	(t) => [
 		check("part_pos", sql`${t.part} >= 0`),

@@ -160,5 +160,5 @@ erDiagram
       string name
     }
     studios ||--|{ studio_translations : has
-    shows ||--|{ studios : has
+    shows }|--|{ studios : has
 ```

@@ -92,6 +92,9 @@ export const shows = schema.table(
 		createdAt: timestamp({ withTimezone: true, mode: "string" })
 			.notNull()
 			.defaultNow(),
+		updatedAt: timestamp({ withTimezone: true, mode: "string" })
+			.notNull()
+			.$onUpdate(() => sql`now()`),
 		nextRefresh: timestamp({ withTimezone: true, mode: "string" }).notNull(),
 	},
 	(t) => [
