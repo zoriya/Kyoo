@@ -1,5 +1,6 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
+import { db } from "~/db";
 import { shows } from "~/db/schema";
 import { KError } from "~/models/error";
 import { Serie, SerieTranslation } from "~/models/serie";
@@ -18,6 +19,38 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 		serie: Serie,
 		"serie-translation": SerieTranslation,
 	})
+	.get(
+		"random",
+		async ({ error, redirect }) => {
+			const [serie] = await db
+				.select({ id: shows.id })
+				.from(shows)
+				.where(eq(shows.kind, "serie"))
+				.orderBy(sql`random()`)
+				.limit(1);
+			if (!serie)
+				return error(404, {
+					status: 404,
+					message: "No series in the database.",
+				});
+			return redirect(`/series/${serie.id}`);
+		},
+		{
+			detail: {
+				description: "Get a random serie",
+			},
+			response: {
+				302: t.Void({
+					description:
+						"Redirected to the [/series/{id}](#tag/series/GET/series/{id}) route.",
+				}),
+				404: {
+					...KError,
+					description: "No series in the database.",
+				},
+			},
+		},
+	)
 	.get(
 		"",
 		async ({

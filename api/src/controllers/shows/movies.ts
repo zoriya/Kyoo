@@ -184,7 +184,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 			if (!movie)
 				return error(404, {
 					status: 404,
-					message: "No movies in the database",
+					message: "No movies in the database.",
 				});
 			return redirect(`/movies/${movie.id}`);
 		},
@@ -199,7 +199,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				}),
 				404: {
 					...KError,
-					description: "No movie found with the given id or slug.",
+					description: "No movies in the database.",
 				},
 			},
 		},
