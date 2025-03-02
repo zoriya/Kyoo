@@ -1,6 +1,7 @@
 import { t } from "elysia";
 import type { SeedSerie } from "~/models/serie";
 import { getYear } from "~/utils";
+import { insertCollection } from "./insert/collection";
 import { insertEntries } from "./insert/entries";
 import { insertSeasons } from "./insert/seasons";
 import { insertShow } from "./insert/shows";
@@ -35,6 +36,15 @@ export const SeedSerieResponse = t.Object({
 			slug: t.String({ format: "slug", examples: ["made-in-abyss-s1e1"] }),
 		}),
 	),
+	collection: t.Nullable(
+		t.Object({
+			id: t.String({ format: "uuid" }),
+			slug: t.String({
+				format: "slug",
+				examples: ["made-in-abyss-collection"],
+			}),
+		}),
+	),
 });
 export type SeedSerieResponse = typeof SeedSerieResponse.static;
 
@@ -55,13 +65,16 @@ export const seedSerie = async (
 		seed.slug = `random-${getYear(seed.startAir)}`;
 	}
 
-	const { translations, seasons, entries, extras, ...serie } = seed;
+	const { translations, seasons, entries, extras, collection, ...serie } = seed;
 	const nextRefresh = guessNextRefresh(serie.startAir ?? new Date());
+
+	const col = await insertCollection(collection);
 
 	const show = await insertShow(
 		{
 			kind: "serie",
 			nextRefresh,
+			collectionPk: col?.pk,
 			...serie,
 		},
 		translations,
@@ -82,5 +95,6 @@ export const seedSerie = async (
 		seasons: retSeasons,
 		entries: retEntries,
 		extras: retExtras,
+		collection: col,
 	};
 };

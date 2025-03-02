@@ -2,6 +2,7 @@ import { eq, sql } from "drizzle-orm";
 import { db } from "~/db";
 import { showTranslations, shows } from "~/db/schema";
 import { conflictUpdateAllExcept } from "~/db/utils";
+import type { SeedCollection } from "~/models/collections";
 import type { SeedMovie } from "~/models/movie";
 import type { SeedSerie } from "~/models/serie";
 import { getYear } from "~/utils";
@@ -12,7 +13,10 @@ type ShowTrans = typeof showTranslations.$inferInsert;
 
 export const insertShow = async (
 	show: Show,
-	translations: SeedMovie["translations"] | SeedSerie["translations"],
+	translations:
+		| SeedMovie["translations"]
+		| SeedSerie["translations"]
+		| SeedCollection["translations"],
 ) => {
 	return await db.transaction(async (tx) => {
 		const ret = await insertBaseShow(tx, show);
@@ -77,13 +81,14 @@ async function insertBaseShow(
 
 	// if at this point ret is still undefined, we could not reconciliate.
 	// simply bail and let the caller handle this.
-	const [{ id }] = await db
-		.select({ id: shows.id })
+	const [{ pk, id }] = await db
+		.select({ pk: shows.pk, id: shows.id })
 		.from(shows)
 		.where(eq(shows.slug, show.slug))
 		.limit(1);
 	return {
 		status: 409 as const,
+		pk,
 		id,
 		slug: show.slug,
 	};

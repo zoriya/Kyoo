@@ -52,7 +52,7 @@ export const Collection = t.Intersect([
 export type Collection = Prettify<typeof Collection.static>;
 
 export const SeedCollection = t.Intersect([
-	t.Omit(BaseCollection, ["createdAt", "nextRefresh"]),
+	t.Omit(BaseCollection, ["startAir", "endAir", "createdAt", "nextRefresh"]),
 	t.Object({
 		slug: t.String({ format: "slug" }),
 		translations: TranslationRecord(
