@@ -173,6 +173,34 @@ export const collections = new Elysia({
 			},
 		},
 	)
+	.guard({
+		params: t.Object({
+			id: t.String({
+				description: "The id or slug of the collection.",
+				example: duneCollection.slug,
+			}),
+		}),
+		query: t.Object({
+			sort: showSort,
+			filter: t.Optional(Filter({ def: showFilters })),
+			query: t.Optional(t.String({ description: desc.query })),
+			limit: t.Integer({
+				minimum: 1,
+				maximum: 250,
+				default: 50,
+				description: "Max page size.",
+			}),
+			after: t.Optional(t.String({ description: desc.after })),
+			preferOriginal: t.Optional(
+				t.Boolean({
+					description: desc.preferOriginal,
+				}),
+			),
+		}),
+		headers: t.Object({
+			"accept-language": AcceptLanguage({ autoFallback: true }),
+		}),
+	})
 	.get(
 		"/:id/movies",
 		async ({
@@ -218,32 +246,6 @@ export const collections = new Elysia({
 		},
 		{
 			detail: { description: "Get all movies in a collection" },
-			params: t.Object({
-				id: t.String({
-					description: "The id or slug of the collection.",
-					example: duneCollection.slug,
-				}),
-			}),
-			query: t.Object({
-				sort: showSort,
-				filter: t.Optional(Filter({ def: showFilters })),
-				query: t.Optional(t.String({ description: desc.query })),
-				limit: t.Integer({
-					minimum: 1,
-					maximum: 250,
-					default: 50,
-					description: "Max page size.",
-				}),
-				after: t.Optional(t.String({ description: desc.after })),
-				preferOriginal: t.Optional(
-					t.Boolean({
-						description: desc.preferOriginal,
-					}),
-				),
-			}),
-			headers: t.Object({
-				"accept-language": AcceptLanguage({ autoFallback: true }),
-			}),
 			response: {
 				200: Page(Movie),
 				404: {
@@ -299,32 +301,6 @@ export const collections = new Elysia({
 		},
 		{
 			detail: { description: "Get all series in a collection" },
-			params: t.Object({
-				id: t.String({
-					description: "The id or slug of the collection.",
-					example: duneCollection.slug,
-				}),
-			}),
-			query: t.Object({
-				sort: showSort,
-				filter: t.Optional(Filter({ def: showFilters })),
-				query: t.Optional(t.String({ description: desc.query })),
-				limit: t.Integer({
-					minimum: 1,
-					maximum: 250,
-					default: 50,
-					description: "Max page size.",
-				}),
-				after: t.Optional(t.String({ description: desc.after })),
-				preferOriginal: t.Optional(
-					t.Boolean({
-						description: desc.preferOriginal,
-					}),
-				),
-			}),
-			headers: t.Object({
-				"accept-language": AcceptLanguage({ autoFallback: true }),
-			}),
 			response: {
 				200: Page(Serie),
 				404: {
@@ -376,32 +352,6 @@ export const collections = new Elysia({
 		},
 		{
 			detail: { description: "Get all series & movies in a collection" },
-			params: t.Object({
-				id: t.String({
-					description: "The id or slug of the collection.",
-					example: duneCollection.slug,
-				}),
-			}),
-			query: t.Object({
-				sort: showSort,
-				filter: t.Optional(Filter({ def: showFilters })),
-				query: t.Optional(t.String({ description: desc.query })),
-				limit: t.Integer({
-					minimum: 1,
-					maximum: 250,
-					default: 50,
-					description: "Max page size.",
-				}),
-				after: t.Optional(t.String({ description: desc.after })),
-				preferOriginal: t.Optional(
-					t.Boolean({
-						description: desc.preferOriginal,
-					}),
-				),
-			}),
-			headers: t.Object({
-				"accept-language": AcceptLanguage({ autoFallback: true }),
-			}),
 			response: {
 				200: Page(Show),
 				404: {

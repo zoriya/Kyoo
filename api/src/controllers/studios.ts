@@ -21,6 +21,34 @@ export const studiosH = new Elysia({ tags: ["studios"] })
 		studio: Studio,
 		"studio-translation": StudioTranslation,
 	})
+	.guard({
+		params: t.Object({
+			id: t.String({
+				description: "The id or slug of the studio.",
+				example: "mappa",
+			}),
+		}),
+		query: t.Object({
+			sort: showSort,
+			filter: t.Optional(Filter({ def: showFilters })),
+			query: t.Optional(t.String({ description: desc.query })),
+			limit: t.Integer({
+				minimum: 1,
+				maximum: 250,
+				default: 50,
+				description: "Max page size.",
+			}),
+			after: t.Optional(t.String({ description: desc.after })),
+			preferOriginal: t.Optional(
+				t.Boolean({
+					description: desc.preferOriginal,
+				}),
+			),
+		}),
+		headers: t.Object({
+			"accept-language": AcceptLanguage({ autoFallback: true }),
+		}),
+	})
 	.get(
 		"/studios/:id/shows",
 		async ({
@@ -70,32 +98,6 @@ export const studiosH = new Elysia({ tags: ["studios"] })
 		},
 		{
 			detail: { description: "Get all series & movies made by a studio." },
-			params: t.Object({
-				id: t.String({
-					description: "The id or slug of the studio.",
-					example: "mappa",
-				}),
-			}),
-			query: t.Object({
-				sort: showSort,
-				filter: t.Optional(Filter({ def: showFilters })),
-				query: t.Optional(t.String({ description: desc.query })),
-				limit: t.Integer({
-					minimum: 1,
-					maximum: 250,
-					default: 50,
-					description: "Max page size.",
-				}),
-				after: t.Optional(t.String({ description: desc.after })),
-				preferOriginal: t.Optional(
-					t.Boolean({
-						description: desc.preferOriginal,
-					}),
-				),
-			}),
-			headers: t.Object({
-				"accept-language": AcceptLanguage({ autoFallback: true }),
-			}),
 			response: {
 				200: Page(Show),
 				404: {
