@@ -107,7 +107,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 				"accept-language": AcceptLanguage(),
 			}),
 			response: {
-				200: { ...Studio, description: "Found" },
+				200: "studio",
 				404: {
 					...KError,
 					description: "No collection found with the given id or slug.",
