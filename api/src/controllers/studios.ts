@@ -15,6 +15,8 @@ import {
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import { getShows, showFilters, showSort } from "./shows/logic";
+import { Serie } from "~/models/serie";
+import { Movie } from "~/models/movie";
 
 export const studiosH = new Elysia({ tags: ["studios"] })
 	.model({
@@ -100,6 +102,126 @@ export const studiosH = new Elysia({ tags: ["studios"] })
 			detail: { description: "Get all series & movies made by a studio." },
 			response: {
 				200: Page(Show),
+				404: {
+					...KError,
+					description: "No collection found with the given id or slug.",
+				},
+				422: KError,
+			},
+		},
+	)
+	.get(
+		"/studios/:id/movies",
+		async ({
+			params: { id },
+			query: { limit, after, query, sort, filter, preferOriginal },
+			headers: { "accept-language": languages },
+			request: { url },
+			error,
+		}) => {
+			const [studio] = await db
+				.select({ pk: studios.pk })
+				.from(studios)
+				.where(isUuid(id) ? eq(studios.id, id) : eq(studios.slug, id))
+				.limit(1);
+
+			if (!studio) {
+				return error(404, {
+					status: 404,
+					message: `No studios with the id or slug: '${id}'.`,
+				});
+			}
+
+			const langs = processLanguages(languages);
+			const items = await getShows({
+				limit,
+				after,
+				query,
+				sort,
+				filter: and(
+					eq(shows.kind, "movie"),
+					exists(
+						db
+							.select()
+							.from(showStudioJoin)
+							.where(
+								and(
+									eq(showStudioJoin.studio, studio.pk),
+									eq(showStudioJoin.show, shows.pk),
+								),
+							),
+					),
+					filter,
+				),
+				languages: langs,
+				preferOriginal,
+			});
+			return createPage(items, { url, sort, limit });
+		},
+		{
+			detail: { description: "Get all movies made by a studio." },
+			response: {
+				200: Page(Movie),
+				404: {
+					...KError,
+					description: "No collection found with the given id or slug.",
+				},
+				422: KError,
+			},
+		},
+	)
+	.get(
+		"/studios/:id/series",
+		async ({
+			params: { id },
+			query: { limit, after, query, sort, filter, preferOriginal },
+			headers: { "accept-language": languages },
+			request: { url },
+			error,
+		}) => {
+			const [studio] = await db
+				.select({ pk: studios.pk })
+				.from(studios)
+				.where(isUuid(id) ? eq(studios.id, id) : eq(studios.slug, id))
+				.limit(1);
+
+			if (!studio) {
+				return error(404, {
+					status: 404,
+					message: `No studios with the id or slug: '${id}'.`,
+				});
+			}
+
+			const langs = processLanguages(languages);
+			const items = await getShows({
+				limit,
+				after,
+				query,
+				sort,
+				filter: and(
+					eq(shows.kind, "serie"),
+					exists(
+						db
+							.select()
+							.from(showStudioJoin)
+							.where(
+								and(
+									eq(showStudioJoin.studio, studio.pk),
+									eq(showStudioJoin.show, shows.pk),
+								),
+							),
+					),
+					filter,
+				),
+				languages: langs,
+				preferOriginal,
+			});
+			return createPage(items, { url, sort, limit });
+		},
+		{
+			detail: { description: "Get all series made by a studio." },
+			response: {
+				200: Page(Serie),
 				404: {
 					...KError,
 					description: "No collection found with the given id or slug.",
