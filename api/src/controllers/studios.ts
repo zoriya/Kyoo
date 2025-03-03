@@ -36,7 +36,7 @@ export const studiosH = new Elysia({ tags: ["studios"] })
 				.where(isUuid(id) ? eq(studios.id, id) : eq(studios.slug, id))
 				.limit(1);
 
-			if (!studios) {
+			if (!studio) {
 				return error(404, {
 					status: 404,
 					message: `No studios with the id or slug: '${id}'.`,
