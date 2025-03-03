@@ -41,6 +41,7 @@ describe("with a null value", () => {
 			airDate: null,
 			originalLanguage: null,
 			externalId: {},
+			studios: [],
 		});
 	});
 

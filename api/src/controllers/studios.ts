@@ -1,81 +1,98 @@
-import { and, eq, sql } from "drizzle-orm";
-import { Elysia, t } from "elysia";
+import { and, eq, exists, sql } from "drizzle-orm";
+import Elysia, { t } from "elysia";
 import { db } from "~/db";
-import { shows } from "~/db/schema";
 import {
-	Collection,
-	CollectionTranslation,
-	FullCollection,
-} from "~/models/collections";
+	showStudioJoin,
+	shows,
+	studioTranslations,
+	studios,
+} from "~/db/schema";
+import { getColumns, sqlarr } from "~/db/utils";
 import { KError } from "~/models/error";
-import { duneCollection } from "~/models/examples";
 import { Movie } from "~/models/movie";
 import { Serie } from "~/models/serie";
 import { Show } from "~/models/show";
+import { Studio, StudioTranslation } from "~/models/studio";
 import {
 	AcceptLanguage,
 	Filter,
 	Page,
+	Sort,
 	createPage,
 	isUuid,
+	keysetPaginate,
 	processLanguages,
+	selectTranslationQuery,
+	sortToSql,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
-import { getShow, getShows, showFilters, showSort } from "./logic";
+import { getShows, showFilters, showSort } from "./shows/logic";
 
-export const collections = new Elysia({
-	prefix: "/collections",
-	tags: ["collections"],
-})
+const studioSort = Sort(["slug", "createdAt"], { default: ["slug"] });
+
+export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 	.model({
-		collection: Collection,
-		"collection-translation": CollectionTranslation,
+		studio: Studio,
+		"studio-translation": StudioTranslation,
 	})
 	.get(
 		"/:id",
 		async ({
 			params: { id },
 			headers: { "accept-language": languages },
-			query: { preferOriginal, with: relations },
+			query: { with: relations },
 			error,
 			set,
 		}) => {
 			const langs = processLanguages(languages);
-			const ret = await getShow(id, {
-				languages: langs,
-				preferOriginal,
-				relations,
-				filters: eq(shows.kind, "collection"),
+			const ret = await db.query.studios.findFirst({
+				where: isUuid(id) ? eq(studios.id, id) : eq(studios.slug, id),
+				with: {
+					selectedTranslation: selectTranslationQuery(
+						studioTranslations,
+						langs,
+					),
+					...(relations.includes("translations") && {
+						translations: {
+							columns: {
+								pk: false,
+							},
+						},
+					}),
+				},
 			});
 			if (!ret) {
 				return error(404, {
 					status: 404,
-					message: "Collection not found",
+					message: `No studio with the id or slug: '${id}'`,
 				});
 			}
-			if (!ret.language) {
-				return error(422, {
-					status: 422,
-					message: "Accept-Language header could not be satisfied.",
-				});
-			}
-			set.headers["content-language"] = ret.language;
-			return ret.show;
+			const tr = ret.selectedTranslation[0];
+			set.headers["content-language"] = tr.language;
+			return {
+				...ret,
+				...tr,
+				...(ret.translations && {
+					translations: Object.fromEntries(
+						ret.translations.map(
+							({ language, ...translation }) =>
+								[language, translation] as const,
+						),
+					),
+				}),
+			};
 		},
 		{
 			detail: {
-				description: "Get a collection by id or slug",
+				description: "Get a studio by id or slug",
 			},
 			params: t.Object({
 				id: t.String({
 					description: "The id or slug of the collection to retrieve.",
-					example: duneCollection.slug,
+					example: "mappa",
 				}),
 			}),
 			query: t.Object({
-				preferOriginal: t.Optional(
-					t.Boolean({ description: desc.preferOriginal }),
-				),
 				with: t.Array(t.UnionEnum(["translations"]), {
 					default: [],
 					description: "Include related resources in the response.",
@@ -85,7 +102,7 @@ export const collections = new Elysia({
 				"accept-language": AcceptLanguage(),
 			}),
 			response: {
-				200: { ...FullCollection, description: "Found" },
+				200: "studio",
 				404: {
 					...KError,
 					description: "No collection found with the given id or slug.",
@@ -97,31 +114,30 @@ export const collections = new Elysia({
 	.get(
 		"random",
 		async ({ error, redirect }) => {
-			const [serie] = await db
-				.select({ slug: shows.slug })
-				.from(shows)
-				.where(eq(shows.kind, "collection"))
+			const [studio] = await db
+				.select({ slug: studios.slug })
+				.from(studios)
 				.orderBy(sql`random()`)
 				.limit(1);
-			if (!serie)
+			if (!studio)
 				return error(404, {
 					status: 404,
-					message: "No collection in the database.",
+					message: "No studios in the database.",
 				});
-			return redirect(`/collections/${serie.slug}`);
+			return redirect(`/studios/${studio.slug}`);
 		},
 		{
 			detail: {
-				description: "Get a random collection",
+				description: "Get a random studio.",
 			},
 			response: {
 				302: t.Void({
 					description:
-						"Redirected to the [/collections/{id}](#tag/collections/GET/collections/{id}) route.",
+						"Redirected to the [/studios/{id}](#tag/studios/GET/studios/{id}) route.",
 				}),
 				404: {
 					...KError,
-					description: "No collections in the database.",
+					description: "No studios in the database.",
 				},
 			},
 		},
@@ -129,27 +145,46 @@ export const collections = new Elysia({
 	.get(
 		"",
 		async ({
-			query: { limit, after, query, sort, filter, preferOriginal },
+			query: { limit, after, query, sort },
 			headers: { "accept-language": languages },
 			request: { url },
 		}) => {
 			const langs = processLanguages(languages);
-			const items = await getShows({
-				limit,
-				after,
-				query,
-				sort,
-				filter: and(eq(shows.kind, "collection"), filter),
-				languages: langs,
-				preferOriginal,
-			});
+			const transQ = db
+				.selectDistinctOn([studioTranslations.pk])
+				.from(studioTranslations)
+				.orderBy(
+					studioTranslations.pk,
+					sql`array_position(${sqlarr(langs)}, ${studioTranslations.language}`,
+				)
+				.as("t");
+			const { pk, ...transCol } = getColumns(transQ);
+
+			const items = await db
+				.select({
+					...getColumns(studios),
+					...transCol,
+				})
+				.from(studios)
+				.where(
+					and(
+						query ? sql`${transQ.name} %> ${query}::text` : undefined,
+						keysetPaginate({ table: studios, after, sort }),
+					),
+				)
+				.orderBy(
+					...(query
+						? [sql`word_similarity(${query}::text, ${transQ.name})`]
+						: sortToSql(sort, studios)),
+					studios.pk,
+				)
+				.limit(limit);
 			return createPage(items, { url, sort, limit });
 		},
 		{
-			detail: { description: "Get all collections" },
+			detail: { description: "Get all studios" },
 			query: t.Object({
-				sort: showSort,
-				filter: t.Optional(Filter({ def: showFilters })),
+				sort: studioSort,
 				query: t.Optional(t.String({ description: desc.query })),
 				limit: t.Integer({
 					minimum: 1,
@@ -158,17 +193,12 @@ export const collections = new Elysia({
 					description: "Max page size.",
 				}),
 				after: t.Optional(t.String({ description: desc.after })),
-				preferOriginal: t.Optional(
-					t.Boolean({
-						description: desc.preferOriginal,
-					}),
-				),
 			}),
 			headers: t.Object({
 				"accept-language": AcceptLanguage({ autoFallback: true }),
 			}),
 			response: {
-				200: Page(Collection),
+				200: Page(Studio),
 				422: KError,
 			},
 		},
@@ -176,8 +206,8 @@ export const collections = new Elysia({
 	.guard({
 		params: t.Object({
 			id: t.String({
-				description: "The id or slug of the collection.",
-				example: duneCollection.slug,
+				description: "The id or slug of the studio.",
+				example: "mappa",
 			}),
 		}),
 		query: t.Object({
@@ -202,7 +232,7 @@ export const collections = new Elysia({
 		}),
 	})
 	.get(
-		"/:id/movies",
+		"/:id/shows",
 		async ({
 			params: { id },
 			query: { limit, after, query, sort, filter, preferOriginal },
@@ -210,21 +240,16 @@ export const collections = new Elysia({
 			request: { url },
 			error,
 		}) => {
-			const [collection] = await db
-				.select({ pk: shows.pk })
-				.from(shows)
-				.where(
-					and(
-						eq(shows.kind, "collection"),
-						isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
-					),
-				)
+			const [studio] = await db
+				.select({ pk: studios.pk })
+				.from(studios)
+				.where(isUuid(id) ? eq(studios.id, id) : eq(studios.slug, id))
 				.limit(1);
 
-			if (!collection) {
+			if (!studio) {
 				return error(404, {
 					status: 404,
-					message: `No collection with the id or slug: '${id}'.`,
+					message: `No studios with the id or slug: '${id}'.`,
 				});
 			}
 
@@ -235,8 +260,17 @@ export const collections = new Elysia({
 				query,
 				sort,
 				filter: and(
-					eq(shows.collectionPk, collection.pk),
-					eq(shows.kind, "movie"),
+					exists(
+						db
+							.select()
+							.from(showStudioJoin)
+							.where(
+								and(
+									eq(showStudioJoin.studioPk, studio.pk),
+									eq(showStudioJoin.showPk, shows.pk),
+								),
+							),
+					),
 					filter,
 				),
 				languages: langs,
@@ -245,7 +279,67 @@ export const collections = new Elysia({
 			return createPage(items, { url, sort, limit });
 		},
 		{
-			detail: { description: "Get all movies in a collection" },
+			detail: { description: "Get all series & movies made by a studio." },
+			response: {
+				200: Page(Show),
+				404: {
+					...KError,
+					description: "No collection found with the given id or slug.",
+				},
+				422: KError,
+			},
+		},
+	)
+	.get(
+		"/:id/movies",
+		async ({
+			params: { id },
+			query: { limit, after, query, sort, filter, preferOriginal },
+			headers: { "accept-language": languages },
+			request: { url },
+			error,
+		}) => {
+			const [studio] = await db
+				.select({ pk: studios.pk })
+				.from(studios)
+				.where(isUuid(id) ? eq(studios.id, id) : eq(studios.slug, id))
+				.limit(1);
+
+			if (!studio) {
+				return error(404, {
+					status: 404,
+					message: `No studios with the id or slug: '${id}'.`,
+				});
+			}
+
+			const langs = processLanguages(languages);
+			const items = await getShows({
+				limit,
+				after,
+				query,
+				sort,
+				filter: and(
+					eq(shows.kind, "movie"),
+					exists(
+						db
+							.select()
+							.from(showStudioJoin)
+							.where(
+								and(
+									eq(showStudioJoin.studioPk, studio.pk),
+									eq(showStudioJoin.showPk, shows.pk),
+								),
+							),
+					),
+					filter,
+				),
+				languages: langs,
+				preferOriginal,
+			});
+			return createPage(items, { url, sort, limit });
+		},
+		{
+			detail: { description: "Get all movies made by a studio." },
 			response: {
 				200: Page(Movie),
 				404: {
@@ -265,21 +359,16 @@ export const collections = new Elysia({
 			request: { url },
 			error,
 		}) => {
-			const [collection] = await db
-				.select({ pk: shows.pk })
-				.from(shows)
-				.where(
-					and(
-						eq(shows.kind, "collection"),
-						isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
-					),
-				)
+			const [studio] = await db
+				.select({ pk: studios.pk })
+				.from(studios)
+				.where(isUuid(id) ? eq(studios.id, id) : eq(studios.slug, id))
 				.limit(1);
 
-			if (!collection) {
+			if (!studio) {
 				return error(404, {
 					status: 404,
-					message: `No collection with the id or slug: '${id}'.`,
+					message: `No studios with the id or slug: '${id}'.`,
 				});
 			}
 
@@ -290,8 +379,18 @@ export const collections = new Elysia({
 				query,
 				sort,
 				filter: and(
-					eq(shows.collectionPk, collection.pk),
 					eq(shows.kind, "serie"),
+					exists(
+						db
+							.select()
+							.from(showStudioJoin)
+							.where(
+								and(
+									eq(showStudioJoin.studioPk, studio.pk),
+									eq(showStudioJoin.showPk, shows.pk),
+								),
+							),
+					),
 					filter,
 				),
 				languages: langs,
@@ -300,60 +399,9 @@ export const collections = new Elysia({
 			return createPage(items, { url, sort, limit });
 		},
 		{
-			detail: { description: "Get all series in a collection" },
+			detail: { description: "Get all series made by a studio." },
 			response: {
 				200: Page(Serie),
-				404: {
-					...KError,
-					description: "No collection found with the given id or slug.",
-				},
-				422: KError,
-			},
-		},
-	)
-	.get(
-		"/:id/shows",
-		async ({
-			params: { id },
-			query: { limit, after, query, sort, filter, preferOriginal },
-			headers: { "accept-language": languages },
-			request: { url },
-			error,
-		}) => {
-			const [collection] = await db
-				.select({ pk: shows.pk })
-				.from(shows)
-				.where(
-					and(
-						eq(shows.kind, "collection"),
-						isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
-					),
-				)
-				.limit(1);
-
-			if (!collection) {
-				return error(404, {
-					status: 404,
-					message: `No collection with the id or slug: '${id}'.`,
-				});
-			}
-
-			const langs = processLanguages(languages);
-			const items = await getShows({
-				limit,
-				after,
-				query,
-				sort,
-				filter: and(eq(shows.collectionPk, collection.pk), filter),
-				languages: langs,
-				preferOriginal,
-			});
-			return createPage(items, { url, sort, limit });
-		},
-		{
-			detail: { description: "Get all series & movies in a collection" },
-			response: {
-				200: Page(Show),
 				404: {
 					...KError,
 					description: "No collection found with the given id or slug.",

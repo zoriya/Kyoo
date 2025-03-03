@@ -5,6 +5,7 @@ import { insertCollection } from "./insert/collection";
 import { insertEntries } from "./insert/entries";
 import { insertSeasons } from "./insert/seasons";
 import { insertShow } from "./insert/shows";
+import { insertStudios } from "./insert/studios";
 import { guessNextRefresh } from "./refresh";
 
 export const SeedSerieResponse = t.Object({
@@ -45,6 +46,12 @@ export const SeedSerieResponse = t.Object({
 			}),
 		}),
 	),
+	studios: t.Array(
+		t.Object({
+			id: t.String({ format: "uuid" }),
+			slug: t.String({ format: "slug", examples: ["mappa"] }),
+		}),
+	),
 });
 export type SeedSerieResponse = typeof SeedSerieResponse.static;
 
@@ -65,7 +72,15 @@ export const seedSerie = async (
 		seed.slug = `random-${getYear(seed.startAir)}`;
 	}
 
-	const { translations, seasons, entries, extras, collection, ...serie } = seed;
+	const {
+		translations,
+		seasons,
+		entries,
+		extras,
+		collection,
+		studios,
+		...serie
+	} = seed;
 	const nextRefresh = guessNextRefresh(serie.startAir ?? new Date());
 
 	const col = await insertCollection(collection, {
@@ -92,6 +107,8 @@ export const seedSerie = async (
 		(extras ?? []).map((x) => ({ ...x, kind: "extra", extraKind: x.kind })),
 	);
 
+	const retStudios = await insertStudios(studios, show.pk);
+
 	return {
 		updated: show.updated,
 		id: show.id,
@@ -100,5 +117,6 @@ export const seedSerie = async (
 		entries: retEntries,
 		extras: retExtras,
 		collection: col,
+		studios: retStudios,
 	};
 };

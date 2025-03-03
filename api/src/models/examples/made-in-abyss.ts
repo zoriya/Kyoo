@@ -16,6 +16,7 @@ export const madeInAbyssVideo: Video = {
 		from: "guessit",
 	},
 	createdAt: "2024-11-23T15:01:24.968Z",
+	updatedAt: "2024-11-23T15:01:24.968Z",
 };
 
 export const madeInAbyss = {
@@ -240,6 +241,23 @@ export const madeInAbyss = {
 			runtime: 17,
 			thumbnail: null,
 			video: "3cd436ee-01ff-4f45-ba98-654282531234",
+		},
+	],
+	studios: [
+		{
+			slug: "kinema-citrus",
+			translations: {
+				en: {
+					name: "Kinema Citrus",
+					logo: "https://image.tmdb.org/t/p/original/Lf0udeB7OwHoFJ0XIxVwfyGOqE.png",
+				},
+			},
+			externalId: {
+				themoviedatabase: {
+					dataId: "16738",
+					link: "https://www.themoviedb.org/company/16738",
+				},
+			},
 		},
 	],
 } satisfies SeedSerie;

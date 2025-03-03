@@ -9,6 +9,7 @@ export const dune1984Video: Video = {
 	part: null,
 	version: 1,
 	createdAt: "2024-12-02T11:45:12.968Z",
+	updatedAt: "2024-12-02T11:45:12.968Z",
 };
 
 export const dune1984: SeedMovie = {
@@ -47,6 +48,7 @@ export const dune1984: SeedMovie = {
 		},
 	},
 	videos: [dune1984Video.id],
+	studios: [],
 };
 
 export const dune1984Images = {

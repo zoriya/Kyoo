@@ -26,6 +26,9 @@ export const videos = schema.table(
 		createdAt: timestamp({ withTimezone: true, mode: "string" })
 			.notNull()
 			.defaultNow(),
+		updatedAt: timestamp({ withTimezone: true, mode: "string" })
+			.notNull()
+			.$onUpdate(() => sql`now()`),
 	},
 	(t) => [
 		check("part_pos", sql`${t.part} >= 0`),
@@ -36,15 +39,15 @@ export const videos = schema.table(
 export const entryVideoJoin = schema.table(
 	"entry_video_join",
 	{
-		entry: integer()
+		entryPk: integer()
 			.notNull()
 			.references(() => entries.pk, { onDelete: "cascade" }),
-		video: integer()
+		videoPk: integer()
 			.notNull()
 			.references(() => videos.pk, { onDelete: "cascade" }),
 		slug: varchar({ length: 255 }).notNull().unique(),
 	},
-	(t) => [primaryKey({ columns: [t.entry, t.video] })],
+	(t) => [primaryKey({ columns: [t.entryPk, t.videoPk] })],
 );
 
 export const videosRelations = relations(videos, ({ many }) => ({
@@ -56,12 +59,12 @@ export const videosRelations = relations(videos, ({ many }) => ({
 export const evjRelations = relations(entryVideoJoin, ({ one }) => ({
 	video: one(videos, {
 		relationName: "evj_video",
-		fields: [entryVideoJoin.video],
+		fields: [entryVideoJoin.videoPk],
 		references: [videos.pk],
 	}),
 	entry: one(entries, {
 		relationName: "evj_entry",
-		fields: [entryVideoJoin.entry],
+		fields: [entryVideoJoin.entryPk],
 		references: [entries.pk],
 	}),
 }));

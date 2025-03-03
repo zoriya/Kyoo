@@ -1,9 +1,10 @@
 import { t } from "elysia";
 import type { Prettify } from "~/utils";
 import { SeedCollection } from "./collections";
-import { bubble, registerExamples } from "./examples";
-import { bubbleImages } from "./examples/bubble";
+import { bubble, bubbleImages, registerExamples } from "./examples";
+import { SeedStudio, Studio } from "./studio";
 import {
+	DbMetadata,
 	ExternalId,
 	Genre,
 	Image,
@@ -33,10 +34,9 @@ const BaseMovie = t.Object({
 		}),
 	),
 
-	createdAt: t.String({ format: "date-time" }),
 	nextRefresh: t.String({ format: "date-time" }),
 
-	externalId: ExternalId,
+	externalId: ExternalId(),
 });
 
 export const MovieTranslation = t.Object({
@@ -58,6 +58,7 @@ export const Movie = t.Intersect([
 	Resource(),
 	MovieTranslation,
 	BaseMovie,
+	DbMetadata,
 	// t.Object({ isAvailable: t.Boolean() }),
 ]);
 export type Movie = Prettify<typeof Movie.static>;
@@ -67,12 +68,13 @@ export const FullMovie = t.Intersect([
 	t.Object({
 		translations: t.Optional(TranslationRecord(MovieTranslation)),
 		videos: t.Optional(t.Array(Video)),
+		studios: t.Optional(t.Array(Studio)),
 	}),
 ]);
 export type FullMovie = Prettify<typeof FullMovie.static>;
 
 export const SeedMovie = t.Intersect([
-	t.Omit(BaseMovie, ["kind", "createdAt", "nextRefresh"]),
+	t.Omit(BaseMovie, ["kind", "nextRefresh"]),
 	t.Object({
 		slug: t.String({ format: "slug", examples: ["bubble"] }),
 		translations: TranslationRecord(
@@ -88,6 +90,7 @@ export const SeedMovie = t.Intersect([
 		),
 		videos: t.Optional(t.Array(t.String({ format: "uuid" }))),
 		collection: t.Optional(SeedCollection),
+		studios: t.Array(SeedStudio),
 	}),
 ]);
 export type SeedMovie = Prettify<typeof SeedMovie.static>;

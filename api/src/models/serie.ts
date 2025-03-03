@@ -4,11 +4,17 @@ import { SeedCollection } from "./collections";
 import { SeedEntry, SeedExtra } from "./entry";
 import { bubbleImages, madeInAbyss, registerExamples } from "./examples";
 import { SeedSeason } from "./season";
-import { ExternalId } from "./utils/external-id";
-import { Genre } from "./utils/genres";
-import { Image, SeedImage } from "./utils/image";
-import { Language, TranslationRecord } from "./utils/language";
-import { Resource } from "./utils/resource";
+import { SeedStudio, Studio } from "./studio";
+import {
+	DbMetadata,
+	ExternalId,
+	Genre,
+	Image,
+	Language,
+	Resource,
+	SeedImage,
+	TranslationRecord,
+} from "./utils";
 
 export const SerieStatus = t.UnionEnum([
 	"unknown",
@@ -18,7 +24,7 @@ export const SerieStatus = t.UnionEnum([
 ]);
 export type SerieStatus = typeof SerieStatus.static;
 
-export const BaseSerie = t.Object({
+const BaseSerie = t.Object({
 	kind: t.Literal("serie"),
 	genres: t.Array(Genre),
 	rating: t.Nullable(t.Integer({ minimum: 0, maximum: 100 })),
@@ -38,10 +44,9 @@ export const BaseSerie = t.Object({
 		}),
 	),
 
-	createdAt: t.String({ format: "date-time" }),
 	nextRefresh: t.String({ format: "date-time" }),
 
-	externalId: ExternalId,
+	externalId: ExternalId(),
 });
 
 export const SerieTranslation = t.Object({
@@ -59,19 +64,25 @@ export const SerieTranslation = t.Object({
 });
 export type SerieTranslation = typeof SerieTranslation.static;
 
-export const Serie = t.Intersect([Resource(), SerieTranslation, BaseSerie]);
+export const Serie = t.Intersect([
+	Resource(),
+	SerieTranslation,
+	BaseSerie,
+	DbMetadata,
+]);
 export type Serie = Prettify<typeof Serie.static>;
 
 export const FullSerie = t.Intersect([
 	Serie,
 	t.Object({
 		translations: t.Optional(TranslationRecord(SerieTranslation)),
+		studios: t.Optional(t.Array(Studio)),
 	}),
 ]);
 export type FullMovie = Prettify<typeof FullSerie.static>;
 
 export const SeedSerie = t.Intersect([
-	t.Omit(BaseSerie, ["kind", "createdAt", "nextRefresh"]),
+	t.Omit(BaseSerie, ["kind", "nextRefresh"]),
 	t.Object({
 		slug: t.String({ format: "slug" }),
 		translations: TranslationRecord(
@@ -89,6 +100,7 @@ export const SeedSerie = t.Intersect([
 		entries: t.Array(SeedEntry),
 		extras: t.Optional(t.Array(SeedExtra)),
 		collection: t.Optional(SeedCollection),
+		studios: t.Array(SeedStudio),
 	}),
 ]);
 export type SeedSerie = typeof SeedSerie.static;

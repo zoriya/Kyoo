@@ -6,3 +6,17 @@ export const language = () => varchar({ length: 255 });
 
 export const image = () =>
 	jsonb().$type<{ id: string; source: string; blurhash: string }>();
+
+export const externalid = () =>
+	jsonb()
+		.$type<
+			Record<
+				string,
+				{
+					dataId: string;
+					link: string | null;
+				}
+			>
+		>()
+		.notNull()
+		.default({});

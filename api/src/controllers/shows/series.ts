@@ -65,7 +65,7 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 				preferOriginal: t.Optional(
 					t.Boolean({ description: desc.preferOriginal }),
 				),
-				with: t.Array(t.UnionEnum(["translations"]), {
+				with: t.Array(t.UnionEnum(["translations", "studios"]), {
 					default: [],
 					description: "Include related resources in the response.",
 				}),

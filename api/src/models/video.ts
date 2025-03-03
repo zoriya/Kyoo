@@ -1,10 +1,9 @@
-import { type TSchema, t } from "elysia";
-import { comment } from "../utils";
+import { t } from "elysia";
+import { type Prettify, comment } from "~/utils";
 import { bubbleVideo, registerExamples } from "./examples";
+import { DbMetadata, Resource } from "./utils";
 
-export const Video = t.Object({
-	id: t.String({ format: "uuid" }),
-	slug: t.String({ format: "slug" }),
+export const SeedVideo = t.Object({
 	path: t.String(),
 	rendering: t.String({
 		description: comment`
@@ -29,8 +28,6 @@ export const Video = t.Object({
 		description:
 			"Kyoo will prefer playing back the highest `version` number if there are multiples rendering.",
 	}),
-
-	createdAt: t.String({ format: "date-time" }),
 
 	guess: t.Optional(
 		t.Recursive((Self) =>
@@ -69,8 +66,9 @@ export const Video = t.Object({
 		),
 	),
 });
-export type Video = typeof Video.static;
-registerExamples(Video, bubbleVideo);
-
-export const SeedVideo = t.Omit(Video, ["id", "slug", "createdAt"]);
 export type SeedVideo = typeof SeedVideo.static;
+
+export const Video = t.Intersect([Resource(), SeedVideo, DbMetadata]);
+export type Video = Prettify<typeof Video.static>;
+
+registerExamples(Video, bubbleVideo);

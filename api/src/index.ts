@@ -63,6 +63,7 @@ app
 							Can be used for administration or third party apps.
 						`,
 					},
+					{ name: "studios", description: "Routes about studios" },
 				],
 			},
 		}),

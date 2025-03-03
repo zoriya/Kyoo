@@ -2,10 +2,8 @@ import { and, isNull, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "~/db";
 import { shows } from "~/db/schema";
-import { Collection } from "~/models/collections";
 import { KError } from "~/models/error";
-import { Movie } from "~/models/movie";
-import { Serie } from "~/models/serie";
+import { Show } from "~/models/show";
 import {
 	AcceptLanguage,
 	Filter,
@@ -15,8 +13,6 @@ import {
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import { getShows, showFilters, showSort } from "./logic";
-
-const Show = t.Union([Movie, Serie, Collection]);
 
 export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 	.model({

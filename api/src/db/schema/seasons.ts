@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
 	date,
 	index,
@@ -45,11 +45,15 @@ export const seasons = schema.table(
 		createdAt: timestamp({ withTimezone: true, mode: "string" })
 			.notNull()
 			.defaultNow(),
+		updatedAt: timestamp({ withTimezone: true, mode: "string" })
+			.notNull()
+			.$onUpdate(() => sql`now()`),
 		nextRefresh: timestamp({ withTimezone: true, mode: "string" }).notNull(),
 	},
 	(t) => [
 		unique().on(t.showPk, t.seasonNumber),
 		index("show_fk").using("hash", t.showPk),
+		index("season_nbr").on(t.seasonNumber),
 	],
 );
 
@@ -66,7 +70,10 @@ export const seasonTranslations = schema.table(
 		thumbnail: image(),
 		banner: image(),
 	},
-	(t) => [primaryKey({ columns: [t.pk, t.language] })],
+	(t) => [
+		primaryKey({ columns: [t.pk, t.language] }),
+		index("season_name_trgm").using("gin", sql`${t.name} gin_trgm_ops`),
+	],
 );
 
 export const seasonRelations = relations(seasons, ({ one, many }) => ({

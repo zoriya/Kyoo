@@ -5,7 +5,6 @@ import {
 	date,
 	index,
 	integer,
-	jsonb,
 	primaryKey,
 	smallint,
 	text,
@@ -15,7 +14,8 @@ import {
 } from "drizzle-orm/pg-core";
 import { entries } from "./entries";
 import { seasons } from "./seasons";
-import { image, language, schema } from "./utils";
+import { showStudioJoin } from "./studios";
+import { externalid, image, language, schema } from "./utils";
 
 export const showKind = schema.enum("show_kind", [
 	"serie",
@@ -54,20 +54,6 @@ export const genres = schema.enum("genres", [
 	"talk",
 ]);
 
-export const externalid = () =>
-	jsonb()
-		.$type<
-			Record<
-				string,
-				{
-					dataId: string;
-					link: string | null;
-				}
-			>
-		>()
-		.notNull()
-		.default({});
-
 export const shows = schema.table(
 	"shows",
 	{
@@ -92,6 +78,9 @@ export const shows = schema.table(
 		createdAt: timestamp({ withTimezone: true, mode: "string" })
 			.notNull()
 			.defaultNow(),
+		updatedAt: timestamp({ withTimezone: true, mode: "string" })
+			.notNull()
+			.$onUpdate(() => sql`now()`),
 		nextRefresh: timestamp({ withTimezone: true, mode: "string" }).notNull(),
 	},
 	(t) => [
@@ -141,6 +130,7 @@ export const showsRelations = relations(shows, ({ many, one }) => ({
 	}),
 	entries: many(entries, { relationName: "show_entries" }),
 	seasons: many(seasons, { relationName: "show_seasons" }),
+	studios: many(showStudioJoin, { relationName: "ssj_show" }),
 }));
 export const showsTrRelations = relations(showTranslations, ({ one }) => ({
 	show: one(shows, {

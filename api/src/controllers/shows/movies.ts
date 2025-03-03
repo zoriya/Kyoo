@@ -65,7 +65,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				preferOriginal: t.Optional(
 					t.Boolean({ description: desc.preferOriginal }),
 				),
-				with: t.Array(t.UnionEnum(["translations", "videos"]), {
+				with: t.Array(t.UnionEnum(["translations", "studios", "videos"]), {
 					default: [],
 					description: "Include related resources in the response.",
 				}),

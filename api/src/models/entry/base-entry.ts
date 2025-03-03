@@ -12,7 +12,6 @@ export const BaseEntry = () =>
 		),
 		thumbnail: t.Nullable(Image),
 
-		createdAt: t.String({ format: "date-time" }),
 		nextRefresh: t.String({ format: "date-time" }),
 	});
 

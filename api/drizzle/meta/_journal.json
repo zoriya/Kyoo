@@ -71,6 +71,20 @@
 			"when": 1740872363604,
 			"tag": "0009_collections",
 			"breakpoints": true
+		},
+		{
+			"idx": 10,
+			"version": "7",
+			"when": 1740950531468,
+			"tag": "0010_studios",
+			"breakpoints": true
+		},
+		{
+			"idx": 11,
+			"version": "7",
+			"when": 1741014917375,
+			"tag": "0011_join_rename",
+			"breakpoints": true
 		}
 	]
 }

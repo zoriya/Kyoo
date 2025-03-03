@@ -1,6 +1,7 @@
 import { t } from "elysia";
 import type { Prettify } from "~/utils";
 import { bubbleImages, madeInAbyss, registerExamples } from "./examples";
+import { DbMetadata } from "./utils";
 import { SeasonId } from "./utils/external-id";
 import { Image, SeedImage } from "./utils/image";
 import { TranslationRecord } from "./utils/language";
@@ -11,7 +12,6 @@ export const BaseSeason = t.Object({
 	startAir: t.Nullable(t.String({ format: "date" })),
 	endAir: t.Nullable(t.String({ format: "date" })),
 
-	createdAt: t.String({ format: "date-time" }),
 	nextRefresh: t.String({ format: "date-time" }),
 
 	externalId: SeasonId,
@@ -27,11 +27,16 @@ export const SeasonTranslation = t.Object({
 });
 export type SeasonTranslation = typeof SeasonTranslation.static;
 
-export const Season = t.Intersect([Resource(), SeasonTranslation, BaseSeason]);
-export type Season = typeof Season.static;
+export const Season = t.Intersect([
+	Resource(),
+	SeasonTranslation,
+	BaseSeason,
+	DbMetadata,
+]);
+export type Season = Prettify<typeof Season.static>;
 
 export const SeedSeason = t.Intersect([
-	t.Omit(BaseSeason, ["createdAt", "nextRefresh"]),
+	t.Omit(BaseSeason, ["nextRefresh"]),
 	t.Object({
 		translations: TranslationRecord(
 			t.Intersect([

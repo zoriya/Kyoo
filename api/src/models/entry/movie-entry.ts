@@ -2,6 +2,7 @@ import { t } from "elysia";
 import { type Prettify, comment } from "~/utils";
 import { bubbleImages, madeInAbyss, registerExamples } from "../examples";
 import {
+	DbMetadata,
 	ExternalId,
 	Image,
 	Resource,
@@ -18,7 +19,7 @@ export const BaseMovieEntry = t.Intersect(
 				minimum: 1,
 				description: "Absolute playback order. Can be mixed with episodes.",
 			}),
-			externalId: ExternalId,
+			externalId: ExternalId(),
 		}),
 		BaseEntry(),
 	],
@@ -42,11 +43,12 @@ export const MovieEntry = t.Intersect([
 	Resource(),
 	MovieEntryTranslation,
 	BaseMovieEntry,
+	DbMetadata,
 ]);
 export type MovieEntry = Prettify<typeof MovieEntry.static>;
 
 export const SeedMovieEntry = t.Intersect([
-	t.Omit(BaseMovieEntry, ["thumbnail", "createdAt", "nextRefresh"]),
+	t.Omit(BaseMovieEntry, ["thumbnail", "nextRefresh"]),
 	t.Object({
 		slug: t.Optional(t.String({ format: "slug" })),
 		thumbnail: t.Nullable(SeedImage),
