@@ -4,7 +4,7 @@ import { SeedCollection } from "./collections";
 import { SeedEntry, SeedExtra } from "./entry";
 import { bubbleImages, madeInAbyss, registerExamples } from "./examples";
 import { SeedSeason } from "./season";
-import { SeedStudio } from "./studio";
+import { SeedStudio, Studio } from "./studio";
 import {
 	DbMetadata,
 	ExternalId,
@@ -76,6 +76,7 @@ export const FullSerie = t.Intersect([
 	Serie,
 	t.Object({
 		translations: t.Optional(TranslationRecord(SerieTranslation)),
+		studios: t.Optional(t.Array(Studio)),
 	}),
 ]);
 export type FullMovie = Prettify<typeof FullSerie.static>;

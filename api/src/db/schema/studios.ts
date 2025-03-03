@@ -8,8 +8,8 @@ import {
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
-import { externalid, shows } from "./shows";
-import { image, language, schema } from "./utils";
+import { shows } from "./shows";
+import { externalid, image, language, schema } from "./utils";
 
 export const studios = schema.table("studios", {
 	pk: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -44,14 +44,14 @@ export const studioTranslations = schema.table(
 export const showStudioJoin = schema.table(
 	"show_studio_join",
 	{
-		show: integer()
+		showPk: integer()
 			.notNull()
 			.references(() => shows.pk, { onDelete: "cascade" }),
-		studio: integer()
+		studioPk: integer()
 			.notNull()
 			.references(() => studios.pk, { onDelete: "cascade" }),
 	},
-	(t) => [primaryKey({ columns: [t.show, t.studio] })],
+	(t) => [primaryKey({ columns: [t.showPk, t.studioPk] })],
 );
 
 export const studioRelations = relations(studios, ({ many }) => ({
@@ -61,7 +61,7 @@ export const studioRelations = relations(studios, ({ many }) => ({
 	selectedTranslation: many(studioTranslations, {
 		relationName: "studio_selected_translation",
 	}),
-	showsJoin: many(showStudioJoin, { relationName: "show_studios" }),
+	showsJoin: many(showStudioJoin, { relationName: "ssj_studio" }),
 }));
 export const studioTrRelations = relations(studioTranslations, ({ one }) => ({
 	studio: one(studios, {
@@ -78,12 +78,12 @@ export const studioTrRelations = relations(studioTranslations, ({ one }) => ({
 export const ssjRelations = relations(showStudioJoin, ({ one }) => ({
 	show: one(shows, {
 		relationName: "ssj_show",
-		fields: [showStudioJoin.show],
+		fields: [showStudioJoin.showPk],
 		references: [shows.pk],
 	}),
 	studio: one(studios, {
 		relationName: "ssj_studio",
-		fields: [showStudioJoin.studio],
+		fields: [showStudioJoin.studioPk],
 		references: [studios.pk],
 	}),
 }));

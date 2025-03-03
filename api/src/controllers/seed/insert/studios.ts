@@ -48,7 +48,7 @@ export const insertStudios = async (seed: SeedStudio[], showPk: number) => {
 
 		await tx
 			.insert(showStudioJoin)
-			.values(ret.map((studio) => ({ show: showPk, studio: studio.pk })))
+			.values(ret.map((studio) => ({ showPk: showPk, studioPk: studio.pk })))
 			.onConflictDoNothing();
 		return ret;
 	});

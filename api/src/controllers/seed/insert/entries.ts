@@ -141,8 +141,8 @@ export const insertEntries = async (
 		.select(
 			db
 				.select({
-					entry: sql<number>`vids.entryPk::integer`.as("entry"),
-					video: sql`${videos.pk}`.as("video"),
+					entryPk: sql<number>`vids.entryPk::integer`.as("entry"),
+					videoPk: sql`${videos.pk}`.as("video"),
 					slug: computeVideoSlug(
 						sql`${show.slug}::text`,
 						sql`vids.needRendering::boolean`,
@@ -154,7 +154,7 @@ export const insertEntries = async (
 		.onConflictDoNothing()
 		.returning({
 			slug: entryVideoJoin.slug,
-			entryPk: entryVideoJoin.entry,
+			entryPk: entryVideoJoin.entryPk,
 		});
 
 	return retEntries.map((entry) => ({

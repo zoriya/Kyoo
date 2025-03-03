@@ -4,7 +4,9 @@ import {
 	type TSchema,
 	type TString,
 } from "@sinclair/typebox";
+import { type Column, type Table, eq, sql } from "drizzle-orm";
 import { t } from "elysia";
+import { sqlarr } from "~/db/utils";
 import { comment } from "../../utils";
 import { KErrorT } from "../error";
 
@@ -106,3 +108,19 @@ export const AcceptLanguage = ({
 		`
 				: ""),
 	});
+
+export const selectTranslationQuery = (
+	translationTable: Table & { language: Column },
+	languages: string[],
+) => ({
+	columns: {
+		pk: false,
+	} as const,
+	where: !languages.includes("*")
+		? eq(translationTable.language, sql`any(${sqlarr(languages)})`)
+		: undefined,
+	orderBy: [
+		sql`array_position(${sqlarr(languages)}, ${translationTable.language})`,
+	],
+	limit: 1,
+});

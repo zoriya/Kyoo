@@ -2,7 +2,7 @@ import { t } from "elysia";
 import type { Prettify } from "~/utils";
 import { SeedCollection } from "./collections";
 import { bubble, bubbleImages, registerExamples } from "./examples";
-import { SeedStudio } from "./studio";
+import { SeedStudio, Studio } from "./studio";
 import {
 	DbMetadata,
 	ExternalId,
@@ -68,6 +68,7 @@ export const FullMovie = t.Intersect([
 	t.Object({
 		translations: t.Optional(TranslationRecord(MovieTranslation)),
 		videos: t.Optional(t.Array(Video)),
+		studios: t.Optional(t.Array(Studio)),
 	}),
 ]);
 export type FullMovie = Prettify<typeof FullMovie.static>;

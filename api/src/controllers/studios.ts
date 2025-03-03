@@ -22,6 +22,7 @@ import {
 	isUuid,
 	keysetPaginate,
 	processLanguages,
+	selectTranslationQuery,
 	sortToSql,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
@@ -47,16 +48,10 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 			const ret = await db.query.studios.findFirst({
 				where: isUuid(id) ? eq(studios.id, id) : eq(studios.slug, id),
 				with: {
-					selectedTranslation: {
-						columns: { pk: false },
-						where: !languages.includes("*")
-							? eq(studioTranslations.language, sql`any(${sqlarr(langs)})`)
-							: undefined,
-						orderBy: [
-							sql`array_position(${sqlarr(langs)}, ${studioTranslations.language})`,
-						],
-						limit: 1,
-					},
+					selectedTranslation: selectTranslationQuery(
+						studioTranslations,
+						langs,
+					),
 					...(relations.includes("translations") && {
 						translations: {
 							columns: {
@@ -150,7 +145,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 	.get(
 		"",
 		async ({
-			query: { limit, after, query, sort, filter },
+			query: { limit, after, query, sort },
 			headers: { "accept-language": languages },
 			request: { url },
 		}) => {
@@ -271,8 +266,8 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 							.from(showStudioJoin)
 							.where(
 								and(
-									eq(showStudioJoin.studio, studio.pk),
-									eq(showStudioJoin.show, shows.pk),
+									eq(showStudioJoin.studioPk, studio.pk),
+									eq(showStudioJoin.showPk, shows.pk),
 								),
 							),
 					),
@@ -331,8 +326,8 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 							.from(showStudioJoin)
 							.where(
 								and(
-									eq(showStudioJoin.studio, studio.pk),
-									eq(showStudioJoin.show, shows.pk),
+									eq(showStudioJoin.studioPk, studio.pk),
+									eq(showStudioJoin.showPk, shows.pk),
 								),
 							),
 					),
@@ -391,8 +386,8 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 							.from(showStudioJoin)
 							.where(
 								and(
-									eq(showStudioJoin.studio, studio.pk),
-									eq(showStudioJoin.show, shows.pk),
+									eq(showStudioJoin.studioPk, studio.pk),
+									eq(showStudioJoin.showPk, shows.pk),
 								),
 							),
 					),

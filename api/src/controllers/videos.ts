@@ -42,78 +42,77 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 			return error(201, oldRet);
 
 			// TODO: this is a huge untested wip
-			// biome-ignore lint/correctness/noUnreachable: leave me alone
-			const vidsI = db.$with("vidsI").as(
-				db.insert(videos).values(body).onConflictDoNothing().returning({
-					pk: videos.pk,
-					id: videos.id,
-					path: videos.path,
-					guess: videos.guess,
-				}),
-			);
-
-			const findEntriesQ = db
-				.select({
-					guess: videos.guess,
-					entryPk: entries.pk,
-					showSlug: shows.slug,
-					// TODO: handle extras here
-					// guessit can't know if an episode is a special or not. treat specials like a normal episode.
-					kind: sql`
-						case when ${entries.kind} = 'movie' then 'movie' else 'episode' end
-					`.as("kind"),
-					season: entries.seasonNumber,
-					episode: entries.episodeNumber,
-				})
-				.from(entries)
-				.leftJoin(entryVideoJoin, eq(entryVideoJoin.entry, entries.pk))
-				.leftJoin(videos, eq(videos.pk, entryVideoJoin.video))
-				.leftJoin(shows, eq(shows.pk, entries.showPk))
-				.as("find_entries");
-
-			const hasRenderingQ = db
-				.select()
-				.from(entryVideoJoin)
-				.where(eq(entryVideoJoin.entry, findEntriesQ.entryPk));
-
-			const ret = await db
-				.with(vidsI)
-				.insert(entryVideoJoin)
-				.select(
-					db
-						.select({
-							entry: findEntriesQ.entryPk,
-							video: vidsI.pk,
-							slug: computeVideoSlug(
-								findEntriesQ.showSlug,
-								sql`exists(${hasRenderingQ})`,
-							),
-						})
-						.from(vidsI)
-						.leftJoin(
-							findEntriesQ,
-							and(
-								eq(
-									sql`${findEntriesQ.guess}->'title'`,
-									sql`${vidsI.guess}->'title'`,
-								),
-								// TODO: find if @> with a jsonb created on the fly is
-								// better than multiples checks
-								sql`${vidsI.guess} @> {"kind": }::jsonb`,
-								inArray(findEntriesQ.kind, sql`${vidsI.guess}->'type'`),
-								inArray(findEntriesQ.episode, sql`${vidsI.guess}->'episode'`),
-								inArray(findEntriesQ.season, sql`${vidsI.guess}->'season'`),
-							),
-						),
-				)
-				.onConflictDoNothing()
-				.returning({
-					slug: entryVideoJoin.slug,
-					entryPk: entryVideoJoin.entry,
-					id: vidsI.id,
-					path: vidsI.path,
-				});
-			return error(201, ret as any);
+			// const vidsI = db.$with("vidsI").as(
+			// 	db.insert(videos).values(body).onConflictDoNothing().returning({
+			// 		pk: videos.pk,
+			// 		id: videos.id,
+			// 		path: videos.path,
+			// 		guess: videos.guess,
+			// 	}),
+			// );
+			//
+			// const findEntriesQ = db
+			// 	.select({
+			// 		guess: videos.guess,
+			// 		entryPk: entries.pk,
+			// 		showSlug: shows.slug,
+			// 		// TODO: handle extras here
+			// 		// guessit can't know if an episode is a special or not. treat specials like a normal episode.
+			// 		kind: sql`
+			// 			case when ${entries.kind} = 'movie' then 'movie' else 'episode' end
+			// 		`.as("kind"),
+			// 		season: entries.seasonNumber,
+			// 		episode: entries.episodeNumber,
+			// 	})
+			// 	.from(entries)
+			// 	.leftJoin(entryVideoJoin, eq(entryVideoJoin.entry, entries.pk))
+			// 	.leftJoin(videos, eq(videos.pk, entryVideoJoin.video))
+			// 	.leftJoin(shows, eq(shows.pk, entries.showPk))
+			// 	.as("find_entries");
+			//
+			// const hasRenderingQ = db
+			// 	.select()
+			// 	.from(entryVideoJoin)
+			// 	.where(eq(entryVideoJoin.entry, findEntriesQ.entryPk));
+			//
+			// const ret = await db
+			// 	.with(vidsI)
+			// 	.insert(entryVideoJoin)
+			// 	.select(
+			// 		db
+			// 			.select({
+			// 				entry: findEntriesQ.entryPk,
+			// 				video: vidsI.pk,
+			// 				slug: computeVideoSlug(
+			// 					findEntriesQ.showSlug,
+			// 					sql`exists(${hasRenderingQ})`,
+			// 				),
+			// 			})
+			// 			.from(vidsI)
+			// 			.leftJoin(
+			// 				findEntriesQ,
+			// 				and(
+			// 					eq(
+			// 						sql`${findEntriesQ.guess}->'title'`,
+			// 						sql`${vidsI.guess}->'title'`,
+			// 					),
+			// 					// TODO: find if @> with a jsonb created on the fly is
+			// 					// better than multiples checks
+			// 					sql`${vidsI.guess} @> {"kind": }::jsonb`,
+			// 					inArray(findEntriesQ.kind, sql`${vidsI.guess}->'type'`),
+			// 					inArray(findEntriesQ.episode, sql`${vidsI.guess}->'episode'`),
+			// 					inArray(findEntriesQ.season, sql`${vidsI.guess}->'season'`),
+			// 				),
+			// 			),
+			// 	)
+			// 	.onConflictDoNothing()
+			// 	.returning({
+			// 		slug: entryVideoJoin.slug,
+			// 		entryPk: entryVideoJoin.entry,
+			// 		id: vidsI.id,
+			// 		path: vidsI.path,
+			// 	});
+			// return error(201, ret as any);
 		},
 		{
 			body: t.Array(SeedVideo),

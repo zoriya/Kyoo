@@ -1,7 +1,7 @@
 import type { StaticDecode } from "@sinclair/typebox";
 import { type SQL, and, eq, sql } from "drizzle-orm";
 import { db } from "~/db";
-import { showTranslations, shows } from "~/db/schema";
+import { showTranslations, shows, studioTranslations } from "~/db/schema";
 import { getColumns, sqlarr } from "~/db/utils";
 import type { MovieStatus } from "~/models/movie";
 import { SerieStatus } from "~/models/serie";
@@ -12,6 +12,7 @@ import {
 	Sort,
 	isUuid,
 	keysetPaginate,
+	selectTranslationQuery,
 	sortToSql,
 } from "~/models/utils";
 
@@ -130,7 +131,7 @@ export async function getShow(
 	}: {
 		languages: string[];
 		preferOriginal: boolean | undefined;
-		relations: ("translations" | "videos")[];
+		relations: ("translations" | "studios" | "videos")[];
 		filters: SQL | undefined;
 	},
 ) {
@@ -141,18 +142,7 @@ export async function getShow(
 		},
 		where: and(isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id), filters),
 		with: {
-			selectedTranslation: {
-				columns: {
-					pk: false,
-				},
-				where: !languages.includes("*")
-					? eq(showTranslations.language, sql`any(${sqlarr(languages)})`)
-					: undefined,
-				orderBy: [
-					sql`array_position(${sqlarr(languages)}, ${showTranslations.language})`,
-				],
-				limit: 1,
-			},
+			selectedTranslation: selectTranslationQuery(showTranslations, languages),
 			originalTranslation: {
 				columns: {
 					poster: true,
@@ -172,6 +162,23 @@ export async function getShow(
 				translations: {
 					columns: {
 						pk: false,
+					},
+				},
+			}),
+			...(relations.includes("studios") && {
+				studios: {
+					with: {
+						studio: {
+							columns: {
+								pk: false,
+							},
+							with: {
+								selectedTranslation: selectTranslationQuery(
+									studioTranslations,
+									languages,
+								),
+							},
+						},
 					},
 				},
 			}),
@@ -197,6 +204,12 @@ export async function getShow(
 					({ language, ...translation }) => [language, translation] as const,
 				),
 			),
+		}),
+		...(ret.studios && {
+			studios: ret.studios.map((x: any) => ({
+				...x.studio,
+				...x.studio.selectedTranslation[0],
+			})),
 		}),
 	};
 	return { show, language: translation.language };
