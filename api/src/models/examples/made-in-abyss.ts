@@ -255,7 +255,7 @@ export const madeInAbyss = {
 			externalId: {
 				themoviedatabase: {
 					dataId: "16738",
-					link: "https://www.themoviedb.org/company/16738/movie",
+					link: "https://www.themoviedb.org/company/16738",
 				},
 			},
 		},

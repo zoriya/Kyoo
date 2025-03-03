@@ -19,7 +19,7 @@ export const BaseMovieEntry = t.Intersect(
 				minimum: 1,
 				description: "Absolute playback order. Can be mixed with episodes.",
 			}),
-			externalId: ExternalId,
+			externalId: ExternalId(),
 		}),
 		BaseEntry(),
 	],

@@ -36,7 +36,7 @@ const BaseMovie = t.Object({
 
 	nextRefresh: t.String({ format: "date-time" }),
 
-	externalId: ExternalId,
+	externalId: ExternalId(),
 });
 
 export const MovieTranslation = t.Object({

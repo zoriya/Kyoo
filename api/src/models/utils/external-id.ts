@@ -1,14 +1,13 @@
 import { t } from "elysia";
 import { comment } from "../../utils";
 
-export const ExternalId = t.Record(
+export const ExternalId = () => t.Record(
 	t.String(),
 	t.Object({
 		dataId: t.String(),
 		link: t.Nullable(t.String({ format: "uri" })),
 	}),
 );
-export type ExternalId = typeof ExternalId.static;
 
 export const EpisodeId = t.Record(
 	t.String(),

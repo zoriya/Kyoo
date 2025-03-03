@@ -5,7 +5,7 @@ import { DbMetadata, ExternalId, Resource, TranslationRecord } from "./utils";
 import { Image, SeedImage } from "./utils/image";
 
 const BaseStudio = t.Object({
-	externalId: ExternalId,
+	externalId: ExternalId(),
 });
 
 export const StudioTranslation = t.Object({

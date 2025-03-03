@@ -36,7 +36,7 @@ const BaseCollection = t.Object({
 
 	nextRefresh: t.String({ format: "date-time" }),
 
-	externalId: ExternalId,
+	externalId: ExternalId(),
 });
 
 export const CollectionTranslation = t.Object({
