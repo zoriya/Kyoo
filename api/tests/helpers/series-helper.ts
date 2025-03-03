@@ -16,6 +16,27 @@ export const createSerie = async (serie: SeedSerie) => {
 	return [resp, body] as const;
 };
 
+export const getSerie = async (
+	id: string,
+	{
+		langs,
+		...query
+	}: { langs?: string; preferOriginal?: boolean; with?: string[] },
+) => {
+	const resp = await app.handle(
+		new Request(buildUrl(`series/${id}`, query), {
+			method: "GET",
+			headers: langs
+				? {
+						"Accept-Language": langs,
+					}
+				: {},
+		}),
+	);
+	const body = await resp.json();
+	return [resp, body] as const;
+};
+
 export const getSeasons = async (
 	serie: string,
 	{

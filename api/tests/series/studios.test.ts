@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "bun:test";
-import { getShowsByStudio, getStudio } from "tests/helpers";
+import { getSerie, getShowsByStudio, getStudio } from "tests/helpers";
 import { expectStatus } from "tests/utils";
 import { seedSerie } from "~/controllers/seed/series";
 import { madeInAbyss } from "~/models/examples";
@@ -45,5 +45,20 @@ describe("Get a studio", () => {
 
 		expectStatus(resp, body).toBe(200);
 		expect(body.slug).toBe(slug);
+	});
+	it("Get using /shows?with=", async () => {
+		const [resp, body] = await getSerie(madeInAbyss.slug, {
+			langs: "en",
+			with: ["studios"],
+		});
+
+		expectStatus(resp, body).toBe(200);
+		expect(body.slug).toBe(madeInAbyss.slug);
+		expect(body.studios).toBeArrayOfSize(1);
+		const studio = madeInAbyss.studios[0];
+		expect(body.studios[0]).toMatchObject({
+			slug: studio.slug,
+			name: studio.translations.en.name,
+		});
 	});
 });

@@ -4,7 +4,10 @@ import type { SeedMovie } from "~/models/movie";
 
 export const getMovie = async (
 	id: string,
-	{ langs, ...query }: { langs?: string; preferOriginal?: boolean },
+	{
+		langs,
+		...query
+	}: { langs?: string; preferOriginal?: boolean; with?: string[] },
 ) => {
 	const resp = await app.handle(
 		new Request(buildUrl(`movies/${id}`, query), {
