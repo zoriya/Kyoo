@@ -7,7 +7,7 @@ import {
 	studioTranslations,
 	studios,
 } from "~/db/schema";
-import { sqlarr } from "~/db/utils";
+import { getColumns, sqlarr } from "~/db/utils";
 import { KError } from "~/models/error";
 import { Movie } from "~/models/movie";
 import { Serie } from "~/models/serie";
@@ -17,12 +17,17 @@ import {
 	AcceptLanguage,
 	Filter,
 	Page,
+	Sort,
 	createPage,
 	isUuid,
+	keysetPaginate,
 	processLanguages,
+	sortToSql,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import { getShows, showFilters, showSort } from "./shows/logic";
+
+const studioSort = Sort(["slug", "createdAt"], { default: ["slug"] });
 
 export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 	.model({
@@ -107,6 +112,98 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 					...KError,
 					description: "No collection found with the given id or slug.",
 				},
+				422: KError,
+			},
+		},
+	)
+	.get(
+		"random",
+		async ({ error, redirect }) => {
+			const [studio] = await db
+				.select({ slug: studios.slug })
+				.from(studios)
+				.orderBy(sql`random()`)
+				.limit(1);
+			if (!studio)
+				return error(404, {
+					status: 404,
+					message: "No studios in the database.",
+				});
+			return redirect(`/studios/${studio.slug}`);
+		},
+		{
+			detail: {
+				description: "Get a random studio.",
+			},
+			response: {
+				302: t.Void({
+					description:
+						"Redirected to the [/studios/{id}](#tag/studios/GET/studios/{id}) route.",
+				}),
+				404: {
+					...KError,
+					description: "No studios in the database.",
+				},
+			},
+		},
+	)
+	.get(
+		"",
+		async ({
+			query: { limit, after, query, sort, filter },
+			headers: { "accept-language": languages },
+			request: { url },
+		}) => {
+			const langs = processLanguages(languages);
+			const transQ = db
+				.selectDistinctOn([studioTranslations.pk])
+				.from(studioTranslations)
+				.orderBy(
+					studioTranslations.pk,
+					sql`array_position(${sqlarr(langs)}, ${studioTranslations.language}`,
+				)
+				.as("t");
+			const { pk, ...transCol } = getColumns(transQ);
+
+			const items = await db
+				.select({
+					...getColumns(studios),
+					...transCol,
+				})
+				.from(studios)
+				.where(
+					and(
+						query ? sql`${transQ.name} %> ${query}::text` : undefined,
+						keysetPaginate({ table: studios, after, sort }),
+					),
+				)
+				.orderBy(
+					...(query
+						? [sql`word_similarity(${query}::text, ${transQ.name})`]
+						: sortToSql(sort, studios)),
+					studios.pk,
+				)
+				.limit(limit);
+			return createPage(items, { url, sort, limit });
+		},
+		{
+			detail: { description: "Get all studios" },
+			query: t.Object({
+				sort: studioSort,
+				query: t.Optional(t.String({ description: desc.query })),
+				limit: t.Integer({
+					minimum: 1,
+					maximum: 250,
+					default: 50,
+					description: "Max page size.",
+				}),
+				after: t.Optional(t.String({ description: desc.after })),
+			}),
+			headers: t.Object({
+				"accept-language": AcceptLanguage({ autoFallback: true }),
+			}),
+			response: {
+				200: Page(Studio),
 				422: KError,
 			},
 		},
