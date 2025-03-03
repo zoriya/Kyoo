@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "bun:test";
-import { getShowsByStudio } from "tests/helpers/studio-helper";
+import { getShowsByStudio, getStudio } from "tests/helpers";
 import { expectStatus } from "tests/utils";
 import { seedSerie } from "~/controllers/seed/series";
 import { madeInAbyss } from "~/models/examples";
@@ -26,5 +26,24 @@ describe("Get by studio", () => {
 		expectStatus(resp, body).toBe(200);
 		expect(body.items).toBeArrayOfSize(1);
 		expect(body.items[0].slug).toBe(madeInAbyss.slug);
+	});
+});
+
+describe("Get a studio", () => {
+	it("Invalid slug", async () => {
+		const [resp, body] = await getStudio("sotneuhn", { langs: "en" });
+
+		expectStatus(resp, body).toBe(404);
+		expect(body).toMatchObject({
+			status: 404,
+			message: expect.any(String),
+		});
+	});
+	it("Get by id", async () => {
+		const slug = madeInAbyss.studios[0].slug;
+		const [resp, body] = await getStudio(slug, { langs: "en" });
+
+		expectStatus(resp, body).toBe(200);
+		expect(body.slug).toBe(slug);
 	});
 });

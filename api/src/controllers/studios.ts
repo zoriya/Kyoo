@@ -1,8 +1,16 @@
-import { and, eq, exists } from "drizzle-orm";
+import { and, eq, exists, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { db } from "~/db";
-import { showStudioJoin, shows, studios } from "~/db/schema";
+import {
+	showStudioJoin,
+	shows,
+	studioTranslations,
+	studios,
+} from "~/db/schema";
+import { sqlarr } from "~/db/utils";
 import { KError } from "~/models/error";
+import { Movie } from "~/models/movie";
+import { Serie } from "~/models/serie";
 import { Show } from "~/models/show";
 import { Studio, StudioTranslation } from "~/models/studio";
 import {
@@ -15,14 +23,94 @@ import {
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import { getShows, showFilters, showSort } from "./shows/logic";
-import { Serie } from "~/models/serie";
-import { Movie } from "~/models/movie";
 
-export const studiosH = new Elysia({ tags: ["studios"] })
+export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 	.model({
 		studio: Studio,
 		"studio-translation": StudioTranslation,
 	})
+	.get(
+		"/:id",
+		async ({
+			params: { id },
+			headers: { "accept-language": languages },
+			query: { with: relations },
+			error,
+			set,
+		}) => {
+			const langs = processLanguages(languages);
+			const ret = await db.query.studios.findFirst({
+				where: isUuid(id) ? eq(studios.id, id) : eq(studios.slug, id),
+				with: {
+					selectedTranslation: {
+						columns: { pk: false },
+						where: !languages.includes("*")
+							? eq(studioTranslations.language, sql`any(${sqlarr(langs)})`)
+							: undefined,
+						orderBy: [
+							sql`array_position(${sqlarr(langs)}, ${studioTranslations.language})`,
+						],
+						limit: 1,
+					},
+					...(relations.includes("translations") && {
+						translations: {
+							columns: {
+								pk: false,
+							},
+						},
+					}),
+				},
+			});
+			if (!ret) {
+				return error(404, {
+					status: 404,
+					message: `No studio with the id or slug: '${id}'`,
+				});
+			}
+			const tr = ret.selectedTranslation[0];
+			set.headers["content-language"] = tr.language;
+			return {
+				...ret,
+				...tr,
+				...(ret.translations && {
+					translations: Object.fromEntries(
+						ret.translations.map(
+							({ language, ...translation }) =>
+								[language, translation] as const,
+						),
+					),
+				}),
+			};
+		},
+		{
+			detail: {
+				description: "Get a studio by id or slug",
+			},
+			params: t.Object({
+				id: t.String({
+					description: "The id or slug of the collection to retrieve.",
+					example: "mappa",
+				}),
+			}),
+			query: t.Object({
+				with: t.Array(t.UnionEnum(["translations"]), {
+					default: [],
+					description: "Include related resources in the response.",
+				}),
+			}),
+			headers: t.Object({
+				"accept-language": AcceptLanguage(),
+			}),
+			response: {
+				200: { ...Studio, description: "Found" },
+				404: {
+					...KError,
+					description: "No collection found with the given id or slug.",
+				},
+				422: KError,
+			},
+		},
+	)
 	.guard({
 		params: t.Object({
 			id: t.String({
@@ -52,7 +140,7 @@ export const studiosH = new Elysia({ tags: ["studios"] })
 		}),
 	})
 	.get(
-		"/studios/:id/shows",
+		"/:id/shows",
 		async ({
 			params: { id },
 			query: { limit, after, query, sort, filter, preferOriginal },
@@ -111,7 +199,7 @@ export const studiosH = new Elysia({ tags: ["studios"] })
 		},
 	)
 	.get(
-		"/studios/:id/movies",
+		"/:id/movies",
 		async ({
 			params: { id },
 			query: { limit, after, query, sort, filter, preferOriginal },
@@ -171,7 +259,7 @@ export const studiosH = new Elysia({ tags: ["studios"] })
 		},
 	)
 	.get(
-		"/studios/:id/series",
+		"/:id/series",
 		async ({
 			params: { id },
 			query: { limit, after, query, sort, filter, preferOriginal },
