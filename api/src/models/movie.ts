@@ -88,9 +88,9 @@ export const SeedMovie = t.Intersect([
 				}),
 			]),
 		),
-		videos: t.Optional(t.Array(t.String({ format: "uuid" }))),
+		videos: t.Optional(t.Array(t.String({ format: "uuid" }), { default: [] })),
 		collection: t.Optional(SeedCollection),
-		studios: t.Array(SeedStudio),
+		studios: t.Optional(t.Array(SeedStudio, { default: [] })),
 	}),
 ]);
 export type SeedMovie = Prettify<typeof SeedMovie.static>;

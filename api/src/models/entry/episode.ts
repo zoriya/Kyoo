@@ -8,6 +8,7 @@ import {
 	SeedImage,
 	TranslationRecord,
 } from "../utils";
+import { Video } from "../video";
 import { BaseEntry, EntryTranslation } from "./base-entry";
 
 export const BaseEpisode = t.Intersect([
@@ -25,6 +26,9 @@ export const Episode = t.Intersect([
 	Resource(),
 	EntryTranslation(),
 	BaseEpisode,
+	t.Object({
+		videos: t.Optional(t.Array(Video)),
+	}),
 	DbMetadata,
 ]);
 export type Episode = Prettify<typeof Episode.static>;
@@ -34,7 +38,7 @@ export const SeedEpisode = t.Intersect([
 	t.Object({
 		thumbnail: t.Nullable(SeedImage),
 		translations: TranslationRecord(EntryTranslation()),
-		videos: t.Optional(t.Array(t.String({ format: "uuid" }))),
+		videos: t.Optional(t.Array(t.String({ format: "uuid" }), { default: [] })),
 	}),
 ]);
 export type SeedEpisode = Prettify<typeof SeedEpisode.static>;
@@ -45,4 +49,5 @@ registerExamples(Episode, {
 	...ep.translations.en,
 	...bubbleImages,
 	slug: `${madeInAbyss.slug}-s${ep.seasonNumber}-e${ep.episodeNumber}`,
+	videos: [],
 });

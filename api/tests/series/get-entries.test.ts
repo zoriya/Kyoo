@@ -1,14 +1,15 @@
 import { beforeAll, describe, expect, it } from "bun:test";
-import { getEntries, getExtras, getUnknowns } from "tests/helpers";
+import { createSerie, createVideo, getEntries, getExtras } from "tests/helpers";
 import { expectStatus } from "tests/utils";
-import { seedSerie } from "~/controllers/seed/series";
-import { madeInAbyss } from "~/models/examples";
-
-let miaId = "";
+import { db } from "~/db";
+import { shows, videos } from "~/db/schema";
+import { madeInAbyss, madeInAbyssVideo } from "~/models/examples";
 
 beforeAll(async () => {
-	const ret = await seedSerie(madeInAbyss);
-	if (!("status" in ret)) miaId = ret.id;
+	await db.delete(shows);
+	await db.delete(videos);
+	console.log(await createVideo(madeInAbyssVideo));
+	await createSerie(madeInAbyss);
 });
 
 describe("Get entries", () => {
@@ -26,6 +27,12 @@ describe("Get entries", () => {
 
 		expectStatus(resp, body).toBe(200);
 		expect(body.items).toBeArrayOfSize(madeInAbyss.entries.length);
+	});
+	it("With videos", async () => {
+		const [resp, body] = await getEntries(madeInAbyss.slug, { langs: "en" });
+
+		expectStatus(resp, body).toBe(200);
+		expect(body.items[0].videos).toBeArrayOfSize(1);
 	});
 });
 

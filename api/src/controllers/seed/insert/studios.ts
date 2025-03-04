@@ -7,8 +7,11 @@ import { processOptImage } from "../images";
 type StudioI = typeof studios.$inferInsert;
 type StudioTransI = typeof studioTranslations.$inferInsert;
 
-export const insertStudios = async (seed: SeedStudio[], showPk: number) => {
-	if (!seed.length) return [];
+export const insertStudios = async (
+	seed: SeedStudio[] | undefined,
+	showPk: number,
+) => {
+	if (!seed?.length) return [];
 
 	return await db.transaction(async (tx) => {
 		const vals: StudioI[] = seed.map((x) => {

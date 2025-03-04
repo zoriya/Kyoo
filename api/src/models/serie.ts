@@ -98,9 +98,9 @@ export const SeedSerie = t.Intersect([
 		),
 		seasons: t.Array(SeedSeason),
 		entries: t.Array(SeedEntry),
-		extras: t.Optional(t.Array(SeedExtra)),
+		extras: t.Optional(t.Array(SeedExtra, { default: [] })),
 		collection: t.Optional(SeedCollection),
-		studios: t.Array(SeedStudio),
+		studios: t.Optional(t.Array(SeedStudio, { default: [] })),
 	}),
 ]);
 export type SeedSerie = typeof SeedSerie.static;
