@@ -21,5 +21,8 @@
 		"@types/pg": "^8.11.11",
 		"bun-types": "^1.2.4"
 	},
-	"module": "src/index.js"
+	"module": "src/index.js",
+	"patchedDependencies": {
+		"drizzle-orm@0.39.0": "patches/drizzle-orm@0.39.0.patch"
+	}
 }

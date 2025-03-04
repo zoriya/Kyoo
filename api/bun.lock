@@ -17,6 +17,9 @@
       },
     },
   },
+  "patchedDependencies": {
+    "drizzle-orm@0.39.0": "patches/drizzle-orm@0.39.0.patch",
+  },
   "packages": {
     "@drizzle-team/brocli": ["@drizzle-team/brocli@0.10.2", "", {}, "sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w=="],
 
