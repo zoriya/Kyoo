@@ -1,0 +1,76 @@
+diff --git a/node_modules/one/.bun-tag-2de151ab6f27ae4d b/.bun-tag-2de151ab6f27ae4d
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/dist/cjs/vite/one-server-only.cjs b/dist/cjs/vite/one-server-only.cjs
+index d15e8f68d97a261ffb203fe31a6733fd9ff7a38c..a70727b8491e5b6890e7e37d893ea89d602812da 100644
+--- a/dist/cjs/vite/one-server-only.cjs
++++ b/dist/cjs/vite/one-server-only.cjs
+@@ -109,6 +109,5 @@ function setServerData(key2, value) {
+   } else throw new Error(`Cannot setServerData in ${process.env.VITE_ENVIRONMENT} environment!`);
+ }
+ function getServerData(key2) {
+-  if (process.env.VITE_ENVIRONMENT === "ssr") throw new Error("Cannot getServerData on the server");
+-  if (process.env.VITE_ENVIRONMENT !== "ssr") return getServerContext()?.postRenderData?.[key2];
++  return getServerContext()?.postRenderData?.[key2];
+ }
+diff --git a/dist/cjs/vite/one-server-only.js b/dist/cjs/vite/one-server-only.js
+index 6fc1e3823184d2947823c0461edd2812adf01c98..b67b608a5a5960e4078093df861611a573a2d0d8 100644
+--- a/dist/cjs/vite/one-server-only.js
++++ b/dist/cjs/vite/one-server-only.js
+@@ -100,9 +100,6 @@ function setServerData(key2, value) {
+     throw new Error(`Cannot setServerData in ${process.env.VITE_ENVIRONMENT} environment!`);
+ }
+ function getServerData(key2) {
+-  if (process.env.VITE_ENVIRONMENT === "ssr")
+-    throw new Error("Cannot getServerData on the server");
+-  if (process.env.VITE_ENVIRONMENT !== "ssr")
+-    return getServerContext()?.postRenderData?.[key2];
++  return getServerContext()?.postRenderData?.[key2];
+ }
+ //# sourceMappingURL=one-server-only.js.map
+diff --git a/dist/esm/vite/one-server-only.js b/dist/esm/vite/one-server-only.js
+index 5d52c4efe4dacb19dfa581d85d828d4a95f9edd4..c140a0bdb62a3c94dc74634ecded861a35a54f38 100644
+--- a/dist/esm/vite/one-server-only.js
++++ b/dist/esm/vite/one-server-only.js
+@@ -72,10 +72,7 @@ function setServerData(key2, value) {
+     throw new Error(`Cannot setServerData in ${process.env.VITE_ENVIRONMENT} environment!`);
+ }
+ function getServerData(key2) {
+-  if (process.env.VITE_ENVIRONMENT === "ssr")
+-    throw new Error("Cannot getServerData on the server");
+-  if (process.env.VITE_ENVIRONMENT !== "ssr")
+-    return getServerContext()?.postRenderData?.[key2];
++  return getServerContext()?.postRenderData?.[key2];
+ }
+ export {
+   asyncHeadersCache,
+diff --git a/dist/esm/vite/one-server-only.mjs b/dist/esm/vite/one-server-only.mjs
+index a24223c8f62a491407999783be8124941c36cd6e..8010cb4941b545ad171b8c4e8d29053f0d65684c 100644
+--- a/dist/esm/vite/one-server-only.mjs
++++ b/dist/esm/vite/one-server-only.mjs
+@@ -74,8 +74,7 @@ function setServerData(key2, value) {
+   } else throw new Error(`Cannot setServerData in ${process.env.VITE_ENVIRONMENT} environment!`);
+ }
+ function getServerData(key2) {
+-  if (process.env.VITE_ENVIRONMENT === "ssr") throw new Error("Cannot getServerData on the server");
+-  if (process.env.VITE_ENVIRONMENT !== "ssr") return getServerContext()?.postRenderData?.[key2];
++  return getServerContext()?.postRenderData?.[key2];
+ }
+ export { asyncHeadersCache, ensureAsyncLocalID, getServerContext, getServerData, mergeHeaders, requestAsyncLocalStore, runWithAsyncLocalContext, setResponseHeaders, setServerContext, setServerData, useServerContext };
+ //# sourceMappingURL=one-server-only.mjs.map
+diff --git a/src/vite/one-server-only.tsx b/src/vite/one-server-only.tsx
+index c54dcae3445da6681abd004f94897d86fc6c1b0e..3b0d3e9496597358c2c4b3d25559b3e775bfa38c 100644
+--- a/src/vite/one-server-only.tsx
++++ b/src/vite/one-server-only.tsx
+@@ -142,10 +142,5 @@ export function setServerData<Key extends keyof One.ClientData>(
+  * For getting data set by setServerData on the server.
+  */
+ export function getServerData(key: keyof One.ClientData) {
+-  if (process.env.VITE_ENVIRONMENT === 'ssr') {
+-    throw new Error(`Cannot getServerData on the server`)
+-  }
+-  if (process.env.VITE_ENVIRONMENT !== 'ssr') {
+-    return getServerContext()?.postRenderData?.[key]
+-  }
++  return getServerContext()?.postRenderData?.[key]
+ }

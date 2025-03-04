@@ -36,7 +36,7 @@ import { Platform, StyleSheet, View } from "react-native";
 import { useRouter } from "solito/router";
 import { useYoshiki } from "yoshiki/native";
 import { episodeDisplayNumber } from "../details/episode";
-import { ErrorView } from "../errors";
+import { ErrorView } from "../../../../src/ui/errors";
 import { Back, Hover, LoadingIndicator } from "./components/hover";
 import { useVideoKeyboard } from "./keyboard";
 import { Video, durationAtom, fullscreenAtom } from "./state";
