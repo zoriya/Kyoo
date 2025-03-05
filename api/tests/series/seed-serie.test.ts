@@ -25,7 +25,12 @@ describe("Serie seeding", () => {
 			where: eq(shows.id, body.id),
 			with: {
 				seasons: { orderBy: seasons.seasonNumber },
-				entries: { with: { translations: true } },
+				entries: {
+					with: {
+						translations: true,
+						evj: { with: { video: true } },
+					},
+				},
 			},
 		});
 
@@ -37,7 +42,9 @@ describe("Serie seeding", () => {
 			madeInAbyss.entries.length + madeInAbyss.extras.length,
 		);
 
-		const ep13 = madeInAbyss.entries.find((x) => x.order === 13)!;
+		const { videos: _, ...ep13 } = madeInAbyss.entries.find(
+			(x) => x.order === 13,
+		)!;
 		expect(ret!.entries.find((x) => x.order === 13)).toMatchObject({
 			...ep13,
 			slug: "made-in-abyss-s1e13",
@@ -47,6 +54,12 @@ describe("Serie seeding", () => {
 					language: "en",
 					...ep13.translations.en,
 				},
+			],
+			evj: [
+				expect.objectContaining({
+					slug: madeInAbyssVideo.slug,
+					video: expect.objectContaining({ path: madeInAbyssVideo.path }),
+				}),
 			],
 		});
 

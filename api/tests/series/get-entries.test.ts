@@ -1,15 +1,15 @@
 import { beforeAll, describe, expect, it } from "bun:test";
-import { createVideo, getEntries, getExtras, getUnknowns } from "tests/helpers";
+import { createSerie, createVideo, getEntries, getExtras } from "tests/helpers";
 import { expectStatus } from "tests/utils";
-import { seedSerie } from "~/controllers/seed/series";
+import { db } from "~/db";
+import { shows, videos } from "~/db/schema";
 import { madeInAbyss, madeInAbyssVideo } from "~/models/examples";
 
-let miaId = "";
-
 beforeAll(async () => {
-	await createVideo(madeInAbyssVideo);
-	const ret = await seedSerie(madeInAbyss);
-	if (!("status" in ret)) miaId = ret.id;
+	await db.delete(shows);
+	await db.delete(videos);
+	console.log(await createVideo(madeInAbyssVideo));
+	await createSerie(madeInAbyss);
 });
 
 describe("Get entries", () => {

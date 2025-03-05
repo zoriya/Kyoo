@@ -156,7 +156,7 @@ export const madeInAbyss = {
 					link: "https://www.themoviedb.org/tv/72636/season/1/episode/13",
 				},
 			},
-			videos: [madeInAbyssVideo.id]
+			videos: [madeInAbyssVideo.id],
 		},
 		{
 			kind: "special",
@@ -241,7 +241,7 @@ export const madeInAbyss = {
 			name: "The Making of MADE IN ABYSS 01",
 			runtime: 17,
 			thumbnail: null,
-			video: "3cd436ee-01ff-4f45-ba98-654282531234",
+			video: madeInAbyssVideo.id,
 		},
 	],
 	studios: [
