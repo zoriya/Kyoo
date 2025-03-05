@@ -18,6 +18,10 @@ export const base = new Elysia({ name: "base" })
 				const { code, ...ret } = details;
 				return ret;
 			}
+			details.errors = details.errors.map((x: any) => {
+				const { schema, ...err } = x;
+				return err;
+			});
 			return {
 				status: error.status,
 				message: `Validation error on ${details.on}.`,
