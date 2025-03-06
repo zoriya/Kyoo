@@ -1,7 +1,7 @@
-import { eq, sql } from "drizzle-orm";
+import { and, count, eq, exists, sql } from "drizzle-orm";
 import { db } from "~/db";
-import { showTranslations, shows } from "~/db/schema";
-import { conflictUpdateAllExcept } from "~/db/utils";
+import { entries, entryVideoJoin, showTranslations, shows } from "~/db/schema";
+import { conflictUpdateAllExcept, sqlarr } from "~/db/utils";
 import type { SeedCollection } from "~/models/collections";
 import type { SeedMovie } from "~/models/movie";
 import type { SeedSerie } from "~/models/serie";
@@ -92,4 +92,35 @@ async function insertBaseShow(
 		id,
 		slug: show.slug,
 	};
+}
+
+export async function updateAvailableCount(
+	showPks: number[],
+	updateEntryCount = true,
+) {
+	return await db
+		.update(shows)
+		.set({
+			availableCount: db
+				.select({ availableCount: count() })
+				.from(entries)
+				.where(
+					and(
+						eq(entries.showPk, shows.pk),
+						exists(
+							db
+								.select()
+								.from(entryVideoJoin)
+								.where(eq(entryVideoJoin.entryPk, entries.pk)),
+						),
+					),
+				),
+			...(updateEntryCount && {
+				entriesCount: db
+					.select({ entriesCount: count() })
+					.from(entries)
+					.where(eq(entries.showPk, shows.pk)),
+			}),
+		})
+		.where(eq(shows.pk, sql`any(${sqlarr(showPks)})`));
 }

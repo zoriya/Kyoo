@@ -48,6 +48,9 @@ const BaseSerie = t.Object({
 	entriesCount: t.Integer({
 		description: "The number of episodes in this serie",
 	}),
+	availableCount: t.Integer({
+		description: "The number of episodes that can be played right away",
+	}),
 
 	externalId: ExternalId(),
 });

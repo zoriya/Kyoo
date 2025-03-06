@@ -73,6 +73,7 @@ export const shows = schema.table(
 			onDelete: "set null",
 		}),
 		entriesCount: integer().notNull(),
+		availableCount: integer().notNull().default(0),
 
 		externalId: externalid(),
 
