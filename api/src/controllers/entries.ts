@@ -113,7 +113,9 @@ async function getEntries({
 		.leftJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
 		.as("videos");
 	const videosJ = db
-		.select({ videos: sql`coalesce(json_agg("videos"), '[]'::json)`.as("videos") })
+		.select({
+			videos: sql`coalesce(json_agg("videos"), '[]'::json)`.as("videos"),
+		})
 		.from(videosQ)
 		.as("videos_json");
 
