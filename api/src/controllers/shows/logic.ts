@@ -99,10 +99,9 @@ export async function getShows({
 		.leftJoin(
 			showTranslations,
 			and(
+				sql`${preferOriginal ?? false}`,
 				eq(shows.pk, showTranslations.pk),
 				eq(showTranslations.language, shows.originalLanguage),
-				// TODO: check user's settings before fallbacking to false.
-				sql`coalesce(${preferOriginal ?? null}::boolean, false)`,
 			),
 		)
 		.where(
@@ -143,21 +142,16 @@ export async function getShow(
 		where: and(isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id), filters),
 		with: {
 			selectedTranslation: selectTranslationQuery(showTranslations, languages),
-			originalTranslation: {
-				columns: {
-					poster: true,
-					thumbnail: true,
-					banner: true,
-					logo: true,
+			...(preferOriginal && {
+				originalTranslation: {
+					columns: {
+						poster: true,
+						thumbnail: true,
+						banner: true,
+						logo: true,
+					},
 				},
-				extras: {
-					// TODO: also fallback on user settings (that's why i made a select here)
-					preferOriginal:
-						sql<boolean>`(select coalesce(${preferOriginal ?? null}::boolean, false))`.as(
-							"preferOriginal",
-						),
-				},
-			},
+			}),
 			...(relations.includes("translations") && {
 				translations: {
 					columns: {
@@ -192,7 +186,7 @@ export async function getShow(
 		...ret,
 		...translation,
 		kind: ret.kind as any,
-		...(ot?.preferOriginal && {
+		...(ot && {
 			...(ot.poster && { poster: ot.poster }),
 			...(ot.thumbnail && { thumbnail: ot.thumbnail }),
 			...(ot.banner && { banner: ot.banner }),
