@@ -40,6 +40,13 @@ describe("Get entries", () => {
 
 		expectStatus(resp, body).toBe(200);
 		expect(body.items[0].videos).toBeArrayOfSize(1);
+		expect(body.items[0].videos[0]).toMatchObject({
+			path: madeInAbyssVideo.path,
+			slug: madeInAbyssVideo.slug,
+			version: madeInAbyssVideo.version,
+			rendering: madeInAbyssVideo.rendering,
+			part: madeInAbyssVideo.part,
+		});
 	});
 });
 
