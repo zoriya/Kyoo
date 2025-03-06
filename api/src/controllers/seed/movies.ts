@@ -60,6 +60,7 @@ export const seedMovie = async (
 			startAir: bMovie.airDate,
 			nextRefresh,
 			collectionPk: col?.pk,
+			entriesCount: 1,
 			...bMovie,
 		},
 		translations,

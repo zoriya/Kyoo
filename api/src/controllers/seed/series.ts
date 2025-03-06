@@ -94,6 +94,7 @@ export const seedSerie = async (
 			kind: "serie",
 			nextRefresh,
 			collectionPk: col?.pk,
+			entriesCount: entries.length,
 			...serie,
 		},
 		translations,
