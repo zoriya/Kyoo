@@ -8,6 +8,7 @@ import {
 	SeedImage,
 	TranslationRecord,
 } from "../utils";
+import { EmbeddedVideo } from "../video";
 import { BaseEntry, EntryTranslation } from "./base-entry";
 
 export const BaseSpecial = t.Intersect(
@@ -35,6 +36,9 @@ export const Special = t.Intersect([
 	Resource(),
 	EntryTranslation(),
 	BaseSpecial,
+	t.Object({
+		videos: t.Optional(t.Array(EmbeddedVideo)),
+	}),
 	DbMetadata,
 ]);
 export type Special = Prettify<typeof Special.static>;
@@ -44,7 +48,7 @@ export const SeedSpecial = t.Intersect([
 	t.Object({
 		thumbnail: t.Nullable(SeedImage),
 		translations: TranslationRecord(EntryTranslation()),
-		videos: t.Optional(t.Array(t.String({ format: "uuid" }))),
+		videos: t.Optional(t.Array(t.String({ format: "uuid" }), { default: [] })),
 	}),
 ]);
 export type SeedSpecial = Prettify<typeof SeedSpecial.static>;

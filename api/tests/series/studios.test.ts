@@ -1,11 +1,15 @@
 import { beforeAll, describe, expect, it } from "bun:test";
-import { getSerie, getShowsByStudio, getStudio } from "tests/helpers";
+import {
+	createSerie,
+	getSerie,
+	getShowsByStudio,
+	getStudio,
+} from "tests/helpers";
 import { expectStatus } from "tests/utils";
-import { seedSerie } from "~/controllers/seed/series";
 import { madeInAbyss } from "~/models/examples";
 
 beforeAll(async () => {
-	await seedSerie(madeInAbyss);
+	await createSerie(madeInAbyss);
 });
 
 describe("Get by studio", () => {

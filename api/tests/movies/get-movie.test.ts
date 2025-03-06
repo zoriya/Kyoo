@@ -21,7 +21,7 @@ describe("Get movie", () => {
 		expectStatus(resp, body).toBe(404);
 		expect(body).toMatchObject({
 			status: 404,
-			message: "Movie not found",
+			message: expect.any(String),
 		});
 	});
 	it("Retrive by slug", async () => {

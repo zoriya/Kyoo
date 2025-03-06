@@ -2,7 +2,13 @@ import type { StaticDecode } from "@sinclair/typebox";
 import { type SQL, and, eq, ne, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "~/db";
-import { entries, entryTranslations, shows } from "~/db/schema";
+import {
+	entries,
+	entryTranslations,
+	entryVideoJoin,
+	shows,
+	videos,
+} from "~/db/schema";
 import { getColumns, sqlarr } from "~/db/utils";
 import {
 	Entry,
@@ -99,6 +105,20 @@ async function getEntries({
 		.as("t");
 	const { pk, name, ...transCol } = getColumns(transQ);
 
+	const { guess, createdAt, updatedAt, ...videosCol } = getColumns(videos);
+	const videosQ = db
+		.select({ slug: entryVideoJoin.slug, ...videosCol })
+		.from(entryVideoJoin)
+		.where(eq(entryVideoJoin.entryPk, entries.pk))
+		.leftJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
+		.as("videos");
+	const videosJ = db
+		.select({
+			videos: sql`coalesce(json_agg("videos"), '[]'::json)`.as("videos"),
+		})
+		.from(videosQ)
+		.as("videos_json");
+
 	const {
 		kind,
 		externalId,
@@ -112,24 +132,25 @@ async function getEntries({
 		.select({
 			...entryCol,
 			...transCol,
+			videos: videosJ.videos,
 			// specials don't have an `episodeNumber` but a `number` field.
-			number: sql<number>`${episodeNumber}`.as("order"),
+			number: episodeNumber,
 
 			// merge `extraKind` into `kind`
 			kind: sql<EntryKind>`case when ${kind} = 'extra' then ${extraKind} else ${kind}::text end`.as(
 				"kind",
 			),
-			isExtra: sql<boolean>`${kind} = 'extra'`.as("isExtra"),
 
 			// assign more restrained types to make typescript happy.
-			externalId: sql<any>`${externalId}`.as("externalId"),
-			order: sql<number>`${order}`.as("order"),
-			seasonNumber: sql<number>`${seasonNumber}`.as("order"),
-			episodeNumber: sql<number>`${episodeNumber}`.as("order"),
-			name: sql<string>`${name}`.as("name"),
+			externalId: sql<any>`${externalId}`,
+			order: sql<number>`${order}`,
+			seasonNumber: sql<number>`${seasonNumber}`,
+			episodeNumber: sql<number>`${episodeNumber}`,
+			name: sql<string>`${name}`,
 		})
 		.from(entries)
 		.innerJoin(transQ, eq(entries.pk, transQ.pk))
+		.leftJoinLateral(videosJ, sql`true`)
 		.where(
 			and(
 				filter,

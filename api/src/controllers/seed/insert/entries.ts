@@ -121,6 +121,7 @@ export const insertEntries = async (
 			return {
 				videoId: seed.video,
 				entryPk: retEntries[i].pk,
+				entrySlug: retEntries[i].slug,
 				needRendering: false,
 			};
 		}
@@ -128,8 +129,9 @@ export const insertEntries = async (
 		return seed.videos.map((x, j) => ({
 			videoId: x,
 			entryPk: retEntries[i].pk,
+			entrySlug: retEntries[i].slug,
 			// The first video should not have a rendering.
-			needRendering: j && seed.videos!.length > 1,
+			needRendering: j !== 0 && seed.videos!.length > 1,
 		}));
 	});
 
@@ -142,9 +144,9 @@ export const insertEntries = async (
 			db
 				.select({
 					entryPk: sql<number>`vids.entryPk::integer`.as("entry"),
-					videoPk: sql`${videos.pk}`.as("video"),
+					videoPk: videos.pk,
 					slug: computeVideoSlug(
-						sql`${show.slug}::text`,
+						sql`vids.entrySlug::text`,
 						sql`vids.needRendering::boolean`,
 					),
 				})

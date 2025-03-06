@@ -1,14 +1,22 @@
 import { beforeAll, describe, expect, it } from "bun:test";
-import { getEntries, getExtras, getUnknowns } from "tests/helpers";
+import { createSerie, createVideo, getEntries, getExtras } from "tests/helpers";
 import { expectStatus } from "tests/utils";
-import { seedSerie } from "~/controllers/seed/series";
-import { madeInAbyss } from "~/models/examples";
+import { db } from "~/db";
+import { shows, videos } from "~/db/schema";
+import { madeInAbyss as base, madeInAbyssVideo } from "~/models/examples";
 
-let miaId = "";
+// make a copy so we can mutate it.
+const madeInAbyss = JSON.parse(JSON.stringify(base)) as typeof base;
 
 beforeAll(async () => {
-	const ret = await seedSerie(madeInAbyss);
-	if (!("status" in ret)) miaId = ret.id;
+	await db.delete(shows);
+	await db.delete(videos);
+	const [_, vid] = await createVideo(madeInAbyssVideo);
+	for (const entry of madeInAbyss.entries.filter((x) => x.videos?.length))
+		entry.videos = [vid[0].id];
+	for (const entry of madeInAbyss.extras.filter((x) => x.video))
+		entry.video = vid[0].id;
+	await createSerie(madeInAbyss);
 });
 
 describe("Get entries", () => {
@@ -26,6 +34,19 @@ describe("Get entries", () => {
 
 		expectStatus(resp, body).toBe(200);
 		expect(body.items).toBeArrayOfSize(madeInAbyss.entries.length);
+	});
+	it("With videos", async () => {
+		const [resp, body] = await getEntries(madeInAbyss.slug, { langs: "en" });
+
+		expectStatus(resp, body).toBe(200);
+		expect(body.items[0].videos).toBeArrayOfSize(1);
+		expect(body.items[0].videos[0]).toMatchObject({
+			path: madeInAbyssVideo.path,
+			slug: madeInAbyssVideo.slug,
+			version: madeInAbyssVideo.version,
+			rendering: madeInAbyssVideo.rendering,
+			part: madeInAbyssVideo.part,
+		});
 	});
 });
 
