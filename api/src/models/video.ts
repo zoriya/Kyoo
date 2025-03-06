@@ -38,7 +38,7 @@ export const SeedVideo = t.Object({
 					season: t.Optional(t.Array(t.Integer(), { default: [] })),
 					episode: t.Optional(t.Array(t.Integer(), { default: [] })),
 					// TODO: maybe replace "extra" with the `extraKind` value (aka behind-the-scene, trailer, etc)
-					type: t.Optional(t.UnionEnum(["episode", "movie", "extra"])),
+					kind: t.Optional(t.UnionEnum(["episode", "movie", "extra"])),
 
 					from: t.String({
 						description: "Name of the tool that made the guess",
@@ -70,5 +70,9 @@ export type SeedVideo = typeof SeedVideo.static;
 
 export const Video = t.Intersect([Resource(), SeedVideo, DbMetadata]);
 export type Video = Prettify<typeof Video.static>;
+
+// type used in entry responses
+export const EmbeddedVideo = t.Omit(Video, ["createdAt", "updatedAt"]);
+export type EmbeddedVideo = Prettify<typeof EmbeddedVideo.static>;
 
 registerExamples(Video, bubbleVideo);

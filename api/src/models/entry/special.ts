@@ -8,7 +8,7 @@ import {
 	SeedImage,
 	TranslationRecord,
 } from "../utils";
-import { Video } from "../video";
+import { EmbeddedVideo } from "../video";
 import { BaseEntry, EntryTranslation } from "./base-entry";
 
 export const BaseSpecial = t.Intersect(
@@ -37,7 +37,7 @@ export const Special = t.Intersect([
 	EntryTranslation(),
 	BaseSpecial,
 	t.Object({
-		videos: t.Optional(t.Array(Video)),
+		videos: t.Optional(t.Array(EmbeddedVideo)),
 	}),
 	DbMetadata,
 ]);

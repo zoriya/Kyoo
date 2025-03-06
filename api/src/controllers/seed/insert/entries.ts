@@ -131,7 +131,7 @@ export const insertEntries = async (
 			entryPk: retEntries[i].pk,
 			entrySlug: retEntries[i].slug,
 			// The first video should not have a rendering.
-			needRendering: j && seed.videos!.length > 1,
+			needRendering: j !== 0 && seed.videos!.length > 1,
 		}));
 	});
 

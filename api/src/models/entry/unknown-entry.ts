@@ -2,6 +2,7 @@ import { t } from "elysia";
 import { type Prettify, comment } from "~/utils";
 import { bubbleImages, registerExamples, youtubeExample } from "../examples";
 import { DbMetadata, Resource } from "../utils";
+import { EmbeddedVideo } from "../video";
 import { BaseEntry, EntryTranslation } from "./base-entry";
 
 export const BaseUnknownEntry = t.Intersect(
@@ -27,6 +28,9 @@ export const UnknownEntry = t.Intersect([
 	Resource(),
 	UnknownEntryTranslation,
 	BaseUnknownEntry,
+	t.Object({
+		video: t.Optional(EmbeddedVideo),
+	}),
 	DbMetadata,
 ]);
 export type UnknownEntry = Prettify<typeof UnknownEntry.static>;

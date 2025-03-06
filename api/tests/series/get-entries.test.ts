@@ -3,12 +3,19 @@ import { createSerie, createVideo, getEntries, getExtras } from "tests/helpers";
 import { expectStatus } from "tests/utils";
 import { db } from "~/db";
 import { shows, videos } from "~/db/schema";
-import { madeInAbyss, madeInAbyssVideo } from "~/models/examples";
+import { madeInAbyss as base, madeInAbyssVideo } from "~/models/examples";
+
+// make a copy so we can mutate it.
+const madeInAbyss = JSON.parse(JSON.stringify(base)) as typeof base;
 
 beforeAll(async () => {
 	await db.delete(shows);
 	await db.delete(videos);
-	console.log(await createVideo(madeInAbyssVideo));
+	const [_, vid] = await createVideo(madeInAbyssVideo);
+	for (const entry of madeInAbyss.entries.filter((x) => x.videos?.length))
+		entry.videos = [vid[0].id];
+	for (const entry of madeInAbyss.extras.filter((x) => x.video))
+		entry.video = vid[0].id;
 	await createSerie(madeInAbyss);
 });
 

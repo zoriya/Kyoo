@@ -9,7 +9,7 @@ import {
 	SeedImage,
 	TranslationRecord,
 } from "../utils";
-import { Video } from "../video";
+import { EmbeddedVideo } from "../video";
 import { BaseEntry, EntryTranslation } from "./base-entry";
 
 export const BaseMovieEntry = t.Intersect(
@@ -45,7 +45,7 @@ export const MovieEntry = t.Intersect([
 	MovieEntryTranslation,
 	BaseMovieEntry,
 	t.Object({
-		videos: t.Optional(t.Array(Video)),
+		videos: t.Optional(t.Array(EmbeddedVideo)),
 	}),
 	DbMetadata,
 ]);

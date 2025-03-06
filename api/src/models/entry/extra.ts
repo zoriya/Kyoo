@@ -3,7 +3,7 @@ import { type Prettify, comment } from "~/utils";
 import { madeInAbyss, registerExamples } from "../examples";
 import { DbMetadata, SeedImage } from "../utils";
 import { Resource } from "../utils/resource";
-import { Video } from "../video";
+import { EmbeddedVideo } from "../video";
 import { BaseEntry } from "./base-entry";
 
 export const ExtraType = t.UnionEnum([
@@ -36,7 +36,7 @@ export const Extra = t.Intersect([
 	Resource(),
 	BaseExtra,
 	t.Object({
-		video: t.Optional(Video),
+		video: t.Optional(EmbeddedVideo),
 	}),
 	DbMetadata,
 ]);

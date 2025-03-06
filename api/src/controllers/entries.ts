@@ -111,9 +111,9 @@ async function getEntries({
 		.from(entryVideoJoin)
 		.where(eq(entryVideoJoin.entryPk, entries.pk))
 		.leftJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
-		.as("video");
+		.as("videos");
 	const videosJ = db
-		.select({ videos: sql`json_agg("video")`.as("videos") })
+		.select({ videos: sql`coalesce(json_agg("videos"), '[]'::json)`.as("videos") })
 		.from(videosQ)
 		.as("videos_json");
 
@@ -130,9 +130,9 @@ async function getEntries({
 		.select({
 			...entryCol,
 			...transCol,
-			videos: sql`${videosJ.videos}`.as("videos"),
+			videos: videosJ.videos,
 			// specials don't have an `episodeNumber` but a `number` field.
-			number: sql<number>`${episodeNumber}`.as("number"),
+			number: episodeNumber,
 
 			// merge `extraKind` into `kind`
 			kind: sql<EntryKind>`case when ${kind} = 'extra' then ${extraKind} else ${kind}::text end`.as(
@@ -140,11 +140,11 @@ async function getEntries({
 			),
 
 			// assign more restrained types to make typescript happy.
-			externalId: sql<any>`${externalId}`.as("externalId"),
-			order: sql<number>`${order}`.as("order"),
-			seasonNumber: sql<number>`${seasonNumber}`.as("seasonNumber"),
-			episodeNumber: sql<number>`${episodeNumber}`.as("episodeNumber"),
-			name: sql<string>`${name}`.as("name"),
+			externalId: sql<any>`${externalId}`,
+			order: sql<number>`${order}`,
+			seasonNumber: sql<number>`${seasonNumber}`,
+			episodeNumber: sql<number>`${episodeNumber}`,
+			name: sql<string>`${name}`,
 		})
 		.from(entries)
 		.innerJoin(transQ, eq(entries.pk, transQ.pk))

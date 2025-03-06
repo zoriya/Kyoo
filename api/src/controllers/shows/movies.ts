@@ -39,7 +39,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 			if (!ret) {
 				return error(404, {
 					status: 404,
-					message: "Movie not found",
+					message: `No movie found with id or slug: '${id}'.`,
 				});
 			}
 			if (!ret.language) {
