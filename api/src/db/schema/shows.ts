@@ -72,6 +72,8 @@ export const shows = schema.table(
 		collectionPk: integer().references((): AnyPgColumn => shows.pk, {
 			onDelete: "set null",
 		}),
+		entriesCount: integer().notNull(),
+		availableCount: integer().notNull().default(0),
 
 		externalId: externalid(),
 

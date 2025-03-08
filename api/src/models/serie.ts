@@ -45,6 +45,12 @@ const BaseSerie = t.Object({
 	),
 
 	nextRefresh: t.String({ format: "date-time" }),
+	entriesCount: t.Integer({
+		description: "The number of episodes in this serie",
+	}),
+	availableCount: t.Integer({
+		description: "The number of episodes that can be played right away",
+	}),
 
 	externalId: ExternalId(),
 });
@@ -82,7 +88,7 @@ export const FullSerie = t.Intersect([
 export type FullMovie = Prettify<typeof FullSerie.static>;
 
 export const SeedSerie = t.Intersect([
-	t.Omit(BaseSerie, ["kind", "nextRefresh"]),
+	t.Omit(BaseSerie, ["kind", "nextRefresh", "entriesCount", "availableCount"]),
 	t.Object({
 		slug: t.String({ format: "slug" }),
 		translations: TranslationRecord(

@@ -85,6 +85,13 @@
 			"when": 1741014917375,
 			"tag": "0011_join_rename",
 			"breakpoints": true
+		},
+		{
+			"idx": 12,
+			"version": "7",
+			"when": 1741360992371,
+			"tag": "0012_available_count",
+			"breakpoints": true
 		}
 	]
 }

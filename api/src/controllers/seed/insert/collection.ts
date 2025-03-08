@@ -27,6 +27,7 @@ export const insertCollection = async (
 				startAir: show.kind === "movie" ? show.airDate : show.startAir,
 				endAir: show.kind === "movie" ? show.airDate : show.endAir,
 				nextRefresh: show.nextRefresh,
+				entriesCount: 0,
 				...col,
 			})
 			.onConflictDoUpdate({

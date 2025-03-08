@@ -12,7 +12,7 @@ export const madeInAbyssVideo: Video = {
 		title: "Made in abyss",
 		season: [1],
 		episode: [13],
-		type: "episode",
+		kind: "episode",
 		from: "guessit",
 	},
 	createdAt: "2024-11-23T15:01:24.968Z",

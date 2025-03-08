@@ -3,7 +3,7 @@ import type { SeedMovie } from "~/models/movie";
 import { getYear } from "~/utils";
 import { insertCollection } from "./insert/collection";
 import { insertEntries } from "./insert/entries";
-import { insertShow } from "./insert/shows";
+import { insertShow, updateAvailableCount } from "./insert/shows";
 import { insertStudios } from "./insert/studios";
 import { guessNextRefresh } from "./refresh";
 
@@ -60,6 +60,7 @@ export const seedMovie = async (
 			startAir: bMovie.airDate,
 			nextRefresh,
 			collectionPk: col?.pk,
+			entriesCount: 1,
 			...bMovie,
 		},
 		translations,
@@ -80,6 +81,7 @@ export const seedMovie = async (
 			videos,
 		},
 	]);
+	await updateAvailableCount([show.pk], false);
 
 	const retStudios = await insertStudios(studios, show.pk);
 

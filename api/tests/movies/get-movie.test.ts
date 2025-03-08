@@ -2,14 +2,15 @@ import { beforeAll, describe, expect, it } from "bun:test";
 import { expectStatus } from "tests/utils";
 import { seedMovie } from "~/controllers/seed/movies";
 import { db } from "~/db";
-import { shows } from "~/db/schema";
-import { bubble } from "~/models/examples";
+import { shows, videos } from "~/db/schema";
+import { bubble, bubbleVideo } from "~/models/examples";
 import { getMovie } from "../helpers";
 
 let bubbleId = "";
 
 beforeAll(async () => {
 	await db.delete(shows);
+	await db.insert(videos).values(bubbleVideo);
 	const ret = await seedMovie(bubble);
 	if (!("status" in ret)) bubbleId = ret.id;
 });
@@ -115,5 +116,22 @@ describe("Get movie", () => {
 			logo: { source: bubble.translations.en.logo },
 		});
 		expect(resp.headers.get("Content-Language")).toBe("en");
+	});
+	it("With isAvailable", async () => {
+		const [resp, body] = await getMovie(bubble.slug, {});
+
+		expectStatus(resp, body).toBe(200);
+		expect(body.isAvailable).toBe(true);
+	});
+	it("With isAvailable=false", async () => {
+		await seedMovie({
+			...bubble,
+			slug: "no-video",
+			videos: [],
+		});
+		const [resp, body] = await getMovie("no-video", {});
+
+		expectStatus(resp, body).toBe(200);
+		expect(body.isAvailable).toBe(false);
 	});
 });

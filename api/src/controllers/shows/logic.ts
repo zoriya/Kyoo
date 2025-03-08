@@ -88,6 +88,7 @@ export async function getShows({
 			status: sql<MovieStatus>`${shows.status}`,
 			airDate: shows.startAir,
 			kind: sql<any>`${shows.kind}`,
+			isAvailable: sql<boolean>`${shows.availableCount} != 0`,
 
 			poster: sql<Image>`coalesce(${showTranslations.poster}, ${poster})`,
 			thumbnail: sql<Image>`coalesce(${showTranslations.thumbnail}, ${thumbnail})`,
@@ -99,10 +100,9 @@ export async function getShows({
 		.leftJoin(
 			showTranslations,
 			and(
+				sql`${preferOriginal ?? false}`,
 				eq(shows.pk, showTranslations.pk),
 				eq(showTranslations.language, shows.originalLanguage),
-				// TODO: check user's settings before fallbacking to false.
-				sql`coalesce(${preferOriginal ?? null}::boolean, false)`,
 			),
 		)
 		.where(
@@ -139,25 +139,21 @@ export async function getShow(
 		extras: {
 			airDate: sql<string>`${shows.startAir}`.as("airDate"),
 			status: sql<MovieStatus>`${shows.status}`.as("status"),
+			isAvailable: sql<boolean>`${shows.availableCount} != 0`.as("isAvailable"),
 		},
 		where: and(isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id), filters),
 		with: {
 			selectedTranslation: selectTranslationQuery(showTranslations, languages),
-			originalTranslation: {
-				columns: {
-					poster: true,
-					thumbnail: true,
-					banner: true,
-					logo: true,
+			...(preferOriginal && {
+				originalTranslation: {
+					columns: {
+						poster: true,
+						thumbnail: true,
+						banner: true,
+						logo: true,
+					},
 				},
-				extras: {
-					// TODO: also fallback on user settings (that's why i made a select here)
-					preferOriginal:
-						sql<boolean>`(select coalesce(${preferOriginal ?? null}::boolean, false))`.as(
-							"preferOriginal",
-						),
-				},
-			},
+			}),
 			...(relations.includes("translations") && {
 				translations: {
 					columns: {
@@ -192,7 +188,7 @@ export async function getShow(
 		...ret,
 		...translation,
 		kind: ret.kind as any,
-		...(ot?.preferOriginal && {
+		...(ot && {
 			...(ot.poster && { poster: ot.poster }),
 			...(ot.thumbnail && { thumbnail: ot.thumbnail }),
 			...(ot.banner && { banner: ot.banner }),

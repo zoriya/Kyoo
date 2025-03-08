@@ -4,7 +4,7 @@ import { getYear } from "~/utils";
 import { insertCollection } from "./insert/collection";
 import { insertEntries } from "./insert/entries";
 import { insertSeasons } from "./insert/seasons";
-import { insertShow } from "./insert/shows";
+import { insertShow, updateAvailableCount } from "./insert/shows";
 import { insertStudios } from "./insert/studios";
 import { guessNextRefresh } from "./refresh";
 
@@ -94,6 +94,7 @@ export const seedSerie = async (
 			kind: "serie",
 			nextRefresh,
 			collectionPk: col?.pk,
+			entriesCount: entries.length,
 			...serie,
 		},
 		translations,
@@ -106,6 +107,7 @@ export const seedSerie = async (
 		show,
 		(extras ?? []).map((x) => ({ ...x, kind: "extra", extraKind: x.kind })),
 	);
+	await updateAvailableCount([show.pk]);
 
 	const retStudios = await insertStudios(studios, show.pk);
 
