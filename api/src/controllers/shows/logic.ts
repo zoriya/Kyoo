@@ -102,14 +102,14 @@ export async function getShows({
 			isAvailable: sql<boolean>`${shows.availableCount} != 0`,
 
 			...(preferOriginal && {
-				poster: sql<Image>`coalesce(${shows.original}->'poster', ${transQ.poster})`,
-				thumbnail: sql<Image>`coalesce(${shows.original}->'thumbnail', ${transQ.thumbnail})`,
-				banner: sql<Image>`coalesce(${shows.original}->'banner', ${transQ.banner})`,
-				logo: sql<Image>`coalesce(${shows.original}->'logo', ${transQ.logo})`,
+				poster: sql<Image>`coalesce(nullif(${shows.original}->'poster', 'null'::jsonb), ${transQ.poster})`,
+				thumbnail: sql<Image>`coalesce(nullif(${shows.original}->'thumbnail', 'null'::jsonb), ${transQ.thumbnail})`,
+				banner: sql<Image>`coalesce(nullif(${shows.original}->'banner', 'null'::jsonb), ${transQ.banner})`,
+				logo: sql<Image>`coalesce(nullif(${shows.original}->'logo', 'null'::jsonb), ${transQ.logo})`,
 			}),
 		})
 		.from(shows)
-		[fallbackLanguage ? "leftJoin" : "innerJoin"](
+		[fallbackLanguage ? "innerJoin" : "leftJoin"](
 			transQ,
 			eq(shows.pk, transQ.pk),
 		)

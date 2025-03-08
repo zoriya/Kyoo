@@ -12,7 +12,7 @@ beforeAll(async () => {
 	await createSerie(madeInAbyss);
 });
 
-describe("aet series", () => {
+describe("Get series", () => {
 	it("Invalid slug", async () => {
 		const [resp, body] = await getSerie("sotneuhn", { langs: "en" });
 

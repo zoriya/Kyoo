@@ -1,18 +1,19 @@
 import { beforeAll, describe, expect, it } from "bun:test";
 import { expectStatus } from "tests/utils";
-import { seedMovie } from "~/controllers/seed/movies";
 import { db } from "~/db";
 import { shows } from "~/db/schema";
 import { bubble } from "~/models/examples";
 import { dune1984 } from "~/models/examples/dune-1984";
 import { dune } from "~/models/examples/dune-2021";
 import type { Movie } from "~/models/movie";
-import { isUuid } from "~/models/utils";
-import { app, getMovies } from "../helpers";
+import { app, createMovie, getMovies } from "../helpers";
 
 beforeAll(async () => {
 	await db.delete(shows);
-	for (const movie of [bubble, dune1984, dune]) await seedMovie(movie);
+	for (const movie of [bubble, dune1984, dune]) {
+		const [ret, _] = await createMovie(movie);
+		expect(ret.status).toBe(201);
+	}
 });
 
 describe("Get all movies", () => {

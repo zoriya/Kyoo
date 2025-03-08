@@ -8,6 +8,12 @@ export const bubbleVideo: Video = {
 	rendering: "459429fa062adeebedcc2bb04b9965de0262bfa453369783132d261be79021bd",
 	part: null,
 	version: 1,
+	guess: {
+		kind: "movie",
+		title: "bubble",
+		year: [2022],
+		from: "guessit",
+	},
 	createdAt: "2024-11-23T15:01:24.968Z",
 	updatedAt: "2024-11-23T15:01:24.968Z",
 };
