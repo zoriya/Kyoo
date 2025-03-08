@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { type Prettify, comment } from "~/utils";
+import type { Prettify } from "~/utils";
 import { SeedCollection } from "./collections";
 import { bubble, bubbleImages, registerExamples } from "./examples";
 import { SeedStudio, Studio } from "./studio";
@@ -20,7 +20,6 @@ export const MovieStatus = t.UnionEnum(["unknown", "finished", "planned"]);
 export type MovieStatus = typeof MovieStatus.static;
 
 const BaseMovie = t.Object({
-	kind: t.Literal("movie"),
 	genres: t.Array(Genre),
 	rating: t.Nullable(t.Integer({ minimum: 0, maximum: 100 })),
 	status: MovieStatus,

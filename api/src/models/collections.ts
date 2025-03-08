@@ -13,7 +13,6 @@ import {
 } from "./utils";
 
 const BaseCollection = t.Object({
-	kind: t.Literal("collection"),
 	genres: t.Array(Genre),
 	rating: t.Nullable(t.Integer({ minimum: 0, maximum: 100 })),
 	startAir: t.Nullable(

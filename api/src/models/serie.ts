@@ -26,7 +26,6 @@ export const SerieStatus = t.UnionEnum([
 export type SerieStatus = typeof SerieStatus.static;
 
 const BaseSerie = t.Object({
-	kind: t.Literal("serie"),
 	genres: t.Array(Genre),
 	rating: t.Nullable(t.Integer({ minimum: 0, maximum: 100 })),
 	status: SerieStatus,
