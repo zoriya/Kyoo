@@ -1,4 +1,4 @@
-import { and, count, eq, exists, sql } from "drizzle-orm";
+import { and, count, eq, exists, ne, sql } from "drizzle-orm";
 import { db } from "~/db";
 import { entries, entryVideoJoin, showTranslations, shows } from "~/db/schema";
 import { conflictUpdateAllExcept, sqlarr } from "~/db/utils";
@@ -107,6 +107,7 @@ export async function updateAvailableCount(
 				.where(
 					and(
 						eq(entries.showPk, shows.pk),
+						ne(entries.kind, "extra"),
 						exists(
 							db
 								.select()
@@ -119,7 +120,9 @@ export async function updateAvailableCount(
 				entriesCount: sql`${db
 					.select({ count: count() })
 					.from(entries)
-					.where(eq(entries.showPk, shows.pk))}`,
+					.where(
+						and(eq(entries.showPk, shows.pk), ne(entries.kind, "extra")),
+					)}`,
 			}),
 		})
 		.where(eq(shows.pk, sql`any(${sqlarr(showPks)})`));
