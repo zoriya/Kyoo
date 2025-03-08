@@ -62,6 +62,7 @@ export async function getShows({
 	sort,
 	filter,
 	languages,
+	fallbackLanguage = true,
 	preferOriginal = false,
 }: {
 	after: string | undefined;
@@ -70,11 +71,17 @@ export async function getShows({
 	sort: StaticDecode<typeof showSort>;
 	filter: SQL | undefined;
 	languages: string[];
+	fallbackLanguage?: boolean;
 	preferOriginal?: boolean;
 }) {
 	const transQ = db
 		.selectDistinctOn([showTranslations.pk])
 		.from(showTranslations)
+		.where(
+			!fallbackLanguage
+				? eq(showTranslations.language, sql`any(${sqlarr(languages)})`)
+				: undefined,
+		)
 		.orderBy(
 			showTranslations.pk,
 			sql`array_position(${sqlarr(languages)}, ${showTranslations.language})`,
@@ -86,6 +93,8 @@ export async function getShows({
 		.select({
 			...getColumns(shows),
 			...transCol,
+			lanugage: transQ.language,
+
 			// movie columns (status is only a typescript hint)
 			status: sql<MovieStatus>`${shows.status}`,
 			airDate: shows.startAir,
@@ -93,14 +102,17 @@ export async function getShows({
 			isAvailable: sql<boolean>`${shows.availableCount} != 0`,
 
 			...(preferOriginal && {
-				poster: sql<Image>`coalesce(${shows.original}->'poster', ${showTranslations.poster})`,
-				thumbnail: sql<Image>`coalesce(${shows.original}->'thumbnail', ${showTranslations.thumbnail})`,
-				banner: sql<Image>`coalesce(${shows.original}->'banner', ${showTranslations.banner})`,
-				logo: sql<Image>`coalesce(${shows.original}->'logo', ${showTranslations.logo})`,
+				poster: sql<Image>`coalesce(${shows.original}->'poster', ${transQ.poster})`,
+				thumbnail: sql<Image>`coalesce(${shows.original}->'thumbnail', ${transQ.thumbnail})`,
+				banner: sql<Image>`coalesce(${shows.original}->'banner', ${transQ.banner})`,
+				logo: sql<Image>`coalesce(${shows.original}->'logo', ${transQ.logo})`,
 			}),
 		})
 		.from(shows)
-		.innerJoin(transQ, eq(shows.pk, transQ.pk))
+		[fallbackLanguage ? "leftJoin" : "innerJoin"](
+			transQ,
+			eq(shows.pk, transQ.pk),
+		)
 		.where(
 			and(
 				filter,
