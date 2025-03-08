@@ -1,6 +1,7 @@
 import { t } from "elysia";
 import type { SeedSerie } from "~/models/serie";
 import { getYear } from "~/utils";
+import { processOptImage } from "./images";
 import { insertCollection } from "./insert/collection";
 import { insertEntries } from "./insert/entries";
 import { insertSeasons } from "./insert/seasons";
@@ -89,12 +90,22 @@ export const seedSerie = async (
 		...seed,
 	});
 
+	const original = translations[serie.originalLanguage];
 	const show = await insertShow(
 		{
 			kind: "serie",
 			nextRefresh,
 			collectionPk: col?.pk,
 			entriesCount: entries.length,
+			original: {
+				language: serie.originalLanguage,
+				name: original.name,
+				latinName: original.latinName ?? null,
+				poster: processOptImage(original.poster),
+				thumbnail: processOptImage(original.thumbnail),
+				logo: processOptImage(original.logo),
+				banner: processOptImage(original.banner),
+			},
 			...serie,
 		},
 		translations,

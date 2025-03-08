@@ -15,7 +15,7 @@ import {
 	SeedImage,
 	TranslationRecord,
 } from "./utils";
-import { Original } from "./utils/orignial";
+import { Original } from "./utils/original";
 
 export const SerieStatus = t.UnionEnum([
 	"unknown",

@@ -5,6 +5,7 @@ import {
 	date,
 	index,
 	integer,
+	jsonb,
 	primaryKey,
 	smallint,
 	text,
@@ -12,6 +13,7 @@ import {
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
+import type { Image, Original } from "~/models/utils";
 import { entries } from "./entries";
 import { seasons } from "./seasons";
 import { showStudioJoin } from "./studios";
@@ -54,6 +56,13 @@ export const genres = schema.enum("genres", [
 	"talk",
 ]);
 
+type OriginalWithImages = Original & {
+	poster: Image | null;
+	thumbnail: Image | null;
+	banner: Image | null;
+	logo: Image | null;
+};
+
 export const shows = schema.table(
 	"shows",
 	{
@@ -67,7 +76,7 @@ export const shows = schema.table(
 		status: showStatus().notNull(),
 		startAir: date(),
 		endAir: date(),
-		originalLanguage: language(),
+		original: jsonb().$type<OriginalWithImages>().notNull(),
 
 		collectionPk: integer().references((): AnyPgColumn => shows.pk, {
 			onDelete: "set null",
@@ -120,16 +129,8 @@ export const showTranslations = schema.table(
 	],
 );
 
-export const showsRelations = relations(shows, ({ many, one }) => ({
-	selectedTranslation: many(showTranslations, {
-		relationName: "selected_translation",
-	}),
+export const showsRelations = relations(shows, ({ many }) => ({
 	translations: many(showTranslations, { relationName: "show_translations" }),
-	originalTranslation: one(showTranslations, {
-		relationName: "original_translation",
-		fields: [shows.pk, shows.originalLanguage],
-		references: [showTranslations.pk, showTranslations.language],
-	}),
 	entries: many(entries, { relationName: "show_entries" }),
 	seasons: many(seasons, { relationName: "show_seasons" }),
 	studios: many(showStudioJoin, { relationName: "ssj_show" }),
@@ -139,15 +140,5 @@ export const showsTrRelations = relations(showTranslations, ({ one }) => ({
 		relationName: "show_translations",
 		fields: [showTranslations.pk],
 		references: [shows.pk],
-	}),
-	selectedTranslation: one(shows, {
-		relationName: "selected_translation",
-		fields: [showTranslations.pk],
-		references: [shows.pk],
-	}),
-	originalTranslation: one(shows, {
-		relationName: "original_translation",
-		fields: [showTranslations.pk, showTranslations.language],
-		references: [shows.pk, shows.originalLanguage],
 	}),
 }));

@@ -13,7 +13,7 @@ import {
 	SeedImage,
 	TranslationRecord,
 } from "./utils";
-import { Original } from "./utils/orignial";
+import { Original } from "./utils/original";
 import { Video } from "./video";
 
 export const MovieStatus = t.UnionEnum(["unknown", "finished", "planned"]);
