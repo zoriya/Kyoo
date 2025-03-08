@@ -101,8 +101,8 @@ export async function updateAvailableCount(
 	return await db
 		.update(shows)
 		.set({
-			availableCount: db
-				.select({ availableCount: count() })
+			availableCount: sql`${db
+				.select({ count: count() })
 				.from(entries)
 				.where(
 					and(
@@ -114,12 +114,12 @@ export async function updateAvailableCount(
 								.where(eq(entryVideoJoin.entryPk, entries.pk)),
 						),
 					),
-				),
+				)}`,
 			...(updateEntryCount && {
-				entriesCount: db
-					.select({ entriesCount: count() })
+				entriesCount: sql`${db
+					.select({ count: count() })
 					.from(entries)
-					.where(eq(entries.showPk, shows.pk)),
+					.where(eq(entries.showPk, shows.pk))}`,
 			}),
 		})
 		.where(eq(shows.pk, sql`any(${sqlarr(showPks)})`));

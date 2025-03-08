@@ -88,7 +88,7 @@ export const FullSerie = t.Intersect([
 export type FullMovie = Prettify<typeof FullSerie.static>;
 
 export const SeedSerie = t.Intersect([
-	t.Omit(BaseSerie, ["kind", "nextRefresh", "entriesCount"]),
+	t.Omit(BaseSerie, ["kind", "nextRefresh", "entriesCount", "availableCount"]),
 	t.Object({
 		slug: t.String({ format: "slug" }),
 		translations: TranslationRecord(
