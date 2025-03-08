@@ -65,7 +65,7 @@ export const SeedVideo = t.Object({
 			"Kyoo will prefer playing back the highest `version` number if there are multiples rendering.",
 	}),
 
-	guess: t.Optional(Guess),
+	guess: Guess,
 });
 export type SeedVideo = typeof SeedVideo.static;
 
