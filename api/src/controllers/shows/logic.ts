@@ -29,7 +29,10 @@ export const showFilters: FilterDef = {
 	airDate: { column: shows.startAir, type: "date" },
 	startAir: { column: shows.startAir, type: "date" },
 	endAir: { column: shows.startAir, type: "date" },
-	originalLanguage: { column: shows.originalLanguage, type: "string" },
+	originalLanguage: {
+		column: sql`${shows.original}->'language'`,
+		type: "string",
+	},
 	tags: {
 		column: sql.raw(`t.${showTranslations.tags.name}`),
 		type: "string",
@@ -59,7 +62,7 @@ export async function getShows({
 	sort,
 	filter,
 	languages,
-	preferOriginal,
+	preferOriginal = false,
 }: {
 	after: string | undefined;
 	limit: number;
@@ -67,7 +70,7 @@ export async function getShows({
 	sort: StaticDecode<typeof showSort>;
 	filter: SQL | undefined;
 	languages: string[];
-	preferOriginal: boolean | undefined;
+	preferOriginal?: boolean;
 }) {
 	const transQ = db
 		.selectDistinctOn([showTranslations.pk])
@@ -77,8 +80,7 @@ export async function getShows({
 			sql`array_position(${sqlarr(languages)}, ${showTranslations.language})`,
 		)
 		.as("t");
-	const { pk, poster, thumbnail, banner, logo, ...transCol } =
-		getColumns(transQ);
+	const { pk, ...transCol } = getColumns(transQ);
 
 	return await db
 		.select({
@@ -90,21 +92,15 @@ export async function getShows({
 			kind: sql<any>`${shows.kind}`,
 			isAvailable: sql<boolean>`${shows.availableCount} != 0`,
 
-			poster: sql<Image>`coalesce(${showTranslations.poster}, ${poster})`,
-			thumbnail: sql<Image>`coalesce(${showTranslations.thumbnail}, ${thumbnail})`,
-			banner: sql<Image>`coalesce(${showTranslations.banner}, ${banner})`,
-			logo: sql<Image>`coalesce(${showTranslations.logo}, ${logo})`,
+			...(preferOriginal && {
+				poster: sql<Image>`coalesce(${shows.original}->'poster', ${showTranslations.poster})`,
+				thumbnail: sql<Image>`coalesce(${shows.original}->'thumbnail', ${showTranslations.thumbnail})`,
+				banner: sql<Image>`coalesce(${shows.original}->'banner', ${showTranslations.banner})`,
+				logo: sql<Image>`coalesce(${shows.original}->'logo', ${showTranslations.logo})`,
+			}),
 		})
 		.from(shows)
 		.innerJoin(transQ, eq(shows.pk, transQ.pk))
-		.leftJoin(
-			showTranslations,
-			and(
-				sql`${preferOriginal ?? false}`,
-				eq(shows.pk, showTranslations.pk),
-				eq(showTranslations.language, shows.originalLanguage),
-			),
-		)
 		.where(
 			and(
 				filter,
