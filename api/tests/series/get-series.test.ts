@@ -1,14 +1,18 @@
 import { beforeAll, describe, expect, it } from "bun:test";
-import { createSerie, createVideo, getSerie } from "tests/helpers";
+import { createSerie, getSerie } from "tests/helpers";
 import { expectStatus } from "tests/utils";
+import { db } from "~/db";
+import { shows, videos } from "~/db/schema";
 import { madeInAbyss, madeInAbyssVideo } from "~/models/examples";
 
 beforeAll(async () => {
-	await createVideo(madeInAbyssVideo);
+	await db.delete(videos);
+	await db.delete(shows);
+	await db.insert(videos).values(madeInAbyssVideo);
 	await createSerie(madeInAbyss);
 });
 
-describe("Get seasons", () => {
+describe("aet series", () => {
 	it("Invalid slug", async () => {
 		const [resp, body] = await getSerie("sotneuhn", { langs: "en" });
 
