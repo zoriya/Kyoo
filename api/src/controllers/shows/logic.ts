@@ -88,6 +88,7 @@ export async function getShows({
 			status: sql<MovieStatus>`${shows.status}`,
 			airDate: shows.startAir,
 			kind: sql<any>`${shows.kind}`,
+			isAvailable: sql<boolean>`${shows.availableCount} != 0`,
 
 			poster: sql<Image>`coalesce(${showTranslations.poster}, ${poster})`,
 			thumbnail: sql<Image>`coalesce(${showTranslations.thumbnail}, ${thumbnail})`,
@@ -138,6 +139,7 @@ export async function getShow(
 		extras: {
 			airDate: sql<string>`${shows.startAir}`.as("airDate"),
 			status: sql<MovieStatus>`${shows.status}`.as("status"),
+			isAvailable: sql<boolean>`${shows.availableCount} != 0`.as("isAvailable"),
 		},
 		where: and(isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id), filters),
 		with: {
