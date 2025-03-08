@@ -9,6 +9,7 @@ import {
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
+import type { Guess } from "~/models/video";
 import { entries } from "./entries";
 import { schema } from "./utils";
 
@@ -21,7 +22,7 @@ export const videos = schema.table(
 		rendering: text().notNull(),
 		part: integer(),
 		version: integer().notNull().default(1),
-		guess: jsonb().notNull().default({}),
+		guess: jsonb().$type<Guess>().notNull(),
 
 		createdAt: timestamp({ withTimezone: true, mode: "string" })
 			.notNull()
