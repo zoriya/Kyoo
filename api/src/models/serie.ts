@@ -15,6 +15,7 @@ import {
 	SeedImage,
 	TranslationRecord,
 } from "./utils";
+import { Original } from "./utils/orignial";
 
 export const SerieStatus = t.UnionEnum([
 	"unknown",
@@ -38,19 +39,8 @@ const BaseSerie = t.Object({
 
 	startAir: t.Nullable(t.String({ format: "date" })),
 	endAir: t.Nullable(t.String({ format: "date" })),
-	originalLanguage: t.Nullable(
-		Language({
-			description: "The language code this serie was made in.",
-		}),
-	),
 
 	nextRefresh: t.String({ format: "date-time" }),
-	entriesCount: t.Integer({
-		description: "The number of episodes in this serie",
-	}),
-	availableCount: t.Integer({
-		description: "The number of episodes that can be played right away",
-	}),
 
 	externalId: ExternalId(),
 });
@@ -75,6 +65,15 @@ export const Serie = t.Intersect([
 	SerieTranslation,
 	BaseSerie,
 	DbMetadata,
+	t.Object({
+		original: Original,
+		entriesCount: t.Integer({
+			description: "The number of episodes in this serie",
+		}),
+		availableCount: t.Integer({
+			description: "The number of episodes that can be played right away",
+		}),
+	}),
 ]);
 export type Serie = Prettify<typeof Serie.static>;
 
@@ -88,9 +87,12 @@ export const FullSerie = t.Intersect([
 export type FullMovie = Prettify<typeof FullSerie.static>;
 
 export const SeedSerie = t.Intersect([
-	t.Omit(BaseSerie, ["kind", "nextRefresh", "entriesCount", "availableCount"]),
+	t.Omit(BaseSerie, ["kind", "nextRefresh"]),
 	t.Object({
 		slug: t.String({ format: "slug" }),
+		originalLanguage: Language({
+			description: "The language code this serie was made in.",
+		}),
 		translations: TranslationRecord(
 			t.Intersect([
 				t.Omit(SerieTranslation, ["poster", "thumbnail", "banner", "logo"]),
@@ -99,6 +101,7 @@ export const SeedSerie = t.Intersect([
 					thumbnail: t.Nullable(SeedImage),
 					banner: t.Nullable(SeedImage),
 					logo: t.Nullable(SeedImage),
+					latinName: t.Optional(Original.properties.latinName),
 				}),
 			]),
 		),

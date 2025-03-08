@@ -32,6 +32,7 @@ export const bubble: SeedMovie = {
 		},
 		ja: {
 			name: "バブル：2022",
+			latinName: "Buburu",
 			tagline: null,
 			description: null,
 			aliases: ["Baburu", "Bubble"],

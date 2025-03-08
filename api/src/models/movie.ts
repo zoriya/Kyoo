@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import type { Prettify } from "~/utils";
+import { type Prettify, comment } from "~/utils";
 import { SeedCollection } from "./collections";
 import { bubble, bubbleImages, registerExamples } from "./examples";
 import { SeedStudio, Studio } from "./studio";
@@ -13,6 +13,7 @@ import {
 	SeedImage,
 	TranslationRecord,
 } from "./utils";
+import { Original } from "./utils/orignial";
 import { Video } from "./video";
 
 export const MovieStatus = t.UnionEnum(["unknown", "finished", "planned"]);
@@ -28,11 +29,6 @@ const BaseMovie = t.Object({
 	),
 
 	airDate: t.Nullable(t.String({ format: "date" })),
-	originalLanguage: t.Nullable(
-		Language({
-			description: "The language code this movie was made in.",
-		}),
-	),
 
 	nextRefresh: t.String({ format: "date-time" }),
 
@@ -60,6 +56,7 @@ export const Movie = t.Intersect([
 	BaseMovie,
 	DbMetadata,
 	t.Object({
+		original: Original,
 		isAvailable: t.Boolean(),
 	}),
 ]);
@@ -79,6 +76,9 @@ export const SeedMovie = t.Intersect([
 	t.Omit(BaseMovie, ["kind", "nextRefresh"]),
 	t.Object({
 		slug: t.String({ format: "slug", examples: ["bubble"] }),
+		originalLanguage: Language({
+			description: "The language code this movie was made in.",
+		}),
 		translations: TranslationRecord(
 			t.Intersect([
 				t.Omit(MovieTranslation, ["poster", "thumbnail", "banner", "logo"]),
@@ -87,6 +87,7 @@ export const SeedMovie = t.Intersect([
 					thumbnail: t.Nullable(SeedImage),
 					banner: t.Nullable(SeedImage),
 					logo: t.Nullable(SeedImage),
+					latinName: t.Optional(Original.properties.latinName),
 				}),
 			]),
 		),
