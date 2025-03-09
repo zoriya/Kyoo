@@ -134,4 +134,35 @@ describe("Get movie", () => {
 		expectStatus(resp, body).toBe(200);
 		expect(body.isAvailable).toBe(false);
 	});
+
+	it("with=translations", async () => {
+		const [resp, body] = await getMovie(bubble.slug, {
+			with: ["translations"],
+		});
+
+		expectStatus(resp, body).toBe(200);
+		expect(body.translations).toMatchObject({
+			en: { name: bubble.translations.en.name },
+			ja: { name: bubble.translations.ja.name },
+		});
+	});
+	it("with=translations,videos", async () => {
+		const [resp, body] = await getMovie(bubble.slug, {
+			with: ["translations", "videos"],
+		});
+
+		expectStatus(resp, body).toBe(200);
+		expect(body.translations).toMatchObject({
+			en: { name: bubble.translations.en.name },
+			ja: { name: bubble.translations.ja.name },
+		});
+		expect(body.videos).toBeArrayOfSize(bubble.videos!.length);
+		expect(body.videos[0]).toMatchObject({
+			path: bubbleVideo.path,
+			slug: bubbleVideo.slug,
+			version: bubbleVideo.version,
+			rendering: bubbleVideo.rendering,
+			part: bubbleVideo.part,
+		});
+	});
 });
