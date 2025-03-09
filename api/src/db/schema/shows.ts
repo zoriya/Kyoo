@@ -16,6 +16,7 @@ import {
 import type { Image, Original } from "~/models/utils";
 import { entries } from "./entries";
 import { seasons } from "./seasons";
+import { roles } from "./staff";
 import { showStudioJoin } from "./studios";
 import { externalid, image, language, schema } from "./utils";
 
@@ -134,6 +135,7 @@ export const showsRelations = relations(shows, ({ many }) => ({
 	entries: many(entries, { relationName: "show_entries" }),
 	seasons: many(seasons, { relationName: "show_seasons" }),
 	studios: many(showStudioJoin, { relationName: "ssj_show" }),
+	staff: many(roles, { relationName: "show_roles" }),
 }));
 export const showsTrRelations = relations(showTranslations, ({ one }) => ({
 	show: one(shows, {
