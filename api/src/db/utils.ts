@@ -1,6 +1,7 @@
 import {
 	type ColumnsSelection,
 	type SQL,
+	type SQLWrapper,
 	type Subquery,
 	Table,
 	View,
@@ -92,3 +93,17 @@ export function values(items: Record<string, unknown>[]) {
 		},
 	};
 }
+
+export const jsonbObjectAgg = (key: SQLWrapper, value: SQLWrapper) => {
+	return sql`jsonb_object_agg(${sql.join([key, value], sql.raw(","))})`;
+};
+
+export const jsonbBuildObject = (select: Record<string, SQLWrapper>) => {
+	const query = sql.join(
+		Object.entries(select).flatMap(([k, v]) => {
+			return [sql.raw(`'${k}'`), v];
+		}),
+		sql.raw(", "),
+	);
+	return sql`jsonb_build_object(${query})`;
+};

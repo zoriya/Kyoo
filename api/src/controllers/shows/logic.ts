@@ -2,7 +2,12 @@ import type { StaticDecode } from "@sinclair/typebox";
 import { type SQL, and, eq, sql } from "drizzle-orm";
 import { db } from "~/db";
 import { showTranslations, shows, studioTranslations } from "~/db/schema";
-import { getColumns, sqlarr } from "~/db/utils";
+import {
+	getColumns,
+	jsonbBuildObject,
+	jsonbObjectAgg,
+	sqlarr,
+} from "~/db/utils";
 import type { MovieStatus } from "~/models/movie";
 import { SerieStatus } from "~/models/serie";
 import {
@@ -55,6 +60,16 @@ export const showSort = Sort(
 	},
 );
 
+const buildRelations = <R extends string>(
+	relations: R[],
+	toSql: (relation: R) => SQL,
+) => {
+	return Object.fromEntries(relations.map((x) => [x, toSql(x)])) as Record<
+		R,
+		SQL
+	>;
+};
+
 export async function getShows({
 	after,
 	limit,
@@ -64,15 +79,17 @@ export async function getShows({
 	languages,
 	fallbackLanguage = true,
 	preferOriginal = false,
+	relations = [],
 }: {
-	after: string | undefined;
+	after?: string;
 	limit: number;
-	query: string | undefined;
-	sort: StaticDecode<typeof showSort>;
-	filter: SQL | undefined;
+	query?: string;
+	sort?: StaticDecode<typeof showSort>;
+	filter?: SQL;
 	languages: string[];
 	fallbackLanguage?: boolean;
 	preferOriginal?: boolean;
+	relations?: ("translations" | "studios" | "videos")[];
 }) {
 	const transQ = db
 		.selectDistinctOn([showTranslations.pk])
@@ -88,6 +105,22 @@ export async function getShows({
 		)
 		.as("t");
 	const { pk, ...transCol } = getColumns(transQ);
+
+	const relationsSql = buildRelations(relations, (x) => {
+		switch (x) {
+			case "studios":
+			case "videos":
+			case "translations": {
+				// we wrap that in a sql`` instead of using the builder because of this issue
+				// https://github.com/drizzle-team/drizzle-orm/pull/1674
+				const { pk, language, ...trans } = getColumns(showTranslations);
+				return sql`${db
+					.select({ json: jsonbObjectAgg(language, jsonbBuildObject(trans)) })
+					.from(showTranslations)
+					.where(eq(showTranslations.pk, shows.pk))}`;
+			}
+		}
+	});
 
 	return await db
 		.select({
@@ -107,6 +140,8 @@ export async function getShows({
 				banner: sql<Image>`coalesce(nullif(${shows.original}->'banner', 'null'::jsonb), ${transQ.banner})`,
 				logo: sql<Image>`coalesce(nullif(${shows.original}->'logo', 'null'::jsonb), ${transQ.logo})`,
 			}),
+
+			...relationsSql,
 		})
 		.from(shows)
 		[fallbackLanguage ? "innerJoin" : "leftJoin"](

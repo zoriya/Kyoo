@@ -32,6 +32,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 		}) => {
 			const langs = processLanguages(languages);
 			const [ret] = await getShows({
+				limit: 1,
 				filter: and(
 					isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
 					eq(shows.kind, "movie"),
