@@ -9,7 +9,7 @@ require (
 	github.com/jackc/pgx/v5 v5.7.2
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.13.3
-	github.com/otaxhu/problem v1.3.0
+	github.com/otaxhu/problem v1.4.0
 	github.com/swaggo/echo-swagger v1.4.1
 	github.com/swaggo/swag v1.16.4
 )
