@@ -17,16 +17,15 @@ import {
 	sqlarr,
 } from "~/db/utils";
 import type { MovieStatus } from "~/models/movie";
-import { SerieStatus, SerieTranslation } from "~/models/serie";
-import { Studio } from "~/models/studio";
+import { SerieStatus, type SerieTranslation } from "~/models/serie";
+import type { Studio } from "~/models/studio";
 import {
 	type FilterDef,
 	Genre,
 	type Image,
 	Sort,
-	isUuid,
+	buildRelations,
 	keysetPaginate,
-	selectTranslationQuery,
 	sortToSql,
 } from "~/models/utils";
 
@@ -69,14 +68,60 @@ export const showSort = Sort(
 	},
 );
 
-const buildRelations = <R extends string>(
-	relations: R[],
-	toSql: (relation: R) => SQL,
-) => {
-	return Object.fromEntries(relations.map((x) => [x, toSql(x)])) as Record<
-		R,
-		SQL
-	>;
+const showRelations = {
+	translations: () => {
+		const { pk, language, ...trans } = getColumns(showTranslations);
+		return db
+			.select({
+				json: jsonbObjectAgg(
+					language,
+					jsonbBuildObject<SerieTranslation>(trans),
+				).as("json"),
+			})
+			.from(showTranslations)
+			.where(eq(showTranslations.pk, shows.pk))
+			.as("translations");
+	},
+	studios: ({ languages }: { languages: string[] }) => {
+		const { pk: _, ...studioCol } = getColumns(studios);
+		const studioTransQ = db
+			.selectDistinctOn([studioTranslations.pk])
+			.from(studioTranslations)
+			.orderBy(
+				studioTranslations.pk,
+				sql`array_position(${sqlarr(languages)}, ${studioTranslations.language}`,
+			)
+			.as("t");
+		const { pk, language, ...studioTrans } = getColumns(studioTransQ);
+
+		return db
+			.select({
+				json: coalesce(
+					jsonbAgg(jsonbBuildObject<Studio>({ ...studioTrans, ...studioCol })),
+					sql`'[]'::jsonb`,
+				).as("json"),
+			})
+			.from(studios)
+			.leftJoin(studioTransQ, eq(studios.pk, studioTransQ.pk))
+			.where(
+				exists(
+					db
+						.select()
+						.from(showStudioJoin)
+						.where(
+							and(
+								eq(showStudioJoin.studioPk, studios.pk),
+								eq(showStudioJoin.showPk, shows.pk),
+							),
+						),
+				),
+			)
+			.as("studios");
+	},
+	// only available for movies
+	videos: () => {
+		throw new Error();
+	},
 };
 
 export async function getShows({
@@ -115,61 +160,6 @@ export async function getShows({
 		.as("t");
 	const { pk, ...transCol } = getColumns(transQ);
 
-	const relationsSql = buildRelations(relations, (x) => {
-		switch (x) {
-			case "videos":
-			case "translations": {
-				// we wrap that in a sql`` instead of using the builder because of this issue
-				// https://github.com/drizzle-team/drizzle-orm/pull/1674
-				const { pk, language, ...trans } = getColumns(showTranslations);
-				return sql<SerieTranslation[]>`${db
-					.select({ json: jsonbObjectAgg(language, jsonbBuildObject(trans)) })
-					.from(showTranslations)
-					.where(eq(showTranslations.pk, shows.pk))}`;
-			}
-			case "studios": {
-				const { pk: _, ...studioCol } = getColumns(studios);
-				const studioTransQ = db
-					.selectDistinctOn([studioTranslations.pk])
-					.from(studioTranslations)
-					.where(
-						!fallbackLanguage
-							? eq(showTranslations.language, sql`any(${sqlarr(languages)})`)
-							: undefined,
-					)
-					.orderBy(
-						studioTranslations.pk,
-						sql`array_position(${sqlarr(languages)}, ${studioTranslations.language}`,
-					)
-					.as("t");
-				const { pk, language, ...studioTrans } = getColumns(studioTransQ);
-
-				return sql<Studio>`${db
-					.select({
-						json: coalesce(
-							jsonbAgg(jsonbBuildObject({ ...studioTrans, ...studioCol })),
-							sql`'[]'::jsonb`,
-						),
-					})
-					.from(studios)
-					.leftJoin(studioTransQ, eq(studios.pk, studioTransQ.pk))
-					.where(
-						exists(
-							db
-								.select()
-								.from(showStudioJoin)
-								.where(
-									and(
-										eq(showStudioJoin.studioPk, studios.pk),
-										eq(showStudioJoin.showPk, shows.pk),
-									),
-								),
-						),
-					)}`;
-			}
-		}
-	});
-
 	return await db
 		.select({
 			...getColumns(shows),
@@ -189,7 +179,7 @@ export async function getShows({
 				logo: sql<Image>`coalesce(nullif(${shows.original}->'logo', 'null'::jsonb), ${transQ.logo})`,
 			}),
 
-			...relationsSql,
+			...buildRelations(relations, showRelations, { languages }),
 		})
 		.from(shows)
 		[fallbackLanguage ? "innerJoin" : "leftJoin"](

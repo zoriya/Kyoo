@@ -1,5 +1,6 @@
 import {
 	type ColumnsSelection,
+	InferColumnsDataTypes,
 	type SQL,
 	type SQLWrapper,
 	type Subquery,
@@ -94,24 +95,26 @@ export function values(items: Record<string, unknown>[]) {
 	};
 }
 
-export const coalesce = (val: SQLWrapper, def: SQLWrapper) => {
-	return sql`coalesce(${val}, ${def})`;
+export const coalesce = <T>(val: SQL<T>, def: SQLWrapper) => {
+	return sql<T>`coalesce(${val}, ${def})`;
 };
 
-export const jsonbObjectAgg = (key: SQLWrapper, value: SQLWrapper) => {
-	return sql`jsonb_object_agg(${sql.join([key, value], sql.raw(","))})`;
+export const jsonbObjectAgg = <T>(key: SQLWrapper, value: SQL<T>) => {
+	return sql<
+		Record<string, T>
+	>`jsonb_object_agg(${sql.join([key, value], sql.raw(","))})`;
 };
 
-export const jsonbAgg = (val: SQLWrapper) => {
-	return sql`jsonb_agg(${val})`;
+export const jsonbAgg = <T>(val: SQL<T>) => {
+	return sql<T>`jsonb_agg(${val})`;
 };
 
-export const jsonbBuildObject = (select: Record<string, SQLWrapper>) => {
+export const jsonbBuildObject = <T>(select: Record<string, SQLWrapper>) => {
 	const query = sql.join(
 		Object.entries(select).flatMap(([k, v]) => {
 			return [sql.raw(`'${k}'`), v];
 		}),
 		sql.raw(", "),
 	);
-	return sql`jsonb_build_object(${query})`;
+	return sql<T>`jsonb_build_object(${query})`;
 };
