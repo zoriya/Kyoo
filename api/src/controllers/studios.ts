@@ -156,7 +156,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 			},
 			params: t.Object({
 				id: t.String({
-					description: "The id or slug of the collection to retrieve.",
+					description: "The id or slug of the studio to retrieve.",
 					example: "mappa",
 				}),
 			}),
@@ -173,7 +173,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 				200: "studio",
 				404: {
 					...KError,
-					description: "No collection found with the given id or slug.",
+					description: "No studio found with the given id or slug.",
 				},
 				422: KError,
 			},
