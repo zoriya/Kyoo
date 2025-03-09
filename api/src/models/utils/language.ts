@@ -107,19 +107,3 @@ export const AcceptLanguage = ({
 		`
 				: ""),
 	});
-
-export const selectTranslationQuery = (
-	translationTable: Table & { language: Column },
-	languages: string[],
-) => ({
-	columns: {
-		pk: false,
-	} as const,
-	where: !languages.includes("*")
-		? eq(translationTable.language, sql`any(${sqlarr(languages)})`)
-		: undefined,
-	orderBy: [
-		sql`array_position(${sqlarr(languages)}, ${translationTable.language})`,
-	],
-	limit: 1,
-});

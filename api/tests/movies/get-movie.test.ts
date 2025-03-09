@@ -11,7 +11,7 @@ beforeAll(async () => {
 	await db.delete(shows);
 	await db.insert(videos).values(bubbleVideo);
 	const [ret, body] = await createMovie(bubble);
-	expect(ret.status).toBe(201)
+	expect(ret.status).toBe(201);
 	bubbleId = body.id;
 });
 

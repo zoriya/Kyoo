@@ -5,7 +5,7 @@ import { Language } from "./language";
 export const Original = t.Object({
 	language: Language({
 		description: "The language code this was made in.",
-		examples: ["ja"]
+		examples: ["ja"],
 	}),
 	name: t.String({
 		description: "The name in the original language",

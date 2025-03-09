@@ -8,12 +8,12 @@ export const buildRelations = <
 >(
 	enabled: R[],
 	relations: Rel,
-	params: P,
+	params?: P,
 ) => {
 	// we wrap that in a sql`` instead of using the builder because of this issue
 	// https://github.com/drizzle-team/drizzle-orm/pull/1674
 	return Object.fromEntries(
-		enabled.map((x) => [x, sql`${relations[x](params)}`]),
+		enabled.map((x) => [x, sql`${relations[x](params!)}`]),
 	) as {
 		[P in R]?: SQL<
 			ReturnType<Rel[P]>["_"]["selectedFields"] extends {

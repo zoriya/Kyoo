@@ -89,7 +89,7 @@ const showRelations = {
 			.from(studioTranslations)
 			.orderBy(
 				studioTranslations.pk,
-				sql`array_position(${sqlarr(languages)}, ${studioTranslations.language}`,
+				sql`array_position(${sqlarr(languages)}, ${studioTranslations.language})`,
 			)
 			.as("t");
 		const { pk, language, ...studioTrans } = getColumns(studioTransQ);
@@ -158,13 +158,11 @@ export async function getShows({
 			sql`array_position(${sqlarr(languages)}, ${showTranslations.language})`,
 		)
 		.as("t");
-	const { pk, ...transCol } = getColumns(transQ);
 
 	return await db
 		.select({
 			...getColumns(shows),
-			...transCol,
-			lanugage: transQ.language,
+			...getColumns(transQ),
 
 			// movie columns (status is only a typescript hint)
 			status: sql<MovieStatus>`${shows.status}`,

@@ -12,6 +12,7 @@ export const StudioTranslation = t.Object({
 	name: t.String(),
 	logo: t.Nullable(Image),
 });
+export type StudioTranslation = typeof StudioTranslation.static;
 
 export const Studio = t.Intersect([
 	Resource(),
