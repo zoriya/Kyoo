@@ -1,15 +1,24 @@
 import type { StaticDecode } from "@sinclair/typebox";
-import { type SQL, and, eq, sql } from "drizzle-orm";
+import { type SQL, and, eq, exists, sql } from "drizzle-orm";
 import { db } from "~/db";
-import { showTranslations, shows, studioTranslations } from "~/db/schema";
 import {
+	showStudioJoin,
+	showTranslations,
+	shows,
+	studioTranslations,
+	studios,
+} from "~/db/schema";
+import {
+	coalesce,
 	getColumns,
+	jsonbAgg,
 	jsonbBuildObject,
 	jsonbObjectAgg,
 	sqlarr,
 } from "~/db/utils";
 import type { MovieStatus } from "~/models/movie";
-import { SerieStatus } from "~/models/serie";
+import { SerieStatus, SerieTranslation } from "~/models/serie";
+import { Studio } from "~/models/studio";
 import {
 	type FilterDef,
 	Genre,
@@ -108,16 +117,55 @@ export async function getShows({
 
 	const relationsSql = buildRelations(relations, (x) => {
 		switch (x) {
-			case "studios":
 			case "videos":
 			case "translations": {
 				// we wrap that in a sql`` instead of using the builder because of this issue
 				// https://github.com/drizzle-team/drizzle-orm/pull/1674
 				const { pk, language, ...trans } = getColumns(showTranslations);
-				return sql`${db
+				return sql<SerieTranslation[]>`${db
 					.select({ json: jsonbObjectAgg(language, jsonbBuildObject(trans)) })
 					.from(showTranslations)
 					.where(eq(showTranslations.pk, shows.pk))}`;
+			}
+			case "studios": {
+				const { pk: _, ...studioCol } = getColumns(studios);
+				const studioTransQ = db
+					.selectDistinctOn([studioTranslations.pk])
+					.from(studioTranslations)
+					.where(
+						!fallbackLanguage
+							? eq(showTranslations.language, sql`any(${sqlarr(languages)})`)
+							: undefined,
+					)
+					.orderBy(
+						studioTranslations.pk,
+						sql`array_position(${sqlarr(languages)}, ${studioTranslations.language}`,
+					)
+					.as("t");
+				const { pk, language, ...studioTrans } = getColumns(studioTransQ);
+
+				return sql<Studio>`${db
+					.select({
+						json: coalesce(
+							jsonbAgg(jsonbBuildObject({ ...studioTrans, ...studioCol })),
+							sql`'[]'::jsonb`,
+						),
+					})
+					.from(studios)
+					.leftJoin(studioTransQ, eq(studios.pk, studioTransQ.pk))
+					.where(
+						exists(
+							db
+								.select()
+								.from(showStudioJoin)
+								.where(
+									and(
+										eq(showStudioJoin.studioPk, studios.pk),
+										eq(showStudioJoin.showPk, shows.pk),
+									),
+								),
+						),
+					)}`;
 			}
 		}
 	});
@@ -162,94 +210,4 @@ export async function getShows({
 			shows.pk,
 		)
 		.limit(limit);
-}
-
-export async function getShow(
-	id: string,
-	{
-		languages,
-		preferOriginal,
-		relations,
-		filters,
-	}: {
-		languages: string[];
-		preferOriginal: boolean | undefined;
-		relations: ("translations" | "studios" | "videos")[];
-		filters: SQL | undefined;
-	},
-) {
-	const ret = await db.query.shows.findFirst({
-		extras: {
-			airDate: sql<string>`${shows.startAir}`.as("airDate"),
-			status: sql<MovieStatus>`${shows.status}`.as("status"),
-			isAvailable: sql<boolean>`${shows.availableCount} != 0`.as("isAvailable"),
-		},
-		where: and(isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id), filters),
-		with: {
-			selectedTranslation: selectTranslationQuery(showTranslations, languages),
-			...(preferOriginal && {
-				originalTranslation: {
-					columns: {
-						poster: true,
-						thumbnail: true,
-						banner: true,
-						logo: true,
-					},
-				},
-			}),
-			...(relations.includes("translations") && {
-				translations: {
-					columns: {
-						pk: false,
-					},
-				},
-			}),
-			...(relations.includes("studios") && {
-				studios: {
-					with: {
-						studio: {
-							columns: {
-								pk: false,
-							},
-							with: {
-								selectedTranslation: selectTranslationQuery(
-									studioTranslations,
-									languages,
-								),
-							},
-						},
-					},
-				},
-			}),
-		},
-	});
-	if (!ret) return null;
-	const translation = ret.selectedTranslation[0];
-	if (!translation) return { show: null, language: null };
-	const ot = ret.originalTranslation;
-	const show = {
-		...ret,
-		...translation,
-		kind: ret.kind as any,
-		...(ot && {
-			...(ot.poster && { poster: ot.poster }),
-			...(ot.thumbnail && { thumbnail: ot.thumbnail }),
-			...(ot.banner && { banner: ot.banner }),
-			...(ot.logo && { logo: ot.logo }),
-		}),
-		...(ret.translations && {
-			translations: Object.fromEntries(
-				ret.translations.map(
-					({ language, ...translation }) => [language, translation] as const,
-				),
-			),
-		}),
-		...(ret.studios && {
-			studios: ret.studios.map((x: any) => ({
-				...x.studio,
-				...x.studio.selectedTranslation[0],
-			})),
-		}),
-	};
-	return { show, language: translation.language };
 }
