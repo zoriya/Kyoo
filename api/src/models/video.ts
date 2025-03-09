@@ -73,7 +73,7 @@ export const Video = t.Intersect([Resource(), SeedVideo, DbMetadata]);
 export type Video = Prettify<typeof Video.static>;
 
 // type used in entry responses
-export const EmbeddedVideo = t.Omit(Video, ["createdAt", "updatedAt"]);
+export const EmbeddedVideo = t.Omit(Video, ["guess", "createdAt", "updatedAt"]);
 export type EmbeddedVideo = Prettify<typeof EmbeddedVideo.static>;
 
 registerExamples(Video, bubbleVideo);

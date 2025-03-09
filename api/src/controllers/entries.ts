@@ -41,6 +41,7 @@ import {
 	sortToSql,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
+import type { EmbeddedVideo } from "~/models/video";
 
 const entryFilters: FilterDef = {
 	kind: {
@@ -115,9 +116,14 @@ async function getEntries({
 	const videosQ = db
 		.select({
 			videos: coalesce(
-				jsonbAgg(jsonbBuildObject({ slug: entryVideoJoin.slug, ...videosCol })),
+				jsonbAgg(
+					jsonbBuildObject<EmbeddedVideo>({
+						slug: entryVideoJoin.slug,
+						...videosCol,
+					}),
+				),
 				sql`'[]'::jsonb`,
-			),
+			).as("videos"),
 		})
 		.from(entryVideoJoin)
 		.where(eq(entryVideoJoin.entryPk, entries.pk))
