@@ -106,7 +106,7 @@ export const jsonbObjectAgg = <T>(key: SQLWrapper, value: SQL<T>) => {
 };
 
 export const jsonbAgg = <T>(val: SQL<T>) => {
-	return sql<T>`jsonb_agg(${val})`;
+	return sql<T[]>`jsonb_agg(${val})`;
 };
 
 export const jsonbBuildObject = <T>(select: Record<string, SQLWrapper>) => {

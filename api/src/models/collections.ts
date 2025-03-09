@@ -7,6 +7,7 @@ import {
 	Genre,
 	Image,
 	Language,
+	Original,
 	Resource,
 	SeedImage,
 	TranslationRecord,
@@ -27,14 +28,7 @@ const BaseCollection = t.Object({
 			descrpition: "Date of the last item of the collection",
 		}),
 	),
-	originalLanguage: t.Nullable(
-		Language({
-			description: "The language code this movie was made in.",
-		}),
-	),
-
 	nextRefresh: t.String({ format: "date-time" }),
-
 	externalId: ExternalId(),
 });
 
@@ -56,6 +50,9 @@ export const Collection = t.Intersect([
 	CollectionTranslation,
 	BaseCollection,
 	DbMetadata,
+	t.Object({
+		original: Original,
+	}),
 ]);
 export type Collection = Prettify<typeof Collection.static>;
 
@@ -71,6 +68,9 @@ export const SeedCollection = t.Intersect([
 	t.Omit(BaseCollection, ["kind", "startAir", "endAir", "nextRefresh"]),
 	t.Object({
 		slug: t.String({ format: "slug" }),
+		originalLanguage: Language({
+			description: "The language code this collection's items were made in.",
+		}),
 		translations: TranslationRecord(
 			t.Intersect([
 				t.Omit(CollectionTranslation, [
@@ -84,6 +84,7 @@ export const SeedCollection = t.Intersect([
 					thumbnail: t.Nullable(SeedImage),
 					banner: t.Nullable(SeedImage),
 					logo: t.Nullable(SeedImage),
+					latinName: t.Optional(Original.properties.latinName),
 				}),
 			]),
 		),

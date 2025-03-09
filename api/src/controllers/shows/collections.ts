@@ -21,7 +21,7 @@ import {
 	processLanguages,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
-import { getShow, getShows, showFilters, showSort } from "./logic";
+import { getShows, showFilters, showSort } from "./logic";
 
 export const collections = new Elysia({
 	prefix: "/collections",
@@ -41,11 +41,16 @@ export const collections = new Elysia({
 			set,
 		}) => {
 			const langs = processLanguages(languages);
-			const ret = await getShow(id, {
+			const [ret] = await getShows({
+				limit: 1,
+				filter: and(
+					isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
+					eq(shows.kind, "collection"),
+				),
 				languages: langs,
+				fallbackLanguage: langs.includes("*"),
 				preferOriginal,
 				relations,
-				filters: eq(shows.kind, "collection"),
 			});
 			if (!ret) {
 				return error(404, {
@@ -60,7 +65,7 @@ export const collections = new Elysia({
 				});
 			}
 			set.headers["content-language"] = ret.language;
-			return ret.show;
+			return ret;
 		},
 		{
 			detail: {

@@ -143,7 +143,7 @@ export async function getShows({
 	languages: string[];
 	fallbackLanguage?: boolean;
 	preferOriginal?: boolean;
-	relations?: ("translations" | "studios" | "videos")[];
+	relations?: (keyof typeof showRelations)[];
 }) {
 	const transQ = db
 		.selectDistinctOn([showTranslations.pk])
@@ -182,7 +182,7 @@ export async function getShows({
 			...buildRelations(relations, showRelations, { languages }),
 		})
 		.from(shows)
-		[fallbackLanguage ? "innerJoin" : "leftJoin"](
+		[fallbackLanguage ? "innerJoin" : ("leftJoin" as "innerJoin")](
 			transQ,
 			eq(shows.pk, transQ.pk),
 		)

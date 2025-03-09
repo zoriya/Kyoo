@@ -35,12 +35,9 @@ const BaseSerie = t.Object({
 			description: "Average runtime of all episodes (in minutes.)",
 		}),
 	),
-
 	startAir: t.Nullable(t.String({ format: "date" })),
 	endAir: t.Nullable(t.String({ format: "date" })),
-
 	nextRefresh: t.String({ format: "date-time" }),
-
 	externalId: ExternalId(),
 });
 
