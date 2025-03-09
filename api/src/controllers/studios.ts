@@ -138,7 +138,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 			if (!ret) {
 				return error(404, {
 					status: 404,
-					message: `No studio with the id or slug: '${id}'`,
+					message: `No studio found with the id or slug: '${id}'`,
 				});
 			}
 			if (!ret.language) {

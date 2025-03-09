@@ -1,11 +1,20 @@
-import { sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { db } from "~/db";
 import { staff } from "~/db/schema/staff";
 import { KError } from "~/models/error";
 import { Role, Staff } from "~/models/staff";
-import { Filter, Page, Sort } from "~/models/utils";
+import {
+	Page,
+	Sort,
+	createPage,
+	isUuid,
+	keysetPaginate,
+	sortToSql,
+} from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
+
+const staffSort = Sort(["slug", "name", "latinName"], { default: ["slug"] });
 
 export const staffH = new Elysia({ tags: ["staff"] })
 	.model({
@@ -14,8 +23,19 @@ export const staffH = new Elysia({ tags: ["staff"] })
 	})
 	.get(
 		"/staff/:id",
-		async ({ params: { id }, error, set }) => {
-			throw new Error();
+		async ({ params: { id }, error }) => {
+			const [ret] = await db
+				.select()
+				.from(staff)
+				.where(isUuid(id) ? eq(staff.id, id) : eq(staff.slug, id))
+				.limit(1);
+			if (!ret) {
+				return error(404, {
+					status: 404,
+					message: `No staff found with the id or slug: '${id}'`,
+				});
+			}
+			return ret;
 		},
 		{
 			detail: {
@@ -69,14 +89,31 @@ export const staffH = new Elysia({ tags: ["staff"] })
 	)
 	.get(
 		"/staff",
-		async ({ query: { limit, after, query }, request: { url } }) => {
-			throw new Error();
+		async ({ query: { limit, after, sort, query }, request: { url } }) => {
+			const items = await db
+				.select()
+				.from(staff)
+				.where(
+					and(
+						query ? sql`${staff.name} %> ${query}::text` : undefined,
+						keysetPaginate({ table: staff, after, sort }),
+					),
+				)
+				.orderBy(
+					...(query
+						? [sql`word_similarity(${query}::text, ${staff.name})`]
+						: sortToSql(sort, staff)),
+					staff.pk,
+				)
+				.limit(limit);
+			return createPage(items, { url, sort, limit });
 		},
 		{
 			detail: {
 				description: "Get all staff members known by kyoo.",
 			},
 			query: t.Object({
+				sort: staffSort,
 				query: t.Optional(t.String({ description: desc.query })),
 				limit: t.Integer({
 					minimum: 1,

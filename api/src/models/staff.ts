@@ -3,7 +3,7 @@ import { DbMetadata, ExternalId, Image, Resource } from "./utils";
 
 export const Character = t.Object({
 	name: t.String(),
-	latinName: t.String(),
+	latinName: t.Nullable(t.String()),
 	image: t.Nullable(Image),
 });
 export type Character = typeof Character.static;
@@ -25,7 +25,7 @@ export const Staff = t.Intersect([
 	Resource(),
 	t.Object({
 		name: t.String(),
-		latinName: t.String(),
+		latinName: t.Nullable(t.String()),
 		image: t.Nullable(Image),
 		externalId: ExternalId(),
 	}),
