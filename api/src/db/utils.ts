@@ -94,8 +94,16 @@ export function values(items: Record<string, unknown>[]) {
 	};
 }
 
+export const coalesce = (val: SQLWrapper, def: SQLWrapper) => {
+	return sql`coalesce(${val}, ${def})`;
+};
+
 export const jsonbObjectAgg = (key: SQLWrapper, value: SQLWrapper) => {
 	return sql`jsonb_object_agg(${sql.join([key, value], sql.raw(","))})`;
+};
+
+export const jsonbAgg = (val: SQLWrapper) => {
+	return sql`jsonb_agg(${val})`;
 };
 
 export const jsonbBuildObject = (select: Record<string, SQLWrapper>) => {
