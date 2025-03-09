@@ -6,7 +6,7 @@ import { roles, staff } from "~/db/schema/staff";
 import { getColumns, sqlarr } from "~/db/utils";
 import { KError } from "~/models/error";
 import type { MovieStatus } from "~/models/movie";
-import { Role, RoleWShow, Staff } from "~/models/staff";
+import { Role, RoleWShow, RoleWStaff, Staff } from "~/models/staff";
 import {
 	Filter,
 	type FilterDef,
@@ -24,12 +24,29 @@ import { showFilters, showSort } from "./shows/logic";
 
 const staffSort = Sort(["slug", "name", "latinName"], { default: ["slug"] });
 
-const roleShowFilters: FilterDef = {
+const staffRoleSort = Sort(
+	[
+		"order",
+		// "slug",
+		// "name",
+		// "latinName",
+		// "characterName", "characterLatinName"
+	],
+	{
+		default: ["order"],
+	},
+);
+
+const staffRoleFilter: FilterDef = {
 	kind: {
 		column: roles.kind,
 		type: "enum",
 		values: Role.properties.kind.enum,
 	},
+};
+
+const roleShowFilters: FilterDef = {
+	...staffRoleFilter,
 	...showFilters,
 };
 
@@ -250,6 +267,83 @@ export const staffH = new Elysia({ tags: ["staff"] })
 			}),
 			response: {
 				200: Page(Staff),
+				422: KError,
+			},
+		},
+	)
+	.get(
+		"/movies/:id/staff",
+		async ({
+			params: { id },
+			query: { limit, after, query, sort, filter },
+			request: { url },
+			error,
+		}) => {
+			const [movie] = await db
+				.select({ pk: shows.pk })
+				.from(shows)
+				.where(isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id))
+				.limit(1);
+
+			if (!movie) {
+				return error(404, {
+					status: 404,
+					message: `No movie with the id or slug: '${id}'.`,
+				});
+			}
+
+			const items = await db
+				.select({
+					...getColumns(roles),
+					staff: getColumns(staff),
+				})
+				.from(roles)
+				.innerJoin(staff, eq(roles.staffPk, staff.pk))
+				.where(
+					and(
+						filter,
+						query ? sql`${staff.name} %> ${query}::text` : undefined,
+						keysetPaginate({ table: roles, sort, after }),
+					),
+				)
+				.orderBy(
+					...(query
+						? [sql`word_similarity(${query}::text, ${staff.name})`]
+						: sortToSql(sort, roles)),
+					shows.pk,
+				)
+				.limit(limit);
+
+			return createPage(items, { url, sort, limit });
+		},
+		{
+			detail: {
+				description: "Get all staff member who worked on this movie",
+			},
+			params: t.Object({
+				id: t.String({
+					description: "The id or slug of the movie.",
+					example: "bubble",
+				}),
+			}),
+			query: t.Object({
+				sort: staffRoleSort,
+				filter: t.Optional(Filter({ def: staffRoleFilter })),
+				query: t.Optional(t.String({ description: desc.query })),
+				limit: t.Integer({
+					minimum: 1,
+					maximum: 250,
+					default: 50,
+					description: "Max page size.",
+				}),
+				after: t.Optional(t.String({ description: desc.after })),
+			}),
+			response: {
+				200: Page(RoleWStaff),
+				404: {
+					...KError,
+					description: "No movie found with the given id or slug.",
+				},
 				422: KError,
 			},
 		},

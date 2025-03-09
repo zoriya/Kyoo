@@ -43,8 +43,6 @@ export const Sort = <
 					t.TemplateLiteral("random:${number}"),
 				]),
 				{
-					// TODO: support explode: true (allow sort=slug,-createdAt). needs a pr to elysia
-					explode: false,
 					default: def,
 					description: description,
 				},
