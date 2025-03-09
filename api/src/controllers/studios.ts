@@ -34,7 +34,16 @@ import {
 import { desc } from "~/models/utils/descriptions";
 import { getShows, showFilters, showSort } from "./shows/logic";
 
-const studioSort = Sort(["slug", "createdAt"], { default: ["slug"] });
+const studioSort = Sort(
+	{
+		slug: studios.slug,
+		createdAt: studios.createdAt,
+	},
+	{
+		default: ["slug"],
+		tablePk: studios.pk,
+	},
+);
 
 const studioRelations = {
 	translations: () => {
@@ -101,13 +110,13 @@ export async function getStudios({
 			and(
 				filter,
 				query ? sql`${transQ.name} %> ${query}::text` : undefined,
-				keysetPaginate({ table: studios, after, sort }),
+				keysetPaginate({ after, sort }),
 			),
 		)
 		.orderBy(
 			...(query
 				? [sql`word_similarity(${query}::text, ${transQ.name})`]
-				: sortToSql(sort, studios)),
+				: sortToSql(sort)),
 			studios.pk,
 		)
 		.limit(limit);

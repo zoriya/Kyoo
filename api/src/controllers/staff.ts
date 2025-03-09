@@ -23,18 +23,36 @@ import {
 import { desc } from "~/models/utils/descriptions";
 import { showFilters, showSort } from "./shows/logic";
 
-const staffSort = Sort(["slug", "name", "latinName"], { default: ["slug"] });
+const staffSort = Sort(
+	{
+		slug: staff.slug,
+		name: staff.name,
+		latinName: staff.latinName,
+	},
+	{
+		default: ["slug"],
+		tablePk: staff.pk,
+	},
+);
 
 const staffRoleSort = Sort(
-	[
-		"order",
-		// "slug",
-		// "name",
-		// "latinName",
-		// "characterName", "characterLatinName"
-	],
+	{
+		order: roles.order,
+		slug: { sql: staff.slug, accessor: (x) => x.staff.slug },
+		name: { sql: staff.name, accessor: (x) => x.staff.name },
+		latinName: { sql: staff.latinName, accessor: (x) => x.staff.latinName },
+		characterName: {
+			sql: sql`${roles.character}->'name'`,
+			accessor: (x) => x.character.name,
+		},
+		characterLatinName: {
+			sql: sql`${roles.character}->'latinName'`,
+			accessor: (x) => x.character.latinName,
+		},
+	},
 	{
 		default: ["order"],
+		tablePk: staff.pk,
 	},
 );
 
@@ -75,13 +93,13 @@ async function getStaffRoles({
 			and(
 				filter,
 				query ? sql`${staff.name} %> ${query}::text` : undefined,
-				keysetPaginate({ table: roles, sort, after }),
+				keysetPaginate({ sort, after }),
 			),
 		)
 		.orderBy(
 			...(query
 				? [sql`word_similarity(${query}::text, ${staff.name})`]
-				: sortToSql(sort, roles)),
+				: sortToSql(sort)),
 			shows.pk,
 		)
 		.limit(limit);
@@ -217,13 +235,13 @@ export const staffH = new Elysia({ tags: ["staff"] })
 						eq(roles.staffPk, member.pk),
 						filter,
 						query ? sql`${transQ.name} %> ${query}::text` : undefined,
-						keysetPaginate({ table: shows, after, sort }),
+						keysetPaginate({ after, sort }),
 					),
 				)
 				.orderBy(
 					...(query
 						? [sql`word_similarity(${query}::text, ${transQ.name})`]
-						: sortToSql(sort, shows)),
+						: sortToSql(sort)),
 					roles.showPk,
 				)
 				.limit(limit);
@@ -275,13 +293,13 @@ export const staffH = new Elysia({ tags: ["staff"] })
 				.where(
 					and(
 						query ? sql`${staff.name} %> ${query}::text` : undefined,
-						keysetPaginate({ table: staff, after, sort }),
+						keysetPaginate({ after, sort }),
 					),
 				)
 				.orderBy(
 					...(query
 						? [sql`word_similarity(${query}::text, ${staff.name})`]
-						: sortToSql(sort, staff)),
+						: sortToSql(sort)),
 					staff.pk,
 				)
 				.limit(limit);
