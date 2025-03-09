@@ -14,7 +14,7 @@ import {
 	TranslationRecord,
 } from "./utils";
 import { Original } from "./utils/original";
-import { Video } from "./video";
+import { EmbeddedVideo } from "./video";
 
 export const MovieStatus = t.UnionEnum(["unknown", "finished", "planned"]);
 export type MovieStatus = typeof MovieStatus.static;
@@ -62,7 +62,7 @@ export const FullMovie = t.Intersect([
 	Movie,
 	t.Object({
 		translations: t.Optional(TranslationRecord(MovieTranslation)),
-		videos: t.Optional(t.Array(Video)),
+		videos: t.Optional(t.Array(EmbeddedVideo)),
 		studios: t.Optional(t.Array(Studio)),
 	}),
 ]);

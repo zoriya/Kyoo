@@ -2,11 +2,14 @@ import type { StaticDecode } from "@sinclair/typebox";
 import { type SQL, and, eq, exists, sql } from "drizzle-orm";
 import { db } from "~/db";
 import {
+	entries,
+	entryVideoJoin,
 	showStudioJoin,
 	showTranslations,
 	shows,
 	studioTranslations,
 	studios,
+	videos,
 } from "~/db/schema";
 import {
 	coalesce,
@@ -28,6 +31,7 @@ import {
 	keysetPaginate,
 	sortToSql,
 } from "~/models/utils";
+import type { EmbeddedVideo } from "~/models/video";
 
 export const showFilters: FilterDef = {
 	genres: {
@@ -120,7 +124,24 @@ const showRelations = {
 	},
 	// only available for movies
 	videos: () => {
-		throw new Error();
+		const { guess, createdAt, updatedAt, ...videosCol } = getColumns(videos);
+		return db
+			.select({
+				videos: coalesce(
+					jsonbAgg(
+						jsonbBuildObject<EmbeddedVideo>({
+							slug: entryVideoJoin.slug,
+							...videosCol,
+						}),
+					),
+					sql`'[]'::jsonb`,
+				).as("videos"),
+			})
+			.from(entryVideoJoin)
+			.where(eq(entryVideoJoin.entryPk, entries.pk))
+			.leftJoin(entries, eq(entries.showPk, shows.pk))
+			.leftJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
+			.as("videos");
 	},
 };
 
