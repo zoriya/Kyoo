@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { Show } from "./show";
 import { DbMetadata, ExternalId, Image, Resource } from "./utils";
 
 export const Character = t.Object({
@@ -32,3 +33,19 @@ export const Staff = t.Intersect([
 	DbMetadata,
 ]);
 export type Staff = typeof Staff.static;
+
+export const RoleWShow = t.Intersect([
+	Role,
+	t.Object({
+		show: Show,
+	}),
+]);
+export type RoleWShow = typeof RoleWShow.static;
+
+export const RoleWStaff = t.Intersect([
+	Role,
+	t.Object({
+		staff: Staff
+	}),
+]);
+export type RoleWStaff = typeof RoleWStaff.static;
