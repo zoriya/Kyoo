@@ -23,7 +23,6 @@ export const Language = (props?: NonNullable<Parameters<typeof t.String>[0]>) =>
 					This is a BCP 47 language code (the IETF Best Current Practices on Tags for Identifying Languages).
 					BCP 47 is also known as RFC 5646. It subsumes ISO 639 and is backward compatible with it.
 				`,
-				error: "Expected a valid (and NORMALIZED) bcp-47 language code.",
 				examples: ["en-US"],
 				...props,
 			}),
@@ -108,19 +107,3 @@ export const AcceptLanguage = ({
 		`
 				: ""),
 	});
-
-export const selectTranslationQuery = (
-	translationTable: Table & { language: Column },
-	languages: string[],
-) => ({
-	columns: {
-		pk: false,
-	} as const,
-	where: !languages.includes("*")
-		? eq(translationTable.language, sql`any(${sqlarr(languages)})`)
-		: undefined,
-	orderBy: [
-		sql`array_position(${sqlarr(languages)}, ${translationTable.language})`,
-	],
-	limit: 1,
-});

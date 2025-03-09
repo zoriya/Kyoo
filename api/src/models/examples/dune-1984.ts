@@ -8,6 +8,12 @@ export const dune1984Video: Video = {
 	rendering: "ea3a0f8f2f2c5b61a07f61e4e8d9f8e01b2b92bcbb6f5ed1151e1f61619c2c0f",
 	part: null,
 	version: 1,
+	guess: {
+		kind: "movie",
+		title: "dune",
+		year: [1984],
+		from: "guessit",
+	},
 	createdAt: "2024-12-02T11:45:12.968Z",
 	updatedAt: "2024-12-02T11:45:12.968Z",
 };

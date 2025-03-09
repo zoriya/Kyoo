@@ -1,6 +1,7 @@
 import { t } from "elysia";
 import type { SeedMovie } from "~/models/movie";
 import { getYear } from "~/utils";
+import { processOptImage } from "./images";
 import { insertCollection } from "./insert/collection";
 import { insertEntries } from "./insert/entries";
 import { insertShow, updateAvailableCount } from "./insert/shows";
@@ -45,8 +46,15 @@ export const seedMovie = async (
 		seed.slug = `random-${getYear(seed.airDate)}`;
 	}
 
-	const { translations, videos, collection, studios, ...bMovie } = seed;
-	const nextRefresh = guessNextRefresh(bMovie.airDate ?? new Date());
+	const { translations, videos, collection, studios, ...movie } = seed;
+	const nextRefresh = guessNextRefresh(movie.airDate ?? new Date());
+	const original = translations[movie.originalLanguage];
+	if (!original) {
+		return {
+			status: 422,
+			message: "No translation available in the original language.",
+		};
+	}
 
 	const col = await insertCollection(collection, {
 		kind: "movie",
@@ -57,11 +65,20 @@ export const seedMovie = async (
 	const show = await insertShow(
 		{
 			kind: "movie",
-			startAir: bMovie.airDate,
+			startAir: movie.airDate,
 			nextRefresh,
 			collectionPk: col?.pk,
 			entriesCount: 1,
-			...bMovie,
+			original: {
+				language: movie.originalLanguage,
+				name: original.name,
+				latinName: original.latinName ?? null,
+				poster: processOptImage(original.poster),
+				thumbnail: processOptImage(original.thumbnail),
+				logo: processOptImage(original.logo),
+				banner: processOptImage(original.banner),
+			},
+			...movie,
 		},
 		translations,
 	);
@@ -70,11 +87,11 @@ export const seedMovie = async (
 	// even if never shown to the user, a movie still has an entry.
 	const [entry] = await insertEntries(show, [
 		{
-			...bMovie,
+			...movie,
 			kind: "movie",
 			order: 1,
-			thumbnail: (bMovie.originalLanguage
-				? translations[bMovie.originalLanguage]
+			thumbnail: (movie.originalLanguage
+				? translations[movie.originalLanguage]
 				: Object.values(translations)[0]
 			)?.thumbnail,
 			translations,

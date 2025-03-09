@@ -26,9 +26,9 @@ export const keysetPaginate = <
 }: {
 	table: Table<"pk" | Sort<T, Remap>["sort"][number]["key"]>;
 	after: string | undefined;
-	sort: Sort<T, Remap>;
+	sort: Sort<T, Remap> | undefined;
 }) => {
-	if (!after) return undefined;
+	if (!after || !sort) return undefined;
 	const cursor: After = JSON.parse(
 		Buffer.from(after, "base64").toString("utf-8"),
 	);

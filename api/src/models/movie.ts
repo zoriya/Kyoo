@@ -13,29 +13,21 @@ import {
 	SeedImage,
 	TranslationRecord,
 } from "./utils";
+import { Original } from "./utils/original";
 import { Video } from "./video";
 
 export const MovieStatus = t.UnionEnum(["unknown", "finished", "planned"]);
 export type MovieStatus = typeof MovieStatus.static;
 
 const BaseMovie = t.Object({
-	kind: t.Literal("movie"),
 	genres: t.Array(Genre),
 	rating: t.Nullable(t.Integer({ minimum: 0, maximum: 100 })),
 	status: MovieStatus,
 	runtime: t.Nullable(
 		t.Number({ minimum: 0, description: "Runtime of the movie in minutes." }),
 	),
-
 	airDate: t.Nullable(t.String({ format: "date" })),
-	originalLanguage: t.Nullable(
-		Language({
-			description: "The language code this movie was made in.",
-		}),
-	),
-
 	nextRefresh: t.String({ format: "date-time" }),
-
 	externalId: ExternalId(),
 });
 
@@ -60,6 +52,7 @@ export const Movie = t.Intersect([
 	BaseMovie,
 	DbMetadata,
 	t.Object({
+		original: Original,
 		isAvailable: t.Boolean(),
 	}),
 ]);
@@ -79,6 +72,9 @@ export const SeedMovie = t.Intersect([
 	t.Omit(BaseMovie, ["kind", "nextRefresh"]),
 	t.Object({
 		slug: t.String({ format: "slug", examples: ["bubble"] }),
+		originalLanguage: Language({
+			description: "The language code this movie was made in.",
+		}),
 		translations: TranslationRecord(
 			t.Intersect([
 				t.Omit(MovieTranslation, ["poster", "thumbnail", "banner", "logo"]),
@@ -87,6 +83,7 @@ export const SeedMovie = t.Intersect([
 					thumbnail: t.Nullable(SeedImage),
 					banner: t.Nullable(SeedImage),
 					logo: t.Nullable(SeedImage),
+					latinName: t.Optional(Original.properties.latinName),
 				}),
 			]),
 		),

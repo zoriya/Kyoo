@@ -1,4 +1,5 @@
-import { and, eq, exists, sql } from "drizzle-orm";
+import type { StaticDecode } from "@sinclair/typebox";
+import { type SQL, and, eq, exists, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { db } from "~/db";
 import {
@@ -7,7 +8,12 @@ import {
 	studioTranslations,
 	studios,
 } from "~/db/schema";
-import { getColumns, sqlarr } from "~/db/utils";
+import {
+	getColumns,
+	jsonbBuildObject,
+	jsonbObjectAgg,
+	sqlarr,
+} from "~/db/utils";
 import { KError } from "~/models/error";
 import { Movie } from "~/models/movie";
 import { Serie } from "~/models/serie";
@@ -18,17 +24,94 @@ import {
 	Filter,
 	Page,
 	Sort,
+	buildRelations,
 	createPage,
 	isUuid,
 	keysetPaginate,
 	processLanguages,
-	selectTranslationQuery,
 	sortToSql,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import { getShows, showFilters, showSort } from "./shows/logic";
 
 const studioSort = Sort(["slug", "createdAt"], { default: ["slug"] });
+
+const studioRelations = {
+	translations: () => {
+		const { pk, language, ...trans } = getColumns(studioTranslations);
+		return db
+			.select({
+				json: jsonbObjectAgg(
+					language,
+					jsonbBuildObject<StudioTranslation>(trans),
+				).as("json"),
+			})
+			.from(studioTranslations)
+			.where(eq(studioTranslations.pk, shows.pk))
+			.as("translations");
+	},
+};
+
+export async function getStudios({
+	after,
+	limit,
+	query,
+	sort,
+	filter,
+	languages,
+	fallbackLanguage = true,
+	relations = [],
+}: {
+	after?: string;
+	limit: number;
+	query?: string;
+	sort?: StaticDecode<typeof studioSort>;
+	filter?: SQL;
+	languages: string[];
+	fallbackLanguage?: boolean;
+	preferOriginal?: boolean;
+	relations?: (keyof typeof studioRelations)[];
+}) {
+	const transQ = db
+		.selectDistinctOn([studioTranslations.pk])
+		.from(studioTranslations)
+		.where(
+			!fallbackLanguage
+				? eq(studioTranslations.language, sql`any(${sqlarr(languages)})`)
+				: undefined,
+		)
+		.orderBy(
+			studioTranslations.pk,
+			sql`array_position(${sqlarr(languages)}, ${studioTranslations.language})`,
+		)
+		.as("t");
+
+	return await db
+		.select({
+			...getColumns(studios),
+			...getColumns(transQ),
+			...buildRelations(relations, studioRelations),
+		})
+		.from(studios)
+		[fallbackLanguage ? "innerJoin" : ("leftJoin" as "innerJoin")](
+			transQ,
+			eq(studios.pk, transQ.pk),
+		)
+		.where(
+			and(
+				filter,
+				query ? sql`${transQ.name} %> ${query}::text` : undefined,
+				keysetPaginate({ table: studios, after, sort }),
+			),
+		)
+		.orderBy(
+			...(query
+				? [sql`word_similarity(${query}::text, ${transQ.name})`]
+				: sortToSql(sort, studios)),
+			studios.pk,
+		)
+		.limit(limit);
+}
 
 export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 	.model({
@@ -45,21 +128,12 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 			set,
 		}) => {
 			const langs = processLanguages(languages);
-			const ret = await db.query.studios.findFirst({
-				where: isUuid(id) ? eq(studios.id, id) : eq(studios.slug, id),
-				with: {
-					selectedTranslation: selectTranslationQuery(
-						studioTranslations,
-						langs,
-					),
-					...(relations.includes("translations") && {
-						translations: {
-							columns: {
-								pk: false,
-							},
-						},
-					}),
-				},
+			const [ret] = await getStudios({
+				limit: 1,
+				filter: isUuid(id) ? eq(studios.id, id) : eq(studios.slug, id),
+				languages: langs,
+				fallbackLanguage: langs.includes("*"),
+				relations,
 			});
 			if (!ret) {
 				return error(404, {
@@ -67,20 +141,14 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 					message: `No studio with the id or slug: '${id}'`,
 				});
 			}
-			const tr = ret.selectedTranslation[0];
-			set.headers["content-language"] = tr.language;
-			return {
-				...ret,
-				...tr,
-				...(ret.translations && {
-					translations: Object.fromEntries(
-						ret.translations.map(
-							({ language, ...translation }) =>
-								[language, translation] as const,
-						),
-					),
-				}),
-			};
+			if (!ret.language) {
+				return error(422, {
+					status: 422,
+					message: "Accept-Language header could not be satisfied.",
+				});
+			}
+			set.headers["content-language"] = ret.language;
+			return ret;
 		},
 		{
 			detail: {
@@ -150,35 +218,13 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 			request: { url },
 		}) => {
 			const langs = processLanguages(languages);
-			const transQ = db
-				.selectDistinctOn([studioTranslations.pk])
-				.from(studioTranslations)
-				.orderBy(
-					studioTranslations.pk,
-					sql`array_position(${sqlarr(langs)}, ${studioTranslations.language}`,
-				)
-				.as("t");
-			const { pk, ...transCol } = getColumns(transQ);
-
-			const items = await db
-				.select({
-					...getColumns(studios),
-					...transCol,
-				})
-				.from(studios)
-				.where(
-					and(
-						query ? sql`${transQ.name} %> ${query}::text` : undefined,
-						keysetPaginate({ table: studios, after, sort }),
-					),
-				)
-				.orderBy(
-					...(query
-						? [sql`word_similarity(${query}::text, ${transQ.name})`]
-						: sortToSql(sort, studios)),
-					studios.pk,
-				)
-				.limit(limit);
+			const items = await getStudios({
+				limit,
+				after,
+				query,
+				sort,
+				languages: langs,
+			});
 			return createPage(items, { url, sort, limit });
 		},
 		{

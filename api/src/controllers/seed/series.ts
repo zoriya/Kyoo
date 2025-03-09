@@ -1,6 +1,7 @@
 import { t } from "elysia";
 import type { SeedSerie } from "~/models/serie";
 import { getYear } from "~/utils";
+import { processOptImage } from "./images";
 import { insertCollection } from "./insert/collection";
 import { insertEntries } from "./insert/entries";
 import { insertSeasons } from "./insert/seasons";
@@ -82,6 +83,13 @@ export const seedSerie = async (
 		...serie
 	} = seed;
 	const nextRefresh = guessNextRefresh(serie.startAir ?? new Date());
+	const original = translations[serie.originalLanguage];
+	if (!original) {
+		return {
+			status: 422,
+			message: "No translation available in the original language.",
+		};
+	}
 
 	const col = await insertCollection(collection, {
 		kind: "serie",
@@ -95,6 +103,15 @@ export const seedSerie = async (
 			nextRefresh,
 			collectionPk: col?.pk,
 			entriesCount: entries.length,
+			original: {
+				language: serie.originalLanguage,
+				name: original.name,
+				latinName: original.latinName ?? null,
+				poster: processOptImage(original.poster),
+				thumbnail: processOptImage(original.thumbnail),
+				logo: processOptImage(original.logo),
+				banner: processOptImage(original.banner),
+			},
 			...serie,
 		},
 		translations,

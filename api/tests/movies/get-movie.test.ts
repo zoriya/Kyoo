@@ -1,18 +1,18 @@
 import { beforeAll, describe, expect, it } from "bun:test";
 import { expectStatus } from "tests/utils";
-import { seedMovie } from "~/controllers/seed/movies";
 import { db } from "~/db";
 import { shows, videos } from "~/db/schema";
 import { bubble, bubbleVideo } from "~/models/examples";
-import { getMovie } from "../helpers";
+import { createMovie, getMovie } from "../helpers";
 
 let bubbleId = "";
 
 beforeAll(async () => {
 	await db.delete(shows);
 	await db.insert(videos).values(bubbleVideo);
-	const ret = await seedMovie(bubble);
-	if (!("status" in ret)) bubbleId = ret.id;
+	const [ret, body] = await createMovie(bubble);
+	expect(ret.status).toBe(201);
+	bubbleId = body.id;
 });
 
 describe("Get movie", () => {
@@ -124,7 +124,7 @@ describe("Get movie", () => {
 		expect(body.isAvailable).toBe(true);
 	});
 	it("With isAvailable=false", async () => {
-		await seedMovie({
+		await createMovie({
 			...bubble,
 			slug: "no-video",
 			videos: [],

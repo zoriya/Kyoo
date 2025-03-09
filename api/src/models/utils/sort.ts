@@ -78,9 +78,10 @@ export const sortToSql = <
 	T extends string[],
 	Remap extends Partial<Record<T[number], string>>,
 >(
-	sort: Sort<T, Remap>,
+	sort: Sort<T, Remap> | undefined,
 	table: Table<Sort<T, Remap>["sort"][number]["key"] | "pk">,
 ) => {
+	if (!sort) return [];
 	if (sort.random) {
 		return [sql`md5(${sort.random.seed} || ${table.pk})`];
 	}

@@ -168,7 +168,7 @@ describe("Movie seeding", () => {
 		const [resp, body] = await createMovie({
 			...bubble,
 			slug: "casing-test",
-			originalLanguage: "jp-jp",
+			originalLanguage: "en-us",
 			translations: {
 				"en-us": {
 					name: "foo",
@@ -191,7 +191,7 @@ describe("Movie seeding", () => {
 			where: eq(shows.id, body.id),
 			with: { translations: true },
 		});
-		expect(ret!.originalLanguage).toBe("jp-JP");
+		expect(ret!.original.language).toBe("en-US");
 		expect(ret!.translations).toBeArrayOfSize(2);
 		expect(ret!.translations).toEqual(
 			expect.arrayContaining([
@@ -229,7 +229,10 @@ describe("Movie seeding", () => {
 		const [resp, body] = await createMovie({
 			...bubble,
 			slug: "bubble-translation-test",
-			translations: { "en-us": bubble.translations.en },
+			translations: {
+				"en-us": bubble.translations.en,
+				ja: bubble.translations.ja,
+			},
 		});
 		expectStatus(resp, body).toBe(201);
 
@@ -262,6 +265,7 @@ describe("Movie seeding", () => {
 				"en-us": bubble.translations.en,
 				"en-au": { ...bubble.translations.en, name: "australian thing" },
 				en: { ...bubble.translations.en, name: "Generic" },
+				ja: bubble.translations.ja,
 			},
 		});
 		expectStatus(resp, body).toBe(201);
@@ -304,6 +308,7 @@ describe("Movie seeding", () => {
 			part: null,
 			version: 1,
 			rendering: "oeunhtoeuth",
+			guess: { title: "bubble", from: "test" },
 		});
 		expectStatus(vresp, video).toBe(201);
 
@@ -329,6 +334,7 @@ describe("Movie seeding", () => {
 			part: null,
 			version: 2,
 			rendering: "oeunhtoeuth",
+			guess: { title: "bubble", from: "test" },
 		});
 		expectStatus(vresp, video).toBe(201);
 
@@ -353,6 +359,7 @@ describe("Movie seeding", () => {
 			part: 1,
 			version: 2,
 			rendering: "oaoeueunhtoeuth",
+			guess: { title: "bubble", from: "test" },
 		});
 		expectStatus(vresp, video).toBe(201);
 
@@ -378,12 +385,14 @@ describe("Movie seeding", () => {
 				part: null,
 				version: 1,
 				rendering: "oeunhtoeuth",
+				guess: { title: "bubble", from: "test" },
 			},
 			{
 				path: "/video/bubble4.mkv",
 				part: null,
 				version: 1,
 				rendering: "aoeuaoeu",
+				guess: { title: "bubble", from: "test" },
 			},
 		]);
 		expectStatus(vresp, video).toBe(201);

@@ -1,18 +1,31 @@
 import type { StaticDecode } from "@sinclair/typebox";
-import { type SQL, and, eq, sql } from "drizzle-orm";
+import { type SQL, and, eq, exists, sql } from "drizzle-orm";
 import { db } from "~/db";
-import { showTranslations, shows, studioTranslations } from "~/db/schema";
-import { getColumns, sqlarr } from "~/db/utils";
+import {
+	showStudioJoin,
+	showTranslations,
+	shows,
+	studioTranslations,
+	studios,
+} from "~/db/schema";
+import {
+	coalesce,
+	getColumns,
+	jsonbAgg,
+	jsonbBuildObject,
+	jsonbObjectAgg,
+	sqlarr,
+} from "~/db/utils";
 import type { MovieStatus } from "~/models/movie";
-import { SerieStatus } from "~/models/serie";
+import { SerieStatus, type SerieTranslation } from "~/models/serie";
+import type { Studio } from "~/models/studio";
 import {
 	type FilterDef,
 	Genre,
 	type Image,
 	Sort,
-	isUuid,
+	buildRelations,
 	keysetPaginate,
-	selectTranslationQuery,
 	sortToSql,
 } from "~/models/utils";
 
@@ -29,7 +42,10 @@ export const showFilters: FilterDef = {
 	airDate: { column: shows.startAir, type: "date" },
 	startAir: { column: shows.startAir, type: "date" },
 	endAir: { column: shows.startAir, type: "date" },
-	originalLanguage: { column: shows.originalLanguage, type: "string" },
+	originalLanguage: {
+		column: sql`${shows.original}->'language'`,
+		type: "string",
+	},
 	tags: {
 		column: sql.raw(`t.${showTranslations.tags.name}`),
 		type: "string",
@@ -52,6 +68,62 @@ export const showSort = Sort(
 	},
 );
 
+const showRelations = {
+	translations: () => {
+		const { pk, language, ...trans } = getColumns(showTranslations);
+		return db
+			.select({
+				json: jsonbObjectAgg(
+					language,
+					jsonbBuildObject<SerieTranslation>(trans),
+				).as("json"),
+			})
+			.from(showTranslations)
+			.where(eq(showTranslations.pk, shows.pk))
+			.as("translations");
+	},
+	studios: ({ languages }: { languages: string[] }) => {
+		const { pk: _, ...studioCol } = getColumns(studios);
+		const studioTransQ = db
+			.selectDistinctOn([studioTranslations.pk])
+			.from(studioTranslations)
+			.orderBy(
+				studioTranslations.pk,
+				sql`array_position(${sqlarr(languages)}, ${studioTranslations.language})`,
+			)
+			.as("t");
+		const { pk, language, ...studioTrans } = getColumns(studioTransQ);
+
+		return db
+			.select({
+				json: coalesce(
+					jsonbAgg(jsonbBuildObject<Studio>({ ...studioTrans, ...studioCol })),
+					sql`'[]'::jsonb`,
+				).as("json"),
+			})
+			.from(studios)
+			.leftJoin(studioTransQ, eq(studios.pk, studioTransQ.pk))
+			.where(
+				exists(
+					db
+						.select()
+						.from(showStudioJoin)
+						.where(
+							and(
+								eq(showStudioJoin.studioPk, studios.pk),
+								eq(showStudioJoin.showPk, shows.pk),
+							),
+						),
+				),
+			)
+			.as("studios");
+	},
+	// only available for movies
+	videos: () => {
+		throw new Error();
+	},
+};
+
 export async function getShows({
 	after,
 	limit,
@@ -59,51 +131,58 @@ export async function getShows({
 	sort,
 	filter,
 	languages,
-	preferOriginal,
+	fallbackLanguage = true,
+	preferOriginal = false,
+	relations = [],
 }: {
-	after: string | undefined;
+	after?: string;
 	limit: number;
-	query: string | undefined;
-	sort: StaticDecode<typeof showSort>;
-	filter: SQL | undefined;
+	query?: string;
+	sort?: StaticDecode<typeof showSort>;
+	filter?: SQL;
 	languages: string[];
-	preferOriginal: boolean | undefined;
+	fallbackLanguage?: boolean;
+	preferOriginal?: boolean;
+	relations?: (keyof typeof showRelations)[];
 }) {
 	const transQ = db
 		.selectDistinctOn([showTranslations.pk])
 		.from(showTranslations)
+		.where(
+			!fallbackLanguage
+				? eq(showTranslations.language, sql`any(${sqlarr(languages)})`)
+				: undefined,
+		)
 		.orderBy(
 			showTranslations.pk,
 			sql`array_position(${sqlarr(languages)}, ${showTranslations.language})`,
 		)
 		.as("t");
-	const { pk, poster, thumbnail, banner, logo, ...transCol } =
-		getColumns(transQ);
 
 	return await db
 		.select({
 			...getColumns(shows),
-			...transCol,
+			...getColumns(transQ),
+
 			// movie columns (status is only a typescript hint)
 			status: sql<MovieStatus>`${shows.status}`,
 			airDate: shows.startAir,
 			kind: sql<any>`${shows.kind}`,
 			isAvailable: sql<boolean>`${shows.availableCount} != 0`,
 
-			poster: sql<Image>`coalesce(${showTranslations.poster}, ${poster})`,
-			thumbnail: sql<Image>`coalesce(${showTranslations.thumbnail}, ${thumbnail})`,
-			banner: sql<Image>`coalesce(${showTranslations.banner}, ${banner})`,
-			logo: sql<Image>`coalesce(${showTranslations.logo}, ${logo})`,
+			...(preferOriginal && {
+				poster: sql<Image>`coalesce(nullif(${shows.original}->'poster', 'null'::jsonb), ${transQ.poster})`,
+				thumbnail: sql<Image>`coalesce(nullif(${shows.original}->'thumbnail', 'null'::jsonb), ${transQ.thumbnail})`,
+				banner: sql<Image>`coalesce(nullif(${shows.original}->'banner', 'null'::jsonb), ${transQ.banner})`,
+				logo: sql<Image>`coalesce(nullif(${shows.original}->'logo', 'null'::jsonb), ${transQ.logo})`,
+			}),
+
+			...buildRelations(relations, showRelations, { languages }),
 		})
 		.from(shows)
-		.innerJoin(transQ, eq(shows.pk, transQ.pk))
-		.leftJoin(
-			showTranslations,
-			and(
-				sql`${preferOriginal ?? false}`,
-				eq(shows.pk, showTranslations.pk),
-				eq(showTranslations.language, shows.originalLanguage),
-			),
+		[fallbackLanguage ? "innerJoin" : ("leftJoin" as "innerJoin")](
+			transQ,
+			eq(shows.pk, transQ.pk),
 		)
 		.where(
 			and(
@@ -119,94 +198,4 @@ export async function getShows({
 			shows.pk,
 		)
 		.limit(limit);
-}
-
-export async function getShow(
-	id: string,
-	{
-		languages,
-		preferOriginal,
-		relations,
-		filters,
-	}: {
-		languages: string[];
-		preferOriginal: boolean | undefined;
-		relations: ("translations" | "studios" | "videos")[];
-		filters: SQL | undefined;
-	},
-) {
-	const ret = await db.query.shows.findFirst({
-		extras: {
-			airDate: sql<string>`${shows.startAir}`.as("airDate"),
-			status: sql<MovieStatus>`${shows.status}`.as("status"),
-			isAvailable: sql<boolean>`${shows.availableCount} != 0`.as("isAvailable"),
-		},
-		where: and(isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id), filters),
-		with: {
-			selectedTranslation: selectTranslationQuery(showTranslations, languages),
-			...(preferOriginal && {
-				originalTranslation: {
-					columns: {
-						poster: true,
-						thumbnail: true,
-						banner: true,
-						logo: true,
-					},
-				},
-			}),
-			...(relations.includes("translations") && {
-				translations: {
-					columns: {
-						pk: false,
-					},
-				},
-			}),
-			...(relations.includes("studios") && {
-				studios: {
-					with: {
-						studio: {
-							columns: {
-								pk: false,
-							},
-							with: {
-								selectedTranslation: selectTranslationQuery(
-									studioTranslations,
-									languages,
-								),
-							},
-						},
-					},
-				},
-			}),
-		},
-	});
-	if (!ret) return null;
-	const translation = ret.selectedTranslation[0];
-	if (!translation) return { show: null, language: null };
-	const ot = ret.originalTranslation;
-	const show = {
-		...ret,
-		...translation,
-		kind: ret.kind as any,
-		...(ot && {
-			...(ot.poster && { poster: ot.poster }),
-			...(ot.thumbnail && { thumbnail: ot.thumbnail }),
-			...(ot.banner && { banner: ot.banner }),
-			...(ot.logo && { logo: ot.logo }),
-		}),
-		...(ret.translations && {
-			translations: Object.fromEntries(
-				ret.translations.map(
-					({ language, ...translation }) => [language, translation] as const,
-				),
-			),
-		}),
-		...(ret.studios && {
-			studios: ret.studios.map((x: any) => ({
-				...x.studio,
-				...x.studio.selectedTranslation[0],
-			})),
-		}),
-	};
-	return { show, language: translation.language };
 }

@@ -9,7 +9,13 @@ import {
 	shows,
 	videos,
 } from "~/db/schema";
-import { getColumns, sqlarr } from "~/db/utils";
+import {
+	coalesce,
+	getColumns,
+	jsonbAgg,
+	jsonbBuildObject,
+	sqlarr,
+} from "~/db/utils";
 import {
 	Entry,
 	type EntryKind,
@@ -35,6 +41,7 @@ import {
 	sortToSql,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
+import type { EmbeddedVideo } from "~/models/video";
 
 const entryFilters: FilterDef = {
 	kind: {
@@ -107,17 +114,21 @@ async function getEntries({
 
 	const { guess, createdAt, updatedAt, ...videosCol } = getColumns(videos);
 	const videosQ = db
-		.select({ slug: entryVideoJoin.slug, ...videosCol })
+		.select({
+			videos: coalesce(
+				jsonbAgg(
+					jsonbBuildObject<EmbeddedVideo>({
+						slug: entryVideoJoin.slug,
+						...videosCol,
+					}),
+				),
+				sql`'[]'::jsonb`,
+			).as("videos"),
+		})
 		.from(entryVideoJoin)
 		.where(eq(entryVideoJoin.entryPk, entries.pk))
 		.leftJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
 		.as("videos");
-	const videosJ = db
-		.select({
-			videos: sql`coalesce(json_agg("videos"), '[]'::json)`.as("videos"),
-		})
-		.from(videosQ)
-		.as("videos_json");
 
 	const {
 		kind,
@@ -132,7 +143,7 @@ async function getEntries({
 		.select({
 			...entryCol,
 			...transCol,
-			videos: videosJ.videos,
+			videos: videosQ.videos,
 			// specials don't have an `episodeNumber` but a `number` field.
 			number: episodeNumber,
 
@@ -150,7 +161,7 @@ async function getEntries({
 		})
 		.from(entries)
 		.innerJoin(transQ, eq(entries.pk, transQ.pk))
-		.leftJoinLateral(videosJ, sql`true`)
+		.leftJoinLateral(videosQ, sql`true`)
 		.where(
 			and(
 				filter,
