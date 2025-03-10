@@ -1,0 +1,1 @@
+ALTER TABLE "kyoo"."entries" ADD COLUMN "available_since" timestamp with time zone;
