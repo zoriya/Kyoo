@@ -3601,6 +3601,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-tvos/config-tv@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "@react-native-tvos/config-tv@npm:0.1.1"
+  dependencies:
+    getenv: ^1.0.0
+  peerDependencies:
+    expo: ^52
+  checksum: 9b632f68b4006dc68ac09c9d38874a8fb954cf42661037bca6b3aa2a80beef76e430c3d6a12da621e2bca31682a2d5e15e0886f54e4d5a5e0f3f3586aa01377a
+  languageName: node
+  linkType: hard
+
+"@react-native-tvos/virtualized-lists@npm:0.74.5-0":
+  version: 0.74.5-0
+  resolution: "@react-native-tvos/virtualized-lists@npm:0.74.5-0"
+  dependencies:
+    invariant: ^2.2.4
+    nullthrows: ^1.1.1
+  peerDependencies:
+    "@types/react": ^18.2.6
+    react: "*"
+    react-native: "*"
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+  checksum: 882a77f9682566bc841afd65f138098fde9502781e0fa4b68873e661f4836d10934b12836a858ebc4bb7554bbde6aaa8b43d80e817f95da04114f42de8067b23
+  languageName: node
+  linkType: hard
+
 "@react-native/assets-registry@npm:0.74.87":
   version: 0.74.87
   resolution: "@react-native/assets-registry@npm:0.74.87"
@@ -9681,6 +9709,7 @@ __metadata:
     "@kyoo/ui": "workspace:^"
     "@material-symbols/svg-400": ^0.22.0
     "@react-native-community/netinfo": 11.3.2
+    "@react-native-tvos/config-tv": ^0.1.1
     "@shopify/flash-list": 1.7.1
     "@tanstack/query-sync-storage-persister": ^5.51.21
     "@tanstack/react-query": ^5.51.23
@@ -9708,7 +9737,7 @@ __metadata:
     moti: ^0.29.0
     react: 18.3.1
     react-i18next: ^15.0.1
-    react-native: 0.74.5
+    react-native: "npm:react-native-tvos@0.74.5-0"
     react-native-blurhash: ^2.0.3
     react-native-fast-image: ^8.6.3
     react-native-mmkv: ^2.12.2
@@ -11019,6 +11048,59 @@ __metadata:
   bin:
     react-native: cli.js
   checksum: 3ac8df993a8ca1e2598049dfcdd10ef5708292be37137c7c39884f36044b83b2cbb7b1354059b48551b3570135ea8570c914e64a882a5d51e641d33c40f759bd
+  languageName: node
+  linkType: hard
+
+"react-native@npm:react-native-tvos@0.74.5-0":
+  version: 0.74.5-0
+  resolution: "react-native-tvos@npm:0.74.5-0"
+  dependencies:
+    "@jest/create-cache-key-function": ^29.6.3
+    "@react-native-community/cli": 13.6.9
+    "@react-native-community/cli-platform-android": 13.6.9
+    "@react-native-community/cli-platform-ios": 13.6.9
+    "@react-native-tvos/virtualized-lists": 0.74.5-0
+    "@react-native/assets-registry": 0.74.87
+    "@react-native/codegen": 0.74.87
+    "@react-native/community-cli-plugin": 0.74.87
+    "@react-native/gradle-plugin": 0.74.87
+    "@react-native/js-polyfills": 0.74.87
+    "@react-native/normalize-colors": 0.74.87
+    abort-controller: ^3.0.0
+    anser: ^1.4.9
+    ansi-regex: ^5.0.0
+    base64-js: ^1.5.1
+    chalk: ^4.0.0
+    event-target-shim: ^5.0.1
+    flow-enums-runtime: ^0.0.6
+    invariant: ^2.2.4
+    jest-environment-node: ^29.6.3
+    jsc-android: ^250231.0.0
+    memoize-one: ^5.0.0
+    metro-runtime: ^0.80.3
+    metro-source-map: ^0.80.3
+    mkdirp: ^0.5.1
+    nullthrows: ^1.1.1
+    pretty-format: ^26.5.2
+    promise: ^8.3.0
+    react-devtools-core: ^5.0.0
+    react-refresh: ^0.14.0
+    react-shallow-renderer: ^16.15.0
+    regenerator-runtime: ^0.13.2
+    scheduler: 0.24.0-canary-efb381bbf-20230505
+    stacktrace-parser: ^0.1.10
+    whatwg-fetch: ^3.0.0
+    ws: ^6.2.3
+    yargs: ^17.6.2
+  peerDependencies:
+    "@types/react": ^18.2.6
+    react: 18.2.0
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+  bin:
+    react-native-tvos: cli.js
+  checksum: 4066fa54120e33cc78ca84222a083d51c377b6d4ab2dfa2e41d5200a85af2f71db1d71ae44c1acd21b6221ec0dd5c60f27578333d7c56e6e5f51a022fc1758e4
   languageName: node
   linkType: hard
 
@@ -13286,7 +13368,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:^6.2.2":
+"ws@npm:^6.2.2, ws@npm:^6.2.3":
   version: 6.2.3
   resolution: "ws@npm:6.2.3"
   dependencies:
