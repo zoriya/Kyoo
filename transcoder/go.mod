@@ -1,6 +1,8 @@
 module github.com/zoriya/kyoo/transcoder
 
-go 1.23
+go 1.23.0
+
+toolchain go1.24.1
 
 require (
 	github.com/disintegration/imaging v1.6.2
@@ -24,6 +26,6 @@ require (
 	golang.org/x/image v0.23.0 // indirect
 	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
-	golang.org/x/text v0.22.0
+	golang.org/x/text v0.23.0
 	golang.org/x/time v0.8.0 // indirect
 )
