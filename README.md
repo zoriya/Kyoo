@@ -12,7 +12,7 @@ Kyoo does not have a plugin system and aim to have every features built-in (see 
 
 - **[Installation](./INSTALLING.md):** Basic installation guidelines, how to start Kyoo, enable OIDC or hardware transcoding.
 - **[Join the discord](https://discord.gg/E6Apw3aFaA):** Ask questions, talk about the development, feature you might want or bugs you might encounter.
-- **[API Documentation](https://kyoo.zoriya.dev/api/doc):** The API to integrate Kyoo with other services, if you have any questions, please ask on github or discord!
+- **[API Documentation](https://kyoo.zoriya.dev/api/doc):** The API to integrate Kyoo with other services, if you have any questions, please ask on GitHub or Discord!
 - **[Contributing](./CONTRIBUTING.md):** Feel free to open issues, submit pull requests, and contribute to making Kyoo even better. We need you!
 
 [![](https://discord.com/api/guilds/1216460898139635753/widget.png?style=banner2)](https://discord.gg/zpA74Qpvj5)
@@ -29,7 +29,7 @@ Kyoo does not have a plugin system and aim to have every features built-in (see 
 
 - **Watch List Scrubbing Support:** Your watch list is automatically synced to connected services (SIMKL and soon others [#351](https://github.com/zoriya/Kyoo/issues/351), [#352](https://github.com/zoriya/Kyoo/issues/352)). No need to manually mark episodes as watched.
 
-- **Download and Offline Support:** Download videos to watch them without internet access, you progress will automatically be synced next time your devices goes online.
+- **Download and Offline Support:** Download videos to watch them without internet access, your progress will automatically be synced next time your devices goes online.
 
 - **Enhanced Subtitle Support:** Subtitles are important, Kyoo supports SSA/ASS and uses the video's embedded fonts when available.
 
@@ -42,9 +42,9 @@ Kyoo does not have a plugin system and aim to have every features built-in (see 
 Kyoo currently supports Web and Android clients, with additional platforms being thought about. Rough estimates:
 * Today: Web & Android
 * Spring 2025: Chromecast
-* Summer 2025: AndroidTV
+* Summer 2025: Android-TV
 
-Don't see your client? Kyoo is focused on adding features but welcomes contributors! The frontend is built with React-Native and Expo. Come hang and develop with us on Discord.
+Don't see your client? Kyoo is focused on adding features, but welcomes contributors! The frontend is built with React-Native and Expo. Come hang and develop with us on Discord.
 
 Support for Apple devices (iOS, tvOS) is not currently planned due to buying hardware and yearly developer fee (~$100).
 
@@ -58,9 +58,9 @@ If Kyoo is not available on your language, you can use [weblate](https://hosted.
 
 From a technical standpoint, both Jellyfin and Plex lean on SQLite and confine everything within a single container, Kyoo takes a different route. We're not afraid to bring in additional containers when it makes sense – whether for specialized features like Meilisearch powering our search system or for scalability, as seen with our transcoder.
 
-Kyoo embraces the "setup once, forget about it" philosophy. Unlike Plex and Jellyfin, we don't burden you with manual file renaming or specific folder structures. Kyoo seamlessly works with files straight from your download directory, minimizing the maintenance headache for server admins.
+Kyoo embraces the “setup once, forget about it” philosophy. Unlike Plex and Jellyfin, we don't burden you with manual file renaming or specific folder structures. Kyoo seamlessly works with files straight from your download directory, minimizing the maintenance headache for server admins.
 
-Kyoo narrows its focus to movies, TV shows, and anime streaming. No music, ebooks, or games – just pure cinematic delight.
+Kyoo narrows its focus to movies, TV shows, and anime streaming. No music, e-books, or games – just pure cinematic delight.
 
 ## 🔗 Live Demo
 
