@@ -1,11 +1,15 @@
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, exists, inArray, not, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { Elysia, t } from "elysia";
 import { db } from "~/db";
 import { entries, entryVideoJoin, shows, videos } from "~/db/schema";
+import { sqlarr } from "~/db/utils";
 import { bubbleVideo } from "~/models/examples";
+import { Page } from "~/models/utils";
 import { SeedVideo, Video } from "~/models/video";
 import { comment } from "~/utils";
 import { computeVideoSlug } from "./seed/insert/entries";
+import { updateAvailableCount } from "./seed/insert/shows";
 
 const CreatedVideo = t.Object({
 	id: t.String({ format: "uuid" }),
@@ -22,9 +26,6 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 		video: Video,
 		"created-videos": t.Array(CreatedVideo),
 		error: t.Object({}),
-	})
-	.get("/:id", () => "hello" as unknown as Video, {
-		response: { 200: "video" },
 	})
 	.post(
 		"",
@@ -115,8 +116,6 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 			// return error(201, ret as any);
 		},
 		{
-			body: t.Array(SeedVideo),
-			response: { 201: t.Array(CreatedVideo) },
 			detail: {
 				description: comment`
 					Create videos in bulk.
@@ -126,5 +125,67 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 					movie or entry.
 				`,
 			},
+			body: t.Array(SeedVideo),
+			response: { 201: t.Array(CreatedVideo) },
+		},
+	)
+	.delete(
+		"",
+		async ({ body }) => {
+			await db.transaction(async (tx) => {
+				const vids = tx.$with("vids").as(
+					tx
+						.delete(videos)
+						.where(eq(videos.path, sql`any(${body})`))
+						.returning({ pk: videos.pk }),
+				);
+				const evj = alias(entryVideoJoin, "evj");
+				const delEntries = tx.$with("del_entries").as(
+					tx
+						.with(vids)
+						.select({ entry: entryVideoJoin.entryPk })
+						.from(entryVideoJoin)
+						.where(
+							and(
+								inArray(entryVideoJoin.videoPk, tx.select().from(vids)),
+								not(
+									exists(
+										tx
+											.select()
+											.from(evj)
+											.where(
+												and(
+													eq(evj.entryPk, entryVideoJoin.entryPk),
+													not(inArray(evj.videoPk, db.select().from(vids))),
+												),
+											),
+									),
+								),
+							),
+						),
+				);
+				const delShows = await tx
+					.with(delEntries)
+					.update(entries)
+					.set({ availableSince: null })
+					.where(inArray(entries.pk, db.select().from(delEntries)))
+					.returning({ show: entries.showPk });
+
+				await updateAvailableCount(
+					tx,
+					delShows.map((x) => x.show),
+					false,
+				);
+			});
+		},
+		{
+			detail: { description: "Delete videos in bulk." },
+			body: t.Array(
+				t.String({
+					description: "Path of the video to delete",
+					examples: [bubbleVideo.path],
+				}),
+			),
+			response: { 204: t.Void() },
 		},
 	);
