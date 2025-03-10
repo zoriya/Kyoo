@@ -74,6 +74,7 @@ export const entries = schema.table(
 		updatedAt: timestamp({ withTimezone: true, mode: "string" })
 			.notNull()
 			.$onUpdate(() => sql`now()`),
+		availableSince: timestamp({ withTimezone: true, mode: "string" }),
 		nextRefresh: timestamp({ withTimezone: true, mode: "string" }).notNull(),
 	},
 	(t) => [
