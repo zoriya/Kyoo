@@ -1,4 +1,3 @@
-import type { StaticDecode } from "@sinclair/typebox";
 import { type SQL, and, eq, exists, sql } from "drizzle-orm";
 import { db } from "~/db";
 import {
@@ -159,7 +158,7 @@ export async function getShows({
 	after?: string;
 	limit: number;
 	query?: string;
-	sort?: StaticDecode<typeof showSort>;
+	sort?: Sort;
 	filter?: SQL;
 	languages: string[];
 	fallbackLanguage?: boolean;

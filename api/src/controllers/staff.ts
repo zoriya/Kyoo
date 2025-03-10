@@ -1,4 +1,3 @@
-import type { StaticDecode } from "@sinclair/typebox";
 import { type SQL, and, eq, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { db } from "~/db";
@@ -82,7 +81,7 @@ async function getStaffRoles({
 	after?: string;
 	limit: number;
 	query?: string;
-	sort?: StaticDecode<typeof staffRoleSort>;
+	sort?: Sort;
 	filter?: SQL;
 }) {
 	return await db

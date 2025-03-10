@@ -1,4 +1,3 @@
-import type { StaticDecode } from "@sinclair/typebox";
 import { type SQL, and, eq, ne, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "~/db";
@@ -105,7 +104,7 @@ async function getEntries({
 	after: string | undefined;
 	limit: number;
 	query: string | undefined;
-	sort: StaticDecode<typeof entrySort>;
+	sort: Sort;
 	filter: SQL | undefined;
 	languages: string[];
 }): Promise<(Entry | Extra | UnknownEntry)[]> {

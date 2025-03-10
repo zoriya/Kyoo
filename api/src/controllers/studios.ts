@@ -1,4 +1,3 @@
-import type { StaticDecode } from "@sinclair/typebox";
 import { type SQL, and, eq, exists, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { db } from "~/db";
@@ -74,7 +73,7 @@ export async function getStudios({
 	after?: string;
 	limit: number;
 	query?: string;
-	sort?: StaticDecode<typeof studioSort>;
+	sort?: Sort,
 	filter?: SQL;
 	languages: string[];
 	fallbackLanguage?: boolean;
