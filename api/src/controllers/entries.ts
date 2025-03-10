@@ -1,4 +1,4 @@
-import { type SQL, and, eq, ne, sql } from "drizzle-orm";
+import { type SQL, and, eq, isNotNull, ne, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "~/db";
 import {
@@ -92,6 +92,19 @@ const extraSort = Sort(
 		tablePk: entries.pk,
 	},
 );
+
+const newsSort: Sort = {
+	tablePk: entries.pk,
+	sort: [
+		{
+			sql: entries.availableSince,
+			// in the news query we already filter nulls out
+			isNullable: false,
+			accessor: (x) => x.availableSince,
+			desc: false,
+		},
+	],
+};
 
 async function getEntries({
 	after,
@@ -304,7 +317,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				limit,
 				after,
 				query,
-				sort: sort as any,
+				sort: sort,
 				filter: and(
 					eq(entries.showPk, serie.pk),
 					eq(entries.kind, "extra"),
@@ -355,7 +368,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				limit,
 				after,
 				query,
-				sort: sort as any,
+				sort: sort,
 				filter: and(eq(entries.kind, "unknown"), filter),
 				languages: ["extra"],
 			})) as UnknownEntry[];
@@ -378,6 +391,46 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			}),
 			response: {
 				200: Page(UnknownEntry),
+				422: KError,
+			},
+			tags: ["videos"],
+		},
+	)
+	.get(
+		"/news",
+		async ({ query: { limit, after, query, filter }, request: { url } }) => {
+			const sort = newsSort;
+			const items = (await getEntries({
+				limit,
+				after,
+				query,
+				sort,
+				filter: and(
+					isNotNull(entries.availableSince),
+					ne(entries.kind, "unknown"),
+					ne(entries.kind, "extra"),
+					filter,
+				),
+				languages: ["extra"],
+			})) as Entry[];
+
+			return createPage(items, { url, sort, limit });
+		},
+		{
+			detail: { description: "Get new movies/episodes added recently." },
+			query: t.Object({
+				filter: t.Optional(Filter({ def: entryFilters })),
+				query: t.Optional(t.String({ description: desc.query })),
+				limit: t.Integer({
+					minimum: 1,
+					maximum: 250,
+					default: 50,
+					description: "Max page size.",
+				}),
+				after: t.Optional(t.String({ description: desc.after })),
+			}),
+			response: {
+				200: Page(Entry),
 				422: KError,
 			},
 			tags: ["videos"],
