@@ -105,7 +105,6 @@ export const seedMovie = async (
 			videos,
 		},
 	]);
-	await updateAvailableCount([show.pk], false);
 
 	const retStudios = await insertStudios(studios, show.pk);
 	const retStaff = await insertStaff(staff, show.pk);

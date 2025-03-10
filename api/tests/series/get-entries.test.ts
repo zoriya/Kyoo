@@ -1,5 +1,11 @@
 import { beforeAll, describe, expect, it } from "bun:test";
-import { createSerie, createVideo, getEntries, getExtras } from "tests/helpers";
+import {
+	createSerie,
+	createVideo,
+	getEntries,
+	getExtras,
+	getNews,
+} from "tests/helpers";
 import { expectStatus } from "tests/utils";
 import { db } from "~/db";
 import { shows, videos } from "~/db/schema";
@@ -39,6 +45,21 @@ describe("Get entries", () => {
 		const [resp, body] = await getEntries(madeInAbyss.slug, { langs: "en" });
 
 		expectStatus(resp, body).toBe(200);
+		expect(body.items[0].videos).toBeArrayOfSize(1);
+		expect(body.items[0].videos[0]).toMatchObject({
+			path: madeInAbyssVideo.path,
+			slug: madeInAbyssVideo.slug,
+			version: madeInAbyssVideo.version,
+			rendering: madeInAbyssVideo.rendering,
+			part: madeInAbyssVideo.part,
+		});
+	});
+	it("Get new videos", async () => {
+		const [resp, body] = await getNews({ langs: "en" });
+
+		expectStatus(resp, body).toBe(200);
+		expect(body.items).toBeArrayOfSize(1);
+		expect(body.items[0].slug).toBe("made-in-abyss-s1e13");
 		expect(body.items[0].videos).toBeArrayOfSize(1);
 		expect(body.items[0].videos[0]).toMatchObject({
 			path: madeInAbyssVideo.path,
