@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { bubbleImages, madeInAbyss, registerExamples } from "./examples";
 import { DbMetadata, ExternalId, Image, Resource, SeedImage } from "./utils";
 
 export const Character = t.Object({
@@ -49,3 +50,25 @@ export const SeedStaff = t.Intersect([
 	}),
 ]);
 export type SeedStaff = typeof SeedStaff.static;
+
+const role = madeInAbyss.staff[0];
+registerExamples(SeedStaff, role);
+registerExamples(Staff, {
+	...role.staff,
+	image: {
+		id: bubbleImages.poster.id,
+		source: role.staff.image,
+		blurhash: bubbleImages.poster.blurhash,
+	},
+});
+registerExamples(Role, {
+	...role,
+	character: {
+		...role.character,
+		image: {
+			id: bubbleImages.poster.id,
+			source: role.character.image,
+			blurhash: bubbleImages.poster.blurhash,
+		},
+	},
+});
