@@ -73,7 +73,7 @@ export async function getStudios({
 	after?: string;
 	limit: number;
 	query?: string;
-	sort?: Sort,
+	sort?: Sort;
 	filter?: SQL;
 	languages: string[];
 	fallbackLanguage?: boolean;

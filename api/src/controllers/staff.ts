@@ -102,7 +102,7 @@ async function getStaffRoles({
 			...(query
 				? [sql`word_similarity(${query}::text, ${staff.name})`]
 				: sortToSql(sort)),
-			shows.pk,
+			staff.pk,
 		)
 		.limit(limit);
 }
@@ -232,6 +232,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 				})
 				.from(roles)
 				.innerJoin(shows, eq(roles.showPk, shows.pk))
+				.innerJoin(transQ, eq(shows.pk, transQ.pk))
 				.where(
 					and(
 						eq(roles.staffPk, member.pk),
@@ -359,7 +360,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 				after,
 				query,
 				sort,
-				filter: and(eq(shows.pk, roles.showPk), filter),
+				filter: and(eq(roles.showPk, movie.pk), filter),
 			});
 			return createPage(items, { url, sort, limit });
 		},
@@ -426,7 +427,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 				after,
 				query,
 				sort,
-				filter: and(eq(shows.pk, roles.showPk), filter),
+				filter: and(eq(roles.showPk, serie.pk), filter),
 			});
 			return createPage(items, { url, sort, limit });
 		},
