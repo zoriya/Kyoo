@@ -26,6 +26,19 @@ const seasonFilters: FilterDef = {
 	endAir: { column: seasons.endAir, type: "date" },
 };
 
+const seasonSort = Sort(
+	{
+		seasonNumber: seasons.seasonNumber,
+		startAir: seasons.startAir,
+		endAir: seasons.endAir,
+		nextRefresh: seasons.nextRefresh,
+	},
+	{
+		default: ["seasonNumber"],
+		tablePk: seasons.pk,
+	},
+);
+
 export const seasonsH = new Elysia({ tags: ["series"] })
 	.model({
 		season: Season,
@@ -82,13 +95,13 @@ export const seasonsH = new Elysia({ tags: ["series"] })
 						eq(seasons.showPk, serie.pk),
 						filter,
 						query ? sql`${transQ.name} %> ${query}::text` : undefined,
-						keysetPaginate({ table: seasons, after, sort }),
+						keysetPaginate({ after, sort }),
 					),
 				)
 				.orderBy(
 					...(query
 						? [sql`word_similarity(${query}::text, ${transQ.name})`]
-						: sortToSql(sort, seasons)),
+						: sortToSql(sort)),
 					seasons.pk,
 				)
 				.limit(limit);
@@ -104,9 +117,7 @@ export const seasonsH = new Elysia({ tags: ["series"] })
 				}),
 			}),
 			query: t.Object({
-				sort: Sort(["seasonNumber", "startAir", "endAir", "nextRefresh"], {
-					default: ["seasonNumber"],
-				}),
+				sort: seasonSort,
 				filter: t.Optional(Filter({ def: seasonFilters })),
 				query: t.Optional(t.String({ description: desc.query })),
 				limit: t.Integer({

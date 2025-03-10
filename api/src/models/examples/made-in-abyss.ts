@@ -295,4 +295,26 @@ export const madeInAbyss = {
 			},
 		},
 	],
+	staff: [
+		{
+			kind: "actor",
+			character: {
+				name: "レグ",
+				latinName: "Reg",
+				image: "https://cdn.myanimelist.net/images/characters/4/326001.jpg",
+			},
+			staff: {
+				slug: "mariya-ise",
+				name: "伊瀬茉莉也",
+				latinName: "Mariya Ise",
+				image: "https://cdn.myanimelist.net/images/voiceactors/2/65504.jpg",
+				externalId: {
+					themoviedatabase: {
+						dataId: "1250465",
+						link: "https://www.themoviedb.org/person/1250465",
+					},
+				},
+			},
+		},
+	],
 } satisfies SeedSerie;

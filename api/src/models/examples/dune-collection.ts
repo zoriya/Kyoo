@@ -5,7 +5,7 @@ export const duneCollection: SeedCollection = {
 	translations: {
 		en: {
 			name: " Dune Collection",
-			tagline: "A mythic and emotionally charged hero's journey.",
+			tagline: "A mythic and emotionally charged hero journey.",
 			description:
 				"The saga of Paul Atreides and his rise to power on the deadly planet Arrakis.",
 			aliases: [],

@@ -1,4 +1,3 @@
-import type { StaticDecode } from "@sinclair/typebox";
 import { type SQL, and, eq, ne, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "~/db";
@@ -67,25 +66,32 @@ const unknownFilters: FilterDef = {
 };
 
 const entrySort = Sort(
-	[
-		"order",
-		"seasonNumber",
-		"episodeNumber",
-		"number",
-		"airDate",
-		"nextRefresh",
-	],
+	{
+		order: entries.order,
+		seasonNumber: entries.seasonNumber,
+		episodeNumber: entries.episodeNumber,
+		number: entries.episodeNumber,
+		airDate: entries.airDate,
+		nextRefresh: entries.nextRefresh,
+	},
 	{
 		default: ["order"],
-		remap: {
-			number: "episodeNumber",
-		},
+		tablePk: entries.pk,
 	},
 );
 
-const extraSort = Sort(["slug", "name", "runtime", "createdAt"], {
-	default: ["slug"],
-});
+const extraSort = Sort(
+	{
+		slug: entries.slug,
+		name: entryTranslations.name,
+		runtime: entries.runtime,
+		createdAt: entries.createdAt,
+	},
+	{
+		default: ["slug"],
+		tablePk: entries.pk,
+	},
+);
 
 async function getEntries({
 	after,
@@ -98,7 +104,7 @@ async function getEntries({
 	after: string | undefined;
 	limit: number;
 	query: string | undefined;
-	sort: StaticDecode<typeof entrySort>;
+	sort: Sort;
 	filter: SQL | undefined;
 	languages: string[];
 }): Promise<(Entry | Extra | UnknownEntry)[]> {
@@ -166,13 +172,13 @@ async function getEntries({
 			and(
 				filter,
 				query ? sql`${transQ.name} %> ${query}::text` : undefined,
-				keysetPaginate({ table: entries, after, sort }),
+				keysetPaginate({ after, sort }),
 			),
 		)
 		.orderBy(
 			...(query
 				? [sql`word_similarity(${query}::text, ${transQ.name})`]
-				: sortToSql(sort, entries)),
+				: sortToSql(sort)),
 			entries.pk,
 		)
 		.limit(limit);
