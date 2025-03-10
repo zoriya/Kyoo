@@ -6,6 +6,7 @@ import { insertCollection } from "./insert/collection";
 import { insertEntries } from "./insert/entries";
 import { insertSeasons } from "./insert/seasons";
 import { insertShow, updateAvailableCount } from "./insert/shows";
+import { insertStaff } from "./insert/staff";
 import { insertStudios } from "./insert/studios";
 import { guessNextRefresh } from "./refresh";
 
@@ -53,6 +54,12 @@ export const SeedSerieResponse = t.Object({
 			slug: t.String({ format: "slug", examples: ["mappa"] }),
 		}),
 	),
+	staff: t.Array(
+		t.Object({
+			id: t.String({ format: "uuid" }),
+			slug: t.String({ format: "slug", examples: ["hiroyuki-sawano"] }),
+		}),
+	),
 });
 export type SeedSerieResponse = typeof SeedSerieResponse.static;
 
@@ -80,6 +87,7 @@ export const seedSerie = async (
 		extras,
 		collection,
 		studios,
+		staff,
 		...serie
 	} = seed;
 	const nextRefresh = guessNextRefresh(serie.startAir ?? new Date());
@@ -127,6 +135,7 @@ export const seedSerie = async (
 	await updateAvailableCount([show.pk]);
 
 	const retStudios = await insertStudios(studios, show.pk);
+	const retStaff = await insertStaff(staff, show.pk);
 
 	return {
 		updated: show.updated,
@@ -137,5 +146,6 @@ export const seedSerie = async (
 		extras: retExtras,
 		collection: col,
 		studios: retStudios,
+		staff: retStaff,
 	};
 };

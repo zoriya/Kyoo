@@ -64,6 +64,7 @@ app
 						`,
 					},
 					{ name: "studios", description: "Routes about studios" },
+					{ name: "staff", description: "Routes about staff & roles" },
 				],
 			},
 		}),

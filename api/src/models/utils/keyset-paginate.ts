@@ -1,7 +1,5 @@
-import { type Column, and, eq, gt, isNull, lt, or, sql } from "drizzle-orm";
-import type { NonEmptyArray, Sort } from "./sort";
-
-type Table<Name extends string> = Record<Name, Column>;
+import { and, eq, gt, isNull, lt, or, sql } from "drizzle-orm";
+import type { Sort } from "./sort";
 
 type After = (string | number | boolean | undefined)[];
 
@@ -16,37 +14,37 @@ type After = (string | number | boolean | undefined)[];
 //   (x > a) OR
 //   (x = a AND y < b) OR
 //   (x = a AND y = b AND z > c) OR...
-export const keysetPaginate = <
-	const T extends NonEmptyArray<string>,
-	const Remap extends Partial<Record<T[number], string>>,
->({
-	table,
+export const keysetPaginate = ({
 	sort,
 	after,
 }: {
-	table: Table<"pk" | Sort<T, Remap>["sort"][number]["key"]>;
+	sort: Sort | undefined;
 	after: string | undefined;
-	sort: Sort<T, Remap> | undefined;
 }) => {
 	if (!after || !sort) return undefined;
 	const cursor: After = JSON.parse(
 		Buffer.from(after, "base64").toString("utf-8"),
 	);
 
-	const pkSort = { key: "pk" as const, desc: false };
+	const pkSort = {
+		sql: sort.tablePk,
+		isNullable: false,
+		accessor: (x: any) => x.pk,
+		desc: false,
+	};
 
 	if (sort.random) {
 		return or(
 			gt(
-				sql`md5(${sort.random.seed} || ${table[pkSort.key]})`,
+				sql`md5(${sort.random.seed} || ${sort.tablePk})`,
 				sql`md5(${sort.random.seed} || ${cursor[0]})`,
 			),
 			and(
 				eq(
-					sql`md5(${sort.random.seed} || ${table[pkSort.key]})`,
+					sql`md5(${sort.random.seed} || ${sort.tablePk})`,
 					sql`md5(${sort.random.seed} || ${cursor[0]})`,
 				),
-				gt(table[pkSort.key], cursor[0]),
+				gt(sort.tablePk, cursor[0]),
 			),
 		);
 	}
@@ -62,31 +60,19 @@ export const keysetPaginate = <
 			where,
 			and(
 				previous,
-				or(
-					cmp(table[by.key], cursor[i]),
-					!table[by.key].notNull ? isNull(table[by.key]) : undefined,
-				),
+				or(cmp(by.sql, cursor[i]), by.isNullable ? isNull(by.sql) : undefined),
 			),
 		);
 		previous = and(
 			previous,
-			cursor[i] === null ? isNull(table[by.key]) : eq(table[by.key], cursor[i]),
+			cursor[i] === null ? isNull(by.sql) : eq(by.sql, cursor[i]),
 		);
 	}
 
 	return where;
 };
 
-export const generateAfter = <
-	const ST extends NonEmptyArray<string>,
-	const Remap extends Partial<Record<ST[number], string>> = never,
->(
-	cursor: any,
-	sort: Sort<ST, Remap>,
-) => {
-	const ret = [
-		...sort.sort.map((by) => cursor[by.remmapedKey ?? by.key]),
-		cursor.pk,
-	];
+export const generateAfter = (cursor: any, sort: Sort) => {
+	const ret = [...sort.sort.map((by) => by.accessor(cursor)), cursor.pk];
 	return Buffer.from(JSON.stringify(ret), "utf-8").toString("base64url");
 };

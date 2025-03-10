@@ -57,18 +57,18 @@ export const showFilters: FilterDef = {
 	},
 };
 export const showSort = Sort(
-	[
-		"slug",
-		"rating",
-		"airDate",
-		"startAir",
-		"endAir",
-		"createdAt",
-		"nextRefresh",
-	],
 	{
-		remap: { airDate: "startAir" },
+		slug: shows.slug,
+		rating: shows.rating,
+		airDate: shows.startAir,
+		startAir: shows.startAir,
+		endAir: shows.endAir,
+		createdAt: shows.createdAt,
+		nextRefresh: shows.nextRefresh,
+	},
+	{
 		default: ["slug"],
+		tablePk: shows.pk,
 	},
 );
 
@@ -209,13 +209,13 @@ export async function getShows({
 			and(
 				filter,
 				query ? sql`${transQ.name} %> ${query}::text` : undefined,
-				keysetPaginate({ table: shows, after, sort }),
+				keysetPaginate({ after, sort }),
 			),
 		)
 		.orderBy(
 			...(query
 				? [sql`word_similarity(${query}::text, ${transQ.name})`]
-				: sortToSql(sort, shows)),
+				: sortToSql(sort)),
 			shows.pk,
 		)
 		.limit(limit);

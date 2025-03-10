@@ -34,7 +34,16 @@ import {
 import { desc } from "~/models/utils/descriptions";
 import { getShows, showFilters, showSort } from "./shows/logic";
 
-const studioSort = Sort(["slug", "createdAt"], { default: ["slug"] });
+const studioSort = Sort(
+	{
+		slug: studios.slug,
+		createdAt: studios.createdAt,
+	},
+	{
+		default: ["slug"],
+		tablePk: studios.pk,
+	},
+);
 
 const studioRelations = {
 	translations: () => {
@@ -101,13 +110,13 @@ export async function getStudios({
 			and(
 				filter,
 				query ? sql`${transQ.name} %> ${query}::text` : undefined,
-				keysetPaginate({ table: studios, after, sort }),
+				keysetPaginate({ after, sort }),
 			),
 		)
 		.orderBy(
 			...(query
 				? [sql`word_similarity(${query}::text, ${transQ.name})`]
-				: sortToSql(sort, studios)),
+				: sortToSql(sort)),
 			studios.pk,
 		)
 		.limit(limit);
@@ -138,7 +147,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 			if (!ret) {
 				return error(404, {
 					status: 404,
-					message: `No studio with the id or slug: '${id}'`,
+					message: `No studio found with the id or slug: '${id}'`,
 				});
 			}
 			if (!ret.language) {
@@ -156,7 +165,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 			},
 			params: t.Object({
 				id: t.String({
-					description: "The id or slug of the collection to retrieve.",
+					description: "The id or slug of the studio to retrieve.",
 					example: "mappa",
 				}),
 			}),
@@ -173,7 +182,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 				200: "studio",
 				404: {
 					...KError,
-					description: "No collection found with the given id or slug.",
+					description: "No studio found with the given id or slug.",
 				},
 				422: KError,
 			},

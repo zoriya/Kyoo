@@ -129,30 +129,19 @@ erDiagram
 		guid staff_id PK, FK
 		uint order
 		type type "actor|director|writer|producer|music|other"
+		string character_name
+		string character_latin_name
 		jsonb character_image
 	}
-
-	role_translations {
-		string language PK
-		string character_name
-	}
-	roles||--o{ role_translations : has
-	shows ||--|{ roles : has
-
 	staff {
 		guid id PK
 		string(256) slug UK
+		string name "NN"
+		string latin_name
 		jsonb image
 		datetime next_refresh
 		jsonb external_id
 	}
-
-	staff_translations {
-		guid id PK,FK
-		string language PK
-		string name "NN"
-	}
-	staff ||--|{ staff_translations : has
 	staff ||--|{ roles : has
 
 	studios {

@@ -6,6 +6,7 @@ import { collections } from "./controllers/shows/collections";
 import { movies } from "./controllers/shows/movies";
 import { series } from "./controllers/shows/series";
 import { showsH } from "./controllers/shows/shows";
+import { staffH } from "./controllers/staff";
 import { studiosH } from "./controllers/studios";
 import { videosH } from "./controllers/videos";
 import type { KError } from "./models/error";
@@ -54,4 +55,5 @@ export const app = new Elysia()
 	.use(seasonsH)
 	.use(videosH)
 	.use(studiosH)
+	.use(staffH)
 	.use(seed);

@@ -67,25 +67,32 @@ const unknownFilters: FilterDef = {
 };
 
 const entrySort = Sort(
-	[
-		"order",
-		"seasonNumber",
-		"episodeNumber",
-		"number",
-		"airDate",
-		"nextRefresh",
-	],
+	{
+		order: entries.order,
+		seasonNumber: entries.seasonNumber,
+		episodeNumber: entries.episodeNumber,
+		number: entries.episodeNumber,
+		airDate: entries.airDate,
+		nextRefresh: entries.nextRefresh,
+	},
 	{
 		default: ["order"],
-		remap: {
-			number: "episodeNumber",
-		},
+		tablePk: entries.pk,
 	},
 );
 
-const extraSort = Sort(["slug", "name", "runtime", "createdAt"], {
-	default: ["slug"],
-});
+const extraSort = Sort(
+	{
+		slug: entries.slug,
+		name: entryTranslations.name,
+		runtime: entries.runtime,
+		createdAt: entries.createdAt,
+	},
+	{
+		default: ["slug"],
+		tablePk: entries.pk,
+	},
+);
 
 async function getEntries({
 	after,
@@ -166,13 +173,13 @@ async function getEntries({
 			and(
 				filter,
 				query ? sql`${transQ.name} %> ${query}::text` : undefined,
-				keysetPaginate({ table: entries, after, sort }),
+				keysetPaginate({ after, sort }),
 			),
 		)
 		.orderBy(
 			...(query
 				? [sql`word_similarity(${query}::text, ${transQ.name})`]
-				: sortToSql(sort, entries)),
+				: sortToSql(sort)),
 			entries.pk,
 		)
 		.limit(limit);

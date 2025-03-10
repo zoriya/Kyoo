@@ -1,7 +1,7 @@
 import type { ObjectOptions } from "@sinclair/typebox";
 import { type TSchema, t } from "elysia";
 import { generateAfter } from "./keyset-paginate";
-import type { NonEmptyArray, Sort } from "./sort";
+import type { Sort } from "./sort";
 
 export const Page = <T extends TSchema>(schema: T, options?: ObjectOptions) =>
 	t.Object(
@@ -16,13 +16,9 @@ export const Page = <T extends TSchema>(schema: T, options?: ObjectOptions) =>
 		},
 	);
 
-export const createPage = <
-	T,
-	const ST extends NonEmptyArray<string>,
-	const Remap extends Partial<Record<ST[number], string>> = never,
->(
+export const createPage = <T>(
 	items: T[],
-	{ url, sort, limit }: { url: string; sort: Sort<ST, Remap>; limit: number },
+	{ url, sort, limit }: { url: string; sort: Sort; limit: number },
 ) => {
 	let next: string | null = null;
 	const uri = new URL(url);
