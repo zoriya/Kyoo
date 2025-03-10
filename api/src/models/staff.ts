@@ -1,6 +1,5 @@
 import { t } from "elysia";
-import { Show } from "./show";
-import { DbMetadata, ExternalId, Image, Resource } from "./utils";
+import { DbMetadata, ExternalId, Image, Resource, SeedImage } from "./utils";
 
 export const Character = t.Object({
 	name: t.String(),
@@ -22,30 +21,31 @@ export const Role = t.Object({
 });
 export type Role = typeof Role.static;
 
-export const Staff = t.Intersect([
-	Resource(),
-	t.Object({
-		name: t.String(),
-		latinName: t.Nullable(t.String()),
-		image: t.Nullable(Image),
-		externalId: ExternalId(),
-	}),
-	DbMetadata,
-]);
+const StaffData = t.Object({
+	name: t.String(),
+	latinName: t.Nullable(t.String()),
+	image: t.Nullable(Image),
+	externalId: ExternalId(),
+});
+export const Staff = t.Intersect([Resource(), StaffData, DbMetadata]);
 export type Staff = typeof Staff.static;
 
-export const RoleWShow = t.Intersect([
-	Role,
+export const SeedStaff = t.Intersect([
+	t.Omit(Role, ["character"]),
 	t.Object({
-		show: Show,
+		character: t.Intersect([
+			t.Omit(Character, ["image"]),
+			t.Object({
+				image: t.Nullable(SeedImage),
+			}),
+		]),
+		staff: t.Intersect([
+			t.Object({
+				slug: t.String({ format: "slug" }),
+				image: t.Nullable(SeedImage),
+			}),
+			t.Omit(StaffData, ["image"]),
+		]),
 	}),
 ]);
-export type RoleWShow = typeof RoleWShow.static;
-
-export const RoleWStaff = t.Intersect([
-	Role,
-	t.Object({
-		staff: Staff
-	}),
-]);
-export type RoleWStaff = typeof RoleWStaff.static;
+export type SeedStaff = typeof SeedStaff.static;

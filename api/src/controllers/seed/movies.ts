@@ -5,6 +5,7 @@ import { processOptImage } from "./images";
 import { insertCollection } from "./insert/collection";
 import { insertEntries } from "./insert/entries";
 import { insertShow, updateAvailableCount } from "./insert/shows";
+import { insertStaff } from "./insert/staff";
 import { insertStudios } from "./insert/studios";
 import { guessNextRefresh } from "./refresh";
 
@@ -24,6 +25,12 @@ export const SeedMovieResponse = t.Object({
 		t.Object({
 			id: t.String({ format: "uuid" }),
 			slug: t.String({ format: "slug", examples: ["disney"] }),
+		}),
+	),
+	staff: t.Array(
+		t.Object({
+			id: t.String({ format: "uuid" }),
+			slug: t.String({ format: "slug", examples: ["hiroyuki-sawano"] }),
 		}),
 	),
 });
@@ -46,7 +53,7 @@ export const seedMovie = async (
 		seed.slug = `random-${getYear(seed.airDate)}`;
 	}
 
-	const { translations, videos, collection, studios, ...movie } = seed;
+	const { translations, videos, collection, studios, staff, ...movie } = seed;
 	const nextRefresh = guessNextRefresh(movie.airDate ?? new Date());
 	const original = translations[movie.originalLanguage];
 	if (!original) {
@@ -101,6 +108,7 @@ export const seedMovie = async (
 	await updateAvailableCount([show.pk], false);
 
 	const retStudios = await insertStudios(studios, show.pk);
+	const retStaff = await insertStaff(staff, show.pk);
 
 	return {
 		updated: show.updated,
@@ -109,5 +117,6 @@ export const seedMovie = async (
 		videos: entry.videos,
 		collection: col,
 		studios: retStudios,
+		staff: retStaff,
 	};
 };

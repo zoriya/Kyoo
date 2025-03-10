@@ -4,6 +4,7 @@ import { SeedCollection } from "./collections";
 import { SeedEntry, SeedExtra } from "./entry";
 import { bubbleImages, madeInAbyss, registerExamples } from "./examples";
 import { SeedSeason } from "./season";
+import { SeedStaff } from "./staff";
 import { SeedStudio, Studio } from "./studio";
 import {
 	DbMetadata,
@@ -106,6 +107,7 @@ export const SeedSerie = t.Intersect([
 		extras: t.Optional(t.Array(SeedExtra, { default: [] })),
 		collection: t.Optional(SeedCollection),
 		studios: t.Optional(t.Array(SeedStudio, { default: [] })),
+		staff: t.Optional(t.Array(SeedStaff, { default: [] })),
 	}),
 ]);
 export type SeedSerie = typeof SeedSerie.static;

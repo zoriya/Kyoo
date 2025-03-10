@@ -7,7 +7,8 @@ import { roles, staff } from "~/db/schema/staff";
 import { getColumns, sqlarr } from "~/db/utils";
 import { KError } from "~/models/error";
 import type { MovieStatus } from "~/models/movie";
-import { Role, RoleWShow, RoleWStaff, Staff } from "~/models/staff";
+import { Role, Staff } from "~/models/staff";
+import { RoleWShow, RoleWStaff } from "~/models/staff-roles";
 import {
 	Filter,
 	type FilterDef,
@@ -42,11 +43,13 @@ const staffRoleSort = Sort(
 		name: { sql: staff.name, accessor: (x) => x.staff.name },
 		latinName: { sql: staff.latinName, accessor: (x) => x.staff.latinName },
 		characterName: {
-			sql: sql`${roles.character}->'name'`,
+			sql: sql`${roles.character}->>'name'`,
+			isNullable: true,
 			accessor: (x) => x.character.name,
 		},
 		characterLatinName: {
-			sql: sql`${roles.character}->'latinName'`,
+			sql: sql`${roles.character}->>'latinName'`,
+			isNullable: true,
 			accessor: (x) => x.character.latinName,
 		},
 	},

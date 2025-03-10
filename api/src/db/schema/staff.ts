@@ -42,6 +42,7 @@ export const staff = schema.table("staff", {
 export const roles = schema.table(
 	"roles",
 	{
+		pk: integer().primaryKey().generatedAlwaysAsIdentity(),
 		showPk: integer()
 			.notNull()
 			.references(() => shows.pk, { onDelete: "cascade" }),
@@ -53,7 +54,6 @@ export const roles = schema.table(
 		character: jsonb().$type<Character>(),
 	},
 	(t) => [
-		primaryKey({ columns: [t.showPk, t.staffPk] }),
 		index("role_kind").using("hash", t.kind),
 		index("role_order").on(t.order),
 	],

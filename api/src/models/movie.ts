@@ -2,6 +2,7 @@ import { t } from "elysia";
 import type { Prettify } from "~/utils";
 import { SeedCollection } from "./collections";
 import { bubble, bubbleImages, registerExamples } from "./examples";
+import { SeedStaff } from "./staff";
 import { SeedStudio, Studio } from "./studio";
 import {
 	DbMetadata,
@@ -90,6 +91,7 @@ export const SeedMovie = t.Intersect([
 		videos: t.Optional(t.Array(t.String({ format: "uuid" }), { default: [] })),
 		collection: t.Optional(SeedCollection),
 		studios: t.Optional(t.Array(SeedStudio, { default: [] })),
+		staff: t.Optional(t.Array(SeedStaff, { default: [] })),
 	}),
 ]);
 export type SeedMovie = Prettify<typeof SeedMovie.static>;
