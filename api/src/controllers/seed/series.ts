@@ -131,8 +131,8 @@ export const seedSerie = async (
 	const retExtras = await insertEntries(
 		show,
 		(extras ?? []).map((x) => ({ ...x, kind: "extra", extraKind: x.kind })),
+		true,
 	);
-	await updateAvailableCount([show.pk]);
 
 	const retStudios = await insertStudios(studios, show.pk);
 	const retStaff = await insertStaff(staff, show.pk);

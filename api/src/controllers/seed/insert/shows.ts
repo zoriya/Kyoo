@@ -60,6 +60,7 @@ async function insertBaseShow(
 			})
 			.returning({
 				pk: shows.pk,
+				kind: shows.kind,
 				id: shows.id,
 				slug: shows.slug,
 				// https://stackoverflow.com/questions/39058213/differentiate-inserted-and-updated-rows-in-upsert-using-system-columns/39204667#39204667
@@ -81,13 +82,14 @@ async function insertBaseShow(
 
 	// if at this point ret is still undefined, we could not reconciliate.
 	// simply bail and let the caller handle this.
-	const [{ pk, id }] = await db
-		.select({ pk: shows.pk, id: shows.id })
+	const [{ pk, id, kind }] = await db
+		.select({ pk: shows.pk, id: shows.id, kind: shows.kind })
 		.from(shows)
 		.where(eq(shows.slug, show.slug))
 		.limit(1);
 	return {
 		status: 409 as const,
+		kind,
 		pk,
 		id,
 		slug: show.slug,
@@ -95,10 +97,11 @@ async function insertBaseShow(
 }
 
 export async function updateAvailableCount(
+	tx: typeof db | Parameters<Parameters<typeof db.transaction>[0]>[0],
 	showPks: number[],
 	updateEntryCount = true,
 ) {
-	return await db
+	return await tx
 		.update(shows)
 		.set({
 			availableCount: sql`${db

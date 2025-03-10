@@ -10,6 +10,7 @@ import { conflictUpdateAllExcept, values } from "~/db/utils";
 import type { SeedEntry as SEntry, SeedExtra as SExtra } from "~/models/entry";
 import { processOptImage } from "../images";
 import { guessNextRefresh } from "../refresh";
+import { updateAvailableCount } from "./shows";
 
 type SeedEntry = SEntry & {
 	video?: undefined;
@@ -41,8 +42,9 @@ const generateSlug = (
 };
 
 export const insertEntries = async (
-	show: { pk: number; slug: string },
+	show: { pk: number; slug: string; kind: "movie" | "serie" | "collection" },
 	items: (SeedEntry | SeedExtra)[],
+	onlyExtras = false,
 ) => {
 	if (!items) return [];
 
@@ -135,29 +137,39 @@ export const insertEntries = async (
 		}));
 	});
 
-	if (vids.length === 0)
+	if (vids.length === 0) {
+		// we have not added videos but we need to update the `entriesCount`
+		if (show.kind === "serie" && !onlyExtras)
+			await updateAvailableCount(db, [show.pk], true);
 		return retEntries.map((x) => ({ id: x.id, slug: x.slug, videos: [] }));
+	}
 
-	const retVideos = await db
-		.insert(entryVideoJoin)
-		.select(
-			db
-				.select({
-					entryPk: sql<number>`vids.entryPk::integer`.as("entry"),
-					videoPk: videos.pk,
-					slug: computeVideoSlug(
-						sql`vids.entrySlug::text`,
-						sql`vids.needRendering::boolean`,
-					),
-				})
-				.from(values(vids).as("vids"))
-				.innerJoin(videos, eq(videos.id, sql`vids.videoId::uuid`)),
-		)
-		.onConflictDoNothing()
-		.returning({
-			slug: entryVideoJoin.slug,
-			entryPk: entryVideoJoin.entryPk,
-		});
+	const retVideos = await db.transaction(async (tx) => {
+		const ret = await tx
+			.insert(entryVideoJoin)
+			.select(
+				db
+					.select({
+						entryPk: sql<number>`vids.entryPk::integer`.as("entry"),
+						videoPk: videos.pk,
+						slug: computeVideoSlug(
+							sql`vids.entrySlug::text`,
+							sql`vids.needRendering::boolean`,
+						),
+					})
+					.from(values(vids).as("vids"))
+					.innerJoin(videos, eq(videos.id, sql`vids.videoId::uuid`)),
+			)
+			.onConflictDoNothing()
+			.returning({
+				slug: entryVideoJoin.slug,
+				entryPk: entryVideoJoin.entryPk,
+			});
+
+		if (!onlyExtras)
+			await updateAvailableCount(tx, [show.pk], show.kind === "serie");
+		return ret;
+	});
 
 	return retEntries.map((entry) => ({
 		id: entry.id,
