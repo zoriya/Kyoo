@@ -1,7 +1,7 @@
 import { t } from "elysia";
 import type { Prettify } from "~/utils";
 import { SeedCollection } from "./collections";
-import { SeedEntry, SeedExtra } from "./entry";
+import { Entry, SeedEntry, SeedExtra } from "./entry";
 import { bubbleImages, madeInAbyss, registerExamples } from "./examples";
 import { SeedSeason } from "./season";
 import { SeedStaff } from "./staff";
@@ -79,6 +79,7 @@ export const FullSerie = t.Intersect([
 	t.Object({
 		translations: t.Optional(TranslationRecord(SerieTranslation)),
 		studios: t.Optional(t.Array(Studio)),
+		firstEntry: t.Optional(Entry),
 	}),
 ]);
 export type FullMovie = Prettify<typeof FullSerie.static>;
