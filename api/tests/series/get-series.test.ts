@@ -29,4 +29,17 @@ describe("Get series", () => {
 		expect(body.entriesCount).toBe(madeInAbyss.entries.length);
 		expect(body.availableCount).toBe(1);
 	});
+	it("With firstEntry", async () => {
+		const [resp, body] = await getSerie(madeInAbyss.slug, {
+			langs: "en",
+			with: ["firstEntry"],
+		});
+
+		expectStatus(resp, body).toBe(200);
+		expect(body.firstEntry.slug).toBe("made-in-abyss-s1e13");
+		expect(body.firstEntry.name).toBe(
+			madeInAbyss.entries[0].translations.en.name,
+		);
+		expect(body.firstEntry.videos).toBeArrayOfSize(1);
+	});
 });

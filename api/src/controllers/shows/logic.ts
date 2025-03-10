@@ -1,7 +1,8 @@
-import { type SQL, and, eq, exists, sql } from "drizzle-orm";
+import { type SQL, and, eq, exists, ne, sql } from "drizzle-orm";
 import { db } from "~/db";
 import {
 	entries,
+	entryTranslations,
 	entryVideoJoin,
 	showStudioJoin,
 	showTranslations,
@@ -18,6 +19,7 @@ import {
 	jsonbObjectAgg,
 	sqlarr,
 } from "~/db/utils";
+import type { Entry } from "~/models/entry";
 import type { MovieStatus } from "~/models/movie";
 import { SerieStatus, type SerieTranslation } from "~/models/serie";
 import type { Studio } from "~/models/studio";
@@ -141,6 +143,52 @@ const showRelations = {
 			.leftJoin(entries, eq(entries.showPk, shows.pk))
 			.leftJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
 			.as("videos");
+	},
+	firstEntry: ({ languages }: { languages: string[] }) => {
+		const transQ = db
+			.selectDistinctOn([entryTranslations.pk])
+			.from(entryTranslations)
+			.orderBy(
+				entryTranslations.pk,
+				sql`array_position(${sqlarr(languages)}, ${entryTranslations.language})`,
+			)
+			.as("t");
+		const { pk, ...transCol } = getColumns(transQ);
+
+		const { guess, createdAt, updatedAt, ...videosCol } = getColumns(videos);
+		const videosQ = db
+			.select({
+				videos: coalesce(
+					jsonbAgg(
+						jsonbBuildObject<EmbeddedVideo>({
+							slug: entryVideoJoin.slug,
+							...videosCol,
+						}),
+					),
+					sql`'[]'::jsonb`,
+				).as("videos"),
+			})
+			.from(entryVideoJoin)
+			.where(eq(entryVideoJoin.entryPk, entries.pk))
+			.leftJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
+			.as("videos");
+
+		return db
+			.select({
+				firstEntry: jsonbBuildObject<Entry>({
+					...getColumns(entries),
+					...transCol,
+					number: entries.episodeNumber,
+					videos: videosQ.videos,
+				}).as("firstEntry"),
+			})
+			.from(entries)
+			.innerJoin(transQ, eq(entries.pk, transQ.pk))
+			.leftJoinLateral(videosQ, sql`true`)
+			.where(and(eq(entries.showPk, shows.pk), ne(entries.kind, "extra")))
+			.orderBy(entries.order)
+			.limit(1)
+			.as("firstEntry");
 	},
 };
 
