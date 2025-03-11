@@ -27,3 +27,22 @@ export const Progress = t.Object({
 	),
 });
 export type Progress = typeof Progress.static;
+
+export const WatchlistStatus = t.UnionEnum([
+	"completed",
+	"watching",
+	"rewatching",
+	"dropped",
+	"planned",
+]);
+
+export const WatchStatus = t.Object({
+	status: WatchlistStatus,
+	score: t.Nullable(t.Integer({ minimum: 0, maximum: 100 })),
+	startedAt: t.Nullable(t.String({ format: "date-time" })),
+	completedAt: t.Nullable(t.String({ format: "date-time" })),
+	seenCount: t.Integer({
+		description: "The number of episodes you watched in this serie.",
+		minimum: 0,
+	}),
+});

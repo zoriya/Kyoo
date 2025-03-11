@@ -1,11 +1,5 @@
 import { sql } from "drizzle-orm";
-import {
-	check,
-	integer,
-	primaryKey,
-	text,
-	timestamp,
-} from "drizzle-orm/pg-core";
+import { check, integer, primaryKey, timestamp } from "drizzle-orm/pg-core";
 import { entries } from "./entries";
 import { profiles } from "./profiles";
 import { shows } from "./shows";
@@ -34,7 +28,9 @@ export const watchlist = schema.table(
 		nextEntry: integer().references(() => entries.pk, { onDelete: "set null" }),
 
 		score: integer(),
-		notes: text(),
+
+		startedAt: timestamp({ withTimezone: true, mode: "string" }),
+		completedAt: timestamp({ withTimezone: true, mode: "string" }),
 
 		createdAt: timestamp({ withTimezone: true, mode: "string" })
 			.notNull()
