@@ -1,10 +1,11 @@
-import { type SQL, and, eq, isNotNull, ne, sql } from "drizzle-orm";
+import { type SQL, and, desc, eq, isNotNull, ne, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "~/db";
 import {
 	entries,
 	entryTranslations,
 	entryVideoJoin,
+	history,
 	shows,
 	videos,
 } from "~/db/schema";
@@ -39,7 +40,7 @@ import {
 	processLanguages,
 	sortToSql,
 } from "~/models/utils";
-import { desc } from "~/models/utils/descriptions";
+import { desc as description } from "~/models/utils/descriptions";
 import type { EmbeddedVideo } from "~/models/video";
 
 const entryFilters: FilterDef = {
@@ -149,6 +150,18 @@ async function getEntries({
 		.leftJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
 		.as("videos");
 
+	const progressQ = db
+		.selectDistinctOn([history.entryPk], {
+			percent: history.percent,
+			time: history.time,
+			entryPk: history.entryPk,
+			videoId: videos.id,
+		})
+		.from(history)
+		.leftJoin(videos, eq(history.videoPk, videos.pk))
+		.orderBy(history.entryPk, desc(history.playedDate))
+		.as("progress");
+
 	const {
 		kind,
 		externalId,
@@ -163,6 +176,9 @@ async function getEntries({
 			...entryCol,
 			...transCol,
 			videos: videosQ.videos,
+			progress: {
+				...getColumns(progressQ),
+			},
 			// specials don't have an `episodeNumber` but a `number` field.
 			number: episodeNumber,
 
@@ -181,6 +197,7 @@ async function getEntries({
 		.from(entries)
 		.innerJoin(transQ, eq(entries.pk, transQ.pk))
 		.leftJoinLateral(videosQ, sql`true`)
+		.leftJoin(progressQ, eq(entries.pk, progressQ.entryPk))
 		.where(
 			and(
 				filter,
@@ -265,14 +282,14 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			query: t.Object({
 				sort: entrySort,
 				filter: t.Optional(Filter({ def: entryFilters })),
-				query: t.Optional(t.String({ description: desc.query })),
+				query: t.Optional(t.String({ description: description.query })),
 				limit: t.Integer({
 					minimum: 1,
 					maximum: 250,
 					default: 50,
 					description: "Max page size.",
 				}),
-				after: t.Optional(t.String({ description: desc.after })),
+				after: t.Optional(t.String({ description: description.after })),
 			}),
 			headers: t.Object(
 				{
@@ -342,14 +359,14 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			query: t.Object({
 				sort: extraSort,
 				filter: t.Optional(Filter({ def: extraFilters })),
-				query: t.Optional(t.String({ description: desc.query })),
+				query: t.Optional(t.String({ description: description.query })),
 				limit: t.Integer({
 					minimum: 1,
 					maximum: 250,
 					default: 50,
 					description: "Max page size.",
 				}),
-				after: t.Optional(t.String({ description: desc.after })),
+				after: t.Optional(t.String({ description: description.after })),
 			}),
 			response: {
 				200: Page(Extra),
@@ -383,14 +400,14 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			query: t.Object({
 				sort: extraSort,
 				filter: t.Optional(Filter({ def: unknownFilters })),
-				query: t.Optional(t.String({ description: desc.query })),
+				query: t.Optional(t.String({ description: description.query })),
 				limit: t.Integer({
 					minimum: 1,
 					maximum: 250,
 					default: 50,
 					description: "Max page size.",
 				}),
-				after: t.Optional(t.String({ description: desc.after })),
+				after: t.Optional(t.String({ description: description.after })),
 			}),
 			response: {
 				200: Page(UnknownEntry),
@@ -423,14 +440,14 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			detail: { description: "Get new movies/episodes added recently." },
 			query: t.Object({
 				filter: t.Optional(Filter({ def: entryFilters })),
-				query: t.Optional(t.String({ description: desc.query })),
+				query: t.Optional(t.String({ description: description.query })),
 				limit: t.Integer({
 					minimum: 1,
 					maximum: 250,
 					default: 50,
 					description: "Max page size.",
 				}),
-				after: t.Optional(t.String({ description: desc.after })),
+				after: t.Optional(t.String({ description: description.after })),
 			}),
 			response: {
 				200: Page(Entry),

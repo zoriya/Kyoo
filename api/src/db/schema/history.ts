@@ -1,5 +1,5 @@
-import { index, integer, jsonb, timestamp } from "drizzle-orm/pg-core";
-import type { Progress } from "~/models/watchlist";
+import { sql } from "drizzle-orm";
+import { check, index, integer, jsonb, timestamp } from "drizzle-orm/pg-core";
 import { entries } from "./entries";
 import { profiles } from "./profiles";
 import { schema } from "./utils";
@@ -18,8 +18,13 @@ export const history = schema.table(
 		videoPk: integer()
 			.notNull()
 			.references(() => videos.pk, { onDelete: "set null" }),
-		progress: jsonb().$type<Progress>(),
+		percent: integer().notNull().default(0),
+		time: integer(),
 		playedDate: timestamp({ mode: "string" }).notNull().defaultNow(),
 	},
-	(t) => [index("history_play_date").on(t.playedDate.desc())],
+	(t) => [
+		index("history_play_date").on(t.playedDate.desc()),
+
+		check("percent_valid", sql`${t.percent} between 0 and 100`),
+	],
 );

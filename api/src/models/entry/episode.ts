@@ -10,6 +10,7 @@ import {
 } from "../utils";
 import { EmbeddedVideo } from "../video";
 import { BaseEntry, EntryTranslation } from "./base-entry";
+import { Progress } from "../watchlist";
 
 export const BaseEpisode = t.Intersect([
 	t.Object({
@@ -27,7 +28,8 @@ export const Episode = t.Intersect([
 	EntryTranslation(),
 	BaseEpisode,
 	t.Object({
-		videos: t.Optional(t.Array(EmbeddedVideo)),
+		videos: t.Array(EmbeddedVideo),
+		progress: Progress,
 	}),
 	DbMetadata,
 ]);
