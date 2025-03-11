@@ -63,14 +63,14 @@ erDiagram
 	}
 	entries ||--|{ entry_translations : has
 
-	video {
+	videos {
 		guid id PK
 		string path "NN"
 		uint rendering "dedup for duplicates part1/2"
 		uint part
 		uint version "max version is preferred rendering"
 	}
-	video }|--|{ entries : for
+	videos }|--|{ entries : for
 
 	seasons {
 		guid id PK
@@ -102,16 +102,16 @@ erDiagram
 		guid id PK
 	}
 
-	watched_shows {
+	watchlist {
 		guid show_id PK, FK
 		guid user_id PK, FK
-		status status "completed|watching|dropped|planned"
+		status status "completed|watching|rewatching|dropped|planned"
 		uint seen_entry_count "NN"
 		guid next_entry FK
 	}
-	shows ||--|{ watched_shows : has
-	users ||--|{ watched_shows : has
-	watched_shows ||--|o entries : next_entry
+	shows ||--|{ watchlist : has
+	users ||--|{ watchlist : has
+	watchlist ||--|o entries : next_entry
 
 	history {
 		int id PK
