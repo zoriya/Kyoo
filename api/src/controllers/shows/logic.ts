@@ -12,6 +12,7 @@ import {
 	studios,
 	videos,
 } from "~/db/schema";
+import { watchlist } from "~/db/schema/watchlist";
 import {
 	coalesce,
 	getColumns,
@@ -248,6 +249,12 @@ export async function getShows({
 		)
 		.as("t");
 
+	const watchStatusQ = db
+		.select()
+		.from(watchlist)
+		.where(eq(watchlist.profilePk, userId))
+		.as("watchstatus");
+
 	return await db
 		.select({
 			...getColumns(shows),
@@ -266,9 +273,12 @@ export async function getShows({
 				logo: sql<Image>`coalesce(nullif(${shows.original}->'logo', 'null'::jsonb), ${transQ.logo})`,
 			}),
 
+			watchStatus: getColumns(watchStatusQ),
+
 			...buildRelations(relations, showRelations, { languages, userId }),
 		})
 		.from(shows)
+		.leftJoin(watchStatusQ, eq(shows.pk, watchStatusQ.showPk))
 		[fallbackLanguage ? "innerJoin" : ("leftJoin" as "innerJoin")](
 			transQ,
 			eq(shows.pk, transQ.pk),

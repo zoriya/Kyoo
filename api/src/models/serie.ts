@@ -17,6 +17,7 @@ import {
 	TranslationRecord,
 } from "./utils";
 import { Original } from "./utils/original";
+import { WatchStatus } from "./watchlist";
 
 export const SerieStatus = t.UnionEnum([
 	"unknown",
@@ -70,6 +71,7 @@ export const Serie = t.Intersect([
 		availableCount: t.Integer({
 			description: "The number of episodes that can be played right away",
 		}),
+		watchStatus: WatchStatus,
 	}),
 ]);
 export type Serie = Prettify<typeof Serie.static>;
