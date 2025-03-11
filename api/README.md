@@ -116,13 +116,14 @@ erDiagram
 	history {
 		int id PK
 		guid entry_id FK
-		guid user_id FK
-		uint time "in seconds, null of finished"
-		uint progress "NN, from 0 to 100"
+		guid profile_id FK
+		guid video_id FK
+		jsonb progress "{ percent, time }"
 		datetime played_date
 	}
 	entries ||--|{ history : part_of
 	users ||--|{ history : has
+	videos o|--o{ history : has
 
 	roles {
 		guid show_id PK, FK
@@ -143,6 +144,7 @@ erDiagram
 		jsonb external_id
 	}
 	staff ||--|{ roles : has
+	shows ||--|{ roles : has
 
 	studios {
 		guid id PK
