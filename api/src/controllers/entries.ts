@@ -114,6 +114,7 @@ async function getEntries({
 	sort,
 	filter,
 	languages,
+	userId,
 }: {
 	after: string | undefined;
 	limit: number;
@@ -121,6 +122,7 @@ async function getEntries({
 	sort: Sort;
 	filter: SQL | undefined;
 	languages: string[];
+	userId: number;
 }): Promise<(Entry | Extra | UnknownEntry)[]> {
 	const transQ = db
 		.selectDistinctOn([entryTranslations.pk])
@@ -158,6 +160,7 @@ async function getEntries({
 			videoId: videos.id,
 		})
 		.from(history)
+		.where(eq(history.profilePk, userId))
 		.leftJoin(videos, eq(history.videoPk, videos.pk))
 		.orderBy(history.entryPk, desc(history.playedDate))
 		.as("progress");
@@ -176,9 +179,7 @@ async function getEntries({
 			...entryCol,
 			...transCol,
 			videos: videosQ.videos,
-			progress: {
-				...getColumns(progressQ),
-			},
+			progress: getColumns(progressQ),
 			// specials don't have an `episodeNumber` but a `number` field.
 			number: episodeNumber,
 

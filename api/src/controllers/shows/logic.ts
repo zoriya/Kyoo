@@ -1,9 +1,10 @@
-import { type SQL, and, eq, exists, ne, sql } from "drizzle-orm";
+import { type SQL, and, desc, eq, exists, ne, sql } from "drizzle-orm";
 import { db } from "~/db";
 import {
 	entries,
 	entryTranslations,
 	entryVideoJoin,
+	history,
 	showStudioJoin,
 	showTranslations,
 	shows,
@@ -144,7 +145,10 @@ const showRelations = {
 			.leftJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
 			.as("videos");
 	},
-	firstEntry: ({ languages }: { languages: string[] }) => {
+	firstEntry: ({
+		languages,
+		userId,
+	}: { languages: string[]; userId: number }) => {
 		const transQ = db
 			.selectDistinctOn([entryTranslations.pk])
 			.from(entryTranslations)
@@ -173,6 +177,19 @@ const showRelations = {
 			.leftJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
 			.as("videos");
 
+		const progressQ = db
+			.selectDistinctOn([history.entryPk], {
+				percent: history.percent,
+				time: history.time,
+				entryPk: history.entryPk,
+				videoId: videos.id,
+			})
+			.from(history)
+			.where(eq(history.profilePk, userId))
+			.leftJoin(videos, eq(history.videoPk, videos.pk))
+			.orderBy(history.entryPk, desc(history.playedDate))
+			.as("progress");
+
 		return db
 			.select({
 				firstEntry: jsonbBuildObject<Entry>({
@@ -180,10 +197,12 @@ const showRelations = {
 					...transCol,
 					number: entries.episodeNumber,
 					videos: videosQ.videos,
+					progress: getColumns(progressQ),
 				}).as("firstEntry"),
 			})
 			.from(entries)
 			.innerJoin(transQ, eq(entries.pk, transQ.pk))
+			.leftJoin(progressQ, eq(entries.pk, progressQ.entryPk))
 			.leftJoinLateral(videosQ, sql`true`)
 			.where(and(eq(entries.showPk, shows.pk), ne(entries.kind, "extra")))
 			.orderBy(entries.order)
@@ -202,6 +221,7 @@ export async function getShows({
 	fallbackLanguage = true,
 	preferOriginal = false,
 	relations = [],
+	userId,
 }: {
 	after?: string;
 	limit: number;
@@ -212,6 +232,7 @@ export async function getShows({
 	fallbackLanguage?: boolean;
 	preferOriginal?: boolean;
 	relations?: (keyof typeof showRelations)[];
+	userId: number;
 }) {
 	const transQ = db
 		.selectDistinctOn([showTranslations.pk])
@@ -245,7 +266,7 @@ export async function getShows({
 				logo: sql<Image>`coalesce(nullif(${shows.original}->'logo', 'null'::jsonb), ${transQ.logo})`,
 			}),
 
-			...buildRelations(relations, showRelations, { languages }),
+			...buildRelations(relations, showRelations, { languages, userId }),
 		})
 		.from(shows)
 		[fallbackLanguage ? "innerJoin" : ("leftJoin" as "innerJoin")](

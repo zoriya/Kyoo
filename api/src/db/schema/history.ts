@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { check, index, integer, jsonb, timestamp } from "drizzle-orm/pg-core";
+import { check, index, integer, timestamp } from "drizzle-orm/pg-core";
 import { entries } from "./entries";
 import { profiles } from "./profiles";
 import { schema } from "./utils";
