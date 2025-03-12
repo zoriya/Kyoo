@@ -10,8 +10,8 @@ import {
 	TranslationRecord,
 } from "../utils";
 import { EmbeddedVideo } from "../video";
-import { BaseEntry, EntryTranslation } from "./base-entry";
 import { Progress } from "../watchlist";
+import { BaseEntry, EntryTranslation } from "./base-entry";
 
 export const BaseMovieEntry = t.Intersect(
 	[

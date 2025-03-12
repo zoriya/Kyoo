@@ -3,8 +3,8 @@ import { type Prettify, comment } from "~/utils";
 import { madeInAbyss, registerExamples } from "../examples";
 import { DbMetadata, SeedImage } from "../utils";
 import { Resource } from "../utils/resource";
-import { BaseEntry } from "./base-entry";
 import { Progress } from "../watchlist";
+import { BaseEntry } from "./base-entry";
 
 export const ExtraType = t.UnionEnum([
 	"other",
