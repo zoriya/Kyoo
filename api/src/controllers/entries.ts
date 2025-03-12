@@ -106,6 +106,37 @@ const newsSort: Sort = {
 		},
 	],
 };
+const { guess, createdAt, updatedAt, ...videosCol } = getColumns(videos);
+export const entryVideosQ = db
+	.select({
+		videos: coalesce(
+			jsonbAgg(
+				jsonbBuildObject<EmbeddedVideo>({
+					slug: entryVideoJoin.slug,
+					...videosCol,
+				}),
+			),
+			sql`'[]'::jsonb`,
+		).as("videos"),
+	})
+	.from(entryVideoJoin)
+	.where(eq(entryVideoJoin.entryPk, entries.pk))
+	.leftJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
+	.as("videos");
+
+export const getEntryProgressQ = (userId: number) =>
+	db
+		.selectDistinctOn([history.entryPk], {
+			percent: history.percent,
+			time: history.time,
+			entryPk: history.entryPk,
+			videoId: videos.id,
+		})
+		.from(history)
+		.where(eq(history.profilePk, userId))
+		.leftJoin(videos, eq(history.videoPk, videos.pk))
+		.orderBy(history.entryPk, desc(history.playedDate))
+		.as("progress");
 
 async function getEntries({
 	after,
@@ -134,36 +165,7 @@ async function getEntries({
 		.as("t");
 	const { pk, name, ...transCol } = getColumns(transQ);
 
-	const { guess, createdAt, updatedAt, ...videosCol } = getColumns(videos);
-	const videosQ = db
-		.select({
-			videos: coalesce(
-				jsonbAgg(
-					jsonbBuildObject<EmbeddedVideo>({
-						slug: entryVideoJoin.slug,
-						...videosCol,
-					}),
-				),
-				sql`'[]'::jsonb`,
-			).as("videos"),
-		})
-		.from(entryVideoJoin)
-		.where(eq(entryVideoJoin.entryPk, entries.pk))
-		.leftJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
-		.as("videos");
-
-	const progressQ = db
-		.selectDistinctOn([history.entryPk], {
-			percent: history.percent,
-			time: history.time,
-			entryPk: history.entryPk,
-			videoId: videos.id,
-		})
-		.from(history)
-		.where(eq(history.profilePk, userId))
-		.leftJoin(videos, eq(history.videoPk, videos.pk))
-		.orderBy(history.entryPk, desc(history.playedDate))
-		.as("progress");
+	const entryProgressQ = getEntryProgressQ(userId);
 
 	const {
 		kind,
@@ -178,8 +180,8 @@ async function getEntries({
 		.select({
 			...entryCol,
 			...transCol,
-			videos: videosQ.videos,
-			progress: getColumns(progressQ),
+			videos: entryVideosQ.videos,
+			progress: getColumns(entryProgressQ),
 			// specials don't have an `episodeNumber` but a `number` field.
 			number: episodeNumber,
 
@@ -197,8 +199,8 @@ async function getEntries({
 		})
 		.from(entries)
 		.innerJoin(transQ, eq(entries.pk, transQ.pk))
-		.leftJoinLateral(videosQ, sql`true`)
-		.leftJoin(progressQ, eq(entries.pk, progressQ.entryPk))
+		.leftJoinLateral(entryVideosQ, sql`true`)
+		.leftJoin(entryProgressQ, eq(entries.pk, entryProgressQ.entryPk))
 		.where(
 			and(
 				filter,
