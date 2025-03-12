@@ -250,7 +250,10 @@ export async function getShows({
 		.as("t");
 
 	const watchStatusQ = db
-		.select()
+		.select({
+			...getColumns(watchlist),
+			percent: watchlist.seenCount,
+		})
 		.from(watchlist)
 		.where(eq(watchlist.profilePk, userId))
 		.as("watchstatus");

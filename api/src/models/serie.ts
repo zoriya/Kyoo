@@ -71,7 +71,7 @@ export const Serie = t.Intersect([
 		availableCount: t.Integer({
 			description: "The number of episodes that can be played right away",
 		}),
-		watchStatus: WatchStatus,
+		watchStatus: t.Omit(WatchStatus, ["percent"]),
 	}),
 ]);
 export type Serie = Prettify<typeof Serie.static>;
