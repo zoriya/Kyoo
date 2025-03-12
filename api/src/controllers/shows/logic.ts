@@ -35,6 +35,7 @@ import {
 	sortToSql,
 } from "~/models/utils";
 import type { EmbeddedVideo } from "~/models/video";
+import { entryVideosQ, getEntryProgressQ } from "../entries";
 
 export const showFilters: FilterDef = {
 	genres: {
@@ -160,36 +161,7 @@ const showRelations = {
 			.as("t");
 		const { pk, ...transCol } = getColumns(transQ);
 
-		const { guess, createdAt, updatedAt, ...videosCol } = getColumns(videos);
-		const videosQ = db
-			.select({
-				videos: coalesce(
-					jsonbAgg(
-						jsonbBuildObject<EmbeddedVideo>({
-							slug: entryVideoJoin.slug,
-							...videosCol,
-						}),
-					),
-					sql`'[]'::jsonb`,
-				).as("videos"),
-			})
-			.from(entryVideoJoin)
-			.where(eq(entryVideoJoin.entryPk, entries.pk))
-			.leftJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
-			.as("videos");
-
-		const progressQ = db
-			.selectDistinctOn([history.entryPk], {
-				percent: history.percent,
-				time: history.time,
-				entryPk: history.entryPk,
-				videoId: videos.id,
-			})
-			.from(history)
-			.where(eq(history.profilePk, userId))
-			.leftJoin(videos, eq(history.videoPk, videos.pk))
-			.orderBy(history.entryPk, desc(history.playedDate))
-			.as("progress");
+		const progressQ = getEntryProgressQ(userId);
 
 		return db
 			.select({
@@ -197,14 +169,14 @@ const showRelations = {
 					...getColumns(entries),
 					...transCol,
 					number: entries.episodeNumber,
-					videos: videosQ.videos,
+					videos: entryVideosQ.videos,
 					progress: getColumns(progressQ),
 				}).as("firstEntry"),
 			})
 			.from(entries)
 			.innerJoin(transQ, eq(entries.pk, transQ.pk))
 			.leftJoin(progressQ, eq(entries.pk, progressQ.entryPk))
-			.leftJoinLateral(videosQ, sql`true`)
+			.leftJoinLateral(entryVideosQ, sql`true`)
 			.where(and(eq(entries.showPk, shows.pk), ne(entries.kind, "extra")))
 			.orderBy(entries.order)
 			.limit(1)
