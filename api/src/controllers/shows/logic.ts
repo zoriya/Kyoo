@@ -1,4 +1,5 @@
 import { type SQL, and, desc, eq, exists, ne, sql } from "drizzle-orm";
+import type { PgSelect } from "drizzle-orm/pg-core";
 import { db } from "~/db";
 import {
 	entries,
@@ -181,6 +182,44 @@ const showRelations = {
 			.orderBy(entries.order)
 			.limit(1)
 			.as("firstEntry");
+	},
+	nextEntry: ({
+		languages,
+		userId,
+		watchStatusQ,
+	}: {
+		languages: string[];
+		userId: number;
+		watchStatusQ: PgSelect<typeof watchlist>;
+	}) => {
+		const transQ = db
+			.selectDistinctOn([entryTranslations.pk])
+			.from(entryTranslations)
+			.orderBy(
+				entryTranslations.pk,
+				sql`array_position(${sqlarr(languages)}, ${entryTranslations.language})`,
+			)
+			.as("t");
+		const { pk, ...transCol } = getColumns(transQ);
+
+		const progressQ = getEntryProgressQ(userId);
+
+		return db
+			.select({
+				nextEntry: jsonbBuildObject<Entry>({
+					...getColumns(entries),
+					...transCol,
+					number: entries.episodeNumber,
+					videos: entryVideosQ.videos,
+					progress: getColumns(progressQ),
+				}).as("nextEntry"),
+			})
+			.from(entries)
+			.innerJoin(transQ, eq(entries.pk, transQ.pk))
+			.leftJoin(progressQ, eq(entries.pk, progressQ.entryPk))
+			.leftJoinLateral(entryVideosQ, sql`true`)
+			.where(eq(watchStatusQ.nextEntryPk, entries.pk))
+			.as("nextEntry");
 	},
 };
 
