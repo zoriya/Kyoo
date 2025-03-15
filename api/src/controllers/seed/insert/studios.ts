@@ -2,7 +2,7 @@ import { db } from "~/db";
 import { showStudioJoin, studioTranslations, studios } from "~/db/schema";
 import { conflictUpdateAllExcept } from "~/db/utils";
 import type { SeedStudio } from "~/models/studio";
-import { processOptImage } from "../images";
+import { enqueueOptImage } from "../images";
 
 type StudioI = typeof studios.$inferInsert;
 type StudioTransI = typeof studioTranslations.$inferInsert;
@@ -38,7 +38,7 @@ export const insertStudios = async (
 				pk: ret[i].pk,
 				language: lang,
 				name: tr.name,
-				logo: processOptImage(tr.logo),
+				logo: enqueueOptImage(tr.logo),
 			})),
 		);
 		await tx

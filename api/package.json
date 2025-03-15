@@ -1,6 +1,6 @@
 {
 	"name": "api",
-	"version": "1.0.50",
+	"version": "5.0.0",
 	"scripts": {
 		"dev": "bun --watch src/index.ts",
 		"build": "bun build src/index.ts --target bun --outdir ./dist",

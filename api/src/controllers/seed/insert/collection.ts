@@ -5,7 +5,7 @@ import { conflictUpdateAllExcept } from "~/db/utils";
 import type { SeedCollection } from "~/models/collections";
 import type { SeedMovie } from "~/models/movie";
 import type { SeedSerie } from "~/models/serie";
-import { processOptImage } from "../images";
+import { enqueueOptImage } from "../images";
 
 type ShowTrans = typeof showTranslations.$inferInsert;
 
@@ -53,10 +53,10 @@ export const insertCollection = async (
 				pk: ret.pk,
 				language: lang,
 				...tr,
-				poster: processOptImage(tr.poster),
-				thumbnail: processOptImage(tr.thumbnail),
-				logo: processOptImage(tr.logo),
-				banner: processOptImage(tr.banner),
+				poster: enqueueOptImage(tr.poster),
+				thumbnail: enqueueOptImage(tr.thumbnail),
+				logo: enqueueOptImage(tr.logo),
+				banner: enqueueOptImage(tr.banner),
 			}),
 		);
 		await tx
