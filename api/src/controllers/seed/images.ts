@@ -1,10 +1,17 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { encode } from "blurhash";
 import { eq, sql } from "drizzle-orm";
 import { version } from "package.json";
 import type { PoolClient } from "pg";
+import sharp from "sharp";
 import { db } from "~/db";
 import * as schema from "~/db/schema";
 import { mqueue } from "~/db/schema/queue";
 import type { Image } from "~/models/utils";
+
+export const imageDir = process.env.IMAGES_PATH ?? "/images";
+await mkdir(imageDir, { recursive: true });
 
 type ImageTask = {
 	id: string;
@@ -52,8 +59,7 @@ export const processImages = async () => {
 			.limit(1);
 
 		const img = item.message as ImageTask;
-		await fetch(img.url, { headers: { "User-Agent": `Kyoo v${version}` }, });
-		const blurhash = "";
+		const blurhash = await downloadImage(img.id, img.url);
 
 		const table = schema[img.table as keyof typeof schema] as any;
 
@@ -72,3 +78,46 @@ export const processImages = async () => {
 		if (evt.channel !== "image") return;
 	});
 };
+
+async function downloadImage(id: string, url: string): Promise<string> {
+	const resp = await fetch(url, {
+		headers: { "User-Agent": `Kyoo v${version}` },
+	});
+	if (!resp.ok) {
+		throw new Error(`Failed to fetch image: ${resp.status} ${resp.statusText}`);
+	}
+	const buf = Buffer.from(await resp.arrayBuffer());
+
+	const image = sharp(buf);
+	const metadata = await image.metadata();
+
+	if (!metadata.width || !metadata.height) {
+		throw new Error("Could not determine image dimensions");
+	}
+	const resolutions = {
+		low: { width: 320 },
+		medium: { width: 640 },
+		high: { width: 1280 },
+	};
+	await Promise.all(
+		Object.entries(resolutions).map(async ([resolution, dimensions]) => {
+			const buffer = await image.clone().resize(dimensions.width).toBuffer();
+			await writeFile(path.join(imageDir, `${id}.${resolution}.jpg`), buffer);
+		}),
+	);
+
+	const { data, info } = await image
+		.resize(32, 32, { fit: "inside" })
+		.raw()
+		.toBuffer({ resolveWithObject: true });
+
+	const blurHash = encode(
+		new Uint8ClampedArray(data),
+		info.width,
+		info.height,
+		4,
+		3,
+	);
+
+	return blurHash;
+}
