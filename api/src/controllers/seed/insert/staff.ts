@@ -3,7 +3,7 @@ import { db } from "~/db";
 import { roles, staff } from "~/db/schema";
 import { conflictUpdateAllExcept } from "~/db/utils";
 import type { SeedStaff } from "~/models/staff";
-import { processOptImage } from "../images";
+import { enqueueOptImage } from "../images";
 
 export const insertStaff = async (
 	seed: SeedStaff[] | undefined,
@@ -14,7 +14,7 @@ export const insertStaff = async (
 	return await db.transaction(async (tx) => {
 		const people = seed.map((x) => ({
 			...x.staff,
-			image: processOptImage(x.staff.image),
+			image: enqueueOptImage(x.staff.image),
 		}));
 		const ret = await tx
 			.insert(staff)
@@ -32,7 +32,7 @@ export const insertStaff = async (
 			order: i,
 			character: {
 				...x.character,
-				image: processOptImage(x.character.image),
+				image: enqueueOptImage(x.character.image),
 			},
 		}));
 

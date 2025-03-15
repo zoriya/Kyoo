@@ -1,7 +1,7 @@
 import { t } from "elysia";
 import type { SeedMovie } from "~/models/movie";
 import { getYear } from "~/utils";
-import { processOptImage } from "./images";
+import { enqueueOptImage } from "./images";
 import { insertCollection } from "./insert/collection";
 import { insertEntries } from "./insert/entries";
 import { insertShow, updateAvailableCount } from "./insert/shows";
@@ -80,10 +80,10 @@ export const seedMovie = async (
 				language: movie.originalLanguage,
 				name: original.name,
 				latinName: original.latinName ?? null,
-				poster: processOptImage(original.poster),
-				thumbnail: processOptImage(original.thumbnail),
-				logo: processOptImage(original.logo),
-				banner: processOptImage(original.banner),
+				poster: enqueueOptImage(original.poster),
+				thumbnail: enqueueOptImage(original.thumbnail),
+				logo: enqueueOptImage(original.logo),
+				banner: enqueueOptImage(original.banner),
 			},
 			...movie,
 		},

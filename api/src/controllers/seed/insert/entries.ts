@@ -8,7 +8,7 @@ import {
 } from "~/db/schema";
 import { conflictUpdateAllExcept, sqlarr, values } from "~/db/utils";
 import type { SeedEntry as SEntry, SeedExtra as SExtra } from "~/models/entry";
-import { processOptImage } from "../images";
+import { enqueueOptImage } from "../images";
 import { guessNextRefresh } from "../refresh";
 import { updateAvailableCount } from "./shows";
 
@@ -55,7 +55,7 @@ export const insertEntries = async (
 				...entry,
 				showPk: show.pk,
 				slug: generateSlug(show.slug, seed),
-				thumbnail: processOptImage(seed.thumbnail),
+				thumbnail: enqueueOptImage(seed.thumbnail),
 				nextRefresh:
 					entry.kind !== "extra"
 						? guessNextRefresh(entry.airDate ?? new Date())
@@ -103,7 +103,7 @@ export const insertEntries = async (
 				...tr,
 				poster:
 					seed.kind === "movie"
-						? processOptImage((tr as any).poster)
+						? enqueueOptImage((tr as any).poster)
 						: undefined,
 			}));
 		});
