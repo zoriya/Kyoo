@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { encode } from "blurhash";
-import { type SQLWrapper, eq, sql } from "drizzle-orm";
+import { SQL, type SQLWrapper, eq, getTableName, sql } from "drizzle-orm";
 import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
 import { version } from "package.json";
 import type { PoolClient } from "pg";
@@ -10,7 +10,7 @@ import { type Transaction, db } from "~/db";
 import { mqueue } from "~/db/schema/queue";
 import type { Image } from "~/models/utils";
 
-export const imageDir = process.env.IMAGES_PATH ?? "/images";
+export const imageDir = process.env.IMAGES_PATH ?? "./images";
 await mkdir(imageDir, { recursive: true });
 
 type ImageTask = {
@@ -27,7 +27,7 @@ export const enqueueOptImage = async (
 	tx: Transaction,
 	img:
 		| { url: string | null; column: PgColumn }
-		| { url: string | null; table: PgTable; column: SQLWrapper },
+		| { url: string | null; table: PgTable; column: SQL },
 ): Promise<Image | null> => {
 	if (!img.url) return null;
 
@@ -40,14 +40,14 @@ export const enqueueOptImage = async (
 			? {
 					id,
 					url: img.url,
-					table: img.table._.name,
-					column: img.column.getSQL().sql,
+					table: getTableName(img.table),
+					column: db.execute(img.column).getQuery().sql,
 				}
 			: {
 					id,
 					url: img.url,
-					table: img.column.table._.name,
-					column: img.column,
+					table: getTableName(img.column.table),
+					column: img.column.name,
 				};
 	await tx.insert(mqueue).values({
 		kind: "image",

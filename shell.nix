@@ -42,7 +42,12 @@ in
       go-swag
       robotframework-tidy
       bun
+      pkg-config
+      node-gyp
+      vips
     ];
 
     DOTNET_ROOT = "${dotnet}";
+
+    SHARP_FORCE_GLOBAL_LIBVIPS = 1;
   }

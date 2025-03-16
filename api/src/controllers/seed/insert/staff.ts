@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "~/db";
 import { roles, staff } from "~/db/schema";
 import { conflictUpdateAllExcept } from "~/db/utils";
@@ -41,7 +41,7 @@ export const insertStaff = async (
 					image: await enqueueOptImage(tx, {
 						url: x.character.image,
 						table: roles,
-						column: `${roles.character}['image']`,
+						column: sql`${roles.character}['image']`,
 					}),
 				},
 			})),

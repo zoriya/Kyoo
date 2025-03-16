@@ -3,7 +3,7 @@ import type { SeedMovie } from "~/models/movie";
 import { getYear } from "~/utils";
 import { insertCollection } from "./insert/collection";
 import { insertEntries } from "./insert/entries";
-import { insertShow, updateAvailableCount } from "./insert/shows";
+import { insertShow } from "./insert/shows";
 import { insertStaff } from "./insert/staff";
 import { insertStudios } from "./insert/studios";
 import { guessNextRefresh } from "./refresh";

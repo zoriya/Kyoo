@@ -3,9 +3,7 @@
 		"target": "ES2021",
 		"module": "ES2022",
 		"moduleResolution": "node",
-		"types": [
-			"bun-types"
-		],
+		"types": ["bun-types"],
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"strict": true,
@@ -14,12 +12,8 @@
 		"resolveJsonModule": true,
 		"baseUrl": ".",
 		"paths": {
-			"~/*": [
-				"./src/*"
-			],
-			"package.json": [
-				"package.json"
-			]
+			"~/*": ["./src/*"],
+			"package.json": ["package.json"]
 		}
 	}
 }
