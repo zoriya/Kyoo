@@ -1,13 +1,12 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { encode } from "blurhash";
-import { eq, sql } from "drizzle-orm";
-import type { PgColumn } from "drizzle-orm/pg-core";
+import { type SQLWrapper, eq, sql } from "drizzle-orm";
+import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
 import { version } from "package.json";
 import type { PoolClient } from "pg";
 import sharp from "sharp";
 import { type Transaction, db } from "~/db";
-import * as schema from "~/db/schema";
 import { mqueue } from "~/db/schema/queue";
 import type { Image } from "~/models/utils";
 
@@ -21,30 +20,38 @@ type ImageTask = {
 	column: string;
 };
 
-type ImageTaskC = {
-	url: string;
-	column: PgColumn;
-};
-
 // this will only push a task to the image downloader service and not download it instantly.
 // this is both done to prevent to many requests to be sent at once and to make sure POST
 // requests are not blocked by image downloading or blurhash calculation
-export const enqueueImage = async (
+export const enqueueOptImage = async (
 	tx: Transaction,
-	img: ImageTaskC,
-): Promise<Image> => {
+	img:
+		| { url: string | null; column: PgColumn }
+		| { url: string | null; table: PgTable; column: SQLWrapper },
+): Promise<Image | null> => {
+	if (!img.url) return null;
+
 	const hasher = new Bun.CryptoHasher("sha256");
 	hasher.update(img.url);
 	const id = hasher.digest().toString("hex");
 
+	const message: ImageTask =
+		"table" in img
+			? {
+					id,
+					url: img.url,
+					table: img.table._.name,
+					column: img.column.getSQL().sql,
+				}
+			: {
+					id,
+					url: img.url,
+					table: img.column.table._.name,
+					column: img.column,
+				};
 	await tx.insert(mqueue).values({
 		kind: "image",
-		message: {
-			id,
-			url: img.url,
-			table: img.column.table._.name,
-			column: img.column.name,
-		} satisfies ImageTask,
+		message,
 	});
 	await tx.execute(sql`notify image`);
 
@@ -53,14 +60,6 @@ export const enqueueImage = async (
 		source: img.url,
 		blurhash: "",
 	};
-};
-
-export const enqueueOptImage = async (
-	tx: Transaction,
-	img: { url: string | null; column: PgColumn },
-): Promise<Image | null> => {
-	if (!img.url) return null;
-	return await enqueueImage(tx, { url: img.url, column: img.column });
 };
 
 export const processImages = async () => {
@@ -78,19 +77,14 @@ export const processImages = async () => {
 
 			const img = item.message as ImageTask;
 			const blurhash = await downloadImage(img.id, img.url);
+			const ret: Image = { id: img.id, source: img.url, blurhash };
 
-			const table = schema[img.table as keyof typeof schema] as any;
+			const table = sql.raw(img.table);
+			const column = sql.raw(img.column);
 
-			await tx
-				.update(table)
-				.set({
-					[img.column]: {
-						id: img.id,
-						source: img.url,
-						blurhash,
-					} satisfies Image,
-				})
-				.where(eq(sql`${table[img.column]}->'id'`, img.id));
+			await tx.execute(sql`
+				update ${table} set ${column} = ${ret} where ${column}->'id' = '${item.id}'
+			`);
 
 			await tx.delete(mqueue).where(eq(mqueue.id, item.id));
 			return true;

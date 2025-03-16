@@ -40,7 +40,8 @@ export const insertStaff = async (
 					...x.character,
 					image: await enqueueOptImage(tx, {
 						url: x.character.image,
-						column: roles.character.image,
+						table: roles,
+						column: `${roles.character}['image']`,
 					}),
 				},
 			})),

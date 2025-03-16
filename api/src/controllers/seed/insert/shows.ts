@@ -30,19 +30,23 @@ export const insertShow = async (
 			...original,
 			poster: await enqueueOptImage(tx, {
 				url: original.poster,
-				column: shows.original.poster,
+				table: shows,
+				column: sql`${shows.original}['poster']`,
 			}),
 			thumbnail: await enqueueOptImage(tx, {
 				url: original.thumbnail,
-				column: shows.original.thumbnail,
+				table: shows,
+				column: sql`${shows.original}['thumbnail']`,
 			}),
 			banner: await enqueueOptImage(tx, {
 				url: original.banner,
-				column: shows.original.banner,
+				table: shows,
+				column: sql`${shows.original}['banner']`,
 			}),
 			logo: await enqueueOptImage(tx, {
 				url: original.logo,
-				column: shows.original.logo,
+				table: shows,
+				column: sql`${shows.original}['logo']`,
 			}),
 		};
 		const ret = await insertBaseShow(tx, { ...show, original: orig });
