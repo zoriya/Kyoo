@@ -2,10 +2,11 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { encode } from "blurhash";
 import { eq, sql } from "drizzle-orm";
+import type { PgColumn } from "drizzle-orm/pg-core";
 import { version } from "package.json";
 import type { PoolClient } from "pg";
 import sharp from "sharp";
-import { db } from "~/db";
+import { type Transaction, db } from "~/db";
 import * as schema from "~/db/schema";
 import { mqueue } from "~/db/schema/queue";
 import type { Image } from "~/models/utils";
@@ -20,18 +21,31 @@ type ImageTask = {
 	column: string;
 };
 
+type ImageTaskC = {
+	url: string;
+	column: PgColumn;
+};
+
 // this will only push a task to the image downloader service and not download it instantly.
 // this is both done to prevent to many requests to be sent at once and to make sure POST
 // requests are not blocked by image downloading or blurhash calculation
 export const enqueueImage = async (
-	tx: typeof db,
-	img: Omit<ImageTask, "id">,
+	tx: Transaction,
+	img: ImageTaskC,
 ): Promise<Image> => {
 	const hasher = new Bun.CryptoHasher("sha256");
 	hasher.update(img.url);
 	const id = hasher.digest().toString("hex");
 
-	await tx.insert(mqueue).values({ kind: "image", message: { id, ...img } });
+	await tx.insert(mqueue).values({
+		kind: "image",
+		message: {
+			id,
+			url: img.url,
+			table: img.column.table._.name,
+			column: img.column.name,
+		} satisfies ImageTask,
+	});
 	await tx.execute(sql`notify image`);
 
 	return {
@@ -42,11 +56,11 @@ export const enqueueImage = async (
 };
 
 export const enqueueOptImage = async (
-	tx: typeof db,
-	img: Omit<ImageTask, "id">,
+	tx: Transaction,
+	img: { url: string | null; column: PgColumn },
 ): Promise<Image | null> => {
 	if (!img.url) return null;
-	return await enqueueImage(tx, img);
+	return await enqueueImage(tx, { url: img.url, column: img.column });
 };
 
 export const processImages = async () => {
@@ -107,6 +121,7 @@ export const processImages = async () => {
 };
 
 async function downloadImage(id: string, url: string): Promise<string> {
+	// TODO: check if file exists before downloading
 	const resp = await fetch(url, {
 		headers: { "User-Agent": `Kyoo v${version}` },
 	});

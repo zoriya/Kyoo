@@ -12,10 +12,15 @@ export const insertStaff = async (
 	if (!seed?.length) return [];
 
 	return await db.transaction(async (tx) => {
-		const people = seed.map((x) => ({
-			...x.staff,
-			image: enqueueOptImage(x.staff.image),
-		}));
+		const people = await Promise.all(
+			seed.map(async (x) => ({
+				...x.staff,
+				image: await enqueueOptImage(tx, {
+					url: x.staff.image,
+					column: staff.image,
+				}),
+			})),
+		);
 		const ret = await tx
 			.insert(staff)
 			.values(people)
@@ -25,16 +30,21 @@ export const insertStaff = async (
 			})
 			.returning({ pk: staff.pk, id: staff.id, slug: staff.slug });
 
-		const rval = seed.map((x, i) => ({
-			showPk,
-			staffPk: ret[i].pk,
-			kind: x.kind,
-			order: i,
-			character: {
-				...x.character,
-				image: enqueueOptImage(x.character.image),
-			},
-		}));
+		const rval = await Promise.all(
+			seed.map(async (x, i) => ({
+				showPk,
+				staffPk: ret[i].pk,
+				kind: x.kind,
+				order: i,
+				character: {
+					...x.character,
+					image: await enqueueOptImage(tx, {
+						url: x.character.image,
+						column: roles.character.image,
+					}),
+				},
+			})),
+		);
 
 		// always replace all roles. this is because:
 		//  - we want `order` to stay in sync (& without duplicates)

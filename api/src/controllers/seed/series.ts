@@ -5,7 +5,7 @@ import { enqueueOptImage } from "./images";
 import { insertCollection } from "./insert/collection";
 import { insertEntries } from "./insert/entries";
 import { insertSeasons } from "./insert/seasons";
-import { insertShow, updateAvailableCount } from "./insert/shows";
+import { insertShow } from "./insert/shows";
 import { insertStaff } from "./insert/staff";
 import { insertStudios } from "./insert/studios";
 import { guessNextRefresh } from "./refresh";
@@ -91,13 +91,6 @@ export const seedSerie = async (
 		...serie
 	} = seed;
 	const nextRefresh = guessNextRefresh(serie.startAir ?? new Date());
-	const original = translations[serie.originalLanguage];
-	if (!original) {
-		return {
-			status: 422,
-			message: "No translation available in the original language.",
-		};
-	}
 
 	const col = await insertCollection(collection, {
 		kind: "serie",
@@ -111,15 +104,6 @@ export const seedSerie = async (
 			nextRefresh,
 			collectionPk: col?.pk,
 			entriesCount: entries.length,
-			original: {
-				language: serie.originalLanguage,
-				name: original.name,
-				latinName: original.latinName ?? null,
-				poster: enqueueOptImage(original.poster),
-				thumbnail: enqueueOptImage(original.thumbnail),
-				logo: enqueueOptImage(original.logo),
-				banner: enqueueOptImage(original.banner),
-			},
 			...serie,
 		},
 		translations,

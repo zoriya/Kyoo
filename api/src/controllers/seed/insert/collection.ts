@@ -48,16 +48,28 @@ export const insertCollection = async (
 			})
 			.returning({ pk: shows.pk, id: shows.id, slug: shows.slug });
 
-		const trans: ShowTrans[] = Object.entries(translations).map(
-			([lang, tr]) => ({
+		const trans: ShowTrans[] = await Promise.all(
+			Object.entries(translations).map(async ([lang, tr]) => ({
 				pk: ret.pk,
 				language: lang,
 				...tr,
-				poster: enqueueOptImage(tr.poster),
-				thumbnail: enqueueOptImage(tr.thumbnail),
-				logo: enqueueOptImage(tr.logo),
-				banner: enqueueOptImage(tr.banner),
-			}),
+				poster: await enqueueOptImage(tx, {
+					url: tr.poster,
+					column: showTranslations.poster,
+				}),
+				thumbnail: await enqueueOptImage(tx, {
+					url: tr.thumbnail,
+					column: showTranslations.thumbnail,
+				}),
+				logo: await enqueueOptImage(tx, {
+					url: tr.logo,
+					column: showTranslations.logo,
+				}),
+				banner: await enqueueOptImage(tx, {
+					url: tr.banner,
+					column: showTranslations.banner,
+				}),
+			})),
 		);
 		await tx
 			.insert(showTranslations)

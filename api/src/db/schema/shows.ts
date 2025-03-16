@@ -58,10 +58,10 @@ export const genres = schema.enum("genres", [
 ]);
 
 type OriginalWithImages = Original & {
-	poster: Image | null;
-	thumbnail: Image | null;
-	banner: Image | null;
-	logo: Image | null;
+	poster?: Image | null;
+	thumbnail?: Image | null;
+	banner?: Image | null;
+	logo?: Image | null;
 };
 
 export const shows = schema.table(

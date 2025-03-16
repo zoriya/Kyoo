@@ -1,5 +1,5 @@
 import { and, count, eq, exists, ne, sql } from "drizzle-orm";
-import { db } from "~/db";
+import { type Transaction, db } from "~/db";
 import { entries, entryVideoJoin, showTranslations, shows } from "~/db/schema";
 import { conflictUpdateAllExcept, sqlarr } from "~/db/utils";
 import type { SeedCollection } from "~/models/collections";
@@ -12,30 +12,53 @@ type Show = typeof shows.$inferInsert;
 type ShowTrans = typeof showTranslations.$inferInsert;
 
 export const insertShow = async (
-	show: Show,
+	show: Omit<Show, "original"> & { originalLanguage: string },
 	translations:
 		| SeedMovie["translations"]
 		| SeedSerie["translations"]
 		| SeedCollection["translations"],
 ) => {
 	return await db.transaction(async (tx) => {
-		const ret = await insertBaseShow(tx, show);
+		const trans: (Omit<ShowTrans, "pk"> & { latinName: string | null })[] =
+			await Promise.all(
+				Object.entries(translations).map(async ([lang, tr]) => ({
+					language: lang,
+					...tr,
+					latinName: tr.latinName ?? null,
+					poster: await enqueueOptImage(tx, {
+						url: tr.poster,
+						column: showTranslations.poster,
+					}),
+					thumbnail: await enqueueOptImage(tx, {
+						url: tr.thumbnail,
+						column: showTranslations.thumbnail,
+					}),
+					logo: await enqueueOptImage(tx, {
+						url: tr.logo,
+						column: showTranslations.logo,
+					}),
+					banner: await enqueueOptImage(tx, {
+						url: tr.banner,
+						column: showTranslations.banner,
+					}),
+				})),
+			);
+		const original = trans.find((x) => x.language === show.originalLanguage);
+
+		if (!original) {
+			tx.rollback();
+			return {
+				status: 422 as const,
+				message: "No translation available in the original language.",
+			};
+		}
+
+		const ret = await insertBaseShow(tx, { ...show, original });
 		if ("status" in ret) return ret;
 
-		const trans: ShowTrans[] = Object.entries(translations).map(
-			([lang, tr]) => ({
-				pk: ret.pk,
-				language: lang,
-				...tr,
-				poster: enqueueOptImage(tr.poster),
-				thumbnail: enqueueOptImage(tr.thumbnail),
-				logo: enqueueOptImage(tr.logo),
-				banner: enqueueOptImage(tr.banner),
-			}),
-		);
 		await tx
 			.insert(showTranslations)
-			.values(trans)
+			.values(trans.map((x) => ({ ...x, pk: ret.pk })))
 			.onConflictDoUpdate({
 				target: [showTranslations.pk, showTranslations.language],
 				set: conflictUpdateAllExcept(showTranslations, ["pk", "language"]),
@@ -44,10 +67,7 @@ export const insertShow = async (
 	});
 };
 
-async function insertBaseShow(
-	tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
-	show: Show,
-) {
+async function insertBaseShow(tx: Transaction, show: Show) {
 	function insert() {
 		return tx
 			.insert(shows)
@@ -97,7 +117,7 @@ async function insertBaseShow(
 }
 
 export async function updateAvailableCount(
-	tx: typeof db | Parameters<Parameters<typeof db.transaction>[0]>[0],
+	tx: Transaction,
 	showPks: number[],
 	updateEntryCount = true,
 ) {

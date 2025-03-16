@@ -37,17 +37,33 @@ export const insertSeasons = async (
 			})
 			.returning({ pk: seasons.pk, id: seasons.id, slug: seasons.slug });
 
-		const trans: SeasonTransI[] = items.flatMap((seed, i) =>
-			Object.entries(seed.translations).map(([lang, tr]) => ({
-				// assumes ret is ordered like items.
-				pk: ret[i].pk,
-				language: lang,
-				...tr,
-				poster: enqueueOptImage(tr.poster),
-				thumbnail: enqueueOptImage(tr.thumbnail),
-				banner: enqueueOptImage(tr.banner),
-			})),
-		);
+		const trans: SeasonTransI[] = (
+			await Promise.all(
+				items.map(
+					async (seed, i) =>
+						await Promise.all(
+							Object.entries(seed.translations).map(async ([lang, tr]) => ({
+								// assumes ret is ordered like items.
+								pk: ret[i].pk,
+								language: lang,
+								...tr,
+								poster: await enqueueOptImage(tx, {
+									url: tr.poster,
+									column: seasonTranslations.poster,
+								}),
+								thumbnail: await enqueueOptImage(tx, {
+									url: tr.thumbnail,
+									column: seasonTranslations.thumbnail,
+								}),
+								banner: await enqueueOptImage(tx, {
+									url: tr.banner,
+									column: seasonTranslations.banner,
+								}),
+							})),
+						),
+				),
+			)
+		).flat();
 		await tx
 			.insert(seasonTranslations)
 			.values(trans)

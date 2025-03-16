@@ -1,7 +1,6 @@
 import { t } from "elysia";
 import type { SeedMovie } from "~/models/movie";
 import { getYear } from "~/utils";
-import { enqueueOptImage } from "./images";
 import { insertCollection } from "./insert/collection";
 import { insertEntries } from "./insert/entries";
 import { insertShow, updateAvailableCount } from "./insert/shows";
@@ -55,13 +54,6 @@ export const seedMovie = async (
 
 	const { translations, videos, collection, studios, staff, ...movie } = seed;
 	const nextRefresh = guessNextRefresh(movie.airDate ?? new Date());
-	const original = translations[movie.originalLanguage];
-	if (!original) {
-		return {
-			status: 422,
-			message: "No translation available in the original language.",
-		};
-	}
 
 	const col = await insertCollection(collection, {
 		kind: "movie",
@@ -76,15 +68,6 @@ export const seedMovie = async (
 			nextRefresh,
 			collectionPk: col?.pk,
 			entriesCount: 1,
-			original: {
-				language: movie.originalLanguage,
-				name: original.name,
-				latinName: original.latinName ?? null,
-				poster: enqueueOptImage(original.poster),
-				thumbnail: enqueueOptImage(original.thumbnail),
-				logo: enqueueOptImage(original.logo),
-				banner: enqueueOptImage(original.banner),
-			},
 			...movie,
 		},
 		translations,

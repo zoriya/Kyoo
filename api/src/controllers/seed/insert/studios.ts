@@ -33,14 +33,24 @@ export const insertStudios = async (
 			})
 			.returning({ pk: studios.pk, id: studios.id, slug: studios.slug });
 
-		const trans: StudioTransI[] = seed.flatMap((x, i) =>
-			Object.entries(x.translations).map(([lang, tr]) => ({
-				pk: ret[i].pk,
-				language: lang,
-				name: tr.name,
-				logo: enqueueOptImage(tr.logo),
-			})),
-		);
+		const trans: StudioTransI[] = (
+			await Promise.all(
+				seed.map(
+					async (x, i) =>
+						await Promise.all(
+							Object.entries(x.translations).map(async ([lang, tr]) => ({
+								pk: ret[i].pk,
+								language: lang,
+								name: tr.name,
+								logo: await enqueueOptImage(tx, {
+									url: tr.logo,
+									column: studioTranslations.logo,
+								}),
+							})),
+						),
+				),
+			)
+		).flat();
 		await tx
 			.insert(studioTranslations)
 			.values(trans)
