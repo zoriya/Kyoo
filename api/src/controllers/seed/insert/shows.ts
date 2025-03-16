@@ -5,6 +5,7 @@ import { conflictUpdateAllExcept, sqlarr } from "~/db/utils";
 import type { SeedCollection } from "~/models/collections";
 import type { SeedMovie } from "~/models/movie";
 import type { SeedSerie } from "~/models/serie";
+import type { Original } from "~/models/utils";
 import { getYear } from "~/utils";
 import { enqueueOptImage } from "../images";
 
@@ -12,53 +13,68 @@ type Show = typeof shows.$inferInsert;
 type ShowTrans = typeof showTranslations.$inferInsert;
 
 export const insertShow = async (
-	show: Omit<Show, "original"> & { originalLanguage: string },
+	show: Omit<Show, "original">,
+	original: Original & {
+		poster: string | null;
+		thumbnail: string | null;
+		banner: string | null;
+		logo: string | null;
+	},
 	translations:
 		| SeedMovie["translations"]
 		| SeedSerie["translations"]
 		| SeedCollection["translations"],
 ) => {
 	return await db.transaction(async (tx) => {
-		const trans: (Omit<ShowTrans, "pk"> & { latinName: string | null })[] =
-			await Promise.all(
-				Object.entries(translations).map(async ([lang, tr]) => ({
-					language: lang,
-					...tr,
-					latinName: tr.latinName ?? null,
-					poster: await enqueueOptImage(tx, {
-						url: tr.poster,
-						column: showTranslations.poster,
-					}),
-					thumbnail: await enqueueOptImage(tx, {
-						url: tr.thumbnail,
-						column: showTranslations.thumbnail,
-					}),
-					logo: await enqueueOptImage(tx, {
-						url: tr.logo,
-						column: showTranslations.logo,
-					}),
-					banner: await enqueueOptImage(tx, {
-						url: tr.banner,
-						column: showTranslations.banner,
-					}),
-				})),
-			);
-		const original = trans.find((x) => x.language === show.originalLanguage);
-
-		if (!original) {
-			tx.rollback();
-			return {
-				status: 422 as const,
-				message: "No translation available in the original language.",
-			};
-		}
-
-		const ret = await insertBaseShow(tx, { ...show, original });
+		const orig = {
+			...original,
+			poster: await enqueueOptImage(tx, {
+				url: original.poster,
+				column: shows.original.poster,
+			}),
+			thumbnail: await enqueueOptImage(tx, {
+				url: original.thumbnail,
+				column: shows.original.thumbnail,
+			}),
+			banner: await enqueueOptImage(tx, {
+				url: original.banner,
+				column: shows.original.banner,
+			}),
+			logo: await enqueueOptImage(tx, {
+				url: original.logo,
+				column: shows.original.logo,
+			}),
+		};
+		const ret = await insertBaseShow(tx, { ...show, original: orig });
 		if ("status" in ret) return ret;
 
+		const trans: ShowTrans[] = await Promise.all(
+			Object.entries(translations).map(async ([lang, tr]) => ({
+				pk: ret.pk,
+				language: lang,
+				...tr,
+				latinName: tr.latinName ?? null,
+				poster: await enqueueOptImage(tx, {
+					url: tr.poster,
+					column: showTranslations.poster,
+				}),
+				thumbnail: await enqueueOptImage(tx, {
+					url: tr.thumbnail,
+					column: showTranslations.thumbnail,
+				}),
+				logo: await enqueueOptImage(tx, {
+					url: tr.logo,
+					column: showTranslations.logo,
+				}),
+				banner: await enqueueOptImage(tx, {
+					url: tr.banner,
+					column: showTranslations.banner,
+				}),
+			})),
+		);
 		await tx
 			.insert(showTranslations)
-			.values(trans.map((x) => ({ ...x, pk: ret.pk })))
+			.values(trans)
 			.onConflictDoUpdate({
 				target: [showTranslations.pk, showTranslations.language],
 				set: conflictUpdateAllExcept(showTranslations, ["pk", "language"]),

@@ -55,6 +55,14 @@ export const seedMovie = async (
 	const { translations, videos, collection, studios, staff, ...movie } = seed;
 	const nextRefresh = guessNextRefresh(movie.airDate ?? new Date());
 
+	const original = translations[movie.originalLanguage];
+	if (!original) {
+		return {
+			status: 422,
+			message: "No translation available in the original language.",
+		};
+	}
+
 	const col = await insertCollection(collection, {
 		kind: "movie",
 		nextRefresh,
@@ -69,6 +77,11 @@ export const seedMovie = async (
 			collectionPk: col?.pk,
 			entriesCount: 1,
 			...movie,
+		},
+		{
+			...original,
+			latinName: original.latinName ?? null,
+			language: movie.originalLanguage,
 		},
 		translations,
 	);
