@@ -3,6 +3,7 @@ import { type Prettify, comment } from "~/utils";
 import { madeInAbyss, registerExamples } from "../examples";
 import { DbMetadata, SeedImage } from "../utils";
 import { Resource } from "../utils/resource";
+import { Progress } from "../watchlist";
 import { BaseEntry } from "./base-entry";
 
 export const ExtraType = t.UnionEnum([
@@ -31,7 +32,14 @@ export const BaseExtra = t.Intersect(
 	},
 );
 
-export const Extra = t.Intersect([Resource(), BaseExtra, DbMetadata]);
+export const Extra = t.Intersect([
+	Resource(),
+	BaseExtra,
+	t.Object({
+		progress: t.Omit(Progress, ["videoId"]),
+	}),
+	DbMetadata,
+]);
 export type Extra = Prettify<typeof Extra.static>;
 
 export const SeedExtra = t.Intersect([
