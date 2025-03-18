@@ -31,3 +31,7 @@ export const migrate = async () => {
 	});
 	console.log(`Database ${dbConfig.database} migrated!`);
 };
+
+export type Transaction =
+	| typeof db
+	| Parameters<Parameters<typeof db.transaction>[0]>[0];

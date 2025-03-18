@@ -2,7 +2,7 @@ import { db } from "~/db";
 import { seasonTranslations, seasons } from "~/db/schema";
 import { conflictUpdateAllExcept } from "~/db/utils";
 import type { SeedSeason } from "~/models/season";
-import { processOptImage } from "../images";
+import { enqueueOptImage } from "../images";
 import { guessNextRefresh } from "../refresh";
 
 type SeasonI = typeof seasons.$inferInsert;
@@ -37,17 +37,33 @@ export const insertSeasons = async (
 			})
 			.returning({ pk: seasons.pk, id: seasons.id, slug: seasons.slug });
 
-		const trans: SeasonTransI[] = items.flatMap((seed, i) =>
-			Object.entries(seed.translations).map(([lang, tr]) => ({
-				// assumes ret is ordered like items.
-				pk: ret[i].pk,
-				language: lang,
-				...tr,
-				poster: processOptImage(tr.poster),
-				thumbnail: processOptImage(tr.thumbnail),
-				banner: processOptImage(tr.banner),
-			})),
-		);
+		const trans: SeasonTransI[] = (
+			await Promise.all(
+				items.map(
+					async (seed, i) =>
+						await Promise.all(
+							Object.entries(seed.translations).map(async ([lang, tr]) => ({
+								// assumes ret is ordered like items.
+								pk: ret[i].pk,
+								language: lang,
+								...tr,
+								poster: await enqueueOptImage(tx, {
+									url: tr.poster,
+									column: seasonTranslations.poster,
+								}),
+								thumbnail: await enqueueOptImage(tx, {
+									url: tr.thumbnail,
+									column: seasonTranslations.thumbnail,
+								}),
+								banner: await enqueueOptImage(tx, {
+									url: tr.banner,
+									column: seasonTranslations.banner,
+								}),
+							})),
+						),
+				),
+			)
+		).flat();
 		await tx
 			.insert(seasonTranslations)
 			.values(trans)

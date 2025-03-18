@@ -1,11 +1,10 @@
 import { t } from "elysia";
 import type { SeedSerie } from "~/models/serie";
 import { getYear } from "~/utils";
-import { processOptImage } from "./images";
 import { insertCollection } from "./insert/collection";
 import { insertEntries } from "./insert/entries";
 import { insertSeasons } from "./insert/seasons";
-import { insertShow, updateAvailableCount } from "./insert/shows";
+import { insertShow } from "./insert/shows";
 import { insertStaff } from "./insert/staff";
 import { insertStudios } from "./insert/studios";
 import { guessNextRefresh } from "./refresh";
@@ -91,6 +90,7 @@ export const seedSerie = async (
 		...serie
 	} = seed;
 	const nextRefresh = guessNextRefresh(serie.startAir ?? new Date());
+
 	const original = translations[serie.originalLanguage];
 	if (!original) {
 		return {
@@ -111,16 +111,12 @@ export const seedSerie = async (
 			nextRefresh,
 			collectionPk: col?.pk,
 			entriesCount: entries.length,
-			original: {
-				language: serie.originalLanguage,
-				name: original.name,
-				latinName: original.latinName ?? null,
-				poster: processOptImage(original.poster),
-				thumbnail: processOptImage(original.thumbnail),
-				logo: processOptImage(original.logo),
-				banner: processOptImage(original.banner),
-			},
 			...serie,
+		},
+		{
+			...original,
+			latinName: original.latinName ?? null,
+			language: serie.originalLanguage,
 		},
 		translations,
 	);

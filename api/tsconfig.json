@@ -9,9 +9,11 @@
 		"strict": true,
 		"skipLibCheck": true,
 		"noErrorTruncation": true,
+		"resolveJsonModule": true,
 		"baseUrl": ".",
 		"paths": {
-			"~/*": ["./src/*"]
+			"~/*": ["./src/*"],
+			"package.json": ["package.json"]
 		}
 	}
 }

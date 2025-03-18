@@ -5,7 +5,7 @@ import { conflictUpdateAllExcept } from "~/db/utils";
 import type { SeedCollection } from "~/models/collections";
 import type { SeedMovie } from "~/models/movie";
 import type { SeedSerie } from "~/models/serie";
-import { processOptImage } from "../images";
+import { enqueueOptImage } from "../images";
 
 type ShowTrans = typeof showTranslations.$inferInsert;
 
@@ -48,16 +48,28 @@ export const insertCollection = async (
 			})
 			.returning({ pk: shows.pk, id: shows.id, slug: shows.slug });
 
-		const trans: ShowTrans[] = Object.entries(translations).map(
-			([lang, tr]) => ({
+		const trans: ShowTrans[] = await Promise.all(
+			Object.entries(translations).map(async ([lang, tr]) => ({
 				pk: ret.pk,
 				language: lang,
 				...tr,
-				poster: processOptImage(tr.poster),
-				thumbnail: processOptImage(tr.thumbnail),
-				logo: processOptImage(tr.logo),
-				banner: processOptImage(tr.banner),
-			}),
+				poster: await enqueueOptImage(tx, {
+					url: tr.poster,
+					column: showTranslations.poster,
+				}),
+				thumbnail: await enqueueOptImage(tx, {
+					url: tr.thumbnail,
+					column: showTranslations.thumbnail,
+				}),
+				logo: await enqueueOptImage(tx, {
+					url: tr.logo,
+					column: showTranslations.logo,
+				}),
+				banner: await enqueueOptImage(tx, {
+					url: tr.banner,
+					column: showTranslations.banner,
+				}),
+			})),
 		);
 		await tx
 			.insert(showTranslations)

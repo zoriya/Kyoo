@@ -1,10 +1,9 @@
 import { t } from "elysia";
 import type { SeedMovie } from "~/models/movie";
 import { getYear } from "~/utils";
-import { processOptImage } from "./images";
 import { insertCollection } from "./insert/collection";
 import { insertEntries } from "./insert/entries";
-import { insertShow, updateAvailableCount } from "./insert/shows";
+import { insertShow } from "./insert/shows";
 import { insertStaff } from "./insert/staff";
 import { insertStudios } from "./insert/studios";
 import { guessNextRefresh } from "./refresh";
@@ -55,6 +54,7 @@ export const seedMovie = async (
 
 	const { translations, videos, collection, studios, staff, ...movie } = seed;
 	const nextRefresh = guessNextRefresh(movie.airDate ?? new Date());
+
 	const original = translations[movie.originalLanguage];
 	if (!original) {
 		return {
@@ -76,16 +76,12 @@ export const seedMovie = async (
 			nextRefresh,
 			collectionPk: col?.pk,
 			entriesCount: 1,
-			original: {
-				language: movie.originalLanguage,
-				name: original.name,
-				latinName: original.latinName ?? null,
-				poster: processOptImage(original.poster),
-				thumbnail: processOptImage(original.thumbnail),
-				logo: processOptImage(original.logo),
-				banner: processOptImage(original.banner),
-			},
 			...movie,
+		},
+		{
+			...original,
+			latinName: original.latinName ?? null,
+			language: movie.originalLanguage,
 		},
 		translations,
 	);

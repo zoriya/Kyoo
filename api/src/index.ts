@@ -1,5 +1,6 @@
 import jwt from "@elysiajs/jwt";
 import { swagger } from "@elysiajs/swagger";
+import { processImages } from "./controllers/seed/images";
 import { migrate } from "./db";
 import { app } from "./elysia";
 import { comment } from "./utils";
@@ -22,6 +23,9 @@ if (!secret) {
 	console.error("Missing jwt secret or auth server. exiting");
 	process.exit(1);
 }
+
+// run image processor task in background
+processImages();
 
 app
 	.use(jwt({ secret }))

@@ -1,37 +1,80 @@
 import { and, count, eq, exists, ne, sql } from "drizzle-orm";
-import { db } from "~/db";
+import { type Transaction, db } from "~/db";
 import { entries, entryVideoJoin, showTranslations, shows } from "~/db/schema";
 import { conflictUpdateAllExcept, sqlarr } from "~/db/utils";
 import type { SeedCollection } from "~/models/collections";
 import type { SeedMovie } from "~/models/movie";
 import type { SeedSerie } from "~/models/serie";
+import type { Original } from "~/models/utils";
 import { getYear } from "~/utils";
-import { processOptImage } from "../images";
+import { enqueueOptImage } from "../images";
 
 type Show = typeof shows.$inferInsert;
 type ShowTrans = typeof showTranslations.$inferInsert;
 
 export const insertShow = async (
-	show: Show,
+	show: Omit<Show, "original">,
+	original: Original & {
+		poster: string | null;
+		thumbnail: string | null;
+		banner: string | null;
+		logo: string | null;
+	},
 	translations:
 		| SeedMovie["translations"]
 		| SeedSerie["translations"]
 		| SeedCollection["translations"],
 ) => {
 	return await db.transaction(async (tx) => {
-		const ret = await insertBaseShow(tx, show);
+		const orig = {
+			...original,
+			poster: await enqueueOptImage(tx, {
+				url: original.poster,
+				table: shows,
+				column: sql`${shows.original}['poster']`,
+			}),
+			thumbnail: await enqueueOptImage(tx, {
+				url: original.thumbnail,
+				table: shows,
+				column: sql`${shows.original}['thumbnail']`,
+			}),
+			banner: await enqueueOptImage(tx, {
+				url: original.banner,
+				table: shows,
+				column: sql`${shows.original}['banner']`,
+			}),
+			logo: await enqueueOptImage(tx, {
+				url: original.logo,
+				table: shows,
+				column: sql`${shows.original}['logo']`,
+			}),
+		};
+		const ret = await insertBaseShow(tx, { ...show, original: orig });
 		if ("status" in ret) return ret;
 
-		const trans: ShowTrans[] = Object.entries(translations).map(
-			([lang, tr]) => ({
+		const trans: ShowTrans[] = await Promise.all(
+			Object.entries(translations).map(async ([lang, tr]) => ({
 				pk: ret.pk,
 				language: lang,
 				...tr,
-				poster: processOptImage(tr.poster),
-				thumbnail: processOptImage(tr.thumbnail),
-				logo: processOptImage(tr.logo),
-				banner: processOptImage(tr.banner),
-			}),
+				latinName: tr.latinName ?? null,
+				poster: await enqueueOptImage(tx, {
+					url: tr.poster,
+					column: showTranslations.poster,
+				}),
+				thumbnail: await enqueueOptImage(tx, {
+					url: tr.thumbnail,
+					column: showTranslations.thumbnail,
+				}),
+				logo: await enqueueOptImage(tx, {
+					url: tr.logo,
+					column: showTranslations.logo,
+				}),
+				banner: await enqueueOptImage(tx, {
+					url: tr.banner,
+					column: showTranslations.banner,
+				}),
+			})),
 		);
 		await tx
 			.insert(showTranslations)
@@ -44,10 +87,7 @@ export const insertShow = async (
 	});
 };
 
-async function insertBaseShow(
-	tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
-	show: Show,
-) {
+async function insertBaseShow(tx: Transaction, show: Show) {
 	function insert() {
 		return tx
 			.insert(shows)
@@ -97,7 +137,7 @@ async function insertBaseShow(
 }
 
 export async function updateAvailableCount(
-	tx: typeof db | Parameters<Parameters<typeof db.transaction>[0]>[0],
+	tx: Transaction,
 	showPks: number[],
 	updateEntryCount = true,
 ) {

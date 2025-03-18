@@ -1,9 +1,9 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "~/db";
 import { roles, staff } from "~/db/schema";
 import { conflictUpdateAllExcept } from "~/db/utils";
 import type { SeedStaff } from "~/models/staff";
-import { processOptImage } from "../images";
+import { enqueueOptImage } from "../images";
 
 export const insertStaff = async (
 	seed: SeedStaff[] | undefined,
@@ -12,10 +12,15 @@ export const insertStaff = async (
 	if (!seed?.length) return [];
 
 	return await db.transaction(async (tx) => {
-		const people = seed.map((x) => ({
-			...x.staff,
-			image: processOptImage(x.staff.image),
-		}));
+		const people = await Promise.all(
+			seed.map(async (x) => ({
+				...x.staff,
+				image: await enqueueOptImage(tx, {
+					url: x.staff.image,
+					column: staff.image,
+				}),
+			})),
+		);
 		const ret = await tx
 			.insert(staff)
 			.values(people)
@@ -25,16 +30,22 @@ export const insertStaff = async (
 			})
 			.returning({ pk: staff.pk, id: staff.id, slug: staff.slug });
 
-		const rval = seed.map((x, i) => ({
-			showPk,
-			staffPk: ret[i].pk,
-			kind: x.kind,
-			order: i,
-			character: {
-				...x.character,
-				image: processOptImage(x.character.image),
-			},
-		}));
+		const rval = await Promise.all(
+			seed.map(async (x, i) => ({
+				showPk,
+				staffPk: ret[i].pk,
+				kind: x.kind,
+				order: i,
+				character: {
+					...x.character,
+					image: await enqueueOptImage(tx, {
+						url: x.character.image,
+						table: roles,
+						column: sql`${roles.character}['image']`,
+					}),
+				},
+			})),
+		);
 
 		// always replace all roles. this is because:
 		//  - we want `order` to stay in sync (& without duplicates)
