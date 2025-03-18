@@ -60,6 +60,8 @@ app
 					{ name: "movies", description: "Routes about movies" },
 					{ name: "series", description: "Routes about series" },
 					{ name: "collections", description: "Routes about collections" },
+					{ name: "studios", description: "Routes about studios" },
+					{ name: "staff", description: "Routes about staff & roles" },
 					{
 						name: "videos",
 						description: comment`
@@ -67,8 +69,10 @@ app
 							Can be used for administration or third party apps.
 						`,
 					},
-					{ name: "studios", description: "Routes about studios" },
-					{ name: "staff", description: "Routes about staff & roles" },
+					{
+						name: "images",
+						description: "Routes about images: posters, thumbnails...",
+					},
 				],
 			},
 		}),
