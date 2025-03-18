@@ -1,17 +1,19 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { encode } from "blurhash";
-import { SQL, type SQLWrapper, eq, getTableName, sql } from "drizzle-orm";
-import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
+import { type SQL, eq, is, sql } from "drizzle-orm";
+import { PgColumn, type PgTable } from "drizzle-orm/pg-core";
 import { version } from "package.json";
 import type { PoolClient } from "pg";
 import sharp from "sharp";
 import { type Transaction, db } from "~/db";
-import { mqueue } from "~/db/schema/queue";
+import { mqueue } from "~/db/schema/mqueue";
 import type { Image } from "~/models/utils";
 
 export const imageDir = process.env.IMAGES_PATH ?? "./images";
 await mkdir(imageDir, { recursive: true });
+
+export const defaultBlurhash = "000000";
 
 type ImageTask = {
 	id: string;
@@ -35,19 +37,34 @@ export const enqueueOptImage = async (
 	hasher.update(img.url);
 	const id = hasher.digest().toString("hex");
 
+	const cleanupColumn = (column: SQL) =>
+		// @ts-expect-error dialect is private
+		db.dialect.sqlToQuery(
+			sql.join(
+				column.queryChunks.map((x) => {
+					if (is(x, PgColumn)) {
+						return sql.identifier(x.name);
+					}
+					return x;
+				}),
+			),
+		).sql;
+
 	const message: ImageTask =
 		"table" in img
 			? {
 					id,
 					url: img.url,
-					table: getTableName(img.table),
-					column: db.execute(img.column).getQuery().sql,
+					// @ts-expect-error dialect is private
+					table: db.dialect.sqlToQuery(sql`${img.table}`).sql,
+					column: cleanupColumn(img.column),
 				}
 			: {
 					id,
 					url: img.url,
-					table: getTableName(img.column.table),
-					column: img.column.name,
+					// @ts-expect-error dialect is private
+					table: db.dialect.sqlToQuery(sql`${img.column.table}`).sql,
+					column: sql.identifier(img.column.name).value,
 				};
 	await tx.insert(mqueue).values({
 		kind: "image",
@@ -58,7 +75,7 @@ export const enqueueOptImage = async (
 	return {
 		id,
 		source: img.url,
-		blurhash: "",
+		blurhash: defaultBlurhash,
 	};
 };
 
@@ -83,7 +100,7 @@ export const processImages = async () => {
 			const column = sql.raw(img.column);
 
 			await tx.execute(sql`
-				update ${table} set ${column} = ${ret} where ${column}->'id' = '${item.id}'
+				update ${table} set ${column} = ${ret} where ${column}->'id' = ${sql.raw(`'"${img.id}"'::jsonb`)}
 			`);
 
 			await tx.delete(mqueue).where(eq(mqueue.id, item.id));
@@ -112,6 +129,7 @@ export const processImages = async () => {
 
 	// start processing old tasks
 	await processAll();
+	return () => client.release(true);
 };
 
 async function downloadImage(id: string, url: string): Promise<string> {
@@ -144,6 +162,7 @@ async function downloadImage(id: string, url: string): Promise<string> {
 
 	const { data, info } = await image
 		.resize(32, 32, { fit: "inside" })
+		.ensureAlpha()
 		.raw()
 		.toBuffer({ resolveWithObject: true });
 
