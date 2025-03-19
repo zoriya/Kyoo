@@ -1,43 +1,36 @@
 import { stat } from "node:fs/promises";
 import type { BunFile } from "bun";
 import { type SQL, and, eq, sql } from "drizzle-orm";
-import type { PgColumn } from "drizzle-orm/pg-core";
 import Elysia, { type Context, t } from "elysia";
 import { db } from "~/db";
 import { showTranslations, shows } from "~/db/schema";
 import { sqlarr } from "~/db/utils";
 import { KError } from "~/models/error";
 import { bubble } from "~/models/examples";
-import {
-	AcceptLanguage,
-	type Image,
-	isUuid,
-	processLanguages,
-} from "~/models/utils";
+import { AcceptLanguage, isUuid, processLanguages } from "~/models/utils";
 import { imageDir } from "./seed/images";
 
 function getRedirectToImageHandler({
-	image,
 	filter,
 }: {
-	image: PgColumn<any, any, { $type: Image }>;
-	filter: SQL;
+	filter?: SQL;
 }) {
 	return async function Handler({
-		params: { id },
+		params: { id, image },
 		headers: { "accept-language": languages },
 		query: { quality },
 		set,
 		error,
 		redirect,
 	}: {
-		params: { id: string };
+		params: { id: string; image: "poster" | "thumbnail" | "banner" | "logo" };
 		headers: { "accept-language": string };
 		query: { quality: "high" | "medium" | "low" };
 		set: Context["set"];
 		error: Context["error"];
 		redirect: Context["redirect"];
 	}) {
+		id ??= "random";
 		const lang = processLanguages(languages);
 		const item = db.$with("item").as(
 			db
@@ -59,7 +52,7 @@ function getRedirectToImageHandler({
 		const [ret] = await db
 			.with(item)
 			.select({
-				image,
+				image: showTranslations[image],
 				language: showTranslations.language,
 			})
 			.from(item)
@@ -140,10 +133,7 @@ export const imagesH = new Elysia({ tags: ["images"] })
 	)
 	.guard({
 		params: t.Object({
-			id: t.String({
-				description: "The id or slug of the item to retrieve.",
-				example: bubble.slug,
-			}),
+			image: t.UnionEnum(["poster", "thumbnail", "logo", "banner"]),
 		}),
 		query: t.Object({
 			quality: t.Optional(
@@ -168,44 +158,43 @@ export const imagesH = new Elysia({ tags: ["images"] })
 			422: KError,
 		},
 	})
+	.get("/shows/random/:image", getRedirectToImageHandler({}), {
+		detail: { description: "Get the specified image of a random show." },
+	})
+	.guard({
+		params: t.Object({
+			id: t.String({
+				description: "The id or slug of the item to retrieve.",
+				example: bubble.slug,
+			}),
+			image: t.UnionEnum(["poster", "thumbnail", "logo", "banner"]),
+		}),
+	})
 	.get(
-		"/movies/:id/poster",
+		"/movies/:id/:image",
 		getRedirectToImageHandler({
 			filter: eq(shows.kind, "movie"),
-			image: showTranslations.poster,
 		}),
 		{
-			detail: { description: "Get the poster of a movie" },
+			detail: { description: "Get the specified image of a movie" },
 		},
 	)
 	.get(
-		"/movies/:id/thumbnail",
+		"/series/:id/:image",
 		getRedirectToImageHandler({
-			filter: eq(shows.kind, "movie"),
-			image: showTranslations.thumbnail,
+			filter: eq(shows.kind, "serie"),
 		}),
 		{
-			detail: { description: "Get the thumbnail of a movie" },
+			detail: { description: "Get the specified image of a serie" },
 		},
 	)
 	.get(
-		"/movies/:id/logo",
+		"/collections/:id/:image",
 		getRedirectToImageHandler({
-			filter: eq(shows.kind, "movie"),
-			image: showTranslations.logo,
+			filter: eq(shows.kind, "collection"),
 		}),
 		{
-			detail: { description: "Get the logo of a movie" },
-		},
-	)
-	.get(
-		"/movies/:id/banner",
-		getRedirectToImageHandler({
-			filter: eq(shows.kind, "movie"),
-			image: showTranslations.banner,
-		}),
-		{
-			detail: { description: "Get the banner of a movie" },
+			detail: { description: "Get the specified image of a collection" },
 		},
 	);
 
