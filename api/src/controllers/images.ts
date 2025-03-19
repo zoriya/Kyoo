@@ -2,84 +2,95 @@ import { stat } from "node:fs/promises";
 import type { BunFile } from "bun";
 import { type SQL, and, eq, sql } from "drizzle-orm";
 import type { PgColumn } from "drizzle-orm/pg-core";
-import Elysia, { type InferContext, t } from "elysia";
+import Elysia, { type Context, t } from "elysia";
 import { db } from "~/db";
 import { showTranslations, shows } from "~/db/schema";
 import { sqlarr } from "~/db/utils";
 import { KError } from "~/models/error";
 import { bubble } from "~/models/examples";
-import { AcceptLanguage, isUuid, processLanguages } from "~/models/utils";
+import {
+	AcceptLanguage,
+	type Image,
+	isUuid,
+	processLanguages,
+} from "~/models/utils";
 import { imageDir } from "./seed/images";
 
-async function redirectToImage({
+function getRedirectToImageHandler({
 	image,
 	filter,
-	id,
-	languages,
-	quality,
-	set,
-	error,
-	redirect,
 }: {
-	image: typeof showTranslations.poster;
+	image: PgColumn<any, any, { $type: Image }>;
 	filter: SQL;
-	id: string;
-	languages: string;
-	quality?: "high" | "medium" | "low";
-	set: InferContext<typeof imagesH>["set"];
-	error: InferContext<typeof imagesH>["error"];
-	redirect: InferContext<typeof imagesH>["redirect"];
 }) {
-	const lang = processLanguages(languages);
-	const item = db.$with("item").as(
-		db
-			.select({ pk: shows.pk })
-			.from(shows)
+	return async function Handler({
+		params: { id },
+		headers: { "accept-language": languages },
+		query: { quality },
+		set,
+		error,
+		redirect,
+	}: {
+		params: { id: string };
+		headers: { "accept-language": string };
+		query: { quality: "high" | "medium" | "low" };
+		set: Context["set"];
+		error: Context["error"];
+		redirect: Context["redirect"];
+	}) {
+		const lang = processLanguages(languages);
+		const item = db.$with("item").as(
+			db
+				.select({ pk: shows.pk })
+				.from(shows)
+				.where(
+					and(
+						filter,
+						id !== "random"
+							? isUuid(id)
+								? eq(shows.id, id)
+								: eq(shows.slug, id)
+							: undefined,
+					),
+				)
+				.orderBy(sql`random()`)
+				.limit(1),
+		);
+		const [ret] = await db
+			.with(item)
+			.select({
+				image,
+				language: showTranslations.language,
+			})
+			.from(item)
+			.leftJoin(showTranslations, eq(item.pk, showTranslations.pk))
 			.where(
-				and(
-					filter,
-					id !== "random"
-						? isUuid(id)
-							? eq(shows.id, id)
-							: eq(shows.slug, id)
-						: undefined,
-				),
+				!lang.includes("*")
+					? eq(showTranslations.language, sql`any(${sqlarr(lang)})`)
+					: undefined,
 			)
-			.orderBy(sql`random()`)
-			.limit(1),
-	);
-	const [ret] = await db
-		.with(item)
-		.select({
-			image,
-			language: showTranslations.language,
-		})
-		.from(item)
-		.leftJoin(showTranslations, eq(item.pk, showTranslations.pk))
-		.where(
-			!lang.includes("*")
-				? eq(showTranslations.language, sql`any(${sqlarr(lang)})`)
-				: undefined,
-		)
-		.orderBy(sql`array_position(${sqlarr(lang)}, ${showTranslations.language})`)
-		.limit(1);
+			.orderBy(
+				sql`array_position(${sqlarr(lang)}, ${showTranslations.language})`,
+			)
+			.limit(1);
 
-	if (!ret) {
-		return error(404, {
-			status: 404,
-			message: `No movie found with id or slug: '${id}'.`,
-		});
-	}
-	if (!ret.language) {
-		return error(422, {
-			status: 422,
-			message: "Accept-Language header could not be satisfied.",
-		});
-	}
-	set.headers["content-language"] = ret.language;
-	return quality
-		? redirect(`/images/${ret.image!.id}?quality=${quality}`)
-		: redirect(`/images/${ret.image!.id}`);
+		if (!ret) {
+			return error(404, {
+				status: 404,
+				message: `No movie found with id or slug: '${id}'.`,
+			});
+		}
+		if (!ret.language) {
+			return error(422, {
+				status: 422,
+				message: "Accept-Language header could not be satisfied.",
+			});
+		}
+		set.headers["content-language"] = ret.language;
+		return quality
+			? redirect(`/images/${ret.image!.id}?quality=${quality}`)
+			: redirect(`/images/${ret.image!.id}`);
+	};
 }
 
 export const imagesH = new Elysia({ tags: ["images"] })
@@ -159,26 +170,42 @@ export const imagesH = new Elysia({ tags: ["images"] })
 	})
 	.get(
 		"/movies/:id/poster",
-		({
-			params: { id },
-			headers: { "accept-language": languages },
-			query: { quality },
-			set,
-			error,
-			redirect,
-		}) =>
-			redirectToImage({
-				filter: eq(shows.kind, "movie"),
-				image: showTranslations.poster,
-				id,
-				languages,
-				quality,
-				set,
-				error,
-				redirect,
-			}),
+		getRedirectToImageHandler({
+			filter: eq(shows.kind, "movie"),
+			image: showTranslations.poster,
+		}),
 		{
 			detail: { description: "Get the poster of a movie" },
+		},
+	)
+	.get(
+		"/movies/:id/thumbnail",
+		getRedirectToImageHandler({
+			filter: eq(shows.kind, "movie"),
+			image: showTranslations.thumbnail,
+		}),
+		{
+			detail: { description: "Get the thumbnail of a movie" },
+		},
+	)
+	.get(
+		"/movies/:id/logo",
+		getRedirectToImageHandler({
+			filter: eq(shows.kind, "movie"),
+			image: showTranslations.logo,
+		}),
+		{
+			detail: { description: "Get the logo of a movie" },
+		},
+	)
+	.get(
+		"/movies/:id/banner",
+		getRedirectToImageHandler({
+			filter: eq(shows.kind, "movie"),
+			image: showTranslations.banner,
+		}),
+		{
+			detail: { description: "Get the banner of a movie" },
 		},
 	);
 
