@@ -3,7 +3,13 @@ import type { BunFile } from "bun";
 import { type SQL, and, eq, sql } from "drizzle-orm";
 import Elysia, { type Context, t } from "elysia";
 import { db } from "~/db";
-import { showTranslations, shows } from "~/db/schema";
+import {
+	showTranslations,
+	shows,
+	staff,
+	studioTranslations,
+	studios,
+} from "~/db/schema";
 import { sqlarr } from "~/db/utils";
 import { KError } from "~/models/error";
 import { bubble } from "~/models/examples";
@@ -70,7 +76,7 @@ function getRedirectToImageHandler({
 		if (!ret) {
 			return error(404, {
 				status: 404,
-				message: `No movie found with id or slug: '${id}'.`,
+				message: `No item found with id or slug: '${id}'.`,
 			});
 		}
 		if (!ret.language) {
@@ -132,9 +138,6 @@ export const imagesH = new Elysia({ tags: ["images"] })
 		},
 	)
 	.guard({
-		params: t.Object({
-			image: t.UnionEnum(["poster", "thumbnail", "logo", "banner"]),
-		}),
 		query: t.Object({
 			quality: t.Optional(
 				t.UnionEnum(["high", "medium", "low"], {
@@ -142,9 +145,6 @@ export const imagesH = new Elysia({ tags: ["images"] })
 					description: "The quality you want your image to be in.",
 				}),
 			),
-		}),
-		headers: t.Object({
-			"accept-language": AcceptLanguage(),
 		}),
 		response: {
 			302: t.Void({
@@ -158,8 +158,124 @@ export const imagesH = new Elysia({ tags: ["images"] })
 			422: KError,
 		},
 	})
+	.get(
+		"/staff/:id/image",
+		async ({ params: { id }, query: { quality }, error, redirect }) => {
+			const [ret] = await db
+				.select({ image: staff.image })
+				.from(staff)
+				.where(
+					id !== "random"
+						? isUuid(id)
+							? eq(shows.id, id)
+							: eq(shows.slug, id)
+						: undefined,
+				)
+				.orderBy(sql`random()`)
+				.limit(1);
+
+			if (!ret) {
+				return error(404, {
+					status: 404,
+					message: `No staff member found with id or slug: '${id}'.`,
+				});
+			}
+			return quality
+				? redirect(`/images/${ret.image!.id}?quality=${quality}`)
+				: redirect(`/images/${ret.image!.id}`);
+		},
+		{
+			detail: { description: "Get the image of a staff member." },
+			params: t.Object({
+				id: t.String({
+					description: "The id or slug of the staff member.",
+					example: bubble.slug,
+				}),
+			}),
+		},
+	)
+	.guard({
+		headers: t.Object({
+			"accept-language": AcceptLanguage(),
+		}),
+	})
+	.get(
+		"/studios/:id/logo",
+		async ({
+			params: { id },
+			headers: { "accept-language": languages },
+			query: { quality },
+			set,
+			error,
+			redirect,
+		}) => {
+			const lang = processLanguages(languages);
+			const item = db.$with("item").as(
+				db
+					.select({ pk: studios.pk })
+					.from(studios)
+					.where(
+						id !== "random"
+							? isUuid(id)
+								? eq(studios.id, id)
+								: eq(studios.slug, id)
+							: undefined,
+					)
+					.orderBy(sql`random()`)
+					.limit(1),
+			);
+			const [ret] = await db
+				.with(item)
+				.select({
+					image: studioTranslations.logo,
+					language: studioTranslations.language,
+				})
+				.from(item)
+				.leftJoin(studioTranslations, eq(item.pk, studioTranslations.pk))
+				.where(
+					!lang.includes("*")
+						? eq(studioTranslations.language, sql`any(${sqlarr(lang)})`)
+						: undefined,
+				)
+				.orderBy(
+					sql`array_position(${sqlarr(lang)}, ${studioTranslations.language})`,
+				)
+				.limit(1);
+
+			if (!ret) {
+				return error(404, {
+					status: 404,
+					message: `No studio found with id or slug: '${id}'.`,
+				});
+			}
+			if (!ret.language) {
+				return error(422, {
+					status: 422,
+					message: "Accept-Language header could not be satisfied.",
+				});
+			}
+			set.headers["content-language"] = ret.language;
+			return quality
+				? redirect(`/images/${ret.image!.id}?quality=${quality}`)
+				: redirect(`/images/${ret.image!.id}`);
+		},
+		{
+			detail: { description: "Get the logo of a studio." },
+			params: t.Object({
+				id: t.String({
+					description: "The id or slug of the studio.",
+					example: bubble.slug,
+				}),
+			}),
+		},
+	)
 	.get("/shows/random/:image", getRedirectToImageHandler({}), {
 		detail: { description: "Get the specified image of a random show." },
+		params: t.Object({
+			image: t.UnionEnum(["poster", "thumbnail", "logo", "banner"], {
+				description: "The type of image to retrive.",
+			}),
+		}),
 	})
 	.guard({
 		params: t.Object({
@@ -167,7 +283,9 @@ export const imagesH = new Elysia({ tags: ["images"] })
 				description: "The id or slug of the item to retrieve.",
 				example: bubble.slug,
 			}),
-			image: t.UnionEnum(["poster", "thumbnail", "logo", "banner"]),
+			image: t.UnionEnum(["poster", "thumbnail", "logo", "banner"], {
+				description: "The type of image to retrive.",
+			}),
 		}),
 	})
 	.get(
