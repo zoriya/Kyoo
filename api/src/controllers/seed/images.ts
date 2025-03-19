@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { encode } from "blurhash";
-import { type SQL, eq, is, sql } from "drizzle-orm";
+import { type SQL, and, eq, is, lt, sql } from "drizzle-orm";
 import { PgColumn, type PgTable } from "drizzle-orm/pg-core";
 import { version } from "package.json";
 import type { PoolClient } from "pg";
@@ -86,24 +86,32 @@ export const processImages = async () => {
 				.select()
 				.from(mqueue)
 				.for("update", { skipLocked: true })
-				.where(eq(mqueue.kind, "image"))
-				.orderBy(mqueue.createdAt)
+				.where(and(eq(mqueue.kind, "image"), lt(mqueue.attempt, 5)))
+				.orderBy(mqueue.attempt, mqueue.createdAt)
 				.limit(1);
 
 			if (!item) return false;
 
 			const img = item.message as ImageTask;
-			const blurhash = await downloadImage(img.id, img.url);
-			const ret: Image = { id: img.id, source: img.url, blurhash };
+			try {
+				const blurhash = await downloadImage(img.id, img.url);
+				const ret: Image = { id: img.id, source: img.url, blurhash };
 
-			const table = sql.raw(img.table);
-			const column = sql.raw(img.column);
+				const table = sql.raw(img.table);
+				const column = sql.raw(img.column);
 
-			await tx.execute(sql`
+				await tx.execute(sql`
 				update ${table} set ${column} = ${ret} where ${column}->'id' = ${sql.raw(`'"${img.id}"'::jsonb`)}
 			`);
 
-			await tx.delete(mqueue).where(eq(mqueue.id, item.id));
+				await tx.delete(mqueue).where(eq(mqueue.id, item.id));
+			} catch (err) {
+				console.error("Failed to download image", img.url, err);
+				await tx
+					.update(mqueue)
+					.set({ attempt: sql`${mqueue.attempt}+1` })
+					.where(eq(mqueue.id, item.id));
+			}
 			return true;
 		});
 	}

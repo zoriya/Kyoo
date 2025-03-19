@@ -1,5 +1,6 @@
 import { Elysia } from "elysia";
 import { entriesH } from "./controllers/entries";
+import { imagesH } from "./controllers/images";
 import { seasonsH } from "./controllers/seasons";
 import { seed } from "./controllers/seed";
 import { collections } from "./controllers/shows/collections";
@@ -53,7 +54,8 @@ export const app = new Elysia()
 	.use(collections)
 	.use(entriesH)
 	.use(seasonsH)
-	.use(videosH)
 	.use(studiosH)
 	.use(staffH)
+	.use(videosH)
+	.use(imagesH)
 	.use(seed);
