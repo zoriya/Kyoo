@@ -1,7 +1,8 @@
 import { stat } from "node:fs/promises";
 import type { BunFile } from "bun";
-import { and, eq, sql } from "drizzle-orm";
-import Elysia, { t } from "elysia";
+import { type SQL, and, eq, sql } from "drizzle-orm";
+import type { PgColumn } from "drizzle-orm/pg-core";
+import Elysia, { type InferContext, t } from "elysia";
 import { db } from "~/db";
 import { showTranslations, shows } from "~/db/schema";
 import { sqlarr } from "~/db/utils";
@@ -9,6 +10,77 @@ import { KError } from "~/models/error";
 import { bubble } from "~/models/examples";
 import { AcceptLanguage, isUuid, processLanguages } from "~/models/utils";
 import { imageDir } from "./seed/images";
+
+async function redirectToImage({
+	image,
+	filter,
+	id,
+	languages,
+	quality,
+	set,
+	error,
+	redirect,
+}: {
+	image: typeof showTranslations.poster;
+	filter: SQL;
+	id: string;
+	languages: string;
+	quality?: "high" | "medium" | "low";
+	set: InferContext<typeof imagesH>["set"];
+	error: InferContext<typeof imagesH>["error"];
+	redirect: InferContext<typeof imagesH>["redirect"];
+}) {
+	const lang = processLanguages(languages);
+	const item = db.$with("item").as(
+		db
+			.select({ pk: shows.pk })
+			.from(shows)
+			.where(
+				and(
+					filter,
+					id !== "random"
+						? isUuid(id)
+							? eq(shows.id, id)
+							: eq(shows.slug, id)
+						: undefined,
+				),
+			)
+			.orderBy(sql`random()`)
+			.limit(1),
+	);
+	const [ret] = await db
+		.with(item)
+		.select({
+			image,
+			language: showTranslations.language,
+		})
+		.from(item)
+		.leftJoin(showTranslations, eq(item.pk, showTranslations.pk))
+		.where(
+			!lang.includes("*")
+				? eq(showTranslations.language, sql`any(${sqlarr(lang)})`)
+				: undefined,
+		)
+		.orderBy(sql`array_position(${sqlarr(lang)}, ${showTranslations.language})`)
+		.limit(1);
+
+	if (!ret) {
+		return error(404, {
+			status: 404,
+			message: `No movie found with id or slug: '${id}'.`,
+		});
+	}
+	if (!ret.language) {
+		return error(422, {
+			status: 422,
+			message: "Accept-Language header could not be satisfied.",
+		});
+	}
+	set.headers["content-language"] = ret.language;
+	return quality
+		? redirect(`/images/${ret.image!.id}?quality=${quality}`)
+		: redirect(`/images/${ret.image!.id}`);
+}
 
 export const imagesH = new Elysia({ tags: ["images"] })
 	.get(
@@ -55,83 +127,58 @@ export const imagesH = new Elysia({ tags: ["images"] })
 			},
 		},
 	)
+	.guard({
+		params: t.Object({
+			id: t.String({
+				description: "The id or slug of the item to retrieve.",
+				example: bubble.slug,
+			}),
+		}),
+		query: t.Object({
+			quality: t.Optional(
+				t.UnionEnum(["high", "medium", "low"], {
+					default: "high",
+					description: "The quality you want your image to be in.",
+				}),
+			),
+		}),
+		headers: t.Object({
+			"accept-language": AcceptLanguage(),
+		}),
+		response: {
+			302: t.Void({
+				description:
+					"Redirected to the [/images/{id}](#tag/images/GET/images/{id}) route.",
+			}),
+			404: {
+				...KError,
+				description: "No item found with the given id or slug.",
+			},
+			422: KError,
+		},
+	})
 	.get(
 		"/movies/:id/poster",
-		async ({
+		({
 			params: { id },
 			headers: { "accept-language": languages },
 			query: { quality },
 			set,
 			error,
 			redirect,
-		}) => {
-			const lang = processLanguages(languages);
-			const [movie] = await db
-				.select({
-					poster: showTranslations.poster,
-					language: showTranslations.language,
-				})
-				.from(shows)
-				.leftJoin(showTranslations, eq(shows.pk, showTranslations.pk))
-				.where(
-					and(
-						eq(shows.kind, "movie"),
-						isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
-						!lang.includes("*")
-							? eq(showTranslations.language, sql`any(${sqlarr(lang)})`)
-							: undefined,
-					),
-				)
-				.orderBy(
-					sql`array_position(${sqlarr(lang)}, ${showTranslations.language})`,
-				)
-				.limit(1);
-
-			if (!movie) {
-				return error(404, {
-					status: 404,
-					message: `No movie found with id or slug: '${id}'.`,
-				});
-			}
-			if (!movie.language) {
-				return error(422, {
-					status: 422,
-					message: "Accept-Language header could not be satisfied.",
-				});
-			}
-			set.headers["content-language"] = movie.language;
-			return redirect(`/images/${movie.poster!.id}?quality=${quality}`);
-		},
+		}) =>
+			redirectToImage({
+				filter: eq(shows.kind, "movie"),
+				image: showTranslations.poster,
+				id,
+				languages,
+				quality,
+				set,
+				error,
+				redirect,
+			}),
 		{
 			detail: { description: "Get the poster of a movie" },
-			params: t.Object({
-				id: t.String({
-					description: "The id or slug of the movie to retrieve.",
-					example: bubble.slug,
-				}),
-			}),
-			query: t.Object({
-				quality: t.Optional(
-					t.UnionEnum(["high", "medium", "low"], {
-						default: "high",
-						description: "The quality you want your image to be in.",
-					}),
-				),
-			}),
-			headers: t.Object({
-				"accept-language": AcceptLanguage(),
-			}),
-			response: {
-				302: t.Void({
-					description:
-						"Redirected to the [/movies/{id}](#tag/movies/GET/movies/{id}) route.",
-				}),
-				404: {
-					...KError,
-					description: "No movie found with the given id or slug.",
-				},
-				422: KError,
-			},
 		},
 	);
 
