@@ -1,205 +1,205 @@
 {
 	"home": {
-		"recommended": "",
-		"news": "",
-		"watchlist": "",
-		"info": "",
+		"recommended": "موصى به",
+		"news": "أخبار",
+		"watchlist": "مواصلة المشاهدة",
+		"info": "شاهد المزيد",
 		"none": "",
 		"watchlistLogin": "",
 		"refreshMetadata": "",
 		"episodeMore": {
 			"goToShow": "",
-			"download": "",
-			"mediainfo": ""
+			"download": "تحميل",
+			"mediainfo": "عرض معلومات الملف"
 		}
 	},
 	"show": {
-		"play": "",
-		"trailer": "",
-		"studio": "",
-		"genre": "",
-		"genre-none": "",
-		"staff": "",
-		"staff-none": "",
-		"noOverview": "",
-		"episode-none": "",
-		"episodeNoMetadata": "",
-		"tags": "",
-		"links": "",
-		"jumpToSeason": "",
-		"partOf": "",
-		"watchlistAdd": "",
-		"watchlistEdit": "",
-		"watchlistRemove": "",
-		"watchlistLogin": "",
+		"play": "تشغيل",
+		"trailer": "تشغيل المقطع الدعائي",
+		"studio": "استوديو",
+		"genre": "الأنواع",
+		"genre-none": "لا توجد أنواع",
+		"staff": "الطاقم",
+		"staff-none": "الطاقم غير معروف",
+		"noOverview": "لا يوجد ملخص متاح",
+		"episode-none": "لا توجد حلقات في هذا الموسم",
+		"episodeNoMetadata": "لا توجد بيانات وصفية متاحة",
+		"tags": "الوسوم",
+		"links": "الروابط",
+		"jumpToSeason": "الانتقال إلى الموسم",
+		"partOf": "جزء من",
+		"watchlistAdd": "أضف إلى قائمة المشاهدة الخاصة بك",
+		"watchlistEdit": "تعديل حالة المشاهدة",
+		"watchlistRemove": "وضع علامة كغير مُشاهد",
+		"watchlistLogin": "سجّل الدخول لإضافة إلى قائمة المشاهدة الخاصة بك",
 		"watchlistMark": {
-			"completed": "",
-			"planned": "",
-			"watching": "",
-			"droped": "",
-			"null": ""
+			"completed": "وضع علامة كمكتمل",
+			"planned": "وضع علامة كمخطط له",
+			"watching": "وضع علامة كمُشاهَد حالياً",
+			"droped": "وضع علامة كمتروك",
+			"null": "وضع علامة كغير مُشاهد"
 		},
-		"nextUp": "",
-		"season": ""
+		"nextUp": "التالي",
+		"season": "الموسم {{number}}"
 	},
 	"browse": {
 		"mediatypekey": {
-			"all": "",
-			"movie": "",
-			"show": "",
-			"collection": ""
+			"all": "الكل",
+			"movie": "أفلام",
+			"show": "مسلسلات",
+			"collection": "المجموعة"
 		},
-		"mediatype-tt": "",
-		"mediatypelabel": "",
-		"sortby": "",
-		"sortby-tt": "",
+		"mediatype-tt": "نوع الوسائط",
+		"mediatypelabel": "نوع الوسائط",
+		"sortby": "ترتيب حسب {{key}}",
+		"sortby-tt": "ترتيب حسب",
 		"sortkey": {
-			"relevance": "",
-			"name": "",
-			"airDate": "",
-			"startAir": "",
-			"endAir": "",
-			"addedDate": "",
-			"rating": ""
+			"relevance": "الصلة",
+			"name": "الأسم",
+			"airDate": "تاريخ العرض",
+			"startAir": "بداية العرض",
+			"endAir": "نهاية العرض",
+			"addedDate": "تاريخ الإضافة",
+			"rating": "التقييمات"
 		},
 		"sortord": {
-			"asc": "",
-			"desc": ""
+			"asc": "تصاعدي",
+			"desc": "تنازلي"
 		},
-		"switchToGrid": "",
-		"switchToList": ""
+		"switchToGrid": "التبديل إلى عرض الشبكة",
+		"switchToList": "التبديل إلى عرض القائمة"
 	},
 	"genres": {
-		"Action": "",
-		"Adventure": "",
-		"Animation": "",
-		"Comedy": "",
-		"Crime": "",
-		"Documentary": "",
-		"Drama": "",
-		"Family": "",
-		"Fantasy": "",
-		"History": "",
-		"Horror": "",
-		"Music": "",
-		"Mystery": "",
-		"Romance": "",
-		"ScienceFiction": "",
-		"Thriller": "",
-		"War": "",
-		"Western": "",
-		"Kids": "",
-		"News": "",
-		"Reality": "",
-		"Soap": "",
-		"Talk": "",
-		"Politics": ""
+		"Action": "أكشن",
+		"Adventure": "مغامرات",
+		"Animation": "أنميشن",
+		"Comedy": "كوميدي",
+		"Crime": "جريمة",
+		"Documentary": "وثائقي",
+		"Drama": "دراما",
+		"Family": "عائلي",
+		"Fantasy": "خيال",
+		"History": "تاريخي",
+		"Horror": "رعب",
+		"Music": "موسيقى",
+		"Mystery": "غموض",
+		"Romance": "رومانسي",
+		"ScienceFiction": "خيال علمي",
+		"Thriller": "إثارة",
+		"War": "حرب",
+		"Western": "غربي",
+		"Kids": "أطفال",
+		"News": "أخبار",
+		"Reality": "واقع",
+		"Soap": "دراما طويلة",
+		"Talk": "حوار",
+		"Politics": "سياسة"
 	},
 	"misc": {
-		"settings": "",
-		"prev-page": "",
-		"next-page": "",
-		"delete": "",
-		"cancel": "",
-		"more": "",
-		"expand": "",
-		"collapse": "",
-		"edit": "",
-		"or": "",
-		"loading": ""
+		"settings": "إعدادات",
+		"prev-page": "الصفحة السابقة",
+		"next-page": "الصفحة التالية",
+		"delete": "حذف",
+		"cancel": "إلغاء",
+		"more": "المزيد",
+		"expand": "توسيع",
+		"collapse": "طي",
+		"edit": "تعديل",
+		"or": "أو",
+		"loading": "جارٍ التحميل"
 	},
 	"navbar": {
-		"home": "",
-		"browse": "",
-		"download": "",
-		"search": "",
-		"login": "",
-		"admin": ""
+		"home": "الرئيسية",
+		"browse": "تصفح",
+		"download": "تنزيل",
+		"search": "بحث",
+		"login": "تسجيل الدخول",
+		"admin": "لوحة الإدارة"
 	},
 	"settings": {
 		"general": {
-			"label": "",
+			"label": "عام",
 			"theme": {
-				"label": "",
-				"description": "",
-				"auto": "",
-				"light": "",
-				"dark": ""
+				"label": "الثيم",
+				"description": "تعيين ثيم التطبيق الخاص بك",
+				"auto": "النظام",
+				"light": "فاتح",
+				"dark": "غامق"
 			},
 			"language": {
-				"label": "",
-				"description": "",
-				"system": ""
+				"label": "اللغة",
+				"description": "تعيين لغة التطبيق الخاص بك",
+				"system": "النظام"
 			}
 		},
 		"playback": {
-			"label": "",
+			"label": "التشغيل",
 			"playmode": {
-				"label": "",
-				"description": ""
+				"label": "وضع التشغيل الافتراضي",
+				"description": "وضع التشغيل الافتراضي المستخدم على هذا العميل. Pristine أخف على الخادم ولكنه لا يسمح بتغيير الجودة تلقائيًا."
 			},
 			"audioLanguage": {
-				"label": "",
-				"description": ""
+				"label": "لغة الصوت",
+				"description": "لغة الصوت الافتراضية المستخدمة عند تشغيل الفيديوهات متعددة الصوت."
 			},
 			"subtitleLanguage": {
-				"label": "",
-				"description": "",
-				"none": ""
+				"label": "لغة الترجمة",
+				"description": "لغة الترجمة الافتراضية المستخدمة",
+				"none": "بلا"
 			}
 		},
 		"account": {
-			"label": "",
+			"label": "الحساب",
 			"username": {
-				"label": ""
+				"label": "اسم المستخدم"
 			},
 			"avatar": {
-				"label": "",
-				"description": ""
+				"label": "الصورة الرمزية",
+				"description": "تغيير أيقونة ملفك الشخصي"
 			},
 			"email": {
-				"label": ""
+				"label": "البريد الإلكتروني"
 			},
 			"password": {
-				"label": "",
-				"description": "",
-				"oldPassword": "",
-				"newPassword": ""
+				"label": "كلمة المرور",
+				"description": "تغيير كلمة المرور الخاصة بك",
+				"oldPassword": "كلمة المرور القديمة",
+				"newPassword": "كلمة المرور الجديدة"
 			}
 		},
 		"oidc": {
-			"label": "",
-			"connected": "",
-			"not-connected": "",
-			"open-profile": "",
-			"link": "",
-			"delete": ""
+			"label": "الحسابات المرتبطة",
+			"connected": "متصل كـ {{username}}.",
+			"not-connected": "غير متصل",
+			"open-profile": "افتح ملفك الشخصي على {{provider}}",
+			"link": "رابط",
+			"delete": "إلغاء ربط حسابك على Kyoo بحسابك على {{provider}}"
 		},
 		"about": {
-			"label": "",
+			"label": "حول",
 			"android-app": {
-				"label": "",
-				"description": ""
+				"label": "تطبيق أندرويد",
+				"description": "تنزيل تطبيق الأندرويد"
 			},
 			"git": {
-				"label": "",
-				"description": ""
+				"label": "Github",
+				"description": "افتح مستودع GitHub حيث يمكنك تصفح كود Kyoo"
 			}
 		}
 	},
 	"player": {
-		"back": "",
-		"previous": "",
-		"next": "",
-		"play": "",
-		"pause": "",
-		"mute": "",
-		"volume": "",
-		"quality": "",
-		"audios": "",
-		"subtitles": "",
-		"subtitle-none": "",
-		"fullscreen": "",
+		"back": "عودة",
+		"previous": "الحلقة السابقة",
+		"next": "الحلقة التالية",
+		"play": "تشغيل",
+		"pause": "إيقاف مؤقت",
+		"mute": "تبديل كتم الصوت",
+		"volume": "مستوى الصوت",
+		"quality": "الجودة",
+		"audios": "الصوت",
+		"subtitles": "الترجمة",
+		"subtitle-none": "بلا",
+		"fullscreen": "شاشة كاملة",
 		"direct": "",
 		"transmux": "",
 		"auto": "",
