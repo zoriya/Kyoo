@@ -4,11 +4,11 @@
 		"news": "أخبار",
 		"watchlist": "مواصلة المشاهدة",
 		"info": "شاهد المزيد",
-		"none": "",
-		"watchlistLogin": "",
-		"refreshMetadata": "",
+		"none": "لا توجد حلقات",
+		"watchlistLogin": "لمتابعة ما شاهدته أو تخطط لمشاهدته، تحتاج إلى تسجيل الدخول.",
+		"refreshMetadata": "تحديث البيانات الوصفية",
 		"episodeMore": {
-			"goToShow": "",
+			"goToShow": "الانتقال إلى المسلسل",
 			"download": "تحميل",
 			"mediainfo": "عرض معلومات الملف"
 		}
@@ -136,11 +136,11 @@
 			"label": "التشغيل",
 			"playmode": {
 				"label": "وضع التشغيل الافتراضي",
-				"description": "وضع التشغيل الافتراضي المستخدم على هذا العميل. Pristine أخف على الخادم ولكنه لا يسمح بتغيير الجودة تلقائيًا."
+				"description": "وضع التشغيل الافتراضي المستخدم على هذا العميل. Pristine أخف على الخادم ولكنه لا يسمح بتغيير الجودة تلقائيًا"
 			},
 			"audioLanguage": {
 				"label": "لغة الصوت",
-				"description": "لغة الصوت الافتراضية المستخدمة عند تشغيل الفيديوهات متعددة الصوت."
+				"description": "لغة الصوت الافتراضية المستخدمة عند تشغيل الفيديوهات متعددة الصوت"
 			},
 			"subtitleLanguage": {
 				"label": "لغة الترجمة",
@@ -211,75 +211,77 @@
 	},
 	"login": {
 		"login": "تسجيل الدخول",
-		"register": "",
-		"guest": "",
-		"guest-forbidden": "",
-		"via": "",
-		"add-account": "",
-		"logout": "",
-		"server": "",
-		"email": "",
-		"username": "",
-		"password": "",
-		"confirm": "",
-		"or-register": "",
-		"or-login": "",
-		"password-no-match": "",
-		"delete": "",
-		"delete-confirmation": ""
+		"register": "تسجيل حساب جديد",
+		"guest": "المتابعة كضيف",
+		"guest-forbidden": "هذا الإصدار من النظام لا يسمح بدخول الضيوف.",
+		"via": "المتابعة باستخدام {{provider}}",
+		"add-account": "إضافة حساب",
+		"logout": "تسجيل خروج",
+		"server": "عنوان الخادم",
+		"email": "البريد الإلكتروني",
+		"username": "أسم المستخدم",
+		"password": "كلمة المرور",
+		"confirm": "تأكيد كلمة المرور",
+		"or-register": "ليس لديك حساب؟ <1>سجّل الآن</1>.",
+		"or-login": "لديك حساب بالفعل؟ <1>تسجيل الدخول</1>.",
+		"password-no-match": "كلمات المرور غير متطابقة.",
+		"delete": "حذف حسابك",
+		"delete-confirmation": "لا يمكن التراجع عن هذا الإجراء. هل أنت متأكد؟"
 	},
 	"downloads": {
-		"empty": "",
-		"error": "",
-		"delete": "",
-		"deleteMessage": "",
-		"pause": "",
-		"resume": "",
-		"retry": ""
+		"empty": "لم يتم تنزيل أي شيء بعد، ابدأ بتصفح ما يعجبك",
+		"error": "خطأ: {{error}}",
+		"delete": "حذف العنصر",
+		"deleteMessage": "هل تريد إزالة هذا العنصر من التخزين المحلي لديك؟",
+		"pause": "إيقاف مؤقت",
+		"resume": "استئناف",
+		"retry": "إعادة المحاولة"
 	},
 	"errors": {
-		"connection": "",
-		"connection-tips": "",
-		"unknown": "",
-		"try-again": "",
-		"re-login": "",
-		"offline": "",
-		"unauthorized": "",
-		"needVerification": "",
-		"needAccount": "",
+		"connection": "تعذر الاتصال بخادم النظام",
+		"connection-tips": "نصائح استكشاف الأخطاء وإصلاحها:\n- هل أنت متصل بالإنترنت؟\n- هل خادم النظام الخاص بك متصل؟\n- هل تم حظر حسابك؟",
+		"unknown": "خطأ غير معروف",
+		"try-again": "حاول مرة أخرى",
+		"re-login": "إعادة تسجيل الدخول",
+		"offline": "أنت غير متصل بالإنترنت. حاول مرة أخرى لاحقًا.",
+		"unauthorized": "تفتقد الأذونات {{permission}} للوصول إلى هذه الصفحة.",
+		"needVerification": "يجب التحقق من حسابك بواسطة مسؤول الخادم قبل أن تتمكن من استخدامه.",
+		"needAccount": "لا يمكن الوصول إلى هذه الصفحة في وضع الضيف. يجب عليك إنشاء حساب أو تسجيل الدخول.",
 		"setup": {
-			"MissingAdminAccount": "",
-			"NoVideoFound": ""
+			"MissingAdminAccount": "لم يتم إنشاء أي حساب مسؤول بعد. يُرجى التسجيل لإنشاء واحد.",
+			"NoVideoFound": "لم يتم العثور على أي فيديو بعد. أضف أفلامًا أو مسلسلات داخل مجلد مكتبتك لتظهر هنا!"
 		}
 	},
 	"mediainfo": {
-		"file": "",
-		"container": "",
-		"video": "",
-		"audio": "",
-		"subtitles": "",
-		"forced": "",
-		"default": "",
-		"external": "",
-		"duration": "",
-		"size": "",
-		"novideo": "",
-		"nocontainer": ""
+		"file": "ملف",
+		"container": "حاوية",
+		"video": "فيديو",
+		"audio": "صوت",
+		"subtitles": "ترجمات",
+		"forced": "إجباري",
+		"default": "افتراضي",
+		"external": "خارجي",
+		"duration": "المدة",
+		"size": "الحجم",
+		"novideo": "لا يوجد فيديو",
+		"nocontainer": "حاوية غير صالحة",
+		"hearing-impaired": "CC",
+		"unknown": "غير معروف"
 	},
 	"admin": {
 		"users": {
-			"label": "",
-			"adminUser": "",
-			"regularUser": "",
-			"set-permissions": "",
-			"delete": "",
-			"unverifed": "",
-			"verify": ""
+			"label": "مستخدمين",
+			"adminUser": "مدير",
+			"regularUser": "مستخدم",
+			"set-permissions": "تعيين الأذونات",
+			"delete": "حذف مستخدم",
+			"unverifed": "غير مُحقق",
+			"verify": "التحقق من المستخدم"
 		},
 		"scanner": {
-			"label": "",
-			"scan": "",
-			"empty": ""
+			"label": "الماسح",
+			"scan": "تشغيل فحص المكتبة",
+			"empty": "لم يتم العثور على أي مشكلة. جميع عناصرك مسجلة."
 		}
 	}
 }
