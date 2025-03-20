@@ -200,17 +200,17 @@
 		"subtitles": "الترجمة",
 		"subtitle-none": "بلا",
 		"fullscreen": "شاشة كاملة",
-		"direct": "",
-		"transmux": "",
-		"auto": "",
-		"notInPristine": "",
-		"unsupportedError": ""
+		"direct": "تشغيل مباشر",
+		"transmux": "أصلي",
+		"auto": "تلقائي",
+		"notInPristine": "غير متاح في وضع التشغيل المباشر",
+		"unsupportedError": "برنامج ترميز الفيديو غير مدعوم، جارٍ تحويل الجودة..."
 	},
 	"search": {
-		"empty": ""
+		"empty": "لم يتم العثور على نتائج. جرّب استعلامًا مختلفًا."
 	},
 	"login": {
-		"login": "",
+		"login": "تسجيل الدخول",
 		"register": "",
 		"guest": "",
 		"guest-forbidden": "",
