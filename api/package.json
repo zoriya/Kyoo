@@ -11,6 +11,7 @@
 	"dependencies": {
 		"@elysiajs/jwt": "^1.2.0",
 		"@elysiajs/swagger": "^1.2.2",
+		"better-auth": "^1.2.4",
 		"blurhash": "^2.0.5",
 		"drizzle-kit": "^0.30.4",
 		"drizzle-orm": "0.39.0",
