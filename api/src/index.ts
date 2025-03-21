@@ -77,6 +77,6 @@ app
 			},
 		}),
 	)
-	.listen(3000);
+	.listen(3567);
 
 console.log(`Api running at ${app.server?.hostname}:${app.server?.port}`);
