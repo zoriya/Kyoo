@@ -24,6 +24,6 @@ WORKDIR /app
 COPY --from=builder /app/server server
 
 ENV NODE_ENV=production
-EXPOSE 3000
+EXPOSE 3567
 CMD ["./server"]
 
