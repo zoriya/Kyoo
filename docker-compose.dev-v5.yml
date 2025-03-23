@@ -86,8 +86,8 @@ services:
       - "traefik.http.routers.api.rule=PathPrefix(`/api/`)"
       - "traefik.http.routers.api.middlewares=phantom-token"
       - "traefik.http.middlewares.phantom-token.forwardauth.address=http://auth:4568/auth/jwt"
-      - "traefik.http.middlewares.phantom-token.forwardauth.authResponseHeaders=Authorization"
       - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,X-Api-Key"
+      - "traefik.http.middlewares.phantom-token.forwardauth.authResponseHeaders=Authorization"
 
   # scanner:
   #   build: ./scanner

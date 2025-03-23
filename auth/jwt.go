@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
 	"maps"
 	"net/http"
 	"strings"
@@ -67,6 +68,7 @@ func (h *Handler) CreateJwt(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	c.Response().Header().Add("Authorization", fmt.Sprintf("Bearer %s", t))
 	return c.JSON(http.StatusOK, Jwt{
 		Token: t,
 	})
