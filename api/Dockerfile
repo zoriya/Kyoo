@@ -26,4 +26,3 @@ COPY --from=builder /app/server server
 ENV NODE_ENV=production
 EXPOSE 3567
 CMD ["./server"]
-

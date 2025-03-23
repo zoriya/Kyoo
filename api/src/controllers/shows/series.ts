@@ -2,6 +2,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "~/db";
 import { shows } from "~/db/schema";
+import { prefix } from "~/elysia";
 import { KError } from "~/models/error";
 import { madeInAbyss } from "~/models/examples";
 import { FullSerie, Serie, SerieTranslation } from "~/models/serie";
@@ -15,7 +16,6 @@ import {
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import { getShows, showFilters, showSort } from "./logic";
-import { prefix } from "~/elysia";
 
 export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 	.model({
@@ -46,7 +46,7 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 			if (!ret) {
 				return error(404, {
 					status: 404,
-					message: "Movie not found",
+					message: `No serie found with the id or slug: '${id}'.`,
 				});
 			}
 			if (!ret.language) {
