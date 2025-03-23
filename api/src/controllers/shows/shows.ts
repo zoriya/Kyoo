@@ -13,6 +13,7 @@ import {
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import { getShows, showFilters, showSort } from "./logic";
+import { prefix } from "~/elysia";
 
 export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 	.model({
@@ -31,7 +32,7 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 					status: 404,
 					message: "No shows in the database.",
 				});
-			return redirect(`/${show.kind}s/${show.slug}`);
+			return redirect(`${prefix}/${show.kind}s/${show.slug}`);
 		},
 		{
 			detail: {

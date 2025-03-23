@@ -22,6 +22,7 @@ import {
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import { getShows, showFilters, showSort } from "./logic";
+import { prefix } from "~/elysia";
 
 export const collections = new Elysia({
 	prefix: "/collections",
@@ -113,7 +114,7 @@ export const collections = new Elysia({
 					status: 404,
 					message: "No collection in the database.",
 				});
-			return redirect(`/collections/${serie.slug}`);
+			return redirect(`${prefix}/collections/${serie.slug}`);
 		},
 		{
 			detail: {

@@ -15,6 +15,7 @@ import { KError } from "~/models/error";
 import { bubble } from "~/models/examples";
 import { AcceptLanguage, isUuid, processLanguages } from "~/models/utils";
 import { imageDir } from "./seed/images";
+import { prefix } from "~/elysia";
 
 function getRedirectToImageHandler({
 	filter,
@@ -87,8 +88,8 @@ function getRedirectToImageHandler({
 		}
 		set.headers["content-language"] = ret.language;
 		return quality
-			? redirect(`/images/${ret.image!.id}?quality=${quality}`)
-			: redirect(`/images/${ret.image!.id}`);
+			? redirect(`${prefix}/images/${ret.image!.id}?quality=${quality}`)
+			: redirect(`${prefix}/images/${ret.image!.id}`);
 	};
 }
 
@@ -181,8 +182,8 @@ export const imagesH = new Elysia({ tags: ["images"] })
 				});
 			}
 			return quality
-				? redirect(`/images/${ret.image!.id}?quality=${quality}`)
-				: redirect(`/images/${ret.image!.id}`);
+				? redirect(`${prefix}/images/${ret.image!.id}?quality=${quality}`)
+				: redirect(`${prefix}/images/${ret.image!.id}`);
 		},
 		{
 			detail: { description: "Get the image of a staff member." },
@@ -256,8 +257,8 @@ export const imagesH = new Elysia({ tags: ["images"] })
 			}
 			set.headers["content-language"] = ret.language;
 			return quality
-				? redirect(`/images/${ret.image!.id}?quality=${quality}`)
-				: redirect(`/images/${ret.image!.id}`);
+				? redirect(`${prefix}/images/${ret.image!.id}?quality=${quality}`)
+				: redirect(`${prefix}/images/${ret.image!.id}`);
 		},
 		{
 			detail: { description: "Get the logo of a studio." },

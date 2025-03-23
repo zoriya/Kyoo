@@ -22,6 +22,7 @@ import {
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import { showFilters, showSort } from "./shows/logic";
+import { prefix } from "~/elysia";
 
 const staffSort = Sort(
 	{
@@ -160,7 +161,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 					status: 404,
 					message: "No staff in the database.",
 				});
-			return redirect(`/staff/${member.slug}`);
+			return redirect(`${prefix}/staff/${member.slug}`);
 		},
 		{
 			detail: {

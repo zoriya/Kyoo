@@ -15,6 +15,7 @@ import {
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import { getShows, showFilters, showSort } from "./logic";
+import { prefix } from "~/elysia";
 
 export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 	.model({
@@ -103,7 +104,7 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 					status: 404,
 					message: "No series in the database.",
 				});
-			return redirect(`/series/${serie.slug}`);
+			return redirect(`${prefix}/series/${serie.slug}`);
 		},
 		{
 			detail: {

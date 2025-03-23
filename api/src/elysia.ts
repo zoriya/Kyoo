@@ -46,7 +46,8 @@ export const base = new Elysia({ name: "base" })
 	})
 	.as("plugin");
 
-export const app = new Elysia({ prefix: process.env.KYOO_PREFIX })
+export const prefix = process.env.KYOO_PREFIX;
+export const app = new Elysia({ prefix })
 	.use(base)
 	.use(showsH)
 	.use(movies)

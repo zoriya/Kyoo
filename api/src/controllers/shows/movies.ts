@@ -15,6 +15,7 @@ import {
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import { getShows, showFilters, showSort } from "./logic";
+import { prefix } from "~/elysia";
 
 export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 	.model({
@@ -103,7 +104,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					status: 404,
 					message: "No movies in the database.",
 				});
-			return redirect(`/movies/${movie.slug}`);
+			return redirect(`${prefix}/movies/${movie.slug}`);
 		},
 		{
 			detail: {

@@ -32,6 +32,7 @@ import {
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import { getShows, showFilters, showSort } from "./shows/logic";
+import { prefix } from "~/elysia";
 
 const studioSort = Sort(
 	{
@@ -200,7 +201,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 					status: 404,
 					message: "No studios in the database.",
 				});
-			return redirect(`/studios/${studio.slug}`);
+			return redirect(`${prefix}/studios/${studio.slug}`);
 		},
 		{
 			detail: {

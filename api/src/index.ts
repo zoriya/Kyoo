@@ -9,7 +9,7 @@ await migrate();
 
 let secret = process.env.JWT_SECRET;
 if (!secret) {
-	const auth = process.env.AUTH_SERVER ?? "http://auth:4568";
+	const auth = process.env.AUTH_SERVER ?? "http://auth:4568/auth";
 	try {
 		const ret = await fetch(`${auth}/info`);
 		const info = await ret.json();
@@ -28,7 +28,6 @@ if (!secret) {
 processImages();
 
 app
-	.use(jwt({ secret }))
 	.use(
 		swagger({
 			documentation: {
@@ -77,6 +76,7 @@ app
 			},
 		}),
 	)
+	.use(jwt({ secret }))
 	.listen(3567);
 
 console.log(`Api running at ${app.server?.hostname}:${app.server?.port}`);
