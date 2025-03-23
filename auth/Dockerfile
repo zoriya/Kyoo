@@ -23,4 +23,5 @@ USER nonroot:nonroot
 COPY --from=build /keibi /app/keibi
 COPY sql ./sql
 
+HEALTHCHECK --interval=5s --retries=15 CMD curl --fail http://localhost:4568$KEIBI_PREFIX/health || exit
 CMD ["/app/keibi"]
