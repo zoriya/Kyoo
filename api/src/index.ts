@@ -2,7 +2,7 @@ import jwt from "@elysiajs/jwt";
 import { swagger } from "@elysiajs/swagger";
 import { processImages } from "./controllers/seed/images";
 import { migrate } from "./db";
-import { app } from "./elysia";
+import { app } from "./base";
 import { comment } from "./utils";
 
 await migrate();

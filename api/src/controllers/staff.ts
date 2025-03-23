@@ -22,7 +22,7 @@ import {
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import { showFilters, showSort } from "./shows/logic";
-import { prefix } from "~/elysia";
+import { prefix } from "~/base";
 
 const staffSort = Sort(
 	{

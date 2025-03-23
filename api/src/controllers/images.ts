@@ -15,7 +15,7 @@ import { KError } from "~/models/error";
 import { bubble } from "~/models/examples";
 import { AcceptLanguage, isUuid, processLanguages } from "~/models/utils";
 import { imageDir } from "./seed/images";
-import { prefix } from "~/elysia";
+import { prefix } from "~/base";
 
 function getRedirectToImageHandler({
 	filter,

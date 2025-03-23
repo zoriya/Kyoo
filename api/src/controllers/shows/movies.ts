@@ -15,7 +15,7 @@ import {
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import { getShows, showFilters, showSort } from "./logic";
-import { prefix } from "~/elysia";
+import { prefix } from "~/base";
 
 export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 	.model({

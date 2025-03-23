@@ -1,5 +1,5 @@
 import { buildUrl } from "tests/utils";
-import { app } from "~/elysia";
+import { app } from "~/base";
 import type { SeedSerie } from "~/models/serie";
 
 export const createSerie = async (serie: SeedSerie) => {

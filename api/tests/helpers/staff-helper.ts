@@ -1,5 +1,5 @@
 import { buildUrl } from "tests/utils";
-import { app } from "~/elysia";
+import { app } from "~/base";
 
 export const getStaff = async (id: string, query: {}) => {
 	const resp = await app.handle(
