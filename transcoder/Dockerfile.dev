@@ -46,5 +46,8 @@ WORKDIR /app
 ENV NVIDIA_VISIBLE_DEVICES="all"
 ENV NVIDIA_DRIVER_CAPABILITIES="all"
 
+COPY go.mod go.sum ./
+RUN go mod download
+
 EXPOSE 7666
 CMD ["wgo", "run", "-race", "."]
