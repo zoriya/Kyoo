@@ -61,6 +61,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.auth.rule=PathPrefix(`/auth/`)"
+      - "traefik.http.routers.auth.rule=PathPrefix(`/.well-known/`)"
 
   api:
     build:
@@ -161,7 +162,6 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entryPoints.web.address=:8901"
       - "--accesslog=true"
-      - "--log.level=DEBUG"
     ports:
       - "8901:8901"
     volumes:

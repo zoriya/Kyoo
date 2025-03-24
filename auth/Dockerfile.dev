@@ -7,5 +7,5 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 EXPOSE 4568
-HEALTHCHECK --interval=5s --retries=15 CMD curl --fail http://localhost:4568$KEIBI_PREFIX/health || exit
+HEALTHCHECK --interval=30s --retries=15 CMD curl --fail http://localhost:4568$KEIBI_PREFIX/health || exit
 CMD ["wgo", "run", "-race", "."]
