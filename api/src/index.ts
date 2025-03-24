@@ -1,25 +1,13 @@
-import jwt from "@elysiajs/jwt";
 import { swagger } from "@elysiajs/swagger";
+import { jwtSecret } from "./auth";
+import { app } from "./base";
 import { processImages } from "./controllers/seed/images";
 import { migrate } from "./db";
-import { app } from "./base";
 import { comment } from "./utils";
 
 await migrate();
 
-let secret = process.env.JWT_SECRET;
-if (!secret) {
-	const auth = process.env.AUTH_SERVER ?? "http://auth:4568/auth";
-	try {
-		const ret = await fetch(`${auth}/info`);
-		const info = await ret.json();
-		secret = info.publicKey;
-	} catch (error) {
-		console.error(`Can't access auth server at ${auth}:\n${error}`);
-	}
-}
-
-if (!secret) {
+if (!jwtSecret) {
 	console.error("Missing jwt secret or auth server. exiting");
 	process.exit(1);
 }
@@ -76,7 +64,6 @@ app
 			},
 		}),
 	)
-	.use(jwt({ secret }))
 	.listen(3567);
 
 console.log(`Api running at ${app.server?.hostname}:${app.server?.port}`);
