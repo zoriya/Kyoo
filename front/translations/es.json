@@ -264,7 +264,9 @@
 		"duration": "Duración",
 		"size": "Tamaño",
 		"novideo": "Sin vídeo",
-		"nocontainer": "Contenedor invalido"
+		"nocontainer": "Contenedor invalido",
+		"unknown": "Desconocido",
+		"hearing-impaired": "CC"
 	},
 	"admin": {
 		"users": {
