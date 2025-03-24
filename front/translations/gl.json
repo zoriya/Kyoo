@@ -1,70 +1,70 @@
 {
 	"home": {
-		"recommended": "",
-		"news": "",
-		"watchlist": "",
-		"info": "",
-		"none": "",
-		"watchlistLogin": "",
-		"refreshMetadata": "",
+		"recommended": "Recomendado",
+		"news": "Novas",
+		"watchlist": "Continuar vendo",
+		"info": "Ver máis",
+		"none": "Sen episodios",
+		"watchlistLogin": "Para facer un seguimento do que viu ou planea ver, cómpre iniciar sesión.",
+		"refreshMetadata": "Refrescar metadatos",
 		"episodeMore": {
-			"goToShow": "",
-			"download": "",
-			"mediainfo": ""
+			"goToShow": "Ir ao show",
+			"download": "Descargar",
+			"mediainfo": "Ver información do ficheiro"
 		}
 	},
 	"show": {
-		"play": "",
-		"trailer": "",
-		"studio": "",
-		"genre": "",
-		"genre-none": "",
-		"staff": "",
-		"staff-none": "",
-		"noOverview": "",
-		"episode-none": "",
-		"episodeNoMetadata": "",
-		"tags": "",
-		"links": "",
-		"jumpToSeason": "",
-		"partOf": "",
-		"watchlistAdd": "",
-		"watchlistEdit": "",
-		"watchlistRemove": "",
-		"watchlistLogin": "",
+		"play": "Reproducir",
+		"trailer": "Reproducir tráiler",
+		"studio": "Estudio",
+		"genre": "Xéneros",
+		"genre-none": "Sen xéneros",
+		"staff": "Persoal",
+		"staff-none": "O persoal é descoñecido",
+		"noOverview": "Resumo non dispoñíbel",
+		"episode-none": "Non hai episodios nesta tempada",
+		"episodeNoMetadata": "Metadatos non dispoñíbeis",
+		"tags": "Etiquetas",
+		"links": "Ligazóns",
+		"jumpToSeason": "Ir á tempada",
+		"partOf": "Parte de",
+		"watchlistAdd": "Engádeo á túa lista de planificados",
+		"watchlistEdit": "Modificar o estado de visualización",
+		"watchlistRemove": "Marcar como non visto",
+		"watchlistLogin": "Inicia sesión para engadir á túa lista de planificados",
 		"watchlistMark": {
-			"completed": "",
-			"planned": "",
-			"watching": "",
-			"droped": "",
-			"null": ""
+			"completed": "Marcar como completado",
+			"planned": "Marcar como planificado",
+			"watching": "Marcar como visualizando",
+			"droped": "Marcar como abandonado",
+			"null": "Marcar como non visto"
 		},
-		"nextUp": "",
-		"season": ""
+		"nextUp": "Seguinte",
+		"season": "Tempada {{number}}"
 	},
 	"browse": {
 		"mediatypekey": {
-			"all": "",
-			"movie": "",
-			"show": "",
-			"collection": ""
+			"all": "Todo",
+			"movie": "Filmes",
+			"show": "Series",
+			"collection": "Colección"
 		},
-		"mediatype-tt": "",
-		"mediatypelabel": "",
-		"sortby": "",
-		"sortby-tt": "",
+		"mediatype-tt": "Tipo de contido multimedia",
+		"mediatypelabel": "Tipo de contido multimedia",
+		"sortby": "Ordenar por {{key}}",
+		"sortby-tt": "Ordenar por",
 		"sortkey": {
-			"relevance": "",
-			"name": "",
-			"airDate": "",
-			"startAir": "",
-			"endAir": "",
-			"addedDate": "",
-			"rating": ""
+			"relevance": "Relevancia",
+			"name": "Nome",
+			"airDate": "Data de emisión",
+			"startAir": "Comezo de emisión",
+			"endAir": "Fin da emisión",
+			"addedDate": "Data de incorporación",
+			"rating": "Valoracións"
 		},
 		"sortord": {
-			"asc": "",
-			"desc": ""
+			"asc": "ascendente",
+			"desc": "descendente"
 		},
 		"switchToGrid": "",
 		"switchToList": ""
