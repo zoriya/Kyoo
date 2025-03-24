@@ -184,7 +184,7 @@ func main() {
 	r.DELETE("/sessions/:id", h.Logout)
 
 	g.GET("/jwt", h.CreateJwt)
-	g.GET("/info", h.GetInfo)
+	e.GET("/.well-known/jwks.json", h.GetInfo)
 
 	g.GET("/swagger/*", echoSwagger.WrapHandler)
 

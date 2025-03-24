@@ -1,16 +1,10 @@
 import { swagger } from "@elysiajs/swagger";
-import { jwtSecret } from "./auth";
 import { app } from "./base";
 import { processImages } from "./controllers/seed/images";
 import { migrate } from "./db";
 import { comment } from "./utils";
 
 await migrate();
-
-if (!jwtSecret) {
-	console.error("Missing jwt secret or auth server. exiting");
-	process.exit(1);
-}
 
 // run image processor task in background
 processImages();
