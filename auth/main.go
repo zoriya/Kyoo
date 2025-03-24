@@ -184,7 +184,8 @@ func main() {
 	r.DELETE("/sessions/:id", h.Logout)
 
 	g.GET("/jwt", h.CreateJwt)
-	e.GET("/.well-known/jwks.json", h.GetInfo)
+	e.GET("/.well-known/jwks.json", h.GetJwks)
+	e.GET("/.well-known/openid-configuration", h.GetOidcConfig)
 
 	g.GET("/swagger/*", echoSwagger.WrapHandler)
 

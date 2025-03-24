@@ -74,7 +74,7 @@ func (h *Handler) CreateJwt(c echo.Context) error {
 // @Produce      json
 // @Success      200  {object}  jwk.Key
 // @Router /.well-known/jwks.json [get]
-func (h *Handler) GetInfo(c echo.Context) error {
+func (h *Handler) GetJwks(c echo.Context) error {
 	key, err := jwk.New(h.config.JwtPublicKey)
 	if err != nil {
 		return err
@@ -85,4 +85,12 @@ func (h *Handler) GetInfo(c echo.Context) error {
 	set := jwk.NewSet()
 	set.Add(key)
 	return c.JSON(200, set)
+}
+
+func (h *Handler) GetOidcConfig(c echo.Context) error {
+	return c.JSON(200, struct {
+		JwksUri string `json:"jwks_uri"`
+	}{
+		JwksUri: fmt.Sprintf("%s/.well-known/jwks.json", h.config.PublicUrl),
+	})
 }
