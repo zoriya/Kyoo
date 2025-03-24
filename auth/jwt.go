@@ -48,6 +48,7 @@ func (h *Handler) CreateJwt(c echo.Context) error {
 	}()
 
 	claims := maps.Clone(session.User.Claims)
+	claims["username"] = session.User.Username
 	claims["sub"] = session.User.Id.String()
 	claims["sid"] = session.Id.String()
 	claims["iss"] = h.config.PublicUrl

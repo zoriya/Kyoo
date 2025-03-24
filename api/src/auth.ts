@@ -1,14 +1,17 @@
-import jwt from "@elysiajs/jwt";
 import Elysia, { t } from "elysia";
-import { createRemoteJWKSet } from "jose";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 
-const jwtSecret = process.env.JWT_SECRET;
+const jwtSecret = process.env.JWT_SECRET
+	? new TextEncoder().encode(process.env.JWT_SECRET)
+	: null;
 const jwks = createRemoteJWKSet(
-	new URL(process.env.AUTH_SERVER ?? "http://auth:4568"),
+	new URL(
+		".well-known/jwks.json",
+		process.env.AUTH_SERVER ?? "http://auth:4568",
+	),
 );
 
 export const auth = new Elysia({ name: "auth" })
-	.use(jwt({ secret: jwtSecret ?? jwks }))
 	.guard({
 		headers: t.Object({
 			authorization: t.String({ pattern: "^Bearer .+$" }),
@@ -18,11 +21,12 @@ export const auth = new Elysia({ name: "auth" })
 		permissions(perms: string[]) {
 			return {
 				beforeHandle: () => {},
-				resolve: async ({ headers: { authorization }, jwt }) => {
-					console.log(authorization?.slice(7));
-					const user = await jwt.verify(authorization?.slice(7));
-					console.log("macro", user);
-					return { user };
+				resolve: async ({ headers: { authorization } }) => {
+					const bearer = authorization?.slice(7);
+					if (!bearer) return { jwt: false };
+					// @ts-expect-error ts can't understand that there's two overload idk why
+					const { payload: jwt } = await jwtVerify(bearer, jwtSecret ?? jwks);
+					return { jwt };
 				},
 			};
 		},
