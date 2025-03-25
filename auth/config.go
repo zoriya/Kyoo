@@ -17,13 +17,12 @@ type Configuration struct {
 	Prefix          string
 	JwtPrivateKey   *rsa.PrivateKey
 	JwtPublicKey    *rsa.PublicKey
-	Issuer          string
+	PublicUrl       string
 	DefaultClaims   jwt.MapClaims
 	ExpirationDelay time.Duration
 }
 
 var DefaultConfig = Configuration{
-	Issuer:          "kyoo",
 	DefaultClaims:   make(jwt.MapClaims),
 	ExpirationDelay: 30 * 24 * time.Hour,
 }
@@ -54,6 +53,7 @@ func LoadConfiguration(db *dbc.Queries) (*Configuration, error) {
 		}
 	}
 
+	ret.PublicUrl = os.Getenv("PUBLIC_URL")
 	ret.Prefix = os.Getenv("KEIBI_PREFIX")
 
 	if ret.JwtPrivateKey == nil {

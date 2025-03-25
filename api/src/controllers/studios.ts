@@ -1,5 +1,6 @@
 import { type SQL, and, eq, exists, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
+import { prefix } from "~/base";
 import { db } from "~/db";
 import {
 	showStudioJoin,
@@ -200,7 +201,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 					status: 404,
 					message: "No studios in the database.",
 				});
-			return redirect(`/studios/${studio.slug}`);
+			return redirect(`${prefix}/studios/${studio.slug}`);
 		},
 		{
 			detail: {

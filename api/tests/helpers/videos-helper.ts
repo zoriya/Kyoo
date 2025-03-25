@@ -1,5 +1,5 @@
 import { buildUrl } from "tests/utils";
-import { app } from "~/elysia";
+import { app } from "~/base";
 import type { SeedVideo } from "~/models/video";
 
 export const createVideo = async (video: SeedVideo | SeedVideo[]) => {

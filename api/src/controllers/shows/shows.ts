@@ -1,5 +1,6 @@
 import { and, isNull, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
+import { prefix } from "~/base";
 import { db } from "~/db";
 import { shows } from "~/db/schema";
 import { KError } from "~/models/error";
@@ -31,7 +32,7 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 					status: 404,
 					message: "No shows in the database.",
 				});
-			return redirect(`/${show.kind}s/${show.slug}`);
+			return redirect(`${prefix}/${show.kind}s/${show.slug}`);
 		},
 		{
 			detail: {

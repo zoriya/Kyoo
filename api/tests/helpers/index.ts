@@ -4,4 +4,4 @@ export * from "./studio-helper";
 export * from "./staff-helper";
 export * from "./videos-helper";
 
-export * from "~/elysia";
+export * from "~/base";

@@ -1,5 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
+import { prefix } from "~/base";
 import { db } from "~/db";
 import { shows } from "~/db/schema";
 import {
@@ -113,7 +114,7 @@ export const collections = new Elysia({
 					status: 404,
 					message: "No collection in the database.",
 				});
-			return redirect(`/collections/${serie.slug}`);
+			return redirect(`${prefix}/collections/${serie.slug}`);
 		},
 		{
 			detail: {

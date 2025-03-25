@@ -17,6 +17,6 @@ RUN dotnet restore
 WORKDIR /app
 EXPOSE 5000
 ENV DOTNET_USE_POLLING_FILE_WATCHER 1
-# HEALTHCHECK --interval=5s CMD curl --fail http://localhost:5000/health || exit
+# HEALTHCHECK --interval=30s CMD curl --fail http://localhost:5000/health || exit
 HEALTHCHECK CMD true
 ENTRYPOINT ["dotnet", "watch", "--non-interactive", "run", "--no-restore", "--project", "/app/src/Kyoo.Core"]

@@ -2,6 +2,7 @@ import { stat } from "node:fs/promises";
 import type { BunFile } from "bun";
 import { type SQL, and, eq, sql } from "drizzle-orm";
 import Elysia, { type Context, t } from "elysia";
+import { prefix } from "~/base";
 import { db } from "~/db";
 import {
 	showTranslations,
@@ -87,8 +88,8 @@ function getRedirectToImageHandler({
 		}
 		set.headers["content-language"] = ret.language;
 		return quality
-			? redirect(`/images/${ret.image!.id}?quality=${quality}`)
-			: redirect(`/images/${ret.image!.id}`);
+			? redirect(`${prefix}/images/${ret.image!.id}?quality=${quality}`)
+			: redirect(`${prefix}/images/${ret.image!.id}`);
 	};
 }
 
@@ -181,8 +182,8 @@ export const imagesH = new Elysia({ tags: ["images"] })
 				});
 			}
 			return quality
-				? redirect(`/images/${ret.image!.id}?quality=${quality}`)
-				: redirect(`/images/${ret.image!.id}`);
+				? redirect(`${prefix}/images/${ret.image!.id}?quality=${quality}`)
+				: redirect(`${prefix}/images/${ret.image!.id}`);
 		},
 		{
 			detail: { description: "Get the image of a staff member." },
@@ -256,8 +257,8 @@ export const imagesH = new Elysia({ tags: ["images"] })
 			}
 			set.headers["content-language"] = ret.language;
 			return quality
-				? redirect(`/images/${ret.image!.id}?quality=${quality}`)
-				: redirect(`/images/${ret.image!.id}`);
+				? redirect(`${prefix}/images/${ret.image!.id}?quality=${quality}`)
+				: redirect(`${prefix}/images/${ret.image!.id}`);
 		},
 		{
 			detail: { description: "Get the logo of a studio." },

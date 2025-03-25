@@ -43,7 +43,7 @@ type Validator struct {
 	validator *validator.Validate
 }
 
-func (v *Validator) Validate(i interface{}) error {
+func (v *Validator) Validate(i any) error {
 	if err := v.validator.Struct(i); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -149,7 +149,7 @@ func main() {
 
 	db, err := OpenDatabase()
 	if err != nil {
-		e.Logger.Fatal("Could not open databse: ", err)
+		e.Logger.Fatal("Could not open database: ", err)
 		return
 	}
 
@@ -184,7 +184,8 @@ func main() {
 	r.DELETE("/sessions/:id", h.Logout)
 
 	g.GET("/jwt", h.CreateJwt)
-	g.GET("/info", h.GetInfo)
+	e.GET("/.well-known/jwks.json", h.GetJwks)
+	e.GET("/.well-known/openid-configuration", h.GetOidcConfig)
 
 	g.GET("/swagger/*", echoSwagger.WrapHandler)
 

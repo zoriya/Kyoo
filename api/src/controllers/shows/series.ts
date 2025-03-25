@@ -1,5 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
+import { prefix } from "~/base";
 import { db } from "~/db";
 import { shows } from "~/db/schema";
 import { KError } from "~/models/error";
@@ -45,7 +46,7 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 			if (!ret) {
 				return error(404, {
 					status: 404,
-					message: "Movie not found",
+					message: `No serie found with the id or slug: '${id}'.`,
 				});
 			}
 			if (!ret.language) {
@@ -103,7 +104,7 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 					status: 404,
 					message: "No series in the database.",
 				});
-			return redirect(`/series/${serie.slug}`);
+			return redirect(`${prefix}/series/${serie.slug}`);
 		},
 		{
 			detail: {

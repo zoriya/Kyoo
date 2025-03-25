@@ -1,4 +1,4 @@
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import { entriesH } from "./controllers/entries";
 import { imagesH } from "./controllers/images";
 import { seasonsH } from "./controllers/seasons";
@@ -44,9 +44,14 @@ export const base = new Elysia({ name: "base" })
 		console.error(code, error);
 		return error;
 	})
+	.get("/health", () => ({ status: "healthy" }) as const, {
+		detail: { description: "Check if the api is healthy." },
+		response: { 200: t.Object({ status: t.Literal("healthy") }) },
+	})
 	.as("plugin");
 
-export const app = new Elysia()
+export const prefix = process.env.KYOO_PREFIX ?? "";
+export const app = new Elysia({ prefix })
 	.use(base)
 	.use(showsH)
 	.use(movies)

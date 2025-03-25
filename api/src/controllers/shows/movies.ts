@@ -1,5 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
+import { prefix } from "~/base";
 import { db } from "~/db";
 import { shows } from "~/db/schema";
 import { KError } from "~/models/error";
@@ -103,7 +104,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					status: 404,
 					message: "No movies in the database.",
 				});
-			return redirect(`/movies/${movie.slug}`);
+			return redirect(`${prefix}/movies/${movie.slug}`);
 		},
 		{
 			detail: {

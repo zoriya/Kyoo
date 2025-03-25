@@ -1,5 +1,6 @@
 import { type SQL, and, eq, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
+import { prefix } from "~/base";
 import { db } from "~/db";
 import { showTranslations, shows } from "~/db/schema";
 import { roles, staff } from "~/db/schema/staff";
@@ -160,7 +161,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 					status: 404,
 					message: "No staff in the database.",
 				});
-			return redirect(`/staff/${member.slug}`);
+			return redirect(`${prefix}/staff/${member.slug}`);
 		},
 		{
 			detail: {

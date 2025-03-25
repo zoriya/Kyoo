@@ -25,5 +25,5 @@ COPY --from=builder /app /app
 WORKDIR /app
 EXPOSE 5000
 # The back can take a long time to start if meilisearch is initializing
-HEALTHCHECK --interval=5s --retries=15 CMD curl --fail http://localhost:5000/health || exit
+HEALTHCHECK --interval=30s --retries=15 CMD curl --fail http://localhost:5000/health || exit
 ENTRYPOINT ["/app/kyoo"]

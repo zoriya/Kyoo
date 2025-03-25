@@ -1,0 +1,190 @@
+x-transcoder: &transcoder-base
+  build:
+    context: ./transcoder
+    dockerfile: Dockerfile.dev
+  networks:
+    default:
+      aliases:
+        - transcoder
+  ports:
+    - "7666:7666"
+  restart: on-failure
+  cpus: 1
+  env_file:
+    - ./.env
+  environment:
+    - GOCODER_PREFIX=/video
+  volumes:
+    - ./transcoder:/app
+    - ${LIBRARY_ROOT}:/video:ro
+    - ${CACHE_ROOT}:/cache
+    - transcoder_metadata:/metadata
+
+services:
+  front:
+    build:
+      context: ./front
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./front:/app
+      - /app/.yarn
+      - /app/node_modules
+      - /app/apps/mobile/node_modules
+      - /app/apps/web/.next/
+      - /app/apps/mobile/.expo/
+    ports:
+      - "3000:3000"
+      - "8081:8081"
+    restart: on-failure
+    environment:
+      - KYOO_URL=${KYOO_URL:-http://api:5000/api}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.front.rule=PathPrefix(`/`)"
+
+  auth:
+    build:
+      context: ./auth
+      dockerfile: Dockerfile.dev
+    restart: on-failure
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "4568:4568"
+    env_file:
+      - ./.env
+    environment:
+      - KEIBI_PREFIX=/auth
+    volumes:
+      - ./auth:/app
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.auth.rule=PathPrefix(`/auth/`)"
+      - "traefik.http.routers.auth.rule=PathPrefix(`/.well-known/`)"
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    restart: on-failure
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth:
+        condition: service_healthy
+    volumes:
+      - ./api:/app
+      - /app/node_modules
+    ports:
+      - "3567:3567"
+    environment:
+      - KYOO_PREFIX=/api
+    env_file:
+      - ./.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=PathPrefix(`/api/`)"
+      - "traefik.http.routers.api.middlewares=phantom-token"
+      - "traefik.http.middlewares.phantom-token.forwardauth.address=http://auth:4568/auth/jwt"
+      - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,X-Api-Key"
+      - "traefik.http.middlewares.phantom-token.forwardauth.authResponseHeaders=Authorization"
+
+  # scanner:
+  #   build: ./scanner
+  #   restart: on-failure
+  #   depends_on:
+  #     back:
+  #       condition: service_healthy
+  #   env_file:
+  #     - ./.env
+  #   environment:
+  #     - KYOO_URL=${KYOO_URL:-http://back:5000/api}
+  #   volumes:
+  #     - ${LIBRARY_ROOT}:/video:ro
+  #
+  # matcher:
+  #   build: ./scanner
+  #   command: matcher
+  #   restart: on-failure
+  #   depends_on:
+  #     back:
+  #       condition: service_healthy
+  #   env_file:
+  #     - ./.env
+  #   environment:
+  #     - KYOO_URL=${KYOO_URL:-http://back:5000/api}
+
+  transcoder:
+    <<: *transcoder-base
+    profiles: ['', 'cpu']
+
+  transcoder-nvidia:
+    <<: *transcoder-base
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+              driver: cdi
+              device_ids:
+                - nvidia.com/gpu=all
+    environment:
+      - GOCODER_PREFIX=/video
+      - GOCODER_HWACCEL=nvidia
+    profiles: ['nvidia']
+
+  transcoder-vaapi:
+    <<: *transcoder-base
+    devices:
+      - /dev/dri:/dev/dri
+    environment:
+      - GOCODER_PREFIX=/video
+      - GOCODER_HWACCEL=vaapi
+      - GOCODER_VAAPI_RENDERER=${GOCODER_VAAPI_RENDERER:-/dev/dri/renderD128}
+    profiles: ['vaapi']
+  # qsv is the same setup as vaapi but with the hwaccel env var different
+  transcoder-qsv:
+    <<: *transcoder-base
+    devices:
+      - /dev/dri:/dev/dri
+    environment:
+      - GOCODER_PREFIX=/video
+      - GOCODER_HWACCEL=qsv
+      - GOCODER_VAAPI_RENDERER=${GOCODER_VAAPI_RENDERER:-/dev/dri/renderD128}
+    profiles: ['qsv']
+
+  traefik:
+    image: traefik:v3.3
+    restart: on-failure
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.web.address=:8901"
+      - "--accesslog=true"
+    ports:
+      - "8901:8901"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  postgres:
+    image: postgres:15
+    restart: on-failure
+    env_file:
+      - ./.env
+    volumes:
+      - db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+     - POSTGRES_HOST_AUTH_METHOD=trust
+    command: ["postgres", "-c", "log_statement=all"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db:
+  transcoder_metadata:

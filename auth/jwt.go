@@ -2,8 +2,7 @@ package main
 
 import (
 	"context"
-	"crypto/x509"
-	"encoding/pem"
+	"fmt"
 	"maps"
 	"net/http"
 	"strings"
@@ -11,16 +10,12 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
+	"github.com/lestrrat-go/jwx/jwk"
 )
 
 type Jwt struct {
 	// The jwt token you can use for all authorized call to either keibi or other services.
 	Token string `json:"token"`
-}
-
-type Info struct {
-	// The public key used to sign jwt tokens. It can be used by your services to check if the jwt is valid.
-	PublicKey string `json:"publicKey"`
 }
 
 // @Summary      Get JWT
@@ -53,40 +48,50 @@ func (h *Handler) CreateJwt(c echo.Context) error {
 	}()
 
 	claims := maps.Clone(session.User.Claims)
+	claims["username"] = session.User.Username
 	claims["sub"] = session.User.Id.String()
 	claims["sid"] = session.Id.String()
-	claims["iss"] = h.config.Issuer
+	claims["iss"] = h.config.PublicUrl
+	claims["iat"] = &jwt.NumericDate{
+		Time: time.Now().UTC(),
+	}
 	claims["exp"] = &jwt.NumericDate{
 		Time: time.Now().UTC().Add(time.Hour),
-	}
-	claims["iss"] = &jwt.NumericDate{
-		Time: time.Now().UTC(),
 	}
 	jwt := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	t, err := jwt.SignedString(h.config.JwtPrivateKey)
 	if err != nil {
 		return err
 	}
+	c.Response().Header().Add("Authorization", fmt.Sprintf("Bearer %s", t))
 	return c.JSON(http.StatusOK, Jwt{
 		Token: t,
 	})
 }
 
-// @Summary      Info
-// @Description  Get info like the public key used to sign the jwts.
+// @Summary      Jwks
+// @Description  Get the jwks info, used to validate jwts.
 // @Tags         jwt
 // @Produce      json
-// @Success      200  {object}  Info
-// @Router /info [get]
-func (h *Handler) GetInfo(c echo.Context) error {
-	key := pem.EncodeToMemory(
-		&pem.Block{
-			Type:  "RSA PUBLIC KEY",
-			Bytes: x509.MarshalPKCS1PublicKey(h.config.JwtPublicKey),
-		},
-	)
+// @Success      200  {object}  jwk.Key
+// @Router /.well-known/jwks.json [get]
+func (h *Handler) GetJwks(c echo.Context) error {
+	key, err := jwk.New(h.config.JwtPublicKey)
+	if err != nil {
+		return err
+	}
 
-	return c.JSON(200, Info{
-		PublicKey: string(key),
+	key.Set("use", "sig")
+	key.Set("key_ops", "verify")
+	set := jwk.NewSet()
+	set.Add(key)
+	return c.JSON(200, set)
+}
+
+func (h *Handler) GetOidcConfig(c echo.Context) error {
+	return c.JSON(200, struct {
+		JwksUri string `json:"jwks_uri"`
+	}{
+		JwksUri: fmt.Sprintf("%s/.well-known/jwks.json", h.config.PublicUrl),
 	})
 }

@@ -1,0 +1,626 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Auth system made for kyoo.",
+        "title": "Keibi - Kyoo's auth",
+        "contact": {
+            "name": "Repository",
+            "url": "https://github.com/zoriya/kyoo"
+        },
+        "license": {
+            "name": "GPL-3.0",
+            "url": "https://www.gnu.org/licenses/gpl-3.0.en.html"
+        },
+        "version": "1.0"
+    },
+    "host": "kyoo.zoriya.dev",
+    "basePath": "/auth",
+    "paths": {
+        "/info": {
+            "get": {
+                "description": "Get info like the public key used to sign the jwts.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "jwt"
+                ],
+                "summary": "Info",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.Info"
+                        }
+                    }
+                }
+            }
+        },
+        "/jwt": {
+            "get": {
+                "security": [
+                    {
+                        "Token": []
+                    }
+                ],
+                "description": "Convert a session token to a short lived JWT.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "jwt"
+                ],
+                "summary": "Get JWT",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.Jwt"
+                        }
+                    },
+                    "401": {
+                        "description": "Missing session token",
+                        "schema": {}
+                    },
+                    "403": {
+                        "description": "Invalid session token (or expired)",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/sessions": {
+            "post": {
+                "description": "Login to your account and open a session",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Login",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The device the created session will be used on",
+                        "name": "device",
+                        "in": "query"
+                    },
+                    {
+                        "description": "Account informations",
+                        "name": "login",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/main.LoginDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dbc.Session"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid login body",
+                        "schema": {}
+                    },
+                    "403": {
+                        "description": "Invalid password",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Account does not exists",
+                        "schema": {}
+                    },
+                    "422": {
+                        "description": "User does not have a password (registered via oidc, please login via oidc)",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/sessions/current": {
+            "delete": {
+                "security": [
+                    {
+                        "Jwt": []
+                    }
+                ],
+                "description": "Delete a session and logout",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Logout",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.Session"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid session id",
+                        "schema": {}
+                    },
+                    "401": {
+                        "description": "Missing jwt token",
+                        "schema": {}
+                    },
+                    "403": {
+                        "description": "Invalid jwt token (or expired)",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Session not found with specified id (if not using the /current route)",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/sessions/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "Jwt": []
+                    }
+                ],
+                "description": "Delete a session and logout",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Logout",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The id of the session to delete",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.Session"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid session id",
+                        "schema": {}
+                    },
+                    "401": {
+                        "description": "Missing jwt token",
+                        "schema": {}
+                    },
+                    "403": {
+                        "description": "Invalid jwt token (or expired)",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Session not found with specified id (if not using the /current route)",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "security": [
+                    {
+                        "Jwt": [
+                            "users.read"
+                        ]
+                    }
+                ],
+                "description": "List all users existing in this instance.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "List all users",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "used for pagination.",
+                        "name": "afterId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid after id",
+                        "schema": {}
+                    }
+                }
+            },
+            "post": {
+                "description": "Register as a new user and open a session for it",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Register",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The device the created session will be used on",
+                        "name": "device",
+                        "in": "query"
+                    },
+                    {
+                        "description": "Registration informations",
+                        "name": "user",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/main.RegisterDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dbc.Session"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid register body",
+                        "schema": {}
+                    },
+                    "409": {
+                        "description": "Duplicated email or username",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/users/me": {
+            "get": {
+                "security": [
+                    {
+                        "Jwt": []
+                    }
+                ],
+                "description": "Get informations about the currently connected user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get me",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.User"
+                        }
+                    },
+                    "401": {
+                        "description": "Missing jwt token",
+                        "schema": {}
+                    },
+                    "403": {
+                        "description": "Invalid jwt token (or expired)",
+                        "schema": {}
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Jwt": []
+                    }
+                ],
+                "description": "Delete your account and all your sessions",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Delete self",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.User"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Jwt": [
+                            "users.read"
+                        ]
+                    }
+                ],
+                "description": "Get informations about a user from it's id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The id of the user",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.User"
+                        }
+                    },
+                    "404": {
+                        "description": "No user with the given id found",
+                        "schema": {}
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Jwt": [
+                            "users.delete"
+                        ]
+                    }
+                ],
+                "description": "Delete an account and all it's sessions.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Delete user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "User id of the user to delete",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.User"
+                        }
+                    },
+                    "404": {
+                        "description": "Invalid user id",
+                        "schema": {}
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dbc.Session": {
+            "type": "object",
+            "properties": {
+                "createdDate": {
+                    "type": "string"
+                },
+                "device": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lastUsed": {
+                    "type": "string"
+                },
+                "pk": {
+                    "type": "integer"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "userPk": {
+                    "type": "integer"
+                }
+            }
+        },
+        "main.Info": {
+            "type": "object",
+            "properties": {
+                "publicKey": {
+                    "description": "The public key used to sign jwt tokens. It can be used by your services to check if the jwt is valid.",
+                    "type": "string"
+                }
+            }
+        },
+        "main.Jwt": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "description": "The jwt token you can use for all authorized call to either keibi or other services.",
+                    "type": "string"
+                }
+            }
+        },
+        "main.LoginDto": {
+            "type": "object",
+            "required": [
+                "login",
+                "password"
+            ],
+            "properties": {
+                "login": {
+                    "description": "Either the email or the username.",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "Password of the account.",
+                    "type": "string"
+                }
+            }
+        },
+        "main.OidcHandle": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Id of this oidc handle.",
+                    "type": "string"
+                },
+                "profileUrl": {
+                    "description": "Link to the profile of the user on the external service. Null if unknown or irrelevant.",
+                    "type": "string",
+                    "format": "url"
+                },
+                "username": {
+                    "description": "Username of the user on the external service.",
+                    "type": "string"
+                }
+            }
+        },
+        "main.RegisterDto": {
+            "type": "object",
+            "required": [
+                "email",
+                "password",
+                "username"
+            ],
+            "properties": {
+                "email": {
+                    "description": "Valid email that could be used for forgotten password requests. Can be used for login.",
+                    "type": "string",
+                    "format": "email"
+                },
+                "password": {
+                    "description": "Password to use.",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "Username of the new account, can't contain @ signs. Can be used for login.",
+                    "type": "string"
+                }
+            }
+        },
+        "main.Session": {
+            "type": "object",
+            "properties": {
+                "createdDate": {
+                    "description": "When was the session first opened",
+                    "type": "string"
+                },
+                "device": {
+                    "description": "Device that created the session.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Unique id of this session. Can be used for calls to DELETE",
+                    "type": "string"
+                },
+                "lastUsed": {
+                    "description": "Last date this session was used to access a service.",
+                    "type": "string"
+                }
+            }
+        },
+        "main.User": {
+            "type": "object",
+            "properties": {
+                "claims": {
+                    "description": "List of custom claims JWT created via get /jwt will have",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "createdDate": {
+                    "description": "When was this account created?",
+                    "type": "string"
+                },
+                "email": {
+                    "description": "Email of the user. Can be used as a login.",
+                    "type": "string",
+                    "format": "email"
+                },
+                "id": {
+                    "description": "Id of the user.",
+                    "type": "string"
+                },
+                "lastSeen": {
+                    "description": "When was the last time this account made any authorized request?",
+                    "type": "string"
+                },
+                "oidc": {
+                    "description": "List of other login method available for this user. Access tokens wont be returned here.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/main.OidcHandle"
+                    }
+                },
+                "username": {
+                    "description": "Username of the user. Can be used as a login.",
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "Jwt": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        },
+        "Token": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

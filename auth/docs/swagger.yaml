@@ -1,0 +1,426 @@
+basePath: /auth
+definitions:
+  dbc.Session:
+    properties:
+      createdDate:
+        type: string
+      device:
+        type: string
+      id:
+        type: string
+      lastUsed:
+        type: string
+      pk:
+        type: integer
+      token:
+        type: string
+      userPk:
+        type: integer
+    type: object
+  main.Info:
+    properties:
+      publicKey:
+        description: The public key used to sign jwt tokens. It can be used by your
+          services to check if the jwt is valid.
+        type: string
+    type: object
+  main.Jwt:
+    properties:
+      token:
+        description: The jwt token you can use for all authorized call to either keibi
+          or other services.
+        type: string
+    type: object
+  main.LoginDto:
+    properties:
+      login:
+        description: Either the email or the username.
+        type: string
+      password:
+        description: Password of the account.
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  main.OidcHandle:
+    properties:
+      id:
+        description: Id of this oidc handle.
+        type: string
+      profileUrl:
+        description: Link to the profile of the user on the external service. Null
+          if unknown or irrelevant.
+        format: url
+        type: string
+      username:
+        description: Username of the user on the external service.
+        type: string
+    type: object
+  main.RegisterDto:
+    properties:
+      email:
+        description: Valid email that could be used for forgotten password requests.
+          Can be used for login.
+        format: email
+        type: string
+      password:
+        description: Password to use.
+        type: string
+      username:
+        description: Username of the new account, can't contain @ signs. Can be used
+          for login.
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  main.Session:
+    properties:
+      createdDate:
+        description: When was the session first opened
+        type: string
+      device:
+        description: Device that created the session.
+        type: string
+      id:
+        description: Unique id of this session. Can be used for calls to DELETE
+        type: string
+      lastUsed:
+        description: Last date this session was used to access a service.
+        type: string
+    type: object
+  main.User:
+    properties:
+      claims:
+        additionalProperties:
+          type: string
+        description: List of custom claims JWT created via get /jwt will have
+        type: object
+      createdDate:
+        description: When was this account created?
+        type: string
+      email:
+        description: Email of the user. Can be used as a login.
+        format: email
+        type: string
+      id:
+        description: Id of the user.
+        type: string
+      lastSeen:
+        description: When was the last time this account made any authorized request?
+        type: string
+      oidc:
+        additionalProperties:
+          $ref: '#/definitions/main.OidcHandle'
+        description: List of other login method available for this user. Access tokens
+          wont be returned here.
+        type: object
+      username:
+        description: Username of the user. Can be used as a login.
+        type: string
+    type: object
+host: kyoo.zoriya.dev
+info:
+  contact:
+    name: Repository
+    url: https://github.com/zoriya/kyoo
+  description: Auth system made for kyoo.
+  license:
+    name: GPL-3.0
+    url: https://www.gnu.org/licenses/gpl-3.0.en.html
+  title: Keibi - Kyoo's auth
+  version: "1.0"
+paths:
+  /info:
+    get:
+      description: Get info like the public key used to sign the jwts.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Info'
+      summary: Info
+      tags:
+      - jwt
+  /jwt:
+    get:
+      description: Convert a session token to a short lived JWT.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Jwt'
+        "401":
+          description: Missing session token
+          schema: {}
+        "403":
+          description: Invalid session token (or expired)
+          schema: {}
+      security:
+      - Token: []
+      summary: Get JWT
+      tags:
+      - jwt
+  /sessions:
+    post:
+      consumes:
+      - application/json
+      description: Login to your account and open a session
+      parameters:
+      - description: The device the created session will be used on
+        in: query
+        name: device
+        type: string
+      - description: Account informations
+        in: body
+        name: login
+        schema:
+          $ref: '#/definitions/main.LoginDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dbc.Session'
+        "400":
+          description: Invalid login body
+          schema: {}
+        "403":
+          description: Invalid password
+          schema: {}
+        "404":
+          description: Account does not exists
+          schema: {}
+        "422":
+          description: User does not have a password (registered via oidc, please
+            login via oidc)
+          schema: {}
+      summary: Login
+      tags:
+      - sessions
+  /sessions/{id}:
+    delete:
+      description: Delete a session and logout
+      parameters:
+      - description: The id of the session to delete
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Session'
+        "400":
+          description: Invalid session id
+          schema: {}
+        "401":
+          description: Missing jwt token
+          schema: {}
+        "403":
+          description: Invalid jwt token (or expired)
+          schema: {}
+        "404":
+          description: Session not found with specified id (if not using the /current
+            route)
+          schema: {}
+      security:
+      - Jwt: []
+      summary: Logout
+      tags:
+      - sessions
+  /sessions/current:
+    delete:
+      description: Delete a session and logout
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Session'
+        "400":
+          description: Invalid session id
+          schema: {}
+        "401":
+          description: Missing jwt token
+          schema: {}
+        "403":
+          description: Invalid jwt token (or expired)
+          schema: {}
+        "404":
+          description: Session not found with specified id (if not using the /current
+            route)
+          schema: {}
+      security:
+      - Jwt: []
+      summary: Logout
+      tags:
+      - sessions
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: List all users existing in this instance.
+      parameters:
+      - description: used for pagination.
+        format: uuid
+        in: query
+        name: afterId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.User'
+        "400":
+          description: Invalid after id
+          schema: {}
+      security:
+      - Jwt:
+        - users.read
+      summary: List all users
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Register as a new user and open a session for it
+      parameters:
+      - description: The device the created session will be used on
+        in: query
+        name: device
+        type: string
+      - description: Registration informations
+        in: body
+        name: user
+        schema:
+          $ref: '#/definitions/main.RegisterDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dbc.Session'
+        "400":
+          description: Invalid register body
+          schema: {}
+        "409":
+          description: Duplicated email or username
+          schema: {}
+      summary: Register
+      tags:
+      - users
+  /users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an account and all it's sessions.
+      parameters:
+      - description: User id of the user to delete
+        format: uuid
+        in: path
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.User'
+        "404":
+          description: Invalid user id
+          schema: {}
+      security:
+      - Jwt:
+        - users.delete
+      summary: Delete user
+      tags:
+      - users
+    get:
+      description: Get informations about a user from it's id
+      parameters:
+      - description: The id of the user
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.User'
+        "404":
+          description: No user with the given id found
+          schema: {}
+      security:
+      - Jwt:
+        - users.read
+      summary: Get user
+      tags:
+      - users
+  /users/me:
+    delete:
+      consumes:
+      - application/json
+      description: Delete your account and all your sessions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.User'
+      security:
+      - Jwt: []
+      summary: Delete self
+      tags:
+      - users
+    get:
+      description: Get informations about the currently connected user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.User'
+        "401":
+          description: Missing jwt token
+          schema: {}
+        "403":
+          description: Invalid jwt token (or expired)
+          schema: {}
+      security:
+      - Jwt: []
+      summary: Get me
+      tags:
+      - users
+securityDefinitions:
+  Jwt:
+    in: header
+    name: Authorization
+    type: apiKey
+  Token:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -1,34 +1,15 @@
-import jwt from "@elysiajs/jwt";
 import { swagger } from "@elysiajs/swagger";
+import { app } from "./base";
 import { processImages } from "./controllers/seed/images";
 import { migrate } from "./db";
-import { app } from "./elysia";
 import { comment } from "./utils";
 
 await migrate();
-
-let secret = process.env.JWT_SECRET;
-if (!secret) {
-	const auth = process.env.AUTH_SERVER ?? "http://auth:4568";
-	try {
-		const ret = await fetch(`${auth}/info`);
-		const info = await ret.json();
-		secret = info.publicKey;
-	} catch (error) {
-		console.error(`Can't access auth server at ${auth}:\n${error}`);
-	}
-}
-
-if (!secret) {
-	console.error("Missing jwt secret or auth server. exiting");
-	process.exit(1);
-}
 
 // run image processor task in background
 processImages();
 
 app
-	.use(jwt({ secret }))
 	.use(
 		swagger({
 			documentation: {
@@ -74,9 +55,23 @@ app
 						description: "Routes about images: posters, thumbnails...",
 					},
 				],
+				components: {
+					securitySchemes: {
+						bearer: {
+							type: "http",
+							scheme: "bearer",
+							bearerFormat: "opaque",
+						},
+						api: {
+							type: "apiKey",
+							in: "header",
+							name: "X-API-KEY",
+						},
+					},
+				},
 			},
 		}),
 	)
-	.listen(3000);
+	.listen(3567);
 
 console.log(`Api running at ${app.server?.hostname}:${app.server?.port}`);
