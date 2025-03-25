@@ -1,8 +1,8 @@
 import { and, eq, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
+import { prefix } from "~/base";
 import { db } from "~/db";
 import { shows } from "~/db/schema";
-import { prefix } from "~/base";
 import { KError } from "~/models/error";
 import { madeInAbyss } from "~/models/examples";
 import { FullSerie, Serie, SerieTranslation } from "~/models/serie";

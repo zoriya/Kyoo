@@ -9,8 +9,9 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.3
-	github.com/labstack/echo-jwt/v4 v4.3.1
+	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.13.3
+	github.com/lestrrat-go/jwx v1.2.30
 	github.com/otaxhu/problem v1.4.0
 	github.com/swaggo/echo-swagger v1.4.1
 	github.com/swaggo/swag v1.16.4
@@ -23,7 +24,6 @@ require (
 	github.com/lestrrat-go/blackmagic v1.0.2 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
 	github.com/lestrrat-go/iter v1.0.2 // indirect
-	github.com/lestrrat-go/jwx v1.2.30 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/otaxhu/type-mismatch-encoding v0.0.0-20241118152201-1861af90dd01 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

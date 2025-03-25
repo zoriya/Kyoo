@@ -1,5 +1,6 @@
 import { and, isNull, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
+import { prefix } from "~/base";
 import { db } from "~/db";
 import { shows } from "~/db/schema";
 import { KError } from "~/models/error";
@@ -13,7 +14,6 @@ import {
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import { getShows, showFilters, showSort } from "./logic";
-import { prefix } from "~/base";
 
 export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 	.model({

@@ -2,6 +2,7 @@ import { stat } from "node:fs/promises";
 import type { BunFile } from "bun";
 import { type SQL, and, eq, sql } from "drizzle-orm";
 import Elysia, { type Context, t } from "elysia";
+import { prefix } from "~/base";
 import { db } from "~/db";
 import {
 	showTranslations,
@@ -15,7 +16,6 @@ import { KError } from "~/models/error";
 import { bubble } from "~/models/examples";
 import { AcceptLanguage, isUuid, processLanguages } from "~/models/utils";
 import { imageDir } from "./seed/images";
-import { prefix } from "~/base";
 
 function getRedirectToImageHandler({
 	filter,

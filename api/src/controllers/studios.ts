@@ -1,5 +1,6 @@
 import { type SQL, and, eq, exists, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
+import { prefix } from "~/base";
 import { db } from "~/db";
 import {
 	showStudioJoin,
@@ -32,7 +33,6 @@ import {
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import { getShows, showFilters, showSort } from "./shows/logic";
-import { prefix } from "~/base";
 
 const studioSort = Sort(
 	{
