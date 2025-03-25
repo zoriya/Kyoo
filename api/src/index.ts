@@ -55,6 +55,20 @@ app
 						description: "Routes about images: posters, thumbnails...",
 					},
 				],
+				components: {
+					securitySchemes: {
+						bearer: {
+							type: "http",
+							scheme: "bearer",
+							bearerFormat: "opaque",
+						},
+						api: {
+							type: "apiKey",
+							in: "header",
+							name: "X-API-KEY",
+						},
+					},
+				},
 			},
 		}),
 	)
