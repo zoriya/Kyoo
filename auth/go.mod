@@ -9,7 +9,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.3
-	github.com/labstack/echo-jwt/v4 v4.2.0
+	github.com/labstack/echo-jwt/v4 v4.3.1
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/lestrrat-go/jwx v1.2.30
 	github.com/otaxhu/problem v1.4.0
