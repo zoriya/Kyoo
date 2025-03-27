@@ -15,7 +15,7 @@ import (
 
 type Jwt struct {
 	// The jwt token you can use for all authorized call to either keibi or other services.
-	Token string `json:"token"`
+	Token *string `json:"token"`
 }
 
 // @Summary      Get JWT
@@ -30,7 +30,7 @@ type Jwt struct {
 func (h *Handler) CreateJwt(c echo.Context) error {
 	auth := c.Request().Header.Get("Authorization")
 	if !strings.HasPrefix(auth, "Bearer ") {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Missing session token")
+		return c.JSON(http.StatusOK, Jwt{Token: nil})
 	}
 	token := auth[len("Bearer "):]
 
@@ -65,7 +65,7 @@ func (h *Handler) CreateJwt(c echo.Context) error {
 	}
 	c.Response().Header().Add("Authorization", fmt.Sprintf("Bearer %s", t))
 	return c.JSON(http.StatusOK, Jwt{
-		Token: t,
+		Token: &t,
 	})
 }
 
