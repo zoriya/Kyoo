@@ -60,8 +60,7 @@ services:
       - ./auth:/app
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.auth.rule=PathPrefix(`/auth/`)"
-      - "traefik.http.routers.auth.rule=PathPrefix(`/.well-known/`)"
+      - "traefik.http.routers.auth.rule=PathPrefix(`/auth/`) || PathPrefix(`/.well-known/`)"
 
   api:
     build:
@@ -70,8 +69,6 @@ services:
     restart: on-failure
     depends_on:
       postgres:
-        condition: service_healthy
-      auth:
         condition: service_healthy
     volumes:
       - ./api:/app
@@ -89,6 +86,9 @@ services:
       - "traefik.http.middlewares.phantom-token.forwardauth.address=http://auth:4568/auth/jwt"
       - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,X-Api-Key"
       - "traefik.http.middlewares.phantom-token.forwardauth.authResponseHeaders=Authorization"
+      - "traefik.http.routers.swagger.rule=PathPrefix(`/swagger`)"
+      - "traefik.http.routers.swagger.service=api"
+      - "traefik.http.services.api.loadbalancer.server.port=3567"
 
   # scanner:
   #   build: ./scanner
