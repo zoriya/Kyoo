@@ -19,7 +19,7 @@ func GetCurrentUserId(c echo.Context) (uuid.UUID, error) {
 	}
 	sub, err := user.Claims.GetSubject()
 	if err != nil {
-		return uuid.UUID{}, echo.NewHTTPError(403, "Could not retrive subject")
+		return uuid.UUID{}, echo.NewHTTPError(403, "Could not retrieve subject")
 	}
 	ret, err := uuid.Parse(sub)
 	if err != nil {
