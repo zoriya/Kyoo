@@ -17,19 +17,49 @@ definitions:
       userPk:
         type: integer
     type: object
-  main.Info:
+  main.JwkSet:
     properties:
-      publicKey:
-        description: The public key used to sign jwt tokens. It can be used by your
-          services to check if the jwt is valid.
-        type: string
+      keys:
+        items:
+          properties:
+            e:
+              example: AQAB
+              type: string
+            key_ops:
+              example:
+              - '[verify]'
+              items:
+                type: string
+              type: array
+            kty:
+              example: RSA
+              type: string
+            "n":
+              example: oBcXcJUR-Sb8_b4qIj28LRAPxdF_6odRr52K5-ymiEkR2DOlEuXBtM-biWxPESW-U-zhfHzdVLf6ioy5xL0bJTh8BMIorkrDliN3vb81jCvyOMgZ7ATMJpMAQMmSDN7sL3U45r22FaoQufCJMQHmUsZPecdQSgj2aFBiRXxsLleYlSezdBVT_gKH-coqeYXSC_hk-ezSq4aDZ10BlDnZ-FA7-ES3T7nBmJEAU7KDAGeSvbYAfYimOW0r-Vc0xQNuwGCfzZtSexKXDbYbNwOVo3SjfCabq-gMfap_owcHbKicGBZu1LDlh7CpkmLQf_kv6GihM2LWFFh6Vwg2cltiwF22EIPlUDtYTkUR0qRkdNJaNkwV5Vv_6r3pzSmu5ovRriKtlrvJMjlTnLb4_ltsge3fw5Z34cJrsp094FbUc2O6Or4FGEXUldieJCnVRhs2_h6SDcmeMXs1zfvE5GlDnq8tZV6WMJ5Sb4jNO7rs_hTkr23_E6mVg-DdtozGfqzRzhIjPym6D_jVfR6dZv5W0sKwOHRmT7nYq-C7b2sAwmNNII296M4Rq-jn0b5pgSeMDYbIpbIA4thU8LYU0lBZp_ZVwWKG1RFZDxz3k9O5UVth2kTpTWlwn0hB1aAvgXHo6in1CScITGA72p73RbDieNnLFaCK4xUVstkWAKLqPxs
+              type: string
+            use:
+              example: sig
+              type: string
+          type: object
+        type: array
     type: object
   main.Jwt:
     properties:
       token:
         description: The jwt token you can use for all authorized call to either keibi
           or other services.
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30
         type: string
+    type: object
+  main.KError:
+    properties:
+      details: {}
+      message:
+        example: No user found with this id
+        type: string
+      status:
+        example: 404
+        type: integer
     type: object
   main.LoginDto:
     properties:
@@ -133,17 +163,17 @@ info:
   title: Keibi - Kyoo's auth
   version: "1.0"
 paths:
-  /info:
+  /.well-known/jwks.json:
     get:
-      description: Get info like the public key used to sign the jwts.
+      description: Get the jwks info, used to validate jwts.
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.Info'
-      summary: Info
+            $ref: '#/definitions/main.JwkSet'
+      summary: Jwks
       tags:
       - jwt
   /jwt:
@@ -154,14 +184,16 @@ paths:
       responses:
         "200":
           description: OK
+          headers:
+            Authorization:
+              description: Jwt (same value as the returned token)
+              type: string
           schema:
             $ref: '#/definitions/main.Jwt'
-        "401":
-          description: Missing session token
-          schema: {}
         "403":
           description: Invalid session token (or expired)
-          schema: {}
+          schema:
+            $ref: '#/definitions/main.KError'
       security:
       - Token: []
       summary: Get JWT

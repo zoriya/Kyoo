@@ -15,7 +15,7 @@ import (
 
 type Jwt struct {
 	// The jwt token you can use for all authorized call to either keibi or other services.
-	Token *string `json:"token"`
+	Token *string `json:"token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30"`
 }
 
 // @Summary      Get JWT
@@ -24,8 +24,8 @@ type Jwt struct {
 // @Produce      json
 // @Security     Token
 // @Success      200  {object}  Jwt
-// @Failure      401  {object}  problem.Problem "Missing session token"
-// @Failure      403  {object}  problem.Problem "Invalid session token (or expired)"
+// @Failure      403  {object}  KError "Invalid session token (or expired)"
+// @Header       200  {string}  Authorization  "Jwt (same value as the returned token)"
 // @Router /jwt [get]
 func (h *Handler) CreateJwt(c echo.Context) error {
 	auth := c.Request().Header.Get("Authorization")
@@ -69,11 +69,22 @@ func (h *Handler) CreateJwt(c echo.Context) error {
 	})
 }
 
+// only used for the swagger doc
+type JwkSet struct {
+	Keys []struct {
+		E       string   `json:"e" example:"AQAB"`
+		KeyOps []string `json:"key_ops" example:"[verify]"`
+		Kty     string   `json:"kty" example:"RSA"`
+		N       string   `json:"n" example:"oBcXcJUR-Sb8_b4qIj28LRAPxdF_6odRr52K5-ymiEkR2DOlEuXBtM-biWxPESW-U-zhfHzdVLf6ioy5xL0bJTh8BMIorkrDliN3vb81jCvyOMgZ7ATMJpMAQMmSDN7sL3U45r22FaoQufCJMQHmUsZPecdQSgj2aFBiRXxsLleYlSezdBVT_gKH-coqeYXSC_hk-ezSq4aDZ10BlDnZ-FA7-ES3T7nBmJEAU7KDAGeSvbYAfYimOW0r-Vc0xQNuwGCfzZtSexKXDbYbNwOVo3SjfCabq-gMfap_owcHbKicGBZu1LDlh7CpkmLQf_kv6GihM2LWFFh6Vwg2cltiwF22EIPlUDtYTkUR0qRkdNJaNkwV5Vv_6r3pzSmu5ovRriKtlrvJMjlTnLb4_ltsge3fw5Z34cJrsp094FbUc2O6Or4FGEXUldieJCnVRhs2_h6SDcmeMXs1zfvE5GlDnq8tZV6WMJ5Sb4jNO7rs_hTkr23_E6mVg-DdtozGfqzRzhIjPym6D_jVfR6dZv5W0sKwOHRmT7nYq-C7b2sAwmNNII296M4Rq-jn0b5pgSeMDYbIpbIA4thU8LYU0lBZp_ZVwWKG1RFZDxz3k9O5UVth2kTpTWlwn0hB1aAvgXHo6in1CScITGA72p73RbDieNnLFaCK4xUVstkWAKLqPxs"`
+		Use     string   `json:"use" example:"sig"`
+	}
+}
+
 // @Summary      Jwks
 // @Description  Get the jwks info, used to validate jwts.
 // @Tags         jwt
 // @Produce      json
-// @Success      200  {object}  jwk.Key
+// @Success      200  {object}  JwkSet  "OK"
 // @Router /.well-known/jwks.json [get]
 func (h *Handler) GetJwks(c echo.Context) error {
 	key, err := jwk.New(h.config.JwtPublicKey)

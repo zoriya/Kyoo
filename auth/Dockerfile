@@ -12,7 +12,7 @@ COPY sql ./sql
 RUN sqlc generate
 
 COPY . .
-RUN swag init --parseDependency
+RUN swag init --parseDependency --outputTypes yaml
 RUN CGO_ENABLED=0 GOOS=linux go build -o /keibi
 
 FROM gcr.io/distroless/base-debian11
