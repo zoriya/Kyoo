@@ -159,14 +159,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/main.Session"
                         }
                     },
-                    "403": {
-                        "description": "Invalid jwt token (or expired)",
+                    "401": {
+                        "description": "Missing jwt token",
                         "schema": {
                             "$ref": "#/definitions/main.KError"
                         }
                     },
-                    "422": {
-                        "description": "Invalid session id",
+                    "403": {
+                        "description": "Invalid jwt token (or expired)",
                         "schema": {
                             "$ref": "#/definitions/main.KError"
                         }
@@ -258,9 +258,11 @@ const docTemplate = `{
                             "$ref": "#/definitions/main.User"
                         }
                     },
-                    "400": {
+                    "422": {
                         "description": "Invalid after id",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
                     }
                 }
             },
@@ -279,6 +281,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "example": "android",
                         "description": "The device the created session will be used on",
                         "name": "device",
                         "in": "query"
@@ -296,16 +299,20 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dbc.Session"
+                            "$ref": "#/definitions/main.SessionWToken"
                         }
-                    },
-                    "400": {
-                        "description": "Invalid register body",
-                        "schema": {}
                     },
                     "409": {
                         "description": "Duplicated email or username",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid register body",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
                     }
                 }
             }
@@ -334,11 +341,15 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Missing jwt token",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
                     },
                     "403": {
                         "description": "Invalid jwt token (or expired)",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
                     }
                 }
             },
@@ -405,7 +416,15 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "No user with the given id found",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid id (not a uuid)",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
                     }
                 }
             },
@@ -446,39 +465,15 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Invalid user id",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
                     }
                 }
             }
         }
     },
     "definitions": {
-        "dbc.Session": {
-            "type": "object",
-            "properties": {
-                "createdDate": {
-                    "type": "string"
-                },
-                "device": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "lastUsed": {
-                    "type": "string"
-                },
-                "pk": {
-                    "type": "integer"
-                },
-                "token": {
-                    "type": "string"
-                },
-                "userPk": {
-                    "type": "integer"
-                }
-            }
-        },
         "main.JwkSet": {
             "type": "object",
             "properties": {
@@ -565,16 +560,19 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "description": "Id of this oidc handle.",
-                    "type": "string"
+                    "type": "string",
+                    "example": "e05089d6-9179-4b5b-a63e-94dd5fc2a397"
                 },
                 "profileUrl": {
                     "description": "Link to the profile of the user on the external service. Null if unknown or irrelevant.",
                     "type": "string",
-                    "format": "url"
+                    "format": "url",
+                    "example": "https://myanimelist.net/profile/zoriya"
                 },
                 "username": {
                     "description": "Username of the user on the external service.",
-                    "type": "string"
+                    "type": "string",
+                    "example": "zoriya"
                 }
             }
         },
@@ -589,15 +587,18 @@ const docTemplate = `{
                 "email": {
                     "description": "Valid email that could be used for forgotten password requests. Can be used for login.",
                     "type": "string",
-                    "format": "email"
+                    "format": "email",
+                    "example": "kyoo@zoriya.dev"
                 },
                 "password": {
                     "description": "Password to use.",
-                    "type": "string"
+                    "type": "string",
+                    "example": "password1234"
                 },
                 "username": {
                     "description": "Username of the new account, can't contain @ signs. Can be used for login.",
-                    "type": "string"
+                    "type": "string",
+                    "example": "zoriya"
                 }
             }
         },
@@ -663,24 +664,31 @@ const docTemplate = `{
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
+                    },
+                    "example": {
+                        "isAdmin": " true"
                     }
                 },
                 "createdDate": {
                     "description": "When was this account created?",
-                    "type": "string"
+                    "type": "string",
+                    "example": "2025-03-29T18:20:05.267Z"
                 },
                 "email": {
                     "description": "Email of the user. Can be used as a login.",
                     "type": "string",
-                    "format": "email"
+                    "format": "email",
+                    "example": "kyoo@zoriya.dev"
                 },
                 "id": {
                     "description": "Id of the user.",
-                    "type": "string"
+                    "type": "string",
+                    "example": "e05089d6-9179-4b5b-a63e-94dd5fc2a397"
                 },
                 "lastSeen": {
                     "description": "When was the last time this account made any authorized request?",
-                    "type": "string"
+                    "type": "string",
+                    "example": "2025-03-29T18:20:05.267Z"
                 },
                 "oidc": {
                     "description": "List of other login method available for this user. Access tokens wont be returned here.",
@@ -691,7 +699,8 @@ const docTemplate = `{
                 },
                 "username": {
                     "description": "Username of the user. Can be used as a login.",
-                    "type": "string"
+                    "type": "string",
+                    "example": "zoriya"
                 }
             }
         }
