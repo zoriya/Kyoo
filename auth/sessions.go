@@ -18,13 +18,18 @@ import (
 
 type Session struct {
 	// Unique id of this session. Can be used for calls to DELETE
-	Id uuid.UUID `json:"id"`
+	Id uuid.UUID `json:"id" example:"e05089d6-9179-4b5b-a63e-94dd5fc2a397"`
 	// When was the session first opened
-	CreatedDate time.Time `json:"createdDate"`
+	CreatedDate time.Time `json:"createdDate" example:"2025-03-29T18:20:05.267Z"`
 	// Last date this session was used to access a service.
-	LastUsed time.Time `json:"lastUsed"`
+	LastUsed time.Time `json:"lastUsed" example:"2025-03-29T18:20:05.267Z"`
 	// Device that created the session.
-	Device *string `json:"device"`
+	Device *string `json:"device" example:"Web - Firefox"`
+}
+
+type SessionWToken struct {
+	Session
+	Token string `json:"token" example:"lyHzTYm9yi+pkEv3m2tamAeeK7Dj7N3QRP7xv7dPU5q9MAe8tU4ySwYczE0RaMr4fijsA=="`
 }
 
 func MapSession(ses *dbc.Session) Session {
@@ -36,11 +41,23 @@ func MapSession(ses *dbc.Session) Session {
 	}
 }
 
+func MapSessionToken(ses *dbc.Session) SessionWToken {
+	return SessionWToken{
+		Session: Session{
+			Id:          ses.Id,
+			CreatedDate: ses.CreatedDate,
+			LastUsed:    ses.LastUsed,
+			Device:      ses.Device,
+		},
+		Token: ses.Token,
+	}
+}
+
 type LoginDto struct {
 	// Either the email or the username.
-	Login string `json:"login" validate:"required"`
+	Login string `json:"login" validate:"required" example:"zoriya"`
 	// Password of the account.
-	Password string `json:"password" validate:"required"`
+	Password string `json:"password" validate:"required" example:"password1234"`
 }
 
 // @Summary      Login
@@ -48,19 +65,18 @@ type LoginDto struct {
 // @Tags         sessions
 // @Accept       json
 // @Produce      json
-// @Param        device  query   string    false  "The device the created session will be used on"
+// @Param        device  query   string    false  "The device the created session will be used on"  example(android tv)
 // @Param        login   body    LoginDto  false  "Account informations"
-// @Success      201  {object}   dbc.Session
-// @Failure      400  {object}   problem.Problem "Invalid login body"
-// @Failure      403  {object}   problem.Problem "Invalid password"
-// @Failure      404  {object}   problem.Problem "Account does not exists"
-// @Failure      422  {object}   problem.Problem "User does not have a password (registered via oidc, please login via oidc)"
+// @Success      201  {object}   SessionWToken
+// @Failure      403  {object}   KError "Invalid password"
+// @Failure      404  {object}   KError "Account does not exists"
+// @Failure      422  {object}   KError "User does not have a password (registered via oidc, please login via oidc)"
 // @Router /sessions [post]
 func (h *Handler) Login(c echo.Context) error {
 	var req LoginDto
 	err := c.Bind(&req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
 	}
 	if err = c.Validate(&req); err != nil {
 		return err
@@ -117,13 +133,9 @@ func (h *Handler) createSession(c echo.Context, user *User) error {
 // @Tags         sessions
 // @Produce      json
 // @Security     Jwt
-// @Param        id   path      string    true  "The id of the session to delete" Format(uuid)
 // @Success      200  {object}  Session
-// @Failure      400  {object}  problem.Problem "Invalid session id"
-// @Failure      401  {object}  problem.Problem "Missing jwt token"
-// @Failure      403  {object}  problem.Problem "Invalid jwt token (or expired)"
-// @Failure      404  {object}  problem.Problem "Session not found with specified id (if not using the /current route)"
-// @Router /sessions/{id} [delete]
+// @Failure      401  {object}  KError "Missing jwt token"
+// @Failure      403  {object}  KError "Invalid jwt token (or expired)"
 // @Router /sessions/current [delete]
 func (h *Handler) Logout(c echo.Context) error {
 	uid, err := GetCurrentUserId(c)
@@ -135,13 +147,13 @@ func (h *Handler) Logout(c echo.Context) error {
 	if session == "current" {
 		sid, ok := c.Get("user").(*jwt.Token).Claims.(jwt.MapClaims)["sid"]
 		if !ok {
-			return echo.NewHTTPError(400, "Missing session id")
+			return echo.NewHTTPError(http.StatusInternalServerError, "Missing session id")
 		}
 		session = sid.(string)
 	}
 	sid, err := uuid.Parse(session)
 	if err != nil {
-		return echo.NewHTTPError(400, "Invalid session id")
+		return echo.NewHTTPError(422, "Invalid session id")
 	}
 
 	ret, err := h.db.DeleteSession(context.Background(), dbc.DeleteSessionParams{
@@ -155,3 +167,15 @@ func (h *Handler) Logout(c echo.Context) error {
 	}
 	return c.JSON(200, MapSession(&ret))
 }
+
+// @Summary      Delete other session
+// @Description  Delete a session and logout
+// @Tags         sessions
+// @Produce      json
+// @Security     Jwt
+// @Param        id   path      string    true  "The id of the session to delete"  Format(uuid) Example(e05089d6-9179-4b5b-a63e-94dd5fc2a397)
+// @Success      200  {object}  Session
+// @Failure      404  {object}  KError "Session not found with specified id (if not using the /current route)"
+// @Failure      422  {object}  KError "Invalid session id"
+// @Router /sessions/{id} [delete]
+func DocOnly() {}
