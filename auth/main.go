@@ -8,7 +8,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/otaxhu/problem"
 	"github.com/zoriya/kyoo/keibi/dbc"
 	_ "github.com/zoriya/kyoo/keibi/docs"
 
@@ -35,8 +34,11 @@ func ErrorHandler(err error, c echo.Context) {
 		c.Logger().Error(err)
 	}
 
-	ret := problem.NewMap(code, message)
-	c.JSON(code, ret)
+	c.JSON(code, KError{
+		Status:  code,
+		Message: message,
+		Details: nil,
+	})
 }
 
 type Validator struct {
