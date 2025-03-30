@@ -118,7 +118,7 @@ func (h *Handler) createSession(c echo.Context, user *User) error {
 	}
 
 	session, err := h.db.CreateSession(ctx, dbc.CreateSessionParams{
-		Token:  base64.StdEncoding.EncodeToString(id),
+		Token:  base64.RawURLEncoding.EncodeToString(id),
 		UserPk: user.Pk,
 		Device: device,
 	})

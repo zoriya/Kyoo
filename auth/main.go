@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/zoriya/kyoo/keibi/dbc"
 	_ "github.com/zoriya/kyoo/keibi/docs"
@@ -123,6 +125,30 @@ type Handler struct {
 	config *Configuration
 }
 
+func (h *Handler) TokenToJwt(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		auth := c.Request().Header.Get("Authorization")
+		if auth == "" || !strings.HasPrefix(auth, "Bearer ") {
+			return next(c)
+		}
+		token := auth[len("Bearer "):]
+
+		// this is only used to check if it is a session token or a jwt
+		_, err := base64.RawURLEncoding.DecodeString(token)
+		if err != nil {
+			return next(c)
+		}
+
+		jwt, err := h.createJwt(token)
+		if err != nil {
+			return err
+		}
+		c.Request().Header.Set("Authorization", jwt)
+
+		return next(c)
+	}
+}
+
 // @title Keibi - Kyoo's auth
 // @version 1.0
 // @description Auth system made for kyoo.
@@ -167,6 +193,7 @@ func main() {
 
 	g := e.Group(conf.Prefix)
 	r := e.Group(conf.Prefix)
+	r.Use(h.TokenToJwt)
 	r.Use(echojwt.WithConfig(echojwt.Config{
 		SigningMethod: "RS256",
 		SigningKey:    h.config.JwtPublicKey,

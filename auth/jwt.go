@@ -34,12 +34,24 @@ func (h *Handler) CreateJwt(c echo.Context) error {
 	}
 	token := auth[len("Bearer "):]
 
+	jwt, err := h.createJwt(token)
+	if err != nil {
+		return err
+	}
+
+	c.Response().Header().Add("Authorization", fmt.Sprintf("Bearer %s", jwt))
+	return c.JSON(http.StatusOK, Jwt{
+		Token: &jwt,
+	})
+}
+
+func (h *Handler) createJwt(token string) (string, error) {
 	session, err := h.db.GetUserFromToken(context.Background(), token)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusForbidden, "Invalid token")
+		return "", echo.NewHTTPError(http.StatusForbidden, "Invalid token")
 	}
 	if session.LastUsed.Add(h.config.ExpirationDelay).Compare(time.Now().UTC()) < 0 {
-		return echo.NewHTTPError(http.StatusForbidden, "Token has expired")
+		return "", echo.NewHTTPError(http.StatusForbidden, "Token has expired")
 	}
 
 	go func() {
@@ -61,22 +73,19 @@ func (h *Handler) CreateJwt(c echo.Context) error {
 	jwt := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	t, err := jwt.SignedString(h.config.JwtPrivateKey)
 	if err != nil {
-		return err
+		return "", err
 	}
-	c.Response().Header().Add("Authorization", fmt.Sprintf("Bearer %s", t))
-	return c.JSON(http.StatusOK, Jwt{
-		Token: &t,
-	})
+	return t, nil
 }
 
 // only used for the swagger doc
 type JwkSet struct {
 	Keys []struct {
-		E       string   `json:"e" example:"AQAB"`
+		E      string   `json:"e" example:"AQAB"`
 		KeyOps []string `json:"key_ops" example:"[verify]"`
-		Kty     string   `json:"kty" example:"RSA"`
-		N       string   `json:"n" example:"oBcXcJUR-Sb8_b4qIj28LRAPxdF_6odRr52K5-ymiEkR2DOlEuXBtM-biWxPESW-U-zhfHzdVLf6ioy5xL0bJTh8BMIorkrDliN3vb81jCvyOMgZ7ATMJpMAQMmSDN7sL3U45r22FaoQufCJMQHmUsZPecdQSgj2aFBiRXxsLleYlSezdBVT_gKH-coqeYXSC_hk-ezSq4aDZ10BlDnZ-FA7-ES3T7nBmJEAU7KDAGeSvbYAfYimOW0r-Vc0xQNuwGCfzZtSexKXDbYbNwOVo3SjfCabq-gMfap_owcHbKicGBZu1LDlh7CpkmLQf_kv6GihM2LWFFh6Vwg2cltiwF22EIPlUDtYTkUR0qRkdNJaNkwV5Vv_6r3pzSmu5ovRriKtlrvJMjlTnLb4_ltsge3fw5Z34cJrsp094FbUc2O6Or4FGEXUldieJCnVRhs2_h6SDcmeMXs1zfvE5GlDnq8tZV6WMJ5Sb4jNO7rs_hTkr23_E6mVg-DdtozGfqzRzhIjPym6D_jVfR6dZv5W0sKwOHRmT7nYq-C7b2sAwmNNII296M4Rq-jn0b5pgSeMDYbIpbIA4thU8LYU0lBZp_ZVwWKG1RFZDxz3k9O5UVth2kTpTWlwn0hB1aAvgXHo6in1CScITGA72p73RbDieNnLFaCK4xUVstkWAKLqPxs"`
-		Use     string   `json:"use" example:"sig"`
+		Kty    string   `json:"kty" example:"RSA"`
+		N      string   `json:"n" example:"oBcXcJUR-Sb8_b4qIj28LRAPxdF_6odRr52K5-ymiEkR2DOlEuXBtM-biWxPESW-U-zhfHzdVLf6ioy5xL0bJTh8BMIorkrDliN3vb81jCvyOMgZ7ATMJpMAQMmSDN7sL3U45r22FaoQufCJMQHmUsZPecdQSgj2aFBiRXxsLleYlSezdBVT_gKH-coqeYXSC_hk-ezSq4aDZ10BlDnZ-FA7-ES3T7nBmJEAU7KDAGeSvbYAfYimOW0r-Vc0xQNuwGCfzZtSexKXDbYbNwOVo3SjfCabq-gMfap_owcHbKicGBZu1LDlh7CpkmLQf_kv6GihM2LWFFh6Vwg2cltiwF22EIPlUDtYTkUR0qRkdNJaNkwV5Vv_6r3pzSmu5ovRriKtlrvJMjlTnLb4_ltsge3fw5Z34cJrsp094FbUc2O6Or4FGEXUldieJCnVRhs2_h6SDcmeMXs1zfvE5GlDnq8tZV6WMJ5Sb4jNO7rs_hTkr23_E6mVg-DdtozGfqzRzhIjPym6D_jVfR6dZv5W0sKwOHRmT7nYq-C7b2sAwmNNII296M4Rq-jn0b5pgSeMDYbIpbIA4thU8LYU0lBZp_ZVwWKG1RFZDxz3k9O5UVth2kTpTWlwn0hB1aAvgXHo6in1CScITGA72p73RbDieNnLFaCK4xUVstkWAKLqPxs"`
+		Use    string   `json:"use" example:"sig"`
 	}
 }
 
