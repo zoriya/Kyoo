@@ -238,7 +238,9 @@
 		"size": "Taille",
 		"novideo": "Pas de video",
 		"nocontainer": "Conteneur invalide",
-		"external": "Externe"
+		"external": "Externe",
+		"hearing-impaired": "ST",
+		"unknown": "Inconnu"
 	},
 	"admin": {
 		"users": {
@@ -248,7 +250,7 @@
 			"set-permissions": "Definir les permissions",
 			"delete": "Supprimer l'utilisateur",
 			"unverifed": "Non vérifié",
-			"verify": "Vérifié l'utilisateur"
+			"verify": "Vérifier l'utilisateur"
 		},
 		"scanner": {
 			"label": "Scanner",
@@ -261,7 +263,7 @@
 		"Adventure": "Aventure",
 		"Comedy": "Comédie",
 		"Documentary": "Documentaire",
-		"Drama": "Drama",
+		"Drama": "Drame",
 		"Family": "Famille",
 		"Fantasy": "Fantastique",
 		"History": "Histoire",
@@ -279,7 +281,7 @@
 		"Soap": "Soap",
 		"Talk": "Talkshow",
 		"Animation": "Animation",
-		"News": "Actualité",
+		"News": "Nouveautés",
 		"Reality": "Télé-réalité"
 	}
 }
