@@ -245,9 +245,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "format": "uuid",
                         "description": "used for pagination.",
-                        "name": "afterId",
+                        "name": "after",
                         "in": "query"
                     }
                 ],
@@ -255,7 +254,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/main.User"
+                            "$ref": "#/definitions/main.Page-main_User"
                         }
                     },
                     "422": {
@@ -573,6 +572,25 @@ const docTemplate = `{
                     "description": "Username of the user on the external service.",
                     "type": "string",
                     "example": "zoriya"
+                }
+            }
+        },
+        "main.Page-main_User": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/main.User"
+                    }
+                },
+                "next": {
+                    "type": "string",
+                    "example": "https://kyoo.zoriya.dev/auth/users?after=aoeusth"
+                },
+                "this": {
+                    "type": "string",
+                    "example": "https://kyoo.zoriya.dev/auth/users"
                 }
             }
         },

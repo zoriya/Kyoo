@@ -8,7 +8,7 @@ export const desc = {
 	`,
 
 	after: comment`
-		Id of the cursor in the pagination.
+		Cursor for the pagination.
 		You can ignore this and only use the prev/next field in the response.
 	`,
 

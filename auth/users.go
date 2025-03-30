@@ -78,8 +78,8 @@ func MapOidc(oidc *dbc.GetUserRow) OidcHandle {
 // @Accept       json
 // @Produce      json
 // @Security     Jwt[users.read]
-// @Param        afterId   query      string  false  "used for pagination." Format(uuid)
-// @Success      200  {object}  User[]
+// @Param        after   query      string  false  "used for pagination."
+// @Success      200  {object}  Page[User]
 // @Failure      422  {object}  KError "Invalid after id"
 // @Router       /users [get]
 func (h *Handler) ListUsers(c echo.Context) error {
@@ -90,7 +90,7 @@ func (h *Handler) ListUsers(c echo.Context) error {
 
 	ctx := context.Background()
 	limit := int32(20)
-	id := c.Param("afterId")
+	id := c.Param("after")
 
 	var users []dbc.User
 	if id == "" {
@@ -98,7 +98,7 @@ func (h *Handler) ListUsers(c echo.Context) error {
 	} else {
 		uid, uerr := uuid.Parse(id)
 		if uerr != nil {
-			return echo.NewHTTPError(http.StatusUnprocessableEntity, "Invalid `afterId` parameter, uuid was expected")
+			return echo.NewHTTPError(http.StatusUnprocessableEntity, "Invalid `after` parameter, uuid was expected")
 		}
 		users, err = h.db.GetAllUsersAfter(ctx, dbc.GetAllUsersAfterParams{
 			Limit:   limit,
@@ -114,8 +114,7 @@ func (h *Handler) ListUsers(c echo.Context) error {
 	for _, user := range users {
 		ret = append(ret, MapDbUser(&user))
 	}
-	// TODO: switch to a Page
-	return c.JSON(200, ret)
+	return c.JSON(200, NewPage(ret, c.Request().URL, limit))
 }
 
 // @Summary      Get user
