@@ -49,14 +49,14 @@
 			"relevance": "Pertinenza",
 			"name": "Nome",
 			"airDate": "Data di trasmissione",
-			"startAir": "",
-			"endAir": "",
-			"addedDate": "",
+			"startAir": "Inizio trasmissione",
+			"endAir": "Fine trasmissione",
+			"addedDate": "Data di aggiunta",
 			"rating": "Valutazioni"
 		},
 		"sortord": {
-			"asc": "",
-			"desc": ""
+			"asc": "ascendente",
+			"desc": "discendente"
 		},
 		"switchToGrid": "Passa a modalità griglia",
 		"switchToList": "Passa a modalità lista",
@@ -110,7 +110,7 @@
 			"label": "Riproduzione",
 			"playmode": {
 				"label": "Modalità di riproduzione predefinita",
-				"description": ""
+				"description": "Modalità di riproduzione predefinita per questo client. 'Pristine' è più leggera per il server ma non consente modifiche automatiche della qualità"
 			},
 			"audioLanguage": {
 				"label": "Lingua audio",
@@ -118,64 +118,64 @@
 			},
 			"subtitleLanguage": {
 				"label": "Lingua dei sottotitoli",
-				"description": "",
-				"none": ""
+				"description": "Lingua predefinita dei sottotitoli",
+				"none": "Nessuno"
 			}
 		},
 		"account": {
-			"label": "",
+			"label": "Account",
 			"username": {
-				"label": ""
+				"label": "Nome utente"
 			},
 			"avatar": {
-				"label": "",
-				"description": ""
+				"label": "Avatar",
+				"description": "Cambia l'icona del profilo"
 			},
 			"email": {
-				"label": ""
+				"label": "Email"
 			},
 			"password": {
-				"label": "",
-				"description": "",
-				"oldPassword": "",
-				"newPassword": ""
+				"label": "Password",
+				"description": "Modifica password",
+				"oldPassword": "Vecchia password",
+				"newPassword": "Nuova password"
 			}
 		},
 		"oidc": {
-			"label": "",
-			"connected": "",
-			"not-connected": "",
+			"label": "Account collegati",
+			"connected": "Connesso come {{username}}.",
+			"not-connected": "Disconnesso",
 			"open-profile": "",
-			"link": "",
+			"link": "Link",
 			"delete": ""
 		},
 		"about": {
 			"label": "",
 			"android-app": {
-				"label": "",
-				"description": ""
+				"label": "Applicazione Android",
+				"description": "Scarica l'applicazione Android"
 			},
 			"git": {
-				"label": "",
-				"description": ""
+				"label": "Github",
+				"description": "Apri la repository github dove puoi controllare il codice di kyoo"
 			}
 		}
 	},
 	"player": {
-		"back": "",
-		"previous": "",
-		"next": "",
-		"play": "",
-		"pause": "",
-		"mute": "",
-		"volume": "",
-		"quality": "",
-		"audios": "",
-		"subtitles": "",
-		"subtitle-none": "",
-		"fullscreen": "",
+		"back": "Indietro",
+		"previous": "Episodio precedente",
+		"next": "Prossimo episodio",
+		"play": "Riproduci",
+		"pause": "Pausa",
+		"mute": "Attiva il muto",
+		"volume": "Volume",
+		"quality": "Qualità",
+		"audios": "Audio",
+		"subtitles": "Sottotitoli",
+		"subtitle-none": "Nessuno",
+		"fullscreen": "Schermo intero",
 		"direct": "",
-		"transmux": "",
+		"transmux": "Originale",
 		"auto": "",
 		"notInPristine": "",
 		"unsupportedError": ""
