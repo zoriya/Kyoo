@@ -27,6 +27,9 @@ sql:
           go_type:
             import: "github.com/google/uuid"
             type: "UUID"
+        - db_type: "jsonb"
+          go_type:
+            type: "interface{}"
         - column: "users.claims"
           go_type:
             import: "github.com/golang-jwt/jwt/v5"

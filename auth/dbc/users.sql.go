@@ -14,16 +14,25 @@ import (
 
 const createUser = `-- name: CreateUser :one
 insert into users(username, email, password, claims)
-	values ($1, $2, $3, $4)
+	values ($1, $2, $3, case when not exists (
+			select
+				pk, id, username, email, password, claims, created_date, last_seen
+			from
+				users) then
+			$4::jsonb
+		else
+			$5::jsonb
+		end)
 returning
 	pk, id, username, email, password, claims, created_date, last_seen
 `
 
 type CreateUserParams struct {
-	Username string        `json:"username"`
-	Email    string        `json:"email"`
-	Password *string       `json:"password"`
-	Claims   jwt.MapClaims `json:"claims"`
+	Username    string      `json:"username"`
+	Email       string      `json:"email"`
+	Password    *string     `json:"password"`
+	FirstClaims interface{} `json:"firstClaims"`
+	Claims      interface{} `json:"claims"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -31,6 +40,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.Username,
 		arg.Email,
 		arg.Password,
+		arg.FirstClaims,
 		arg.Claims,
 	)
 	var i User

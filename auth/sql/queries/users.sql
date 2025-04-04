@@ -51,7 +51,15 @@ where
 
 -- name: CreateUser :one
 insert into users(username, email, password, claims)
-	values ($1, $2, $3, $4)
+	values ($1, $2, $3, case when not exists (
+			select
+				*
+			from
+				users) then
+			sqlc.arg(first_claims)::jsonb
+		else
+			sqlc.arg(claims)::jsonb
+		end)
 returning
 	*;
 

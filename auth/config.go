@@ -1,11 +1,12 @@
 package main
 
 import (
-	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/json"
 	"encoding/pem"
+	"maps"
 	"os"
 	"time"
 
@@ -19,11 +20,13 @@ type Configuration struct {
 	JwtPublicKey    *rsa.PublicKey
 	PublicUrl       string
 	DefaultClaims   jwt.MapClaims
+	FirstUserClaims jwt.MapClaims
 	ExpirationDelay time.Duration
 }
 
 var DefaultConfig = Configuration{
 	DefaultClaims:   make(jwt.MapClaims),
+	FirstUserClaims: make(jwt.MapClaims),
 	ExpirationDelay: 30 * 24 * time.Hour,
 }
 
@@ -32,6 +35,25 @@ func LoadConfiguration(db *dbc.Queries) (*Configuration, error) {
 
 	ret.PublicUrl = os.Getenv("PUBLIC_URL")
 	ret.Prefix = os.Getenv("KEIBI_PREFIX")
+
+	claims := os.Getenv("EXTRA_CLAIMS")
+	if claims != "" {
+		err := json.Unmarshal([]byte(claims), &ret.DefaultClaims)
+		if err != nil {
+			return nil, err
+		}
+	}
+	claims = os.Getenv("FIRST_USER_CLAIMS")
+	if claims != "" {
+		err := json.Unmarshal([]byte(claims), &ret.FirstUserClaims)
+		if err != nil {
+			return nil, err
+		}
+
+		maps.Insert(ret.FirstUserClaims, maps.All(ret.DefaultClaims))
+	} else {
+		ret.FirstUserClaims = ret.DefaultClaims
+	}
 
 	rsa_pk_path := os.Getenv("RSA_PRIVATE_KEY_PATH")
 	if rsa_pk_path != "" {

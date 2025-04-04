@@ -40,7 +40,7 @@ in
       go-migrate
       sqlc
       go-swag
-      robotframework-tidy
+      # robotframework-tidy
       bun
       pkg-config
       node-gyp

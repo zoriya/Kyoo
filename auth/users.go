@@ -208,10 +208,11 @@ func (h *Handler) Register(c echo.Context) error {
 	}
 
 	duser, err := h.db.CreateUser(context.Background(), dbc.CreateUserParams{
-		Username: req.Username,
-		Email:    req.Email,
-		Password: &pass,
-		Claims:   h.config.DefaultClaims,
+		Username:    req.Username,
+		Email:       req.Email,
+		Password:    &pass,
+		Claims:      h.config.DefaultClaims,
+		FirstClaims: h.config.FirstUserClaims,
 	})
 	if ErrIs(err, pgerrcode.UniqueViolation) {
 		return echo.NewHTTPError(409, "Email or username already taken")
