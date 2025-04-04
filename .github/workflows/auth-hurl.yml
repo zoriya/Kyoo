@@ -1,4 +1,4 @@
-name: RobotTests
+name: HurlTests
 on:
   push:
     branches:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   test:
-    name: Robot tests Auth
+    name: Hurl tests Auth
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -27,13 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Robot cache
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.9'
-          cache: 'pip'
-
-      - run: pip install -r requirements.txt
+      - uses: gacts/install-hurl@v1
 
       - uses: actions/setup-go@v5
         with:
@@ -44,22 +38,18 @@ jobs:
         working-directory: ./auth
         run: |
           go mod download
-          go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
-          go install github.com/swaggo/swag/cmd/swag@latest
 
       - name: Build
         working-directory: ./auth
         run: |
-          sqlc generate
-          swag init --parseDependency
           go build -o ./keibi
 
-      - name: Run robot tests
+      - name: Run hurl tests
         working-directory: ./auth
         run: |
           ./keibi > logs &
           wget --retry-connrefused --retry-on-http-error=502 http://localhost:4568/health
-          robot -d out robot
+          hurl --error-format long --variable host=http://localhost:4568 tests/*
         env:
           POSTGRES_SERVER: localhost
 

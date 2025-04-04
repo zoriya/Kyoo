@@ -22,21 +22,21 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/info": {
+        "/.well-known/jwks.json": {
             "get": {
-                "description": "Get info like the public key used to sign the jwts.",
+                "description": "Get the jwks info, used to validate jwts.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "jwt"
                 ],
-                "summary": "Info",
+                "summary": "Jwks",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/main.Info"
+                            "$ref": "#/definitions/main.JwkSet"
                         }
                     }
                 }
@@ -62,15 +62,19 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/main.Jwt"
+                        },
+                        "headers": {
+                            "Authorization": {
+                                "type": "string",
+                                "description": "Jwt (same value as the returned token)"
+                            }
                         }
-                    },
-                    "401": {
-                        "description": "Missing session token",
-                        "schema": {}
                     },
                     "403": {
                         "description": "Invalid session token (or expired)",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
                     }
                 }
             }
@@ -91,6 +95,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "example": "android tv",
                         "description": "The device the created session will be used on",
                         "name": "device",
                         "in": "query"
@@ -108,24 +113,26 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dbc.Session"
+                            "$ref": "#/definitions/main.SessionWToken"
                         }
-                    },
-                    "400": {
-                        "description": "Invalid login body",
-                        "schema": {}
                     },
                     "403": {
                         "description": "Invalid password",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
                     },
                     "404": {
                         "description": "Account does not exists",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
                     },
                     "422": {
                         "description": "User does not have a password (registered via oidc, please login via oidc)",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
                     }
                 }
             }
@@ -152,21 +159,17 @@ const docTemplate = `{
                             "$ref": "#/definitions/main.Session"
                         }
                     },
-                    "400": {
-                        "description": "Invalid session id",
-                        "schema": {}
-                    },
                     "401": {
                         "description": "Missing jwt token",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
                     },
                     "403": {
                         "description": "Invalid jwt token (or expired)",
-                        "schema": {}
-                    },
-                    "404": {
-                        "description": "Session not found with specified id (if not using the /current route)",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
                     }
                 }
             }
@@ -185,11 +188,12 @@ const docTemplate = `{
                 "tags": [
                     "sessions"
                 ],
-                "summary": "Logout",
+                "summary": "Delete other session",
                 "parameters": [
                     {
                         "type": "string",
                         "format": "uuid",
+                        "example": "e05089d6-9179-4b5b-a63e-94dd5fc2a397",
                         "description": "The id of the session to delete",
                         "name": "id",
                         "in": "path",
@@ -203,21 +207,17 @@ const docTemplate = `{
                             "$ref": "#/definitions/main.Session"
                         }
                     },
-                    "400": {
-                        "description": "Invalid session id",
-                        "schema": {}
-                    },
-                    "401": {
-                        "description": "Missing jwt token",
-                        "schema": {}
-                    },
-                    "403": {
-                        "description": "Invalid jwt token (or expired)",
-                        "schema": {}
-                    },
                     "404": {
                         "description": "Session not found with specified id (if not using the /current route)",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid session id",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
                     }
                 }
             }
@@ -245,9 +245,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "format": "uuid",
                         "description": "used for pagination.",
-                        "name": "afterId",
+                        "name": "after",
                         "in": "query"
                     }
                 ],
@@ -255,12 +254,14 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/main.User"
+                            "$ref": "#/definitions/main.Page-main_User"
                         }
                     },
-                    "400": {
+                    "422": {
                         "description": "Invalid after id",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
                     }
                 }
             },
@@ -279,6 +280,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "example": "android",
                         "description": "The device the created session will be used on",
                         "name": "device",
                         "in": "query"
@@ -296,16 +298,20 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dbc.Session"
+                            "$ref": "#/definitions/main.SessionWToken"
                         }
-                    },
-                    "400": {
-                        "description": "Invalid register body",
-                        "schema": {}
                     },
                     "409": {
                         "description": "Duplicated email or username",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid register body",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
                     }
                 }
             }
@@ -334,11 +340,15 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Missing jwt token",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
                     },
                     "403": {
                         "description": "Invalid jwt token (or expired)",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
                     }
                 }
             },
@@ -405,7 +415,15 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "No user with the given id found",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid id (not a uuid)",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
                     }
                 }
             },
@@ -446,45 +464,50 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Invalid user id",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
                     }
                 }
             }
         }
     },
     "definitions": {
-        "dbc.Session": {
+        "main.JwkSet": {
             "type": "object",
             "properties": {
-                "createdDate": {
-                    "type": "string"
-                },
-                "device": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "lastUsed": {
-                    "type": "string"
-                },
-                "pk": {
-                    "type": "integer"
-                },
-                "token": {
-                    "type": "string"
-                },
-                "userPk": {
-                    "type": "integer"
-                }
-            }
-        },
-        "main.Info": {
-            "type": "object",
-            "properties": {
-                "publicKey": {
-                    "description": "The public key used to sign jwt tokens. It can be used by your services to check if the jwt is valid.",
-                    "type": "string"
+                "keys": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "e": {
+                                "type": "string",
+                                "example": "AQAB"
+                            },
+                            "key_ops": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "example": [
+                                    "[verify]"
+                                ]
+                            },
+                            "kty": {
+                                "type": "string",
+                                "example": "RSA"
+                            },
+                            "n": {
+                                "type": "string",
+                                "example": "oBcXcJUR-Sb8_b4qIj28LRAPxdF_6odRr52K5-ymiEkR2DOlEuXBtM-biWxPESW-U-zhfHzdVLf6ioy5xL0bJTh8BMIorkrDliN3vb81jCvyOMgZ7ATMJpMAQMmSDN7sL3U45r22FaoQufCJMQHmUsZPecdQSgj2aFBiRXxsLleYlSezdBVT_gKH-coqeYXSC_hk-ezSq4aDZ10BlDnZ-FA7-ES3T7nBmJEAU7KDAGeSvbYAfYimOW0r-Vc0xQNuwGCfzZtSexKXDbYbNwOVo3SjfCabq-gMfap_owcHbKicGBZu1LDlh7CpkmLQf_kv6GihM2LWFFh6Vwg2cltiwF22EIPlUDtYTkUR0qRkdNJaNkwV5Vv_6r3pzSmu5ovRriKtlrvJMjlTnLb4_ltsge3fw5Z34cJrsp094FbUc2O6Or4FGEXUldieJCnVRhs2_h6SDcmeMXs1zfvE5GlDnq8tZV6WMJ5Sb4jNO7rs_hTkr23_E6mVg-DdtozGfqzRzhIjPym6D_jVfR6dZv5W0sKwOHRmT7nYq-C7b2sAwmNNII296M4Rq-jn0b5pgSeMDYbIpbIA4thU8LYU0lBZp_ZVwWKG1RFZDxz3k9O5UVth2kTpTWlwn0hB1aAvgXHo6in1CScITGA72p73RbDieNnLFaCK4xUVstkWAKLqPxs"
+                            },
+                            "use": {
+                                "type": "string",
+                                "example": "sig"
+                            }
+                        }
+                    }
                 }
             }
         },
@@ -493,7 +516,22 @@ const docTemplate = `{
             "properties": {
                 "token": {
                     "description": "The jwt token you can use for all authorized call to either keibi or other services.",
-                    "type": "string"
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30"
+                }
+            }
+        },
+        "main.KError": {
+            "type": "object",
+            "properties": {
+                "details": {},
+                "message": {
+                    "type": "string",
+                    "example": "No user found with this id"
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 404
                 }
             }
         },
@@ -506,11 +544,13 @@ const docTemplate = `{
             "properties": {
                 "login": {
                     "description": "Either the email or the username.",
-                    "type": "string"
+                    "type": "string",
+                    "example": "zoriya"
                 },
                 "password": {
                     "description": "Password of the account.",
-                    "type": "string"
+                    "type": "string",
+                    "example": "password1234"
                 }
             }
         },
@@ -519,16 +559,38 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "description": "Id of this oidc handle.",
-                    "type": "string"
+                    "type": "string",
+                    "example": "e05089d6-9179-4b5b-a63e-94dd5fc2a397"
                 },
                 "profileUrl": {
                     "description": "Link to the profile of the user on the external service. Null if unknown or irrelevant.",
                     "type": "string",
-                    "format": "url"
+                    "format": "url",
+                    "example": "https://myanimelist.net/profile/zoriya"
                 },
                 "username": {
                     "description": "Username of the user on the external service.",
-                    "type": "string"
+                    "type": "string",
+                    "example": "zoriya"
+                }
+            }
+        },
+        "main.Page-main_User": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/main.User"
+                    }
+                },
+                "next": {
+                    "type": "string",
+                    "example": "https://kyoo.zoriya.dev/auth/users?after=aoeusth"
+                },
+                "this": {
+                    "type": "string",
+                    "example": "https://kyoo.zoriya.dev/auth/users"
                 }
             }
         },
@@ -543,15 +605,18 @@ const docTemplate = `{
                 "email": {
                     "description": "Valid email that could be used for forgotten password requests. Can be used for login.",
                     "type": "string",
-                    "format": "email"
+                    "format": "email",
+                    "example": "kyoo@zoriya.dev"
                 },
                 "password": {
                     "description": "Password to use.",
-                    "type": "string"
+                    "type": "string",
+                    "example": "password1234"
                 },
                 "username": {
                     "description": "Username of the new account, can't contain @ signs. Can be used for login.",
-                    "type": "string"
+                    "type": "string",
+                    "example": "zoriya"
                 }
             }
         },
@@ -560,19 +625,52 @@ const docTemplate = `{
             "properties": {
                 "createdDate": {
                     "description": "When was the session first opened",
-                    "type": "string"
+                    "type": "string",
+                    "example": "2025-03-29T18:20:05.267Z"
                 },
                 "device": {
                     "description": "Device that created the session.",
-                    "type": "string"
+                    "type": "string",
+                    "example": "Web - Firefox"
                 },
                 "id": {
                     "description": "Unique id of this session. Can be used for calls to DELETE",
-                    "type": "string"
+                    "type": "string",
+                    "example": "e05089d6-9179-4b5b-a63e-94dd5fc2a397"
                 },
                 "lastUsed": {
                     "description": "Last date this session was used to access a service.",
-                    "type": "string"
+                    "type": "string",
+                    "example": "2025-03-29T18:20:05.267Z"
+                }
+            }
+        },
+        "main.SessionWToken": {
+            "type": "object",
+            "properties": {
+                "createdDate": {
+                    "description": "When was the session first opened",
+                    "type": "string",
+                    "example": "2025-03-29T18:20:05.267Z"
+                },
+                "device": {
+                    "description": "Device that created the session.",
+                    "type": "string",
+                    "example": "Web - Firefox"
+                },
+                "id": {
+                    "description": "Unique id of this session. Can be used for calls to DELETE",
+                    "type": "string",
+                    "example": "e05089d6-9179-4b5b-a63e-94dd5fc2a397"
+                },
+                "lastUsed": {
+                    "description": "Last date this session was used to access a service.",
+                    "type": "string",
+                    "example": "2025-03-29T18:20:05.267Z"
+                },
+                "token": {
+                    "type": "string",
+                    "example": "lyHzTYm9yi+pkEv3m2tamAeeK7Dj7N3QRP7xv7dPU5q9MAe8tU4ySwYczE0RaMr4fijsA=="
                 }
             }
         },
@@ -584,24 +682,31 @@ const docTemplate = `{
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
+                    },
+                    "example": {
+                        "isAdmin": " true"
                     }
                 },
                 "createdDate": {
                     "description": "When was this account created?",
-                    "type": "string"
+                    "type": "string",
+                    "example": "2025-03-29T18:20:05.267Z"
                 },
                 "email": {
                     "description": "Email of the user. Can be used as a login.",
                     "type": "string",
-                    "format": "email"
+                    "format": "email",
+                    "example": "kyoo@zoriya.dev"
                 },
                 "id": {
                     "description": "Id of the user.",
-                    "type": "string"
+                    "type": "string",
+                    "example": "e05089d6-9179-4b5b-a63e-94dd5fc2a397"
                 },
                 "lastSeen": {
                     "description": "When was the last time this account made any authorized request?",
-                    "type": "string"
+                    "type": "string",
+                    "example": "2025-03-29T18:20:05.267Z"
                 },
                 "oidc": {
                     "description": "List of other login method available for this user. Access tokens wont be returned here.",
@@ -612,7 +717,8 @@ const docTemplate = `{
                 },
                 "username": {
                     "description": "Username of the user. Can be used as a login.",
-                    "type": "string"
+                    "type": "string",
+                    "example": "zoriya"
                 }
             }
         }

@@ -15,7 +15,7 @@ import (
 
 type Jwt struct {
 	// The jwt token you can use for all authorized call to either keibi or other services.
-	Token string `json:"token"`
+	Token *string `json:"token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30"`
 }
 
 // @Summary      Get JWT
@@ -24,22 +24,64 @@ type Jwt struct {
 // @Produce      json
 // @Security     Token
 // @Success      200  {object}  Jwt
-// @Failure      401  {object}  problem.Problem "Missing session token"
-// @Failure      403  {object}  problem.Problem "Invalid session token (or expired)"
+// @Failure      403  {object}  KError "Invalid session token (or expired)"
+// @Header       200  {string}  Authorization  "Jwt (same value as the returned token)"
 // @Router /jwt [get]
 func (h *Handler) CreateJwt(c echo.Context) error {
 	auth := c.Request().Header.Get("Authorization")
-	if !strings.HasPrefix(auth, "Bearer ") {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Missing session token")
-	}
-	token := auth[len("Bearer "):]
+	var jwt *string
 
+	if !strings.HasPrefix(auth, "Bearer ") {
+		jwt = h.createGuestJwt()
+	} else {
+		token := auth[len("Bearer "):]
+
+		tkn, err := h.createJwt(token)
+		if err != nil {
+			return err
+		}
+		jwt = &tkn
+	}
+
+	if jwt != nil {
+		c.Response().Header().Add("Authorization", fmt.Sprintf("Bearer %s", *jwt))
+	}
+	return c.JSON(http.StatusOK, Jwt{
+		Token: jwt,
+	})
+}
+
+func (h *Handler) createGuestJwt() *string {
+	if h.config.GuestClaims == nil {
+		return nil
+	}
+
+	claims := maps.Clone(h.config.GuestClaims)
+	claims["username"] = "guest"
+	claims["sub"] = "guest"
+	claims["sid"] = "guest"
+	claims["iss"] = h.config.PublicUrl
+	claims["iat"] = &jwt.NumericDate{
+		Time: time.Now().UTC(),
+	}
+	claims["exp"] = &jwt.NumericDate{
+		Time: time.Now().UTC().Add(time.Hour),
+	}
+	jwt := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	t, err := jwt.SignedString(h.config.JwtPrivateKey)
+	if err != nil {
+		return nil
+	}
+	return &t
+}
+
+func (h *Handler) createJwt(token string) (string, error) {
 	session, err := h.db.GetUserFromToken(context.Background(), token)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusForbidden, "Invalid token")
+		return "", echo.NewHTTPError(http.StatusForbidden, "Invalid token")
 	}
 	if session.LastUsed.Add(h.config.ExpirationDelay).Compare(time.Now().UTC()) < 0 {
-		return echo.NewHTTPError(http.StatusForbidden, "Token has expired")
+		return "", echo.NewHTTPError(http.StatusForbidden, "Token has expired")
 	}
 
 	go func() {
@@ -61,19 +103,27 @@ func (h *Handler) CreateJwt(c echo.Context) error {
 	jwt := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	t, err := jwt.SignedString(h.config.JwtPrivateKey)
 	if err != nil {
-		return err
+		return "", err
 	}
-	c.Response().Header().Add("Authorization", fmt.Sprintf("Bearer %s", t))
-	return c.JSON(http.StatusOK, Jwt{
-		Token: t,
-	})
+	return t, nil
+}
+
+// only used for the swagger doc
+type JwkSet struct {
+	Keys []struct {
+		E      string   `json:"e" example:"AQAB"`
+		KeyOps []string `json:"key_ops" example:"[verify]"`
+		Kty    string   `json:"kty" example:"RSA"`
+		N      string   `json:"n" example:"oBcXcJUR-Sb8_b4qIj28LRAPxdF_6odRr52K5-ymiEkR2DOlEuXBtM-biWxPESW-U-zhfHzdVLf6ioy5xL0bJTh8BMIorkrDliN3vb81jCvyOMgZ7ATMJpMAQMmSDN7sL3U45r22FaoQufCJMQHmUsZPecdQSgj2aFBiRXxsLleYlSezdBVT_gKH-coqeYXSC_hk-ezSq4aDZ10BlDnZ-FA7-ES3T7nBmJEAU7KDAGeSvbYAfYimOW0r-Vc0xQNuwGCfzZtSexKXDbYbNwOVo3SjfCabq-gMfap_owcHbKicGBZu1LDlh7CpkmLQf_kv6GihM2LWFFh6Vwg2cltiwF22EIPlUDtYTkUR0qRkdNJaNkwV5Vv_6r3pzSmu5ovRriKtlrvJMjlTnLb4_ltsge3fw5Z34cJrsp094FbUc2O6Or4FGEXUldieJCnVRhs2_h6SDcmeMXs1zfvE5GlDnq8tZV6WMJ5Sb4jNO7rs_hTkr23_E6mVg-DdtozGfqzRzhIjPym6D_jVfR6dZv5W0sKwOHRmT7nYq-C7b2sAwmNNII296M4Rq-jn0b5pgSeMDYbIpbIA4thU8LYU0lBZp_ZVwWKG1RFZDxz3k9O5UVth2kTpTWlwn0hB1aAvgXHo6in1CScITGA72p73RbDieNnLFaCK4xUVstkWAKLqPxs"`
+		Use    string   `json:"use" example:"sig"`
+	}
 }
 
 // @Summary      Jwks
 // @Description  Get the jwks info, used to validate jwts.
 // @Tags         jwt
 // @Produce      json
-// @Success      200  {object}  jwk.Key
+// @Success      200  {object}  JwkSet  "OK"
 // @Router /.well-known/jwks.json [get]
 func (h *Handler) GetJwks(c echo.Context) error {
 	key, err := jwk.New(h.config.JwtPublicKey)

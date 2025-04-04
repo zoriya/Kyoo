@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
-	"github.com/otaxhu/problem"
 	"github.com/zoriya/kyoo/keibi/dbc"
 	_ "github.com/zoriya/kyoo/keibi/docs"
 
@@ -31,12 +32,19 @@ func ErrorHandler(err error, c echo.Context) {
 	if he, ok := err.(*echo.HTTPError); ok {
 		code = he.Code
 		message = fmt.Sprint(he.Message)
+
+		if message == "missing or malformed jwt" {
+			code = http.StatusUnauthorized
+		}
 	} else {
 		c.Logger().Error(err)
 	}
 
-	ret := problem.NewMap(code, message)
-	c.JSON(code, ret)
+	c.JSON(code, KError{
+		Status:  code,
+		Message: message,
+		Details: nil,
+	})
 }
 
 type Validator struct {
@@ -121,6 +129,35 @@ type Handler struct {
 	config *Configuration
 }
 
+func (h *Handler) TokenToJwt(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		auth := c.Request().Header.Get("Authorization")
+		var jwt *string
+
+		if auth == "" || !strings.HasPrefix(auth, "Bearer ") {
+			jwt = h.createGuestJwt()
+		} else {
+			token := auth[len("Bearer "):]
+			// this is only used to check if it is a session token or a jwt
+			_, err := base64.RawURLEncoding.DecodeString(token)
+			if err != nil {
+				return next(c)
+			}
+
+			tkn, err := h.createJwt(token)
+			if err != nil {
+				return err
+			}
+			jwt = &tkn
+		}
+
+		if jwt != nil {
+			c.Request().Header.Set("Authorization", *jwt)
+		}
+		return next(c)
+	}
+}
+
 // @title Keibi - Kyoo's auth
 // @version 1.0
 // @description Auth system made for kyoo.
@@ -165,6 +202,7 @@ func main() {
 
 	g := e.Group(conf.Prefix)
 	r := e.Group(conf.Prefix)
+	r.Use(h.TokenToJwt)
 	r.Use(echojwt.WithConfig(echojwt.Config{
 		SigningMethod: "RS256",
 		SigningKey:    h.config.JwtPublicKey,

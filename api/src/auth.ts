@@ -34,10 +34,13 @@ export const auth = new Elysia({ name: "auth" })
 		permissions(perms: string[]) {
 			return {
 				resolve: async ({ headers: { authorization }, error }) => {
+					console.log(process.env.JWT_ISSUER);
 					const bearer = authorization?.slice(7);
 					if (!bearer) return { jwt: false };
 					// @ts-expect-error ts can't understand that there's two overload idk why
-					const { payload } = await jwtVerify(bearer, jwtSecret ?? jwks);
+					const { payload } = await jwtVerify(bearer, jwtSecret ?? jwks, {
+						issuer: process.env.JWT_ISSUER,
+					});
 					// TODO: use perms
 					return { jwt: validator.Decode<typeof Jwt>(payload) };
 				},

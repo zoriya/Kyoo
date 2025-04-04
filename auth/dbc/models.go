@@ -11,11 +11,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type Config struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
-
 type OidcHandle struct {
 	UserPk       int32      `json:"userPk"`
 	Provider     string     `json:"provider"`

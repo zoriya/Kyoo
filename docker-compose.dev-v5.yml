@@ -60,8 +60,7 @@ services:
       - ./auth:/app
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.auth.rule=PathPrefix(`/auth/`)"
-      - "traefik.http.routers.auth.rule=PathPrefix(`/.well-known/`)"
+      - "traefik.http.routers.auth.rule=PathPrefix(`/auth/`) || PathPrefix(`/.well-known/`)"
 
   api:
     build:
@@ -71,8 +70,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      auth:
-        condition: service_healthy
     volumes:
       - ./api:/app
       - /app/node_modules
@@ -80,11 +77,12 @@ services:
       - "3567:3567"
     environment:
       - KYOO_PREFIX=/api
+      - JWT_ISSUER=${PUBLIC_URL}
     env_file:
       - ./.env
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.api.rule=PathPrefix(`/api/`)"
+      - "traefik.http.routers.api.rule=PathPrefix(`/api/`) || PathPrefix(`/swagger`)"
       - "traefik.http.routers.api.middlewares=phantom-token"
       - "traefik.http.middlewares.phantom-token.forwardauth.address=http://auth:4568/auth/jwt"
       - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,X-Api-Key"

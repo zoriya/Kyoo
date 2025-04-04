@@ -18,37 +18,37 @@ type User struct {
 	// Primary key in database
 	Pk int32 `json:"-"`
 	// Id of the user.
-	Id uuid.UUID `json:"id"`
+	Id uuid.UUID `json:"id" example:"e05089d6-9179-4b5b-a63e-94dd5fc2a397"`
 	// Username of the user. Can be used as a login.
-	Username string `json:"username"`
+	Username string `json:"username" example:"zoriya"`
 	// Email of the user. Can be used as a login.
-	Email string `json:"email" format:"email"`
+	Email string `json:"email" format:"email" example:"kyoo@zoriya.dev"`
 	// When was this account created?
-	CreatedDate time.Time `json:"createdDate"`
+	CreatedDate time.Time `json:"createdDate" example:"2025-03-29T18:20:05.267Z"`
 	// When was the last time this account made any authorized request?
-	LastSeen time.Time `json:"lastSeen"`
+	LastSeen time.Time `json:"lastSeen" example:"2025-03-29T18:20:05.267Z"`
 	// List of custom claims JWT created via get /jwt will have
-	Claims jwt.MapClaims `json:"claims"`
+	Claims jwt.MapClaims `json:"claims" example:"isAdmin: true"`
 	// List of other login method available for this user. Access tokens wont be returned here.
 	Oidc map[string]OidcHandle `json:"oidc,omitempty"`
 }
 
 type OidcHandle struct {
 	// Id of this oidc handle.
-	Id string `json:"id"`
+	Id string `json:"id" example:"e05089d6-9179-4b5b-a63e-94dd5fc2a397"`
 	// Username of the user on the external service.
-	Username string `json:"username"`
+	Username string `json:"username" example:"zoriya"`
 	// Link to the profile of the user on the external service. Null if unknown or irrelevant.
-	ProfileUrl *string `json:"profileUrl" format:"url"`
+	ProfileUrl *string `json:"profileUrl" format:"url" example:"https://myanimelist.net/profile/zoriya"`
 }
 
 type RegisterDto struct {
 	// Username of the new account, can't contain @ signs. Can be used for login.
-	Username string `json:"username" validate:"required,excludes=@"`
+	Username string `json:"username" validate:"required,excludes=@" example:"zoriya"`
 	// Valid email that could be used for forgotten password requests. Can be used for login.
-	Email string `json:"email" validate:"required,email" format:"email"`
+	Email string `json:"email" validate:"required,email" format:"email" example:"kyoo@zoriya.dev"`
 	// Password to use.
-	Password string `json:"password" validate:"required"`
+	Password string `json:"password" validate:"required" example:"password1234"`
 }
 
 func MapDbUser(user *dbc.User) User {
@@ -78,9 +78,9 @@ func MapOidc(oidc *dbc.GetUserRow) OidcHandle {
 // @Accept       json
 // @Produce      json
 // @Security     Jwt[users.read]
-// @Param        afterId   query      string  false  "used for pagination." Format(uuid)
-// @Success      200  {object}  User[]
-// @Failure      400  {object}  problem.Problem "Invalid after id"
+// @Param        after   query      string  false  "used for pagination."
+// @Success      200  {object}  Page[User]
+// @Failure      422  {object}  KError "Invalid after id"
 // @Router       /users [get]
 func (h *Handler) ListUsers(c echo.Context) error {
 	err := CheckPermissions(c, []string{"user.read"})
@@ -90,7 +90,7 @@ func (h *Handler) ListUsers(c echo.Context) error {
 
 	ctx := context.Background()
 	limit := int32(20)
-	id := c.Param("afterId")
+	id := c.Param("after")
 
 	var users []dbc.User
 	if id == "" {
@@ -98,7 +98,7 @@ func (h *Handler) ListUsers(c echo.Context) error {
 	} else {
 		uid, uerr := uuid.Parse(id)
 		if uerr != nil {
-			return echo.NewHTTPError(400, "Invalid `afterId` parameter, uuid was expected")
+			return echo.NewHTTPError(http.StatusUnprocessableEntity, "Invalid `after` parameter, uuid was expected")
 		}
 		users, err = h.db.GetAllUsersAfter(ctx, dbc.GetAllUsersAfterParams{
 			Limit:   limit,
@@ -114,8 +114,7 @@ func (h *Handler) ListUsers(c echo.Context) error {
 	for _, user := range users {
 		ret = append(ret, MapDbUser(&user))
 	}
-	// TODO: switch to a Page
-	return c.JSON(200, ret)
+	return c.JSON(200, NewPage(ret, c.Request().URL, limit))
 }
 
 // @Summary      Get user
@@ -125,7 +124,8 @@ func (h *Handler) ListUsers(c echo.Context) error {
 // @Security     Jwt[users.read]
 // @Param        id   path      string    true  "The id of the user" Format(uuid)
 // @Success      200  {object}  User
-// @Failure      404  {object}  problem.Problem "No user with the given id found"
+// @Failure      404  {object}  KError "No user with the given id found"
+// @Failure      422  {object}  KError "Invalid id (not a uuid)"
 // @Router /users/{id} [get]
 func (h *Handler) GetUser(c echo.Context) error {
 	err := CheckPermissions(c, []string{"user.read"})
@@ -135,7 +135,7 @@ func (h *Handler) GetUser(c echo.Context) error {
 
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		return echo.NewHTTPError(400, "Invalid id")
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, "Invalid id")
 	}
 	dbuser, err := h.db.GetUser(context.Background(), id)
 	if err != nil {
@@ -158,8 +158,8 @@ func (h *Handler) GetUser(c echo.Context) error {
 // @Produce      json
 // @Security     Jwt
 // @Success      200  {object}  User
-// @Failure      401  {object}  problem.Problem "Missing jwt token"
-// @Failure      403  {object}  problem.Problem "Invalid jwt token (or expired)"
+// @Failure      401  {object}  KError "Missing jwt token"
+// @Failure      403  {object}  KError "Invalid jwt token (or expired)"
 // @Router /users/me [get]
 func (h *Handler) GetMe(c echo.Context) error {
 	id, err := GetCurrentUserId(c)
@@ -186,17 +186,17 @@ func (h *Handler) GetMe(c echo.Context) error {
 // @Tags         users
 // @Accept       json
 // @Produce      json
-// @Param        device   query   string         false  "The device the created session will be used on"
+// @Param        device   query   string         false  "The device the created session will be used on"  Example(android)
 // @Param        user     body    RegisterDto  false  "Registration informations"
-// @Success      201  {object}  dbc.Session
-// @Failure      400  {object}  problem.Problem "Invalid register body"
-// @Success      409  {object}  problem.Problem "Duplicated email or username"
+// @Success      201  {object}  SessionWToken
+// @Success      409  {object}  KError "Duplicated email or username"
+// @Failure      422  {object}  KError "Invalid register body"
 // @Router /users [post]
 func (h *Handler) Register(c echo.Context) error {
 	var req RegisterDto
 	err := c.Bind(&req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
 	}
 	if err = c.Validate(&req); err != nil {
 		return err
@@ -208,10 +208,11 @@ func (h *Handler) Register(c echo.Context) error {
 	}
 
 	duser, err := h.db.CreateUser(context.Background(), dbc.CreateUserParams{
-		Username: req.Username,
-		Email:    req.Email,
-		Password: &pass,
-		Claims:   h.config.DefaultClaims,
+		Username:    req.Username,
+		Email:       req.Email,
+		Password:    &pass,
+		Claims:      h.config.DefaultClaims,
+		FirstClaims: h.config.FirstUserClaims,
 	})
 	if ErrIs(err, pgerrcode.UniqueViolation) {
 		return echo.NewHTTPError(409, "Email or username already taken")
@@ -230,8 +231,8 @@ func (h *Handler) Register(c echo.Context) error {
 // @Security     Jwt[users.delete]
 // @Param        id   path      string  false  "User id of the user to delete" Format(uuid)
 // @Success      200  {object}  User
-// @Failure      404  {object}  problem.Problem "Invalid id format"
-// @Failure      404  {object}  problem.Problem "Invalid user id"
+// @Failure      404  {object}  KError "Invalid id format"
+// @Failure      404  {object}  KError "Invalid user id"
 // @Router /users/{id} [delete]
 func (h *Handler) DeleteUser(c echo.Context) error {
 	uid, err := uuid.Parse(c.Param("id"))
