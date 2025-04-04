@@ -49,7 +49,7 @@ jobs:
         run: |
           ./keibi > logs &
           wget --retry-connrefused --retry-on-http-error=502 http://localhost:4568/health
-          hurl --variable host=http://localhost:4568 tests/*
+          hurl --error-format long --variable host=http://localhost:4568 tests/*
         env:
           POSTGRES_SERVER: localhost
 

@@ -6,13 +6,13 @@ POST {{host}}/sessions
 }
 HTTP 404
 
-# Invalid password
+# Invalid username
 POST {{host}}/sessions
 {
-    "login": "invalid-password-user",
+    "login": "invalid-username-user",
     "password": "pass"
 }
-HTTP 403
+HTTP 404
 
 # Me cant be accessed without an account
 GET {{host}}/users/me

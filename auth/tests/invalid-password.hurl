@@ -27,14 +27,15 @@ DELETE {{host}}/sessions/current
 Authorization: Bearer {{jwt}}
 HTTP 200
 
-POST {{hosts}}/sessions
+# Ensure we can login again & /users/me is the same
+POST {{host}}/sessions
 {
     "login": "login-user",
     "password": "password-login-user"
 }
 HTTP 201
 [Captures]
-jwt: jsonpath "$.token"
+token: jsonpath "$.token"
 
 GET {{host}}/jwt
 Authorization: Bearer {{token}}
@@ -48,6 +49,15 @@ HTTP 200
 [Asserts]
 jsonpath "$.username" == "login-user"
 body == {{register_info}}
+
+
+# Invalid password login
+POST {{host}}/sessions
+{
+    "login": "login-user",
+    "password": "pass-invalid"
+}
+HTTP 403
 
 DELETE {{host}}/users/me
 Authorization: Bearer {{jwt}}
