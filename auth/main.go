@@ -32,6 +32,10 @@ func ErrorHandler(err error, c echo.Context) {
 	if he, ok := err.(*echo.HTTPError); ok {
 		code = he.Code
 		message = fmt.Sprint(he.Message)
+
+		if message == "missing or malformed jwt" {
+			code = http.StatusUnauthorized
+		}
 	} else {
 		c.Logger().Error(err)
 	}
