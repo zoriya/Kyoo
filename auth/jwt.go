@@ -29,20 +29,50 @@ type Jwt struct {
 // @Router /jwt [get]
 func (h *Handler) CreateJwt(c echo.Context) error {
 	auth := c.Request().Header.Get("Authorization")
+	var jwt *string
+
 	if !strings.HasPrefix(auth, "Bearer ") {
-		return c.JSON(http.StatusOK, Jwt{Token: nil})
-	}
-	token := auth[len("Bearer "):]
+		jwt = h.createGuestJwt()
+	} else {
+		token := auth[len("Bearer "):]
 
-	jwt, err := h.createJwt(token)
-	if err != nil {
-		return err
+		tkn, err := h.createJwt(token)
+		if err != nil {
+			return err
+		}
+		jwt = &tkn
 	}
 
-	c.Response().Header().Add("Authorization", fmt.Sprintf("Bearer %s", jwt))
+	if jwt != nil {
+		c.Response().Header().Add("Authorization", fmt.Sprintf("Bearer %s", *jwt))
+	}
 	return c.JSON(http.StatusOK, Jwt{
-		Token: &jwt,
+		Token: jwt,
 	})
+}
+
+func (h *Handler) createGuestJwt() *string {
+	if h.config.GuestClaims == nil {
+		return nil
+	}
+
+	claims := maps.Clone(h.config.GuestClaims)
+	claims["username"] = "guest"
+	claims["sub"] = "guest"
+	claims["sid"] = "guest"
+	claims["iss"] = h.config.PublicUrl
+	claims["iat"] = &jwt.NumericDate{
+		Time: time.Now().UTC(),
+	}
+	claims["exp"] = &jwt.NumericDate{
+		Time: time.Now().UTC().Add(time.Hour),
+	}
+	jwt := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	t, err := jwt.SignedString(h.config.JwtPrivateKey)
+	if err != nil {
+		return nil
+	}
+	return &t
 }
 
 func (h *Handler) createJwt(token string) (string, error) {

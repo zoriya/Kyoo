@@ -128,23 +128,28 @@ type Handler struct {
 func (h *Handler) TokenToJwt(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		auth := c.Request().Header.Get("Authorization")
+		var jwt *string
+
 		if auth == "" || !strings.HasPrefix(auth, "Bearer ") {
-			return next(c)
-		}
-		token := auth[len("Bearer "):]
+			jwt = h.createGuestJwt()
+		} else {
+			token := auth[len("Bearer "):]
+			// this is only used to check if it is a session token or a jwt
+			_, err := base64.RawURLEncoding.DecodeString(token)
+			if err != nil {
+				return next(c)
+			}
 
-		// this is only used to check if it is a session token or a jwt
-		_, err := base64.RawURLEncoding.DecodeString(token)
-		if err != nil {
-			return next(c)
+			tkn, err := h.createJwt(token)
+			if err != nil {
+				return err
+			}
+			jwt = &tkn
 		}
 
-		jwt, err := h.createJwt(token)
-		if err != nil {
-			return err
+		if jwt != nil {
+			c.Request().Header.Set("Authorization", *jwt)
 		}
-		c.Request().Header.Set("Authorization", jwt)
-
 		return next(c)
 	}
 }

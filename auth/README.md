@@ -10,6 +10,7 @@
 - Username/password login
 - OIDC (login via Google, Discord, Authentik, whatever)
 - Custom jwt claims (for your role/permissions handling or something else)
+- Guest handling (only if using `GUEST_CLAIMS`)
 - Api keys support
 - Optionally [Federated](#federated)
 

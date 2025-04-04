@@ -21,6 +21,7 @@ type Configuration struct {
 	PublicUrl       string
 	DefaultClaims   jwt.MapClaims
 	FirstUserClaims jwt.MapClaims
+	GuestClaims     jwt.MapClaims
 	ExpirationDelay time.Duration
 }
 
@@ -53,6 +54,14 @@ func LoadConfiguration(db *dbc.Queries) (*Configuration, error) {
 		maps.Insert(ret.FirstUserClaims, maps.All(ret.DefaultClaims))
 	} else {
 		ret.FirstUserClaims = ret.DefaultClaims
+	}
+
+	claims = os.Getenv("GUEST_CLAIMS")
+	if claims != "" {
+		err := json.Unmarshal([]byte(claims), &ret.GuestClaims)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	rsa_pk_path := os.Getenv("RSA_PRIVATE_KEY_PATH")
