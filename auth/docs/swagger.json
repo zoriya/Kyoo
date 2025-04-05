@@ -371,6 +371,48 @@
                         }
                     }
                 }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "Jwt": []
+                    }
+                ],
+                "description": "Edit your account's info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Edit self",
+                "parameters": [
+                    {
+                        "description": "Edited user info",
+                        "name": "user",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/main.EditUserDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.User"
+                        }
+                    },
+                    "403": {
+                        "description": "You can't edit a protected claim",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    }
+                }
             }
         },
         "/users/{id}": {
@@ -463,10 +505,83 @@
                         }
                     }
                 }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "Jwt": [
+                            "users.write"
+                        ]
+                    }
+                ],
+                "description": "Edit an account info or permissions",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Edit user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "User id of the user to delete",
+                        "name": "id",
+                        "in": "path"
+                    },
+                    {
+                        "description": "Edited user info",
+                        "name": "user",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/main.EditUserDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.User"
+                        }
+                    },
+                    "403": {
+                        "description": "You don't have permissions to edit another account",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    }
+                }
             }
         }
     },
     "definitions": {
+        "main.EditUserDto": {
+            "type": "object",
+            "properties": {
+                "claims": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "example": {
+                        "preferOriginal": " true"
+                    }
+                },
+                "email": {
+                    "type": "string",
+                    "example": "kyoo@zoriya.dev"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "zoriya"
+                }
+            }
+        },
         "main.JwkSet": {
             "type": "object",
             "properties": {
