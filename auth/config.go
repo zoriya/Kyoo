@@ -8,6 +8,7 @@ import (
 	"encoding/pem"
 	"maps"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -22,12 +23,14 @@ type Configuration struct {
 	DefaultClaims   jwt.MapClaims
 	FirstUserClaims jwt.MapClaims
 	GuestClaims     jwt.MapClaims
+	ProtectedClaims []string
 	ExpirationDelay time.Duration
 }
 
 var DefaultConfig = Configuration{
 	DefaultClaims:   make(jwt.MapClaims),
 	FirstUserClaims: make(jwt.MapClaims),
+	ProtectedClaims: []string{"permissions"},
 	ExpirationDelay: 30 * 24 * time.Hour,
 }
 
@@ -63,6 +66,9 @@ func LoadConfiguration(db *dbc.Queries) (*Configuration, error) {
 			return nil, err
 		}
 	}
+
+	protected := strings.Split(os.Getenv("PROTECTED_CLAIMS"), ",")
+	ret.ProtectedClaims = append(ret.ProtectedClaims, protected...)
 
 	rsa_pk_path := os.Getenv("RSA_PRIVATE_KEY_PATH")
 	if rsa_pk_path != "" {

@@ -43,3 +43,8 @@ where s.user_pk = u.pk
 returning
 	s.*;
 
+-- name: ClearOtherSessions :exec
+delete from sessions as s using users as u
+where s.user_pk = u.pk
+	and s.id != @session_id
+	and u.id = @user_id;
