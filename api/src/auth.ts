@@ -1,6 +1,6 @@
-import Elysia, { getSchemaValidator, t } from "elysia";
+import { TypeCompiler } from "@sinclair/typebox/compiler";
+import Elysia, { t } from "elysia";
 import { createRemoteJWKSet, jwtVerify } from "jose";
-import { KError } from "./models/error";
 
 const jwtSecret = process.env.JWT_SECRET
 	? new TextEncoder().encode(process.env.JWT_SECRET)
@@ -16,33 +16,40 @@ const Jwt = t.Object({
 	sub: t.String({ description: "User id" }),
 	username: t.String(),
 	sid: t.String({ description: "Session id" }),
+	permissions: t.Array(t.String()),
 });
-const validator = getSchemaValidator(Jwt);
+const validator = TypeCompiler.Compile(Jwt);
 
 export const auth = new Elysia({ name: "auth" })
-	.guard({
-		// Those are not applied for now. See https://github.com/elysiajs/elysia/issues/1139
-		detail: {
-			security: [{ bearer: ["read"] }, { api: ["read"] }],
-		},
-		response: {
-			401: { ...KError, description: "" },
-			403: { ...KError, description: "" },
-		},
-	})
 	.macro({
 		permissions(perms: string[]) {
 			return {
 				resolve: async ({ headers: { authorization }, error }) => {
-					console.log(process.env.JWT_ISSUER);
 					const bearer = authorization?.slice(7);
-					if (!bearer) return { jwt: false };
+					if (!bearer) {
+						return error(500, {
+							status: 500,
+							message: "No jwt, auth server configuration error.",
+						});
+					}
+
 					// @ts-expect-error ts can't understand that there's two overload idk why
 					const { payload } = await jwtVerify(bearer, jwtSecret ?? jwks, {
 						issuer: process.env.JWT_ISSUER,
 					});
-					// TODO: use perms
-					return { jwt: validator.Decode<typeof Jwt>(payload) };
+					const jwt = validator.Decode(payload);
+
+					for (const perm of perms) {
+						if (!jwt.permissions.includes(perm)) {
+							return error(403, {
+								status: 403,
+								message: `Missing permission: '${perm}'.`,
+								details: { current: jwt.permissions, required: perms },
+							});
+						}
+					}
+
+					return { jwt };
 				},
 			};
 		},

@@ -1,4 +1,5 @@
 import { Elysia, t } from "elysia";
+import { auth } from "./auth";
 import { entriesH } from "./controllers/entries";
 import { imagesH } from "./controllers/images";
 import { seasonsH } from "./controllers/seasons";
@@ -10,7 +11,7 @@ import { showsH } from "./controllers/shows/shows";
 import { staffH } from "./controllers/staff";
 import { studiosH } from "./controllers/studios";
 import { videosH } from "./controllers/videos";
-import type { KError } from "./models/error";
+import { KError } from "./models/error";
 
 export const base = new Elysia({ name: "base" })
 	.onError(({ code, error }) => {
@@ -53,14 +54,41 @@ export const base = new Elysia({ name: "base" })
 export const prefix = process.env.KYOO_PREFIX ?? "";
 export const app = new Elysia({ prefix })
 	.use(base)
-	.use(showsH)
-	.use(movies)
-	.use(series)
-	.use(collections)
-	.use(entriesH)
-	.use(seasonsH)
-	.use(studiosH)
-	.use(staffH)
-	.use(videosH)
-	.use(imagesH)
-	.use(seed);
+	.use(auth)
+	.guard(
+		{
+			// Those are not applied for now. See https://github.com/elysiajs/elysia/issues/1139
+			detail: {
+				security: [{ bearer: ["core.read"] }, { api: ["core.read"] }],
+			},
+			response: {
+				401: { ...KError, description: "" },
+				403: { ...KError, description: "" },
+			},
+			perms: ["core.read"],
+		},
+		(app) =>
+			app
+				.use(showsH)
+				.use(movies)
+				.use(series)
+				.use(collections)
+				.use(entriesH)
+				.use(seasonsH)
+				.use(studiosH)
+				.use(staffH)
+				.use(imagesH),
+	)
+	.guard(
+		{
+			detail: {
+				security: [{ bearer: ["core.write"] }, { api: ["core.write"] }],
+			},
+			response: {
+				401: { ...KError, description: "" },
+				403: { ...KError, description: "" },
+			},
+			perms: ["core.read"],
+		},
+		(app) => app.use(videosH).use(seed),
+	);
