@@ -58,6 +58,10 @@ type EditUserDto struct {
 	Claims   jwt.MapClaims `json:"claims,omitempty" example:"preferOriginal: true"`
 }
 
+type EditPasswordDto struct {
+	Password string `json:"password" validate:"required" example:"password1234"`
+}
+
 func MapDbUser(user *dbc.User) User {
 	return User{
 		Pk:          user.Pk,
@@ -293,6 +297,7 @@ func (h *Handler) DeleteSelf(c echo.Context) error {
 // @Param        user     body  EditUserDto  false  "Edited user info"
 // @Success      200  {object}  User
 // @Success      403  {object}  KError  "You can't edit a protected claim"
+// @Success      422  {object}  KError  "Invalid body"
 // @Router /users/me [patch]
 func (h *Handler) EditSelf(c echo.Context) error {
 	var req EditUserDto
@@ -340,6 +345,7 @@ func (h *Handler) EditSelf(c echo.Context) error {
 // @Param        user     body  EditUserDto  false  "Edited user info"
 // @Success      200  {object}  User
 // @Success      403  {object}  KError  "You don't have permissions to edit another account"
+// @Success      422  {object}  KError  "Invalid body"
 // @Router /users/{id} [patch]
 func (h *Handler) EditUser(c echo.Context) error {
 	err := CheckPermissions(c, []string{"user.write"})
@@ -374,4 +380,56 @@ func (h *Handler) EditUser(c echo.Context) error {
 	}
 
 	return c.JSON(200, MapDbUser(&ret))
+}
+
+// @Summary      Edit password
+// @Description  Edit your password
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Security     Jwt
+// @Param        invalidate  query  bool  false  "Invalidate other sessions" default(true)
+// @Param        user     body  EditPasswordDto  false  "New password"
+// @Success      204
+// @Success      422  {object}  KError  "Invalid body"
+// @Router /users/me/password [patch]
+func (h *Handler) ChangePassword(c echo.Context) error {
+	uid, err := GetCurrentUserId(c)
+	if err != nil {
+		return err
+	}
+
+	sid, err := GetCurrentSessionId(c)
+	if err != nil {
+		return err
+	}
+
+	var req EditPasswordDto
+	err = c.Bind(&req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
+	}
+	if err = c.Validate(&req); err != nil {
+		return err
+	}
+
+	_, err = h.db.UpdateUser(context.Background(), dbc.UpdateUserParams{
+		Id:       uid,
+		Password: &req.Password,
+	})
+	if err == pgx.ErrNoRows {
+		return echo.NewHTTPError(http.StatusNotFound, "Invalid token, user not found")
+	} else if err != nil {
+		return err
+	}
+
+	err = h.db.ClearOtherSessions(context.Background(), dbc.ClearOtherSessionsParams{
+		SessionId: sid,
+		UserId:    uid,
+	})
+	if err != nil {
+		return err
+	}
+
+	return c.NoContent(http.StatusNoContent)
 }

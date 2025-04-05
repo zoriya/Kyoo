@@ -12,6 +12,23 @@ import (
 	"github.com/google/uuid"
 )
 
+const clearOtherSessions = `-- name: ClearOtherSessions :exec
+delete from sessions as s using users as u
+where s.user_pk = u.pk
+	and s.id != $1
+	and u.id = $2
+`
+
+type ClearOtherSessionsParams struct {
+	SessionId uuid.UUID `json:"sessionId"`
+	UserId    uuid.UUID `json:"userId"`
+}
+
+func (q *Queries) ClearOtherSessions(ctx context.Context, arg ClearOtherSessionsParams) error {
+	_, err := q.db.Exec(ctx, clearOtherSessions, arg.SessionId, arg.UserId)
+	return err
+}
+
 const createSession = `-- name: CreateSession :one
 insert into sessions(token, user_pk, device)
 	values ($1, $2, $3)
