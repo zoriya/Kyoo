@@ -217,6 +217,7 @@ func main() {
 	r.DELETE("/users/me", h.DeleteSelf)
 	r.PATCH("/users/:id", h.EditUser)
 	r.PATCH("/users/me", h.EditSelf)
+	r.PATCH("/users/me/password", h.ChangePassword)
 	g.POST("/users", h.Register)
 
 	g.POST("/sessions", h.Login)

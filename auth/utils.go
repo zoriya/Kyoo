@@ -28,6 +28,32 @@ func GetCurrentUserId(c echo.Context) (uuid.UUID, error) {
 	return ret, nil
 }
 
+func GetCurrentSessionId(c echo.Context) (uuid.UUID, error) {
+	user := c.Get("user").(*jwt.Token)
+	if user == nil {
+		return uuid.UUID{}, echo.NewHTTPError(401, "Unauthorized")
+	}
+	claims, ok := user.Claims.(jwt.MapClaims)
+	if !ok {
+		return uuid.UUID{}, echo.NewHTTPError(403, "Could not retrieve claims")
+	}
+	sid, ok := claims["sid"]
+	if !ok {
+		return uuid.UUID{}, echo.NewHTTPError(403, "Could not retrieve session")
+	}
+
+	sid_str, ok := sid.(string)
+	if !ok {
+		return uuid.UUID{}, echo.NewHTTPError(403, "Invalid session id claim.")
+	}
+
+	ret, err := uuid.Parse(sid_str)
+	if err != nil {
+		return uuid.UUID{}, echo.NewHTTPError(403, "Invalid id")
+	}
+	return ret, nil
+}
+
 func CheckPermissions(c echo.Context, perms []string) error {
 	token, ok := c.Get("user").(*jwt.Token)
 	if !ok {

@@ -417,6 +417,60 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/main.KError"
                         }
+                    },
+                    "422": {
+                        "description": "Invalid body",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/me/password": {
+            "patch": {
+                "security": [
+                    {
+                        "Jwt": []
+                    }
+                ],
+                "description": "Edit your password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Edit password",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Invalidate other sessions",
+                        "name": "invalidate",
+                        "in": "query"
+                    },
+                    {
+                        "description": "New password",
+                        "name": "user",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/main.EditPasswordDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "422": {
+                        "description": "Invalid body",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
                     }
                 }
             }
@@ -535,7 +589,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "format": "uuid",
-                        "description": "User id of the user to delete",
+                        "description": "User id of the user to edit",
                         "name": "id",
                         "in": "path"
                     },
@@ -560,12 +614,30 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/main.KError"
                         }
+                    },
+                    "422": {
+                        "description": "Invalid body",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
                     }
                 }
             }
         }
     },
     "definitions": {
+        "main.EditPasswordDto": {
+            "type": "object",
+            "required": [
+                "password"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "example": "password1234"
+                }
+            }
+        },
         "main.EditUserDto": {
             "type": "object",
             "properties": {
