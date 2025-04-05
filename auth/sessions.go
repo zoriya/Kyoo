@@ -125,7 +125,7 @@ func (h *Handler) createSession(c echo.Context, user *User) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(201, session)
+	return c.JSON(201, MapSessionToken(&session))
 }
 
 // @Summary      Logout

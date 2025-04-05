@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -49,6 +50,12 @@ type RegisterDto struct {
 	Email string `json:"email" validate:"required,email" format:"email" example:"kyoo@zoriya.dev"`
 	// Password to use.
 	Password string `json:"password" validate:"required" example:"password1234"`
+}
+
+type EditUserDto struct {
+	Username *string       `json:"username,omitempty" validate:"excludes=@" example:"zoriya"`
+	Email    *string       `json:"email,omitempty" validate:"email" example:"kyoo@zoriya.dev"`
+	Claims   jwt.MapClaims `json:"claims,omitempty" example:"preferOriginal: true"`
 }
 
 func MapDbUser(user *dbc.User) User {
@@ -235,6 +242,11 @@ func (h *Handler) Register(c echo.Context) error {
 // @Failure      404  {object}  KError "Invalid user id"
 // @Router /users/{id} [delete]
 func (h *Handler) DeleteUser(c echo.Context) error {
+	err := CheckPermissions(c, []string{"user.delete"})
+	if err != nil {
+		return err
+	}
+
 	uid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return echo.NewHTTPError(400, "Invalid id given: not an uuid")
@@ -269,5 +281,97 @@ func (h *Handler) DeleteSelf(c echo.Context) error {
 	} else if err != nil {
 		return err
 	}
+	return c.JSON(200, MapDbUser(&ret))
+}
+
+// @Summary      Edit self
+// @Description  Edit your account's info
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Security     Jwt
+// @Param        user     body  EditUserDto  false  "Edited user info"
+// @Success      200  {object}  User
+// @Success      403  {object}  KError  "You can't edit a protected claim"
+// @Router /users/me [patch]
+func (h *Handler) EditSelf(c echo.Context) error {
+	var req EditUserDto
+	err := c.Bind(&req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
+	}
+	if err = c.Validate(&req); err != nil {
+		return err
+	}
+
+	for _, key := range h.config.ProtectedClaims {
+		if _, contains := req.Claims[key]; contains {
+			return echo.NewHTTPError(http.StatusForbidden, fmt.Sprintf("Can't edit protected claim: '%s'.", key))
+		}
+	}
+
+	uid, err := GetCurrentUserId(c)
+	if err != nil {
+		return err
+	}
+
+	ret, err := h.db.UpdateUser(context.Background(), dbc.UpdateUserParams{
+		Id:       uid,
+		Username: req.Username,
+		Email:    req.Email,
+		Claims:   req.Claims,
+	})
+	if err == pgx.ErrNoRows {
+		return echo.NewHTTPError(http.StatusNotFound, "Invalid token, user not found.")
+	} else if err != nil {
+		return err
+	}
+
+	return c.JSON(200, MapDbUser(&ret))
+}
+
+// @Summary      Edit user
+// @Description  Edit an account info or permissions
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Security     Jwt[users.write]
+// @Param        id       path  string  false  "User id of the user to edit" Format(uuid)
+// @Param        user     body  EditUserDto  false  "Edited user info"
+// @Success      200  {object}  User
+// @Success      403  {object}  KError  "You don't have permissions to edit another account"
+// @Router /users/{id} [patch]
+func (h *Handler) EditUser(c echo.Context) error {
+	err := CheckPermissions(c, []string{"user.write"})
+	if err != nil {
+		return err
+	}
+
+	uid, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return echo.NewHTTPError(400, "Invalid id given: not an uuid")
+	}
+
+	var req EditUserDto
+	err = c.Bind(&req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
+	}
+	if err = c.Validate(&req); err != nil {
+		return err
+	}
+
+	ret, err := h.db.UpdateUser(context.Background(), dbc.UpdateUserParams{
+		Id:       uid,
+		Username: req.Username,
+		Email:    req.Email,
+		Claims:   req.Claims,
+	})
+	if err == pgx.ErrNoRows {
+		return echo.NewHTTPError(http.StatusNotFound, "Invalid user id, user not found")
+	} else if err != nil {
+		return err
+	}
+
 	return c.JSON(200, MapDbUser(&ret))
 }
