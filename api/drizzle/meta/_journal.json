@@ -120,6 +120,13 @@
 			"when": 1742205790510,
 			"tag": "0016_mqueue",
 			"breakpoints": true
+		},
+		{
+			"idx": 17,
+			"version": "7",
+			"when": 1743944773824,
+			"tag": "0017_watchlist",
+			"breakpoints": true
 		}
 	]
 }
