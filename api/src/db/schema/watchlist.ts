@@ -6,9 +6,9 @@ import { shows } from "./shows";
 import { schema } from "./utils";
 
 export const watchlistStatus = schema.enum("watchlist_status", [
-	"completed",
 	"watching",
 	"rewatching",
+	"completed",
 	"dropped",
 	"planned",
 ]);
