@@ -47,14 +47,13 @@ func LoadConfiguration(db *dbc.Queries) (*Configuration, error) {
 			return nil, err
 		}
 	}
+	maps.Insert(ret.FirstUserClaims, maps.All(ret.DefaultClaims))
 	claims = os.Getenv("FIRST_USER_CLAIMS")
 	if claims != "" {
 		err := json.Unmarshal([]byte(claims), &ret.FirstUserClaims)
 		if err != nil {
 			return nil, err
 		}
-
-		maps.Insert(ret.FirstUserClaims, maps.All(ret.DefaultClaims))
 	} else {
 		ret.FirstUserClaims = ret.DefaultClaims
 	}
