@@ -53,8 +53,8 @@ type RegisterDto struct {
 }
 
 type EditUserDto struct {
-	Username *string       `json:"username,omitempty" validate:"excludes=@" example:"zoriya"`
-	Email    *string       `json:"email,omitempty" validate:"email" example:"kyoo@zoriya.dev"`
+	Username *string       `json:"username,omitempty" validate:"omitnil,excludes=@" example:"zoriya"`
+	Email    *string       `json:"email,omitempty" validate:"omitnil,email" example:"kyoo@zoriya.dev"`
 	Claims   jwt.MapClaims `json:"claims,omitempty" example:"preferOriginal: true"`
 }
 

@@ -23,13 +23,12 @@ Authorization: Bearer {{jwt}}
 }
 HTTP 200
 [Asserts]
-jsonpath ".claims.preferOriginal" == true
-jsonpath ".username" == "edit-settings"
+jsonpath "$.claims.preferOriginal" == true
+jsonpath "$.username" == "edit-settings"
 
-# Invalid password login
-POST {{host}}/jwt
+GET {{host}}/jwt
 Authorization: Bearer {{token}}
-HTTP 403
+HTTP 200
 
 DELETE {{host}}/users/me
 Authorization: Bearer {{jwt}}
