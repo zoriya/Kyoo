@@ -1,5 +1,5 @@
 import {
-    Column,
+	type Column,
 	type ColumnsSelection,
 	type SQL,
 	type SQLWrapper,

@@ -58,8 +58,8 @@ func (h *Handler) createGuestJwt() *string {
 
 	claims := maps.Clone(h.config.GuestClaims)
 	claims["username"] = "guest"
-	claims["sub"] = "guest"
-	claims["sid"] = "guest"
+	claims["sub"] = "00000000-0000-0000-0000-000000000000"
+	claims["sid"] = "00000000-0000-0000-0000-000000000000"
 	claims["iss"] = h.config.PublicUrl
 	claims["iat"] = &jwt.NumericDate{
 		Time: time.Now().UTC(),

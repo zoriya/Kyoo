@@ -35,13 +35,21 @@ export const auth = new Elysia({ name: "auth" })
 			});
 		}
 
-		// @ts-expect-error ts can't understand that there's two overload idk why
-		const { payload } = await jwtVerify(bearer, jwtSecret ?? jwks, {
-			issuer: process.env.JWT_ISSUER,
-		});
-		const jwt = validator.Decode(payload);
+		try {
+			// @ts-expect-error ts can't understand that there's two overload idk why
+			const { payload } = await jwtVerify(bearer, jwtSecret ?? jwks, {
+				issuer: process.env.JWT_ISSUER,
+			});
+			const jwt = validator.Decode(payload);
 
-		return { jwt };
+			return { jwt };
+		} catch (err) {
+			return error(403, {
+				status: 403,
+				message: "Invalid jwt. Verification vailed",
+				details: err,
+			});
+		}
 	})
 	.macro({
 		permissions(perms: string[]) {
