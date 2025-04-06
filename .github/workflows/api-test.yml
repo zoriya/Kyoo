@@ -36,5 +36,4 @@ jobs:
         working-directory: ./api
         run: bun test
         env:
-          JWT_SECRET: "TODO"
           POSTGRES_SERVER: localhost

@@ -57,8 +57,3 @@ jobs:
         working-directory: ./auth
         run: cat logs
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: results
-          path: auth/out
-

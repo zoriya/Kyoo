@@ -196,9 +196,12 @@ export const imagesH = new Elysia({ tags: ["images"] })
 		},
 	)
 	.guard({
-		headers: t.Object({
-			"accept-language": AcceptLanguage(),
-		}),
+		headers: t.Object(
+			{
+				"accept-language": AcceptLanguage(),
+			},
+			{ additionalProperties: true },
+		),
 	})
 	.get(
 		"/studios/:id/logo",

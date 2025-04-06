@@ -53,7 +53,7 @@ type Validator struct {
 
 func (v *Validator) Validate(i any) error {
 	if err := v.validator.Struct(i); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
 	}
 	return nil
 }
@@ -215,6 +215,9 @@ func main() {
 	r.GET("/users/me", h.GetMe)
 	r.DELETE("/users/:id", h.DeleteUser)
 	r.DELETE("/users/me", h.DeleteSelf)
+	r.PATCH("/users/:id", h.EditUser)
+	r.PATCH("/users/me", h.EditSelf)
+	r.PATCH("/users/me/password", h.ChangePassword)
 	g.POST("/users", h.Register)
 
 	g.POST("/sessions", h.Login)

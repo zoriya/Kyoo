@@ -265,10 +265,10 @@ const updateUser = `-- name: UpdateUser :one
 update
 	users
 set
-	username = $2,
-	email = $3,
-	password = $4,
-	claims = $5
+	username = coalesce($2, username),
+	email = coalesce($3, email),
+	password = coalesce($4, password),
+	claims = coalesce($5, claims)
 where
 	id = $1
 returning
@@ -277,8 +277,8 @@ returning
 
 type UpdateUserParams struct {
 	Id       uuid.UUID     `json:"id"`
-	Username string        `json:"username"`
-	Email    string        `json:"email"`
+	Username *string       `json:"username"`
+	Email    *string       `json:"email"`
 	Password *string       `json:"password"`
 	Claims   jwt.MapClaims `json:"claims"`
 }

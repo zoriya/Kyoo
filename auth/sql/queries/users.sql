@@ -67,10 +67,10 @@ returning
 update
 	users
 set
-	username = $2,
-	email = $3,
-	password = $4,
-	claims = $5
+	username = coalesce(sqlc.narg(username), username),
+	email = coalesce(sqlc.narg(email), email),
+	password = coalesce(sqlc.narg(password), password),
+	claims = coalesce(sqlc.narg(claims), claims)
 where
 	id = $1
 returning
