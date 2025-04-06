@@ -1,4 +1,13 @@
-import { type SQL, and, desc, eq, exists, ne, sql } from "drizzle-orm";
+import {
+	type SQL,
+	type Subquery,
+	and,
+	desc,
+	eq,
+	exists,
+	ne,
+	sql,
+} from "drizzle-orm";
 import type { PgSelect } from "drizzle-orm/pg-core";
 import { db } from "~/db";
 import {
@@ -191,7 +200,7 @@ const showRelations = {
 	}: {
 		languages: string[];
 		userId: string;
-		watchStatusQ: PgSelect<typeof watchlist>;
+		watchStatusQ: Subquery;
 	}) => {
 		const transQ = db
 			.selectDistinctOn([entryTranslations.pk])
@@ -219,7 +228,9 @@ const showRelations = {
 			.innerJoin(transQ, eq(entries.pk, transQ.pk))
 			.leftJoin(progressQ, eq(entries.pk, progressQ.entryPk))
 			.leftJoinLateral(entryVideosQ, sql`true`)
-			.where(eq(watchStatusQ.nextEntryPk, entries.pk))
+			.where(
+				eq((watchStatusQ as unknown as typeof watchlist).nextEntry, entries.pk),
+			)
 			.as("nextEntry");
 	},
 };
@@ -291,7 +302,11 @@ export async function getShows({
 
 			watchStatus: getColumns(watchStatusQ),
 
-			...buildRelations(relations, showRelations, { languages, userId }),
+			...buildRelations(relations, showRelations, {
+				languages,
+				userId,
+				watchStatusQ,
+			}),
 		})
 		.from(shows)
 		.leftJoin(watchStatusQ, eq(shows.pk, watchStatusQ.showPk))
