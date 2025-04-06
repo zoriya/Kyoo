@@ -143,13 +143,16 @@ export const getEntryProgressQ = (userId: string) =>
 
 export const mapProgress = (
 	progressQ: ReturnType<typeof getEntryProgressQ>,
+	{ aliased }: { aliased: boolean } = { aliased: false },
 ) => {
 	const { time, percent, videoId } = getColumns(progressQ);
-	return {
+	const ret = {
 		time: coalesce(time, sql`0`),
 		percent: coalesce(percent, sql`0`),
-		videoId,
+		videoId: sql`${videoId}`,
 	};
+	if (!aliased) return ret;
+	return Object.fromEntries(Object.entries(ret).map(([k, v]) => [k, v.as(k)]));
 };
 
 async function getEntries({
@@ -195,7 +198,7 @@ async function getEntries({
 			...entryCol,
 			...transCol,
 			videos: entryVideosQ.videos,
-			progress: mapProgress(entryProgressQ),
+			progress: mapProgress(entryProgressQ, { aliased: true }),
 			// specials don't have an `episodeNumber` but a `number` field.
 			number: episodeNumber,
 

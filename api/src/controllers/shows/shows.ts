@@ -1,5 +1,6 @@
 import { and, isNull, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
+import { auth } from "~/auth";
 import { prefix } from "~/base";
 import { db } from "~/db";
 import { shows } from "~/db/schema";
@@ -19,6 +20,7 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 	.model({
 		show: Show,
 	})
+	.use(auth)
 	.get(
 		"random",
 		async ({ error, redirect }) => {
@@ -63,6 +65,7 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 			},
 			headers: { "accept-language": languages },
 			request: { url },
+			jwt: { sub },
 		}) => {
 			const langs = processLanguages(languages);
 			const items = await getShows({
@@ -76,6 +79,7 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 				),
 				languages: langs,
 				preferOriginal,
+				userId: sub,
 			});
 			return createPage(items, { url, sort, limit });
 		},

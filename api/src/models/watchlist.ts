@@ -52,3 +52,4 @@ export const WatchStatus = t.Object({
 		maximum: 100,
 	}),
 });
+export type WatchStatus = typeof WatchStatus.static;

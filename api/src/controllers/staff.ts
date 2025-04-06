@@ -1,15 +1,18 @@
 import { type SQL, and, eq, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
+import { auth } from "~/auth";
 import { prefix } from "~/base";
 import { db } from "~/db";
-import { showTranslations, shows } from "~/db/schema";
+import { profiles, showTranslations, shows } from "~/db/schema";
 import { roles, staff } from "~/db/schema/staff";
-import { getColumns, sqlarr } from "~/db/utils";
+import { watchlist } from "~/db/schema/watchlist";
+import { getColumns, jsonbBuildObject, sqlarr } from "~/db/utils";
 import { KError } from "~/models/error";
 import type { MovieStatus } from "~/models/movie";
 import { Role, Staff } from "~/models/staff";
 import { RoleWShow, RoleWStaff } from "~/models/staff-roles";
 import {
+	AcceptLanguage,
 	Filter,
 	type FilterDef,
 	type Image,
@@ -22,6 +25,7 @@ import {
 	sortToSql,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
+import type { WatchStatus } from "~/models/watchlist";
 import { showFilters, showSort } from "./shows/logic";
 
 const staffSort = Sort(
@@ -113,6 +117,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 		staff: Staff,
 		role: Role,
 	})
+	.use(auth)
 	.get(
 		"/staff/:id",
 		async ({ params: { id }, error }) => {
@@ -186,6 +191,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 			query: { limit, after, query, sort, filter, preferOriginal },
 			headers: { "accept-language": languages },
 			request: { url },
+			jwt: { sub },
 			error,
 		}) => {
 			const [member] = await db
@@ -210,6 +216,20 @@ export const staffH = new Elysia({ tags: ["staff"] })
 					sql`array_position(${sqlarr(langs)}, ${showTranslations.language})`,
 				)
 				.as("t");
+
+			const watchStatusQ = db
+				.select({
+					watchStatus: jsonbBuildObject<WatchStatus>({
+						...getColumns(watchlist),
+						percent: watchlist.seenCount,
+					}).as("watchStatus"),
+				})
+				.from(watchlist)
+				.leftJoin(profiles, eq(watchlist.profilePk, profiles.pk))
+				.where(and(eq(profiles.id, sub), eq(watchlist.showPk, shows.pk)))
+				.limit(1)
+				.as("watchstatus");
+
 			const items = await db
 				.select({
 					...getColumns(roles),
@@ -229,6 +249,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 							banner: sql<Image>`coalesce(nullif(${shows.original}->'banner', 'null'::jsonb), ${transQ.banner})`,
 							logo: sql<Image>`coalesce(nullif(${shows.original}->'logo', 'null'::jsonb), ${transQ.logo})`,
 						}),
+						watchStatus: sql`${watchStatusQ}`,
 					},
 				})
 				.from(roles)
@@ -278,6 +299,12 @@ export const staffH = new Elysia({ tags: ["staff"] })
 					}),
 				),
 			}),
+			headers: t.Object(
+				{
+					"accept-language": AcceptLanguage(),
+				},
+				{ additionalProperties: true },
+			),
 			response: {
 				200: Page(RoleWShow),
 				404: {
