@@ -6,6 +6,7 @@ import {
 	entryTranslations,
 	entryVideoJoin,
 	history,
+	profiles,
 	showStudioJoin,
 	showTranslations,
 	shows,
@@ -36,7 +37,7 @@ import {
 	sortToSql,
 } from "~/models/utils";
 import type { EmbeddedVideo } from "~/models/video";
-import { entryVideosQ, getEntryProgressQ } from "../entries";
+import { entryVideosQ, getEntryProgressQ, mapProgress } from "../entries";
 
 export const showFilters: FilterDef = {
 	genres: {
@@ -151,7 +152,7 @@ const showRelations = {
 	firstEntry: ({
 		languages,
 		userId,
-	}: { languages: string[]; userId: number }) => {
+	}: { languages: string[]; userId: string }) => {
 		const transQ = db
 			.selectDistinctOn([entryTranslations.pk])
 			.from(entryTranslations)
@@ -171,7 +172,7 @@ const showRelations = {
 					...transCol,
 					number: entries.episodeNumber,
 					videos: entryVideosQ.videos,
-					progress: getColumns(progressQ),
+					progress: mapProgress(progressQ),
 				}).as("firstEntry"),
 			})
 			.from(entries)
@@ -189,7 +190,7 @@ const showRelations = {
 		watchStatusQ,
 	}: {
 		languages: string[];
-		userId: number;
+		userId: string;
 		watchStatusQ: PgSelect<typeof watchlist>;
 	}) => {
 		const transQ = db
@@ -211,7 +212,7 @@ const showRelations = {
 					...transCol,
 					number: entries.episodeNumber,
 					videos: entryVideosQ.videos,
-					progress: getColumns(progressQ),
+					progress: mapProgress(progressQ),
 				}).as("nextEntry"),
 			})
 			.from(entries)
@@ -244,7 +245,7 @@ export async function getShows({
 	fallbackLanguage?: boolean;
 	preferOriginal?: boolean;
 	relations?: (keyof typeof showRelations)[];
-	userId: number;
+	userId: string;
 }) {
 	const transQ = db
 		.selectDistinctOn([showTranslations.pk])
@@ -263,10 +264,11 @@ export async function getShows({
 	const watchStatusQ = db
 		.select({
 			...getColumns(watchlist),
-			percent: watchlist.seenCount,
+			percent: sql`${watchlist.seenCount}`.as("percent"),
 		})
 		.from(watchlist)
-		.where(eq(watchlist.profilePk, userId))
+		.leftJoin(profiles, eq(watchlist.profilePk, profiles.pk))
+		.where(eq(profiles.id, userId))
 		.as("watchstatus");
 
 	return await db

@@ -56,7 +56,7 @@ export const Movie = t.Intersect([
 	t.Object({
 		original: Original,
 		isAvailable: t.Boolean(),
-		watchStatus: t.Omit(WatchStatus, ["seenCount"]),
+		watchStatus: t.Nullable(t.Omit(WatchStatus, ["seenCount"])),
 	}),
 ]);
 export type Movie = Prettify<typeof Movie.static>;
