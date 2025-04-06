@@ -68,9 +68,19 @@ func CheckPermissions(c echo.Context, perms []string) error {
 	if !ok {
 		return echo.NewHTTPError(403, fmt.Sprintf("Missing permissions: %s.", ", "))
 	}
-	permissions, ok := permissions_claims.([]string)
+	fmt.Printf("%v\n", permissions_claims)
+	fmt.Printf("%t\n", permissions_claims)
+	permissions_int, ok := permissions_claims.([]any)
 	if !ok {
 		return echo.NewHTTPError(403, "Invalid permission claim.")
+	}
+
+	permissions := make([]string, len(permissions_int))
+	for i, perm := range permissions_int {
+		permissions[i], ok = perm.(string)
+		if !ok {
+			return echo.NewHTTPError(403, "Invalid permission claim.")
+		}
 	}
 
 	missing := make([]string, 0)

@@ -94,7 +94,7 @@ func MapOidc(oidc *dbc.GetUserRow) OidcHandle {
 // @Failure      422  {object}  KError "Invalid after id"
 // @Router       /users [get]
 func (h *Handler) ListUsers(c echo.Context) error {
-	err := CheckPermissions(c, []string{"user.read"})
+	err := CheckPermissions(c, []string{"users.read"})
 	if err != nil {
 		return err
 	}
@@ -139,18 +139,23 @@ func (h *Handler) ListUsers(c echo.Context) error {
 // @Failure      422  {object}  KError "Invalid id (not a uuid)"
 // @Router /users/{id} [get]
 func (h *Handler) GetUser(c echo.Context) error {
-	err := CheckPermissions(c, []string{"user.read"})
+	err := CheckPermissions(c, []string{"users.read"})
 	if err != nil {
 		return err
 	}
 
-	id, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, "Invalid id")
-	}
-	dbuser, err := h.db.GetUser(context.Background(), id)
+	id := c.Param("id")
+	uid, err := uuid.Parse(c.Param("id"))
+	dbuser, err := h.db.GetUser(context.Background(), dbc.GetUserParams{
+		UseId:    err == nil,
+		Id:       uid,
+		Username: id,
+	})
 	if err != nil {
 		return err
+	}
+	if len(dbuser) == 0 {
+		return echo.NewHTTPError(404, fmt.Sprintf("No user found with id or username: '%s'.", id))
 	}
 
 	user := MapDbUser(&dbuser[0].User)
@@ -177,7 +182,10 @@ func (h *Handler) GetMe(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	dbuser, err := h.db.GetUser(context.Background(), id)
+	dbuser, err := h.db.GetUser(context.Background(), dbc.GetUserParams{
+		UseId: true,
+		Id:    id,
+	})
 	if err != nil {
 		return err
 	}
@@ -246,7 +254,7 @@ func (h *Handler) Register(c echo.Context) error {
 // @Failure      404  {object}  KError "Invalid user id"
 // @Router /users/{id} [delete]
 func (h *Handler) DeleteUser(c echo.Context) error {
-	err := CheckPermissions(c, []string{"user.delete"})
+	err := CheckPermissions(c, []string{"users.delete"})
 	if err != nil {
 		return err
 	}
@@ -348,7 +356,7 @@ func (h *Handler) EditSelf(c echo.Context) error {
 // @Success      422  {object}  KError  "Invalid body"
 // @Router /users/{id} [patch]
 func (h *Handler) EditUser(c echo.Context) error {
-	err := CheckPermissions(c, []string{"user.write"})
+	err := CheckPermissions(c, []string{"users.write"})
 	if err != nil {
 		return err
 	}

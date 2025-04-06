@@ -28,8 +28,10 @@ select
 from
 	users as u
 	left join oidc_handle as h on u.pk = h.user_pk
-where
-	u.id = $1;
+where (@use_id::boolean
+	and u.id = @id)
+	or (not @use_id
+		and u.username = @username);
 
 -- name: GetUserByLogin :one
 select
