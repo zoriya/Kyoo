@@ -1,5 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
+import { auth } from "~/auth";
 import { prefix } from "~/base";
 import { db } from "~/db";
 import { shows } from "~/db/schema";
@@ -22,12 +23,14 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 		serie: Serie,
 		"serie-translation": SerieTranslation,
 	})
+	.use(auth)
 	.get(
 		"/:id",
 		async ({
 			params: { id },
 			headers: { "accept-language": languages },
 			query: { preferOriginal, with: relations },
+			jwt: { sub },
 			error,
 			set,
 		}) => {
@@ -42,6 +45,7 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 				fallbackLanguage: langs.includes("*"),
 				preferOriginal,
 				relations,
+				userId: sub,
 			});
 			if (!ret) {
 				return error(404, {
@@ -72,10 +76,13 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 				preferOriginal: t.Optional(
 					t.Boolean({ description: desc.preferOriginal }),
 				),
-				with: t.Array(t.UnionEnum(["translations", "studios", "firstEntry"]), {
-					default: [],
-					description: "Include related resources in the response.",
-				}),
+				with: t.Array(
+					t.UnionEnum(["translations", "studios", "firstEntry", "nextEntry"]),
+					{
+						default: [],
+						description: "Include related resources in the response.",
+					},
+				),
 			}),
 			headers: t.Object(
 				{
@@ -131,6 +138,7 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 			query: { limit, after, query, sort, filter, preferOriginal },
 			headers: { "accept-language": languages },
 			request: { url },
+			jwt: { sub },
 		}) => {
 			const langs = processLanguages(languages);
 			const items = await getShows({
@@ -141,6 +149,7 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 				filter: and(eq(shows.kind, "serie"), filter),
 				languages: langs,
 				preferOriginal,
+				userId: sub,
 			});
 			return createPage(items, { url, sort, limit });
 		},

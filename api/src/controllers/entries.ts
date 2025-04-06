@@ -1,10 +1,13 @@
-import { type SQL, and, eq, isNotNull, ne, sql } from "drizzle-orm";
+import { type SQL, and, desc, eq, isNotNull, ne, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
+import { auth } from "~/auth";
 import { db } from "~/db";
 import {
 	entries,
 	entryTranslations,
 	entryVideoJoin,
+	history,
+	profiles,
 	shows,
 	videos,
 } from "~/db/schema";
@@ -39,7 +42,7 @@ import {
 	processLanguages,
 	sortToSql,
 } from "~/models/utils";
-import { desc } from "~/models/utils/descriptions";
+import { desc as description } from "~/models/utils/descriptions";
 import type { EmbeddedVideo } from "~/models/video";
 
 const entryFilters: FilterDef = {
@@ -105,6 +108,52 @@ const newsSort: Sort = {
 		},
 	],
 };
+const { guess, createdAt, updatedAt, ...videosCol } = getColumns(videos);
+export const entryVideosQ = db
+	.select({
+		videos: coalesce(
+			jsonbAgg(
+				jsonbBuildObject<EmbeddedVideo>({
+					slug: entryVideoJoin.slug,
+					...videosCol,
+				}),
+			),
+			sql`'[]'::jsonb`,
+		).as("videos"),
+	})
+	.from(entryVideoJoin)
+	.where(eq(entryVideoJoin.entryPk, entries.pk))
+	.leftJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
+	.as("videos");
+
+export const getEntryProgressQ = (userId: string) =>
+	db
+		.selectDistinctOn([history.entryPk], {
+			percent: history.percent,
+			time: history.time,
+			entryPk: history.entryPk,
+			videoId: videos.id,
+		})
+		.from(history)
+		.leftJoin(videos, eq(history.videoPk, videos.pk))
+		.leftJoin(profiles, eq(history.profilePk, profiles.pk))
+		.where(eq(profiles.id, userId))
+		.orderBy(history.entryPk, desc(history.playedDate))
+		.as("progress");
+
+export const mapProgress = (
+	progressQ: ReturnType<typeof getEntryProgressQ>,
+	{ aliased }: { aliased: boolean } = { aliased: false },
+) => {
+	const { time, percent, videoId } = getColumns(progressQ);
+	const ret = {
+		time: coalesce(time, sql`0`),
+		percent: coalesce(percent, sql`0`),
+		videoId: sql`${videoId}`,
+	};
+	if (!aliased) return ret;
+	return Object.fromEntries(Object.entries(ret).map(([k, v]) => [k, v.as(k)]));
+};
 
 async function getEntries({
 	after,
@@ -113,6 +162,7 @@ async function getEntries({
 	sort,
 	filter,
 	languages,
+	userId,
 }: {
 	after: string | undefined;
 	limit: number;
@@ -120,6 +170,7 @@ async function getEntries({
 	sort: Sort;
 	filter: SQL | undefined;
 	languages: string[];
+	userId: string;
 }): Promise<(Entry | Extra | UnknownEntry)[]> {
 	const transQ = db
 		.selectDistinctOn([entryTranslations.pk])
@@ -131,23 +182,7 @@ async function getEntries({
 		.as("t");
 	const { pk, name, ...transCol } = getColumns(transQ);
 
-	const { guess, createdAt, updatedAt, ...videosCol } = getColumns(videos);
-	const videosQ = db
-		.select({
-			videos: coalesce(
-				jsonbAgg(
-					jsonbBuildObject<EmbeddedVideo>({
-						slug: entryVideoJoin.slug,
-						...videosCol,
-					}),
-				),
-				sql`'[]'::jsonb`,
-			).as("videos"),
-		})
-		.from(entryVideoJoin)
-		.where(eq(entryVideoJoin.entryPk, entries.pk))
-		.leftJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
-		.as("videos");
+	const entryProgressQ = getEntryProgressQ(userId);
 
 	const {
 		kind,
@@ -162,7 +197,8 @@ async function getEntries({
 		.select({
 			...entryCol,
 			...transCol,
-			videos: videosQ.videos,
+			videos: entryVideosQ.videos,
+			progress: mapProgress(entryProgressQ, { aliased: true }),
 			// specials don't have an `episodeNumber` but a `number` field.
 			number: episodeNumber,
 
@@ -180,7 +216,8 @@ async function getEntries({
 		})
 		.from(entries)
 		.innerJoin(transQ, eq(entries.pk, transQ.pk))
-		.leftJoinLateral(videosQ, sql`true`)
+		.leftJoinLateral(entryVideosQ, sql`true`)
+		.leftJoin(entryProgressQ, eq(entries.pk, entryProgressQ.entryPk))
 		.where(
 			and(
 				filter,
@@ -210,6 +247,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 		...models,
 		entry: t.Union([models.episode, models.movie_entry, models.special]),
 	}))
+	.use(auth)
 	.get(
 		"/series/:id/entries",
 		async ({
@@ -217,6 +255,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			query: { limit, after, query, sort, filter },
 			headers: { "accept-language": languages },
 			request: { url },
+			jwt: { sub },
 			error,
 		}) => {
 			const [serie] = await db
@@ -250,6 +289,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 					filter,
 				),
 				languages: langs,
+				userId: sub,
 			})) as Entry[];
 
 			return createPage(items, { url, sort, limit });
@@ -265,14 +305,14 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			query: t.Object({
 				sort: entrySort,
 				filter: t.Optional(Filter({ def: entryFilters })),
-				query: t.Optional(t.String({ description: desc.query })),
+				query: t.Optional(t.String({ description: description.query })),
 				limit: t.Integer({
 					minimum: 1,
 					maximum: 250,
 					default: 50,
 					description: "Max page size.",
 				}),
-				after: t.Optional(t.String({ description: desc.after })),
+				after: t.Optional(t.String({ description: description.after })),
 			}),
 			headers: t.Object(
 				{
@@ -296,6 +336,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			params: { id },
 			query: { limit, after, query, sort, filter },
 			request: { url },
+			jwt: { sub },
 			error,
 		}) => {
 			const [serie] = await db
@@ -327,6 +368,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 					filter,
 				),
 				languages: ["extra"],
+				userId: sub,
 			})) as Extra[];
 
 			return createPage(items, { url, sort, limit });
@@ -342,14 +384,14 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			query: t.Object({
 				sort: extraSort,
 				filter: t.Optional(Filter({ def: extraFilters })),
-				query: t.Optional(t.String({ description: desc.query })),
+				query: t.Optional(t.String({ description: description.query })),
 				limit: t.Integer({
 					minimum: 1,
 					maximum: 250,
 					default: 50,
 					description: "Max page size.",
 				}),
-				after: t.Optional(t.String({ description: desc.after })),
+				after: t.Optional(t.String({ description: description.after })),
 			}),
 			response: {
 				200: Page(Extra),
@@ -366,6 +408,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 		async ({
 			query: { limit, after, query, sort, filter },
 			request: { url },
+			jwt: { sub },
 		}) => {
 			const items = (await getEntries({
 				limit,
@@ -374,6 +417,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				sort: sort,
 				filter: and(eq(entries.kind, "unknown"), filter),
 				languages: ["extra"],
+				userId: sub,
 			})) as UnknownEntry[];
 
 			return createPage(items, { url, sort, limit });
@@ -383,14 +427,14 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			query: t.Object({
 				sort: extraSort,
 				filter: t.Optional(Filter({ def: unknownFilters })),
-				query: t.Optional(t.String({ description: desc.query })),
+				query: t.Optional(t.String({ description: description.query })),
 				limit: t.Integer({
 					minimum: 1,
 					maximum: 250,
 					default: 50,
 					description: "Max page size.",
 				}),
-				after: t.Optional(t.String({ description: desc.after })),
+				after: t.Optional(t.String({ description: description.after })),
 			}),
 			response: {
 				200: Page(UnknownEntry),
@@ -401,7 +445,11 @@ export const entriesH = new Elysia({ tags: ["series"] })
 	)
 	.get(
 		"/news",
-		async ({ query: { limit, after, query, filter }, request: { url } }) => {
+		async ({
+			query: { limit, after, query, filter },
+			request: { url },
+			jwt: { sub },
+		}) => {
 			const sort = newsSort;
 			const items = (await getEntries({
 				limit,
@@ -415,6 +463,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 					filter,
 				),
 				languages: ["extra"],
+				userId: sub,
 			})) as Entry[];
 
 			return createPage(items, { url, sort, limit });
@@ -423,14 +472,14 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			detail: { description: "Get new movies/episodes added recently." },
 			query: t.Object({
 				filter: t.Optional(Filter({ def: entryFilters })),
-				query: t.Optional(t.String({ description: desc.query })),
+				query: t.Optional(t.String({ description: description.query })),
 				limit: t.Integer({
 					minimum: 1,
 					maximum: 250,
 					default: 50,
 					description: "Max page size.",
 				}),
-				after: t.Optional(t.String({ description: desc.after })),
+				after: t.Optional(t.String({ description: description.after })),
 			}),
 			response: {
 				200: Page(Entry),

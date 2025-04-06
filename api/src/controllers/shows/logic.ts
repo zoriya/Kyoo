@@ -1,9 +1,21 @@
-import { type SQL, and, eq, exists, ne, sql } from "drizzle-orm";
+import {
+	type SQL,
+	type Subquery,
+	and,
+	desc,
+	eq,
+	exists,
+	ne,
+	sql,
+} from "drizzle-orm";
+import type { PgSelect } from "drizzle-orm/pg-core";
 import { db } from "~/db";
 import {
 	entries,
 	entryTranslations,
 	entryVideoJoin,
+	history,
+	profiles,
 	showStudioJoin,
 	showTranslations,
 	shows,
@@ -11,6 +23,7 @@ import {
 	studios,
 	videos,
 } from "~/db/schema";
+import { watchlist } from "~/db/schema/watchlist";
 import {
 	coalesce,
 	getColumns,
@@ -33,6 +46,7 @@ import {
 	sortToSql,
 } from "~/models/utils";
 import type { EmbeddedVideo } from "~/models/video";
+import { entryVideosQ, getEntryProgressQ, mapProgress } from "../entries";
 
 export const showFilters: FilterDef = {
 	genres: {
@@ -144,7 +158,10 @@ const showRelations = {
 			.leftJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
 			.as("videos");
 	},
-	firstEntry: ({ languages }: { languages: string[] }) => {
+	firstEntry: ({
+		languages,
+		userId,
+	}: { languages: string[]; userId: string }) => {
 		const transQ = db
 			.selectDistinctOn([entryTranslations.pk])
 			.from(entryTranslations)
@@ -155,23 +172,7 @@ const showRelations = {
 			.as("t");
 		const { pk, ...transCol } = getColumns(transQ);
 
-		const { guess, createdAt, updatedAt, ...videosCol } = getColumns(videos);
-		const videosQ = db
-			.select({
-				videos: coalesce(
-					jsonbAgg(
-						jsonbBuildObject<EmbeddedVideo>({
-							slug: entryVideoJoin.slug,
-							...videosCol,
-						}),
-					),
-					sql`'[]'::jsonb`,
-				).as("videos"),
-			})
-			.from(entryVideoJoin)
-			.where(eq(entryVideoJoin.entryPk, entries.pk))
-			.leftJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
-			.as("videos");
+		const progressQ = getEntryProgressQ(userId);
 
 		return db
 			.select({
@@ -179,16 +180,58 @@ const showRelations = {
 					...getColumns(entries),
 					...transCol,
 					number: entries.episodeNumber,
-					videos: videosQ.videos,
+					videos: entryVideosQ.videos,
+					progress: mapProgress(progressQ),
 				}).as("firstEntry"),
 			})
 			.from(entries)
 			.innerJoin(transQ, eq(entries.pk, transQ.pk))
-			.leftJoinLateral(videosQ, sql`true`)
+			.leftJoin(progressQ, eq(entries.pk, progressQ.entryPk))
+			.leftJoinLateral(entryVideosQ, sql`true`)
 			.where(and(eq(entries.showPk, shows.pk), ne(entries.kind, "extra")))
 			.orderBy(entries.order)
 			.limit(1)
 			.as("firstEntry");
+	},
+	nextEntry: ({
+		languages,
+		userId,
+		watchStatusQ,
+	}: {
+		languages: string[];
+		userId: string;
+		watchStatusQ: Subquery;
+	}) => {
+		const transQ = db
+			.selectDistinctOn([entryTranslations.pk])
+			.from(entryTranslations)
+			.orderBy(
+				entryTranslations.pk,
+				sql`array_position(${sqlarr(languages)}, ${entryTranslations.language})`,
+			)
+			.as("t");
+		const { pk, ...transCol } = getColumns(transQ);
+
+		const progressQ = getEntryProgressQ(userId);
+
+		return db
+			.select({
+				nextEntry: jsonbBuildObject<Entry>({
+					...getColumns(entries),
+					...transCol,
+					number: entries.episodeNumber,
+					videos: entryVideosQ.videos,
+					progress: mapProgress(progressQ),
+				}).as("nextEntry"),
+			})
+			.from(entries)
+			.innerJoin(transQ, eq(entries.pk, transQ.pk))
+			.leftJoin(progressQ, eq(entries.pk, progressQ.entryPk))
+			.leftJoinLateral(entryVideosQ, sql`true`)
+			.where(
+				eq((watchStatusQ as unknown as typeof watchlist).nextEntry, entries.pk),
+			)
+			.as("nextEntry");
 	},
 };
 
@@ -202,6 +245,7 @@ export async function getShows({
 	fallbackLanguage = true,
 	preferOriginal = false,
 	relations = [],
+	userId,
 }: {
 	after?: string;
 	limit: number;
@@ -212,6 +256,7 @@ export async function getShows({
 	fallbackLanguage?: boolean;
 	preferOriginal?: boolean;
 	relations?: (keyof typeof showRelations)[];
+	userId: string;
 }) {
 	const transQ = db
 		.selectDistinctOn([showTranslations.pk])
@@ -226,6 +271,16 @@ export async function getShows({
 			sql`array_position(${sqlarr(languages)}, ${showTranslations.language})`,
 		)
 		.as("t");
+
+	const watchStatusQ = db
+		.select({
+			...getColumns(watchlist),
+			percent: sql`${watchlist.seenCount}`.as("percent"),
+		})
+		.from(watchlist)
+		.leftJoin(profiles, eq(watchlist.profilePk, profiles.pk))
+		.where(eq(profiles.id, userId))
+		.as("watchstatus");
 
 	return await db
 		.select({
@@ -245,9 +300,16 @@ export async function getShows({
 				logo: sql<Image>`coalesce(nullif(${shows.original}->'logo', 'null'::jsonb), ${transQ.logo})`,
 			}),
 
-			...buildRelations(relations, showRelations, { languages }),
+			watchStatus: getColumns(watchStatusQ),
+
+			...buildRelations(relations, showRelations, {
+				languages,
+				userId,
+				watchStatusQ,
+			}),
 		})
 		.from(shows)
+		.leftJoin(watchStatusQ, eq(shows.pk, watchStatusQ.showPk))
 		[fallbackLanguage ? "innerJoin" : ("leftJoin" as "innerJoin")](
 			transQ,
 			eq(shows.pk, transQ.pk),

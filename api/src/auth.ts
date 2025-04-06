@@ -26,35 +26,44 @@ export const auth = new Elysia({ name: "auth" })
 			authorization: t.TemplateLiteral("Bearer ${string}"),
 		}),
 	})
+	.resolve(async ({ headers: { authorization }, error }) => {
+		const bearer = authorization?.slice(7);
+		if (!bearer) {
+			return error(500, {
+				status: 500,
+				message: "No jwt, auth server configuration error.",
+			});
+		}
+
+		try {
+			// @ts-expect-error ts can't understand that there's two overload idk why
+			const { payload } = await jwtVerify(bearer, jwtSecret ?? jwks, {
+				issuer: process.env.JWT_ISSUER,
+			});
+			const jwt = validator.Decode(payload);
+
+			return { jwt };
+		} catch (err) {
+			return error(403, {
+				status: 403,
+				message: "Invalid jwt. Verification vailed",
+				details: err,
+			});
+		}
+	})
 	.macro({
 		permissions(perms: string[]) {
 			return {
-				resolve: async ({ headers: { authorization }, error }) => {
-					const bearer = authorization?.slice(7);
-					if (!bearer) {
-						return error(500, {
-							status: 500,
-							message: "No jwt, auth server configuration error.",
-						});
-					}
-
-					// @ts-expect-error ts can't understand that there's two overload idk why
-					const { payload } = await jwtVerify(bearer, jwtSecret ?? jwks, {
-						issuer: process.env.JWT_ISSUER,
-					});
-					const jwt = validator.Decode(payload);
-
+				beforeHandle: ({ jwt, error }) => {
 					for (const perm of perms) {
-						if (!jwt.permissions.includes(perm)) {
+						if (!jwt!.permissions.includes(perm)) {
 							return error(403, {
 								status: 403,
 								message: `Missing permission: '${perm}'.`,
-								details: { current: jwt.permissions, required: perms },
+								details: { current: jwt!.permissions, required: perms },
 							});
 						}
 					}
-
-					return { jwt };
 				},
 			};
 		},
