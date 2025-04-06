@@ -274,9 +274,12 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				}),
 				after: t.Optional(t.String({ description: desc.after })),
 			}),
-			headers: t.Object({
-				"accept-language": AcceptLanguage({ autoFallback: true }),
-			}),
+			headers: t.Object(
+				{
+					"accept-language": AcceptLanguage({ autoFallback: true }),
+				},
+				{ additionalProperties: true },
+			),
 			response: {
 				200: Page(Entry),
 				404: {

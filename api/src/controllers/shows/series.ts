@@ -77,9 +77,12 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 					description: "Include related resources in the response.",
 				}),
 			}),
-			headers: t.Object({
-				"accept-language": AcceptLanguage(),
-			}),
+			headers: t.Object(
+				{
+					"accept-language": AcceptLanguage(),
+				},
+				{ additionalProperties: true },
+			),
 			response: {
 				200: { ...FullSerie, description: "Found" },
 				404: {
@@ -160,9 +163,12 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 					}),
 				),
 			}),
-			headers: t.Object({
-				"accept-language": AcceptLanguage({ autoFallback: true }),
-			}),
+			headers: t.Object(
+				{
+					"accept-language": AcceptLanguage({ autoFallback: true }),
+				},
+				{ additionalProperties: true },
+			),
 			response: {
 				200: Page(Serie),
 				422: KError,

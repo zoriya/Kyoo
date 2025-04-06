@@ -105,9 +105,12 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 					}),
 				),
 			}),
-			headers: t.Object({
-				"accept-language": AcceptLanguage({ autoFallback: true }),
-			}),
+			headers: t.Object(
+				{
+					"accept-language": AcceptLanguage({ autoFallback: true }),
+				},
+				{ additionalProperties: true },
+			),
 			response: {
 				200: Page(Show),
 				422: KError,
