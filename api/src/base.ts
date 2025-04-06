@@ -11,7 +11,7 @@ import { showsH } from "./controllers/shows/shows";
 import { staffH } from "./controllers/staff";
 import { studiosH } from "./controllers/studios";
 import { videosH } from "./controllers/videos";
-import { KError } from "./models/error";
+import type { KError } from "./models/error";
 
 export const base = new Elysia({ name: "base" })
 	.onError(({ code, error }) => {
@@ -61,11 +61,12 @@ export const app = new Elysia({ prefix })
 			detail: {
 				security: [{ bearer: ["core.read"] }, { api: ["core.read"] }],
 			},
-			response: {
-				401: { ...KError, description: "" },
-				403: { ...KError, description: "" },
-			},
-			perms: ["core.read"],
+			// See https://github.com/elysiajs/elysia/issues/1158
+			// response: {
+			// 	401: { ...KError, description: "" },
+			// 	403: { ...KError, description: "" },
+			// },
+			permissions: ["core.read"],
 		},
 		(app) =>
 			app
@@ -84,11 +85,12 @@ export const app = new Elysia({ prefix })
 			detail: {
 				security: [{ bearer: ["core.write"] }, { api: ["core.write"] }],
 			},
-			response: {
-				401: { ...KError, description: "" },
-				403: { ...KError, description: "" },
-			},
-			perms: ["core.read"],
+			// See https://github.com/elysiajs/elysia/issues/1158
+			// response: {
+			// 	401: { ...KError, description: "" },
+			// 	403: { ...KError, description: "" },
+			// },
+			permissions: ["core.write"],
 		},
 		(app) => app.use(videosH).use(seed),
 	);

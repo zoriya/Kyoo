@@ -1,4 +1,5 @@
 import { beforeAll, describe, expect, it } from "bun:test";
+import { getJwtHeaders } from "tests/helpers/jwt";
 import { expectStatus } from "tests/utils";
 import { db } from "~/db";
 import { shows } from "~/db/schema";
@@ -10,8 +11,8 @@ import { app, createMovie, getMovies } from "../helpers";
 beforeAll(async () => {
 	await db.delete(shows);
 	for (const movie of [bubble, dune1984, dune]) {
-		const [ret, _] = await createMovie(movie);
-		expect(ret.status).toBe(201);
+		const [ret, body] = await createMovie(movie);
+		expectStatus(ret, body).toBe(201);
 	}
 });
 
@@ -73,7 +74,9 @@ describe("with a null value", () => {
 			),
 		});
 
-		resp = await app.handle(new Request(next));
+		resp = await app.handle(
+			new Request(next, { headers: await getJwtHeaders() }),
+		);
 		body = await resp.json();
 
 		expectStatus(resp, body).toBe(200);
@@ -120,7 +123,9 @@ describe("with a null value", () => {
 			),
 		});
 
-		resp = await app.handle(new Request(next));
+		resp = await app.handle(
+			new Request(next, { headers: await getJwtHeaders() }),
+		);
 		body = await resp.json();
 
 		expectStatus(resp, body).toBe(200);

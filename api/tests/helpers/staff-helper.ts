@@ -1,10 +1,12 @@
 import { buildUrl } from "tests/utils";
 import { app } from "~/base";
+import { getJwtHeaders } from "./jwt";
 
 export const getStaff = async (id: string, query: {}) => {
 	const resp = await app.handle(
 		new Request(buildUrl(`staff/${id}`, query), {
 			method: "GET",
+			headers: await getJwtHeaders(),
 		}),
 	);
 	const body = await resp.json();
@@ -32,8 +34,9 @@ export const getStaffRoles = async (
 			headers: langs
 				? {
 						"Accept-Language": langs,
+						...(await getJwtHeaders()),
 					}
-				: {},
+				: await getJwtHeaders(),
 		}),
 	);
 	const body = await resp.json();
@@ -52,6 +55,7 @@ export const getSerieStaff = async (
 	const resp = await app.handle(
 		new Request(buildUrl(`series/${serie}/staff`, opts), {
 			method: "GET",
+			headers: await getJwtHeaders(),
 		}),
 	);
 	const body = await resp.json();
@@ -70,6 +74,7 @@ export const getMovieStaff = async (
 	const resp = await app.handle(
 		new Request(buildUrl(`movies/${movie}/staff`, opts), {
 			method: "GET",
+			headers: await getJwtHeaders(),
 		}),
 	);
 	const body = await resp.json();

@@ -1,6 +1,7 @@
 import { buildUrl } from "tests/utils";
 import { app } from "~/base";
 import type { SeedSerie } from "~/models/serie";
+import { getJwtHeaders } from "./jwt";
 
 export const createSerie = async (serie: SeedSerie) => {
 	const resp = await app.handle(
@@ -9,6 +10,7 @@ export const createSerie = async (serie: SeedSerie) => {
 			body: JSON.stringify(serie),
 			headers: {
 				"Content-Type": "application/json",
+				...(await getJwtHeaders()),
 			},
 		}),
 	);
@@ -29,8 +31,9 @@ export const getSerie = async (
 			headers: langs
 				? {
 						"Accept-Language": langs,
+						...(await getJwtHeaders()),
 					}
-				: {},
+				: await getJwtHeaders(),
 		}),
 	);
 	const body = await resp.json();
@@ -58,8 +61,9 @@ export const getSeasons = async (
 			headers: langs
 				? {
 						"Accept-Language": langs,
+						...(await getJwtHeaders()),
 					}
-				: {},
+				: await getJwtHeaders(),
 		}),
 	);
 	const body = await resp.json();
@@ -87,8 +91,9 @@ export const getEntries = async (
 			headers: langs
 				? {
 						"Accept-Language": langs,
+						...(await getJwtHeaders()),
 					}
-				: {},
+				: await getJwtHeaders(),
 		}),
 	);
 	const body = await resp.json();
@@ -108,6 +113,7 @@ export const getExtras = async (
 	const resp = await app.handle(
 		new Request(buildUrl(`series/${serie}/extras`, opts), {
 			method: "GET",
+			headers: await getJwtHeaders(),
 		}),
 	);
 	const body = await resp.json();
@@ -124,6 +130,7 @@ export const getUnknowns = async (opts: {
 	const resp = await app.handle(
 		new Request(buildUrl("unknowns", opts), {
 			method: "GET",
+			headers: await getJwtHeaders(),
 		}),
 	);
 	const body = await resp.json();
@@ -147,8 +154,9 @@ export const getNews = async ({
 			headers: langs
 				? {
 						"Accept-Language": langs,
+						...(await getJwtHeaders()),
 					}
-				: {},
+				: await getJwtHeaders(),
 		}),
 	);
 	const body = await resp.json();

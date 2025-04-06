@@ -1,5 +1,6 @@
 import { buildUrl } from "tests/utils";
 import { app } from "~/base";
+import { getJwtHeaders } from "./jwt";
 
 export const getStudio = async (
 	id: string,
@@ -11,8 +12,9 @@ export const getStudio = async (
 			headers: langs
 				? {
 						"Accept-Language": langs,
+						...await getJwtHeaders()
 					}
-				: {},
+				: await getJwtHeaders()
 		}),
 	);
 	const body = await resp.json();
@@ -40,8 +42,9 @@ export const getShowsByStudio = async (
 			headers: langs
 				? {
 						"Accept-Language": langs,
+						...await getJwtHeaders()
 					}
-				: {},
+				: await getJwtHeaders()
 		}),
 	);
 	const body = await resp.json();

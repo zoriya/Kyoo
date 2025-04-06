@@ -1,4 +1,5 @@
 import { beforeAll, describe, expect, it } from "bun:test";
+import { getJwtHeaders } from "tests/helpers/jwt";
 import { expectStatus } from "tests/utils";
 import { db } from "~/db";
 import { shows } from "~/db/schema";
@@ -71,7 +72,9 @@ describe("Get all movies", () => {
 		});
 		expectStatus(resp, body).toBe(200);
 
-		resp = await app.handle(new Request(body.next));
+		resp = await app.handle(
+			new Request(body.next, { headers: await getJwtHeaders() }),
+		);
 		body = await resp.json();
 
 		expectStatus(resp, body).toBe(200);
@@ -104,7 +107,9 @@ describe("Get all movies", () => {
 			),
 		});
 
-		resp = await app.handle(new Request(next));
+		resp = await app.handle(
+			new Request(next, { headers: await getJwtHeaders() }),
+		);
 		body = await resp.json();
 
 		expectStatus(resp, body).toBe(200);
@@ -160,7 +165,9 @@ describe("Get all movies", () => {
 			expect(items.length).toBe(1);
 			expect(items[0].id).toBe(expectedIds[0]);
 			// Get Second Page
-			resp = await app.handle(new Request(body.next));
+			resp = await app.handle(
+				new Request(body.next, { headers: await getJwtHeaders() }),
+			);
 			body = await resp.json();
 
 			expectStatus(resp, body).toBe(200);
@@ -175,7 +182,9 @@ describe("Get all movies", () => {
 			});
 			expectStatus(resp, body).toBe(200);
 
-			const resp2 = await app.handle(new Request(body.next));
+			const resp2 = await app.handle(
+				new Request(body.next, { headers: await getJwtHeaders() }),
+			);
 			const body2 = await resp2.json();
 			expectStatus(resp2, body).toBe(200);
 
@@ -187,7 +196,9 @@ describe("Get all movies", () => {
 
 		it("Get /random", async () => {
 			const resp = await app.handle(
-				new Request("http://localhost/movies/random"),
+				new Request("http://localhost/movies/random", {
+					headers: await getJwtHeaders(),
+				}),
 			);
 			expect(resp.status).toBe(302);
 			const location = resp.headers.get("location")!;

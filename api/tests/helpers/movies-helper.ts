@@ -1,6 +1,7 @@
 import { buildUrl } from "tests/utils";
 import { app } from "~/base";
 import type { SeedMovie } from "~/models/movie";
+import { getJwtHeaders } from "./jwt";
 
 export const getMovie = async (
 	id: string,
@@ -15,8 +16,9 @@ export const getMovie = async (
 			headers: langs
 				? {
 						"Accept-Language": langs,
+						...(await getJwtHeaders()),
 					}
-				: {},
+				: await getJwtHeaders(),
 		}),
 	);
 	const body = await resp.json();
@@ -41,8 +43,9 @@ export const getMovies = async ({
 			headers: langs
 				? {
 						"Accept-Language": langs,
+						...(await getJwtHeaders()),
 					}
-				: {},
+				: await getJwtHeaders(),
 		}),
 	);
 	const body = await resp.json();
@@ -56,6 +59,7 @@ export const createMovie = async (movie: SeedMovie) => {
 			body: JSON.stringify(movie),
 			headers: {
 				"Content-Type": "application/json",
+				...(await getJwtHeaders()),
 			},
 		}),
 	);

@@ -14,13 +14,18 @@ const jwks = createRemoteJWKSet(
 
 const Jwt = t.Object({
 	sub: t.String({ description: "User id" }),
-	username: t.String(),
 	sid: t.String({ description: "Session id" }),
+	username: t.String(),
 	permissions: t.Array(t.String()),
 });
 const validator = TypeCompiler.Compile(Jwt);
 
 export const auth = new Elysia({ name: "auth" })
+	.guard({
+		headers: t.Object({
+			authorization: t.TemplateLiteral("Bearer ${string}"),
+		}),
+	})
 	.macro({
 		permissions(perms: string[]) {
 			return {
