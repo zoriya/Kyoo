@@ -1,11 +1,16 @@
-import { and, isNotNull, isNull } from "drizzle-orm";
+import { type SQL, and, eq, isNotNull, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { auth, getUserInfo } from "~/auth";
-import { shows } from "~/db/schema";
+import { db } from "~/db";
+import { profiles, shows } from "~/db/schema";
+import { watchlist } from "~/db/schema/watchlist";
+import { conflictUpdateAllExcept } from "~/db/utils";
 import { KError } from "~/models/error";
+import { bubble, madeInAbyss } from "~/models/examples";
 import { Show } from "~/models/show";
 import {
 	AcceptLanguage,
+	DbMetadata,
 	Filter,
 	Page,
 	createPage,
@@ -13,111 +18,216 @@ import {
 	processLanguages,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
+import { WatchStatus } from "~/models/watchlist";
 import { getShows, showFilters, showSort, watchStatusQ } from "./shows/logic";
+
+async function setWatchStatus({
+	showFilter,
+	status,
+	userId,
+}: {
+	showFilter?: SQL;
+	status: Omit<WatchStatus, "percent">;
+	userId: string;
+}) {
+	const profileQ = db
+		.select({ pk: profiles.pk })
+		.from(profiles)
+		.where(eq(profiles.id, userId))
+		.as("profileQ");
+	const showQ = db
+		.select({ pk: shows.pk })
+		.from(shows)
+		.where(showFilter)
+		.as("showQ");
+
+	return await db
+		.insert(watchlist)
+		.values({
+			...status,
+			profilePk: sql`${profileQ}`,
+			showPk: sql`${showQ}`,
+		})
+		.onConflictDoUpdate({
+			target: [watchlist.profilePk, watchlist.showPk],
+			set: {
+				...conflictUpdateAllExcept(watchlist, [
+					"profilePk",
+					"showPk",
+					"createdAt",
+				]),
+			},
+		})
+		.returning();
+}
 
 export const watchlistH = new Elysia({ tags: ["profiles"] })
 	.use(auth)
-	.guard({
-		query: t.Object({
-			sort: showSort,
-			filter: t.Optional(Filter({ def: showFilters })),
-			query: t.Optional(t.String({ description: desc.query })),
-			limit: t.Integer({
-				minimum: 1,
-				maximum: 250,
-				default: 50,
-				description: "Max page size.",
-			}),
-			after: t.Optional(t.String({ description: desc.after })),
-			preferOriginal: t.Optional(
-				t.Boolean({
-					description: desc.preferOriginal,
+	.guard(
+		{
+			query: t.Object({
+				sort: showSort,
+				filter: t.Optional(Filter({ def: showFilters })),
+				query: t.Optional(t.String({ description: desc.query })),
+				limit: t.Integer({
+					minimum: 1,
+					maximum: 250,
+					default: 50,
+					description: "Max page size.",
 				}),
-			),
-		}),
-		response: {
-			200: Page(Show),
-			422: KError,
-		},
-	})
-	.get(
-		"/profiles/me/watchlist",
-		async ({
-			query: { limit, after, query, sort, filter, preferOriginal },
-			headers: { "accept-language": languages },
-			request: { url },
-			jwt: { sub },
-		}) => {
-			const langs = processLanguages(languages);
-			const items = await getShows({
-				limit,
-				after,
-				query,
-				sort,
-				filter: and(
-					isNotNull(watchStatusQ.status),
-					isNull(shows.collectionPk),
-					filter,
+				after: t.Optional(t.String({ description: desc.after })),
+				preferOriginal: t.Optional(
+					t.Boolean({
+						description: desc.preferOriginal,
+					}),
 				),
-				languages: langs,
-				preferOriginal,
-				userId: sub,
-			});
-			return createPage(items, { url, sort, limit });
+			}),
+			response: {
+				200: Page(Show),
+				422: KError,
+			},
 		},
-		{
-			detail: { description: "Get all movies/series in your watchlist" },
-			headers: t.Object(
-				{
-					"accept-language": AcceptLanguage({ autoFallback: true }),
-				},
-				{ additionalProperties: true },
-			),
-		},
-	)
-	.get(
-		"/profiles/:id/watchlist",
-		async ({
-			params: { id },
-			query: { limit, after, query, sort, filter, preferOriginal },
-			headers: { "accept-language": languages, authorization },
-			request: { url },
-		}) => {
-			if (!isUuid(id)) {
-				const uInfo = await getUserInfo(id, { authorization });
-				id = uInfo.id;
-			}
+		(app) =>
+			app
+				.get(
+					"/profiles/me/watchlist",
+					async ({
+						query: { limit, after, query, sort, filter, preferOriginal },
+						headers: { "accept-language": languages },
+						request: { url },
+						jwt: { sub },
+					}) => {
+						const langs = processLanguages(languages);
+						const items = await getShows({
+							limit,
+							after,
+							query,
+							sort,
+							filter: and(
+								isNotNull(watchStatusQ.status),
+								isNull(shows.collectionPk),
+								filter,
+							),
+							languages: langs,
+							preferOriginal,
+							userId: sub,
+						});
+						return createPage(items, { url, sort, limit });
+					},
+					{
+						detail: { description: "Get all movies/series in your watchlist" },
+						headers: t.Object(
+							{
+								"accept-language": AcceptLanguage({ autoFallback: true }),
+							},
+							{ additionalProperties: true },
+						),
+					},
+				)
+				.get(
+					"/profiles/:id/watchlist",
+					async ({
+						params: { id },
+						query: { limit, after, query, sort, filter, preferOriginal },
+						headers: { "accept-language": languages, authorization },
+						request: { url },
+					}) => {
+						if (!isUuid(id)) {
+							const uInfo = await getUserInfo(id, { authorization });
+							id = uInfo.id;
+						}
 
-			const langs = processLanguages(languages);
-			const items = await getShows({
-				limit,
-				after,
-				query,
-				sort,
-				filter: and(
-					isNotNull(watchStatusQ.status),
-					isNull(shows.collectionPk),
-					filter,
+						const langs = processLanguages(languages);
+						const items = await getShows({
+							limit,
+							after,
+							query,
+							sort,
+							filter: and(
+								isNotNull(watchStatusQ.status),
+								isNull(shows.collectionPk),
+								filter,
+							),
+							languages: langs,
+							preferOriginal,
+							userId: id,
+						});
+						return createPage(items, { url, sort, limit });
+					},
+					{
+						detail: {
+							description: "Get all movies/series in someone's watchlist",
+						},
+						params: t.Object({
+							id: t.String({
+								description:
+									"The id or username of the user to read the watchlist of",
+								example: "zoriya",
+							}),
+						}),
+						headers: t.Object({
+							authorization: t.TemplateLiteral("Bearer ${string}"),
+							"accept-language": AcceptLanguage({ autoFallback: true }),
+						}),
+						permissions: ["users.read"],
+					},
 				),
-				languages: langs,
-				preferOriginal,
-				userId: id,
+	)
+	.post(
+		"/series/:id/watchstatus",
+		async ({ params: { id }, body, jwt: { sub } }) => {
+			return await setWatchStatus({
+				showFilter: and(
+					eq(shows.kind, "serie"),
+					isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
+				),
+				userId: sub,
+				status: body,
 			});
-			return createPage(items, { url, sort, limit });
 		},
 		{
-			detail: { description: "Get all movies/series in someone's watchlist" },
+			detail: { description: "Set watchstatus of a series." },
 			params: t.Object({
 				id: t.String({
-					description:
-						"The id or username of the user to read the watchlist of",
-					example: "zoriya",
+					description: "The id or slug of the serie.",
+					example: madeInAbyss.slug,
 				}),
 			}),
-			headers: t.Object({
-				authorization: t.TemplateLiteral("Bearer ${string}"),
-				"accept-language": AcceptLanguage({ autoFallback: true }),
+			body: t.Omit(WatchStatus, ["percent"]),
+			response: {
+				201: t.Union([t.Omit(WatchStatus, ["percent"]), DbMetadata]),
+			},
+			permissions: ["core.read"],
+		},
+	)
+	.post(
+		"/movies/:id/watchstatus",
+		async ({ params: { id }, body, jwt: { sub } }) => {
+			return await setWatchStatus({
+				showFilter: and(
+					eq(shows.kind, "movie"),
+					isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
+				),
+				userId: sub,
+				// for movies, watch-percent is stored in `seenCount`.
+				status: { ...body, seenCount: body.status === "completed" ? 100 : 0 },
+			});
+		},
+		{
+			detail: { description: "Set watchstatus of a movie." },
+			params: t.Object({
+				id: t.String({
+					description: "The id or slug of the movie.",
+					example: bubble.slug,
+				}),
 			}),
-			permissions: ["users.read"],
+			body: t.Omit(WatchStatus, ["seenCount", "percent"]),
+			response: {
+				201: t.Union([
+					t.Omit(WatchStatus, ["seenCount", "percent"]),
+					DbMetadata,
+				]),
+			},
+			permissions: ["core.read"],
 		},
 	);
