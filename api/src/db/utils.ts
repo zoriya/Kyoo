@@ -1,6 +1,6 @@
 import {
+    Column,
 	type ColumnsSelection,
-	InferColumnsDataTypes,
 	type SQL,
 	type SQLWrapper,
 	type Subquery,
@@ -13,7 +13,7 @@ import {
 } from "drizzle-orm";
 import type { CasingCache } from "drizzle-orm/casing";
 import type { AnyMySqlSelect } from "drizzle-orm/mysql-core";
-import type { AnyPgSelect } from "drizzle-orm/pg-core";
+import type { AnyPgSelect, SelectedFieldsFlat } from "drizzle-orm/pg-core";
 import type { AnySQLiteSelect } from "drizzle-orm/sqlite-core";
 import type { WithSubquery } from "drizzle-orm/subquery";
 import { db } from "./index";
@@ -95,7 +95,7 @@ export function values(items: Record<string, unknown>[]) {
 	};
 }
 
-export const coalesce = <T>(val: SQL<T>, def: SQLWrapper) => {
+export const coalesce = <T>(val: SQL<T> | Column, def: SQL<T>) => {
 	return sql<T>`coalesce(${val}, ${def})`;
 };
 
@@ -109,10 +109,19 @@ export const jsonbAgg = <T>(val: SQL<T>) => {
 	return sql<T[]>`jsonb_agg(${val})`;
 };
 
-export const jsonbBuildObject = <T>(select: Record<string, SQLWrapper>) => {
+type JsonFields = {
+	[k: string]:
+		| SelectedFieldsFlat[string]
+		| Table
+		| SelectedFieldsFlat
+		| JsonFields;
+};
+export const jsonbBuildObject = <T>(select: JsonFields) => {
 	const query = sql.join(
 		Object.entries(select).flatMap(([k, v]) => {
-			return [sql.raw(`'${k}'`), v];
+			if (v.getSQL) return [sql.raw(`'${k}'`), v];
+			// nested object (getSql is present in all SqlWrappers)
+			return [sql.raw(`'${k}'`), jsonbBuildObject<any>(v as JsonFields)];
 		}),
 		sql.raw(", "),
 	);

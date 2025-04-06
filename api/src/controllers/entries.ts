@@ -1,11 +1,13 @@
 import { type SQL, and, desc, eq, isNotNull, ne, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
+import { auth } from "~/auth";
 import { db } from "~/db";
 import {
 	entries,
 	entryTranslations,
 	entryVideoJoin,
 	history,
+	profiles,
 	shows,
 	videos,
 } from "~/db/schema";
@@ -124,7 +126,7 @@ export const entryVideosQ = db
 	.leftJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
 	.as("videos");
 
-export const getEntryProgressQ = (userId: number) =>
+export const getEntryProgressQ = (userId: string) =>
 	db
 		.selectDistinctOn([history.entryPk], {
 			percent: history.percent,
@@ -133,10 +135,22 @@ export const getEntryProgressQ = (userId: number) =>
 			videoId: videos.id,
 		})
 		.from(history)
-		.where(eq(history.profilePk, userId))
 		.leftJoin(videos, eq(history.videoPk, videos.pk))
+		.leftJoin(profiles, eq(history.profilePk, profiles.pk))
+		.where(eq(profiles.id, userId))
 		.orderBy(history.entryPk, desc(history.playedDate))
 		.as("progress");
+
+export const mapProgress = (
+	progressQ: ReturnType<typeof getEntryProgressQ>,
+) => {
+	const { time, percent, videoId } = getColumns(progressQ);
+	return {
+		time: coalesce(time, sql`0`),
+		percent: coalesce(percent, sql`0`),
+		videoId,
+	};
+};
 
 async function getEntries({
 	after,
@@ -153,7 +167,7 @@ async function getEntries({
 	sort: Sort;
 	filter: SQL | undefined;
 	languages: string[];
-	userId: number;
+	userId: string;
 }): Promise<(Entry | Extra | UnknownEntry)[]> {
 	const transQ = db
 		.selectDistinctOn([entryTranslations.pk])
@@ -181,7 +195,7 @@ async function getEntries({
 			...entryCol,
 			...transCol,
 			videos: entryVideosQ.videos,
-			progress: getColumns(entryProgressQ),
+			progress: mapProgress(entryProgressQ),
 			// specials don't have an `episodeNumber` but a `number` field.
 			number: episodeNumber,
 
@@ -230,6 +244,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 		...models,
 		entry: t.Union([models.episode, models.movie_entry, models.special]),
 	}))
+	.use(auth)
 	.get(
 		"/series/:id/entries",
 		async ({
@@ -237,6 +252,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			query: { limit, after, query, sort, filter },
 			headers: { "accept-language": languages },
 			request: { url },
+			jwt: { sub },
 			error,
 		}) => {
 			const [serie] = await db
@@ -270,6 +286,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 					filter,
 				),
 				languages: langs,
+				userId: sub,
 			})) as Entry[];
 
 			return createPage(items, { url, sort, limit });
@@ -316,6 +333,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			params: { id },
 			query: { limit, after, query, sort, filter },
 			request: { url },
+			jwt: { sub },
 			error,
 		}) => {
 			const [serie] = await db
@@ -347,6 +365,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 					filter,
 				),
 				languages: ["extra"],
+				userId: sub,
 			})) as Extra[];
 
 			return createPage(items, { url, sort, limit });
@@ -386,6 +405,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 		async ({
 			query: { limit, after, query, sort, filter },
 			request: { url },
+			jwt: { sub },
 		}) => {
 			const items = (await getEntries({
 				limit,
@@ -394,6 +414,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				sort: sort,
 				filter: and(eq(entries.kind, "unknown"), filter),
 				languages: ["extra"],
+				userId: sub,
 			})) as UnknownEntry[];
 
 			return createPage(items, { url, sort, limit });
@@ -421,7 +442,11 @@ export const entriesH = new Elysia({ tags: ["series"] })
 	)
 	.get(
 		"/news",
-		async ({ query: { limit, after, query, filter }, request: { url } }) => {
+		async ({
+			query: { limit, after, query, filter },
+			request: { url },
+			jwt: { sub },
+		}) => {
 			const sort = newsSort;
 			const items = (await getEntries({
 				limit,
@@ -435,6 +460,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 					filter,
 				),
 				languages: ["extra"],
+				userId: sub,
 			})) as Entry[];
 
 			return createPage(items, { url, sort, limit });
