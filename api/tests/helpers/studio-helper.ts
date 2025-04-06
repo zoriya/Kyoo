@@ -12,9 +12,9 @@ export const getStudio = async (
 			headers: langs
 				? {
 						"Accept-Language": langs,
-						...await getJwtHeaders()
+						...(await getJwtHeaders()),
 					}
-				: await getJwtHeaders()
+				: await getJwtHeaders(),
 		}),
 	);
 	const body = await resp.json();
@@ -42,9 +42,9 @@ export const getShowsByStudio = async (
 			headers: langs
 				? {
 						"Accept-Language": langs,
-						...await getJwtHeaders()
+						...(await getJwtHeaders()),
 					}
-				: await getJwtHeaders()
+				: await getJwtHeaders(),
 		}),
 	);
 	const body = await resp.json();
