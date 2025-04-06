@@ -69,3 +69,33 @@ export const auth = new Elysia({ name: "auth" })
 		},
 	})
 	.as("plugin");
+
+const User = t.Object({
+	id: t.String({ format: "uuid" }),
+	username: t.String(),
+	email: t.String({ format: "email" }),
+	createdDate: t.String({ format: "date-time" }),
+	lastSeen: t.String({ format: "date-time" }),
+	claims: t.Record(t.String(), t.Any()),
+	oidc: t.Record(
+		t.String(),
+		t.Object({
+			id: t.String({ format: "uuid" }),
+			username: t.String(),
+			profileUrl: t.Nullable(t.String({ format: "url" })),
+		}),
+	),
+});
+const UserC = TypeCompiler.Compile(User);
+
+export async function getUserInfo(
+	id: string,
+	headers: { authorization: string },
+) {
+	const resp = await fetch(
+		new URL(`/auth/users/${id}`, process.env.AUTH_SERVER ?? "http://auth:4568"),
+		{ headers },
+	);
+
+	return UserC.Decode(await resp.json());
+}
