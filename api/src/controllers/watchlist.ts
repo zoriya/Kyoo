@@ -174,6 +174,15 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 							authorization: t.TemplateLiteral("Bearer ${string}"),
 							"accept-language": AcceptLanguage({ autoFallback: true }),
 						}),
+						response: {
+							200: Page(Show),
+							403: KError,
+							404: {
+								...KError,
+								description: "No user found with the specified id/username.",
+							},
+							422: KError,
+						},
 						permissions: ["users.read"],
 					},
 				),

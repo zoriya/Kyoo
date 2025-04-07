@@ -1,6 +1,7 @@
 import { TypeCompiler } from "@sinclair/typebox/compiler";
 import Elysia, { t } from "elysia";
 import { createRemoteJWKSet, jwtVerify } from "jose";
+import { KError } from "./models/error";
 
 const jwtSecret = process.env.JWT_SECRET
 	? new TextEncoder().encode(process.env.JWT_SECRET)
@@ -86,7 +87,7 @@ const User = t.Object({
 		}),
 	),
 });
-const UserC = TypeCompiler.Compile(User);
+const UserC = TypeCompiler.Compile(t.Union([User, KError]));
 
 export async function getUserInfo(
 	id: string,
