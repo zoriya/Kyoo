@@ -18,7 +18,7 @@ import {
 	processLanguages,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
-import { WatchStatus } from "~/models/watchlist";
+import { MovieWatchStatus, SerieWatchStatus } from "~/models/watchlist";
 import { getShows, showFilters, showSort, watchStatusQ } from "./shows/logic";
 
 async function setWatchStatus({
@@ -26,8 +26,8 @@ async function setWatchStatus({
 	status,
 	userId,
 }: {
-	showFilter?: SQL;
-	status: Omit<WatchStatus, "percent">;
+	showFilter: { id: SQL; kind: "movie" | "serie" };
+	status: SerieWatchStatus;
 	userId: string;
 }) {
 	const profileQ = db
@@ -38,7 +38,7 @@ async function setWatchStatus({
 	const showQ = db
 		.select({ pk: shows.pk })
 		.from(shows)
-		.where(showFilter)
+		.where(and(showFilter.id, eq(shows.kind, showFilter.kind)))
 		.as("showQ");
 
 	return await db
@@ -55,7 +55,12 @@ async function setWatchStatus({
 					"profilePk",
 					"showPk",
 					"createdAt",
+					"seenCount",
 				]),
+				// do not reset movie's progress during drop
+				...(showFilter.kind === "movie" && status.status !== "dropped"
+					? { seenCount: sql`excluded.seen_count` }
+					: {}),
 			},
 		})
 		.returning();
@@ -177,10 +182,10 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 		"/series/:id/watchstatus",
 		async ({ params: { id }, body, jwt: { sub } }) => {
 			return await setWatchStatus({
-				showFilter: and(
-					eq(shows.kind, "serie"),
-					isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
-				),
+				showFilter: {
+					kind: "serie",
+					id: isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
+				},
 				userId: sub,
 				status: body,
 			});
@@ -193,9 +198,9 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 					example: madeInAbyss.slug,
 				}),
 			}),
-			body: t.Omit(WatchStatus, ["percent"]),
+			body: SerieWatchStatus,
 			response: {
-				201: t.Union([t.Omit(WatchStatus, ["percent"]), DbMetadata]),
+				201: t.Union([SerieWatchStatus, DbMetadata]),
 			},
 			permissions: ["core.read"],
 		},
@@ -204,13 +209,17 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 		"/movies/:id/watchstatus",
 		async ({ params: { id }, body, jwt: { sub } }) => {
 			return await setWatchStatus({
-				showFilter: and(
-					eq(shows.kind, "movie"),
-					isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
-				),
+				showFilter: {
+					kind: "movie",
+					id: isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
+				},
 				userId: sub,
-				// for movies, watch-percent is stored in `seenCount`.
-				status: { ...body, seenCount: body.status === "completed" ? 100 : 0 },
+				status: {
+					...body,
+					startedAt: body.completedAt,
+					// for movies, watch-percent is stored in `seenCount`.
+					seenCount: body.status === "completed" ? 100 : 0,
+				},
 			});
 		},
 		{
@@ -221,12 +230,9 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 					example: bubble.slug,
 				}),
 			}),
-			body: t.Omit(WatchStatus, ["seenCount", "percent"]),
+			body: t.Omit(MovieWatchStatus, ["percent"]),
 			response: {
-				201: t.Union([
-					t.Omit(WatchStatus, ["seenCount", "percent"]),
-					DbMetadata,
-				]),
+				201: t.Union([MovieWatchStatus, DbMetadata]),
 			},
 			permissions: ["core.read"],
 		},

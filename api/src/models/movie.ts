@@ -16,7 +16,7 @@ import {
 } from "./utils";
 import { Original } from "./utils/original";
 import { EmbeddedVideo } from "./video";
-import { WatchStatus } from "./watchlist";
+import { MovieWatchStatus } from "./watchlist";
 
 export const MovieStatus = t.UnionEnum(["unknown", "finished", "planned"]);
 export type MovieStatus = typeof MovieStatus.static;
@@ -56,7 +56,7 @@ export const Movie = t.Intersect([
 	t.Object({
 		original: Original,
 		isAvailable: t.Boolean(),
-		watchStatus: t.Nullable(t.Omit(WatchStatus, ["seenCount"])),
+		watchStatus: t.Nullable(MovieWatchStatus),
 	}),
 ]);
 export type Movie = Prettify<typeof Movie.static>;
