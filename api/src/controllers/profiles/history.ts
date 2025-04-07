@@ -2,7 +2,7 @@ import { and, eq, isNotNull, ne, not, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { auth, getUserInfo } from "~/auth";
 import { db } from "~/db";
-import { entries, history, videos } from "~/db/schema";
+import { entries, history, profiles, videos } from "~/db/schema";
 import { values } from "~/db/utils";
 import { Entry } from "~/models/entry";
 import { KError } from "~/models/error";
@@ -23,6 +23,20 @@ import {
 	getEntries,
 } from "../entries";
 import { getOrCreateProfile } from "./profile";
+
+const historyProgressQ: typeof entryProgressQ = db
+	.select({
+		percent: history.percent,
+		time: history.time,
+		entryPk: history.entryPk,
+		playedDate: history.playedDate,
+		videoId: videos.id,
+	})
+	.from(history)
+	.leftJoin(videos, eq(history.videoPk, videos.pk))
+	.leftJoin(profiles, eq(history.profilePk, profiles.pk))
+	.where(eq(profiles.id, sql.placeholder("userId")))
+	.as("progress");
 
 export const historyH = new Elysia({ tags: ["profiles"] })
 	.use(auth)
@@ -68,6 +82,7 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 							),
 							languages: langs,
 							userId: sub,
+							progressQ: historyProgressQ,
 						})) as Entry[];
 
 						return createPage(items, { url, sort, limit });
@@ -113,6 +128,7 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 							),
 							languages: langs,
 							userId: uInfo.id,
+							progressQ: historyProgressQ,
 						})) as Entry[];
 
 						return createPage(items, { url, sort, limit });

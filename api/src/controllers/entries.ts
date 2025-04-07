@@ -166,6 +166,7 @@ export async function getEntries({
 	filter,
 	languages,
 	userId,
+	progressQ = entryProgressQ,
 }: {
 	after: string | undefined;
 	limit: number;
@@ -174,6 +175,7 @@ export async function getEntries({
 	filter: SQL | undefined;
 	languages: string[];
 	userId: string;
+	progressQ?: typeof entryProgressQ;
 }): Promise<(Entry | Extra | UnknownEntry)[]> {
 	const transQ = db
 		.selectDistinctOn([entryTranslations.pk])
@@ -218,7 +220,7 @@ export async function getEntries({
 		.from(entries)
 		.innerJoin(transQ, eq(entries.pk, transQ.pk))
 		.leftJoinLateral(entryVideosQ, sql`true`)
-		.leftJoin(entryProgressQ, eq(entries.pk, entryProgressQ.entryPk))
+		.leftJoin(progressQ, eq(entries.pk, progressQ.entryPk))
 		.where(
 			and(
 				filter,
