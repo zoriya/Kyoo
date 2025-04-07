@@ -45,7 +45,22 @@ import {
 import { desc as description } from "~/models/utils/descriptions";
 import type { EmbeddedVideo } from "~/models/video";
 
-const entryFilters: FilterDef = {
+export const entryProgressQ = db
+	.selectDistinctOn([history.entryPk], {
+		percent: history.percent,
+		time: history.time,
+		entryPk: history.entryPk,
+		playedDate: history.playedDate,
+		videoId: videos.id,
+	})
+	.from(history)
+	.leftJoin(videos, eq(history.videoPk, videos.pk))
+	.leftJoin(profiles, eq(history.profilePk, profiles.pk))
+	.where(eq(profiles.id, sql.placeholder("userId")))
+	.orderBy(history.entryPk, desc(history.playedDate))
+	.as("progress");
+
+export const entryFilters: FilterDef = {
 	kind: {
 		column: entries.kind,
 		type: "enum",
@@ -57,18 +72,21 @@ const entryFilters: FilterDef = {
 	order: { column: entries.order, type: "float" },
 	runtime: { column: entries.runtime, type: "float" },
 	airDate: { column: entries.airDate, type: "date" },
+	playedDate: { column: entryProgressQ.playedDate, type: "date" },
 };
 
 const extraFilters: FilterDef = {
 	kind: { column: entries.extraKind, type: "enum", values: ExtraType.enum },
 	runtime: { column: entries.runtime, type: "float" },
+	playedDate: { column: entryProgressQ.playedDate, type: "date" },
 };
 
 const unknownFilters: FilterDef = {
 	runtime: { column: entries.runtime, type: "float" },
+	playedDate: { column: entryProgressQ.playedDate, type: "date" },
 };
 
-const entrySort = Sort(
+export const entrySort = Sort(
 	{
 		order: entries.order,
 		seasonNumber: entries.seasonNumber,
@@ -76,6 +94,7 @@ const entrySort = Sort(
 		number: entries.episodeNumber,
 		airDate: entries.airDate,
 		nextRefresh: entries.nextRefresh,
+		playedDate: entryProgressQ.playedDate,
 	},
 	{
 		default: ["order"],
@@ -89,6 +108,7 @@ const extraSort = Sort(
 		name: entryTranslations.name,
 		runtime: entries.runtime,
 		createdAt: entries.createdAt,
+		playedDate: entryProgressQ.playedDate,
 	},
 	{
 		default: ["slug"],
@@ -126,36 +146,19 @@ export const entryVideosQ = db
 	.leftJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
 	.as("videos");
 
-export const getEntryProgressQ = (userId: string) =>
-	db
-		.selectDistinctOn([history.entryPk], {
-			percent: history.percent,
-			time: history.time,
-			entryPk: history.entryPk,
-			videoId: videos.id,
-		})
-		.from(history)
-		.leftJoin(videos, eq(history.videoPk, videos.pk))
-		.leftJoin(profiles, eq(history.profilePk, profiles.pk))
-		.where(eq(profiles.id, userId))
-		.orderBy(history.entryPk, desc(history.playedDate))
-		.as("progress");
-
-export const mapProgress = (
-	progressQ: ReturnType<typeof getEntryProgressQ>,
-	{ aliased }: { aliased: boolean } = { aliased: false },
-) => {
-	const { time, percent, videoId } = getColumns(progressQ);
+export const mapProgress = ({ aliased }: { aliased: boolean }) => {
+	const { time, percent, playedDate, videoId } = getColumns(entryProgressQ);
 	const ret = {
 		time: coalesce(time, sql`0`),
 		percent: coalesce(percent, sql`0`),
+		playedDate: sql`${playedDate}`,
 		videoId: sql`${videoId}`,
 	};
 	if (!aliased) return ret;
 	return Object.fromEntries(Object.entries(ret).map(([k, v]) => [k, v.as(k)]));
 };
 
-async function getEntries({
+export async function getEntries({
 	after,
 	limit,
 	query,
@@ -182,8 +185,6 @@ async function getEntries({
 		.as("t");
 	const { pk, name, ...transCol } = getColumns(transQ);
 
-	const entryProgressQ = getEntryProgressQ(userId);
-
 	const {
 		kind,
 		externalId,
@@ -198,7 +199,7 @@ async function getEntries({
 			...entryCol,
 			...transCol,
 			videos: entryVideosQ.videos,
-			progress: mapProgress(entryProgressQ, { aliased: true }),
+			progress: mapProgress({ aliased: true }),
 			// specials don't have an `episodeNumber` but a `number` field.
 			number: episodeNumber,
 
@@ -231,7 +232,8 @@ async function getEntries({
 				: sortToSql(sort)),
 			entries.pk,
 		)
-		.limit(limit);
+		.limit(limit)
+		.execute({ userId });
 }
 
 export const entriesH = new Elysia({ tags: ["series"] })

@@ -36,7 +36,7 @@ import {
 } from "~/models/utils";
 import type { EmbeddedVideo } from "~/models/video";
 import { WatchlistStatus } from "~/models/watchlist";
-import { entryVideosQ, getEntryProgressQ, mapProgress } from "../entries";
+import { entryProgressQ, entryVideosQ, mapProgress } from "../entries";
 
 export const watchStatusQ = db
 	.select({
@@ -75,6 +75,7 @@ export const showFilters: FilterDef = {
 		type: "enum",
 		values: WatchlistStatus.enum,
 	},
+	score: { column: watchStatusQ.score, type: "int" },
 };
 export const showSort = Sort(
 	{
@@ -86,6 +87,7 @@ export const showSort = Sort(
 		createdAt: shows.createdAt,
 		nextRefresh: shows.nextRefresh,
 		watchStatus: watchStatusQ.status,
+		score: watchStatusQ.score,
 	},
 	{
 		default: ["slug"],
@@ -164,10 +166,7 @@ const showRelations = {
 			.leftJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
 			.as("videos");
 	},
-	firstEntry: ({
-		languages,
-		userId,
-	}: { languages: string[]; userId: string }) => {
+	firstEntry: ({ languages }: { languages: string[] }) => {
 		const transQ = db
 			.selectDistinctOn([entryTranslations.pk])
 			.from(entryTranslations)
@@ -178,8 +177,6 @@ const showRelations = {
 			.as("t");
 		const { pk, ...transCol } = getColumns(transQ);
 
-		const progressQ = getEntryProgressQ(userId);
-
 		return db
 			.select({
 				firstEntry: jsonbBuildObject<Entry>({
@@ -187,12 +184,12 @@ const showRelations = {
 					...transCol,
 					number: entries.episodeNumber,
 					videos: entryVideosQ.videos,
-					progress: mapProgress(progressQ),
+					progress: mapProgress({ aliased: false }),
 				}).as("firstEntry"),
 			})
 			.from(entries)
 			.innerJoin(transQ, eq(entries.pk, transQ.pk))
-			.leftJoin(progressQ, eq(entries.pk, progressQ.entryPk))
+			.leftJoin(entryProgressQ, eq(entries.pk, entryProgressQ.entryPk))
 			.leftJoinLateral(entryVideosQ, sql`true`)
 			.where(and(eq(entries.showPk, shows.pk), ne(entries.kind, "extra")))
 			.orderBy(entries.order)
@@ -201,10 +198,8 @@ const showRelations = {
 	},
 	nextEntry: ({
 		languages,
-		userId,
 	}: {
 		languages: string[];
-		userId: string;
 	}) => {
 		const transQ = db
 			.selectDistinctOn([entryTranslations.pk])
@@ -216,8 +211,6 @@ const showRelations = {
 			.as("t");
 		const { pk, ...transCol } = getColumns(transQ);
 
-		const progressQ = getEntryProgressQ(userId);
-
 		return db
 			.select({
 				nextEntry: jsonbBuildObject<Entry>({
@@ -225,12 +218,12 @@ const showRelations = {
 					...transCol,
 					number: entries.episodeNumber,
 					videos: entryVideosQ.videos,
-					progress: mapProgress(progressQ),
+					progress: mapProgress({ aliased: false }),
 				}).as("nextEntry"),
 			})
 			.from(entries)
 			.innerJoin(transQ, eq(entries.pk, transQ.pk))
-			.leftJoin(progressQ, eq(entries.pk, progressQ.entryPk))
+			.leftJoin(entryProgressQ, eq(entries.pk, entryProgressQ.entryPk))
 			.leftJoinLateral(entryVideosQ, sql`true`)
 			.where(eq(watchStatusQ.nextEntry, entries.pk))
 			.as("nextEntry");
@@ -294,7 +287,7 @@ export async function getShows({
 
 			watchStatus: getColumns(watchStatusQ),
 
-			...buildRelations(relations, showRelations, { languages, userId }),
+			...buildRelations(relations, showRelations, { languages }),
 		})
 		.from(shows)
 		.leftJoin(watchStatusQ, eq(shows.pk, watchStatusQ.showPk))

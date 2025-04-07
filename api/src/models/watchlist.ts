@@ -12,6 +12,7 @@ export const Progress = t.Object({
 			`,
 		}),
 	),
+	playedDate: t.Nullable(t.String({ format: "date-time" })),
 	videoId: t.Nullable(
 		t.String({
 			format: "uuid",
