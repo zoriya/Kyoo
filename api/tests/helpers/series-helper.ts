@@ -1,5 +1,6 @@
 import { buildUrl } from "tests/utils";
 import { app } from "~/base";
+import type { SeedHistory } from "~/models/history";
 import type { SeedSerie } from "~/models/serie";
 import type { SerieWatchStatus } from "~/models/watchlist";
 import { getJwtHeaders } from "./jwt";
@@ -188,6 +189,50 @@ export const setSerieStatus = async (id: string, status: SerieWatchStatus) => {
 		new Request(buildUrl(`series/${id}/watchstatus`), {
 			method: "POST",
 			body: JSON.stringify(status),
+			headers: {
+				"Content-Type": "application/json",
+				...(await getJwtHeaders()),
+			},
+		}),
+	);
+	const body = await resp.json();
+	return [resp, body] as const;
+};
+
+export const getHistory = async (
+	profile: string,
+	{
+		langs,
+		...opts
+	}: {
+		filter?: string;
+		limit?: number;
+		after?: string;
+		query?: string;
+		langs?: string;
+		preferOriginal?: boolean;
+	},
+) => {
+	const resp = await app.handle(
+		new Request(buildUrl(`profiles/${profile}/history`, opts), {
+			method: "GET",
+			headers: langs
+				? {
+						"Accept-Language": langs,
+						...(await getJwtHeaders()),
+					}
+				: await getJwtHeaders(),
+		}),
+	);
+	const body = await resp.json();
+	return [resp, body] as const;
+};
+
+export const addToHistory = async (profile: string, seed: SeedHistory[]) => {
+	const resp = await app.handle(
+		new Request(buildUrl(`profiles/${profile}/history`), {
+			method: "POST",
+			body: JSON.stringify(seed),
 			headers: {
 				"Content-Type": "application/json",
 				...(await getJwtHeaders()),

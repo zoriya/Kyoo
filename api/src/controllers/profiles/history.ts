@@ -145,7 +145,7 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 				),
 	)
 	.post(
-		"/profile/me/history",
+		"/profiles/me/history",
 		async ({ body, jwt: { sub } }) => {
 			const profilePk = await getOrCreateProfile(sub);
 
