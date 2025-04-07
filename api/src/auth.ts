@@ -1,7 +1,9 @@
 import { TypeCompiler } from "@sinclair/typebox/compiler";
+import { Value } from "@sinclair/typebox/value";
 import Elysia, { t } from "elysia";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { KError } from "./models/error";
+import type { Prettify } from "./utils";
 
 const jwtSecret = process.env.JWT_SECRET
 	? new TextEncoder().encode(process.env.JWT_SECRET)
@@ -13,12 +15,22 @@ const jwks = createRemoteJWKSet(
 	),
 );
 
+const Settings = t.Object(
+	{
+		preferOriginal: t.Boolean({ default: true }),
+	},
+	{ additionalProperties: true },
+);
+type Settings = typeof Settings.static;
+
 const Jwt = t.Object({
 	sub: t.String({ description: "User id" }),
 	sid: t.String({ description: "Session id" }),
 	username: t.String(),
 	permissions: t.Array(t.String()),
+	settings: t.Optional(t.Partial(Settings, { default: {} })),
 });
+type Jwt = typeof Jwt.static;
 const validator = TypeCompiler.Compile(Jwt);
 
 export const auth = new Elysia({ name: "auth" })
@@ -44,7 +56,10 @@ export const auth = new Elysia({ name: "auth" })
 			const { payload } = await jwtVerify(bearer, jwtSecret ?? jwks, {
 				issuer: process.env.JWT_ISSUER,
 			});
-			const jwt = validator.Decode(payload);
+			const raw = validator.Decode(payload);
+			const jwt = Value.Default(Jwt, raw) as Prettify<
+				Jwt & { settings: Settings }
+			>;
 
 			return { jwt };
 		} catch (err) {

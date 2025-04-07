@@ -303,7 +303,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 			params: { id },
 			query: { limit, after, query, sort, filter, preferOriginal },
 			headers: { "accept-language": languages },
-			jwt: { sub },
+			jwt: { sub, settings },
 			request: { url },
 			error,
 		}) => {
@@ -341,7 +341,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 					filter,
 				),
 				languages: langs,
-				preferOriginal,
+				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
 			return createPage(items, { url, sort, limit });
@@ -364,7 +364,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 			params: { id },
 			query: { limit, after, query, sort, filter, preferOriginal },
 			headers: { "accept-language": languages },
-			jwt: { sub },
+			jwt: { sub, settings },
 			request: { url },
 			error,
 		}) => {
@@ -403,7 +403,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 					filter,
 				),
 				languages: langs,
-				preferOriginal,
+				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
 			return createPage(items, { url, sort, limit });
@@ -426,7 +426,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 			params: { id },
 			query: { limit, after, query, sort, filter, preferOriginal },
 			headers: { "accept-language": languages },
-			jwt: { sub },
+			jwt: { sub, settings },
 			request: { url },
 			error,
 		}) => {
@@ -465,7 +465,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 					filter,
 				),
 				languages: langs,
-				preferOriginal,
+				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
 			return createPage(items, { url, sort, limit });

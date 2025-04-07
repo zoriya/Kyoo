@@ -126,7 +126,7 @@ describe("Set & get history", () => {
 		});
 	});
 
-	// extras, unknowns
+	// TODO: extras, unknowns
 
 	it("Update watchlist", async () => {
 		const [resp, body] = await getWatchlist("me", {});

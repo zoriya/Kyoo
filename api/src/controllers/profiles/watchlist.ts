@@ -100,7 +100,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 						query: { limit, after, query, sort, filter, preferOriginal },
 						headers: { "accept-language": languages },
 						request: { url },
-						jwt: { sub },
+						jwt: { sub, settings },
 					}) => {
 						const langs = processLanguages(languages);
 						const items = await getShows({
@@ -114,7 +114,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 								filter,
 							),
 							languages: langs,
-							preferOriginal,
+							preferOriginal: preferOriginal ?? settings.preferOriginal,
 							userId: sub,
 						});
 						return createPage(items, { url, sort, limit });
@@ -138,6 +138,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 					async ({
 						params: { id },
 						query: { limit, after, query, sort, filter, preferOriginal },
+						jwt: { settings },
 						headers: { "accept-language": languages, authorization },
 						request: { url },
 						error,
@@ -157,7 +158,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 								filter,
 							),
 							languages: langs,
-							preferOriginal,
+							preferOriginal: preferOriginal ?? settings.preferOriginal,
 							userId: uInfo.id,
 						});
 						return createPage(items, { url, sort, limit });

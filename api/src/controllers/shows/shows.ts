@@ -65,7 +65,7 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 			},
 			headers: { "accept-language": languages },
 			request: { url },
-			jwt: { sub },
+			jwt: { sub, settings },
 		}) => {
 			const langs = processLanguages(languages);
 			const items = await getShows({
@@ -78,7 +78,7 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 					filter,
 				),
 				languages: langs,
-				preferOriginal,
+				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
 			return createPage(items, { url, sort, limit });
