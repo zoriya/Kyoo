@@ -5,7 +5,7 @@ export async function getJwtHeaders() {
 		sub: "39158be0-3f59-4c45-b00d-d25b3bc2b884",
 		sid: "04ac7ecc-255b-481d-b0c8-537c1578e3d5",
 		username: "test-username",
-		permissions: ["core.read", "core.write"],
+		permissions: ["core.read", "core.write", "users.read"],
 	})
 		.setProtectedHeader({ alg: "HS256" })
 		.setIssuedAt()

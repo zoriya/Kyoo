@@ -1,8 +1,8 @@
 import { buildUrl } from "tests/utils";
 import { app } from "~/base";
 import type { SeedSerie } from "~/models/serie";
+import type { SerieWatchStatus } from "~/models/watchlist";
 import { getJwtHeaders } from "./jwt";
-import { SerieWatchStatus } from "~/models/watchlist";
 
 export const createSerie = async (serie: SeedSerie) => {
 	const resp = await app.handle(
@@ -164,10 +164,7 @@ export const getNews = async ({
 	return [resp, body] as const;
 };
 
-export const setSerieStatus = async (
-	id: string,
-	status: SerieWatchStatus
-) => {
+export const setSerieStatus = async (id: string, status: SerieWatchStatus) => {
 	const resp = await app.handle(
 		new Request(buildUrl(`movies/${id}/watchstatus`), {
 			method: "POST",

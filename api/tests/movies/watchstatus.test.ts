@@ -28,7 +28,7 @@ describe("Set & get watch status", () => {
 			completedAt: "2024-12-21",
 			score: 85,
 		});
-		expectStatus(r, b).toBe(201);
+		expectStatus(r, b).toBe(200);
 
 		[resp, body] = await getWatchlist("me", {});
 		expectStatus(resp, body).toBe(200);
@@ -36,7 +36,7 @@ describe("Set & get watch status", () => {
 		expect(body.items[0].slug).toBe(bubble.slug);
 		expect(body.items[0].watchStatus).toMatchObject({
 			status: "completed",
-			completedAt: "2024-12-21",
+			completedAt: "2024-12-21 00:00:00+00",
 			score: 85,
 			percent: 100,
 		});
@@ -53,15 +53,15 @@ describe("Set & get watch status", () => {
 			completedAt: "2024-12-21",
 			score: 85,
 		});
-		expectStatus(r, b).toBe(201);
+		expectStatus(r, b).toBe(200);
 
 		[resp, body] = await getWatchlist("me", {});
 		expectStatus(resp, body).toBe(200);
 		expect(body.items).toBeArrayOfSize(1);
 		expect(body.items[0].slug).toBe(bubble.slug);
 		expect(body.items[0].watchStatus).toMatchObject({
-			status: "completed",
-			completedAt: "2024-12-21",
+			status: "rewatching",
+			completedAt: "2024-12-21 00:00:00+00",
 			score: 85,
 			percent: 0,
 		});
@@ -73,8 +73,8 @@ describe("Set & get watch status", () => {
 		expect(body.items).toBeArrayOfSize(1);
 		expect(body.items[0].slug).toBe(bubble.slug);
 		expect(body.items[0].watchStatus).toMatchObject({
-			status: "completed",
-			completedAt: "2024-12-21",
+			status: "rewatching",
+			completedAt: "2024-12-21 00:00:00+00",
 			score: 85,
 			percent: 0,
 		});
@@ -85,8 +85,8 @@ describe("Set & get watch status", () => {
 		expectStatus(resp, body).toBe(200);
 		expect(body.slug).toBe(bubble.slug);
 		expect(body.watchStatus).toMatchObject({
-			status: "completed",
-			completedAt: "2024-12-21",
+			status: "rewatching",
+			completedAt: "2024-12-21 00:00:00+00",
 			score: 85,
 			percent: 0,
 		});

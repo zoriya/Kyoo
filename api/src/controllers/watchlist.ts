@@ -4,7 +4,7 @@ import { auth, getUserInfo } from "~/auth";
 import { db } from "~/db";
 import { profiles, shows } from "~/db/schema";
 import { watchlist } from "~/db/schema/watchlist";
-import { conflictUpdateAllExcept } from "~/db/utils";
+import { conflictUpdateAllExcept, getColumns } from "~/db/utils";
 import { KError } from "~/models/error";
 import { bubble, madeInAbyss } from "~/models/examples";
 import { Show } from "~/models/show";
@@ -30,22 +30,34 @@ async function setWatchStatus({
 	status: SerieWatchStatus;
 	userId: string;
 }) {
-	const profileQ = db
+	let [profile] = await db
 		.select({ pk: profiles.pk })
 		.from(profiles)
 		.where(eq(profiles.id, userId))
-		.as("profileQ");
+		.limit(1);
+	if (!profile) {
+		[profile] = await db
+			.insert(profiles)
+			.values({ id: userId })
+			.onConflictDoUpdate({
+				// we can't do `onConflictDoNothing` because on race conditions
+				// we still want the profile to be returned.
+				target: [profiles.id],
+				set: { id: sql`excluded.id` },
+			})
+			.returning({ pk: profiles.pk });
+	}
+
 	const showQ = db
 		.select({ pk: shows.pk })
 		.from(shows)
-		.where(and(showFilter.id, eq(shows.kind, showFilter.kind)))
-		.as("showQ");
+		.where(and(showFilter.id, eq(shows.kind, showFilter.kind)));
 
-	return await db
+	const [ret] = await db
 		.insert(watchlist)
 		.values({
 			...status,
-			profilePk: sql`${profileQ}`,
+			profilePk: profile.pk,
 			showPk: sql`${showQ}`,
 		})
 		.onConflictDoUpdate({
@@ -63,7 +75,11 @@ async function setWatchStatus({
 					: {}),
 			},
 		})
-		.returning();
+		.returning({
+			...getColumns(watchlist),
+			percent: sql`${watchlist.seenCount}`.as("percent"),
+		});
+	return ret;
 }
 
 export const watchlistH = new Elysia({ tags: ["profiles"] })
@@ -87,10 +103,6 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 					}),
 				),
 			}),
-			response: {
-				200: Page(Show),
-				422: KError,
-			},
 		},
 		(app) =>
 			app
@@ -127,6 +139,10 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 							},
 							{ additionalProperties: true },
 						),
+						response: {
+							200: Page(Show),
+							422: KError,
+						},
 					},
 				)
 				.get(
@@ -136,11 +152,11 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 						query: { limit, after, query, sort, filter, preferOriginal },
 						headers: { "accept-language": languages, authorization },
 						request: { url },
+						error,
 					}) => {
-						if (!isUuid(id)) {
-							const uInfo = await getUserInfo(id, { authorization });
-							id = uInfo.id;
-						}
+						const uInfo = await getUserInfo(id, { authorization });
+
+						if ("status" in uInfo) return error(uInfo.status as 404, uInfo);
 
 						const langs = processLanguages(languages);
 						const items = await getShows({
@@ -155,7 +171,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 							),
 							languages: langs,
 							preferOriginal,
-							userId: id,
+							userId: uInfo.id,
 						});
 						return createPage(items, { url, sort, limit });
 					},
@@ -209,7 +225,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 			}),
 			body: SerieWatchStatus,
 			response: {
-				201: t.Union([SerieWatchStatus, DbMetadata]),
+				200: t.Union([SerieWatchStatus, DbMetadata]),
 			},
 			permissions: ["core.read"],
 		},
@@ -241,7 +257,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 			}),
 			body: t.Omit(MovieWatchStatus, ["percent"]),
 			response: {
-				201: t.Union([MovieWatchStatus, DbMetadata]),
+				200: t.Union([MovieWatchStatus, DbMetadata]),
 			},
 			permissions: ["core.read"],
 		},
