@@ -5,11 +5,7 @@ import {
 	createSerie,
 	getEntries,
 	getHistory,
-	getMovie,
 	getNews,
-	getShows,
-	getWatchlist,
-	setMovieStatus,
 } from "tests/helpers";
 import { expectStatus } from "tests/utils";
 import { db } from "~/db";
@@ -59,12 +55,12 @@ describe("Set & get history", () => {
 		expectStatus(resp, body).toBe(200);
 		expect(body.items).toBeArrayOfSize(2);
 		expect(body.items[0].slug).toBe(bubble.slug);
-		expect(body.items[0].watchStatus).toMatchObject({
+		expect(body.items[0].progress).toMatchObject({
 			percent: 100,
 			time: 2 * 60,
 		});
 		expect(body.items[1].slug).toBe(miaEntrySlug);
-		expect(body.items[1].watchStatus).toMatchObject({
+		expect(body.items[1].progress).toMatchObject({
 			percent: 58,
 			videoId: madeInAbyssVideo.id,
 		});
@@ -87,17 +83,17 @@ describe("Set & get history", () => {
 		expectStatus(resp, body).toBe(200);
 		expect(body.items).toBeArrayOfSize(3);
 		expect(body.items[0].slug).toBe(miaEntrySlug);
-		expect(body.items[0].watchStatus).toMatchObject({
+		expect(body.items[0].progress).toMatchObject({
 			percent: 100,
 			videoId: madeInAbyssVideo.id,
 		});
 		expect(body.items[1].slug).toBe(bubble.slug);
-		expect(body.items[1].watchStatus).toMatchObject({
+		expect(body.items[1].progress).toMatchObject({
 			percent: 100,
 			time: 2 * 60,
 		});
 		expect(body.items[2].slug).toBe(miaEntrySlug);
-		expect(body.items[2].watchStatus).toMatchObject({
+		expect(body.items[2].progress).toMatchObject({
 			percent: 58,
 			videoId: madeInAbyssVideo.id,
 		});
@@ -112,7 +108,7 @@ describe("Set & get history", () => {
 			percent: 100,
 			time: 38 * 60,
 			videoId: madeInAbyssVideo.id,
-			playedDate: "2025-02-03 00:00:00",
+			playedDate: "2025-02-03 00:00:00+00",
 		});
 	});
 
@@ -120,12 +116,12 @@ describe("Set & get history", () => {
 		const [resp, body] = await getNews({ langs: "en" });
 
 		expectStatus(resp, body).toBe(200);
-		const entry = body.items.findFirst((x: any) => x.slug === miaEntrySlug);
+		const entry = body.items.find((x: any) => x.slug === miaEntrySlug);
 		expect(entry.progress).toMatchObject({
 			percent: 100,
 			time: 38 * 60,
 			videoId: madeInAbyssVideo.id,
-			playedDate: "2025-02-03 00:00:00",
+			playedDate: "2025-02-03 00:00:00+00",
 		});
 	});
 
@@ -143,7 +139,7 @@ describe("Set & get history", () => {
 	// 	const [resp, body] = await getMovie(bubble.slug, {});
 	// 	expectStatus(resp, body).toBe(200);
 	// 	expect(body.slug).toBe(bubble.slug);
-	// 	expect(body.watchStatus).toMatchObject({
+	// 	expect(body.progress).toMatchObject({
 	// 		status: "rewatching",
 	// 		completedAt: "2024-12-21 00:00:00+00",
 	// 		score: 85,

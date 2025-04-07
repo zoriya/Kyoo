@@ -146,7 +146,7 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 	)
 	.post(
 		"/profiles/me/history",
-		async ({ body, jwt: { sub } }) => {
+		async ({ body, jwt: { sub }, error }) => {
 			const profilePk = await getOrCreateProfile(sub);
 
 			const rows = await db
@@ -175,14 +175,14 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 								),
 								and(
 									not(sql`hist.entryUseId::boolean`),
-									eq(entries.id, sql`hist.entry`),
+									eq(entries.slug, sql`hist.entry`),
 								),
 							),
 						)
-						.innerJoin(videos, eq(videos.id, sql`hist.videoId::uuid`)),
+						.leftJoin(videos, eq(videos.id, sql`hist.videoId::uuid`)),
 				)
 				.returning({ pk: history.pk });
-			return { status: 201, inserted: rows.length };
+			return error(201, { status: 201, inserted: rows.length });
 		},
 		{
 			detail: { description: "Bulk add entries/movies to your watch history." },
