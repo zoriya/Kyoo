@@ -6,6 +6,7 @@ import {
 	getEntries,
 	getHistory,
 	getNews,
+	getWatchlist,
 } from "tests/helpers";
 import { expectStatus } from "tests/utils";
 import { db } from "~/db";
@@ -127,23 +128,22 @@ describe("Set & get history", () => {
 
 	// extras, unknowns
 
-	// it("Update watchlist", async () => {
-	// 	const [r, b] = await setMovieStatus(bubble.slug, {
-	// 		status: "rewatching",
-	// 		// we still need to specify all values
-	// 		completedAt: "2024-12-21",
-	// 		score: 85,
-	// 	});
-	// 	expectStatus(r, b).toBe(200);
-	//
-	// 	const [resp, body] = await getMovie(bubble.slug, {});
-	// 	expectStatus(resp, body).toBe(200);
-	// 	expect(body.slug).toBe(bubble.slug);
-	// 	expect(body.progress).toMatchObject({
-	// 		status: "rewatching",
-	// 		completedAt: "2024-12-21 00:00:00+00",
-	// 		score: 85,
-	// 		percent: 0,
-	// 	});
-	// });
+	it("Update watchlist", async () => {
+		const [resp, body] = await getWatchlist("me", {});
+		expectStatus(resp, body).toBe(200);
+		expect(body.items).toBeArrayOfSize(2);
+		// watching items before completed ones
+		expect(body.items[0].slug).toBe(madeInAbyss.slug);
+		expect(body.items[0].watchStatus).toMatchObject({
+			status: "watching",
+			seenCount: 1,
+			startedAt: "2025-02-01 00:00:00+00",
+		});
+		expect(body.items[1].slug).toBe(bubble.slug);
+		expect(body.items[1].watchStatus).toMatchObject({
+			status: "completed",
+			percent: 100,
+			startedAt: "2025-02-02 00:00:00+00",
+		});
+	});
 });

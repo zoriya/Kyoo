@@ -1,9 +1,22 @@
-import { and, eq, isNotNull, ne, not, or, sql } from "drizzle-orm";
+import {
+	and,
+	count,
+	eq,
+	exists,
+	gt,
+	isNotNull,
+	ne,
+	not,
+	or,
+	sql,
+} from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
 import { auth, getUserInfo } from "~/auth";
 import { db } from "~/db";
-import { entries, history, profiles, videos } from "~/db/schema";
-import { values } from "~/db/utils";
+import { entries, history, profiles, shows, videos } from "~/db/schema";
+import { watchlist } from "~/db/schema/watchlist";
+import { coalesce, values } from "~/db/utils";
 import { Entry } from "~/models/entry";
 import { KError } from "~/models/error";
 import { SeedHistory } from "~/models/history";
@@ -165,6 +178,10 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 		async ({ body, jwt: { sub }, error }) => {
 			const profilePk = await getOrCreateProfile(sub);
 
+			const vals = values(
+				body.map((x) => ({ ...x, entryUseId: isUuid(x.entry) })),
+			).as("hist");
+
 			const rows = await db
 				.insert(history)
 				.select(
@@ -177,11 +194,7 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 							time: sql`hist.time::integer`,
 							playedDate: sql`hist.playedDate::timestamptz`,
 						})
-						.from(
-							values(
-								body.map((x) => ({ ...x, entryUseId: isUuid(x.entry) })),
-							).as("hist"),
-						)
+						.from(vals)
 						.innerJoin(
 							entries,
 							or(
@@ -198,6 +211,121 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 						.leftJoin(videos, eq(videos.id, sql`hist.videoId::uuid`)),
 				)
 				.returning({ pk: history.pk });
+
+			// automatically update watchlist with this new info
+
+			const nextEntry = alias(entries, "next_entry");
+			const nextEntryQ = db
+				.select({
+					pk: nextEntry.pk,
+				})
+				.from(nextEntry)
+				.where(
+					and(
+						eq(nextEntry.showPk, entries.showPk),
+						gt(nextEntry.order, entries.order),
+					),
+				)
+				.orderBy(nextEntry.showPk, entries.order)
+				.as("nextEntryQ");
+
+			const seenCountQ = db
+				.select({ c: count() })
+				.from(entries)
+				.where(
+					and(
+						eq(entries.showPk, sql`excluded.show_pk`),
+						exists(
+							db
+								.select()
+								.from(history)
+								.where(
+									and(
+										eq(history.profilePk, profilePk),
+										eq(history.entryPk, entries.pk),
+									),
+								),
+						),
+					),
+				)
+				.as("seenCountQ");
+
+			await db
+				.insert(watchlist)
+				.select(
+					db
+						.select({
+							profilePk: sql`${profilePk}`,
+							showPk: entries.showPk,
+							status: sql`
+								case
+									when
+										hist.progress >= 95
+										and ${nextEntryQ.pk} is null
+									then 'completed'::watchstatus
+									else 'watching'::watchstatus
+								end
+							`,
+							seenCount: sql`
+								case
+									when ${eq(entries.kind, "movie")} then hist.progress::number
+									when hist.progress >= 95 then 1
+									else 0
+								end
+							`,
+							nextEntry: nextEntryQ.pk,
+							score: sql`null`,
+							startedAt: sql`hist.playedDate::timestamptz`,
+							completedAt: sql`
+								case
+									when ${nextEntryQ.pk} is null then hist.playedDate::timestamptz
+									else null
+								end
+							`,
+						})
+						.from(vals)
+						.leftJoin(
+							entries,
+							or(
+								and(
+									sql`hist.entryUseId::boolean`,
+									eq(entries.id, sql`hist.entry::uuid`),
+								),
+								and(
+									not(sql`hist.entryUseId::boolean`),
+									eq(entries.slug, sql`hist.entry`),
+								),
+							),
+						)
+						.leftLateralJoin(nextEntryQ, sql`true`),
+				)
+				.onConflictDoUpdate({
+					target: [watchlist.profilePk, watchlist.showPk],
+					set: {
+						status: sql`
+							case
+								when ${eq(sql`excluded.status`, "completed")} then excluded.status
+								when ${and(
+									ne(watchlist.status, "completed"),
+									ne(watchlist.status, "rewatching"),
+								)} then excluded.status
+								else ${watchlist.status}
+							end
+						`,
+						seenCount: sql`${seenCountQ.c}`,
+						nextEntry: sql`
+							case
+								when ${eq(watchlist.status, "completed")} then null
+								else excluded.nextEntry
+							end
+						`,
+						completedAt: coalesce(
+							watchlist.completedAt,
+							sql`excluded.completed_at`,
+						),
+					},
+				});
+
 			return error(201, { status: 201, inserted: rows.length });
 		},
 		{
