@@ -158,7 +158,6 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 						error,
 					}) => {
 						const uInfo = await getUserInfo(id, { authorization });
-
 						if ("status" in uInfo) return error(uInfo.status as 404, uInfo);
 
 						const langs = processLanguages(languages);
