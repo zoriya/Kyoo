@@ -11,7 +11,7 @@ import { showsH } from "./controllers/shows/shows";
 import { staffH } from "./controllers/staff";
 import { studiosH } from "./controllers/studios";
 import { videosH } from "./controllers/videos";
-import { watchlistH } from "./controllers/watchlist";
+import { watchlistH } from "./controllers/profiles/watchlist";
 import type { KError } from "./models/error";
 
 export const base = new Elysia({ name: "base" })
