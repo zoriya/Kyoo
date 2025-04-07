@@ -2,7 +2,7 @@ module github.com/zoriya/kyoo/transcoder
 
 go 1.23.0
 
-toolchain go1.24.1
+toolchain go1.24.2
 
 require (
 	github.com/disintegration/imaging v1.6.2
