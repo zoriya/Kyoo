@@ -95,8 +95,12 @@ export function values(items: Record<string, unknown>[]) {
 	};
 }
 
-export const coalesce = <T>(val: SQL<T> | Column, def: SQL<T>) => {
+export const coalesce = <T>(val: SQL<T> | Column, def: SQL<T> | Column) => {
 	return sql<T>`coalesce(${val}, ${def})`;
+};
+
+export const nullif = <T>(val: SQL<T> | Column, eq: SQL<T>) => {
+	return sql<T>`nullif(${val}, ${eq})`;
 };
 
 export const jsonbObjectAgg = <T>(key: SQLWrapper, value: SQL<T>) => {

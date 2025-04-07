@@ -187,7 +187,7 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 				.select(
 					db
 						.select({
-							profilePk: sql<number>`${profilePk}`,
+							profilePk: sql`${profilePk}`,
 							entryPk: entries.pk,
 							videoPk: videos.pk,
 							percent: sql`hist.percent::integer`,
@@ -227,6 +227,7 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 					),
 				)
 				.orderBy(nextEntry.showPk, entries.order)
+				.limit(1)
 				.as("nextEntryQ");
 
 			const seenCountQ = db
@@ -247,8 +248,7 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 								),
 						),
 					),
-				)
-				.as("seenCountQ");
+				);
 
 			await db
 				.insert(watchlist)
@@ -260,16 +260,16 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 							status: sql`
 								case
 									when
-										hist.progress >= 95
+										hist.percent::integer >= 95
 										and ${nextEntryQ.pk} is null
-									then 'completed'::watchstatus
-									else 'watching'::watchstatus
+									then 'completed'::watchlist_status
+									else 'watching'::watchlist_status
 								end
 							`,
 							seenCount: sql`
 								case
-									when ${eq(entries.kind, "movie")} then hist.progress::number
-									when hist.progress >= 95 then 1
+									when ${entries.kind} = 'movie' then hist.percent::integer
+									when hist.percent::integer >= 95 then 1
 									else 0
 								end
 							`,
@@ -282,6 +282,8 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 									else null
 								end
 							`,
+							// see https://github.com/drizzle-team/drizzle-orm/issues/3608
+							updatedAt: sql`now()`,
 						})
 						.from(vals)
 						.leftJoin(
@@ -297,26 +299,26 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 								),
 							),
 						)
-						.leftLateralJoin(nextEntryQ, sql`true`),
+						.leftJoinLateral(nextEntryQ, sql`true`),
 				)
 				.onConflictDoUpdate({
 					target: [watchlist.profilePk, watchlist.showPk],
 					set: {
 						status: sql`
 							case
-								when ${eq(sql`excluded.status`, "completed")} then excluded.status
-								when ${and(
-									ne(watchlist.status, "completed"),
-									ne(watchlist.status, "rewatching"),
-								)} then excluded.status
+								when excluded.status = 'completed' then excluded.status
+								when
+									${watchlist.status} != 'completed'
+									and ${watchlist.status} != 'rewatching'
+								then excluded.status
 								else ${watchlist.status}
 							end
 						`,
-						seenCount: sql`${seenCountQ.c}`,
+						seenCount: sql`${seenCountQ}`,
 						nextEntry: sql`
 							case
-								when ${eq(watchlist.status, "completed")} then null
-								else excluded.nextEntry
+								when ${watchlist.status} = 'completed' then null
+								else excluded.next_entry
 							end
 						`,
 						completedAt: coalesce(

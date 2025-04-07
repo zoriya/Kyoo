@@ -143,7 +143,7 @@ describe("Set & get history", () => {
 		expect(body.items[1].watchStatus).toMatchObject({
 			status: "completed",
 			percent: 100,
-			startedAt: "2025-02-02 00:00:00+00",
+			completedAt: "2025-02-02 00:00:00+00",
 		});
 	});
 });
