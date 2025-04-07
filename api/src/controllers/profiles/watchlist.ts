@@ -1,8 +1,14 @@
-import { type SQL, and, eq, isNotNull, isNull, sql } from "drizzle-orm";
+import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { auth, getUserInfo } from "~/auth";
+import {
+	getShows,
+	showFilters,
+	showSort,
+	watchStatusQ,
+} from "~/controllers/shows/logic";
 import { db } from "~/db";
-import { profiles, shows } from "~/db/schema";
+import { shows } from "~/db/schema";
 import { watchlist } from "~/db/schema/watchlist";
 import { conflictUpdateAllExcept, getColumns } from "~/db/utils";
 import { KError } from "~/models/error";
@@ -19,7 +25,7 @@ import {
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import { MovieWatchStatus, SerieWatchStatus } from "~/models/watchlist";
-import { getShows, showFilters, showSort, watchStatusQ } from "./shows/logic";
+import { getOrCreateProfile } from "./profile";
 
 async function setWatchStatus({
 	show,
@@ -30,29 +36,13 @@ async function setWatchStatus({
 	status: SerieWatchStatus;
 	userId: string;
 }) {
-	let [profile] = await db
-		.select({ pk: profiles.pk })
-		.from(profiles)
-		.where(eq(profiles.id, userId))
-		.limit(1);
-	if (!profile) {
-		[profile] = await db
-			.insert(profiles)
-			.values({ id: userId })
-			.onConflictDoUpdate({
-				// we can't do `onConflictDoNothing` because on race conditions
-				// we still want the profile to be returned.
-				target: [profiles.id],
-				set: { id: sql`excluded.id` },
-			})
-			.returning({ pk: profiles.pk });
-	}
+	const profilePk = await getOrCreateProfile(userId);
 
 	const [ret] = await db
 		.insert(watchlist)
 		.values({
 			...status,
-			profilePk: profile.pk,
+			profilePk: profilePk,
 			showPk: show.pk,
 		})
 		.onConflictDoUpdate({
@@ -72,7 +62,7 @@ async function setWatchStatus({
 		})
 		.returning({
 			...getColumns(watchlist),
-			percent: sql`${watchlist.seenCount}`.as("percent"),
+			percent: sql<number>`${watchlist.seenCount}`.as("percent"),
 		});
 	return ret;
 }
@@ -82,7 +72,10 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 	.guard(
 		{
 			query: t.Object({
-				sort: showSort,
+				sort: {
+					...showSort,
+					default: ["watchStatus", ...showSort.default],
+				},
 				filter: t.Optional(Filter({ def: showFilters })),
 				query: t.Optional(t.String({ description: desc.query })),
 				limit: t.Integer({
@@ -150,7 +143,6 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 						error,
 					}) => {
 						const uInfo = await getUserInfo(id, { authorization });
-
 						if ("status" in uInfo) return error(uInfo.status as 404, uInfo);
 
 						const langs = processLanguages(languages);
@@ -233,7 +225,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 			}),
 			body: SerieWatchStatus,
 			response: {
-				200: t.Union([SerieWatchStatus, DbMetadata]),
+				200: t.Intersect([SerieWatchStatus, DbMetadata]),
 				404: KError,
 			},
 			permissions: ["core.read"],
@@ -280,7 +272,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 			}),
 			body: t.Omit(MovieWatchStatus, ["percent"]),
 			response: {
-				200: t.Union([MovieWatchStatus, DbMetadata]),
+				200: t.Intersect([MovieWatchStatus, DbMetadata]),
 				404: KError,
 			},
 			permissions: ["core.read"],

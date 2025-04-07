@@ -1,6 +1,7 @@
 import { t } from "elysia";
 import type { Prettify } from "~/utils";
 import { bubbleImages, madeInAbyss, registerExamples } from "../examples";
+import { Progress } from "../history";
 import {
 	DbMetadata,
 	EpisodeId,
@@ -9,7 +10,6 @@ import {
 	TranslationRecord,
 } from "../utils";
 import { EmbeddedVideo } from "../video";
-import { Progress } from "../watchlist";
 import { BaseEntry, EntryTranslation } from "./base-entry";
 
 export const BaseEpisode = t.Intersect([

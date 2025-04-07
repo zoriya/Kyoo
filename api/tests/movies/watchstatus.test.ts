@@ -67,6 +67,21 @@ describe("Set & get watch status", () => {
 		});
 	});
 
+	it("Can filter watchlist", async () => {
+		let [resp, body] = await getWatchlist("me", {
+			filter: "watchStatus eq rewatching",
+		});
+		expectStatus(resp, body).toBe(200);
+		expect(body.items).toBeArrayOfSize(1);
+		expect(body.items[0].slug).toBe(bubble.slug);
+
+		[resp, body] = await getWatchlist("me", {
+			filter: "watchStatus eq completed",
+		});
+		expectStatus(resp, body).toBe(200);
+		expect(body.items).toBeArrayOfSize(0);
+	});
+
 	it("Return watchstatus in /shows", async () => {
 		const [resp, body] = await getShows({});
 		expectStatus(resp, body).toBe(200);

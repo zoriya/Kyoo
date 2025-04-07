@@ -1,9 +1,9 @@
 import { t } from "elysia";
 import { type Prettify, comment } from "~/utils";
 import { madeInAbyss, registerExamples } from "../examples";
+import { Progress } from "../history";
 import { DbMetadata, SeedImage } from "../utils";
 import { Resource } from "../utils/resource";
-import { Progress } from "../watchlist";
 import { BaseEntry } from "./base-entry";
 
 export const ExtraType = t.UnionEnum([

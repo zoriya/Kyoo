@@ -2,6 +2,8 @@ import { Elysia, t } from "elysia";
 import { auth } from "./auth";
 import { entriesH } from "./controllers/entries";
 import { imagesH } from "./controllers/images";
+import { historyH } from "./controllers/profiles/history";
+import { watchlistH } from "./controllers/profiles/watchlist";
 import { seasonsH } from "./controllers/seasons";
 import { seed } from "./controllers/seed";
 import { collections } from "./controllers/shows/collections";
@@ -11,7 +13,6 @@ import { showsH } from "./controllers/shows/shows";
 import { staffH } from "./controllers/staff";
 import { studiosH } from "./controllers/studios";
 import { videosH } from "./controllers/videos";
-import { watchlistH } from "./controllers/watchlist";
 import type { KError } from "./models/error";
 
 export const base = new Elysia({ name: "base" })
@@ -95,4 +96,5 @@ export const app = new Elysia({ prefix })
 		},
 		(app) => app.use(videosH).use(seed),
 	)
-	.use(watchlistH);
+	.use(watchlistH)
+	.use(historyH);
