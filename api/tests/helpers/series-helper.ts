@@ -41,6 +41,25 @@ export const getSerie = async (
 	return [resp, body] as const;
 };
 
+export const getSeries = async ({
+	langs,
+	...query
+}: { langs?: string; preferOriginal?: boolean; with?: string[] }) => {
+	const resp = await app.handle(
+		new Request(buildUrl("series", query), {
+			method: "GET",
+			headers: langs
+				? {
+						"Accept-Language": langs,
+						...(await getJwtHeaders()),
+					}
+				: await getJwtHeaders(),
+		}),
+	);
+	const body = await resp.json();
+	return [resp, body] as const;
+};
+
 export const getSeasons = async (
 	serie: string,
 	{
@@ -166,7 +185,7 @@ export const getNews = async ({
 
 export const setSerieStatus = async (id: string, status: SerieWatchStatus) => {
 	const resp = await app.handle(
-		new Request(buildUrl(`movies/${id}/watchstatus`), {
+		new Request(buildUrl(`series/${id}/watchstatus`), {
 			method: "POST",
 			body: JSON.stringify(status),
 			headers: {

@@ -23,9 +23,12 @@ const validator = TypeCompiler.Compile(Jwt);
 
 export const auth = new Elysia({ name: "auth" })
 	.guard({
-		headers: t.Object({
-			authorization: t.TemplateLiteral("Bearer ${string}"),
-		}),
+		headers: t.Object(
+			{
+				authorization: t.TemplateLiteral("Bearer ${string}"),
+			},
+			{ additionalProperties: true },
+		),
 	})
 	.resolve(async ({ headers: { authorization }, error }) => {
 		const bearer = authorization?.slice(7);

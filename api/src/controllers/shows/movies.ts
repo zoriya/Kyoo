@@ -1,5 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
+import { auth } from "~/auth";
 import { prefix } from "~/base";
 import { db } from "~/db";
 import { shows } from "~/db/schema";
@@ -22,12 +23,14 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 		movie: Movie,
 		"movie-translation": MovieTranslation,
 	})
+	.use(auth)
 	.get(
 		"/:id",
 		async ({
 			params: { id },
 			headers: { "accept-language": languages },
 			query: { preferOriginal, with: relations },
+			jwt: { sub },
 			error,
 			set,
 		}) => {
@@ -42,6 +45,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				fallbackLanguage: langs.includes("*"),
 				preferOriginal,
 				relations,
+				userId: sub,
 			});
 			if (!ret) {
 				return error(404, {
@@ -131,6 +135,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 			query: { limit, after, query, sort, filter, preferOriginal },
 			headers: { "accept-language": languages },
 			request: { url },
+			jwt: { sub },
 		}) => {
 			const langs = processLanguages(languages);
 			const items = await getShows({
@@ -141,6 +146,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				filter: and(eq(shows.kind, "movie"), filter),
 				languages: langs,
 				preferOriginal,
+				userId: sub,
 			});
 			return createPage(items, { url, sort, limit });
 		},

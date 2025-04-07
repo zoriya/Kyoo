@@ -1,5 +1,6 @@
 import { type SQL, and, eq, exists, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
+import { auth } from "~/auth";
 import { prefix } from "~/base";
 import { db } from "~/db";
 import {
@@ -127,6 +128,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 		studio: Studio,
 		"studio-translation": StudioTranslation,
 	})
+	.use(auth)
 	.get(
 		"/:id",
 		async ({
@@ -301,6 +303,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 			params: { id },
 			query: { limit, after, query, sort, filter, preferOriginal },
 			headers: { "accept-language": languages },
+			jwt: { sub },
 			request: { url },
 			error,
 		}) => {
@@ -339,6 +342,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 				),
 				languages: langs,
 				preferOriginal,
+				userId: sub,
 			});
 			return createPage(items, { url, sort, limit });
 		},
@@ -360,6 +364,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 			params: { id },
 			query: { limit, after, query, sort, filter, preferOriginal },
 			headers: { "accept-language": languages },
+			jwt: { sub },
 			request: { url },
 			error,
 		}) => {
@@ -399,6 +404,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 				),
 				languages: langs,
 				preferOriginal,
+				userId: sub,
 			});
 			return createPage(items, { url, sort, limit });
 		},
@@ -420,6 +426,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 			params: { id },
 			query: { limit, after, query, sort, filter, preferOriginal },
 			headers: { "accept-language": languages },
+			jwt: { sub },
 			request: { url },
 			error,
 		}) => {
@@ -459,6 +466,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 				),
 				languages: langs,
 				preferOriginal,
+				userId: sub,
 			});
 			return createPage(items, { url, sort, limit });
 		},

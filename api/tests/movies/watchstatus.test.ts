@@ -81,6 +81,14 @@ describe("Set & get watch status", () => {
 	});
 
 	it("Return watchstatus in /movies/:id", async () => {
+		const [r, b] = await setMovieStatus(bubble.slug, {
+			status: "rewatching",
+			// we still need to specify all values
+			completedAt: "2024-12-21",
+			score: 85,
+		});
+		expectStatus(r, b).toBe(200);
+
 		const [resp, body] = await getMovie(bubble.slug, {});
 		expectStatus(resp, body).toBe(200);
 		expect(body.slug).toBe(bubble.slug);

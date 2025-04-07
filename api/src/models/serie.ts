@@ -84,7 +84,7 @@ export const FullSerie = t.Intersect([
 		firstEntry: t.Optional(Entry),
 	}),
 ]);
-export type FullMovie = Prettify<typeof FullSerie.static>;
+export type FullSerie = Prettify<typeof FullSerie.static>;
 
 export const SeedSerie = t.Intersect([
 	t.Omit(BaseSerie, ["kind", "nextRefresh"]),

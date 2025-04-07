@@ -22,11 +22,11 @@ import { MovieWatchStatus, SerieWatchStatus } from "~/models/watchlist";
 import { getShows, showFilters, showSort, watchStatusQ } from "./shows/logic";
 
 async function setWatchStatus({
-	showFilter,
+	show,
 	status,
 	userId,
 }: {
-	showFilter: { id: SQL; kind: "movie" | "serie" };
+	show: { pk: number; kind: "movie" | "serie" };
 	status: SerieWatchStatus;
 	userId: string;
 }) {
@@ -48,17 +48,12 @@ async function setWatchStatus({
 			.returning({ pk: profiles.pk });
 	}
 
-	const showQ = db
-		.select({ pk: shows.pk })
-		.from(shows)
-		.where(and(showFilter.id, eq(shows.kind, showFilter.kind)));
-
 	const [ret] = await db
 		.insert(watchlist)
 		.values({
 			...status,
 			profilePk: profile.pk,
-			showPk: sql`${showQ}`,
+			showPk: show.pk,
 		})
 		.onConflictDoUpdate({
 			target: [watchlist.profilePk, watchlist.showPk],
@@ -70,7 +65,7 @@ async function setWatchStatus({
 					"seenCount",
 				]),
 				// do not reset movie's progress during drop
-				...(showFilter.kind === "movie" && status.status !== "dropped"
+				...(show.kind === "movie" && status.status !== "dropped"
 					? { seenCount: sql`excluded.seen_count` }
 					: {}),
 			},
@@ -205,12 +200,25 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 	)
 	.post(
 		"/series/:id/watchstatus",
-		async ({ params: { id }, body, jwt: { sub } }) => {
+		async ({ params: { id }, body, jwt: { sub }, error }) => {
+			const [show] = await db
+				.select({ pk: shows.pk })
+				.from(shows)
+				.where(
+					and(
+						eq(shows.kind, "serie"),
+						isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
+					),
+				);
+
+			if (!show) {
+				return error(404, {
+					status: 404,
+					message: `No serie found for the id/slug: '${id}'.`,
+				});
+			}
 			return await setWatchStatus({
-				showFilter: {
-					kind: "serie",
-					id: isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
-				},
+				show: { pk: show.pk, kind: "serie" },
 				userId: sub,
 				status: body,
 			});
@@ -226,18 +234,33 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 			body: SerieWatchStatus,
 			response: {
 				200: t.Union([SerieWatchStatus, DbMetadata]),
+				404: KError,
 			},
 			permissions: ["core.read"],
 		},
 	)
 	.post(
 		"/movies/:id/watchstatus",
-		async ({ params: { id }, body, jwt: { sub } }) => {
+		async ({ params: { id }, body, jwt: { sub }, error }) => {
+			const [show] = await db
+				.select({ pk: shows.pk })
+				.from(shows)
+				.where(
+					and(
+						eq(shows.kind, "movie"),
+						isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
+					),
+				);
+
+			if (!show) {
+				return error(404, {
+					status: 404,
+					message: `No movie found for the id/slug: '${id}'.`,
+				});
+			}
+
 			return await setWatchStatus({
-				showFilter: {
-					kind: "movie",
-					id: isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
-				},
+				show: { pk: show.pk, kind: "movie" },
 				userId: sub,
 				status: {
 					...body,
@@ -258,6 +281,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 			body: t.Omit(MovieWatchStatus, ["percent"]),
 			response: {
 				200: t.Union([MovieWatchStatus, DbMetadata]),
+				404: KError,
 			},
 			permissions: ["core.read"],
 		},
