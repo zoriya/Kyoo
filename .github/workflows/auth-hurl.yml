@@ -52,6 +52,7 @@ jobs:
           hurl --error-format long --variable host=http://localhost:4568 tests/*
         env:
           POSTGRES_SERVER: localhost
+          FIRST_USER_CLAIMS: '{"permissions": ["users.read"]}'
 
       - name: Show logs
         working-directory: ./auth

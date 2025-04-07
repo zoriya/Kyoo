@@ -61,6 +61,10 @@ new Elysia()
 						name: "images",
 						description: "Routes about images: posters, thumbnails...",
 					},
+					{
+						name: "profiles",
+						description: "Routes about user profiles, watchlist & history.",
+					},
 				],
 				components: {
 					securitySchemes: {

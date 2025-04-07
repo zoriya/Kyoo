@@ -1,20 +1,9 @@
-import {
-	type SQL,
-	type Subquery,
-	and,
-	desc,
-	eq,
-	exists,
-	ne,
-	sql,
-} from "drizzle-orm";
-import type { PgSelect } from "drizzle-orm/pg-core";
+import { type SQL, and, eq, exists, ne, sql } from "drizzle-orm";
 import { db } from "~/db";
 import {
 	entries,
 	entryTranslations,
 	entryVideoJoin,
-	history,
 	profiles,
 	showStudioJoin,
 	showTranslations,
@@ -46,7 +35,18 @@ import {
 	sortToSql,
 } from "~/models/utils";
 import type { EmbeddedVideo } from "~/models/video";
+import { WatchlistStatus } from "~/models/watchlist";
 import { entryVideosQ, getEntryProgressQ, mapProgress } from "../entries";
+
+export const watchStatusQ = db
+	.select({
+		...getColumns(watchlist),
+		percent: sql`${watchlist.seenCount}`.as("percent"),
+	})
+	.from(watchlist)
+	.leftJoin(profiles, eq(watchlist.profilePk, profiles.pk))
+	.where(eq(profiles.id, sql.placeholder("userId")))
+	.as("watchstatus");
 
 export const showFilters: FilterDef = {
 	genres: {
@@ -70,6 +70,11 @@ export const showFilters: FilterDef = {
 		type: "string",
 		isArray: true,
 	},
+	watchStatus: {
+		column: watchStatusQ.status,
+		type: "enum",
+		values: WatchlistStatus.enum,
+	},
 };
 export const showSort = Sort(
 	{
@@ -80,6 +85,7 @@ export const showSort = Sort(
 		endAir: shows.endAir,
 		createdAt: shows.createdAt,
 		nextRefresh: shows.nextRefresh,
+		watchStatus: watchStatusQ.status,
 	},
 	{
 		default: ["slug"],
@@ -196,11 +202,9 @@ const showRelations = {
 	nextEntry: ({
 		languages,
 		userId,
-		watchStatusQ,
 	}: {
 		languages: string[];
 		userId: string;
-		watchStatusQ: Subquery;
 	}) => {
 		const transQ = db
 			.selectDistinctOn([entryTranslations.pk])
@@ -228,9 +232,7 @@ const showRelations = {
 			.innerJoin(transQ, eq(entries.pk, transQ.pk))
 			.leftJoin(progressQ, eq(entries.pk, progressQ.entryPk))
 			.leftJoinLateral(entryVideosQ, sql`true`)
-			.where(
-				eq((watchStatusQ as unknown as typeof watchlist).nextEntry, entries.pk),
-			)
+			.where(eq(watchStatusQ.nextEntry, entries.pk))
 			.as("nextEntry");
 	},
 };
@@ -272,16 +274,6 @@ export async function getShows({
 		)
 		.as("t");
 
-	const watchStatusQ = db
-		.select({
-			...getColumns(watchlist),
-			percent: sql`${watchlist.seenCount}`.as("percent"),
-		})
-		.from(watchlist)
-		.leftJoin(profiles, eq(watchlist.profilePk, profiles.pk))
-		.where(eq(profiles.id, userId))
-		.as("watchstatus");
-
 	return await db
 		.select({
 			...getColumns(shows),
@@ -302,11 +294,7 @@ export async function getShows({
 
 			watchStatus: getColumns(watchStatusQ),
 
-			...buildRelations(relations, showRelations, {
-				languages,
-				userId,
-				watchStatusQ,
-			}),
+			...buildRelations(relations, showRelations, { languages, userId }),
 		})
 		.from(shows)
 		.leftJoin(watchStatusQ, eq(shows.pk, watchStatusQ.showPk))
@@ -327,5 +315,6 @@ export async function getShows({
 				: sortToSql(sort)),
 			shows.pk,
 		)
-		.limit(limit);
+		.limit(limit)
+		.execute({ userId });
 }

@@ -1,6 +1,7 @@
 import { TypeCompiler } from "@sinclair/typebox/compiler";
 import Elysia, { t } from "elysia";
 import { createRemoteJWKSet, jwtVerify } from "jose";
+import { KError } from "./models/error";
 
 const jwtSecret = process.env.JWT_SECRET
 	? new TextEncoder().encode(process.env.JWT_SECRET)
@@ -22,9 +23,12 @@ const validator = TypeCompiler.Compile(Jwt);
 
 export const auth = new Elysia({ name: "auth" })
 	.guard({
-		headers: t.Object({
-			authorization: t.TemplateLiteral("Bearer ${string}"),
-		}),
+		headers: t.Object(
+			{
+				authorization: t.TemplateLiteral("Bearer ${string}"),
+			},
+			{ additionalProperties: true },
+		),
 	})
 	.resolve(async ({ headers: { authorization }, error }) => {
 		const bearer = authorization?.slice(7);
@@ -69,3 +73,33 @@ export const auth = new Elysia({ name: "auth" })
 		},
 	})
 	.as("plugin");
+
+const User = t.Object({
+	id: t.String({ format: "uuid" }),
+	username: t.String(),
+	email: t.String({ format: "email" }),
+	createdDate: t.String({ format: "date-time" }),
+	lastSeen: t.String({ format: "date-time" }),
+	claims: t.Record(t.String(), t.Any()),
+	oidc: t.Record(
+		t.String(),
+		t.Object({
+			id: t.String({ format: "uuid" }),
+			username: t.String(),
+			profileUrl: t.Nullable(t.String({ format: "url" })),
+		}),
+	),
+});
+const UserC = TypeCompiler.Compile(t.Union([User, KError]));
+
+export async function getUserInfo(
+	id: string,
+	headers: { authorization: string },
+) {
+	const resp = await fetch(
+		new URL(`/auth/users/${id}`, process.env.AUTH_SERVER ?? "http://auth:4568"),
+		{ headers },
+	);
+
+	return UserC.Decode(await resp.json());
+}

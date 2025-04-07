@@ -25,7 +25,7 @@ import {
 	sortToSql,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
-import type { WatchStatus } from "~/models/watchlist";
+import type { MovieWatchStatus, SerieWatchStatus } from "~/models/watchlist";
 import { showFilters, showSort } from "./shows/logic";
 
 const staffSort = Sort(
@@ -219,7 +219,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 
 			const watchStatusQ = db
 				.select({
-					watchStatus: jsonbBuildObject<WatchStatus>({
+					watchStatus: jsonbBuildObject<MovieWatchStatus & SerieWatchStatus>({
 						...getColumns(watchlist),
 						percent: watchlist.seenCount,
 					}).as("watchStatus"),

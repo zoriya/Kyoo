@@ -15,6 +15,15 @@ HTTP 200
 [Captures]
 jwt: jsonpath "$.token"
 
+GET {{host}}/users/me
+Authorization: Bearer {{jwt}}
+HTTP 200
+[Captures]
+userId: jsonpath "$.id"
+[Asserts]
+# this should be defined in the `FIRST_USER_CLAIMS='{"permissions": ["users.read"]}'` env var
+jsonpath "$.claims.permissions" contains "users.read"
+
 
 # Duplicates usernames
 POST {{host}}/users
@@ -34,6 +43,26 @@ POST {{host}}/users
     "email": "user-1@zoriya.dev"
 }
 HTTP 409
+
+# Cannot get non-existing user
+GET {{host}}/users/dont-exist
+Authorization: Bearer {{jwt}}
+HTTP 404
+
+# Can get user by id
+GET {{host}}/users/{{userId}}
+Authorization: Bearer {{jwt}}
+HTTP 200
+[Asserts]
+jsonpath "$.username" == "user-1"
+
+# Can get user by username
+GET {{host}}/users/user-1
+Authorization: Bearer {{jwt}}
+HTTP 200
+[Asserts]
+jsonpath "$.id" == {{userId}}
+jsonpath "$.username" == "user-1"
 
 
 DELETE {{host}}/users/me

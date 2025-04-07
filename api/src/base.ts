@@ -11,6 +11,7 @@ import { showsH } from "./controllers/shows/shows";
 import { staffH } from "./controllers/staff";
 import { studiosH } from "./controllers/studios";
 import { videosH } from "./controllers/videos";
+import { watchlistH } from "./controllers/watchlist";
 import type { KError } from "./models/error";
 
 export const base = new Elysia({ name: "base" })
@@ -93,4 +94,5 @@ export const app = new Elysia({ prefix })
 			permissions: ["core.write"],
 		},
 		(app) => app.use(videosH).use(seed),
-	);
+	)
+	.use(watchlistH);

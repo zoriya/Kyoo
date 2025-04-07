@@ -1,6 +1,7 @@
 import { buildUrl } from "tests/utils";
 import { app } from "~/base";
 import type { SeedSerie } from "~/models/serie";
+import type { SerieWatchStatus } from "~/models/watchlist";
 import { getJwtHeaders } from "./jwt";
 
 export const createSerie = async (serie: SeedSerie) => {
@@ -27,6 +28,25 @@ export const getSerie = async (
 ) => {
 	const resp = await app.handle(
 		new Request(buildUrl(`series/${id}`, query), {
+			method: "GET",
+			headers: langs
+				? {
+						"Accept-Language": langs,
+						...(await getJwtHeaders()),
+					}
+				: await getJwtHeaders(),
+		}),
+	);
+	const body = await resp.json();
+	return [resp, body] as const;
+};
+
+export const getSeries = async ({
+	langs,
+	...query
+}: { langs?: string; preferOriginal?: boolean; with?: string[] }) => {
+	const resp = await app.handle(
+		new Request(buildUrl("series", query), {
 			method: "GET",
 			headers: langs
 				? {
@@ -157,6 +177,21 @@ export const getNews = async ({
 						...(await getJwtHeaders()),
 					}
 				: await getJwtHeaders(),
+		}),
+	);
+	const body = await resp.json();
+	return [resp, body] as const;
+};
+
+export const setSerieStatus = async (id: string, status: SerieWatchStatus) => {
+	const resp = await app.handle(
+		new Request(buildUrl(`series/${id}/watchstatus`), {
+			method: "POST",
+			body: JSON.stringify(status),
+			headers: {
+				"Content-Type": "application/json",
+				...(await getJwtHeaders()),
+			},
 		}),
 	);
 	const body = await resp.json();

@@ -175,9 +175,17 @@ select
 from
 	users as u
 	left join oidc_handle as h on u.pk = h.user_pk
-where
-	u.id = $1
+where ($1::boolean
+	and u.id = $2)
+	or (not $1
+		and u.username = $3)
 `
+
+type GetUserParams struct {
+	UseId    bool      `json:"useId"`
+	Id       uuid.UUID `json:"id"`
+	Username string    `json:"username"`
+}
 
 type GetUserRow struct {
 	User       User    `json:"user"`
@@ -187,8 +195,8 @@ type GetUserRow struct {
 	ProfileUrl *string `json:"profileUrl"`
 }
 
-func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) ([]GetUserRow, error) {
-	rows, err := q.db.Query(ctx, getUser, id)
+func (q *Queries) GetUser(ctx context.Context, arg GetUserParams) ([]GetUserRow, error) {
+	rows, err := q.db.Query(ctx, getUser, arg.UseId, arg.Id, arg.Username)
 	if err != nil {
 		return nil, err
 	}
