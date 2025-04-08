@@ -58,3 +58,33 @@ export const getWatchlist = async (
 	const body = await resp.json();
 	return [resp, body] as const;
 };
+
+export const getNextup = async (
+	id: string,
+	{
+		langs,
+		...query
+	}: {
+		filter?: string;
+		limit?: number;
+		after?: string;
+		sort?: string | string[];
+		query?: string;
+		langs?: string;
+		preferOriginal?: boolean;
+	},
+) => {
+	const resp = await app.handle(
+		new Request(buildUrl(`profiles/${id}/nextup`, query), {
+			method: "GET",
+			headers: langs
+				? {
+						"Accept-Language": langs,
+						...(await getJwtHeaders()),
+					}
+				: await getJwtHeaders(),
+		}),
+	);
+	const body = await resp.json();
+	return [resp, body] as const;
+};

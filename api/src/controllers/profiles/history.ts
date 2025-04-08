@@ -206,6 +206,7 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 				.where(
 					and(
 						eq(nextEntry.showPk, entries.showPk),
+						ne(entries.kind, "extra"),
 						gt(nextEntry.order, entries.order),
 					),
 				)
