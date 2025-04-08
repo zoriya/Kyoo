@@ -11,9 +11,11 @@ import { db } from "~/db";
 import { entries, shows } from "~/db/schema";
 import { watchlist } from "~/db/schema/watchlist";
 import { conflictUpdateAllExcept, getColumns } from "~/db/utils";
+import { Entry } from "~/models/entry";
 import { KError } from "~/models/error";
 import { bubble, madeInAbyss } from "~/models/examples";
-import { Show } from "~/models/show";
+import { Movie } from "~/models/movie";
+import { Serie } from "~/models/serie";
 import {
 	AcceptLanguage,
 	DbMetadata,
@@ -60,8 +62,7 @@ async function setWatchStatus({
 					: 0,
 			showPk: show.pk,
 			nextEntry:
-				show.kind === "movie" &&
-				(status.status === "watching" || status.status === "rewatching")
+				status.status === "watching" || status.status === "rewatching"
 					? sql`${firstEntryQ}`
 					: sql`null`,
 			lastPlayedAt: status.startedAt,
@@ -172,7 +173,18 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 							{ additionalProperties: true },
 						),
 						response: {
-							200: Page(Show),
+							200: Page(
+								t.Union([
+									t.Intersect([Movie, t.Object({ kind: t.Literal("movie") })]),
+									t.Intersect([
+										Serie,
+										t.Object({
+											kind: t.Literal("serie"),
+											nextEntry: t.Optional(t.Nullable(Entry)),
+										}),
+									]),
+								]),
+							),
 							422: KError,
 						},
 					},
@@ -224,7 +236,18 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 							"accept-language": AcceptLanguage({ autoFallback: true }),
 						}),
 						response: {
-							200: Page(Show),
+							200: Page(
+								t.Union([
+									t.Intersect([Movie, t.Object({ kind: t.Literal("movie") })]),
+									t.Intersect([
+										Serie,
+										t.Object({
+											kind: t.Literal("serie"),
+											nextEntry: t.Optional(t.Nullable(Entry)),
+										}),
+									]),
+								]),
+							),
 							403: KError,
 							404: {
 								...KError,
