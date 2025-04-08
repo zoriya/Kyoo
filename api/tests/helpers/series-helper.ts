@@ -184,7 +184,10 @@ export const getNews = async ({
 	return [resp, body] as const;
 };
 
-export const setSerieStatus = async (id: string, status: SerieWatchStatus) => {
+export const setSerieStatus = async (
+	id: string,
+	status: Omit<SerieWatchStatus, "seenCount">,
+) => {
 	const resp = await app.handle(
 		new Request(buildUrl(`series/${id}/watchstatus`), {
 			method: "POST",
