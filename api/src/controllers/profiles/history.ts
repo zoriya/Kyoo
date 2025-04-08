@@ -1,20 +1,9 @@
-import {
-	and,
-	count,
-	eq,
-	exists,
-	gt,
-	isNotNull,
-	ne,
-	not,
-	or,
-	sql,
-} from "drizzle-orm";
+import { and, count, eq, exists, gt, isNotNull, ne, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
 import { auth, getUserInfo } from "~/auth";
 import { db } from "~/db";
-import { entries, history, profiles, videos } from "~/db/schema";
+import { entries, history, profiles, shows, videos } from "~/db/schema";
 import { watchlist } from "~/db/schema/watchlist";
 import { coalesce, values } from "~/db/utils";
 import { Entry } from "~/models/entry";
@@ -244,6 +233,11 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 					),
 				);
 
+			const showKindQ = db
+				.select({ k: shows.kind })
+				.from(shows)
+				.where(eq(shows.pk, sql`excluded.show_pk`));
+
 			await db
 				.insert(watchlist)
 				.select(
@@ -302,7 +296,11 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 								else ${watchlist.status}
 							end
 						`,
-						seenCount: sql`${seenCountQ}`,
+						seenCount: sql`
+							case
+								when ${showKindQ} = 'movie' then excluded.seen_count
+								else ${seenCountQ}
+							end`,
 						nextEntry: sql`
 							case
 								when ${watchlist.status} = 'completed' then null
