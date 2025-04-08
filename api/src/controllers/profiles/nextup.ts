@@ -39,7 +39,7 @@ const nextupSort = Sort(
 		lastPlayed: watchlist.lastPlayedAt,
 	},
 	{
-		default: ["lastPlayed"],
+		default: ["-lastPlayed"],
 		tablePk: entries.pk,
 	},
 );
@@ -85,7 +85,6 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 			const { pk, name, ...transCol } = getColumns(transQ);
 
 			const {
-				kind,
 				externalId,
 				order,
 				seasonNumber,
@@ -100,6 +99,8 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 					...transCol,
 					videos: entryVideosQ.videos,
 					progress: mapProgress({ aliased: true }),
+					// specials don't have an `episodeNumber` but a `number` field.
+					number: episodeNumber,
 
 					// assign more restrained types to make typescript happy.
 					externalId: sql<any>`${externalId}`,

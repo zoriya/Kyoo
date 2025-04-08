@@ -196,11 +196,7 @@ const showRelations = {
 			.limit(1)
 			.as("firstEntry");
 	},
-	nextEntry: ({
-		languages,
-	}: {
-		languages: string[];
-	}) => {
+	nextEntry: ({ languages }: { languages: string[] }) => {
 		const transQ = db
 			.selectDistinctOn([entryTranslations.pk])
 			.from(entryTranslations)
