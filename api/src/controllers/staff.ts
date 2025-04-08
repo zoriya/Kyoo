@@ -191,7 +191,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 			query: { limit, after, query, sort, filter, preferOriginal },
 			headers: { "accept-language": languages },
 			request: { url },
-			jwt: { sub },
+			jwt: { sub, settings },
 			error,
 		}) => {
 			const [member] = await db
@@ -243,7 +243,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 						kind: sql<any>`${shows.kind}`,
 						isAvailable: sql<boolean>`${shows.availableCount} != 0`,
 
-						...(preferOriginal && {
+						...((preferOriginal ?? settings.preferOriginal) && {
 							poster: sql<Image>`coalesce(nullif(${shows.original}->'poster', 'null'::jsonb), ${transQ.poster})`,
 							thumbnail: sql<Image>`coalesce(nullif(${shows.original}->'thumbnail', 'null'::jsonb), ${transQ.thumbnail})`,
 							banner: sql<Image>`coalesce(nullif(${shows.original}->'banner', 'null'::jsonb), ${transQ.banner})`,

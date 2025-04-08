@@ -40,7 +40,7 @@ export const collections = new Elysia({
 			params: { id },
 			headers: { "accept-language": languages },
 			query: { preferOriginal, with: relations },
-			jwt: { sub },
+			jwt: { sub, settings },
 			error,
 			set,
 		}) => {
@@ -53,7 +53,7 @@ export const collections = new Elysia({
 				),
 				languages: langs,
 				fallbackLanguage: langs.includes("*"),
-				preferOriginal,
+				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				relations,
 				userId: sub,
 			});
@@ -144,7 +144,7 @@ export const collections = new Elysia({
 		async ({
 			query: { limit, after, query, sort, filter, preferOriginal },
 			headers: { "accept-language": languages },
-			jwt: { sub },
+			jwt: { sub, settings },
 			request: { url },
 		}) => {
 			const langs = processLanguages(languages);
@@ -155,7 +155,7 @@ export const collections = new Elysia({
 				sort,
 				filter: and(eq(shows.kind, "collection"), filter),
 				languages: langs,
-				preferOriginal,
+				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
 			return createPage(items, { url, sort, limit });
@@ -228,7 +228,7 @@ export const collections = new Elysia({
 			params: { id },
 			query: { limit, after, query, sort, filter, preferOriginal },
 			headers: { "accept-language": languages },
-			jwt: { sub },
+			jwt: { sub, settings },
 			request: { url },
 			error,
 		}) => {
@@ -262,7 +262,7 @@ export const collections = new Elysia({
 					filter,
 				),
 				languages: langs,
-				preferOriginal,
+				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
 			return createPage(items, { url, sort, limit });
@@ -285,7 +285,7 @@ export const collections = new Elysia({
 			params: { id },
 			query: { limit, after, query, sort, filter, preferOriginal },
 			headers: { "accept-language": languages },
-			jwt: { sub },
+			jwt: { sub, settings },
 			request: { url },
 			error,
 		}) => {
@@ -319,7 +319,7 @@ export const collections = new Elysia({
 					filter,
 				),
 				languages: langs,
-				preferOriginal,
+				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
 			return createPage(items, { url, sort, limit });
@@ -342,7 +342,7 @@ export const collections = new Elysia({
 			params: { id },
 			query: { limit, after, query, sort, filter, preferOriginal },
 			headers: { "accept-language": languages },
-			jwt: { sub },
+			jwt: { sub, settings },
 			request: { url },
 			error,
 		}) => {
@@ -372,7 +372,7 @@ export const collections = new Elysia({
 				sort,
 				filter: and(eq(shows.collectionPk, collection.pk), filter),
 				languages: langs,
-				preferOriginal,
+				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
 			return createPage(items, { url, sort, limit });

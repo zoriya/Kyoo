@@ -30,7 +30,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 			params: { id },
 			headers: { "accept-language": languages },
 			query: { preferOriginal, with: relations },
-			jwt: { sub },
+			jwt: { sub, settings },
 			error,
 			set,
 		}) => {
@@ -43,7 +43,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				),
 				languages: langs,
 				fallbackLanguage: langs.includes("*"),
-				preferOriginal,
+				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				relations,
 				userId: sub,
 			});
@@ -135,7 +135,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 			query: { limit, after, query, sort, filter, preferOriginal },
 			headers: { "accept-language": languages },
 			request: { url },
-			jwt: { sub },
+			jwt: { sub, settings },
 		}) => {
 			const langs = processLanguages(languages);
 			const items = await getShows({
@@ -145,7 +145,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				sort,
 				filter: and(eq(shows.kind, "movie"), filter),
 				languages: langs,
-				preferOriginal,
+				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
 			return createPage(items, { url, sort, limit });

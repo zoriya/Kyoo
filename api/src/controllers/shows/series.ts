@@ -30,7 +30,7 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 			params: { id },
 			headers: { "accept-language": languages },
 			query: { preferOriginal, with: relations },
-			jwt: { sub },
+			jwt: { sub, settings },
 			error,
 			set,
 		}) => {
@@ -43,7 +43,7 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 				),
 				languages: langs,
 				fallbackLanguage: langs.includes("*"),
-				preferOriginal,
+				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				relations,
 				userId: sub,
 			});
@@ -138,7 +138,7 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 			query: { limit, after, query, sort, filter, preferOriginal },
 			headers: { "accept-language": languages },
 			request: { url },
-			jwt: { sub },
+			jwt: { sub, settings },
 		}) => {
 			const langs = processLanguages(languages);
 			const items = await getShows({
@@ -148,7 +148,7 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 				sort,
 				filter: and(eq(shows.kind, "serie"), filter),
 				languages: langs,
-				preferOriginal,
+				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
 			return createPage(items, { url, sort, limit });
