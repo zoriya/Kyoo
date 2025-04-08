@@ -14,7 +14,7 @@ import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
 import { auth, getUserInfo } from "~/auth";
 import { db } from "~/db";
-import { entries, history, profiles, shows, videos } from "~/db/schema";
+import { entries, history, profiles, videos } from "~/db/schema";
 import { watchlist } from "~/db/schema/watchlist";
 import { coalesce, values } from "~/db/utils";
 import { Entry } from "~/models/entry";
