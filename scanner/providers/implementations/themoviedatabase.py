@@ -219,7 +219,7 @@ class TheMovieDatabase(Provider):
 				params={
 					"language": lng.to_tag(),
 					"append_to_response": "alternative_titles,videos,credits,keywords,images",
-					"include_image_language": f"{lng.language},null,{original_language.language if original_language else ""}",
+					"include_image_language": f"{lng.language},null,{original_language.language if original_language else ''}",
 				},
 			)
 			logger.debug("TMDb responded: %s", movie)
