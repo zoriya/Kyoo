@@ -1,15 +1,4 @@
-import {
-	and,
-	count,
-	eq,
-	exists,
-	gt,
-	isNotNull,
-	ne,
-	not,
-	or,
-	sql,
-} from "drizzle-orm";
+import { and, count, eq, exists, gt, isNotNull, ne, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
 import { auth, getUserInfo } from "~/auth";
@@ -181,6 +170,12 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 			const vals = values(
 				body.map((x) => ({ ...x, entryUseId: isUuid(x.entry) })),
 			).as("hist");
+			const valEqEntries = sql`
+				case
+					when hist.entryUseId::boolean then ${entries.id} = hist.entry::uuid
+					else ${entries.slug} = hist.entry
+				end
+			`;
 
 			const rows = await db
 				.insert(history)
@@ -195,19 +190,7 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 							playedDate: sql`hist.playedDate::timestamptz`,
 						})
 						.from(vals)
-						.innerJoin(
-							entries,
-							or(
-								and(
-									sql`hist.entryUseId::boolean`,
-									eq(entries.id, sql`hist.entry::uuid`),
-								),
-								and(
-									not(sql`hist.entryUseId::boolean`),
-									eq(entries.slug, sql`hist.entry`),
-								),
-							),
-						)
+						.innerJoin(entries, valEqEntries)
 						.leftJoin(videos, eq(videos.id, sql`hist.videoId::uuid`)),
 				)
 				.returning({ pk: history.pk });
@@ -223,10 +206,11 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 				.where(
 					and(
 						eq(nextEntry.showPk, entries.showPk),
+						ne(nextEntry.kind, "extra"),
 						gt(nextEntry.order, entries.order),
 					),
 				)
-				.orderBy(nextEntry.showPk, entries.order)
+				.orderBy(nextEntry.order)
 				.limit(1)
 				.as("nextEntryQ");
 
@@ -249,6 +233,11 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 						),
 					),
 				);
+
+			const showKindQ = db
+				.select({ k: shows.kind })
+				.from(shows)
+				.where(eq(shows.pk, sql`excluded.show_pk`));
 
 			await db
 				.insert(watchlist)
@@ -273,9 +262,15 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 									else 0
 								end
 							`,
-							nextEntry: nextEntryQ.pk,
+							nextEntry: sql`
+								case
+									when hist.percent::integer >= 95 then ${nextEntryQ.pk}
+									else ${entries.pk}
+								end
+							`,
 							score: sql`null`,
 							startedAt: sql`hist.playedDate::timestamptz`,
+							lastPlayedAt: sql`hist.playedDate::timestamptz`,
 							completedAt: sql`
 								case
 									when ${nextEntryQ.pk} is null then hist.playedDate::timestamptz
@@ -286,19 +281,7 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 							updatedAt: sql`now()`,
 						})
 						.from(vals)
-						.leftJoin(
-							entries,
-							or(
-								and(
-									sql`hist.entryUseId::boolean`,
-									eq(entries.id, sql`hist.entry::uuid`),
-								),
-								and(
-									not(sql`hist.entryUseId::boolean`),
-									eq(entries.slug, sql`hist.entry`),
-								),
-							),
-						)
+						.leftJoin(entries, valEqEntries)
 						.leftJoinLateral(nextEntryQ, sql`true`),
 				)
 				.onConflictDoUpdate({
@@ -314,13 +297,18 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 								else ${watchlist.status}
 							end
 						`,
-						seenCount: sql`${seenCountQ}`,
+						seenCount: sql`
+							case
+								when ${showKindQ} = 'movie' then excluded.seen_count
+								else ${seenCountQ}
+							end`,
 						nextEntry: sql`
 							case
 								when ${watchlist.status} = 'completed' then null
 								else excluded.next_entry
 							end
 						`,
+						lastPlayedAt: sql`excluded.last_played_at`,
 						completedAt: coalesce(
 							watchlist.completedAt,
 							sql`excluded.completed_at`,

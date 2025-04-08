@@ -82,6 +82,7 @@ export const FullSerie = t.Intersect([
 		translations: t.Optional(TranslationRecord(SerieTranslation)),
 		studios: t.Optional(t.Array(Studio)),
 		firstEntry: t.Optional(Entry),
+		nextEntry: t.Optional(t.Nullable(Entry)),
 	}),
 ]);
 export type FullSerie = Prettify<typeof FullSerie.static>;

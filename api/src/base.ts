@@ -3,6 +3,7 @@ import { auth } from "./auth";
 import { entriesH } from "./controllers/entries";
 import { imagesH } from "./controllers/images";
 import { historyH } from "./controllers/profiles/history";
+import { nextup } from "./controllers/profiles/nextup";
 import { watchlistH } from "./controllers/profiles/watchlist";
 import { seasonsH } from "./controllers/seasons";
 import { seed } from "./controllers/seed";
@@ -80,7 +81,10 @@ export const app = new Elysia({ prefix })
 				.use(seasonsH)
 				.use(studiosH)
 				.use(staffH)
-				.use(imagesH),
+				.use(imagesH)
+				.use(watchlistH)
+				.use(historyH)
+				.use(nextup),
 	)
 	.guard(
 		{
@@ -95,6 +99,4 @@ export const app = new Elysia({ prefix })
 			permissions: ["core.write"],
 		},
 		(app) => app.use(videosH).use(seed),
-	)
-	.use(watchlistH)
-	.use(historyH);
+	);
