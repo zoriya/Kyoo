@@ -30,6 +30,7 @@ export const watchlist = schema.table(
 		score: integer(),
 
 		startedAt: timestamp({ withTimezone: true, mode: "string" }),
+		lastPlayedAt: timestamp({ withTimezone: true, mode: "string" }),
 		completedAt: timestamp({ withTimezone: true, mode: "string" }),
 
 		createdAt: timestamp({ withTimezone: true, mode: "string" })

@@ -36,10 +36,10 @@ const nextupSort = Sort(
 
 		started: watchlist.startedAt,
 		added: watchlist.createdAt,
-		updated: watchlist.updatedAt,
+		lastPlayed: watchlist.lastPlayedAt,
 	},
 	{
-		default: ["updated"],
+		default: ["lastPlayed"],
 		tablePk: entries.pk,
 	},
 );

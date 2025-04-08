@@ -1,0 +1,1 @@
+ALTER TABLE "kyoo"."watchlist" ADD COLUMN "last_played_at" timestamp with time zone;
