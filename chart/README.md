@@ -107,3 +107,19 @@ Kyoo consists of multiple microservices.  Best practice is for each microservice
 
 ## Subchart Support
 Subcharts are updated frequently and subject to changes.  This chart includes subcharts for deploying Meilisearch, PostgreSQL, and RabbitMQ.  Please consider hosting those independently of Kyoo to better handle versioning and lifecycle management.
+
+# v5 Traefik Requirement
+Starting with v5, Kyoo leverages ForwardAuth middleware for offloading auth from the microservices onto a gateway. ForwardAuth is currently a custom specification implemented by Traefik and could be generalized as GatewayAPI spec matures. For additional reading, please see gateway-api sigs [documentation](https://gateway-api.sigs.k8s.io/geps/gep-1494/?h=auth#currently-implemented-auth-mechanisms-in-implementations).  
+
+In order for Kyoo to function there needs to Traefik proxy included somewhere in the network.  There are several ways to accomplish this.
+
+## Additional Hop (Default)
+Using the existing IngressController/GatewayController, we deploy a Traefik instance dedicated towards handling Kyoo's traffic. This avoids needing to add more operators/controllers into the cluster.
+
+Using this approach, we can offload the TLS certificate to the existing controller and reduces the configuration needed in Traefik.
+
+## Direct to Traefik
+Instead of adding additional hop, Traefik can be exposed via LoadBalancer.  To do this securely, please be sure to mount and configuring the TLS certificate inside of Traefik.
+
+## Add Traefik as IngressController/GatewayController
+Disable the integrated Traefik and adopt Traefik into your cluster.  This option will offer the most Kubernetes native experience.

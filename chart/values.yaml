@@ -8,6 +8,7 @@ global:
     tag: ""
     imagePullPolicy: IfNotPresent
   imagePullSecrets: []
+  configmapAnnotations: {}
   deploymentAnnotations: {}
   persistentVolumeClaimAnnotations: {}
   podAnnotations: {}
@@ -426,6 +427,38 @@ ingress:
   host: kyoo.mydomain.com
   tls: false
   tlsSecret: ~
+
+# traefikproxy deployment configuration
+traefikproxy:
+  enabled: true
+  name: traefik
+  # traefik container configuration
+  traefik:
+    livenessProbe: {}
+    readinessProbe: {}
+    resources: {}
+    containerSecurityContext: {}
+    extraVolumeMounts: []
+    extraArgs: []
+    extraEnv: []
+    image:
+      repository: ~
+      tag: ~
+  replicaCount: 1
+  updateStrategy: ~
+  podLabels: {}
+  configmapAnnotations: {}
+  deploymentAnnotations: {}
+  podAnnotations: {}
+  imagePullSecrets: []
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    name: ~
+  extraContainers: []
+  extraInitContainers: []
+  extraVolumes: []
 
 # subchart settings
 meilisearch:
