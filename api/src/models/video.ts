@@ -1,7 +1,8 @@
 import { t } from "elysia";
 import { type Prettify, comment } from "~/utils";
+import { ExtraType } from "./entry/extra";
 import { bubbleVideo, registerExamples } from "./examples";
-import { DbMetadata, Resource } from "./utils";
+import { DbMetadata, EpisodeId, ExternalId, Resource } from "./utils";
 
 export const Guess = t.Recursive((Self) =>
 	t.Object(
@@ -10,8 +11,8 @@ export const Guess = t.Recursive((Self) =>
 			year: t.Optional(t.Array(t.Integer(), { default: [] })),
 			season: t.Optional(t.Array(t.Integer(), { default: [] })),
 			episode: t.Optional(t.Array(t.Integer(), { default: [] })),
-			// TODO: maybe replace "extra" with the `extraKind` value (aka behind-the-scene, trailer, etc)
 			kind: t.Optional(t.UnionEnum(["episode", "movie", "extra"])),
+			extraKind: t.Optional(ExtraType),
 
 			from: t.String({
 				description: "Name of the tool that made the guess",
@@ -66,10 +67,56 @@ export const SeedVideo = t.Object({
 	}),
 
 	guess: Guess,
-});
-export type SeedVideo = typeof SeedVideo.static;
 
-export const Video = t.Intersect([Resource(), SeedVideo, DbMetadata]);
+	for: t.Array(
+		t.Union([
+			t.Object({
+				movie: t.Union([
+					t.String({ format: "uuid" }),
+					t.String({ format: "slug", examples: ["bubble"] }),
+				]),
+				externalId: t.Optional(ExternalId()),
+			}),
+			t.Intersect([
+				t.Object({
+					serie: t.Union([
+						t.String({ format: "uuid" }),
+						t.String({ format: "slug", examples: ["made-in-abyss"] }),
+					]),
+				}),
+				t.Union([
+					t.Object({
+						season: t.Integer({ minimum: 1 }),
+						episode: t.Integer(),
+						externalId: t.Optional(EpisodeId),
+					}),
+					t.Object({
+						absolute: t.Integer(),
+						externalId: t.Optional(t.Union([EpisodeId, ExternalId()])),
+					}),
+					t.Object({
+						special: t.Integer(),
+						externalId: t.Optional(EpisodeId),
+					}),
+					t.Object({
+						slug: t.String({
+							format: "slug",
+							examples: ["made-in-abyss-dawn-of-the-deep-soul"],
+						}),
+						externalId: t.Optional(t.Union([EpisodeId, ExternalId()])),
+					}),
+				]),
+			]),
+		]),
+	),
+});
+export type SeedVideo = Prettify<typeof SeedVideo.static>;
+
+export const Video = t.Intersect([
+	Resource(),
+	t.Omit(SeedVideo, ["for"]),
+	DbMetadata,
+]);
 export type Video = Prettify<typeof Video.static>;
 
 // type used in entry responses
