@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  {{- with (mergeOverwrite (deepCopy .Values.global.deploymentAnnotations) .Values.traefikproxy.deploymentAnnotations) }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
+  name: {{ include "kyoo.traefikproxy.fullname" . }}
+  labels:
+    {{- include "kyoo.labels" (dict "context" . "component" .Values.traefikproxy.name "name" .Values.traefikproxy.name) | nindent 4 }}
+spec:
+  replicas: {{ .Values.traefikproxy.replicaCount }}
+  {{- with .Values.traefikproxy.updateStrategy }}
+  strategy: 
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "kyoo.selectorLabels" (dict "context" . "name" .Values.traefikproxy.name) | nindent 6 }}
+  template:
+    metadata:
+      {{- with (mergeOverwrite (deepCopy .Values.global.podAnnotations) .Values.traefikproxy.podAnnotations) }}
+      annotations:
+        {{- range $key, $value := . }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+      {{- end }}
+      labels:
+        {{- include "kyoo.labels" (dict "context" . "component" .Values.traefikproxy.name "name" .Values.traefikproxy.name) | nindent 8 }}
+        {{- with (mergeOverwrite (deepCopy .Values.global.podLabels) .Values.traefikproxy.podLabels) }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.traefikproxy.imagePullSecrets | default .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.global.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "kyoo.traefikproxy.serviceAccountName" . }}
+      containers:
+        - name: main
+          image: {{ .Values.traefikproxy.traefik.image.repository | default (printf "%s/traefikproxy" .Values.global.image.repositoryBase) }}:{{ default (include "kyoo.defaultTag" .) .Values.traefikproxy.traefik.image.tag }}
+          imagePullPolicy: {{ default .Values.global.image.imagePullPolicy }}
+          args:
+            {{- with .Values.traefikproxy.traefik.extraArgs }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          env:
+            {{- with (concat .Values.global.extraEnv .Values.traefikproxy.traefik.extraEnv) }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: web
+              containerPort: 80
+              protocol: TCP
+            - name: websecure
+              containerPort: 443
+              protocol: TCP
+            - name: traefik
+              containerPort: 8080
+              protocol: TCP
+          {{- with .Values.traefikproxy.traefik.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.traefikproxy.traefik.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.traefikproxy.traefik.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.traefikproxy.traefik.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            {{- with .Values.traefikproxy.traefik.volumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.traefikproxy.traefik.extraVolumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+        {{- with .Values.traefikproxy.extraContainers }}
+          {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+      {{- with .Values.traefikproxy.extraInitContainers }}
+      initContainers:
+        {{- tpl (toYaml .) $ | nindent 6 }}
+      {{- end }}
+      volumes:
+        {{- with .Values.traefikproxy.volumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.traefikproxy.extraVolumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
