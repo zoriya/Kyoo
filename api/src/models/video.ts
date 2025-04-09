@@ -124,3 +124,34 @@ export const EmbeddedVideo = t.Omit(Video, ["guess", "createdAt", "updatedAt"]);
 export type EmbeddedVideo = Prettify<typeof EmbeddedVideo.static>;
 
 registerExamples(Video, bubbleVideo);
+
+export const Guesses = t.Object({
+	paths: t.Array(t.String()),
+	guesses: t.Record(
+		t.String(),
+		t.Record(
+			t.Union([t.Literal("unknown"), t.String({ pattern: "[1-9][0-9]*" })]),
+			Resource(),
+		),
+	),
+});
+export type Guesses = typeof Guesses.static;
+
+registerExamples(Guesses, {
+	paths: [
+		"/videos/Evangelion S01E02.mkv",
+		"/videos/Evangelion (1995) S01E26.mkv",
+	],
+	guesses: {
+		Evangelion: {
+			unknown: {
+				id: "43b742f5-9ce6-467d-ad29-74460624020a",
+				slug: "evangelion",
+			},
+			1995: {
+				id: "43b742f5-9ce6-467d-ad29-74460624020a",
+				slug: "evangelion",
+			},
+		},
+	},
+});
