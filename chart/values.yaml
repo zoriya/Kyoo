@@ -431,6 +431,7 @@ ingress:
 # traefikproxy deployment configuration
 traefikproxy:
   enabled: true
+  defaultConfigmap: true
   name: traefik
   # traefik container configuration
   traefik:
