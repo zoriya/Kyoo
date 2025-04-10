@@ -1,3 +1,4 @@
+{{- if .Values.traefikproxy.enabled -}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -26,3 +27,4 @@ spec:
       name: websecure
   selector:
     {{- include "kyoo.selectorLabels" (dict "context" . "name" .Values.traefikproxy.name) | nindent 4 }}
+{{- end }}
