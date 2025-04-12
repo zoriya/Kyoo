@@ -122,4 +122,4 @@ Using this approach, we can offload the TLS certificate to the existing controll
 Instead of adding additional hop, Traefik can be exposed via LoadBalancer.  To do this securely, please be sure to mount and configuring the TLS certificate inside of Traefik.
 
 ## Add Traefik as IngressController/GatewayController
-Disable the integrated Traefik and adopt Traefik into your cluster.  This option will offer the most Kubernetes native experience.
+Disable the integrated Traefik and adopt Traefik controller into your cluster.  This option will offer the most Kubernetes native experience.
