@@ -61,11 +61,11 @@ GET `/users/$id/sessions` can be used by admins to list others session
 
 ```
 Get `/apikeys`
-Post `/apikeys` {...nlaims} Create a new api keys with given claims
+Post `/apikeys` {...claims} Create a new api keys with given claims
 ```
 
 An api key can be used like an opaque token, calling /jwt with it will return a valid jwt with the claims you specified during the post request to create it.
-Creating an apikeys requires the `apikey.create` permission, reading them requires the `apikey.read` permission.
+Creating an apikeys requires the `apikey.write` permission, reading them requires the `apikey.read` permission.
 
 ### OIDC
 
