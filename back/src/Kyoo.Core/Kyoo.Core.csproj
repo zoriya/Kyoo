@@ -23,7 +23,7 @@
 		<PackageReference Include="Serilog.Sinks.SyslogMessages" Version="4.0.0" />
 		<PackageReference Include="SkiaSharp" Version="3.116.1" />
 		<PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.116.1" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.14">
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.15">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
