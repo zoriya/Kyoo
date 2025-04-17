@@ -14,11 +14,12 @@ In order of action:
          part: number | null,
          rendering: sha(path except version & part),
          guess: {
-             kind: movie | episode | trailer | interview | ...,
-             name: string,
-             year: number | null,
-             season?: number,
-             episode?: number,
+             from: "guessit"
+             kind: movie | episode | extra
+             title: string,
+             year?: number[],
+             season?: number[],
+             episode?: number[],
              ...
           },
      }
@@ -32,17 +33,22 @@ In order of action:
          part: number | null,
          rendering: sha(path except version & part),
          guess: {
-             kind: movie | episode | trailer | interview | ...,
+             from: "anilist",
+             kind: movie | episode | extra
              name: string,
              year: number | null,
-             season?: number,
-             episodes?: number[],
-             absolutes?: number[],
+             season?: number[],
+             episode?: number[],
+             absolute?: number[],
              externalId: Record<string, {showId, season, number}[]>,
-             remap: {
-                 from: "thexem",
-                 oldSeason: number,
-                 oldEpisodes: number[],
+             history: {
+                 from: "guessit"
+                 kind: movie | episode | extra
+                 title: string,
+                 year?: number,
+                 season?: number[],
+                 episode?: number[],
+                 ...
               },
              ...
           },
@@ -67,3 +73,4 @@ In order of action:
  - Matcher retrieves metadata from the movie/serie + ALL episodes/seasons (from an external provider)
  - Matcher pushes every metadata to the api (if there are 1000 episodes but only 1 video, still push the 1000 episodes)
 
+<!-- vim: set noexpandtab : -->

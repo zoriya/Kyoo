@@ -3,10 +3,10 @@ import { alias } from "drizzle-orm/pg-core";
 import { Elysia, t } from "elysia";
 import { db } from "~/db";
 import { entries, entryVideoJoin, shows, videos } from "~/db/schema";
-import { sqlarr } from "~/db/utils";
+import { jsonbBuildObject, jsonbObjectAgg, sqlarr } from "~/db/utils";
 import { bubbleVideo } from "~/models/examples";
 import { Page } from "~/models/utils";
-import { SeedVideo, Video } from "~/models/video";
+import { Guesses, SeedVideo, Video } from "~/models/video";
 import { comment } from "~/utils";
 import { computeVideoSlug } from "./seed/insert/entries";
 import { updateAvailableCount } from "./seed/insert/shows";
@@ -27,6 +27,56 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 		"created-videos": t.Array(CreatedVideo),
 		error: t.Object({}),
 	})
+	.get(
+		"",
+		async () => {
+			const years = db.$with("years").as(
+				db
+					.select({
+						guess: sql`${videos.guess}->>'title'`.as("guess"),
+						year: sql`coalesce(year, 'unknown')`.as("year"),
+						id: shows.id,
+						slug: shows.slug,
+					})
+					.from(videos)
+					.leftJoin(
+						sql`jsonb_array_elements_text(${videos.guess}->'year') as year`,
+						sql`true`,
+					)
+					.innerJoin(entryVideoJoin, eq(entryVideoJoin.videoPk, videos.pk))
+					.innerJoin(entries, eq(entries.pk, entryVideoJoin.entryPk))
+					.innerJoin(shows, eq(shows.pk, entries.showPk)),
+			);
+
+			const guess = db.$with("guess").as(
+				db
+					.select({
+						guess: years.guess,
+						years: jsonbObjectAgg(
+							years.year,
+							jsonbBuildObject({ id: years.id, slug: years.slug }),
+						).as("years"),
+					})
+					.from(years)
+					.groupBy(years.guess),
+			);
+
+			const [{ guesses }] = await db
+				.with(years, guess)
+				.select({ guesses: jsonbObjectAgg<Guesses["guesses"]>(guess.guess, guess.years) })
+				.from(guess);
+
+			const paths = await db.select({ path: videos.path }).from(videos);
+
+			return { paths: paths.map((x) => x.path), guesses };
+		},
+		{
+			detail: { description: "Get all video registered & guessed made" },
+			response: {
+				200: Guesses,
+			},
+		},
+	)
 	.post(
 		"",
 		async ({ body, error }) => {
