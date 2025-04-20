@@ -1,18 +1,16 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { encode } from "blurhash";
 import { type SQL, and, eq, is, lt, sql } from "drizzle-orm";
 import { PgColumn, type PgTable } from "drizzle-orm/pg-core";
+import path from "node:path";
 import { version } from "package.json";
 import type { PoolClient } from "pg";
 import sharp from "sharp";
 import { type Transaction, db } from "~/db";
 import { mqueue } from "~/db/schema/mqueue";
 import type { Image } from "~/models/utils";
+import { getFile } from "~/utils";
 
 export const imageDir = process.env.IMAGES_PATH ?? "./images";
-await mkdir(imageDir, { recursive: true });
-
 export const defaultBlurhash = "000000";
 
 type ImageTask = {
@@ -164,7 +162,9 @@ async function downloadImage(id: string, url: string): Promise<string> {
 	await Promise.all(
 		Object.entries(resolutions).map(async ([resolution, dimensions]) => {
 			const buffer = await image.clone().resize(dimensions.width).toBuffer();
-			await writeFile(path.join(imageDir, `${id}.${resolution}.jpg`), buffer);
+			const file = getFile(path.join(imageDir, `${id}.${resolution}.jpg`));
+
+			await Bun.write(file, buffer, { mode: 0o660 });
 		}),
 	);
 
