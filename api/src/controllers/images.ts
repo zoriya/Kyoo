@@ -369,9 +369,9 @@ export async function isCached(
 		let lastModified: Date | undefined;
 		const stat = await getFile(filePath).stat();
 		try {
-			if (stat as S3Stats) {
+			if ((stat as S3Stats).lastModified) {
 				lastModified = (stat as S3Stats).lastModified;
-			} else if (stat as Stats) {
+			} else if ((stat as Stats).mtime) {
 				lastModified = (stat as Stats).mtime;
 			}
 		} catch {
