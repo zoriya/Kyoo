@@ -35,5 +35,10 @@ sql:
             import: "github.com/golang-jwt/jwt/v5"
             package: "jwt"
             type: "MapClaims"
+        - column: "apikeys.claims"
+          go_type:
+            import: "github.com/golang-jwt/jwt/v5"
+            package: "jwt"
+            type: "MapClaims"
 
 

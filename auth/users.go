@@ -250,8 +250,8 @@ func (h *Handler) Register(c echo.Context) error {
 // @Security     Jwt[users.delete]
 // @Param        id   path      string  false  "User id of the user to delete" Format(uuid)
 // @Success      200  {object}  User
-// @Failure      404  {object}  KError "Invalid id format"
 // @Failure      404  {object}  KError "Invalid user id"
+// @Failure      422  {object}  KError "Invalid id format"
 // @Router /users/{id} [delete]
 func (h *Handler) DeleteUser(c echo.Context) error {
 	err := CheckPermissions(c, []string{"users.delete"})
@@ -261,7 +261,7 @@ func (h *Handler) DeleteUser(c echo.Context) error {
 
 	uid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		return echo.NewHTTPError(400, "Invalid id given: not an uuid")
+		return echo.NewHTTPError(422, "Invalid id given: not an uuid")
 	}
 
 	ret, err := h.db.DeleteUser(context.Background(), uid)

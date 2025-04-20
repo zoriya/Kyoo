@@ -11,7 +11,6 @@ logger = getLogger(__name__)
 
 
 def get_ignore_pattern():
-	"""Compile ignore pattern from environment variable."""
 	try:
 		pattern = os.environ.get("LIBRARY_IGNORE_PATTERN")
 		return re.compile(pattern) if pattern else None

@@ -224,6 +224,10 @@ func main() {
 	r.DELETE("/sessions", h.Logout)
 	r.DELETE("/sessions/:id", h.Logout)
 
+	r.GET("/keys", h.ListApiKey)
+	r.POST("/keys", h.CreateApiKey)
+	r.DELETE("/keys", h.DeleteApiKey)
+
 	g.GET("/jwt", h.CreateJwt)
 	e.GET("/.well-known/jwks.json", h.GetJwks)
 	e.GET("/.well-known/openid-configuration", h.GetOidcConfig)
