@@ -1,5 +1,5 @@
-import { stat } from "node:fs/promises";
-import type { BunFile } from "bun";
+import type { Stats } from "node:fs";
+import type { BunFile, S3File, S3Stats } from "bun";
 import { type SQL, and, eq, sql } from "drizzle-orm";
 import Elysia, { type Context, t } from "elysia";
 import { prefix } from "~/base";
@@ -15,6 +15,7 @@ import { sqlarr } from "~/db/utils";
 import { KError } from "~/models/error";
 import { bubble } from "~/models/examples";
 import { AcceptLanguage, isUuid, processLanguages } from "~/models/utils";
+import { getFile } from "~/utils";
 import { imageDir } from "./seed/images";
 
 function getRedirectToImageHandler({
@@ -98,7 +99,7 @@ export const imagesH = new Elysia({ tags: ["images"] })
 		"/images/:id",
 		async ({ params: { id }, query: { quality }, headers: reqHeaders }) => {
 			const path = `${imageDir}/${id}.${quality}.jpg`;
-			const file = Bun.file(path);
+			const file = getFile(path);
 
 			const etag = await generateETag(file);
 			if (await isCached(reqHeaders, etag, path))
@@ -366,8 +367,13 @@ export async function isCached(
 	if (headers["if-modified-since"]) {
 		const ifModifiedSince = headers["if-modified-since"];
 		let lastModified: Date | undefined;
+		const stat = await getFile(filePath).stat();
 		try {
-			lastModified = (await stat(filePath)).mtime;
+			if ((stat as S3Stats).lastModified) {
+				lastModified = (stat as S3Stats).lastModified;
+			} else if ((stat as Stats).mtime) {
+				lastModified = (stat as Stats).mtime;
+			}
 		} catch {
 			/* empty */
 		}
@@ -382,7 +388,7 @@ export async function isCached(
 	return false;
 }
 
-export async function generateETag(file: BunFile) {
+export async function generateETag(file: BunFile | S3File) {
 	const hash = new Bun.CryptoHasher("md5");
 	hash.update(await file.arrayBuffer());
 
