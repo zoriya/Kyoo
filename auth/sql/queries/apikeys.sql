@@ -1,3 +1,20 @@
+-- name: GetApiKey :one
+select
+	*
+from
+	apikeys
+where
+	name = $1
+	and token = $2;
+
+-- name: TouchApiKey :exec
+update
+	apikeys
+set
+	last_used = now()::timestamptz
+where
+	pk = $1;
+
 -- name: ListApiKeys :many
 select
 	*

@@ -64,6 +64,37 @@ func (q *Queries) DeleteApiKey(ctx context.Context, id uuid.UUID) (Apikey, error
 	return i, err
 }
 
+const getApiKey = `-- name: GetApiKey :one
+select
+	pk, id, name, token, claims, created_by, created_at, last_used
+from
+	apikeys
+where
+	name = $1
+	and token = $2
+`
+
+type GetApiKeyParams struct {
+	Name  string `json:"name"`
+	Token string `json:"token"`
+}
+
+func (q *Queries) GetApiKey(ctx context.Context, arg GetApiKeyParams) (Apikey, error) {
+	row := q.db.QueryRow(ctx, getApiKey, arg.Name, arg.Token)
+	var i Apikey
+	err := row.Scan(
+		&i.Pk,
+		&i.Id,
+		&i.Name,
+		&i.Token,
+		&i.Claims,
+		&i.CreatedBy,
+		&i.CreatedAt,
+		&i.LastUsed,
+	)
+	return i, err
+}
+
 const listApiKeys = `-- name: ListApiKeys :many
 select
 	pk, id, name, token, claims, created_by, created_at, last_used
@@ -100,4 +131,18 @@ func (q *Queries) ListApiKeys(ctx context.Context) ([]Apikey, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const touchApiKey = `-- name: TouchApiKey :exec
+update
+	apikeys
+set
+	last_used = now()::timestamptz
+where
+	pk = $1
+`
+
+func (q *Queries) TouchApiKey(ctx context.Context, pk int32) error {
+	_, err := q.db.Exec(ctx, touchApiKey, pk)
+	return err
 }

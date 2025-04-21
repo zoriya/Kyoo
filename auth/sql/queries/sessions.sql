@@ -1,5 +1,6 @@
 -- name: GetUserFromToken :one
 select
+	s.pk,
 	s.id,
 	s.last_used,
 	sqlc.embed(u)
@@ -16,7 +17,7 @@ update
 set
 	last_used = now()::timestamptz
 where
-	id = $1;
+	pk = $1;
 
 -- name: GetUserSessions :many
 select

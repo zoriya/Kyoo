@@ -41,7 +41,7 @@ func MapDbKey(key *dbc.Apikey) ApiKeyWToken {
 			CreatedAt: key.CreatedAt,
 			LastUsed: key.LastUsed,
 		},
-		Token: key.Token,
+		Token: fmt.Sprintf("%s-%s", key.Name, key.Token),
 	}
 }
 
@@ -74,7 +74,7 @@ func (h *Handler) CreateApiKey(c echo.Context) error {
 
 	dbkey, err := h.db.CreateApiKey(context.Background(), dbc.CreateApiKeyParams{
 		Name: req.Name,
-		Token: fmt.Sprintf("%s-%s", req.Name, base64.RawURLEncoding.EncodeToString(id)),
+		Token: base64.RawURLEncoding.EncodeToString(id),
 		Claims: req.Claims,
 	})
 	if ErrIs(err, pgerrcode.UniqueViolation) {

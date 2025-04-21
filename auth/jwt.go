@@ -9,8 +9,10 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/jwk"
+	"github.com/zoriya/kyoo/keibi/dbc"
 )
 
 type Jwt struct {
@@ -19,7 +21,7 @@ type Jwt struct {
 }
 
 // @Summary      Get JWT
-// @Description  Convert a session token to a short lived JWT.
+// @Description  Convert a session token or an API key to a short lived JWT.
 // @Tags         jwt
 // @Produce      json
 // @Security     Token
@@ -28,6 +30,17 @@ type Jwt struct {
 // @Header       200  {string}  Authorization  "Jwt (same value as the returned token)"
 // @Router /jwt [get]
 func (h *Handler) CreateJwt(c echo.Context) error {
+	apikey := c.Request().Header.Get("X-Api-Key")
+	if apikey != "" {
+		token, err := h.createApiJwt(apikey)
+		if err != nil {
+			return err
+		}
+		return c.JSON(http.StatusOK, Jwt{
+			Token: &token,
+		})
+	}
+
 	auth := c.Request().Header.Get("Authorization")
 	var jwt *string
 
@@ -85,14 +98,53 @@ func (h *Handler) createJwt(token string) (string, error) {
 	}
 
 	go func() {
-		h.db.TouchSession(context.Background(), session.Id)
-		h.db.TouchUser(context.Background(), session.User.Id)
+		h.db.TouchSession(context.Background(), session.Pk)
+		h.db.TouchUser(context.Background(), session.User.Pk)
 	}()
 
 	claims := maps.Clone(session.User.Claims)
 	claims["username"] = session.User.Username
 	claims["sub"] = session.User.Id.String()
 	claims["sid"] = session.Id.String()
+	claims["iss"] = h.config.PublicUrl
+	claims["iat"] = &jwt.NumericDate{
+		Time: time.Now().UTC(),
+	}
+	claims["exp"] = &jwt.NumericDate{
+		Time: time.Now().UTC().Add(time.Hour),
+	}
+	jwt := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	t, err := jwt.SignedString(h.config.JwtPrivateKey)
+	if err != nil {
+		return "", err
+	}
+	return t, nil
+}
+
+func (h *Handler) createApiJwt(apikey string) (string, error) {
+	info := strings.Split(apikey, "-")
+	if len(info) != 2 {
+		return "", echo.NewHTTPError(http.StatusForbidden, "Invalid api key format")
+	}
+
+	key, err := h.db.GetApiKey(context.Background(), dbc.GetApiKeyParams{
+		Name: info[0],
+		Token: info[1],
+	})
+	if err == pgx.ErrNoRows {
+		return "", echo.NewHTTPError(http.StatusForbidden, "Invalid api key")
+	} else if err != nil {
+		return "", err
+	}
+
+	go func() {
+		h.db.TouchApiKey(context.Background(), key.Pk)
+	}()
+
+	claims := maps.Clone(key.Claims)
+	claims["username"] = key.Name
+	claims["sub"] = key.Id
+	claims["sid"] = key.Id
 	claims["iss"] = h.config.PublicUrl
 	claims["iat"] = &jwt.NumericDate{
 		Time: time.Now().UTC(),
