@@ -5,7 +5,9 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"maps"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -17,6 +19,7 @@ import (
 )
 
 type ApiKey struct {
+	Id uuid.UUID `json:"id" example:"e05089d6-9179-4b5b-a63e-94dd5fc2a397"`
 	Name string `json:"name" example:"myapp"`
 	CreatedAt time.Time `json:"createAt" example:"2025-03-29T18:20:05.267Z"`
 	LastUsed time.Time `json:"lastUsed" example:"2025-03-29T18:20:05.267Z"`
@@ -36,6 +39,7 @@ type ApiKeyDto struct {
 func MapDbKey(key *dbc.Apikey) ApiKeyWToken {
 	return ApiKeyWToken{
 		ApiKey: ApiKey{
+			Id: key.Id,
 			Name: key.Name,
 			Claims: key.Claims,
 			CreatedAt: key.CreatedAt,
@@ -64,6 +68,10 @@ func (h *Handler) CreateApiKey(c echo.Context) error {
 	}
 	if err = c.Validate(&req); err != nil {
 		return err
+	}
+
+	if _, conflict := h.config.EnvApiKeys[req.Name]; conflict {
+		return echo.NewHTTPError(409, "An env apikey is already defined with the same name")
 	}
 
 	id := make([]byte, 64)
@@ -127,8 +135,57 @@ func (h *Handler) ListApiKey(c echo.Context) error {
 	for _, key := range dbkeys {
 		ret = append(ret, MapDbKey(&key).ApiKey)
 	}
+
+	for _, key := range h.config.EnvApiKeys {
+		ret = append(ret, key.ApiKey)
+	}
+
 	return c.JSON(200, Page[ApiKey]{
 		Items: ret,
 		This: c.Request().URL.String(),
 	})
+}
+
+func (h *Handler) createApiJwt(apikey string) (string, error) {
+	info := strings.Split(apikey, "-")
+	if len(info) != 2 {
+		return "", echo.NewHTTPError(http.StatusForbidden, "Invalid api key format")
+	}
+
+	key, fromEnv := h.config.EnvApiKeys[info[0]]
+	if !fromEnv {
+		dbKey, err := h.db.GetApiKey(context.Background(), dbc.GetApiKeyParams{
+			Name: info[0],
+			Token: info[1],
+		})
+		if err == pgx.ErrNoRows {
+			return "", echo.NewHTTPError(http.StatusForbidden, "Invalid api key")
+		} else if err != nil {
+			return "", err
+		}
+
+		go func() {
+			h.db.TouchApiKey(context.Background(), dbKey.Pk)
+		}()
+
+		key = MapDbKey(&dbKey)
+	}
+
+	claims := maps.Clone(key.Claims)
+	claims["username"] = key.Name
+	claims["sub"] = key.Id
+	claims["sid"] = key.Id
+	claims["iss"] = h.config.PublicUrl
+	claims["iat"] = &jwt.NumericDate{
+		Time: time.Now().UTC(),
+	}
+	claims["exp"] = &jwt.NumericDate{
+		Time: time.Now().UTC().Add(time.Hour),
+	}
+	jwt := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	t, err := jwt.SignedString(h.config.JwtPrivateKey)
+	if err != nil {
+		return "", err
+	}
+	return t, nil
 }

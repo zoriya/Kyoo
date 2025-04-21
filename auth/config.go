@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/json"
 	"encoding/pem"
+	"fmt"
 	"maps"
 	"os"
 	"strings"
@@ -25,6 +27,7 @@ type Configuration struct {
 	GuestClaims     jwt.MapClaims
 	ProtectedClaims []string
 	ExpirationDelay time.Duration
+	EnvApiKeys map[string]ApiKeyWToken
 }
 
 var DefaultConfig = Configuration{
@@ -32,6 +35,7 @@ var DefaultConfig = Configuration{
 	FirstUserClaims: make(jwt.MapClaims),
 	ProtectedClaims: []string{"permissions"},
 	ExpirationDelay: 30 * 24 * time.Hour,
+	EnvApiKeys: make(map[string]ApiKeyWToken),
 }
 
 func LoadConfiguration(db *dbc.Queries) (*Configuration, error) {
@@ -96,6 +100,45 @@ func LoadConfiguration(db *dbc.Queries) (*Configuration, error) {
 			return nil, err
 		}
 		ret.JwtPublicKey = &ret.JwtPrivateKey.PublicKey
+	}
+
+	for _, env := range os.Environ() {
+		if !strings.HasPrefix(env, "KEIBI_APIKEY_") || strings.HasSuffix(env, "_CLAIMS") {
+			continue
+		}
+
+		v := strings.Split(env, "=")
+		name := strings.TrimPrefix(v[0], "KEIBI_APIKEY_")
+		cstr := os.Getenv(fmt.Sprintf("KEIBI_APIKEY_%s_CLAIMS", name))
+
+		var claims jwt.MapClaims
+		if cstr != "" {
+			err := json.Unmarshal([]byte(cstr), &claims)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		ret.EnvApiKeys[name] = ApiKeyWToken{
+			ApiKey: ApiKey{
+				Name: name,
+				Claims: claims,
+			},
+			Token: v[1],
+		}
+
+	}
+	apikeys, err := db.ListApiKeys(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	for _, key := range apikeys {
+		if _, defined := ret.EnvApiKeys[key.Name]; defined {
+			return nil, fmt.Errorf(
+				"an api key with the name %s is already defined in database. Can't specify a new one via env var",
+				key.Name,
+			)
+		}
 	}
 
 	return &ret, nil
