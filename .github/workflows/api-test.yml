@@ -36,4 +36,4 @@ jobs:
         working-directory: ./api
         run: bun test
         env:
-          POSTGRES_SERVER: localhost
+          PGHOST: localhost
