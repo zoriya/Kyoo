@@ -56,7 +56,12 @@ func GetCurrentSessionId(c echo.Context) (uuid.UUID, error) {
 
 func CheckPermissions(c echo.Context, perms []string) error {
 	token, ok := c.Get("user").(*jwt.Token)
-	if !ok {
+	if !ok{
+		return echo.NewHTTPError(401, "Not logged in")
+	}
+	sub, err := token.Claims.GetSubject()
+	// ignore guests
+	if err != nil || sub == "00000000-0000-0000-0000-000000000000" {
 		return echo.NewHTTPError(401, "Not logged in")
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
@@ -68,8 +73,6 @@ func CheckPermissions(c echo.Context, perms []string) error {
 	if !ok {
 		return echo.NewHTTPError(403, fmt.Sprintf("Missing permissions: %s.", ", "))
 	}
-	fmt.Printf("%v\n", permissions_claims)
-	fmt.Printf("%t\n", permissions_claims)
 	permissions_int, ok := permissions_claims.([]any)
 	if !ok {
 		return echo.NewHTTPError(403, "Invalid permission claim.")

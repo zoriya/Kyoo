@@ -162,7 +162,7 @@ func (h *Handler) TokenToJwt(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		if jwt != nil {
-			c.Request().Header.Set("Authorization", *jwt)
+			c.Request().Header.Set("Authorization", fmt.Sprintf("Bearer %s", *jwt))
 		}
 		return next(c)
 	}
@@ -236,7 +236,7 @@ func main() {
 
 	r.GET("/keys", h.ListApiKey)
 	r.POST("/keys", h.CreateApiKey)
-	r.DELETE("/keys", h.DeleteApiKey)
+	r.DELETE("/keys/:id", h.DeleteApiKey)
 
 	g.GET("/jwt", h.CreateJwt)
 	e.GET("/.well-known/jwks.json", h.GetJwks)

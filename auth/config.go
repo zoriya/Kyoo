@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/zoriya/kyoo/keibi/dbc"
 )
 
@@ -103,11 +104,14 @@ func LoadConfiguration(db *dbc.Queries) (*Configuration, error) {
 	}
 
 	for _, env := range os.Environ() {
-		if !strings.HasPrefix(env, "KEIBI_APIKEY_") || strings.HasSuffix(env, "_CLAIMS") {
+		if !strings.HasPrefix(env, "KEIBI_APIKEY_"){
+			continue
+		}
+		v := strings.Split(env, "=")
+		if strings.HasSuffix(v[0], "_CLAIMS") {
 			continue
 		}
 
-		v := strings.Split(env, "=")
 		name := strings.TrimPrefix(v[0], "KEIBI_APIKEY_")
 		cstr := os.Getenv(fmt.Sprintf("KEIBI_APIKEY_%s_CLAIMS", name))
 
@@ -117,10 +121,14 @@ func LoadConfiguration(db *dbc.Queries) (*Configuration, error) {
 			if err != nil {
 				return nil, err
 			}
+		} else {
+			return nil, fmt.Errorf("missing claims env var KEIBI_APIKEY_%s_CLAIMS", name)
 		}
 
+		name = strings.ToLower(name)
 		ret.EnvApiKeys[name] = ApiKeyWToken{
 			ApiKey: ApiKey{
+				Id: uuid.New(),
 				Name: name,
 				Claims: claims,
 			},

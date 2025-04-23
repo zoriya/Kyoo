@@ -32,7 +32,7 @@ type ApiKeyWToken struct {
 }
 
 type ApiKeyDto struct {
-	Name string `json:"name" example:"my-app" validate:"alpha"`
+	Name string `json:"name" example:"myapp" validate:"alpha"`
 	Claims jwt.MapClaims `json:"claims" example:"isAdmin: true"`
 }
 
@@ -61,8 +61,13 @@ func MapDbKey(key *dbc.Apikey) ApiKeyWToken {
 // @Failure      422  {object}  KError "Invalid create body"
 // @Router       /keys [post]
 func (h *Handler) CreateApiKey(c echo.Context) error {
+	err := CheckPermissions(c, []string{"apikeys.write"})
+	if err != nil {
+		return err
+	}
+
 	var req ApiKeyDto
-	err := c.Bind(&req)
+	err = c.Bind(&req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
 	}
@@ -104,6 +109,11 @@ func (h *Handler) CreateApiKey(c echo.Context) error {
 // @Failure      422  {object}  KError "Invalid id format"
 // @Router       /keys [delete]
 func (h *Handler) DeleteApiKey(c echo.Context) error {
+	err := CheckPermissions(c, []string{"apikeys.write"})
+	if err != nil {
+		return err
+	}
+
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return echo.NewHTTPError(422, "Invalid id given: not an uuid")
@@ -127,6 +137,11 @@ func (h *Handler) DeleteApiKey(c echo.Context) error {
 // @Success      200  {object}  Page[ApiKey]
 // @Router       /keys [get]
 func (h *Handler) ListApiKey(c echo.Context) error {
+	err := CheckPermissions(c, []string{"apikeys.read"})
+	if err != nil {
+		return err
+	}
+
 	dbkeys, err := h.db.ListApiKeys(context.Background())
 	if err != nil {
 		return err

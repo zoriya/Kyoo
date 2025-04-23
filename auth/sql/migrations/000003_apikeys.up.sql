@@ -9,7 +9,7 @@ create table apikeys(
 
 	created_by integer not null references users(pk) on delete cascade,
 	created_at timestamptz not null default now()::timestamptz,
-	last_used timestamptz not null default now()::temistamptz
+	last_used timestamptz not null default now()::timestamptz
 );
 
 commit;
