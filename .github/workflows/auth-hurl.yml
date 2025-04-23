@@ -53,8 +53,12 @@ jobs:
         env:
           POSTGRES_SERVER: localhost
           FIRST_USER_CLAIMS: '{"permissions": ["users.read"]}'
+          KEIBI_APIKEY_HURL: 1234apikey
+          KEIBI_APIKEY_HURL_CLAIMS: '{"permissions": ["apikeys.write", "apikeys.read"]}'
+
 
       - name: Show logs
+        if: failure()
         working-directory: ./auth
         run: cat logs
 

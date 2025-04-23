@@ -11,6 +11,17 @@ import (
 	"github.com/google/uuid"
 )
 
+type Apikey struct {
+	Pk        int32         `json:"pk"`
+	Id        uuid.UUID     `json:"id"`
+	Name      string        `json:"name"`
+	Token     string        `json:"token"`
+	Claims    jwt.MapClaims `json:"claims"`
+	CreatedBy *int32        `json:"createdBy"`
+	CreatedAt time.Time     `json:"createdAt"`
+	LastUsed  time.Time     `json:"lastUsed"`
+}
+
 type OidcHandle struct {
 	UserPk       int32      `json:"userPk"`
 	Provider     string     `json:"provider"`

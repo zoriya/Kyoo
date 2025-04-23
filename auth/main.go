@@ -131,28 +131,38 @@ type Handler struct {
 
 func (h *Handler) TokenToJwt(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		auth := c.Request().Header.Get("Authorization")
 		var jwt *string
 
-		if auth == "" || !strings.HasPrefix(auth, "Bearer ") {
-			jwt = h.createGuestJwt()
-		} else {
-			token := auth[len("Bearer "):]
-			// this is only used to check if it is a session token or a jwt
-			_, err := base64.RawURLEncoding.DecodeString(token)
-			if err != nil {
-				return next(c)
-			}
-
-			tkn, err := h.createJwt(token)
+		apikey := c.Request().Header.Get("X-Api-Key")
+		if apikey != "" {
+			token, err := h.createApiJwt(apikey)
 			if err != nil {
 				return err
 			}
-			jwt = &tkn
+			jwt = &token
+		} else {
+			auth := c.Request().Header.Get("Authorization")
+
+			if auth == "" || !strings.HasPrefix(auth, "Bearer ") {
+				jwt = h.createGuestJwt()
+			} else {
+				token := auth[len("Bearer "):]
+				// this is only used to check if it is a session token or a jwt
+				_, err := base64.RawURLEncoding.DecodeString(token)
+				if err != nil {
+					return next(c)
+				}
+
+				tkn, err := h.createJwt(token)
+				if err != nil {
+					return err
+				}
+				jwt = &tkn
+			}
 		}
 
 		if jwt != nil {
-			c.Request().Header.Set("Authorization", *jwt)
+			c.Request().Header.Set("Authorization", fmt.Sprintf("Bearer %s", *jwt))
 		}
 		return next(c)
 	}
@@ -223,6 +233,10 @@ func main() {
 	g.POST("/sessions", h.Login)
 	r.DELETE("/sessions", h.Logout)
 	r.DELETE("/sessions/:id", h.Logout)
+
+	r.GET("/keys", h.ListApiKey)
+	r.POST("/keys", h.CreateApiKey)
+	r.DELETE("/keys/:id", h.DeleteApiKey)
 
 	g.GET("/jwt", h.CreateJwt)
 	e.GET("/.well-known/jwks.json", h.GetJwks)

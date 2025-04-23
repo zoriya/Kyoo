@@ -88,6 +88,7 @@ func (q *Queries) DeleteSession(ctx context.Context, arg DeleteSessionParams) (S
 
 const getUserFromToken = `-- name: GetUserFromToken :one
 select
+	s.pk,
 	s.id,
 	s.last_used,
 	u.pk, u.id, u.username, u.email, u.password, u.claims, u.created_date, u.last_seen
@@ -100,6 +101,7 @@ limit 1
 `
 
 type GetUserFromTokenRow struct {
+	Pk       int32     `json:"pk"`
 	Id       uuid.UUID `json:"id"`
 	LastUsed time.Time `json:"lastUsed"`
 	User     User      `json:"user"`
@@ -109,6 +111,7 @@ func (q *Queries) GetUserFromToken(ctx context.Context, token string) (GetUserFr
 	row := q.db.QueryRow(ctx, getUserFromToken, token)
 	var i GetUserFromTokenRow
 	err := row.Scan(
+		&i.Pk,
 		&i.Id,
 		&i.LastUsed,
 		&i.User.Pk,
@@ -169,10 +172,10 @@ update
 set
 	last_used = now()::timestamptz
 where
-	id = $1
+	pk = $1
 `
 
-func (q *Queries) TouchSession(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, touchSession, id)
+func (q *Queries) TouchSession(ctx context.Context, pk int32) error {
+	_, err := q.db.Exec(ctx, touchSession, pk)
 	return err
 }

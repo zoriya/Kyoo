@@ -49,7 +49,7 @@ update
 set
 	last_used = now()::timestamptz
 where
-	id = $1;
+	pk = $1;
 
 -- name: CreateUser :one
 insert into users(username, email, password, claims)

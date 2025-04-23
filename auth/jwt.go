@@ -19,7 +19,7 @@ type Jwt struct {
 }
 
 // @Summary      Get JWT
-// @Description  Convert a session token to a short lived JWT.
+// @Description  Convert a session token or an API key to a short lived JWT.
 // @Tags         jwt
 // @Produce      json
 // @Security     Token
@@ -28,6 +28,17 @@ type Jwt struct {
 // @Header       200  {string}  Authorization  "Jwt (same value as the returned token)"
 // @Router /jwt [get]
 func (h *Handler) CreateJwt(c echo.Context) error {
+	apikey := c.Request().Header.Get("X-Api-Key")
+	if apikey != "" {
+		token, err := h.createApiJwt(apikey)
+		if err != nil {
+			return err
+		}
+		return c.JSON(http.StatusOK, Jwt{
+			Token: &token,
+		})
+	}
+
 	auth := c.Request().Header.Get("Authorization")
 	var jwt *string
 
@@ -85,8 +96,8 @@ func (h *Handler) createJwt(token string) (string, error) {
 	}
 
 	go func() {
-		h.db.TouchSession(context.Background(), session.Id)
-		h.db.TouchUser(context.Background(), session.User.Id)
+		h.db.TouchSession(context.Background(), session.Pk)
+		h.db.TouchUser(context.Background(), session.User.Pk)
 	}()
 
 	claims := maps.Clone(session.User.Claims)

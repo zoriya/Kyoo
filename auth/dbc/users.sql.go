@@ -261,11 +261,11 @@ update
 set
 	last_used = now()::timestamptz
 where
-	id = $1
+	pk = $1
 `
 
-func (q *Queries) TouchUser(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, touchUser, id)
+func (q *Queries) TouchUser(ctx context.Context, pk int32) error {
+	_, err := q.db.Exec(ctx, touchUser, pk)
 	return err
 }
 
