@@ -137,7 +137,7 @@ type JwkSet struct {
 // @Success      200  {object}  JwkSet  "OK"
 // @Router /.well-known/jwks.json [get]
 func (h *Handler) GetJwks(c echo.Context) error {
-	key, err := jwk.New(h.config.JwtPublicKey)
+	key, err := jwk.Import(h.config.JwtPublicKey)
 	if err != nil {
 		return err
 	}
@@ -145,7 +145,7 @@ func (h *Handler) GetJwks(c echo.Context) error {
 	key.Set("use", "sig")
 	key.Set("key_ops", "verify")
 	set := jwk.NewSet()
-	set.Add(key)
+	set.AddKey(key)
 	return c.JSON(200, set)
 }
 
