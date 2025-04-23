@@ -1,5 +1,3 @@
-import dns from "node:dns";
-import net from "node:net";
 import os from "node:os";
 import path from "node:path";
 import tls, { type ConnectionOptions } from "node:tls";
@@ -12,12 +10,11 @@ import * as schema from "./schema";
 async function getPostgresConfig(): Promise<PoolConfig> {
 	const config: PoolConfig = {
 		connectionString: process.env.POSTGRES_URL,
-		host: process.env.PGHOST ?? process.env.POSTGRES_SERVER ?? "postgres",
-		port: Number(process.env.PGPORT ?? process.env.POSTGRES_PORT) || 5432,
-		database: process.env.PGDATABASE ?? process.env.POSTGRES_DB ?? "kyoo",
-		user: process.env.PGUSER ?? process.env.POSTGRES_USER ?? "kyoo",
-		password:
-			process.env.PGPASSWORD ?? process.env.POSTGRES_PASSWORD ?? "password",
+		host: process.env.PGHOST ?? "postgres",
+		port: Number(process.env.PGPORT) || 5432,
+		database: process.env.PGDATABASE ?? "kyoo",
+		user: process.env.PGUSER ?? "kyoo",
+		password: process.env.PGPASSWORD ?? "password",
 		options: process.env.PGOPTIONS,
 		application_name: process.env.PGAPPNAME ?? "kyoo",
 	};
@@ -28,41 +25,7 @@ async function getPostgresConfig(): Promise<PoolConfig> {
 		return config;
 
 	// Despite this field's name, it is used to configure everything below the application layer.
-	const ssl: ConnectionOptions = {
-		timeout:
-			(process.env.PGCONNECT_TIMEOUT &&
-				Number(process.env.PGCONNECT_TIMEOUT)) ||
-			undefined,
-		minVersion: process.env.PGSSLMINPROTOCOLVERSION as tls.SecureVersion,
-		maxVersion: process.env.PGSSLMAXPROTOCOLVERSION as tls.SecureVersion,
-	};
-
-	// If the config is a hostname and the host address is set, use a custom lookup function
-	if (net.isIP(config.host ?? "") === 0 && process.env.PGHOSTADDR) {
-		const ipVersion = net.isIP(process.env.PGHOSTADDR);
-		if (ipVersion === 0) {
-			throw new Error(
-				`PGHOSTADDR is not a valid IP address: ${process.env.PGHOSTADDR}`,
-			);
-		}
-
-		(config.ssl as ConnectionOptions).lookup = (
-			hostname: string,
-			options: dns.LookupOptions,
-			callback: (
-				err: NodeJS.ErrnoException | null,
-				address: string | dns.LookupAddress[],
-				family?: number,
-			) => void,
-		) => {
-			if (hostname !== config.host) {
-				dns.lookup(hostname, options, callback);
-				return;
-			}
-
-			return callback(null, process.env.PGHOSTADDR as string, ipVersion);
-		};
-	}
+	const ssl: ConnectionOptions = {};
 
 	if (process.env.PGPASSFILE || !process.env.PGPASSWORD) {
 		const file = Bun.file(
@@ -115,11 +78,7 @@ async function getPostgresConfig(): Promise<PoolConfig> {
 			path.join(os.homedir(), ".postgresql", "postgresql.key"),
 	);
 	if (await file.exists()) {
-		ssl.key = [
-			{
-				pem: await file.text(),
-			},
-		];
+		ssl.key = await file.text();
 	}
 
 	if (process.env.PGSSLMODE) {
@@ -127,11 +86,6 @@ async function getPostgresConfig(): Promise<PoolConfig> {
 			// Disable is handled above, gateing the configurating of any SSL options.
 			// Allow and prefer are not currently supported. Supporting them would require
 			// either mulitiple attempted connections, or changes upstream to the postgres driver.
-			case "require":
-				ssl.checkServerIdentity = (_host, _cert) => {
-					return undefined;
-				};
-				break;
 			case "verify-ca":
 				ssl.rejectUnauthorized = true;
 				ssl.checkServerIdentity = (_host, _cert) => {
@@ -142,21 +96,22 @@ async function getPostgresConfig(): Promise<PoolConfig> {
 				ssl.rejectUnauthorized = true;
 				break;
 			default:
+				ssl.checkServerIdentity = (_host, _cert) => {
+					return undefined;
+				};
 				ssl.rejectUnauthorized = false;
 		}
-	}
-
-	if (process.env.PGSSLSNI !== "0") {
-		ssl.servername = config.host;
 	}
 
 	config.ssl = ssl;
 	return config;
 }
 
+const postgresConfig = await getPostgresConfig();
+
 export const db = drizzle({
 	schema,
-	connection: await getPostgresConfig(),
+	connection: postgresConfig,
 	casing: "snake_case",
 });
 
@@ -165,14 +120,14 @@ export const migrate = async () => {
 		sql.raw(`
 			create extension if not exists pg_trgm;
 			SET pg_trgm.word_similarity_threshold = 0.4;
-			ALTER DATABASE "${(await getPostgresConfig()).database}" SET pg_trgm.word_similarity_threshold = 0.4;
+			ALTER DATABASE "${postgresConfig.database}" SET pg_trgm.word_similarity_threshold = 0.4;
 		`),
 	);
 	await migrateDb(db, {
 		migrationsSchema: "kyoo",
 		migrationsFolder: "./drizzle",
 	});
-	console.log(`Database ${(await getPostgresConfig()).database} migrated!`);
+	console.log(`Database ${postgresConfig.database} migrated!`);
 };
 
 export type Transaction =
