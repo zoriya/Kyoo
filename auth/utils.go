@@ -71,7 +71,7 @@ func CheckPermissions(c echo.Context, perms []string) error {
 
 	permissions_claims, ok := claims["permissions"]
 	if !ok {
-		return echo.NewHTTPError(403, fmt.Sprintf("Missing permissions: %s.", ", "))
+		return echo.NewHTTPError(403, fmt.Sprintf("No permissions on this account. Needs permissions: %s.", strings.Join(perms, ", ")))
 	}
 	permissions_int, ok := permissions_claims.([]any)
 	if !ok {

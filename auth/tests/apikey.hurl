@@ -4,7 +4,7 @@ POST {{host}}/keys
 	"name": "dryflower",
 	"claims": {
 		"isAdmin": true,
-		"permssions": ["core.read"]
+		"permissions": ["core.read"]
 	}
 }
 HTTP 401
@@ -16,18 +16,18 @@ X-API-KEY: hurl-1234apikey
 	"name": "dryflower",
 	"claims": {
 		"isAdmin": true,
-		"permssions": ["core.read"]
+		"permissions": ["apikeys.read"]
 	}
 }
 HTTP 201
 [Captures]
+id: jsonpath "$.id"
 token: jsonpath "$.token"
 
 GET {{host}}/jwt
-Authorization: Bearer {{token}}
+X-API-KEY: {{token}}
 HTTP 200
 [Captures]
-id: jsonpath "$.id"
 jwt: jsonpath "$.token"
 
 # Duplicates email
@@ -37,22 +37,25 @@ X-API-KEY: hurl-1234apikey
 	"name": "dryflower",
 	"claims": {
 		"isAdmin": true,
-		"permssions": ["core.read"]
+		"permissions": ["core.read"]
 	}
 }
 HTTP 409
 
 # List
 GET {{host}}/keys
-Authorization: Bearer {{token}}
+Authorization: Bearer {{jwt}}
 HTTP 200
 [Asserts]
 jsonpath "$.items[0].id" == {{id}}
 jsonpath "$.items[0].name" == "dryflower"
-jsonpath "$.items[0].claims.permissions" contains "core.read"
-
+jsonpath "$.items[0].claims.permissions" contains "apikeys.read"
 
 
 DELETE {{host}}/keys/{{id}}
 Authorization: Bearer {{jwt}}
+HTTP 403
+
+DELETE {{host}}/keys/{{id}}
+X-API-KEY: hurl-1234apikey
 HTTP 200

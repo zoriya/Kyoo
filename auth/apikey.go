@@ -86,7 +86,7 @@ func (h *Handler) CreateApiKey(c echo.Context) error {
 	}
 
 	var user *int32
-	uid, err :=GetCurrentUserId(c)
+	uid, err := GetCurrentUserId(c)
 	// if err, we probably are using an api key (so no user)
 	if err != nil {
 		u, _ := h.db.GetUser(context.Background(), dbc.GetUserParams{
@@ -174,7 +174,7 @@ func (h *Handler) ListApiKey(c echo.Context) error {
 }
 
 func (h *Handler) createApiJwt(apikey string) (string, error) {
-	info := strings.Split(apikey, "-")
+	info := strings.SplitN(apikey, "-", 2)
 	if len(info) != 2 {
 		return "", echo.NewHTTPError(http.StatusForbidden, "Invalid api key format")
 	}
