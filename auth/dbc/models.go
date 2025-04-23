@@ -17,7 +17,7 @@ type Apikey struct {
 	Name      string        `json:"name"`
 	Token     string        `json:"token"`
 	Claims    jwt.MapClaims `json:"claims"`
-	CreatedBy int32         `json:"createdBy"`
+	CreatedBy *int32        `json:"createdBy"`
 	CreatedAt time.Time     `json:"createdAt"`
 	LastUsed  time.Time     `json:"lastUsed"`
 }

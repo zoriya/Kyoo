@@ -13,20 +13,26 @@ import (
 )
 
 const createApiKey = `-- name: CreateApiKey :one
-insert into apikeys(name, token, claims)
-	values ($1, $2, $3)
+insert into apikeys(name, token, claims, created_by)
+	values ($1, $2, $3, $4)
 returning
 	pk, id, name, token, claims, created_by, created_at, last_used
 `
 
 type CreateApiKeyParams struct {
-	Name   string        `json:"name"`
-	Token  string        `json:"token"`
-	Claims jwt.MapClaims `json:"claims"`
+	Name      string        `json:"name"`
+	Token     string        `json:"token"`
+	Claims    jwt.MapClaims `json:"claims"`
+	CreatedBy *int32        `json:"createdBy"`
 }
 
 func (q *Queries) CreateApiKey(ctx context.Context, arg CreateApiKeyParams) (Apikey, error) {
-	row := q.db.QueryRow(ctx, createApiKey, arg.Name, arg.Token, arg.Claims)
+	row := q.db.QueryRow(ctx, createApiKey,
+		arg.Name,
+		arg.Token,
+		arg.Claims,
+		arg.CreatedBy,
+	)
 	var i Apikey
 	err := row.Scan(
 		&i.Pk,

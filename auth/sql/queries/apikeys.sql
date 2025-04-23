@@ -24,8 +24,8 @@ order by
 	last_used;
 
 -- name: CreateApiKey :one
-insert into apikeys(name, token, claims)
-	values ($1, $2, $3)
+insert into apikeys(name, token, claims, created_by)
+	values ($1, $2, $3, $4)
 returning
 	*;
 

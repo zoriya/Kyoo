@@ -7,7 +7,7 @@ create table apikeys(
 	token varchar(128) not null unique,
 	claims jsonb not null,
 
-	created_by integer not null references users(pk) on delete cascade,
+	created_by integer references users(pk) on delete cascade,
 	created_at timestamptz not null default now()::timestamptz,
 	last_used timestamptz not null default now()::timestamptz
 );

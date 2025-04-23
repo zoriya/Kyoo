@@ -85,10 +85,22 @@ func (h *Handler) CreateApiKey(c echo.Context) error {
 		return err
 	}
 
+	var user *int32
+	uid, err :=GetCurrentUserId(c)
+	// if err, we probably are using an api key (so no user)
+	if err != nil {
+		u, _ := h.db.GetUser(context.Background(), dbc.GetUserParams{
+			UseId: true,
+			Id: uid,
+		})
+		user = &u[0].User.Pk
+	}
+
 	dbkey, err := h.db.CreateApiKey(context.Background(), dbc.CreateApiKeyParams{
 		Name: req.Name,
 		Token: base64.RawURLEncoding.EncodeToString(id),
 		Claims: req.Claims,
+		CreatedBy: user,
 	})
 	if ErrIs(err, pgerrcode.UniqueViolation) {
 		return echo.NewHTTPError(409, "An apikey with the same name already exists.")
