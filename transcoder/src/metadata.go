@@ -23,20 +23,25 @@ type MetadataService struct {
 }
 
 func NewMetadataService() (*MetadataService, error) {
-	con := fmt.Sprintf(
-		"postgresql://%v:%v@%v:%v/%v?application_name=gocoder&sslmode=%s",
-		url.QueryEscape(os.Getenv("POSTGRES_USER")),
-		url.QueryEscape(os.Getenv("POSTGRES_PASSWORD")),
-		url.QueryEscape(os.Getenv("POSTGRES_SERVER")),
-		url.QueryEscape(os.Getenv("POSTGRES_PORT")),
-		url.QueryEscape(os.Getenv("POSTGRES_DB")),
-		url.QueryEscape(GetEnvOr("POSTGRES_SSLMODE", "disable")),
-	)
 	schema := GetEnvOr("POSTGRES_SCHEMA", "gocoder")
-	if schema != "disabled" {
-		con = fmt.Sprintf("%s&search_path=%s", con, url.QueryEscape(schema))
+
+	connectionString := os.Getenv("POSTGRES_URL")
+	if connectionString == "" {
+		connectionString = fmt.Sprintf(
+			"postgresql://%v:%v@%v:%v/%v?application_name=gocoder&sslmode=%s",
+			url.QueryEscape(os.Getenv("POSTGRES_USER")),
+			url.QueryEscape(os.Getenv("POSTGRES_PASSWORD")),
+			url.QueryEscape(os.Getenv("POSTGRES_SERVER")),
+			url.QueryEscape(os.Getenv("POSTGRES_PORT")),
+			url.QueryEscape(os.Getenv("POSTGRES_DB")),
+			url.QueryEscape(GetEnvOr("POSTGRES_SSLMODE", "disable")),
+		)
+		if schema != "disabled" {
+			connectionString = fmt.Sprintf("%s&search_path=%s", connectionString, url.QueryEscape(schema))
+		}
 	}
-	db, err := sql.Open("postgres", con)
+
+	db, err := sql.Open("postgres", connectionString)
 	if err != nil {
 		fmt.Printf("Could not connect to database, check your env variables!")
 		return nil, err
