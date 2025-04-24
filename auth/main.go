@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strconv"
+	"os/user"
 	"strings"
 
 	"github.com/zoriya/kyoo/keibi/dbc"
@@ -73,23 +73,41 @@ func GetenvOr(env string, def string) string {
 func OpenDatabase() (*pgxpool.Pool, error) {
 	ctx := context.Background()
 
-	port, err := strconv.ParseUint(GetenvOr("POSTGRES_PORT", "5432"), 10, 16)
+	connectionString := GetenvOr("POSTGRES_URL", "")
+	config, err := pgxpool.ParseConfig(connectionString)
 	if err != nil {
-		return nil, errors.New("invalid postgres port specified")
+		return nil, errors.New("failed to create postgres config from environment variables")
 	}
 
-	config, _ := pgxpool.ParseConfig("")
-	config.ConnConfig.Host = GetenvOr("POSTGRES_SERVER", "postgres")
-	config.ConnConfig.Port = uint16(port)
-	config.ConnConfig.Database = GetenvOr("POSTGRES_DB", "kyoo")
-	config.ConnConfig.User = GetenvOr("POSTGRES_USER", "kyoo")
-	config.ConnConfig.Password = GetenvOr("POSTGRES_PASSWORD", "password")
-	config.ConnConfig.TLSConfig = nil
-	config.ConnConfig.RuntimeParams = map[string]string{
-		"application_name": "keibi",
+	// Set default values
+	if config.ConnConfig.Host == "" {
+		config.ConnConfig.Host = "postgres"
 	}
+	if config.ConnConfig.Database == "" {
+		config.ConnConfig.Database = "kyoo"
+	}
+	// The pgx library will set the username to the name of the current user if not provided via
+	// environment variable or connection string. Make a best-effort attempt to see if the user
+	// was explicitly specified, without implementing full connection string parsing. If not, set
+	// the username to the default value of "kyoo".
+	if os.Getenv("PGUSER") == "" {
+		currentUserName, _ := user.Current()
+		// If the username matches the current user and it's not in the connection string, then it was set
+		// by the pgx library. This doesn't cover the case where the system username happens to be in some other part
+		// of the connection string, but this cannot be checked without full connection string parsing.
+		if currentUserName.Username == config.ConnConfig.User && !strings.Contains(connectionString, currentUserName.Username) {
+		config.ConnConfig.User = "kyoo"
+		}
+	}
+	if config.ConnConfig.Password == "" {
+		config.ConnConfig.Password = "password"
+	}
+	if _, ok := config.ConnConfig.RuntimeParams["application_name"]; !ok {
+		config.ConnConfig.RuntimeParams["application_name"] = "keibi"
+	}
+
 	schema := GetenvOr("POSTGRES_SCHEMA", "keibi")
-	if schema != "disabled" {
+	if _, ok := config.ConnConfig.RuntimeParams["search_path"]; !ok {
 		config.ConnConfig.RuntimeParams["search_path"] = schema
 	}
 

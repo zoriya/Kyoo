@@ -51,7 +51,7 @@ jobs:
           wget --retry-connrefused --retry-on-http-error=502 http://localhost:4568/health
           hurl --error-format long --variable host=http://localhost:4568 tests/*
         env:
-          POSTGRES_SERVER: localhost
+          PGHOST: localhost
           FIRST_USER_CLAIMS: '{"permissions": ["users.read"]}'
           KEIBI_APIKEY_HURL: 1234apikey
           KEIBI_APIKEY_HURL_CLAIMS: '{"permissions": ["apikeys.write", "apikeys.read"]}'
