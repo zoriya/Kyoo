@@ -33,18 +33,45 @@ public static class PostgresModule
 {
 	public static NpgsqlDataSource CreateDataSource(IConfiguration configuration)
 	{
-		DbConnectionStringBuilder conBuilder =
-			new()
+		// Load the connection string from the environment variable, as well as standard libpq environment variables
+		// (PGUSER, PGPASSWORD, PGHOST, PGPORT, PGDATABASE, etc.)
+		NpgsqlConnectionStringBuilder conBuilder =
+			new(configuration.GetValue<string>("POSTGRES_URL") ?? "")
 			{
-				["USER ID"] = configuration.GetValue("POSTGRES_USER", "KyooUser"),
-				["PASSWORD"] = configuration.GetValue("POSTGRES_PASSWORD", "KyooPassword"),
-				["SERVER"] = configuration.GetValue("POSTGRES_SERVER", "postgres"),
-				["PORT"] = configuration.GetValue("POSTGRES_PORT", "5432"),
-				["DATABASE"] = configuration.GetValue("POSTGRES_DB", "kyooDB"),
-				["POOLING"] = "true",
-				["MAXPOOLSIZE"] = "95",
-				["TIMEOUT"] = "30"
+				Pooling = true,
+				MaxPoolSize = 95,
+				Timeout = 30
 			};
+
+		string? oldVarUsername = configuration.GetValue<string>("POSTGRES_USER");
+		if (!string.IsNullOrEmpty(oldVarUsername))
+			conBuilder.Username = oldVarUsername;
+		if (string.IsNullOrEmpty(conBuilder.Username))
+			conBuilder.Username = "KyooUser";
+
+		string? oldVarPassword = configuration.GetValue<string>("POSTGRES_PASSWORD");
+		if (!string.IsNullOrEmpty(oldVarPassword))
+			conBuilder.Password = oldVarPassword;
+		if (string.IsNullOrEmpty(conBuilder.Password))
+			conBuilder.Password = "KyooPassword";
+
+		string? oldVarHost = configuration.GetValue<string>("POSTGRES_SERVER");
+		if (!string.IsNullOrEmpty(oldVarHost))
+			conBuilder.Host = oldVarHost;
+		if (string.IsNullOrEmpty(conBuilder.Host))
+			conBuilder.Host = "postgres";
+
+		int? oldVarPort = configuration.GetValue<int>("POSTGRES_PORT");
+		if (oldVarPort != null && oldVarPort != 0)
+			conBuilder.Port = oldVarPort.Value;
+		if (conBuilder.Port == 0)
+			conBuilder.Port = 5432;
+
+		string? oldVarDatabase = configuration.GetValue<string>("POSTGRES_DB");
+		if (!string.IsNullOrEmpty(oldVarDatabase))
+			conBuilder.Database = oldVarDatabase;
+		if (string.IsNullOrEmpty(conBuilder.Database))
+			conBuilder.Database = "kyooDB";
 
 		NpgsqlDataSourceBuilder dsBuilder = new(conBuilder.ConnectionString);
 		dsBuilder.MapEnum<Status>();
