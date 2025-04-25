@@ -16,28 +16,18 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.IO;
 using System.Threading.Tasks;
-using Kyoo.Abstractions.Models;
 
-namespace Kyoo.Abstractions.Controllers;
+namespace Kyoo.Core.Storage;
 
-public interface IThumbnailsManager
+/// <summary>
+/// Interface for storage operations.
+/// </summary>
+public interface IStorage
 {
-	Task DownloadImages<T>(T item)
-		where T : IThumbnails;
-
-	Task DownloadImage(Image? image, string what);
-
-	Task<bool> IsImageSaved(Guid imageId, ImageQuality quality);
-
-	Task<Stream> GetImage(Guid imageId, ImageQuality quality);
-
-	Task DeleteImages<T>(T item)
-		where T : IThumbnails;
-
-	Task<Stream> GetUserImage(Guid userId);
-
-	Task SetUserImage(Guid userId, Stream? image);
+	Task<bool> DoesExist(string path);
+	Task<Stream> Read(string path);
+	Task Write(Stream stream, string path);
+	Task Delete(string path);
 }

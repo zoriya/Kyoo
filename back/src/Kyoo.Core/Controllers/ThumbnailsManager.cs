@@ -17,7 +17,6 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -28,6 +27,7 @@ using Blurhash.SkiaSharp;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Exceptions;
+using Kyoo.Core.Storage;
 using Microsoft.Extensions.Logging;
 using SkiaSharp;
 using SKSvg = SkiaSharp.Extended.Svg.SKSvg;
@@ -40,15 +40,15 @@ namespace Kyoo.Core.Controllers;
 public class ThumbnailsManager(
 	IHttpClientFactory clientFactory,
 	ILogger<ThumbnailsManager> logger,
+	IStorage storage,
 	Lazy<IRepository<User>> users
 ) : IThumbnailsManager
 {
-	private static async Task _WriteTo(SKBitmap bitmap, string path, int quality)
+	private async Task _SaveImage(SKBitmap bitmap, string path, int quality)
 	{
 		SKData data = bitmap.Encode(SKEncodedImageFormat.Webp, quality);
 		await using Stream reader = data.AsStream();
-		await using Stream file = File.Create(path);
-		await reader.CopyToAsync(file);
+		await storage.Write(reader, path);
 	}
 
 	private SKBitmap _SKBitmapFrom(Stream reader, bool isSvg)
@@ -100,19 +100,19 @@ public class ThumbnailsManager(
 				new SKSizeI(original.Width, original.Height),
 				SKFilterQuality.High
 			);
-			await _WriteTo(original, GetImagePath(image.Id, ImageQuality.High), 90);
+			await _SaveImage(original, _GetImagePath(image.Id, ImageQuality.High), 90);
 
 			using SKBitmap medium = high.Resize(
 				new SKSizeI((int)(high.Width / 1.5), (int)(high.Height / 1.5)),
 				SKFilterQuality.Medium
 			);
-			await _WriteTo(medium, GetImagePath(image.Id, ImageQuality.Medium), 75);
+			await _SaveImage(medium, _GetImagePath(image.Id, ImageQuality.Medium), 75);
 
 			using SKBitmap low = medium.Resize(
 				new SKSizeI(original.Width / 2, original.Height / 2),
 				SKFilterQuality.Low
 			);
-			await _WriteTo(low, GetImagePath(image.Id, ImageQuality.Low), 50);
+			await _SaveImage(low, _GetImagePath(image.Id, ImageQuality.Low), 50);
 
 			image.Blurhash = Blurhasher.Encode(low, 4, 3);
 		}
@@ -133,8 +133,20 @@ public class ThumbnailsManager(
 		await DownloadImage(item.Logo, $"The logo of {name}");
 	}
 
+	public async Task<bool> IsImageSaved(Guid imageId, ImageQuality quality) =>
+		await storage.DoesExist(_GetImagePath(imageId, quality));
+
+	public async Task<Stream> GetImage(Guid imageId, ImageQuality quality)
+	{
+		string path = _GetImagePath(imageId, quality);
+		if (await storage.DoesExist(path))
+			return await storage.Read(path);
+
+		throw new ItemNotFoundException();
+	}
+
 	/// <inheritdoc />
-	public string GetImagePath(Guid imageId, ImageQuality quality)
+	private string _GetImagePath(Guid imageId, ImageQuality quality)
 	{
 		return $"/metadata/{imageId}.{quality.ToString().ToLowerInvariant()}.webp";
 	}
@@ -143,7 +155,7 @@ public class ThumbnailsManager(
 	public Task DeleteImages<T>(T item)
 		where T : IThumbnails
 	{
-		IEnumerable<string> images = new[] { item.Poster?.Id, item.Thumbnail?.Id, item.Logo?.Id }
+		var imageDeletionTasks = new[] { item.Poster?.Id, item.Thumbnail?.Id, item.Logo?.Id }
 			.Where(x => x is not null)
 			.SelectMany(x => $"/metadata/{x}")
 			.SelectMany(x =>
@@ -153,21 +165,17 @@ public class ThumbnailsManager(
 					ImageQuality.Medium.ToString().ToLowerInvariant(),
 					ImageQuality.Low.ToString().ToLowerInvariant(),
 				}.Select(quality => $"{x}.{quality}.webp")
-			);
+			)
+			.Select(storage.Delete);
 
-		foreach (string image in images)
-			File.Delete(image);
-		return Task.CompletedTask;
+		return Task.WhenAll(imageDeletionTasks);
 	}
 
 	public async Task<Stream> GetUserImage(Guid userId)
 	{
-		try
-		{
-			return File.Open($"/metadata/user/{userId}.webp", FileMode.Open);
-		}
-		catch (FileNotFoundException) { }
-		catch (DirectoryNotFoundException) { }
+		var filePath = $"/metadata/user/{userId}.webp";
+		if (await storage.DoesExist(filePath))
+			return await storage.Read(filePath);
 
 		User user = await users.Value.Get(userId);
 		if (user.Email == null)
@@ -193,21 +201,18 @@ public class ThumbnailsManager(
 
 	public async Task SetUserImage(Guid userId, Stream? image)
 	{
-		if (image == null)
+		var filePath = $"/metadata/user/{userId}.webp";
+		if (image == null && await storage.DoesExist(filePath))
 		{
-			try
-			{
-				File.Delete($"/metadata/user/{userId}.webp");
-			}
-			catch { }
+			await storage.Delete(filePath);
 			return;
 		}
+
 		using SKCodec codec = SKCodec.Create(image);
 		SKImageInfo info = codec.Info;
 		info.ColorType = SKColorType.Rgba8888;
 		using SKBitmap original = SKBitmap.Decode(codec, info);
 		using SKBitmap ret = original.Resize(new SKSizeI(250, 250), SKFilterQuality.High);
-		Directory.CreateDirectory("/metadata/user");
-		await _WriteTo(ret, $"/metadata/user/{userId}.webp", 75);
+		await _SaveImage(ret, filePath, 75);
 	}
 }
