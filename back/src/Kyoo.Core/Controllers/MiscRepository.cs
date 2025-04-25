@@ -69,9 +69,12 @@ public class MiscRepository(
 	public async Task DownloadMissingImages()
 	{
 		ICollection<Image> images = await _GetAllImages();
-		IEnumerable<Task> tasks = images
-			.Where(x => !File.Exists(thumbnails.GetImagePath(x.Id, ImageQuality.Low)))
-			.Select(x => thumbnails.DownloadImage(x, x.Id.ToString()));
+		var tasks = images
+			.ToAsyncEnumerable()
+			.WhereAwait(async x => !await thumbnails.IsImageSaved(x.Id, ImageQuality.Low))
+			.Select(x => thumbnails.DownloadImage(x, x.Id.ToString()))
+			.ToEnumerable();
+
 		// Chunk tasks to prevent http timouts
 		foreach (IEnumerable<Task> batch in tasks.Chunk(30))
 			await Task.WhenAll(batch);

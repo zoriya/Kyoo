@@ -18,6 +18,7 @@
 
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
@@ -54,14 +55,14 @@ public class ThumbnailsApi(IThumbnailsManager thumbs) : BaseApi
 	[HttpGet("{id:guid}")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
-	public IActionResult GetPoster(Guid id, [FromQuery] ImageQuality? quality)
+	public async Task<IActionResult> GetPoster(Guid id, [FromQuery] ImageQuality? quality)
 	{
-		string path = thumbs.GetImagePath(id, quality ?? ImageQuality.High);
-		if (!System.IO.File.Exists(path))
+		quality ??= ImageQuality.High;
+		if (await thumbs.IsImageSaved(id, quality.Value))
 			return NotFound();
 
 		// Allow clients to cache the image for 6 month.
 		Response.Headers.CacheControl = $"public, max-age={60 * 60 * 24 * 31 * 6}";
-		return PhysicalFile(Path.GetFullPath(path), "image/webp", true);
+		return File(await thumbs.GetImage(id, quality.Value), "image/webp", true);
 	}
 }

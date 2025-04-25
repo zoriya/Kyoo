@@ -18,11 +18,14 @@
 
 using System;
 using System.Linq;
+using Amazon.S3;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Core.Controllers;
+using Kyoo.Core.Storage;
 using Kyoo.Postgresql;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Core;
@@ -46,6 +49,8 @@ public static class CoreModule
 
 	public static void ConfigureKyoo(this WebApplicationBuilder builder)
 	{
+		builder._AddStorage();
+
 		builder.Services.AddScoped<IThumbnailsManager, ThumbnailsManager>();
 		builder.Services.AddScoped<ILibraryManager, LibraryManager>();
 
@@ -66,5 +71,22 @@ public static class CoreModule
 		builder.Services.AddScoped<IIssueRepository, IssueRepository>();
 		builder.Services.AddScoped<SqlVariableContext>();
 		builder.Services.AddScoped<MiscRepository>();
+	}
+
+	private static void _AddStorage(this WebApplicationBuilder builder)
+	{
+		var shouldUseS3 = !string.IsNullOrEmpty(
+			builder.Configuration.GetValue<string>(S3Storage.S3BucketEnvironmentVariable)
+		);
+
+		if (!shouldUseS3)
+		{
+			builder.Services.AddScoped<IStorage, FileStorage>();
+			return;
+		}
+
+		// Configuration (credentials, endpoint, etc.) are done via standard AWS env vars
+		builder.Services.AddScoped<IAmazonS3, AmazonS3Client>();
+		builder.Services.AddScoped<IStorage, S3Storage>();
 	}
 }

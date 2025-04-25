@@ -11,6 +11,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="AspNetCore.Proxy" Version="4.5.0" />
+		<PackageReference Include="AWSSDK.S3" Version="3.7.416.15" />
 		<PackageReference Include="Blurhash.SkiaSharp" Version="2.0.0" />
 		<PackageReference Include="Dapper" Version="2.1.44" />
 		<PackageReference Include="InterpolatedSql.Dapper" Version="2.3.0" />
@@ -28,6 +29,7 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="SkiaSharp.Svg" Version="1.60.0" />
+		<PackageReference Include="System.Linq.Async" Version="6.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>

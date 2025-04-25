@@ -19,25 +19,33 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Kyoo.Abstractions.Models;
 
-namespace Kyoo.Abstractions.Controllers;
+namespace Kyoo.Core.Storage;
 
-public interface IThumbnailsManager
+/// <summary>
+/// File-backed storage.
+/// </summary>
+public class FileStorage : IStorage
 {
-	Task DownloadImages<T>(T item)
-		where T : IThumbnails;
+	public Task<bool> DoesExist(string path) => Task.FromResult(File.Exists(path));
 
-	Task DownloadImage(Image? image, string what);
+	public async Task<Stream> Read(string path) =>
+		await Task.FromResult(File.Open(path, FileMode.Open, FileAccess.Read));
 
-	Task<bool> IsImageSaved(Guid imageId, ImageQuality quality);
+	public async Task Write(Stream reader, string path)
+	{
+		Directory.CreateDirectory(
+			Path.GetDirectoryName(path) ?? throw new InvalidOperationException()
+		);
+		await using Stream file = File.Create(path);
+		await reader.CopyToAsync(file);
+	}
 
-	Task<Stream> GetImage(Guid imageId, ImageQuality quality);
+	public Task Delete(string path)
+	{
+		if (File.Exists(path))
+			File.Delete(path);
 
-	Task DeleteImages<T>(T item)
-		where T : IThumbnails;
-
-	Task<Stream> GetUserImage(Guid userId);
-
-	Task SetUserImage(Guid userId, Stream? image);
+		return Task.CompletedTask;
+	}
 }
