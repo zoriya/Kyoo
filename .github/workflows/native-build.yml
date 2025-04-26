@@ -15,15 +15,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Check for EXPO_TOKEN
+      # This is required because GHA doesn't support secrets in the `if` condition
+      - name: Check if Expo build is enabled
+        env:
+          IS_SECRET_SET: ${{ env.IS_EXPO_ENABLED == 'true' && 'true' || 'false' }}
+        run: echo "IS_EXPO_ENABLED=${IS_SECRET_SET}" >> "${GITHUB_ENV}"
+
+      - name: Log if Expo build is disabled due to fork
+        if: env.IS_EXPO_ENABLED != 'true'
         run: |
-          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
-            echo "You must provide an EXPO_TOKEN secret linked to this project's Expo account in this repo's secrets. Learn more: https://docs.expo.dev/eas-update/github-actions"
-            exit 1
-          fi
+          echo "Expo build is disabled for forks. To enable it, add an EXPO_TOKEN secret to this repository. See https://docs.expo.dev/eas-update/github-actions/ for more information."
 
       - name: Setup Node
         uses: actions/setup-node@v4
+        if: env.IS_EXPO_ENABLED == 'true'
         with:
           node-version: 22.x
           cache: yarn
@@ -31,34 +36,40 @@ jobs:
 
       - name: Setup Expo
         uses: expo/expo-github-action@v8
+        if: env.IS_EXPO_ENABLED == 'true'
         with:
           expo-version: latest
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Install dependencies
+        if: env.IS_EXPO_ENABLED == 'true'
         run: yarn install --immutable
 
       - name: Build Mobile Release
+        if: env.IS_EXPO_ENABLED == 'true'
         run: yarn build:mobile:apk | tee log.txt
 
       - name: Parse Asset URL
         id: url
+        if: env.IS_EXPO_ENABLED == 'true'
         run: |
           ASSET_URL=$(cat log.txt | jq '.[0].artifacts.buildUrl' -r)
           echo The android url is $ASSET_URL
           echo "assetUrl=$ASSET_URL" >> $GITHUB_OUTPUT
 
       - name: Download APK Asset
+        if: env.IS_EXPO_ENABLED == 'true'
         run: wget -O kyoo.apk ${{ steps.url.outputs.assetUrl }}
 
       - uses: actions/upload-artifact@v4
+        if: env.IS_EXPO_ENABLED == 'true'
         with:
           name: kyoo.apk
           path: ./front/kyoo.apk
 
       - name: Upload release artifacts
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
+        if: env.IS_EXPO_ENABLED == 'true' && startsWith(github.ref, 'refs/tags/')
         with:
           files: ./front/kyoo.apk

@@ -31,7 +31,12 @@ jobs:
       run: |
         export tag=$(echo ${GITHUB_REF#refs/tags/} | sed 's/^v//')
         helm package ./chart --version $tag --app-version $tag
+    
+    - name: Build Helm-safe repo name
+      run: |
+        REPO_NAME="$(echo "oci://ghcr.io/${GITHUB_REPOSITORY_OWNER}/helm-charts" | tr '[:upper:]' '[:lower:]')"
+        echo "REPO_NAME=${REPO_NAME}" >> "${GITHUB_ENV}"
 
     - name: Push Helm Chart to GHCR
       run: |
-        helm push kyoo-*.tgz oci://ghcr.io/${{ github.repository_owner }}/helm-charts
+        helm push kyoo-*.tgz "${REPO_NAME}"
