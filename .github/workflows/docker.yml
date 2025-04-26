@@ -22,42 +22,44 @@ jobs:
           - context: ./back
             dockerfile: Dockerfile
             label: back
-            image: zoriya/kyoo_back
+            image: ${{ github.repository_owner }}/kyoo_back
 
           - context: ./back
             dockerfile: Dockerfile.migrations
             label: migrations
-            image: zoriya/kyoo_migrations
+            image: ${{ github.repository_owner }}/kyoo_migrations
 
           - context: ./api
             dockerfile: Dockerfile
             label: api
-            image: zoriya/kyoo_api
+            image: ${{ github.repository_owner }}/kyoo_api
 
           - context: ./front
             dockerfile: Dockerfile
             label: front
-            image: zoriya/kyoo_front
+            image: ${{ github.repository_owner }}/kyoo_front
 
           - context: ./scanner
             dockerfile: Dockerfile
             label: scanner
-            image: zoriya/kyoo_scanner
+            image: ${{ github.repository_owner }}/kyoo_scanner
 
           - context: ./autosync
             dockerfile: Dockerfile
             label: autosync
-            image: zoriya/kyoo_autosync
+            image: ${{ github.repository_owner }}/kyoo_autosync
 
           - context: ./transcoder
             dockerfile: Dockerfile
             label: transcoder
-            image: zoriya/kyoo_transcoder
+            image: ${{ github.repository_owner }}/kyoo_transcoder
 
           - context: ./auth
             dockerfile: Dockerfile
             label: auth
-            image: zoriya/keibi
+            image: ${{ github.repository_owner }}/keibi
+    env:
+      DOCKERHUB_ENABLED: ${{ secrets.DOCKER_USERNAME && secrets.DOCKER_PASSWORD && 'true' || 'false' }}
     name: Build ${{matrix.label}}
     steps:
       - uses: actions/checkout@v4
@@ -74,7 +76,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            docker.io/${{matrix.image}}
+            docker.io/${{matrix.image}},enable=${{ env.DOCKERHUB_ENABLED }}
             ghcr.io/${{matrix.image}}
           tags: |
             type=edge
@@ -94,7 +96,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Login to DockerHub
-        if: env.SHOULD_PUSH == 'true'
+        if: env.SHOULD_PUSH == 'true' && env.DOCKERHUB_ENABLED == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -124,7 +126,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Sync README.MD
-        if: env.SHOULD_PUSH == 'true'
+        if: env.SHOULD_PUSH == 'true' && env.DOCKERHUB_ENABLED == 'true'
         uses: ms-jpq/sync-dockerhub-readme@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
