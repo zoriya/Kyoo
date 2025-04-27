@@ -96,7 +96,8 @@ public static class RabbitMqModule
 		if (!string.IsNullOrEmpty(caCertFile))
 		{
 			// Load the cert once at startup instead of on every connection.
-			X509Certificate2 rootCA = new(caCertFile);
+			X509Certificate2Collection rootCACollection = [];
+			rootCACollection.ImportFromPemFile(caCertFile);
 
 			// This is a custom validator that obeys the set SslPolicyErrors, while also using the CA cert specified in the query string.
 			factory.Ssl.CertificateValidationCallback = (
@@ -144,7 +145,7 @@ public static class RabbitMqModule
 				);
 				chain.ChainPolicy.CustomTrustStore.Clear();
 				chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
-				chain.ChainPolicy.CustomTrustStore.Add(rootCA);
+				chain.ChainPolicy.CustomTrustStore.AddRange(rootCACollection);
 
 				return chain.Build(new X509Certificate2(certificate));
 			};
