@@ -31,8 +31,34 @@ public class ScannerProducer : IScanner
 	public ScannerProducer(IConnection rabbitConnection)
 	{
 		_channel = rabbitConnection.CreateModel();
-		_channel.QueueDeclare("scanner", exclusive: false, autoDelete: false);
-		_channel.QueueDeclare("scanner.rescan", exclusive: false, autoDelete: false);
+		if (!doesQueueExist(rabbitConnection, "scanner"))
+			_channel.QueueDeclare("scanner", exclusive: false, autoDelete: false);
+		if (!doesQueueExist(rabbitConnection, "scanner.rescan"))
+			_channel.QueueDeclare("scanner.rescan", exclusive: false, autoDelete: false);
+	}
+
+	/// <summary>
+	/// Checks if the queue exists. Needed to avoid crashing when re-declaring an existing
+	/// queue with different parameters.
+	/// </summary>
+	/// <param name="rabbitConnection">The RabbitMQ connection.</param>
+	/// <param name="queueName">The name of the channel.</param>
+	/// <returns>True if the queue exists, false otherwise.</returns>
+	private bool doesQueueExist(IConnection rabbitConnection, string queueName)
+	{
+		// If the queue does not exist when QueueDeclarePassive is called,
+		// an exception will be thrown. According to the docs, when this
+		// happens, the entire channel should be thrown away.
+		using var channel = rabbitConnection.CreateModel();
+		try
+		{
+			channel.QueueDeclarePassive(queueName);
+			return true;
+		}
+		catch (Exception)
+		{
+			return false;
+		}
 	}
 
 	private Task _Publish<T>(T message, string queue = "scanner")

@@ -30,7 +30,8 @@ public class RabbitProducer
 	{
 		_channel = rabbitConnection.CreateModel();
 
-		_channel.ExchangeDeclare("events.resource", ExchangeType.Topic);
+		if (!doesExchangeExist(rabbitConnection, "events.resource"))
+			_channel.ExchangeDeclare("events.resource", ExchangeType.Topic);
 		_ListenResourceEvents<Collection>("events.resource");
 		_ListenResourceEvents<Movie>("events.resource");
 		_ListenResourceEvents<Show>("events.resource");
@@ -39,12 +40,37 @@ public class RabbitProducer
 		_ListenResourceEvents<Studio>("events.resource");
 		_ListenResourceEvents<User>("events.resource");
 
-		_channel.ExchangeDeclare("events.watched", ExchangeType.Topic);
+		if (!doesExchangeExist(rabbitConnection, "events.watched"))
+			_channel.ExchangeDeclare("events.watched", ExchangeType.Topic);
 		IWatchStatusRepository.OnMovieStatusChangedHandler += _PublishWatchStatus<Movie>("movie");
 		IWatchStatusRepository.OnShowStatusChangedHandler += _PublishWatchStatus<Show>("show");
 		IWatchStatusRepository.OnEpisodeStatusChangedHandler += _PublishWatchStatus<Episode>(
 			"episode"
 		);
+	}
+
+	/// <summary>
+	/// Checks if the exchange exists. Needed to avoid crashing when re-declaring an existing
+	/// queue with different parameters.
+	/// </summary>
+	/// <param name="rabbitConnection">The RabbitMQ connection.</param>
+	/// <param name="exchangeName">The name of the channel.</param>
+	/// <returns>True if the queue exists, false otherwise.</returns>
+	private bool doesExchangeExist(IConnection rabbitConnection, string exchangeName)
+	{
+		// If the queue does not exist when QueueDeclarePassive is called,
+		// an exception will be thrown. According to the docs, when this
+		// happens, the entire channel should be thrown away.
+		using var channel = rabbitConnection.CreateModel();
+		try
+		{
+			channel.ExchangeDeclarePassive(exchangeName);
+			return true;
+		}
+		catch (Exception)
+		{
+			return false;
+		}
 	}
 
 	private void _ListenResourceEvents<T>(string exchange)
