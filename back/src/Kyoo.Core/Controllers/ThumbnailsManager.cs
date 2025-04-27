@@ -202,9 +202,10 @@ public class ThumbnailsManager(
 	public async Task SetUserImage(Guid userId, Stream? image)
 	{
 		var filePath = $"/metadata/user/{userId}.webp";
-		if (image == null && await storage.DoesExist(filePath))
+		if (image == null)
 		{
-			await storage.Delete(filePath);
+			if (await storage.DoesExist(filePath))
+				await storage.Delete(filePath);
 			return;
 		}
 
