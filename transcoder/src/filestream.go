@@ -1,12 +1,15 @@
 package src
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"math"
 	"os"
 	"strings"
 	"sync"
+
+	"github.com/zoriya/kyoo/transcoder/src/utils"
 )
 
 type FileStream struct {
@@ -24,7 +27,7 @@ type VideoKey struct {
 	quality Quality
 }
 
-func (t *Transcoder) newFileStream(path string, sha string) *FileStream {
+func (t *Transcoder) newFileStream(ctx context.Context, path string, sha string) *FileStream {
 	ret := &FileStream{
 		transcoder: t,
 		Out:        fmt.Sprintf("%s/%s", Settings.Outpath, sha),
@@ -35,7 +38,7 @@ func (t *Transcoder) newFileStream(path string, sha string) *FileStream {
 	ret.ready.Add(1)
 	go func() {
 		defer ret.ready.Done()
-		info, err := t.metadataService.GetMetadata(path, sha)
+		info, err := t.metadataService.GetMetadata(ctx, path, sha)
 		ret.Info = info
 		if err != nil {
 			ret.err = err
@@ -107,7 +110,7 @@ func (fs *FileStream) GetMaster() string {
 	}
 
 	if def_video != nil {
-		qualities := Filter(Qualities, func(quality Quality) bool {
+		qualities := utils.Filter(Qualities, func(quality Quality) bool {
 			return quality.Height() < def_video.Height
 		})
 		transcode_count := len(qualities)

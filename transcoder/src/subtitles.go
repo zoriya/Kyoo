@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/zoriya/kyoo/transcoder/src/utils"
 	"golang.org/x/text/language"
 )
 
@@ -72,7 +73,7 @@ outer:
 				// "hi" by itself means a language code, but when combined with other lang flags it means Hearing Impaired.
 				// In case Hindi was not detected before, but "hi" is present, assume it is Hindi.
 				if sub.Language == nil {
-					hiCount := Count(flags, "hi")
+					hiCount := utils.Count(flags, "hi")
 					if hiCount > 0 {
 						languageStr := language.Hindi.String()
 						sub.Language = &languageStr

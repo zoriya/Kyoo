@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/lib/pq"
+	"github.com/zoriya/kyoo/transcoder/src/utils"
 )
 
 const KeyframeVersion = 1
@@ -162,7 +163,7 @@ func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx uint32
 // Returns when all key frames are retrived (or an error occurs)
 // info.ready.Done() is called when more than 100 are retrived (or extraction is done)
 func getVideoKeyframes(path string, video_idx uint32, kf *Keyframe) error {
-	defer printExecTime("ffprobe keyframe analysis for %s video n%d", path, video_idx)()
+	defer utils.PrintExecTime("ffprobe keyframe analysis for %s video n%d", path, video_idx)()
 	// run ffprobe to return all IFrames, IFrames are points where we can split the video in segments.
 	// We ask ffprobe to return the time of each frame and it's flags
 	// We could ask it to return only i-frames (keyframes) with the -skip_frame nokey but using it is extremly slow
@@ -254,7 +255,7 @@ const DummyKeyframeDuration = float64(4)
 
 // we can pretty much cut audio at any point so no need to get specific frames, just cut every 4s
 func getAudioKeyframes(info *MediaInfo, audio_idx uint32, kf *Keyframe) error {
-	defer printExecTime("ffprobe keyframe analysis for %s audio n%d", info.Path, audio_idx)()
+	defer utils.PrintExecTime("ffprobe keyframe analysis for %s audio n%d", info.Path, audio_idx)()
 	// Format's duration CAN be different than audio's duration. To make sure we do not
 	// miss a segment or make one more, we need to check the audio's duration.
 	//

@@ -15,7 +15,6 @@ func GetEnvOr(env string, def string) string {
 
 type SettingsT struct {
 	Outpath     string
-	Metadata    string
 	RoutePrefix string
 	SafePath    string
 	HwAccel     HwAccelT
@@ -32,7 +31,6 @@ type HwAccelT struct {
 var Settings = SettingsT{
 	// we manually add a folder to make sure we do not delete user data.
 	Outpath:     path.Join(GetEnvOr("GOCODER_CACHE_ROOT", "/cache"), "kyoo_cache"),
-	Metadata:    GetEnvOr("GOCODER_METADATA_ROOT", "/metadata"),
 	RoutePrefix: GetEnvOr("GOCODER_PREFIX", ""),
 	SafePath:    GetEnvOr("GOCODER_SAFE_PATH", "/video"),
 	HwAccel:     DetectHardwareAccel(),
