@@ -68,44 +68,47 @@ export const SeedVideo = t.Object({
 
 	guess: Guess,
 
-	for: t.Array(
-		t.Union([
-			t.Object({
-				slug: t.String({
-					format: "slug",
-					examples: ["made-in-abyss-dawn-of-the-deep-soul"],
-				}),
-			}),
-			t.Object({
-				externalId: t.Optional(t.Union([EpisodeId, ExternalId()])),
-			}),
-			t.Object({
-				movie: t.Union([
-					t.String({ format: "uuid" }),
-					t.String({ format: "slug", examples: ["bubble"] }),
-				]),
-			}),
-			t.Intersect([
+	for: t.Optional(
+		t.Array(
+			t.Union([
 				t.Object({
-					serie: t.Union([
+					slug: t.String({
+						format: "slug",
+						examples: ["made-in-abyss-dawn-of-the-deep-soul"],
+					}),
+				}),
+				t.Object({
+					externalId: t.Optional(t.Union([EpisodeId, ExternalId()])),
+				}),
+				t.Object({
+					movie: t.Union([
 						t.String({ format: "uuid" }),
-						t.String({ format: "slug", examples: ["made-in-abyss"] }),
+						t.String({ format: "slug", examples: ["bubble"] }),
 					]),
 				}),
-				t.Union([
+				t.Intersect([
 					t.Object({
-						season: t.Integer({ minimum: 1 }),
-						episode: t.Integer(),
+						serie: t.Union([
+							t.String({ format: "uuid" }),
+							t.String({ format: "slug", examples: ["made-in-abyss"] }),
+						]),
 					}),
-					t.Object({
-						order: t.Number(),
-					}),
-					t.Object({
-						special: t.Integer(),
-					}),
+					t.Union([
+						t.Object({
+							season: t.Integer({ minimum: 1 }),
+							episode: t.Integer(),
+						}),
+						t.Object({
+							order: t.Number(),
+						}),
+						t.Object({
+							special: t.Integer(),
+						}),
+					]),
 				]),
 			]),
-		]),
+			{ default: [] },
+		),
 	),
 });
 export type SeedVideo = Prettify<typeof SeedVideo.static>;

@@ -7,11 +7,10 @@ import {
 	conflictUpdateAllExcept,
 	jsonbBuildObject,
 	jsonbObjectAgg,
-	sqlarr,
 	values,
 } from "~/db/utils";
 import { bubbleVideo } from "~/models/examples";
-import { Page, isUuid } from "~/models/utils";
+import { isUuid } from "~/models/utils";
 import { Guesses, SeedVideo, Video } from "~/models/video";
 import { comment } from "~/utils";
 import { computeVideoSlug } from "./seed/insert/entries";
@@ -138,10 +137,11 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 						})
 						.from(
 							values(
-								body.flatMap((x) =>
-									x.for.map((e) => ({
+								body.flatMap((x) => {
+									if (!x.for) return [];
+									return x.for.map((e) => ({
 										path: x.path,
-										needRendering: x.for.length > 1,
+										needRendering: x.for!.length > 1,
 										entry: {
 											...e,
 											movie:
@@ -157,8 +157,8 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 														: { slug: e.serie }
 													: undefined,
 										},
-									})),
-								),
+									}));
+								}),
 							).as("j"),
 						)
 						.innerJoin(vidsI, eq(vidsI.path, sql`j.path`))

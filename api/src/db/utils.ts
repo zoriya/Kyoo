@@ -103,7 +103,10 @@ export const nullif = <T>(val: SQL<T> | Column, eq: SQL<T>) => {
 	return sql<T>`nullif(${val}, ${eq})`;
 };
 
-export const jsonbObjectAgg = <T>(key: SQLWrapper, value: SQL<T> | SQLWrapper) => {
+export const jsonbObjectAgg = <T>(
+	key: SQLWrapper,
+	value: SQL<T> | SQLWrapper,
+) => {
 	return sql<
 		Record<string, T>
 	>`jsonb_object_agg(${sql.join([key, value], sql.raw(","))})`;
