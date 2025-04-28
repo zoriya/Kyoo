@@ -71,11 +71,19 @@ export const SeedVideo = t.Object({
 	for: t.Array(
 		t.Union([
 			t.Object({
+				slug: t.String({
+					format: "slug",
+					examples: ["made-in-abyss-dawn-of-the-deep-soul"],
+				}),
+			}),
+			t.Object({
+				externalId: t.Optional(t.Union([EpisodeId, ExternalId()])),
+			}),
+			t.Object({
 				movie: t.Union([
 					t.String({ format: "uuid" }),
 					t.String({ format: "slug", examples: ["bubble"] }),
 				]),
-				externalId: t.Optional(ExternalId()),
 			}),
 			t.Intersect([
 				t.Object({
@@ -88,22 +96,12 @@ export const SeedVideo = t.Object({
 					t.Object({
 						season: t.Integer({ minimum: 1 }),
 						episode: t.Integer(),
-						externalId: t.Optional(EpisodeId),
 					}),
 					t.Object({
-						absolute: t.Integer(),
-						externalId: t.Optional(t.Union([EpisodeId, ExternalId()])),
+						order: t.Number(),
 					}),
 					t.Object({
 						special: t.Integer(),
-						externalId: t.Optional(EpisodeId),
-					}),
-					t.Object({
-						slug: t.String({
-							format: "slug",
-							examples: ["made-in-abyss-dawn-of-the-deep-soul"],
-						}),
-						externalId: t.Optional(t.Union([EpisodeId, ExternalId()])),
 					}),
 				]),
 			]),

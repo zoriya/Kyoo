@@ -1,11 +1,17 @@
-import { and, eq, exists, inArray, not, sql } from "drizzle-orm";
+import { and, eq, exists, inArray, not, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { Elysia, t } from "elysia";
 import { db } from "~/db";
 import { entries, entryVideoJoin, shows, videos } from "~/db/schema";
-import { jsonbBuildObject, jsonbObjectAgg, sqlarr } from "~/db/utils";
+import {
+	conflictUpdateAllExcept,
+	jsonbBuildObject,
+	jsonbObjectAgg,
+	sqlarr,
+	values,
+} from "~/db/utils";
 import { bubbleVideo } from "~/models/examples";
-import { Page } from "~/models/utils";
+import { Page, isUuid } from "~/models/utils";
 import { Guesses, SeedVideo, Video } from "~/models/video";
 import { comment } from "~/utils";
 import { computeVideoSlug } from "./seed/insert/entries";
@@ -14,11 +20,11 @@ import { updateAvailableCount } from "./seed/insert/shows";
 const CreatedVideo = t.Object({
 	id: t.String({ format: "uuid" }),
 	path: t.String({ examples: [bubbleVideo.path] }),
-	// entries: t.Array(
-	// 	t.Object({
-	// 		slug: t.String({ format: "slug", examples: ["bubble-v2"] }),
-	// 	}),
-	// ),
+	entries: t.Array(
+		t.Object({
+			slug: t.String({ format: "slug", examples: ["bubble-v2"] }),
+		}),
+	),
 });
 
 export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
@@ -63,7 +69,9 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 
 			const [{ guesses }] = await db
 				.with(years, guess)
-				.select({ guesses: jsonbObjectAgg<Guesses["guesses"]>(guess.guess, guess.years) })
+				.select({
+					guesses: jsonbObjectAgg<Guesses["guesses"]>(guess.guess, guess.years),
+				})
 				.from(guess);
 
 			const paths = await db.select({ path: videos.path }).from(videos);
@@ -80,90 +88,128 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 	.post(
 		"",
 		async ({ body, error }) => {
-			const oldRet = await db
-				.insert(videos)
-				.values(body)
+			const vidsI = db.$with("vidsI").as(
+				db
+					.insert(videos)
+					.values(body)
+					.onConflictDoUpdate({
+						target: [videos.path],
+						set: conflictUpdateAllExcept(videos, ["pk", "id", "createdAt"]),
+					})
+					.returning({
+						pk: videos.pk,
+						id: videos.id,
+						path: videos.path,
+					}),
+			);
+
+			const entriesQ = db
+				.select({
+					pk: entries.pk,
+					id: entries.id,
+					slug: entries.slug,
+					seasonNumber: entries.seasonNumber,
+					episodeNumber: entries.episodeNumber,
+					order: entries.order,
+					showId: shows.id,
+					showSlug: shows.slug,
+				})
+				.from(entries)
+				.innerJoin(shows, eq(entries.showPk, shows.pk))
+				.as("entriesQ");
+
+			const hasRenderingQ = db
+				.select()
+				.from(entryVideoJoin)
+				.where(eq(entryVideoJoin.entryPk, entriesQ.pk));
+
+			const ret = await db
+				.with(vidsI)
+				.insert(entryVideoJoin)
+				.select(
+					db
+						.select({
+							entry: entries.pk,
+							video: vidsI.pk,
+							slug: computeVideoSlug(
+								entriesQ.showSlug,
+								sql`j.needRendering::boolean || exists(${hasRenderingQ})`,
+							),
+						})
+						.from(
+							values(
+								body.flatMap((x) =>
+									x.for.map((e) => ({
+										path: x.path,
+										needRendering: x.for.length > 1,
+										entry: {
+											...e,
+											movie:
+												"movie" in e
+													? isUuid(e.movie)
+														? { id: e.movie }
+														: { slug: e.movie }
+													: undefined,
+											serie:
+												"serie" in e
+													? isUuid(e.serie)
+														? { id: e.serie }
+														: { slug: e.serie }
+													: undefined,
+										},
+									})),
+								),
+							).as("j"),
+						)
+						.innerJoin(vidsI, eq(vidsI.path, sql`j.path`))
+						.innerJoin(
+							entriesQ,
+							or(
+								and(
+									sql`j.entry ? 'slug'`,
+									eq(entriesQ.slug, sql`j.entry->'slug'`),
+								),
+								and(
+									sql`j.entry ? 'movie'`,
+									or(
+										eq(entriesQ.showId, sql`j.entry #> '{movie, id}'`),
+										eq(entriesQ.showSlug, sql`j.entry #> '{movie, slug}'`),
+									),
+								),
+								and(
+									sql`j.entry ? 'serie'`,
+									or(
+										eq(entriesQ.showId, sql`j.entry #> '{serie, id}'`),
+										eq(entriesQ.showSlug, sql`j.entry #> '{serie, slug}'`),
+									),
+									or(
+										and(
+											sql`j.entry ?& array['season', 'episode']`,
+											eq(entriesQ.seasonNumber, sql`j.entry->'season'`),
+											eq(entriesQ.episodeNumber, sql`j.entry->'episode'`),
+										),
+										and(
+											sql`j.entry ? 'order'`,
+											eq(entriesQ.order, sql`j.entry->'order'`),
+										),
+										and(
+											sql`j.entry ? 'special'`,
+											eq(entriesQ.episodeNumber, sql`j.entry->'special'`),
+										),
+									),
+								),
+							),
+						),
+				)
 				.onConflictDoNothing()
 				.returning({
-					pk: videos.pk,
-					id: videos.id,
-					path: videos.path,
-					guess: videos.guess,
+					slug: entryVideoJoin.slug,
+					entryPk: entryVideoJoin.entryPk,
+					id: vidsI.id,
+					path: vidsI.path,
 				});
-			return error(201, oldRet);
-
-			// TODO: this is a huge untested wip
-			// const vidsI = db.$with("vidsI").as(
-			// 	db.insert(videos).values(body).onConflictDoNothing().returning({
-			// 		pk: videos.pk,
-			// 		id: videos.id,
-			// 		path: videos.path,
-			// 		guess: videos.guess,
-			// 	}),
-			// );
-			//
-			// const findEntriesQ = db
-			// 	.select({
-			// 		guess: videos.guess,
-			// 		entryPk: entries.pk,
-			// 		showSlug: shows.slug,
-			// 		// TODO: handle extras here
-			// 		// guessit can't know if an episode is a special or not. treat specials like a normal episode.
-			// 		kind: sql`
-			// 			case when ${entries.kind} = 'movie' then 'movie' else 'episode' end
-			// 		`.as("kind"),
-			// 		season: entries.seasonNumber,
-			// 		episode: entries.episodeNumber,
-			// 	})
-			// 	.from(entries)
-			// 	.leftJoin(entryVideoJoin, eq(entryVideoJoin.entry, entries.pk))
-			// 	.leftJoin(videos, eq(videos.pk, entryVideoJoin.video))
-			// 	.leftJoin(shows, eq(shows.pk, entries.showPk))
-			// 	.as("find_entries");
-			//
-			// const hasRenderingQ = db
-			// 	.select()
-			// 	.from(entryVideoJoin)
-			// 	.where(eq(entryVideoJoin.entry, findEntriesQ.entryPk));
-			//
-			// const ret = await db
-			// 	.with(vidsI)
-			// 	.insert(entryVideoJoin)
-			// 	.select(
-			// 		db
-			// 			.select({
-			// 				entry: findEntriesQ.entryPk,
-			// 				video: vidsI.pk,
-			// 				slug: computeVideoSlug(
-			// 					findEntriesQ.showSlug,
-			// 					sql`exists(${hasRenderingQ})`,
-			// 				),
-			// 			})
-			// 			.from(vidsI)
-			// 			.leftJoin(
-			// 				findEntriesQ,
-			// 				and(
-			// 					eq(
-			// 						sql`${findEntriesQ.guess}->'title'`,
-			// 						sql`${vidsI.guess}->'title'`,
-			// 					),
-			// 					// TODO: find if @> with a jsonb created on the fly is
-			// 					// better than multiples checks
-			// 					sql`${vidsI.guess} @> {"kind": }::jsonb`,
-			// 					inArray(findEntriesQ.kind, sql`${vidsI.guess}->'type'`),
-			// 					inArray(findEntriesQ.episode, sql`${vidsI.guess}->'episode'`),
-			// 					inArray(findEntriesQ.season, sql`${vidsI.guess}->'season'`),
-			// 				),
-			// 			),
-			// 	)
-			// 	.onConflictDoNothing()
-			// 	.returning({
-			// 		slug: entryVideoJoin.slug,
-			// 		entryPk: entryVideoJoin.entry,
-			// 		id: vidsI.id,
-			// 		path: vidsI.path,
-			// 	});
-			// return error(201, ret as any);
+			return error(201, ret);
+			// return error(201, ret.map(x => ({ id: x.id, slug: x.})));
 		},
 		{
 			detail: {
@@ -176,7 +222,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				`,
 			},
 			body: t.Array(SeedVideo),
-			response: { 201: t.Array(CreatedVideo) },
+			// response: { 201: t.Array(CreatedVideo) },
 		},
 	)
 	.delete(
