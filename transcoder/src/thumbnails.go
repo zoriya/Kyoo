@@ -1,17 +1,19 @@
 package src
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"image"
 	"image/color"
+	"io"
 	"log"
 	"math"
-	"os"
-	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/disintegration/imaging"
+	"github.com/zoriya/kyoo/transcoder/src/utils"
 	"gitlab.com/opennota/screengen"
 )
 
@@ -29,33 +31,54 @@ type Thumbnail struct {
 
 const ThumbsVersion = 1
 
-func getThumbGlob(sha string) string {
-	return fmt.Sprintf("%s/%s/thumbs-v*.*", Settings.Metadata, sha)
+// getThumbGlob returns the path prefix for all thumbnail files for a given sha.
+func getThumbPrefix(sha string) string {
+	return sha
 }
 
 func getThumbPath(sha string) string {
-	return fmt.Sprintf("%s/%s/thumbs-v%d.png", Settings.Metadata, sha, ThumbsVersion)
+	return fmt.Sprintf("%s/thumbs-v%d.png", sha, ThumbsVersion)
 }
 
 func getThumbVttPath(sha string) string {
-	return fmt.Sprintf("%s/%s/thumbs-v%d.vtt", Settings.Metadata, sha, ThumbsVersion)
+	return fmt.Sprintf("%s/thumbs-v%d.vtt", sha, ThumbsVersion)
 }
 
-func (s *MetadataService) GetThumb(path string, sha string) (string, string, error) {
-	_, err := s.ExtractThumbs(path, sha)
+func (s *MetadataService) GetThumbVtt(ctx context.Context, path string, sha string) (io.ReadCloser, error) {
+	_, err := s.ExtractThumbs(ctx, path, sha)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
-	return getThumbPath(sha), getThumbVttPath(sha), nil
+
+	vttPath := getThumbVttPath(sha)
+	vtt, err := s.storage.GetItem(ctx, vttPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get thumbnail vtt with path %q: %w", vttPath, err)
+	}
+	return vtt, nil
 }
 
-func (s *MetadataService) ExtractThumbs(path string, sha string) (interface{}, error) {
+func (s *MetadataService) GetThumbSprite(ctx context.Context, path string, sha string) (io.ReadCloser, error) {
+	_, err := s.ExtractThumbs(ctx, path, sha)
+	if err != nil {
+		return nil, err
+	}
+
+	spritePath := getThumbPath(sha)
+	sprite, err := s.storage.GetItem(ctx, spritePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get thumbnail sprite with path %q: %w", spritePath, err)
+	}
+	return sprite, nil
+}
+
+func (s *MetadataService) ExtractThumbs(ctx context.Context, path string, sha string) (interface{}, error) {
 	get_running, set := s.thumbLock.Start(sha)
 	if get_running != nil {
 		return get_running()
 	}
 
-	err := extractThumbnail(path, sha)
+	err := s.extractThumbnail(ctx, path, sha)
 	if err != nil {
 		return set(nil, err)
 	}
@@ -63,12 +86,18 @@ func (s *MetadataService) ExtractThumbs(path string, sha string) (interface{}, e
 	return set(nil, err)
 }
 
-func extractThumbnail(path string, sha string) error {
-	defer printExecTime("extracting thumbnails for %s", path)()
+func (s *MetadataService) extractThumbnail(ctx context.Context, path string, sha string) (err error) {
+	defer utils.PrintExecTime("extracting thumbnails for %s", path)()
 
-	os.MkdirAll(fmt.Sprintf("%s/%s", Settings.Metadata, sha), 0o755)
+	vttPath := getThumbVttPath(sha)
+	spritePath := getThumbPath(sha)
+	newItemPaths := []string{spritePath, vttPath}
 
-	if _, err := os.Stat(getThumbPath(sha)); err == nil {
+	doAllExist, err := s.doAllThumbnailFilesExist(ctx, newItemPaths)
+	if err != nil {
+		return fmt.Errorf("failed to check if thumbnail files exist: %w", err)
+	}
+	if doAllExist {
 		return nil
 	}
 
@@ -77,7 +106,7 @@ func extractThumbnail(path string, sha string) error {
 		log.Printf("Error reading video file: %v", err)
 		return err
 	}
-	defer gen.Close()
+	defer utils.CleanupWithErr(&err, gen.Close, "failed to close screengen generator")
 
 	gen.Fast = true
 
@@ -128,24 +157,47 @@ func extractThumbnail(path string, sha string) error {
 		)
 	}
 
-	// Cleanup old versions of thumbnails
-	files, err := filepath.Glob(getThumbGlob(sha))
-	if err == nil {
-		for _, f := range files {
-			// ignore errors
-			os.Remove(f)
-		}
+	// Cleanup old thumbnails
+	if err := s.storage.DeleteItemsWithPrefix(ctx, getThumbPrefix(sha)); err != nil {
+		return fmt.Errorf("failed to delete old thumbnails: %w", err)
 	}
 
-	err = os.WriteFile(getThumbVttPath(sha), []byte(vtt), 0o644)
+	// Store the new items
+	//  Thumbnail vtt
+	if err = s.storage.SaveItem(ctx, vttPath, strings.NewReader(vtt)); err != nil {
+		return fmt.Errorf("failed to save thumbnail vtt with path %q: %w", vttPath, err)
+	}
+
+	//  Thumbnail sprite
+	spriteFormat, err := imaging.FormatFromFilename(spritePath)
 	if err != nil {
 		return err
 	}
-	err = imaging.Save(sprite, getThumbPath(sha))
+
+	err = s.storage.SaveItemWithCallback(ctx, spritePath, func(_ context.Context, writer io.Writer) error {
+		if err := imaging.Encode(writer, sprite, spriteFormat); err != nil {
+			return fmt.Errorf("failed to encode thumbnail sprite: %w", err)
+		}
+		return nil
+	})
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to save thumbnail sprite with path %q: %w", spritePath, err)
 	}
+
 	return nil
+}
+
+func (s *MetadataService) doAllThumbnailFilesExist(ctx context.Context, filePaths []string) (bool, error) {
+	for _, filePath := range filePaths {
+		doesExist, err := s.storage.DoesItemExist(ctx, filePath)
+		if err != nil {
+			return false, fmt.Errorf("failed to check if thumbnail file %q exists: %w", filePath, err)
+		}
+		if !doesExist {
+			return false, nil
+		}
+	}
+	return true, nil
 }
 
 func tsToVttTime(ts int) string {

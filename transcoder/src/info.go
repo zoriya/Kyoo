@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/zoriya/kyoo/transcoder/src/utils"
 	"golang.org/x/text/language"
 	"gopkg.in/vansante/go-ffprobe.v2"
 )
@@ -228,7 +229,7 @@ var SubtitleExtensions = map[string]string{
 }
 
 func RetriveMediaInfo(path string, sha string) (*MediaInfo, error) {
-	defer printExecTime("mediainfo for %s", path)()
+	defer utils.PrintExecTime("mediainfo for %s", path)()
 
 	ctx, cancelFn := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancelFn()

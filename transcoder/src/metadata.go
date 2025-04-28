@@ -1,17 +1,21 @@
 package src
 
 import (
+	"context"
 	"database/sql"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
 
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/lib/pq"
-	_ "github.com/lib/pq"
+	"github.com/zoriya/kyoo/transcoder/src/storage"
 )
 
 type MetadataService struct {
@@ -20,9 +24,60 @@ type MetadataService struct {
 	thumbLock    RunLock[string, interface{}]
 	extractLock  RunLock[string, interface{}]
 	keyframeLock RunLock[KeyframeKey, *Keyframe]
+	storage      storage.StorageBackend
 }
 
 func NewMetadataService() (*MetadataService, error) {
+	ctx := context.TODO()
+
+	s := &MetadataService{
+		lock:         NewRunLock[string, *MediaInfo](),
+		thumbLock:    NewRunLock[string, interface{}](),
+		extractLock:  NewRunLock[string, interface{}](),
+		keyframeLock: NewRunLock[KeyframeKey, *Keyframe](),
+	}
+
+	db, err := s.setupDb()
+	if err != nil {
+		return nil, fmt.Errorf("failed to setup database: %w", err)
+	}
+	s.database = db
+
+	storage, err := s.setupStorage(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to setup storage: %w", err)
+	}
+	s.storage = storage
+
+	return s, nil
+}
+
+func (s *MetadataService) Close() error {
+	cleanupErrs := make([]error, 0, 2)
+	if s.database != nil {
+		err := s.database.Close()
+		if err != nil {
+			cleanupErrs = append(cleanupErrs, fmt.Errorf("failed to close database: %w", err))
+		}
+	}
+
+	if s.storage != nil {
+		if storageCloser, ok := s.storage.(storage.StorageBackendCloser); ok {
+			err := storageCloser.Close()
+			if err != nil {
+				cleanupErrs = append(cleanupErrs, fmt.Errorf("failed to close storage: %w", err))
+			}
+		}
+	}
+
+	if err := errors.Join(cleanupErrs...); err != nil {
+		return fmt.Errorf("failed to cleanup resources: %w", err)
+	}
+
+	return nil
+}
+
+func (s *MetadataService) setupDb() (*sql.DB, error) {
 	schema := GetEnvOr("POSTGRES_SCHEMA", "gocoder")
 
 	connectionString := os.Getenv("POSTGRES_URL")
@@ -64,26 +119,44 @@ func NewMetadataService() (*MetadataService, error) {
 	}
 	m.Up()
 
-	return &MetadataService{
-		database:     db,
-		lock:         NewRunLock[string, *MediaInfo](),
-		thumbLock:    NewRunLock[string, interface{}](),
-		extractLock:  NewRunLock[string, interface{}](),
-		keyframeLock: NewRunLock[KeyframeKey, *Keyframe](),
-	}, nil
+	return db, nil
 }
 
-func (s *MetadataService) GetMetadata(path string, sha string) (*MediaInfo, error) {
+func (s *MetadataService) setupStorage(ctx context.Context) (storage.StorageBackend, error) {
+	s3BucketName := os.Getenv("S3_BUCKET_NAME")
+	if s3BucketName != "" {
+		// Use S3 storage
+		// Create the client (use all standard AWS config sources like env vars, config files, etc.)
+		awsConfig, err := config.LoadDefaultConfig(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load AWS config: %w", err)
+		}
+		s3Client := s3.NewFromConfig(awsConfig)
+
+		return storage.NewS3StorageBackend(s3Client, s3BucketName), nil
+	}
+
+	// Use local file storage
+	storageRoot := GetEnvOr("GOCODER_METADATA_ROOT", "/metadata")
+
+	localStorage, err := storage.NewFileStorageBackend(storageRoot)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create local storage backend: %w", err)
+	}
+	return localStorage, nil
+}
+
+func (s *MetadataService) GetMetadata(ctx context.Context, path string, sha string) (*MediaInfo, error) {
 	ret, err := s.getMetadata(path, sha)
 	if err != nil {
 		return nil, err
 	}
 
 	if ret.Versions.Thumbs < ThumbsVersion {
-		go s.ExtractThumbs(path, sha)
+		go s.ExtractThumbs(ctx, path, sha)
 	}
 	if ret.Versions.Extract < ExtractVersion {
-		go s.ExtractSubs(ret)
+		go s.ExtractSubs(ctx, ret)
 	}
 	if ret.Versions.Keyframes < KeyframeVersion && ret.Versions.Keyframes != 0 {
 		for _, video := range ret.Videos {
@@ -229,6 +302,10 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 	}
 
 	tx, err := s.database.Begin()
+	if err != nil {
+		return set(ret, err)
+	}
+
 	// it needs to be a delete instead of a on conflict do update because we want to trigger delete casquade for
 	// videos/audios & co.
 	tx.Exec(`delete from info where path = $1`, path)
