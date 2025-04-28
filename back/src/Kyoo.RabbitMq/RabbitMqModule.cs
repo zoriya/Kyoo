@@ -23,6 +23,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Primitives;
 using RabbitMQ.Client;
 
 namespace Kyoo.RabbitMq;
@@ -61,37 +62,26 @@ public static class RabbitMqModule
 
 		// Support query parameters defined here:
 		// https://www.rabbitmq.com/docs/uri-query-parameters
-		Dictionary<string, Microsoft.Extensions.Primitives.StringValues> queryParameters =
-			QueryHelpers.ParseQuery(factory.Uri.Query);
-
-		queryParameters.TryGetValue(
-			"heartbeat",
-			out Microsoft.Extensions.Primitives.StringValues heartbeats
+		Dictionary<string, StringValues> queryParameters = QueryHelpers.ParseQuery(
+			factory.Uri.Query
 		);
+
+		queryParameters.TryGetValue("heartbeat", out StringValues heartbeats);
 		if (int.TryParse(heartbeats.LastOrDefault(), out int heartbeatValue))
 			factory.RequestedHeartbeat = TimeSpan.FromSeconds(heartbeatValue);
 
-		queryParameters.TryGetValue(
-			"connection_timeout",
-			out Microsoft.Extensions.Primitives.StringValues connectionTimeouts
-		);
+		queryParameters.TryGetValue("connection_timeout", out StringValues connectionTimeouts);
 		if (int.TryParse(connectionTimeouts.LastOrDefault(), out int connectionTimeoutValue))
 			factory.RequestedConnectionTimeout = TimeSpan.FromSeconds(connectionTimeoutValue);
 
-		queryParameters.TryGetValue(
-			"channel_max",
-			out Microsoft.Extensions.Primitives.StringValues channelMaxValues
-		);
+		queryParameters.TryGetValue("channel_max", out StringValues channelMaxValues);
 		if (ushort.TryParse(channelMaxValues.LastOrDefault(), out ushort channelMaxValue))
 			factory.RequestedChannelMax = channelMaxValue;
 
 		if (!factory.Ssl.Enabled)
 			return;
 
-		queryParameters.TryGetValue(
-			"cacertfile",
-			out Microsoft.Extensions.Primitives.StringValues caCertFiles
-		);
+		queryParameters.TryGetValue("cacertfile", out StringValues caCertFiles);
 		var caCertFile = caCertFiles.LastOrDefault();
 		if (!string.IsNullOrEmpty(caCertFile))
 		{
@@ -169,10 +159,7 @@ public static class RabbitMqModule
 				break;
 		}
 
-		queryParameters.TryGetValue(
-			"server_name_indication",
-			out Microsoft.Extensions.Primitives.StringValues sniValues
-		);
+		queryParameters.TryGetValue("server_name_indication", out StringValues sniValues);
 		var sni = sniValues.LastOrDefault();
 		if (!string.IsNullOrEmpty(sni))
 		{
@@ -185,10 +172,7 @@ public static class RabbitMqModule
 				factory.Ssl.ServerName = sni;
 		}
 
-		queryParameters.TryGetValue(
-			"auth_mechanism",
-			out Microsoft.Extensions.Primitives.StringValues authMechanisms
-		);
+		queryParameters.TryGetValue("auth_mechanism", out StringValues authMechanisms);
 		if (authMechanisms.Count > 0)
 		{
 			factory.AuthMechanisms.Clear();
@@ -231,18 +215,9 @@ public static class RabbitMqModule
 			factory.HostName,
 			"rabbitmq"
 		);
-		var port = configuration.GetValue<int?>("RABBITMQ_PORT");
-		if (port != null)
-			factory.Port = port.Value;
-		else if (factory.Port == 0)
-			factory.Port = 5672;
+		factory.Port = configuration.GetValue("RABBITMQ_PORT", 5672);
 	}
 
-	private static string _GetNonEmptyString(params string?[] values)
-	{
-		foreach (var value in values)
-			if (!string.IsNullOrEmpty(value))
-				return value;
-		return string.Empty;
-	}
+	private static string _GetNonEmptyString(params string?[] values) =>
+		values.FirstOrDefault(string.IsNullOrEmpty) ?? string.Empty;
 }
