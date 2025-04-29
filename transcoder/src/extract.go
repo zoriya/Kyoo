@@ -1,6 +1,7 @@
 package src
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -9,7 +10,7 @@ import (
 
 const ExtractVersion = 1
 
-func (s *MetadataService) ExtractSubs(info *MediaInfo) (interface{}, error) {
+func (s *MetadataService) ExtractSubs(ctx context.Context, info *MediaInfo) (interface{}, error) {
 	get_running, set := s.extractLock.Start(info.Sha)
 	if get_running != nil {
 		return get_running()
@@ -19,7 +20,7 @@ func (s *MetadataService) ExtractSubs(info *MediaInfo) (interface{}, error) {
 	if err != nil {
 		return set(nil, err)
 	}
-	_, err = s.database.Exec(`update info set ver_extract = $2 where sha = $1`, info.Sha, ExtractVersion)
+	_, err = s.database.Exec(ctx, `update info set ver_extract = $2 where sha = $1`, info.Sha, ExtractVersion)
 	return set(nil, err)
 }
 
