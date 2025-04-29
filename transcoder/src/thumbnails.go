@@ -1,6 +1,7 @@
 package src
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"image"
@@ -41,15 +42,15 @@ func getThumbVttPath(sha string) string {
 	return fmt.Sprintf("%s/%s/thumbs-v%d.vtt", Settings.Metadata, sha, ThumbsVersion)
 }
 
-func (s *MetadataService) GetThumb(path string, sha string) (string, string, error) {
-	_, err := s.ExtractThumbs(path, sha)
+func (s *MetadataService) GetThumb(ctx context.Context, path string, sha string) (string, string, error) {
+	_, err := s.ExtractThumbs(ctx, path, sha)
 	if err != nil {
 		return "", "", err
 	}
 	return getThumbPath(sha), getThumbVttPath(sha), nil
 }
 
-func (s *MetadataService) ExtractThumbs(path string, sha string) (interface{}, error) {
+func (s *MetadataService) ExtractThumbs(ctx context.Context, path string, sha string) (interface{}, error) {
 	get_running, set := s.thumbLock.Start(sha)
 	if get_running != nil {
 		return get_running()
@@ -59,7 +60,7 @@ func (s *MetadataService) ExtractThumbs(path string, sha string) (interface{}, e
 	if err != nil {
 		return set(nil, err)
 	}
-	_, err = s.database.Exec(`update info set ver_thumbs = $2 where sha = $1`, sha, ThumbsVersion)
+	_, err = s.database.Exec(ctx, `update info set ver_thumbs = $2 where sha = $1`, sha, ThumbsVersion)
 	return set(nil, err)
 }
 

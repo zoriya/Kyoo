@@ -2,6 +2,7 @@ package src
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -9,8 +10,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-
-	"github.com/lib/pq"
 )
 
 const KeyframeVersion = 1
@@ -70,25 +69,13 @@ func (kf *Keyframe) AddListener(callback func(keyframes []float64)) {
 	kf.info.listeners = append(kf.info.listeners, callback)
 }
 
-func (kf *Keyframe) Scan(src interface{}) error {
-	var arr pq.Float64Array
-	err := arr.Scan(src)
-	if err != nil {
-		return err
-	}
-	kf.Keyframes = arr
-	kf.IsDone = true
-	kf.info = &KeyframeInfo{}
-	return nil
-}
-
 type KeyframeKey struct {
 	Sha     string
 	IsVideo bool
 	Index   uint32
 }
 
-func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx uint32) (*Keyframe, error) {
+func (s *MetadataService) GetKeyframes(ctx context.Context, info *MediaInfo, isVideo bool, idx uint32) (*Keyframe, error) {
 	info.lock.Lock()
 	var ret *Keyframe
 	if isVideo && info.Videos[idx].Keyframes != nil {
@@ -142,15 +129,16 @@ func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx uint32
 		}
 
 		kf.info.ready.Wait()
-		tx, _ := s.database.Begin()
+		tx, _ := s.database.Begin(ctx)
 		tx.Exec(
+			ctx,
 			fmt.Sprintf(`update %s set keyframes = $3 where sha = $1 and idx = $2`, table),
 			info.Sha,
 			idx,
-			pq.Array(kf.Keyframes),
+			kf.Keyframes,
 		)
-		tx.Exec(`update info set ver_keyframes = $2 where sha = $1`, info.Sha, KeyframeVersion)
-		err = tx.Commit()
+		tx.Exec(ctx, `update info set ver_keyframes = $2 where sha = $1`, info.Sha, KeyframeVersion)
+		err = tx.Commit(ctx)
 		if err != nil {
 			log.Printf("Couldn't store keyframes on database: %v", err)
 		}

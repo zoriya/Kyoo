@@ -1,6 +1,7 @@
 package src
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"math"
@@ -24,7 +25,7 @@ type VideoKey struct {
 	quality Quality
 }
 
-func (t *Transcoder) newFileStream(path string, sha string) *FileStream {
+func (t *Transcoder) newFileStream(ctx context.Context, path string, sha string) *FileStream {
 	ret := &FileStream{
 		transcoder: t,
 		Out:        fmt.Sprintf("%s/%s", Settings.Outpath, sha),
@@ -35,7 +36,7 @@ func (t *Transcoder) newFileStream(path string, sha string) *FileStream {
 	ret.ready.Add(1)
 	go func() {
 		defer ret.ready.Done()
-		info, err := t.metadataService.GetMetadata(path, sha)
+		info, err := t.metadataService.GetMetadata(ctx, path, sha)
 		ret.Info = info
 		if err != nil {
 			ret.err = err
@@ -176,50 +177,50 @@ func (fs *FileStream) GetMaster() string {
 	return master
 }
 
-func (fs *FileStream) getVideoStream(idx uint32, quality Quality) (*VideoStream, error) {
+func (fs *FileStream) getVideoStream(ctx context.Context, idx uint32, quality Quality) (*VideoStream, error) {
 	stream, _ := fs.videos.GetOrCreate(VideoKey{idx, quality}, func() *VideoStream {
-		ret, _ := fs.transcoder.NewVideoStream(fs, idx, quality)
+		ret, _ := fs.transcoder.NewVideoStream(ctx, fs, idx, quality)
 		return ret
 	})
 	stream.ready.Wait()
 	return stream, nil
 }
 
-func (fs *FileStream) GetVideoIndex(idx uint32, quality Quality) (string, error) {
-	stream, err := fs.getVideoStream(idx, quality)
+func (fs *FileStream) GetVideoIndex(ctx context.Context, idx uint32, quality Quality) (string, error) {
+	stream, err := fs.getVideoStream(ctx, idx, quality)
 	if err != nil {
 		return "", err
 	}
 	return stream.GetIndex()
 }
 
-func (fs *FileStream) GetVideoSegment(idx uint32, quality Quality, segment int32) (string, error) {
-	stream, err := fs.getVideoStream(idx, quality)
+func (fs *FileStream) GetVideoSegment(ctx context.Context, idx uint32, quality Quality, segment int32) (string, error) {
+	stream, err := fs.getVideoStream(ctx, idx, quality)
 	if err != nil {
 		return "", err
 	}
 	return stream.GetSegment(segment)
 }
 
-func (fs *FileStream) getAudioStream(audio uint32) (*AudioStream, error) {
+func (fs *FileStream) getAudioStream(ctx context.Context, audio uint32) (*AudioStream, error) {
 	stream, _ := fs.audios.GetOrCreate(audio, func() *AudioStream {
-		ret, _ := fs.transcoder.NewAudioStream(fs, audio)
+		ret, _ := fs.transcoder.NewAudioStream(ctx, fs, audio)
 		return ret
 	})
 	stream.ready.Wait()
 	return stream, nil
 }
 
-func (fs *FileStream) GetAudioIndex(audio uint32) (string, error) {
-	stream, err := fs.getAudioStream(audio)
+func (fs *FileStream) GetAudioIndex(ctx context.Context, audio uint32) (string, error) {
+	stream, err := fs.getAudioStream(ctx, audio)
 	if err != nil {
 		return "", nil
 	}
 	return stream.GetIndex()
 }
 
-func (fs *FileStream) GetAudioSegment(audio uint32, segment int32) (string, error) {
-	stream, err := fs.getAudioStream(audio)
+func (fs *FileStream) GetAudioSegment(ctx context.Context, audio uint32, segment int32) (string, error) {
+	stream, err := fs.getAudioStream(ctx, audio)
 	if err != nil {
 		return "", nil
 	}

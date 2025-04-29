@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"strconv"
 
@@ -42,7 +44,7 @@ func (h *Handler) GetMaster(c echo.Context) error {
 		return err
 	}
 
-	ret, err := h.transcoder.GetMaster(path, client, sha)
+	ret, err := h.transcoder.GetMaster(c.Request().Context(), path, client, sha)
 	if err != nil {
 		return err
 	}
@@ -74,7 +76,7 @@ func (h *Handler) GetVideoIndex(c echo.Context) error {
 		return err
 	}
 
-	ret, err := h.transcoder.GetVideoIndex(path, uint32(video), quality, client, sha)
+	ret, err := h.transcoder.GetVideoIndex(c.Request().Context(), path, uint32(video), quality, client, sha)
 	if err != nil {
 		return err
 	}
@@ -102,7 +104,7 @@ func (h *Handler) GetAudioIndex(c echo.Context) error {
 		return err
 	}
 
-	ret, err := h.transcoder.GetAudioIndex(path, uint32(audio), client, sha)
+	ret, err := h.transcoder.GetAudioIndex(c.Request().Context(), path, uint32(audio), client, sha)
 	if err != nil {
 		return err
 	}
@@ -137,6 +139,7 @@ func (h *Handler) GetVideoSegment(c echo.Context) error {
 	}
 
 	ret, err := h.transcoder.GetVideoSegment(
+		c.Request().Context(),
 		path,
 		uint32(video),
 		quality,
@@ -173,7 +176,7 @@ func (h *Handler) GetAudioSegment(c echo.Context) error {
 		return err
 	}
 
-	ret, err := h.transcoder.GetAudioSegment(path, uint32(audio), segment, client, sha)
+	ret, err := h.transcoder.GetAudioSegment(c.Request().Context(), path, uint32(audio), segment, client, sha)
 	if err != nil {
 		return err
 	}
@@ -191,7 +194,7 @@ func (h *Handler) GetInfo(c echo.Context) error {
 		return err
 	}
 
-	ret, err := h.metadata.GetMetadata(path, sha)
+	ret, err := h.metadata.GetMetadata(c.Request().Context(), path, sha)
 	if err != nil {
 		return err
 	}
@@ -256,7 +259,7 @@ func (h *Handler) GetThumbnails(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	sprite, _, err := h.metadata.GetThumb(path, sha)
+	sprite, _, err := h.metadata.GetThumb(c.Request().Context(), path, sha)
 	if err != nil {
 		return err
 	}
@@ -275,7 +278,7 @@ func (h *Handler) GetThumbnailsVtt(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	_, vtt, err := h.metadata.GetThumb(path, sha)
+	_, vtt, err := h.metadata.GetThumb(c.Request().Context(), path, sha)
 	if err != nil {
 		return err
 	}
@@ -289,11 +292,19 @@ type Handler struct {
 }
 
 func main() {
+	// TODO listen for SIGTERM and SIGINT, cancel context when signal is received
+	ctx := context.Background()
+
 	e := echo.New()
 	e.Use(middleware.Logger())
+	// This is a no-op until ctx is replaced by a signal context
+	e.Server.BaseContext = func(_ net.Listener) context.Context {
+		return ctx
+	}
 	e.HTTPErrorHandler = ErrorHandler
 
-	metadata, err := src.NewMetadataService()
+	// TODO this should use a time-limited context at some point
+	metadata, err := src.NewMetadataService(ctx)
 	if err != nil {
 		e.Logger.Fatal(err)
 		return

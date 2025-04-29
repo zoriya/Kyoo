@@ -1,6 +1,7 @@
 package src
 
 import (
+	"context"
 	"fmt"
 	"log"
 )
@@ -10,10 +11,10 @@ type AudioStream struct {
 	index uint32
 }
 
-func (t *Transcoder) NewAudioStream(file *FileStream, idx uint32) (*AudioStream, error) {
+func (t *Transcoder) NewAudioStream(ctx context.Context, file *FileStream, idx uint32) (*AudioStream, error) {
 	log.Printf("Creating a audio stream %d for %s", idx, file.Info.Path)
 
-	keyframes, err := t.metadataService.GetKeyframes(file.Info, false, idx)
+	keyframes, err := t.metadataService.GetKeyframes(ctx, file.Info, false, idx)
 	if err != nil {
 		return nil, err
 	}
