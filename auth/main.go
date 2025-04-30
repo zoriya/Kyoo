@@ -80,7 +80,7 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 	}
 
 	// Set default values
-	if config.ConnConfig.Host == "" {
+	if config.ConnConfig.Host == "/tmp" {
 		config.ConnConfig.Host = "postgres"
 	}
 	if config.ConnConfig.Database == "" {
@@ -96,7 +96,7 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 		// by the pgx library. This doesn't cover the case where the system username happens to be in some other part
 		// of the connection string, but this cannot be checked without full connection string parsing.
 		if currentUserName.Username == config.ConnConfig.User && !strings.Contains(connectionString, currentUserName.Username) {
-		config.ConnConfig.User = "kyoo"
+			config.ConnConfig.User = "kyoo"
 		}
 	}
 	if config.ConnConfig.Password == "" {
@@ -113,7 +113,7 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 
 	db, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
-		fmt.Printf("Could not connect to database, check your env variables!")
+		fmt.Printf("Could not connect to database, check your env variables!\n")
 		return nil, err
 	}
 
