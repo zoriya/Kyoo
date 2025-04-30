@@ -1,4 +1,4 @@
-import { and, eq, exists, inArray, not, or, sql } from "drizzle-orm";
+import { and, eq, exists, inArray, not, notExists, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { Elysia, t } from "elysia";
 import { db } from "~/db";
@@ -9,8 +9,17 @@ import {
 	jsonbObjectAgg,
 	values,
 } from "~/db/utils";
+import { KError } from "~/models/error";
 import { bubbleVideo } from "~/models/examples";
-import { isUuid } from "~/models/utils";
+import {
+	Page,
+	Sort,
+	createPage,
+	isUuid,
+	keysetPaginate,
+	sortToSql,
+} from "~/models/utils";
+import { desc as description } from "~/models/utils/descriptions";
 import { Guesses, SeedVideo, Video } from "~/models/video";
 import { comment } from "~/utils";
 import { computeVideoSlug } from "./seed/insert/entries";
@@ -81,6 +90,55 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 			detail: { description: "Get all video registered & guessed made" },
 			response: {
 				200: Guesses,
+			},
+		},
+	)
+	.get(
+		"unknowns",
+		async ({ query: { sort, query, limit, after }, request: { url } }) => {
+			const ret = await db
+				.select()
+				.from(videos)
+				.where(
+					and(
+						notExists(
+							db
+								.select()
+								.from(entryVideoJoin)
+								.where(eq(videos.pk, entryVideoJoin.videoPk)),
+						),
+						query
+							? or(
+									sql`${videos.path} %> ${query}::text`,
+									sql`${videos.guess}->'title' %> ${query}::text`,
+								)
+							: undefined,
+						keysetPaginate({ after, sort }),
+					),
+				)
+				.orderBy(...(query ? [] : sortToSql(sort)), videos.pk)
+				.limit(limit);
+			return createPage(ret, { url, sort, limit });
+		},
+		{
+			detail: { description: "Get unknown/unmatch videos." },
+			query: t.Object({
+				sort: Sort(
+					{ createdAt: videos.createdAt, path: videos.path },
+					{ default: ["-createdAt"], tablePk: videos.pk },
+				),
+				query: t.Optional(t.String({ description: description.query })),
+				limit: t.Integer({
+					minimum: 1,
+					maximum: 250,
+					default: 50,
+					description: "Max page size.",
+				}),
+				after: t.Optional(t.String({ description: description.after })),
+			}),
+			response: {
+				200: Page(Video),
+				422: KError,
 			},
 		},
 	)

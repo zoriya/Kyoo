@@ -17,4 +17,3 @@ export * from "./episode";
 export * from "./movie-entry";
 export * from "./special";
 export * from "./extra";
-export * from "./unknown-entry";

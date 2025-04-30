@@ -114,7 +114,9 @@ export const SeedVideo = t.Object({
 export type SeedVideo = Prettify<typeof SeedVideo.static>;
 
 export const Video = t.Intersect([
-	Resource(),
+	t.Object({
+		id: t.String({ format: "uuid" }),
+	}),
 	t.Omit(SeedVideo, ["for"]),
 	DbMetadata,
 ]);

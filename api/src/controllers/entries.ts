@@ -26,7 +26,6 @@ import {
 	ExtraType,
 	MovieEntry,
 	Special,
-	UnknownEntry,
 } from "~/models/entry";
 import { KError } from "~/models/error";
 import { madeInAbyss } from "~/models/examples";
@@ -77,11 +76,6 @@ export const entryFilters: FilterDef = {
 
 const extraFilters: FilterDef = {
 	kind: { column: entries.extraKind, type: "enum", values: ExtraType.enum },
-	runtime: { column: entries.runtime, type: "float" },
-	playedDate: { column: entryProgressQ.playedDate, type: "date" },
-};
-
-const unknownFilters: FilterDef = {
 	runtime: { column: entries.runtime, type: "float" },
 	playedDate: { column: entryProgressQ.playedDate, type: "date" },
 };
@@ -176,7 +170,7 @@ export async function getEntries({
 	languages: string[];
 	userId: string;
 	progressQ?: typeof entryProgressQ;
-}): Promise<(Entry | Extra | UnknownEntry)[]> {
+}): Promise<(Entry | Extra)[]> {
 	const transQ = db
 		.selectDistinctOn([entryTranslations.pk])
 		.from(entryTranslations)
@@ -244,7 +238,6 @@ export const entriesH = new Elysia({ tags: ["series"] })
 		movie_entry: MovieEntry,
 		special: Special,
 		extra: Extra,
-		unknown_entry: UnknownEntry,
 		error: t.Object({}),
 	})
 	.model((models) => ({
@@ -289,7 +282,6 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				filter: and(
 					eq(entries.showPk, serie.pk),
 					ne(entries.kind, "extra"),
-					ne(entries.kind, "unknown"),
 					filter,
 				),
 				languages: langs,
@@ -408,46 +400,6 @@ export const entriesH = new Elysia({ tags: ["series"] })
 		},
 	)
 	.get(
-		"/unknowns",
-		async ({
-			query: { limit, after, query, sort, filter },
-			request: { url },
-			jwt: { sub },
-		}) => {
-			const items = (await getEntries({
-				limit,
-				after,
-				query,
-				sort: sort,
-				filter: and(eq(entries.kind, "unknown"), filter),
-				languages: ["extra"],
-				userId: sub,
-			})) as UnknownEntry[];
-
-			return createPage(items, { url, sort, limit });
-		},
-		{
-			detail: { description: "Get unknown/unmatch videos." },
-			query: t.Object({
-				sort: extraSort,
-				filter: t.Optional(Filter({ def: unknownFilters })),
-				query: t.Optional(t.String({ description: description.query })),
-				limit: t.Integer({
-					minimum: 1,
-					maximum: 250,
-					default: 50,
-					description: "Max page size.",
-				}),
-				after: t.Optional(t.String({ description: description.after })),
-			}),
-			response: {
-				200: Page(UnknownEntry),
-				422: KError,
-			},
-			tags: ["videos"],
-		},
-	)
-	.get(
 		"/news",
 		async ({
 			query: { limit, after, query, filter },
@@ -462,7 +414,6 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				sort,
 				filter: and(
 					isNotNull(entries.availableSince),
-					ne(entries.kind, "unknown"),
 					ne(entries.kind, "extra"),
 					filter,
 				),
@@ -489,6 +440,6 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				200: Page(Entry),
 				422: KError,
 			},
-			tags: ["videos"],
+			tags: ["shows"],
 		},
 	);
