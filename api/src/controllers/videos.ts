@@ -84,7 +84,23 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 
 			const paths = await db.select({ path: videos.path }).from(videos);
 
-			return { paths: paths.map((x) => x.path), guesses };
+			const unmatched = await db
+				.select({ path: videos.path })
+				.from(videos)
+				.where(
+					notExists(
+						db
+							.select()
+							.from(entryVideoJoin)
+							.where(eq(entryVideoJoin.videoPk, videos.pk)),
+					),
+				);
+
+			return {
+				paths: paths.map((x) => x.path),
+				guesses,
+				unmatched: unmatched.map((x) => x.path),
+			};
 		},
 		{
 			detail: { description: "Get all video registered & guessed made" },

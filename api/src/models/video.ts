@@ -137,6 +137,7 @@ export const Guesses = t.Object({
 			Resource(),
 		),
 	),
+	unmatched: t.Array(t.String()),
 });
 export type Guesses = typeof Guesses.static;
 
@@ -144,6 +145,7 @@ registerExamples(Guesses, {
 	paths: [
 		"/videos/Evangelion S01E02.mkv",
 		"/videos/Evangelion (1995) S01E26.mkv",
+		"/videos/SomeUnknownThing.mkv",
 	],
 	guesses: {
 		Evangelion: {
@@ -157,4 +159,5 @@ registerExamples(Guesses, {
 			},
 		},
 	},
+	unmatched: ["/videos/SomeUnknownThing.mkv"],
 });
