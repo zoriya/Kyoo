@@ -1,0 +1,72 @@
+diff --git a/pg-core/dialect.cjs b/pg-core/dialect.cjs
+index a0ef03142f21d319376bc50070ff7fdcd4d18132..45fc94e5a7c3fa4c201e636dd227122164e1bd02 100644
+--- a/pg-core/dialect.cjs
++++ b/pg-core/dialect.cjs
+@@ -348,7 +348,14 @@ class PgDialect {
+   buildInsertQuery({ table, values: valuesOrSelect, onConflict, returning, withList, select, overridingSystemValue_ }) {
+     const valuesSqlList = [];
+     const columns = table[import_table2.Table.Symbol.Columns];
+-    const colEntries = Object.entries(columns).filter(([_, col]) => !col.shouldDisableInsert());
++    let colEntries = Object.entries(columns);
++    colEntries = select && !is(valuesOrSelect, SQL)
++        ? Object
++            .keys(valuesOrSelect._.selectedFields)
++            .map((key) => [key, columns[key]])
++        : overridingSystemValue_
++            ? colEntries
++            : colEntries.filter(([_, col]) => !col.shouldDisableInsert());
+     const insertOrder = colEntries.map(
+       ([, column]) => import_sql2.sql.identifier(this.casing.getColumnCasing(column))
+     );
+diff --git a/pg-core/dialect.js b/pg-core/dialect.js
+index 120aaed9c3e4ae0a24653893379b98506c866f6f..48df463c0a6d5864fe2c324c8f86432860e50e00 100644
+--- a/pg-core/dialect.js
++++ b/pg-core/dialect.js
+@@ -346,7 +346,14 @@ class PgDialect {
+   buildInsertQuery({ table, values: valuesOrSelect, onConflict, returning, withList, select, overridingSystemValue_ }) {
+     const valuesSqlList = [];
+     const columns = table[Table.Symbol.Columns];
+-    const colEntries = Object.entries(columns).filter(([_, col]) => !col.shouldDisableInsert());
++	let colEntries = Object.entries(columns);
++	colEntries = select && !is(valuesOrSelect, SQL)
++		? Object
++			.keys(valuesOrSelect._.selectedFields)
++			.map((key) => [key, columns[key]])
++		: overridingSystemValue_
++			? colEntries
++			: colEntries.filter(([_, col]) => !col.shouldDisableInsert());
+     const insertOrder = colEntries.map(
+       ([, column]) => sql.identifier(this.casing.getColumnCasing(column))
+     );
+diff --git a/pg-core/query-builders/insert.cjs b/pg-core/query-builders/insert.cjs
+index 08bb0d7485ebf997e3f081e2254ea8fd8bc20f65..20c8036374a1f25f7c5880c40e8d3c42c05f3eee 100644
+--- a/pg-core/query-builders/insert.cjs
++++ b/pg-core/query-builders/insert.cjs
+@@ -75,11 +75,6 @@ class PgInsertBuilder {
+   }
+   select(selectQuery) {
+     const select = typeof selectQuery === "function" ? selectQuery(new import_query_builder.QueryBuilder()) : selectQuery;
+-    if (!(0, import_entity.is)(select, import_sql.SQL) && !(0, import_utils.haveSameKeys)(this.table[import_table.Columns], select._.selectedFields)) {
+-      throw new Error(
+-        "Insert select error: selected fields are not the same or are in a different order compared to the table definition"
+-      );
+-    }
+     return new PgInsertBase(this.table, select, this.session, this.dialect, this.withList, true);
+   }
+ }
+diff --git a/pg-core/query-builders/insert.js b/pg-core/query-builders/insert.js
+index 0fc8eeb80f4a5512f6c84f3d596832623a33b748..998e2ab0bfe3f322bf268a01f71ebd06c57d4d07 100644
+--- a/pg-core/query-builders/insert.js
++++ b/pg-core/query-builders/insert.js
+@@ -51,11 +51,6 @@ class PgInsertBuilder {
+   }
+   select(selectQuery) {
+     const select = typeof selectQuery === "function" ? selectQuery(new QueryBuilder()) : selectQuery;
+-    if (!is(select, SQL) && !haveSameKeys(this.table[Columns], select._.selectedFields)) {
+-      throw new Error(
+-        "Insert select error: selected fields are not the same or are in a different order compared to the table definition"
+-      );
+-    }
+     return new PgInsertBase(this.table, select, this.session, this.dialect, this.withList, true);
+   }
+ }

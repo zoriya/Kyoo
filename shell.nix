@@ -39,6 +39,7 @@ in
       go-swag
       bun
       pkg-config
+      nodejs
       node-gyp
       vips
       hurl
