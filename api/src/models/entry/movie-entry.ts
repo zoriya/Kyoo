@@ -13,7 +13,7 @@ import {
 import { EmbeddedVideo } from "../video";
 import { BaseEntry, EntryTranslation } from "./base-entry";
 
-export const BaseMovieEntry = t.Intersect(
+export const BaseMovieEntry = t.Composite(
 	[
 		t.Object({
 			kind: t.Literal("movie"),
@@ -33,7 +33,7 @@ export const BaseMovieEntry = t.Intersect(
 	},
 );
 
-export const MovieEntryTranslation = t.Intersect([
+export const MovieEntryTranslation = t.Composite([
 	EntryTranslation(),
 	t.Object({
 		tagline: t.Nullable(t.String()),
@@ -41,7 +41,7 @@ export const MovieEntryTranslation = t.Intersect([
 	}),
 ]);
 
-export const MovieEntry = t.Intersect([
+export const MovieEntry = t.Composite([
 	Resource(),
 	MovieEntryTranslation,
 	BaseMovieEntry,
@@ -53,7 +53,7 @@ export const MovieEntry = t.Intersect([
 ]);
 export type MovieEntry = Prettify<typeof MovieEntry.static>;
 
-export const SeedMovieEntry = t.Intersect([
+export const SeedMovieEntry = t.Composite([
 	t.Omit(BaseMovieEntry, ["thumbnail", "nextRefresh"]),
 	t.Object({
 		slug: t.Optional(t.String({ format: "slug" })),

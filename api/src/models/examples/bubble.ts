@@ -3,7 +3,6 @@ import type { Video } from "~/models/video";
 
 export const bubbleVideo: Video = {
 	id: "3cd436ee-01ff-4f45-ba98-62aabeb22f25",
-	slug: "bubble",
 	path: "/video/Bubble/Bubble (2022).mkv",
 	rendering: "459429fa062adeebedcc2bb04b9965de0262bfa453369783132d261be79021bd",
 	part: null,

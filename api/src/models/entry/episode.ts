@@ -12,7 +12,7 @@ import {
 import { EmbeddedVideo } from "../video";
 import { BaseEntry, EntryTranslation } from "./base-entry";
 
-export const BaseEpisode = t.Intersect([
+export const BaseEpisode = t.Composite([
 	t.Object({
 		kind: t.Literal("episode"),
 		order: t.Number({ minimum: 1, description: "Absolute playback order." }),
@@ -23,7 +23,7 @@ export const BaseEpisode = t.Intersect([
 	BaseEntry(),
 ]);
 
-export const Episode = t.Intersect([
+export const Episode = t.Composite([
 	Resource(),
 	EntryTranslation(),
 	BaseEpisode,
@@ -35,7 +35,7 @@ export const Episode = t.Intersect([
 ]);
 export type Episode = Prettify<typeof Episode.static>;
 
-export const SeedEpisode = t.Intersect([
+export const SeedEpisode = t.Composite([
 	t.Omit(BaseEpisode, ["thumbnail", "nextRefresh"]),
 	t.Object({
 		thumbnail: t.Nullable(SeedImage),

@@ -113,7 +113,7 @@ export const SeedVideo = t.Object({
 });
 export type SeedVideo = Prettify<typeof SeedVideo.static>;
 
-export const Video = t.Intersect([
+export const Video = t.Composite([
 	t.Object({
 		id: t.String({ format: "uuid" }),
 	}),
@@ -123,7 +123,7 @@ export const Video = t.Intersect([
 export type Video = Prettify<typeof Video.static>;
 
 // type used in entry responses (the slug comes from the entryVideoJoin)
-export const EmbeddedVideo = t.Intersect([
+export const EmbeddedVideo = t.Composite([
 	t.Object({ slug: t.String({ format: "slug" }) }),
 	t.Omit(Video, ["guess", "createdAt", "updatedAt"]),
 ]);

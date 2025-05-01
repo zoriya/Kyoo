@@ -28,19 +28,19 @@ const StaffData = t.Object({
 	image: t.Nullable(Image),
 	externalId: ExternalId(),
 });
-export const Staff = t.Intersect([Resource(), StaffData, DbMetadata]);
+export const Staff = t.Composite([Resource(), StaffData, DbMetadata]);
 export type Staff = typeof Staff.static;
 
-export const SeedStaff = t.Intersect([
+export const SeedStaff = t.Composite([
 	t.Omit(Role, ["character"]),
 	t.Object({
-		character: t.Intersect([
+		character: t.Composite([
 			t.Omit(Character, ["image"]),
 			t.Object({
 				image: t.Nullable(SeedImage),
 			}),
 		]),
-		staff: t.Intersect([
+		staff: t.Composite([
 			t.Object({
 				slug: t.String({ format: "slug" }),
 				image: t.Nullable(SeedImage),

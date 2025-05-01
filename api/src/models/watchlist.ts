@@ -20,7 +20,7 @@ export const SerieWatchStatus = t.Object({
 });
 export type SerieWatchStatus = typeof SerieWatchStatus.static;
 
-export const MovieWatchStatus = t.Intersect([
+export const MovieWatchStatus = t.Composite([
 	t.Omit(SerieWatchStatus, ["startedAt", "seenCount"]),
 	t.Object({
 		percent: t.Integer({
