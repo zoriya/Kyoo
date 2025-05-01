@@ -230,14 +230,20 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				.select(
 					db
 						.select({
-							entry: entries.pk,
-							video: sql`j.video`,
+							entryPk: entriesQ.pk,
+							videoPk: sql`j.video`,
 							slug: computeVideoSlug(
 								entriesQ.showSlug,
-								sql`j.needRendering::boolean || exists(${hasRenderingQ})`,
+								sql`j.needRendering || exists(${hasRenderingQ})`,
 							),
 						})
-						.from(values(vidEntries).as("j"))
+						.from(
+							values(vidEntries, {
+								video: "integer",
+								needRendering: "boolean",
+								entry: "jsonb",
+							}).as("j"),
+						)
 						.innerJoin(
 							entriesQ,
 							or(

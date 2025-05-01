@@ -167,8 +167,14 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 		async ({ body, jwt: { sub }, error }) => {
 			const profilePk = await getOrCreateProfile(sub);
 
-			const vals = values(
+			const hist = values(
 				body.map((x) => ({ ...x, entryUseId: isUuid(x.entry) })),
+				{
+					percent: "integer",
+					time: "integer",
+					playedDate: "timestamptz",
+					videoId: "uuid",
+				},
 			).as("hist");
 			const valEqEntries = sql`
 				case
@@ -185,13 +191,13 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 							profilePk: sql`${profilePk}`,
 							entryPk: entries.pk,
 							videoPk: videos.pk,
-							percent: sql`hist.percent::integer`,
-							time: sql`hist.time::integer`,
-							playedDate: sql`hist.playedDate::timestamptz`,
+							percent: sql`hist.percent`,
+							time: sql`hist.time`,
+							playedDate: sql`hist.playedDate`,
 						})
-						.from(vals)
+						.from(hist)
 						.innerJoin(entries, valEqEntries)
-						.leftJoin(videos, eq(videos.id, sql`hist.videoId::uuid`)),
+						.leftJoin(videos, eq(videos.id, sql`hist.videoId`)),
 				)
 				.returning({ pk: history.pk });
 
@@ -249,7 +255,7 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 							status: sql`
 								case
 									when
-										hist.percent::integer >= 95
+										hist.percent >= 95
 										and ${nextEntryQ.pk} is null
 									then 'completed'::watchlist_status
 									else 'watching'::watchlist_status
@@ -257,30 +263,30 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 							`,
 							seenCount: sql`
 								case
-									when ${entries.kind} = 'movie' then hist.percent::integer
-									when hist.percent::integer >= 95 then 1
+									when ${entries.kind} = 'movie' then hist.percent
+									when hist.percent >= 95 then 1
 									else 0
 								end
 							`,
 							nextEntry: sql`
 								case
-									when hist.percent::integer >= 95 then ${nextEntryQ.pk}
+									when hist.percent >= 95 then ${nextEntryQ.pk}
 									else ${entries.pk}
 								end
 							`,
 							score: sql`null`,
-							startedAt: sql`hist.playedDate::timestamptz`,
-							lastPlayedAt: sql`hist.playedDate::timestamptz`,
+							startedAt: sql`hist.playedDate`,
+							lastPlayedAt: sql`hist.playedDate`,
 							completedAt: sql`
 								case
-									when ${nextEntryQ.pk} is null then hist.playedDate::timestamptz
+									when ${nextEntryQ.pk} is null then hist.playedDate
 									else null
 								end
 							`,
 							// see https://github.com/drizzle-team/drizzle-orm/issues/3608
 							updatedAt: sql`now()`,
 						})
-						.from(vals)
+						.from(hist)
 						.leftJoin(entries, valEqEntries)
 						.leftJoinLateral(nextEntryQ, sql`true`),
 				)
