@@ -210,11 +210,12 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 					pk: entries.pk,
 					id: entries.id,
 					slug: entries.slug,
+					kind: entries.kind,
 					seasonNumber: entries.seasonNumber,
 					episodeNumber: entries.episodeNumber,
 					order: entries.order,
-					showId: shows.id,
-					showSlug: shows.slug,
+					showId: sql`${shows.id}`.as("showId"),
+					showSlug: sql`${shows.slug}`.as("showSlug"),
 				})
 				.from(entries)
 				.innerJoin(shows, eq(entries.showPk, shows.pk))
@@ -231,10 +232,10 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 					db
 						.select({
 							entryPk: entriesQ.pk,
-							videoPk: sql`j.video`,
+							videoPk: videos.pk,
 							slug: computeVideoSlug(
-								entriesQ.showSlug,
-								sql`j.needRendering || exists(${hasRenderingQ})`,
+								entriesQ.slug,
+								sql`j.needRendering or exists(${hasRenderingQ})`,
 							),
 						})
 						.from(
@@ -244,39 +245,51 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 								entry: "jsonb",
 							}).as("j"),
 						)
+						.innerJoin(videos, eq(videos.pk, sql`j.video`))
 						.innerJoin(
 							entriesQ,
 							or(
 								and(
 									sql`j.entry ? 'slug'`,
-									eq(entriesQ.slug, sql`j.entry->'slug'`),
+									eq(entriesQ.slug, sql`j.entry->>'slug'`),
 								),
 								and(
 									sql`j.entry ? 'movie'`,
 									or(
-										eq(entriesQ.showId, sql`j.entry #> '{movie, id}'`),
-										eq(entriesQ.showSlug, sql`j.entry #> '{movie, slug}'`),
+										eq(entriesQ.showId, sql`(j.entry #>> '{movie, id}')::uuid`),
+										eq(entriesQ.showSlug, sql`j.entry #>> '{movie, slug}'`),
 									),
+									eq(entriesQ.kind, "movie"),
 								),
 								and(
 									sql`j.entry ? 'serie'`,
 									or(
-										eq(entriesQ.showId, sql`j.entry #> '{serie, id}'`),
-										eq(entriesQ.showSlug, sql`j.entry #> '{serie, slug}'`),
+										eq(entriesQ.showId, sql`(j.entry #>> '{serie, id}')::uuid`),
+										eq(entriesQ.showSlug, sql`j.entry #>> '{serie, slug}'`),
 									),
 									or(
 										and(
 											sql`j.entry ?& array['season', 'episode']`,
-											eq(entriesQ.seasonNumber, sql`j.entry->'season'`),
-											eq(entriesQ.episodeNumber, sql`j.entry->'episode'`),
+											eq(
+												entriesQ.seasonNumber,
+												sql`(j.entry->>'season')::integer`,
+											),
+											eq(
+												entriesQ.episodeNumber,
+												sql`(j.entry->>'episode')::integer`,
+											),
 										),
 										and(
 											sql`j.entry ? 'order'`,
-											eq(entriesQ.order, sql`j.entry->'order'`),
+											eq(entriesQ.order, sql`(j.entry->>'order')::float`),
 										),
 										and(
 											sql`j.entry ? 'special'`,
-											eq(entriesQ.episodeNumber, sql`j.entry->'special'`),
+											eq(
+												entriesQ.episodeNumber,
+												sql`(j.entry->>'special')::integer`,
+											),
+											eq(entriesQ.kind, "special"),
 										),
 									),
 								),
@@ -299,7 +312,11 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 			);
 			return error(
 				201,
-				vids.map((x) => ({ id: x.id, path: x.path, entries: entr[x.pk] })),
+				vids.map((x) => ({
+					id: x.id,
+					path: x.path,
+					entries: entr[x.pk] ?? [],
+				})),
 			);
 		},
 		{
@@ -313,7 +330,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				`,
 			},
 			body: t.Array(SeedVideo),
-			// response: { 201: t.Array(CreatedVideo) },
+			response: { 201: t.Array(CreatedVideo) },
 		},
 	)
 	.delete(

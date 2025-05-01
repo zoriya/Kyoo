@@ -77,18 +77,50 @@ describe("Video seeding", () => {
 		expect(vid!.evj[0].entry.slug).toBe(`${madeInAbyss.slug}-s1e13`);
 	});
 
+	it("With movie", async () => {
+		const [resp, body] = await createVideo({
+			guess: { title: "bubble", from: "test" },
+			part: null,
+			path: "/video/bubble.mkv",
+			rendering: "sha",
+			version: 1,
+			for: [{ movie: bubble.slug }],
+		});
+
+		expectStatus(resp, body).toBe(201);
+		expect(body).toBeArrayOfSize(1);
+		expect(body[0].id).toBeString();
+
+		const vid = await db.query.videos.findFirst({
+			where: eq(videos.id, body[0].id),
+			with: {
+				evj: { with: { entry: true } },
+			},
+		});
+
+		expect(vid).not.toBeNil();
+		expect(vid!.path).toBe("/video/bubble.mkv");
+		expect(vid!.guess).toMatchObject({ title: "bubble", from: "test" });
+
+		expect(body[0].entries).toBeArrayOfSize(1);
+		expect(vid!.evj).toBeArrayOfSize(1);
+
+		expect(vid!.evj[0].slug).toBe(bubble.slug);
+		expect(vid!.evj[0].entry.slug).toBe(bubble.slug);
+	});
+
 	it("With season/episode", async () => {
 		const [resp, body] = await createVideo({
-			guess: { title: "mia", season: [1], episode: [13], from: "test" },
+			guess: { title: "mia", season: [2], episode: [1], from: "test" },
 			part: null,
-			path: "/video/mia s1e13.mkv",
+			path: "/video/mia s2e1.mkv",
 			rendering: "renderingsha",
 			version: 1,
 			for: [
 				{
 					serie: madeInAbyss.slug,
-					season: madeInAbyss.entries[0].seasonNumber!,
-					episode: madeInAbyss.entries[0].episodeNumber!,
+					season: madeInAbyss.entries[3].seasonNumber!,
+					episode: madeInAbyss.entries[3].episodeNumber!,
 				},
 			],
 		});
@@ -105,13 +137,87 @@ describe("Video seeding", () => {
 		});
 
 		expect(vid).not.toBeNil();
-		expect(vid!.path).toBe("/video/mia s1e13.mkv");
+		expect(vid!.path).toBe("/video/mia s2e1.mkv");
 		expect(vid!.guess).toMatchObject({ title: "mia", from: "test" });
 
 		expect(body[0].entries).toBeArrayOfSize(1);
 		expect(vid!.evj).toBeArrayOfSize(1);
 
-		expect(vid!.evj[0].slug).toBe(`${madeInAbyss.slug}-s1e13-renderingsha`);
-		expect(vid!.evj[0].entry.slug).toBe(`${madeInAbyss.slug}-s1e13`);
+		expect(vid!.evj[0].slug).toBe(`${madeInAbyss.slug}-s2e1`);
+		expect(vid!.evj[0].entry.slug).toBe(`${madeInAbyss.slug}-s2e1`);
+	});
+
+	it("With special", async () => {
+		const [resp, body] = await createVideo({
+			guess: { title: "mia", season: [0], episode: [3], from: "test" },
+			part: null,
+			path: "/video/mia sp3.mkv",
+			rendering: "notehu",
+			version: 1,
+			for: [
+				{
+					serie: madeInAbyss.slug,
+					special: madeInAbyss.entries[1].number!,
+				},
+			],
+		});
+
+		expectStatus(resp, body).toBe(201);
+		expect(body).toBeArrayOfSize(1);
+		expect(body[0].id).toBeString();
+
+		const vid = await db.query.videos.findFirst({
+			where: eq(videos.id, body[0].id),
+			with: {
+				evj: { with: { entry: true } },
+			},
+		});
+
+		expect(vid).not.toBeNil();
+		expect(vid!.path).toBe("/video/mia sp3.mkv");
+		expect(vid!.guess).toMatchObject({ title: "mia", from: "test" });
+
+		expect(body[0].entries).toBeArrayOfSize(1);
+		expect(vid!.evj).toBeArrayOfSize(1);
+
+		expect(vid!.evj[0].slug).toBe(`${madeInAbyss.slug}-sp3`);
+		expect(vid!.evj[0].entry.slug).toBe(`${madeInAbyss.slug}-sp3`);
+	});
+
+	it("With order", async () => {
+		const [resp, body] = await createVideo({
+			guess: { title: "mia", season: [0], episode: [3], from: "test" },
+			part: null,
+			path: "/video/mia 13.5.mkv",
+			rendering: "notehu",
+			version: 1,
+			for: [
+				{
+					serie: madeInAbyss.slug,
+					order: 13.5,
+				},
+			],
+		});
+
+		expectStatus(resp, body).toBe(201);
+		expect(body).toBeArrayOfSize(1);
+		expect(body[0].id).toBeString();
+
+		const vid = await db.query.videos.findFirst({
+			where: eq(videos.id, body[0].id),
+			with: {
+				evj: { with: { entry: true } },
+			},
+		});
+
+		expect(vid).not.toBeNil();
+		expect(vid!.path).toBe("/video/mia 13.5.mkv");
+		expect(vid!.guess).toMatchObject({ title: "mia", from: "test" });
+
+		expect(body[0].entries).toBeArrayOfSize(1);
+		expect(vid!.evj).toBeArrayOfSize(1);
+
+		expect(vid!.evj[0].slug).toBe("made-in-abyss-dawn-of-the-deep-soul");
+		expect(vid!.evj[0].entry.slug).toBe("made-in-abyss-dawn-of-the-deep-soul");
 	});
 });

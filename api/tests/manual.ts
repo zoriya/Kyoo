@@ -1,29 +1,34 @@
 import { db, migrate } from "~/db";
 import { profiles, shows } from "~/db/schema";
 import { madeInAbyss } from "~/models/examples";
-import { createSerie, getSerie, setSerieStatus } from "./helpers";
-import { getJwtHeaders } from "./helpers/jwt";
+import { createSerie, createVideo } from "./helpers";
 
 // test file used to run manually using `bun tests/manual.ts`
+// run those before running this script
+// export JWT_SECRET="this is a secret";
+// export JWT_ISSUER="https://kyoo.zoriya.dev";
+
 
 await migrate();
 await db.delete(shows);
 await db.delete(profiles);
 
-console.log(await getJwtHeaders());
-
-const [_, ser] = await createSerie(madeInAbyss);
+const [__, ser] = await createSerie(madeInAbyss);
 console.log(ser);
-const [__, ret] = await setSerieStatus(madeInAbyss.slug, {
-	status: "watching",
-	startedAt: "2024-12-21",
-	completedAt: "2024-12-21",
-	seenCount: 2,
-	score: 85,
+const [_, body] = await createVideo({
+	guess: { title: "mia", season: [1], episode: [13], from: "test" },
+	part: null,
+	path: "/video/mia s1e13.mkv",
+	rendering: "renderingsha",
+	version: 1,
+	for: [
+		{
+			serie: madeInAbyss.slug,
+			season: madeInAbyss.entries[0].seasonNumber!,
+			episode: madeInAbyss.entries[0].episodeNumber!,
+		},
+	],
 });
-console.log(ret);
-
-const [___, got] = await getSerie(madeInAbyss.slug, {});
-console.log(JSON.stringify(got, undefined, 4));
+console.log(body);
 
 process.exit(0);

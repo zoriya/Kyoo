@@ -79,7 +79,6 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 							filter: and(
 								isNotNull(entryProgressQ.playedDate),
 								ne(entries.kind, "extra"),
-								ne(entries.kind, "unknown"),
 								filter,
 							),
 							languages: langs,
@@ -125,7 +124,6 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 							filter: and(
 								isNotNull(entryProgressQ.playedDate),
 								ne(entries.kind, "extra"),
-								ne(entries.kind, "unknown"),
 								filter,
 							),
 							languages: langs,

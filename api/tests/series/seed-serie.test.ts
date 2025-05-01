@@ -57,7 +57,7 @@ describe("Serie seeding", () => {
 			],
 			evj: [
 				expect.objectContaining({
-					slug: madeInAbyssVideo.slug,
+					slug: `${madeInAbyss.slug}-s1e13`,
 					video: expect.objectContaining({ path: madeInAbyssVideo.path }),
 				}),
 			],

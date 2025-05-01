@@ -78,7 +78,7 @@ export const SeedVideo = t.Object({
 					}),
 				}),
 				t.Object({
-					externalId: t.Optional(t.Union([EpisodeId, ExternalId()])),
+					externalId: t.Union([EpisodeId, ExternalId()]),
 				}),
 				t.Object({
 					movie: t.Union([

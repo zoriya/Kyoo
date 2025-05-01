@@ -212,10 +212,10 @@ export const insertEntries = async (
 	}));
 };
 
-export function computeVideoSlug(showSlug: SQL | Column, needsRendering: SQL) {
+export function computeVideoSlug(entrySlug: SQL | Column, needsRendering: SQL) {
 	return sql<string>`
 		concat(
-			${showSlug},
+			${entrySlug},
 			case when ${videos.part} is not null then ('-p' || ${videos.part}) else '' end,
 			case when ${videos.version} <> 1 then ('-v' || ${videos.version}) else '' end,
 			case when ${needsRendering} then concat('-', ${videos.rendering}) else '' end
