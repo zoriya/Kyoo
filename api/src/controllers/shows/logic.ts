@@ -41,7 +41,7 @@ import { entryProgressQ, entryVideosQ, mapProgress } from "../entries";
 export const watchStatusQ = db
 	.select({
 		...getColumns(watchlist),
-		percent: sql`${watchlist.seenCount}`.as("percent"),
+		percent: sql<number>`${watchlist.seenCount}`.as("percent"),
 	})
 	.from(watchlist)
 	.leftJoin(profiles, eq(watchlist.profilePk, profiles.pk))
@@ -161,9 +161,9 @@ const showRelations = {
 				).as("videos"),
 			})
 			.from(entryVideoJoin)
+			.innerJoin(entries, eq(entries.showPk, shows.pk))
+			.innerJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
 			.where(eq(entryVideoJoin.entryPk, entries.pk))
-			.leftJoin(entries, eq(entries.showPk, shows.pk))
-			.leftJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
 			.as("videos");
 	},
 	firstEntry: ({ languages }: { languages: string[] }) => {
@@ -190,7 +190,7 @@ const showRelations = {
 			.from(entries)
 			.innerJoin(transQ, eq(entries.pk, transQ.pk))
 			.leftJoin(entryProgressQ, eq(entries.pk, entryProgressQ.entryPk))
-			.leftJoinLateral(entryVideosQ, sql`true`)
+			.crossJoinLateral(entryVideosQ)
 			.where(and(eq(entries.showPk, shows.pk), ne(entries.kind, "extra")))
 			.orderBy(entries.order)
 			.limit(1)
@@ -220,7 +220,7 @@ const showRelations = {
 			.from(entries)
 			.innerJoin(transQ, eq(entries.pk, transQ.pk))
 			.leftJoin(entryProgressQ, eq(entries.pk, entryProgressQ.entryPk))
-			.leftJoinLateral(entryVideosQ, sql`true`)
+			.crossJoinLateral(entryVideosQ)
 			.where(eq(watchStatusQ.nextEntry, entries.pk))
 			.as("nextEntry");
 	},

@@ -1,8 +1,20 @@
+import { PatternString } from "@sinclair/typebox";
 import { t } from "elysia";
 import { type Prettify, comment } from "~/utils";
 import { ExtraType } from "./entry/extra";
-import { bubbleVideo, registerExamples } from "./examples";
+import { bubble, bubbleVideo, registerExamples } from "./examples";
 import { DbMetadata, EpisodeId, ExternalId, Resource } from "./utils";
+
+const ExternalIds = t.Record(
+	t.String(),
+	t.Omit(
+		t.Union([
+			EpisodeId.patternProperties[PatternString],
+			ExternalId().patternProperties[PatternString],
+		]),
+		["link"],
+	),
+);
 
 export const Guess = t.Recursive((Self) =>
 	t.Object(
@@ -13,6 +25,7 @@ export const Guess = t.Recursive((Self) =>
 			episode: t.Optional(t.Array(t.Integer(), { default: [] })),
 			kind: t.Optional(t.UnionEnum(["episode", "movie", "extra"])),
 			extraKind: t.Optional(ExtraType),
+			externalId: t.Optional(ExternalIds),
 
 			from: t.String({
 				description: "Name of the tool that made the guess",
@@ -78,7 +91,7 @@ export const SeedVideo = t.Object({
 					}),
 				}),
 				t.Object({
-					externalId: t.Union([EpisodeId, ExternalId()]),
+					externalId: ExternalIds,
 				}),
 				t.Object({
 					movie: t.Union([
@@ -86,26 +99,28 @@ export const SeedVideo = t.Object({
 						t.String({ format: "slug", examples: ["bubble"] }),
 					]),
 				}),
-				t.Intersect([
-					t.Object({
-						serie: t.Union([
-							t.String({ format: "uuid" }),
-							t.String({ format: "slug", examples: ["made-in-abyss"] }),
-						]),
-					}),
-					t.Union([
-						t.Object({
-							season: t.Integer({ minimum: 1 }),
-							episode: t.Integer(),
-						}),
-						t.Object({
-							order: t.Number(),
-						}),
-						t.Object({
-							special: t.Integer(),
-						}),
+				t.Object({
+					serie: t.Union([
+						t.String({ format: "uuid" }),
+						t.String({ format: "slug", examples: ["made-in-abyss"] }),
 					]),
-				]),
+					season: t.Integer({ minimum: 1 }),
+					episode: t.Integer(),
+				}),
+				t.Object({
+					serie: t.Union([
+						t.String({ format: "uuid" }),
+						t.String({ format: "slug", examples: ["made-in-abyss"] }),
+					]),
+					order: t.Number(),
+				}),
+				t.Object({
+					serie: t.Union([
+						t.String({ format: "uuid" }),
+						t.String({ format: "slug", examples: ["made-in-abyss"] }),
+					]),
+					special: t.Integer(),
+				}),
 			]),
 			{ default: [] },
 		),
@@ -123,13 +138,29 @@ export const Video = t.Composite([
 export type Video = Prettify<typeof Video.static>;
 
 // type used in entry responses (the slug comes from the entryVideoJoin)
-export const EmbeddedVideo = t.Composite([
-	t.Object({ slug: t.String({ format: "slug" }) }),
-	t.Omit(Video, ["guess", "createdAt", "updatedAt"]),
-]);
+export const EmbeddedVideo = t.Composite(
+	[
+		t.Object({ slug: t.String({ format: "slug" }) }),
+		t.Omit(Video, ["guess", "createdAt", "updatedAt"]),
+	],
+	{ additionalProperties: true },
+);
 export type EmbeddedVideo = Prettify<typeof EmbeddedVideo.static>;
 
 registerExamples(Video, bubbleVideo);
+registerExamples(SeedVideo, {
+	...bubbleVideo,
+	for: [
+		{ movie: "bubble" },
+		{
+			externalId: {
+				themoviedatabase: {
+					dataId: bubble.externalId.themoviedatabase.dataId,
+				},
+			},
+		},
+	],
+});
 
 export const Guesses = t.Object({
 	paths: t.Array(t.String()),

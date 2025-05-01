@@ -213,7 +213,7 @@ export async function getEntries({
 		})
 		.from(entries)
 		.innerJoin(transQ, eq(entries.pk, transQ.pk))
-		.leftJoinLateral(entryVideosQ, sql`true`)
+		.crossJoinLateral(entryVideosQ)
 		.leftJoin(progressQ, eq(entries.pk, progressQ.entryPk))
 		.where(
 			and(

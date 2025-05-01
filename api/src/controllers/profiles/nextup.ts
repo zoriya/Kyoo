@@ -112,7 +112,7 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 				.from(entries)
 				.innerJoin(watchlist, eq(watchlist.nextEntry, entries.pk))
 				.innerJoin(transQ, eq(entries.pk, transQ.pk))
-				.leftJoinLateral(entryVideosQ, sql`true`)
+				.crossJoinLateral(entryVideosQ)
 				.leftJoin(entryProgressQ, eq(entries.pk, entryProgressQ.entryPk))
 				.where(
 					and(

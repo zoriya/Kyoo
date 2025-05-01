@@ -286,7 +286,7 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 						})
 						.from(hist)
 						.leftJoin(entries, valEqEntries)
-						.leftJoinLateral(nextEntryQ, sql`true`),
+						.crossJoinLateral(nextEntryQ),
 				)
 				.onConflictDoUpdate({
 					target: [watchlist.profilePk, watchlist.showPk],

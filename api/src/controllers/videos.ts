@@ -53,9 +53,8 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 						slug: shows.slug,
 					})
 					.from(videos)
-					.leftJoin(
+					.crossJoin(
 						sql`jsonb_array_elements_text(${videos.guess}->'year') as year`,
-						sql`true`,
 					)
 					.innerJoin(entryVideoJoin, eq(entryVideoJoin.videoPk, videos.pk))
 					.innerJoin(entries, eq(entries.pk, entryVideoJoin.entryPk))
@@ -179,7 +178,6 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				return x.for.map((e) => ({
 					video: vids.find((v) => v.path === x.path)!.pk,
 					path: x.path,
-					needRendering: x.for!.length > 1,
 					entry: {
 						...e,
 						movie:
@@ -216,6 +214,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 					order: entries.order,
 					showId: sql`${shows.id}`.as("showId"),
 					showSlug: sql`${shows.slug}`.as("showSlug"),
+					externalId: entries.externalId,
 				})
 				.from(entries)
 				.innerJoin(shows, eq(entries.showPk, shows.pk))
@@ -235,13 +234,12 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 							videoPk: videos.pk,
 							slug: computeVideoSlug(
 								entriesQ.slug,
-								sql`j.needRendering or exists(${hasRenderingQ})`,
+								sql`exists(${hasRenderingQ})`,
 							),
 						})
 						.from(
 							values(vidEntries, {
 								video: "integer",
-								needRendering: "boolean",
 								entry: "jsonb",
 							}).as("j"),
 						)
@@ -292,6 +290,10 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 											eq(entriesQ.kind, "special"),
 										),
 									),
+								),
+								and(
+									sql`j.entry ? 'externalId'`,
+									sql`j.entry->'externalId' <@ ${entriesQ.externalId}`,
 								),
 							),
 						),

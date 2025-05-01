@@ -220,4 +220,185 @@ describe("Video seeding", () => {
 		expect(vid!.evj[0].slug).toBe("made-in-abyss-dawn-of-the-deep-soul");
 		expect(vid!.evj[0].entry.slug).toBe("made-in-abyss-dawn-of-the-deep-soul");
 	});
+
+	it("With external id", async () => {
+		const [resp, body] = await createVideo({
+			guess: {
+				title: "mia",
+				season: [0],
+				episode: [3],
+				from: "test",
+				externalId: {
+					themoviedb: { serieId: "72636", season: 1, episode: 13 },
+				},
+			},
+			part: null,
+			path: "/video/mia s1e13 [tmdb=72636].mkv",
+			rendering: "notehu",
+			version: 1,
+			for: [
+				{
+					externalId: {
+						themoviedb: { serieId: "72636", season: 1, episode: 13 },
+					},
+				},
+			],
+		});
+
+		expectStatus(resp, body).toBe(201);
+		expect(body).toBeArrayOfSize(1);
+		expect(body[0].id).toBeString();
+
+		const vid = await db.query.videos.findFirst({
+			where: eq(videos.id, body[0].id),
+			with: {
+				evj: { with: { entry: true } },
+			},
+		});
+
+		expect(vid).not.toBeNil();
+		expect(vid!.path).toBe("/video/mia s1e13 [tmdb=72636].mkv");
+		expect(vid!.guess).toMatchObject({ title: "mia", from: "test" });
+
+		expect(body[0].entries).toBeArrayOfSize(1);
+		expect(vid!.evj).toBeArrayOfSize(1);
+
+		expect(vid!.evj[0].slug).toBe("made-in-abyss-s1e13-notehu");
+		expect(vid!.evj[0].entry.slug).toBe("made-in-abyss-s1e13");
+	});
+
+	it("With movie external id", async () => {
+		const [resp, body] = await createVideo({
+			guess: {
+				title: "bubble",
+				from: "test",
+				externalId: {
+					themoviedb: { dataId: "912598", season: 1, episode: 13 },
+				},
+			},
+			part: null,
+			path: "/video/bubble [tmdb=912598].mkv",
+			rendering: "onetuh",
+			version: 1,
+			for: [
+				{
+					externalId: {
+						themoviedb: { serieId: "912598", season: 1, episode: 13 },
+					},
+				},
+			],
+		});
+
+		expectStatus(resp, body).toBe(201);
+		expect(body).toBeArrayOfSize(1);
+		expect(body[0].id).toBeString();
+
+		const vid = await db.query.videos.findFirst({
+			where: eq(videos.id, body[0].id),
+			with: {
+				evj: { with: { entry: true } },
+			},
+		});
+
+		expect(vid).not.toBeNil();
+		expect(vid!.path).toBe("/video/bubble [tmdb=912598].mkv");
+		expect(vid!.guess).toMatchObject({ title: "bubble", from: "test" });
+
+		expect(body[0].entries).toBeArrayOfSize(1);
+		expect(vid!.evj).toBeArrayOfSize(1);
+
+		expect(vid!.evj[0].slug).toBe("bubble-onetuh");
+		expect(vid!.evj[0].entry.slug).toBe("bubble");
+	});
+
+	it("Two for the same entry", async () => {
+		const [resp, body] = await createVideo({
+			guess: {
+				title: "bubble",
+				from: "test",
+				externalId: {
+					themoviedb: { dataId: "912598", season: 1, episode: 13 },
+				},
+			},
+			part: null,
+			path: "/video/bubble [tmdb=912598].mkv",
+			rendering: "cwhtn",
+			version: 1,
+			for: [
+				{ movie: "bubble" },
+				{
+					externalId: {
+						themoviedb: { serieId: "912598", season: 1, episode: 13 },
+					},
+				},
+			],
+		});
+
+		expectStatus(resp, body).toBe(201);
+		expect(body).toBeArrayOfSize(1);
+		expect(body[0].id).toBeString();
+
+		const vid = await db.query.videos.findFirst({
+			where: eq(videos.id, body[0].id),
+			with: {
+				evj: { with: { entry: true } },
+			},
+		});
+
+		expect(vid).not.toBeNil();
+		expect(vid!.path).toBe("/video/bubble [tmdb=912598].mkv");
+		expect(vid!.guess).toMatchObject({ title: "bubble", from: "test" });
+
+		expect(body[0].entries).toBeArrayOfSize(1);
+		expect(vid!.evj).toBeArrayOfSize(1);
+
+		expect(vid!.evj[0].slug).toBe("bubble-cwhtn");
+		expect(vid!.evj[0].entry.slug).toBe("bubble");
+	});
+
+	it("Two for the same entry WITHOUT rendering", async () => {
+		await db.delete(videos);
+		const [resp, body] = await createVideo({
+			guess: {
+				title: "bubble",
+				from: "test",
+				externalId: {
+					themoviedb: { dataId: "912598", season: 1, episode: 13 },
+				},
+			},
+			part: null,
+			path: "/video/bubble [tmdb=912598].mkv",
+			rendering: "cwhtn",
+			version: 1,
+			for: [
+				{ movie: "bubble" },
+				{
+					externalId: {
+						themoviedb: { serieId: "912598", season: 1, episode: 13 },
+					},
+				},
+			],
+		});
+
+		expectStatus(resp, body).toBe(201);
+		expect(body).toBeArrayOfSize(1);
+		expect(body[0].id).toBeString();
+
+		const vid = await db.query.videos.findFirst({
+			where: eq(videos.id, body[0].id),
+			with: {
+				evj: { with: { entry: true } },
+			},
+		});
+
+		expect(vid).not.toBeNil();
+		expect(vid!.path).toBe("/video/bubble [tmdb=912598].mkv");
+		expect(vid!.guess).toMatchObject({ title: "bubble", from: "test" });
+
+		expect(body[0].entries).toBeArrayOfSize(1);
+		expect(vid!.evj).toBeArrayOfSize(1);
+
+		expect(vid!.evj[0].slug).toBe("bubble");
+		expect(vid!.evj[0].entry.slug).toBe("bubble");
+	});
 });

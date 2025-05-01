@@ -8,7 +8,6 @@ import { createSerie, createVideo } from "./helpers";
 // export JWT_SECRET="this is a secret";
 // export JWT_ISSUER="https://kyoo.zoriya.dev";
 
-
 await migrate();
 await db.delete(shows);
 await db.delete(profiles);
