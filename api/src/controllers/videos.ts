@@ -161,20 +161,49 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 	.post(
 		"",
 		async ({ body, error }) => {
-			const vidsI = db.$with("vidsI").as(
-				db
-					.insert(videos)
-					.values(body)
-					.onConflictDoUpdate({
-						target: [videos.path],
-						set: conflictUpdateAllExcept(videos, ["pk", "id", "createdAt"]),
-					})
-					.returning({
-						pk: videos.pk,
-						id: videos.id,
-						path: videos.path,
-					}),
-			);
+			const vids = await db
+				.insert(videos)
+				.values(body)
+				.onConflictDoUpdate({
+					target: [videos.path],
+					set: conflictUpdateAllExcept(videos, ["pk", "id", "createdAt"]),
+				})
+				.returning({
+					pk: videos.pk,
+					id: videos.id,
+					path: videos.path,
+				});
+
+			const vidEntries = body.flatMap((x) => {
+				if (!x.for) return [];
+				return x.for.map((e) => ({
+					video: vids.find((v) => v.path === x.path)!.pk,
+					path: x.path,
+					needRendering: x.for!.length > 1,
+					entry: {
+						...e,
+						movie:
+							"movie" in e
+								? isUuid(e.movie)
+									? { id: e.movie }
+									: { slug: e.movie }
+								: undefined,
+						serie:
+							"serie" in e
+								? isUuid(e.serie)
+									? { id: e.serie }
+									: { slug: e.serie }
+								: undefined,
+					},
+				}));
+			});
+
+			if (!vidEntries.length) {
+				return error(
+					201,
+					vids.map((x) => ({ id: x.id, path: x.path, entries: [] })),
+				);
+			}
 
 			const entriesQ = db
 				.select({
@@ -197,45 +226,18 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				.where(eq(entryVideoJoin.entryPk, entriesQ.pk));
 
 			const ret = await db
-				.with(vidsI)
 				.insert(entryVideoJoin)
 				.select(
 					db
 						.select({
 							entry: entries.pk,
-							video: vidsI.pk,
+							video: sql`j.video`,
 							slug: computeVideoSlug(
 								entriesQ.showSlug,
 								sql`j.needRendering::boolean || exists(${hasRenderingQ})`,
 							),
 						})
-						.from(
-							values(
-								body.flatMap((x) => {
-									if (!x.for) return [];
-									return x.for.map((e) => ({
-										path: x.path,
-										needRendering: x.for!.length > 1,
-										entry: {
-											...e,
-											movie:
-												"movie" in e
-													? isUuid(e.movie)
-														? { id: e.movie }
-														: { slug: e.movie }
-													: undefined,
-											serie:
-												"serie" in e
-													? isUuid(e.serie)
-														? { id: e.serie }
-														: { slug: e.serie }
-													: undefined,
-										},
-									}));
-								}),
-							).as("j"),
-						)
-						.innerJoin(vidsI, eq(vidsI.path, sql`j.path`))
+						.from(values(vidEntries).as("j"))
 						.innerJoin(
 							entriesQ,
 							or(
@@ -279,11 +281,20 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				.returning({
 					slug: entryVideoJoin.slug,
 					entryPk: entryVideoJoin.entryPk,
-					id: vidsI.id,
-					path: vidsI.path,
+					videoPk: entryVideoJoin.videoPk,
 				});
-			return error(201, ret);
-			// return error(201, ret.map(x => ({ id: x.id, slug: x.})));
+			const entr = ret.reduce(
+				(acc, x) => {
+					acc[x.videoPk] ??= [];
+					acc[x.videoPk].push({ slug: x.slug });
+					return acc;
+				},
+				{} as Record<number, { slug: string }[]>,
+			);
+			return error(
+				201,
+				vids.map((x) => ({ id: x.id, path: x.path, entries: entr[x.pk] })),
+			);
 		},
 		{
 			detail: {

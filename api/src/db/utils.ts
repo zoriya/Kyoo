@@ -76,6 +76,7 @@ export function sqlarr(array: unknown[]) {
 // See https://github.com/drizzle-team/drizzle-orm/issues/4044
 // TODO: type values (everything is a `text` for now)
 export function values(items: Record<string, unknown>[]) {
+	if (items[0] === undefined) throw new Error("Invalid values, expecting at least one items")
 	const [firstProp, ...props] = Object.keys(items[0]);
 	const values = items
 		.map((x) => {

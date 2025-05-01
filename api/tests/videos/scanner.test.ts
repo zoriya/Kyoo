@@ -39,7 +39,7 @@ describe("Video seeding", () => {
 
 		expect(vid).not.toBeNil();
 		expect(vid!.path).toBe("/video/unknown s1e13.mkv");
-		expect(vid!.guess).toBe({ title: "unknown", from: "test" });
+		expect(vid!.guess).toMatchObject({ title: "unknown", from: "test" });
 
 		expect(body[0].entries).toBeArrayOfSize(0);
 		expect(vid!.evj).toBeArrayOfSize(0);
@@ -68,7 +68,7 @@ describe("Video seeding", () => {
 
 		expect(vid).not.toBeNil();
 		expect(vid!.path).toBe("/video/mia s1e13.mkv");
-		expect(vid!.guess).toBe({ title: "mia", from: "test" });
+		expect(vid!.guess).toMatchObject({ title: "mia", from: "test" });
 
 		expect(body[0].entries).toBeArrayOfSize(1);
 		expect(vid!.evj).toBeArrayOfSize(1);
@@ -106,7 +106,7 @@ describe("Video seeding", () => {
 
 		expect(vid).not.toBeNil();
 		expect(vid!.path).toBe("/video/mia s1e13.mkv");
-		expect(vid!.guess).toBe({ title: "mia", from: "test" });
+		expect(vid!.guess).toMatchObject({ title: "mia", from: "test" });
 
 		expect(body[0].entries).toBeArrayOfSize(1);
 		expect(vid!.evj).toBeArrayOfSize(1);
