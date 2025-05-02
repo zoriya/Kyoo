@@ -33,15 +33,19 @@ public static class PostgresModule
 {
 	public static NpgsqlDataSource CreateDataSource(IConfiguration configuration)
 	{
+		var connectionString = configuration.GetValue<string>("POSTGRES_URL");
+
 		// Load the connection string from the environment variable, as well as standard libpq environment variables
 		// (PGUSER, PGPASSWORD, PGHOST, PGPORT, PGDATABASE, etc.)
-		NpgsqlConnectionStringBuilder conBuilder =
-			new(configuration.GetValue<string>("POSTGRES_URL") ?? "")
-			{
-				Pooling = true,
-				MaxPoolSize = 95,
-				Timeout = 30
-			};
+		NpgsqlConnectionStringBuilder conBuilder = new(connectionString ?? "");
+		// Set defaults when no explicit connection string is provided. This cannot be set if the connection string
+		// is provided, or it will override connection string values.
+		if (string.IsNullOrEmpty(connectionString))
+		{
+			conBuilder.Pooling = true;
+			conBuilder.MaxPoolSize = 95;
+			conBuilder.Timeout = 30;
+		}
 
 		string? oldVarUsername = configuration.GetValue<string>("POSTGRES_USER");
 		if (!string.IsNullOrEmpty(oldVarUsername))
