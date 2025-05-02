@@ -160,166 +160,174 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 	.post(
 		"",
 		async ({ body, error }) => {
-			const vids = await db
-				.insert(videos)
-				.values(body)
-				.onConflictDoUpdate({
-					target: [videos.path],
-					set: conflictUpdateAllExcept(videos, ["pk", "id", "createdAt"]),
-				})
-				.returning({
-					pk: videos.pk,
-					id: videos.id,
-					path: videos.path,
+			return await db.transaction(async (tx) => {
+				const vids = await tx
+					.insert(videos)
+					.values(body)
+					.onConflictDoUpdate({
+						target: [videos.path],
+						set: conflictUpdateAllExcept(videos, ["pk", "id", "createdAt"]),
+					})
+					.returning({
+						pk: videos.pk,
+						id: videos.id,
+						path: videos.path,
+					});
+
+				const vidEntries = body.flatMap((x) => {
+					if (!x.for) return [];
+					return x.for.map((e) => ({
+						video: vids.find((v) => v.path === x.path)!.pk,
+						path: x.path,
+						entry: {
+							...e,
+							movie:
+								"movie" in e
+									? isUuid(e.movie)
+										? { id: e.movie }
+										: { slug: e.movie }
+									: undefined,
+							serie:
+								"serie" in e
+									? isUuid(e.serie)
+										? { id: e.serie }
+										: { slug: e.serie }
+									: undefined,
+						},
+					}));
 				});
 
-			const vidEntries = body.flatMap((x) => {
-				if (!x.for) return [];
-				return x.for.map((e) => ({
-					video: vids.find((v) => v.path === x.path)!.pk,
-					path: x.path,
-					entry: {
-						...e,
-						movie:
-							"movie" in e
-								? isUuid(e.movie)
-									? { id: e.movie }
-									: { slug: e.movie }
-								: undefined,
-						serie:
-							"serie" in e
-								? isUuid(e.serie)
-									? { id: e.serie }
-									: { slug: e.serie }
-								: undefined,
-					},
-				}));
-			});
+				if (!vidEntries.length) {
+					return error(
+						201,
+						vids.map((x) => ({ id: x.id, path: x.path, entries: [] })),
+					);
+				}
 
-			if (!vidEntries.length) {
+				const entriesQ = tx
+					.select({
+						pk: entries.pk,
+						id: entries.id,
+						slug: entries.slug,
+						kind: entries.kind,
+						seasonNumber: entries.seasonNumber,
+						episodeNumber: entries.episodeNumber,
+						order: entries.order,
+						showId: sql`${shows.id}`.as("showId"),
+						showSlug: sql`${shows.slug}`.as("showSlug"),
+						externalId: entries.externalId,
+					})
+					.from(entries)
+					.innerJoin(shows, eq(entries.showPk, shows.pk))
+					.as("entriesQ");
+
+				const hasRenderingQ = tx
+					.select()
+					.from(entryVideoJoin)
+					.where(eq(entryVideoJoin.entryPk, entriesQ.pk));
+
+				const ret = await tx
+					.insert(entryVideoJoin)
+					.select(
+						tx
+							.selectDistinctOn([entriesQ.pk, videos.pk], {
+								entryPk: entriesQ.pk,
+								videoPk: videos.pk,
+								slug: computeVideoSlug(
+									entriesQ.slug,
+									sql`exists(${hasRenderingQ})`,
+								),
+							})
+							.from(
+								values(vidEntries, {
+									video: "integer",
+									entry: "jsonb",
+								}).as("j"),
+							)
+							.innerJoin(videos, eq(videos.pk, sql`j.video`))
+							.innerJoin(
+								entriesQ,
+								or(
+									and(
+										sql`j.entry ? 'slug'`,
+										eq(entriesQ.slug, sql`j.entry->>'slug'`),
+									),
+									and(
+										sql`j.entry ? 'movie'`,
+										or(
+											eq(
+												entriesQ.showId,
+												sql`(j.entry #>> '{movie, id}')::uuid`,
+											),
+											eq(entriesQ.showSlug, sql`j.entry #>> '{movie, slug}'`),
+										),
+										eq(entriesQ.kind, "movie"),
+									),
+									and(
+										sql`j.entry ? 'serie'`,
+										or(
+											eq(
+												entriesQ.showId,
+												sql`(j.entry #>> '{serie, id}')::uuid`,
+											),
+											eq(entriesQ.showSlug, sql`j.entry #>> '{serie, slug}'`),
+										),
+										or(
+											and(
+												sql`j.entry ?& array['season', 'episode']`,
+												eq(
+													entriesQ.seasonNumber,
+													sql`(j.entry->>'season')::integer`,
+												),
+												eq(
+													entriesQ.episodeNumber,
+													sql`(j.entry->>'episode')::integer`,
+												),
+											),
+											and(
+												sql`j.entry ? 'order'`,
+												eq(entriesQ.order, sql`(j.entry->>'order')::float`),
+											),
+											and(
+												sql`j.entry ? 'special'`,
+												eq(
+													entriesQ.episodeNumber,
+													sql`(j.entry->>'special')::integer`,
+												),
+												eq(entriesQ.kind, "special"),
+											),
+										),
+									),
+									and(
+										sql`j.entry ? 'externalId'`,
+										sql`j.entry->'externalId' <@ ${entriesQ.externalId}`,
+									),
+								),
+							),
+					)
+					.onConflictDoNothing()
+					.returning({
+						slug: entryVideoJoin.slug,
+						entryPk: entryVideoJoin.entryPk,
+						videoPk: entryVideoJoin.videoPk,
+					});
+				const entr = ret.reduce(
+					(acc, x) => {
+						acc[x.videoPk] ??= [];
+						acc[x.videoPk].push({ slug: x.slug });
+						return acc;
+					},
+					{} as Record<number, { slug: string }[]>,
+				);
 				return error(
 					201,
-					vids.map((x) => ({ id: x.id, path: x.path, entries: [] })),
+					vids.map((x) => ({
+						id: x.id,
+						path: x.path,
+						entries: entr[x.pk] ?? [],
+					})),
 				);
-			}
-
-			const entriesQ = db
-				.select({
-					pk: entries.pk,
-					id: entries.id,
-					slug: entries.slug,
-					kind: entries.kind,
-					seasonNumber: entries.seasonNumber,
-					episodeNumber: entries.episodeNumber,
-					order: entries.order,
-					showId: sql`${shows.id}`.as("showId"),
-					showSlug: sql`${shows.slug}`.as("showSlug"),
-					externalId: entries.externalId,
-				})
-				.from(entries)
-				.innerJoin(shows, eq(entries.showPk, shows.pk))
-				.as("entriesQ");
-
-			const hasRenderingQ = db
-				.select()
-				.from(entryVideoJoin)
-				.where(eq(entryVideoJoin.entryPk, entriesQ.pk));
-
-			const ret = await db
-				.insert(entryVideoJoin)
-				.select(
-					db
-						.select({
-							entryPk: entriesQ.pk,
-							videoPk: videos.pk,
-							slug: computeVideoSlug(
-								entriesQ.slug,
-								sql`exists(${hasRenderingQ})`,
-							),
-						})
-						.from(
-							values(vidEntries, {
-								video: "integer",
-								entry: "jsonb",
-							}).as("j"),
-						)
-						.innerJoin(videos, eq(videos.pk, sql`j.video`))
-						.innerJoin(
-							entriesQ,
-							or(
-								and(
-									sql`j.entry ? 'slug'`,
-									eq(entriesQ.slug, sql`j.entry->>'slug'`),
-								),
-								and(
-									sql`j.entry ? 'movie'`,
-									or(
-										eq(entriesQ.showId, sql`(j.entry #>> '{movie, id}')::uuid`),
-										eq(entriesQ.showSlug, sql`j.entry #>> '{movie, slug}'`),
-									),
-									eq(entriesQ.kind, "movie"),
-								),
-								and(
-									sql`j.entry ? 'serie'`,
-									or(
-										eq(entriesQ.showId, sql`(j.entry #>> '{serie, id}')::uuid`),
-										eq(entriesQ.showSlug, sql`j.entry #>> '{serie, slug}'`),
-									),
-									or(
-										and(
-											sql`j.entry ?& array['season', 'episode']`,
-											eq(
-												entriesQ.seasonNumber,
-												sql`(j.entry->>'season')::integer`,
-											),
-											eq(
-												entriesQ.episodeNumber,
-												sql`(j.entry->>'episode')::integer`,
-											),
-										),
-										and(
-											sql`j.entry ? 'order'`,
-											eq(entriesQ.order, sql`(j.entry->>'order')::float`),
-										),
-										and(
-											sql`j.entry ? 'special'`,
-											eq(
-												entriesQ.episodeNumber,
-												sql`(j.entry->>'special')::integer`,
-											),
-											eq(entriesQ.kind, "special"),
-										),
-									),
-								),
-								and(
-									sql`j.entry ? 'externalId'`,
-									sql`j.entry->'externalId' <@ ${entriesQ.externalId}`,
-								),
-							),
-						),
-				)
-				.onConflictDoNothing()
-				.returning({
-					slug: entryVideoJoin.slug,
-					entryPk: entryVideoJoin.entryPk,
-					videoPk: entryVideoJoin.videoPk,
-				});
-			const entr = ret.reduce(
-				(acc, x) => {
-					acc[x.videoPk] ??= [];
-					acc[x.videoPk].push({ slug: x.slug });
-					return acc;
-				},
-				{} as Record<number, { slug: string }[]>,
-			);
-			return error(
-				201,
-				vids.map((x) => ({
-					id: x.id,
-					path: x.path,
-					entries: entr[x.pk] ?? [],
-				})),
-			);
+			});
 		},
 		{
 			detail: {

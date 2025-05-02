@@ -1,4 +1,4 @@
-import { PatternString } from "@sinclair/typebox";
+import { PatternStringExact } from "@sinclair/typebox";
 import { t } from "elysia";
 import { type Prettify, comment } from "~/utils";
 import { ExtraType } from "./entry/extra";
@@ -9,12 +9,13 @@ const ExternalIds = t.Record(
 	t.String(),
 	t.Omit(
 		t.Union([
-			EpisodeId.patternProperties[PatternString],
-			ExternalId().patternProperties[PatternString],
+			EpisodeId.patternProperties[PatternStringExact],
+			ExternalId().patternProperties[PatternStringExact],
 		]),
 		["link"],
 	),
 );
+type ExternalIds = typeof ExternalIds.static;
 
 export const Guess = t.Recursive((Self) =>
 	t.Object(

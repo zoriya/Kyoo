@@ -109,6 +109,38 @@ describe("Video seeding", () => {
 		expect(vid!.evj[0].entry.slug).toBe(bubble.slug);
 	});
 
+	it("Conflicting path", async () => {
+		const [resp, body] = await createVideo({
+			guess: { title: "bubble", from: "test" },
+			part: null,
+			path: "/video/bubble.mkv",
+			rendering: "sha",
+			version: 1,
+			for: [{ movie: bubble.slug }],
+		});
+
+		expectStatus(resp, body).toBe(201);
+		expect(body).toBeArrayOfSize(1);
+		expect(body[0].id).toBeString();
+
+		const vid = await db.query.videos.findFirst({
+			where: eq(videos.id, body[0].id),
+			with: {
+				evj: { with: { entry: true } },
+			},
+		});
+
+		expect(vid).not.toBeNil();
+		expect(vid!.path).toBe("/video/bubble.mkv");
+		expect(vid!.guess).toMatchObject({ title: "bubble", from: "test" });
+
+		expect(body[0].entries).toBeArrayOfSize(1);
+		expect(vid!.evj).toBeArrayOfSize(1);
+
+		expect(vid!.evj[0].slug).toBe(bubble.slug);
+		expect(vid!.evj[0].entry.slug).toBe(bubble.slug);
+	});
+
 	it("With season/episode", async () => {
 		const [resp, body] = await createVideo({
 			guess: { title: "mia", season: [2], episode: [1], from: "test" },
@@ -229,7 +261,7 @@ describe("Video seeding", () => {
 				episode: [3],
 				from: "test",
 				externalId: {
-					themoviedb: { serieId: "72636", season: 1, episode: 13 },
+					themoviedatabase: { serieId: "72636", season: 1, episode: 13 },
 				},
 			},
 			part: null,
@@ -239,7 +271,7 @@ describe("Video seeding", () => {
 			for: [
 				{
 					externalId: {
-						themoviedb: { serieId: "72636", season: 1, episode: 13 },
+						themoviedatabase: { serieId: "72636", season: 1, episode: 13 },
 					},
 				},
 			],
@@ -273,7 +305,7 @@ describe("Video seeding", () => {
 				title: "bubble",
 				from: "test",
 				externalId: {
-					themoviedb: { dataId: "912598", season: 1, episode: 13 },
+					themoviedatabase: { dataId: "912598" },
 				},
 			},
 			part: null,
@@ -283,7 +315,7 @@ describe("Video seeding", () => {
 			for: [
 				{
 					externalId: {
-						themoviedb: { serieId: "912598", season: 1, episode: 13 },
+						themoviedatabase: { dataId: "912598" },
 					},
 				},
 			],
@@ -317,18 +349,18 @@ describe("Video seeding", () => {
 				title: "bubble",
 				from: "test",
 				externalId: {
-					themoviedb: { dataId: "912598", season: 1, episode: 13 },
+					themoviedatabase: { dataId: "912598" },
 				},
 			},
 			part: null,
-			path: "/video/bubble [tmdb=912598].mkv",
-			rendering: "cwhtn",
+			path: "/video/bubble ue [tmdb=912598].mkv",
+			rendering: "aoeubnht",
 			version: 1,
 			for: [
 				{ movie: "bubble" },
 				{
 					externalId: {
-						themoviedb: { serieId: "912598", season: 1, episode: 13 },
+						themoviedatabase: { dataId: "912598" },
 					},
 				},
 			],
@@ -346,13 +378,13 @@ describe("Video seeding", () => {
 		});
 
 		expect(vid).not.toBeNil();
-		expect(vid!.path).toBe("/video/bubble [tmdb=912598].mkv");
+		expect(vid!.path).toBe("/video/bubble ue [tmdb=912598].mkv");
 		expect(vid!.guess).toMatchObject({ title: "bubble", from: "test" });
 
 		expect(body[0].entries).toBeArrayOfSize(1);
 		expect(vid!.evj).toBeArrayOfSize(1);
 
-		expect(vid!.evj[0].slug).toBe("bubble-cwhtn");
+		expect(vid!.evj[0].slug).toBe("bubble-aoeubnht");
 		expect(vid!.evj[0].entry.slug).toBe("bubble");
 	});
 
@@ -363,7 +395,7 @@ describe("Video seeding", () => {
 				title: "bubble",
 				from: "test",
 				externalId: {
-					themoviedb: { dataId: "912598", season: 1, episode: 13 },
+					themoviedatabase: { dataId: "912598" },
 				},
 			},
 			part: null,
@@ -374,7 +406,7 @@ describe("Video seeding", () => {
 				{ movie: "bubble" },
 				{
 					externalId: {
-						themoviedb: { serieId: "912598", season: 1, episode: 13 },
+						themoviedatabase: { dataId: "912598" },
 					},
 				},
 			],
@@ -400,5 +432,121 @@ describe("Video seeding", () => {
 
 		expect(vid!.evj[0].slug).toBe("bubble");
 		expect(vid!.evj[0].entry.slug).toBe("bubble");
+	});
+
+	it("Multi part", async () => {
+		await db.delete(videos);
+		const [resp, body] = await createVideo([
+			{
+				guess: {
+					title: "bubble",
+					from: "test",
+					externalId: {
+						themoviedatabase: { dataId: "912598" },
+					},
+				},
+				part: 1,
+				path: "/video/bubble p1 [tmdb=912598].mkv",
+				rendering: "cwhtn",
+				version: 1,
+				for: [
+					{ movie: "bubble" },
+					{
+						externalId: {
+							themoviedatabase: { dataId: "912598" },
+						},
+					},
+				],
+			},
+			{
+				guess: {
+					title: "bubble",
+					from: "test",
+					externalId: {
+						themoviedatabase: { dataId: "912598" },
+					},
+				},
+				part: 2,
+				path: "/video/bubble p2 [tmdb=912598].mkv",
+				rendering: "cwhtn",
+				version: 1,
+				for: [
+					{ movie: "bubble" },
+					{
+						externalId: {
+							themoviedatabase: { dataId: "912598" },
+						},
+					},
+				],
+			},
+		]);
+
+		expectStatus(resp, body).toBe(201);
+		expect(body).toBeArrayOfSize(2);
+		expect(body[0].id).toBeString();
+		expect(body[1].id).toBeString();
+		expect(body[0].entries).toBeArrayOfSize(1);
+		expect(body[1].entries).toBeArrayOfSize(1);
+
+		const entr = (await db.query.entries.findFirst({
+			where: eq(entries.slug, bubble.slug),
+			with: {
+				evj: { with: { video: true } },
+			},
+		}))!;
+
+		expect(entr.evj).toBeArrayOfSize(2);
+		expect(entr.evj[0].video.path).toBe("/video/bubble p1 [tmdb=912598].mkv");
+
+		expect(entr.evj[0].slug).toBe("bubble-p1");
+		expect(entr.evj[1].slug).toBe("bubble-p2");
+	});
+
+	it("Multi entry", async () => {
+		await db.delete(videos);
+		const [resp, body] = await createVideo({
+			guess: {
+				title: "mia",
+				season: [1, 2],
+				episode: [13, 1],
+				from: "test",
+			},
+			part: null,
+			path: "/video/mia s1e13 & s2e1 [tmdb=72636].mkv",
+			rendering: "notehu",
+			version: 1,
+			for: [
+				{ serie: madeInAbyss.slug, season: 1, episode: 13 },
+				{
+					externalId: {
+						themoviedatabase: { serieId: "72636", season: 1, episode: 13 },
+					},
+				},
+				{ serie: madeInAbyss.slug, season: 2, episode: 1 },
+			],
+		});
+
+		expectStatus(resp, body).toBe(201);
+		expect(body).toBeArrayOfSize(1);
+		expect(body[0].id).toBeString();
+
+		const vid = await db.query.videos.findFirst({
+			where: eq(videos.id, body[0].id),
+			with: {
+				evj: { with: { entry: true } },
+			},
+		});
+
+		expect(vid).not.toBeNil();
+		expect(vid!.path).toBe("/video/mia s1e13 & s2e1 [tmdb=72636].mkv");
+		expect(vid!.guess).toMatchObject({ title: "mia", from: "test" });
+
+		expect(body[0].entries).toBeArrayOfSize(2);
+		expect(vid!.evj).toBeArrayOfSize(2);
+
+		expect(vid!.evj[0].slug).toBe("made-in-abyss-s1e13");
+		expect(vid!.evj[0].entry.slug).toBe("made-in-abyss-s1e13");
+		expect(vid!.evj[1].slug).toBe("made-in-abyss-s2e1");
+		expect(vid!.evj[1].entry.slug).toBe("made-in-abyss-s2e1");
 	});
 });
