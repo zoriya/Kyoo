@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/zoriya/kyoo/transcoder/src"
+	"github.com/zoriya/kyoo/transcoder/src/api"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -321,6 +322,8 @@ func main() {
 	g.GET("/:path/thumbnails.vtt", h.GetThumbnailsVtt)
 	g.GET("/:path/attachment/:name", h.GetAttachment)
 	g.GET("/:path/subtitle/:name", h.GetSubtitle)
+
+	api.RegisterPProfHandlers(e)
 
 	e.Logger.Fatal(e.Start(":7666"))
 }
