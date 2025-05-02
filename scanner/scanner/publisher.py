@@ -13,11 +13,6 @@ logger = getLogger(__name__)
 class Publisher(RabbitBase):
 	QUEUE_RESCAN = "scanner.rescan"
 
-	async def __aenter__(self):
-		await super().__aenter__()
-		self._queue = await self._channel.declare_queue(self.QUEUE_RESCAN)
-		return self
-
 	async def _publish(self, data: dict):
 		await self._channel.default_exchange.publish(
 			Message(json.dumps(data).encode()),
