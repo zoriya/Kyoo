@@ -6,12 +6,17 @@ async def main():
 	from .scanner import scan
 	from .refresher import refresh
 	from .publisher import Publisher
+	from .subscriber import Subscriber
 	from providers.kyoo_client import KyooClient
 
 	logging.basicConfig(level=logging.INFO)
 	logging.getLogger("watchfiles").setLevel(logging.WARNING)
 
-	async with Publisher() as publisher, KyooClient() as client:
+	async with (
+		Publisher() as publisher,
+		Subscriber() as subscriber,
+		KyooClient() as client,
+	):
 		path = os.environ.get("SCANNER_LIBRARY_ROOT", "/video")
 
 		async def scan_all():
@@ -21,5 +26,5 @@ async def main():
 			monitor(path, publisher, client),
 			scan_all(),
 			refresh(publisher, client),
-			publisher.listen(scan_all),
+			subscriber.listen(scan_all),
 		)
