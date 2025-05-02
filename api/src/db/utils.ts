@@ -142,3 +142,7 @@ export const jsonbBuildObject = <T>(select: JsonFields) => {
 	);
 	return sql<T>`jsonb_build_object(${query})`;
 };
+
+export const isUniqueConstraint = (e: unknown): boolean => {
+	return typeof e === "object" && e != null && "code" in e && e.code === "23505";
+};

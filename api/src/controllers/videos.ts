@@ -5,6 +5,7 @@ import { db } from "~/db";
 import { entries, entryVideoJoin, shows, videos } from "~/db/schema";
 import {
 	conflictUpdateAllExcept,
+	isUniqueConstraint,
 	jsonbBuildObject,
 	jsonbObjectAgg,
 	values,
@@ -161,18 +162,33 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 		"",
 		async ({ body, error }) => {
 			return await db.transaction(async (tx) => {
-				const vids = await tx
-					.insert(videos)
-					.values(body)
-					.onConflictDoUpdate({
-						target: [videos.path],
-						set: conflictUpdateAllExcept(videos, ["pk", "id", "createdAt"]),
-					})
-					.returning({
-						pk: videos.pk,
-						id: videos.id,
-						path: videos.path,
+				let vids: { pk: number; id: string; path: string }[] = [];
+				try {
+					vids = await tx
+						.insert(videos)
+						.values(body)
+						.onConflictDoUpdate({
+							target: [videos.path],
+							set: conflictUpdateAllExcept(videos, ["pk", "id", "createdAt"]),
+						})
+						.returning({
+							pk: videos.pk,
+							id: videos.id,
+							path: videos.path,
+						});
+				} catch (e) {
+					if (!isUniqueConstraint(e))
+						throw e;
+					return error(409, {
+						status: 409,
+						message: comment`
+							Invalid rendering. A video with the same (rendering, part, version) combo
+							(but with a different path) already exists in db.
+
+							rendering should be computed by the sha of your path (excluding only the version & part numbers)
+						`,
 					});
+				}
 
 				const vidEntries = body.flatMap((x) => {
 					if (!x.for) return [];
@@ -305,7 +321,11 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 								),
 							),
 					)
-					.onConflictDoNothing()
+					.onConflictDoUpdate({
+						target: [entryVideoJoin.entryPk, entryVideoJoin.videoPk],
+						// this is basically a `.onConflictDoNothing()` but we want `returning` to give us the existing data
+						set: { entryPk: sql`excluded.entry_pk` },
+					})
 					.returning({
 						slug: entryVideoJoin.slug,
 						entryPk: entryVideoJoin.entryPk,
@@ -340,7 +360,14 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				`,
 			},
 			body: t.Array(SeedVideo),
-			response: { 201: t.Array(CreatedVideo) },
+			response: {
+				201: t.Array(CreatedVideo),
+				409: {
+					...KError,
+					description:
+						"Invalid rendering specified. (conflicts with an existing video)",
+				},
+			},
 		},
 	)
 	.delete(

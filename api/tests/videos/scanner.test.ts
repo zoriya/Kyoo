@@ -50,7 +50,7 @@ describe("Video seeding", () => {
 			guess: { title: "mia", season: [1], episode: [13], from: "test" },
 			part: null,
 			path: "/video/mia s1e13.mkv",
-			rendering: "sha",
+			rendering: "sha2",
 			version: 1,
 			for: [{ slug: `${madeInAbyss.slug}-s1e13` }],
 		});
@@ -82,7 +82,7 @@ describe("Video seeding", () => {
 			guess: { title: "bubble", from: "test" },
 			part: null,
 			path: "/video/bubble.mkv",
-			rendering: "sha",
+			rendering: "sha3",
 			version: 1,
 			for: [{ movie: bubble.slug }],
 		});
@@ -114,7 +114,7 @@ describe("Video seeding", () => {
 			guess: { title: "bubble", from: "test" },
 			part: null,
 			path: "/video/bubble.mkv",
-			rendering: "sha",
+			rendering: "sha4",
 			version: 1,
 			for: [{ movie: bubble.slug }],
 		});
@@ -221,7 +221,7 @@ describe("Video seeding", () => {
 			guess: { title: "mia", season: [0], episode: [3], from: "test" },
 			part: null,
 			path: "/video/mia 13.5.mkv",
-			rendering: "notehu",
+			rendering: "notehu2",
 			version: 1,
 			for: [
 				{
@@ -266,7 +266,7 @@ describe("Video seeding", () => {
 			},
 			part: null,
 			path: "/video/mia s1e13 [tmdb=72636].mkv",
-			rendering: "notehu",
+			rendering: "notehu3",
 			version: 1,
 			for: [
 				{
@@ -295,7 +295,7 @@ describe("Video seeding", () => {
 		expect(body[0].entries).toBeArrayOfSize(1);
 		expect(vid!.evj).toBeArrayOfSize(1);
 
-		expect(vid!.evj[0].slug).toBe("made-in-abyss-s1e13-notehu");
+		expect(vid!.evj[0].slug).toBe("made-in-abyss-s1e13-notehu3");
 		expect(vid!.evj[0].entry.slug).toBe("made-in-abyss-s1e13");
 	});
 
@@ -342,6 +342,22 @@ describe("Video seeding", () => {
 		expect(vid!.evj[0].slug).toBe("bubble-onetuh");
 		expect(vid!.evj[0].entry.slug).toBe("bubble");
 	});
+
+	it("Different path, same sha", async () => {
+		const [resp, body] = await createVideo({
+			guess: { title: "bubble", from: "test" },
+			part: null,
+			path: "/video/bubble invalid-sha.mkv",
+			rendering: "sha",
+			version: 1,
+			for: [{ movie: bubble.slug }],
+		});
+
+		// conflict with existing video, message will contain an explanation on how to fix this
+		expectStatus(resp, body).toBe(409);
+		expect(body.message).toBeString();
+	});
+
 
 	it("Two for the same entry", async () => {
 		const [resp, body] = await createVideo({
@@ -513,7 +529,7 @@ describe("Video seeding", () => {
 			},
 			part: null,
 			path: "/video/mia s1e13 & s2e1 [tmdb=72636].mkv",
-			rendering: "notehu",
+			rendering: "notehu5",
 			version: 1,
 			for: [
 				{ serie: madeInAbyss.slug, season: 1, episode: 13 },
