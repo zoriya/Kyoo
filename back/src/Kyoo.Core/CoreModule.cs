@@ -86,7 +86,9 @@ public static class CoreModule
 		}
 
 		// Configuration (credentials, endpoint, etc.) are done via standard AWS env vars
-		builder.Services.AddScoped<IAmazonS3, AmazonS3Client>();
+		// See https://docs.aws.amazon.com/sdk-for-net/v3/developer-guide/net-dg-config-netcore.html
+		builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+		builder.Services.AddAWSService<IAmazonS3>();
 		builder.Services.AddScoped<IStorage, S3Storage>();
 	}
 }
