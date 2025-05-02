@@ -1,7 +1,5 @@
-import asyncio
 from guessit.jsonutils import json
 from aio_pika import Message
-from aio_pika.abc import AbstractIncomingMessage
 from logging import getLogger
 from typing import Literal
 
@@ -11,8 +9,6 @@ logger = getLogger(__name__)
 
 
 class Publisher(RabbitBase):
-	QUEUE_RESCAN = "scanner.rescan"
-
 	async def _publish(self, data: dict):
 		await self._channel.default_exchange.publish(
 			Message(json.dumps(data).encode()),
@@ -32,15 +28,3 @@ class Publisher(RabbitBase):
 		**_kwargs,
 	):
 		await self._publish({"action": "refresh", "kind": kind, "id": id})
-
-	async def listen(self, scan):
-		async def on_message(message: AbstractIncomingMessage):
-			try:
-				await scan()
-				await message.ack()
-			except Exception as e:
-				logger.exception("Unhandled error", exc_info=e)
-				await message.reject()
-
-		await self._queue.consume(on_message)
-		await asyncio.Future()
