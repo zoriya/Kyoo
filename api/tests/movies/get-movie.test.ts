@@ -159,7 +159,7 @@ describe("Get movie", () => {
 		expect(body.videos).toBeArrayOfSize(bubble.videos!.length);
 		expect(body.videos[0]).toMatchObject({
 			path: bubbleVideo.path,
-			slug: bubbleVideo.slug,
+			slug: bubble.slug,
 			version: bubbleVideo.version,
 			rendering: bubbleVideo.rendering,
 			part: bubbleVideo.part,

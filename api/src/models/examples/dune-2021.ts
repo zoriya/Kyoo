@@ -3,7 +3,6 @@ import type { Video } from "~/models/video";
 
 export const duneVideo: Video = {
 	id: "c9a0d02e-6b8e-4ac1-b431-45b022ec0708",
-	slug: "dune",
 	path: "/video/Dune/Dune (2021).mkv",
 	rendering: "f1953a4fb58247efb6c15b76468b6a9d13b4155b02094863b1a4f0c3fbb6db58",
 	part: null,

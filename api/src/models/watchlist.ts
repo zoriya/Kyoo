@@ -7,6 +7,7 @@ export const WatchlistStatus = t.UnionEnum([
 	"dropped",
 	"planned",
 ]);
+export type WatchlistStatus = typeof WatchlistStatus.static;
 
 export const SerieWatchStatus = t.Object({
 	status: WatchlistStatus,

@@ -18,6 +18,7 @@ import {
 	processLanguages,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
+import type { WatchlistStatus } from "~/models/watchlist";
 import {
 	entryFilters,
 	entryProgressQ,
@@ -186,12 +187,12 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 				.select(
 					db
 						.select({
-							profilePk: sql`${profilePk}`,
+							profilePk: sql`${profilePk}`.as("profilePk"),
 							entryPk: entries.pk,
 							videoPk: videos.pk,
-							percent: sql`hist.percent`,
-							time: sql`hist.time`,
-							playedDate: sql`hist.playedDate`,
+							percent: sql`hist.percent`.as("percent"),
+							time: sql`hist.time`.as("time"),
+							playedDate: sql`hist.playedDate`.as("playedDate"),
 						})
 						.from(hist)
 						.innerJoin(entries, valEqEntries)
@@ -248,9 +249,9 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 				.select(
 					db
 						.select({
-							profilePk: sql`${profilePk}`,
+							profilePk: sql`${profilePk}`.as("profilePk"),
 							showPk: entries.showPk,
-							status: sql`
+							status: sql<WatchlistStatus>`
 								case
 									when
 										hist.percent >= 95
@@ -258,35 +259,35 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 									then 'completed'::watchlist_status
 									else 'watching'::watchlist_status
 								end
-							`,
+							`.as("status"),
 							seenCount: sql`
 								case
 									when ${entries.kind} = 'movie' then hist.percent
 									when hist.percent >= 95 then 1
 									else 0
 								end
-							`,
+							`.as("seen_count"),
 							nextEntry: sql`
 								case
 									when hist.percent >= 95 then ${nextEntryQ.pk}
 									else ${entries.pk}
 								end
-							`,
-							score: sql`null`,
-							startedAt: sql`hist.playedDate`,
-							lastPlayedAt: sql`hist.playedDate`,
+							`.as("next_entry"),
+							score: sql`null`.as("score"),
+							startedAt: sql`hist.playedDate`.as("startedAt"),
+							lastPlayedAt: sql`hist.playedDate`.as("lastPlayedAt"),
 							completedAt: sql`
 								case
 									when ${nextEntryQ.pk} is null then hist.playedDate
 									else null
 								end
-							`,
+							`.as("completedAt"),
 							// see https://github.com/drizzle-team/drizzle-orm/issues/3608
-							updatedAt: sql`now()`,
+							updatedAt: sql`now()`.as("updatedAt"),
 						})
 						.from(hist)
 						.leftJoin(entries, valEqEntries)
-						.crossJoinLateral(nextEntryQ),
+						.leftJoinLateral(nextEntryQ, sql`true`),
 				)
 				.onConflictDoUpdate({
 					target: [watchlist.profilePk, watchlist.showPk],

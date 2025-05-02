@@ -90,6 +90,7 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 				seasonNumber,
 				episodeNumber,
 				extraKind,
+				kind,
 				...entryCol
 			} = getColumns(entries);
 
@@ -100,9 +101,10 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 					videos: entryVideosQ.videos,
 					progress: mapProgress({ aliased: true }),
 					// specials don't have an `episodeNumber` but a `number` field.
-					number: episodeNumber,
+					number: sql<number>`${episodeNumber}`,
 
 					// assign more restrained types to make typescript happy.
+					kind: sql<Entry["kind"]>`${kind}`,
 					externalId: sql<any>`${externalId}`,
 					order: sql<number>`${order}`,
 					seasonNumber: sql<number>`${seasonNumber}`,

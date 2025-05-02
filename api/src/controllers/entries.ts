@@ -143,13 +143,15 @@ export const entryVideosQ = db
 export const mapProgress = ({ aliased }: { aliased: boolean }) => {
 	const { time, percent, playedDate, videoId } = getColumns(entryProgressQ);
 	const ret = {
-		time: coalesce(time, sql`0`),
-		percent: coalesce(percent, sql`0`),
-		playedDate: sql`${playedDate}`,
-		videoId: sql`${videoId}`,
+		time: coalesce(time, sql<number>`0`),
+		percent: coalesce(percent, sql<number>`0`),
+		playedDate: sql<string>`${playedDate}`,
+		videoId: sql<string>`${videoId}`,
 	};
 	if (!aliased) return ret;
-	return Object.fromEntries(Object.entries(ret).map(([k, v]) => [k, v.as(k)]));
+	return Object.fromEntries(
+		Object.entries(ret).map(([k, v]) => [k, v.as(k)]),
+	) as unknown as typeof ret;
 };
 
 export async function getEntries({
@@ -197,7 +199,7 @@ export async function getEntries({
 			videos: entryVideosQ.videos,
 			progress: mapProgress({ aliased: true }),
 			// specials don't have an `episodeNumber` but a `number` field.
-			number: episodeNumber,
+			number: sql<number>`${episodeNumber}`,
 
 			// merge `extraKind` into `kind`
 			kind: sql<EntryKind>`case when ${kind} = 'extra' then ${extraKind} else ${kind}::text end`.as(

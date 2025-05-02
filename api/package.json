@@ -13,7 +13,7 @@
 		"blurhash": "^2.0.5",
 		"drizzle-kit": "^0.31.0",
 		"drizzle-orm": "0.43.1",
-		"elysia": "^1.3.0-exp.71",
+		"elysia": "^1.2.25",
 		"jose": "^6.0.10",
 		"parjs": "^1.3.9",
 		"pg": "^8.15.6",
