@@ -58,7 +58,7 @@ public class ThumbnailsApi(IThumbnailsManager thumbs) : BaseApi
 	public async Task<IActionResult> GetPoster(Guid id, [FromQuery] ImageQuality? quality)
 	{
 		quality ??= ImageQuality.High;
-		if (await thumbs.IsImageSaved(id, quality.Value))
+		if (!await thumbs.IsImageSaved(id, quality.Value))
 			return NotFound();
 
 		// Allow clients to cache the image for 6 month.
