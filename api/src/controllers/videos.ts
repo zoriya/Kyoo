@@ -8,6 +8,7 @@ import {
 	isUniqueConstraint,
 	jsonbBuildObject,
 	jsonbObjectAgg,
+	sqlarr,
 	values,
 } from "~/db/utils";
 import { KError } from "~/models/error";
@@ -343,6 +344,17 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 					},
 					{} as Record<number, { slug: string }[]>,
 				);
+
+				await updateAvailableCount(
+					tx,
+					tx
+						.selectDistinct({ pk: entries.showPk })
+						.from(entries)
+						.where(
+							eq(entries.pk, sql`any(${sqlarr(ret.map((x) => x.entryPk))})`),
+						),
+				);
+
 				return error(
 					201,
 					vids.map((x) => ({
