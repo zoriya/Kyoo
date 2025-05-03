@@ -26,7 +26,10 @@ import { desc as description } from "~/models/utils/descriptions";
 import { Guesses, SeedVideo, Video } from "~/models/video";
 import { comment } from "~/utils";
 import { computeVideoSlug } from "./seed/insert/entries";
-import { updateAvailableCount } from "./seed/insert/shows";
+import {
+	updateAvailableCount,
+	updateAvailableSince,
+} from "./seed/insert/shows";
 
 const CreatedVideo = t.Object({
 	id: t.String({ format: "uuid" }),
@@ -345,15 +348,15 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 					{} as Record<number, { slug: string }[]>,
 				);
 
+				const entriesPk = [...new Set(ret.map((x) => x.entryPk))];
 				await updateAvailableCount(
 					tx,
 					tx
 						.selectDistinct({ pk: entries.showPk })
 						.from(entries)
-						.where(
-							eq(entries.pk, sql`any(${sqlarr(ret.map((x) => x.entryPk))})`),
-						),
+						.where(eq(entries.pk, sql`any(${sqlarr(entriesPk)})`)),
 				);
+				await updateAvailableSince(tx, entriesPk);
 
 				return error(
 					201,
@@ -405,18 +408,16 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 						.where(
 							and(
 								inArray(entryVideoJoin.videoPk, tx.select().from(vids)),
-								not(
-									exists(
-										tx
-											.select()
-											.from(evj)
-											.where(
-												and(
-													eq(evj.entryPk, entryVideoJoin.entryPk),
-													not(inArray(evj.videoPk, db.select().from(vids))),
-												),
+								notExists(
+									tx
+										.select()
+										.from(evj)
+										.where(
+											and(
+												eq(evj.entryPk, entryVideoJoin.entryPk),
+												not(inArray(evj.videoPk, db.select().from(vids))),
 											),
-									),
+										),
 								),
 							),
 						),
