@@ -192,7 +192,7 @@ export const insertEntries = async (
 		if (!onlyExtras)
 			await updateAvailableCount(tx, [show.pk], show.kind === "serie");
 
-		await updateAvailableSince(tx,[...new Set(vids.map((x) => x.entryPk))]);
+		await updateAvailableSince(tx, [...new Set(vids.map((x) => x.entryPk))]);
 		return ret;
 	});
 

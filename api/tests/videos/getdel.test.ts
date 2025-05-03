@@ -1,13 +1,15 @@
 import { beforeAll, describe, expect, it } from "bun:test";
+import { eq } from "drizzle-orm";
 import {
 	createMovie,
 	createSerie,
 	createVideo,
+	deleteVideo,
 	getVideos,
 } from "tests/helpers";
 import { expectStatus } from "tests/utils";
 import { db } from "~/db";
-import { shows, videos } from "~/db/schema";
+import { entries, shows, videos } from "~/db/schema";
 import { bubble, madeInAbyss } from "~/models/examples";
 
 beforeAll(async () => {
@@ -56,6 +58,23 @@ beforeAll(async () => {
 	expect(body[0].entries).toBeArrayOfSize(1);
 	expect(body[1].entries).toBeArrayOfSize(1);
 	expect(body[2].entries).toBeArrayOfSize(1);
+
+	const items = await db.query.shows.findMany();
+	expect(items.find((x) => x.slug === "bubble")!.availableCount).toBe(1);
+	expect(items.find((x) => x.slug === "made-in-abyss")!.availableCount).toBe(2);
+
+	const etrs = await db.query.entries.findMany({
+		where: eq(
+			entries.showPk,
+			items.find((x) => x.slug === "made-in-abyss")!.pk,
+		),
+	});
+	expect(
+		etrs.find((x) => x.slug === "made-in-abyss-s1e13")!.availableSince,
+	).not.toBe(null);
+	expect(
+		etrs.find((x) => x.slug === "made-in-abyss-s2e1")!.availableSince,
+	).not.toBe(null);
 });
 
 describe("Video get/deletion", () => {
@@ -150,5 +169,59 @@ describe("Video get/deletion", () => {
 		});
 	});
 
-	it.todo("Delete video", async () => {});
+	it("Delete video", async () => {
+		const [resp, body] = await deleteVideo(["/video/mia s1e13 mismatch.mkv"]);
+		expectStatus(resp, body).toBe(204);
+
+		const bubble = await db.query.shows.findFirst({
+			where: eq(shows.slug, "bubble"),
+		});
+		expect(bubble!.availableCount).toBe(1);
+	});
+
+	it("Delete all videos of a movie", async () => {
+		const [resp, body] = await deleteVideo(["/video/bubble.mkv"]);
+		expectStatus(resp, body).toBe(204);
+
+		const bubble = await db.query.shows.findFirst({
+			where: eq(shows.slug, "bubble"),
+		});
+		expect(bubble!.availableCount).toBe(0);
+	});
+
+	it("Delete non existing video", async () => {
+		// it's way too much of a pain to return deleted paths with the current query so this will do
+		const [resp, body] = await deleteVideo(["/video/toto.mkv"]);
+		expectStatus(resp, body).toBe(204);
+	});
+
+	it("Delete episodes", async () => {
+		const [resp, body] = await deleteVideo([
+			"/video/mia s1e13.mkv",
+			"/video/mia 2017 s2e1.mkv",
+		]);
+		expectStatus(resp, body).toBe(204);
+
+		const mia = await db.query.shows.findFirst({
+			where: eq(shows.slug, "made-in-abyss"),
+		});
+		expect(mia!.availableCount).toBe(0);
+
+		const etrs = await db.query.entries.findMany({
+			where: eq(entries.showPk, mia!.pk),
+		});
+		expect(
+			etrs.find((x) => x.slug === "made-in-abyss-s1e13")!.availableSince,
+		).toBe(null);
+		expect(
+			etrs.find((x) => x.slug === "made-in-abyss-s2e1")!.availableSince,
+		).toBe(null);
+	});
+
+	it("Delete unmatched", async () => {
+		const [resp, body] = await deleteVideo([
+			"/video/mia s1e13 unknown test.mkv",
+		]);
+		expectStatus(resp, body).toBe(204);
+	});
 });
