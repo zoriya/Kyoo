@@ -167,10 +167,7 @@ export const Guesses = t.Object({
 	paths: t.Array(t.String()),
 	guesses: t.Record(
 		t.String(),
-		t.Record(
-			t.Union([t.Literal("unknown"), t.String({ pattern: "[1-9][0-9]*" })]),
-			Resource(),
-		),
+		t.Record(t.String({ pattern: "^([1-9][0-9]{3})|unknown$" }), Resource()),
 	),
 	unmatched: t.Array(t.String()),
 });
@@ -188,7 +185,7 @@ registerExamples(Guesses, {
 				id: "43b742f5-9ce6-467d-ad29-74460624020a",
 				slug: "evangelion",
 			},
-			1995: {
+			"1995": {
 				id: "43b742f5-9ce6-467d-ad29-74460624020a",
 				slug: "evangelion",
 			},

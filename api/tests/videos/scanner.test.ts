@@ -8,7 +8,6 @@ import { bubble, madeInAbyss } from "~/models/examples";
 
 beforeAll(async () => {
 	await db.delete(shows);
-	await db.delete(entries);
 	await db.delete(videos);
 	let [ret, body] = await createSerie(madeInAbyss);
 	expectStatus(ret, body).toBe(201);
@@ -357,7 +356,6 @@ describe("Video seeding", () => {
 		expectStatus(resp, body).toBe(409);
 		expect(body.message).toBeString();
 	});
-
 
 	it("Two for the same entry", async () => {
 		const [resp, body] = await createVideo({

@@ -14,6 +14,7 @@ import { KError } from "~/models/error";
 import { bubbleVideo } from "~/models/examples";
 import {
 	Page,
+	type Resource,
 	Sort,
 	createPage,
 	isUuid,
@@ -54,8 +55,9 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 						slug: shows.slug,
 					})
 					.from(videos)
-					.crossJoin(
+					.leftJoin(
 						sql`jsonb_array_elements_text(${videos.guess}->'year') as year`,
+						sql`true`,
 					)
 					.innerJoin(entryVideoJoin, eq(entryVideoJoin.videoPk, videos.pk))
 					.innerJoin(entries, eq(entries.pk, entryVideoJoin.entryPk))
@@ -78,7 +80,10 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 			const [{ guesses }] = await db
 				.with(years, guess)
 				.select({
-					guesses: jsonbObjectAgg<Guesses["guesses"]>(guess.guess, guess.years),
+					guesses: jsonbObjectAgg<Record<string, Resource>>(
+						guess.guess,
+						guess.years,
+					),
 				})
 				.from(guess);
 
@@ -98,7 +103,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 
 			return {
 				paths: paths.map((x) => x.path),
-				guesses,
+				guesses: guesses ?? {},
 				unmatched: unmatched.map((x) => x.path),
 			};
 		},
@@ -177,8 +182,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 							path: videos.path,
 						});
 				} catch (e) {
-					if (!isUniqueConstraint(e))
-						throw e;
+					if (!isUniqueConstraint(e)) throw e;
 					return error(409, {
 						status: 409,
 						message: comment`

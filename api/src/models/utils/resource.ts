@@ -13,6 +13,7 @@ export const Resource = () =>
 		id: t.String({ format: "uuid" }),
 		slug: t.String({ format: "slug" }),
 	});
+export type Resource = ReturnType<typeof Resource>["static"];
 
 const checker = TypeCompiler.Compile(t.String({ format: "uuid" }));
 export const isUuid = (id: string) => checker.Check(id);
