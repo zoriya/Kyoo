@@ -6,4 +6,4 @@ RUN pip3 install --no-cache-dir --upgrade -r ./requirements.txt
 
 COPY . .
 
-CMD ["fastapi", "run", "scanner/main.py", "--port", "80"]
+CMD ["fastapi", "run", "scanner", "--port", "4389"]
