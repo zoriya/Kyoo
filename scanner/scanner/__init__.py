@@ -1,6 +1,11 @@
 from fastapi import FastAPI
 
-app = FastAPI()
+app = FastAPI(
+	title="Scanner",
+	description="API to control the long running scanner or interacting with external databases (themoviedb, tvdb...)\n\n"
+	+ "Most of those APIs are for admins only.",
+	openapi_prefix="/scanner",
+)
 
 
 @app.get("/items/{item_id}")

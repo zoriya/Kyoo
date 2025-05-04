@@ -16,7 +16,8 @@ const app = new Elysia()
 			scalarConfig: {
 				sources: [
 					{ slug: "kyoo", url: "/swagger/json" },
-					{ slug: "keibi", url: "http://localhost:4568/auth/swagger/doc.json" },
+					{ slug: "keibi", url: "/auth/swagger/doc.json" },
+					{ slug: "scanner", url: "/scanner/openapi.json" },
 				],
 			},
 			documentation: {

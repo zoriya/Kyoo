@@ -107,6 +107,13 @@ services:
     volumes:
       - ./scanner:/app
       - ${LIBRARY_ROOT}:/video:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.scanner.rule=PathPrefix(`/scanner/`)"
+      - "traefik.http.routers.scanner.middlewares=phantom-token"
+      - "traefik.http.middlewares.phantom-token.forwardauth.address=http://auth:4568/auth/jwt"
+      - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,X-Api-Key"
+      - "traefik.http.middlewares.phantom-token.forwardauth.authResponseHeaders=Authorization"
 
   transcoder:
     <<: *transcoder-base
