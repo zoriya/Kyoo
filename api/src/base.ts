@@ -55,7 +55,7 @@ export const base = new Elysia({ name: "base" })
 	.as("plugin");
 
 export const prefix = process.env.KYOO_PREFIX ?? "";
-export const app = new Elysia({ prefix })
+export const handlers = new Elysia({ prefix })
 	.use(base)
 	.use(auth)
 	.guard(
