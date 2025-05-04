@@ -1,4 +1,4 @@
-import { type Column, type SQL, and, eq, isNull, sql } from "drizzle-orm";
+import { type Column, type SQL, eq, sql } from "drizzle-orm";
 import { db } from "~/db";
 import {
 	entries,
@@ -6,7 +6,7 @@ import {
 	entryVideoJoin,
 	videos,
 } from "~/db/schema";
-import { conflictUpdateAllExcept, sqlarr, values } from "~/db/utils";
+import { conflictUpdateAllExcept, values } from "~/db/utils";
 import type { SeedEntry as SEntry, SeedExtra as SExtra } from "~/models/entry";
 import { enqueueOptImage } from "../images";
 import { guessNextRefresh } from "../refresh";

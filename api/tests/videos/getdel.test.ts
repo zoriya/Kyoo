@@ -171,7 +171,9 @@ describe("Video get/deletion", () => {
 
 	it("Delete video", async () => {
 		const [resp, body] = await deleteVideo(["/video/mia s1e13 mismatch.mkv"]);
-		expectStatus(resp, body).toBe(204);
+		expectStatus(resp, body).toBe(200);
+		expect(body).toBeArrayOfSize(1);
+		expect(body).toContain("/video/mia s1e13 mismatch.mkv");
 
 		const bubble = await db.query.shows.findFirst({
 			where: eq(shows.slug, "bubble"),
@@ -181,7 +183,9 @@ describe("Video get/deletion", () => {
 
 	it("Delete all videos of a movie", async () => {
 		const [resp, body] = await deleteVideo(["/video/bubble.mkv"]);
-		expectStatus(resp, body).toBe(204);
+		expectStatus(resp, body).toBe(200);
+		expect(body).toBeArrayOfSize(1);
+		expect(body).toContain("/video/bubble.mkv");
 
 		const bubble = await db.query.shows.findFirst({
 			where: eq(shows.slug, "bubble"),
@@ -190,9 +194,9 @@ describe("Video get/deletion", () => {
 	});
 
 	it("Delete non existing video", async () => {
-		// it's way too much of a pain to return deleted paths with the current query so this will do
 		const [resp, body] = await deleteVideo(["/video/toto.mkv"]);
-		expectStatus(resp, body).toBe(204);
+		expectStatus(resp, body).toBe(200);
+		expect(body).toBeArrayOfSize(0);
 	});
 
 	it("Delete episodes", async () => {
@@ -200,7 +204,10 @@ describe("Video get/deletion", () => {
 			"/video/mia s1e13.mkv",
 			"/video/mia 2017 s2e1.mkv",
 		]);
-		expectStatus(resp, body).toBe(204);
+		expectStatus(resp, body).toBe(200);
+		expect(body).toBeArrayOfSize(2);
+		expect(body).toContain("/video/mia s1e13.mkv");
+		expect(body).toContain("/video/mia 2017 s2e1.mkv");
 
 		const mia = await db.query.shows.findFirst({
 			where: eq(shows.slug, "made-in-abyss"),
@@ -222,6 +229,8 @@ describe("Video get/deletion", () => {
 		const [resp, body] = await deleteVideo([
 			"/video/mia s1e13 unknown test.mkv",
 		]);
-		expectStatus(resp, body).toBe(204);
+		expectStatus(resp, body).toBe(200);
+		expect(body).toBeArrayOfSize(1);
+		expect(body[0]).toBe("/video/mia s1e13 unknown test.mkv");
 	});
 });

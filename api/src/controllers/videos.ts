@@ -392,48 +392,48 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 	.delete(
 		"",
 		async ({ body }) => {
-			await db.transaction(async (tx) => {
+			return await db.transaction(async (tx) => {
 				const vids = tx.$with("vids").as(
 					tx
 						.delete(videos)
-						.where(eq(videos.path, sql`any(${body})`))
-						.returning({ pk: videos.pk }),
+						.where(eq(videos.path, sql`any(${sqlarr(body)})`))
+						.returning({ pk: videos.pk, path: videos.path }),
 				);
-				const evj = alias(entryVideoJoin, "evj");
-				const delEntries = tx.$with("del_entries").as(
-					tx
-						.with(vids)
-						.select({ entry: entryVideoJoin.entryPk })
-						.from(entryVideoJoin)
-						.where(
-							and(
-								inArray(entryVideoJoin.videoPk, tx.select().from(vids)),
-								notExists(
-									tx
-										.select()
-										.from(evj)
-										.where(
-											and(
-												eq(evj.entryPk, entryVideoJoin.entryPk),
-												not(inArray(evj.videoPk, db.select().from(vids))),
-											),
-										),
-								),
-							),
-						),
-				);
-				const delShows = await tx
-					.with(delEntries)
+
+				const deletedJoin = await tx
+					.with(vids)
+					.select({ entryPk: entryVideoJoin.entryPk, path: vids.path })
+					.from(entryVideoJoin)
+					.rightJoin(vids, eq(vids.pk, entryVideoJoin.videoPk));
+
+				const delEntries = await tx
 					.update(entries)
 					.set({ availableSince: null })
-					.where(inArray(entries.pk, db.select().from(delEntries)))
+					.where(
+						and(
+							eq(
+								entries.pk,
+								sql`any(${sqlarr(
+									deletedJoin.filter((x) => x.entryPk).map((x) => x.entryPk!),
+								)})`,
+							),
+							notExists(
+								tx
+									.select()
+									.from(entryVideoJoin)
+									.where(eq(entries.pk, entryVideoJoin.entryPk)),
+							),
+						),
+					)
 					.returning({ show: entries.showPk });
 
 				await updateAvailableCount(
 					tx,
-					delShows.map((x) => x.show),
+					delEntries.map((x) => x.show),
 					false,
 				);
+
+				return [...new Set(deletedJoin.map((x) => x.path))];
 			});
 		},
 		{
@@ -444,6 +444,6 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 					examples: [bubbleVideo.path],
 				}),
 			),
-			response: { 204: t.Void() },
+			response: { 200: t.Array(t.String()) },
 		},
 	);
