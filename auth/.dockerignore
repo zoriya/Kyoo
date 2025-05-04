@@ -8,5 +8,3 @@ Dockerfile*
 dbc/
 # genereated via swag
 docs/
-
-# vim: ft=gitignore

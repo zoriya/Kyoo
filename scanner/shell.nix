@@ -1,6 +1,7 @@
 {pkgs ? import <nixpkgs> {}}: let
-  python = pkgs.python312.withPackages (ps:
+  python = pkgs.python313.withPackages (ps:
     with ps; [
+      fastapi
       guessit
       aiohttp
       jsons
@@ -17,5 +18,6 @@ in
     packages = with pkgs; [
       python
       ruff
+      fastapi-cli
     ];
   }

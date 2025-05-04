@@ -1,4 +1,6 @@
 guessit@git+https://github.com/zoriya/guessit
+fastapi[standard]
+
 aiohttp
 jsons
 watchfiles

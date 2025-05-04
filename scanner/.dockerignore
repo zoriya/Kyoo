@@ -1,2 +1,5 @@
-Dockerfile*
+**
+!/requirements.txt
+!scanner/**.py
+
 

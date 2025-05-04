@@ -100,9 +100,12 @@ services:
         condition: service_healthy
     env_file:
       - ./.env
+    ports:
+      - "4389:4389"
     environment:
       - KYOO_URL=${KYOO_URL:-http://api:3567/api}
     volumes:
+      - ./scanner:/app
       - ${LIBRARY_ROOT}:/video:ro
 
   transcoder:
