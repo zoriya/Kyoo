@@ -20,7 +20,7 @@
 in
   pkgs.mkShell {
     packages = with pkgs; [
-      nodejs-18_x
+      # nodejs-18_x
       nodePackages.yarn
       dotnet
       csharpier
@@ -39,6 +39,7 @@ in
       go-swag
       bun
       pkg-config
+      nodejs
       node-gyp
       vips
       hurl

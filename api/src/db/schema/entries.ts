@@ -18,7 +18,6 @@ import { image, language, schema } from "./utils";
 import { entryVideoJoin } from "./videos";
 
 export const entryType = schema.enum("entry_type", [
-	"unknown",
 	"episode",
 	"movie",
 	"special",

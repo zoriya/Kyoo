@@ -7,6 +7,7 @@ export const WatchlistStatus = t.UnionEnum([
 	"dropped",
 	"planned",
 ]);
+export type WatchlistStatus = typeof WatchlistStatus.static;
 
 export const SerieWatchStatus = t.Object({
 	status: WatchlistStatus,
@@ -20,7 +21,7 @@ export const SerieWatchStatus = t.Object({
 });
 export type SerieWatchStatus = typeof SerieWatchStatus.static;
 
-export const MovieWatchStatus = t.Intersect([
+export const MovieWatchStatus = t.Composite([
 	t.Omit(SerieWatchStatus, ["startedAt", "seenCount"]),
 	t.Object({
 		percent: t.Integer({

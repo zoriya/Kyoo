@@ -4,7 +4,7 @@ import type { SelectResultField } from "drizzle-orm/query-builders/select.types"
 export const buildRelations = <
 	R extends string,
 	P extends object,
-	Rel extends Record<R, (languages: P) => Subquery>,
+	Rel extends Record<R, (params: P) => Subquery>,
 >(
 	enabled: R[],
 	relations: Rel,

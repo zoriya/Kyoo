@@ -1,29 +1,53 @@
 import { db, migrate } from "~/db";
 import { profiles, shows } from "~/db/schema";
-import { madeInAbyss } from "~/models/examples";
-import { createSerie, getSerie, setSerieStatus } from "./helpers";
-import { getJwtHeaders } from "./helpers/jwt";
+import { bubble, madeInAbyss } from "~/models/examples";
+import { createMovie, createSerie, createVideo, getVideos } from "./helpers";
 
 // test file used to run manually using `bun tests/manual.ts`
+// run those before running this script
+// export JWT_SECRET="this is a secret";
+// export JWT_ISSUER="https://kyoo.zoriya.dev";
 
 await migrate();
 await db.delete(shows);
 await db.delete(profiles);
 
-console.log(await getJwtHeaders());
-
 const [_, ser] = await createSerie(madeInAbyss);
-console.log(ser);
-const [__, ret] = await setSerieStatus(madeInAbyss.slug, {
-	status: "watching",
-	startedAt: "2024-12-21",
-	completedAt: "2024-12-21",
-	seenCount: 2,
-	score: 85,
-});
-console.log(ret);
-
-const [___, got] = await getSerie(madeInAbyss.slug, {});
-console.log(JSON.stringify(got, undefined, 4));
+const [__, mov] = await createMovie(bubble);
+const [resp, body] = await createVideo([
+	{
+		guess: { title: "mia", season: [1], episode: [13], from: "test" },
+		part: null,
+		path: "/video/mia s1e13.mkv",
+		rendering: "sha2",
+		version: 1,
+		for: [{ slug: `${madeInAbyss.slug}-s1e13` }],
+	},
+	{
+		guess: {
+			title: "mia",
+			season: [2],
+			episode: [1],
+			year: [2017],
+			from: "test",
+		},
+		part: null,
+		path: "/video/mia 2017 s2e1.mkv",
+		rendering: "sha8",
+		version: 1,
+		for: [{ slug: `${madeInAbyss.slug}-s2e1` }],
+	},
+	{
+		guess: { title: "bubble", from: "test" },
+		part: null,
+		path: "/video/bubble.mkv",
+		rendering: "sha5",
+		version: 1,
+		for: [{ movie: bubble.slug }],
+	},
+]);
+console.log(body);
+const [___, ret] = await getVideos();
+console.log(JSON.stringify(ret, undefined, 4));
 
 process.exit(0);

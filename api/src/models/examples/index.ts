@@ -35,4 +35,3 @@ export * from "./made-in-abyss";
 export * from "./dune-1984";
 export * from "./dune-2021";
 export * from "./dune-collection";
-export * from "./others";

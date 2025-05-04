@@ -17,3 +17,29 @@ export const createVideo = async (video: SeedVideo | SeedVideo[]) => {
 	const body = await resp.json();
 	return [resp, body] as const;
 };
+
+export const getVideos = async () => {
+	const resp = await app.handle(
+		new Request(buildUrl("videos"), {
+			method: "GET",
+			headers: await getJwtHeaders(),
+		}),
+	);
+	const body = await resp.json();
+	return [resp, body] as const;
+};
+
+export const deleteVideo = async (paths: string[]) => {
+	const resp = await app.handle(
+		new Request(buildUrl("videos"), {
+			method: "DELETE",
+			body: JSON.stringify(paths),
+			headers: {
+				"Content-Type": "application/json",
+				...(await getJwtHeaders()),
+			},
+		}),
+	);
+	const body = await resp.json();
+	return [resp, body] as const;
+};

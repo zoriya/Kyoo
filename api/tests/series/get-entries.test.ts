@@ -48,7 +48,7 @@ describe("Get entries", () => {
 		expect(body.items[0].videos).toBeArrayOfSize(1);
 		expect(body.items[0].videos[0]).toMatchObject({
 			path: madeInAbyssVideo.path,
-			slug: madeInAbyssVideo.slug,
+			slug: `${madeInAbyss.slug}-s1e13`,
 			version: madeInAbyssVideo.version,
 			rendering: madeInAbyssVideo.rendering,
 			part: madeInAbyssVideo.part,
@@ -63,7 +63,7 @@ describe("Get entries", () => {
 		expect(body.items[0].videos).toBeArrayOfSize(1);
 		expect(body.items[0].videos[0]).toMatchObject({
 			path: madeInAbyssVideo.path,
-			slug: madeInAbyssVideo.slug,
+			slug: `${madeInAbyss.slug}-s1e13`,
 			version: madeInAbyssVideo.version,
 			rendering: madeInAbyssVideo.rendering,
 			part: madeInAbyssVideo.part,

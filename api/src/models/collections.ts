@@ -45,7 +45,7 @@ export const CollectionTranslation = t.Object({
 	logo: t.Nullable(Image),
 });
 
-export const Collection = t.Intersect([
+export const Collection = t.Composite([
 	Resource(),
 	CollectionTranslation,
 	BaseCollection,
@@ -64,7 +64,7 @@ export const FullCollection = t.Intersect([
 ]);
 export type FullCollection = Prettify<typeof FullCollection.static>;
 
-export const SeedCollection = t.Intersect([
+export const SeedCollection = t.Composite([
 	t.Omit(BaseCollection, ["kind", "startAir", "endAir", "nextRefresh"]),
 	t.Object({
 		slug: t.String({ format: "slug" }),
@@ -72,7 +72,7 @@ export const SeedCollection = t.Intersect([
 			description: "The language code this collection's items were made in.",
 		}),
 		translations: TranslationRecord(
-			t.Intersect([
+			t.Composite([
 				t.Omit(CollectionTranslation, [
 					"poster",
 					"thumbnail",

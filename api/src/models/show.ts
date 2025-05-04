@@ -4,7 +4,8 @@ import { Movie } from "./movie";
 import { Serie } from "./serie";
 
 export const Show = t.Union([
-	t.Intersect([Movie, t.Object({ kind: t.Literal("movie") })]),
-	t.Intersect([Serie, t.Object({ kind: t.Literal("serie") })]),
-	t.Intersect([Collection, t.Object({ kind: t.Literal("collection") })]),
+	t.Intersect([t.Object({ kind: t.Literal("movie") }), Movie]),
+	t.Intersect([t.Object({ kind: t.Literal("serie") }), Serie]),
+	t.Intersect([t.Object({ kind: t.Literal("collection") }), Collection]),
 ]);
+export type Show = typeof Show.static;

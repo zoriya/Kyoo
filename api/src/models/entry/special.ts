@@ -12,7 +12,7 @@ import {
 import { EmbeddedVideo } from "../video";
 import { BaseEntry, EntryTranslation } from "./base-entry";
 
-export const BaseSpecial = t.Intersect(
+export const BaseSpecial = t.Composite(
 	[
 		t.Object({
 			kind: t.Literal("special"),
@@ -33,7 +33,7 @@ export const BaseSpecial = t.Intersect(
 	},
 );
 
-export const Special = t.Intersect([
+export const Special = t.Composite([
 	Resource(),
 	EntryTranslation(),
 	BaseSpecial,
@@ -45,7 +45,7 @@ export const Special = t.Intersect([
 ]);
 export type Special = Prettify<typeof Special.static>;
 
-export const SeedSpecial = t.Intersect([
+export const SeedSpecial = t.Composite([
 	t.Omit(BaseSpecial, ["thumbnail", "nextRefresh"]),
 	t.Object({
 		thumbnail: t.Nullable(SeedImage),

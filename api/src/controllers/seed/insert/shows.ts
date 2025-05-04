@@ -1,4 +1,13 @@
-import { and, count, eq, exists, ne, sql } from "drizzle-orm";
+import {
+	type SQLWrapper,
+	and,
+	count,
+	eq,
+	exists,
+	isNull,
+	ne,
+	sql,
+} from "drizzle-orm";
 import { type Transaction, db } from "~/db";
 import { entries, entryVideoJoin, showTranslations, shows } from "~/db/schema";
 import { conflictUpdateAllExcept, sqlarr } from "~/db/utils";
@@ -138,9 +147,10 @@ async function insertBaseShow(tx: Transaction, show: Show) {
 
 export async function updateAvailableCount(
 	tx: Transaction,
-	showPks: number[],
-	updateEntryCount = true,
+	showPks: number[] | SQLWrapper,
+	updateEntryCount = false,
 ) {
+	const showPkQ = Array.isArray(showPks) ? sqlarr(showPks) : showPks;
 	return await tx
 		.update(shows)
 		.set({
@@ -168,5 +178,20 @@ export async function updateAvailableCount(
 					)}`,
 			}),
 		})
-		.where(eq(shows.pk, sql`any(${sqlarr(showPks)})`));
+		.where(eq(shows.pk, sql`any(${showPkQ})`));
+}
+
+export async function updateAvailableSince(
+	tx: Transaction,
+	entriesPk: number[],
+) {
+	return await tx
+		.update(entries)
+		.set({ availableSince: sql`now()` })
+		.where(
+			and(
+				eq(entries.pk, sql`any(${sqlarr(entriesPk)})`),
+				isNull(entries.availableSince),
+			),
+		);
 }

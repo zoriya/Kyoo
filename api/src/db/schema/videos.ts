@@ -6,6 +6,7 @@ import {
 	primaryKey,
 	text,
 	timestamp,
+	unique,
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
@@ -34,6 +35,9 @@ export const videos = schema.table(
 	(t) => [
 		check("part_pos", sql`${t.part} >= 0`),
 		check("version_pos", sql`${t.version} >= 0`),
+		unique("rendering_unique")
+			.on(t.rendering, t.part, t.version)
+			.nullsNotDistinct(),
 	],
 );
 

@@ -74,14 +74,22 @@ export function sqlarr(array: unknown[]) {
 }
 
 // See https://github.com/drizzle-team/drizzle-orm/issues/4044
-// TODO: type values (everything is a `text` for now)
-export function values(items: Record<string, unknown>[]) {
-	const [firstProp, ...props] = Object.keys(items[0]);
+export function values<K extends string>(
+	items: Record<K, unknown>[],
+	typeInfo: Partial<Record<K, string>> = {},
+) {
+	if (items[0] === undefined)
+		throw new Error("Invalid values, expecting at least one items");
+	const [firstProp, ...props] = Object.keys(items[0]) as K[];
 	const values = items
-		.map((x) => {
+		.map((x, i) => {
 			let ret = sql`(${x[firstProp]}`;
+			if (i === 0 && typeInfo[firstProp])
+				ret = sql`${ret}::${sql.raw(typeInfo[firstProp])}`;
 			for (const val of props) {
 				ret = sql`${ret}, ${x[val]}`;
+				if (i === 0 && typeInfo[val])
+					ret = sql`${ret}::${sql.raw(typeInfo[val])}`;
 			}
 			return sql`${ret})`;
 		})
@@ -103,7 +111,10 @@ export const nullif = <T>(val: SQL<T> | Column, eq: SQL<T>) => {
 	return sql<T>`nullif(${val}, ${eq})`;
 };
 
-export const jsonbObjectAgg = <T>(key: SQLWrapper, value: SQL<T>) => {
+export const jsonbObjectAgg = <T>(
+	key: SQLWrapper,
+	value: SQL<T> | SQLWrapper,
+) => {
 	return sql<
 		Record<string, T>
 	>`jsonb_object_agg(${sql.join([key, value], sql.raw(","))})`;
@@ -130,4 +141,10 @@ export const jsonbBuildObject = <T>(select: JsonFields) => {
 		sql.raw(", "),
 	);
 	return sql<T>`jsonb_build_object(${query})`;
+};
+
+export const isUniqueConstraint = (e: unknown): boolean => {
+	return (
+		typeof e === "object" && e != null && "code" in e && e.code === "23505"
+	);
 };

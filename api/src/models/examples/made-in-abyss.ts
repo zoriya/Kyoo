@@ -3,7 +3,6 @@ import type { Video } from "~/models/video";
 
 export const madeInAbyssVideo: Video = {
 	id: "3cd436ee-01ff-4f45-ba98-654282531234",
-	slug: "made-in-abyss-s1e13",
 	path: "/video/Made in abyss S01E13.mkv",
 	rendering: "459429fa062adeebedcc2bb04b9965de0262bfa453369783132d261be79021bd",
 	part: null,

@@ -26,7 +26,6 @@ import {
 	ExtraType,
 	MovieEntry,
 	Special,
-	UnknownEntry,
 } from "~/models/entry";
 import { KError } from "~/models/error";
 import { madeInAbyss } from "~/models/examples";
@@ -77,11 +76,6 @@ export const entryFilters: FilterDef = {
 
 const extraFilters: FilterDef = {
 	kind: { column: entries.extraKind, type: "enum", values: ExtraType.enum },
-	runtime: { column: entries.runtime, type: "float" },
-	playedDate: { column: entryProgressQ.playedDate, type: "date" },
-};
-
-const unknownFilters: FilterDef = {
 	runtime: { column: entries.runtime, type: "float" },
 	playedDate: { column: entryProgressQ.playedDate, type: "date" },
 };
@@ -149,13 +143,15 @@ export const entryVideosQ = db
 export const mapProgress = ({ aliased }: { aliased: boolean }) => {
 	const { time, percent, playedDate, videoId } = getColumns(entryProgressQ);
 	const ret = {
-		time: coalesce(time, sql`0`),
-		percent: coalesce(percent, sql`0`),
-		playedDate: sql`${playedDate}`,
-		videoId: sql`${videoId}`,
+		time: coalesce(time, sql<number>`0`),
+		percent: coalesce(percent, sql<number>`0`),
+		playedDate: sql<string>`${playedDate}`,
+		videoId: sql<string>`${videoId}`,
 	};
 	if (!aliased) return ret;
-	return Object.fromEntries(Object.entries(ret).map(([k, v]) => [k, v.as(k)]));
+	return Object.fromEntries(
+		Object.entries(ret).map(([k, v]) => [k, v.as(k)]),
+	) as unknown as typeof ret;
 };
 
 export async function getEntries({
@@ -176,7 +172,7 @@ export async function getEntries({
 	languages: string[];
 	userId: string;
 	progressQ?: typeof entryProgressQ;
-}): Promise<(Entry | Extra | UnknownEntry)[]> {
+}): Promise<(Entry | Extra)[]> {
 	const transQ = db
 		.selectDistinctOn([entryTranslations.pk])
 		.from(entryTranslations)
@@ -203,7 +199,7 @@ export async function getEntries({
 			videos: entryVideosQ.videos,
 			progress: mapProgress({ aliased: true }),
 			// specials don't have an `episodeNumber` but a `number` field.
-			number: episodeNumber,
+			number: sql<number>`${episodeNumber}`,
 
 			// merge `extraKind` into `kind`
 			kind: sql<EntryKind>`case when ${kind} = 'extra' then ${extraKind} else ${kind}::text end`.as(
@@ -219,7 +215,7 @@ export async function getEntries({
 		})
 		.from(entries)
 		.innerJoin(transQ, eq(entries.pk, transQ.pk))
-		.leftJoinLateral(entryVideosQ, sql`true`)
+		.crossJoinLateral(entryVideosQ)
 		.leftJoin(progressQ, eq(entries.pk, progressQ.entryPk))
 		.where(
 			and(
@@ -244,7 +240,6 @@ export const entriesH = new Elysia({ tags: ["series"] })
 		movie_entry: MovieEntry,
 		special: Special,
 		extra: Extra,
-		unknown_entry: UnknownEntry,
 		error: t.Object({}),
 	})
 	.model((models) => ({
@@ -289,7 +284,6 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				filter: and(
 					eq(entries.showPk, serie.pk),
 					ne(entries.kind, "extra"),
-					ne(entries.kind, "unknown"),
 					filter,
 				),
 				languages: langs,
@@ -408,46 +402,6 @@ export const entriesH = new Elysia({ tags: ["series"] })
 		},
 	)
 	.get(
-		"/unknowns",
-		async ({
-			query: { limit, after, query, sort, filter },
-			request: { url },
-			jwt: { sub },
-		}) => {
-			const items = (await getEntries({
-				limit,
-				after,
-				query,
-				sort: sort,
-				filter: and(eq(entries.kind, "unknown"), filter),
-				languages: ["extra"],
-				userId: sub,
-			})) as UnknownEntry[];
-
-			return createPage(items, { url, sort, limit });
-		},
-		{
-			detail: { description: "Get unknown/unmatch videos." },
-			query: t.Object({
-				sort: extraSort,
-				filter: t.Optional(Filter({ def: unknownFilters })),
-				query: t.Optional(t.String({ description: description.query })),
-				limit: t.Integer({
-					minimum: 1,
-					maximum: 250,
-					default: 50,
-					description: "Max page size.",
-				}),
-				after: t.Optional(t.String({ description: description.after })),
-			}),
-			response: {
-				200: Page(UnknownEntry),
-				422: KError,
-			},
-			tags: ["videos"],
-		},
-	)
-	.get(
 		"/news",
 		async ({
 			query: { limit, after, query, filter },
@@ -462,7 +416,6 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				sort,
 				filter: and(
 					isNotNull(entries.availableSince),
-					ne(entries.kind, "unknown"),
 					ne(entries.kind, "extra"),
 					filter,
 				),
@@ -489,6 +442,6 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				200: Page(Entry),
 				422: KError,
 			},
-			tags: ["videos"],
+			tags: ["shows"],
 		},
 	);

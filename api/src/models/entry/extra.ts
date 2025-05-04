@@ -16,7 +16,7 @@ export const ExtraType = t.UnionEnum([
 ]);
 export type ExtraType = typeof ExtraType.static;
 
-export const BaseExtra = t.Intersect(
+export const BaseExtra = t.Composite(
 	[
 		t.Object({
 			kind: ExtraType,
@@ -32,7 +32,7 @@ export const BaseExtra = t.Intersect(
 	},
 );
 
-export const Extra = t.Intersect([
+export const Extra = t.Composite([
 	Resource(),
 	BaseExtra,
 	t.Object({
@@ -42,7 +42,7 @@ export const Extra = t.Intersect([
 ]);
 export type Extra = Prettify<typeof Extra.static>;
 
-export const SeedExtra = t.Intersect([
+export const SeedExtra = t.Composite([
 	t.Omit(BaseExtra, ["thumbnail"]),
 	t.Object({
 		slug: t.String({ format: "slug" }),

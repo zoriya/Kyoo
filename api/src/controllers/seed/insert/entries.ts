@@ -1,4 +1,4 @@
-import { type Column, type SQL, and, eq, isNull, sql } from "drizzle-orm";
+import { type Column, type SQL, eq, sql } from "drizzle-orm";
 import { db } from "~/db";
 import {
 	entries,
@@ -6,11 +6,11 @@ import {
 	entryVideoJoin,
 	videos,
 } from "~/db/schema";
-import { conflictUpdateAllExcept, sqlarr, values } from "~/db/utils";
+import { conflictUpdateAllExcept, values } from "~/db/utils";
 import type { SeedEntry as SEntry, SeedExtra as SExtra } from "~/models/entry";
 import { enqueueOptImage } from "../images";
 import { guessNextRefresh } from "../refresh";
-import { updateAvailableCount } from "./shows";
+import { updateAvailableCount, updateAvailableSince } from "./shows";
 
 type SeedEntry = SEntry & {
 	video?: undefined;
@@ -167,15 +167,21 @@ export const insertEntries = async (
 			.select(
 				db
 					.select({
-						entryPk: sql<number>`vids.entryPk::integer`.as("entry"),
+						entryPk: sql<number>`vids.entryPk`.as("entry"),
 						videoPk: videos.pk,
 						slug: computeVideoSlug(
-							sql`vids.entrySlug::text`,
-							sql`vids.needRendering::boolean`,
+							sql`vids.entrySlug`,
+							sql`vids.needRendering`,
 						),
 					})
-					.from(values(vids).as("vids"))
-					.innerJoin(videos, eq(videos.id, sql`vids.videoId::uuid`)),
+					.from(
+						values(vids, {
+							entryPk: "integer",
+							needRendering: "boolean",
+							videoId: "uuid",
+						}).as("vids"),
+					)
+					.innerJoin(videos, eq(videos.id, sql`vids.videoId`)),
 			)
 			.onConflictDoNothing()
 			.returning({
@@ -186,16 +192,7 @@ export const insertEntries = async (
 		if (!onlyExtras)
 			await updateAvailableCount(tx, [show.pk], show.kind === "serie");
 
-		const entriesPk = [...new Set(vids.map((x) => x.entryPk))];
-		await tx
-			.update(entries)
-			.set({ availableSince: sql`now()` })
-			.where(
-				and(
-					eq(entries.pk, sql`any(${sqlarr(entriesPk)})`),
-					isNull(entries.availableSince),
-				),
-			);
+		await updateAvailableSince(tx, [...new Set(vids.map((x) => x.entryPk))]);
 		return ret;
 	});
 
@@ -206,10 +203,10 @@ export const insertEntries = async (
 	}));
 };
 
-export function computeVideoSlug(showSlug: SQL | Column, needsRendering: SQL) {
+export function computeVideoSlug(entrySlug: SQL | Column, needsRendering: SQL) {
 	return sql<string>`
 		concat(
-			${showSlug},
+			${entrySlug},
 			case when ${videos.part} is not null then ('-p' || ${videos.part}) else '' end,
 			case when ${videos.version} <> 1 then ('-v' || ${videos.version}) else '' end,
 			case when ${needsRendering} then concat('-', ${videos.rendering}) else '' end

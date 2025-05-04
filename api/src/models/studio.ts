@@ -14,7 +14,7 @@ export const StudioTranslation = t.Object({
 });
 export type StudioTranslation = typeof StudioTranslation.static;
 
-export const Studio = t.Intersect([
+export const Studio = t.Composite([
 	Resource(),
 	StudioTranslation,
 	BaseStudio,
@@ -22,12 +22,12 @@ export const Studio = t.Intersect([
 ]);
 export type Studio = Prettify<typeof Studio.static>;
 
-export const SeedStudio = t.Intersect([
+export const SeedStudio = t.Composite([
 	BaseStudio,
 	t.Object({
 		slug: t.String({ format: "slug" }),
 		translations: TranslationRecord(
-			t.Intersect([
+			t.Composite([
 				t.Omit(StudioTranslation, ["logo"]),
 				t.Object({
 					logo: t.Nullable(SeedImage),

@@ -384,7 +384,7 @@ describe("Movie seeding", () => {
 				path: "/video/bubble3.mkv",
 				part: null,
 				version: 1,
-				rendering: "oeunhtoeuth",
+				rendering: "oeunhtoeuthoeu",
 				guess: { title: "bubble", from: "test" },
 			},
 			{

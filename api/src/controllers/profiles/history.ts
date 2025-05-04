@@ -18,6 +18,7 @@ import {
 	processLanguages,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
+import type { WatchlistStatus } from "~/models/watchlist";
 import {
 	entryFilters,
 	entryProgressQ,
@@ -79,7 +80,6 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 							filter: and(
 								isNotNull(entryProgressQ.playedDate),
 								ne(entries.kind, "extra"),
-								ne(entries.kind, "unknown"),
 								filter,
 							),
 							languages: langs,
@@ -125,7 +125,6 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 							filter: and(
 								isNotNull(entryProgressQ.playedDate),
 								ne(entries.kind, "extra"),
-								ne(entries.kind, "unknown"),
 								filter,
 							),
 							languages: langs,
@@ -167,8 +166,14 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 		async ({ body, jwt: { sub }, error }) => {
 			const profilePk = await getOrCreateProfile(sub);
 
-			const vals = values(
+			const hist = values(
 				body.map((x) => ({ ...x, entryUseId: isUuid(x.entry) })),
+				{
+					percent: "integer",
+					time: "integer",
+					playedDate: "timestamptz",
+					videoId: "uuid",
+				},
 			).as("hist");
 			const valEqEntries = sql`
 				case
@@ -182,16 +187,16 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 				.select(
 					db
 						.select({
-							profilePk: sql`${profilePk}`,
+							profilePk: sql`${profilePk}`.as("profilePk"),
 							entryPk: entries.pk,
 							videoPk: videos.pk,
-							percent: sql`hist.percent::integer`,
-							time: sql`hist.time::integer`,
-							playedDate: sql`hist.playedDate::timestamptz`,
+							percent: sql`hist.percent`.as("percent"),
+							time: sql`hist.time`.as("time"),
+							playedDate: sql`hist.playedDate`.as("playedDate"),
 						})
-						.from(vals)
+						.from(hist)
 						.innerJoin(entries, valEqEntries)
-						.leftJoin(videos, eq(videos.id, sql`hist.videoId::uuid`)),
+						.leftJoin(videos, eq(videos.id, sql`hist.videoId`)),
 				)
 				.returning({ pk: history.pk });
 
@@ -244,43 +249,43 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 				.select(
 					db
 						.select({
-							profilePk: sql`${profilePk}`,
+							profilePk: sql`${profilePk}`.as("profilePk"),
 							showPk: entries.showPk,
-							status: sql`
+							status: sql<WatchlistStatus>`
 								case
 									when
-										hist.percent::integer >= 95
+										hist.percent >= 95
 										and ${nextEntryQ.pk} is null
 									then 'completed'::watchlist_status
 									else 'watching'::watchlist_status
 								end
-							`,
+							`.as("status"),
 							seenCount: sql`
 								case
-									when ${entries.kind} = 'movie' then hist.percent::integer
-									when hist.percent::integer >= 95 then 1
+									when ${entries.kind} = 'movie' then hist.percent
+									when hist.percent >= 95 then 1
 									else 0
 								end
-							`,
+							`.as("seen_count"),
 							nextEntry: sql`
 								case
-									when hist.percent::integer >= 95 then ${nextEntryQ.pk}
+									when hist.percent >= 95 then ${nextEntryQ.pk}
 									else ${entries.pk}
 								end
-							`,
-							score: sql`null`,
-							startedAt: sql`hist.playedDate::timestamptz`,
-							lastPlayedAt: sql`hist.playedDate::timestamptz`,
+							`.as("next_entry"),
+							score: sql`null`.as("score"),
+							startedAt: sql`hist.playedDate`.as("startedAt"),
+							lastPlayedAt: sql`hist.playedDate`.as("lastPlayedAt"),
 							completedAt: sql`
 								case
-									when ${nextEntryQ.pk} is null then hist.playedDate::timestamptz
+									when ${nextEntryQ.pk} is null then hist.playedDate
 									else null
 								end
-							`,
+							`.as("completedAt"),
 							// see https://github.com/drizzle-team/drizzle-orm/issues/3608
-							updatedAt: sql`now()`,
+							updatedAt: sql`now()`.as("updatedAt"),
 						})
-						.from(vals)
+						.from(hist)
 						.leftJoin(entries, valEqEntries)
 						.leftJoinLateral(nextEntryQ, sql`true`),
 				)

@@ -58,7 +58,7 @@ export const SerieTranslation = t.Object({
 });
 export type SerieTranslation = typeof SerieTranslation.static;
 
-export const Serie = t.Intersect([
+export const Serie = t.Composite([
 	Resource(),
 	SerieTranslation,
 	BaseSerie,
@@ -87,7 +87,7 @@ export const FullSerie = t.Intersect([
 ]);
 export type FullSerie = Prettify<typeof FullSerie.static>;
 
-export const SeedSerie = t.Intersect([
+export const SeedSerie = t.Composite([
 	t.Omit(BaseSerie, ["kind", "nextRefresh"]),
 	t.Object({
 		slug: t.String({ format: "slug" }),
@@ -95,7 +95,7 @@ export const SeedSerie = t.Intersect([
 			description: "The language code this serie was made in.",
 		}),
 		translations: TranslationRecord(
-			t.Intersect([
+			t.Composite([
 				t.Omit(SerieTranslation, ["poster", "thumbnail", "banner", "logo"]),
 				t.Object({
 					poster: t.Nullable(SeedImage),
