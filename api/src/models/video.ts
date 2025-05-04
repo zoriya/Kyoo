@@ -21,11 +21,15 @@ export const Guess = t.Recursive((Self) =>
 	t.Object(
 		{
 			title: t.String(),
-			year: t.Optional(t.Array(t.Integer(), { default: [] })),
-			season: t.Optional(t.Array(t.Integer(), { default: [] })),
-			episode: t.Optional(t.Array(t.Integer(), { default: [] })),
 			kind: t.Optional(t.UnionEnum(["episode", "movie", "extra"])),
 			extraKind: t.Optional(ExtraType),
+			years: t.Optional(t.Array(t.Integer(), { default: [] })),
+			episodes: t.Optional(
+				t.Array(
+					t.Object({ season: t.Nullable(t.Integer()), episode: t.Integer() }),
+					{ default: [] },
+				),
+			),
 			externalId: t.Optional(ExternalIds),
 
 			from: t.String({
