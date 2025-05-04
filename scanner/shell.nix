@@ -2,15 +2,10 @@
   python = pkgs.python313.withPackages (ps:
     with ps; [
       fastapi
+      pydantic
       guessit
       aiohttp
-      jsons
       watchfiles
-      pika
-      aio-pika
-      requests
-      dataclasses-json
-      msgspec
       langcodes
     ]);
 in

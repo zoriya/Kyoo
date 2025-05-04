@@ -1,9 +1,6 @@
-guessit@git+https://github.com/zoriya/guessit
 fastapi[standard]
-
+pydantic
+guessit@git+https://github.com/zoriya/guessit
 aiohttp
-jsons
 watchfiles
-aio-pika
-msgspec
 langcodes
