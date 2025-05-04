@@ -18,49 +18,9 @@ x-transcoder: &transcoder-base
     - ./transcoder:/app
     - ${LIBRARY_ROOT}:/video:ro
     - ${CACHE_ROOT}:/cache
-    - metadata:/metadata
+    - transcoder_metadata:/metadata
 
 services:
-  back:
-    build:
-      context: ./back
-      dockerfile: Dockerfile.dev
-    ports:
-      - "5000:5000"
-    restart: on-failure
-    environment:
-      - TRANSCODER_URL=${TRANSCODER_URL:-http://transcoder:7666/video}
-      - KYOO_PREFIX=/api
-    env_file:
-      - ./.env
-    depends_on:
-      postgres:
-        condition: service_healthy
-      meilisearch:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-      migrations:
-        condition: service_completed_successfully
-    volumes:
-      - ./back:/app
-      - /app/out/
-      - kyoo:/metadata
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.api.rule=PathPrefix(`/api/`)"
-
-  migrations:
-    build:
-      context: ./back
-      dockerfile: Dockerfile.migrations
-    restart: "no"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    env_file:
-      - ./.env
-
   front:
     build:
       context: ./front
@@ -77,7 +37,7 @@ services:
       - "8081:8081"
     restart: on-failure
     environment:
-      - KYOO_URL=${KYOO_URL:-http://back:5000/api}
+      - KYOO_URL=${KYOO_URL:-http://api:5000/api}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.front.rule=PathPrefix(`/`)"
@@ -100,46 +60,54 @@ services:
       - ./auth:/app
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.auth.rule=PathPrefix(`/auth/`)"
+      - "traefik.http.routers.auth.rule=PathPrefix(`/auth/`) || PathPrefix(`/.well-known/`)"
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    restart: on-failure
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./api:/app
+      - /app/node_modules
+    ports:
+      - "3567:3567"
+    environment:
+      - KYOO_PREFIX=/api
+      - JWT_ISSUER=${PUBLIC_URL}
+    env_file:
+      - ./.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=PathPrefix(`/api/`) || PathPrefix(`/swagger`)"
+      - "traefik.http.routers.api.middlewares=phantom-token"
+      - "traefik.http.middlewares.phantom-token.forwardauth.address=http://auth:4568/auth/jwt"
+      - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,X-Api-Key"
+      - "traefik.http.middlewares.phantom-token.forwardauth.authResponseHeaders=Authorization"
 
   scanner:
-    build: ./scanner
+    build:
+      context: ./scanner
+      dockerfile: Dockerfile.dev
     restart: on-failure
     depends_on:
-      back:
+      api:
+        condition: service_started
+      postgres:
         condition: service_healthy
     env_file:
       - ./.env
     environment:
-      - KYOO_URL=${KYOO_URL:-http://back:5000/api}
+      - KYOO_URL=${KYOO_URL:-http://api:3567/api}
     volumes:
       - ${LIBRARY_ROOT}:/video:ro
-
-  matcher:
-    build: ./scanner
-    command: matcher
-    restart: on-failure
-    depends_on:
-      back:
-        condition: service_healthy
-    env_file:
-      - ./.env
-    environment:
-      - KYOO_URL=${KYOO_URL:-http://back:5000/api}
-
-  autosync:
-    build: ./autosync
-    restart: on-failure
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-    env_file:
-      - ./.env
 
   transcoder:
     <<: *transcoder-base
     profiles: ['', 'cpu']
-
   transcoder-nvidia:
     <<: *transcoder-base
     deploy:
@@ -154,7 +122,6 @@ services:
       - GOCODER_PREFIX=/video
       - GOCODER_HWACCEL=nvidia
     profiles: ['nvidia']
-
   transcoder-vaapi:
     <<: *transcoder-base
     devices:
@@ -206,41 +173,6 @@ services:
       timeout: 5s
       retries: 5
 
-  meilisearch:
-    image: getmeili/meilisearch:v1.4
-    restart: on-failure
-    ports:
-      - "7700:7700"
-    volumes:
-      - search:/meili_data
-    environment:
-      - MEILI_ENV=development
-    env_file:
-      - .env
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--spider", "http://meilisearch:7700/health"]
-      interval: 30s
-      timeout: 5s
-      retries: 5
-
-  rabbitmq:
-    image: rabbitmq:4-management-alpine
-    restart: on-failure
-    environment:
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
-    ports:
-      - 5672:5672
-      - 15672:15672
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 10s
-
 volumes:
-  kyoo:
   db:
-  metadata:
-  search:
+  transcoder_metadata:
