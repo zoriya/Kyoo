@@ -1,8 +1,14 @@
-from dataclasses import dataclass
 from typing import Optional
+from ..utils import Model
 
 
-@dataclass
-class MetadataID:
+class MetadataId(Model):
 	data_id: str
+	link: Optional[str]
+
+
+class EpisodeId(Model):
+	serie_id: str
+	season: Optional[int]
+	episode: int
 	link: Optional[str]

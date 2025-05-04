@@ -6,7 +6,7 @@ from logging import getLogger
 from typing import Optional
 
 from .utils import format_date
-from .models.videos import VideoInfo
+from .models.videos import VideoInfo, Video
 
 logger = getLogger(__name__)
 
@@ -44,7 +44,7 @@ class KyooClient:
 	async def create_videos(self, videos: list[Video]):
 		async with self._client.post(
 			f"{self._url}/videos",
-			json=[x.model_dump() for x in videos]
+			json=[x.model_dump_json() for x in videos],
 		) as r:
 			r.raise_for_status()
 
