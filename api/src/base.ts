@@ -52,7 +52,7 @@ export const base = new Elysia({ name: "base" })
 		detail: { description: "Check if the api is healthy." },
 		response: { 200: t.Object({ status: t.Literal("healthy") }) },
 	})
-	.as("plugin");
+	.as("scoped");
 
 export const prefix = process.env.KYOO_PREFIX ?? "";
 export const handlers = new Elysia({ prefix })

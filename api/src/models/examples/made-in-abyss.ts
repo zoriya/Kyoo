@@ -9,8 +9,7 @@ export const madeInAbyssVideo: Video = {
 	version: 1,
 	guess: {
 		title: "Made in abyss",
-		season: [1],
-		episode: [13],
+		episodes: [{ season: 1, episode: 13 }],
 		kind: "episode",
 		from: "guessit",
 	},

@@ -10,7 +10,7 @@ export const duneVideo: Video = {
 	guess: {
 		kind: "movie",
 		title: "dune",
-		year: [2021],
+		years: [2021],
 		from: "guessit",
 	},
 	createdAt: "2024-12-02T10:10:24.968Z",

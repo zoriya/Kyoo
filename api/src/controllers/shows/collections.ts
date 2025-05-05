@@ -41,7 +41,7 @@ export const collections = new Elysia({
 			headers: { "accept-language": languages },
 			query: { preferOriginal, with: relations },
 			jwt: { sub, settings },
-			error,
+			status,
 			set,
 		}) => {
 			const langs = processLanguages(languages);
@@ -58,13 +58,13 @@ export const collections = new Elysia({
 				userId: sub,
 			});
 			if (!ret) {
-				return error(404, {
+				return status(404, {
 					status: 404,
 					message: "Collection not found",
 				});
 			}
 			if (!ret.language) {
-				return error(422, {
+				return status(422, {
 					status: 422,
 					message: "Accept-Language header could not be satisfied.",
 				});
@@ -109,7 +109,7 @@ export const collections = new Elysia({
 	)
 	.get(
 		"random",
-		async ({ error, redirect }) => {
+		async ({ status, redirect }) => {
 			const [serie] = await db
 				.select({ slug: shows.slug })
 				.from(shows)
@@ -117,7 +117,7 @@ export const collections = new Elysia({
 				.orderBy(sql`random()`)
 				.limit(1);
 			if (!serie)
-				return error(404, {
+				return status(404, {
 					status: 404,
 					message: "No collection in the database.",
 				});
@@ -230,7 +230,7 @@ export const collections = new Elysia({
 			headers: { "accept-language": languages },
 			jwt: { sub, settings },
 			request: { url },
-			error,
+			status,
 		}) => {
 			const [collection] = await db
 				.select({ pk: shows.pk })
@@ -244,7 +244,7 @@ export const collections = new Elysia({
 				.limit(1);
 
 			if (!collection) {
-				return error(404, {
+				return status(404, {
 					status: 404,
 					message: `No collection with the id or slug: '${id}'.`,
 				});
@@ -287,7 +287,7 @@ export const collections = new Elysia({
 			headers: { "accept-language": languages },
 			jwt: { sub, settings },
 			request: { url },
-			error,
+			status,
 		}) => {
 			const [collection] = await db
 				.select({ pk: shows.pk })
@@ -301,7 +301,7 @@ export const collections = new Elysia({
 				.limit(1);
 
 			if (!collection) {
-				return error(404, {
+				return status(404, {
 					status: 404,
 					message: `No collection with the id or slug: '${id}'.`,
 				});
@@ -344,7 +344,7 @@ export const collections = new Elysia({
 			headers: { "accept-language": languages },
 			jwt: { sub, settings },
 			request: { url },
-			error,
+			status,
 		}) => {
 			const [collection] = await db
 				.select({ pk: shows.pk })
@@ -358,7 +358,7 @@ export const collections = new Elysia({
 				.limit(1);
 
 			if (!collection) {
-				return error(404, {
+				return status(404, {
 					status: 404,
 					message: `No collection with the id or slug: '${id}'.`,
 				});

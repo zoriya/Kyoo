@@ -10,7 +10,7 @@ export const bubbleVideo: Video = {
 	guess: {
 		kind: "movie",
 		title: "bubble",
-		year: [2022],
+		years: [2022],
 		from: "guessit",
 	},
 	createdAt: "2024-11-23T15:01:24.968Z",

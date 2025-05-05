@@ -1,12 +1,12 @@
 import { buildUrl } from "tests/utils";
-import { app } from "~/base";
+import { handlers } from "~/base";
 import { getJwtHeaders } from "./jwt";
 
 export const getStudio = async (
 	id: string,
 	{ langs, ...query }: { langs?: string; preferOriginal?: boolean },
 ) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl(`studios/${id}`, query), {
 			method: "GET",
 			headers: langs
@@ -36,7 +36,7 @@ export const getShowsByStudio = async (
 		preferOriginal?: boolean;
 	},
 ) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl(`studios/${studio}/shows`, opts), {
 			method: "GET",
 			headers: langs

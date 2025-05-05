@@ -23,14 +23,14 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 	.use(auth)
 	.get(
 		"random",
-		async ({ error, redirect }) => {
+		async ({ status, redirect }) => {
 			const [show] = await db
 				.select({ kind: shows.kind, slug: shows.slug })
 				.from(shows)
 				.orderBy(sql`random()`)
 				.limit(1);
 			if (!show)
-				return error(404, {
+				return status(404, {
 					status: 404,
 					message: "No shows in the database.",
 				});

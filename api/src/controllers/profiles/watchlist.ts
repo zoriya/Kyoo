@@ -197,10 +197,10 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 						jwt: { settings },
 						headers: { "accept-language": languages, authorization },
 						request: { url },
-						error,
+						status,
 					}) => {
 						const uInfo = await getUserInfo(id, { authorization });
-						if ("status" in uInfo) return error(uInfo.status as 404, uInfo);
+						if ("status" in uInfo) return status(uInfo.status as 404, uInfo);
 
 						const langs = processLanguages(languages);
 						const items = await getShows({
@@ -261,7 +261,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 	)
 	.post(
 		"/series/:id/watchstatus",
-		async ({ params: { id }, body, jwt: { sub }, error }) => {
+		async ({ params: { id }, body, jwt: { sub }, status }) => {
 			const [show] = await db
 				.select({ pk: shows.pk, entriesCount: shows.entriesCount })
 				.from(shows)
@@ -273,7 +273,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 				);
 
 			if (!show) {
-				return error(404, {
+				return status(404, {
 					status: 404,
 					message: `No serie found for the id/slug: '${id}'.`,
 				});
@@ -302,7 +302,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 	)
 	.post(
 		"/movies/:id/watchstatus",
-		async ({ params: { id }, body, jwt: { sub }, error }) => {
+		async ({ params: { id }, body, jwt: { sub }, status }) => {
 			const [show] = await db
 				.select({ pk: shows.pk })
 				.from(shows)
@@ -314,7 +314,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 				);
 
 			if (!show) {
-				return error(404, {
+				return status(404, {
 					status: 404,
 					message: `No movie found for the id/slug: '${id}'.`,
 				});

@@ -31,7 +31,7 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 			headers: { "accept-language": languages },
 			query: { preferOriginal, with: relations },
 			jwt: { sub, settings },
-			error,
+			status,
 			set,
 		}) => {
 			const langs = processLanguages(languages);
@@ -48,13 +48,13 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 				userId: sub,
 			});
 			if (!ret) {
-				return error(404, {
+				return status(404, {
 					status: 404,
 					message: `No serie found with the id or slug: '${id}'.`,
 				});
 			}
 			if (!ret.language) {
-				return error(422, {
+				return status(422, {
 					status: 422,
 					message: "Accept-Language header could not be satisfied.",
 				});
@@ -102,7 +102,7 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 	)
 	.get(
 		"random",
-		async ({ error, redirect }) => {
+		async ({ status, redirect }) => {
 			const [serie] = await db
 				.select({ slug: shows.slug })
 				.from(shows)
@@ -110,7 +110,7 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 				.orderBy(sql`random()`)
 				.limit(1);
 			if (!serie)
-				return error(404, {
+				return status(404, {
 					status: 404,
 					message: "No series in the database.",
 				});
