@@ -3,7 +3,7 @@ from __future__ import annotations
 from ..utils import Model
 from .extra import ExtraKind
 from .metadataid import MetadataId, EpisodeId
-from typing import Optional, Literal
+from typing import Optional, Literal, Any
 
 
 class Resource(Model):
@@ -17,16 +17,17 @@ class VideoInfo(Model):
 	guesses: dict[str, dict[str, Resource]]
 
 
-class Guess(Model):
+class Guess(Model, extra="allow"):
 	title: str
 	kind: Literal["episode"] | Literal["movie"] | Literal["extra"]
 	extraKind: Optional[ExtraKind]
 	years: list[int]
 	episodes: list[Guess.Episode]
 	external_id: dict[str, MetadataId | EpisodeId]
+	raw: dict[str, Any]
 
 	from_: str
-	history: list[Guess]
+	history: list[Guess] = []
 
 	class Episode(Model):
 		season: Optional[int]
@@ -68,4 +69,4 @@ class Video(Model):
 	guess: Guess
 	for_: Optional[
 		For.Slug | For.ExternalId | For.Movie | For.Episode | For.Order | For.Special
-	]
+	] = None
