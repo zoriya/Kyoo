@@ -1,5 +1,5 @@
 import { buildUrl } from "tests/utils";
-import { app } from "~/base";
+import { handlers } from "~/base";
 import { getJwtHeaders } from "./jwt";
 
 export const getShows = async ({
@@ -14,7 +14,7 @@ export const getShows = async ({
 	langs?: string;
 	preferOriginal?: boolean;
 }) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl("shows", query), {
 			method: "GET",
 			headers: langs
@@ -44,7 +44,7 @@ export const getWatchlist = async (
 		preferOriginal?: boolean;
 	},
 ) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl(`profiles/${id}/watchlist`, query), {
 			method: "GET",
 			headers: langs
@@ -74,7 +74,7 @@ export const getNextup = async (
 		preferOriginal?: boolean;
 	},
 ) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl(`profiles/${id}/nextup`, query), {
 			method: "GET",
 			headers: langs
