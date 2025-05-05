@@ -33,7 +33,7 @@ def guessit(
 			"episode_prefer_number": True,
 			"excludes": "language",
 			"expected_title": expected_titles,
-			"enforce_list": True
+			"enforce_list": True,
 		}
 		| extra_flags,
 	)
@@ -43,6 +43,7 @@ def guessit(
 if __name__ == "__main__":
 	import sys
 	import json
+
 	# from providers.implementations.thexem import TheXemClient
 	from guessit.jsonutils import GuessitEncoder
 	from aiohttp import ClientSession

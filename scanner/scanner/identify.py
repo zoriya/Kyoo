@@ -1,7 +1,17 @@
-from .models.videos import Video, Guess
-from .guess.guess import guessit
-from typing import Literal
 from itertools import zip_longest
+from logging import getLogger
+from typing import Awaitable, Callable, Literal
+
+from .guess.guess import guessit
+from .models.videos import Guess, Video
+
+logger = getLogger(__name__)
+
+pipeline: list[Callable[[str, Guess], Awaitable[Guess]]] = [
+	# TODO: add nfo scanner
+	# TODO: add thexem
+	# TODO: add anilist
+]
 
 
 async def identify(path: str) -> Video:
@@ -37,6 +47,12 @@ async def identify(path: str) -> Video:
 		from_="guessit",
 		raw=raw,
 	)
+
+	for step in pipeline:
+		try:
+			guess = await step(path, guess)
+		except Exception as e:
+			logger.error("Couldn't run %s.", step.__name__, exc_info=e)
 
 	return Video(
 		path=path,
