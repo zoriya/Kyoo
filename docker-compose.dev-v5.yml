@@ -153,7 +153,7 @@ services:
     profiles: ['qsv']
 
   traefik:
-    image: traefik:v3.3
+    image: traefik:v3.4
     restart: on-failure
     command:
       - "--providers.docker=true"
