@@ -1,5 +1,4 @@
-import { and, eq, exists, inArray, not, notExists, or, sql } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
+import { and, eq, notExists, or, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "~/db";
 import { entries, entryVideoJoin, shows, videos } from "~/db/schema";
@@ -60,7 +59,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 					})
 					.from(videos)
 					.leftJoin(
-						sql`jsonb_array_elements_text(${videos.guess}->'year') as year`,
+						sql`jsonb_array_elements_text(${videos.guess}->'years') as year`,
 						sql`true`,
 					)
 					.innerJoin(entryVideoJoin, eq(entryVideoJoin.videoPk, videos.pk))
@@ -169,7 +168,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 	)
 	.post(
 		"",
-		async ({ body, error }) => {
+		async ({ body, status }) => {
 			return await db.transaction(async (tx) => {
 				let vids: { pk: number; id: string; path: string }[] = [];
 				try {
@@ -187,7 +186,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 						});
 				} catch (e) {
 					if (!isUniqueConstraint(e)) throw e;
-					return error(409, {
+					return status(409, {
 						status: 409,
 						message: comment`
 							Invalid rendering. A video with the same (rendering, part, version) combo
@@ -222,7 +221,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				});
 
 				if (!vidEntries.length) {
-					return error(
+					return status(
 						201,
 						vids.map((x) => ({ id: x.id, path: x.path, entries: [] })),
 					);
@@ -358,7 +357,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				);
 				await updateAvailableSince(tx, entriesPk);
 
-				return error(
+				return status(
 					201,
 					vids.map((x) => ({
 						id: x.id,

@@ -16,7 +16,11 @@ const [_, ser] = await createSerie(madeInAbyss);
 const [__, mov] = await createMovie(bubble);
 const [resp, body] = await createVideo([
 	{
-		guess: { title: "mia", season: [1], episode: [13], from: "test" },
+		guess: {
+			title: "mia",
+			episodes: [{ season: 1, episode: 13 }],
+			from: "test",
+		},
 		part: null,
 		path: "/video/mia s1e13.mkv",
 		rendering: "sha2",
@@ -26,9 +30,8 @@ const [resp, body] = await createVideo([
 	{
 		guess: {
 			title: "mia",
-			season: [2],
-			episode: [1],
-			year: [2017],
+			episodes: [{ season: 2, episode: 1 }],
+			years: [2017],
 			from: "test",
 		},
 		part: null,
