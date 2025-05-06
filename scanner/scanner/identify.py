@@ -16,11 +16,7 @@ pipeline: list[Callable[[str, Guess], Awaitable[Guess]]] = [
 
 
 async def identify(path: str) -> Video:
-	raw = guessit(
-		path,
-		expected_titles=[],
-		extra_flags={"advanced": True},
-	)
+	raw = guessit(path, expected_titles=[])
 
 	# guessit should only return one (according to the doc)
 	title = raw.get("title", [])[0]
@@ -34,9 +30,14 @@ async def identify(path: str) -> Video:
 	seasons = raw.get("season", [])
 	episodes = raw.get("episode", [])
 
-	rendering = path[:version.start] + path[version.end:]
+	# just strip the version & part number from the path
+	rendering_path = "".join(
+		c
+		for i, c in enumerate(path)
+		if not (version and version.start <= i < version.end)
+		and not (part and part.start <= i < part.end)
+	)
 
-	print(raw)
 	guess = Guess(
 		title=cast(str, title.value),
 		kind=cast(Literal["episode"] | Literal["movie"], kind.value),
@@ -63,7 +64,7 @@ async def identify(path: str) -> Video:
 
 	return Video(
 		path=path,
-		rendering=sha256(path.encode()).hexdigest(),
+		rendering=sha256(rendering_path.encode()).hexdigest(),
 		part=cast(int, part.value) if part else None,
 		version=cast(int, version.value) if version else 1,
 		guess=guess,
