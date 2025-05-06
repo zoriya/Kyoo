@@ -115,6 +115,11 @@ func GetMimeCodec(stream *ffprobe.Stream) *string {
 		ret := "alac"
 		return &ret
 
+	// Based on https://cconcolato.github.io/media-mime-support/#video/mp4;%20codecs=%22dtsc%22
+	case "dts":
+		ret := "dtsc"
+		return &ret
+
 	default:
 		log.Printf("No known mime format for: %s", stream.CodecName)
 		return nil
