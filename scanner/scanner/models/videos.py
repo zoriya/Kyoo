@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+from typing import Any, Literal, Optional
+
 from ..utils import Model
 from .extra import ExtraKind
-from .metadataid import MetadataId, EpisodeId
-from typing import Optional, Literal, Any
+from .metadataid import EpisodeId, MetadataId
 
 
 class Resource(Model):
@@ -20,11 +21,11 @@ class VideoInfo(Model):
 class Guess(Model, extra="allow"):
 	title: str
 	kind: Literal["episode"] | Literal["movie"] | Literal["extra"]
-	extraKind: Optional[ExtraKind]
+	extra_kind: Optional[ExtraKind]
 	years: list[int]
 	episodes: list[Guess.Episode]
 	external_id: dict[str, MetadataId | EpisodeId]
-	raw: dict[str, Any]
+	raw: dict[str, Any] = {}
 
 	from_: str
 	history: list[Guess] = []
@@ -67,6 +68,6 @@ class Video(Model):
 	part: Optional[int]
 	version: int = 1
 	guess: Guess
-	for_: Optional[
+	for_: list[
 		For.Slug | For.ExternalId | For.Movie | For.Episode | For.Order | For.Special
-	] = None
+	] = []
