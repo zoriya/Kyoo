@@ -72,7 +72,7 @@ func SaveFilesToBackend(ctx context.Context, backend StorageBackend, sourceDirec
 			if err != nil {
 				return fmt.Errorf("failed to open file %q: %w", sourcePath, err)
 			}
-			utils.CleanupWithErr(&err, file.Close, "failed to close file %q", sourcePath)
+			defer utils.CleanupWithErr(&err, file.Close, "failed to close file %q", sourcePath)
 
 			if err := backend.SaveItem(ctx, destinationPath, file); err != nil {
 				return fmt.Errorf("failed to save file %q to backend: %w", sourcePath, err)

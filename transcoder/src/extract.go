@@ -8,26 +8,45 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 
 	"github.com/zoriya/kyoo/transcoder/src/storage"
 	"github.com/zoriya/kyoo/transcoder/src/utils"
 	"golang.org/x/sync/errgroup"
 )
 
-const ExtractVersion = 1
+const (
+	ExtractVersion = 1
+	maxJobDuration = 5 * time.Minute // TODO make this configurable
+)
 
-func (s *MetadataService) ExtractSubs(ctx context.Context, info *MediaInfo) (interface{}, error) {
+// SubtitleExtractionJob runs a subtitle extraction job for the given piece of media.
+// If the job is already running, it will return the result of the running job upon completion.
+// The function will wait for job completion. If the context is cancelled, the job will continue
+// running in the background, but the function will return a context cancellation error.
+func (s *MetadataService) SubtitleExtractionJob(ctx context.Context, info *MediaInfo) error {
 	get_running, set := s.extractLock.Start(info.Sha)
 	if get_running != nil {
-		return get_running()
+		_, err := get_running()
+		return err
 	}
 
-	err := s.extractSubs(ctx, info)
-	if err != nil {
-		return set(nil, err)
+	job := func(ctx context.Context) error {
+		err := s.extractSubs(ctx, info)
+		if err != nil {
+			_, err = set(nil, fmt.Errorf("failed to extract subtitles for %s: %w", info.Path, err))
+			return err
+		}
+
+		_, err = set(nil, nil)
+		return err
 	}
-	_, err = s.database.Exec(`update info set ver_extract = $2 where sha = $1`, info.Sha, ExtractVersion)
-	return set(nil, err)
+
+	if err := utils.RunJob(ctx, job, maxJobDuration); err != nil {
+		return fmt.Errorf("failed while waiting for subtitle extraction job completion: %w", err)
+	}
+
+	return nil
 }
 
 func (s *MetadataService) GetAttachment(ctx context.Context, sha string, name string) (io.ReadCloser, error) {
@@ -72,17 +91,14 @@ func (s *MetadataService) extractSubs(ctx context.Context, info *MediaInfo) (err
 	// TODO if the transcoder ever uses the ffmpeg library directly, remove this
 	// and write directly to storage via stream instead
 	tempWorkingDirectory := filepath.Join(os.TempDir(), info.Sha)
-	if err := os.MkdirAll(tempWorkingDirectory, 0660); err != nil {
-		return fmt.Errorf("failed to create temporary directory: %w", err)
-	}
 
 	attachmentWorkingDirectory := filepath.Join(tempWorkingDirectory, "att")
-	if err := os.MkdirAll(attachmentWorkingDirectory, 0660); err != nil {
+	if err := os.MkdirAll(attachmentWorkingDirectory, 0770); err != nil {
 		return fmt.Errorf("failed to create attachment directory: %w", err)
 	}
 
 	subtitlesWorkingDirectory := filepath.Join(tempWorkingDirectory, "sub")
-	if err := os.MkdirAll(subtitlesWorkingDirectory, 0660); err != nil {
+	if err := os.MkdirAll(subtitlesWorkingDirectory, 0770); err != nil {
 		return fmt.Errorf("failed to create subtitles directory: %w", err)
 	}
 
@@ -145,6 +161,11 @@ func (s *MetadataService) extractSubs(ctx context.Context, info *MediaInfo) (err
 
 	if err := saveGroup.Wait(); err != nil {
 		return fmt.Errorf("failed while saving files to backend: %w", err)
+	}
+
+	_, err = s.database.Exec(`update info set ver_extract = $2 where sha = $1`, info.Sha, ExtractVersion)
+	if err != nil {
+		return fmt.Errorf("failed to update database: %w", err)
 	}
 
 	return nil

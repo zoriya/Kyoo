@@ -32,7 +32,10 @@ func (r *RunLock[K, V]) Start(key K) (func() (V, error), func(val V, err error) 
 	task, ok := r.running[key]
 
 	if ok {
-		ret := make(chan Result[V])
+		// Important: Buffer this so that listener notifications are not blocked
+		// when the job completes. Without a buffered channel, the "set" function
+		// can get hung if any one of the listeners does not read from the channel.
+		ret := make(chan Result[V], 1)
 		task.listeners = append(task.listeners, ret)
 		return func() (V, error) {
 			res := <-ret

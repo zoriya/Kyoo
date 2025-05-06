@@ -45,7 +45,7 @@ func getThumbVttPath(sha string) string {
 }
 
 func (s *MetadataService) GetThumbVtt(ctx context.Context, path string, sha string) (io.ReadCloser, error) {
-	_, err := s.ExtractThumbs(ctx, path, sha)
+	err := s.ThumbnailExtractionJob(ctx, path, sha)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func (s *MetadataService) GetThumbVtt(ctx context.Context, path string, sha stri
 }
 
 func (s *MetadataService) GetThumbSprite(ctx context.Context, path string, sha string) (io.ReadCloser, error) {
-	_, err := s.ExtractThumbs(ctx, path, sha)
+	err := s.ThumbnailExtractionJob(ctx, path, sha)
 	if err != nil {
 		return nil, err
 	}
@@ -72,18 +72,33 @@ func (s *MetadataService) GetThumbSprite(ctx context.Context, path string, sha s
 	return sprite, nil
 }
 
-func (s *MetadataService) ExtractThumbs(ctx context.Context, path string, sha string) (interface{}, error) {
+// ThumbnailExtractionJob runs a thumbnail extraction job for the given path and sha.
+// If the job is already running, it will return the result of the running job upon completion.
+// The function will wait for job completion. If the context is cancelled, the job will continue
+// running in the background, but the function will return a context cancellation error.
+func (s *MetadataService) ThumbnailExtractionJob(ctx context.Context, path string, sha string) error {
 	get_running, set := s.thumbLock.Start(sha)
 	if get_running != nil {
-		return get_running()
+		_, err := get_running()
+		return err
 	}
 
-	err := s.extractThumbnail(ctx, path, sha)
-	if err != nil {
-		return set(nil, err)
+	job := func(ctx context.Context) error {
+		err := s.extractThumbnail(ctx, path, sha)
+		if err != nil {
+			_, err = set(nil, fmt.Errorf("failed to extract thumbnail for %s: %w", path, err))
+			return err
+		}
+
+		_, err = set(nil, nil)
+		return err
 	}
-	_, err = s.database.Exec(`update info set ver_thumbs = $2 where sha = $1`, sha, ThumbsVersion)
-	return set(nil, err)
+
+	if err := utils.RunJob(ctx, job, maxJobDuration); err != nil {
+		return fmt.Errorf("failed while waiting for thumbnail extraction job completion: %w", err)
+	}
+
+	return nil
 }
 
 func (s *MetadataService) extractThumbnail(ctx context.Context, path string, sha string) (err error) {
@@ -182,6 +197,11 @@ func (s *MetadataService) extractThumbnail(ctx context.Context, path string, sha
 	})
 	if err != nil {
 		return fmt.Errorf("failed to save thumbnail sprite with path %q: %w", spritePath, err)
+	}
+
+	_, err = s.database.Exec(`update info set ver_thumbs = $2 where sha = $1`, sha, ThumbsVersion)
+	if err != nil {
+		return fmt.Errorf("failed to update thumbnail version in database: %w", err)
 	}
 
 	return nil
