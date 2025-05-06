@@ -1,7 +1,8 @@
-from pydantic import BaseModel, ConfigDict
-from pydantic.alias_generators import to_camel
 from datetime import date
+
 from langcodes import Language
+from pydantic import AliasGenerator, BaseModel, ConfigDict
+from pydantic.alias_generators import to_camel
 
 
 def format_date(date: date | int | None) -> str | None:
@@ -24,5 +25,7 @@ class ProviderError(RuntimeError):
 class Model(BaseModel):
 	model_config = ConfigDict(
 		use_enum_values=True,
-		alias_generator=to_camel,
+		alias_generator=AliasGenerator(
+			serialization_alias=lambda x: to_camel(x[:-1] if x[-1] == "_" else x),
+		),
 	)
