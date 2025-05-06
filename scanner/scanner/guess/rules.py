@@ -1,10 +1,12 @@
 # Read that for examples/rules: https://github.com/pymedusa/Medusa/blob/master/medusa/name_parser/rules/rules.py
 
+import hashlib
+from copy import copy
 from logging import getLogger
 from typing import Any, List, Optional, cast
-from rebulk import Rule, RemoveMatch, AppendMatch, POST_PROCESS
-from rebulk.match import Matches, Match
-from copy import copy
+
+from rebulk import POST_PROCESS, AppendMatch, RemoveMatch, Rule
+from rebulk.match import Match, Matches
 
 logger = getLogger(__name__)
 
@@ -67,7 +69,7 @@ class UnlistTitles(Rule):
 				# Check if titles are next to each other, if they are not ignore it.
 				next: List[Match] = matches.next(title)  # type: ignore
 				if not next or next[0] != nmatch:
-					logger.warn(f"Ignoring potential part of title: {nmatch.value}")
+					logger.warning(f"Ignoring potential part of title: {nmatch.value}")
 					continue
 				title.end = nmatch.end
 
@@ -176,7 +178,7 @@ class SeasonYearDedup(Rule):
 	"""
 
 	# This rules does the opposite of the YearSeason rule of guessit (with POST_PROCESS priority)
-	# To overide it, we need the -1. (rule: https://github.com/guessit-io/guessit/blob/develop/guessit/rules/processors.py#L195)
+	# To override it, we need the -1. (rule: https://github.com/guessit-io/guessit/blob/develop/guessit/rules/processors.py#L195)
 	priority = POST_PROCESS - 1
 	consequence = RemoveMatch
 
@@ -185,3 +187,29 @@ class SeasonYearDedup(Rule):
 		year: List[Match] = matches.named("year")  # type: ignore
 		if len(season) == 1 and len(year) == 1 and season[0].value == year[0].value:
 			return season
+
+
+# class RenderingDedup(Rule):
+# 	"""Compute rendering (sha of path - version/part)
+#
+# 	Example: "One Piece (1999) v2 152 part2.mkv"
+# 	Computes: sha("One Piece (1999) 152.mkv")
+# 	```
+# 	"""
+#
+# 	priority = POST_PROCESS + 100000
+# 	consequence = AppendMatch
+#
+# 	def when(self, matches: Matches, context: dict[str, list[str]]) -> Any:
+# 		ret = hashlib.new("sha256")
+#
+# 		value: list[Match] = sorted(
+# 			list(matches) + matches.holes(),  # type: ignore
+# 			key=lambda m: m.start,
+# 		)
+# 		for m in value:
+# 			if m.name == "part" or m.name == "version":
+# 				continue
+# 			ret.update(cast(str, m.raw).encode("utf-8"))
+# 		context["rendering"] = [ret.hexdigest()]
+# 		return [Match(start=0, end=1, value=ret.hexdigest(), raw="", name="rendering")]

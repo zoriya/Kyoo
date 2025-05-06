@@ -4,7 +4,7 @@ app = FastAPI(
 	title="Scanner",
 	description="API to control the long running scanner or interacting with external databases (themoviedb, tvdb...)\n\n"
 	+ "Most of those APIs are for admins only.",
-	openapi_prefix="/scanner",
+	root_path="/scanner",
 	# lifetime=smth
 )
 
