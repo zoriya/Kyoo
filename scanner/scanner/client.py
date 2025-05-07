@@ -1,12 +1,9 @@
 import os
-import jsons
-from aiohttp import ClientSession
-from datetime import date
 from logging import getLogger
-from typing import Optional
 
-from .utils import format_date
-from .models.videos import VideoInfo, Video
+from aiohttp import ClientSession
+
+from .models.videos import Video, VideoCreated, VideoInfo
 
 logger = getLogger(__name__)
 
@@ -20,14 +17,10 @@ class KyooClient:
 		self._url = os.environ.get("KYOO_URL", "http://api:3567/api")
 
 	async def __aenter__(self):
-		jsons.set_serializer(lambda x, **_: format_date(x), type[Optional[date | int]])
 		self._client = ClientSession(
 			headers={
 				"User-Agent": "kyoo",
 			},
-			json_serialize=lambda *args, **kwargs: jsons.dumps(
-				*args, key_transformer=jsons.KEY_TRANSFORMER_CAMELCASE, **kwargs
-			),
 		)
 		return self
 
@@ -41,12 +34,13 @@ class KyooClient:
 			r.raise_for_status()
 			return VideoInfo(**await r.json())
 
-	async def create_videos(self, videos: list[Video]):
+	async def create_videos(self, videos: list[Video]) -> list[VideoCreated]:
 		async with self._client.post(
 			f"{self._url}/videos",
 			json=[x.model_dump_json() for x in videos],
 		) as r:
 			r.raise_for_status()
+			return list[VideoCreated](** await r.json())
 
 	async def delete_videos(self, videos: list[str] | set[str]):
 		async with self._client.delete(

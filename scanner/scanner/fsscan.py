@@ -1,10 +1,12 @@
 import os
 import re
-import asyncio
-from typing import Optional
 from logging import getLogger
+from mimetypes import guess_file_type
+from typing import Optional
 
 from .client import KyooClient
+from .identify import identify
+from .models.videos import Video
 
 logger = getLogger(__name__)
 
@@ -21,6 +23,11 @@ def get_ignore_pattern():
 ignore_pattern = get_ignore_pattern()
 
 
+def is_video(path: str) -> bool:
+	(mime, _) =  guess_file_type(path, strict=False)
+	return mime is not None and mime.startswith("video/")
+
+
 async def scan(path: Optional[str], client: KyooClient, remove_deleted=False):
 	path = path or os.environ.get("SCANNER_LIBRARY_ROOT", "/video")
 	logger.info("Starting scan at %s. This may take some time...", path)
@@ -29,7 +36,7 @@ async def scan(path: Optional[str], client: KyooClient, remove_deleted=False):
 
 	info = await client.get_videos_info()
 
-	videos = set()
+	videos: set[str] = set()
 	for dirpath, dirnames, files in os.walk(path):
 		# Skip directories with a `.ignore` file
 		if ".ignore" in files:
@@ -42,7 +49,8 @@ async def scan(path: Optional[str], client: KyooClient, remove_deleted=False):
 			# Apply ignore pattern, if any
 			if ignore_pattern and ignore_pattern.match(file_path):
 				continue
-			videos.add(file_path)
+			if is_video(file_path):
+				videos.add(file_path)
 
 	to_register = videos - info.paths
 	to_delete = info.paths - videos if remove_deleted else set()
@@ -58,6 +66,17 @@ async def scan(path: Optional[str], client: KyooClient, remove_deleted=False):
 
 	if to_register:
 		logger.info("Found %d new files to register.", len(to_register))
-		await asyncio.gather(*[publisher.add(path) for path in to_register])
+
+		# TODO: we should probably chunk those
+		vids: list[Video] = []
+		for path in to_register:
+			try:
+				new = await identify(path)
+				vids.append(new)
+			except Exception as e:
+				logger.error("Couldn't identify %s.", path, exc_info=e)
+		created = await client.create_videos(vids)
+
+		need_scan = [x for x in created if not any(x.entries)]
 
 	logger.info("Scan finished for %s.", path)
