@@ -1,7 +1,7 @@
 from hashlib import sha256
 from itertools import zip_longest
 from logging import getLogger
-from typing import Awaitable, Callable, Literal, Optional, cast
+from typing import Awaitable, Callable, Literal, cast
 
 from .guess.guess import guessit
 from .models.videos import Guess, Video
