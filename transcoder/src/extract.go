@@ -63,8 +63,15 @@ func (s *MetadataService) GetSubtitle(ctx context.Context, sha string, name stri
 func (s *MetadataService) extractSubs(ctx context.Context, info *MediaInfo) (err error) {
 	defer utils.PrintExecTime("extraction of %s", info.Path)()
 
-	// If there is no subtitles, there is nothing to extract (also fonts would be useless).
-	if len(info.Subtitles) == 0 {
+	// If there are no supported, embedded subtitles, there is nothing to extract.
+	hasSupportedSubtitle := false
+	for _, sub := range info.Subtitles {
+		if !sub.IsExternal && sub.Extension != nil {
+			hasSupportedSubtitle = true
+			break
+		}
+	}
+	if !hasSupportedSubtitle {
 		return nil
 	}
 

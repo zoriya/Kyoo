@@ -109,12 +109,14 @@ const Video = forwardRef<VideoRef, VideoProps>(function Video(
 				}
 				// when video file is invalid, audio is undefined
 				selectedAudioTrack={{ type: SelectedTrackType.INDEX, value: audio?.index ?? 0 }}
-				textTracks={subtitles?.map((x) => ({
-					type: MimeTypes.get(x.codec) as any,
-					uri: x.link!,
-					title: x.title ?? "Unknown",
-					language: x.language ?? ("Unknown" as any),
-				}))}
+				textTracks={subtitles
+					?.filter((x) => !!x.link)
+					.map((x) => ({
+						type: MimeTypes.get(x.codec) as any,
+						uri: x.link!,
+						title: x.title ?? "Unknown",
+						language: x.language ?? ("Unknown" as any),
+					}))}
 				selectedTextTrack={
 					subtitle
 						? {
