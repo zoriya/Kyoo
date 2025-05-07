@@ -71,3 +71,7 @@ class Video(Model):
 	for_: list[
 		For.Slug | For.ExternalId | For.Movie | For.Episode | For.Order | For.Special
 	] = []
+
+class VideoCreated(Resource):
+	guess: Guess
+	entries: list[Resource]

@@ -22,7 +22,7 @@ import {
 	sortToSql,
 } from "~/models/utils";
 import { desc as description } from "~/models/utils/descriptions";
-import { Guesses, SeedVideo, Video } from "~/models/video";
+import { Guess, Guesses, SeedVideo, Video } from "~/models/video";
 import { comment } from "~/utils";
 import { computeVideoSlug } from "./seed/insert/entries";
 import {
@@ -33,6 +33,7 @@ import {
 const CreatedVideo = t.Object({
 	id: t.String({ format: "uuid" }),
 	path: t.String({ examples: [bubbleVideo.path] }),
+	guess: t.Omit(Guess, ["history"]),
 	entries: t.Array(
 		t.Object({
 			slug: t.String({ format: "slug", examples: ["bubble-v2"] }),
@@ -170,7 +171,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 		"",
 		async ({ body, status }) => {
 			return await db.transaction(async (tx) => {
-				let vids: { pk: number; id: string; path: string }[] = [];
+				let vids: { pk: number; id: string; path: string; guess: Guess }[] = [];
 				try {
 					vids = await tx
 						.insert(videos)
@@ -183,6 +184,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 							pk: videos.pk,
 							id: videos.id,
 							path: videos.path,
+							guess: videos.guess,
 						});
 				} catch (e) {
 					if (!isUniqueConstraint(e)) throw e;
@@ -223,7 +225,12 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				if (!vidEntries.length) {
 					return status(
 						201,
-						vids.map((x) => ({ id: x.id, path: x.path, entries: [] })),
+						vids.map((x) => ({
+							id: x.id,
+							path: x.path,
+							guess: x.guess,
+							entries: [],
+						})),
 					);
 				}
 
@@ -362,6 +369,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 					vids.map((x) => ({
 						id: x.id,
 						path: x.path,
+						guess: x.guess,
 						entries: entr[x.pk] ?? [],
 					})),
 				);
