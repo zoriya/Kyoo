@@ -71,15 +71,17 @@ export const RightButtons = ({
 						selected={!selectedSubtitle}
 						onSelect={() => setSubtitle(null)}
 					/>
-					{subtitles.map((x, i) => (
-						<Menu.Item
-							key={x.index ?? i}
-							label={x.link ? getSubtitleName(x) : `${getSubtitleName(x)} (${x.codec})`}
-							selected={selectedSubtitle === x}
-							disabled={!x.link}
-							onSelect={() => setSubtitle(x)}
-						/>
-					))}
+					{subtitles
+						.filter((x) => !!x.link)
+						.map((x, i) => (
+							<Menu.Item
+								key={x.index ?? i}
+								label={x.link ? getSubtitleName(x) : `${getSubtitleName(x)} (${x.codec})`}
+								selected={selectedSubtitle === x}
+								disabled={!x.link}
+								onSelect={() => setSubtitle(x)}
+							/>
+						))}
 				</Menu>
 			)}
 			<AudiosMenu
