@@ -25,7 +25,7 @@ class CollectionTranslation(Model):
 	aliases: list[str]
 	tags: list[str]
 
-	posters: list[str]
-	thumbnails: list[str]
-	banner: list[str]
-	logos: list[str]
+	poster: str | None
+	thumbnail: str | None
+	banner: str | None
+	logo: str | None

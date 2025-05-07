@@ -38,7 +38,9 @@ class CompositeProvider(Provider):
 			raise ProviderError(
 				f"Couldn't find a movie with title {title}. (year: {year}"
 			)
-		ret = await self.get_movie(search[0].external_id)
+		ret = await self.get_movie(
+			{k: v.data_id for k, v in search[0].external_id.items()}
+		)
 		if not ret:
 			raise ValueError()
 		return ret
@@ -68,4 +70,9 @@ class CompositeProvider(Provider):
 			raise ProviderError(
 				f"Couldn't find a serie with title {title}. (year: {year}"
 			)
-		return await self.get_serie(search[0].external_id)
+		ret = await self.get_serie(
+			{k: v.data_id for k, v in search[0].external_id.items()}
+		)
+		if not ret:
+			raise ValueError()
+		return ret
