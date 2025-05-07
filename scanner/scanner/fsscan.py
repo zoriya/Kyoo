@@ -6,7 +6,8 @@ from typing import Optional
 
 from .client import KyooClient
 from .identify import identify
-from .models.videos import Video
+from .models.metadataid import EpisodeId, MetadataId
+from .models.videos import For, Video, VideoInfo
 
 logger = getLogger(__name__)
 
@@ -24,7 +25,7 @@ ignore_pattern = get_ignore_pattern()
 
 
 def is_video(path: str) -> bool:
-	(mime, _) =  guess_file_type(path, strict=False)
+	(mime, _) = guess_file_type(path, strict=False)
 	return mime is not None and mime.startswith("video/")
 
 
@@ -52,6 +53,7 @@ async def scan(path: Optional[str], client: KyooClient, remove_deleted=False):
 			if is_video(file_path):
 				videos.add(file_path)
 
+	# TODO: handle unmatched
 	to_register = videos - info.paths
 	to_delete = info.paths - videos if remove_deleted else set()
 
@@ -71,12 +73,61 @@ async def scan(path: Optional[str], client: KyooClient, remove_deleted=False):
 		vids: list[Video] = []
 		for path in to_register:
 			try:
-				new = await identify(path)
-				vids.append(new)
+				vid = await identify(path)
+				vid = match(info, vid)
+				vids.append(vid)
 			except Exception as e:
 				logger.error("Couldn't identify %s.", path, exc_info=e)
 		created = await client.create_videos(vids)
 
+		# TODO: queue those
 		need_scan = [x for x in created if not any(x.entries)]
 
 	logger.info("Scan finished for %s.", path)
+
+
+def match(info: VideoInfo, video: Video) -> Video:
+	video.for_ = []
+
+	year_info = (
+		info.guesses[video.guess.title] if video.guess.title in info.guesses else {}
+	)
+	slugs = set(
+		x
+		for x in (
+			[
+				year_info[str(y)].slug if str(y) in year_info else None
+				for y in video.guess.years
+			]
+			+ ([year_info["unknown"].slug] if "unknown" in year_info else [])
+		)
+		if x is not None
+	)
+
+	if video.guess.kind == "movie":
+		for slug in slugs:
+			video.for_.append(For.Movie(movie=slug))
+
+		for k, v in video.guess.external_id.items():
+			video.for_.append(For.ExternalId(external_id={k: MetadataId(data_id=v)}))
+	else:
+		for ep in video.guess.episodes:
+			if ep.season is not None:
+				for slug in slugs:
+					video.for_.append(
+						For.Episode(serie=slug, season=ep.season, episode=ep.episode)
+					)
+
+			for k, v in video.guess.external_id.items():
+				video.for_.append(
+					For.ExternalId(
+						external_id={
+							k: EpisodeId(
+								serie_id=v, season=ep.season, episode=ep.episode
+							)
+						}
+					)
+				)
+
+	# TODO: handle specials & movie as episodes (needs animelist or thexem)
+	return video
