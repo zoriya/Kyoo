@@ -2,7 +2,7 @@
 
 from copy import copy
 from logging import getLogger
-from typing import Any, List, Optional, cast
+from typing import Any, cast, override
 
 from rebulk import POST_PROCESS, AppendMatch, RemoveMatch, Rule
 from rebulk.match import Match, Matches
@@ -52,11 +52,12 @@ class UnlistTitles(Rule):
 	priority = POST_PROCESS
 	consequence = [RemoveMatch, AppendMatch]
 
+	@override
 	def when(self, matches: Matches, context) -> Any:
-		fileparts: List[Match] = matches.markers.named("path")  # type: ignore
+		fileparts: list[Match] = matches.markers.named("path")  # type: ignore
 
 		for part in fileparts:
-			titles: List[Match] = matches.range(
+			titles: list[Match] = matches.range(
 				part.start, part.end, lambda x: x.name == "title"
 			)  # type: ignore
 
@@ -66,7 +67,7 @@ class UnlistTitles(Rule):
 			title = copy(titles[0])
 			for nmatch in titles[1:]:
 				# Check if titles are next to each other, if they are not ignore it.
-				next: List[Match] = matches.next(title)  # type: ignore
+				next: list[Match] = matches.next(title)  # type: ignore
 				if not next or next[0] != nmatch:
 					logger.warning(f"Ignoring potential part of title: {nmatch.value}")
 					continue
@@ -107,14 +108,15 @@ class MultipleSeasonRule(Rule):
 	priority = POST_PROCESS
 	consequence = [RemoveMatch, AppendMatch]
 
+	@override
 	def when(self, matches: Matches, context) -> Any:
-		seasons: List[Match] = matches.named("season")  # type: ignore
+		seasons: list[Match] = matches.named("season")  # type: ignore
 
 		if not seasons:
 			return
 
 		# Only apply this rule if all seasons are due to the same match
-		initiator: Optional[Match] = seasons[0].initiator
+		initiator: Match | None = seasons[0].initiator
 		if not initiator or any(
 			True for match in seasons if match.initiator != initiator
 		):
@@ -130,7 +132,7 @@ class MultipleSeasonRule(Rule):
 
 		try:
 			episodes = [int(x) for x in new_episodes]
-			parents: List[Match] = [match.parent for match in to_remove]  # type: ignore
+			parents: list[Match] = [match.parent for match in to_remove]  # type: ignore
 			for episode in episodes:
 				smatch = next(
 					x
@@ -181,8 +183,9 @@ class SeasonYearDedup(Rule):
 	priority = POST_PROCESS - 1
 	consequence = RemoveMatch
 
+	@override
 	def when(self, matches: Matches, context) -> Any:
-		season: List[Match] = matches.named("season")  # type: ignore
-		year: List[Match] = matches.named("year")  # type: ignore
+		season: list[Match] = matches.named("season")  # type: ignore
+		year: list[Match] = matches.named("year")  # type: ignore
 		if len(season) == 1 and len(year) == 1 and season[0].value == year[0].value:
 			return season
