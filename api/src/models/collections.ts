@@ -65,7 +65,7 @@ export const FullCollection = t.Intersect([
 export type FullCollection = Prettify<typeof FullCollection.static>;
 
 export const SeedCollection = t.Composite([
-	t.Omit(BaseCollection, ["kind", "startAir", "endAir", "nextRefresh"]),
+	t.Omit(BaseCollection, ["startAir", "endAir", "nextRefresh"]),
 	t.Object({
 		slug: t.String({ format: "slug" }),
 		originalLanguage: Language({

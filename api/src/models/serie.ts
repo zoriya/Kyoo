@@ -88,7 +88,7 @@ export const FullSerie = t.Intersect([
 export type FullSerie = Prettify<typeof FullSerie.static>;
 
 export const SeedSerie = t.Composite([
-	t.Omit(BaseSerie, ["kind", "nextRefresh"]),
+	t.Omit(BaseSerie, ["nextRefresh"]),
 	t.Object({
 		slug: t.String({ format: "slug" }),
 		originalLanguage: Language({

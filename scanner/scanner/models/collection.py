@@ -1,32 +1,31 @@
-from dataclasses import asdict, dataclass, field
-from typing import Optional
+from __future__ import annotations
 
-from providers.types.genre import Genre
-from .metadataid import MetadataID
+from langcodes import Language
+
+from ..utils import Model
+from .genre import Genre
+from .metadataid import MetadataId
 
 
-@dataclass
-class CollectionTranslation:
+class Collection(Model):
+	slug: str
+	original_language: Language
+	genres: list[Genre]
+	rating: int | None
+	external_id: dict[str, MetadataId]
+
+	translations: dict[str, CollectionTranslation] = {}
+
+
+class CollectionTranslation(Model):
 	name: str
-	descrpition: Optional[str]
-	tagline: Optional[str]
-	aliases: Optional[str]
-	tags: Optional[str]
+	latin_name: str | None
+	description: str | None
+	tagline: str | None
+	aliases: list[str]
+	tags: list[str]
 
 	posters: list[str]
 	thumbnails: list[str]
 	banner: list[str]
 	logos: list[str]
-
-
-@dataclass
-class Collection:
-	slug: str
-	original_language: str
-	genres: list[Genre]
-	rating: Optional[int]
-	external_id: dict[str, MetadataID]
-	translations: dict[str, CollectionTranslation] = field(default_factory=dict)
-
-	def to_kyoo(self):
-		return asdict(self)

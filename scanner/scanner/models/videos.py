@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Literal, Optional
+from typing import Any, Literal
 
 from ..utils import Model
 from .extra import ExtraKind
@@ -21,7 +21,7 @@ class VideoInfo(Model):
 class Guess(Model, extra="allow"):
 	title: str
 	kind: Literal["episode"] | Literal["movie"] | Literal["extra"]
-	extra_kind: Optional[ExtraKind]
+	extra_kind: ExtraKind | None
 	years: list[int]
 	episodes: list[Guess.Episode]
 	external_id: dict[str, str]
@@ -31,11 +31,11 @@ class Guess(Model, extra="allow"):
 	history: list[Guess] = []
 
 	class Episode(Model):
-		season: Optional[int]
+		season: int | None
 		episode: int
 
 
-Guess.model_rebuild()
+_ = Guess.model_rebuild()
 
 
 class For(Model):
@@ -65,12 +65,13 @@ class For(Model):
 class Video(Model):
 	path: str
 	rendering: str
-	part: Optional[int]
+	part: int | None
 	version: int = 1
 	guess: Guess
 	for_: list[
 		For.Slug | For.ExternalId | For.Movie | For.Episode | For.Order | For.Special
 	] = []
+
 
 class VideoCreated(Resource):
 	guess: Guess
