@@ -7,7 +7,8 @@ from typing import Optional
 from .client import KyooClient
 from .identify import identify
 from .models.metadataid import EpisodeId, MetadataId
-from .models.videos import For, Video, VideoInfo
+from .models.videos import For, Guess, Video, VideoInfo
+from .queue import Request, enqueue
 
 logger = getLogger(__name__)
 
@@ -29,16 +30,9 @@ def is_video(path: str) -> bool:
 	return mime is not None and mime.startswith("video/")
 
 
-async def scan(path: Optional[str], client: KyooClient, remove_deleted=False):
-	path = path or os.environ.get("SCANNER_LIBRARY_ROOT", "/video")
-	logger.info("Starting scan at %s. This may take some time...", path)
-	if ignore_pattern:
-		logger.info(f"Applying ignore pattern: {ignore_pattern}")
-
-	info = await client.get_videos_info()
-
+def walk_fs(root_path: str) -> set[str]:
 	videos: set[str] = set()
-	for dirpath, dirnames, files in os.walk(path):
+	for dirpath, dirnames, files in os.walk(root_path):
 		# Skip directories with a `.ignore` file
 		if ".ignore" in files:
 			# Prevents os.walk from descending into this directory
@@ -52,6 +46,17 @@ async def scan(path: Optional[str], client: KyooClient, remove_deleted=False):
 				continue
 			if is_video(file_path):
 				videos.add(file_path)
+	return videos
+
+
+async def scan(path: Optional[str], client: KyooClient, remove_deleted=False):
+	path = path or os.environ.get("SCANNER_LIBRARY_ROOT", "/video")
+	logger.info("Starting scan at %s. This may take some time...", path)
+	if ignore_pattern:
+		logger.info(f"Applying ignore pattern: {ignore_pattern}")
+	videos = walk_fs(path)
+
+	info = await client.get_videos_info()
 
 	# TODO: handle unmatched
 	to_register = videos - info.paths
@@ -80,8 +85,18 @@ async def scan(path: Optional[str], client: KyooClient, remove_deleted=False):
 				logger.error("Couldn't identify %s.", path, exc_info=e)
 		created = await client.create_videos(vids)
 
-		# TODO: queue those
-		need_scan = [x for x in created if not any(x.entries)]
+		await enqueue(
+			[
+				Request(
+					kind=x.guess.kind,
+					title=x.guess.title,
+					year=next(iter(x.guess.years), None),
+					videos=[Request.Video(id=x.id, episodes=x.guess.episodes)],
+				)
+				for x in created
+				if not any(x.entries) and x.guess.kind != "extra"
+			]
+		)
 
 	logger.info("Scan finished for %s.", path)
 
