@@ -1,4 +1,11 @@
+import logging
+
 from fastapi import FastAPI
+
+logging.basicConfig(level=logging.INFO)
+logging.getLogger("watchfiles").setLevel(logging.WARNING)
+logging.getLogger("rebulk").setLevel(logging.WARNING)
+
 
 app = FastAPI(
 	title="Scanner",
