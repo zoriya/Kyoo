@@ -2,12 +2,15 @@ import os
 import re
 from logging import getLogger
 from mimetypes import guess_file_type
+from os.path import dirname, exists, isdir, join
 from typing import Optional
+
+from watchfiles import Change, awatch
 
 from .client import KyooClient
 from .identify import identify
 from .models.metadataid import EpisodeId, MetadataId
-from .models.videos import For, Guess, Video, VideoInfo
+from .models.videos import For, Video, VideoInfo
 from .queue import Request, enqueue
 
 logger = getLogger(__name__)
@@ -25,9 +28,14 @@ def get_ignore_pattern():
 ignore_pattern = get_ignore_pattern()
 
 
-def is_video(path: str) -> bool:
-	(mime, _) = guess_file_type(path, strict=False)
-	return mime is not None and mime.startswith("video/")
+def is_ignored_path(path: str) -> bool:
+	current_path = path
+	# Traverse up to the root directory
+	while current_path != "/":
+		if exists(join(current_path, ".ignore")):
+			return True
+		current_path = dirname(current_path)
+	return False
 
 
 def walk_fs(root_path: str) -> set[str]:
@@ -49,11 +57,17 @@ def walk_fs(root_path: str) -> set[str]:
 	return videos
 
 
+def is_video(path: str) -> bool:
+	(mime, _) = guess_file_type(path, strict=False)
+	return mime is not None and mime.startswith("video/")
+
+
 async def scan(path: Optional[str], client: KyooClient, remove_deleted=False):
+	if path is None:
+		logger.info("Starting scan at %s. This may take some time...", path)
+		if ignore_pattern:
+			logger.info(f"Applying ignore pattern: {ignore_pattern}")
 	path = path or os.environ.get("SCANNER_LIBRARY_ROOT", "/video")
-	logger.info("Starting scan at %s. This may take some time...", path)
-	if ignore_pattern:
-		logger.info(f"Applying ignore pattern: {ignore_pattern}")
 	videos = walk_fs(path)
 
 	info = await client.get_videos_info()
@@ -99,6 +113,34 @@ async def scan(path: Optional[str], client: KyooClient, remove_deleted=False):
 		)
 
 	logger.info("Scan finished for %s.", path)
+
+
+async def monitor(path: str, client: KyooClient):
+	async for changes in awatch(path, ignore_permission_denied=True):
+		for event, file in changes:
+			if not isdir(file) and not is_video(file):
+				continue
+			if ignore_pattern and ignore_pattern.match(file) or is_ignored_path(file):
+				logger.info("Ignoring event %s for file %s", event, file)
+				continue
+
+			match event:
+				case Change.added if isdir(file):
+					logger.info("New dir found: %s", file)
+					await scan(file, client)
+				case Change.added:
+					logger.info("New video found: %s", file)
+					try:
+						vid = await identify(file)
+						vid = match(info, vid)
+						await client.create_videos([vid])
+					except Exception as e:
+						logger.error("Couldn't identify %s.", file, exc_info=e)
+				case Change.deleted:
+					logger.info("Delete video at: %s", file)
+					await client.delete_videos([file])
+				case Change.modified:
+					pass
 
 
 def match(info: VideoInfo, video: Video) -> Video:
