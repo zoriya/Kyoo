@@ -25,6 +25,3 @@ class Genre(str, Enum):
 	POLITICS = "politics"
 	SOAP = "soap"
 	TALK = "talk"
-
-	def to_kyoo(self):
-		return self.value

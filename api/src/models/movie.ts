@@ -72,7 +72,7 @@ export const FullMovie = t.Intersect([
 export type FullMovie = Prettify<typeof FullMovie.static>;
 
 export const SeedMovie = t.Composite([
-	t.Omit(BaseMovie, ["kind", "nextRefresh"]),
+	t.Omit(BaseMovie, ["nextRefresh"]),
 	t.Object({
 		slug: t.String({ format: "slug", examples: ["bubble"] }),
 		originalLanguage: Language({

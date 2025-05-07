@@ -1,16 +1,15 @@
-from dataclasses import asdict, dataclass, field
+from __future__ import annotations
 
-from .metadataid import MetadataID
+from ..utils import Model
+from .metadataid import MetadataId
 
 
-@dataclass
-class Studio:
+class Studio(Model):
+	slug: str
+	external_id: dict[str, MetadataId]
+	translations: dict[str, StudioTranslations] = {}
+
+
+class StudioTranslations(Model):
 	name: str
-	logos: list[str] = field(default_factory=list)
-	external_id: dict[str, MetadataID] = field(default_factory=dict)
-
-	def to_kyoo(self):
-		return {
-			**asdict(self),
-			"logo": next(iter(self.logos), None),
-		}
+	logo: str | None
