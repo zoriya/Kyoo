@@ -14,7 +14,11 @@ import (
 	"github.com/zoriya/kyoo/transcoder/src/utils"
 )
 
-const KeyframeVersion = 1
+const (
+	KeyframeVersion        = 1
+	minParsedKeyframeTime  = 5.0 // seconds
+	minParsedKeyframeCount = 3
+)
 
 type Keyframe struct {
 	Keyframes []float64
@@ -192,6 +196,8 @@ func getVideoKeyframes(path string, video_idx uint32, kf *Keyframe) error {
 	ret := make([]float64, 0, 1000)
 	limit := 100
 	done := 0
+	indexNotificationComplete := false
+
 	// sometimes, videos can start at a timing greater than 0:00. We need to take that into account
 	// and only list keyframes that come after the start of the video (without that, our segments count
 	// mismatch and we can have the same segment twice on the stream).
@@ -231,7 +237,8 @@ func getVideoKeyframes(path string, video_idx uint32, kf *Keyframe) error {
 
 		ret = append(ret, fpts)
 
-		if len(ret) == limit {
+		shouldNotifyIndexers := !indexNotificationComplete && fpts >= minParsedKeyframeTime && len(ret) >= minParsedKeyframeCount
+		if len(ret) == limit || shouldNotifyIndexers {
 			kf.add(ret)
 			if done == 0 {
 				kf.info.ready.Done()
@@ -241,6 +248,10 @@ func getVideoKeyframes(path string, video_idx uint32, kf *Keyframe) error {
 			done += limit
 			// clear the array without reallocing it
 			ret = ret[:0]
+
+			if shouldNotifyIndexers {
+				indexNotificationComplete = true
+			}
 		}
 	}
 	kf.add(ret)
