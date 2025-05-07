@@ -26,7 +26,7 @@ class Scanner:
 		except re.error as e:
 			logger.error(f"Invalid ignore pattern. Ignoring. Error: {e}")
 
-	async def scan(self, path: Optional[str], remove_deleted=False):
+	async def scan(self, path: Optional[str] = None, remove_deleted=False):
 		if path is None:
 			logger.info("Starting scan at %s. This may take some time...", path)
 			if self._ignore_pattern:
