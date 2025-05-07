@@ -5,18 +5,6 @@ import { ExtraType } from "./entry/extra";
 import { bubble, bubbleVideo, registerExamples } from "./examples";
 import { DbMetadata, EpisodeId, ExternalId, Resource } from "./utils";
 
-const ExternalIds = t.Record(
-	t.String(),
-	t.Omit(
-		t.Union([
-			EpisodeId.patternProperties[PatternStringExact],
-			ExternalId().patternProperties[PatternStringExact],
-		]),
-		["link"],
-	),
-);
-type ExternalIds = typeof ExternalIds.static;
-
 export const Guess = t.Recursive((Self) =>
 	t.Object(
 		{
@@ -30,7 +18,7 @@ export const Guess = t.Recursive((Self) =>
 					{ default: [] },
 				),
 			),
-			externalId: t.Optional(ExternalIds),
+			externalId: t.Optional(t.String()),
 
 			from: t.String({
 				description: "Name of the tool that made the guess",
@@ -96,7 +84,16 @@ export const SeedVideo = t.Object({
 					}),
 				}),
 				t.Object({
-					externalId: ExternalIds,
+					externalId: t.Record(
+						t.String(),
+						t.Omit(
+							t.Union([
+								EpisodeId.patternProperties[PatternStringExact],
+								ExternalId().patternProperties[PatternStringExact],
+							]),
+							["link"],
+						),
+					),
 				}),
 				t.Object({
 					movie: t.Union([
