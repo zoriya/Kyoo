@@ -4,12 +4,12 @@ from typing import Literal
 
 from .client import KyooClient
 from .models.videos import Guess
-from .utils import Model
 from .providers.composite import CompositeProvider
+from .utils import Model
 
 
 class Request(Model):
-	kind: Literal["episode"] | Literal["movie"]
+	kind: Literal["episode", "movie"]
 	title: str
 	year: int | None
 	external_id: dict[str, str]
@@ -39,7 +39,9 @@ class RequestProcessor:
 		request: Request = ...
 
 		if request.kind == "movie":
-			movie = await providers.get_movie(request.title, request.year, request.external_id)
+			movie = await providers.get_movie(
+				request.title, request.year, request.external_id
+			)
 			movie.videos = request.videos
 			await self._client.create_movie(movie)
 		else:

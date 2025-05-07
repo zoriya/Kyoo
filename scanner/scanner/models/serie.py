@@ -7,36 +7,43 @@ from langcodes import Language
 
 from ..utils import Model
 from .collection import Collection
+from .entry import Entry
+from .extra import Extra
 from .genre import Genre
 from .metadataid import MetadataId
+from .season import Season
 from .staff import Staff
 from .studio import Studio
 
 
-class MovieStatus(str, Enum):
+class SerieStatus(str, Enum):
 	UNKNOWN = "unknown"
 	FINISHED = "finished"
+	AIRING = "airing"
 	PLANNED = "planned"
 
 
-class Movie(Model):
+class Serie(Model):
 	slug: str
 	original_language: Language | None
 	genres: list[Genre]
 	rating: int | None
-	status: MovieStatus
+	status: SerieStatus
 	runtime: int | None
-	air_date: date | None
+	start_air: date | None
+	end_air: date | None
 
 	external_id: dict[str, MetadataId]
-	translations: dict[str, MovieTranslation] = {}
-	videos: list[str] = []
+	translations: dict[str, SerieTranslation] = {}
+	seasons: list[Season] = []
+	entries: list[Entry] = []
+	extra: list[Extra] = []
 	collections: list[Collection] = []
 	studios: list[Studio] = []
 	staff: list[Staff] = []
 
 
-class MovieTranslation(Model):
+class SerieTranslation(Model):
 	name: str
 	latin_name: str | None
 	description: str | None
@@ -51,11 +58,12 @@ class MovieTranslation(Model):
 	trailer: str | None
 
 
-class SearchMovie(Model):
+class SearchSerie(Model):
 	slug: str
 	name: str
 	description: str | None
-	air_date: date | None
+	start_air: date | None
+	end_air: date | None
 	poster: str
 	original_language: Language | None
 	external_id: dict[str, MetadataId]
