@@ -3,7 +3,6 @@ import re
 from logging import getLogger
 from mimetypes import guess_file_type
 from os.path import dirname, exists, isdir, join
-from typing import Optional
 
 from watchfiles import Change, awatch
 
@@ -11,7 +10,7 @@ from .client import KyooClient
 from .identify import identify
 from .models.metadataid import EpisodeId, MetadataId
 from .models.videos import For, Video, VideoInfo
-from .queue import Request, enqueue
+from .requests import Request, enqueue
 
 logger = getLogger(__name__)
 
@@ -26,7 +25,7 @@ class Scanner:
 		except re.error as e:
 			logger.error(f"Invalid ignore pattern. Ignoring. Error: {e}")
 
-	async def scan(self, path: Optional[str] = None, remove_deleted=False):
+	async def scan(self, path: str | None = None, remove_deleted=False):
 		if path is None:
 			logger.info("Starting scan at %s. This may take some time...", path)
 			if self._ignore_pattern:
@@ -101,6 +100,7 @@ class Scanner:
 					kind=x.guess.kind,
 					title=x.guess.title,
 					year=next(iter(x.guess.years), None),
+					external_id=x.guess.external_id,
 					videos=[Request.Video(id=x.id, episodes=x.guess.episodes)],
 				)
 				for x in created

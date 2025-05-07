@@ -17,11 +17,6 @@ def normalize_lang(lang: str) -> str:
 	return str(Language.get(lang))
 
 
-class ProviderError(RuntimeError):
-	def __init__(self, *args: object) -> None:
-		super().__init__(*args)
-
-
 class Model(BaseModel):
 	model_config = ConfigDict(
 		use_enum_values=True,
