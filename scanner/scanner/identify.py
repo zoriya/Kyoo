@@ -41,7 +41,7 @@ async def identify(path: str) -> Video:
 
 	guess = Guess(
 		title=cast(str, title.value),
-		kind=cast(Literal["episode"] | Literal["movie"], kind.value),
+		kind=cast(Literal["episode", "movie"], kind.value),
 		extra_kind=None,
 		years=[cast(int, y.value) for y in years],
 		episodes=[

@@ -1,10 +1,21 @@
-from typing import Literal
+from enum import Enum
 
-type ExtraKind = (
-	Literal["other"]
-	| Literal["trailer"]
-	| Literal["interview"]
-	| Literal["behind-the-scene"]
-	| Literal["deleted-scene"]
-	| Literal["blooper"]
-)
+from ..utils import Model
+
+
+class ExtraKind(str, Enum):
+	OTHER = "other"
+	TRAILER = "trailer"
+	INTERVIEW = "interview"
+	BEHIND_THE_SCENE = "behind-the-scene"
+	DELETED_SCENE = "deleted-scene"
+	BLOOPER = "blooper"
+
+
+class Extra(Model):
+	kind: ExtraKind
+	slug: str
+	name: str
+	runtime: int | None
+	thumbnail: str | None
+	video: str
