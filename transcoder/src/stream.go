@@ -72,12 +72,7 @@ func NewStream(file *FileStream, keyframes *Keyframe, handle StreamHandle, ret *
 
 	ret.ready.Add(1)
 	go func() {
-		if keyframes.info.indexKeyframesParsed == nil {
-			keyframes.info.ready.Wait()
-		} else {
-			// Use a keyframe-time based notifier if supported
-			<-keyframes.info.indexKeyframesParsed
-		}
+		keyframes.info.ready.Wait()
 
 		length, is_done := keyframes.Length()
 		ret.segments = make([]Segment, length, max(length, 2000))

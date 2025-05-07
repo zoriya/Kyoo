@@ -26,13 +26,9 @@ type Keyframe struct {
 	info      *KeyframeInfo
 }
 type KeyframeInfo struct {
-	ready sync.WaitGroup
-	mutex sync.RWMutex
-	// This channel is closed when enough keyfraames for index generation
-	// have been parsed. A nil value also indicates that the keyframes have
-	// been parsed.
-	indexKeyframesParsed chan struct{}
-	listeners            []func(keyframes []float64)
+	ready     sync.WaitGroup
+	mutex     sync.RWMutex
+	listeners []func(keyframes []float64)
 }
 
 func (kf *Keyframe) Get(idx int32) float64 {
@@ -129,7 +125,6 @@ func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx uint32
 	info.lock.Lock()
 	if isVideo {
 		info.Videos[idx].Keyframes = kf
-		kf.info.indexKeyframesParsed = make(chan struct{})
 	} else {
 		info.Audios[idx].Keyframes = kf
 	}
@@ -242,16 +237,8 @@ func getVideoKeyframes(path string, video_idx uint32, kf *Keyframe) error {
 
 		ret = append(ret, fpts)
 
-		// Notify listeners that enough keyframes for index generation have been parsed
-		if !indexNotificationComplete && fpts >= minParsedKeyframeTime && len(ret) >= minParsedKeyframeCount {
-			kf.add(ret)
-			done += len(ret)
-			ret = ret[:0]
-			indexNotificationComplete = true
-			close(kf.info.indexKeyframesParsed)
-		}
-
-		if len(ret) == limit {
+		shouldNotifyIndexers := !indexNotificationComplete && fpts >= minParsedKeyframeTime && len(ret) >= minParsedKeyframeCount
+		if len(ret) == limit || shouldNotifyIndexers {
 			kf.add(ret)
 			if done == 0 {
 				kf.info.ready.Done()
@@ -261,6 +248,10 @@ func getVideoKeyframes(path string, video_idx uint32, kf *Keyframe) error {
 			done += limit
 			// clear the array without reallocing it
 			ret = ret[:0]
+
+			if shouldNotifyIndexers {
+				indexNotificationComplete = true
+			}
 		}
 	}
 	kf.add(ret)
