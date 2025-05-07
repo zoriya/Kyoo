@@ -1,23 +1,19 @@
-from typing import Any, List, cast
+from typing import Any, cast
 
 from guessit.api import default_api
 from rebulk import Rebulk
 from rebulk.match import Match
 
-try:
-	from . import rules
-except:
-	import rules
+from . import rules
 
 default_api.configure({})
-rblk = cast(Rebulk, default_api.rebulk)
-rblk.rules(rules)
+rblk = cast(Rebulk, default_api.rebulk).rules(rules)
 
 
 def guessit(
 	name: str,
 	*,
-	expected_titles: List[str] = [],
+	expected_titles: list[str] = [],
 	extra_flags: dict[str, Any] = {},
 ) -> dict[str, list[Match]]:
 	return default_api.guessit(
