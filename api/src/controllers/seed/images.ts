@@ -21,7 +21,7 @@ type ImageTask = {
 };
 
 // this will only push a task to the image downloader service and not download it instantly.
-// this is both done to prevent to many requests to be sent at once and to make sure POST
+// this is both done to prevent too many requests to be sent at once and to make sure POST
 // requests are not blocked by image downloading or blurhash calculation
 export const enqueueOptImage = async (
 	tx: Transaction,
