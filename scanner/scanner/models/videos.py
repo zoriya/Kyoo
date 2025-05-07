@@ -24,7 +24,7 @@ class Guess(Model, extra="allow"):
 	extra_kind: Optional[ExtraKind]
 	years: list[int]
 	episodes: list[Guess.Episode]
-	external_id: dict[str, MetadataId | EpisodeId]
+	external_id: dict[str, str]
 	raw: dict[str, Any] = {}
 
 	from_: str
