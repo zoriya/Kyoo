@@ -73,4 +73,4 @@ For each item in the queue, the scanner will:
  - retrieves metadata from the movie/serie + ALL episodes/seasons (from an external provider)
  - pushes every metadata to the api (if there are 1000 episodes but only 1 video, still push the 1000 episodes)
 
-<!-- vim: set noexpandtab : -->
+<!-- vim: set expandtab : -->
