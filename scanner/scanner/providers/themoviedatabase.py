@@ -416,8 +416,6 @@ class TheMovieDatabase(Provider):
 			episodes = [
 				ep
 				for grp in sorted(gog["groups"], key=lambda x: x["order"])
-				# Some shows include specials as the first absolute group (like TenSura)
-				if grp["name"] != "Specials"
 				for ep in sorted(grp["episodes"], key=lambda x: x["order"])
 			]
 			# the episode number of the first episode of each season
@@ -444,8 +442,6 @@ class TheMovieDatabase(Provider):
 				episodes += [
 					{"season_number": s["season_number"], "episode_number": e}
 					for s in seasons
-					# ignore specials not specified in the absgrp
-					if s["season_number"] > 0
 					for e in range(1, s["episodes_count"] + 1)
 					if not any(
 						x["season_number"] == s["season_number"]
