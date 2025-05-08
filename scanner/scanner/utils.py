@@ -1,20 +1,17 @@
-from datetime import date
-
 from langcodes import Language
 from pydantic import AliasGenerator, BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 
 
-def format_date(date: date | int | None) -> str | None:
-	if date is None:
-		return None
-	if isinstance(date, int):
-		return f"{date}-01-01"
-	return date.isoformat()
-
-
 def normalize_lang(lang: str) -> str:
 	return str(Language.get(lang))
+
+
+def to_slug(title: str) -> str:
+	return title
+
+def clean(val: str) -> str | None:
+	return val or None
 
 
 class Model(BaseModel):
