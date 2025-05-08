@@ -56,6 +56,6 @@ class SearchMovie(Model):
 	name: str
 	description: str | None
 	air_date: date | None
-	poster: str
+	poster: str | None
 	original_language: Language | None
 	external_id: dict[str, MetadataId]

@@ -64,6 +64,6 @@ class SearchSerie(Model):
 	description: str | None
 	start_air: date | None
 	end_air: date | None
-	poster: str
+	poster: str | None
 	original_language: Language | None
 	external_id: dict[str, MetadataId]
