@@ -18,7 +18,7 @@ export const Guess = t.Recursive((Self) =>
 					{ default: [] },
 				),
 			),
-			externalId: t.Optional(t.String()),
+			externalId: t.Optional(t.Record(t.String(), t.String())),
 
 			from: t.String({
 				description: "Name of the tool that made the guess",

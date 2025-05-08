@@ -40,7 +40,7 @@ class KyooClient:
 			json=[x.model_dump_json() for x in videos],
 		) as r:
 			r.raise_for_status()
-			return list[VideoCreated](** await r.json())
+			return list[VideoCreated](**await r.json())
 
 	async def delete_videos(self, videos: list[str] | set[str]):
 		async with self._client.delete(
