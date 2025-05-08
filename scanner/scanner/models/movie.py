@@ -29,11 +29,11 @@ class Movie(Model):
 	air_date: date | None
 
 	external_id: dict[str, MetadataId]
-	translations: dict[str, MovieTranslation] = {}
-	videos: list[str] = []
+	translations: dict[Language, MovieTranslation] = {}
 	collections: list[Collection] = []
 	studios: list[Studio] = []
 	staff: list[Staff] = []
+	videos: list[str] = []
 
 
 class MovieTranslation(Model):
