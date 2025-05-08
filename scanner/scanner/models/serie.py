@@ -34,7 +34,7 @@ class Serie(Model):
 	end_air: date | None
 
 	external_id: dict[str, MetadataId]
-	translations: dict[str, SerieTranslation] = {}
+	translations: dict[Language, SerieTranslation] = {}
 	seasons: list[Season] = []
 	entries: list[Entry] = []
 	extra: list[Extra] = []
