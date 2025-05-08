@@ -3,6 +3,8 @@ from __future__ import annotations
 from datetime import date
 from typing import Literal
 
+from langcodes import Language
+
 from ..utils import Model
 from .metadataid import EpisodeId, MetadataId
 
@@ -10,27 +12,27 @@ from .metadataid import EpisodeId, MetadataId
 class Entry(Model):
 	kind: Literal["episode", "movie", "special"]
 	order: float
-	runtime: int | None = None
-	air_date: date | None = None
-	thumbnail: str | None = None
+	runtime: int | None
+	air_date: date | None
+	thumbnail: str | None
 
 	# Movie-specific fields
-	slug: str | None = None
+	slug: str | None
 
 	# Episode-specific fields
-	season_number: int | None = None
-	episode_number: int | None = None
+	season_number: int | None
+	episode_number: int | None
 
 	# Special-specific fields
-	number: int | None = None
+	number: int | None
 
-	externalId: dict[str, MetadataId | EpisodeId]
-	translations: dict[str, EntryTranslation] = {}
+	external_id: dict[str, MetadataId | EpisodeId]
+	translations: dict[Language, EntryTranslation] = {}
 	videos: list[str] = []
 
 
 class EntryTranslation(Model):
-	name: str | None = None
-	description: str | None = None
-	tagline: str | None = None
-	poster: str | None = None
+	name: str | None
+	description: str | None
+	tagline: str | None
+	poster: str | None

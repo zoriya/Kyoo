@@ -2,16 +2,18 @@ from __future__ import annotations
 
 from datetime import date
 
+from langcodes import Language
+
 from ..utils import Model
-from .metadataid import MetadataId
+from .metadataid import SeasonId
 
 
 class Season(Model):
 	season_number: int
 	start_air: date | None
 	end_air: date | None
-	external_id: dict[str, MetadataId]
-	translations: dict[str, SeasonTranslation] = {}
+	external_id: dict[str, SeasonId]
+	translations: dict[Language, SeasonTranslation] = {}
 
 
 class SeasonTranslation(Model):
