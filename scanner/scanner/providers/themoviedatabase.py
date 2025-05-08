@@ -1,10 +1,11 @@
 import asyncio
 import os
+from collections.abc import Generator
 from datetime import datetime, timedelta
 from itertools import accumulate, zip_longest
 from logging import getLogger
 from statistics import mean
-from typing import Any, Generator, Optional, override
+from typing import Any, cast, override
 
 from aiohttp import ClientSession
 from langcodes import Language
@@ -342,7 +343,7 @@ class TheMovieDatabase(Provider):
 					for x in serie["seasons"]
 				]
 			),
-			entries=[],
+			entries=await self._get_all_entries(serie["id"], serie["seasons"]),
 			extra=[],
 			collections=[],
 			studios=[self._map_studio(x) for x in serie["production_companies"]],
@@ -386,6 +387,104 @@ class TheMovieDatabase(Provider):
 			},
 		)
 
+	async def _get_all_entries(
+		self, serie_id: str, seasons: list[dict[str, Any]]
+	) -> list[Entry]:
+		# TODO: batch those
+		ret = await asyncio.gather(
+			*[
+				self._get_entry(serie_id, s["season_number"], e)
+				for s in seasons
+				for e in range(1, s["episode_count"])
+			]
+		)
+
+		# find the absolute ordering of entries (to set the `order` field)
+		try:
+			groups = await self._get(f"tv/{serie_id}/episode_groups")
+			group = max(
+				(x for x in groups["results"] if x["type"] == 2),
+				key=lambda x: x["episode_count"],
+				default=None,
+			)
+			# if it doesn't have 75% of all episodes, it's probably unmaintained. keep default order
+			if group is None or group["episode_count"] < len(ret) // 1.5:
+				return ret
+
+			# groups of groups (each `episode_group` contains a `group` that acts like a season)
+			gog = await self._get(f"tv/episode_group/{group['id']}")
+			episodes = [
+				ep
+				for grp in sorted(gog["groups"], key=lambda x: x["order"])
+				# Some shows include specials as the first absolute group (like TenSura)
+				if grp["name"] != "Specials"
+				for ep in sorted(grp["episodes"], key=lambda x: x["order"])
+			]
+			# the episode number of the first episode of each season
+			# this is because tmdb has some weird absolute groups, for example:
+			# one piece's s22e1089 is the first ep of s22.
+			# this is because episode_numbers simply don't reset after season start
+			#   (eg s21e1088 is the last ep of s21)
+			season_starts = [
+				next(
+					(
+						x["episode_number"]
+						for x in episodes
+						if x["season_number"] == s["season_number"]
+					),
+					1,
+				)
+				for s in seasons
+			]
+
+			if len(episodes) != len(ret):
+				logger.warning(
+					f"Incomplete absolute group for show {serie_id}. Filling missing values by assuming season/episode order is ascending."
+				)
+				episodes += [
+					{"season_number": s["season_number"], "episode_number": e}
+					for s in seasons
+					# ignore specials not specified in the absgrp
+					if s["season_number"] > 0
+					for e in range(1, s["episodes_count"] + 1)
+					if not any(
+						x["season_number"] == s["season_number"]
+						and (
+							x["episode_number"] == e
+							# take into account weird absolute (for example one piece, episodes are not reset to 1 when the season starts)
+							or x["episode_number"]
+							== season_starts[s["season_number"] - 1] + e
+						)
+						for x in episodes
+					)
+				]
+			for ep in ret:
+				snbr = cast(int, ep.season_number)
+				enbr = cast(int, ep.episode_number)
+				ep.order = next(
+					(
+						# Using absolute + 1 since the array is 0based (absolute episode 1 is at index 0)
+						i + 1
+						for i, x in enumerate(episodes)
+						if x["season_number"] == snbr
+						and (
+							x["episode_number"] == enbr
+							# don't forget weird numbering
+							or x["episode_number"] == enbr + season_starts[snbr - 1]
+						)
+					),
+					0,
+				)
+		except Exception as e:
+			logger.exception(
+				"Could not retrieve absolute ordering information", exc_info=e
+			)
+			ret = sorted(ret, key=lambda ep: (ep.season_number, ep.episode_number))
+			for order, ep in enumerate(ret):
+				ep.order = order
+
+		return ret
+
 	async def _get_entry(self, serie_id: str, season: int, episode_nbr: int) -> Entry:
 		episode = await self._get(
 			f"tv/{serie_id}/season/{season}/episode/{episode_nbr}",
@@ -427,149 +526,6 @@ class TheMovieDatabase(Provider):
 				for trans in episode["translations"]["translations"]
 			},
 		)
-
-	@cache(ttl=timedelta(days=1))
-	async def get_absolute_order(self, show_id: str):
-		"""
-		TheMovieDb does not allow to fetch an episode by an absolute number but it
-		support groups where you can list episodes. One type is the absolute group
-		where everything should be on one season, this method tries to find a complete
-		absolute-ordered group and return it
-		"""
-
-		show = await self.identify_show(show_id)
-		try:
-			groups = await self._get(f"tv/{show_id}/episode_groups")
-			ep_count = max((x["episode_count"] for x in groups["results"]), default=0)
-			if ep_count == 0:
-				return None
-			# Filter only absolute groups that contains at least 75% of all episodes (to skip non maintained absolute ordering)
-			group_id = next(
-				(
-					x["id"]
-					for x in groups["results"]
-					if x["type"] == 2 and x["episode_count"] >= ep_count // 1.5
-				),
-				None,
-			)
-
-			if group_id is None:
-				return None
-			group = await self._get(f"tv/episode_group/{group_id}")
-			absgrp = [
-				ep
-				for grp in sorted(group["groups"], key=lambda x: x["order"])
-				# Some shows include specials as the first absolute group (like TenSura)
-				if grp["name"] != "Specials"
-				for ep in sorted(grp["episodes"], key=lambda x: x["order"])
-			]
-			season_starts = [
-				next(
-					(
-						x["episode_number"]
-						for x in absgrp
-						if x["season_number"] == s.season_number
-					),
-					1,
-				)
-				for s in show.seasons
-			]
-			complete_abs = absgrp + [
-				{"season_number": s.season_number, "episode_number": e}
-				for s in show.seasons
-				# ignore specials not specified in the absgrp
-				if s.season_number > 0
-				for e in range(1, s.episodes_count + 1)
-				if not any(
-					x["season_number"] == s.season_number
-					and (
-						x["episode_number"] == e
-						# take into account weird absolute (for example one piece, episodes are not reset to 1 when the season starts)
-						or x["episode_number"] == season_starts[s.season_number - 1] + e
-					)
-					for x in absgrp
-				)
-			]
-			if len(complete_abs) != len(absgrp):
-				logger.warn(
-					f"Incomplete absolute group for show {show_id}. Filling missing values by assuming season/episode order is ascending"
-				)
-			return complete_abs
-		except Exception as e:
-			logger.exception(
-				"Could not retrieve absolute ordering information", exc_info=e
-			)
-			return None
-
-	async def get_episode_from_absolute(self, show_id: str, absolute: int):
-		absgrp = await self.get_absolute_order(show_id)
-
-		if absgrp is not None and len(absgrp) >= absolute:
-			# Using absolute - 1 since the array is 0based (absolute episode 1 is at index 0)
-			season = absgrp[absolute - 1]["season_number"]
-			episode_nbr = absgrp[absolute - 1]["episode_number"]
-			return (season, episode_nbr)
-		# We assume that each season should be played in order with no special episodes.
-		show = await self.identify_show(show_id)
-		# Dont forget to ingore the special season (season_number 0)
-		seasons_nbrs = [x.season_number for x in show.seasons if x.season_number != 0]
-		seasons_eps = [x.episodes_count for x in show.seasons if x.season_number != 0]
-
-		if not any(seasons_nbrs):
-			return (None, None)
-
-		# zip_longest(seasons_nbrs[1:], accumulate(seasons_eps)) return [(2, 12), (None, 24)] if the show has two seasons with 12 eps
-		# we take the last group that has less total episodes than the absolute number.
-		return next(
-			(
-				(snbr, absolute - ep_cnt)
-				for snbr, ep_cnt in reversed(
-					list(zip_longest(seasons_nbrs[1:], accumulate(seasons_eps)))
-				)
-				if ep_cnt < absolute
-			),
-			# If the absolute episode number is lower than the 1st season number of episode, it is part of it.
-			(seasons_nbrs[0], absolute),
-		)
-
-	async def get_absolute_number(
-		self, show_id: str, season: int, episode_nbr: int
-	) -> int:
-		absgrp = await self.get_absolute_order(show_id)
-		if absgrp is None:
-			# We assume that each season should be played in order with no special episodes.
-			show = await self.identify_show(show_id)
-			return (
-				sum(
-					x.episodes_count
-					for x in show.seasons
-					if 0 < x.season_number < season
-				)
-				+ episode_nbr
-			)
-		absolute = next(
-			(
-				# The + 1 is to go from 0based index to 1based absolute number
-				i + 1
-				for i, x in enumerate(absgrp)
-				if x["episode_number"] == episode_nbr and x["season_number"] == season
-			),
-			None,
-		)
-		if absolute is not None:
-			return absolute
-		# assume we use tmdb weird absolute by default (for example, One Piece S21E800, the first
-		# episode of S21 is not reset to 0 but keep increasing so it can be 800
-		start = next(
-			(x["episode_number"] for x in absgrp if x["season_number"] == season), None
-		)
-		if start is None or start <= episode_nbr:
-			raise ProviderError(
-				f"Could not guess absolute number of episode {show_id} s{season} e{episode_nbr}"
-			)
-		# add back the continuous number (imagine the user has one piece S21e31
-		# but tmdb registered it as S21E831 since S21's first ep is 800
-		return await self.get_absolute_number(show_id, season, episode_nbr + start)
 
 	async def _get_collection(self, provider_id: str) -> Collection:
 		collection = await self._get(
