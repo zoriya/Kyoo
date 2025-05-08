@@ -4,7 +4,7 @@ from langcodes import Language
 
 from ..models.movie import Movie, SearchMovie
 from ..models.serie import SearchSerie, Serie
-from .provider import Provider, ProviderError
+from .provider import Provider
 
 
 class CompositeProvider(Provider):
@@ -27,24 +27,6 @@ class CompositeProvider(Provider):
 	async def get_movie(self, external_id: dict[str, str]) -> Movie | None:
 		return await self._themoviedb.get_movie(external_id)
 
-	async def find_movie(
-		self, title: str, year: int | None, external_id: dict[str, str]
-	) -> Movie:
-		ret = await self.get_movie(external_id)
-		if ret is not None:
-			return ret
-		search = await self.search_movies(title, year, language=[])
-		if not any(search):
-			raise ProviderError(
-				f"Couldn't find a movie with title {title}. (year: {year}"
-			)
-		ret = await self.get_movie(
-			{k: v.data_id for k, v in search[0].external_id.items()}
-		)
-		if not ret:
-			raise ValueError()
-		return ret
-
 	@override
 	async def search_series(
 		self, title: str, year: int | None, *, language: list[Language]
@@ -57,22 +39,4 @@ class CompositeProvider(Provider):
 		if ret is None:
 			return None
 		# TODO: complete metadata with info from tmdb
-		return ret
-
-	async def find_serie(
-		self, title: str, year: int | None, external_id: dict[str, str]
-	) -> Serie:
-		ret = await self.get_serie(external_id)
-		if ret is not None:
-			return ret
-		search = await self.search_series(title, year, language=[])
-		if not any(search):
-			raise ProviderError(
-				f"Couldn't find a serie with title {title}. (year: {year}"
-			)
-		ret = await self.get_serie(
-			{k: v.data_id for k, v in search[0].external_id.items()}
-		)
-		if not ret:
-			raise ValueError()
 		return ret

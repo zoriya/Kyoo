@@ -1,16 +1,13 @@
 import asyncio
 import os
 from collections.abc import Generator
-from datetime import datetime, timedelta
-from itertools import accumulate, zip_longest
+from datetime import datetime
 from logging import getLogger
 from statistics import mean
 from typing import Any, cast, override
 
 from aiohttp import ClientSession
 from langcodes import Language
-
-from matcher.cache import cache
 
 from ..models.collection import Collection, CollectionTranslation
 from ..models.entry import Entry, EntryTranslation
