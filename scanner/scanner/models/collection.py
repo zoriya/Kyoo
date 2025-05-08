@@ -9,12 +9,12 @@ from .metadataid import MetadataId
 
 class Collection(Model):
 	slug: str
-	original_language: Language
+	original_language: Language | None
 	genres: list[Genre]
 	rating: int | None
 	external_id: dict[str, MetadataId]
 
-	translations: dict[str, CollectionTranslation] = {}
+	translations: dict[Language, CollectionTranslation] = {}
 
 
 class CollectionTranslation(Model):
