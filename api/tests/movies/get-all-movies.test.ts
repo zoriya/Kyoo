@@ -7,7 +7,7 @@ import { bubble } from "~/models/examples";
 import { dune1984 } from "~/models/examples/dune-1984";
 import { dune } from "~/models/examples/dune-2021";
 import type { Movie } from "~/models/movie";
-import { handlers, createMovie, getMovies } from "../helpers";
+import { createMovie, getMovies, handlers } from "../helpers";
 
 beforeAll(async () => {
 	await db.delete(shows);

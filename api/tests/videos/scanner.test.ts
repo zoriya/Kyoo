@@ -275,7 +275,7 @@ describe("Video seeding", () => {
 				episodes: [{ season: 1, episode: 13 }],
 				from: "test",
 				externalId: {
-					themoviedatabase: { serieId: "72636", season: 1, episode: 13 },
+					themoviedatabase: "72636",
 				},
 			},
 			part: null,
@@ -319,7 +319,7 @@ describe("Video seeding", () => {
 				title: "bubble",
 				from: "test",
 				externalId: {
-					themoviedatabase: { dataId: "912598" },
+					themoviedatabase: "912598",
 				},
 			},
 			part: null,
@@ -378,7 +378,7 @@ describe("Video seeding", () => {
 				title: "bubble",
 				from: "test",
 				externalId: {
-					themoviedatabase: { dataId: "912598" },
+					themoviedatabase: "912598",
 				},
 			},
 			part: null,
@@ -424,7 +424,7 @@ describe("Video seeding", () => {
 				title: "bubble",
 				from: "test",
 				externalId: {
-					themoviedatabase: { dataId: "912598" },
+					themoviedatabase: "912598",
 				},
 			},
 			part: null,
@@ -471,7 +471,7 @@ describe("Video seeding", () => {
 					title: "bubble",
 					from: "test",
 					externalId: {
-						themoviedatabase: { dataId: "912598" },
+						themoviedatabase: "912598",
 					},
 				},
 				part: 1,
@@ -492,7 +492,7 @@ describe("Video seeding", () => {
 					title: "bubble",
 					from: "test",
 					externalId: {
-						themoviedatabase: { dataId: "912598" },
+						themoviedatabase: "912598",
 					},
 				},
 				part: 2,
