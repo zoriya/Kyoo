@@ -51,6 +51,16 @@ public class ServerInfo
 	/// Check if kyoo's setup is finished.
 	/// </summary>
 	public SetupStep SetupStatus { get; set; }
+
+	/// <summary>
+	/// True if password login is enabled on this instance.
+	/// </summary>
+	public bool PasswordLoginEnabled { get; set; }
+
+	/// <summary>
+	/// True if registration is enabled on this instance.
+	/// </summary>
+	public bool RegistrationEnabled { get; set; }
 }
 
 public class OidcInfo

@@ -26,6 +26,7 @@ using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
+using Kyoo.Authentication.Attributes;
 using Kyoo.Authentication.Models;
 using Kyoo.Authentication.Models.DTO;
 using Kyoo.Models;
@@ -206,6 +207,7 @@ public class AuthApi(
 	[HttpPost("login")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
+	[DisableOnEnvVar("AUTHENTICATION_DISABLE_PASSWORD_LOGIN")]
 	public async Task<ActionResult<JwtToken>> Login([FromBody] LoginRequest request)
 	{
 		User? user = await users.GetOrDefault(
@@ -241,6 +243,7 @@ public class AuthApi(
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 	[ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(RequestError))]
+	[DisableOnEnvVar("AUTHENTICATION_DISABLE_USER_REGISTRATION")]
 	public async Task<ActionResult<JwtToken>> Register([FromBody] RegisterRequest request)
 	{
 		try

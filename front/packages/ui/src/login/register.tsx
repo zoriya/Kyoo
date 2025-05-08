@@ -18,11 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { type QueryPage, login } from "@kyoo/models";
+import { type QueryPage, ServerInfoP, login, useFetch } from "@kyoo/models";
 import { A, Button, H1, Input, P, ts } from "@kyoo/primitives";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { Trans } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 import { useRouter } from "solito/router";
 import { percent, px, useYoshiki } from "yoshiki/native";
@@ -32,6 +31,11 @@ import { OidcLogin } from "./oidc";
 import { PasswordInput } from "./password-input";
 
 export const RegisterPage: QueryPage<{ apiUrl?: string }> = ({ apiUrl }) => {
+	const { data } = useFetch({
+		path: ["info"],
+		parser: ServerInfoP,
+	});
+
 	const [email, setEmail] = useState("");
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
@@ -52,50 +56,58 @@ export const RegisterPage: QueryPage<{ apiUrl?: string }> = ({ apiUrl }) => {
 	return (
 		<FormPage apiUrl={apiUrl}>
 			<H1>{t("login.register")}</H1>
-			<OidcLogin apiUrl={apiUrl} />
-			<P {...css({ paddingLeft: ts(1) })}>{t("login.username")}</P>
-			<Input autoComplete="username" variant="big" onChangeText={(value) => setUsername(value)} />
+			<OidcLogin apiUrl={apiUrl} hideOr={!data?.passwordLoginEnabled} />
+			{data?.registrationEnabled && (
+				<Array>
+					<P {...css({ paddingLeft: ts(1) })}>{t("login.username")}</P>
+					<Input
+						autoComplete="username"
+						variant="big"
+						onChangeText={(value) => setUsername(value)}
+					/>
 
-			<P {...css({ paddingLeft: ts(1) })}>{t("login.email")}</P>
-			<Input autoComplete="email" variant="big" onChangeText={(value) => setEmail(value)} />
+					<P {...css({ paddingLeft: ts(1) })}>{t("login.email")}</P>
+					<Input autoComplete="email" variant="big" onChangeText={(value) => setEmail(value)} />
 
-			<P {...css({ paddingLeft: ts(1) })}>{t("login.password")}</P>
-			<PasswordInput
-				autoComplete="password-new"
-				variant="big"
-				onChangeText={(value) => setPassword(value)}
-			/>
+					<P {...css({ paddingLeft: ts(1) })}>{t("login.password")}</P>
+					<PasswordInput
+						autoComplete="password-new"
+						variant="big"
+						onChangeText={(value) => setPassword(value)}
+					/>
 
-			<P {...css({ paddingLeft: ts(1) })}>{t("login.confirm")}</P>
-			<PasswordInput
-				autoComplete="password-new"
-				variant="big"
-				onChangeText={(value) => setConfirm(value)}
-			/>
+					<P {...css({ paddingLeft: ts(1) })}>{t("login.confirm")}</P>
+					<PasswordInput
+						autoComplete="password-new"
+						variant="big"
+						onChangeText={(value) => setConfirm(value)}
+					/>
 
-			{password !== confirm && (
-				<P {...css({ color: (theme) => theme.colors.red })}>{t("login.password-no-match")}</P>
+					{password !== confirm && (
+						<P {...css({ color: (theme) => theme.colors.red })}>{t("login.password-no-match")}</P>
+					)}
+					{error && <P {...css({ color: (theme) => theme.colors.red })}>{error}</P>}
+					<Button
+						text={t("login.register")}
+						disabled={password !== confirm}
+						onPress={async () => {
+							const { error } = await login("register", { email, username, password, apiUrl });
+							setError(error);
+							if (error) return;
+							router.replace("/", undefined, {
+								experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
+							});
+						}}
+						{...css({
+							m: ts(1),
+							width: px(250),
+							maxWidth: percent(100),
+							alignSelf: "center",
+							mY: ts(3),
+						})}
+					/>
+				</Array>
 			)}
-			{error && <P {...css({ color: (theme) => theme.colors.red })}>{error}</P>}
-			<Button
-				text={t("login.register")}
-				disabled={password !== confirm}
-				onPress={async () => {
-					const { error } = await login("register", { email, username, password, apiUrl });
-					setError(error);
-					if (error) return;
-					router.replace("/", undefined, {
-						experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
-					});
-				}}
-				{...css({
-					m: ts(1),
-					width: px(250),
-					maxWidth: percent(100),
-					alignSelf: "center",
-					mY: ts(3),
-				})}
-			/>
 			<P>
 				<Trans i18nKey="login.or-login">
 					Have an account already? <A href={{ pathname: "/login", query: { apiUrl } }}>Log in</A>.
