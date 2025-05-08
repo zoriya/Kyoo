@@ -115,6 +115,33 @@ func GetMimeCodec(stream *ffprobe.Stream) *string {
 		ret := "alac"
 		return &ret
 
+	// MIME type codec values: https://cconcolato.github.io/media-mime-support/#video/mp4;%20codecs=%22dtsc%22
+	// Profiles supported by ffmpeg: https://github.com/FFmpeg/FFmpeg/blob/1b643e3f65d75a4e6a25986466254bdd4fc1a01a/libavcodec/profiles.c#L40-L50
+	case "dts":
+		ret := "dts"
+		switch strings.ToLower(stream.Profile) {
+		case "dts-hd hra": // DTS-HD High Resolution Audio
+			ret += "h"
+		case "dts-hd ma": // DTS-HD Master Audio
+			ret += "l"
+		case "dts-hd ma + dts:x": // DTS-HD Master Audio + DTS:X
+			fallthrough
+		case "dts-hd ma + dts-hd imax": // DTS-HD Master Audio + DTS:X IMAX (?)
+			ret += "x"
+		case "dts express": // DTS Express, AKA DTS LBR
+			ret += "e"
+		case "dts": // Plain DTS. The original codec name was "Digital Coherent Acoustics", which is where the "c" comes from. All other codecs are a superset of "dtsc".
+			fallthrough
+		// Profiles with unknown MIME type codec value(s)
+		case "dts-es": // DTS-ES (Extended Surround)
+			fallthrough
+		case "dts 96/24": // DTS 96/24
+			fallthrough
+		default:
+			ret += "c"
+		}
+		return &ret
+
 	default:
 		log.Printf("No known mime format for: %s", stream.CodecName)
 		return nil

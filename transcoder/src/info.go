@@ -17,7 +17,7 @@ import (
 	"gopkg.in/vansante/go-ffprobe.v2"
 )
 
-const InfoVersion = 1
+const InfoVersion = 2
 
 type Versions struct {
 	Info      int32 `json:"info"`
