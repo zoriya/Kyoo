@@ -16,7 +16,7 @@ from ..models.genre import Genre
 from ..models.metadataid import EpisodeId, MetadataId
 from ..models.movie import Movie, MovieStatus, MovieTranslation, SearchMovie
 from ..models.season import Season, SeasonTranslation
-from ..models.serie import Serie, SerieStatus, SerieTranslation
+from ..models.serie import SearchSerie, Serie, SerieStatus, SerieTranslation
 from ..models.staff import Character, Person, Role, Staff
 from ..models.studio import Studio, StudioTranslation
 from ..utils import clean, to_slug
@@ -201,6 +201,40 @@ class TheMovieDatabase(Provider):
 			staff=[self._map_staff(x) for x in movie["credits"]["cast"]],
 		)
 
+	@override
+	async def search_series(
+		self, title: str, year: int | None, *, language: list[Language]
+	) -> list[SearchSerie]:
+		search = (
+			await self._get(
+				"search/tv",
+				params={
+					"query": title,
+					"year": year,
+					"languages": [str(x) for x in language],
+				},
+			)
+		)["results"]
+		search = self._sort_search(search, title, year)
+		return [
+			SearchSerie(
+				slug=to_slug(x["name"]),
+				name=x["name"],
+				description=x["overview"],
+				start_air=datetime.strptime(x["first_air_date"], "%Y-%m-%d").date(),
+				end_air=None,
+				poster=self._image_path + x["poster_path"],
+				original_language=Language.get(x["original_language"]),
+				external_id={
+					self.name: MetadataId(
+						data_id=x["id"],
+						link=f"https://www.themoviedb.org/tv/{x['id']}",
+					)
+				},
+			)
+			for x in search
+		]
+
 	@cache(ttl=timedelta(days=1))
 	async def identify_show(
 		self,
@@ -349,27 +383,6 @@ class TheMovieDatabase(Provider):
 				f"Could not find season {season} for show {show.to_kyoo()['name']}"
 			)
 		return ret
-
-	@cache(ttl=timedelta(days=1))
-	async def search_show(self, name: str, year: Optional[int]) -> PartialShow:
-		search_results = (
-			await self._get("search/tv", params={"query": name, "year": year})
-		)["results"]
-
-		if len(search_results) == 0:
-			raise ProviderError(f"No result for a tv show named: {name}")
-
-		search = self._sort_search(search_results, name, year)
-		show_id = search["id"]
-		return PartialShow(
-			name=search["name"],
-			original_language=search["original_language"],
-			external_id={
-				self.name: MetadataID(
-					show_id, f"https://www.themoviedb.org/tv/{show_id}"
-				)
-			},
-		)
 
 	async def search_episode(
 		self,
@@ -687,7 +700,7 @@ class TheMovieDatabase(Provider):
 		path: str,
 		*,
 		params: dict[str, Any] = {},
-		not_found_fail: Optional[str] = None,
+		not_found_fail: str | None = None,
 	):
 		params = {k: v for k, v in params.items() if v is not None}
 		async with self._client.get(
