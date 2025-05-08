@@ -7,9 +7,9 @@ from .metadataid import MetadataId
 class Studio(Model):
 	slug: str
 	external_id: dict[str, MetadataId]
-	translations: dict[str, StudioTranslations] = {}
+	translations: dict[str, StudioTranslation] = {}
 
 
-class StudioTranslations(Model):
+class StudioTranslation(Model):
 	name: str
 	logo: str | None
