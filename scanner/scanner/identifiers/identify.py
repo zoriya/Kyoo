@@ -4,8 +4,8 @@ from itertools import zip_longest
 from logging import getLogger
 from typing import Callable, Literal, cast
 
+from ..models.videos import Guess, Video
 from .guess.guess import guessit
-from .models.videos import Guess, Video
 
 logger = getLogger(__name__)
 
