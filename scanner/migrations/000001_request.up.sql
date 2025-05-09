@@ -21,8 +21,7 @@ create table scanner.requests(
 	status scanner.request_status not null,
 	started_at created_at timestamptz,
 	created_at created_at timestamptz not null default now() ::timestamptz,
-	constraint unique_kty(kind, title, year),
-	constraint unique_eid(external_id)
+	constraint unique_kty(kind, title, year)
 );
 
 commit;
