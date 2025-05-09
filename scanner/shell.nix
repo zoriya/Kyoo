@@ -7,6 +7,7 @@
       aiohttp
       watchfiles
       langcodes
+      psycopg
     ]);
 in
   pkgs.mkShell {
