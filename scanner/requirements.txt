@@ -4,5 +4,5 @@ guessit@git+https://github.com/zoriya/guessit
 aiohttp
 watchfiles
 langcodes
-psycopg[binary]
+psycopg[binary,pool]
 

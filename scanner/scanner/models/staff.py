@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 
 from ..utils import Model
 from .metadataid import MetadataId
 
 
-class Role(str, Enum):
+class Role(StrEnum):
 	ACTOR = "actor"
 	DIRECTOR = "director"
 	WRITTER = "writter"

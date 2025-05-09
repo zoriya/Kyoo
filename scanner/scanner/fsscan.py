@@ -94,7 +94,7 @@ class Scanner:
 				logger.error("Couldn't identify %s.", path, exc_info=e)
 		created = await self._client.create_videos(vids)
 
-		await enqueue(
+		await self._requests.enqueue(
 			[
 				Request(
 					kind=x.guess.kind,
