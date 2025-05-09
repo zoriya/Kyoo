@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import date
-from enum import Enum
+from enum import StrEnum
 
 from langcodes import Language
 
@@ -13,7 +13,7 @@ from .staff import Staff
 from .studio import Studio
 
 
-class MovieStatus(str, Enum):
+class MovieStatus(StrEnum):
 	UNKNOWN = "unknown"
 	FINISHED = "finished"
 	PLANNED = "planned"

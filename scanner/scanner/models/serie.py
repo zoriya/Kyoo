@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import date
-from enum import Enum
+from enum import StrEnum
 
 from langcodes import Language
 
@@ -16,7 +16,7 @@ from .staff import Staff
 from .studio import Studio
 
 
-class SerieStatus(str, Enum):
+class SerieStatus(StrEnum):
 	UNKNOWN = "unknown"
 	FINISHED = "finished"
 	AIRING = "airing"

@@ -1,9 +1,9 @@
-from enum import Enum
+from enum import StrEnum
 
 from ..utils import Model
 
 
-class ExtraKind(str, Enum):
+class ExtraKind(StrEnum):
 	OTHER = "other"
 	TRAILER = "trailer"
 	INTERVIEW = "interview"
