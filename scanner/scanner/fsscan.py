@@ -7,7 +7,7 @@ from os.path import dirname, exists, isdir, join
 from watchfiles import Change, awatch
 
 from .client import KyooClient
-from .identify import identify
+from .identifiers.identify import identify
 from .models.metadataid import EpisodeId, MetadataId
 from .models.videos import For, Video, VideoInfo
 from .requests import Request, enqueue
