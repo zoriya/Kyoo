@@ -34,7 +34,7 @@ import { useRouter } from "solito/router";
 import { percent, rem, useYoshiki } from "yoshiki/native";
 import { ErrorView } from "../errors";
 
-export const OidcLogin = ({ apiUrl }: { apiUrl?: string }) => {
+export const OidcLogin = ({ apiUrl, hideOr }: { apiUrl?: string; hideOr?: boolean }) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 	const { data, error } = useFetch({ options: { apiUrl }, ...OidcLogin.query() });
@@ -76,6 +76,7 @@ export const OidcLogin = ({ apiUrl }: { apiUrl?: string }) => {
 					flexDirection: "row",
 					width: percent(100),
 					alignItems: "center",
+					display: hideOr ? "none" : undefined,
 				})}
 			>
 				<HR {...css({ flexGrow: 1 })} />

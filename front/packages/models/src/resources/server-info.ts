@@ -61,6 +61,14 @@ export const ServerInfoP = z
 		 * Check if kyoo's setup is finished.
 		 */
 		setupStatus: z.nativeEnum(SetupStep),
+		/*
+		 * True if password login is enabled on this instance.
+		 */
+		passwordLoginEnabled: z.boolean(),
+		/*
+		 * True if registration is enabled on this instance.
+		 */
+		registrationEnabled: z.boolean(),
 	})
 	.transform((x) => {
 		const baseUrl = Platform.OS === "web" ? x.publicUrl : "kyoo://";
