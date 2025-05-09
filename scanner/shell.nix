@@ -8,6 +8,7 @@
       watchfiles
       langcodes
       psycopg
+      psycopg-pool
     ]);
 in
   pkgs.mkShell {
@@ -15,5 +16,6 @@ in
       python
       ruff
       fastapi-cli
+      pgformatter
     ];
   }
