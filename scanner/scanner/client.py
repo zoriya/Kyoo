@@ -5,7 +5,7 @@ from aiohttp import ClientSession
 
 from .models.movie import Movie
 from .models.serie import Serie
-from .models.videos import Video, VideoCreated, VideoInfo
+from .models.videos import Resource, Video, VideoCreated, VideoInfo
 
 logger = getLogger(__name__)
 
@@ -50,16 +50,18 @@ class KyooClient:
 		) as r:
 			r.raise_for_status()
 
-	async def create_movie(self, movie: Movie):
+	async def create_movie(self, movie: Movie) -> Resource:
 		async with self._client.post(
 			"movies",
 			json=movie.model_dump_json(),
 		) as r:
 			r.raise_for_status()
+			return Resource(**await r.json())
 
-	async def create_serie(self, serie: Serie):
+	async def create_serie(self, serie: Serie) -> Resource:
 		async with self._client.post(
 			"series",
 			json=serie.model_dump_json(),
 		) as r:
 			r.raise_for_status()
+			return Resource(**await r.json())
