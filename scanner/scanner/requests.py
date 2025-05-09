@@ -5,7 +5,7 @@ from typing import Literal
 
 from .client import KyooClient
 from .models.videos import Guess
-from .providers.composite import CompositeProvider
+from .old.composite import CompositeProvider
 from .utils import Model
 
 logger = getLogger(__name__)
