@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class Genre(str, Enum):
+class Genre(StrEnum):
 	ACTION = "action"
 	ADVENTURE = "adventure"
 	ANIMATION = "animation"
