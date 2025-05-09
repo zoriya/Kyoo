@@ -1,7 +1,7 @@
 import asyncio
 from logging import getLogger
 
-from providers.kyoo_client import KyooClient
+from old.kyoo_client import KyooClient
 from scanner.publisher import Publisher
 
 

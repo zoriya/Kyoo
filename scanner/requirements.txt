@@ -5,3 +5,4 @@ aiohttp
 watchfiles
 langcodes
 psycopg[binary]
+

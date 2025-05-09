@@ -7,7 +7,7 @@ async def main():
 	from .refresher import refresh
 	from .publisher import Publisher
 	from .subscriber import Subscriber
-	from providers.kyoo_client import KyooClient
+	from old.kyoo_client import KyooClient
 
 	logging.basicConfig(level=logging.INFO)
 	logging.getLogger("watchfiles").setLevel(logging.WARNING)
