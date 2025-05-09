@@ -36,7 +36,10 @@ class Provider(ABC):
 		raise NotImplementedError
 
 	async def find_movie(
-		self, title: str, year: int | None, external_id: dict[str, str]
+		self,
+		title: str,
+		year: int | None,
+		external_id: dict[str, str],
 	) -> Movie:
 		ret = await self.get_movie(external_id)
 		if ret is not None:
@@ -54,7 +57,10 @@ class Provider(ABC):
 		return ret
 
 	async def find_serie(
-		self, title: str, year: int | None, external_id: dict[str, str]
+		self,
+		title: str,
+		year: int | None,
+		external_id: dict[str, str],
 	) -> Serie:
 		ret = await self.get_serie(external_id)
 		if ret is not None:
