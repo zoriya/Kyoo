@@ -58,7 +58,7 @@ export const RegisterPage: QueryPage<{ apiUrl?: string }> = ({ apiUrl }) => {
 			<H1>{t("login.register")}</H1>
 			<OidcLogin apiUrl={apiUrl} hideOr={!data?.passwordLoginEnabled} />
 			{data?.registrationEnabled && (
-				<Array>
+				<>
 					<P {...css({ paddingLeft: ts(1) })}>{t("login.username")}</P>
 					<Input
 						autoComplete="username"
@@ -106,7 +106,7 @@ export const RegisterPage: QueryPage<{ apiUrl?: string }> = ({ apiUrl }) => {
 							mY: ts(3),
 						})}
 					/>
-				</Array>
+				</>
 			)}
 			<P>
 				<Trans i18nKey="login.or-login">
