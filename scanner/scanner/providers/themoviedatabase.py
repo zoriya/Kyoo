@@ -25,20 +25,21 @@ logger = getLogger(__name__)
 
 
 class TheMovieDatabase(Provider):
-	DEFAULT_API_KEY = "c9f328a01011b28f22483717395fc3fa"
+	THEMOVIEDB_API_ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJjOWYzMjhhMDEwMTFiMjhmMjI0ODM3MTczOTVmYzNmYSIsIm5iZiI6MTU4MTYzMTExOS44NjgsInN1YiI6IjVlNDVjNjhmODNlZTY3MDAxMTFmMmU5NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.CeXrQwgB3roCAVs-Z2ayLRx99VIJbym7XSpcRjGzyLA"
 
-	def __init__(
-		self,
-		client: ClientSession,
-		api_key: str,
-	) -> None:
+	def __init__(self) -> None:
 		super().__init__()
-		self._client = client
-		self._base = "https://api.themoviedb.org/3"
-		self._image_path = "https://image.tmdb.org/t/p/original"
-		self._api_key = (
-			os.environ.get("THEMOVIEDB_APIKEY") or TheMovieDatabase.DEFAULT_API_KEY
+		self._client = ClientSession(
+			base_url="https://api.themoviedb.org/3",
+			headers={
+				"User-Agent": "kyoo scanner v5",
+				"X-API-KEY": (
+					os.environ.get("THEMOVIEDB_API_ACCESS_TOKEN")
+					or TheMovieDatabase.THEMOVIEDB_API_ACCESS_TOKEN
+				),
+			},
 		)
+		self._image_path = "https://image.tmdb.org/t/p/original"
 		self._genre_map = {
 			28: Genre.ACTION,
 			12: Genre.ADVENTURE,
@@ -66,6 +67,12 @@ class TheMovieDatabase(Provider):
 			10767: Genre.TALK,
 			10768: [Genre.WAR, Genre.POLITICS],
 		}
+
+	async def __aenter__(self):
+		return self
+
+	async def __aexit__(self):
+		await self._client.close()
 
 	@property
 	@override
@@ -610,9 +617,7 @@ class TheMovieDatabase(Provider):
 		not_found_fail: str | None = None,
 	):
 		params = {k: v for k, v in params.items() if v is not None} if params else {}
-		async with self._client.get(
-			f"{self._base}/{path}", params={"api_key": self._api_key, **params}
-		) as r:
+		async with self._client.get(path, params=params) as r:
 			if not_found_fail and r.status == 404:
 				raise ProviderError(not_found_fail)
 			r.raise_for_status()
