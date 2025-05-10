@@ -1,6 +1,6 @@
 import { swagger } from "@elysiajs/swagger";
 import Elysia from "elysia";
-import { app } from "./base";
+import { handlers } from "./base";
 import { processImages } from "./controllers/seed/images";
 import { migrate } from "./db";
 import { comment } from "./utils";
@@ -10,13 +10,14 @@ await migrate();
 // run image processor task in background
 processImages();
 
-new Elysia()
+const app = new Elysia()
 	.use(
 		swagger({
 			scalarConfig: {
 				sources: [
 					{ slug: "kyoo", url: "/swagger/json" },
-					{ slug: "keibi", url: "http://localhost:4568/auth/swagger/doc.json" },
+					{ slug: "keibi", url: "/auth/swagger/doc.json" },
+					{ slug: "scanner", url: "/scanner/openapi.json" },
 				],
 			},
 			documentation: {
@@ -83,7 +84,7 @@ new Elysia()
 			},
 		}),
 	)
-	.use(app)
+	.use(handlers)
 	.listen(3567);
 
 console.log(`Api running at ${app.server?.hostname}:${app.server?.port}`);

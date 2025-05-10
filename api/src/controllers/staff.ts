@@ -120,14 +120,14 @@ export const staffH = new Elysia({ tags: ["staff"] })
 	.use(auth)
 	.get(
 		"/staff/:id",
-		async ({ params: { id }, error }) => {
+		async ({ params: { id }, status }) => {
 			const [ret] = await db
 				.select()
 				.from(staff)
 				.where(isUuid(id) ? eq(staff.id, id) : eq(staff.slug, id))
 				.limit(1);
 			if (!ret) {
-				return error(404, {
+				return status(404, {
 					status: 404,
 					message: `No staff found with the id or slug: '${id}'`,
 				});
@@ -155,14 +155,14 @@ export const staffH = new Elysia({ tags: ["staff"] })
 	)
 	.get(
 		"/staff/random",
-		async ({ error, redirect }) => {
+		async ({ status, redirect }) => {
 			const [member] = await db
 				.select({ slug: staff.slug })
 				.from(staff)
 				.orderBy(sql`random()`)
 				.limit(1);
 			if (!member)
-				return error(404, {
+				return status(404, {
 					status: 404,
 					message: "No staff in the database.",
 				});
@@ -192,7 +192,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 			headers: { "accept-language": languages },
 			request: { url },
 			jwt: { sub, settings },
-			error,
+			status,
 		}) => {
 			const [member] = await db
 				.select({ pk: staff.pk })
@@ -201,7 +201,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 				.limit(1);
 
 			if (!member) {
-				return error(404, {
+				return status(404, {
 					status: 404,
 					message: `No staff member with the id or slug: '${id}'.`,
 				});
@@ -363,7 +363,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 			params: { id },
 			query: { limit, after, query, sort, filter },
 			request: { url },
-			error,
+			status,
 		}) => {
 			const [movie] = await db
 				.select({ pk: shows.pk })
@@ -377,7 +377,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 				.limit(1);
 
 			if (!movie) {
-				return error(404, {
+				return status(404, {
 					status: 404,
 					message: `No movie with the id or slug: '${id}'.`,
 				});
@@ -430,7 +430,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 			params: { id },
 			query: { limit, after, query, sort, filter },
 			request: { url },
-			error,
+			status,
 		}) => {
 			const [serie] = await db
 				.select({ pk: shows.pk })
@@ -444,7 +444,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 				.limit(1);
 
 			if (!serie) {
-				return error(404, {
+				return status(404, {
 					status: 404,
 					message: `No serie with the id or slug: '${id}'.`,
 				});

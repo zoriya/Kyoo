@@ -5,28 +5,20 @@ import { ExtraType } from "./entry/extra";
 import { bubble, bubbleVideo, registerExamples } from "./examples";
 import { DbMetadata, EpisodeId, ExternalId, Resource } from "./utils";
 
-const ExternalIds = t.Record(
-	t.String(),
-	t.Omit(
-		t.Union([
-			EpisodeId.patternProperties[PatternStringExact],
-			ExternalId().patternProperties[PatternStringExact],
-		]),
-		["link"],
-	),
-);
-type ExternalIds = typeof ExternalIds.static;
-
 export const Guess = t.Recursive((Self) =>
 	t.Object(
 		{
 			title: t.String(),
-			year: t.Optional(t.Array(t.Integer(), { default: [] })),
-			season: t.Optional(t.Array(t.Integer(), { default: [] })),
-			episode: t.Optional(t.Array(t.Integer(), { default: [] })),
 			kind: t.Optional(t.UnionEnum(["episode", "movie", "extra"])),
 			extraKind: t.Optional(ExtraType),
-			externalId: t.Optional(ExternalIds),
+			years: t.Optional(t.Array(t.Integer(), { default: [] })),
+			episodes: t.Optional(
+				t.Array(
+					t.Object({ season: t.Nullable(t.Integer()), episode: t.Integer() }),
+					{ default: [] },
+				),
+			),
+			externalId: t.Optional(t.Record(t.String(), t.String())),
 
 			from: t.String({
 				description: "Name of the tool that made the guess",
@@ -92,7 +84,16 @@ export const SeedVideo = t.Object({
 					}),
 				}),
 				t.Object({
-					externalId: ExternalIds,
+					externalId: t.Record(
+						t.String(),
+						t.Omit(
+							t.Union([
+								EpisodeId.patternProperties[PatternStringExact],
+								ExternalId().patternProperties[PatternStringExact],
+							]),
+							["link"],
+						),
+					),
 				}),
 				t.Object({
 					movie: t.Union([
