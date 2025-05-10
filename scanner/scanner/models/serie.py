@@ -3,9 +3,7 @@ from __future__ import annotations
 from datetime import date
 from enum import StrEnum
 
-from langcodes import Language
-
-from ..utils import Model
+from ..utils import Language, Model
 from .collection import Collection
 from .entry import Entry
 from .extra import Extra
