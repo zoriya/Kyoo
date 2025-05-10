@@ -8,6 +8,7 @@
       watchfiles
       langcodes
       asyncpg
+      pyjwt
     ]);
 in
   pkgs.mkShell {

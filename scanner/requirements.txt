@@ -5,3 +5,4 @@ aiohttp
 watchfiles
 langcodes
 asyncpg
+pyjwt[crypto]
