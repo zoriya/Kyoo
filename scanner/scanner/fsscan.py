@@ -10,15 +10,17 @@ from .client import KyooClient
 from .identifiers.identify import identify
 from .models.metadataid import EpisodeId, MetadataId
 from .models.videos import For, Video, VideoInfo
-from .requests import Request, enqueue
+from .requests import Request, RequestCreator
 
 logger = getLogger(__name__)
 
 
 class Scanner:
-	def __init__(self, client: KyooClient):
+	def __init__(self, client: KyooClient, requests: RequestCreator):
 		self._client = client
+		self._requests = requests
 		self._info: VideoInfo = None  # type: ignore
+		self._root_path = os.environ.get("SCANNER_LIBRARY_ROOT", "/video")
 		try:
 			pattern = os.environ.get("LIBRARY_IGNORE_PATTERN")
 			self._ignore_pattern = re.compile(pattern) if pattern else None
@@ -27,10 +29,10 @@ class Scanner:
 
 	async def scan(self, path: str | None = None, remove_deleted=False):
 		if path is None:
+			path = self._root_path
 			logger.info("Starting scan at %s. This may take some time...", path)
 			if self._ignore_pattern:
 				logger.info(f"Applying ignore pattern: {self._ignore_pattern}")
-		path = path or os.environ.get("SCANNER_LIBRARY_ROOT", "/video")
 		videos = self.walk_fs(path)
 
 		self._info = await self._client.get_videos_info()
@@ -58,8 +60,8 @@ class Scanner:
 
 		logger.info("Scan finished for %s.", path)
 
-	async def monitor(self, path: str, client: KyooClient):
-		async for changes in awatch(path, ignore_permission_denied=True):
+	async def monitor(self):
+		async for changes in awatch(self._root_path, ignore_permission_denied=True):
 			for event, file in changes:
 				if not isdir(file) and not is_video(file):
 					continue
@@ -78,7 +80,7 @@ class Scanner:
 						await self._register([file])
 					case Change.deleted:
 						logger.info("Delete video at: %s", file)
-						await client.delete_videos([file])
+						await self._client.delete_videos([file])
 					case Change.modified:
 						pass
 

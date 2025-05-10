@@ -27,16 +27,9 @@ class Request(Model, extra="allow"):
 		episodes: list[Guess.Episode]
 
 
-class RequestProcessor:
-	def __init__(
-		self,
-		database: Connection,
-		client: KyooClient,
-		providers: CompositeProvider,
-	):
+class RequestCreator:
+	def __init__(self, database: Connection):
 		self._database = database
-		self._client = client
-		self._providers = providers
 
 	async def enqueue(self, requests: list[Request]):
 		await self._database.executemany(
@@ -50,6 +43,18 @@ class RequestProcessor:
 			(x.model_dump() for x in requests),
 		)
 		_ = await self._database.execute("notify scanner.requests")
+
+
+class RequestProcessor:
+	def __init__(
+		self,
+		database: Connection,
+		client: KyooClient,
+		providers: CompositeProvider,
+	):
+		self._database = database
+		self._client = client
+		self._providers = providers
 
 	async def listen_for_requests(self):
 		logger.info("Listening for requestes")
