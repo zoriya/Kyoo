@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-from langcodes import Language
-
-from ..utils import Model
+from ..utils import Language, Model
 from .genre import Genre
 from .metadataid import MetadataId
 
