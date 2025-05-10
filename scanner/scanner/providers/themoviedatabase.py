@@ -4,6 +4,7 @@ from collections.abc import Generator
 from datetime import datetime
 from logging import getLogger
 from statistics import mean
+from types import TracebackType
 from typing import Any, cast, override
 
 from aiohttp import ClientSession
@@ -71,7 +72,12 @@ class TheMovieDatabase(Provider):
 	async def __aenter__(self):
 		return self
 
-	async def __aexit__(self):
+	async def __aexit__(
+		self,
+		exc_type: type[BaseException] | None,
+		exc_value: BaseException | None,
+		traceback: TracebackType | None,
+	):
 		await self._client.close()
 
 	@property

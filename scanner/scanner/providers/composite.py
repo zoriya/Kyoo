@@ -8,9 +8,9 @@ from .provider import Provider
 
 
 class CompositeProvider(Provider):
-	def __init__(self):
+	def __init__(self, themoviedb: Provider):
 		self._tvdb: Provider = None  # type: ignore
-		self._themoviedb: Provider = None  # type: ignore
+		self._themoviedb = themoviedb
 
 	@property
 	@override

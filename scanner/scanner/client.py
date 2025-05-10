@@ -1,5 +1,6 @@
 import os
 from logging import getLogger
+from types import TracebackType
 
 from aiohttp import ClientSession
 
@@ -27,7 +28,12 @@ class KyooClient:
 	async def __aenter__(self):
 		return self
 
-	async def __aexit__(self):
+	async def __aexit__(
+		self,
+		exc_type: type[BaseException] | None,
+		exc_value: BaseException | None,
+		traceback: TracebackType | None,
+	):
 		await self._client.close()
 
 	async def get_videos_info(self) -> VideoInfo:

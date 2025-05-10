@@ -3,8 +3,7 @@ from __future__ import annotations
 from logging import getLogger
 from typing import Literal
 
-from psycopg import AsyncConnection
-from psycopg.rows import class_row, dict_row
+from asyncpg import Connection
 from pydantic import Field
 
 from .client import KyooClient
@@ -31,7 +30,7 @@ class Request(Model, extra="allow"):
 class RequestProcessor:
 	def __init__(
 		self,
-		database: AsyncConnection,
+		database: Connection,
 		client: KyooClient,
 		providers: CompositeProvider,
 	):
@@ -40,85 +39,76 @@ class RequestProcessor:
 		self._providers = providers
 
 	async def enqueue(self, requests: list[Request]):
-		async with self._database.cursor() as cur:
-			await cur.executemany(
+		await self._database.executemany(
+			"""
+			insert into scanner.requests(kind, title, year, external_id, videos)
+				values (%(kind)s, %(title) s, %(year)s, %(external_id)s, %(videos)s)
+			on conflict (kind, title, year)
+				do update set
+					videos = videos || excluded.videos
+			""",
+			(x.model_dump() for x in requests),
+		)
+		_ = await self._database.execute("notify scanner.requests")
+
+	async def listen_for_requests(self):
+		logger.info("Listening for requestes")
+		await self._database.add_listener("scanner.requests", self.process_request)
+
+	async def process_request(self):
+		cur = await self._database.fetchrow(
+			"""
+			update
+				scanner.requests
+			set
+				status = 'running',
+				started_at = nom()::timestamptz
+			where
+				pk in (
+					select
+						*
+					from
+						scanner.requests
+					where
+						status = 'pending'
+					limit 1
+					for update
+						skip locked)
+			returning
+				*
+			"""
+		)
+		if cur is None:
+			return
+		request = Request.model_validate(cur)
+
+		logger.info(f"Starting to process {request.title}")
+		try:
+			show = await self._run_request(request)
+			finished = await self._database.fetchrow(
 				"""
-				insert into scanner.requests(kind, title, year, external_id, videos)
-					values (%(kind)s, %(title) s, %(year)s, %(external_id)s, %(videos)s)
-				on conflict (kind, title, year)
-					do update set
-						videos = videos || excluded.videos
+				delete from scanner.requests
+				where pk = %s
+				returning
+					videos
 				""",
-				(x.model_dump() for x in requests),
+				[request.pk],
 			)
-			# TODO: how will this conflict be handled if the request is already running
-			if cur.rowcount > 0:
-				_ = await cur.execute("notify scanner.requests")
-
-	async def process_requests(self):
-		async with await self._database.execute("listen scanner.requests"):
-			gen = self._database.notifies()
-			async for _ in gen:
-				await self._process_request()
-
-	async def _process_request(self):
-		async with self._database.cursor(row_factory=class_row(Request)) as cur:
+			if finished and finished["videos"] != request.videos:
+				await self._client.link_videos(show.slug, finished["videos"])
+		except Exception as e:
+			logger.error("Couldn't process request", exc_info=e)
 			cur = await cur.execute(
 				"""
 				update
 					scanner.requests
 				set
-					status = 'running',
-					started_at = nom()::timestamptz
+					status = 'failed'
 				where
-					pk in (
-						select
-							*
-						from
-							scanner.requests
-						where
-							status = 'pending'
-						limit 1
-						for update
-							skip locked)
-				returning
-					*
-				"""
+					pk = %s
+				""",
+				[request.pk],
 			)
-			request = await cur.fetchone()
-			if request is None:
-				return
-
-			logger.info(f"Starting to process {request.title}")
-			try:
-				show = await self._run_request(request)
-
-				async with self._database.cursor(row_factory=dict_row) as cur:
-					cur = await cur.execute(
-						"""
-						delete from scanner.requests
-						where pk = %s
-						returning
-							videos
-						""",
-						[request.pk],
-					)
-					finished = await anext(cur)
-					if finished["videos"] != request.videos:
-						await self._client.link_videos(show.slug, finished["videos"])
-			except Exception as e:
-				logger.error("Couldn't process request", exc_info=e)
-				cur = await cur.execute(
-					"""
-					update
-						scanner.requests
-					set
-						status = 'failed'
-					where
-						pk = %s
-					""",
-					[request.pk],
-				)
 
 	async def _run_request(self, request: Request) -> Resource:
 		if request.kind == "movie":
