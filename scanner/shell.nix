@@ -7,8 +7,7 @@
       aiohttp
       watchfiles
       langcodes
-      psycopg
-      psycopg-pool
+      asyncpg
     ]);
 in
   pkgs.mkShell {

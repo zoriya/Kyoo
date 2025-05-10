@@ -1,27 +1,37 @@
 import logging
 from contextlib import asynccontextmanager
 
+import asyncpg
 from fastapi import FastAPI
-from psycopg import AsyncConnection
-from psycopg_pool import AsyncConnectionPool
+
+from .client import KyooClient
+from .providers.composite import CompositeProvider
+from .providers.themoviedatabase import TheMovieDatabase
+from .requests import RequestProcessor
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("watchfiles").setLevel(logging.WARNING)
 logging.getLogger("rebulk").setLevel(logging.WARNING)
 
-pool = AsyncConnectionPool(open=False, kwargs={"autocommit": True})
-
 
 @asynccontextmanager
 async def lifetime():
-	await pool.open()
-	yield
-	await pool.close()
+	async with (
+		await asyncpg.create_pool() as pool,
+		create_request_processor(pool) as processor,
+	):
+		await processor.listen_for_requests()
+		yield
 
 
-async def get_db() -> AsyncConnection:
-	async with pool.connection() as ret:
-		yield ret
+@asynccontextmanager
+async def create_request_processor(pool: asyncpg.Pool):
+	async with (
+		pool.acquire() as db,
+		KyooClient() as client,
+		TheMovieDatabase() as themoviedb,
+	):
+		yield RequestProcessor(db, client, CompositeProvider(themoviedb))
 
 
 app = FastAPI(
