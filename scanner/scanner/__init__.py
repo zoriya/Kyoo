@@ -3,7 +3,7 @@ import logging
 from contextlib import asynccontextmanager
 
 import asyncpg
-from fastapi import FastAPI
+from fastapi import BackgroundTasks, FastAPI
 
 from .client import KyooClient
 from .fsscan import Scanner
@@ -16,13 +16,19 @@ logging.getLogger("watchfiles").setLevel(logging.WARNING)
 logging.getLogger("rebulk").setLevel(logging.WARNING)
 
 
+scanner: Scanner
+
+
 @asynccontextmanager
 async def lifetime():
 	async with (
 		await asyncpg.create_pool() as pool,
 		create_request_processor(pool) as processor,
-		create_scanner(pool) as (scanner, is_master),
+		create_scanner(pool) as (scan, is_master),
 	):
+		global scanner
+		scanner = scan
+
 		await processor.listen_for_requests()
 		if is_master:
 			_ = await asyncio.gather(
@@ -62,6 +68,11 @@ app = FastAPI(
 )
 
 
-@app.get("/items/{item_id}")
-async def read_item(item_id):
-	return {"item_id": item_id}
+@app.put(
+	"/scan",
+	status_code=204,
+	description="Trigger a full scan of the filesystem, trying to find new videos & deleting old ones.",
+	response_description="Scan started.",
+)
+async def trigger_scan(tasks: BackgroundTasks):
+	tasks.add_task(scanner.scan)
