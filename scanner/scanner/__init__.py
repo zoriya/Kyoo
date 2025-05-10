@@ -1,12 +1,14 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager
+from typing import Annotated
 
 import asyncpg
-from fastapi import BackgroundTasks, FastAPI
+from fastapi import BackgroundTasks, FastAPI, Security
 
 from .client import KyooClient
 from .fsscan import Scanner
+from .jwt import validate_bearer
 from .providers.composite import CompositeProvider
 from .providers.themoviedatabase import TheMovieDatabase
 from .requests import RequestCreator, RequestProcessor
@@ -71,8 +73,13 @@ app = FastAPI(
 @app.put(
 	"/scan",
 	status_code=204,
-	description="Trigger a full scan of the filesystem, trying to find new videos & deleting old ones.",
 	response_description="Scan started.",
 )
-async def trigger_scan(tasks: BackgroundTasks):
+async def trigger_scan(
+	tasks: BackgroundTasks,
+	_: Annotated[None, Security(validate_bearer, scopes=["scanner."])],
+):
+	"""
+	Trigger a full scan of the filesystem, trying to find new videos & deleting old ones.
+	"""
 	tasks.add_task(scanner.scan)
