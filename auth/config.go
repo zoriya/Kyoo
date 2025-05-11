@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
@@ -15,6 +17,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/lestrrat-go/jwx/v3/jwk"
 	"github.com/zoriya/kyoo/keibi/dbc"
 )
 
@@ -22,13 +25,14 @@ type Configuration struct {
 	Prefix          string
 	JwtPrivateKey   *rsa.PrivateKey
 	JwtPublicKey    *rsa.PublicKey
+	JwtKid          string
 	PublicUrl       string
 	DefaultClaims   jwt.MapClaims
 	FirstUserClaims jwt.MapClaims
 	GuestClaims     jwt.MapClaims
 	ProtectedClaims []string
 	ExpirationDelay time.Duration
-	EnvApiKeys map[string]ApiKeyWToken
+	EnvApiKeys      map[string]ApiKeyWToken
 }
 
 var DefaultConfig = Configuration{
@@ -36,7 +40,7 @@ var DefaultConfig = Configuration{
 	FirstUserClaims: make(jwt.MapClaims),
 	ProtectedClaims: []string{"permissions"},
 	ExpirationDelay: 30 * 24 * time.Hour,
-	EnvApiKeys: make(map[string]ApiKeyWToken),
+	EnvApiKeys:      make(map[string]ApiKeyWToken),
 }
 
 func LoadConfiguration(db *dbc.Queries) (*Configuration, error) {
@@ -100,11 +104,20 @@ func LoadConfiguration(db *dbc.Queries) (*Configuration, error) {
 		if err != nil {
 			return nil, err
 		}
-		ret.JwtPublicKey = &ret.JwtPrivateKey.PublicKey
 	}
+	ret.JwtPublicKey = &ret.JwtPrivateKey.PublicKey
+	key, err := jwk.Import(ret.JwtPublicKey)
+	if err != nil {
+		return nil, err
+	}
+	thumbprint, err := key.Thumbprint(crypto.SHA256)
+	if err != nil {
+		return nil, err
+	}
+	ret.JwtKid = base64.RawStdEncoding.EncodeToString(thumbprint)
 
 	for _, env := range os.Environ() {
-		if !strings.HasPrefix(env, "KEIBI_APIKEY_"){
+		if !strings.HasPrefix(env, "KEIBI_APIKEY_") {
 			continue
 		}
 		v := strings.Split(env, "=")
@@ -128,8 +141,8 @@ func LoadConfiguration(db *dbc.Queries) (*Configuration, error) {
 		name = strings.ToLower(name)
 		ret.EnvApiKeys[name] = ApiKeyWToken{
 			ApiKey: ApiKey{
-				Id: uuid.New(),
-				Name: name,
+				Id:     uuid.New(),
+				Name:   name,
 				Claims: claims,
 			},
 			Token: v[1],
