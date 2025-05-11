@@ -77,7 +77,7 @@ app = FastAPI(
 )
 async def trigger_scan(
 	tasks: BackgroundTasks,
-	_: Annotated[None, Security(validate_bearer, scopes=["scanner."])],
+	_: Annotated[None, Security(validate_bearer, scopes=["scanner.trigger"])],
 ):
 	"""
 	Trigger a full scan of the filesystem, trying to find new videos & deleting old ones.
