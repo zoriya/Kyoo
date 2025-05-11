@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 from logging import getLogger
-from typing import Literal
+from typing import Annotated, Literal
 
 from asyncpg import Connection
+from fastapi import Depends
 from pydantic import Field
 
 from .client import KyooClient
+from .database import get_db
 from .models.videos import Guess, Resource
 from .providers.composite import CompositeProvider
 from .utils import Model
@@ -28,7 +30,10 @@ class Request(Model, extra="allow"):
 
 
 class RequestCreator:
-	def __init__(self, database: Connection):
+	def __init__(
+		self,
+		database: Annotated[Connection, Depends(get_db)],
+	):
 		self._database = database
 
 	async def enqueue(self, requests: list[Request]):
@@ -48,9 +53,9 @@ class RequestCreator:
 class RequestProcessor:
 	def __init__(
 		self,
-		database: Connection,
-		client: KyooClient,
-		providers: CompositeProvider,
+		database: Annotated[Connection, Depends(get_db)],
+		client: Annotated[KyooClient, Depends],
+		providers: Annotated[CompositeProvider, Depends],
 	):
 		self._database = database
 		self._client = client
