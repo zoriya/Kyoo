@@ -3,7 +3,9 @@ import re
 from logging import getLogger
 from mimetypes import guess_file_type
 from os.path import dirname, exists, isdir, join
+from typing import Annotated
 
+from fastapi import Depends
 from watchfiles import Change, awatch
 
 from .client import KyooClient
@@ -16,7 +18,11 @@ logger = getLogger(__name__)
 
 
 class Scanner:
-	def __init__(self, client: KyooClient, requests: RequestCreator):
+	def __init__(
+		self,
+		client: Annotated[KyooClient, Depends],
+		requests: Annotated[RequestCreator, Depends],
+	):
 		self._client = client
 		self._requests = requests
 		self._info: VideoInfo = None  # type: ignore
