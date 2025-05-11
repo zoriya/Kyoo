@@ -1,14 +1,19 @@
-from typing import override
+from typing import Annotated, override
 
+from fastapi import Depends
 from langcodes import Language
 
 from ..models.movie import Movie, SearchMovie
 from ..models.serie import SearchSerie, Serie
 from .provider import Provider
+from .themoviedatabase import TheMovieDatabase
 
 
 class CompositeProvider(Provider):
-	def __init__(self, themoviedb: Provider):
+	def __init__(
+		self,
+		themoviedb: Annotated[TheMovieDatabase, Depends],
+	):
 		self._tvdb: Provider = None  # type: ignore
 		self._themoviedb = themoviedb
 
