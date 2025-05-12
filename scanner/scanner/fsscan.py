@@ -39,56 +39,63 @@ class Scanner:
 			logger.info("Starting scan at %s. This may take some time...", path)
 			if self._ignore_pattern:
 				logger.info(f"Applying ignore pattern: {self._ignore_pattern}")
-		videos = self.walk_fs(path)
+		try:
+			videos = self.walk_fs(path)
 
-		self._info = await self._client.get_videos_info()
+			self._info = await self._client.get_videos_info()
 
-		# TODO: handle unmatched
-		to_register = videos - self._info.paths
-		to_delete = self._info.paths - videos if remove_deleted else set()
+			# TODO: handle unmatched
+			to_register = videos - self._info.paths
+			to_delete = self._info.paths - videos if remove_deleted else set()
 
-		if (
-			not any(to_register)
-			and any(to_delete)
-			and len(to_delete) == len(self._info.paths)
-		):
-			logger.warning("All video files are unavailable. Check your disks.")
-			return
+			if (
+				not any(to_register)
+				and any(to_delete)
+				and len(to_delete) == len(self._info.paths)
+			):
+				logger.warning("All video files are unavailable. Check your disks.")
+				return
 
-		# delete stale files before creating new ones to prevent potential conflicts
-		if to_delete:
-			logger.info("Removing %d stale files.", len(to_delete))
-			await self._client.delete_videos(to_delete)
+			# delete stale files before creating new ones to prevent potential conflicts
+			if to_delete:
+				logger.info("Removing %d stale files.", len(to_delete))
+				await self._client.delete_videos(to_delete)
 
-		if to_register:
-			logger.info("Found %d new files to register.", len(to_register))
-			await self._register(to_register)
+			if to_register:
+				logger.info("Found %d new files to register.", len(to_register))
+				await self._register(to_register)
 
-		logger.info("Scan finished for %s.", path)
+			logger.info("Scan finished for %s.", path)
+		except Exception as e:
+			logger.error("Unexpected error while running scan.", exc_info=e)
 
 	async def monitor(self):
+		logger.info(f"Watching for new files in {self._root_path}")
 		async for changes in awatch(self._root_path, ignore_permission_denied=True):
-			for event, file in changes:
-				if not isdir(file) and not is_video(file):
-					continue
-				if (
-					self._ignore_pattern and self._ignore_pattern.match(file)
-				) or is_ignored_path(file):
-					logger.info("Ignoring event %s for file %s", event, file)
-					continue
+			try:
+				for event, file in changes:
+					if not isdir(file) and not is_video(file):
+						continue
+					if (
+						self._ignore_pattern and self._ignore_pattern.match(file)
+					) or is_ignored_path(file):
+						logger.info("Ignoring event %s for file %s", event, file)
+						continue
 
-				match event:
-					case Change.added if isdir(file):
-						logger.info("New dir found: %s", file)
-						await self.scan(file)
-					case Change.added:
-						logger.info("New video found: %s", file)
-						await self._register([file])
-					case Change.deleted:
-						logger.info("Delete video at: %s", file)
-						await self._client.delete_videos([file])
-					case Change.modified:
-						pass
+					match event:
+						case Change.added if isdir(file):
+							logger.info("New dir found: %s", file)
+							await self.scan(file)
+						case Change.added:
+							logger.info("New video found: %s", file)
+							await self._register([file])
+						case Change.deleted:
+							logger.info("Delete video at: %s", file)
+							await self._client.delete_videos([file])
+						case Change.modified:
+							pass
+			except Exception as e:
+				logger.error("Unexpected error while monitoring files.", exc_info=e)
 
 	async def _register(self, videos: list[str] | set[str]):
 		# TODO: we should probably chunk those
