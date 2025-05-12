@@ -17,7 +17,6 @@ logging.getLogger("rebulk").setLevel(logging.WARNING)
 
 @asynccontextmanager
 async def lifespan(_):
-	print("starting lifetime")
 	async with (
 		init_pool(),
 		get_db() as db,
@@ -34,7 +33,6 @@ async def lifespan(_):
 			# there's no way someone else used the same id, right?
 			is_master = await db.fetchval("select pg_try_advisory_lock(198347)")
 			if is_master:
-				print("this is master")
 				_ = await asyncio.create_task(scanner.scan(remove_deleted=True))
 				_ = await asyncio.create_task(scanner.monitor())
 			yield
