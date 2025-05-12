@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from logging import getLogger
+from types import TracebackType
 from typing import Annotated, Literal
 
 from asyncpg import Connection
@@ -61,9 +62,18 @@ class RequestProcessor:
 		self._client = client
 		self._providers = providers
 
-	async def listen_for_requests(self):
+	async def __aenter__(self):
 		logger.info("Listening for requestes")
 		await self._database.add_listener("scanner.requests", self.process_request)
+		return self
+
+	async def __aexit__(
+		self,
+		exc_type: type[BaseException] | None,
+		exc_value: BaseException | None,
+		traceback: TracebackType | None,
+	):
+		await self._database.remove_listener("scanner.requests", self.process_request)
 
 	async def process_request(self):
 		cur = await self._database.fetchrow(

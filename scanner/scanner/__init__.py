@@ -25,9 +25,9 @@ async def lifespan(_):
 		get_db() as db,
 		KyooClient() as client,
 		TheMovieDatabase() as tmdb,
+		RequestProcessor(db, client, CompositeProvider(tmdb)) as processor
 	):
-		processor = RequestProcessor(db, client, CompositeProvider(tmdb))
-		await processor.listen_for_requests()
+		# creating the processor makes it listen to requests event in pg
 		async with (
 			get_db() as db,
 			KyooClient() as client,
