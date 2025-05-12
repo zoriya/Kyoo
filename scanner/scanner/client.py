@@ -18,7 +18,7 @@ class KyooClient:
 			print("Missing environment variable 'KYOO_APIKEY'.")
 			exit(2)
 		self._client = ClientSession(
-			base_url=os.environ.get("KYOO_URL", "http://api:3567/api"),
+			base_url=os.environ.get("KYOO_URL", "http://api:3567/api") + "/",
 			headers={
 				"User-Agent": "kyoo scanner v5",
 				"X-API-KEY": api_key,
@@ -37,7 +37,7 @@ class KyooClient:
 		await self._client.close()
 
 	async def get_videos_info(self) -> VideoInfo:
-		async with self._client.get("/videos") as r:
+		async with self._client.get("videos") as r:
 			r.raise_for_status()
 			return VideoInfo(**await r.json())
 
