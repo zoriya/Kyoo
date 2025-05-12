@@ -31,7 +31,7 @@ class TheMovieDatabase(Provider):
 	def __init__(self) -> None:
 		super().__init__()
 		self._client = ClientSession(
-			base_url="https://api.themoviedb.org/3",
+			base_url="https://api.themoviedb.org/3/",
 			headers={
 				"User-Agent": "kyoo scanner v5",
 				"X-API-KEY": (
