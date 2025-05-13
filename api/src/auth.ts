@@ -37,7 +37,7 @@ export const auth = new Elysia({ name: "auth" })
 	.guard({
 		headers: t.Object(
 			{
-				authorization: t.TemplateLiteral("Bearer ${string}"),
+				authorization: t.Optional(t.TemplateLiteral("Bearer ${string}")),
 			},
 			{ additionalProperties: true },
 		),
@@ -45,9 +45,9 @@ export const auth = new Elysia({ name: "auth" })
 	.resolve(async ({ headers: { authorization }, status }) => {
 		const bearer = authorization?.slice(7);
 		if (!bearer) {
-			return status(500, {
-				status: 500,
-				message: "No jwt, auth server configuration error.",
+			return status(403, {
+				status: 403,
+				message: "No authorization header was found.",
 			});
 		}
 
