@@ -20,8 +20,8 @@ logger = getLogger(__name__)
 class Scanner:
 	def __init__(
 		self,
-		client: Annotated[KyooClient, Depends],
-		requests: Annotated[RequestCreator, Depends],
+		client: Annotated[KyooClient, Depends(KyooClient)],
+		requests: Annotated[RequestCreator, Depends(RequestCreator)],
 	):
 		self._client = client
 		self._requests = requests

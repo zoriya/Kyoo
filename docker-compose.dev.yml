@@ -104,7 +104,7 @@ services:
       - "4389:4389"
     environment:
       - KYOO_URL=${KYOO_URL:-http://api:3567/api}
-      - JWKS_URL="http://auth:4568/.well-known/jwks.json"
+      - JWKS_URL=http://auth:4568/.well-known/jwks.json
       - JWT_ISSUER=${PUBLIC_URL}
     volumes:
       - ./scanner:/app

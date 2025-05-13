@@ -6,7 +6,7 @@ from typing import Annotated, Literal
 
 from asyncpg import Connection
 from fastapi import Depends
-from pydantic import Field
+from pydantic import Field, TypeAdapter
 
 from .client import KyooClient
 from .database import get_db
@@ -46,7 +46,7 @@ class RequestCreator:
 				do update set
 					videos = videos || excluded.videos
 			""",
-			(x.model_dump() for x in requests),
+			TypeAdapter(list[Request]).dump_python(requests),
 		)
 		_ = await self._database.execute("notify scanner.requests")
 

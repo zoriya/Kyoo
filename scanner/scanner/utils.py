@@ -1,4 +1,5 @@
-from typing import Annotated, Any, Callable
+from abc import ABC, ABCMeta
+from typing import Annotated, Any, Callable, override
 
 from langcodes import Language as BaseLanguage
 from pydantic import AliasGenerator, BaseModel, ConfigDict, GetJsonSchemaHandler
@@ -13,6 +14,16 @@ def to_slug(title: str) -> str:
 
 def clean(val: str) -> str | None:
 	return val or None
+
+
+class Singleton(ABCMeta, type):
+	_instances = {}
+
+	@override
+	def __call__(cls, *args, **kwargs):
+		if cls not in cls._instances:
+			cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+		return cls._instances[cls]
 
 
 class Model(BaseModel):
