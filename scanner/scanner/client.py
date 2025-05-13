@@ -4,6 +4,8 @@ from types import TracebackType
 
 from aiohttp import ClientSession
 
+from scanner.utils import Singleton
+
 from .models.movie import Movie
 from .models.serie import Serie
 from .models.videos import Resource, Video, VideoCreated, VideoInfo
@@ -11,7 +13,7 @@ from .models.videos import Resource, Video, VideoCreated, VideoInfo
 logger = getLogger(__name__)
 
 
-class KyooClient:
+class KyooClient(metaclass=Singleton):
 	def __init__(self) -> None:
 		api_key = os.environ.get("KYOO_APIKEY")
 		if not api_key:

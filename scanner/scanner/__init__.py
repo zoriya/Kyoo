@@ -30,7 +30,6 @@ async def lifespan(_):
 		# creating the processor makes it listen to requests event in pg
 		async with (
 			get_db() as db,
-			KyooClient() as client,
 		):
 			scanner = Scanner(client, RequestCreator(db))
 			# there's no way someone else used the same id, right?
