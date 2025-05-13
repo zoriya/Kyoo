@@ -36,12 +36,12 @@ class RequestCreator:
 		await self._database.executemany(
 			"""
 			insert into scanner.requests(kind, title, year, external_id, videos)
-				values (%(kind)s, %(title) s, %(year)s, %(external_id)s, %(videos)s)
+				values ($1, $2, $3, $4, $5)
 			on conflict (kind, title, year)
 				do update set
 					videos = videos || excluded.videos
 			""",
-			TypeAdapter(list[Request]).dump_python(requests),
+			[[x.kind, x.title, x.year, x.external_id, x.videos] for x in requests],
 		)
 		_ = await self._database.execute("notify scanner.requests")
 

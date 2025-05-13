@@ -23,6 +23,7 @@ async def init_pool():
 		global pool
 		pool = p
 		yield
+		pool = None  # type: ignore
 
 
 @asynccontextmanager
