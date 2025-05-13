@@ -12,10 +12,11 @@ router = APIRouter()
 	"/scan",
 	status_code=204,
 	response_description="Scan started.",
+	response_model=None,
 )
 async def trigger_scan(
 	tasks: BackgroundTasks,
-	# scanner: Annotated[Scanner, Depends],
+	scanner: Annotated[Scanner, Depends(Scanner)],
 	_: Annotated[None, Security(validate_bearer, scopes=["scanner.trigger"])],
 ):
 	"""
