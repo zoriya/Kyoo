@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from scanner.client import KyooClient
-from scanner.fsscan import Scanner
+from scanner.fsscan import FsScanner
 from scanner.providers.composite import CompositeProvider
 from scanner.providers.themoviedatabase import TheMovieDatabase
 from scanner.requests import RequestCreator, RequestProcessor
@@ -25,13 +25,11 @@ async def lifespan(_):
 		get_db() as db,
 		KyooClient() as client,
 		TheMovieDatabase() as tmdb,
-		RequestProcessor(db, client, CompositeProvider(tmdb)) as processor
+		RequestProcessor(db, client, CompositeProvider(tmdb)) as processor,
 	):
 		# creating the processor makes it listen to requests event in pg
-		async with (
-			get_db() as db,
-		):
-			scanner = Scanner(client, RequestCreator(db))
+		async with get_db() as db:
+			scanner = FsScanner(client, RequestCreator(db))
 			# there's no way someone else used the same id, right?
 			is_master = await db.fetchval("select pg_try_advisory_lock(198347)")
 			if is_master:

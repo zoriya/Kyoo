@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Security
 
-from ..fsscan import Scanner
+from ..fsscan import FsScanner, create_scanner
 from ..jwt import validate_bearer
 
 router = APIRouter()
@@ -12,11 +12,10 @@ router = APIRouter()
 	"/scan",
 	status_code=204,
 	response_description="Scan started.",
-	response_model=None,
 )
 async def trigger_scan(
 	tasks: BackgroundTasks,
-	scanner: Annotated[Scanner, Depends(Scanner)],
+	scanner: Annotated[FsScanner, Depends(create_scanner)],
 	_: Annotated[None, Security(validate_bearer, scopes=["scanner.trigger"])],
 ):
 	"""

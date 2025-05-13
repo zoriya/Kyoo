@@ -19,13 +19,13 @@ from ..models.season import Season, SeasonTranslation
 from ..models.serie import SearchSerie, Serie, SerieStatus, SerieTranslation
 from ..models.staff import Character, Person, Role, Staff
 from ..models.studio import Studio, StudioTranslation
-from ..utils import Singleton, clean, to_slug
+from ..utils import clean, to_slug
 from .provider import Provider, ProviderError
 
 logger = getLogger(__name__)
 
 
-class TheMovieDatabase(Provider, metaclass=Singleton):
+class TheMovieDatabase(Provider):
 	THEMOVIEDB_API_ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJjOWYzMjhhMDEwMTFiMjhmMjI0ODM3MTczOTVmYzNmYSIsIm5iZiI6MTU4MTYzMTExOS44NjgsInN1YiI6IjVlNDVjNjhmODNlZTY3MDAxMTFmMmU5NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.CeXrQwgB3roCAVs-Z2ayLRx99VIJbym7XSpcRjGzyLA"
 
 	def __init__(self) -> None:
