@@ -73,6 +73,8 @@ class Video(Model):
 	] = []
 
 
-class VideoCreated(Resource):
+class VideoCreated(Model):
+	id: str
+	path: str
 	guess: Guess
 	entries: list[Resource]

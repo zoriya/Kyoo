@@ -1,6 +1,6 @@
 # Scanner
 
-## Workflow (for v5, not current)
+## Workflow
 
 In order of action:
 

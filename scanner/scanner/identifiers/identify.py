@@ -4,6 +4,8 @@ from itertools import zip_longest
 from logging import getLogger
 from typing import Callable, Literal, cast
 
+from rebulk.match import Match
+
 from ..models.videos import Guess, Video
 from .guess.guess import guessit
 
@@ -49,12 +51,15 @@ async def identify(path: str) -> Video:
 			for s, e in zip_longest(
 				seasons,
 				episodes,
-				fillvalue=seasons[-1] if len(seasons) < len(episodes) else episodes[-1],
+				fillvalue=seasons[-1] if any(seasons) else Match(0, 0, value=1),
 			)
 		],
 		external_id={},
 		from_="guessit",
-		raw={k: [x.value for x in v] for k, v in raw.items()},
+		raw={
+			k: [x.value if x.value is int else str(x.value) for x in v]
+			for k, v in raw.items()
+		},
 	)
 
 	for step in pipeline:

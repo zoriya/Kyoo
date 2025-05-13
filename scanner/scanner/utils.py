@@ -2,7 +2,7 @@ from abc import ABCMeta
 from typing import Annotated, Any, Callable, override
 
 from langcodes import Language as BaseLanguage
-from pydantic import AliasGenerator, BaseModel, ConfigDict, GetJsonSchemaHandler
+from pydantic import BaseModel, ConfigDict, GetJsonSchemaHandler
 from pydantic.alias_generators import to_camel
 from pydantic.json_schema import JsonSchemaValue
 from pydantic_core import core_schema
@@ -29,9 +29,8 @@ class Singleton(ABCMeta, type):
 class Model(BaseModel):
 	model_config = ConfigDict(
 		use_enum_values=True,
-		alias_generator=AliasGenerator(
-			serialization_alias=lambda x: to_camel(x[:-1] if x[-1] == "_" else x),
-		),
+		validate_by_name=True,
+		alias_generator=lambda x: to_camel(x[:-1] if x[-1] == "_" else x),
 	)
 
 
