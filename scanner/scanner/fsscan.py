@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 import os
 import re
 from logging import getLogger
@@ -16,6 +17,7 @@ from .requests import Request, RequestCreator
 logger = getLogger(__name__)
 
 
+@asynccontextmanager
 async def create_scanner():
 	async with get_db() as db:
 		yield FsScanner(KyooClient(), RequestCreator(db))
