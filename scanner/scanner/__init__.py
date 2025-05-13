@@ -10,7 +10,7 @@ from scanner.providers.composite import CompositeProvider
 from scanner.providers.themoviedatabase import TheMovieDatabase
 from scanner.requests import RequestCreator, RequestProcessor
 
-from .database import get_db, init_pool
+from .database import get_db, init_pool, migrate
 from .routers.routes import router
 
 logging.basicConfig(level=logging.DEBUG)
@@ -26,6 +26,7 @@ async def lifespan(_):
 		KyooClient() as client,
 		TheMovieDatabase() as tmdb,
 	):
+		await migrate();
 		# creating the processor makes it listen to requests event in pg
 		async with (
 			RequestProcessor(db, client, CompositeProvider(tmdb)) as processor,

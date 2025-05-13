@@ -5,4 +5,3 @@ type-case=1
 no-space-function=1
 keep-newline=1
 nogrouping=1
-placeholder=%(\(\w+\))?s

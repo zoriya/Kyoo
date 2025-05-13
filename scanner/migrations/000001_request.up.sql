@@ -1,5 +1,3 @@
-begin;
-
 create type scanner.request_kind as enum(
 	'episode',
 	'movie'
@@ -17,12 +15,9 @@ create table scanner.requests(
 	kind scanner.request_kind not null,
 	title text not null,
 	year integer,
-	external_id jsonb not null default '{}' ::jsonb,
+	external_id jsonb not null default '{}'::jsonb,
 	status scanner.request_status not null,
-	started_at created_at timestamptz,
-	created_at created_at timestamptz not null default now() ::timestamptz,
-	constraint unique_kty(kind, title, year)
+	started_at timestamptz,
+	created_at timestamptz not null default now()::timestamptz,
+	constraint unique_kty unique(kind, title, year)
 );
-
-commit;
-

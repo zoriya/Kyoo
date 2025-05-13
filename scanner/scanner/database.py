@@ -1,8 +1,11 @@
 import os
 from contextlib import asynccontextmanager
+from logging import getLogger
 from typing import Any, cast
 
 from asyncpg import Connection, Pool, create_pool
+
+logger = getLogger(__name__)
 
 pool: Pool
 
@@ -30,3 +33,53 @@ async def init_pool():
 async def get_db():
 	async with pool.acquire() as db:
 		yield cast(Connection, db)
+
+
+async def migrate(migrations_dir="./migrations"):
+	async with get_db() as db:
+		_ = await db.execute(
+			"""
+			create schema if not exists scanner;
+
+			create table if not exists scanner._migrations(
+				pk serial primary key,
+				name text not null,
+				applied_at timestamptz not null default now() ::timestamptz
+			);
+			""",
+		)
+
+		applied = await db.fetchval(
+			"""
+			select
+				count(*)
+			from
+				scanner._migrations
+			"""
+		)
+
+		if not os.path.exists(migrations_dir):
+			logger.warning(f"Migrations directory '{migrations_dir}' not found")
+			return
+
+		migrations = sorted(
+			f for f in os.listdir(migrations_dir) if f.endswith("up.sql")
+		)
+		for migration in migrations[applied:]:
+			file_path = os.path.join(migrations_dir, migration)
+			logger.info(f"Applying migration: {migration}")
+			try:
+				with open(file_path, "r") as f:
+					sql = f.read()
+					async with db.transaction():
+						_ = await db.execute(sql)
+						_ = await db.execute(
+							"""
+							insert into scanner._migrations(name)
+								values ($1)
+							""",
+							migration,
+						)
+			except Exception as e:
+				logger.error(f"Failed to apply migration {migration}", exc_info=e)
+				raise
