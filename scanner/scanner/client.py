@@ -3,6 +3,7 @@ from logging import getLogger
 from types import TracebackType
 
 from aiohttp import ClientSession
+from pydantic import TypeAdapter
 
 from scanner.utils import Singleton
 
@@ -44,15 +45,15 @@ class KyooClient(metaclass=Singleton):
 	async def create_videos(self, videos: list[Video]) -> list[VideoCreated]:
 		async with self._client.post(
 			"videos",
-			json=[x.model_dump_json() for x in videos],
+			data=TypeAdapter(list[Video]).dump_json(videos, by_alias=True),
 		) as r:
 			r.raise_for_status()
-			return list[VideoCreated](**await r.json())
+			return TypeAdapter(list[VideoCreated]).validate_json(await r.text())
 
 	async def delete_videos(self, videos: list[str] | set[str]):
 		async with self._client.delete(
 			"videos",
-			json=videos,
+			data=TypeAdapter(list[str] | set[str]).dump_json(videos, by_alias=True),
 		) as r:
 			r.raise_for_status()
 
