@@ -3,12 +3,11 @@ import re
 from logging import getLogger
 from mimetypes import guess_file_type
 from os.path import dirname, exists, isdir, join
-from typing import Annotated
 
-from fastapi import Depends
 from watchfiles import Change, awatch
 
 from .client import KyooClient
+from .database import get_db
 from .identifiers.identify import identify
 from .models.metadataid import EpisodeId, MetadataId
 from .models.videos import For, Video, VideoInfo
@@ -17,12 +16,13 @@ from .requests import Request, RequestCreator
 logger = getLogger(__name__)
 
 
-class Scanner:
-	def __init__(
-		self,
-		client: Annotated[KyooClient, Depends(KyooClient)],
-		requests: Annotated[RequestCreator, Depends(RequestCreator)],
-	):
+async def create_scanner():
+	async with get_db() as db:
+		yield FsScanner(KyooClient(), RequestCreator(db))
+
+
+class FsScanner:
+	def __init__(self, client: KyooClient, requests: RequestCreator):
 		self._client = client
 		self._requests = requests
 		self._info: VideoInfo = None  # type: ignore
