@@ -15,17 +15,15 @@ logger = getLogger(__name__)
 
 class KyooClient(metaclass=Singleton):
 	def __init__(self) -> None:
-		api_key = os.environ.get("KYOO_APIKEY")
-		if not api_key:
-			print("Missing environment variable 'KYOO_APIKEY'.")
-			exit(2)
 		self._client = ClientSession(
 			base_url=os.environ.get("KYOO_URL", "http://api:3567/api") + "/",
 			headers={
 				"User-Agent": "kyoo scanner v5",
-				"X-API-KEY": api_key,
+				"Content-type": "application/json",
 			},
 		)
+		if api_key := os.environ.get("KYOO_APIKEY"):
+			self._client.headers["X-API-KEY"] = api_key
 
 	async def __aenter__(self):
 		return self
