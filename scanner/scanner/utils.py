@@ -1,6 +1,8 @@
 from abc import ABCMeta
+from collections.abc import Mapping
 from typing import Annotated, Any, Callable, override
 
+from asyncpg import Record
 from langcodes import Language as BaseLanguage
 from pydantic import BaseModel, ConfigDict, GetJsonSchemaHandler
 from pydantic.alias_generators import to_camel
@@ -32,6 +34,9 @@ class Model(BaseModel):
 		validate_by_name=True,
 		alias_generator=lambda x: to_camel(x[:-1] if x[-1] == "_" else x),
 	)
+
+
+Mapping.register(Record)  # type: ignore
 
 
 class _LanguagePydanticAnnotation:
