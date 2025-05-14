@@ -62,7 +62,7 @@ class RequestProcessor:
 
 	async def __aenter__(self):
 		logger.info("Listening for requestes")
-		await self._database.add_listener("scanner_requests", self.process_request)
+		await self._database.add_listener("scanner_requests", self.process_all)
 		return self
 
 	async def __aexit__(
@@ -71,7 +71,15 @@ class RequestProcessor:
 		exc_value: BaseException | None,
 		traceback: TracebackType | None,
 	):
-		await self._database.remove_listener("scanner_requests", self.process_request)
+		await self._database.remove_listener("scanner_requests", self.process_all)
+
+	async def process_all(self):
+		found = True
+		while found:
+			try:
+				found = await self.process_request()
+			except Exception as e:
+				logger.error("Failed to process one of the metadata request", exc_info=e)
 
 	async def process_request(self):
 		cur = await self._database.fetchrow(
@@ -80,11 +88,11 @@ class RequestProcessor:
 				scanner.requests
 			set
 				status = 'running',
-				started_at = nom()::timestamptz
+				started_at = now()::timestamptz
 			where
 				pk in (
 					select
-						*
+						pk
 					from
 						scanner.requests
 					where
@@ -96,8 +104,9 @@ class RequestProcessor:
 				*
 			"""
 		)
+		logger.warning("toto %s", cur)
 		if cur is None:
-			return
+			return False
 		request = Request.model_validate(cur)
 
 		logger.info(f"Starting to process {request.title}")
@@ -127,6 +136,7 @@ class RequestProcessor:
 				""",
 				[request.pk],
 			)
+		return True
 
 	async def _run_request(self, request: Request) -> Resource:
 		if request.kind == "movie":
