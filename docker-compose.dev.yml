@@ -179,10 +179,13 @@ services:
     ports:
       - "5432:5432"
     environment:
+     - POSTGRES_USER=$PGUSER
+     - POSTGRES_PASSWORD=$PGPASSWORD
+     - POSTGRES_DB=$PGDATABASE
      - POSTGRES_HOST_AUTH_METHOD=trust
     command: ["postgres", "-c", "log_statement=all"]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${PGUSER} -d ${PGDATABASE}"]
       interval: 5s
       timeout: 5s
       retries: 5
