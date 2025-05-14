@@ -26,15 +26,16 @@ async def lifespan(_):
 		KyooClient() as client,
 		TheMovieDatabase() as tmdb,
 	):
-		await migrate();
+		# there's no way someone else used the same id, right?
+		is_master = await db.fetchval("select pg_try_advisory_lock(198347)")
+		if is_master:
+			await migrate();
 		# creating the processor makes it listen to requests event in pg
 		async with (
 			RequestProcessor(db, client, CompositeProvider(tmdb)) as processor,
 			get_db() as db,
 		):
 			scanner = FsScanner(client, RequestCreator(db))
-			# there's no way someone else used the same id, right?
-			is_master = await db.fetchval("select pg_try_advisory_lock(198347)")
 			if is_master:
 				_ = asyncio.create_task(scanner.monitor())
 				_ = asyncio.create_task(scanner.scan(remove_deleted=True))

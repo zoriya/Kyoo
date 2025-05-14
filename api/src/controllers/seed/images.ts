@@ -68,7 +68,7 @@ export const enqueueOptImage = async (
 		kind: "image",
 		message,
 	});
-	await tx.execute(sql`notify kyoo.image`);
+	await tx.execute(sql`notify kyoo_image`);
 
 	return {
 		id,
@@ -128,7 +128,7 @@ export const processImages = async () => {
 
 	const client = (await db.$client.connect()) as PoolClient;
 	client.on("notification", (evt) => {
-		if (evt.channel !== "kyoo.image") return;
+		if (evt.channel !== "kyoo_image") return;
 		processAll();
 	});
 	await client.query("listen image");
