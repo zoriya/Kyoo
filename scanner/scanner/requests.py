@@ -125,7 +125,7 @@ class RequestProcessor:
 				await self._client.link_videos(show.slug, finished["videos"])
 		except Exception as e:
 			logger.error("Couldn't process request", exc_info=e)
-			cur = await cur.execute(
+			cur = await self._database.execute(
 				"""
 				update
 					scanner.requests
@@ -134,7 +134,7 @@ class RequestProcessor:
 				where
 					pk = $1
 				""",
-				[request.pk],
+				request.pk,
 			)
 		return True
 
