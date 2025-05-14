@@ -8,7 +8,7 @@ from asyncpg import Connection
 from pydantic import Field, TypeAdapter
 
 from .client import KyooClient
-from .models.videos import Guess, Resource
+from .models.videos import Guess, Resource, Video
 from .providers.composite import CompositeProvider
 from .utils import Model
 
@@ -21,7 +21,7 @@ class Request(Model, extra="allow"):
 	title: str
 	year: int | None
 	external_id: dict[str, str]
-	videos: list[Video]
+	videos: list[Request.Video]
 
 	class Video(Model):
 		id: str
@@ -39,11 +39,14 @@ class RequestCreator:
 				values ($1, $2, $3, $4, $5)
 			on conflict (kind, title, year)
 				do update set
-					videos = videos || excluded.videos
+					videos = requests.videos || excluded.videos
 			""",
-			[[x.kind, x.title, x.year, x.external_id, x.videos] for x in requests],
+			[
+				[x["kind"], x["title"], x["year"], x["external_id"], x["videos"]]
+				for x in TypeAdapter(list[Request]).dump_python(requests)
+			],
 		)
-		_ = await self._database.execute("notify scanner.requests")
+		_ = await self._database.execute("notify scanner_requests")
 
 
 class RequestProcessor:
@@ -59,7 +62,7 @@ class RequestProcessor:
 
 	async def __aenter__(self):
 		logger.info("Listening for requestes")
-		await self._database.add_listener("scanner.requests", self.process_request)
+		await self._database.add_listener("scanner_requests", self.process_request)
 		return self
 
 	async def __aexit__(
@@ -68,7 +71,7 @@ class RequestProcessor:
 		exc_value: BaseException | None,
 		traceback: TracebackType | None,
 	):
-		await self._database.remove_listener("scanner.requests", self.process_request)
+		await self._database.remove_listener("scanner_requests", self.process_request)
 
 	async def process_request(self):
 		cur = await self._database.fetchrow(
@@ -103,7 +106,7 @@ class RequestProcessor:
 			finished = await self._database.fetchrow(
 				"""
 				delete from scanner.requests
-				where pk = %s
+				where pk = $1
 				returning
 					videos
 				""",
@@ -120,7 +123,7 @@ class RequestProcessor:
 				set
 					status = 'failed'
 				where
-					pk = %s
+					pk = $1
 				""",
 				[request.pk],
 			)
