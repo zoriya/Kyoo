@@ -30,14 +30,15 @@ class TheMovieDatabase(Provider):
 
 	def __init__(self) -> None:
 		super().__init__()
+		bearer = (
+			os.environ.get("THEMOVIEDB_API_ACCESS_TOKEN")
+			or TheMovieDatabase.THEMOVIEDB_API_ACCESS_TOKEN
+		)
 		self._client = ClientSession(
 			base_url="https://api.themoviedb.org/3/",
 			headers={
 				"User-Agent": "kyoo scanner v5",
-				"X-API-KEY": (
-					os.environ.get("THEMOVIEDB_API_ACCESS_TOKEN")
-					or TheMovieDatabase.THEMOVIEDB_API_ACCESS_TOKEN
-				),
+				"Authorization": f"Bearer {bearer}",
 			},
 		)
 		self._image_path = "https://image.tmdb.org/t/p/original"
@@ -105,12 +106,14 @@ class TheMovieDatabase(Provider):
 				slug=to_slug(x["title"]),
 				name=x["title"],
 				description=x["overview"],
-				air_date=datetime.strptime(x["release_date"], "%Y-%m-%d").date(),
+				air_date=datetime.strptime(x["release_date"], "%Y-%m-%d").date()
+				if x["release_date"]
+				else None,
 				poster=self._map_image(x["poster_path"]),
 				original_language=Language.get(x["original_language"]),
 				external_id={
 					self.name: MetadataId(
-						data_id=x["id"],
+						data_id=str(x["id"]),
 						link=f"https://www.themoviedb.org/movie/{x['id']}",
 					)
 				},
@@ -147,14 +150,14 @@ class TheMovieDatabase(Provider):
 			external_id=(
 				{
 					self.name: MetadataId(
-						data_id=movie["id"],
+						data_id=str(movie["id"]),
 						link=f"https://www.themoviedb.org/movie/{movie['id']}",
 					)
 				}
 				| (
 					{
 						"imdb": MetadataId(
-							data_id=movie["imdb_id"],
+							data_id=str(movie["imdb_id"]),
 							link=f"https://www.imdb.com/title/{movie['imdb_id']}",
 						)
 					}
@@ -234,13 +237,15 @@ class TheMovieDatabase(Provider):
 				slug=to_slug(x["name"]),
 				name=x["name"],
 				description=x["overview"],
-				start_air=datetime.strptime(x["first_air_date"], "%Y-%m-%d").date(),
+				start_air=datetime.strptime(x["first_air_date"], "%Y-%m-%d").date()
+				if x["first_air_date"]
+				else None,
 				end_air=None,
 				poster=self._map_image(x["poster_path"]),
 				original_language=Language.get(x["original_language"]),
 				external_id={
 					self.name: MetadataId(
-						data_id=x["id"],
+						data_id=str(x["id"]),
 						link=f"https://www.themoviedb.org/tv/{x['id']}",
 					)
 				},
@@ -281,14 +286,14 @@ class TheMovieDatabase(Provider):
 			else None,
 			external_id={
 				self.name: MetadataId(
-					data_id=serie["id"],
+					data_id=str((serie["id"])),
 					link=f"https://www.themoviedb.org/tv/{serie['id']}",
 				),
 			}
 			| (
 				{
 					"imdb": MetadataId(
-						data_id=serie["external_ids"]["imdb_id"],
+						data_id=str(serie["external_ids"]["imdb_id"]),
 						link=f"https://www.imdb.com/title/{serie['external_ids']['imdb_id']}",
 					)
 				}
@@ -298,7 +303,7 @@ class TheMovieDatabase(Provider):
 			| (
 				{
 					"tvdb": MetadataId(
-						data_id=serie["external_ids"]["tvdb_id"],
+						data_id=str(serie["external_ids"]["tvdb_id"]),
 						link=None,
 					)
 				}
@@ -554,7 +559,7 @@ class TheMovieDatabase(Provider):
 			),
 			external_id={
 				self.name: MetadataId(
-					data_id=collection["id"],
+					data_id=str(collection["id"]),
 					link=f"https://www.themoviedb.org/collection/{collection['id']}",
 				)
 			},
@@ -642,7 +647,7 @@ class TheMovieDatabase(Provider):
 			slug=to_slug(company["name"]),
 			external_id={
 				self.name: MetadataId(
-					data_id=company["id"],
+					data_id=str(company["id"]),
 					link=f"https://www.themoviedb.org/company/{company['id']}",
 				)
 			},
@@ -672,7 +677,7 @@ class TheMovieDatabase(Provider):
 				image=self._map_image(person["profile_path"]),
 				external_id={
 					self.name: MetadataId(
-						data_id=person["id"],
+						data_id=str(person["id"]),
 						link=f"https://www.themoviedb.org/person/{person['id']}",
 					)
 				},
@@ -694,13 +699,13 @@ class TheMovieDatabase(Provider):
 		# check images in your language
 		localized = next((x for x in images if x["iso_639_1"] == lng), None)
 		if localized:
-			return self._image_path + localized
+			return self._image_path + localized["file_path"]
 		# if failed, check images without text
 		notext = next((x for x in images if x["iso_639_1"] == None), None)
 		if notext:
-			return self._image_path + notext
+			return self._image_path + notext["file_path"]
 		# take a random image, it's better than nothing
 		random_img = next((x for x in images if x["iso_639_1"] == None), None)
 		if random_img:
-			return self._image_path + random_img
+			return self._image_path + random_img["file_path"]
 		return None
