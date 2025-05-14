@@ -35,6 +35,7 @@ async def lifespan(_):
 			RequestProcessor(db, client, CompositeProvider(tmdb)) as processor,
 			get_db() as db,
 		):
+			_ = asyncio.create_task(processor.process_all())
 			scanner = FsScanner(client, RequestCreator(db))
 			if is_master:
 				_ = asyncio.create_task(scanner.monitor())
