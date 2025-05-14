@@ -1,3 +1,4 @@
+import json
 import os
 from contextlib import asynccontextmanager
 from logging import getLogger
@@ -32,6 +33,19 @@ async def init_pool():
 @asynccontextmanager
 async def get_db():
 	async with pool.acquire() as db:
+		await db.set_type_codec(
+			"json",
+			encoder=json.dumps,
+			decoder=json.loads,
+			schema="pg_catalog",
+		)
+		await db.set_type_codec(
+			"jsonb",
+			encoder=lambda data: b"\x01" + bytes(json.dumps(data), encoding="utf8"),
+			decoder=lambda data: json.loads(data[1:]),
+			schema="pg_catalog",
+			format="binary",
+		)
 		yield cast(Connection, db)
 
 
@@ -44,9 +58,7 @@ async def migrate(migrations_dir="./migrations"):
 			create table if not exists scanner._migrations(
 				pk serial primary key,
 				name text not null,
-				applied_at timestamptz not null default now() ::timestamptz
-			);
-			""",
+				applied_at timestamptz not null default now() ::timestamptz)""",
 		)
 
 		applied = await db.fetchval(

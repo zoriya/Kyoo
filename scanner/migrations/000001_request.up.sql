@@ -16,7 +16,8 @@ create table scanner.requests(
 	title text not null,
 	year integer,
 	external_id jsonb not null default '{}'::jsonb,
-	status scanner.request_status not null,
+	videos jsonb not null default '[]'::jsonb,
+	status scanner.request_status not null default 'pending',
 	started_at timestamptz,
 	created_at timestamptz not null default now()::timestamptz,
 	constraint unique_kty unique(kind, title, year)
