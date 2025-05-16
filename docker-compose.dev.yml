@@ -70,9 +70,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    volumes:
-      - ./api:/app
-      - /app/node_modules
     ports:
       - "3567:3567"
     environment:
@@ -87,6 +84,13 @@ services:
       - "traefik.http.middlewares.phantom-token.forwardauth.address=http://auth:4568/auth/jwt"
       - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,X-Api-Key"
       - "traefik.http.middlewares.phantom-token.forwardauth.authResponseHeaders=Authorization"
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+        - action: rebuild
+          path: ./packages.json
 
   scanner:
     build: ./scanner
