@@ -89,9 +89,7 @@ services:
       - "traefik.http.middlewares.phantom-token.forwardauth.authResponseHeaders=Authorization"
 
   scanner:
-    build:
-      context: ./scanner
-      dockerfile: Dockerfile.dev
+    build: ./scanner
     restart: on-failure
     depends_on:
       api:
@@ -109,7 +107,6 @@ services:
       - JWKS_URL=http://auth:4568/.well-known/jwks.json
       - JWT_ISSUER=${PUBLIC_URL}
     volumes:
-      - ./scanner:/app
       - ${LIBRARY_ROOT}:/video:ro
     labels:
       - "traefik.enable=true"
@@ -118,6 +115,14 @@ services:
       - "traefik.http.middlewares.phantom-token.forwardauth.address=http://auth:4568/auth/jwt"
       - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,X-Api-Key"
       - "traefik.http.middlewares.phantom-token.forwardauth.authResponseHeaders=Authorization"
+    command: fastapi dev scanner --host 0.0.0.0 --port 3489
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+        - action: rebuild
+          path: ./pyproject.toml
 
   transcoder:
     <<: *transcoder-base
