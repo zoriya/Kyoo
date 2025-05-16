@@ -31,8 +31,9 @@ async def lifespan(_):
 		if is_master:
 			await migrate();
 		# creating the processor makes it listen to requests event in pg
+		provider = tmdb #CompositeProvider(tmdb)
 		async with (
-			RequestProcessor(db, client, CompositeProvider(tmdb)) as processor,
+			RequestProcessor(db, client, provider) as processor,
 			get_db() as db,
 		):
 			_ = asyncio.create_task(processor.process_all())
