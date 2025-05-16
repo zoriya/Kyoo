@@ -8,8 +8,8 @@ from asyncpg import Connection
 from pydantic import Field, TypeAdapter
 
 from .client import KyooClient
-from .models.videos import Guess, Resource, Video
-from .providers.composite import CompositeProvider
+from .models.videos import Guess, Resource
+from .providers.provider import Provider
 from .utils import Model
 
 logger = getLogger(__name__)
@@ -54,7 +54,7 @@ class RequestProcessor:
 		self,
 		database: Connection,
 		client: KyooClient,
-		providers: CompositeProvider,
+		providers: Provider,
 	):
 		self._database = database
 		self._client = client
@@ -79,7 +79,9 @@ class RequestProcessor:
 			try:
 				found = await self.process_request()
 			except Exception as e:
-				logger.error("Failed to process one of the metadata request", exc_info=e)
+				logger.error(
+					"Failed to process one of the metadata request", exc_info=e
+				)
 
 	async def process_request(self):
 		cur = await self._database.fetchrow(
