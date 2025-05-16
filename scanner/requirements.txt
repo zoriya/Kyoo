@@ -1,8 +1,0 @@
-fastapi[standard]
-pydantic
-guessit@git+https://github.com/zoriya/guessit
-aiohttp
-watchfiles
-langcodes
-asyncpg
-pyjwt[crypto]
