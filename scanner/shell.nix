@@ -1,0 +1,22 @@
+{pkgs ? import <nixpkgs> {}}: let
+  python = pkgs.python313.withPackages (ps:
+    with ps; [
+      fastapi
+      pydantic
+      guessit
+      aiohttp
+      watchfiles
+      langcodes
+      asyncpg
+      pyjwt
+    ]);
+in
+  pkgs.mkShell {
+    packages = with pkgs; [
+      python
+      uv
+      ruff
+      fastapi-cli
+      pgformatter
+    ];
+  }

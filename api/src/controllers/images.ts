@@ -28,14 +28,14 @@ function getRedirectToImageHandler({
 		headers: { "accept-language": languages },
 		query: { quality },
 		set,
-		error,
+		status,
 		redirect,
 	}: {
 		params: { id: string; image: "poster" | "thumbnail" | "banner" | "logo" };
 		headers: { "accept-language": string };
 		query: { quality: "high" | "medium" | "low" };
 		set: Context["set"];
-		error: Context["error"];
+		status: Context["status"];
 		redirect: Context["redirect"];
 	}) {
 		id ??= "random";
@@ -76,13 +76,13 @@ function getRedirectToImageHandler({
 			.limit(1);
 
 		if (!ret) {
-			return error(404, {
+			return status(404, {
 				status: 404,
 				message: `No item found with id or slug: '${id}'.`,
 			});
 		}
 		if (!ret.language) {
-			return error(422, {
+			return status(422, {
 				status: 422,
 				message: "Accept-Language header could not be satisfied.",
 			});
@@ -162,7 +162,7 @@ export const imagesH = new Elysia({ tags: ["images"] })
 	})
 	.get(
 		"/staff/:id/image",
-		async ({ params: { id }, query: { quality }, error, redirect }) => {
+		async ({ params: { id }, query: { quality }, status, redirect }) => {
 			const [ret] = await db
 				.select({ image: staff.image })
 				.from(staff)
@@ -177,7 +177,7 @@ export const imagesH = new Elysia({ tags: ["images"] })
 				.limit(1);
 
 			if (!ret) {
-				return error(404, {
+				return status(404, {
 					status: 404,
 					message: `No staff member found with id or slug: '${id}'.`,
 				});
@@ -211,7 +211,7 @@ export const imagesH = new Elysia({ tags: ["images"] })
 			headers: { "accept-language": languages },
 			query: { quality },
 			set,
-			error,
+			status,
 			redirect,
 		}) => {
 			const lang = processLanguages(languages);
@@ -248,13 +248,13 @@ export const imagesH = new Elysia({ tags: ["images"] })
 				.limit(1);
 
 			if (!ret) {
-				return error(404, {
+				return status(404, {
 					status: 404,
 					message: `No studio found with id or slug: '${id}'.`,
 				});
 			}
 			if (!ret.language) {
-				return error(422, {
+				return status(422, {
 					status: 422,
 					message: "Accept-Language header could not be satisfied.",
 				});

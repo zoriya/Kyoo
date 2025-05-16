@@ -46,7 +46,11 @@ describe("Video seeding", () => {
 
 	it("With slug", async () => {
 		const [resp, body] = await createVideo({
-			guess: { title: "mia", season: [1], episode: [13], from: "test" },
+			guess: {
+				title: "mia",
+				episodes: [{ season: 1, episode: 13 }],
+				from: "test",
+			},
 			part: null,
 			path: "/video/mia s1e13.mkv",
 			rendering: "sha2",
@@ -142,7 +146,11 @@ describe("Video seeding", () => {
 
 	it("With season/episode", async () => {
 		const [resp, body] = await createVideo({
-			guess: { title: "mia", season: [2], episode: [1], from: "test" },
+			guess: {
+				title: "mia",
+				episodes: [{ season: 2, episode: 1 }],
+				from: "test",
+			},
 			part: null,
 			path: "/video/mia s2e1.mkv",
 			rendering: "renderingsha",
@@ -180,7 +188,11 @@ describe("Video seeding", () => {
 
 	it("With special", async () => {
 		const [resp, body] = await createVideo({
-			guess: { title: "mia", season: [0], episode: [3], from: "test" },
+			guess: {
+				title: "mia",
+				episodes: [{ season: 0, episode: 3 }],
+				from: "test",
+			},
 			part: null,
 			path: "/video/mia sp3.mkv",
 			rendering: "notehu",
@@ -217,7 +229,11 @@ describe("Video seeding", () => {
 
 	it("With order", async () => {
 		const [resp, body] = await createVideo({
-			guess: { title: "mia", season: [0], episode: [3], from: "test" },
+			guess: {
+				title: "mia",
+				episodes: [{ season: 0, episode: 3 }],
+				from: "test",
+			},
 			part: null,
 			path: "/video/mia 13.5.mkv",
 			rendering: "notehu2",
@@ -256,11 +272,10 @@ describe("Video seeding", () => {
 		const [resp, body] = await createVideo({
 			guess: {
 				title: "mia",
-				season: [0],
-				episode: [3],
+				episodes: [{ season: 1, episode: 13 }],
 				from: "test",
 				externalId: {
-					themoviedatabase: { serieId: "72636", season: 1, episode: 13 },
+					themoviedatabase: "72636",
 				},
 			},
 			part: null,
@@ -304,7 +319,7 @@ describe("Video seeding", () => {
 				title: "bubble",
 				from: "test",
 				externalId: {
-					themoviedatabase: { dataId: "912598" },
+					themoviedatabase: "912598",
 				},
 			},
 			part: null,
@@ -363,7 +378,7 @@ describe("Video seeding", () => {
 				title: "bubble",
 				from: "test",
 				externalId: {
-					themoviedatabase: { dataId: "912598" },
+					themoviedatabase: "912598",
 				},
 			},
 			part: null,
@@ -409,7 +424,7 @@ describe("Video seeding", () => {
 				title: "bubble",
 				from: "test",
 				externalId: {
-					themoviedatabase: { dataId: "912598" },
+					themoviedatabase: "912598",
 				},
 			},
 			part: null,
@@ -456,7 +471,7 @@ describe("Video seeding", () => {
 					title: "bubble",
 					from: "test",
 					externalId: {
-						themoviedatabase: { dataId: "912598" },
+						themoviedatabase: "912598",
 					},
 				},
 				part: 1,
@@ -477,7 +492,7 @@ describe("Video seeding", () => {
 					title: "bubble",
 					from: "test",
 					externalId: {
-						themoviedatabase: { dataId: "912598" },
+						themoviedatabase: "912598",
 					},
 				},
 				part: 2,
@@ -521,8 +536,10 @@ describe("Video seeding", () => {
 		const [resp, body] = await createVideo({
 			guess: {
 				title: "mia",
-				season: [1, 2],
-				episode: [13, 1],
+				episodes: [
+					{ season: 1, episode: 13 },
+					{ season: 2, episode: 1 },
+				],
 				from: "test",
 			},
 			part: null,

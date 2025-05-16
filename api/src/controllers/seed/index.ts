@@ -16,10 +16,10 @@ export const seed = new Elysia()
 	})
 	.post(
 		"/movies",
-		async ({ body, error }) => {
+		async ({ body, status }) => {
 			const ret = await seedMovie(body);
-			if ("status" in ret) return error(ret.status, ret as any);
-			return error(ret.updated ? 200 : 201, ret);
+			if ("status" in ret) return status(ret.status, ret as any);
+			return status(ret.updated ? 200 : 201, ret);
 		},
 		{
 			detail: {
@@ -47,10 +47,10 @@ export const seed = new Elysia()
 	)
 	.post(
 		"/series",
-		async ({ body, error }) => {
+		async ({ body, status }) => {
 			const ret = await seedSerie(body);
-			if ("status" in ret) return error(ret.status, ret as any);
-			return error(ret.updated ? 200 : 201, ret);
+			if ("status" in ret) return status(ret.status, ret as any);
+			return status(ret.updated ? 200 : 201, ret);
 		},
 		{
 			detail: {

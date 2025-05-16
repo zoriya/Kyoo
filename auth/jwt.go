@@ -79,6 +79,7 @@ func (h *Handler) createGuestJwt() *string {
 		Time: time.Now().UTC().Add(time.Hour),
 	}
 	jwt := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	jwt.Header["kid"] = h.config.JwtKid
 	t, err := jwt.SignedString(h.config.JwtPrivateKey)
 	if err != nil {
 		return nil
@@ -112,6 +113,7 @@ func (h *Handler) createJwt(token string) (string, error) {
 		Time: time.Now().UTC().Add(time.Hour),
 	}
 	jwt := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	jwt.Header["kid"] = h.config.JwtKid
 	t, err := jwt.SignedString(h.config.JwtPrivateKey)
 	if err != nil {
 		return "", err
@@ -144,6 +146,7 @@ func (h *Handler) GetJwks(c echo.Context) error {
 
 	key.Set("use", "sig")
 	key.Set("key_ops", "verify")
+	key.Set("kid", h.config.JwtKid)
 	set := jwk.NewSet()
 	set.AddKey(key)
 	return c.JSON(200, set)

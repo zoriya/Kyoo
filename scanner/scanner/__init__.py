@@ -1,30 +1,54 @@
-async def main():
-	import asyncio
-	import os
-	import logging
-	from .monitor import monitor
-	from .scanner import scan
-	from .refresher import refresh
-	from .publisher import Publisher
-	from .subscriber import Subscriber
-	from providers.kyoo_client import KyooClient
+import asyncio
+import logging
+from contextlib import asynccontextmanager
 
-	logging.basicConfig(level=logging.INFO)
-	logging.getLogger("watchfiles").setLevel(logging.WARNING)
+from fastapi import FastAPI
 
+from scanner.client import KyooClient
+from scanner.fsscan import FsScanner
+from scanner.providers.composite import CompositeProvider
+from scanner.providers.themoviedatabase import TheMovieDatabase
+from scanner.requests import RequestCreator, RequestProcessor
+
+from .database import get_db, init_pool, migrate
+from .routers.routes import router
+
+logging.basicConfig(level=logging.DEBUG)
+logging.getLogger("watchfiles").setLevel(logging.WARNING)
+logging.getLogger("rebulk").setLevel(logging.WARNING)
+
+
+@asynccontextmanager
+async def lifespan(_):
 	async with (
-		Publisher() as publisher,
-		Subscriber() as subscriber,
+		init_pool(),
+		get_db() as db,
 		KyooClient() as client,
+		TheMovieDatabase() as tmdb,
 	):
-		path = os.environ.get("SCANNER_LIBRARY_ROOT", "/video")
+		# there's no way someone else used the same id, right?
+		is_master = await db.fetchval("select pg_try_advisory_lock(198347)")
+		if is_master:
+			await migrate();
+		# creating the processor makes it listen to requests event in pg
+		provider = tmdb #CompositeProvider(tmdb)
+		async with (
+			RequestProcessor(db, client, provider) as processor,
+			get_db() as db,
+		):
+			_ = asyncio.create_task(processor.process_all())
+			scanner = FsScanner(client, RequestCreator(db))
+			if is_master:
+				_ = asyncio.create_task(scanner.monitor())
+				_ = asyncio.create_task(scanner.scan(remove_deleted=True))
+			yield
 
-		async def scan_all():
-			await scan(path, publisher, client, remove_deleted=True)
 
-		await asyncio.gather(
-			monitor(path, publisher, client),
-			scan_all(),
-			refresh(publisher, client),
-			subscriber.listen(scan_all),
-		)
+app = FastAPI(
+	title="Scanner",
+	description="API to control the long running scanner or interacting with external databases (themoviedb, tvdb...)\n\n"
+	+ "Most of those APIs are for admins only.",
+	root_path="/scanner",
+	lifespan=lifespan,
+)
+app.include_router(router)
