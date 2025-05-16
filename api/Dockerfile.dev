@@ -5,6 +5,8 @@ COPY package.json bun.lock .
 COPY patches patches
 RUN bun install --production
 
+COPY . .
+
 EXPOSE 3567
 CMD ["bun", "dev"]
 
