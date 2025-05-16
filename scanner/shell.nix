@@ -14,6 +14,7 @@ in
   pkgs.mkShell {
     packages = with pkgs; [
       python
+      uv
       ruff
       fastapi-cli
       pgformatter

@@ -1,5 +1,5 @@
 **
-!/requirements.txt
-!scanner/**.py
-
-
+!/pyproject.toml
+!/uv.lock
+!/scanner/**.py
+!/migrations/**.sql
