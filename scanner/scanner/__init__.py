@@ -1,5 +1,5 @@
 import logging
-from asyncio import CancelledError, TaskGroup
+from asyncio import CancelledError, TaskGroup, create_task
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -25,29 +25,29 @@ async def lifespan(_):
 		get_db() as db,
 		KyooClient() as client,
 		TheMovieDatabase() as tmdb,
+		RequestProcessor(db, client, tmdb) as processor,
 	):
 		# there's no way someone else used the same id, right?
 		is_master = await db.fetchval("select pg_try_advisory_lock(198347)")
 		if is_master:
 			await migrate()
-		# creating the processor makes it listen to requests event in pg
-		provider = tmdb  # CompositeProvider(tmdb)
-		async with (
-			RequestProcessor(db, client, provider) as processor,
-			get_db() as db,
-		):
-			# see https://github.com/python/cpython/issues/108951
-			try:
-				async with TaskGroup() as tg:
-					_ = tg.create_task(processor.process_all())
-					scanner = FsScanner(client, RequestCreator(db))
-					if is_master:
-						_ = tg.create_task(scanner.monitor())
-						_ = tg.create_task(scanner.scan(remove_deleted=True))
-					yield
-					_ = tg.create_task(cancel())
-			except CancelledError:
-				pass
+		async with get_db() as db:
+			scanner = FsScanner(client, RequestCreator(db))
+			tasks = create_task(background_startup(scanner, processor, is_master))
+			yield
+			_ = tasks.cancel()
+
+
+async def background_startup(
+	scanner: FsScanner,
+	processor: RequestProcessor,
+	is_master: bool | None,
+):
+	async with TaskGroup() as tg:
+		_ = tg.create_task(processor.listen())
+		if is_master:
+			_ = tg.create_task(scanner.monitor())
+			_ = tg.create_task(scanner.scan(remove_deleted=True))
 
 
 async def cancel():
