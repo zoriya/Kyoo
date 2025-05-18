@@ -48,6 +48,14 @@ class RequestCreator:
 		)
 		_ = await self._database.execute("notify scanner_requests")
 
+	async def clear_failed(self):
+		_ = await self._database.execute(
+			"""
+			delete from scanner.requests
+			where status = 'failed'
+			"""
+		)
+
 
 class RequestProcessor:
 	def __init__(

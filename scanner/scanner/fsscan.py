@@ -41,6 +41,8 @@ class FsScanner:
 			logger.info("Starting scan at %s. This may take some time...", path)
 			if self._ignore_pattern:
 				logger.info(f"Applying ignore pattern: {self._ignore_pattern}")
+			await self._requests.clear_failed()
+
 		try:
 			videos = self.walk_fs(path)
 
