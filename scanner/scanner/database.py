@@ -26,7 +26,7 @@ async def init_pool():
 	async with await create_pool(**connection) as p:
 		global pool
 		pool = p
-		yield
+		yield pool
 		pool = None  # type: ignore
 
 
