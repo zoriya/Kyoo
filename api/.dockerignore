@@ -3,5 +3,5 @@
 !/bun.lock
 !/tsconfig.json
 !/patches
-!/src/**.ts
-!/drizzle/**
+!/src
+!/drizzle
