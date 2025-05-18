@@ -87,10 +87,10 @@ services:
     develop:
       watch:
         - action: sync
-          path: .
+          path: ./api
           target: /app
         - action: rebuild
-          path: ./packages.json
+          path: ./api/packages.json
 
   scanner:
     build: ./scanner
@@ -123,10 +123,10 @@ services:
     develop:
       watch:
         - action: sync
-          path: .
+          path: ./scanner
           target: /app
         - action: rebuild
-          path: ./pyproject.toml
+          path: ./scanner/pyproject.toml
 
   transcoder:
     <<: *transcoder-base
