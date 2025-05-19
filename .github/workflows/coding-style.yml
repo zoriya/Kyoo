@@ -71,3 +71,15 @@ jobs:
 
       - name: Run go fmt
         run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then exit 1; fi
+
+  auth:
+    name: "Lint auth"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./auth
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run go fmt
+        run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then exit 1; fi
