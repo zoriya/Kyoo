@@ -22,7 +22,6 @@ import (
 )
 
 type Configuration struct {
-	Prefix          string
 	JwtPrivateKey   *rsa.PrivateKey
 	JwtPublicKey    *rsa.PublicKey
 	JwtKid          string
@@ -47,7 +46,6 @@ func LoadConfiguration(db *dbc.Queries) (*Configuration, error) {
 	ret := DefaultConfig
 
 	ret.PublicUrl = os.Getenv("PUBLIC_URL")
-	ret.Prefix = os.Getenv("KEIBI_PREFIX")
 
 	claims := os.Getenv("EXTRA_CLAIMS")
 	if claims != "" {
