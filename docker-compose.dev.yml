@@ -21,26 +21,26 @@ x-transcoder: &transcoder-base
     - transcoder_metadata:/metadata
 
 services:
-  front:
-    build:
-      context: ./front
-      dockerfile: Dockerfile.dev
-    volumes:
-      - ./front:/app
-      - /app/.yarn
-      - /app/node_modules
-      - /app/apps/mobile/node_modules
-      - /app/apps/web/.next/
-      - /app/apps/mobile/.expo/
-    ports:
-      - "3000:3000"
-      - "8081:8081"
-    restart: on-failure
-    environment:
-      - KYOO_URL=${KYOO_URL:-http://api:5000/api}
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.front.rule=PathPrefix(`/`)"
+  # front:
+  #   build:
+  #     context: ./front
+  #     dockerfile: Dockerfile.dev
+  #   volumes:
+  #     - ./front:/app
+  #     - /app/.yarn
+  #     - /app/node_modules
+  #     - /app/apps/mobile/node_modules
+  #     - /app/apps/web/.next/
+  #     - /app/apps/mobile/.expo/
+  #   ports:
+  #     - "3000:3000"
+  #     - "8081:8081"
+  #   restart: on-failure
+  #   environment:
+  #     - KYOO_URL=${KYOO_URL:-http://api:5000/api}
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.front.rule=PathPrefix(`/`)"
 
   auth:
     build:
@@ -54,13 +54,14 @@ services:
       - "4568:4568"
     env_file:
       - ./.env
-    environment:
-      - KEIBI_PREFIX=/auth
-    volumes:
-      - ./auth:/app
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.auth.rule=PathPrefix(`/auth/`) || PathPrefix(`/.well-known/`)"
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./auth
+          target: /app
 
   api:
     build:
