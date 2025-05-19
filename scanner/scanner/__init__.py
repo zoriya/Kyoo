@@ -1,5 +1,5 @@
 import logging
-from asyncio import CancelledError, TaskGroup, create_task
+from asyncio import CancelledError, TaskGroup, create_task, sleep
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -25,15 +25,21 @@ async def lifespan(_):
 		get_db() as db,
 		KyooClient() as client,
 		TheMovieDatabase() as tmdb,
-		RequestProcessor(db, client, tmdb) as processor,
 	):
 		# there's no way someone else used the same id, right?
 		is_master = await db.fetchval("select pg_try_advisory_lock(198347)")
 		if is_master:
 			await migrate()
-		async with get_db() as db:
-			scanner = FsScanner(client, RequestCreator(db))
-			tasks = create_task(background_startup(scanner, processor, is_master))
+		async with get_db() as scanner_db:
+			processor = RequestProcessor(db, client, tmdb)
+			scanner = FsScanner(client, RequestCreator(scanner_db))
+			tasks = create_task(
+				background_startup(
+					scanner,
+					processor,
+					is_master,
+				)
+			)
 			yield
 			_ = tasks.cancel()
 
@@ -44,7 +50,7 @@ async def background_startup(
 	is_master: bool | None,
 ):
 	async with TaskGroup() as tg:
-		_ = tg.create_task(processor.listen())
+		_ = tg.create_task(processor.listen(tg))
 		if is_master:
 			_ = tg.create_task(scanner.monitor())
 			_ = tg.create_task(scanner.scan(remove_deleted=True))
