@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from asyncio import CancelledError, Future, TaskGroup, sleep
+from asyncio import CancelledError, Event, Future, TaskGroup, sleep
 from logging import getLogger
 from types import TracebackType
 from typing import Literal, cast
@@ -61,25 +61,45 @@ class RequestCreator:
 class RequestProcessor:
 	def __init__(
 		self,
-		database: Connection,
+		pool: Pool,
 		client: KyooClient,
 		providers: Provider,
 	):
-		self._database = database
+		self._pool = pool
+		self._database: Connection = None  # type: ignore
 		self._client = client
 		self._providers = providers
 
 	async def listen(self, tg: TaskGroup):
+		closed = Event()
+
 		def process(*_):
 			_ = tg.create_task(self.process_all())
 
-		try:
-			logger.info("Listening for requestes")
-			await self._database.add_listener("scanner_requests", process)
-			await Future()
-		except CancelledError as e:
-			logger.info("Stopped listening for requsets")
-			await self._database.remove_listener("scanner_requests", process)
+		def terminated(*_):
+			logger.info("terminated")
+			closed.set()
+
+		while True:
+			closed.clear()
+			logger.info("aquire")
+			try:
+				async with self._pool.acquire(timeout=10) as db:
+					try:
+						self._database = cast(Connection, db)
+						self._database.add_termination_listener(terminated)
+						await self._database.add_listener("scanner_requests", process)
+
+						logger.info("Listening for requestes")
+						_ = await closed.wait()
+						logger.info("stopping...")
+					except CancelledError as e:
+						logger.info("Stopped listening for requsets")
+						await self._database.remove_listener("scanner_requests", process)
+						self._database.remove_termination_listener(terminated)
+						raise
+			except TimeoutError:
+				logger.info("temiout")
 
 	async def process_all(self):
 		found = True
