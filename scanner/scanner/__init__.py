@@ -21,7 +21,7 @@ logging.getLogger("rebulk").setLevel(logging.WARNING)
 @asynccontextmanager
 async def lifespan(_):
 	async with (
-		init_pool(),
+		init_pool() as pool,
 		get_db() as db,
 		KyooClient() as client,
 		TheMovieDatabase() as tmdb,
@@ -30,18 +30,17 @@ async def lifespan(_):
 		is_master = await db.fetchval("select pg_try_advisory_lock(198347)")
 		if is_master:
 			await migrate()
-		async with get_db() as scanner_db:
-			processor = RequestProcessor(db, client, tmdb)
-			scanner = FsScanner(client, RequestCreator(scanner_db))
-			tasks = create_task(
-				background_startup(
-					scanner,
-					processor,
-					is_master,
-				)
+		processor = RequestProcessor(pool, client, tmdb)
+		scanner = FsScanner(client, RequestCreator(db))
+		tasks = create_task(
+			background_startup(
+				scanner,
+				processor,
+				is_master,
 			)
-			yield
-			_ = tasks.cancel()
+		)
+		yield
+		_ = tasks.cancel()
 
 
 async def background_startup(
