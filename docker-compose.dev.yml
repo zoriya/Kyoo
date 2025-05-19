@@ -15,10 +15,14 @@ x-transcoder: &transcoder-base
   environment:
     - GOCODER_PREFIX=/video
   volumes:
-    - ./transcoder:/app
     - ${LIBRARY_ROOT}:/video:ro
     - ${CACHE_ROOT}:/cache
     - transcoder_metadata:/metadata
+  develop:
+    watch:
+      - action: sync+restart
+        path: ./transcoder
+        target: /app
 
 services:
   # front:
