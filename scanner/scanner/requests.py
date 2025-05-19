@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+from asyncio import CancelledError, Future, TaskGroup, sleep
 from logging import getLogger
 from types import TracebackType
-from typing import Literal
+from typing import Literal, cast
 
-from asyncpg import Connection
+from asyncpg import Connection, Pool
 from pydantic import Field, TypeAdapter
 
 from .client import KyooClient
@@ -68,18 +69,17 @@ class RequestProcessor:
 		self._client = client
 		self._providers = providers
 
-	async def __aenter__(self):
-		logger.info("Listening for requestes")
-		await self._database.add_listener("scanner_requests", self.process_all)
-		return self
+	async def listen(self, tg: TaskGroup):
+		def process(*_):
+			_ = tg.create_task(self.process_all())
 
-	async def __aexit__(
-		self,
-		exc_type: type[BaseException] | None,
-		exc_value: BaseException | None,
-		traceback: TracebackType | None,
-	):
-		await self._database.remove_listener("scanner_requests", self.process_all)
+		try:
+			logger.info("Listening for requestes")
+			await self._database.add_listener("scanner_requests", process)
+			await Future()
+		except CancelledError as e:
+			logger.info("Stopped listening for requsets")
+			await self._database.remove_listener("scanner_requests", process)
 
 	async def process_all(self):
 		found = True
