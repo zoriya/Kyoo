@@ -19,6 +19,7 @@ export const roleKind = schema.enum("role_kind", [
 	"writter",
 	"producer",
 	"music",
+	"crew",
 	"other",
 ]);
 

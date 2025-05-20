@@ -7,6 +7,7 @@ from typing import Optional, Any, Callable, OrderedDict
 from langcodes import Language
 
 from matcher.cache import cache
+from scanner.models.staff import Role
 
 from ..provider import Provider, ProviderError
 from ..utils import normalize_lang
@@ -74,6 +75,19 @@ class TVDB(Provider):
 			"war": Genre.WAR,
 			"martial-arts": None,
 			"awards-show": None,
+		}
+		self._roles_map = {
+			"Actor": Role.ACTOR,
+			"Creator": Role.OTHER,
+			"Crew": Role.CREW,
+			"Director": Role.DIRECTOR,
+			"Executive Producer": Role.OTHER,
+			"Guest Star": Role.OTHER,
+			"Host": Role.OTHER,
+			"Musical Guest": Role.MUSIC,
+			"Producer": Role.PRODUCER,
+			"Showrunner": Role.OTHER,
+			"Writer": Role.WRITTER,
 		}
 
 	@cache(ttl=timedelta(days=30))
