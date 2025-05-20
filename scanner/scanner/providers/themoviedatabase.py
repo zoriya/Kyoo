@@ -69,6 +69,20 @@ class TheMovieDatabase(Provider):
 			10767: Genre.TALK,
 			10768: [Genre.WAR, Genre.POLITICS],
 		}
+		self._roles_map = {
+			"Camera": Role.OTHER,
+			"Costume & Make-Up": Role.OTHER,
+			"Lighting": Role.OTHER,
+			"Art": Role.OTHER,
+			"Visual Effects": Role.OTHER,
+			"Crew": Role.CREW,
+			"Writing": Role.WRITTER,
+			"Production": Role.PRODUCER,
+			"Editing": Role.OTHER,
+			"Directing": Role.DIRECTOR,
+			"Sound": Role.MUSIC,
+			"Actors": Role.ACTOR,
+		}
 
 	async def __aenter__(self):
 		return self
@@ -169,7 +183,7 @@ class TheMovieDatabase(Provider):
 				Language.get(
 					f"{trans['iso_639_1']}-{trans['iso_3166_1']}"
 				): MovieTranslation(
-					name=clean(trans["data"]["title"])
+					name=clean(trans["data"]["name"])
 					or (
 						clean(movie["original_title"])
 						if movie["original_language"] == trans["iso_639_1"]
@@ -314,17 +328,17 @@ class TheMovieDatabase(Provider):
 				Language.get(
 					f"{trans['iso_639_1']}-{trans['iso_3166_1']}"
 				): SerieTranslation(
-					name=clean(trans["data"]["title"])
+					name=clean(trans["data"]["name"])
 					or (
-						clean(serie["original_title"])
+						clean(serie["original_name"])
 						if serie["original_language"] == trans["iso_639_1"]
 						else None
 					)
-					or serie["title"],
+					or serie["name"],
 					latin_name=next(
 						(
 							x["title"]
-							for x in serie["alternative_titles"]["titles"]
+							for x in serie["alternative_titles"]["results"]
 							if x["iso_3166_1"] == trans["iso_3166_1"]
 							and x["type"] == "Romaji"
 						),
@@ -334,10 +348,10 @@ class TheMovieDatabase(Provider):
 					tagline=clean(trans["data"]["tagline"]),
 					aliases=[
 						x["title"]
-						for x in serie["alternative_titles"]["titles"]
+						for x in serie["alternative_titles"]["results"]
 						if x["iso_3166_1"] == trans["iso_3166_1"]
 					],
-					tags=[x["name"] for x in serie["keywords"]["keywords"]],
+					tags=[x["name"] for x in serie["keywords"]["results"]],
 					poster=self._pick_image(serie, trans["iso_639_1"], "posters"),
 					logo=self._pick_image(serie, trans["iso_639_1"], "logos"),
 					banner=None,
@@ -366,7 +380,7 @@ class TheMovieDatabase(Provider):
 			staff=[self._map_staff(x) for x in serie["credits"]["cast"]],
 		)
 
-	async def _get_season(self, serie_id: str, season_number: int) -> Season:
+	async def _get_season(self, serie_id: str | int, season_number: int) -> Season:
 		season = await self._get(
 			f"tv/{serie_id}/season/{season_number}",
 			params={
@@ -383,7 +397,7 @@ class TheMovieDatabase(Provider):
 			end_air=None,
 			external_id={
 				self.name: SeasonId(
-					serie_id=serie_id,
+					serie_id=str(serie_id),
 					season=season["season_number"],
 					link=f"https://www.themoviedb.org/tv/{serie_id}/season/{season['season_number']}",
 				)
@@ -403,7 +417,7 @@ class TheMovieDatabase(Provider):
 		)
 
 	async def _get_all_entries(
-		self, serie_id: str, seasons: list[dict[str, Any]]
+		self, serie_id: str | int, seasons: list[dict[str, Any]]
 	) -> list[Entry]:
 		# TODO: batch those
 		ret = await asyncio.gather(
@@ -496,7 +510,7 @@ class TheMovieDatabase(Provider):
 
 		return ret
 
-	async def _get_entry(self, serie_id: str, season: int, episode_nbr: int) -> Entry:
+	async def _get_entry(self, serie_id: str | int, season: int, episode_nbr: int) -> Entry:
 		episode = await self._get(
 			f"tv/{serie_id}/season/{season}/episode/{episode_nbr}",
 			params={
@@ -519,7 +533,7 @@ class TheMovieDatabase(Provider):
 			number=episode["episode_number"],
 			external_id={
 				self.name: EpisodeId(
-					serie_id=serie_id,
+					serie_id=str(serie_id),
 					season=episode["season_number"],
 					episode=episode["episode_number"],
 					link=f"https://www.themoviedb.org/tv/{serie_id}/season/{episode['season_number']}/episode/{episode['episode_number']}",
@@ -538,7 +552,7 @@ class TheMovieDatabase(Provider):
 			},
 		)
 
-	async def _get_collection(self, provider_id: str) -> Collection:
+	async def _get_collection(self, provider_id: str | int) -> Collection:
 		collection = await self._get(
 			f"collection/{provider_id}",
 			params={
@@ -567,7 +581,7 @@ class TheMovieDatabase(Provider):
 				Language.get(
 					f"{trans['iso_639_1']}-{trans['iso_3166_1']}"
 				): CollectionTranslation(
-					name=clean(trans["data"]["title"]) or collection["title"],
+					name=clean(trans["data"]["name"]) or collection["name"],
 					latin_name=None,
 					description=trans["overview"],
 					tagline=None,
@@ -663,8 +677,7 @@ class TheMovieDatabase(Provider):
 
 	def _map_staff(self, person: dict[str, Any]) -> Staff:
 		return Staff(
-			# TODO: map those to Role (see https://developer.themoviedb.org/reference/configuration-jobs for list)
-			kind=person["known_for_department"],
+			kind=self._roles_map.get(person["known_for_department"], Role.OTHER),
 			character=Character(
 				name=person["character"],
 				latin_name=None,

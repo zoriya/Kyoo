@@ -77,29 +77,25 @@ class RequestProcessor:
 			_ = tg.create_task(self.process_all())
 
 		def terminated(*_):
-			logger.info("terminated")
 			closed.set()
 
 		while True:
 			closed.clear()
-			logger.info("aquire")
-			try:
-				async with self._pool.acquire(timeout=10) as db:
-					try:
-						self._database = cast(Connection, db)
-						self._database.add_termination_listener(terminated)
-						await self._database.add_listener("scanner_requests", process)
+			# TODO: unsure if timeout actually work, i think not...
+			async with self._pool.acquire(timeout=10) as db:
+				try:
+					self._database = cast(Connection, db)
+					self._database.add_termination_listener(terminated)
+					await self._database.add_listener("scanner_requests", process)
 
-						logger.info("Listening for requestes")
-						_ = await closed.wait()
-						logger.info("stopping...")
-					except CancelledError as e:
-						logger.info("Stopped listening for requsets")
-						await self._database.remove_listener("scanner_requests", process)
-						self._database.remove_termination_listener(terminated)
-						raise
-			except TimeoutError:
-				logger.info("temiout")
+					logger.info("Listening for requestes")
+					_ = await closed.wait()
+					logger.info("stopping...")
+				except CancelledError as e:
+					logger.info("Stopped listening for requsets")
+					await self._database.remove_listener("scanner_requests", process)
+					self._database.remove_termination_listener(terminated)
+					raise
 
 	async def process_all(self):
 		found = True

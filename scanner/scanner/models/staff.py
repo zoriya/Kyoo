@@ -12,6 +12,7 @@ class Role(StrEnum):
 	WRITTER = "writter"
 	PRODUCER = "producer"
 	MUSIC = "music"
+	CREW = "crew"
 	OTHER = "other"
 
 
