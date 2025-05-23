@@ -8,10 +8,11 @@ from pydantic import BaseModel, ConfigDict, GetJsonSchemaHandler
 from pydantic.alias_generators import to_camel
 from pydantic.json_schema import JsonSchemaValue
 from pydantic_core import core_schema
+from slugify import slugify
 
 
 def to_slug(title: str) -> str:
-	return title
+	return slugify(title)
 
 
 def clean(val: str) -> str | None:

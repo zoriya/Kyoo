@@ -58,19 +58,19 @@ class KyooClient(metaclass=Singleton):
 			r.raise_for_status()
 
 	async def create_movie(self, movie: Movie) -> Resource:
-		logger.debug("sending movie %s", movie.model_dump_json())
+		logger.debug("sending movie %s", movie.model_dump_json(by_alias=True))
 		async with self._client.post(
 			"movies",
-			json=movie.model_dump_json(),
+			json=movie.model_dump_json(by_alias=True),
 		) as r:
 			r.raise_for_status()
 			return Resource(**await r.json())
 
 	async def create_serie(self, serie: Serie) -> Resource:
-		logger.debug("sending serie %s", serie.model_dump_json())
+		logger.debug("sending serie %s", serie.model_dump_json(by_alias=True))
 		async with self._client.post(
 			"series",
-			json=serie.model_dump_json(),
+			json=serie.model_dump_json(by_alias=True),
 		) as r:
 			r.raise_for_status()
 			return Resource(**await r.json())
