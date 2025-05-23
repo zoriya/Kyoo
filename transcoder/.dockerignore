@@ -1,1 +1,7 @@
-target/
+**
+!/go.mod
+!/go.sum
+!/**.go
+!/migrations
+# genereated via swag
+!/docs

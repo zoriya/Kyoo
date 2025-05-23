@@ -1,0 +1,7 @@
+**
+!/package.json
+!/bun.lock
+!/tsconfig.json
+!/patches
+!/src
+!/drizzle

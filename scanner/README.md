@@ -1,6 +1,6 @@
 # Scanner
 
-## Workflow (for v5, not current)
+## Workflow
 
 In order of action:
 
@@ -17,9 +17,8 @@ In order of action:
              from: "guessit"
              kind: movie | episode | extra
              title: string,
-             year?: number[],
-             season?: number[],
-             episode?: number[],
+             years?: number[],
+             episodes?: {season?: number, episode: number}[],
              ...
           },
      }
@@ -36,41 +35,42 @@ In order of action:
              from: "anilist",
              kind: movie | episode | extra
              name: string,
-             year: number | null,
-             season?: number[],
-             episode?: number[],
-             absolute?: number[],
+             years: number[],
+             episodes?: {season?: number, episode: number}[],
              externalId: Record<string, {showId, season, number}[]>,
              history: {
                  from: "guessit"
                  kind: movie | episode | extra
                  title: string,
-                 year?: number,
-                 season?: number[],
-                 episode?: number[],
-                 ...
+                 years?: number[],
+                 episodes?: {season?: number, episode: number}[],
               },
              ...
           },
      }
      ```
- - If kind is episode, try to find the serie's id on kyoo (using the previously fetched data from `/videos`):
+ - Try to find the series id on kyoo (using the previously fetched data from `/videos`):
    - if another video in the list of already registered videos has the same `kind`, `name` & `year`, assume it's the same
    - if a match is found, add to the video's json:
    ```json5
    {
-       entries: (uuid | slug | {
-           show: uuid | slug,
-           season: number,
-           episode: number,
-           externalId?: Record<string, {showId, season, number}> // takes priority over season/episode for matching if we have one
+       entries: (
+         | { slug: string }
+         | { movie: uuid | string }
+         | { serie: uuid | slug, season: number, episode: number }
+         | { serie: uuid | slug, order: number }
+         | { serie: uuid | slug, special: number }
+         | { externalId?: Record<string, {serieId, season, number}> }
+         | { externalId?: Record<string, {dataId}> }
        })[],
    }
    ```
  - Scanner pushes everything to the api in a single post `/videos` call
- - Api registers every video in the database
- - For each video without an associated entry, the guess data + the video's id is sent to the Matcher via a queue.
- - Matcher retrieves metadata from the movie/serie + ALL episodes/seasons (from an external provider)
- - Matcher pushes every metadata to the api (if there are 1000 episodes but only 1 video, still push the 1000 episodes)
+ - Api registers every video in the database & return the list of videos not matched to an existing serie/movie.
+ - Scanner adds every non-matched video to a queue
 
-<!-- vim: set noexpandtab : -->
+For each item in the queue, the scanner will:
+ - retrieves metadata from the movie/serie + ALL episodes/seasons (from an external provider)
+ - pushes every metadata to the api (if there are 1000 episodes but only 1 video, still push the 1000 episodes)
+
+<!-- vim: set expandtab : -->

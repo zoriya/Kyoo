@@ -16,6 +16,7 @@ export const Role = t.Object({
 		"writter",
 		"producer",
 		"music",
+		"crew",
 		"other",
 	]),
 	character: t.Nullable(Character),

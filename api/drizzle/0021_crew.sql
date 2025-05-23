@@ -1,0 +1,1 @@
+ALTER TYPE "kyoo"."role_kind" ADD VALUE 'crew' BEFORE 'other';

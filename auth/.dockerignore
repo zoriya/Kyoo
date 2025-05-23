@@ -1,12 +1,9 @@
-Dockerfile*
-*.md
-.dockerignore
-.gitignore
-.env*
-
+**
+!/go.mod
+!/go.sum
+!/**.go
 # generated via sqlc
-dbc/
+!/sql
+!/dbc
 # genereated via swag
-docs/
-
-# vim: ft=gitignore
+!/docs

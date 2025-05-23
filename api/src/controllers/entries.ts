@@ -255,7 +255,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			headers: { "accept-language": languages },
 			request: { url },
 			jwt: { sub },
-			error,
+			status,
 		}) => {
 			const [serie] = await db
 				.select({ pk: shows.pk })
@@ -269,7 +269,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				.limit(1);
 
 			if (!serie) {
-				return error(404, {
+				return status(404, {
 					status: 404,
 					message: `No serie with the id or slug: '${id}'.`,
 				});
@@ -335,7 +335,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			query: { limit, after, query, sort, filter },
 			request: { url },
 			jwt: { sub },
-			error,
+			status,
 		}) => {
 			const [serie] = await db
 				.select({ pk: shows.pk })
@@ -349,7 +349,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				.limit(1);
 
 			if (!serie) {
-				return error(404, {
+				return status(404, {
 					status: 404,
 					message: `No serie with the id or slug: '${id}'.`,
 				});

@@ -21,7 +21,7 @@ type ImageTask = {
 };
 
 // this will only push a task to the image downloader service and not download it instantly.
-// this is both done to prevent to many requests to be sent at once and to make sure POST
+// this is both done to prevent too many requests to be sent at once and to make sure POST
 // requests are not blocked by image downloading or blurhash calculation
 export const enqueueOptImage = async (
 	tx: Transaction,
@@ -68,7 +68,7 @@ export const enqueueOptImage = async (
 		kind: "image",
 		message,
 	});
-	await tx.execute(sql`notify image`);
+	await tx.execute(sql`notify kyoo_image`);
 
 	return {
 		id,
@@ -128,7 +128,7 @@ export const processImages = async () => {
 
 	const client = (await db.$client.connect()) as PoolClient;
 	client.on("notification", (evt) => {
-		if (evt.channel !== "image") return;
+		if (evt.channel !== "kyoo_image") return;
 		processAll();
 	});
 	await client.query("listen image");
