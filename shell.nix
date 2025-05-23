@@ -12,4 +12,6 @@ pkgs.mkShell {
 
   # env vars aren't inherited from the `inputsFrom`
   SHARP_FORCE_GLOBAL_LIBVIPS = 1;
+  UV_PYTHON_PREFERENCE = "only-system";
+  UV_PYTHON = pkgs.python313;
 }
