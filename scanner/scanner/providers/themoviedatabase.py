@@ -685,8 +685,8 @@ class TheMovieDatabase(Provider):
 			),
 			staff=Person(
 				slug=to_slug(person["name"]),
-				name=person["name"],
-				latin_name=person["original_name"],
+				name=person["original_name"],
+				latin_name=person["name"],
 				image=self._map_image(person["profile_path"]),
 				external_id={
 					self.name: MetadataId(

@@ -1,5 +1,5 @@
 import logging
-from asyncio import CancelledError, TaskGroup, create_task, sleep
+from asyncio import CancelledError, TaskGroup, create_task
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
