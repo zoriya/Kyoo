@@ -9,6 +9,7 @@
       langcodes
       asyncpg
       pyjwt
+      python-slugify
     ]);
 in
   pkgs.mkShell {
@@ -19,4 +20,7 @@ in
       fastapi-cli
       pgformatter
     ];
+
+    UV_PYTHON_PREFERENCE = "only-system";
+    UV_PYTHON = pkgs.python313;
   }
