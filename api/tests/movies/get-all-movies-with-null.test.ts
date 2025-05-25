@@ -21,7 +21,7 @@ describe("with a null value", () => {
 	// instead we just make a new file for those /shrug
 	// see: https://github.com/oven-sh/bun/issues/5738
 	beforeAll(async () => {
-		await createMovie({
+		const [ret, body] = await createMovie({
 			slug: "no-air-date",
 			translations: {
 				en: {
@@ -34,7 +34,7 @@ describe("with a null value", () => {
 					tagline: null,
 					tags: [],
 					thumbnail: null,
-					trailerUrl: null,
+					trailer: null,
 				},
 			},
 			genres: [],
@@ -46,6 +46,7 @@ describe("with a null value", () => {
 			externalId: {},
 			studios: [],
 		});
+		expectStatus(ret, body).toBe(201);
 	});
 
 	it("sort by dates desc with a null value", async () => {

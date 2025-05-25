@@ -12,6 +12,7 @@ export const madeInAbyssVideo: Video = {
 		episodes: [{ season: 1, episode: 13 }],
 		kind: "episode",
 		from: "guessit",
+		history: [],
 	},
 	createdAt: "2024-11-23T15:01:24.968Z",
 	updatedAt: "2024-11-23T15:01:24.968Z",
@@ -56,7 +57,7 @@ export const madeInAbyss = {
 				"https://image.tmdb.org/t/p/original/Df9XrvZFIeQfLKfu8evRmzvRsd.jpg",
 			logo: "https://image.tmdb.org/t/p/original/7hY3Q4GhkiYPBfn4UoVg0AO4Zgk.png",
 			banner: null,
-			trailerUrl: "https://www.youtube.com/watch?v=ePOyy6Wlk4s",
+			trailer: "https://www.youtube.com/watch?v=ePOyy6Wlk4s",
 		},
 		ja: {
 			name: "メイドインアビス",
@@ -90,7 +91,7 @@ export const madeInAbyss = {
 				"https://image.tmdb.org/t/p/original/Df9XrvZFIeQfLKfu8evRmzvRsd.jpg",
 			logo: "https://image.tmdb.org/t/p/original/7hY3Q4GhkiYPBfn4UoVg0AO4Zgk.png",
 			banner: null,
-			trailerUrl: "https://www.youtube.com/watch?v=ePOyy6Wlk4s",
+			trailer: "https://www.youtube.com/watch?v=ePOyy6Wlk4s",
 		},
 	},
 	genres: [

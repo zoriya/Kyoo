@@ -8,7 +8,7 @@ import { TranslationRecord } from "./utils/language";
 import { Resource } from "./utils/resource";
 
 export const BaseSeason = t.Object({
-	seasonNumber: t.Integer({ minimum: 1 }),
+	seasonNumber: t.Integer({ minimum: 0 }),
 	startAir: t.Nullable(t.String({ format: "date" })),
 	endAir: t.Nullable(t.String({ format: "date" })),
 
