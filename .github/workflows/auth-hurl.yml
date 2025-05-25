@@ -48,7 +48,7 @@ jobs:
         working-directory: ./auth
         run: |
           ./keibi > logs &
-          wget --retry-connrefused --retry-on-http-error=502 http://localhost:4568/health
+          wget --retry-connrefused --retry-on-http-error=502 http://localhost:4568/auth/health
           hurl --error-format long --variable host=http://localhost:4568/auth tests/*
         env:
           PGHOST: localhost

@@ -131,7 +131,7 @@ export const processImages = async () => {
 		if (evt.channel !== "kyoo_image") return;
 		processAll();
 	});
-	await client.query("listen image");
+	await client.query("listen kyoo_image");
 
 	// start processing old tasks
 	await processAll();
@@ -139,7 +139,13 @@ export const processImages = async () => {
 };
 
 async function downloadImage(id: string, url: string): Promise<string> {
-	// TODO: check if file exists before downloading
+	const low = await getFile(path.join(imageDir, `${id}.low.jpg`))
+		.arrayBuffer()
+		.catch(() => false as const);
+	if (low) {
+		return await getBlurhash(sharp(low));
+	}
+
 	const resp = await fetch(url, {
 		headers: { "User-Agent": `Kyoo v${version}` },
 	});
@@ -167,20 +173,15 @@ async function downloadImage(id: string, url: string): Promise<string> {
 			await Bun.write(file, buffer, { mode: 0o660 });
 		}),
 	);
+	return await getBlurhash(image);
+}
 
+async function getBlurhash(image: sharp.Sharp): Promise<string> {
 	const { data, info } = await image
 		.resize(32, 32, { fit: "inside" })
 		.ensureAlpha()
 		.raw()
 		.toBuffer({ resolveWithObject: true });
 
-	const blurHash = encode(
-		new Uint8ClampedArray(data),
-		info.width,
-		info.height,
-		4,
-		3,
-	);
-
-	return blurHash;
+	return encode(new Uint8ClampedArray(data), info.width, info.height, 4, 3);
 }
