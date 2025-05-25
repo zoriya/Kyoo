@@ -19,11 +19,11 @@ import (
 )
 
 type ApiKey struct {
-	Id uuid.UUID `json:"id" example:"e05089d6-9179-4b5b-a63e-94dd5fc2a397"`
-	Name string `json:"name" example:"myapp"`
-	CreatedAt time.Time `json:"createAt" example:"2025-03-29T18:20:05.267Z"`
-	LastUsed time.Time `json:"lastUsed" example:"2025-03-29T18:20:05.267Z"`
-	Claims jwt.MapClaims `json:"claims" example:"isAdmin: true"`
+	Id        uuid.UUID     `json:"id" example:"e05089d6-9179-4b5b-a63e-94dd5fc2a397"`
+	Name      string        `json:"name" example:"myapp"`
+	CreatedAt time.Time     `json:"createAt" example:"2025-03-29T18:20:05.267Z"`
+	LastUsed  time.Time     `json:"lastUsed" example:"2025-03-29T18:20:05.267Z"`
+	Claims    jwt.MapClaims `json:"claims" example:"isAdmin: true"`
 }
 
 type ApiKeyWToken struct {
@@ -32,18 +32,18 @@ type ApiKeyWToken struct {
 }
 
 type ApiKeyDto struct {
-	Name string `json:"name" example:"myapp" validate:"alpha"`
+	Name   string        `json:"name" example:"myapp" validate:"alpha"`
 	Claims jwt.MapClaims `json:"claims" example:"isAdmin: true"`
 }
 
 func MapDbKey(key *dbc.Apikey) ApiKeyWToken {
 	return ApiKeyWToken{
 		ApiKey: ApiKey{
-			Id: key.Id,
-			Name: key.Name,
-			Claims: key.Claims,
+			Id:        key.Id,
+			Name:      key.Name,
+			Claims:    key.Claims,
 			CreatedAt: key.CreatedAt,
-			LastUsed: key.LastUsed,
+			LastUsed:  key.LastUsed,
 		},
 		Token: fmt.Sprintf("%s-%s", key.Name, key.Token),
 	}
@@ -91,15 +91,15 @@ func (h *Handler) CreateApiKey(c echo.Context) error {
 	if err != nil {
 		u, _ := h.db.GetUser(context.Background(), dbc.GetUserParams{
 			UseId: true,
-			Id: uid,
+			Id:    uid,
 		})
 		user = &u[0].User.Pk
 	}
 
 	dbkey, err := h.db.CreateApiKey(context.Background(), dbc.CreateApiKeyParams{
-		Name: req.Name,
-		Token: base64.RawURLEncoding.EncodeToString(id),
-		Claims: req.Claims,
+		Name:      req.Name,
+		Token:     base64.RawURLEncoding.EncodeToString(id),
+		Claims:    req.Claims,
 		CreatedBy: user,
 	})
 	if ErrIs(err, pgerrcode.UniqueViolation) {
@@ -169,7 +169,7 @@ func (h *Handler) ListApiKey(c echo.Context) error {
 
 	return c.JSON(200, Page[ApiKey]{
 		Items: ret,
-		This: c.Request().URL.String(),
+		This:  c.Request().URL.String(),
 	})
 }
 
@@ -182,7 +182,7 @@ func (h *Handler) createApiJwt(apikey string) (string, error) {
 	key, fromEnv := h.config.EnvApiKeys[info[0]]
 	if !fromEnv {
 		dbKey, err := h.db.GetApiKey(context.Background(), dbc.GetApiKeyParams{
-			Name: info[0],
+			Name:  info[0],
 			Token: info[1],
 		})
 		if err == pgx.ErrNoRows {
