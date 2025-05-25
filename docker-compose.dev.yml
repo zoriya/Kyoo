@@ -8,7 +8,7 @@ x-transcoder: &transcoder-base
         - transcoder
   ports:
     - "7666:7666"
-  restart: on-failure
+  restart: unless-stopped
   cpus: 1
   env_file:
     - ./.env
@@ -39,7 +39,7 @@ services:
   #   ports:
   #     - "3000:3000"
   #     - "8081:8081"
-  #   restart: on-failure
+  #   restart: unless-stopped
   #   environment:
   #     - KYOO_URL=${KYOO_URL:-http://api:5000/api}
   #   labels:
@@ -50,7 +50,7 @@ services:
     build:
       context: ./auth
       dockerfile: Dockerfile.dev
-    restart: on-failure
+    restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
@@ -71,7 +71,7 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile.dev
-    restart: on-failure
+    restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
@@ -99,7 +99,7 @@ services:
 
   scanner:
     build: ./scanner
-    restart: on-failure
+    restart: unless-stopped
     depends_on:
       api:
         condition: service_started
@@ -172,7 +172,7 @@ services:
 
   traefik:
     image: traefik:v3.4
-    restart: on-failure
+    restart: unless-stopped
     command:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
@@ -185,7 +185,7 @@ services:
 
   postgres:
     image: postgres:15
-    restart: on-failure
+    restart: unless-stopped
     env_file:
       - ./.env
     volumes:
