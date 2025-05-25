@@ -487,18 +487,15 @@ class TheMovieDatabase(Provider):
 				snbr = cast(int, ep.season_number)
 				enbr = cast(int, ep.episode_number)
 				ep.order = next(
-					(
-						# Using absolute + 1 since the array is 0based (absolute episode 1 is at index 0)
-						i + 1
-						for i, x in enumerate(episodes)
-						if x["season_number"] == snbr
-						and (
-							x["episode_number"] == enbr
-							# don't forget weird numbering
-							or x["episode_number"] == enbr + season_starts[snbr - 1]
-						)
-					),
-					0,
+					# Using absolute + 1 since the array is 0based (absolute episode 1 is at index 0)
+					i + 1
+					for i, x in enumerate(episodes)
+					if x["season_number"] == snbr
+					and (
+						x["episode_number"] == enbr
+						# don't forget weird numbering
+						or x["episode_number"] == enbr + season_starts[snbr - 1]
+					)
 				)
 		except Exception as e:
 			logger.exception(
@@ -506,11 +503,16 @@ class TheMovieDatabase(Provider):
 			)
 			ret = sorted(ret, key=lambda ep: (ep.season_number, ep.episode_number))
 			for order, ep in enumerate(ret):
-				ep.order = order
+				ep.order = order + 1
 
 		return ret
 
-	async def _get_entry(self, serie_id: str | int, season: int, episode_nbr: int) -> Entry:
+	async def _get_entry(
+		self,
+		serie_id: str | int,
+		season: int,
+		episode_nbr: int,
+	) -> Entry:
 		episode = await self._get(
 			f"tv/{serie_id}/season/{season}/episode/{episode_nbr}",
 			params={
