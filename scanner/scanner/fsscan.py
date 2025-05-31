@@ -104,7 +104,7 @@ class FsScanner:
 	async def _register(self, videos: list[str] | set[str]):
 		# TODO: we should probably chunk those
 		vids: list[Video] = []
-		for path in list(videos)[:1]:
+		for path in list(videos):
 			try:
 				vid = await identify(path)
 				vid = self._match(vid)

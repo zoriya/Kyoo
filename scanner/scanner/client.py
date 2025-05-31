@@ -61,7 +61,7 @@ class KyooClient(metaclass=Singleton):
 		logger.debug("sending movie %s", movie.model_dump_json(by_alias=True))
 		async with self._client.post(
 			"movies",
-			json=movie.model_dump_json(by_alias=True),
+			data=movie.model_dump_json(by_alias=True),
 		) as r:
 			r.raise_for_status()
 			return Resource(**await r.json())
@@ -70,7 +70,7 @@ class KyooClient(metaclass=Singleton):
 		logger.debug("sending serie %s", serie.model_dump_json(by_alias=True))
 		async with self._client.post(
 			"series",
-			json=serie.model_dump_json(by_alias=True),
+			data=serie.model_dump_json(by_alias=True),
 		) as r:
 			r.raise_for_status()
 			return Resource(**await r.json())

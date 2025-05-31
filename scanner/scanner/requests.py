@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from asyncio import CancelledError, Event, Future, TaskGroup, sleep
+from asyncio import CancelledError, Event, TaskGroup
 from logging import getLogger
-from types import TracebackType
 from typing import Literal, cast
 
 from asyncpg import Connection, Pool
@@ -91,7 +90,7 @@ class RequestProcessor:
 					logger.info("Listening for requestes")
 					_ = await closed.wait()
 					logger.info("stopping...")
-				except CancelledError as e:
+				except CancelledError:
 					logger.info("Stopped listening for requsets")
 					await self._database.remove_listener("scanner_requests", process)
 					self._database.remove_termination_listener(terminated)
@@ -130,7 +129,6 @@ class RequestProcessor:
 				*
 			"""
 		)
-		logger.warning("toto %s", cur)
 		if cur is None:
 			return False
 		request = Request.model_validate(cur)
