@@ -143,7 +143,7 @@ class RequestProcessor:
 				returning
 					videos
 				""",
-				[request.pk],
+				request.pk,
 			)
 			if finished and finished["videos"] != request.videos:
 				await self._client.link_videos(show.slug, finished["videos"])
