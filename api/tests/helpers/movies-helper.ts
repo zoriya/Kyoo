@@ -1,5 +1,5 @@
 import { buildUrl } from "tests/utils";
-import { app } from "~/base";
+import { handlers } from "~/base";
 import type { SeedMovie } from "~/models/movie";
 import type { MovieWatchStatus } from "~/models/watchlist";
 import { getJwtHeaders } from "./jwt";
@@ -11,7 +11,7 @@ export const getMovie = async (
 		...query
 	}: { langs?: string; preferOriginal?: boolean; with?: string[] },
 ) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl(`movies/${id}`, query), {
 			method: "GET",
 			headers: langs
@@ -38,7 +38,7 @@ export const getMovies = async ({
 	langs?: string;
 	preferOriginal?: boolean;
 }) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl("movies", query), {
 			method: "GET",
 			headers: langs
@@ -54,7 +54,7 @@ export const getMovies = async ({
 };
 
 export const createMovie = async (movie: SeedMovie) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl("movies"), {
 			method: "POST",
 			body: JSON.stringify(movie),
@@ -72,7 +72,7 @@ export const setMovieStatus = async (
 	id: string,
 	status: Omit<MovieWatchStatus, "percent">,
 ) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl(`movies/${id}/watchstatus`), {
 			method: "POST",
 			body: JSON.stringify(status),

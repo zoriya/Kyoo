@@ -24,11 +24,13 @@ RUN apt-get update \
 	ffmpeg libavformat-dev libavutil-dev libswscale-dev \
 	&& apt-get clean autoclean -y \
 	&& apt-get autoremove -y
+
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
+
 COPY . .
-RUN go build -o ./transcoder
+RUN GOOS=linux go build -o ./transcoder
 
 # debian is required for nvidia hardware acceleration
 # we use trixie (debian's testing because ffmpeg on latest is v5 and we need v6)

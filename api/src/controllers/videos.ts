@@ -1,5 +1,4 @@
-import { and, eq, exists, inArray, not, notExists, or, sql } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
+import { and, eq, notExists, or, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "~/db";
 import { entries, entryVideoJoin, shows, videos } from "~/db/schema";
@@ -23,7 +22,7 @@ import {
 	sortToSql,
 } from "~/models/utils";
 import { desc as description } from "~/models/utils/descriptions";
-import { Guesses, SeedVideo, Video } from "~/models/video";
+import { Guess, Guesses, SeedVideo, Video } from "~/models/video";
 import { comment } from "~/utils";
 import { computeVideoSlug } from "./seed/insert/entries";
 import {
@@ -34,6 +33,7 @@ import {
 const CreatedVideo = t.Object({
 	id: t.String({ format: "uuid" }),
 	path: t.String({ examples: [bubbleVideo.path] }),
+	guess: t.Omit(Guess, ["history"]),
 	entries: t.Array(
 		t.Object({
 			slug: t.String({ format: "slug", examples: ["bubble-v2"] }),
@@ -60,7 +60,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 					})
 					.from(videos)
 					.leftJoin(
-						sql`jsonb_array_elements_text(${videos.guess}->'year') as year`,
+						sql`jsonb_array_elements_text(${videos.guess}->'years') as year`,
 						sql`true`,
 					)
 					.innerJoin(entryVideoJoin, eq(entryVideoJoin.videoPk, videos.pk))
@@ -169,9 +169,9 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 	)
 	.post(
 		"",
-		async ({ body, error }) => {
+		async ({ body, status }) => {
 			return await db.transaction(async (tx) => {
-				let vids: { pk: number; id: string; path: string }[] = [];
+				let vids: { pk: number; id: string; path: string; guess: Guess }[] = [];
 				try {
 					vids = await tx
 						.insert(videos)
@@ -184,10 +184,11 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 							pk: videos.pk,
 							id: videos.id,
 							path: videos.path,
+							guess: videos.guess,
 						});
 				} catch (e) {
 					if (!isUniqueConstraint(e)) throw e;
-					return error(409, {
+					return status(409, {
 						status: 409,
 						message: comment`
 							Invalid rendering. A video with the same (rendering, part, version) combo
@@ -222,9 +223,14 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				});
 
 				if (!vidEntries.length) {
-					return error(
+					return status(
 						201,
-						vids.map((x) => ({ id: x.id, path: x.path, entries: [] })),
+						vids.map((x) => ({
+							id: x.id,
+							path: x.path,
+							guess: x.guess,
+							entries: [],
+						})),
 					);
 				}
 
@@ -358,11 +364,12 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				);
 				await updateAvailableSince(tx, entriesPk);
 
-				return error(
+				return status(
 					201,
 					vids.map((x) => ({
 						id: x.id,
 						path: x.path,
+						guess: x.guess,
 						entries: entr[x.pk] ?? [],
 					})),
 				);

@@ -56,7 +56,7 @@ func GetCurrentSessionId(c echo.Context) (uuid.UUID, error) {
 
 func CheckPermissions(c echo.Context, perms []string) error {
 	token, ok := c.Get("user").(*jwt.Token)
-	if !ok{
+	if !ok {
 		return echo.NewHTTPError(401, "Not logged in")
 	}
 	sub, err := token.Claims.GetSubject()

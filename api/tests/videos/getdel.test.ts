@@ -23,7 +23,12 @@ beforeAll(async () => {
 
 	[ret, body] = await createVideo([
 		{
-			guess: { title: "mia", season: [1], episode: [13], from: "test" },
+			guess: {
+				title: "mia",
+				episodes: [{ season: 1, episode: 13 }],
+				from: "test",
+				history: [],
+			},
 			part: null,
 			path: "/video/mia s1e13.mkv",
 			rendering: "sha2",
@@ -33,10 +38,10 @@ beforeAll(async () => {
 		{
 			guess: {
 				title: "mia",
-				season: [2],
-				episode: [1],
-				year: [2017],
+				episodes: [{ season: 2, episode: 1 }],
+				years: [2017],
 				from: "test",
+				history: [],
 			},
 			part: null,
 			path: "/video/mia 2017 s2e1.mkv",
@@ -45,7 +50,7 @@ beforeAll(async () => {
 			for: [{ slug: `${madeInAbyss.slug}-s2e1` }],
 		},
 		{
-			guess: { title: "bubble", from: "test" },
+			guess: { title: "bubble", from: "test", history: [] },
 			part: null,
 			path: "/video/bubble.mkv",
 			rendering: "sha5",
@@ -103,7 +108,12 @@ describe("Video get/deletion", () => {
 
 	it("With unknown", async () => {
 		let [resp, body] = await createVideo({
-			guess: { title: "mia", season: [1], episode: [13], from: "test" },
+			guess: {
+				title: "mia",
+				episodes: [{ season: 1, episode: 13 }],
+				from: "test",
+				history: [],
+			},
 			part: null,
 			path: "/video/mia s1e13 unknown test.mkv",
 			rendering: "shanthnth",
@@ -137,7 +147,12 @@ describe("Video get/deletion", () => {
 
 	it("Mismatch title guess", async () => {
 		let [resp, body] = await createVideo({
-			guess: { title: "mia", season: [1], episode: [13], from: "test" },
+			guess: {
+				title: "mia",
+				episodes: [{ season: 1, episode: 13 }],
+				from: "test",
+				history: [],
+			},
 			part: null,
 			path: "/video/mia s1e13 mismatch.mkv",
 			rendering: "mismatch",

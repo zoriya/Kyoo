@@ -1,5 +1,38 @@
+[project]
+name = "scanner"
+version = "0.1.0"
+description = "Register video files to kyoo"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiohttp>=3.11.18",
+    "asyncpg>=0.30.0",
+    "fastapi[standard]>=0.115.12",
+    "guessit",
+    "langcodes>=3.5.0",
+    "pydantic>=2.11.4",
+    "pyjwt[crypto]>=2.10.1",
+    "python-slugify>=8.0.4",
+    "watchfiles>=1.0.5",
+]
+
+[tool.uv.sources]
+guessit = { git = "https://github.com/zoriya/guessit" }
+
 [tool.ruff.format]
 indent-style = "tab"
 
 [tool.pyright]
 reportAbstractUsage = false
+reportUnannotatedClassAttribute = false
+enableTypeIgnoreComments = true
+reportIgnoreCommentWithoutRule = false
+reportUnknownArgumentType = false
+reportUnknownVariableType = false
+reportMissingParameterType = false
+reportUnknownParameterType = false
+reportUnknownMemberType = false
+reportAny = false
+reportExplicitAny = false
+reportMissingTypeStubs = false
+reportUnknownLambdaType = false

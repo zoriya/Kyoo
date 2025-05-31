@@ -111,10 +111,10 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 						query: { sort, filter, query, limit, after },
 						headers: { "accept-language": languages, authorization },
 						request: { url },
-						error,
+						status,
 					}) => {
 						const uInfo = await getUserInfo(id, { authorization });
-						if ("status" in uInfo) return error(uInfo.status as 404, uInfo);
+						if ("status" in uInfo) return status(uInfo.status as 404, uInfo);
 
 						const langs = processLanguages(languages);
 						const items = (await getEntries({
@@ -163,7 +163,7 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 	)
 	.post(
 		"/profiles/me/history",
-		async ({ body, jwt: { sub }, error }) => {
+		async ({ body, jwt: { sub }, status }) => {
 			const profilePk = await getOrCreateProfile(sub);
 
 			const hist = values(
@@ -321,7 +321,7 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 					},
 				});
 
-			return error(201, { status: 201, inserted: rows.length });
+			return status(201, { status: 201, inserted: rows.length });
 		},
 		{
 			detail: { description: "Bulk add entries/movies to your watch history." },
