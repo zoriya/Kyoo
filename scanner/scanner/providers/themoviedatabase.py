@@ -147,7 +147,6 @@ class TheMovieDatabase(Provider):
 				"append_to_response": "alternative_titles,videos,credits,keywords,images,translations",
 			},
 		)
-		logger.debug("TMDb responded: %s", movie)
 
 		return Movie(
 			slug=to_slug(movie["title"]),
@@ -279,7 +278,6 @@ class TheMovieDatabase(Provider):
 				"append_to_response": "alternative_titles,videos,credits,keywords,images,external_ids,translations",
 			},
 		)
-		logger.debug("TMDb responded: %s", serie)
 
 		return Serie(
 			slug=to_slug(serie["name"]),
@@ -387,7 +385,6 @@ class TheMovieDatabase(Provider):
 				"append_to_response": "translations,images",
 			},
 		)
-		logger.debug("TMDb responded: %s", season)
 
 		return Season(
 			season_number=season["season_number"],
@@ -438,7 +435,7 @@ class TheMovieDatabase(Provider):
 			)
 			# if it doesn't have 75% of all episodes, it's probably unmaintained. keep default order
 			if group is None or group["episode_count"] < len(ret) // 1.5:
-				return ret
+				raise ProviderError("No valid absolute ordering group.")
 
 			# groups of groups (each `episode_group` contains a `group` that acts like a season)
 			gog = await self._get(f"tv/episode_group/{group['id']}")
@@ -498,9 +495,10 @@ class TheMovieDatabase(Provider):
 					)
 				)
 		except Exception as e:
-			logger.exception(
-				"Could not retrieve absolute ordering information", exc_info=e
-			)
+			if not isinstance(e, ProviderError):
+				logger.exception(
+					"Could not retrieve absolute ordering information", exc_info=e
+				)
 			ret = sorted(ret, key=lambda ep: (ep.season_number, ep.episode_number))
 			for order, ep in enumerate(ret):
 				ep.order = order + 1
@@ -519,7 +517,6 @@ class TheMovieDatabase(Provider):
 				"append_to_response": "translations",
 			},
 		)
-		logger.debug("TMDb responded: %s", episode)
 
 		return Entry(
 			kind="episode" if episode["season_number"] != 0 else "special",
@@ -561,7 +558,6 @@ class TheMovieDatabase(Provider):
 				"append_to_response": "images,translations",
 			},
 		)
-		logger.debug("TMDb responded: %s", collection)
 
 		return Collection(
 			slug=to_slug(collection["name"]),
