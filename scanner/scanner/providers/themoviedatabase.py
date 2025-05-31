@@ -278,6 +278,13 @@ class TheMovieDatabase(Provider):
 				"append_to_response": "alternative_titles,videos,credits,keywords,images,external_ids,translations",
 			},
 		)
+		seasons = await asyncio.gather(
+			*[
+				self._get_season(serie["id"], x["season_number"])
+				for x in serie["seasons"]
+			]
+		)
+		entries = await self._get_all_entries(serie["id"], seasons)
 
 		return Serie(
 			slug=to_slug(serie["name"]),
@@ -364,13 +371,8 @@ class TheMovieDatabase(Provider):
 				)
 				for trans in serie["translations"]["translations"]
 			},
-			seasons=await asyncio.gather(
-				*[
-					self._get_season(serie["id"], x["season_number"])
-					for x in serie["seasons"]
-				]
-			),
-			entries=await self._get_all_entries(serie["id"], serie["seasons"]),
+			seasons=seasons,
+			entries=entries,
 			extra=[],
 			collections=[],
 			studios=[self._map_studio(x) for x in serie["production_companies"]],
@@ -411,17 +413,23 @@ class TheMovieDatabase(Provider):
 				)
 				for trans in season["translations"]["translations"]
 			},
+			extra={
+				"first_entry": next(
+					(x["episode_number"] for x in season["episodes"]), None
+				),
+				"entries_count": len(season["episodes"]),
+			},
 		)
 
 	async def _get_all_entries(
-		self, serie_id: str | int, seasons: list[dict[str, Any]]
+		self, serie_id: str | int, seasons: list[Season]
 	) -> list[Entry]:
 		# TODO: batch those
 		ret = await asyncio.gather(
 			*[
-				self._get_entry(serie_id, s["season_number"], e)
+				self._get_entry(serie_id, s.season_number, s.extra["first_entry"] + e)
 				for s in seasons
-				for e in range(1, s["episode_count"])
+				for e in range(0, s.extra["entries_count"])
 			]
 		)
 
@@ -449,33 +457,23 @@ class TheMovieDatabase(Provider):
 			# one piece's s22e1089 is the first ep of s22.
 			# this is because episode_numbers simply don't reset after season start
 			#   (eg s21e1088 is the last ep of s21)
-			season_starts = [
-				next(
-					(
-						x["episode_number"]
-						for x in episodes
-						if x["season_number"] == s["season_number"]
-					),
-					1,
-				)
-				for s in seasons
-			]
+			season_starts = [s.extra["first_entry"] for s in seasons]
 
 			if len(episodes) != len(ret):
 				logger.warning(
 					f"Incomplete absolute group for show {serie_id}. Filling missing values by assuming season/episode order is ascending."
 				)
 				episodes += [
-					{"season_number": s["season_number"], "episode_number": e}
+					{"season_number": s.season_number, "episode_number": e}
 					for s in seasons
-					for e in range(1, s["episodes_count"] + 1)
+					for e in range(1, s.extra["entries_count"] + 1)
 					if not any(
-						x["season_number"] == s["season_number"]
+						x["season_number"] == s.season_number
 						and (
 							x["episode_number"] == e
 							# take into account weird absolute (for example one piece, episodes are not reset to 1 when the season starts)
 							or x["episode_number"]
-							== season_starts[s["season_number"] - 1] + e
+							== season_starts[s.season_number - 1] + e
 						)
 						for x in episodes
 					)

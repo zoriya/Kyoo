@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 from datetime import date
+from typing import Any
+
+from pydantic import Field
 
 from ..utils import Language, Model
 from .metadataid import SeasonId
@@ -12,6 +15,7 @@ class Season(Model):
 	end_air: date | None
 	external_id: dict[str, SeasonId]
 	translations: dict[Language, SeasonTranslation] = {}
+	extra: dict[str, Any] = Field(exclude=True)
 
 
 class SeasonTranslation(Model):
