@@ -119,7 +119,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 		},
 	)
 	.get(
-		"unknowns",
+		"unmatched",
 		async ({ query: { sort, query, limit, after }, request: { url } }) => {
 			const ret = await db
 				.select()
@@ -146,7 +146,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 			return createPage(ret, { url, sort, limit });
 		},
 		{
-			detail: { description: "Get unknown/unmatch videos." },
+			detail: { description: "Get unknown/unmatched videos." },
 			query: t.Object({
 				sort: Sort(
 					{ createdAt: videos.createdAt, path: videos.path },
