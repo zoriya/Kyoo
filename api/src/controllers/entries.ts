@@ -72,6 +72,7 @@ export const entryFilters: FilterDef = {
 	runtime: { column: entries.runtime, type: "float" },
 	airDate: { column: entries.airDate, type: "date" },
 	playedDate: { column: entryProgressQ.playedDate, type: "date" },
+	isAvailable: { column: isNotNull(entries.availableSince), type: "bool" },
 };
 
 const extraFilters: FilterDef = {

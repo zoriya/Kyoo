@@ -29,7 +29,8 @@ export type Value =
 	| { type: "float"; value: number }
 	| { type: "date"; value: string }
 	| { type: "string"; value: string }
-	| { type: "enum"; value: string };
+	| { type: "enum"; value: string }
+	| { type: "bool"; value: boolean };
 const operators = ["eq", "ne", "gt", "ge", "lt", "le", "has"] as const;
 export type Operator = (typeof operators)[number];
 export type Expression =
