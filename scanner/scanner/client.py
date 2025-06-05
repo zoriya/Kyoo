@@ -1,15 +1,16 @@
 import os
 from logging import getLogger
 from types import TracebackType
+from typing import Literal
 
 from aiohttp import ClientSession
 from pydantic import TypeAdapter
 
-from scanner.utils import Singleton
-
 from .models.movie import Movie
 from .models.serie import Serie
-from .models.videos import Resource, Video, VideoCreated, VideoInfo
+from .models.videos import For, Resource, Video, VideoCreated, VideoInfo, VideoLink
+from .requests import Request
+from .utils import Singleton
 
 logger = getLogger(__name__)
 
@@ -74,3 +75,32 @@ class KyooClient(metaclass=Singleton):
 		) as r:
 			r.raise_for_status()
 			return Resource(**await r.json())
+
+	async def link_videos(
+		self,
+		kind: Literal["movie", "serie"],
+		show: str,
+		videos: list[Request.Video],
+	):
+		def map_request(request: Request.Video):
+			if kind == "movie":
+				return VideoLink(id=request.id, for_=[For.Movie(movie=show)])
+			return VideoLink(
+				id=request.id,
+				for_=[
+					For.Special(serie=show, special=ep.episode)
+					if ep.season is None
+					else For.Episode(serie=show, season=ep.season, episode=ep.episode)
+					for ep in request.episodes
+				],
+			)
+
+		async with self._client.post(
+			"videos",
+			data=TypeAdapter(list[VideoLink]).dump_json(
+				[map_request(x) for x in videos],
+				by_alias=True,
+			),
+		) as r:
+			r.raise_for_status()
+			return TypeAdapter(list[VideoCreated]).validate_json(await r.text())

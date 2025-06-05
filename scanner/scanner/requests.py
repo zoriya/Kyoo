@@ -146,7 +146,7 @@ class RequestProcessor:
 				request.pk,
 			)
 			if finished and finished["videos"] != request.videos:
-				await self._client.link_videos(show.slug, finished["videos"])
+				await self._client.link_videos(show.kind, show.slug, finished["videos"])
 		except Exception as e:
 			logger.error("Couldn't process request", exc_info=e)
 			cur = await self._database.execute(

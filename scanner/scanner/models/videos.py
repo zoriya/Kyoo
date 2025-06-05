@@ -58,7 +58,7 @@ class For(Model):
 		order: float
 
 	class Special(Model):
-		serie: int
+		serie: str
 		special: int
 
 
@@ -78,3 +78,10 @@ class VideoCreated(Model):
 	path: str
 	guess: Guess
 	entries: list[Resource]
+
+
+class VideoLink(Model):
+	id: str
+	for_: list[
+		For.Slug | For.ExternalId | For.Movie | For.Episode | For.Order | For.Special
+	]

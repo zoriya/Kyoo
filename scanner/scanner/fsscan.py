@@ -1,6 +1,6 @@
-from contextlib import asynccontextmanager
 import os
 import re
+from contextlib import asynccontextmanager
 from logging import getLogger
 from mimetypes import guess_file_type
 from os.path import dirname, exists, isdir, join
@@ -157,13 +157,12 @@ class FsScanner:
 				)
 		else:
 			for ep in video.guess.episodes:
-				if ep.season is not None:
-					for slug in slugs:
-						video.for_.append(
-							For.Episode(
-								serie=slug, season=ep.season, episode=ep.episode
-							)
-						)
+				for slug in slugs:
+					video.for_.append(
+						For.Episode(serie=slug, season=ep.season, episode=ep.episode)
+						if ep.season is not None
+						else For.Special(serie=slug, special=ep.episode)
+					)
 
 				for k, v in video.guess.external_id.items():
 					video.for_.append(
