@@ -43,3 +43,20 @@ export const deleteVideo = async (paths: string[]) => {
 	const body = await resp.json();
 	return [resp, body] as const;
 };
+
+export const linkVideos = async (
+	links: { id: string; for: SeedVideo["for"] }[],
+) => {
+	const resp = await handlers.handle(
+		new Request(buildUrl("videos/link"), {
+			method: "POST",
+			body: JSON.stringify(links),
+			headers: {
+				"Content-Type": "application/json",
+				...(await getJwtHeaders()),
+			},
+		}),
+	);
+	const body = await resp.json();
+	return [resp, body] as const;
+};

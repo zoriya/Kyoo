@@ -58,7 +58,7 @@ export const toDrizzle = (expr: Expression, config: FilterDef): SQL => {
 						{ in: where },
 					);
 				}
-				expr.value = { type: "bool", value: expr.value.value === "true" }
+				expr.value = { type: "bool", value: expr.value.value === "true" };
 			}
 			if (prop.type !== expr.value.type) {
 				throw new KErrorT(

@@ -7,9 +7,9 @@ from aiohttp import ClientSession
 from pydantic import TypeAdapter
 
 from .models.movie import Movie
+from .models.request import Request
 from .models.serie import Serie
 from .models.videos import For, Resource, Video, VideoCreated, VideoInfo, VideoLink
-from .requests import Request
 from .utils import Singleton
 
 logger = getLogger(__name__)
@@ -96,7 +96,7 @@ class KyooClient(metaclass=Singleton):
 			)
 
 		async with self._client.post(
-			"videos",
+			"videos/link",
 			data=TypeAdapter(list[VideoLink]).dump_json(
 				[map_request(x) for x in videos],
 				by_alias=True,

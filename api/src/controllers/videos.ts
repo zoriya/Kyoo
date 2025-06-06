@@ -515,10 +515,13 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				201: t.Array(
 					t.Object({
 						id: t.String({ format: "uuid" }),
-						path: t.String(),
+						path: t.String({ examples: ["/video/made in abyss s1e13.mkv"] }),
 						entries: t.Array(
 							t.Object({
-								slug: t.String({ format: "slug" }),
+								slug: t.String({
+									format: "slug",
+									examples: ["made-in-abyss-s1e13"],
+								}),
 							}),
 						),
 					}),

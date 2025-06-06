@@ -1,31 +1,16 @@
-from __future__ import annotations
-
 from asyncio import CancelledError, Event, TaskGroup
 from logging import getLogger
-from typing import Literal, cast
+from typing import cast
 
 from asyncpg import Connection, Pool
-from pydantic import Field, TypeAdapter
+from pydantic import TypeAdapter
 
 from .client import KyooClient
-from .models.videos import Guess, Resource
+from .models.request import Request
+from .models.videos import Resource
 from .providers.provider import Provider
-from .utils import Model
 
 logger = getLogger(__name__)
-
-
-class Request(Model, extra="allow"):
-	pk: int | None = Field(exclude=True, default=None)
-	kind: Literal["episode", "movie"]
-	title: str
-	year: int | None
-	external_id: dict[str, str]
-	videos: list[Request.Video]
-
-	class Video(Model):
-		id: str
-		episodes: list[Guess.Episode]
 
 
 class RequestCreator:
