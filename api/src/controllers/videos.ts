@@ -1,6 +1,6 @@
 import { and, eq, notExists, or, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import { db } from "~/db";
+import { type Transaction, db } from "~/db";
 import { entries, entryVideoJoin, shows, videos } from "~/db/schema";
 import {
 	conflictUpdateAllExcept,
@@ -29,6 +29,140 @@ import {
 	updateAvailableCount,
 	updateAvailableSince,
 } from "./seed/insert/shows";
+
+async function linkVideos(
+	tx: Transaction,
+	links: {
+		video: number;
+		entry: Omit<SeedVideo["for"], "movie" | "serie"> & {
+			movie?: { id?: string; slug?: string };
+			serie?: { id?: string; slug?: string };
+		};
+	}[],
+) {
+	if (!links.length) return {};
+
+	const entriesQ = tx
+		.select({
+			pk: entries.pk,
+			id: entries.id,
+			slug: entries.slug,
+			kind: entries.kind,
+			seasonNumber: entries.seasonNumber,
+			episodeNumber: entries.episodeNumber,
+			order: entries.order,
+			showId: sql`${shows.id}`.as("showId"),
+			showSlug: sql`${shows.slug}`.as("showSlug"),
+			externalId: entries.externalId,
+		})
+		.from(entries)
+		.innerJoin(shows, eq(entries.showPk, shows.pk))
+		.as("entriesQ");
+
+	const hasRenderingQ = tx
+		.select()
+		.from(entryVideoJoin)
+		.where(eq(entryVideoJoin.entryPk, entriesQ.pk));
+
+	const ret = await tx
+		.insert(entryVideoJoin)
+		.select(
+			tx
+				.selectDistinctOn([entriesQ.pk, videos.pk], {
+					entryPk: entriesQ.pk,
+					videoPk: videos.pk,
+					slug: computeVideoSlug(entriesQ.slug, sql`exists(${hasRenderingQ})`),
+				})
+				.from(
+					values(links, {
+						video: "integer",
+						entry: "jsonb",
+					}).as("j"),
+				)
+				.innerJoin(videos, eq(videos.pk, sql`j.video`))
+				.innerJoin(
+					entriesQ,
+					or(
+						and(
+							sql`j.entry ? 'slug'`,
+							eq(entriesQ.slug, sql`j.entry->>'slug'`),
+						),
+						and(
+							sql`j.entry ? 'movie'`,
+							or(
+								eq(entriesQ.showId, sql`(j.entry #>> '{movie, id}')::uuid`),
+								eq(entriesQ.showSlug, sql`j.entry #>> '{movie, slug}'`),
+							),
+							eq(entriesQ.kind, "movie"),
+						),
+						and(
+							sql`j.entry ? 'serie'`,
+							or(
+								eq(entriesQ.showId, sql`(j.entry #>> '{serie, id}')::uuid`),
+								eq(entriesQ.showSlug, sql`j.entry #>> '{serie, slug}'`),
+							),
+							or(
+								and(
+									sql`j.entry ?& array['season', 'episode']`,
+									eq(entriesQ.seasonNumber, sql`(j.entry->>'season')::integer`),
+									eq(
+										entriesQ.episodeNumber,
+										sql`(j.entry->>'episode')::integer`,
+									),
+								),
+								and(
+									sql`j.entry ? 'order'`,
+									eq(entriesQ.order, sql`(j.entry->>'order')::float`),
+								),
+								and(
+									sql`j.entry ? 'special'`,
+									eq(
+										entriesQ.episodeNumber,
+										sql`(j.entry->>'special')::integer`,
+									),
+									eq(entriesQ.kind, "special"),
+								),
+							),
+						),
+						and(
+							sql`j.entry ? 'externalId'`,
+							sql`j.entry->'externalId' <@ ${entriesQ.externalId}`,
+						),
+					),
+				),
+		)
+		.onConflictDoUpdate({
+			target: [entryVideoJoin.entryPk, entryVideoJoin.videoPk],
+			// this is basically a `.onConflictDoNothing()` but we want `returning` to give us the existing data
+			set: { entryPk: sql`excluded.entry_pk` },
+		})
+		.returning({
+			slug: entryVideoJoin.slug,
+			entryPk: entryVideoJoin.entryPk,
+			videoPk: entryVideoJoin.videoPk,
+		});
+
+	const entr = ret.reduce(
+		(acc, x) => {
+			acc[x.videoPk] ??= [];
+			acc[x.videoPk].push({ slug: x.slug });
+			return acc;
+		},
+		{} as Record<number, { slug: string }[]>,
+	);
+
+	const entriesPk = [...new Set(ret.map((x) => x.entryPk))];
+	await updateAvailableCount(
+		tx,
+		tx
+			.selectDistinct({ pk: entries.showPk })
+			.from(entries)
+			.where(eq(entries.pk, sql`any(${sqlarr(entriesPk)})`)),
+	);
+	await updateAvailableSince(tx, entriesPk);
+
+	return entr;
+}
 
 const CreatedVideo = t.Object({
 	id: t.String({ format: "uuid" }),
@@ -203,7 +337,6 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 					if (!x.for) return [];
 					return x.for.map((e) => ({
 						video: vids.find((v) => v.path === x.path)!.pk,
-						path: x.path,
 						entry: {
 							...e,
 							movie:
@@ -234,135 +367,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 					);
 				}
 
-				const entriesQ = tx
-					.select({
-						pk: entries.pk,
-						id: entries.id,
-						slug: entries.slug,
-						kind: entries.kind,
-						seasonNumber: entries.seasonNumber,
-						episodeNumber: entries.episodeNumber,
-						order: entries.order,
-						showId: sql`${shows.id}`.as("showId"),
-						showSlug: sql`${shows.slug}`.as("showSlug"),
-						externalId: entries.externalId,
-					})
-					.from(entries)
-					.innerJoin(shows, eq(entries.showPk, shows.pk))
-					.as("entriesQ");
-
-				const hasRenderingQ = tx
-					.select()
-					.from(entryVideoJoin)
-					.where(eq(entryVideoJoin.entryPk, entriesQ.pk));
-
-				const ret = await tx
-					.insert(entryVideoJoin)
-					.select(
-						tx
-							.selectDistinctOn([entriesQ.pk, videos.pk], {
-								entryPk: entriesQ.pk,
-								videoPk: videos.pk,
-								slug: computeVideoSlug(
-									entriesQ.slug,
-									sql`exists(${hasRenderingQ})`,
-								),
-							})
-							.from(
-								values(vidEntries, {
-									video: "integer",
-									entry: "jsonb",
-								}).as("j"),
-							)
-							.innerJoin(videos, eq(videos.pk, sql`j.video`))
-							.innerJoin(
-								entriesQ,
-								or(
-									and(
-										sql`j.entry ? 'slug'`,
-										eq(entriesQ.slug, sql`j.entry->>'slug'`),
-									),
-									and(
-										sql`j.entry ? 'movie'`,
-										or(
-											eq(
-												entriesQ.showId,
-												sql`(j.entry #>> '{movie, id}')::uuid`,
-											),
-											eq(entriesQ.showSlug, sql`j.entry #>> '{movie, slug}'`),
-										),
-										eq(entriesQ.kind, "movie"),
-									),
-									and(
-										sql`j.entry ? 'serie'`,
-										or(
-											eq(
-												entriesQ.showId,
-												sql`(j.entry #>> '{serie, id}')::uuid`,
-											),
-											eq(entriesQ.showSlug, sql`j.entry #>> '{serie, slug}'`),
-										),
-										or(
-											and(
-												sql`j.entry ?& array['season', 'episode']`,
-												eq(
-													entriesQ.seasonNumber,
-													sql`(j.entry->>'season')::integer`,
-												),
-												eq(
-													entriesQ.episodeNumber,
-													sql`(j.entry->>'episode')::integer`,
-												),
-											),
-											and(
-												sql`j.entry ? 'order'`,
-												eq(entriesQ.order, sql`(j.entry->>'order')::float`),
-											),
-											and(
-												sql`j.entry ? 'special'`,
-												eq(
-													entriesQ.episodeNumber,
-													sql`(j.entry->>'special')::integer`,
-												),
-												eq(entriesQ.kind, "special"),
-											),
-										),
-									),
-									and(
-										sql`j.entry ? 'externalId'`,
-										sql`j.entry->'externalId' <@ ${entriesQ.externalId}`,
-									),
-								),
-							),
-					)
-					.onConflictDoUpdate({
-						target: [entryVideoJoin.entryPk, entryVideoJoin.videoPk],
-						// this is basically a `.onConflictDoNothing()` but we want `returning` to give us the existing data
-						set: { entryPk: sql`excluded.entry_pk` },
-					})
-					.returning({
-						slug: entryVideoJoin.slug,
-						entryPk: entryVideoJoin.entryPk,
-						videoPk: entryVideoJoin.videoPk,
-					});
-				const entr = ret.reduce(
-					(acc, x) => {
-						acc[x.videoPk] ??= [];
-						acc[x.videoPk].push({ slug: x.slug });
-						return acc;
-					},
-					{} as Record<number, { slug: string }[]>,
-				);
-
-				const entriesPk = [...new Set(ret.map((x) => x.entryPk))];
-				await updateAvailableCount(
-					tx,
-					tx
-						.selectDistinct({ pk: entries.showPk })
-						.from(entries)
-						.where(eq(entries.pk, sql`any(${sqlarr(entriesPk)})`)),
-				);
-				await updateAvailableSince(tx, entriesPk);
+				const links = await linkVideos(tx, vidEntries);
 
 				return status(
 					201,
@@ -370,7 +375,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 						id: x.id,
 						path: x.path,
 						guess: x.guess,
-						entries: entr[x.pk] ?? [],
+						entries: links[x.pk] ?? [],
 					})),
 				);
 			});
@@ -452,5 +457,73 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				}),
 			),
 			response: { 200: t.Array(t.String()) },
+		},
+	)
+	.post(
+		"/link",
+		async ({ body, status }) => {
+			return await db.transaction(async (tx) => {
+				const vids = await tx
+					.select({ pk: videos.pk, id: videos.id, path: videos.path })
+					.from(videos)
+					.where(eq(videos.id, sql`any(${sqlarr(body.map((x) => x.id))})`));
+				const lVids = body.flatMap((x) => {
+					return x.for.map((e) => ({
+						video: vids.find((v) => v.id === x.id)!.pk,
+						entry: {
+							...e,
+							movie:
+								"movie" in e
+									? isUuid(e.movie)
+										? { id: e.movie }
+										: { slug: e.movie }
+									: undefined,
+							serie:
+								"serie" in e
+									? isUuid(e.serie)
+										? { id: e.serie }
+										: { slug: e.serie }
+									: undefined,
+						},
+					}));
+				});
+				const links = await linkVideos(tx, lVids);
+				return status(
+					201,
+					vids.map((x) => ({
+						id: x.id,
+						path: x.path,
+						entries: links[x.pk] ?? [],
+					})),
+				);
+			});
+		},
+		{
+			detail: {
+				description: "Link existing videos to existing entries",
+			},
+			body: t.Array(
+				t.Object({
+					id: t.String({
+						description: "Id of the video",
+						format: "uuid",
+					}),
+					for: t.Array(SeedVideo.properties.for.items),
+				}),
+			),
+			response: {
+				201: t.Array(
+					t.Object({
+						id: t.String({ format: "uuid" }),
+						path: t.String(),
+						entries: t.Array(
+							t.Object({
+								slug: t.String({ format: "slug" }),
+							}),
+						),
+					}),
+				),
+				422: KError,
+			},
 		},
 	);
