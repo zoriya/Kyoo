@@ -131,7 +131,14 @@ class RequestProcessor:
 				request.pk,
 			)
 			if finished and finished["videos"] != request.videos:
-				await self._client.link_videos(show.kind, show.slug, finished["videos"])
+				videos = TypeAdapter(list[Request.Video]).validate_python(
+					finished["videos"]
+				)
+				await self._client.link_videos(
+					"movie" if request.kind == "movie" else "serie",
+					show.slug,
+					videos,
+				)
 		except Exception as e:
 			logger.error("Couldn't process request", exc_info=e)
 			cur = await self._database.execute(

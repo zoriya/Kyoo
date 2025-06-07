@@ -103,8 +103,8 @@ export const processImages = async () => {
 			`);
 
 				await tx.delete(mqueue).where(eq(mqueue.id, item.id));
-			} catch (err) {
-				console.error("Failed to download image", img.url, err);
+			} catch (err: any) {
+				console.error("Failed to download image", img.url, err.message);
 				await tx
 					.update(mqueue)
 					.set({ attempt: sql`${mqueue.attempt}+1` })

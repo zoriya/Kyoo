@@ -59,22 +59,20 @@ class KyooClient(metaclass=Singleton):
 			r.raise_for_status()
 
 	async def create_movie(self, movie: Movie) -> Resource:
-		logger.debug("sending movie %s", movie.model_dump_json(by_alias=True))
 		async with self._client.post(
 			"movies",
 			data=movie.model_dump_json(by_alias=True),
 		) as r:
 			r.raise_for_status()
-			return Resource(**await r.json())
+			return Resource.model_validate(await r.json())
 
 	async def create_serie(self, serie: Serie) -> Resource:
-		logger.debug("sending serie %s", serie.model_dump_json(by_alias=True))
 		async with self._client.post(
 			"series",
 			data=serie.model_dump_json(by_alias=True),
 		) as r:
 			r.raise_for_status()
-			return Resource(**await r.json())
+			return Resource.model_validate(await r.json())
 
 	async def link_videos(
 		self,
@@ -89,7 +87,7 @@ class KyooClient(metaclass=Singleton):
 				id=request.id,
 				for_=[
 					For.Special(serie=show, special=ep.episode)
-					if ep.season is None
+					if ep.season is None or ep.season == 0
 					else For.Episode(serie=show, season=ep.season, episode=ep.episode)
 					for ep in request.episodes
 				],
@@ -103,4 +101,3 @@ class KyooClient(metaclass=Singleton):
 			),
 		) as r:
 			r.raise_for_status()
-			return TypeAdapter(list[VideoCreated]).validate_json(await r.text())

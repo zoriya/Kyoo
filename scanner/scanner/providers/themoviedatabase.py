@@ -182,7 +182,7 @@ class TheMovieDatabase(Provider):
 				Language.get(
 					f"{trans['iso_639_1']}-{trans['iso_3166_1']}"
 				): MovieTranslation(
-					name=clean(trans["data"]["name"])
+					name=clean(trans["data"]["title"])
 					or (
 						clean(movie["original_title"])
 						if movie["original_language"] == trans["iso_639_1"]
@@ -296,7 +296,9 @@ class TheMovieDatabase(Provider):
 			else SerieStatus.AIRING
 			if serie["in_production"]
 			else SerieStatus.FINISHED,
-			runtime=serie["last_episode_to_air"]["runtime"],
+			runtime=serie["last_episode_to_air"]["runtime"]
+			if serie["last_episode_to_air"]
+			else None,
 			start_air=datetime.strptime(serie["first_air_date"], "%Y-%m-%d").date()
 			if serie["first_air_date"]
 			else None,
@@ -560,12 +562,12 @@ class TheMovieDatabase(Provider):
 		return Collection(
 			slug=to_slug(collection["name"]),
 			# assume all parts are in the same language
-			original_language=Language.get(collection["part"][0]["original_language"]),
+			original_language=Language.get(collection["parts"][0]["original_language"]),
 			genres=[
-				y for x in collection["part"] for y in self._map_genres(x["genres"])
+				y for x in collection["parts"] for y in self._map_genres(x["genre_ids"])
 			],
 			rating=round(
-				mean(float(x["vote_average"]) * 10 for x in collection["part"])
+				mean(float(x["vote_average"]) * 10 for x in collection["parts"])
 			),
 			external_id={
 				self.name: MetadataId(
@@ -577,9 +579,9 @@ class TheMovieDatabase(Provider):
 				Language.get(
 					f"{trans['iso_639_1']}-{trans['iso_3166_1']}"
 				): CollectionTranslation(
-					name=clean(trans["data"]["name"]) or collection["name"],
+					name=clean(trans["data"]["title"]) or collection["name"],
 					latin_name=None,
-					description=trans["overview"],
+					description=trans["data"]["overview"],
 					tagline=None,
 					aliases=[],
 					tags=[],
@@ -664,7 +666,7 @@ class TheMovieDatabase(Provider):
 			translations={
 				"en": StudioTranslation(
 					name=company["name"],
-					logo=f"https://image.tmdb.org/t/p/original{company['logo_path']}"
+					logo=self._map_image(company["logo_path"])
 					if "logo_path" in company
 					else None,
 				),

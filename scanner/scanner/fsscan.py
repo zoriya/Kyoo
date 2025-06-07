@@ -11,8 +11,9 @@ from .client import KyooClient
 from .database import get_db
 from .identifiers.identify import identify
 from .models.metadataid import EpisodeId, MetadataId
+from .models.request import Request
 from .models.videos import For, Video, VideoInfo
-from .requests import Request, RequestCreator
+from .requests import RequestCreator
 
 logger = getLogger(__name__)
 
@@ -48,7 +49,6 @@ class FsScanner:
 
 			self._info = await self._client.get_videos_info()
 
-			# TODO: handle unmatched
 			to_register = videos - self._info.paths
 			to_delete = self._info.paths - videos if remove_deleted else set()
 
@@ -68,6 +68,11 @@ class FsScanner:
 			if to_register:
 				logger.info("Found %d new files to register.", len(to_register))
 				await self._register(to_register)
+			if self._info.unmatched:
+				logger.info(
+					"Retrying & updating %d unmatched files.", len(self._info.unmatched)
+				)
+				await self._register(self._info.unmatched)
 
 			logger.info("Scan finished for %s.", path)
 		except Exception as e:
@@ -160,7 +165,7 @@ class FsScanner:
 				for slug in slugs:
 					video.for_.append(
 						For.Episode(serie=slug, season=ep.season, episode=ep.episode)
-						if ep.season is not None
+						if ep.season is not None and ep.season != 0
 						else For.Special(serie=slug, special=ep.episode)
 					)
 
