@@ -47,7 +47,7 @@ export const insertEntries = async (
 	items: (SeedEntry | SeedExtra)[],
 	onlyExtras = false,
 ) => {
-	if (!items) return [];
+	if (!items.length) return [];
 
 	const retEntries = await db.transaction(async (tx) => {
 		const vals: EntryI[] = await Promise.all(

@@ -31,7 +31,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 			headers: { "accept-language": languages },
 			query: { preferOriginal, with: relations },
 			jwt: { sub, settings },
-			error,
+			status,
 			set,
 		}) => {
 			const langs = processLanguages(languages);
@@ -48,13 +48,13 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				userId: sub,
 			});
 			if (!ret) {
-				return error(404, {
+				return status(404, {
 					status: 404,
 					message: `No movie found with id or slug: '${id}'.`,
 				});
 			}
 			if (!ret.language) {
-				return error(422, {
+				return status(422, {
 					status: 422,
 					message: "Accept-Language header could not be satisfied.",
 				});
@@ -99,7 +99,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 	)
 	.get(
 		"random",
-		async ({ error, redirect }) => {
+		async ({ status, redirect }) => {
 			const [movie] = await db
 				.select({ slug: shows.slug })
 				.from(shows)
@@ -107,7 +107,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				.orderBy(sql`random()`)
 				.limit(1);
 			if (!movie)
-				return error(404, {
+				return status(404, {
 					status: 404,
 					message: "No movies in the database.",
 				});

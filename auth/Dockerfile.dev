@@ -1,11 +1,10 @@
 FROM golang:1.24 AS build
 WORKDIR /app
 
-RUN go install github.com/bokwoon95/wgo@latest
-
 COPY go.mod go.sum ./
 RUN go mod download
 
+COPY . .
+
 EXPOSE 4568
-HEALTHCHECK --interval=30s --retries=15 CMD curl --fail http://localhost:4568$KEIBI_PREFIX/health || exit
-CMD ["wgo", "run", "-race", "."]
+CMD ["go", "run", "-race", "."]

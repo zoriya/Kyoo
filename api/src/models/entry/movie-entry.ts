@@ -56,7 +56,7 @@ export type MovieEntry = Prettify<typeof MovieEntry.static>;
 export const SeedMovieEntry = t.Composite([
 	t.Omit(BaseMovieEntry, ["thumbnail", "nextRefresh"]),
 	t.Object({
-		slug: t.Optional(t.String({ format: "slug" })),
+		slug: t.Optional(t.Nullable(t.String({ format: "slug" }))),
 		thumbnail: t.Nullable(SeedImage),
 		translations: TranslationRecord(
 			t.Intersect([

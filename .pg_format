@@ -3,3 +3,5 @@ function-case=1 #lowercase
 keyword-case=1
 type-case=1
 no-space-function=1
+keep-newline=1
+nogrouping=1

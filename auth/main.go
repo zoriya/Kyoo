@@ -228,8 +228,8 @@ func main() {
 	}
 	h.config = conf
 
-	g := e.Group(conf.Prefix)
-	r := e.Group(conf.Prefix)
+	g := e.Group("/auth")
+	r := e.Group("/auth")
 	r.Use(h.TokenToJwt)
 	r.Use(echojwt.WithConfig(echojwt.Config{
 		SigningMethod: "RS256",

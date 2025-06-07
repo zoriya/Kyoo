@@ -1,12 +1,12 @@
 import { buildUrl } from "tests/utils";
-import { app } from "~/base";
+import { handlers } from "~/base";
 import type { SeedHistory } from "~/models/history";
 import type { SeedSerie } from "~/models/serie";
 import type { SerieWatchStatus } from "~/models/watchlist";
 import { getJwtHeaders } from "./jwt";
 
 export const createSerie = async (serie: SeedSerie) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl("series"), {
 			method: "POST",
 			body: JSON.stringify(serie),
@@ -27,7 +27,7 @@ export const getSerie = async (
 		...query
 	}: { langs?: string; preferOriginal?: boolean; with?: string[] },
 ) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl(`series/${id}`, query), {
 			method: "GET",
 			headers: langs
@@ -46,7 +46,7 @@ export const getSeries = async ({
 	langs,
 	...query
 }: { langs?: string; preferOriginal?: boolean; with?: string[] }) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl("series", query), {
 			method: "GET",
 			headers: langs
@@ -76,7 +76,7 @@ export const getSeasons = async (
 		preferOriginal?: boolean;
 	},
 ) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl(`series/${serie}/seasons`, opts), {
 			method: "GET",
 			headers: langs
@@ -106,7 +106,7 @@ export const getEntries = async (
 		preferOriginal?: boolean;
 	},
 ) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl(`series/${serie}/entries`, opts), {
 			method: "GET",
 			headers: langs
@@ -131,7 +131,7 @@ export const getExtras = async (
 		query?: string;
 	},
 ) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl(`series/${serie}/extras`, opts), {
 			method: "GET",
 			headers: await getJwtHeaders(),
@@ -148,7 +148,7 @@ export const getUnknowns = async (opts: {
 	sort?: string | string[];
 	query?: string;
 }) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl("unknowns", opts), {
 			method: "GET",
 			headers: await getJwtHeaders(),
@@ -169,7 +169,7 @@ export const getNews = async ({
 	langs?: string;
 	preferOriginal?: boolean;
 }) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl("news", opts), {
 			method: "GET",
 			headers: langs
@@ -188,7 +188,7 @@ export const setSerieStatus = async (
 	id: string,
 	status: Omit<SerieWatchStatus, "seenCount">,
 ) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl(`series/${id}/watchstatus`), {
 			method: "POST",
 			body: JSON.stringify(status),
@@ -216,7 +216,7 @@ export const getHistory = async (
 		preferOriginal?: boolean;
 	},
 ) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl(`profiles/${profile}/history`, opts), {
 			method: "GET",
 			headers: langs
@@ -232,7 +232,7 @@ export const getHistory = async (
 };
 
 export const addToHistory = async (profile: string, seed: SeedHistory[]) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl(`profiles/${profile}/history`), {
 			method: "POST",
 			body: JSON.stringify(seed),

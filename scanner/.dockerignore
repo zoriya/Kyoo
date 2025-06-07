@@ -1,2 +1,5 @@
-Dockerfile*
-
+**
+!/pyproject.toml
+!/uv.lock
+!/scanner
+!/migrations

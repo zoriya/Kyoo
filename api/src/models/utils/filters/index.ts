@@ -9,7 +9,7 @@ export type FilterDef = {
 	[key: string]:
 		| {
 				column: Column | SQLWrapper;
-				type: "int" | "float" | "date" | "string";
+				type: "int" | "float" | "date" | "string" | "bool";
 				isArray?: boolean;
 		  }
 		| {

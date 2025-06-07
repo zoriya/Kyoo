@@ -1,9 +1,9 @@
 import { buildUrl } from "tests/utils";
-import { app } from "~/base";
+import { handlers } from "~/base";
 import { getJwtHeaders } from "./jwt";
 
 export const getStaff = async (id: string, query: {}) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl(`staff/${id}`, query), {
 			method: "GET",
 			headers: await getJwtHeaders(),
@@ -28,7 +28,7 @@ export const getStaffRoles = async (
 		preferOriginal?: boolean;
 	},
 ) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl(`staff/${staff}/roles`, opts), {
 			method: "GET",
 			headers: langs
@@ -52,7 +52,7 @@ export const getSerieStaff = async (
 		sort?: string | string[];
 	},
 ) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl(`series/${serie}/staff`, opts), {
 			method: "GET",
 			headers: await getJwtHeaders(),
@@ -71,7 +71,7 @@ export const getMovieStaff = async (
 		sort?: string | string[];
 	},
 ) => {
-	const resp = await app.handle(
+	const resp = await handlers.handle(
 		new Request(buildUrl(`movies/${movie}/staff`, opts), {
 			method: "GET",
 			headers: await getJwtHeaders(),

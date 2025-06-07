@@ -6,10 +6,11 @@ import {
 	createVideo,
 	deleteVideo,
 	getVideos,
+	linkVideos,
 } from "tests/helpers";
 import { expectStatus } from "tests/utils";
 import { db } from "~/db";
-import { entries, shows, videos } from "~/db/schema";
+import { entries, entryVideoJoin, shows, videos } from "~/db/schema";
 import { bubble, madeInAbyss } from "~/models/examples";
 
 beforeAll(async () => {
@@ -23,7 +24,12 @@ beforeAll(async () => {
 
 	[ret, body] = await createVideo([
 		{
-			guess: { title: "mia", season: [1], episode: [13], from: "test" },
+			guess: {
+				title: "mia",
+				episodes: [{ season: 1, episode: 13 }],
+				from: "test",
+				history: [],
+			},
 			part: null,
 			path: "/video/mia s1e13.mkv",
 			rendering: "sha2",
@@ -33,10 +39,10 @@ beforeAll(async () => {
 		{
 			guess: {
 				title: "mia",
-				season: [2],
-				episode: [1],
-				year: [2017],
+				episodes: [{ season: 2, episode: 1 }],
+				years: [2017],
 				from: "test",
+				history: [],
 			},
 			part: null,
 			path: "/video/mia 2017 s2e1.mkv",
@@ -45,19 +51,42 @@ beforeAll(async () => {
 			for: [{ slug: `${madeInAbyss.slug}-s2e1` }],
 		},
 		{
-			guess: { title: "bubble", from: "test" },
+			guess: { title: "bubble", from: "test", history: [] },
 			part: null,
 			path: "/video/bubble.mkv",
 			rendering: "sha5",
 			version: 1,
 			for: [{ movie: bubble.slug }],
 		},
+		{
+			guess: {
+				title: "mia",
+				episodes: [{ season: 1, episode: 1 }], // Different episode for unlinked
+				from: "test",
+				history: [],
+			},
+			part: null,
+			path: "/video/mia-unlinked.mkv",
+			rendering: "sha-unlinked-1",
+			version: 1,
+			// No 'for' initially
+		},
+		{
+			guess: { title: "bubble", from: "test", history: [] },
+			part: null,
+			path: "/video/bubble-unlinked.mkv",
+			rendering: "sha-unlinked-2",
+			version: 1,
+			// No 'for' initially
+		},
 	]);
 	expectStatus(ret, body).toBe(201);
-	expect(body).toBeArrayOfSize(3);
+	expect(body).toBeArrayOfSize(5);
 	expect(body[0].entries).toBeArrayOfSize(1);
 	expect(body[1].entries).toBeArrayOfSize(1);
 	expect(body[2].entries).toBeArrayOfSize(1);
+	expect(body[3].entries).toBeArrayOfSize(0); // Unlinked
+	expect(body[4].entries).toBeArrayOfSize(0); // Unlinked
 
 	const items = await db.query.shows.findMany();
 	expect(items.find((x) => x.slug === "bubble")!.availableCount).toBe(1);
@@ -103,7 +132,12 @@ describe("Video get/deletion", () => {
 
 	it("With unknown", async () => {
 		let [resp, body] = await createVideo({
-			guess: { title: "mia", season: [1], episode: [13], from: "test" },
+			guess: {
+				title: "mia",
+				episodes: [{ season: 1, episode: 13 }],
+				from: "test",
+				history: [],
+			},
 			part: null,
 			path: "/video/mia s1e13 unknown test.mkv",
 			rendering: "shanthnth",
@@ -131,13 +165,20 @@ describe("Video get/deletion", () => {
 				},
 			},
 		});
-		expect(body.unmatched).toBeArrayOfSize(1);
-		expect(body.unmatched[0]).toBe("/video/mia s1e13 unknown test.mkv");
+		expect(body.unmatched).toBeArrayOfSize(3);
+		expect(body.unmatched).toContain("/video/mia s1e13 unknown test.mkv");
+		expect(body.unmatched).toContain("/video/mia-unlinked.mkv");
+		expect(body.unmatched).toContain("/video/bubble-unlinked.mkv");
 	});
 
 	it("Mismatch title guess", async () => {
 		let [resp, body] = await createVideo({
-			guess: { title: "mia", season: [1], episode: [13], from: "test" },
+			guess: {
+				title: "mia",
+				episodes: [{ season: 1, episode: 13 }],
+				from: "test",
+				history: [],
+			},
 			part: null,
 			path: "/video/mia s1e13 mismatch.mkv",
 			rendering: "mismatch",
@@ -232,5 +273,71 @@ describe("Video get/deletion", () => {
 		expectStatus(resp, body).toBe(200);
 		expect(body).toBeArrayOfSize(1);
 		expect(body[0]).toBe("/video/mia s1e13 unknown test.mkv");
+	});
+});
+
+describe("Video linking", () => {
+	it("Should link videos to entries", async () => {
+		const allVideos = await db
+			.select({
+				id: videos.id,
+				path: videos.path,
+				rendering: videos.rendering,
+			})
+			.from(videos);
+
+		const miaUnlinkedVideo = allVideos.find(
+			(v) => v.rendering === "sha-unlinked-1",
+		);
+		const bubbleUnlinkedVideo = allVideos.find(
+			(v) => v.rendering === "sha-unlinked-2",
+		);
+
+		expect(miaUnlinkedVideo).toBeDefined();
+		expect(bubbleUnlinkedVideo).toBeDefined();
+
+		const [resp, body] = await linkVideos([
+			{
+				id: miaUnlinkedVideo!.id,
+				for: [{ slug: `${madeInAbyss.slug}-s1e13` }],
+			},
+			{
+				id: bubbleUnlinkedVideo!.id,
+				for: [{ movie: bubble.slug }],
+			},
+		]);
+
+		expectStatus(resp, body).toBe(201);
+		expect(body).toBeArrayOfSize(2);
+
+		expect(body[0]).toMatchObject({
+			id: miaUnlinkedVideo!.id,
+			path: "/video/mia-unlinked.mkv",
+			entries: [
+				{
+					slug: expect.stringContaining(`${madeInAbyss.slug}-s1e13`),
+				},
+			],
+		});
+
+		expect(body[1]).toMatchObject({
+			id: bubbleUnlinkedVideo!.id,
+			path: "/video/bubble-unlinked.mkv",
+			entries: [
+				{
+					slug: expect.stringContaining(bubble.slug),
+				},
+			],
+		});
+
+		const miaShow = await db.query.shows.findFirst({
+			where: eq(shows.slug, madeInAbyss.slug),
+		});
+		expect(miaShow!.availableCount).toBe(1);
+
+		const bubbleShow = await db.query.shows.findFirst({
+			where: eq(shows.slug, bubble.slug),
+		});
+		expect(bubbleShow!.availableCount).toBe(1);
 	});
 });

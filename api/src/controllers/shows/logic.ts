@@ -1,4 +1,4 @@
-import { type SQL, and, eq, exists, ne, sql } from "drizzle-orm";
+import { type SQL, and, eq, exists, gt, ne, sql } from "drizzle-orm";
 import { db } from "~/db";
 import {
 	entries,
@@ -60,7 +60,7 @@ export const showFilters: FilterDef = {
 	runtime: { column: shows.runtime, type: "float" },
 	airDate: { column: shows.startAir, type: "date" },
 	startAir: { column: shows.startAir, type: "date" },
-	endAir: { column: shows.startAir, type: "date" },
+	endAir: { column: shows.endAir, type: "date" },
 	originalLanguage: {
 		column: sql`${shows.original}->'language'`,
 		type: "string",
@@ -76,6 +76,7 @@ export const showFilters: FilterDef = {
 		values: WatchlistStatus.enum,
 	},
 	score: { column: watchStatusQ.score, type: "int" },
+	isAvailable: { column: sql`(${shows.availableCount} > 0)`, type: "bool" },
 };
 export const showSort = Sort(
 	{

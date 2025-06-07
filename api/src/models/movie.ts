@@ -72,7 +72,7 @@ export const FullMovie = t.Intersect([
 export type FullMovie = Prettify<typeof FullMovie.static>;
 
 export const SeedMovie = t.Composite([
-	t.Omit(BaseMovie, ["kind", "nextRefresh"]),
+	t.Omit(BaseMovie, ["nextRefresh"]),
 	t.Object({
 		slug: t.String({ format: "slug", examples: ["bubble"] }),
 		originalLanguage: Language({
@@ -80,12 +80,19 @@ export const SeedMovie = t.Composite([
 		}),
 		translations: TranslationRecord(
 			t.Composite([
-				t.Omit(MovieTranslation, ["poster", "thumbnail", "banner", "logo"]),
+				t.Omit(MovieTranslation, [
+					"poster",
+					"thumbnail",
+					"banner",
+					"logo",
+					"trailerUrl",
+				]),
 				t.Object({
 					poster: t.Nullable(SeedImage),
 					thumbnail: t.Nullable(SeedImage),
 					banner: t.Nullable(SeedImage),
 					logo: t.Nullable(SeedImage),
+					trailer: t.Nullable(SeedImage),
 					latinName: t.Optional(Original.properties.latinName),
 				}),
 			]),
