@@ -1,4 +1,4 @@
-import { Slot } from "one";
+import { Slot } from "expo-router";
 import { ErrorConsumer } from "~/providers/error-consumer";
 
 export default function Layout() {

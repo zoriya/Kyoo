@@ -4,29 +4,30 @@
 	"version": "1.0.0",
 	"type": "module",
 	"scripts": {
-		"dev": "one dev",
-		"build": "one build",
+		"dev": "expo start",
 		"apk": "eas build --profile preview --platform android --non-interactive --json",
 		"apk:dev": "eas build --profile development --platform android --non-interactive",
-		"serve": "one serve",
 		"lint": "biome lint .",
 		"lint:fix": "biome lint . --write",
 		"format": "biome format .",
-		"format:fix": "biome format . --write",
-		"eas-build-post-install": "cd android && ./gradlew generateCodegenArtifactsFromSchema && react-native config | jq -r '.dependencies[].name' | xargs --replace=PROJECT -- sed -i -e '/implementation(\"com.facebook.react:react-android\")/a\\' -e 'implementation project(\":PROJECT\")' app/build.gradle"
+		"format:fix": "biome format . --write"
 	},
 	"dependencies": {
 		"@expo/html-elements": "^0.12.5",
 		"@material-symbols/svg-400": "^0.31.6",
+		"@react-navigation/bottom-tabs": "^7.3.10",
+		"@react-navigation/elements": "^2.3.8",
+		"@react-navigation/native": "^7.1.6",
 		"@tanstack/react-query": "^5.80.6",
-		"caniuse-api": "^3.0.0",
-		"expo": "~53.0.11",
+		"expo": "~53.0.10",
 		"expo-build-properties": "^0.14.6",
 		"expo-localization": "^16.1.5",
+		"expo-router": "^5.0.7",
+		"expo-splash-screen": "^0.30.9",
+		"expo-status-bar": "~2.2.3",
 		"expo-updates": "~0.28.14",
 		"i18next-http-backend": "^3.0.2",
 		"jotai": "^2.12.5",
-		"one": "1.1.486",
 		"react": "19.0.0",
 		"react-i18next": "^15.5.2",
 		"react-native": "0.79.3",
@@ -45,14 +46,7 @@
 		"@types/react": "~19.0.10",
 		"@types/react-dom": "^19.1.6",
 		"expo-dev-client": "^5.2.0",
-		"typescript": "5.8.3",
-		"vite": "^6.3.5",
-		"vite-plugin-compile-time": "^0.4.6",
-		"vite-plugin-svgr": "^4.3.0"
-	},
-	"patchedDependencies": {
-		"yoshiki@1.2.14": "patches/yoshiki@1.2.14.patch",
-		"one@1.1.445": "patches/one@1.1.445.patch"
+		"typescript": "5.8.3"
 	},
 	"expo": {
 		"doctor": {
