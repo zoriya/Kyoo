@@ -8,7 +8,7 @@ export const expo: ExpoConfig = {
 	scheme: "kyoo",
 	version: "1.0.0",
 	newArchEnabled: true,
-	platforms: ["ios", "android"],
+	platforms: ["web", "ios", "android"],
 	orientation: "default",
 	icon: "./public/icon-256x256.png",
 	userInterfaceStyle: "automatic",
@@ -21,6 +21,10 @@ export const expo: ExpoConfig = {
 			foregroundImage: "./public/icon-256x256.png",
 			backgroundColor: "#eff1f5",
 		},
+	},
+	web: {
+		favicon: "./public/icon-256x256.png",
+		bundler: "metro"
 	},
 	updates: {
 		url: "https://u.expo.dev/55de6b52-c649-4a15-9a45-569ff5ed036c",

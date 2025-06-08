@@ -1,5 +1,4 @@
 import { HydrationBoundary, QueryClientProvider } from "@tanstack/react-query";
-import { getServerData } from "one";
 import { type ReactNode, useState } from "react";
 // import { useUserTheme } from "@kyoo/models";
 import { ThemeSelector } from "~/primitives/theme";
@@ -8,6 +7,9 @@ import { AccountProvider } from "./account-provider";
 import { ErrorConsumer } from "./error-consumer";
 import { ErrorProvider } from "./error-provider";
 import { TranslationsProvider } from "./translations.native";
+
+function getServerData(key: string) {
+}
 
 const QueryProvider = ({ children }: { children: ReactNode }) => {
 	const [queryClient] = useState(() => createQueryClient());
