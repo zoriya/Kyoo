@@ -16,6 +16,7 @@ export default {
 			"@react-native/assets-registry/registry": resolvePath(
 				"react-native-web/dist/modules/AssetRegistry/index.js",
 			),
+			"^inline-style-prefixer$": "inline-style-prefixer/lib",
 		},
 	},
 	plugins: [
@@ -28,6 +29,9 @@ export default {
 					"**/*.js": ["jsx"],
 				},
 				"inline-style-prefixer/lib": "interop",
+				"react-native-reanimated": {
+					"**/*.js": ["jsx"],
+				},
 				yoshiki: {
 					"**/*.tsx": ["jsx"],
 				},

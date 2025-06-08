@@ -19,7 +19,6 @@ export const expo: ExpoConfig = {
 	slug: "kyoo",
 	scheme: "kyoo",
 	version: "1.0.0",
-	sdkVersion: "52.0.0",
 	newArchEnabled: true,
 	platforms: ["ios", "android"],
 	orientation: "default",
