@@ -3,8 +3,8 @@
 1. Install docker & docker-compose
 2. Download the
    [`docker-compose.yml`](https://github.com/zoriya/kyoo/releases/latest/download/docker-compose.yml) and
-   [`.env`](https://raw.githubusercontent.com/zoriya/Kyoo/master/.env.example) files
-3. Fill the `.env` file with your configuration options
+   [`.env`](https://github.com/zoriya/kyoo/releases/latest/download/env.example) files
+3. Fill the `.env` file with your configuration options. Ensure it's named `.env` (nothing before the dot)
 4. Look at [Hardware Acceleration section](#Hardware-Acceleration) if you need it
 5. Look at [FAQ](#FAQ) if you need it,
 6. Run `docker compose up -d` and see kyoo at `http://localhost:8901`
@@ -23,7 +23,7 @@ Those files can be put in any directory of your choice.
 Those files are:
 
 - A `docker-compose.yml` (simply download docker-compose.yml from [the latest release](https://github.com/zoriya/kyoo/releases/latest/download/docker-compose.yml)).
-- A `.env` file that you will need to **fill**. Look at the example [.env.example](https://raw.githubusercontent.com/zoriya/Kyoo/master/.env.example)
+- A `.env` file that you will need to **fill**. Look at the example [.env.example](https://github.com/zoriya/kyoo/releases/latest/download/env.example). It's name NEEDS to be `.env` (nothing before the dot)
 
 > If you want an explanation of what are those files, you can read the following:
 > The `docker-compose.yml` file describes the different services of Kyoo, where they should be downloaded and their start order. \
