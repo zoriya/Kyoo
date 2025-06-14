@@ -1,6 +1,7 @@
-import { useLinkTo } from "one";
+import { useRouter } from "expo-router";
 import { type ReactNode, forwardRef } from "react";
 import {
+	Linking,
 	Platform,
 	Pressable,
 	type PressableProps,
@@ -10,6 +11,28 @@ import {
 } from "react-native";
 import { useTheme, useYoshiki } from "yoshiki/native";
 import { alpha } from "./theme";
+
+function useLinkTo({
+	href,
+	replace = false,
+}: {
+	href: string;
+	replace?: boolean;
+}) {
+	const router = useRouter();
+
+	// TODO: add href attr for web
+	return {
+		onPress: (e) => {
+			if (e?.defaultPrevented) return;
+			if (href.startsWith("http")) {
+				Platform.OS === "web" ? window.open(href, "_blank") : Linking.openURL(href);
+			} else {
+				replace ? router.replace(href) : router.push(href);
+			}
+		},
+	} satisfies PressableProps;
+}
 
 export const A = ({
 	href,

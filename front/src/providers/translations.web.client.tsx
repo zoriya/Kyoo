@@ -1,9 +1,9 @@
 import i18next from "i18next";
 import HttpApi, { type HttpBackendOptions } from "i18next-http-backend";
-import { getServerData } from "one";
 import { type ReactNode, useMemo } from "react";
 import { I18nextProvider } from "react-i18next";
 import { supportedLanguages } from "./translations.compile";
+import { getServerData } from "~/utils";
 
 export const TranslationsProvider = ({ children }: { children: ReactNode }) => {
 	const val = useMemo(() => {

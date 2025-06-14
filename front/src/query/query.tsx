@@ -1,10 +1,10 @@
 import { QueryClient, dehydrate, useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { setServerData } from "one";
 import { useContext } from "react";
 import { Platform } from "react-native";
 import type { z } from "zod";
 import { type KyooError, type Page, Paged } from "~/models";
 import { AccountContext } from "~/providers/account-context";
+import { setServerData } from "~/utils";
 
 const ssrApiUrl = process.env.KYOO_URL ?? "http://back/api";
 

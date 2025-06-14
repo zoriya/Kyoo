@@ -1,7 +1,7 @@
-import { getServerData } from "one";
 import { Platform } from "react-native";
 import { MMKV, useMMKVString } from "react-native-mmkv";
 import type { ZodTypeAny, z } from "zod";
+import { getServerData } from "~/utils";
 
 export const storage = new MMKV();
 
