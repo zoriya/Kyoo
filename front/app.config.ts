@@ -62,12 +62,12 @@ export const expo: ExpoConfig = {
 				},
 			},
 		],
-		// [
-		// 	"react-native-video",
-		// 	{
-		// 		enableNotificationControls: true,
-		// 	},
-		// ],
+		[
+			"react-native-video",
+			{
+				enableNotificationControls: true,
+			},
+		],
 	],
 	experiments: {
 		typedRoutes: true,
