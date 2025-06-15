@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./navbar";
+export * from "../../../src/ui/navbar";
 export { HomePage } from "./home";
 export { BrowsePage } from "./browse";
 export { MovieDetails, ShowDetails } from "./details";

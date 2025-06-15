@@ -1,24 +1,13 @@
-/*
- * Kyoo - A portable and vast media library solution.
- * Copyright (c) Kyoo.
- *
- * See AUTHORS.md and LICENSE file in the project root for full license information.
- *
- * Kyoo is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Kyoo is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
- */
-
-import { logout, useAccount, useAccounts, useHasPermission } from "@kyoo/models";
+import Admin from "@material-symbols/svg-400/rounded/admin_panel_settings.svg";
+import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
+import Login from "@material-symbols/svg-400/rounded/login.svg";
+import Logout from "@material-symbols/svg-400/rounded/logout.svg";
+import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
+import Settings from "@material-symbols/svg-400/rounded/settings.svg";
+import type { ReactElement, Ref } from "react";
+import { useTranslation } from "react-i18next";
+import { Platform, type TextInput, type TextInputProps, View, type ViewProps } from "react-native";
+import { type Stylable, percent, useYoshiki } from "yoshiki/native";
 import {
 	A,
 	Avatar,
@@ -31,19 +20,11 @@ import {
 	PressableFeedback,
 	tooltip,
 	ts,
-} from "@kyoo/primitives";
-import Admin from "@material-symbols/svg-400/rounded/admin_panel_settings.svg";
-import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
-import Login from "@material-symbols/svg-400/rounded/login.svg";
-import Logout from "@material-symbols/svg-400/rounded/logout.svg";
-import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
-import Settings from "@material-symbols/svg-400/rounded/settings.svg";
-import { type ReactElement, forwardRef, useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { Platform, type TextInput, View, type ViewProps } from "react-native";
-import { useRouter } from "solito/router";
-import { type Stylable, percent, useYoshiki } from "yoshiki/native";
-import { AdminPage } from "../admin";
+} from "~/primitives";
+import { useAccount, useAccounts, useHasPermission } from "~/providers/account-context";
+import { logout } from "~/ui/login/logic";
+import { useQueryState } from "~/utils";
+// import { AdminPage } from "../../../packages/ui/src/admin/packages/ui/src/admin";
 import { KyooLongLogo } from "./icon";
 
 export const NavbarTitle = (props: Stylable & { onLayout?: ViewProps["onLayout"] }) => {
@@ -62,28 +43,16 @@ export const NavbarTitle = (props: Stylable & { onLayout?: ViewProps["onLayout"]
 	);
 };
 
-const SearchBar = forwardRef<TextInput, Stylable>(function SearchBar(props, ref) {
+const SearchBar = ({ ref, ...props }: TextInputProps & { ref?: Ref<TextInput> }) => {
 	const { theme } = useYoshiki();
 	const { t } = useTranslation();
-	const { push, replace, back } = useRouter();
-	const hasChanged = useRef<boolean>(false);
-	const [query, setQuery] = useState("");
-
-	useEffect(() => {
-		if (Platform.OS !== "web" || !hasChanged.current) return;
-		const action = window.location.pathname.startsWith("/search") ? replace : push;
-		if (query) action(`/search?q=${encodeURI(query)}`, undefined, { shallow: true });
-		else back();
-	}, [query, push, replace, back]);
+	const [query, setQuery] = useQueryState("q", "");
 
 	return (
 		<Input
 			ref={ref}
 			value={query ?? ""}
-			onChangeText={(q) => {
-				hasChanged.current = true;
-				setQuery(q);
-			}}
+			onChangeText={setQuery}
 			placeholder={t("navbar.search")}
 			placeholderTextColor={theme.contrast}
 			containerStyle={{ height: ts(4), flexShrink: 1, borderColor: (theme) => theme.contrast }}
@@ -91,7 +60,7 @@ const SearchBar = forwardRef<TextInput, Stylable>(function SearchBar(props, ref)
 			{...props}
 		/>
 	);
-});
+};
 
 const getDisplayUrl = (url: string) => {
 	url = url.replace(/\/api$/, "");
@@ -145,8 +114,7 @@ export const NavbarProfile = () => {
 export const NavbarRight = () => {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
-	const { push } = useRouter();
-	const isAdmin = useHasPermission(AdminPage.requiredPermissions);
+	const isAdmin = false; //useHasPermission(AdminPage.requiredPermissions);
 
 	return (
 		<View {...css({ flexDirection: "row", alignItems: "center", flexShrink: 1 })}>
@@ -156,7 +124,8 @@ export const NavbarRight = () => {
 				<IconButton
 					icon={Search}
 					color={theme.colors.white}
-					onPress={() => push("/search")}
+					as={Link}
+					href={"/search"}
 					{...tooltip(t("navbar.search"))}
 				/>
 			)}
@@ -184,7 +153,7 @@ export const Navbar = ({
 	right?: ReactElement | null;
 	background?: ReactElement;
 } & Stylable) => {
-	const { css, theme } = useYoshiki();
+	const { css } = useYoshiki();
 	const { t } = useTranslation();
 
 	return (

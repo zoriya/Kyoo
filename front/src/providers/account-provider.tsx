@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { type ReactNode, useContext, useEffect, useMemo, useRef } from "react";
+import { type ReactNode, useEffect, useMemo, useRef } from "react";
 import { Platform } from "react-native";
 import { z } from "zod";
 import { AccountP, UserP } from "~/models";
@@ -75,9 +75,4 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 	}, [selectedId, queryClient]);
 
 	return <AccountContext.Provider value={ret}>{children}</AccountContext.Provider>;
-};
-
-export const useAccount = () => {
-	const { selectedAccount } = useContext(AccountContext);
-	return selectedAccount;
 };

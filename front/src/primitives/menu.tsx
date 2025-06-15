@@ -1,27 +1,6 @@
-/*
- * Kyoo - A portable and vast media library solution.
- * Copyright (c) Kyoo.
- *
- * See AUTHORS.md and LICENSE file in the project root for full license information.
- *
- * Kyoo is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Kyoo is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
- */
-
 import { Portal } from "@gorhom/portal";
 import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
 import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
-import { ScrollView } from "moti";
 import {
 	type ComponentType,
 	type ReactElement,
@@ -32,16 +11,15 @@ import {
 	useRef,
 	useState,
 } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { SvgProps } from "react-native-svg";
-import { useRouter } from "solito/router";
 import { percent, px, sm, useYoshiki, vh, xl } from "yoshiki/native";
 import { Icon, IconButton } from "./icons";
 import { PressableFeedback } from "./links";
 import { P } from "./text";
-import { ContrastArea, SwitchVariant } from "./themes";
 import { ts } from "./utils";
+import { ContrastArea, SwitchVariant } from "./theme";
 
 const MenuContext = createContext<((open: boolean) => void) | undefined>(undefined);
 

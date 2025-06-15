@@ -1,10 +1,32 @@
-import { Slot } from "expo-router";
+import { Stack } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTheme } from "yoshiki/native";
 import { ErrorConsumer } from "~/providers/error-consumer";
+import { NavbarRight, NavbarTitle } from "~/ui/navbar";
 
 export default function Layout() {
+	const insets = useSafeAreaInsets();
+	const theme = useTheme();
+
 	return (
 		<ErrorConsumer scope="app">
-			<Slot />
+			<Stack
+				screenOptions={{
+					navigationBarColor: "transparent",
+					navigationBarTranslucent: true,
+					headerTitle: () => <NavbarTitle />,
+					headerRight: () => <NavbarRight />,
+					contentStyle: {
+						backgroundColor: theme.background,
+						paddingLeft: insets.left,
+						paddingRight: insets.right,
+					},
+					headerStyle: {
+						backgroundColor: theme.accent,
+					},
+					headerTintColor: theme.colors.white,
+				}}
+			/>
 		</ErrorConsumer>
 	);
 }
