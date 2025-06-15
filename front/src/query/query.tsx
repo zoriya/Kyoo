@@ -106,13 +106,13 @@ export const createQueryClient = () =>
 				retry: false,
 			},
 			mutations: {
-				mutationFn: (({ method, path, body, params }: MutationParam) => {
-					return queryFn({
-						method,
-						path: toQueryKey({ path, params }),
-						body,
-					});
-				}) as any,
+				// mutationFn: (({ method, path, body, params }: MutationParam) => {
+				// 	return queryFn({
+				// 		method,
+				// 		url: keyToUrl(toQueryKey({ path, params })),
+				// 		body,
+				// 	});
+				// }) as any,
 			},
 		},
 	});
@@ -147,6 +147,10 @@ export const toQueryKey = (query: {
 	].filter((x) => x);
 };
 
+export const keyToUrl = (key: ReturnType<typeof toQueryKey>) => {
+	return key.join("/").replace("/?", "?");
+};
+
 export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 	const { apiUrl, authToken } = useContext(AccountContext);
 	const key = toQueryKey({ apiUrl, path: query.path, params: query.params });
@@ -155,7 +159,7 @@ export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 		queryKey: key,
 		queryFn: (ctx) =>
 			queryFn({
-				url: key.join("/").replace("/?", "?"),
+				url: keyToUrl(key),
 				parser: query.parser,
 				signal: ctx.signal,
 				authToken: authToken?.access_token ?? null,
@@ -174,7 +178,7 @@ export const useInfiniteFetch = <Data, Ret>(query: QueryIdentifier<Data, Ret>) =
 		queryKey: key,
 		queryFn: (ctx) =>
 			queryFn({
-				url: (ctx.pageParam as string) ?? key.join("/").replace("/?", "?"),
+				url: (ctx.pageParam as string) ?? keyToUrl(key),
 				parser: Paged(query.parser),
 				signal: ctx.signal,
 				authToken: authToken?.access_token ?? null,
@@ -214,7 +218,7 @@ export const prefetch = async (...queries: QueryIdentifier[]) => {
 						queryKey: key,
 						queryFn: (ctx) =>
 							queryFn({
-								url: key.join("/").replace("/?", "?"),
+								url: keyToUrl(key),
 								parser: Paged(query.parser),
 								signal: ctx.signal,
 								authToken: authToken?.access_token ?? null,
@@ -227,7 +231,7 @@ export const prefetch = async (...queries: QueryIdentifier[]) => {
 					queryKey: key,
 					queryFn: (ctx) =>
 						queryFn({
-							url: key.join("/").replace("/?", "?"),
+							url: keyToUrl(key),
 							parser: query.parser,
 							signal: ctx.signal,
 							authToken: authToken?.access_token ?? null,

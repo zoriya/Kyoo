@@ -21,10 +21,11 @@ export const expo: ExpoConfig = {
 			foregroundImage: "./public/icon-256x256.png",
 			backgroundColor: "#eff1f5",
 		},
+		edgeToEdgeEnabled: true,
 	},
 	web: {
 		favicon: "./public/icon-256x256.png",
-		bundler: "metro"
+		bundler: "metro",
 	},
 	updates: {
 		url: "https://u.expo.dev/55de6b52-c649-4a15-9a45-569ff5ed036c",

@@ -12,8 +12,10 @@ export default function Layout() {
 		<ErrorConsumer scope="app">
 			<Stack
 				screenOptions={{
-					navigationBarColor: "transparent",
-					navigationBarTranslucent: true,
+					// navigationBarColor: "transparent",
+					// navigationBarTranslucent: true,
+					// statusBarTranslucent: true,
+					// statusBarBackgroundColor: theme.accent,
 					headerTitle: () => <NavbarTitle />,
 					headerRight: () => <NavbarRight />,
 					contentStyle: {
