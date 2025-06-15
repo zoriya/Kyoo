@@ -18,15 +18,15 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./navbar";
+export * from "../../../src/ui/navbar";
 export { HomePage } from "./home";
 export { BrowsePage } from "./browse";
 export { MovieDetails, ShowDetails } from "./details";
 export { CollectionPage } from "./collection";
 export { Player } from "./player";
 export { SearchPage } from "./search";
-export { ServerUrlPage, LoginPage, RegisterPage, OidcCallbackPage } from "./login";
+export { ServerUrlPage, LoginPage, RegisterPage, OidcCallbackPage } from "../../../src/ui/login";
 export { DownloadPage, DownloadProvider } from "./downloads";
 export { SettingsPage } from "./settings";
 export { AdminPage } from "./admin";
-export * from "./errors";
+export * from "../../../src/ui/errors";
