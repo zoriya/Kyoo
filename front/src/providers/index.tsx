@@ -6,10 +6,10 @@ import { createQueryClient } from "~/query";
 import { AccountProvider } from "./account-provider";
 import { ErrorConsumer } from "./error-consumer";
 import { ErrorProvider } from "./error-provider";
+import { NativeProviders } from "./native-providers";
 import { TranslationsProvider } from "./translations.native";
 
-function getServerData(key: string) {
-}
+function getServerData(key: string) {}
 
 const QueryProvider = ({ children }: { children: ReactNode }) => {
 	const [queryClient] = useState(() => createQueryClient());
@@ -38,7 +38,9 @@ export const Providers = ({ children }: { children: ReactNode }) => {
 				<ErrorProvider>
 					<AccountProvider>
 						<TranslationsProvider>
-							<ErrorConsumer scope="root">{children}</ErrorConsumer>
+							<NativeProviders>
+								<ErrorConsumer scope="root">{children}</ErrorConsumer>
+							</NativeProviders>
 						</TranslationsProvider>
 					</AccountProvider>
 				</ErrorProvider>
