@@ -1,4 +1,7 @@
-import type { KyooImage, WatchStatusV } from "@kyoo/models";
+import { useState } from "react";
+import { Platform, View } from "react-native";
+import { percent, px, rem, useYoshiki } from "yoshiki/native";
+import type { KyooImage, WatchStatusV } from "~/models";
 import {
 	GradientImageBackground,
 	Heading,
@@ -10,13 +13,9 @@ import {
 	imageBorderRadius,
 	important,
 	ts,
-} from "@kyoo/primitives";
-import { useState } from "react";
-import { Platform, View } from "react-native";
-import { percent, px, rem, useYoshiki } from "yoshiki/native";
-import { ItemContext } from "../../packages/ui/src/components/context-menus";
-import type { Layout } from "../fetch";
-import { ItemWatchStatus } from "../ui/browse/grid";
+} from "~/primitives";
+import type { Layout } from "~/query";
+import { ItemWatchStatus } from "./item-helpers";
 
 export const ItemList = ({
 	href,
@@ -173,4 +172,9 @@ ItemList.Loader = (props: object) => {
 	);
 };
 
-ItemList.layout = { numColumns: 1, size: 300, layout: "vertical", gap: ts(2) } satisfies Layout;
+ItemList.layout = {
+	numColumns: 1,
+	size: 300,
+	layout: "vertical",
+	gap: ts(2),
+} satisfies Layout;

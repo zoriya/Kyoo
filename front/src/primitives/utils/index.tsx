@@ -4,3 +4,4 @@ export * from "./spacing";
 export * from "./capitalize";
 export * from "./touchonly";
 export * from "./page-style";
+export * from "./breakpoint";

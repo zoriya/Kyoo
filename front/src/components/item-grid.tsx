@@ -1,6 +1,8 @@
-import { type KyooImage, WatchStatusV } from "@kyoo/models";
+import { useState } from "react";
+import { type ImageStyle, Platform, View } from "react-native";
+import { type Stylable, type Theme, percent, px, useYoshiki } from "yoshiki/native";
+import type { KyooImage, WatchStatusV } from "~/models";
 import {
-	Icon,
 	Link,
 	P,
 	Poster,
@@ -10,55 +12,9 @@ import {
 	focusReset,
 	important,
 	ts,
-} from "@kyoo/primitives";
-import Done from "@material-symbols/svg-400/rounded/check-fill.svg";
-import { useState } from "react";
-import { type ImageStyle, Platform, View } from "react-native";
-import { type Stylable, type Theme, max, percent, px, rem, useYoshiki } from "yoshiki/native";
-import { ItemContext } from "../../../packages/ui/src/components/context-menus";
-import type { Layout } from "../fetch";
-
-export const ItemWatchStatus = ({
-	watchStatus,
-	unseenEpisodesCount,
-	...props
-}: {
-	watchStatus?: WatchStatusV | null;
-	unseenEpisodesCount?: number | null;
-}) => {
-	const { css } = useYoshiki();
-
-	if (watchStatus !== WatchStatusV.Completed && !unseenEpisodesCount) return null;
-
-	return (
-		<View
-			{...css(
-				{
-					position: "absolute",
-					top: 0,
-					right: 0,
-					minWidth: max(rem(1), ts(3.5)),
-					aspectRatio: 1,
-					justifyContent: "center",
-					alignItems: "center",
-					m: ts(0.5),
-					pX: ts(0.5),
-					bg: (theme) => theme.darkOverlay,
-					borderRadius: 999999,
-				},
-				props,
-			)}
-		>
-			{watchStatus === WatchStatusV.Completed ? (
-				<Icon icon={Done} size={16} />
-			) : (
-				<P {...css({ marginVertical: 0, verticalAlign: "middle", textAlign: "center" })}>
-					{unseenEpisodesCount}
-				</P>
-			)}
-		</View>
-	);
-};
+} from "~/primitives";
+import type { Layout } from "~/query";
+import { ItemWatchStatus } from "./item-helpers";
 
 export const ItemProgress = ({ watchPercent }: { watchPercent: number }) => {
 	const { css } = useYoshiki("episodebox");
@@ -106,7 +62,7 @@ export const ItemGrid = ({
 	poster: KyooImage | null;
 	watchStatus: WatchStatusV | null;
 	watchPercent: number | null;
-	type: "movie" | "show" | "collection";
+	type: "movie" | "serie" | "collection";
 	unseenEpisodesCount: number | null;
 } & Stylable<"text">) => {
 	const [moreOpened, setMoreOpened] = useState(false);

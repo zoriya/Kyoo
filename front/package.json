@@ -15,6 +15,7 @@
 	"dependencies": {
 		"@expo/html-elements": "^0.12.5",
 		"@gorhom/portal": "^1.0.14",
+		"@legendapp/list": "^1.0.20",
 		"@material-symbols/svg-400": "^0.31.6",
 		"@radix-ui/react-dropdown-menu": "^2.1.15",
 		"@react-navigation/bottom-tabs": "^7.3.10",

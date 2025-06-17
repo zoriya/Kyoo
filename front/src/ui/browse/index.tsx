@@ -6,11 +6,12 @@ import {
 	type QueryPage,
 	getDisplayDate,
 } from "~/models";
-import { InfiniteFetch } from "../../query/fetch-infinite"
+import { useQueryState } from "~/utils";
 import { DefaultLayout } from "../../../packages/ui/src/layout";
-import { ItemGrid } from "./grid";
+import { InfiniteFetch } from "../../query/fetch-infinite";
+import { ItemGrid } from "~/components";
 import { BrowseSettings } from "./header";
-import { ItemList } from "./list";
+import { ItemList } from "../../components/item-list";
 import {
 	Layout,
 	type MediaType,
@@ -20,8 +21,6 @@ import {
 	SortBy,
 	SortOrd,
 } from "./types";
-
-const { useParam } = createParam<{ sortBy?: string; mediaType?: string }>();
 
 export const itemMap = (
 	item: LibraryItem,
@@ -66,8 +65,8 @@ export const getMediaTypeFromParam = (mediaTypeParam?: string): MediaType => {
 };
 
 export const BrowsePage: QueryPage = () => {
-	const [sort, setSort] = useParam("sortBy");
-	const [mediaTypeParam, setMediaTypeParam] = useParam("mediaType");
+	const [sort, setSort] = useQueryState("sortBy", "");
+	const [mediaTypeParam, setMediaTypeParam] = useQueryState("mediaType", "");
 	const sortKey = (sort?.split(":")[0] as SortBy) || SortBy.Name;
 	const sortOrd = (sort?.split(":")[1] as SortOrd) || SortOrd.Asc;
 	const [layout, setLayout] = useState(Layout.Grid);
