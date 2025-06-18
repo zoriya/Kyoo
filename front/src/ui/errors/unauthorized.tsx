@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 import { Button, Icon, Link, P, ts } from "~/primitives";
-import { useAccount } from "~/providers/account-provider";
+import { useAccount } from "~/providers/account-context";
 
 export const Unauthorized = ({ missing }: { missing: string[] }) => {
 	const { t } = useTranslation();

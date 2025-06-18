@@ -23,7 +23,6 @@ import Refresh from "@material-symbols/svg-400/rounded/autorenew.svg";
 import Info from "@material-symbols/svg-400/rounded/info.svg";
 import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
 import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
@@ -31,7 +30,7 @@ import { useYoshiki } from "yoshiki/native";
 import { WatchStatusV } from "~/models";
 import { HR, IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
-import { queryFn } from "~/query";
+import { useMutation } from "~/query";
 // import { useDownloader } from "../../packages/ui/src/downloadses/ui/src/downloads";
 
 export const EpisodesContext = ({
@@ -53,22 +52,19 @@ export const EpisodesContext = ({
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 
-	const queryClient = useQueryClient();
 	const mutation = useMutation({
-		mutationFn: (newStatus: WatchStatusV | null) =>
-			queryFn({
-				path: [type, slug, "watchStatus", newStatus && `?status=${newStatus}`],
-				method: newStatus ? "POST" : "DELETE",
-			}),
-		onSettled: async () => await queryClient.invalidateQueries({ queryKey: [type, slug] }),
+		path: [type, slug, "watchStatus"],
+		compute: (newStatus: WatchStatusV | null) => ({
+			method: newStatus ? "POST" : "DELETE",
+			params: newStatus ? { status: newStatus } : undefined,
+		}),
+		invalidate: [type, slug],
 	});
 
 	const metadataRefreshMutation = useMutation({
-		mutationFn: () =>
-			queryFn({
-				path: [type, slug, "refresh"],
-				method: "POST",
-			}),
+		method: "POST",
+		path: [type, slug, "refresh"],
+		invalidate: null,
 	});
 
 	return (

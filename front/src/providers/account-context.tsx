@@ -1,10 +1,10 @@
 import { createContext, useContext } from "react";
-import { ServerInfoP, type Account, type Token } from "~/models";
+import { type Account, ServerInfoP, type Token } from "~/models";
 import { useFetch } from "~/query";
 
 export const AccountContext = createContext<{
 	apiUrl: string;
-	authToken: Token | null;
+	authToken: string | null; //Token | null;
 	selectedAccount: Account | null;
 	accounts: (Account & { select: () => void; remove: () => void })[];
 }>({ apiUrl: "api", authToken: null, selectedAccount: null, accounts: [] });

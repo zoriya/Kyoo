@@ -1,4 +1,11 @@
-import { QueryClient, dehydrate, useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+	QueryClient,
+	dehydrate,
+	useInfiniteQuery,
+	useQuery,
+	useQueryClient,
+	useMutation as useRQMutation,
+} from "@tanstack/react-query";
 import { useContext } from "react";
 import { Platform } from "react-native";
 import type { z } from "zod";
@@ -14,7 +21,7 @@ const cleanSlash = (str: string | null, keepFirst = false) => {
 	return str.replace(/^\/|\/$/g, "");
 };
 
-export const queryFn = async <Parser extends z.ZodTypeAny>(context: {
+const queryFn = async <Parser extends z.ZodTypeAny>(context: {
 	method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 	url: string;
 	body?: object;
@@ -22,7 +29,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(context: {
 	plainText?: boolean;
 	authToken: string | null;
 	parser?: Parser;
-	signal: AbortSignal;
+	signal?: AbortSignal;
 }): Promise<z.infer<Parser>> => {
 	if (Platform.OS === "web" && typeof window === "undefined" && context.url.startsWith("/api"))
 		context.url = `${ssrApiUrl}/${context.url.substring(4)}`;
@@ -88,13 +95,6 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(context: {
 	return parsed.data;
 };
 
-export type MutationParam = {
-	params?: Record<string, number | string>;
-	body?: object;
-	path: string[];
-	method: "POST" | "DELETE";
-};
-
 export const createQueryClient = () =>
 	new QueryClient({
 		defaultOptions: {
@@ -104,15 +104,6 @@ export const createQueryClient = () =>
 				refetchOnWindowFocus: false,
 				refetchOnReconnect: false,
 				retry: false,
-			},
-			mutations: {
-				// mutationFn: (({ method, path, body, params }: MutationParam) => {
-				// 	return queryFn({
-				// 		method,
-				// 		url: keyToUrl(toQueryKey({ path, params })),
-				// 		body,
-				// 	});
-				// }) as any,
 			},
 		},
 	});
@@ -130,7 +121,7 @@ export type QueryIdentifier<T = unknown, Ret = T> = {
 	};
 };
 
-export const toQueryKey = (query: {
+const toQueryKey = (query: {
 	apiUrl: string;
 	path: (string | undefined)[];
 	params?: { [query: string]: boolean | number | string | string[] | undefined };
@@ -162,7 +153,7 @@ export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 				url: keyToUrl(key),
 				parser: query.parser,
 				signal: ctx.signal,
-				authToken: authToken?.access_token ?? null,
+				authToken: authToken ?? null,
 				...query.options,
 			}),
 		placeholderData: query.placeholderData as any,
@@ -181,7 +172,7 @@ export const useInfiniteFetch = <Data, Ret>(query: QueryIdentifier<Data, Ret>) =
 				url: (ctx.pageParam as string) ?? keyToUrl(key),
 				parser: Paged(query.parser),
 				signal: ctx.signal,
-				authToken: authToken?.access_token ?? null,
+				authToken: authToken ?? null,
 				...query.options,
 			}),
 		getNextPageParam: (page: Page<Data>) => page?.next || undefined,
@@ -221,7 +212,7 @@ export const prefetch = async (...queries: QueryIdentifier[]) => {
 								url: keyToUrl(key),
 								parser: Paged(query.parser),
 								signal: ctx.signal,
-								authToken: authToken?.access_token ?? null,
+								authToken: authToken ?? null,
 								...query.options,
 							}),
 						initialPageParam: undefined,
@@ -234,7 +225,7 @@ export const prefetch = async (...queries: QueryIdentifier[]) => {
 							url: keyToUrl(key),
 							parser: query.parser,
 							signal: ctx.signal,
-							authToken: authToken?.access_token ?? null,
+							authToken: authToken ?? null,
 							...query.options,
 						}),
 				});
@@ -242,4 +233,47 @@ export const prefetch = async (...queries: QueryIdentifier[]) => {
 	);
 	setServerData("queryState", dehydrate(client));
 	return client;
+};
+
+type MutationParams = {
+	method?: "POST" | "PUT" | "DELETE";
+	path?: string[];
+	params?: { [query: string]: boolean | number | string | string[] | undefined };
+	body?: object;
+};
+
+export const useMutation = <T = void,>({
+	compute,
+	invalidate,
+	...queryParams
+}: MutationParams & {
+	compute?: (param: T) => MutationParams;
+	invalidate: string[] | null;
+}) => {
+	const { apiUrl, authToken } = useContext(AccountContext);
+	const queryClient = useQueryClient();
+	const mutation = useRQMutation({
+		mutationFn: (param: T) => {
+			const { method, path, params, body } = {
+				...queryParams,
+				...compute?.(param),
+			} as Required<MutationParams>;
+
+			return queryFn({
+				method,
+				url: keyToUrl(toQueryKey({ apiUrl, path, params })),
+				body,
+				authToken,
+			});
+		},
+		onSuccess: invalidate
+			? async () =>
+					await queryClient.invalidateQueries({
+						queryKey: toQueryKey({ apiUrl, path: invalidate }),
+					})
+			: undefined,
+		// TODO: Do something
+		// onError: () => {}
+	});
+	return mutation;
 };
