@@ -1,17 +1,11 @@
 import { type ComponentProps, useState } from "react";
-import {
-	type LibraryItem,
-	LibraryItemP,
-	type QueryIdentifier,
-	type QueryPage,
-	getDisplayDate,
-} from "~/models";
+import { ItemGrid } from "~/components";
+import { type LibraryItem, LibraryItemP, getDisplayDate } from "~/models";
+import { InfiniteFetch, type QueryIdentifier, type QueryPage } from "~/query";
 import { useQueryState } from "~/utils";
 import { DefaultLayout } from "../../../packages/ui/src/layout";
-import { InfiniteFetch } from "../../query/fetch-infinite";
-import { ItemGrid } from "~/components";
-import { BrowseSettings } from "./header";
 import { ItemList } from "../../components/item-list";
+import { BrowseSettings } from "./header";
 import {
 	Layout,
 	type MediaType,

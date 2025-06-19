@@ -1,32 +1,13 @@
-/*
- * Kyoo - A portable and vast media library solution.
- * Copyright (c) Kyoo.
- *
- * See AUTHORS.md and LICENSE file in the project root for full license information.
- *
- * Kyoo is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Kyoo is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
- */
-
-import { WatchStatusV, queryFn, useAccount } from "@kyoo/models";
-import { IconButton, Menu, tooltip } from "@kyoo/primitives";
 import Bookmark from "@material-symbols/svg-400/rounded/bookmark-fill.svg";
 import BookmarkAdd from "@material-symbols/svg-400/rounded/bookmark_add.svg";
 import BookmarkAdded from "@material-symbols/svg-400/rounded/bookmark_added-fill.svg";
 import BookmarkRemove from "@material-symbols/svg-400/rounded/bookmark_remove.svg";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
+import { WatchStatusV } from "~/models";
+import { IconButton, Menu, tooltip } from "~/primitives";
+import { useAccount } from "~/providers/account-context";
+import { useMutation } from "~/query";
 
 export const watchListIcon = (status: WatchStatusV | null) => {
 	switch (status) {
@@ -55,14 +36,13 @@ export const WatchListInfo = ({
 	const account = useAccount();
 	const { t } = useTranslation();
 
-	const queryClient = useQueryClient();
 	const mutation = useMutation({
-		mutationFn: (newStatus: WatchStatusV | null) =>
-			queryFn({
-				path: [type, slug, "watchStatus", newStatus && `?status=${newStatus}`],
-				method: newStatus ? "POST" : "DELETE",
-			}),
-		onSettled: async () => await queryClient.invalidateQueries({ queryKey: [type, slug] }),
+		path: [type, slug, "watchStatus"],
+		compute: (newStatus: WatchStatusV | null) => ({
+			method: newStatus ? "POST" : "DELETE",
+			params: newStatus ? { status: newStatus } : undefined,
+		}),
+		invalidate: [type, slug],
 	});
 	if (mutation.isPending) status = mutation.variables;
 
@@ -112,5 +92,11 @@ export const WatchListInfo = ({
 					<Menu.Item label={t("show.watchlistMark.null")} onSelect={() => mutation.mutate(null)} />
 				</Menu>
 			);
+		default:
+			return exhaustiveCheck(status);
 	}
 };
+
+function exhaustiveCheck(v: never): never {
+	return v;
+}
