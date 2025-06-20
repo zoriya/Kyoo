@@ -8,3 +8,4 @@ export const Show = z.union([
 	Movie.and(z.object({ kind: z.literal("movie") })),
 	Collection.and(z.object({ kind: z.literal("collection") })),
 ]);
+export type Show = z.infer<typeof Show>;

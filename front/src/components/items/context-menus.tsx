@@ -1,23 +1,3 @@
-/*
- * Kyoo - A portable and vast media library solution.
- * Copyright (c) Kyoo.
- *
- * See AUTHORS.md and LICENSE file in the project root for full license information.
- *
- * Kyoo is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Kyoo is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
- */
-
 import Refresh from "@material-symbols/svg-400/rounded/autorenew.svg";
 // import Download from "@material-symbols/svg-400/rounded/download.svg";
 import Info from "@material-symbols/svg-400/rounded/info.svg";
@@ -27,11 +7,14 @@ import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 import { useYoshiki } from "yoshiki/native";
-import { WatchStatusV } from "~/models";
+import type { Serie } from "~/models";
 import { HR, IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { useMutation } from "~/query";
+import { watchListIcon } from "./watchlist-info";
 // import { useDownloader } from "../../packages/ui/src/downloadses/ui/src/downloads";
+
+type WatchStatusV = NonNullable<Serie["watchStatus"]>["status"];
 
 export const EpisodesContext = ({
 	type = "episode",

@@ -1,90 +1,34 @@
-import { type ComponentProps, useState } from "react";
-import { ItemGrid } from "~/components";
-import { type LibraryItem, LibraryItemP, getDisplayDate } from "~/models";
-import { InfiniteFetch, type QueryIdentifier, type QueryPage } from "~/query";
+import { useState } from "react";
+import { ItemGrid, itemMap } from "~/components/items";
+import { ItemList } from "~/components/items";
+import { Show } from "~/models";
+import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { useQueryState } from "~/utils";
-import { DefaultLayout } from "../../../packages/ui/src/layout";
-import { ItemList } from "../../components/item-list";
 import { BrowseSettings } from "./header";
-import {
-	Layout,
-	type MediaType,
-	MediaTypeAll,
-	MediaTypeKey,
-	MediaTypes,
-	SortBy,
-	SortOrd,
-} from "./types";
+import type { SortBy, SortOrd } from "./types";
 
-export const itemMap = (
-	item: LibraryItem,
-): ComponentProps<typeof ItemGrid> & ComponentProps<typeof ItemList> => ({
-	slug: item.slug,
-	name: item.name,
-	subtitle: item.kind !== "collection" ? getDisplayDate(item) : null,
-	href: item.href,
-	poster: item.poster,
-	thumbnail: item.thumbnail,
-	watchStatus: item.kind !== "collection" ? (item.watchStatus?.status ?? null) : null,
-	type: item.kind,
-	watchPercent: item.kind !== "collection" ? (item.watchStatus?.watchedPercent ?? null) : null,
-	unseenEpisodesCount:
-		item.kind === "show" ? (item.watchStatus?.unseenEpisodesCount ?? item.episodesCount!) : null,
-});
-
-export const createFilterString = (mediaType: MediaType): string | undefined => {
-	return mediaType !== MediaTypeAll ? `kind eq ${mediaType.key}` : undefined;
-};
-
-const query = (
-	mediaType: MediaType,
-	sortKey?: SortBy,
-	sortOrd?: SortOrd,
-): QueryIdentifier<LibraryItem> => {
-	return {
-		parser: LibraryItemP,
-		path: ["items"],
-		infinite: true,
-		params: {
-			sortBy: sortKey ? `${sortKey}:${sortOrd ?? "asc"}` : "name:asc",
-			filter: createFilterString(mediaType),
-			fields: ["watchStatus", "episodesCount"],
-		},
-	};
-};
-
-export const getMediaTypeFromParam = (mediaTypeParam?: string): MediaType => {
-	const mediaTypeKey = (mediaTypeParam as MediaTypeKey) || MediaTypeKey.All;
-	return MediaTypes.find((t) => t.key === mediaTypeKey) ?? MediaTypeAll;
-};
-
-export const BrowsePage: QueryPage = () => {
+export const BrowsePage = () => {
+	const [filter, setFilter] = useQueryState("filter", "");
 	const [sort, setSort] = useQueryState("sortBy", "");
-	const [mediaTypeParam, setMediaTypeParam] = useQueryState("mediaType", "");
-	const sortKey = (sort?.split(":")[0] as SortBy) || SortBy.Name;
-	const sortOrd = (sort?.split(":")[1] as SortOrd) || SortOrd.Asc;
-	const [layout, setLayout] = useState(Layout.Grid);
+	const sortBy = (sort?.split(":")[0] as SortBy) || "name";
+	const sortOrd = (sort?.split(":")[1] as SortOrd) || "asc";
 
-	const mediaType = getMediaTypeFromParam(mediaTypeParam);
-	const LayoutComponent = layout === Layout.Grid ? ItemGrid : ItemList;
+	const [layout, setLayout] = useState<"grid" | "list">("grid");
+	const LayoutComponent = layout === "grid" ? ItemGrid : ItemList;
 
 	return (
 		<InfiniteFetch
-			query={query(mediaType, sortKey, sortOrd)}
+			query={BrowsePage.query(filter, sortBy, sortOrd)}
 			layout={LayoutComponent.layout}
 			Header={
 				<BrowseSettings
-					availableSorts={Object.values(SortBy)}
-					sortKey={sortKey}
+					sortBy={sortBy}
 					sortOrd={sortOrd}
 					setSort={(key, ord) => {
 						setSort(`${key}:${ord}`);
 					}}
-					mediaType={mediaType}
-					availableMediaTypes={MediaTypes}
-					setMediaType={(mediaType) => {
-						setMediaTypeParam(mediaType.key);
-					}}
+					filter={filter}
+					setFilter={setFilter}
 					layout={layout}
 					setLayout={setLayout}
 				/>
@@ -95,9 +39,18 @@ export const BrowsePage: QueryPage = () => {
 	);
 };
 
-BrowsePage.getLayout = DefaultLayout;
-
-BrowsePage.getFetchUrls = ({ mediaType, sortBy }) => {
-	const mediaTypeObj = getMediaTypeFromParam(mediaType);
-	return [query(mediaTypeObj, sortBy?.split("-")[0] as SortBy, sortBy?.split("-")[1] as SortOrd)];
+BrowsePage.query = (
+	filter?: string,
+	sortKey?: SortBy,
+	sortOrd?: SortOrd,
+): QueryIdentifier<Show> => {
+	return {
+		parser: Show,
+		path: ["shows"],
+		infinite: true,
+		params: {
+			sort: sortKey ? `${sortKey}:${sortOrd ?? "asc"}` : "name:asc",
+			filter,
+		},
+	};
 };

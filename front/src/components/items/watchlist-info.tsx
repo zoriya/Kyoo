@@ -4,18 +4,21 @@ import BookmarkAdded from "@material-symbols/svg-400/rounded/bookmark_added-fill
 import BookmarkRemove from "@material-symbols/svg-400/rounded/bookmark_remove.svg";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
-import { WatchStatusV } from "~/models";
+import type { Serie } from "~/models";
 import { IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { useMutation } from "~/query";
 
-export const watchListIcon = (status: WatchStatusV | null) => {
+type WatchStatus = NonNullable<Serie["watchStatus"]>["status"];
+const WatchStatus = ["completed", "watching", "rewatching", "dropped", "planned"] as const;
+
+export const watchListIcon = (status: WatchStatus | null) => {
 	switch (status) {
 		case null:
 			return BookmarkAdd;
-		case WatchStatusV.Completed:
+		case "completed":
 			return BookmarkAdded;
-		case WatchStatusV.Droped:
+		case "dropped":
 			return BookmarkRemove;
 		default:
 			return Bookmark;
@@ -30,7 +33,7 @@ export const WatchListInfo = ({
 }: {
 	type: "movie" | "show" | "episode";
 	slug: string;
-	status: WatchStatusV | null;
+	status: WatchStatus | null;
 	color: ComponentProps<typeof IconButton>["color"];
 }) => {
 	const account = useAccount();
@@ -38,7 +41,7 @@ export const WatchListInfo = ({
 
 	const mutation = useMutation({
 		path: [type, slug, "watchStatus"],
-		compute: (newStatus: WatchStatusV | null) => ({
+		compute: (newStatus: WatchStatus | null) => ({
 			method: newStatus ? "POST" : "DELETE",
 			params: newStatus ? { status: newStatus } : undefined,
 		}),
@@ -57,12 +60,12 @@ export const WatchListInfo = ({
 			return (
 				<IconButton
 					icon={BookmarkAdd}
-					onPress={() => mutation.mutate(WatchStatusV.Planned)}
+					onPress={() => mutation.mutate("planned")}
 					{...tooltip(t("show.watchlistAdd"))}
 					{...props}
 				/>
 			);
-		case WatchStatusV.Completed:
+		case "completed":
 			return (
 				<IconButton
 					icon={BookmarkAdded}
@@ -71,9 +74,10 @@ export const WatchListInfo = ({
 					{...props}
 				/>
 			);
-		case WatchStatusV.Planned:
-		case WatchStatusV.Watching:
-		case WatchStatusV.Droped:
+		case "planned":
+		case "watching":
+		case "rewatching":
+		case "dropped":
 			return (
 				<Menu
 					Trigger={IconButton}
@@ -81,10 +85,10 @@ export const WatchListInfo = ({
 					{...tooltip(t("show.watchlistEdit"))}
 					{...props}
 				>
-					{Object.values(WatchStatusV).map((x) => (
+					{Object.values(WatchStatus).map((x) => (
 						<Menu.Item
 							key={x}
-							label={t(`show.watchlistMark.${x.toLowerCase() as Lowercase<WatchStatusV>}`)}
+							label={t(`show.watchlistMark.${x}`)}
 							onSelect={() => mutation.mutate(x)}
 							selected={x === status}
 						/>
