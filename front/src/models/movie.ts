@@ -1,12 +1,12 @@
 import { z } from "zod";
-import { Entry } from "./entry";
 import { Studio } from "./studio";
 import { Genre } from "./utils/genre";
 import { Image } from "./utils/images";
 import { Metadata } from "./utils/metadata";
 import { zdate } from "./utils/utils";
+import { EmbeddedVideo } from "./video";
 
-export const Serie = z
+export const Movie = z
 	.object({
 		id: z.string(),
 		slug: z.string(),
@@ -20,12 +20,11 @@ export const Serie = z
 		aliases: z.array(z.string()),
 		tags: z.array(z.string()),
 		description: z.string().nullable(),
-		status: z.enum(["unknown", "finished", "airing", "planned"]),
-		rating: z.number().int().gte(0).lte(100).nullable(),
-		startAir: zdate().nullable(),
-		endAir: zdate().nullable(),
+		status: z.enum(["unknown", "finished", "planned"]),
+		rating: z.number().int().gte(0).lte(100),
+		runtime: z.number().int().nullable(),
+		airDate: zdate().nullable(),
 		genres: z.array(Genre),
-		runtime: z.number().nullable(),
 		externalId: Metadata,
 
 		poster: Image.nullable(),
@@ -34,29 +33,24 @@ export const Serie = z
 		logo: Image.nullable(),
 		trailerUrl: z.string().optional().nullable(),
 
-		entriesCount: z.number().int(),
-		availableCount: z.number().int(),
+		isAvailable: z.boolean(),
 
 		createdAt: zdate(),
 		updatedAt: zdate(),
 
 		studios: z.array(Studio).optional(),
-		firstEntry: Entry.optional().nullable(),
-		nextEntry: Entry.optional().nullable(),
+		videos: z.array(EmbeddedVideo).optional(),
 		watchStatus: z
 			.object({
 				status: z.enum(["completed", "watching", "rewatching", "dropped", "planned"]),
 				score: z.number().int().gte(0).lte(100).nullable(),
-				startedAt: zdate().nullable(),
 				completedAt: zdate().nullable(),
-				seenCount: z.number().int().gte(0),
+				percent: z.number().int().gte(0).lte(100),
 			})
 			.nullable(),
 	})
 	.transform((x) => ({
 		...x,
-		href: `/series/${x.slug}`,
-		playHref: x.firstEntry ? `/watch/${x.firstEntry.slug}` : null,
+		href: `/movies/${x.slug}`,
 	}));
-
-export type Serie = z.infer<typeof Serie>;
+export type Movie = z.infer<typeof Movie>;
