@@ -81,6 +81,11 @@ export const showFilters: FilterDef = {
 export const showSort = Sort(
 	{
 		slug: shows.slug,
+		name: {
+			sql: sql.raw(`t.${showTranslations.name.name}`),
+			isNullable: false,
+			accessor: (x) => x.name,
+		},
 		rating: shows.rating,
 		airDate: shows.startAir,
 		startAir: shows.startAir,
