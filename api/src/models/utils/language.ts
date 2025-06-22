@@ -4,7 +4,7 @@ import {
 	type TSchema,
 	type TString,
 } from "@sinclair/typebox";
-import { type Column, type Table, eq, sql } from "drizzle-orm";
+import { type Column, eq, sql, type Table } from "drizzle-orm";
 import { t } from "elysia";
 import { sqlarr } from "~/db/utils";
 import { comment } from "../../utils";
@@ -74,7 +74,7 @@ export const TranslationRecord = <T extends TSchema>(
 		.Encode((x) => x);
 
 export const processLanguages = (languages?: string) => {
-	if (!languages) return ["*"];
+	if (!languages) return ["en", "*"];
 	return languages
 		.split(",")
 		.map((x) => {
@@ -91,9 +91,11 @@ export const processLanguages = (languages?: string) => {
 
 export const AcceptLanguage = ({
 	autoFallback = false,
-}: { autoFallback?: boolean } = {}) =>
+}: {
+	autoFallback?: boolean;
+} = {}) =>
 	t.String({
-		default: "*",
+		default: "en, *",
 		example: "en-us, ja;q=0.5",
 		description:
 			comment`

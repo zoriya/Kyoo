@@ -271,6 +271,8 @@ export async function getShows({
 		.orderBy(
 			showTranslations.pk,
 			sql`array_position(${sqlarr(languages)}, ${showTranslations.language})`,
+			// ensure a stable sort to prevent future pages to contains the same element again
+			showTranslations.language,
 		)
 		.as("t");
 
