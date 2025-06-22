@@ -36,7 +36,7 @@
 			"completed": "Marcar como completado",
 			"planned": "Marcar como planificado",
 			"watching": "Marcar como visualizando",
-			"droped": "Marcar como abandonado",
+			"dropped": "Marcar como abandonado",
 			"null": "Marcar como non visto"
 		},
 		"nextUp": "Seguinte",

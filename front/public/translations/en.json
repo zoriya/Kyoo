@@ -36,7 +36,8 @@
 			"completed": "Mark as completed",
 			"planned": "Mark as planned",
 			"watching": "Mark as watching",
-			"droped": "Mark as dropped",
+			"rewatching": "Mark as rewatching",
+			"dropped": "Mark as dropped",
 			"null": "Mark as not seen"
 		},
 		"nextUp": "Next up",

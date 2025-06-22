@@ -36,7 +36,7 @@
 			"completed": "İzlemeyi bitirdiniz olarak işaretleyin",
 			"planned": "İzlemeyi planlıyorsunuz olarak işaretleyin",
 			"watching": "İzleniyor olarak işaretleyin",
-			"droped": "İzlemeyi bıraktınız olarak işaretleyin",
+			"dropped": "İzlemeyi bıraktınız olarak işaretleyin",
 			"null": "İzlenmedi olarak işaretleyin"
 		},
 		"nextUp": "Sonraki",

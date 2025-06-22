@@ -23,7 +23,7 @@
 			"planned": "Oznacz jako zaplanowane",
 			"completed": "Oznacz jako zakończone",
 			"watching": "Oznacz jako oglądany",
-			"droped": "Oznacz jako anulowany",
+			"dropped": "Oznacz jako anulowany",
 			"null": "Oznacz jako nieobejrzane"
 		},
 		"season": "Sezon {{number}}",

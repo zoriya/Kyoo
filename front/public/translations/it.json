@@ -36,7 +36,7 @@
 			"completed": "Segna come completato",
 			"planned": "Segna come pianificato",
 			"watching": "Segna come in visione",
-			"droped": "Segna come scartato",
+			"dropped": "Segna come scartato",
 			"null": "Segna come non visto"
 		},
 		"nextUp": "Prossimo",

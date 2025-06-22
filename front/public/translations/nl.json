@@ -36,7 +36,7 @@
 			"completed": "Markeer als afgekeken",
 			"planned": "Markeer als gepland",
 			"watching": "Markeer als \"aan het kijken\"",
-			"droped": "Markeer als gestopt",
+			"dropped": "Markeer als gestopt",
 			"null": "Markeer als ongekeken"
 		},
 		"nextUp": "Volgende",

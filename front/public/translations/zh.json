@@ -36,7 +36,7 @@
 			"completed": "标记为已完成",
 			"planned": "标记为已计划",
 			"watching": "标记为正在观看",
-			"droped": "标记为已放弃",
+			"dropped": "标记为已放弃",
 			"null": "标记为未观看"
 		},
 		"nextUp": "下一集",

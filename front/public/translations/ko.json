@@ -36,7 +36,7 @@
 			"completed": "시청함으로 표시",
 			"planned": "계획됨으로 표시",
 			"watching": "시청 중으로 표시",
-			"droped": "취소한 것으로 표시",
+			"dropped": "취소한 것으로 표시",
 			"null": "시청하지 않음으로 표시"
 		},
 		"nextUp": "다음",
