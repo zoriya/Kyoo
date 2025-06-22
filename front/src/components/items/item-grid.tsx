@@ -1,21 +1,27 @@
 import { useState } from "react";
 import { type ImageStyle, Platform, View } from "react-native";
-import { type Stylable, type Theme, percent, px, useYoshiki } from "yoshiki/native";
+import {
+	percent,
+	px,
+	type Stylable,
+	type Theme,
+	useYoshiki,
+} from "yoshiki/native";
 import type { KImage, WatchStatusV } from "~/models";
 import {
+	focusReset,
+	important,
 	Link,
 	P,
 	Poster,
 	PosterBackground,
 	Skeleton,
 	SubP,
-	focusReset,
-	important,
 	ts,
 } from "~/primitives";
 import type { Layout } from "~/query";
-import { ItemWatchStatus } from "./item-helpers";
 import { ItemContext } from "./context-menus";
+import { ItemWatchStatus } from "./item-helpers";
 
 export const ItemProgress = ({ watchPercent }: { watchPercent: number }) => {
 	const { css } = useYoshiki("episodebox");
@@ -48,7 +54,7 @@ export const ItemGrid = ({
 	href,
 	slug,
 	name,
-	type,
+	kind,
 	subtitle,
 	poster,
 	watchStatus,
@@ -63,7 +69,7 @@ export const ItemGrid = ({
 	poster: KImage | null;
 	watchStatus: WatchStatusV | null;
 	watchPercent: number | null;
-	type: "movie" | "serie" | "collection";
+	kind: "movie" | "serie" | "collection";
 	unseenEpisodesCount: number | null;
 } & Stylable<"text">) => {
 	const [moreOpened, setMoreOpened] = useState(false);
@@ -111,11 +117,16 @@ export const ItemGrid = ({
 				layout={{ width: percent(100) }}
 				{...(css("poster") as { style: ImageStyle })}
 			>
-				<ItemWatchStatus watchStatus={watchStatus} unseenEpisodesCount={unseenEpisodesCount} />
-				{type === "movie" && watchPercent && <ItemProgress watchPercent={watchPercent} />}
-				{type !== "collection" && (
+				<ItemWatchStatus
+					watchStatus={watchStatus}
+					unseenEpisodesCount={unseenEpisodesCount}
+				/>
+				{kind === "movie" && watchPercent && (
+					<ItemProgress watchPercent={watchPercent} />
+				)}
+				{kind !== "collection" && (
 					<ItemContext
-						type={type}
+						kind={kind}
 						slug={slug}
 						status={watchStatus}
 						isOpen={moreOpened}
@@ -128,12 +139,16 @@ export const ItemGrid = ({
 								bg: (theme) => theme.dark.background,
 							},
 							"more",
-							Platform.OS === "web" && moreOpened && { display: important("flex") },
+							Platform.OS === "web" &&
+								moreOpened && { display: important("flex") },
 						])}
 					/>
 				)}
 			</PosterBackground>
-			<P numberOfLines={subtitle ? 1 : 2} {...css([{ marginY: 0, textAlign: "center" }, "title"])}>
+			<P
+				numberOfLines={subtitle ? 1 : 2}
+				{...css([{ marginY: 0, textAlign: "center" }, "title"])}
+			>
 				{name}
 			</P>
 			{subtitle && (

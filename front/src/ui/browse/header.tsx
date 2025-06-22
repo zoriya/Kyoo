@@ -11,10 +11,22 @@ import ViewList from "@material-symbols/svg-400/rounded/view_list.svg";
 import { useTranslation } from "react-i18next";
 import { type PressableProps, View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
-import { HR, Icon, IconButton, Menu, P, PressableFeedback, tooltip, ts } from "~/primitives";
-import { type SortBy, type SortOrd, availableSorts } from "./types";
+import {
+	HR,
+	Icon,
+	IconButton,
+	Menu,
+	P,
+	PressableFeedback,
+	tooltip,
+	ts,
+} from "~/primitives";
+import { availableSorts, type SortBy, type SortOrd } from "./types";
 
-const SortTrigger = ({ sortBy, ...props }: { sortBy: SortBy } & PressableProps) => {
+const SortTrigger = ({
+	sortBy,
+	...props
+}: { sortBy: SortBy } & PressableProps) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 
@@ -48,8 +60,17 @@ const MediaTypeTrigger = ({
 			{...css({ flexDirection: "row", alignItems: "center" }, props as any)}
 			{...tooltip(t("browse.mediatype-tt"))}
 		>
-			<Icon icon={MediaTypeIcons[mediaType] ?? FilterList} {...css({ paddingX: ts(0.5) })} />
-			<P>{t(mediaType !== "all" ? `browse.mediatypekey.${mediaType}` : "browse.mediatypelabel")}</P>
+			<Icon
+				icon={MediaTypeIcons[mediaType] ?? FilterList}
+				{...css({ paddingX: ts(0.5) })}
+			/>
+			<P>
+				{t(
+					mediaType !== "all"
+						? `browse.mediatypekey.${mediaType}`
+						: "browse.mediatypelabel",
+				)}
+			</P>
 		</PressableFeedback>
 	);
 };
@@ -75,8 +96,9 @@ export const BrowseSettings = ({
 	const { t } = useTranslation();
 
 	// TODO: have a proper filter frontend
-	const mediaType = /kind eq (\w+)/.exec(filter)?.groups?.[0] ?? "all";
-	const setMediaType = (kind: string) => setFilter(kind !== "all " ? `kind eq ${kind}` : "");
+	const mediaType = /kind eq (\w+)/.exec(filter)?.[1] ?? "all";
+	const setMediaType = (kind: string) =>
+		setFilter(kind !== "all" ? `kind eq ${kind}` : "");
 
 	return (
 		<View
@@ -95,7 +117,9 @@ export const BrowseSettings = ({
 							label={t(`browse.sortkey.${x}`)}
 							selected={sortBy === x}
 							icon={sortOrd === "asc" ? ArrowUpward : ArrowDownward}
-							onSelect={() => setSort(x, sortBy === x && sortOrd === "asc" ? "desc" : "asc")}
+							onSelect={() =>
+								setSort(x, sortBy === x && sortOrd === "asc" ? "desc" : "asc")
+							}
 						/>
 					))}
 				</Menu>
@@ -115,8 +139,13 @@ export const BrowseSettings = ({
 					{...css({ padding: ts(0.5), marginY: "auto" })}
 				/>
 			</View>
-			<View {...css({ flexGrow: 1, flexDirection: "row", alignItems: "center" })}>
-				<Menu Trigger={MediaTypeTrigger} mediaType={mediaType as keyof typeof MediaTypeIcons}>
+			<View
+				{...css({ flexGrow: 1, flexDirection: "row", alignItems: "center" })}
+			>
+				<Menu
+					Trigger={MediaTypeTrigger}
+					mediaType={mediaType as keyof typeof MediaTypeIcons}
+				>
 					{Object.keys(MediaTypeIcons).map((x) => (
 						<Menu.Item
 							key={x}

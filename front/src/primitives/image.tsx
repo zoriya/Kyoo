@@ -1,6 +1,6 @@
 import { Image as EImage } from "expo-image";
 import type { ComponentProps } from "react";
-import type { ImageStyle, ViewStyle } from "react-native";
+import { type ImageStyle, Platform, type ViewStyle } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 import type { YoshikiStyle } from "yoshiki/src/type";
 import type { KImage } from "~/models";
@@ -41,11 +41,13 @@ export const Image = ({
 		<EImage
 			source={{
 				uri: src ? `${apiUrl}${src[quality ?? "high"]}` : null,
-				headers: authToken
-					? {
-							Authorization: authToken,
-						}
-					: {},
+				// use cookies on web to allow `img` to make the call instead of js
+				headers:
+					authToken && Platform.OS !== "web"
+						? {
+								Authorization: authToken,
+							}
+						: undefined,
 			}}
 			placeholder={{ blurhash: src?.blurhash }}
 			accessibilityLabel={alt}

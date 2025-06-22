@@ -15,14 +15,14 @@ import { watchListIcon } from "./watchlist-info";
 // import { useDownloader } from "../../packages/ui/src/downloadses/ui/src/downloads";
 
 export const EpisodesContext = ({
-	type = "episode",
+	kind = "episode",
 	slug,
 	showSlug,
 	status,
 	force,
 	...props
 }: {
-	type?: "serie" | "movie" | "episode";
+	kind?: "serie" | "movie" | "episode";
 	showSlug?: string | null;
 	slug: string;
 	status: WatchStatusV | null;
@@ -34,17 +34,17 @@ export const EpisodesContext = ({
 	const { t } = useTranslation();
 
 	const mutation = useMutation({
-		path: [type, slug, "watchStatus"],
+		path: [kind, slug, "watchStatus"],
 		compute: (newStatus: WatchStatusV | null) => ({
 			method: newStatus ? "POST" : "DELETE",
 			params: newStatus ? { status: newStatus } : undefined,
 		}),
-		invalidate: [type, slug],
+		invalidate: [kind, slug],
 	});
 
 	const metadataRefreshMutation = useMutation({
 		method: "POST",
-		path: [type, slug, "refresh"],
+		path: [kind, slug, "refresh"],
 		invalidate: null,
 	});
 
@@ -54,7 +54,10 @@ export const EpisodesContext = ({
 				Trigger={IconButton}
 				icon={MoreVert}
 				{...tooltip(t("misc.more"))}
-				{...(css([Platform.OS !== "web" && !force && { display: "none" }], props) as any)}
+				{...(css(
+					[Platform.OS !== "web" && !force && { display: "none" }],
+					props,
+				) as any)}
 			>
 				{showSlug && (
 					<Menu.Item
@@ -71,7 +74,9 @@ export const EpisodesContext = ({
 					{Object.values(WatchStatusV).map((x) => (
 						<Menu.Item
 							key={x}
-							label={t(`show.watchlistMark.${x.toLowerCase() as Lowercase<WatchStatusV>}`)}
+							label={t(
+								`show.watchlistMark.${x.toLowerCase() as Lowercase<WatchStatusV>}`,
+							)}
 							onSelect={() => mutation.mutate(x)}
 							selected={x === status}
 						/>
@@ -83,7 +88,7 @@ export const EpisodesContext = ({
 						/>
 					)}
 				</Menu.Sub>
-				{type !== "serie" && (
+				{kind !== "serie" && (
 					<>
 						{/* <Menu.Item */}
 						{/* 	label={t("home.episodeMore.download")} */}
@@ -93,7 +98,7 @@ export const EpisodesContext = ({
 						<Menu.Item
 							label={t("home.episodeMore.mediainfo")}
 							icon={MovieInfo}
-							href={`/${type}/${slug}/info`}
+							href={`/${kind}/${slug}/info`}
 						/>
 					</>
 				)}
@@ -113,20 +118,20 @@ export const EpisodesContext = ({
 };
 
 export const ItemContext = ({
-	type,
+	kind,
 	slug,
 	status,
 	force,
 	...props
 }: {
-	type: "movie" | "serie";
+	kind: "movie" | "serie";
 	slug: string;
 	status: WatchStatusV | null;
 	force?: boolean;
 } & Partial<ComponentProps<typeof Menu<typeof IconButton>>>) => {
 	return (
 		<EpisodesContext
-			type={type}
+			kind={kind}
 			slug={slug}
 			status={status}
 			showSlug={null}

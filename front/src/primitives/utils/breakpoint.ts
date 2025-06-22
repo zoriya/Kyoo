@@ -1,5 +1,5 @@
 import { useWindowDimensions } from "react-native";
-import { type Breakpoints as YoshikiBreakpoint, breakpoints, isBreakpoints } from "yoshiki/native";
+import { breakpoints, isBreakpoints, type Breakpoints as YoshikiBreakpoint } from "yoshiki/native";
 
 type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> & U[keyof U];
 export type Breakpoint<T> = T | AtLeastOne<YoshikiBreakpoint<T>>;
@@ -7,9 +7,9 @@ export type Breakpoint<T> = T | AtLeastOne<YoshikiBreakpoint<T>>;
 // copied from yoshiki.
 const useBreakpoint = () => {
 	const { width } = useWindowDimensions();
-	const idx = Object.values(breakpoints).findIndex((x) => width <= x);
+	const idx = Object.values(breakpoints).findLastIndex((x) => x <= width);
 	if (idx === -1) return 0;
-	return idx - 1;
+	return idx;
 };
 
 const getBreakpointValue = <T>(value: Breakpoint<T>, breakpoint: number): T => {

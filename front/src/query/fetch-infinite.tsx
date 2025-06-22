@@ -80,12 +80,10 @@ export const InfiniteFetch = <Data, Props, _, Kind extends number | string>({
 			onEndReachedThreshold={0.5}
 			onRefresh={layout.layout !== "horizontal" ? refetch : undefined}
 			refreshing={isRefetching}
-
 			ListHeaderComponent={Header}
 			ItemSeparatorComponent={divider === true ? HR : (divider as any) || undefined}
 			ListEmptyComponent={Empty}
-
-			contentContainerStyle={{ gap, margin: gap }}
+			contentContainerStyle={{ gap, marginHorizontal: gap }}
 			{...props}
 		/>
 	);

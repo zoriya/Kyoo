@@ -1,5 +1,6 @@
 import { NavigationContext, useRoute } from "@react-navigation/native";
 import { useContext } from "react";
+import type { Movie, Show } from "~/models";
 
 export function setServerData(key: string, val: any) {}
 export function getServerData(key: string) {
@@ -35,4 +36,3 @@ export const getDisplayDate = (data: Show | Movie) => {
 	}
 	return null;
 };
-

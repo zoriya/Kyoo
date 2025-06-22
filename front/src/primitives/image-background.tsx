@@ -2,6 +2,7 @@ import { ImageBackground as EImageBackground } from "expo-image";
 import { LinearGradient, type LinearGradientProps } from "expo-linear-gradient";
 import type { ComponentProps, ReactNode } from "react";
 import type { ImageStyle } from "react-native";
+import { Platform } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 import type { KImage } from "~/models";
 import { useToken } from "~/providers/account-context";
@@ -31,11 +32,13 @@ export const ImageBackground = ({
 		<EImageBackground
 			source={{
 				uri: src ? `${apiUrl}${src[quality ?? "high"]}` : null,
-				headers: authToken
-					? {
-							Authorization: authToken,
-						}
-					: {},
+				// use cookies on web to allow `img` to make the call instead of js
+				headers:
+					authToken && Platform.OS !== "web"
+						? {
+								Authorization: authToken,
+							}
+						: undefined,
 			}}
 			placeholder={{ blurhash: src?.blurhash }}
 			accessibilityLabel={alt}
@@ -57,7 +60,7 @@ export const PosterBackground = ({
 		<ImageBackground
 			alt={alt!}
 			layout={{ aspectRatio: 2 / 3, ...layout }}
-			{...css({ borderRadius: 6 }, props)}
+			{...css({ borderRadius: 10, overflow: "hidden" }, props)}
 		/>
 	);
 };

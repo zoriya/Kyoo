@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { ItemGrid, itemMap } from "~/components/items";
-import { ItemList } from "~/components/items";
+import { ItemGrid, ItemList, itemMap } from "~/components/items";
 import { Show } from "~/models";
 import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { useQueryState } from "~/utils";
@@ -9,11 +8,11 @@ import type { SortBy, SortOrd } from "./types";
 
 export const BrowsePage = () => {
 	const [filter, setFilter] = useQueryState("filter", "");
-	const [sort, setSort] = useQueryState("sortBy", "");
-	const sortBy = (sort?.split(":")[0] as SortBy) || "name";
-	const sortOrd = (sort?.split(":")[1] as SortOrd) || "asc";
+	const [sort, setSort] = useQueryState("sort", "name");
+	const sortOrd = sort.startsWith("-") ? "desc" : "asc";
+	const sortBy = (sort.startsWith("-") ? sort.substring(1) : sort) as SortBy;
 
-	const [layout, setLayout] = useState<"grid" | "list">("grid");
+	const [layout, setLayout] = useQueryState<"grid" | "list">("layout", "grid");
 	const LayoutComponent = layout === "grid" ? ItemGrid : ItemList;
 
 	return (
@@ -25,7 +24,7 @@ export const BrowsePage = () => {
 					sortBy={sortBy}
 					sortOrd={sortOrd}
 					setSort={(key, ord) => {
-						setSort(`${key}:${ord}`);
+						setSort(ord === "desc" ? `-${key}` : key);
 					}}
 					filter={filter}
 					setFilter={setFilter}
@@ -41,7 +40,7 @@ export const BrowsePage = () => {
 
 BrowsePage.query = (
 	filter?: string,
-	sortKey?: SortBy,
+	sortBy?: SortBy,
 	sortOrd?: SortOrd,
 ): QueryIdentifier<Show> => {
 	return {
@@ -49,7 +48,7 @@ BrowsePage.query = (
 		path: ["shows"],
 		infinite: true,
 		params: {
-			sort: sortKey ? `${sortKey}:${sortOrd ?? "asc"}` : "name:asc",
+			sort: sortBy ? `${sortOrd === "desc" ? "-" : ""}${sortBy}` : "name",
 			filter,
 		},
 	};
