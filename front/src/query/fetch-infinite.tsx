@@ -2,8 +2,8 @@ import { LegendList } from "@legendapp/list";
 import { type ComponentType, type ReactElement, useRef } from "react";
 import { type Breakpoint, HR, useBreakpointMap } from "~/primitives";
 import { useSetError } from "~/providers/error-provider";
-import { type QueryIdentifier, useInfiniteFetch } from "~/query";
-import { ErrorView } from "../ui/errors";
+import { ErrorView } from "~/ui/errors";
+import { type QueryIdentifier, useInfiniteFetch } from "./query";
 
 export type Layout = {
 	numColumns: Breakpoint<number>;

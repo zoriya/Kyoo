@@ -5,8 +5,8 @@ import { OfflineView } from "./offline";
 // import { SetupPage } from "./setup";
 import { Unauthorized } from "./unauthorized";
 
-export * from "./error";
 export * from "./empty";
+export * from "./error";
 
 export type ErrorHandler = {
 	view: FC<{ error: KyooError; retry: () => void }>;
@@ -16,6 +16,6 @@ export type ErrorHandler = {
 export const errorHandlers: Record<string, ErrorHandler> = {
 	unauthorized: { view: Unauthorized, forbid: "app" },
 	// setup: { view: SetupPage, forbid: "setup" },
-	connection: { view: ConnectionError },
+	connection: { view: ConnectionError, forbid: "login" },
 	offline: { view: OfflineView },
 };

@@ -3,21 +3,26 @@ import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
 	type ComponentProps,
 	type ComponentType,
+	forwardRef,
 	type ReactElement,
 	type ReactNode,
-	forwardRef,
 } from "react";
 import type { PressableProps } from "react-native";
 import type { SvgProps } from "react-native-svg";
 import { useYoshiki as useNativeYoshiki } from "yoshiki/native";
 import { useYoshiki } from "yoshiki/web";
-import { ContrastArea, SwitchVariant } from "~/primitives";
 import { Icon } from "./icons";
+import { Link } from "./links";
 import { P } from "./text";
+import { ContrastArea, SwitchVariant } from "./theme";
 import { focusReset, ts } from "./utils";
 
 type YoshikiFunc<T> = (props: ReturnType<typeof useYoshiki>) => T;
-export const YoshikiProvider = ({ children }: { children: YoshikiFunc<ReactNode> }) => {
+export const YoshikiProvider = ({
+	children,
+}: {
+	children: YoshikiFunc<ReactNode>;
+}) => {
 	const yoshiki = useYoshiki();
 	return <>{children(yoshiki)}</>;
 };
@@ -26,7 +31,12 @@ export const InternalTriger = forwardRef<unknown, any>(function _Triger(
 	ref,
 ) {
 	return (
-		<Component ref={ref} {...ComponentProps} {...props} onClickCapture={props.onPointerDown} />
+		<Component
+			ref={ref}
+			{...ComponentProps}
+			{...props}
+			onClickCapture={props.onPointerDown}
+		/>
 	);
 });
 
@@ -74,7 +84,8 @@ const Menu = <AsProps extends { onPress: PressableProps["onPress"] }>({
 										boxShadow:
 											"0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2)",
 										zIndex: 2,
-										maxHeight: "calc(var(--radix-dropdown-menu-content-available-height) * 0.8)",
+										maxHeight:
+											"calc(var(--radix-dropdown-menu-content-available-height) * 0.8)",
 									})}
 								>
 									{children}
@@ -89,25 +100,25 @@ const Menu = <AsProps extends { onPress: PressableProps["onPress"] }>({
 	);
 };
 
-const Item = forwardRef<
-	HTMLDivElement,
-	ComponentProps<typeof DropdownMenu.Item> & { href?: string }
->(function _Item({ children, href, onSelect, ...props }, ref) {
+const Item = ({
+	children,
+	href,
+	onSelect,
+	...props
+}: ComponentProps<typeof DropdownMenu.Item> & { href?: string }) => {
 	if (href) {
 		return (
-			<DropdownMenu.Item ref={ref} onSelect={onSelect} {...props} asChild>
-				<Link href={href} style={{ textDecoration: "none" }}>
-					{children}
-				</Link>
+			<DropdownMenu.Item onSelect={onSelect} {...props} asChild>
+				<Link href={href}>{children}</Link>
 			</DropdownMenu.Item>
 		);
 	}
 	return (
-		<DropdownMenu.Item ref={ref} onSelect={onSelect} {...props}>
+		<DropdownMenu.Item onSelect={onSelect} {...props}>
 			{children}
 		</DropdownMenu.Item>
 	);
-});
+};
 
 const MenuItem = forwardRef<
 	HTMLDivElement,
@@ -117,8 +128,14 @@ const MenuItem = forwardRef<
 		left?: ReactElement;
 		disabled?: boolean;
 		selected?: boolean;
-	} & ({ onSelect: () => void; href?: undefined } | { href: string; onSelect?: undefined })
->(function MenuItem({ label, icon, left, selected, onSelect, href, disabled, ...props }, ref) {
+	} & (
+		| { onSelect: () => void; href?: undefined }
+		| { href: string; onSelect?: undefined }
+	)
+>(function MenuItem(
+	{ label, icon, left, selected, onSelect, href, disabled, ...props },
+	ref,
+) {
 	const { css: nCss } = useNativeYoshiki();
 	const { css, theme } = useYoshiki();
 
@@ -133,17 +150,17 @@ const MenuItem = forwardRef<
 
 	return (
 		<>
-			<style jsx global>{`
-				[data-highlighted] {
-					background: ${theme.variant.accent};
-					svg {
-						fill: ${theme.alternate.contrast};
-					}
-					div {
-						color: ${theme.alternate.contrast};
-					}
-				}
-			`}</style>
+			{/* <style jsx global>{` */}
+			{/* 	[data-highlighted] { */}
+			{/* 		background: ${theme.variant.accent}; */}
+			{/* 		svg { */}
+			{/* 			fill: ${theme.alternate.contrast}; */}
+			{/* 		} */}
+			{/* 		div { */}
+			{/* 			color: ${theme.alternate.contrast}; */}
+			{/* 		} */}
+			{/* 	} */}
+			{/* `}</style> */}
 			<Item
 				ref={ref}
 				onSelect={onSelect}
@@ -164,7 +181,10 @@ const MenuItem = forwardRef<
 				{!left && icn && icn}
 				<P
 					{...nCss([
-						{ paddingLeft: 8 * 2 + +!(icon || selected || left) * 24, flexGrow: 1 },
+						{
+							paddingLeft: 8 * 2 + +!(icon || selected || left) * 24,
+							flexGrow: 1,
+						},
 						disabled && {
 							color: theme.overlay0,
 						},
@@ -197,7 +217,11 @@ const Sub = <AsProps,>({
 	return (
 		<DropdownMenu.Sub>
 			<DropdownMenu.SubTrigger asChild disabled={disabled}>
-				<MenuItem disabled={disabled} {...props} onSelect={(e?: any) => e.preventDefault()} />
+				<MenuItem
+					disabled={disabled}
+					{...props}
+					onSelect={(e?: any) => e.preventDefault()}
+				/>
 			</DropdownMenu.SubTrigger>
 			<DropdownMenu.Portal>
 				<DropdownMenu.SubContent
@@ -210,7 +234,8 @@ const Sub = <AsProps,>({
 						boxShadow:
 							"0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2)",
 						zIndex: 2,
-						maxHeight: "calc(var(--radix-dropdown-menu-content-available-height) * 0.8)",
+						maxHeight:
+							"calc(var(--radix-dropdown-menu-content-available-height) * 0.8)",
 					})}
 				>
 					{children}

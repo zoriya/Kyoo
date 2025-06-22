@@ -45,7 +45,7 @@ BrowsePage.query = (
 ): QueryIdentifier<Show> => {
 	return {
 		parser: Show,
-		path: ["shows"],
+		path: ["api", "shows"],
 		infinite: true,
 		params: {
 			sort: sortBy ? `${sortOrd === "desc" ? "-" : ""}${sortBy}` : "name",

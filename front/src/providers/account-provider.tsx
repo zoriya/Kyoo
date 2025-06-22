@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useMemo, useRef } from "react";
 import { Platform } from "react-native";
 import { z } from "zod/v4";
-import { AccountP, UserP } from "~/models";
+import { Account, User } from "~/models";
 import { useFetch } from "~/query";
 import { AccountContext } from "./account-context";
 import { removeAccounts, updateAccount } from "./account-store";
@@ -11,12 +11,12 @@ import { useStoreValue } from "./settings";
 
 export const AccountProvider = ({ children }: { children: ReactNode }) => {
 	const [setError, clearError] = useSetError("account");
-	const accounts = useStoreValue("accounts", z.array(AccountP)) ?? [];
+	const accounts = useStoreValue("accounts", z.array(Account)) ?? [];
 
 	const ret = useMemo(() => {
 		const acc = accounts.find((x) => x.selected);
 		return {
-			apiUrl: Platform.OS === "web" ? "/api" : acc?.apiUrl!,
+			apiUrl: acc?.apiUrl ?? "",
 			authToken: acc?.token ?? null,
 			selectedAccount: acc ?? null,
 			accounts: accounts.map((account) => ({
@@ -34,13 +34,13 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 		data: user,
 		error: userError,
 	} = useFetch({
-		path: ["auth", "me"],
-		parser: UserP,
+		path: ["auth", "users", "me"],
+		parser: User,
 		placeholderData: ret.selectedAccount,
 		enabled: !!ret.selectedAccount,
 		options: {
 			apiUrl: ret.apiUrl,
-			authToken: ret.authToken?.access_token,
+			authToken: ret.authToken,
 		},
 	});
 	// Use a ref here because we don't want the effect to trigger when the selected
@@ -74,5 +74,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 		queryClient.resetQueries();
 	}, [selectedId, queryClient]);
 
-	return <AccountContext.Provider value={ret}>{children}</AccountContext.Provider>;
+	return (
+		<AccountContext.Provider value={ret}>{children}</AccountContext.Provider>
+	);
 };

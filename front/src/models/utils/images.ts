@@ -8,9 +8,9 @@ export const KImage = z
 	})
 	.transform((x) => ({
 		...x,
-		low: `/images/${x.id}?quality=low`,
-		medium: `/images/${x.id}?quality=medium`,
-		high: `/images/${x.id}?quality=high`,
+		low: `/api/images/${x.id}?quality=low`,
+		medium: `/api/images/${x.id}?quality=medium`,
+		high: `/api/images/${x.id}?quality=high`,
 	}));
 
 export type KImage = z.infer<typeof KImage>;

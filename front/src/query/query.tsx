@@ -21,18 +21,22 @@ const cleanSlash = (str: string | null, keepFirst = false) => {
 	return str.replace(/^\/|\/$/g, "");
 };
 
-const queryFn = async <Parser extends z.ZodTypeAny>(context: {
+export const queryFn = async <Parser extends z.ZodTypeAny>(context: {
 	method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 	url: string;
 	body?: object;
 	formData?: FormData;
 	plainText?: boolean;
 	authToken: string | null;
-	parser?: Parser;
+	parser: Parser | null;
 	signal?: AbortSignal;
 }): Promise<z.infer<Parser>> => {
-	if (Platform.OS === "web" && typeof window === "undefined" && context.url.startsWith("/api"))
-		context.url = `${ssrApiUrl}/${context.url.substring(4)}`;
+	if (
+		Platform.OS === "web" &&
+		typeof window === "undefined" &&
+		context.url.startsWith("/")
+	)
+		context.url = `${ssrApiUrl}${context.url}`;
 	let resp: Response;
 	try {
 		resp = await fetch(context.url, {
@@ -44,7 +48,9 @@ const queryFn = async <Parser extends z.ZodTypeAny>(context: {
 						? context.formData
 						: undefined,
 			headers: {
-				...(context.authToken ? { Authorization: `Bearer ${context.authToken}` } : {}),
+				...(context.authToken
+					? { Authorization: `Bearer ${context.authToken}` }
+					: {}),
 				...("body" in context ? { "Content-Type": "application/json" } : {}),
 			},
 			signal: context.signal,
@@ -53,7 +59,10 @@ const queryFn = async <Parser extends z.ZodTypeAny>(context: {
 		if (typeof e === "object" && e && "name" in e && e.name === "AbortError")
 			throw { message: "Aborted", status: "aborted" } as KyooError;
 		console.log("Fetch error", e, context.url);
-		throw { message: "Could not reach Kyoo's server.", status: "aborted" } as KyooError;
+		throw {
+			message: "Could not reach Kyoo's server.",
+			status: "aborted",
+		} as KyooError;
 	}
 	if (resp.status === 404) {
 		throw { message: "Resource not found.", status: 404 } as KyooError;
@@ -67,7 +76,11 @@ const queryFn = async <Parser extends z.ZodTypeAny>(context: {
 			data = { message: error } as KyooError;
 		}
 		data.status = resp.status;
-		console.log(`Invalid response (${context.method ?? "GET"} ${context.url}):`, data, resp.status);
+		console.log(
+			`Invalid response (${context.method ?? "GET"} ${context.url}):`,
+			data,
+			resp.status,
+		);
 		throw data as KyooError;
 	}
 
@@ -80,12 +93,22 @@ const queryFn = async <Parser extends z.ZodTypeAny>(context: {
 		data = await resp.json();
 	} catch (e) {
 		console.error("Invalid json from kyoo", e);
-		throw { message: "Invalid response from kyoo", status: "json" } as KyooError;
+		throw {
+			message: "Invalid response from kyoo",
+			status: "json",
+		} as KyooError;
 	}
 	if (!context.parser) return data as any;
 	const parsed = await context.parser.safeParseAsync(data);
 	if (!parsed.success) {
-		console.log("Url: ", context.url, " Response: ", resp.status, " Parse error: ", parsed.error);
+		console.log(
+			"Url: ",
+			context.url,
+			" Response: ",
+			resp.status,
+			" Parse error: ",
+			parsed.error,
+		);
 		throw {
 			status: "parse",
 			message:
@@ -109,9 +132,11 @@ export const createQueryClient = () =>
 	});
 
 export type QueryIdentifier<T = unknown> = {
-	parser: z.ZodType<T>;
+	parser: z.ZodType<T> | null;
 	path: (string | undefined)[];
-	params?: { [query: string]: boolean | number | string | string[] | undefined };
+	params?: {
+		[query: string]: boolean | number | string | string[] | undefined;
+	};
 	infinite?: boolean;
 
 	placeholderData?: T | (() => T);
@@ -124,7 +149,9 @@ export type QueryIdentifier<T = unknown> = {
 const toQueryKey = (query: {
 	apiUrl: string;
 	path: (string | undefined)[];
-	params?: { [query: string]: boolean | number | string | string[] | undefined };
+	params?: {
+		[query: string]: boolean | number | string | string[] | undefined;
+	};
 }) => {
 	return [
 		cleanSlash(query.apiUrl, true),
@@ -172,7 +199,7 @@ export const useInfiniteFetch = <Data,>(query: QueryIdentifier<Data>) => {
 		queryFn: (ctx) =>
 			queryFn({
 				url: (ctx.pageParam as string) ?? keyToUrl(key),
-				parser: Paged(query.parser),
+				parser: query.parser ? Paged(query.parser) : null,
 				signal: ctx.signal,
 				authToken: authToken ?? null,
 				...query.options,
@@ -207,7 +234,7 @@ export const prefetch = async (...queries: QueryIdentifier[]) => {
 						queryFn: (ctx) =>
 							queryFn({
 								url: keyToUrl(key),
-								parser: Paged(query.parser),
+								parser: query.parser ? Paged(query.parser) : null,
 								signal: ctx.signal,
 								authToken: authToken ?? null,
 								...query.options,
@@ -235,7 +262,9 @@ export const prefetch = async (...queries: QueryIdentifier[]) => {
 type MutationParams = {
 	method?: "POST" | "PUT" | "DELETE";
 	path?: string[];
-	params?: { [query: string]: boolean | number | string | string[] | undefined };
+	params?: {
+		[query: string]: boolean | number | string | string[] | undefined;
+	};
 	body?: object;
 };
 
@@ -261,6 +290,7 @@ export const useMutation = <T = void>({
 				url: keyToUrl(toQueryKey({ apiUrl, path, params })),
 				body,
 				authToken,
+				parser: null,
 			});
 		},
 		onSuccess: invalidate

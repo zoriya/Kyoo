@@ -1,21 +1,17 @@
-import { type QueryPage, login } from "@kyoo/models";
-import { A, Button, H1, Input, P, ts } from "@kyoo/primitives";
-import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Platform } from "react-native";
-import { useRouter } from "solito/router";
 import { percent, px, useYoshiki } from "yoshiki/native";
-import { DefaultLayout } from "../../../packages/ui/src/layout";
+import { A, Button, H1, Input, P, ts } from "~/primitives";
+import { useQueryState } from "~/utils";
 import { FormPage } from "./form";
-import { OidcLogin } from "./oidc";
+import { login } from "./logic";
 import { PasswordInput } from "./password-input";
+import { ServerUrlPage } from "./server-url";
 
-export const RegisterPage: QueryPage<{ apiUrl?: string }> = ({ apiUrl }) => {
-	const { data } = useFetch({
-		path: ["info"],
-		parser: ServerInfoP,
-	});
-
+export const RegisterPage = () => {
+	const [apiUrl] = useQueryState("apiUrl", null);
 	const [email, setEmail] = useState("");
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
@@ -26,77 +22,78 @@ export const RegisterPage: QueryPage<{ apiUrl?: string }> = ({ apiUrl }) => {
 	const { t } = useTranslation();
 	const { css } = useYoshiki();
 
-	useEffect(() => {
-		if (!apiUrl && Platform.OS !== "web")
-			router.replace("/server-url", undefined, {
-				experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
-			});
-	}, [apiUrl, router]);
+	if (Platform.OS !== "web" && !apiUrl) return <ServerUrlPage />;
 
 	return (
-		<FormPage apiUrl={apiUrl}>
+		<FormPage apiUrl={apiUrl!}>
 			<H1>{t("login.register")}</H1>
-			<OidcLogin apiUrl={apiUrl} hideOr={!data?.passwordLoginEnabled} />
-			{data?.registrationEnabled && (
-				<>
-					<P {...css({ paddingLeft: ts(1) })}>{t("login.username")}</P>
-					<Input
-						autoComplete="username"
-						variant="big"
-						onChangeText={(value) => setUsername(value)}
-					/>
+			{/* <OidcLogin apiUrl={apiUrl} hideOr={!data?.passwordLoginEnabled} /> */}
+			{/* {data?.registrationEnabled && ( */}
+			{/* 	<> */}
+			<P {...(css({ paddingLeft: ts(1) }) as any)}>{t("login.username")}</P>
+			<Input
+				autoComplete="username"
+				variant="big"
+				onChangeText={(value) => setUsername(value)}
+			/>
 
-					<P {...css({ paddingLeft: ts(1) })}>{t("login.email")}</P>
-					<Input autoComplete="email" variant="big" onChangeText={(value) => setEmail(value)} />
+			<P {...(css({ paddingLeft: ts(1) }) as any)}>{t("login.email")}</P>
+			<Input
+				autoComplete="email"
+				variant="big"
+				onChangeText={(value) => setEmail(value)}
+			/>
 
-					<P {...css({ paddingLeft: ts(1) })}>{t("login.password")}</P>
-					<PasswordInput
-						autoComplete="password-new"
-						variant="big"
-						onChangeText={(value) => setPassword(value)}
-					/>
+			<P {...(css({ paddingLeft: ts(1) }) as any)}>{t("login.password")}</P>
+			<PasswordInput
+				autoComplete="password-new"
+				variant="big"
+				onChangeText={(value) => setPassword(value)}
+			/>
 
-					<P {...css({ paddingLeft: ts(1) })}>{t("login.confirm")}</P>
-					<PasswordInput
-						autoComplete="password-new"
-						variant="big"
-						onChangeText={(value) => setConfirm(value)}
-					/>
+			<P {...(css({ paddingLeft: ts(1) }) as any)}>{t("login.confirm")}</P>
+			<PasswordInput
+				autoComplete="password-new"
+				variant="big"
+				onChangeText={(value) => setConfirm(value)}
+			/>
 
-					{password !== confirm && (
-						<P {...css({ color: (theme) => theme.colors.red })}>{t("login.password-no-match")}</P>
-					)}
-					{error && <P {...css({ color: (theme) => theme.colors.red })}>{error}</P>}
-					<Button
-						text={t("login.register")}
-						disabled={password !== confirm}
-						onPress={async () => {
-							const { error } = await login("register", { email, username, password, apiUrl });
-							setError(error);
-							if (error) return;
-							router.replace("/", undefined, {
-								experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
-							});
-						}}
-						{...css({
-							m: ts(1),
-							width: px(250),
-							maxWidth: percent(100),
-							alignSelf: "center",
-							mY: ts(3),
-						})}
-					/>
-				</>
+			{password !== confirm && (
+				<P {...css({ color: (theme) => theme.colors.red })}>
+					{t("login.password-no-match")}
+				</P>
 			)}
+			{error && <P {...css({ color: (theme) => theme.colors.red })}>{error}</P>}
+			<Button
+				text={t("login.register")}
+				disabled={password !== confirm}
+				onPress={async () => {
+					const { error } = await login("register", {
+						email,
+						username,
+						password,
+						apiUrl,
+					});
+					setError(error);
+					if (error) return;
+					router.replace("/");
+				}}
+				{...css({
+					m: ts(1),
+					width: px(250),
+					maxWidth: percent(100),
+					alignSelf: "center",
+					mY: ts(3),
+				})}
+			/>
+			{/* 	</> */}
+			{/* )} */}
 			<P>
 				<Trans i18nKey="login.or-login">
-					Have an account already? <A href={{ pathname: "/login", query: { apiUrl } }}>Log in</A>.
+					Have an account already?{" "}
+					<A href={`/login?apiUrl=${apiUrl}`}>Log in</A>.
 				</Trans>
 			</P>
 		</FormPage>
 	);
 };
-
-RegisterPage.getFetchUrls = () => [OidcLogin.query()];
-RegisterPage.isPublic = true;
-RegisterPage.getLayout = DefaultLayout;

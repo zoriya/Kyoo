@@ -1,6 +1,6 @@
 import { Platform } from "react-native";
 import { MMKV, useMMKVString } from "react-native-mmkv";
-import type { z, ZodType } from "zod/v4";
+import type { ZodType, z } from "zod/v4";
 import { getServerData } from "~/utils";
 
 export const storage = new MMKV();
@@ -20,7 +20,9 @@ export const setCookie = (key: string, val?: unknown) => {
 	const d = new Date();
 	// A year
 	d.setTime(d.getTime() + 365 * 24 * 60 * 60 * 1000);
-	const expires = value ? `expires=${d.toUTCString()}` : "expires=Thu, 01 Jan 1970 00:00:01 GMT";
+	const expires = value
+		? `expires=${d.toUTCString()}`
+		: "expires=Thu, 01 Jan 1970 00:00:01 GMT";
 	document.cookie = `${key}=${value};${expires};path=/;samesite=strict`;
 };
 

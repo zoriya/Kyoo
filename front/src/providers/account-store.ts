@@ -1,6 +1,6 @@
 import { Platform } from "react-native";
 import { z } from "zod/v4";
-import { type Account, AccountP } from "~/models";
+import { Account } from "~/models";
 import { readValue, setCookie, storeValue } from "./settings";
 
 const writeAccounts = (accounts: Account[]) => {
@@ -10,12 +10,12 @@ const writeAccounts = (accounts: Account[]) => {
 		if (!selected) return;
 		setCookie("account", selected);
 		// cookie used for images and videos since we can't add Authorization headers in img or video tags.
-		setCookie("X-Bearer", selected?.token.access_token);
+		setCookie("X-Bearer", selected?.token);
 	}
 };
 
 export const addAccount = (account: Account) => {
-	const accounts = readValue("accounts", z.array(AccountP)) ?? [];
+	const accounts = readValue("accounts", z.array(Account)) ?? [];
 
 	// Prevent the user from adding the same account twice.
 	if (accounts.find((x) => x.id === account.id)) {
@@ -30,7 +30,7 @@ export const addAccount = (account: Account) => {
 };
 
 export const removeAccounts = (filter: (acc: Account) => boolean) => {
-	let accounts = readValue("accounts", z.array(AccountP)) ?? [];
+	let accounts = readValue("accounts", z.array(Account)) ?? [];
 	accounts = accounts.filter((x) => !filter(x));
 	if (!accounts.find((x) => x.selected) && accounts.length > 0) {
 		accounts[0].selected = true;
@@ -39,7 +39,7 @@ export const removeAccounts = (filter: (acc: Account) => boolean) => {
 };
 
 export const updateAccount = (id: string, account: Account) => {
-	const accounts = readValue("accounts", z.array(AccountP)) ?? [];
+	const accounts = readValue("accounts", z.array(Account)) ?? [];
 	const idx = accounts.findIndex((x) => x.id === id);
 	if (idx === -1) return;
 

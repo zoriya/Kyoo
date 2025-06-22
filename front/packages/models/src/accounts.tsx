@@ -38,7 +38,6 @@ import { useFetch } from "./query";
 import { ServerInfoP, type User, UserP } from "./resources";
 import { zdate } from "./utils";
 
-const defaultApiUrl = Platform.OS === "web" ? "/api" : null;
 const currentApiUrl = atom<string | null>(defaultApiUrl);
 export const getCurrentApiUrl = () => {
 	const store = getDefaultStore();

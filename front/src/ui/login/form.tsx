@@ -1,9 +1,8 @@
-import { imageFn } from "@kyoo/models";
-import { ts } from "@kyoo/primitives";
 import type { ReactNode } from "react";
-import { ImageBackground, type ImageProps, Platform, ScrollView, View } from "react-native";
-import Svg, { type SvgProps, Path } from "react-native-svg";
-import { type Stylable, min, px, useYoshiki, vh } from "yoshiki/native";
+import { ImageBackground, ScrollView, View } from "react-native";
+import Svg, { Path, type SvgProps } from "react-native-svg";
+import { min, px, type Stylable, useYoshiki, vh } from "yoshiki/native";
+import { ts } from "~/primitives";
 
 const SvgBlob = (props: SvgProps) => {
 	const { css, theme } = useYoshiki();
@@ -27,18 +26,9 @@ export const FormPage = ({
 }: { children: ReactNode; apiUrl?: string } & Stylable) => {
 	const { css } = useYoshiki();
 
-	const src = apiUrl ? `${apiUrl}/items/random/thumbnail` : imageFn("/items/random/thumbnail");
-	const nativeProps = Platform.select<Partial<ImageProps>>({
-		web: {
-			defaultSource: { uri: src },
-		},
-		default: {},
-	});
-
 	return (
 		<ImageBackground
-			source={{ uri: src }}
-			{...nativeProps}
+			source={{ uri: `${apiUrl ?? ""}/api/shows/random/thumbnail` }}
 			{...css({
 				flexDirection: "row",
 				flexGrow: 1,

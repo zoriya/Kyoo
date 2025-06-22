@@ -1,8 +1,8 @@
-import { IconButton, Input } from "@kyoo/primitives";
-import Visibility from "@material-symbols/svg-400/rounded/visibility-fill.svg";
 import VisibilityOff from "@material-symbols/svg-400/rounded/visibility_off-fill.svg";
+import Visibility from "@material-symbols/svg-400/rounded/visibility-fill.svg";
 import { type ComponentProps, useState } from "react";
 import { px, useYoshiki } from "yoshiki/native";
+import { IconButton, Input } from "~/primitives";
 
 export const PasswordInput = (props: ComponentProps<typeof Input>) => {
 	const { css } = useYoshiki();

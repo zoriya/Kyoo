@@ -1,9 +1,9 @@
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
-import { type LibraryItem, LibraryItemP } from "~/models";
+import { Show } from "~/models";
 import { P } from "~/primitives";
-import { Fetch, type QueryIdentifier, prefetch } from "~/query";
+import { Fetch, prefetch, type QueryIdentifier } from "~/query";
 
 export async function loader() {
 	await prefetch(Header.query());
@@ -18,17 +18,17 @@ export default function Header() {
 			<P>{t("home.recommended")}</P>
 			<Fetch
 				query={Header.query()}
-				Render={({ name }) => <P {...css({ bg: "red" })}>{name}</P>}
+				Render={({ name }) => <P {...(css({ bg: "red" }) as any)}>{name}</P>}
 				Loader={() => <P>Loading</P>}
 			/>
 		</View>
 	);
 }
 
-Header.query = (): QueryIdentifier<LibraryItem> => ({
-	parser: LibraryItemP,
-	path: ["items", "random"],
+Header.query = (): QueryIdentifier<Show> => ({
+	parser: Show,
+	path: ["shows", "random"],
 	params: {
-		fields: ["firstEpisode"],
+		fields: ["firstEntry"],
 	},
 });
