@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useMemo, useRef } from "react";
 import { Platform } from "react-native";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { AccountP, UserP } from "~/models";
 import { useFetch } from "~/query";
 import { AccountContext } from "./account-context";

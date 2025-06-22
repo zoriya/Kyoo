@@ -7,14 +7,12 @@ import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 import { useYoshiki } from "yoshiki/native";
-import type { Serie } from "~/models";
+import { WatchStatusV } from "~/models";
 import { HR, IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { useMutation } from "~/query";
 import { watchListIcon } from "./watchlist-info";
 // import { useDownloader } from "../../packages/ui/src/downloadses/ui/src/downloads";
-
-type WatchStatusV = NonNullable<Serie["watchStatus"]>["status"];
 
 export const EpisodesContext = ({
 	type = "episode",

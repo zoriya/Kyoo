@@ -8,3 +8,5 @@ export * from "./show";
 export * from "./entry";
 export * from "./studio";
 export * from "./video";
+
+export * from "./utils/images";

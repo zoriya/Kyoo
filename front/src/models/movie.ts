@@ -1,7 +1,7 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 import { Studio } from "./studio";
 import { Genre } from "./utils/genre";
-import { Image } from "./utils/images";
+import { KImage } from "./utils/images";
 import { Metadata } from "./utils/metadata";
 import { zdate } from "./utils/utils";
 import { EmbeddedVideo } from "./video";
@@ -27,10 +27,10 @@ export const Movie = z
 		genres: z.array(Genre),
 		externalId: Metadata,
 
-		poster: Image.nullable(),
-		thumbnail: Image.nullable(),
-		banner: Image.nullable(),
-		logo: Image.nullable(),
+		poster: KImage.nullable(),
+		thumbnail: KImage.nullable(),
+		banner: KImage.nullable(),
+		logo: KImage.nullable(),
 		trailerUrl: z.string().optional().nullable(),
 
 		isAvailable: z.boolean(),

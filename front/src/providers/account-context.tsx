@@ -9,6 +9,11 @@ export const AccountContext = createContext<{
 	accounts: (Account & { select: () => void; remove: () => void })[];
 }>({ apiUrl: "api", authToken: null, selectedAccount: null, accounts: [] });
 
+export const useToken = () => {
+	const { apiUrl, authToken } = useContext(AccountContext);
+	return { apiUrl, authToken };
+};
+
 export const useAccount = () => {
 	const { selectedAccount } = useContext(AccountContext);
 	return selectedAccount;

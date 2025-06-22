@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { Image } from "./utils/images";
+import { z } from "zod/v4";
+import { KImage } from "./utils/images";
 import { Metadata } from "./utils/metadata";
 import { zdate } from "./utils/utils";
 
@@ -7,7 +7,7 @@ export const Studio = z.object({
 	id: z.string(),
 	slug: z.string(),
 	name: z.string(),
-	logo: Image.nullable(),
+	logo: KImage.nullable(),
 	externalId: Metadata,
 	createdAt: zdate(),
 	updatedAt: zdate(),

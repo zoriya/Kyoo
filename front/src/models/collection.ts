@@ -1,6 +1,6 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 import { Genre } from "./utils/genre";
-import { Image } from "./utils/images";
+import { KImage } from "./utils/images";
 import { Metadata } from "./utils/metadata";
 import { zdate } from "./utils/utils";
 
@@ -24,10 +24,10 @@ export const Collection = z
 		genres: z.array(Genre),
 		externalId: Metadata,
 
-		poster: Image.nullable(),
-		thumbnail: Image.nullable(),
-		banner: Image.nullable(),
-		logo: Image.nullable(),
+		poster: KImage.nullable(),
+		thumbnail: KImage.nullable(),
+		banner: KImage.nullable(),
+		logo: KImage.nullable(),
 
 		createdAt: zdate(),
 		updatedAt: zdate(),

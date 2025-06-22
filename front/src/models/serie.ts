@@ -1,8 +1,8 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 import { Entry } from "./entry";
 import { Studio } from "./studio";
 import { Genre } from "./utils/genre";
-import { Image } from "./utils/images";
+import { KImage } from "./utils/images";
 import { Metadata } from "./utils/metadata";
 import { zdate } from "./utils/utils";
 
@@ -28,10 +28,10 @@ export const Serie = z
 		runtime: z.number().nullable(),
 		externalId: Metadata,
 
-		poster: Image.nullable(),
-		thumbnail: Image.nullable(),
-		banner: Image.nullable(),
-		logo: Image.nullable(),
+		poster: KImage.nullable(),
+		thumbnail: KImage.nullable(),
+		banner: KImage.nullable(),
+		logo: KImage.nullable(),
 		trailerUrl: z.string().optional().nullable(),
 
 		entriesCount: z.number().int(),

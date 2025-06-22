@@ -1,6 +1,6 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 
-export const Image = z
+export const KImage = z
 	.object({
 		id: z.string(),
 		source: z.string(),
@@ -13,4 +13,4 @@ export const Image = z
 		high: `/images/${x.id}?quality=high`,
 	}));
 
-export type Image = z.infer<typeof Image>;
+export type KImage = z.infer<typeof KImage>;

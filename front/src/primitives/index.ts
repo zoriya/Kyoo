@@ -4,8 +4,9 @@ export * from "./theme";
 export * from "./icons";
 export * from "./links";
 export * from "./avatar";
-// export * from "./image";
-// export * from "./skeleton";
+export * from "./image";
+export * from "./image-background";
+export * from "./skeleton";
 export * from "./tooltip";
 // export * from "./container";
 export * from "./divider";
@@ -21,4 +22,3 @@ export * from "./button";
 // export * from "./chip";
 
 export * from "./utils";
-export * from "./constants";

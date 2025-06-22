@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { type ImageStyle, Platform, View } from "react-native";
 import { type Stylable, type Theme, percent, px, useYoshiki } from "yoshiki/native";
-import type { KyooImage, WatchStatusV } from "~/models";
+import type { KImage, WatchStatusV } from "~/models";
 import {
 	Link,
 	P,
@@ -15,6 +15,7 @@ import {
 } from "~/primitives";
 import type { Layout } from "~/query";
 import { ItemWatchStatus } from "./item-helpers";
+import { ItemContext } from "./context-menus";
 
 export const ItemProgress = ({ watchPercent }: { watchPercent: number }) => {
 	const { css } = useYoshiki("episodebox");
@@ -59,7 +60,7 @@ export const ItemGrid = ({
 	slug: string;
 	name: string;
 	subtitle: string | null;
-	poster: KyooImage | null;
+	poster: KImage | null;
 	watchStatus: WatchStatusV | null;
 	watchPercent: number | null;
 	type: "movie" | "serie" | "collection";

@@ -1,6 +1,6 @@
 import {
-	QueryClient,
 	dehydrate,
+	QueryClient,
 	useInfiniteQuery,
 	useQuery,
 	useQueryClient,
@@ -8,12 +8,12 @@ import {
 } from "@tanstack/react-query";
 import { useContext } from "react";
 import { Platform } from "react-native";
-import type { z } from "zod";
+import type { z } from "zod/v4";
 import { type KyooError, type Page, Paged } from "~/models";
 import { AccountContext } from "~/providers/account-context";
 import { setServerData } from "~/utils";
 
-const ssrApiUrl = process.env.KYOO_URL ?? "http://back/api";
+const ssrApiUrl = process.env.KYOO_URL ?? "http://api:3567/api";
 
 const cleanSlash = (str: string | null, keepFirst = false) => {
 	if (!str) return null;
@@ -71,9 +71,9 @@ const queryFn = async <Parser extends z.ZodTypeAny>(context: {
 		throw data as KyooError;
 	}
 
-	if (resp.status === 204) return null;
+	if (resp.status === 204) return null!;
 
-	if (context.plainText) return (await resp.text()) as unknown;
+	if (context.plainText) return (await resp.text()) as any;
 
 	let data: Record<string, any>;
 	try {
@@ -82,7 +82,7 @@ const queryFn = async <Parser extends z.ZodTypeAny>(context: {
 		console.error("Invalid json from kyoo", e);
 		throw { message: "Invalid response from kyoo", status: "json" } as KyooError;
 	}
-	if (!context.parser) return data;
+	if (!context.parser) return data as any;
 	const parsed = await context.parser.safeParseAsync(data);
 	if (!parsed.success) {
 		console.log("Url: ", context.url, " Response: ", resp.status, " Parse error: ", parsed.error);
@@ -108,11 +108,11 @@ export const createQueryClient = () =>
 		},
 	});
 
-export type QueryIdentifier<T = unknown, Ret = T> = {
-	parser: z.ZodType<T, z.ZodTypeDef, any>;
+export type QueryIdentifier<T = unknown> = {
+	parser: z.ZodType<T>;
 	path: (string | undefined)[];
 	params?: { [query: string]: boolean | number | string | string[] | undefined };
-	infinite?: boolean | { value: true; map?: (x: any[]) => Ret[] };
+	infinite?: boolean;
 
 	placeholderData?: T | (() => T);
 	enabled?: boolean;
@@ -143,7 +143,8 @@ export const keyToUrl = (key: ReturnType<typeof toQueryKey>) => {
 };
 
 export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
-	const { apiUrl, authToken } = useContext(AccountContext);
+	let { apiUrl, authToken } = useContext(AccountContext);
+	if (query.options?.apiUrl) apiUrl = query.options.apiUrl;
 	const key = toQueryKey({ apiUrl, path: query.path, params: query.params });
 
 	return useQuery<Data, KyooError>({
@@ -155,17 +156,18 @@ export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 				signal: ctx.signal,
 				authToken: authToken ?? null,
 				...query.options,
-			}),
+			}) as Promise<Data>,
 		placeholderData: query.placeholderData as any,
 		enabled: query.enabled,
 	});
 };
 
-export const useInfiniteFetch = <Data, Ret>(query: QueryIdentifier<Data, Ret>) => {
-	const { apiUrl, authToken } = useContext(AccountContext);
+export const useInfiniteFetch = <Data,>(query: QueryIdentifier<Data>) => {
+	let { apiUrl, authToken } = useContext(AccountContext);
+	if (query.options?.apiUrl) apiUrl = query.options.apiUrl;
 	const key = toQueryKey({ apiUrl, path: query.path, params: query.params });
 
-	const ret = useInfiniteQuery<Page<Data>, KyooError>({
+	const res = useInfiniteQuery<Page<Data>, KyooError>({
 		queryKey: key,
 		queryFn: (ctx) =>
 			queryFn({
@@ -174,20 +176,15 @@ export const useInfiniteFetch = <Data, Ret>(query: QueryIdentifier<Data, Ret>) =
 				signal: ctx.signal,
 				authToken: authToken ?? null,
 				...query.options,
-			}),
+			}) as Promise<Page<Data>>,
 		getNextPageParam: (page: Page<Data>) => page?.next || undefined,
 		initialPageParam: undefined,
 		placeholderData: query.placeholderData as any,
 		enabled: query.enabled,
 	});
-	const items = ret.data?.pages.flatMap((x) => x.items);
-	return {
-		...ret,
-		items:
-			items && typeof query.infinite === "object" && query.infinite.map
-				? query.infinite.map(items)
-				: (items as unknown as Ret[] | undefined),
-	};
+	const ret = res as typeof res & { items?: Data[] };
+	ret.items = ret.data?.pages.flatMap((x) => x.items);
+	return ret;
 };
 
 export const prefetch = async (...queries: QueryIdentifier[]) => {
@@ -242,7 +239,7 @@ type MutationParams = {
 	body?: object;
 };
 
-export const useMutation = <T = void,>({
+export const useMutation = <T = void>({
 	compute,
 	invalidate,
 	...queryParams

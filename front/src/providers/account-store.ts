@@ -1,5 +1,5 @@
 import { Platform } from "react-native";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { type Account, AccountP } from "~/models";
 import { readValue, setCookie, storeValue } from "./settings";
 
