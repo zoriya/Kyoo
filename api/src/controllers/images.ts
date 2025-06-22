@@ -1,28 +1,24 @@
 import type { Stats } from "node:fs";
-import type { BunFile, S3File, S3Stats } from "bun";
-import { type SQL, and, eq, sql } from "drizzle-orm";
+import type { S3Stats } from "bun";
+import { and, eq, type SQL, sql } from "drizzle-orm";
 import Elysia, { type Context, t } from "elysia";
 import { prefix } from "~/base";
 import { db } from "~/db";
 import {
-	showTranslations,
 	shows,
+	showTranslations,
 	staff,
-	studioTranslations,
 	studios,
+	studioTranslations,
 } from "~/db/schema";
 import { sqlarr } from "~/db/utils";
 import { KError } from "~/models/error";
 import { bubble } from "~/models/examples";
 import { AcceptLanguage, isUuid, processLanguages } from "~/models/utils";
-import { getFile } from "~/utils";
+import { comment, getFile } from "~/utils";
 import { imageDir } from "./seed/images";
 
-function getRedirectToImageHandler({
-	filter,
-}: {
-	filter?: SQL;
-}) {
+function getRedirectToImageHandler({ filter }: { filter?: SQL }) {
 	return async function Handler({
 		params: { id, image },
 		headers: { "accept-language": languages },
@@ -97,11 +93,30 @@ function getRedirectToImageHandler({
 export const imagesH = new Elysia({ tags: ["images"] })
 	.get(
 		"/images/:id",
-		async ({ params: { id }, query: { quality }, headers: reqHeaders }) => {
+		async ({
+			params: { id },
+			query: { quality },
+			headers: reqHeaders,
+			status,
+		}) => {
 			const path = `${imageDir}/${id}.${quality}.jpg`;
 			const file = getFile(path);
 
-			const etag = await generateETag(file);
+			const stat = await file.stat().catch(() => undefined);
+			if (!stat) {
+				return status(404, {
+					status: 404,
+					message: comment`
+						No image available with this ID.
+						Either the id is invalid or the image has not been downloaded yet.
+					`,
+				});
+			}
+			const etag =
+				"etag" in stat
+					? stat.etag
+					: Buffer.from(stat.mtime.toISOString(), "utf8").toString("base64");
+
 			if (await isCached(reqHeaders, etag, path))
 				return new Response(null, { status: 304 });
 
@@ -386,11 +401,4 @@ export async function isCached(
 	}
 
 	return false;
-}
-
-export async function generateETag(file: BunFile | S3File) {
-	const hash = new Bun.CryptoHasher("md5");
-	hash.update(await file.arrayBuffer());
-
-	return hash.digest("base64");
 }
