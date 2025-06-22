@@ -77,7 +77,10 @@ class VideoCreated(Model):
 	id: str
 	path: str
 	guess: Guess
-	entries: list[Resource]
+	entries: list[CreatedEntry]
+
+	class CreatedEntry(Model):
+		slug: str
 
 
 class VideoLink(Model):
