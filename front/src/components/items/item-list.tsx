@@ -3,6 +3,7 @@ import { Platform, View } from "react-native";
 import { percent, px, rem, useYoshiki } from "yoshiki/native";
 import type { KImage, WatchStatusV } from "~/models";
 import {
+	ContrastArea,
 	GradientImageBackground,
 	Heading,
 	important,
@@ -39,114 +40,117 @@ export const ItemList = ({
 	watchStatus: WatchStatusV | null;
 	unseenEpisodesCount: number | null;
 }) => {
-	const { css } = useYoshiki("line");
 	const [moreOpened, setMoreOpened] = useState(false);
 
 	return (
-		<Link
-			href={moreOpened ? undefined : href}
-			onLongPress={() => setMoreOpened(true)}
-			{...css({
-				child: {
-					more: {
-						opacity: 0,
-					},
-				},
-				fover: {
-					title: {
-						textDecorationLine: "underline",
-					},
-					more: {
-						opacity: 100,
-					},
-				},
-			})}
-		>
-			<GradientImageBackground
-				src={thumbnail}
-				alt={name}
-				quality="medium"
-				layout={{ width: percent(100), height: ItemList.layout.size }}
-				{...(css(
-					{
-						alignItems: "center",
-						justifyContent: "space-evenly",
-						flexDirection: "row",
-						borderRadius: px(10),
-						overflow: "hidden",
-					},
-					props,
-				) as any)}
-			>
-				<View
+		<ContrastArea>
+			{({ css }) => (
+				<Link
+					href={moreOpened ? undefined : href}
+					onLongPress={() => setMoreOpened(true)}
 					{...css({
-						width: { xs: "50%", lg: "30%" },
+						child: {
+							more: {
+								opacity: 0,
+							},
+						},
+						fover: {
+							title: {
+								textDecorationLine: "underline",
+							},
+							more: {
+								opacity: 100,
+							},
+						},
 					})}
+					{...props}
 				>
-					<View
-						{...css({
+					<GradientImageBackground
+						src={thumbnail}
+						alt={name}
+						quality="medium"
+						layout={{ width: percent(100), height: ItemList.layout.size }}
+						gradientStyle={{
+							alignItems: "center",
+							justifyContent: "space-evenly",
 							flexDirection: "row",
-							justifyContent: "center",
-						})}
+						}}
+						{...(css({
+							borderRadius: px(10),
+							overflow: "hidden",
+						}) as any)}
 					>
-						<Heading
-							{...css([
-								"title",
-								{
-									textAlign: "center",
-									fontSize: rem(2),
-									letterSpacing: rem(0.002),
-									fontWeight: "900",
-									textTransform: "uppercase",
-								},
-							])}
-						>
-							{name}
-						</Heading>
-						{kind !== "collection" && (
-							<ItemContext
-								kind={kind}
-								slug={slug}
-								status={watchStatus}
-								isOpen={moreOpened}
-								setOpen={(v) => setMoreOpened(v)}
-								{...css([
-									{
-										// I dont know why marginLeft gets overwritten by the margin: px(2) so we important
-										marginLeft: important(ts(2)),
-										bg: (theme) => theme.darkOverlay,
-									},
-									"more",
-									Platform.OS === "web" &&
-										moreOpened && { opacity: important(100) },
-								])}
-							/>
-						)}
-					</View>
-					{subtitle && (
-						<P
+						<View
 							{...css({
-								textAlign: "center",
-								marginRight: ts(4),
+								width: { xs: "50%", lg: "30%" },
 							})}
 						>
-							{subtitle}
-						</P>
-					)}
-				</View>
-				<PosterBackground
-					src={poster}
-					alt=""
-					quality="low"
-					layout={{ height: percent(80) }}
-				>
-					<ItemWatchStatus
-						watchStatus={watchStatus}
-						unseenEpisodesCount={unseenEpisodesCount}
-					/>
-				</PosterBackground>
-			</GradientImageBackground>
-		</Link>
+							<View
+								{...css({
+									flexDirection: "row",
+									justifyContent: "center",
+								})}
+							>
+								<Heading
+									{...css([
+										"title",
+										{
+											textAlign: "center",
+											fontSize: rem(2),
+											letterSpacing: rem(0.002),
+											fontWeight: "900",
+											textTransform: "uppercase",
+										},
+									])}
+								>
+									{name}
+								</Heading>
+								{kind !== "collection" && (
+									<ItemContext
+										kind={kind}
+										slug={slug}
+										status={watchStatus}
+										isOpen={moreOpened}
+										setOpen={(v) => setMoreOpened(v)}
+										{...css([
+											{
+												// I dont know why marginLeft gets overwritten by the margin: px(2) so we important
+												marginLeft: important(ts(2)),
+												bg: (theme) => theme.darkOverlay,
+											},
+											"more",
+											Platform.OS === "web" &&
+												moreOpened && { opacity: important(100) },
+										])}
+									/>
+								)}
+							</View>
+							{subtitle && (
+								<P
+									{...css({
+										textAlign: "center",
+										marginRight: ts(4),
+									})}
+								>
+									{subtitle}
+								</P>
+							)}
+						</View>
+						<PosterBackground
+							src={poster}
+							alt=""
+							quality="low"
+							layout={{ height: percent(80) }}
+						>
+							<ItemWatchStatus
+								watchStatus={watchStatus}
+								unseenEpisodesCount={unseenEpisodesCount}
+							/>
+						</PosterBackground>
+					</GradientImageBackground>
+				</Link>
+			)}
+		</ContrastArea>
 	);
 };
 

@@ -48,11 +48,19 @@ export const InfiniteFetch = <Data, Props, _, Kind extends number | string>({
 	const { numColumns, size, gap } = useBreakpointMap(layout);
 	const [setOffline, clearOffline] = useSetError("offline");
 	const oldItems = useRef<Data[] | undefined>(undefined);
-	let { items, isPaused, error, fetchNextPage, isFetching, refetch, isRefetching } =
-		useInfiniteFetch(query);
+	let {
+		items,
+		isPaused,
+		error,
+		fetchNextPage,
+		isFetching,
+		refetch,
+		isRefetching,
+	} = useInfiniteFetch(query);
 	if (incremental && items) oldItems.current = items;
 
-	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
+	if (!query.infinite)
+		console.warn("A non infinite query was passed to an InfiniteFetch.");
 
 	if (isPaused) setOffline();
 	else clearOffline();
@@ -60,10 +68,13 @@ export const InfiniteFetch = <Data, Props, _, Kind extends number | string>({
 	if (error) return <ErrorView error={error} />;
 
 	if (incremental) items ??= oldItems.current;
-	const count = items ? numColumns - (items.length % numColumns) : placeholderCount;
-	console.log(numColumns, count);
+	const count = items
+		? numColumns - (items.length % numColumns)
+		: placeholderCount;
 	const placeholders = [...Array(count === 0 ? numColumns : count)].fill(null);
-	const data = isFetching || !items ? [...(items || []), ...placeholders] : items;
+	const data =
+		isFetching || !items ? [...(items || []), ...placeholders] : items;
+
 	return (
 		<LegendList
 			data={data}
@@ -71,9 +82,8 @@ export const InfiniteFetch = <Data, Props, _, Kind extends number | string>({
 			renderItem={({ item, index }) =>
 				item ? <Render index={index} item={item} /> : <Loader index={index} />
 			}
-			// keyExtractor={(item: any, index) => (item ? item.id : index)}
-			// estimatedItemSize={size}
-
+			keyExtractor={(item: any, index) => (item ? item.id : index)}
+			estimatedItemSize={size}
 			horizontal={layout.layout === "horizontal"}
 			numColumns={layout.layout === "horizontal" ? 1 : numColumns}
 			onEndReached={fetchMore ? () => fetchNextPage() : undefined}
@@ -81,7 +91,9 @@ export const InfiniteFetch = <Data, Props, _, Kind extends number | string>({
 			onRefresh={layout.layout !== "horizontal" ? refetch : undefined}
 			refreshing={isRefetching}
 			ListHeaderComponent={Header}
-			ItemSeparatorComponent={divider === true ? HR : (divider as any) || undefined}
+			ItemSeparatorComponent={
+				divider === true ? HR : (divider as any) || undefined
+			}
 			ListEmptyComponent={Empty}
 			contentContainerStyle={{ gap, marginHorizontal: gap }}
 			{...props}

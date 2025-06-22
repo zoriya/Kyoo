@@ -187,7 +187,7 @@ ItemGrid.Loader = (props: object) => {
 };
 
 ItemGrid.layout = {
-	size: px(150),
+	size: 150,
 	numColumns: { xs: 3, sm: 4, md: 5, lg: 6, xl: 8 },
 	gap: { xs: ts(1), sm: ts(2), md: ts(4) },
 	layout: "grid",

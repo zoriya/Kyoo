@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { type ReactNode, forwardRef } from "react";
+import type { ReactNode } from "react";
 import {
 	Linking,
 	Platform,
@@ -7,7 +7,6 @@ import {
 	type PressableProps,
 	Text,
 	type TextProps,
-	type View,
 } from "react-native";
 import { useTheme, useYoshiki } from "yoshiki/native";
 import { alpha } from "./theme";
@@ -26,7 +25,9 @@ function useLinkTo({
 		onPress: (e) => {
 			if (e?.defaultPrevented) return;
 			if (href.startsWith("http")) {
-				Platform.OS === "web" ? window.open(href, "_blank") : Linking.openURL(href);
+				Platform.OS === "web"
+					? window.open(href, "_blank")
+					: Linking.openURL(href);
 			} else {
 				replace ? router.replace(href) : router.push(href);
 			}
@@ -65,25 +66,26 @@ export const A = ({
 	);
 };
 
-export const PressableFeedback = forwardRef<View, PressableProps>(function Feedback(
-	{ children, ...props },
-	ref,
-) {
+export const PressableFeedback = ({ children, ...props }: PressableProps) => {
 	const theme = useTheme();
 
 	return (
 		<Pressable
-			ref={ref}
 			// TODO: Enable ripple on tv. Waiting for https://github.com/react-native-tvos/react-native-tvos/issues/440
 			{...(Platform.isTV
 				? {}
-				: { android_ripple: { foreground: true, color: alpha(theme.contrast, 0.5) as any } })}
+				: {
+						android_ripple: {
+							foreground: true,
+							color: alpha(theme.contrast, 0.5) as any,
+						},
+					})}
 			{...props}
 		>
 			{children}
 		</Pressable>
 	);
-});
+};
 
 export const Link = ({
 	href,

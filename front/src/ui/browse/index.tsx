@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { ItemGrid, ItemList, itemMap } from "~/components/items";
 import { Show } from "~/models";
 import { InfiniteFetch, type QueryIdentifier } from "~/query";
@@ -17,6 +16,7 @@ export const BrowsePage = () => {
 
 	return (
 		<InfiniteFetch
+			key={layout}
 			query={BrowsePage.query(filter, sortBy, sortOrd)}
 			layout={LayoutComponent.layout}
 			Header={

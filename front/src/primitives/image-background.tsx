@@ -52,7 +52,9 @@ export const PosterBackground = ({
 	...props
 }: Omit<ComponentProps<typeof ImageBackground>, "layout"> & {
 	style?: ImageStyle;
-	layout: YoshikiEnhanced<{ width: ImageStyle["width"] } | { height: ImageStyle["height"] }>;
+	layout: YoshikiEnhanced<
+		{ width: ImageStyle["width"] } | { height: ImageStyle["height"] }
+	>;
 }) => {
 	const { css } = useYoshiki();
 
@@ -67,10 +69,12 @@ export const PosterBackground = ({
 
 export const GradientImageBackground = ({
 	gradient,
+	gradientStyle,
 	children,
 	...props
 }: ComponentProps<typeof ImageBackground> & {
 	gradient?: Partial<LinearGradientProps>;
+	gradientStyle?: Parameters<ReturnType<typeof useYoshiki>["css"]>[0];
 }) => {
 	const { css, theme } = useYoshiki();
 
@@ -81,13 +85,16 @@ export const GradientImageBackground = ({
 				end={{ x: 0, y: 1 }}
 				colors={["transparent", theme.darkOverlay]}
 				{...css(
-					{
-						position: "absolute",
-						top: 0,
-						bottom: 0,
-						left: 0,
-						right: 0,
-					},
+					[
+						{
+							position: "absolute",
+							top: 0,
+							bottom: 0,
+							left: 0,
+							right: 0,
+						},
+						gradientStyle,
+					],
 					typeof gradient === "object" ? gradient : undefined,
 				)}
 			>

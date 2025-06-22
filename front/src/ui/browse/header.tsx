@@ -149,7 +149,9 @@ export const BrowseSettings = ({
 					{Object.keys(MediaTypeIcons).map((x) => (
 						<Menu.Item
 							key={x}
-							label={t(`browse.mediatypekey.${x}`)}
+							label={t(
+								`browse.mediatypekey.${x as keyof typeof MediaTypeIcons}`,
+							)}
 							selected={mediaType === x}
 							icon={MediaTypeIcons[x as keyof typeof MediaTypeIcons]}
 							onSelect={() => setMediaType(x)}
