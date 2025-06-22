@@ -46,8 +46,8 @@
 		"mediatypekey": {
 			"all": "전부",
 			"movie": "영화",
-			"show": "시리즈",
-			"collection": "컬렉션"
+			"collection": "컬렉션",
+			"serie": "시리즈"
 		},
 		"mediatype-tt": "미디어 타입",
 		"mediatypelabel": "미디어 타입",
@@ -59,7 +59,7 @@
 			"airDate": "방영 날짜",
 			"startAir": "방영 시작 날짜",
 			"endAir": "종영 날짜",
-			"addedDate": "추가된 날짜",
+			"createdAt": "추가된 날짜",
 			"rating": "평가"
 		},
 		"sortord": {

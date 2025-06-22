@@ -46,8 +46,8 @@
 		"mediatypekey": {
 			"all": "Все",
 			"movie": "Фильмы",
-			"show": "Сериалы",
-			"collection": "Коллекция"
+			"collection": "Коллекция",
+			"serie": "Сериалы"
 		},
 		"mediatype-tt": "Тип медиа",
 		"mediatypelabel": "Тип медиа",
@@ -59,7 +59,7 @@
 			"airDate": "Дата премьеры",
 			"startAir": "Впервые вышло",
 			"endAir": "Завершение выхода",
-			"addedDate": "Дата добавления",
+			"createdAt": "Дата добавления",
 			"rating": "Рейтинг"
 		},
 		"sortord": {

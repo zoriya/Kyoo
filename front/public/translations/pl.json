@@ -173,7 +173,7 @@
 			"airDate": "Data emisji",
 			"name": "Nazwa",
 			"endAir": "Koniec emisji",
-			"addedDate": "Data dodania",
+			"createdAt": "Data dodania",
 			"rating": "Ocena"
 		},
 		"sortord": {
@@ -187,8 +187,8 @@
 		"mediatypekey": {
 			"all": "Wszystko",
 			"movie": "Filmy",
-			"show": "Seriale",
-			"collection": "Kolekcja"
+			"collection": "Kolekcja",
+			"serie": "Seriale"
 		},
 		"mediatype-tt": "Typ",
 		"mediatypelabel": "Typ"

@@ -46,8 +46,8 @@
 		"mediatypekey": {
 			"all": "",
 			"movie": "",
-			"show": "",
-			"collection": ""
+			"collection": "",
+			"serie": ""
 		},
 		"mediatype-tt": "",
 		"mediatypelabel": "",
@@ -59,7 +59,7 @@
 			"airDate": "",
 			"startAir": "",
 			"endAir": "",
-			"addedDate": "",
+			"createdAt": "",
 			"rating": ""
 		},
 		"sortord": {

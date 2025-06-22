@@ -46,8 +46,8 @@
 		"mediatypekey": {
 			"all": "الكل",
 			"movie": "أفلام",
-			"show": "مسلسلات",
-			"collection": "المجموعة"
+			"collection": "المجموعة",
+			"serie": "مسلسلات"
 		},
 		"mediatype-tt": "نوع الوسائط",
 		"mediatypelabel": "نوع الوسائط",
@@ -59,7 +59,7 @@
 			"airDate": "تاريخ العرض",
 			"startAir": "بداية العرض",
 			"endAir": "نهاية العرض",
-			"addedDate": "تاريخ الإضافة",
+			"createdAt": "تاريخ الإضافة",
 			"rating": "التقييمات"
 		},
 		"sortord": {

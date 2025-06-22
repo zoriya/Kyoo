@@ -51,7 +51,7 @@
 			"airDate": "Date de sortie",
 			"startAir": "Date de sortie",
 			"endAir": "Date de fin de sortie",
-			"addedDate": "Date d'ajout",
+			"createdAt": "Date d'ajout",
 			"rating": "Notes"
 		},
 		"sortord": {
@@ -61,10 +61,10 @@
 		"switchToGrid": "Passer en vue grille",
 		"switchToList": "Passer en vue liste",
 		"mediatypekey": {
-			"show": "Séries",
 			"collection": "Collection",
 			"movie": "Films",
-			"all": "Tous"
+			"all": "Tous",
+			"serie": "Séries"
 		},
 		"mediatype-tt": "Type de média",
 		"mediatypelabel": "Type de média"

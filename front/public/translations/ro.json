@@ -46,8 +46,8 @@
 		"mediatypekey": {
 			"all": "Toate",
 			"movie": "Filme",
-			"show": "Serie",
-			"collection": "Colecție"
+			"collection": "Colecție",
+			"serie": "Serie"
 		},
 		"mediatype-tt": "Tip media",
 		"mediatypelabel": "Tip media",
@@ -59,7 +59,7 @@
 			"airDate": "Data de difuzare",
 			"startAir": "Începe aerul",
 			"endAir": "Sfârșit aerul",
-			"addedDate": "Data adăugată",
+			"createdAt": "Data adăugată",
 			"rating": "Evaluări"
 		},
 		"sortord": {

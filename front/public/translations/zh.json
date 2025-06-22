@@ -51,7 +51,7 @@
 			"airDate": "播出日期",
 			"startAir": "开始播出日期",
 			"endAir": "结束播出日期",
-			"addedDate": "添加日期",
+			"createdAt": "添加日期",
 			"rating": "评分"
 		},
 		"sortord": {
@@ -63,8 +63,8 @@
 		"mediatypekey": {
 			"all": "全部",
 			"movie": "电影",
-			"show": "系列",
-			"collection": "集合"
+			"collection": "集合",
+			"serie": "系列"
 		},
 		"mediatype-tt": "媒体类型",
 		"mediatypelabel": "媒体类型"

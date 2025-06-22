@@ -46,8 +46,8 @@
 		"mediatypekey": {
 			"all": "ሁሉም",
 			"movie": "ፊልሞች",
-			"show": "ተከታታይ ድራማ",
-			"collection": "ስብስብ"
+			"collection": "ስብስብ",
+			"serie": "ተከታታይ ድራማ"
 		},
 		"mediatype-tt": "የሚዲያ ዓይነት",
 		"mediatypelabel": "የሚዲያ ዓይነት",
@@ -59,7 +59,7 @@
 			"airDate": "የተለቀቀበት ቀን",
 			"startAir": "የጀመረበት ቀን",
 			"endAir": "ያለቀበት ቀን",
-			"addedDate": "የታከለበት ቀን",
+			"createdAt": "የታከለበት ቀን",
 			"rating": "ግምገማዎች"
 		},
 		"sortord": {

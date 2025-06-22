@@ -47,8 +47,8 @@
 		"mediatypekey": {
 			"all": "All",
 			"movie": "Movies",
-			"show": "Series",
-			"collection": "Collection"
+			"collection": "Collection",
+			"serie": "Series"
 		},
 		"mediatype-tt": "Media Type",
 		"mediatypelabel": "Media Type",
@@ -60,7 +60,7 @@
 			"airDate": "Air Date",
 			"startAir": "Start air",
 			"endAir": "End air",
-			"addedDate": "Added date",
+			"createdAt": "Added date",
 			"rating": "Ratings"
 		},
 		"sortord": {

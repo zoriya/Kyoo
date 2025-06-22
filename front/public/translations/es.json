@@ -46,8 +46,8 @@
 		"mediatypekey": {
 			"all": "Todo",
 			"movie": "Películas",
-			"show": "Programas de TV",
-			"collection": "Colección"
+			"collection": "Colección",
+			"serie": "Programas de TV"
 		},
 		"mediatype-tt": "Tipos de medios",
 		"mediatypelabel": "Tipo de medio",
@@ -59,7 +59,7 @@
 			"airDate": "Fecha de emisión",
 			"startAir": "Empieza emisión",
 			"endAir": "Finaliza emisión",
-			"addedDate": "Fecha de incorporación",
+			"createdAt": "Fecha de incorporación",
 			"rating": "Calificaciones"
 		},
 		"sortord": {

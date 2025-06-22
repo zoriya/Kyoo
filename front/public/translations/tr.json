@@ -51,7 +51,7 @@
 			"airDate": "Çıktığı tarih",
 			"startAir": "Başladığı tarih",
 			"endAir": "Bittiği tarih",
-			"addedDate": "Eklendiği tarih",
+			"createdAt": "Eklendiği tarih",
 			"rating": "Puanlama"
 		},
 		"sortord": {
@@ -62,9 +62,9 @@
 		"switchToList": "Liste görünümüne geç",
 		"mediatypekey": {
 			"collection": "Koleksiyonlar",
-			"show": "Diziler",
 			"all": "Hepsi",
-			"movie": "Filmler"
+			"movie": "Filmler",
+			"serie": "Diziler"
 		},
 		"mediatype-tt": "İçeriğin Türü",
 		"mediatypelabel": "İçeriğin Türü"

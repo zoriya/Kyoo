@@ -51,7 +51,7 @@
 			"airDate": "Дата виходу",
 			"startAir": "Початок виходу",
 			"endAir": "Кінець виходу",
-			"addedDate": "Дата додавання",
+			"createdAt": "Дата додавання",
 			"rating": "Рейтинг"
 		},
 		"sortord": {
@@ -65,8 +65,8 @@
 		"mediatypekey": {
 			"all": "Усе",
 			"movie": "Фільми",
-			"show": "Серіали",
-			"collection": "Колекція"
+			"collection": "Колекція",
+			"serie": "Серіали"
 		}
 	},
 	"misc": {

@@ -51,7 +51,7 @@
 			"airDate": "Ausstrahlungsdatum",
 			"startAir": "Erstausstrahlung",
 			"endAir": "Letzte Ausstrahlung",
-			"addedDate": "Hinzufügedatum",
+			"createdAt": "Hinzufügedatum",
 			"rating": "Bewertungen"
 		},
 		"sortord": {
@@ -63,8 +63,8 @@
 		"mediatypekey": {
 			"all": "Alles",
 			"movie": "Filme",
-			"show": "Serien",
-			"collection": "Sammlungen"
+			"collection": "Sammlungen",
+			"serie": "Serien"
 		},
 		"mediatype-tt": "Medientyp",
 		"mediatypelabel": "Medientyp"

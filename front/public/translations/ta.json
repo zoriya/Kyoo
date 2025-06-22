@@ -46,8 +46,8 @@
 		"mediatypekey": {
 			"all": "அனைத்தும்",
 			"movie": "திரைப்படங்கள்",
-			"show": "தொடர்",
-			"collection": "சேகரிப்பு"
+			"collection": "சேகரிப்பு",
+			"serie": "தொடர்"
 		},
 		"mediatype-tt": "ஊடக வகை",
 		"mediatypelabel": "ஊடக வகை",
@@ -59,7 +59,7 @@
 			"airDate": "காற்று தேதி",
 			"startAir": "காற்றைத் தொடங்கவும்",
 			"endAir": "இறுதி காற்று",
-			"addedDate": "சேர்க்கப்பட்ட தேதி",
+			"createdAt": "சேர்க்கப்பட்ட தேதி",
 			"rating": "மதிப்பீடுகள்"
 		},
 		"sortord": {

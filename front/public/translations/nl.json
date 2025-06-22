@@ -46,8 +46,8 @@
 		"mediatypekey": {
 			"all": "Alle",
 			"movie": "Film",
-			"show": "Serie",
-			"collection": "Verzameling"
+			"collection": "Verzameling",
+			"serie": "Serie"
 		},
 		"mediatype-tt": "Mediatype",
 		"mediatypelabel": "Mediatype",
@@ -59,7 +59,7 @@
 			"airDate": "Datum eerste vertoning",
 			"startAir": "Startdatum",
 			"endAir": "Einddatum",
-			"addedDate": "Datum toegevoegd",
+			"createdAt": "Datum toegevoegd",
 			"rating": "Beoordelingen"
 		},
 		"sortord": {
