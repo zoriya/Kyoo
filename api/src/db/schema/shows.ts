@@ -9,11 +9,11 @@ import {
 	primaryKey,
 	smallint,
 	text,
-	timestamp,
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
 import type { Image, Original } from "~/models/utils";
+import { timestamp } from "../utils";
 import { entries } from "./entries";
 import { seasons } from "./seasons";
 import { roles } from "./staff";
@@ -87,13 +87,13 @@ export const shows = schema.table(
 
 		externalId: externalid(),
 
-		createdAt: timestamp({ withTimezone: true, mode: "string" })
+		createdAt: timestamp({ withTimezone: true, mode: "iso" })
 			.notNull()
-			.defaultNow(),
-		updatedAt: timestamp({ withTimezone: true, mode: "string" })
+			.default(sql`now()`),
+		updatedAt: timestamp({ withTimezone: true, mode: "iso" })
 			.notNull()
 			.$onUpdate(() => sql`now()`),
-		nextRefresh: timestamp({ withTimezone: true, mode: "string" }).notNull(),
+		nextRefresh: timestamp({ withTimezone: true, mode: "iso" }).notNull(),
 	},
 	(t) => [
 		check("rating_valid", sql`${t.rating} between 0 and 100`),

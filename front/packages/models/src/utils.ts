@@ -26,25 +26,6 @@ import type { Movie, Show } from "./resources";
 
 export const zdate = z.coerce.date;
 
-export const getDisplayDate = (data: Show | Movie) => {
-	const {
-		startAir,
-		endAir,
-		airDate,
-	}: { startAir?: Date | null; endAir?: Date | null; airDate?: Date | null } = data;
-
-	if (startAir) {
-		if (!endAir || startAir.getFullYear() === endAir.getFullYear()) {
-			return startAir.getFullYear().toString();
-		}
-		return startAir.getFullYear() + (endAir ? ` - ${endAir.getFullYear()}` : "");
-	}
-	if (airDate) {
-		return airDate.getFullYear().toString();
-	}
-	return null;
-};
-
 export const useLocalSetting = (setting: string, def: string) => {
 	if (Platform.OS === "web" && typeof window === "undefined") return [def, null!] as const;
 	// eslint-disable-next-line react-hooks/rules-of-hooks

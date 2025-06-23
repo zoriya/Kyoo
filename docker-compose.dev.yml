@@ -25,26 +25,25 @@ x-transcoder: &transcoder-base
         target: /app
 
 services:
-  # front:
-  #   build:
-  #     context: ./front
-  #     dockerfile: Dockerfile.dev
-  #   volumes:
-  #     - ./front:/app
-  #     - /app/.yarn
-  #     - /app/node_modules
-  #     - /app/apps/mobile/node_modules
-  #     - /app/apps/web/.next/
-  #     - /app/apps/mobile/.expo/
-  #   ports:
-  #     - "3000:3000"
-  #     - "8081:8081"
-  #   restart: unless-stopped
-  #   environment:
-  #     - KYOO_URL=${KYOO_URL:-http://api:5000/api}
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.http.routers.front.rule=PathPrefix(`/`)"
+  front:
+    build:
+      context: ./front
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      - KYOO_URL=${KYOO_URL:-http://api:5000/api}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.front.rule=PathPrefix(`/`)"
+    develop:
+      watch:
+        - action: sync
+          path: ./front
+          target: /app
+        - action: rebuild
+          path: ./front/bun.lock
 
   auth:
     build:
@@ -82,6 +81,8 @@ services:
       - JWT_ISSUER=${PUBLIC_URL}
     env_file:
       - ./.env
+    volumes:
+      - images:/app/images
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=PathPrefix(`/api/`) || PathPrefix(`/swagger`)"
@@ -95,7 +96,7 @@ services:
           path: ./api
           target: /app
         - action: rebuild
-          path: ./api/packages.json
+          path: ./api/bun.lock
 
   scanner:
     build: ./scanner
@@ -206,4 +207,5 @@ services:
 
 volumes:
   db:
+  images:
   transcoder_metadata:

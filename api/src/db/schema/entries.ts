@@ -8,11 +8,11 @@ import {
 	primaryKey,
 	real,
 	text,
-	timestamp,
 	unique,
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
+import { timestamp } from "../utils";
 import { shows } from "./shows";
 import { image, language, schema } from "./utils";
 import { entryVideoJoin } from "./videos";
@@ -67,14 +67,14 @@ export const entries = schema.table(
 
 		externalId: entry_extid(),
 
-		createdAt: timestamp({ withTimezone: true, mode: "string" })
+		createdAt: timestamp({ withTimezone: true, mode: "iso" })
 			.notNull()
-			.defaultNow(),
-		updatedAt: timestamp({ withTimezone: true, mode: "string" })
+			.default(sql`now()`),
+		updatedAt: timestamp({ withTimezone: true, mode: "iso" })
 			.notNull()
 			.$onUpdate(() => sql`now()`),
-		availableSince: timestamp({ withTimezone: true, mode: "string" }),
-		nextRefresh: timestamp({ withTimezone: true, mode: "string" }).notNull(),
+		availableSince: timestamp({ withTimezone: true, mode: "iso" }),
+		nextRefresh: timestamp({ withTimezone: true, mode: "iso" }).notNull(),
 	},
 	(t) => [
 		unique().on(t.showPk, t.seasonNumber, t.episodeNumber),

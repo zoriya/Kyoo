@@ -42,7 +42,7 @@ import { type Atom, useAtomValue } from "jotai";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { percent, useYoshiki } from "yoshiki/native";
-import { EpisodeLine, displayRuntime, episodeDisplayNumber } from "../details/episode";
+import { EpisodeLine, displayRuntime, episodeDisplayNumber } from "../../../../src/ui/details/episode";
 import { EmptyView } from "../fetch";
 import { type State, downloadAtom } from "./state";
 

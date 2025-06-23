@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
-import { check, index, integer, timestamp } from "drizzle-orm/pg-core";
+import { check, index, integer } from "drizzle-orm/pg-core";
+import { timestamp } from "../utils";
 import { entries } from "./entries";
 import { profiles } from "./profiles";
 import { schema } from "./utils";
@@ -18,9 +19,9 @@ export const history = schema.table(
 		videoPk: integer().references(() => videos.pk, { onDelete: "set null" }),
 		percent: integer().notNull().default(0),
 		time: integer(),
-		playedDate: timestamp({ withTimezone: true, mode: "string" })
+		playedDate: timestamp({ withTimezone: true, mode: "iso" })
 			.notNull()
-			.defaultNow(),
+			.default(sql`now()`),
 	},
 	(t) => [
 		index("history_play_date").on(t.playedDate.desc()),

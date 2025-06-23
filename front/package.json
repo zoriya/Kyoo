@@ -1,24 +1,68 @@
 {
 	"name": "kyoo",
 	"private": true,
+	"main": "expo-router/entry",
+	"version": "1.0.0",
 	"scripts": {
-		"dev": "yarn workspaces foreach -pi run dev",
-		"web": "yarn workspace web dev",
-		"mobile": "yarn workspace mobile dev",
-		"build:web": "yarn workspace web build",
-		"build:mobile": "yarn workspace mobile build",
-		"build:mobile:apk": "yarn workspace mobile build:apk",
-		"build:mobile:dev": "yarn workspace mobile build:dev",
-		"update": "yarn workspace mobile update",
+		"dev": "expo start",
+		"apk": "eas build --profile preview --platform android --non-interactive --json",
+		"apk:dev": "eas build --profile development --platform android --non-interactive",
 		"lint": "biome lint .",
 		"lint:fix": "biome lint . --write",
 		"format": "biome format .",
 		"format:fix": "biome format . --write"
 	},
-	"workspaces": ["apps/*", "packages/*"],
-	"devDependencies": {
-		"@biomejs/biome": "1.8.3",
-		"typescript": "5.5.4"
+	"dependencies": {
+		"@expo/html-elements": "^0.12.5",
+		"@gorhom/portal": "^1.0.14",
+		"@legendapp/list": "^1.0.20",
+		"@material-symbols/svg-400": "^0.31.6",
+		"@radix-ui/react-dropdown-menu": "^2.1.15",
+		"@react-navigation/bottom-tabs": "^7.3.10",
+		"@react-navigation/elements": "^2.3.8",
+		"@react-navigation/native": "^7.1.6",
+		"@tanstack/react-query": "^5.80.6",
+		"expo": "~53.0.10",
+		"expo-build-properties": "^0.14.6",
+		"expo-image": "^2.3.0",
+		"expo-linear-gradient": "^14.1.5",
+		"expo-linking": "~7.1.5",
+		"expo-localization": "^16.1.5",
+		"expo-router": "~5.1.0",
+		"expo-splash-screen": "^0.30.9",
+		"expo-status-bar": "~2.2.3",
+		"expo-updates": "~0.28.14",
+		"i18next-http-backend": "^3.0.2",
+		"jotai": "^2.12.5",
+		"react": "19.0.0",
+		"react-i18next": "^15.5.2",
+		"react-native": "0.79.3",
+		"react-native-mmkv": "^3.2.0",
+		"react-native-reanimated": "~3.17.4",
+		"react-native-safe-area-context": "5.4.0",
+		"react-native-screens": "~4.11.1",
+		"react-native-svg": "15.11.2",
+		"react-native-video": "^6.15.0",
+		"react-native-web": "^0.20.0",
+		"react-tooltip": "^5.29.1",
+		"sweetalert2": "^11.22.0",
+		"yoshiki": "1.2.14",
+		"zod": "^3.25.56"
 	},
-	"packageManager": "yarn@3.2.4"
+	"devDependencies": {
+		"@biomejs/biome": "2.0.0",
+		"@tanstack/react-query-devtools": "^5.80.6",
+		"@types/react": "~19.0.10",
+		"@types/react-dom": "^19.1.6",
+		"expo-dev-client": "^5.2.0",
+		"react-native-svg-transformer": "^1.5.1",
+		"typescript": "5.8.3"
+	},
+	"expo": {
+		"doctor": {
+			"reactNativeDirectoryCheck": {
+				"listUnknownPackages": false
+			}
+		}
+	}
 }

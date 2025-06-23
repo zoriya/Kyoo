@@ -22,7 +22,7 @@ import { Main } from "@kyoo/primitives";
 import { LinearGradient } from "expo-linear-gradient";
 import type { ReactElement } from "react";
 import { useYoshiki, vw } from "yoshiki/native";
-import { Navbar } from "./navbar";
+import { Navbar } from "../../../src/ui/navbar/src/ui/navbar";
 
 export const DefaultLayout = ({
 	page,

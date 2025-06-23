@@ -1,19 +1,23 @@
 import {
 	type Column,
 	type ColumnsSelection,
+	getTableColumns,
+	is,
 	type SQL,
 	type SQLWrapper,
 	type Subquery,
+	sql,
 	Table,
 	View,
 	ViewBaseConfig,
-	getTableColumns,
-	is,
-	sql,
 } from "drizzle-orm";
 import type { CasingCache } from "drizzle-orm/casing";
 import type { AnyMySqlSelect } from "drizzle-orm/mysql-core";
-import type { AnyPgSelect, SelectedFieldsFlat } from "drizzle-orm/pg-core";
+import {
+	type AnyPgSelect,
+	customType,
+	type SelectedFieldsFlat,
+} from "drizzle-orm/pg-core";
 import type { AnySQLiteSelect } from "drizzle-orm/sqlite-core";
 import type { WithSubquery } from "drizzle-orm/subquery";
 import { db } from "./index";
@@ -148,3 +152,19 @@ export const isUniqueConstraint = (e: unknown): boolean => {
 		typeof e === "object" && e != null && "code" in e && e.code === "23505"
 	);
 };
+
+export const timestamp = customType<{
+	data: string;
+	driverData: string;
+	config: { withTimezone: boolean; precision?: number; mode: "iso" };
+}>({
+	dataType(config) {
+		const precision = config?.precision ? ` (${config.precision})` : "";
+		return `timestamp${precision}${config?.withTimezone ? " with time zone" : ""}`;
+	},
+	fromDriver(value: string): string {
+		// postgres format: 2025-06-22 16:13:37.489301+00
+		// what we want:    2025-06-22T16:13:37Z
+		return `${value.substring(0, 10)}T${value.substring(11, 19)}Z`;
+	},
+});
