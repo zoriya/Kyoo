@@ -31,7 +31,7 @@ import { useTranslation } from "react-i18next";
 import { Platform, View, type ViewProps } from "react-native";
 import Svg, { Path, type SvgProps } from "react-native-svg";
 import { percent, useYoshiki } from "yoshiki/native";
-import { DefaultLayout } from "../layout";
+import { DefaultLayout } from "../../../packages/ui/src/layoutpackages/ui/src/layout";
 import { DetailsCollections } from "./collection";
 import { EpisodeLine, episodeDisplayNumber } from "./episode";
 import { Header } from "./header";

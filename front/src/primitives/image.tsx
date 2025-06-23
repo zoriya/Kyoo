@@ -66,13 +66,17 @@ Image.Loader = ({ layout, ...props }: { layout: ImageLayout }) => {
 export const Poster = ({
 	layout,
 	...props
-}: ComponentProps<typeof Image> & {
-	layout: YoshikiEnhanced<{ width: ImageStyle["width"] } | { height: ImageStyle["height"] }>;
+}: Omit<ComponentProps<typeof Image>, "layout"> & {
+	layout: YoshikiEnhanced<
+		{ width: ImageStyle["width"] } | { height: ImageStyle["height"] }
+	>;
 }) => <Image layout={{ aspectRatio: 2 / 3, ...layout }} {...props} />;
 
 Poster.Loader = ({
 	layout,
 	...props
 }: {
-	layout: YoshikiEnhanced<{ width: ImageStyle["width"] } | { height: ImageStyle["height"] }>;
+	layout: YoshikiEnhanced<
+		{ width: ImageStyle["width"] } | { height: ImageStyle["height"] }
+	>;
 }) => <Image.Loader layout={{ aspectRatio: 2 / 3, ...layout }} {...props} />;

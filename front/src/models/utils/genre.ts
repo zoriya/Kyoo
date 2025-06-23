@@ -25,3 +25,4 @@ export const Genre = z.enum([
 	"soap",
 	"talk",
 ]);
+export type Genre = z.infer<typeof Genre>;

@@ -35,7 +35,7 @@ import { useTranslation } from "react-i18next";
 import { Platform, StyleSheet, View } from "react-native";
 import { useRouter } from "solito/router";
 import { useYoshiki } from "yoshiki/native";
-import { episodeDisplayNumber } from "../details/episode";
+import { episodeDisplayNumber } from "../../../../src/ui/details/episode";
 import { ErrorView } from "../../../../src/ui/errors";
 import { Back, Hover, LoadingIndicator } from "./components/hover";
 import { useVideoKeyboard } from "./keyboard";

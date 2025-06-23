@@ -32,7 +32,7 @@ export const Serie = z
 		thumbnail: KImage.nullable(),
 		banner: KImage.nullable(),
 		logo: KImage.nullable(),
-		trailerUrl: z.string().optional().nullable(),
+		trailerUrl: z.string().nullable(),
 
 		entriesCount: z.number().int(),
 		availableCount: z.number().int(),
@@ -45,7 +45,13 @@ export const Serie = z
 		nextEntry: Entry.optional().nullable(),
 		watchStatus: z
 			.object({
-				status: z.enum(["completed", "watching", "rewatching", "dropped", "planned"]),
+				status: z.enum([
+					"completed",
+					"watching",
+					"rewatching",
+					"dropped",
+					"planned",
+				]),
 				score: z.number().int().gte(0).lte(100).nullable(),
 				startedAt: zdate().nullable(),
 				completedAt: zdate().nullable(),
@@ -53,10 +59,13 @@ export const Serie = z
 			})
 			.nullable(),
 	})
-	.transform((x) => ({
-		...x,
-		href: `/series/${x.slug}`,
-		playHref: x.firstEntry ? `/watch/${x.firstEntry.slug}` : null,
-	}));
+	.transform((x) => {
+		const entry = x.nextEntry ?? x.firstEntry;
+		return {
+			...x,
+			href: `/series/${x.slug}`,
+			playHref: entry ? `/watch/${entry.slug}` : null,
+		};
+	});
 
 export type Serie = z.infer<typeof Serie>;

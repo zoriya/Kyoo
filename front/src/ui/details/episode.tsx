@@ -56,12 +56,6 @@ export const episodeDisplayNumber = (episode: {
 	return "??";
 };
 
-export const displayRuntime = (runtime: number | null) => {
-	if (!runtime) return null;
-	if (runtime < 60) return `${runtime}min`;
-	return `${Math.floor(runtime / 60)}h${runtime % 60}`;
-};
-
 export const EpisodeBox = ({
 	slug,
 	showSlug,

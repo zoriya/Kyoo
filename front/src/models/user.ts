@@ -54,5 +54,5 @@ export const Account = User.and(
 		token: z.string(),
 		selected: z.boolean(),
 	}),
-);
+).transform((x) => ({ ...x, isAdmin: true }));
 export type Account = z.infer<typeof Account>;

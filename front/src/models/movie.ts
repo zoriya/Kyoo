@@ -31,7 +31,7 @@ export const Movie = z
 		thumbnail: KImage.nullable(),
 		banner: KImage.nullable(),
 		logo: KImage.nullable(),
-		trailerUrl: z.string().optional().nullable(),
+		trailerUrl: z.string().nullable(),
 
 		isAvailable: z.boolean(),
 
@@ -42,7 +42,13 @@ export const Movie = z
 		videos: z.array(EmbeddedVideo).optional(),
 		watchStatus: z
 			.object({
-				status: z.enum(["completed", "watching", "rewatching", "dropped", "planned"]),
+				status: z.enum([
+					"completed",
+					"watching",
+					"rewatching",
+					"dropped",
+					"planned",
+				]),
 				score: z.number().int().gte(0).lte(100).nullable(),
 				completedAt: zdate().nullable(),
 				percent: z.number().int().gte(0).lte(100),
@@ -52,5 +58,6 @@ export const Movie = z
 	.transform((x) => ({
 		...x,
 		href: `/movies/${x.slug}`,
+		playHref: `/watch/${x.slug}`,
 	}));
 export type Movie = z.infer<typeof Movie>;

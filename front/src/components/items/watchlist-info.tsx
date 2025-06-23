@@ -26,12 +26,12 @@ export const watchListIcon = (status: WatchStatus | null) => {
 };
 
 export const WatchListInfo = ({
-	type,
+	kind,
 	slug,
 	status,
 	...props
 }: {
-	type: "movie" | "show" | "episode";
+	kind: "movie" | "serie" | "episode";
 	slug: string;
 	status: WatchStatus | null;
 	color: ComponentProps<typeof IconButton>["color"];
@@ -40,12 +40,12 @@ export const WatchListInfo = ({
 	const { t } = useTranslation();
 
 	const mutation = useMutation({
-		path: [type, slug, "watchStatus"],
+		path: [kind, slug, "watchStatus"],
 		compute: (newStatus: WatchStatus | null) => ({
 			method: newStatus ? "POST" : "DELETE",
 			params: newStatus ? { status: newStatus } : undefined,
 		}),
-		invalidate: [type, slug],
+		invalidate: [kind, slug],
 	});
 	if (mutation.isPending) status = mutation.variables;
 

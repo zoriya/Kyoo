@@ -1,9 +1,14 @@
 import type React from "react";
-import { type ComponentProps, type ComponentType, type ForwardedRef, forwardRef } from "react";
+import {
+	type ComponentProps,
+	type ComponentType,
+	type ForwardedRef,
+	forwardRef,
+} from "react";
 import { Platform, type PressableProps } from "react-native";
 import type { SvgProps } from "react-native-svg";
 import type { YoshikiStyle } from "yoshiki";
-import { type Stylable, type Theme, px, useYoshiki } from "yoshiki/native";
+import { px, type Stylable, type Theme, useYoshiki } from "yoshiki/native";
 import { PressableFeedback } from "./links";
 import { P } from "./text";
 import { type Breakpoint, focusReset, ts } from "./utils";
@@ -25,7 +30,12 @@ type IconProps = {
 export const Icon = ({ icon: Icon, color, size = 24, ...props }: IconProps) => {
 	const { css, theme } = useYoshiki();
 	const computed = css(
-		{ width: size, height: size, fill: color ?? theme.contrast, flexShrink: 0 } as any,
+		{
+			width: size,
+			height: size,
+			fill: color ?? theme.contrast,
+			flexShrink: 0,
+		} as any,
 		props,
 	) as any;
 
@@ -44,7 +54,9 @@ export const Icon = ({ icon: Icon, color, size = 24, ...props }: IconProps) => {
 	);
 };
 
-export const IconButton = forwardRef(function IconButton<AsProps = PressableProps>(
+export const IconButton = forwardRef(function IconButton<
+	AsProps = PressableProps,
+>(
 	{
 		icon,
 		size,
@@ -84,7 +96,9 @@ export const IconButton = forwardRef(function IconButton<AsProps = PressableProp
 			<Icon
 				icon={icon}
 				size={size}
-				color={"disabled" in asProps && asProps.disabled ? theme.overlay1 : color}
+				color={
+					"disabled" in asProps && asProps.disabled ? theme.overlay1 : color
+				}
 			/>
 		</Container>
 	);
@@ -114,7 +128,7 @@ export const IconFab = <AsProps = PressableProps>(
 	);
 };
 
-export const DottedSeparator = (props: Stylable) => {
+export const DottedSeparator = (props: Stylable<"text">) => {
 	const { css } = useYoshiki();
 	return <P {...css({ mX: ts(1) }, props)}>{String.fromCharCode(0x2022)}</P>;
 };

@@ -22,7 +22,7 @@ import { type News, NewsP, type QueryIdentifier, getDisplayDate } from "@kyoo/mo
 import { useTranslation } from "react-i18next";
 import { useYoshiki } from "yoshiki/native";
 import { ItemGrid } from "../browse/grid";
-import { EpisodeBox, episodeDisplayNumber } from "../details/episode";
+import { EpisodeBox, episodeDisplayNumber } from "../../../../src/ui/details/episode";
 import { InfiniteFetch } from "../fetch-infinite";
 import { Header } from "./genre";
 
