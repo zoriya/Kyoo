@@ -20,8 +20,9 @@ function useLinkTo({
 }) {
 	const router = useRouter();
 
-	// TODO: add href attr for web
 	return {
+		// @ts-expect-error href is not known
+		href: href,
 		onPress: (e) => {
 			if (e?.defaultPrevented) return;
 			if (href.startsWith("http")) {

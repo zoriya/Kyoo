@@ -1,6 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useMemo, useRef } from "react";
-import { Platform } from "react-native";
 import { z } from "zod/v4";
 import { Account, User } from "~/models";
 import { useFetch } from "~/query";
@@ -16,7 +15,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 	const ret = useMemo(() => {
 		const acc = accounts.find((x) => x.selected);
 		return {
-			apiUrl: acc?.apiUrl ?? "",
+			apiUrl: acc?.apiUrl ?? "/",
 			authToken: acc?.token ?? null,
 			selectedAccount: acc ?? null,
 			accounts: accounts.map((account) => ({

@@ -541,7 +541,9 @@ export const Header = ({
 							// studio={data.studio}
 							playHref={data.kind !== "collection" ? data.playHref : null}
 							trailerUrl={data.kind !== "collection" ? data.trailerUrl : null}
-							watchStatus={data.kind !== "collection" ? data.watchStatus?.status! : null}
+							watchStatus={
+								data.kind !== "collection" ? data.watchStatus?.status! : null
+							}
 							{...css({
 								marginTop: {
 									xs: max(vh(20), px(200)),
@@ -596,10 +598,13 @@ export const Header = ({
 	);
 };
 
-Header.query = (kind: string, slug: string): QueryIdentifier<Show> => ({
+Header.query = (
+	kind: "serie" | "movie" | "collection",
+	slug: string,
+): QueryIdentifier<Show> => ({
 	parser: Show,
-	path: [kind, slug],
+	path: ["api", `${kind}s`, slug],
 	params: {
-		with: ["studio", "watchStatus"],
+		with: ["studios"],
 	},
 });

@@ -15,10 +15,9 @@ import { setServerData } from "~/utils";
 
 const ssrApiUrl = process.env.KYOO_URL ?? "http://api:3567/api";
 
-const cleanSlash = (str: string | null, keepFirst = false) => {
-	if (!str) return null;
-	if (keepFirst) return str.replace(/\/$/g, "");
-	return str.replace(/^\/|\/$/g, "");
+const cleanSlash = (str: string | null) => {
+	if (str === null) return null;
+	return str.replace(/\/$/g, "");
 };
 
 export const queryFn = async <Parser extends z.ZodTypeAny>(context: {
@@ -31,6 +30,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(context: {
 	parser: Parser | null;
 	signal?: AbortSignal;
 }): Promise<z.infer<Parser>> => {
+	console.log(context.url);
 	if (
 		Platform.OS === "web" &&
 		typeof window === "undefined" &&
@@ -154,7 +154,7 @@ const toQueryKey = (query: {
 	};
 }) => {
 	return [
-		cleanSlash(query.apiUrl, true),
+		cleanSlash(query.apiUrl),
 		...query.path,
 		query.params
 			? `?${Object.entries(query.params)
@@ -162,7 +162,7 @@ const toQueryKey = (query: {
 					.map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(",") : v}`)
 					.join("&")}`
 			: null,
-	].filter((x) => x);
+	].filter((x) => x !== undefined);
 };
 
 export const keyToUrl = (key: ReturnType<typeof toQueryKey>) => {

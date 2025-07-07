@@ -43,7 +43,7 @@ export const User = z
 		...x,
 		logo: `auth/users/${x.id}/logo`,
 		// isVerified: x.permissions.length > 0,
-		// isAdmin: x.permissions?.includes("admin.write"),
+		isAdmin: true, //x.permissions?.includes("admin.write"),
 	}));
 export type User = z.infer<typeof User>;
 
@@ -54,5 +54,5 @@ export const Account = User.and(
 		token: z.string(),
 		selected: z.boolean(),
 	}),
-).transform((x) => ({ ...x, isAdmin: true }));
+);
 export type Account = z.infer<typeof Account>;

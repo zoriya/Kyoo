@@ -20,7 +20,7 @@ export const login = async (
 		apiUrl: string | null;
 	},
 ): Promise<Result<Account, string>> => {
-	apiUrl ??= "";
+	apiUrl ??= "/";
 	try {
 		const controller = new AbortController();
 		setTimeout(() => controller.abort(), 5_000);
