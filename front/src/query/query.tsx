@@ -30,7 +30,6 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(context: {
 	parser: Parser | null;
 	signal?: AbortSignal;
 }): Promise<z.infer<Parser>> => {
-	console.log(context.url);
 	if (
 		Platform.OS === "web" &&
 		typeof window === "undefined" &&

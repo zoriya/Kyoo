@@ -22,15 +22,7 @@ import {
 } from "yoshiki/native";
 import { WatchListInfo } from "~/components/items/watchlist-info";
 import { Rating } from "~/components/rating";
-import {
-	type Genre,
-	type KImage,
-	Movie,
-	Serie,
-	Show,
-	type Studio,
-	type WatchStatusV,
-} from "~/models";
+import { type Genre, type KImage, Show, type WatchStatusV } from "~/models";
 import {
 	A,
 	Chip,

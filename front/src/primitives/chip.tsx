@@ -1,5 +1,5 @@
 import { type TextProps, View } from "react-native";
-import { type Theme, px, rem, useYoshiki } from "yoshiki/native";
+import { px, rem, type Theme, useYoshiki } from "yoshiki/native";
 import { Link } from "./links";
 import { Skeleton } from "./skeleton";
 import { P } from "./text";
@@ -19,8 +19,8 @@ export const Chip = ({
 	color?: string;
 	size?: "small" | "medium" | "large";
 	outline?: boolean;
-	label?: string;
-	href?: string;
+	label: string;
+	href: string;
 	replace?: boolean;
 	target?: string;
 	textProps?: TextProps;
@@ -72,13 +72,14 @@ export const Chip = ({
 						{
 							marginVertical: 0,
 							fontSize: rem(0.8),
-							color: (theme: Theme) => (outline ? theme.contrast : theme.alternate.contrast),
+							color: (theme: Theme) =>
+								outline ? theme.contrast : theme.alternate.contrast,
 						},
 					],
 					textProps,
 				)}
 			>
-				{label ? capitalize(label) : <Skeleton {...css({ width: rem(3) })} />}
+				{capitalize(label)}
 			</P>
 		</Link>
 	);
@@ -89,7 +90,11 @@ Chip.Loader = ({
 	size = "medium",
 	outline = false,
 	...props
-}: { color?: string; size?: "small" | "medium" | "large"; outline?: boolean }) => {
+}: {
+	color?: string;
+	size?: "small" | "medium" | "large";
+	outline?: boolean;
+}) => {
 	const { css } = useYoshiki();
 	const sizeMult = size === "medium" ? 1 : size === "small" ? 0.5 : 1.5;
 

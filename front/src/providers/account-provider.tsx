@@ -15,7 +15,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 	const ret = useMemo(() => {
 		const acc = accounts.find((x) => x.selected);
 		return {
-			apiUrl: acc?.apiUrl ?? "/",
+			apiUrl: acc?.apiUrl ?? "",
 			authToken: acc?.token ?? null,
 			selectedAccount: acc ?? null,
 			accounts: accounts.map((account) => ({

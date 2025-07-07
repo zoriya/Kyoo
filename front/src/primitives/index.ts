@@ -8,7 +8,7 @@ export * from "./image";
 export * from "./image-background";
 export * from "./skeleton";
 export * from "./tooltip";
-// export * from "./container";
+export * from "./container";
 export * from "./divider";
 // export * from "./progress";
 // export * from "./slider";
@@ -19,6 +19,6 @@ export * from "./menu";
 // export * from "./select";
 export * from "./input";
 export * from "./button";
-// export * from "./chip";
+export * from "./chip";
 
 export * from "./utils";
