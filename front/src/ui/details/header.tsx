@@ -4,6 +4,7 @@ import MoreHoriz from "@material-symbols/svg-400/rounded/more_horiz.svg";
 import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg";
+import { Stack } from "expo-router";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { type ImageStyle, Platform, View } from "react-native";
@@ -487,95 +488,108 @@ export const Header = ({
 	const { t } = useTranslation();
 
 	return (
-		<Fetch
-			query={Header.query(kind, slug)}
-			Loader={() => <p>loading</p>}
-			Render={(data) => (
-				<>
-					<Head
-						title={data.name}
-						description={data.description}
-						image={data.thumbnail?.high}
-					/>
-					<GradientImageBackground
-						src={data.thumbnail}
-						quality="high"
-						alt=""
-						layout={{
-							width: percent(100),
-							height: {
-								xs: vh(40),
-								sm: min(vh(60), px(750)),
-								md: min(vh(60), px(680)),
-								lg: vh(70),
-							},
-						}}
-						{...(css({
-							minHeight: { xs: px(350), sm: px(300), md: px(400), lg: px(600) },
-						}) as any)}
-					>
-						<TitleLine
-							kind={kind}
-							slug={slug}
-							name={data.name}
-							tagline={data.tagline}
-							date={getDisplayDate(data)}
-							rating={data.rating}
-							runtime={data.kind === "movie" ? data.runtime : null}
-							poster={data.poster}
-							studios={data.kind !== "collection" ? data.studios : null}
-							playHref={data.kind !== "collection" ? data.playHref : null}
-							trailerUrl={data.kind !== "collection" ? data.trailerUrl : null}
-							watchStatus={
-								data.kind !== "collection" ? data.watchStatus?.status! : null
-							}
-							{...css({
-								marginTop: {
-									xs: max(vh(20), px(200)),
-									sm: vh(45),
-									md: max(vh(30), px(150)),
-									lg: max(vh(35), px(200)),
-								},
-							})}
+		<>
+			<Stack.Screen
+				options={{
+					headerTransparent: true,
+					headerStyle: { backgroundColor: undefined },
+				}}
+			/>
+			<Fetch
+				query={Header.query(kind, slug)}
+				Loader={() => <p>loading</p>}
+				Render={(data) => (
+					<>
+						<Head
+							title={data.name}
+							description={data.description}
+							image={data.thumbnail?.high}
 						/>
-					</GradientImageBackground>
-					<Description
-						description={data?.description}
-						genres={data?.genres}
-						tags={data?.tags}
-						{...css({ paddingTop: { xs: 0, md: ts(2) } })}
-					/>
-					<Container
-						{...css({
-							flexWrap: "wrap",
-							flexDirection: "row",
-							alignItems: "center",
-							marginTop: ts(0.5),
-						})}
-					>
-						<P {...css({ marginRight: ts(0.5), textAlign: "center" })}>
-							{t("show.links")}:
-						</P>
-						{Object.entries(data.externalId!)
-							.filter(([_, data]) => data.link)
-							.map(([name, data]) => (
-								<Chip
-									key={name}
-									label={name}
-									href={data.link}
-									target="_blank"
-									size="small"
-									outline
-									{...css({ m: ts(0.5) })}
-								/>
-							))}
-					</Container>
-					{/* {type === "show" && ( */}
-					{/* 	<ShowWatchStatusCard {...(data?.watchStatus as any)} /> */}
-					{/* )} */}
-				</>
-			)}
-		/>
+						<GradientImageBackground
+							src={data.thumbnail}
+							quality="high"
+							alt=""
+							layout={{
+								width: percent(100),
+								height: {
+									xs: vh(40),
+									sm: min(vh(60), px(750)),
+									md: min(vh(60), px(680)),
+									lg: vh(70),
+								},
+							}}
+							{...(css({
+								minHeight: {
+									xs: px(350),
+									sm: px(300),
+									md: px(400),
+									lg: px(600),
+								},
+							}) as any)}
+						>
+							<TitleLine
+								kind={kind}
+								slug={slug}
+								name={data.name}
+								tagline={data.tagline}
+								date={getDisplayDate(data)}
+								rating={data.rating}
+								runtime={data.kind === "movie" ? data.runtime : null}
+								poster={data.poster}
+								studios={data.kind !== "collection" ? data.studios : null}
+								playHref={data.kind !== "collection" ? data.playHref : null}
+								trailerUrl={data.kind !== "collection" ? data.trailerUrl : null}
+								watchStatus={
+									data.kind !== "collection" ? data.watchStatus?.status! : null
+								}
+								{...css({
+									marginTop: {
+										xs: max(vh(20), px(200)),
+										sm: vh(45),
+										md: max(vh(30), px(150)),
+										lg: max(vh(35), px(200)),
+									},
+								})}
+							/>
+						</GradientImageBackground>
+						<Description
+							description={data?.description}
+							genres={data?.genres}
+							tags={data?.tags}
+							{...css({ paddingTop: { xs: 0, md: ts(2) } })}
+						/>
+						<Container
+							{...css({
+								flexWrap: "wrap",
+								flexDirection: "row",
+								alignItems: "center",
+								marginTop: ts(0.5),
+							})}
+						>
+							<P {...css({ marginRight: ts(0.5), textAlign: "center" })}>
+								{t("show.links")}:
+							</P>
+							{Object.entries(data.externalId!)
+								.filter(([_, data]) => data.link)
+								.map(([name, data]) => (
+									<Chip
+										key={name}
+										label={name}
+										href={data.link}
+										target="_blank"
+										size="small"
+										outline
+										{...css({ m: ts(0.5) })}
+									/>
+								))}
+						</Container>
+						{/* {type === "show" && ( */}
+						{/* 	<ShowWatchStatusCard {...(data?.watchStatus as any)} /> */}
+						{/* )} */}
+					</>
+				)}
+			/>
+		</>
 	);
 };
 
