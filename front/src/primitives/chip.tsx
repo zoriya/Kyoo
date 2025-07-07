@@ -20,7 +20,7 @@ export const Chip = ({
 	size?: "small" | "medium" | "large";
 	outline?: boolean;
 	label: string;
-	href: string;
+	href: string | null;
 	replace?: boolean;
 	target?: string;
 	textProps?: TextProps;

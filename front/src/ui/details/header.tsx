@@ -22,7 +22,13 @@ import {
 } from "yoshiki/native";
 import { WatchListInfo } from "~/components/items/watchlist-info";
 import { Rating } from "~/components/rating";
-import { type Genre, type KImage, Show, type WatchStatusV } from "~/models";
+import {
+	type Genre,
+	type KImage,
+	Show,
+	type Studio,
+	type WatchStatusV,
+} from "~/models";
 import {
 	A,
 	Chip,
@@ -159,7 +165,7 @@ export const TitleLine = ({
 	runtime,
 	poster,
 	trailerUrl,
-	// studio,
+	studios,
 	watchStatus,
 	...props
 }: {
@@ -173,7 +179,7 @@ export const TitleLine = ({
 	runtime: number | null;
 	poster: KImage | null;
 	trailerUrl: string | null;
-	// studio: Studio;
+	studios: Studio[] | null;
 	watchStatus: WatchStatusV | null;
 } & Stylable) => {
 	const { css, theme } = useYoshiki();
@@ -331,57 +337,56 @@ export const TitleLine = ({
 					</View>
 				</View>
 			</View>
-			{/* <View */}
-			{/* 	{...css([ */}
-			{/* 		{ */}
-			{/* 			paddingTop: { xs: ts(3), sm: ts(8) }, */}
-			{/* 			alignSelf: { xs: "flex-start", md: "flex-end" }, */}
-			{/* 			justifyContent: "flex-end", */}
-			{/* 			flexDirection: "column", */}
-			{/* 		}, */}
-			{/* 		md({ */}
-			{/* 			position: "absolute", */}
-			{/* 			top: 0, */}
-			{/* 			bottom: 0, */}
-			{/* 			right: 0, */}
-			{/* 			width: percent(25), */}
-			{/* 			height: percent(100), */}
-			{/* 			paddingRight: ts(3), */}
-			{/* 		}) as any, */}
-			{/* 	])} */}
-			{/* > */}
-			{/* 	{studio && ( */}
-			{/* 		<P */}
-			{/* 			{...css({ */}
-			{/* 				color: (theme: Theme) => theme.user.paragraph, */}
-			{/* 				display: "flex", */}
-			{/* 			})} */}
-			{/* 		> */}
-			{/* 			{t("show.studio")}:{" "} */}
-			{/* 			<A */}
-			{/* 				href={`/studio/${studio.slug}`} */}
-			{/* 				{...css({ color: (theme) => theme.user.link })} */}
-			{/* 			> */}
-			{/* 				{studio.name} */}
-			{/* 			</A> */}
-			{/* 		</P> */}
-			{/* 	)} */}
-			{/* </View> */}
+			<View
+				{...css([
+					{
+						paddingTop: { xs: ts(3), sm: ts(8) },
+						alignSelf: { xs: "flex-start", md: "flex-end" },
+						justifyContent: "flex-end",
+						flexDirection: "column",
+					},
+					md({
+						position: "absolute",
+						top: 0,
+						bottom: 0,
+						right: 0,
+						width: percent(25),
+						height: percent(100),
+						paddingRight: ts(3),
+					}) as any,
+				])}
+			>
+				{studios?.map((x) => (
+					<P
+						key={x.slug}
+						{...css({
+							color: (theme: Theme) => theme.user.paragraph,
+							display: "flex",
+						})}
+					>
+						{t("show.studio")}:{" "}
+						<A
+							href={`/studio/${x.slug}`}
+							{...css({ color: (theme) => theme.user.link })}
+						>
+							{x.name}
+						</A>
+					</P>
+				))}
+			</View>
 		</Container>
 	);
 };
 
 const Description = ({
-	isLoading,
-	overview,
+	description,
 	tags,
 	genres,
 	...props
 }: {
-	isLoading: boolean;
-	overview?: string | null;
-	tags?: string[];
-	genres?: Genre[];
+	description: string | null;
+	tags: string[];
+	genres: Genre[];
 } & Stylable) => {
 	const { t } = useTranslation();
 	const { css } = useYoshiki();
@@ -401,16 +406,12 @@ const Description = ({
 				})}
 			>
 				{t("show.genre")}:{" "}
-				{(isLoading ? [...Array<Genre>(3)] : genres!).map((genre, i) => (
-					<Fragment key={genre ?? i.toString()}>
-						<P {...css({ m: 0 })}>{i !== 0 && ", "}</P>
-						{isLoading ? (
-							<Skeleton {...css({ width: rem(5) })} />
-						) : (
-							<A href={`/genres/${genre.toLowerCase()}`}>
-								{t(`genres.${genre}`)}
-							</A>
-						)}
+				{genres.map((genre, i) => (
+					<Fragment key={genre}>
+						<P {...(css({ m: 0 }) as any)}>{i !== 0 && ", "}</P>
+						<A href={`/genres/${genre.toLowerCase()}`}>
+							{t(`genres.${genre}`)}
+						</A>
 					</Fragment>
 				))}
 			</P>
@@ -423,13 +424,9 @@ const Description = ({
 					paddingTop: ts(4),
 				})}
 			>
-				<Skeleton lines={4}>
-					{isLoading || (
-						<P {...css({ textAlign: "justify" })}>
-							{overview ?? t("show.noOverview")}
-						</P>
-					)}
-				</Skeleton>
+				<P {...css({ textAlign: "justify" })}>
+					{description ?? t("show.noOverview")}
+				</P>
 				<View
 					{...css({
 						flexWrap: "wrap",
@@ -439,9 +436,9 @@ const Description = ({
 					})}
 				>
 					<P {...css({ marginRight: ts(0.5) })}>{t("show.tags")}:</P>
-					{(isLoading ? [...Array<string>(3)] : tags!).map((tag, i) => (
+					{tags.map((tag) => (
 						<Chip
-							key={tag ?? i}
+							key={tag}
 							label={tag && capitalize(tag)}
 							href={`/search?q=${tag}`}
 							size="small"
@@ -461,17 +458,13 @@ const Description = ({
 				})}
 			>
 				<H2>{t("show.genre")}</H2>
-				{isLoading || genres?.length ? (
+				{genres.length ? (
 					<UL>
-						{(isLoading ? [...Array<Genre>(3)] : genres!).map((genre, i) => (
-							<LI key={genre ?? i}>
-								{isLoading ? (
-									<Skeleton {...css({ marginBottom: 0 })} />
-								) : (
-									<A href={`/genres/${genre.toLowerCase()}`}>
-										{t(`genres.${genre}`)}
-									</A>
-								)}
+						{genres.map((genre) => (
+							<LI key={genre}>
+								<A href={`/genres/${genre.toLowerCase()}`}>
+									{t(`genres.${genre}`)}
+								</A>
 							</LI>
 						))}
 					</UL>
@@ -530,7 +523,7 @@ export const Header = ({
 							rating={data.rating}
 							runtime={data.kind === "movie" ? data.runtime : null}
 							poster={data.poster}
-							// studio={data.studio}
+							studios={data.kind !== "collection" ? data.studios : null}
 							playHref={data.kind !== "collection" ? data.playHref : null}
 							trailerUrl={data.kind !== "collection" ? data.trailerUrl : null}
 							watchStatus={
@@ -546,41 +539,37 @@ export const Header = ({
 							})}
 						/>
 					</GradientImageBackground>
-					{/* <Description */}
-					{/* 	isLoading={isLoading} */}
-					{/* 	overview={data?.overview} */}
-					{/* 	genres={data?.genres} */}
-					{/* 	tags={data?.tags} */}
-					{/* 	{...css({ paddingTop: { xs: 0, md: ts(2) } })} */}
-					{/* /> */}
-					{/* <Container */}
-					{/* 	{...css({ */}
-					{/* 		flexWrap: "wrap", */}
-					{/* 		flexDirection: "row", */}
-					{/* 		alignItems: "center", */}
-					{/* 		marginTop: ts(0.5), */}
-					{/* 	})} */}
-					{/* > */}
-					{/* 	<P {...css({ marginRight: ts(0.5), textAlign: "center" })}> */}
-					{/* 		{t("show.links")}: */}
-					{/* 	</P> */}
-					{/* 	{(!isLoading */}
-					{/* 		? Object.entries(data.externalId!).filter( */}
-					{/* 				([_, data]) => data.link, */}
-					{/* 			) */}
-					{/* 		: [...Array(3)].map((_) => [undefined, undefined] as const) */}
-					{/* 	).map(([name, data], i) => ( */}
-					{/* 		<Chip */}
-					{/* 			key={name ?? i} */}
-					{/* 			label={name} */}
-					{/* 			href={data?.link || undefined} */}
-					{/* 			target="_blank" */}
-					{/* 			size="small" */}
-					{/* 			outline */}
-					{/* 			{...css({ m: ts(0.5) })} */}
-					{/* 		/> */}
-					{/* 	))} */}
-					{/* </Container> */}
+					<Description
+						description={data?.description}
+						genres={data?.genres}
+						tags={data?.tags}
+						{...css({ paddingTop: { xs: 0, md: ts(2) } })}
+					/>
+					<Container
+						{...css({
+							flexWrap: "wrap",
+							flexDirection: "row",
+							alignItems: "center",
+							marginTop: ts(0.5),
+						})}
+					>
+						<P {...css({ marginRight: ts(0.5), textAlign: "center" })}>
+							{t("show.links")}:
+						</P>
+						{Object.entries(data.externalId!)
+							.filter(([_, data]) => data.link)
+							.map(([name, data]) => (
+								<Chip
+									key={name}
+									label={name}
+									href={data.link}
+									target="_blank"
+									size="small"
+									outline
+									{...css({ m: ts(0.5) })}
+								/>
+							))}
+					</Container>
 					{/* {type === "show" && ( */}
 					{/* 	<ShowWatchStatusCard {...(data?.watchStatus as any)} /> */}
 					{/* )} */}
