@@ -109,6 +109,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(context: {
 			" Parse error: ",
 			parsed.error,
 		);
+		console.log(parsed.error.issues);
 		throw {
 			status: "parse",
 			message:

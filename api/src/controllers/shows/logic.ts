@@ -121,7 +121,7 @@ const showRelations = {
 			.as("translations");
 	},
 	studios: ({ languages }: { languages: string[] }) => {
-		const { pk: _, ...studioCol } = getColumns(studios);
+		const { pk: _, createdAt, updatedAt, ...studioCol } = getColumns(studios);
 		const studioTransQ = db
 			.selectDistinctOn([studioTranslations.pk])
 			.from(studioTranslations)
@@ -135,7 +135,14 @@ const showRelations = {
 		return db
 			.select({
 				json: coalesce(
-					jsonbAgg(jsonbBuildObject<Studio>({ ...studioTrans, ...studioCol })),
+					jsonbAgg(
+						jsonbBuildObject<Studio>({
+							...studioTrans,
+							...studioCol,
+							createdAt: sql`to_char(${createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+							updatedAt: sql`to_char(${updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+						}),
+					),
 					sql`'[]'::jsonb`,
 				).as("json"),
 			})
