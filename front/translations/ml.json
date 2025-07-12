@@ -51,8 +51,8 @@
 		},
 		"mediatype-tt": "മീഡിയ തരം",
 		"mediatypelabel": "മീഡിയ തരം",
-		"sortby": "{{കീ}} പ്രകാരം അടുക്കുക",
-		"sortby-tt": "",
+		"sortby": "{{key}} പ്രകാരം അടുക്കുക",
+		"sortby-tt": "ഇങ്ങനെ അടുക്കുക",
 		"sortkey": {
 			"relevance": "",
 			"name": "",
