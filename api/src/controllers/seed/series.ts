@@ -122,7 +122,15 @@ export const seedSerie = async (
 	);
 	if ("status" in show) return show;
 
-	const retSeasons = await insertSeasons(show, seasons);
+	const retSeasons = await insertSeasons(
+		show,
+		seasons.map((s) => ({
+			...s,
+			entriesCount: entries.filter(
+				(x) => x.kind === "episode" && x.seasonNumber === s.seasonNumber,
+			).length,
+		})),
+	);
 	const retEntries = await insertEntries(show, entries);
 	const retExtras = await insertEntries(
 		show,

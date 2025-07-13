@@ -24,6 +24,8 @@ const seasonFilters: FilterDef = {
 	seasonNumber: { column: seasons.seasonNumber, type: "int" },
 	startAir: { column: seasons.startAir, type: "date" },
 	endAir: { column: seasons.endAir, type: "date" },
+	entriesCount: { column: seasons.entriesCount, type: "int" },
+	availableCount: { column: seasons.availableCount, type: "int" },
 };
 
 const seasonSort = Sort(
@@ -31,6 +33,8 @@ const seasonSort = Sort(
 		seasonNumber: seasons.seasonNumber,
 		startAir: seasons.startAir,
 		endAir: seasons.endAir,
+		entriesCount: seasons.entriesCount,
+		availableCount: seasons.availableCount,
 		nextRefresh: seasons.nextRefresh,
 	},
 	{
