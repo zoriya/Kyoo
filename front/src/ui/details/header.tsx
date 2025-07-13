@@ -1,9 +1,11 @@
 import Refresh from "@material-symbols/svg-400/rounded/autorenew.svg";
+import BookmarkAdd from "@material-symbols/svg-400/rounded/bookmark_add.svg";
 import Download from "@material-symbols/svg-400/rounded/download.svg";
 import MoreHoriz from "@material-symbols/svg-400/rounded/more_horiz.svg";
 import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg";
+import { LinearGradient } from "expo-linear-gradient";
 import { Stack } from "expo-router";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
@@ -379,6 +381,117 @@ export const TitleLine = ({
 	);
 };
 
+TitleLine.Loader = ({
+	kind,
+	...props
+}: {
+	kind: "serie" | "movie" | "collection";
+}) => {
+	const { css, theme } = useYoshiki();
+
+	return (
+		<Container
+			{...css(
+				{
+					flexDirection: { xs: "column", md: "row" },
+				},
+				props,
+			)}
+		>
+			<View
+				{...css({
+					flexDirection: { xs: "column", sm: "row" },
+					alignItems: { xs: "center", sm: "flex-start" },
+					flexGrow: 1,
+					maxWidth: percent(100),
+				})}
+			>
+				<Poster.Loader
+					layout={{
+						width: { xs: percent(50), md: percent(25) },
+					}}
+					{...(css({
+						maxWidth: {
+							xs: px(175),
+							sm: Platform.OS === "web" ? ("unset" as any) : 99999999,
+						},
+						flexShrink: 0,
+					}) as { style: ImageStyle })}
+				/>
+				<View
+					{...css({
+						alignSelf: { xs: "center", sm: "flex-end", md: "center" },
+						alignItems: { xs: "center", sm: "flex-start" },
+						paddingLeft: { sm: em(2.5) },
+						flexShrink: 1,
+						flexGrow: 1,
+					})}
+				>
+					<Skeleton
+						variant="header"
+						{...css({ width: rem(15), height: rem(2.5), marginBottom: rem(1) })}
+					/>
+					<Skeleton
+						{...css({
+							width: rem(5),
+							height: rem(1.5),
+							marginBottom: rem(0.5),
+						})}
+					/>
+					<View
+						{...css({
+							flexDirection: "row",
+							alignItems: "center",
+							flexWrap: "wrap",
+							justifyContent: "center",
+						})}
+					>
+						<IconFab
+							icon={PlayArrow}
+							color={{ xs: theme.user.colors.black, md: theme.colors.black }}
+							{...css({
+								bg: theme.user.accent,
+								fover: { self: { bg: theme.user.accent } },
+							})}
+						/>
+						<IconButton
+							icon={Theaters}
+							color={{ xs: theme.user.contrast, md: theme.colors.white }}
+						/>
+						{kind !== "collection" && (
+							<IconButton
+								icon={BookmarkAdd}
+								color={{ xs: theme.user.contrast, md: theme.colors.white }}
+							/>
+						)}
+						{kind === "movie" && <IconButton icon={MoreHoriz} />}
+						<DottedSeparator
+							{...css({
+								color: {
+									xs: theme.user.contrast,
+									md: theme.colors.white,
+								},
+							})}
+						/>
+						<Rating.Loader
+							color={{ xs: theme.user.contrast, md: theme.colors.white }}
+						/>
+						<DottedSeparator
+							{...css({
+								color: {
+									xs: theme.user.contrast,
+									md: theme.colors.white,
+								},
+							})}
+						/>
+						<Skeleton {...css({ width: rem(3) })} />
+					</View>
+				</View>
+			</View>
+		</Container>
+	);
+};
+
 const Description = ({
 	description,
 	tags,
@@ -436,7 +549,7 @@ const Description = ({
 						marginTop: ts(0.5),
 					})}
 				>
-					<P {...css({ marginRight: ts(0.5) })}>{t("show.tags")}:</P>
+					<P {...(css({ marginRight: ts(0.5) }) as any)}>{t("show.tags")}:</P>
 					{tags.map((tag) => (
 						<Chip
 							key={tag}
@@ -477,6 +590,79 @@ const Description = ({
 	);
 };
 
+Description.Loader = ({ ...props }: object) => {
+	const { t } = useTranslation();
+	const { css } = useYoshiki();
+
+	return (
+		<Container
+			{...css(
+				{ paddingBottom: ts(1), flexDirection: { xs: "column", sm: "row" } },
+				props,
+			)}
+		>
+			<P
+				{...css({
+					display: { xs: "flex", sm: "none" },
+					flexWrap: "wrap",
+					color: (theme: Theme) => theme.user.paragraph,
+				})}
+			>
+				{t("show.genre")}:{" "}
+				{[...Array<Genre>(3)].map((_, i) => (
+					<Fragment key={i.toString()}>
+						<P {...(css({ m: 0 }) as any)}>{i !== 0 && ", "}</P>
+						<Skeleton {...css({ width: rem(5) })} />
+					</Fragment>
+				))}
+			</P>
+
+			<View
+				{...css({
+					flexDirection: "column",
+					flexGrow: 1,
+					flexBasis: { sm: 0 },
+					paddingTop: ts(4),
+				})}
+			>
+				<Skeleton lines={4} />
+				<View
+					{...css({
+						flexWrap: "wrap",
+						flexDirection: "row",
+						alignItems: "center",
+						marginTop: ts(0.5),
+					})}
+				>
+					<P {...(css({ marginRight: ts(0.5) }) as any)}>{t("show.tags")}:</P>
+					{[...Array<string>(3)].map((_, i) => (
+						<Chip.Loader key={i} size="small" {...css({ m: ts(0.5) })} />
+					))}
+				</View>
+			</View>
+			<HR
+				orientation="vertical"
+				{...css({ marginX: ts(2), display: { xs: "none", sm: "flex" } })}
+			/>
+			<View
+				{...css({
+					flexBasis: percent(25),
+					display: { xs: "none", sm: "flex" },
+				})}
+			>
+				<H2>{t("show.genre")}</H2>
+				<UL>
+					{[...Array<Genre>(3)].map((_, i) => (
+						<LI key={i}>
+							<Skeleton {...css({ marginBottom: 0 })} />
+						</LI>
+					))}
+				</UL>
+			</View>
+		</Container>
+	);
+};
+
 export const Header = ({
 	kind,
 	slug,
@@ -484,7 +670,7 @@ export const Header = ({
 	kind: "movie" | "serie";
 	slug: string;
 }) => {
-	const { css } = useYoshiki();
+	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 
 	return (
@@ -497,9 +683,8 @@ export const Header = ({
 			/>
 			<Fetch
 				query={Header.query(kind, slug)}
-				Loader={() => <p>loading</p>}
 				Render={(data) => (
-					<>
+					<View {...css({ flex: 1 })}>
 						<Head
 							title={data.name}
 							description={data.description}
@@ -519,6 +704,10 @@ export const Header = ({
 								},
 							}}
 							{...(css({
+								position: "absolute",
+								top: 0,
+								left: 0,
+								right: 0,
 								minHeight: {
 									xs: px(350),
 									sm: px(300),
@@ -526,66 +715,105 @@ export const Header = ({
 									lg: px(600),
 								},
 							}) as any)}
+						/>
+						<TitleLine
+							kind={kind}
+							slug={slug}
+							name={data.name}
+							tagline={data.tagline}
+							date={getDisplayDate(data)}
+							rating={data.rating}
+							runtime={data.kind === "movie" ? data.runtime : null}
+							poster={data.poster}
+							studios={data.kind !== "collection" ? data.studios! : null}
+							playHref={data.kind !== "collection" ? data.playHref : null}
+							trailerUrl={data.kind !== "collection" ? data.trailerUrl : null}
+							watchStatus={
+								data.kind !== "collection" ? data.watchStatus?.status! : null
+							}
+							{...css({
+								marginTop: {
+									xs: max(vh(20), px(200)),
+									sm: vh(45),
+									md: max(vh(30), px(150)),
+									lg: max(vh(35), px(200)),
+								},
+							})}
+						/>
+						<Description
+							description={data?.description}
+							genres={data?.genres}
+							tags={data?.tags}
+							{...css({ paddingTop: { xs: 0, md: ts(2) } })}
+						/>
+						<Container
+							{...css({
+								flexWrap: "wrap",
+								flexDirection: "row",
+								alignItems: "center",
+								marginTop: ts(0.5),
+							})}
 						>
-							<TitleLine
-								kind={kind}
-								slug={slug}
-								name={data.name}
-								tagline={data.tagline}
-								date={getDisplayDate(data)}
-								rating={data.rating}
-								runtime={data.kind === "movie" ? data.runtime : null}
-								poster={data.poster}
-								studios={data.kind !== "collection" ? data.studios! : null}
-								playHref={data.kind !== "collection" ? data.playHref : null}
-								trailerUrl={data.kind !== "collection" ? data.trailerUrl : null}
-								watchStatus={
-									data.kind !== "collection" ? data.watchStatus?.status! : null
-								}
-								{...css({
-									marginTop: {
-										xs: max(vh(20), px(200)),
-										sm: vh(45),
-										md: max(vh(30), px(150)),
-										lg: max(vh(35), px(200)),
-									},
-								})}
-							/>
-							<Description
-								description={data?.description}
-								genres={data?.genres}
-								tags={data?.tags}
-								{...css({ paddingTop: { xs: 0, md: ts(2) } })}
-							/>
-							<Container
-								{...css({
-									flexWrap: "wrap",
-									flexDirection: "row",
-									alignItems: "center",
-									marginTop: ts(0.5),
-								})}
-							>
-								<P {...css({ marginRight: ts(0.5), textAlign: "center" })}>
-									{t("show.links")}:
-								</P>
-								{Object.entries(data.externalId!)
-									.filter(([_, data]) => data.link)
-									.map(([name, data]) => (
-										<Chip
-											key={name}
-											label={name}
-											href={data.link}
-											target="_blank"
-											size="small"
-											outline
-											{...css({ m: ts(0.5) })}
-										/>
-									))}
-							</Container>
-						</GradientImageBackground>
+							<P {...css({ marginRight: ts(0.5), textAlign: "center" })}>
+								{t("show.links")}:
+							</P>
+							{Object.entries(data.externalId!)
+								.filter(([_, data]) => data.link)
+								.map(([name, data]) => (
+									<Chip
+										key={name}
+										label={name}
+										href={data.link}
+										target="_blank"
+										size="small"
+										outline
+										{...css({ m: ts(0.5) })}
+									/>
+								))}
+						</Container>
 						{/* {type === "show" && ( */}
 						{/* 	<ShowWatchStatusCard {...(data?.watchStatus as any)} /> */}
 						{/* )} */}
+					</View>
+				)}
+				Loader={() => (
+					<>
+						<LinearGradient
+							start={{ x: 0, y: 0.25 }}
+							end={{ x: 0, y: 1 }}
+							colors={["transparent", theme.darkOverlay]}
+							{...(css({
+								width: percent(100),
+								height: {
+									xs: vh(40),
+									sm: min(vh(60), px(750)),
+									md: min(vh(60), px(680)),
+									lg: vh(65),
+								},
+								minHeight: {
+									xs: px(350),
+									sm: px(300),
+									md: px(400),
+									lg: px(600),
+								},
+								position: "absolute",
+								top: 0,
+								left: 0,
+								right: 0,
+							}) as any)}
+						/>
+						<TitleLine.Loader
+							kind={kind}
+							{...css({
+								marginTop: {
+									xs: max(vh(20), px(200)),
+									sm: vh(45),
+									md: max(vh(30), px(150)),
+									lg: max(vh(35), px(200)),
+								},
+							})}
+						/>
+						<Description.Loader />
 					</>
 				)}
 			/>

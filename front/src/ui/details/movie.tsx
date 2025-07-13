@@ -10,21 +10,8 @@ export const MovieDetails = () => {
 	const { css } = useYoshiki();
 
 	return (
-		<ScrollView
-			//{...css(
-			//	Platform.OS === "web" && {
-			//		// @ts-ignore Web only property
-			//		overflow: "auto" as any,
-			//		// @ts-ignore Web only property
-			//		overflowX: "hidden",
-			//		// @ts-ignore Web only property
-			//		overflowY: "overlay",
-			//	},
-			//)}
-		>
+		<ScrollView>
 			<Header kind="movie" slug={slug} />
-			{/* <DetailsCollections type="movie" slug={slug} /> */}
-			{/* <Staff slug={slug} /> */}
 		</ScrollView>
 	);
 };

@@ -9,7 +9,7 @@ import { useSetError } from "./error-provider";
 import { useStoreValue } from "./settings";
 
 export const AccountProvider = ({ children }: { children: ReactNode }) => {
-	const [setError, clearError] = useSetError("account");
+	const [setError, clearError] = useSetError("connection");
 	const accounts = useStoreValue("accounts", z.array(Account)) ?? [];
 
 	const ret = useMemo(() => {
