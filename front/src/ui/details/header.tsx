@@ -515,7 +515,7 @@ export const Header = ({
 									xs: vh(40),
 									sm: min(vh(60), px(750)),
 									md: min(vh(60), px(680)),
-									lg: vh(70),
+									lg: vh(65),
 								},
 							}}
 							{...(css({
@@ -536,7 +536,7 @@ export const Header = ({
 								rating={data.rating}
 								runtime={data.kind === "movie" ? data.runtime : null}
 								poster={data.poster}
-								studios={data.kind !== "collection" ? data.studios : null}
+								studios={data.kind !== "collection" ? data.studios! : null}
 								playHref={data.kind !== "collection" ? data.playHref : null}
 								trailerUrl={data.kind !== "collection" ? data.trailerUrl : null}
 								watchStatus={
@@ -551,38 +551,38 @@ export const Header = ({
 									},
 								})}
 							/>
+							<Description
+								description={data?.description}
+								genres={data?.genres}
+								tags={data?.tags}
+								{...css({ paddingTop: { xs: 0, md: ts(2) } })}
+							/>
+							<Container
+								{...css({
+									flexWrap: "wrap",
+									flexDirection: "row",
+									alignItems: "center",
+									marginTop: ts(0.5),
+								})}
+							>
+								<P {...css({ marginRight: ts(0.5), textAlign: "center" })}>
+									{t("show.links")}:
+								</P>
+								{Object.entries(data.externalId!)
+									.filter(([_, data]) => data.link)
+									.map(([name, data]) => (
+										<Chip
+											key={name}
+											label={name}
+											href={data.link}
+											target="_blank"
+											size="small"
+											outline
+											{...css({ m: ts(0.5) })}
+										/>
+									))}
+							</Container>
 						</GradientImageBackground>
-						<Description
-							description={data?.description}
-							genres={data?.genres}
-							tags={data?.tags}
-							{...css({ paddingTop: { xs: 0, md: ts(2) } })}
-						/>
-						<Container
-							{...css({
-								flexWrap: "wrap",
-								flexDirection: "row",
-								alignItems: "center",
-								marginTop: ts(0.5),
-							})}
-						>
-							<P {...css({ marginRight: ts(0.5), textAlign: "center" })}>
-								{t("show.links")}:
-							</P>
-							{Object.entries(data.externalId!)
-								.filter(([_, data]) => data.link)
-								.map(([name, data]) => (
-									<Chip
-										key={name}
-										label={name}
-										href={data.link}
-										target="_blank"
-										size="small"
-										outline
-										{...css({ m: ts(0.5) })}
-									/>
-								))}
-						</Container>
 						{/* {type === "show" && ( */}
 						{/* 	<ShowWatchStatusCard {...(data?.watchStatus as any)} /> */}
 						{/* )} */}
