@@ -32,6 +32,15 @@ export const Season = t.Composite([
 	SeasonTranslation,
 	BaseSeason,
 	DbMetadata,
+	t.Object({
+		entriesCount: t.Integer({
+			description: "The number of episodes in this season",
+		}),
+
+		availableCount: t.Integer({
+			description: "The number of episodes that can be played right away",
+		}),
+	}),
 ]);
 export type Season = Prettify<typeof Season.static>;
 

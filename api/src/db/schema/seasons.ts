@@ -40,6 +40,9 @@ export const seasons = schema.table(
 		startAir: date(),
 		endAir: date(),
 
+		entriesCount: integer().notNull(),
+		availableCount: integer().notNull().default(0),
+
 		externalId: season_extid(),
 
 		createdAt: timestamp({ withTimezone: true, mode: "iso" })

@@ -9,7 +9,13 @@ import {
 	sql,
 } from "drizzle-orm";
 import { db, type Transaction } from "~/db";
-import { entries, entryVideoJoin, shows, showTranslations } from "~/db/schema";
+import {
+	entries,
+	entryVideoJoin,
+	seasons,
+	shows,
+	showTranslations,
+} from "~/db/schema";
 import { conflictUpdateAllExcept, sqlarr } from "~/db/utils";
 import type { SeedCollection } from "~/models/collections";
 import type { SeedMovie } from "~/models/movie";
@@ -151,7 +157,7 @@ export async function updateAvailableCount(
 	updateEntryCount = false,
 ) {
 	const showPkQ = Array.isArray(showPks) ? sqlarr(showPks) : showPks;
-	return await tx
+	await tx
 		.update(shows)
 		.set({
 			availableCount: sql`${db
@@ -179,6 +185,35 @@ export async function updateAvailableCount(
 			}),
 		})
 		.where(eq(shows.pk, sql`any(${showPkQ})`));
+	await tx
+		.update(seasons)
+		.set({
+			availableCount: sql`${db
+				.select({ count: count() })
+				.from(entries)
+				.where(
+					and(
+						eq(entries.showPk, seasons.showPk),
+						eq(entries.seasonNumber, seasons.seasonNumber),
+						ne(entries.kind, "extra"),
+						exists(
+							db
+								.select()
+								.from(entryVideoJoin)
+								.where(eq(entryVideoJoin.entryPk, entries.pk)),
+						),
+					),
+				)}`,
+			...(updateEntryCount && {
+				entriesCount: sql`${db
+					.select({ count: count() })
+					.from(entries)
+					.where(
+						and(eq(entries.showPk, seasons.showPk), ne(entries.kind, "extra")),
+					)}`,
+			}),
+		})
+		.where(eq(seasons.showPk, sql`any(${showPkQ})`));
 }
 
 export async function updateAvailableSince(
