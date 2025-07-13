@@ -238,7 +238,9 @@
 		"size": "Größe",
 		"novideo": "Kein Video",
 		"nocontainer": "Unzulässiger Container",
-		"external": "Extern"
+		"external": "Extern",
+		"hearing-impaired": "CC",
+		"unknown": "Unbekannt"
 	},
 	"admin": {
 		"users": {

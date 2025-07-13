@@ -12,12 +12,12 @@ dependencies:
 - condition: meilisearch.enabled
   name: meilisearch
   repository: https://meilisearch.github.io/meilisearch-kubernetes
-  version: 0.13.0
+  version: 0.14.0
 - condition: postgresql.enabled
   name: postgresql
   repository: https://charts.bitnami.com/bitnami
-  version: 16.7.5
+  version: 16.7.11
 - condition: rabbitmq.enabled
   name: rabbitmq
   repository: https://charts.bitnami.com/bitnami
-  version: 16.0.3
+  version: 16.0.7
