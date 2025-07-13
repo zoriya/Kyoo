@@ -45,14 +45,14 @@
 	"browse": {
 		"mediatypekey": {
 			"all": "",
-			"movie": "",
-			"show": "",
-			"collection": ""
+			"movie": "സിനിമകൾ",
+			"show": "സീരിയൽ",
+			"collection": "ശേഖരം"
 		},
-		"mediatype-tt": "",
-		"mediatypelabel": "",
-		"sortby": "",
-		"sortby-tt": "",
+		"mediatype-tt": "മീഡിയ തരം",
+		"mediatypelabel": "മീഡിയ തരം",
+		"sortby": "{{key}} പ്രകാരം അടുക്കുക",
+		"sortby-tt": "ഇങ്ങനെ അടുക്കുക",
 		"sortkey": {
 			"relevance": "",
 			"name": "",
