@@ -1,38 +1,22 @@
-/*
- * Kyoo - A portable and vast media library solution.
- * Copyright (c) Kyoo.
- *
- * See AUTHORS.md and LICENSE file in the project root for full license information.
- *
- * Kyoo is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Kyoo is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
- */
-
-import {
-	type Episode,
-	EpisodeP,
-	type QueryIdentifier,
-	type Season,
-	SeasonP,
-	useInfiniteFetch,
-} from "@kyoo/models";
-import { H2, HR, IconButton, Menu, P, Skeleton, tooltip, ts, usePageStyle } from "@kyoo/primitives";
 import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
 import type { ComponentType } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { rem, useYoshiki } from "yoshiki/native";
-import { InfiniteFetch } from "../fetch-infinite";
+import { type Episode, type Season, useInfiniteFetch } from "~/models";
+import {
+	H2,
+	HR,
+	IconButton,
+	Menu,
+	P,
+	Skeleton,
+	tooltip,
+	ts,
+	usePageStyle,
+} from "~/primitives";
+import type { QueryIdentifier } from "~/query";
+import { InfiniteFetch } from "~/query/fetch-infinite";
 import { EpisodeLine, episodeDisplayNumber } from "./episode";
 
 type SeasonProcessed = Season & { href: string };
@@ -63,10 +47,21 @@ export const SeasonHeader = ({
 				>
 					{seasonNumber}
 				</P>
-				<H2 {...css({ marginX: ts(1), fontSize: rem(1.5), flexGrow: 1, flexShrink: 1 })}>
+				<H2
+					{...css({
+						marginX: ts(1),
+						fontSize: rem(1.5),
+						flexGrow: 1,
+						flexShrink: 1,
+					})}
+				>
 					{name ?? t("show.season", { number: seasonNumber })}
 				</H2>
-				<Menu Trigger={IconButton} icon={MenuIcon} {...tooltip(t("show.jumpToSeason"))}>
+				<Menu
+					Trigger={IconButton}
+					icon={MenuIcon}
+					{...tooltip(t("show.jumpToSeason"))}
+				>
 					{seasons
 						?.filter((x) => x.episodesCount > 0)
 						.map((x) => (
@@ -90,7 +85,13 @@ SeasonHeader.Loader = () => {
 
 	return (
 		<View>
-			<View {...css({ flexDirection: "row", marginX: ts(1), justifyContent: "space-between" })}>
+			<View
+				{...css({
+					flexDirection: "row",
+					marginX: ts(1),
+					justifyContent: "space-between",
+				})}
+			>
 				<View {...css({ flexDirection: "row", alignItems: "center" })}>
 					<Skeleton
 						variant="custom"
@@ -101,7 +102,9 @@ SeasonHeader.Loader = () => {
 							height: rem(1.5),
 						})}
 					/>
-					<Skeleton {...css({ marginX: ts(1), width: rem(12), height: rem(2) })} />
+					<Skeleton
+						{...css({ marginX: ts(1), width: rem(12), height: rem(2) })}
+					/>
 				</View>
 				<IconButton icon={MenuIcon} disabled />
 			</View>
@@ -110,18 +113,20 @@ SeasonHeader.Loader = () => {
 	);
 };
 
-SeasonHeader.query = (slug: string): QueryIdentifier<Season, SeasonProcessed> => ({
-	parser: SeasonP,
-	path: ["show", slug, "seasons"],
+SeasonHeader.query = (slug: string): QueryIdentifier<Season> => ({
+	parser: Season,
+	path: ["series", slug, "seasons"],
 	params: {
 		// Fetch all seasons at one, there won't be hundred of thems anyways.
 		limit: 0,
-		fields: ["episodesCount"],
 	},
 	infinite: {
 		value: true,
 		map: (seasons) =>
-			seasons.map((x) => ({ ...x, href: `/show/${slug}?season=${x.seasonNumber}` })),
+			seasons.map((x) => ({
+				...x,
+				href: `/show/${slug}?season=${x.seasonNumber}`,
+			})),
 	},
 });
 
@@ -150,7 +155,9 @@ export const EpisodeList = <Props,>({
 			divider
 			Header={Header}
 			headerProps={headerProps}
-			getItemType={(item) => (!item || item.firstOfSeason ? "withHeader" : "normal")}
+			getItemType={(item) =>
+				!item || item.firstOfSeason ? "withHeader" : "normal"
+			}
 			contentContainerStyle={pageStyle}
 			placeholderCount={5}
 			Render={({ item }) => {
@@ -161,7 +168,11 @@ export const EpisodeList = <Props,>({
 					<>
 						{item.firstOfSeason &&
 							(sea ? (
-								<SeasonHeader name={sea.name} seasonNumber={sea.seasonNumber} seasons={seasons} />
+								<SeasonHeader
+									name={sea.name}
+									seasonNumber={sea.seasonNumber}
+									seasons={seasons}
+								/>
 							) : (
 								<SeasonHeader.Loader />
 							))}
