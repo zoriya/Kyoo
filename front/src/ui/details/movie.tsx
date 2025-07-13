@@ -1,16 +1,14 @@
-import { Platform, ScrollView } from "react-native";
-import { useYoshiki } from "yoshiki/native";
-import { Movie } from "~/models";
-import type { QueryIdentifier } from "~/query";
+import { ScrollView } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQueryState } from "~/utils";
 import { Header } from "./header";
 
 export const MovieDetails = () => {
 	const [slug] = useQueryState("slug", undefined!);
-	const { css } = useYoshiki();
+	const insets = useSafeAreaInsets();
 
 	return (
-		<ScrollView>
+		<ScrollView contentContainerStyle={{ paddingBottom: insets.bottom }}>
 			<Header kind="movie" slug={slug} />
 		</ScrollView>
 	);
