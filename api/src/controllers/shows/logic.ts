@@ -1,4 +1,4 @@
-import { and, eq, exists, gt, ne, type SQL, sql } from "drizzle-orm";
+import { and, eq, exists, ne, type SQL, sql } from "drizzle-orm";
 import { db } from "~/db";
 import {
 	entries,

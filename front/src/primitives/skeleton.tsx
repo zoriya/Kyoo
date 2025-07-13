@@ -32,7 +32,10 @@ export const Skeleton = ({
 	}));
 
 	useEffect(() => {
-		mult.value = withRepeat(withDelay(800, withTiming(1, { duration: 800 })), 0);
+		mult.value = withRepeat(
+			withDelay(800, withTiming(1, { duration: 800 })),
+			0,
+		);
 	});
 
 	return (

@@ -1,6 +1,5 @@
 import Refresh from "@material-symbols/svg-400/rounded/autorenew.svg";
 import BookmarkAdd from "@material-symbols/svg-400/rounded/bookmark_add.svg";
-import Download from "@material-symbols/svg-400/rounded/download.svg";
 import MoreHoriz from "@material-symbols/svg-400/rounded/more_horiz.svg";
 import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";

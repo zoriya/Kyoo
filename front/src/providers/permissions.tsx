@@ -1,5 +1,5 @@
-import { useFetch } from "~/query";
-import { useAccount } from "./account-context";
+// import { useFetch } from "~/query";
+// import { useAccount } from "./account-context";
 // import { ServerInfoP } from "~/models/resources/server-info";
 
 // export const useHasPermission = (perms?: string[]) => {

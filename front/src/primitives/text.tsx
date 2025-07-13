@@ -8,7 +8,13 @@ import {
 	P as EP,
 } from "@expo/html-elements";
 import type { ComponentProps, ComponentType } from "react";
-import { Platform, type StyleProp, Text, type TextProps, type TextStyle } from "react-native";
+import {
+	Platform,
+	type StyleProp,
+	Text,
+	type TextProps,
+	type TextStyle,
+} from "react-native";
 import { percent, rem, useYoshiki } from "yoshiki/native";
 import { ts } from "./utils/spacing";
 
@@ -55,7 +61,10 @@ const styleText = (
 	return Text;
 };
 
-export const H1 = styleText(EH1, "header", { fontSize: rem(3), fontWeight: "900" });
+export const H1 = styleText(EH1, "header", {
+	fontSize: rem(3),
+	fontWeight: "900",
+});
 export const H2 = styleText(EH2, "header", { fontSize: rem(2) });
 export const H3 = styleText(EH3, "header");
 export const H4 = styleText(EH4, "header");

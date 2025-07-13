@@ -37,7 +37,9 @@ export class Alert {
 		const denyButton = buttons
 			? buttons.find((button) => button.style === "destructive")
 			: undefined;
-		const cancelButton = buttons ? buttons.find((button) => button.style === "cancel") : undefined;
+		const cancelButton = buttons
+			? buttons.find((button) => button.style === "cancel")
+			: undefined;
 
 		Swal.fire({
 			title: title,

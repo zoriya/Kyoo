@@ -1,7 +1,6 @@
 import {
-	type BinaryOperator,
-	type SQL,
 	and,
+	type BinaryOperator,
 	eq,
 	gt,
 	gte,
@@ -10,6 +9,7 @@ import {
 	ne,
 	not,
 	or,
+	type SQL,
 	sql,
 } from "drizzle-orm";
 import { KErrorT } from "~/models/error";

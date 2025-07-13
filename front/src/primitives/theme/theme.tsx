@@ -1,7 +1,11 @@
 import type { Property } from "csstype";
 import type { ReactNode } from "react";
 import { Platform, type TextStyle } from "react-native";
-import { type Theme, ThemeProvider as WebThemeProvider, useAutomaticTheme } from "yoshiki";
+import {
+	type Theme,
+	useAutomaticTheme,
+	ThemeProvider as WebThemeProvider,
+} from "yoshiki";
 import "yoshiki";
 import { ThemeProvider, useTheme, useYoshiki } from "yoshiki/native";
 import "yoshiki/native";
@@ -52,7 +56,9 @@ declare module "yoshiki" {
 
 export type { Theme } from "yoshiki";
 export type ThemeBuilder = {
-	light: Omit<Mode, "contrast" | "mode" | "themeOverlay"> & { default: Variant };
+	light: Omit<Mode, "contrast" | "mode" | "themeOverlay"> & {
+		default: Variant;
+	};
 	dark: Omit<Mode, "contrast" | "mode" | "themeOverlay"> & { default: Variant };
 };
 
@@ -88,8 +94,13 @@ const selectMode = (
 		};
 	}
 
+	// biome-ignore lint/correctness/useHookAtTopLevel: const
 	const auto = useAutomaticTheme("theme", { light, dark });
-	const alternate = useAutomaticTheme("alternate", { dark: light, light: dark });
+	// biome-ignore lint/correctness/useHookAtTopLevel: const
+	const alternate = useAutomaticTheme("alternate", {
+		dark: light,
+		light: dark,
+	});
 	return {
 		...options,
 		...auto,
@@ -136,12 +147,20 @@ export const ThemeSelector = ({
 
 export type YoshikiFunc<T> = (props: ReturnType<typeof useYoshiki>) => T;
 
-const YoshikiProvider = ({ children }: { children: YoshikiFunc<ReactNode> }) => {
+const YoshikiProvider = ({
+	children,
+}: {
+	children: YoshikiFunc<ReactNode>;
+}) => {
 	const yoshiki = useYoshiki();
 	return <>{children(yoshiki)}</>;
 };
 
-export const SwitchVariant = ({ children }: { children: ReactNode | YoshikiFunc<ReactNode> }) => {
+export const SwitchVariant = ({
+	children,
+}: {
+	children: ReactNode | YoshikiFunc<ReactNode>;
+}) => {
 	const theme = useTheme();
 
 	return (

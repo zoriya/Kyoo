@@ -4,9 +4,7 @@ import {
 	type TSchema,
 	type TString,
 } from "@sinclair/typebox";
-import { type Column, eq, sql, type Table } from "drizzle-orm";
 import { t } from "elysia";
-import { sqlarr } from "~/db/utils";
 import { comment } from "../../utils";
 import { KErrorT } from "../error";
 

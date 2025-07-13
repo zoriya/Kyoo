@@ -1,5 +1,5 @@
 import { db } from "~/db";
-import { seasonTranslations, seasons } from "~/db/schema";
+import { seasons, seasonTranslations } from "~/db/schema";
 import { conflictUpdateAllExcept } from "~/db/utils";
 import type { SeedSeason } from "~/models/season";
 import { enqueueOptImage } from "../images";

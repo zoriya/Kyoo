@@ -10,7 +10,7 @@ import {
 } from "tests/helpers";
 import { expectStatus } from "tests/utils";
 import { db } from "~/db";
-import { entries, entryVideoJoin, shows, videos } from "~/db/schema";
+import { entries, shows, videos } from "~/db/schema";
 import { bubble, madeInAbyss } from "~/models/examples";
 
 beforeAll(async () => {

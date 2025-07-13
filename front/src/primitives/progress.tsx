@@ -20,7 +20,7 @@
 
 import { ActivityIndicator, Platform, View } from "react-native";
 import { Circle, Svg } from "react-native-svg";
-import { type Stylable, px, useYoshiki } from "yoshiki/native";
+import { px, type Stylable, useYoshiki } from "yoshiki/native";
 
 export const CircularProgress = ({
 	size = 48,
@@ -31,7 +31,9 @@ export const CircularProgress = ({
 	const { css, theme } = useYoshiki();
 
 	if (Platform.OS !== "web")
-		return <ActivityIndicator size={size} color={color ?? theme.accent} {...props} />;
+		return (
+			<ActivityIndicator size={size} color={color ?? theme.accent} {...props} />
+		);
 
 	return (
 		<View {...css({ width: size, height: size, overflow: "hidden" }, props)}>
@@ -63,7 +65,9 @@ export const CircularProgress = ({
 				viewBox={`${size / 2} ${size / 2} ${size} ${size}`}
 				{...css(
 					// @ts-ignore Web only
-					Platform.OS === "web" && { animation: "circularProgress-svg 1.4s ease-in-out infinite" },
+					Platform.OS === "web" && {
+						animation: "circularProgress-svg 1.4s ease-in-out infinite",
+					},
 				)}
 			>
 				<Circle

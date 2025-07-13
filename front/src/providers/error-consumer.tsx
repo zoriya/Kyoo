@@ -2,7 +2,13 @@ import { type ReactNode, useContext } from "react";
 import { ErrorView, errorHandlers } from "~/ui/errors";
 import { ErrorContext } from "./error-provider";
 
-export const ErrorConsumer = ({ children, scope }: { children: ReactNode; scope: string }) => {
+export const ErrorConsumer = ({
+	children,
+	scope,
+}: {
+	children: ReactNode;
+	scope: string;
+}) => {
 	const error = useContext(ErrorContext);
 	if (!error) return children;
 

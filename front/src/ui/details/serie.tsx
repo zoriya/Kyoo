@@ -77,38 +77,37 @@ export const ShowWatchStatusCard = ({
 	);
 };
 
-const ShowHeader = ({ children, slug, ...props }) => {
-		const { css, theme } = useYoshiki();
+const ShowHeader = ({ children, slug, ...props }: any) => {
+	const { css, theme } = useYoshiki();
 
-		return (
-			<View
-				{...css(
-					[
-						{ bg: (theme) => theme.background },
-						Platform.OS === "web" && {
-							flexGrow: 1,
-							flexShrink: 1,
-							// @ts-ignore Web only property
-							overflowY: "auto" as any,
-						},
-					],
-					props,
-				)}
-			>
-				<Header kind="serie" slug={slug} />
-				{/* <DetailsCollections type="serie" slug={slug} /> */}
-				{/* <Staff slug={slug} /> */}
-				<SvgWave
-					fill={theme.variant.background}
-					{...css({ flexShrink: 0, flexGrow: 1, display: "flex" })}
-				/>
-				<View {...css({ bg: theme.variant.background })}>
-					<Container>{children}</Container>
-				</View>
+	return (
+		<View
+			{...css(
+				[
+					{ bg: (theme) => theme.background },
+					Platform.OS === "web" && {
+						flexGrow: 1,
+						flexShrink: 1,
+						// @ts-ignore Web only property
+						overflowY: "auto" as any,
+					},
+				],
+				props,
+			)}
+		>
+			<Header kind="serie" slug={slug} />
+			{/* <DetailsCollections type="serie" slug={slug} /> */}
+			{/* <Staff slug={slug} /> */}
+			<SvgWave
+				fill={theme.variant.background}
+				{...css({ flexShrink: 0, flexGrow: 1, display: "flex" })}
+			/>
+			<View {...css({ bg: theme.variant.background })}>
+				<Container>{children}</Container>
 			</View>
-		);
-	},
-)
+		</View>
+	);
+};
 
 export const ShowDetails = () => {
 	const { css, theme } = useYoshiki();

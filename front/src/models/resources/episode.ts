@@ -23,7 +23,8 @@ export const EpisodeP = BaseEpisodeP.and(
 		watchStatus: WatchStatusP.optional().nullable(),
 	}),
 ).transform((x) => {
-	if (x.show && !x.thumbnail && x.show.thumbnail) x.thumbnail = x.show.thumbnail;
+	if (x.show && !x.thumbnail && x.show.thumbnail)
+		x.thumbnail = x.show.thumbnail;
 	return x;
 });
 

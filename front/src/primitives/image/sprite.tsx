@@ -43,7 +43,9 @@ export const Sprite = ({
 	style?: object;
 }) => {
 	return (
-		<View style={{ width, height, overflow: "hidden", flexGrow: 0, flexShrink: 0 }}>
+		<View
+			style={{ width, height, overflow: "hidden", flexGrow: 0, flexShrink: 0 }}
+		>
 			<Image
 				source={{ uri: src }}
 				alt={alt}

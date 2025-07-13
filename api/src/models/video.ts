@@ -1,6 +1,6 @@
 import { PatternStringExact, type TSchema } from "@sinclair/typebox";
 import { t } from "elysia";
-import { type Prettify, comment } from "~/utils";
+import { comment, type Prettify } from "~/utils";
 import { ExtraType } from "./entry/extra";
 import { bubble, bubbleVideo, registerExamples } from "./examples";
 import { DbMetadata, EpisodeId, ExternalId, Resource } from "./utils";

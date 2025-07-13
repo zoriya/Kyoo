@@ -18,20 +18,22 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+/** biome-ignore-all lint/correctness/noUnusedImports: TODO */
+
 import { type KyooImage, WatchStatusV } from "@kyoo/models";
 import {
+	focusReset,
 	H6,
 	IconButton,
 	Image,
 	ImageBackground,
 	type ImageProps,
+	imageBorderRadius,
+	important,
 	Link,
 	P,
 	Skeleton,
 	SubP,
-	focusReset,
-	imageBorderRadius,
-	important,
 	tooltip,
 	ts,
 } from "@kyoo/primitives";
@@ -39,8 +41,19 @@ import ExpandMore from "@material-symbols/svg-400/rounded/keyboard_arrow_down-fi
 import ExpandLess from "@material-symbols/svg-400/rounded/keyboard_arrow_up-fill.svg";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { type ImageStyle, Platform, type PressableProps, View } from "react-native";
-import { type Stylable, type Theme, percent, rem, useYoshiki } from "yoshiki/native";
+import {
+	type ImageStyle,
+	Platform,
+	type PressableProps,
+	View,
+} from "react-native";
+import {
+	percent,
+	rem,
+	type Stylable,
+	type Theme,
+	useYoshiki,
+} from "yoshiki/native";
 import { ItemProgress } from "../browse/grid";
 import { EpisodesContext } from "../components/context-menus";
 import type { Layout } from "../fetch";
@@ -50,7 +63,10 @@ export const episodeDisplayNumber = (episode: {
 	episodeNumber?: number | null;
 	absoluteNumber?: number | null;
 }) => {
-	if (typeof episode.seasonNumber === "number" && typeof episode.episodeNumber === "number")
+	if (
+		typeof episode.seasonNumber === "number" &&
+		typeof episode.episodeNumber === "number"
+	)
 		return `S${episode.seasonNumber}:E${episode.episodeNumber}`;
 	if (episode.absoluteNumber) return episode.absoluteNumber.toString();
 	return "??";
@@ -139,7 +155,8 @@ export const EpisodeBox = ({
 							bg: (theme) => theme.darkOverlay,
 						},
 						"more",
-						Platform.OS === "web" && moreOpened && { display: important("flex") },
+						Platform.OS === "web" &&
+							moreOpened && { display: important("flex") },
 					])}
 				/>
 			</ImageBackground>
@@ -295,7 +312,9 @@ export const EpisodeLine = ({
 						<SubP>
 							{[
 								// @ts-ignore Source https://www.i18next.com/translation-function/formatting#datetime
-								releaseDate ? t("{{val, datetime}}", { val: releaseDate }) : null,
+								releaseDate
+									? t("{{val, datetime}}", { val: releaseDate })
+									: null,
 								displayRuntime(runtime),
 							]
 								.filter((item) => item != null)
@@ -310,17 +329,22 @@ export const EpisodeLine = ({
 							{...css([
 								"more",
 								{ display: "flex", marginLeft: ts(3) },
-								Platform.OS === "web" && moreOpened && { display: important("flex") },
+								Platform.OS === "web" &&
+									moreOpened && { display: important("flex") },
 							])}
 						/>
 					</View>
 				</View>
-				<View {...css({ flexDirection: "row", justifyContent: "space-between" })}>
+				<View
+					{...css({ flexDirection: "row", justifyContent: "space-between" })}
+				>
 					<P numberOfLines={descriptionExpanded ? undefined : 3}>{overview}</P>
 					<IconButton
 						{...css(["more", Platform.OS !== "web" && { opacity: 1 }])}
 						icon={descriptionExpanded ? ExpandLess : ExpandMore}
-						{...tooltip(t(descriptionExpanded ? "misc.collapse" : "misc.expand"))}
+						{...tooltip(
+							t(descriptionExpanded ? "misc.collapse" : "misc.expand"),
+						)}
 						onPress={(e) => {
 							e.preventDefault();
 							setDescriptionExpanded((isExpanded) => !isExpanded);

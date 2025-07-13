@@ -23,6 +23,7 @@ export const setCookie = (key: string, val?: unknown) => {
 	const expires = value
 		? `expires=${d.toUTCString()}`
 		: "expires=Thu, 01 Jan 1970 00:00:01 GMT";
+	// biome-ignore lint/suspicious/noDocumentCookie: idk
 	document.cookie = `${key}=${value};${expires};path=/;samesite=strict`;
 };
 
@@ -43,6 +44,7 @@ export const useStoreValue = <T extends ZodType>(key: string, parser: T) => {
 	if (Platform.OS === "web" && typeof window === "undefined") {
 		return readCookie(key, parser);
 	}
+	// biome-ignore lint/correctness/useHookAtTopLevel: constant
 	const [val] = useMMKVString(key);
 	if (val === undefined) return val;
 	return parser.parse(JSON.parse(val)) as z.infer<T>;

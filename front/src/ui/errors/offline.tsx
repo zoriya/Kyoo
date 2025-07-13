@@ -16,7 +16,9 @@ export const OfflineView = () => {
 				alignItems: "center",
 			})}
 		>
-			<P {...css({ color: (theme) => theme.colors.white })}>{t("errors.offline")}</P>
+			<P {...css({ color: (theme) => theme.colors.white })}>
+				{t("errors.offline")}
+			</P>
 		</View>
 	);
 };

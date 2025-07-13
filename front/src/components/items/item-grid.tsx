@@ -1,12 +1,6 @@
 import { useState } from "react";
 import { type ImageStyle, Platform, View } from "react-native";
-import {
-	percent,
-	px,
-	type Stylable,
-	type Theme,
-	useYoshiki,
-} from "yoshiki/native";
+import { percent, type Stylable, type Theme, useYoshiki } from "yoshiki/native";
 import type { KImage, WatchStatusV } from "~/models";
 import {
 	focusReset,

@@ -1,9 +1,9 @@
 import {
+	oidcLogin,
 	type QueryIdentifier,
 	type QueryPage,
 	type ServerInfo,
 	ServerInfoP,
-	oidcLogin,
 	useFetch,
 } from "@kyoo/models";
 import { Button, HR, Link, P, Skeleton, ts } from "@kyoo/primitives";
@@ -14,12 +14,24 @@ import { useRouter } from "solito/router";
 import { percent, rem, useYoshiki } from "yoshiki/native";
 import { ErrorView } from "../errors";
 
-export const OidcLogin = ({ apiUrl, hideOr }: { apiUrl?: string; hideOr?: boolean }) => {
+export const OidcLogin = ({
+	apiUrl,
+	hideOr,
+}: {
+	apiUrl?: string;
+	hideOr?: boolean;
+}) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
-	const { data, error } = useFetch({ options: { apiUrl }, ...OidcLogin.query() });
+	const { data, error } = useFetch({
+		options: { apiUrl },
+		...OidcLogin.query(),
+	});
 
-	const btn = css({ width: { xs: percent(100), sm: percent(75) }, marginY: ts(1) });
+	const btn = css({
+		width: { xs: percent(100), sm: percent(75) },
+		marginY: ts(1),
+	});
 
 	return (
 		<View {...css({ alignItems: "center", marginY: ts(1) })}>
@@ -86,16 +98,26 @@ export const OidcCallbackPage: QueryPage<{
 		hasRun.current = true;
 
 		function onError(error: string) {
-			router.replace({ pathname: "/login", query: { error, apiUrl } }, undefined, {
-				experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
-			});
+			router.replace(
+				{ pathname: "/login", query: { error, apiUrl } },
+				undefined,
+				{
+					experimental: {
+						nativeBehavior: "stack-replace",
+						isNestedNavigator: false,
+					},
+				},
+			);
 		}
 		async function run() {
 			const { error: loginError } = await oidcLogin(provider, code, apiUrl);
 			if (loginError) onError(loginError);
 			else {
 				router.replace("/", undefined, {
-					experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
+					experimental: {
+						nativeBehavior: "stack-replace",
+						isNestedNavigator: false,
+					},
 				});
 			}
 		}

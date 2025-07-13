@@ -1,4 +1,4 @@
-import { type Column, type SQL, eq, sql } from "drizzle-orm";
+import { type Column, eq, type SQL, sql } from "drizzle-orm";
 import { db } from "~/db";
 import {
 	entries,

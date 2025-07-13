@@ -24,7 +24,6 @@ import { Icon } from "./icons";
 import { Menu } from "./menu";
 
 export const Select = <Value extends string>({
-	label,
 	value,
 	onValueChange,
 	values,
@@ -37,7 +36,11 @@ export const Select = <Value extends string>({
 	getLabel: (key: Value) => string;
 }) => {
 	return (
-		<Menu Trigger={Button} text={getLabel(value)} icon={<Icon icon={ExpandMore} />}>
+		<Menu
+			Trigger={Button}
+			text={getLabel(value)}
+			icon={<Icon icon={ExpandMore} />}
+		>
 			{values.map((x) => (
 				<Menu.Item
 					key={x}

@@ -1,6 +1,6 @@
 import { and, eq, notExists, or, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import { type Transaction, db } from "~/db";
+import { db, type Transaction } from "~/db";
 import { entries, entryVideoJoin, shows, videos } from "~/db/schema";
 import {
 	conflictUpdateAllExcept,
@@ -13,12 +13,12 @@ import {
 import { KError } from "~/models/error";
 import { bubbleVideo } from "~/models/examples";
 import {
-	Page,
-	type Resource,
-	Sort,
 	createPage,
 	isUuid,
 	keysetPaginate,
+	Page,
+	type Resource,
+	Sort,
 	sortToSql,
 } from "~/models/utils";
 import { desc as description } from "~/models/utils/descriptions";

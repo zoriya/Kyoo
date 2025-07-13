@@ -21,7 +21,7 @@
 import { useRef, useState } from "react";
 import { type GestureResponderEvent, Platform, View } from "react-native";
 import type { ViewProps } from "react-native-svg/lib/typescript/fabric/utils";
-import { Stylable, percent, px, useYoshiki } from "yoshiki/native";
+import { percent, px, useYoshiki } from "yoshiki/native";
 import { focusReset } from "./utils";
 
 export const Slider = ({
@@ -80,7 +80,10 @@ export const Slider = ({
 			}}
 			// @ts-ignore Web only
 			onMouseMove={(e) =>
-				onHover?.(Math.max(0, Math.min((e.clientX - layout.x) / layout.width, 1) * max), layout)
+				onHover?.(
+					Math.max(0, Math.min((e.clientX - layout.x) / layout.width, 1) * max),
+					layout,
+				)
 			}
 			tabIndex={0}
 			onFocus={() => setFocus(true)}

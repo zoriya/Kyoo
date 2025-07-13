@@ -4,9 +4,9 @@ import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
 import { useRouter } from "expo-router";
 import {
 	type ComponentType,
+	createContext,
 	type ReactElement,
 	type ReactNode,
-	createContext,
 	useContext,
 	useEffect,
 	useRef,
@@ -22,7 +22,9 @@ import { P } from "./text";
 import { ContrastArea, SwitchVariant } from "./theme";
 import { ts } from "./utils";
 
-const MenuContext = createContext<((open: boolean) => void) | undefined>(undefined);
+const MenuContext = createContext<((open: boolean) => void) | undefined>(
+	undefined,
+);
 
 type Optional<T, K extends keyof any> = Omit<T, K> & Partial<T>;
 
@@ -45,7 +47,10 @@ const Menu = <AsProps,>({
 	const insets = useSafeAreaInsets();
 	const alreadyRendered = useRef(false);
 	const [isOpen, setOpen] =
-		outerOpen !== undefined && outerSetOpen ? [outerOpen, outerSetOpen] : useState(false);
+		outerOpen !== undefined && outerSetOpen
+			? [outerOpen, outerSetOpen]
+			: // biome-ignore lint/correctness/useHookAtTopLevel: const
+				useState(false);
 
 	// does the same as a useMemo but for props.
 	const memoRef = useRef({ onMenuOpen, onMenuClose });
@@ -73,7 +78,11 @@ const Menu = <AsProps,>({
 									<Pressable
 										onPress={() => setOpen(false)}
 										tabIndex={-1}
-										{...css({ ...StyleSheet.absoluteFillObject, flexGrow: 1, bg: "transparent" })}
+										{...css({
+											...StyleSheet.absoluteFillObject,
+											flexGrow: 1,
+											bg: "transparent",
+										})}
 									/>
 									<View
 										{...css([
@@ -107,7 +116,10 @@ const Menu = <AsProps,>({
 												icon={Close}
 												color={theme.colors.black}
 												onPress={() => setOpen(false)}
-												{...css({ alignSelf: "flex-end", display: { xs: "none", xl: "flex" } })}
+												{...css({
+													alignSelf: "flex-end",
+													display: { xs: "none", xl: "flex" },
+												})}
 											/>
 											{children}
 										</ScrollView>
@@ -137,7 +149,10 @@ const MenuItem = ({
 	left?: ReactElement;
 	disabled?: boolean;
 	icon?: ComponentType<SvgProps>;
-} & ({ onSelect: () => void; href?: undefined } | { href: string; onSelect?: undefined })) => {
+} & (
+	| { onSelect: () => void; href?: undefined }
+	| { href: string; onSelect?: undefined }
+)) => {
 	const { css, theme } = useYoshiki();
 	const setOpen = useContext(MenuContext);
 	const router = useRouter();
@@ -174,7 +189,10 @@ const MenuItem = ({
 			{!left && icn && icn}
 			<P
 				{...css([
-					{ paddingLeft: ts(2) + +!(icon || selected || left) * px(24), flexGrow: 1 },
+					{
+						paddingLeft: ts(2) + +!(icon || selected || left) * px(24),
+						flexGrow: 1,
+					},
 					disabled && { color: theme.overlay0 },
 				])}
 			>

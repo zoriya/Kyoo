@@ -21,13 +21,18 @@
 			},
 			"suspicious": {
 				"noExplicitAny": "off",
-				"noArrayIndexKey": "off"
+				"noArrayIndexKey": "off",
+				"noTemplateCurlyInString": "off"
 			},
 			"security": {
 				"noDangerouslySetInnerHtml": "off"
 			},
 			"complexity": {
-				"noBannedTypes": "off"
+				"noBannedTypes": "off",
+				"noUselessUndefinedInitialization": "off"
+			},
+			"correctness": {
+				"noUnusedVariables": "off"
 			}
 		}
 	},

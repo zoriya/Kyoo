@@ -1,7 +1,7 @@
-import Bookmark from "@material-symbols/svg-400/rounded/bookmark-fill.svg";
 import BookmarkAdd from "@material-symbols/svg-400/rounded/bookmark_add.svg";
 import BookmarkAdded from "@material-symbols/svg-400/rounded/bookmark_added-fill.svg";
 import BookmarkRemove from "@material-symbols/svg-400/rounded/bookmark_remove.svg";
+import Bookmark from "@material-symbols/svg-400/rounded/bookmark-fill.svg";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import type { Serie } from "~/models";
@@ -10,7 +10,13 @@ import { useAccount } from "~/providers/account-context";
 import { useMutation } from "~/query";
 
 type WatchStatus = NonNullable<Serie["watchStatus"]>["status"];
-const WatchStatus = ["completed", "watching", "rewatching", "dropped", "planned"] as const;
+const WatchStatus = [
+	"completed",
+	"watching",
+	"rewatching",
+	"dropped",
+	"planned",
+] as const;
 
 export const watchListIcon = (status: WatchStatus | null) => {
 	switch (status) {
@@ -51,7 +57,12 @@ export const WatchListInfo = ({
 
 	if (account == null) {
 		return (
-			<IconButton icon={BookmarkAdd} disabled {...tooltip(t("show.watchlistLogin"))} {...props} />
+			<IconButton
+				icon={BookmarkAdd}
+				disabled
+				{...tooltip(t("show.watchlistLogin"))}
+				{...props}
+			/>
 		);
 	}
 
@@ -93,7 +104,10 @@ export const WatchListInfo = ({
 							selected={x === status}
 						/>
 					))}
-					<Menu.Item label={t("show.watchlistMark.null")} onSelect={() => mutation.mutate(null)} />
+					<Menu.Item
+						label={t("show.watchlistMark.null")}
+						onSelect={() => mutation.mutate(null)}
+					/>
 				</Menu>
 			);
 		default:

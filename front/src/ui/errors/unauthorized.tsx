@@ -13,7 +13,12 @@ export const Unauthorized = ({ missing }: { missing: string[] }) => {
 	if (!account) {
 		return (
 			<View
-				{...css({ flexGrow: 1, flexShrink: 1, justifyContent: "center", alignItems: "center" })}
+				{...css({
+					flexGrow: 1,
+					flexShrink: 1,
+					justifyContent: "center",
+					alignItems: "center",
+				})}
 			>
 				<P>{t("errors.needAccount")}</P>
 				<Button
@@ -29,7 +34,12 @@ export const Unauthorized = ({ missing }: { missing: string[] }) => {
 	if (!account.isVerified) {
 		return (
 			<View
-				{...css({ flexGrow: 1, flexShrink: 1, justifyContent: "center", alignItems: "center" })}
+				{...css({
+					flexGrow: 1,
+					flexShrink: 1,
+					justifyContent: "center",
+					alignItems: "center",
+				})}
 			>
 				<P>{t("errors.needVerification")}</P>
 			</View>
@@ -45,7 +55,9 @@ export const Unauthorized = ({ missing }: { missing: string[] }) => {
 				alignItems: "center",
 			})}
 		>
-			<P>{t("errors.unauthorized", { permission: missing?.join(", ") ?? "" })}</P>
+			<P>
+				{t("errors.unauthorized", { permission: missing?.join(", ") ?? "" })}
+			</P>
 		</View>
 	);
 };

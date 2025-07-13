@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
 import { db } from "~/db";
-import { showTranslations, shows } from "~/db/schema";
+import { shows, showTranslations } from "~/db/schema";
 import { conflictUpdateAllExcept } from "~/db/utils";
 import type { SeedCollection } from "~/models/collections";
 import type { SeedMovie } from "~/models/movie";

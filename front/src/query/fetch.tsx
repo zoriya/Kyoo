@@ -22,7 +22,7 @@ export const Fetch = <Data,>({
 		if (error && (error.status === 401 || error.status === 403)) {
 			setError({ key: "unauthorized", error });
 		}
-	}, [error, isPaused]);
+	}, [error, isPaused, setError]);
 
 	if (error) {
 		return <ErrorView error={error} />;

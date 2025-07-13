@@ -1,5 +1,5 @@
 import { HR as EHR } from "@expo/html-elements";
-import { type Stylable, px, useYoshiki } from "yoshiki/native";
+import { px, type Stylable, useYoshiki } from "yoshiki/native";
 import { ts } from "./utils";
 
 export const HR = ({

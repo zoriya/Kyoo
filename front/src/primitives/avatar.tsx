@@ -1,7 +1,7 @@
 import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
-import { type ComponentType, type RefAttributes, forwardRef } from "react";
+import { type ComponentType, forwardRef, type RefAttributes } from "react";
 import { Image, type ImageProps, View, type ViewStyle } from "react-native";
-import { type Stylable, px, useYoshiki } from "yoshiki/native";
+import { px, type Stylable, useYoshiki } from "yoshiki/native";
 import { Icon } from "./icons";
 import { Skeleton } from "./skeleton";
 import { P } from "./text";
@@ -73,7 +73,11 @@ const AvatarC = forwardRef<
 					{placeholder[0]}
 				</P>
 			) : (
-				<Icon icon={AccountCircle} size={size} color={fill ? col : theme.colors.white} />
+				<Icon
+					icon={AccountCircle}
+					size={size}
+					color={fill ? col : theme.colors.white}
+				/>
 			)}
 			<Image
 				resizeMode="cover"

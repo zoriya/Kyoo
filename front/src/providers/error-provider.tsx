@@ -1,6 +1,6 @@
 import {
-	type ReactNode,
 	createContext,
+	type ReactNode,
 	useCallback,
 	useContext,
 	useMemo,
@@ -46,7 +46,10 @@ export const ErrorProvider = ({ children }: { children: ReactNode }) => {
 
 export const useSetError = (key: string) => {
 	const { setError, clearError } = useContext(ErrorSetterContext);
-	const set = ({ key: nKey, ...obj }: Omit<Error, "key"> & { key?: Error["key"] } = {}) =>
+	const set = ({
+		key: nKey,
+		...obj
+	}: Omit<Error, "key"> & { key?: Error["key"] } = {}) =>
 		setError({ key: nKey ?? key, ...obj });
 	const clear = () => clearError(key);
 	return [set, clear] as const;

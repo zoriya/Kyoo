@@ -27,7 +27,12 @@ import { Container } from "./container";
 import { ContrastArea, SwitchVariant, type YoshikiFunc } from "./themes";
 import { ts } from "./utils";
 
-export const Popup = ({ children, ...props }: { children: ReactNode | YoshikiFunc<ReactNode> }) => {
+export const Popup = ({
+	children,
+	...props
+}: {
+	children: ReactNode | YoshikiFunc<ReactNode>;
+}) => {
 	return (
 		<ContrastArea mode="user">
 			<SwitchVariant>
@@ -67,7 +72,9 @@ export const Popup = ({ children, ...props }: { children: ReactNode | YoshikiFun
 									flexShrink: 1,
 								})}
 							>
-								{typeof children === "function" ? children({ css, theme }) : children}
+								{typeof children === "function"
+									? children({ css, theme })
+									: children}
 							</ScrollView>
 						</Container>
 					</View>

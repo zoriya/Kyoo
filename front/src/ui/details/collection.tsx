@@ -18,6 +18,8 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+/** biome-ignore-all lint/correctness/noUnusedImports: TODO */
+
 import {
 	type Collection,
 	CollectionP,
@@ -27,12 +29,12 @@ import {
 } from "@kyoo/models";
 import {
 	Container,
+	focusReset,
 	GradientImageBackground,
 	H2,
 	ImageBackground,
 	Link,
 	P,
-	focusReset,
 	ts,
 } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
@@ -90,8 +92,16 @@ export const PartOf = ({
 	);
 };
 
-export const DetailsCollections = ({ type, slug }: { type: "movie" | "show"; slug: string }) => {
-	const { items, error } = useInfiniteFetch(DetailsCollections.query(type, slug));
+export const DetailsCollections = ({
+	type,
+	slug,
+}: {
+	type: "movie" | "show";
+	slug: string;
+}) => {
+	const { items, error } = useInfiniteFetch(
+		DetailsCollections.query(type, slug),
+	);
 	const { css } = useYoshiki();
 
 	if (error) return <ErrorView error={error} />;
@@ -114,7 +124,10 @@ export const DetailsCollections = ({ type, slug }: { type: "movie" | "show"; slu
 	);
 };
 
-DetailsCollections.query = (type: "movie" | "show", slug: string): QueryIdentifier<Collection> => ({
+DetailsCollections.query = (
+	type: "movie" | "show",
+	slug: string,
+): QueryIdentifier<Collection> => ({
 	parser: CollectionP,
 	path: [type, slug, "collections"],
 	params: {

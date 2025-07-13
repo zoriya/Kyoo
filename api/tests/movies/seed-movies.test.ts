@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from "bun:test";
 import { eq } from "drizzle-orm";
 import { expectStatus } from "tests/utils";
 import { db } from "~/db";
-import { showTranslations, shows, videos } from "~/db/schema";
+import { shows, showTranslations, videos } from "~/db/schema";
 import { bubble } from "~/models/examples";
 import { dune, duneVideo } from "~/models/examples/dune-2021";
 import { createMovie, createVideo } from "../helpers";

@@ -1,5 +1,5 @@
 import { db } from "~/db";
-import { showStudioJoin, studioTranslations, studios } from "~/db/schema";
+import { showStudioJoin, studios, studioTranslations } from "~/db/schema";
 import { conflictUpdateAllExcept } from "~/db/utils";
 import type { SeedStudio } from "~/models/studio";
 import { enqueueOptImage } from "../images";

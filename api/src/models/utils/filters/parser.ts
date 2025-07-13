@@ -1,11 +1,11 @@
 import {
-	type Parjser,
 	anyStringOf,
 	digit,
 	float,
 	int,
 	letter,
 	noCharOf,
+	type Parjser,
 	string,
 } from "parjs";
 import {

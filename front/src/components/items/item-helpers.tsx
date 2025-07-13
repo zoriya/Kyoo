@@ -14,7 +14,8 @@ export const ItemWatchStatus = ({
 }) => {
 	const { css } = useYoshiki();
 
-	if (watchStatus !== WatchStatusV.Completed && !unseenEpisodesCount) return null;
+	if (watchStatus !== WatchStatusV.Completed && !unseenEpisodesCount)
+		return null;
 
 	return (
 		<View
@@ -38,7 +39,13 @@ export const ItemWatchStatus = ({
 			{watchStatus === WatchStatusV.Completed ? (
 				<Icon icon={Done} size={16} />
 			) : (
-				<P {...css({ marginVertical: 0, verticalAlign: "middle", textAlign: "center" })}>
+				<P
+					{...css({
+						marginVertical: 0,
+						verticalAlign: "middle",
+						textAlign: "center",
+					})}
+				>
 					{unseenEpisodesCount}
 				</P>
 			)}

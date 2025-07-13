@@ -1,4 +1,4 @@
-import { type SQL, and, eq, exists, sql } from "drizzle-orm";
+import { and, eq, exists, type SQL, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { auth } from "~/auth";
 import { prefix } from "~/base";
@@ -6,8 +6,8 @@ import { db } from "~/db";
 import {
 	showStudioJoin,
 	shows,
-	studioTranslations,
 	studios,
+	studioTranslations,
 } from "~/db/schema";
 import {
 	getColumns,
@@ -22,14 +22,14 @@ import { Show } from "~/models/show";
 import { Studio, StudioTranslation } from "~/models/studio";
 import {
 	AcceptLanguage,
-	Filter,
-	Page,
-	Sort,
 	buildRelations,
 	createPage,
+	Filter,
 	isUuid,
 	keysetPaginate,
+	Page,
 	processLanguages,
+	Sort,
 	sortToSql,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";

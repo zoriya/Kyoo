@@ -19,7 +19,13 @@
  */
 
 import { usePortal } from "@gorhom/portal";
-import { type ReactElement, createContext, useCallback, useContext, useRef } from "react";
+import {
+	createContext,
+	type ReactElement,
+	useCallback,
+	useContext,
+	useRef,
+} from "react";
 import { View } from "react-native";
 import { percent, px } from "yoshiki/native";
 import { Button } from "./button";
@@ -43,14 +49,21 @@ export type Action = {
 
 const SnackbarContext = createContext<(snackbar: Snackbar) => void>(null!);
 
-export const SnackbarProvider = ({ children }: { children: ReactElement | ReactElement[] }) => {
+export const SnackbarProvider = ({
+	children,
+}: {
+	children: ReactElement | ReactElement[];
+}) => {
 	const { addPortal, removePortal } = usePortal();
 	const snackbars = useRef<Snackbar[]>([]);
 	const timeout = useRef<NodeJS.Timeout | null>(null);
 
 	const createSnackbar = useCallback(
 		(snackbar: Snackbar) => {
-			if (snackbar.key) snackbars.current = snackbars.current.filter((x) => snackbar.key !== x.key);
+			if (snackbar.key)
+				snackbars.current = snackbars.current.filter(
+					(x) => snackbar.key !== x.key,
+				);
 			snackbars.current.unshift(snackbar);
 
 			if (timeout.current) return;
@@ -73,7 +86,11 @@ export const SnackbarProvider = ({ children }: { children: ReactElement | ReactE
 		[addPortal, removePortal],
 	);
 
-	return <SnackbarContext.Provider value={createSnackbar}>{children}</SnackbarContext.Provider>;
+	return (
+		<SnackbarContext.Provider value={createSnackbar}>
+			{children}
+		</SnackbarContext.Provider>
+	);
 };
 
 export const useSnackbar = () => {

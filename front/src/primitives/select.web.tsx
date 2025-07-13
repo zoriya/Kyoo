@@ -25,7 +25,7 @@ import * as RSelect from "@radix-ui/react-select";
 import { forwardRef } from "react";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki";
-import { type Theme, px, useYoshiki as useNativeYoshiki } from "yoshiki/native";
+import { px, type Theme, useYoshiki as useNativeYoshiki } from "yoshiki/native";
 import { Icon } from "./icons";
 import { PressableFeedback } from "./links";
 import { InternalTriger, YoshikiProvider } from "./menu.web";
@@ -78,7 +78,9 @@ export const Select = ({
 						})}
 					>
 						<P {...css({ textAlign: "center" }, "text")}>{<RSelect.Value />}</P>
-						<RSelect.Icon {...wCss({ display: "flex", justifyContent: "center" })}>
+						<RSelect.Icon
+							{...wCss({ display: "flex", justifyContent: "center" })}
+						>
 							<Icon icon={ExpandMore} />
 						</RSelect.Icon>
 					</View>
@@ -98,7 +100,8 @@ export const Select = ({
 										boxShadow:
 											"0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2)",
 										zIndex: 2,
-										maxHeight: "calc(var(--radix-dropdown-menu-content-available-height) * 0.8)",
+										maxHeight:
+											"calc(var(--radix-dropdown-menu-content-available-height) * 0.8)",
 									})}
 								>
 									<RSelect.ScrollUpButton>
@@ -122,55 +125,56 @@ export const Select = ({
 	);
 };
 
-const Item = forwardRef<HTMLDivElement, { label: string; value: string }>(function Item(
-	{ label, value, ...props },
-	ref,
-) {
-	const { css, theme } = useYoshiki();
-	const { css: nCss } = useNativeYoshiki();
-	return (
-		<>
-			<style jsx global>{`
+const Item = forwardRef<HTMLDivElement, { label: string; value: string }>(
+	function Item({ label, value, ...props }, ref) {
+		const { css, theme } = useYoshiki();
+		const { css: nCss } = useNativeYoshiki();
+		return (
+			<>
+				<style jsx global>{`
 				[data-highlighted] {
 					background: ${theme.variant.accent};
 				}
 			`}</style>
-			<RSelect.Item
-				ref={ref}
-				value={value}
-				{...css(
-					{
-						display: "flex",
-						alignItems: "center",
-						paddingTop: "8px",
-						paddingBottom: "8px",
-						paddingLeft: "35px",
-						paddingRight: "25px",
-						height: "32px",
-						color: (theme) => theme.paragraph,
-						borderRadius: "4px",
-						position: "relative",
-						userSelect: "none",
-						...focusReset,
-					},
-					props as any,
-				)}
-			>
-				<RSelect.ItemText {...css({ color: (theme) => theme.paragraph })}>{label}</RSelect.ItemText>
-				<RSelect.ItemIndicator asChild>
-					<InternalTriger
-						Component={Icon}
-						icon={Check}
-						ComponentProps={nCss({
-							position: "absolute",
-							left: 0,
-							width: px(25),
+				<RSelect.Item
+					ref={ref}
+					value={value}
+					{...css(
+						{
+							display: "flex",
 							alignItems: "center",
-							justifyContent: "center",
-						})}
-					/>
-				</RSelect.ItemIndicator>
-			</RSelect.Item>
-		</>
-	);
-});
+							paddingTop: "8px",
+							paddingBottom: "8px",
+							paddingLeft: "35px",
+							paddingRight: "25px",
+							height: "32px",
+							color: (theme) => theme.paragraph,
+							borderRadius: "4px",
+							position: "relative",
+							userSelect: "none",
+							...focusReset,
+						},
+						props as any,
+					)}
+				>
+					<RSelect.ItemText {...css({ color: (theme) => theme.paragraph })}>
+						{label}
+					</RSelect.ItemText>
+					<RSelect.ItemIndicator asChild>
+						<InternalTriger
+							Component={Icon}
+							icon={Check}
+							ComponentProps={nCss({
+								position: "absolute",
+								left: 0,
+								width: px(25),
+								alignItems: "center",
+								justifyContent: "center",
+							})}
+						/>
+					</RSelect.ItemIndicator>
+				</RSelect.Item>
+			</>
+		);
+	},
+);

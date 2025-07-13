@@ -23,7 +23,10 @@ export type FilterDef = {
 export const Filter = ({
 	def,
 	description = "Filters to apply to the query.",
-}: { def: FilterDef; description?: string }) =>
+}: {
+	def: FilterDef;
+	description?: string;
+}) =>
 	t
 		.Transform(
 			t.String({

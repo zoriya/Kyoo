@@ -14,10 +14,16 @@ export const TouchOnlyCss = () => {
 };
 
 export const touchOnly: ViewProps = {
-	style: Platform.OS === "web" ? ({ $$css: true, touchOnly: "touchOnly" } as any) : {},
+	style:
+		Platform.OS === "web"
+			? ({ $$css: true, touchOnly: "touchOnly" } as any)
+			: {},
 };
 export const noTouch: ViewProps = {
-	style: Platform.OS === "web" ? ({ $$css: true, noTouch: "noTouch" } as any) : { display: "none" },
+	style:
+		Platform.OS === "web"
+			? ({ $$css: true, noTouch: "noTouch" } as any)
+			: { display: "none" },
 };
 
 export const useIsTouch = () => {

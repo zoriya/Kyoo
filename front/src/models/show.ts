@@ -11,4 +11,10 @@ export const Show = z.union([
 export type Show = z.infer<typeof Show>;
 
 export type WatchStatusV = NonNullable<Serie["watchStatus"]>["status"];
-export const WatchStatusV = ["completed", "watching", "rewatching", "dropped", "planned"] as const;
+export const WatchStatusV = [
+	"completed",
+	"watching",
+	"rewatching",
+	"dropped",
+	"planned",
+] as const;

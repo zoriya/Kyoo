@@ -3,11 +3,7 @@ import { useYoshiki } from "yoshiki/native";
 import type { KyooError } from "~/models";
 import { P } from "~/primitives";
 
-export const ErrorView = ({
-	error,
-}: {
-	error: KyooError;
-}) => {
+export const ErrorView = ({ error }: { error: KyooError }) => {
 	const { css } = useYoshiki();
 
 	return (

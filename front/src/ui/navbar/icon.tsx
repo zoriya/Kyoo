@@ -1,4 +1,4 @@
-import Svg, { type SvgProps, Path } from "react-native-svg";
+import Svg, { Path, type SvgProps } from "react-native-svg";
 import { useYoshiki } from "yoshiki/native";
 
 /* export const KyooLogo = (props: SvgProps) => ( */
@@ -24,7 +24,12 @@ export const KyooLongLogo = ({
 	const { theme } = useYoshiki();
 	const textColor = theme.contrast;
 	return (
-		<Svg viewBox="49.954 131.833 318.13 108.676" height={height} width={height * 2.9272} {...props}>
+		<Svg
+			viewBox="49.954 131.833 318.13 108.676"
+			height={height}
+			width={height * 2.9272}
+			{...props}
+		>
 			<Path
 				d="m164.844 186.759-114.89-53.76v107.51l114.89-53.75Z"
 				fill="#121327"
