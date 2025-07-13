@@ -359,23 +359,22 @@ export const TitleLine = ({
 					}) as any,
 				])}
 			>
-				{studios?.map((x) => (
+				{studios !== null && (
 					<P
-						key={x.slug}
 						{...css({
+							flexWrap: "wrap",
 							color: (theme: Theme) => theme.user.paragraph,
-							display: "flex",
 						})}
 					>
-						{t("show.studio")}:{" "}
-						<A
-							href={`/studio/${x.slug}`}
-							{...css({ color: (theme) => theme.user.link })}
-						>
-							{x.name}
-						</A>
+						{t("show.studios")}:{" "}
+						{studios.map((studio, i) => (
+							<Fragment key={studio.id}>
+								<P {...(css({ m: 0 }) as any)}>{i !== 0 && ", "}</P>
+								<A href={`/studios/${studio.slug}`}>{studio.name}</A>
+							</Fragment>
+						))}
 					</P>
-				))}
+				)}
 			</View>
 		</Container>
 	);
