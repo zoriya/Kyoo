@@ -1,5 +1,6 @@
 import { LegendList } from "@legendapp/list";
 import { type ComponentType, type ReactElement, useRef } from "react";
+import type { ViewStyle } from "react-native";
 import { type Breakpoint, HR, useBreakpointMap } from "~/primitives";
 import { useSetError } from "~/providers/error-provider";
 import { ErrorView } from "~/ui/errors";
@@ -23,6 +24,7 @@ export const InfiniteFetch = <Data,>({
 	divider,
 	Header,
 	fetchMore = true,
+	contentContainerStyle,
 	...props
 }: {
 	query: QueryIdentifier<Data>;
@@ -36,6 +38,7 @@ export const InfiniteFetch = <Data,>({
 	divider?: true | ComponentType;
 	Header?: ComponentType<{ children: JSX.Element }> | ReactElement;
 	fetchMore?: boolean;
+	contentContainerStyle?: ViewStyle;
 }): JSX.Element | null => {
 	const { numColumns, size, gap } = useBreakpointMap(layout);
 	const [setOffline, clearOffline] = useSetError("offline");
@@ -87,7 +90,11 @@ export const InfiniteFetch = <Data,>({
 				divider === true ? HR : (divider as any) || undefined
 			}
 			ListEmptyComponent={Empty}
-			contentContainerStyle={{ gap, marginHorizontal: gap }}
+			contentContainerStyle={{
+				...contentContainerStyle,
+				gap,
+				marginHorizontal: gap,
+			}}
 			{...props}
 		/>
 	);
