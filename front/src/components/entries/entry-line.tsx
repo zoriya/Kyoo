@@ -6,7 +6,7 @@ import { Platform, type PressableProps, View } from "react-native";
 import { percent, type Stylable, useYoshiki } from "yoshiki/native";
 import { EntryContext } from "~/components/items/context-menus";
 import { ItemProgress } from "~/components/items/item-grid";
-import type { KImage, WatchStatusV } from "~/models";
+import type { KImage } from "~/models";
 import {
 	focusReset,
 	H6,
@@ -34,7 +34,6 @@ export const EntryLine = ({
 	airDate,
 	runtime,
 	watchedPercent,
-	watchedStatus,
 	href,
 	...props
 }: {
@@ -48,7 +47,6 @@ export const EntryLine = ({
 	airDate: Date | null;
 	runtime: number | null;
 	watchedPercent: number | null;
-	watchedStatus: WatchStatusV | null;
 	href: string;
 } & PressableProps) => {
 	const [moreOpened, setMoreOpened] = useState(false);
@@ -92,7 +90,7 @@ export const EntryLine = ({
 				}}
 				{...(css({ flexShrink: 0, m: ts(1), borderRadius: 6 }) as any)}
 			>
-				{(watchedPercent || watchedStatus === "completed") && (
+				{watchedPercent && (
 					<ItemProgress watchPercent={watchedPercent ?? 100} />
 				)}
 			</ImageBackground>
@@ -124,7 +122,6 @@ export const EntryLine = ({
 						<EntryContext
 							slug={slug}
 							serieSlug={serieSlug}
-							status={watchedStatus}
 							isOpen={moreOpened}
 							setOpen={(v) => setMoreOpened(v)}
 							{...css([

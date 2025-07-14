@@ -3,11 +3,11 @@ import { useTranslation } from "react-i18next";
 import { Platform, View } from "react-native";
 import Svg, { Path, type SvgProps } from "react-native-svg";
 import { percent, useYoshiki } from "yoshiki/native";
+import { EntryLine, entryDisplayNumber } from "~/components/entries";
 import { Container, focusReset, H2, SwitchVariant, ts } from "~/primitives";
 import { useQueryState } from "~/utils";
-import { EpisodeLine, episodeDisplayNumber } from "./episode";
 import { Header } from "./header";
-import { EpisodeList } from "./season";
+import { EntryList } from "./season";
 
 export const SvgWave = (props: SvgProps) => {
 	const { css } = useYoshiki();
@@ -31,7 +31,6 @@ export const SvgWave = (props: SvgProps) => {
 
 export const ShowWatchStatusCard = ({
 	watchedPercent,
-	status,
 	nextEpisode,
 }: ShowWatchStatus) => {
 	const { t } = useTranslation();
@@ -60,12 +59,11 @@ export const ShowWatchStatusCard = ({
 					])}
 				>
 					<H2 {...css({ marginLeft: ts(2) })}>{t("show.nextUp")}</H2>
-					<EpisodeLine
+					<EntryLine
 						{...nextEpisode}
-						showSlug={null}
+						serieSlug={null}
 						watchedPercent={watchedPercent || null}
-						watchedStatus={status || null}
-						displayNumber={episodeDisplayNumber(nextEpisode)}
+						displayNumber={entryDisplayNumber(nextEpisode)}
 						onHoverIn={() => setFocus(true)}
 						onHoverOut={() => setFocus(false)}
 						onFocus={() => setFocus(true)}
@@ -77,8 +75,9 @@ export const ShowWatchStatusCard = ({
 	);
 };
 
-const ShowHeader = ({ children, slug, ...props }: any) => {
+const SerieHeader = ({ children, ...props }: any) => {
 	const { css, theme } = useYoshiki();
+	const [slug] = useQueryState("slug", undefined!);
 
 	return (
 		<View
@@ -109,18 +108,14 @@ const ShowHeader = ({ children, slug, ...props }: any) => {
 	);
 };
 
-export const ShowDetails = () => {
+export const SerieDetails = () => {
 	const { css, theme } = useYoshiki();
 	const [slug] = useQueryState("slug", undefined!);
+	const [season] = useQueryState("season", undefined!);
 
 	return (
 		<View {...css({ bg: theme.variant.background, flex: 1 })}>
-			<EpisodeList
-				slug={slug}
-				season={season}
-				Header={ShowHeader}
-				headerProps={{ slug }}
-			/>
+			<EntryList slug={slug} season={season} Header={SerieHeader} />
 		</View>
 	);
 };

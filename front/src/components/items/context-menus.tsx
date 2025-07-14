@@ -15,14 +15,54 @@ import { watchListIcon } from "./watchlist-info";
 // import { useDownloader } from "../../packages/ui/src/downloadses/ui/src/downloads";
 
 export const EntryContext = ({
-	kind = "entry",
 	slug,
 	serieSlug,
+	...props
+}: {
+	serieSlug: string | null;
+	slug: string;
+} & Partial<ComponentProps<typeof Menu<typeof IconButton>>>) => {
+	// const downloader = useDownloader();
+	const { css } = useYoshiki();
+	const { t } = useTranslation();
+
+	return (
+		<>
+			<Menu
+				Trigger={IconButton}
+				icon={MoreVert}
+				{...tooltip(t("misc.more"))}
+				{...(css([Platform.OS !== "web" && { display: "none" }], props) as any)}
+			>
+				{serieSlug && (
+					<Menu.Item
+						label={t("home.episodeMore.goToShow")}
+						icon={Info}
+						href={`/series/${serieSlug}`}
+					/>
+				)}
+				{/* <Menu.Item */}
+				{/* 	label={t("home.episodeMore.download")} */}
+				{/* 	icon={Download} */}
+				{/* 	onSelect={() => downloader(type, slug)} */}
+				{/* /> */}
+				<Menu.Item
+					label={t("home.episodeMore.mediainfo")}
+					icon={MovieInfo}
+					href={`/entries/${slug}/info`}
+				/>
+			</Menu>
+		</>
+	);
+};
+
+export const ItemContext = ({
+	kind,
+	slug,
 	status,
 	...props
 }: {
-	kind?: "serie" | "movie" | "entry";
-	serieSlug?: string | null;
+	kind: "movie" | "serie";
 	slug: string;
 	status: WatchStatusV | null;
 } & Partial<ComponentProps<typeof Menu<typeof IconButton>>>) => {
@@ -32,10 +72,7 @@ export const EntryContext = ({
 	const { t } = useTranslation();
 
 	const mutation = useMutation({
-		path:
-			kind === "entry"
-				? ["serie", serieSlug!, "entries", slug]
-				: [kind, slug, "watchStatus"],
+		path: [kind, slug, "watchStatus"],
 		compute: (newStatus: WatchStatusV | null) => ({
 			method: newStatus ? "POST" : "DELETE",
 			params: newStatus ? { status: newStatus } : undefined,
@@ -55,18 +92,8 @@ export const EntryContext = ({
 				Trigger={IconButton}
 				icon={MoreVert}
 				{...tooltip(t("misc.more"))}
-				{...(css(
-					[Platform.OS !== "web" && { display: "none" }],
-					props,
-				) as any)}
+				{...(css([Platform.OS !== "web" && { display: "none" }], props) as any)}
 			>
-				{serieSlug && (
-					<Menu.Item
-						label={t("home.episodeMore.goToShow")}
-						icon={Info}
-						href={`/serie/${serieSlug}`}
-					/>
-				)}
 				<Menu.Sub
 					label={account ? t("show.watchlistEdit") : t("show.watchlistLogin")}
 					disabled={!account}
@@ -89,7 +116,7 @@ export const EntryContext = ({
 						/>
 					)}
 				</Menu.Sub>
-				{kind !== "serie" && (
+				{kind === "movie" && (
 					<>
 						{/* <Menu.Item */}
 						{/* 	label={t("home.episodeMore.download")} */}
@@ -99,7 +126,7 @@ export const EntryContext = ({
 						<Menu.Item
 							label={t("home.episodeMore.mediainfo")}
 							icon={MovieInfo}
-							href={`/${kind}/${slug}/info`}
+							href={`/movies/${slug}/info`}
 						/>
 					</>
 				)}
@@ -115,26 +142,5 @@ export const EntryContext = ({
 				)}
 			</Menu>
 		</>
-	);
-};
-
-export const ItemContext = ({
-	kind,
-	slug,
-	status,
-	...props
-}: {
-	kind: "movie" | "serie";
-	slug: string;
-	status: WatchStatusV | null;
-} & Partial<ComponentProps<typeof Menu<typeof IconButton>>>) => {
-	return (
-		<EntryContext
-			kind={kind}
-			slug={slug}
-			status={status}
-			serieSlug={null}
-			{...props}
-		/>
 	);
 };

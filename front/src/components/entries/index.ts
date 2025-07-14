@@ -1,16 +1,17 @@
-export * from "./entry-box";
-export * from "./entry-list";
+import type { Entry } from "~/models";
 
-export const episodeDisplayNumber = (episode: {
-	seasonNumber?: number | null;
-	episodeNumber?: number | null;
-	absoluteNumber?: number | null;
-}) => {
-	if (
-		typeof episode.seasonNumber === "number" &&
-		typeof episode.episodeNumber === "number"
-	)
-		return `S${episode.seasonNumber}:E${episode.episodeNumber}`;
-	if (episode.absoluteNumber) return episode.absoluteNumber.toString();
-	return "??";
+export * from "./entry-box";
+export * from "./entry-line";
+
+export const entryDisplayNumber = (entry: Entry) => {
+	switch (entry.kind) {
+		case "episode":
+			return `S${entry.seasonNumber}:E${entry.episodeNumber}`;
+		case "special":
+			return `SP${entry.number}`
+		case "movie":
+			return "";
+		default:
+			return "??";
+	}
 };
