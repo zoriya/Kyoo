@@ -383,7 +383,7 @@ func run(e *echo.Echo) (err error) {
 		metadata:   metadata,
 	}
 
-	g := e.Group(src.Settings.RoutePrefix)
+	g := e.Group("/video")
 	g.GET("/:path/direct", DirectStream)
 	g.GET("/:path/direct/:identifier", DirectStream)
 	g.GET("/:path/master.m3u8", h.GetMaster)

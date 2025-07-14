@@ -59,8 +59,6 @@ spec:
               value: "/cache"
             - name: GOCODER_METADATA_ROOT
               value: "/metadata"
-            - name: GOCODER_PREFIX
-              value: "/video"
             - name: GOCODER_SAFE_PATH
               value: {{ .Values.media.baseMountPath | quote }}
             - name: POSTGRES_USER

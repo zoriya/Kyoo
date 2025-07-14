@@ -145,10 +145,9 @@ func (s *MetadataService) extractThumbnail(ctx context.Context, path string, sha
 		timestamps := ts
 		ts += interval
 		vtt += fmt.Sprintf(
-			"%s --> %s\n%s/%s/thumbnails.png#xywh=%d,%d,%d,%d\n\n",
+			"%s --> %s\nvideo/%s/thumbnails.png#xywh=%d,%d,%d,%d\n\n",
 			tsToVttTime(timestamps),
 			tsToVttTime(ts),
-			Settings.RoutePrefix,
 			base64.RawURLEncoding.EncodeToString([]byte(path)),
 			x,
 			y,
