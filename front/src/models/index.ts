@@ -1,5 +1,6 @@
 export * from "./collection";
 export * from "./entry";
+export * from "./extra";
 export * from "./kyoo-error";
 export * from "./movie";
 export * from "./serie";

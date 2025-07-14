@@ -34,8 +34,8 @@ export const Serie = z
 		logo: KImage.nullable(),
 		trailerUrl: z.string().nullable(),
 
-		entriesCount: z.number().int(),
-		availableCount: z.number().int(),
+		entriesCount: z.int().gte(0),
+		availableCount: z.int().gte(0),
 
 		createdAt: zdate(),
 		updatedAt: zdate(),

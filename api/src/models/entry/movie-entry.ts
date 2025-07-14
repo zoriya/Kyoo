@@ -46,7 +46,7 @@ export const MovieEntry = t.Composite([
 	MovieEntryTranslation,
 	BaseMovieEntry,
 	t.Object({
-		videos: t.Optional(t.Array(EmbeddedVideo)),
+		videos: t.Array(EmbeddedVideo),
 		progress: Progress,
 	}),
 	DbMetadata,
