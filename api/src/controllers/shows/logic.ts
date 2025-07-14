@@ -203,6 +203,8 @@ const showRelations = {
 					number: entries.episodeNumber,
 					videos: entryVideosQ.videos,
 					progress: mapProgress({ aliased: false }),
+					createdAt: sql`to_char(${entries.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+					updatedAt: sql`to_char(${entries.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
 				}).as("firstEntry"),
 			})
 			.from(entries)
@@ -233,6 +235,8 @@ const showRelations = {
 					number: entries.episodeNumber,
 					videos: entryVideosQ.videos,
 					progress: mapProgress({ aliased: false }),
+					createdAt: sql`to_char(${entries.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+					updatedAt: sql`to_char(${entries.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
 				}).as("nextEntry"),
 			})
 			.from(entries)
