@@ -8,7 +8,7 @@ export const Season = z.object({
 	seasonNumber: z.int().gte(0),
 	name: z.string().nullable(),
 	description: z.string().nullable(),
-	entryCount: z.int().gte(0),
+	entriesCount: z.int().gte(0),
 	availableCount: z.int().gte(0),
 	startAir: zdate().nullable(),
 	endAir: zdate().nullable(),

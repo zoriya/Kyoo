@@ -47,7 +47,7 @@ export const EntryLine = ({
 	airDate: Date | null;
 	runtime: number | null;
 	watchedPercent: number | null;
-	href: string;
+	href: string | null;
 } & PressableProps) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 	const [descriptionExpanded, setDescriptionExpanded] = useState(false);

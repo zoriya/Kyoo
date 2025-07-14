@@ -17,10 +17,9 @@ export const BaseSpecial = t.Composite(
 		t.Object({
 			kind: t.Literal("special"),
 			order: t.Number({
-				minimum: 1,
 				description: "Absolute playback order. Can be mixed with episodes.",
 			}),
-			number: t.Integer({ minimum: 1 }),
+			number: t.Integer(),
 			externalId: EpisodeId,
 		}),
 		BaseEntry(),
