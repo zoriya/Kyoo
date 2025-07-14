@@ -209,7 +209,11 @@ export async function updateAvailableCount(
 					.select({ count: count() })
 					.from(entries)
 					.where(
-						and(eq(entries.showPk, seasons.showPk), ne(entries.kind, "extra")),
+						and(
+							eq(entries.showPk, seasons.showPk),
+							eq(entries.seasonNumber, seasons.seasonNumber),
+							ne(entries.kind, "extra"),
+						),
 					)}`,
 			}),
 		})
