@@ -14,7 +14,7 @@ require (
 require (
 	github.com/aws/aws-sdk-go-v2 v1.36.4
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.80.2
-	golang.org/x/sync v0.15.0
+	golang.org/x/sync v0.16.0
 )
 
 require (
