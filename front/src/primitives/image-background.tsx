@@ -42,7 +42,7 @@ export const ImageBackground = ({
 			}}
 			placeholder={{ blurhash: src?.blurhash }}
 			accessibilityLabel={alt}
-			{...(css(layout, props) as any)}
+			{...(css([layout, { overflow: "hidden" }], props) as any)}
 		/>
 	);
 };
