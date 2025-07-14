@@ -12,7 +12,7 @@ export type Layout = {
 	layout: "grid" | "horizontal" | "vertical";
 };
 
-export const InfiniteFetch = <Data, Props, _, Kind extends number | string>({
+export const InfiniteFetch = <Data, Props>({
 	query,
 	placeholderCount = 2,
 	incremental = false,
@@ -22,11 +22,7 @@ export const InfiniteFetch = <Data, Props, _, Kind extends number | string>({
 	Empty,
 	divider,
 	Header,
-	headerProps,
-	getItemType,
-	getItemSize,
 	fetchMore = true,
-	nested = false,
 	...props
 }: {
 	query: QueryIdentifier<Data>;
@@ -39,11 +35,7 @@ export const InfiniteFetch = <Data, Props, _, Kind extends number | string>({
 	incremental?: boolean;
 	divider?: true | ComponentType;
 	Header?: ComponentType<Props & { children: JSX.Element }> | ReactElement;
-	headerProps?: Props;
-	getItemType?: (item: Data | null, index: number) => Kind;
-	getItemSize?: (kind: Kind) => number;
 	fetchMore?: boolean;
-	nested?: boolean;
 }): JSX.Element | null => {
 	const { numColumns, size, gap } = useBreakpointMap(layout);
 	const [setOffline, clearOffline] = useSetError("offline");

@@ -74,9 +74,11 @@ export const Special = Base.extend({
 });
 export type Special = z.infer<typeof Special>;
 
-export const Entry = z.discriminatedUnion("kind", [
-	Episode,
-	MovieEntry,
-	Special,
-]);
+export const Entry = z
+	.discriminatedUnion("kind", [Episode, MovieEntry, Special])
+	.transform((x) => ({
+		...x,
+		// TODO: don't just pick the first video, be smart about it
+		href: x.videos.length ? `/watch/${x.videos[0].slug}` : null,
+	}));
 export type Entry = z.infer<typeof Entry>;

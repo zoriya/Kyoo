@@ -1,9 +1,10 @@
 import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
-import type { ComponentType } from "react";
+import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { rem, useYoshiki } from "yoshiki/native";
-import { type Episode, type Season, useInfiniteFetch } from "~/models";
+import { EntryLine, entryDisplayNumber } from "~/components/entries";
+import { Entry, Season } from "~/models";
 import {
 	H2,
 	HR,
@@ -13,22 +14,21 @@ import {
 	Skeleton,
 	tooltip,
 	ts,
-	usePageStyle,
 } from "~/primitives";
-import type { QueryIdentifier } from "~/query";
+import { type QueryIdentifier, useInfiniteFetch } from "~/query";
 import { InfiniteFetch } from "~/query/fetch-infinite";
-import { EpisodeLine, episodeDisplayNumber } from "./episode";
-
-type SeasonProcessed = Season & { href: string };
+import { EmptyView } from "~/ui/errors";
 
 export const SeasonHeader = ({
+	serieSlug,
 	seasonNumber,
 	name,
 	seasons,
 }: {
+	serieSlug: string;
 	seasonNumber: number;
 	name: string | null;
-	seasons?: SeasonProcessed[];
+	seasons: Season[];
 }) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
@@ -62,17 +62,15 @@ export const SeasonHeader = ({
 					icon={MenuIcon}
 					{...tooltip(t("show.jumpToSeason"))}
 				>
-					{seasons
-						?.filter((x) => x.episodesCount > 0)
-						.map((x) => (
-							<Menu.Item
-								key={x.seasonNumber}
-								label={`${x.seasonNumber}: ${
-									x.name ?? t("show.season", { number: x.seasonNumber })
-								} (${x.episodesCount})`}
-								href={x.href}
-							/>
-						))}
+					{seasons.map((x) => (
+						<Menu.Item
+							key={x.seasonNumber}
+							label={`${x.seasonNumber}: ${
+								x.name ?? t("show.season", { number: x.seasonNumber })
+							} (${x.entryCount})`}
+							href={`/series/${serieSlug}?season=${x.seasonNumber}`}
+						/>
+					))}
 				</Menu>
 			</View>
 			<HR />
@@ -115,33 +113,22 @@ SeasonHeader.Loader = () => {
 
 SeasonHeader.query = (slug: string): QueryIdentifier<Season> => ({
 	parser: Season,
-	path: ["series", slug, "seasons"],
+	path: ["api", "series", slug, "seasons"],
 	params: {
-		// Fetch all seasons at one, there won't be hundred of thems anyways.
+		// Fetch all seasons at one, there won't be hundred of them anyways.
 		limit: 0,
 	},
-	infinite: {
-		value: true,
-		map: (seasons) =>
-			seasons.map((x) => ({
-				...x,
-				href: `/show/${slug}?season=${x.seasonNumber}`,
-			})),
-	},
+	infinite: true,
 });
 
-export const EpisodeList = <Props,>({
+export const EntryList = ({
 	slug,
 	season,
-	Header,
-	headerProps,
+	...props
 }: {
 	slug: string;
 	season: string | number;
-	Header: ComponentType<Props & { children: JSX.Element }>;
-	headerProps: Props;
-}) => {
-	const pageStyle = usePageStyle();
+} & Partial<ComponentProps<typeof InfiniteFetch>>) => {
 	const { t } = useTranslation();
 	const { items: seasons, error } = useInfiniteFetch(SeasonHeader.query(slug));
 
@@ -149,40 +136,35 @@ export const EpisodeList = <Props,>({
 
 	return (
 		<InfiniteFetch
-			query={EpisodeList.query(slug, season)}
-			layout={EpisodeLine.layout}
-			empty={t("show.episode-none")}
+			query={EntryList.query(slug, season)}
+			layout={EntryLine.layout}
+			Empty={<EmptyView message={t("show.episode-none")} />}
 			divider
-			Header={Header}
-			headerProps={headerProps}
-			getItemType={(item) =>
-				!item || item.firstOfSeason ? "withHeader" : "normal"
-			}
-			contentContainerStyle={pageStyle}
+			// getItemType={(item) =>
+			// 	item.kind === "episode" && item.episodeNumber === 1? "withHeader" : "normal"
+			// }
 			placeholderCount={5}
 			Render={({ item }) => {
-				const sea = item?.firstOfSeason
-					? seasons?.find((x) => x.seasonNumber === item.seasonNumber)
-					: null;
+				const sea =
+					item.kind === "episode" && item.episodeNumber === 1
+						? seasons?.find((x) => x.seasonNumber === item.seasonNumber)
+						: null;
 				return (
 					<>
-						{item.firstOfSeason &&
-							(sea ? (
-								<SeasonHeader
-									name={sea.name}
-									seasonNumber={sea.seasonNumber}
-									seasons={seasons}
-								/>
-							) : (
-								<SeasonHeader.Loader />
-							))}
-						<EpisodeLine
+						{sea && (
+							<SeasonHeader
+								serieSlug={slug}
+								name={sea.name}
+								seasonNumber={sea.seasonNumber}
+								seasons={seasons ?? []}
+							/>
+						)}
+						<EntryLine
 							{...item}
-							// Don't display "Go to show"
-							showSlug={null}
-							displayNumber={episodeDisplayNumber(item)}
-							watchedPercent={item.watchStatus?.watchedPercent ?? null}
-							watchedStatus={item.watchStatus?.status ?? null}
+							// Don't display "Go to serie"
+							serieSlug={null}
+							displayNumber={entryDisplayNumber(item)}
+							watchedPercent={item.progress.percent}
 						/>
 					</>
 				);
@@ -190,32 +172,22 @@ export const EpisodeList = <Props,>({
 			Loader={({ index }) => (
 				<>
 					{index === 0 && <SeasonHeader.Loader />}
-					<EpisodeLine.Loader />
+					<EntryLine.Loader />
 				</>
 			)}
+			{...props}
 		/>
 	);
 };
 
-EpisodeList.query = (
+EntryList.query = (
 	slug: string,
 	season: string | number,
-): QueryIdentifier<Episode, Episode & { firstOfSeason?: boolean }> => ({
-	parser: EpisodeP,
-	path: ["show", slug, "episode"],
+): QueryIdentifier<Entry> => ({
+	parser: Entry,
+	path: ["api", "series", slug, "entries"],
 	params: {
 		filter: season ? `seasonNumber gte ${season}` : undefined,
-		fields: ["watchStatus"],
 	},
-	infinite: {
-		value: true,
-		map: (episodes) => {
-			let currentSeason: number | null = null;
-			return episodes.map((x) => {
-				if (x.seasonNumber === currentSeason) return x;
-				currentSeason = x.seasonNumber;
-				return { ...x, firstOfSeason: true };
-			});
-		},
-	},
+	infinite: true,
 });
