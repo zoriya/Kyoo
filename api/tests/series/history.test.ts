@@ -109,7 +109,7 @@ describe("Set & get history", () => {
 			percent: 100,
 			time: 38 * 60,
 			videoId: madeInAbyssVideo.id,
-			playedDate: "2025-02-03 00:00:00+00",
+			playedDate: "2025-02-03T00:00:00Z",
 		});
 	});
 
@@ -122,7 +122,7 @@ describe("Set & get history", () => {
 			percent: 100,
 			time: 38 * 60,
 			videoId: madeInAbyssVideo.id,
-			playedDate: "2025-02-03 00:00:00+00",
+			playedDate: "2025-02-03T00:00:00Z",
 		});
 	});
 
@@ -137,13 +137,13 @@ describe("Set & get history", () => {
 		expect(body.items[0].watchStatus).toMatchObject({
 			status: "watching",
 			seenCount: 1,
-			startedAt: "2025-02-01 00:00:00+00",
+			startedAt: "2025-02-01T00:00:00Z",
 		});
 		expect(body.items[1].slug).toBe(bubble.slug);
 		expect(body.items[1].watchStatus).toMatchObject({
 			status: "completed",
 			percent: 100,
-			completedAt: "2025-02-02 00:00:00+00",
+			completedAt: "2025-02-02T00:00:00Z",
 		});
 	});
 });

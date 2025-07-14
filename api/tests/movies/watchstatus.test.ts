@@ -36,7 +36,7 @@ describe("Set & get watch status", () => {
 		expect(body.items[0].slug).toBe(bubble.slug);
 		expect(body.items[0].watchStatus).toMatchObject({
 			status: "completed",
-			completedAt: "2024-12-21 00:00:00+00",
+			completedAt: "2024-12-21T00:00:00Z",
 			score: 85,
 			percent: 100,
 		});
@@ -61,7 +61,7 @@ describe("Set & get watch status", () => {
 		expect(body.items[0].slug).toBe(bubble.slug);
 		expect(body.items[0].watchStatus).toMatchObject({
 			status: "rewatching",
-			completedAt: "2024-12-21 00:00:00+00",
+			completedAt: "2024-12-21T00:00:00Z",
 			score: 85,
 			percent: 0,
 		});
@@ -89,7 +89,7 @@ describe("Set & get watch status", () => {
 		expect(body.items[0].slug).toBe(bubble.slug);
 		expect(body.items[0].watchStatus).toMatchObject({
 			status: "rewatching",
-			completedAt: "2024-12-21 00:00:00+00",
+			completedAt: "2024-12-21T00:00:00Z",
 			score: 85,
 			percent: 0,
 		});
@@ -109,7 +109,7 @@ describe("Set & get watch status", () => {
 		expect(body.slug).toBe(bubble.slug);
 		expect(body.watchStatus).toMatchObject({
 			status: "rewatching",
-			completedAt: "2024-12-21 00:00:00+00",
+			completedAt: "2024-12-21T00:00:00Z",
 			score: 85,
 			percent: 0,
 		});

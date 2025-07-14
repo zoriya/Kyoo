@@ -146,7 +146,7 @@ export const mapProgress = ({ aliased }: { aliased: boolean }) => {
 	const ret = {
 		time: coalesce(time, sql<number>`0`),
 		percent: coalesce(percent, sql<number>`0`),
-		playedDate: sql<string>`${playedDate}`,
+		playedDate: sql`to_char(${playedDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
 		videoId: sql<string>`${videoId}`,
 	};
 	if (!aliased) return ret;
