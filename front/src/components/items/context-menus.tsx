@@ -14,19 +14,17 @@ import { useMutation } from "~/query";
 import { watchListIcon } from "./watchlist-info";
 // import { useDownloader } from "../../packages/ui/src/downloadses/ui/src/downloads";
 
-export const EpisodesContext = ({
-	kind = "episode",
+export const EntryContext = ({
+	kind = "entry",
 	slug,
-	showSlug,
+	serieSlug,
 	status,
-	force,
 	...props
 }: {
-	kind?: "serie" | "movie" | "episode";
-	showSlug?: string | null;
+	kind?: "serie" | "movie" | "entry";
+	serieSlug?: string | null;
 	slug: string;
 	status: WatchStatusV | null;
-	force?: boolean;
 } & Partial<ComponentProps<typeof Menu<typeof IconButton>>>) => {
 	const account = useAccount();
 	// const downloader = useDownloader();
@@ -34,7 +32,10 @@ export const EpisodesContext = ({
 	const { t } = useTranslation();
 
 	const mutation = useMutation({
-		path: [kind, slug, "watchStatus"],
+		path:
+			kind === "entry"
+				? ["serie", serieSlug!, "entries", slug]
+				: [kind, slug, "watchStatus"],
 		compute: (newStatus: WatchStatusV | null) => ({
 			method: newStatus ? "POST" : "DELETE",
 			params: newStatus ? { status: newStatus } : undefined,
@@ -55,15 +56,15 @@ export const EpisodesContext = ({
 				icon={MoreVert}
 				{...tooltip(t("misc.more"))}
 				{...(css(
-					[Platform.OS !== "web" && !force && { display: "none" }],
+					[Platform.OS !== "web" && { display: "none" }],
 					props,
 				) as any)}
 			>
-				{showSlug && (
+				{serieSlug && (
 					<Menu.Item
 						label={t("home.episodeMore.goToShow")}
 						icon={Info}
-						href={`/serie/${showSlug}`}
+						href={`/serie/${serieSlug}`}
 					/>
 				)}
 				<Menu.Sub
@@ -121,21 +122,18 @@ export const ItemContext = ({
 	kind,
 	slug,
 	status,
-	force,
 	...props
 }: {
 	kind: "movie" | "serie";
 	slug: string;
 	status: WatchStatusV | null;
-	force?: boolean;
 } & Partial<ComponentProps<typeof Menu<typeof IconButton>>>) => {
 	return (
-		<EpisodesContext
+		<EntryContext
 			kind={kind}
 			slug={slug}
 			status={status}
-			showSlug={null}
-			force={force}
+			serieSlug={null}
 			{...props}
 		/>
 	);

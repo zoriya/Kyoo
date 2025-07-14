@@ -3,6 +3,7 @@ export * from "./entry";
 export * from "./extra";
 export * from "./kyoo-error";
 export * from "./movie";
+export * from "./season";
 export * from "./serie";
 export * from "./show";
 export * from "./studio";
