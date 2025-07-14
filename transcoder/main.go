@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"io"
 	"mime"
@@ -8,10 +10,15 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/zoriya/kyoo/transcoder/src"
 	"github.com/zoriya/kyoo/transcoder/src/api"
 	"github.com/zoriya/kyoo/transcoder/src/utils"
 
+	"github.com/lestrrat-go/httprc/v3"
+	"github.com/lestrrat-go/jwx/v3/jwk"
+
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -383,7 +390,31 @@ func run(e *echo.Echo) (err error) {
 		metadata:   metadata,
 	}
 
+	jwksUrl := ""
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	jwks, err := jwk.NewCache(ctx, httprc.NewClient())
+	if err != nil {
+		return fmt.Errorf("failed to create jwk cache: %w", err)
+	}
+	jwks.Register(ctx, jwksUrl)
+
 	g := e.Group("/video")
+	g.Use(echojwt.WithConfig(echojwt.Config{
+		KeyFunc: func(token *jwt.Token) (interface{}, error) {
+			return jwks.CachedSet(jwksUrl)
+			// kid, ok := token.Header["kid"]
+			// if !ok {
+			// 	return nil, errors.New("missing kid in jwt")
+			// }
+			// keys, err := jwks.CachedSet(jwksUrl)
+			// if err != nil {
+			// 	return nil, err
+			// }
+			// return keys.LookupKeyID(kid.(string))
+		},
+	}))
 	g.GET("/:path/direct", DirectStream)
 	g.GET("/:path/direct/:identifier", DirectStream)
 	g.GET("/:path/master.m3u8", h.GetMaster)
