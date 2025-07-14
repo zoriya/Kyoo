@@ -77,7 +77,6 @@ services:
     ports:
       - "3567:3567"
     environment:
-      - KYOO_PREFIX=/api
       - JWT_ISSUER=${PUBLIC_URL}
     env_file:
       - ./.env
