@@ -54,7 +54,7 @@ export const base = new Elysia({ name: "base" })
 	})
 	.as("scoped");
 
-export const prefix = process.env.KYOO_PREFIX ?? "";
+export const prefix = "/api";
 export const handlers = new Elysia({ prefix })
 	.use(base)
 	.use(auth)
