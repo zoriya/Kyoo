@@ -6,6 +6,7 @@ import { rem, useYoshiki } from "yoshiki/native";
 import { EntryLine, entryDisplayNumber } from "~/components/entries";
 import { Entry, Season } from "~/models";
 import {
+	Container,
 	H2,
 	HR,
 	IconButton,
@@ -139,7 +140,11 @@ export const EntryList = ({
 			query={EntryList.query(slug, season)}
 			layout={EntryLine.layout}
 			Empty={<EmptyView message={t("show.episode-none")} />}
-			divider
+			divider={() => (
+				<Container>
+					<HR />
+				</Container>
+			)}
 			// getItemType={(item) =>
 			// 	item.kind === "episode" && item.episodeNumber === 1? "withHeader" : "normal"
 			// }
@@ -150,7 +155,7 @@ export const EntryList = ({
 						? seasons?.find((x) => x.seasonNumber === item.seasonNumber)
 						: null;
 				return (
-					<>
+					<Container>
 						{sea && (
 							<SeasonHeader
 								serieSlug={slug}
@@ -166,14 +171,14 @@ export const EntryList = ({
 							displayNumber={entryDisplayNumber(item)}
 							watchedPercent={item.progress.percent}
 						/>
-					</>
+					</Container>
 				);
 			}}
 			Loader={({ index }) => (
-				<>
+				<Container>
 					{index === 0 && <SeasonHeader.Loader />}
 					<EntryLine.Loader />
-				</>
+				</Container>
 			)}
 			{...props}
 		/>

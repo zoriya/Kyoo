@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform, View } from "react-native";
+import { View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path, type SvgProps } from "react-native-svg";
 import { percent, useYoshiki } from "yoshiki/native";
 import { EntryLine, entryDisplayNumber } from "~/components/entries";
@@ -97,25 +98,12 @@ NextUp.Loader = () => {
 	);
 };
 
-const SerieHeader = ({ children, ...props }: any) => {
+const SerieHeader = () => {
 	const { css, theme } = useYoshiki();
 	const [slug] = useQueryState("slug", undefined!);
 
 	return (
-		<View
-			{...css(
-				[
-					{ bg: (theme) => theme.background },
-					Platform.OS === "web" && {
-						flexGrow: 1,
-						flexShrink: 1,
-						// @ts-ignore Web only property
-						overflowY: "auto" as any,
-					},
-				],
-				props,
-			)}
-		>
+		<View {...css({ bg: (theme) => theme.background })}>
 			<Header kind="serie" slug={slug} />
 			<Fetch
 				// Use the same fetch query as header
@@ -133,9 +121,6 @@ const SerieHeader = ({ children, ...props }: any) => {
 				fill={theme.variant.background}
 				{...css({ flexShrink: 0, flexGrow: 1, display: "flex" })}
 			/>
-			<View {...css({ bg: theme.variant.background })}>
-				<Container>{children}</Container>
-			</View>
 		</View>
 	);
 };
@@ -144,10 +129,16 @@ export const SerieDetails = () => {
 	const { css, theme } = useYoshiki();
 	const [slug] = useQueryState("slug", undefined!);
 	const [season] = useQueryState("season", undefined!);
+	const insets = useSafeAreaInsets();
 
 	return (
 		<View {...css({ bg: theme.variant.background, flex: 1 })}>
-			<EntryList slug={slug} season={season} Header={SerieHeader} />
+			<EntryList
+				slug={slug}
+				season={season}
+				Header={SerieHeader}
+				contentContainerStyle={{ paddingBottom: insets.bottom }}
+			/>
 		</View>
 	);
 };
