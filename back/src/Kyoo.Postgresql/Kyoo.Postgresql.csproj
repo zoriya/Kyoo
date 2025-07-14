@@ -8,7 +8,7 @@
 		<PackageReference Include="Dapper" Version="2.1.66" />
 		<PackageReference Include="EFCore.NamingConventions" Version="8.0.3" />
 		<PackageReference Include="EntityFrameworkCore.Projectables" Version="4.1.4-prebeta" />
-		<PackageReference Include="InterpolatedSql.Dapper" Version="2.3.0" />
+		<PackageReference Include="InterpolatedSql.Dapper" Version="2.4.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.17">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
