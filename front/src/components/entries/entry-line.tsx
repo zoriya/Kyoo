@@ -29,6 +29,7 @@ export const EntryLine = ({
 	serieSlug,
 	name,
 	thumbnail,
+	poster,
 	description,
 	displayNumber,
 	airDate,
@@ -44,6 +45,7 @@ export const EntryLine = ({
 	name: string | null;
 	description: string | null;
 	thumbnail: KImage | null;
+	poster?: KImage | null;
 	airDate: Date | null;
 	runtime: number | null;
 	watchedPercent: number | null;
@@ -81,12 +83,12 @@ export const EntryLine = ({
 			)}
 		>
 			<ImageBackground
-				src={thumbnail}
+				src={poster ?? thumbnail}
 				quality="low"
 				alt=""
 				layout={{
 					width: percent(18),
-					aspectRatio: 16 / 9,
+					aspectRatio: poster ? 2 / 3 : 16 / 9,
 				}}
 				{...(css({ flexShrink: 0, m: ts(1), borderRadius: 6 }) as any)}
 			>
@@ -105,7 +107,9 @@ export const EntryLine = ({
 				>
 					{/* biome-ignore lint/a11y/useValidAriaValues: simply use H6 for the style but keep a P */}
 					<H6 aria-level={undefined} {...css([{ flexShrink: 1 }, "title"])}>
-						{[displayNumber, name ?? t("show.episodeNoMetadata")].join(" · ")}
+						{[displayNumber, name ?? t("show.episodeNoMetadata")]
+							.filter((x) => x)
+							.join(" · ")}
 					</H6>
 					<View {...css({ flexDirection: "row", alignItems: "center" })}>
 						<SubP>

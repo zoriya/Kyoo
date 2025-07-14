@@ -8,7 +8,7 @@ export const entryDisplayNumber = (entry: Entry) => {
 		case "episode":
 			return `S${entry.seasonNumber}:E${entry.episodeNumber}`;
 		case "special":
-			return `SP${entry.number}`
+			return `SP${entry.number}`;
 		case "movie":
 			return "";
 		default:
