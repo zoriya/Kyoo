@@ -127,3 +127,21 @@ Create kyoo transcoder-metadata name
 {{- define "kyoo.transcodermetadata.fullname" -}}
 {{- printf "%s-%s%s" (include "kyoo.fullname" .) .Values.transcoder.name "metadata" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{/*
+Create kyoo traefikproxy name
+*/}}
+{{- define "kyoo.traefikproxy.fullname" -}}
+{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.traefikproxy.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Create the name of the traefikproxy service account to use
+*/}}
+{{- define "kyoo.traefikproxy.serviceAccountName" -}}
+{{- if .Values.traefikproxy.serviceAccount.create -}}
+    {{ default (include "kyoo.traefikproxy.fullname" .) .Values.traefikproxy.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.traefikproxy.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
