@@ -826,6 +826,6 @@ Header.query = (
 	parser: Show,
 	path: ["api", `${kind}s`, slug],
 	params: {
-		with: ["studios"],
+		with: ["studios", ...(kind === "serie" ? ["firstEntry", "nextEntry"] : [])],
 	},
 });

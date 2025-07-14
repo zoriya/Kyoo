@@ -4,7 +4,9 @@ import { Platform, View } from "react-native";
 import Svg, { Path, type SvgProps } from "react-native-svg";
 import { percent, useYoshiki } from "yoshiki/native";
 import { EntryLine, entryDisplayNumber } from "~/components/entries";
+import type { Entry, Serie } from "~/models";
 import { Container, focusReset, H2, SwitchVariant, ts } from "~/primitives";
+import { Fetch } from "~/query";
 import { useQueryState } from "~/utils";
 import { Header } from "./header";
 import { EntryList } from "./season";
@@ -29,14 +31,9 @@ export const SvgWave = (props: SvgProps) => {
 	);
 };
 
-export const ShowWatchStatusCard = ({
-	watchedPercent,
-	nextEpisode,
-}: ShowWatchStatus) => {
+export const NextUp = (nextEntry: Entry) => {
 	const { t } = useTranslation();
 	const [focused, setFocus] = useState(false);
-
-	if (!nextEpisode) return null;
 
 	return (
 		<SwitchVariant>
@@ -60,15 +57,40 @@ export const ShowWatchStatusCard = ({
 				>
 					<H2 {...css({ marginLeft: ts(2) })}>{t("show.nextUp")}</H2>
 					<EntryLine
-						{...nextEpisode}
+						{...nextEntry}
 						serieSlug={null}
-						watchedPercent={watchedPercent || null}
-						displayNumber={entryDisplayNumber(nextEpisode)}
+						watchedPercent={nextEntry.progress.percent}
+						displayNumber={entryDisplayNumber(nextEntry)}
 						onHoverIn={() => setFocus(true)}
 						onHoverOut={() => setFocus(false)}
 						onFocus={() => setFocus(true)}
 						onBlur={() => setFocus(false)}
 					/>
+				</Container>
+			)}
+		</SwitchVariant>
+	);
+};
+
+NextUp.Loader = () => {
+	const { t } = useTranslation();
+
+	return (
+		<SwitchVariant>
+			{({ css }) => (
+				<Container
+					{...css({
+						marginY: ts(2),
+						borderRadius: 16,
+						overflow: "hidden",
+						borderWidth: ts(0.5),
+						borderStyle: "solid",
+						borderColor: (theme) => theme.background,
+						backgroundColor: (theme) => theme.background,
+					})}
+				>
+					<H2 {...css({ marginLeft: ts(2) })}>{t("show.nextUp")}</H2>
+					<EntryLine.Loader />
 				</Container>
 			)}
 		</SwitchVariant>
@@ -95,6 +117,16 @@ const SerieHeader = ({ children, ...props }: any) => {
 			)}
 		>
 			<Header kind="serie" slug={slug} />
+			<Fetch
+				// Use the same fetch query as header
+				query={Header.query("serie", slug)}
+				Render={(serie) => {
+					const nextEntry = (serie as Serie).nextEntry;
+					if (!nextEntry) return null;
+					return <NextUp {...nextEntry} />;
+				}}
+				Loader={NextUp.Loader}
+			/>
 			{/* <DetailsCollections type="serie" slug={slug} /> */}
 			{/* <Staff slug={slug} /> */}
 			<SvgWave

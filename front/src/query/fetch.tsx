@@ -9,8 +9,8 @@ export const Fetch = <Data,>({
 	Loader,
 }: {
 	query: QueryIdentifier<Data>;
-	Render: (item: Data) => ReactElement;
-	Loader: () => ReactElement;
+	Render: (item: Data) => ReactElement | null;
+	Loader: () => ReactElement | null;
 }): JSX.Element | null => {
 	const { data, isPaused, error } = useFetch(query);
 	const [setError] = useSetError("fetch");

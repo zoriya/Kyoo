@@ -67,7 +67,7 @@ export const SeasonHeader = ({
 							key={x.seasonNumber}
 							label={`${x.seasonNumber}: ${
 								x.name ?? t("show.season", { number: x.seasonNumber })
-							} (${x.entryCount})`}
+							} (${x.entriesCount})`}
 							href={`/series/${serieSlug}?season=${x.seasonNumber}`}
 						/>
 					))}
@@ -115,8 +115,8 @@ SeasonHeader.query = (slug: string): QueryIdentifier<Season> => ({
 	parser: Season,
 	path: ["api", "series", slug, "seasons"],
 	params: {
-		// Fetch all seasons at one, there won't be hundred of them anyways.
-		limit: 0,
+		// I don't wanna deal with pagination, no serie has more than 100 seasons anyways, right?
+		limit: 100,
 	},
 	infinite: true,
 });
@@ -128,7 +128,7 @@ export const EntryList = ({
 }: {
 	slug: string;
 	season: string | number;
-} & Partial<ComponentProps<typeof InfiniteFetch>>) => {
+} & Partial<ComponentProps<typeof InfiniteFetch<Entry>>>) => {
 	const { t } = useTranslation();
 	const { items: seasons, error } = useInfiniteFetch(SeasonHeader.query(slug));
 

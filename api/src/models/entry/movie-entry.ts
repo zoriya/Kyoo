@@ -18,7 +18,6 @@ export const BaseMovieEntry = t.Composite(
 		t.Object({
 			kind: t.Literal("movie"),
 			order: t.Number({
-				minimum: 1,
 				description: "Absolute playback order. Can be mixed with episodes.",
 			}),
 			externalId: ExternalId(),

@@ -15,7 +15,7 @@ import { BaseEntry, EntryTranslation } from "./base-entry";
 export const BaseEpisode = t.Composite([
 	t.Object({
 		kind: t.Literal("episode"),
-		order: t.Number({ minimum: 1, description: "Absolute playback order." }),
+		order: t.Number({ description: "Absolute playback order." }),
 		seasonNumber: t.Integer(),
 		episodeNumber: t.Integer(),
 		externalId: EpisodeId,

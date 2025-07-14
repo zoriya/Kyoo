@@ -12,7 +12,7 @@ export type Layout = {
 	layout: "grid" | "horizontal" | "vertical";
 };
 
-export const InfiniteFetch = <Data, Props>({
+export const InfiniteFetch = <Data,>({
 	query,
 	placeholderCount = 2,
 	incremental = false,
@@ -34,7 +34,7 @@ export const InfiniteFetch = <Data, Props>({
 	Empty?: JSX.Element;
 	incremental?: boolean;
 	divider?: true | ComponentType;
-	Header?: ComponentType<Props & { children: JSX.Element }> | ReactElement;
+	Header?: ComponentType<{ children: JSX.Element }> | ReactElement;
 	fetchMore?: boolean;
 }): JSX.Element | null => {
 	const { numColumns, size, gap } = useBreakpointMap(layout);
