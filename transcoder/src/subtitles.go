@@ -31,8 +31,7 @@ outer:
 		for codec, ext := range SubtitleExtensions {
 			if strings.HasSuffix(match, ext) {
 				link := fmt.Sprintf(
-					"%s/%s/direct/%s",
-					Settings.RoutePrefix,
+					"video/%s/direct/%s",
 					base64.RawURLEncoding.EncodeToString([]byte(match)),
 					filepath.Base(match),
 				)

@@ -109,8 +109,6 @@ For example, if your library is split into multiples paths you can edit the `vol
    restart: unless-stopped
    env_file:
      - ./.env
-   environment:
-     - GOCODER_PREFIX=/video
    volumes:
 -    - ${LIBRARY_ROOT}:/video:ro
 +    - /my_path/number1:/video/1:ro

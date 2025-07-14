@@ -256,8 +256,7 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 		}
 		if s.Extension != nil {
 			link := fmt.Sprintf(
-				"%s/%s/subtitle/%d.%s",
-				Settings.RoutePrefix,
+				"video/%s/subtitle/%d.%s",
 				base64.RawURLEncoding.EncodeToString([]byte(ret.Path)),
 				*s.Index,
 				*s.Extension,
