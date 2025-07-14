@@ -13,6 +13,6 @@ export type SeedEntry = SeedEpisode | SeedMovieEntry | SeedSpecial;
 export type EntryKind = Entry["kind"] | Extra["kind"];
 
 export * from "./episode";
+export * from "./extra";
 export * from "./movie-entry";
 export * from "./special";
-export * from "./extra";

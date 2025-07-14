@@ -1,7 +1,7 @@
 // oh i hate js dates so much.
 export const guessNextRefresh = (airDate: Date | string) => {
 	if (typeof airDate === "string") airDate = new Date(airDate);
-	const diff = new Date().getTime() - airDate.getTime();
+	const diff = Date.now() - airDate.getTime();
 	const days = diff / (24 * 60 * 60 * 1000);
 
 	const ret = new Date();

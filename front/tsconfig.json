@@ -1,0 +1,30 @@
+{
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"~/*": ["./src/*"]
+		},
+		"strict": true,
+		"rootDir": ".",
+		"noEmit": true,
+		"module": "Preserve",
+		"moduleResolution": "Bundler",
+		"target": "ES2017",
+		"preserveSymlinks": true,
+		"skipLibCheck": true,
+		"jsx": "react-jsx",
+		"forceConsistentCasingInFileNames": true,
+		"types": ["node", "react"],
+		"lib": ["dom", "esnext"]
+	},
+	"include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
+	"exclude": [
+		"node_modules",
+		".expo",
+		"**/test",
+		"**/dist",
+		"**/types",
+		"**/tests"
+	],
+	"extends": "expo/tsconfig.base"
+}

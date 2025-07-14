@@ -5,12 +5,12 @@ import {
 	jsonb,
 	primaryKey,
 	text,
-	timestamp,
 	unique,
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
 import type { Guess } from "~/models/video";
+import { timestamp } from "../utils";
 import { entries } from "./entries";
 import { schema } from "./utils";
 
@@ -25,10 +25,10 @@ export const videos = schema.table(
 		version: integer().notNull().default(1),
 		guess: jsonb().$type<Guess>().notNull(),
 
-		createdAt: timestamp({ withTimezone: true, mode: "string" })
+		createdAt: timestamp({ withTimezone: true, mode: "iso" })
 			.notNull()
-			.defaultNow(),
-		updatedAt: timestamp({ withTimezone: true, mode: "string" })
+			.default(sql`now()`),
+		updatedAt: timestamp({ withTimezone: true, mode: "iso" })
 			.notNull()
 			.$onUpdate(() => sql`now()`),
 	},

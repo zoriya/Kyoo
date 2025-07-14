@@ -24,7 +24,7 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 import { z } from "zod";
-import { ErrorView } from "../errors";
+import { ErrorView } from "../../../../src/ui/errors";
 import { SettingsContainer } from "../settings/base";
 
 import Info from "@material-symbols/svg-400/outlined/info.svg";

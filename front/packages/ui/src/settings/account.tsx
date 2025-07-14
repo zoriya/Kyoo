@@ -33,7 +33,7 @@ import { type ComponentProps, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { rem, useYoshiki } from "yoshiki/native";
-import { PasswordInput } from "../login/password-input";
+import { PasswordInput } from "../../../../src/ui/login/password-input";
 import { Preference, SettingsContainer } from "./base";
 
 import Username from "@material-symbols/svg-400/outlined/badge.svg";

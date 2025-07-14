@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { type Prettify, comment } from "~/utils";
+import { comment, type Prettify } from "~/utils";
 import { bubbleImages, madeInAbyss, registerExamples } from "../examples";
 import { Progress } from "../history";
 import {

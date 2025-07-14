@@ -1,17 +1,10 @@
-FROM node:18-alpine
-RUN apk add git bash
+FROM oven/bun
 WORKDIR /app
-COPY .yarn ./.yarn
-COPY .yarnrc.yml ./
-COPY package.json yarn.lock ./
-COPY apps/web/package.json apps/web/package.json
-COPY apps/mobile/package.json apps/mobile/package.json
-COPY packages/ui/package.json packages/ui/package.json
-COPY packages/primitives/package.json packages/primitives/package.json
-COPY packages/models/package.json packages/models/package.json
-RUN yarn --immutable
 
-ENV NEXT_TELEMETRY_DISABLED=1
-EXPOSE 3000
+COPY package.json bun.lock .
+RUN bun install --frozen-lockfile
+
+COPY . .
+
 EXPOSE 8081
-ENTRYPOINT ["yarn", "dev"]
+CMD ["bun", "dev"]

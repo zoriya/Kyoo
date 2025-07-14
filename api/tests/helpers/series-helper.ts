@@ -45,7 +45,11 @@ export const getSerie = async (
 export const getSeries = async ({
 	langs,
 	...query
-}: { langs?: string; preferOriginal?: boolean; with?: string[] }) => {
+}: {
+	langs?: string;
+	preferOriginal?: boolean;
+	with?: string[];
+}) => {
 	const resp = await handlers.handle(
 		new Request(buildUrl("series", query), {
 			method: "GET",

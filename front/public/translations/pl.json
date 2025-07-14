@@ -1,0 +1,282 @@
+{
+	"home": {
+		"recommended": "Polecane",
+		"watchlist": "Kontynuuj oglądanie",
+		"info": "Zobacz więcej",
+		"none": "Brak odcinków",
+		"watchlistLogin": "Żeby śledzić co było oglądane albo co planujesz oglądać musisz się zalogować.",
+		"refreshMetadata": "Odśwież metadane",
+		"news": "Nowości",
+		"episodeMore": {
+			"goToShow": "Idź do",
+			"download": "Pobrane",
+			"mediainfo": "Informacja o pliku"
+		}
+	},
+	"show": {
+		"play": "Odtwórz",
+		"trailer": "Odtwórz zwiastun",
+		"episode-none": "Brak odcinków w tym sezonie",
+		"genre-none": "Nie przypisane",
+		"staff-none": "Obsada jest nieznana",
+		"watchlistMark": {
+			"planned": "Oznacz jako zaplanowane",
+			"completed": "Oznacz jako zakończone",
+			"watching": "Oznacz jako oglądany",
+			"dropped": "Oznacz jako anulowany",
+			"null": "Oznacz jako nieobejrzane"
+		},
+		"season": "Sezon {{number}}",
+		"studio": "Studio",
+		"genre": "Gatunek",
+		"staff": "Obsada",
+		"noOverview": "Brak dostępnego podsumowania",
+		"episodeNoMetadata": "Brak dostępnych metadanych",
+		"tags": "Tagi",
+		"links": "Linki",
+		"jumpToSeason": "Idź do sezonu",
+		"partOf": "Część",
+		"watchlistAdd": "Dodaj do listy obserwowanych",
+		"watchlistEdit": "Edytuj status obserwowanych",
+		"watchlistRemove": "Oznacz jako nie oglądane",
+		"watchlistLogin": "Zaloguj się, aby dodać do listy obserwowanych",
+		"nextUp": "Następny"
+	},
+	"settings": {
+		"about": {
+			"git": {
+				"description": "Otwórz repozytorium github gdzie możesz przejrzeć kod kyoo",
+				"label": "Github"
+			},
+			"label": "Info",
+			"android-app": {
+				"label": "Android apk",
+				"description": "Pobierz aplikację na androida"
+			}
+		},
+		"oidc": {
+			"connected": "Połączony jako {{username}}.",
+			"delete": "Odłączenie konta kyoo od konta {{provider}}",
+			"link": "Połącz",
+			"label": "Połączone konta",
+			"not-connected": "Rozłączony",
+			"open-profile": "Otwórz swój {{provider}} profil"
+		},
+		"general": {
+			"theme": {
+				"dark": "Ciemny",
+				"label": "Temat",
+				"auto": "System",
+				"light": "Jasny",
+				"description": "Wybierz motyw"
+			},
+			"language": {
+				"label": "Język",
+				"description": "Ustaw język",
+				"system": "Język systemu"
+			},
+			"label": "Ogólne"
+		},
+		"account": {
+			"username": {
+				"label": "Nazwa użytkownika"
+			},
+			"label": "Konto",
+			"avatar": {
+				"label": "Miniatura",
+				"description": "Zmiana miniatury profilu"
+			},
+			"password": {
+				"newPassword": "Nowe hasło",
+				"label": "Hasło",
+				"description": "Zmień hasło",
+				"oldPassword": "Stare hasło"
+			},
+			"email": {
+				"label": "Poczta"
+			}
+		},
+		"playback": {
+			"label": "Odtwarzanie",
+			"playmode": {
+				"label": "Domyślny tryb odtwarzania",
+				"description": "Domyślny tryb odtwarzania używany na tym kliencie. Naturalny jest lżejszy, ale nie pozwala na automatyczne zmiany jakości."
+			},
+			"audioLanguage": {
+				"label": "Język ścieżki dźwiękowej",
+				"description": "Domyślny język audio używany podczas odtwarzania filmów z wieloma językami"
+			},
+			"subtitleLanguage": {
+				"label": "Język napisów",
+				"description": "Domyślny język napisów",
+				"none": "Bez"
+			}
+		}
+	},
+	"player": {
+		"fullscreen": "Pełny ekran",
+		"pause": "Pauza",
+		"back": "Wróć",
+		"direct": "Normalny",
+		"transmux": "Oryginalny",
+		"subtitle-none": "Brak",
+		"auto": "Automatyczny",
+		"unsupportedError": "Kodek wideo nie jest obsługiwany, trwa transkodowanie...",
+		"previous": "Poprzedni odcinek",
+		"next": "Następny odcinek",
+		"play": "Start",
+		"mute": "Wycisz",
+		"volume": "Głośność",
+		"quality": "Jakość",
+		"audios": "Dźwięk",
+		"subtitles": "Napisy",
+		"notInPristine": "Niedostępne w wersji normalnej"
+	},
+	"login": {
+		"register": "Zarejestruj",
+		"guest": "Kontynuuj jako gość",
+		"guest-forbidden": "Ta instancja kyoo nie zezwala na korzystanie jako gość",
+		"via": "Kontynuuj z {{provider}}",
+		"add-account": "Dodaj konto",
+		"logout": "Wyloguj",
+		"server": "Adres serwera",
+		"email": "Email",
+		"username": "Nazwa użytkownika",
+		"password": "Hasło",
+		"confirm": "Powtórz hasło",
+		"delete": "Usuń konto",
+		"login": "Zaloguj się",
+		"or-register": "Nie masz konta? <1>Register</1>.",
+		"or-login": "Posiadasz konto? <1>Log in</1>.",
+		"password-no-match": "Hasła nie są takie same.",
+		"delete-confirmation": "Ta akcja nie może zostać cofnięta. Napewno chcesz to zrobić?"
+	},
+	"errors": {
+		"unknown": "Nieznany błąd",
+		"try-again": "Spróbuj ponownie",
+		"re-login": "Zaloguj się ponownie",
+		"unauthorized": "Brakuje ci uprawnień {{permission}} aby otworzyć tę stronę.",
+		"setup": {
+			"MissingAdminAccount": "Konto administratora nie zostało jeszcze stworzone. Zarejestruj się aby je stworzyć.",
+			"NoVideoFound": "Żaden film nie został jeszcze znaleziony. Dodaj filmy lub seriale do twojego folderu biblioteki aby je tu wyświetlić!"
+		},
+		"offline": "Brak połączenia z internetem. Spróbuj ponownie później.",
+		"connection": "Nie udało się połączyć z serwerami kyoo",
+		"connection-tips": "Wskazówki dotyczące rozwiązywania problemów:\n- Czy masz połączenie z Internetem?\n- Czy serwer kyoo jest online?\n- Czy twoje konto zostało zablokowane?",
+		"needVerification": "Twoje konto musi zostać zweryfikowane przez administratora twojego serweru, zanim będziesz mógł go używać.",
+		"needAccount": "Aby odwiedzić tę stronę musisz zalogować się lub stworzyć konto."
+	},
+	"browse": {
+		"sortkey": {
+			"startAir": "Początek emisji",
+			"relevance": "Nowość",
+			"airDate": "Data emisji",
+			"name": "Nazwa",
+			"endAir": "Koniec emisji",
+			"createdAt": "Data dodania",
+			"rating": "Ocena"
+		},
+		"sortord": {
+			"desc": "malejąco",
+			"asc": "rosnąco"
+		},
+		"switchToGrid": "Widok siatki",
+		"switchToList": "Widok listy",
+		"sortby-tt": "Sortuj",
+		"sortby": "Sortuj według {{key}}",
+		"mediatypekey": {
+			"all": "Wszystko",
+			"movie": "Filmy",
+			"collection": "Kolekcja",
+			"serie": "Seriale"
+		},
+		"mediatype-tt": "Typ",
+		"mediatypelabel": "Typ"
+	},
+	"misc": {
+		"more": "Więcej",
+		"expand": "Rozwiń",
+		"collapse": "Zwiń",
+		"edit": "Edytuj",
+		"or": "LUB",
+		"loading": "Wczytuję",
+		"settings": "Ustawienia",
+		"prev-page": "Wstecz",
+		"next-page": "Dalej",
+		"delete": "Usuń",
+		"cancel": "Anuluj"
+	},
+	"search": {
+		"empty": "Nie znaleziono wyniku. Spróbuj użyć innego zapytania."
+	},
+	"genres": {
+		"Action": "Akcja",
+		"Adventure": "Przygodowy",
+		"Animation": "Animacja",
+		"Comedy": "Komedia",
+		"Crime": "Kryminał",
+		"Documentary": "Dokument",
+		"Drama": "Dramat",
+		"Family": "Rodzinny",
+		"Fantasy": "Fantastyka",
+		"History": "Historyczny",
+		"Horror": "Horror",
+		"Music": "Muzyczny",
+		"Mystery": "Tajemnica",
+		"Romance": "Romans",
+		"ScienceFiction": "Sci-Fi",
+		"Thriller": "Dreszczowiec",
+		"War": "Wojenny",
+		"Western": "Dziki Zachód",
+		"Kids": "Dziecięcy",
+		"News": "Nowy",
+		"Reality": "Realny",
+		"Soap": "Opera mydlana",
+		"Talk": "Dyskusja",
+		"Politics": "Polityczny"
+	},
+	"navbar": {
+		"home": "Ekran Główny",
+		"browse": "Przeglądaj",
+		"search": "Wyszukaj",
+		"login": "Zaloguj się",
+		"admin": "Panel Administratora",
+		"download": "Pobierz"
+	},
+	"downloads": {
+		"delete": "Usuń",
+		"empty": "Nic jeszcze nie pobrano, zacznij przeglądać w celu znalezienia czegoś, co Ci się podoba",
+		"deleteMessage": "Chcesz usunąć ten element z lokalnej pamięci?",
+		"pause": "Zatrzymaj",
+		"resume": "Wznów",
+		"retry": "Ponów",
+		"error": "Błąd:{{error}}"
+	},
+	"mediainfo": {
+		"audio": "Audio",
+		"subtitles": "Napisy",
+		"default": "Domyślne",
+		"duration": "Czas trwania",
+		"size": "Rozmiar",
+		"novideo": "Brak filmu",
+		"forced": "Wymuszony",
+		"video": "Wideo",
+		"file": "Plik"
+	},
+	"admin": {
+		"users": {
+			"adminUser": "Administrator",
+			"regularUser": "Użytkownik",
+			"set-permissions": "Nadawanie uprawnień",
+			"delete": "Usuń użytkownika",
+			"unverifed": "Niezweryfikowany",
+			"verify": "Zweryfikuj użytkownika",
+			"label": "Użytkownicy"
+		},
+		"scanner": {
+			"label": "Skaner",
+			"scan": "Wywołaj skanowanie biblioteki",
+			"empty": "Nie znaleziono błędów. Wszystkie elementy są zarejestrowane."
+		}
+	}
+}

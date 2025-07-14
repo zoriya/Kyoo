@@ -1,4 +1,4 @@
-import { type SQL, and, desc, eq, isNotNull, ne, sql } from "drizzle-orm";
+import { and, desc, eq, isNotNull, ne, type SQL, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { auth } from "~/auth";
 import { db } from "~/db";
@@ -31,14 +31,14 @@ import { KError } from "~/models/error";
 import { madeInAbyss } from "~/models/examples";
 import {
 	AcceptLanguage,
+	createPage,
 	Filter,
 	type FilterDef,
-	Page,
-	Sort,
-	createPage,
 	isUuid,
 	keysetPaginate,
+	Page,
 	processLanguages,
+	Sort,
 	sortToSql,
 } from "~/models/utils";
 import { desc as description } from "~/models/utils/descriptions";
@@ -146,7 +146,7 @@ export const mapProgress = ({ aliased }: { aliased: boolean }) => {
 	const ret = {
 		time: coalesce(time, sql<number>`0`),
 		percent: coalesce(percent, sql<number>`0`),
-		playedDate: sql<string>`${playedDate}`,
+		playedDate: sql`to_char(${playedDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
 		videoId: sql<string>`${videoId}`,
 	};
 	if (!aliased) return ret;

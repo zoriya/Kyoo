@@ -63,59 +63,6 @@ import { withTranslations } from "../i18n";
 
 const font = Poppins({ weight: ["300", "400", "900"], subsets: ["latin"], display: "swap" });
 
-const GlobalCssTheme = () => {
-	const theme = useTheme();
-	return (
-		<>
-			<style jsx global>{`
-				body {
-					margin: 0px;
-					padding: 0px;
-					overflow: "hidden";
-					background-color: ${theme.background};
-					font-family: ${font.style.fontFamily};
-				}
-
-				*::-webkit-scrollbar {
-					height: 6px;
-					width: 6px;
-					background: transparent;
-				}
-
-				*::-webkit-scrollbar-thumb {
-					background-color: #999;
-					border-radius: 90px;
-				}
-				*:hover::-webkit-scrollbar-thumb {
-					background-color: rgb(134, 127, 127);
-				}
-
-				#__next {
-					height: 100vh;
-				}
-
-				.infinite-scroll-component__outerdiv {
-					width: 100%;
-					height: 100%;
-				}
-
-				::cue {
-					background-color: transparent;
-					text-shadow:
-						-1px -1px 0 #000,
-						1px -1px 0 #000,
-						-1px 1px 0 #000,
-						1px 1px 0 #000;
-				}
-			`}</style>
-			<WebTooltip theme={theme} />
-			<SkeletonCss />
-			<TouchOnlyCss />
-			<HiddenIfNoJs />
-		</>
-	);
-};
-
 const YoshikiDebug = ({ children }: { children: JSX.Element }) => {
 	if (typeof window === "undefined") return children;
 	const registry = useStyleRegistry();

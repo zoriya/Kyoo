@@ -1,4 +1,4 @@
-import { type SQL, and, eq, exists, gt, ne, sql } from "drizzle-orm";
+import { and, eq, exists, ne, type SQL, sql } from "drizzle-orm";
 import { db } from "~/db";
 import {
 	entries,
@@ -6,10 +6,10 @@ import {
 	entryVideoJoin,
 	profiles,
 	showStudioJoin,
-	showTranslations,
 	shows,
-	studioTranslations,
+	showTranslations,
 	studios,
+	studioTranslations,
 	videos,
 } from "~/db/schema";
 import { watchlist } from "~/db/schema/watchlist";
@@ -26,12 +26,12 @@ import type { MovieStatus } from "~/models/movie";
 import { SerieStatus, type SerieTranslation } from "~/models/serie";
 import type { Studio } from "~/models/studio";
 import {
+	buildRelations,
 	type FilterDef,
 	Genre,
 	type Image,
-	Sort,
-	buildRelations,
 	keysetPaginate,
+	Sort,
 	sortToSql,
 } from "~/models/utils";
 import type { EmbeddedVideo } from "~/models/video";
@@ -49,6 +49,11 @@ export const watchStatusQ = db
 	.as("watchstatus");
 
 export const showFilters: FilterDef = {
+	kind: {
+		column: shows.kind,
+		type: "enum",
+		values: ["serie", "movie", "collection"],
+	},
 	genres: {
 		column: shows.genres,
 		type: "enum",
@@ -81,6 +86,11 @@ export const showFilters: FilterDef = {
 export const showSort = Sort(
 	{
 		slug: shows.slug,
+		name: {
+			sql: sql.raw(`t.${showTranslations.name.name}`),
+			isNullable: false,
+			accessor: (x) => x.name,
+		},
 		rating: shows.rating,
 		airDate: shows.startAir,
 		startAir: shows.startAir,
@@ -111,7 +121,7 @@ const showRelations = {
 			.as("translations");
 	},
 	studios: ({ languages }: { languages: string[] }) => {
-		const { pk: _, ...studioCol } = getColumns(studios);
+		const { pk: _, createdAt, updatedAt, ...studioCol } = getColumns(studios);
 		const studioTransQ = db
 			.selectDistinctOn([studioTranslations.pk])
 			.from(studioTranslations)
@@ -125,7 +135,14 @@ const showRelations = {
 		return db
 			.select({
 				json: coalesce(
-					jsonbAgg(jsonbBuildObject<Studio>({ ...studioTrans, ...studioCol })),
+					jsonbAgg(
+						jsonbBuildObject<Studio>({
+							...studioTrans,
+							...studioCol,
+							createdAt: sql`to_char(${createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+							updatedAt: sql`to_char(${updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+						}),
+					),
 					sql`'[]'::jsonb`,
 				).as("json"),
 			})
@@ -261,6 +278,8 @@ export async function getShows({
 		.orderBy(
 			showTranslations.pk,
 			sql`array_position(${sqlarr(languages)}, ${showTranslations.language})`,
+			// ensure a stable sort to prevent future pages to contains the same element again
+			showTranslations.language,
 		)
 		.as("t");
 

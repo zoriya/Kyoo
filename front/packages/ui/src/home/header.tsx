@@ -37,7 +37,7 @@ import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { percent, rem, useYoshiki } from "yoshiki/native";
-import { Header as DetailsHeader } from "../details/header";
+import { Header as DetailsHeader } from "../../../../src/ui/details/header";
 import type { WithLoading } from "../fetch";
 
 export const Header = ({

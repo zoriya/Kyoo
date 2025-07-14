@@ -1,0 +1,285 @@
+{
+	"home": {
+		"recommended": "推荐",
+		"news": "新闻",
+		"watchlist": "继续观看",
+		"info": "查看更多",
+		"none": "没有剧集",
+		"watchlistLogin": "要跟踪您观看或计划观看的内容，您需要登录。",
+		"episodeMore": {
+			"goToShow": "转到节目",
+			"download": "下载",
+			"mediainfo": "查看文件信息"
+		},
+		"refreshMetadata": "刷新元数据"
+	},
+	"show": {
+		"play": "播放",
+		"trailer": "播放预告片",
+		"studio": "制作公司",
+		"genre": "类型",
+		"genre-none": "无类型",
+		"staff": "制作人员",
+		"staff-none": "未知制作人员",
+		"noOverview": "暂无简介",
+		"episode-none": "本季无剧集",
+		"episodeNoMetadata": "无元数据",
+		"tags": "标签",
+		"links": "链接",
+		"jumpToSeason": "跳转到季度",
+		"partOf": "属于",
+		"watchlistAdd": "添加到计划观看列表",
+		"watchlistEdit": "编辑观看状态",
+		"watchlistRemove": "标记为未观看",
+		"watchlistLogin": "登录以添加到您的观看列表",
+		"watchlistMark": {
+			"completed": "标记为已完成",
+			"planned": "标记为已计划",
+			"watching": "标记为正在观看",
+			"dropped": "标记为已放弃",
+			"null": "标记为未观看"
+		},
+		"nextUp": "下一集",
+		"season": "第{{number}}季"
+	},
+	"browse": {
+		"sortby": "按{{key}}排序",
+		"sortby-tt": "排序方式",
+		"sortkey": {
+			"relevance": "相关性",
+			"name": "名称",
+			"airDate": "播出日期",
+			"startAir": "开始播出日期",
+			"endAir": "结束播出日期",
+			"createdAt": "添加日期",
+			"rating": "评分"
+		},
+		"sortord": {
+			"asc": "升序",
+			"desc": "降序"
+		},
+		"switchToGrid": "切换到网格视图",
+		"switchToList": "切换到列表视图",
+		"mediatypekey": {
+			"all": "全部",
+			"movie": "电影",
+			"collection": "集合",
+			"serie": "系列"
+		},
+		"mediatype-tt": "媒体类型",
+		"mediatypelabel": "媒体类型"
+	},
+	"misc": {
+		"settings": "设置",
+		"prev-page": "上一页",
+		"next-page": "下一页",
+		"delete": "删除",
+		"cancel": "取消",
+		"more": "更多",
+		"expand": "展开",
+		"collapse": "收起",
+		"edit": "编辑",
+		"or": "或",
+		"loading": "加载中"
+	},
+	"navbar": {
+		"home": "首页",
+		"browse": "浏览",
+		"search": "搜索",
+		"login": "登录",
+		"admin": "管理员面板",
+		"download": "下载"
+	},
+	"settings": {
+		"general": {
+			"label": "常规",
+			"theme": {
+				"label": "主题",
+				"description": "设置应用程序的主题",
+				"auto": "跟随系统",
+				"light": "明亮",
+				"dark": "暗黑"
+			},
+			"language": {
+				"label": "语言",
+				"description": "设置应用程序的语言",
+				"system": "跟随系统"
+			}
+		},
+		"playback": {
+			"label": "播放",
+			"playmode": {
+				"label": "默认播放模式",
+				"description": "该客户端使用的默认播放模式。原始模式对服务器负担较轻，但不允许自动调整画质。"
+			},
+			"audioLanguage": {
+				"label": "音频语言",
+				"description": "播放多音频视频时使用的默认音频语言"
+			},
+			"subtitleLanguage": {
+				"label": "字幕语言",
+				"description": "使用的默认字幕语言",
+				"none": "无"
+			}
+		},
+		"account": {
+			"label": "账户",
+			"username": {
+				"label": "用户名"
+			},
+			"avatar": {
+				"label": "头像",
+				"description": "更改您的个人资料图标"
+			},
+			"email": {
+				"label": "邮箱"
+			},
+			"password": {
+				"label": "密码",
+				"description": "更改您的密码",
+				"oldPassword": "旧密码",
+				"newPassword": "新密码"
+			}
+		},
+		"oidc": {
+			"label": "已链接的账户",
+			"connected": "已连接为{{username}}。",
+			"not-connected": "未连接",
+			"open-profile": "打开您的{{provider}}个人资料",
+			"link": "链接",
+			"delete": "取消与您的{{provider}}账户的链接"
+		},
+		"about": {
+			"label": "关于",
+			"android-app": {
+				"label": "Android 应用",
+				"description": "下载 Android 应用程序"
+			},
+			"git": {
+				"label": "Github",
+				"description": "打开 GitHub 仓库，您可以浏览 kyoo 的代码"
+			}
+		}
+	},
+	"player": {
+		"back": "返回",
+		"previous": "上一集",
+		"next": "下一集",
+		"play": "播放",
+		"pause": "暂停",
+		"mute": "静音",
+		"volume": "音量",
+		"quality": "画质",
+		"audios": "音频",
+		"subtitles": "字幕",
+		"subtitle-none": "无",
+		"fullscreen": "全屏",
+		"direct": "原始",
+		"transmux": "转换",
+		"auto": "自动",
+		"notInPristine": "原始模式不可用",
+		"unsupportedError": "视频编解码器不支持，正在转码中..."
+	},
+	"search": {
+		"empty": "未找到结果，请尝试不同的查询。"
+	},
+	"login": {
+		"login": "登录",
+		"register": "注册",
+		"guest": "以访客身份继续",
+		"guest-forbidden": "此 kyoo 实例不允许访客",
+		"via": "继续使用{{provider}}",
+		"add-account": "添加账户",
+		"logout": "退出",
+		"server": "服务器地址",
+		"email": "邮箱",
+		"username": "用户名",
+		"password": "密码",
+		"confirm": "确认密码",
+		"or-register": "还没有账户？<1>注册</1>。",
+		"or-login": "已有账户？<1>登录</1>。",
+		"password-no-match": "密码不匹配。",
+		"delete": "删除您的账户",
+		"delete-confirmation": "此操作无法撤销。您确定吗？"
+	},
+	"downloads": {
+		"empty": "尚未下载任何内容，请开始浏览您喜欢的内容",
+		"error": "错误：{{error}}",
+		"delete": "删除项目",
+		"deleteMessage": "您是否要从本地存储中删除此项目？",
+		"pause": "暂停",
+		"resume": "恢复",
+		"retry": "重试"
+	},
+	"errors": {
+		"connection": "无法连接到 kyoo 服务器",
+		"connection-tips": "故障排除提示：\n - 您是否已连接到互联网？\n - 您的 kyoo 服务器是否在线？\n - 您的账户是否已被禁止？",
+		"unknown": "未知错误",
+		"try-again": "请重试",
+		"re-login": "重新登录",
+		"offline": "您未连接到互联网。请稍后重试。",
+		"unauthorized": "您缺少访问此页面所需的权限 {{permission}}。",
+		"needVerification": "您的帐户需要服务器管理员验证才能使用。",
+		"needAccount": "无法以访客模式访问此页面。您需要创建一个帐户或登录。",
+		"setup": {
+			"MissingAdminAccount": "尚未创建管理员帐户。请注册一个。",
+			"NoVideoFound": "未找到任何视频。将电影或连续剧添加到媒体库的文件夹中，以便在此处显示!"
+		}
+	},
+	"mediainfo": {
+		"file": "文件",
+		"container": "容器",
+		"video": "视频",
+		"audio": "音频",
+		"subtitles": "字幕",
+		"forced": "强制",
+		"default": "默认",
+		"duration": "时长",
+		"size": "大小",
+		"novideo": "无视频",
+		"nocontainer": "无效容器",
+		"external": "外部"
+	},
+	"admin": {
+		"users": {
+			"label": "用户",
+			"adminUser": "管理员",
+			"regularUser": "普通用户",
+			"set-permissions": "设置权限",
+			"delete": "删除用户",
+			"unverifed": "未验证",
+			"verify": "验证用户"
+		},
+		"scanner": {
+			"label": "扫描器",
+			"empty": "未发现问题。所有项目均已注册。",
+			"scan": "触发媒体库扫描"
+		}
+	},
+	"genres": {
+		"Action": "动作片",
+		"Adventure": "冒险",
+		"Animation": "动漫",
+		"Comedy": "喜剧片",
+		"Crime": "犯罪片",
+		"Documentary": "纪录片",
+		"Drama": "戏剧",
+		"Family": "家庭",
+		"Fantasy": "奇幻",
+		"History": "历史",
+		"Horror": "恐怖",
+		"Music": "音乐",
+		"Mystery": "悬疑",
+		"Romance": "浪漫",
+		"ScienceFiction": "科幻",
+		"Thriller": "惊悚",
+		"War": "战争",
+		"Western": "西部",
+		"Kids": "儿童",
+		"News": "新闻",
+		"Reality": "现实",
+		"Soap": "肥皂剧",
+		"Talk": "访谈",
+		"Politics": "政治"
+	}
+}

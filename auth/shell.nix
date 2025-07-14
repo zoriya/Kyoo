@@ -10,6 +10,6 @@ pkgs.mkShell {
     postgresql_15
     pgformatter
     # to run tests
-    hurl
+    # hurl
   ];
 }
