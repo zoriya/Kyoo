@@ -1,15 +1,34 @@
 package api
 
 import (
+	"crypto/sha1"
+	"encoding/base64"
+	"encoding/hex"
+	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/zoriya/kyoo/transcoder/src"
 )
 
-type handler struct {
+type shandler struct {
 	transcoder *src.Transcoder
+}
+
+func RegisterStreamHandlers(e *echo.Group, transcoder *src.Transcoder) {
+	h := shandler{transcoder}
+
+	e.GET("/:path/direct", DirectStream)
+	e.GET("/:path/direct/:identifier", DirectStream)
+	e.GET("/:path/master.m3u8", h.GetMaster)
+	e.GET("/:path/:video/:quality/index.m3u8", h.GetVideoIndex)
+	e.GET("/:path/audio/:audio/index.m3u8", h.GetAudioIndex)
+	e.GET("/:path/:video/:quality/:chunk", h.GetVideoSegment)
+	e.GET("/:path/audio/:audio/:chunk", h.GetAudioSegment)
 }
 
 // @Summary      Direct video
@@ -24,7 +43,7 @@ type handler struct {
 // @Success      206  file   "Video file (supports byte-requests)"
 // @Router /:path/direct [get]
 func DirectStream(c echo.Context) error {
-	path, _, err := GetPath(c)
+	path, _, err := getPath(c)
 	if err != nil {
 		return err
 	}
@@ -42,12 +61,12 @@ func DirectStream(c echo.Context) error {
 //
 // @Success      200  file   "Master playlist with all available stream qualities"
 // @Router  /:path/master.m3u8 [get]
-func (h *handler) GetMaster(c echo.Context) error {
-	client, err := GetClientId(c)
+func (h *shandler) GetMaster(c echo.Context) error {
+	client, err := getClientId(c)
 	if err != nil {
 		return err
 	}
-	path, sha, err := GetPath(c)
+	path, sha, err := getPath(c)
 	if err != nil {
 		return err
 	}
@@ -69,7 +88,7 @@ func (h *handler) GetMaster(c echo.Context) error {
 //
 // PRIVATE ROUTE (not documented in swagger, can change at any time)
 // Only reached via the master.m3u8.
-func (h *handler) GetVideoIndex(c echo.Context) error {
+func (h *shandler) GetVideoIndex(c echo.Context) error {
 	video, err := strconv.ParseInt(c.Param("video"), 10, 32)
 	if err != nil {
 		return err
@@ -78,11 +97,11 @@ func (h *handler) GetVideoIndex(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	client, err := GetClientId(c)
+	client, err := getClientId(c)
 	if err != nil {
 		return err
 	}
-	path, sha, err := GetPath(c)
+	path, sha, err := getPath(c)
 	if err != nil {
 		return err
 	}
@@ -104,16 +123,16 @@ func (h *handler) GetVideoIndex(c echo.Context) error {
 //
 // PRIVATE ROUTE (not documented in swagger, can change at any time)
 // Only reached via the master.m3u8.
-func (h *handler) GetAudioIndex(c echo.Context) error {
+func (h *shandler) GetAudioIndex(c echo.Context) error {
 	audio, err := strconv.ParseInt(c.Param("audio"), 10, 32)
 	if err != nil {
 		return err
 	}
-	client, err := GetClientId(c)
+	client, err := getClientId(c)
 	if err != nil {
 		return err
 	}
-	path, sha, err := GetPath(c)
+	path, sha, err := getPath(c)
 	if err != nil {
 		return err
 	}
@@ -133,7 +152,7 @@ func (h *handler) GetAudioIndex(c echo.Context) error {
 //
 // PRIVATE ROUTE (not documented in swagger, can change at any time)
 // Only reached via the master.m3u8.
-func (h *handler) GetVideoSegment(c echo.Context) error {
+func (h *shandler) GetVideoSegment(c echo.Context) error {
 	video, err := strconv.ParseInt(c.Param("video"), 10, 32)
 	if err != nil {
 		return err
@@ -142,15 +161,15 @@ func (h *handler) GetVideoSegment(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	segment, err := ParseSegment(c.Param("chunk"))
+	segment, err := parseSegment(c.Param("chunk"))
 	if err != nil {
 		return err
 	}
-	client, err := GetClientId(c)
+	client, err := getClientId(c)
 	if err != nil {
 		return err
 	}
-	path, sha, err := GetPath(c)
+	path, sha, err := getPath(c)
 	if err != nil {
 		return err
 	}
@@ -178,20 +197,20 @@ func (h *handler) GetVideoSegment(c echo.Context) error {
 //
 // PRIVATE ROUTE (not documented in swagger, can change at any time)
 // Only reached via the master.m3u8.
-func (h *handler) GetAudioSegment(c echo.Context) error {
+func (h *shandler) GetAudioSegment(c echo.Context) error {
 	audio, err := strconv.ParseInt(c.Param("audio"), 10, 32)
 	if err != nil {
 		return err
 	}
-	segment, err := ParseSegment(c.Param("chunk"))
+	segment, err := parseSegment(c.Param("chunk"))
 	if err != nil {
 		return err
 	}
-	client, err := GetClientId(c)
+	client, err := getClientId(c)
 	if err != nil {
 		return err
 	}
-	path, sha, err := GetPath(c)
+	path, sha, err := getPath(c)
 	if err != nil {
 		return err
 	}
@@ -203,14 +222,62 @@ func (h *handler) GetAudioSegment(c echo.Context) error {
 	return c.File(ret)
 }
 
-func RegisterStreamHandlers(e *echo.Group, transcoder *src.Transcoder) {
-	h := handler{transcoder}
+func getPath(c echo.Context) (string, string, error) {
+	key := c.Param("path")
+	if key == "" {
+		return "", "", echo.NewHTTPError(http.StatusBadRequest, "Missing resouce path.")
+	}
+	pathb, err := base64.RawURLEncoding.DecodeString(key)
+	if err != nil {
+		return "", "", echo.NewHTTPError(http.StatusBadRequest, "Invalid path. Should be base64url (without padding) encoded.")
+	}
+	path := filepath.Clean(string(pathb))
+	if !filepath.IsAbs(path) {
+		return "", "", echo.NewHTTPError(http.StatusBadRequest, "Absolute path required.")
+	}
+	if !strings.HasPrefix(path, src.Settings.SafePath) {
+		return "", "", echo.NewHTTPError(http.StatusBadRequest, "Selected path is not marked as safe.")
+	}
+	hash, err := getHash(path)
+	if err != nil {
+		return "", "", echo.NewHTTPError(http.StatusNotFound, "File does not exist")
+	}
 
-	e.GET("/:path/direct", DirectStream)
-	e.GET("/:path/direct/:identifier", DirectStream)
-	e.GET("/:path/master.m3u8", h.GetMaster)
-	e.GET("/:path/:video/:quality/index.m3u8", h.GetVideoIndex)
-	e.GET("/:path/audio/:audio/index.m3u8", h.GetAudioIndex)
-	e.GET("/:path/:video/:quality/:chunk", h.GetVideoSegment)
-	e.GET("/:path/audio/:audio/:chunk", h.GetAudioSegment)
+	return path, hash, nil
+}
+
+func getHash(path string) (string, error) {
+	info, err := os.Stat(path)
+	if err != nil {
+		return "", err
+	}
+	h := sha1.New()
+	h.Write([]byte(path))
+	h.Write([]byte(info.ModTime().String()))
+	sha := hex.EncodeToString(h.Sum(nil))
+	return sha, nil
+}
+
+func sanitizePath(path string) error {
+	if strings.Contains(path, "/") || strings.Contains(path, "..") {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid parameter. Can't contains path delimiters or ..")
+	}
+	return nil
+}
+
+func getClientId(c echo.Context) (string, error) {
+	key := c.Request().Header.Get("X-CLIENT-ID")
+	if key == "" {
+		return "", echo.NewHTTPError(http.StatusBadRequest, "missing client id. Please specify the X-CLIENT-ID header to a guid constant for the lifetime of the player (but unique per instance)")
+	}
+	return key, nil
+}
+
+func parseSegment(segment string) (int32, error) {
+	var ret int32
+	_, err := fmt.Sscanf(segment, "segment-%d.ts", &ret)
+	if err != nil {
+		return 0, echo.NewHTTPError(http.StatusBadRequest, "Could not parse segment.")
+	}
+	return ret, nil
 }

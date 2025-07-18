@@ -25,6 +25,21 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
+func ErrorHandler(err error, c echo.Context) {
+	code := http.StatusInternalServerError
+	var message string
+	if he, ok := err.(*echo.HTTPError); ok {
+		code = he.Code
+		message = fmt.Sprint(he.Message)
+	} else {
+		c.Logger().Error(err)
+		message = "Internal server error"
+	}
+	c.JSON(code, struct {
+		Errors []string `json:"errors"`
+	}{Errors: []string{message}})
+}
+
 // Identify
 //
 // Identify metadata about a file.
