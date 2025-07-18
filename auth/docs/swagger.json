@@ -43,7 +43,7 @@
                         "Token": []
                     }
                 ],
-                "description": "Convert a session token to a short lived JWT.",
+                "description": "Convert a session token or an API key to a short lived JWT.",
                 "produces": [
                     "application/json"
                 ],
@@ -66,6 +66,126 @@
                     },
                     "403": {
                         "description": "Invalid session token (or expired)",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    }
+                }
+            }
+        },
+        "/keys": {
+            "get": {
+                "security": [
+                    {
+                        "Jwt": [
+                            "apikeys.read"
+                        ]
+                    }
+                ],
+                "description": "List all api keys",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "apikeys"
+                ],
+                "summary": "List API keys",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.Page-main_ApiKey"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Jwt": [
+                            "apikeys.write"
+                        ]
+                    }
+                ],
+                "description": "Create a new API key",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "apikeys"
+                ],
+                "summary": "Create API key",
+                "parameters": [
+                    {
+                        "description": "Api key info",
+                        "name": "key",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/main.ApiKeyDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/main.ApiKeyWToken"
+                        }
+                    },
+                    "409": {
+                        "description": "Duplicated api key",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid create body",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Jwt": [
+                            "apikeys.write"
+                        ]
+                    }
+                ],
+                "description": "Delete an existing API key",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "apikeys"
+                ],
+                "summary": "Delete API key",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.ApiKey"
+                        }
+                    },
+                    "404": {
+                        "description": "Invalid id",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid id format",
                         "schema": {
                             "$ref": "#/definitions/main.KError"
                         }
@@ -557,6 +677,12 @@
                         "schema": {
                             "$ref": "#/definitions/main.KError"
                         }
+                    },
+                    "422": {
+                        "description": "Invalid id format",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
                     }
                 }
             },
@@ -620,6 +746,88 @@
         }
     },
     "definitions": {
+        "main.ApiKey": {
+            "type": "object",
+            "properties": {
+                "claims": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "example": {
+                        "isAdmin": " true"
+                    }
+                },
+                "createAt": {
+                    "type": "string",
+                    "example": "2025-03-29T18:20:05.267Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "e05089d6-9179-4b5b-a63e-94dd5fc2a397"
+                },
+                "lastUsed": {
+                    "type": "string",
+                    "example": "2025-03-29T18:20:05.267Z"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "myapp"
+                }
+            }
+        },
+        "main.ApiKeyDto": {
+            "type": "object",
+            "properties": {
+                "claims": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "example": {
+                        "isAdmin": " true"
+                    }
+                },
+                "name": {
+                    "type": "string",
+                    "example": "myapp"
+                }
+            }
+        },
+        "main.ApiKeyWToken": {
+            "type": "object",
+            "properties": {
+                "claims": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "example": {
+                        "isAdmin": " true"
+                    }
+                },
+                "createAt": {
+                    "type": "string",
+                    "example": "2025-03-29T18:20:05.267Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "e05089d6-9179-4b5b-a63e-94dd5fc2a397"
+                },
+                "lastUsed": {
+                    "type": "string",
+                    "example": "2025-03-29T18:20:05.267Z"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "myapp"
+                },
+                "token": {
+                    "type": "string",
+                    "example": "myapp-lyHzTYm9yi+pkEv3m2tamAeeK7Dj7N3QRP7xv7dPU5q9MAe8tU4ySwYczE0RaMr4fijsA=="
+                }
+            }
+        },
         "main.EditPasswordDto": {
             "type": "object",
             "required": [
@@ -753,6 +961,25 @@
                     "description": "Username of the user on the external service.",
                     "type": "string",
                     "example": "zoriya"
+                }
+            }
+        },
+        "main.Page-main_ApiKey": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/main.ApiKey"
+                    }
+                },
+                "next": {
+                    "type": "string",
+                    "example": "https://kyoo.zoriya.dev/auth/users?after=aoeusth"
+                },
+                "this": {
+                    "type": "string",
+                    "example": "https://kyoo.zoriya.dev/auth/users"
                 }
             }
         },
