@@ -18,6 +18,7 @@ const app = new Elysia()
 					{ slug: "kyoo", url: "/swagger/json" },
 					{ slug: "keibi", url: "/auth/swagger/doc.json" },
 					{ slug: "scanner", url: "/scanner/openapi.json" },
+					{ slug: "transcoder", url: "/video/swagger/doc.json" },
 				],
 			},
 			documentation: {

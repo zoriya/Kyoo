@@ -34,7 +34,7 @@ func RegisterMetadataHandlers(e *echo.Group, metadata *src.MetadataService) {
 // @Param        path  path   string    true  "Base64 of a video's path"  format(base64) example(L3ZpZGVvL2J1YmJsZS5ta3YK)
 //
 // @Success      200  {object}  src.MediaInfo   "Metadata info of the video."
-// @Router  /:path/info [get]
+// @Router       /:path/info [get]
 func (h *mhandler) GetInfo(c echo.Context) error {
 	path, sha, err := getPath(c)
 	if err != nil {
@@ -52,7 +52,7 @@ func (h *mhandler) GetInfo(c echo.Context) error {
 	return c.JSON(http.StatusOK, ret)
 }
 
-// @Summary  Get subtitle
+// @Summary      Get subtitle
 //
 // @Description  Get a specific subtitle.
 //
