@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"mime"
@@ -10,7 +9,10 @@ import (
 	"path/filepath"
 	"strconv"
 
+	_ "github.com/zoriya/kyoo/transcoder/docs"
+
 	"github.com/golang-jwt/jwt/v5"
+	echoSwagger "github.com/swaggo/echo-swagger"
 	"github.com/zoriya/kyoo/transcoder/src"
 	"github.com/zoriya/kyoo/transcoder/src/api"
 	"github.com/zoriya/kyoo/transcoder/src/utils"
@@ -22,176 +24,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
-
-// Direct video
-//
-// Retrieve the raw video stream, in the same container as the one on the server. No transcoding or
-// transmuxing is done.
-//
-// Path: /:path/direct
-func DirectStream(c echo.Context) error {
-	path, _, err := GetPath(c)
-	if err != nil {
-		return err
-	}
-	return c.File(path)
-}
-
-// Get master playlist
-//
-// Get a master playlist containing all possible video qualities and audios available for this resource.
-// Note that the direct stream is missing (since the direct is not an hls stream) and
-// subtitles/fonts are not included to support more codecs than just webvtt.
-//
-// Path: /:path/master.m3u8
-func (h *Handler) GetMaster(c echo.Context) error {
-	client, err := GetClientId(c)
-	if err != nil {
-		return err
-	}
-	path, sha, err := GetPath(c)
-	if err != nil {
-		return err
-	}
-
-	ret, err := h.transcoder.GetMaster(c.Request().Context(), path, client, sha)
-	if err != nil {
-		return err
-	}
-	return c.String(http.StatusOK, ret)
-}
-
-// Transcode video
-//
-// Transcode the video to the selected quality.
-// This route can take a few seconds to respond since it will way for at least one segment to be
-// available.
-//
-// Path: /:path/:video/:quality/index.m3u8
-func (h *Handler) GetVideoIndex(c echo.Context) error {
-	video, err := strconv.ParseInt(c.Param("video"), 10, 32)
-	if err != nil {
-		return err
-	}
-	quality, err := src.QualityFromString(c.Param("quality"))
-	if err != nil {
-		return err
-	}
-	client, err := GetClientId(c)
-	if err != nil {
-		return err
-	}
-	path, sha, err := GetPath(c)
-	if err != nil {
-		return err
-	}
-
-	ret, err := h.transcoder.GetVideoIndex(c.Request().Context(), path, uint32(video), quality, client, sha)
-	if err != nil {
-		return err
-	}
-	return c.String(http.StatusOK, ret)
-}
-
-// Transcode audio
-//
-// Get the selected audio
-// This route can take a few seconds to respond since it will way for at least one segment to be
-// available.
-//
-// Path: /:path/audio/:audio/index.m3u8
-func (h *Handler) GetAudioIndex(c echo.Context) error {
-	audio, err := strconv.ParseInt(c.Param("audio"), 10, 32)
-	if err != nil {
-		return err
-	}
-	client, err := GetClientId(c)
-	if err != nil {
-		return err
-	}
-	path, sha, err := GetPath(c)
-	if err != nil {
-		return err
-	}
-
-	ret, err := h.transcoder.GetAudioIndex(c.Request().Context(), path, uint32(audio), client, sha)
-	if err != nil {
-		return err
-	}
-	return c.String(http.StatusOK, ret)
-}
-
-// Get transmuxed chunk
-//
-// Retrieve a chunk of a transmuxed video.
-//
-// Path: /:path/:video/:quality/segments-:chunk.ts
-func (h *Handler) GetVideoSegment(c echo.Context) error {
-	video, err := strconv.ParseInt(c.Param("video"), 10, 32)
-	if err != nil {
-		return err
-	}
-	quality, err := src.QualityFromString(c.Param("quality"))
-	if err != nil {
-		return err
-	}
-	segment, err := ParseSegment(c.Param("chunk"))
-	if err != nil {
-		return err
-	}
-	client, err := GetClientId(c)
-	if err != nil {
-		return err
-	}
-	path, sha, err := GetPath(c)
-	if err != nil {
-		return err
-	}
-
-	ret, err := h.transcoder.GetVideoSegment(
-		c.Request().Context(),
-		path,
-		uint32(video),
-		quality,
-		segment,
-		client,
-		sha,
-	)
-	if err != nil {
-		return err
-	}
-	return c.File(ret)
-}
-
-// Get audio chunk
-//
-// Retrieve a chunk of a transcoded audio.
-//
-// Path: /:path/audio/:audio/segments-:chunk.ts
-func (h *Handler) GetAudioSegment(c echo.Context) error {
-	audio, err := strconv.ParseInt(c.Param("audio"), 10, 32)
-	if err != nil {
-		return err
-	}
-	segment, err := ParseSegment(c.Param("chunk"))
-	if err != nil {
-		return err
-	}
-	client, err := GetClientId(c)
-	if err != nil {
-		return err
-	}
-	path, sha, err := GetPath(c)
-	if err != nil {
-		return err
-	}
-
-	ret, err := h.transcoder.GetAudioSegment(c.Request().Context(), path, uint32(audio), segment, client, sha)
-	if err != nil {
-		return err
-	}
-	return c.File(ret)
-}
 
 // Identify
 //
@@ -362,27 +194,43 @@ func guessMimeType(path string, content any) (string, error) {
 	return mimeType, nil
 }
 
+// @title gocoder - Kyoo's transcoder
+// @version 1.0
+// @description Real time transcoder.
+
+// @contact.name Repository
+// @contact.url https://github.com/zoriya/kyoo
+
+// @license.name  GPL-3.0
+// @license.url https://www.gnu.org/licenses/gpl-3.0.en.html
+
+// @host kyoo.zoriya.dev
+// @BasePath /video
+
+// @securityDefinitions.apiKey Token
+// @in header
+// @name Authorization
+
+// @securityDefinitions.apiKey Jwt
+// @in header
+// @name Authorization
 func main() {
 	e := echo.New()
-
-	if err := run(e); err != nil {
-		e.Logger.Fatal(err)
-	}
-}
-
-func run(e *echo.Echo) (err error) {
 	e.Use(middleware.Logger())
+	e.GET("/video/swagger/*", echoSwagger.WrapHandler)
 	e.HTTPErrorHandler = ErrorHandler
 
 	metadata, err := src.NewMetadataService()
 	if err != nil {
-		return fmt.Errorf("failed to create metadata service: %w", err)
+		e.Logger.Fatal("failed to create metadata service: ", err)
+		return
 	}
 	defer utils.CleanupWithErr(&err, metadata.Close, "failed to close metadata service")
 
 	transcoder, err := src.NewTranscoder(metadata)
 	if err != nil {
-		return fmt.Errorf("failed to create transcoder: %w", err)
+		e.Logger.Fatal("failed to create transcoder: ", err)
+		return
 	}
 
 	h := Handler{
@@ -390,48 +238,39 @@ func run(e *echo.Echo) (err error) {
 		metadata:   metadata,
 	}
 
-	jwksUrl := ""
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	jwks, err := jwk.NewCache(ctx, httprc.NewClient())
 	if err != nil {
-		return fmt.Errorf("failed to create jwk cache: %w", err)
+		e.Logger.Fatal("failed to create jwk cache: ", err)
+		return
 	}
-	jwks.Register(ctx, jwksUrl)
+	jwks.Register(ctx, src.Settings.JwksUrl)
 
 	g := e.Group("/video")
 	g.Use(echojwt.WithConfig(echojwt.Config{
-		KeyFunc: func(token *jwt.Token) (interface{}, error) {
-			return jwks.CachedSet(jwksUrl)
+		KeyFunc: func(token *jwt.Token) (any, error) {
+			return jwks.CachedSet(src.Settings.JwksUrl)
 			// kid, ok := token.Header["kid"]
 			// if !ok {
 			// 	return nil, errors.New("missing kid in jwt")
 			// }
-			// keys, err := jwks.CachedSet(jwksUrl)
+			// keys, err := jwks.CachedSet(src.Settings.JwksUrl)
 			// if err != nil {
 			// 	return nil, err
 			// }
 			// return keys.LookupKeyID(kid.(string))
 		},
 	}))
-	g.GET("/:path/direct", DirectStream)
-	g.GET("/:path/direct/:identifier", DirectStream)
-	g.GET("/:path/master.m3u8", h.GetMaster)
-	g.GET("/:path/:video/:quality/index.m3u8", h.GetVideoIndex)
-	g.GET("/:path/audio/:audio/index.m3u8", h.GetAudioIndex)
-	g.GET("/:path/:video/:quality/:chunk", h.GetVideoSegment)
-	g.GET("/:path/audio/:audio/:chunk", h.GetAudioSegment)
 	g.GET("/:path/info", h.GetInfo)
 	g.GET("/:path/thumbnails.png", h.GetThumbnails)
 	g.GET("/:path/thumbnails.vtt", h.GetThumbnailsVtt)
 	g.GET("/:path/attachment/:name", h.GetAttachment)
 	g.GET("/:path/subtitle/:name", h.GetSubtitle)
 
+	api.RegisterStreamHandlers(g)
 	api.RegisterPProfHandlers(e)
 
-	if err := e.Start(":7666"); err != nil {
-		return fmt.Errorf("failed to start server: %w", err)
-	}
-	return nil
+	e.Logger.Fatal(e.Start(":7666"))
 }
