@@ -21,6 +21,6 @@ export const buildUrl = (route: string, query?: Record<string, any>) => {
 		}
 	}
 	return params.size
-		? `http://localhost/${route}?${params}`
-		: `http://localhost/${route}`;
+		? `http://localhost/api/${route}?${params}`
+		: `http://localhost/api/${route}`;
 };
