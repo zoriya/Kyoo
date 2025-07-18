@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -88,16 +89,25 @@ func main() {
 	g := e.Group("/video")
 	g.Use(echojwt.WithConfig(echojwt.Config{
 		KeyFunc: func(token *jwt.Token) (any, error) {
-			return jwks.CachedSet(src.Settings.JwksUrl)
-			// kid, ok := token.Header["kid"]
-			// if !ok {
-			// 	return nil, errors.New("missing kid in jwt")
-			// }
-			// keys, err := jwks.CachedSet(src.Settings.JwksUrl)
-			// if err != nil {
-			// 	return nil, err
-			// }
-			// return keys.LookupKeyID(kid.(string))
+			keys, err := jwks.CachedSet(src.Settings.JwksUrl)
+			if err != nil {
+				return nil, err
+			}
+			kid, ok := token.Header["kid"].(string)
+			if !ok {
+				return nil, errors.New("missing kid in jwt")
+			}
+			key, found := keys.LookupKeyID(kid)
+			if !found {
+				return nil, fmt.Errorf("unable to find key %q", kid)
+			}
+
+			var pubkey interface{}
+			if err := jwk.Export(key, &pubkey); err != nil {
+				return nil, fmt.Errorf("Unable to get the public key. Error: %s", err.Error())
+			}
+
+			return pubkey, nil
 		},
 	}))
 

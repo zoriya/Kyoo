@@ -14,11 +14,10 @@ func GetEnvOr(env string, def string) string {
 }
 
 type SettingsT struct {
-	Outpath   string
-	SafePath  string
-	JwksUrl   string
-	JwtIssuer string
-	HwAccel   HwAccelT
+	Outpath  string
+	SafePath string
+	JwksUrl  string
+	HwAccel  HwAccelT
 }
 
 type HwAccelT struct {
@@ -31,9 +30,8 @@ type HwAccelT struct {
 
 var Settings = SettingsT{
 	// we manually add a folder to make sure we do not delete user data.
-	Outpath:   path.Join(GetEnvOr("GOCODER_CACHE_ROOT", "/cache"), "kyoo_cache"),
-	SafePath:  GetEnvOr("GOCODER_SAFE_PATH", "/video"),
-	JwksUrl:   GetEnvOr("JWKS_URL", "http://auth:4568/.well-known/jwks.json"),
-	JwtIssuer: GetEnvOr("JWT_ISSUER", "http://localhost:8901"),
-	HwAccel:   DetectHardwareAccel(),
+	Outpath:  path.Join(GetEnvOr("GOCODER_CACHE_ROOT", "/cache"), "kyoo_cache"),
+	SafePath: GetEnvOr("GOCODER_SAFE_PATH", "/video"),
+	JwksUrl:  GetEnvOr("JWKS_URL", "http://auth:4568/.well-known/jwks.json"),
+	HwAccel:  DetectHardwareAccel(),
 }
