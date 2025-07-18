@@ -4,6 +4,7 @@ pkgs.mkShell {
     go
     wgo
     go-migrate
+    go-swag
     # for psql in cli (+ pgformatter for sql files)
     postgresql_15
     pgformatter
