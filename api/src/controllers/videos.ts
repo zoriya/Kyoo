@@ -18,6 +18,7 @@ import { db, type Transaction } from "~/db";
 import {
 	entries,
 	entryVideoJoin,
+	history,
 	profiles,
 	shows,
 	showTranslations,
@@ -38,8 +39,9 @@ import {
 import { Entry } from "~/models/entry";
 import { KError } from "~/models/error";
 import { bubbleVideo } from "~/models/examples";
+import { Progress } from "~/models/history";
 import { Movie, type MovieStatus } from "~/models/movie";
-import { Serie, type Serie } from "~/models/serie";
+import { Serie } from "~/models/serie";
 import {
 	AcceptLanguage,
 	buildRelations,
@@ -227,6 +229,35 @@ const videoRelations = {
 			.from(entryVideoJoin)
 			.where(eq(entryVideoJoin.videoPk, videos.pk))
 			.as("slugs");
+	},
+	progress: () => {
+		const query = db
+			.select({
+				json: jsonbBuildObject<Progress>({
+					percent: history.percent,
+					time: history.time,
+					playedDate: sql`to_char(${history.playedDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+					videoId: videos.id,
+				}),
+			})
+			.from(history)
+			.innerJoin(profiles, eq(history.profilePk, profiles.pk))
+			.where(
+				and(
+					eq(profiles.id, sql.placeholder("userId")),
+					eq(history.videoPk, videos.pk),
+				),
+			)
+			.orderBy(desc(history.playedDate))
+			.limit(1);
+		return sql`
+			(
+				select coalesce(
+					${query},
+					'{"percent": 0, "time": 0, "playedDate": null, "videoId": null}'::jsonb
+				)
+				as "progress"
+			)`;
 	},
 	entries: ({ languages }: { languages: string[] }) => {
 		const transQ = getEntryTransQ(languages);
@@ -431,7 +462,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				.select({
 					...getColumns(videos),
 					...buildRelations(
-						["slugs", "entries", ...relations],
+						["slugs", "progress", "entries", ...relations],
 						videoRelations,
 						{
 							languages,
@@ -486,6 +517,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 						slugs: t.Array(
 							t.String({ format: "slug", examples: ["made-in-abyss-s1e13"] }),
 						),
+						progress: Progress,
 						entries: t.Array(Entry),
 						previous: t.Optional(
 							t.Nullable(
