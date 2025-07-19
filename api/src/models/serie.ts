@@ -81,7 +81,7 @@ export const FullSerie = t.Intersect([
 	t.Object({
 		translations: t.Optional(TranslationRecord(SerieTranslation)),
 		studios: t.Optional(t.Array(Studio)),
-		firstEntry: t.Optional(Entry),
+		firstEntry: t.Optional(t.Nullable(Entry)),
 		nextEntry: t.Optional(t.Nullable(Entry)),
 	}),
 ]);
