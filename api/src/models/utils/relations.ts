@@ -15,7 +15,7 @@ export const buildRelations = <
 	return Object.fromEntries(
 		enabled.map((x) => [x, sql`${relations[x](params!)}`]),
 	) as {
-		[P in R]?: SQL<
+		[P in R]: SQL<
 			ReturnType<Rel[P]>["_"]["selectedFields"] extends {
 				[key: string]: infer TValue;
 			}
