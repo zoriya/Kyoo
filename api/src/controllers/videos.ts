@@ -317,6 +317,8 @@ function getNextVideoEntry({
 			prev ? desc(entries.order) : entries.order,
 			// prefer next part of the current entry over next entry
 			eq(vids.rendering, videos.rendering),
+			// take the first part available
+			vids.part,
 			// always prefer latest version of video
 			desc(vids.version),
 		)

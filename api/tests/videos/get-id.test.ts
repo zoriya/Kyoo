@@ -7,11 +7,11 @@ import { madeInAbyss } from "~/models/examples";
 
 beforeAll(async () => {
 	await db.delete(shows);
-	const [ret, _] = await createSerie(madeInAbyss);
+	let [ret, _] = await createSerie(madeInAbyss);
 	expect(ret.status).toBe(201);
 	await db.delete(videos);
 
-	await createVideo([
+	[ret, _] = await createVideo([
 		{
 			path: "/video/Made in abyss S01E13.mkv",
 			rendering: "mia13",
@@ -114,6 +114,7 @@ beforeAll(async () => {
 			for: [{ serie: madeInAbyss.slug, season: 2, episode: 4 }],
 		},
 	]);
+	expect(ret.status).toBe(201);
 });
 
 describe("Get videos", () => {
@@ -197,6 +198,88 @@ describe("Get videos", () => {
 					slug: "made-in-abyss-dawn-of-the-deep-soul",
 					name: "Made in Abyss: Dawn of the Deep Soul",
 					order: 13.5,
+				}),
+			},
+		});
+	});
+
+	it("Get video with multi-part next", async () => {
+		const [resp, body] = await getVideo("made-in-abyss-dawn-of-the-deep-soul", {
+			langs: "en",
+			with: ["previous", "next"],
+		});
+		expectStatus(resp, body).toBe(200);
+		expect(body).toMatchObject({
+			path: "/video/Made in abyss movie.mkv",
+			slugs: ["made-in-abyss-dawn-of-the-deep-soul"],
+			previous: {
+				video: "made-in-abyss-s1e13",
+				entry: expect.objectContaining({
+					slug: "made-in-abyss-s1e13",
+					order: 13,
+				}),
+			},
+			next: {
+				video: "made-in-abyss-s2e1-p1",
+				entry: expect.objectContaining({
+					slug: "made-in-abyss-s2e1",
+					seasonNumber: 2,
+					episodeNumber: 1,
+				}),
+			},
+		});
+	});
+
+	it("Get first part", async () => {
+		const [resp, body] = await getVideo("made-in-abyss-s2e1-p1", {
+			langs: "en",
+			with: ["previous", "next"],
+		});
+		expectStatus(resp, body).toBe(200);
+		expect(body).toMatchObject({
+			path: "/video/Made in abyss s2e1 p1.mkv",
+			slugs: ["made-in-abyss-s2e1-p1"],
+			previous: {
+				video: "made-in-abyss-dawn-of-the-deep-soul",
+				entry: expect.objectContaining({
+					slug: "made-in-abyss-dawn-of-the-deep-soul",
+					order: 13.5,
+				}),
+			},
+			next: {
+				video: "made-in-abyss-s2e1-p2-v2",
+				entry: expect.objectContaining({
+					slug: "made-in-abyss-s2e1",
+					seasonNumber: 2,
+					episodeNumber: 1,
+				}),
+			},
+		});
+	});
+
+	it("Get second part", async () => {
+		const [resp, body] = await getVideo("made-in-abyss-s2e1-p2-v2", {
+			langs: "en",
+			with: ["previous", "next"],
+		});
+		expectStatus(resp, body).toBe(200);
+		expect(body).toMatchObject({
+			path: "/video/Made in abyss s2e1 p2 v2.mkv",
+			slugs: ["made-in-abyss-s2e1-p2-v2"],
+			previous: {
+				video: "made-in-abyss-s2e1-p1",
+				entry: expect.objectContaining({
+					slug: "made-in-abyss-s2e1",
+					seasonNumber: 2,
+					episodeNumber: 1,
+				}),
+			},
+			next: {
+				video: "made-in-abyss-s2e2-v2",
+				entry: expect.objectContaining({
+					slug: "made-in-abyss-s2e2",
+					seasonNumber: 2,
+					episodeNumber: 2,
 				}),
 			},
 		});
