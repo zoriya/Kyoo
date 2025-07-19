@@ -83,14 +83,17 @@ beforeAll(async () => {
 			for: [{ serie: madeInAbyss.slug, season: 2, episode: 1 }],
 		},
 		{
-			path: "/video/Made in abyss s2e2.mkv",
+			path: "/video/Made in abyss s2e2&3.mkv",
 			rendering: "mia-s2e2",
 			part: null,
-			version: 2,
+			version: 1,
 			guess: {
 				title: "Made in abyss",
 				kind: "episode",
-				episodes: [{ season: 2, episode: 2 }],
+				episodes: [
+					{ season: 2, episode: 2 },
+					{ season: 2, episode: 3 },
+				],
 				from: "guessit",
 				history: [],
 			},
@@ -103,7 +106,7 @@ beforeAll(async () => {
 			path: "/video/Made in abyss s2e4.mkv",
 			rendering: "mia-s2e4",
 			part: null,
-			version: 2,
+			version: 1,
 			guess: {
 				title: "Made in abyss",
 				kind: "episode",
@@ -275,7 +278,7 @@ describe("Get videos", () => {
 				}),
 			},
 			next: {
-				video: "made-in-abyss-s2e2-v2",
+				video: "made-in-abyss-s2e2",
 				entry: expect.objectContaining({
 					slug: "made-in-abyss-s2e2",
 					seasonNumber: 2,
@@ -303,13 +306,92 @@ describe("Get videos", () => {
 				}),
 			},
 			next: {
-				video: "made-in-abyss-s2e2-v2",
+				video: "made-in-abyss-s2e2",
 				entry: expect.objectContaining({
 					slug: "made-in-abyss-s2e2",
 					seasonNumber: 2,
 					episodeNumber: 2,
 				}),
 			},
+		});
+	});
+
+	it("Get multi entry video", async () => {
+		const [resp, body] = await getVideo("made-in-abyss-s2e2", {
+			langs: "en",
+			with: ["previous", "next"],
+		});
+		expectStatus(resp, body).toBe(200);
+		expect(body).toMatchObject({
+			path: "/video/Made in abyss s2e2&3.mkv",
+			slugs: ["made-in-abyss-s2e2", "made-in-abyss-s2e3"],
+			previous: {
+				// when going to the prev episode, go to the first part of it
+				video: "made-in-abyss-s2e1-p1",
+				entry: expect.objectContaining({
+					slug: "made-in-abyss-s2e1",
+					seasonNumber: 2,
+					episodeNumber: 1,
+				}),
+			},
+			next: {
+				video: "made-in-abyss-s2e4",
+				entry: expect.objectContaining({
+					slug: "made-in-abyss-s2e4",
+					seasonNumber: 2,
+					episodeNumber: 4,
+				}),
+			},
+		});
+	});
+
+	it("Get multi entry video (ep 2)", async () => {
+		const [resp, body] = await getVideo("made-in-abyss-s2e3", {
+			langs: "en",
+			with: ["previous", "next"],
+		});
+		expectStatus(resp, body).toBe(200);
+		expect(body).toMatchObject({
+			path: "/video/Made in abyss s2e2&3.mkv",
+			slugs: ["made-in-abyss-s2e2", "made-in-abyss-s2e3"],
+			previous: {
+				// when going to the prev episode, go to the first part of it
+				video: "made-in-abyss-s2e1-p1",
+				entry: expect.objectContaining({
+					slug: "made-in-abyss-s2e1",
+					seasonNumber: 2,
+					episodeNumber: 1,
+				}),
+			},
+			next: {
+				video: "made-in-abyss-s2e4",
+				entry: expect.objectContaining({
+					slug: "made-in-abyss-s2e4",
+					seasonNumber: 2,
+					episodeNumber: 4,
+				}),
+			},
+		});
+	});
+
+	it("Get last ep with next=null", async () => {
+		const [resp, body] = await getVideo("made-in-abyss-s2e4", {
+			langs: "en",
+			with: ["previous", "next"],
+		});
+		expectStatus(resp, body).toBe(200);
+		expect(body).toMatchObject({
+			path: "/video/Made in abyss s2e4.mkv",
+			slugs: ["made-in-abyss-s2e4"],
+			previous: {
+				video: "made-in-abyss-s2e3",
+				entry: expect.objectContaining({
+					slug: "made-in-abyss-s2e3",
+					seasonNumber: 2,
+					episodeNumber: 3,
+				}),
+			},
+			next: null,
 		});
 	});
 });
