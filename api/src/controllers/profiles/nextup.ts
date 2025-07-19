@@ -101,7 +101,7 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 					order: sql<number>`${order}`,
 					seasonNumber: sql<number>`${seasonNumber}`,
 					episodeNumber: sql<number>`${episodeNumber}`,
-					name: sql<string>`${name}`,
+					name: sql<string>`${transQ.name}`,
 				})
 				.from(entries)
 				.innerJoin(watchlist, eq(watchlist.nextEntry, entries.pk))
