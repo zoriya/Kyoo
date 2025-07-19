@@ -2,7 +2,6 @@ import { and, eq, exists, ne, type SQL, sql } from "drizzle-orm";
 import { db } from "~/db";
 import {
 	entries,
-	entryTranslations,
 	entryVideoJoin,
 	profiles,
 	showStudioJoin,
@@ -36,7 +35,12 @@ import {
 } from "~/models/utils";
 import type { EmbeddedVideo } from "~/models/video";
 import { WatchlistStatus } from "~/models/watchlist";
-import { entryProgressQ, entryVideosQ, getEntryTransQ, mapProgress } from "../entries";
+import {
+	entryProgressQ,
+	entryVideosQ,
+	getEntryTransQ,
+	mapProgress,
+} from "../entries";
 
 export const watchStatusQ = db
 	.select({

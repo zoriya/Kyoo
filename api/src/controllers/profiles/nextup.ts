@@ -2,9 +2,9 @@ import { and, eq, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { auth } from "~/auth";
 import { db } from "~/db";
-import { entries, entryTranslations } from "~/db/schema";
+import { entries } from "~/db/schema";
 import { watchlist } from "~/db/schema/watchlist";
-import { getColumns, sqlarr } from "~/db/utils";
+import { getColumns } from "~/db/utils";
 import { Entry } from "~/models/entry";
 import {
 	AcceptLanguage,

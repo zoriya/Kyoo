@@ -123,7 +123,7 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 			response: {
 				302: t.Void({
 					description:
-						"Redirected to the [/series/{id}](#tag/series/GET/series/{id}) route.",
+						"Redirected to the [/series/{id}](#tag/series/get/api/series/{id}) route.",
 				}),
 				404: {
 					...KError,

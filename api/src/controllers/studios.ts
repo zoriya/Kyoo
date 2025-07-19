@@ -215,7 +215,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 			response: {
 				302: t.Void({
 					description:
-						"Redirected to the [/studios/{id}](#tag/studios/GET/studios/{id}) route.",
+						"Redirected to the [/studios/{id}](#tag/studios/get/api/studios/{id}) route.",
 				}),
 				404: {
 					...KError,

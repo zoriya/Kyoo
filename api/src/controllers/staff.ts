@@ -175,7 +175,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 			response: {
 				302: t.Void({
 					description:
-						"Redirected to the [/staff/{id}](#tag/staff/GET/staff/{id}) route.",
+						"Redirected to the [/staff/{id}](#tag/staff/get/api/staff/{id}) route.",
 				}),
 				404: {
 					...KError,

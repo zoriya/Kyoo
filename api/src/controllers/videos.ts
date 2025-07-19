@@ -9,20 +9,13 @@ import {
 	min,
 	notExists,
 	or,
-	type SQL,
 	sql,
 } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { Elysia, t } from "elysia";
 import { auth } from "~/auth";
 import { db, type Transaction } from "~/db";
-import {
-	entries,
-	entryTranslations,
-	entryVideoJoin,
-	shows,
-	videos,
-} from "~/db/schema";
+import { entries, entryVideoJoin, shows, videos } from "~/db/schema";
 import {
 	coalesce,
 	conflictUpdateAllExcept,
