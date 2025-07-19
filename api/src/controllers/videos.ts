@@ -434,6 +434,47 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 		},
 	)
 	.get(
+		":id/info",
+		async ({ params: { id }, status, redirect }) => {
+			const [video] = await db
+				.select({
+					path: videos.path,
+				})
+				.from(videos)
+				.leftJoin(entryVideoJoin, eq(videos.pk, entryVideoJoin.videoPk))
+				.where(isUuid(id) ? eq(videos.id, id) : eq(entryVideoJoin.slug, id))
+				.limit(1);
+
+			if (!video) {
+				return status(404, {
+					status: 404,
+					message: `No video found with id or slug '${id}'`,
+				});
+			}
+			const path = Buffer.from(video.path, "utf8").toString("base64url");
+			return redirect(`/video/${path}/info`);
+		},
+		{
+			detail: { description: "Get a video's metadata informations" },
+			params: t.Object({
+				id: t.String({
+					description: "The id or slug of the video to retrieve.",
+					example: "made-in-abyss-s1e13",
+				}),
+			}),
+			response: {
+				302: t.Void({
+					description:
+						"Redirected to the [/video/{path}/info](?api=transcoder#tag/metadata/get/:path/info) route (of the transcoder)",
+				}),
+				404: {
+					...KError,
+					description: "No video found with the given id or slug.",
+				},
+			},
+		},
+	)
+	.get(
 		"",
 		async () => {
 			const years = db.$with("years").as(
