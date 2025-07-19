@@ -15,7 +15,15 @@ import { alias } from "drizzle-orm/pg-core";
 import { Elysia, t } from "elysia";
 import { auth } from "~/auth";
 import { db, type Transaction } from "~/db";
-import { entries, entryVideoJoin, shows, videos } from "~/db/schema";
+import {
+	entries,
+	entryVideoJoin,
+	profiles,
+	shows,
+	showTranslations,
+	videos,
+} from "~/db/schema";
+import { watchlist } from "~/db/schema/watchlist";
 import {
 	coalesce,
 	conflictUpdateAllExcept,
@@ -30,10 +38,13 @@ import {
 import { Entry } from "~/models/entry";
 import { KError } from "~/models/error";
 import { bubbleVideo } from "~/models/examples";
+import { Movie, type MovieStatus } from "~/models/movie";
+import { Serie, type Serie } from "~/models/serie";
 import {
 	AcceptLanguage,
 	buildRelations,
 	createPage,
+	type Image,
 	isUuid,
 	keysetPaginate,
 	Page,
@@ -44,6 +55,7 @@ import {
 } from "~/models/utils";
 import { desc as description } from "~/models/utils/descriptions";
 import { Guess, Guesses, SeedVideo, Video } from "~/models/video";
+import type { MovieWatchStatus, SerieWatchStatus } from "~/models/watchlist";
 import { comment } from "~/utils";
 import {
 	entryProgressQ,
@@ -56,6 +68,7 @@ import {
 	updateAvailableCount,
 	updateAvailableSince,
 } from "./seed/insert/shows";
+import { watchStatusQ } from "./shows/logic";
 
 async function linkVideos(
 	tx: Transaction,
@@ -206,9 +219,10 @@ const videoRelations = {
 	slugs: () => {
 		return db
 			.select({
-				slugs: coalesce(jsonbAgg(entryVideoJoin.slug), sql`'[]'::jsonb`).as(
-					"slugs",
-				),
+				slugs: coalesce<string[]>(
+					jsonbAgg(entryVideoJoin.slug),
+					sql`'[]'::jsonb`,
+				).as("slugs"),
 			})
 			.from(entryVideoJoin)
 			.where(eq(entryVideoJoin.videoPk, videos.pk))
@@ -242,6 +256,72 @@ const videoRelations = {
 			.where(eq(entryVideoJoin.videoPk, videos.pk))
 			.as("entries");
 	},
+	show: ({
+		languages,
+		preferOriginal,
+	}: {
+		languages: string[];
+		preferOriginal: boolean;
+	}) => {
+		const transQ = db
+			.selectDistinctOn([showTranslations.pk])
+			.from(showTranslations)
+			.orderBy(
+				showTranslations.pk,
+				sql`array_position(${sqlarr(languages)}, ${showTranslations.language})`,
+			)
+			.as("t");
+
+		const watchStatusQ = db
+			.select({
+				watchStatus: jsonbBuildObject<MovieWatchStatus & SerieWatchStatus>({
+					...getColumns(watchlist),
+					percent: watchlist.seenCount,
+				}).as("watchStatus"),
+			})
+			.from(watchlist)
+			.leftJoin(profiles, eq(watchlist.profilePk, profiles.pk))
+			.where(
+				and(
+					eq(profiles.id, sql.placeholder("userId")),
+					eq(watchlist.showPk, shows.pk),
+				),
+			);
+
+		return db
+			.select({
+				json: jsonbBuildObject<Serie | Movie>({
+					...getColumns(shows),
+					...getColumns(transQ),
+					// movie columns (status is only a typescript hint)
+					status: sql<MovieStatus>`${shows.status}`,
+					airDate: shows.startAir,
+					kind: sql<any>`${shows.kind}`,
+					isAvailable: sql<boolean>`${shows.availableCount} != 0`,
+
+					...(preferOriginal && {
+						poster: sql<Image>`coalesce(nullif(${shows.original}->'poster', 'null'::jsonb), ${transQ.poster})`,
+						thumbnail: sql<Image>`coalesce(nullif(${shows.original}->'thumbnail', 'null'::jsonb), ${transQ.thumbnail})`,
+						banner: sql<Image>`coalesce(nullif(${shows.original}->'banner', 'null'::jsonb), ${transQ.banner})`,
+						logo: sql<Image>`coalesce(nullif(${shows.original}->'logo', 'null'::jsonb), ${transQ.logo})`,
+					}),
+					watchStatus: sql`${watchStatusQ}`,
+				}).as("json"),
+			})
+			.from(shows)
+			.innerJoin(transQ, eq(shows.pk, transQ.pk))
+			.where(
+				eq(
+					shows.pk,
+					db
+						.select({ pk: entries.showPk })
+						.from(entries)
+						.innerJoin(entryVideoJoin, eq(entryVideoJoin.entryPk, entries.pk))
+						.where(eq(videos.pk, entryVideoJoin.videoPk)),
+				),
+			)
+			.as("show");
+	},
 	previous: ({ languages }: { languages: string[] }) => {
 		return getNextVideoEntry({ languages, prev: true });
 	},
@@ -263,7 +343,7 @@ function getNextVideoEntry({
 	const evj = alias(entryVideoJoin, `evj_${prev ? "prev" : "next"}`);
 	return db
 		.select({
-			json: jsonbBuildObject<Entry>({
+			json: jsonbBuildObject<{ video: string; entry: Entry }>({
 				video: entryVideoJoin.slug,
 				entry: {
 					...getColumns(entries),
@@ -274,7 +354,7 @@ function getNextVideoEntry({
 					createdAt: sql`to_char(${entries.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
 					updatedAt: sql`to_char(${entries.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
 				},
-			}),
+			}).as("json"),
 		})
 		.from(entries)
 		.innerJoin(transQ, eq(entries.pk, transQ.pk))
@@ -337,9 +417,9 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 		":id",
 		async ({
 			params: { id },
-			query: { with: relations },
+			query: { with: relations, preferOriginal },
 			headers: { "accept-language": langs },
-			jwt: { sub },
+			jwt: { sub, settings },
 			status,
 		}) => {
 			const languages = processLanguages(langs);
@@ -355,6 +435,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 						videoRelations,
 						{
 							languages,
+							preferOriginal: preferOriginal ?? settings.preferOriginal,
 						},
 					),
 				})
@@ -382,10 +463,15 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				}),
 			}),
 			query: t.Object({
-				with: t.Array(t.UnionEnum(["previous", "next"]), {
+				with: t.Array(t.UnionEnum(["previous", "next", "show"]), {
 					default: [],
 					description: "Include related entries in the response.",
 				}),
+				preferOriginal: t.Optional(
+					t.Boolean({
+						description: description.preferOriginal,
+					}),
+				),
 			}),
 			headers: t.Object(
 				{
@@ -423,6 +509,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 								}),
 							),
 						),
+						show: t.Optional(t.Union([Movie, Serie])),
 					}),
 				]),
 				404: {
