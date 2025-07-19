@@ -1,45 +1,20 @@
-/*
- * Kyoo - A portable and vast media library solution.
- * Copyright (c) Kyoo.
- *
- * See AUTHORS.md and LICENSE file in the project root for full license information.
- *
- * Kyoo is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Kyoo is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
- */
-
-import {
-	type Episode,
-	EpisodeP,
-	type Movie,
-	MovieP,
-	type QueryIdentifier,
-	type WatchInfo,
-	WatchInfoP,
-	useFetch,
-} from "@kyoo/models";
-import { Head } from "@kyoo/primitives";
 import { useSetAtom } from "jotai";
 import { type ComponentProps, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, StyleSheet, View } from "react-native";
-import { useRouter } from "solito/router";
 import { useYoshiki } from "yoshiki/native";
-import { episodeDisplayNumber } from "../../../../src/ui/details/episode";
-import { ErrorView } from "../../../../src/ui/errors";
+import {
+	Episode,
+	Movie,
+	type QueryIdentifier,
+	useFetch,
+	type WatchInfo,
+	WatchInfoP,
+} from "~/models";
+import { Head } from "~/primitives";
 import { Back, Hover, LoadingIndicator } from "./components/hover";
 import { useVideoKeyboard } from "./keyboard";
-import { Video, durationAtom, fullscreenAtom } from "./state";
+import { durationAtom, fullscreenAtom, Video } from "./state";
 import { WatchStatusObserver } from "./watch-status-observer";
 
 type Item = (Movie & { type: "movie" }) | (Episode & { type: "episode" });
@@ -53,7 +28,10 @@ const mapData = (
 	if (!data) return { isLoading: true };
 	return {
 		isLoading: false,
-		name: data.type === "movie" ? data.name : `${episodeDisplayNumber(data)} ${data.name}`,
+		name:
+			data.type === "movie"
+				? data.name
+				: `${episodeDisplayNumber(data)} ${data.name}`,
 		showName: data.type === "movie" ? data.name! : data.show!.name,
 		poster: data.type === "movie" ? data.poster : data.show!.poster,
 		subtitles: info?.subtitles,
@@ -89,11 +67,17 @@ export const Player = ({
 	const { t } = useTranslation();
 	const router = useRouter();
 
-	const [playbackError, setPlaybackError] = useState<string | undefined>(undefined);
+	const [playbackError, setPlaybackError] = useState<string | undefined>(
+		undefined,
+	);
 	const { data, error } = useFetch(Player.query(type, slug));
-	const { data: info, error: infoError } = useFetch(Player.infoQuery(type, slug));
+	const { data: info, error: infoError } = useFetch(
+		Player.infoQuery(type, slug),
+	);
 	const image =
-		data && data.type === "episode" ? (data.show?.poster ?? data?.poster) : data?.poster;
+		data && data.type === "episode"
+			? (data.show?.poster ?? data?.poster)
+			: data?.poster;
 	const previous =
 		data && data.type === "episode" && data.previousEpisode
 			? `/watch/${data.previousEpisode.slug}?t=0`
@@ -103,7 +87,8 @@ export const Player = ({
 			? `/watch/${data.nextEpisode.slug}?t=0`
 			: undefined;
 	const title = data && formatTitleMetadata(data);
-	const subtitle = data && data.type === "episode" ? data.show?.name : undefined;
+	const subtitle =
+		data && data.type === "episode" ? data.show?.name : undefined;
 
 	useVideoKeyboard(info?.subtitles, info?.fonts, previous, next);
 
@@ -126,7 +111,10 @@ export const Player = ({
 	if (error || infoError || playbackError)
 		return (
 			<>
-				<Back isLoading={false} {...css({ position: "relative", bg: (theme) => theme.accent })} />
+				<Back
+					isLoading={false}
+					{...css({ position: "relative", bg: (theme) => theme.accent })}
+				/>
 				<ErrorView error={error ?? infoError ?? { errors: [playbackError!] }} />
 			</>
 		);
@@ -135,7 +123,11 @@ export const Player = ({
 		<>
 			<Head title={title} description={data?.overview} />
 			{data && info && (
-				<WatchStatusObserver type={type} slug={data.slug} duration={info.durationSeconds} />
+				<WatchStatusObserver
+					type={type}
+					slug={data.slug}
+					duration={info.durationSeconds}
+				/>
 			)}
 			<View
 				{...css({
@@ -164,23 +156,35 @@ export const Player = ({
 						if (!data) return;
 						if (data.type === "movie")
 							router.replace(`/movie/${data.slug}`, undefined, {
-								experimental: { nativeBehavior: "stack-replace", isNestedNavigator: true },
+								experimental: {
+									nativeBehavior: "stack-replace",
+									isNestedNavigator: true,
+								},
 							});
 						else
 							router.replace(next ?? `/show/${data.show!.slug}`, undefined, {
-								experimental: { nativeBehavior: "stack-replace", isNestedNavigator: true },
+								experimental: {
+									nativeBehavior: "stack-replace",
+									isNestedNavigator: true,
+								},
 							});
 					}}
 					{...css(StyleSheet.absoluteFillObject)}
 				/>
 				<LoadingIndicator />
-				<Hover {...mapData(data, info, previous, next)} url={`${type}/${slug}`} />
+				<Hover
+					{...mapData(data, info, previous, next)}
+					url={`${type}/${slug}`}
+				/>
 			</View>
 		</>
 	);
 };
 
-Player.query = (type: "episode" | "movie", slug: string): QueryIdentifier<Item> =>
+Player.query = (
+	type: "episode" | "movie",
+	slug: string,
+): QueryIdentifier<Item> =>
 	type === "episode"
 		? {
 				path: ["episode", slug],
@@ -197,15 +201,10 @@ Player.query = (type: "episode" | "movie", slug: string): QueryIdentifier<Item> 
 				parser: MovieP.transform((x) => ({ ...x, type: "movie" })),
 			};
 
-Player.infoQuery = (type: "episode" | "movie", slug: string): QueryIdentifier<WatchInfo> => ({
+Player.infoQuery = (
+	type: "episode" | "movie",
+	slug: string,
+): QueryIdentifier<WatchInfo> => ({
 	path: [type, slug, "info"],
 	parser: WatchInfoP,
 });
-
-// if more queries are needed, dont forget to update download.tsx to cache those.
-Player.getFetchUrls = ({ slug, type }: { slug: string; type: "episode" | "movie" }) => [
-	Player.query(type, slug),
-	Player.infoQuery(type, slug),
-];
-
-Player.requiredPermissions = ["overall.play"];

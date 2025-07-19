@@ -29,7 +29,7 @@ import { useAtom } from "jotai";
 import { useTranslation } from "react-i18next";
 import { Platform, View } from "react-native";
 import { type Stylable, useYoshiki } from "yoshiki/native";
-import { useSubtitleName } from "../../utils";
+import { useSubtitleName } from "../../../../packages/ui/src/utils";
 import { fullscreenAtom, subtitleAtom } from "../state";
 import { AudiosMenu, QualitiesMenu } from "../video";
 
