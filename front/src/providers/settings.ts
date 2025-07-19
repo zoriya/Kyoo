@@ -62,3 +62,16 @@ export const readValue = <T extends ZodType>(key: string, parser: T) => {
 	if (val === undefined) return val;
 	return parser.parse(JSON.parse(val)) as z.infer<T>;
 };
+
+export const useLocalSetting = <T extends string>(setting: string, def: T) => {
+	if (Platform.OS === "web" && typeof window === "undefined")
+		return [def as T, null!] as const;
+	// biome-ignore lint/correctness/useHookAtTopLevel: ssr
+	const [val, setter] = useMMKVString(`settings.${setting}`, storage);
+	return [(val ?? def) as T, setter] as const;
+};
+
+export const getLocalSetting = (setting: string, def: string) => {
+	if (Platform.OS === "web" && typeof window === "undefined") return def;
+	return storage.getString(`settings.${setting}`) ?? setting;
+};

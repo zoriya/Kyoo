@@ -1,6 +1,7 @@
 import { z } from "zod/v4";
 import { Entry } from "./entry";
 import { Extra } from "./extra";
+import { Show } from "./show";
 import { zdate } from "./utils/utils";
 
 export const Video = z.object({
@@ -36,9 +37,16 @@ export const Video = z.object({
 
 export const FullVideo = Video.extend({
 	slugs: z.array(z.string()),
+	progress: z.object({
+		percent: z.int().min(0).max(100),
+		time: z.int().min(0).nullable(),
+		playedDate: zdate().nullable(),
+		videoId: z.string().nullable(),
+	}),
 	entries: z.array(Entry),
 	previous: z.object({ video: z.string(), entry: Entry }).nullable().optional(),
 	next: z.object({ video: z.string(), entry: Entry }).nullable().optional(),
+	show: Show.optional(),
 });
 export type FullVideo = z.infer<typeof FullVideo>;
 
