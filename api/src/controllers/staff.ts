@@ -227,7 +227,6 @@ export const staffH = new Elysia({ tags: ["staff"] })
 				.from(watchlist)
 				.leftJoin(profiles, eq(watchlist.profilePk, profiles.pk))
 				.where(and(eq(profiles.id, sub), eq(watchlist.showPk, shows.pk)))
-				.limit(1)
 				.as("watchstatus");
 
 			const items = await db
