@@ -284,4 +284,32 @@ describe("Get videos", () => {
 			},
 		});
 	});
+
+	it("Get v1", async () => {
+		const [resp, body] = await getVideo("made-in-abyss-s2e1-p2", {
+			langs: "en",
+			with: ["previous", "next"],
+		});
+		expectStatus(resp, body).toBe(200);
+		expect(body).toMatchObject({
+			path: "/video/Made in abyss s2e1 p2.mkv",
+			slugs: ["made-in-abyss-s2e1-p2"],
+			previous: {
+				video: "made-in-abyss-s2e1-p1",
+				entry: expect.objectContaining({
+					slug: "made-in-abyss-s2e1",
+					seasonNumber: 2,
+					episodeNumber: 1,
+				}),
+			},
+			next: {
+				video: "made-in-abyss-s2e2-v2",
+				entry: expect.objectContaining({
+					slug: "made-in-abyss-s2e2",
+					seasonNumber: 2,
+					episodeNumber: 2,
+				}),
+			},
+		});
+	});
 });
