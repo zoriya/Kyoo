@@ -3,15 +3,9 @@ import { type ComponentProps, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, StyleSheet, View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
-import {
-	Episode,
-	Movie,
-	type QueryIdentifier,
-	useFetch,
-	type WatchInfo,
-	WatchInfoP,
-} from "~/models";
+import { type Episode, FullVideo, type Movie, VideoInfo } from "~/models";
 import { Head } from "~/primitives";
+import type { QueryIdentifier } from "~/query";
 import { Back, Hover, LoadingIndicator } from "./components/hover";
 import { useVideoKeyboard } from "./keyboard";
 import { durationAtom, fullscreenAtom, Video } from "./state";
@@ -181,30 +175,15 @@ export const Player = ({
 	);
 };
 
-Player.query = (
-	type: "episode" | "movie",
-	slug: string,
-): QueryIdentifier<Item> =>
-	type === "episode"
-		? {
-				path: ["episode", slug],
-				params: {
-					fields: ["nextEpisode", "previousEpisode", "show", "watchStatus"],
-				},
-				parser: EpisodeP.transform((x) => ({ ...x, type: "episode" })),
-			}
-		: {
-				path: ["movie", slug],
-				params: {
-					fields: ["watchStatus"],
-				},
-				parser: MovieP.transform((x) => ({ ...x, type: "movie" })),
-			};
+Player.query = (slug: string): QueryIdentifier<FullVideo> => ({
+	path: ["api", "videos", slug],
+	params: {
+		fields: ["next", "previous", "serie"],
+	},
+	parser: FullVideo,
+});
 
-Player.infoQuery = (
-	type: "episode" | "movie",
-	slug: string,
-): QueryIdentifier<WatchInfo> => ({
-	path: [type, slug, "info"],
-	parser: WatchInfoP,
+Player.infoQuery = (slug: string): QueryIdentifier<VideoInfo> => ({
+	path: ["api", "videos", slug, "info"],
+	parser: VideoInfo,
 });
