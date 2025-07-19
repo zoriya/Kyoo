@@ -22,6 +22,7 @@ import {
 	entryFilters,
 	entryProgressQ,
 	entryVideosQ,
+	getEntryTransQ,
 	mapProgress,
 } from "../entries";
 
@@ -73,16 +74,7 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 			jwt: { sub },
 		}) => {
 			const langs = processLanguages(languages);
-
-			const transQ = db
-				.selectDistinctOn([entryTranslations.pk])
-				.from(entryTranslations)
-				.orderBy(
-					entryTranslations.pk,
-					sql`array_position(${sqlarr(langs)}, ${entryTranslations.language})`,
-				)
-				.as("t");
-			const { pk, name, ...transCol } = getColumns(transQ);
+			const transQ = getEntryTransQ(langs);
 
 			const {
 				externalId,
@@ -97,7 +89,7 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 			const items = await db
 				.select({
 					...entryCol,
-					...transCol,
+					...getColumns(transQ),
 					videos: entryVideosQ.videos,
 					progress: mapProgress({ aliased: true }),
 					// specials don't have an `episodeNumber` but a `number` field.

@@ -36,7 +36,7 @@ import {
 } from "~/models/utils";
 import type { EmbeddedVideo } from "~/models/video";
 import { WatchlistStatus } from "~/models/watchlist";
-import { entryProgressQ, entryVideosQ, mapProgress } from "../entries";
+import { entryProgressQ, entryVideosQ, getEntryTransQ, mapProgress } from "../entries";
 
 export const watchStatusQ = db
 	.select({
@@ -147,7 +147,7 @@ const showRelations = {
 				).as("json"),
 			})
 			.from(studios)
-			.leftJoin(studioTransQ, eq(studios.pk, studioTransQ.pk))
+			.innerJoin(studioTransQ, eq(studios.pk, studioTransQ.pk))
 			.where(
 				exists(
 					db
@@ -185,21 +185,13 @@ const showRelations = {
 			.as("videos");
 	},
 	firstEntry: ({ languages }: { languages: string[] }) => {
-		const transQ = db
-			.selectDistinctOn([entryTranslations.pk])
-			.from(entryTranslations)
-			.orderBy(
-				entryTranslations.pk,
-				sql`array_position(${sqlarr(languages)}, ${entryTranslations.language})`,
-			)
-			.as("t");
-		const { pk, ...transCol } = getColumns(transQ);
+		const transQ = getEntryTransQ(languages);
 
 		return db
 			.select({
 				firstEntry: jsonbBuildObject<Entry>({
 					...getColumns(entries),
-					...transCol,
+					...getColumns(transQ),
 					number: entries.episodeNumber,
 					videos: entryVideosQ.videos,
 					progress: mapProgress({ aliased: false }),
@@ -217,21 +209,13 @@ const showRelations = {
 			.as("firstEntry");
 	},
 	nextEntry: ({ languages }: { languages: string[] }) => {
-		const transQ = db
-			.selectDistinctOn([entryTranslations.pk])
-			.from(entryTranslations)
-			.orderBy(
-				entryTranslations.pk,
-				sql`array_position(${sqlarr(languages)}, ${entryTranslations.language})`,
-			)
-			.as("t");
-		const { pk, ...transCol } = getColumns(transQ);
+		const transQ = getEntryTransQ(languages);
 
 		return db
 			.select({
 				nextEntry: jsonbBuildObject<Entry>({
 					...getColumns(entries),
-					...transCol,
+					...getColumns(transQ),
 					number: entries.episodeNumber,
 					videos: entryVideosQ.videos,
 					progress: mapProgress({ aliased: false }),
