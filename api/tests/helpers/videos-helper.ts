@@ -29,6 +29,25 @@ export const getVideos = async () => {
 	return [resp, body] as const;
 };
 
+export const getVideo = async (
+	id: string,
+	{ langs, ...query }: { langs?: string; with?: string[] },
+) => {
+	const resp = await handlers.handle(
+		new Request(buildUrl(`videos/${id}`, query), {
+			method: "GET",
+			headers: langs
+				? {
+						"Accept-Language": langs,
+						...(await getJwtHeaders()),
+					}
+				: await getJwtHeaders(),
+		}),
+	);
+	const body = await resp.json();
+	return [resp, body] as const;
+};
+
 export const deleteVideo = async (paths: string[]) => {
 	const resp = await handlers.handle(
 		new Request(buildUrl("videos"), {

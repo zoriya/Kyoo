@@ -124,7 +124,7 @@ export const jsonbObjectAgg = <T>(
 	>`jsonb_object_agg(${sql.join([key, value], sql.raw(","))})`;
 };
 
-export const jsonbAgg = <T>(val: SQL<T>) => {
+export const jsonbAgg = <T>(val: SQL<T> | SQLWrapper) => {
 	return sql<T[]>`jsonb_agg(${val})`;
 };
 

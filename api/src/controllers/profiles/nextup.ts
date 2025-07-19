@@ -2,9 +2,9 @@ import { and, eq, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { auth } from "~/auth";
 import { db } from "~/db";
-import { entries, entryTranslations } from "~/db/schema";
+import { entries } from "~/db/schema";
 import { watchlist } from "~/db/schema/watchlist";
-import { getColumns, sqlarr } from "~/db/utils";
+import { getColumns } from "~/db/utils";
 import { Entry } from "~/models/entry";
 import {
 	AcceptLanguage,
@@ -22,6 +22,7 @@ import {
 	entryFilters,
 	entryProgressQ,
 	entryVideosQ,
+	getEntryTransQ,
 	mapProgress,
 } from "../entries";
 
@@ -73,16 +74,7 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 			jwt: { sub },
 		}) => {
 			const langs = processLanguages(languages);
-
-			const transQ = db
-				.selectDistinctOn([entryTranslations.pk])
-				.from(entryTranslations)
-				.orderBy(
-					entryTranslations.pk,
-					sql`array_position(${sqlarr(langs)}, ${entryTranslations.language})`,
-				)
-				.as("t");
-			const { pk, name, ...transCol } = getColumns(transQ);
+			const transQ = getEntryTransQ(langs);
 
 			const {
 				externalId,
@@ -97,7 +89,7 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 			const items = await db
 				.select({
 					...entryCol,
-					...transCol,
+					...getColumns(transQ),
 					videos: entryVideosQ.videos,
 					progress: mapProgress({ aliased: true }),
 					// specials don't have an `episodeNumber` but a `number` field.
@@ -109,7 +101,7 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 					order: sql<number>`${order}`,
 					seasonNumber: sql<number>`${seasonNumber}`,
 					episodeNumber: sql<number>`${episodeNumber}`,
-					name: sql<string>`${name}`,
+					name: sql<string>`${transQ.name}`,
 				})
 				.from(entries)
 				.innerJoin(watchlist, eq(watchlist.nextEntry, entries.pk))

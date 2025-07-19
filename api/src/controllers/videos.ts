@@ -1,22 +1,43 @@
-import { and, eq, notExists, or, sql } from "drizzle-orm";
+import {
+	and,
+	desc,
+	eq,
+	gt,
+	isNotNull,
+	lt,
+	max,
+	min,
+	notExists,
+	or,
+	sql,
+} from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { Elysia, t } from "elysia";
+import { auth } from "~/auth";
 import { db, type Transaction } from "~/db";
 import { entries, entryVideoJoin, shows, videos } from "~/db/schema";
 import {
+	coalesce,
 	conflictUpdateAllExcept,
+	getColumns,
 	isUniqueConstraint,
+	jsonbAgg,
 	jsonbBuildObject,
 	jsonbObjectAgg,
 	sqlarr,
 	values,
 } from "~/db/utils";
+import { Entry } from "~/models/entry";
 import { KError } from "~/models/error";
 import { bubbleVideo } from "~/models/examples";
 import {
+	AcceptLanguage,
+	buildRelations,
 	createPage,
 	isUuid,
 	keysetPaginate,
 	Page,
+	processLanguages,
 	type Resource,
 	Sort,
 	sortToSql,
@@ -24,6 +45,12 @@ import {
 import { desc as description } from "~/models/utils/descriptions";
 import { Guess, Guesses, SeedVideo, Video } from "~/models/video";
 import { comment } from "~/utils";
+import {
+	entryProgressQ,
+	entryVideosQ,
+	getEntryTransQ,
+	mapProgress,
+} from "./entries";
 import { computeVideoSlug } from "./seed/insert/entries";
 import {
 	updateAvailableCount,
@@ -175,12 +202,237 @@ const CreatedVideo = t.Object({
 	),
 });
 
+const videoRelations = {
+	slugs: () => {
+		return db
+			.select({
+				slugs: coalesce(jsonbAgg(entryVideoJoin.slug), sql`'[]'::jsonb`).as(
+					"slugs",
+				),
+			})
+			.from(entryVideoJoin)
+			.where(eq(entryVideoJoin.videoPk, videos.pk))
+			.as("slugs");
+	},
+	entries: ({ languages }: { languages: string[] }) => {
+		const transQ = getEntryTransQ(languages);
+
+		return db
+			.select({
+				json: coalesce(
+					jsonbAgg(
+						jsonbBuildObject<Entry>({
+							...getColumns(entries),
+							...getColumns(transQ),
+							number: entries.episodeNumber,
+							videos: entryVideosQ.videos,
+							progress: mapProgress({ aliased: false }),
+							createdAt: sql`to_char(${entries.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+							updatedAt: sql`to_char(${entries.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+						}),
+					),
+					sql`'[]'::jsonb`,
+				).as("json"),
+			})
+			.from(entries)
+			.innerJoin(transQ, eq(entries.pk, transQ.pk))
+			.leftJoin(entryProgressQ, eq(entries.pk, entryProgressQ.entryPk))
+			.crossJoinLateral(entryVideosQ)
+			.innerJoin(entryVideoJoin, eq(entryVideoJoin.entryPk, entries.pk))
+			.where(eq(entryVideoJoin.videoPk, videos.pk))
+			.as("entries");
+	},
+	previous: ({ languages }: { languages: string[] }) => {
+		return getNextVideoEntry({ languages, prev: true });
+	},
+	next: getNextVideoEntry,
+};
+
+function getNextVideoEntry({
+	languages,
+	prev = false,
+}: {
+	languages: string[];
+	prev?: boolean;
+}) {
+	const transQ = getEntryTransQ(languages);
+
+	// tables we use two times in the query bellow
+	const vids = alias(videos, `vid_${prev ? "prev" : "next"}`);
+	const entr = alias(entries, `entr_${prev ? "prev" : "next"}`);
+	const evj = alias(entryVideoJoin, `evj_${prev ? "prev" : "next"}`);
+	return db
+		.select({
+			json: jsonbBuildObject<Entry>({
+				video: entryVideoJoin.slug,
+				entry: {
+					...getColumns(entries),
+					...getColumns(transQ),
+					number: entries.episodeNumber,
+					videos: entryVideosQ.videos,
+					progress: mapProgress({ aliased: false }),
+					createdAt: sql`to_char(${entries.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+					updatedAt: sql`to_char(${entries.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+				},
+			}),
+		})
+		.from(entries)
+		.innerJoin(transQ, eq(entries.pk, transQ.pk))
+		.leftJoin(entryProgressQ, eq(entries.pk, entryProgressQ.entryPk))
+		.crossJoinLateral(entryVideosQ)
+		.leftJoin(entryVideoJoin, eq(entries.pk, entryVideoJoin.entryPk))
+		.innerJoin(vids, eq(vids.pk, entryVideoJoin.videoPk))
+		.where(
+			and(
+				// either way it needs to be of the same show
+				eq(
+					entries.showPk,
+					db
+						.select({ showPk: entr.showPk })
+						.from(entr)
+						.innerJoin(evj, eq(evj.entryPk, entr.pk))
+						.where(eq(evj.videoPk, videos.pk))
+						.limit(1),
+				),
+				or(
+					// either the next entry
+					(prev ? lt : gt)(
+						entries.order,
+						db
+							.select({ order: (prev ? min : max)(entr.order) })
+							.from(entr)
+							.innerJoin(evj, eq(evj.entryPk, entr.pk))
+							.where(eq(evj.videoPk, videos.pk)),
+					),
+					// or the second part of the current entry
+					and(
+						isNotNull(videos.part),
+						eq(vids.rendering, videos.rendering),
+						eq(vids.part, sql`${videos.part} ${sql.raw(prev ? "-" : "+")} 1`),
+					),
+				),
+			),
+		)
+		.orderBy(
+			prev ? desc(entries.order) : entries.order,
+			// prefer next part of the current entry over next entry
+			eq(vids.rendering, videos.rendering),
+			// take the first part available
+			vids.part,
+			// always prefer latest version of video
+			desc(vids.version),
+		)
+		.limit(1)
+		.as("next");
+}
+
 export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 	.model({
 		video: Video,
 		"created-videos": t.Array(CreatedVideo),
 		error: t.Object({}),
 	})
+	.use(auth)
+	.get(
+		":id",
+		async ({
+			params: { id },
+			query: { with: relations },
+			headers: { "accept-language": langs },
+			jwt: { sub },
+			status,
+		}) => {
+			const languages = processLanguages(langs);
+
+			// make an alias so entry video join is not usable on subqueries
+			const evj = alias(entryVideoJoin, "evj");
+
+			const [video] = await db
+				.select({
+					...getColumns(videos),
+					...buildRelations(
+						["slugs", "entries", ...relations],
+						videoRelations,
+						{
+							languages,
+						},
+					),
+				})
+				.from(videos)
+				.leftJoin(evj, eq(videos.pk, evj.videoPk))
+				.where(isUuid(id) ? eq(videos.id, id) : eq(evj.slug, id))
+				.limit(1)
+				.execute({ userId: sub });
+			if (!video) {
+				return status(404, {
+					status: 404,
+					message: `No video found with id or slug '${id}'`,
+				});
+			}
+			return video;
+		},
+		{
+			detail: {
+				description: "Get a video & it's related entries",
+			},
+			params: t.Object({
+				id: t.String({
+					description: "The id or slug of the video to retrieve.",
+					example: "made-in-abyss-s1e13",
+				}),
+			}),
+			query: t.Object({
+				with: t.Array(t.UnionEnum(["previous", "next"]), {
+					default: [],
+					description: "Include related entries in the response.",
+				}),
+			}),
+			headers: t.Object(
+				{
+					"accept-language": AcceptLanguage(),
+				},
+				{ additionalProperties: true },
+			),
+			response: {
+				200: t.Composite([
+					Video,
+					t.Object({
+						slugs: t.Array(
+							t.String({ format: "slug", examples: ["made-in-abyss-s1e13"] }),
+						),
+						entries: t.Array(Entry),
+						previous: t.Optional(
+							t.Nullable(
+								t.Object({
+									video: t.String({
+										format: "slug",
+										examples: ["made-in-abyss-s1e12"],
+									}),
+									entry: Entry,
+								}),
+							),
+						),
+						next: t.Optional(
+							t.Nullable(
+								t.Object({
+									video: t.String({
+										format: "slug",
+										examples: ["made-in-abyss-dawn-of-the-deep-soul"],
+									}),
+									entry: Entry,
+								}),
+							),
+						),
+					}),
+				]),
+				404: {
+					...KError,
+					description: "No video found with the given id or slug.",
+				},
+				422: KError,
+			},
+		},
+	)
 	.get(
 		"",
 		async () => {

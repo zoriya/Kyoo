@@ -120,7 +120,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 			response: {
 				302: t.Void({
 					description:
-						"Redirected to the [/movies/{id}](#tag/movies/GET/movies/{id}) route.",
+						"Redirected to the [/movies/{id}](#tag/movies/get/api/movies/{id}) route.",
 				}),
 				404: {
 					...KError,

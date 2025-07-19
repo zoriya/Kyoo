@@ -130,7 +130,7 @@ export const collections = new Elysia({
 			response: {
 				302: t.Void({
 					description:
-						"Redirected to the [/collections/{id}](#tag/collections/GET/collections/{id}) route.",
+						"Redirected to the [/collections/{id}](#tag/collections/get/api/collections/{id}) route.",
 				}),
 				404: {
 					...KError,

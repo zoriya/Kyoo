@@ -141,6 +141,17 @@ export const entryVideosQ = db
 	.leftJoin(videos, eq(videos.pk, entryVideoJoin.videoPk))
 	.as("videos");
 
+export const getEntryTransQ = (languages: string[]) => {
+	return db
+		.selectDistinctOn([entryTranslations.pk])
+		.from(entryTranslations)
+		.orderBy(
+			entryTranslations.pk,
+			sql`array_position(${sqlarr(languages)}, ${entryTranslations.language})`,
+		)
+		.as("entry_t");
+};
+
 export const mapProgress = ({ aliased }: { aliased: boolean }) => {
 	const { time, percent, playedDate, videoId } = getColumns(entryProgressQ);
 	const ret = {
@@ -174,15 +185,7 @@ export async function getEntries({
 	userId: string;
 	progressQ?: typeof entryProgressQ;
 }): Promise<(Entry | Extra)[]> {
-	const transQ = db
-		.selectDistinctOn([entryTranslations.pk])
-		.from(entryTranslations)
-		.orderBy(
-			entryTranslations.pk,
-			sql`array_position(${sqlarr(languages)}, ${entryTranslations.language})`,
-		)
-		.as("t");
-	const { pk, name, ...transCol } = getColumns(transQ);
+	const transQ = getEntryTransQ(languages);
 
 	const {
 		kind,
@@ -196,7 +199,7 @@ export async function getEntries({
 	return await db
 		.select({
 			...entryCol,
-			...transCol,
+			...getColumns(transQ),
 			videos: entryVideosQ.videos,
 			progress: mapProgress({ aliased: true }),
 			// specials don't have an `episodeNumber` but a `number` field.
@@ -212,7 +215,7 @@ export async function getEntries({
 			order: sql<number>`${order}`,
 			seasonNumber: sql<number>`${seasonNumber}`,
 			episodeNumber: sql<number>`${episodeNumber}`,
-			name: sql<string>`${name}`,
+			name: sql<string>`${transQ.name}`,
 		})
 		.from(entries)
 		.innerJoin(transQ, eq(entries.pk, transQ.pk))

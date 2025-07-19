@@ -166,7 +166,7 @@ export const imagesH = new Elysia({ tags: ["images"] })
 		response: {
 			302: t.Void({
 				description:
-					"Redirected to the [/images/{id}](#tag/images/GET/images/{id}) route.",
+					"Redirected to the [/images/{id}](#tag/images/get/api/images/{id}) route.",
 			}),
 			404: {
 				...KError,
