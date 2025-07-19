@@ -50,7 +50,7 @@ import NativeVideo, {
 	SelectedVideoTrackType,
 } from "react-native-video";
 import { useYoshiki } from "yoshiki/native";
-import { useDisplayName } from "../utils";
+import { useDisplayName } from "../../../packages/ui/src/utils";
 import { PlayMode, audioAtom, playModeAtom, subtitleAtom } from "./state";
 
 const MimeTypes: Map<string, string> = new Map([
