@@ -75,9 +75,6 @@ func (s *MetadataService) extractSubs(ctx context.Context, info *MediaInfo) (err
 		return nil
 	}
 
-	// Create a temporary directory for writing attachments
-	// TODO if the transcoder ever uses the ffmpeg library directly, remove this
-	// and write directly to storage via stream instead
 	tempWorkingDirectory := filepath.Join(os.TempDir(), info.Sha)
 	if err := os.MkdirAll(tempWorkingDirectory, 0660); err != nil {
 		return fmt.Errorf("failed to create temporary directory: %w", err)

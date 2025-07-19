@@ -282,10 +282,6 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 		}
 		ret.Chapters = append(ret.Chapters, c)
 	}
-
-	if len(ret.Videos) > 0 {
-		ret.Video = ret.Videos[0]
-	}
 	return &ret, nil
 }
 
