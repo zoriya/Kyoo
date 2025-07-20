@@ -1,6 +1,7 @@
 import { Stack } from "expo-router";
+import { useEffect, useRef } from "react";
 import { StyleSheet, View } from "react-native";
-import { useVideoPlayer, VideoView } from "react-native-video";
+import { useVideoPlayer, VideoView, VideoViewRef } from "react-native-video";
 import { entryDisplayNumber } from "~/components/entries";
 import { FullVideo, VideoInfo } from "~/models";
 import { Head } from "~/primitives";
@@ -34,18 +35,34 @@ const mapMetadata = (item: FullVideo | undefined) => {
 export const Player = () => {
 	const [slug] = useQueryState("slug", undefined!);
 
-	const { apiUrl, authToken } = useToken();
-	const [playMode] = useLocalSetting<"direct" | "hls">("playMode", "direct");
-	const player = useVideoPlayer({
-		uri: `${apiUrl}/api/videos/${slug}/${playMode === "direct" ? "direct" : "master.m3u8"}`,
-		headers: {
-			Authorization: `Bearer ${authToken}`,
-		},
-	});
-
 	const { data, error } = useFetch(Player.query(slug));
 	const { data: info, error: infoError } = useFetch(Player.infoQuery(slug));
 	const metadata = mapMetadata(data);
+
+	const { apiUrl, authToken } = useToken();
+	const [playMode] = useLocalSetting<"direct" | "hls">("playMode", "direct");
+	const player = useVideoPlayer(
+		{
+			uri: `${apiUrl}/api/videos/${slug}/${playMode === "direct" ? "direct" : "master.m3u8"}`,
+			headers: {
+				Authorization: `Bearer ${authToken}`,
+			},
+			externalSubtitles: info?.subtitles
+				.filter((x) => x.link)
+				.map((x) => ({
+					uri: x.link!,
+					// TODO: translate this `Unknown`
+					label: x.title ?? "Unknown",
+					language: x.language ?? "und",
+					type: x.codec,
+				})),
+		},
+		(p) => {
+			p.playWhenInactive = true;
+			p.playInBackground = true;
+			p.play();
+		},
+	);
 
 	// const [playbackError, setPlaybackError] = useState<string | undefined>(
 	// 	undefined,
@@ -92,6 +109,7 @@ export const Player = () => {
 					navigationBarHidden: true,
 					statusBarHidden: true,
 					orientation: "landscape",
+					contentStyle: { paddingLeft: 0, paddingRight: 0 },
 				}}
 			/>
 			<VideoView
