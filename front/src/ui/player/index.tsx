@@ -1,7 +1,12 @@
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { useEffect, useRef } from "react";
 import { StyleSheet, View } from "react-native";
-import { useVideoPlayer, VideoView, VideoViewRef } from "react-native-video";
+import {
+	useEvent,
+	useVideoPlayer,
+	VideoView,
+	VideoViewRef,
+} from "react-native-video";
 import { entryDisplayNumber } from "~/components/entries";
 import { FullVideo, VideoInfo } from "~/models";
 import { Head } from "~/primitives";
@@ -9,6 +14,7 @@ import { useToken } from "~/providers/account-context";
 import { useLocalSetting } from "~/providers/settings";
 import { type QueryIdentifier, useFetch } from "~/query";
 import { useQueryState } from "~/utils";
+import { LoadingIndicator } from "./components/hover";
 
 // import { Hover, LoadingIndicator } from "./components/hover";
 // import { useVideoKeyboard } from "./keyboard";
@@ -33,7 +39,8 @@ const mapMetadata = (item: FullVideo | undefined) => {
 };
 
 export const Player = () => {
-	const [slug] = useQueryState("slug", undefined!);
+	const [slug, setSlug] = useQueryState<string>("slug", undefined!);
+	const [start, setStart] = useQueryState<number | undefined>("t", undefined);
 
 	const { data, error } = useFetch(Player.query(slug));
 	const { data: info, error: infoError } = useFetch(Player.infoQuery(slug));
@@ -60,9 +67,24 @@ export const Player = () => {
 		(p) => {
 			p.playWhenInactive = true;
 			p.playInBackground = true;
+			const seek = start ?? data?.progress.time;
+			// TODO: fix console.error bellow
+			if (seek) p.seekTo(seek);
+			else console.error("Player got ready before progress info was loaded.");
 			p.play();
 		},
 	);
+
+	const router = useRouter();
+	useEvent(player, "onEnd", () => {
+		if (!data) return;
+		if (data.next) {
+			setStart(0);
+			setSlug(data.next.video);
+		} else {
+			router.navigate(data.show!.href);
+		}
+	});
 
 	// const [playbackError, setPlaybackError] = useState<string | undefined>(
 	// 	undefined,
@@ -120,7 +142,7 @@ export const Player = () => {
 				controls
 				style={StyleSheet.absoluteFillObject}
 			/>
-			{/* <LoadingIndicator /> */}
+			<LoadingIndicator player={player} />
 			{/* <Hover {...mapData(data, info, previous, next)} url={`${type}/${slug}`} /> */}
 		</View>
 	);
