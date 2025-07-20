@@ -17,7 +17,7 @@ import (
 	"gopkg.in/vansante/go-ffprobe.v2"
 )
 
-const InfoVersion = 2
+const InfoVersion = 3
 
 type Versions struct {
 	Info      int32 `json:"info"`
@@ -112,6 +112,8 @@ type Subtitle struct {
 	Language *string `json:"language"`
 	/// The codec of this stream.
 	Codec string `json:"codec"`
+	/// The codec of this stream (defined as the RFC 6381).
+	MimeCodec *string `json:"mimeCodec"`
 	/// The extension for the codec.
 	Extension *string `json:"extension"`
 	/// Is this stream the default one of it's type?
@@ -136,7 +138,7 @@ type Chapter struct {
 	/// The name of this chapter. This should be a human-readable name that could be presented to the user.
 	Name string `json:"name"`
 	/// The type value is used to mark special chapters (openning/credits...)
-	Type ChapterType `json:"type"`  
+	Type ChapterType `json:"type"`
 }
 
 type ChapterType string
@@ -222,6 +224,12 @@ var SubtitleExtensions = map[string]string{
 	"vtt":    "vtt",
 }
 
+var SubtitleMimes = map[string]string{
+	"subrip": "application/x-subrip",
+	"ass":    "text/x-ssa",
+	"vtt":    "text/vtt",
+}
+
 func RetriveMediaInfo(path string, sha string) (*MediaInfo, error) {
 	defer utils.PrintExecTime("mediainfo for %s", path)()
 
@@ -288,6 +296,7 @@ func RetriveMediaInfo(path string, sha string) (*MediaInfo, error) {
 				Title:             OrNull(stream.Tags.Title),
 				Language:          NullIfUnd(lang.String()),
 				Codec:             stream.CodecName,
+				MimeCodec:         OrNull(SubtitleMimes[stream.CodecName]),
 				Extension:         extension,
 				IsDefault:         stream.Disposition.Default != 0,
 				IsForced:          stream.Disposition.Forced != 0,
