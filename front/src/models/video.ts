@@ -49,13 +49,3 @@ export const FullVideo = Video.extend({
 	show: Show.optional(),
 });
 export type FullVideo = z.infer<typeof FullVideo>;
-
-export const EmbeddedVideo = z.object({
-	id: z.string(),
-	slug: z.string(),
-	path: z.string(),
-	rendering: z.string(),
-	part: z.number().int().gt(0).nullable(),
-	version: z.number().gt(0),
-});
-export type EmbeddedVideo = z.infer<typeof EmbeddedVideo>;
