@@ -67,6 +67,7 @@ export const expo: ExpoConfig = {
 			"react-native-video",
 			{
 				enableNotificationControls: true,
+				enableAndroidPictureInPicture: true,
 			},
 		],
 	],
