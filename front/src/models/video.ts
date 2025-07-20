@@ -39,7 +39,7 @@ export const FullVideo = Video.extend({
 	slugs: z.array(z.string()),
 	progress: z.object({
 		percent: z.int().min(0).max(100),
-		time: z.int().min(0).nullable(),
+		time: z.int().min(0),
 		playedDate: zdate().nullable(),
 		videoId: z.string().nullable(),
 	}),
