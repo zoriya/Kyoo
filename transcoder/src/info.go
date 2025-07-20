@@ -136,7 +136,7 @@ type Chapter struct {
 	/// The name of this chapter. This should be a human-readable name that could be presented to the user.
 	Name string `json:"name"`
 	/// The type value is used to mark special chapters (openning/credits...)
-	Type ChapterType
+	Type ChapterType `json:"type"`  
 }
 
 type ChapterType string

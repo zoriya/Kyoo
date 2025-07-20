@@ -88,16 +88,18 @@ export const Player = () => {
 			/>
 			<Stack.Screen
 				options={{
-					// TODO: find a way to force fullscreen on mobile
-					headerTransparent: true,
-					headerStyle: { backgroundColor: undefined },
+					headerShown: false,
+					navigationBarHidden: true,
+					statusBarHidden: true,
+					orientation: "landscape",
 				}}
 			/>
 			<VideoView
 				player={player}
-				pictureInPicture={true}
-				autoEnterPictureInPicture={true}
+				pictureInPicture
+				autoEnterPictureInPicture
 				resizeMode={"contain"}
+				controls
 				style={StyleSheet.absoluteFillObject}
 			/>
 			{/* <LoadingIndicator /> */}

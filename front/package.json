@@ -35,8 +35,9 @@
 		"i18next-http-backend": "^3.0.2",
 		"react": "19.0.0",
 		"react-i18next": "^15.5.2",
-		"react-native": "0.79.3",
+		"react-native": "0.79.5",
 		"react-native-mmkv": "^3.2.0",
+		"react-native-nitro-modules": "^0.26.4",
 		"react-native-reanimated": "~3.17.4",
 		"react-native-safe-area-context": "5.4.0",
 		"react-native-screens": "~4.11.1",
@@ -60,7 +61,8 @@
 	"expo": {
 		"doctor": {
 			"reactNativeDirectoryCheck": {
-				"listUnknownPackages": false
+				"listUnknownPackages": false,
+				"exclude": ["@gorhom/portal"]
 			}
 		}
 	}

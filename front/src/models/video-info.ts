@@ -15,7 +15,7 @@ export const Quality = z
 	.default("original");
 export type Quality = z.infer<typeof Quality>;
 
-export const Video = z.object({
+export const VideoTrack = z.object({
 	index: z.number(),
 	title: z.string().nullable(),
 	language: z.string().nullable(),
@@ -27,9 +27,9 @@ export const Video = z.object({
 	isDefault: z.boolean(),
 });
 
-export type Video = z.infer<typeof Video>;
+export type VideoTrack = z.infer<typeof VideoTrack>;
 
-export const Audio = z.object({
+export const AudioTrack = z.object({
 	index: z.number(),
 	title: z.string().nullable(),
 	language: z.string().nullable(),
@@ -38,7 +38,7 @@ export const Audio = z.object({
 	bitrate: z.number(),
 	isDefault: z.boolean(),
 });
-export type Audio = z.infer<typeof Audio>;
+export type AudioTrack = z.infer<typeof AudioTrack>;
 
 export const Subtitle = z.object({
 	// external subtitles don't have indexes
@@ -46,7 +46,6 @@ export const Subtitle = z.object({
 	title: z.string().nullable(),
 	language: z.string().nullable(),
 	codec: z.string(),
-	mimeCodec: z.string(),
 	extension: z.string(),
 	isDefault: z.boolean(),
 	isForced: z.boolean(),
@@ -78,8 +77,8 @@ export const VideoInfo = z
 		// in seconds
 		duration: z.number(),
 		container: z.string().nullable(),
-		videos: z.array(Video),
-		audios: z.array(Audio),
+		videos: z.array(VideoTrack),
+		audios: z.array(AudioTrack),
 		subtitles: z.array(Subtitle),
 		fonts: z.array(z.string()),
 		chapters: z.array(Chapter),
