@@ -1,25 +1,24 @@
-/*
- * Kyoo - A portable and vast media library solution.
- * Copyright (c) Kyoo.
- *
- * See AUTHORS.md and LICENSE file in the project root for full license information.
- *
- * Kyoo is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Kyoo is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
- */
-
-import type { Audio, Chapter, KyooImage, Subtitle } from "@kyoo/models";
+import ArrowBack from "@material-symbols/svg-400/rounded/arrow_back-fill.svg";
 import {
+	type ReactNode,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
+import { useTranslation } from "react-i18next";
+import {
+	type ImageStyle,
+	Platform,
+	Pressable,
+	View,
+	type ViewProps,
+} from "react-native";
+import { useEvent, type VideoPlayer } from "react-native-video";
+import { percent, rem, useYoshiki } from "yoshiki/native";
+import type { AudioTrack, Chapter, KImage, Subtitle } from "~/models";
+import {
+	alpha,
 	CircularProgress,
 	ContrastArea,
 	H1,
@@ -30,42 +29,13 @@ import {
 	Skeleton,
 	Slider,
 	Tooltip,
-	alpha,
-	imageBorderRadius,
 	tooltip,
 	ts,
 	useIsTouch,
-} from "@kyoo/primitives";
-import ArrowBack from "@material-symbols/svg-400/rounded/arrow_back-fill.svg";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { atom } from "jotai";
-import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { type ImageStyle, Platform, Pressable, View, type ViewProps } from "react-native";
-import { useRouter } from "solito/router";
-import { percent, rem, useYoshiki } from "yoshiki/native";
-import {
-	bufferedAtom,
-	durationAtom,
-	fullscreenAtom,
-	loadAtom,
-	playAtom,
-	progressAtom,
-} from "../state";
+} from "~/primitives";
 import { LeftButtons, TouchControls } from "./left-buttons";
 import { RightButtons } from "./right-buttons";
 import { BottomScrubber, ScrubberTooltip } from "./scrubber";
-
-const hoverReasonAtom = atom({
-	mouseMoved: false,
-	mouseHover: false,
-	menuOpened: false,
-});
-export const hoverAtom = atom((get) =>
-	[!get(playAtom), ...Object.values(get(hoverReasonAtom))].includes(true),
-);
-export const seekingAtom = atom(false);
-export const seekProgressAtom = atom<number | null>(null);
 
 export const Hover = ({
 	isLoading,
@@ -145,7 +115,11 @@ export const Hover = ({
 								padding: percent(1),
 							})}
 						>
-							<VideoPoster poster={poster} alt={showName} isLoading={isLoading} />
+							<VideoPoster
+								poster={poster}
+								alt={showName}
+								isLoading={isLoading}
+							/>
 							<View
 								{...css({
 									marginLeft: { xs: ts(0.5), sm: ts(3) },
@@ -157,7 +131,11 @@ export const Hover = ({
 							>
 								{!showBottomSeeker && (
 									<H2 numberOfLines={1} {...css({ paddingBottom: ts(1) })}>
-										{isLoading ? <Skeleton {...css({ width: rem(15), height: rem(2) })} /> : name}
+										{isLoading ? (
+											<Skeleton {...css({ width: rem(15), height: rem(2) })} />
+										) : (
+											name
+										)}
 									</H2>
 								)}
 								<ProgressBar chapters={chapters} url={url} />
@@ -172,15 +150,24 @@ export const Hover = ({
 											flexWrap: "wrap",
 										})}
 									>
-										<LeftButtons previousSlug={previousSlug} nextSlug={nextSlug} />
+										<LeftButtons
+											previousSlug={previousSlug}
+											nextSlug={nextSlug}
+										/>
 										<RightButtons
 											subtitles={subtitles}
 											audios={audios}
 											fonts={fonts}
-											onMenuOpen={() => setHover((x) => ({ ...x, menuOpened: true }))}
+											onMenuOpen={() =>
+												setHover((x) => ({ ...x, menuOpened: true }))
+											}
 											onMenuClose={() => {
 												// Disable hover since the menu overlay makes the mouseout unreliable.
-												setHover((x) => ({ ...x, menuOpened: false, mouseHover: false }));
+												setHover((x) => ({
+													...x,
+													menuOpened: false,
+													mouseHover: false,
+												}));
 											}}
 										/>
 									</View>
@@ -198,7 +185,9 @@ export const HoverTouch = ({ children, ...props }: { children: ReactNode }) => {
 	const hover = useAtomValue(hoverAtom);
 	const setHover = useSetAtom(hoverReasonAtom);
 	const mouseCallback = useRef<NodeJS.Timeout | null>(null);
-	const touch = useRef<{ count: number; timeout?: NodeJS.Timeout }>({ count: 0 });
+	const touch = useRef<{ count: number; timeout?: NodeJS.Timeout }>({
+		count: 0,
+	});
 	const playerWidth = useRef<number | null>(null);
 	const isTouch = useIsTouch();
 
@@ -226,7 +215,8 @@ export const HoverTouch = ({ children, ...props }: { children: ReactNode }) => {
 	// It also serves to hide the tooltip.
 	useEffect(() => {
 		if (Platform.OS !== "web") return;
-		if (!hover && document.activeElement instanceof HTMLElement) document.activeElement.blur();
+		if (!hover && document.activeElement instanceof HTMLElement)
+			document.activeElement.blur();
 	}, [hover]);
 
 	const { css } = useYoshiki();
@@ -282,7 +272,8 @@ export const HoverTouch = ({ children, ...props }: { children: ReactNode }) => {
 		<Pressable
 			tabIndex={-1}
 			onPointerLeave={(e) => {
-				if (e.nativeEvent.pointerType === "mouse") setHover((x) => ({ ...x, mouseMoved: false }));
+				if (e.nativeEvent.pointerType === "mouse")
+					setHover((x) => ({ ...x, mouseMoved: false }));
 			}}
 			onPress={(e) => {
 				e.preventDefault();
@@ -315,7 +306,13 @@ export const HoverTouch = ({ children, ...props }: { children: ReactNode }) => {
 	);
 };
 
-const ProgressBar = ({ url, chapters }: { url: string; chapters?: Chapter[] }) => {
+const ProgressBar = ({
+	url,
+	chapters,
+}: {
+	url: string;
+	chapters?: Chapter[];
+}) => {
 	const [progress, setProgress] = useAtom(progressAtom);
 	const buffered = useAtomValue(bufferedAtom);
 	const duration = useAtomValue(durationAtom);
@@ -353,10 +350,17 @@ const ProgressBar = ({ url, chapters }: { url: string; chapters?: Chapter[] }) =
 				id={"progress-scrubber"}
 				isOpen={hoverProgress !== null}
 				place="top"
-				position={{ x: layout.x + (layout.width * hoverProgress!) / (duration ?? 1), y: layout.y }}
+				position={{
+					x: layout.x + (layout.width * hoverProgress!) / (duration ?? 1),
+					y: layout.y,
+				}}
 				render={() =>
 					hoverProgress ? (
-						<ScrubberTooltip seconds={hoverProgress} chapters={chapters} url={url} />
+						<ScrubberTooltip
+							seconds={hoverProgress}
+							chapters={chapters}
+							url={url}
+						/>
 					) : null
 				}
 				opacity={1}
@@ -449,9 +453,13 @@ const VideoPoster = ({
 	);
 };
 
-export const LoadingIndicator = () => {
-	const isLoading = useAtomValue(loadAtom);
+export const LoadingIndicator = ({ player }: { player: VideoPlayer }) => {
 	const { css } = useYoshiki();
+	const [isLoading, setLoading] = useState(false);
+
+	useEvent(player, "onStatusChange", (status) => {
+		setLoading(status === "loading");
+	});
 
 	if (!isLoading) return null;
 
