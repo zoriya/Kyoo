@@ -13,7 +13,7 @@ require (
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/lestrrat-go/jwx/v3 v3.0.5
 	github.com/swaggo/echo-swagger v1.4.1
-	github.com/swaggo/swag v1.16.4
+	github.com/swaggo/swag v1.16.5
 )
 
 require (
@@ -24,6 +24,7 @@ require (
 	github.com/lestrrat-go/httprc/v3 v3.0.0 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
+	golang.org/x/mod v0.25.0 // indirect
 )
 
 require (
