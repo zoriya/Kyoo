@@ -10,6 +10,8 @@ x-transcoder: &transcoder-base
     - "7666:7666"
   restart: unless-stopped
   cpus: 1
+  environment:
+    - JWKS_URL=http://auth:4568/.well-known/jwks.json
   env_file:
     - ./.env
   volumes:
