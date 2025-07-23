@@ -79,37 +79,39 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	jwks, err := jwk.NewCache(ctx, httprc.NewClient())
-	if err != nil {
-		e.Logger.Fatal("failed to create jwk cache: ", err)
-		return
-	}
-	jwks.Register(ctx, src.Settings.JwksUrl)
-
 	g := e.Group("/video")
-	g.Use(echojwt.WithConfig(echojwt.Config{
-		KeyFunc: func(token *jwt.Token) (any, error) {
-			keys, err := jwks.CachedSet(src.Settings.JwksUrl)
-			if err != nil {
-				return nil, err
-			}
-			kid, ok := token.Header["kid"].(string)
-			if !ok {
-				return nil, errors.New("missing kid in jwt")
-			}
-			key, found := keys.LookupKeyID(kid)
-			if !found {
-				return nil, fmt.Errorf("unable to find key %q", kid)
-			}
 
-			var pubkey interface{}
-			if err := jwk.Export(key, &pubkey); err != nil {
-				return nil, fmt.Errorf("Unable to get the public key. Error: %s", err.Error())
-			}
+	if src.Settings.JwksUrl != "" {
+		jwks, err := jwk.NewCache(ctx, httprc.NewClient())
+		if err != nil {
+			e.Logger.Fatal("failed to create jwk cache: ", err)
+			return
+		}
+		jwks.Register(ctx, src.Settings.JwksUrl)
+		g.Use(echojwt.WithConfig(echojwt.Config{
+			KeyFunc: func(token *jwt.Token) (any, error) {
+				keys, err := jwks.CachedSet(src.Settings.JwksUrl)
+				if err != nil {
+					return nil, err
+				}
+				kid, ok := token.Header["kid"].(string)
+				if !ok {
+					return nil, errors.New("missing kid in jwt")
+				}
+				key, found := keys.LookupKeyID(kid)
+				if !found {
+					return nil, fmt.Errorf("unable to find key %q", kid)
+				}
 
-			return pubkey, nil
-		},
-	}))
+				var pubkey interface{}
+				if err := jwk.Export(key, &pubkey); err != nil {
+					return nil, fmt.Errorf("Unable to get the public key. Error: %s", err.Error())
+				}
+
+				return pubkey, nil
+			},
+		}))
+	}
 
 	api.RegisterStreamHandlers(g, transcoder)
 	api.RegisterMetadataHandlers(g, metadata)
