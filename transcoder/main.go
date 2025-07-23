@@ -76,12 +76,12 @@ func main() {
 		return
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	g := e.Group("/video")
 
 	if src.Settings.JwksUrl != "" {
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
 		jwks, err := jwk.NewCache(ctx, httprc.NewClient())
 		if err != nil {
 			e.Logger.Fatal("failed to create jwk cache: ", err)
