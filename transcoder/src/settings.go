@@ -32,6 +32,6 @@ var Settings = SettingsT{
 	// we manually add a folder to make sure we do not delete user data.
 	Outpath:  path.Join(GetEnvOr("GOCODER_CACHE_ROOT", "/cache"), "kyoo_cache"),
 	SafePath: GetEnvOr("GOCODER_SAFE_PATH", "/video"),
-	JwksUrl:  GetEnvOr("JWKS_URL", "http://auth:4568/.well-known/jwks.json"),
+	JwksUrl:  os.Getenv("JWKS_URL"),
 	HwAccel:  DetectHardwareAccel(),
 }
