@@ -45,6 +45,7 @@ export const TouchControls = ({
 
 	return (
 		<DoublePressable
+			tabIndex={-1}
 			onPress={() => {
 				if (isTouch) {
 					show(!shouldShow);
