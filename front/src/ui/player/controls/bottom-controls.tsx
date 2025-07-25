@@ -11,10 +11,10 @@ import {
 	IconButton,
 	Link,
 	type Menu,
-	noTouch,
 	Poster,
 	tooltip,
 	ts,
+	useIsTouch,
 } from "~/primitives";
 import { FullscreenButton, PlayButton, VolumeSlider } from "./misc";
 import { ProgressBar, ProgressText } from "./progress";
@@ -102,6 +102,7 @@ const ControlButtons = ({
 }) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
+	const isTouch = useIsTouch();
 
 	const spacing = css({ marginHorizontal: ts(1) });
 	const menuProps = {
@@ -123,34 +124,36 @@ const ControlButtons = ({
 			)}
 		>
 			<View {...css({ flexDirection: "row" })}>
-				<View {...css({ flexDirection: "row" }, noTouch)}>
-					{previous && (
-						<IconButton
-							icon={SkipPrevious}
-							as={Link}
-							href={previous}
-							replace
-							{...tooltip(t("player.previous"), true)}
-							{...spacing}
-						/>
-					)}
-					<PlayButton player={player} {...spacing} />
-					{next && (
-						<IconButton
-							icon={SkipNext}
-							as={Link}
-							href={next}
-							replace
-							{...tooltip(t("player.next"), true)}
-							{...spacing}
-						/>
-					)}
-					{Platform.OS === "web" && <VolumeSlider player={player} />}
-				</View>
+				{isTouch && (
+					<View {...css({ flexDirection: "row" })}>
+						{previous && (
+							<IconButton
+								icon={SkipPrevious}
+								as={Link}
+								href={previous}
+								replace
+								{...tooltip(t("player.previous"), true)}
+								{...spacing}
+							/>
+						)}
+						<PlayButton player={player} {...spacing} />
+						{next && (
+							<IconButton
+								icon={SkipNext}
+								as={Link}
+								href={next}
+								replace
+								{...tooltip(t("player.next"), true)}
+								{...spacing}
+							/>
+						)}
+						{Platform.OS === "web" && <VolumeSlider player={player} />}
+					</View>
+				)}
 				<ProgressText player={player} {...spacing} />
 			</View>
 			<View {...css({ flexDirection: "row" })}>
-				<SubtitleMenu {...menuProps}  />
+				<SubtitleMenu {...menuProps} />
 				<AudioMenu {...menuProps} />
 				<QualityMenu {...menuProps} />
 				{Platform.OS === "web" && <FullscreenButton {...spacing} />}

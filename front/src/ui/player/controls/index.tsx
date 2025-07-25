@@ -3,8 +3,10 @@ import type { ViewProps } from "react-native";
 import type { VideoPlayer } from "react-native-video";
 import { useYoshiki } from "yoshiki/native";
 import type { Chapter, KImage } from "~/models";
+import { useIsTouch } from "~/primitives";
 import { Back } from "./back";
 import { BottomControls } from "./bottom-controls";
+import { MiddleControls } from "./middle-controls";
 import { TouchControls } from "./touch";
 
 export const Controls = ({
@@ -25,6 +27,7 @@ export const Controls = ({
 	next: string | null;
 }) => {
 	const { css } = useYoshiki();
+	const isTouch = useIsTouch();
 
 	const [hover, setHover] = useState(false);
 	const [menuOpenned, setMenu] = useState(false);
@@ -56,6 +59,9 @@ export const Controls = ({
 					hoverControls,
 				)}
 			/>
+			{isTouch && (
+				<MiddleControls player={player} previous={previous} next={next} />
+			)}
 			<BottomControls
 				player={player}
 				name={subTitle}
@@ -66,7 +72,7 @@ export const Controls = ({
 				setMenu={setMenu}
 				{...css(
 					{
-						// Fixed is used because firefox android make the hover disapear under the navigation bar in absolute
+						// Fixed is used because firefox android make the hover disappear under the navigation bar in absolute
 						// position: Platform.OS === "web" ? ("fixed" as any) : "absolute",
 						position: "absolute",
 						bottom: 0,
