@@ -25,9 +25,9 @@ import { useMemo } from "react";
 import { Platform, View } from "react-native";
 import { type Theme, percent, px, useForceRerender, useYoshiki } from "yoshiki/native";
 import { ErrorView } from "../../errors";
-import { durationAtom } from "../state";
-import { seekProgressAtom } from "./hover";
-import { toTimerString } from "./left-buttons";
+import { durationAtom } from "./state";
+import { seekProgressAtom } from "../controls";
+import { toTimerString } from "../controls/left-buttonsttons";
 
 type Thumb = {
 	from: number;
