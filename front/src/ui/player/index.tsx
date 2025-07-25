@@ -8,7 +8,7 @@ import { useToken } from "~/providers/account-context";
 import { useLocalSetting } from "~/providers/settings";
 import { type QueryIdentifier, useFetch } from "~/query";
 import { useQueryState } from "~/utils";
-import { LoadingIndicator } from "./controls";
+import { Controls, LoadingIndicator } from "./controls";
 
 const mapMetadata = (item: FullVideo | undefined) => {
 	if (!item) return null;
@@ -134,7 +134,11 @@ export const Player = () => {
 			/>
 			<ContrastArea mode="dark">
 				<LoadingIndicator player={player} />
-				<Controls player={player} {...metadata} />
+				<Controls
+					player={player}
+					title={metadata?.title}
+					subTitle={metadata?.subtitle}
+				/>
 			</ContrastArea>
 		</View>
 	);

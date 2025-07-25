@@ -12,13 +12,15 @@ import { useIsTouch } from "~/primitives";
 export const TouchControls = ({
 	player,
 	children,
+	forceShow = false,
 	...props
-}: { player: VideoPlayer } & PressableProps) => {
+}: { player: VideoPlayer; forceShow?: boolean } & PressableProps) => {
 	const { css } = useYoshiki();
 	const isTouch = useIsTouch();
 
-	const [shouldShow, setShow] = useState(true);
+	const [_show, setShow] = useState(true);
 	const hideTimeout = useRef<NodeJS.Timeout | null>(null);
+	const shouldShow = forceShow || _show;
 	const show = useCallback((val: boolean = true) => {
 		setShow(val);
 		if (hideTimeout.current) clearTimeout(hideTimeout.current);
@@ -27,7 +29,6 @@ export const TouchControls = ({
 			setShow(false);
 		}, 2500);
 	}, []);
-	// TODO: handle mouse hover & seek
 
 	// On mouse move
 	useEffect(() => {

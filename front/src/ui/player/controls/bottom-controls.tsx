@@ -1,5 +1,6 @@
 import SkipNext from "@material-symbols/svg-400/rounded/skip_next-fill.svg";
 import SkipPrevious from "@material-symbols/svg-400/rounded/skip_previous-fill.svg";
+import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, View, type ViewProps } from "react-native";
 import type { VideoPlayer } from "react-native-video";
@@ -9,6 +10,7 @@ import {
 	H2,
 	IconButton,
 	Link,
+	type Menu,
 	noTouch,
 	Poster,
 	tooltip,
@@ -23,12 +25,18 @@ export const BottomControls = ({
 	poster,
 	name,
 	chapters,
+	previous,
+	next,
+	setMenu,
 	...props
 }: {
 	player: VideoPlayer;
 	poster: KImage;
 	name: string;
 	chapters: Chapter[];
+	previous: string | null;
+	next: string | null;
+	setMenu: (isOpen: boolean) => void;
 } & ViewProps) => {
 	const { css } = useYoshiki();
 
@@ -69,7 +77,12 @@ export const BottomControls = ({
 					name
 				</H2>
 				<ProgressBar player={player} chapters={chapters} />
-				<ControlButtons player={player} />
+				<ControlButtons
+					player={player}
+					previous={previous}
+					next={next}
+					setMenu={setMenu}
+				/>
 			</View>
 		</View>
 	);
@@ -79,16 +92,23 @@ const ControlButtons = ({
 	player,
 	previous,
 	next,
+	setMenu,
 	...props
 }: {
 	player: VideoPlayer;
-	previous: string;
-	next: string;
+	previous: string | null;
+	next: string | null;
+	setMenu: (isOpen: boolean) => void;
 }) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 
 	const spacing = css({ marginHorizontal: ts(1) });
+	const menuProps = {
+		onMenuOpen: () => setMenu(true),
+		onMenuClose: () => setMenu(false),
+		...spacing,
+	} satisfies Partial<ComponentProps<typeof Menu>>;
 
 	return (
 		<View
@@ -130,9 +150,9 @@ const ControlButtons = ({
 				<ProgressText player={player} {...spacing} />
 			</View>
 			<View {...css({ flexDirection: "row" })}>
-				<SubtitleMenu {...(spacing as any)} />
-				<AudioMenu {...(spacing as any)} />
-				<QualityMenu {...(spacing as any)} />
+				<SubtitleMenu {...menuProps}  />
+				<AudioMenu {...menuProps} />
+				<QualityMenu {...menuProps} />
 				{Platform.OS === "web" && <FullscreenButton {...spacing} />}
 			</View>
 		</View>
