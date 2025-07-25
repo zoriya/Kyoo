@@ -10,8 +10,8 @@ import { useAtom, useAtomValue } from "jotai";
 import { useTranslation } from "react-i18next";
 import { Platform, View } from "react-native";
 import { px, type Stylable, useYoshiki } from "yoshiki/native";
-import { HoverTouch, hoverAtom } from "../controls";
-import { playAtom } from "./state";
+import { HoverTouch, hoverAtom } from ".";
+import { playAtom } from "../old/state";
 
 export const TouchControls = ({
 	previousSlug,
