@@ -33,7 +33,7 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
-import NativeVideo, { canPlay, type VideoMetadata, type VideoProps } from "./video";
+import NativeVideo, { canPlay, type VideoMetadata, type VideoProps } from "../videoideo";
 
 export const playAtom = atom(true);
 export const loadAtom = atom(false);

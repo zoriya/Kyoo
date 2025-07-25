@@ -23,7 +23,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
 import { useAtomCallback } from "jotai/utils";
 import { useCallback, useEffect } from "react";
-import { playAtom, progressAtom } from "./state";
+import { playAtom, progressAtom } from "./old/statee";
 
 export const WatchStatusObserver = ({
 	type,

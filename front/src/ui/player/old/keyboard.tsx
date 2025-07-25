@@ -31,7 +31,7 @@ import {
 	progressAtom,
 	subtitleAtom,
 	volumeAtom,
-} from "./state";
+} from "./old/statee";
 
 type Action =
 	| { type: "play" }
