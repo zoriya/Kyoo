@@ -1,10 +1,4 @@
-import type React from "react";
-import {
-	type ComponentProps,
-	type ComponentType,
-	type ForwardedRef,
-	forwardRef,
-} from "react";
+import type { ComponentProps, ComponentType } from "react";
 import { Platform, type PressableProps } from "react-native";
 import type { SvgProps } from "react-native-svg";
 import type { YoshikiStyle } from "yoshiki";
@@ -12,12 +6,6 @@ import { px, type Stylable, type Theme, useYoshiki } from "yoshiki/native";
 import { PressableFeedback } from "./links";
 import { P } from "./text";
 import { type Breakpoint, focusReset, ts } from "./utils";
-
-declare module "react" {
-	function forwardRef<T, P = {}>(
-		render: (props: P, ref: React.ForwardedRef<T>) => React.ReactElement | null,
-	): (props: P & React.RefAttributes<T>) => React.ReactElement | null;
-}
 
 export type Icon = ComponentType<SvgProps>;
 
@@ -54,27 +42,21 @@ export const Icon = ({ icon: Icon, color, size = 24, ...props }: IconProps) => {
 	);
 };
 
-export const IconButton = forwardRef(function IconButton<
-	AsProps = PressableProps,
->(
-	{
-		icon,
-		size,
-		color,
-		as,
-		...asProps
-	}: IconProps & {
-		as?: ComponentType<AsProps>;
-	} & AsProps,
-	ref: ForwardedRef<unknown>,
-) {
+export const IconButton = <AsProps = PressableProps>({
+	icon,
+	size,
+	color,
+	as,
+	...asProps
+}: IconProps & {
+	as?: ComponentType<AsProps>;
+} & AsProps) => {
 	const { css, theme } = useYoshiki();
 
 	const Container = as ?? PressableFeedback;
 
 	return (
 		<Container
-			ref={ref as any}
 			focusRipple
 			{...(css(
 				{
@@ -102,7 +84,7 @@ export const IconButton = forwardRef(function IconButton<
 			/>
 		</Container>
 	);
-});
+};
 
 export const IconFab = <AsProps = PressableProps>(
 	props: ComponentProps<typeof IconButton<AsProps>>,

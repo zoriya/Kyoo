@@ -20,11 +20,6 @@ export const Back = ({ name, ...props }: { name: string } & ViewProps) => {
 		<View
 			{...css(
 				{
-					position: "absolute",
-					top: 0,
-					left: 0,
-					right: 0,
-					bg: (theme) => theme.darkOverlay,
 					display: "flex",
 					flexDirection: "row",
 					alignItems: "center",
