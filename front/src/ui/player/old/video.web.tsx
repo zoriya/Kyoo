@@ -36,9 +36,9 @@ import { useTranslation } from "react-i18next";
 import type { VideoProps } from "react-native-video";
 import toVttBlob from "srt-webvtt";
 import { useForceRerender, useYoshiki } from "yoshiki";
-import { useDisplayName } from "../../../packages/ui/src/utils";
-import { MediaSessionManager } from "./media-session";
-import { PlayMode, audioAtom, playAtom, playModeAtom, progressAtom, subtitleAtom } from "./state";
+import { useDisplayName } from "../../../../packages/ui/src/utils";
+import { MediaSessionManager } from "./old/media-sessionn";
+import { PlayMode, audioAtom, playAtom, playModeAtom, progressAtom, subtitleAtom } from "./old/statee";
 
 let hls: Hls | null = null;
 

@@ -1,24 +1,14 @@
 import { Stack, useRouter } from "expo-router";
-import { useEffect, useRef } from "react";
 import { StyleSheet, View } from "react-native";
-import {
-	useEvent,
-	useVideoPlayer,
-	VideoView,
-	VideoViewRef,
-} from "react-native-video";
+import { useEvent, useVideoPlayer, VideoView } from "react-native-video";
 import { entryDisplayNumber } from "~/components/entries";
 import { FullVideo, VideoInfo } from "~/models";
-import { Head } from "~/primitives";
+import { ContrastArea, Head } from "~/primitives";
 import { useToken } from "~/providers/account-context";
 import { useLocalSetting } from "~/providers/settings";
 import { type QueryIdentifier, useFetch } from "~/query";
 import { useQueryState } from "~/utils";
-import { LoadingIndicator } from "./components/hover";
-
-// import { Hover, LoadingIndicator } from "./components/hover";
-// import { useVideoKeyboard } from "./keyboard";
-// import { durationAtom, fullscreenAtom, Video } from "./state";
+import { LoadingIndicator } from "./controls";
 
 const mapMetadata = (item: FullVideo | undefined) => {
 	if (!item) return null;
@@ -142,8 +132,10 @@ export const Player = () => {
 				controls
 				style={StyleSheet.absoluteFillObject}
 			/>
-			<LoadingIndicator player={player} />
-			{/* <Hover {...mapData(data, info, previous, next)} url={`${type}/${slug}`} /> */}
+			<ContrastArea mode="dark">
+				<LoadingIndicator player={player} />
+				<Controls player={player} {...metadata} />
+			</ContrastArea>
 		</View>
 	);
 };

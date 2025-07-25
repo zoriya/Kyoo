@@ -50,8 +50,8 @@ import NativeVideo, {
 	SelectedVideoTrackType,
 } from "react-native-video";
 import { useYoshiki } from "yoshiki/native";
-import { useDisplayName } from "../../../packages/ui/src/utils";
-import { PlayMode, audioAtom, playModeAtom, subtitleAtom } from "./state";
+import { useDisplayName } from "../../../../packages/ui/src/utils";
+import { PlayMode, audioAtom, playModeAtom, subtitleAtom } from "./old/statee";
 
 const MimeTypes: Map<string, string> = new Map([
 	["subrip", "application/x-subrip"],
