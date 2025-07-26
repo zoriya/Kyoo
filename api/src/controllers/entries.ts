@@ -54,7 +54,7 @@ export const entryProgressQ = db
 	})
 	.from(history)
 	.leftJoin(videos, eq(history.videoPk, videos.pk))
-	.leftJoin(profiles, eq(history.profilePk, profiles.pk))
+	.innerJoin(profiles, eq(history.profilePk, profiles.pk))
 	.where(eq(profiles.id, sql.placeholder("userId")))
 	.orderBy(history.entryPk, desc(history.playedDate))
 	.as("progress");

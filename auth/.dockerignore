@@ -1,7 +1,7 @@
 **
 !/go.mod
 !/go.sum
-!/**.go
+!/**/*.go
 # generated via sqlc
 !/sql
 !/dbc
