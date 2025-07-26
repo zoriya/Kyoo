@@ -27,9 +27,10 @@ export const Video = z.object({
 
 		// Name of the tool that made the guess
 		from: z.string(),
-		get history() {
-			return z.array(Video.shape.guess.omit({ history: true })).default([]);
-		},
+		// Adding that results in an infinite recursion
+		// get history() {
+		// 	return z.array(Video.shape.guess.omit({ history: true })).default([]);
+		// },
 	}),
 	createdAt: zdate(),
 	updatedAt: zdate(),

@@ -10,31 +10,15 @@ import { type QueryIdentifier, useFetch } from "~/query";
 import { useQueryState } from "~/utils";
 import { Controls, LoadingIndicator } from "./controls";
 
-const mapMetadata = (item: FullVideo | undefined) => {
-	if (!item) return null;
-
-	// TODO: map current entry using entries' duration & the current playtime
-	const currentEntry = 0;
-	const entry = item.entries[currentEntry] ?? item.entries[0];
-	if (!entry) return null;
-
-	return {
-		currentEntry,
-		title: `${entry.name} (${entryDisplayNumber(entry)})`,
-		description: entry.description,
-		subtitle: item.show!.kind !== "movie" ? item.show!.name : null,
-		poster: item.show!.poster,
-		thumbnail: item.show!.thumbnail,
-	};
-};
-
 export const Player = () => {
 	const [slug, setSlug] = useQueryState<string>("slug", undefined!);
 	const [start, setStart] = useQueryState<number | undefined>("t", undefined);
 
 	const { data, error } = useFetch(Player.query(slug));
 	const { data: info, error: infoError } = useFetch(Player.infoQuery(slug));
-	const metadata = mapMetadata(data);
+	// TODO: map current entry using entries' duration & the current playtime
+	const currentEntry = 0;
+	const entry = data?.entries[currentEntry] ?? data?.entries[0];
 
 	const { apiUrl, authToken } = useToken();
 	const [playMode] = useLocalSetting<"direct" | "hls">("playMode", "direct");
@@ -44,15 +28,15 @@ export const Player = () => {
 			headers: {
 				Authorization: `Bearer ${authToken}`,
 			},
-			externalSubtitles: info?.subtitles
-				.filter((x) => x.link)
-				.map((x) => ({
-					uri: x.link!,
-					// TODO: translate this `Unknown`
-					label: x.title ?? "Unknown",
-					language: x.language ?? "und",
-					type: x.codec,
-				})),
+			// externalSubtitles: info?.subtitles
+			// 	.filter((x) => x.link)
+			// 	.map((x) => ({
+			// 		uri: x.link!,
+			// 		// TODO: translate this `Unknown`
+			// 		label: x.title ?? "Unknown",
+			// 		language: x.language ?? "und",
+			// 		type: x.codec,
+			// 	})),
 		},
 		(p) => {
 			p.playWhenInactive = true;
@@ -111,9 +95,9 @@ export const Player = () => {
 			}}
 		>
 			<Head
-				title={metadata?.title}
-				description={metadata?.description}
-				image={metadata?.thumbnail?.high}
+				title={entry ? `${entry.name} (${entryDisplayNumber(entry)})` : null}
+				description={entry?.description}
+				image={data?.show?.thumbnail?.high}
 			/>
 			<Stack.Screen
 				options={{
@@ -129,15 +113,24 @@ export const Player = () => {
 				pictureInPicture
 				autoEnterPictureInPicture
 				resizeMode={"contain"}
-				controls
 				style={StyleSheet.absoluteFillObject}
 			/>
 			<ContrastArea mode="dark">
 				<LoadingIndicator player={player} />
 				<Controls
 					player={player}
-					title={metadata?.title}
-					subTitle={metadata?.subtitle}
+					name={data?.show?.name}
+					poster={data?.show?.poster}
+					subName={
+						entry
+							? [entryDisplayNumber(entry), entry.name]
+									.filter((x) => x)
+									.join(" - ")
+							: undefined
+					}
+					chapters={info?.chapters ?? []}
+					previous={data?.previous?.video}
+					next={data?.next?.video}
 				/>
 			</ContrastArea>
 		</View>
@@ -147,7 +140,7 @@ export const Player = () => {
 Player.query = (slug: string): QueryIdentifier<FullVideo> => ({
 	path: ["api", "videos", slug],
 	params: {
-		fields: ["next", "previous", "show"],
+		with: ["next", "previous", "show"],
 	},
 	parser: FullVideo,
 });

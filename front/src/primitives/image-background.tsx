@@ -25,7 +25,7 @@ export const ImageBackground = ({
 	layout: ImageLayout;
 	children: ReactNode;
 }) => {
-	const { css } = useYoshiki();
+	const { css, theme } = useYoshiki();
 	const { apiUrl, authToken } = useToken();
 
 	return (
@@ -42,7 +42,10 @@ export const ImageBackground = ({
 			}}
 			placeholder={{ blurhash: src?.blurhash }}
 			accessibilityLabel={alt}
-			{...(css([layout, { overflow: "hidden" }], props) as any)}
+			{...(css(
+				[layout, { overflow: "hidden", backgroundColor: theme.overlay0 }],
+				props,
+			) as any)}
 		/>
 	);
 };

@@ -39,9 +39,9 @@ export const ProgressBar = ({
 				}}
 				setProgress={setSeek}
 				endSeek={() => {
-					setProgress(seek!);
-					setSeek(null);
+					player.seekTo(seek!);
 					setTimeout(player.play, 10);
+					setSeek(null);
 				}}
 				// onHover={(progress, layout) => {
 				// 	setHoverProgress(progress);
