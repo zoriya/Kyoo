@@ -4,7 +4,7 @@ import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, View, type ViewProps } from "react-native";
 import type { VideoPlayer } from "react-native-video";
-import { percent, useYoshiki } from "yoshiki/native";
+import { percent, rem, useYoshiki } from "yoshiki/native";
 import type { Chapter, KImage } from "~/models";
 import {
 	H2,
@@ -12,6 +12,7 @@ import {
 	Link,
 	type Menu,
 	Poster,
+	Skeleton,
 	tooltip,
 	ts,
 	useIsTouch,
@@ -31,11 +32,11 @@ export const BottomControls = ({
 	...props
 }: {
 	player: VideoPlayer;
-	poster: KImage;
-	name: string;
+	poster?: KImage | null;
+	name?: string;
 	chapters: Chapter[];
-	previous: string | null;
-	next: string | null;
+	previous?: string | null;
+	next?: string | null;
 	setMenu: (isOpen: boolean) => void;
 } & ViewProps) => {
 	const { css } = useYoshiki();
@@ -57,25 +58,34 @@ export const BottomControls = ({
 					position: "relative",
 				})}
 			>
-				<Poster
-					src={poster}
-					quality="low"
-					layout={{ width: percent(100) }}
-					{...(css({ position: "absolute", bottom: 0 }) as any)}
-				/>
+				{poster !== undefined ? (
+					<Poster
+						src={poster}
+						quality="low"
+						layout={{ width: percent(100) }}
+						{...(css({ position: "absolute", bottom: 0 }) as any)}
+					/>
+				) : (
+					<Poster.Loader
+						layout={{ width: percent(100) }}
+						{...(css({ position: "absolute", bottom: 0 }) as any)}
+					/>
+				)}
 			</View>
 			<View
 				{...css({
-					marginLeft: { xs: ts(0.5), sm: ts(3) },
+					marginHorizontal: { xs: ts(0.5), sm: ts(3) },
 					flexDirection: "column",
-					flexGrow: 1,
-					flexShrink: 1,
-					maxWidth: percent(100),
+					flex: 1,
 				})}
 			>
-				<H2 numberOfLines={1} {...css({ paddingBottom: ts(1) })}>
-					name
-				</H2>
+				{name ? (
+					<H2 numberOfLines={1} {...css({ paddingBottom: ts(1) })}>
+						{name}
+					</H2>
+				) : (
+					<Skeleton {...css({ width: rem(15), height: rem(2) })} />
+				)}
 				<ProgressBar player={player} chapters={chapters} />
 				<ControlButtons
 					player={player}
@@ -96,8 +106,8 @@ const ControlButtons = ({
 	...props
 }: {
 	player: VideoPlayer;
-	previous: string | null;
-	next: string | null;
+	previous?: string | null;
+	next?: string | null;
 	setMenu: (isOpen: boolean) => void;
 }) => {
 	const { css } = useYoshiki();
@@ -116,7 +126,7 @@ const ControlButtons = ({
 			{...css(
 				{
 					flexDirection: "row",
-					flexGrow: 1,
+					flex: 1,
 					justifyContent: "space-between",
 					flexWrap: "wrap",
 				},
@@ -124,7 +134,7 @@ const ControlButtons = ({
 			)}
 		>
 			<View {...css({ flexDirection: "row" })}>
-				{isTouch && (
+				{!isTouch && (
 					<View {...css({ flexDirection: "row" })}>
 						{previous && (
 							<IconButton

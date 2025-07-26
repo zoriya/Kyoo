@@ -5,7 +5,7 @@ import {
 	Pressable,
 	type PressableProps,
 } from "react-native";
-import type { VideoPlayer } from "react-native-video";
+import { useEvent, type VideoPlayer } from "react-native-video";
 import { useYoshiki } from "yoshiki/native";
 import { useIsTouch } from "~/primitives";
 
@@ -18,9 +18,14 @@ export const TouchControls = ({
 	const { css } = useYoshiki();
 	const isTouch = useIsTouch();
 
-	const [_show, setShow] = useState(true);
+	const [playing, setPlay] = useState(player.isPlaying);
+	useEvent(player, "onPlaybackStateChange", (status) => {
+		setPlay(status.isPlaying);
+	});
+
+	const [_show, setShow] = useState(false);
 	const hideTimeout = useRef<NodeJS.Timeout | null>(null);
-	const shouldShow = forceShow || _show;
+	const shouldShow = forceShow || _show || !playing;
 	const show = useCallback((val: boolean = true) => {
 		setShow(val);
 		if (hideTimeout.current) clearTimeout(hideTimeout.current);
