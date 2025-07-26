@@ -70,7 +70,6 @@ import {
 	updateAvailableCount,
 	updateAvailableSince,
 } from "./seed/insert/shows";
-import { watchStatusQ } from "./shows/logic";
 
 async function linkVideos(
 	tx: Transaction,
@@ -257,7 +256,7 @@ const videoRelations = {
 					'{"percent": 0, "time": 0, "playedDate": null, "videoId": null}'::jsonb
 				)
 				as "progress"
-			)`;
+			)` as any;
 	},
 	entries: ({ languages }: { languages: string[] }) => {
 		const transQ = getEntryTransQ(languages);
@@ -274,6 +273,7 @@ const videoRelations = {
 							progress: mapProgress({ aliased: false }),
 							createdAt: sql`to_char(${entries.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
 							updatedAt: sql`to_char(${entries.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+							availableSince: sql`to_char(${entries.availableSince}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
 						}),
 					),
 					sql`'[]'::jsonb`,
@@ -329,6 +329,8 @@ const videoRelations = {
 					airDate: shows.startAir,
 					kind: sql<any>`${shows.kind}`,
 					isAvailable: sql<boolean>`${shows.availableCount} != 0`,
+					createdAt: sql`to_char(${shows.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+					updatedAt: sql`to_char(${shows.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
 
 					...(preferOriginal && {
 						poster: sql<Image>`coalesce(nullif(${shows.original}->'poster', 'null'::jsonb), ${transQ.poster})`,
@@ -541,7 +543,12 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 								}),
 							),
 						),
-						show: t.Optional(t.Union([Movie, Serie])),
+						show: t.Optional(
+							t.Union([
+								t.Composite([t.Object({ kind: t.Literal("movie") }), Movie]),
+								t.Composite([t.Object({ kind: t.Literal("serie") }), Serie]),
+							]),
+						),
 					}),
 				]),
 				404: {
@@ -616,7 +623,9 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 			return redirect(`/video/${path}/direct/${filename}`);
 		},
 		{
-			detail: { description: "Get redirected to the direct stream of the video" },
+			detail: {
+				description: "Get redirected to the direct stream of the video",
+			},
 			params: t.Object({
 				id: t.String({
 					description: "The id or slug of the video to watch.",
