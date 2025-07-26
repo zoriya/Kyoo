@@ -1,5 +1,7 @@
 import { useState } from "react";
 import type { ViewProps } from "react-native";
+import { StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { VideoPlayer } from "react-native-video";
 import { useYoshiki } from "yoshiki/native";
 import type { Chapter, KImage } from "~/models";
@@ -11,22 +13,23 @@ import { TouchControls } from "./touch";
 
 export const Controls = ({
 	player,
-	title,
-	subTitle,
+	name,
 	poster,
+	subName,
 	chapters,
 	previous,
 	next,
 }: {
 	player: VideoPlayer;
-	title: string;
-	subTitle: string;
-	poster: KImage;
+	name?: string;
+	poster?: KImage | null;
+	subName?: string;
 	chapters: Chapter[];
-	previous: string | null;
-	next: string | null;
+	previous?: string | null;
+	next?: string | null;
 }) => {
 	const { css } = useYoshiki();
+	const insets = useSafeAreaInsets();
 	const isTouch = useIsTouch();
 
 	const [hover, setHover] = useState(false);
@@ -44,9 +47,13 @@ export const Controls = ({
 	} satisfies ViewProps;
 
 	return (
-		<TouchControls player={player} forceShow={hover || menuOpenned}>
+		<TouchControls
+			player={player}
+			forceShow={hover || menuOpenned}
+			{...css(StyleSheet.absoluteFillObject)}
+		>
 			<Back
-				name={title}
+				name={name}
 				{...css(
 					{
 						//	pointerEvents: "auto",
@@ -55,6 +62,9 @@ export const Controls = ({
 						left: 0,
 						right: 0,
 						bg: (theme) => theme.darkOverlay,
+						paddingTop: insets.top,
+						paddingLeft: insets.left,
+						paddingRight: insets.right,
 					},
 					hoverControls,
 				)}
@@ -64,7 +74,7 @@ export const Controls = ({
 			)}
 			<BottomControls
 				player={player}
-				name={subTitle}
+				name={subName}
 				poster={poster}
 				chapters={chapters}
 				previous={previous}
@@ -79,6 +89,9 @@ export const Controls = ({
 						left: 0,
 						right: 0,
 						bg: (theme) => theme.darkOverlay,
+						paddingLeft: insets.left,
+						paddingRight: insets.right,
+						paddingBottom: insets.bottom,
 					},
 					hoverControls,
 				)}

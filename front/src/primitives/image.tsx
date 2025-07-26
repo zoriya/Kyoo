@@ -34,7 +34,7 @@ export const Image = ({
 	style?: ImageStyle;
 	layout: ImageLayout;
 }) => {
-	const { css } = useYoshiki();
+	const { css, theme } = useYoshiki();
 	const { apiUrl, authToken } = useToken();
 
 	return (
@@ -51,7 +51,10 @@ export const Image = ({
 			}}
 			placeholder={{ blurhash: src?.blurhash }}
 			accessibilityLabel={alt}
-			{...(css([layout, { borderRadius: 6 }], props) as any)}
+			{...(css(
+				[layout, { borderRadius: 6, backgroundColor: theme.overlay0 }],
+				props,
+			) as any)}
 		/>
 	);
 };
