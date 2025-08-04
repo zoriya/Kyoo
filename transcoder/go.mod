@@ -11,7 +11,7 @@ require (
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/lib/pq v1.10.9
 	github.com/swaggo/echo-swagger v1.4.1
-	github.com/swaggo/swag v1.16.5
+	github.com/swaggo/swag v1.16.6
 	gitlab.com/opennota/screengen v1.0.2
 	golang.org/x/sync v0.16.0
 	gopkg.in/vansante/go-ffprobe.v2 v2.2.1
