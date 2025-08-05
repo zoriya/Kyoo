@@ -21,8 +21,8 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect } from "react";
 import { useRouter } from "solito/router";
-import { reducerAtom } from "./keyboard";
-import { durationAtom, playAtom, progressAtom } from "./state";
+import { reducerAtom } from "./old/keyboardd";
+import { durationAtom, playAtom, progressAtom } from "./old/statee";
 
 export const MediaSessionManager = ({
 	title,

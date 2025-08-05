@@ -3,15 +3,13 @@ import { comment } from "~/utils";
 
 export const Progress = t.Object({
 	percent: t.Integer({ minimum: 0, maximum: 100 }),
-	time: t.Nullable(
-		t.Integer({
-			minimum: 0,
-			description: comment`
+	time: t.Integer({
+		minimum: 0,
+		description: comment`
 				When this episode was stopped (in seconds since the start).
 				This value is null if the entry was never watched or is finished.
 			`,
-		}),
-	),
+	}),
 	playedDate: t.Nullable(t.String({ format: "date-time" })),
 	videoId: t.Nullable(
 		t.String({
