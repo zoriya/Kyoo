@@ -1,7 +1,7 @@
 **
 !/go.mod
 !/go.sum
-!/**.go
+!/**/*.go
 !/migrations
 # genereated via swag
 !/docs
