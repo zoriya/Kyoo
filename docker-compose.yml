@@ -35,6 +35,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=PathPrefix(`/api/`)"
+      - "traefik.http.services.back.loadbalancer.server.port=5000"
 
   migrations:
     image: ghcr.io/zoriya/kyoo_migrations:edge
@@ -53,6 +54,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.front.rule=PathPrefix(`/`)"
+      - "traefik.http.services.front.loadbalancer.server.port=8901"
 
   scanner:
     image: ghcr.io/zoriya/kyoo_scanner:edge
