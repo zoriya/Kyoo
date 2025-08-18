@@ -13,7 +13,7 @@ jobs:
         working-directory: ./front
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # This is required because GHA doesn't support secrets in the `if` condition
       - name: Check if Expo build is enabled

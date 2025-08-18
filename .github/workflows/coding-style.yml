@@ -9,7 +9,7 @@ jobs:
       run:
         working-directory: ./back
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Check coding style
         run: |
@@ -23,7 +23,7 @@ jobs:
       run:
         working-directory: ./api
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Biome
         uses: biomejs/setup-biome@v2
@@ -40,7 +40,7 @@ jobs:
       run:
         working-directory: ./front
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Biome
         uses: biomejs/setup-biome@v2
@@ -54,7 +54,7 @@ jobs:
     name: "Lint scanner/autosync"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: chartboost/ruff-action@v1
         with:
@@ -67,7 +67,7 @@ jobs:
       run:
         working-directory: ./transcoder
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Run go fmt
         run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then exit 1; fi
@@ -79,7 +79,7 @@ jobs:
       run:
         working-directory: ./auth
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Run go fmt
         run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then exit 1; fi
