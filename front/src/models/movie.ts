@@ -4,7 +4,7 @@ import { Genre } from "./utils/genre";
 import { KImage } from "./utils/images";
 import { Metadata } from "./utils/metadata";
 import { zdate } from "./utils/utils";
-import { EmbeddedVideo } from "./video";
+import { EmbeddedVideo } from "./video-embed";
 
 export const Movie = z
 	.object({
@@ -39,7 +39,18 @@ export const Movie = z
 		updatedAt: zdate(),
 
 		studios: z.array(Studio).optional(),
-		videos: z.array(EmbeddedVideo).optional(),
+		videos: z
+			.array(
+				z.object({
+					id: z.string(),
+					slug: z.string(),
+					path: z.string(),
+					rendering: z.string(),
+					part: z.number().int().gt(0).nullable(),
+					version: z.number().gt(0),
+				}),
+			)
+			.optional(),
 		watchStatus: z
 			.object({
 				status: z.enum([
