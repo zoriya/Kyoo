@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 as builder
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 as builder
 ARG TARGETARCH
 WORKDIR /kyoo
 
@@ -18,7 +18,7 @@ COPY . .
 ARG VERSION
 RUN dotnet publish -a $TARGETARCH --no-restore -c Release -o /app "-p:Version=${VERSION:-"0.0.0-dev"}" src/Kyoo.Core
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
 RUN apt-get update && apt-get install -y curl
 COPY --from=builder /app /app
 
