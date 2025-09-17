@@ -11,8 +11,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="AspNetCore.Proxy" Version="4.5.0" />
-		<PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.2.1" />
-		<PackageReference Include="AWSSDK.S3" Version="4.0.6.7" />
+		<PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.2.2" />
+		<PackageReference Include="AWSSDK.S3" Version="4.0.7" />
 		<PackageReference Include="Blurhash.SkiaSharp" Version="2.0.0" />
 		<PackageReference Include="Dapper" Version="2.1.66" />
 		<PackageReference Include="InterpolatedSql.Dapper" Version="2.4.0" />
