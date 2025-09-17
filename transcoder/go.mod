@@ -6,7 +6,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.39.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.88.1
 	github.com/disintegration/imaging v1.6.2
-	github.com/golang-migrate/migrate/v4 v4.18.3
+	github.com/golang-migrate/migrate/v4 v4.19.0
 	github.com/labstack/echo-jwt/v4 v4.3.1
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/lib/pq v1.10.9
@@ -67,7 +67,6 @@ require (
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	go.uber.org/atomic v1.11.0 // indirect
 	golang.org/x/crypto v0.40.0 // indirect
 	golang.org/x/image v0.29.0 // indirect
 	golang.org/x/net v0.42.0 // indirect
