@@ -13,7 +13,7 @@ metadata:
 spec:
   replicas: {{ .Values.transcoder.replicaCount }}
   {{- with .Values.transcoder.updateStrategy }}
-  strategy: 
+  strategy:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   selector:
@@ -33,6 +33,9 @@ spec:
           {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      {{- with .Values.transcoder.runtimeClass }}
+      runtimeClassName: {{ . }}
+      {{- end }}
       {{- with .Values.transcoder.imagePullSecrets | default .Values.global.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}

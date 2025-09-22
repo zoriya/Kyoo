@@ -367,6 +367,8 @@ scanner:
 # scanner deployment configuration
 transcoder:
   name: transcoder
+  # can be used if you have a gpu runtime class
+  runtimeClass: ""
   # kyoo_transcoder container configuration
   kyoo_transcoder:
     livenessProbe: {}
