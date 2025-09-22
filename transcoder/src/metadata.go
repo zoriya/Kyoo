@@ -153,10 +153,10 @@ func (s *MetadataService) GetMetadata(ctx context.Context, path string, sha stri
 	}
 
 	if ret.Versions.Thumbs < ThumbsVersion {
-		go s.ExtractThumbs(ctx, path, sha)
+		go s.ThumbnailExtractionJob(ctx, path, sha)
 	}
 	if ret.Versions.Extract < ExtractVersion {
-		go s.ExtractSubs(ctx, ret)
+		go s.SubtitleExtractionJob(ctx, ret)
 	}
 	if ret.Versions.Keyframes < KeyframeVersion && ret.Versions.Keyframes != 0 {
 		for _, video := range ret.Videos {
