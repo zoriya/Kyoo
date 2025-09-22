@@ -35,8 +35,6 @@ export const Controls = ({
 	const [hover, setHover] = useState(false);
 	const [menuOpenned, setMenu] = useState(false);
 
-	// <TouchControls previousSlug={previousSlug} nextSlug={nextSlug} />
-
 	const hoverControls = {
 		onPointerEnter: (e) => {
 			if (e.nativeEvent.pointerType === "mouse") setHover(true);
