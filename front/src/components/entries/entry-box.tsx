@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform, View } from "react-native";
+import { View } from "react-native";
 import {
 	percent,
 	rem,
@@ -8,14 +8,11 @@ import {
 	type Theme,
 	useYoshiki,
 } from "yoshiki/native";
-import { EntryContext } from "~/components/items/context-menus";
-import { ItemProgress } from "~/components/items/item-grid";
-import type { KImage, WatchStatusV } from "~/models";
+import type { KImage } from "~/models";
 import {
 	focusReset,
 	Image,
 	ImageBackground,
-	important,
 	Link,
 	P,
 	Skeleton,
@@ -31,7 +28,7 @@ export const EntryBox = ({
 	thumbnail,
 	href,
 	watchedPercent,
-	watchedStatus,
+	// watchedStatus,
 	...props
 }: Stylable & {
 	slug: string;
@@ -42,7 +39,7 @@ export const EntryBox = ({
 	href: string;
 	thumbnail: KImage | null;
 	watchedPercent: number | null;
-	watchedStatus: WatchStatusV | null;
+	// watchedStatus: WatchStatusV | null;
 }) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 	const { css } = useYoshiki("episodebox");
@@ -89,27 +86,27 @@ export const EntryBox = ({
 				layout={{ width: percent(100), aspectRatio: 16 / 9 }}
 				{...(css("poster") as any)}
 			>
-				{(watchedPercent || watchedStatus === "completed") && (
-					<ItemProgress watchPercent={watchedPercent ?? 100} />
-				)}
-				<EntryContext
-					slug={slug}
-					serieSlug={serieSlug}
-					status={watchedStatus}
-					isOpen={moreOpened}
-					setOpen={(v) => setMoreOpened(v)}
-					{...css([
-						{
-							position: "absolute",
-							top: 0,
-							right: 0,
-							bg: (theme) => theme.darkOverlay,
-						},
-						"more",
-						Platform.OS === "web" &&
-							moreOpened && { display: important("flex") },
-					])}
-				/>
+				{/* 	{(watchedPercent || watchedStatus === "completed") && ( */}
+				{/* 		<ItemProgress watchPercent={watchedPercent ?? 100} /> */}
+				{/* 	)} */}
+				{/* 	<EntryContext */}
+				{/* 		slug={slug} */}
+				{/* 		serieSlug={serieSlug} */}
+				{/* 		status={watchedStatus} */}
+				{/* 		isOpen={moreOpened} */}
+				{/* 		setOpen={(v) => setMoreOpened(v)} */}
+				{/* 		{...css([ */}
+				{/* 			{ */}
+				{/* 				position: "absolute", */}
+				{/* 				top: 0, */}
+				{/* 				right: 0, */}
+				{/* 				bg: (theme) => theme.darkOverlay, */}
+				{/* 			}, */}
+				{/* 			"more", */}
+				{/* 			Platform.OS === "web" && */}
+				{/* 				moreOpened && { display: important("flex") }, */}
+				{/* 		])} */}
+				{/* 	/> */}
 			</ImageBackground>
 			<P {...css([{ marginY: 0, textAlign: "center" }, "title"])}>
 				{name ?? t("show.episodeNoMetadata")}

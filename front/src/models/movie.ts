@@ -4,7 +4,6 @@ import { Genre } from "./utils/genre";
 import { KImage } from "./utils/images";
 import { Metadata } from "./utils/metadata";
 import { zdate } from "./utils/utils";
-import { EmbeddedVideo } from "./video-embed";
 
 export const Movie = z
 	.object({

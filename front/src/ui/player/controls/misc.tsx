@@ -69,10 +69,11 @@ export const VolumeSlider = ({ player, ...props }: { player: VideoPlayer }) => {
 	const { t } = useTranslation();
 
 	const [volume, setVolume] = useState(player.volume);
-	useEvent(player, "onVolumeChange", setVolume);
-	// TODO: listen to `player.muted` changes (currently hook does not exists
-	// const [muted, setMuted] = useState(player.muted);
-	const muted = player.muted;
+	const [muted, setMuted] = useState(player.muted);
+	useEvent(player, "onVolumeChange", (info) => {
+		setVolume(info.volume);
+		setMuted(info.muted);
+	});
 
 	return (
 		<View

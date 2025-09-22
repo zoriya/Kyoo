@@ -62,7 +62,7 @@ export const TouchControls = ({
 			}}
 			onDoublePress={(e) => {
 				if (!isTouch) {
-					player.toggleFullscreen();
+					// player.toggleFullscreen();
 					return;
 				}
 
