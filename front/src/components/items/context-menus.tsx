@@ -12,7 +12,7 @@ import { HR, IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { useMutation } from "~/query";
 import { watchListIcon } from "./watchlist-info";
-// import { useDownloader } from "../../packages/ui/src/downloadses/ui/src/downloads";
+// import { useDownloader } from "../../packages/ui/src/downloads/ui/src/downloads";
 
 export const EntryContext = ({
 	slug,
@@ -27,32 +27,30 @@ export const EntryContext = ({
 	const { t } = useTranslation();
 
 	return (
-		<>
-			<Menu
-				Trigger={IconButton}
-				icon={MoreVert}
-				{...tooltip(t("misc.more"))}
-				{...(css([Platform.OS !== "web" && { display: "none" }], props) as any)}
-			>
-				{serieSlug && (
-					<Menu.Item
-						label={t("home.episodeMore.goToShow")}
-						icon={Info}
-						href={`/series/${serieSlug}`}
-					/>
-				)}
-				{/* <Menu.Item */}
-				{/* 	label={t("home.episodeMore.download")} */}
-				{/* 	icon={Download} */}
-				{/* 	onSelect={() => downloader(type, slug)} */}
-				{/* /> */}
+		<Menu
+			Trigger={IconButton}
+			icon={MoreVert}
+			{...tooltip(t("misc.more"))}
+			{...(css([Platform.OS !== "web" && { display: "none" }], props) as any)}
+		>
+			{serieSlug && (
 				<Menu.Item
-					label={t("home.episodeMore.mediainfo")}
-					icon={MovieInfo}
-					href={`/entries/${slug}/info`}
+					label={t("home.episodeMore.goToShow")}
+					icon={Info}
+					href={`/series/${serieSlug}`}
 				/>
-			</Menu>
-		</>
+			)}
+			{/* <Menu.Item */}
+			{/* 	label={t("home.episodeMore.download")} */}
+			{/* 	icon={Download} */}
+			{/* 	onSelect={() => downloader(type, slug)} */}
+			{/* /> */}
+			<Menu.Item
+				label={t("home.episodeMore.mediainfo")}
+				icon={MovieInfo}
+				href={`/entries/${slug}/info`}
+			/>
+		</Menu>
 	);
 };
 
@@ -87,60 +85,58 @@ export const ItemContext = ({
 	});
 
 	return (
-		<>
-			<Menu
-				Trigger={IconButton}
-				icon={MoreVert}
-				{...tooltip(t("misc.more"))}
-				{...(css([Platform.OS !== "web" && { display: "none" }], props) as any)}
+		<Menu
+			Trigger={IconButton}
+			icon={MoreVert}
+			{...tooltip(t("misc.more"))}
+			{...(css([Platform.OS !== "web" && { display: "none" }], props) as any)}
+		>
+			<Menu.Sub
+				label={account ? t("show.watchlistEdit") : t("show.watchlistLogin")}
+				disabled={!account}
+				icon={watchListIcon(status)}
 			>
-				<Menu.Sub
-					label={account ? t("show.watchlistEdit") : t("show.watchlistLogin")}
-					disabled={!account}
-					icon={watchListIcon(status)}
-				>
-					{Object.values(WatchStatusV).map((x) => (
-						<Menu.Item
-							key={x}
-							label={t(
-								`show.watchlistMark.${x.toLowerCase() as Lowercase<WatchStatusV>}`,
-							)}
-							onSelect={() => mutation.mutate(x)}
-							selected={x === status}
-						/>
-					))}
-					{status !== null && (
-						<Menu.Item
-							label={t("show.watchlistMark.null")}
-							onSelect={() => mutation.mutate(null)}
-						/>
-					)}
-				</Menu.Sub>
-				{kind === "movie" && (
-					<>
-						{/* <Menu.Item */}
-						{/* 	label={t("home.episodeMore.download")} */}
-						{/* 	icon={Download} */}
-						{/* 	onSelect={() => downloader(type, slug)} */}
-						{/* /> */}
-						<Menu.Item
-							label={t("home.episodeMore.mediainfo")}
-							icon={MovieInfo}
-							href={`/movies/${slug}/info`}
-						/>
-					</>
+				{Object.values(WatchStatusV).map((x) => (
+					<Menu.Item
+						key={x}
+						label={t(
+							`show.watchlistMark.${x.toLowerCase() as Lowercase<WatchStatusV>}`,
+						)}
+						onSelect={() => mutation.mutate(x)}
+						selected={x === status}
+					/>
+				))}
+				{status !== null && (
+					<Menu.Item
+						label={t("show.watchlistMark.null")}
+						onSelect={() => mutation.mutate(null)}
+					/>
 				)}
-				{account?.isAdmin === true && (
-					<>
-						<HR />
-						<Menu.Item
-							label={t("home.refreshMetadata")}
-							icon={Refresh}
-							onSelect={() => metadataRefreshMutation.mutate()}
-						/>
-					</>
-				)}
-			</Menu>
-		</>
+			</Menu.Sub>
+			{kind === "movie" && (
+				<>
+					{/* <Menu.Item */}
+					{/* 	label={t("home.episodeMore.download")} */}
+					{/* 	icon={Download} */}
+					{/* 	onSelect={() => downloader(type, slug)} */}
+					{/* /> */}
+					<Menu.Item
+						label={t("home.episodeMore.mediainfo")}
+						icon={MovieInfo}
+						href={`/movies/${slug}/info`}
+					/>
+				</>
+			)}
+			{account?.isAdmin === true && (
+				<>
+					<HR />
+					<Menu.Item
+						label={t("home.refreshMetadata")}
+						icon={Refresh}
+						onSelect={() => metadataRefreshMutation.mutate()}
+					/>
+				</>
+			)}
+		</Menu>
 	);
 };
