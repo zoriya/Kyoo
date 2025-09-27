@@ -18,6 +18,7 @@
 		"@legendapp/list": "^2.0.6",
 		"@material-symbols/svg-400": "^0.35.2",
 		"@radix-ui/react-dropdown-menu": "^2.1.16",
+		"@radix-ui/react-select": "^2.2.6",
 		"@react-navigation/bottom-tabs": "^7.4.7",
 		"@react-navigation/elements": "^2.6.4",
 		"@react-navigation/native": "^7.1.17",
