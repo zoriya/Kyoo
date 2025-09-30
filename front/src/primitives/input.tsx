@@ -1,4 +1,4 @@
-import { forwardRef, type ReactNode, useState } from "react";
+import { type ReactNode, type Ref, useState } from "react";
 import {
 	TextInput,
 	type TextInputProps,
@@ -6,20 +6,22 @@ import {
 	type ViewStyle,
 } from "react-native";
 import { px, type Theme, useYoshiki } from "yoshiki/native";
-import type { YoshikiEnhanced } from "./image/base-image";
+import type { YoshikiEnhanced } from "./image";
 import { focusReset, ts } from "./utils";
 
-export const Input = forwardRef<
-	TextInput,
-	{
-		variant?: "small" | "big";
-		right?: ReactNode;
-		containerStyle?: YoshikiEnhanced<ViewStyle>;
-	} & TextInputProps
->(function Input(
-	{ placeholderTextColor, variant = "small", right, containerStyle, ...props },
+export const Input = ({
+	placeholderTextColor,
+	variant = "small",
+	right,
+	containerStyle,
 	ref,
-) {
+	...props
+}: {
+	variant?: "small" | "big";
+	right?: ReactNode;
+	containerStyle?: YoshikiEnhanced<ViewStyle>;
+	ref?: Ref<TextInput>;
+} & TextInputProps) => {
 	const [focused, setFocused] = useState(false);
 	const { css, theme } = useYoshiki();
 
@@ -64,4 +66,4 @@ export const Input = forwardRef<
 			{right}
 		</View>
 	);
-});
+};

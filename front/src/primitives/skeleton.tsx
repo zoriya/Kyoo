@@ -108,7 +108,6 @@ export const Skeleton = ({
 						colors={["transparent", theme.overlay1, "transparent"]}
 						style={[
 							StyleSheet.absoluteFillObject,
-							{ transform: [{ translateX: -width.value }] },
 							animated,
 						]}
 					/>
