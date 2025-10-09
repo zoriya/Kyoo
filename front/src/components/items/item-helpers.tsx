@@ -1,7 +1,7 @@
 import Done from "@material-symbols/svg-400/rounded/check-fill.svg";
 import { View } from "react-native";
 import { max, rem, useYoshiki } from "yoshiki/native";
-import { WatchStatusV } from "~/models";
+import type { WatchStatusV } from "~/models";
 import { Icon, P, ts } from "~/primitives";
 
 export const ItemWatchStatus = ({
@@ -14,8 +14,7 @@ export const ItemWatchStatus = ({
 }) => {
 	const { css } = useYoshiki();
 
-	if (watchStatus !== WatchStatusV.Completed && !unseenEpisodesCount)
-		return null;
+	if (watchStatus !== "completed" && !unseenEpisodesCount) return null;
 
 	return (
 		<View
@@ -36,7 +35,7 @@ export const ItemWatchStatus = ({
 				props,
 			)}
 		>
-			{watchStatus === WatchStatusV.Completed ? (
+			{watchStatus === "completed" ? (
 				<Icon icon={Done} size={16} />
 			) : (
 				<P

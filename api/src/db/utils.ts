@@ -107,7 +107,7 @@ export function values<K extends string>(
 	};
 }
 
-export const coalesce = <T>(val: SQL<T> | Column, def: SQL<T> | Column) => {
+export const coalesce = <T>(val: SQL<T> | SQLWrapper, def: SQL<T> | Column) => {
 	return sql<T>`coalesce(${val}, ${def})`;
 };
 
