@@ -241,7 +241,7 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 	}
 
 	rows, err = s.database.Query(
-		`select s.idx, s.title, s.language, s.codec, s.mime_codec s.extension, s.is_default, s.is_forced, s.is_hearing_impaired
+		`select s.idx, s.title, s.language, s.codec, s.mime_codec, s.extension, s.is_default, s.is_forced, s.is_hearing_impaired
 		from subtitles as s where s.sha=$1`,
 		sha,
 	)
@@ -264,6 +264,10 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 			s.Link = &link
 		}
 		ret.Subtitles = append(ret.Subtitles, s)
+	}
+	err = ret.SearchExternalSubtitles()
+	if err != nil {
+		fmt.Printf("Couldn't find external subtitles: %v", err)
 	}
 
 	rows, err = s.database.Query(

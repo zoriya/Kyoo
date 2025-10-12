@@ -16,7 +16,7 @@ import (
 
 const ExtractVersion = 1
 
-func (s *MetadataService) ExtractSubs(ctx context.Context, info *MediaInfo) (interface{}, error) {
+func (s *MetadataService) ExtractSubs(ctx context.Context, info *MediaInfo) (any, error) {
 	get_running, set := s.extractLock.Start(info.Sha)
 	if get_running != nil {
 		return get_running()

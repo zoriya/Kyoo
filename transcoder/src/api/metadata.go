@@ -45,10 +45,6 @@ func (h *mhandler) GetInfo(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	err = ret.SearchExternalSubtitles()
-	if err != nil {
-		fmt.Printf("Couldn't find external subtitles: %v", err)
-	}
 	return c.JSON(http.StatusOK, ret)
 }
 
