@@ -82,7 +82,7 @@ export const TouchControls = ({
 				// instantly hide the controls when mouse leaves the view
 				if (e.nativeEvent.pointerType === "mouse") show(false);
 			}}
-			{...css({ cursor: "none" as any }, props)}
+			{...css({ cursor: (shouldShow ? "unset" : "none") as any }, props)}
 		>
 			{shouldShow && children}
 		</DoublePressable>

@@ -63,7 +63,7 @@ func (t *Transcoder) GetMaster(ctx context.Context, path string, client string, 
 		vhead:  -1,
 		ahead:  -1,
 	}
-	return stream.GetMaster(), nil
+	return stream.GetMaster(client), nil
 }
 
 func (t *Transcoder) GetVideoIndex(
@@ -87,7 +87,7 @@ func (t *Transcoder) GetVideoIndex(
 		vhead:  -1,
 		ahead:  -1,
 	}
-	return stream.GetVideoIndex(video, quality)
+	return stream.GetVideoIndex(video, quality, client)
 }
 
 func (t *Transcoder) GetAudioIndex(
@@ -109,7 +109,7 @@ func (t *Transcoder) GetAudioIndex(
 		vhead:  -1,
 		ahead:  -1,
 	}
-	return stream.GetAudioIndex(audio)
+	return stream.GetAudioIndex(audio, client)
 }
 
 func (t *Transcoder) GetVideoSegment(

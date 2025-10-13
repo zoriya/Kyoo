@@ -646,7 +646,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 	)
 	.get(
 		":id/master.m3u8",
-		async ({ params: { id }, status, redirect }) => {
+		async ({ params: { id }, request, status, redirect }) => {
 			const [video] = await db
 				.select({
 					path: videos.path,
@@ -663,7 +663,8 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				});
 			}
 			const path = Buffer.from(video.path, "utf8").toString("base64url");
-			return redirect(`/video/${path}/master.m3u8`);
+			const query = request.url.substring(request.url.indexOf("?"))
+			return redirect(`/video/${path}/master.m3u8${query}`);
 		},
 		{
 			detail: { description: "Get redirected to the master.m3u8 of the video" },
