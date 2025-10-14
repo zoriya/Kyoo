@@ -1,5 +1,5 @@
 import { NavigationContext, useRoute } from "@react-navigation/native";
-import { useContext } from "react";
+import { useCallback, useContext } from "react";
 import type { Movie, Show } from "~/models";
 
 export function setServerData(_key: string, _val: any) {}
@@ -12,9 +12,12 @@ export const useQueryState = <S>(key: string, initial: S) => {
 	const nav = useContext(NavigationContext);
 
 	const state = ((route.params as any)?.[key] as S) ?? initial;
-	const update = (val: S | ((old: S) => S)) => {
-		nav!.setParams({ [key]: val });
-	};
+	const update = useCallback(
+		(val: S | ((old: S) => S)) => {
+			nav!.setParams({ [key]: val });
+		},
+		[nav, key],
+	);
 	return [state, update] as const;
 };
 

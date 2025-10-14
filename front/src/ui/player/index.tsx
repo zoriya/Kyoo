@@ -1,5 +1,5 @@
 import { Stack, useRouter } from "expo-router";
-import { StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import { useEvent, useVideoPlayer, VideoView } from "react-native-video";
 import { entryDisplayNumber } from "~/components/entries";
 import { FullVideo, VideoInfo } from "~/models";
@@ -9,6 +9,11 @@ import { useLocalSetting } from "~/providers/settings";
 import { type QueryIdentifier, useFetch } from "~/query";
 import { useQueryState } from "~/utils";
 import { Controls, LoadingIndicator } from "./controls";
+import { useEffect } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { toggleFullscreen } from "./controls/misc";
+
+const clientId = uuidv4();
 
 export const Player = () => {
 	const [slug, setSlug] = useQueryState<string>("slug", undefined!);
@@ -19,28 +24,40 @@ export const Player = () => {
 	// TODO: map current entry using entries' duration & the current playtime
 	const currentEntry = 0;
 	const entry = data?.entries[currentEntry] ?? data?.entries[0];
+	const title = entry ? `${entry.name} (${entryDisplayNumber(entry)})` : null;
 
 	const { apiUrl, authToken } = useToken();
 	const [playMode] = useLocalSetting<"direct" | "hls">("playMode", "direct");
 	const player = useVideoPlayer(
 		{
-			uri: `${apiUrl}/api/videos/${slug}/${playMode === "direct" ? "direct" : "master.m3u8"}`,
-			headers: {
-				Authorization: `Bearer ${authToken}`,
+			uri: `${apiUrl}/api/videos/${slug}/${playMode === "direct" ? "direct" : "master.m3u8"}?clientId=${clientId}`,
+			// chrome based browsers support matroska but they tell they don't
+			mimeType: info?.mimeCodec?.replace("x-matroska", "mp4"),
+			headers: authToken
+				? {
+						Authorization: `Bearer ${authToken}`,
+					}
+				: {},
+			metadata: {
+				title: title ?? undefined,
+				description: entry?.description ?? undefined,
+				artist: data?.show?.name ?? undefined,
+				imageUri: data?.show?.thumbnail?.high ?? undefined,
 			},
-			// externalSubtitles: info?.subtitles
-			// 	.filter((x) => x.link)
-			// 	.map((x) => ({
-			// 		uri: x.link!,
-			// 		// TODO: translate this `Unknown`
-			// 		label: x.title ?? "Unknown",
-			// 		language: x.language ?? "und",
-			// 		type: x.codec,
-			// 	})),
+			externalSubtitles: info?.subtitles
+				.filter((x) => x.link)
+				.map((x) => ({
+					uri: x.link!,
+					// TODO: translate this `Unknown`
+					label: x.title ?? "Unknown",
+					language: x.language ?? "und",
+					type: x.codec,
+				})),
 		},
 		(p) => {
 			p.playWhenInactive = true;
 			p.playInBackground = true;
+			p.showNotificationControls = true;
 			const seek = start ?? data?.progress.time;
 			// TODO: fix console.error bellow
 			if (seek) p.seekTo(seek);
@@ -60,6 +77,31 @@ export const Player = () => {
 		}
 	});
 
+	// TODO: add the equivalent of this for android
+	useEffect(() => {
+		if (typeof window === "undefined") return;
+		const prev = data?.previous?.video;
+		window.navigator.mediaSession.setActionHandler(
+			"previoustrack",
+			prev
+				? () => {
+						setStart(0);
+						setSlug(prev);
+					}
+				: null,
+		);
+		const next = data?.next?.video;
+		window.navigator.mediaSession.setActionHandler(
+			"nexttrack",
+			next
+				? () => {
+						setStart(0);
+						setSlug(next);
+					}
+				: null,
+		);
+	}, [data?.next?.video, data?.previous?.video, setSlug, setStart]);
+
 	// const [playbackError, setPlaybackError] = useState<string | undefined>(
 	// 	undefined,
 	// );
@@ -67,14 +109,13 @@ export const Player = () => {
 
 	// const startTime = startTimeP ?? data?.watchStatus?.watchedTime;
 
-	// const setFullscreen = useSetAtom(fullscreenAtom);
-	// useEffect(() => {
-	// 	if (Platform.OS !== "web") return;
-	// 	if (/Mobi/i.test(window.navigator.userAgent)) setFullscreen(true);
-	// 	return () => {
-	// 		if (!document.location.href.includes("/watch")) setFullscreen(false);
-	// 	};
-	// }, [setFullscreen]);
+	useEffect(() => {
+		if (Platform.OS !== "web") return;
+		if (/Mobi/i.test(window.navigator.userAgent)) toggleFullscreen(true);
+		return () => {
+			if (!document.location.href.includes("/watch")) toggleFullscreen(false);
+		};
+	}, []);
 
 	// if (error || infoError || playbackError)
 	// 	return (
@@ -95,7 +136,7 @@ export const Player = () => {
 			}}
 		>
 			<Head
-				title={entry ? `${entry.name} (${entryDisplayNumber(entry)})` : null}
+				title={title}
 				description={entry?.description}
 				image={data?.show?.thumbnail?.high}
 			/>

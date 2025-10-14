@@ -6,9 +6,9 @@ import VolumeDown from "@material-symbols/svg-400/rounded/volume_down-fill.svg";
 import VolumeMute from "@material-symbols/svg-400/rounded/volume_mute-fill.svg";
 import VolumeOff from "@material-symbols/svg-400/rounded/volume_off-fill.svg";
 import VolumeUp from "@material-symbols/svg-400/rounded/volume_up-fill.svg";
-import { type ComponentProps, useState } from "react";
+import { type ComponentProps, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { type PressableProps, View } from "react-native";
+import { type PressableProps, View, Platform } from "react-native";
 import { useEvent, type VideoPlayer } from "react-native-video";
 import { px, useYoshiki } from "yoshiki/native";
 import {
@@ -46,18 +46,39 @@ export const PlayButton = ({
 	);
 };
 
+export const toggleFullscreen = async (set?: boolean) => {
+	set ??= document.fullscreenElement === null;
+	try {
+		if (set) {
+			await document.body.requestFullscreen({ navigationUI: "hide" });
+			// @ts-expect-error Firefox does not support this so ts complains
+			await screen.orientation.lock("landscape");
+		} else {
+			if (document.fullscreenElement) await document.exitFullscreen();
+			screen.orientation.unlock();
+		}
+	} catch (e) {
+		console.log(e);
+	}
+};
+
 export const FullscreenButton = (
 	props: Partial<ComponentProps<typeof IconButton<PressableProps>>>,
 ) => {
+	// this is a web only component
 	const { t } = useTranslation();
 
-	// TODO: actually implement that
-	const [fullscreen, setFullscreen] = useState(true);
+	const [fullscreen, setFullscreen] = useState(false);
+	useEffect(() => {
+		const update = () => setFullscreen(document.fullscreenElement !== null);
+		document.addEventListener("fullscreenchange", update);
+		return () => document.removeEventListener("fullscreenchange", update);
+	}, []);
 
 	return (
 		<IconButton
 			icon={fullscreen ? FullscreenExit : Fullscreen}
-			onPress={() => console.log("lol")}
+			onPress={() => toggleFullscreen()}
 			{...tooltip(t("player.fullscreen"), true)}
 			{...props}
 		/>
@@ -91,9 +112,9 @@ export const VolumeSlider = ({ player, ...props }: { player: VideoPlayer }) => {
 				icon={
 					muted || volume === 0
 						? VolumeOff
-						: volume < 25
+						: volume < 0.25
 							? VolumeMute
-							: volume < 65
+							: volume < 0.65
 								? VolumeDown
 								: VolumeUp
 				}
@@ -103,9 +124,9 @@ export const VolumeSlider = ({ player, ...props }: { player: VideoPlayer }) => {
 				{...tooltip(t("player.mute"), true)}
 			/>
 			<Slider
-				progress={volume}
+				progress={volume * 100}
 				setProgress={(vol) => {
-					player.volume = vol;
+					player.volume = vol / 100;
 				}}
 				size={4}
 				{...css({ width: px(100) })}

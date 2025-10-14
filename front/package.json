@@ -48,6 +48,8 @@
 		"react-native-web": "^0.21.1",
 		"react-tooltip": "^5.29.1",
 		"sweetalert2": "^11.23.0",
+		"uuid": "^13.0.0",
+		"video.js": "^8.23.4",
 		"yoshiki": "1.2.14",
 		"zod": "^4.1.11"
 	},

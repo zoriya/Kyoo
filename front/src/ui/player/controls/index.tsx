@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ViewProps } from "react-native";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { VideoPlayer } from "react-native-video";
 import { useYoshiki } from "yoshiki/native";
@@ -45,16 +45,16 @@ export const Controls = ({
 	} satisfies ViewProps;
 
 	return (
-		<TouchControls
-			player={player}
-			forceShow={hover || menuOpenned}
-			{...css(StyleSheet.absoluteFillObject)}
-		>
+		<View {...css(StyleSheet.absoluteFillObject)}>
+			<TouchControls
+				player={player}
+				forceShow={hover || menuOpenned}
+				{...css(StyleSheet.absoluteFillObject)}
+			/>
 			<Back
 				name={name}
 				{...css(
 					{
-						//	pointerEvents: "auto",
 						position: "absolute",
 						top: 0,
 						left: 0,
@@ -94,7 +94,7 @@ export const Controls = ({
 					hoverControls,
 				)}
 			/>
-		</TouchControls>
+		</View>
 	);
 };
 

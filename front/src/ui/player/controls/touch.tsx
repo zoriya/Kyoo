@@ -8,6 +8,7 @@ import {
 import { useEvent, type VideoPlayer } from "react-native-video";
 import { useYoshiki } from "yoshiki/native";
 import { useIsTouch } from "~/primitives";
+import { toggleFullscreen } from "./misc";
 
 export const TouchControls = ({
 	player,
@@ -62,7 +63,7 @@ export const TouchControls = ({
 			}}
 			onDoublePress={(e) => {
 				if (!isTouch) {
-					// player.toggleFullscreen();
+					toggleFullscreen();
 					return;
 				}
 

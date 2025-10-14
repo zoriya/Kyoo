@@ -80,11 +80,11 @@ export const ProgressText = ({
 }: { player: VideoPlayer } & TextProps) => {
 	const { css } = useYoshiki();
 
-	const [progress, setProgress] = useState(player.currentTime || 0);
+	const [progress, setProgress] = useState(player.currentTime);
 	useEvent(player, "onProgress", (progress) => {
 		setProgress(progress.currentTime);
 	});
-	const [duration, setDuration] = useState(player.duration || 100);
+	const [duration, setDuration] = useState(player.duration);
 	useEvent(player, "onLoad", (info) => {
 		if (info.duration) setDuration(info.duration);
 	});
