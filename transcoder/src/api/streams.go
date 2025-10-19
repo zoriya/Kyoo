@@ -69,6 +69,7 @@ func (h *shandler) GetMaster(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	c.Response().Header().Set("Content-Type", "application/vnd.apple.mpegurl")
 	return c.String(http.StatusOK, ret)
 }
 
@@ -104,6 +105,7 @@ func (h *shandler) GetVideoIndex(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	c.Response().Header().Set("Content-Type", "application/vnd.apple.mpegurl")
 	return c.String(http.StatusOK, ret)
 }
 
@@ -135,6 +137,7 @@ func (h *shandler) GetAudioIndex(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	c.Response().Header().Set("Content-Type", "application/vnd.apple.mpegurl")
 	return c.String(http.StatusOK, ret)
 }
 

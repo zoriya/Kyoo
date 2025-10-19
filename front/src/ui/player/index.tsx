@@ -9,9 +9,12 @@ import { useLocalSetting } from "~/providers/settings";
 import { type QueryIdentifier, useFetch } from "~/query";
 import { useQueryState } from "~/utils";
 import { Controls, LoadingIndicator } from "./controls";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { toggleFullscreen } from "./controls/misc";
+import { Back } from "./controls/back";
+import { useYoshiki } from "yoshiki/native";
+import { ErrorView } from "../errors";
 
 const clientId = uuidv4();
 
@@ -27,12 +30,19 @@ export const Player = () => {
 	const title = entry ? `${entry.name} (${entryDisplayNumber(entry)})` : null;
 
 	const { apiUrl, authToken } = useToken();
-	const [playMode] = useLocalSetting<"direct" | "hls">("playMode", "direct");
+	const [defaultPlayMode] = useLocalSetting<"direct" | "hls">(
+		"playMode",
+		"direct",
+	);
+	const [playMode, setPlayMode] = useState(defaultPlayMode);
 	const player = useVideoPlayer(
 		{
 			uri: `${apiUrl}/api/videos/${slug}/${playMode === "direct" ? "direct" : "master.m3u8"}?clientId=${clientId}`,
 			// chrome based browsers support matroska but they tell they don't
-			mimeType: info?.mimeCodec?.replace("x-matroska", "mp4"),
+			mimeType:
+				playMode === "direct"
+					? info?.mimeCodec?.replace("x-matroska", "mp4")
+					: "application/vnd.apple.mpegurl",
 			headers: authToken
 				? {
 						Authorization: `Bearer ${authToken}`,
@@ -102,9 +112,6 @@ export const Player = () => {
 		);
 	}, [data?.next?.video, data?.previous?.video, setSlug, setStart]);
 
-	// const [playbackError, setPlaybackError] = useState<string | undefined>(
-	// 	undefined,
-	// );
 	// useVideoKeyboard(info?.subtitles, info?.fonts, previous, next);
 
 	// const startTime = startTimeP ?? data?.watchStatus?.watchedTime;
@@ -117,16 +124,28 @@ export const Player = () => {
 		};
 	}, []);
 
-	// if (error || infoError || playbackError)
-	// 	return (
-	// 		<>
-	// 			<Back
-	// 				isLoading={false}
-	// 				{...css({ position: "relative", bg: (theme) => theme.accent })}
-	// 			/>
-	// 			<ErrorView error={error ?? infoError ?? { errors: [playbackError!] }} />
-	// 		</>
-	// 	);
+	const [playbackError, setPlaybackError] = useState<string | undefined>();
+	useEvent(player, "onError", (error) => {
+		console.log("error", error, "code", error.code, "playbackMode", playMode);
+		if (
+			error.code === "source/unsupported-content-type" &&
+			playMode === "direct"
+		)
+			setPlayMode("hls");
+		else setPlaybackError(error);
+	});
+	const { css } = useYoshiki();
+	if (error || infoError || playbackError) {
+		return (
+			<>
+				<Back
+					name={data?.show?.name ?? "Error"}
+					{...css({ position: "relative", bg: (theme) => theme.accent })}
+				/>
+				<ErrorView error={error ?? infoError ?? { errors: [playbackError!] }} />
+			</>
+		);
+	}
 
 	return (
 		<View
