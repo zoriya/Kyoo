@@ -165,8 +165,8 @@ const ControlButtons = ({
 			<View {...css({ flexDirection: "row" })}>
 				<SubtitleMenu {...menuProps} />
 				<AudioMenu player={player} {...menuProps} />
-				<VideoMenu {...menuProps} />
-				<QualityMenu {...menuProps} />
+				<VideoMenu player={player} {...menuProps} />
+				<QualityMenu player={player} {...menuProps} />
 				{Platform.OS === "web" && <FullscreenButton {...spacing} />}
 			</View>
 		</View>

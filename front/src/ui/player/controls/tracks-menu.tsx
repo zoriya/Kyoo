@@ -51,13 +51,12 @@ export const AudioMenu = ({
 }: { player: VideoPlayer } & Partial<MenuProps>) => {
 	const { t } = useTranslation();
 	const getDisplayName = useDisplayName();
-	const rerender = useForceRerender();
 
+	const rerender = useForceRerender();
 	useEvent(player, "onAudioTrackChange", rerender);
 
 	const tracks = player.getAvailableAudioTracks();
-
-	if (tracks.length === 0) return null;
+	if (tracks.length <= 1) return null;
 
 	return (
 		<Menu
@@ -78,8 +77,20 @@ export const AudioMenu = ({
 	);
 };
 
-export const VideoMenu = (props: Partial<MenuProps>) => {
+export const VideoMenu = ({
+	player,
+	...props
+}: {
+	player: VideoPlayer;
+} & Partial<MenuProps>) => {
 	const { t } = useTranslation();
+	const getDisplayName = useDisplayName();
+
+	const rerender = useForceRerender();
+	useEvent(player, "onVideoTrackChange", rerender);
+
+	const tracks = player.getAvailableVideoTracks();
+	if (tracks.length <= 1) return null;
 
 	return (
 		<Menu
@@ -87,7 +98,16 @@ export const VideoMenu = (props: Partial<MenuProps>) => {
 			icon={VideoSettings}
 			{...tooltip(t("player.audios"), true)}
 			{...props}
-		></Menu>
+		>
+			{tracks.map((x) => (
+				<Menu.Item
+					key={x.id}
+					label={getDisplayName({ title: x.label, language: x.language })}
+					selected={x.selected}
+					onSelect={() => player.selectAudioTrack(x)}
+				/>
+			))}
+		</Menu>
 	);
 };
 
@@ -95,9 +115,19 @@ export const PlayModeContext = createContext<
 	["direct" | "hls", (val: "direct" | "hls") => void]
 >(null!);
 
-export const QualityMenu = (props: Partial<MenuProps>) => {
+export const QualityMenu = ({
+	player,
+	...props
+}: { player: VideoPlayer } & Partial<MenuProps>) => {
 	const { t } = useTranslation();
 	const [playMode, setPlayMode] = useContext(PlayModeContext);
+	const rerender = useForceRerender();
+
+	useEvent(player, "onQualityChange", rerender);
+
+	const lvls = player.getAvailableQualities();
+	const current = player.currentQuality;
+	const auto = player.autoQualityEnabled;
 
 	return (
 		<Menu
@@ -111,35 +141,35 @@ export const QualityMenu = (props: Partial<MenuProps>) => {
 				selected={playMode === "direct"}
 				onSelect={() => setPlayMode("direct")}
 			/>
-			{/* <Menu.Item */}
-			{/* 	label={ */}
-			{/* 		hls?.autoLevelEnabled && hls.currentLevel >= 0 */}
-			{/* 			? `${t("player.auto")} (${levelName(hls.levels[hls.currentLevel], true)})` */}
-			{/* 			: t("player.auto") */}
-			{/* 	} */}
-			{/* 	selected={hls?.autoLevelEnabled && mode === PlayMode.Hls} */}
-			{/* 	onSelect={() => { */}
-			{/* 		setPlayMode(PlayMode.Hls); */}
-			{/* 		if (hls) hls.currentLevel = -1; */}
-			{/* 	}} */}
-			{/* /> */}
-			{/* {hls?.levels */}
-			{/* 	.map((x, i) => ( */}
-			{/* 		<Menu.Item */}
-			{/* 			key={i.toString()} */}
-			{/* 			label={levelName(x)} */}
-			{/* 			selected={ */}
-			{/* 				mode === PlayMode.Hls && */}
-			{/* 				hls!.currentLevel === i && */}
-			{/* 				!hls?.autoLevelEnabled */}
-			{/* 			} */}
-			{/* 			onSelect={() => { */}
-			{/* 				setPlayMode(PlayMode.Hls); */}
-			{/* 				hls!.currentLevel = i; */}
-			{/* 			}} */}
-			{/* 		/> */}
-			{/* 	)) */}
-			{/* 	.reverse()} */}
+			<Menu.Item
+				label={
+					auto && current
+						? `${t("player.auto")} (${current.id.includes("original") ? t("player.transmux") : `${current.height}p`})`
+						: t("player.auto")
+				}
+				selected={auto && playMode === "hls"}
+				onSelect={() => {
+					setPlayMode("hls");
+					player.selectQuality(null);
+				}}
+			/>
+			{lvls
+				.map((x) => (
+					<Menu.Item
+						key={x.id}
+						label={
+							x.id.includes("original")
+								? `${t("player.transmux")} (${x.height}p)`
+								: `${x.height}p`
+						}
+						selected={x.selected && !auto}
+						onSelect={() => {
+							setPlayMode("hls");
+							player.selectQuality(x);
+						}}
+					/>
+				))
+				.reverse()}
 		</Menu>
 	);
 };
