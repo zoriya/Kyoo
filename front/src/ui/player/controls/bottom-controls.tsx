@@ -19,7 +19,7 @@ import {
 } from "~/primitives";
 import { FullscreenButton, PlayButton, VolumeSlider } from "./misc";
 import { ProgressBar, ProgressText } from "./progress";
-import { AudioMenu, QualityMenu, SubtitleMenu } from "./tracks-menu";
+import { AudioMenu, QualityMenu, SubtitleMenu, VideoMenu } from "./tracks-menu";
 
 export const BottomControls = ({
 	player,
@@ -164,7 +164,8 @@ const ControlButtons = ({
 			</View>
 			<View {...css({ flexDirection: "row" })}>
 				<SubtitleMenu {...menuProps} />
-				<AudioMenu {...menuProps} />
+				<AudioMenu player={player} {...menuProps} />
+				<VideoMenu {...menuProps} />
 				<QualityMenu {...menuProps} />
 				{Platform.OS === "web" && <FullscreenButton {...spacing} />}
 			</View>

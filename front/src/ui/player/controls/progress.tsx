@@ -98,7 +98,7 @@ export const ProgressText = ({
 
 const toTimerString = (timer?: number, duration?: number) => {
 	if (!duration) duration = timer;
-	if (timer === undefined || Number.isNaN(timer)) return "??:??";
+	if (timer === undefined || !Number.isFinite(timer)) return "??:??";
 
 	const h = Math.floor(timer / 3600);
 	const min = Math.floor((timer / 60) % 60);

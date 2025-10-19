@@ -36,6 +36,7 @@
 		"expo-status-bar": "~3.0.8",
 		"expo-updates": "~29.0.11",
 		"i18next-http-backend": "^3.0.2",
+		"langmap": "^0.0.16",
 		"react": "19.1.0",
 		"react-dom": "19.1.0",
 		"react-i18next": "^16.1.0",

@@ -42,7 +42,7 @@ export const MiddleControls = ({
 			<IconButton
 				icon={SkipPrevious}
 				as={Link}
-				href={previous}
+				href={previous ?? ""}
 				replace
 				size={ts(4)}
 				{...css([!previous && { opacity: 0, pointerEvents: "none" }], common)}
@@ -51,7 +51,7 @@ export const MiddleControls = ({
 			<IconButton
 				icon={SkipNext}
 				as={Link}
-				href={next}
+				href={next ?? ""}
 				replace
 				size={ts(4)}
 				{...css([!next && { opacity: 0, pointerEvents: "none" }], common)}

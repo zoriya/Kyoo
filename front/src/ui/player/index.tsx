@@ -2,7 +2,7 @@ import { Stack, useRouter } from "expo-router";
 import { Platform, StyleSheet, View } from "react-native";
 import { useEvent, useVideoPlayer, VideoView } from "react-native-video";
 import { entryDisplayNumber } from "~/components/entries";
-import { FullVideo, VideoInfo } from "~/models";
+import { FullVideo, type KyooError, VideoInfo } from "~/models";
 import { ContrastArea, Head } from "~/primitives";
 import { useToken } from "~/providers/account-context";
 import { useLocalSetting } from "~/providers/settings";
@@ -15,6 +15,7 @@ import { toggleFullscreen } from "./controls/misc";
 import { Back } from "./controls/back";
 import { useYoshiki } from "yoshiki/native";
 import { ErrorView } from "../errors";
+import { PlayModeContext } from "./controls/tracks-menu";
 
 const clientId = uuidv4();
 
@@ -27,14 +28,19 @@ export const Player = () => {
 	// TODO: map current entry using entries' duration & the current playtime
 	const currentEntry = 0;
 	const entry = data?.entries[currentEntry] ?? data?.entries[0];
-	const title = entry ? `${entry.name} (${entryDisplayNumber(entry)})` : null;
+	const title = entry
+		? entry.kind === "movie"
+			? entry.name
+			: `${entry.name} (${entryDisplayNumber(entry)})`
+		: null;
 
 	const { apiUrl, authToken } = useToken();
 	const [defaultPlayMode] = useLocalSetting<"direct" | "hls">(
 		"playMode",
 		"direct",
 	);
-	const [playMode, setPlayMode] = useState(defaultPlayMode);
+	const playModeState = useState(defaultPlayMode);
+	const [playMode, setPlayMode] = playModeState;
 	const player = useVideoPlayer(
 		{
 			uri: `${apiUrl}/api/videos/${slug}/${playMode === "direct" ? "direct" : "master.m3u8"}?clientId=${clientId}`,
@@ -50,8 +56,8 @@ export const Player = () => {
 				: {},
 			metadata: {
 				title: title ?? undefined,
-				description: entry?.description ?? undefined,
 				artist: data?.show?.name ?? undefined,
+				description: entry?.description ?? undefined,
 				imageUri: data?.show?.thumbnail?.high ?? undefined,
 			},
 			externalSubtitles: info?.subtitles
@@ -124,15 +130,14 @@ export const Player = () => {
 		};
 	}, []);
 
-	const [playbackError, setPlaybackError] = useState<string | undefined>();
+	const [playbackError, setPlaybackError] = useState<KyooError | undefined>();
 	useEvent(player, "onError", (error) => {
-		console.log("error", error, "code", error.code, "playbackMode", playMode);
 		if (
 			error.code === "source/unsupported-content-type" &&
 			playMode === "direct"
 		)
 			setPlayMode("hls");
-		else setPlaybackError(error);
+		else setPlaybackError({ status: error.code, message: error.message });
 	});
 	const { css } = useYoshiki();
 	if (error || infoError || playbackError) {
@@ -142,7 +147,7 @@ export const Player = () => {
 					name={data?.show?.name ?? "Error"}
 					{...css({ position: "relative", bg: (theme) => theme.accent })}
 				/>
-				<ErrorView error={error ?? infoError ?? { errors: [playbackError!] }} />
+				<ErrorView error={error ?? infoError ?? playbackError!} />
 			</>
 		);
 	}
@@ -177,21 +182,23 @@ export const Player = () => {
 			/>
 			<ContrastArea mode="dark">
 				<LoadingIndicator player={player} />
-				<Controls
-					player={player}
-					name={data?.show?.name}
-					poster={data?.show?.poster}
-					subName={
-						entry
-							? [entryDisplayNumber(entry), entry.name]
-									.filter((x) => x)
-									.join(" - ")
-							: undefined
-					}
-					chapters={info?.chapters ?? []}
-					previous={data?.previous?.video}
-					next={data?.next?.video}
-				/>
+				<PlayModeContext.Provider value={playModeState}>
+					<Controls
+						player={player}
+						name={data?.show?.name}
+						poster={data?.show?.poster}
+						subName={
+							entry
+								? [entryDisplayNumber(entry), entry.name]
+										.filter((x) => x)
+										.join(" - ")
+								: undefined
+						}
+						chapters={info?.chapters ?? []}
+						previous={data?.previous?.video}
+						next={data?.next?.video}
+					/>
+				</PlayModeContext.Provider>
 			</ContrastArea>
 		</View>
 	);

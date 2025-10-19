@@ -6,9 +6,9 @@ import VolumeDown from "@material-symbols/svg-400/rounded/volume_down-fill.svg";
 import VolumeMute from "@material-symbols/svg-400/rounded/volume_mute-fill.svg";
 import VolumeOff from "@material-symbols/svg-400/rounded/volume_off-fill.svg";
 import VolumeUp from "@material-symbols/svg-400/rounded/volume_up-fill.svg";
-import { type ComponentProps, useState, useEffect } from "react";
+import { type ComponentProps, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { type PressableProps, View, Platform } from "react-native";
+import { type PressableProps, View } from "react-native";
 import { useEvent, type VideoPlayer } from "react-native-video";
 import { px, useYoshiki } from "yoshiki/native";
 import {
