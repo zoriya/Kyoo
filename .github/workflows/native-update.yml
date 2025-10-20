@@ -27,7 +27,7 @@ jobs:
           echo "Expo build is disabled for forks. To enable it, add an EXPO_TOKEN secret to this repository. See https://docs.expo.dev/eas-update/github-actions/ for more information."
 
       - name: Setup Node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         if: env.IS_EXPO_ENABLED == 'true'
         with:
           node-version: 22.x
