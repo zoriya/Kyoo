@@ -3,19 +3,50 @@ import MusicNote from "@material-symbols/svg-400/rounded/music_note-fill.svg";
 import SettingsIcon from "@material-symbols/svg-400/rounded/settings-fill.svg";
 import VideoSettings from "@material-symbols/svg-400/rounded/video_settings-fill.svg";
 import { type ComponentProps, createContext, useContext } from "react";
-import { useEvent, type VideoPlayer } from "react-native-video";
 import { useTranslation } from "react-i18next";
-import { IconButton, Menu, tooltip } from "~/primitives";
-import { useDisplayName } from "~/track-utils";
+import { useEvent, type VideoPlayer } from "react-native-video";
 import { useForceRerender } from "yoshiki";
+import type { Subtitle } from "~/models";
+import { IconButton, Menu, tooltip } from "~/primitives";
+import { useFetch } from "~/query";
+import { useDisplayName, useSubtitleName } from "~/track-utils";
+import { useQueryState } from "~/utils";
+import { Player } from "..";
 
 type MenuProps = ComponentProps<typeof Menu<ComponentProps<typeof IconButton>>>;
 
-export const SubtitleMenu = (props: Partial<MenuProps>) => {
+export const SubtitleMenu = ({
+	player,
+	...props
+}: {
+	player: VideoPlayer;
+} & Partial<MenuProps>) => {
 	const { t } = useTranslation();
+	const getDisplayName = useSubtitleName();
 
-	// {subtitles && subtitles.length > 0 && (
-	// )}
+	const rerender = useForceRerender();
+	useEvent(player, "onTrackChange", rerender);
+
+	const [slug] = useQueryState<string>("slug", undefined!);
+	const { data } = useFetch(Player.infoQuery(slug));
+
+	if (data?.subtitles.length === 0) return null;
+
+	const selectedIdx = player
+		.getAvailableTextTracks()
+		.findIndex((x) => x.selected);
+
+	const select = (track: Subtitle | null, idx: number) => {
+		if (!track) {
+			player.selectTextTrack(null);
+			return;
+		}
+
+		// TODO: filter by codec here
+		const sub = player.getAvailableTextTracks()[idx];
+		player.selectTextTrack(sub);
+	};
+
 	return (
 		<Menu
 			Trigger={IconButton}
@@ -23,24 +54,19 @@ export const SubtitleMenu = (props: Partial<MenuProps>) => {
 			{...tooltip(t("player.subtitles"), true)}
 			{...props}
 		>
-			{/* <Menu.Item */}
-			{/* 	label={t("player.subtitle-none")} */}
-			{/* 	selected={!selectedSubtitle} */}
-			{/* 	onSelect={() => setSubtitle(null)} */}
-			{/* /> */}
-			{/* {subtitles */}
-			{/* 	.filter((x) => !!x.link) */}
-			{/* 	.map((x, i) => ( */}
-			{/* 		<Menu.Item */}
-			{/* 			key={x.index ?? i} */}
-			{/* 			label={ */}
-			{/* 				x.link ? getSubtitleName(x) : `${getSubtitleName(x)} (${x.codec})` */}
-			{/* 			} */}
-			{/* 			selected={selectedSubtitle === x} */}
-			{/* 			disabled={!x.link} */}
-			{/* 			onSelect={() => setSubtitle(x)} */}
-			{/* 		/> */}
-			{/* 	))} */}
+			<Menu.Item
+				label={t("player.subtitle-none")}
+				selected={selectedIdx === -1}
+				onSelect={() => select(null, -1)}
+			/>
+			{data?.subtitles.map((x, i) => (
+				<Menu.Item
+					key={x.index ?? x.link}
+					label={getDisplayName(x)}
+					selected={i === selectedIdx}
+					onSelect={() => select(x, i)}
+				/>
+			))}
 		</Menu>
 	);
 };

@@ -62,10 +62,13 @@ export const Player = () => {
 				imageUri: data?.show?.thumbnail?.high ?? undefined,
 			},
 			externalSubtitles: info?.subtitles
-				.filter((x) => x.link)
+				.filter(
+					(x) => Platform.OS === "web" || playMode === "hls" || x.isExternal,
+				)
 				.map((x) => ({
+					// we also add those without link to prevent the order from getting out of sync with `info.subtitles`.
+					// since we never actually play those this is fine
 					uri: x.link!,
-					// TODO: translate this `Unknown`
 					label: x.title ?? "Unknown",
 					language: x.language ?? "und",
 					type: x.codec,

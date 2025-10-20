@@ -174,7 +174,7 @@ func (s *MetadataService) GetMetadata(ctx context.Context, path string, sha stri
 		tx.Exec(`update info set ver_keyframes = 0 where sha = $1`, sha)
 		err = tx.Commit()
 		if err != nil {
-			fmt.Printf("error deleteing old keyframes from database: %v", err)
+			fmt.Printf("error deleting old keyframes from database: %v", err)
 		}
 	}
 
@@ -256,7 +256,7 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 		}
 		if s.Extension != nil {
 			link := fmt.Sprintf(
-				"video/%s/subtitle/%d.%s",
+				"/video/%s/subtitle/%d.%s",
 				base64.RawURLEncoding.EncodeToString([]byte(ret.Path)),
 				*s.Index,
 				*s.Extension,
@@ -387,6 +387,11 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 		)
 	}
 	err = tx.Commit()
+	if err != nil {
+		return set(ret, err)
+	}
+
+	err = ret.SearchExternalSubtitles()
 	if err != nil {
 		return set(ret, err)
 	}

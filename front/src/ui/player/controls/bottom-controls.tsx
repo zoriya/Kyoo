@@ -163,7 +163,7 @@ const ControlButtons = ({
 				<ProgressText player={player} {...spacing} />
 			</View>
 			<View {...css({ flexDirection: "row" })}>
-				<SubtitleMenu {...menuProps} />
+				<SubtitleMenu player={player} {...menuProps} />
 				<AudioMenu player={player} {...menuProps} />
 				<VideoMenu player={player} {...menuProps} />
 				<QualityMenu player={player} {...menuProps} />
