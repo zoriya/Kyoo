@@ -1,6 +1,9 @@
 import { Stack, useRouter } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { useEvent, useVideoPlayer, VideoView } from "react-native-video";
+import { v4 as uuidv4 } from "uuid";
+import { useYoshiki } from "yoshiki/native";
 import { entryDisplayNumber } from "~/components/entries";
 import { FullVideo, type KyooError, VideoInfo } from "~/models";
 import { ContrastArea, Head } from "~/primitives";
@@ -8,14 +11,12 @@ import { useToken } from "~/providers/account-context";
 import { useLocalSetting } from "~/providers/settings";
 import { type QueryIdentifier, useFetch } from "~/query";
 import { useQueryState } from "~/utils";
-import { Controls, LoadingIndicator } from "./controls";
-import { useEffect, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
-import { toggleFullscreen } from "./controls/misc";
-import { Back } from "./controls/back";
-import { useYoshiki } from "yoshiki/native";
 import { ErrorView } from "../errors";
+import { Controls, LoadingIndicator } from "./controls";
+import { Back } from "./controls/back";
+import { toggleFullscreen } from "./controls/misc";
 import { PlayModeContext } from "./controls/tracks-menu";
+import { useKeyboard } from "./keyboard";
 
 const clientId = uuidv4();
 
@@ -83,44 +84,38 @@ export const Player = () => {
 	);
 
 	const router = useRouter();
+	const playPrev = useCallback(() => {
+		if (!data?.previous) return false;
+		setStart(0);
+		setSlug(data.previous.video);
+		return true;
+	}, [data?.previous, setSlug, setStart]);
+	const playNext = useCallback(() => {
+		if (!data?.next) return false;
+		setStart(0);
+		setSlug(data.next.video);
+		return true;
+	}, [data?.next, setSlug, setStart]);
+
 	useEvent(player, "onEnd", () => {
-		if (!data) return;
-		if (data.next) {
-			setStart(0);
-			setSlug(data.next.video);
-		} else {
-			router.navigate(data.show!.href);
-		}
+		const hasNext = playNext();
+		if (!hasNext && data?.show) router.navigate(data.show.href);
 	});
 
 	// TODO: add the equivalent of this for android
 	useEffect(() => {
 		if (typeof window === "undefined") return;
-		const prev = data?.previous?.video;
 		window.navigator.mediaSession.setActionHandler(
 			"previoustrack",
-			prev
-				? () => {
-						setStart(0);
-						setSlug(prev);
-					}
-				: null,
+			data?.previous?.video ? playPrev : null,
 		);
-		const next = data?.next?.video;
 		window.navigator.mediaSession.setActionHandler(
 			"nexttrack",
-			next
-				? () => {
-						setStart(0);
-						setSlug(next);
-					}
-				: null,
+			data?.next?.video ? playNext : null,
 		);
-	}, [data?.next?.video, data?.previous?.video, setSlug, setStart]);
+	}, [data?.next?.video, data?.previous?.video, playNext, playPrev]);
 
-	// useVideoKeyboard(info?.subtitles, info?.fonts, previous, next);
-
-	// const startTime = startTimeP ?? data?.watchStatus?.watchedTime;
+	useKeyboard(player, playPrev, playNext);
 
 	useEffect(() => {
 		if (Platform.OS !== "web") return;
