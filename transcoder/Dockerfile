@@ -1,24 +1,4 @@
-# FROM golang:1.23 as build
-FROM debian:trixie-slim AS build
-# those were copied from https://github.com/docker-library/golang/blob/master/Dockerfile-linux.template
-ENV GOTOOLCHAIN=local
-ENV GOPATH=/go
-ENV PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
-RUN set -eux; \
-	apt-get update; \
-	apt-get install -y --no-install-recommends \
-	ca-certificates openssl \
-	golang\
-	g++ \
-	gcc \
-	libc6-dev \
-	make \
-	pkg-config
-
-# https://github.com/golang/go/issues/54400
-ENV SSL_CERT_DIR=/etc/ssl/certs
-RUN update-ca-certificates
-
+FROM golang:1.25 as build
 RUN apt-get update \
 	&& apt-get install --no-install-recommends --no-install-suggests -y \
 	ffmpeg libavformat-dev libavutil-dev libswscale-dev \
@@ -32,10 +12,8 @@ RUN go mod download
 COPY . .
 RUN GOOS=linux go build -o ./transcoder
 
-# debian is required for nvidia hardware acceleration
-# we use trixie (debian's testing because ffmpeg on latest is v5 and we need v6)
-# https://packages.debian.org/bookworm/ffmpeg for version tracking
-FROM debian:trixie-slim
+# https://packages.debian.org/trixie/ffmpeg for version tracking
+FROM debian:trixie
 
 # read target arch from buildx or default to amd64 if using legacy builder.
 ARG TARGETARCH

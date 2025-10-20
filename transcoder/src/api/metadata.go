@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"path/filepath"
 
+	"github.com/asticode/go-astisub"
 	"github.com/labstack/echo/v4"
 	"github.com/zoriya/kyoo/transcoder/src"
 	"github.com/zoriya/kyoo/transcoder/src/utils"
@@ -55,11 +56,12 @@ func (h *mhandler) GetInfo(c echo.Context) error {
 // @Tags         metadata
 // @Param        path  path   string    true  "Base64 of a video's path"  format(base64) example(L3ZpZGVvL2J1YmJsZS5ta3YK)
 // @Param        name  path   string    true  "Name of the subtitle"  example(en.srt)
+// @Param        format  query   string    false  "Output format to convert the subtitle into"  example(vtt)
 //
 // @Success      200  file  "Requested subtitle"
 // @Router  /:path/subtitle/:name [get]
 func (h *mhandler) GetSubtitle(c echo.Context) (err error) {
-	_, sha, err := getPath(c)
+	path, sha, err := getPath(c)
 	if err != nil {
 		return err
 	}
@@ -68,23 +70,41 @@ func (h *mhandler) GetSubtitle(c echo.Context) (err error) {
 		return err
 	}
 
-	subtitleStream, err := h.metadata.GetSubtitle(c.Request().Context(), sha, name)
+	stream, err := h.metadata.GetSubtitle(c.Request().Context(), path, sha, name)
 	if err != nil {
 		return err
 	}
-	defer utils.CleanupWithErr(&err, subtitleStream.Close, "failed to close subtitle reader")
+	defer utils.CleanupWithErr(&err, stream.Close, "failed to close subtitle reader")
 
-	mimeType, err := guessMimeType(name, subtitleStream)
-	if err != nil {
-		return fmt.Errorf("failed to guess mime type: %w", err)
+	outFmt := c.QueryParam("format")
+	if outFmt == "" {
+		mimeType, err := guessMimeType(name, stream)
+		if err != nil {
+			return fmt.Errorf("failed to guess mime type: %w", err)
+		}
+
+		// Default the mime type to text/plain if it is not recognized
+		if mimeType == "" {
+			mimeType = "text/plain"
+		}
+		return c.Stream(200, mimeType, stream)
 	}
 
-	// Default the mime type to text/plain if it is not recognized
-	if mimeType == "" {
-		mimeType = "text/plain"
+	pr, pw := io.Pipe()
+	outExt := fmt.Sprintf(".%s", outFmt)
+	err = src.ConvertSubtitle(
+		filepath.Ext(name),
+		stream,
+		outExt,
+		pw,
+	)
+	if err == astisub.ErrInvalidExtension {
+		return echo.NewHTTPError(http.StatusBadRequest, "Input or output format not supported. Conversion failed.")
+	} else if err != nil {
+		return err
 	}
 
-	return c.Stream(200, mimeType, subtitleStream)
+	return c.Stream(200, mime.TypeByExtension(outExt), pr)
 }
 
 // @Summary      Get attachments

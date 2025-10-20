@@ -21,8 +21,8 @@ import (
 type MetadataService struct {
 	database     *sql.DB
 	lock         RunLock[string, *MediaInfo]
-	thumbLock    RunLock[string, interface{}]
-	extractLock  RunLock[string, interface{}]
+	thumbLock    RunLock[string, any]
+	extractLock  RunLock[string, any]
 	keyframeLock RunLock[KeyframeKey, *Keyframe]
 	storage      storage.StorageBackend
 }
@@ -32,8 +32,8 @@ func NewMetadataService() (*MetadataService, error) {
 
 	s := &MetadataService{
 		lock:         NewRunLock[string, *MediaInfo](),
-		thumbLock:    NewRunLock[string, interface{}](),
-		extractLock:  NewRunLock[string, interface{}](),
+		thumbLock:    NewRunLock[string, any](),
+		extractLock:  NewRunLock[string, any](),
 		keyframeLock: NewRunLock[KeyframeKey, *Keyframe](),
 	}
 

@@ -31,11 +31,6 @@ type Thumbnail struct {
 
 const ThumbsVersion = 1
 
-// getThumbGlob returns the path prefix for all thumbnail files for a given sha.
-func getThumbPrefix(sha string) string {
-	return sha
-}
-
 func getThumbPath(sha string) string {
 	return fmt.Sprintf("%s/thumbs-v%d.png", sha, ThumbsVersion)
 }
@@ -91,13 +86,9 @@ func (s *MetadataService) extractThumbnail(ctx context.Context, path string, sha
 
 	vttPath := getThumbVttPath(sha)
 	spritePath := getThumbPath(sha)
-	newItemPaths := []string{spritePath, vttPath}
 
-	doAllExist, err := s.doAllThumbnailFilesExist(ctx, newItemPaths)
-	if err != nil {
-		return fmt.Errorf("failed to check if thumbnail files exist: %w", err)
-	}
-	if doAllExist {
+	alreadyOk, _ := s.storage.DoesItemExist(ctx, spritePath)
+	if alreadyOk {
 		return nil
 	}
 
@@ -106,7 +97,7 @@ func (s *MetadataService) extractThumbnail(ctx context.Context, path string, sha
 		log.Printf("Error reading video file: %v", err)
 		return err
 	}
-	defer utils.CleanupWithErr(&err, gen.Close, "failed to close screengen generator")
+	defer gen.Close()
 
 	gen.Fast = true
 
@@ -156,47 +147,21 @@ func (s *MetadataService) extractThumbnail(ctx context.Context, path string, sha
 		)
 	}
 
-	// Cleanup old thumbnails
-	if err := s.storage.DeleteItemsWithPrefix(ctx, getThumbPrefix(sha)); err != nil {
-		return fmt.Errorf("failed to delete old thumbnails: %w", err)
-	}
+	_ = s.storage.DeleteItem(ctx, spritePath)
+	_ = s.storage.DeleteItem(ctx, vttPath)
 
-	// Store the new items
-	//  Thumbnail vtt
-	if err = s.storage.SaveItem(ctx, vttPath, strings.NewReader(vtt)); err != nil {
-		return fmt.Errorf("failed to save thumbnail vtt with path %q: %w", vttPath, err)
-	}
-
-	//  Thumbnail sprite
 	spriteFormat, err := imaging.FormatFromFilename(spritePath)
 	if err != nil {
 		return err
 	}
 
 	err = s.storage.SaveItemWithCallback(ctx, spritePath, func(_ context.Context, writer io.Writer) error {
-		if err := imaging.Encode(writer, sprite, spriteFormat); err != nil {
-			return fmt.Errorf("failed to encode thumbnail sprite: %w", err)
-		}
-		return nil
+		return imaging.Encode(writer, sprite, spriteFormat)
 	})
 	if err != nil {
-		return fmt.Errorf("failed to save thumbnail sprite with path %q: %w", spritePath, err)
+		return err
 	}
-
-	return nil
-}
-
-func (s *MetadataService) doAllThumbnailFilesExist(ctx context.Context, filePaths []string) (bool, error) {
-	for _, filePath := range filePaths {
-		doesExist, err := s.storage.DoesItemExist(ctx, filePath)
-		if err != nil {
-			return false, fmt.Errorf("failed to check if thumbnail file %q exists: %w", filePath, err)
-		}
-		if !doesExist {
-			return false, nil
-		}
-	}
-	return true, nil
+	return s.storage.SaveItem(ctx, vttPath, strings.NewReader(vtt))
 }
 
 func tsToVttTime(ts int) string {

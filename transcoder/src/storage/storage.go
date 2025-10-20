@@ -8,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/zoriya/kyoo/transcoder/src/utils"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -18,9 +17,7 @@ type ContentsWriterCallback func(ctx context.Context, writer io.Writer) error
 // "Items" are pieces of data that can be stored and retrieved.
 // Paths with ".." are not allowed, and may result in unexpected behavior.
 type StorageBackend interface {
-	// DoesItemExist checks if an item exists in the storage backend.
 	DoesItemExist(ctx context.Context, path string) (bool, error)
-	// ListItemsWithPrefix returns a list of items in the storage backend that match the given prefix.
 	// Note: returned items may have a "/" in them, e.g. "foo/bar/baz".
 	ListItemsWithPrefix(ctx context.Context, pathPrefix string) ([]string, error)
 	// DeleteItem deletes an item from the storage backend. If the item does not exist, it returns nil.
@@ -45,37 +42,34 @@ type StorageBackendCloser interface {
 	Close() error
 }
 
-// SaveFilesToBackend is a helper function that saves files from the source directory to the backend storage.
-func SaveFilesToBackend(ctx context.Context, backend StorageBackend, sourceDirectory, destinationBasePath string) error {
+func SaveFilesToBackend(ctx context.Context, backend StorageBackend, source, dest string) error {
 	// Allow for save in parallel. Running in series can be slow with many files.
 	var saveGroup errgroup.Group
 
-	err := filepath.WalkDir(sourceDirectory, func(sourcePath string, d fs.DirEntry, err error) error {
+	err := filepath.WalkDir(source, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
-			return fmt.Errorf("error walking the path %q: %v", sourcePath, err)
+			return err
 		}
 
 		if d.IsDir() {
 			return nil
 		}
 
-		// Path relative to the source directory
-		relativePath, err := filepath.Rel(sourceDirectory, sourcePath)
+		rel, err := filepath.Rel(source, path)
 		if err != nil {
 			return err
 		}
+		dest := filepath.Join(dest, rel)
 
-		// Destination path in the backend storage
-		destinationPath := filepath.Join(destinationBasePath, relativePath)
 		saveGroup.Go(func() (err error) {
-			file, err := os.Open(sourcePath)
+			file, err := os.Open(path)
 			if err != nil {
-				return fmt.Errorf("failed to open file %q: %w", sourcePath, err)
+				return err
 			}
-			utils.CleanupWithErr(&err, file.Close, "failed to close file %q", sourcePath)
+			defer file.Close()
 
-			if err := backend.SaveItem(ctx, destinationPath, file); err != nil {
-				return fmt.Errorf("failed to save file %q to backend: %w", sourcePath, err)
+			if err := backend.SaveItem(ctx, dest, file); err != nil {
+				return fmt.Errorf("failed to save file %q to backend: %w", path, err)
 			}
 
 			return nil

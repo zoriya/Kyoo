@@ -3,6 +3,7 @@ module github.com/zoriya/kyoo/transcoder
 go 1.24.2
 
 require (
+	github.com/asticode/go-astisub v0.35.0
 	github.com/aws/aws-sdk-go-v2 v1.39.3
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.88.5
 	github.com/disintegration/imaging v1.6.2
@@ -19,6 +20,8 @@ require (
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
+	github.com/asticode/go-astikit v0.20.0 // indirect
+	github.com/asticode/go-astits v1.8.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-openapi/jsonpointer v0.21.1 // indirect
 	github.com/go-openapi/jsonreference v0.21.0 // indirect

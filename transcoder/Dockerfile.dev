@@ -1,27 +1,4 @@
-# we use trixie (debian's testing because ffmpeg on latest is v5 and we need v6)
-# https://packages.debian.org/bookworm/ffmpeg for version tracking
-# FROM golang:1.21
-# trixie's golang is also 1.21
-FROM debian:trixie-slim
-# those were copied from https://github.com/docker-library/golang/blob/master/Dockerfile-linux.template
-ENV GOTOOLCHAIN=local
-ENV GOPATH=/go
-ENV PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
-RUN set -eux; \
-	apt-get update; \
-	apt-get install -y --no-install-recommends \
-	ca-certificates openssl \
-	golang\
-	g++ \
-	gcc \
-	libc6-dev \
-	make \
-	pkg-config
-
-# https://github.com/golang/go/issues/54400
-ENV SSL_CERT_DIR=/etc/ssl/certs
-RUN update-ca-certificates
-
+FROM golang:1.25
 # read target arch from buildx or default to amd64 if using legacy builder.
 ARG TARGETARCH
 ENV TARGETARCH=${TARGETARCH:-amd64}
