@@ -17,6 +17,7 @@ import { Back } from "./controls/back";
 import { toggleFullscreen } from "./controls/misc";
 import { PlayModeContext } from "./controls/tracks-menu";
 import { useKeyboard } from "./keyboard";
+import { enhanceSubtitles } from "./subtitles";
 
 const clientId = uuidv4();
 
@@ -81,6 +82,7 @@ export const Player = () => {
 			p.playWhenInactive = true;
 			p.playInBackground = true;
 			p.showNotificationControls = true;
+			enhanceSubtitles(p);
 			const seek = start ?? data?.progress.time;
 			// TODO: fix console.error bellow
 			if (seek) p.seekTo(seek);
@@ -88,6 +90,11 @@ export const Player = () => {
 			p.play();
 		},
 	);
+
+	// we'll also want to replace source here once https://github.com/TheWidlarzGroup/react-native-video/issues/4722 is ready
+	useEffect(() => {
+		player.__ass.fonts = info?.fonts ?? [];
+	}, [player, info?.fonts]);
 
 	const router = useRouter();
 	const playPrev = useCallback(() => {

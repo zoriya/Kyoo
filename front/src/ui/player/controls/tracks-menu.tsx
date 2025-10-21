@@ -12,6 +12,7 @@ import { useFetch } from "~/query";
 import { useDisplayName, useSubtitleName } from "~/track-utils";
 import { useQueryState } from "~/utils";
 import { Player } from "..";
+import { Platform } from "react-native";
 
 type MenuProps = ComponentProps<typeof Menu<ComponentProps<typeof IconButton>>>;
 
@@ -36,17 +37,6 @@ export const SubtitleMenu = ({
 		.getAvailableTextTracks()
 		.findIndex((x) => x.selected);
 
-	const select = (track: Subtitle | null, idx: number) => {
-		if (!track) {
-			player.selectTextTrack(null);
-			return;
-		}
-
-		// TODO: filter by codec here
-		const sub = player.getAvailableTextTracks()[idx];
-		player.selectTextTrack(sub);
-	};
-
 	return (
 		<Menu
 			Trigger={IconButton}
@@ -57,14 +47,16 @@ export const SubtitleMenu = ({
 			<Menu.Item
 				label={t("player.subtitle-none")}
 				selected={selectedIdx === -1}
-				onSelect={() => select(null, -1)}
+				onSelect={() => player.selectTextTrack(null)}
 			/>
 			{data?.subtitles.map((x, i) => (
 				<Menu.Item
 					key={x.index ?? x.link}
 					label={getDisplayName(x)}
 					selected={i === selectedIdx}
-					onSelect={() => select(x, i)}
+					onSelect={() =>
+						player.selectTextTrack(player.getAvailableTextTracks()[i])
+					}
 				/>
 			))}
 		</Menu>
