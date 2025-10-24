@@ -15,7 +15,16 @@ import { alias } from "drizzle-orm/pg-core";
 import { Elysia, t } from "elysia";
 import { auth } from "~/auth";
 import { db, type Transaction } from "~/db";
-import { entries, entryVideoJoin, shows, videos } from "~/db/schema";
+import {
+	entries,
+	entryVideoJoin,
+	history,
+	profiles,
+	shows,
+	showTranslations,
+	videos,
+} from "~/db/schema";
+import { watchlist } from "~/db/schema/watchlist";
 import {
 	coalesce,
 	conflictUpdateAllExcept,
@@ -30,10 +39,14 @@ import {
 import { Entry } from "~/models/entry";
 import { KError } from "~/models/error";
 import { bubbleVideo } from "~/models/examples";
+import { Progress } from "~/models/history";
+import { Movie, type MovieStatus } from "~/models/movie";
+import { Serie } from "~/models/serie";
 import {
 	AcceptLanguage,
 	buildRelations,
 	createPage,
+	type Image,
 	isUuid,
 	keysetPaginate,
 	Page,
@@ -44,6 +57,7 @@ import {
 } from "~/models/utils";
 import { desc as description } from "~/models/utils/descriptions";
 import { Guess, Guesses, SeedVideo, Video } from "~/models/video";
+import type { MovieWatchStatus, SerieWatchStatus } from "~/models/watchlist";
 import { comment } from "~/utils";
 import {
 	entryProgressQ,
@@ -206,13 +220,43 @@ const videoRelations = {
 	slugs: () => {
 		return db
 			.select({
-				slugs: coalesce(jsonbAgg(entryVideoJoin.slug), sql`'[]'::jsonb`).as(
-					"slugs",
-				),
+				slugs: coalesce<string[]>(
+					jsonbAgg(entryVideoJoin.slug),
+					sql`'[]'::jsonb`,
+				).as("slugs"),
 			})
 			.from(entryVideoJoin)
 			.where(eq(entryVideoJoin.videoPk, videos.pk))
 			.as("slugs");
+	},
+	progress: () => {
+		const query = db
+			.select({
+				json: jsonbBuildObject<Progress>({
+					percent: history.percent,
+					time: history.time,
+					playedDate: sql`to_char(${history.playedDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+					videoId: videos.id,
+				}),
+			})
+			.from(history)
+			.innerJoin(profiles, eq(history.profilePk, profiles.pk))
+			.where(
+				and(
+					eq(profiles.id, sql.placeholder("userId")),
+					eq(history.videoPk, videos.pk),
+				),
+			)
+			.orderBy(desc(history.playedDate))
+			.limit(1);
+		return sql`
+			(
+				select coalesce(
+					${query},
+					'{"percent": 0, "time": 0, "playedDate": null, "videoId": null}'::jsonb
+				)
+				as "progress"
+			)` as any;
 	},
 	entries: ({ languages }: { languages: string[] }) => {
 		const transQ = getEntryTransQ(languages);
@@ -229,6 +273,7 @@ const videoRelations = {
 							progress: mapProgress({ aliased: false }),
 							createdAt: sql`to_char(${entries.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
 							updatedAt: sql`to_char(${entries.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+							availableSince: sql`to_char(${entries.availableSince}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
 						}),
 					),
 					sql`'[]'::jsonb`,
@@ -241,6 +286,74 @@ const videoRelations = {
 			.innerJoin(entryVideoJoin, eq(entryVideoJoin.entryPk, entries.pk))
 			.where(eq(entryVideoJoin.videoPk, videos.pk))
 			.as("entries");
+	},
+	show: ({
+		languages,
+		preferOriginal,
+	}: {
+		languages: string[];
+		preferOriginal: boolean;
+	}) => {
+		const transQ = db
+			.selectDistinctOn([showTranslations.pk])
+			.from(showTranslations)
+			.orderBy(
+				showTranslations.pk,
+				sql`array_position(${sqlarr(languages)}, ${showTranslations.language})`,
+			)
+			.as("t");
+
+		const watchStatusQ = db
+			.select({
+				watchStatus: jsonbBuildObject<MovieWatchStatus & SerieWatchStatus>({
+					...getColumns(watchlist),
+					percent: watchlist.seenCount,
+				}).as("watchStatus"),
+			})
+			.from(watchlist)
+			.leftJoin(profiles, eq(watchlist.profilePk, profiles.pk))
+			.where(
+				and(
+					eq(profiles.id, sql.placeholder("userId")),
+					eq(watchlist.showPk, shows.pk),
+				),
+			);
+
+		return db
+			.select({
+				json: jsonbBuildObject<Serie | Movie>({
+					...getColumns(shows),
+					...getColumns(transQ),
+					// movie columns (status is only a typescript hint)
+					status: sql<MovieStatus>`${shows.status}`,
+					airDate: shows.startAir,
+					kind: sql<any>`${shows.kind}`,
+					isAvailable: sql<boolean>`${shows.availableCount} != 0`,
+					createdAt: sql`to_char(${shows.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+					updatedAt: sql`to_char(${shows.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+
+					...(preferOriginal && {
+						poster: sql<Image>`coalesce(nullif(${shows.original}->'poster', 'null'::jsonb), ${transQ.poster})`,
+						thumbnail: sql<Image>`coalesce(nullif(${shows.original}->'thumbnail', 'null'::jsonb), ${transQ.thumbnail})`,
+						banner: sql<Image>`coalesce(nullif(${shows.original}->'banner', 'null'::jsonb), ${transQ.banner})`,
+						logo: sql<Image>`coalesce(nullif(${shows.original}->'logo', 'null'::jsonb), ${transQ.logo})`,
+					}),
+					watchStatus: sql`${watchStatusQ}`,
+				}).as("json"),
+			})
+			.from(shows)
+			.innerJoin(transQ, eq(shows.pk, transQ.pk))
+			.where(
+				eq(
+					shows.pk,
+					db
+						.select({ pk: entries.showPk })
+						.from(entries)
+						.innerJoin(entryVideoJoin, eq(entryVideoJoin.entryPk, entries.pk))
+						.where(eq(videos.pk, entryVideoJoin.videoPk)),
+				),
+			)
+			.as("show");
 	},
 	previous: ({ languages }: { languages: string[] }) => {
 		return getNextVideoEntry({ languages, prev: true });
@@ -263,7 +376,7 @@ function getNextVideoEntry({
 	const evj = alias(entryVideoJoin, `evj_${prev ? "prev" : "next"}`);
 	return db
 		.select({
-			json: jsonbBuildObject<Entry>({
+			json: jsonbBuildObject<{ video: string; entry: Entry }>({
 				video: entryVideoJoin.slug,
 				entry: {
 					...getColumns(entries),
@@ -274,7 +387,7 @@ function getNextVideoEntry({
 					createdAt: sql`to_char(${entries.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
 					updatedAt: sql`to_char(${entries.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
 				},
-			}),
+			}).as("json"),
 		})
 		.from(entries)
 		.innerJoin(transQ, eq(entries.pk, transQ.pk))
@@ -337,9 +450,9 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 		":id",
 		async ({
 			params: { id },
-			query: { with: relations },
+			query: { with: relations, preferOriginal },
 			headers: { "accept-language": langs },
-			jwt: { sub },
+			jwt: { sub, settings },
 			status,
 		}) => {
 			const languages = processLanguages(langs);
@@ -351,10 +464,11 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				.select({
 					...getColumns(videos),
 					...buildRelations(
-						["slugs", "entries", ...relations],
+						["slugs", "progress", "entries", ...relations],
 						videoRelations,
 						{
 							languages,
+							preferOriginal: preferOriginal ?? settings.preferOriginal,
 						},
 					),
 				})
@@ -382,10 +496,15 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				}),
 			}),
 			query: t.Object({
-				with: t.Array(t.UnionEnum(["previous", "next"]), {
+				with: t.Array(t.UnionEnum(["previous", "next", "show"]), {
 					default: [],
 					description: "Include related entries in the response.",
 				}),
+				preferOriginal: t.Optional(
+					t.Boolean({
+						description: description.preferOriginal,
+					}),
+				),
 			}),
 			headers: t.Object(
 				{
@@ -400,6 +519,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 						slugs: t.Array(
 							t.String({ format: "slug", examples: ["made-in-abyss-s1e13"] }),
 						),
+						progress: Progress,
 						entries: t.Array(Entry),
 						previous: t.Optional(
 							t.Nullable(
@@ -423,6 +543,12 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 								}),
 							),
 						),
+						show: t.Optional(
+							t.Union([
+								t.Composite([t.Object({ kind: t.Literal("movie") }), Movie]),
+								t.Composite([t.Object({ kind: t.Literal("serie") }), Serie]),
+							]),
+						),
 					}),
 				]),
 				404: {
@@ -430,6 +556,133 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 					description: "No video found with the given id or slug.",
 				},
 				422: KError,
+			},
+		},
+	)
+	.get(
+		":id/info",
+		async ({ params: { id }, status, redirect }) => {
+			const [video] = await db
+				.select({
+					path: videos.path,
+				})
+				.from(videos)
+				.leftJoin(entryVideoJoin, eq(videos.pk, entryVideoJoin.videoPk))
+				.where(isUuid(id) ? eq(videos.id, id) : eq(entryVideoJoin.slug, id))
+				.limit(1);
+
+			if (!video) {
+				return status(404, {
+					status: 404,
+					message: `No video found with id or slug '${id}'`,
+				});
+			}
+			const path = Buffer.from(video.path, "utf8").toString("base64url");
+			return redirect(`/video/${path}/info`);
+		},
+		{
+			detail: { description: "Get a video's metadata informations" },
+			params: t.Object({
+				id: t.String({
+					description: "The id or slug of the video to retrieve.",
+					example: "made-in-abyss-s1e13",
+				}),
+			}),
+			response: {
+				302: t.Void({
+					description:
+						"Redirected to the [/video/{path}/info](?api=transcoder#tag/metadata/get/:path/info) route (of the transcoder)",
+				}),
+				404: {
+					...KError,
+					description: "No video found with the given id or slug.",
+				},
+			},
+		},
+	)
+	.get(
+		":id/direct",
+		async ({ params: { id }, status, redirect }) => {
+			const [video] = await db
+				.select({
+					path: videos.path,
+				})
+				.from(videos)
+				.leftJoin(entryVideoJoin, eq(videos.pk, entryVideoJoin.videoPk))
+				.where(isUuid(id) ? eq(videos.id, id) : eq(entryVideoJoin.slug, id))
+				.limit(1);
+
+			if (!video) {
+				return status(404, {
+					status: 404,
+					message: `No video found with id or slug '${id}'`,
+				});
+			}
+			const path = Buffer.from(video.path, "utf8").toString("base64url");
+			const filename = path.substring(path.lastIndexOf("/") + 1);
+			return redirect(`/video/${path}/direct/${filename}`);
+		},
+		{
+			detail: {
+				description: "Get redirected to the direct stream of the video",
+			},
+			params: t.Object({
+				id: t.String({
+					description: "The id or slug of the video to watch.",
+					example: "made-in-abyss-s1e13",
+				}),
+			}),
+			response: {
+				302: t.Void({
+					description:
+						"Redirected to the [/video/{path}/direct](?api=transcoder#tag/metadata/get/:path/direct) route (of the transcoder)",
+				}),
+				404: {
+					...KError,
+					description: "No video found with the given id or slug.",
+				},
+			},
+		},
+	)
+	.get(
+		":id/master.m3u8",
+		async ({ params: { id }, request, status, redirect }) => {
+			const [video] = await db
+				.select({
+					path: videos.path,
+				})
+				.from(videos)
+				.leftJoin(entryVideoJoin, eq(videos.pk, entryVideoJoin.videoPk))
+				.where(isUuid(id) ? eq(videos.id, id) : eq(entryVideoJoin.slug, id))
+				.limit(1);
+
+			if (!video) {
+				return status(404, {
+					status: 404,
+					message: `No video found with id or slug '${id}'`,
+				});
+			}
+			const path = Buffer.from(video.path, "utf8").toString("base64url");
+			const query = request.url.substring(request.url.indexOf("?"));
+			return redirect(`/video/${path}/master.m3u8${query}`);
+		},
+		{
+			detail: { description: "Get redirected to the master.m3u8 of the video" },
+			params: t.Object({
+				id: t.String({
+					description: "The id or slug of the video to watch.",
+					example: "made-in-abyss-s1e13",
+				}),
+			}),
+			response: {
+				302: t.Void({
+					description:
+						"Redirected to the [/video/{path}/master.m3u8](?api=transcoder#tag/metadata/get/:path/master.m3u8) route (of the transcoder)",
+				}),
+				404: {
+					...KError,
+					description: "No video found with the given id or slug.",
+				},
 			},
 		},
 	)

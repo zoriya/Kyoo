@@ -21,8 +21,8 @@ import (
 type MetadataService struct {
 	database     *sql.DB
 	lock         RunLock[string, *MediaInfo]
-	thumbLock    RunLock[string, interface{}]
-	extractLock  RunLock[string, interface{}]
+	thumbLock    RunLock[string, any]
+	extractLock  RunLock[string, any]
 	keyframeLock RunLock[KeyframeKey, *Keyframe]
 	storage      storage.StorageBackend
 }
@@ -32,8 +32,8 @@ func NewMetadataService() (*MetadataService, error) {
 
 	s := &MetadataService{
 		lock:         NewRunLock[string, *MediaInfo](),
-		thumbLock:    NewRunLock[string, interface{}](),
-		extractLock:  NewRunLock[string, interface{}](),
+		thumbLock:    NewRunLock[string, any](),
+		extractLock:  NewRunLock[string, any](),
 		keyframeLock: NewRunLock[KeyframeKey, *Keyframe](),
 	}
 
@@ -174,7 +174,7 @@ func (s *MetadataService) GetMetadata(ctx context.Context, path string, sha stri
 		tx.Exec(`update info set ver_keyframes = 0 where sha = $1`, sha)
 		err = tx.Commit()
 		if err != nil {
-			fmt.Printf("error deleteing old keyframes from database: %v", err)
+			fmt.Printf("error deleting old keyframes from database: %v", err)
 		}
 	}
 
@@ -241,7 +241,7 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 	}
 
 	rows, err = s.database.Query(
-		`select s.idx, s.title, s.language, s.codec, s.extension, s.is_default, s.is_forced, s.is_hearing_impaired
+		`select s.idx, s.title, s.language, s.codec, s.mime_codec, s.extension, s.is_default, s.is_forced, s.is_hearing_impaired
 		from subtitles as s where s.sha=$1`,
 		sha,
 	)
@@ -250,13 +250,13 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 	}
 	for rows.Next() {
 		var s Subtitle
-		err := rows.Scan(&s.Index, &s.Title, &s.Language, &s.Codec, &s.Extension, &s.IsDefault, &s.IsForced, &s.IsHearingImpaired)
+		err := rows.Scan(&s.Index, &s.Title, &s.Language, &s.Codec, &s.MimeCodec, &s.Extension, &s.IsDefault, &s.IsForced, &s.IsHearingImpaired)
 		if err != nil {
 			return nil, err
 		}
 		if s.Extension != nil {
 			link := fmt.Sprintf(
-				"video/%s/subtitle/%d.%s",
+				"/video/%s/subtitle/%d.%s",
 				base64.RawURLEncoding.EncodeToString([]byte(ret.Path)),
 				*s.Index,
 				*s.Extension,
@@ -264,6 +264,10 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 			s.Link = &link
 		}
 		ret.Subtitles = append(ret.Subtitles, s)
+	}
+	err = ret.SearchExternalSubtitles()
+	if err != nil {
+		fmt.Printf("Couldn't find external subtitles: %v", err)
 	}
 
 	rows, err = s.database.Query(
@@ -281,10 +285,6 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 			return nil, err
 		}
 		ret.Chapters = append(ret.Chapters, c)
-	}
-
-	if len(ret.Videos) > 0 {
-		ret.Video = ret.Videos[0]
 	}
 	return &ret, nil
 }
@@ -355,20 +355,21 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 	}
 	for _, s := range ret.Subtitles {
 		tx.Exec(`
-			insert into subtitles(sha, idx, title, language, codec, extension, is_default, is_forced, is_hearing_impaired)
-			values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+			insert into subtitles(sha, idx, title, language, codec, mime_codec, extension, is_default, is_forced, is_hearing_impaired)
+			values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 			on conflict (sha, idx) do update set
 				sha = excluded.sha,
 				idx = excluded.idx,
 				title = excluded.title,
 				language = excluded.language,
 				codec = excluded.codec,
+				mime_codec = excluded.mime_codec,
 				extension = excluded.extension,
 				is_default = excluded.is_default,
 				is_forced = excluded.is_forced,
 				is_hearing_impaired = excluded.is_hearing_impaired
 			`,
-			ret.Sha, s.Index, s.Title, s.Language, s.Codec, s.Extension, s.IsDefault, s.IsForced, s.IsHearingImpaired,
+			ret.Sha, s.Index, s.Title, s.Language, s.Codec, s.MimeCodec, s.Extension, s.IsDefault, s.IsForced, s.IsHearingImpaired,
 		)
 	}
 	for _, c := range ret.Chapters {
@@ -386,6 +387,11 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 		)
 	}
 	err = tx.Commit()
+	if err != nil {
+		return set(ret, err)
+	}
+
+	err = ret.SearchExternalSubtitles()
 	if err != nil {
 		return set(ret, err)
 	}

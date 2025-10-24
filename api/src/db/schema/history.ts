@@ -18,7 +18,7 @@ export const history = schema.table(
 			.references(() => entries.pk, { onDelete: "cascade" }),
 		videoPk: integer().references(() => videos.pk, { onDelete: "set null" }),
 		percent: integer().notNull().default(0),
-		time: integer(),
+		time: integer().notNull().default(0),
 		playedDate: timestamp({ withTimezone: true, mode: "iso" })
 			.notNull()
 			.default(sql`now()`),

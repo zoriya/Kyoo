@@ -12,3 +12,4 @@ export * from "./utils/genre";
 export * from "./utils/images";
 export * from "./utils/page";
 export * from "./video";
+export * from "./video-info";

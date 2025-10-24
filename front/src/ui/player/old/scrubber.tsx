@@ -18,16 +18,27 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { type Chapter, type QueryIdentifier, imageFn, useFetch } from "@kyoo/models";
-import { P, Sprite, imageBorderRadius, ts } from "@kyoo/primitives";
+import {
+	type Chapter,
+	imageFn,
+	type QueryIdentifier,
+	useFetch,
+} from "@kyoo/models";
+import { imageBorderRadius, P, Sprite, ts } from "@kyoo/primitives";
 import { useAtomValue } from "jotai";
 import { useMemo } from "react";
 import { Platform, View } from "react-native";
-import { type Theme, percent, px, useForceRerender, useYoshiki } from "yoshiki/native";
-import { ErrorView } from "../../../../../src/ui/errors";
-import { durationAtom } from "../state";
-import { seekProgressAtom } from "./hover";
-import { toTimerString } from "./left-buttons";
+import {
+	percent,
+	px,
+	type Theme,
+	useForceRerender,
+	useYoshiki,
+} from "yoshiki/native";
+import { ErrorView } from "../../errors";
+import { seekProgressAtom } from "../controls";
+import { toTimerString } from "../controls/left-buttonsttons";
+import { durationAtom } from "./state";
 
 type Thumb = {
 	from: number;
@@ -42,8 +53,8 @@ type Thumb = {
 const parseTs = (time: string) => {
 	const times = time.split(":");
 	return (
-		(Number.parseInt(times[0]) * 3600 +
-			Number.parseInt(times[1]) * 60 +
+		(Number.parseInt(times[0], 10) * 3600 +
+			Number.parseInt(times[1], 10) * 60 +
 			Number.parseFloat(times[2])) *
 		1000
 	);
@@ -69,7 +80,7 @@ export const useScrubber = (url: string) => {
 		for (let i = 0; i < ret.length; i++) {
 			const times = lines[i * 2].split(" --> ");
 			const url = lines[i * 2 + 1].split("#xywh=");
-			const xywh = url[1].split(",").map((x) => Number.parseInt(x));
+			const xywh = url[1].split(",").map((x) => Number.parseInt(x, 10));
 			ret[i] = {
 				from: parseTs(times[0]),
 				to: parseTs(times[1]),
@@ -123,7 +134,9 @@ export const ScrubberTooltip = ({
 	const current =
 		info.findLast((x) => x.from <= seconds * 1000 && seconds * 1000 < x.to) ??
 		info.findLast(() => true);
-	const chapter = chapters?.findLast((x) => x.startTime <= seconds && seconds < x.endTime);
+	const chapter = chapters?.findLast(
+		(x) => x.startTime <= seconds && seconds < x.endTime,
+	);
 
 	return (
 		<View
@@ -153,7 +166,13 @@ export const ScrubberTooltip = ({
 };
 let scrubberWidth = 0;
 
-export const BottomScrubber = ({ url, chapters }: { url: string; chapters?: Chapter[] }) => {
+export const BottomScrubber = ({
+	url,
+	chapters,
+}: {
+	url: string;
+	chapters?: Chapter[];
+}) => {
 	const { css } = useYoshiki();
 	const { info, error, stats } = useScrubber(url);
 	const rerender = useForceRerender();
@@ -164,7 +183,9 @@ export const BottomScrubber = ({ url, chapters }: { url: string; chapters?: Chap
 	if (error) return <ErrorView error={error} />;
 
 	const width = stats?.width ?? 1;
-	const chapter = chapters?.findLast((x) => x.startTime <= progress && progress < x.endTime);
+	const chapter = chapters?.findLast(
+		(x) => x.startTime <= progress && progress < x.endTime,
+	);
 	return (
 		<View {...css({ overflow: "hidden" })}>
 			<View

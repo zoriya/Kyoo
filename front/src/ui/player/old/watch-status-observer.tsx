@@ -18,12 +18,12 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { type MutationParam, WatchStatusV, useAccount } from "@kyoo/models";
+import { type MutationParam, useAccount, WatchStatusV } from "@kyoo/models";
 import { useMutation } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
 import { useAtomCallback } from "jotai/utils";
 import { useCallback, useEffect } from "react";
-import { playAtom, progressAtom } from "./state";
+import { playAtom, progressAtom } from "./old/statee";
 
 export const WatchStatusObserver = ({
 	type,

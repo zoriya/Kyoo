@@ -35,6 +35,7 @@ import {
 	A,
 	Chip,
 	Container,
+	ContrastArea,
 	capitalize,
 	DottedSeparator,
 	GradientImageBackground,
@@ -714,30 +715,34 @@ export const Header = ({
 								},
 							}) as any)}
 						/>
-						<TitleLine
-							kind={kind}
-							slug={slug}
-							name={data.name}
-							tagline={data.tagline}
-							date={getDisplayDate(data)}
-							rating={data.rating}
-							runtime={data.kind === "movie" ? data.runtime : null}
-							poster={data.poster}
-							studios={data.kind !== "collection" ? data.studios! : null}
-							playHref={data.kind !== "collection" ? data.playHref : null}
-							trailerUrl={data.kind !== "collection" ? data.trailerUrl : null}
-							watchStatus={
-								data.kind !== "collection" ? data.watchStatus?.status! : null
-							}
-							{...css({
-								marginTop: {
-									xs: max(vh(20), px(200)),
-									sm: vh(45),
-									md: max(vh(30), px(150)),
-									lg: max(vh(35), px(200)),
-								},
-							})}
-						/>
+						<ContrastArea>
+							<TitleLine
+								kind={kind}
+								slug={slug}
+								name={data.name}
+								tagline={data.tagline}
+								date={getDisplayDate(data)}
+								rating={data.rating}
+								runtime={data.kind === "movie" ? data.runtime : null}
+								poster={data.poster}
+								studios={data.kind !== "collection" ? data.studios! : null}
+								playHref={data.kind !== "collection" ? data.playHref : null}
+								trailerUrl={data.kind !== "collection" ? data.trailerUrl : null}
+								watchStatus={
+									data.kind !== "collection"
+										? (data.watchStatus?.status ?? null)
+										: null
+								}
+								{...css({
+									marginTop: {
+										xs: max(vh(20), px(200)),
+										sm: vh(45),
+										md: max(vh(30), px(150)),
+										lg: max(vh(35), px(200)),
+									},
+								})}
+							/>
+						</ContrastArea>
 						<Description
 							description={data?.description}
 							genres={data?.genres}

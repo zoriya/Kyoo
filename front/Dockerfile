@@ -1,8 +1,9 @@
 FROM oven/bun AS builder
 WORKDIR /app
 
-COPY package.json bun.lock .
-RUN bun install --production
+COPY package.json bun.lock scripts .
+COPY scripts scripts
+RUN bun install --production --frozen-lockfile
 
 COPY . .
 

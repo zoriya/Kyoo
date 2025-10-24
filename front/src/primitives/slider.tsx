@@ -1,26 +1,10 @@
-/*
- * Kyoo - A portable and vast media library solution.
- * Copyright (c) Kyoo.
- *
- * See AUTHORS.md and LICENSE file in the project root for full license information.
- *
- * Kyoo is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Kyoo is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
- */
-
 import { useRef, useState } from "react";
-import { type GestureResponderEvent, Platform, View } from "react-native";
-import type { ViewProps } from "react-native-svg/lib/typescript/fabric/utils";
+import {
+	type GestureResponderEvent,
+	Platform,
+	View,
+	type ViewProps,
+} from "react-native";
 import { percent, px, useYoshiki } from "yoshiki/native";
 import { focusReset } from "./utils";
 
@@ -71,14 +55,14 @@ export const Slider = ({
 	return (
 		<View
 			ref={ref}
-			// @ts-ignore Web only
+			// @ts-expect-error Web only
 			onMouseEnter={() => setHover(true)}
-			// @ts-ignore Web only
+			// @ts-expect-error Web only
 			onMouseLeave={() => {
 				setHover(false);
 				onHover?.(null, layout);
 			}}
-			// @ts-ignore Web only
+			// @ts-expect-error Web only
 			onMouseMove={(e) =>
 				onHover?.(
 					Math.max(0, Math.min((e.clientX - layout.x) / layout.width, 1) * max),
@@ -123,7 +107,7 @@ export const Slider = ({
 			{...css(
 				{
 					paddingVertical: ts(1),
-					// @ts-ignore Web only
+					// @ts-expect-error Web only
 					cursor: "pointer",
 					...focusReset,
 				},

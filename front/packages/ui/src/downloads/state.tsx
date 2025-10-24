@@ -41,7 +41,7 @@ import { type PrimitiveAtom, atom, useSetAtom, useStore } from "jotai";
 import { type ReactNode, useEffect } from "react";
 import { ToastAndroid } from "react-native";
 import { z } from "zod";
-import { Player } from "../player";
+import { Player } from "../../../../src/ui/player";
 
 type Router = ReturnType<typeof useRouter>;
 

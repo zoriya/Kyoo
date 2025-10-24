@@ -39,7 +39,7 @@ export const useBreakpointMap = <T extends Record<string, unknown>>(
 	value: T,
 ): { [key in keyof T]: T[key] extends Breakpoint<infer V> ? V : T } => {
 	const breakpoint = useBreakpoint();
-	// @ts-ignore
+	// @ts-expect-error
 	return Object.fromEntries(
 		Object.entries(value).map(([key, val]) => [
 			key,

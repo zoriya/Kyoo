@@ -8,7 +8,7 @@ x-transcoder: &transcoder-base
         - transcoder
   ports:
     - "7666:7666"
-  restart: unless-stopped
+  restart: on-failure
   cpus: 1
   environment:
     - JWKS_URL=http://auth:4568/.well-known/jwks.json
@@ -36,7 +36,7 @@ services:
     build:
       context: ./front
       dockerfile: Dockerfile.dev
-    restart: unless-stopped
+    restart: on-failure
     ports:
       - "8081:8081"
     environment:
@@ -56,7 +56,7 @@ services:
     build:
       context: ./auth
       dockerfile: Dockerfile.dev
-    restart: unless-stopped
+    restart: on-failure
     depends_on:
       postgres:
         condition: service_healthy
@@ -77,7 +77,7 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile.dev
-    restart: unless-stopped
+    restart: on-failure
     depends_on:
       postgres:
         condition: service_healthy
@@ -106,7 +106,7 @@ services:
 
   scanner:
     build: ./scanner
-    restart: unless-stopped
+    restart: on-failure
     depends_on:
       api:
         condition: service_started
@@ -176,7 +176,7 @@ services:
 
   traefik:
     image: traefik:v3.5
-    restart: unless-stopped
+    restart: on-failure
     command:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
@@ -189,7 +189,7 @@ services:
 
   postgres:
     image: postgres:15
-    restart: unless-stopped
+    restart: on-failure
     env_file:
       - ./.env
     volumes:
