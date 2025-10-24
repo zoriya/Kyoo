@@ -1,3 +1,5 @@
+import "react-native-get-random-values";
+
 import { Stack, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
@@ -5,11 +7,12 @@ import { useEvent, useVideoPlayer, VideoView } from "react-native-video";
 import { v4 as uuidv4 } from "uuid";
 import { useYoshiki } from "yoshiki/native";
 import { entryDisplayNumber } from "~/components/entries";
-import { FullVideo, type KyooError, VideoInfo } from "~/models";
+import { FullVideo, type KyooError } from "~/models";
 import { ContrastArea, Head } from "~/primitives";
 import { useToken } from "~/providers/account-context";
 import { useLocalSetting } from "~/providers/settings";
 import { type QueryIdentifier, useFetch } from "~/query";
+import { Info } from "~/ui/info";
 import { useQueryState } from "~/utils";
 import { ErrorView } from "../errors";
 import { Controls, LoadingIndicator } from "./controls";
@@ -26,7 +29,7 @@ export const Player = () => {
 	const [start, setStart] = useQueryState<number | undefined>("t", undefined);
 
 	const { data, error } = useFetch(Player.query(slug));
-	const { data: info, error: infoError } = useFetch(Player.infoQuery(slug));
+	const { data: info, error: infoError } = useFetch(Info.infoQuery(slug));
 	// TODO: map current entry using entries' duration & the current playtime
 	const currentEntry = 0;
 	const entry = data?.entries[currentEntry] ?? data?.entries[0];
@@ -93,7 +96,7 @@ export const Player = () => {
 
 	// we'll also want to replace source here once https://github.com/TheWidlarzGroup/react-native-video/issues/4722 is ready
 	useEffect(() => {
-		player.__ass.fonts = info?.fonts ?? [];
+		if (Platform.OS === "web") player.__ass.fonts = info?.fonts ?? [];
 	}, [player, info?.fonts]);
 
 	const router = useRouter();
@@ -117,7 +120,7 @@ export const Player = () => {
 
 	// TODO: add the equivalent of this for android
 	useEffect(() => {
-		if (typeof window === "undefined") return;
+		if (Platform.OS !== "web" || typeof window === "undefined") return;
 		window.navigator.mediaSession.setActionHandler(
 			"previoustrack",
 			data?.previous?.video ? playPrev : null,
@@ -218,9 +221,4 @@ Player.query = (slug: string): QueryIdentifier<FullVideo> => ({
 		with: ["next", "previous", "show"],
 	},
 	parser: FullVideo,
-});
-
-Player.infoQuery = (slug: string): QueryIdentifier<VideoInfo> => ({
-	path: ["api", "videos", slug, "info"],
-	parser: VideoInfo,
 });

@@ -6,13 +6,11 @@ import { type ComponentProps, createContext, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { useEvent, type VideoPlayer } from "react-native-video";
 import { useForceRerender } from "yoshiki";
-import type { Subtitle } from "~/models";
 import { IconButton, Menu, tooltip } from "~/primitives";
 import { useFetch } from "~/query";
 import { useDisplayName, useSubtitleName } from "~/track-utils";
+import { Info } from "~/ui/info";
 import { useQueryState } from "~/utils";
-import { Player } from "..";
-import { Platform } from "react-native";
 
 type MenuProps = ComponentProps<typeof Menu<ComponentProps<typeof IconButton>>>;
 
@@ -29,7 +27,7 @@ export const SubtitleMenu = ({
 	useEvent(player, "onTrackChange", rerender);
 
 	const [slug] = useQueryState<string>("slug", undefined!);
-	const { data } = useFetch(Player.infoQuery(slug));
+	const { data } = useFetch(Info.infoQuery(slug));
 
 	if (data?.subtitles.length === 0) return null;
 
