@@ -663,7 +663,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				});
 			}
 			const path = Buffer.from(video.path, "utf8").toString("base64url");
-			const query = request.url.substring(request.url.indexOf("?"))
+			const query = request.url.substring(request.url.indexOf("?"));
 			return redirect(`/video/${path}/master.m3u8${query}`);
 		},
 		{

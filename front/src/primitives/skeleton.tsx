@@ -106,10 +106,7 @@ export const Skeleton = ({
 						start={{ x: 0, y: 0.5 }}
 						end={{ x: 1, y: 0.5 }}
 						colors={["transparent", theme.overlay1, "transparent"]}
-						style={[
-							StyleSheet.absoluteFillObject,
-							animated,
-						]}
+						style={[StyleSheet.absoluteFillObject, animated]}
 					/>
 				</View>
 			))}

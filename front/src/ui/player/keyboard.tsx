@@ -95,10 +95,10 @@ export const useKeyboard = (
 					break;
 
 				case "ArrowUp":
-					reducer(player, { type: "volume", value: +.05 });
+					reducer(player, { type: "volume", value: +0.05 });
 					break;
 				case "ArrowDown":
-					reducer(player, { type: "volume", value: -.05 });
+					reducer(player, { type: "volume", value: -0.05 });
 					break;
 
 				case "f":

@@ -55,14 +55,14 @@ export const Slider = ({
 	return (
 		<View
 			ref={ref}
-			// @ts-ignore Web only
+			// @ts-expect-error Web only
 			onMouseEnter={() => setHover(true)}
-			// @ts-ignore Web only
+			// @ts-expect-error Web only
 			onMouseLeave={() => {
 				setHover(false);
 				onHover?.(null, layout);
 			}}
-			// @ts-ignore Web only
+			// @ts-expect-error Web only
 			onMouseMove={(e) =>
 				onHover?.(
 					Math.max(0, Math.min((e.clientX - layout.x) / layout.width, 1) * max),
@@ -107,7 +107,7 @@ export const Slider = ({
 			{...css(
 				{
 					paddingVertical: ts(1),
-					// @ts-ignore Web only
+					// @ts-expect-error Web only
 					cursor: "pointer",
 					...focusReset,
 				},

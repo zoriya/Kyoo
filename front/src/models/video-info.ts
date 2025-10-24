@@ -101,7 +101,7 @@ export type VideoInfo = z.infer<typeof VideoInfo>;
 const humanFileSize = (size: number): string => {
 	const i = size === 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
 	return (
-		// @ts-ignore I'm not gonna fix stackoverflow's working code.
+		// @ts-expect-error I'm not gonna fix stackoverflow's working code.
 		// biome-ignore lint/style/useTemplate: same as above
 		(size / 1024 ** i).toFixed(2) * 1 + " " + ["B", "kB", "MB", "GB", "TB"][i]
 	);

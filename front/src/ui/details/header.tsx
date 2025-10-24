@@ -729,7 +729,9 @@ export const Header = ({
 								playHref={data.kind !== "collection" ? data.playHref : null}
 								trailerUrl={data.kind !== "collection" ? data.trailerUrl : null}
 								watchStatus={
-									data.kind !== "collection" ? data.watchStatus?.status! : null
+									data.kind !== "collection"
+										? (data.watchStatus?.status ?? null)
+										: null
 								}
 								{...css({
 									marginTop: {
