@@ -10,7 +10,11 @@ export const useDisplayName = () => {
 	const getLanguageName = useLanguageName();
 	const { t } = useTranslation();
 
-	return (sub: { language?: string; title?: string; index?: number }) => {
+	return (sub: {
+		language?: string | null;
+		title?: string | null;
+		index?: number | null;
+	}) => {
 		const lng = sub.language ? getLanguageName(sub.language) : null;
 
 		if (lng && sub.title && sub.title !== lng) return `${lng} - ${sub.title}`;
