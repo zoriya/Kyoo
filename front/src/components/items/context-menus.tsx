@@ -48,7 +48,7 @@ export const EntryContext = ({
 			<Menu.Item
 				label={t("home.episodeMore.mediainfo")}
 				icon={MovieInfo}
-				href={`/entries/${slug}/info`}
+				href={`/info/${slug}`}
 			/>
 		</Menu>
 	);
@@ -123,7 +123,7 @@ export const ItemContext = ({
 					<Menu.Item
 						label={t("home.episodeMore.mediainfo")}
 						icon={MovieInfo}
-						href={`/movies/${slug}/info`}
+						href={`/info/${slug}`}
 					/>
 				</>
 			)}
