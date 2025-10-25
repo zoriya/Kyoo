@@ -137,7 +137,7 @@ const ButtonList = ({
 							<Menu.Item
 								label={t("home.episodeMore.mediainfo")}
 								icon={MovieInfo}
-								href={`/${kind}/${slug}/info`}
+								href={`/info/${slug}`}
 							/>
 						</>
 					)}

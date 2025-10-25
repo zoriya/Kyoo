@@ -24,6 +24,7 @@
 		"@react-navigation/elements": "^2.6.4",
 		"@react-navigation/native": "^7.1.8",
 		"@tanstack/react-query": "^5.90.5",
+		"@types/langmap": "^0.0.3",
 		"expo": "54.0.17",
 		"expo-build-properties": "^1.0.9",
 		"expo-constants": "~18.0.10",
