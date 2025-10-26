@@ -71,9 +71,6 @@ services:
     build: ./scanner
     image: ghcr.io/zoriya/kyoo_scanner:edge
     restart: unless-stopped
-    depends_on:
-      api:
-        condition: service_healthy
     env_file:
       - ./.env
     environment:

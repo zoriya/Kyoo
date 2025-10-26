@@ -1,4 +1,4 @@
-FROM oven/bun AS builder
+FROM oven/bun:debian AS builder
 WORKDIR /app
 
 COPY package.json bun.lock .
@@ -18,11 +18,13 @@ RUN bun build \
 	--outfile server \
 	./src/index.ts
 
-FROM gcr.io/distroless/base
+FROM debian
 WORKDIR /app
 
 COPY --from=builder /app/server server
+COPY --from=builder /app/node_modules/@img /app/node_modules/@img
+COPY ./drizzle ./drizzle
 
 ENV NODE_ENV=production
 EXPOSE 3567
-CMD ["./server"]
+CMD ["/app/server"]
