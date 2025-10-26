@@ -148,8 +148,13 @@ export const jsonbBuildObject = <T>(select: JsonFields) => {
 };
 
 export const isUniqueConstraint = (e: unknown): boolean => {
+	if (typeof e !== "object" || !e || !("cause" in e)) return false;
+	const cause = e.cause;
 	return (
-		typeof e === "object" && e != null && "code" in e && e.code === "23505"
+		typeof cause === "object" &&
+		cause != null &&
+		"code" in cause &&
+		cause.code === "23505"
 	);
 };
 

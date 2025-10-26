@@ -18,6 +18,16 @@ import type { KError } from "./models/error";
 
 export const base = new Elysia({ name: "base" })
 	.onError(({ code, error }) => {
+		// sometimes elysia as an unknown code when throwing errors
+		if (code === "UNKNOWN") {
+			try {
+				const details = JSON.parse(error.message);
+				if (details?.code === "KError") {
+					const { code, ...ret } = details;
+					return ret;
+				}
+			} catch {}
+		}
 		if (code === "VALIDATION") {
 			const details = JSON.parse(error.message);
 			if (details.code === "KError") {
@@ -34,25 +44,21 @@ export const base = new Elysia({ name: "base" })
 				details: details,
 			} as KError;
 		}
-		if (code === "INTERNAL_SERVER_ERROR") {
-			console.error(error);
-			return {
-				status: 500,
-				message: error.message,
-				details: error,
-			} as KError;
-		}
 		if (code === "NOT_FOUND") {
 			return error;
 		}
 		console.error(code, error);
-		return error;
+		return {
+			status: 500,
+			message: "message" in error ? (error?.message ?? code) : code,
+			details: error,
+		} as KError;
 	})
 	.get("/health", () => ({ status: "healthy" }) as const, {
 		detail: { description: "Check if the api is healthy." },
 		response: { 200: t.Object({ status: t.Literal("healthy") }) },
 	})
-	.as("scoped");
+	.as("global");
 
 export const prefix = "/api";
 export const handlers = new Elysia({ prefix })

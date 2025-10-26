@@ -1,8 +1,8 @@
 diff --git a/pg-core/dialect.cjs b/pg-core/dialect.cjs
-index a0ef03142f21d319376bc50070ff7fdcd4d18132..45fc94e5a7c3fa4c201e636dd227122164e1bd02 100644
+index d776a1fb503f35b5e53c6d3c1c086efa8230ea94..86541bf408e4955029c65be59d7b8ec98bb6e914 100644
 --- a/pg-core/dialect.cjs
 +++ b/pg-core/dialect.cjs
-@@ -348,7 +348,14 @@ class PgDialect {
+@@ -347,7 +347,14 @@ class PgDialect {
    buildInsertQuery({ table, values: valuesOrSelect, onConflict, returning, withList, select, overridingSystemValue_ }) {
      const valuesSqlList = [];
      const columns = table[import_table2.Table.Symbol.Columns];
@@ -19,30 +19,30 @@ index a0ef03142f21d319376bc50070ff7fdcd4d18132..45fc94e5a7c3fa4c201e636dd2271221
        ([, column]) => import_sql2.sql.identifier(this.casing.getColumnCasing(column))
      );
 diff --git a/pg-core/dialect.js b/pg-core/dialect.js
-index 120aaed9c3e4ae0a24653893379b98506c866f6f..48df463c0a6d5864fe2c324c8f86432860e50e00 100644
+index 74a16c9e86fe3a89ced32af44af0a72f1cf43cf6..08f820d46a040c315fed40b8b36d94d094174425 100644
 --- a/pg-core/dialect.js
 +++ b/pg-core/dialect.js
-@@ -346,7 +346,14 @@ class PgDialect {
+@@ -345,7 +345,14 @@ class PgDialect {
    buildInsertQuery({ table, values: valuesOrSelect, onConflict, returning, withList, select, overridingSystemValue_ }) {
      const valuesSqlList = [];
      const columns = table[Table.Symbol.Columns];
 -    const colEntries = Object.entries(columns).filter(([_, col]) => !col.shouldDisableInsert());
-+	let colEntries = Object.entries(columns);
-+	colEntries = select && !is(valuesOrSelect, SQL)
-+		? Object
-+			.keys(valuesOrSelect._.selectedFields)
-+			.map((key) => [key, columns[key]])
-+		: overridingSystemValue_
-+			? colEntries
-+			: colEntries.filter(([_, col]) => !col.shouldDisableInsert());
++    let colEntries = Object.entries(columns);
++    colEntries = select && !is(valuesOrSelect, SQL)
++        ? Object
++        .keys(valuesOrSelect._.selectedFields)
++        .map((key) => [key, columns[key]])
++        : overridingSystemValue_
++            ? colEntries
++            : colEntries.filter(([_, col]) => !col.shouldDisableInsert());
      const insertOrder = colEntries.map(
        ([, column]) => sql.identifier(this.casing.getColumnCasing(column))
      );
 diff --git a/pg-core/query-builders/insert.cjs b/pg-core/query-builders/insert.cjs
-index 08bb0d7485ebf997e3f081e2254ea8fd8bc20f65..20c8036374a1f25f7c5880c40e8d3c42c05f3eee 100644
+index 22e0a4b4ad7ac64b065fc540416c6ed15ff4336b..fd590a6a3feb48c9f1894a0619b09ca6a5d22a5c 100644
 --- a/pg-core/query-builders/insert.cjs
 +++ b/pg-core/query-builders/insert.cjs
-@@ -75,11 +75,6 @@ class PgInsertBuilder {
+@@ -76,11 +76,6 @@ class PgInsertBuilder {
    }
    select(selectQuery) {
      const select = typeof selectQuery === "function" ? selectQuery(new import_query_builder.QueryBuilder()) : selectQuery;
@@ -55,10 +55,10 @@ index 08bb0d7485ebf997e3f081e2254ea8fd8bc20f65..20c8036374a1f25f7c5880c40e8d3c42
    }
  }
 diff --git a/pg-core/query-builders/insert.js b/pg-core/query-builders/insert.js
-index 0fc8eeb80f4a5512f6c84f3d596832623a33b748..998e2ab0bfe3f322bf268a01f71ebd06c57d4d07 100644
+index 60a8bb0d1c22b890bd8fbf4c85d5df41ca42444c..8754d0f2923f905816016c42f339c3e9097b4128 100644
 --- a/pg-core/query-builders/insert.js
 +++ b/pg-core/query-builders/insert.js
-@@ -51,11 +51,6 @@ class PgInsertBuilder {
+@@ -52,11 +52,6 @@ class PgInsertBuilder {
    }
    select(selectQuery) {
      const select = typeof selectQuery === "function" ? selectQuery(new QueryBuilder()) : selectQuery;

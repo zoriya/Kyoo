@@ -55,6 +55,7 @@ export const Sort = (
 			),
 		)
 		.Decode((sort: string[]): Sort => {
+			if (!Array.isArray(sort)) sort = [sort];
 			const random = sort.find((x) => x.startsWith("random"));
 			if (random) {
 				const seed = random.includes(":")
