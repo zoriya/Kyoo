@@ -25,6 +25,7 @@ export const expo: ExpoConfig = {
 	},
 	web: {
 		favicon: "./public/icon-256x256.png",
+		output: "single",
 		bundler: "metro",
 	},
 	updates: {

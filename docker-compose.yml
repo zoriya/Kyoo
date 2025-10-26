@@ -32,6 +32,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.front.rule=PathPrefix(`/`)"
+      - "traefik.http.services.front.loadbalancer.server.port=8901"
 
   auth:
     build: ./auth
@@ -93,7 +94,7 @@ services:
 
   transcoder:
     <<: *transcoder-base
-    profiles: ['', 'cpu']
+    profiles: ["", "cpu"]
   transcoder-nvidia:
     <<: *transcoder-base
     deploy:
@@ -106,7 +107,7 @@ services:
                 - nvidia.com/gpu=all
     environment:
       - GOCODER_HWACCEL=nvidia
-    profiles: ['nvidia']
+    profiles: ["nvidia"]
   transcoder-vaapi:
     <<: *transcoder-base
     devices:
@@ -114,7 +115,7 @@ services:
     environment:
       - GOCODER_HWACCEL=vaapi
       - GOCODER_VAAPI_RENDERER=${GOCODER_VAAPI_RENDERER:-/dev/dri/renderD128}
-    profiles: ['vaapi']
+    profiles: ["vaapi"]
   # qsv is the same setup as vaapi but with the hwaccel env var different
   transcoder-qsv:
     <<: *transcoder-base
@@ -123,7 +124,7 @@ services:
     environment:
       - GOCODER_HWACCEL=qsv
       - GOCODER_VAAPI_RENDERER=${GOCODER_VAAPI_RENDERER:-/dev/dri/renderD128}
-    profiles: ['qsv']
+    profiles: ["qsv"]
 
   traefik:
     image: traefik:v3.5
@@ -146,10 +147,10 @@ services:
     volumes:
       - db:/var/lib/postgresql/data
     environment:
-     - POSTGRES_USER=$PGUSER
-     - POSTGRES_PASSWORD=$PGPASSWORD
-     - POSTGRES_DB=$PGDATABASE
-     - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_USER=$PGUSER
+      - POSTGRES_PASSWORD=$PGPASSWORD
+      - POSTGRES_DB=$PGDATABASE
+      - POSTGRES_HOST_AUTH_METHOD=trust
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${PGUSER} -d ${PGDATABASE}"]
       interval: 5s
