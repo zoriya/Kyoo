@@ -22,7 +22,14 @@ export default function Layout() {
 						backgroundColor: theme.accent,
 					},
 				}}
-			/>
+			>
+				<Stack.Screen
+					name="info/[slug]"
+					options={{
+						presentation: "modal",
+					}}
+				/>
+			</Stack>
 		</ErrorConsumer>
 	);
 }

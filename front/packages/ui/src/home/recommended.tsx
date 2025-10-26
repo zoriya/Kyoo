@@ -48,7 +48,7 @@ import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
 import { type Theme, calc, percent, px, rem, useYoshiki } from "yoshiki/native";
 import { ItemGrid, ItemWatchStatus } from "../browse/grid";
-import { ItemContext } from "../components/context-menus";
+import { ItemContext } from "../../../../src/ui/info/components/context-menus";
 import type { Layout } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
 
