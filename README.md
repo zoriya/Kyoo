@@ -39,10 +39,7 @@ Kyoo does not have a plugin system and aim to have every features built-in (see 
 
 ## 📺 Clients
 
-Kyoo currently supports Web and Android clients, with additional platforms being thought about. Rough estimates:
-* Today: Web & Android
-* Spring 2025: Chromecast
-* Summer 2025: Android-TV
+Kyoo currently supports Web and Android clients, with additional platforms being thought about.
 
 Don't see your client? Kyoo is focused on adding features, but welcomes contributors! The frontend is built with React-Native and Expo. Come hang and develop with us on Discord.
 
