@@ -1,4 +1,0 @@
-[tool.robotidy]
-configure = [
-	"MergeAndOrderSections:order=comments,settings,keywords,variables,testcases"
-]

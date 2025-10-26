@@ -19,16 +19,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - context: ./back
-            dockerfile: Dockerfile
-            label: back
-            image: ${{ github.repository_owner }}/kyoo_back
-
-          - context: ./back
-            dockerfile: Dockerfile.migrations
-            label: migrations
-            image: ${{ github.repository_owner }}/kyoo_migrations
-
           - context: ./api
             dockerfile: Dockerfile
             label: api
