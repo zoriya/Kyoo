@@ -1,9 +1,0 @@
-{
-	"$schema": "https://raw.githubusercontent.com/DotNetAnalyzers/StyleCopAnalyzers/master/StyleCop.Analyzers/StyleCop.Analyzers/Settings/stylecop.schema.json",
-	"settings": {
-		"documentationRules": {
-			"copyrightText": "Kyoo - A portable and vast media library solution.\nCopyright (c) Kyoo.\n\nSee AUTHORS.md and LICENSE file in the project root for full license information.\n\nKyoo is free software: you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of the License, or\nany later version.\n\nKyoo is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with Kyoo. If not, see <https://www.gnu.org/licenses/>.",
-			"xmlHeader": false
-		}
-	}
-}

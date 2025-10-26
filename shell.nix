@@ -4,7 +4,6 @@ pkgs.mkShell {
   inputsFrom = [
     (import ./api/shell.nix {inherit pkgs;})
     (import ./auth/shell.nix {inherit pkgs;})
-    (import ./back/shell.nix {inherit pkgs;})
     (import ./chart/shell.nix {inherit pkgs;})
     (import ./front/shell.nix {inherit pkgs;})
     (import ./scanner/shell.nix {inherit pkgs;})

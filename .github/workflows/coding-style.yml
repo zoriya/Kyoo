@@ -2,20 +2,6 @@ name: Coding Style
 on: [pull_request, workflow_dispatch]
 
 jobs:
-  back:
-    name: "Lint Back"
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./back
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Check coding style
-        run: |
-          dotnet tool restore
-          dotnet csharpier . --check
-
   api:
     name: "Lint api"
     runs-on: ubuntu-latest

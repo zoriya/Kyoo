@@ -25,9 +25,11 @@ import {
 import { WatchListInfo } from "~/components/items/watchlist-info";
 import { Rating } from "~/components/rating";
 import {
+	Collection,
 	type Genre,
 	type KImage,
-	Show,
+	Movie,
+	Serie,
 	type Studio,
 	type WatchStatusV,
 } from "~/models";
@@ -827,8 +829,8 @@ export const Header = ({
 Header.query = (
 	kind: "serie" | "movie" | "collection",
 	slug: string,
-): QueryIdentifier<Show> => ({
-	parser: Show,
+): QueryIdentifier<Serie | Movie | Collection> => ({
+	parser: kind === "serie" ? Serie : kind === "movie" ? Movie : Collection,
 	path: ["api", `${kind}s`, slug],
 	params: {
 		with: ["studios", ...(kind === "serie" ? ["firstEntry", "nextEntry"] : [])],
