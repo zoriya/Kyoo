@@ -48,7 +48,7 @@
 		"react-native": "0.81.5",
 		"react-native-get-random-values": "^2.0.0",
 		"react-native-mmkv": "^3.3.3",
-		"react-native-nitro-modules": "^0.30.2",
+		"react-native-nitro-modules": "^0.31.0",
 		"react-native-reanimated": "~4.1.2",
 		"react-native-safe-area-context": "5.6.1",
 		"react-native-screens": "~4.16.0",
