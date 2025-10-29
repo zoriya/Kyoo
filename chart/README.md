@@ -108,18 +108,16 @@ Kyoo consists of multiple microservices.  Best practice is for each microservice
 ## Subchart Support
 Subcharts are updated frequently and subject to changes.  This chart includes subcharts for deploying Meilisearch, PostgreSQL, and RabbitMQ.  Please consider hosting those independently of Kyoo to better handle versioning and lifecycle management.
 
-# v5 Traefik Requirement
-Starting with v5, Kyoo leverages ForwardAuth middleware for offloading auth from the microservices onto a gateway. ForwardAuth is currently a custom specification implemented by Traefik and could be generalized as GatewayAPI spec matures. For additional reading, please see gateway-api sigs [documentation](https://gateway-api.sigs.k8s.io/geps/gep-1494/?h=auth#currently-implemented-auth-mechanisms-in-implementations).  
+# v5 ForwardAuth Requirement
+Starting with v5, Kyoo leverages ForwardAuth middleware for offloading auth from the microservices onto a gateway.  For additional reading, please see gateway-api sigs [documentation](https://gateway-api.sigs.k8s.io/geps/gep-1494/). 
 
-In order for Kyoo to function there needs to Traefik proxy included somewhere in the network.  There are several ways to accomplish this.
+This Helm chart provides a few choices as most ingress/gatewayapi controllers do not currently support ForwardAuth.  
 
-## Additional Hop (Default)
-Using the existing IngressController/GatewayController, we deploy a Traefik instance dedicated towards handling Kyoo's traffic. This avoids needing to add more operators/controllers into the cluster.
+## Add TraefikProxy (Default)
+By default, this chart will deploy TraefikProxy behind the existing ingress/gateway resources.  TraefikProxy hop is added and configured to handle ForwardAuth.  This approach offers the most compatibility and requires the least amount of change from the user perspective.
 
-Using this approach, we can offload the TLS certificate to the existing controller and reduces the configuration needed in Traefik.
+## Direct to TraefikProxy
+Instead of using an additional hop, Traefik can be exposed via LoadBalancer.  To do this securely, please be sure to mount and configuring the TLS certificate inside of Traefik.
 
-## Direct to Traefik
-Instead of adding additional hop, Traefik can be exposed via LoadBalancer.  To do this securely, please be sure to mount and configuring the TLS certificate inside of Traefik.
-
-## Add Traefik as IngressController/GatewayController
-Disable the integrated Traefik and adopt Traefik controller into your cluster.  This option will offer the most Kubernetes native experience.
+## Ingress/GatewayApi with ForwardAuth
+Disable the integrated TraefikProxy and adopt a controller that supports ForwardAuth.  This option will offer the most Kubernetes native experience.
