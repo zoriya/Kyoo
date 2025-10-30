@@ -24,7 +24,7 @@ data:
           entryPoints:
           - web
           middlewares:
-          - phantomtest-api
+          - phantom-token
           service: phantomtest-api
           rule: "Host(`pt2.bitey.life`) && PathPrefix(`/`)"
         phantomtest-wellknown:
@@ -38,7 +38,7 @@ data:
           service: phantomtest-auth
           rule: "Host(`pt2.bitey.life`) && PathPrefix(`/auth`)"
       middlewares:
-        phantomtest-api:
+        phantom-token:
           forwardAuth:
             address: "http://pt2.bitey.life/auth/jwt"
             authRequestHeaders:
