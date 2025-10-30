@@ -86,24 +86,6 @@ Create the name of the front service account to use
 {{- end -}}
 
 {{/*
-Create kyoo matcher name
-*/}}
-{{- define "kyoo.matcher.fullname" -}}
-{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.matcher.name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
-Create the name of the matcher service account to use
-*/}}
-{{- define "kyoo.matcher.serviceAccountName" -}}
-{{- if .Values.matcher.serviceAccount.create -}}
-    {{ default (include "kyoo.matcher.fullname" .) .Values.matcher.serviceAccount.name }}
-{{- else -}}
-    {{ default "default" .Values.matcher.serviceAccount.name }}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Create kyoo scanner name
 */}}
 {{- define "kyoo.scanner.fullname" -}}

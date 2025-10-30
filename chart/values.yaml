@@ -107,11 +107,6 @@ global:
       userKey: rabbitmq_user
       passwordKey: rabbitmq_password
       existingSecret: bigsecret
-    # kyoo_matcher workload specific settings
-    kyoo_matcher:
-      userKey: rabbitmq_user
-      passwordKey: rabbitmq_password
-      existingSecret: bigsecret
     # kyoo_scanner workload specific settings
     kyoo_scanner:
       userKey: rabbitmq_user
@@ -345,41 +340,6 @@ front:
     annotations: {}
     labels: {}
     type: ClusterIP
-  serviceAccount:
-    create: true
-    automount: true
-    annotations: {}
-    name: ~
-  extraContainers: []
-  extraInitContainers: []
-  extraVolumes: []
-
-# matcher deployment configuration
-matcher:
-  name: matcher
-  # kyoo_matcher container configuration
-  kyoo_matcher:
-    livenessProbe: {}
-    readinessProbe: {}
-    resources: {}
-    containerSecurityContext: {}
-    extraVolumeMounts: []
-    # kyoo_matcher uses the same image as kyoo_scanner
-    # requires an additional argument to function as matcher
-    extraArgs:
-      - matcher
-    extraEnv: []
-    image:
-      # kyoo_matcher uses the same image as kyoo_scanner
-      repository: ghcr.io/zoriya/kyoo_scanner
-      tag: ~
-  # matcher does not support multiple replicas
-  replicaCount: 1
-  updateStrategy: ~
-  podLabels: {}
-  deploymentAnnotations: {}
-  podAnnotations: {}
-  imagePullSecrets: []
   serviceAccount:
     create: true
     automount: true
