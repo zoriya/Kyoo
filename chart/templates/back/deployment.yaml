@@ -126,13 +126,6 @@ spec:
               value: {{ .Values.global.rabbitmq.host | quote }}
             - name: RABBITMQ_PORT
               value: {{ .Values.global.rabbitmq.port | quote }}
-            - name: MEILI_HOST
-              value: "{{ .Values.global.meilisearch.proto }}://{{ .Values.global.meilisearch.host }}:{{ .Values.global.meilisearch.port }}"
-            - name: MEILI_MASTER_KEY
-              valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.global.meilisearch.kyoo_back.masterkeyKey }}
-                  name: {{ .Values.global.meilisearch.kyoo_back.existingSecret }}
             {{- range $index, $provider := .Values.kyoo.oidc_providers }}
             - name: OIDC_{{ $provider.name | upper }}_NAME
               value: {{ $provider.name | quote }}

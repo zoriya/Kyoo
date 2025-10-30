@@ -15,21 +15,6 @@ global:
   podLabels: {}
   extraEnv: []
 
-  # kyoo connectivity & subchart settings for meilisearch
-  # subchart configuration can be found at .meilisearch
-  meilisearch:
-    proto: http
-    host: kyoo-meilisearch
-    port: 7700
-    # subchart specific settings
-    infra:
-      # subchart does not support specifying keyname.
-      # key must be named `MEILI_MASTER_KEY`
-      existingSecret: bigsecret
-    # kyoo_back workload specific settings
-    kyoo_back:
-      masterkeyKey: MEILI_MASTER_KEY
-      existingSecret: bigsecret
   # kyoo connectivity & subchart settings for postgres
   # subchart configuration can be found at .postgresql
   postgres:
@@ -479,19 +464,6 @@ traefikproxy:
   extraContainers: []
   extraInitContainers: []
   extraVolumes: []
-
-# subchart settings
-meilisearch:
-  enabled: false
-  environment:
-    MEILI_ENV: production
-  auth:
-    # subchart does not support specifying keyname.
-    # key must be named `MEILI_MASTER_KEY`
-    existingMasterKeySecret: "{{ .Values.global.meilisearch.infra.existingSecret }}"
-  persistence:
-    enabled: true
-    size: 3Gi
 
 # subchart settings
 postgresql:
