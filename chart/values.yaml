@@ -148,36 +148,6 @@ contentdatabase:
     pinKey: tvdb_pin
     existingSecret: bigsecret
 
-# autosync deployment configuration
-autosync:
-  name: autosync
-  # kyoo_autosync container configuration
-  kyoo_autosync:
-    livenessProbe: {}
-    readinessProbe: {}
-    resources: {}
-    containerSecurityContext: {}
-    extraVolumeMounts: []
-    extraArgs: []
-    extraEnv: []
-    image:
-      repository: ~
-      tag: ~
-  replicaCount: 1
-  updateStrategy: ~
-  podLabels: {}
-  deploymentAnnotations: {}
-  podAnnotations: {}
-  imagePullSecrets: []
-  serviceAccount:
-    create: true
-    automount: true
-    annotations: {}
-    name: ~
-  extraContainers: []
-  extraInitContainers: []
-  extraVolumes: []
-
 # auth deployment configuration
 auth:
   name: auth
