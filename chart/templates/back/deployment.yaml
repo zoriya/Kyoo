@@ -43,30 +43,6 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "kyoo.back.serviceAccountName" . }}
       initContainers:
-        - name: migrations
-          image: {{ .Values.back.kyoo_migrations.image.repository | default (printf "%s/kyoo_migrations" .Values.global.image.repositoryBase) }}:{{ default (include "kyoo.defaultTag" .) .Values.back.kyoo_migrations.image.tag }}
-          imagePullPolicy: {{ default .Values.global.image.imagePullPolicy }}
-          args:
-            {{- with .Values.back.kyoo_migrations.extraArgs }}
-              {{- toYaml . | nindent 12 }}
-            {{- end }}
-          env:
-            - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.global.postgres.kyoo_back.kyoo_migrations.userKey }}
-                  name: {{ .Values.global.postgres.kyoo_back.kyoo_migrations.existingSecret }}
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.global.postgres.kyoo_back.kyoo_migrations.passwordKey }}
-                  name: {{ .Values.global.postgres.kyoo_back.kyoo_migrations.existingSecret }}
-            - name: POSTGRES_DB
-              value: {{ .Values.global.postgres.kyoo_back.database }}
-            - name: POSTGRES_SERVER
-              value: {{ .Values.global.postgres.kyoo_back.host }}
-            - name: POSTGRES_PORT
-              value: "{{ .Values.global.postgres.kyoo_back.port }}"
         {{- with .Values.back.extraInitContainers }}
           {{- tpl (toYaml .) $ | nindent 6 }}
         {{- end }}

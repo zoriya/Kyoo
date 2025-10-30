@@ -44,11 +44,6 @@ global:
       host: kyoo-postgresql
       port: 5432
       database: kyoo_back
-      # kyoo_migrations workload specific settings
-      kyoo_migrations:
-        userKey: postgres_user
-        passwordKey: postgres_password
-        existingSecret: bigsecret
       # kyoo_back workload specific settings
       kyoo_back:
         userKey: postgres_user
@@ -137,6 +132,7 @@ media:
   baseMountPath: "/media"
 
 # configures workloads that require access to contentdatabase
+# unused until autosync pulled into kyoo_back
 contentdatabase:
   # TheMovieDB
   tmdb:
@@ -185,18 +181,6 @@ auth:
 # back deployment configuration
 back:
   name: back
-  # kyoo_migrations init container configuration
-  kyoo_migrations:
-    livenessProbe: {}
-    readinessProbe: {}
-    resources: {}
-    containerSecurityContext: {}
-    extraVolumeMounts: []
-    extraArgs: []
-    extraEnv: []
-    image:
-      repository: ~
-      tag: ~
   # kyoo_back container configuration
   kyoo_back:
     livenessProbe: {}
