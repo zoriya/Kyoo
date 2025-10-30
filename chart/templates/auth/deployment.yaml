@@ -51,8 +51,38 @@ spec:
               {{- toYaml . | nindent 12 }}
             {{- end }}
           env:
-            - name: KYOO_URL
-              value: "http://{{ include "kyoo.back.fullname" . }}:5000/api"
+            - name: RSA_PRIVATE_KEY_PATH
+              value: {{ .Values.kyoo.address | quote }}
+            - name: EXTRA_CLAIMS
+              value: {{ .Values.kyoo.extraClaims | quote }}
+            - name: FIRST_USER_CLAIMS
+              value: {{ .Values.kyoo.firstUserClaims | quote }}
+            - name: GUEST_CLAIMS
+              value: {{ .Values.kyoo.guestClaims | quote }}
+            - name: PROTECTED_CLAIMS
+              value: {{ .Values.kyoo.protectedClaims | quote }}
+            - name: PUBLIC_URL
+              value: {{ .Values.kyoo.address | quote }}
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.global.postgres.kyoo_auth.kyoo_auth.userKey }}
+                  name: {{ .Values.global.postgres.kyoo_auth.kyoo_auth.existingSecret }}
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.global.postgres.kyoo_auth.kyoo_auth.passwordKey }}
+                  name: {{ .Values.global.postgres.kyoo_auth.kyoo_auth.existingSecret }}
+            - name: PGDATABASE
+              value: {{ .Values.global.postgres.kyoo_auth.database }}
+            - name: PGHOST
+              value: {{ .Values.global.postgres.kyoo_auth.host | quote }}
+            - name: PGPORT
+              value: {{ .Values.global.postgres.kyoo_auth.port | quote }}
+            - name: PGSSLMODE
+              value: {{ .Values.global.postgres.kyoo_auth.sslmode | quote  }}
+            - name: POSTGRES_SCHEMA
+              value: {{ .Values.global.postgres.kyoo_auth.schema | quote  }}
             {{- with (concat .Values.global.extraEnv .Values.auth.kyoo_auth.extraEnv) }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
