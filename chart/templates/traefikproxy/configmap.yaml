@@ -13,34 +13,50 @@ metadata:
     {{- end }}
   {{- end }}
 data:
-  # TODO: finish templating
-  # can probably remove host rules, since this will only be infront of Kyoo
-  # WILL ONLY SUPPORT WEB BY DEFAULT
-  # forwardAuth.address will be taken from $values.kyoo.address
   dynamic_config.yaml: |
     http:
       routers:
-        phantomtest-basepath:
+        basepath:
           entryPoints:
           - web
           middlewares:
-          - phantom-token
-          service: phantomtest-api
-          rule: "Host(`pt2.bitey.life`) && PathPrefix(`/`)"
-        phantomtest-wellknown:
+          - phantomtoken
+          service: front
+          rule: "PathPrefix(`/`)"
+        video:
           entryPoints:
           - web
-          service: phantomtest-auth
-          rule: "Host(`pt2.bitey.life`) && PathPrefix(`/.well-known/`)"
-        phantomtest-auth:
+          service: transcoder
+          rule: "PathPrefix(`/video`)"
+        auth:
           entryPoints:
           - web
-          service: phantomtest-auth
-          rule: "Host(`pt2.bitey.life`) && PathPrefix(`/auth`)"
+          service: auth
+          rule: "PathPrefix(`/auth/`)"
+        wellknown:
+          entryPoints:
+          - web
+          service: auth
+          rule: "PathPrefix(`/.well-known/`)"
+        api:
+          entryPoints:
+          - web
+          service: back
+          rule: "PathPrefix(`/api/`)"
+        swagger:
+          entryPoints:
+          - web
+          service: back
+          rule: "PathPrefix(`/swagger`)"
+        scanner:
+          entryPoints:
+          - web
+          service: scanner
+          rule: "PathPrefix(`/scanner/`)"
       middlewares:
-        phantom-token:
+        phantomtoken:
           forwardAuth:
-            address: "http://pt2.bitey.life/auth/jwt"
+            address: "http://{{ include "kyoo.auth.fullname" . }}:4568/auth/jwt"
             authRequestHeaders:
               - "Authorization"
               - "X-Api-Key"
