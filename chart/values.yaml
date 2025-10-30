@@ -40,6 +40,20 @@ global:
       user: kyoo_all
       passwordKey: postgres_password
       existingSecret: bigsecret
+    # kyoo settings for connecting to kyoo_auth database
+    kyoo_auth:
+      host: kyoo-postgresql
+      port: 5432
+      database: kyoo_auth
+      # schema disabled means application will not create the schema
+      # and will instead use the user's search path
+      schema: disabled
+      sslmode: prefer
+      # kyoo_transcoder workload specific settings
+      kyoo_auth:
+        userKey: postgres_user
+        passwordKey: postgres_password
+        existingSecret: bigsecret
     # kyoo settings for connecting to kyoo_back database
     kyoo_back:
       host: kyoo-postgresql
@@ -108,6 +122,13 @@ global:
 kyoo:
   # The url you can use to reach your kyoo instance. This is used during oidc to redirect users to your instance.
   address: "https://kyoo.mydomain.com"
+
+  # new auth settings
+  extraClaims: '{"permissions": ["core.read"], "verified": false}'
+  firstUserClaims: '{"permissions": ["users.read", "users.write", "apikeys.read", "apikeys.write", "users.delete", "core.read", "core.write", "scanner.trigger"], "verified": true}'
+  guestClaims: '{"permissions": ["users.read", "users.write", "apikeys.read", "apikeys.write", "users.delete", "core.read", "core.write", "scanner.trigger"], "verified": true}'
+  protectedClaims: "permissions,verified"
+
   # If this is true, new accounts wont have any permissions before you approve them in your admin dashboard.
   requireAccountVerification: true
   # Specify permissions of new accounts.
@@ -196,6 +217,40 @@ autosync:
   deploymentAnnotations: {}
   podAnnotations: {}
   imagePullSecrets: []
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    name: ~
+  extraContainers: []
+  extraInitContainers: []
+  extraVolumes: []
+
+# auth deployment configuration
+auth:
+  name: auth
+  # kyoo_auth container configuration
+  kyoo_auth:
+    livenessProbe: {}
+    readinessProbe: {}
+    resources: {}
+    containerSecurityContext: {}
+    extraVolumeMounts: []
+    extraArgs: []
+    extraEnv: []
+    image:
+      repository: ~
+      tag: ~
+  replicaCount: 1
+  updateStrategy: ~
+  podLabels: {}
+  deploymentAnnotations: {}
+  podAnnotations: {}
+  imagePullSecrets: []
+  service:
+    annotations: {}
+    labels: {}
+    type: ClusterIP
   serviceAccount:
     create: true
     automount: true
