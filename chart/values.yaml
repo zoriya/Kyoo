@@ -69,34 +69,6 @@ global:
         userKey: postgres_user
         passwordKey: postgres_password
         existingSecret: bigsecret
-  # kyoo connectivity & subchart settings for rabbitmq
-  # subchart configuration can be found at .rabbitmq
-  rabbitmq:
-    host: kyoo-rabbitmq
-    port: 5672
-    # vhost is not used yet https://github.com/zoriya/Kyoo/issues/537
-    # vhost: ""
-    # subchart specific settings
-    infra:
-      # user must be manually aligned via rabbitmq.auth.user
-      passwordKey: rabbitmq_password
-      keyErlangCookie: rabbitmq_cookie
-      existingSecret: bigsecret
-    # kyoo_autosync workload specific settings
-    kyoo_autosync:
-      userKey: rabbitmq_user
-      passwordKey: rabbitmq_password
-      existingSecret: bigsecret
-    # kyoo_back workload specific settings
-    kyoo_back:
-      userKey: rabbitmq_user
-      passwordKey: rabbitmq_password
-      existingSecret: bigsecret
-    # kyoo_scanner workload specific settings
-    kyoo_scanner:
-      userKey: rabbitmq_user
-      passwordKey: rabbitmq_password
-      existingSecret: bigsecret
 
 # kyoo application settings
 kyoo:
@@ -499,18 +471,6 @@ postgresql:
           IN DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} SET search_path TO "$user", data;
     persistence:
       size: 3Gi
-
-# subchart settings
-rabbitmq:
-  enabled: false
-  auth:
-    # default user to be created by rabbitmq subchart
-    # subchart is unable to consume a secret for specifying user
-    username: kyoo_all
-    existingPasswordSecret: "{{ .Values.global.rabbitmq.infra.existingSecret }}"
-    existingSecretPasswordKey: "{{ .Values.global.rabbitmq.infra.passwordKey }}"
-    existingErlangSecret: "{{ .Values.global.rabbitmq.infra.existingSecret }}"
-    existingSecretErlangKey: "{{ .Values.global.rabbitmq.infra.keyErlangCookie }}"
 
 # allows for the creation of any additional kubernetes resources
 extraObjects: []

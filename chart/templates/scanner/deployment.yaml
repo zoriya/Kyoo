@@ -64,20 +64,6 @@ spec:
               value: "http://{{ include "kyoo.back.fullname" . }}:5000/api"
             - name: LIBRARY_LANGUAGES
               value: {{ .Values.kyoo.languages | quote }}
-            - name: RABBITMQ_HOST
-              value: {{ .Values.global.rabbitmq.host | quote }}
-            - name: RABBITMQ_PORT
-              value: {{ .Values.global.rabbitmq.port | quote }}
-            - name: RABBITMQ_DEFAULT_USER
-              valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.global.rabbitmq.kyoo_scanner.userKey }}
-                  name: {{ .Values.global.rabbitmq.kyoo_scanner.existingSecret }}
-            - name: RABBITMQ_DEFAULT_PASS
-              valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.global.rabbitmq.kyoo_scanner.passwordKey }}
-                  name: {{ .Values.global.rabbitmq.kyoo_scanner.existingSecret }}
             {{- with (concat .Values.global.extraEnv .Values.scanner.kyoo_scanner.extraEnv) }}
               {{- toYaml . | nindent 12 }}
             {{- end }}

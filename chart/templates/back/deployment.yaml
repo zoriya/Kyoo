@@ -112,20 +112,6 @@ spec:
               value: {{ .Values.global.postgres.kyoo_back.host | quote }}
             - name: POSTGRES_PORT
               value: {{ .Values.global.postgres.kyoo_back.port | quote }}
-            - name: RABBITMQ_DEFAULT_USER
-              valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.global.rabbitmq.kyoo_back.userKey }}
-                  name: {{ .Values.global.rabbitmq.kyoo_back.existingSecret }}
-            - name: RABBITMQ_DEFAULT_PASS
-              valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.global.rabbitmq.kyoo_back.passwordKey }}
-                  name: {{ .Values.global.rabbitmq.kyoo_back.existingSecret }}
-            - name: RABBITMQ_HOST
-              value: {{ .Values.global.rabbitmq.host | quote }}
-            - name: RABBITMQ_PORT
-              value: {{ .Values.global.rabbitmq.port | quote }}
             {{- range $index, $provider := .Values.kyoo.oidc_providers }}
             - name: OIDC_{{ $provider.name | upper }}_NAME
               value: {{ $provider.name | quote }}

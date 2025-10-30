@@ -1,5 +1,5 @@
 # Kyoo Helm Chart
-Kyoo consists of multiple interconnected workloads, leveraging a variety of technologies including Postgres, and RabbitMQ.  This helm chart is designed to simplify configurations for basic setups while offering advanced customization options.  Naming and opinionation aims to follow structures described in [diagrams](../DIAGRAMS.md).
+Kyoo consists of multiple interconnected workloads, leveraging a variety of technologies including Postgres.  This helm chart is designed to simplify configurations for basic setups while offering advanced customization options.  Naming and opinionation aims to follow structures described in [diagrams](../DIAGRAMS.md).
 
 # Examples
 ## Quickstart
@@ -14,8 +14,6 @@ kyoo:
   address: https://kyoo.mydomain.com
 postgresql:
   enabled: true
-rabbitmq:
-  enabled: true
 extraObjects:
   - apiVersion: v1
     kind: Secret
@@ -27,9 +25,6 @@ extraObjects:
       MEILI_MASTER_KEY: barkLike8SuperDucks
       postgres_user: kyoo_all
       postgres_password: watchSomething4me
-      rabbitmq_user: kyoo_all
-      rabbitmq_password: youAreAmazing2
-      rabbitmq_cookie: mmmGoodCookie
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
@@ -53,8 +48,6 @@ global:
       host: postgres
     kyoo_transcoder:
       host: postgres
-  rabbitmq:
-    host: rabbitmq
 # specify hardware resources
 transcoder:
   kyoo_transcoder:
@@ -92,8 +85,6 @@ stringData:
   MEILI_MASTER_KEY: barkLike8SuperDucks
   postgres_user: kyoo_all
   postgres_password: watchSomething4me
-  rabbitmq_user: kyoo_all
-  rabbitmq_password: youAreAmazing2
 ```
 
 # Additional Notes
@@ -101,7 +92,7 @@ stringData:
 Kyoo consists of multiple microservices.  Best practice is for each microservice to use its own database.  Kyoo workloads support best practices or sharing a single postgres database.  Please see the `POSTGRES_SCHEMA` setting for additional information.  Strongly recomended to use a Kubernetes operator for managing Postgres.
 
 ## Subchart Support
-Subcharts are updated frequently and subject to changes.  This chart includes subcharts for deploying PostgreSQL, and RabbitMQ.  Please consider hosting those independently of Kyoo to better handle versioning and lifecycle management.
+Subcharts are updated frequently and subject to changes.  This chart includes subcharts for deploying PostgreSQL.  Please consider hosting those independently of Kyoo to better handle versioning and lifecycle management.
 
 # v5 ForwardAuth Requirement
 Starting with v5, Kyoo leverages ForwardAuth middleware for offloading auth from the microservices onto a gateway.  For additional reading, please see gateway-api sigs [documentation](https://gateway-api.sigs.k8s.io/geps/gep-1494/). 
