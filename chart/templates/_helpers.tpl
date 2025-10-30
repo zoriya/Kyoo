@@ -6,24 +6,6 @@ Create kyoo ingress name
 {{- end -}}
 
 {{/*
-Create kyoo autosync name
-*/}}
-{{- define "kyoo.autosync.fullname" -}}
-{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.autosync.name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
-Create the name of the autosync service account to use
-*/}}
-{{- define "kyoo.autosync.serviceAccountName" -}}
-{{- if .Values.autosync.serviceAccount.create -}}
-    {{ default (include "kyoo.autosync.fullname" .) .Values.autosync.serviceAccount.name }}
-{{- else -}}
-    {{ default "default" .Values.autosync.serviceAccount.name }}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Create kyoo auth name
 */}}
 {{- define "kyoo.auth.fullname" -}}
