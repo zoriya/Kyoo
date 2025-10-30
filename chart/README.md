@@ -1,5 +1,5 @@
 # Kyoo Helm Chart
-Kyoo consists of multiple interconnected workloads, leveraging a variety of technologies including Meilisearch, Postgres, and RabbitMQ.  This helm chart is designed to simplify configurations for basic setups while offering advanced customization options.  Naming and opinionation aims to follow structures described in [diagrams](../DIAGRAMS.md).
+Kyoo consists of multiple interconnected workloads, leveraging a variety of technologies including Postgres, and RabbitMQ.  This helm chart is designed to simplify configurations for basic setups while offering advanced customization options.  Naming and opinionation aims to follow structures described in [diagrams](../DIAGRAMS.md).
 
 # Examples
 ## Quickstart
@@ -12,8 +12,6 @@ helm upgrade kyoo oci://ghcr.io/zoriya/helm-charts/kyoo --install --values myval
 ```yaml
 kyoo:
   address: https://kyoo.mydomain.com
-meilisearch:
-  enabled: true
 postgresql:
   enabled: true
 rabbitmq:
@@ -50,9 +48,6 @@ values.yaml configuration
 ```yaml
 # specify external hosts for backend resources
 global:
-  meilisearch:
-    kyoo_back:
-      host: meilisearch
   postgres:
     kyoo_back:
       host: postgres
@@ -106,7 +101,7 @@ stringData:
 Kyoo consists of multiple microservices.  Best practice is for each microservice to use its own database.  Kyoo workloads support best practices or sharing a single postgres database.  Please see the `POSTGRES_SCHEMA` setting for additional information.  Strongly recomended to use a Kubernetes operator for managing Postgres.
 
 ## Subchart Support
-Subcharts are updated frequently and subject to changes.  This chart includes subcharts for deploying Meilisearch, PostgreSQL, and RabbitMQ.  Please consider hosting those independently of Kyoo to better handle versioning and lifecycle management.
+Subcharts are updated frequently and subject to changes.  This chart includes subcharts for deploying PostgreSQL, and RabbitMQ.  Please consider hosting those independently of Kyoo to better handle versioning and lifecycle management.
 
 # v5 ForwardAuth Requirement
 Starting with v5, Kyoo leverages ForwardAuth middleware for offloading auth from the microservices onto a gateway.  For additional reading, please see gateway-api sigs [documentation](https://gateway-api.sigs.k8s.io/geps/gep-1494/). 
