@@ -47,13 +47,25 @@ data:
             authResponseHeaders:
               - Authorization
       services:
-        phantomtest-api:
+        back:
           loadBalancer:
             servers:
-            - url: http://phantomtest-api:3000/
-        phantomtest-auth:
+            - url: http://{{ include "kyoo.back.fullname" . }}:5000/
+        front:
           loadBalancer:
             servers:
-            - url: http://phantomtest-auth:8080/
+            - url: http://{{ include "kyoo.front.fullname" . }}:8901/
+        transcoder:
+          loadBalancer:
+            servers:
+            - url: http://{{ include "kyoo.transcoder.fullname" . }}:7666/
+        auth:
+          loadBalancer:
+            servers:
+            - url: http://{{ include "kyoo.auth.fullname" . }}:4568/
+        scanner:
+          loadBalancer:
+            servers:
+            - url: http://{{ include "kyoo.scanner.fullname" . }}:4389/
 {{- end }}
 {{- end }}
