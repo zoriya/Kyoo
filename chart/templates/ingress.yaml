@@ -24,16 +24,9 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: {{ include "kyoo.front.fullname" . }}
+              name: {{ include "kyoo.traefikproxy.fullname" . }}
               port:
-                number: 8901
-        - path: "/api"
-          pathType: Prefix
-          backend:
-            service:
-              name: {{ include "kyoo.back.fullname" . }}
-              port:
-                number: 5000
+                number: 80
 {{- if .Values.ingress.tls }}
   tls:
   - hosts:
