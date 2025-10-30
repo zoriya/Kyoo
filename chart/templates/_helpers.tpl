@@ -24,6 +24,24 @@ Create the name of the autosync service account to use
 {{- end -}}
 
 {{/*
+Create kyoo auth name
+*/}}
+{{- define "kyoo.auth.fullname" -}}
+{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.auth.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Create the name of the auth service account to use
+*/}}
+{{- define "kyoo.auth.serviceAccountName" -}}
+{{- if .Values.auth.serviceAccount.create -}}
+    {{ default (include "kyoo.auth.fullname" .) .Values.auth.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.auth.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create kyoo back name
 */}}
 {{- define "kyoo.back.fullname" -}}
