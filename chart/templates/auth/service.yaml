@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.auth.service.annotations }}
+  annotations:
+  {{- range $key, $value := .Values.auth.service.annotations }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}
+  name: {{ include "kyoo.auth.fullname" . }}
+  labels:
+    {{- include "kyoo.labels" (dict "context" . "component" .Values.auth.name "name" .Values.auth.name) | nindent 4 }}
+    {{- with .Values.auth.service.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ .Values.auth.service.type }}
+  ports:
+    - port: 4568
+      targetPort: 4568
+      protocol: TCP
+      name: main
+  selector:
+    {{- include "kyoo.selectorLabels" (dict "context" . "name" .Values.auth.name) | nindent 4 }}
