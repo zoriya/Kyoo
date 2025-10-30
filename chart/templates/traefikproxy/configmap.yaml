@@ -50,10 +50,10 @@ data:
         phantomtest-api:
           loadBalancer:
             servers:
-            - url: http://phantomtest-api.phantomtest.svc.cluster.local:3000/
+            - url: http://phantomtest-api:3000/
         phantomtest-auth:
           loadBalancer:
             servers:
-            - url: http://phantomtest-auth.phantomtest.svc.cluster.local:8080/
+            - url: http://phantomtest-auth:8080/
 {{- end }}
 {{- end }}
