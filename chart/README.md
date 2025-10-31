@@ -12,7 +12,7 @@ helm upgrade kyoo oci://ghcr.io/zoriya/helm-charts/kyoo --install --values myval
 ```yaml
 kyoo:
   address: https://kyoo.mydomain.com
-postgresql:
+postgres:
   enabled: true
 extraObjects:
   - apiVersion: v1
@@ -22,7 +22,6 @@ extraObjects:
     type: Opaque
     stringData:
       kyoo_apikeys: yHXWGsjfjE6sy6UxavqmTUYxgCFYek
-      MEILI_MASTER_KEY: barkLike8SuperDucks
       postgres_user: kyoo_all
       postgres_password: watchSomething4me
   - kind: PersistentVolumeClaim

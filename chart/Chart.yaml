@@ -9,7 +9,7 @@ appVersion: "0.0.0"
 icon: https://raw.githubusercontent.com/zoriya/Kyoo/refs/heads/master/icons/icon.svg
 
 dependencies:
-- condition: postgresql.enabled
+- condition: postgres.enabled
   name: postgres
   repository: oci://registry-1.docker.io/cloudpirates
   version: 0.11.1

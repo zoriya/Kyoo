@@ -398,7 +398,7 @@ traefikproxy:
   extraVolumes: []
 
 # subchart settings
-postgresql:
+postgres:
   enabled: false
   auth:
     # default user to be created by postgres subchart
