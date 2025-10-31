@@ -3,6 +3,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ include "kyoo.transcodermetadata.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kyoo.labels" (dict "context" . "component" .Values.transcoder.name "name" .Values.transcoder.name) | nindent 4 }}
   {{- with (mergeOverwrite (deepCopy .Values.global.persistentVolumeClaimAnnotations) .Values.transcoder.persistence.annotations) }}

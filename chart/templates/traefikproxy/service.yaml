@@ -9,6 +9,7 @@ metadata:
   {{- end }}
 {{- end }}
   name: {{ include "kyoo.traefikproxy.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kyoo.labels" (dict "context" . "component" .Values.traefikproxy.name "name" .Values.traefikproxy.name) | nindent 4 }}
     {{- with .Values.traefikproxy.service.labels }}

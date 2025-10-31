@@ -8,6 +8,7 @@ metadata:
     {{- end }}
   {{- end }}
   name: {{ include "kyoo.scanner.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kyoo.labels" (dict "context" . "component" .Values.scanner.name "name" .Values.scanner.name) | nindent 4 }}
 spec:
