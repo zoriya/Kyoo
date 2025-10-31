@@ -10,6 +10,6 @@ icon: https://raw.githubusercontent.com/zoriya/Kyoo/refs/heads/master/icons/icon
 
 dependencies:
 - condition: postgresql.enabled
-  name: postgresql
-  repository: https://charts.bitnami.com/bitnami
-  version: 18.1.3
+  name: postgres
+  repository: oci://registry-1.docker.io/cloudpirates
+  version: 0.11.1
