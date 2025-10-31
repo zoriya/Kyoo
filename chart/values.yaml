@@ -39,9 +39,6 @@ global:
       host: kyoo-postgres
       port: 5432
       database: kyoo_auth
-      # schema disabled means application will not create the schema
-      # and will instead use the user's search path
-      schema: disabled
       sslmode: prefer
       # kyoo_auth workload specific settings
       kyoo_auth:
