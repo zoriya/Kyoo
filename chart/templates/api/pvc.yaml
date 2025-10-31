@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "kyoo.apimetadata.fullname" . }}
+  name: {{ include "kyoo.apiimagedata.fullname" . }}
   labels:
     {{- include "kyoo.labels" (dict "context" . "component" .Values.api.name "name" .Values.api.name) | nindent 4 }}
   {{- with (mergeOverwrite (deepCopy .Values.global.persistentVolumeClaimAnnotations) .Values.api.persistence.annotations) }}
