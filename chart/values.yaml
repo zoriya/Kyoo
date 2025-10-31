@@ -26,7 +26,7 @@ global:
       existingSecret: bigsecret
     # kyoo settings for connecting to kyoo_api database
     kyoo_api:
-      host: kyoo-postgresql
+      host: kyoo-postgres
       port: 5432
       database: kyoo_api
       # kyoo_api workload specific settings
@@ -36,7 +36,7 @@ global:
         existingSecret: bigsecret
     # kyoo settings for connecting to kyoo_auth database
     kyoo_auth:
-      host: kyoo-postgresql
+      host: kyoo-postgres
       port: 5432
       database: kyoo_auth
       # schema disabled means application will not create the schema
@@ -50,7 +50,7 @@ global:
         existingSecret: bigsecret
     # kyoo settings for connecting to kyoo_transcoder database
     kyoo_transcoder:
-      host: kyoo-postgresql
+      host: kyoo-postgres
       port: 5432
       database: kyoo_transcoder
       # schema disabled means application will not create the schema
