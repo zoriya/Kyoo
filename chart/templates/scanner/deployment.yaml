@@ -55,15 +55,41 @@ spec:
               value: {{ .Values.media.baseMountPath | quote }}
             - name: LIBRARY_IGNORE_PATTERN
               value: {{ .Values.kyoo.libraryIgnorePattern | quote }}
-            - name: KYOO_APIKEYS
+            - name: KYOO_APIKEY
               valueFrom:
                 secretKeyRef:
                   key: {{ .Values.kyoo.apikey.apikeyKey }}
                   name: {{ .Values.kyoo.apikey.existingSecret }}
+                  # unclear if needed
+                  optional: true
             - name: KYOO_URL
-              value: "http://{{ include "kyoo.api.fullname" . }}:5000/api"
-            - name: LIBRARY_LANGUAGES
-              value: {{ .Values.kyoo.languages | quote }}
+              value: "http://{{ include "kyoo.api.fullname" . }}:3567/api"
+            - name: JWKS_URL
+              value: "http://{{ include "kyoo.auth.fullname" . }}:4568/.well-known/jwks.json"
+            - name: JWT_ISSUER
+              value: {{ .Values.kyoo.address | quote }}
+            - name: THEMOVIEDB_API_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.contentdatabase.tmdb.apikeyKey }}
+                  name: {{ .Values.contentdatabase.tmdb.existingSecret }}
+                  optional: true
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.global.postgres.kyoo_scanner.kyoo_scanner.userKey }}
+                  name: {{ .Values.global.postgres.kyoo_scanner.kyoo_scanner.existingSecret }}
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.global.postgres.kyoo_scanner.kyoo_scanner.passwordKey }}
+                  name: {{ .Values.global.postgres.kyoo_scanner.kyoo_scanner.existingSecret }}
+            - name: PGDATABASE
+              value: {{ .Values.global.postgres.kyoo_scanner.database }}
+            - name: PGHOST
+              value: {{ .Values.global.postgres.kyoo_scanner.host | quote }}
+            - name: PGPORT
+              value: {{ .Values.global.postgres.kyoo_scanner.port | quote }}
             {{- with (concat .Values.global.extraEnv .Values.scanner.kyoo_scanner.extraEnv) }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
