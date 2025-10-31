@@ -108,7 +108,7 @@ spec:
             {{- end }}
           ports:
             - name: main
-              containerPort: 5000
+              containerPort: 3567
               protocol: TCP
           {{- with .Values.api.kyoo_api.livenessProbe }}
           livenessProbe:
