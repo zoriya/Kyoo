@@ -24,6 +24,16 @@ global:
       user: kyoo_all
       passwordKey: postgres_password
       existingSecret: bigsecret
+    # kyoo settings for connecting to kyoo_api database
+    kyoo_api:
+      host: kyoo-postgresql
+      port: 5432
+      database: kyoo_api
+      # kyoo_api workload specific settings
+      kyoo_api:
+        userKey: postgres_user
+        passwordKey: postgres_password
+        existingSecret: bigsecret
     # kyoo settings for connecting to kyoo_auth database
     kyoo_auth:
       host: kyoo-postgresql
@@ -35,16 +45,6 @@ global:
       sslmode: prefer
       # kyoo_auth workload specific settings
       kyoo_auth:
-        userKey: postgres_user
-        passwordKey: postgres_password
-        existingSecret: bigsecret
-    # kyoo settings for connecting to kyoo_back database
-    kyoo_back:
-      host: kyoo-postgresql
-      port: 5432
-      database: kyoo_back
-      # kyoo_back workload specific settings
-      kyoo_back:
         userKey: postgres_user
         passwordKey: postgres_password
         existingSecret: bigsecret
@@ -131,7 +131,7 @@ media:
   baseMountPath: "/media"
 
 # configures workloads that require access to contentdatabase
-# unused until autosync pulled into kyoo_back
+# unused until autosync pulled into kyoo_api
 contentdatabase:
   # TheMovieDB
   tmdb:
@@ -146,7 +146,7 @@ contentdatabase:
 # api deployment configuration
 api:
   name: api
-  # kyoo_back container configuration
+  # kyoo_api container configuration
   kyoo_api:
     livenessProbe: {}
     readinessProbe: {}
@@ -403,14 +403,14 @@ postgresql:
       passwordKey: "{{ .Values.global.postgres.infra.passwordKey }}"
   initdb:
     scripts:
+      kyoo_api.sql: |
+        CREATE DATABASE {{ .Values.global.postgres.kyoo_api.database }} WITH OWNER {{ .Values.global.postgres.infra.user }}; 
+        \connect {{ .Values.global.postgres.kyoo_api.database }};
+        REVOKE ALL ON SCHEMA public FROM PUBLIC;
+        CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
       kyoo_auth.sql: |
         CREATE DATABASE {{ .Values.global.postgres.kyoo_auth.database }} WITH OWNER {{ .Values.global.postgres.infra.user }}; 
         \connect {{ .Values.global.postgres.kyoo_auth.database }};
-        REVOKE ALL ON SCHEMA public FROM PUBLIC;
-        CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
-      kyoo_back.sql: |
-        CREATE DATABASE {{ .Values.global.postgres.kyoo_back.database }} WITH OWNER {{ .Values.global.postgres.infra.user }}; 
-        \connect {{ .Values.global.postgres.kyoo_back.database }};
         REVOKE ALL ON SCHEMA public FROM PUBLIC;
         CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
       kyoo_transcoder.sql: |
@@ -422,7 +422,7 @@ postgresql:
         ALTER ROLE {{ .Values.global.postgres.infra.user }}
         IN DATABASE {{ .Values.global.postgres.kyoo_auth.database }} SET search_path TO "$user", data;
         ALTER ROLE {{ .Values.global.postgres.infra.user }} 
-        IN DATABASE {{ .Values.global.postgres.kyoo_back.database }} SET search_path TO "$user", public;
+        IN DATABASE {{ .Values.global.postgres.kyoo_api.database }} SET search_path TO "$user", data;
         ALTER ROLE {{ .Values.global.postgres.infra.user }} 
         IN DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} SET search_path TO "$user", data;
   persistence:
