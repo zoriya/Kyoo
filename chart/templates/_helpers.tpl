@@ -26,7 +26,7 @@ Create the name of the api service account to use
 {{/*
 Create kyoo api-metadata name
 */}}
-{{- define "kyoo.apimetadata.fullname" -}}
+{{- define "kyoo.apiimagedata.fullname" -}}
 {{- printf "%s-%s%s" (include "kyoo.fullname" .) .Values.api.name "metadata" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 

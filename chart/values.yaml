@@ -75,12 +75,6 @@ kyoo:
   guestClaims: '{"permissions": ["users.read", "users.write", "apikeys.read", "apikeys.write", "users.delete", "core.read", "core.write", "scanner.trigger"], "verified": true}'
   protectedClaims: "permissions,verified"
 
-  # If this is true, new accounts wont have any permissions before you approve them in your admin dashboard.
-  requireAccountVerification: true
-  # Specify permissions of new accounts.
-  defaultPermissions: "overall.read,overall.play"
-  # Specify permissions of guest accounts, default is no permissions.
-  unloggedPermissions: ""
   # A pattern (regex) to ignore video files.
   libraryIgnorePattern: ".*/[dD]ownloads?/.*"
   languages: "en"
@@ -180,7 +174,7 @@ api:
   extraContainers: []
   extraInitContainers: []
   extraVolumes: []
-  # apimetadata
+  # api image data
   # user profile pictures
   persistence:
     enabled: true
