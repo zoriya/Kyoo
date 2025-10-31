@@ -52,7 +52,7 @@ spec:
             {{- end }}
           env:
             - name: KYOO_URL
-              value: "http://{{ include "kyoo.back.fullname" . }}:5000/api"
+              value: "http://{{ include "kyoo.api.fullname" . }}:5000/api"
             {{- with (concat .Values.global.extraEnv .Values.front.kyoo_front.extraEnv) }}
               {{- toYaml . | nindent 12 }}
             {{- end }}

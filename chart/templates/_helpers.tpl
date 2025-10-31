@@ -6,6 +6,31 @@ Create kyoo ingress name
 {{- end -}}
 
 {{/*
+Create kyoo api name
+*/}}
+{{- define "kyoo.api.fullname" -}}
+{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.api.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Create the name of the api service account to use
+*/}}
+{{- define "kyoo.api.serviceAccountName" -}}
+{{- if .Values.api.serviceAccount.create -}}
+    {{ default (include "kyoo.api.fullname" .) .Values.api.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.api.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create kyoo api-metadata name
+*/}}
+{{- define "kyoo.apimetadata.fullname" -}}
+{{- printf "%s-%s%s" (include "kyoo.fullname" .) .Values.api.name "metadata" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
 Create kyoo auth name
 */}}
 {{- define "kyoo.auth.fullname" -}}
@@ -21,31 +46,6 @@ Create the name of the auth service account to use
 {{- else -}}
     {{ default "default" .Values.auth.serviceAccount.name }}
 {{- end -}}
-{{- end -}}
-
-{{/*
-Create kyoo back name
-*/}}
-{{- define "kyoo.back.fullname" -}}
-{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.back.name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
-Create the name of the back service account to use
-*/}}
-{{- define "kyoo.back.serviceAccountName" -}}
-{{- if .Values.back.serviceAccount.create -}}
-    {{ default (include "kyoo.back.fullname" .) .Values.back.serviceAccount.name }}
-{{- else -}}
-    {{ default "default" .Values.back.serviceAccount.name }}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Create kyoo back-metadata name
-*/}}
-{{- define "kyoo.backmetadata.fullname" -}}
-{{- printf "%s-%s%s" (include "kyoo.fullname" .) .Values.back.name "metadata" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 

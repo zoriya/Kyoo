@@ -143,6 +143,54 @@ contentdatabase:
     pinKey: tvdb_pin
     existingSecret: bigsecret
 
+# api deployment configuration
+api:
+  name: api
+  # kyoo_back container configuration
+  kyoo_api:
+    livenessProbe: {}
+    readinessProbe: {}
+    resources: {}
+    containerSecurityContext: {}
+    extraVolumeMounts: []
+    extraArgs: []
+    extraEnv: []
+    image:
+      repository: ~
+      tag: ~
+    volumeMounts: []
+  volumes: []
+  replicaCount: 1
+  # default to recreate for better user experience with ReadWriteOnce volumes  
+  updateStrategy:
+    type: Recreate
+  podLabels: {}
+  deploymentAnnotations: {}
+  podAnnotations: {}
+  imagePullSecrets: []
+  service:
+    annotations: {}
+    labels: {}
+    type: ClusterIP
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    name: ~
+  extraContainers: []
+  extraInitContainers: []
+  extraVolumes: []
+  # apimetadata
+  # user profile pictures
+  persistence:
+    enabled: true
+    size: 3Gi
+    annotations: {}
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+    existingClaim: ""
+
 # auth deployment configuration
 auth:
   name: auth
@@ -176,54 +224,6 @@ auth:
   extraContainers: []
   extraInitContainers: []
   extraVolumes: []
-
-# back deployment configuration
-back:
-  name: back
-  # kyoo_back container configuration
-  kyoo_back:
-    livenessProbe: {}
-    readinessProbe: {}
-    resources: {}
-    containerSecurityContext: {}
-    extraVolumeMounts: []
-    extraArgs: []
-    extraEnv: []
-    image:
-      repository: ~
-      tag: ~
-    volumeMounts: []
-  volumes: []
-  replicaCount: 1
-  # default to recreate for better user experience with ReadWriteOnce volumes  
-  updateStrategy:
-    type: Recreate
-  podLabels: {}
-  deploymentAnnotations: {}
-  podAnnotations: {}
-  imagePullSecrets: []
-  service:
-    annotations: {}
-    labels: {}
-    type: ClusterIP
-  serviceAccount:
-    create: true
-    automount: true
-    annotations: {}
-    name: ~
-  extraContainers: []
-  extraInitContainers: []
-  extraVolumes: []
-  # backmetadata
-  # user profile pictures
-  persistence:
-    enabled: true
-    size: 3Gi
-    annotations: {}
-    storageClass: ""
-    accessModes:
-      - ReadWriteOnce
-    existingClaim: ""
 
 # front deployment configuration
 front:

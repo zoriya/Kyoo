@@ -41,12 +41,12 @@ data:
         api:
           entryPoints:
           - web
-          service: back
+          service: api
           rule: "PathPrefix(`/api/`)"
         swagger:
           entryPoints:
           - web
-          service: back
+          service: api
           rule: "PathPrefix(`/swagger`)"
         scanner:
           entryPoints:
@@ -63,10 +63,10 @@ data:
             authResponseHeaders:
               - Authorization
       services:
-        back:
+        api:
           loadBalancer:
             servers:
-            - url: http://{{ include "kyoo.back.fullname" . }}:5000/
+            - url: http://{{ include "kyoo.api.fullname" . }}:5000/
         front:
           loadBalancer:
             servers:

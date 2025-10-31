@@ -1,0 +1,25 @@
+{{- if and .Values.api.persistence.enabled (not .Values.api.persistence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "kyoo.apimetadata.fullname" . }}
+  labels:
+    {{- include "kyoo.labels" (dict "context" . "component" .Values.api.name "name" .Values.api.name) | nindent 4 }}
+  {{- with (mergeOverwrite (deepCopy .Values.global.persistentVolumeClaimAnnotations) .Values.api.persistence.annotations) }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- range .Values.api.persistence.accessModes }}
+    - {{ . }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.api.persistence.size }}
+  {{- if .Values.api.persistence.storageClass }}
+  storageClassName: {{ .Values.api.persistence.storageClass }}
+  {{- end }}
+{{- end }}
