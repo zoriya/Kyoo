@@ -54,6 +54,8 @@ spec:
               {{- toYaml . | nindent 12 }}
             {{- end }}
           env:
+            - name: JWKS_URL
+              value: "http://{{ include "kyoo.auth.fullname" . }}:4568/.well-known/jwks.json"
             - name: GOCODER_HWACCEL
               value: {{ .Values.kyoo.transcoderAcceleration | quote }}
             - name: GOCODER_PRESET
@@ -62,6 +64,12 @@ spec:
               value: "/cache"
             - name: GOCODER_METADATA_ROOT
               value: "/metadata"
+            # the vaapi device path (only used with GOCODER_HWACCEL=vaapi)
+            - name: GOCODER_VAAPI_RENDERER
+              value: "/dev/dri/renderD128"
+            # the qsv device path (only used with GOCODER_HWACCEL=qsv)
+            - name: GOCODER_QSV_RENDERER
+              value: "/dev/dri/renderD128"
             - name: GOCODER_SAFE_PATH
               value: {{ .Values.media.baseMountPath | quote }}
             - name: POSTGRES_USER
