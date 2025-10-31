@@ -20,8 +20,7 @@ global:
   postgres:
     # subchart specific settings
     infra:
-      # subchart does not accept this global value in one place
-      # if updating be sure to also update .postgresql.auth.username
+      # subchart does not accept setting username via secret, so defining here
       user: kyoo_all
       passwordKey: postgres_password
       existingSecret: bigsecret
@@ -34,7 +33,7 @@ global:
       # and will instead use the user's search path
       schema: disabled
       sslmode: prefer
-      # kyoo_transcoder workload specific settings
+      # kyoo_auth workload specific settings
       kyoo_auth:
         userKey: postgres_user
         passwordKey: postgres_password
@@ -397,34 +396,38 @@ postgresql:
   auth:
     # default user to be created by postgres subchart
     # subchart is unable to consume a secret for specifying user
-    username: kyoo_all
+    username: "{{ .Values.global.postgres.infra.user }}"
     existingSecret: "{{ .Values.global.postgres.infra.existingSecret }}"
     secretKeys:
       # set the postgres user password to the same as our user
-      adminPasswordKey: "{{ .Values.global.postgres.infra.passwordKey }}"
-      userPasswordKey: "{{ .Values.global.postgres.infra.passwordKey }}"
-  primary:
-    # create databases, schemas, and set search_path
-    initdb:
-      scripts:
-        # kyoo_back still requires public schema
-        # https://github.com/zoriya/Kyoo/issues/536
-        kyoo_back.sql: |
-          CREATE DATABASE {{ .Values.global.postgres.kyoo_back.database }} WITH OWNER {{ .Values.global.postgres.infra.user }}; 
-          \connect {{ .Values.global.postgres.kyoo_back.database }};
-          CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
-        kyoo_transcoder.sql: |
-          CREATE DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} WITH OWNER {{ .Values.global.postgres.infra.user }};
-          \connect {{ .Values.global.postgres.kyoo_transcoder.database }};
-          REVOKE ALL ON SCHEMA public FROM PUBLIC;
-          CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
-        user.sql: |
-          ALTER ROLE {{ .Values.global.postgres.infra.user }} 
-          IN DATABASE {{ .Values.global.postgres.kyoo_back.database }} SET search_path TO "$user", public;
-          ALTER ROLE {{ .Values.global.postgres.infra.user }} 
-          IN DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} SET search_path TO "$user", data;
-    persistence:
-      size: 3Gi
+      passwordKey: "{{ .Values.global.postgres.infra.passwordKey }}"
+  initdb:
+    scripts:
+      kyoo_auth.sql: |
+        CREATE DATABASE {{ .Values.global.postgres.kyoo_auth.database }} WITH OWNER {{ .Values.global.postgres.infra.user }}; 
+        \connect {{ .Values.global.postgres.kyoo_auth.database }};
+        REVOKE ALL ON SCHEMA public FROM PUBLIC;
+        CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
+      kyoo_back.sql: |
+        CREATE DATABASE {{ .Values.global.postgres.kyoo_back.database }} WITH OWNER {{ .Values.global.postgres.infra.user }}; 
+        \connect {{ .Values.global.postgres.kyoo_back.database }};
+        REVOKE ALL ON SCHEMA public FROM PUBLIC;
+        CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
+      kyoo_transcoder.sql: |
+        CREATE DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} WITH OWNER {{ .Values.global.postgres.infra.user }};
+        \connect {{ .Values.global.postgres.kyoo_transcoder.database }};
+        REVOKE ALL ON SCHEMA public FROM PUBLIC;
+        CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
+      user.sql: |
+        ALTER ROLE {{ .Values.global.postgres.infra.user }}
+        IN DATABASE {{ .Values.global.postgres.kyoo_auth.database }} SET search_path TO "$user", data;
+        ALTER ROLE {{ .Values.global.postgres.infra.user }} 
+        IN DATABASE {{ .Values.global.postgres.kyoo_back.database }} SET search_path TO "$user", public;
+        ALTER ROLE {{ .Values.global.postgres.infra.user }} 
+        IN DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} SET search_path TO "$user", data;
+  persistence:
+    enabled: true
+    size: 3Gi
 
 # allows for the creation of any additional kubernetes resources
 extraObjects: []
