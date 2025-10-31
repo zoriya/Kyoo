@@ -47,7 +47,7 @@ jobs:
           - context: ./auth
             dockerfile: Dockerfile
             label: auth
-            image: ${{ github.repository_owner }}/keibi
+            image: ${{ github.repository_owner }}/kyoo_auth
     env:
       DOCKERHUB_ENABLED: ${{ secrets.DOCKER_USERNAME && secrets.DOCKER_PASSWORD && 'true' || 'false' }}
     name: Build ${{matrix.label}}
