@@ -52,8 +52,6 @@ spec:
               {{- toYaml . | nindent 12 }}
             {{- end }}
           env:
-            - name: RSA_PRIVATE_KEY_PATH
-              value: {{ .Values.kyoo.address | quote }}
             - name: EXTRA_CLAIMS
               value: {{ .Values.kyoo.extraClaims | quote }}
             - name: FIRST_USER_CLAIMS
@@ -82,8 +80,6 @@ spec:
               value: {{ .Values.global.postgres.kyoo_auth.port | quote }}
             - name: PGSSLMODE
               value: {{ .Values.global.postgres.kyoo_auth.sslmode | quote  }}
-            - name: POSTGRES_SCHEMA
-              value: {{ .Values.global.postgres.kyoo_auth.schema | quote  }}
             {{- with (concat .Values.global.extraEnv .Values.auth.kyoo_auth.extraEnv) }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
