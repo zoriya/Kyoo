@@ -48,6 +48,20 @@ global:
         userKey: postgres_user
         passwordKey: postgres_password
         existingSecret: bigsecret
+    # kyoo settings for connecting to kyoo_scanner database
+    kyoo_scanner:
+      host: kyoo-postgres
+      port: 5432
+      database: kyoo_scanner
+      # schema disabled means application will not create the schema
+      # and will instead use the user's search path
+      schema: disabled
+      sslmode: prefer
+      # kyoo_scanner workload specific settings
+      kyoo_scanner:
+        userKey: postgres_user
+        passwordKey: postgres_password
+        existingSecret: bigsecret
     # kyoo settings for connecting to kyoo_transcoder database
     kyoo_transcoder:
       host: kyoo-postgres
@@ -77,7 +91,6 @@ kyoo:
 
   # A pattern (regex) to ignore video files.
   libraryIgnorePattern: ".*/[dD]ownloads?/.*"
-  languages: "en"
   # hardware acceleration profile (valid values: disabled, vaapi, qsv, nvidia)
   transcoderAcceleration: disabled
   # the preset used during transcode. faster means worst quality, you can probably use a slower preset with hwaccels
@@ -407,6 +420,11 @@ postgresql:
         \connect {{ .Values.global.postgres.kyoo_auth.database }};
         REVOKE ALL ON SCHEMA public FROM PUBLIC;
         CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
+      kyoo_scanner.sql: |
+        CREATE DATABASE {{ .Values.global.postgres.kyoo_scanner.database }} WITH OWNER {{ .Values.global.postgres.infra.user }};
+        \connect {{ .Values.global.postgres.kyoo_scanner.database }};
+        REVOKE ALL ON SCHEMA public FROM PUBLIC;
+        CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
       kyoo_transcoder.sql: |
         CREATE DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} WITH OWNER {{ .Values.global.postgres.infra.user }};
         \connect {{ .Values.global.postgres.kyoo_transcoder.database }};
@@ -417,6 +435,8 @@ postgresql:
         IN DATABASE {{ .Values.global.postgres.kyoo_auth.database }} SET search_path TO "$user", data;
         ALTER ROLE {{ .Values.global.postgres.infra.user }} 
         IN DATABASE {{ .Values.global.postgres.kyoo_api.database }} SET search_path TO "$user", data;
+        ALTER ROLE {{ .Values.global.postgres.infra.user }} 
+        IN DATABASE {{ .Values.global.postgres.kyoo_scanner.database }} SET search_path TO "$user", data;
         ALTER ROLE {{ .Values.global.postgres.infra.user }} 
         IN DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} SET search_path TO "$user", data;
   persistence:
