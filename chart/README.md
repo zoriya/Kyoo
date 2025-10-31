@@ -41,10 +41,12 @@ extraObjects:
 
 values.yaml configuration
 ```yaml
-# specify external hosts for backend resources
+# specify external hosts for resources
 global:
   postgres:
-    kyoo_back:
+    kyoo_api:
+      host: postgres
+    kyoo_auth:
       host: postgres
     kyoo_transcoder:
       host: postgres
