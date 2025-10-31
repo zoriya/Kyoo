@@ -82,7 +82,6 @@ stringData:
   tmdb_apikey: ""
   tvdb_apikey: ""
   tvdb_pin: ""
-  MEILI_MASTER_KEY: barkLike8SuperDucks
   postgres_user: kyoo_all
   postgres_password: watchSomething4me
 ```
