@@ -1,39 +1,39 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  {{- with (mergeOverwrite (deepCopy .Values.global.deploymentAnnotations) .Values.back.deploymentAnnotations) }}
+  {{- with (mergeOverwrite (deepCopy .Values.global.deploymentAnnotations) .Values.api.deploymentAnnotations) }}
   annotations:
     {{- range $key, $value := . }}
     {{ $key }}: {{ $value | quote }}
     {{- end }}
   {{- end }}
-  name: {{ include "kyoo.back.fullname" . }}
+  name: {{ include "kyoo.api.fullname" . }}
   labels:
-    {{- include "kyoo.labels" (dict "context" . "component" .Values.back.name "name" .Values.back.name) | nindent 4 }}
+    {{- include "kyoo.labels" (dict "context" . "component" .Values.api.name "name" .Values.api.name) | nindent 4 }}
 spec:
-  replicas: {{ .Values.back.replicaCount }}
-  {{- with .Values.back.updateStrategy }}
+  replicas: {{ .Values.api.replicaCount }}
+  {{- with .Values.api.updateStrategy }}
   strategy: 
     {{- toYaml . | nindent 4 }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "kyoo.selectorLabels" (dict "context" . "name" .Values.back.name) | nindent 6 }}
+      {{- include "kyoo.selectorLabels" (dict "context" . "name" .Values.api.name) | nindent 6 }}
   template:
     metadata:
-      {{- with (mergeOverwrite (deepCopy .Values.global.podAnnotations) .Values.back.podAnnotations) }}
+      {{- with (mergeOverwrite (deepCopy .Values.global.podAnnotations) .Values.api.podAnnotations) }}
       annotations:
         {{- range $key, $value := . }}
         {{ $key }}: {{ $value | quote }}
         {{- end }}
       {{- end }}
       labels:
-        {{- include "kyoo.labels" (dict "context" . "component" .Values.back.name "name" .Values.back.name) | nindent 8 }}
-        {{- with (mergeOverwrite (deepCopy .Values.global.podLabels) .Values.back.podLabels) }}
+        {{- include "kyoo.labels" (dict "context" . "component" .Values.api.name "name" .Values.api.name) | nindent 8 }}
+        {{- with (mergeOverwrite (deepCopy .Values.global.podLabels) .Values.api.podLabels) }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      {{- with .Values.back.imagePullSecrets | default .Values.global.imagePullSecrets }}
+      {{- with .Values.api.imagePullSecrets | default .Values.global.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -41,17 +41,17 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "kyoo.back.serviceAccountName" . }}
+      serviceAccountName: {{ include "kyoo.api.serviceAccountName" . }}
       initContainers:
-        {{- with .Values.back.extraInitContainers }}
+        {{- with .Values.api.extraInitContainers }}
           {{- tpl (toYaml .) $ | nindent 6 }}
         {{- end }}
       containers:
         - name: main
-          image: {{ .Values.back.kyoo_back.image.repository | default (printf "%s/kyoo_back" .Values.global.image.repositoryBase) }}:{{ default (include "kyoo.defaultTag" .) .Values.back.kyoo_back.image.tag }}
+          image: {{ .Values.api.kyoo_api.image.repository | default (printf "%s/kyoo_api" .Values.global.image.repositoryBase) }}:{{ default (include "kyoo.defaultTag" .) .Values.api.kyoo_api.image.tag }}
           imagePullPolicy: {{ default .Values.global.image.imagePullPolicy }}
           args:
-            {{- with .Values.back.kyoo_back.extraArgs }}
+            {{- with .Values.api.kyoo_api.extraArgs }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
           env:
@@ -75,19 +75,19 @@ spec:
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.postgres.kyoo_back.kyoo_back.userKey }}
-                  name: {{ .Values.global.postgres.kyoo_back.kyoo_back.existingSecret }}
+                  key: {{ .Values.global.postgres.kyoo_api.kyoo_api.userKey }}
+                  name: {{ .Values.global.postgres.kyoo_api.kyoo_api.existingSecret }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.postgres.kyoo_back.kyoo_back.passwordKey }}
-                  name: {{ .Values.global.postgres.kyoo_back.kyoo_back.existingSecret }}
+                  key: {{ .Values.global.postgres.kyoo_api.kyoo_api.passwordKey }}
+                  name: {{ .Values.global.postgres.kyoo_api.kyoo_api.existingSecret }}
             - name: POSTGRES_DB
-              value: {{ .Values.global.postgres.kyoo_back.database }}
+              value: {{ .Values.global.postgres.kyoo_api.database }}
             - name: POSTGRES_SERVER
-              value: {{ .Values.global.postgres.kyoo_back.host | quote }}
+              value: {{ .Values.global.postgres.kyoo_api.host | quote }}
             - name: POSTGRES_PORT
-              value: {{ .Values.global.postgres.kyoo_back.port | quote }}
+              value: {{ .Values.global.postgres.kyoo_api.port | quote }}
             {{- range $index, $provider := .Values.kyoo.oidc_providers }}
             - name: OIDC_{{ $provider.name | upper }}_NAME
               value: {{ $provider.name | quote }}
@@ -114,58 +114,58 @@ spec:
             - name: OIDC_{{ $provider.name | upper }}_AUTHMETHOD
               value: {{ $provider.authMethod | default "ClientSecretBasic" | quote }}
             {{- end }}
-            {{- with (concat .Values.global.extraEnv .Values.back.kyoo_back.extraEnv) }}
+            {{- with (concat .Values.global.extraEnv .Values.api.kyoo_api.extraEnv) }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
           ports:
             - name: main
               containerPort: 5000
               protocol: TCP
-          {{- with .Values.back.kyoo_back.livenessProbe }}
+          {{- with .Values.api.kyoo_api.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.back.kyoo_back.readinessProbe }}
+          {{- with .Values.api.kyoo_api.readinessProbe }}
           readinessProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.back.kyoo_back.resources }}
+          {{- with .Values.api.kyoo_api.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.back.kyoo_back.containerSecurityContext }}
+          {{- with .Values.api.kyoo_api.containerSecurityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
-            {{- if .Values.back.persistence.enabled }}
-            - name: backmetadata
+            {{- if .Values.api.persistence.enabled }}
+            - name: apimetadata
               mountPath: /metadata
             {{- end }}
-            {{- with .Values.back.kyoo_back.volumeMounts }}
+            {{- with .Values.api.kyoo_api.volumeMounts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
-            {{- with .Values.back.kyoo_back.extraVolumeMounts }}
+            {{- with .Values.api.kyoo_api.extraVolumeMounts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
-        {{- with .Values.back.extraContainers }}
+        {{- with .Values.api.extraContainers }}
           {{- tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
       volumes:
-        {{- if .Values.back.persistence.enabled }}
-        {{- if .Values.back.persistence.existingClaim }}
-        - name: backmetadata
+        {{- if .Values.api.persistence.enabled }}
+        {{- if .Values.api.persistence.existingClaim }}
+        - name: apimetadata
           persistentVolumeClaim:
-            claimName: {{ .Values.back.persistence.existingClaim }}
+            claimName: {{ .Values.api.persistence.existingClaim }}
         {{- else }}
-        - name: backmetadata
+        - name: apimetadata
           persistentVolumeClaim:
-            claimName: {{ include "kyoo.backmetadata.fullname" . }}
+            claimName: {{ include "kyoo.apimetadata.fullname" . }}
         {{- end }}
         {{- end }}
-        {{- with .Values.back.volumes }}
+        {{- with .Values.api.volumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
-        {{- with .Values.back.extraVolumes }}
+        {{- with .Values.api.extraVolumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
