@@ -8,6 +8,7 @@ metadata:
   {{- end }}
 {{- end }}
   name: {{ include "kyoo.front.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kyoo.labels" (dict "context" . "component" .Values.front.name "name" .Values.front.name) | nindent 4 }}
     {{- with .Values.front.service.labels }}

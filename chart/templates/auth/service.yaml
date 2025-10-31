@@ -8,6 +8,7 @@ metadata:
   {{- end }}
 {{- end }}
   name: {{ include "kyoo.auth.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kyoo.labels" (dict "context" . "component" .Values.auth.name "name" .Values.auth.name) | nindent 4 }}
     {{- with .Values.auth.service.labels }}
