@@ -56,13 +56,6 @@ spec:
               value: {{ .Values.media.baseMountPath | quote }}
             - name: LIBRARY_IGNORE_PATTERN
               value: {{ .Values.kyoo.libraryIgnorePattern | quote }}
-            - name: KYOO_APIKEY
-              valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.kyoo.apikey.apikeyKey }}
-                  name: {{ .Values.kyoo.apikey.existingSecret }}
-                  # unclear if needed
-                  optional: true
             - name: KYOO_URL
               value: "http://{{ include "kyoo.api.fullname" . }}:3567/api"
             - name: JWKS_URL
