@@ -85,7 +85,7 @@ spec:
             {{- end }}
           ports:
             - name: main
-              containerPort: 8901
+              containerPort: 4568
               protocol: TCP
           {{- with .Values.auth.kyoo_auth.livenessProbe }}
           livenessProbe:
