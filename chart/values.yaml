@@ -8,55 +8,60 @@ global:
     tag: ""
     imagePullPolicy: IfNotPresent
   imagePullSecrets: []
+  configmapAnnotations: {}
   deploymentAnnotations: {}
   persistentVolumeClaimAnnotations: {}
   podAnnotations: {}
   podLabels: {}
   extraEnv: []
 
-  # kyoo connectivity & subchart settings for meilisearch
-  # subchart configuration can be found at .meilisearch
-  meilisearch:
-    proto: http
-    host: kyoo-meilisearch
-    port: 7700
-    # subchart specific settings
-    infra:
-      # subchart does not support specifying keyname.
-      # key must be named `MEILI_MASTER_KEY`
-      existingSecret: bigsecret
-    # kyoo_back workload specific settings
-    kyoo_back:
-      masterkeyKey: MEILI_MASTER_KEY
-      existingSecret: bigsecret
   # kyoo connectivity & subchart settings for postgres
   # subchart configuration can be found at .postgresql
   postgres:
     # subchart specific settings
     infra:
-      # subchart does not accept this global value in one place
-      # if updating be sure to also update .postgresql.auth.username
+      # subchart does not accept setting username via secret, so defining here
       user: kyoo_all
       passwordKey: postgres_password
       existingSecret: bigsecret
-    # kyoo settings for connecting to kyoo_back database
-    kyoo_back:
-      host: kyoo-postgresql
+    # kyoo settings for connecting to kyoo_api database
+    kyoo_api:
+      host: kyoo-postgres
       port: 5432
-      database: kyoo_back
-      # kyoo_migrations workload specific settings
-      kyoo_migrations:
+      database: kyoo_api
+      # kyoo_api workload specific settings
+      kyoo_api:
         userKey: postgres_user
         passwordKey: postgres_password
         existingSecret: bigsecret
-      # kyoo_back workload specific settings
-      kyoo_back:
+    # kyoo settings for connecting to kyoo_auth database
+    kyoo_auth:
+      host: kyoo-postgres
+      port: 5432
+      database: kyoo_auth
+      sslmode: prefer
+      # kyoo_auth workload specific settings
+      kyoo_auth:
+        userKey: postgres_user
+        passwordKey: postgres_password
+        existingSecret: bigsecret
+    # kyoo settings for connecting to kyoo_scanner database
+    kyoo_scanner:
+      host: kyoo-postgres
+      port: 5432
+      database: kyoo_scanner
+      # schema disabled means application will not create the schema
+      # and will instead use the user's search path
+      schema: disabled
+      sslmode: prefer
+      # kyoo_scanner workload specific settings
+      kyoo_scanner:
         userKey: postgres_user
         passwordKey: postgres_password
         existingSecret: bigsecret
     # kyoo settings for connecting to kyoo_transcoder database
     kyoo_transcoder:
-      host: kyoo-postgresql
+      host: kyoo-postgres
       port: 5432
       database: kyoo_transcoder
       # schema disabled means application will not create the schema
@@ -69,61 +74,25 @@ global:
         userKey: postgres_user
         passwordKey: postgres_password
         existingSecret: bigsecret
-  # kyoo connectivity & subchart settings for rabbitmq
-  # subchart configuration can be found at .rabbitmq
-  rabbitmq:
-    host: kyoo-rabbitmq
-    port: 5672
-    # vhost is not used yet https://github.com/zoriya/Kyoo/issues/537
-    # vhost: ""
-    # subchart specific settings
-    infra:
-      # user must be manually aligned via rabbitmq.auth.user
-      passwordKey: rabbitmq_password
-      keyErlangCookie: rabbitmq_cookie
-      existingSecret: bigsecret
-    # kyoo_autosync workload specific settings
-    kyoo_autosync:
-      userKey: rabbitmq_user
-      passwordKey: rabbitmq_password
-      existingSecret: bigsecret
-    # kyoo_back workload specific settings
-    kyoo_back:
-      userKey: rabbitmq_user
-      passwordKey: rabbitmq_password
-      existingSecret: bigsecret
-    # kyoo_matcher workload specific settings
-    kyoo_matcher:
-      userKey: rabbitmq_user
-      passwordKey: rabbitmq_password
-      existingSecret: bigsecret
-    # kyoo_scanner workload specific settings
-    kyoo_scanner:
-      userKey: rabbitmq_user
-      passwordKey: rabbitmq_password
-      existingSecret: bigsecret
 
 # kyoo application settings
 kyoo:
   # The url you can use to reach your kyoo instance. This is used during oidc to redirect users to your instance.
   address: "https://kyoo.mydomain.com"
-  # If this is true, new accounts wont have any permissions before you approve them in your admin dashboard.
-  requireAccountVerification: true
-  # Specify permissions of new accounts.
-  defaultPermissions: "overall.read,overall.play"
-  # Specify permissions of guest accounts, default is no permissions.
-  unloggedPermissions: ""
+
+  # new auth settings
+  extraClaims: '{"permissions": ["core.read"], "verified": false}'
+  firstUserClaims: '{"permissions": ["users.read", "users.write", "apikeys.read", "apikeys.write", "users.delete", "core.read", "core.write", "scanner.trigger"], "verified": true}'
+  guestClaims: '{"permissions": ["users.read", "users.write", "apikeys.read", "apikeys.write", "users.delete", "core.read", "core.write", "scanner.trigger"], "verified": true}'
+  protectedClaims: "permissions,verified"
+
   # A pattern (regex) to ignore video files.
   libraryIgnorePattern: ".*/[dD]ownloads?/.*"
-  languages: "en"
   # hardware acceleration profile (valid values: disabled, vaapi, qsv, nvidia)
   transcoderAcceleration: disabled
   # the preset used during transcode. faster means worst quality, you can probably use a slower preset with hwaccels
   # warning: using vaapi hwaccel disable presets (they are not supported).
   transcoderPreset: fast
-  apikey:
-    existingSecret: bigsecret
-    apikeyKey: kyoo_apikeys
   # oidc_providers is a list of oidc providers that you want to use for authentication.
   # see the example below for how to configure an oidc provider.
   oidc_providers: []
@@ -163,6 +132,7 @@ media:
   baseMountPath: "/media"
 
 # configures workloads that require access to contentdatabase
+# unused until autosync pulled into kyoo_api
 contentdatabase:
   # TheMovieDB
   tmdb:
@@ -174,53 +144,11 @@ contentdatabase:
     pinKey: tvdb_pin
     existingSecret: bigsecret
 
-# autosync deployment configuration
-autosync:
-  name: autosync
-  # kyoo_autosync container configuration
-  kyoo_autosync:
-    livenessProbe: {}
-    readinessProbe: {}
-    resources: {}
-    containerSecurityContext: {}
-    extraVolumeMounts: []
-    extraArgs: []
-    extraEnv: []
-    image:
-      repository: ~
-      tag: ~
-  replicaCount: 1
-  updateStrategy: ~
-  podLabels: {}
-  deploymentAnnotations: {}
-  podAnnotations: {}
-  imagePullSecrets: []
-  serviceAccount:
-    create: true
-    automount: true
-    annotations: {}
-    name: ~
-  extraContainers: []
-  extraInitContainers: []
-  extraVolumes: []
-
-# back deployment configuration
-back:
-  name: back
-  # kyoo_migrations init container configuration
-  kyoo_migrations:
-    livenessProbe: {}
-    readinessProbe: {}
-    resources: {}
-    containerSecurityContext: {}
-    extraVolumeMounts: []
-    extraArgs: []
-    extraEnv: []
-    image:
-      repository: ~
-      tag: ~
-  # kyoo_back container configuration
-  kyoo_back:
+# api deployment configuration
+api:
+  name: api
+  # kyoo_api container configuration
+  kyoo_api:
     livenessProbe: {}
     readinessProbe: {}
     resources: {}
@@ -253,7 +181,7 @@ back:
   extraContainers: []
   extraInitContainers: []
   extraVolumes: []
-  # backmetadata
+  # api image data
   # user profile pictures
   persistence:
     enabled: true
@@ -263,6 +191,40 @@ back:
     accessModes:
       - ReadWriteOnce
     existingClaim: ""
+
+# auth deployment configuration
+auth:
+  name: auth
+  # kyoo_auth container configuration
+  kyoo_auth:
+    livenessProbe: {}
+    readinessProbe: {}
+    resources: {}
+    containerSecurityContext: {}
+    extraVolumeMounts: []
+    extraArgs: []
+    extraEnv: []
+    image:
+      repository: ~
+      tag: ~
+  replicaCount: 1
+  updateStrategy: ~
+  podLabels: {}
+  deploymentAnnotations: {}
+  podAnnotations: {}
+  imagePullSecrets: []
+  service:
+    annotations: {}
+    labels: {}
+    type: ClusterIP
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    name: ~
+  extraContainers: []
+  extraInitContainers: []
+  extraVolumes: []
 
 # front deployment configuration
 front:
@@ -298,41 +260,6 @@ front:
   extraInitContainers: []
   extraVolumes: []
 
-# matcher deployment configuration
-matcher:
-  name: matcher
-  # kyoo_matcher container configuration
-  kyoo_matcher:
-    livenessProbe: {}
-    readinessProbe: {}
-    resources: {}
-    containerSecurityContext: {}
-    extraVolumeMounts: []
-    # kyoo_matcher uses the same image as kyoo_scanner
-    # requires an additional argument to function as matcher
-    extraArgs:
-      - matcher
-    extraEnv: []
-    image:
-      # kyoo_matcher uses the same image as kyoo_scanner
-      repository: ghcr.io/zoriya/kyoo_scanner
-      tag: ~
-  # matcher does not support multiple replicas
-  replicaCount: 1
-  updateStrategy: ~
-  podLabels: {}
-  deploymentAnnotations: {}
-  podAnnotations: {}
-  imagePullSecrets: []
-  serviceAccount:
-    create: true
-    automount: true
-    annotations: {}
-    name: ~
-  extraContainers: []
-  extraInitContainers: []
-  extraVolumes: []
-
 # scanner deployment configuration
 scanner:
   name: scanner
@@ -355,6 +282,10 @@ scanner:
   deploymentAnnotations: {}
   podAnnotations: {}
   imagePullSecrets: []
+  service:
+    annotations: {}
+    labels: {}
+    type: ClusterIP
   serviceAccount:
     create: true
     automount: true
@@ -427,65 +358,94 @@ ingress:
   tls: false
   tlsSecret: ~
 
-# subchart settings
-meilisearch:
-  enabled: false
-  environment:
-    MEILI_ENV: production
-  auth:
-    # subchart does not support specifying keyname.
-    # key must be named `MEILI_MASTER_KEY`
-    existingMasterKeySecret: "{{ .Values.global.meilisearch.infra.existingSecret }}"
-  persistence:
-    enabled: true
-    size: 3Gi
+# traefikproxy deployment configuration
+traefikproxy:
+  enabled: true
+  defaultConfigmap: true
+  name: traefik
+  # traefik container configuration
+  traefik:
+    livenessProbe: {}
+    readinessProbe: {}
+    resources: {}
+    containerSecurityContext: {}
+    extraVolumeMounts: []
+    extraArgs:
+      - '--entryPoints.web.address=:80/tcp'
+      - '--entryPoints.websecure.address=:443/tcp'
+      - '--api.dashboard=true'
+      - '--api.insecure=true'
+      - '--log.level=INFO'
+      - '--providers.file.filename=/dynamic_config/dynamic_config.yaml'
+    extraEnv: []
+    image:
+      repository: docker.io/traefik
+      tag: v3.5.3
+  replicaCount: 1
+  updateStrategy: ~
+  podLabels: {}
+  configmapAnnotations: {}
+  deploymentAnnotations: {}
+  podAnnotations: {}
+  imagePullSecrets: []
+  service:
+    annotations: {}
+    labels: {}
+    type: ClusterIP
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+    name: ~
+  extraContainers: []
+  extraInitContainers: []
+  extraVolumes: []
 
 # subchart settings
-postgresql:
+postgres:
   enabled: false
   auth:
     # default user to be created by postgres subchart
     # subchart is unable to consume a secret for specifying user
-    username: kyoo_all
+    username: "{{ .Values.global.postgres.infra.user }}"
     existingSecret: "{{ .Values.global.postgres.infra.existingSecret }}"
     secretKeys:
       # set the postgres user password to the same as our user
-      adminPasswordKey: "{{ .Values.global.postgres.infra.passwordKey }}"
-      userPasswordKey: "{{ .Values.global.postgres.infra.passwordKey }}"
-  primary:
-    # create databases, schemas, and set search_path
-    initdb:
-      scripts:
-        # kyoo_back still requires public schema
-        # https://github.com/zoriya/Kyoo/issues/536
-        kyoo_back.sql: |
-          CREATE DATABASE {{ .Values.global.postgres.kyoo_back.database }} WITH OWNER {{ .Values.global.postgres.infra.user }}; 
-          \connect {{ .Values.global.postgres.kyoo_back.database }};
-          CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
-        kyoo_transcoder.sql: |
-          CREATE DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} WITH OWNER {{ .Values.global.postgres.infra.user }};
-          \connect {{ .Values.global.postgres.kyoo_transcoder.database }};
-          REVOKE ALL ON SCHEMA public FROM PUBLIC;
-          CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
-        user.sql: |
-          ALTER ROLE {{ .Values.global.postgres.infra.user }} 
-          IN DATABASE {{ .Values.global.postgres.kyoo_back.database }} SET search_path TO "$user", public;
-          ALTER ROLE {{ .Values.global.postgres.infra.user }} 
-          IN DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} SET search_path TO "$user", data;
-    persistence:
-      size: 3Gi
-
-# subchart settings
-rabbitmq:
-  enabled: false
-  auth:
-    # default user to be created by rabbitmq subchart
-    # subchart is unable to consume a secret for specifying user
-    username: kyoo_all
-    existingPasswordSecret: "{{ .Values.global.rabbitmq.infra.existingSecret }}"
-    existingSecretPasswordKey: "{{ .Values.global.rabbitmq.infra.passwordKey }}"
-    existingErlangSecret: "{{ .Values.global.rabbitmq.infra.existingSecret }}"
-    existingSecretErlangKey: "{{ .Values.global.rabbitmq.infra.keyErlangCookie }}"
+      passwordKey: "{{ .Values.global.postgres.infra.passwordKey }}"
+  initdb:
+    scripts:
+      kyoo_api.sql: |
+        CREATE DATABASE {{ .Values.global.postgres.kyoo_api.database }} WITH OWNER {{ .Values.global.postgres.infra.user }}; 
+        \connect {{ .Values.global.postgres.kyoo_api.database }};
+        REVOKE ALL ON SCHEMA public FROM PUBLIC;
+        CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
+      kyoo_auth.sql: |
+        CREATE DATABASE {{ .Values.global.postgres.kyoo_auth.database }} WITH OWNER {{ .Values.global.postgres.infra.user }}; 
+        \connect {{ .Values.global.postgres.kyoo_auth.database }};
+        REVOKE ALL ON SCHEMA public FROM PUBLIC;
+        CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
+      kyoo_scanner.sql: |
+        CREATE DATABASE {{ .Values.global.postgres.kyoo_scanner.database }} WITH OWNER {{ .Values.global.postgres.infra.user }};
+        \connect {{ .Values.global.postgres.kyoo_scanner.database }};
+        REVOKE ALL ON SCHEMA public FROM PUBLIC;
+        CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
+      kyoo_transcoder.sql: |
+        CREATE DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} WITH OWNER {{ .Values.global.postgres.infra.user }};
+        \connect {{ .Values.global.postgres.kyoo_transcoder.database }};
+        REVOKE ALL ON SCHEMA public FROM PUBLIC;
+        CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
+      user.sql: |
+        ALTER ROLE {{ .Values.global.postgres.infra.user }}
+        IN DATABASE {{ .Values.global.postgres.kyoo_auth.database }} SET search_path TO "$user", data;
+        ALTER ROLE {{ .Values.global.postgres.infra.user }} 
+        IN DATABASE {{ .Values.global.postgres.kyoo_api.database }} SET search_path TO "$user", data;
+        ALTER ROLE {{ .Values.global.postgres.infra.user }} 
+        IN DATABASE {{ .Values.global.postgres.kyoo_scanner.database }} SET search_path TO "$user", data;
+        ALTER ROLE {{ .Values.global.postgres.infra.user }} 
+        IN DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} SET search_path TO "$user", data;
+  persistence:
+    enabled: true
+    size: 3Gi
 
 # allows for the creation of any additional kubernetes resources
 extraObjects: []

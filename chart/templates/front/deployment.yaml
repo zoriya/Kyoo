@@ -8,6 +8,7 @@ metadata:
     {{- end }}
   {{- end }}
   name: {{ include "kyoo.front.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kyoo.labels" (dict "context" . "component" .Values.front.name "name" .Values.front.name) | nindent 4 }}
 spec:
@@ -52,7 +53,7 @@ spec:
             {{- end }}
           env:
             - name: KYOO_URL
-              value: "http://{{ include "kyoo.back.fullname" . }}:5000/api"
+              value: "http://{{ include "kyoo.api.fullname" . }}:5000/api"
             {{- with (concat .Values.global.extraEnv .Values.front.kyoo_front.extraEnv) }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
