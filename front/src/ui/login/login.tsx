@@ -11,7 +11,7 @@ import { PasswordInput } from "./password-input";
 import { ServerUrlPage } from "./server-url";
 
 export const LoginPage = () => {
-	const [apiUrl] = useQueryState("apiUrl", null);
+	const [apiUrl] = useQueryState("apiUrl", "");
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState<string | undefined>();
