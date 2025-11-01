@@ -21,7 +21,6 @@ extraObjects:
       name: bigsecret
     type: Opaque
     stringData:
-      kyoo_apikeys: yHXWGsjfjE6sy6UxavqmTUYxgCFYek
       postgres_user: kyoo_all
       postgres_password: watchSomething4me
   - kind: PersistentVolumeClaim
@@ -79,7 +78,6 @@ metadata:
   name: bigsecret
 type: Opaque
 stringData:
-  kyoo_apikeys: yHXWGsjfjE6sy6UxavqmTUYxgCFYek
   tmdb_apikey: ""
   tvdb_apikey: ""
   tvdb_pin: ""

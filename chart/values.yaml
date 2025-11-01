@@ -93,9 +93,6 @@ kyoo:
   # the preset used during transcode. faster means worst quality, you can probably use a slower preset with hwaccels
   # warning: using vaapi hwaccel disable presets (they are not supported).
   transcoderPreset: fast
-  apikey:
-    existingSecret: bigsecret
-    apikeyKey: kyoo_apikeys
   # oidc_providers is a list of oidc providers that you want to use for authentication.
   # see the example below for how to configure an oidc provider.
   oidc_providers: []
