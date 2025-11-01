@@ -20,13 +20,13 @@ data:
         basepath:
           entryPoints:
           - web
-          middlewares:
-          - phantomtoken
           service: front
           rule: "PathPrefix(`/`)"
         video:
           entryPoints:
           - web
+          middlewares:
+          - phantomtoken
           service: transcoder
           rule: "PathPrefix(`/video`)"
         auth:
@@ -42,16 +42,22 @@ data:
         api:
           entryPoints:
           - web
+          middlewares:
+          - phantomtoken
           service: api
           rule: "PathPrefix(`/api/`)"
         swagger:
           entryPoints:
           - web
+          middlewares:
+          - phantomtoken
           service: api
           rule: "PathPrefix(`/swagger`)"
         scanner:
           entryPoints:
           - web
+          middlewares:
+          - phantomtoken
           service: scanner
           rule: "PathPrefix(`/scanner/`)"
       middlewares:
