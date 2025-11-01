@@ -373,7 +373,13 @@ traefikproxy:
     resources: {}
     containerSecurityContext: {}
     extraVolumeMounts: []
-    extraArgs: []
+    extraArgs:
+      - '--entryPoints.web.address=:80/tcp'
+      - '--entryPoints.websecure.address=:443/tcp'
+      - '--api.dashboard=true'
+      - '--api.insecure=true'
+      - '--log.level=INFO'
+      - '--providers.file.filename=/dynamic_config/dynamic_config.yaml'
     extraEnv: []
     image:
       repository: docker.io/traefik
