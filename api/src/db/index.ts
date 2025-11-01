@@ -116,13 +116,17 @@ export const db = drizzle({
 });
 
 export const migrate = async () => {
-	await db.execute(
-		sql.raw(`
+	try {
+		await db.execute(
+			sql.raw(`
 			create extension if not exists pg_trgm;
 			SET pg_trgm.word_similarity_threshold = 0.4;
 			ALTER DATABASE "${postgresConfig.database}" SET pg_trgm.word_similarity_threshold = 0.4;
 		`),
-	);
+		);
+	} catch (err: any) {
+		console.error("Error while updating pg_trgm", err.message);
+	}
 	await migrateDb(db, {
 		migrationsSchema: "kyoo",
 		migrationsFolder: "./drizzle",
