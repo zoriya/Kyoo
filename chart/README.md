@@ -92,10 +92,10 @@ Kyoo consists of multiple microservices.  Best practice is for each microservice
 ## Subchart Support
 Subcharts are updated frequently and subject to changes.  This chart includes subcharts for deploying PostgreSQL.  Please consider hosting those independently of Kyoo to better handle versioning and lifecycle management.
 
-# v5 ForwardAuth Requirement
-Starting with v5, Kyoo leverages ForwardAuth middleware for offloading auth from the microservices onto a gateway.  For additional reading, please see gateway-api sigs [documentation](https://gateway-api.sigs.k8s.io/geps/gep-1494/). 
+# v5 Middleware Requirement
+Starting with v5, Kyoo leverages middleware for offloading auth from the microservices onto a gateway.  For additional reading, please see gateway-api sigs [documentation](https://gateway-api.sigs.k8s.io/geps/gep-1494/). 
 
-This Helm chart provides a few choices as most ingress/gatewayapi controllers do not currently support ForwardAuth.  
+This Helm chart provides a few choices as most ingress/gatewayapi controllers do not currently support PhantomToken auth.  
 
 ## Add TraefikProxy (Default)
 By default, this chart will deploy TraefikProxy behind the existing ingress/gateway resources.  TraefikProxy hop is added and configured to handle ForwardAuth.  This approach offers the most compatibility and requires the least amount of change from the user perspective.
@@ -103,5 +103,7 @@ By default, this chart will deploy TraefikProxy behind the existing ingress/gate
 ## Direct to TraefikProxy
 Instead of using an additional hop, Traefik can be exposed via LoadBalancer.  To do this securely, please be sure to mount and configuring the TLS certificate inside of Traefik.
 
-## Ingress/GatewayApi with ForwardAuth
-Disable the integrated TraefikProxy and adopt a controller that supports ForwardAuth.  This option will offer the most Kubernetes native experience.
+## Ingress/GatewayApi (WIP)
+Disable the integrated TraefikProxy and adopt a controller that supports PhantomToken auth.  This option will offer the most Kubernetes native experience.
+
+This is a work in progress.  One of the challenges is that microserice to microservice communication relies upon this middleware as well.  Pointing microservices to Ingress/Gateway service address is not enough since those leverage Layer7 hosts for routing traffic--unless we create a dedicated one that routes all hosts to Kyoo.
