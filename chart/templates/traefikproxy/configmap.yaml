@@ -67,7 +67,7 @@ data:
         api:
           loadBalancer:
             servers:
-            - url: http://{{ include "kyoo.api.fullname" . }}:5000/
+            - url: http://{{ include "kyoo.api.fullname" . }}:3567/
         front:
           loadBalancer:
             servers:

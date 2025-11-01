@@ -83,6 +83,9 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
+            - name: config
+              mountPath: /dynamic_config
+              readOnly: true
             {{- with .Values.traefikproxy.traefik.volumeMounts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -97,6 +100,12 @@ spec:
         {{- tpl (toYaml .) $ | nindent 6 }}
       {{- end }}
       volumes:
+        - name: config
+          configMap:
+            name: {{ include "kyoo.traefikproxy.fullname" . }}
+            items:
+              - key: dynamic_config.yaml
+                path: dynamic_config.yaml
         {{- with .Values.traefikproxy.volumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
