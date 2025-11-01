@@ -285,6 +285,10 @@ scanner:
   deploymentAnnotations: {}
   podAnnotations: {}
   imagePullSecrets: []
+  service:
+    annotations: {}
+    labels: {}
+    type: ClusterIP
   serviceAccount:
     create: true
     automount: true

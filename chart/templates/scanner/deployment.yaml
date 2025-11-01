@@ -94,6 +94,10 @@ spec:
             {{- with (concat .Values.global.extraEnv .Values.scanner.kyoo_scanner.extraEnv) }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
+          ports:
+            - name: web
+              containerPort: 4389
+              protocol: TCP
           {{- with .Values.scanner.kyoo_scanner.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
