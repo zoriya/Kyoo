@@ -78,8 +78,6 @@ func (s *MetadataService) Close() error {
 }
 
 func (s *MetadataService) setupDb() (*sql.DB, error) {
-	schema := GetEnvOr("POSTGRES_SCHEMA", "gocoder")
-
 	connectionString := os.Getenv("POSTGRES_URL")
 	if connectionString == "" {
 		connectionString = fmt.Sprintf(
@@ -91,22 +89,12 @@ func (s *MetadataService) setupDb() (*sql.DB, error) {
 			url.QueryEscape(os.Getenv("POSTGRES_DB")),
 			url.QueryEscape(GetEnvOr("POSTGRES_SSLMODE", "disable")),
 		)
-		if schema != "disabled" {
-			connectionString = fmt.Sprintf("%s&search_path=%s", connectionString, url.QueryEscape(schema))
-		}
 	}
 
 	db, err := sql.Open("postgres", connectionString)
 	if err != nil {
 		fmt.Printf("Could not connect to database, check your env variables!")
 		return nil, err
-	}
-
-	if schema != "disabled" {
-		_, err = db.Exec(fmt.Sprintf("create schema if not exists %s", schema))
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
@@ -169,9 +157,9 @@ func (s *MetadataService) GetMetadata(ctx context.Context, path string, sha stri
 		if err != nil {
 			return nil, err
 		}
-		tx.Exec(`update videos set keyframes = null where sha = $1`, sha)
-		tx.Exec(`update audios set keyframes = null where sha = $1`, sha)
-		tx.Exec(`update info set ver_keyframes = 0 where sha = $1`, sha)
+		tx.Exec(`update gocoder.videos set keyframes = null where sha = $1`, sha)
+		tx.Exec(`update gocoder.audios set keyframes = null where sha = $1`, sha)
+		tx.Exec(`update gocoder.info set ver_keyframes = 0 where sha = $1`, sha)
 		err = tx.Commit()
 		if err != nil {
 			fmt.Printf("error deleting old keyframes from database: %v", err)
@@ -187,7 +175,7 @@ func (s *MetadataService) getMetadata(path string, sha string) (*MediaInfo, erro
 	err := s.database.QueryRow(
 		`select i.sha, i.path, i.extension, i.mime_codec, i.size, i.duration, i.container,
 		i.fonts, i.ver_info, i.ver_extract, i.ver_thumbs, i.ver_keyframes
-		from info as i where i.sha=$1`,
+		from gocoder.info as i where i.sha=$1`,
 		sha,
 	).Scan(
 		&ret.Sha, &ret.Path, &ret.Extension, &ret.MimeCodec, &ret.Size, &ret.Duration, &ret.Container,
@@ -307,9 +295,9 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 
 	// it needs to be a delete instead of a on conflict do update because we want to trigger delete casquade for
 	// videos/audios & co.
-	tx.Exec(`delete from info where path = $1`, path)
+	tx.Exec(`delete from gocoder.info where path = $1`, path)
 	tx.Exec(`
-		insert into info(sha, path, extension, mime_codec, size, duration, container,
+		insert into gocoder.info(sha, path, extension, mime_codec, size, duration, container,
 		fonts, ver_info, ver_extract, ver_thumbs, ver_keyframes)
 		values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 		`,
@@ -319,7 +307,7 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 	)
 	for _, v := range ret.Videos {
 		tx.Exec(`
-			insert into videos(sha, idx, title, language, codec, mime_codec, width, height, is_default, bitrate)
+			insert into gocoder.videos(sha, idx, title, language, codec, mime_codec, width, height, is_default, bitrate)
 			values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 			on conflict (sha, idx) do update set
 				sha = excluded.sha,
@@ -338,7 +326,7 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 	}
 	for _, a := range ret.Audios {
 		tx.Exec(`
-			insert into audios(sha, idx, title, language, codec, mime_codec, is_default, bitrate)
+			insert into gocoder.audios(sha, idx, title, language, codec, mime_codec, is_default, bitrate)
 			values ($1, $2, $3, $4, $5, $6, $7, $8)
 			on conflict (sha, idx) do update set
 				sha = excluded.sha,
@@ -355,7 +343,7 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 	}
 	for _, s := range ret.Subtitles {
 		tx.Exec(`
-			insert into subtitles(sha, idx, title, language, codec, mime_codec, extension, is_default, is_forced, is_hearing_impaired)
+			insert into gocoder.subtitles(sha, idx, title, language, codec, mime_codec, extension, is_default, is_forced, is_hearing_impaired)
 			values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 			on conflict (sha, idx) do update set
 				sha = excluded.sha,
@@ -374,7 +362,7 @@ func (s *MetadataService) storeFreshMetadata(path string, sha string) (*MediaInf
 	}
 	for _, c := range ret.Chapters {
 		tx.Exec(`
-			insert into chapters(sha, start_time, end_time, name, type)
+			insert into gocoder.chapters(sha, start_time, end_time, name, type)
 			values ($1, $2, $3, $4, $5)
 			on conflict (sha, start_time) do update set
 				sha = excluded.sha,

@@ -134,10 +134,10 @@ func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx uint32
 		var table string
 		var err error
 		if isVideo {
-			table = "videos"
+			table = "gocoder.videos"
 			err = getVideoKeyframes(info.Path, idx, kf)
 		} else {
-			table = "audios"
+			table = "gocoder.audios"
 			err = getAudioKeyframes(info, idx, kf)
 		}
 
@@ -154,7 +154,7 @@ func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx uint32
 			idx,
 			pq.Array(kf.Keyframes),
 		)
-		tx.Exec(`update info set ver_keyframes = $2 where sha = $1`, info.Sha, KeyframeVersion)
+		tx.Exec(`update gocoder.info set ver_keyframes = $2 where sha = $1`, info.Sha, KeyframeVersion)
 		err = tx.Commit()
 		if err != nil {
 			log.Printf("Couldn't store keyframes on database: %v", err)
