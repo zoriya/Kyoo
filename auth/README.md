@@ -60,8 +60,8 @@ GET `/users/$id/sessions` can be used by admins to list others session
 ### Api keys
 
 ```
-Get `/apikeys`
-Post `/apikeys` {...claims} Create a new api keys with given claims
+Get `/keys`
+Post `/keys` {...claims} Create a new api keys with given claims
 ```
 
 An api key can be used like an opaque token, calling /jwt with it will return a valid jwt with the claims you specified during the post request to create it.

@@ -34,6 +34,7 @@ func (h *Handler) CreateJwt(c echo.Context) error {
 		if err != nil {
 			return err
 		}
+		c.Response().Header().Add("Authorization", fmt.Sprintf("Bearer %s", token))
 		return c.JSON(http.StatusOK, Jwt{
 			Token: &token,
 		})
