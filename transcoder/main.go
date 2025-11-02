@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 
 	_ "github.com/zoriya/kyoo/transcoder/docs"
 
@@ -35,6 +36,35 @@ func ErrorHandler(err error, c echo.Context) {
 	c.JSON(code, struct {
 		Errors []string `json:"errors"`
 	}{Errors: []string{message}})
+}
+
+func RequireCorePlayPermission(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		user := c.Get("user")
+		if user == nil {
+			return echo.NewHTTPError(http.StatusForbidden, "missing jwt")
+		}
+		token, ok := user.(*jwt.Token)
+		if !ok {
+			return echo.NewHTTPError(http.StatusForbidden, "invalid jwt")
+		}
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			return echo.NewHTTPError(http.StatusForbidden, "invalid jwt claims")
+		}
+		permissions, ok := claims["permissions"]
+		if !ok {
+			return echo.NewHTTPError(http.StatusForbidden, "missing permissions claim")
+		}
+		perms, ok := permissions.([]any)
+		if !ok {
+			return echo.NewHTTPError(http.StatusForbidden, "permissions claim is not an array")
+		}
+		if !slices.Contains(perms, "core.play") {
+			return echo.NewHTTPError(http.StatusForbidden, "missing core.play permission")
+		}
+		return next(c)
+	}
 }
 
 // @title gocoder - Kyoo's transcoder
@@ -103,7 +133,7 @@ func main() {
 					return nil, fmt.Errorf("unable to find key %q", kid)
 				}
 
-				var pubkey interface{}
+				var pubkey any
 				if err := jwk.Export(key, &pubkey); err != nil {
 					return nil, fmt.Errorf("Unable to get the public key. Error: %s", err.Error())
 				}
@@ -111,6 +141,8 @@ func main() {
 				return pubkey, nil
 			},
 		}))
+
+		g.Use(RequireCorePlayPermission)
 	}
 
 	api.RegisterStreamHandlers(g, transcoder)
