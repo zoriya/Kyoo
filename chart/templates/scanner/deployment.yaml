@@ -57,7 +57,7 @@ spec:
             - name: LIBRARY_IGNORE_PATTERN
               value: {{ .Values.kyoo.libraryIgnorePattern | quote }}
             - name: KYOO_URL
-              value: "http://{{ include "kyoo.api.fullname" . }}:3567/api"
+              value: "{{ include "kyoo.middlewareRootURL" . }}/api"
             - name: JWKS_URL
               value: "http://{{ include "kyoo.auth.fullname" . }}:4568/.well-known/jwks.json"
             - name: JWT_ISSUER
