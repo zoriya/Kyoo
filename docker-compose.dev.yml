@@ -23,7 +23,7 @@ x-transcoder: &transcoder-base
     - "traefik.http.routers.transcoder.rule=PathPrefix(`/video`)"
     - "traefik.http.routers.transcoder.middlewares=phantom-token"
     - "traefik.http.middlewares.phantom-token.forwardauth.address=http://auth:4568/auth/jwt"
-    - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,X-Api-Key"
+    - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,Cookie,X-Api-Key"
     - "traefik.http.middlewares.phantom-token.forwardauth.authResponseHeaders=Authorization"
   develop:
     watch:
@@ -94,7 +94,7 @@ services:
       - "traefik.http.routers.api.rule=PathPrefix(`/api/`) || PathPrefix(`/swagger`)"
       - "traefik.http.routers.api.middlewares=phantom-token"
       - "traefik.http.middlewares.phantom-token.forwardauth.address=http://auth:4568/auth/jwt"
-      - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,X-Api-Key"
+      - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,Cookie,X-Api-Key"
       - "traefik.http.middlewares.phantom-token.forwardauth.authResponseHeaders=Authorization"
     develop:
       watch:
@@ -129,7 +129,7 @@ services:
       - "traefik.http.routers.scanner.rule=PathPrefix(`/scanner/`)"
       - "traefik.http.routers.scanner.middlewares=phantom-token"
       - "traefik.http.middlewares.phantom-token.forwardauth.address=http://auth:4568/auth/jwt"
-      - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,X-Api-Key"
+      - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,Cookie,X-Api-Key"
       - "traefik.http.middlewares.phantom-token.forwardauth.authResponseHeaders=Authorization"
     command: fastapi dev scanner --host 0.0.0.0 --port 4389
     develop:
