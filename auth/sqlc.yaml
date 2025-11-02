@@ -30,15 +30,20 @@ sql:
         - db_type: "jsonb"
           go_type:
             type: "interface{}"
-        - column: "users.claims"
+        - column: "keibi.users.claims"
           go_type:
             import: "github.com/golang-jwt/jwt/v5"
             package: "jwt"
             type: "MapClaims"
-        - column: "apikeys.claims"
+        - column: "keibi.apikeys.claims"
           go_type:
             import: "github.com/golang-jwt/jwt/v5"
             package: "jwt"
             type: "MapClaims"
-
-
+overrides:
+  go:
+    rename:
+      keibi_apikey: Apikey
+      keibi_oidc_handle: OidcHandle
+      keibi_session: Session
+      keibi_user: User

@@ -106,29 +106,20 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 		config.ConnConfig.RuntimeParams["application_name"] = "keibi"
 	}
 
-	schema := GetenvOr("POSTGRES_SCHEMA", "keibi")
-	if _, ok := config.ConnConfig.RuntimeParams["search_path"]; !ok {
-		config.ConnConfig.RuntimeParams["search_path"] = schema
-	}
-
 	db, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
 		fmt.Printf("Could not connect to database, check your env variables!\n")
 		return nil, err
 	}
 
-	if schema != "disabled" {
-		_, err = db.Exec(ctx, fmt.Sprintf("create schema if not exists %s", schema))
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	fmt.Println("Migrating database")
 	dbi := stdlib.OpenDBFromPool(db)
 	defer dbi.Close()
 
-	driver, err := pgxd.WithInstance(dbi, &pgxd.Config{})
+	dbi.Exec("create schema if not exists keibi")
+	driver, err := pgxd.WithInstance(dbi, &pgxd.Config{
+		SchemaName: "keibi",
+	})
 	if err != nil {
 		return nil, err
 	}
