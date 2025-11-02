@@ -127,3 +127,11 @@ Create the name of the traefikproxy service account to use
     {{ default "default" .Values.traefikproxy.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Create kyoo middlewareproxy rootURL
+rootURL does not include 
+*/}}
+{{- define "kyoo.middlewareRootURL" -}}
+    {{ default (printf "http://%s" (include "kyoo.traefikproxy.fullname" .)) .Values.kyoo.middlewareRootURL }}
+{{- end -}}
