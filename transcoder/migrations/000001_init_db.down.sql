@@ -1,10 +1,10 @@
 begin;
 
-drop table info;
-drop table videos;
-drop table audios;
-drop table subtitles;
-drop table chapters;
-drop type chapter_type;
+drop table gocoder.info;
+drop table gocoder.videos;
+drop table gocoder.audios;
+drop table gocoder.subtitles;
+drop table gocoder.chapters;
+drop type gocoder.chapter_type;
 
 commit;

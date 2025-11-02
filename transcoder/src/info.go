@@ -20,125 +20,133 @@ import (
 const InfoVersion = 3
 
 type Versions struct {
-	Info      int32 `json:"info"`
-	Extract   int32 `json:"extract"`
-	Thumbs    int32 `json:"thumbs"`
-	Keyframes int32 `json:"keyframes"`
+	Info      int32 `json:"info" db:"ver_info"`
+	Extract   int32 `json:"extract" db:"ver_extract"`
+	Thumbs    int32 `json:"thumbs" db:"ver_thumbs"`
+	Keyframes int32 `json:"keyframes" db:"ver_keyframes"`
 }
 
 type MediaInfo struct {
 	// The sha1 of the video file.
-	Sha string `json:"sha"`
+	Sha string `json:"sha" db:"sha"`
 	/// The internal path of the video file.
-	Path string `json:"path"`
+	Path string `json:"path" db:"path"`
 	/// The extension currently used to store this video file
-	Extension string `json:"extension"`
-	/// The whole mimetype (defined as the RFC 6381). ex: `video/mp4; codecs="avc1.640028, mp4a.40.2"`
-	MimeCodec *string `json:"mimeCodec"`
+	Extension string `json:"extension" db:"extension"`
+	/// The whole mimetype (defined as the RFC 6381). ex: `video/mp4; codecs=\"avc1.640028, mp4a.40.2\"`
+	MimeCodec *string `json:"mimeCodec" db:"mime_codec"`
 	/// The file size of the video file.
-	Size int64 `json:"size"`
+	Size int64 `json:"size" db:"size"`
 	/// The length of the media in seconds.
-	Duration float64 `json:"duration"`
+	Duration float64 `json:"duration" db:"duration"`
 	/// The container of the video file of this episode.
-	Container *string `json:"container"`
+	Container *string `json:"container" db:"container"`
 	/// Version of the metadata. This can be used to invalidate older metadata from db if the extraction code has changed.
-	Versions Versions `json:"versions"`
+	Versions Versions `json:"versions" db:"versions"`
 
 	/// The list of videos if there are multiples.
-	Videos []Video `json:"videos"`
+	Videos []Video `json:"videos" db:"-"`
 	/// The list of audio tracks.
-	Audios []Audio `json:"audios"`
+	Audios []Audio `json:"audios" db:"-"`
 	/// The list of subtitles tracks.
-	Subtitles []Subtitle `json:"subtitles"`
+	Subtitles []Subtitle `json:"subtitles" db:"-"`
 	/// The list of fonts that can be used to display subtitles.
-	Fonts []string `json:"fonts"`
+	Fonts []string `json:"fonts" db:"fonts"`
 	/// The list of chapters. See Chapter for more information.
-	Chapters []Chapter `json:"chapters"`
+	Chapters []Chapter `json:"chapters" db:"-"`
 
 	/// lock used to read/set keyframes of video/audio
-	lock sync.Mutex
+	lock sync.Mutex `json:"-" db:"-"`
 }
 
 type Video struct {
+	Sha string `json:"-" db:"sha"`
+
 	/// The index of this track on the media.
-	Index uint32 `json:"index"`
+	Index uint32 `json:"index" db:"idx"`
 	/// The title of the stream.
-	Title *string `json:"title"`
+	Title *string `json:"title" db:"title"`
 	/// The language of this stream (as a ISO-639-2 language code)
-	Language *string `json:"language"`
+	Language *string `json:"language" db:"language"`
 	/// The human readable codec name.
-	Codec string `json:"codec"`
+	Codec string `json:"codec" db:"codec"`
 	/// The codec of this stream (defined as the RFC 6381).
-	MimeCodec *string `json:"mimeCodec"`
+	MimeCodec *string `json:"mimeCodec" db:"mime_codec"`
 	/// The width of the video stream
-	Width uint32 `json:"width"`
+	Width uint32 `json:"width" db:"width"`
 	/// The height of the video stream
-	Height uint32 `json:"height"`
+	Height uint32 `json:"height" db:"height"`
 	/// The average bitrate of the video in bytes/s
-	Bitrate uint32 `json:"bitrate"`
+	Bitrate uint32 `json:"bitrate" db:"bitrate"`
 	/// Is this stream the default one of it's type?
-	IsDefault bool `json:"isDefault"`
+	IsDefault bool `json:"isDefault" db:"is_default"`
 
 	/// Keyframes of this video
 	Keyframes *Keyframe `json:"-"`
 }
 
 type Audio struct {
+	Sha string `json:"-" db:"sha"`
+
 	/// The index of this track on the media.
-	Index uint32 `json:"index"`
+	Index uint32 `json:"index" db:"idx"`
 	/// The title of the stream.
-	Title *string `json:"title"`
+	Title *string `json:"title" db:"title"`
 	/// The language of this stream (as a IETF-BCP-47 language code)
-	Language *string `json:"language"`
+	Language *string `json:"language" db:"language"`
 	/// The human readable codec name.
-	Codec string `json:"codec"`
+	Codec string `json:"codec" db:"codec"`
 	/// The codec of this stream (defined as the RFC 6381).
-	MimeCodec *string `json:"mimeCodec"`
+	MimeCodec *string `json:"mimeCodec" db:"mime_codec"`
 	/// The average bitrate of the audio in bytes/s
-	Bitrate uint32 `json:"bitrate"`
+	Bitrate uint32 `json:"bitrate" db:"bitrate"`
 	/// Is this stream the default one of it's type?
-	IsDefault bool `json:"isDefault"`
+	IsDefault bool `json:"isDefault" db:"is_default"`
 
 	/// Keyframes of this video
 	Keyframes *Keyframe `json:"-"`
 }
 
 type Subtitle struct {
+	Sha string `json:"-" db:"sha"`
+
 	/// The index of this track on the media.
-	Index *uint32 `json:"index"`
+	Index *uint32 `json:"index" db:"idx"`
 	/// The title of the stream.
-	Title *string `json:"title"`
+	Title *string `json:"title" db:"title"`
 	/// The language of this stream (as a IETF-BCP-47 language code)
-	Language *string `json:"language"`
+	Language *string `json:"language" db:"language"`
 	/// The codec of this stream.
-	Codec string `json:"codec"`
+	Codec string `json:"codec" db:"codec"`
 	/// The codec of this stream (defined as the RFC 6381).
-	MimeCodec *string `json:"mimeCodec"`
+	MimeCodec *string `json:"mimeCodec" db:"mime_codec"`
 	/// The extension for the codec.
-	Extension *string `json:"extension"`
+	Extension *string `json:"extension" db:"extension"`
 	/// Is this stream the default one of it's type?
-	IsDefault bool `json:"isDefault"`
+	IsDefault bool `json:"isDefault" db:"is_default"`
 	/// Is this stream tagged as forced?
-	IsForced bool `json:"isForced"`
+	IsForced bool `json:"isForced" db:"is_forced"`
 	/// Is this stream tagged as hearing impaired?
-	IsHearingImpaired bool `json:"isHearingImpaired"`
+	IsHearingImpaired bool `json:"isHearingImpaired" db:"is_hearing_impaired"`
 	/// Is this an external subtitle (as in stored in a different file)
-	IsExternal bool `json:"isExternal"`
+	IsExternal bool `json:"isExternal" db:"-"`
 	/// Where the subtitle is stored (null if stored inside the video)
-	Path *string `json:"path"`
+	Path *string `json:"path" db:"-"`
 	/// The link to access this subtitle.
-	Link *string `json:"link"`
+	Link *string `json:"link" db:"-"`
 }
 
 type Chapter struct {
+	Sha string `json:"-" db:"sha"`
+
 	/// The start time of the chapter (in second from the start of the episode).
-	StartTime float32 `json:"startTime"`
+	StartTime float32 `json:"startTime" db:"start_time"`
 	/// The end time of the chapter (in second from the start of the episode).
-	EndTime float32 `json:"endTime"`
+	EndTime float32 `json:"endTime" db:"end_time"`
 	/// The name of this chapter. This should be a human-readable name that could be presented to the user.
-	Name string `json:"name"`
+	Name string `json:"name" db:"name"`
 	/// The type value is used to mark special chapters (openning/credits...)
-	Type ChapterType `json:"type"`
+	Type ChapterType `json:"type" db:"type"`
 }
 
 type ChapterType string

@@ -2,6 +2,7 @@ package src
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -10,7 +11,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/lib/pq"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/zoriya/kyoo/transcoder/src/utils"
 )
 
@@ -75,12 +76,20 @@ func (kf *Keyframe) AddListener(callback func(keyframes []float64)) {
 	kf.info.listeners = append(kf.info.listeners, callback)
 }
 
-func (kf *Keyframe) Scan(src interface{}) error {
-	var arr pq.Float64Array
-	err := arr.Scan(src)
+func (kf *Keyframe) Scan(src any) error {
+	var arr []float64
+
+	m := pgtype.NewMap()
+	t, ok := m.TypeForValue(&arr)
+
+	if !ok {
+		return errors.New("failed to parse keyframes")
+	}
+	err := m.Scan(t.OID, pgtype.BinaryFormatCode, src.([]byte), &arr)
 	if err != nil {
 		return err
 	}
+
 	kf.Keyframes = arr
 	kf.IsDone = true
 	kf.info = &KeyframeInfo{}
@@ -131,6 +140,7 @@ func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx uint32
 	info.lock.Unlock()
 
 	go func() {
+		ctx := context.Background()
 		var table string
 		var err error
 		if isVideo {
@@ -147,15 +157,16 @@ func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx uint32
 		}
 
 		kf.info.ready.Wait()
-		tx, _ := s.database.Begin()
+		tx, _ := s.database.Begin(ctx)
 		tx.Exec(
+			ctx,
 			fmt.Sprintf(`update %s set keyframes = $3 where sha = $1 and idx = $2`, table),
 			info.Sha,
 			idx,
-			pq.Array(kf.Keyframes),
+			kf.Keyframes,
 		)
-		tx.Exec(`update gocoder.info set ver_keyframes = $2 where sha = $1`, info.Sha, KeyframeVersion)
-		err = tx.Commit()
+		tx.Exec(ctx, `update gocoder.info set ver_keyframes = $2 where sha = $1`, info.Sha, KeyframeVersion)
+		err = tx.Commit(ctx)
 		if err != nil {
 			log.Printf("Couldn't store keyframes on database: %v", err)
 		}
