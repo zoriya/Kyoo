@@ -45,7 +45,7 @@ export const Image = ({
 				headers:
 					authToken && Platform.OS !== "web"
 						? {
-								Authorization: authToken,
+								Authorization: `Bearer ${authToken}`,
 							}
 						: undefined,
 			}}

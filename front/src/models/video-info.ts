@@ -47,7 +47,7 @@ export const Subtitle = z.object({
 	language: z.string().nullable(),
 	codec: z.string(),
 	mimeCodec: z.string().nullable(),
-	extension: z.string(),
+	extension: z.string().nullable(),
 	isDefault: z.boolean(),
 	isForced: z.boolean(),
 	isHearingImpaired: z.boolean(),
