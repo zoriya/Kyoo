@@ -23,7 +23,7 @@ extraObjects:
     stringData:
       postgres_user: kyoo_all
       postgres_password: watchSomething4me
-      scanner_apikey: triquarter4u
+      scanner_apikey: scanner-triquarter4u
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
@@ -86,7 +86,7 @@ stringData:
   tvdb_pin: ""
   postgres_user: kyoo_all
   postgres_password: watchSomething4me
-  scanner_apikey: triquarter4u
+  scanner_apikey: scanner-triquarter4u
 ```
 
 # Additional Notes
