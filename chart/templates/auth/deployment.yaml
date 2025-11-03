@@ -53,15 +53,31 @@ spec:
             {{- end }}
           env:
             - name: EXTRA_CLAIMS
-              value: {{ .Values.kyoo.extraClaims | quote }}
+              value: {{ .Values.kyoo.auth.extraClaims | quote }}
             - name: FIRST_USER_CLAIMS
-              value: {{ .Values.kyoo.firstUserClaims | quote }}
+              value: {{ .Values.kyoo.auth.firstUserClaims | quote }}
             - name: GUEST_CLAIMS
-              value: {{ .Values.kyoo.guestClaims | quote }}
+              value: {{ .Values.kyoo.auth.guestClaims | quote }}
             - name: PROTECTED_CLAIMS
-              value: {{ .Values.kyoo.protectedClaims | quote }}
+              value: {{ .Values.kyoo.auth.protectedClaims | quote }}
             - name: PUBLIC_URL
               value: {{ .Values.kyoo.address | quote }}
+            - name: KEIBI_APIKEY_SCANNER
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.kyoo.auth.apikeys.scanner.apikeyKey }}
+                  name: {{ .Values.kyoo.auth.apikeys.scanner.existingSecret }}
+            - name: KEIBI_APIKEY_SCANNER_CLAIMS
+              value: {{ .Values.kyoo.auth.apikeys.scanner.claims | quote}}
+            {{- range $index, $entry := .Values.kyoo.auth.apikeys.extra }}
+            - name: KEIBI_APIKEY_{{ $entry.name | upper }}
+              valueFrom:
+                secretKeyRef:
+                  key: {{ $entry.apikeyKey }}
+                  name: {{ $entry.existingSecret }}
+            - name: KEIBI_APIKEY_{{ $entry.name | upper }}_CLAIMS
+              value: {{ $entry.claims | quote }}
+            {{- end }}
             - name: PGUSER
               valueFrom:
                 secretKeyRef:

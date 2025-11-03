@@ -62,6 +62,11 @@ spec:
               value: "http://{{ include "kyoo.auth.fullname" . }}:4568/.well-known/jwks.json"
             - name: JWT_ISSUER
               value: {{ .Values.kyoo.address | quote }}
+            - name: KYOO_APIKEY
+              valueFrom:
+                secretKeyRef:
+                  key: {{ .Values.kyoo.auth.apikeys.scanner.apikeyKey }}
+                  name: {{ .Values.kyoo.auth.apikeys.scanner.existingSecret }}
             - name: THEMOVIEDB_API_ACCESS_TOKEN
               valueFrom:
                 secretKeyRef:

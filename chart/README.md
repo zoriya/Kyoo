@@ -23,6 +23,7 @@ extraObjects:
     stringData:
       postgres_user: kyoo_all
       postgres_password: watchSomething4me
+      scanner_apikey: triquarter4u
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
@@ -47,6 +48,8 @@ global:
     kyoo_auth:
       host: postgres
     kyoo_transcoder:
+      host: postgres
+    kyoo_scanner:
       host: postgres
 # specify hardware resources
 transcoder:
@@ -83,6 +86,7 @@ stringData:
   tvdb_pin: ""
   postgres_user: kyoo_all
   postgres_password: watchSomething4me
+  scanner_apikey: triquarter4u
 ```
 
 # Additional Notes
