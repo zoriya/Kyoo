@@ -15,8 +15,14 @@ function fromBase64(b64: string) {
 	return Buffer.from(b64, "base64").toString("utf8");
 }
 
-export const setCookie = (key: string, val?: unknown) => {
-	const value = toBase64(typeof val !== "string" ? JSON.stringify(val) : val);
+export const setCookie = (
+	key: string,
+	val?: unknown,
+	opts?: { skipBase64?: boolean },
+) => {
+	const value = opts?.skipBase64
+		? val
+		: toBase64(typeof val !== "string" ? JSON.stringify(val) : val);
 	const d = new Date();
 	// A year
 	d.setTime(d.getTime() + 365 * 24 * 60 * 60 * 1000);
