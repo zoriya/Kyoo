@@ -1,5 +1,5 @@
 import logging
-from asyncio import CancelledError, TaskGroup, create_task
+from asyncio import CancelledError, TaskGroup, create_task, sleep
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -48,12 +48,16 @@ async def background_startup(
 	processor: RequestProcessor,
 	is_master: bool | None,
 ):
+	async def scan():
+		# wait for everything to startup & resume before scanning
+		await sleep(30)
+		await scanner.scan(remove_deleted=True)
+
 	async with TaskGroup() as tg:
 		_ = tg.create_task(processor.listen(tg))
 		if is_master:
 			_ = tg.create_task(scanner.monitor())
-			_ = tg.create_task(scanner.scan(remove_deleted=True))
-
+			_ = tg.create_task(scan())
 
 async def cancel():
 	raise CancelledError()
