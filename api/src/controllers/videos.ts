@@ -439,10 +439,9 @@ function getNextVideoEntry({
 		.as("next");
 }
 
-export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
+export const videosReadH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 	.model({
 		video: Video,
-		"created-videos": t.Array(CreatedVideo),
 		error: t.Object({}),
 	})
 	.use(auth)
@@ -483,7 +482,7 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 					message: `No video found with id or slug '${id}'`,
 				});
 			}
-			return video;
+			return video as any;
 		},
 		{
 			detail: {
@@ -806,6 +805,14 @@ export const videosH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 			},
 		},
 	)
+
+export const videosWriteH = new Elysia({ prefix: "/videos", tags: ["videos"] })
+	.model({
+		video: Video,
+		"created-videos": t.Array(CreatedVideo),
+		error: t.Object({}),
+	})
+	.use(auth)
 	.post(
 		"",
 		async ({ body, status }) => {
