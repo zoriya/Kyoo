@@ -90,6 +90,11 @@ kyoo:
     extraClaims: '{"permissions": ["core.read"], "verified": false}'
     protectedClaims: "permissions,verified"
 
+    # Providing a private key is optional, one will be generated at startup
+    privatekey:
+      existingSecret:
+      privatekeyKey: private_key_rsa
+
     apikeys:
       scanner:
         existingSecret: bigsecret

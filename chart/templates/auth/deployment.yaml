@@ -96,6 +96,10 @@ spec:
               value: {{ .Values.global.postgres.kyoo_auth.port | quote }}
             - name: PGSSLMODE
               value: {{ .Values.global.postgres.kyoo_auth.sslmode | quote  }}
+            {{- if .Values.kyoo.auth.privatekey.existingSecret }}
+            - name: RSA_PRIVATE_KEY_PATH
+              value: /mnt/private_key/private_key.pem
+            {{- end }}
             {{- with (concat .Values.global.extraEnv .Values.auth.kyoo_auth.extraEnv) }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -119,9 +123,16 @@ spec:
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.auth.kyoo_auth.extraVolumeMounts }}
+          {{- if or .Values.auth.kyoo_auth.extraVolumeMounts .Values.kyoo.auth.privatekey.existingSecret }}
           volumeMounts:
+            {{- with .Values.auth.kyoo_auth.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- if .Values.kyoo.auth.privatekey.existingSecret }}
+            - name: private-key
+              mountPath: /mnt/private_key
+              readOnly: true
+            {{- end }}
           {{- end }}
         {{- with .Values.auth.extraContainers }}
           {{- tpl (toYaml .) $ | nindent 8 }}
@@ -130,7 +141,17 @@ spec:
       initContainers:
         {{- tpl (toYaml .) $ | nindent 6 }}
       {{- end }}
-      {{- with .Values.auth.extraVolumes }}
+      {{- if or .Values.auth.extraVolumes .Values.kyoo.auth.privatekey.existingSecret }}
       volumes:
+        {{- with .Values.auth.extraVolumes }}
         {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- if .Values.kyoo.auth.privatekey.existingSecret }}
+        - name: private-key
+          secret:
+            secretName: {{ .Values.kyoo.auth.privatekey.existingSecret }}
+            items:
+              - key: {{ .Values.kyoo.auth.privatekey.privatekeyKey }}
+                path: private_key.pem
+        {{- end }}
       {{- end }}
