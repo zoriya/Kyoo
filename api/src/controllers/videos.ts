@@ -804,7 +804,7 @@ export const videosReadH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				422: KError,
 			},
 		},
-	)
+	);
 
 export const videosWriteH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 	.model({

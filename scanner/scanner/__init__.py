@@ -59,6 +59,7 @@ async def background_startup(
 			_ = tg.create_task(scanner.monitor())
 			_ = tg.create_task(scan())
 
+
 async def cancel():
 	raise CancelledError()
 

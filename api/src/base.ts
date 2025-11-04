@@ -14,7 +14,7 @@ import { showsH } from "./controllers/shows/shows";
 import { staffH } from "./controllers/staff";
 import { studiosH } from "./controllers/studios";
 import { videosReadH, videosWriteH } from "./controllers/videos";
-import { KError } from "./models/error";
+import type { KError } from "./models/error";
 
 export const base = new Elysia({ name: "base" })
 	.onError(({ code, error }) => {
