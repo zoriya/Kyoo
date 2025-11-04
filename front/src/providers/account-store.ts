@@ -7,10 +7,9 @@ const writeAccounts = (accounts: Account[]) => {
 	storeValue("accounts", accounts);
 	if (Platform.OS === "web") {
 		const selected = accounts.find((x) => x.selected);
-		if (!selected) return;
 		setCookie("account", selected);
 		// cookie used for images and videos since we can't add Authorization headers in img or video tags.
-		setCookie("X-Bearer", selected?.token);
+		setCookie("X-Bearer", selected?.token, { skipBase64: true });
 	}
 };
 

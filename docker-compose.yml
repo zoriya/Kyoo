@@ -19,7 +19,7 @@ x-transcoder: &transcoder-base
     - "traefik.http.routers.transcoder.rule=PathPrefix(`/video`)"
     - "traefik.http.routers.transcoder.middlewares=phantom-token"
     - "traefik.http.middlewares.phantom-token.forwardauth.address=http://auth:4568/auth/jwt"
-    - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,X-Api-Key"
+    - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,Cookie,X-Api-Key"
     - "traefik.http.middlewares.phantom-token.forwardauth.authResponseHeaders=Authorization"
 
 services:
@@ -64,7 +64,7 @@ services:
       - "traefik.http.routers.api.rule=PathPrefix(`/api/`) || PathPrefix(`/swagger`)"
       - "traefik.http.routers.api.middlewares=phantom-token"
       - "traefik.http.middlewares.phantom-token.forwardauth.address=http://auth:4568/auth/jwt"
-      - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,X-Api-Key"
+      - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,Cookie,X-Api-Key"
       - "traefik.http.middlewares.phantom-token.forwardauth.authResponseHeaders=Authorization"
 
   scanner:
@@ -77,6 +77,7 @@ services:
       # Use this env var once we use mTLS for auth
       # - KYOO_URL=${KYOO_URL:-http://api:3567/api}
       - KYOO_URL=${KYOO_URL:-http://traefik:8901/api}
+      - KYOO_APIKEY=scanner-$KEIBI_APIKEY_SCANNER
       - JWKS_URL=http://auth:4568/.well-known/jwks.json
       - JWT_ISSUER=${PUBLIC_URL}
     volumes:
@@ -86,7 +87,7 @@ services:
       - "traefik.http.routers.scanner.rule=PathPrefix(`/scanner/`)"
       - "traefik.http.routers.scanner.middlewares=phantom-token"
       - "traefik.http.middlewares.phantom-token.forwardauth.address=http://auth:4568/auth/jwt"
-      - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,X-Api-Key"
+      - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,Cookie,X-Api-Key"
       - "traefik.http.middlewares.phantom-token.forwardauth.authResponseHeaders=Authorization"
 
   transcoder:

@@ -5,15 +5,15 @@ select
 	s.last_used,
 	sqlc.embed(u)
 from
-	users as u
-	inner join sessions as s on u.pk = s.user_pk
+	keibi.users as u
+	inner join keibi.sessions as s on u.pk = s.user_pk
 where
 	s.token = $1
 limit 1;
 
 -- name: TouchSession :exec
 update
-	sessions
+	keibi.sessions
 set
 	last_used = now()::timestamptz
 where
@@ -23,21 +23,21 @@ where
 select
 	s.*
 from
-	sessions as s
-	inner join users as u on u.pk = s.user_pk
+	keibi.sessions as s
+	inner join keibi.users as u on u.pk = s.user_pk
 where
 	u.pk = $1
 order by
 	last_used;
 
 -- name: CreateSession :one
-insert into sessions(token, user_pk, device)
+insert into keibi.sessions(token, user_pk, device)
 	values ($1, $2, $3)
 returning
 	*;
 
 -- name: DeleteSession :one
-delete from sessions as s using users as u
+delete from keibi.sessions as s using keibi.users as u
 where s.user_pk = u.pk
 	and s.id = $1
 	and u.id = sqlc.arg(user_id)
@@ -45,7 +45,7 @@ returning
 	s.*;
 
 -- name: ClearOtherSessions :exec
-delete from sessions as s using users as u
+delete from keibi.sessions as s using keibi.users as u
 where s.user_pk = u.pk
 	and s.id != @session_id
 	and u.id = @user_id;

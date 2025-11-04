@@ -77,7 +77,7 @@ func (s *MetadataService) ExtractThumbs(ctx context.Context, path string, sha st
 	if err != nil {
 		return set(nil, err)
 	}
-	_, err = s.database.Exec(`update info set ver_thumbs = $2 where sha = $1`, sha, ThumbsVersion)
+	_, err = s.database.Exec(ctx, `update gocoder.info set ver_thumbs = $2 where sha = $1`, sha, ThumbsVersion)
 	return set(nil, err)
 }
 

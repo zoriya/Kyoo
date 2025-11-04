@@ -2,7 +2,7 @@
 select
 	*
 from
-	users
+	keibi.users
 order by
 	id
 limit $1;
@@ -11,7 +11,7 @@ limit $1;
 select
 	*
 from
-	users
+	keibi.users
 where
 	id >= sqlc.arg(after_id)
 order by
@@ -26,8 +26,8 @@ select
 	h.username,
 	h.profile_url
 from
-	users as u
-	left join oidc_handle as h on u.pk = h.user_pk
+	keibi.users as u
+	left join keibi.oidc_handle as h on u.pk = h.user_pk
 where (@use_id::boolean
 	and u.id = @id)
 	or (not @use_id
@@ -37,7 +37,7 @@ where (@use_id::boolean
 select
 	*
 from
-	users
+	keibi.users
 where
 	email = sqlc.arg(login)
 	or username = sqlc.arg(login)
@@ -45,19 +45,19 @@ limit 1;
 
 -- name: TouchUser :exec
 update
-	users
+	keibi.users
 set
 	last_used = now()::timestamptz
 where
 	pk = $1;
 
 -- name: CreateUser :one
-insert into users(username, email, password, claims)
+insert into keibi.users(username, email, password, claims)
 	values ($1, $2, $3, case when not exists (
 			select
 				*
 			from
-				users) then
+				keibi.users) then
 			sqlc.arg(first_claims)::jsonb
 		else
 			sqlc.arg(claims)::jsonb
@@ -67,7 +67,7 @@ returning
 
 -- name: UpdateUser :one
 update
-	users
+	keibi.users
 set
 	username = coalesce(sqlc.narg(username), username),
 	email = coalesce(sqlc.narg(email), email),
@@ -79,7 +79,7 @@ returning
 	*;
 
 -- name: DeleteUser :one
-delete from users
+delete from keibi.users
 where id = $1
 returning
 	*;

@@ -1,6 +1,8 @@
 begin;
 
-create table users(
+create schema if not exists keibi;
+
+create table keibi.users(
 	pk serial primary key,
 	id uuid not null default gen_random_uuid(),
 	username varchar(256) not null unique,
@@ -12,8 +14,8 @@ create table users(
 	last_seen timestamptz not null default now()::timestamptz
 );
 
-create table oidc_handle(
-	user_pk integer not null references users(pk) on delete cascade,
+create table keibi.oidc_handle(
+	user_pk integer not null references keibi.users(pk) on delete cascade,
 	provider varchar(256) not null,
 
 	id text not null,

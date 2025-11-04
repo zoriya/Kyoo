@@ -1,5 +1,5 @@
 begin;
 
-drop table apikeys;
+drop table keibi.apikeys;
 
 commit;

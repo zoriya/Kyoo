@@ -1,6 +1,6 @@
 begin;
 
-create table info(
+create table gocoder.info(
 	sha varchar(40) not null primary key,
 	path varchar(4096) not null unique,
 	extension varchar(16),
@@ -15,8 +15,8 @@ create table info(
 	ver_keyframes integer not null
 );
 
-create table videos(
-	sha varchar(40) not null references info(sha) on delete cascade,
+create table gocoder.videos(
+	sha varchar(40) not null references gocoder.info(sha) on delete cascade,
 	idx integer not null,
 	title varchar(1024),
 	language varchar(256),
@@ -32,8 +32,8 @@ create table videos(
 	constraint videos_pk primary key (sha, idx)
 );
 
-create table audios(
-	sha varchar(40) not null references info(sha) on delete cascade,
+create table gocoder.audios(
+	sha varchar(40) not null references gocoder.info(sha) on delete cascade,
 	idx integer not null,
 	title varchar(1024),
 	language varchar(256),
@@ -47,8 +47,8 @@ create table audios(
 	constraint audios_pk primary key (sha, idx)
 );
 
-create table subtitles(
-	sha varchar(40) not null references info(sha) on delete cascade,
+create table gocoder.subtitles(
+	sha varchar(40) not null references gocoder.info(sha) on delete cascade,
 	idx integer not null,
 	title varchar(1024),
 	language varchar(256),
@@ -60,14 +60,14 @@ create table subtitles(
 	constraint subtitle_pk primary key (sha, idx)
 );
 
-create type chapter_type as enum('content', 'recap', 'intro', 'credits', 'preview');
+create type gocoder.chapter_type as enum('content', 'recap', 'intro', 'credits', 'preview');
 
-create table chapters(
-	sha varchar(40) not null references info(sha) on delete cascade,
+create table gocoder.chapters(
+	sha varchar(40) not null references gocoder.info(sha) on delete cascade,
 	start_time real not null,
 	end_time real not null,
 	name varchar(1024),
-	type chapter_type,
+	type gocoder.chapter_type,
 
 	constraint chapter_pk primary key (sha, start_time)
 );

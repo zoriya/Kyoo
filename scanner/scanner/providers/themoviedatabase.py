@@ -7,7 +7,7 @@ from statistics import mean
 from types import TracebackType
 from typing import Any, cast, override
 
-from aiohttp import ClientSession
+from aiohttp import ClientResponseError, ClientSession
 from langcodes import Language
 
 from ..models.collection import Collection, CollectionTranslation
@@ -643,7 +643,21 @@ class TheMovieDatabase(Provider):
 		async with self._client.get(path, params=params) as r:
 			if not_found_fail and r.status == 404:
 				raise ProviderError(not_found_fail)
-			r.raise_for_status()
+			if r.status == 429:
+				retry_after = r.headers.get("Retry-After")
+				delay = float(retry_after) if retry_after else 2.0
+				await asyncio.sleep(delay)
+				return await self._get(
+					path, params=params, not_found_fail=not_found_fail
+				)
+			if r.status >= 400:
+				raise ClientResponseError(
+					r.request_info,
+					r.history,
+					status=r.status,
+					message=await r.text(),
+					headers=r.headers,
+				)
 			return await r.json()
 
 	def _map_genres(self, genres: Generator[int]) -> list[Genre]:

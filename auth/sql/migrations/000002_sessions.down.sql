@@ -1,5 +1,5 @@
 begin;
 
-drop table sessions;
+drop table keibi.sessions;
 
 commit;

@@ -34,19 +34,30 @@ func (h *Handler) CreateJwt(c echo.Context) error {
 		if err != nil {
 			return err
 		}
+		c.Response().Header().Add("Authorization", fmt.Sprintf("Bearer %s", token))
 		return c.JSON(http.StatusOK, Jwt{
 			Token: &token,
 		})
 	}
 
 	auth := c.Request().Header.Get("Authorization")
-	var jwt *string
+	var token string
 
-	if !strings.HasPrefix(auth, "Bearer ") {
+	if auth == "" {
+		c, _ := c.Request().Cookie("X-Bearer")
+		if c != nil {
+			token = c.Value
+		}
+	} else if strings.HasPrefix(auth, "Bearer ") {
+		token = auth[len("Bearer "):]
+	} else if auth != "" {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid bearer format.")
+	}
+
+	var jwt *string
+	if token == "" {
 		jwt = h.createGuestJwt()
 	} else {
-		token := auth[len("Bearer "):]
-
 		tkn, err := h.createJwt(token)
 		if err != nil {
 			return err

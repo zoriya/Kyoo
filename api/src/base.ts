@@ -13,7 +13,7 @@ import { series } from "./controllers/shows/series";
 import { showsH } from "./controllers/shows/shows";
 import { staffH } from "./controllers/staff";
 import { studiosH } from "./controllers/studios";
-import { videosH } from "./controllers/videos";
+import { videosReadH, videosWriteH } from "./controllers/videos";
 import type { KError } from "./models/error";
 
 export const base = new Elysia({ name: "base" })
@@ -90,7 +90,8 @@ export const handlers = new Elysia({ prefix })
 				.use(imagesH)
 				.use(watchlistH)
 				.use(historyH)
-				.use(nextup),
+				.use(nextup)
+				.use(videosReadH),
 	)
 	.guard(
 		{
@@ -104,5 +105,5 @@ export const handlers = new Elysia({ prefix })
 			// },
 			permissions: ["core.write"],
 		},
-		(app) => app.use(videosH).use(seed),
+		(app) => app.use(videosWriteH).use(seed),
 	);
