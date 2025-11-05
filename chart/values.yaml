@@ -64,9 +64,6 @@ global:
       host: kyoo-postgres
       port: 5432
       database: kyoo_transcoder
-      # schema disabled means application will not create the schema
-      # and will instead use the user's search path
-      schema: disabled
       # sslmode valid options are 'require' or 'disable', 'prefer' is not supported
       sslmode: disable
       # kyoo_transcoder workload specific settings

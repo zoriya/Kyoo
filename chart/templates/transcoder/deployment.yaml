@@ -73,25 +73,23 @@ spec:
               value: "/dev/dri/renderD128"
             - name: GOCODER_SAFE_PATH
               value: {{ .Values.media.baseMountPath | quote }}
-            - name: POSTGRES_USER
+            - name: PGUSER
               valueFrom:
                 secretKeyRef:
                   key: {{ .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.userKey }}
                   name: {{ .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.existingSecret }}
-            - name: POSTGRES_PASSWORD
+            - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
                   key: {{ .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.passwordKey }}
                   name: {{ .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.existingSecret }}
-            - name: POSTGRES_DB
+            - name: PGDATABASE
               value: {{ .Values.global.postgres.kyoo_transcoder.database | quote }}
-            - name: POSTGRES_SERVER
+            - name: PGHOST
               value: {{ .Values.global.postgres.kyoo_transcoder.host | quote }}
-            - name: POSTGRES_PORT
+            - name: PGPORT
               value: {{ .Values.global.postgres.kyoo_transcoder.port | quote }}
-            - name: POSTGRES_SCHEMA
-              value: {{ .Values.global.postgres.kyoo_transcoder.schema | quote  }}
-            - name: POSTGRES_SSLMODE
+            - name: PGSSLMODE
               value: {{ .Values.global.postgres.kyoo_transcoder.sslmode | quote  }}
             {{- with (concat .Values.global.extraEnv .Values.transcoder.kyoo_transcoder.extraEnv) }}
               {{- toYaml . | nindent 12 }}
