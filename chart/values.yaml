@@ -92,7 +92,7 @@ kyoo:
 
     # Providing a private key is optional, one will be generated at startup
     privatekey:
-      existingSecret:
+      existingSecret: ~
       privatekeyKey: private_key_rsa
 
     apikeys:
