@@ -19,10 +19,10 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
-	"github.com/labstack/echo-jwt/v4"
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/swaggo/echo-swagger"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 func ErrorHandler(err error, c echo.Context) {
@@ -248,6 +248,7 @@ func main() {
 	r.DELETE("/keys/:id", h.DeleteApiKey)
 
 	g.GET("/jwt", h.CreateJwt)
+	g.Any("/jwt/*", h.CreateJwt)
 	e.GET("/.well-known/jwks.json", h.GetJwks)
 	e.GET("/.well-known/openid-configuration", h.GetOidcConfig)
 
