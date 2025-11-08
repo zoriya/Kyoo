@@ -260,7 +260,7 @@ export const prefetch = async (...queries: QueryIdentifier[]) => {
 };
 
 type MutationParams = {
-	method?: "POST" | "PUT" | "DELETE";
+	method?: "POST" | "PUT" | "PATCH" | "DELETE";
 	path?: string[];
 	params?: {
 		[query: string]: boolean | number | string | string[] | undefined;
@@ -268,12 +268,14 @@ type MutationParams = {
 	body?: object;
 };
 
-export const useMutation = <T = void>({
+export const useMutation = <T = void, QueryRet>({
 	compute,
 	invalidate,
+	optimistic,
 	...queryParams
 }: MutationParams & {
 	compute?: (param: T) => MutationParams;
+	optimistic?: ((param: T) => QueryRet);
 	invalidate: string[] | null;
 }) => {
 	const { apiUrl, authToken } = useContext(AccountContext);
@@ -293,14 +295,29 @@ export const useMutation = <T = void>({
 				parser: null,
 			});
 		},
-		onSuccess: invalidate
-			? async () =>
-					await queryClient.invalidateQueries({
-						queryKey: toQueryKey({ apiUrl, path: invalidate }),
-					})
-			: undefined,
-		// TODO: Do something
-		// onError: () => {}
+		...(invalidate && optimistic
+			? {
+					onMutate: async (params) => {
+						const next = optimistic(params);
+						await queryClient.cancelQueries({ queryKey: invalidate });
+						const previous = queryClient.getQueryData(invalidate);
+						queryClient.setQueryData(invalidate, next);
+						return { previous, next };
+					},
+					onError: (_, __, context) => {
+						queryClient.setQueryData(invalidate, context!.previous);
+					},
+				}
+			: {}),
+		...(invalidate
+			? {
+					onSettled: async () => {
+						await queryClient.invalidateQueries({
+							queryKey: toQueryKey({ apiUrl, path: invalidate }),
+						});
+					},
+				}
+			: {}),
 	});
 	return mutation;
 };
