@@ -1,5 +1,5 @@
-import { NavigationContext, useRoute } from "@react-navigation/native";
-import { useCallback, useContext } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback } from "react";
 import type { Movie, Show } from "~/models";
 
 export function setServerData(_key: string, _val: any) {}
@@ -8,15 +8,15 @@ export function getServerData(key: string) {
 }
 
 export const useQueryState = <S>(key: string, initial: S) => {
-	const route = useRoute();
-	const nav = useContext(NavigationContext);
+	const params = useLocalSearchParams();
+	const router = useRouter();
 
-	const state = ((route.params as any)?.[key] as S) ?? initial;
+	const state = (params[key] as S) ?? initial;
 	const update = useCallback(
 		(val: S | ((old: S) => S)) => {
-			nav!.setParams({ [key]: val });
+			router.setParams({ [key]: val } as any);
 		},
-		[nav, key],
+		[router, key],
 	);
 	return [state, update] as const;
 };

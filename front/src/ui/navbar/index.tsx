@@ -4,7 +4,8 @@ import Login from "@material-symbols/svg-400/rounded/login.svg";
 import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import Settings from "@material-symbols/svg-400/rounded/settings.svg";
-import type { Ref } from "react";
+import { useGlobalSearchParams, usePathname, useRouter } from "expo-router";
+import { type Ref, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
 	Platform,
@@ -28,7 +29,6 @@ import {
 } from "~/primitives";
 import { useAccount, useAccounts } from "~/providers/account-context";
 import { logout } from "~/ui/login/logic";
-import { useQueryState } from "~/utils";
 import { KyooLongLogo } from "./icon";
 
 export const NavbarTitle = (props: { onLayout?: ViewProps["onLayout"] }) => {
@@ -52,13 +52,31 @@ const SearchBar = ({
 }: TextInputProps & { ref?: Ref<TextInput> }) => {
 	const { theme } = useYoshiki();
 	const { t } = useTranslation();
-	const [query, setQuery] = useQueryState("q", "");
+	const params = useGlobalSearchParams();
+	const [query, setQuery] = useState((params.q as string) ?? "");
+	const path = usePathname();
+	const router = useRouter();
+	const inputRef = useRef<TextInput>(null);
+
+	useEffect(() => {
+		if (path === "/browse") {
+			inputRef.current?.focus();
+			setQuery(params.q as string);
+		} else {
+			inputRef.current?.blur();
+			setQuery("");
+		}
+	}, [path, params.q]);
 
 	return (
 		<Input
-			ref={ref}
-			value={query ?? ""}
-			onChangeText={setQuery}
+			ref={inputRef}
+			value={query}
+			onChangeText={(q) => {
+				setQuery(q);
+				if (path !== "/browse") router.navigate(`/browse?q=${q}`);
+				else router.setParams({ q });
+			}}
 			placeholder={t("navbar.search")}
 			placeholderTextColor={theme.contrast}
 			containerStyle={{
@@ -153,7 +171,7 @@ export const NavbarRight = () => {
 					icon={Search}
 					color={theme.colors.white}
 					as={Link}
-					href={"/search"}
+					href={"/browse"}
 					{...tooltip(t("navbar.search"))}
 				/>
 			)}
