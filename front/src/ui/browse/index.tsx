@@ -8,6 +8,7 @@ import type { SortBy, SortOrd } from "./types";
 export const BrowsePage = () => {
 	const [filter, setFilter] = useQueryState("filter", "");
 	const [sort, setSort] = useQueryState("sort", "name");
+	const [search] = useQueryState("q", "");
 	const sortOrd = sort.startsWith("-") ? "desc" : "asc";
 	const sortBy = (sort.startsWith("-") ? sort.substring(1) : sort) as SortBy;
 
@@ -17,7 +18,7 @@ export const BrowsePage = () => {
 	return (
 		<InfiniteFetch
 			key={layout}
-			query={BrowsePage.query(filter, sortBy, sortOrd)}
+			query={BrowsePage.query({ filter, sortBy, sortOrd, search })}
 			layout={LayoutComponent.layout}
 			Header={
 				<BrowseSettings
@@ -38,11 +39,17 @@ export const BrowsePage = () => {
 	);
 };
 
-BrowsePage.query = (
-	filter?: string,
-	sortBy?: SortBy,
-	sortOrd?: SortOrd,
-): QueryIdentifier<Show> => {
+BrowsePage.query = ({
+	filter,
+	sortBy,
+	sortOrd,
+	search,
+}: {
+	filter?: string;
+	sortBy?: SortBy;
+	sortOrd?: SortOrd;
+	search?: string;
+}): QueryIdentifier<Show> => {
 	return {
 		parser: Show,
 		path: ["api", "shows"],
@@ -50,6 +57,7 @@ BrowsePage.query = (
 		params: {
 			sort: sortBy ? `${sortOrd === "desc" ? "-" : ""}${sortBy}` : "name",
 			filter,
+			query: search,
 		},
 	};
 };
