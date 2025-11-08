@@ -3,6 +3,7 @@ WORKDIR /app
 
 COPY package.json bun.lock .
 COPY scripts scripts
+COPY public public
 RUN bun install --frozen-lockfile
 
 COPY . .

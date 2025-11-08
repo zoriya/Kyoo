@@ -1,6 +1,9 @@
 {
 	"extends": "//",
 	"files": {
-		"includes": ["src/**"]
+		"includes": [
+			"src/**",
+			"scripts/**"
+		]
 	}
 }
