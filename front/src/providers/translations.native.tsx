@@ -3,11 +3,12 @@ import { type ReactNode, useMemo } from "react";
 import { I18nextProvider } from "react-i18next";
 import { setServerData } from "~/utils";
 import { resources, supportedLanguages } from "./translations.compile";
+import { languageDetector } from "./translations-detector";
 
 export const TranslationsProvider = ({ children }: { children: ReactNode }) => {
 	const val = useMemo(() => {
 		const i18n = i18next.createInstance();
-		i18n.init({
+		i18n.use(languageDetector).init({
 			interpolation: {
 				escapeValue: false,
 			},

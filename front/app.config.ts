@@ -1,4 +1,5 @@
 import type { ExpoConfig } from "expo/config";
+import { supportedLanguages } from "~/providers/translations.compile";
 
 const IS_DEV = process.env.APP_VARIANT === "development";
 
@@ -75,6 +76,12 @@ export const expo: ExpoConfig = {
 				},
 			},
 		],
+		[
+			"react-native-localization-settings",
+			{
+				languages: supportedLanguages,
+			}
+		]
 	],
 	experiments: {
 		typedRoutes: true,
