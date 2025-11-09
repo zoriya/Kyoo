@@ -127,8 +127,7 @@
 			},
 			"language": {
 				"label": "Limbă",
-				"description": "Setați limba aplicației",
-				"system": "Sistem"
+				"description": "Setați limba aplicației"
 			}
 		},
 		"playback": {

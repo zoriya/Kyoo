@@ -127,8 +127,7 @@
 			},
 			"language": {
 				"label": "Idioma",
-				"description": "Establecer el idioma de tu aplicación",
-				"system": "Sistema"
+				"description": "Establecer el idioma de tu aplicación"
 			}
 		},
 		"playback": {

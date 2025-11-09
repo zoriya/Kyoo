@@ -127,8 +127,7 @@
 			},
 			"language": {
 				"label": "Taal",
-				"description": "Zet de taal van je applicatie",
-				"system": "Systeem"
+				"description": "Zet de taal van je applicatie"
 			}
 		},
 		"playback": {

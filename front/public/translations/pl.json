@@ -72,8 +72,7 @@
 			},
 			"language": {
 				"label": "Język",
-				"description": "Ustaw język",
-				"system": "Język systemu"
+				"description": "Ustaw język"
 			},
 			"label": "Ogólne"
 		},

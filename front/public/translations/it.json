@@ -102,8 +102,7 @@
 			},
 			"language": {
 				"label": "Lingua",
-				"description": "Imposta la lingua della tua applicazione",
-				"system": "Sistema"
+				"description": "Imposta la lingua della tua applicazione"
 			}
 		},
 		"playback": {

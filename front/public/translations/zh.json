@@ -102,8 +102,7 @@
 			},
 			"language": {
 				"label": "语言",
-				"description": "设置应用程序的语言",
-				"system": "跟随系统"
+				"description": "设置应用程序的语言"
 			}
 		},
 		"playback": {
