@@ -14,6 +14,7 @@ import { showsH } from "./controllers/shows/shows";
 import { staffH } from "./controllers/staff";
 import { studiosH } from "./controllers/studios";
 import { videosReadH, videosWriteH } from "./controllers/videos";
+import { db } from "./db";
 import type { KError } from "./models/error";
 
 export const base = new Elysia({ name: "base" })
@@ -58,6 +59,33 @@ export const base = new Elysia({ name: "base" })
 		detail: { description: "Check if the api is healthy." },
 		response: { 200: t.Object({ status: t.Literal("healthy") }) },
 	})
+	.get(
+		"/ready",
+		async ({ status }) => {
+			try {
+				await db.execute("select 1");
+				return { status: "healthy", database: "healthy" } as const;
+			} catch (e) {
+				return status(500, {
+					status: "unhealthy",
+					database: e,
+				});
+			}
+		},
+		{
+			detail: { description: "Check if the api is healthy." },
+			response: {
+				200: t.Object({
+					status: t.Literal("healthy"),
+					database: t.Literal("healthy"),
+				}),
+				500: t.Object({
+					status: t.Literal("unhealthy"),
+					database: t.Any(),
+				}),
+			},
+		},
+	)
 	.as("global");
 
 export const prefix = "/api";

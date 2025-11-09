@@ -49,6 +49,12 @@ async def get_db():
 		yield cast(Connection, db)
 
 
+# because https://github.com/fastapi/fastapi/pull/10353
+async def get_db_fapi():
+	async with get_db() as db:
+		yield db
+
+
 async def migrate(migrations_dir="./migrations"):
 	async with get_db() as db:
 		_ = await db.execute(

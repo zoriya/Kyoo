@@ -91,7 +91,8 @@ services:
       - images:/app/images
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.api.rule=PathPrefix(`/api/`) || PathPrefix(`/swagger`)"
+      - "traefik.http.routers.swagger.rule=PathPrefix(`/swagger`)"
+      - "traefik.http.routers.api.rule=PathPrefix(`/api/`)"
       - "traefik.http.routers.api.middlewares=phantom-token"
       - "traefik.http.middlewares.phantom-token.forwardauth.address=http://auth:4568/auth/jwt"
       - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,Cookie,X-Api-Key"

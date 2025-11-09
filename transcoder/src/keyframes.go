@@ -157,7 +157,7 @@ func (s *MetadataService) GetKeyframes(info *MediaInfo, isVideo bool, idx uint32
 		}
 
 		kf.info.ready.Wait()
-		tx, _ := s.database.Begin(ctx)
+		tx, _ := s.Database.Begin(ctx)
 		tx.Exec(
 			ctx,
 			fmt.Sprintf(`update %s set keyframes = $3 where sha = $1 and idx = $2`, table),

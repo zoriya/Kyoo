@@ -145,6 +145,7 @@ func main() {
 		g.Use(RequireCorePlayPermission)
 	}
 
+	api.RegisterHealthHandlers(e.Group("/video"), metadata.Database)
 	api.RegisterStreamHandlers(g, transcoder)
 	api.RegisterMetadataHandlers(g, metadata)
 	api.RegisterPProfHandlers(e)

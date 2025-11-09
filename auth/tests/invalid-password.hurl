@@ -19,7 +19,7 @@ GET {{host}}/users/me
 Authorization: Bearer {{jwt}}
 HTTP 200
 [Captures]
-register_info: body
+register_id: jsonpath "$.id"
 [Asserts]
 jsonpath "$.username" == "login-user"
 
@@ -48,7 +48,7 @@ Authorization: Bearer {{jwt}}
 HTTP 200
 [Asserts]
 jsonpath "$.username" == "login-user"
-body == {{register_info}}
+jsonpath "$.id" == {{register_id}}
 
 
 # Invalid password login

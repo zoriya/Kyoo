@@ -27,7 +27,7 @@ func (s *MetadataService) ExtractSubs(ctx context.Context, info *MediaInfo) (any
 		log.Printf("Couldn't extract subs: %v", err)
 		return set(nil, err)
 	}
-	_, err = s.database.Exec(ctx, `update gocoder.info set ver_extract = $2 where sha = $1`, info.Sha, ExtractVersion)
+	_, err = s.Database.Exec(ctx, `update gocoder.info set ver_extract = $2 where sha = $1`, info.Sha, ExtractVersion)
 	return set(nil, err)
 }
 

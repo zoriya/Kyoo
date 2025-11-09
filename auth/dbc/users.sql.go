@@ -259,7 +259,7 @@ const touchUser = `-- name: TouchUser :exec
 update
 	keibi.users
 set
-	last_used = now()::timestamptz
+	last_seen = now()::timestamptz
 where
 	pk = $1
 `

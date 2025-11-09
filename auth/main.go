@@ -59,7 +59,27 @@ func (v *Validator) Validate(i any) error {
 }
 
 func (h *Handler) CheckHealth(c echo.Context) error {
-	return c.JSON(200, struct{ Status string }{Status: "healthy"})
+	return c.JSON(200, struct {
+		Status string `json:"status"`
+	}{Status: "healthy"})
+}
+
+func (h *Handler) CheckReady(c echo.Context) error {
+	_, err := h.rawDb.Exec(c.Request().Context(), "select 1")
+
+	status := "healthy"
+	db := "healthy"
+	ret := 200
+	if err != nil {
+		status = "unhealthy"
+		db = err.Error()
+		ret = 500
+	}
+
+	return c.JSON(ret, struct {
+		Status   string `json:"status"`
+		Database string `json:"database"`
+	}{Status: status, Database: db})
 }
 
 func GetenvOr(env string, def string) string {
@@ -135,6 +155,7 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 
 type Handler struct {
 	db     *dbc.Queries
+	rawDb  *pgxpool.Pool
 	config *Configuration
 }
 
@@ -210,7 +231,8 @@ func main() {
 	}
 
 	h := Handler{
-		db: dbc.New(db),
+		db:    dbc.New(db),
+		rawDb: db,
 	}
 	conf, err := LoadConfiguration(h.db)
 	if err != nil {
@@ -228,6 +250,7 @@ func main() {
 	}))
 
 	g.GET("/health", h.CheckHealth)
+	g.GET("/ready", h.CheckReady)
 
 	r.GET("/users", h.ListUsers)
 	r.GET("/users/:id", h.GetUser)
