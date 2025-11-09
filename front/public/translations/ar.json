@@ -127,8 +127,7 @@
 			},
 			"language": {
 				"label": "اللغة",
-				"description": "تعيين لغة التطبيق الخاص بك",
-				"system": "النظام"
+				"description": "تعيين لغة التطبيق الخاص بك"
 			}
 		},
 		"playback": {

@@ -127,8 +127,7 @@
 			},
 			"language": {
 				"label": "언어",
-				"description": "애플리케이션 언어 설정",
-				"system": "시스템"
+				"description": "애플리케이션 언어 설정"
 			}
 		},
 		"playback": {

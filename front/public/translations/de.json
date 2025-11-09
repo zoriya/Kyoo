@@ -102,8 +102,7 @@
 			},
 			"language": {
 				"label": "Sprache",
-				"description": "Lege die Sprache der Anwending fest",
-				"system": "System"
+				"description": "Lege die Sprache der Anwending fest"
 			}
 		},
 		"playback": {
