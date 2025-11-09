@@ -115,26 +115,37 @@ export const SettingsContainer = ({
 	);
 };
 
-export const useSetting = <Setting extends keyof User["settings"]>(
+export const useSetting = <Setting extends keyof User["claims"]["settings"]>(
 	setting: Setting,
 ) => {
 	const account = useAccount();
 	const { mutateAsync } = useMutation({
 		method: "PATCH",
-		path: ["auth", "me"],
-		compute: (update: Partial<User["settings"]>) => ({
-			body: { settings: { ...account!.settings, ...update } },
+		path: ["auth", "users", "me"],
+		compute: (update: Partial<User["claims"]["settings"]>) => ({
+			body: {
+				claims: {
+					...account!.claims,
+					settings: { ...account!.claims.settings, ...update },
+				},
+			},
 		}),
 		optimistic: (update) => ({
-			body: { ...account, settings: { ...account!.settings, ...update } },
+			body: {
+				...account,
+				claims: {
+					...account!.claims,
+					settings: { ...account!.claims.settings, ...update },
+				},
+			},
 		}),
-		invalidate: ["auth", "me"],
+		invalidate: ["auth", "users", "me"],
 	});
 
 	if (!account) return null;
 	return [
-		account.settings[setting],
-		async (value: User["settings"][Setting]) => {
+		account.claims.settings[setting],
+		async (value: User["claims"]["settings"][Setting]) => {
 			await mutateAsync({ [setting]: value });
 		},
 	] as const;

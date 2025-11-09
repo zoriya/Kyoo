@@ -1,4 +1,4 @@
-import Theme from "@material-symbols/svg-400/outlined/dark_mode.svg";
+// import Theme from "@material-symbols/svg-400/outlined/dark_mode.svg";
 import Language from "@material-symbols/svg-400/outlined/language.svg";
 import Android from "@material-symbols/svg-400/rounded/android.svg";
 import Public from "@material-symbols/svg-400/rounded/public.svg";

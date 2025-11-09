@@ -2,7 +2,7 @@ import { Stack } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "yoshiki/native";
 import { ErrorConsumer } from "~/providers/error-consumer";
-import { NavbarTitle } from "~/ui/navbar";
+import { NavbarProfile, NavbarTitle } from "~/ui/navbar";
 
 export default function Layout() {
 	const insets = useSafeAreaInsets();
@@ -13,6 +13,7 @@ export default function Layout() {
 			<Stack
 				screenOptions={{
 					headerTitle: () => <NavbarTitle />,
+					headerRight: () => <NavbarProfile />,
 					contentStyle: {
 						paddingLeft: insets.left,
 						paddingRight: insets.right,

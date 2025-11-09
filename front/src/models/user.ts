@@ -2,42 +2,48 @@ import { z } from "zod/v4";
 
 export const User = z
 	.object({
+			// 	// keep a default for older versions of the api
+			// 	.default({}),
 		id: z.string(),
 		username: z.string(),
 		email: z.string(),
-		// permissions: z.array(z.string()),
-		// hasPassword: z.boolean().default(true),
-		// settings: z
-		// 	.object({
-		// 		downloadQuality: z
-		// 			.union([
-		// 				z.literal("original"),
-		// 				z.literal("8k"),
-		// 				z.literal("4k"),
-		// 				z.literal("1440p"),
-		// 				z.literal("1080p"),
-		// 				z.literal("720p"),
-		// 				z.literal("480p"),
-		// 				z.literal("360p"),
-		// 				z.literal("240p"),
-		// 			])
-		// 			.default("original")
-		// 			.catch("original"),
-		// 		audioLanguage: z.string().default("default").catch("default"),
-		// 		subtitleLanguage: z.string().nullable().default(null).catch(null),
-		// 	})
-		// 	// keep a default for older versions of the api
-		// 	.default({}),
-		// externalId: z
-		// 	.record(
-		// 		z.string(),
-		// 		z.object({
-		// 			id: z.string(),
-		// 			username: z.string().nullable().default(""),
-		// 			profileUrl: z.string().nullable(),
-		// 		}),
-		// 	)
-		// 	.default({}),
+		claims: z.object({
+			permissions: z.array(z.string()),
+			// hasPassword: z.boolean().default(true),
+			settings: z
+				.object({
+					downloadQuality: z
+						.union([
+							z.literal("original"),
+							z.literal("8k"),
+							z.literal("4k"),
+							z.literal("1440p"),
+							z.literal("1080p"),
+							z.literal("720p"),
+							z.literal("480p"),
+							z.literal("360p"),
+							z.literal("240p"),
+						])
+						.catch("original"),
+					audioLanguage: z.string().catch("default"),
+					subtitleLanguage: z.string().nullable().catch(null),
+				})
+				.default({
+					downloadQuality: "original",
+					audioLanguage: "default",
+					subtitleLanguage: null,
+				}),
+			// externalId: z
+			// 	.record(
+			// 		z.string(),
+			// 		z.object({
+			// 			id: z.string(),
+			// 			username: z.string().nullable().default(""),
+			// 			profileUrl: z.string().nullable(),
+			// 		}),
+			// 	)
+			// 	.default({}),
+		}),
 	})
 	.transform((x) => ({
 		...x,

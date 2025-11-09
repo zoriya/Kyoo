@@ -1,32 +1,26 @@
-/*
- * Kyoo - A portable and vast media library solution.
- * Copyright (c) Kyoo.
- *
- * See AUTHORS.md and LICENSE file in the project root for full license information.
- *
- * Kyoo is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Kyoo is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
- */
-
-import { languageCodes, useLanguageName } from "../utils";
-import { Preference, SettingsContainer, useSetting } from "./base";
-
-import { useLocalSetting } from "@kyoo/models";
-import { Select } from "@kyoo/primitives";
 import SubtitleLanguage from "@material-symbols/svg-400/rounded/closed_caption-fill.svg";
 import PlayModeI from "@material-symbols/svg-400/rounded/display_settings-fill.svg";
 import AudioLanguage from "@material-symbols/svg-400/rounded/music_note-fill.svg";
 import { useTranslation } from "react-i18next";
+import { Select } from "~/primitives";
+import { useLocalSetting } from "~/providers/settings";
+import { useLanguageName } from "~/track-utils";
+import { Preference, SettingsContainer, useSetting } from "./base";
+import langmap from "langmap";
+
+const seenNativeNames = new Set();
+export const languageCodes = Object.keys(langmap)
+	.filter((x) => {
+		const nativeName = langmap[x]?.nativeName;
+
+		// Only include if nativeName is unique and defined
+		if (nativeName && !seenNativeNames.has(nativeName)) {
+			seenNativeNames.add(nativeName);
+			return true;
+		}
+		return false;
+	})
+	.filter((x) => !x.includes("@"));
 
 export const PlaybackSettings = () => {
 	const { t } = useTranslation();
@@ -61,7 +55,9 @@ export const PlaybackSettings = () => {
 					onValueChange={(value) => setAudio(value)}
 					values={["default", ...languageCodes]}
 					getLabel={(key) =>
-						key === "default" ? t("mediainfo.default") : (getLanguageName(key) ?? key)
+						key === "default"
+							? t("mediainfo.default")
+							: (getLanguageName(key) ?? key)
 					}
 				/>
 			</Preference>
@@ -73,7 +69,9 @@ export const PlaybackSettings = () => {
 				<Select
 					label={t("settings.playback.subtitleLanguage.label")}
 					value={subtitle ?? "none"}
-					onValueChange={(value) => setSubtitle(value === "none" ? null : value)}
+					onValueChange={(value) =>
+						setSubtitle(value === "none" ? null : value)
+					}
 					values={["none", "default", ...languageCodes]}
 					getLabel={(key) =>
 						key === "none"

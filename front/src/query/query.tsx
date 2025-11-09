@@ -268,7 +268,7 @@ type MutationParams = {
 	body?: object;
 };
 
-export const useMutation = <T = void, QueryRet>({
+export const useMutation = <T = void, QueryRet = void>({
 	compute,
 	invalidate,
 	optimistic,
