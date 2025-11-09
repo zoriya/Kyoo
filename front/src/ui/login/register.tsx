@@ -46,14 +46,14 @@ export const RegisterPage = () => {
 
 			<P {...(css({ paddingLeft: ts(1) }) as any)}>{t("login.password")}</P>
 			<PasswordInput
-				autoComplete="password-new"
+				autoComplete="new-password"
 				variant="big"
 				onChangeText={(value) => setPassword(value)}
 			/>
 
 			<P {...(css({ paddingLeft: ts(1) }) as any)}>{t("login.confirm")}</P>
 			<PasswordInput
-				autoComplete="password-new"
+				autoComplete="new-password"
 				variant="big"
 				onChangeText={(value) => setConfirm(value)}
 			/>
@@ -90,7 +90,7 @@ export const RegisterPage = () => {
 			{/* )} */}
 			<P>
 				<Trans i18nKey="login.or-login">
-					Have an account already?{" "}
+					Have an account already?
 					<A href={`/login?apiUrl=${apiUrl}`}>Log in</A>.
 				</Trans>
 			</P>

@@ -1,81 +1,67 @@
-/*
- * Kyoo - A portable and vast media library solution.
- * Copyright (c) Kyoo.
- *
- * See AUTHORS.md and LICENSE file in the project root for full license information.
- *
- * Kyoo is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Kyoo is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
- */
-
-import {
-	type Account,
-	type KyooErrors,
-	deleteAccount,
-	logout,
-	queryFn,
-	useAccount,
-} from "@kyoo/models";
-import { Alert, Avatar, Button, H1, Icon, Input, P, Popup, ts, usePopup } from "@kyoo/primitives";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import * as ImagePicker from "expo-image-picker";
+import Username from "@material-symbols/svg-400/outlined/badge.svg";
+import Mail from "@material-symbols/svg-400/outlined/mail.svg";
+import Password from "@material-symbols/svg-400/outlined/password.svg";
+// import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
+import Delete from "@material-symbols/svg-400/rounded/delete.svg";
+import Logout from "@material-symbols/svg-400/rounded/logout.svg";
+// import * as ImagePicker from "expo-image-picker";
 import { type ComponentProps, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { rem, useYoshiki } from "yoshiki/native";
-import { PasswordInput } from "../../../../src/ui/login/password-input";
+import type { KyooError, User } from "~/models";
+import {
+	Alert,
+	Button,
+	H1,
+	Icon,
+	Input,
+	P,
+	Popup,
+	ts,
+	usePopup,
+} from "~/primitives";
+import { useAccount } from "~/providers/account-context";
+import { useMutation } from "~/query";
+import { deleteAccount, logout } from "../login/logic";
+import { PasswordInput } from "../login/password-input";
 import { Preference, SettingsContainer } from "./base";
 
-import Username from "@material-symbols/svg-400/outlined/badge.svg";
-import Mail from "@material-symbols/svg-400/outlined/mail.svg";
-import Password from "@material-symbols/svg-400/outlined/password.svg";
-import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
-import Delete from "@material-symbols/svg-400/rounded/delete.svg";
-import Logout from "@material-symbols/svg-400/rounded/logout.svg";
-
-function dataURItoBlob(dataURI: string) {
-	const byteString = atob(dataURI.split(",")[1]);
-	const ab = new ArrayBuffer(byteString.length);
-	const ia = new Uint8Array(ab);
-	for (let i = 0; i < byteString.length; i++) {
-		ia[i] = byteString.charCodeAt(i);
-	}
-	return new Blob([ab], { type: "image/jpeg" });
-}
+// function dataURItoBlob(dataURI: string) {
+// 	const byteString = atob(dataURI.split(",")[1]);
+// 	const ab = new ArrayBuffer(byteString.length);
+// 	const ia = new Uint8Array(ab);
+// 	for (let i = 0; i < byteString.length; i++) {
+// 		ia[i] = byteString.charCodeAt(i);
+// 	}
+// 	return new Blob([ab], { type: "image/jpeg" });
+// }
 
 export const AccountSettings = () => {
 	const account = useAccount()!;
 	const { css, theme } = useYoshiki();
-	const { t } = useTranslation();
 	const [setPopup, close] = usePopup();
+	const { t } = useTranslation();
 
-	const queryClient = useQueryClient();
 	const { mutateAsync } = useMutation({
-		mutationFn: async (update: Partial<Account>) =>
-			await queryFn({
-				path: ["auth", "me"],
-				method: "PATCH",
-				body: update,
-			}),
-		onSettled: async () => await queryClient.invalidateQueries({ queryKey: ["auth", "me"] }),
+		method: "PATCH",
+		path: ["auth", "users", "me"],
+		compute: (update: Partial<User>) => ({ body: update }),
+		optimistic: (update) => ({
+			...account,
+			...update,
+			claims: { ...account.claims, ...update.claims },
+		}),
+		invalidate: ["auth", "users", "me"],
 	});
+
 	const { mutateAsync: editPassword } = useMutation({
-		mutationFn: async (request: { newPassword: string; oldPassword: string }) =>
-			await queryFn({
-				path: ["auth", "password-reset"],
-				method: "POST",
-				body: request,
-			}),
+		method: "PATCH",
+		path: ["auth", "users", "me", "password"],
+		compute: (body: { oldPassword: string; newPassword: string }) => ({
+			body,
+		}),
+		invalidate: null,
 	});
 
 	return (
@@ -106,7 +92,8 @@ export const AccountSettings = () => {
 								],
 								{
 									cancelable: true,
-									userInterfaceStyle: theme.mode === "auto" ? "light" : theme.mode,
+									userInterfaceStyle:
+										theme.mode === "auto" ? "light" : theme.mode,
 									icon: "warning",
 								},
 							);
@@ -137,43 +124,47 @@ export const AccountSettings = () => {
 					}
 				/>
 			</Preference>
+			{/* <Preference */}
+			{/* 	icon={AccountCircle} */}
+			{/* 	customIcon={<Avatar src={account.logo} />} */}
+			{/* 	label={t("settings.account.avatar.label")} */}
+			{/* 	description={t("settings.account.avatar.description")} */}
+			{/* > */}
+			{/* 	<Button */}
+			{/* 		text={t("misc.edit")} */}
+			{/* 		onPress={async () => { */}
+			{/* 			const img = await ImagePicker.launchImageLibraryAsync({ */}
+			{/* 				mediaTypes: ImagePicker.MediaTypeOptions.Images, */}
+			{/* 				aspect: [1, 1], */}
+			{/* 				quality: 1, */}
+			{/* 				base64: true, */}
+			{/* 			}); */}
+			{/* 			if (img.canceled || img.assets.length !== 1) return; */}
+			{/* 			const data = dataURItoBlob(img.assets[0].uri); */}
+			{/* 			const formData = new FormData(); */}
+			{/* 			formData.append("picture", data); */}
+			{/* 			await queryFn({ */}
+			{/* 				method: "POST", */}
+			{/* 				path: ["auth", "me", "logo"], */}
+			{/* 				formData, */}
+			{/* 			}); */}
+			{/* 		}} */}
+			{/* 	/> */}
+			{/* 	<Button */}
+			{/* 		text={t("misc.delete")} */}
+			{/* 		onPress={async () => { */}
+			{/* 			await queryFn({ */}
+			{/* 				method: "DELETE", */}
+			{/* 				path: ["auth", "me", "logo"], */}
+			{/* 			}); */}
+			{/* 		}} */}
+			{/* 	/> */}
+			{/* </Preference> */}
 			<Preference
-				icon={AccountCircle}
-				customIcon={<Avatar src={account.logo} />}
-				label={t("settings.account.avatar.label")}
-				description={t("settings.account.avatar.description")}
+				icon={Mail}
+				label={t("settings.account.email.label")}
+				description={account.email}
 			>
-				<Button
-					text={t("misc.edit")}
-					onPress={async () => {
-						const img = await ImagePicker.launchImageLibraryAsync({
-							mediaTypes: ImagePicker.MediaTypeOptions.Images,
-							aspect: [1, 1],
-							quality: 1,
-							base64: true,
-						});
-						if (img.canceled || img.assets.length !== 1) return;
-						const data = dataURItoBlob(img.assets[0].uri);
-						const formData = new FormData();
-						formData.append("picture", data);
-						await queryFn({
-							method: "POST",
-							path: ["auth", "me", "logo"],
-							formData,
-						});
-					}}
-				/>
-				<Button
-					text={t("misc.delete")}
-					onPress={async () => {
-						await queryFn({
-							method: "DELETE",
-							path: ["auth", "me", "logo"],
-						});
-					}}
-				/>
-			</Preference>
-			<Preference icon={Mail} label={t("settings.account.email.label")} description={account.email}>
 				<Button
 					text={t("misc.edit")}
 					onPress={() =>
@@ -202,8 +193,10 @@ export const AccountSettings = () => {
 							<ChangePasswordPopup
 								icon={Password}
 								label={t("settings.account.password.label")}
-								hasPassword={account.hasPassword}
-								apply={async (op, np) => await editPassword({ oldPassword: op, newPassword: np })}
+								hasPassword={true}
+								apply={async (op, np) =>
+									await editPassword({ oldPassword: op, newPassword: np })
+								}
 								close={close}
 							/>,
 						)
@@ -236,7 +229,9 @@ const ChangePopup = ({
 		<Popup>
 			{({ css }) => (
 				<>
-					<View {...css({ flexDirection: "row", alignItems: "center", gap: ts(2) })}>
+					<View
+						{...css({ flexDirection: "row", alignItems: "center", gap: ts(2) })}
+					>
 						<Icon icon={icon} />
 						<H1 {...css({ fontSize: rem(2) })}>{label}</H1>
 					</View>
@@ -246,7 +241,13 @@ const ChangePopup = ({
 						value={value}
 						onChangeText={(v) => setValue(v)}
 					/>
-					<View {...css({ flexDirection: "row", alignSelf: "flex-end", gap: ts(1) })}>
+					<View
+						{...css({
+							flexDirection: "row",
+							alignSelf: "flex-end",
+							gap: ts(1),
+						})}
+					>
 						<Button
 							text={t("misc.cancel")}
 							onPress={() => close()}
@@ -289,7 +290,9 @@ const ChangePasswordPopup = ({
 		<Popup>
 			{({ css }) => (
 				<>
-					<View {...css({ flexDirection: "row", alignItems: "center", gap: ts(2) })}>
+					<View
+						{...css({ flexDirection: "row", alignItems: "center", gap: ts(2) })}
+					>
 						<Icon icon={icon} />
 						<H1 {...css({ fontSize: rem(2) })}>{label}</H1>
 					</View>
@@ -303,14 +306,22 @@ const ChangePasswordPopup = ({
 						/>
 					)}
 					<PasswordInput
-						autoComplete="password-new"
+						autoComplete="new-password"
 						variant="big"
 						value={newValue}
 						onChangeText={(v) => setNewValue(v)}
 						placeholder={t("settings.account.password.newPassword")}
 					/>
-					{error && <P {...css({ color: (theme) => theme.colors.red })}>{error}</P>}
-					<View {...css({ flexDirection: "row", alignSelf: "flex-end", gap: ts(1) })}>
+					{error && (
+						<P {...css({ color: (theme) => theme.colors.red })}>{error}</P>
+					)}
+					<View
+						{...css({
+							flexDirection: "row",
+							alignSelf: "flex-end",
+							gap: ts(1),
+						})}
+					>
 						<Button
 							text={t("misc.cancel")}
 							onPress={() => close()}
@@ -323,7 +334,7 @@ const ChangePasswordPopup = ({
 									await apply(oldValue, newValue);
 									close();
 								} catch (e) {
-									setError((e as KyooErrors).errors[0]);
+									setError((e as KyooError).message);
 								}
 							}}
 							{...css({ minWidth: rem(6) })}

@@ -1,12 +1,14 @@
 FROM oven/bun AS builder
 WORKDIR /app
 
-# idk why it doesnt' build without it
+# https://github.com/oven-sh/bun/issues/24538
+# Remember to also remove `tsx` after this bug is fixed
 RUN apt update && apt install -y nodejs && rm /usr/local/bun-node-fallback-bin/node
 
 ENV NODE_ENV=production
-COPY package.json bun.lock scripts .
+COPY package.json bun.lock .
 COPY scripts scripts
+COPY public public
 RUN bun install --production
 
 COPY . .

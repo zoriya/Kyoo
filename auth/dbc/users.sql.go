@@ -276,7 +276,7 @@ set
 	username = coalesce($2, username),
 	email = coalesce($3, email),
 	password = coalesce($4, password),
-	claims = coalesce($5, claims)
+	claims = claims || coalesce($5, '{}'::jsonb)
 where
 	id = $1
 returning

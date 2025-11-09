@@ -59,7 +59,8 @@ type EditUserDto struct {
 }
 
 type EditPasswordDto struct {
-	Password string `json:"password" validate:"required" example:"password1234"`
+	OldPassword string `json:"oldPassword" validate:"required" example:"password1234"`
+	NewPassword string `json:"newPassword" validate:"required" example:"password1234"`
 }
 
 func MapDbUser(user *dbc.User) User {
@@ -182,7 +183,7 @@ func (h *Handler) GetMe(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	dbuser, err := h.db.GetUser(context.Background(), dbc.GetUserParams{
+	dbuser, err := h.db.GetUser(c.Request().Context(), dbc.GetUserParams{
 		UseId: true,
 		Id:    id,
 	})
@@ -406,6 +407,10 @@ func (h *Handler) ChangePassword(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	user, err := h.db.GetUser(c.Request().Context(), dbc.GetUserParams{
+		UseId: true,
+		Id:    uid,
+	})
 
 	sid, err := GetCurrentSessionId(c)
 	if err != nil {
@@ -421,13 +426,26 @@ func (h *Handler) ChangePassword(c echo.Context) error {
 		return err
 	}
 
+	match, err := argon2id.ComparePasswordAndHash(
+		req.OldPassword,
+		*user[0].User.Password,
+	)
+	if err != nil {
+		return err
+	}
+	if !match {
+		return echo.NewHTTPError(http.StatusForbidden, "Invalid password")
+	}
+
+	pass, err := argon2id.CreateHash(req.NewPassword, argon2id.DefaultParams)
+	if err != nil {
+		return err
+	}
 	_, err = h.db.UpdateUser(context.Background(), dbc.UpdateUserParams{
 		Id:       uid,
-		Password: &req.Password,
+		Password: &pass,
 	})
-	if err == pgx.ErrNoRows {
-		return echo.NewHTTPError(http.StatusNotFound, "Invalid token, user not found")
-	} else if err != nil {
+	if err != nil {
 		return err
 	}
 

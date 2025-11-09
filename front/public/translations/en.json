@@ -16,7 +16,7 @@
 	"show": {
 		"play": "Play",
 		"trailer": "Play Trailer",
-		"studio": "Studio",
+		"studios": "Studios",
 		"genre": "Genres",
 		"genre-none": "No genres",
 		"staff": "Staff",
@@ -71,30 +71,29 @@
 		"switchToList": "Switch to list view"
 	},
 	"genres": {
-		"Action": "Action",
-		"Adventure": "Adventure",
-		"Animation": "Animation",
-		"Comedy": "Comedy",
-		"Crime": "Crime",
-		"Documentary": "Documentary",
-		"Drama": "Drama",
-		"Family": "Family",
-		"Fantasy": "Fantasy",
-		"History": "History",
-		"Horror": "Horror",
-		"Music": "Music",
-		"Mystery": "Mystery",
-		"Romance": "Romance",
-		"ScienceFiction": "Science Fiction",
-		"Thriller": "Thriller",
-		"War": "War",
-		"Western": "Western",
-		"Kids": "Kids",
-		"News": "News",
-		"Reality": "Reality",
-		"Soap": "Soap",
-		"Talk": "Talk",
-		"Politics": "Politics"
+		"action": "Action",
+		"adventure": "Adventure",
+		"animation": "Animation",
+		"comedy": "Comedy",
+		"crime": "Crime",
+		"documentary": "Documentary",
+		"drama": "Drama",
+		"family": "Family",
+		"fantasy": "Fantasy",
+		"history": "History",
+		"horror": "Horror",
+		"music": "Music",
+		"mystery": "Mystery",
+		"romance": "Romance",
+		"science-fiction": "Science Fiction",
+		"thriller": "Thriller",
+		"war": "War",
+		"western": "Western",
+		"kids": "Kids",
+		"reality": "Reality",
+		"politics": "Politics",
+		"soap": "Soap",
+		"talk": "Talk"
 	},
 	"misc": {
 		"settings": "Settings",
@@ -129,8 +128,7 @@
 			},
 			"language": {
 				"label": "Language",
-				"description": "Set the language of your application",
-				"system": "System"
+				"description": "Set the language of your application"
 			}
 		},
 		"playback": {

@@ -16,6 +16,7 @@
 		"skipLibCheck": true,
 		"jsx": "react-jsx",
 		"forceConsistentCasingInFileNames": true,
+		"allowImportingTsExtensions": true,
 		"types": [
 			"node",
 			"react"

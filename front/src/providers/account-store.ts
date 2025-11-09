@@ -13,8 +13,12 @@ const writeAccounts = (accounts: Account[]) => {
 	}
 };
 
+export const readAccounts = () => {
+	return readValue("accounts", z.array(Account)) ?? [];
+};
+
 export const addAccount = (account: Account) => {
-	const accounts = readValue("accounts", z.array(Account)) ?? [];
+	const accounts = readAccounts();
 
 	// Prevent the user from adding the same account twice.
 	if (accounts.find((x) => x.id === account.id)) {
@@ -29,7 +33,7 @@ export const addAccount = (account: Account) => {
 };
 
 export const removeAccounts = (filter: (acc: Account) => boolean) => {
-	let accounts = readValue("accounts", z.array(Account)) ?? [];
+	let accounts = readAccounts();
 	accounts = accounts.filter((x) => !filter(x));
 	if (!accounts.find((x) => x.selected) && accounts.length > 0) {
 		accounts[0].selected = true;
@@ -38,7 +42,7 @@ export const removeAccounts = (filter: (acc: Account) => boolean) => {
 };
 
 export const updateAccount = (id: string, account: Account) => {
-	const accounts = readValue("accounts", z.array(Account)) ?? [];
+	const accounts = readAccounts();
 	const idx = accounts.findIndex((x) => x.id === id);
 	if (idx === -1) return;
 
