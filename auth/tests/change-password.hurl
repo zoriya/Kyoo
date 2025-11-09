@@ -26,7 +26,16 @@ jwt: jsonpath "$.token"
 PATCH {{host}}/users/me/password
 Authorization: Bearer {{jwt}}
 {
-	"password": "new-password"
+	"oldPassword": "invalid-one",
+	"newPassword": "wont-be-changed"
+}
+HTTP 403
+
+PATCH {{host}}/users/me/password
+Authorization: Bearer {{jwt}}
+{
+	"oldPassword": "password-login-user",
+	"newPassword": "new-password"
 }
 HTTP 204
 
