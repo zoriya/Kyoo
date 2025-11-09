@@ -1,6 +1,9 @@
 from typing import Annotated
 
-from fastapi import APIRouter, BackgroundTasks, Security
+from asyncpg import Connection
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Security
+
+from scanner.database import get_db_fapi
 
 from ..fsscan import create_scanner
 from ..jwt import validate_bearer
@@ -26,3 +29,19 @@ async def trigger_scan(
 			await scanner.scan()
 
 	tasks.add_task(run)
+
+
+@router.get("/health")
+def get_health():
+	return {"status": "healthy"}
+
+
+@router.get("/ready")
+async def get_ready(db: Annotated[Connection, Depends(get_db_fapi)]):
+	try:
+		_ = await db.execute("select 1")
+		return {"status": "healthy", "database": "healthy"}
+	except Exception as e:
+		raise HTTPException(
+			status_code=500, detail={"status": "unhealthy", "database": str(e)}
+		)
