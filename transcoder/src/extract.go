@@ -88,17 +88,13 @@ func (s *MetadataService) extractSubs(ctx context.Context, info *MediaInfo) (err
 	}
 
 	workdir := filepath.Join(os.TempDir(), info.Sha)
-	if err := os.MkdirAll(workdir, 0660); err != nil {
-		return fmt.Errorf("failed to create temporary directory: %w", err)
-	}
-
 	attDir := filepath.Join(workdir, "att")
-	if err := os.MkdirAll(attDir, 0660); err != nil {
+	if err := os.MkdirAll(attDir, 0770); err != nil {
 		return fmt.Errorf("failed to create attachment directory: %w", err)
 	}
 
 	subDir := filepath.Join(workdir, "sub")
-	if err := os.MkdirAll(subDir, 0660); err != nil {
+	if err := os.MkdirAll(subDir, 0770); err != nil {
 		return fmt.Errorf("failed to create subtitles directory: %w", err)
 	}
 
