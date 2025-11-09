@@ -190,6 +190,9 @@ func (h *Handler) GetMe(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	if len(dbuser) == 0 {
+		return c.JSON(403, "Invalid jwt token, couldn't find user.")
+	}
 
 	user := MapDbUser(&dbuser[0].User)
 	for _, oidc := range dbuser {
