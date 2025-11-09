@@ -21,7 +21,7 @@ import (
 )
 
 type MetadataService struct {
-	database     *pgxpool.Pool
+	Database     *pgxpool.Pool
 	lock         RunLock[string, *MediaInfo]
 	thumbLock    RunLock[string, any]
 	extractLock  RunLock[string, any]
@@ -43,7 +43,7 @@ func NewMetadataService() (*MetadataService, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to setup database: %w", err)
 	}
-	s.database = db
+	s.Database = db
 
 	storage, err := s.setupStorage(ctx)
 	if err != nil {
@@ -55,8 +55,8 @@ func NewMetadataService() (*MetadataService, error) {
 }
 
 func (s *MetadataService) Close() error {
-	if s.database != nil {
-		s.database.Close()
+	if s.Database != nil {
+		s.Database.Close()
 	}
 
 	if s.storage != nil {
@@ -174,7 +174,7 @@ func (s *MetadataService) GetMetadata(ctx context.Context, path string, sha stri
 		for _, audio := range ret.Audios {
 			audio.Keyframes = nil
 		}
-		tx, err := s.database.Begin(ctx)
+		tx, err := s.Database.Begin(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -191,7 +191,7 @@ func (s *MetadataService) GetMetadata(ctx context.Context, path string, sha stri
 }
 
 func (s *MetadataService) getMetadata(ctx context.Context, path string, sha string) (*MediaInfo, error) {
-	rows, _ := s.database.Query(
+	rows, _ := s.Database.Query(
 		ctx,
 		`select
 			i.sha, i.path, i.extension, i.mime_codec, i.size, i.duration, i.container, i.fonts,
@@ -214,7 +214,7 @@ func (s *MetadataService) getMetadata(ctx context.Context, path string, sha stri
 		return nil, err
 	}
 
-	rows, _ = s.database.Query(
+	rows, _ = s.Database.Query(
 		ctx,
 		`select * from gocoder.videos as v where v.sha=$1`,
 		sha,
@@ -224,7 +224,7 @@ func (s *MetadataService) getMetadata(ctx context.Context, path string, sha stri
 		return nil, err
 	}
 
-	rows, _ = s.database.Query(
+	rows, _ = s.Database.Query(
 		ctx,
 		`select * from gocoder.audios as a where a.sha=$1`,
 		sha,
@@ -234,7 +234,7 @@ func (s *MetadataService) getMetadata(ctx context.Context, path string, sha stri
 		return nil, err
 	}
 
-	rows, _ = s.database.Query(
+	rows, _ = s.Database.Query(
 		ctx,
 		`select * from gocoder.subtitles as s where s.sha=$1`,
 		sha,
@@ -259,7 +259,7 @@ func (s *MetadataService) getMetadata(ctx context.Context, path string, sha stri
 		fmt.Printf("Couldn't find external subtitles: %v", err)
 	}
 
-	rows, _ = s.database.Query(
+	rows, _ = s.Database.Query(
 		ctx,
 		`select * from gocoder.chapters as c where c.sha=$1`,
 		sha,
@@ -282,7 +282,7 @@ func (s *MetadataService) storeFreshMetadata(ctx context.Context, path string, s
 		return set(nil, err)
 	}
 
-	tx, err := s.database.Begin(ctx)
+	tx, err := s.Database.Begin(ctx)
 	if err != nil {
 		return set(ret, err)
 	}
