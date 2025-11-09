@@ -1,5 +1,6 @@
+import "tsx/cjs";
 import type { ExpoConfig } from "expo/config";
-import { supportedLanguages } from "~/providers/translations.compile";
+import { supportedLanguages } from "./src/providers/translations.compile.ts";
 
 const IS_DEV = process.env.APP_VARIANT === "development";
 

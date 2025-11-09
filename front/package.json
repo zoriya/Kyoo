@@ -61,6 +61,7 @@
 		"react-native-worklets": "0.5.1",
 		"react-tooltip": "^5.29.1",
 		"sweetalert2": "^11.26.3",
+		"tsx": "^4.20.6",
 		"uuid": "^13.0.0",
 		"video.js": "^8.23.4",
 		"yoshiki": "1.2.14",

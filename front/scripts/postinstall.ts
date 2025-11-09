@@ -47,7 +47,8 @@ export const resources = {
 
 export const supportedLanguages = [
 	${translations.map((x) => `"${x.lang}",`).join("\n\t")}
-];`,
+];
+`,
 	);
 }
 
