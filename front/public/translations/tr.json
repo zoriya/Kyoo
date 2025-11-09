@@ -102,8 +102,7 @@
 			},
 			"language": {
 				"label": "Dil",
-				"description": "Uygulamanın dilini seçin",
-				"system": "Sistem"
+				"description": "Uygulamanın dilini seçin"
 			}
 		},
 		"playback": {
