@@ -2,8 +2,8 @@ import { z } from "zod/v4";
 
 export const User = z
 	.object({
-			// 	// keep a default for older versions of the api
-			// 	.default({}),
+		// 	// keep a default for older versions of the api
+		// 	.default({}),
 		id: z.string(),
 		username: z.string(),
 		email: z.string(),

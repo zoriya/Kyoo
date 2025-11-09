@@ -125,18 +125,15 @@ export const useSetting = <Setting extends keyof User["claims"]["settings"]>(
 		compute: (update: Partial<User["claims"]["settings"]>) => ({
 			body: {
 				claims: {
-					...account!.claims,
 					settings: { ...account!.claims.settings, ...update },
 				},
 			},
 		}),
 		optimistic: (update) => ({
-			body: {
-				...account,
-				claims: {
-					...account!.claims,
-					settings: { ...account!.claims.settings, ...update },
-				},
+			...account,
+			claims: {
+				...account!.claims,
+				settings: { ...account!.claims.settings, ...update },
 			},
 		}),
 		invalidate: ["auth", "users", "me"],

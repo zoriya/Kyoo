@@ -22,10 +22,10 @@ import {
 	usePopup,
 } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
+import { useMutation } from "~/query";
 import { deleteAccount, logout } from "../login/logic";
 import { PasswordInput } from "../login/password-input";
 import { Preference, SettingsContainer } from "./base";
-import { useMutation } from "~/query";
 
 // function dataURItoBlob(dataURI: string) {
 // 	const byteString = atob(dataURI.split(",")[1]);

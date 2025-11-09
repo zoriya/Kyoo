@@ -1,12 +1,12 @@
 import SubtitleLanguage from "@material-symbols/svg-400/rounded/closed_caption-fill.svg";
 import PlayModeI from "@material-symbols/svg-400/rounded/display_settings-fill.svg";
 import AudioLanguage from "@material-symbols/svg-400/rounded/music_note-fill.svg";
+import langmap from "langmap";
 import { useTranslation } from "react-i18next";
 import { Select } from "~/primitives";
 import { useLocalSetting } from "~/providers/settings";
 import { useLanguageName } from "~/track-utils";
 import { Preference, SettingsContainer, useSetting } from "./base";
-import langmap from "langmap";
 
 const seenNativeNames = new Set();
 export const languageCodes = Object.keys(langmap)
