@@ -66,7 +66,7 @@ export const LoginPage = () => {
 			{/* )} */}
 			<P>
 				<Trans i18nKey="login.or-register">
-					Don’t have an account?{" "}
+					Don’t have an account?
 					<A href={`/register?apiUrl=${apiUrl}`}>Register</A>.
 				</Trans>
 			</P>

@@ -1,6 +1,10 @@
 import { z } from "zod/v4";
 import { type Account, type KyooError, User } from "~/models";
-import { addAccount, removeAccounts } from "~/providers/account-store";
+import {
+	addAccount,
+	readAccounts,
+	removeAccounts,
+} from "~/providers/account-store";
 import { queryFn } from "~/query";
 
 type Result<A, B> =
@@ -77,15 +81,30 @@ export const login = async (
 // 	}
 // };
 
-export const logout = () => {
+export const logout = async () => {
+	const accounts = readAccounts();
+	const account = accounts.find((x) => x.selected);
+	if (account) {
+		await queryFn({
+			method: "DELETE",
+			url: "auth/sessions/current",
+			authToken: account.token,
+			parser: null,
+		});
+	}
 	removeAccounts((x) => x.selected);
 };
 
 export const deleteAccount = async () => {
-	// await queryFn({
-	// 	method: "DELETE",
-	// 	url: "auth/users/me",
-	// 	parser: null,
-	// });
+	const accounts = readAccounts();
+	const account = accounts.find((x) => x.selected);
+	if (account) {
+		await queryFn({
+			method: "DELETE",
+			url: "auth/users/me",
+			authToken: account.token,
+			parser: null,
+		});
+	}
 	logout();
 };
