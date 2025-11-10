@@ -29,6 +29,7 @@ global:
       host: kyoo-postgres
       port: 5432
       database: kyoo_api
+      sslmode: prefer
       # kyoo_api workload specific settings
       kyoo_api:
         userKey: postgres_user
@@ -61,8 +62,7 @@ global:
       host: kyoo-postgres
       port: 5432
       database: kyoo_transcoder
-      # sslmode valid options are 'require' or 'disable', 'prefer' is not supported
-      sslmode: disable
+      sslmode: prefer
       # kyoo_transcoder workload specific settings
       kyoo_transcoder:
         userKey: postgres_user

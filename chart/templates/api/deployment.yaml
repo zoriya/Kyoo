@@ -78,6 +78,8 @@ spec:
               value: {{ .Values.global.postgres.kyoo_api.host | quote }}
             - name: PGPORT
               value: {{ .Values.global.postgres.kyoo_api.port | quote }}
+            - name: PGSSLMODE
+              value: {{ .Values.global.postgres.kyoo_api.sslmode | quote  }}
             {{- with (concat .Values.global.extraEnv .Values.api.kyoo_api.extraEnv) }}
               {{- toYaml . | nindent 12 }}
             {{- end }}

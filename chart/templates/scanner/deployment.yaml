@@ -91,6 +91,8 @@ spec:
               value: {{ .Values.global.postgres.kyoo_scanner.host | quote }}
             - name: PGPORT
               value: {{ .Values.global.postgres.kyoo_scanner.port | quote }}
+            - name: PGSSLMODE
+              value: {{ .Values.global.postgres.kyoo_scanner.sslmode | quote  }}
             {{- with (concat .Values.global.extraEnv .Values.scanner.kyoo_scanner.extraEnv) }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
