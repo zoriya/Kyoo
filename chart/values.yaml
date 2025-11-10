@@ -92,7 +92,6 @@ kyoo:
     apikeys:
       scanner:
         existingSecret: bigsecret
-        # value of the apikey should be scanner-$apikey
         apikeyKey: scanner_apikey
         claims: '{"permissions": ["core.read", "core.write"]}'
       # create additional apikeys
