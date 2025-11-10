@@ -50,9 +50,6 @@ global:
       host: kyoo-postgres
       port: 5432
       database: kyoo_scanner
-      # schema disabled means application will not create the schema
-      # and will instead use the user's search path
-      schema: disabled
       sslmode: prefer
       # kyoo_scanner workload specific settings
       kyoo_scanner:
@@ -462,31 +459,31 @@ postgres:
         CREATE DATABASE {{ .Values.global.postgres.kyoo_api.database }} WITH OWNER {{ .Values.global.postgres.infra.user }}; 
         \connect {{ .Values.global.postgres.kyoo_api.database }};
         REVOKE ALL ON SCHEMA public FROM PUBLIC;
-        CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
+        CREATE SCHEMA IF NOT EXISTS kyoo AUTHORIZATION {{ .Values.global.postgres.infra.user }};
       kyoo_auth.sql: |
         CREATE DATABASE {{ .Values.global.postgres.kyoo_auth.database }} WITH OWNER {{ .Values.global.postgres.infra.user }}; 
         \connect {{ .Values.global.postgres.kyoo_auth.database }};
         REVOKE ALL ON SCHEMA public FROM PUBLIC;
-        CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
+        CREATE SCHEMA IF NOT EXISTS keibi AUTHORIZATION {{ .Values.global.postgres.infra.user }};
       kyoo_scanner.sql: |
         CREATE DATABASE {{ .Values.global.postgres.kyoo_scanner.database }} WITH OWNER {{ .Values.global.postgres.infra.user }};
         \connect {{ .Values.global.postgres.kyoo_scanner.database }};
         REVOKE ALL ON SCHEMA public FROM PUBLIC;
-        CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
+        CREATE SCHEMA IF NOT EXISTS scanner AUTHORIZATION {{ .Values.global.postgres.infra.user }};
       kyoo_transcoder.sql: |
         CREATE DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} WITH OWNER {{ .Values.global.postgres.infra.user }};
         \connect {{ .Values.global.postgres.kyoo_transcoder.database }};
         REVOKE ALL ON SCHEMA public FROM PUBLIC;
-        CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
+        CREATE SCHEMA IF NOT EXISTS gocoder AUTHORIZATION {{ .Values.global.postgres.infra.user }};
       user.sql: |
+        ALTER ROLE {{ .Values.global.postgres.infra.user }} 
+        IN DATABASE {{ .Values.global.postgres.kyoo_api.database }} SET search_path TO "$user", kyoo;
         ALTER ROLE {{ .Values.global.postgres.infra.user }}
-        IN DATABASE {{ .Values.global.postgres.kyoo_auth.database }} SET search_path TO "$user", data;
+        IN DATABASE {{ .Values.global.postgres.kyoo_auth.database }} SET search_path TO "$user", keibi;
         ALTER ROLE {{ .Values.global.postgres.infra.user }} 
-        IN DATABASE {{ .Values.global.postgres.kyoo_api.database }} SET search_path TO "$user", data;
+        IN DATABASE {{ .Values.global.postgres.kyoo_scanner.database }} SET search_path TO "$user", scanner;
         ALTER ROLE {{ .Values.global.postgres.infra.user }} 
-        IN DATABASE {{ .Values.global.postgres.kyoo_scanner.database }} SET search_path TO "$user", data;
-        ALTER ROLE {{ .Values.global.postgres.infra.user }} 
-        IN DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} SET search_path TO "$user", data;
+        IN DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} SET search_path TO "$user", gocoder;
   persistence:
     enabled: true
     size: 3Gi
