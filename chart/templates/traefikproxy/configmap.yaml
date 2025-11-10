@@ -49,8 +49,6 @@ data:
         swagger:
           entryPoints:
           - web
-          middlewares:
-          - phantomtoken
           service: api
           rule: "PathPrefix(`/swagger`)"
         scanner:
