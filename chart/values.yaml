@@ -169,8 +169,14 @@ api:
   name: api
   # kyoo_api container configuration
   kyoo_api:
-    livenessProbe: {}
-    readinessProbe: {}
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: main
+    readinessProbe:
+      httpGet:
+        path: /ready
+        port: main
     resources: {}
     containerSecurityContext: {}
     extraVolumeMounts: []
@@ -217,8 +223,14 @@ auth:
   name: auth
   # kyoo_auth container configuration
   kyoo_auth:
-    livenessProbe: {}
-    readinessProbe: {}
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: main
+    readinessProbe:
+      httpGet:
+        path: /ready
+        port: main
     resources: {}
     containerSecurityContext: {}
     extraVolumeMounts: []
@@ -285,8 +297,14 @@ scanner:
   name: scanner
   # kyoo_scanner container configuration
   kyoo_scanner:
-    livenessProbe: {}
-    readinessProbe: {}
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: main
+    readinessProbe:
+      httpGet:
+        path: /ready
+        port: main
     resources: {}
     containerSecurityContext: {}
     extraVolumeMounts: []
@@ -322,8 +340,14 @@ transcoder:
   runtimeClass: ""
   # kyoo_transcoder container configuration
   kyoo_transcoder:
-    livenessProbe: {}
-    readinessProbe: {}
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: main
+    readinessProbe:
+      httpGet:
+        path: /ready
+        port: main
     resources: {}
     containerSecurityContext: {}
     extraVolumeMounts: []
