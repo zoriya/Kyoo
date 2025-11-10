@@ -168,11 +168,11 @@ api:
   kyoo_api:
     livenessProbe:
       httpGet:
-        path: /health
+        path: /api/health
         port: main
     readinessProbe:
       httpGet:
-        path: /ready
+        path: /api/ready
         port: main
     resources: {}
     containerSecurityContext: {}
@@ -222,11 +222,11 @@ auth:
   kyoo_auth:
     livenessProbe:
       httpGet:
-        path: /health
+        path: /auth/health
         port: main
     readinessProbe:
       httpGet:
-        path: /ready
+        path: /auth/ready
         port: main
     resources: {}
     containerSecurityContext: {}
@@ -339,11 +339,11 @@ transcoder:
   kyoo_transcoder:
     livenessProbe:
       httpGet:
-        path: /health
+        path: /video/health
         port: main
     readinessProbe:
       httpGet:
-        path: /ready
+        path: /video/ready
         port: main
     resources: {}
     containerSecurityContext: {}
