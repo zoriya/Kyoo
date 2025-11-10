@@ -78,32 +78,6 @@ spec:
               value: {{ .Values.global.postgres.kyoo_api.host | quote }}
             - name: PGPORT
               value: {{ .Values.global.postgres.kyoo_api.port | quote }}
-            {{- range $index, $provider := .Values.kyoo.oidc_providers }}
-            - name: OIDC_{{ $provider.name | upper }}_NAME
-              value: {{ $provider.name | quote }}
-            - name: OIDC_{{ $provider.name | upper }}_LOGO
-              value: {{ $provider.logo | quote }}
-            - name: OIDC_{{ $provider.name | upper }}_CLIENTID
-              valueFrom:
-                secretKeyRef:
-                  key: {{ $provider.clientIdKey }}
-                  name: {{ $provider.existingSecret }}
-            - name: OIDC_{{ $provider.name | upper }}_SECRET
-              valueFrom:
-                secretKeyRef:
-                  key: {{ $provider.clientSecretKey }}
-                  name: {{ $provider.existingSecret }}
-            - name: OIDC_{{ $provider.name | upper }}_AUTHORIZATION
-              value: {{ $provider.authorizationAddress | quote }}
-            - name: OIDC_{{ $provider.name | upper }}_TOKEN
-              value: {{ $provider.tokenAddress | quote }}
-            - name: OIDC_{{ $provider.name | upper }}_PROFILE
-              value: {{ $provider.profileAddress | quote }}
-            - name: OIDC_{{ $provider.name | upper }}_SCOPE
-              value: {{ $provider.scope | quote }}
-            - name: OIDC_{{ $provider.name | upper }}_AUTHMETHOD
-              value: {{ $provider.authMethod | default "ClientSecretBasic" | quote }}
-            {{- end }}
             {{- with (concat .Values.global.extraEnv .Values.api.kyoo_api.extraEnv) }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
