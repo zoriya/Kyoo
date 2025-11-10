@@ -14,7 +14,7 @@ require (
 	github.com/swaggo/echo-swagger v1.4.1
 	github.com/swaggo/swag v1.16.6
 	gitlab.com/opennota/screengen v1.0.2
-	golang.org/x/sync v0.17.0
+	golang.org/x/sync v0.18.0
 	gopkg.in/vansante/go-ffprobe.v2 v2.2.1
 )
 
