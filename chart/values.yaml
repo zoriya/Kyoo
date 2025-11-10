@@ -460,6 +460,10 @@ postgres:
         \connect {{ .Values.global.postgres.kyoo_api.database }};
         REVOKE ALL ON SCHEMA public FROM PUBLIC;
         CREATE SCHEMA IF NOT EXISTS kyoo AUTHORIZATION {{ .Values.global.postgres.infra.user }};
+
+        CREATE EXTENSION IF NOT EXISTS pg_trgm SCHEMA kyoo;
+        SET pg_trgm.word_similarity_threshold = 0.4;
+        ALTER DATABASE {{ .Values.global.postgres.kyoo_api.database }} SET pg_trgm.word_similarity_threshold = 0.4;
       kyoo_auth.sql: |
         CREATE DATABASE {{ .Values.global.postgres.kyoo_auth.database }} WITH OWNER {{ .Values.global.postgres.infra.user }}; 
         \connect {{ .Values.global.postgres.kyoo_auth.database }};

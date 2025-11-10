@@ -1,0 +1,67 @@
+global:
+  image:
+    tag: "edge"
+kyoo:
+  address: https://kyootest.bitey.life
+  #middlewareRootURL: https://kyootest.bitey.life
+  # auth:
+  #   apikeys:
+  #     extra:
+  #       - name: testme
+  #         existingSecret: bigsecret
+  #         apikeyKey: postgres_user
+  #         claims: "role:internal"
+media:
+  volumes:
+    - name: media
+      nfs:
+        server: "192.168.1.179"
+        path: /spin0/media/movies
+postgres:
+  enabled: true
+extraObjects:
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: bigsecret
+      namespace: kyootest
+    type: Opaque
+    stringData:
+      postgres_user: kyoo_all
+      postgres_password: watchSomething4me
+      scanner_apikey: secretapikey
+auth:
+  kyoo_auth:
+    image:
+      repository: ghcr.io/zoriya/keibi
+# ---
+# apiVersion: gateway.networking.k8s.io/v1
+# kind: HTTPRoute
+# metadata:
+#   name: kyootest
+#   namespace: kyootest
+# spec:
+#   parentRefs:
+#     - name: internal
+#       namespace: gateway
+#       sectionName: https
+#   hostnames:
+#     - "kyootest.bitey.life"
+#   rules:
+#     - backendRefs:
+#         - name: kyoo-traefik
+#           port: 80
+# ---
+# apiVersion: externaldns.k8s.io/v1alpha1
+# kind: DNSEndpoint
+# metadata:
+#   name: kyootest
+#   namespace: kyootest
+#   annotations:
+#     external-dns.custom/type: private
+# spec:
+#   endpoints:
+#     - dnsName: kyootest.bitey.life
+#       recordType: CNAME
+#       targets:
+#         - intgw.bitey.life
