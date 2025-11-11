@@ -79,9 +79,9 @@ kyoo:
 
   # auth settings
   auth:
-    firstUserClaims: '{"permissions": ["users.read", "users.write", "apikeys.read", "apikeys.write", "users.delete", "core.read", "core.write", "scanner.trigger"], "verified": true}'
-    guestClaims: '{"permissions": ["users.read", "users.write", "apikeys.read", "apikeys.write", "users.delete", "core.read", "core.write", "scanner.trigger"], "verified": true}'
-    extraClaims: '{"permissions": ["core.read"], "verified": false}'
+    firstUserClaims: '{"permissions": ["users.read", "users.write", "apikeys.read", "apikeys.write", "users.delete", "core.read", "core.write", "core.play", "scanner.trigger"], "verified": true}'
+    guestClaims: '{"permissions": ["core.read"], "verified": true}'
+    extraClaims: '{"permissions": ["core.read", "core.play"], "verified": false}'
     protectedClaims: "permissions,verified"
 
     # Providing a private key is optional, one will be generated at startup
