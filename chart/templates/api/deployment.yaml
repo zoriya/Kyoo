@@ -65,19 +65,19 @@ spec:
             - name: PGUSER
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.postgres.kyoo_api.kyoo_api.userKey }}
-                  name: {{ .Values.global.postgres.kyoo_api.kyoo_api.existingSecret }}
+                  key: {{ default .Values.global.postgres.shared.userKey .Values.global.postgres.kyoo_api.kyoo_api.userKey }}
+                  name: {{ default .Values.global.postgres.shared.existingSecret .Values.global.postgres.kyoo_api.kyoo_api.existingSecret }}
             - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.postgres.kyoo_api.kyoo_api.passwordKey }}
-                  name: {{ .Values.global.postgres.kyoo_api.kyoo_api.existingSecret }}
+                  key: {{ default .Values.global.postgres.shared.passwordKey .Values.global.postgres.kyoo_api.kyoo_api.passwordKey }}
+                  name: {{ default .Values.global.postgres.shared.existingSecret .Values.global.postgres.kyoo_api.kyoo_api.existingSecret }}
             - name: PGDATABASE
-              value: {{ .Values.global.postgres.kyoo_api.database }}
+              value: {{ default .Values.global.postgres.kyoo_api.database .Values.global.postgres.shared.databaseOverride | quote }}
             - name: PGHOST
-              value: {{ .Values.global.postgres.kyoo_api.host | quote }}
+              value: {{ default (include "kyoo.postgres.shared.host" .) .Values.global.postgres.kyoo_api.host | quote}}
             - name: PGPORT
-              value: {{ .Values.global.postgres.kyoo_api.port | quote }}
+              value: {{ default .Values.global.postgres.shared.port .Values.global.postgres.kyoo_api.port | quote }}
             - name: PGSSLMODE
               value: {{ .Values.global.postgres.kyoo_api.sslmode | quote  }}
             {{- with (concat .Values.global.extraEnv .Values.api.kyoo_api.extraEnv) }}

@@ -78,19 +78,19 @@ spec:
             - name: PGUSER
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.postgres.kyoo_scanner.kyoo_scanner.userKey }}
-                  name: {{ .Values.global.postgres.kyoo_scanner.kyoo_scanner.existingSecret }}
+                  key: {{ default .Values.global.postgres.shared.userKey .Values.global.postgres.kyoo_scanner.kyoo_scanner.userKey }}
+                  name: {{ default .Values.global.postgres.shared.existingSecret .Values.global.postgres.kyoo_scanner.kyoo_scanner.existingSecret }}
             - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.postgres.kyoo_scanner.kyoo_scanner.passwordKey }}
-                  name: {{ .Values.global.postgres.kyoo_scanner.kyoo_scanner.existingSecret }}
+                  key: {{ default .Values.global.postgres.shared.passwordKey .Values.global.postgres.kyoo_scanner.kyoo_scanner.passwordKey }}
+                  name: {{ default .Values.global.postgres.shared.existingSecret .Values.global.postgres.kyoo_scanner.kyoo_scanner.existingSecret }}
             - name: PGDATABASE
-              value: {{ .Values.global.postgres.kyoo_scanner.database }}
+              value: {{ default .Values.global.postgres.kyoo_scanner.database .Values.global.postgres.shared.databaseOverride | quote }}
             - name: PGHOST
-              value: {{ .Values.global.postgres.kyoo_scanner.host | quote }}
+              value: {{ default (include "kyoo.postgres.shared.host" .) .Values.global.postgres.kyoo_scanner.host | quote}}
             - name: PGPORT
-              value: {{ .Values.global.postgres.kyoo_scanner.port | quote }}
+              value: {{ default .Values.global.postgres.shared.port .Values.global.postgres.kyoo_scanner.port | quote }}
             - name: PGSSLMODE
               value: {{ .Values.global.postgres.kyoo_scanner.sslmode | quote  }}
             {{- with (concat .Values.global.extraEnv .Values.scanner.kyoo_scanner.extraEnv) }}

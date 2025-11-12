@@ -24,50 +24,65 @@ global:
       user: kyoo_all
       passwordKey: postgres_password
       existingSecret: bigsecret
-    # kyoo settings for connecting to kyoo_api database
-    kyoo_api:
-      host: kyoo-postgres
+    # shared postgres settings
+    shared:
+      # base setting for specifying host for all kyoo workloads
+      # defaults to <release-name>-postgres
+      host: ~
+      # base setting for specifying ports for all kyoo workloads
       port: 5432
+      # setting the database here will override the other database settings
+      databaseOverride: ~
+      # base setting for specifying existingSecret for all kyoo workloads
+      existingSecret: bigsecret
+      # base setting for specifying userKey for all kyoo workloads
+      userKey: postgres_user
+      # base setting for specifying passwordKey for all kyoo workloads
+      passwordKey: postgres_password
+    # overlay settings for connecting to kyoo_api database
+    kyoo_api:
+      host: ~
+      port: ~
       database: kyoo_api
       sslmode: prefer
       # kyoo_api workload specific settings
       kyoo_api:
-        userKey: postgres_user
-        passwordKey: postgres_password
-        existingSecret: bigsecret
-    # kyoo settings for connecting to kyoo_auth database
+        userKey: ~
+        passwordKey: ~
+        existingSecret: ~
+    # overlay settings for connecting to kyoo_auth database
     kyoo_auth:
-      host: kyoo-postgres
-      port: 5432
+      host: ~
+      port: ~
       database: kyoo_auth
       sslmode: prefer
       # kyoo_auth workload specific settings
       kyoo_auth:
-        userKey: postgres_user
-        passwordKey: postgres_password
-        existingSecret: bigsecret
-    # kyoo settings for connecting to kyoo_scanner database
+        userKey: ~
+        passwordKey: ~
+        existingSecret: ~
+    # overlay settings for connecting to kyoo_scanner database
     kyoo_scanner:
-      host: kyoo-postgres
-      port: 5432
+      host: ~
+      port: ~
       database: kyoo_scanner
       sslmode: prefer
       # kyoo_scanner workload specific settings
       kyoo_scanner:
-        userKey: postgres_user
-        passwordKey: postgres_password
-        existingSecret: bigsecret
-    # kyoo settings for connecting to kyoo_transcoder database
+        userKey: ~
+        passwordKey: ~
+        existingSecret: ~
+    # overlay settings for connecting to kyoo_transcoder database
     kyoo_transcoder:
-      host: kyoo-postgres
-      port: 5432
+      host: ~
+      port: ~
       database: kyoo_transcoder
       sslmode: prefer
       # kyoo_transcoder workload specific settings
       kyoo_transcoder:
-        userKey: postgres_user
-        passwordKey: postgres_password
-        existingSecret: bigsecret
+        userKey: ~
+        passwordKey: ~
+        existingSecret: ~
 
 # kyoo application settings
 kyoo:

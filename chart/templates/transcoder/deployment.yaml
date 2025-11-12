@@ -76,19 +76,19 @@ spec:
             - name: PGUSER
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.userKey }}
-                  name: {{ .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.existingSecret }}
+                  key: {{ default .Values.global.postgres.shared.userKey .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.userKey }}
+                  name: {{ default .Values.global.postgres.shared.existingSecret .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.existingSecret }}
             - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.passwordKey }}
-                  name: {{ .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.existingSecret }}
+                  key: {{ default .Values.global.postgres.shared.passwordKey .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.passwordKey }}
+                  name: {{ default .Values.global.postgres.shared.existingSecret .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.existingSecret }}
             - name: PGDATABASE
-              value: {{ .Values.global.postgres.kyoo_transcoder.database | quote }}
+              value: {{ default .Values.global.postgres.kyoo_transcoder.database .Values.global.postgres.shared.databaseOverride | quote }}
             - name: PGHOST
-              value: {{ .Values.global.postgres.kyoo_transcoder.host | quote }}
+              value: {{ default (include "kyoo.postgres.shared.host" .) .Values.global.postgres.kyoo_transcoder.host | quote}}
             - name: PGPORT
-              value: {{ .Values.global.postgres.kyoo_transcoder.port | quote }}
+              value: {{ default .Values.global.postgres.shared.port .Values.global.postgres.kyoo_transcoder.port | quote }}
             - name: PGSSLMODE
               value: {{ .Values.global.postgres.kyoo_transcoder.sslmode | quote  }}
             {{- with (concat .Values.global.extraEnv .Values.transcoder.kyoo_transcoder.extraEnv) }}

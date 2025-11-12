@@ -81,19 +81,19 @@ spec:
             - name: PGUSER
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.postgres.kyoo_auth.kyoo_auth.userKey }}
-                  name: {{ .Values.global.postgres.kyoo_auth.kyoo_auth.existingSecret }}
+                  key: {{ default .Values.global.postgres.shared.userKey .Values.global.postgres.kyoo_auth.kyoo_auth.userKey }}
+                  name: {{ default .Values.global.postgres.shared.existingSecret .Values.global.postgres.kyoo_auth.kyoo_auth.existingSecret }}
             - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.postgres.kyoo_auth.kyoo_auth.passwordKey }}
-                  name: {{ .Values.global.postgres.kyoo_auth.kyoo_auth.existingSecret }}
+                  key: {{ default .Values.global.postgres.shared.passwordKey .Values.global.postgres.kyoo_auth.kyoo_auth.passwordKey }}
+                  name: {{ default .Values.global.postgres.shared.existingSecret .Values.global.postgres.kyoo_auth.kyoo_auth.existingSecret }}
             - name: PGDATABASE
-              value: {{ .Values.global.postgres.kyoo_auth.database }}
+              value: {{ default .Values.global.postgres.kyoo_auth.database .Values.global.postgres.shared.databaseOverride | quote }}
             - name: PGHOST
-              value: {{ .Values.global.postgres.kyoo_auth.host | quote }}
+              value: {{ default (include "kyoo.postgres.shared.host" .) .Values.global.postgres.kyoo_auth.host | quote}}
             - name: PGPORT
-              value: {{ .Values.global.postgres.kyoo_auth.port | quote }}
+              value: {{ default .Values.global.postgres.shared.port .Values.global.postgres.kyoo_auth.port | quote }}
             - name: PGSSLMODE
               value: {{ .Values.global.postgres.kyoo_auth.sslmode | quote  }}
             {{- if .Values.kyoo.auth.privatekey.existingSecret }}

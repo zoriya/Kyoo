@@ -135,3 +135,11 @@ rootURL does not include
 {{- define "kyoo.middlewareRootURL" -}}
     {{ default (printf "http://%s" (include "kyoo.traefikproxy.fullname" .)) .Values.kyoo.middlewareRootURL }}
 {{- end -}}
+
+
+{{/*
+Create kyoo postgres base host
+*/}}
+{{- define "kyoo.postgres.shared.host" -}}
+{{- default (printf "%s-postgres" (include "kyoo.fullname" .)) .Values.global.postgres.shared.host -}}
+{{- end -}}
