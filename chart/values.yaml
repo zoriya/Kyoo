@@ -44,7 +44,9 @@ global:
       host: ~
       port: ~
       database: kyoo_api
-      sslmode: prefer
+      # upstream sql library does not support 'prefer' sslmode
+      # tracking: https://github.com/zoriya/Kyoo/issues/1154
+      sslmode: disable
       # kyoo_api workload specific settings
       kyoo_api:
         userKey: ~
