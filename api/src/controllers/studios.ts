@@ -228,7 +228,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 		"",
 		async ({
 			query: { limit, after, query, sort },
-			headers: { "accept-language": languages },
+			headers: { "accept-language": languages, ...headers },
 			request: { url },
 		}) => {
 			const langs = processLanguages(languages);
@@ -239,7 +239,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 				sort,
 				languages: langs,
 			});
-			return createPage(items, { url, sort, limit });
+			return createPage(items, { url, sort, limit, headers });
 		},
 		{
 			detail: { description: "Get all studios" },
@@ -302,7 +302,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 		async ({
 			params: { id },
 			query: { limit, after, query, sort, filter, preferOriginal },
-			headers: { "accept-language": languages },
+			headers: { "accept-language": languages, ...headers },
 			jwt: { sub, settings },
 			request: { url },
 			status,
@@ -344,7 +344,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
-			return createPage(items, { url, sort, limit });
+			return createPage(items, { url, sort, limit, headers });
 		},
 		{
 			detail: { description: "Get all series & movies made by a studio." },
@@ -363,7 +363,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 		async ({
 			params: { id },
 			query: { limit, after, query, sort, filter, preferOriginal },
-			headers: { "accept-language": languages },
+			headers: { "accept-language": languages, ...headers },
 			jwt: { sub, settings },
 			request: { url },
 			status,
@@ -406,7 +406,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
-			return createPage(items, { url, sort, limit });
+			return createPage(items, { url, sort, limit, headers });
 		},
 		{
 			detail: { description: "Get all movies made by a studio." },
@@ -425,7 +425,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 		async ({
 			params: { id },
 			query: { limit, after, query, sort, filter, preferOriginal },
-			headers: { "accept-language": languages },
+			headers: { "accept-language": languages, ...headers },
 			jwt: { sub, settings },
 			request: { url },
 			status,
@@ -468,7 +468,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
-			return createPage(items, { url, sort, limit });
+			return createPage(items, { url, sort, limit, headers });
 		},
 		{
 			detail: { description: "Get all series made by a studio." },

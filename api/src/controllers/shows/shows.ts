@@ -63,7 +63,7 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 				preferOriginal,
 				ignoreInCollection,
 			},
-			headers: { "accept-language": languages },
+			headers: { "accept-language": languages, ...headers },
 			request: { url },
 			jwt: { sub, settings },
 		}) => {
@@ -81,7 +81,7 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
-			return createPage(items, { url, sort, limit });
+			return createPage(items, { url, sort, limit, headers });
 		},
 		{
 			detail: { description: "Get all movies/series/collections" },

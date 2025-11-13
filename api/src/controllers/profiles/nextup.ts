@@ -69,7 +69,7 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 		"/profiles/me/nextup",
 		async ({
 			query: { sort, filter, query, limit, after },
-			headers: { "accept-language": languages },
+			headers: { "accept-language": languages, ...headers },
 			request: { url },
 			jwt: { sub },
 		}) => {
@@ -124,7 +124,7 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 				.limit(limit)
 				.execute({ userId: sub });
 
-			return createPage(items, { url, sort, limit });
+			return createPage(items, { url, sort, limit, headers });
 		},
 		{
 			detail: {

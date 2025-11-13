@@ -53,7 +53,7 @@ export const seasonsH = new Elysia({ tags: ["series"] })
 		async ({
 			params: { id },
 			query: { limit, after, query, sort, filter },
-			headers: { "accept-language": languages },
+			headers: { "accept-language": languages, ...headers },
 			request: { url },
 			status,
 		}) => {
@@ -110,7 +110,7 @@ export const seasonsH = new Elysia({ tags: ["series"] })
 				)
 				.limit(limit);
 
-			return createPage(items, { url, sort, limit });
+			return createPage(items, { url, sort, limit, headers });
 		},
 		{
 			detail: { description: "Get seasons of a serie" },
