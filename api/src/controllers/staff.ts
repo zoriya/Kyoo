@@ -189,7 +189,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 		async ({
 			params: { id },
 			query: { limit, after, query, sort, filter, preferOriginal },
-			headers: { "accept-language": languages },
+			headers: { "accept-language": languages, ...headers },
 			request: { url },
 			jwt: { sub, settings },
 			status,
@@ -269,7 +269,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 					roles.showPk,
 				)
 				.limit(limit);
-			return createPage(items, { url, sort, limit });
+			return createPage(items, { url, sort, limit, headers });
 		},
 		{
 			detail: {
@@ -316,7 +316,11 @@ export const staffH = new Elysia({ tags: ["staff"] })
 	)
 	.get(
 		"/staff",
-		async ({ query: { limit, after, sort, query }, request: { url } }) => {
+		async ({
+			query: { limit, after, sort, query },
+			request: { url },
+			headers,
+		}) => {
 			const items = await db
 				.select()
 				.from(staff)
@@ -333,7 +337,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 					staff.pk,
 				)
 				.limit(limit);
-			return createPage(items, { url, sort, limit });
+			return createPage(items, { url, sort, limit, headers });
 		},
 		{
 			detail: {
@@ -362,6 +366,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 			params: { id },
 			query: { limit, after, query, sort, filter },
 			request: { url },
+			headers,
 			status,
 		}) => {
 			const [movie] = await db
@@ -389,7 +394,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 				sort,
 				filter: and(eq(roles.showPk, movie.pk), filter),
 			});
-			return createPage(items, { url, sort, limit });
+			return createPage(items, { url, sort, limit, headers });
 		},
 		{
 			detail: {
@@ -429,6 +434,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 			params: { id },
 			query: { limit, after, query, sort, filter },
 			request: { url },
+			headers,
 			status,
 		}) => {
 			const [serie] = await db
@@ -456,7 +462,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 				sort,
 				filter: and(eq(roles.showPk, serie.pk), filter),
 			});
-			return createPage(items, { url, sort, limit });
+			return createPage(items, { url, sort, limit, headers });
 		},
 		{
 			detail: {

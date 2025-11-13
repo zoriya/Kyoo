@@ -1,5 +1,6 @@
 import type { ObjectOptions } from "@sinclair/typebox";
 import { type TSchema, t } from "elysia";
+import { buildUrl } from "~/utils";
 import { generateAfter } from "./keyset-paginate";
 import type { Sort } from "./sort";
 
@@ -18,11 +19,31 @@ export const Page = <T extends TSchema>(schema: T, options?: ObjectOptions) =>
 
 export const createPage = <T>(
 	items: T[],
-	{ url, sort, limit }: { url: string; sort: Sort; limit: number },
+	{
+		url,
+		sort,
+		limit,
+		headers,
+	}: {
+		url: string;
+		sort: Sort;
+		limit: number;
+		headers?: Record<string, string | undefined>;
+	},
 ) => {
-	let next: string | null = null;
 	const uri = new URL(url);
+	const forwardedProto = headers?.["x-forwarded-proto"];
+	if (forwardedProto) {
+		uri.protocol = forwardedProto;
+	}
+	const forwardedHost = headers?.["x-forwarded-host"];
+	if (forwardedHost) {
+		uri.host = forwardedHost;
+	}
 
+	const current = uri.toString();
+
+	let next: string | null = null;
 	if (sort.random) {
 		uri.searchParams.set("sort", `random:${sort.random.seed}`);
 		url = uri.toString();
@@ -35,5 +56,5 @@ export const createPage = <T>(
 		uri.searchParams.set("after", generateAfter(items[items.length - 1], sort));
 		next = uri.toString();
 	}
-	return { items, this: url, next };
+	return { items, this: current, next };
 };

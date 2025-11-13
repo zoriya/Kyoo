@@ -133,7 +133,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 		"",
 		async ({
 			query: { limit, after, query, sort, filter, preferOriginal },
-			headers: { "accept-language": languages },
+			headers: { "accept-language": languages, ...headers },
 			request: { url },
 			jwt: { sub, settings },
 		}) => {
@@ -148,7 +148,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
-			return createPage(items, { url, sort, limit });
+			return createPage(items, { url, sort, limit, headers });
 		},
 		{
 			detail: { description: "Get all movies" },

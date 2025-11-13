@@ -67,7 +67,7 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 					"/profiles/me/history",
 					async ({
 						query: { sort, filter, query, limit, after },
-						headers: { "accept-language": languages },
+						headers: { "accept-language": languages, ...headers },
 						request: { url },
 						jwt: { sub },
 					}) => {
@@ -87,7 +87,7 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 							progressQ: historyProgressQ,
 						})) as Entry[];
 
-						return createPage(items, { url, sort, limit });
+						return createPage(items, { url, sort, limit, headers });
 					},
 					{
 						detail: {
@@ -109,7 +109,11 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 					async ({
 						params: { id },
 						query: { sort, filter, query, limit, after },
-						headers: { "accept-language": languages, authorization },
+						headers: {
+							"accept-language": languages,
+							authorization,
+							...headers
+						},
 						request: { url },
 						status,
 					}) => {
@@ -132,7 +136,7 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 							progressQ: historyProgressQ,
 						})) as Entry[];
 
-						return createPage(items, { url, sort, limit });
+						return createPage(items, { url, sort, limit, headers });
 					},
 					{
 						detail: {

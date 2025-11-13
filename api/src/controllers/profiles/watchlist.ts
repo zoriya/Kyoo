@@ -142,7 +142,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 					"/profiles/me/watchlist",
 					async ({
 						query: { limit, after, query, sort, filter, preferOriginal },
-						headers: { "accept-language": languages },
+						headers: { "accept-language": languages, ...headers },
 						request: { url },
 						jwt: { sub, settings },
 					}) => {
@@ -162,7 +162,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 							relations: ["nextEntry"],
 							userId: sub,
 						});
-						return createPage(items, { url, sort, limit });
+						return createPage(items, { url, sort, limit, headers });
 					},
 					{
 						detail: { description: "Get all movies/series in your watchlist" },
@@ -195,7 +195,11 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 						params: { id },
 						query: { limit, after, query, sort, filter, preferOriginal },
 						jwt: { settings },
-						headers: { "accept-language": languages, authorization },
+						headers: {
+							"accept-language": languages,
+							authorization,
+							...headers
+						},
 						request: { url },
 						status,
 					}) => {
@@ -218,7 +222,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 							relations: ["nextEntry"],
 							userId: uInfo.id,
 						});
-						return createPage(items, { url, sort, limit });
+						return createPage(items, { url, sort, limit, headers });
 					},
 					{
 						detail: {

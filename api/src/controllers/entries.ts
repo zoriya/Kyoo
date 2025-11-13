@@ -256,7 +256,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 		async ({
 			params: { id },
 			query: { limit, after, query, sort, filter },
-			headers: { "accept-language": languages },
+			headers: { "accept-language": languages, ...headers },
 			request: { url },
 			jwt: { sub },
 			status,
@@ -294,7 +294,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				userId: sub,
 			})) as Entry[];
 
-			return createPage(items, { url, sort, limit });
+			return createPage(items, { url, sort, limit, headers });
 		},
 		{
 			detail: { description: "Get entries of a serie" },
@@ -338,6 +338,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			params: { id },
 			query: { limit, after, query, sort, filter },
 			request: { url },
+			headers,
 			jwt: { sub },
 			status,
 		}) => {
@@ -373,7 +374,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				userId: sub,
 			})) as Extra[];
 
-			return createPage(items, { url, sort, limit });
+			return createPage(items, { url, sort, limit, headers });
 		},
 		{
 			detail: { description: "Get extras of a serie" },
@@ -410,6 +411,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 		async ({
 			query: { limit, after, query, filter },
 			request: { url },
+			headers,
 			jwt: { sub },
 		}) => {
 			const sort = newsSort;
@@ -427,7 +429,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				userId: sub,
 			})) as Entry[];
 
-			return createPage(items, { url, sort, limit });
+			return createPage(items, { url, sort, limit, headers });
 		},
 		{
 			detail: { description: "Get new movies/episodes added recently." },
