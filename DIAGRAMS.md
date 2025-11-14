@@ -5,27 +5,26 @@ These diagrams are created with Mermaid and rendered locally.  For the best expe
 Kyoo is a monorepo that consists of several projects each in their own directory.  Diagram below shows an outline of kyoo, projects, and artifacts.
 
 ```mermaid
-block-beta
+block
   columns 1
   block:proj1:1
     proj_name["Kyoo"]:1
   end
   block:proj2:1
-    dir_1["autosync/"]
-    dir_2["back/"]
+    dir_1["api/"]
+    dir_2["auth/"]
     dir_3["front/"]
     dir_4["transcoder/"]
     dir_5["scanner/"]
   end
   block:proj3:1
     %% columns auto (default)
-    block:autosync_b:1
-      autosync_i1("kyoo_autosync")
+    block:api_b:1
+      autosync_i1("kyoo_api")
     end
-    block:back_b:1
+    block:auth_b:1
       columns 1
-      back_i1("kyoo_back")
-      back_i2("kyoo_migrations")
+      back_i1("kyoo_auth")
     end
     block:front_b:1
       front_i1("kyoo_front")
@@ -36,7 +35,6 @@ block-beta
     block:scanner_b:1
       columns 1
       scanner_i1("kyoo_scanner")
-      scanner_i2("kyoo_scanner*")
     end
   end
 
@@ -51,19 +49,17 @@ block-beta
   style dir_4 fill:#438dd5,stroke-width:0px
   style dir_5 fill:#438dd5,stroke-width:0px
 
-  style autosync_b fill:#438dd5,stroke-width:0px
-  style back_b fill:#438dd5,stroke-width:0px
+  style api_b fill:#438dd5,stroke-width:0px
+  style auth_b fill:#438dd5,stroke-width:0px
   style front_b fill:#438dd5,stroke-width:0px
   style transcoder_b fill:#438dd5,stroke-width:0px
   style scanner_b fill:#438dd5,stroke-width:0px
 
   style autosync_i1 fill:#85bbf0,stroke-width:0px
   style back_i1 fill:#85bbf0,stroke-width:0px
-  style back_i2 fill:#85bbf0,stroke-width:0px
   style front_i1 fill:#85bbf0,stroke-width:0px
   style transcoder_i1 fill:#85bbf0,stroke-width:0px
   style scanner_i1 fill:#85bbf0,stroke-width:0px
-  style scanner_i2 fill:#85bbf0,stroke-width:0px
 ```
 
 # C4 Diagrams
