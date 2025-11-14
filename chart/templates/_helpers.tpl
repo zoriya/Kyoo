@@ -6,46 +6,46 @@ Create kyoo ingress name
 {{- end -}}
 
 {{/*
-Create kyoo autosync name
+Create kyoo api name
 */}}
-{{- define "kyoo.autosync.fullname" -}}
-{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.autosync.name | trunc 63 | trimSuffix "-" -}}
+{{- define "kyoo.api.fullname" -}}
+{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.api.name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
-Create the name of the autosync service account to use
+Create the name of the api service account to use
 */}}
-{{- define "kyoo.autosync.serviceAccountName" -}}
-{{- if .Values.autosync.serviceAccount.create -}}
-    {{ default (include "kyoo.autosync.fullname" .) .Values.autosync.serviceAccount.name }}
+{{- define "kyoo.api.serviceAccountName" -}}
+{{- if .Values.api.serviceAccount.create -}}
+    {{ default (include "kyoo.api.fullname" .) .Values.api.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.autosync.serviceAccount.name }}
+    {{ default "default" .Values.api.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
 
 {{/*
-Create kyoo back name
+Create kyoo api-metadata name
 */}}
-{{- define "kyoo.back.fullname" -}}
-{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.back.name | trunc 63 | trimSuffix "-" -}}
+{{- define "kyoo.apiimagedata.fullname" -}}
+{{- printf "%s-%s%s" (include "kyoo.fullname" .) .Values.api.name "metadata" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
-Create the name of the back service account to use
+Create kyoo auth name
 */}}
-{{- define "kyoo.back.serviceAccountName" -}}
-{{- if .Values.back.serviceAccount.create -}}
-    {{ default (include "kyoo.back.fullname" .) .Values.back.serviceAccount.name }}
+{{- define "kyoo.auth.fullname" -}}
+{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.auth.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Create the name of the auth service account to use
+*/}}
+{{- define "kyoo.auth.serviceAccountName" -}}
+{{- if .Values.auth.serviceAccount.create -}}
+    {{ default (include "kyoo.auth.fullname" .) .Values.auth.serviceAccount.name }}
 {{- else -}}
-    {{ default "default" .Values.back.serviceAccount.name }}
+    {{ default "default" .Values.auth.serviceAccount.name }}
 {{- end -}}
-{{- end -}}
-
-{{/*
-Create kyoo back-metadata name
-*/}}
-{{- define "kyoo.backmetadata.fullname" -}}
-{{- printf "%s-%s%s" (include "kyoo.fullname" .) .Values.back.name "metadata" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 
@@ -64,24 +64,6 @@ Create the name of the front service account to use
     {{ default (include "kyoo.front.fullname" .) .Values.front.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.front.serviceAccount.name }}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Create kyoo matcher name
-*/}}
-{{- define "kyoo.matcher.fullname" -}}
-{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.matcher.name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
-Create the name of the matcher service account to use
-*/}}
-{{- define "kyoo.matcher.serviceAccountName" -}}
-{{- if .Values.matcher.serviceAccount.create -}}
-    {{ default (include "kyoo.matcher.fullname" .) .Values.matcher.serviceAccount.name }}
-{{- else -}}
-    {{ default "default" .Values.matcher.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
 
@@ -126,4 +108,38 @@ Create kyoo transcoder-metadata name
 */}}
 {{- define "kyoo.transcodermetadata.fullname" -}}
 {{- printf "%s-%s%s" (include "kyoo.fullname" .) .Values.transcoder.name "metadata" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Create kyoo traefikproxy name
+*/}}
+{{- define "kyoo.traefikproxy.fullname" -}}
+{{- printf "%s-%s" (include "kyoo.fullname" .) .Values.traefikproxy.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Create the name of the traefikproxy service account to use
+*/}}
+{{- define "kyoo.traefikproxy.serviceAccountName" -}}
+{{- if .Values.traefikproxy.serviceAccount.create -}}
+    {{ default (include "kyoo.traefikproxy.fullname" .) .Values.traefikproxy.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.traefikproxy.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create kyoo middlewareproxy rootURL
+rootURL does not include 
+*/}}
+{{- define "kyoo.middlewareRootURL" -}}
+    {{ default (printf "http://%s" (include "kyoo.traefikproxy.fullname" .)) .Values.kyoo.middlewareRootURL }}
+{{- end -}}
+
+
+{{/*
+Create kyoo postgres base host
+*/}}
+{{- define "kyoo.postgres.shared.host" -}}
+{{- default (printf "%s-postgres" (include "kyoo.fullname" .)) .Values.global.postgres.shared.host -}}
 {{- end -}}

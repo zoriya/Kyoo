@@ -8,6 +8,7 @@ metadata:
     {{- end }}
   {{- end }}
   name: {{ include "kyoo.transcoder.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kyoo.labels" (dict "context" . "component" .Values.transcoder.name "name" .Values.transcoder.name) | nindent 4 }}
 spec:
@@ -54,6 +55,8 @@ spec:
               {{- toYaml . | nindent 12 }}
             {{- end }}
           env:
+            - name: JWKS_URL
+              value: "http://{{ include "kyoo.auth.fullname" . }}:4568/.well-known/jwks.json"
             - name: GOCODER_HWACCEL
               value: {{ .Values.kyoo.transcoderAcceleration | quote }}
             - name: GOCODER_PRESET
@@ -62,27 +65,31 @@ spec:
               value: "/cache"
             - name: GOCODER_METADATA_ROOT
               value: "/metadata"
+            # the vaapi device path (only used with GOCODER_HWACCEL=vaapi)
+            - name: GOCODER_VAAPI_RENDERER
+              value: "/dev/dri/renderD128"
+            # the qsv device path (only used with GOCODER_HWACCEL=qsv)
+            - name: GOCODER_QSV_RENDERER
+              value: "/dev/dri/renderD128"
             - name: GOCODER_SAFE_PATH
               value: {{ .Values.media.baseMountPath | quote }}
-            - name: POSTGRES_USER
+            - name: PGUSER
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.userKey }}
-                  name: {{ .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.existingSecret }}
-            - name: POSTGRES_PASSWORD
+                  key: {{ default .Values.global.postgres.shared.userKey .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.userKey }}
+                  name: {{ default .Values.global.postgres.shared.existingSecret .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.existingSecret }}
+            - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.passwordKey }}
-                  name: {{ .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.existingSecret }}
-            - name: POSTGRES_DB
-              value: {{ .Values.global.postgres.kyoo_transcoder.database | quote }}
-            - name: POSTGRES_SERVER
-              value: {{ .Values.global.postgres.kyoo_transcoder.host | quote }}
-            - name: POSTGRES_PORT
-              value: {{ .Values.global.postgres.kyoo_transcoder.port | quote }}
-            - name: POSTGRES_SCHEMA
-              value: {{ .Values.global.postgres.kyoo_transcoder.schema | quote  }}
-            - name: POSTGRES_SSLMODE
+                  key: {{ default .Values.global.postgres.shared.passwordKey .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.passwordKey }}
+                  name: {{ default .Values.global.postgres.shared.existingSecret .Values.global.postgres.kyoo_transcoder.kyoo_transcoder.existingSecret }}
+            - name: PGDATABASE
+              value: {{ default .Values.global.postgres.kyoo_transcoder.database .Values.global.postgres.shared.databaseOverride | quote }}
+            - name: PGHOST
+              value: {{ default (include "kyoo.postgres.shared.host" .) .Values.global.postgres.kyoo_transcoder.host | quote}}
+            - name: PGPORT
+              value: {{ default .Values.global.postgres.shared.port .Values.global.postgres.kyoo_transcoder.port | quote }}
+            - name: PGSSLMODE
               value: {{ .Values.global.postgres.kyoo_transcoder.sslmode | quote  }}
             {{- with (concat .Values.global.extraEnv .Values.transcoder.kyoo_transcoder.extraEnv) }}
               {{- toYaml . | nindent 12 }}

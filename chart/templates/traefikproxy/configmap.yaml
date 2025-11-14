@@ -1,0 +1,93 @@
+{{- if .Values.traefikproxy.enabled -}}
+{{- if .Values.traefikproxy.defaultConfigmap -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "kyoo.traefikproxy.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kyoo.labels" (dict "context" . "component" .Values.traefikproxy.name "name" .Values.traefikproxy.name) | nindent 4 }}
+  {{- with (mergeOverwrite (deepCopy .Values.global.configmapAnnotations) .Values.traefikproxy.configmapAnnotations) }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
+data:
+  dynamic_config.yaml: |
+    http:
+      routers:
+        basepath:
+          entryPoints:
+          - web
+          service: front
+          rule: "PathPrefix(`/`)"
+        video:
+          entryPoints:
+          - web
+          middlewares:
+          - phantomtoken
+          service: transcoder
+          rule: "PathPrefix(`/video`)"
+        auth:
+          entryPoints:
+          - web
+          service: auth
+          rule: "PathPrefix(`/auth/`)"
+        wellknown:
+          entryPoints:
+          - web
+          service: auth
+          rule: "PathPrefix(`/.well-known/`)"
+        api:
+          entryPoints:
+          - web
+          middlewares:
+          - phantomtoken
+          service: api
+          rule: "PathPrefix(`/api/`)"
+        swagger:
+          entryPoints:
+          - web
+          service: api
+          rule: "PathPrefix(`/swagger`)"
+        scanner:
+          entryPoints:
+          - web
+          middlewares:
+          - phantomtoken
+          service: scanner
+          rule: "PathPrefix(`/scanner/`)"
+      middlewares:
+        phantomtoken:
+          forwardAuth:
+            address: "http://{{ include "kyoo.auth.fullname" . }}:4568/auth/jwt"
+            authRequestHeaders:
+              - "Authorization"
+              - "X-Api-Key"
+              - "Cookie"
+            authResponseHeaders:
+              - Authorization
+      services:
+        api:
+          loadBalancer:
+            servers:
+            - url: http://{{ include "kyoo.api.fullname" . }}:3567/
+        front:
+          loadBalancer:
+            servers:
+            - url: http://{{ include "kyoo.front.fullname" . }}:8901/
+        transcoder:
+          loadBalancer:
+            servers:
+            - url: http://{{ include "kyoo.transcoder.fullname" . }}:7666/
+        auth:
+          loadBalancer:
+            servers:
+            - url: http://{{ include "kyoo.auth.fullname" . }}:4568/
+        scanner:
+          loadBalancer:
+            servers:
+            - url: http://{{ include "kyoo.scanner.fullname" . }}:4389/
+{{- end }}
+{{- end }}

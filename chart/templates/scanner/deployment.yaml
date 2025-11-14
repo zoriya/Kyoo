@@ -8,6 +8,7 @@ metadata:
     {{- end }}
   {{- end }}
   name: {{ include "kyoo.scanner.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kyoo.labels" (dict "context" . "component" .Values.scanner.name "name" .Values.scanner.name) | nindent 4 }}
 spec:
@@ -55,32 +56,50 @@ spec:
               value: {{ .Values.media.baseMountPath | quote }}
             - name: LIBRARY_IGNORE_PATTERN
               value: {{ .Values.kyoo.libraryIgnorePattern | quote }}
-            - name: KYOO_APIKEYS
-              valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.kyoo.apikey.apikeyKey }}
-                  name: {{ .Values.kyoo.apikey.existingSecret }}
             - name: KYOO_URL
-              value: "http://{{ include "kyoo.back.fullname" . }}:5000/api"
-            - name: LIBRARY_LANGUAGES
-              value: {{ .Values.kyoo.languages | quote }}
-            - name: RABBITMQ_HOST
-              value: {{ .Values.global.rabbitmq.host | quote }}
-            - name: RABBITMQ_PORT
-              value: {{ .Values.global.rabbitmq.port | quote }}
-            - name: RABBITMQ_DEFAULT_USER
+              value: "{{ include "kyoo.middlewareRootURL" . }}/api"
+            - name: JWKS_URL
+              value: "http://{{ include "kyoo.auth.fullname" . }}:4568/.well-known/jwks.json"
+            - name: JWT_ISSUER
+              value: {{ .Values.kyoo.address | quote }}
+            - name: HELPERVAR_APIKEY
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.rabbitmq.kyoo_scanner.userKey }}
-                  name: {{ .Values.global.rabbitmq.kyoo_scanner.existingSecret }}
-            - name: RABBITMQ_DEFAULT_PASS
+                  key: {{ .Values.kyoo.auth.apikeys.scanner.apikeyKey }}
+                  name: {{ .Values.kyoo.auth.apikeys.scanner.existingSecret }}
+            - name: KYOO_APIKEY
+              value: "scanner-$(HELPERVAR_APIKEY)"
+            - name: THEMOVIEDB_API_ACCESS_TOKEN
               valueFrom:
                 secretKeyRef:
-                  key: {{ .Values.global.rabbitmq.kyoo_scanner.passwordKey }}
-                  name: {{ .Values.global.rabbitmq.kyoo_scanner.existingSecret }}
+                  key: {{ .Values.contentdatabase.tmdb.apikeyKey }}
+                  name: {{ .Values.contentdatabase.tmdb.existingSecret }}
+                  optional: true
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  key: {{ default .Values.global.postgres.shared.userKey .Values.global.postgres.kyoo_scanner.kyoo_scanner.userKey }}
+                  name: {{ default .Values.global.postgres.shared.existingSecret .Values.global.postgres.kyoo_scanner.kyoo_scanner.existingSecret }}
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: {{ default .Values.global.postgres.shared.passwordKey .Values.global.postgres.kyoo_scanner.kyoo_scanner.passwordKey }}
+                  name: {{ default .Values.global.postgres.shared.existingSecret .Values.global.postgres.kyoo_scanner.kyoo_scanner.existingSecret }}
+            - name: PGDATABASE
+              value: {{ default .Values.global.postgres.kyoo_scanner.database .Values.global.postgres.shared.databaseOverride | quote }}
+            - name: PGHOST
+              value: {{ default (include "kyoo.postgres.shared.host" .) .Values.global.postgres.kyoo_scanner.host | quote}}
+            - name: PGPORT
+              value: {{ default .Values.global.postgres.shared.port .Values.global.postgres.kyoo_scanner.port | quote }}
+            - name: PGSSLMODE
+              value: {{ .Values.global.postgres.kyoo_scanner.sslmode | quote  }}
             {{- with (concat .Values.global.extraEnv .Values.scanner.kyoo_scanner.extraEnv) }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
+          ports:
+            - name: main
+              containerPort: 4389
+              protocol: TCP
           {{- with .Values.scanner.kyoo_scanner.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}

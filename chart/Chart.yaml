@@ -9,15 +9,7 @@ appVersion: "0.0.0"
 icon: https://raw.githubusercontent.com/zoriya/Kyoo/refs/heads/master/icons/icon.svg
 
 dependencies:
-- condition: meilisearch.enabled
-  name: meilisearch
-  repository: https://meilisearch.github.io/meilisearch-kubernetes
-  version: 0.17.1
-- condition: postgresql.enabled
-  name: postgresql
-  repository: https://charts.bitnami.com/bitnami
-  version: 18.1.3
-- condition: rabbitmq.enabled
-  name: rabbitmq
-  repository: https://charts.bitnami.com/bitnami
-  version: 16.0.14
+- condition: postgres.enabled
+  name: postgres
+  repository: oci://registry-1.docker.io/cloudpirates
+  version: 0.11.1

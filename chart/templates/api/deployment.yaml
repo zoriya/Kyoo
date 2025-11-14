@@ -1,0 +1,137 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  {{- with (mergeOverwrite (deepCopy .Values.global.deploymentAnnotations) .Values.api.deploymentAnnotations) }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
+  name: {{ include "kyoo.api.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kyoo.labels" (dict "context" . "component" .Values.api.name "name" .Values.api.name) | nindent 4 }}
+spec:
+  replicas: {{ .Values.api.replicaCount }}
+  {{- with .Values.api.updateStrategy }}
+  strategy: 
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "kyoo.selectorLabels" (dict "context" . "name" .Values.api.name) | nindent 6 }}
+  template:
+    metadata:
+      {{- with (mergeOverwrite (deepCopy .Values.global.podAnnotations) .Values.api.podAnnotations) }}
+      annotations:
+        {{- range $key, $value := . }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+      {{- end }}
+      labels:
+        {{- include "kyoo.labels" (dict "context" . "component" .Values.api.name "name" .Values.api.name) | nindent 8 }}
+        {{- with (mergeOverwrite (deepCopy .Values.global.podLabels) .Values.api.podLabels) }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.api.imagePullSecrets | default .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.global.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "kyoo.api.serviceAccountName" . }}
+      initContainers:
+        {{- with .Values.api.extraInitContainers }}
+          {{- tpl (toYaml .) $ | nindent 6 }}
+        {{- end }}
+      containers:
+        - name: main
+          image: {{ .Values.api.kyoo_api.image.repository | default (printf "%s/kyoo_api" .Values.global.image.repositoryBase) }}:{{ default (include "kyoo.defaultTag" .) .Values.api.kyoo_api.image.tag }}
+          imagePullPolicy: {{ default .Values.global.image.imagePullPolicy }}
+          args:
+            {{- with .Values.api.kyoo_api.extraArgs }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          env:
+            - name: JWT_ISSUER
+              value: {{ .Values.kyoo.address | quote }}
+            - name: AUTH_SERVER
+              value: "http://{{ include "kyoo.auth.fullname" . }}:4568"
+            - name: IMAGES_PATH
+              value: "/images"
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  key: {{ default .Values.global.postgres.shared.userKey .Values.global.postgres.kyoo_api.kyoo_api.userKey }}
+                  name: {{ default .Values.global.postgres.shared.existingSecret .Values.global.postgres.kyoo_api.kyoo_api.existingSecret }}
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: {{ default .Values.global.postgres.shared.passwordKey .Values.global.postgres.kyoo_api.kyoo_api.passwordKey }}
+                  name: {{ default .Values.global.postgres.shared.existingSecret .Values.global.postgres.kyoo_api.kyoo_api.existingSecret }}
+            - name: PGDATABASE
+              value: {{ default .Values.global.postgres.kyoo_api.database .Values.global.postgres.shared.databaseOverride | quote }}
+            - name: PGHOST
+              value: {{ default (include "kyoo.postgres.shared.host" .) .Values.global.postgres.kyoo_api.host | quote}}
+            - name: PGPORT
+              value: {{ default .Values.global.postgres.shared.port .Values.global.postgres.kyoo_api.port | quote }}
+            - name: PGSSLMODE
+              value: {{ .Values.global.postgres.kyoo_api.sslmode | quote  }}
+            {{- with (concat .Values.global.extraEnv .Values.api.kyoo_api.extraEnv) }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: main
+              containerPort: 3567
+              protocol: TCP
+          {{- with .Values.api.kyoo_api.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.api.kyoo_api.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.api.kyoo_api.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.api.kyoo_api.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            {{- if .Values.api.persistence.enabled }}
+            - name: apiimagedata
+              mountPath: /images
+            {{- end }}
+            {{- with .Values.api.kyoo_api.volumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.api.kyoo_api.extraVolumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+        {{- with .Values.api.extraContainers }}
+          {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+      volumes:
+        {{- if .Values.api.persistence.enabled }}
+        {{- if .Values.api.persistence.existingClaim }}
+        - name: apiimagedata
+          persistentVolumeClaim:
+            claimName: {{ .Values.api.persistence.existingClaim }}
+        {{- else }}
+        - name: apiimagedata
+          persistentVolumeClaim:
+            claimName: {{ include "kyoo.apiimagedata.fullname" . }}
+        {{- end }}
+        {{- end }}
+        {{- with .Values.api.volumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.api.extraVolumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}

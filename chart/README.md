@@ -1,5 +1,5 @@
 # Kyoo Helm Chart
-Kyoo consists of multiple interconnected workloads, leveraging a variety of technologies including Meilisearch, Postgres, and RabbitMQ.  This helm chart is designed to simplify configurations for basic setups while offering advanced customization options.  Naming and opinionation aims to follow structures described in [diagrams](../DIAGRAMS.md).
+Kyoo consists of multiple interconnected workloads, leveraging a variety of technologies including Postgres.  This helm chart is designed to simplify configurations for basic setups while offering advanced customization options.  Naming and opinionation aims to follow structures described in [diagrams](../DIAGRAMS.md).
 
 # Examples
 ## Quickstart
@@ -12,11 +12,7 @@ helm upgrade kyoo oci://ghcr.io/zoriya/helm-charts/kyoo --install --values myval
 ```yaml
 kyoo:
   address: https://kyoo.mydomain.com
-meilisearch:
-  enabled: true
-postgresql:
-  enabled: true
-rabbitmq:
+postgres:
   enabled: true
 extraObjects:
   - apiVersion: v1
@@ -25,13 +21,9 @@ extraObjects:
       name: bigsecret
     type: Opaque
     stringData:
-      kyoo_apikeys: yHXWGsjfjE6sy6UxavqmTUYxgCFYek
-      MEILI_MASTER_KEY: barkLike8SuperDucks
       postgres_user: kyoo_all
       postgres_password: watchSomething4me
-      rabbitmq_user: kyoo_all
-      rabbitmq_password: youAreAmazing2
-      rabbitmq_cookie: mmmGoodCookie
+      scanner_apikey: scanner-triquarter4u
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
@@ -48,18 +40,17 @@ extraObjects:
 
 values.yaml configuration
 ```yaml
-# specify external hosts for backend resources
+# specify external hosts for resources
 global:
-  meilisearch:
-    kyoo_back:
-      host: meilisearch
   postgres:
-    kyoo_back:
+    kyoo_api:
+      host: postgres
+    kyoo_auth:
       host: postgres
     kyoo_transcoder:
       host: postgres
-  rabbitmq:
-    host: rabbitmq
+    kyoo_scanner:
+      host: postgres
 # specify hardware resources
 transcoder:
   kyoo_transcoder:
@@ -90,20 +81,33 @@ metadata:
   name: bigsecret
 type: Opaque
 stringData:
-  kyoo_apikeys: yHXWGsjfjE6sy6UxavqmTUYxgCFYek
   tmdb_apikey: ""
   tvdb_apikey: ""
   tvdb_pin: ""
-  MEILI_MASTER_KEY: barkLike8SuperDucks
   postgres_user: kyoo_all
   postgres_password: watchSomething4me
-  rabbitmq_user: kyoo_all
-  rabbitmq_password: youAreAmazing2
+  scanner_apikey: scanner-triquarter4u
 ```
 
 # Additional Notes
 ## Postgres
-Kyoo consists of multiple microservices.  Best practice is for each microservice to use its own database.  Kyoo workloads support best practices or sharing a single postgres database.  Please see the `POSTGRES_SCHEMA` setting for additional information.  Strongly recomended to use a Kubernetes operator for managing Postgres.
+Strongly recomended to use a Kubernetes operator for managing Postgres.  Kyoo consists of multiple microservices.  Best practice is for each microservice to use its own database.  Kyoo workloads support best practices or sharing a single postgres database.  
 
 ## Subchart Support
-Subcharts are updated frequently and subject to changes.  This chart includes subcharts for deploying Meilisearch, PostgreSQL, and RabbitMQ.  Please consider hosting those independently of Kyoo to better handle versioning and lifecycle management.
+Subcharts are updated frequently and subject to changes.  This chart includes subcharts for deploying PostgreSQL.  Please consider hosting those independently of Kyoo to better handle versioning and lifecycle management.
+
+# v5 Middleware Requirement
+Starting with v5, Kyoo leverages middleware for offloading auth from the microservices onto a gateway.  For additional reading, please see gateway-api sigs [documentation](https://gateway-api.sigs.k8s.io/geps/gep-1494/). 
+
+This Helm chart provides a few choices as most ingress/gatewayapi controllers do not currently support PhantomToken auth.  
+
+## Add TraefikProxy (Default)
+By default, this chart will deploy TraefikProxy behind the existing ingress/gateway resources.  TraefikProxy hop is added and configured to handle ForwardAuth.  This approach offers the most compatibility and requires the least amount of change from the user perspective.
+
+## Direct to TraefikProxy
+Instead of using an additional hop, Traefik can be exposed via LoadBalancer.  To do this securely, please be sure to mount and configuring the TLS certificate inside of Traefik.
+
+## Ingress/GatewayApi (WIP)
+Disable the integrated TraefikProxy and adopt a controller that supports PhantomToken auth.  This option will offer the most Kubernetes native experience.
+
+This is a work in progress.  One of the challenges is that microserice to microservice communication relies upon this middleware as well.  Pointing microservices to Ingress/Gateway service address is not enough since those leverage Layer7 hosts for routing traffic--unless we create a dedicated one that routes all hosts to Kyoo.
