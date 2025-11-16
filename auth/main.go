@@ -24,21 +24,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 
-	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc"
-	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
-	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
-	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
-	"go.opentelemetry.io/otel/log/global"
-	"go.opentelemetry.io/otel/sdk/log"
-	"go.opentelemetry.io/otel/sdk/metric"
-	"go.opentelemetry.io/otel/sdk/resource"
-	"go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
+	"github.com/exaring/otelpgx"
 )
 
 func ErrorHandler(err error, c echo.Context) {
@@ -142,6 +128,12 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 		config.ConnConfig.RuntimeParams["application_name"] = "keibi"
 	}
 
+	config.ConnConfig.Tracer = otelpgx.NewTracer(
+		otelpgx.WithSpanNameFunc(dbGetSpanName),
+		otelpgx.WithDisableQuerySpanNamePrefix(),
+		otelpgx.WithIncludeQueryParameters(),
+	)
+
 	db, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
 		fmt.Printf("Could not connect to database, check your env variables!\n")
@@ -214,82 +206,6 @@ func (h *Handler) TokenToJwt(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func setupOtel(e *echo.Echo) (func(), error) {
-	ctx := context.Background()
-	proto := GetenvOr("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
-
-	res, err := resource.New(
-		ctx,
-		resource.WithAttributes(semconv.ServiceNameKey.String("kyoo.auth")),
-		resource.WithFromEnv(),
-		resource.WithTelemetrySDK(),
-		resource.WithProcess(),
-		resource.WithOS(),
-		resource.WithContainer(),
-		resource.WithHost(),
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	var le log.Exporter
-	if proto == "http/protobuf" {
-		le, err = otlploghttp.New(ctx)
-	} else {
-		le, err = otlploggrpc.New(ctx)
-	}
-	if err != nil {
-		return nil, err
-	}
-	lp := log.NewLoggerProvider(
-		log.WithProcessor(log.NewBatchProcessor(le)),
-		log.WithResource(res),
-	)
-	global.SetLoggerProvider(lp)
-
-	var me metric.Exporter
-	if proto == "http/protobuf" {
-		me, err = otlpmetrichttp.New(ctx)
-	} else {
-		me, err = otlpmetricgrpc.New(ctx)
-	}
-	if err != nil {
-		return func() {}, err
-	}
-	mp := metric.NewMeterProvider(
-		metric.WithReader(
-			metric.NewPeriodicReader(me),
-		),
-		metric.WithResource(res),
-	)
-	otel.SetMeterProvider(mp)
-
-	var te *otlptrace.Exporter
-	if proto == "http/protobuf" {
-		te, err = otlptracehttp.New(ctx)
-	} else {
-		te, err = otlptracegrpc.New(ctx)
-	}
-	if err != nil {
-		return func() {}, err
-	}
-	tp := trace.NewTracerProvider(
-		trace.WithBatcher(te),
-		trace.WithResource(res),
-	)
-	otel.SetTracerProvider(tp)
-
-	e.Use(otelecho.Middleware("kyoo.auth", otelecho.WithSkipper(func(c echo.Context) bool {
-		return c.Path() == "/auth/health" || c.Path() == "/auth/ready"
-	})))
-
-	return func() {
-		lp.Shutdown(ctx)
-		mp.Shutdown(ctx)
-		tp.Shutdown(ctx)
-	}, nil
-}
-
 // @title Keibi - Kyoo's auth
 // @version 1.0
 // @description Auth system made for kyoo.
@@ -316,6 +232,13 @@ func main() {
 	e.Validator = &Validator{validator: validator.New(validator.WithRequiredStructEnabled())}
 	e.HTTPErrorHandler = ErrorHandler
 
+	cleanup, err := setupOtel(e)
+	if err != nil {
+		e.Logger.Fatal("Failed to setup otel: ", err)
+		return
+	}
+	defer cleanup()
+
 	db, err := OpenDatabase()
 	if err != nil {
 		e.Logger.Fatal("Could not open database: ", err)
@@ -332,13 +255,6 @@ func main() {
 		return
 	}
 	h.config = conf
-
-	cleanup, err := setupOtel(e)
-	if err != nil {
-		e.Logger.Fatal("Failed to setup otel: ", err)
-		return
-	}
-	defer cleanup()
 
 	g := e.Group("/auth")
 	r := e.Group("/auth")
