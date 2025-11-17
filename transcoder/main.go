@@ -100,7 +100,6 @@ func main() {
 	}
 	defer cleanup()
 
-
 	metadata, err := src.NewMetadataService()
 	if err != nil {
 		e.Logger.Fatal("failed to create metadata service: ", err)

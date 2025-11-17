@@ -61,7 +61,9 @@ def instrument(app: FastAPI):
 	provider = MeterProvider(
 		metric_readers=[
 			PeriodicExportingMetricReader(
-				HttpMetricExporter() if proto == "http/protobuf" else GrpcMetricExporter()
+				HttpMetricExporter()
+				if proto == "http/protobuf"
+				else GrpcMetricExporter()
 			)
 		],
 		resource=resource,
