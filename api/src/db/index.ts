@@ -1,6 +1,7 @@
 import os from "node:os";
 import path from "node:path";
 import tls, { type ConnectionOptions } from "node:tls";
+import { instrumentDrizzleClient } from "@kubiks/otel-drizzle";
 import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate as migrateDb } from "drizzle-orm/node-postgres/migrator";
@@ -113,6 +114,9 @@ export const db = drizzle({
 	schema,
 	connection: postgresConfig,
 	casing: "snake_case",
+});
+instrumentDrizzleClient(db, {
+	maxQueryTextLength: 100_000_000,
 });
 
 export const migrate = async () => {
