@@ -5,6 +5,7 @@ from logging import getLogger
 from mimetypes import guess_file_type
 from os.path import dirname, exists, isdir, join
 
+from opentelemetry import trace
 from watchfiles import Change, awatch
 
 from .client import KyooClient
@@ -16,6 +17,7 @@ from .models.videos import For, Video, VideoInfo
 from .requests import RequestCreator
 
 logger = getLogger(__name__)
+tracer = trace.get_tracer("kyoo.scanner")
 
 
 @asynccontextmanager
@@ -36,6 +38,7 @@ class FsScanner:
 		except re.error as e:
 			logger.error(f"Invalid ignore pattern. Ignoring. Error: {e}")
 
+	@tracer.start_as_current_span("scan")
 	async def scan(self, path: str | None = None, remove_deleted=False):
 		if path is None:
 			path = self._root_path
@@ -78,6 +81,7 @@ class FsScanner:
 		except Exception as e:
 			logger.error("Unexpected error while running scan.", exc_info=e)
 
+	@tracer.start_as_current_span("monitor")
 	async def monitor(self):
 		logger.info(f"Watching for new files in {self._root_path}")
 		async for changes in awatch(self._root_path, ignore_permission_denied=True):

@@ -3,6 +3,7 @@ from logging import getLogger
 from typing import cast
 
 from asyncpg import Connection, Pool
+from opentelemetry import trace
 from pydantic import TypeAdapter
 
 from .client import KyooClient
@@ -11,6 +12,7 @@ from .models.videos import Resource
 from .providers.provider import Provider
 
 logger = getLogger(__name__)
+tracer = trace.get_tracer("kyoo.scanner")
 
 
 class RequestCreator:
@@ -54,6 +56,7 @@ class RequestProcessor:
 		self._client = client
 		self._providers = providers
 
+	@tracer.start_as_current_span("listen_requests")
 	async def listen(self, tg: TaskGroup):
 		closed = Event()
 
@@ -118,40 +121,43 @@ class RequestProcessor:
 			return False
 		request = Request.model_validate(cur)
 
-		logger.info(f"Starting to process {request.title}")
-		try:
-			show = await self._run_request(request)
-			finished = await self._database.fetchrow(
-				"""
-				delete from scanner.requests
-				where pk = $1
-				returning
-					videos
-				""",
-				request.pk,
-			)
-			if finished and finished["videos"] != request.videos:
-				videos = TypeAdapter(list[Request.Video]).validate_python(
-					finished["videos"]
+		with tracer.start_as_current_span(f"process {request.title}") as span:
+			logger.info(f"Starting to process {request.title}")
+			try:
+				show = await self._run_request(request)
+				finished = await self._database.fetchrow(
+					"""
+					delete from scanner.requests
+					where pk = $1
+					returning
+						videos
+					""",
+					request.pk,
 				)
-				await self._client.link_videos(
-					"movie" if request.kind == "movie" else "serie",
-					show.slug,
-					videos,
+				if finished and finished["videos"] != request.videos:
+					videos = TypeAdapter(list[Request.Video]).validate_python(
+						finished["videos"]
+					)
+					await self._client.link_videos(
+						"movie" if request.kind == "movie" else "serie",
+						show.slug,
+						videos,
+					)
+			except Exception as e:
+				span.set_status(trace.Status(trace.StatusCode.ERROR))
+				span.record_exception(e)
+				logger.error("Couldn't process request", exc_info=e)
+				cur = await self._database.execute(
+					"""
+					update
+						scanner.requests
+					set
+						status = 'failed'
+					where
+						pk = $1
+					""",
+					request.pk,
 				)
-		except Exception as e:
-			logger.error("Couldn't process request", exc_info=e)
-			cur = await self._database.execute(
-				"""
-				update
-					scanner.requests
-				set
-					status = 'failed'
-				where
-					pk = $1
-				""",
-				request.pk,
-			)
 		return True
 
 	async def _run_request(self, request: Request) -> Resource:
