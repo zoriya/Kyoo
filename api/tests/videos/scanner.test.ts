@@ -591,4 +591,127 @@ describe("Video seeding", () => {
 		expect(vid!.evj[1].slug).toBe("made-in-abyss-s2e1");
 		expect(vid!.evj[1].entry.slug).toBe("made-in-abyss-s2e1");
 	});
+
+	it("work with duplicated episodes", async () => {
+		await db.delete(videos);
+		const [resp, body] = await createVideo({
+			guess: {
+				title: "mia",
+				episodes: [
+					{ season: 1, episode: 13 },
+					{ season: 1, episode: 13 },
+				],
+				from: "test",
+				history: [],
+			},
+			part: null,
+			path: "/video/mia s1e13.mkv",
+			rendering: "duptest",
+			version: 1,
+			for: [
+				{ serie: madeInAbyss.slug, season: 1, episode: 13 },
+				{ serie: madeInAbyss.slug, season: 1, episode: 13 },
+			],
+		});
+
+		expectStatus(resp, body).toBe(201);
+		expect(body).toBeArrayOfSize(1);
+		expect(body[0].id).toBeString();
+
+		const vid = await db.query.videos.findFirst({
+			where: eq(videos.id, body[0].id),
+			with: {
+				evj: { with: { entry: true } },
+			},
+		});
+
+		expect(vid).not.toBeNil();
+		expect(vid!.path).toBe("/video/mia s1e13.mkv");
+		expect(vid!.guess).toMatchObject({ title: "mia", from: "test" });
+
+		expect(body[0].entries).toBeArrayOfSize(1);
+		expect(vid!.evj).toBeArrayOfSize(1);
+
+		expect(vid!.evj[0].slug).toBe("made-in-abyss-s1e13");
+		expect(vid!.evj[0].entry.slug).toBe("made-in-abyss-s1e13");
+	});
+
+	it("work with duplicated two episodes", async () => {
+		await db.delete(videos);
+		const [resp, body] = await createVideo([
+			{
+				guess: {
+					title: "mia",
+					episodes: [
+						{ season: 1, episode: 13 },
+						{ season: 1, episode: 13 },
+					],
+					from: "test",
+					history: [],
+				},
+				part: null,
+				path: "/video/mia s1e13.mkv",
+				rendering: "duptest-two",
+				version: 1,
+				for: [
+					{ serie: madeInAbyss.slug, season: 1, episode: 13 },
+					{ serie: madeInAbyss.slug, season: 1, episode: 13 },
+				],
+			},
+			{
+				guess: {
+					title: "mia",
+					episodes: [
+						{ season: 1, episode: 13 },
+						{ season: 1, episode: 13 },
+					],
+					from: "test",
+					history: [],
+				},
+				part: null,
+				path: "/video/mia s1e13 bis.mkv",
+				rendering: "duptest-two-bis",
+				version: 1,
+				for: [
+					{ serie: madeInAbyss.slug, season: 1, episode: 13 },
+					{ serie: madeInAbyss.slug, season: 1, episode: 13 },
+				],
+			},
+		]);
+
+		expectStatus(resp, body).toBe(201);
+		expect(body).toBeArrayOfSize(2);
+		expect(body[0].id).toBeString();
+		expect(body[1].id).toBeString();
+		expect(body[0].entries).toBeArrayOfSize(1);
+		expect(body[0].entries[0].slug).toBe("made-in-abyss-s1e13");
+		expect(body[1].entries).toBeArrayOfSize(1);
+		expect(body[1].entries[0].slug).toBe("made-in-abyss-s1e13-duptest-two-bis");
+
+		let vid = await db.query.videos.findFirst({
+			where: eq(videos.id, body[0].id),
+			with: {
+				evj: { with: { entry: true } },
+			},
+		});
+
+		expect(vid).not.toBeNil();
+		expect(vid!.path).toBe("/video/mia s1e13.mkv");
+		expect(vid!.guess).toMatchObject({ title: "mia", from: "test" });
+		expect(vid!.evj).toBeArrayOfSize(1);
+		expect(vid!.evj[0].slug).toBe("made-in-abyss-s1e13");
+
+		vid = await db.query.videos.findFirst({
+			where: eq(videos.id, body[1].id),
+			with: {
+				evj: { with: { entry: true } },
+			},
+		});
+
+		expect(vid).not.toBeNil();
+		expect(vid!.path).toBe("/video/mia s1e13 bis.mkv");
+		expect(vid!.guess).toMatchObject({ title: "mia", from: "test" });
+		expect(vid!.evj).toBeArrayOfSize(1);
+		expect(vid!.evj[0].slug).toBe("made-in-abyss-s1e13-duptest-two-bis");
+	});
 });
