@@ -11,6 +11,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/exaring/otelpgx"
 	"github.com/golang-migrate/migrate/v4"
 	pgxd "github.com/golang-migrate/migrate/v4/database/pgx/v5"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -103,6 +104,11 @@ func (s *MetadataService) setupDb() (*pgxpool.Pool, error) {
 	if _, ok := config.ConnConfig.RuntimeParams["application_name"]; !ok {
 		config.ConnConfig.RuntimeParams["application_name"] = "gocoder"
 	}
+
+	config.ConnConfig.Tracer = otelpgx.NewTracer(
+		otelpgx.WithDisableQuerySpanNamePrefix(),
+		otelpgx.WithIncludeQueryParameters(),
+	)
 
 	db, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {

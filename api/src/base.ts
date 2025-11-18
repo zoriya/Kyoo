@@ -16,6 +16,7 @@ import { studiosH } from "./controllers/studios";
 import { videosReadH, videosWriteH } from "./controllers/videos";
 import { db } from "./db";
 import type { KError } from "./models/error";
+import { otel } from "./otel";
 
 export const base = new Elysia({ name: "base" })
 	.onError(({ code, error }) => {
@@ -92,6 +93,7 @@ export const prefix = "/api";
 export const handlers = new Elysia({ prefix })
 	.use(base)
 	.use(auth)
+	.use(otel)
 	.guard(
 		{
 			// Those are not applied for now. See https://github.com/elysiajs/elysia/issues/1139
