@@ -85,6 +85,8 @@ C4Context
 ```
 
 ## Container
+Kyoo leverages the [API Gateway](https://learn.microsoft.com/en-us/azure/architecture/microservices/design/gateway) approach to microservices and [offloads](https://learn.microsoft.com/en-us/azure/architecture/patterns/gateway-offloading) authentication at the gateway.
+
 ```mermaid
 C4Container
   UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
@@ -111,6 +113,7 @@ C4Container
   Rel(apigateway, auth, "")
   Rel(frontend, api, "")
   Rel(api, tracker, "")
+  Rel(api, content, "")
   Rel(scanner, api, "")
   Rel(scanner, media, "")
   Rel(scanner, content, "")
@@ -118,9 +121,7 @@ C4Container
 ```
 ## Component
 #### Auth
-Kyoo leverages the [API Gateway](https://learn.microsoft.com/en-us/azure/architecture/microservices/design/gateway) approach to microservices and [offloads](https://learn.microsoft.com/en-us/azure/architecture/patterns/gateway-offloading) authentication at the gateway.  Auth microservice is implicitly used by each other microservice for both end user authentication and microservice to microservice communications.  
-
-*Auth microservice will not be directly represented in the other component diagrams.  Instead in their relationsihp will specify "auth via middleware".
+Auth microservice is implicitly used by each other microservice for both end user authentication and microservice to microservice communications.  Auth microservice will not be directly represented in the other component diagrams.  Instead in their relationsihp will specify "auth via middleware".
 
 ```mermaid
 C4Component
@@ -151,20 +152,23 @@ C4Component
   Container_Boundary(scanner, "scanner") {
     Component(scanner_c1, "kyoo_scanner", "Python", "")
   }
-  Container_Boundary(front, "front") {
-    Component(front_c1, "kyoo_front", "TypeScript", "")
-  }
 
   System_Boundary(external, "") {
     System_Ext(tracker, "ActivityTracker", "")
+    System_Ext(content, "ContentDatabase", "")
+  }
+
+  Container_Boundary(front, "front") {
+    Component(front_c1, "kyoo_front", "TypeScript", "")
   }
 
   Rel(user, api_c1, "auth via middleware")
   Rel(api_c1, api_db1, "")
   Rel(api_c1, api_c2, "")
+  Rel(api_c1, content, "http(s) <br/> retries media images")
   Rel(api_c1, tracker, "")
   Rel(scanner_c1, api_c1, "auth via middleware")
-  Rel(front_c1, api_c1, "")
+  Rel(front_c1, api_c1, "http(s) SSR <br/> auth via middleware")
 ```
 
 #### Front
@@ -183,7 +187,7 @@ C4Component
     Component(api_c1, "kyoo_api", "TypeScript", "")
   }
   Rel(user, front_c1, "")
-  Rel(front_c1, api_c1, "")
+  Rel(front_c1, api_c1, "http(s) SSR <br/> auth via middleware")
 ```
 
 
@@ -240,6 +244,6 @@ C4Component
   Rel(user, scanner_c1, "http(s) <br/> auth via middleware")
   Rel(scanner_c1, api_c1, "http(s) <br/> auth via middleware")
   Rel(scanner_c1, scanner_db1, "")
-  Rel(scanner_c1, content, "http(s) <br/> gathers media info & images")
+  Rel(scanner_c1, content, "http(s) <br/> gathers media metadata")
   Rel(scanner_c1, media, "mounted to filesystem <br/> watches")
 ```
