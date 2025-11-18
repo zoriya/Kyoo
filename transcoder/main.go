@@ -93,6 +93,13 @@ func main() {
 	e.GET("/video/swagger/*", echoSwagger.WrapHandler)
 	e.HTTPErrorHandler = ErrorHandler
 
+	cleanup, err := setupOtel(e)
+	if err != nil {
+		e.Logger.Fatal("Failed to setup otel: ", err)
+		return
+	}
+	defer cleanup()
+
 	metadata, err := src.NewMetadataService()
 	if err != nil {
 		e.Logger.Fatal("failed to create metadata service: ", err)

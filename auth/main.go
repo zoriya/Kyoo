@@ -23,6 +23,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
+
+	"github.com/exaring/otelpgx"
 )
 
 func ErrorHandler(err error, c echo.Context) {
@@ -126,6 +128,12 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 		config.ConnConfig.RuntimeParams["application_name"] = "keibi"
 	}
 
+	config.ConnConfig.Tracer = otelpgx.NewTracer(
+		otelpgx.WithSpanNameFunc(dbGetSpanName),
+		otelpgx.WithDisableQuerySpanNamePrefix(),
+		otelpgx.WithIncludeQueryParameters(),
+	)
+
 	db, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
 		fmt.Printf("Could not connect to database, check your env variables!\n")
@@ -223,6 +231,13 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Validator = &Validator{validator: validator.New(validator.WithRequiredStructEnabled())}
 	e.HTTPErrorHandler = ErrorHandler
+
+	cleanup, err := setupOtel(e)
+	if err != nil {
+		e.Logger.Fatal("Failed to setup otel: ", err)
+		return
+	}
+	defer cleanup()
 
 	db, err := OpenDatabase()
 	if err != nil {

@@ -1,4 +1,3 @@
-import logging
 from asyncio import CancelledError, TaskGroup, create_task, sleep
 from contextlib import asynccontextmanager
 
@@ -6,16 +5,13 @@ from fastapi import FastAPI
 
 from scanner.client import KyooClient
 from scanner.fsscan import FsScanner
+from scanner.otel import instrument
 from scanner.providers.composite import CompositeProvider
 from scanner.providers.themoviedatabase import TheMovieDatabase
 from scanner.requests import RequestCreator, RequestProcessor
 
 from .database import get_db, init_pool, migrate
 from .routers.routes import router
-
-logging.basicConfig(level=logging.DEBUG)
-logging.getLogger("watchfiles").setLevel(logging.WARNING)
-logging.getLogger("rebulk").setLevel(logging.WARNING)
 
 
 @asynccontextmanager
@@ -72,3 +68,4 @@ app = FastAPI(
 	lifespan=lifespan,
 )
 app.include_router(router)
+instrument(app)
