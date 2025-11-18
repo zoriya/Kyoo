@@ -85,7 +85,6 @@ C4Context
 ```
 
 ## Container
-Messaging is middleware.  EnterpriseMessageBus is for any messaging handled between different projects.
 ```mermaid
 C4Container
   UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
@@ -121,7 +120,7 @@ C4Container
 #### Auth
 Kyoo leverages the [API Gateway](https://learn.microsoft.com/en-us/azure/architecture/microservices/design/gateway) approach to microservices and [offloads](https://learn.microsoft.com/en-us/azure/architecture/patterns/gateway-offloading) authentication at the gateway.  Auth microservice is implicitly used by each other microservice for both end user authentication and microservice to microservice communications.  
 
-*Auth microservice will not be directly represented in the other component diagrams.  Instead in their relationsihp, they will specify "auth via middleware".
+*Auth microservice will not be directly represented in the other component diagrams.  Instead in their relationsihp will specify "auth via middleware".
 
 ```mermaid
 C4Component
@@ -147,7 +146,7 @@ C4Component
   Container_Boundary(api, "api") {
     ComponentDb(api_db1, "kyoo", "Postgres", "")
     Component(api_c1, "kyoo_api", "TypeScript", "")
-    Component(api_c2, "ApiMetadata", "Volume", "Persistent. Distributed Metadata")
+    Component(api_c2, "ApiMetadata", "S3/Volume", "Persistent. Distributed Metadata")
   }
   Container_Boundary(scanner, "scanner") {
     Component(scanner_c1, "kyoo_scanner", "Python", "")
@@ -200,7 +199,7 @@ C4Component
   Container_Boundary(transcoder, "transcoder") {
     ComponentDb(transcoder_db1, "gocoder", "Postgres", "")
     Component(transcoder_c1, "kyoo_transcoder", "Go", "")
-    Component(transcoder_c2, "TranscodeMetadata", "Volume", "Persistent. Distributed Metadata")
+    Component(transcoder_c2, "TranscodeMetadata", "S3/Volume", "Persistent. Distributed Metadata")
     Component(transcoder_c3, "TranscodeCache", "Volume", "Volatile. Local cache")
   }
 
@@ -223,6 +222,8 @@ C4Component
   
   title Scanner Component Diagram
 
+  Person(user, "User")
+
   Container_Boundary(api, "api") {
     Component(api_c1, "kyoo_api", "TypeScript", "")
   }
@@ -236,6 +237,7 @@ C4Component
     System_Ext(media, "MediaLibrary", "")
   }
 
+  Rel(user, scanner_c1, "http(s) <br/> auth via middleware")
   Rel(scanner_c1, api_c1, "http(s) <br/> auth via middleware")
   Rel(scanner_c1, scanner_db1, "")
   Rel(scanner_c1, content, "http(s) <br/> gathers media info & images")
