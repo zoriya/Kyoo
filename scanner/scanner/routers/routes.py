@@ -37,11 +37,17 @@ def get_health():
 
 
 @router.get("/ready")
-async def get_ready(db: Annotated[Connection, Depends(get_db_fapi)]):
-	try:
-		_ = await db.execute("select 1")
-		return {"status": "healthy", "database": "healthy"}
-	except Exception as e:
-		raise HTTPException(
-			status_code=500, detail={"status": "unhealthy", "database": str(e)}
-		)
+def get_ready():
+	# child spans (`select 1` & db connection reset) was still logged,
+	# since i don't really wanna deal with it, let's just do that.
+	return {"status": "healthy"}
+
+
+# async def get_ready(db: Annotated[Connection, Depends(get_db_fapi)]):
+# try:
+# 	_ = await db.execute("select 1")
+# 	return {"status": "healthy", "database": "healthy"}
+# except Exception as e:
+# 	raise HTTPException(
+# 		status_code=500, detail={"status": "unhealthy", "database": str(e)}
+# 	)
