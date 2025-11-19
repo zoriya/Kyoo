@@ -75,7 +75,7 @@ class RequestProcessor:
 					self._database.add_termination_listener(terminated)
 					await self._database.add_listener("scanner_requests", process)
 
-					logger.info("Listening for requestes")
+					logger.info("Listening for requests")
 					_ = await closed.wait()
 					logger.info("stopping...")
 				except CancelledError:
