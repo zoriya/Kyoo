@@ -86,3 +86,4 @@ if __name__ == "__main__":
 		print(ret.model_dump_json(indent=4, by_alias=True))
 
 	asyncio.run(main())
+	# use this with `uv run python3 -m scanner.identifiers.identify "path"`

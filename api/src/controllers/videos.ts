@@ -7,6 +7,7 @@ import {
 	lt,
 	max,
 	min,
+	ne,
 	notExists,
 	or,
 	sql,
@@ -100,10 +101,23 @@ async function linkVideos(
 		.innerJoin(shows, eq(entries.showPk, shows.pk))
 		.as("entriesQ");
 
-	const hasRenderingQ = tx
-		.select()
-		.from(entryVideoJoin)
-		.where(eq(entryVideoJoin.entryPk, entriesQ.pk));
+	const renderVid = alias(videos, "renderVid");
+	const hasRenderingQ = or(
+		gt(
+			sql`dense_rank() over (partition by ${entriesQ.pk} order by ${videos.rendering})`,
+			1,
+		),
+		sql`exists(${tx
+			.select()
+			.from(entryVideoJoin)
+			.innerJoin(renderVid, eq(renderVid.pk, entryVideoJoin.videoPk))
+			.where(
+				and(
+					eq(entryVideoJoin.entryPk, entriesQ.pk),
+					ne(renderVid.rendering, videos.rendering),
+				),
+			)})`,
+	)!;
 
 	const ret = await tx
 		.insert(entryVideoJoin)
@@ -112,7 +126,7 @@ async function linkVideos(
 				.selectDistinctOn([entriesQ.pk, videos.pk], {
 					entryPk: entriesQ.pk,
 					videoPk: videos.pk,
-					slug: computeVideoSlug(entriesQ.slug, sql`exists(${hasRenderingQ})`),
+					slug: computeVideoSlug(entriesQ.slug, hasRenderingQ),
 				})
 				.from(
 					values(links, {
