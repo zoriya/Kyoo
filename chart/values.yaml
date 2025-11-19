@@ -115,7 +115,6 @@ kyoo:
       extra: []
         # - name: example
         #   existingSecret: bigsecret
-        ## value of the apieky should be $name-$apikey
         #   apikeyKey: example_apikey
         #   claims: '{"permissions": ["core.read"]}'
 
@@ -201,7 +200,7 @@ api:
     volumeMounts: []
   volumes: []
   replicaCount: 1
-  # default to recreate for better user experience with ReadWriteOnce volumes  
+  # default to recreate for better user experience with ReadWriteOnce volumes
   updateStrategy:
     type: Recreate
   podLabels: {}
@@ -472,7 +471,7 @@ postgres:
   initdb:
     scripts:
       kyoo_api.sql: |
-        CREATE DATABASE {{ .Values.global.postgres.kyoo_api.database }} WITH OWNER {{ .Values.global.postgres.infra.user }}; 
+        CREATE DATABASE {{ .Values.global.postgres.kyoo_api.database }} WITH OWNER {{ .Values.global.postgres.infra.user }};
         \connect {{ .Values.global.postgres.kyoo_api.database }};
         REVOKE ALL ON SCHEMA public FROM PUBLIC;
         CREATE SCHEMA IF NOT EXISTS kyoo AUTHORIZATION {{ .Values.global.postgres.infra.user }};
@@ -481,7 +480,7 @@ postgres:
         SET pg_trgm.word_similarity_threshold = 0.4;
         ALTER DATABASE {{ .Values.global.postgres.kyoo_api.database }} SET pg_trgm.word_similarity_threshold = 0.4;
       kyoo_auth.sql: |
-        CREATE DATABASE {{ .Values.global.postgres.kyoo_auth.database }} WITH OWNER {{ .Values.global.postgres.infra.user }}; 
+        CREATE DATABASE {{ .Values.global.postgres.kyoo_auth.database }} WITH OWNER {{ .Values.global.postgres.infra.user }};
         \connect {{ .Values.global.postgres.kyoo_auth.database }};
         REVOKE ALL ON SCHEMA public FROM PUBLIC;
         CREATE SCHEMA IF NOT EXISTS keibi AUTHORIZATION {{ .Values.global.postgres.infra.user }};
@@ -496,13 +495,13 @@ postgres:
         REVOKE ALL ON SCHEMA public FROM PUBLIC;
         CREATE SCHEMA IF NOT EXISTS gocoder AUTHORIZATION {{ .Values.global.postgres.infra.user }};
       user.sql: |
-        ALTER ROLE {{ .Values.global.postgres.infra.user }} 
+        ALTER ROLE {{ .Values.global.postgres.infra.user }}
         IN DATABASE {{ .Values.global.postgres.kyoo_api.database }} SET search_path TO "$user", kyoo;
         ALTER ROLE {{ .Values.global.postgres.infra.user }}
         IN DATABASE {{ .Values.global.postgres.kyoo_auth.database }} SET search_path TO "$user", keibi;
-        ALTER ROLE {{ .Values.global.postgres.infra.user }} 
+        ALTER ROLE {{ .Values.global.postgres.infra.user }}
         IN DATABASE {{ .Values.global.postgres.kyoo_scanner.database }} SET search_path TO "$user", scanner;
-        ALTER ROLE {{ .Values.global.postgres.infra.user }} 
+        ALTER ROLE {{ .Values.global.postgres.infra.user }}
         IN DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} SET search_path TO "$user", gocoder;
   persistence:
     enabled: true

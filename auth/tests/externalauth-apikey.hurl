@@ -1,6 +1,6 @@
 POST {{host}}/keys
 # this is created from the gh workflow file's env var
-X-API-KEY: hurl-1234apikey
+X-API-KEY: 1234apikey
 {
 	"name": "dryflower",
 	"claims": {
@@ -32,5 +32,5 @@ jsonpath "$.items[0].claims.permissions" contains "apikeys.read"
 # Clean api key
 
 DELETE {{host}}/keys/{{id}}
-X-API-KEY: hurl-1234apikey
+X-API-KEY: 1234apikey
 HTTP 200

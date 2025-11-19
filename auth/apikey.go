@@ -4,10 +4,9 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
-	"fmt"
 	"maps"
 	"net/http"
-	"strings"
+	"slices"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -45,7 +44,7 @@ func MapDbKey(key *dbc.Apikey) ApiKeyWToken {
 			CreatedAt: key.CreatedAt,
 			LastUsed:  key.LastUsed,
 		},
-		Token: fmt.Sprintf("%s-%s", key.Name, key.Token),
+		Token: key.Token,
 	}
 }
 
@@ -75,7 +74,10 @@ func (h *Handler) CreateApiKey(c echo.Context) error {
 		return err
 	}
 
-	if _, conflict := h.config.EnvApiKeys[req.Name]; conflict {
+	conflict := slices.ContainsFunc(h.config.EnvApiKeys, func(k ApiKeyWToken) bool {
+		return k.Name == req.Name
+	})
+	if conflict {
 		return echo.NewHTTPError(409, "An env apikey is already defined with the same name")
 	}
 
@@ -174,17 +176,15 @@ func (h *Handler) ListApiKey(c echo.Context) error {
 }
 
 func (h *Handler) createApiJwt(apikey string) (string, error) {
-	info := strings.SplitN(apikey, "-", 2)
-	if len(info) != 2 {
-		return "", echo.NewHTTPError(http.StatusForbidden, "Invalid api key format")
+	var key *ApiKeyWToken
+	for _, k := range h.config.EnvApiKeys {
+		if k.Token == apikey {
+			key = &k
+			break
+		}
 	}
-
-	key, fromEnv := h.config.EnvApiKeys[info[0]]
-	if !fromEnv {
-		dbKey, err := h.db.GetApiKey(context.Background(), dbc.GetApiKeyParams{
-			Name:  info[0],
-			Token: info[1],
-		})
+	if key == nil {
+		dbKey, err := h.db.GetApiKey(context.Background(), apikey)
 		if err == pgx.ErrNoRows {
 			return "", echo.NewHTTPError(http.StatusForbidden, "Invalid api key")
 		} else if err != nil {
@@ -195,7 +195,8 @@ func (h *Handler) createApiJwt(apikey string) (string, error) {
 			h.db.TouchApiKey(context.Background(), dbKey.Pk)
 		}()
 
-		key = MapDbKey(&dbKey)
+		found := MapDbKey(&dbKey)
+		key = &found
 	}
 
 	claims := maps.Clone(key.Claims)

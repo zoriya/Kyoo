@@ -11,7 +11,7 @@ HTTP 401
 
 POST {{host}}/keys
 # this is created from the gh workflow file's env var
-X-API-KEY: hurl-1234apikey
+X-API-KEY: 1234apikey
 {
 	"name": "dryflower",
 	"claims": {
@@ -32,7 +32,7 @@ jwt: jsonpath "$.token"
 
 # Duplicates email
 POST {{host}}/keys
-X-API-KEY: hurl-1234apikey
+X-API-KEY: 1234apikey
 {
 	"name": "dryflower",
 	"claims": {
@@ -57,5 +57,5 @@ Authorization: Bearer {{jwt}}
 HTTP 403
 
 DELETE {{host}}/keys/{{id}}
-X-API-KEY: hurl-1234apikey
+X-API-KEY: 1234apikey
 HTTP 200
