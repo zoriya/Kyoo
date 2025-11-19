@@ -14,7 +14,7 @@ metadata:
 spec:
   replicas: {{ .Values.scanner.replicaCount }}
   {{- with .Values.scanner.updateStrategy }}
-  strategy: 
+  strategy:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   selector:
@@ -62,13 +62,11 @@ spec:
               value: "http://{{ include "kyoo.auth.fullname" . }}:4568/.well-known/jwks.json"
             - name: JWT_ISSUER
               value: {{ .Values.kyoo.address | quote }}
-            - name: HELPERVAR_APIKEY
+            - name: KYOO_APIKEY
               valueFrom:
                 secretKeyRef:
                   key: {{ .Values.kyoo.auth.apikeys.scanner.apikeyKey }}
                   name: {{ .Values.kyoo.auth.apikeys.scanner.existingSecret }}
-            - name: KYOO_APIKEY
-              value: "scanner-$(HELPERVAR_APIKEY)"
             - name: THEMOVIEDB_API_ACCESS_TOKEN
               valueFrom:
                 secretKeyRef:

@@ -121,7 +121,7 @@ services:
       # Use this env var once we use mTLS for auth
       # - KYOO_URL=${KYOO_URL:-http://api:3567/api}
       - KYOO_URL=${KYOO_URL:-http://traefik:8901/api}
-      - KYOO_APIKEY=scanner-$KEIBI_APIKEY_SCANNER
+      - KYOO_APIKEY=$KEIBI_APIKEY_SCANNER
       - JWKS_URL=http://auth:4568/.well-known/jwks.json
       - JWT_ISSUER=${PUBLIC_URL}
     volumes:

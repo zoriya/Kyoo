@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"maps"
 	"os"
+	"slices"
 	"strings"
 	"time"
 
@@ -31,7 +32,7 @@ type Configuration struct {
 	GuestClaims     jwt.MapClaims
 	ProtectedClaims []string
 	ExpirationDelay time.Duration
-	EnvApiKeys      map[string]ApiKeyWToken
+	EnvApiKeys      []ApiKeyWToken
 }
 
 var DefaultConfig = Configuration{
@@ -39,7 +40,7 @@ var DefaultConfig = Configuration{
 	FirstUserClaims: make(jwt.MapClaims),
 	ProtectedClaims: []string{"permissions"},
 	ExpirationDelay: 30 * 24 * time.Hour,
-	EnvApiKeys:      make(map[string]ApiKeyWToken),
+	EnvApiKeys:      make([]ApiKeyWToken, 0),
 }
 
 func LoadConfiguration(db *dbc.Queries) (*Configuration, error) {
@@ -137,14 +138,14 @@ func LoadConfiguration(db *dbc.Queries) (*Configuration, error) {
 		}
 
 		name = strings.ToLower(name)
-		ret.EnvApiKeys[name] = ApiKeyWToken{
+		ret.EnvApiKeys = append(ret.EnvApiKeys, ApiKeyWToken{
 			ApiKey: ApiKey{
 				Id:     uuid.New(),
 				Name:   name,
 				Claims: claims,
 			},
 			Token: v[1],
-		}
+		})
 
 	}
 	apikeys, err := db.ListApiKeys(context.Background())
@@ -152,7 +153,10 @@ func LoadConfiguration(db *dbc.Queries) (*Configuration, error) {
 		return nil, err
 	}
 	for _, key := range apikeys {
-		if _, defined := ret.EnvApiKeys[key.Name]; defined {
+		dup := slices.ContainsFunc(ret.EnvApiKeys, func(k ApiKeyWToken) bool {
+			return k.Name == key.Name
+		})
+		if dup {
 			return nil, fmt.Errorf(
 				"an api key with the name %s is already defined in database. Can't specify a new one via env var",
 				key.Name,

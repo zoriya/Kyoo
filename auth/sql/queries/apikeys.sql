@@ -4,8 +4,7 @@ select
 from
 	keibi.apikeys
 where
-	name = $1
-	and token = $2;
+	token = $1;
 
 -- name: TouchApiKey :exec
 update

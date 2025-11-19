@@ -76,17 +76,11 @@ select
 from
 	keibi.apikeys
 where
-	name = $1
-	and token = $2
+	token = $1
 `
 
-type GetApiKeyParams struct {
-	Name  string `json:"name"`
-	Token string `json:"token"`
-}
-
-func (q *Queries) GetApiKey(ctx context.Context, arg GetApiKeyParams) (Apikey, error) {
-	row := q.db.QueryRow(ctx, getApiKey, arg.Name, arg.Token)
+func (q *Queries) GetApiKey(ctx context.Context, token string) (Apikey, error) {
+	row := q.db.QueryRow(ctx, getApiKey, token)
 	var i Apikey
 	err := row.Scan(
 		&i.Pk,
