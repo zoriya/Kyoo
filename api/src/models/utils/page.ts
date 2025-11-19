@@ -1,6 +1,5 @@
 import type { ObjectOptions } from "@sinclair/typebox";
 import { type TSchema, t } from "elysia";
-import { buildUrl } from "~/utils";
 import { generateAfter } from "./keyset-paginate";
 import type { Sort } from "./sort";
 

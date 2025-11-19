@@ -31,7 +31,7 @@ func setupOtel(e *echo.Echo) (func(), error) {
 
 	res, err := resource.New(
 		ctx,
-		resource.WithAttributes(semconv.ServiceNameKey.String("kyoo.auth")),
+		resource.WithAttributes(semconv.ServiceNameKey.String("kyoo.transcoder")),
 		resource.WithFromEnv(),
 		resource.WithTelemetrySDK(),
 		resource.WithProcess(),
@@ -90,8 +90,8 @@ func setupOtel(e *echo.Echo) (func(), error) {
 	)
 	otel.SetTracerProvider(tp)
 
-	e.Use(otelecho.Middleware("kyoo.auth", otelecho.WithSkipper(func(c echo.Context) bool {
-		return c.Path() == "/auth/health" || c.Path() == "/auth/ready"
+	e.Use(otelecho.Middleware("kyoo.transcoder", otelecho.WithSkipper(func(c echo.Context) bool {
+		return c.Path() == "/video/health" || c.Path() == "/video/ready"
 	})))
 
 	return func() {
