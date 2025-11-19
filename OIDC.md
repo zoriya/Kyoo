@@ -45,7 +45,7 @@ Then, fill the following environment variables in your `.env` file:
 ```env
 PUBLIC_URL=https://your-kyoo-instance.com
 OIDC_GOOGLE_NAME=Google
-OIDC_GOOGLE_LOGO=https://logo.clearbit.com/google.com
+OIDC_GOOGLE_LOGO=https://www.gstatic.com/marketing-cms/assets/images/d5/dc/cfe9ce8b4425b410b49b7f2dd3f3/g.webp=s200
 OIDC_GOOGLE_CLIENTID=<client-id> # the client ID you got from Google
 OIDC_GOOGLE_SECRET=<client-secret> # the client secret you got from Google
 OIDC_GOOGLE_AUTHORIZATION=https://accounts.google.com/o/oauth2/auth
