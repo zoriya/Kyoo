@@ -55,6 +55,7 @@ class RequestProcessor:
 		self._database: Connection = None  # type: ignore
 		self._client = client
 		self._providers = providers
+		self._processing = False
 
 	@tracer.start_as_current_span("listen_requests")
 	async def listen(self, tg: TaskGroup):
@@ -85,14 +86,20 @@ class RequestProcessor:
 					raise
 
 	async def process_all(self):
-		found = True
-		while found:
-			try:
-				found = await self.process_request()
-			except Exception as e:
-				logger.error(
-					"Failed to process one of the metadata request", exc_info=e
-				)
+		if self._processing:
+			return
+		self._processing = True
+		try:
+			found = True
+			while found:
+				try:
+					found = await self.process_request()
+				except Exception as e:
+					logger.error(
+						"Failed to process one of the metadata request", exc_info=e
+					)
+		finally:
+			self._processing = False
 
 	async def process_request(self):
 		cur = await self._database.fetchrow(

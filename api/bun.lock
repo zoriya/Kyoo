@@ -5,7 +5,7 @@
     "": {
       "name": "api",
       "dependencies": {
-        "@elysiajs/opentelemetry": "^1.4.6",
+        "@elysiajs/opentelemetry": "^1.4.7",
         "@elysiajs/swagger": "zoriya/elysia-swagger#build",
         "@kubiks/otel-drizzle": "zoriya/drizzle-otel#build",
         "@types/bun": "^1.3.1",
@@ -49,7 +49,7 @@
 
     "@drizzle-team/brocli": ["@drizzle-team/brocli@0.10.2", "", {}, "sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w=="],
 
-    "@elysiajs/opentelemetry": ["@elysiajs/opentelemetry@1.4.6", "", { "dependencies": { "@opentelemetry/api": "^1.9.0", "@opentelemetry/instrumentation": "^0.200.0", "@opentelemetry/sdk-node": "^0.200.0" }, "peerDependencies": { "elysia": ">= 1.4.0" } }, "sha512-jR7t4M6ZvMnBqzzHsNTL6y3sNq9jbGi2vKxbkizi/OO5tlvlKl/rnBGyFjZUjQ1Hte7rCz+2kfmgOQMhkjk+Og=="],
+    "@elysiajs/opentelemetry": ["@elysiajs/opentelemetry@1.4.7", "", { "dependencies": { "@opentelemetry/api": "^1.9.0", "@opentelemetry/instrumentation": "^0.200.0", "@opentelemetry/sdk-node": "^0.200.0" }, "peerDependencies": { "elysia": ">= 1.4.0" } }, "sha512-biJfj3bCHf7aYPB8EygvN90sEKR/qgPn8Cziq2ebJSGyY8cpmskTTP6zbUMkMk6R6rfpoP7ECZbXlTZz+7BfJA=="],
 
     "@elysiajs/swagger": ["@elysiajs/swagger@github:zoriya/elysia-swagger#f88fbc7", { "dependencies": { "@scalar/themes": "^0.9.81", "@scalar/types": "^0.1.3", "openapi-types": "^12.1.3", "pathe": "^1.1.2" }, "peerDependencies": { "elysia": ">= 1.3.0" } }, "zoriya-elysia-swagger-f88fbc7"],
 
