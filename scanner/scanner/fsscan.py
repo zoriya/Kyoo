@@ -1,3 +1,5 @@
+import asyncio
+import itertools
 import os
 import re
 from contextlib import asynccontextmanager
@@ -111,30 +113,33 @@ class FsScanner:
 				logger.error("Unexpected error while monitoring files.", exc_info=e)
 
 	async def _register(self, videos: list[str] | set[str]):
-		# TODO: we should probably chunk those
-		vids: list[Video] = []
-		for path in list(videos):
+		async def process(path: str):
 			try:
 				vid = await identify(path)
-				vid = self._match(vid)
-				vids.append(vid)
+				return self._match(vid)
 			except Exception as e:
 				logger.error("Couldn't identify %s.", path, exc_info=e)
-		created = await self._client.create_videos(vids)
+				return None
 
-		await self._requests.enqueue(
-			[
-				Request(
-					kind=x.guess.kind,
-					title=x.guess.title,
-					year=next(iter(x.guess.years), None),
-					external_id=x.guess.external_id,
-					videos=[Request.Video(id=x.id, episodes=x.guess.episodes)],
-				)
-				for x in created
-				if not any(x.entries) and x.guess.kind != "extra"
-			]
-		)
+		for batch in itertools.batched(videos, 20):
+			vids = await asyncio.gather(*(process(path) for path in batch))
+			created = await self._client.create_videos(
+				[v for v in vids if v is not None]
+			)
+
+			await self._requests.enqueue(
+				[
+					Request(
+						kind=x.guess.kind,
+						title=x.guess.title,
+						year=next(iter(x.guess.years), None),
+						external_id=x.guess.external_id,
+						videos=[Request.Video(id=x.id, episodes=x.guess.episodes)],
+					)
+					for x in created
+					if not any(x.entries) and x.guess.kind != "extra"
+				]
+			)
 
 	def _match(self, video: Video) -> Video:
 		video.for_ = []
