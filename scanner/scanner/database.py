@@ -5,8 +5,10 @@ from logging import getLogger
 from typing import Any, cast
 
 from asyncpg import Connection, Pool, create_pool
+from opentelemetry import trace
 
 logger = getLogger(__name__)
+tracer = trace.get_tracer("kyoo.scanner")
 
 pool: Pool
 
@@ -55,6 +57,7 @@ async def get_db_fapi():
 		yield db
 
 
+@tracer.start_as_current_span("migrate")
 async def migrate(migrations_dir="./migrations"):
 	async with get_db() as db:
 		_ = await db.execute(

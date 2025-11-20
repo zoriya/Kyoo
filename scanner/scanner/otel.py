@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 
 from fastapi import FastAPI
 from opentelemetry import metrics, trace
@@ -45,8 +46,13 @@ def instrument(app: FastAPI):
 		)
 	)
 	set_logger_provider(provider)
-	handler = LoggingHandler(level=logging.DEBUG, logger_provider=provider)
-	logging.basicConfig(handlers=[handler], level=logging.DEBUG)
+	logging.basicConfig(
+		handlers=[
+			LoggingHandler(level=logging.DEBUG, logger_provider=provider),
+			logging.StreamHandler(sys.stdout),
+		],
+		level=logging.DEBUG,
+	)
 	logging.getLogger("watchfiles").setLevel(logging.WARNING)
 	logging.getLogger("rebulk").setLevel(logging.WARNING)
 
