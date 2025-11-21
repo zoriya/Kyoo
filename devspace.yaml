@@ -1,0 +1,41 @@
+version: v2beta1
+name: kyoo-devspace
+
+dev:
+  api:
+    imageSelector: ghcr.io/zoriya/kyoo_api
+    devImage: docker.io/nixos/nix:latest
+    workingDir: /app
+    sync:
+      - path: ./api:/app
+    terminal:
+      command: ./devspace_start.sh
+    ssh:
+      enabled: true
+    proxyCommands:
+      - command: devspace
+      - command: kubectl
+      - command: helm
+      - gitCredentials: true
+    ports:
+      - port: "3567"
+  
+  # WIP
+  # auth:
+  #   imageSelector: ghcr.io/zoriya/kyoo_auth
+  #   devImage: docker.io/nixos/nix:latest
+  #   workingDir: /app
+  # front:
+  #   imageSelector: ghcr.io/zoriya/kyoo_front
+  #   devImage: docker.io/nixos/nix:latest
+  #   workingDir: /app
+  # scanner:
+  #   imageSelector: ghcr.io/zoriya/kyoo_scanner
+  #   devImage: docker.io/nixos/nix:latest
+  #   workingDir: /app
+  # transcoder:
+  #   imageSelector: ghcr.io/zoriya/kyoo_transcoder
+  #   devImage: docker.io/nixos/nix:latest
+  #   workingDir: /app
+
+
