@@ -14,7 +14,19 @@ dev:
       command: bun install --production; bun dev
     ports:
       - port: "3567"
-  
+  auth:
+    imageSelector: ghcr.io/zoriya/kyoo_auth
+    devImage: docker.io/golang:1.25
+    workingDir: /app
+    sync:
+      - path: ./auth:/app
+        excludePaths:
+          - node_modules
+    # need someling like air for live reloads
+    terminal:
+      command: go mod download; go run -race .
+    ports:
+      - port: "4568"
   # WIP
   # auth:
   #   imageSelector: ghcr.io/zoriya/kyoo_auth
