@@ -12,13 +12,6 @@ dev:
           - node_modules
     terminal:
       command: bun install --production; bun dev
-    ssh:
-      enabled: true
-    proxyCommands:
-      - command: devspace
-      - command: kubectl
-      - command: helm
-      - gitCredentials: true
     ports:
       - port: "3567"
   
