@@ -4,12 +4,14 @@ name: kyoo-devspace
 dev:
   api:
     imageSelector: ghcr.io/zoriya/kyoo_api
-    devImage: docker.io/nixos/nix:latest
+    devImage: docker.io/oven/bun:latest
     workingDir: /app
     sync:
       - path: ./api:/app
+        excludePaths:
+          - node_modules
     terminal:
-      command: ./devspace_start.sh
+      command: bun install --production; bun dev
     ssh:
       enabled: true
     proxyCommands:
