@@ -8,11 +8,7 @@ on:
       channel:
         description: 'Release channel (master, edge, or leave blank for tag-based)'
         required: false
-        default: ''
-      version:
-        description: 'Specify a version manually (optional, used with channel)'
-        required: false
-        default: ''
+        default: 'master'
 
 jobs:
   release:
@@ -33,31 +29,21 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update Helm Dependencies
-        run: |
-          helm dependency update ./chart
+        run: helm dependency update ./chart
 
       - name: Determine Chart Version
         id: version
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            if [ -n "${{ github.event.inputs.version }}" ]; then
-              TAG="${{ github.event.inputs.version }}"
-            elif [ -n "${{ github.event.inputs.channel }}" ]; then
-              TAG="${{ github.event.inputs.channel }}"
-            else
-              echo "Error: Must provide a version or channel for manual dispatch"
-              exit 1
-            fi
+            TAG="${{ github.event.inputs.channel }}"
           else
-            # Tag-triggered release
             TAG=$(echo ${GITHUB_REF#refs/tags/} | sed 's/^v//')
           fi
           echo "TAG=$TAG" >> "${GITHUB_ENV}"
           echo "Using chart version: $TAG"
 
       - name: Package Helm Chart
-        run: |
-          helm package ./chart --version $TAG --app-version $TAG
+        run: helm package ./chart --version $TAG --app-version $TAG
 
       - name: Build Helm-safe repo name
         run: |
@@ -65,5 +51,4 @@ jobs:
           echo "REPO_NAME=${REPO_NAME}" >> "${GITHUB_ENV}"
 
       - name: Push Helm Chart to GHCR
-        run: |
-          helm push kyoo-*.tgz "${REPO_NAME}"
+        run: helm push kyoo-*.tgz "${REPO_NAME}"
