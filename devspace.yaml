@@ -25,15 +25,22 @@ dev:
       command: go mod download; go run -race .
     ports:
       - port: "4568"
-  # WIP
-  # auth:
-  #   imageSelector: ghcr.io/zoriya/kyoo_auth
-  #   devImage: docker.io/nixos/nix:latest
-  #   workingDir: /app
-  # front:
-  #   imageSelector: ghcr.io/zoriya/kyoo_front
-  #   devImage: docker.io/nixos/nix:latest
-  #   workingDir: /app
+  front:
+    imageSelector: ghcr.io/zoriya/kyoo_front
+    devImage: docker.io/oven/bun:latest
+    workingDir: /app
+    sync:
+      - path: ./front:/app
+        excludePaths:
+          - node_modules
+    terminal:
+      # front needs increased sysctl limits for file watching
+      # these are node level settings that should be raised
+      # fs.inotify.max_user_instances = 8192
+      # fs.inotify.max_user_watches = 1048576
+      command: bun install --frozen-lockfile; bun dev --port 8901
+    ports:
+      - port: "8901"
   # scanner:
   #   imageSelector: ghcr.io/zoriya/kyoo_scanner
   #   devImage: docker.io/nixos/nix:latest
@@ -42,5 +49,3 @@ dev:
   #   imageSelector: ghcr.io/zoriya/kyoo_transcoder
   #   devImage: docker.io/nixos/nix:latest
   #   workingDir: /app
-
-
