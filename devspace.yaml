@@ -20,8 +20,6 @@ dev:
     workingDir: /app
     sync:
       - path: ./auth:/app
-        excludePaths:
-          - node_modules
     # need someling like air for live reloads
     terminal:
       command: go mod download; go run -race .
