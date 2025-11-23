@@ -8,7 +8,7 @@ import {
 } from "~/db/schema";
 import { conflictUpdateAllExcept, values } from "~/db/utils";
 import type { SeedEntry as SEntry, SeedExtra as SExtra } from "~/models/entry";
-import { enqueueOptImage } from "../images";
+import { enqueueOptImage, flushImageQueue, type ImageTask } from "../images";
 import { guessNextRefresh } from "../refresh";
 import { updateAvailableCount, updateAvailableSince } from "./shows";
 
@@ -50,30 +50,29 @@ export const insertEntries = async (
 	if (!items.length) return [];
 
 	const retEntries = await db.transaction(async (tx) => {
-		const vals: EntryI[] = await Promise.all(
-			items.map(async (seed) => {
-				const { translations, videos, video, ...entry } = seed;
-				return {
-					...entry,
-					showPk: show.pk,
-					slug: generateSlug(show.slug, seed),
-					thumbnail: await enqueueOptImage(tx, {
-						url: seed.thumbnail,
-						column: entries.thumbnail,
-					}),
-					nextRefresh:
-						entry.kind !== "extra"
-							? guessNextRefresh(entry.airDate ?? new Date())
-							: guessNextRefresh(new Date()),
-					episodeNumber:
-						entry.kind === "episode"
-							? entry.episodeNumber
-							: entry.kind === "special"
-								? entry.number
-								: undefined,
-				};
-			}),
-		);
+		const imgQueue: ImageTask[] = [];
+		const vals: EntryI[] = items.map((seed) => {
+			const { translations, videos, video, ...entry } = seed;
+			return {
+				...entry,
+				showPk: show.pk,
+				slug: generateSlug(show.slug, seed),
+				thumbnail: enqueueOptImage(imgQueue, {
+					url: seed.thumbnail,
+					column: entries.thumbnail,
+				}),
+				nextRefresh:
+					entry.kind !== "extra"
+						? guessNextRefresh(entry.airDate ?? new Date())
+						: guessNextRefresh(new Date()),
+				episodeNumber:
+					entry.kind === "episode"
+						? entry.episodeNumber
+						: entry.kind === "special"
+							? entry.number
+							: undefined,
+			};
+		});
 		const ret = await tx
 			.insert(entries)
 			.values(vals)
@@ -89,41 +88,36 @@ export const insertEntries = async (
 			})
 			.returning({ pk: entries.pk, id: entries.id, slug: entries.slug });
 
-		const trans: EntryTransI[] = (
-			await Promise.all(
-				items.map(async (seed, i) => {
-					if (seed.kind === "extra") {
-						return [
-							{
-								pk: ret[i].pk,
-								// yeah we hardcode the language to extra because if we want to support
-								// translations one day it won't be awkward
-								language: "extra",
-								name: seed.name,
-								description: null,
-								poster: undefined,
-							},
-						];
-					}
+		const trans: EntryTransI[] = items.flatMap((seed, i) => {
+			if (seed.kind === "extra") {
+				return [
+					{
+						pk: ret[i].pk,
+						// yeah we hardcode the language to extra because if we want to support
+						// translations one day it won't be awkward
+						language: "extra",
+						name: seed.name,
+						description: null,
+						poster: undefined,
+					},
+				];
+			}
 
-					return await Promise.all(
-						Object.entries(seed.translations).map(async ([lang, tr]) => ({
-							// assumes ret is ordered like items.
-							pk: ret[i].pk,
-							language: lang,
-							...tr,
-							poster:
-								seed.kind === "movie"
-									? await enqueueOptImage(tx, {
-											url: (tr as any).poster,
-											column: entryTranslations.poster,
-										})
-									: undefined,
-						})),
-					);
-				}),
-			)
-		).flat();
+			return Object.entries(seed.translations).map(([lang, tr]) => ({
+				// assumes ret is ordered like items.
+				pk: ret[i].pk,
+				language: lang,
+				...tr,
+				poster:
+					seed.kind === "movie"
+						? enqueueOptImage(imgQueue, {
+								url: (tr as any).poster,
+								column: entryTranslations.poster,
+							})
+						: undefined,
+			}));
+		});
+		await flushImageQueue(tx, imgQueue, 0);
 		await tx
 			.insert(entryTranslations)
 			.values(trans)

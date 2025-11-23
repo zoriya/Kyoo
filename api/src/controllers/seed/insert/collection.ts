@@ -5,7 +5,7 @@ import { conflictUpdateAllExcept } from "~/db/utils";
 import type { SeedCollection } from "~/models/collections";
 import type { SeedMovie } from "~/models/movie";
 import type { SeedSerie } from "~/models/serie";
-import { enqueueOptImage } from "../images";
+import { enqueueOptImage, flushImageQueue, type ImageTask } from "../images";
 
 type ShowTrans = typeof showTranslations.$inferInsert;
 
@@ -19,6 +19,7 @@ export const insertCollection = async (
 	const { translations, ...col } = collection;
 
 	return await db.transaction(async (tx) => {
+		const imgQueue: ImageTask[] = [];
 		const [ret] = await tx
 			.insert(shows)
 			.values({
@@ -48,29 +49,30 @@ export const insertCollection = async (
 			})
 			.returning({ pk: shows.pk, id: shows.id, slug: shows.slug });
 
-		const trans: ShowTrans[] = await Promise.all(
-			Object.entries(translations).map(async ([lang, tr]) => ({
+		const trans: ShowTrans[] = Object.entries(translations).map(
+			([lang, tr]) => ({
 				pk: ret.pk,
 				language: lang,
 				...tr,
-				poster: await enqueueOptImage(tx, {
+				poster: enqueueOptImage(imgQueue, {
 					url: tr.poster,
 					column: showTranslations.poster,
 				}),
-				thumbnail: await enqueueOptImage(tx, {
+				thumbnail: enqueueOptImage(imgQueue, {
 					url: tr.thumbnail,
 					column: showTranslations.thumbnail,
 				}),
-				logo: await enqueueOptImage(tx, {
+				logo: enqueueOptImage(imgQueue, {
 					url: tr.logo,
 					column: showTranslations.logo,
 				}),
-				banner: await enqueueOptImage(tx, {
+				banner: enqueueOptImage(imgQueue, {
 					url: tr.banner,
 					column: showTranslations.banner,
 				}),
-			})),
+			}),
 		);
+		await flushImageQueue(tx, imgQueue, 100);
 		await tx
 			.insert(showTranslations)
 			.values(trans)

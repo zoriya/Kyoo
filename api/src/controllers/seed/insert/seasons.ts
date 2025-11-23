@@ -2,7 +2,7 @@ import { db } from "~/db";
 import { seasons, seasonTranslations } from "~/db/schema";
 import { conflictUpdateAllExcept } from "~/db/utils";
 import type { SeedSeason } from "~/models/season";
-import { enqueueOptImage } from "../images";
+import { enqueueOptImage, flushImageQueue, type ImageTask } from "../images";
 import { guessNextRefresh } from "../refresh";
 
 type SeasonI = typeof seasons.$inferInsert;
@@ -15,6 +15,7 @@ export const insertSeasons = async (
 	if (!items.length) return [];
 
 	return db.transaction(async (tx) => {
+		const imgQueue: ImageTask[] = [];
 		const vals: SeasonI[] = items.map((x) => {
 			const { translations, ...season } = x;
 			return {
@@ -42,33 +43,27 @@ export const insertSeasons = async (
 			})
 			.returning({ pk: seasons.pk, id: seasons.id, slug: seasons.slug });
 
-		const trans: SeasonTransI[] = (
-			await Promise.all(
-				items.map(
-					async (seed, i) =>
-						await Promise.all(
-							Object.entries(seed.translations).map(async ([lang, tr]) => ({
-								// assumes ret is ordered like items.
-								pk: ret[i].pk,
-								language: lang,
-								...tr,
-								poster: await enqueueOptImage(tx, {
-									url: tr.poster,
-									column: seasonTranslations.poster,
-								}),
-								thumbnail: await enqueueOptImage(tx, {
-									url: tr.thumbnail,
-									column: seasonTranslations.thumbnail,
-								}),
-								banner: await enqueueOptImage(tx, {
-									url: tr.banner,
-									column: seasonTranslations.banner,
-								}),
-							})),
-						),
-				),
-			)
-		).flat();
+		const trans: SeasonTransI[] = items.flatMap((seed, i) =>
+			Object.entries(seed.translations).map(([lang, tr]) => ({
+				// assumes ret is ordered like items.
+				pk: ret[i].pk,
+				language: lang,
+				...tr,
+				poster: enqueueOptImage(imgQueue, {
+					url: tr.poster,
+					column: seasonTranslations.poster,
+				}),
+				thumbnail: enqueueOptImage(imgQueue, {
+					url: tr.thumbnail,
+					column: seasonTranslations.thumbnail,
+				}),
+				banner: enqueueOptImage(imgQueue, {
+					url: tr.banner,
+					column: seasonTranslations.banner,
+				}),
+			})),
+		);
+		await flushImageQueue(tx, imgQueue, -10);
 		await tx
 			.insert(seasonTranslations)
 			.values(trans)

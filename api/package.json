@@ -9,7 +9,7 @@
 		"format": "biome check --write ."
 	},
 	"dependencies": {
-		"@elysiajs/opentelemetry": "^1.4.7",
+		"@elysiajs/opentelemetry": "^1.4.8",
 		"@elysiajs/swagger": "zoriya/elysia-swagger#build",
 		"@kubiks/otel-drizzle": "zoriya/drizzle-otel#build",
 		"@types/bun": "^1.3.1",

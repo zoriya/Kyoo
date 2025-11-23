@@ -10,9 +10,8 @@ import {
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
-import { timestamp } from "../utils";
 import { shows } from "./shows";
-import { image, language, schema } from "./utils";
+import { image, language, schema, timestamp  } from "./utils";
 
 export const season_extid = () =>
 	jsonb()
