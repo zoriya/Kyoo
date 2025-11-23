@@ -1,4 +1,5 @@
 /video
+.devspace/
 .env
 .venv
 .idea
