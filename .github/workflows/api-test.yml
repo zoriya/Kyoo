@@ -37,3 +37,4 @@ jobs:
         run: bun test
         env:
           PGHOST: localhost
+          IMAGES_PATH: ./images
