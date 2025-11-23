@@ -73,7 +73,7 @@ export const auth = new Elysia({ name: "auth" })
 	.macro({
 		permissions(perms: string[]) {
 			return {
-				beforeHandle: ({ jwt, status }) => {
+				beforeHandle: function permissionCheck({ jwt, status }) {
 					for (const perm of perms) {
 						if (!jwt!.permissions.includes(perm)) {
 							return status(403, {

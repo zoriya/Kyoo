@@ -1,4 +1,6 @@
 import path from "node:path";
+import { getCurrentSpan, record, setAttributes } from "@elysiajs/opentelemetry";
+import { SpanStatusCode } from "@opentelemetry/api";
 import { encode } from "blurhash";
 import { and, eq, is, lt, type SQL, sql } from "drizzle-orm";
 import { PgColumn, type PgTable } from "drizzle-orm/pg-core";
@@ -78,7 +80,34 @@ export const enqueueOptImage = async (
 };
 
 export const processImages = async () => {
-	async function processOne() {
+	return record("download images", async () => {
+		let running = false;
+		async function processAll() {
+			if (running) return;
+			running = true;
+
+			let found = true;
+			while (found) {
+				found = await processOne();
+			}
+			running = false;
+		}
+
+		const client = (await db.$client.connect()) as PoolClient;
+		client.on("notification", (evt) => {
+			if (evt.channel !== "kyoo_image") return;
+			processAll();
+		});
+		await client.query("listen kyoo_image");
+
+		// start processing old tasks
+		await processAll();
+		return () => client.release(true);
+	});
+};
+
+async function processOne() {
+	return record("download", async () => {
 		return await db.transaction(async (tx) => {
 			const [item] = await tx
 				.select()
@@ -91,6 +120,7 @@ export const processImages = async () => {
 			if (!item) return false;
 
 			const img = item.message as ImageTask;
+			setAttributes({ "item.url": img.url });
 			try {
 				const blurhash = await downloadImage(img.id, img.url);
 				const ret: Image = { id: img.id, source: img.url, blurhash };
@@ -105,6 +135,11 @@ export const processImages = async () => {
 
 				await tx.delete(mqueue).where(eq(mqueue.id, item.id));
 			} catch (err: any) {
+				const span = getCurrentSpan();
+				if (span) {
+					span.recordException(err);
+					span.setStatus({ code: SpanStatusCode.ERROR });
+				}
 				console.error("Failed to download image", img.url, err.message);
 				// don't use the transaction here, it can be aborted.
 				await db
@@ -114,31 +149,8 @@ export const processImages = async () => {
 			}
 			return true;
 		});
-	}
-
-	let running = false;
-	async function processAll() {
-		if (running) return;
-		running = true;
-
-		let found = true;
-		while (found) {
-			found = await processOne();
-		}
-		running = false;
-	}
-
-	const client = (await db.$client.connect()) as PoolClient;
-	client.on("notification", (evt) => {
-		if (evt.channel !== "kyoo_image") return;
-		processAll();
 	});
-	await client.query("listen kyoo_image");
-
-	// start processing old tasks
-	await processAll();
-	return () => client.release(true);
-};
+}
 
 async function downloadImage(id: string, url: string): Promise<string> {
 	const low = await getFile(path.join(imageDir, `${id}.low.jpg`))
