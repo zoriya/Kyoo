@@ -101,6 +101,7 @@ class RequestProcessor:
 		finally:
 			self._processing = False
 
+	@tracer.start_as_current_span("process video")
 	async def process_request(self):
 		cur = await self._database.fetchrow(
 			"""
@@ -128,43 +129,44 @@ class RequestProcessor:
 			return False
 		request = Request.model_validate(cur)
 
-		with tracer.start_as_current_span(f"process {request.title}") as span:
-			logger.info(f"Starting to process {request.title}")
-			try:
-				show = await self._run_request(request)
-				finished = await self._database.fetchrow(
-					"""
-					delete from scanner.requests
-					where pk = $1
-					returning
-						videos
-					""",
-					request.pk,
+		span = trace.get_current_span()
+		span.update_name(f"process {request.title}")
+		logger.info(f"Starting to process {request.title}")
+		try:
+			show = await self._run_request(request)
+			finished = await self._database.fetchrow(
+				"""
+				delete from scanner.requests
+				where pk = $1
+				returning
+					videos
+				""",
+				request.pk,
+			)
+			if finished and finished["videos"] != request.videos:
+				videos = TypeAdapter(list[Request.Video]).validate_python(
+					finished["videos"]
 				)
-				if finished and finished["videos"] != request.videos:
-					videos = TypeAdapter(list[Request.Video]).validate_python(
-						finished["videos"]
-					)
-					await self._client.link_videos(
-						"movie" if request.kind == "movie" else "serie",
-						show.slug,
-						videos,
-					)
-			except Exception as e:
-				span.set_status(trace.Status(trace.StatusCode.ERROR))
-				span.record_exception(e)
-				logger.error("Couldn't process request", exc_info=e)
-				cur = await self._database.execute(
-					"""
-					update
-						scanner.requests
-					set
-						status = 'failed'
-					where
-						pk = $1
-					""",
-					request.pk,
+				await self._client.link_videos(
+					"movie" if request.kind == "movie" else "serie",
+					show.slug,
+					videos,
 				)
+		except Exception as e:
+			span.set_status(trace.Status(trace.StatusCode.ERROR))
+			span.record_exception(e)
+			logger.error("Couldn't process request", exc_info=e)
+			cur = await self._database.execute(
+				"""
+				update
+					scanner.requests
+				set
+					status = 'failed'
+				where
+					pk = $1
+				""",
+				request.pk,
+			)
 		return True
 
 	async def _run_request(self, request: Request) -> Resource:
