@@ -10,7 +10,7 @@ import { mqueue } from "~/db/schema/mqueue";
 import type { Image } from "~/models/utils";
 import { getFile } from "~/utils";
 
-export const imageDir = process.env.IMAGES_PATH ?? "./images";
+export const imageDir = process.env.IMAGES_PATH ?? "/images";
 export const defaultBlurhash = "000000";
 
 type ImageTask = {
