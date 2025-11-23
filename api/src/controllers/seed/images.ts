@@ -15,7 +15,7 @@ import { getFile } from "~/utils";
 export const imageDir = process.env.IMAGES_PATH ?? "/images";
 export const defaultBlurhash = "000000";
 
-type ImageTask = {
+export type ImageTask = {
 	id: string;
 	url: string;
 	table: string;
@@ -25,12 +25,12 @@ type ImageTask = {
 // this will only push a task to the image downloader service and not download it instantly.
 // this is both done to prevent too many requests to be sent at once and to make sure POST
 // requests are not blocked by image downloading or blurhash calculation
-export const enqueueOptImage = async (
-	tx: Transaction,
+export const enqueueOptImage = (
+	imgQueue: ImageTask[],
 	img:
 		| { url: string | null; column: PgColumn }
 		| { url: string | null; table: PgTable; column: SQL },
-): Promise<Image | null> => {
+): Image | null => {
 	if (!img.url) return null;
 
 	const hasher = new Bun.CryptoHasher("sha256");
@@ -66,17 +66,28 @@ export const enqueueOptImage = async (
 					table: db.dialect.sqlToQuery(sql`${img.column.table}`).sql,
 					column: sql.identifier(img.column.name).value,
 				};
-	await tx.insert(mqueue).values({
-		kind: "image",
-		message,
-	});
-	await tx.execute(sql`notify kyoo_image`);
+
+	imgQueue.push(message);
 
 	return {
 		id,
 		source: img.url,
 		blurhash: defaultBlurhash,
 	};
+};
+
+export const flushImageQueue = async (
+	tx: Transaction,
+	imgQueue: ImageTask[],
+	priority: number,
+) => {
+	if (!imgQueue.length) return;
+	record("enqueue images", async () => {
+		await tx
+			.insert(mqueue)
+			.values(imgQueue.map((x) => ({ kind: "image", message: x, priority })));
+		await tx.execute(sql`notify kyoo_image`);
+	});
 };
 
 export const processImages = async () => {
@@ -114,7 +125,7 @@ async function processOne() {
 				.from(mqueue)
 				.for("update", { skipLocked: true })
 				.where(and(eq(mqueue.kind, "image"), lt(mqueue.attempt, 5)))
-				.orderBy(mqueue.attempt, mqueue.createdAt)
+				.orderBy(mqueue.priority, mqueue.attempt, mqueue.createdAt)
 				.limit(1);
 
 			if (!item) return false;
@@ -141,8 +152,7 @@ async function processOne() {
 					span.setStatus({ code: SpanStatusCode.ERROR });
 				}
 				console.error("Failed to download image", img.url, err.message);
-				// don't use the transaction here, it can be aborted.
-				await db
+				await tx
 					.update(mqueue)
 					.set({ attempt: sql`${mqueue.attempt}+1` })
 					.where(eq(mqueue.id, item.id));

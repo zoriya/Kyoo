@@ -1,9 +1,8 @@
 import { sql } from "drizzle-orm";
 import { check, index, integer } from "drizzle-orm/pg-core";
-import { timestamp } from "../utils";
 import { entries } from "./entries";
 import { profiles } from "./profiles";
-import { schema } from "./utils";
+import { schema, timestamp } from "./utils";
 import { videos } from "./videos";
 
 export const history = schema.table(

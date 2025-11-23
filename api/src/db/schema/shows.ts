@@ -13,12 +13,11 @@ import {
 	varchar,
 } from "drizzle-orm/pg-core";
 import type { Image, Original } from "~/models/utils";
-import { timestamp } from "../utils";
 import { entries } from "./entries";
 import { seasons } from "./seasons";
 import { roles } from "./staff";
 import { showStudioJoin } from "./studios";
-import { externalid, image, language, schema } from "./utils";
+import { externalid, image, language, schema, timestamp } from "./utils";
 
 export const showKind = schema.enum("show_kind", [
 	"serie",

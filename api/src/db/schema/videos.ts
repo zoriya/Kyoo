@@ -10,9 +10,8 @@ import {
 	varchar,
 } from "drizzle-orm/pg-core";
 import type { Guess } from "~/models/video";
-import { timestamp } from "../utils";
 import { entries } from "./entries";
-import { schema } from "./utils";
+import { schema, timestamp } from "./utils";
 
 export const videos = schema.table(
 	"videos",

@@ -8,18 +8,18 @@ import { migrate as migrateDb } from "drizzle-orm/node-postgres/migrator";
 import type { PoolConfig } from "pg";
 import * as schema from "./schema";
 
-async function getPostgresConfig(): Promise<PoolConfig> {
-	const config: PoolConfig = {
-		connectionString: process.env.POSTGRES_URL,
-		host: process.env.PGHOST ?? "postgres",
-		port: Number(process.env.PGPORT) || 5432,
-		database: process.env.PGDATABASE ?? "kyoo",
-		user: process.env.PGUSER ?? "kyoo",
-		password: process.env.PGPASSWORD ?? "password",
-		options: process.env.PGOPTIONS,
-		application_name: process.env.PGAPPNAME ?? "kyoo",
-	};
+const config: PoolConfig = {
+	connectionString: process.env.POSTGRES_URL,
+	host: process.env.PGHOST ?? "postgres",
+	port: Number(process.env.PGPORT) || 5432,
+	database: process.env.PGDATABASE ?? "kyoo",
+	user: process.env.PGUSER ?? "kyoo",
+	password: process.env.PGPASSWORD ?? "password",
+	options: process.env.PGOPTIONS,
+	application_name: process.env.PGAPPNAME ?? "kyoo",
+};
 
+async function parseSslConfig(): Promise<PoolConfig> {
 	// Due to an upstream bug, if `ssl` is not falsey, an SSL connection will always be attempted. This means
 	// that non-SSL connection options under `ssl` (which is incorrectly named) cannot be set unless SSL is enabled.
 	if (!process.env.PGSSLMODE || process.env.PGSSLMODE === "disable")
@@ -108,8 +108,11 @@ async function getPostgresConfig(): Promise<PoolConfig> {
 	return config;
 }
 
-const postgresConfig = await getPostgresConfig();
+const postgresConfig = await parseSslConfig();
+// use this when using drizzle-kit since it can't parse await statements
+// const postgresConfig = config;
 
+console.log("Connecting to postgres with config", postgresConfig);
 export const db = drizzle({
 	schema,
 	connection: postgresConfig,

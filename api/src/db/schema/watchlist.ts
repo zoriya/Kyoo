@@ -1,10 +1,9 @@
 import { sql } from "drizzle-orm";
 import { check, integer, primaryKey } from "drizzle-orm/pg-core";
-import { timestamp } from "../utils";
 import { entries } from "./entries";
 import { profiles } from "./profiles";
 import { shows } from "./shows";
-import { schema } from "./utils";
+import { schema, timestamp } from "./utils";
 
 export const watchlistStatus = schema.enum("watchlist_status", [
 	"watching",

@@ -2,7 +2,7 @@ import { db } from "~/db";
 import { showStudioJoin, studios, studioTranslations } from "~/db/schema";
 import { conflictUpdateAllExcept } from "~/db/utils";
 import type { SeedStudio } from "~/models/studio";
-import { enqueueOptImage } from "../images";
+import { enqueueOptImage, flushImageQueue, type ImageTask } from "../images";
 
 type StudioI = typeof studios.$inferInsert;
 type StudioTransI = typeof studioTranslations.$inferInsert;
@@ -33,24 +33,19 @@ export const insertStudios = async (
 			})
 			.returning({ pk: studios.pk, id: studios.id, slug: studios.slug });
 
-		const trans: StudioTransI[] = (
-			await Promise.all(
-				seed.map(
-					async (x, i) =>
-						await Promise.all(
-							Object.entries(x.translations).map(async ([lang, tr]) => ({
-								pk: ret[i].pk,
-								language: lang,
-								name: tr.name,
-								logo: await enqueueOptImage(tx, {
-									url: tr.logo,
-									column: studioTranslations.logo,
-								}),
-							})),
-						),
-				),
-			)
-		).flat();
+		const imgQueue: ImageTask[] = [];
+		const trans: StudioTransI[] = seed.flatMap((x, i) =>
+			Object.entries(x.translations).map(([lang, tr]) => ({
+				pk: ret[i].pk,
+				language: lang,
+				name: tr.name,
+				logo: enqueueOptImage(imgQueue, {
+					url: tr.logo,
+					column: studioTranslations.logo,
+				}),
+			})),
+		);
+		await flushImageQueue(tx, imgQueue, -100);
 		await tx
 			.insert(studioTranslations)
 			.values(trans)
