@@ -45,16 +45,34 @@ dev:
     # example values:
     # fs.inotify.max_user_instances = 8192
     # fs.inotify.max_user_watches = 1048576
-    command: 
+    command:
     - bash
     - -c
     - "bun install --frozen-lockfile; bun dev --port 8901"
     ports:
       - port: "8901"
-  # scanner:
-  #   imageSelector: ghcr.io/zoriya/kyoo_scanner
-  #   devImage: docker.io/nixos/nix:latest
-  #   workingDir: /app
+  scanner:
+    imageSelector: ghcr.io/zoriya/kyoo_scanner
+    devImage: python:3.13
+    workingDir: /app
+    sync:
+      - path: ./scanner:/app
+        excludePaths:
+          - __pycache__
+          - .venv
+        startContainer: true
+    command:
+      - bash
+      - -c
+      - |
+        echo "installing uv..."
+        pip install uv
+        echo "Running uv sync..."
+        uv sync --locked || (echo 'uv sync failed' && exit 1)
+        echo "Starting FastAPI..."
+        /app/.venv/bin/fastapi run scanner --port 4389
+    ports:
+      - port: "4389"
   # transcoder:
   #   imageSelector: ghcr.io/zoriya/kyoo_transcoder
   #   devImage: docker.io/nixos/nix:latest
