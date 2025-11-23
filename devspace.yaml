@@ -10,8 +10,11 @@ dev:
       - path: ./api:/app
         excludePaths:
           - node_modules
-    terminal:
-      command: bun install --production; bun dev
+        startContainer: true
+    command: 
+      - bash 
+      - -c 
+      - "bun install && bun dev"
     ports:
       - port: "3567"
   auth:
@@ -20,9 +23,11 @@ dev:
     workingDir: /app
     sync:
       - path: ./auth:/app
-    # need someling like air for live reloads
-    terminal:
-      command: go mod download; go run -race .
+        startContainer: true
+    command: 
+    - bash 
+    - -c 
+    - "go mod download; go run -race ."
     ports:
       - port: "4568"
   front:
@@ -33,12 +38,17 @@ dev:
       - path: ./front:/app
         excludePaths:
           - node_modules
-    terminal:
-      # front needs increased sysctl limits for file watching
-      # these are node level settings that should be raised
-      # fs.inotify.max_user_instances = 8192
-      # fs.inotify.max_user_watches = 1048576
-      command: bun install --frozen-lockfile; bun dev --port 8901
+        startContainer: true
+    # increased sysctl limits for file watching
+    # front uses Metro javascript bundler which watches a lot of files
+    # these are node level settings that should be raised
+    # example values:
+    # fs.inotify.max_user_instances = 8192
+    # fs.inotify.max_user_watches = 1048576
+    command: 
+    - bash
+    - -c
+    - "bun install --frozen-lockfile; bun dev --port 8901"
     ports:
       - port: "8901"
   # scanner:
