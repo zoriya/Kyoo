@@ -1,0 +1,1 @@
+ALTER TABLE "kyoo"."seasons" ALTER COLUMN "entries_count" SET DEFAULT 0;

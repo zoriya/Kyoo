@@ -2,7 +2,7 @@ import { db } from "~/db";
 import { showStudioJoin, studios, studioTranslations } from "~/db/schema";
 import { conflictUpdateAllExcept } from "~/db/utils";
 import type { SeedStudio } from "~/models/studio";
-import { enqueueOptImage, flushImageQueue, ImageTask } from "../images";
+import { enqueueOptImage, flushImageQueue, type ImageTask } from "../images";
 
 type StudioI = typeof studios.$inferInsert;
 type StudioTransI = typeof studioTranslations.$inferInsert;

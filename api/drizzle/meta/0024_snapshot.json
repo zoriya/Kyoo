@@ -1,6 +1,6 @@
 {
-	"id": "5d875c17-7d8b-4aa1-a4a8-137df6703537",
-	"prevId": "40840aa3-3b37-4dc0-97fa-efb8adc4da02",
+	"id": "cf102e61-dd73-4664-bbb5-b0b1597ba6e9",
+	"prevId": "5d875c17-7d8b-4aa1-a4a8-137df6703537",
 	"version": "7",
 	"dialect": "postgresql",
 	"tables": {
@@ -659,7 +659,8 @@
 					"name": "entries_count",
 					"type": "integer",
 					"primaryKey": false,
-					"notNull": true
+					"notNull": true,
+					"default": 0
 				},
 				"available_count": {
 					"name": "available_count",

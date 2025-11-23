@@ -13,7 +13,7 @@ import {
 	varchar,
 } from "drizzle-orm/pg-core";
 import { shows } from "./shows";
-import { image, language, schema, timestamp  } from "./utils";
+import { image, language, schema, timestamp } from "./utils";
 import { entryVideoJoin } from "./videos";
 
 export const entryType = schema.enum("entry_type", [
