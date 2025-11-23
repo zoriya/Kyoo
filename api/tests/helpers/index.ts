@@ -1,4 +1,5 @@
 export * from "~/base";
+export * from "./collections-helper";
 export * from "./movies-helper";
 export * from "./series-helper";
 export * from "./shows-helper";

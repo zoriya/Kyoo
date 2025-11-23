@@ -152,8 +152,7 @@ async function processOne() {
 					span.setStatus({ code: SpanStatusCode.ERROR });
 				}
 				console.error("Failed to download image", img.url, err.message);
-				// don't use the transaction here, it can be aborted.
-				await db
+				await tx
 					.update(mqueue)
 					.set({ attempt: sql`${mqueue.attempt}+1` })
 					.where(eq(mqueue.id, item.id));
