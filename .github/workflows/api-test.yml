@@ -15,10 +15,11 @@ jobs:
       postgres:
         image: postgres:15
         ports:
-         - "5432:5432"
+          - "5432:5432"
         env:
           POSTGRES_USER: kyoo
           POSTGRES_PASSWORD: password
+          POSTGRES_DB: kyoo_test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -37,3 +38,4 @@ jobs:
         run: bun test
         env:
           PGHOST: localhost
+          IMAGES_PATH: ./images

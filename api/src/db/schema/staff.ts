@@ -8,9 +8,8 @@ import {
 	varchar,
 } from "drizzle-orm/pg-core";
 import type { Character } from "~/models/staff";
-import { timestamp } from "../utils";
 import { shows } from "./shows";
-import { externalid, image, schema } from "./utils";
+import { externalid, image, schema, timestamp } from "./utils";
 
 export const roleKind = schema.enum("role_kind", [
 	"actor",

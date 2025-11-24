@@ -22,7 +22,7 @@ import type { SeedMovie } from "~/models/movie";
 import type { SeedSerie } from "~/models/serie";
 import type { Original } from "~/models/utils";
 import { getYear } from "~/utils";
-import { enqueueOptImage } from "../images";
+import { enqueueOptImage, flushImageQueue, type ImageTask } from "../images";
 
 type Show = typeof shows.$inferInsert;
 type ShowTrans = typeof showTranslations.$inferInsert;
@@ -41,24 +41,25 @@ export const insertShow = async (
 		| SeedCollection["translations"],
 ) => {
 	return await db.transaction(async (tx) => {
+		const imgQueue: ImageTask[] = [];
 		const orig = {
 			...original,
-			poster: await enqueueOptImage(tx, {
+			poster: enqueueOptImage(imgQueue, {
 				url: original.poster,
 				table: shows,
 				column: sql`${shows.original}['poster']`,
 			}),
-			thumbnail: await enqueueOptImage(tx, {
+			thumbnail: enqueueOptImage(imgQueue, {
 				url: original.thumbnail,
 				table: shows,
 				column: sql`${shows.original}['thumbnail']`,
 			}),
-			banner: await enqueueOptImage(tx, {
+			banner: enqueueOptImage(imgQueue, {
 				url: original.banner,
 				table: shows,
 				column: sql`${shows.original}['banner']`,
 			}),
-			logo: await enqueueOptImage(tx, {
+			logo: enqueueOptImage(imgQueue, {
 				url: original.logo,
 				table: shows,
 				column: sql`${shows.original}['logo']`,
@@ -67,30 +68,31 @@ export const insertShow = async (
 		const ret = await insertBaseShow(tx, { ...show, original: orig });
 		if ("status" in ret) return ret;
 
-		const trans: ShowTrans[] = await Promise.all(
-			Object.entries(translations).map(async ([lang, tr]) => ({
+		const trans: ShowTrans[] = Object.entries(translations).map(
+			([lang, tr]) => ({
 				pk: ret.pk,
 				language: lang,
 				...tr,
 				latinName: tr.latinName ?? null,
-				poster: await enqueueOptImage(tx, {
+				poster: enqueueOptImage(imgQueue, {
 					url: tr.poster,
 					column: showTranslations.poster,
 				}),
-				thumbnail: await enqueueOptImage(tx, {
+				thumbnail: enqueueOptImage(imgQueue, {
 					url: tr.thumbnail,
 					column: showTranslations.thumbnail,
 				}),
-				logo: await enqueueOptImage(tx, {
+				logo: enqueueOptImage(imgQueue, {
 					url: tr.logo,
 					column: showTranslations.logo,
 				}),
-				banner: await enqueueOptImage(tx, {
+				banner: enqueueOptImage(imgQueue, {
 					url: tr.banner,
 					column: showTranslations.banner,
 				}),
-			})),
+			}),
 		);
+		await flushImageQueue(tx, imgQueue, 200);
 		await tx
 			.insert(showTranslations)
 			.values(trans)

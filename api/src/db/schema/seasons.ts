@@ -10,9 +10,8 @@ import {
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
-import { timestamp } from "../utils";
 import { shows } from "./shows";
-import { image, language, schema } from "./utils";
+import { image, language, schema, timestamp } from "./utils";
 
 export const season_extid = () =>
 	jsonb()
@@ -40,7 +39,7 @@ export const seasons = schema.table(
 		startAir: date(),
 		endAir: date(),
 
-		entriesCount: integer().notNull(),
+		entriesCount: integer().notNull().default(0),
 		availableCount: integer().notNull().default(0),
 
 		externalId: season_extid(),

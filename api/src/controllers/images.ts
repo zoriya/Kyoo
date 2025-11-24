@@ -27,9 +27,9 @@ function getRedirectToImageHandler({ filter }: { filter?: SQL }) {
 		status,
 		redirect,
 	}: {
-		params: { id: string; image: "poster" | "thumbnail" | "banner" | "logo" };
+		params: { id?: string; image: "poster" | "thumbnail" | "banner" | "logo" };
 		headers: { "accept-language": string };
-		query: { quality: "high" | "medium" | "low" };
+		query: { quality?: "high" | "medium" | "low" };
 		set: Context["set"];
 		status: Context["status"];
 		redirect: Context["redirect"];
@@ -212,12 +212,9 @@ export const imagesH = new Elysia({ tags: ["images"] })
 		},
 	)
 	.guard({
-		headers: t.Object(
-			{
-				"accept-language": AcceptLanguage(),
-			},
-			{ additionalProperties: true },
-		),
+		headers: t.Object({
+			"accept-language": AcceptLanguage(),
+		}),
 	})
 	.get(
 		"/studios/:id/logo",
@@ -306,6 +303,9 @@ export const imagesH = new Elysia({ tags: ["images"] })
 			image: t.UnionEnum(["poster", "thumbnail", "logo", "banner"], {
 				description: "The type of image to retrive.",
 			}),
+		}),
+		headers: t.Object({
+			"accept-language": AcceptLanguage(),
 		}),
 	})
 	.get(
