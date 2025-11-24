@@ -1,111 +1,18 @@
 version: v2beta1
 name: kyoo-devspace
-
-dev:
+dependencies:
   api:
-    imageSelector: ghcr.io/zoriya/kyoo_api
-    devImage: docker.io/oven/bun:latest
-    workingDir: /app
-    sync:
-      - path: ./api:/app
-        excludePaths:
-          - node_modules
-        startContainer: true
-    command: 
-      - bash 
-      - -c 
-      - "bun install && bun dev"
-    ports:
-      - port: "3567"
+    path: ./api
+    pipeline: dev
   auth:
-    imageSelector: ghcr.io/zoriya/kyoo_auth
-    devImage: docker.io/golang:1.25
-    workingDir: /app
-    sync:
-      - path: ./auth:/app
-        startContainer: true
-    command: 
-    - bash 
-    - -c 
-    - "go mod download; go run -race ."
-    ports:
-      - port: "4568"
+    path: ./auth
+    pipeline: dev
   front:
-    imageSelector: ghcr.io/zoriya/kyoo_front
-    devImage: docker.io/oven/bun:latest
-    workingDir: /app
-    sync:
-      - path: ./front:/app
-        excludePaths:
-          - node_modules
-        startContainer: true
-    # increased sysctl limits for file watching
-    # front uses Metro javascript bundler which watches a lot of files
-    # these are node level settings that should be raised
-    # example values:
-    # fs.inotify.max_user_instances = 8192
-    # fs.inotify.max_user_watches = 1048576
-    command:
-    - bash
-    - -c
-    - "bun install --frozen-lockfile; bun dev --port 8901"
-    ports:
-      - port: "8901"
+    path: ./front
+    pipeline: dev
   scanner:
-    imageSelector: ghcr.io/zoriya/kyoo_scanner
-    devImage: python:3.13
-    workingDir: /app
-    sync:
-      - path: ./scanner:/app
-        excludePaths:
-          - __pycache__
-          - .venv
-        startContainer: true
-    command:
-      - bash
-      - -c
-      - |
-        echo "installing uv..."
-        pip install uv
-        echo "Running uv sync..."
-        uv sync --locked || (echo 'uv sync failed' && exit 1)
-        echo "Starting FastAPI..."
-        /app/.venv/bin/fastapi run scanner --port 4389
-    ports:
-      - port: "4389"
+    path: ./scanner
+    pipeline: dev
   transcoder:
-    imageSelector: ghcr.io/zoriya/kyoo_transcoder
-    # would be good to publish the kyoo_transcoder builder image with all deps installed
-    devImage: golang:1.25
-    workingDir: /app
-    sync:
-      - path: ./transcoder:/app
-        startContainer: true
-    command:
-      - bash
-      - -c
-      - |
-        echo "Determining architecture..."
-        ARCH=$(dpkg --print-architecture)
-        echo "Container architecture: $ARCH"
-        echo "Updating apt and installing transcoder dependencies..."
-        apt-get update && \
-          apt-get install --no-install-recommends --no-install-suggests -y \
-            ffmpeg \
-            libavformat-dev libavutil-dev libswscale-dev \
-            vainfo mesa-va-drivers \
-            ca-certificates
-          if [ "$ARCH" = "amd64" ]; then
-            echo "Installing Intel VAAPI drivers (amd64 only)..."
-            apt-get install -y intel-media-va-driver-non-free i965-va-driver-shaders
-          else
-            echo "Skipping Intel VAAPI drivers for arch $ARCH"
-          fi
-
-        echo "Downloading Go dependencies..."
-        go mod download
-
-        echo "Starting transcoder..."
-        go run -race .
-    ports:
-      - port: "7666"
+    path: ./transcoder
+    pipeline: dev

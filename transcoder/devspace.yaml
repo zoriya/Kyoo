@@ -1,0 +1,39 @@
+version: v2beta1
+name: transcoder
+dev:
+  transcoder:
+    imageSelector: ghcr.io/zoriya/kyoo_transcoder
+    # would be good to publish the kyoo_transcoder builder image with all deps installed
+    devImage: golang:1.25
+    workingDir: /app
+    sync:
+      - path: .:/app
+        startContainer: true
+    command:
+      - bash
+      - -c
+      - |
+        echo "Determining architecture..."
+        ARCH=$(dpkg --print-architecture)
+        echo "Container architecture: $ARCH"
+        echo "Updating apt and installing transcoder dependencies..."
+        apt-get update && \
+          apt-get install --no-install-recommends --no-install-suggests -y \
+            ffmpeg \
+            libavformat-dev libavutil-dev libswscale-dev \
+            vainfo mesa-va-drivers \
+            ca-certificates
+          if [ "$ARCH" = "amd64" ]; then
+            echo "Installing Intel VAAPI drivers (amd64 only)..."
+            apt-get install -y intel-media-va-driver-non-free i965-va-driver-shaders
+          else
+            echo "Skipping Intel VAAPI drivers for arch $ARCH"
+          fi
+
+        echo "Downloading Go dependencies..."
+        go mod download
+
+        echo "Starting transcoder..."
+        go run -race .
+    ports:
+      - port: "7666"

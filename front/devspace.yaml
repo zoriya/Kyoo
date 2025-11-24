@@ -1,0 +1,24 @@
+version: v2beta1
+name: front
+dev:
+  front:
+    imageSelector: ghcr.io/zoriya/kyoo_front
+    devImage: docker.io/oven/bun:latest
+    workingDir: /app
+    sync:
+      - path: .:/app
+        excludePaths:
+          - node_modules
+        startContainer: true
+    # increased sysctl limits for file watching
+    # front uses Metro javascript bundler which watches a lot of files
+    # these are node level settings that should be raised
+    # example values:
+    # fs.inotify.max_user_instances = 8192
+    # fs.inotify.max_user_watches = 1048576
+    command:
+    - bash
+    - -c
+    - "bun install --frozen-lockfile; bun dev --port 8901"
+    ports:
+      - port: "8901"
