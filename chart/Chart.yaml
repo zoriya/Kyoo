@@ -12,4 +12,4 @@ dependencies:
 - condition: postgres.enabled
   name: postgres
   repository: oci://registry-1.docker.io/cloudpirates
-  version: 0.11.6
+  version: 0.12.0
