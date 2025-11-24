@@ -7,6 +7,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate as migrateDb } from "drizzle-orm/node-postgres/migrator";
 import type { PoolConfig } from "pg";
 import * as schema from "./schema";
+import { record } from "@elysiajs/opentelemetry";
 
 const config: PoolConfig = {
 	connectionString: process.env.POSTGRES_URL,
@@ -112,7 +113,6 @@ const postgresConfig = await parseSslConfig();
 // use this when using drizzle-kit since it can't parse await statements
 // const postgresConfig = config;
 
-console.log("Connecting to postgres with config", postgresConfig);
 export const db = drizzle({
 	schema,
 	connection: postgresConfig,
@@ -123,22 +123,24 @@ instrumentDrizzleClient(db, {
 });
 
 export const migrate = async () => {
-	try {
-		await db.execute(
-			sql.raw(`
-			create extension if not exists pg_trgm;
-			set pg_trgm.word_similarity_threshold = 0.4;
-			alter database "${postgresConfig.database}" set pg_trgm.word_similarity_threshold = 0.4;
-		`),
-		);
-	} catch (err: any) {
-		console.error("Error while updating pg_trgm", err.message);
-	}
-	await migrateDb(db, {
-		migrationsSchema: "kyoo",
-		migrationsFolder: "./drizzle",
+	return record("migrate", async () => {
+		try {
+			await db.execute(
+				sql.raw(`
+					create extension if not exists pg_trgm;
+					set pg_trgm.word_similarity_threshold = 0.4;
+					alter database "${postgresConfig.database}" set pg_trgm.word_similarity_threshold = 0.4;
+				`),
+			);
+		} catch (err: any) {
+			console.error("Error while updating pg_trgm", err.message);
+		}
+		await migrateDb(db, {
+			migrationsSchema: "kyoo",
+			migrationsFolder: "./drizzle",
+		});
+		console.log(`Database ${postgresConfig.database} migrated!`);
 	});
-	console.log(`Database ${postgresConfig.database} migrated!`);
 };
 
 export type Transaction =
