@@ -11,6 +11,8 @@ dev:
           - __pycache__
           - .venv
         startContainer: true
+        onUpload:
+          restartContainer: true
     command:
       - bash
       - -c
