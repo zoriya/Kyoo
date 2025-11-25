@@ -21,6 +21,7 @@ describe("images", () => {
 		const release = await processImages();
 		// remove notifications to prevent other images to be downloaded (do not curl 20000 images for nothing)
 		release();
+		await db.delete(mqueue);
 
 		const ret = await db.query.shows.findFirst({
 			where: eq(shows.slug, madeInAbyss.slug),
@@ -45,6 +46,7 @@ describe("images", () => {
 		const release = await processImages();
 		// remove notifications to prevent other images to be downloaded (do not curl 20000 images for nothing)
 		release();
+		await db.delete(mqueue);
 
 		const failed = await db.query.mqueue.findFirst({
 			where: and(

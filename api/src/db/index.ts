@@ -1,13 +1,13 @@
 import os from "node:os";
 import path from "node:path";
 import tls, { type ConnectionOptions } from "node:tls";
+import { record } from "@elysiajs/opentelemetry";
 import { instrumentDrizzleClient } from "@kubiks/otel-drizzle";
 import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate as migrateDb } from "drizzle-orm/node-postgres/migrator";
 import type { PoolConfig } from "pg";
 import * as schema from "./schema";
-import { record } from "@elysiajs/opentelemetry";
 
 const config: PoolConfig = {
 	connectionString: process.env.POSTGRES_URL,

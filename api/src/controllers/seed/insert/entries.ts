@@ -6,7 +6,7 @@ import {
 	entryVideoJoin,
 	videos,
 } from "~/db/schema";
-import { conflictUpdateAllExcept, values } from "~/db/utils";
+import { conflictUpdateAllExcept, unnestValues, values } from "~/db/utils";
 import type { SeedEntry as SEntry, SeedExtra as SExtra } from "~/models/entry";
 import { enqueueOptImage, flushImageQueue, type ImageTask } from "../images";
 import { guessNextRefresh } from "../refresh";
@@ -75,7 +75,7 @@ export const insertEntries = async (
 		});
 		const ret = await tx
 			.insert(entries)
-			.values(vals)
+			.select(unnestValues(vals, entries))
 			.onConflictDoUpdate({
 				target: entries.slug,
 				set: conflictUpdateAllExcept(entries, [
@@ -120,7 +120,7 @@ export const insertEntries = async (
 		await flushImageQueue(tx, imgQueue, 0);
 		await tx
 			.insert(entryTranslations)
-			.values(trans)
+			.select(unnestValues(trans, entryTranslations))
 			.onConflictDoUpdate({
 				target: [entryTranslations.pk, entryTranslations.language],
 				set: conflictUpdateAllExcept(entryTranslations, ["pk", "language"]),
