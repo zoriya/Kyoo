@@ -118,14 +118,15 @@ const postgresConfig = await parseSslConfig();
 console.log("Connecting to postgres with config", {
 	...postgresConfig,
 	password: postgresConfig.password ? "<redacted>" : undefined,
-	ssl: postgresConfig.ssl && typeof postgresConfig.ssl === "object"
-		? {
-				...postgresConfig.ssl,
-				key: "<redacted>",
-				cert: "<redacted>",
-				ca: "<redacted>",
-		}
-		: postgresConfig.ssl,
+	ssl:
+		postgresConfig.ssl && typeof postgresConfig.ssl === "object"
+			? {
+					...postgresConfig.ssl,
+					key: "<redacted>",
+					cert: "<redacted>",
+					ca: "<redacted>",
+				}
+				: postgresConfig.ssl,
 });
 export const db = drizzle({
 	schema,
