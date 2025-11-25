@@ -113,6 +113,18 @@ const postgresConfig = await parseSslConfig();
 // use this when using drizzle-kit since it can't parse await statements
 // const postgresConfig = config;
 
+console.log("Connecting to postgres with config", {
+	...postgresConfig,
+	password: postgresConfig.password ? "<redacted>" : undefined,
+	ssl: postgresConfig.ssl && typeof postgresConfig.ssl === "object"
+		? {
+				...postgresConfig.ssl,
+				key: "<redacted>",
+				cert: "<redacted>",
+				ca: "<redacted>",
+		}
+		: postgresConfig.ssl,
+});
 export const db = drizzle({
 	schema,
 	connection: postgresConfig,
