@@ -126,7 +126,7 @@ export const migrate = record("migrate", async () => {
 	try {
 		await db.execute(
 			sql.raw(`
-				create extension if not exists pg_trgm;
+				create extension if not exists pg_trgm schema kyoo;
 				set pg_trgm.word_similarity_threshold = 0.4;
 				alter database "${postgresConfig.database}" set pg_trgm.word_similarity_threshold = 0.4;
 			`),
