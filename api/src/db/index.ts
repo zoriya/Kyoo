@@ -128,8 +128,6 @@ export const migrate = record("migrate", async () => {
 		await db.execute(
 			sql.raw(`
 				create schema if not exists ${APP_SCHEMA};
-				alter database "${postgresConfig.database}" set search_path = ${APP_SCHEMA}, public;
-				set search_path = ${APP_SCHEMA}, public;
 				create extension if not exists pg_trgm schema ${APP_SCHEMA};
 				set pg_trgm.word_similarity_threshold = 0.4;
 				alter database "${postgresConfig.database}" set pg_trgm.word_similarity_threshold = 0.4;
