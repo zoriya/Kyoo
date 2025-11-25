@@ -126,7 +126,7 @@ console.log("Connecting to postgres with config", {
 					cert: "<redacted>",
 					ca: "<redacted>",
 				}
-				: postgresConfig.ssl,
+			: postgresConfig.ssl,
 });
 export const db = drizzle({
 	schema,
