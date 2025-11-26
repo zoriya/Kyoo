@@ -1,6 +1,7 @@
+import { sql } from "drizzle-orm";
 import { db } from "~/db";
 import { showStudioJoin, studios, studioTranslations } from "~/db/schema";
-import { conflictUpdateAllExcept } from "~/db/utils";
+import { conflictUpdateAllExcept, sqlarr, unnestValues } from "~/db/utils";
 import type { SeedStudio } from "~/models/studio";
 import { enqueueOptImage, flushImageQueue, type ImageTask } from "../images";
 
@@ -21,7 +22,7 @@ export const insertStudios = async (
 
 		const ret = await tx
 			.insert(studios)
-			.values(vals)
+			.select(unnestValues(vals, studios))
 			.onConflictDoUpdate({
 				target: studios.slug,
 				set: conflictUpdateAllExcept(studios, [
@@ -48,7 +49,7 @@ export const insertStudios = async (
 		await flushImageQueue(tx, imgQueue, -100);
 		await tx
 			.insert(studioTranslations)
-			.values(trans)
+			.select(unnestValues(trans, studioTranslations))
 			.onConflictDoUpdate({
 				target: [studioTranslations.pk, studioTranslations.language],
 				set: conflictUpdateAllExcept(studioTranslations, ["pk", "language"]),
@@ -56,7 +57,14 @@ export const insertStudios = async (
 
 		await tx
 			.insert(showStudioJoin)
-			.values(ret.map((studio) => ({ showPk: showPk, studioPk: studio.pk })))
+			.select(
+				db
+					.select({
+						showPk: sql`${showPk}`.as("showPk"),
+						studioPk: sql`v.studioPk`.as("studioPk"),
+					})
+					.from(sql`unnest(${sqlarr(ret.map((x) => x.pk))}) as v("studioPk")`),
+			)
 			.onConflictDoNothing();
 		return ret;
 	});

@@ -1,7 +1,7 @@
 import { eq, sql } from "drizzle-orm";
 import { db } from "~/db";
 import { roles, staff } from "~/db/schema";
-import { conflictUpdateAllExcept } from "~/db/utils";
+import { conflictUpdateAllExcept, unnestValues } from "~/db/utils";
 import type { SeedStaff } from "~/models/staff";
 import { enqueueOptImage, flushImageQueue, type ImageTask } from "../images";
 
@@ -22,7 +22,7 @@ export const insertStaff = async (
 		}));
 		const ret = await tx
 			.insert(staff)
-			.values(people)
+			.select(unnestValues(people, staff))
 			.onConflictDoUpdate({
 				target: staff.slug,
 				set: conflictUpdateAllExcept(staff, ["pk", "id", "slug", "createdAt"]),
@@ -50,7 +50,7 @@ export const insertStaff = async (
 		//  - we want `order` to stay in sync (& without duplicates)
 		//  - we don't have ways to identify a role so we can't onConflict
 		await tx.delete(roles).where(eq(roles.showPk, showPk));
-		await tx.insert(roles).values(rval);
+		await tx.insert(roles).select(unnestValues(rval, roles));
 
 		return ret;
 	});

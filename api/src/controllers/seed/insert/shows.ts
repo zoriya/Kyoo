@@ -16,7 +16,7 @@ import {
 	shows,
 	showTranslations,
 } from "~/db/schema";
-import { conflictUpdateAllExcept, sqlarr } from "~/db/utils";
+import { conflictUpdateAllExcept, sqlarr, unnestValues } from "~/db/utils";
 import type { SeedCollection } from "~/models/collections";
 import type { SeedMovie } from "~/models/movie";
 import type { SeedSerie } from "~/models/serie";
@@ -95,7 +95,7 @@ export const insertShow = async (
 		await flushImageQueue(tx, imgQueue, 200);
 		await tx
 			.insert(showTranslations)
-			.values(trans)
+			.select(unnestValues(trans, showTranslations))
 			.onConflictDoUpdate({
 				target: [showTranslations.pk, showTranslations.language],
 				set: conflictUpdateAllExcept(showTranslations, ["pk", "language"]),

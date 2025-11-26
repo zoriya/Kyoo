@@ -11,6 +11,7 @@ import { db, type Transaction } from "~/db";
 import { mqueue } from "~/db/schema/mqueue";
 import type { Image } from "~/models/utils";
 import { getFile } from "~/utils";
+import { unnestValues } from "~/db/utils";
 
 export const imageDir = process.env.IMAGES_PATH ?? "/images";
 export const defaultBlurhash = "000000";
@@ -83,9 +84,12 @@ export const flushImageQueue = async (
 ) => {
 	if (!imgQueue.length) return;
 	record("enqueue images", async () => {
-		await tx
-			.insert(mqueue)
-			.values(imgQueue.map((x) => ({ kind: "image", message: x, priority })));
+		await tx.insert(mqueue).select(
+			unnestValues(
+				imgQueue.map((x) => ({ kind: "image", message: x, priority })),
+				mqueue,
+			),
+		);
 		await tx.execute(sql`notify kyoo_image`);
 	});
 };

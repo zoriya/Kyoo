@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { db } from "~/db";
 import { shows, showTranslations } from "~/db/schema";
-import { conflictUpdateAllExcept } from "~/db/utils";
+import { conflictUpdateAllExcept, unnestValues } from "~/db/utils";
 import type { SeedCollection } from "~/models/collections";
 import type { SeedMovie } from "~/models/movie";
 import type { SeedSerie } from "~/models/serie";
@@ -75,7 +75,7 @@ export const insertCollection = async (
 		await flushImageQueue(tx, imgQueue, 100);
 		await tx
 			.insert(showTranslations)
-			.values(trans)
+			.select(unnestValues(trans, showTranslations))
 			.onConflictDoUpdate({
 				target: [showTranslations.pk, showTranslations.language],
 				set: conflictUpdateAllExcept(showTranslations, ["pk", "language"]),

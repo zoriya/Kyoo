@@ -1,6 +1,6 @@
 import { db } from "~/db";
 import { seasons, seasonTranslations } from "~/db/schema";
-import { conflictUpdateAllExcept } from "~/db/utils";
+import { conflictUpdateAllExcept, unnestValues } from "~/db/utils";
 import type { SeedSeason } from "~/models/season";
 import { enqueueOptImage, flushImageQueue, type ImageTask } from "../images";
 import { guessNextRefresh } from "../refresh";
@@ -30,7 +30,7 @@ export const insertSeasons = async (
 		});
 		const ret = await tx
 			.insert(seasons)
-			.values(vals)
+			.select(unnestValues(vals, seasons))
 			.onConflictDoUpdate({
 				target: seasons.slug,
 				set: conflictUpdateAllExcept(seasons, [
@@ -66,7 +66,7 @@ export const insertSeasons = async (
 		await flushImageQueue(tx, imgQueue, -10);
 		await tx
 			.insert(seasonTranslations)
-			.values(trans)
+			.select(unnestValues(trans, seasonTranslations))
 			.onConflictDoUpdate({
 				target: [seasonTranslations.pk, seasonTranslations.language],
 				set: conflictUpdateAllExcept(seasonTranslations, ["pk", "language"]),

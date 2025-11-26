@@ -6,7 +6,7 @@ import {
 	entryVideoJoin,
 	videos,
 } from "~/db/schema";
-import { conflictUpdateAllExcept, unnestValues, values } from "~/db/utils";
+import { conflictUpdateAllExcept, unnest, unnestValues } from "~/db/utils";
 import type { SeedEntry as SEntry, SeedExtra as SExtra } from "~/models/entry";
 import { enqueueOptImage, flushImageQueue, type ImageTask } from "../images";
 import { guessNextRefresh } from "../refresh";
@@ -169,11 +169,12 @@ export const insertEntries = async (
 						),
 					})
 					.from(
-						values(vids, {
+						unnest(vids, "vids", {
 							entryPk: "integer",
+							entrySlug: "string",
 							needRendering: "boolean",
 							videoId: "uuid",
-						}).as("vids"),
+						}),
 					)
 					.innerJoin(videos, eq(videos.id, sql`vids.videoId`)),
 			)

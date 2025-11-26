@@ -74,14 +74,16 @@ export function conflictUpdateAllExcept<
 }
 
 // drizzle is bugged and doesn't allow js arrays to be used in raw sql.
-export function sqlarr(array: unknown[]) {
+export function sqlarr(array: unknown[]): string {
 	return `{${array
 		.map((item) =>
 			!item || item === "null"
 				? "null"
-				: typeof item === "object"
-					? `"${JSON.stringify(item).replaceAll('"', '\\"')}"`
-					: `"${item}"`,
+				: Array.isArray(item)
+					? sqlarr(item)
+					: typeof item === "object"
+						? `"${JSON.stringify(item).replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`
+						: `"${item}"`,
 		)
 		.join(", ")}}`;
 }
@@ -137,6 +139,7 @@ export const unnestValues = <
 ) => {
 	if (values[0] === undefined)
 		throw new Error("Invalid values, expecting at least one items");
+
 	const columns = getTableColumns(typeInfo);
 	const keys = Object.keys(values[0]).filter((x) => x in columns);
 	// @ts-expect-error: drizzle internal
@@ -187,6 +190,28 @@ export const unnestValues = <
 				sql.raw(", "),
 			)}) as v(${sql.raw(keys.map((x) => `"${dbNames[x]}"`).join(", "))})`,
 		);
+};
+
+export const unnest = <T extends Record<string, unknown>>(
+	values: T[],
+	name: string,
+	typeInfo: Record<keyof T, string>,
+) => {
+	const keys = Object.keys(typeInfo);
+	const vals = values.reduce(
+		(acc, cur) => {
+			for (const k of keys) {
+				if (k in cur) acc[k].push(cur[k]);
+				else acc[k].push(null);
+			}
+			return acc;
+		},
+		Object.fromEntries(keys.map((x) => [x, [] as unknown[]])),
+	);
+	return sql`unnest(${sql.join(
+		keys.map((k) => sql`${sqlarr(vals[k])}${sql.raw(`::${typeInfo[k]}[]`)}`),
+		sql.raw(", "),
+	)}) as ${sql.raw(name)}(${sql.raw(keys.map((x) => `"${x}"`).join(", "))})`;
 };
 
 export const coalesce = <T>(val: SQL<T> | SQLWrapper, def: SQL<T> | Column) => {
