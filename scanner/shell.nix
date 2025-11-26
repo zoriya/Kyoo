@@ -19,6 +19,7 @@ in
       ruff
       fastapi-cli
       pgformatter
+      devspace
     ];
 
     UV_PYTHON_PREFERENCE = "only-system";

@@ -11,5 +11,6 @@ pkgs.mkShell {
     pgformatter
     # to run tests
     hurl
+    devspace
   ];
 }
