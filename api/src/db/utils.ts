@@ -155,7 +155,7 @@ export const unnestValues = <
 				if (!(k in columns)) continue;
 				keys.push(k);
 				acc[k] = new Array(i).fill(null);
-				acc[k].push(cur[k])
+				acc[k].push(cur[k]);
 			}
 			return acc;
 		},
@@ -172,7 +172,11 @@ export const unnestValues = <
 					x,
 					(columns[x].defaultFn?.() ?? columns[x].onUpdateFn!()).as(dbNames[x]),
 				]),
-			]),
+			]) as {
+				[k in keyof typeof typeInfo.$inferInsert]-?: SQL.Aliased<
+					(typeof typeInfo.$inferInsert)[k]
+				>;
+			},
 		)
 		.from(
 			sql`unnest(${sql.join(
