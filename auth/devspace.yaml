@@ -8,6 +8,8 @@ dev:
     sync:
       - path: .:/app
         startContainer: true
+        onUpload:
+          restartContainer: true
     command: 
     - bash 
     - -c 
