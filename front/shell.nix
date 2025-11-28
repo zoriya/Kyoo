@@ -4,7 +4,6 @@ pkgs.mkShell {
     bun
     biome
     nodePackages.eas-cli
-    devspace
   ];
 }
 

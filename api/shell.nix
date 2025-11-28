@@ -10,7 +10,6 @@ pkgs.mkShell {
     node-gyp
     pkg-config
     vips
-    devspace
   ];
 
   SHARP_FORCE_GLOBAL_LIBVIPS = 1;

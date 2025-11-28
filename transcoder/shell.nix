@@ -11,6 +11,5 @@ pkgs.mkShell {
     # to debug video files
     mediainfo
     ffmpeg-full
-    devspace
   ];
 }
