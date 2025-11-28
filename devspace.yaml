@@ -1,0 +1,18 @@
+version: v2beta1
+name: kyoo-devspace
+dependencies:
+  api:
+    path: ./api
+    pipeline: dev
+  auth:
+    path: ./auth
+    pipeline: dev
+  front:
+    path: ./front
+    pipeline: dev
+  scanner:
+    path: ./scanner
+    pipeline: dev
+  transcoder:
+    path: ./transcoder
+    pipeline: dev

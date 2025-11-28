@@ -1,0 +1,23 @@
+version: v2beta1
+name: api
+dev:
+  api:
+    imageSelector: ghcr.io/zoriya/kyoo_api
+    devImage: docker.io/oven/bun:latest
+    workingDir: /app
+    sync:
+      - path: .:/app
+        excludePaths:
+          - node_modules
+        startContainer: true
+        onUpload:
+          exec:
+            - command: bun install --frozen-lockfile
+              onChange: 
+                - "./bun.lock"
+    command: 
+      - bash 
+      - -c 
+      - "bun install && bun dev"
+    ports:
+      - port: "3567"

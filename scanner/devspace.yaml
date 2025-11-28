@@ -1,0 +1,25 @@
+version: v2beta1
+name: scanner
+dev:
+  scanner:
+    imageSelector: ghcr.io/zoriya/kyoo_scanner
+    devImage: docker.io/astral/uv:python3.13-trixie
+    workingDir: /app
+    sync:
+      - path: .:/app
+        excludePaths:
+          - __pycache__
+          - .venv
+        startContainer: true
+        onUpload:
+          restartContainer: true
+    command:
+      - bash
+      - -c
+      - |
+        echo "Running uv sync..."
+        uv sync --locked || (echo 'uv sync failed' && exit 1)
+        echo "Starting FastAPI..."
+        /app/.venv/bin/fastapi run scanner --port 4389
+    ports:
+      - port: "4389"

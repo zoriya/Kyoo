@@ -10,6 +10,10 @@ pkgs.mkShell {
     (import ./transcoder/shell.nix {inherit pkgs;})
   ];
 
+  packages = [
+    pkgs.devspace
+  ];
+
   # env vars aren't inherited from the `inputsFrom`
   SHARP_FORCE_GLOBAL_LIBVIPS = 1;
   UV_PYTHON_PREFERENCE = "only-system";
