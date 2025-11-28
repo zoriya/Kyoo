@@ -469,7 +469,7 @@ postgres:
     existingSecret: "{{ .Values.global.postgres.infra.existingSecret }}"
     secretKeys:
       # set the postgres user password to the same as our user
-      passwordKey: "{{ .Values.global.postgres.infra.passwordKey }}"
+      adminPasswordKey: "{{ .Values.global.postgres.infra.passwordKey }}"
   initdb:
     scripts:
       kyoo_api.sql: |
