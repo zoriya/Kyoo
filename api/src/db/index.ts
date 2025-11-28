@@ -23,8 +23,10 @@ const config: PoolConfig = {
 async function parseSslConfig(): Promise<PoolConfig> {
 	// Due to an upstream bug, if `ssl` is not falsey, an SSL connection will always be attempted. This means
 	// that non-SSL connection options under `ssl` (which is incorrectly named) cannot be set unless SSL is enabled.
-	if (!process.env.PGSSLMODE || process.env.PGSSLMODE === "disable")
+	if (!process.env.PGSSLMODE || process.env.PGSSLMODE === "disable") {
+		config.ssl = false;
 		return config;
+	}
 
 	// Despite this field's name, it is used to configure everything below the application layer.
 	const ssl: ConnectionOptions = {};
@@ -113,6 +115,19 @@ const postgresConfig = await parseSslConfig();
 // use this when using drizzle-kit since it can't parse await statements
 // const postgresConfig = config;
 
+console.log("Connecting to postgres with config", {
+	...postgresConfig,
+	password: postgresConfig.password ? "<redacted>" : undefined,
+	ssl:
+		postgresConfig.ssl && typeof postgresConfig.ssl === "object"
+			? {
+					...postgresConfig.ssl,
+					key: "<redacted>",
+					cert: "<redacted>",
+					ca: "<redacted>",
+				}
+			: postgresConfig.ssl,
+});
 export const db = drizzle({
 	schema,
 	connection: postgresConfig,
