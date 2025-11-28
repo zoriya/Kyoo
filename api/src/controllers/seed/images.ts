@@ -1,5 +1,5 @@
 import path from "node:path";
-import { getCurrentSpan, record, setAttributes } from "@elysiajs/opentelemetry";
+import { getCurrentSpan, setAttributes } from "@elysiajs/opentelemetry";
 import { SpanStatusCode } from "@opentelemetry/api";
 import { encode } from "blurhash";
 import { and, eq, is, lt, type SQL, sql } from "drizzle-orm";
@@ -9,9 +9,10 @@ import type { PoolClient } from "pg";
 import sharp from "sharp";
 import { db, type Transaction } from "~/db";
 import { mqueue } from "~/db/schema/mqueue";
-import type { Image } from "~/models/utils";
-import { getFile } from "~/utils";
 import { unnestValues } from "~/db/utils";
+import type { Image } from "~/models/utils";
+import { record } from "~/otel";
+import { getFile } from "~/utils";
 
 export const imageDir = process.env.IMAGES_PATH ?? "/images";
 export const defaultBlurhash = "000000";
@@ -77,13 +78,10 @@ export const enqueueOptImage = (
 	};
 };
 
-export const flushImageQueue = async (
-	tx: Transaction,
-	imgQueue: ImageTask[],
-	priority: number,
-) => {
-	if (!imgQueue.length) return;
-	record("enqueue images", async () => {
+export const flushImageQueue = record(
+	"enqueueImages",
+	async (tx: Transaction, imgQueue: ImageTask[], priority: number) => {
+		if (!imgQueue.length) return;
 		await tx.insert(mqueue).select(
 			unnestValues(
 				imgQueue.map((x) => ({ kind: "image", message: x, priority })),
@@ -91,80 +89,76 @@ export const flushImageQueue = async (
 			),
 		);
 		await tx.execute(sql`notify kyoo_image`);
-	});
-};
+	},
+);
 
-export const processImages = async () => {
-	return record("download images", async () => {
-		let running = false;
-		async function processAll() {
-			if (running) return;
-			running = true;
+export const processImages = record("processImages", async () => {
+	let running = false;
+	async function processAll() {
+		if (running) return;
+		running = true;
 
-			let found = true;
-			while (found) {
-				found = await processOne();
-			}
-			running = false;
+		let found = true;
+		while (found) {
+			found = await processOne();
 		}
+		running = false;
+	}
 
-		const client = (await db.$client.connect()) as PoolClient;
-		client.on("notification", (evt) => {
-			if (evt.channel !== "kyoo_image") return;
-			processAll();
-		});
-		await client.query("listen kyoo_image");
-
-		// start processing old tasks
-		await processAll();
-		return () => client.release(true);
+	const client = (await db.$client.connect()) as PoolClient;
+	client.on("notification", (evt) => {
+		if (evt.channel !== "kyoo_image") return;
+		processAll();
 	});
-};
+	await client.query("listen kyoo_image");
 
-async function processOne() {
-	return record("download", async () => {
-		return await db.transaction(async (tx) => {
-			const [item] = await tx
-				.select()
-				.from(mqueue)
-				.for("update", { skipLocked: true })
-				.where(and(eq(mqueue.kind, "image"), lt(mqueue.attempt, 5)))
-				.orderBy(mqueue.priority, mqueue.attempt, mqueue.createdAt)
-				.limit(1);
+	// start processing old tasks
+	await processAll();
+	return () => client.release(true);
+});
 
-			if (!item) return false;
+const processOne = record("download", async () => {
+	return await db.transaction(async (tx) => {
+		const [item] = await tx
+			.select()
+			.from(mqueue)
+			.for("update", { skipLocked: true })
+			.where(and(eq(mqueue.kind, "image"), lt(mqueue.attempt, 5)))
+			.orderBy(mqueue.priority, mqueue.attempt, mqueue.createdAt)
+			.limit(1);
 
-			const img = item.message as ImageTask;
-			setAttributes({ "item.url": img.url });
-			try {
-				const blurhash = await downloadImage(img.id, img.url);
-				const ret: Image = { id: img.id, source: img.url, blurhash };
+		if (!item) return false;
 
-				const table = sql.raw(img.table);
-				const column = sql.raw(img.column);
+		const img = item.message as ImageTask;
+		setAttributes({ "item.url": img.url });
+		try {
+			const blurhash = await downloadImage(img.id, img.url);
+			const ret: Image = { id: img.id, source: img.url, blurhash };
 
-				await tx.execute(sql`
+			const table = sql.raw(img.table);
+			const column = sql.raw(img.column);
+
+			await tx.execute(sql`
 					update ${table} set ${column} = ${ret}
 					where ${column}->'id' = ${sql.raw(`'"${img.id}"'::jsonb`)}
 				`);
 
-				await tx.delete(mqueue).where(eq(mqueue.id, item.id));
-			} catch (err: any) {
-				const span = getCurrentSpan();
-				if (span) {
-					span.recordException(err);
-					span.setStatus({ code: SpanStatusCode.ERROR });
-				}
-				console.error("Failed to download image", img.url, err.message);
-				await tx
-					.update(mqueue)
-					.set({ attempt: sql`${mqueue.attempt}+1` })
-					.where(eq(mqueue.id, item.id));
+			await tx.delete(mqueue).where(eq(mqueue.id, item.id));
+		} catch (err: any) {
+			const span = getCurrentSpan();
+			if (span) {
+				span.recordException(err);
+				span.setStatus({ code: SpanStatusCode.ERROR });
 			}
-			return true;
-		});
+			console.error("Failed to download image", img.url, err.message);
+			await tx
+				.update(mqueue)
+				.set({ attempt: sql`${mqueue.attempt}+1` })
+				.where(eq(mqueue.id, item.id));
+		}
+		return true;
 	});
-}
+});
 
 async function downloadImage(id: string, url: string): Promise<string> {
 	const low = await getFile(path.join(imageDir, `${id}.low.jpg`))

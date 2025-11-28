@@ -1,12 +1,12 @@
 import os from "node:os";
 import path from "node:path";
 import tls, { type ConnectionOptions } from "node:tls";
-import { record } from "@elysiajs/opentelemetry";
 import { instrumentDrizzleClient } from "@kubiks/otel-drizzle";
 import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate as migrateDb } from "drizzle-orm/node-postgres/migrator";
 import type { PoolConfig } from "pg";
+import { record } from "~/otel";
 import * as schema from "./schema";
 
 const config: PoolConfig = {
@@ -122,26 +122,24 @@ instrumentDrizzleClient(db, {
 	maxQueryTextLength: 100_000_000,
 });
 
-export const migrate = async () => {
-	return record("migrate", async () => {
-		try {
-			await db.execute(
-				sql.raw(`
-					create extension if not exists pg_trgm;
-					set pg_trgm.word_similarity_threshold = 0.4;
-					alter database "${postgresConfig.database}" set pg_trgm.word_similarity_threshold = 0.4;
-				`),
-			);
-		} catch (err: any) {
-			console.error("Error while updating pg_trgm", err.message);
-		}
-		await migrateDb(db, {
-			migrationsSchema: "kyoo",
-			migrationsFolder: "./drizzle",
-		});
-		console.log(`Database ${postgresConfig.database} migrated!`);
+export const migrate = record("migrate", async () => {
+	try {
+		await db.execute(
+			sql.raw(`
+				create extension if not exists pg_trgm;
+				set pg_trgm.word_similarity_threshold = 0.4;
+				alter database "${postgresConfig.database}" set pg_trgm.word_similarity_threshold = 0.4;
+			`),
+		);
+	} catch (err: any) {
+		console.error("Error while updating pg_trgm", err.message);
+	}
+	await migrateDb(db, {
+		migrationsSchema: "kyoo",
+		migrationsFolder: "./drizzle",
 	});
-};
+	console.log(`Database ${postgresConfig.database} migrated!`);
+});
 
 export type Transaction =
 	| typeof db

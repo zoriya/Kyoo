@@ -33,7 +33,7 @@ describe("images", () => {
 
 	it("Download 404 image", async () => {
 		await db.delete(mqueue);
-		const url404 =  "https://mockhttp.org/status/404";
+		const url404 = "https://mockhttp.org/status/404";
 		const [ret, body] = await createMovie({
 			...dune,
 			translations: {
