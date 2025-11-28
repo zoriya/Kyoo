@@ -61,9 +61,9 @@ export const insertStudios = async (
 				db
 					.select({
 						showPk: sql`${showPk}`.as("showPk"),
-						studioPk: sql`v.studioPk`.as("studioPk"),
+						studioPk: sql`v."studioPk"`.as("studioPk"),
 					})
-					.from(sql`unnest(${sqlarr(ret.map((x) => x.pk))}) as v("studioPk")`),
+					.from(sql`unnest(${sqlarr(ret.map((x) => x.pk))}::integer[]) as v("studioPk")`),
 			)
 			.onConflictDoNothing();
 		return ret;

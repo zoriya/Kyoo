@@ -73,9 +73,10 @@ export const insertCollection = async (
 			}),
 		);
 		await flushImageQueue(tx, imgQueue, 100);
+		// we can't unnest values here because show translations contains arrays.
 		await tx
 			.insert(showTranslations)
-			.select(unnestValues(trans, showTranslations))
+			.values(trans)
 			.onConflictDoUpdate({
 				target: [showTranslations.pk, showTranslations.language],
 				set: conflictUpdateAllExcept(showTranslations, ["pk", "language"]),

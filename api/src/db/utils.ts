@@ -77,7 +77,7 @@ export function conflictUpdateAllExcept<
 export function sqlarr(array: unknown[]): string {
 	return `{${array
 		.map((item) =>
-			!item || item === "null"
+			item === "null" || item === null || item === undefined
 				? "null"
 				: Array.isArray(item)
 					? sqlarr(item)

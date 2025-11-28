@@ -161,22 +161,22 @@ export const insertEntries = async (
 			.select(
 				db
 					.select({
-						entryPk: sql<number>`vids.entryPk`.as("entry"),
+						entryPk: sql<number>`vids."entryPk"`.as("entry"),
 						videoPk: videos.pk,
 						slug: computeVideoSlug(
-							sql`vids.entrySlug`,
-							sql`vids.needRendering`,
+							sql`vids."entrySlug"`,
+							sql`vids."needRendering"`,
 						),
 					})
 					.from(
 						unnest(vids, "vids", {
 							entryPk: "integer",
-							entrySlug: "string",
+							entrySlug: "varchar(255)",
 							needRendering: "boolean",
 							videoId: "uuid",
 						}),
 					)
-					.innerJoin(videos, eq(videos.id, sql`vids.videoId`)),
+					.innerJoin(videos, eq(videos.id, sql`vids."videoId"`)),
 			)
 			.onConflictDoNothing()
 			.returning({

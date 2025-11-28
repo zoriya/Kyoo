@@ -17,11 +17,11 @@ describe("images", () => {
 	});
 
 	it("Create a serie download images", async () => {
+		await db.delete(mqueue);
 		await createSerie(madeInAbyss);
 		const release = await processImages();
 		// remove notifications to prevent other images to be downloaded (do not curl 20000 images for nothing)
 		release();
-		await db.delete(mqueue);
 
 		const ret = await db.query.shows.findFirst({
 			where: eq(shows.slug, madeInAbyss.slug),
@@ -32,12 +32,17 @@ describe("images", () => {
 	});
 
 	it("Download 404 image", async () => {
+		await db.delete(mqueue);
+		const url404 =  "https://mockhttp.org/status/404";
 		const [ret, body] = await createMovie({
 			...dune,
 			translations: {
 				en: {
 					...dune.translations.en,
-					poster: "https://www.google.com/404",
+					poster: url404,
+					thumbnail: null,
+					banner: null,
+					logo: null,
 				},
 			},
 		});
@@ -46,12 +51,11 @@ describe("images", () => {
 		const release = await processImages();
 		// remove notifications to prevent other images to be downloaded (do not curl 20000 images for nothing)
 		release();
-		await db.delete(mqueue);
 
 		const failed = await db.query.mqueue.findFirst({
 			where: and(
 				eq(mqueue.kind, "image"),
-				eq(sql`${mqueue.message}->>'url'`, "https://www.google.com/404"),
+				eq(sql`${mqueue.message}->>'url'`, url404),
 			),
 		});
 		expect(failed!.attempt).toBe(5);
