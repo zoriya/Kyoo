@@ -123,10 +123,12 @@ instrumentDrizzleClient(db, {
 });
 
 export const migrate = record("migrate", async () => {
+	const APP_SCHEMA = "kyoo";
 	try {
 		await db.execute(
 			sql.raw(`
-				create extension if not exists pg_trgm;
+				create schema if not exists ${APP_SCHEMA};
+				create extension if not exists pg_trgm schema ${APP_SCHEMA};
 				set pg_trgm.word_similarity_threshold = 0.4;
 				alter database "${postgresConfig.database}" set pg_trgm.word_similarity_threshold = 0.4;
 			`),
@@ -135,7 +137,7 @@ export const migrate = record("migrate", async () => {
 		console.error("Error while updating pg_trgm", err.message);
 	}
 	await migrateDb(db, {
-		migrationsSchema: "kyoo",
+		migrationsSchema: APP_SCHEMA,
 		migrationsFolder: "./drizzle",
 	});
 	console.log(`Database ${postgresConfig.database} migrated!`);
