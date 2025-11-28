@@ -11,7 +11,10 @@ dev:
           - node_modules
         startContainer: true
         onUpload:
-          restartContainer: true
+          exec:
+            - command: bun install --frozen-lockfile
+              onChange: 
+               - "./bun.lock"
     command: 
       - bash 
       - -c 
