@@ -8,12 +8,17 @@ import {
 	type Subquery,
 	sql,
 	Table,
+	type TableConfig,
 	View,
 	ViewBaseConfig,
 } from "drizzle-orm";
 import type { CasingCache } from "drizzle-orm/casing";
 import type { AnyMySqlSelect } from "drizzle-orm/mysql-core";
-import type { AnyPgSelect, SelectedFieldsFlat } from "drizzle-orm/pg-core";
+import type {
+	AnyPgSelect,
+	PgTableWithColumns,
+	SelectedFieldsFlat,
+} from "drizzle-orm/pg-core";
 import type { AnySQLiteSelect } from "drizzle-orm/sqlite-core";
 import type { WithSubquery } from "drizzle-orm/subquery";
 import { db } from "./index";
@@ -69,8 +74,18 @@ export function conflictUpdateAllExcept<
 }
 
 // drizzle is bugged and doesn't allow js arrays to be used in raw sql.
-export function sqlarr(array: unknown[]) {
-	return `{${array.map((item) => `"${item}"`).join(",")}}`;
+export function sqlarr(array: unknown[]): string {
+	return `{${array
+		.map((item) =>
+			item === "null" || item === null || item === undefined
+				? "null"
+				: Array.isArray(item)
+					? sqlarr(item)
+					: typeof item === "object"
+						? `"${JSON.stringify(item).replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`
+						: `"${item}"`,
+		)
+		.join(", ")}}`;
 }
 
 // See https://github.com/drizzle-team/drizzle-orm/issues/4044
@@ -102,6 +117,102 @@ export function values<K extends string>(
 		},
 	};
 }
+
+/* goal:
+ *  unnestValues([{a: 1, b: 2}, {a: 3, b: 4}], tbl)
+ *
+ * ```sql
+ * select a, b, now() as updated_at from unnest($1::integer[], $2::integer[]);
+ * ```
+ * params:
+ *   $1: [1, 2]
+ *   $2: [3, 4]
+ *
+ * select
+ */
+export const unnestValues = <
+	T extends Record<string, unknown>,
+	C extends TableConfig = never,
+>(
+	values: T[],
+	typeInfo: PgTableWithColumns<C>,
+) => {
+	if (values[0] === undefined)
+		throw new Error("Invalid values, expecting at least one items");
+
+	const columns = getTableColumns(typeInfo);
+	const keys = Object.keys(values[0]).filter((x) => x in columns);
+	// @ts-expect-error: drizzle internal
+	const casing = db.dialect.casing as CasingCache;
+	const dbNames = Object.fromEntries(
+		Object.entries(columns).map(([k, v]) => [k, casing.getColumnCasing(v)]),
+	);
+	const vals = values.reduce(
+		(acc, cur, i) => {
+			for (const k of keys) {
+				if (k in cur) acc[k].push(cur[k]);
+				else acc[k].push(null);
+			}
+			for (const k of Object.keys(cur)) {
+				if (k in acc) continue;
+				if (!(k in columns)) continue;
+				keys.push(k);
+				acc[k] = new Array(i).fill(null);
+				acc[k].push(cur[k]);
+			}
+			return acc;
+		},
+		Object.fromEntries(keys.map((x) => [x, [] as unknown[]])),
+	);
+	const computed = Object.entries(columns)
+		.filter(([k, v]) => (v.defaultFn || v.onUpdateFn) && !keys.includes(k))
+		.map(([k]) => k);
+	return db
+		.select(
+			Object.fromEntries([
+				...keys.map((x) => [x, sql.raw(`"${dbNames[x]}"`)]),
+				...computed.map((x) => [
+					x,
+					(columns[x].defaultFn?.() ?? columns[x].onUpdateFn!()).as(dbNames[x]),
+				]),
+			]) as {
+				[k in keyof typeof typeInfo.$inferInsert]-?: SQL.Aliased<
+					(typeof typeInfo.$inferInsert)[k]
+				>;
+			},
+		)
+		.from(
+			sql`unnest(${sql.join(
+				keys.map(
+					(k) =>
+						sql`${sqlarr(vals[k])}${sql.raw(`::${columns[k].getSQLType()}[]`)}`,
+				),
+				sql.raw(", "),
+			)}) as v(${sql.raw(keys.map((x) => `"${dbNames[x]}"`).join(", "))})`,
+		);
+};
+
+export const unnest = <T extends Record<string, unknown>>(
+	values: T[],
+	name: string,
+	typeInfo: Record<keyof T, string>,
+) => {
+	const keys = Object.keys(typeInfo);
+	const vals = values.reduce(
+		(acc, cur) => {
+			for (const k of keys) {
+				if (k in cur) acc[k].push(cur[k]);
+				else acc[k].push(null);
+			}
+			return acc;
+		},
+		Object.fromEntries(keys.map((x) => [x, [] as unknown[]])),
+	);
+	return sql`unnest(${sql.join(
+		keys.map((k) => sql`${sqlarr(vals[k])}${sql.raw(`::${typeInfo[k]}[]`)}`),
+		sql.raw(", "),
+	)}) as ${sql.raw(name)}(${sql.raw(keys.map((x) => `"${x}"`).join(", "))})`;
+};
 
 export const coalesce = <T>(val: SQL<T> | SQLWrapper, def: SQL<T> | Column) => {
 	return sql<T>`coalesce(${val}, ${def})`;

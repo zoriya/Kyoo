@@ -35,7 +35,8 @@ import {
 	jsonbBuildObject,
 	jsonbObjectAgg,
 	sqlarr,
-	values,
+	unnest,
+	unnestValues,
 } from "~/db/utils";
 import { Entry } from "~/models/entry";
 import { KError } from "~/models/error";
@@ -129,10 +130,10 @@ async function linkVideos(
 					slug: computeVideoSlug(entriesQ.slug, hasRenderingQ),
 				})
 				.from(
-					values(links, {
+					unnest(links, "j", {
 						video: "integer",
 						entry: "jsonb",
-					}).as("j"),
+					}),
 				)
 				.innerJoin(videos, eq(videos.pk, sql`j.video`))
 				.innerJoin(
@@ -835,7 +836,7 @@ export const videosWriteH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				try {
 					vids = await tx
 						.insert(videos)
-						.values(body)
+						.select(unnestValues(body, videos))
 						.onConflictDoUpdate({
 							target: [videos.path],
 							set: conflictUpdateAllExcept(videos, ["pk", "id", "createdAt"]),
