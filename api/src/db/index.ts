@@ -6,6 +6,7 @@ import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate as migrateDb } from "drizzle-orm/node-postgres/migrator";
 import type { PoolConfig } from "pg";
+import { record } from "~/otel";
 import * as schema from "./schema";
 
 const config: PoolConfig = {
@@ -22,8 +23,10 @@ const config: PoolConfig = {
 async function parseSslConfig(): Promise<PoolConfig> {
 	// Due to an upstream bug, if `ssl` is not falsey, an SSL connection will always be attempted. This means
 	// that non-SSL connection options under `ssl` (which is incorrectly named) cannot be set unless SSL is enabled.
-	if (!process.env.PGSSLMODE || process.env.PGSSLMODE === "disable")
+	if (!process.env.PGSSLMODE || process.env.PGSSLMODE === "disable") {
+		config.ssl = false;
 		return config;
+	}
 
 	// Despite this field's name, it is used to configure everything below the application layer.
 	const ssl: ConnectionOptions = {};
@@ -112,7 +115,19 @@ const postgresConfig = await parseSslConfig();
 // use this when using drizzle-kit since it can't parse await statements
 // const postgresConfig = config;
 
-console.log("Connecting to postgres with config", postgresConfig);
+console.log("Connecting to postgres with config", {
+	...postgresConfig,
+	password: postgresConfig.password ? "<redacted>" : undefined,
+	ssl:
+		postgresConfig.ssl && typeof postgresConfig.ssl === "object"
+			? {
+					...postgresConfig.ssl,
+					key: "<redacted>",
+					cert: "<redacted>",
+					ca: "<redacted>",
+				}
+			: postgresConfig.ssl,
+});
 export const db = drizzle({
 	schema,
 	connection: postgresConfig,
@@ -122,24 +137,26 @@ instrumentDrizzleClient(db, {
 	maxQueryTextLength: 100_000_000,
 });
 
-export const migrate = async () => {
+export const migrate = record("migrate", async () => {
+	const APP_SCHEMA = "kyoo";
 	try {
 		await db.execute(
 			sql.raw(`
-			create extension if not exists pg_trgm;
-			set pg_trgm.word_similarity_threshold = 0.4;
-			alter database "${postgresConfig.database}" set pg_trgm.word_similarity_threshold = 0.4;
-		`),
+				create schema if not exists ${APP_SCHEMA};
+				create extension if not exists pg_trgm schema ${APP_SCHEMA};
+				set pg_trgm.word_similarity_threshold = 0.4;
+				alter database "${postgresConfig.database}" set pg_trgm.word_similarity_threshold = 0.4;
+			`),
 		);
 	} catch (err: any) {
 		console.error("Error while updating pg_trgm", err.message);
 	}
 	await migrateDb(db, {
-		migrationsSchema: "kyoo",
+		migrationsSchema: APP_SCHEMA,
 		migrationsFolder: "./drizzle",
 	});
 	console.log(`Database ${postgresConfig.database} migrated!`);
-};
+});
 
 export type Transaction =
 	| typeof db

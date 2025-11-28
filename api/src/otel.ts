@@ -1,4 +1,4 @@
-import { opentelemetry } from "@elysiajs/opentelemetry";
+import { record as elysiaRecord, opentelemetry } from "@elysiajs/opentelemetry";
 import { OTLPMetricExporter as GrpcMetricExporter } from "@opentelemetry/exporter-metrics-otlp-grpc";
 import { OTLPMetricExporter as HttpMetricExporter } from "@opentelemetry/exporter-metrics-otlp-proto";
 import { OTLPTraceExporter as GrpcTraceExporter } from "@opentelemetry/exporter-trace-otlp-grpc";
@@ -32,3 +32,12 @@ export const otel = new Elysia()
 		}),
 	)
 	.as("global");
+
+export function record<T extends (...args: any) => any>(
+	spanName: string,
+	fn: T,
+): T {
+	const wrapped = (...args: Parameters<T>) =>
+		elysiaRecord(spanName, () => fn(...args));
+	return wrapped as T;
+}

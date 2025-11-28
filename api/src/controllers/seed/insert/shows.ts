@@ -21,88 +21,93 @@ import type { SeedCollection } from "~/models/collections";
 import type { SeedMovie } from "~/models/movie";
 import type { SeedSerie } from "~/models/serie";
 import type { Original } from "~/models/utils";
+import { record } from "~/otel";
 import { getYear } from "~/utils";
 import { enqueueOptImage, flushImageQueue, type ImageTask } from "../images";
 
 type Show = typeof shows.$inferInsert;
 type ShowTrans = typeof showTranslations.$inferInsert;
 
-export const insertShow = async (
-	show: Omit<Show, "original">,
-	original: Original & {
-		poster: string | null;
-		thumbnail: string | null;
-		banner: string | null;
-		logo: string | null;
-	},
-	translations:
-		| SeedMovie["translations"]
-		| SeedSerie["translations"]
-		| SeedCollection["translations"],
-) => {
-	return await db.transaction(async (tx) => {
-		const imgQueue: ImageTask[] = [];
-		const orig = {
-			...original,
-			poster: enqueueOptImage(imgQueue, {
-				url: original.poster,
-				table: shows,
-				column: sql`${shows.original}['poster']`,
-			}),
-			thumbnail: enqueueOptImage(imgQueue, {
-				url: original.thumbnail,
-				table: shows,
-				column: sql`${shows.original}['thumbnail']`,
-			}),
-			banner: enqueueOptImage(imgQueue, {
-				url: original.banner,
-				table: shows,
-				column: sql`${shows.original}['banner']`,
-			}),
-			logo: enqueueOptImage(imgQueue, {
-				url: original.logo,
-				table: shows,
-				column: sql`${shows.original}['logo']`,
-			}),
-		};
-		const ret = await insertBaseShow(tx, { ...show, original: orig });
-		if ("status" in ret) return ret;
-
-		const trans: ShowTrans[] = Object.entries(translations).map(
-			([lang, tr]) => ({
-				pk: ret.pk,
-				language: lang,
-				...tr,
-				latinName: tr.latinName ?? null,
+export const insertShow = record(
+	"insertShow",
+	async (
+		show: Omit<Show, "original">,
+		original: Original & {
+			poster: string | null;
+			thumbnail: string | null;
+			banner: string | null;
+			logo: string | null;
+		},
+		translations:
+			| SeedMovie["translations"]
+			| SeedSerie["translations"]
+			| SeedCollection["translations"],
+	) => {
+		return await db.transaction(async (tx) => {
+			const imgQueue: ImageTask[] = [];
+			const orig = {
+				...original,
 				poster: enqueueOptImage(imgQueue, {
-					url: tr.poster,
-					column: showTranslations.poster,
+					url: original.poster,
+					table: shows,
+					column: sql`${shows.original}['poster']`,
 				}),
 				thumbnail: enqueueOptImage(imgQueue, {
-					url: tr.thumbnail,
-					column: showTranslations.thumbnail,
-				}),
-				logo: enqueueOptImage(imgQueue, {
-					url: tr.logo,
-					column: showTranslations.logo,
+					url: original.thumbnail,
+					table: shows,
+					column: sql`${shows.original}['thumbnail']`,
 				}),
 				banner: enqueueOptImage(imgQueue, {
-					url: tr.banner,
-					column: showTranslations.banner,
+					url: original.banner,
+					table: shows,
+					column: sql`${shows.original}['banner']`,
 				}),
-			}),
-		);
-		await flushImageQueue(tx, imgQueue, 200);
-		await tx
-			.insert(showTranslations)
-			.values(trans)
-			.onConflictDoUpdate({
-				target: [showTranslations.pk, showTranslations.language],
-				set: conflictUpdateAllExcept(showTranslations, ["pk", "language"]),
-			});
-		return ret;
-	});
-};
+				logo: enqueueOptImage(imgQueue, {
+					url: original.logo,
+					table: shows,
+					column: sql`${shows.original}['logo']`,
+				}),
+			};
+			const ret = await insertBaseShow(tx, { ...show, original: orig });
+			if ("status" in ret) return ret;
+
+			const trans: ShowTrans[] = Object.entries(translations).map(
+				([lang, tr]) => ({
+					pk: ret.pk,
+					language: lang,
+					...tr,
+					latinName: tr.latinName ?? null,
+					poster: enqueueOptImage(imgQueue, {
+						url: tr.poster,
+						column: showTranslations.poster,
+					}),
+					thumbnail: enqueueOptImage(imgQueue, {
+						url: tr.thumbnail,
+						column: showTranslations.thumbnail,
+					}),
+					logo: enqueueOptImage(imgQueue, {
+						url: tr.logo,
+						column: showTranslations.logo,
+					}),
+					banner: enqueueOptImage(imgQueue, {
+						url: tr.banner,
+						column: showTranslations.banner,
+					}),
+				}),
+			);
+			await flushImageQueue(tx, imgQueue, 200);
+			// we can't unnest values here because show translations contains arrays.
+			await tx
+				.insert(showTranslations)
+				.values(trans)
+				.onConflictDoUpdate({
+					target: [showTranslations.pk, showTranslations.language],
+					set: conflictUpdateAllExcept(showTranslations, ["pk", "language"]),
+				});
+			return ret;
+		});
+	},
+);
 
 async function insertBaseShow(tx: Transaction, show: Show) {
 	function insert() {
