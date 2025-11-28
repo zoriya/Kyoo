@@ -10,6 +10,11 @@ dev:
         excludePaths:
           - node_modules
         startContainer: true
+        onUpload:
+          exec:
+            - command: bun install --frozen-lockfile
+              onChange: 
+                - "./bun.lock"
     # increased sysctl limits for file watching
     # front uses Metro javascript bundler which watches a lot of files
     # these are node level settings that should be raised
