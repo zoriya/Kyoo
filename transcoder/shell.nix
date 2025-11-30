@@ -6,7 +6,7 @@ pkgs.mkShell {
     go-migrate
     go-swag
     # for psql in cli (+ pgformatter for sql files)
-    postgresql_15
+    postgresql_18
     pgformatter
     # to debug video files
     mediainfo

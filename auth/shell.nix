@@ -7,7 +7,7 @@ pkgs.mkShell {
     sqlc
     go-swag
     # for psql in cli (+ pgformatter for sql files)
-    postgresql_15
+    postgresql_18
     pgformatter
     # to run tests
     hurl
