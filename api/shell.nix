@@ -4,7 +4,7 @@ pkgs.mkShell {
     bun
     biome
     # for psql to debug from the cli
-    postgresql_15
+    postgresql_18
     # to build libvips (for sharp)
     nodejs
     node-gyp
