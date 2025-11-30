@@ -83,7 +83,7 @@ export function sqlarr(array: unknown[]): string {
 					? sqlarr(item)
 					: typeof item === "object"
 						? `"${JSON.stringify(item).replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`
-						: `"${item}"`,
+						: `"${item?.toString().replaceAll('"', '\\"')}"`,
 		)
 		.join(", ")}}`;
 }
