@@ -82,7 +82,7 @@ export function sqlarr(array: unknown[]): string {
 				: Array.isArray(item)
 					? sqlarr(item)
 					: typeof item === "object"
-						? `"${JSON.stringify(item).replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`
+						? `"${JSON.stringify(item).replaceAll('"', '\\"').replaceAll("\\", "\\\\")}"`
 						: `"${item}"`,
 		)
 		.join(", ")}}`;
