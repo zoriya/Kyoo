@@ -190,12 +190,12 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
   postgres:
-    image: postgres:15
+    image: postgres:18
     restart: on-failure
     env_file:
       - ./.env
     volumes:
-      - db:/var/lib/postgresql/data
+      - db:/var/lib/postgresql
     ports:
       - "5432:5432"
     environment:

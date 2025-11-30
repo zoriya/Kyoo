@@ -139,12 +139,12 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
   postgres:
-    image: postgres:15
+    image: postgres:18
     restart: unless-stopped
     env_file:
       - ./.env
     volumes:
-      - db:/var/lib/postgresql/data
+      - db:/var/lib/postgresql
     environment:
       - POSTGRES_USER=$PGUSER
       - POSTGRES_PASSWORD=$PGPASSWORD
