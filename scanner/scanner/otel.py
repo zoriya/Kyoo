@@ -59,7 +59,7 @@ def setup_otelproviders() -> tuple[object, object, object]:
 	from opentelemetry.sdk.resources import Resource
 
 	resource = Resource.create(
-		{"service.name": os.getenv("OTEL_SERVICE_NAME", "testpythonapp")}
+		{"service.name": os.getenv("OTEL_SERVICE_NAME", "kyoo.scanner")}
 	)
 
 	# Traces
