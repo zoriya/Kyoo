@@ -1,4 +1,5 @@
 from __future__ import annotations
+from datetime import datetime
 from typing import Literal
 
 from pydantic import Field
@@ -18,3 +19,16 @@ class Request(Model, extra="allow"):
 	class Video(Model):
 		id: str
 		episodes: list[Guess.Episode]
+
+
+class RequestRet(Model):
+	id: str
+	kind: Literal["episode", "movie"]
+	title: str
+	year: int | None
+	status: Literal[
+		"pending",
+		"running",
+		"failed",
+	]
+	started_at: datetime | None

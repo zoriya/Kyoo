@@ -1,14 +1,27 @@
-from typing import Annotated
+from typing import Annotated, Literal
 
-from asyncpg import Connection
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Security
+from fastapi import APIRouter, BackgroundTasks, Depends, Security
 
-from scanner.database import get_db_fapi
+from scanner.models.request import RequestRet
+from scanner.status import StatusService
 
 from ..fsscan import create_scanner
 from ..jwt import validate_bearer
 
 router = APIRouter()
+
+
+@router.get("/scan")
+async def get_scan_status(
+	svc: Annotated[StatusService, Depends(StatusService.create)],
+	_: Annotated[None, Security(validate_bearer, scopes=["scanner.trigger"])],
+	status: Literal["pending", "running", "failed"] | None = None,
+) -> list[RequestRet]:
+	"""
+	Get scan status, know what tasks are running, pending or failed.
+	"""
+
+	return await svc.list_requests(status=status)
 
 
 @router.put(
@@ -29,25 +42,3 @@ async def trigger_scan(
 			await scanner.scan()
 
 	tasks.add_task(run)
-
-
-@router.get("/health")
-def get_health():
-	return {"status": "healthy"}
-
-
-@router.get("/ready")
-def get_ready():
-	# child spans (`select 1` & db connection reset) was still logged,
-	# since i don't really wanna deal with it, let's just do that.
-	return {"status": "healthy"}
-
-
-# async def get_ready(db: Annotated[Connection, Depends(get_db_fapi)]):
-# try:
-# 	_ = await db.execute("select 1")
-# 	return {"status": "healthy", "database": "healthy"}
-# except Exception as e:
-# 	raise HTTPException(
-# 		status_code=500, detail={"status": "unhealthy", "database": str(e)}
-# 	)

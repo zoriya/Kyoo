@@ -211,6 +211,7 @@ func (h *Handler) createApiJwt(apikey string) (string, error) {
 		Time: time.Now().UTC().Add(time.Hour),
 	}
 	jwt := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	jwt.Header["kid"] = h.config.JwtKid
 	t, err := jwt.SignedString(h.config.JwtPrivateKey)
 	if err != nil {
 		return "", err
