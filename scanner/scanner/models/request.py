@@ -20,6 +20,7 @@ class Request(Model, extra="allow"):
 		id: str
 		episodes: list[Guess.Episode]
 
+
 class RequestRet(Model):
 	id: str
 	kind: Literal["episode", "movie"]

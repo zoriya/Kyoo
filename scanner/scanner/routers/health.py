@@ -13,4 +13,3 @@ def get_ready():
 	# child spans (`select 1` & db connection reset) was still logged,
 	# since i don't really wanna deal with it, let's just do that.
 	return {"status": "healthy"}
-

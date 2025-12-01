@@ -20,5 +20,5 @@ create table scanner.requests(
 	status scanner.request_status not null default 'pending',
 	started_at timestamptz,
 	created_at timestamptz not null default now()::timestamptz,
-	constraint unique_kty unique(kind, title, year)
+	constraint unique_kty unique nulls not distinct (kind, title, year)
 );
