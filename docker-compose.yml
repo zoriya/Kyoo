@@ -58,7 +58,7 @@ services:
     env_file:
       - ./.env
     volumes:
-      - images:/app/images
+      - images:/images
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.swagger.rule=PathPrefix(`/swagger`)"

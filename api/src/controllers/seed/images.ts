@@ -139,9 +139,9 @@ const processOne = record("download", async () => {
 			const column = sql.raw(img.column);
 
 			await tx.execute(sql`
-					update ${table} set ${column} = ${ret}
-					where ${column}->'id' = ${sql.raw(`'"${img.id}"'::jsonb`)}
-				`);
+				update ${table} set ${column} = ${ret}
+				where ${column}->'id' = ${sql.raw(`'"${img.id}"'::jsonb`)}
+			`);
 
 			await tx.delete(mqueue).where(eq(mqueue.id, item.id));
 		} catch (err: any) {
