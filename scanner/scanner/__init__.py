@@ -5,7 +5,8 @@ from fastapi import FastAPI
 
 from scanner.client import KyooClient
 from scanner.fsscan import FsScanner
-from scanner.otel import instrument
+from scanner.log import configure_logging
+from scanner.otel import setup_otelproviders, instrument
 from scanner.providers.composite import CompositeProvider
 from scanner.providers.themoviedatabase import TheMovieDatabase
 from scanner.requests import RequestCreator, RequestProcessor
@@ -68,4 +69,6 @@ app = FastAPI(
 	lifespan=lifespan,
 )
 app.include_router(router)
+configure_logging()
+setup_otelproviders()
 instrument(app)
