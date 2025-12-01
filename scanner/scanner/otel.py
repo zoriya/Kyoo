@@ -1,80 +1,91 @@
 import logging
-import os
-import sys
-
 from fastapi import FastAPI
-from opentelemetry import metrics, trace
-from opentelemetry._logs import set_logger_provider
-from opentelemetry.exporter.otlp.proto.grpc._log_exporter import (
-	OTLPLogExporter as GrpcLogExporter,
-)
-from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import (
-	OTLPMetricExporter as GrpcMetricExporter,
-)
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
-	OTLPSpanExporter as GrpcSpanExporter,
-)
-from opentelemetry.exporter.otlp.proto.http._log_exporter import (
-	OTLPLogExporter as HttpLogExporter,
-)
-from opentelemetry.exporter.otlp.proto.http.metric_exporter import (
-	OTLPMetricExporter as HttpMetricExporter,
-)
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import (
-	OTLPSpanExporter as HttpSpanExporter,
-)
-from opentelemetry.instrumentation.aiohttp_client import AioHttpClientInstrumentor
-from opentelemetry.instrumentation.asyncpg import AsyncPGInstrumentor
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
-from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
-from opentelemetry.sdk.metrics import MeterProvider
-from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
-from opentelemetry.sdk.resources import SERVICE_NAME, Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+logger = logging.getLogger(__name__)
+
+
+def setup_otelproviders() -> tuple[object, object, object]:
+	import os
+
+	if not (os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "").strip()):
+		logger.info(
+			"OTEL_EXPORTER_OTLP_ENDPOINT not specified, skipping otel provider setup."
+		)
+		return None, None, None
+
+	# choose exporters (grpc vs http) ...
+	if os.getenv("OTEL_EXPORTER_OTLP_PROTOCOL", "").lower().strip() == "grpc":
+		try:
+			from opentelemetry.exporter.otlp.proto.grpc._log_exporter import (
+				OTLPLogExporter,
+			)
+			from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import (
+				OTLPMetricExporter,
+			)
+			from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
+				OTLPSpanExporter,
+			)
+		except Exception as exc:
+			raise RuntimeError(
+				"gRPC OTLP exporter imports failed. Install the necessary packages / system libs."
+			) from exc
+		else:
+			logger.info("Using gRPC libs for OpenTelemetry exporter.")
+	else:
+		try:
+			from opentelemetry.exporter.otlp.proto.http._log_exporter import (
+				OTLPLogExporter,
+			)
+			from opentelemetry.exporter.otlp.proto.http.metric_exporter import (
+				OTLPMetricExporter,
+			)
+			from opentelemetry.exporter.otlp.proto.http.trace_exporter import (
+				OTLPSpanExporter,
+			)
+		except Exception as exc:
+			raise RuntimeError(
+				"HTTP OTLP exporter imports failed. Install the necessary packages / system libs."
+			) from exc
+		else:
+			logger.info("Using HTTP libs for OpenTelemetry exporter.")
+
+	from opentelemetry import trace, metrics, _logs
+	from opentelemetry.sdk.trace import TracerProvider
+	from opentelemetry.sdk.trace.export import BatchSpanProcessor
+	from opentelemetry.sdk.metrics import MeterProvider
+	from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+	from opentelemetry.sdk._logs import LoggerProvider
+	from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+	from opentelemetry.sdk.resources import Resource
+
+	resource = Resource.create(
+		{"service.name": os.getenv("OTEL_SERVICE_NAME", "testpythonapp")}
+	)
+
+	# Traces
+	tracer_provider = TracerProvider(resource=resource)
+	tracer_provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
+	trace.set_tracer_provider(tracer_provider)
+
+	# Metrics
+	meter_provider = MeterProvider(
+		resource=resource,
+		metric_readers=[PeriodicExportingMetricReader(OTLPMetricExporter())],
+	)
+	metrics.set_meter_provider(meter_provider)
+
+	# Logs — install logger provider + processor/exporter
+	logger_provider = LoggerProvider(resource=resource)
+	logger_provider.add_log_record_processor(BatchLogRecordProcessor(OTLPLogExporter()))
+	_logs.set_logger_provider(logger_provider)
+
+	return tracer_provider, meter_provider, logger_provider
 
 
 def instrument(app: FastAPI):
-	proto = os.getenv("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
-	resource = Resource.create(attributes={SERVICE_NAME: "kyoo.scanner"})
-
-	provider = LoggerProvider(resource=resource)
-	provider.add_log_record_processor(
-		BatchLogRecordProcessor(
-			HttpLogExporter() if proto == "http/protobuf" else GrpcLogExporter()
-		)
-	)
-	set_logger_provider(provider)
-	logging.basicConfig(
-		handlers=[
-			LoggingHandler(level=logging.DEBUG, logger_provider=provider),
-			logging.StreamHandler(sys.stdout),
-		],
-		level=logging.DEBUG,
-	)
-	logging.getLogger("watchfiles").setLevel(logging.WARNING)
-	logging.getLogger("rebulk").setLevel(logging.WARNING)
-
-	provider = TracerProvider(resource=resource)
-	provider.add_span_processor(
-		BatchSpanProcessor(
-			HttpSpanExporter() if proto == "http/protobuf" else GrpcSpanExporter()
-		)
-	)
-	trace.set_tracer_provider(provider)
-
-	provider = MeterProvider(
-		metric_readers=[
-			PeriodicExportingMetricReader(
-				HttpMetricExporter()
-				if proto == "http/protobuf"
-				else GrpcMetricExporter()
-			)
-		],
-		resource=resource,
-	)
-	metrics.set_meter_provider(provider)
+	from opentelemetry.instrumentation.aiohttp_client import AioHttpClientInstrumentor
+	from opentelemetry.instrumentation.asyncpg import AsyncPGInstrumentor
+	from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 	FastAPIInstrumentor.instrument_app(
 		app,
