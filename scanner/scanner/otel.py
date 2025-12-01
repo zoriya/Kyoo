@@ -26,39 +26,26 @@ def setup_otelproviders() -> tuple[object, object, object]:
 
 	# choose exporters (grpc vs http) ...
 	if os.getenv("OTEL_EXPORTER_OTLP_PROTOCOL", "").lower().strip() == "grpc":
-		try:
-			from opentelemetry.exporter.otlp.proto.grpc._log_exporter import (
-				OTLPLogExporter,
-			)
-			from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import (
-				OTLPMetricExporter,
-			)
-			from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
-				OTLPSpanExporter,
-			)
-		except Exception as exc:
-			raise RuntimeError(
-				"gRPC OTLP exporter imports failed. Install the necessary packages / system libs."
-			) from exc
-		else:
-			logger.info("Using gRPC libs for OpenTelemetry exporter.")
+		from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
+		from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import (
+			OTLPMetricExporter,
+		)
+		from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
+			OTLPSpanExporter,
+		)
+
+		logger.info("Using gRPC libs for OpenTelemetry exporter.")
+
 	else:
-		try:
-			from opentelemetry.exporter.otlp.proto.http._log_exporter import (
-				OTLPLogExporter,
-			)
-			from opentelemetry.exporter.otlp.proto.http.metric_exporter import (
-				OTLPMetricExporter,
-			)
-			from opentelemetry.exporter.otlp.proto.http.trace_exporter import (
-				OTLPSpanExporter,
-			)
-		except Exception as exc:
-			raise RuntimeError(
-				"HTTP OTLP exporter imports failed. Install the necessary packages / system libs."
-			) from exc
-		else:
-			logger.info("Using HTTP libs for OpenTelemetry exporter.")
+		from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+		from opentelemetry.exporter.otlp.proto.http.metric_exporter import (
+			OTLPMetricExporter,
+		)
+		from opentelemetry.exporter.otlp.proto.http.trace_exporter import (
+			OTLPSpanExporter,
+		)
+
+		logger.info("Using HTTP libs for OpenTelemetry exporter.")
 
 	resource = Resource.create(
 		{"service.name": os.getenv("OTEL_SERVICE_NAME", "kyoo.scanner")}
