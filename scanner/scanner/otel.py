@@ -1,5 +1,16 @@
 import logging
 from fastapi import FastAPI
+from opentelemetry import trace, metrics, _logs
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry.sdk._logs import LoggerProvider
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.instrumentation.aiohttp_client import AioHttpClientInstrumentor
+from opentelemetry.instrumentation.asyncpg import AsyncPGInstrumentor
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 logger = logging.getLogger(__name__)
 
@@ -49,15 +60,6 @@ def setup_otelproviders() -> tuple[object, object, object]:
 		else:
 			logger.info("Using HTTP libs for OpenTelemetry exporter.")
 
-	from opentelemetry import trace, metrics, _logs
-	from opentelemetry.sdk.trace import TracerProvider
-	from opentelemetry.sdk.trace.export import BatchSpanProcessor
-	from opentelemetry.sdk.metrics import MeterProvider
-	from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
-	from opentelemetry.sdk._logs import LoggerProvider
-	from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
-	from opentelemetry.sdk.resources import Resource
-
 	resource = Resource.create(
 		{"service.name": os.getenv("OTEL_SERVICE_NAME", "kyoo.scanner")}
 	)
@@ -83,10 +85,6 @@ def setup_otelproviders() -> tuple[object, object, object]:
 
 
 def instrument(app: FastAPI):
-	from opentelemetry.instrumentation.aiohttp_client import AioHttpClientInstrumentor
-	from opentelemetry.instrumentation.asyncpg import AsyncPGInstrumentor
-	from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-
 	FastAPIInstrumentor.instrument_app(
 		app,
 		http_capture_headers_server_request=[".*"],
