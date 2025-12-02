@@ -34,11 +34,6 @@ jobs:
             label: scanner
             image: ${{ github.repository_owner }}/kyoo_scanner
 
-          - context: ./autosync
-            dockerfile: Dockerfile
-            label: autosync
-            image: ${{ github.repository_owner }}/kyoo_autosync
-
           - context: ./transcoder
             dockerfile: Dockerfile
             label: transcoder
