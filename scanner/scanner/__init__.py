@@ -13,6 +13,7 @@ from scanner.requests import RequestCreator, RequestProcessor
 
 from .database import get_db, init_pool, migrate
 from .routers.routes import router
+from .routers.health import router as health_router
 
 
 @asynccontextmanager
@@ -69,6 +70,7 @@ app = FastAPI(
 	lifespan=lifespan,
 )
 app.include_router(router)
+app.include_router(health_router)
 configure_logging()
 setup_otelproviders()
 instrument(app)
