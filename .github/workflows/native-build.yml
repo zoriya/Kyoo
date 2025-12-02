@@ -2,7 +2,7 @@ name: Native build
 on:
   push:
     tags:
-     - v*
+      - v*
 
 jobs:
   update:

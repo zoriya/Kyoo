@@ -37,7 +37,7 @@ jobs:
         run: biome ci .
 
   scanner:
-    name: "Lint scanner/autosync"
+    name: "Lint scanner"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
