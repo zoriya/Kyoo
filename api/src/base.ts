@@ -52,8 +52,7 @@ export const base = new Elysia({ name: "base" })
 		console.error(code, error);
 		return {
 			status: 500,
-			message: "message" in error ? (error?.message ?? code) : code,
-			details: error,
+			message: "Internal server error",
 		} as KError;
 	})
 	.get("/health", () => ({ status: "healthy" }) as const, {

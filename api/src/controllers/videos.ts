@@ -831,6 +831,9 @@ export const videosWriteH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 	.post(
 		"",
 		async ({ body, status }) => {
+			if (body.length === 0) {
+				return status(422, { status: 422, message: "No videos" });
+			}
 			return await db.transaction(async (tx) => {
 				let vids: { pk: number; id: string; path: string; guess: Guess }[] = [];
 				try {
@@ -925,6 +928,7 @@ export const videosWriteH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 					description:
 						"Invalid rendering specified. (conflicts with an existing video)",
 				},
+				422: KError,
 			},
 		},
 	)

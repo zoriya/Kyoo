@@ -104,4 +104,60 @@ describe("Serie seeding", () => {
 			],
 		});
 	});
+
+	it("Can create a serie with quotes", async () => {
+		const [resp, body] = await createSerie({
+			...madeInAbyss,
+			slug: "quote-test",
+			seasons: [
+				{
+					...madeInAbyss.seasons[0],
+					translations: {
+						en: {
+							...madeInAbyss.seasons[0].translations.en,
+							name: "Season'1",
+						},
+					},
+				},
+				{
+					...madeInAbyss.seasons[1],
+					translations: {
+						en: {
+							...madeInAbyss.seasons[0].translations.en,
+							name: 'Season"2',
+							description: `This's """""quote, idk'''''`,
+						},
+					},
+				},
+			],
+		});
+
+		expectStatus(resp, body).toBe(201);
+		expect(body.id).toBeString();
+		expect(body.slug).toBe("quote-test");
+
+		const ret = await db.query.shows.findFirst({
+			where: eq(shows.id, body.id),
+			with: {
+				seasons: {
+					orderBy: seasons.seasonNumber,
+					with: { translations: true },
+				},
+				entries: {
+					with: {
+						translations: true,
+						evj: { with: { video: true } },
+					},
+				},
+			},
+		});
+
+		expect(ret).not.toBeNull();
+		expect(ret!.seasons).toBeArrayOfSize(2);
+		expect(ret!.seasons[0].translations[0].name).toBe("Season'1");
+		expect(ret!.seasons[1].translations[0].name).toBe('Season"2');
+		expect(ret!.entries).toBeArrayOfSize(
+			madeInAbyss.entries.length + madeInAbyss.extras.length,
+		);
+	});
 });
