@@ -13,4 +13,7 @@ pkgs.mkShell {
   ];
 
   SHARP_FORCE_GLOBAL_LIBVIPS = 1;
+  shellHook = ''
+    export LD_LIBRARY_PATH=${pkgs.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH
+  '';
 }
