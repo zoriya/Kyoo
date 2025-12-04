@@ -75,6 +75,10 @@ export function conflictUpdateAllExcept<
 
 // drizzle is bugged and doesn't allow js arrays to be used in raw sql.
 export function sqlarr(array: unknown[]): string {
+	function escapeStr(str: string) {
+		return str.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
+	}
+
 	return `{${array
 		.map((item) =>
 			item === "null" || item === null || item === undefined
@@ -82,8 +86,8 @@ export function sqlarr(array: unknown[]): string {
 				: Array.isArray(item)
 					? sqlarr(item)
 					: typeof item === "object"
-						? `"${JSON.stringify(item).replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`
-						: `"${item?.toString().replaceAll('"', '\\"')}"`,
+						? `"${escapeStr(JSON.stringify(item))}"`
+						: `"${escapeStr(item.toString())}"`,
 		)
 		.join(", ")}}`;
 }
