@@ -1,6 +1,6 @@
 from __future__ import annotations
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import Field
 
@@ -31,4 +31,5 @@ class RequestRet(Model):
 		"running",
 		"failed",
 	]
+	error: dict[str, Any] | None
 	started_at: datetime | None
