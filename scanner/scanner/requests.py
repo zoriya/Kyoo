@@ -41,6 +41,8 @@ class RequestCreator:
 			"""
 			delete from scanner.requests
 			where status = 'failed'
+				or (status = 'running'
+					and now() - started_at > interval '1 hour')
 			"""
 		)
 
