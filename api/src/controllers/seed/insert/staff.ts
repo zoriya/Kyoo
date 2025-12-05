@@ -40,7 +40,7 @@ export const insertStaff = record(
 
 			const rval = seed.map((x, i) => ({
 				showPk,
-				staffPk: ret.find(y => y.slug === x.staff.slug)!.pk,
+				staffPk: ret.find((y) => y.slug === x.staff.slug)!.pk,
 				kind: x.kind,
 				order: i,
 				character: {

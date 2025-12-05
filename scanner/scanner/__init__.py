@@ -26,7 +26,9 @@ async def lifespan(_):
 	):
 		# there's no way someone else used the same id, right?
 		is_master = await db.fetchval("select pg_try_advisory_lock(198347)")
-		is_http = not is_master and await db.fetchval("select pg_try_advisory_lock(645633)")
+		is_http = not is_master and await db.fetchval(
+			"select pg_try_advisory_lock(645633)"
+		)
 		if is_http:
 			yield
 			return
