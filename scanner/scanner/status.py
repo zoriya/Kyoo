@@ -28,6 +28,7 @@ class StatusService:
 				title,
 				year,
 				status,
+				error,
 				started_at
 			from
 				scanner.requests

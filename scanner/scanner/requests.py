@@ -1,5 +1,6 @@
 from asyncio import CancelledError, Event, TaskGroup
 from logging import getLogger
+from traceback import TracebackException
 from typing import cast
 
 from asyncpg import Connection, Pool
@@ -40,6 +41,8 @@ class RequestCreator:
 			"""
 			delete from scanner.requests
 			where status = 'failed'
+				or (status = 'running'
+					and now() - started_at > interval '1 hour')
 			"""
 		)
 
@@ -161,11 +164,22 @@ class RequestProcessor:
 				update
 					scanner.requests
 				set
-					status = 'failed'
+					status = 'failed',
+					error = $2
 				where
 					pk = $1
 				""",
 				request.pk,
+				{
+					"title": type(e).__name__,
+					"message": str(e),
+					"traceback": [
+						line
+						for part in TracebackException.from_exception(e).format()
+						for line in part.split("\n")
+						if line.strip()
+					],
+				},
 			)
 		return True
 

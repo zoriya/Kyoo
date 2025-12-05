@@ -91,20 +91,13 @@ export const seedSerie = async (
 	} = seed;
 	const nextRefresh = guessNextRefresh(serie.startAir ?? new Date());
 
-	const original = translations[serie.originalLanguage];
-	if (!original) {
-		return {
-			status: 422,
-			message: "No translation available in the original language.",
-		};
-	}
-
 	const col = await insertCollection(collection, {
 		kind: "serie",
 		nextRefresh,
 		...seed,
 	});
 
+	const original = translations[serie.originalLanguage];
 	const show = await insertShow(
 		{
 			kind: "serie",
@@ -113,11 +106,17 @@ export const seedSerie = async (
 			entriesCount: entries.length,
 			...serie,
 		},
-		{
-			...original,
-			latinName: original.latinName ?? null,
-			language: serie.originalLanguage,
-		},
+		original
+			? {
+					...original,
+					latinName: original.latinName ?? null,
+					language: serie.originalLanguage,
+				}
+			: {
+					name: null,
+					latinName: null,
+					language: serie.originalLanguage,
+				},
 		translations,
 	);
 	if ("status" in show) return show;

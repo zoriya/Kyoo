@@ -88,7 +88,9 @@ func setupOtel(e *echo.Echo) (func(), error) {
 	otel.SetTracerProvider(tp)
 
 	e.Use(otelecho.Middleware("kyoo.auth", otelecho.WithSkipper(func(c echo.Context) bool {
-		return c.Path() == "/auth/health" || c.Path() == "/auth/ready"
+		return (c.Path() == "/auth/health" ||
+			c.Path() == "/auth/ready" ||
+			strings.HasPrefix(c.Path(), "/.well-known/"))
 	})))
 
 	return func() {

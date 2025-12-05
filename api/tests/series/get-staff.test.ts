@@ -6,9 +6,12 @@ import {
 	getStaffRoles,
 } from "tests/helpers";
 import { expectStatus } from "tests/utils";
+import { db } from "~/db";
+import { staff } from "~/db/schema";
 import { madeInAbyss } from "~/models/examples";
 
 beforeAll(async () => {
+	await db.delete(staff);
 	await createSerie(madeInAbyss);
 });
 

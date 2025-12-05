@@ -7,10 +7,12 @@ export const Original = t.Object({
 		description: "The language code this was made in.",
 		examples: ["ja"],
 	}),
-	name: t.String({
-		description: "The name in the original language",
-		examples: ["進撃の巨人"],
-	}),
+	name: t.Nullable(
+		t.String({
+			description: "The name in the original language",
+			examples: ["進撃の巨人"],
+		}),
+	),
 	latinName: t.Nullable(
 		t.String({
 			description: comment`

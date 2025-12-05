@@ -84,6 +84,7 @@ export const login = async (
 export const logout = async () => {
 	const accounts = readAccounts();
 	const account = accounts.find((x) => x.selected);
+	removeAccounts((x) => x.selected);
 	if (account) {
 		await queryFn({
 			method: "DELETE",
@@ -92,7 +93,6 @@ export const logout = async () => {
 			parser: null,
 		});
 	}
-	removeAccounts((x) => x.selected);
 };
 
 export const deleteAccount = async () => {

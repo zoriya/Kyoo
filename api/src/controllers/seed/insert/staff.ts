@@ -4,6 +4,7 @@ import { roles, staff } from "~/db/schema";
 import { conflictUpdateAllExcept, unnestValues } from "~/db/utils";
 import type { SeedStaff } from "~/models/staff";
 import { record } from "~/otel";
+import { uniqBy } from "~/utils";
 import { enqueueOptImage, flushImageQueue, type ImageTask } from "../images";
 
 export const insertStaff = record(
@@ -13,13 +14,16 @@ export const insertStaff = record(
 
 		return await db.transaction(async (tx) => {
 			const imgQueue: ImageTask[] = [];
-			const people = seed.map((x) => ({
-				...x.staff,
-				image: enqueueOptImage(imgQueue, {
-					url: x.staff.image,
-					column: staff.image,
-				}),
-			}));
+			const people = uniqBy(
+				seed.map((x) => ({
+					...x.staff,
+					image: enqueueOptImage(imgQueue, {
+						url: x.staff.image,
+						column: staff.image,
+					}),
+				})),
+				(x) => x.slug,
+			);
 			const ret = await tx
 				.insert(staff)
 				.select(unnestValues(people, staff))
@@ -36,7 +40,7 @@ export const insertStaff = record(
 
 			const rval = seed.map((x, i) => ({
 				showPk,
-				staffPk: ret[i].pk,
+				staffPk: ret.find((y) => y.slug === x.staff.slug)!.pk,
 				kind: x.kind,
 				order: i,
 				character: {

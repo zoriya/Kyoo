@@ -33,10 +33,10 @@ export const insertShow = record(
 	async (
 		show: Omit<Show, "original">,
 		original: Original & {
-			poster: string | null;
-			thumbnail: string | null;
-			banner: string | null;
-			logo: string | null;
+			poster?: string | null;
+			thumbnail?: string | null;
+			banner?: string | null;
+			logo?: string | null;
 		},
 		translations:
 			| SeedMovie["translations"]

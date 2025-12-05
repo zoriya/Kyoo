@@ -91,7 +91,7 @@ export const seasonRelations = relations(seasons, ({ one, many }) => ({
 
 export const seasonTrRelations = relations(seasonTranslations, ({ one }) => ({
 	season: one(seasons, {
-		relationName: "season_translation",
+		relationName: "season_translations",
 		fields: [seasonTranslations.pk],
 		references: [seasons.pk],
 	}),

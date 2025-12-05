@@ -3,7 +3,7 @@ from logging import getLogger
 from types import TracebackType
 from typing import Literal
 
-from aiohttp import ClientSession
+from aiohttp import ClientResponse, ClientResponseError, ClientSession
 from pydantic import TypeAdapter
 
 from .models.movie import Movie
@@ -38,9 +38,19 @@ class KyooClient(metaclass=Singleton):
 	):
 		await self._client.close()
 
+	async def raise_for_status(self, r: ClientResponse):
+		if r.status >= 400:
+			raise ClientResponseError(
+				r.request_info,
+				r.history,
+				status=r.status,
+				message=await r.text(),
+				headers=r.headers,
+			)
+
 	async def get_videos_info(self) -> VideoInfo:
 		async with self._client.get("videos") as r:
-			r.raise_for_status()
+			await self.raise_for_status(r)
 			return VideoInfo(**await r.json())
 
 	async def create_videos(self, videos: list[Video]) -> list[VideoCreated]:
@@ -48,7 +58,7 @@ class KyooClient(metaclass=Singleton):
 			"videos",
 			data=TypeAdapter(list[Video]).dump_json(videos, by_alias=True),
 		) as r:
-			r.raise_for_status()
+			await self.raise_for_status(r)
 			return TypeAdapter(list[VideoCreated]).validate_json(await r.text())
 
 	async def delete_videos(self, videos: list[str] | set[str]):
@@ -56,14 +66,14 @@ class KyooClient(metaclass=Singleton):
 			"videos",
 			data=TypeAdapter(list[str] | set[str]).dump_json(videos, by_alias=True),
 		) as r:
-			r.raise_for_status()
+			await self.raise_for_status(r)
 
 	async def create_movie(self, movie: Movie) -> Resource:
 		async with self._client.post(
 			"movies",
 			data=movie.model_dump_json(by_alias=True),
 		) as r:
-			r.raise_for_status()
+			await self.raise_for_status(r)
 			return Resource.model_validate(await r.json())
 
 	async def create_serie(self, serie: Serie) -> Resource:
@@ -71,7 +81,7 @@ class KyooClient(metaclass=Singleton):
 			"series",
 			data=serie.model_dump_json(by_alias=True),
 		) as r:
-			r.raise_for_status()
+			await self.raise_for_status(r)
 			return Resource.model_validate(await r.json())
 
 	async def link_videos(
@@ -100,4 +110,4 @@ class KyooClient(metaclass=Singleton):
 				by_alias=True,
 			),
 		) as r:
-			r.raise_for_status()
+			await self.raise_for_status(r)

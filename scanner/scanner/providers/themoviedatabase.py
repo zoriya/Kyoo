@@ -420,6 +420,8 @@ class TheMovieDatabase(Provider):
 					(x["episode_number"] for x in season["episodes"]), None
 				),
 				"entries_count": len(season["episodes"]),
+				# there can be gaps in episodes (like 1,2,5,6,7)
+				"episodes": [x["episode_number"] for x in season["episodes"]],
 			},
 		)
 
@@ -429,9 +431,9 @@ class TheMovieDatabase(Provider):
 		# TODO: batch those
 		ret = await asyncio.gather(
 			*[
-				self._get_entry(serie_id, s.season_number, s.extra["first_entry"] + e)
+				self._get_entry(serie_id, s.season_number, e)
 				for s in seasons
-				for e in range(0, s.extra["entries_count"])
+				for e in s.extra["episodes"]
 			]
 		)
 

@@ -47,7 +47,7 @@ class Provider(ABC):
 		search = await self.search_movies(title, year, language=[])
 		if not any(search):
 			raise ProviderError(
-				f"Couldn't find a movie with title {title}. (year: {year}"
+				f"Couldn't find a movie with title {title}. (year: {year})"
 			)
 		ret = await self.get_movie(
 			{k: v.data_id for k, v in search[0].external_id.items()}
@@ -68,7 +68,7 @@ class Provider(ABC):
 		search = await self.search_series(title, year, language=[])
 		if not any(search):
 			raise ProviderError(
-				f"Couldn't find a serie with title {title}. (year: {year}"
+				f"Couldn't find a serie with title {title}. (year: {year})"
 			)
 		ret = await self.get_serie(
 			{k: v.data_id for k, v in search[0].external_id.items()}
