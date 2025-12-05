@@ -11,7 +11,7 @@ export const Movie = z
 		slug: z.string(),
 		name: z.string(),
 		original: z.object({
-			name: z.string(),
+			name: z.string().nullable(),
 			latinName: z.string().nullable(),
 			language: z.string(),
 		}),
