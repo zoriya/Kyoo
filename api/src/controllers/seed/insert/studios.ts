@@ -4,6 +4,7 @@ import { showStudioJoin, studios, studioTranslations } from "~/db/schema";
 import { conflictUpdateAllExcept, sqlarr, unnestValues } from "~/db/utils";
 import type { SeedStudio } from "~/models/studio";
 import { record } from "~/otel";
+import { uniqBy } from "~/utils";
 import { enqueueOptImage, flushImageQueue, type ImageTask } from "../images";
 
 type StudioI = typeof studios.$inferInsert;
@@ -15,6 +16,7 @@ export const insertStudios = record(
 		if (!seed?.length) return [];
 
 		return await db.transaction(async (tx) => {
+			seed = uniqBy(seed!, (x) => x.slug);
 			const vals: StudioI[] = seed.map((x) => {
 				const { translations, ...item } = x;
 				return item;

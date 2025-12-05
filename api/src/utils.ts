@@ -29,7 +29,7 @@ export function getFile(path: string): BunFile | S3File {
 	return Bun.file(path);
 }
 
-export function uniqBy<T>(a: T[], key: (val: T) => string) {
+export function uniqBy<T>(a: T[], key: (val: T) => string): T[] {
 	const seen: Record<string, boolean> = {};
 	return a.filter((item) => {
 		const k = key(item);
