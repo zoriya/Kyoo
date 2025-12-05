@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from "bun:test";
 import { eq } from "drizzle-orm";
 import { expectStatus } from "tests/utils";
 import { db } from "~/db";
-import { seasons, shows, videos } from "~/db/schema";
+import { entries, seasons, shows, videos } from "~/db/schema";
 import { madeInAbyss, madeInAbyssVideo } from "~/models/examples";
 import { createSerie } from "../helpers";
 
@@ -106,6 +106,7 @@ describe("Serie seeding", () => {
 	});
 
 	it("Can create a serie with quotes", async () => {
+		await db.delete(entries);
 		const [resp, body] = await createSerie({
 			...madeInAbyss,
 			slug: "quote-test",

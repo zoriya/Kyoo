@@ -30,8 +30,8 @@ export type ImageTask = {
 export const enqueueOptImage = (
 	imgQueue: ImageTask[],
 	img:
-		| { url: string | null; column: PgColumn }
-		| { url: string | null; table: PgTable; column: SQL },
+		| { url?: string | null; column: PgColumn }
+		| { url?: string | null; table: PgTable; column: SQL },
 ): Image | null => {
 	if (!img.url) return null;
 
