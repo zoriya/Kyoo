@@ -37,10 +37,12 @@ export const Image = ({
 	const { css, theme } = useYoshiki();
 	const { apiUrl, authToken } = useToken();
 
+	const uri = src ? `${apiUrl}${src[quality ?? "high"]}` : null;
 	return (
 		<EImage
+			recyclingKey={uri}
 			source={{
-				uri: src ? `${apiUrl}${src[quality ?? "high"]}` : null,
+				uri,
 				// use cookies on web to allow `img` to make the call instead of js
 				headers:
 					authToken && Platform.OS !== "web"

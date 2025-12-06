@@ -8,7 +8,9 @@ import { comment } from "./utils";
 await migrate();
 
 // run image processor task in background
-processImages();
+for (let i = 0; i < 10; i++) {
+	processImages();
+}
 
 const app = new Elysia()
 	.use(
