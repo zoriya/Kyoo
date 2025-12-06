@@ -1,4 +1,4 @@
-FROM oven/bun AS builder
+FROM --platform=$BUILDPLATFORM oven/bun AS builder
 WORKDIR /app
 
 # https://github.com/oven-sh/bun/issues/24538
