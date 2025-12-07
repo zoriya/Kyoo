@@ -100,7 +100,11 @@ export const processImages = record("processImages", async () => {
 
 		let found = true;
 		while (found) {
-			found = await processOne();
+			// run 10 downloads at the same time,
+			// if one of them couldn't find an item the queue is empty.
+			found = !(
+				await Promise.all([new Array(10)].map(() => processOne()))
+			).includes(false);
 		}
 		running = false;
 	}
