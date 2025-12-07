@@ -5,9 +5,11 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/user"
+	"sort"
 	"strings"
 
 	"github.com/zoriya/kyoo/keibi/dbc"
@@ -140,7 +142,7 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 		return nil, err
 	}
 
-	fmt.Println("Migrating database")
+	slog.Info("Migrating database")
 	dbi := stdlib.OpenDBFromPool(db)
 	defer dbi.Close()
 
@@ -156,7 +158,7 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 		return nil, err
 	}
 	m.Up()
-	fmt.Println("Migrating finished")
+	slog.Info("Migrating finished")
 
 	return db, nil
 }
@@ -227,17 +229,96 @@ func (h *Handler) TokenToJwt(next echo.HandlerFunc) echo.HandlerFunc {
 // @in header
 // @name Authorization
 func main() {
-	e := echo.New()
-	e.Use(middleware.Logger())
-	e.Validator = &Validator{validator: validator.New(validator.WithRequiredStructEnabled())}
-	e.HTTPErrorHandler = ErrorHandler
+	ctx := context.Background()
 
-	cleanup, err := setupOtel(e)
+	logger, _, err := SetupLogger(ctx)
 	if err != nil {
-		e.Logger.Fatal("Failed to setup otel: ", err)
+		slog.Error("logger init", "err", err)
+	}
+
+	cleanup, err := setupOtel(ctx)
+	if err != nil {
+		slog.Error("Failed to setup otel: ", err)
 		return
 	}
-	defer cleanup()
+	defer cleanup(ctx)
+
+	e := echo.New()
+	e.HideBanner = true
+	e.Logger.SetOutput(logger)
+	instrument(e)
+
+	// build ignore list from env or fall back to defaults
+	var ignore []string
+	if val, ok := os.LookupEnv("LOG_IGNORE_WEBPATHS"); !ok {
+		slog.Info("env LOG_IGNORE_WEBPATHS not set, using defaults")
+		ignore = []string{
+			"/health",
+			"/favicon.ico",
+			"/ready",
+		}
+	} else {
+		val = strings.TrimSpace(val)
+		if val != "" {
+			for _, p := range strings.Split(val, ",") {
+				if p = strings.TrimSpace(p); p != "" {
+					ignore = append(ignore, p)
+				}
+			}
+		}
+	}
+	sort.Strings(ignore)
+	stringignore := strings.Join(ignore, ",")
+	slog.Info("web_request.log_ignore_paths", "paths", stringignore)
+
+	contains := func(list []string, s string) bool {
+		for _, v := range list {
+			if v == s {
+				return true
+			}
+		}
+		return false
+	}
+	// using example from https://echo.labstack.com/docs/middleware/logger#examples
+	// full configs https://github.com/labstack/echo/blob/master/middleware/request_logger.go
+	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+		// declare a small set of paths to ignore
+		Skipper: func(c echo.Context) bool {
+			p := c.Request().URL.Path
+			return contains(ignore, p)
+		},
+		LogStatus:    true,
+		LogURI:       true,
+		LogError:     true,
+		LogHost:      true,
+		LogMethod:    true,
+		LogUserAgent: true,
+		HandleError:  true, // forwards error to the global error handler, so it can decide appropriate status code
+		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+			if v.Error == nil {
+				logger.LogAttrs(ctx, slog.LevelInfo, "web_request",
+					slog.String("method", v.Method),
+					slog.Int("status", v.Status),
+					slog.String("host", v.Host),
+					slog.String("uri", v.URI),
+					slog.String("agent", v.UserAgent),
+				)
+			} else {
+				logger.LogAttrs(ctx, slog.LevelError, "web_request_error",
+					slog.String("method", v.Method),
+					slog.Int("status", v.Status),
+					slog.String("host", v.Host),
+					slog.String("uri", v.URI),
+					slog.String("agent", v.UserAgent),
+					slog.String("err", v.Error.Error()),
+				)
+			}
+			return nil
+		},
+	}))
+
+	e.Validator = &Validator{validator: validator.New(validator.WithRequiredStructEnabled())}
+	e.HTTPErrorHandler = ErrorHandler
 
 	db, err := OpenDatabase()
 	if err != nil {
