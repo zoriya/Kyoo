@@ -52,17 +52,17 @@ func setupOtel(ctx context.Context) (func(context.Context) error, error) {
 	var te tracesdk.SpanExporter
 	switch {
 	case strings.TrimSpace(os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")) == "":
-		slog.Info("Using OLTP exporter", "type", "noop")
+		slog.Info("Using OLTP type", "type", "noop")
 		le = nil
 		me = nil
 		te = nil
 	case strings.ToLower(strings.TrimSpace(os.Getenv("OTEL_EXPORTER_OTLP_PROTOCOL"))) == "grpc":
-		slog.Info("Using OLTP exporter", "type", "grpc")
+		slog.Info("Using OLTP type", "type", "grpc")
 		le, err = otlploggrpc.New(ctx)
 		me, err = otlpmetricgrpc.New(ctx)
 		te, err = otlptracegrpc.New(ctx)
 	default:
-		slog.Info("Using OLTP exporter", "type", "http")
+		slog.Info("Using OLTP type", "type", "http")
 		le, err = otlploghttp.New(ctx)
 		me, err = otlpmetrichttp.New(ctx)
 		te, err = otlptracehttp.New(ctx)
