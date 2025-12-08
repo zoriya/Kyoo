@@ -251,8 +251,8 @@ func main() {
 
 	ignorepath := []string{
 		"/.well-known/jwks.json",
-		"/health",
-		"/ready",
+		"/auth/health",
+		"/auth/ready",
 	}
 	slog.Info("Skipping request logging for these paths", "paths", func() string { sort.Strings(ignorepath); return strings.Join(ignorepath, ",") }())
 
