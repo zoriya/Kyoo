@@ -59,13 +59,37 @@ func setupOtel(ctx context.Context) (func(context.Context) error, error) {
 	case strings.ToLower(strings.TrimSpace(os.Getenv("OTEL_EXPORTER_OTLP_PROTOCOL"))) == "grpc":
 		slog.Info("Using OLTP type", "type", "grpc")
 		le, err = otlploggrpc.New(ctx)
+		if err != nil {
+			slog.Error("Failed setting up OLTP: ", err)
+			return nil, err
+		}
 		me, err = otlpmetricgrpc.New(ctx)
+		if err != nil {
+			slog.Error("Failed setting up OLTP: ", err)
+			return nil, err
+		}
 		te, err = otlptracegrpc.New(ctx)
+		if err != nil {
+			slog.Error("Failed setting up OLTP: ", err)
+			return nil, err
+		}
 	default:
 		slog.Info("Using OLTP type", "type", "http")
 		le, err = otlploghttp.New(ctx)
+		if err != nil {
+			slog.Error("Failed setting up OLTP: ", err)
+			return nil, err
+		}
 		me, err = otlpmetrichttp.New(ctx)
+		if err != nil {
+			slog.Error("Failed setting up OLTP: ", err)
+			return nil, err
+		}
 		te, err = otlptracehttp.New(ctx)
+		if err != nil {
+			slog.Error("Failed setting up OLTP: ", err)
+			return nil, err
+		}
 	}
 	if err != nil {
 		return nil, err
