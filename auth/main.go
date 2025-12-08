@@ -9,9 +9,9 @@ import (
 	"net/http"
 	"os"
 	"os/user"
+	"slices"
 	"sort"
 	"strings"
-	"slices"
 
 	"github.com/zoriya/kyoo/keibi/dbc"
 	_ "github.com/zoriya/kyoo/keibi/docs"
@@ -249,28 +249,12 @@ func main() {
 	e.Logger.SetOutput(logger)
 	instrument(e)
 
-	// build ignore list from env or fall back to defaults
-	var ignore []string
-	if val, ok := os.LookupEnv("LOG_IGNORE_WEBPATHS"); !ok {
-		slog.Info("env LOG_IGNORE_WEBPATHS not set, using defaults")
-		ignore = []string{
-			"/health",
-			"/favicon.ico",
-			"/ready",
-		}
-	} else {
-		val = strings.TrimSpace(val)
-		if val != "" {
-			for _, p := range strings.Split(val, ",") {
-				if p = strings.TrimSpace(p); p != "" {
-					ignore = append(ignore, p)
-				}
-			}
-		}
+	ignorepath := []string{
+		"/.well-known/jwks.json",
+		"/health",
+		"/ready",
 	}
-	sort.Strings(ignore)
-	stringignore := strings.Join(ignore, ",")
-	slog.Info("web_request.log_ignore_paths", "paths", stringignore)
+	slog.Info("Skipping request logging for these paths", "paths", func() string { sort.Strings(ignorepath); return strings.Join(ignorepath, ",") }())
 
 	// using example from https://echo.labstack.com/docs/middleware/logger#examples
 	// full configs https://github.com/labstack/echo/blob/master/middleware/request_logger.go
@@ -278,7 +262,7 @@ func main() {
 		// declare a small set of paths to ignore
 		Skipper: func(c echo.Context) bool {
 			p := c.Request().URL.Path
-			return slices.Contains(ignore, p)
+			return slices.Contains(ignorepath, p)
 		},
 		LogStatus:    true,
 		LogURI:       true,
