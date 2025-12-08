@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/user"
 	"strings"
+	"log/slog"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -116,7 +117,7 @@ func (s *MetadataService) setupDb() (*pgxpool.Pool, error) {
 		return nil, err
 	}
 
-	fmt.Println("Migrating database")
+	slog.Info("Database migration state", "state", "starting")
 	dbi := stdlib.OpenDBFromPool(db)
 	defer dbi.Close()
 
@@ -132,7 +133,7 @@ func (s *MetadataService) setupDb() (*pgxpool.Pool, error) {
 		return nil, err
 	}
 	m.Up()
-	fmt.Println("Migrating finished")
+	slog.Info("Database migration state", "state", "completed")
 
 	return db, nil
 }
