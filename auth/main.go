@@ -5,9 +5,12 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/user"
+	"slices"
+	"sort"
 	"strings"
 
 	"github.com/zoriya/kyoo/keibi/dbc"
@@ -140,7 +143,7 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 		return nil, err
 	}
 
-	fmt.Println("Migrating database")
+	slog.Info("Database migration state", "state", "starting")
 	dbi := stdlib.OpenDBFromPool(db)
 	defer dbi.Close()
 
@@ -156,7 +159,7 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 		return nil, err
 	}
 	m.Up()
-	fmt.Println("Migrating finished")
+	slog.Info("Database migration state", "state", "completed")
 
 	return db, nil
 }
@@ -227,17 +230,72 @@ func (h *Handler) TokenToJwt(next echo.HandlerFunc) echo.HandlerFunc {
 // @in header
 // @name Authorization
 func main() {
-	e := echo.New()
-	e.Use(middleware.Logger())
-	e.Validator = &Validator{validator: validator.New(validator.WithRequiredStructEnabled())}
-	e.HTTPErrorHandler = ErrorHandler
+	ctx := context.Background()
 
-	cleanup, err := setupOtel(e)
+	logger, _, err := SetupLogger(ctx)
 	if err != nil {
-		e.Logger.Fatal("Failed to setup otel: ", err)
+		slog.Error("logger init", "err", err)
+	}
+
+	cleanup, err := setupOtel(ctx)
+	if err != nil {
+		slog.Error("Failed to setup otel: ", "err", err)
 		return
 	}
-	defer cleanup()
+	defer cleanup(ctx)
+
+	e := echo.New()
+	e.HideBanner = true
+	e.Logger.SetOutput(logger)
+	instrument(e)
+
+	ignorepath := []string{
+		"/.well-known/jwks.json",
+		"/auth/health",
+		"/auth/ready",
+	}
+	slog.Info("Skipping request logging for these paths", "paths", func() string { sort.Strings(ignorepath); return strings.Join(ignorepath, ",") }())
+
+	// using example from https://echo.labstack.com/docs/middleware/logger#examples
+	// full configs https://github.com/labstack/echo/blob/master/middleware/request_logger.go
+	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+		// declare a small set of paths to ignore
+		Skipper: func(c echo.Context) bool {
+			p := c.Request().URL.Path
+			return slices.Contains(ignorepath, p)
+		},
+		LogStatus:    true,
+		LogURI:       true,
+		LogError:     true,
+		LogHost:      true,
+		LogMethod:    true,
+		LogUserAgent: true,
+		HandleError:  true, // forwards error to the global error handler, so it can decide appropriate status code
+		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+			if v.Error == nil {
+				logger.LogAttrs(ctx, slog.LevelInfo, "web_request",
+					slog.String("method", v.Method),
+					slog.Int("status", v.Status),
+					slog.String("host", v.Host),
+					slog.String("uri", v.URI),
+					slog.String("agent", v.UserAgent),
+				)
+			} else {
+				logger.LogAttrs(ctx, slog.LevelError, "web_request_error",
+					slog.String("method", v.Method),
+					slog.Int("status", v.Status),
+					slog.String("host", v.Host),
+					slog.String("uri", v.URI),
+					slog.String("agent", v.UserAgent),
+					slog.String("err", v.Error.Error()),
+				)
+			}
+			return nil
+		},
+	}))
+
+	e.Validator = &Validator{validator: validator.New(validator.WithRequiredStructEnabled())}
+	e.HTTPErrorHandler = ErrorHandler
 
 	db, err := OpenDatabase()
 	if err != nil {
