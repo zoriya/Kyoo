@@ -142,7 +142,7 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 		return nil, err
 	}
 
-	slog.Info("Migrating database")
+	slog.Info("Database migration state", "state", "starting")
 	dbi := stdlib.OpenDBFromPool(db)
 	defer dbi.Close()
 
@@ -158,7 +158,7 @@ func OpenDatabase() (*pgxpool.Pool, error) {
 		return nil, err
 	}
 	m.Up()
-	slog.Info("Migrating finished")
+	slog.Info("Database migration state", "state", "completed")
 
 	return db, nil
 }
