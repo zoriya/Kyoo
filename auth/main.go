@@ -11,6 +11,7 @@ import (
 	"os/user"
 	"sort"
 	"strings"
+	"slices"
 
 	"github.com/zoriya/kyoo/keibi/dbc"
 	_ "github.com/zoriya/kyoo/keibi/docs"
@@ -271,21 +272,13 @@ func main() {
 	stringignore := strings.Join(ignore, ",")
 	slog.Info("web_request.log_ignore_paths", "paths", stringignore)
 
-	contains := func(list []string, s string) bool {
-		for _, v := range list {
-			if v == s {
-				return true
-			}
-		}
-		return false
-	}
 	// using example from https://echo.labstack.com/docs/middleware/logger#examples
 	// full configs https://github.com/labstack/echo/blob/master/middleware/request_logger.go
 	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		// declare a small set of paths to ignore
 		Skipper: func(c echo.Context) bool {
 			p := c.Request().URL.Path
-			return contains(ignore, p)
+			return slices.Contains(ignore, p)
 		},
 		LogStatus:    true,
 		LogURI:       true,
