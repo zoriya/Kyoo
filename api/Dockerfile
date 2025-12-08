@@ -12,6 +12,8 @@ COPY tsconfig.json .
 ENV NODE_ENV=production
 RUN bun build \
 	--compile \
+	# needed for sharp
+	--compile-autoload-package-json \
 	--minify-whitespace \
 	--minify-syntax \
 	--target bun \
