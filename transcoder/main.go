@@ -111,8 +111,8 @@ func main() {
 	instrument(e)
 
 	ignorepath := []string{
-		"/health",
-		"/ready",
+		"/video/health",
+		"/video/ready",
 	}
 	slog.Info("Skipping request logging for these paths", "paths", func() string { sort.Strings(ignorepath); return strings.Join(ignorepath, ",") }())
 
