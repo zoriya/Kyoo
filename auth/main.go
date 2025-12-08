@@ -239,7 +239,7 @@ func main() {
 
 	cleanup, err := setupOtel(ctx)
 	if err != nil {
-		slog.Error("Failed to setup otel: ", err)
+		slog.Error("Failed to setup otel: ", "err", err)
 		return
 	}
 	defer cleanup(ctx)
