@@ -92,34 +92,47 @@ export const flushImageQueue = record(
 	},
 );
 
-export const processImages = record("processImages", async () => {
-	let running = false;
-	async function processAll() {
-		if (running) return;
-		running = true;
+export const processImages = record(
+	"processImages",
+	async (waitToFinish = false) => {
+		let running = false;
+		async function processAll() {
+			if (running) return;
+			running = true;
 
-		let found = true;
-		while (found) {
-			// run 10 downloads at the same time,
-			// if one of them couldn't find an item the queue is empty.
-			found = !(
-				await Promise.all([new Array(10)].map(() => processOne()))
-			).includes(false);
+			let found = true;
+			while (found) {
+				// run 10 downloads at the same time,
+				const founds = await Promise.all([...new Array(10)].map(processOne));
+				// continue as long as there's one found (if it failed we wanna retry)
+				found = founds.includes(true);
+			}
+			running = false;
 		}
-		running = false;
-	}
 
-	const client = (await db.$client.connect()) as PoolClient;
-	client.on("notification", (evt) => {
-		if (evt.channel !== "kyoo_image") return;
-		processAll();
-	});
-	await client.query("listen kyoo_image");
+		const client = (await db.$client.connect()) as PoolClient;
+		client.on("notification", (evt) => {
+			if (evt.channel !== "kyoo_image") return;
+			try {
+				processAll();
+			} catch (e) {
+				console.error(
+					"Failed to processs images. aborting images downloading",
+					e,
+				);
+			}
+		});
+		await client.query("listen kyoo_image");
 
-	// start processing old tasks
-	await processAll();
-	return () => client.release(true);
-});
+		if (waitToFinish) {
+			// start processing old tasks
+			await processAll();
+		} else {
+			processAll();
+		}
+		return () => client.release(true);
+	},
+);
 
 const processOne = record("download", async () => {
 	return await db.transaction(async (tx) => {
@@ -144,7 +157,7 @@ const processOne = record("download", async () => {
 
 			await tx.execute(sql`
 				update ${table} set ${column} = ${ret}
-				where ${column}->'id' = ${sql.raw(`'"${img.id}"'::jsonb`)}
+				where ${column}->'id' = to_jsonb(${img.id}::text)
 			`);
 
 			await tx.delete(mqueue).where(eq(mqueue.id, item.id));
@@ -154,7 +167,7 @@ const processOne = record("download", async () => {
 				span.recordException(err);
 				span.setStatus({ code: SpanStatusCode.ERROR });
 			}
-			console.error("Failed to download image", img.url, err.message);
+			console.error("Failed to download image", img.url, err);
 			await tx
 				.update(mqueue)
 				.set({ attempt: sql`${mqueue.attempt}+1` })

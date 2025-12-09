@@ -19,7 +19,7 @@ describe("images", () => {
 	it("Create a serie download images", async () => {
 		await db.delete(mqueue);
 		await createSerie(madeInAbyss);
-		const release = await processImages();
+		const release = await processImages(true);
 		// remove notifications to prevent other images to be downloaded (do not curl 20000 images for nothing)
 		release();
 
@@ -48,7 +48,7 @@ describe("images", () => {
 		});
 		expectStatus(ret, body).toBe(201);
 
-		const release = await processImages();
+		const release = await processImages(true);
 		// remove notifications to prevent other images to be downloaded (do not curl 20000 images for nothing)
 		release();
 

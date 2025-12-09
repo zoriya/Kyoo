@@ -2,12 +2,12 @@ import { swagger } from "@elysiajs/swagger";
 import Elysia from "elysia";
 import { handlers } from "./base";
 import { processImages } from "./controllers/seed/images";
-import { migrate } from "./db";
+import { db, migrate } from "./db";
 import { comment } from "./utils";
 
 await migrate();
 
-processImages();
+const disposeImages = await processImages();
 
 const app = new Elysia()
 	.use(
@@ -86,5 +86,15 @@ const app = new Elysia()
 	)
 	.use(handlers)
 	.listen(3567);
+
+process.on("SIGTERM", () => {
+	app.stop().then(async () => {
+		console.log("Api stopping");
+		disposeImages();
+		await db.$client.end();
+		console.log("Api stopped");
+		process.exit(0);
+	});
+});
 
 console.log(`Api running at ${app.server?.hostname}:${app.server?.port}`);
