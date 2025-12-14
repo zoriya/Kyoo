@@ -92,36 +92,6 @@ export function sqlarr(array: unknown[]): string {
 		.join(", ")}}`;
 }
 
-// See https://github.com/drizzle-team/drizzle-orm/issues/4044
-export function values<K extends string>(
-	items: Record<K, unknown>[],
-	typeInfo: Partial<Record<K, string>> = {},
-) {
-	if (items[0] === undefined)
-		throw new Error("Invalid values, expecting at least one items");
-	const [firstProp, ...props] = Object.keys(items[0]) as K[];
-	const values = items
-		.map((x, i) => {
-			let ret = sql`(${x[firstProp]}`;
-			if (i === 0 && typeInfo[firstProp])
-				ret = sql`${ret}::${sql.raw(typeInfo[firstProp])}`;
-			for (const val of props) {
-				ret = sql`${ret}, ${x[val]}`;
-				if (i === 0 && typeInfo[val])
-					ret = sql`${ret}::${sql.raw(typeInfo[val])}`;
-			}
-			return sql`${ret})`;
-		})
-		.reduce((acc, x) => sql`${acc}, ${x}`);
-	const valueNames = [firstProp, ...props].join(", ");
-
-	return {
-		as: (name: string) => {
-			return sql`(values ${values}) as ${sql.raw(name)}(${sql.raw(valueNames)})`;
-		},
-	};
-}
-
 /* goal:
  *  unnestValues([{a: 1, b: 2}, {a: 3, b: 4}], tbl)
  *

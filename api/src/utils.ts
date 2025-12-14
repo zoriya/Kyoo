@@ -38,3 +38,20 @@ export function uniqBy<T>(a: T[], key: (val: T) => string): T[] {
 		return true;
 	});
 }
+
+export function traverse<T extends Record<string, any>>(
+	arr: T[],
+): { [K in keyof T]: T[K][] } {
+	const result = {} as { [K in keyof T]: T[K][] };
+
+	arr.forEach((obj) => {
+		for (const key in obj) {
+			if (!result[key]) {
+				result[key] = [];
+			}
+			result[key].push(obj[key]);
+		}
+	});
+
+	return result;
+}
