@@ -30,7 +30,7 @@ export type Progress = typeof Progress.static;
 export const SeedHistory = t.Object({
 	percent: Progress.properties.percent,
 	time: Progress.properties.time,
-	playedDate: t.Optional(Progress.properties.playedDate),
+	playedDate: Progress.properties.playedDate,
 	videoId: Progress.properties.videoId.anyOf[0],
 });
 export type SeedHistory = typeof SeedHistory.static;

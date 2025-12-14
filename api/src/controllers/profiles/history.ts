@@ -22,7 +22,7 @@ import {
 	videos,
 } from "~/db/schema";
 import { watchlist } from "~/db/schema/watchlist";
-import { coalesce } from "~/db/utils";
+import { coalesce, sqlarr } from "~/db/utils";
 import { Entry } from "~/models/entry";
 import { KError } from "~/models/error";
 import { SeedHistory } from "~/models/history";
@@ -50,16 +50,18 @@ export async function updateHistory(
 	progress: SeedHistory[],
 ) {
 	return dbTx.transaction(async (tx) => {
+		// `for("update", { of: history })` will put the `kyoo.history` instead
+		// of `history` in the sql and that triggers a sql error.
 		const existing = (
 			await tx
 				.select({ videoId: videos.id })
 				.from(history)
-				.for("update")
+				.for("update", { of: sql`history` as any })
 				.leftJoin(videos, eq(videos.pk, history.videoPk))
 				.where(
 					and(
 						eq(history.profilePk, userPk),
-						lte(history.playedDate, sql`interval '1 day'`),
+						lte(sql`now() - ${history.playedDate}`, sql`interval '1 day'`),
 					),
 				)
 		).map((x) => x.videoId);
@@ -71,18 +73,19 @@ export async function updateHistory(
 			progress.filter((x) => !existing.includes(x.videoId)),
 		);
 
+		// TODO: only call update/insert if toUpdate/newEntries aren't empty
 		const updated = await tx
 			.update(history)
 			.set({
 				time: sql`hist.ts`,
 				percent: sql`hist.percent`,
-				playedDate: coalesce(sql`hist.played_date`, sql`now()`)
+				playedDate: coalesce(sql`hist.played_date`, sql`now()`),
 			})
 			.from(sql`unnest(
-				${toUpdate.videoId}::uuid[],
-				${toUpdate.time}::integer[],
-				${toUpdate.percent}::integer[],
-				${toUpdate.playedDate}::timestamp[]
+				${sqlarr(toUpdate.videoId)}::uuid[],
+				${sqlarr(toUpdate.time)}::integer[],
+				${sqlarr(toUpdate.percent)}::integer[],
+				${sqlarr(toUpdate.playedDate)}::timestamp[]
 			) as hist(video_id, ts, percent, played_date)`)
 			.innerJoin(videos, eq(videos.id, sql`hist.video_id`))
 			.where(and(eq(history.profilePk, userPk), eq(history.videoPk, videos.pk)))
@@ -107,10 +110,10 @@ export async function updateHistory(
 						),
 					})
 					.from(sql`unnest(
-					${newEntries.videoId}::uuid[],
-					${newEntries.time}::integer[],
-					${newEntries.percent}::integer[],
-					${newEntries.playedDate}::timestamptz[]
+					${sqlarr(newEntries.videoId)}::uuid[],
+					${sqlarr(newEntries.time)}::integer[],
+					${sqlarr(newEntries.percent)}::integer[],
+					${sqlarr(newEntries.playedDate)}::timestamptz[]
 				) as hist(video_id, ts, percent, played_date)`)
 					.innerJoin(videos, eq(videos.id, sql`hist.videoId`))
 					.leftJoin(entryVideoJoin, eq(entryVideoJoin.videoPk, videos.pk))

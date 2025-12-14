@@ -19,7 +19,9 @@ const actionMap = {
 			const profilePk = await getOrCreateProfile(ws.data.jwt.sub);
 
 			await db.transaction(async (tx) => {
-				const hist = await updateHistory(tx, profilePk, [body]);
+				const hist = await updateHistory(tx, profilePk, [
+					{ ...body, playedDate: null },
+				]);
 				await updateWatchlist(tx, profilePk, hist);
 			});
 			ws.send({ response: "ok" });

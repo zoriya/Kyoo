@@ -13,7 +13,7 @@ import {
 import { expectStatus } from "tests/utils";
 import { db } from "~/db";
 import { entries, shows, videos } from "~/db/schema";
-import { bubble, madeInAbyss, madeInAbyssVideo } from "~/models/examples";
+import { bubble, bubbleVideo, madeInAbyss, madeInAbyssVideo } from "~/models/examples";
 
 beforeAll(async () => {
 	await db.delete(shows);
@@ -86,15 +86,13 @@ describe("nextup", () => {
 	it("history watching doesn't update", async () => {
 		let [resp, body] = await addToHistory("me", [
 			{
-				entry: miaEntrySlug,
 				videoId: madeInAbyssVideo.id,
 				percent: 58,
 				time: 28 * 60 + 12,
 				playedDate: "2025-02-01",
 			},
 			{
-				entry: bubble.slug,
-				videoId: null,
+				videoId: bubbleVideo.id,
 				percent: 100,
 				time: 2 * 60,
 				playedDate: "2025-02-02",
@@ -139,7 +137,6 @@ describe("nextup", () => {
 	it("history completed picks next", async () => {
 		let [resp, body] = await addToHistory("me", [
 			{
-				entry: miaEntrySlug,
 				videoId: madeInAbyssVideo.id,
 				percent: 98,
 				time: 28 * 60 + 12,
