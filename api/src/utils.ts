@@ -41,9 +41,10 @@ export function uniqBy<T>(a: T[], key: (val: T) => string): T[] {
 
 export function traverse<T extends Record<string, any>>(
 	arr: T[],
-): { [K in keyof T]: T[K][] } {
-	const result = {} as { [K in keyof T]: T[K][] };
+): { [K in keyof T]: T[K][] } | null {
+	if (arr.length === 0) return null;
 
+	const result = {} as { [K in keyof T]: T[K][] };
 	arr.forEach((obj, i) => {
 		for (const key in obj) {
 			if (!result[key]) {

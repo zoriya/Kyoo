@@ -176,6 +176,13 @@
 			"when": 1763932730557,
 			"tag": "0024_fix-season-count",
 			"breakpoints": true
+		},
+		{
+			"idx": 25,
+			"version": "7",
+			"when": 1765791459003,
+			"tag": "0025_remove-history-entry",
+			"breakpoints": true
 		}
 	]
 }

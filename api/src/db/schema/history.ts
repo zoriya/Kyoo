@@ -1,6 +1,5 @@
 import { sql } from "drizzle-orm";
 import { check, index, integer } from "drizzle-orm/pg-core";
-import { entries } from "./entries";
 import { profiles } from "./profiles";
 import { schema, timestamp } from "./utils";
 import { videos } from "./videos";
@@ -12,10 +11,7 @@ export const history = schema.table(
 		profilePk: integer()
 			.notNull()
 			.references(() => profiles.pk, { onDelete: "cascade" }),
-		entryPk: integer()
-			.notNull()
-			.references(() => entries.pk, { onDelete: "cascade" }),
-		videoPk: integer().references(() => videos.pk, { onDelete: "set null" }),
+		videoPk: integer().notNull().references(() => videos.pk, { onDelete: "cascade" }),
 		percent: integer().notNull().default(0),
 		time: integer().notNull().default(0),
 		playedDate: timestamp({ withTimezone: true, mode: "iso" })

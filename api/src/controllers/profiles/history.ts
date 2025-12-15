@@ -44,7 +44,23 @@ import {
 } from "../entries";
 import { getOrCreateProfile } from "./profile";
 
-export async function updateHistory(
+export async function updateProgress(userPk: number, progress: SeedHistory[]) {
+	return db.transaction(async (tx) => {
+		const hist = await updateHistory(tx, userPk, progress);
+		if (hist.created.length + hist.updated.length !== progress.length) {
+			tx.rollback();
+		}
+		// only return new and entries whose status has changed.
+		// we don't need to update the watchlist every 10s when watching a video.
+		await updateWatchlist(tx, userPk, [
+			...hist.created,
+			...hist.updated.filter((x) => x.percent >= 95),
+		]);
+		return { status: 201, inserted: hist.created.length };
+	});
+}
+
+async function updateHistory(
 	dbTx: Transaction,
 	userPk: number,
 	progress: SeedHistory[],
@@ -73,69 +89,76 @@ export async function updateHistory(
 			progress.filter((x) => !existing.includes(x.videoId)),
 		);
 
-		// TODO: only call update/insert if toUpdate/newEntries aren't empty
-		const updated = await tx
-			.update(history)
-			.set({
-				time: sql`hist.ts`,
-				percent: sql`hist.percent`,
-				playedDate: coalesce(sql`hist.played_date`, sql`now()`),
-			})
-			.from(sql`unnest(
-				${sqlarr(toUpdate.videoId)}::uuid[],
-				${sqlarr(toUpdate.time)}::integer[],
-				${sqlarr(toUpdate.percent)}::integer[],
-				${sqlarr(toUpdate.playedDate)}::timestamp[]
-			) as hist(video_id, ts, percent, played_date)`)
-			.innerJoin(videos, eq(videos.id, sql`hist.video_id`))
-			.where(and(eq(history.profilePk, userPk), eq(history.videoPk, videos.pk)))
-			.returning({
-				entryPk: history.entryPk,
-				percent: history.percent,
-				playedDate: history.playedDate,
-			});
+		const updated =
+			toUpdate === null
+				? []
+				: await tx
+						.update(history)
+						.set({
+							time: sql`hist.ts`,
+							percent: sql`hist.percent`,
+							playedDate: coalesce(sql`hist.played_date`, sql`now()`),
+						})
+						.from(sql`unnest(
+							${sqlarr(toUpdate.videoId)}::uuid[],
+							${sqlarr(toUpdate.time)}::integer[],
+							${sqlarr(toUpdate.percent)}::integer[],
+							${sqlarr(toUpdate.playedDate)}::timestamp[]
+						) as hist(video_id, ts, percent, played_date)`)
+						.innerJoin(videos, eq(videos.id, sql`hist.video_id`))
+						.where(
+							and(
+								eq(history.profilePk, userPk),
+								eq(history.videoPk, videos.pk),
+							),
+						)
+						.returning({
+							videoPk: history.videoPk,
+							percent: history.percent,
+							playedDate: history.playedDate,
+						});
 
-		const ret = await tx
-			.insert(history)
-			.select(
-				db
-					.select({
-						profilePk: sql`${userPk}`.as("profilePk"),
-						entryPk: entries.pk,
-						videoPk: videos.pk,
-						percent: sql`hist.percent`.as("percent"),
-						time: sql`hist.ts`.as("time"),
-						playedDate: coalesce(sql`hist.played_date`, sql`now()`).as(
-							"playedDate",
-						),
-					})
-					.from(sql`unnest(
-					${sqlarr(newEntries.videoId)}::uuid[],
-					${sqlarr(newEntries.time)}::integer[],
-					${sqlarr(newEntries.percent)}::integer[],
-					${sqlarr(newEntries.playedDate)}::timestamptz[]
-				) as hist(video_id, ts, percent, played_date)`)
-					.innerJoin(videos, eq(videos.id, sql`hist.videoId`))
-					.leftJoin(entryVideoJoin, eq(entryVideoJoin.videoPk, videos.pk))
-					.leftJoin(entries, eq(entries.pk, entryVideoJoin.entryPk)),
-			)
-			.returning({
-				entryPk: history.entryPk,
-				percent: history.percent,
-				playedDate: history.playedDate,
-			});
+		const created =
+			newEntries === null
+				? []
+				: await tx
+						.insert(history)
+						.select(
+							db
+								.select({
+									profilePk: sql`${userPk}`.as("profilePk"),
+									videoPk: videos.pk,
+									percent: sql`hist.percent`.as("percent"),
+									time: sql`hist.ts`.as("time"),
+									playedDate: coalesce(sql`hist.played_date`, sql`now()`).as(
+										"playedDate",
+									),
+								})
+								.from(sql`unnest(
+									${sqlarr(newEntries.videoId)}::uuid[],
+									${sqlarr(newEntries.time)}::integer[],
+									${sqlarr(newEntries.percent)}::integer[],
+									${sqlarr(newEntries.playedDate)}::timestamptz[]
+								) as hist(video_id, ts, percent, played_date)`)
+								.innerJoin(videos, eq(videos.id, sql`hist.video_id`)),
+						)
+						.returning({
+							videoPk: history.videoPk,
+							percent: history.percent,
+							playedDate: history.playedDate,
+						});
 
-		// only return new and entries whose status has changed.
-		// we don't need to update the watchlist every 10s when watching a video.
-		return [...ret, ...updated.filter((x) => x.percent >= 95)];
+		return { created, updated };
 	});
 }
 
-export async function updateWatchlist(
+async function updateWatchlist(
 	tx: Transaction,
 	userPk: number,
-	histArr: Awaited<ReturnType<typeof updateHistory>>,
+	histArr: { videoPk: number; percent: number; playedDate: string }[],
 ) {
+	if (histArr.length === 0) return;
+
 	const nextEntry = alias(entries, "next_entry");
 	const nextEntryQ = tx
 		.select({
@@ -163,10 +186,14 @@ export async function updateWatchlist(
 					db
 						.select()
 						.from(history)
+						.leftJoin(
+							entryVideoJoin,
+							eq(history.videoPk, entryVideoJoin.videoPk),
+						)
 						.where(
 							and(
 								eq(history.profilePk, userPk),
-								eq(history.entryPk, entries.pk),
+								eq(entryVideoJoin.entryPk, entries.pk),
 							),
 						),
 				),
@@ -178,7 +205,7 @@ export async function updateWatchlist(
 		.from(shows)
 		.where(eq(shows.pk, sql`excluded.show_pk`));
 
-	const hist = traverse(histArr);
+	const hist = traverse(histArr)!;
 	await tx
 		.insert(watchlist)
 		.select(
@@ -221,11 +248,15 @@ export async function updateWatchlist(
 					updatedAt: sql`now()`.as("updatedAt"),
 				})
 				.from(sql`unnest(
-					${hist.entryPk}::integer[],
-					${hist.percent}::integer[],
-					${hist.playedDate}::timestamptz[]
-				) as hist(entry_pk, percent, played_date)`)
-				.leftJoin(entries, eq(entries.pk, sql`hist.entry_pk`))
+					${sqlarr(hist.videoPk)}::integer[],
+					${sqlarr(hist.percent)}::integer[],
+					${sqlarr(hist.playedDate)}::timestamptz[]
+				) as hist(video_pk, percent, played_date)`)
+				.innerJoin(
+					entryVideoJoin,
+					eq(sql`hist.video_pk`, entryVideoJoin.videoPk),
+				)
+				.leftJoin(entries, eq(entries.pk, entryVideoJoin.entryPk))
 				.leftJoinLateral(nextEntryQ, sql`true`),
 		)
 		.onConflictDoUpdate({
@@ -261,17 +292,19 @@ export async function updateWatchlist(
 		});
 }
 
+// this one is different than the normal progressQ because we want duplicates
 const historyProgressQ: typeof entryProgressQ = db
 	.select({
 		percent: history.percent,
 		time: history.time,
-		entryPk: history.entryPk,
+		entryPk: entryVideoJoin.entryPk,
 		playedDate: history.playedDate,
 		videoId: videos.id,
 	})
 	.from(history)
-	.leftJoin(videos, eq(history.videoPk, videos.pk))
-	.leftJoin(profiles, eq(history.profilePk, profiles.pk))
+	.innerJoin(videos, eq(history.videoPk, videos.pk))
+	.innerJoin(entryVideoJoin, eq(videos.pk, entryVideoJoin.videoPk))
+	.innerJoin(profiles, eq(history.profilePk, profiles.pk))
 	.where(eq(profiles.id, sql.placeholder("userId")))
 	.as("progress");
 
