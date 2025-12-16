@@ -8,19 +8,13 @@ import {
 	lte,
 	ne,
 	sql,
+	TransactionRollbackError,
 } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
 import { auth, getUserInfo } from "~/auth";
 import { db, type Transaction } from "~/db";
-import {
-	entries,
-	entryVideoJoin,
-	history,
-	profiles,
-	shows,
-	videos,
-} from "~/db/schema";
+import { entries, history, profiles, shows, videos } from "~/db/schema";
 import { watchlist } from "~/db/schema/watchlist";
 import { coalesce, sqlarr } from "~/db/utils";
 import { Entry } from "~/models/entry";
@@ -30,6 +24,7 @@ import {
 	AcceptLanguage,
 	createPage,
 	Filter,
+	isUuid,
 	Page,
 	processLanguages,
 } from "~/models/utils";
@@ -45,19 +40,27 @@ import {
 import { getOrCreateProfile } from "./profile";
 
 export async function updateProgress(userPk: number, progress: SeedHistory[]) {
-	return db.transaction(async (tx) => {
-		const hist = await updateHistory(tx, userPk, progress);
-		if (hist.created.length + hist.updated.length !== progress.length) {
-			tx.rollback();
-		}
-		// only return new and entries whose status has changed.
-		// we don't need to update the watchlist every 10s when watching a video.
-		await updateWatchlist(tx, userPk, [
-			...hist.created,
-			...hist.updated.filter((x) => x.percent >= 95),
-		]);
-		return { status: 201, inserted: hist.created.length };
-	});
+	try {
+		return await db.transaction(async (tx) => {
+			const hist = await updateHistory(tx, userPk, progress);
+			if (hist.created.length + hist.updated.length !== progress.length) {
+				tx.rollback();
+			}
+			// only return new and entries whose status has changed.
+			// we don't need to update the watchlist every 10s when watching a video.
+			await updateWatchlist(tx, userPk, [
+				...hist.created,
+				...hist.updated.filter((x) => x.percent >= 95),
+			]);
+			return { status: 201, inserted: hist.created.length } as const;
+		});
+	} catch (e) {
+		if (!(e instanceof TransactionRollbackError)) throw e;
+		return {
+			status: 404,
+			message: "Invalid entry id/slug in progress array",
+		} as const;
+	}
 }
 
 async function updateHistory(
@@ -86,7 +89,9 @@ async function updateHistory(
 			progress.filter((x) => existing.includes(x.videoId)),
 		);
 		const newEntries = traverse(
-			progress.filter((x) => !existing.includes(x.videoId)),
+			progress
+				.filter((x) => !existing.includes(x.videoId))
+				.map((x) => ({ ...x, entryUseid: isUuid(x.entry) })),
 		);
 
 		const updated =
@@ -113,6 +118,7 @@ async function updateHistory(
 							),
 						)
 						.returning({
+							entryPk: history.entryPk,
 							videoPk: history.videoPk,
 							percent: history.percent,
 							playedDate: history.playedDate,
@@ -128,6 +134,7 @@ async function updateHistory(
 								.select({
 									profilePk: sql`${userPk}`.as("profilePk"),
 									videoPk: videos.pk,
+									entryPk: entries.pk,
 									percent: sql`hist.percent`.as("percent"),
 									time: sql`hist.ts`.as("time"),
 									playedDate: coalesce(sql`hist.played_date`, sql`now()`).as(
@@ -135,14 +142,26 @@ async function updateHistory(
 									),
 								})
 								.from(sql`unnest(
+									${sqlarr(newEntries.entry)}::text[],
+									${sqlarr(newEntries.entryUseid)}::boolean[],
 									${sqlarr(newEntries.videoId)}::uuid[],
 									${sqlarr(newEntries.time)}::integer[],
 									${sqlarr(newEntries.percent)}::integer[],
 									${sqlarr(newEntries.playedDate)}::timestamptz[]
-								) as hist(video_id, ts, percent, played_date)`)
-								.innerJoin(videos, eq(videos.id, sql`hist.video_id`)),
+								) as hist(entry, entry_use_id, video_id, ts, percent, played_date)`)
+								.innerJoin(
+									entries,
+									sql`
+										case
+											when hist.entry_use_id then ${entries.id} = hist.entry::uuid
+											else ${entries.slug} = hist.entry
+										end
+									`,
+								)
+								.leftJoin(videos, eq(videos.id, sql`hist.video_id`)),
 						)
 						.returning({
+							entryPk: history.entryPk,
 							videoPk: history.videoPk,
 							percent: history.percent,
 							playedDate: history.playedDate,
@@ -155,7 +174,11 @@ async function updateHistory(
 async function updateWatchlist(
 	tx: Transaction,
 	userPk: number,
-	histArr: { videoPk: number; percent: number; playedDate: string }[],
+	histArr: {
+		entryPk: number;
+		percent: number;
+		playedDate: string;
+	}[],
 ) {
 	if (histArr.length === 0) return;
 
@@ -186,14 +209,10 @@ async function updateWatchlist(
 					db
 						.select()
 						.from(history)
-						.leftJoin(
-							entryVideoJoin,
-							eq(history.videoPk, entryVideoJoin.videoPk),
-						)
 						.where(
 							and(
 								eq(history.profilePk, userPk),
-								eq(entryVideoJoin.entryPk, entries.pk),
+								eq(history.entryPk, entries.pk),
 							),
 						),
 				),
@@ -248,15 +267,11 @@ async function updateWatchlist(
 					updatedAt: sql`now()`.as("updatedAt"),
 				})
 				.from(sql`unnest(
-					${sqlarr(hist.videoPk)}::integer[],
+					${sqlarr(hist.entryPk)}::integer[],
 					${sqlarr(hist.percent)}::integer[],
 					${sqlarr(hist.playedDate)}::timestamptz[]
-				) as hist(video_pk, percent, played_date)`)
-				.innerJoin(
-					entryVideoJoin,
-					eq(sql`hist.video_pk`, entryVideoJoin.videoPk),
-				)
-				.leftJoin(entries, eq(entries.pk, entryVideoJoin.entryPk))
+				) as hist(entry_pk, percent, played_date)`)
+				.innerJoin(entries, eq(entries.pk, sql`hist.entry_pk`))
 				.leftJoinLateral(nextEntryQ, sql`true`),
 		)
 		.onConflictDoUpdate({
@@ -297,13 +312,12 @@ const historyProgressQ: typeof entryProgressQ = db
 	.select({
 		percent: history.percent,
 		time: history.time,
-		entryPk: entryVideoJoin.entryPk,
+		entryPk: history.entryPk,
 		playedDate: history.playedDate,
 		videoId: videos.id,
 	})
 	.from(history)
-	.innerJoin(videos, eq(history.videoPk, videos.pk))
-	.innerJoin(entryVideoJoin, eq(videos.pk, entryVideoJoin.videoPk))
+	.leftJoin(videos, eq(history.videoPk, videos.pk))
 	.innerJoin(profiles, eq(history.profilePk, profiles.pk))
 	.where(eq(profiles.id, sql.placeholder("userId")))
 	.as("progress");
@@ -437,11 +451,8 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 		async ({ body, jwt: { sub }, status }) => {
 			const profilePk = await getOrCreateProfile(sub);
 
-			return db.transaction(async (tx) => {
-				const hist = await updateHistory(tx, profilePk, body);
-				await updateWatchlist(tx, profilePk, hist);
-				return status(201, { status: 201, inserted: hist.length });
-			});
+			const ret = await updateProgress(profilePk, body);
+			return status(ret.status, ret);
 		},
 		{
 			detail: { description: "Bulk add entries/movies to your watch history." },
@@ -454,6 +465,10 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 						description: "The number of history entry inserted",
 					}),
 				}),
+				404: {
+					...KError,
+					description: "No entry found with the given id or slug.",
+				},
 				422: KError,
 			},
 		},

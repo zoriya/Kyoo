@@ -1,9 +1,8 @@
 import type { TObject, TString } from "@sinclair/typebox";
 import Elysia, { type TSchema, t } from "elysia";
 import { verifyJwt } from "./auth";
-import { updateHistory, updateWatchlist } from "./controllers/profiles/history";
+import { updateProgress } from "./controllers/profiles/history";
 import { getOrCreateProfile } from "./controllers/profiles/profile";
-import { db } from "./db";
 import { SeedHistory } from "./models/history";
 
 const actionMap = {
@@ -18,13 +17,10 @@ const actionMap = {
 		async message(ws, body) {
 			const profilePk = await getOrCreateProfile(ws.data.jwt.sub);
 
-			await db.transaction(async (tx) => {
-				const hist = await updateHistory(tx, profilePk, [
-					{ ...body, playedDate: null },
-				]);
-				await updateWatchlist(tx, profilePk, hist);
-			});
-			ws.send({ response: "ok" });
+			const ret = await updateProgress(profilePk, [
+				{ ...body, playedDate: null },
+			]);
+			ws.send(ret);
 		},
 	}),
 };

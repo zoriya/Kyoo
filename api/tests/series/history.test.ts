@@ -11,12 +11,7 @@ import {
 import { expectStatus } from "tests/utils";
 import { db } from "~/db";
 import { entries, shows, videos } from "~/db/schema";
-import {
-	bubble,
-	bubbleVideo,
-	madeInAbyss,
-	madeInAbyssVideo,
-} from "~/models/examples";
+import { bubble, madeInAbyss, madeInAbyssVideo } from "~/models/examples";
 
 beforeAll(async () => {
 	await db.delete(shows);
@@ -40,13 +35,15 @@ describe("Set & get history", () => {
 
 		const [r, b] = await addToHistory("me", [
 			{
+				entry: miaEntrySlug,
 				videoId: madeInAbyssVideo.id,
 				percent: 58,
 				time: 28 * 60 + 12,
 				playedDate: "2025-02-01",
 			},
 			{
-				videoId: bubbleVideo.id,
+				entry: bubble.slug,
+				videoId: null,
 				percent: 100,
 				time: 2 * 60,
 				playedDate: "2025-02-02",
@@ -73,6 +70,7 @@ describe("Set & get history", () => {
 	it("Create duplicated history entry", async () => {
 		const [r, b] = await addToHistory("me", [
 			{
+				entry: miaEntrySlug!,
 				videoId: madeInAbyssVideo.id,
 				percent: 100,
 				time: 38 * 60,

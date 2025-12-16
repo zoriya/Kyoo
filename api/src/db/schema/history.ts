@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import { check, index, integer } from "drizzle-orm/pg-core";
+import { entries } from "./entries";
 import { profiles } from "./profiles";
 import { schema, timestamp } from "./utils";
 import { videos } from "./videos";
@@ -11,7 +12,12 @@ export const history = schema.table(
 		profilePk: integer()
 			.notNull()
 			.references(() => profiles.pk, { onDelete: "cascade" }),
-		videoPk: integer().notNull().references(() => videos.pk, { onDelete: "cascade" }),
+		// we need to attach an history to an entry because we want to keep history
+		// when we delete a video file
+		entryPk: integer()
+			.notNull()
+			.references(() => entries.pk, { onDelete: "cascade" }),
+		videoPk: integer().references(() => videos.pk, { onDelete: "set null" }),
 		percent: integer().notNull().default(0),
 		time: integer().notNull().default(0),
 		playedDate: timestamp({ withTimezone: true, mode: "iso" })

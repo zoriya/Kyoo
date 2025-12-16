@@ -45,19 +45,18 @@ import { desc as description } from "~/models/utils/descriptions";
 import type { EmbeddedVideo } from "~/models/video";
 
 export const entryProgressQ = db
-	.selectDistinctOn([entryVideoJoin.entryPk], {
+	.selectDistinctOn([history.entryPk], {
 		percent: history.percent,
 		time: history.time,
-		entryPk: entryVideoJoin.entryPk,
+		entryPk: history.entryPk,
 		playedDate: history.playedDate,
 		videoId: videos.id,
 	})
 	.from(history)
-	.innerJoin(videos, eq(history.videoPk, videos.pk))
-	.innerJoin(entryVideoJoin, eq(videos.pk, entryVideoJoin.videoPk))
+	.leftJoin(videos, eq(history.videoPk, videos.pk))
 	.innerJoin(profiles, eq(history.profilePk, profiles.pk))
 	.where(eq(profiles.id, sql.placeholder("userId")))
-	.orderBy(entryVideoJoin.entryPk, desc(history.playedDate))
+	.orderBy(history.entryPk, desc(history.playedDate))
 	.as("progress");
 
 export const entryFilters: FilterDef = {

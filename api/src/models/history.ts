@@ -27,10 +27,12 @@ export const Progress = t.Object({
 });
 export type Progress = typeof Progress.static;
 
-export const SeedHistory = t.Object({
-	percent: Progress.properties.percent,
-	time: Progress.properties.time,
-	playedDate: Progress.properties.playedDate,
-	videoId: Progress.properties.videoId.anyOf[0],
-});
+export const SeedHistory = t.Intersect([
+	Progress,
+	t.Object({
+		entry: t.String({
+			description: "Id or slug of the entry/movie you watched",
+		}),
+	}),
+]);
 export type SeedHistory = typeof SeedHistory.static;
