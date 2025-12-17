@@ -12,6 +12,8 @@ export const history = schema.table(
 		profilePk: integer()
 			.notNull()
 			.references(() => profiles.pk, { onDelete: "cascade" }),
+		// we need to attach an history to an entry because we want to keep history
+		// when we delete a video file
 		entryPk: integer()
 			.notNull()
 			.references(() => entries.pk, { onDelete: "cascade" }),

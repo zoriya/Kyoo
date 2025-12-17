@@ -1,11 +1,22 @@
-import { and, count, eq, exists, gt, isNotNull, ne, sql } from "drizzle-orm";
+import {
+	and,
+	count,
+	eq,
+	exists,
+	gt,
+	isNotNull,
+	lte,
+	ne,
+	sql,
+	TransactionRollbackError,
+} from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
 import { auth, getUserInfo } from "~/auth";
-import { db } from "~/db";
+import { db, type Transaction } from "~/db";
 import { entries, history, profiles, shows, videos } from "~/db/schema";
 import { watchlist } from "~/db/schema/watchlist";
-import { coalesce, values } from "~/db/utils";
+import { coalesce, sqlarr } from "~/db/utils";
 import { Entry } from "~/models/entry";
 import { KError } from "~/models/error";
 import { SeedHistory } from "~/models/history";
@@ -19,6 +30,7 @@ import {
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import type { WatchlistStatus } from "~/models/watchlist";
+import { traverse } from "~/utils";
 import {
 	entryFilters,
 	entryProgressQ,
@@ -27,6 +39,275 @@ import {
 } from "../entries";
 import { getOrCreateProfile } from "./profile";
 
+export async function updateProgress(userPk: number, progress: SeedHistory[]) {
+	try {
+		return await db.transaction(async (tx) => {
+			const hist = await updateHistory(tx, userPk, progress);
+			if (hist.created.length + hist.updated.length !== progress.length) {
+				tx.rollback();
+			}
+			// only return new and entries whose status has changed.
+			// we don't need to update the watchlist every 10s when watching a video.
+			await updateWatchlist(tx, userPk, [
+				...hist.created,
+				...hist.updated.filter((x) => x.percent >= 95),
+			]);
+			return { status: 201, inserted: hist.created.length } as const;
+		});
+	} catch (e) {
+		if (!(e instanceof TransactionRollbackError)) throw e;
+		return {
+			status: 404,
+			message: "Invalid entry id/slug in progress array",
+		} as const;
+	}
+}
+
+async function updateHistory(
+	dbTx: Transaction,
+	userPk: number,
+	progress: SeedHistory[],
+) {
+	return dbTx.transaction(async (tx) => {
+		// `for("update", { of: history })` will put the `kyoo.history` instead
+		// of `history` in the sql and that triggers a sql error.
+		const existing = (
+			await tx
+				.select({ videoId: videos.id })
+				.from(history)
+				.for("update", { of: sql`history` as any })
+				.leftJoin(videos, eq(videos.pk, history.videoPk))
+				.where(
+					and(
+						eq(history.profilePk, userPk),
+						lte(sql`now() - ${history.playedDate}`, sql`interval '1 day'`),
+					),
+				)
+		).map((x) => x.videoId);
+
+		const toUpdate = traverse(
+			progress.filter((x) => existing.includes(x.videoId)),
+		);
+		const newEntries = traverse(
+			progress
+				.filter((x) => !existing.includes(x.videoId))
+				.map((x) => ({ ...x, entryUseid: isUuid(x.entry) })),
+		);
+
+		const updated =
+			toUpdate === null
+				? []
+				: await tx
+						.update(history)
+						.set({
+							time: sql`hist.ts`,
+							percent: sql`hist.percent`,
+							playedDate: coalesce(sql`hist.played_date`, sql`now()`),
+						})
+						.from(sql`unnest(
+							${sqlarr(toUpdate.videoId)}::uuid[],
+							${sqlarr(toUpdate.time)}::integer[],
+							${sqlarr(toUpdate.percent)}::integer[],
+							${sqlarr(toUpdate.playedDate)}::timestamp[]
+						) as hist(video_id, ts, percent, played_date)`)
+						.innerJoin(videos, eq(videos.id, sql`hist.video_id`))
+						.where(
+							and(
+								eq(history.profilePk, userPk),
+								eq(history.videoPk, videos.pk),
+							),
+						)
+						.returning({
+							entryPk: history.entryPk,
+							videoPk: history.videoPk,
+							percent: history.percent,
+							playedDate: history.playedDate,
+						});
+
+		const created =
+			newEntries === null
+				? []
+				: await tx
+						.insert(history)
+						.select(
+							db
+								.select({
+									profilePk: sql`${userPk}`.as("profilePk"),
+									videoPk: videos.pk,
+									entryPk: entries.pk,
+									percent: sql`hist.percent`.as("percent"),
+									time: sql`hist.ts`.as("time"),
+									playedDate: coalesce(sql`hist.played_date`, sql`now()`).as(
+										"playedDate",
+									),
+								})
+								.from(sql`unnest(
+									${sqlarr(newEntries.entry)}::text[],
+									${sqlarr(newEntries.entryUseid)}::boolean[],
+									${sqlarr(newEntries.videoId)}::uuid[],
+									${sqlarr(newEntries.time)}::integer[],
+									${sqlarr(newEntries.percent)}::integer[],
+									${sqlarr(newEntries.playedDate)}::timestamptz[]
+								) as hist(entry, entry_use_id, video_id, ts, percent, played_date)`)
+								.innerJoin(
+									entries,
+									sql`
+										case
+											when hist.entry_use_id then ${entries.id} = hist.entry::uuid
+											else ${entries.slug} = hist.entry
+										end
+									`,
+								)
+								.leftJoin(videos, eq(videos.id, sql`hist.video_id`)),
+						)
+						.returning({
+							entryPk: history.entryPk,
+							videoPk: history.videoPk,
+							percent: history.percent,
+							playedDate: history.playedDate,
+						});
+
+		return { created, updated };
+	});
+}
+
+async function updateWatchlist(
+	tx: Transaction,
+	userPk: number,
+	histArr: {
+		entryPk: number;
+		percent: number;
+		playedDate: string;
+	}[],
+) {
+	if (histArr.length === 0) return;
+
+	const nextEntry = alias(entries, "next_entry");
+	const nextEntryQ = tx
+		.select({
+			pk: nextEntry.pk,
+		})
+		.from(nextEntry)
+		.where(
+			and(
+				eq(nextEntry.showPk, entries.showPk),
+				ne(nextEntry.kind, "extra"),
+				gt(nextEntry.order, entries.order),
+			),
+		)
+		.orderBy(nextEntry.order)
+		.limit(1)
+		.as("nextEntryQ");
+
+	const seenCountQ = tx
+		.select({ c: count() })
+		.from(entries)
+		.where(
+			and(
+				eq(entries.showPk, sql`excluded.show_pk`),
+				exists(
+					db
+						.select()
+						.from(history)
+						.where(
+							and(
+								eq(history.profilePk, userPk),
+								eq(history.entryPk, entries.pk),
+							),
+						),
+				),
+			),
+		);
+
+	const showKindQ = tx
+		.select({ k: shows.kind })
+		.from(shows)
+		.where(eq(shows.pk, sql`excluded.show_pk`));
+
+	const hist = traverse(histArr)!;
+	await tx
+		.insert(watchlist)
+		.select(
+			db
+				.selectDistinctOn([entries.showPk], {
+					profilePk: sql`${userPk}`.as("profilePk"),
+					showPk: entries.showPk,
+					status: sql<WatchlistStatus>`
+						case
+							when
+								hist.percent >= 95
+								and ${nextEntryQ.pk} is null
+							then 'completed'::watchlist_status
+							else 'watching'::watchlist_status
+						end
+					`.as("status"),
+					seenCount: sql`
+						case
+							when ${entries.kind} = 'movie' then hist.percent
+							when hist.percent >= 95 then 1
+							else 0
+						end
+					`.as("seen_count"),
+					nextEntry: sql`
+						case
+							when hist.percent >= 95 then ${nextEntryQ.pk}
+							else ${entries.pk}
+						end
+					`.as("next_entry"),
+					score: sql`null`.as("score"),
+					startedAt: sql`hist.played_date`.as("startedAt"),
+					lastPlayedAt: sql`hist.played_date`.as("lastPlayedAt"),
+					completedAt: sql`
+						case
+							when ${nextEntryQ.pk} is null then hist.played_date
+							else null
+						end
+					`.as("completedAt"),
+					// see https://github.com/drizzle-team/drizzle-orm/issues/3608
+					updatedAt: sql`now()`.as("updatedAt"),
+				})
+				.from(sql`unnest(
+					${sqlarr(hist.entryPk)}::integer[],
+					${sqlarr(hist.percent)}::integer[],
+					${sqlarr(hist.playedDate)}::timestamptz[]
+				) as hist(entry_pk, percent, played_date)`)
+				.innerJoin(entries, eq(entries.pk, sql`hist.entry_pk`))
+				.leftJoinLateral(nextEntryQ, sql`true`),
+		)
+		.onConflictDoUpdate({
+			target: [watchlist.profilePk, watchlist.showPk],
+			set: {
+				status: sql`
+					case
+						when excluded.status = 'completed' then excluded.status
+						when
+							${watchlist.status} != 'completed'
+							and ${watchlist.status} != 'rewatching'
+						then excluded.status
+						else ${watchlist.status}
+					end
+				`,
+				seenCount: sql`
+					case
+						when ${showKindQ} = 'movie' then excluded.seen_count
+						else ${seenCountQ}
+					end`,
+				nextEntry: sql`
+					case
+						when ${watchlist.status} = 'completed' then null
+						else excluded.next_entry
+					end
+				`,
+				lastPlayedAt: sql`excluded.last_played_at`,
+				completedAt: coalesce(
+					watchlist.completedAt,
+					sql`excluded.completed_at`,
+				),
+			},
+		});
+}
+
+// this one is different than the normal progressQ because we want duplicates
 const historyProgressQ: typeof entryProgressQ = db
 	.select({
 		percent: history.percent,
@@ -37,7 +318,7 @@ const historyProgressQ: typeof entryProgressQ = db
 	})
 	.from(history)
 	.leftJoin(videos, eq(history.videoPk, videos.pk))
-	.leftJoin(profiles, eq(history.profilePk, profiles.pk))
+	.innerJoin(profiles, eq(history.profilePk, profiles.pk))
 	.where(eq(profiles.id, sql.placeholder("userId")))
 	.as("progress");
 
@@ -170,162 +451,8 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 		async ({ body, jwt: { sub }, status }) => {
 			const profilePk = await getOrCreateProfile(sub);
 
-			const hist = values(
-				body.map((x) => ({ ...x, entryUseId: isUuid(x.entry) })),
-				{
-					percent: "integer",
-					time: "integer",
-					playedDate: "timestamptz",
-					videoId: "uuid",
-				},
-			).as("hist");
-			const valEqEntries = sql`
-				case
-					when hist.entryUseId::boolean then ${entries.id} = hist.entry::uuid
-					else ${entries.slug} = hist.entry
-				end
-			`;
-
-			const rows = await db
-				.insert(history)
-				.select(
-					db
-						.select({
-							profilePk: sql`${profilePk}`.as("profilePk"),
-							entryPk: entries.pk,
-							videoPk: videos.pk,
-							percent: sql`hist.percent`.as("percent"),
-							time: sql`hist.time`.as("time"),
-							playedDate: sql`hist.playedDate`.as("playedDate"),
-						})
-						.from(hist)
-						.innerJoin(entries, valEqEntries)
-						.leftJoin(videos, eq(videos.id, sql`hist.videoId`)),
-				)
-				.returning({ pk: history.pk });
-
-			// automatically update watchlist with this new info
-
-			const nextEntry = alias(entries, "next_entry");
-			const nextEntryQ = db
-				.select({
-					pk: nextEntry.pk,
-				})
-				.from(nextEntry)
-				.where(
-					and(
-						eq(nextEntry.showPk, entries.showPk),
-						ne(nextEntry.kind, "extra"),
-						gt(nextEntry.order, entries.order),
-					),
-				)
-				.orderBy(nextEntry.order)
-				.limit(1)
-				.as("nextEntryQ");
-
-			const seenCountQ = db
-				.select({ c: count() })
-				.from(entries)
-				.where(
-					and(
-						eq(entries.showPk, sql`excluded.show_pk`),
-						exists(
-							db
-								.select()
-								.from(history)
-								.where(
-									and(
-										eq(history.profilePk, profilePk),
-										eq(history.entryPk, entries.pk),
-									),
-								),
-						),
-					),
-				);
-
-			const showKindQ = db
-				.select({ k: shows.kind })
-				.from(shows)
-				.where(eq(shows.pk, sql`excluded.show_pk`));
-
-			await db
-				.insert(watchlist)
-				.select(
-					db
-						.select({
-							profilePk: sql`${profilePk}`.as("profilePk"),
-							showPk: entries.showPk,
-							status: sql<WatchlistStatus>`
-								case
-									when
-										hist.percent >= 95
-										and ${nextEntryQ.pk} is null
-									then 'completed'::watchlist_status
-									else 'watching'::watchlist_status
-								end
-							`.as("status"),
-							seenCount: sql`
-								case
-									when ${entries.kind} = 'movie' then hist.percent
-									when hist.percent >= 95 then 1
-									else 0
-								end
-							`.as("seen_count"),
-							nextEntry: sql`
-								case
-									when hist.percent >= 95 then ${nextEntryQ.pk}
-									else ${entries.pk}
-								end
-							`.as("next_entry"),
-							score: sql`null`.as("score"),
-							startedAt: sql`hist.playedDate`.as("startedAt"),
-							lastPlayedAt: sql`hist.playedDate`.as("lastPlayedAt"),
-							completedAt: sql`
-								case
-									when ${nextEntryQ.pk} is null then hist.playedDate
-									else null
-								end
-							`.as("completedAt"),
-							// see https://github.com/drizzle-team/drizzle-orm/issues/3608
-							updatedAt: sql`now()`.as("updatedAt"),
-						})
-						.from(hist)
-						.leftJoin(entries, valEqEntries)
-						.leftJoinLateral(nextEntryQ, sql`true`),
-				)
-				.onConflictDoUpdate({
-					target: [watchlist.profilePk, watchlist.showPk],
-					set: {
-						status: sql`
-							case
-								when excluded.status = 'completed' then excluded.status
-								when
-									${watchlist.status} != 'completed'
-									and ${watchlist.status} != 'rewatching'
-								then excluded.status
-								else ${watchlist.status}
-							end
-						`,
-						seenCount: sql`
-							case
-								when ${showKindQ} = 'movie' then excluded.seen_count
-								else ${seenCountQ}
-							end`,
-						nextEntry: sql`
-							case
-								when ${watchlist.status} = 'completed' then null
-								else excluded.next_entry
-							end
-						`,
-						lastPlayedAt: sql`excluded.last_played_at`,
-						completedAt: coalesce(
-							watchlist.completedAt,
-							sql`excluded.completed_at`,
-						),
-					},
-				});
-
-			return status(201, { status: 201, inserted: rows.length });
+			const ret = await updateProgress(profilePk, body);
+			return status(ret.status, ret);
 		},
 		{
 			detail: { description: "Bulk add entries/movies to your watch history." },
@@ -338,6 +465,10 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 						description: "The number of history entry inserted",
 					}),
 				}),
+				404: {
+					...KError,
+					description: "No entry found with the given id or slug.",
+				},
 				422: KError,
 			},
 		},

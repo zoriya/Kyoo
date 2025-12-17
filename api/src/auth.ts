@@ -33,6 +33,17 @@ const Jwt = t.Object({
 type Jwt = typeof Jwt.static;
 const validator = TypeCompiler.Compile(Jwt);
 
+export async function verifyJwt(bearer: string) {
+	// @ts-expect-error ts can't understand that there's two overload idk why
+	const { payload } = await jwtVerify(bearer, jwtSecret ?? jwks, {
+		issuer: process.env.JWT_ISSUER,
+	});
+	const raw = validator.Decode(payload);
+	const jwt = Value.Default(Jwt, raw) as Prettify<Jwt & { settings: Settings }>;
+
+	return { jwt };
+}
+
 export const auth = new Elysia({ name: "auth" })
 	.guard({
 		headers: t.Object(
@@ -50,18 +61,8 @@ export const auth = new Elysia({ name: "auth" })
 				message: "No authorization header was found.",
 			});
 		}
-
 		try {
-			// @ts-expect-error ts can't understand that there's two overload idk why
-			const { payload } = await jwtVerify(bearer, jwtSecret ?? jwks, {
-				issuer: process.env.JWT_ISSUER,
-			});
-			const raw = validator.Decode(payload);
-			const jwt = Value.Default(Jwt, raw) as Prettify<
-				Jwt & { settings: Settings }
-			>;
-
-			return { jwt };
+			return await verifyJwt(bearer);
 		} catch (err) {
 			return status(403, {
 				status: 403,

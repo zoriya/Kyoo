@@ -28,11 +28,11 @@ export const Progress = t.Object({
 export type Progress = typeof Progress.static;
 
 export const SeedHistory = t.Intersect([
+	Progress,
 	t.Object({
 		entry: t.String({
 			description: "Id or slug of the entry/movie you watched",
 		}),
 	}),
-	Progress,
 ]);
 export type SeedHistory = typeof SeedHistory.static;
