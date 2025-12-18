@@ -33,7 +33,7 @@ const Jwt = t.Object({
 type Jwt = typeof Jwt.static;
 const validator = TypeCompiler.Compile(Jwt);
 
-export async function verifyJwt(bearer: string) {
+async function verifyJwt(bearer: string) {
 	// @ts-expect-error ts can't understand that there's two overload idk why
 	const { payload } = await jwtVerify(bearer, jwtSecret ?? jwks, {
 		issuer: process.env.JWT_ISSUER,

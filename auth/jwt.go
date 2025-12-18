@@ -44,9 +44,17 @@ func (h *Handler) CreateJwt(c echo.Context) error {
 	var token string
 
 	if auth == "" {
-		c, _ := c.Request().Cookie("X-Bearer")
-		if c != nil {
-			token = c.Value
+		cookie, _ := c.Request().Cookie("X-Bearer")
+		if cookie != nil {
+			token = cookie.Value
+		} else {
+			protocol, ok := c.Request().Header["Sec-Websocket-Protocol"]
+			if ok &&
+				len(protocol) == 2 &&
+				protocol[0] == "kyoo" &&
+				strings.HasPrefix(protocol[1], "Bearer") {
+				token = protocol[1][len("Bearer "):]
+			}
 		}
 	} else if strings.HasPrefix(auth, "Bearer ") {
 		token = auth[len("Bearer "):]
