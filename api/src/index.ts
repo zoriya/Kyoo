@@ -1,13 +1,13 @@
+import { opentelemetry } from "@elysiajs/opentelemetry";
 import { swagger } from "@elysiajs/swagger";
+import { getLogger } from "@logtape/logtape";
 import { Elysia } from "elysia";
-import { opentelemetry } from '@elysiajs/opentelemetry';
 import { handlers } from "./base";
 import { processImages } from "./controllers/seed/images";
 import { db, migrate } from "./db";
+import { setupLogging } from "./logtape";
+import { setupOtel } from "./otel";
 import { comment } from "./utils";
-import { setupOtel } from './otel';
-import { setupLogging } from './logtape';
-import { getLogger } from "@logtape/logtape";
 
 await setupLogging();
 setupOtel();
@@ -111,6 +111,6 @@ process.on("SIGTERM", () => {
 });
 
 logger.info("Api running at {hostname}:{port}", {
-  hostname: app.server?.hostname,
-  port: app.server?.port,
+	hostname: app.server?.hostname,
+	port: app.server?.port,
 });

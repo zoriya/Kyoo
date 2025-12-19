@@ -1,5 +1,6 @@
 import path from "node:path";
 import { getCurrentSpan, setAttributes } from "@elysiajs/opentelemetry";
+import { getLogger } from "@logtape/logtape";
 import { SpanStatusCode } from "@opentelemetry/api";
 import { encode } from "blurhash";
 import { and, eq, is, lt, type SQL, sql } from "drizzle-orm";
@@ -13,7 +14,6 @@ import { unnestValues } from "~/db/utils";
 import type { Image } from "~/models/utils";
 import { record } from "~/otel";
 import { getFile } from "~/utils";
-import { getLogger } from "@logtape/logtape";
 
 const logger = getLogger();
 
@@ -119,9 +119,12 @@ export const processImages = record(
 			try {
 				processAll();
 			} catch (e) {
-			logger.error("Failed to processs images. Aborting images downloading. error={error}", {
-				error: e,
-			});
+				logger.error(
+					"Failed to processs images. Aborting images downloading. error={error}",
+					{
+						error: e,
+					},
+				);
 			}
 		});
 		await client.query("listen kyoo_image");

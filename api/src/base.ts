@@ -1,3 +1,4 @@
+import { getLogger } from "@logtape/logtape";
 import { Elysia, t } from "elysia";
 import { auth } from "./auth";
 import { entriesH } from "./controllers/entries";
@@ -17,7 +18,6 @@ import { videosReadH, videosWriteH } from "./controllers/videos";
 import { db } from "./db";
 import type { KError } from "./models/error";
 import { appWs } from "./websockets";
-import { getLogger } from "@logtape/logtape";
 
 const logger = getLogger();
 

@@ -2,13 +2,13 @@ import os from "node:os";
 import path from "node:path";
 import tls, { type ConnectionOptions } from "node:tls";
 import { instrumentDrizzleClient } from "@kubiks/otel-drizzle";
+import { getLogger } from "@logtape/logtape";
 import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate as migrateDb } from "drizzle-orm/node-postgres/migrator";
 import type { PoolConfig } from "pg";
 import { record } from "~/otel";
 import * as schema from "./schema";
-import { getLogger } from "@logtape/logtape";
 
 const logger = getLogger();
 
@@ -117,7 +117,6 @@ async function parseSslConfig(): Promise<PoolConfig> {
 const postgresConfig = await parseSslConfig();
 // use this when using drizzle-kit since it can't parse await statements
 // const postgresConfig = config;
-
 
 export const db = drizzle({
 	schema,
