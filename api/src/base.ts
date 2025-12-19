@@ -16,7 +16,6 @@ import { studiosH } from "./controllers/studios";
 import { videosReadH, videosWriteH } from "./controllers/videos";
 import { db } from "./db";
 import type { KError } from "./models/error";
-import { otel } from "./otel";
 import { appWs } from "./websockets";
 
 export const base = new Elysia({ name: "base" })
@@ -92,7 +91,6 @@ export const base = new Elysia({ name: "base" })
 export const prefix = "/api";
 export const handlers = new Elysia({ prefix })
 	.use(base)
-	.use(otel)
 	.use(appWs)
 	.use(auth)
 	.guard(

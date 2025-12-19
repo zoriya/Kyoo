@@ -1,15 +1,24 @@
 import { swagger } from "@elysiajs/swagger";
-import Elysia from "elysia";
+import { Elysia } from "elysia";
+import { opentelemetry } from '@elysiajs/opentelemetry';
 import { handlers } from "./base";
 import { processImages } from "./controllers/seed/images";
 import { db, migrate } from "./db";
 import { comment } from "./utils";
+import { setupOtel } from './otel';
+import { setupLogging } from './logtape';
+import { getLogger } from "@logtape/logtape";
+
+await setupLogging();
+setupOtel();
+const logger = getLogger();
 
 await migrate();
 
 const disposeImages = await processImages();
 
 const app = new Elysia()
+	.use(opentelemetry())
 	.use(
 		swagger({
 			scalarConfig: {
@@ -89,12 +98,19 @@ const app = new Elysia()
 
 process.on("SIGTERM", () => {
 	app.stop().then(async () => {
-		console.log("Api stopping");
+		logger.info("API service state changed: {state}", {
+			state: "stopping",
+		});
 		disposeImages();
 		await db.$client.end();
-		console.log("Api stopped");
+		logger.info("API service state changed: {state}", {
+			state: "stopped",
+		});
 		process.exit(0);
 	});
 });
 
-console.log(`Api running at ${app.server?.hostname}:${app.server?.port}`);
+logger.info("Api running at {hostname}:{port}", {
+  hostname: app.server?.hostname,
+  port: app.server?.port,
+});

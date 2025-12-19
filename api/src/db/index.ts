@@ -8,6 +8,9 @@ import { migrate as migrateDb } from "drizzle-orm/node-postgres/migrator";
 import type { PoolConfig } from "pg";
 import { record } from "~/otel";
 import * as schema from "./schema";
+import { getLogger } from "@logtape/logtape";
+
+const logger = getLogger();
 
 const config: PoolConfig = {
 	connectionString: process.env.POSTGRES_URL,
@@ -17,7 +20,7 @@ const config: PoolConfig = {
 	user: process.env.PGUSER ?? "kyoo",
 	password: process.env.PGPASSWORD ?? "password",
 	options: process.env.PGOPTIONS,
-	application_name: process.env.PGAPPNAME ?? "kyoo",
+	application_name: process.env.PGAPPNAME ?? "kyoo.api",
 };
 
 async function parseSslConfig(): Promise<PoolConfig> {
@@ -115,19 +118,7 @@ const postgresConfig = await parseSslConfig();
 // use this when using drizzle-kit since it can't parse await statements
 // const postgresConfig = config;
 
-console.log("Connecting to postgres with config", {
-	...postgresConfig,
-	password: postgresConfig.password ? "<redacted>" : undefined,
-	ssl:
-		postgresConfig.ssl && typeof postgresConfig.ssl === "object"
-			? {
-					...postgresConfig.ssl,
-					key: "<redacted>",
-					cert: "<redacted>",
-					ca: "<redacted>",
-				}
-			: postgresConfig.ssl,
-});
+
 export const db = drizzle({
 	schema,
 	connection: postgresConfig,
@@ -139,6 +130,9 @@ instrumentDrizzleClient(db, {
 
 export const migrate = record("migrate", async () => {
 	const APP_SCHEMA = "kyoo";
+	logger.info("Connecting to postgres with {config}", {
+		config: postgresConfig,
+	});
 	try {
 		await db.execute(
 			sql.raw(`
@@ -155,7 +149,9 @@ export const migrate = record("migrate", async () => {
 		migrationsSchema: APP_SCHEMA,
 		migrationsFolder: "./drizzle",
 	});
-	console.log(`Database ${postgresConfig.database} migrated!`);
+	logger.info("Database {database} migrated", {
+		database: postgresConfig.database,
+	});
 });
 
 export type Transaction =
