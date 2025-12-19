@@ -318,11 +318,16 @@ const videoRelations = {
 			)
 			.as("t");
 
+		const { startedAt, lastPlayedAt, completedAt, ...watchlistCols } =
+			getColumns(watchlist);
 		const watchStatusQ = db
 			.select({
 				watchStatus: jsonbBuildObject<MovieWatchStatus & SerieWatchStatus>({
-					...getColumns(watchlist),
+					...watchlistCols,
 					percent: watchlist.seenCount,
+					startedAt: sql<string>`to_char(${startedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+					lastPlayedAt: sql<string>`to_char(${lastPlayedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+					completedAt: sql<string>`to_char(${completedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
 				}).as("watchStatus"),
 			})
 			.from(watchlist)

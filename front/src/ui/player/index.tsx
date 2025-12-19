@@ -20,6 +20,7 @@ import { Back } from "./controls/back";
 import { toggleFullscreen } from "./controls/misc";
 import { PlayModeContext } from "./controls/tracks-menu";
 import { useKeyboard } from "./keyboard";
+import { useProgressObserver } from "./progress-observer";
 import { enhanceSubtitles } from "./subtitles";
 
 const clientId = uuidv4();
@@ -112,6 +113,11 @@ export const Player = () => {
 		setSlug(data.next.video);
 		return true;
 	}, [data?.next, setSlug, setStart]);
+
+	useProgressObserver(
+		player,
+		data && entry ? { videoId: data.id, entryId: entry.id } : null,
+	);
 
 	useEvent(player, "onEnd", () => {
 		const hasNext = playNext();

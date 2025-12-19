@@ -60,6 +60,7 @@
 		"react-native-web": "^0.21.2",
 		"react-native-worklets": "0.5.1",
 		"react-tooltip": "^5.29.1",
+		"react-use-websocket": "^4.13.0",
 		"sweetalert2": "^11.26.3",
 		"tsx": "^4.20.6",
 		"uuid": "^13.0.0",

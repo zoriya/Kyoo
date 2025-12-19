@@ -3,6 +3,7 @@ pkgs.mkShell {
   packages = with pkgs; [
     bun
     biome
+    websocat
     # for psql to debug from the cli
     postgresql_18
     # to build libvips (for sharp)

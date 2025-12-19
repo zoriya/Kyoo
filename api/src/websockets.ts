@@ -1,18 +1,28 @@
 import type { TObject, TString } from "@sinclair/typebox";
 import Elysia, { type TSchema, t } from "elysia";
-import { verifyJwt } from "./auth";
+import { auth } from "./auth";
 import { updateProgress } from "./controllers/profiles/history";
 import { getOrCreateProfile } from "./controllers/profiles/profile";
-import { SeedHistory } from "./models/history";
 
 const actionMap = {
 	ping: handler({
 		message(ws) {
-			ws.send({ response: "pong" });
+			ws.send({ action: "ping", response: "pong" });
 		},
 	}),
 	watch: handler({
-		body: t.Omit(SeedHistory, ["playedDate"]),
+		body: t.Object({
+			percent: t.Integer({ minimum: 0, maximum: 100 }),
+			time: t.Integer({
+				minimum: 0,
+			}),
+			videoId: t.Nullable(
+				t.String({
+					format: "uuid",
+				}),
+			),
+			entry: t.String(),
+		}),
 		permissions: ["core.read"],
 		async message(ws, body) {
 			const profilePk = await getOrCreateProfile(ws.data.jwt.sub);
@@ -20,55 +30,12 @@ const actionMap = {
 			const ret = await updateProgress(profilePk, [
 				{ ...body, playedDate: null },
 			]);
-			ws.send(ret);
+			ws.send({ action: "watch", ...ret });
 		},
 	}),
 };
 
-const baseWs = new Elysia()
-	.guard({
-		headers: t.Object(
-			{
-				authorization: t.Optional(t.TemplateLiteral("Bearer ${string}")),
-				"Sec-WebSocket-Protocol": t.Optional(
-					t.Array(
-						t.Union([t.Literal("kyoo"), t.TemplateLiteral("Bearer ${string}")]),
-					),
-				),
-			},
-			{ additionalProperties: true },
-		),
-	})
-	.resolve(
-		async ({
-			headers: { authorization, "Sec-WebSocket-Protocol": wsProtocol },
-			status,
-		}) => {
-			const auth =
-				authorization ??
-				(wsProtocol?.length === 2 &&
-				wsProtocol[0] === "kyoo" &&
-				wsProtocol[1].startsWith("Bearer ")
-					? wsProtocol[1]
-					: null);
-			const bearer = auth?.slice(7);
-			if (!bearer) {
-				return status(403, {
-					status: 403,
-					message: "No authorization header was found.",
-				});
-			}
-			try {
-				return await verifyJwt(bearer);
-			} catch (err) {
-				return status(403, {
-					status: 403,
-					message: "Invalid jwt. Verification vailed",
-					details: err,
-				});
-			}
-		},
-	);
+const baseWs = new Elysia().use(auth);
 
 export const appWs = baseWs.ws("/ws", {
 	body: t.Union(
