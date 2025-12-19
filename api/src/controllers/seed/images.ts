@@ -13,6 +13,9 @@ import { unnestValues } from "~/db/utils";
 import type { Image } from "~/models/utils";
 import { record } from "~/otel";
 import { getFile } from "~/utils";
+import { getLogger } from "@logtape/logtape";
+
+const logger = getLogger();
 
 export const imageDir = process.env.IMAGES_PATH ?? "/images";
 export const defaultBlurhash = "000000";
@@ -116,10 +119,9 @@ export const processImages = record(
 			try {
 				processAll();
 			} catch (e) {
-				console.error(
-					"Failed to processs images. aborting images downloading",
-					e,
-				);
+			logger.error("Failed to processs images. Aborting images downloading. error={error}", {
+				error: e,
+			});
 			}
 		});
 		await client.query("listen kyoo_image");
@@ -167,7 +169,10 @@ const processOne = record("download", async () => {
 				span.recordException(err);
 				span.setStatus({ code: SpanStatusCode.ERROR });
 			}
-			console.error("Failed to download image", img.url, err);
+			logger.error("Failed to download image. imageurl={url}, error={error}", {
+				url: img.url,
+				error: err,
+			});
 			await tx
 				.update(mqueue)
 				.set({ attempt: sql`${mqueue.attempt}+1` })

@@ -134,6 +134,7 @@ export const migrate = record("migrate", async () => {
 		config: postgresConfig,
 	});
 	try {
+		logger.info("Setting up database");
 		await db.execute(
 			sql.raw(`
 				create schema if not exists ${APP_SCHEMA};
@@ -143,7 +144,9 @@ export const migrate = record("migrate", async () => {
 			`),
 		);
 	} catch (err: any) {
-		console.error("Error while updating pg_trgm", err.message);
+		logger.error("Setting up database failed: {error}", {
+			error: err.message,
+		});
 	}
 	await migrateDb(db, {
 		migrationsSchema: APP_SCHEMA,

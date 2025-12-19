@@ -17,6 +17,9 @@ import { videosReadH, videosWriteH } from "./controllers/videos";
 import { db } from "./db";
 import type { KError } from "./models/error";
 import { appWs } from "./websockets";
+import { getLogger } from "@logtape/logtape";
+
+const logger = getLogger();
 
 export const base = new Elysia({ name: "base" })
 	.onError(({ code, error }) => {
@@ -49,7 +52,10 @@ export const base = new Elysia({ name: "base" })
 		if (code === "NOT_FOUND") {
 			return error;
 		}
-		console.error(code, error);
+		logger.error("Elysia encountered an error. code={code} error={error}", {
+			code: code,
+			error: error,
+		});
 		return {
 			status: 500,
 			message: "Internal server error",
