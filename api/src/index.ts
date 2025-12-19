@@ -110,7 +110,7 @@ process.on("SIGTERM", () => {
 	});
 });
 
-logger.info("Api running at {hostname}:{port}", {
+logger.info("API service running at {hostname}:{port}", {
 	hostname: app.server?.hostname,
 	port: app.server?.port,
 });

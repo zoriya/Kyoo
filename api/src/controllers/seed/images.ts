@@ -120,7 +120,7 @@ export const processImages = record(
 				processAll();
 			} catch (e) {
 				logger.error(
-					"Failed to processs images. Aborting images downloading. error={error}",
+					"Failed to process images. Aborting images downloading. error={error}",
 					{
 						error: e,
 					},

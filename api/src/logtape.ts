@@ -23,7 +23,7 @@ export async function setupLogging() {
 				const minLevel = aliasMap[minLevelRaw] ?? minLevelRaw;
 				return withFilter(
 					redactByField(getConsoleSink(), {
-						fieldPatterns: [/password/i, /secret/i],
+						fieldPatterns: [/password/i, /secret/i, /apikey/i],
 						action: () => "[REDACTED]",
 					}),
 					getLevelFilter(parseLogLevel(minLevel)),
