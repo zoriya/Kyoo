@@ -3,7 +3,6 @@ import Elysia, { type TSchema, t } from "elysia";
 import { auth } from "./auth";
 import { updateProgress } from "./controllers/profiles/history";
 import { getOrCreateProfile } from "./controllers/profiles/profile";
-import { SeedHistory } from "./models/history";
 
 const actionMap = {
 	ping: handler({
@@ -12,7 +11,18 @@ const actionMap = {
 		},
 	}),
 	watch: handler({
-		body: t.Omit(SeedHistory, ["playedDate"]),
+		body: t.Object({
+			percent: t.Integer({ minimum: 0, maximum: 100 }),
+			time: t.Integer({
+				minimum: 0,
+			}),
+			videoId: t.Nullable(
+				t.String({
+					format: "uuid",
+				}),
+			),
+			entry: t.String(),
+		}),
 		permissions: ["core.read"],
 		async message(ws, body) {
 			const profilePk = await getOrCreateProfile(ws.data.jwt.sub);
