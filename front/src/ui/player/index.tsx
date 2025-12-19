@@ -20,8 +20,8 @@ import { Back } from "./controls/back";
 import { toggleFullscreen } from "./controls/misc";
 import { PlayModeContext } from "./controls/tracks-menu";
 import { useKeyboard } from "./keyboard";
-import { enhanceSubtitles } from "./subtitles";
 import { useProgressObserver } from "./progress-observer";
+import { enhanceSubtitles } from "./subtitles";
 
 const clientId = uuidv4();
 

@@ -50,50 +50,51 @@ export const Controls = ({
 				player={player}
 				forceShow={hover || menuOpenned}
 				{...css(StyleSheet.absoluteFillObject)}
-			/>
-			<Back
-				name={name}
-				{...css(
-					{
-						position: "absolute",
-						top: 0,
-						left: 0,
-						right: 0,
-						bg: (theme) => theme.darkOverlay,
-						paddingTop: insets.top,
-						paddingLeft: insets.left,
-						paddingRight: insets.right,
-					},
-					hoverControls,
+			>
+				<Back
+					name={name}
+					{...css(
+						{
+							position: "absolute",
+							top: 0,
+							left: 0,
+							right: 0,
+							bg: (theme) => theme.darkOverlay,
+							paddingTop: insets.top,
+							paddingLeft: insets.left,
+							paddingRight: insets.right,
+						},
+						hoverControls,
+					)}
+				/>
+				{isTouch && (
+					<MiddleControls player={player} previous={previous} next={next} />
 				)}
-			/>
-			{isTouch && (
-				<MiddleControls player={player} previous={previous} next={next} />
-			)}
-			<BottomControls
-				player={player}
-				name={subName}
-				poster={poster}
-				chapters={chapters}
-				previous={previous}
-				next={next}
-				setMenu={setMenu}
-				{...css(
-					{
-						// Fixed is used because firefox android make the hover disappear under the navigation bar in absolute
-						// position: Platform.OS === "web" ? ("fixed" as any) : "absolute",
-						position: "absolute",
-						bottom: 0,
-						left: 0,
-						right: 0,
-						bg: (theme) => theme.darkOverlay,
-						paddingLeft: insets.left,
-						paddingRight: insets.right,
-						paddingBottom: insets.bottom,
-					},
-					hoverControls,
-				)}
-			/>
+				<BottomControls
+					player={player}
+					name={subName}
+					poster={poster}
+					chapters={chapters}
+					previous={previous}
+					next={next}
+					setMenu={setMenu}
+					{...css(
+						{
+							// Fixed is used because firefox android make the hover disappear under the navigation bar in absolute
+							// position: Platform.OS === "web" ? ("fixed" as any) : "absolute",
+							position: "absolute",
+							bottom: 0,
+							left: 0,
+							right: 0,
+							bg: (theme) => theme.darkOverlay,
+							paddingLeft: insets.left,
+							paddingRight: insets.right,
+							paddingBottom: insets.bottom,
+						},
+						hoverControls,
+					)}
+				/>
+			</TouchControls>
 		</View>
 	);
 };
