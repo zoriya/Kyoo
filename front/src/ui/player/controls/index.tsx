@@ -13,6 +13,7 @@ import { TouchControls } from "./touch";
 
 export const Controls = ({
 	player,
+	showHref,
 	name,
 	poster,
 	subName,
@@ -21,6 +22,7 @@ export const Controls = ({
 	next,
 }: {
 	player: VideoPlayer;
+	showHref?: string;
 	name?: string;
 	poster?: KImage | null;
 	subName?: string;
@@ -52,6 +54,7 @@ export const Controls = ({
 				{...css(StyleSheet.absoluteFillObject)}
 			>
 				<Back
+					showHref={showHref}
 					name={name}
 					{...css(
 						{

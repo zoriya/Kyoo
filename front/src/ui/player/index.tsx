@@ -161,6 +161,7 @@ export const Player = () => {
 		return (
 			<>
 				<Back
+					showHref={data?.show?.href}
 					name={data?.show?.name ?? "Error"}
 					{...css({ position: "relative", bg: (theme) => theme.accent })}
 				/>
@@ -202,6 +203,7 @@ export const Player = () => {
 				<PlayModeContext.Provider value={playModeState}>
 					<Controls
 						player={player}
+						showHref={data?.show?.href}
 						name={data?.show?.name}
 						poster={data?.show?.poster}
 						subName={
