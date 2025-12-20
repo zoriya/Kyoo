@@ -7,6 +7,8 @@ import { OTLPLogExporter as OLTPLogExporterGRPC } from "@opentelemetry/exporter-
 import { OTLPLogExporter as OLTPLogExporterHTTPjson } from "@opentelemetry/exporter-logs-otlp-http";
 import { OTLPLogExporter as OLTPLogExporterHTTPprotobuf } from "@opentelemetry/exporter-logs-otlp-proto";
 import { OTLPMetricExporter as OLTPMetricsExporterGRPC } from "@opentelemetry/exporter-metrics-otlp-grpc";
+// does not currently have a shared 'base'.  Need to use from http package
+import type { OTLPMetricExporterBase } from "@opentelemetry/exporter-metrics-otlp-http";
 import { OTLPMetricExporter as OLTPMetricsExporterHTTPjson } from "@opentelemetry/exporter-metrics-otlp-http";
 import { OTLPMetricExporter as OLTPMetricsExporterHTTPprotobuf } from "@opentelemetry/exporter-metrics-otlp-proto";
 import { OTLPTraceExporter as OLTPTraceExporterGRPC } from "@opentelemetry/exporter-trace-otlp-grpc";
@@ -18,8 +20,6 @@ import {
 	BatchLogRecordProcessor,
 	LoggerProvider,
 } from "@opentelemetry/sdk-logs";
-// does not currently have a shared 'base'.  Need to use from http package
-import type { OTLPMetricExporterBase } from "@opentelemetry/exporter-metrics-otlp-http";
 import {
 	MeterProvider,
 	PeriodicExportingMetricReader,
