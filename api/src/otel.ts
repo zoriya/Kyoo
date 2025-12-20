@@ -24,6 +24,7 @@ import {
 	MeterProvider,
 	PeriodicExportingMetricReader,
 } from "@opentelemetry/sdk-metrics";
+import { SpanProcessor } from '@opentelemetry/sdk-trace-base';
 import type { SpanExporter } from "@opentelemetry/sdk-trace-base";
 import {
 	BatchSpanProcessor,
@@ -43,7 +44,36 @@ const resource = resourceFromAttributes({
 	[ATTR_TELEMETRY_SDK_VERSION]: SDK_INFO[ATTR_TELEMETRY_SDK_VERSION],
 });
 
+
 const logger = getLogger();
+
+class DropSelectOneProcessor implements SpanProcessor {
+  constructor(private next: SpanProcessor) {}
+
+  onStart() {}
+
+  onEnd(span) {
+		const stmt =
+			span.attributes['db.statement'];
+
+    if (
+      typeof stmt === 'string' &&
+      stmt.trim().toLowerCase() === 'select 1'
+    ) {
+      return; // drop span
+    }
+
+    this.next.onEnd(span);
+  }
+
+  shutdown() {
+    return this.next.shutdown();
+  }
+
+  forceFlush() {
+    return this.next.forceFlush();
+  }
+}
 
 export function setupOtel() {
 	logger.info("Configuring OTEL");
@@ -119,12 +149,14 @@ export function setupOtel() {
 		tp = new NodeTracerProvider({
 			resource,
 			spanProcessors: [
-				new BatchSpanProcessor(te, {
-					maxQueueSize: 100,
-					maxExportBatchSize: 10,
-					scheduledDelayMillis: 500,
-					exportTimeoutMillis: 30000,
-				}),
+				new DropSelectOneProcessor(
+					new BatchSpanProcessor(te, {
+						maxQueueSize: 100,
+						maxExportBatchSize: 10,
+						scheduledDelayMillis: 500,
+						exportTimeoutMillis: 30000,
+					}),
+				)
 			],
 		});
 	}
