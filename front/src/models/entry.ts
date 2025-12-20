@@ -33,6 +33,27 @@ const Base = z.object({
 		playedDate: zdate().nullable(),
 		videoId: z.string().nullable(),
 	}),
+	// Optional fields for API responses
+	serie: z
+		.object({
+			id: z.string(),
+			slug: z.string(),
+			name: z.string(),
+		})
+		.optional(),
+	watchStatus: z
+		.object({
+			status: z.enum([
+				"completed",
+				"watching",
+				"rewatching",
+				"dropped",
+				"planned",
+			]),
+			percent: z.number().int().gte(0).lte(100),
+		})
+		.nullable()
+		.optional(),
 });
 
 export const Episode = Base.extend({
