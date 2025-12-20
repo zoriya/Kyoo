@@ -47,18 +47,22 @@ const resource = resourceFromAttributes({
 
 const logger = getLogger();
 
-class DropSelectOneProcessor implements SpanProcessor {
+const DB_STATEMENT_DROP_LIST = new Set([
+  'select 1',
+]);
+
+class FilterSpanProcessor implements SpanProcessor {
   constructor(private next: SpanProcessor) {}
 
   onStart() {}
 
-  onEnd(span) {
-		const stmt =
-			span.attributes['db.statement'];
+	// return type is any
+  onEnd(span: any) {
+		const stmt = span.attributes['db.statement'];
 
     if (
       typeof stmt === 'string' &&
-      stmt.trim().toLowerCase() === 'select 1'
+			DB_STATEMENT_DROP_LIST.has(stmt.trim().toLowerCase())
     ) {
       return; // drop span
     }
@@ -146,10 +150,13 @@ export function setupOtel() {
 	}
 
 	if (te) {
+		logger.info("Skipping spans for the following database statements: {dropList}", {
+			dropList: Array.from(DB_STATEMENT_DROP_LIST),
+		});
 		tp = new NodeTracerProvider({
 			resource,
 			spanProcessors: [
-				new DropSelectOneProcessor(
+				new FilterSpanProcessor(
 					new BatchSpanProcessor(te, {
 						maxQueueSize: 100,
 						maxExportBatchSize: 10,
