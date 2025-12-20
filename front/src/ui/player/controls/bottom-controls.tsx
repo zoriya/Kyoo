@@ -140,7 +140,7 @@ const ControlButtons = ({
 							<IconButton
 								icon={SkipPrevious}
 								as={Link}
-								href={previous}
+								href={`/watch/${previous}`}
 								replace
 								{...tooltip(t("player.previous"), true)}
 								{...spacing}
@@ -151,7 +151,7 @@ const ControlButtons = ({
 							<IconButton
 								icon={SkipNext}
 								as={Link}
-								href={next}
+								href={`/watch/${next}`}
 								replace
 								{...tooltip(t("player.next"), true)}
 								{...spacing}
