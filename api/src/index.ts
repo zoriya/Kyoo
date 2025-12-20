@@ -1,5 +1,6 @@
 import { opentelemetry } from "@elysiajs/opentelemetry";
 import { swagger } from "@elysiajs/swagger";
+import { elysiaLogger } from "@logtape/elysia";
 import { getLogger } from "@logtape/logtape";
 import { Elysia } from "elysia";
 import { handlers } from "./base";
@@ -18,6 +19,11 @@ await migrate();
 const disposeImages = await processImages();
 
 const app = new Elysia()
+	.use(elysiaLogger(
+		{
+			skip: (ctx) => ctx.path === "/api/health",
+		}
+	))
 	.use(opentelemetry())
 	.use(
 		swagger({
