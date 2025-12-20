@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import type { ViewProps } from "react-native";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -13,6 +13,7 @@ import { TouchControls } from "./touch";
 
 export const Controls = ({
 	player,
+	showHref,
 	name,
 	poster,
 	subName,
@@ -21,6 +22,7 @@ export const Controls = ({
 	next,
 }: {
 	player: VideoPlayer;
+	showHref?: string;
 	name?: string;
 	poster?: KImage | null;
 	subName?: string;
@@ -33,7 +35,7 @@ export const Controls = ({
 	const isTouch = useIsTouch();
 
 	const [hover, setHover] = useState(false);
-	const [menuOpenned, setMenu] = useState(false);
+	const [menuOpened, setMenuOpened] = useState(false);
 
 	const hoverControls = {
 		onPointerEnter: (e) => {
@@ -44,14 +46,21 @@ export const Controls = ({
 		},
 	} satisfies ViewProps;
 
+	const setMenu = useCallback((val: boolean) => {
+		setMenuOpened(val);
+		// Disable hover since the menu overlay makes the pointer leave unreliable.
+		if (!val) setHover(false);
+	}, []);
+
 	return (
 		<View {...css(StyleSheet.absoluteFillObject)}>
 			<TouchControls
 				player={player}
-				forceShow={hover || menuOpenned}
+				forceShow={hover || menuOpened}
 				{...css(StyleSheet.absoluteFillObject)}
 			>
 				<Back
+					showHref={showHref}
 					name={name}
 					{...css(
 						{

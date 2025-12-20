@@ -11,7 +11,11 @@ import {
 	tooltip,
 } from "~/primitives";
 
-export const Back = ({ name, ...props }: { name?: string } & ViewProps) => {
+export const Back = ({
+	name,
+	showHref,
+	...props
+}: { showHref?: string; name?: string } & ViewProps) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 	const router = useRouter();
@@ -32,7 +36,10 @@ export const Back = ({ name, ...props }: { name?: string } & ViewProps) => {
 			<IconButton
 				icon={ArrowBack}
 				as={PressableFeedback}
-				onPress={router.back}
+				onPress={() => {
+					if (router.canGoBack()) router.back();
+					else if (showHref) router.navigate(showHref);
+				}}
 				{...tooltip(t("player.back"))}
 			/>
 			{name ? (
