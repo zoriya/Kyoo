@@ -18,7 +18,8 @@ import {
 	BatchLogRecordProcessor,
 	LoggerProvider,
 } from "@opentelemetry/sdk-logs";
-import type { ResourceMetrics } from "@opentelemetry/sdk-metrics";
+// does not currently have a shared 'base'.  Need to use from http package
+import type { OTLPMetricExporterBase } from "@opentelemetry/exporter-metrics-otlp-http";
 import {
 	MeterProvider,
 	PeriodicExportingMetricReader,
@@ -51,7 +52,7 @@ export function setupOtel() {
 	).toLowerCase();
 
 	let le: LogRecordExporter | null;
-	let me: ResourceMetrics | null;
+	let me: OTLPMetricExporterBase | null;
 	let te: SpanExporter | null;
 
 	switch (true) {
