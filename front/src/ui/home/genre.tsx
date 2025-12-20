@@ -18,21 +18,14 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-	type Genre,
-	type LibraryItem,
-	LibraryItemP,
-	type QueryIdentifier,
-	useInfiniteFetch,
-} from "@kyoo/models";
-import { H3, ts } from "@kyoo/primitives";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
-import { itemMap } from "../browse";
-import { ItemGrid } from "../browse/grid";
-import { InfiniteFetchList } from "../fetch-infinite";
+import { ItemGrid, itemMap } from "~/components/items";
+import type { Genre, Show } from "~/models";
+import { H3, ts } from "~/primitives";
+import { InfiniteFetch, type QueryIdentifier } from "~/query";
 
 export const Header = ({ title }: { title: string }) => {
 	const { css } = useYoshiki();
@@ -48,32 +41,19 @@ export const Header = ({ title }: { title: string }) => {
 			})}
 		>
 			<H3>{title}</H3>
-			{/* <View {...css({ flexDirection: "row" })}> */}
-			{/* 	<IconButton */}
-			{/* 		icon={ChevronLeft} */}
-			{/* 		// onPress={() => ref.current?.scrollTo({ x: 0, animated: true })} */}
-			{/* 	/> */}
-			{/* 	<IconButton */}
-			{/* 		icon={ChevronRight} */}
-			{/* 		// onPress={() => ref.current?.scrollTo({ x: 0, animated: true })} */}
-			{/* 	/> */}
-			{/* </View> */}
 		</View>
 	);
 };
 
 export const GenreGrid = ({ genre }: { genre: Genre }) => {
-	const query = useInfiniteFetch(GenreGrid.query(genre));
 	const displayEmpty = useRef(false);
 	const { t } = useTranslation();
 
 	return (
 		<>
-			{(displayEmpty.current || query.items?.length !== 0) && (
-				<Header title={t(`genres.${genre}`)} />
-			)}
-			<InfiniteFetchList
-				query={query}
+			<Header title={t(`genres.${genre}`)} />
+			<InfiniteFetch
+				query={GenreGrid.query(genre)}
 				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
 				placeholderCount={2}
 				empty={displayEmpty.current ? t("home.none") : undefined}
@@ -84,15 +64,15 @@ export const GenreGrid = ({ genre }: { genre: Genre }) => {
 	);
 };
 
-GenreGrid.query = (genre: Genre): QueryIdentifier<LibraryItem> => ({
-	parser: LibraryItemP,
+GenreGrid.query = (genre: Genre): QueryIdentifier<Show> => ({
+	parser: Show,
 	infinite: true,
-	path: ["items"],
+	path: ["api", "shows"],
 	params: {
-		fields: ["watchStatus", "episodesCount"],
+		fields: ["watchStatus"],
 		filter: `genres has ${genre}`,
-		sortBy: "random",
-		// Limit the inital numbers of items
+		sort: "random",
+		// Limit the initial numbers of items
 		limit: 10,
 	},
 });

@@ -18,12 +18,12 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { type News, NewsP, type QueryIdentifier, getDisplayDate } from "@kyoo/models";
 import { useTranslation } from "react-i18next";
 import { useYoshiki } from "yoshiki/native";
-import { ItemGrid } from "../browse/grid";
-import { EpisodeBox, episodeDisplayNumber } from "../../../../src/ui/details/episode";
-import { InfiniteFetch } from "../fetch-infinite";
+import { EntryBox, entryDisplayNumber } from "~/components/entries";
+import { ItemGrid } from "~/components/items";
+import type { Entry } from "~/models";
+import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { Header } from "./genre";
 
 export const NewsList = () => {
@@ -40,17 +40,16 @@ export const NewsList = () => {
 				getItemSize={(kind) => (kind === "episode" ? 2 : 1)}
 				empty={t("home.none")}
 				Render={({ item }) => {
-					if (item.kind === "episode") {
+					if (item.kind === "episode" || item.kind === "special") {
 						return (
-							<EpisodeBox
+							<EntryBox
 								slug={item.slug}
-								showSlug={item.show!.slug}
-								name={`${item.show!.name} ${episodeDisplayNumber(item)}`}
-								overview={item.name}
+								serieSlug={item.serie!.slug}
+								name={`${item.serie!.name} ${entryDisplayNumber(item)}`}
+								description={item.name}
 								thumbnail={item.thumbnail}
-								href={item.href}
-								watchedPercent={item.watchStatus?.watchedPercent || null}
-								watchedStatus={item.watchStatus?.status || null}
+								href={item.href ?? "#"}
+								watchedPercent={item.watchStatus?.percent || null}
 								// TODO: Move this into the ItemList (using getItemSize)
 								// @ts-expect-error This is a web only property
 								{...css({ gridColumnEnd: "span 2" })}
@@ -59,31 +58,31 @@ export const NewsList = () => {
 					}
 					return (
 						<ItemGrid
-							href={item.href}
+							href={item.href ?? "#"}
 							slug={item.slug}
+							kind={"movie"}
 							name={item.name!}
-							subtitle={getDisplayDate(item)}
-							poster={item.poster}
+							subtitle={item.airDate ? new Date(item.airDate).getFullYear().toString() : null}
+							poster={item.kind === "movie" ? item.poster : null}
 							watchStatus={item.watchStatus?.status || null}
-							watchPercent={item.watchStatus?.watchedPercent || null}
+							watchPercent={item.watchStatus?.percent || null}
 							unseenEpisodesCount={null}
-							type={"movie"}
 						/>
 					);
 				}}
-				Loader={({ index }) => (index % 2 ? <EpisodeBox.Loader /> : <ItemGrid.Loader />)}
+				Loader={({ index }) => (index % 2 ? <EntryBox.Loader /> : <ItemGrid.Loader />)}
 			/>
 		</>
 	);
 };
 
-NewsList.query = (): QueryIdentifier<News> => ({
-	parser: NewsP,
+NewsList.query = (): QueryIdentifier<Entry> => ({
+	parser: Entry,
 	infinite: true,
-	path: ["news"],
+	path: ["api", "news"],
 	params: {
 		// Limit the initial numbers of items
 		limit: 10,
-		fields: ["show", "watchStatus"],
+		fields: ["serie", "watchStatus"],
 	},
 });

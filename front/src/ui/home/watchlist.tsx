@@ -18,20 +18,16 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-	type QueryIdentifier,
-	type Watchlist,
-	WatchlistP,
-	getDisplayDate,
-	useAccount,
-} from "@kyoo/models";
-import { Button, P, ts } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
-import { ItemGrid } from "../browse/grid";
-import { EpisodeBox, episodeDisplayNumber } from "../../../../src/ui/details/episode";
-import { InfiniteFetch } from "../fetch-infinite";
+import { EntryBox, entryDisplayNumber } from "~/components/entries";
+import { ItemGrid } from "~/components/items";
+import type { Show } from "~/models";
+import { getDisplayDate } from "~/utils";
+import { Button, P, ts } from "~/primitives";
+import { useAccount } from "~/providers/account-context";
+import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { Header } from "./genre";
 
 export const WatchlistList = () => {
@@ -62,23 +58,22 @@ export const WatchlistList = () => {
 				query={WatchlistList.query()}
 				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
 				getItemType={(x, i) =>
-					(x?.kind === "show" && x.watchStatus?.nextEpisode) || (!x && i % 2) ? "episode" : "item"
+					(x?.kind === "serie" && x.nextEntry) || (!x && i % 2) ? "episode" : "item"
 				}
 				getItemSize={(kind) => (kind === "episode" ? 2 : 1)}
 				empty={t("home.none")}
 				Render={({ item }) => {
-					const episode = item.kind === "show" ? item.watchStatus?.nextEpisode : null;
-					if (episode) {
+					const entry = item.kind === "serie" ? item.nextEntry : null;
+					if (entry) {
 						return (
-							<EpisodeBox
-								slug={episode.slug}
-								showSlug={item.slug}
-								name={`${item.name} ${episodeDisplayNumber(episode)}`}
-								overview={episode.name}
-								thumbnail={episode.thumbnail ?? item.thumbnail}
-								href={episode.href}
-								watchedPercent={item.watchStatus?.watchedPercent || null}
-								watchedStatus={item.watchStatus?.status || null}
+							<EntryBox
+								slug={entry.slug}
+								serieSlug={item.slug}
+								name={`${item.name} ${entryDisplayNumber(entry)}`}
+								description={entry.name}
+								thumbnail={entry.thumbnail ?? item.thumbnail}
+								href={entry.href ?? "#"}
+								watchedPercent={entry.watchStatus?.percent || null}
 								// TODO: Move this into the ItemList (using getItemSize)
 								// @ts-expect-error This is a web only property
 								{...css({ gridColumnEnd: "span 2" })}
@@ -89,31 +84,29 @@ export const WatchlistList = () => {
 						<ItemGrid
 							href={item.href}
 							slug={item.slug}
+							kind={item.kind}
 							name={item.name!}
 							subtitle={getDisplayDate(item)}
 							poster={item.poster}
 							watchStatus={item.watchStatus?.status || null}
-							watchPercent={item.watchStatus?.watchedPercent || null}
-							unseenEpisodesCount={
-								(item.kind === "show" && item.watchStatus?.unseenEpisodesCount) || null
-							}
-							type={item.kind}
+							watchPercent={item.kind === "movie" && item.watchStatus ? item.watchStatus.percent : null}
+							unseenEpisodesCount={null}
 						/>
 					);
 				}}
-				Loader={({ index }) => (index % 2 ? <EpisodeBox.Loader /> : <ItemGrid.Loader />)}
+				Loader={({ index }) => (index % 2 ? <EntryBox.Loader /> : <ItemGrid.Loader />)}
 			/>
 		</>
 	);
 };
 
-WatchlistList.query = (): QueryIdentifier<Watchlist> => ({
-	parser: WatchlistP,
+WatchlistList.query = (): QueryIdentifier<Show> => ({
+	parser: Show,
 	infinite: true,
-	path: ["watchlist"],
+	path: ["api", "watchlist"],
 	params: {
-		// Limit the inital numbers of items
+		// Limit the initial numbers of items
 		limit: 10,
-		fields: ["watchStatus"],
+		fields: ["watchStatus", "nextEntry"],
 	},
 });

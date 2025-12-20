@@ -18,12 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Genre, type QueryPage, toQueryKey } from "@kyoo/models";
-import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { RefreshControl, ScrollView } from "react-native";
-import { Fetch } from "../fetch";
-import { DefaultLayout } from "../layout";
+import { Genre } from "~/models";
+import { Fetch, prefetch } from "~/query";
 import { GenreGrid } from "./genre";
 import { Header } from "./header";
 import { NewsList } from "./news";
@@ -31,9 +29,21 @@ import { Recommended } from "./recommended";
 import { VerticalRecommended } from "./vertical";
 import { WatchlistList } from "./watchlist";
 
-export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
-	const queryClient = useQueryClient();
+export async function loader() {
+	const randomItems = [...Object.values(Genre)];
+	await Promise.all([
+		prefetch(Header.query()),
+		prefetch(WatchlistList.query()),
+		prefetch(NewsList.query()),
+		...randomItems.filter((_, i) => i < 6).map((x) => prefetch(GenreGrid.query(x))),
+		prefetch(Recommended.query()),
+		prefetch(VerticalRecommended.query()),
+	]);
+}
+
+export const HomePage = () => {
 	const [refreshing, setRefreshing] = useState(false);
+	const randomItems = [...Object.values(Genre)];
 
 	return (
 		<ScrollView
@@ -41,34 +51,38 @@ export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
 				<RefreshControl
 					onRefresh={async () => {
 						setRefreshing(true);
-						await Promise.all(
-							HomePage.getFetchUrls!({}, randomItems).map((query) =>
-								queryClient.refetchQueries({
-									queryKey: toQueryKey(query),
-									type: "active",
-									exact: true,
-								}),
-							),
-						);
+						await loader();
 						setRefreshing(false);
 					}}
 					refreshing={refreshing}
 				/>
 			}
 		>
-			<Fetch query={Header.query()}>
-				{(x) => (
+			<Fetch
+				query={Header.query()}
+				Render={(x) => (
 					<Header
-						isLoading={x.isLoading as any}
+						isLoading={false}
 						name={x.name}
-						tagline={"tagline" in x ? x.tagline : null}
-						overview={x.overview}
+						tagline={x.kind !== "collection" && "tagline" in x ? x.tagline : null}
+						description={x.description}
 						thumbnail={x.thumbnail}
-						link={x.kind !== "collection" && !x.isLoading ? x.playHref : undefined}
+						link={x.kind !== "collection" ? x.playHref : null}
 						infoLink={x.href}
 					/>
 				)}
-			</Fetch>
+				Loader={() => (
+					<Header
+						isLoading={true}
+						name=""
+						tagline={null}
+						description={null}
+						thumbnail={null}
+						link={null}
+						infoLink="#"
+					/>
+				)}
+			/>
 			<WatchlistList />
 			<NewsList />
 			{randomItems
@@ -90,16 +104,3 @@ export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
 		</ScrollView>
 	);
 };
-
-HomePage.randomItems = [...Object.values(Genre)];
-
-HomePage.getLayout = { Layout: DefaultLayout, props: { transparent: true } };
-
-HomePage.getFetchUrls = (_, randomItems) => [
-	Header.query(),
-	WatchlistList.query(),
-	NewsList.query(),
-	...randomItems.filter((_, i) => i < 6).map((x) => GenreGrid.query(x)),
-	Recommended.query(),
-	VerticalRecommended.query(),
-];
