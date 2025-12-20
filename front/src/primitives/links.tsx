@@ -25,6 +25,8 @@ function useLinkTo({
 		href: href,
 		onPress: (e) => {
 			if (e?.defaultPrevented) return;
+			// prevent native navigation via href.
+			e.preventDefault();
 			if (href.startsWith("http")) {
 				Platform.OS === "web"
 					? window.open(href, "_blank")

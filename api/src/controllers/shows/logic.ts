@@ -312,7 +312,7 @@ export async function getShows({
 		)
 		.orderBy(
 			...(query
-				? [sql`word_similarity(${query}::text, ${transQ.name})`]
+				? [sql`word_similarity(${query}::text, ${transQ.name}) desc`]
 				: sortToSql(sort)),
 			shows.pk,
 		)

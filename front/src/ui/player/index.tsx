@@ -20,6 +20,7 @@ import { Back } from "./controls/back";
 import { toggleFullscreen } from "./controls/misc";
 import { PlayModeContext } from "./controls/tracks-menu";
 import { useKeyboard } from "./keyboard";
+import { useLanguagePreference } from "./language-preference";
 import { useProgressObserver } from "./progress-observer";
 import { enhanceSubtitles } from "./subtitles";
 
@@ -118,6 +119,7 @@ export const Player = () => {
 		player,
 		data && entry ? { videoId: data.id, entryId: entry.id } : null,
 	);
+	useLanguagePreference(player, slug);
 
 	useEvent(player, "onEnd", () => {
 		const hasNext = playNext();
@@ -161,6 +163,7 @@ export const Player = () => {
 		return (
 			<>
 				<Back
+					showHref={data?.show?.href}
 					name={data?.show?.name ?? "Error"}
 					{...css({ position: "relative", bg: (theme) => theme.accent })}
 				/>
@@ -202,6 +205,7 @@ export const Player = () => {
 				<PlayModeContext.Provider value={playModeState}>
 					<Controls
 						player={player}
+						showHref={data?.show?.href}
 						name={data?.show?.name}
 						poster={data?.show?.poster}
 						subName={
