@@ -152,7 +152,7 @@ export function setupOtel() {
 		logger.info(
 			"Skipping spans for the following database statements: {dropList}",
 			{
-				dropList: Array.from(DB_STATEMENT_DROP_LIST),
+				dropList: Array.from(DB_STATEMENT_DROP_LIST).sort(),
 			},
 		);
 		tp = new NodeTracerProvider({

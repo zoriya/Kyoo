@@ -17,7 +17,7 @@ const logger = getLogger();
 const PATH_IGNORE = new Set(["/api/health", "/api/ready"]);
 
 logger.info("Skipping request logging for these paths: {dropList}", {
-	dropList: Array.from(PATH_IGNORE),
+	dropList: Array.from(PATH_IGNORE).sort(),
 });
 
 await migrate();
