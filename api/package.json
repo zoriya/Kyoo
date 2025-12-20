@@ -37,7 +37,7 @@
 		"blurhash": "^2.0.5",
 		"drizzle-kit": "^0.31.5",
 		"drizzle-orm": "0.44.7",
-		"elysia": "^1.4.13",
+		"elysia": "^1.4.19",
 		"jose": "^6.1.0",
 		"node-addon-api": "^8.5.0",
 		"parjs": "^1.3.9",
