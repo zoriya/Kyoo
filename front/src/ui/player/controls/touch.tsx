@@ -4,6 +4,9 @@ import {
 	Platform,
 	Pressable,
 	type PressableProps,
+	StyleSheet,
+	View,
+	type ViewProps,
 } from "react-native";
 import { useEvent, type VideoPlayer } from "react-native-video";
 import { useYoshiki } from "yoshiki/native";
@@ -15,7 +18,10 @@ export const TouchControls = ({
 	children,
 	forceShow = false,
 	...props
-}: { player: VideoPlayer; forceShow?: boolean } & PressableProps) => {
+}: {
+	player: VideoPlayer;
+	forceShow?: boolean;
+} & ViewProps) => {
 	const { css } = useYoshiki();
 	const isTouch = useIsTouch();
 
@@ -51,42 +57,46 @@ export const TouchControls = ({
 	const playerWidth = useRef<number | null>(null);
 
 	return (
-		<DoublePressable
-			tabIndex={-1}
-			onPress={() => {
-				if (isTouch) {
-					show(!shouldShow);
-					return;
-				}
-				if (player.isPlaying) player.pause();
-				else player.play();
-			}}
-			onDoublePress={(e) => {
-				if (!isTouch) {
-					toggleFullscreen();
-					return;
-				}
+		<View {...props}>
+			<DoublePressable
+				tabIndex={-1}
+				onPress={() => {
+					if (isTouch) {
+						show(!shouldShow);
+						return;
+					}
+					if (player.isPlaying) player.pause();
+					else player.play();
+				}}
+				onDoublePress={(e) => {
+					if (!isTouch) {
+						toggleFullscreen();
+						return;
+					}
 
-				show();
-				if (Number.isNaN(player.duration) || !playerWidth.current) return;
+					show();
+					if (Number.isNaN(player.duration) || !playerWidth.current) return;
 
-				const x = e.nativeEvent.locationX ?? e.nativeEvent.pageX;
-				if (x < playerWidth.current * 0.33) player.seekBy(-10);
-				if (x > playerWidth.current * 0.66) player.seekBy(10);
-				// Do not reset press count, you can continue to seek by pressing again.
-				return true;
-			}}
-			onLayout={(e) => {
-				playerWidth.current = e.nativeEvent.layout.width;
-			}}
-			onPointerLeave={(e) => {
-				// instantly hide the controls when mouse leaves the view
-				if (e.nativeEvent.pointerType === "mouse") show(false);
-			}}
-			{...css({ cursor: (shouldShow ? "unset" : "none") as any }, props)}
-		>
+					const x = e.nativeEvent.locationX ?? e.nativeEvent.pageX;
+					if (x < playerWidth.current * 0.33) player.seekBy(-10);
+					if (x > playerWidth.current * 0.66) player.seekBy(10);
+					// Do not reset press count, you can continue to seek by pressing again.
+					return true;
+				}}
+				onLayout={(e) => {
+					playerWidth.current = e.nativeEvent.layout.width;
+				}}
+				onPointerLeave={(e) => {
+					// instantly hide the controls when mouse leaves the view
+					if (e.nativeEvent.pointerType === "mouse") show(false);
+				}}
+				{...css({
+					cursor: (shouldShow ? "unset" : "none") as any,
+					...StyleSheet.absoluteFillObject,
+				})}
+			/>
 			{shouldShow && children}
-		</DoublePressable>
+		</View>
 	);
 };
 
