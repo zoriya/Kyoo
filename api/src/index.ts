@@ -14,10 +14,7 @@ await setupLogging();
 setupOtel();
 const logger = getLogger();
 
-const PATH_IGNORE = new Set([
-  '/api/health',
-	'/api/ready',
-]);
+const PATH_IGNORE = new Set(["/api/health", "/api/ready"]);
 
 logger.info("Skipping request logging for these paths: {dropList}", {
 	dropList: Array.from(PATH_IGNORE),
@@ -28,11 +25,11 @@ await migrate();
 const disposeImages = await processImages();
 
 const app = new Elysia()
-	.use(elysiaLogger(
-		{
+	.use(
+		elysiaLogger({
 			skip: (ctx) => PATH_IGNORE.has(ctx.path),
-		}
-	))
+		}),
+	)
 	.use(opentelemetry())
 	.use(
 		swagger({

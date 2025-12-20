@@ -24,8 +24,10 @@ import {
 	MeterProvider,
 	PeriodicExportingMetricReader,
 } from "@opentelemetry/sdk-metrics";
-import { SpanProcessor } from '@opentelemetry/sdk-trace-base';
-import type { SpanExporter } from "@opentelemetry/sdk-trace-base";
+import type {
+	SpanExporter,
+	SpanProcessor,
+} from "@opentelemetry/sdk-trace-base";
 import {
 	BatchSpanProcessor,
 	NodeTracerProvider,
@@ -44,39 +46,36 @@ const resource = resourceFromAttributes({
 	[ATTR_TELEMETRY_SDK_VERSION]: SDK_INFO[ATTR_TELEMETRY_SDK_VERSION],
 });
 
-
 const logger = getLogger();
 
-const DB_STATEMENT_DROP_LIST = new Set([
-  'select 1',
-]);
+const DB_STATEMENT_DROP_LIST = new Set(["select 1"]);
 
 class FilterSpanProcessor implements SpanProcessor {
-  constructor(private next: SpanProcessor) {}
+	constructor(private next: SpanProcessor) {}
 
-  onStart() {}
+	onStart() {}
 
 	// return type is any
-  onEnd(span: any) {
-		const stmt = span.attributes['db.statement'];
+	onEnd(span: any) {
+		const stmt = span.attributes["db.statement"];
 
-    if (
-      typeof stmt === 'string' &&
+		if (
+			typeof stmt === "string" &&
 			DB_STATEMENT_DROP_LIST.has(stmt.trim().toLowerCase())
-    ) {
-      return; // drop span
-    }
+		) {
+			return; // drop span
+		}
 
-    this.next.onEnd(span);
-  }
+		this.next.onEnd(span);
+	}
 
-  shutdown() {
-    return this.next.shutdown();
-  }
+	shutdown() {
+		return this.next.shutdown();
+	}
 
-  forceFlush() {
-    return this.next.forceFlush();
-  }
+	forceFlush() {
+		return this.next.forceFlush();
+	}
 }
 
 export function setupOtel() {
@@ -150,9 +149,12 @@ export function setupOtel() {
 	}
 
 	if (te) {
-		logger.info("Skipping spans for the following database statements: {dropList}", {
-			dropList: Array.from(DB_STATEMENT_DROP_LIST),
-		});
+		logger.info(
+			"Skipping spans for the following database statements: {dropList}",
+			{
+				dropList: Array.from(DB_STATEMENT_DROP_LIST),
+			},
+		);
 		tp = new NodeTracerProvider({
 			resource,
 			spanProcessors: [
@@ -163,7 +165,7 @@ export function setupOtel() {
 						scheduledDelayMillis: 500,
 						exportTimeoutMillis: 30000,
 					}),
-				)
+				),
 			],
 		});
 	}
