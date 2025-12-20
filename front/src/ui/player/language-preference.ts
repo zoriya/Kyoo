@@ -43,7 +43,6 @@ export const useLanguagePreference = (player: VideoPlayer, slug: string) => {
 		forced: false,
 	});
 	useEffect(() => {
-		console.log("seraching for sub", sub.current, subtitles);
 		if (!subtitles || sub.current.idx === null) return;
 		let subRet = subtitles.findIndex(
 			sub.current.lang === "default"
