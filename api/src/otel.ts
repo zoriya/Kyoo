@@ -13,14 +13,17 @@ import { OTLPTraceExporter as OLTPTraceExporterGRPC } from "@opentelemetry/expor
 import { OTLPTraceExporter as OLTPTraceExporterHTTPjson } from "@opentelemetry/exporter-trace-otlp-http";
 import { OTLPTraceExporter as OLTPTraceExporterHTTPprotobuf } from "@opentelemetry/exporter-trace-otlp-proto";
 import { resourceFromAttributes } from "@opentelemetry/resources";
+import type { LogRecordExporter } from "@opentelemetry/sdk-logs";
 import {
 	BatchLogRecordProcessor,
 	LoggerProvider,
 } from "@opentelemetry/sdk-logs";
+import type { ResourceMetrics } from "@opentelemetry/sdk-metrics";
 import {
 	MeterProvider,
 	PeriodicExportingMetricReader,
 } from "@opentelemetry/sdk-metrics";
+import type { SpanExporter } from "@opentelemetry/sdk-trace-base";
 import {
 	BatchSpanProcessor,
 	NodeTracerProvider,
@@ -47,9 +50,9 @@ export function setupOtel() {
 		process.env.OTEL_EXPORTER_OTLP_PROTOCOL || ""
 	).toLowerCase();
 
-	let le: any;
-	let me: any;
-	let te: any;
+	let le: LogRecordExporter | null;
+	let me: ResourceMetrics | null;
+	let te: SpanExporter | null;
 
 	switch (true) {
 		case !process.env.OTEL_EXPORTER_OTLP_ENDPOINT:
