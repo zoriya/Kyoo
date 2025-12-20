@@ -116,7 +116,7 @@ export async function getStudios({
 		)
 		.orderBy(
 			...(query
-				? [sql`word_similarity(${query}::text, ${transQ.name})`]
+				? [sql`word_similarity(${query}::text, ${transQ.name}) desc`]
 				: sortToSql(sort)),
 			studios.pk,
 		)
