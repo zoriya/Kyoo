@@ -18,45 +18,45 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { type KyooImage, type LibraryItem, LibraryItemP, type QueryIdentifier } from "@kyoo/models";
+import Info from "@material-symbols/svg-400/rounded/info.svg";
+import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
+import { useTranslation } from "react-i18next";
+import { View } from "react-native";
+import { percent, rem, useYoshiki } from "yoshiki/native";
+import type { KImage, Show } from "~/models";
 import {
 	GradientImageBackground,
 	H1,
 	H2,
 	IconButton,
 	IconFab,
-	ImageBackground,
 	Link,
 	P,
 	Skeleton,
 	tooltip,
 	ts,
-} from "@kyoo/primitives";
-import Info from "@material-symbols/svg-400/rounded/info.svg";
-import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
-import { useTranslation } from "react-i18next";
-import { View } from "react-native";
-import { percent, rem, useYoshiki } from "yoshiki/native";
-import { Header as DetailsHeader } from "../../../../src/ui/details/header";
-import type { WithLoading } from "../fetch";
+} from "~/primitives";
+import { type QueryIdentifier } from "~/query";
+import { Header as DetailsHeader } from "../details/header";
 
 export const Header = ({
 	isLoading,
 	name,
 	thumbnail,
-	overview,
+	description,
 	tagline,
 	link,
 	infoLink,
 	...props
-}: WithLoading<{
+}: {
+	isLoading?: boolean;
 	name: string;
-	thumbnail: KyooImage | null;
-	overview: string | null;
+	thumbnail: KImage | null;
+	description: string | null;
 	tagline: string | null;
 	link: string | null;
 	infoLink: string;
-}>) => {
+}) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 
@@ -105,7 +105,7 @@ export const Header = ({
 				<Skeleton lines={4} {...css({ marginTop: ts(1) })}>
 					{isLoading || (
 						<P numberOfLines={4} {...css({ display: { xs: "none", md: "flex" } })}>
-							{overview}
+							{description}
 						</P>
 					)}
 				</Skeleton>
@@ -114,10 +114,10 @@ export const Header = ({
 	);
 };
 
-Header.query = (): QueryIdentifier<LibraryItem> => ({
-	parser: LibraryItemP,
-	path: ["items", "random"],
+Header.query = (): QueryIdentifier<Show> => ({
+	parser: Show,
+	path: ["api", "shows", "random"],
 	params: {
-		fields: ["firstEpisode"],
+		fields: ["firstEntry"],
 	},
 });
