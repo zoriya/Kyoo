@@ -105,7 +105,7 @@ async function getStaffRoles({
 		)
 		.orderBy(
 			...(query
-				? [sql`word_similarity(${query}::text, ${staff.name})`]
+				? [sql`word_similarity(${query}::text, ${staff.name}) desc`]
 				: sortToSql(sort)),
 			staff.pk,
 		)
@@ -264,7 +264,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 				)
 				.orderBy(
 					...(query
-						? [sql`word_similarity(${query}::text, ${transQ.name})`]
+						? [sql`word_similarity(${query}::text, ${transQ.name}) desc`]
 						: sortToSql(sort)),
 					roles.showPk,
 				)
@@ -332,7 +332,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 				)
 				.orderBy(
 					...(query
-						? [sql`word_similarity(${query}::text, ${staff.name})`]
+						? [sql`word_similarity(${query}::text, ${staff.name}) desc`]
 						: sortToSql(sort)),
 					staff.pk,
 				)

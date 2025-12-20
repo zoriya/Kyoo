@@ -117,7 +117,7 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 				)
 				.orderBy(
 					...(query
-						? [sql`word_similarity(${query}::text, ${transQ.name})`]
+						? [sql`word_similarity(${query}::text, ${transQ.name}) desc`]
 						: sortToSql(sort)),
 					entries.pk,
 				)
