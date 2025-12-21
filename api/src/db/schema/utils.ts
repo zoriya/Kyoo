@@ -31,6 +31,7 @@ export const timestamp = customType<{
 		return `timestamp${precision}${config?.withTimezone ? " with time zone" : ""}`;
 	},
 	fromDriver(value: string): string {
+		if (!value) return value;
 		// postgres format: 2025-06-22 16:13:37.489301+00
 		// what we want:    2025-06-22T16:13:37Z
 		return `${value.substring(0, 10)}T${value.substring(11, 19)}Z`;

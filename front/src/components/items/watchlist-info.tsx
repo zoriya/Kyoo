@@ -46,7 +46,7 @@ export const WatchListInfo = ({
 	const { t } = useTranslation();
 
 	const mutation = useMutation({
-		path: [kind, slug, "watchStatus"],
+		path: ["api", `${kind}s`, slug, "watchstatus"],
 		compute: (newStatus: WatchStatus | null) => ({
 			method: newStatus ? "POST" : "DELETE",
 			body: newStatus ? { status: newStatus } : undefined,
