@@ -123,7 +123,6 @@ export const dbRaw = drizzle({
 	connection: postgresConfig,
 	casing: "snake_case",
 });
-;
 
 export const db = drizzle({
 	schema,
