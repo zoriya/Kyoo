@@ -1,3 +1,5 @@
+import { opentelemetry } from "@elysiajs/opentelemetry";
+import { elysiaLogger } from "@logtape/elysia";
 import { getLogger } from "@logtape/logtape";
 import { Elysia, t } from "elysia";
 import { auth } from "./auth";
@@ -97,6 +99,8 @@ export const base = new Elysia({ name: "base" })
 export const prefix = "/api";
 export const handlers = new Elysia({ prefix })
 	.use(base)
+	.use(elysiaLogger())
+	.use(opentelemetry())
 	.use(appWs)
 	.use(auth)
 	.guard(
