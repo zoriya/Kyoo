@@ -1,10 +1,10 @@
 import { beforeAll, describe, expect, it } from "bun:test";
-import { and, eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { createMovie, createSerie } from "tests/helpers";
 import { expectStatus } from "tests/utils";
 import { defaultBlurhash, processImages } from "~/controllers/seed/images";
 import { db } from "~/db";
-import { mqueue, shows, staff, studios, videos } from "~/db/schema";
+import { images, shows, staff, studios, videos } from "~/db/schema";
 import { dune, madeInAbyss } from "~/models/examples";
 
 describe("images", () => {
@@ -13,11 +13,10 @@ describe("images", () => {
 		await db.delete(studios);
 		await db.delete(staff);
 		await db.delete(videos);
-		await db.delete(mqueue);
+		await db.delete(images);
 	});
 
 	it("Create a serie download images", async () => {
-		await db.delete(mqueue);
 		await createSerie(madeInAbyss);
 		const release = await processImages(true);
 		// remove notifications to prevent other images to be downloaded (do not curl 20000 images for nothing)
@@ -32,7 +31,6 @@ describe("images", () => {
 	});
 
 	it("Download 404 image", async () => {
-		await db.delete(mqueue);
 		const url404 = "https://mockhttp.org/status/404";
 		const [ret, body] = await createMovie({
 			...dune,
@@ -52,11 +50,8 @@ describe("images", () => {
 		// remove notifications to prevent other images to be downloaded (do not curl 20000 images for nothing)
 		release();
 
-		const failed = await db.query.mqueue.findFirst({
-			where: and(
-				eq(mqueue.kind, "image"),
-				eq(sql`${mqueue.message}->>'url'`, url404),
-			),
+		const failed = await db.query.images.findFirst({
+			where: eq(images.url, url404),
 		});
 		expect(failed!.attempt).toBe(5);
 	});
