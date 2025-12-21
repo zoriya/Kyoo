@@ -110,7 +110,7 @@ export const showSort = Sort(
 	},
 );
 
-const showRelations = {
+export const showRelations = {
 	translations: () => {
 		const { pk, language, ...trans } = getColumns(showTranslations);
 		return db
