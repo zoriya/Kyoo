@@ -118,6 +118,13 @@ const postgresConfig = await parseSslConfig();
 // use this when using drizzle-kit since it can't parse await statements
 // const postgresConfig = config;
 
+export const dbRaw = drizzle({
+	schema,
+	connection: postgresConfig,
+	casing: "snake_case",
+});
+;
+
 export const db = drizzle({
 	schema,
 	connection: postgresConfig,

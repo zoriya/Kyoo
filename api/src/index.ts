@@ -1,3 +1,4 @@
+import { opentelemetry } from "@elysiajs/opentelemetry";
 import { swagger } from "@elysiajs/swagger";
 import { getLogger } from "@logtape/logtape";
 import { Elysia } from "elysia";
@@ -23,6 +24,7 @@ await migrate();
 const disposeImages = await processImages();
 
 const app = new Elysia()
+	.use(opentelemetry())
 	.use(
 		swagger({
 			scalarConfig: {
