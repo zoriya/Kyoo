@@ -21,8 +21,13 @@ export const useWebsockets = ({
 	});
 
 	useEffect(() => {
-		console.log(ret.readyState);
-	}, [ret.readyState]);
+		console.log(
+			"websocket connected to:",
+			`${apiUrl}/api/ws`,
+			"status:",
+			ret.readyState,
+		);
+	}, [apiUrl, ret.readyState]);
 
 	return ret;
 };

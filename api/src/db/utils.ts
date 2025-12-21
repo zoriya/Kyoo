@@ -79,15 +79,15 @@ export function sqlarr(array: unknown[]): string {
 		return str.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
 	}
 
+	// we treat arrays as object to have them as jsonb arrays instead of pg arrays.
+	// nested arrays doesn't work well with unnest anyways.
 	return `{${array
 		.map((item) =>
 			item === "null" || item === null || item === undefined
 				? "null"
-				: Array.isArray(item)
-					? sqlarr(item)
-					: typeof item === "object"
-						? `"${escapeStr(JSON.stringify(item))}"`
-						: `"${escapeStr(item.toString())}"`,
+				: typeof item === "object"
+					? `"${escapeStr(JSON.stringify(item))}"`
+					: `"${escapeStr(item.toString())}"`,
 		)
 		.join(", ")}}`;
 }
