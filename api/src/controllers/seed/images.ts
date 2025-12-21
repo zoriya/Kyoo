@@ -209,18 +209,15 @@ const processOne = record("download", async () => {
 				url: img.url,
 				error: err,
 			});
-			await tx
-				.update(mqueue)
-				.set({ attempt: sql`${mqueue.attempt}+1` })
-				.where(eq(mqueue.id, item.id));
-			console.error("Failed to download image", img.url, err);
 			try {
 				await tx
 					.update(images)
 					.set({ attempt: sql`${images.attempt}+1` })
 					.where(eq(images.pk, img.pk));
 			} catch (e) {
-				console.error("Failed to mark download as failed", e);
+				logger.error("Failed to mark download as failed. error={error}", {
+					error: e,
+				});
 			}
 		}
 		return true;
