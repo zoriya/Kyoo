@@ -1,33 +1,14 @@
-/*
- * Kyoo - A portable and vast media library solution.
- * Copyright (c) Kyoo.
- *
- * See AUTHORS.md and LICENSE file in the project root for full license information.
- *
- * Kyoo is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Kyoo is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
- */
-
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 import { EntryBox, entryDisplayNumber } from "~/components/entries";
 import { ItemGrid } from "~/components/items";
-import type { Show } from "~/models";
-import { getDisplayDate } from "~/utils";
-import { Button, P, ts } from "~/primitives";
+import { Show } from "~/models";
+import { Button, Link, P, ts } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { InfiniteFetch, type QueryIdentifier } from "~/query";
+import { getDisplayDate } from "~/utils";
+import { EmptyView } from "../errors";
 import { Header } from "./genre";
 
 export const WatchlistList = () => {
@@ -42,8 +23,9 @@ export const WatchlistList = () => {
 				<View {...css({ justifyContent: "center", alignItems: "center" })}>
 					<P>{t("home.watchlistLogin")}</P>
 					<Button
-						text={t("login.login")}
+						as={Link}
 						href={"/login"}
+						text={t("login.login")}
 						{...css({ minWidth: ts(24), margin: ts(2) })}
 					/>
 				</View>
@@ -58,10 +40,12 @@ export const WatchlistList = () => {
 				query={WatchlistList.query()}
 				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
 				getItemType={(x, i) =>
-					(x?.kind === "serie" && x.nextEntry) || (!x && i % 2) ? "episode" : "item"
+					(x?.kind === "serie" && x.nextEntry) || (!x && i % 2)
+						? "episode"
+						: "item"
 				}
-				getItemSize={(kind) => (kind === "episode" ? 2 : 1)}
-				empty={t("home.none")}
+				getItemSizeMult={(_, __, kind) => (kind === "episode" ? 2 : 1)}
+				Empty={<EmptyView message={t("home.none")} />}
 				Render={({ item }) => {
 					const entry = item.kind === "serie" ? item.nextEntry : null;
 					if (entry) {
@@ -74,9 +58,6 @@ export const WatchlistList = () => {
 								thumbnail={entry.thumbnail ?? item.thumbnail}
 								href={entry.href ?? "#"}
 								watchedPercent={entry.watchStatus?.percent || null}
-								// TODO: Move this into the ItemList (using getItemSize)
-								// @ts-expect-error This is a web only property
-								{...css({ gridColumnEnd: "span 2" })}
 							/>
 						);
 					}
@@ -88,13 +69,23 @@ export const WatchlistList = () => {
 							name={item.name!}
 							subtitle={getDisplayDate(item)}
 							poster={item.poster}
-							watchStatus={item.watchStatus?.status || null}
-							watchPercent={item.kind === "movie" && item.watchStatus ? item.watchStatus.percent : null}
+							watchStatus={
+								item.kind !== "collection"
+									? (item.watchStatus?.status ?? null)
+									: null
+							}
+							watchPercent={
+								item.kind === "movie" && item.watchStatus
+									? item.watchStatus.percent
+									: null
+							}
 							unseenEpisodesCount={null}
 						/>
 					);
 				}}
-				Loader={({ index }) => (index % 2 ? <EntryBox.Loader /> : <ItemGrid.Loader />)}
+				Loader={({ index }) =>
+					index % 2 ? <EntryBox.Loader /> : <ItemGrid.Loader />
+				}
 			/>
 		</>
 	);
@@ -103,10 +94,9 @@ export const WatchlistList = () => {
 WatchlistList.query = (): QueryIdentifier<Show> => ({
 	parser: Show,
 	infinite: true,
-	path: ["api", "watchlist"],
+	path: ["api", "profiles", "me", "watchlist"],
 	params: {
-		// Limit the initial numbers of items
 		limit: 10,
-		fields: ["watchStatus", "nextEntry"],
+		with: ["nextEntry"],
 	},
 });
