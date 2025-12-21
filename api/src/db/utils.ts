@@ -11,11 +11,13 @@ import {
 	type TableConfig,
 	View,
 	ViewBaseConfig,
+	InferSelectModel,
 } from "drizzle-orm";
 import type { CasingCache } from "drizzle-orm/casing";
 import type { AnyMySqlSelect } from "drizzle-orm/mysql-core";
 import type {
 	AnyPgSelect,
+	PgTable,
 	PgTableWithColumns,
 	SelectedFieldsFlat,
 } from "drizzle-orm/pg-core";
@@ -50,6 +52,21 @@ export function getColumns<
 		: is(table, View)
 			? (table as any)[ViewBaseConfig].selectedFields
 			: table._.selectedFields;
+}
+
+// See https://github.com/drizzle-team/drizzle-orm/issues/2842
+export function rowToModel<
+	TTable extends PgTable,
+	TModel = InferSelectModel<TTable>,
+>(row: Record<string, unknown>, table: TTable): TModel {
+	// @ts-expect-error: drizzle internal
+	const casing = db.dialect.casing as CasingCache;
+	return Object.fromEntries(
+		Object.entries(table).map(([schemaName, schema]) => [
+			schemaName,
+			schema.mapFromDriverValue?.(row[casing.getColumnCasing(schema)] ?? null),
+		]),
+	) as TModel;
 }
 
 // See https://github.com/drizzle-team/drizzle-orm/issues/1728

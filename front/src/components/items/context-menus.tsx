@@ -70,19 +70,19 @@ export const ItemContext = ({
 	const { t } = useTranslation();
 
 	const mutation = useMutation({
-		path: [kind, slug, "watchStatus"],
+		path: ["api", `${kind}s`, slug, "watchstatus"],
 		compute: (newStatus: WatchStatusV | null) => ({
 			method: newStatus ? "POST" : "DELETE",
-			params: newStatus ? { status: newStatus } : undefined,
+			body: newStatus ? { status: newStatus } : undefined,
 		}),
 		invalidate: [kind, slug],
 	});
 
-	const metadataRefreshMutation = useMutation({
-		method: "POST",
-		path: [kind, slug, "refresh"],
-		invalidate: null,
-	});
+	// const metadataRefreshMutation = useMutation({
+	// 	method: "POST",
+	// 	path: [kind, slug, "refresh"],
+	// 	invalidate: null,
+	// });
 
 	return (
 		<Menu
@@ -127,16 +127,16 @@ export const ItemContext = ({
 					/>
 				</>
 			)}
-			{account?.isAdmin === true && (
-				<>
-					<HR />
-					<Menu.Item
-						label={t("home.refreshMetadata")}
-						icon={Refresh}
-						onSelect={() => metadataRefreshMutation.mutate()}
-					/>
-				</>
-			)}
+			{/* {account?.isAdmin === true && ( */}
+			{/* 	<> */}
+			{/* 		<HR /> */}
+			{/* 		<Menu.Item */}
+			{/* 			label={t("home.refreshMetadata")} */}
+			{/* 			icon={Refresh} */}
+			{/* 			onSelect={() => metadataRefreshMutation.mutate()} */}
+			{/* 		/> */}
+			{/* 	</> */}
+			{/* )} */}
 		</Menu>
 	);
 };

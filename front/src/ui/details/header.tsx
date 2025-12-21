@@ -58,7 +58,7 @@ import {
 	UL,
 } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
-import { Fetch, type QueryIdentifier, useMutation } from "~/query";
+import { Fetch, type QueryIdentifier } from "~/query";
 import { displayRuntime, getDisplayDate } from "~/utils";
 
 const ButtonList = ({
@@ -78,11 +78,11 @@ const ButtonList = ({
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 
-	const metadataRefreshMutation = useMutation({
-		method: "POST",
-		path: [kind, slug, "refresh"],
-		invalidate: null,
-	});
+	// const metadataRefreshMutation = useMutation({
+	// 	method: "POST",
+	// 	path: [kind, slug, "refresh"],
+	// 	invalidate: null,
+	// });
 
 	return (
 		<View
@@ -143,16 +143,16 @@ const ButtonList = ({
 							/>
 						</>
 					)}
-					{account?.isAdmin === true && (
-						<>
-							{kind === "movie" && <HR />}
-							<Menu.Item
-								label={t("home.refreshMetadata")}
-								icon={Refresh}
-								onSelect={() => metadataRefreshMutation.mutate()}
-							/>
-						</>
-					)}
+					{/* {account?.isAdmin === true && ( */}
+					{/* 	<> */}
+					{/* 		{kind === "movie" && <HR />} */}
+					{/* 		<Menu.Item */}
+					{/* 			label={t("home.refreshMetadata")} */}
+					{/* 			icon={Refresh} */}
+					{/* 			onSelect={() => metadataRefreshMutation.mutate()} */}
+					{/* 		/> */}
+					{/* 	</> */}
+					{/* )} */}
 				</Menu>
 			)}
 		</View>
