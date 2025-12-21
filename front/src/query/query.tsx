@@ -301,7 +301,7 @@ export const useMutation = <T = void, QueryRet = void>({
 	...queryParams
 }: MutationParams & {
 	compute?: (param: T) => MutationParams;
-	optimistic?: (param: T) => QueryRet;
+	optimistic?: (param: T, previous?: QueryRet) => QueryRet | undefined;
 	invalidate: string[] | null;
 }) => {
 	const { apiUrl, authToken } = useContext(AccountContext);
@@ -324,13 +324,15 @@ export const useMutation = <T = void, QueryRet = void>({
 		...(invalidate && optimistic
 			? {
 					onMutate: async (params) => {
-						const next = optimistic(params);
 						const queryKey = toQueryKey({ apiUrl, path: invalidate });
 						await queryClient.cancelQueries({
 							queryKey,
 						});
+
 						const previous = queryClient.getQueryData(queryKey);
+						const next = optimistic(params, previous as QueryRet);
 						queryClient.setQueryData(queryKey, next);
+
 						return { previous, next };
 					},
 					onError: (_, __, context) => {

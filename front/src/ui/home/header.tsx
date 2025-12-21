@@ -56,10 +56,6 @@ export const Header = ({
 					}}
 					{...(css(
 						{
-							position: "absolute",
-							top: 0,
-							left: 0,
-							right: 0,
 							minHeight: {
 								xs: px(350),
 								sm: px(300),
