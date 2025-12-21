@@ -48,36 +48,6 @@ const resource = resourceFromAttributes({
 
 const logger = getLogger();
 
-const DB_STATEMENT_DROP_LIST = new Set(["select 1"]);
-
-class FilterSpanProcessor implements SpanProcessor {
-	constructor(private next: SpanProcessor) {}
-
-	onStart() {}
-
-	// return type is any
-	onEnd(span: any) {
-		const stmt = span.attributes["db.statement"];
-
-		if (
-			typeof stmt === "string" &&
-			DB_STATEMENT_DROP_LIST.has(stmt.trim().toLowerCase())
-		) {
-			return; // drop span
-		}
-
-		this.next.onEnd(span);
-	}
-
-	shutdown() {
-		return this.next.shutdown();
-	}
-
-	forceFlush() {
-		return this.next.forceFlush();
-	}
-}
-
 export function setupOtel() {
 	logger.info("Configuring OTEL");
 	const protocol = (
@@ -158,14 +128,12 @@ export function setupOtel() {
 		tp = new NodeTracerProvider({
 			resource,
 			spanProcessors: [
-				new FilterSpanProcessor(
-					new BatchSpanProcessor(te, {
-						maxQueueSize: 100,
-						maxExportBatchSize: 10,
-						scheduledDelayMillis: 500,
-						exportTimeoutMillis: 30000,
-					}),
-				),
+				new BatchSpanProcessor(te, {
+					maxQueueSize: 100,
+					maxExportBatchSize: 10,
+					scheduledDelayMillis: 500,
+					exportTimeoutMillis: 30000,
+				}),
 			],
 		});
 	}
