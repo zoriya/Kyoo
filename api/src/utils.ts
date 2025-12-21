@@ -56,3 +56,16 @@ export function traverse<T extends Record<string, any>>(
 
 	return result;
 }
+
+export const toQueryStr = (query: Record<string, unknown>) => {
+	const entries = Object.entries(query);
+	if (entries.length === 0) return "";
+	return `?${entries
+		.map(([k, v]) => {
+			if (!Array.isArray(v)) return `${k}=${v}`;
+			if (v.length === 0) return null;
+			return `${k}=${v.join(",")}`;
+		})
+		.filter((x) => x)
+		.join("&")}`;
+};

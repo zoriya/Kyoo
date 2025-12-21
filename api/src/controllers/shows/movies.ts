@@ -17,6 +17,7 @@ import {
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import { getShows, showFilters, showSort } from "./logic";
+import { toQueryStr } from "~/utils";
 
 export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 	.model({
@@ -99,7 +100,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 	)
 	.get(
 		"random",
-		async ({ status, redirect }) => {
+		async ({ status, redirect, query }) => {
 			const [movie] = await db
 				.select({ slug: shows.slug })
 				.from(shows)
@@ -111,12 +112,21 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					status: 404,
 					message: "No movies in the database.",
 				});
-			return redirect(`${prefix}/movies/${movie.slug}`);
+			return redirect(`${prefix}/movies/${movie.slug}${toQueryStr(query)}`);
 		},
 		{
 			detail: {
 				description: "Get a random movie",
 			},
+			query: t.Object({
+				preferOriginal: t.Optional(
+					t.Boolean({ description: desc.preferOriginal }),
+				),
+				with: t.Array(t.UnionEnum(["translations", "studios", "videos"]), {
+					default: [],
+					description: "Include related resources in the response.",
+				}),
+			}),
 			response: {
 				302: t.Void({
 					description:

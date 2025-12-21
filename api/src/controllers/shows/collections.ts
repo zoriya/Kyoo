@@ -24,6 +24,7 @@ import {
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import { getShows, showFilters, showSort } from "./logic";
+import { toQueryStr } from "~/utils";
 
 export const collections = new Elysia({
 	prefix: "/collections",
@@ -109,7 +110,7 @@ export const collections = new Elysia({
 	)
 	.get(
 		"random",
-		async ({ status, redirect }) => {
+		async ({ status, redirect, query }) => {
 			const [serie] = await db
 				.select({ slug: shows.slug })
 				.from(shows)
@@ -121,12 +122,23 @@ export const collections = new Elysia({
 					status: 404,
 					message: "No collection in the database.",
 				});
-			return redirect(`${prefix}/collections/${serie.slug}`);
+			return redirect(
+				`${prefix}/collections/${serie.slug}${toQueryStr(query)}`,
+			);
 		},
 		{
 			detail: {
 				description: "Get a random collection",
 			},
+			query: t.Object({
+				preferOriginal: t.Optional(
+					t.Boolean({ description: desc.preferOriginal }),
+				),
+				with: t.Array(t.UnionEnum(["translations"]), {
+					default: [],
+					description: "Include related resources in the response.",
+				}),
+			}),
 			response: {
 				302: t.Void({
 					description:
