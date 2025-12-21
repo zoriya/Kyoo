@@ -17,6 +17,7 @@ import {
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import { getShows, showFilters, showSort } from "./logic";
+import { toQueryStr } from "~/utils";
 
 export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 	.model({
@@ -102,7 +103,7 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 	)
 	.get(
 		"random",
-		async ({ status, redirect }) => {
+		async ({ status, redirect, query }) => {
 			const [serie] = await db
 				.select({ slug: shows.slug })
 				.from(shows)
@@ -114,12 +115,24 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 					status: 404,
 					message: "No series in the database.",
 				});
-			return redirect(`${prefix}/series/${serie.slug}`);
+			return redirect(`${prefix}/series/${serie.slug}${toQueryStr(query)}`);
 		},
 		{
 			detail: {
 				description: "Get a random serie",
 			},
+			query: t.Object({
+				preferOriginal: t.Optional(
+					t.Boolean({ description: desc.preferOriginal }),
+				),
+				with: t.Array(
+					t.UnionEnum(["translations", "studios", "firstEntry", "nextEntry"]),
+					{
+						default: [],
+						description: "Include related resources in the response.",
+					},
+				),
+			}),
 			response: {
 				302: t.Void({
 					description:

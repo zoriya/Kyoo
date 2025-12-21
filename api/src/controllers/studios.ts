@@ -34,6 +34,7 @@ import {
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import { getShows, showFilters, showSort } from "./shows/logic";
+import { toQueryStr } from "~/utils";
 
 const studioSort = Sort(
 	{
@@ -195,7 +196,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 	)
 	.get(
 		"random",
-		async ({ status, redirect }) => {
+		async ({ status, redirect, query }) => {
 			const [studio] = await db
 				.select({ slug: studios.slug })
 				.from(studios)
@@ -206,12 +207,18 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 					status: 404,
 					message: "No studios in the database.",
 				});
-			return redirect(`${prefix}/studios/${studio.slug}`);
+			return redirect(`${prefix}/studios/${studio.slug}${toQueryStr(query)}`);
 		},
 		{
 			detail: {
 				description: "Get a random studio.",
 			},
+			query: t.Object({
+				with: t.Array(t.UnionEnum(["translations"]), {
+					default: [],
+					description: "Include related resources in the response.",
+				}),
+			}),
 			response: {
 				302: t.Void({
 					description:
