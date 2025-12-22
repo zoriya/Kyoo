@@ -1,5 +1,6 @@
 import path from "node:path";
 import { getCurrentSpan, setAttributes } from "@elysiajs/opentelemetry";
+import { getLogger } from "@logtape/logtape";
 import { SpanStatusCode } from "@opentelemetry/api";
 import { encode } from "blurhash";
 import { and, eq, is, lt, ne, type SQL, sql } from "drizzle-orm";
@@ -13,6 +14,8 @@ import { unnestValues } from "~/db/utils";
 import type { Image } from "~/models/utils";
 import { record } from "~/otel";
 import { getFile } from "~/utils";
+
+const logger = getLogger();
 
 export const imageDir = process.env.IMAGES_PATH ?? "/images";
 export const defaultBlurhash = "000000";
@@ -134,7 +137,16 @@ export const processImages = record(
 		const client = (await db.$client.connect()) as PoolClient;
 		client.on("notification", (evt) => {
 			if (evt.channel !== "kyoo_image") return;
-			processAll();
+			try {
+				processAll();
+			} catch (e) {
+				logger.error(
+					"Failed to process images. Aborting images downloading. error={error}",
+					{
+						error: e,
+					},
+				);
+			}
 		});
 		await client.query("listen kyoo_image");
 
@@ -193,14 +205,19 @@ const processOne = record("download", async () => {
 				span.recordException(err);
 				span.setStatus({ code: SpanStatusCode.ERROR });
 			}
-			console.error("Failed to download image", img.url, err);
+			logger.error("Failed to download image. imageurl={url}, error={error}", {
+				url: img.url,
+				error: err,
+			});
 			try {
 				await tx
 					.update(images)
 					.set({ attempt: sql`${images.attempt}+1` })
 					.where(eq(images.pk, img.pk));
 			} catch (e) {
-				console.error("Failed to mark download as failed", e);
+				logger.error("Failed to mark download as failed. error={error}", {
+					error: e,
+				});
 			}
 		}
 		return true;

@@ -1,3 +1,4 @@
+import { getLogger } from "@logtape/logtape";
 import { Elysia, t } from "elysia";
 import { auth } from "./auth";
 import { entriesH } from "./controllers/entries";
@@ -14,10 +15,11 @@ import { showsH } from "./controllers/shows/shows";
 import { staffH } from "./controllers/staff";
 import { studiosH } from "./controllers/studios";
 import { videosReadH, videosWriteH } from "./controllers/videos";
-import { db } from "./db";
+import { dbRaw } from "./db";
 import type { KError } from "./models/error";
-import { otel } from "./otel";
 import { appWs } from "./websockets";
+
+const logger = getLogger();
 
 export const base = new Elysia({ name: "base" })
 	.onError(({ code, error }) => {
@@ -50,7 +52,10 @@ export const base = new Elysia({ name: "base" })
 		if (code === "NOT_FOUND") {
 			return error;
 		}
-		console.error(code, error);
+		logger.error("Elysia encountered an error. code={code} error={error}", {
+			code: code,
+			error: error,
+		});
 		return {
 			status: 500,
 			message: "Internal server error",
@@ -64,7 +69,7 @@ export const base = new Elysia({ name: "base" })
 		"/ready",
 		async ({ status }) => {
 			try {
-				await db.execute("select 1");
+				await dbRaw.execute("select 1");
 				return { status: "healthy", database: "healthy" } as const;
 			} catch (e) {
 				return status(500, {
@@ -92,7 +97,6 @@ export const base = new Elysia({ name: "base" })
 export const prefix = "/api";
 export const handlers = new Elysia({ prefix })
 	.use(base)
-	.use(otel)
 	.use(appWs)
 	.use(auth)
 	.guard(

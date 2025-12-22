@@ -5,6 +5,7 @@ dev:
     imageSelector: ghcr.io/zoriya/kyoo_api
     devImage: docker.io/oven/bun:latest
     workingDir: /app
+    ssh: {}
     sync:
       - path: .:/app
         excludePaths:
@@ -15,9 +16,9 @@ dev:
             - command: bun install --frozen-lockfile
               onChange: 
                 - "./bun.lock"
-    command: 
-      - bash 
-      - -c 
+    command:
+      - bash
+      - -c
       - "bun install && bun dev"
     ports:
       - port: "3567"
