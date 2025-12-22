@@ -120,9 +120,7 @@ export function setupOtel() {
 	if (te) {
 		tp = new NodeTracerProvider({
 			resource,
-			spanProcessors: [
-				new BatchSpanProcessor(te),
-			],
+			spanProcessors: [new BatchSpanProcessor(te)],
 		});
 	}
 
