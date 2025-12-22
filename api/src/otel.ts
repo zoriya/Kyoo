@@ -112,7 +112,6 @@ export function setupOtel() {
 			readers: [
 				new PeriodicExportingMetricReader({
 					exporter: me,
-					exportIntervalMillis: 5000,
 				}),
 			],
 		});
@@ -122,12 +121,7 @@ export function setupOtel() {
 		tp = new NodeTracerProvider({
 			resource,
 			spanProcessors: [
-				new BatchSpanProcessor(te, {
-					maxQueueSize: 100,
-					maxExportBatchSize: 10,
-					scheduledDelayMillis: 500,
-					exportTimeoutMillis: 30000,
-				}),
+				new BatchSpanProcessor(te),
 			],
 		});
 	}
