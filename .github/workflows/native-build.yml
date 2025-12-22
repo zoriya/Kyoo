@@ -62,7 +62,7 @@ jobs:
         if: env.IS_EXPO_ENABLED == 'true'
         run: wget -O kyoo.apk ${{ steps.url.outputs.assetUrl }}
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: env.IS_EXPO_ENABLED == 'true'
         with:
           name: kyoo.apk
