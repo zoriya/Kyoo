@@ -18,15 +18,13 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { type LibraryItem, LibraryItemP, type QueryIdentifier } from "@kyoo/models";
-import { H3 } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
-import { itemMap } from "../browse";
-import { ItemGrid } from "../browse/grid";
-import { ItemList } from "../browse/list";
-import { InfiniteFetch } from "../fetch-infinite";
+import { ItemGrid, ItemList, itemMap } from "~/components/items";
+import type { Show } from "~/models";
+import { H3 } from "~/primitives";
+import { InfiniteFetch, type QueryIdentifier } from "~/query";
 
 export const VerticalRecommended = () => {
 	const { t } = useTranslation();
@@ -48,13 +46,13 @@ export const VerticalRecommended = () => {
 	);
 };
 
-VerticalRecommended.query = (): QueryIdentifier<LibraryItem> => ({
-	parser: LibraryItemP,
+VerticalRecommended.query = (): QueryIdentifier<Show> => ({
+	parser: Show,
 	infinite: true,
-	path: ["items"],
+	path: ["api", "shows"],
 	params: {
-		fields: ["episodesCount", "watchStatus"],
-		sortBy: "random",
+		fields: ["watchStatus"],
+		sort: "random",
 		limit: 3,
 	},
 });

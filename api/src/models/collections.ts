@@ -57,6 +57,10 @@ export const Collection = t.Composite([
 export type Collection = Prettify<typeof Collection.static>;
 
 export const FullCollection = t.Intersect([
+	// we need the kind because /shows/random can redirect to /collections/:id
+	t.Object({
+		kind: t.Literal("collection"),
+	}),
 	Collection,
 	t.Object({
 		translations: t.Optional(TranslationRecord(CollectionTranslation)),
