@@ -26,6 +26,14 @@ const actionMap = {
 		permissions: ["core.read"],
 		async message(ws, body) {
 			const profilePk = await getOrCreateProfile(ws.data.jwt.sub);
+			if (!profilePk) {
+				ws.send({
+					action: "watch",
+					status: 401,
+					message: "Guest can't set watchstatus",
+				});
+				return;
+			}
 
 			const ret = await updateProgress(profilePk, [
 				{ ...body, playedDate: null },
