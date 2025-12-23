@@ -34,21 +34,17 @@ import {
 } from "~/models/watchlist";
 import { getOrCreateProfile } from "./profile";
 
-console.log();
-
 async function setWatchStatus({
 	show,
 	status,
-	userId,
+	userPk,
 }: {
 	show:
 		| { pk: number; kind: "movie" }
 		| { pk: number; kind: "serie"; entriesCount: number };
 	status: SeedSerieWatchStatus;
-	userId: string;
+	userPk: number;
 }) {
-	const profilePk = await getOrCreateProfile(userId);
-
 	const firstEntryQ = db
 		.select({ pk: entries.pk })
 		.from(entries)
@@ -61,7 +57,7 @@ async function setWatchStatus({
 		.values({
 			...status,
 			startedAt: coalesce(sql`${status.startedAt ?? null}`, sql`now()`),
-			profilePk: profilePk,
+			profilePk: userPk,
 			seenCount:
 				status.status === "completed"
 					? show.kind === "movie"
@@ -269,6 +265,14 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 	.post(
 		"/series/:id/watchstatus",
 		async ({ params: { id }, body, jwt: { sub }, status }) => {
+			const profilePk = await getOrCreateProfile(sub);
+			if (!profilePk) {
+				return status(401, {
+					status: 401,
+					message: "Guest can't set watchstatus",
+				});
+			}
+
 			const [show] = await db
 				.select({ pk: shows.pk, entriesCount: shows.entriesCount })
 				.from(shows)
@@ -287,7 +291,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 			}
 			return await setWatchStatus({
 				show: { pk: show.pk, kind: "serie", entriesCount: show.entriesCount },
-				userId: sub,
+				userPk: profilePk,
 				status: body,
 			});
 		},
@@ -302,6 +306,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 			body: SeedSerieWatchStatus,
 			response: {
 				200: t.Intersect([SerieWatchStatus, DbMetadata]),
+				401: { ...KError, description: "Guest can't set their watchstatus" },
 				404: KError,
 			},
 			permissions: ["core.read"],
@@ -310,6 +315,14 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 	.post(
 		"/movies/:id/watchstatus",
 		async ({ params: { id }, body, jwt: { sub }, status }) => {
+			const profilePk = await getOrCreateProfile(sub);
+			if (!profilePk) {
+				return status(401, {
+					status: 401,
+					message: "Guest can't set watchstatus",
+				});
+			}
+
 			const [show] = await db
 				.select({ pk: shows.pk })
 				.from(shows)
@@ -329,7 +342,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 
 			return await setWatchStatus({
 				show: { pk: show.pk, kind: "movie" },
-				userId: sub,
+				userPk: profilePk,
 				status: {
 					...body,
 					startedAt: body.completedAt,
@@ -347,6 +360,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 			body: SeedMovieWatchStatus,
 			response: {
 				200: t.Intersect([MovieWatchStatus, DbMetadata]),
+				401: { ...KError, description: "Guest can't set their watchstatus" },
 				404: KError,
 			},
 			permissions: ["core.read"],
@@ -356,6 +370,12 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 		"/series/:id/watchstatus",
 		async ({ params: { id }, jwt: { sub }, status }) => {
 			const profilePk = await getOrCreateProfile(sub);
+			if (!profilePk) {
+				return status(401, {
+					status: 401,
+					message: "Guest can't set watchstatus",
+				});
+			}
 
 			const rows = await db.execute(sql`
 				delete from ${watchlist} using ${shows}
@@ -396,6 +416,12 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 		"/movies/:id/watchstatus",
 		async ({ params: { id }, jwt: { sub }, status }) => {
 			const profilePk = await getOrCreateProfile(sub);
+			if (!profilePk) {
+				return status(401, {
+					status: 401,
+					message: "Guest can't set watchstatus",
+				});
+			}
 
 			const rows = await db.execute(sql`
 				delete from ${watchlist} using ${shows}
@@ -428,6 +454,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 			}),
 			response: {
 				200: t.Intersect([MovieWatchStatus, DbMetadata]),
+				401: { ...KError, description: "Guest can't set their watchstatus" },
 				404: KError,
 			},
 			permissions: ["core.read"],
