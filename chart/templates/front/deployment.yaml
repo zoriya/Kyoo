@@ -34,6 +34,13 @@ spec:
           {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      {{- with .Values.front.resourceClaims }}
+      resourceClaims:
+        {{- range . }}
+        - name: {{ .name }}
+          resourceClaimTemplateName: {{ .resourceClaimTemplateName }}
+        {{- end }}
+      {{- end }}
       {{- with .Values.front.imagePullSecrets | default .Values.global.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}

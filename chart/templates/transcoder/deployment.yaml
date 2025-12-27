@@ -37,6 +37,13 @@ spec:
       {{- with .Values.transcoder.runtimeClass }}
       runtimeClassName: {{ . }}
       {{- end }}
+      {{- with .Values.transcoder.resourceClaims }}
+      resourceClaims:
+        {{- range . }}
+        - name: {{ .name }}
+          resourceClaimTemplateName: {{ .resourceClaimTemplateName }}
+        {{- end }}
+      {{- end }}
       {{- with .Values.transcoder.imagePullSecrets | default .Values.global.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
