@@ -5,7 +5,7 @@ go 1.24.2
 require (
 	github.com/asticode/go-astisub v0.38.0
 	github.com/aws/aws-sdk-go-v2 v1.41.0
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.94.0
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.95.0
 	github.com/disintegration/imaging v1.6.2
 	github.com/exaring/otelpgx v0.9.4
 	github.com/golang-migrate/migrate/v4 v4.19.1
