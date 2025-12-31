@@ -345,11 +345,21 @@ scanner:
   extraInitContainers: []
   extraVolumes: []
 
-# scanner deployment configuration
+# transcoder deployment configuration
 transcoder:
   name: transcoder
   # can be used if you have a gpu runtime class
   runtimeClass: ""
+  # resourceClaims for Dynamic Resource Allocation (DRA)
+  # useful for GPU access via ResourceClaimTemplates (Kubernetes 1.32+)
+  # example:
+  #   resourceClaims:
+  #     - name: gpu
+  #       resourceClaimTemplateName: gpu-claim-template
+  # then reference in kyoo_transcoder.resources:
+  #   claims:
+  #     - name: gpu
+  resourceClaims: []
   # kyoo_transcoder container configuration
   kyoo_transcoder:
     livenessProbe:
