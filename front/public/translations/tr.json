@@ -8,7 +8,7 @@
 		"watchlistLogin": "İzlediklerinizin ya da izlemeyi planladıklarınızın takibini yapabilmek için lütfen oturum açın.",
 		"refreshMetadata": "Üstveriyi (metaveriyi) yenileyin",
 		"episodeMore": {
-			"goToShow": "İzlenceye gidin",
+			"goToShow": "İçeriğe gidin",
 			"download": "İndir",
 			"mediainfo": "Dosyanın Özellikleri"
 		}
@@ -28,7 +28,7 @@
 		"links": "Linkler",
 		"jumpToSeason": "Sezona atla",
 		"partOf": "Parçasıdır",
-		"watchlistAdd": "İzlemeyi planlıyorum listenize ekleyin",
+		"watchlistAdd": "İzleme listenize ekleyin",
 		"watchlistEdit": "İzleme durumunuzu düzenleyin",
 		"watchlistRemove": "İzlenmedi olarak işaretleyin",
 		"watchlistLogin": "İzleme listenize eklemek için lütfen oturum açın",
@@ -37,7 +37,8 @@
 			"planned": "İzlemeyi planlıyorsunuz olarak işaretleyin",
 			"watching": "İzleniyor olarak işaretleyin",
 			"dropped": "İzlemeyi bıraktınız olarak işaretleyin",
-			"null": "İzlenmedi olarak işaretleyin"
+			"null": "İzlenmedi olarak işaretleyin",
+			"rewatching": "Yeniden izleniyor olarak işaretleyin"
 		},
 		"nextUp": "Sonraki",
 		"season": "{{number}}. Sezon"
@@ -177,7 +178,8 @@
 		"transmux": "Orjinal",
 		"auto": "Otomatik",
 		"notInPristine": "Kaynak modunda kullanılamıyor",
-		"unsupportedError": "Videonun kodeği desteklenmiyor, video işlemesi başladı..."
+		"unsupportedError": "Videonun kodeği desteklenmiyor, video işlemesi başladı...",
+		"videos": "Video"
 	},
 	"search": {
 		"empty": "Hiçbir sonuç bulunamadı. Farklı bir girdi deneyin."
