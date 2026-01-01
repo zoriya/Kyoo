@@ -20,5 +20,5 @@ pkgs.mkShell {
     export LD_LIBRARY_PATH=${pkgs.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH
   '';
   UV_PYTHON_PREFERENCE = "only-system";
-  UV_PYTHON = pkgs.python313;
+  UV_PYTHON = pkgs.python314;
 }

@@ -3,7 +3,7 @@ name: scanner
 dev:
   scanner:
     imageSelector: ghcr.io/zoriya/kyoo_scanner
-    devImage: docker.io/astral/uv:python3.13-trixie
+    devImage: docker.io/astral/uv:python3.14-trixie
     workingDir: /app
     sync:
       - path: .:/app
