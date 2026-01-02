@@ -1,5 +1,5 @@
 {pkgs ? import <nixpkgs> {}}: let
-  python = pkgs.python313.withPackages (ps:
+  python = pkgs.python314.withPackages (ps:
     with ps; [
       fastapi
       pydantic
@@ -22,5 +22,5 @@ in
     ];
 
     UV_PYTHON_PREFERENCE = "only-system";
-    UV_PYTHON = pkgs.python313;
+    UV_PYTHON = pkgs.python314;
   }
