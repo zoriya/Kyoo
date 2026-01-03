@@ -1,5 +1,5 @@
 import { z } from "zod/v4";
-import { Entry } from "./entry";
+import { BaseEntry } from "./entry";
 import { Studio } from "./studio";
 import { Genre } from "./utils/genre";
 import { KImage } from "./utils/images";
@@ -41,8 +41,12 @@ export const Serie = z
 		updatedAt: zdate(),
 
 		studios: z.array(Studio).optional(),
-		firstEntry: Entry.optional().nullable(),
-		nextEntry: Entry.optional().nullable(),
+		get firstEntry() {
+			return BaseEntry.optional().nullable();
+		},
+		get nextEntry() {
+			return BaseEntry.optional().nullable();
+		},
 		watchStatus: z
 			.object({
 				status: z.enum([

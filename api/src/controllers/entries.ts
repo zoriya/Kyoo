@@ -9,6 +9,7 @@ import {
 	history,
 	profiles,
 	shows,
+	showTranslations,
 	videos,
 } from "~/db/schema";
 import {
@@ -16,11 +17,13 @@ import {
 	getColumns,
 	jsonbAgg,
 	jsonbBuildObject,
+	jsonbObjectAgg,
 	sqlarr,
 } from "~/db/utils";
 import {
 	Entry,
 	type EntryKind,
+	type EntryTranslation,
 	Episode,
 	Extra,
 	ExtraType,
@@ -29,8 +32,12 @@ import {
 } from "~/models/entry";
 import { KError } from "~/models/error";
 import { madeInAbyss } from "~/models/examples";
+import { Movie } from "~/models/movie";
+import { Show } from "~/models/show";
+import type { Image } from "~/models/utils";
 import {
 	AcceptLanguage,
+	buildRelations,
 	createPage,
 	Filter,
 	type FilterDef,
@@ -43,6 +50,7 @@ import {
 } from "~/models/utils";
 import { desc as description } from "~/models/utils/descriptions";
 import type { EmbeddedVideo } from "~/models/video";
+import { watchStatusQ } from "./shows/logic";
 
 export const entryProgressQ = db
 	.selectDistinctOn([history.entryPk], {
@@ -123,6 +131,70 @@ const newsSort: Sort = {
 		},
 	],
 };
+
+const entryRelations = {
+	translations: () => {
+		const { pk, language, ...trans } = getColumns(entryTranslations);
+		return db
+			.select({
+				json: jsonbObjectAgg(
+					language,
+					jsonbBuildObject<EntryTranslation>(trans),
+				).as("json"),
+			})
+			.from(entryTranslations)
+			.where(eq(entryTranslations.pk, entries.pk))
+			.as("translations");
+	},
+	show: ({
+		languages,
+		preferOriginal,
+	}: {
+		languages: string[];
+		preferOriginal: boolean;
+	}) => {
+		const transQ = db
+			.selectDistinctOn([showTranslations.pk])
+			.from(showTranslations)
+			.orderBy(
+				showTranslations.pk,
+				sql`array_position(${sqlarr(languages)}, ${showTranslations.language})`,
+			)
+			.as("t");
+
+		const watchStatus = sql`
+			case
+				when ${watchStatusQ.showPk} is null then null
+				else (${jsonbBuildObject(getColumns(watchStatusQ))})
+			end
+		`;
+
+		return db
+			.select({
+				json: jsonbBuildObject<Show>({
+					...getColumns(shows),
+					airDate: shows.startAir,
+					isAvailable: sql<boolean>`${shows.availableCount} != 0`,
+					...getColumns(transQ),
+
+					...(preferOriginal && {
+						poster: sql<Image>`coalesce(nullif(${shows.original}->'poster', 'null'::jsonb), ${transQ.poster})`,
+						thumbnail: sql<Image>`coalesce(nullif(${shows.original}->'thumbnail', 'null'::jsonb), ${transQ.thumbnail})`,
+						banner: sql<Image>`coalesce(nullif(${shows.original}->'banner', 'null'::jsonb), ${transQ.banner})`,
+						logo: sql<Image>`coalesce(nullif(${shows.original}->'logo', 'null'::jsonb), ${transQ.logo})`,
+					}),
+
+					watchStatus,
+				}).as("json"),
+			})
+			.from(shows)
+			.innerJoin(transQ, eq(shows.pk, transQ.pk))
+			.leftJoin(watchStatusQ, eq(shows.pk, watchStatusQ.showPk))
+			.where(eq(shows.pk, entries.showPk))
+			.as("entry_show");
+	},
+};
+
 const { guess, createdAt, updatedAt, ...videosCol } = getColumns(videos);
 export const entryVideosQ = db
 	.select({
@@ -175,6 +247,8 @@ export async function getEntries({
 	languages,
 	userId,
 	progressQ = entryProgressQ,
+	relations = [],
+	preferOriginal = false,
 }: {
 	after: string | undefined;
 	limit: number;
@@ -184,6 +258,8 @@ export async function getEntries({
 	languages: string[];
 	userId: string;
 	progressQ?: typeof entryProgressQ;
+	relations?: (keyof typeof entryRelations)[];
+	preferOriginal?: boolean;
 }): Promise<(Entry | Extra)[]> {
 	const transQ = getEntryTransQ(languages);
 
@@ -216,6 +292,11 @@ export async function getEntries({
 			seasonNumber: sql<number>`${seasonNumber}`,
 			episodeNumber: sql<number>`${episodeNumber}`,
 			name: sql<string>`${transQ.name}`,
+
+			...buildRelations(relations, entryRelations, {
+				languages,
+				preferOriginal,
+			}),
 		})
 		.from(entries)
 		.innerJoin(transQ, eq(entries.pk, transQ.pk))
@@ -412,7 +493,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			query: { limit, after, query, filter },
 			request: { url },
 			headers,
-			jwt: { sub },
+			jwt: { sub, settings },
 		}) => {
 			const sort = newsSort;
 			const items = (await getEntries({
@@ -427,7 +508,9 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				),
 				languages: ["extra"],
 				userId: sub,
-			})) as Entry[];
+				relations: ["show"],
+				preferOriginal: settings.preferOriginal,
+			})) as (Entry & { show: Show })[];
 
 			return createPage(items, { url, sort, limit, headers });
 		},
@@ -445,7 +528,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				after: t.Optional(t.String({ description: description.after })),
 			}),
 			response: {
-				200: Page(Entry),
+				200: Page(t.Intersect([Entry, t.Object({ show: Show })])),
 				422: KError,
 			},
 			tags: ["shows"],
