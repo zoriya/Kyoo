@@ -25,12 +25,12 @@ export const NewsList = () => {
 					return (
 						<EntryBox
 							slug={item.slug}
-							serieSlug={item.slug}
-							name={`${item.name} ${entryDisplayNumber(item)}`}
+							serieSlug={item.show!.slug}
+							name={`${item.show!.name} ${entryDisplayNumber(item)}`}
 							description={item.name}
 							thumbnail={item.thumbnail}
 							href={item.href ?? "#"}
-							watchedPercent={item.watchStatus?.percent || null}
+							watchedPercent={item.progress.percent}
 						/>
 					);
 					// 	}
