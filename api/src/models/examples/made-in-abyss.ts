@@ -14,8 +14,8 @@ export const madeInAbyssVideo: Video = {
 		from: "guessit",
 		history: [],
 	},
-	createdAt: "2024-11-23T15:01:24.968Z",
-	updatedAt: "2024-11-23T15:01:24.968Z",
+	createdAt: new Date("2024-11-23T15:01:24.968Z"),
+	updatedAt: new Date("2024-11-23T15:01:24.968Z"),
 };
 
 export const madeInAbyss = {

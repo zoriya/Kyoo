@@ -6,7 +6,7 @@ import {
 	useQueryClient,
 	useMutation as useRQMutation,
 } from "@tanstack/react-query";
-import { useContext } from "react";
+import { useCallback, useContext, useState } from "react";
 import { Platform } from "react-native";
 import type { z } from "zod/v4";
 import { type KyooError, type Page, Paged } from "~/models";
@@ -189,6 +189,32 @@ export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 	});
 };
 
+export const useRefresh = (queries: QueryIdentifier<unknown>[]) => {
+	const [refreshing, setRefreshing] = useState(false);
+	const queryClient = useQueryClient();
+	const { apiUrl } = useContext(AccountContext);
+
+	const refresh = useCallback(async () => {
+		setRefreshing(true);
+		await Promise.all(
+			queries.map((query) =>
+				queryClient.refetchQueries({
+					queryKey: toQueryKey({
+						apiUrl: query.options?.apiUrl ?? apiUrl,
+						path: query.path,
+						params: query.params,
+					}),
+					type: "active",
+					exact: true,
+				}),
+			),
+		);
+		setRefreshing(false);
+	}, [queries, apiUrl, queryClient]);
+
+	return [refreshing, refresh] as const;
+};
+
 export const useInfiniteFetch = <Data,>(query: QueryIdentifier<Data>) => {
 	let { apiUrl, authToken } = useContext(AccountContext);
 	if (query.options?.apiUrl) apiUrl = query.options.apiUrl;
@@ -275,7 +301,7 @@ export const useMutation = <T = void, QueryRet = void>({
 	...queryParams
 }: MutationParams & {
 	compute?: (param: T) => MutationParams;
-	optimistic?: (param: T) => QueryRet;
+	optimistic?: (param: T, previous?: QueryRet) => QueryRet | undefined;
 	invalidate: string[] | null;
 }) => {
 	const { apiUrl, authToken } = useContext(AccountContext);
@@ -298,13 +324,15 @@ export const useMutation = <T = void, QueryRet = void>({
 		...(invalidate && optimistic
 			? {
 					onMutate: async (params) => {
-						const next = optimistic(params);
 						const queryKey = toQueryKey({ apiUrl, path: invalidate });
 						await queryClient.cancelQueries({
 							queryKey,
 						});
+
 						const previous = queryClient.getQueryData(queryKey);
+						const next = optimistic(params, previous as QueryRet);
 						queryClient.setQueryData(queryKey, next);
+
 						return { previous, next };
 					},
 					onError: (_, __, context) => {

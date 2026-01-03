@@ -10,7 +10,7 @@ import {
 import { db } from "~/db";
 import { entries, shows } from "~/db/schema";
 import { watchlist } from "~/db/schema/watchlist";
-import { conflictUpdateAllExcept, getColumns } from "~/db/utils";
+import { coalesce, getColumns, rowToModel } from "~/db/utils";
 import { Entry } from "~/models/entry";
 import { KError } from "~/models/error";
 import { bubble, madeInAbyss } from "~/models/examples";
@@ -26,22 +26,25 @@ import {
 	processLanguages,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
-import { MovieWatchStatus, SerieWatchStatus } from "~/models/watchlist";
+import {
+	MovieWatchStatus,
+	SeedMovieWatchStatus,
+	SeedSerieWatchStatus,
+	SerieWatchStatus,
+} from "~/models/watchlist";
 import { getOrCreateProfile } from "./profile";
 
 async function setWatchStatus({
 	show,
 	status,
-	userId,
+	userPk,
 }: {
 	show:
 		| { pk: number; kind: "movie" }
 		| { pk: number; kind: "serie"; entriesCount: number };
-	status: Omit<SerieWatchStatus, "seenCount">;
-	userId: string;
+	status: SeedSerieWatchStatus;
+	userPk: number;
 }) {
-	const profilePk = await getOrCreateProfile(userId);
-
 	const firstEntryQ = db
 		.select({ pk: entries.pk })
 		.from(entries)
@@ -53,7 +56,8 @@ async function setWatchStatus({
 		.insert(watchlist)
 		.values({
 			...status,
-			profilePk: profilePk,
+			startedAt: coalesce(sql`${status.startedAt ?? null}`, sql`now()`),
+			profilePk: userPk,
 			seenCount:
 				status.status === "completed"
 					? show.kind === "movie"
@@ -70,38 +74,33 @@ async function setWatchStatus({
 		.onConflictDoUpdate({
 			target: [watchlist.profilePk, watchlist.showPk],
 			set: {
-				...conflictUpdateAllExcept(watchlist, [
-					"profilePk",
-					"showPk",
-					"createdAt",
-					"seenCount",
-					"nextEntry",
-					"lastPlayedAt",
-				]),
-				...(status.status === "completed"
-					? {
-							seenCount: sql`excluded.seen_count`,
-							nextEntry: sql`null`,
-						}
-					: {}),
+				status: sql`excluded.status`,
+				startedAt: coalesce(
+					sql`${status.startedAt ?? null}`,
+					watchlist.startedAt,
+				),
+				completedAt: sql`
+					case
+						when excluded.status = 'completed' then coalesce(excluded.completed_at, now())
+						else coalesce(excluded.completed_at, ${watchlist.completedAt})
+					end
+				`,
 				// only set seenCount & nextEntry when marking as "rewatching"
 				// if it's already rewatching, the history updates are more up-dated.
-				...(status.status === "rewatching"
-					? {
-							seenCount: sql`
-							case when ${watchlist.status} != 'rewatching'
-								then excluded.seen_count
-							else
-								${watchlist.seenCount}
-							end`,
-							nextEntry: sql`
-							case when ${watchlist.status} != 'rewatching'
-								then excluded.next_entry
-							else
-								${watchlist.nextEntry}
-							end`,
-						}
-					: {}),
+				seenCount: sql`
+					case
+						when excluded.status = 'completed' then excluded.seen_count
+						when excluded.status = 'rewatching' and ${watchlist.status} != 'rewatching' then excluded.seen_count
+						else ${watchlist.seenCount}
+					end
+				`,
+				nextEntry: sql`
+					case
+						when excluded.status = 'completed' then null
+						when excluded.status = 'rewatching' and ${watchlist.status} != 'rewatching' then excluded.next_entry
+						else ${watchlist.nextEntry}
+					end
+				`,
 			},
 		})
 		.returning({
@@ -266,6 +265,14 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 	.post(
 		"/series/:id/watchstatus",
 		async ({ params: { id }, body, jwt: { sub }, status }) => {
+			const profilePk = await getOrCreateProfile(sub);
+			if (!profilePk) {
+				return status(401, {
+					status: 401,
+					message: "Guest can't set watchstatus",
+				});
+			}
+
 			const [show] = await db
 				.select({ pk: shows.pk, entriesCount: shows.entriesCount })
 				.from(shows)
@@ -284,7 +291,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 			}
 			return await setWatchStatus({
 				show: { pk: show.pk, kind: "serie", entriesCount: show.entriesCount },
-				userId: sub,
+				userPk: profilePk,
 				status: body,
 			});
 		},
@@ -296,9 +303,10 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 					example: madeInAbyss.slug,
 				}),
 			}),
-			body: t.Omit(SerieWatchStatus, ["seenCount"]),
+			body: SeedSerieWatchStatus,
 			response: {
 				200: t.Intersect([SerieWatchStatus, DbMetadata]),
+				401: { ...KError, description: "Guest can't set their watchstatus" },
 				404: KError,
 			},
 			permissions: ["core.read"],
@@ -307,6 +315,14 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 	.post(
 		"/movies/:id/watchstatus",
 		async ({ params: { id }, body, jwt: { sub }, status }) => {
+			const profilePk = await getOrCreateProfile(sub);
+			if (!profilePk) {
+				return status(401, {
+					status: 401,
+					message: "Guest can't set watchstatus",
+				});
+			}
+
 			const [show] = await db
 				.select({ pk: shows.pk })
 				.from(shows)
@@ -326,7 +342,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 
 			return await setWatchStatus({
 				show: { pk: show.pk, kind: "movie" },
-				userId: sub,
+				userPk: profilePk,
 				status: {
 					...body,
 					startedAt: body.completedAt,
@@ -341,9 +357,105 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 					example: bubble.slug,
 				}),
 			}),
-			body: t.Omit(MovieWatchStatus, ["percent"]),
+			body: SeedMovieWatchStatus,
 			response: {
 				200: t.Intersect([MovieWatchStatus, DbMetadata]),
+				401: { ...KError, description: "Guest can't set their watchstatus" },
+				404: KError,
+			},
+			permissions: ["core.read"],
+		},
+	)
+	.delete(
+		"/series/:id/watchstatus",
+		async ({ params: { id }, jwt: { sub }, status }) => {
+			const profilePk = await getOrCreateProfile(sub);
+			if (!profilePk) {
+				return status(401, {
+					status: 401,
+					message: "Guest can't set watchstatus",
+				});
+			}
+
+			const rows = await db.execute(sql`
+				delete from ${watchlist} using ${shows}
+				where ${and(
+					eq(watchlist.profilePk, profilePk),
+					eq(watchlist.showPk, shows.pk),
+					eq(shows.kind, "serie"),
+					isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
+				)}
+				returning ${watchlist}.*
+			`);
+
+			if (rows.rowCount === 0) {
+				return status(404, {
+					status: 404,
+					message: `No serie found in your watchlist the id/slug: '${id}'.`,
+				});
+			}
+
+			return rowToModel(rows.rows[0], watchlist);
+		},
+		{
+			detail: { description: "Set watchstatus of a serie." },
+			params: t.Object({
+				id: t.String({
+					description: "The id or slug of the serie.",
+					example: madeInAbyss.slug,
+				}),
+			}),
+			response: {
+				200: t.Intersect([SerieWatchStatus, DbMetadata]),
+				401: KError,
+				404: KError,
+			},
+			permissions: ["core.read"],
+		},
+	)
+	.delete(
+		"/movies/:id/watchstatus",
+		async ({ params: { id }, jwt: { sub }, status }) => {
+			const profilePk = await getOrCreateProfile(sub);
+			if (!profilePk) {
+				return status(401, {
+					status: 401,
+					message: "Guest can't set watchstatus",
+				});
+			}
+
+			const rows = await db.execute(sql`
+				delete from ${watchlist} using ${shows}
+				where ${and(
+					eq(watchlist.profilePk, profilePk),
+					eq(watchlist.showPk, shows.pk),
+					eq(shows.kind, "movie"),
+					isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
+				)}
+				returning ${watchlist}.*
+			`);
+
+			if (rows.rowCount === 0) {
+				return status(404, {
+					status: 404,
+					message: `No movie found in your watchlist the id/slug: '${id}'.`,
+				});
+			}
+
+			const ret = rowToModel(rows.rows[0], watchlist);
+			return { ...ret, percent: ret.seenCount };
+		},
+		{
+			detail: { description: "Set watchstatus of a movie." },
+			params: t.Object({
+				id: t.String({
+					description: "The id or slug of the movie.",
+					example: bubble.slug,
+				}),
+			}),
+			response: {
+				200: t.Intersect([MovieWatchStatus, DbMetadata]),
+				401: { ...KError, description: "Guest can't set their watchstatus" },
 				404: KError,
 			},
 			permissions: ["core.read"],

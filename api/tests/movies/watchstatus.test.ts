@@ -25,7 +25,7 @@ describe("Set & get watch status", () => {
 
 		const [r, b] = await setMovieStatus(bubble.slug, {
 			status: "completed",
-			completedAt: "2024-12-21",
+			completedAt: new Date("2024-12-21"),
 			score: 85,
 		});
 		expectStatus(r, b).toBe(200);
@@ -36,7 +36,7 @@ describe("Set & get watch status", () => {
 		expect(body.items[0].slug).toBe(bubble.slug);
 		expect(body.items[0].watchStatus).toMatchObject({
 			status: "completed",
-			completedAt: "2024-12-21T00:00:00Z",
+			completedAt: "2024-12-21T00:00:00.000Z",
 			score: 85,
 			percent: 100,
 		});
@@ -50,7 +50,7 @@ describe("Set & get watch status", () => {
 		const [r, b] = await setMovieStatus(bubble.slug, {
 			status: "rewatching",
 			// we still need to specify all values
-			completedAt: "2024-12-21",
+			completedAt: new Date("2024-12-21"),
 			score: 85,
 		});
 		expectStatus(r, b).toBe(200);
@@ -61,7 +61,7 @@ describe("Set & get watch status", () => {
 		expect(body.items[0].slug).toBe(bubble.slug);
 		expect(body.items[0].watchStatus).toMatchObject({
 			status: "rewatching",
-			completedAt: "2024-12-21T00:00:00Z",
+			completedAt: "2024-12-21T00:00:00.000Z",
 			score: 85,
 			percent: 0,
 		});
@@ -89,7 +89,7 @@ describe("Set & get watch status", () => {
 		expect(body.items[0].slug).toBe(bubble.slug);
 		expect(body.items[0].watchStatus).toMatchObject({
 			status: "rewatching",
-			completedAt: "2024-12-21T00:00:00Z",
+			completedAt: "2024-12-21T00:00:00.000Z",
 			score: 85,
 			percent: 0,
 		});
@@ -99,7 +99,7 @@ describe("Set & get watch status", () => {
 		const [r, b] = await setMovieStatus(bubble.slug, {
 			status: "rewatching",
 			// we still need to specify all values
-			completedAt: "2024-12-21",
+			completedAt: new Date("2024-12-21"),
 			score: 85,
 		});
 		expectStatus(r, b).toBe(200);
@@ -109,7 +109,7 @@ describe("Set & get watch status", () => {
 		expect(body.slug).toBe(bubble.slug);
 		expect(body.watchStatus).toMatchObject({
 			status: "rewatching",
-			completedAt: "2024-12-21T00:00:00Z",
+			completedAt: "2024-12-21T00:00:00.000Z",
 			score: 85,
 			percent: 0,
 		});

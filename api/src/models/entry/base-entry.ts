@@ -12,7 +12,7 @@ export const BaseEntry = () =>
 		),
 		thumbnail: t.Nullable(Image),
 
-		nextRefresh: t.String({ format: "date-time" }),
+		nextRefresh: t.Date(),
 	});
 
 export const EntryTranslation = () =>

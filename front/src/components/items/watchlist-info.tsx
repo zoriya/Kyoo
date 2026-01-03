@@ -4,7 +4,7 @@ import BookmarkRemove from "@material-symbols/svg-400/rounded/bookmark_remove.sv
 import Bookmark from "@material-symbols/svg-400/rounded/bookmark-fill.svg";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
-import type { Serie } from "~/models";
+import type { Movie, Serie } from "~/models";
 import { IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { useMutation } from "~/query";
@@ -46,12 +46,13 @@ export const WatchListInfo = ({
 	const { t } = useTranslation();
 
 	const mutation = useMutation({
-		path: [kind, slug, "watchStatus"],
+		path: ["api", `${kind}s`, slug, "watchstatus"],
 		compute: (newStatus: WatchStatus | null) => ({
 			method: newStatus ? "POST" : "DELETE",
-			params: newStatus ? { status: newStatus } : undefined,
+			body: newStatus ? { status: newStatus } : undefined,
 		}),
-		invalidate: [kind, slug],
+		invalidate: ["api", `${kind}s`, slug],
+		// optimistic is a pain to do because shows queries often have query params
 	});
 	if (mutation.isPending) status = mutation.variables;
 

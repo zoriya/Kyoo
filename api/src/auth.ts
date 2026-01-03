@@ -94,8 +94,8 @@ const User = t.Object({
 	id: t.String({ format: "uuid" }),
 	username: t.String(),
 	email: t.String({ format: "email" }),
-	createdDate: t.String({ format: "date-time" }),
-	lastSeen: t.String({ format: "date-time" }),
+	createdDate: t.Date(),
+	lastSeen: t.Date(),
 	claims: t.Record(t.String(), t.Any()),
 	oidc: t.Record(
 		t.String(),

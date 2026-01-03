@@ -48,3 +48,20 @@ export const displayRuntime = (runtime: number | null) => {
 	if (runtime < 60) return `${runtime}min`;
 	return `${Math.floor(runtime / 60)}h${runtime % 60}`;
 };
+
+// shuffle an array in place, stolen from https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+export function shuffle<T>(array: T[]): T[] {
+	let currentIndex = array.length;
+
+	while (currentIndex !== 0) {
+		const randomIndex = Math.floor(Math.random() * currentIndex);
+		currentIndex--;
+
+		[array[currentIndex], array[randomIndex]] = [
+			array[randomIndex],
+			array[currentIndex],
+		];
+	}
+
+	return array;
+}

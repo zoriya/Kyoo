@@ -250,7 +250,7 @@ const videoRelations = {
 				json: jsonbBuildObject<Progress>({
 					percent: history.percent,
 					time: history.time,
-					playedDate: sql`to_char(${history.playedDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+					playedDate: history.playedDate,
 					videoId: videos.id,
 				}),
 			})
@@ -286,9 +286,6 @@ const videoRelations = {
 							number: entries.episodeNumber,
 							videos: entryVideosQ.videos,
 							progress: mapProgress({ aliased: false }),
-							createdAt: sql`to_char(${entries.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
-							updatedAt: sql`to_char(${entries.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
-							availableSince: sql`to_char(${entries.availableSince}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
 						}),
 					),
 					sql`'[]'::jsonb`,
@@ -318,16 +315,11 @@ const videoRelations = {
 			)
 			.as("t");
 
-		const { startedAt, lastPlayedAt, completedAt, ...watchlistCols } =
-			getColumns(watchlist);
 		const watchStatusQ = db
 			.select({
 				watchStatus: jsonbBuildObject<MovieWatchStatus & SerieWatchStatus>({
-					...watchlistCols,
+					...getColumns(watchlist),
 					percent: watchlist.seenCount,
-					startedAt: sql<string>`to_char(${startedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
-					lastPlayedAt: sql<string>`to_char(${lastPlayedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
-					completedAt: sql<string>`to_char(${completedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
 				}).as("watchStatus"),
 			})
 			.from(watchlist)
@@ -349,8 +341,6 @@ const videoRelations = {
 					airDate: shows.startAir,
 					kind: sql<any>`${shows.kind}`,
 					isAvailable: sql<boolean>`${shows.availableCount} != 0`,
-					createdAt: sql`to_char(${shows.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
-					updatedAt: sql`to_char(${shows.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
 
 					...(preferOriginal && {
 						poster: sql<Image>`coalesce(nullif(${shows.original}->'poster', 'null'::jsonb), ${transQ.poster})`,
@@ -404,8 +394,6 @@ function getNextVideoEntry({
 					number: entries.episodeNumber,
 					videos: entryVideosQ.videos,
 					progress: mapProgress({ aliased: false }),
-					createdAt: sql`to_char(${entries.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
-					updatedAt: sql`to_char(${entries.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
 				},
 			}).as("json"),
 		})
