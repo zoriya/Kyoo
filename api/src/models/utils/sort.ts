@@ -41,12 +41,12 @@ export const Sort = (
 		.Transform(
 			t.Array(
 				t.Union([
+					t.TemplateLiteral("random:${number}"),
 					t.UnionEnum([
+						"random",
 						...Object.keys(values),
 						...Object.keys(values).map((x) => `-${x}`),
-						"random",
-					] as any),
-					t.TemplateLiteral("random:${number}"),
+					]),
 				]),
 				{
 					default: def,

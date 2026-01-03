@@ -39,14 +39,14 @@ describe("Set & get history", () => {
 				videoId: madeInAbyssVideo.id,
 				percent: 58,
 				time: 28 * 60 + 12,
-				playedDate: "2025-02-01",
+				playedDate: new Date("2025-02-01"),
 			},
 			{
 				entry: bubble.slug,
 				videoId: null,
 				percent: 100,
 				time: 2 * 60,
-				playedDate: "2025-02-02",
+				playedDate: new Date("2025-02-02"),
 			},
 		]);
 		expectStatus(r, b).toBe(201);
@@ -74,7 +74,7 @@ describe("Set & get history", () => {
 				videoId: madeInAbyssVideo.id,
 				percent: 100,
 				time: 38 * 60,
-				playedDate: "2025-02-03",
+				playedDate: new Date("2025-02-03"),
 			},
 		]);
 		expectStatus(r, b).toBe(201);
@@ -109,7 +109,7 @@ describe("Set & get history", () => {
 			percent: 100,
 			time: 38 * 60,
 			videoId: madeInAbyssVideo.id,
-			playedDate: "2025-02-03T00:00:00Z",
+			playedDate: "2025-02-03T00:00:00.000Z",
 		});
 	});
 
@@ -122,7 +122,7 @@ describe("Set & get history", () => {
 			percent: 100,
 			time: 38 * 60,
 			videoId: madeInAbyssVideo.id,
-			playedDate: "2025-02-03T00:00:00Z",
+			playedDate: "2025-02-03T00:00:00.000Z",
 		});
 	});
 
@@ -137,13 +137,13 @@ describe("Set & get history", () => {
 		expect(body.items[0].watchStatus).toMatchObject({
 			status: "watching",
 			seenCount: 1,
-			startedAt: "2025-02-01T00:00:00Z",
+			startedAt: "2025-02-01T00:00:00.000Z",
 		});
 		expect(body.items[1].slug).toBe(bubble.slug);
 		expect(body.items[1].watchStatus).toMatchObject({
 			status: "completed",
 			percent: 100,
-			completedAt: "2025-02-02T00:00:00Z",
+			completedAt: "2025-02-02T00:00:00.000Z",
 		});
 	});
 });

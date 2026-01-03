@@ -6,12 +6,13 @@ import {
 	jsonb,
 	primaryKey,
 	text,
+	timestamp,
 	unique,
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
 import { shows } from "./shows";
-import { image, language, schema, timestamp } from "./utils";
+import { image, language, schema } from "./utils";
 
 export const season_extid = () =>
 	jsonb()
@@ -44,13 +45,11 @@ export const seasons = schema.table(
 
 		externalId: season_extid(),
 
-		createdAt: timestamp({ withTimezone: true, mode: "iso" })
+		createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+		updatedAt: timestamp({ withTimezone: true })
 			.notNull()
-			.default(sql`now()`),
-		updatedAt: timestamp({ withTimezone: true, mode: "iso" })
-			.notNull()
-			.$onUpdate(() => sql`now()`),
-		nextRefresh: timestamp({ withTimezone: true, mode: "iso" }).notNull(),
+			.$onUpdate(() => new Date()),
+		nextRefresh: timestamp({ withTimezone: true }).notNull(),
 	},
 	(t) => [
 		unique().on(t.showPk, t.seasonNumber),

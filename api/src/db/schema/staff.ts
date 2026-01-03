@@ -4,12 +4,13 @@ import {
 	integer,
 	jsonb,
 	text,
+	timestamp,
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
 import type { Character } from "~/models/staff";
 import { shows } from "./shows";
-import { externalid, image, schema, timestamp } from "./utils";
+import { externalid, image, schema } from "./utils";
 
 export const roleKind = schema.enum("role_kind", [
 	"actor",
@@ -30,12 +31,10 @@ export const staff = schema.table("staff", {
 	image: image(),
 	externalId: externalid(),
 
-	createdAt: timestamp({ withTimezone: true, mode: "iso" })
+	createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+	updatedAt: timestamp({ withTimezone: true })
 		.notNull()
-		.default(sql`now()`),
-	updatedAt: timestamp({ withTimezone: true, mode: "iso" })
-		.notNull()
-		.$onUpdate(() => sql`now()`),
+		.$onUpdate(() => new Date()),
 });
 
 export const roles = schema.table(

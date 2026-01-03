@@ -407,6 +407,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 			}),
 			response: {
 				200: t.Intersect([SerieWatchStatus, DbMetadata]),
+				401: KError,
 				404: KError,
 			},
 			permissions: ["core.read"],

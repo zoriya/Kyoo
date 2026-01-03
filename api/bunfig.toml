@@ -1,2 +1,5 @@
+[console]
+depth = 10
+
 [test]
 preload = ["./tests/setup.ts"]

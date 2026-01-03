@@ -1,6 +1,12 @@
-import { sql } from "drizzle-orm";
-import { index, integer, jsonb, uuid, varchar } from "drizzle-orm/pg-core";
-import { schema, timestamp } from "./utils";
+import {
+	index,
+	integer,
+	jsonb,
+	timestamp,
+	uuid,
+	varchar,
+} from "drizzle-orm/pg-core";
+import { schema } from "./utils";
 
 export const mqueue = schema.table(
 	"mqueue",
@@ -10,9 +16,7 @@ export const mqueue = schema.table(
 		message: jsonb().notNull(),
 		priority: integer().notNull().default(0),
 		attempt: integer().notNull().default(0),
-		createdAt: timestamp({ withTimezone: true, mode: "iso" })
-			.notNull()
-			.default(sql`now()`),
+		createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 	},
 	(t) => [index("mqueue_created").on(t.createdAt)],
 );

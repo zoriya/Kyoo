@@ -40,7 +40,7 @@ describe("nextup", () => {
 		expectStatus(r, b).toBe(200);
 		[r, b] = await setSerieStatus(madeInAbyss.slug, {
 			status: "watching",
-			startedAt: "2024-12-22",
+			startedAt: new Date("2024-12-22"),
 			completedAt: null,
 			score: null,
 		});
@@ -90,14 +90,14 @@ describe("nextup", () => {
 				videoId: madeInAbyssVideo.id,
 				percent: 58,
 				time: 28 * 60 + 12,
-				playedDate: "2025-02-01",
+				playedDate: new Date("2025-02-01"),
 			},
 			{
 				entry: bubble.slug,
 				videoId: null,
 				percent: 100,
 				time: 2 * 60,
-				playedDate: "2025-02-02",
+				playedDate: new Date("2025-02-02"),
 			},
 		]);
 		expectStatus(resp, body).toBe(201);
@@ -113,7 +113,7 @@ describe("nextup", () => {
 			percent: 58,
 			time: 28 * 60 + 12,
 			videoId: madeInAbyssVideo.id,
-			playedDate: "2025-02-01T00:00:00Z",
+			playedDate: "2025-02-01T00:00:00.000Z",
 		});
 
 		[resp, body] = await getMovie(bubble.slug, {});
@@ -121,7 +121,7 @@ describe("nextup", () => {
 		expect(body.watchStatus).toMatchObject({
 			percent: 100,
 			status: "completed",
-			completedAt: "2025-02-02T00:00:00Z",
+			completedAt: "2025-02-02T00:00:00.000Z",
 		});
 
 		[resp, body] = await getNextup("me", {});
@@ -132,7 +132,7 @@ describe("nextup", () => {
 			percent: 58,
 			time: 28 * 60 + 12,
 			videoId: madeInAbyssVideo.id,
-			playedDate: "2025-02-01T00:00:00Z",
+			playedDate: "2025-02-01T00:00:00.000Z",
 		});
 	});
 
@@ -143,7 +143,7 @@ describe("nextup", () => {
 				videoId: madeInAbyssVideo.id,
 				percent: 98,
 				time: 28 * 60 + 12,
-				playedDate: "2025-02-05",
+				playedDate: new Date("2025-02-05"),
 			},
 		]);
 		expectStatus(resp, body).toBe(201);

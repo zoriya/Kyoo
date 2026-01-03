@@ -1,9 +1,9 @@
 import { sql } from "drizzle-orm";
-import { check, integer, primaryKey } from "drizzle-orm/pg-core";
+import { check, integer, primaryKey, timestamp } from "drizzle-orm/pg-core";
 import { entries } from "./entries";
 import { profiles } from "./profiles";
 import { shows } from "./shows";
-import { schema, timestamp } from "./utils";
+import { schema } from "./utils";
 
 export const watchlistStatus = schema.enum("watchlist_status", [
 	"watching",
@@ -29,16 +29,14 @@ export const watchlist = schema.table(
 
 		score: integer(),
 
-		startedAt: timestamp({ withTimezone: true, mode: "iso" }),
-		lastPlayedAt: timestamp({ withTimezone: true, mode: "iso" }),
-		completedAt: timestamp({ withTimezone: true, mode: "iso" }),
+		startedAt: timestamp({ withTimezone: true }),
+		lastPlayedAt: timestamp({ withTimezone: true }),
+		completedAt: timestamp({ withTimezone: true }),
 
-		createdAt: timestamp({ withTimezone: true, mode: "iso" })
+		createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+		updatedAt: timestamp({ withTimezone: true })
 			.notNull()
-			.default(sql`now()`),
-		updatedAt: timestamp({ withTimezone: true, mode: "iso" })
-			.notNull()
-			.$onUpdate(() => sql`now()`),
+			.$onUpdate(() => new Date()),
 	},
 	(t) => [
 		primaryKey({ columns: [t.profilePk, t.showPk] }),

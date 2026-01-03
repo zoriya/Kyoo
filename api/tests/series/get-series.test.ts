@@ -41,5 +41,14 @@ describe("Get series", () => {
 			madeInAbyss.entries[0].translations.en.name,
 		);
 		expect(body.firstEntry.videos).toBeArrayOfSize(1);
+		// check that it's an iso datetime
+		console.log(body.createdAt);
+		expect(body.createdAt).toMatch(
+			/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+Z/,
+		);
+		console.log(body.firstEntry.createdAt);
+		expect(body.firstEntry.createdAt).toMatch(
+			/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+Z/,
+		);
 	});
 });

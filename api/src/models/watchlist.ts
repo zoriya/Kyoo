@@ -12,8 +12,8 @@ export type WatchlistStatus = typeof WatchlistStatus.static;
 export const SerieWatchStatus = t.Object({
 	status: WatchlistStatus,
 	score: t.Nullable(t.Integer({ minimum: 0, maximum: 100 })),
-	startedAt: t.Nullable(t.String({ format: "date-time" })),
-	completedAt: t.Nullable(t.String({ format: "date-time" })),
+	startedAt: t.Nullable(t.Date()),
+	completedAt: t.Nullable(t.Date()),
 	seenCount: t.Integer({
 		description: "The number of episodes you watched in this serie.",
 		minimum: 0,

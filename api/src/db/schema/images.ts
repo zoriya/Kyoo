@@ -1,6 +1,13 @@
 import { sql } from "drizzle-orm";
-import { index, integer, jsonb, text, varchar } from "drizzle-orm/pg-core";
-import { schema, timestamp } from "./utils";
+import {
+	index,
+	integer,
+	jsonb,
+	text,
+	timestamp,
+	varchar,
+} from "drizzle-orm/pg-core";
+import { schema } from "./utils";
 
 export const imgStatus = schema.enum("img_status", [
 	"pending",
@@ -19,10 +26,8 @@ export const images = schema.table(
 		priority: integer().notNull().default(0),
 		attempt: integer().notNull().default(0),
 		status: imgStatus().notNull().default("pending"),
-		createdAt: timestamp({ withTimezone: true, mode: "iso" })
-			.notNull()
-			.default(sql`now()`),
-		downloadedAt: timestamp({ withTimezone: true, mode: "iso" }),
+		createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+		downloadedAt: timestamp({ withTimezone: true }),
 	},
 	(t) => [index("imgqueue_sort").on(t.priority, t.attempt, t.createdAt)],
 );

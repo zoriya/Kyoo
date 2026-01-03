@@ -1,5 +1,5 @@
 import {
-	type Column,
+	Column,
 	type ColumnsSelection,
 	getTableColumns,
 	is,
@@ -12,6 +12,8 @@ import {
 	View,
 	ViewBaseConfig,
 	InferSelectModel,
+	isTable,
+	isSQLWrapper,
 } from "drizzle-orm";
 import type { CasingCache } from "drizzle-orm/casing";
 import type { AnyMySqlSelect } from "drizzle-orm/mysql-core";
@@ -162,10 +164,11 @@ export const unnestValues = <
 		.select(
 			Object.fromEntries([
 				...keys.map((x) => [x, sql.raw(`"${dbNames[x]}"`)]),
-				...computed.map((x) => [
-					x,
-					(columns[x].defaultFn?.() ?? columns[x].onUpdateFn!()).as(dbNames[x]),
-				]),
+				...computed.map((x) => {
+					let def = columns[x].defaultFn?.() ?? columns[x].onUpdateFn!();
+					if (!isSQLWrapper(def)) def = sql`${def}`;
+					return [x, def.as(dbNames[x])];
+				}),
 			]) as {
 				[k in keyof typeof typeInfo.$inferInsert]-?: SQL.Aliased<
 					(typeof typeInfo.$inferInsert)[k]
@@ -253,11 +256,5 @@ export const isUniqueConstraint = (e: unknown): boolean => {
 		cause != null &&
 		"code" in cause &&
 		cause.code === "23505"
-	);
-};
-
-export const normalizeDate = (date: Column) => {
-	return sql<string>`to_char(${date}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`.as(
-		date.name,
 	);
 };

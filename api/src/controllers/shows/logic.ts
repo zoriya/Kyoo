@@ -18,7 +18,6 @@ import {
 	jsonbAgg,
 	jsonbBuildObject,
 	jsonbObjectAgg,
-	normalizeDate,
 	sqlarr,
 } from "~/db/utils";
 import type { Entry } from "~/models/entry";
@@ -47,10 +46,6 @@ export const watchStatusQ = db
 	.select({
 		...getColumns(watchlist),
 		percent: sql<number>`${watchlist.seenCount}`.as("percent"),
-		// needed when watchStatusQ is embedded in a jsonbBuildObject
-		startedAt: normalizeDate(watchlist.startedAt),
-		lastPlayedAt: normalizeDate(watchlist.lastPlayedAt),
-		completedAt: normalizeDate(watchlist.completedAt),
 	})
 	.from(watchlist)
 	.innerJoin(profiles, eq(watchlist.profilePk, profiles.pk))
@@ -130,7 +125,6 @@ export const showRelations = {
 			.as("translations");
 	},
 	studios: ({ languages }: { languages: string[] }) => {
-		const { pk: _, createdAt, updatedAt, ...studioCol } = getColumns(studios);
 		const studioTransQ = db
 			.selectDistinctOn([studioTranslations.pk])
 			.from(studioTranslations)
@@ -146,10 +140,8 @@ export const showRelations = {
 				json: coalesce(
 					jsonbAgg(
 						jsonbBuildObject<Studio>({
+							...getColumns(studios),
 							...studioTrans,
-							...studioCol,
-							createdAt: normalizeDate(createdAt),
-							updatedAt: normalizeDate(updatedAt),
 						}),
 					),
 					sql`'[]'::jsonb`,
@@ -204,8 +196,6 @@ export const showRelations = {
 					number: entries.episodeNumber,
 					videos: entryVideosQ.videos,
 					progress: mapProgress({ aliased: false }),
-					createdAt: normalizeDate(entries.createdAt),
-					updatedAt: normalizeDate(entries.updatedAt),
 				}).as("firstEntry"),
 			})
 			.from(entries)
@@ -228,8 +218,6 @@ export const showRelations = {
 					number: entries.episodeNumber,
 					videos: entryVideosQ.videos,
 					progress: mapProgress({ aliased: false }),
-					createdAt: normalizeDate(entries.createdAt),
-					updatedAt: normalizeDate(entries.updatedAt),
 				}).as("nextEntry"),
 			})
 			.from(entries)
