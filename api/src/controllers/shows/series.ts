@@ -16,8 +16,8 @@ import {
 	processLanguages,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
-import { getShows, showFilters, showSort } from "./logic";
 import { toQueryStr } from "~/utils";
+import { getShows, showFilters, showSort } from "./logic";
 
 export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 	.model({

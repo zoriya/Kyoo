@@ -14,7 +14,7 @@ export function getYear(date: string) {
 }
 
 export type Prettify<T> = {
-	[K in keyof T]: Prettify<T[K]>;
+	[K in keyof T]: T[K];
 } & {};
 
 // Returns either a filesystem-backed file, or a S3-backed file,

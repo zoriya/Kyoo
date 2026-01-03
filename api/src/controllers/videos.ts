@@ -34,7 +34,6 @@ import {
 	jsonbAgg,
 	jsonbBuildObject,
 	jsonbObjectAgg,
-	normalizeDate,
 	sqlarr,
 	unnest,
 	unnestValues,
@@ -251,7 +250,7 @@ const videoRelations = {
 				json: jsonbBuildObject<Progress>({
 					percent: history.percent,
 					time: history.time,
-					playedDate: normalizeDate(history.playedDate),
+					playedDate: history.playedDate,
 					videoId: videos.id,
 				}),
 			})
@@ -287,9 +286,6 @@ const videoRelations = {
 							number: entries.episodeNumber,
 							videos: entryVideosQ.videos,
 							progress: mapProgress({ aliased: false }),
-							createdAt: normalizeDate(entries.createdAt),
-							updatedAt: normalizeDate(entries.updatedAt),
-							availableSince: normalizeDate(entries.availableSince),
 						}),
 					),
 					sql`'[]'::jsonb`,
@@ -319,16 +315,11 @@ const videoRelations = {
 			)
 			.as("t");
 
-		const { startedAt, lastPlayedAt, completedAt, ...watchlistCols } =
-			getColumns(watchlist);
 		const watchStatusQ = db
 			.select({
 				watchStatus: jsonbBuildObject<MovieWatchStatus & SerieWatchStatus>({
-					...watchlistCols,
+					...getColumns(watchlist),
 					percent: watchlist.seenCount,
-					startedAt: normalizeDate(startedAt),
-					lastPlayedAt: normalizeDate(lastPlayedAt),
-					completedAt: normalizeDate(completedAt),
 				}).as("watchStatus"),
 			})
 			.from(watchlist)
@@ -350,8 +341,6 @@ const videoRelations = {
 					airDate: shows.startAir,
 					kind: sql<any>`${shows.kind}`,
 					isAvailable: sql<boolean>`${shows.availableCount} != 0`,
-					createdAt: normalizeDate(shows.createdAt),
-					updatedAt: normalizeDate(shows.updatedAt),
 
 					...(preferOriginal && {
 						poster: sql<Image>`coalesce(nullif(${shows.original}->'poster', 'null'::jsonb), ${transQ.poster})`,
@@ -405,8 +394,6 @@ function getNextVideoEntry({
 					number: entries.episodeNumber,
 					videos: entryVideosQ.videos,
 					progress: mapProgress({ aliased: false }),
-					createdAt: normalizeDate(entries.createdAt),
-					updatedAt: normalizeDate(entries.updatedAt),
 				},
 			}).as("json"),
 		})

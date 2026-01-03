@@ -9,6 +9,7 @@ import {
 	primaryKey,
 	smallint,
 	text,
+	timestamp,
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
@@ -17,7 +18,7 @@ import { entries } from "./entries";
 import { seasons } from "./seasons";
 import { roles } from "./staff";
 import { showStudioJoin } from "./studios";
-import { externalid, image, language, schema, timestamp } from "./utils";
+import { externalid, image, language, schema } from "./utils";
 
 export const showKind = schema.enum("show_kind", [
 	"serie",
@@ -86,13 +87,11 @@ export const shows = schema.table(
 
 		externalId: externalid(),
 
-		createdAt: timestamp({ withTimezone: true, mode: "iso" })
+		createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+		updatedAt: timestamp({ withTimezone: true })
 			.notNull()
-			.default(sql`now()`),
-		updatedAt: timestamp({ withTimezone: true, mode: "iso" })
-			.notNull()
-			.$onUpdate(() => sql`now()`),
-		nextRefresh: timestamp({ withTimezone: true, mode: "iso" }).notNull(),
+			.$onUpdate(() => new Date()),
+		nextRefresh: timestamp({ withTimezone: true }).notNull(),
 	},
 	(t) => [
 		check("rating_valid", sql`${t.rating} between 0 and 100`),

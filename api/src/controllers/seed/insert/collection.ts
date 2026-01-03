@@ -18,7 +18,7 @@ export const insertCollection = record(
 			| ({ kind: "movie" } & SeedMovie)
 			| ({ kind: "serie" } & SeedSerie)
 		) & {
-			nextRefresh: string;
+			nextRefresh: Date;
 		},
 	) => {
 		if (!collection) return null;

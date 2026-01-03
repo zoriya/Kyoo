@@ -18,7 +18,6 @@ import {
 	jsonbAgg,
 	jsonbBuildObject,
 	jsonbObjectAgg,
-	normalizeDate,
 	sqlarr,
 } from "~/db/utils";
 import {
@@ -173,9 +172,6 @@ const entryRelations = {
 			.select({
 				json: jsonbBuildObject<Show>({
 					...getColumns(shows),
-					createdAt: normalizeDate(shows.createdAt),
-					updatedAt: normalizeDate(shows.updatedAt),
-
 					airDate: shows.startAir,
 					isAvailable: sql<boolean>`${shows.availableCount} != 0`,
 					...getColumns(transQ),
@@ -232,7 +228,7 @@ export const mapProgress = ({ aliased }: { aliased: boolean }) => {
 	const ret = {
 		time: coalesce(time, sql<number>`0`),
 		percent: coalesce(percent, sql<number>`0`),
-		playedDate: normalizeDate(playedDate),
+		playedDate: sql<Date>`${playedDate}`,
 		videoId: sql<string>`${videoId}`,
 	};
 	if (!aliased) return ret;

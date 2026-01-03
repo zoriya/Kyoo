@@ -177,7 +177,7 @@ async function updateWatchlist(
 	histArr: {
 		entryPk: number;
 		percent: number;
-		playedDate: string;
+		playedDate: Date;
 	}[],
 ) {
 	if (histArr.length === 0) return;

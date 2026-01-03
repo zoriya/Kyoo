@@ -10,7 +10,7 @@ export const Progress = t.Object({
 				This value is null if the entry was never watched or is finished.
 			`,
 	}),
-	playedDate: t.Nullable(t.String({ format: "date-time" })),
+	playedDate: t.Nullable(t.Date()),
 	videoId: t.Nullable(
 		t.String({
 			format: "uuid",

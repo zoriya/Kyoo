@@ -8,5 +8,5 @@ export const guessNextRefresh = (airDate: Date | string) => {
 	if (days <= 4) ret.setDate(ret.getDate() + 4);
 	else if (days <= 21) ret.setDate(ret.getDate() + 14);
 	else ret.setMonth(ret.getMonth() + 2);
-	return ret.toISOString().substring(0, 10);
+	return ret;
 };
