@@ -34,6 +34,7 @@ import {
 	jsonbAgg,
 	jsonbBuildObject,
 	jsonbObjectAgg,
+	normalizeDate,
 	sqlarr,
 	unnest,
 	unnestValues,
@@ -250,7 +251,7 @@ const videoRelations = {
 				json: jsonbBuildObject<Progress>({
 					percent: history.percent,
 					time: history.time,
-					playedDate: sql`to_char(${history.playedDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+					playedDate: normalizeDate(history.playedDate),
 					videoId: videos.id,
 				}),
 			})
@@ -286,9 +287,9 @@ const videoRelations = {
 							number: entries.episodeNumber,
 							videos: entryVideosQ.videos,
 							progress: mapProgress({ aliased: false }),
-							createdAt: sql`to_char(${entries.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
-							updatedAt: sql`to_char(${entries.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
-							availableSince: sql`to_char(${entries.availableSince}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+							createdAt: normalizeDate(entries.createdAt),
+							updatedAt: normalizeDate(entries.updatedAt),
+							availableSince: normalizeDate(entries.availableSince),
 						}),
 					),
 					sql`'[]'::jsonb`,
@@ -325,9 +326,9 @@ const videoRelations = {
 				watchStatus: jsonbBuildObject<MovieWatchStatus & SerieWatchStatus>({
 					...watchlistCols,
 					percent: watchlist.seenCount,
-					startedAt: sql<string>`to_char(${startedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
-					lastPlayedAt: sql<string>`to_char(${lastPlayedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
-					completedAt: sql<string>`to_char(${completedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+					startedAt: normalizeDate(startedAt),
+					lastPlayedAt: normalizeDate(lastPlayedAt),
+					completedAt: normalizeDate(completedAt),
 				}).as("watchStatus"),
 			})
 			.from(watchlist)
@@ -349,8 +350,8 @@ const videoRelations = {
 					airDate: shows.startAir,
 					kind: sql<any>`${shows.kind}`,
 					isAvailable: sql<boolean>`${shows.availableCount} != 0`,
-					createdAt: sql`to_char(${shows.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
-					updatedAt: sql`to_char(${shows.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+					createdAt: normalizeDate(shows.createdAt),
+					updatedAt: normalizeDate(shows.updatedAt),
 
 					...(preferOriginal && {
 						poster: sql<Image>`coalesce(nullif(${shows.original}->'poster', 'null'::jsonb), ${transQ.poster})`,
@@ -404,8 +405,8 @@ function getNextVideoEntry({
 					number: entries.episodeNumber,
 					videos: entryVideosQ.videos,
 					progress: mapProgress({ aliased: false }),
-					createdAt: sql`to_char(${entries.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
-					updatedAt: sql`to_char(${entries.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+					createdAt: normalizeDate(entries.createdAt),
+					updatedAt: normalizeDate(entries.updatedAt),
 				},
 			}).as("json"),
 		})

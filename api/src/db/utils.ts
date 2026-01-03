@@ -255,3 +255,9 @@ export const isUniqueConstraint = (e: unknown): boolean => {
 		cause.code === "23505"
 	);
 };
+
+export const normalizeDate = (date: Column) => {
+	return sql<string>`to_char(${date}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`.as(
+		date.name,
+	);
+};
