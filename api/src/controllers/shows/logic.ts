@@ -18,6 +18,7 @@ import {
 	jsonbAgg,
 	jsonbBuildObject,
 	jsonbObjectAgg,
+	normalizeDate,
 	sqlarr,
 } from "~/db/utils";
 import type { Entry } from "~/models/entry";
@@ -46,9 +47,13 @@ export const watchStatusQ = db
 	.select({
 		...getColumns(watchlist),
 		percent: sql<number>`${watchlist.seenCount}`.as("percent"),
+		// needed when watchStatusQ is embedded in a jsonbBuildObject
+		startedAt: normalizeDate(watchlist.startedAt),
+		lastPlayedAt: normalizeDate(watchlist.lastPlayedAt),
+		completedAt: normalizeDate(watchlist.completedAt),
 	})
 	.from(watchlist)
-	.leftJoin(profiles, eq(watchlist.profilePk, profiles.pk))
+	.innerJoin(profiles, eq(watchlist.profilePk, profiles.pk))
 	.where(eq(profiles.id, sql.placeholder("userId")))
 	.as("watchstatus");
 
@@ -143,8 +148,8 @@ export const showRelations = {
 						jsonbBuildObject<Studio>({
 							...studioTrans,
 							...studioCol,
-							createdAt: sql`to_char(${createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
-							updatedAt: sql`to_char(${updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+							createdAt: normalizeDate(createdAt),
+							updatedAt: normalizeDate(updatedAt),
 						}),
 					),
 					sql`'[]'::jsonb`,
@@ -199,8 +204,8 @@ export const showRelations = {
 					number: entries.episodeNumber,
 					videos: entryVideosQ.videos,
 					progress: mapProgress({ aliased: false }),
-					createdAt: sql`to_char(${entries.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
-					updatedAt: sql`to_char(${entries.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+					createdAt: normalizeDate(entries.createdAt),
+					updatedAt: normalizeDate(entries.updatedAt),
 				}).as("firstEntry"),
 			})
 			.from(entries)
@@ -223,8 +228,8 @@ export const showRelations = {
 					number: entries.episodeNumber,
 					videos: entryVideosQ.videos,
 					progress: mapProgress({ aliased: false }),
-					createdAt: sql`to_char(${entries.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
-					updatedAt: sql`to_char(${entries.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+					createdAt: normalizeDate(entries.createdAt),
+					updatedAt: normalizeDate(entries.updatedAt),
 				}).as("nextEntry"),
 			})
 			.from(entries)

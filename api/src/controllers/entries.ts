@@ -18,6 +18,7 @@ import {
 	jsonbAgg,
 	jsonbBuildObject,
 	jsonbObjectAgg,
+	normalizeDate,
 	sqlarr,
 } from "~/db/utils";
 import {
@@ -32,7 +33,6 @@ import {
 } from "~/models/entry";
 import { KError } from "~/models/error";
 import { madeInAbyss } from "~/models/examples";
-import { Movie } from "~/models/movie";
 import { Show } from "~/models/show";
 import type { Image } from "~/models/utils";
 import {
@@ -173,6 +173,9 @@ const entryRelations = {
 			.select({
 				json: jsonbBuildObject<Show>({
 					...getColumns(shows),
+					createdAt: normalizeDate(shows.createdAt),
+					updatedAt: normalizeDate(shows.updatedAt),
+
 					airDate: shows.startAir,
 					isAvailable: sql<boolean>`${shows.availableCount} != 0`,
 					...getColumns(transQ),
@@ -229,7 +232,7 @@ export const mapProgress = ({ aliased }: { aliased: boolean }) => {
 	const ret = {
 		time: coalesce(time, sql<number>`0`),
 		percent: coalesce(percent, sql<number>`0`),
-		playedDate: sql<string>`to_char(${playedDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+		playedDate: normalizeDate(playedDate),
 		videoId: sql<string>`${videoId}`,
 	};
 	if (!aliased) return ret;
