@@ -491,10 +491,11 @@ export const entriesH = new Elysia({ tags: ["series"] })
 		async ({
 			query: { limit, after, query, filter },
 			request: { url },
-			headers,
+			headers: { "accept-language": languages, ...headers },
 			jwt: { sub, settings },
 		}) => {
 			const sort = newsSort;
+			const langs = processLanguages(languages);
 			const items = (await getEntries({
 				limit,
 				after,
@@ -505,7 +506,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 					ne(entries.kind, "extra"),
 					filter,
 				),
-				languages: ["extra"],
+				languages: langs,
 				userId: sub,
 				relations: ["show"],
 				preferOriginal: settings.preferOriginal,
@@ -515,6 +516,12 @@ export const entriesH = new Elysia({ tags: ["series"] })
 		},
 		{
 			detail: { description: "Get new movies/episodes added recently." },
+			headers: t.Object(
+				{
+					"accept-language": AcceptLanguage({ autoFallback: true }),
+				},
+				{ additionalProperties: true },
+			),
 			query: t.Object({
 				filter: t.Optional(Filter({ def: entryFilters })),
 				query: t.Optional(t.String({ description: description.query })),
