@@ -1,4 +1,7 @@
 import { beforeAll } from "bun:test";
+import { setupLogging } from "../src/logtape";
+
+await setupLogging();
 
 process.env.PGDATABASE = "kyoo_test";
 process.env.JWT_SECRET = "this is a secret";

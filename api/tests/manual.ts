@@ -1,6 +1,7 @@
 import { db, migrate } from "~/db";
 import { profiles, shows } from "~/db/schema";
 import { bubble, madeInAbyss } from "~/models/examples";
+import { setupLogging } from "../src/logtape";
 import { createMovie, createSerie, createVideo, getVideos } from "./helpers";
 
 // test file used to run manually using `bun tests/manual.ts`
@@ -8,6 +9,7 @@ import { createMovie, createSerie, createVideo, getVideos } from "./helpers";
 // export JWT_SECRET="this is a secret";
 // export JWT_ISSUER="https://kyoo.zoriya.dev";
 
+await setupLogging();
 await migrate();
 await db.delete(shows);
 await db.delete(profiles);
