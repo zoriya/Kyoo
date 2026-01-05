@@ -14,7 +14,15 @@ import {
 	processLanguages,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
-import { getShows, showFilters, showRelations, showSort } from "./logic";
+import {
+	collectionRelations,
+	getShows,
+	movieRelations,
+	serieRelations,
+	showFilters,
+	showRelations,
+	showSort,
+} from "./logic";
 import type { NonEmptyArray } from "elysia/dist/type-system/types";
 import { toQueryStr } from "~/utils";
 
@@ -25,7 +33,11 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 	.use(auth)
 	.get(
 		"random",
-		async ({ status, redirect, query }) => {
+		async ({
+			status,
+			redirect,
+			query: { preferOriginal, with: relations },
+		}) => {
 			const [show] = await db
 				.select({ kind: shows.kind, slug: shows.slug })
 				.from(shows)
@@ -36,8 +48,18 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 					status: 404,
 					message: "No shows in the database.",
 				});
+
+			const availableRelations = {
+				serie: serieRelations,
+				movie: movieRelations,
+				collection: collectionRelations,
+			};
+
 			return redirect(
-				`${prefix}/${show.kind}s/${show.slug}${toQueryStr(query)}`,
+				`${prefix}/${show.kind}s/${show.slug}${toQueryStr({
+					preferOriginal,
+					with: relations.filter((x) => x in availableRelations[show.kind]),
+				})}`,
 			);
 		},
 		{

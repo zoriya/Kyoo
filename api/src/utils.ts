@@ -62,6 +62,7 @@ export const toQueryStr = (query: Record<string, unknown>) => {
 	if (entries.length === 0) return "";
 	return `?${entries
 		.map(([k, v]) => {
+			if (!v) return null;
 			if (!Array.isArray(v)) return `${k}=${v}`;
 			if (v.length === 0) return null;
 			return `${k}=${v.join(",")}`;

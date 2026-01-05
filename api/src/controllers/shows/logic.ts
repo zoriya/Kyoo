@@ -185,6 +185,7 @@ export const showRelations = {
 			.where(eq(entryVideoJoin.entryPk, entries.pk))
 			.as("videos");
 	},
+	// only available for series
 	firstEntry: ({ languages }: { languages: string[] }) => {
 		const transQ = getEntryTransQ(languages);
 
@@ -227,6 +228,21 @@ export const showRelations = {
 			.where(eq(watchStatusQ.nextEntry, entries.pk))
 			.as("nextEntry");
 	},
+};
+export const serieRelations = {
+	translations: showRelations.translations,
+	studios: showRelations.studios,
+	firstEntry: showRelations.firstEntry,
+	nextEntry: showRelations.nextEntry,
+};
+export const movieRelations = {
+	translations: showRelations.translations,
+	studios: showRelations.studios,
+	videos: showRelations.videos,
+};
+export const collectionRelations = {
+	translations: showRelations.translations,
+	studios: showRelations.studios,
 };
 
 export async function getShows({
