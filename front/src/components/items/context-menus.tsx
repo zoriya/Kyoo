@@ -1,4 +1,3 @@
-import Refresh from "@material-symbols/svg-400/rounded/autorenew.svg";
 // import Download from "@material-symbols/svg-400/rounded/download.svg";
 import Info from "@material-symbols/svg-400/rounded/info.svg";
 import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
@@ -8,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 import { WatchStatusV } from "~/models";
-import { HR, IconButton, Menu, tooltip } from "~/primitives";
+import { IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { useMutation } from "~/query";
 import { watchListIcon } from "./watchlist-info";

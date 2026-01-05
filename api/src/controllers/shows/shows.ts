@@ -1,5 +1,6 @@
 import { and, isNull, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
+import type { NonEmptyArray } from "elysia/dist/type-system/types";
 import { auth } from "~/auth";
 import { prefix } from "~/base";
 import { db } from "~/db";
@@ -14,6 +15,7 @@ import {
 	processLanguages,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
+import { toQueryStr } from "~/utils";
 import {
 	collectionRelations,
 	getShows,
@@ -23,8 +25,6 @@ import {
 	showRelations,
 	showSort,
 } from "./logic";
-import type { NonEmptyArray } from "elysia/dist/type-system/types";
-import { toQueryStr } from "~/utils";
 
 export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 	.model({

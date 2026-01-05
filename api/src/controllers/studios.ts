@@ -33,8 +33,8 @@ import {
 	sortToSql,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
-import { getShows, showFilters, showSort } from "./shows/logic";
 import { toQueryStr } from "~/utils";
+import { getShows, showFilters, showSort } from "./shows/logic";
 
 const studioSort = Sort(
 	{

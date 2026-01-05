@@ -3,7 +3,7 @@ import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import { min, percent, px, rem, useYoshiki, vh } from "yoshiki/native";
+import { min, percent, px, rem, vh } from "yoshiki/native";
 import { type KImage, Show } from "~/models";
 import {
 	ContrastArea,

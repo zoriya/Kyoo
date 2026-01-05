@@ -24,10 +24,7 @@ import {
 	MeterProvider,
 	PeriodicExportingMetricReader,
 } from "@opentelemetry/sdk-metrics";
-import type {
-	SpanExporter,
-	SpanProcessor,
-} from "@opentelemetry/sdk-trace-base";
+import type { SpanExporter } from "@opentelemetry/sdk-trace-base";
 import {
 	BatchSpanProcessor,
 	NodeTracerProvider,

@@ -4,7 +4,7 @@ import BookmarkRemove from "@material-symbols/svg-400/rounded/bookmark_remove.sv
 import Bookmark from "@material-symbols/svg-400/rounded/bookmark-fill.svg";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
-import type { Movie, Serie } from "~/models";
+import type { Serie } from "~/models";
 import { IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { useMutation } from "~/query";

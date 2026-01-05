@@ -2,11 +2,11 @@ import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
-import { type Theme, calc, percent, px, rem, useYoshiki } from "yoshiki/native";
+import { calc, percent, px, rem, type Theme, useYoshiki } from "yoshiki/native";
 import { ItemGrid } from "~/components/items";
 import { ItemContext } from "~/components/items/context-menus";
+import { ItemWatchStatus } from "~/components/items/item-helpers";
 import { type Genre, type KImage, Show, type WatchStatusV } from "~/models";
-import { getDisplayDate } from "~/utils";
 import {
 	Chip,
 	focusReset,
@@ -21,7 +21,7 @@ import {
 	ts,
 } from "~/primitives";
 import { InfiniteFetch, type Layout, type QueryIdentifier } from "~/query";
-import { ItemWatchStatus } from "~/components/items/item-helpers";
+import { getDisplayDate } from "~/utils";
 
 export const ItemDetails = ({
 	slug,

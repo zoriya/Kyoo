@@ -1,8 +1,10 @@
 import {
-	Column,
+	type Column,
 	type ColumnsSelection,
 	getTableColumns,
+	type InferSelectModel,
 	is,
+	isSQLWrapper,
 	type SQL,
 	type SQLWrapper,
 	type Subquery,
@@ -11,9 +13,6 @@ import {
 	type TableConfig,
 	View,
 	ViewBaseConfig,
-	InferSelectModel,
-	isTable,
-	isSQLWrapper,
 } from "drizzle-orm";
 import type { CasingCache } from "drizzle-orm/casing";
 import type { AnyMySqlSelect } from "drizzle-orm/mysql-core";
