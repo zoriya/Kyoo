@@ -39,7 +39,7 @@ const BaseSerie = t.Object({
 	),
 	startAir: t.Nullable(t.String({ format: "date" })),
 	endAir: t.Nullable(t.String({ format: "date" })),
-	nextRefresh: t.String({ format: "date-time" }),
+	nextRefresh: t.Date(),
 	externalId: ExternalId(),
 });
 
@@ -77,6 +77,10 @@ export const Serie = t.Composite([
 export type Serie = Prettify<typeof Serie.static>;
 
 export const FullSerie = t.Intersect([
+	// we need the kind because /shows/random can redirect to /series/:id
+	t.Object({
+		kind: t.Literal("serie"),
+	}),
 	Serie,
 	t.Object({
 		translations: t.Optional(TranslationRecord(SerieTranslation)),

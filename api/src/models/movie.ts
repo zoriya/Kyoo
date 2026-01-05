@@ -29,7 +29,7 @@ const BaseMovie = t.Object({
 		t.Number({ minimum: 0, description: "Runtime of the movie in minutes." }),
 	),
 	airDate: t.Nullable(t.String({ format: "date" })),
-	nextRefresh: t.String({ format: "date-time" }),
+	nextRefresh: t.Date(),
 	externalId: ExternalId(),
 });
 
@@ -62,6 +62,10 @@ export const Movie = t.Composite([
 export type Movie = Prettify<typeof Movie.static>;
 
 export const FullMovie = t.Intersect([
+	// we need the kind because /shows/random can redirect to /movies/:id
+	t.Object({
+		kind: t.Literal("movie"),
+	}),
 	Movie,
 	t.Object({
 		translations: t.Optional(TranslationRecord(MovieTranslation)),

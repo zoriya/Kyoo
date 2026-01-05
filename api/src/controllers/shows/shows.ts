@@ -1,5 +1,6 @@
 import { and, isNull, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
+import type { NonEmptyArray } from "elysia/dist/type-system/types";
 import { auth } from "~/auth";
 import { prefix } from "~/base";
 import { db } from "~/db";
@@ -14,7 +15,16 @@ import {
 	processLanguages,
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
-import { getShows, showFilters, showSort } from "./logic";
+import { toQueryStr } from "~/utils";
+import {
+	collectionRelations,
+	getShows,
+	movieRelations,
+	serieRelations,
+	showFilters,
+	showRelations,
+	showSort,
+} from "./logic";
 
 export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 	.model({
@@ -23,7 +33,11 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 	.use(auth)
 	.get(
 		"random",
-		async ({ status, redirect }) => {
+		async ({
+			status,
+			redirect,
+			query: { preferOriginal, with: relations },
+		}) => {
 			const [show] = await db
 				.select({ kind: shows.kind, slug: shows.slug })
 				.from(shows)
@@ -34,12 +48,36 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 					status: 404,
 					message: "No shows in the database.",
 				});
-			return redirect(`${prefix}/${show.kind}s/${show.slug}`);
+
+			const availableRelations = {
+				serie: serieRelations,
+				movie: movieRelations,
+				collection: collectionRelations,
+			};
+
+			return redirect(
+				`${prefix}/${show.kind}s/${show.slug}${toQueryStr({
+					preferOriginal,
+					with: relations.filter((x) => x in availableRelations[show.kind]),
+				})}`,
+			);
 		},
 		{
 			detail: {
 				description: "Get a random movie/serie/collection",
 			},
+			query: t.Object({
+				preferOriginal: t.Optional(
+					t.Boolean({ description: desc.preferOriginal }),
+				),
+				with: t.Array(
+					t.UnionEnum(Object.keys(showRelations) as NonEmptyArray<string>),
+					{
+						default: [],
+						description: "Include related resources in the response.",
+					},
+				),
+			}),
 			response: {
 				302: t.Void({
 					description: "Redirected to the appropriate get endpoint.",

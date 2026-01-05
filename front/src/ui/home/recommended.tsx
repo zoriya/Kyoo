@@ -1,64 +1,35 @@
-/*
- * Kyoo - A portable and vast media library solution.
- * Copyright (c) Kyoo.
- *
- * See AUTHORS.md and LICENSE file in the project root for full license information.
- *
- * Kyoo is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Kyoo is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
- */
-
-import {
-	type Genre,
-	type KyooImage,
-	type LibraryItem,
-	LibraryItemP,
-	type QueryIdentifier,
-	type WatchStatusV,
-	getDisplayDate,
-} from "@kyoo/models";
-import {
-	Chip,
-	H3,
-	IconFab,
-	Link,
-	P,
-	Poster,
-	PosterBackground,
-	Skeleton,
-	SubP,
-	focusReset,
-	imageBorderRadius,
-	tooltip,
-	ts,
-} from "@kyoo/primitives";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
-import { type Theme, calc, percent, px, rem, useYoshiki } from "yoshiki/native";
-import { ItemGrid, ItemWatchStatus } from "../browse/grid";
-import { ItemContext } from "../../../../src/ui/info/components/context-menus";
-import type { Layout } from "../fetch";
-import { InfiniteFetch } from "../fetch-infinite";
+import { calc, percent, px, rem, type Theme, useYoshiki } from "yoshiki/native";
+import { ItemGrid } from "~/components/items";
+import { ItemContext } from "~/components/items/context-menus";
+import { ItemWatchStatus } from "~/components/items/item-helpers";
+import { type Genre, type KImage, Show, type WatchStatusV } from "~/models";
+import {
+	Chip,
+	focusReset,
+	H3,
+	IconFab,
+	Link,
+	P,
+	PosterBackground,
+	Skeleton,
+	SubP,
+	tooltip,
+	ts,
+} from "~/primitives";
+import { InfiniteFetch, type Layout, type QueryIdentifier } from "~/query";
+import { getDisplayDate } from "~/utils";
 
 export const ItemDetails = ({
 	slug,
-	type,
+	kind,
 	name,
 	tagline,
 	subtitle,
-	overview,
+	description,
 	poster,
 	genres,
 	href,
@@ -68,13 +39,13 @@ export const ItemDetails = ({
 	...props
 }: {
 	slug: string;
-	type: "movie" | "show" | "collection";
+	kind: "movie" | "serie" | "collection";
 	name: string;
 	tagline: string | null;
 	subtitle: string | null;
-	poster: KyooImage | null;
+	poster: KImage | null;
 	genres: Genre[] | null;
-	overview: string | null;
+	description: string | null;
 	href: string;
 	playHref: string | null;
 	watchStatus: WatchStatusV | null;
@@ -104,7 +75,7 @@ export const ItemDetails = ({
 					bottom: 0,
 					flexDirection: "row",
 					bg: (theme) => theme.variant.background,
-					borderRadius: calc(px(imageBorderRadius), "+", ts(0.25)),
+					borderRadius: px(12),
 					overflow: "hidden",
 					borderColor: (theme) => theme.background,
 					borderWidth: ts(0.25),
@@ -137,13 +108,28 @@ export const ItemDetails = ({
 							p: ts(1),
 						})}
 					>
-						<P {...css([{ m: 0, color: (theme: Theme) => theme.colors.white }, "title"])}>{name}</P>
-						{subtitle && <SubP {...css({ m: 0 })}>{subtitle}</SubP>}
+						<P
+							{...css([
+								{ m: 0, color: (theme: Theme) => theme.colors.white },
+								"title",
+							])}
+						>
+							{name}
+						</P>
+						{subtitle && <SubP {...(css({ m: 0 }) as any)}>{subtitle}</SubP>}
 					</View>
-					<ItemWatchStatus watchStatus={watchStatus} unseenEpisodesCount={unseenEpisodesCount} />
+					<ItemWatchStatus
+						watchStatus={watchStatus}
+						unseenEpisodesCount={unseenEpisodesCount}
+					/>
 				</PosterBackground>
 				<View
-					{...css({ flexShrink: 1, flexGrow: 1, justifyContent: "flex-end", marginBottom: px(50) })}
+					{...css({
+						flexShrink: 1,
+						flexGrow: 1,
+						justifyContent: "flex-end",
+						marginBottom: px(50),
+					})}
 				>
 					<View
 						{...css({
@@ -152,20 +138,21 @@ export const ItemDetails = ({
 							alignContent: "flex-start",
 						})}
 					>
-						{type !== "collection" && (
+						{kind !== "collection" && (
 							<ItemContext
-								type={type}
+								kind={kind}
 								slug={slug}
 								status={watchStatus}
 								isOpen={moreOpened}
 								setOpen={(v) => setMoreOpened(v)}
-								force
 							/>
 						)}
 						{tagline && <P {...css({ p: ts(1) })}>{tagline}</P>}
 					</View>
 					<ScrollView {...css({ pX: ts(1) })}>
-						<SubP {...css({ textAlign: "justify" })}>{overview ?? t("show.noOverview")}</SubP>
+						<SubP {...css({ textAlign: "justify" })}>
+							{description ?? t("show.noOverview")}
+						</SubP>
 					</ScrollView>
 				</View>
 			</Link>
@@ -179,10 +166,10 @@ export const ItemDetails = ({
 					right: ts(0.25),
 					borderWidth: ts(0.25),
 					borderColor: "transparent",
-					borderBottomEndRadius: px(imageBorderRadius),
+					borderBottomEndRadius: px(6),
 					overflow: "hidden",
 					// Calculate the size of the poster
-					left: calc(ItemDetails.layout.size, "*", 2 / 3),
+					left: calc(px(ItemDetails.layout.size), "*", 2 / 3),
 					bg: (theme) => theme.themeOverlay,
 					flexDirection: "row",
 					pX: 4,
@@ -191,9 +178,18 @@ export const ItemDetails = ({
 				})}
 			>
 				{genres && (
-					<ScrollView horizontal contentContainerStyle={{ alignItems: "center" }}>
+					<ScrollView
+						horizontal
+						contentContainerStyle={{ alignItems: "center" }}
+					>
 						{genres.map((x, i) => (
-							<Chip key={x ?? i} label={t(`genres.${x}`)} size="small" {...css({ mX: ts(0.5) })} />
+							<Chip
+								key={x ?? i}
+								label={t(`genres.${x}`)}
+								href={"#"}
+								size="small"
+								{...css({ mX: ts(0.5) })}
+							/>
 						))}
 					</ScrollView>
 				)}
@@ -204,7 +200,9 @@ export const ItemDetails = ({
 						as={Link}
 						href={playHref}
 						{...tooltip(t("show.play"))}
-						{...css({ fover: { self: { transform: "scale(1.2)" as any, mX: ts(0.5) } } })}
+						{...css({
+							fover: { self: { transform: "scale(1.2)" as any, mX: ts(0.5) } },
+						})}
 					/>
 				)}
 			</View>
@@ -222,7 +220,7 @@ ItemDetails.Loader = (props: object) => {
 					height: ItemDetails.layout.size,
 					flexDirection: "row",
 					bg: (theme) => theme.variant.background,
-					borderRadius: calc(px(imageBorderRadius), "+", ts(0.25)),
+					borderRadius: px(12),
 					overflow: "hidden",
 					borderColor: (theme) => theme.background,
 					borderWidth: ts(0.25),
@@ -231,9 +229,12 @@ ItemDetails.Loader = (props: object) => {
 				props,
 			)}
 		>
-			<Poster.Loader
+			<PosterBackground
+				src={null}
+				alt=""
+				quality="low"
 				layout={{ height: percent(100) }}
-				{...css({ borderTopRightRadius: 0, borderBottomRightRadius: 0 })}
+				style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
 			>
 				<View
 					{...css({
@@ -248,7 +249,7 @@ ItemDetails.Loader = (props: object) => {
 					<Skeleton {...css({ width: percent(100) })} />
 					<Skeleton {...css({ height: rem(0.8) })} />
 				</View>
-			</Poster.Loader>
+			</PosterBackground>
 			<View {...css({ flexShrink: 1, flexGrow: 1 })}>
 				<View {...css({ flexGrow: 1, flexShrink: 1, pX: ts(1) })}>
 					<Skeleton {...css({ marginVertical: ts(2) })} />
@@ -283,31 +284,42 @@ export const Recommended = () => {
 	const { css } = useYoshiki();
 
 	return (
-		<View {...css({ marginX: ItemGrid.layout.gap, marginTop: ItemGrid.layout.gap })}>
+		<View
+			{...css({ marginX: ItemGrid.layout.gap, marginTop: ItemGrid.layout.gap })}
+		>
 			<H3 {...css({ pX: ts(0.5) })}>{t("home.recommended")}</H3>
 			<InfiniteFetch
 				query={Recommended.query()}
 				layout={ItemDetails.layout}
 				placeholderCount={6}
 				fetchMore={false}
-				nested
 				contentContainerStyle={{ padding: 0, paddingHorizontal: 0 }}
 				Render={({ item }) => (
 					<ItemDetails
 						slug={item.slug}
-						type={item.kind}
+						kind={item.kind}
 						name={item.name}
-						tagline={"tagline" in item ? item.tagline : null}
-						overview={item.overview}
+						tagline={
+							item.kind !== "collection" && "tagline" in item
+								? item.tagline
+								: null
+						}
+						description={item.description}
 						poster={item.poster}
 						subtitle={item.kind !== "collection" ? getDisplayDate(item) : null}
-						genres={"genres" in item ? item.genres : null}
+						genres={
+							item.kind !== "collection" && "genres" in item
+								? item.genres
+								: null
+						}
 						href={item.href}
 						playHref={item.kind !== "collection" ? item.playHref : null}
-						watchStatus={(item.kind !== "collection" && item.watchStatus?.status) || null}
+						watchStatus={
+							(item.kind !== "collection" && item.watchStatus?.status) || null
+						}
 						unseenEpisodesCount={
-							item.kind === "show"
-								? (item.watchStatus?.unseenEpisodesCount ?? item.episodesCount!)
+							item.kind === "serie"
+								? item.availableCount - (item.watchStatus?.seenCount ?? 0)
 								: null
 						}
 					/>
@@ -318,13 +330,13 @@ export const Recommended = () => {
 	);
 };
 
-Recommended.query = (): QueryIdentifier<LibraryItem> => ({
-	parser: LibraryItemP,
+Recommended.query = (): QueryIdentifier<Show> => ({
+	parser: Show,
 	infinite: true,
-	path: ["items"],
+	path: ["api", "shows"],
 	params: {
-		sortBy: "random",
+		sort: "random",
 		limit: 6,
-		fields: ["firstEpisode", "episodesCount", "watchStatus"],
+		with: ["firstEntry"],
 	},
 });

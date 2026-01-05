@@ -177,7 +177,7 @@ async function updateWatchlist(
 	histArr: {
 		entryPk: number;
 		percent: number;
-		playedDate: string;
+		playedDate: Date;
 	}[],
 ) {
 	if (histArr.length === 0) return;
@@ -450,6 +450,12 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 		"/profiles/me/history",
 		async ({ body, jwt: { sub }, status }) => {
 			const profilePk = await getOrCreateProfile(sub);
+			if (!profilePk) {
+				return status(401, {
+					status: 401,
+					message: "Guest don't have history",
+				});
+			}
 
 			const ret = await updateProgress(profilePk, body);
 			return status(ret.status, ret);
@@ -465,6 +471,7 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 						description: "The number of history entry inserted",
 					}),
 				}),
+				401: { ...KError, description: "Non logged users don't have history" },
 				404: {
 					...KError,
 					description: "No entry found with the given id or slug.",

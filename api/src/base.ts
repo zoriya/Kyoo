@@ -34,24 +34,17 @@ export const base = new Elysia({ name: "base" })
 			} catch {}
 		}
 		if (code === "VALIDATION") {
-			const details = JSON.parse(error.message);
-			if (details.code === "KError") {
-				const { code, ...ret } = details;
-				return ret;
-			}
-			details.errors = details.errors.map((x: any) => {
-				const { schema, ...err } = x;
-				return err;
-			});
+			const { schema, ...details } = error as any;
 			return {
 				status: error.status,
-				message: `Validation error on ${details.on}.`,
+				message: `Validation error.`,
 				details: details,
 			} as KError;
 		}
 		if (code === "NOT_FOUND") {
 			return error;
 		}
+		console.error(code, error);
 		logger.error("Elysia encountered an error. code={code} error={error}", {
 			code: code,
 			error: error,

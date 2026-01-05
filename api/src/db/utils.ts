@@ -2,7 +2,9 @@ import {
 	type Column,
 	type ColumnsSelection,
 	getTableColumns,
+	type InferSelectModel,
 	is,
+	isSQLWrapper,
 	type SQL,
 	type SQLWrapper,
 	type Subquery,
@@ -16,6 +18,7 @@ import type { CasingCache } from "drizzle-orm/casing";
 import type { AnyMySqlSelect } from "drizzle-orm/mysql-core";
 import type {
 	AnyPgSelect,
+	PgTable,
 	PgTableWithColumns,
 	SelectedFieldsFlat,
 } from "drizzle-orm/pg-core";
@@ -50,6 +53,21 @@ export function getColumns<
 		: is(table, View)
 			? (table as any)[ViewBaseConfig].selectedFields
 			: table._.selectedFields;
+}
+
+// See https://github.com/drizzle-team/drizzle-orm/issues/2842
+export function rowToModel<
+	TTable extends PgTable,
+	TModel = InferSelectModel<TTable>,
+>(row: Record<string, unknown>, table: TTable): TModel {
+	// @ts-expect-error: drizzle internal
+	const casing = db.dialect.casing as CasingCache;
+	return Object.fromEntries(
+		Object.entries(table).map(([schemaName, schema]) => [
+			schemaName,
+			schema.mapFromDriverValue?.(row[casing.getColumnCasing(schema)] ?? null),
+		]),
+	) as TModel;
 }
 
 // See https://github.com/drizzle-team/drizzle-orm/issues/1728
@@ -145,10 +163,11 @@ export const unnestValues = <
 		.select(
 			Object.fromEntries([
 				...keys.map((x) => [x, sql.raw(`"${dbNames[x]}"`)]),
-				...computed.map((x) => [
-					x,
-					(columns[x].defaultFn?.() ?? columns[x].onUpdateFn!()).as(dbNames[x]),
-				]),
+				...computed.map((x) => {
+					let def = columns[x].defaultFn?.() ?? columns[x].onUpdateFn!();
+					if (!isSQLWrapper(def)) def = sql`${def}`;
+					return [x, def.as(dbNames[x])];
+				}),
 			]) as {
 				[k in keyof typeof typeInfo.$inferInsert]-?: SQL.Aliased<
 					(typeof typeInfo.$inferInsert)[k]

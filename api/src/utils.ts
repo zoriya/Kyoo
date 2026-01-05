@@ -14,7 +14,7 @@ export function getYear(date: string) {
 }
 
 export type Prettify<T> = {
-	[K in keyof T]: Prettify<T[K]>;
+	[K in keyof T]: T[K];
 } & {};
 
 // Returns either a filesystem-backed file, or a S3-backed file,
@@ -56,3 +56,17 @@ export function traverse<T extends Record<string, any>>(
 
 	return result;
 }
+
+export const toQueryStr = (query: Record<string, unknown>) => {
+	const entries = Object.entries(query);
+	if (entries.length === 0) return "";
+	return `?${entries
+		.map(([k, v]) => {
+			if (!v) return null;
+			if (!Array.isArray(v)) return `${k}=${v}`;
+			if (v.length === 0) return null;
+			return `${k}=${v.join(",")}`;
+		})
+		.filter((x) => x)
+		.join("&")}`;
+};

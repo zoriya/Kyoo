@@ -1,3 +1,4 @@
+import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "yoshiki/native";
@@ -23,6 +24,18 @@ export default function Layout() {
 					},
 				}}
 			>
+				<Stack.Screen
+					name="(tabs)"
+					options={({ route }) => {
+						if (getFocusedRouteNameFromRoute(route) === "index") {
+							return {
+								headerTransparent: true,
+								headerStyle: { backgroundColor: undefined },
+							};
+						}
+						return {};
+					}}
+				/>
 				<Stack.Screen
 					name="info/[slug]"
 					options={{

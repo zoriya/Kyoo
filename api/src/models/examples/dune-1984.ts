@@ -14,8 +14,8 @@ export const dune1984Video: Video = {
 		from: "guessit",
 		history: [],
 	},
-	createdAt: "2024-12-02T11:45:12.968Z",
-	updatedAt: "2024-12-02T11:45:12.968Z",
+	createdAt: new Date("2024-12-02T11:45:12.968Z"),
+	updatedAt: new Date("2024-12-02T11:45:12.968Z"),
 };
 
 export const dune1984: SeedMovie = {

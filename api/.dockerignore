@@ -1,6 +1,7 @@
 **
 !/package.json
 !/bun.lock
+!/bunfig.toml
 !/tsconfig.json
 !/patches
 !/src

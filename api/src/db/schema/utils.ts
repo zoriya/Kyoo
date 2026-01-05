@@ -1,4 +1,4 @@
-import { customType, jsonb, pgSchema, varchar } from "drizzle-orm/pg-core";
+import { jsonb, pgSchema, varchar } from "drizzle-orm/pg-core";
 import type { Image } from "~/models/utils";
 
 export const schema = pgSchema("kyoo");
@@ -20,19 +20,3 @@ export const externalid = () =>
 		>()
 		.notNull()
 		.default({});
-
-export const timestamp = customType<{
-	data: string;
-	driverData: string;
-	config: { withTimezone: boolean; precision?: number; mode: "iso" };
-}>({
-	dataType(config) {
-		const precision = config?.precision ? ` (${config.precision})` : "";
-		return `timestamp${precision}${config?.withTimezone ? " with time zone" : ""}`;
-	},
-	fromDriver(value: string): string {
-		// postgres format: 2025-06-22 16:13:37.489301+00
-		// what we want:    2025-06-22T16:13:37Z
-		return `${value.substring(0, 10)}T${value.substring(11, 19)}Z`;
-	},
-});

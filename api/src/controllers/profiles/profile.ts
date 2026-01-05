@@ -3,6 +3,9 @@ import { db } from "~/db";
 import { profiles } from "~/db/schema";
 
 export async function getOrCreateProfile(userId: string) {
+	// id of the guest user
+	if (userId === "00000000-0000-0000-0000-000000000000") return null;
+
 	let [profile] = await db
 		.select({ pk: profiles.pk })
 		.from(profiles)

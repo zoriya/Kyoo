@@ -13,10 +13,12 @@ export type Layout = {
 	layout: "grid" | "horizontal" | "vertical";
 };
 
-export const InfiniteFetch = <Data,>({
+export const InfiniteFetch = <Data, Type extends string = string>({
 	query,
 	placeholderCount = 2,
 	incremental = false,
+	getItemType,
+	getItemSizeMult,
 	Render,
 	Loader,
 	layout,
@@ -31,6 +33,8 @@ export const InfiniteFetch = <Data,>({
 	placeholderCount?: number;
 	layout: Layout;
 	horizontal?: boolean;
+	getItemType?: (item: Data, index: number) => Type;
+	getItemSizeMult?: (item: Data, index: number, type: Type) => number;
 	Render: (props: { item: Data; index: number }) => ReactElement | null;
 	Loader: (props: { index: number }) => ReactElement | null;
 	Empty?: JSX.Element;
@@ -74,11 +78,17 @@ export const InfiniteFetch = <Data,>({
 		<LegendList
 			data={data}
 			recycleItems
+			getItemType={getItemType}
+			estimatedItemSize={getItemSizeMult ? undefined : size}
+			getEstimatedItemSize={
+				getItemSizeMult
+					? (idx, item, type) => getItemSizeMult(item, idx, type as Type) * size
+					: undefined
+			}
 			renderItem={({ item, index }) =>
 				item ? <Render index={index} item={item} /> : <Loader index={index} />
 			}
 			keyExtractor={(item: any, index) => (item ? item.id : index)}
-			estimatedItemSize={size}
 			horizontal={layout.layout === "horizontal"}
 			numColumns={layout.layout === "horizontal" ? 1 : numColumns}
 			onEndReached={fetchMore ? () => fetchNextPage() : undefined}

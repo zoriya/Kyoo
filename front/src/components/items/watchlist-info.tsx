@@ -46,12 +46,13 @@ export const WatchListInfo = ({
 	const { t } = useTranslation();
 
 	const mutation = useMutation({
-		path: [kind, slug, "watchStatus"],
+		path: ["api", `${kind}s`, slug, "watchstatus"],
 		compute: (newStatus: WatchStatus | null) => ({
 			method: newStatus ? "POST" : "DELETE",
-			params: newStatus ? { status: newStatus } : undefined,
+			body: newStatus ? { status: newStatus } : undefined,
 		}),
-		invalidate: [kind, slug],
+		invalidate: ["api", `${kind}s`, slug],
+		// optimistic is a pain to do because shows queries often have query params
 	});
 	if (mutation.isPending) status = mutation.variables;
 

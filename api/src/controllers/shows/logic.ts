@@ -48,7 +48,7 @@ export const watchStatusQ = db
 		percent: sql<number>`${watchlist.seenCount}`.as("percent"),
 	})
 	.from(watchlist)
-	.leftJoin(profiles, eq(watchlist.profilePk, profiles.pk))
+	.innerJoin(profiles, eq(watchlist.profilePk, profiles.pk))
 	.where(eq(profiles.id, sql.placeholder("userId")))
 	.as("watchstatus");
 
@@ -110,7 +110,7 @@ export const showSort = Sort(
 	},
 );
 
-const showRelations = {
+export const showRelations = {
 	translations: () => {
 		const { pk, language, ...trans } = getColumns(showTranslations);
 		return db
@@ -125,7 +125,6 @@ const showRelations = {
 			.as("translations");
 	},
 	studios: ({ languages }: { languages: string[] }) => {
-		const { pk: _, createdAt, updatedAt, ...studioCol } = getColumns(studios);
 		const studioTransQ = db
 			.selectDistinctOn([studioTranslations.pk])
 			.from(studioTranslations)
@@ -141,10 +140,8 @@ const showRelations = {
 				json: coalesce(
 					jsonbAgg(
 						jsonbBuildObject<Studio>({
+							...getColumns(studios),
 							...studioTrans,
-							...studioCol,
-							createdAt: sql`to_char(${createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
-							updatedAt: sql`to_char(${updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
 						}),
 					),
 					sql`'[]'::jsonb`,
@@ -188,6 +185,7 @@ const showRelations = {
 			.where(eq(entryVideoJoin.entryPk, entries.pk))
 			.as("videos");
 	},
+	// only available for series
 	firstEntry: ({ languages }: { languages: string[] }) => {
 		const transQ = getEntryTransQ(languages);
 
@@ -199,8 +197,6 @@ const showRelations = {
 					number: entries.episodeNumber,
 					videos: entryVideosQ.videos,
 					progress: mapProgress({ aliased: false }),
-					createdAt: sql`to_char(${entries.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
-					updatedAt: sql`to_char(${entries.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
 				}).as("firstEntry"),
 			})
 			.from(entries)
@@ -223,8 +219,6 @@ const showRelations = {
 					number: entries.episodeNumber,
 					videos: entryVideosQ.videos,
 					progress: mapProgress({ aliased: false }),
-					createdAt: sql`to_char(${entries.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
-					updatedAt: sql`to_char(${entries.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
 				}).as("nextEntry"),
 			})
 			.from(entries)
@@ -234,6 +228,21 @@ const showRelations = {
 			.where(eq(watchStatusQ.nextEntry, entries.pk))
 			.as("nextEntry");
 	},
+};
+export const serieRelations = {
+	translations: showRelations.translations,
+	studios: showRelations.studios,
+	firstEntry: showRelations.firstEntry,
+	nextEntry: showRelations.nextEntry,
+};
+export const movieRelations = {
+	translations: showRelations.translations,
+	studios: showRelations.studios,
+	videos: showRelations.videos,
+};
+export const collectionRelations = {
+	translations: showRelations.translations,
+	studios: showRelations.studios,
 };
 
 export async function getShows({

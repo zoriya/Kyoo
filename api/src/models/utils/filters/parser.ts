@@ -1,5 +1,7 @@
+import { isLetter } from "char-info";
 import {
 	anyStringOf,
+	charWhere,
 	digit,
 	float,
 	int,
@@ -43,7 +45,17 @@ function t<T>(parser: Parjser<T>): Parjser<T> {
 	return parser.pipe(thenq(string(" ").pipe(many())));
 }
 
-const enumP = t(letter().pipe(many1(), stringify()).expects("an enum value"));
+const enumP = t(
+	charWhere(
+		(x) =>
+			isLetter(x) ||
+			x === "-" || {
+				reason: "Expected a letter or a `-`",
+			},
+	)
+		.pipe(many1(), stringify())
+		.expects("an enum value"),
+);
 
 const property = t(letter().pipe(many1(), stringify())).expects("a property");
 

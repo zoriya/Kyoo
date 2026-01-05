@@ -4,11 +4,12 @@ import {
 	integer,
 	primaryKey,
 	text,
+	timestamp,
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
 import { shows } from "./shows";
-import { externalid, image, language, schema, timestamp } from "./utils";
+import { externalid, image, language, schema } from "./utils";
 
 export const studios = schema.table("studios", {
 	pk: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -16,12 +17,10 @@ export const studios = schema.table("studios", {
 	slug: varchar({ length: 255 }).notNull().unique(),
 	externalId: externalid(),
 
-	createdAt: timestamp({ withTimezone: true, mode: "iso" })
+	createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+	updatedAt: timestamp({ withTimezone: true })
 		.notNull()
-		.default(sql`now()`),
-	updatedAt: timestamp({ withTimezone: true, mode: "iso" })
-		.notNull()
-		.$onUpdate(() => sql`now()`),
+		.$onUpdate(() => new Date()),
 });
 
 export const studioTranslations = schema.table(
