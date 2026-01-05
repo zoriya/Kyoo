@@ -9,7 +9,7 @@ require (
 	github.com/disintegration/imaging v1.6.2
 	github.com/exaring/otelpgx v0.9.4
 	github.com/golang-migrate/migrate/v4 v4.19.1
-	github.com/jackc/pgx/v5 v5.7.6
+	github.com/jackc/pgx/v5 v5.8.0
 	github.com/labstack/echo-jwt/v4 v4.4.0
 	github.com/labstack/echo/v4 v4.14.0
 	github.com/swaggo/echo-swagger v1.4.1
