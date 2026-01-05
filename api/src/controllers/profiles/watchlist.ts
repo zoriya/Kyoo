@@ -165,12 +165,9 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 					},
 					{
 						detail: { description: "Get all movies/series in your watchlist" },
-						headers: t.Object(
-							{
-								"accept-language": AcceptLanguage({ autoFallback: true }),
-							},
-							{ additionalProperties: true },
-						),
+						headers: t.Object({
+							"accept-language": AcceptLanguage({ autoFallback: true }),
+						}),
 						response: {
 							200: Page(
 								t.Union([

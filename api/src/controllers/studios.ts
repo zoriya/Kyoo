@@ -178,12 +178,9 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 					description: "Include related resources in the response.",
 				}),
 			}),
-			headers: t.Object(
-				{
-					"accept-language": AcceptLanguage(),
-				},
-				{ additionalProperties: true },
-			),
+			headers: t.Object({
+				"accept-language": AcceptLanguage(),
+			}),
 			response: {
 				200: "studio",
 				404: {
@@ -261,12 +258,9 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 				}),
 				after: t.Optional(t.String({ description: desc.after })),
 			}),
-			headers: t.Object(
-				{
-					"accept-language": AcceptLanguage({ autoFallback: true }),
-				},
-				{ additionalProperties: true },
-			),
+			headers: t.Object({
+				"accept-language": AcceptLanguage({ autoFallback: true }),
+			}),
 			response: {
 				200: Page(Studio),
 				422: KError,
@@ -297,12 +291,9 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 				}),
 			),
 		}),
-		headers: t.Object(
-			{
-				"accept-language": AcceptLanguage({ autoFallback: true }),
-			},
-			{ additionalProperties: true },
-		),
+		headers: t.Object({
+			"accept-language": AcceptLanguage({ autoFallback: true }),
+		}),
 	})
 	.get(
 		"/:id/shows",

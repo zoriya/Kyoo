@@ -140,13 +140,10 @@ export const Video = t.Composite([
 export type Video = Prettify<typeof Video.static>;
 
 // type used in entry responses (the slug comes from the entryVideoJoin)
-export const EmbeddedVideo = t.Composite(
-	[
-		t.Object({ slug: t.String({ format: "slug" }) }),
-		t.Omit(Video, ["guess", "createdAt", "updatedAt"]),
-	],
-	{ additionalProperties: true },
-);
+export const EmbeddedVideo = t.Composite([
+	t.Object({ slug: t.String({ format: "slug" }) }),
+	t.Omit(Video, ["guess", "createdAt", "updatedAt"]),
+]);
 export type EmbeddedVideo = Prettify<typeof EmbeddedVideo.static>;
 
 registerExamples(Video, bubbleVideo);

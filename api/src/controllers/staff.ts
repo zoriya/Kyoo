@@ -298,12 +298,9 @@ export const staffH = new Elysia({ tags: ["staff"] })
 					}),
 				),
 			}),
-			headers: t.Object(
-				{
-					"accept-language": AcceptLanguage(),
-				},
-				{ additionalProperties: true },
-			),
+			headers: t.Object({
+				"accept-language": AcceptLanguage(),
+			}),
 			response: {
 				200: Page(RoleWShow),
 				404: {

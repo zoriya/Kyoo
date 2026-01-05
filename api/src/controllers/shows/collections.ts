@@ -92,12 +92,9 @@ export const collections = new Elysia({
 					description: "Include related resources in the response.",
 				}),
 			}),
-			headers: t.Object(
-				{
-					"accept-language": AcceptLanguage(),
-				},
-				{ additionalProperties: true },
-			),
+			headers: t.Object({
+				"accept-language": AcceptLanguage(),
+			}),
 			response: {
 				200: { ...FullCollection, description: "Found" },
 				404: {
@@ -191,12 +188,9 @@ export const collections = new Elysia({
 					}),
 				),
 			}),
-			headers: t.Object(
-				{
-					"accept-language": AcceptLanguage({ autoFallback: true }),
-				},
-				{ additionalProperties: true },
-			),
+			headers: t.Object({
+				"accept-language": AcceptLanguage({ autoFallback: true }),
+			}),
 			response: {
 				200: Page(Collection),
 				422: KError,
@@ -227,12 +221,9 @@ export const collections = new Elysia({
 				}),
 			),
 		}),
-		headers: t.Object(
-			{
-				"accept-language": AcceptLanguage({ autoFallback: true }),
-			},
-			{ additionalProperties: true },
-		),
+		headers: t.Object({
+			"accept-language": AcceptLanguage({ autoFallback: true }),
+		}),
 	})
 	.get(
 		"/:id/movies",

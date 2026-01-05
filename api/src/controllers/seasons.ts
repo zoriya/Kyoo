@@ -132,12 +132,9 @@ export const seasonsH = new Elysia({ tags: ["series"] })
 				}),
 				after: t.Optional(t.String({ description: desc.after })),
 			}),
-			headers: t.Object(
-				{
-					"accept-language": AcceptLanguage({ autoFallback: true }),
-				},
-				{ additionalProperties: true },
-			),
+			headers: t.Object({
+				"accept-language": AcceptLanguage({ autoFallback: true }),
+			}),
 			response: {
 				200: Page(Season),
 				404: {

@@ -513,12 +513,9 @@ export const videosReadH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 					}),
 				),
 			}),
-			headers: t.Object(
-				{
-					"accept-language": AcceptLanguage(),
-				},
-				{ additionalProperties: true },
-			),
+			headers: t.Object({
+				"accept-language": AcceptLanguage(),
+			}),
 			response: {
 				200: t.Composite([
 					Video,
