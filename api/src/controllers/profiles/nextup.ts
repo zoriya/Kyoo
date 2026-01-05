@@ -130,12 +130,9 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 			detail: {
 				description: "",
 			},
-			headers: t.Object(
-				{
-					"accept-language": AcceptLanguage({ autoFallback: true }),
-				},
-				{ additionalProperties: true },
-			),
+			headers: t.Object({
+				"accept-language": AcceptLanguage({ autoFallback: true }),
+			}),
 			response: {
 				200: Page(Entry),
 			},

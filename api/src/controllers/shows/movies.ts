@@ -82,12 +82,9 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					description: "Include related resources in the response.",
 				}),
 			}),
-			headers: t.Object(
-				{
-					"accept-language": AcceptLanguage(),
-				},
-				{ additionalProperties: true },
-			),
+			headers: t.Object({
+				"accept-language": AcceptLanguage(),
+			}),
 			response: {
 				200: { ...FullMovie, description: "Found" },
 				404: {
@@ -179,12 +176,9 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 					}),
 				),
 			}),
-			headers: t.Object(
-				{
-					"accept-language": AcceptLanguage({ autoFallback: true }),
-				},
-				{ additionalProperties: true },
-			),
+			headers: t.Object({
+				"accept-language": AcceptLanguage({ autoFallback: true }),
+			}),
 			response: {
 				200: Page(Movie),
 				422: KError,

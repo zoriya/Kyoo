@@ -46,6 +46,7 @@ async function verifyJwt(bearer: string) {
 
 export const auth = new Elysia({ name: "auth" })
 	.guard({
+		schema: "standalone",
 		headers: t.Object(
 			{
 				authorization: t.Optional(t.TemplateLiteral("Bearer ${string}")),

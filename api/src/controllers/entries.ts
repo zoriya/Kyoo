@@ -396,12 +396,9 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				}),
 				after: t.Optional(t.String({ description: description.after })),
 			}),
-			headers: t.Object(
-				{
-					"accept-language": AcceptLanguage({ autoFallback: true }),
-				},
-				{ additionalProperties: true },
-			),
+			headers: t.Object({
+				"accept-language": AcceptLanguage({ autoFallback: true }),
+			}),
 			response: {
 				200: Page(Entry),
 				404: {
@@ -516,12 +513,9 @@ export const entriesH = new Elysia({ tags: ["series"] })
 		},
 		{
 			detail: { description: "Get new movies/episodes added recently." },
-			headers: t.Object(
-				{
-					"accept-language": AcceptLanguage({ autoFallback: true }),
-				},
-				{ additionalProperties: true },
-			),
+			headers: t.Object({
+				"accept-language": AcceptLanguage({ autoFallback: true }),
+			}),
 			query: t.Object({
 				filter: t.Optional(Filter({ def: entryFilters })),
 				query: t.Optional(t.String({ description: description.query })),

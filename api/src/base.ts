@@ -16,7 +16,7 @@ import { staffH } from "./controllers/staff";
 import { studiosH } from "./controllers/studios";
 import { videosReadH, videosWriteH } from "./controllers/videos";
 import { dbRaw } from "./db";
-import type { KError } from "./models/error";
+import { KError } from "./models/error";
 import { appWs } from "./websockets";
 
 const logger = getLogger();
@@ -98,11 +98,10 @@ export const handlers = new Elysia({ prefix })
 			detail: {
 				security: [{ bearer: ["core.read"] }, { api: ["core.read"] }],
 			},
-			// See https://github.com/elysiajs/elysia/issues/1158
-			// response: {
-			// 	401: { ...KError, description: "" },
-			// 	403: { ...KError, description: "" },
-			// },
+			response: {
+				401: { ...KError, description: "" },
+				403: { ...KError, description: "" },
+			},
 			permissions: ["core.read"],
 		},
 		(app) =>
@@ -126,11 +125,10 @@ export const handlers = new Elysia({ prefix })
 			detail: {
 				security: [{ bearer: ["core.write"] }, { api: ["core.write"] }],
 			},
-			// See https://github.com/elysiajs/elysia/issues/1158
-			// response: {
-			// 	401: { ...KError, description: "" },
-			// 	403: { ...KError, description: "" },
-			// },
+			response: {
+				401: { ...KError, description: "" },
+				403: { ...KError, description: "" },
+			},
 			permissions: ["core.write"],
 		},
 		(app) => app.use(videosWriteH).use(seed),

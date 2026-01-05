@@ -374,12 +374,9 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 						detail: {
 							description: "List your watch history (episodes/movies seen)",
 						},
-						headers: t.Object(
-							{
-								"accept-language": AcceptLanguage({ autoFallback: true }),
-							},
-							{ additionalProperties: true },
-						),
+						headers: t.Object({
+							"accept-language": AcceptLanguage({ autoFallback: true }),
+						}),
 						response: {
 							200: Page(Entry),
 						},

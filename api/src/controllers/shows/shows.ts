@@ -147,12 +147,9 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 					}),
 				),
 			}),
-			headers: t.Object(
-				{
-					"accept-language": AcceptLanguage({ autoFallback: true }),
-				},
-				{ additionalProperties: true },
-			),
+			headers: t.Object({
+				"accept-language": AcceptLanguage({ autoFallback: true }),
+			}),
 			response: {
 				200: Page(Show),
 				422: KError,
