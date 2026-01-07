@@ -8,7 +8,8 @@
         "@elysiajs/opentelemetry": "^1.4.10",
         "@elysiajs/swagger": "zoriya/elysia-swagger#build",
         "@kubiks/otel-drizzle": "zoriya/drizzle-otel#build",
-        "@logtape/logtape": "^1.3.5",
+        "@logtape/elysia": "1.4.0-dev.461",
+        "@logtape/logtape": "1.3.6",
         "@logtape/otel": "^1.3.5",
         "@logtape/redaction": "^1.3.5",
         "@opentelemetry/api": "^1.9.0",
@@ -186,7 +187,9 @@
 
     "@kubiks/otel-drizzle": ["@kubiks/otel-drizzle@github:zoriya/drizzle-otel#cc1d59b", { "peerDependencies": { "@opentelemetry/api": ">=1.9.0 <2.0.0", "drizzle-orm": ">=0.28.0" } }, "zoriya-drizzle-otel-cc1d59b"],
 
-    "@logtape/logtape": ["@logtape/logtape@1.3.5", "", {}, "sha512-G+MxWB7Tbv/2764519+Cp6rKXUdRbe/GiRwTvlm/Wv/sNsiquRnx9Hzr9eXaIpAYLT4PrBlkthjJ4gmqdSPrFg=="],
+    "@logtape/elysia": ["@logtape/elysia@1.4.0-dev.461", "", { "peerDependencies": { "@logtape/logtape": "^1.4.0-dev.461+fd7a5594", "elysia": "^1.4.0" } }, "sha512-ngfDFD17ZFY0lW7g+4iskRUJPeu07fV9vroa0WGkuzN3fKGaP3iAqvg88m3qGw1s1Dr6HH7T1UVHDC0IimQQlg=="],
+
+    "@logtape/logtape": ["@logtape/logtape@1.3.6", "", {}, "sha512-OaK8eal8zcjB0GZbllXKgUC2T9h/GyNLQyQXjJkf1yum7SZKTWs9gs/t8NMS0kVVaSnA7bhU0Sjws/Iy4e0/IQ=="],
 
     "@logtape/otel": ["@logtape/otel@1.3.5", "", { "dependencies": { "@opentelemetry/api": "^1.9.0", "@opentelemetry/api-logs": "^0.208.0", "@opentelemetry/exporter-logs-otlp-grpc": "^0.208.0", "@opentelemetry/exporter-logs-otlp-http": "^0.208.0", "@opentelemetry/exporter-logs-otlp-proto": "^0.208.0", "@opentelemetry/otlp-exporter-base": "^0.208.0", "@opentelemetry/resources": "^2.2.0", "@opentelemetry/sdk-logs": "^0.208.0", "@opentelemetry/semantic-conventions": "^1.38.0" }, "peerDependencies": { "@logtape/logtape": "^1.3.5" } }, "sha512-lsXIC/j3U148PuNXl36o7tPAxCvdn+hlqNT446e7PpCKLbnnp+o2XhQ+wdXaNRi491STR0GyblpX/r+7+6tG/A=="],
 

@@ -1,5 +1,6 @@
 import { opentelemetry } from "@elysiajs/opentelemetry";
 import { swagger } from "@elysiajs/swagger";
+import { elysiaLogger } from "@logtape/elysia";
 import { getLogger } from "@logtape/logtape";
 import { Elysia } from "elysia";
 import { handlers } from "./base";
@@ -17,8 +18,18 @@ await migrate();
 
 const disposeImages = await processImages();
 
+const PATH_IGNORE = new Set(["/api/health", "/api/ready"]);
+logger.info("Skipping request logging for these paths: {dropList}", {
+	dropList: Array.from(PATH_IGNORE).sort(),
+});
+
 const app = new Elysia()
 	.use(opentelemetry())
+	.use(
+		elysiaLogger({
+			skip: (ctx) => PATH_IGNORE.has(ctx.path),
+		}),
+	)
 	.use(
 		swagger({
 			scalarConfig: {
