@@ -26,7 +26,9 @@ logger.info("Skipping request logging for these paths: {dropList}", {
 const app = new Elysia()
 	.use(opentelemetry())
 	.use(
-		elysiaLogger(),
+		elysiaLogger({
+			skip: (ctx) => PATH_IGNORE.has(ctx.path),
+		}),
 	)
 	.use(
 		swagger({
