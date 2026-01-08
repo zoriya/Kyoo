@@ -1,8 +1,8 @@
 import asyncio
 from datetime import datetime, timedelta
-from functools import wraps
-from typing import Any, Optional, Tuple, Final, Literal, TypeVar
 from enum import Enum
+from functools import wraps
+from typing import Any, Final, Literal
 
 
 # Waiting for https://github.com/python/typing/issues/689 for better sentinels
@@ -12,12 +12,16 @@ class Sentinel(Enum):
 
 none: Final = Sentinel.NoneSentinel
 type Cache = dict[
-	Any, Tuple[asyncio.Event | Literal[none], datetime | Literal[none], Any]
+	Any,
+	tuple[
+		asyncio.Event | Literal[Sentinel.NoneSentinel],
+		datetime | Literal[Sentinel.NoneSentinel],
+		Any,
+	],
 ]
-# Cache = TypeVar("Cache")  # type: ignore
 
 
-def cache(ttl: timedelta, cache: Optional[Cache] = None, typed=False):
+def cache(ttl: timedelta, cache: Cache | None = None, typed=False):
 	"""
 	A cache decorator for async methods. If the same method is called twice with
 	the same args, the underlying method will only be called once and the first
@@ -35,12 +39,12 @@ def cache(ttl: timedelta, cache: Optional[Cache] = None, typed=False):
 	def wrap(f):
 		@wraps(f)
 		async def wrapper(*args, **kwargs):
-			key = make_key(args, kwargs, typed)
+			key = _make_key(args, kwargs, typed)
 
 			ret = cache.get(key, (none, none, none))
 			# First check if the same method is already running and wait for it.
 			if ret[0] != none:
-				await ret[0].wait()
+				_ = await ret[0].wait()
 				ret = cache.get(key, (none, none, none))
 				if ret[2] == none:
 					# ret[2] can be None if the cached method failed. if that is the case, run again.
@@ -72,30 +76,13 @@ async def exec_as_cache(cache: Cache, key, f):
 	return result
 
 
-# Code bellow was stolen from https://github.com/python/cpython/blob/3.12/Lib/functools.py#L432
+# Code bellow was stolen from https://github.com/python/cpython/blob/3.14/Lib/functools.py#L522C1-L551C15
 
 
-class _HashedSeq(list):
-	"""This class guarantees that hash() will be called no more than once
-	per element.  This is important because the lru_cache() will hash
-	the key multiple times on a cache miss.
-
-	"""
-
-	__slots__ = "hashvalue"
-
-	def __init__(self, tup, hash=hash):
-		self[:] = tup
-		self.hashvalue = hash(tup)
-
-	def __hash__(self):
-		return self.hashvalue
-
-
-def make_key(
+def _make_key(
 	args,
-	kwds={},
-	typed=False,
+	kwds,
+	typed,
 	kwd_mark=(object(),),
 	fasttypes={int, str},
 	tuple=tuple,
@@ -120,8 +107,6 @@ def make_key(
 	if kwds:
 		key += kwd_mark
 		for item in kwds.items():
-			if isinstance(item[1], list):
-				item = (item[0], tuple(item[1]))
 			key += item
 	if typed:
 		key += tuple(type(v) for v in args)
@@ -129,4 +114,4 @@ def make_key(
 			key += tuple(type(v) for v in kwds.values())
 	elif len(key) == 1 and type(key[0]) in fasttypes:
 		return key[0]
-	return _HashedSeq(key)
+	return key

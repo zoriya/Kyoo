@@ -8,8 +8,8 @@ from .provider import Provider
 
 
 class CompositeProvider(Provider):
-	def __init__(self, themoviedb: Provider):
-		self._tvdb: Provider = None  # type: ignore
+	def __init__(self, tvdb: Provider, themoviedb: Provider):
+		self._tvdb = tvdb
 		self._themoviedb = themoviedb
 
 	@property

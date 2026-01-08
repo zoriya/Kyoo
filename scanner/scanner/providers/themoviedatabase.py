@@ -95,10 +95,12 @@ class TheMovieDatabase(Provider):
 	):
 		await self._client.close()
 
+	NAME = "themoviedatabase"
+
 	@property
 	@override
 	def name(self) -> str:
-		return "themoviedatabase"
+		return self.NAME
 
 	@override
 	async def search_movies(
