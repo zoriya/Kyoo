@@ -280,7 +280,7 @@ func main() {
 		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
 			rCtx := c.Request().Context()
 			if v.Error == nil {
-				logger.LogAttrs(rCtx, slog.LevelInfo, 
+				logger.LogAttrs(rCtx, slog.LevelInfo,
 					fmt.Sprintf("web_request: %s %s %s %d", v.Method, v.Host, v.URI, v.Status),
 					slog.String("method", v.Method),
 					slog.Int("status", v.Status),
@@ -289,8 +289,8 @@ func main() {
 					slog.String("agent", v.UserAgent),
 				)
 			} else {
-				logger.LogAttrs(rCtx, slog.LevelError, 
-					fmt.Sprintf("web_request_error: %s %s %s %d err=%s", 
+				logger.LogAttrs(rCtx, slog.LevelError,
+					fmt.Sprintf("web_request_error: %s %s %s %d err=%s",
 						v.Method, v.Host, v.URI, v.Status, v.Error.Error()),
 					slog.String("method", v.Method),
 					slog.Int("status", v.Status),
