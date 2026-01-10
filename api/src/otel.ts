@@ -124,7 +124,6 @@ export function setupOtel() {
 	logapi.setGlobalLoggerProvider(lp);
 	metricapi.setGlobalMeterProvider(mp);
 	tp.register();
-	traceapi.setGlobalTracerProvider(tp);
 }
 
 export function record<T extends (...args: any) => any>(
