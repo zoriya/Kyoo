@@ -27,6 +27,12 @@ import (
 )
 
 func ErrorHandler(err error, c echo.Context) {
+	// otelecho & RequestLoggerWithConfig middleware call c.Error
+	// otelecho docs: https://pkg.go.dev/go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho#WithOnError
+	if c.Response().Committed {
+		return
+	}
+
 	code := http.StatusInternalServerError
 	var message string
 	if he, ok := err.(*echo.HTTPError); ok {
