@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import Literal
+from typing import Any, Literal
+
+from pydantic import Field
 
 from ..utils import Language, Model
 from .metadataid import EpisodeId, MetadataId
@@ -27,6 +29,7 @@ class Entry(Model):
 	external_id: dict[str, MetadataId | EpisodeId]
 	translations: dict[Language, EntryTranslation] = {}
 	videos: list[str] = []
+	extra: dict[str, Any] = Field(exclude=True)
 
 
 class EntryTranslation(Model):

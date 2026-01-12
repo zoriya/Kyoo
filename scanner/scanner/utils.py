@@ -34,6 +34,7 @@ class Model(BaseModel):
 		use_enum_values=True,
 		validate_by_name=True,
 		alias_generator=lambda x: to_camel(x[:-1] if x[-1] == "_" else x),
+		coerce_numbers_to_str=True,
 	)
 
 

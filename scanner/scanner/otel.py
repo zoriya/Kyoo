@@ -15,14 +15,14 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 logger = logging.getLogger(__name__)
 
 
-def setup_otelproviders() -> tuple[object, object, object]:
+def setup_otelproviders():
 	import os
 
 	if not (os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "").strip()):
 		logger.info(
 			"OTEL_EXPORTER_OTLP_ENDPOINT not specified, skipping otel provider setup."
 		)
-		return None, None, None
+		return
 
 	# choose exporters (grpc vs http) ...
 	if os.getenv("OTEL_EXPORTER_OTLP_PROTOCOL", "").lower().strip() == "grpc":
@@ -67,8 +67,6 @@ def setup_otelproviders() -> tuple[object, object, object]:
 	logger_provider = LoggerProvider(resource=resource)
 	logger_provider.add_log_record_processor(BatchLogRecordProcessor(OTLPLogExporter()))
 	_logs.set_logger_provider(logger_provider)
-
-	return tracer_provider, meter_provider, logger_provider
 
 
 def instrument(app: FastAPI):

@@ -64,6 +64,7 @@ export const insertSeasons = record(
 				})),
 			);
 			await flushImageQueue(tx, imgQueue, -10);
+			if (trans.length === 0) return ret;
 			await tx
 				.insert(seasonTranslations)
 				.select(unnestValues(trans, seasonTranslations))

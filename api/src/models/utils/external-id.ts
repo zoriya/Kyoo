@@ -30,6 +30,31 @@ export const EpisodeId = t.Record(
 );
 export type EpisodeId = typeof EpisodeId.static;
 
+export const MovieEpisodeId = t.Record(
+	t.String(),
+	t.Union([
+		t.Object({
+			dataId: t.String(),
+			link: t.Nullable(t.String({ format: "uri" })),
+		}),
+		t.Object({
+			serieId: t.String({
+				descrpition: comment`
+				Id on the external website.
+				We store the serie's id because episode id are rarely stable.
+			`,
+			}),
+			season: t.Nullable(
+				t.Integer({
+					description: "Null if the external website uses absolute numbering.",
+				}),
+			),
+			episode: t.Integer(),
+			link: t.Nullable(t.String({ format: "uri" })),
+		}),
+	]),
+);
+
 export const SeasonId = t.Record(
 	t.String(),
 	t.Object({

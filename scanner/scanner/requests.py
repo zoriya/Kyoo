@@ -10,7 +10,7 @@ from pydantic import TypeAdapter
 from .client import KyooClient
 from .models.request import Request
 from .models.videos import Resource
-from .providers.provider import Provider
+from .providers.provider import Provider, ProviderError
 
 logger = getLogger(__name__)
 tracer = trace.get_tracer("kyoo.scanner")
@@ -158,7 +158,10 @@ class RequestProcessor:
 		except Exception as e:
 			span.set_status(trace.Status(trace.StatusCode.ERROR))
 			span.record_exception(e)
-			logger.error("Couldn't process request", exc_info=e)
+			if type(e) == ProviderError:
+				logger.error(str(e))
+			else:
+				logger.error("Couldn't process request", exc_info=e)
 			cur = await self._database.execute(
 				"""
 				update

@@ -95,10 +95,12 @@ class TheMovieDatabase(Provider):
 	):
 		await self._client.close()
 
+	NAME = "themoviedatabase"
+
 	@property
 	@override
 	def name(self) -> str:
-		return "themoviedatabase"
+		return self.NAME
 
 	@override
 	async def search_movies(
@@ -267,8 +269,12 @@ class TheMovieDatabase(Provider):
 		]
 
 	@override
-	async def get_serie(self, external_id: dict[str, str]) -> Serie | None:
-		# TODO: fallback to search via another id
+	async def get_serie(
+		self,
+		external_id: dict[str, str],
+		*,
+		skip_entries=False,
+	) -> Serie | None:
 		if self.name not in external_id:
 			return None
 
@@ -278,13 +284,21 @@ class TheMovieDatabase(Provider):
 				"append_to_response": "alternative_titles,videos,credits,keywords,images,external_ids,translations",
 			},
 		)
-		seasons = await asyncio.gather(
-			*[
-				self._get_season(serie["id"], x["season_number"])
-				for x in serie["seasons"]
-			]
+		seasons = (
+			await asyncio.gather(
+				*[
+					self._get_season(serie["id"], x["season_number"])
+					for x in serie["seasons"]
+				]
+			)
+			if not skip_entries
+			else []
 		)
-		entries = await self._get_all_entries(serie["id"], seasons)
+		entries = (
+			await self._get_all_entries(serie["id"], seasons)
+			if not skip_entries
+			else []
+		)
 
 		return Serie(
 			slug=to_slug(serie["name"]),
@@ -428,7 +442,6 @@ class TheMovieDatabase(Provider):
 	async def _get_all_entries(
 		self, serie_id: str | int, seasons: list[Season]
 	) -> list[Entry]:
-		# TODO: batch those
 		ret = await asyncio.gather(
 			*[
 				self._get_entry(serie_id, s.season_number, e)
@@ -731,8 +744,4 @@ class TheMovieDatabase(Provider):
 		notext = next((x for x in images if x["iso_639_1"] == None), None)
 		if notext:
 			return self._image_path + notext["file_path"]
-		# take a random image, it's better than nothing
-		random_img = next((x for x in images if x["iso_639_1"] == None), None)
-		if random_img:
-			return self._image_path + random_img["file_path"]
 		return None
