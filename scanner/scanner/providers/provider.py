@@ -3,6 +3,8 @@ from logging import getLogger
 
 from langcodes import Language
 
+from scanner.models.metadataid import MetadataId
+
 from ..models.movie import Movie, SearchMovie
 from ..models.serie import SearchSerie, Serie
 
@@ -32,7 +34,9 @@ class Provider(ABC):
 		raise NotImplementedError
 
 	@abstractmethod
-	async def get_serie(self, external_id: dict[str, str]) -> Serie | None:
+	async def get_serie(
+		self, external_id: dict[str, str], *, skip_entries=False
+	) -> Serie | None:
 		raise NotImplementedError
 
 	async def find_movie(
@@ -49,9 +53,7 @@ class Provider(ABC):
 			raise ProviderError(
 				f"Couldn't find a movie with title {title}. (year: {year})"
 			)
-		ret = await self.get_movie(
-			{k: v.data_id for k, v in search[0].external_id.items()}
-		)
+		ret = await self.get_movie(MetadataId.map_dict(search[0].external_id))
 		if not ret:
 			raise ValueError()
 		return ret
@@ -70,9 +72,7 @@ class Provider(ABC):
 			raise ProviderError(
 				f"Couldn't find a serie with title {title}. (year: {year})"
 			)
-		ret = await self.get_serie(
-			{k: v.data_id for k, v in search[0].external_id.items()}
-		)
+		ret = await self.get_serie(MetadataId.map_dict(search[0].external_id))
 		if not ret:
 			raise ValueError()
 		return ret

@@ -93,7 +93,7 @@ export const seasonsH = new Elysia({ tags: ["series"] })
 					...transCol,
 				})
 				.from(seasons)
-				.innerJoin(transQ, eq(seasons.pk, transQ.pk))
+				.leftJoin(transQ, eq(seasons.pk, transQ.pk))
 				.where(
 					and(
 						eq(seasons.showPk, serie.pk),

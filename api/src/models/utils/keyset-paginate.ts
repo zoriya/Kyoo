@@ -1,7 +1,9 @@
+import { Value } from "@sinclair/typebox/value";
 import { and, eq, gt, isNull, lt, or, sql } from "drizzle-orm";
+import { t } from "elysia";
 import type { Sort } from "./sort";
 
-type After = (string | number | boolean | undefined)[];
+type After = (string | number | boolean | Date | undefined)[];
 
 // Create a filter (where) expression on the query to skip everything before/after the referenceID.
 // The generalized expression for this in pseudocode is:
@@ -55,6 +57,8 @@ export const keysetPaginate = ({
 	let previous = undefined;
 
 	for (const [i, by] of [...sort.sort, pkSort].entries()) {
+		if (Value.Check(t.String({ format: "date-time" }), cursor[i]))
+			cursor[i] = new Date(cursor[i]);
 		const cmp = by.desc ? lt : gt;
 		where = or(
 			where,

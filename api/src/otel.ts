@@ -1,6 +1,6 @@
 import { record as elysiaRecord } from "@elysiajs/opentelemetry";
 import { getLogger } from "@logtape/logtape";
-import { metrics as metricapi, trace as traceapi } from "@opentelemetry/api";
+import { metrics as metricapi } from "@opentelemetry/api";
 import { logs as logapi } from "@opentelemetry/api-logs";
 import { SDK_INFO } from "@opentelemetry/core";
 import { OTLPLogExporter as OLTPLogExporterGRPC } from "@opentelemetry/exporter-logs-otlp-grpc";

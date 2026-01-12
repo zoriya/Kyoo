@@ -4,8 +4,8 @@ import { bubbleImages, madeInAbyss, registerExamples } from "../examples";
 import { Progress } from "../history";
 import {
 	DbMetadata,
-	ExternalId,
 	Image,
+	MovieEpisodeId,
 	Resource,
 	SeedImage,
 	TranslationRecord,
@@ -20,7 +20,7 @@ export const BaseMovieEntry = t.Composite(
 			order: t.Number({
 				description: "Absolute playback order. Can be mixed with episodes.",
 			}),
-			externalId: ExternalId(),
+			externalId: MovieEpisodeId,
 		}),
 		BaseEntry(),
 	],

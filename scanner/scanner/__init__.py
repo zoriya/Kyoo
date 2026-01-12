@@ -6,14 +6,15 @@ from fastapi import FastAPI
 from scanner.client import KyooClient
 from scanner.fsscan import FsScanner
 from scanner.log import configure_logging
-from scanner.otel import setup_otelproviders, instrument
+from scanner.otel import instrument, setup_otelproviders
 from scanner.providers.composite import CompositeProvider
 from scanner.providers.themoviedatabase import TheMovieDatabase
+from scanner.providers.thetvdb import TVDB
 from scanner.requests import RequestCreator, RequestProcessor
 
 from .database import get_db, init_pool, migrate
-from .routers.routes import router
 from .routers.health import router as health_router
+from .routers.routes import router
 
 
 @asynccontextmanager
@@ -22,6 +23,7 @@ async def lifespan(_):
 		init_pool() as pool,
 		get_db() as db,
 		KyooClient() as client,
+		TVDB() as tvdb,
 		TheMovieDatabase() as tmdb,
 	):
 		# there's no way someone else used the same id, right?
@@ -34,7 +36,11 @@ async def lifespan(_):
 			return
 		if is_master:
 			await migrate()
-		processor = RequestProcessor(pool, client, tmdb)
+		processor = RequestProcessor(
+			pool,
+			client,
+			CompositeProvider(tvdb, tmdb),
+		)
 		scanner = FsScanner(client, RequestCreator(db))
 		tasks = create_task(
 			background_startup(
