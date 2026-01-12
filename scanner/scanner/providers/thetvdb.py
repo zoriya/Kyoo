@@ -199,7 +199,12 @@ class TVDB(Provider):
 		]
 
 	@override
-	async def get_serie(self, external_id: dict[str, str]) -> Serie | None:
+	async def get_serie(
+		self,
+		external_id: dict[str, str],
+		*,
+		skip_entries=False,
+	) -> Serie | None:
 		if self.name not in external_id:
 			return None
 
@@ -213,8 +218,10 @@ class TVDB(Provider):
 			)
 		)["data"]
 
-		entries = await self.get_all_entries(
-			external_id[self.name], ret["nameTranslations"]
+		entries = (
+			await self.get_all_entries(external_id[self.name], ret["nameTranslations"])
+			if not skip_entries
+			else []
 		)
 
 		return Serie(
@@ -280,25 +287,14 @@ class TVDB(Provider):
 					for x in ret["seasons"]
 					if x["type"]["type"] == "official"
 				)
-			),
+			)
+			if not skip_entries
+			else [],
 			entries=entries,
 			# TODO: map extra entries in extra instead of entries
 			extra=[],
 			collections=[],
-			# studios=[
-			# 	Studio(
-			# 		slug=x["slug"],
-			# 		name=x["name"],
-			# 		logos=[],
-			# 		external_id={
-			# 			self.name: MetadataID(
-			# 				x["id"], f"https://thetvdb.com/companies/{x['slug']}"
-			# 			)
-			# 		},
-			# 	)
-			# 	for x in ret["companies"]
-			# 	if x["companyType"]["companyTypeName"] == "Studio"
-			# ],
+			studios=[],
 			staff=[],
 		)
 

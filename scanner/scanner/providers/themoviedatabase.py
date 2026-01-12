@@ -269,7 +269,12 @@ class TheMovieDatabase(Provider):
 		]
 
 	@override
-	async def get_serie(self, external_id: dict[str, str]) -> Serie | None:
+	async def get_serie(
+		self,
+		external_id: dict[str, str],
+		*,
+		skip_entries=False,
+	) -> Serie | None:
 		if self.name not in external_id:
 			return None
 
@@ -279,13 +284,21 @@ class TheMovieDatabase(Provider):
 				"append_to_response": "alternative_titles,videos,credits,keywords,images,external_ids,translations",
 			},
 		)
-		seasons = await asyncio.gather(
-			*[
-				self._get_season(serie["id"], x["season_number"])
-				for x in serie["seasons"]
-			]
+		seasons = (
+			await asyncio.gather(
+				*[
+					self._get_season(serie["id"], x["season_number"])
+					for x in serie["seasons"]
+				]
+			)
+			if not skip_entries
+			else []
 		)
-		entries = await self._get_all_entries(serie["id"], seasons)
+		entries = (
+			await self._get_all_entries(serie["id"], seasons)
+			if not skip_entries
+			else []
+		)
 
 		return Serie(
 			slug=to_slug(serie["name"]),
