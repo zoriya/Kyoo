@@ -281,7 +281,7 @@ func main() {
 			rCtx := c.Request().Context()
 			if v.Error == nil {
 				logger.LogAttrs(rCtx, slog.LevelInfo,
-					fmt.Sprintf("web_request: %s %s %s %d", v.Method, v.Host, v.URI, v.Status),
+					fmt.Sprintf("%s %s%s %d", v.Method, v.Host, v.URI, v.Status),
 					slog.String("method", v.Method),
 					slog.Int("status", v.Status),
 					slog.String("host", v.Host),
