@@ -239,8 +239,8 @@ class TVDB(Provider):
 					data_id=ret["id"],
 					link=f"https://thetvdb.com/series/{ret['slug']}",
 				),
-			}
-			| self._process_remote_id(ret["remoteIds"]),
+				**self._process_remote_id(ret["remoteIds"]),
+			},
 			translations={
 				Language.get(trans["language"]): SerieTranslation(
 					name=trans["name"],
@@ -248,7 +248,7 @@ class TVDB(Provider):
 					description=next(
 						(
 							x["overview"]
-							for x in ret["translations"]["overviewTranslations"]
+							for x in (ret["translations"]["overviewTranslations"] or [])
 							if x["language"] == trans["language"]
 						),
 						None,
@@ -398,8 +398,8 @@ class TVDB(Provider):
 
 		trans = await asyncio.gather(*[fetch_all(lang) for lang in langs])
 		entries = trans[0]
-		# TODO: map multiples `order=0` to their appropriate number using `airsAfterSeason, airsBeforeSeason, airsBeforeEpisode`
-		return [
+
+		ret = [
 			Entry(
 				kind="movie"
 				if entry["isMovie"]
@@ -436,6 +436,102 @@ class TVDB(Provider):
 					for lang, tl in zip(langs, trans)
 					if "name" in tl[i] and tl[i]["name"]
 				},
+				extra={
+					"airs_after_season": entry.get("airsAfterSeason"),
+					"airs_before_season": entry.get("airsBeforeSeason"),
+					"airs_before_episode": entry.get("airsBeforeEpisode"),
+					"linked_movie": entry.get("linkedMovie"),
+				},
 			)
 			for i, entry in enumerate(entries)
 		]
+
+		for i, entry in enumerate(ret):
+			if entry.extra["linked_movie"]:
+				ret[i] = await self.process_movie_entry(entry)
+
+			if entry.order != 0:
+				continue
+
+			if entry.extra["airs_after_season"] is not None:
+				before = max(
+					*(
+						x.order
+						for x in ret
+						if x.season_number == entry.extra["airs_after_season"]
+					),
+					0.0,
+				)
+				after = min(*(x.order for x in ret if x.order > before), before)
+				entry.order = (before + after) / 2
+			elif entry.extra["airs_before_season"] is not None:
+				before = (
+					next(
+						(
+							x.order
+							for x in ret
+							if x.season_number == entry.extra["airs_before_season"]
+							and x.episode_number == entry.extra["airs_before_episode"]
+						),
+						0,
+					)
+					if entry.extra["airs_before_episode"]
+					else min(
+						*(
+							x.order
+							for x in ret
+							if x.season_number == entry.extra["airs_before_season"]
+						),
+						0,
+					)
+				)
+				after = max(*(x.order for x in ret if x.order < before), 0)
+				entry.order = (after + before) / 2
+
+		return ret
+
+	async def process_movie_entry(self, entry: Entry) -> Entry:
+		ret = (
+			await self._get(
+				f"movies/{entry.extra['linked_movie']}/extended",
+				params={
+					"meta": "translations",
+				},
+			)
+		)["data"]
+
+		# keep entry's metadata from series api, it's the same.
+		entry.slug = ret["slug"]
+		entry.translations = {
+			Language.get(trans["language"]): EntryTranslation(
+				name=trans["name"],
+				description=next(
+					(
+						x["overview"]
+						for x in ret["translations"]["overviewTranslations"]
+						if x["language"] == trans["language"]
+					),
+					None,
+				),
+				tagline=trans.get("tagline")
+				or next(
+					(
+						x.get("tagline")
+						for x in ret["translations"]["overviewTranslations"]
+						if x["language"] == trans["language"]
+					),
+					None,
+				),
+				poster=self._pick_image(ret["artworks"], 14, trans["language"]),
+			)
+			for trans in ret["translations"]["nameTranslations"]
+		}
+		entry.external_id = {
+			self.name: MetadataId(
+				data_id=ret["id"],
+				link=f"https://thetvdb.com/movies/{ret['slug']}",
+			),
+			**self._process_remote_id(ret["remoteIds"]),
+		}
+
+		return entry
