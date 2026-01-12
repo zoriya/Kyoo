@@ -44,8 +44,7 @@ export const base = new Elysia({ name: "base" })
 		if (code === "NOT_FOUND") {
 			return error;
 		}
-		console.error(code, error);
-		logger.error("Elysia encountered an error. code={code} error={error.message}", {
+		logger.error("Request error code={code} error={error}", {
 			code: code,
 			error: error,
 		});
