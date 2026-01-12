@@ -290,7 +290,7 @@ func main() {
 				)
 			} else {
 				logger.LogAttrs(rCtx, slog.LevelError,
-					fmt.Sprintf("web_request_error: %s %s %s %d err=%s",
+					fmt.Sprintf("%s %s%s %d err=%s",
 						v.Method, v.Host, v.URI, v.Status, v.Error.Error()),
 					slog.String("method", v.Method),
 					slog.Int("status", v.Status),
