@@ -8,7 +8,9 @@ import {
 } from "~/db/schema";
 import { conflictUpdateAllExcept, unnest, unnestValues } from "~/db/utils";
 import type { SeedEntry as SEntry, SeedExtra as SExtra } from "~/models/entry";
+import { KErrorT } from "~/models/error";
 import { record } from "~/otel";
+import { duplicates } from "~/utils";
 import { enqueueOptImage, flushImageQueue, type ImageTask } from "../images";
 import { guessNextRefresh } from "../refresh";
 import { updateAvailableCount, updateAvailableSince } from "./shows";
@@ -76,6 +78,13 @@ export const insertEntries = record(
 								: undefined,
 				};
 			});
+			const dups = duplicates(vals, (x) => x.slug);
+			if (dups.length !== 0) {
+				throw new KErrorT(
+					"Duplicated slug found in entries list. This is not supported",
+					{ slugs: dups.map((x) => x.slug) },
+				);
+			}
 			const ret = await tx
 				.insert(entries)
 				.select(unnestValues(vals, entries))

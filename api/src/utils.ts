@@ -39,6 +39,19 @@ export function uniqBy<T>(a: T[], key: (val: T) => string): T[] {
 	});
 }
 
+export function duplicates<T>(a: T[], key: (val: T) => string): T[] {
+	const seen: Record<string, boolean> = {};
+	return uniqBy(
+		a.filter((item) => {
+			const k = key(item);
+			if (seen[k]) return true;
+			seen[k] = true;
+			return false;
+		}),
+		key,
+	);
+}
+
 export function traverse<T extends Record<string, any>>(
 	arr: T[],
 ): { [K in keyof T]: T[K][] } | null {
