@@ -121,6 +121,7 @@ export const insertEntries = record(
 				}));
 			});
 			await flushImageQueue(tx, imgQueue, 0);
+			if (trans.length === 0) return ret;
 			await tx
 				.insert(entryTranslations)
 				.select(unnestValues(trans, entryTranslations))

@@ -411,7 +411,7 @@ class TVDB(Provider):
 				air_date=datetime.strptime(entry["aired"], "%Y-%m-%d").date()
 				if entry["aired"]
 				else None,
-				thumbnail=f"https://artworks.thetvdb.com{entry["image"]}"
+				thumbnail=f"https://artworks.thetvdb.com{entry['image']}"
 				if entry["image"]
 				else None,
 				slug=None,

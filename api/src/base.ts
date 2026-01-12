@@ -45,7 +45,7 @@ export const base = new Elysia({ name: "base" })
 			return error;
 		}
 		console.error(code, error);
-		logger.error("Elysia encountered an error. code={code} error={error}", {
+		logger.error("Elysia encountered an error. code={code} error={error.message}", {
 			code: code,
 			error: error,
 		});
