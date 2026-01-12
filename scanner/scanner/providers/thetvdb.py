@@ -272,6 +272,7 @@ class TVDB(Provider):
 					# ],
 				)
 				for trans in ret["translations"]["nameTranslations"]
+				if trans.get("isAlias") is None or False
 			},
 			seasons=await asyncio.gather(
 				*(
@@ -525,6 +526,7 @@ class TVDB(Provider):
 				poster=self._pick_image(ret["artworks"], 14, trans["language"]),
 			)
 			for trans in ret["translations"]["nameTranslations"]
+			if trans.get("isAlias") is None or False
 		}
 		entry.external_id = {
 			self.name: MetadataId(
