@@ -298,7 +298,10 @@ class TVDB(Provider):
 			staff=[],
 		)
 
-	def _pick_image(self, images: list[Any], type: int, lng: str) -> str | None:
+	def _pick_image(self, images: list[Any] | None, type: int, lng: str) -> str | None:
+		# sometimes `artworks` is not even part of the response.
+		if images is None:
+			return None
 		items = sorted(
 			(x for x in images if x["type"] == type),
 			key=lambda x: x.get("score", 0),
@@ -315,7 +318,13 @@ class TVDB(Provider):
 
 		return None
 
-	def _process_remote_id(self, ids: list[dict[str, Any]]) -> dict[str, MetadataId]:
+	def _process_remote_id(
+		self, ids: list[dict[str, Any]] | None
+	) -> dict[str, MetadataId]:
+		# sometimes `remoteIds` is not even part of the response.
+		if ids is None:
+			return {}
+
 		ret = {}
 
 		imdb = next((x["id"] for x in ids if x["sourceName"] == "IMDB"), None)
@@ -452,14 +461,14 @@ class TVDB(Provider):
 
 			if entry.extra["airs_after_season"] is not None:
 				before = max(
-					*(
+					(
 						x.order
 						for x in ret
 						if x.season_number == entry.extra["airs_after_season"]
 					),
-					0.0,
+					default=0,
 				)
-				after = min(*(x.order for x in ret if x.order > before), before)
+				after = min((x.order for x in ret if x.order > before), default=before)
 				entry.order = (before + after) / 2
 			elif entry.extra["airs_before_season"] is not None:
 				before = (
@@ -474,15 +483,15 @@ class TVDB(Provider):
 					)
 					if entry.extra["airs_before_episode"]
 					else min(
-						*(
+						(
 							x.order
 							for x in ret
 							if x.season_number == entry.extra["airs_before_season"]
 						),
-						0,
+						default=0,
 					)
 				)
-				after = max(*(x.order for x in ret if x.order < before), 0)
+				after = max((x.order for x in ret if x.order < before), default=0)
 				entry.order = (after + before) / 2
 
 		return ret
