@@ -28,9 +28,10 @@ type Jwt struct {
 // @Header       200  {string}  Authorization  "Jwt (same value as the returned token)"
 // @Router /jwt [get]
 func (h *Handler) CreateJwt(c echo.Context) error {
+	ctx := c.Request().Context()
 	apikey := c.Request().Header.Get("X-Api-Key")
 	if apikey != "" {
-		token, err := h.createApiJwt(apikey)
+		token, err := h.createApiJwt(ctx, apikey)
 		if err != nil {
 			return err
 		}
@@ -66,7 +67,7 @@ func (h *Handler) CreateJwt(c echo.Context) error {
 	if token == "" {
 		jwt = h.createGuestJwt()
 	} else {
-		tkn, err := h.createJwt(token)
+		tkn, err := h.createJwt(ctx, token)
 		if err != nil {
 			return err
 		}
@@ -106,8 +107,8 @@ func (h *Handler) createGuestJwt() *string {
 	return &t
 }
 
-func (h *Handler) createJwt(token string) (string, error) {
-	session, err := h.db.GetUserFromToken(context.Background(), token)
+func (h *Handler) createJwt(ctx context.Context, token string) (string, error) {
+	session, err := h.db.GetUserFromToken(ctx, token)
 	if err != nil {
 		return "", echo.NewHTTPError(http.StatusForbidden, "Invalid token")
 	}
@@ -116,8 +117,8 @@ func (h *Handler) createJwt(token string) (string, error) {
 	}
 
 	go func() {
-		h.db.TouchSession(context.Background(), session.Pk)
-		h.db.TouchUser(context.Background(), session.User.Pk)
+		h.db.TouchSession(ctx, session.Pk)
+		h.db.TouchUser(ctx, session.User.Pk)
 	}()
 
 	claims := maps.Clone(session.User.Claims)

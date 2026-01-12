@@ -60,6 +60,7 @@ func MapDbKey(key *dbc.Apikey) ApiKeyWToken {
 // @Failure      422  {object}  KError "Invalid create body"
 // @Router       /keys [post]
 func (h *Handler) CreateApiKey(c echo.Context) error {
+	ctx := c.Request().Context()
 	err := CheckPermissions(c, []string{"apikeys.write"})
 	if err != nil {
 		return err
@@ -91,14 +92,14 @@ func (h *Handler) CreateApiKey(c echo.Context) error {
 	uid, err := GetCurrentUserId(c)
 	// if err, we probably are using an api key (so no user)
 	if err != nil {
-		u, _ := h.db.GetUser(context.Background(), dbc.GetUserParams{
+		u, _ := h.db.GetUser(ctx, dbc.GetUserParams{
 			UseId: true,
 			Id:    uid,
 		})
 		user = &u[0].User.Pk
 	}
 
-	dbkey, err := h.db.CreateApiKey(context.Background(), dbc.CreateApiKeyParams{
+	dbkey, err := h.db.CreateApiKey(ctx, dbc.CreateApiKeyParams{
 		Name:      req.Name,
 		Token:     base64.RawURLEncoding.EncodeToString(id),
 		Claims:    req.Claims,
@@ -123,6 +124,7 @@ func (h *Handler) CreateApiKey(c echo.Context) error {
 // @Failure      422  {object}  KError "Invalid id format"
 // @Router       /keys [delete]
 func (h *Handler) DeleteApiKey(c echo.Context) error {
+	ctx := c.Request().Context()
 	err := CheckPermissions(c, []string{"apikeys.write"})
 	if err != nil {
 		return err
@@ -133,7 +135,7 @@ func (h *Handler) DeleteApiKey(c echo.Context) error {
 		return echo.NewHTTPError(422, "Invalid id given: not an uuid")
 	}
 
-	dbkey, err := h.db.DeleteApiKey(context.Background(), id)
+	dbkey, err := h.db.DeleteApiKey(ctx, id)
 	if err == pgx.ErrNoRows {
 		return echo.NewHTTPError(404, "No apikey found")
 	} else if err != nil {
@@ -151,12 +153,13 @@ func (h *Handler) DeleteApiKey(c echo.Context) error {
 // @Success      200  {object}  Page[ApiKey]
 // @Router       /keys [get]
 func (h *Handler) ListApiKey(c echo.Context) error {
+	ctx := c.Request().Context()
 	err := CheckPermissions(c, []string{"apikeys.read"})
 	if err != nil {
 		return err
 	}
 
-	dbkeys, err := h.db.ListApiKeys(context.Background())
+	dbkeys, err := h.db.ListApiKeys(ctx)
 	if err != nil {
 		return err
 	}
@@ -175,7 +178,7 @@ func (h *Handler) ListApiKey(c echo.Context) error {
 	})
 }
 
-func (h *Handler) createApiJwt(apikey string) (string, error) {
+func (h *Handler) createApiJwt(ctx context.Context, apikey string) (string, error) {
 	var key *ApiKeyWToken
 	for _, k := range h.config.EnvApiKeys {
 		if k.Token == apikey {
@@ -184,7 +187,7 @@ func (h *Handler) createApiJwt(apikey string) (string, error) {
 		}
 	}
 	if key == nil {
-		dbKey, err := h.db.GetApiKey(context.Background(), apikey)
+		dbKey, err := h.db.GetApiKey(ctx, apikey)
 		if err == pgx.ErrNoRows {
 			return "", echo.NewHTTPError(http.StatusForbidden, "Invalid api key")
 		} else if err != nil {
@@ -192,7 +195,7 @@ func (h *Handler) createApiJwt(apikey string) (string, error) {
 		}
 
 		go func() {
-			h.db.TouchApiKey(context.Background(), dbKey.Pk)
+			h.db.TouchApiKey(ctx, dbKey.Pk)
 		}()
 
 		found := MapDbKey(&dbKey)

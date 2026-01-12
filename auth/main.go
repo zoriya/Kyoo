@@ -101,9 +101,7 @@ func GetenvOr(env string, def string) string {
 	return out
 }
 
-func OpenDatabase() (*pgxpool.Pool, error) {
-	ctx := context.Background()
-
+func OpenDatabase(ctx context.Context) (*pgxpool.Pool, error) {
 	connectionString := GetenvOr("POSTGRES_URL", "")
 	config, err := pgxpool.ParseConfig(connectionString)
 	if err != nil {
@@ -178,11 +176,12 @@ type Handler struct {
 
 func (h *Handler) TokenToJwt(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		ctx := c.Request().Context()
 		var jwt *string
 
 		apikey := c.Request().Header.Get("X-Api-Key")
 		if apikey != "" {
-			token, err := h.createApiJwt(apikey)
+			token, err := h.createApiJwt(ctx, apikey)
 			if err != nil {
 				return err
 			}
@@ -200,7 +199,7 @@ func (h *Handler) TokenToJwt(next echo.HandlerFunc) echo.HandlerFunc {
 					return next(c)
 				}
 
-				tkn, err := h.createJwt(token)
+				tkn, err := h.createJwt(ctx, token)
 				if err != nil {
 					return err
 				}
@@ -307,7 +306,7 @@ func main() {
 	e.Validator = &Validator{validator: validator.New(validator.WithRequiredStructEnabled())}
 	e.HTTPErrorHandler = ErrorHandler
 
-	db, err := OpenDatabase()
+	db, err := OpenDatabase(ctx)
 	if err != nil {
 		e.Logger.Fatal("Could not open database: ", err)
 		return
@@ -317,7 +316,7 @@ func main() {
 		db:    dbc.New(db),
 		rawDb: db,
 	}
-	conf, err := LoadConfiguration(h.db)
+	conf, err := LoadConfiguration(ctx, h.db)
 	if err != nil {
 		e.Logger.Fatal("Could not load configuration: ", err)
 		return
