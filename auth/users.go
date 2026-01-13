@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -95,12 +94,13 @@ func MapOidc(oidc *dbc.GetUserRow) OidcHandle {
 // @Failure      422  {object}  KError "Invalid after id"
 // @Router       /users [get]
 func (h *Handler) ListUsers(c echo.Context) error {
+	ctx := c.Request().Context()
+
 	err := CheckPermissions(c, []string{"users.read"})
 	if err != nil {
 		return err
 	}
 
-	ctx := context.Background()
 	limit := int32(20)
 	id := c.Param("after")
 
@@ -140,6 +140,7 @@ func (h *Handler) ListUsers(c echo.Context) error {
 // @Failure      422  {object}  KError "Invalid id (not a uuid)"
 // @Router /users/{id} [get]
 func (h *Handler) GetUser(c echo.Context) error {
+	ctx := c.Request().Context()
 	err := CheckPermissions(c, []string{"users.read"})
 	if err != nil {
 		return err
@@ -147,7 +148,7 @@ func (h *Handler) GetUser(c echo.Context) error {
 
 	id := c.Param("id")
 	uid, err := uuid.Parse(c.Param("id"))
-	dbuser, err := h.db.GetUser(context.Background(), dbc.GetUserParams{
+	dbuser, err := h.db.GetUser(ctx, dbc.GetUserParams{
 		UseId:    err == nil,
 		Id:       uid,
 		Username: id,
@@ -179,11 +180,12 @@ func (h *Handler) GetUser(c echo.Context) error {
 // @Failure      403  {object}  KError "Invalid jwt token (or expired)"
 // @Router /users/me [get]
 func (h *Handler) GetMe(c echo.Context) error {
+	ctx := c.Request().Context()
 	id, err := GetCurrentUserId(c)
 	if err != nil {
 		return err
 	}
-	dbuser, err := h.db.GetUser(c.Request().Context(), dbc.GetUserParams{
+	dbuser, err := h.db.GetUser(ctx, dbc.GetUserParams{
 		UseId: true,
 		Id:    id,
 	})
@@ -216,6 +218,7 @@ func (h *Handler) GetMe(c echo.Context) error {
 // @Failure      422  {object}  KError "Invalid register body"
 // @Router /users [post]
 func (h *Handler) Register(c echo.Context) error {
+	ctx := c.Request().Context()
 	var req RegisterDto
 	err := c.Bind(&req)
 	if err != nil {
@@ -230,7 +233,7 @@ func (h *Handler) Register(c echo.Context) error {
 		return err
 	}
 
-	duser, err := h.db.CreateUser(context.Background(), dbc.CreateUserParams{
+	duser, err := h.db.CreateUser(ctx, dbc.CreateUserParams{
 		Username:    req.Username,
 		Email:       req.Email,
 		Password:    &pass,
@@ -258,6 +261,7 @@ func (h *Handler) Register(c echo.Context) error {
 // @Failure      422  {object}  KError "Invalid id format"
 // @Router /users/{id} [delete]
 func (h *Handler) DeleteUser(c echo.Context) error {
+	ctx := c.Request().Context()
 	err := CheckPermissions(c, []string{"users.delete"})
 	if err != nil {
 		return err
@@ -268,7 +272,7 @@ func (h *Handler) DeleteUser(c echo.Context) error {
 		return echo.NewHTTPError(422, "Invalid id given: not an uuid")
 	}
 
-	ret, err := h.db.DeleteUser(context.Background(), uid)
+	ret, err := h.db.DeleteUser(ctx, uid)
 	if err == pgx.ErrNoRows {
 		return echo.NewHTTPError(404, "No user found with given id")
 	} else if err != nil {
@@ -286,12 +290,13 @@ func (h *Handler) DeleteUser(c echo.Context) error {
 // @Success      200  {object}  User
 // @Router /users/me [delete]
 func (h *Handler) DeleteSelf(c echo.Context) error {
+	ctx := c.Request().Context()
 	uid, err := GetCurrentUserId(c)
 	if err != nil {
 		return err
 	}
 
-	ret, err := h.db.DeleteUser(context.Background(), uid)
+	ret, err := h.db.DeleteUser(ctx, uid)
 	if err == pgx.ErrNoRows {
 		return echo.NewHTTPError(403, "Invalid token, user already deleted.")
 	} else if err != nil {
@@ -312,6 +317,7 @@ func (h *Handler) DeleteSelf(c echo.Context) error {
 // @Success      422  {object}  KError  "Invalid body"
 // @Router /users/me [patch]
 func (h *Handler) EditSelf(c echo.Context) error {
+	ctx := c.Request().Context()
 	var req EditUserDto
 	err := c.Bind(&req)
 	if err != nil {
@@ -332,7 +338,7 @@ func (h *Handler) EditSelf(c echo.Context) error {
 		return err
 	}
 
-	ret, err := h.db.UpdateUser(context.Background(), dbc.UpdateUserParams{
+	ret, err := h.db.UpdateUser(ctx, dbc.UpdateUserParams{
 		Id:       uid,
 		Username: req.Username,
 		Email:    req.Email,
@@ -360,6 +366,7 @@ func (h *Handler) EditSelf(c echo.Context) error {
 // @Success      422  {object}  KError  "Invalid body"
 // @Router /users/{id} [patch]
 func (h *Handler) EditUser(c echo.Context) error {
+	ctx := c.Request().Context()
 	err := CheckPermissions(c, []string{"users.write"})
 	if err != nil {
 		return err
@@ -379,7 +386,7 @@ func (h *Handler) EditUser(c echo.Context) error {
 		return err
 	}
 
-	ret, err := h.db.UpdateUser(context.Background(), dbc.UpdateUserParams{
+	ret, err := h.db.UpdateUser(ctx, dbc.UpdateUserParams{
 		Id:       uid,
 		Username: req.Username,
 		Email:    req.Email,
@@ -406,11 +413,12 @@ func (h *Handler) EditUser(c echo.Context) error {
 // @Success      422  {object}  KError  "Invalid body"
 // @Router /users/me/password [patch]
 func (h *Handler) ChangePassword(c echo.Context) error {
+	ctx := c.Request().Context()
 	uid, err := GetCurrentUserId(c)
 	if err != nil {
 		return err
 	}
-	user, err := h.db.GetUser(c.Request().Context(), dbc.GetUserParams{
+	user, err := h.db.GetUser(ctx, dbc.GetUserParams{
 		UseId: true,
 		Id:    uid,
 	})
@@ -444,7 +452,7 @@ func (h *Handler) ChangePassword(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	_, err = h.db.UpdateUser(context.Background(), dbc.UpdateUserParams{
+	_, err = h.db.UpdateUser(ctx, dbc.UpdateUserParams{
 		Id:       uid,
 		Password: &pass,
 	})
@@ -452,7 +460,7 @@ func (h *Handler) ChangePassword(c echo.Context) error {
 		return err
 	}
 
-	err = h.db.ClearOtherSessions(context.Background(), dbc.ClearOtherSessionsParams{
+	err = h.db.ClearOtherSessions(ctx, dbc.ClearOtherSessionsParams{
 		SessionId: sid,
 		UserId:    uid,
 	})

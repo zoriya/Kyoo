@@ -2,7 +2,6 @@ package main
 
 import (
 	"cmp"
-	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"net/http"
@@ -73,6 +72,7 @@ type LoginDto struct {
 // @Failure      422  {object}   KError "User does not have a password (registered via oidc, please login via oidc)"
 // @Router /sessions [post]
 func (h *Handler) Login(c echo.Context) error {
+	ctx := c.Request().Context()
 	var req LoginDto
 	err := c.Bind(&req)
 	if err != nil {
@@ -82,7 +82,7 @@ func (h *Handler) Login(c echo.Context) error {
 		return err
 	}
 
-	dbuser, err := h.db.GetUserByLogin(context.Background(), req.Login)
+	dbuser, err := h.db.GetUserByLogin(ctx, req.Login)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "No account exists with the specified email or username.")
 	}
@@ -103,7 +103,7 @@ func (h *Handler) Login(c echo.Context) error {
 }
 
 func (h *Handler) createSession(c echo.Context, user *User) error {
-	ctx := context.Background()
+	ctx := c.Request().Context()
 
 	id := make([]byte, 64)
 	_, err := rand.Read(id)
@@ -138,6 +138,7 @@ func (h *Handler) createSession(c echo.Context, user *User) error {
 // @Failure      403  {object}  KError "Invalid jwt token (or expired)"
 // @Router /sessions/current [delete]
 func (h *Handler) Logout(c echo.Context) error {
+	ctx := c.Request().Context()
 	uid, err := GetCurrentUserId(c)
 	if err != nil {
 		return err
@@ -156,7 +157,7 @@ func (h *Handler) Logout(c echo.Context) error {
 		return echo.NewHTTPError(422, "Invalid session id")
 	}
 
-	ret, err := h.db.DeleteSession(context.Background(), dbc.DeleteSessionParams{
+	ret, err := h.db.DeleteSession(ctx, dbc.DeleteSessionParams{
 		Id:     sid,
 		UserId: uid,
 	})

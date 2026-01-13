@@ -43,7 +43,7 @@ var DefaultConfig = Configuration{
 	EnvApiKeys:      make([]ApiKeyWToken, 0),
 }
 
-func LoadConfiguration(db *dbc.Queries) (*Configuration, error) {
+func LoadConfiguration(ctx context.Context, db *dbc.Queries) (*Configuration, error) {
 	ret := DefaultConfig
 
 	ret.PublicUrl = os.Getenv("PUBLIC_URL")
@@ -148,7 +148,7 @@ func LoadConfiguration(db *dbc.Queries) (*Configuration, error) {
 		})
 
 	}
-	apikeys, err := db.ListApiKeys(context.Background())
+	apikeys, err := db.ListApiKeys(ctx)
 	if err != nil {
 		return nil, err
 	}
