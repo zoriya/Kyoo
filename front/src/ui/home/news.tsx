@@ -14,7 +14,7 @@ export const NewsList = () => {
 			<Header title={t("home.news")} />
 			<InfiniteFetch
 				query={NewsList.query()}
-				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
+				layout={{ ...EntryBox.layout, layout: "horizontal" }}
 				// getItemType={(x, i) =>
 				// 	x?.kind === "movie" || (!x && i % 2) ? "movie" : "episode"
 				// }

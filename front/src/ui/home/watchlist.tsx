@@ -80,6 +80,7 @@ export const WatchlistList = () => {
 									: null
 							}
 							unseenEpisodesCount={null}
+							horizontal
 						/>
 					);
 				}}
