@@ -17,8 +17,10 @@ export const studios = schema.table("studios", {
 	slug: varchar({ length: 255 }).notNull().unique(),
 	externalId: externalid(),
 
-	createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-	updatedAt: timestamp({ withTimezone: true })
+	createdAt: timestamp({ withTimezone: true, precision: 3 })
+		.notNull()
+		.defaultNow(),
+	updatedAt: timestamp({ withTimezone: true, precision: 3 })
 		.notNull()
 		.$onUpdate(() => new Date()),
 });

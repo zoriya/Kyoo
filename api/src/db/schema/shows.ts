@@ -87,11 +87,13 @@ export const shows = schema.table(
 
 		externalId: externalid(),
 
-		createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-		updatedAt: timestamp({ withTimezone: true })
+		createdAt: timestamp({ withTimezone: true, precision: 3 })
+			.notNull()
+			.defaultNow(),
+		updatedAt: timestamp({ withTimezone: true, precision: 3 })
 			.notNull()
 			.$onUpdate(() => new Date()),
-		nextRefresh: timestamp({ withTimezone: true }).notNull(),
+		nextRefresh: timestamp({ withTimezone: true, precision: 3 }).notNull(),
 	},
 	(t) => [
 		check("rating_valid", sql`${t.rating} between 0 and 100`),

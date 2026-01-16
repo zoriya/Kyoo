@@ -29,12 +29,14 @@ export const watchlist = schema.table(
 
 		score: integer(),
 
-		startedAt: timestamp({ withTimezone: true }),
-		lastPlayedAt: timestamp({ withTimezone: true }),
-		completedAt: timestamp({ withTimezone: true }),
+		startedAt: timestamp({ withTimezone: true, precision: 3 }),
+		lastPlayedAt: timestamp({ withTimezone: true, precision: 3 }),
+		completedAt: timestamp({ withTimezone: true, precision: 3 }),
 
-		createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-		updatedAt: timestamp({ withTimezone: true })
+		createdAt: timestamp({ withTimezone: true, precision: 3 })
+			.notNull()
+			.defaultNow(),
+		updatedAt: timestamp({ withTimezone: true, precision: 3 })
 			.notNull()
 			.$onUpdate(() => new Date()),
 	},

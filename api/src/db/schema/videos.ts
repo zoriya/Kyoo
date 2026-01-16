@@ -25,8 +25,10 @@ export const videos = schema.table(
 		version: integer().notNull().default(1),
 		guess: jsonb().$type<Guess>().notNull(),
 
-		createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-		updatedAt: timestamp({ withTimezone: true })
+		createdAt: timestamp({ withTimezone: true, precision: 3 })
+			.notNull()
+			.defaultNow(),
+		updatedAt: timestamp({ withTimezone: true, precision: 3 })
 			.notNull()
 			.$onUpdate(() => new Date()),
 	},

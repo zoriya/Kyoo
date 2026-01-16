@@ -16,7 +16,9 @@ export const mqueue = schema.table(
 		message: jsonb().notNull(),
 		priority: integer().notNull().default(0),
 		attempt: integer().notNull().default(0),
-		createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+		createdAt: timestamp({ withTimezone: true, precision: 3 })
+			.notNull()
+			.defaultNow(),
 	},
 	(t) => [index("mqueue_created").on(t.createdAt)],
 );

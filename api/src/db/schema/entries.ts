@@ -67,12 +67,14 @@ export const entries = schema.table(
 
 		externalId: entry_extid(),
 
-		createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-		updatedAt: timestamp({ withTimezone: true })
+		createdAt: timestamp({ withTimezone: true, precision: 3 })
+			.notNull()
+			.defaultNow(),
+		updatedAt: timestamp({ withTimezone: true, precision: 3 })
 			.notNull()
 			.$onUpdate(() => new Date()),
-		availableSince: timestamp({ withTimezone: true }),
-		nextRefresh: timestamp({ withTimezone: true }).notNull(),
+		availableSince: timestamp({ withTimezone: true, precision: 3 }),
+		nextRefresh: timestamp({ withTimezone: true, precision: 3 }).notNull(),
 	},
 	(t) => [
 		unique().on(t.showPk, t.seasonNumber, t.episodeNumber),

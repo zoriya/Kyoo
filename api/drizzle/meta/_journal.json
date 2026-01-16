@@ -183,6 +183,13 @@
 			"when": 1766335080472,
 			"tag": "0025_images",
 			"breakpoints": true
+		},
+		{
+			"idx": 26,
+			"version": "7",
+			"when": 1768560733256,
+			"tag": "0026_precision",
+			"breakpoints": true
 		}
 	]
 }
