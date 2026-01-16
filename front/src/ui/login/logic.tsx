@@ -87,12 +87,16 @@ export const logout = async () => {
 	const account = accounts.find((x) => x.selected);
 	removeAccounts((x) => x.selected);
 	if (account) {
-		await queryFn({
-			method: "DELETE",
-			url: "auth/sessions/current",
-			authToken: account.token,
-			parser: null,
-		});
+		try {
+			await queryFn({
+				method: "DELETE",
+				url: "auth/sessions/current",
+				authToken: account.token,
+				parser: null,
+			});
+		} catch (e) {
+			console.error(e, "continuing normaly");
+		}
 	}
 };
 
@@ -107,5 +111,5 @@ export const deleteAccount = async () => {
 			parser: null,
 		});
 	}
-	logout();
+	removeAccounts((x) => x.selected);
 };

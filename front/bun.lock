@@ -32,6 +32,7 @@
         "i18next-http-backend": "^3.0.2",
         "jassub": "^2.2.4",
         "langmap": "^0.0.16",
+        "libpgs": "^0.8.1",
         "react": "19.1.0",
         "react-dom": "19.1.0",
         "react-i18next": "^16.1.0",
@@ -1072,6 +1073,8 @@
     "langmap": ["langmap@0.0.16", "", {}, "sha512-AtYvBK7BsDvWwnSfmO7CfgeUy7GUT1wK3QX8eKH/Ey/eXodqoHuAtvdQ82hmWD9QVFVKnuiNjym9fGY4qSJeLA=="],
 
     "leven": ["leven@3.1.0", "", {}, "sha512-qsda+H8jTaUaN/x5vzW2rzc+8Rw4TAQ/4KjB46IwK5VH+IlVeeeje/EoZRpiXvIqjFgK84QffqPztGI3VBLG1A=="],
+
+    "libpgs": ["libpgs@0.8.1", "", {}, "sha512-Z8WCvHRYr37QjU8b2WqiJpCvnoojbYPtoE4FktwdI+m+b1QkNIKqrYQrlPKG1xvYyQWgV1j+16xjFOhun4nBUA=="],
 
     "lighthouse-logger": ["lighthouse-logger@1.4.2", "", { "dependencies": { "debug": "^2.6.9", "marky": "^1.2.2" } }, "sha512-gPWxznF6TKmUHrOQjlVo2UbaL2EJ71mb2CCeRs/2qBpi4L/g4LUVc9+3lKQ6DTUZwJswfM7ainGrLO1+fOqa2g=="],
 
