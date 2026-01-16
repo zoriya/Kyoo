@@ -25,8 +25,10 @@ export const images = schema.table(
 		priority: integer().notNull().default(0),
 		attempt: integer().notNull().default(0),
 		status: imgStatus().notNull().default("pending"),
-		createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-		downloadedAt: timestamp({ withTimezone: true }),
+		createdAt: timestamp({ withTimezone: true, precision: 3 })
+			.notNull()
+			.defaultNow(),
+		downloadedAt: timestamp({ withTimezone: true, precision: 3 }),
 	},
 	(t) => [index("imgqueue_sort").on(t.priority, t.attempt, t.createdAt)],
 );

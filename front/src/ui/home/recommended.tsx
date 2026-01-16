@@ -276,7 +276,7 @@ ItemDetails.layout = {
 	size: ts(36),
 	numColumns: { xs: 1, md: 2, xl: 3 },
 	layout: "grid",
-	gap: ts(8),
+	gap: { xs: ts(1), md: ts(8) },
 } satisfies Layout;
 
 export const Recommended = () => {
@@ -293,7 +293,7 @@ export const Recommended = () => {
 				layout={ItemDetails.layout}
 				placeholderCount={6}
 				fetchMore={false}
-				contentContainerStyle={{ padding: 0, paddingHorizontal: 0 }}
+				contentContainerStyle={{ marginHorizontal: 0 }}
 				Render={({ item }) => (
 					<ItemDetails
 						slug={item.slug}

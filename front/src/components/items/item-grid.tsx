@@ -54,6 +54,7 @@ export const ItemGrid = ({
 	watchStatus,
 	watchPercent,
 	unseenEpisodesCount,
+	horizontal = false,
 	...props
 }: {
 	href: string;
@@ -65,6 +66,7 @@ export const ItemGrid = ({
 	watchPercent: number | null;
 	kind: "movie" | "serie" | "collection";
 	unseenEpisodesCount: number | null;
+	horizontal: boolean;
 } & Stylable<"text">) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 	const { css } = useYoshiki("grid");
@@ -77,7 +79,8 @@ export const ItemGrid = ({
 				{
 					flexDirection: "column",
 					alignItems: "center",
-					width: percent(100),
+					width: horizontal ? ItemGrid.layout.size : percent(100),
+					height: horizontal ? percent(100) : undefined,
 					child: {
 						poster: {
 							borderColor: (theme) => theme.background,
@@ -181,7 +184,8 @@ ItemGrid.Loader = (props: object) => {
 };
 
 ItemGrid.layout = {
-	size: 150,
+	size: 200,
+	// size: { xs: 150, md: 200, xl: 210 },
 	numColumns: { xs: 3, sm: 4, md: 5, lg: 6, xl: 8 },
 	gap: { xs: ts(1), sm: ts(2), md: ts(4) },
 	layout: "grid",

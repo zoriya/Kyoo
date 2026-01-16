@@ -20,7 +20,9 @@ export const history = schema.table(
 		videoPk: integer().references(() => videos.pk, { onDelete: "set null" }),
 		percent: integer().notNull().default(0),
 		time: integer().notNull().default(0),
-		playedDate: timestamp({ withTimezone: true }).notNull().defaultNow(),
+		playedDate: timestamp({ withTimezone: true, precision: 3 })
+			.notNull()
+			.defaultNow(),
 	},
 	(t) => [
 		index("history_play_date").on(t.playedDate.desc()),

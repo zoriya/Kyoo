@@ -42,7 +42,7 @@ export const GenreGrid = ({ genre }: { genre: Genre }) => {
 						<EmptyView message={t("home.none")} />
 					) : undefined
 				}
-				Render={({ item }) => <ItemGrid {...itemMap(item)} />}
+				Render={({ item }) => <ItemGrid {...itemMap(item)} horizontal />}
 				Loader={ItemGrid.Loader}
 			/>
 		</>

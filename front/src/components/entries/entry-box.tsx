@@ -19,6 +19,7 @@ import {
 	SubP,
 	ts,
 } from "~/primitives";
+import type { Layout } from "~/query";
 
 export const EntryBox = ({
 	slug,
@@ -52,6 +53,7 @@ export const EntryBox = ({
 			{...css(
 				{
 					alignItems: "center",
+					width: EntryBox.layout.size,
 					child: {
 						poster: {
 							borderColor: (theme) => theme.background,
@@ -142,3 +144,10 @@ EntryBox.Loader = (props: Stylable) => {
 		</View>
 	);
 };
+
+EntryBox.layout = {
+	size: 350,
+	numColumns: { xs: 3, sm: 4, md: 5, lg: 6, xl: 8 },
+	gap: { xs: ts(1), sm: ts(2), md: ts(4) },
+	layout: "grid",
+} satisfies Layout;
