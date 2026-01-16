@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -10,18 +9,16 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/golang-jwt/jwt/v5"
 	_ "github.com/zoriya/kyoo/transcoder/docs"
 
-	"github.com/golang-jwt/jwt/v5"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	"github.com/zoriya/kyoo/transcoder/src"
 	"github.com/zoriya/kyoo/transcoder/src/api"
 	"github.com/zoriya/kyoo/transcoder/src/utils"
 
-	"github.com/lestrrat-go/httprc/v3"
-	"github.com/lestrrat-go/jwx/v3/jwk"
+	"github.com/MicahParks/keyfunc/v3"
 
-	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -186,35 +183,29 @@ func main() {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		jwks, err := jwk.NewCache(ctx, httprc.NewClient())
+		k, err := keyfunc.NewDefaultCtx(ctx, []string{src.Settings.JwksUrl})
 		if err != nil {
-			e.Logger.Fatal("failed to create jwk cache: ", err)
-			return
+			e.Logger.Fatalf("Failed to get a jwks: ", err)
 		}
-		jwks.Register(ctx, src.Settings.JwksUrl)
-		g.Use(echojwt.WithConfig(echojwt.Config{
-			KeyFunc: func(token *jwt.Token) (any, error) {
-				keys, err := jwks.CachedSet(src.Settings.JwksUrl)
+		g.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+			return func(c echo.Context) error {
+				authHeader := c.Request().Header.Get("Authorization")
+				if !strings.HasPrefix(authHeader, "Bearer ") {
+					return echo.NewHTTPError(http.StatusUnauthorized, "Missing or invalid token")
+				}
+
+				token, err := jwt.Parse(strings.TrimPrefix(authHeader, "Bearer "), k.Keyfunc)
 				if err != nil {
-					return nil, err
+					return echo.NewHTTPError(http.StatusForbidden, "Invalid token: "+err.Error())
 				}
-				kid, ok := token.Header["kid"].(string)
-				if !ok {
-					return nil, errors.New("missing kid in jwt")
+				if !token.Valid {
+					return echo.NewHTTPError(http.StatusForbidden, "Token is invalid")
 				}
-				key, found := keys.LookupKeyID(kid)
-				if !found {
-					return nil, fmt.Errorf("unable to find key %q", kid)
-				}
+				c.Set("user", token)
 
-				var pubkey any
-				if err := jwk.Export(key, &pubkey); err != nil {
-					return nil, fmt.Errorf("Unable to get the public key. Error: %s", err.Error())
-				}
-
-				return pubkey, nil
-			},
-		}))
+				return next(c)
+			}
+		})
 
 		g.Use(RequireCorePlayPermission)
 	}
