@@ -8,6 +8,8 @@ import { removeAccounts, updateAccount } from "./account-store";
 import { useSetError } from "./error-provider";
 import { useStoreValue } from "./settings";
 
+export const defaultApiUrl = "https://beta.sdg.moe";
+
 export const AccountProvider = ({ children }: { children: ReactNode }) => {
 	const [setError, clearError] = useSetError("connection");
 	const accounts = useStoreValue("accounts", z.array(Account)) ?? [];
@@ -15,7 +17,7 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 	const ret = useMemo(() => {
 		const acc = accounts.find((x) => x.selected);
 		return {
-			apiUrl: acc?.apiUrl ?? "",
+			apiUrl: acc?.apiUrl ?? defaultApiUrl,
 			authToken: acc?.token ?? null,
 			selectedAccount: acc ?? null,
 			accounts: accounts.map((account) => ({

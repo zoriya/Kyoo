@@ -1,5 +1,6 @@
 import { z } from "zod/v4";
 import { type Account, type KyooError, User } from "~/models";
+import { defaultApiUrl } from "~/providers/account-provider";
 import {
 	addAccount,
 	readAccounts,
@@ -24,7 +25,7 @@ export const login = async (
 		apiUrl: string | null;
 	},
 ): Promise<Result<Account, string>> => {
-	apiUrl ??= "";
+	apiUrl ??= defaultApiUrl;
 	try {
 		const controller = new AbortController();
 		setTimeout(() => controller.abort(), 5_000);

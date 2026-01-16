@@ -16,12 +16,12 @@ export const enhanceSubtitles = (player: VideoPlayer) => {
 	player.__ass = { fonts: [] };
 
 	const select = player.selectTextTrack.bind(player);
-	player.selectTextTrack = (track) => {
+	player.selectTextTrack = async (track) => {
 		player.__ass.currentId = undefined;
 
 		// on the web, track.id is the url of the subtitle.
 		if (!track || !track.id.endsWith(".ass")) {
-			player.__ass.jassub?.destroy();
+			await player.__ass.jassub?.destroy();
 			player.__ass.jassub = undefined;
 			select(track);
 			return;
@@ -35,17 +35,20 @@ export const enhanceSubtitles = (player: VideoPlayer) => {
 				video: player.__getNativeRef(),
 				workerUrl: "/jassub/jassub-worker.js",
 				wasmUrl: "/jassub/jassub-worker.wasm",
-				legacyWasmUrl: "/jassub/jassub-worker.wasm.js",
 				modernWasmUrl: "/jassub/jassub-worker-modern.wasm",
-				// Disable offscreen renderer due to bugs on firefox and chrome android
-				// (see https://github.com/ThaUnknown/jassub/issues/31)
-				// offscreenRender: false,
 				subUrl: track.id,
 				fonts: player.__ass.fonts,
+				availableFonts: {
+					"liberation sans": "/jassub/default.woff2",
+				},
+				debug: true,
+				fallbackFont: "liberation sans",
 			});
+			await player.__ass.jassub.ready;
 		} else {
-			player.__ass.jassub.freeTrack();
-			player.__ass.jassub.setTrackByUrl(track.id);
+			await player.__ass.jassub.ready;
+			await player.__ass.jassub.renderer.freeTrack();
+			await player.__ass.jassub.renderer.setTrackByUrl(track.id);
 		}
 	};
 
