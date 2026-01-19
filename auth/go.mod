@@ -12,7 +12,7 @@ require (
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/labstack/echo-jwt/v4 v4.4.0
 	github.com/labstack/echo/v4 v4.15.0
-	github.com/lestrrat-go/jwx/v3 v3.0.12
+	github.com/lestrrat-go/jwx/v3 v3.0.13
 	github.com/swaggo/echo-swagger v1.4.1
 	github.com/swaggo/swag v1.16.6
 	go.opentelemetry.io/contrib/bridges/otelslog v0.14.0
@@ -39,8 +39,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.4 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
-	github.com/lestrrat-go/httprc/v3 v3.0.1 // indirect
-	github.com/lestrrat-go/option v1.0.1 // indirect
+	github.com/lestrrat-go/httprc/v3 v3.0.2 // indirect
 	github.com/lestrrat-go/option/v2 v2.0.0 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
