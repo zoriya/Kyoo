@@ -31,7 +31,7 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.39.0
 	go.opentelemetry.io/otel/trace v1.39.0
 	golang.org/x/sync v0.19.0
-	gopkg.in/vansante/go-ffprobe.v2 v2.2.1
+	gopkg.in/vansante/go-ffprobe.v2 v2.3.0
 )
 
 require (
