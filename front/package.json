@@ -40,7 +40,7 @@
 		"expo-updates": "~29.0.16",
 		"i18next-browser-languagedetector": "^8.2.0",
 		"i18next-http-backend": "^3.0.2",
-		"jassub": "^2.2.4",
+		"jassub": "^1.8.8",
 		"langmap": "^0.0.16",
 		"libpgs": "^0.8.1",
 		"react": "19.1.0",

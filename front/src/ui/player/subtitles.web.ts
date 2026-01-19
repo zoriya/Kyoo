@@ -11,6 +11,7 @@ declare module "react-native-video" {
 		};
 		__pgs?: PgsRenderer;
 		__currentId?: string;
+		__unselect?: (newMode?: string) => void;
 	}
 }
 
@@ -21,31 +22,30 @@ export const enhanceSubtitles = (player: VideoPlayer) => {
 	player.selectTextTrack = async (track) => {
 		player.__currentId = undefined;
 
+		if (!track) {
+			player.__unselect?.();
+			return;
+		}
+
 		// on the web, track.id is the url of the subtitle.
-		switch (track?.id.substring(track.id.length - 3)) {
-			case null:
-			case undefined:
+		const newMode = track.id.substring(track.id.length - 3);
+		player.__unselect?.(newMode);
+
+		switch (newMode) {
 			case "vtt":
-				await player.__ass.jassub?.destroy();
-				player.__ass.jassub = undefined;
-
-				player.__pgs?.dispose();
-				player.__pgs = undefined;
-
 				select(track);
+				player.__unselect = (newMode) => {
+					if (newMode !== "vtt") select(null);
+				};
 				break;
 			case "ass":
-				// since we'll use a custom renderer for ass, disable the existing sub
-				select(null);
 				player.__currentId = track.id;
-				player.__pgs?.dispose();
-				player.__pgs = undefined;
-
 				if (!player.__ass.jassub) {
 					player.__ass.jassub = new Jassub({
 						video: player.__getNativeRef(),
 						workerUrl: "/jassub/jassub-worker.js",
 						wasmUrl: "/jassub/jassub-worker.wasm",
+						legacyWasmUrl: "/jassub/jassub-worker.wasm.js",
 						modernWasmUrl: "/jassub/jassub-worker-modern.wasm",
 						subUrl: track.id,
 						fonts: player.__ass.fonts,
@@ -54,18 +54,21 @@ export const enhanceSubtitles = (player: VideoPlayer) => {
 						},
 						fallbackFont: "liberation sans",
 					});
-					await player.__ass.jassub.ready;
 				} else {
-					await player.__ass.jassub.ready;
-					await player.__ass.jassub.renderer.freeTrack();
-					await player.__ass.jassub.renderer.setTrackByUrl(track.id);
+					player.__ass.jassub.freeTrack();
+					player.__ass.jassub.setTrackByUrl(track.id);
 				}
+
+				player.__unselect = (newMode) => {
+					if (newMode !== "ass") {
+						player.__ass.jassub?.destroy();
+						player.__ass.jassub = undefined;
+						player.__currentId = undefined;
+					}
+				};
 				break;
 			case "sup":
-				select(null);
 				player.__currentId = track.id;
-				await player.__ass.jassub?.destroy();
-				player.__ass.jassub = undefined;
 
 				if (!player.__pgs) {
 					player.__pgs = new PgsRenderer({
@@ -76,6 +79,13 @@ export const enhanceSubtitles = (player: VideoPlayer) => {
 				} else {
 					player.__pgs.loadFromUrl(track.id);
 				}
+
+				player.__unselect = (newMode) => {
+					if (newMode !== "pgs") {
+						player.__pgs?.dispose();
+						player.__pgs = undefined;
+					}
+				};
 				break;
 			default:
 				console.log("invalid track url", track?.id);

@@ -3,7 +3,6 @@
 !/bun.lock
 !/tsconfig.json
 !/app.config.ts
-!/babel.config.js
 !/metro.config.js
 !/src
 !/public

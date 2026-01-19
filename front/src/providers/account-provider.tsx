@@ -8,7 +8,7 @@ import { removeAccounts, updateAccount } from "./account-store";
 import { useSetError } from "./error-provider";
 import { useStoreValue } from "./settings";
 
-export const defaultApiUrl = "https://beta.sdg.moe";
+export const defaultApiUrl = "";
 
 export const AccountProvider = ({ children }: { children: ReactNode }) => {
 	const [setError, clearError] = useSetError("connection");

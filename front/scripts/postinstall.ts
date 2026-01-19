@@ -1,7 +1,7 @@
 import { readdir } from "node:fs/promises";
 
 async function jassub() {
-	const srcDir = new URL("../node_modules/jassub/dist/wasm/", import.meta.url);
+	const srcDir = new URL("../node_modules/jassub/dist/", import.meta.url);
 	const destDir = new URL("../public/jassub/", import.meta.url);
 
 	const files = await readdir(srcDir);
