@@ -4,6 +4,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 import { percent, px, useYoshiki } from "yoshiki/native";
 import { A, Button, H1, Input, P, ts } from "~/primitives";
+import { defaultApiUrl } from "~/providers/account-provider";
 import { useQueryState } from "~/utils";
 import { FormPage } from "./form";
 import { login } from "./logic";
@@ -11,7 +12,7 @@ import { PasswordInput } from "./password-input";
 import { ServerUrlPage } from "./server-url";
 
 export const RegisterPage = () => {
-	const [apiUrl] = useQueryState("apiUrl", "");
+	const [apiUrl] = useQueryState("apiUrl", defaultApiUrl);
 	const [email, setEmail] = useState("");
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");

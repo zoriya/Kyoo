@@ -3,6 +3,7 @@ module github.com/zoriya/kyoo/transcoder
 go 1.24.2
 
 require (
+	github.com/MicahParks/keyfunc/v3 v3.7.0
 	github.com/asticode/go-astisub v0.38.0
 	github.com/aws/aws-sdk-go-v2 v1.41.1
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.95.1
@@ -10,7 +11,6 @@ require (
 	github.com/exaring/otelpgx v0.10.0
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/jackc/pgx/v5 v5.8.0
-	github.com/labstack/echo-jwt/v4 v4.4.0
 	github.com/labstack/echo/v4 v4.15.0
 	github.com/swaggo/echo-swagger v1.4.1
 	github.com/swaggo/swag v1.16.6
@@ -36,6 +36,7 @@ require (
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
+	github.com/MicahParks/jwkset v0.11.0 // indirect
 	github.com/asticode/go-astikit v0.57.1 // indirect
 	github.com/asticode/go-astits v1.14.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/signin v1.0.5 // indirect
@@ -44,18 +45,18 @@ require (
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/go-openapi/jsonpointer v0.22.3 // indirect
-	github.com/go-openapi/jsonreference v0.21.3 // indirect
-	github.com/go-openapi/spec v0.22.1 // indirect
-	github.com/go-openapi/swag/conv v0.25.3 // indirect
-	github.com/go-openapi/swag/jsonname v0.25.3 // indirect
-	github.com/go-openapi/swag/jsonutils v0.25.3 // indirect
-	github.com/go-openapi/swag/loading v0.25.3 // indirect
-	github.com/go-openapi/swag/stringutils v0.25.3 // indirect
-	github.com/go-openapi/swag/typeutils v0.25.3 // indirect
-	github.com/go-openapi/swag/yamlutils v0.25.3 // indirect
+	github.com/go-openapi/jsonpointer v0.22.4 // indirect
+	github.com/go-openapi/jsonreference v0.21.4 // indirect
+	github.com/go-openapi/spec v0.22.3 // indirect
+	github.com/go-openapi/swag/conv v0.25.4 // indirect
+	github.com/go-openapi/swag/jsonname v0.25.4 // indirect
+	github.com/go-openapi/swag/jsonutils v0.25.4 // indirect
+	github.com/go-openapi/swag/loading v0.25.4 // indirect
+	github.com/go-openapi/swag/stringutils v0.25.4 // indirect
+	github.com/go-openapi/swag/typeutils v0.25.4 // indirect
+	github.com/go-openapi/swag/yamlutils v0.25.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.4 // indirect
 	github.com/jackc/pgerrcode v0.0.0-20250907135507-afb5586c32a6 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
@@ -65,12 +66,12 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.39.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.9.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/mod v0.31.0 // indirect
-	golang.org/x/tools v0.40.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20251202230838-ff82c1b0f217 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20251202230838-ff82c1b0f217 // indirect
-	google.golang.org/grpc v1.77.0 // indirect
-	google.golang.org/protobuf v1.36.10 // indirect
+	golang.org/x/mod v0.32.0 // indirect
+	golang.org/x/tools v0.41.0 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260114163908-3f89685c29c3 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260114163908-3f89685c29c3 // indirect
+	google.golang.org/grpc v1.78.0 // indirect
+	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
@@ -91,24 +92,16 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.35.13 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.41.6 // indirect
 	github.com/aws/smithy-go v1.24.0 // indirect
-	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
-	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/labstack/gommon v0.4.2 // indirect
-	github.com/lestrrat-go/blackmagic v1.0.4 // indirect
-	github.com/lestrrat-go/httpcc v1.0.1 // indirect
-	github.com/lestrrat-go/httprc/v3 v3.0.3
-	github.com/lestrrat-go/jwx/v3 v3.0.13
-	github.com/lestrrat-go/option/v2 v2.0.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	golang.org/x/crypto v0.46.0 // indirect
-	golang.org/x/image v0.33.0 // indirect
-	golang.org/x/net v0.48.0 // indirect
-	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/crypto v0.47.0 // indirect
+	golang.org/x/image v0.35.0 // indirect
+	golang.org/x/net v0.49.0 // indirect
+	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/text v0.33.0
 	golang.org/x/time v0.14.0 // indirect
 )

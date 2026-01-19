@@ -1,5 +1,6 @@
 import { z } from "zod/v4";
 import { type Account, type KyooError, User } from "~/models";
+import { defaultApiUrl } from "~/providers/account-provider";
 import {
 	addAccount,
 	readAccounts,
@@ -24,7 +25,7 @@ export const login = async (
 		apiUrl: string | null;
 	},
 ): Promise<Result<Account, string>> => {
-	apiUrl ??= "";
+	apiUrl ??= defaultApiUrl;
 	try {
 		const controller = new AbortController();
 		setTimeout(() => controller.abort(), 5_000);
@@ -86,12 +87,16 @@ export const logout = async () => {
 	const account = accounts.find((x) => x.selected);
 	removeAccounts((x) => x.selected);
 	if (account) {
-		await queryFn({
-			method: "DELETE",
-			url: "auth/sessions/current",
-			authToken: account.token,
-			parser: null,
-		});
+		try {
+			await queryFn({
+				method: "DELETE",
+				url: "auth/sessions/current",
+				authToken: account.token,
+				parser: null,
+			});
+		} catch (e) {
+			console.error(e, "continuing normaly");
+		}
 	}
 };
 
@@ -106,5 +111,5 @@ export const deleteAccount = async () => {
 			parser: null,
 		});
 	}
-	logout();
+	removeAccounts((x) => x.selected);
 };

@@ -118,8 +118,6 @@ type Subtitle struct {
 	Language *string `json:"language" db:"language"`
 	/// The codec of this stream.
 	Codec string `json:"codec" db:"codec"`
-	/// The codec of this stream (defined as the RFC 6381).
-	MimeCodec *string `json:"mimeCodec" db:"mime_codec"`
 	/// The extension for the codec.
 	Extension *string `json:"extension" db:"extension"`
 	/// Is this stream the default one of it's type?
@@ -227,15 +225,10 @@ func NullIfUnd(str string) *string {
 }
 
 var SubtitleExtensions = map[string]string{
-	"subrip": "srt",
-	"ass":    "ass",
-	"vtt":    "vtt",
-}
-
-var SubtitleMimes = map[string]string{
-	"subrip": "application/x-subrip",
-	"ass":    "text/x-ssa",
-	"vtt":    "text/vtt",
+	"subrip":            "srt",
+	"ass":               "ass",
+	"vtt":               "vtt",
+	"hdmv_pgs_subtitle": "sup",
 }
 
 func RetriveMediaInfo(path string, sha string) (*MediaInfo, error) {
@@ -304,7 +297,6 @@ func RetriveMediaInfo(path string, sha string) (*MediaInfo, error) {
 				Title:             OrNull(stream.Tags.Title),
 				Language:          NullIfUnd(lang.String()),
 				Codec:             stream.CodecName,
-				MimeCodec:         OrNull(SubtitleMimes[stream.CodecName]),
 				Extension:         extension,
 				IsDefault:         stream.Disposition.Default != 0,
 				IsForced:          stream.Disposition.Forced != 0,

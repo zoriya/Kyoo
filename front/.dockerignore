@@ -2,8 +2,8 @@
 !/package.json
 !/bun.lock
 !/tsconfig.json
-!/metro.config.js
 !/app.config.ts
+!/metro.config.js
 !/src
 !/public
 !/scripts

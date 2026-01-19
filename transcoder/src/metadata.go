@@ -350,21 +350,20 @@ func (s *MetadataService) storeFreshMetadata(ctx context.Context, path string, s
 		tx.Exec(
 			ctx,
 			`
-			insert into gocoder.subtitles(sha, idx, title, language, codec, mime_codec, extension, is_default, is_forced, is_hearing_impaired)
-			values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+			insert into gocoder.subtitles(sha, idx, title, language, codec, extension, is_default, is_forced, is_hearing_impaired)
+			values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 			on conflict (sha, idx) do update set
 				sha = excluded.sha,
 				idx = excluded.idx,
 				title = excluded.title,
 				language = excluded.language,
 				codec = excluded.codec,
-				mime_codec = excluded.mime_codec,
 				extension = excluded.extension,
 				is_default = excluded.is_default,
 				is_forced = excluded.is_forced,
 				is_hearing_impaired = excluded.is_hearing_impaired
 			`,
-			ret.Sha, s.Index, s.Title, s.Language, s.Codec, s.MimeCodec, s.Extension, s.IsDefault, s.IsForced, s.IsHearingImpaired,
+			ret.Sha, s.Index, s.Title, s.Language, s.Codec, s.Extension, s.IsDefault, s.IsForced, s.IsHearingImpaired,
 		)
 	}
 	for _, c := range ret.Chapters {

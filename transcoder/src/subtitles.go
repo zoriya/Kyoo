@@ -40,7 +40,6 @@ outer:
 				sub := Subtitle{
 					Index:      nil,
 					Codec:      codec,
-					MimeCodec:  OrNull(SubtitleMimes[codec]),
 					Extension:  &ext,
 					IsExternal: true,
 					Path:       &match,

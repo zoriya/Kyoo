@@ -3,6 +3,7 @@ import { ImageBackground, ScrollView, View } from "react-native";
 import Svg, { Path, type SvgProps } from "react-native-svg";
 import { min, px, type Stylable, useYoshiki, vh } from "yoshiki/native";
 import { ts } from "~/primitives";
+import { defaultApiUrl } from "~/providers/account-provider";
 
 const SvgBlob = (props: SvgProps) => {
 	const { css, theme } = useYoshiki();
@@ -28,7 +29,7 @@ export const FormPage = ({
 
 	return (
 		<ImageBackground
-			source={{ uri: `${apiUrl ?? ""}/api/shows/random/thumbnail` }}
+			source={{ uri: `${apiUrl ?? defaultApiUrl}/api/shows/random/thumbnail` }}
 			{...css({
 				flexDirection: "row",
 				flexGrow: 1,
