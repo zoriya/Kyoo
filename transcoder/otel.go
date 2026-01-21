@@ -21,6 +21,7 @@ import (
 	logotelnoop "go.opentelemetry.io/otel/log/noop"
 	metricotel "go.opentelemetry.io/otel/metric"
 	metricotelnoop "go.opentelemetry.io/otel/metric/noop"
+	"go.opentelemetry.io/otel/propagation"
 	logsdk "go.opentelemetry.io/otel/sdk/log"
 	metricsdk "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -46,6 +47,13 @@ func setupOtel(ctx context.Context) (func(context.Context) error, error) {
 	}
 
 	slog.Info("Configuring OTEL")
+
+	otel.SetTextMapPropagator(
+		propagation.NewCompositeTextMapPropagator(
+			propagation.TraceContext{},
+			propagation.Baggage{},
+		),
+	)
 
 	var le logsdk.Exporter
 	var me metricsdk.Exporter
