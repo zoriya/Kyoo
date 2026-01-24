@@ -2,6 +2,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Slot } from "expo-router";
 import { Platform } from "react-native";
 import { Providers } from "~/providers";
+import '../global.css'
 
 const GlobalCssTheme = () => {
 	// const theme = useTheme();
