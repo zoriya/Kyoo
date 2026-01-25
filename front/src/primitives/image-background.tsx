@@ -3,10 +3,14 @@ import { LinearGradient, type LinearGradientProps } from "expo-linear-gradient";
 import type { ComponentProps, ReactNode } from "react";
 import type { ImageStyle } from "react-native";
 import { Platform } from "react-native";
+import { withUniwind } from "uniwind";
 import { useYoshiki } from "yoshiki/native";
 import type { KImage } from "~/models";
 import { useToken } from "~/providers/account-context";
+import { cn } from "~/utils";
 import type { ImageLayout, YoshikiEnhanced } from "./image";
+
+const ImgBg = withUniwind(EImageBackground);
 
 // This should stay in think with `Image`.
 // (copy-pasted but change `EImage` with `EImageBackground`)
@@ -16,24 +20,25 @@ export const ImageBackground = ({
 	quality,
 	alt,
 	layout,
+	className,
 	...props
 }: {
 	src: KImage | null;
 	quality: "low" | "medium" | "high";
 	alt?: string;
 	style?: ImageStyle;
-	layout: ImageLayout;
+	layout?: ImageLayout;
 	children: ReactNode;
+	className?: string;
 }) => {
-	const { css, theme } = useYoshiki();
 	const { apiUrl, authToken } = useToken();
 
 	const uri = src ? `${apiUrl}${src[quality ?? "high"]}` : null;
 	return (
-		<EImageBackground
+		<ImgBg
 			recyclingKey={uri}
 			source={{
-				uri,
+				uri: uri!,
 				// use cookies on web to allow `img` to make the call instead of js
 				headers:
 					authToken && Platform.OS !== "web"
@@ -44,10 +49,9 @@ export const ImageBackground = ({
 			}}
 			placeholder={{ blurhash: src?.blurhash }}
 			accessibilityLabel={alt}
-			{...(css(
-				[layout, { overflow: "hidden", backgroundColor: theme.overlay0 }],
-				props,
-			) as any)}
+			className={cn("overflow-hidden bg-gray-300", className)}
+			imageClassName="m-0 h-full w-full p-0"
+			{...props}
 		/>
 	);
 };

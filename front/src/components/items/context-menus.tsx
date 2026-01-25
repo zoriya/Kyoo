@@ -11,26 +11,29 @@ import { IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { useMutation } from "~/query";
 import { watchListIcon } from "./watchlist-info";
+import { cn } from "~/utils";
 // import { useDownloader } from "../../packages/ui/src/downloads/ui/src/downloads";
 
 export const EntryContext = ({
 	slug,
 	serieSlug,
+	className,
 	...props
 }: {
 	serieSlug: string | null;
 	slug: string;
+	className?: string;
 } & Partial<ComponentProps<typeof Menu<typeof IconButton>>>) => {
 	// const downloader = useDownloader();
-	const { css } = useYoshiki();
 	const { t } = useTranslation();
 
 	return (
 		<Menu
 			Trigger={IconButton}
 			icon={MoreVert}
+			className={cn("not:web:hidden", className)}
 			{...tooltip(t("misc.more"))}
-			{...(css([Platform.OS !== "web" && { display: "none" }], props) as any)}
+			{...(props as any)}
 		>
 			{serieSlug && (
 				<Menu.Item
