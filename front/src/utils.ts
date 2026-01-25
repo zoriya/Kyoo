@@ -1,6 +1,12 @@
+import { type ClassValue, clsx } from "clsx";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback } from "react";
+import { twMerge } from "tailwind-merge";
 import type { Movie, Show } from "~/models";
+
+export function cn(...inputs: ClassValue[]) {
+	return twMerge(clsx(inputs));
+}
 
 export function setServerData(_key: string, _val: any) {}
 export function getServerData(key: string) {

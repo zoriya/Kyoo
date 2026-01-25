@@ -6,6 +6,7 @@ import { px, type Stylable, type Theme, useYoshiki } from "yoshiki/native";
 import { PressableFeedback } from "./links";
 import { P } from "./text";
 import { type Breakpoint, focusReset, ts } from "./utils";
+import { cn } from "~/utils";
 
 export type Icon = ComponentType<SvgProps>;
 
@@ -47,33 +48,25 @@ export const IconButton = <AsProps = PressableProps>({
 	size,
 	color,
 	as,
+	className,
 	...asProps
 }: IconProps & {
 	as?: ComponentType<AsProps>;
+	className?: string;
 } & AsProps) => {
-	const { css, theme } = useYoshiki();
+	const { theme } = useYoshiki();
 
 	const Container = as ?? PressableFeedback;
 
 	return (
 		<Container
 			focusRipple
-			{...(css(
-				{
-					alignSelf: "center",
-					p: ts(1),
-					m: px(2),
-					overflow: "hidden",
-					borderRadius: 9999,
-					fover: {
-						self: {
-							...focusReset,
-							bg: (theme: Theme) => theme.overlay0,
-						},
-					},
-				},
-				asProps,
-			) as AsProps)}
+			className={cn(
+				"m-1 self-center overflow-hidden rounded-full p-2",
+				"hover:bg-gray-300 focus-visible:bg-gray-300 focus-visible:dark:bg-gray-700 hover:dark:bg-gray-700",
+				className,
+			)}
+			{...(asProps as AsProps)}
 		>
 			<Icon
 				icon={icon}
@@ -110,7 +103,15 @@ export const IconFab = <AsProps = PressableProps>(
 	);
 };
 
-export const DottedSeparator = (props: Stylable<"text">) => {
-	const { css } = useYoshiki();
-	return <P {...css({ mX: ts(1) }, props)}>{String.fromCharCode(0x2022)}</P>;
+export const DottedSeparator = ({
+	className,
+	...props
+}: {
+	className?: string;
+}) => {
+	return (
+		<P className={cn("mx-1", className)} {...props}>
+			{String.fromCharCode(0x2022)}
+		</P>
+	);
 };

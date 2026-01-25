@@ -8,86 +8,45 @@ import {
 	P as EP,
 } from "@expo/html-elements";
 import type { ComponentProps, ComponentType } from "react";
-import {
-	Platform,
-	type StyleProp,
-	Text,
-	type TextProps,
-	type TextStyle,
-} from "react-native";
-import { percent, rem, useYoshiki } from "yoshiki/native";
-import { ts } from "./utils/spacing";
+import { Text } from "react-native";
+import { cn } from "~/utils";
 
 const styleText = (
 	Component: ComponentType<ComponentProps<typeof EP>>,
 	type?: "header" | "sub",
-	custom?: TextStyle,
+	custom?: string,
 ) => {
-	const Text = (
-		props: Omit<ComponentProps<typeof EP>, "style"> & {
-			style?: StyleProp<TextStyle>;
-			children?: TextProps["children"];
-		},
-	) => {
-		const { css, theme } = useYoshiki();
-
+	const Text = ({ className, ...props }: ComponentProps<typeof EP>) => {
 		return (
 			<Component
-				{...css(
-					[
-						{
-							marginVertical: rem(0.5),
-							color: type === "header" ? theme.heading : theme.paragraph,
-							flexShrink: 1,
-							fontSize: rem(1),
-							fontFamily: theme.font.normal,
-						},
-						type === "sub" && {
-							fontFamily: theme.font["300"] ?? theme.font.normal,
-							fontWeight: "300",
-							opacity: 0.8,
-							fontSize: rem(0.8),
-						},
-						custom?.fontWeight && {
-							fontFamily: theme.font[custom.fontWeight] ?? theme.font.normal,
-						},
-						custom,
-					],
-					props as TextProps,
+				className={cn(
+					"shrink text-base text-slate-600 dark:text-slate-400",
+					type === "header" && "text-slate-900 dark:text-slate-200",
+					type === "sub" && "text-sm font-light opacity-80",
+					custom,
+					className,
 				)}
+				{...props}
 			/>
 		);
 	};
 	return Text;
 };
 
-export const H1 = styleText(EH1, "header", {
-	fontSize: rem(3),
-	fontWeight: "900",
-});
-export const H2 = styleText(EH2, "header", { fontSize: rem(2) });
+export const H1 = styleText(EH1, "header", "text-5xl font-black");
+export const H2 = styleText(EH2, "header", "text-2xl");
 export const H3 = styleText(EH3, "header");
 export const H4 = styleText(EH4, "header");
 export const H5 = styleText(EH5, "header");
 export const H6 = styleText(EH6, "header");
 export const Heading = styleText(EP, "header");
-export const P = styleText(EP, undefined, { fontSize: rem(1) });
+export const P = styleText(EP, undefined);
 export const SubP = styleText(EP, "sub");
 
-export const LI = ({ children, ...props }: TextProps) => {
-	const { css } = useYoshiki();
-
+export const LI = ({ children, ...props }: ComponentProps<typeof P>) => {
 	return (
-		<P role={Platform.OS === "web" ? "listitem" : props.role} {...props}>
-			<Text
-				{...css({
-					height: percent(100),
-					marginBottom: rem(0.5),
-					paddingRight: ts(1),
-				})}
-			>
-				{String.fromCharCode(0x2022)}
-			</Text>
+		<P role="listitem" {...props}>
+			<Text className="h-full mb-2 pr-1">{String.fromCharCode(0x2022)}</Text>
 			{children}
 		</P>
 	);
