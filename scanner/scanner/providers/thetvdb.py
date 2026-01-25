@@ -429,7 +429,7 @@ class TVDB(Provider):
 						serie_id=str(serie_id),
 						season=entry["seasonNumber"],
 						episode=entry["number"],
-						link=f"https://www.themoviedb.org/tv/{serie_id}/season/{entry['seasonNumber']}/episode/{entry['number']}",
+						link=f"https://thetvdb.com/series/{serie_id}/episodes/{entry['id']}",
 					),
 				},
 				translations={
