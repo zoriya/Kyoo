@@ -2,18 +2,15 @@ import ExpandMore from "@material-symbols/svg-400/rounded/keyboard_arrow_down-fi
 import ExpandLess from "@material-symbols/svg-400/rounded/keyboard_arrow_up-fill.svg";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform, type PressableProps, View } from "react-native";
-import { percent, type Stylable, useYoshiki } from "yoshiki/native";
+import { type PressableProps, View } from "react-native";
 import { EntryContext } from "~/components/items/context-menus";
 import { ItemProgress } from "~/components/items/item-grid";
 import type { KImage } from "~/models";
 import {
-	focusReset,
 	Heading,
 	IconButton,
 	Image,
 	ImageBackground,
-	important,
 	Link,
 	P,
 	Skeleton,
@@ -28,6 +25,7 @@ export const EntryLine = ({
 	slug,
 	serieSlug,
 	name,
+	tagline,
 	thumbnail,
 	poster,
 	description,
@@ -44,6 +42,7 @@ export const EntryLine = ({
 	serieSlug: string | null;
 	displayNumber: string;
 	name: string | null;
+	tagline?: string | null;
 	description: string | null;
 	thumbnail: KImage | null;
 	poster?: KImage | null;
@@ -54,14 +53,17 @@ export const EntryLine = ({
 } & PressableProps) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 	const [descriptionExpanded, setDescriptionExpanded] = useState(false);
-	const { css } = useYoshiki("episode-line");
 	const { t } = useTranslation();
 
 	return (
 		<Link
 			href={moreOpened ? undefined : href}
 			onLongPress={() => setMoreOpened(true)}
-			className={cn("group flex-row items-center", className)}
+			className={cn(
+				"group flex-row items-center",
+				href === null && "opacity-50",
+				className,
+			)}
 			{...props}
 		>
 			<ImageBackground
@@ -69,7 +71,8 @@ export const EntryLine = ({
 				quality="low"
 				alt=""
 				className={cn(
-					"m-1 aspect-video w-1/5 shrink-0 rounded",
+					"m-1 w-1/5 shrink-0 rounded",
+					poster ? "aspect-2/3" : "aspect-video",
 					"group-hover:ring-2 group-hover:ring-primary group-focus-visible:ring-2 group-focus-visible:ring-primary",
 				)}
 			>
@@ -77,13 +80,21 @@ export const EntryLine = ({
 					<ItemProgress watchPercent={watchedPercent ?? 100} />
 				)}
 			</ImageBackground>
-			<View {...css({ flexGrow: 1, flexShrink: 1, m: ts(1) })}>
+			<View className="m-1 mx-2 flex-1">
 				<View className="flex-1 flex-row justify-between">
-					<Heading className="font-medium group-hover:underline group-focus-visible:underline">
-						{[displayNumber, name ?? t("show.episodeNoMetadata")]
-							.filter((x) => x)
-							.join(" · ")}
-					</Heading>
+					<View className="mb-5 flex-1">
+						<Heading
+							className={cn(
+								"font-medium group-hover:underline group-focus-visible:underline",
+								"text-lg",
+							)}
+						>
+							{[displayNumber, name ?? t("show.episodeNoMetadata")]
+								.filter((x) => x)
+								.join(" · ")}
+						</Heading>
+						{tagline && <Heading>{tagline}</Heading>}
+					</View>
 					<View className="flex-row items-center">
 						<SubP>
 							{[
@@ -130,37 +141,14 @@ export const EntryLine = ({
 	);
 };
 
-EntryLine.Loader = (props: Stylable) => {
-	const { css } = useYoshiki();
-
+EntryLine.Loader = ({ className, ...props }: { className?: string }) => {
 	return (
-		<View
-			{...css(
-				{
-					alignItems: "center",
-					flexDirection: "row",
-				},
-				props,
-			)}
-		>
-			<Image.Loader
-				layout={{
-					width: percent(18),
-					aspectRatio: 16 / 9,
-				}}
-				{...css({ flexShrink: 0, m: ts(1) })}
-			/>
-			<View {...css({ flexGrow: 1, flexShrink: 1, m: ts(1) })}>
-				<View
-					{...css({
-						flexGrow: 1,
-						flexShrink: 1,
-						flexDirection: "row",
-						justifyContent: "space-between",
-					})}
-				>
-					<Skeleton {...css({ width: percent(30) })} />
-					<Skeleton {...css({ width: percent(15) })} />
+		<View className={cn("flex-row items-center", className)} {...props}>
+			<Image.Loader className="shring-0 m-1 aspect-video w-1/5" />
+			<View className="m-1 flex-1">
+				<View className="flex-1 flex-row justify-between">
+					<Skeleton className="w-2/5" />
+					<Skeleton className="w-1/5" />
 				</View>
 				<Skeleton />
 			</View>

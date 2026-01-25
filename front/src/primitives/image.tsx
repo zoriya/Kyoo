@@ -61,7 +61,13 @@ export const Image = ({
 	);
 };
 
-Image.Loader = ({ layout, ...props }: { layout: ImageLayout }) => {
+Image.Loader = ({
+	layout,
+	...props
+}: {
+	className?: string;
+	layout?: ImageLayout;
+}) => {
 	const { css } = useYoshiki();
 	const border = { borderRadius: 6 } satisfies ViewStyle;
 
