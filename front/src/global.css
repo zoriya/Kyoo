@@ -1,6 +1,30 @@
-@import 'tailwindcss';
-@import 'uniwind';
+@import "tailwindcss";
+@import "uniwind";
 
 @theme {
-	--color-primary: #FF0000;
+	--color-primary: #ff0000;
+}
+
+*::-webkit-scrollbar {
+	height: 6px;
+	width: 6px;
+	background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+	background-color: #999;
+	border-radius: 90px;
+}
+
+*:hover::-webkit-scrollbar-thumb {
+	background-color: rgb(134, 127, 127);
+}
+
+::cue {
+	background-color: transparent;
+	text-shadow:
+		-1px -1px 0 #000,
+		1px -1px 0 #000,
+		-1px 1px 0 #000,
+		1px 1px 0 #000;
 }
