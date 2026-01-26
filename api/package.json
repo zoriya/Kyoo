@@ -13,7 +13,7 @@
 		"@elysiajs/swagger": "zoriya/elysia-swagger#build",
 		"@kubiks/otel-drizzle": "zoriya/drizzle-otel#build",
 		"@logtape/elysia": "1.4.0-dev.468",
-		"@logtape/logtape": "1.4.0-dev.468",
+		"@logtape/logtape": "2.0.1",
 		"@logtape/otel": "1.4.0-dev.468",
 		"@logtape/redaction": "1.4.0-dev.468",
 		"@opentelemetry/api": "^1.9.0",
