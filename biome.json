@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.3.11/schema.json",
 	"formatter": {
 		"enabled": true,
 		"formatWithErrors": true,
@@ -9,7 +9,13 @@
 		"lineWidth": 80,
 		"attributePosition": "auto"
 	},
-	"assist": { "actions": { "source": { "organizeImports": "on" } } },
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": "on"
+			}
+		}
+	},
 	"linter": {
 		"enabled": true,
 		"rules": {
@@ -33,6 +39,23 @@
 			},
 			"correctness": {
 				"noUnusedVariables": "off"
+			},
+			"nursery": {
+				"useSortedClasses": {
+					"level": "warn",
+					"options": {
+						"attributes": [
+							"classList"
+						],
+						"functions": [
+							"clsx",
+							"cva",
+							"cn",
+							"tw",
+							"tw.*"
+						]
+					}
+				}
 			}
 		}
 	},
@@ -47,6 +70,11 @@
 			"bracketSameLine": false,
 			"quoteStyle": "double",
 			"attributePosition": "auto"
+		}
+	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
 		}
 	}
 }
