@@ -26,8 +26,8 @@ describe("images", () => {
 			where: eq(shows.slug, madeInAbyss.slug),
 		});
 		expect(ret!.slug).toBe(madeInAbyss.slug);
-		expect(ret.original.poster!.blurhash).toBeString();
-		expect(ret.original.poster!.blurhash).not.toBe(defaultBlurhash);
+		expect(ret!.original.poster!.blurhash).toBeString();
+		expect(ret!.original.poster!.blurhash).not.toBe(defaultBlurhash);
 	});
 
 	it("Download 404 image", async () => {

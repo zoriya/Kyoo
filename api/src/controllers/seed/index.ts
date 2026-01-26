@@ -19,6 +19,7 @@ export const seed = new Elysia()
 		async ({ body, status }) => {
 			const ret = await seedMovie(body);
 			if ("status" in ret) return status(ret.status, ret as any);
+			// @ts-expect-error idk why
 			return status(ret.updated ? 200 : 201, ret);
 		},
 		{
@@ -50,6 +51,7 @@ export const seed = new Elysia()
 		async ({ body, status }) => {
 			const ret = await seedSerie(body);
 			if ("status" in ret) return status(ret.status, ret as any);
+			// @ts-expect-error idk why
 			return status(ret.updated ? 200 : 201, ret);
 		},
 		{

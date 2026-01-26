@@ -1,4 +1,4 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, SQL, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "~/db";
 import { seasons, seasonTranslations, shows } from "~/db/schema";
@@ -43,6 +43,66 @@ const seasonSort = Sort(
 	},
 );
 
+export async function getSeasons({
+	after,
+	limit,
+	query,
+	sort,
+	filter,
+	languages,
+}: {
+	after?: string;
+	limit: number;
+	query?: string;
+	sort?: Sort;
+	filter: SQL | undefined;
+	languages: string[];
+}) {
+	sort ??= {
+		tablePk: seasons.pk,
+		sort: [
+			{
+				sql: seasons.seasonNumber,
+				isNullable: false,
+				accessor: (x) => x.seasonNumber,
+				desc: false,
+			},
+		],
+	};
+
+	const transQ = db
+		.selectDistinctOn([seasonTranslations.pk])
+		.from(seasonTranslations)
+		.orderBy(
+			seasonTranslations.pk,
+			sql`array_position(${sqlarr(languages)}, ${seasonTranslations.language})`,
+		)
+		.as("t");
+	const { pk, ...transCol } = getColumns(transQ);
+
+	return await db
+		.select({
+			...getColumns(seasons),
+			...transCol,
+		})
+		.from(seasons)
+		.leftJoin(transQ, eq(seasons.pk, transQ.pk))
+		.where(
+			and(
+				filter,
+				query ? sql`${transQ.name} %> ${query}::text` : undefined,
+				keysetPaginate({ after, sort }),
+			),
+		)
+		.orderBy(
+			...(query
+				? [sql`word_similarity(${query}::text, ${transQ.name}) desc`]
+				: sortToSql(sort)),
+			seasons.pk,
+		)
+		.limit(limit);
+}
+
 export const seasonsH = new Elysia({ tags: ["series"] })
 	.model({
 		season: Season,
@@ -57,8 +117,6 @@ export const seasonsH = new Elysia({ tags: ["series"] })
 			request: { url },
 			status,
 		}) => {
-			const langs = processLanguages(languages);
-
 			const [serie] = await db
 				.select({ pk: shows.pk })
 				.from(shows)
@@ -77,38 +135,15 @@ export const seasonsH = new Elysia({ tags: ["series"] })
 				});
 			}
 
-			const transQ = db
-				.selectDistinctOn([seasonTranslations.pk])
-				.from(seasonTranslations)
-				.orderBy(
-					seasonTranslations.pk,
-					sql`array_position(${sqlarr(langs)}, ${seasonTranslations.language})`,
-				)
-				.as("t");
-			const { pk, ...transCol } = getColumns(transQ);
-
-			const items = await db
-				.select({
-					...getColumns(seasons),
-					...transCol,
-				})
-				.from(seasons)
-				.leftJoin(transQ, eq(seasons.pk, transQ.pk))
-				.where(
-					and(
-						eq(seasons.showPk, serie.pk),
-						filter,
-						query ? sql`${transQ.name} %> ${query}::text` : undefined,
-						keysetPaginate({ after, sort }),
-					),
-				)
-				.orderBy(
-					...(query
-						? [sql`word_similarity(${query}::text, ${transQ.name}) desc`]
-						: sortToSql(sort)),
-					seasons.pk,
-				)
-				.limit(limit);
+			const langs = processLanguages(languages);
+			const items = await getSeasons({
+				limit,
+				after,
+				query,
+				sort,
+				filter: and(eq(seasons.showPk, serie.pk), filter),
+				languages: langs,
+			});
 
 			return createPage(items, { url, sort, limit, headers });
 		},

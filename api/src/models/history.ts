@@ -6,9 +6,9 @@ export const Progress = t.Object({
 	time: t.Integer({
 		minimum: 0,
 		description: comment`
-				When this episode was stopped (in seconds since the start).
-				This value is null if the entry was never watched or is finished.
-			`,
+			When this episode was stopped (in seconds since the start).
+			This value is null if the entry was never watched or is finished.
+		`,
 	}),
 	playedDate: t.Nullable(t.Date()),
 	videoId: t.Nullable(

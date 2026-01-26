@@ -34,11 +34,10 @@ export const base = new Elysia({ name: "base" })
 			} catch {}
 		}
 		if (code === "VALIDATION") {
-			const { schema, ...details } = error as any;
 			return {
 				status: error.status,
 				message: `Validation error.`,
-				details: details,
+				details: error,
 			} as KError;
 		}
 		if (code === "NOT_FOUND") {
@@ -55,7 +54,15 @@ export const base = new Elysia({ name: "base" })
 	})
 	.get("/health", () => ({ status: "healthy" }) as const, {
 		detail: { description: "Check if the api is healthy." },
-		response: { 200: t.Object({ status: t.Literal("healthy") }) },
+		response: {
+			200: t.Union([
+				t.Object({
+					status: t.Literal("a"),
+					a: t.Object({ b: t.Integer() }),
+				}),
+				t.Object({ status: t.Literal("healthy") }),
+			]),
+		},
 	})
 	.get(
 		"/ready",

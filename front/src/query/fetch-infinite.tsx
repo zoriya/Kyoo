@@ -19,6 +19,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	incremental = false,
 	getItemType,
 	getItemSizeMult,
+	getStickyIndices,
 	Render,
 	Loader,
 	layout,
@@ -35,6 +36,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	horizontal?: boolean;
 	getItemType?: (item: Data, index: number) => Type;
 	getItemSizeMult?: (item: Data, index: number, type: Type) => number;
+	getStickyIndices?: (items: Data[]) => number[];
 	Render: (props: { item: Data; index: number }) => ReactElement | null;
 	Loader: (props: { index: number }) => ReactElement | null;
 	Empty?: JSX.Element;
@@ -80,6 +82,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 			recycleItems
 			getItemType={getItemType}
 			estimatedItemSize={getItemSizeMult ? undefined : size}
+			stickyIndices={getStickyIndices?.(items ?? [])}
 			getEstimatedItemSize={
 				getItemSizeMult
 					? (idx, item, type) => getItemSizeMult(item, idx, type as Type) * size

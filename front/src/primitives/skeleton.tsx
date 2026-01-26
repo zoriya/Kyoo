@@ -9,6 +9,7 @@ import Animated, {
 	withTiming,
 } from "react-native-reanimated";
 import { em, percent, px, rem, useYoshiki } from "yoshiki/native";
+import { cn } from "~/utils";
 
 const LinearGradient = Animated.createAnimatedComponent(LG);
 
@@ -18,7 +19,7 @@ export const Skeleton = ({
 	...props
 }: Omit<ViewProps, "children"> & {
 	lines?: number;
-	variant?: "text" | "header" | "round" | "custom" | "fill" | "filltext";
+	variant?: "text" | "round" | "custom";
 }) => {
 	const { css, theme } = useYoshiki();
 	const width = useSharedValue(-900);
@@ -40,41 +41,13 @@ export const Skeleton = ({
 
 	return (
 		<View
-			{...css(
-				[
-					{
-						position: "relative",
-					},
-					lines === 1 && { overflow: "hidden", borderRadius: px(6) },
-					(variant === "text" || variant === "header") &&
-						lines === 1 && [
-							{
-								width: percent(75),
-								height: rem(1.2),
-								margin: px(2),
-							},
-							variant === "text" && {
-								margin: px(2),
-							},
-							variant === "header" && {
-								marginBottom: rem(0.5),
-							},
-						],
-
-					variant === "round" && {
-						borderRadius: 9999999,
-					},
-					variant === "fill" && {
-						width: percent(100),
-						height: percent(100),
-					},
-					variant === "filltext" && {
-						width: percent(100),
-						height: em(1),
-					},
-				],
-				props,
+			className={cn(
+				"relative",
+				lines === 1 && "overflow-hidden rounded",
+				variant === "text" && "m-1 h-5 w-4/5",
+				variant === "round" && "rounded-full",
 			)}
+			{...props}
 		>
 			{[...Array(lines)].map((_, i) => (
 				<View
@@ -82,26 +55,14 @@ export const Skeleton = ({
 					onLayout={(e) => {
 						if (i === 0) width.value = e.nativeEvent.layout.width;
 					}}
-					{...css([
-						{
-							bg: (theme) => theme.overlay0,
-						},
-						lines === 1 && {
-							position: "absolute",
-							top: 0,
-							bottom: 0,
-							left: 0,
-							right: 0,
-						},
-						lines !== 1 && {
-							width: i === lines - 1 ? percent(40) : percent(100),
-							height: rem(1.2),
-							marginBottom: rem(0.5),
-							overflow: "hidden",
-							borderRadius: px(6),
-						},
-					])}
+					className={cn(
+						"bg-gray-300",
+						lines === 1 && "absolute inset-0",
+						lines !== 1 && "mb-2 h-5 w-full overflow-hidden rounded",
+						lines !== 1 && i === lines - 1 && "w-2/5",
+					)}
 				>
+					<View className="absolute inset-0 bg-linear-to-r from-transparent via-gray-500 to-transparent" />
 					<LinearGradient
 						start={{ x: 0, y: 0.5 }}
 						end={{ x: 1, y: 0.5 }}
