@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/asticode/go-astisub"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/zoriya/kyoo/transcoder/src"
 	"github.com/zoriya/kyoo/transcoder/src/utils"
 )
