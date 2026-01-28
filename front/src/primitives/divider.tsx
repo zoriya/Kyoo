@@ -1,37 +1,23 @@
 import { HR as EHR } from "@expo/html-elements";
-import { px, type Stylable, useYoshiki } from "yoshiki/native";
-import { ts } from "./utils";
+import { cn } from "~/utils";
 
 export const HR = ({
 	orientation = "horizontal",
+	className,
 	...props
-}: { orientation?: "vertical" | "horizontal" } & Stylable) => {
-	const { css } = useYoshiki();
-
+}: {
+	orientation?: "vertical" | "horizontal";
+	className?: string;
+}) => {
 	return (
 		<EHR
-			{...css(
-				[
-					{
-						opacity: 0.7,
-						bg: (theme) => theme.overlay0,
-						borderWidth: 0,
-					},
-					orientation === "vertical" && {
-						width: px(1),
-						height: "auto",
-						marginY: ts(1),
-						marginX: ts(2),
-					},
-					orientation === "horizontal" && {
-						height: px(1),
-						width: "auto",
-						marginX: ts(1),
-						marginY: ts(2),
-					},
-				],
-				props,
+			className={cn(
+				"border-0 bg-gray-400 opacity-70",
+				orientation === "vertical" && "mx-4 my-2 h-auto w-px",
+				orientation === "horizontal" && "mx-2 my-4 h-px w-auto",
+				className,
 			)}
+			{...props}
 		/>
 	);
 };

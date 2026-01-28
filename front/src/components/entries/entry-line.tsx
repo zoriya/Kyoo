@@ -148,7 +148,7 @@ EntryLine.Loader = ({ className, ...props }: { className?: string }) => {
 			<View className="m-1 flex-1">
 				<View className="flex-1 flex-row justify-between">
 					<Skeleton className="w-2/5" />
-					<Skeleton className="w-1/5" />
+					<Skeleton className="w-1/10" />
 				</View>
 				<Skeleton />
 			</View>

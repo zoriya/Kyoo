@@ -19,6 +19,7 @@ export const BrowsePage = () => {
 		<InfiniteFetch
 			key={layout}
 			query={BrowsePage.query({ filter, sortBy, sortOrd, search })}
+			incremental
 			layout={LayoutComponent.layout}
 			Header={
 				<BrowseSettings
