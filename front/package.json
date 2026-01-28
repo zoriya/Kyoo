@@ -15,6 +15,7 @@
 		"format:fix": "biome format . --write"
 	},
 	"dependencies": {
+		"@babel/plugin-proposal-export-namespace-from": "^7.18.9",
 		"@expo/html-elements": "^0.13.7",
 		"@gorhom/portal": "^1.0.14",
 		"@legendapp/list": "^2.0.19",
@@ -59,7 +60,7 @@
 		"react-native-svg-transformer": "^1.5.2",
 		"react-native-video": "zoriya/react-native-video#build",
 		"react-native-web": "^0.21.2",
-		"react-native-worklets": "0.5.1",
+		"react-native-worklets": "^0.5.1",
 		"react-tooltip": "^5.29.1",
 		"react-use-websocket": "^4.13.0",
 		"sweetalert2": "^11.26.17",

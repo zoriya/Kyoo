@@ -24,7 +24,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	Loader,
 	layout,
 	Empty,
-	divider,
+	Divider,
 	Header,
 	fetchMore = true,
 	contentContainerStyle,
@@ -41,7 +41,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	Loader: (props: { index: number }) => ReactElement | null;
 	Empty?: JSX.Element;
 	incremental?: boolean;
-	divider?: true | ComponentType;
+	Divider?: true | ComponentType;
 	Header?: ComponentType<{ children: JSX.Element }> | ReactElement;
 	fetchMore?: boolean;
 	contentContainerStyle?: ViewStyle;
@@ -59,6 +59,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 		isRefetching,
 	} = useInfiniteFetch(query);
 	if (incremental && items) oldItems.current = items;
+	if (incremental) items ??= oldItems.current;
 
 	if (!query.infinite)
 		console.warn("A non infinite query was passed to an InfiniteFetch.");
@@ -68,11 +69,10 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 
 	if (error) return <ErrorView error={error} />;
 
-	if (incremental) items ??= oldItems.current;
 	const count = items
 		? numColumns - (items.length % numColumns)
 		: placeholderCount;
-	const placeholders = [...Array(count === 0 ? numColumns : count)].fill(null);
+	const placeholders = [...Array(count === 0 ? numColumns : count)].fill(0);
 	const data =
 		isFetching || !items ? [...(items || []), ...placeholders] : items;
 
@@ -91,7 +91,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 			renderItem={({ item, index }) =>
 				item ? <Render index={index} item={item} /> : <Loader index={index} />
 			}
-			keyExtractor={(item: any, index) => (item ? item.id : index)}
+			keyExtractor={(item: any, index) => (item ? item.id : index + 1)}
 			horizontal={layout.layout === "horizontal"}
 			numColumns={layout.layout === "horizontal" ? 1 : numColumns}
 			onEndReached={fetchMore ? () => fetchNextPage() : undefined}
@@ -100,7 +100,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 			refreshing={isRefetching}
 			ListHeaderComponent={Header}
 			ItemSeparatorComponent={
-				divider === true ? HR : (divider as any) || undefined
+				Divider === true ? HR : (Divider as any) || undefined
 			}
 			ListEmptyComponent={Empty}
 			contentContainerStyle={{

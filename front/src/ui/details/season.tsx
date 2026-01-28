@@ -68,7 +68,7 @@ export const SeasonHeader = ({
 SeasonHeader.Loader = ({ className, ...props }: { className?: string }) => {
 	return (
 		<View className={cn("m-1 flex-row items-center", className)} {...props}>
-			<View className="flex-1 flex-row">
+			<View className="flex-1 flex-row items-center">
 				<Skeleton variant="custom" className="mx-1 h-6 w-8 shrink-0" />
 				<Skeleton className="mx-2 h-8 w-1/5" />
 			</View>
@@ -105,7 +105,7 @@ export const EntryList = ({
 			query={EntryList.query(slug, season)}
 			layout={EntryLine.layout}
 			Empty={<EmptyView message={t("show.episode-none")} />}
-			divider={() => <Container as={HR} />}
+			Divider={() => <Container as={HR} />}
 			getItemType={(item, idx) =>
 				item ? item.kind : idx === 0 ? "season" : "episode"
 			}
