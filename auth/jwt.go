@@ -66,6 +66,9 @@ func (h *Handler) CreateJwt(c echo.Context) error {
 	var jwt *string
 	if token == "" {
 		jwt = h.createGuestJwt()
+		if jwt == nil {
+			return echo.NewHTTPError(http.StatusUnauthorized, "Guests not allowed.")
+		}
 	} else {
 		tkn, err := h.createJwt(ctx, token)
 		if err != nil {
