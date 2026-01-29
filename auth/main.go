@@ -191,6 +191,9 @@ func (h *Handler) TokenToJwt(next echo.HandlerFunc) echo.HandlerFunc {
 
 			if auth == "" || !strings.HasPrefix(auth, "Bearer ") {
 				jwt = h.createGuestJwt()
+				if jwt == nil {
+					return echo.NewHTTPError(http.StatusUnauthorized, "Guests not allowed.")
+				}
 			} else {
 				token := auth[len("Bearer "):]
 				// this is only used to check if it is a session token or a jwt
