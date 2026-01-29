@@ -8,17 +8,22 @@ import {
 	Text,
 	type TextProps,
 } from "react-native";
-import { useTheme, useYoshiki } from "yoshiki/native";
+import { useTheme } from "yoshiki/native";
+import { cn } from "~/utils";
 import { alpha } from "./theme";
 
-function useLinkTo({
+export function useLinkTo({
 	href,
 	replace = false,
 }: {
-	href: string;
+	href?: string | null;
 	replace?: boolean;
 }) {
 	const router = useRouter();
+
+	if (!href) {
+		return {};
+	}
 
 	return {
 		// @ts-expect-error href is not known
@@ -26,7 +31,7 @@ function useLinkTo({
 		onPress: (e) => {
 			if (e?.defaultPrevented) return;
 			// prevent native navigation via href.
-			e.preventDefault();
+			e?.preventDefault();
 			if (href.startsWith("http")) {
 				Platform.OS === "web"
 					? window.open(href, "_blank")
@@ -42,6 +47,7 @@ export const A = ({
 	href,
 	replace,
 	children,
+	className,
 	...props
 }: TextProps & {
 	href?: string | null;
@@ -49,20 +55,13 @@ export const A = ({
 	replace?: boolean;
 	children: ReactNode;
 }) => {
-	const { css, theme } = useYoshiki();
-	const linkProps = useLinkTo({ href: href ?? "#", replace });
+	const linkProps = useLinkTo({ href, replace });
 
 	return (
 		<Text
 			{...linkProps}
-			{...css(
-				{
-					fontFamily: theme.font.normal,
-					color: theme.link,
-					userSelect: "text",
-				},
-				props,
-			)}
+			className={cn("select-text text-accent", className)}
+			{...props}
 		>
 			{children}
 		</Text>
@@ -101,18 +100,18 @@ export const Link = ({
 	download?: boolean;
 	target?: string;
 } & PressableProps) => {
-	const linkProps = useLinkTo({ href: href ?? "#", replace });
+	const linkProps = useLinkTo({ href, replace });
 
 	return (
 		<PressableFeedback
-			{...(href ? linkProps : {})}
+			{...linkProps}
 			{...props}
 			disabled={!href}
 			onPress={(e?: any) => {
 				if (!href) return;
 				props?.onPress?.(e);
 				if (e?.defaultPrevented) return;
-				else linkProps.onPress(e);
+				else linkProps.onPress?.(e);
 			}}
 		>
 			{children}

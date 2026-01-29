@@ -10,8 +10,8 @@ import { WatchStatusV } from "~/models";
 import { IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { useMutation } from "~/query";
-import { watchListIcon } from "./watchlist-info";
 import { cn } from "~/utils";
+import { watchListIcon } from "./watchlist-info";
 // import { useDownloader } from "../../packages/ui/src/downloads/ui/src/downloads";
 
 export const EntryContext = ({

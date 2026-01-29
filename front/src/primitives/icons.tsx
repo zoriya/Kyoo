@@ -1,61 +1,57 @@
 import type { ComponentProps, ComponentType } from "react";
-import { Platform, type PressableProps } from "react-native";
+import { Animated, type PressableProps } from "react-native";
 import type { SvgProps } from "react-native-svg";
-import type { YoshikiStyle } from "yoshiki";
-import { px, type Stylable, type Theme, useYoshiki } from "yoshiki/native";
+import { withUniwind } from "uniwind";
+import { cn } from "~/utils";
 import { PressableFeedback } from "./links";
 import { P } from "./text";
-import { type Breakpoint, focusReset, ts } from "./utils";
-import { cn } from "~/utils";
 
 export type Icon = ComponentType<SvgProps>;
 
-type IconProps = {
-	icon: Icon;
-	color?: Breakpoint<string>;
-	size?: YoshikiStyle<number | string>;
+const IconWrapper = ({ icon: Icon, ...props }: { icon: Icon } & SvgProps) => {
+	return <Icon {...props} />;
 };
 
-export const Icon = ({ icon: Icon, color, size = 24, ...props }: IconProps) => {
-	const { css, theme } = useYoshiki();
-	const computed = css(
-		{
-			width: size,
-			height: size,
-			fill: color ?? theme.contrast,
-			flexShrink: 0,
-		} as any,
-		props,
-	) as any;
+const BaseIcon = withUniwind(IconWrapper, {
+	stroke: {
+		fromClassName: "strokeClassName",
+		styleProperty: "accentColor",
+	},
+	fill: {
+		fromClassName: "fillClassName",
+		styleProperty: "accentColor",
+	},
+});
 
+export const Icon = ({
+	className,
+	fillClassName,
+	...props
+}: ComponentProps<typeof BaseIcon>) => {
 	return (
-		<Icon
-			{...Platform.select<SvgProps>({
-				web: computed,
-				default: {
-					height: computed.style[0]?.height,
-					width: computed.style[0]?.width,
-					fill: computed.style[0]?.fill,
-					...computed,
-				},
-			})}
+		<BaseIcon
+			fillClassName={cn(
+				"accent-slate-600 dark:accent-slate-400",
+				fillClassName,
+			)}
+			className={cn("h-6 w-6 shrink-0", className)}
+			{...props}
 		/>
 	);
 };
 
 export const IconButton = <AsProps = PressableProps>({
 	icon,
-	size,
-	color,
 	as,
 	className,
+	iconProps,
 	...asProps
-}: IconProps & {
+}: {
 	as?: ComponentType<AsProps>;
+	icon: Icon;
+	iconProps?: Exclude<ComponentProps<typeof Icon>, "icon">;
 	className?: string;
 } & AsProps) => {
-	const { theme } = useYoshiki();
-
 	const Container = as ?? PressableFeedback;
 
 	return (
@@ -68,37 +64,33 @@ export const IconButton = <AsProps = PressableProps>({
 			)}
 			{...(asProps as AsProps)}
 		>
-			<Icon
-				icon={icon}
-				size={size}
-				color={
-					"disabled" in asProps && asProps.disabled ? theme.overlay1 : color
-				}
-			/>
+			<Icon icon={icon} />
 		</Container>
 	);
 };
 
-export const IconFab = <AsProps = PressableProps>(
-	props: ComponentProps<typeof IconButton<AsProps>>,
-) => {
-	const { css, theme } = useYoshiki();
+const AIconButton = Animated.createAnimatedComponent(IconButton);
 
+export const IconFab = <AsProps = PressableProps>({
+	icon,
+	className,
+	iconProps,
+	...props
+}: ComponentProps<typeof IconButton<AsProps>>) => {
 	return (
-		<IconButton
-			color={theme.colors.black}
-			{...(css(
-				{
-					bg: (theme) => theme.accent,
-					fover: {
-						self: {
-							transform: "scale(1.3)" as any,
-							bg: (theme: Theme) => theme.accent,
-						},
-					},
-				},
-				props,
-			) as any)}
+		<AIconButton
+			icon={icon}
+			className={cn("bg-accent", className)}
+			iconProps={{
+				...iconProps,
+				className: cn("text-slate-900", iconProps?.className),
+			}}
+			style={{
+				transform: [{ scale: 1.3 }],
+				transitionProperty: "transform",
+				transitionDuration: 3000,
+			}}
+			{...(props as AsProps)}
 		/>
 	);
 };

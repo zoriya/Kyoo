@@ -16,7 +16,7 @@ const styleText = (
 	type?: "header" | "sub",
 	custom?: string,
 ) => {
-	const Text = ({ className, ...props }: ComponentProps<typeof EP>) => {
+	const Text = ({ className, style, ...props }: ComponentProps<typeof EP>) => {
 		return (
 			<Component
 				className={cn(
@@ -27,7 +27,7 @@ const styleText = (
 					className,
 				)}
 				// reset expo/html-elements style
-				style={{ marginVertical: 0 }}
+				style={[{ marginVertical: 0 }, style]}
 				{...props}
 			/>
 		);

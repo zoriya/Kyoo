@@ -40,7 +40,6 @@ export const WatchListInfo = ({
 	kind: "movie" | "serie" | "episode";
 	slug: string;
 	status: WatchStatus | null;
-	color: ComponentProps<typeof IconButton>["color"];
 }) => {
 	const account = useAccount();
 	const { t } = useTranslation();

@@ -30,11 +30,10 @@ import {
 	ExtraType,
 	MovieEntry,
 	Special,
-	BaseEpisode,
 } from "~/models/entry";
 import { KError } from "~/models/error";
 import { madeInAbyss } from "~/models/examples";
-import { Season } from "~/models/season";
+import type { Season } from "~/models/season";
 import { Show } from "~/models/show";
 import type { Image } from "~/models/utils";
 import {
@@ -55,7 +54,6 @@ import type { EmbeddedVideo } from "~/models/video";
 import { comment } from "~/utils";
 import { getSeasons } from "./seasons";
 import { watchStatusQ } from "./shows/logic";
-import { Value } from "@sinclair/typebox/value";
 
 export const entryProgressQ = db
 	.selectDistinctOn([history.entryPk], {

@@ -96,7 +96,6 @@ const ButtonList = ({
 					icon={PlayArrow}
 					as={Link}
 					href={playHref}
-					color={{ xs: theme.user.colors.black, md: theme.colors.black }}
 					{...css({
 						bg: theme.user.accent,
 						fover: { self: { bg: theme.user.accent } },
@@ -110,7 +109,6 @@ const ButtonList = ({
 					as={Link}
 					href={trailerUrl}
 					target="_blank"
-					color={{ xs: theme.user.contrast, md: theme.colors.white }}
 					{...tooltip(t("show.trailer"))}
 				/>
 			)}
@@ -119,7 +117,6 @@ const ButtonList = ({
 					kind={kind}
 					slug={slug}
 					status={watchStatus}
-					color={{ xs: theme.user.contrast, md: theme.colors.white }}
 				/>
 			)}
 			{(kind === "movie" || account?.isAdmin === true) && (

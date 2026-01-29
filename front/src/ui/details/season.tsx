@@ -1,4 +1,5 @@
 import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
+import { useRouter } from "expo-router";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
@@ -35,6 +36,7 @@ export const SeasonHeader = ({
 	className?: string;
 }) => {
 	const { t } = useTranslation();
+	const router = useRouter();
 
 	return (
 		<View
@@ -57,7 +59,7 @@ export const SeasonHeader = ({
 						label={`${x.seasonNumber}: ${
 							x.name ?? t("show.season", { number: x.seasonNumber })
 						} (${x.entriesCount})`}
-						href={`/series/${serieSlug}?season=${x.seasonNumber}`}
+						onSelect={() => router.setParams({ season: x.seasonNumber })}
 					/>
 				))}
 			</Menu>
@@ -160,7 +162,8 @@ EntryList.query = (
 	parser: EntryOrSeason,
 	path: ["api", "series", slug, "entries"],
 	params: {
-		filter: season ? `seasonNumber gte ${season}` : undefined,
+		// TODO: use a better filter, it removes specials and movies
+		filter: season ? `seasonNumber ge ${season}` : undefined,
 		includeSeasons: true,
 	},
 	infinite: true,

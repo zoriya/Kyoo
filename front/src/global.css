@@ -2,7 +2,28 @@
 @import "uniwind";
 
 @theme {
-	--color-primary: #ff0000;
+	--color-accent: #6b00b8;
+	--color-background: #f0f2f5;
+	--color-card: #e3e4e5;
+	--color-popover: #c6c6c6;
+}
+
+@layer theme {
+
+	:root,
+	:host {
+		@variant light {
+			--color-background: #f0f2f5;
+			--color-card: #e3e4e5;
+			--color-popover: #c6c6c6;
+		}
+
+		@variant dark {
+			--color-background: #1f1f2e;
+			--color-card: #1e1e2e;
+			--color-popover: #14141e;
+		}
+	}
 }
 
 *::-webkit-scrollbar {

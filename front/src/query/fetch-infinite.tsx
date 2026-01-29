@@ -1,6 +1,7 @@
-import { LegendList } from "@legendapp/list";
+import { LegendList as RLegendList } from "@legendapp/list";
 import { type ComponentType, type ReactElement, useRef } from "react";
 import type { ViewStyle } from "react-native";
+import { withUniwind } from "uniwind";
 import { type Breakpoint, HR, useBreakpointMap } from "~/primitives";
 import { useSetError } from "~/providers/error-provider";
 import { ErrorView } from "~/ui/errors";
@@ -12,6 +13,8 @@ export type Layout = {
 	gap: Breakpoint<number>;
 	layout: "grid" | "horizontal" | "vertical";
 };
+
+const LegendList = withUniwind(RLegendList) as typeof RLegendList;
 
 export const InfiniteFetch = <Data, Type extends string = string>({
 	query,
@@ -28,6 +31,8 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	Header,
 	fetchMore = true,
 	contentContainerStyle,
+	contentContainerClassName,
+	className,
 	...props
 }: {
 	query: QueryIdentifier<Data>;
@@ -45,6 +50,8 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	Header?: ComponentType<{ children: JSX.Element }> | ReactElement;
 	fetchMore?: boolean;
 	contentContainerStyle?: ViewStyle;
+	contentContainerClassName?: string;
+	className?: string;
 }): JSX.Element | null => {
 	const { numColumns, size, gap } = useBreakpointMap(layout);
 	const [setOffline, clearOffline] = useSetError("offline");

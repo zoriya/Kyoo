@@ -13,6 +13,8 @@ import { ErrorConsumer } from "./error-consumer";
 import { ErrorProvider } from "./error-provider";
 import { NativeProviders } from "./native-providers";
 import { TranslationsProvider } from "./translations.native";
+import { SafeAreaListener } from "react-native-safe-area-context";
+import { Uniwind } from "uniwind";
 
 function getServerData(_key: string) {}
 
@@ -32,9 +34,15 @@ const ThemeProvider = ({ children }: { children: ReactNode }) => {
 	const userTheme = useColorScheme();
 
 	return (
-		<ThemeSelector theme={userTheme ?? "light"} font={{ normal: "inherit" }}>
-			{children}
-		</ThemeSelector>
+		<SafeAreaListener
+			onChange={({ insets }) => {
+				Uniwind.updateInsets(insets);
+			}}
+		>
+			<ThemeSelector theme={userTheme ?? "light"} font={{ normal: "inherit" }}>
+				{children}
+			</ThemeSelector>
+		</SafeAreaListener>
 	);
 };
 
