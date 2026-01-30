@@ -43,6 +43,7 @@ export const NextUp = (nextEntry: Entry) => {
 			<EntryLine
 				{...nextEntry}
 				serieSlug={null}
+				videosCount={nextEntry.videos.length}
 				watchedPercent={nextEntry.progress.percent}
 				displayNumber={entryDisplayNumber(nextEntry)}
 			/>

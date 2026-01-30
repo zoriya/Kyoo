@@ -7,9 +7,20 @@ import {
 	H6 as EH6,
 	P as EP,
 } from "@expo/html-elements";
-import type { ComponentProps, ComponentType } from "react";
-import { Text } from "react-native";
+import ExpandMore from "@material-symbols/svg-400/rounded/keyboard_arrow_down-fill.svg";
+import ExpandLess from "@material-symbols/svg-400/rounded/keyboard_arrow_up-fill.svg";
+import {
+	type ComponentProps,
+	type ComponentType,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from "react";
+import { Platform, Text, View, type ViewProps } from "react-native";
 import { cn } from "~/utils";
+import { IconButton } from "./icons";
+import { tooltip } from "./tooltip";
+import { useTranslation } from "react-i18next";
 
 const styleText = (
 	Component: ComponentType<ComponentProps<typeof EP>>,
@@ -51,5 +62,54 @@ export const LI = ({ children, ...props }: ComponentProps<typeof P>) => {
 			<Text className="mb-2 h-full pr-1">{String.fromCharCode(0x2022)}</Text>
 			{children}
 		</P>
+	);
+};
+
+export const CroppedText = ({
+	className,
+	numberOfLines,
+	onTextLayout,
+	ref,
+	containerProps,
+	children,
+	...props
+}: { containerProps?: ViewProps } & ComponentProps<typeof P>) => {
+	const desc = useRef<HTMLElement>(null);
+	const [expended, setExpanded] = useState(false);
+	const [needExpand, setNeedExpand] = useState(false);
+	const { t } = useTranslation();
+
+	useLayoutEffect(() => {
+		if (Platform.OS !== "web" || !desc.current || expended) return;
+		setNeedExpand(desc.current.scrollHeight > desc.current.clientHeight + 1);
+	});
+
+	return (
+		<View className="flex-row justify-between" {...(containerProps ?? {})}>
+			<P
+				ref={ref}
+				numberOfLines={expended ? undefined : numberOfLines}
+				onTextLayout={(e) => {
+					const visible = e.nativeEvent.lines.reduce(
+						(acc, line) => acc + line.text,
+						"",
+					);
+					setNeedExpand(visible !== children);
+				}}
+				{...props}
+			>
+				{children}
+			</P>
+			{needExpand && (
+				<IconButton
+					icon={expended ? ExpandLess : ExpandMore}
+					{...tooltip(t(expended ? "misc.collapse" : "misc.expand"))}
+					onPress={(e) => {
+						e.preventDefault();
+						setExpanded((isExpanded) => !isExpanded);
+					}}
+				/>
+			)}
+		</View>
 	);
 };

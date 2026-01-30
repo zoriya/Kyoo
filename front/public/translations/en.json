@@ -41,7 +41,9 @@
 			"null": "Mark as not seen"
 		},
 		"nextUp": "Next up",
-		"season": "Season {{number}}"
+		"season": "Season {{number}}",
+		"multiVideos": "Multiples video files available",
+		"videosCount": "{{number}} videos"
 	},
 	"browse": {
 		"mediatypekey": {

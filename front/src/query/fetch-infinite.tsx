@@ -113,7 +113,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 			contentContainerStyle={{
 				...contentContainerStyle,
 				gap,
-				marginHorizontal: gap,
+				marginHorizontal: numColumns > 1 ? gap : 0,
 			}}
 			{...props}
 		/>

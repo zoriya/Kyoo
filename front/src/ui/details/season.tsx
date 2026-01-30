@@ -44,7 +44,9 @@ export const SeasonHeader = ({
 			className={cn("m-1 flex-row", className)}
 			{...props}
 		>
-			<P className="mx-1 w-16 shrink-0 text-center text-2xl">{seasonNumber}</P>
+			<P className="mx-1 w-16 shrink-0 text-center text-2xl text-accent">
+				{seasonNumber}
+			</P>
 			<H2 className="mx-1 flex-1 text-2xl">
 				{name ?? t("show.season", { number: seasonNumber })}
 			</H2>
@@ -131,6 +133,7 @@ export const EntryList = ({
 						as={EntryLine}
 						{...item}
 						// Don't display "Go to serie"
+						videosCount={item.videos.length}
 						serieSlug={null}
 						displayNumber={entryDisplayNumber(item)}
 						watchedPercent={item.progress.percent}

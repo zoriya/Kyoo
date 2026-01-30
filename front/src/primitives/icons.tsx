@@ -21,20 +21,31 @@ const BaseIcon = withUniwind(IconWrapper, {
 		fromClassName: "fillClassName",
 		styleProperty: "accentColor",
 	},
+	width: {
+		fromClassName: "widthClassName",
+		styleProperty: "width",
+	},
+	height: {
+		fromClassName: "heightClassName",
+		styleProperty: "height",
+	},
 });
 
 export const Icon = ({
 	className,
 	fillClassName,
+	widthClassName,
+	heightClassName,
 	...props
 }: ComponentProps<typeof BaseIcon>) => {
 	return (
 		<BaseIcon
-			fillClassName={cn(
-				"accent-slate-600 dark:accent-slate-400",
-				fillClassName,
-			)}
-			className={cn("h-6 w-6 shrink-0", className)}
+			fillClassName={
+				fillClassName ? fillClassName : "accent-slate-600 dark:accent-slate-400"
+			}
+			widthClassName={cn("w-6", widthClassName)}
+			heightClassName={cn("h-6", heightClassName)}
+			className={cn("shrink-0", className)}
 			{...props}
 		/>
 	);
@@ -58,7 +69,7 @@ export const IconButton = <AsProps = PressableProps>({
 		<Container
 			focusRipple
 			className={cn(
-				"m-1 self-center overflow-hidden rounded-full p-2",
+				"m-2 h-6 w-6 self-center overflow-hidden rounded-full",
 				"hover:bg-gray-300 focus-visible:bg-gray-300 focus-visible:dark:bg-gray-700 hover:dark:bg-gray-700",
 				className,
 			)}
