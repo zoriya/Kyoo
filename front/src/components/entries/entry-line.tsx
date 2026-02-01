@@ -105,7 +105,7 @@ export const EntryLine = ({
 								>
 									<Icon
 										icon={MultipleVideos}
-										fillClassName="accent-accent dark:accent-slate-400"
+										className="fill-accent dark:fill-slate-400"
 									/>
 									<SubP className="ml-2">
 										{t("show.videosCount", { number: videosCount })}

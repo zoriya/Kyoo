@@ -8,7 +8,6 @@ import { useYoshiki } from "yoshiki/native";
 import type { KImage } from "~/models";
 import { useToken } from "~/providers/account-context";
 import { cn } from "~/utils";
-import type { ImageLayout, YoshikiEnhanced } from "./image";
 
 const ImgBg = withUniwind(EImageBackground);
 
@@ -19,7 +18,6 @@ export const ImageBackground = ({
 	src,
 	quality,
 	alt,
-	layout,
 	className,
 	...props
 }: {
@@ -27,7 +25,6 @@ export const ImageBackground = ({
 	quality: "low" | "medium" | "high";
 	alt?: string;
 	style?: ImageStyle;
-	layout?: ImageLayout;
 	children: ReactNode;
 	className?: string;
 }) => {
@@ -57,21 +54,14 @@ export const ImageBackground = ({
 };
 export const PosterBackground = ({
 	alt,
-	layout,
+	className,
 	...props
-}: Omit<ComponentProps<typeof ImageBackground>, "layout"> & {
-	style?: ImageStyle;
-	layout: YoshikiEnhanced<
-		{ width: ImageStyle["width"] } | { height: ImageStyle["height"] }
-	>;
-}) => {
-	const { css } = useYoshiki();
-
+}: ComponentProps<typeof ImageBackground>) => {
 	return (
 		<ImageBackground
 			alt={alt!}
-			layout={{ aspectRatio: 2 / 3, ...layout }}
-			{...css({ borderRadius: 10, overflow: "hidden" }, props)}
+			className={cn("aspect-2/3 overflow-hidden rounded", className)}
+			{...props}
 		/>
 	);
 };

@@ -103,9 +103,9 @@ const MenuItem = forwardRef<
 	const icn = (icon || selected) && (
 		<Icon
 			icon={icon ?? Dot}
-			fillClassName={cn(disabled && "accent-slate-600")}
 			className={cn(
 				"mx-2 group-data-highlighted:fill-slate-200",
+				disabled && "fill-slate-600 dark:fill-slate-600",
 				!icon && "h-2 w-2",
 			)}
 		/>

@@ -6,24 +6,39 @@ import { cn } from "~/utils";
 export const Rating = ({
 	rating,
 	className,
+	textClassName,
+	iconClassName,
 	...props
 }: {
 	rating: number | null;
 	className?: string;
+	textClassName?: string;
+	iconClassName?: string;
 }) => {
 	return (
 		<View className={cn("flex-row items-center", className)} {...props}>
-			<Icon icon={Star} className="mr-1" />
-			<P className="align-middle">{rating ? rating / 10 : "??"} / 10</P>
+			<Icon icon={Star} className={cn("mr-1", iconClassName)} />
+			<P className={cn("align-middle", textClassName)}>
+				{rating ? rating / 10 : "??"} / 10
+			</P>
 		</View>
 	);
 };
 
-Rating.Loader = ({ className, ...props }: { className?: string }) => {
+Rating.Loader = ({
+	className,
+	textClassName,
+	iconClassName,
+	...props
+}: {
+	className?: string;
+	textClassName?: string;
+	iconClassName?: string;
+}) => {
 	return (
 		<View className={cn("flex-row items-center", className)} {...props}>
-			<Icon icon={Star} className="mr-1" />
-			<Skeleton className="w-8" />
+			<Icon icon={Star} className={cn("mr-1", iconClassName)} />
+			<Skeleton className={cn("w-8", textClassName)} />
 		</View>
 	);
 };

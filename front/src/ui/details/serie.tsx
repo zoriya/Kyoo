@@ -8,18 +8,18 @@ import { EntryLine, entryDisplayNumber } from "~/components/entries";
 import type { Entry, Serie } from "~/models";
 import { Container, H2 } from "~/primitives";
 import { Fetch } from "~/query";
-import { cn, useQueryState } from "~/utils";
+import { useQueryState } from "~/utils";
 import { Header } from "./header";
 import { EntryList } from "./season";
 
 export const Svg = withUniwind(RSvg, {
 	stroke: {
-		fromClassName: "strokeClassName",
+		fromClassName: "className",
 		styleProperty: "accentColor",
 	},
 	fill: {
-		fromClassName: "fillClassName",
-		styleProperty: "accentColor",
+		fromClassName: "className",
+		styleProperty: "fill",
 	},
 });
 
@@ -79,7 +79,7 @@ const SerieHeader = () => {
 			/>
 			{/* <DetailsCollections type="serie" slug={slug} /> */}
 			{/* <Staff slug={slug} /> */}
-			<SvgWave fillClassName={cn("accent-card")} className="flex-1 shrink-0" />
+			<SvgWave className="flex-1 shrink-0 fill-card" />
 		</View>
 	);
 };

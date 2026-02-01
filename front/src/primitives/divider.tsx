@@ -12,7 +12,7 @@ export const HR = ({
 	return (
 		<EHR
 			className={cn(
-				"border-0 bg-gray-400 opacity-70",
+				"shrink-0 border-0 bg-gray-400 opacity-70",
 				orientation === "vertical" && "mx-4 my-2 h-auto w-px",
 				orientation === "horizontal" && "mx-2 my-4 h-px w-auto",
 				className,

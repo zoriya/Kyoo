@@ -2,12 +2,13 @@ import BookmarkAdd from "@material-symbols/svg-400/rounded/bookmark_add.svg";
 import BookmarkAdded from "@material-symbols/svg-400/rounded/bookmark_added-fill.svg";
 import BookmarkRemove from "@material-symbols/svg-400/rounded/bookmark_remove.svg";
 import Bookmark from "@material-symbols/svg-400/rounded/bookmark-fill.svg";
-import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import type { Serie } from "~/models";
-import { IconButton, Menu, tooltip } from "~/primitives";
+import { IconButton, Menu, PressableFeedback, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { useMutation } from "~/query";
+import { ComponentProps } from "react";
+import { PressableProps } from "react-native";
 
 type WatchStatus = NonNullable<Serie["watchStatus"]>["status"];
 const WatchStatus = [
@@ -40,7 +41,7 @@ export const WatchListInfo = ({
 	kind: "movie" | "serie" | "episode";
 	slug: string;
 	status: WatchStatus | null;
-}) => {
+} & Partial<ComponentProps<typeof IconButton<PressableProps>>>) => {
 	const account = useAccount();
 	const { t } = useTranslation();
 
@@ -94,7 +95,7 @@ export const WatchListInfo = ({
 					Trigger={IconButton}
 					icon={watchListIcon(status)}
 					{...tooltip(t("show.watchlistEdit"))}
-					{...props}
+					{...(props as any)}
 				>
 					{Object.values(WatchStatus).map((x) => (
 						<Menu.Item

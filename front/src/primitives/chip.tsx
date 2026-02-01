@@ -1,82 +1,58 @@
-import { type TextProps, View } from "react-native";
-import { px, rem, type Theme, useYoshiki } from "yoshiki/native";
+import { View } from "react-native";
+import { cn } from "~/utils";
 import { Link } from "./links";
 import { Skeleton } from "./skeleton";
 import { P } from "./text";
-import { capitalize, ts } from "./utils";
+import { capitalize } from "./utils";
 
 export const Chip = ({
-	color,
 	size = "medium",
 	outline = false,
 	label,
 	href,
 	replace,
 	target,
-	textProps,
+	className,
 	...props
 }: {
-	color?: string;
 	size?: "small" | "medium" | "large";
 	outline?: boolean;
 	label: string;
 	href: string | null;
 	replace?: boolean;
 	target?: string;
-	textProps?: TextProps;
+	className?: string;
 }) => {
-	const { css } = useYoshiki("chip");
-
-	textProps ??= {};
-
-	const sizeMult = size === "medium" ? 1 : size === "small" ? 0.5 : 1.5;
-
 	return (
 		<Link
 			href={href}
 			replace={replace}
 			target={target}
-			{...css(
-				[
-					{
-						pY: ts(1 * sizeMult),
-						pX: ts(2.5 * sizeMult),
-						borderRadius: ts(3),
-						overflow: "hidden",
-						justifyContent: "center",
-					},
-					outline && {
-						borderColor: color ?? ((theme: Theme) => theme.accent),
-						borderStyle: "solid",
-						borderWidth: px(1),
-						fover: {
-							self: {
-								bg: (theme: Theme) => theme.accent,
-							},
-							text: {
-								color: (theme: Theme) => theme.alternate.contrast,
-							},
-						},
-					},
-					!outline && {
-						bg: color ?? ((theme: Theme) => theme.accent),
-					},
-				],
-				props,
+			className={cn(
+				"group justify-center overflow-hidden rounded-4xl border border-accent outline-0",
+				size === "small" && "px-2.5 py-1",
+				size === "medium" && "px-5 py-2",
+				size === "large" && "px-10 py-4",
+				outline && "hover:bg-accent focus:bg-accent",
+				!outline && "bg-accent hover:bg-background focus:bg-background",
+				className,
 			)}
+			{...props}
 		>
 			<P
-				{...css(
-					[
-						"text",
-						{
-							marginVertical: 0,
-							fontSize: rem(0.8),
-							color: (theme: Theme) =>
-								outline ? theme.contrast : theme.alternate.contrast,
-						},
-					],
-					textProps,
+				className={cn(
+					outline &&
+						cn(
+							"dark:text-slate-300",
+							"group-hover:text-slate-200 group-focus:text-slate-200",
+						),
+					!outline &&
+						cn(
+							"text-slate-200 dark:text-slate-300",
+							"group-hover:text-slate-600 group-focus:text-slate-600",
+							"dark:group-focus:text-slate-300 dark:group-hover:text-slate-300",
+						),
+					size === "small" && "text-sm",
 				)}
 			>
 				{capitalize(label)}
@@ -86,42 +62,28 @@ export const Chip = ({
 };
 
 Chip.Loader = ({
-	color,
 	size = "medium",
 	outline = false,
+	className,
 	...props
 }: {
-	color?: string;
 	size?: "small" | "medium" | "large";
 	outline?: boolean;
+	className?: string;
 }) => {
-	const { css } = useYoshiki();
-	const sizeMult = size === "medium" ? 1 : size === "small" ? 0.5 : 1.5;
-
 	return (
 		<View
-			{...css(
-				[
-					{
-						pY: ts(1 * sizeMult),
-						pX: ts(2.5 * sizeMult),
-						borderRadius: ts(3),
-						overflow: "hidden",
-						justifyContent: "center",
-					},
-					outline && {
-						borderColor: color ?? ((theme: Theme) => theme.accent),
-						borderStyle: "solid",
-						borderWidth: px(1),
-					},
-					!outline && {
-						bg: color ?? ((theme: Theme) => theme.accent),
-					},
-				],
-				props,
+			className={cn(
+				"group justify-center overflow-hidden rounded-4xl border border-accent outline-0",
+				size === "small" && "px-2.5 py-1",
+				size === "medium" && "px-5 py-2",
+				size === "large" && "px-10 py-4",
+				!outline && "bg-accent",
+				className,
 			)}
+			{...props}
 		>
-			<Skeleton {...css({ width: rem(3) })} />
+			<Skeleton className="w-10" />
 		</View>
 	);
 };

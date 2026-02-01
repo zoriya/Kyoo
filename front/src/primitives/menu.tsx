@@ -121,8 +121,10 @@ const MenuItem = ({
 	const icn = (icon || selected) && (
 		<Icon
 			icon={icon ?? Check}
-			fillClassName={cn(disabled && "accent-slate-600")}
-			className="mx-2"
+			className={cn(
+				"mx-2",
+				disabled && "fill-slate-600 dark:fill-slate-600",
+			)}
 		/>
 	);
 

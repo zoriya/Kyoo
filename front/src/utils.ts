@@ -27,14 +27,15 @@ export const useQueryState = <S>(key: string, initial: S) => {
 	return [state, update] as const;
 };
 
-export const getDisplayDate = (data: Show | Movie) => {
-	const {
-		startAir,
-		endAir,
-		airDate,
-	}: { startAir?: Date | null; endAir?: Date | null; airDate?: Date | null } =
-		data;
-
+export const getDisplayDate = ({
+	startAir,
+	endAir,
+	airDate,
+}: {
+	startAir?: Date | null;
+	endAir?: Date | null;
+	airDate?: Date | null;
+}) => {
 	if (startAir) {
 		if (!endAir || startAir.getFullYear() === endAir.getFullYear()) {
 			return startAir.getFullYear().toString();

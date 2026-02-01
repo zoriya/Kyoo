@@ -31,14 +31,13 @@ const styleText = (
 		return (
 			<Component
 				className={cn(
-					"m-0 shrink font-sans text-base text-slate-600 dark:text-slate-400",
-					type === "header" && "font-headers text-slate-900 dark:text-slate-200",
+					"shrink font-sans text-base text-slate-600 dark:text-slate-400",
+					type === "header" &&
+						"font-headers text-slate-900 dark:text-slate-200",
 					type === "sub" && "font-light text-sm opacity-80",
 					custom,
 					className,
 				)}
-				// reset expo/html-elements style
-				style={[{ marginVertical: 0 }, style]}
 				{...props}
 			/>
 		);
@@ -52,14 +51,22 @@ export const H3 = styleText(EH3, "header");
 export const H4 = styleText(EH4, "header");
 export const H5 = styleText(EH5, "header");
 export const H6 = styleText(EH6, "header");
-export const Heading = styleText(EP, "header");
-export const P = styleText(EP, undefined);
-export const SubP = styleText(EP, "sub");
+export const Heading = styleText(Text as any, "header");
+export const P = styleText(Text as any, undefined);
+export const SubP = styleText(Text as any, "sub");
 
-export const LI = ({ children, ...props }: ComponentProps<typeof P>) => {
+export const LI = ({
+	children,
+	className,
+	...props
+}: ComponentProps<typeof P>) => {
 	return (
-		<P role="listitem" {...props}>
-			<Text className="mb-2 h-full pr-1">{String.fromCharCode(0x2022)}</Text>
+		<P
+			role="listitem"
+			className={cn("flex items-center", className)}
+			{...props}
+		>
+			<Text className="h-full px-1">{String.fromCharCode(0x2022)}</Text>
 			{children}
 		</P>
 	);

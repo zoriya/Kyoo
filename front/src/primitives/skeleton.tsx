@@ -16,7 +16,8 @@ export const Skeleton = ({
 			className={cn(
 				"relative",
 				lines === 1 && "overflow-hidden rounded",
-				variant === "text" && "m-1 h-5 w-4/5",
+				variant === "text" && lines === 1 && "h-5",
+				variant === "text" && "my-1 w-4/5",
 				variant === "round" && "rounded-full",
 				className,
 			)}
@@ -35,6 +36,7 @@ export const Skeleton = ({
 					<Animated.View
 						className="absolute inset-0 bg-linear-to-r from-transparent via-gray-500 to-transparent"
 						style={{
+							transform: [{ translateX: "-100%" }],
 							animationName: {
 								from: {
 									transform: [{ translateX: "-100%" }],

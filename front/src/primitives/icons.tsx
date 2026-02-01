@@ -1,4 +1,4 @@
-import type { ComponentProps, ComponentType } from "react";
+import { type ComponentProps, type ComponentType, useState } from "react";
 import { Animated, type PressableProps } from "react-native";
 import type { SvgProps } from "react-native-svg";
 import { withUniwind } from "uniwind";
@@ -14,38 +14,33 @@ const IconWrapper = ({ icon: Icon, ...props }: { icon: Icon } & SvgProps) => {
 
 const BaseIcon = withUniwind(IconWrapper, {
 	stroke: {
-		fromClassName: "strokeClassName",
+		fromClassName: "className",
 		styleProperty: "accentColor",
 	},
 	fill: {
-		fromClassName: "fillClassName",
-		styleProperty: "accentColor",
+		fromClassName: "className",
+		styleProperty: "fill",
 	},
 	width: {
-		fromClassName: "widthClassName",
+		fromClassName: "className",
 		styleProperty: "width",
 	},
 	height: {
-		fromClassName: "heightClassName",
+		fromClassName: "className",
 		styleProperty: "height",
 	},
 });
 
 export const Icon = ({
 	className,
-	fillClassName,
-	widthClassName,
-	heightClassName,
 	...props
 }: ComponentProps<typeof BaseIcon>) => {
 	return (
 		<BaseIcon
-			fillClassName={
-				fillClassName ? fillClassName : "accent-slate-600 dark:accent-slate-400"
-			}
-			widthClassName={cn("w-6", widthClassName)}
-			heightClassName={cn("h-6", heightClassName)}
-			className={cn("shrink-0", className)}
+			className={cn(
+				"h-6 w-6 shrink-0 fill-slate-600 dark:fill-slate-400",
+				className,
+			)}
 			{...props}
 		/>
 	);
@@ -60,7 +55,7 @@ export const IconButton = <AsProps = PressableProps>({
 }: {
 	as?: ComponentType<AsProps>;
 	icon: Icon;
-	iconProps?: Exclude<ComponentProps<typeof Icon>, "icon">;
+	iconProps?: Omit<ComponentProps<typeof Icon>, "icon">;
 	className?: string;
 } & AsProps) => {
 	const Container = as ?? PressableFeedback;
@@ -69,18 +64,18 @@ export const IconButton = <AsProps = PressableProps>({
 		<Container
 			focusRipple
 			className={cn(
-				"m-2 h-6 w-6 self-center overflow-hidden rounded-full",
-				"hover:bg-gray-300 focus-visible:bg-gray-300 focus-visible:dark:bg-gray-700 hover:dark:bg-gray-700",
+				"h-10 w-10 self-center overflow-hidden rounded-full p-2",
+				"outline-0 hover:bg-gray-400/50 focus-visible:bg-gray-400/50",
 				className,
 			)}
 			{...(asProps as AsProps)}
 		>
-			<Icon icon={icon} />
+			<Icon icon={icon} {...iconProps} />
 		</Container>
 	);
 };
 
-const AIconButton = Animated.createAnimatedComponent(IconButton);
+const Pressable = Animated.createAnimatedComponent(PressableFeedback);
 
 export const IconFab = <AsProps = PressableProps>({
 	icon,
@@ -88,21 +83,35 @@ export const IconFab = <AsProps = PressableProps>({
 	iconProps,
 	...props
 }: ComponentProps<typeof IconButton<AsProps>>) => {
+	const [hover, setHover] = useState(false);
+	const [focus, setFocus] = useState(false);
 	return (
-		<AIconButton
-			icon={icon}
-			className={cn("bg-accent", className)}
-			iconProps={{
-				...iconProps,
-				className: cn("text-slate-900", iconProps?.className),
-			}}
+		<Pressable
+			className={cn(
+				"group h-10 w-10 overflow-hidden rounded-full bg-accent p-2 outline-0",
+				className,
+			)}
+			onHoverIn={() => setHover(true)}
+			onHoverOut={() => setHover(false)}
+			onFocus={() => setFocus(true)}
+			onBlur={() => setFocus(false)}
 			style={{
-				transform: [{ scale: 1.3 }],
+				transform: hover || focus ? [{ scale: 1.3 }] : [],
 				transitionProperty: "transform",
-				transitionDuration: 3000,
+				transitionDuration: "150ms",
 			}}
 			{...(props as AsProps)}
-		/>
+		>
+			<Icon
+				icon={icon}
+				{...iconProps}
+				className={cn(
+					"fill-slate-300",
+					(hover || focus) && "fill-slate-200",
+					iconProps?.className,
+				)}
+			/>
+		</Pressable>
 	);
 };
 

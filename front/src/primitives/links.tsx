@@ -60,7 +60,10 @@ export const A = ({
 	return (
 		<Text
 			{...linkProps}
-			className={cn("select-text text-accent", className)}
+			className={cn(
+				"select-text text-accent hover:underline focus:underline",
+				className,
+			)}
 			{...props}
 		>
 			{children}
