@@ -81,8 +81,40 @@ export const expo: ExpoConfig = {
 			"react-native-localization-settings",
 			{
 				languages: supportedLanguages,
-			}
-		]
+			},
+		],
+		[
+			"expo-font",
+			{
+				android: {
+					fonts: [
+						{
+							fontFamily: "Poppins",
+							fontDefinitions: [
+								{
+									fontFamily: "Poppins",
+									fontStyle: "normal",
+									fontWeight: "300",
+									file: "./node_modules/@expo-google-fonts/poppins/300Light/Poppins_300Light.ttf",
+								},
+								{
+									fontFamily: "Poppins",
+									fontStyle: "normal",
+									fontWeight: "500",
+									file: "./node_modules/@expo-google-fonts/poppins/500Medium/Poppins_500Medium.ttf",
+								},
+								{
+									fontFamily: "Sora",
+									fontStyle: "normal",
+									fontWeight: "800",
+									file: "./node_modules/@expo-google-fonts/sora/800ExtraBold/Sora_800ExtraBold.ttf",
+								},
+							],
+						},
+					],
+				},
+			},
+		],
 	],
 	experiments: {
 		typedRoutes: true,

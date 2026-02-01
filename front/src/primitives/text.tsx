@@ -16,11 +16,11 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { Platform, Text, View, type ViewProps } from "react-native";
 import { cn } from "~/utils";
 import { IconButton } from "./icons";
 import { tooltip } from "./tooltip";
-import { useTranslation } from "react-i18next";
 
 const styleText = (
 	Component: ComponentType<ComponentProps<typeof EP>>,
@@ -31,8 +31,8 @@ const styleText = (
 		return (
 			<Component
 				className={cn(
-					"m-0 shrink text-base text-slate-600 dark:text-slate-400",
-					type === "header" && "text-slate-900 dark:text-slate-200",
+					"m-0 shrink font-sans text-base text-slate-600 dark:text-slate-400",
+					type === "header" && "font-headers text-slate-900 dark:text-slate-200",
 					type === "sub" && "font-light text-sm opacity-80",
 					custom,
 					className,
@@ -46,8 +46,8 @@ const styleText = (
 	return Text;
 };
 
-export const H1 = styleText(EH1, "header", "text-5xl font-black");
-export const H2 = styleText(EH2, "header", "text-2xl");
+export const H1 = styleText(EH1, "header", cn("font-extrabold text-5xl"));
+export const H2 = styleText(EH2, "header", cn("text-2xl"));
 export const H3 = styleText(EH3, "header");
 export const H4 = styleText(EH4, "header");
 export const H5 = styleText(EH5, "header");

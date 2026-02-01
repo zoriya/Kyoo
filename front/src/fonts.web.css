@@ -1,0 +1,20 @@
+@font-face {
+	font-family: "Poppins";
+	src: url("/fonts/Poppins_300Light.ttf") format("truetype");
+	font-weight: 300;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: "Poppins";
+	src: url("/fonts/Poppins_500Medium.ttf") format("truetype");
+	font-weight: 500;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: "Sora";
+	src: url("/fonts/Sora_800ExtraBold.ttf") format("truetype");
+	font-weight: 800;
+	font-style: normal;
+}

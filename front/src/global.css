@@ -6,6 +6,9 @@
 	--color-background: #f0f2f5;
 	--color-card: #e3e4e5;
 	--color-popover: #c6c6c6;
+
+	--font-sans: "Poppins";
+	--font-headers: "Sora";
 }
 
 @layer theme {

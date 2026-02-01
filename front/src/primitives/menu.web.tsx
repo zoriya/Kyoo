@@ -59,10 +59,8 @@ const Menu = <AsProps extends { onPress: PressableProps["onPress"] }>({
 			<DropdownMenu.Portal>
 				<DropdownMenu.Content
 					onFocusOutside={(e) => e.stopImmediatePropagation()}
-					className="z-10 min-w-2xs overflow-hidden rounded bg-popover"
+					className="z-10 min-w-2xs overflow-hidden rounded bg-popover shadow-xl"
 					style={{
-						boxShadow:
-							"0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2)",
 						maxHeight:
 							"calc(var(--radix-dropdown-menu-content-available-height) * 0.8)",
 					}}
@@ -174,10 +172,8 @@ const Sub = <AsProps,>({
 			<DropdownMenu.Portal>
 				<DropdownMenu.SubContent
 					onFocusOutside={(e) => e.stopImmediatePropagation()}
-					className="z-10 min-w-2xs overflow-hidden rounded bg-popover"
+					className="z-10 min-w-2xs overflow-hidden rounded bg-popover shadow-xl"
 					style={{
-						boxShadow:
-							"0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2)",
 						maxHeight:
 							"calc(var(--radix-dropdown-menu-content-available-height) * 0.8)",
 					}}

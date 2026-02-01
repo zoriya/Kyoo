@@ -1,6 +1,7 @@
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import RSvg, { Path } from "react-native-svg";
 import { withUniwind } from "uniwind";
 import { EntryLine, entryDisplayNumber } from "~/components/entries";
@@ -10,7 +11,6 @@ import { Fetch } from "~/query";
 import { cn, useQueryState } from "~/utils";
 import { Header } from "./header";
 import { EntryList } from "./season";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export const Svg = withUniwind(RSvg, {
 	stroke: {

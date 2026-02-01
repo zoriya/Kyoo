@@ -4,9 +4,9 @@ import { Platform } from "react-native";
 import { Providers } from "~/providers";
 import "../global.css";
 import { Tooltip } from "~/primitives";
+import "~/fonts.web.css";
 
 const GlobalCssTheme = () => {
-	// body {font-family: ${font.style.fontFamily};}
 	// background-color: ${theme.background};
 	return (
 		<>
