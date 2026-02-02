@@ -14,7 +14,7 @@
 		"@kubiks/otel-drizzle": "zoriya/drizzle-otel#build",
 		"@logtape/elysia": "2.0.1",
 		"@logtape/logtape": "2.0.2",
-		"@logtape/otel": "2.0.1",
+		"@logtape/otel": "2.0.2",
 		"@logtape/redaction": "2.0.2",
 		"@opentelemetry/api": "^1.9.0",
 		"@opentelemetry/api-logs": "^0.211.0",
