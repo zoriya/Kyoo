@@ -1,67 +1,33 @@
-import { type ReactNode, type Ref, useState } from "react";
-import {
-	TextInput,
-	type TextInputProps,
-	View,
-	type ViewStyle,
-} from "react-native";
-import { px, type Theme, useYoshiki } from "yoshiki/native";
-import type { YoshikiEnhanced } from "./image";
-import { focusReset, ts } from "./utils";
+import type { ReactNode, Ref } from "react";
+import { TextInput, type TextInputProps, View } from "react-native";
+import { cn } from "~/utils";
 
 export const Input = ({
-	placeholderTextColor,
-	variant = "small",
 	right,
-	containerStyle,
+	containerClassName,
 	ref,
+	className,
 	...props
 }: {
-	variant?: "small" | "big";
 	right?: ReactNode;
-	containerStyle?: YoshikiEnhanced<ViewStyle>;
+	containerClassName?: string;
 	ref?: Ref<TextInput>;
 } & TextInputProps) => {
-	const [focused, setFocused] = useState(false);
-	const { css, theme } = useYoshiki();
-
 	return (
 		<View
-			{...css([
-				{
-					borderColor: (theme) => theme.accent,
-					borderRadius: ts(1),
-					borderWidth: px(1),
-					borderStyle: "solid",
-					padding: ts(0.5),
-					flexDirection: "row",
-					alignContent: "center",
-					alignItems: "center",
-				},
-				variant === "big" && {
-					borderRadius: ts(4),
-					p: ts(1),
-				},
-				focused && {
-					borderWidth: px(2),
-				},
-				containerStyle,
-			])}
+			className={cn(
+				"shrink flex-row content-center items-center rounded-xl border border-accent p-1",
+				"focus-within:border-2",
+				containerClassName,
+			)}
 		>
 			<TextInput
 				ref={ref}
-				placeholderTextColor={placeholderTextColor ?? theme.paragraph}
-				onFocus={() => setFocused(true)}
-				onBlur={() => setFocused(false)}
-				{...css(
-					{
-						flexGrow: 1,
-						color: (theme: Theme) => theme.paragraph,
-						borderWidth: 0,
-						...focusReset,
-					},
-					props,
+				className={cn(
+					"flex-1 font-sans text-base text-slate-600 outline-0 dark:text-slate-400",
+					className,
 				)}
+				{...props}
 			/>
 			{right}
 		</View>

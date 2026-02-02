@@ -1,6 +1,6 @@
 import { type ComponentProps, type ComponentType, useState } from "react";
 import { Animated, type PressableProps } from "react-native";
-import type { SvgProps } from "react-native-svg";
+import RSvg, { type SvgProps } from "react-native-svg";
 import { withUniwind } from "uniwind";
 import { cn } from "~/utils";
 import { PressableFeedback } from "./links";
@@ -13,6 +13,25 @@ const IconWrapper = ({ icon: Icon, ...props }: { icon: Icon } & SvgProps) => {
 };
 
 const BaseIcon = withUniwind(IconWrapper, {
+	stroke: {
+		fromClassName: "className",
+		styleProperty: "accentColor",
+	},
+	fill: {
+		fromClassName: "className",
+		styleProperty: "fill",
+	},
+	width: {
+		fromClassName: "className",
+		styleProperty: "width",
+	},
+	height: {
+		fromClassName: "className",
+		styleProperty: "height",
+	},
+});
+
+export const Svg = withUniwind(RSvg, {
 	stroke: {
 		fromClassName: "className",
 		styleProperty: "accentColor",

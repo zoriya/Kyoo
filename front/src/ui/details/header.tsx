@@ -293,7 +293,7 @@ const Description = ({
 				</P>
 				<View className="basis-1/5 flex-row xl:mt-[-100px]">
 					<HR orientation="vertical" className="max-sm:hidden" />
-					<View className="flex-1 items-center max-sm:flex-row">
+					<View className="flex-1 max-sm:flex-row">
 						<H2>{t("show.genre")}</H2>
 						{genres.length ? (
 							<UL className="flex-1 flex-wrap max-sm:flex-row max-sm:items-center max-sm:text-center">

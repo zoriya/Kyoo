@@ -2,26 +2,14 @@ import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import RSvg, { Path } from "react-native-svg";
-import { withUniwind } from "uniwind";
+import { Path } from "react-native-svg";
 import { EntryLine, entryDisplayNumber } from "~/components/entries";
 import type { Entry, Serie } from "~/models";
-import { Container, H2 } from "~/primitives";
+import { Container, H2, Svg } from "~/primitives";
 import { Fetch } from "~/query";
 import { useQueryState } from "~/utils";
 import { Header } from "./header";
 import { EntryList } from "./season";
-
-export const Svg = withUniwind(RSvg, {
-	stroke: {
-		fromClassName: "className",
-		styleProperty: "accentColor",
-	},
-	fill: {
-		fromClassName: "className",
-		styleProperty: "fill",
-	},
-});
 
 export const SvgWave = (props: ComponentProps<typeof Svg>) => {
 	// aspect-[width/height]: width/height of the svg

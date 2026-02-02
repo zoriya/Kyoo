@@ -18,36 +18,38 @@ export default function Root({ children }: PropsWithChildren) {
 				/>
 				<meta httpEquiv="X-UA-Compatible" content="IE=edge" />
 
+				<link rel="icon" type="image/svg+xml" href="/icon.svg" />
 				<link
-					rel="icon"
-					type="image/png"
-					sizes="16x16"
-					href="/icon-16x16.png"
+					rel="shortcut icon"
+					href="/favicon.ico"
+					media="(prefers-color-scheme: light)"
 				/>
 				<link
 					rel="icon"
 					type="image/png"
-					sizes="32x32"
-					href="/icon-32x32.png"
+					href="/favicon-96x96.png"
+					sizes="96x96"
+					media="(prefers-color-scheme: light)"
+				/>
+				<link
+					rel="shortcut icon"
+					href="/favicon-dark.ico"
+					media="(prefers-color-scheme: dark)"
 				/>
 				<link
 					rel="icon"
 					type="image/png"
-					sizes="64x64"
-					href="/icon-64x64.png"
+					href="/favicon-96x96-dark.png"
+					sizes="96x96"
+					media="(prefers-color-scheme: dark)"
 				/>
+				<meta name="apple-mobile-web-app-title" content="Kyoo" />
 				<link
-					rel="icon"
-					type="image/png"
-					sizes="128x128"
-					href="/icon-128x128.png"
+					rel="apple-touch-icon"
+					sizes="180x180"
+					href="/apple-touch-icon.png"
 				/>
-				<link
-					rel="icon"
-					type="image/png"
-					sizes="256x256"
-					href="/icon-256x256.png"
-				/>
+				<link rel="manifest" href="/site.webmanifest" />
 
 				<ScrollViewStyleReset />
 			</head>

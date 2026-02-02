@@ -6,21 +6,7 @@ import "../global.css";
 import { Tooltip } from "~/primitives";
 import "~/fonts.web.css";
 
-const GlobalCssTheme = () => {
-	// background-color: ${theme.background};
-	return (
-		<>
-			{/* <SkeletonCss /> */}
-			{/* <TouchOnlyCss /> */}
-			{/* <HiddenIfNoJs /> */}
-		</>
-	);
-};
-
 export default function Layout() {
-	// const registry = createStyleRegistry();
-	// useServerHeadInsertion(() => registry.flushToComponent());
-
 	return (
 		<Providers>
 			<Slot />

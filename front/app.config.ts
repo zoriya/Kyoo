@@ -12,7 +12,7 @@ export const expo: ExpoConfig = {
 	newArchEnabled: true,
 	platforms: ["web", "ios", "android"],
 	orientation: "default",
-	icon: "./public/icon-256x256.png",
+	icon: "./public/favicon-96x96-dark.png",
 	userInterfaceStyle: "automatic",
 	ios: {
 		supportsTablet: true,
@@ -20,15 +20,15 @@ export const expo: ExpoConfig = {
 	android: {
 		package: IS_DEV ? "dev.zoriya.kyoo.dev" : "dev.zoriya.kyoo",
 		adaptiveIcon: {
-			foregroundImage: "./public/icon-256x256.png",
-			backgroundColor: "#eff1f5",
+			foregroundImage: "./public/android-adaptive-icon.png",
+			backgroundColor: "#6b00b8",
 		},
 		edgeToEdgeEnabled: true,
 	},
 	web: {
-		favicon: "./public/icon-256x256.png",
-		output: "single",
 		bundler: "metro",
+		favicon: "./public/icon.svg",
+		output: "single",
 	},
 	updates: {
 		url: "https://u.expo.dev/55de6b52-c649-4a15-9a45-569ff5ed036c",
@@ -56,14 +56,9 @@ export const expo: ExpoConfig = {
 		[
 			"expo-splash-screen",
 			{
-				image: "./public/icon-256x256.png",
+				image: "./public/splash-screen.png",
 				resizeMode: "contain",
-				backgroundColor: "#eff1f5",
-				dark: {
-					image: "./public/icon-256x256.png",
-					resizeMode: "contain",
-					backgroundColor: "#1e1e2e",
-				},
+				backgroundColor: "#6b00b8",
 			},
 		],
 		[

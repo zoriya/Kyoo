@@ -5,16 +5,21 @@ import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import Settings from "@material-symbols/svg-400/rounded/settings.svg";
 import { useGlobalSearchParams, usePathname, useRouter } from "expo-router";
-import { type Ref, useEffect, useRef, useState } from "react";
+import {
+	type Ref,
+	useEffect,
+	useRef,
+	useState,
+	type ComponentProps,
+} from "react";
 import { useTranslation } from "react-i18next";
 import {
 	Platform,
 	type TextInput,
 	type TextInputProps,
 	View,
-	type ViewProps,
+	type PressableProps,
 } from "react-native";
-import { type Theme, useYoshiki } from "yoshiki/native";
 import {
 	A,
 	Avatar,
@@ -25,32 +30,36 @@ import {
 	Menu,
 	PressableFeedback,
 	tooltip,
-	ts,
 } from "~/primitives";
 import { useAccount, useAccounts } from "~/providers/account-context";
 import { logout } from "~/ui/login/logic";
+import { cn } from "~/utils";
 import { KyooLongLogo } from "./icon";
 
-export const NavbarTitle = (props: { onLayout?: ViewProps["onLayout"] }) => {
+export const NavbarTitle = ({
+	className,
+	...props
+}: ComponentProps<typeof A>) => {
 	const { t } = useTranslation();
 
 	return (
 		<A
 			href="/"
 			aria-label={t("navbar.home")}
+			className={cn("m-4 flex-1", className)}
 			{...tooltip(t("navbar.home"))}
 			{...props}
 		>
-			<KyooLongLogo />
+			<KyooLongLogo className="fill-light accent-dark" />
 		</A>
 	);
 };
 
 const SearchBar = ({
 	ref,
+	className,
 	...props
 }: TextInputProps & { ref?: Ref<TextInput> }) => {
-	const { theme } = useYoshiki();
 	const { t } = useTranslation();
 	const params = useGlobalSearchParams();
 	const [query, setQuery] = useState((params.q as string) ?? "");
@@ -78,12 +87,8 @@ const SearchBar = ({
 				else router.setParams({ q });
 			}}
 			placeholder={t("navbar.search")}
-			placeholderTextColor={theme.contrast}
-			containerStyle={{
-				height: ts(4),
-				flexShrink: 1,
-				borderColor: (theme: Theme) => theme.contrast,
-			}}
+			containerClassName="border-light"
+			className={cn("text-slate-200 dark:text-slate-200", className)}
 			{...tooltip(t("navbar.search"))}
 			{...props}
 		/>
@@ -97,21 +102,18 @@ const getDisplayUrl = (url: string) => {
 };
 
 export const NavbarProfile = () => {
-	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 	const account = useAccount();
 	const accounts = useAccounts();
 
 	return (
 		<Menu
-			Trigger={Avatar}
+			Trigger={Avatar<PressableProps>}
 			as={PressableFeedback}
 			src={account?.logo}
 			placeholder={account?.username}
 			alt={t("navbar.login")}
-			size={24}
-			color={theme.colors.white}
-			{...css({ margin: ts(1), justifyContent: "center" })}
+			className="m-2"
 			{...tooltip(account?.username ?? t("navbar.login"))}
 		>
 			{accounts?.map((x) => (
@@ -122,7 +124,9 @@ export const NavbarProfile = () => {
 							? x.username
 							: `${x.username} - ${getDisplayUrl(x.apiUrl)}`
 					}
-					left={<Avatar placeholder={x.username} src={x.logo} />}
+					left={
+						<Avatar placeholder={x.username} src={x.logo} className="mx-2" />
+					}
 					selected={x.selected}
 					onSelect={() => x.select()}
 				/>
@@ -156,31 +160,28 @@ export const NavbarProfile = () => {
 	);
 };
 export const NavbarRight = () => {
-	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 	const isAdmin = false; //useHasPermission(AdminPage.requiredPermissions);
 
 	return (
-		<View
-			{...css({ flexDirection: "row", alignItems: "center", flexShrink: 1 })}
-		>
+		<View className="shrink flex-row items-center">
 			{Platform.OS === "web" ? (
 				<SearchBar />
 			) : (
 				<IconButton
 					icon={Search}
-					color={theme.colors.white}
 					as={Link}
 					href={"/browse"}
+					className="fill-slate-200 dark:fill-slate-200"
 					{...tooltip(t("navbar.search"))}
 				/>
 			)}
 			{isAdmin && (
 				<IconButton
 					icon={Admin}
-					color={theme.colors.white}
 					as={Link}
 					href={"/admin"}
+					className="fill-slate-200 dark:fill-slate-200"
 					{...tooltip(t("navbar.admin"))}
 				/>
 			)}

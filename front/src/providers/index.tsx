@@ -5,7 +5,13 @@ import {
 import { HydrationBoundary, QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
 import { useColorScheme } from "react-native";
-import { useTheme } from "yoshiki/native";
+import { SafeAreaListener } from "react-native-safe-area-context";
+import {
+	Uniwind,
+	useCSSVariable,
+	useResolveClassNames,
+	useUniwind,
+} from "uniwind";
 import { ThemeSelector } from "~/primitives/theme";
 import { createQueryClient } from "~/query";
 import { AccountProvider } from "./account-provider";
@@ -13,8 +19,6 @@ import { ErrorConsumer } from "./error-consumer";
 import { ErrorProvider } from "./error-provider";
 import { NativeProviders } from "./native-providers";
 import { TranslationsProvider } from "./translations.native";
-import { SafeAreaListener } from "react-native-safe-area-context";
-import { Uniwind } from "uniwind";
 
 function getServerData(_key: string) {}
 
@@ -34,37 +38,45 @@ const ThemeProvider = ({ children }: { children: ReactNode }) => {
 	const userTheme = useColorScheme();
 
 	return (
-		<SafeAreaListener
-			onChange={({ insets }) => {
-				Uniwind.updateInsets(insets);
-			}}
-		>
-			<ThemeSelector theme={userTheme ?? "light"} font={{ normal: "inherit" }}>
-				{children}
-			</ThemeSelector>
-		</SafeAreaListener>
+		<ThemeSelector theme={userTheme ?? "light"} font={{ normal: "inherit" }}>
+			{children}
+		</ThemeSelector>
 	);
 };
 
 const RnTheme = ({ children }: { children: ReactNode }) => {
-	const theme = useTheme();
+	const { theme } = useUniwind();
+	const [accent, background, card, popover] = useCSSVariable([
+		"--color-accent",
+		"--color-background",
+		"--color-card",
+		"--color-popover",
+	]) as string[];
+	const { color } = useResolveClassNames("text-slate-600 dark:text-slate-400");
 
 	return (
 		<RNThemeProvider
 			value={{
-				dark: theme.mode === "dark",
+				dark: theme === "dark",
 				colors: {
-					primary: theme.accent,
-					card: theme.variant.background,
-					text: theme.paragraph,
-					border: theme.background,
-					notification: theme.background,
-					background: theme.background,
+					primary: accent,
+					card: card,
+					text: color as string,
+					border: background,
+					notification: popover,
+					background: background,
 				},
 				fonts: DefaultTheme.fonts,
 			}}
 		>
-			{children}
+			<SafeAreaListener
+				onChange={({ insets }) => {
+					Uniwind.updateInsets(insets);
+				}}
+			>
+				{" "}
+				{children}
+			</SafeAreaListener>
 		</RNThemeProvider>
 	);
 };
