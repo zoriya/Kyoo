@@ -1,16 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
+import type { KImage, WatchStatusV } from "~/models";
 import {
-	percent,
-	rem,
-	type Stylable,
-	type Theme,
-	useYoshiki,
-} from "yoshiki/native";
-import type { KImage } from "~/models";
-import {
-	focusReset,
 	Image,
 	ImageBackground,
 	Link,
@@ -20,6 +12,9 @@ import {
 	ts,
 } from "~/primitives";
 import type { Layout } from "~/query";
+import { cn } from "~/utils";
+import { EntryContext } from "../items/context-menus";
+import { ItemProgress } from "../items/item-grid";
 
 export const EntryBox = ({
 	slug,
@@ -29,9 +24,10 @@ export const EntryBox = ({
 	thumbnail,
 	href,
 	watchedPercent,
-	// watchedStatus,
+	watchedStatus,
+	className,
 	...props
-}: Stylable & {
+}: {
 	slug: string;
 	// if serie slug is null, disable "Go to serie" in the context menu
 	serieSlug: string | null;
@@ -40,107 +36,60 @@ export const EntryBox = ({
 	href: string;
 	thumbnail: KImage | null;
 	watchedPercent: number | null;
-	// watchedStatus: WatchStatusV | null;
+	watchedStatus: WatchStatusV | null;
+	className?: string;
 }) => {
 	const [moreOpened, setMoreOpened] = useState(false);
-	const { css } = useYoshiki("episodebox");
 	const { t } = useTranslation();
 
 	return (
 		<Link
 			href={moreOpened ? undefined : href}
 			onLongPress={() => setMoreOpened(true)}
-			{...css(
-				{
-					alignItems: "center",
-					width: EntryBox.layout.size,
-					child: {
-						poster: {
-							borderColor: (theme) => theme.background,
-							borderWidth: ts(0.5),
-							borderStyle: "solid",
-							borderRadius: 6,
-						},
-						more: {
-							opacity: 0,
-						},
-					},
-					fover: {
-						self: focusReset,
-						poster: {
-							borderColor: (theme: Theme) => theme.accent,
-						},
-						title: {
-							textDecorationLine: "underline",
-						},
-						more: {
-							opacity: 1,
-						},
-					},
-				},
-				props,
-			)}
+			className={cn("group w-[350px] items-center outline-0", className)}
+			{...props}
 		>
 			<ImageBackground
 				src={thumbnail}
 				quality="low"
 				alt=""
-				layout={{ width: percent(100), aspectRatio: 16 / 9 }}
-				{...(css("poster") as any)}
+				className={cn(
+					"aspect-video w-full rounded",
+					"ring-accent group-hover:ring-3 group-focus-visible:ring-3",
+				)}
 			>
-				{/* 	{(watchedPercent || watchedStatus === "completed") && ( */}
-				{/* 		<ItemProgress watchPercent={watchedPercent ?? 100} /> */}
-				{/* 	)} */}
-				{/* 	<EntryContext */}
-				{/* 		slug={slug} */}
-				{/* 		serieSlug={serieSlug} */}
-				{/* 		status={watchedStatus} */}
-				{/* 		isOpen={moreOpened} */}
-				{/* 		setOpen={(v) => setMoreOpened(v)} */}
-				{/* 		{...css([ */}
-				{/* 			{ */}
-				{/* 				position: "absolute", */}
-				{/* 				top: 0, */}
-				{/* 				right: 0, */}
-				{/* 				bg: (theme) => theme.darkOverlay, */}
-				{/* 			}, */}
-				{/* 			"more", */}
-				{/* 			Platform.OS === "web" && */}
-				{/* 				moreOpened && { display: important("flex") }, */}
-				{/* 		])} */}
-				{/* 	/> */}
+				{(watchedPercent || watchedStatus === "completed") && (
+					<ItemProgress watchPercent={watchedPercent ?? 100} />
+				)}
+				<EntryContext
+					slug={slug}
+					serieSlug={serieSlug}
+					isOpen={moreOpened}
+					setOpen={(v) => setMoreOpened(v)}
+					className={cn(
+						"absolute top-0 right-0 bg-gray-800/70 hover:bg-gray-800 focus-visible:bg-gray-800",
+						"native:hidden opacity-0 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100",
+						moreOpened && "opacity-100",
+					)}
+					iconClassName="fill-slate-200 dark:fill-slate-200"
+				/>
 			</ImageBackground>
-			<P {...css([{ marginY: 0, textAlign: "center" }, "title"])}>
+			<P className="text-center group-focus-within:underline group-hover:underline">
 				{name ?? t("show.episodeNoMetadata")}
 			</P>
-			<SubP
-				numberOfLines={3}
-				{...css({
-					marginTop: 0,
-					textAlign: "center",
-				})}
-			>
+			<SubP numberOfLines={3} className="text-center">
 				{description}
 			</SubP>
 		</Link>
 	);
 };
 
-EntryBox.Loader = (props: Stylable) => {
-	const { css } = useYoshiki();
-
+EntryBox.Loader = ({ className, ...props }: { className?: string }) => {
 	return (
-		<View
-			{...css(
-				{
-					alignItems: "center",
-				},
-				props,
-			)}
-		>
-			<Image.Loader layout={{ width: percent(100), aspectRatio: 16 / 9 }} />
-			<Skeleton {...css({ width: percent(50) })} />
-			<Skeleton {...css({ width: percent(75), height: rem(0.8) })} />
+		<View className={cn("items-center", className)} {...props}>
+			<Image.Loader className="aspect-video w-full" />
+			<Skeleton className="w-1/2" />
+			<Skeleton className="h-3 w-4/5" />
 		</View>
 	);
 };

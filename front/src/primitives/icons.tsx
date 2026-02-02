@@ -69,12 +69,12 @@ export const IconButton = <AsProps = PressableProps>({
 	icon,
 	as,
 	className,
-	iconProps,
+	iconClassName,
 	...asProps
 }: {
 	as?: ComponentType<AsProps>;
 	icon: Icon;
-	iconProps?: Omit<ComponentProps<typeof Icon>, "icon">;
+	iconClassName?: string;
 	className?: string;
 } & AsProps) => {
 	const Container = as ?? PressableFeedback;
@@ -89,7 +89,7 @@ export const IconButton = <AsProps = PressableProps>({
 			)}
 			{...(asProps as AsProps)}
 		>
-			<Icon icon={icon} {...iconProps} />
+			<Icon icon={icon} className={iconClassName} />
 		</Container>
 	);
 };
@@ -99,7 +99,7 @@ const Pressable = Animated.createAnimatedComponent(PressableFeedback);
 export const IconFab = <AsProps = PressableProps>({
 	icon,
 	className,
-	iconProps,
+	iconClassName,
 	...props
 }: ComponentProps<typeof IconButton<AsProps>>) => {
 	const [hover, setHover] = useState(false);
@@ -123,11 +123,10 @@ export const IconFab = <AsProps = PressableProps>({
 		>
 			<Icon
 				icon={icon}
-				{...iconProps}
 				className={cn(
 					"fill-slate-300",
 					(hover || focus) && "fill-slate-200",
-					iconProps?.className,
+					iconClassName,
 				)}
 			/>
 		</Pressable>

@@ -1,10 +1,7 @@
 import { useState } from "react";
-import { type ImageStyle, Platform, View } from "react-native";
-import { percent, type Stylable, type Theme, useYoshiki } from "yoshiki/native";
+import { View } from "react-native";
 import type { KImage, WatchStatusV } from "~/models";
 import {
-	focusReset,
-	important,
 	Link,
 	P,
 	Poster,
@@ -14,31 +11,17 @@ import {
 	ts,
 } from "~/primitives";
 import type { Layout } from "~/query";
+import { cn } from "~/utils";
 import { ItemContext } from "./context-menus";
 import { ItemWatchStatus } from "./item-helpers";
 
 export const ItemProgress = ({ watchPercent }: { watchPercent: number }) => {
-	const { css } = useYoshiki("episodebox");
-
 	return (
 		<>
+			<View className="absolute bottom-0 h-1 w-full bg-slate-400" />
 			<View
-				{...css({
-					backgroundColor: (theme) => theme.user.overlay0,
-					width: percent(100),
-					height: ts(0.5),
-					position: "absolute",
-					bottom: 0,
-				})}
-			/>
-			<View
-				{...css({
-					backgroundColor: (theme) => theme.user.accent,
-					width: percent(watchPercent),
-					height: ts(0.5),
-					position: "absolute",
-					bottom: 0,
-				})}
+				className="absolute bottom-0 h-1 bg-accent"
+				style={{ width: `${watchPercent}%` }}
 			/>
 		</>
 	);
@@ -55,6 +38,7 @@ export const ItemGrid = ({
 	watchPercent,
 	unseenEpisodesCount,
 	horizontal = false,
+	className,
 	...props
 }: {
 	href: string;
@@ -67,52 +51,29 @@ export const ItemGrid = ({
 	kind: "movie" | "serie" | "collection";
 	unseenEpisodesCount: number | null;
 	horizontal: boolean;
-} & Stylable<"text">) => {
+	className?: string;
+}) => {
 	const [moreOpened, setMoreOpened] = useState(false);
-	const { css } = useYoshiki("grid");
 
 	return (
 		<Link
 			href={moreOpened ? undefined : href}
 			onLongPress={() => setMoreOpened(true)}
-			{...css(
-				{
-					flexDirection: "column",
-					alignItems: "center",
-					width: horizontal ? ItemGrid.layout.size : percent(100),
-					height: horizontal ? percent(100) : undefined,
-					child: {
-						poster: {
-							borderColor: (theme) => theme.background,
-							borderWidth: ts(0.5),
-							borderStyle: "solid",
-						},
-						more: {
-							display: "none",
-						},
-					},
-					fover: {
-						self: focusReset,
-						poster: {
-							borderColor: (theme: Theme) => theme.accent,
-						},
-						title: {
-							textDecorationLine: "underline",
-						},
-						more: {
-							display: "flex",
-						},
-					},
-				},
-				props,
+			className={cn(
+				"group items-center outline-0",
+				horizontal && "h-full w-[200px]",
+				className,
 			)}
+			{...props}
 		>
 			<PosterBackground
 				src={poster}
 				alt={name}
 				quality="low"
-				layout={{ width: percent(100) }}
-				{...(css("poster") as { style: ImageStyle })}
+				className={cn(
+					"w-full",
+					"ring-accent group-hover:ring-3 group-focus-visible:ring-3",
+				)}
 			>
 				<ItemWatchStatus
 					watchStatus={watchStatus}
@@ -128,64 +89,38 @@ export const ItemGrid = ({
 						status={watchStatus}
 						isOpen={moreOpened}
 						setOpen={(v) => setMoreOpened(v)}
-						{...css([
-							{
-								position: "absolute",
-								top: 0,
-								right: 0,
-								bg: (theme) => theme.dark.background,
-							},
-							"more",
-							Platform.OS === "web" &&
-								moreOpened && { display: important("flex") },
-						])}
+						className={cn(
+							"absolute top-0 right-0 bg-gray-800/70 hover:bg-gray-800 focus-visible:bg-gray-800",
+							"native:hidden opacity-0 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100",
+							moreOpened && "opacity-100",
+						)}
+						iconClassName="fill-slate-200 dark:fill-slate-200"
 					/>
 				)}
 			</PosterBackground>
 			<P
 				numberOfLines={subtitle ? 1 : 2}
-				{...css([{ marginY: 0, textAlign: "center" }, "title"])}
+				className="text-center group-focus-within:underline group-hover:underline"
 			>
 				{name}
 			</P>
-			{subtitle && (
-				<SubP
-					{...css({
-						marginTop: 0,
-						textAlign: "center",
-					})}
-				>
-					{subtitle}
-				</SubP>
-			)}
+			{subtitle && <SubP className="text-center">{subtitle}</SubP>}
 		</Link>
 	);
 };
 
 ItemGrid.Loader = (props: object) => {
-	const { css } = useYoshiki();
-
 	return (
-		<View
-			{...css(
-				{
-					flexDirection: "column",
-					alignItems: "center",
-					width: percent(100),
-				},
-				props,
-			)}
-		>
-			<Poster.Loader layout={{ width: percent(100) }} />
+		<View className="w-full items-center" {...props}>
+			<Poster.Loader className="w-full" />
 			<Skeleton />
-			<Skeleton {...css({ width: percent(50) })} />
+			<Skeleton className="w-1/2" />
 		</View>
 	);
 };
 
 ItemGrid.layout = {
 	size: 200,
-	// size: { xs: 150, md: 200, xl: 210 },
 	numColumns: { xs: 3, sm: 4, md: 5, lg: 6, xl: 8 },
 	gap: { xs: ts(1), sm: ts(2), md: ts(4) },
 	layout: "grid",

@@ -39,7 +39,7 @@ import { KyooLongLogo } from "./icon";
 export const NavbarTitle = ({
 	className,
 	...props
-}: ComponentProps<typeof A>) => {
+}: Partial<ComponentProps<typeof A>>) => {
 	const { t } = useTranslation();
 
 	return (

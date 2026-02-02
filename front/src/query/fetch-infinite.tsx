@@ -18,7 +18,7 @@ const LegendList = withUniwind(RLegendList) as typeof RLegendList;
 
 export const InfiniteFetch = <Data, Type extends string = string>({
 	query,
-	placeholderCount = 2,
+	placeholderCount = 4,
 	incremental = false,
 	getItemType,
 	getItemSizeMult,

@@ -4,8 +4,6 @@ import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
 import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform } from "react-native";
-import { useYoshiki } from "yoshiki/native";
 import { WatchStatusV } from "~/models";
 import { IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
@@ -23,7 +21,8 @@ export const EntryContext = ({
 	serieSlug: string | null;
 	slug: string;
 	className?: string;
-} & Partial<ComponentProps<typeof Menu<typeof IconButton>>>) => {
+} & Partial<ComponentProps<typeof Menu>> &
+	Partial<ComponentProps<typeof IconButton>>) => {
 	// const downloader = useDownloader();
 	const { t } = useTranslation();
 
@@ -60,15 +59,17 @@ export const ItemContext = ({
 	kind,
 	slug,
 	status,
+	className,
 	...props
 }: {
 	kind: "movie" | "serie";
 	slug: string;
 	status: WatchStatusV | null;
-} & Partial<ComponentProps<typeof Menu<typeof IconButton>>>) => {
+	className?: string;
+} & Partial<ComponentProps<typeof Menu>> &
+	Partial<ComponentProps<typeof IconButton>>) => {
 	const account = useAccount();
 	// const downloader = useDownloader();
-	const { css } = useYoshiki();
 	const { t } = useTranslation();
 
 	const mutation = useMutation({
@@ -90,8 +91,9 @@ export const ItemContext = ({
 		<Menu
 			Trigger={IconButton}
 			icon={MoreVert}
+			className={cn("not:web:hidden", className)}
 			{...tooltip(t("misc.more"))}
-			{...(css([Platform.OS !== "web" && { display: "none" }], props) as any)}
+			{...(props as any)}
 		>
 			<Menu.Sub
 				label={account ? t("show.watchlistEdit") : t("show.watchlistLogin")}

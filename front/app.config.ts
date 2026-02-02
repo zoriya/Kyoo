@@ -87,22 +87,21 @@ export const expo: ExpoConfig = {
 							fontFamily: "Poppins",
 							fontDefinitions: [
 								{
-									fontFamily: "Poppins",
-									fontStyle: "normal",
-									fontWeight: "300",
-									file: "./node_modules/@expo-google-fonts/poppins/300Light/Poppins_300Light.ttf",
+									path: "./node_modules/@expo-google-fonts/poppins/300Light/Poppins_300Light.ttf",
+									weight: "300",
 								},
 								{
-									fontFamily: "Poppins",
-									fontStyle: "normal",
-									fontWeight: "500",
-									file: "./node_modules/@expo-google-fonts/poppins/500Medium/Poppins_500Medium.ttf",
+									path: "./node_modules/@expo-google-fonts/poppins/500Medium/Poppins_500Medium.ttf",
+									weight: "500",
 								},
+							],
+						},
+						{
+							fontFamily: "Sora",
+							fontDefinitions: [
 								{
-									fontFamily: "Sora",
-									fontStyle: "normal",
-									fontWeight: "800",
-									file: "./node_modules/@expo-google-fonts/sora/800ExtraBold/Sora_800ExtraBold.ttf",
+									path: "./node_modules/@expo-google-fonts/sora/800ExtraBold/Sora_800ExtraBold.ttf",
+									weight: "800",
 								},
 							],
 						},

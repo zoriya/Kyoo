@@ -74,7 +74,7 @@ export const EntryLine = ({
 				className={cn(
 					"mr-1 w-1/5 shrink-0 rounded",
 					poster ? "aspect-2/3" : "aspect-video",
-					"group-hover:ring-3 group-hover:ring-accent group-focus-visible:ring-3 group-focus-visible:ring-accent",
+					"ring-accent group-hover:ring-3 group-focus-visible:ring-3",
 				)}
 			>
 				{(watchedPercent ?? 0) > 0 && (

@@ -74,7 +74,6 @@ const RnTheme = ({ children }: { children: ReactNode }) => {
 					Uniwind.updateInsets(insets);
 				}}
 			>
-				{" "}
 				{children}
 			</SafeAreaListener>
 		</RNThemeProvider>

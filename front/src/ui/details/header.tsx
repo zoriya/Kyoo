@@ -82,7 +82,7 @@ const ButtonList = ({
 					icon={PlayArrow}
 					as={Link}
 					href={playHref}
-					iconProps={{ className: "dark:fill-slate-200" }}
+					iconClassName="dark:fill-slate-200"
 					{...tooltip(t("show.play"))}
 				/>
 			)}
@@ -92,7 +92,7 @@ const ButtonList = ({
 					as={Link}
 					href={trailerUrl}
 					target="_blank"
-					iconProps={{ className: iconsClassName }}
+					iconClassName={iconsClassName}
 					{...tooltip(t("show.trailer"))}
 				/>
 			)}
@@ -101,14 +101,14 @@ const ButtonList = ({
 					kind={kind}
 					slug={slug}
 					status={watchStatus}
-					iconProps={{ className: iconsClassName }}
+					iconClassName={iconsClassName}
 				/>
 			)}
 			{(kind === "movie" || account?.isAdmin === true) && (
 				<Menu
 					Trigger={IconButton}
 					icon={MoreHoriz}
-					iconProps={{ className: iconsClassName }}
+					iconClassName={iconsClassName}
 					{...tooltip(t("misc.more"))}
 				>
 					{kind === "movie" && (
@@ -241,19 +241,10 @@ TitleLine.Loader = ({
 				<Skeleton variant="custom" className="h-10 w-2/5 max-sm:text-center" />
 				<Skeleton className="h-6 w-4/5 max-sm:text-center" />
 				<View className="flex-warp flex-row items-center max-sm:justify-center sm:mt-8">
-					<IconFab
-						icon={PlayArrow}
-						iconProps={{ className: "lg:fill-slate-200" }}
-					/>
-					<IconButton
-						icon={Theaters}
-						iconProps={{ className: "lg:fill-slate-200" }}
-					/>
+					<IconFab icon={PlayArrow} iconClassName="lg:fill-slate-200" />
+					<IconButton icon={Theaters} iconClassName="lg:fill-slate-200" />
 					{kind !== "collection" && (
-						<IconButton
-							icon={BookmarkAdd}
-							iconProps={{ className: "lg:fill-slate-200" }}
-						/>
+						<IconButton icon={BookmarkAdd} iconClassName="lg:fill-slate-200" />
 					)}
 					{kind === "movie" && <IconButton icon={MoreHoriz} />}
 					<DottedSeparator className="lg:text-slate-200" />
@@ -326,12 +317,12 @@ const Description = ({
 			<P className="my-5 flex-row flex-wrap items-center">
 				<P className="mr-1">{t("show.studios")}:</P>
 				{studios.map((x, i) => (
-					<>
+					<Fragment key={x.id}>
 						{i !== 0 && ","}
-						<A key={x.id} href={x.slug} className="ml-2">
+						<A href={x.slug} className="ml-2">
 							{x.name}
 						</A>
-					</>
+					</Fragment>
 				))}
 			</P>
 			<View className="flex-row flex-wrap items-center">

@@ -4,6 +4,7 @@ import Home from "@material-symbols/svg-400/rounded/home-fill.svg";
 import { Tabs } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Icon } from "~/primitives";
+import { cn } from "~/utils";
 
 export default function TabsLayout() {
 	const { t } = useTranslation();
@@ -18,29 +19,28 @@ export default function TabsLayout() {
 				name="index"
 				options={{
 					tabBarLabel: t("navbar.home"),
-					tabBarIcon: ({ color, size }) => (
-						<Icon icon={Home} color={color} size={size} />
-					),
+					tabBarIcon: ({ focused }) => {
+						return (
+							<Icon
+								icon={Home}
+								className={cn(focused && "fill-accent dark:fill-accent")}
+							/>
+						);
+					},
 				}}
 			/>
 			<Tabs.Screen
 				name="browse"
 				options={{
 					tabBarLabel: t("navbar.browse"),
-					tabBarIcon: ({ color, size }) => (
-						<Icon icon={Browse} color={color} size={size} />
+					tabBarIcon: ({ focused }) => (
+						<Icon
+							icon={Browse}
+							className={cn(focused && "fill-accent dark:fill-accent")}
+						/>
 					),
 				}}
 			/>
-			{/* <Tabs.Screen */}
-			{/* 	name="downloads" */}
-			{/* 	options={{ */}
-			{/* 		tabBarLabel: t("navbar.download"), */}
-			{/* 		tabBarIcon: ({ color, size }) => ( */}
-			{/* 			<Icon icon={Downloading} color={color} size={size} /> */}
-			{/* 		), */}
-			{/* 	}} */}
-			{/* /> */}
 		</Tabs>
 	);
 }
