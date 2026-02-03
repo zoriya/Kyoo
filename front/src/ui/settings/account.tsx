@@ -237,7 +237,6 @@ const ChangePopup = ({
 					</View>
 					<Input
 						autoComplete={autoComplete}
-						variant="big"
 						value={value}
 						onChangeText={(v) => setValue(v)}
 					/>
@@ -299,7 +298,6 @@ const ChangePasswordPopup = ({
 					{hasPassword && (
 						<PasswordInput
 							autoComplete="current-password"
-							variant="big"
 							value={oldValue}
 							onChangeText={(v) => setOldValue(v)}
 							placeholder={t("settings.account.password.oldPassword")}
@@ -307,7 +305,6 @@ const ChangePasswordPopup = ({
 					)}
 					<PasswordInput
 						autoComplete="new-password"
-						variant="big"
 						value={newValue}
 						onChangeText={(v) => setNewValue(v)}
 						placeholder={t("settings.account.password.newPassword")}

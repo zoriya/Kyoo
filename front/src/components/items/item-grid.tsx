@@ -16,6 +16,7 @@ import { ItemContext } from "./context-menus";
 import { ItemWatchStatus } from "./item-helpers";
 
 export const ItemProgress = ({ watchPercent }: { watchPercent: number }) => {
+	if (!watchPercent) return null;
 	return (
 		<>
 			<View className="absolute bottom-0 h-1 w-full bg-slate-400" />
@@ -36,7 +37,8 @@ export const ItemGrid = ({
 	poster,
 	watchStatus,
 	watchPercent,
-	unseenEpisodesCount,
+	availableCount,
+	seenCount,
 	horizontal = false,
 	className,
 	...props
@@ -49,8 +51,9 @@ export const ItemGrid = ({
 	watchStatus: WatchStatusV | null;
 	watchPercent: number | null;
 	kind: "movie" | "serie" | "collection";
-	unseenEpisodesCount: number | null;
-	horizontal: boolean;
+	availableCount?: number | null;
+	seenCount?: number | null;
+	horizontal?: boolean;
 	className?: string;
 }) => {
 	const [moreOpened, setMoreOpened] = useState(false);
@@ -77,7 +80,8 @@ export const ItemGrid = ({
 			>
 				<ItemWatchStatus
 					watchStatus={watchStatus}
-					unseenEpisodesCount={unseenEpisodesCount}
+					availableCount={availableCount}
+					seenCount={seenCount}
 				/>
 				{kind === "movie" && watchPercent && (
 					<ItemProgress watchPercent={watchPercent} />

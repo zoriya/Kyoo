@@ -35,7 +35,7 @@ export const Button = <AsProps = PressableProps>({
 			disabled={disabled}
 			className={cn(
 				"flex-row items-center justify-center overflow-hidden",
-				"rounded-4xl border-3 border-accent p-1",
+				"rounded-4xl border-3 border-accent p-1 outline-0",
 				disabled && "border-slate-600",
 				"group focus-within:bg-accent hover:bg-accent",
 				className,

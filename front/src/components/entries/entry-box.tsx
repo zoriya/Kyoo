@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import type { KImage, WatchStatusV } from "~/models";
+import type { KImage } from "~/models";
 import {
 	Image,
 	ImageBackground,
@@ -24,7 +24,6 @@ export const EntryBox = ({
 	thumbnail,
 	href,
 	watchedPercent,
-	watchedStatus,
 	className,
 	...props
 }: {
@@ -35,8 +34,7 @@ export const EntryBox = ({
 	description: string | null;
 	href: string;
 	thumbnail: KImage | null;
-	watchedPercent: number | null;
-	watchedStatus: WatchStatusV | null;
+	watchedPercent: number;
 	className?: string;
 }) => {
 	const [moreOpened, setMoreOpened] = useState(false);
@@ -58,9 +56,7 @@ export const EntryBox = ({
 					"ring-accent group-hover:ring-3 group-focus-visible:ring-3",
 				)}
 			>
-				{(watchedPercent || watchedStatus === "completed") && (
-					<ItemProgress watchPercent={watchedPercent ?? 100} />
-				)}
+				<ItemProgress watchPercent={watchedPercent} />
 				<EntryContext
 					slug={slug}
 					serieSlug={serieSlug}

@@ -7,13 +7,6 @@ import { Stack } from "expo-router";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import {
-	percent,
-	rem,
-	type Stylable,
-	type Theme,
-	useYoshiki,
-} from "yoshiki/native";
 import { WatchListInfo } from "~/components/items/watchlist-info";
 import { Rating } from "~/components/rating";
 import {
@@ -44,7 +37,6 @@ import {
 	Poster,
 	Skeleton,
 	tooltip,
-	ts,
 	UL,
 } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
@@ -82,7 +74,6 @@ const ButtonList = ({
 					icon={PlayArrow}
 					as={Link}
 					href={playHref}
-					iconClassName="dark:fill-slate-200"
 					{...tooltip(t("show.play"))}
 				/>
 			)}
@@ -273,7 +264,7 @@ const Description = ({
 	genres: Genre[];
 	studios: Studio[];
 	externalIds: Metadata;
-} & Stylable) => {
+}) => {
 	const { t } = useTranslation();
 
 	return (

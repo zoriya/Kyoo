@@ -18,8 +18,8 @@ export const itemMap = (
 		item.kind !== "collection" ? (item.watchStatus?.status ?? null) : null,
 	watchPercent:
 		item.kind === "movie" ? (item.watchStatus?.percent ?? null) : null,
-	unseenEpisodesCount: 0,
-	// 	item.kind === "serie" ? (item.watchStatus?.unseenEpisodesCount ?? item.episodesCount!) : null,
+	availableCount: item.kind === "serie" ? item.availableCount : null,
+	seenCount: item.kind === "serie" ? item.watchStatus?.seenCount : null,
 });
 
 export { ItemGrid, ItemList };

@@ -35,7 +35,8 @@ export const ItemDetails = ({
 	href,
 	playHref,
 	watchStatus,
-	unseenEpisodesCount,
+	availableCount,
+	seenCount,
 	...props
 }: {
 	slug: string;
@@ -49,7 +50,8 @@ export const ItemDetails = ({
 	href: string;
 	playHref: string | null;
 	watchStatus: WatchStatusV | null;
-	unseenEpisodesCount: number | null;
+	availableCount?: number | null;
+	seenCount?: number | null;
 }) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 	const { css } = useYoshiki("recommended-card");
@@ -120,7 +122,8 @@ export const ItemDetails = ({
 					</View>
 					<ItemWatchStatus
 						watchStatus={watchStatus}
-						unseenEpisodesCount={unseenEpisodesCount}
+						availableCount={availableCount}
+						seenCount={seenCount}
 					/>
 				</PosterBackground>
 				<View

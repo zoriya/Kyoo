@@ -1,8 +1,10 @@
+import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
 import type { ComponentType } from "react";
 import { Image, View, type ViewProps, type ViewStyle } from "react-native";
 import { cn } from "~/utils";
 import { Skeleton } from "./skeleton";
 import { P } from "./text";
+import { Icon } from "./icons";
 
 const stringToColor = (string: string) => {
 	let hash = 0;
@@ -51,12 +53,20 @@ export const Avatar = <AsProps = ViewProps>({
 					{placeholder[0]}
 				</P>
 			)}
-			<Image
-				resizeMode="cover"
-				source={{ uri: src }}
-				alt={alt}
-				className="absolute inset-0"
-			/>
+			{src && (
+				<Image
+					resizeMode="cover"
+					source={{ uri: src }}
+					alt={alt}
+					className="absolute inset-0"
+				/>
+			)}
+			{!src && !placeholder && (
+				<Icon
+					icon={AccountCircle}
+					className="fill-slate-200 dark:fill-slate-200"
+				/>
+			)}
 		</Container>
 	);
 };

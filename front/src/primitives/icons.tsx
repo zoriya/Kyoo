@@ -124,8 +124,8 @@ export const IconFab = <AsProps = PressableProps>({
 			<Icon
 				icon={icon}
 				className={cn(
-					"fill-slate-300",
-					(hover || focus) && "fill-slate-200",
+					"fill-slate-300 dark:fill-slate-300",
+					(hover || focus) && "fill-slate-200 dark:fill-slate-200",
 					iconClassName,
 				)}
 			/>
