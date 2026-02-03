@@ -122,7 +122,7 @@ const MenuItem = ({
 		<Icon
 			icon={icon ?? Check}
 			className={cn(
-				"mx-2",
+				"mx-6",
 				disabled && "fill-slate-600 dark:fill-slate-600",
 			)}
 		/>
@@ -136,7 +136,7 @@ const MenuItem = ({
 				if (href) router.push(href);
 			}}
 			disabled={disabled}
-			className="h-10 w-full flex-row items-center px-4"
+			className="h-15 w-full flex-row items-center px-4"
 			{...props}
 		>
 			{left && left}

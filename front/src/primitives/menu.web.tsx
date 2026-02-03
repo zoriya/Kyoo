@@ -54,7 +54,7 @@ const Menu = <AsProps extends { onPress: PressableProps["onPress"] }>({
 			}}
 		>
 			<DropdownMenu.Trigger asChild>
-				<InternalTriger Component={Trigger} ComponentProps={props} />
+				<InternalTriger Component={Trigger} {...props} />
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Portal>
 				<DropdownMenu.Content

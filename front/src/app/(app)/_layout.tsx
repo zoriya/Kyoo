@@ -1,13 +1,14 @@
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useCSSVariable } from "uniwind";
+import { useCSSVariable, useResolveClassNames } from "uniwind";
 import { ErrorConsumer } from "~/providers/error-consumer";
 import { NavbarRight, NavbarTitle } from "~/ui/navbar";
 
 export default function Layout() {
 	const insets = useSafeAreaInsets();
 	const accent = useCSSVariable("--color-accent");
+	const { color } = useResolveClassNames("text-slate-200");
 
 	return (
 		<ErrorConsumer scope="app">
@@ -22,6 +23,7 @@ export default function Layout() {
 					headerStyle: {
 						backgroundColor: accent as string,
 					},
+					headerTintColor: color as string,
 				}}
 			>
 				<Stack.Screen

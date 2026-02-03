@@ -25,7 +25,6 @@ const styleText = (
 ) => {
 	const Wrapped = ({
 		className,
-		style,
 		...props
 	}: { ref?: Ref<Text> } & TextProps) => {
 		return (
@@ -128,7 +127,8 @@ export const CroppedText = ({
 						(acc, line) => acc + line.text,
 						"",
 					);
-					setNeedExpand(visible !== children);
+					if (!expended)
+						setNeedExpand(visible !== children && visible?.length > 0);
 				}}
 				{...props}
 			>

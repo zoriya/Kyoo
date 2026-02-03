@@ -5,7 +5,7 @@ import { supportedLanguages } from "./src/providers/translations.compile.ts";
 const IS_DEV = process.env.APP_VARIANT === "development";
 
 export const expo: ExpoConfig = {
-	name: IS_DEV ? "Kyoo Development" : "Kyoo",
+	name: IS_DEV ? "Kyoo Dev" : "Kyoo",
 	slug: "kyoo",
 	scheme: "kyoo",
 	version: "1.0.0",

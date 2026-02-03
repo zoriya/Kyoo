@@ -46,7 +46,7 @@ export const NavbarTitle = ({
 		<A
 			href="/"
 			aria-label={t("navbar.home")}
-			className={cn("m-4 flex-1", className)}
+			className={cn("m-4 flex flex-1 items-center", className)}
 			{...tooltip(t("navbar.home"))}
 			{...props}
 		>
@@ -172,7 +172,7 @@ export const NavbarRight = () => {
 					icon={Search}
 					as={Link}
 					href={"/browse"}
-					className="fill-slate-200 dark:fill-slate-200"
+					iconClassName="fill-slate-200 dark:fill-slate-200"
 					{...tooltip(t("navbar.search"))}
 				/>
 			)}
@@ -181,7 +181,7 @@ export const NavbarRight = () => {
 					icon={Admin}
 					as={Link}
 					href={"/admin"}
-					className="fill-slate-200 dark:fill-slate-200"
+					iconClassName="fill-slate-200 dark:fill-slate-200"
 					{...tooltip(t("navbar.admin"))}
 				/>
 			)}
