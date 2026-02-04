@@ -21,9 +21,9 @@ export const ItemWatchStatus = ({
 			{...props}
 		>
 			{watchStatus === "completed" ? (
-				<Icon icon={Done} />
+				<Icon icon={Done} className="fill-slate-400" />
 			) : (
-				<P className="text-center">
+				<P className="text-center text-slate-400">
 					{seenCount ?? 0}/{availableCount}
 				</P>
 			)}
