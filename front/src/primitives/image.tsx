@@ -1,12 +1,13 @@
 import { Image as EImage } from "expo-image";
 import type { ComponentProps } from "react";
-import { type ImageStyle, Platform } from "react-native";
+import { type ImageStyle, Platform, ViewProps, View } from "react-native";
 import { withUniwind } from "uniwind";
 import type { YoshikiStyle } from "yoshiki/src/type";
 import type { KImage } from "~/models";
 import { useToken } from "~/providers/account-context";
 import { cn } from "~/utils";
 import { Skeleton } from "./skeleton";
+import KyooLogo from "public/icon.svg";
 
 export type YoshikiEnhanced<Style> = Style extends any
 	? {
@@ -50,7 +51,6 @@ export const Image = ({
 			placeholder={{ blurhash: src?.blurhash }}
 			accessibilityLabel={alt}
 			className={cn("overflow-hidden rounded bg-gray-300", className)}
-			//imageStyle={{ width: "100%", height: "100%", margin: 0, padding: 0 }}
 			{...props}
 		/>
 	);
@@ -61,12 +61,29 @@ Image.Loader = (props: { className?: string }) => {
 };
 
 export const Poster = ({
+	src,
 	className,
 	...props
-}: ComponentProps<typeof Image>) => (
-	<Image className={cn("aspect-2/3", className)} {...props} />
-);
+}: ComponentProps<typeof Image>) => {
+	if (!src) return <PosterPlaceholder className={className} {...props} />;
+
+	return <Image src={src} className={cn("aspect-2/3", className)} {...props} />;
+};
 
 Poster.Loader = ({ className, ...props }: { className?: string }) => (
 	<Image.Loader className={cn("aspect-2/3", className)} {...props} />
 );
+
+export const PosterPlaceholder = ({ className, ...props }: ViewProps) => {
+	return (
+		<View
+			className={cn(
+				"aspect-2/3 items-center justify-center overflow-hidden rounded bg-gray-300",
+				className,
+			)}
+			{...props}
+		>
+			<KyooLogo style={{ width: "50%", height: "50%" }} />
+		</View>
+	);
+};

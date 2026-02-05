@@ -6,6 +6,7 @@ import { withUniwind } from "uniwind";
 import type { KImage } from "~/models";
 import { useToken } from "~/providers/account-context";
 import { cn } from "~/utils";
+import { PosterPlaceholder } from "./image";
 
 const ImgBg = withUniwind(EImageBackground);
 
@@ -45,19 +46,19 @@ export const ImageBackground = ({
 			placeholder={{ blurhash: src?.blurhash }}
 			accessibilityLabel={alt}
 			className={cn("overflow-hidden bg-gray-300", className)}
-			imageStyle={{ width: "100%", height: "100%", margin: 0, padding: 0 }}
 			{...props}
 		/>
 	);
 };
 export const PosterBackground = ({
-	alt,
+	src,
 	className,
 	...props
 }: ComponentProps<typeof ImageBackground>) => {
+	if (!src) return <PosterPlaceholder className={className} {...props} />;
 	return (
 		<ImageBackground
-			alt={alt!}
+			src={src}
 			className={cn("aspect-2/3 overflow-hidden rounded", className)}
 			{...props}
 		/>

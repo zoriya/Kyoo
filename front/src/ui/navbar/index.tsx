@@ -34,7 +34,7 @@ import {
 import { useAccount, useAccounts } from "~/providers/account-context";
 import { logout } from "~/ui/login/logic";
 import { cn } from "~/utils";
-import { KyooLongLogo } from "./icon";
+import KyooLongLogo from "public/icon-long.svg";
 
 export const NavbarTitle = ({
 	className,
@@ -50,7 +50,7 @@ export const NavbarTitle = ({
 			{...tooltip(t("navbar.home"))}
 			{...props}
 		>
-			<KyooLongLogo className="fill-light accent-dark" />
+			<KyooLongLogo style={{ height: 24, width: (531.15 / 149) * 24 }} />
 		</A>
 	);
 };

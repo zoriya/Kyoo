@@ -17,7 +17,7 @@ export const ItemWatchStatus = ({
 
 	return (
 		<View
-			className="absolute top-0 right-0 m-1 aspect-square min-w-8 items-center justify-center rounded-full bg-gray-800/70 p-1"
+			className="absolute top-0 left-0 m-1 aspect-square min-w-8 items-center justify-center rounded-full bg-gray-800/70 p-1"
 			{...props}
 		>
 			{watchStatus === "completed" ? (
