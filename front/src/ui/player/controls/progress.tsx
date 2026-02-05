@@ -1,9 +1,9 @@
 import { useState } from "react";
 import type { TextProps } from "react-native";
 import { useEvent, type VideoPlayer } from "react-native-video";
-import { useYoshiki } from "yoshiki/native";
 import type { Chapter } from "~/models";
 import { P, Slider } from "~/primitives";
+import { cn } from "~/utils";
 
 export const ProgressBar = ({
 	player,
@@ -76,10 +76,9 @@ export const ProgressBar = ({
 
 export const ProgressText = ({
 	player,
+	className,
 	...props
 }: { player: VideoPlayer } & TextProps) => {
-	const { css } = useYoshiki();
-
 	const [progress, setProgress] = useState(player.currentTime);
 	useEvent(player, "onProgress", (progress) => {
 		setProgress(progress.currentTime);
@@ -90,7 +89,7 @@ export const ProgressText = ({
 	});
 
 	return (
-		<P {...css({ alignSelf: "center" }, props)}>
+		<P className={cn("text-center", className)} {...props}>
 			{toTimerString(progress, duration)} : {toTimerString(duration)}
 		</P>
 	);

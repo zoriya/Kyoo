@@ -10,15 +10,8 @@ import { type ComponentProps, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { type PressableProps, View } from "react-native";
 import { useEvent, type VideoPlayer } from "react-native-video";
-import { px, useYoshiki } from "yoshiki/native";
-import {
-	alpha,
-	CircularProgress,
-	IconButton,
-	Slider,
-	tooltip,
-	ts,
-} from "~/primitives";
+import { CircularProgress, IconButton, Slider, tooltip } from "~/primitives";
+import { cn } from "~/utils";
 
 export const PlayButton = ({
 	player,
@@ -85,8 +78,16 @@ export const FullscreenButton = (
 	);
 };
 
-export const VolumeSlider = ({ player, ...props }: { player: VideoPlayer }) => {
-	const { css } = useYoshiki();
+export const VolumeSlider = ({
+	player,
+	className,
+	iconClassName,
+	...props
+}: {
+	player: VideoPlayer;
+	className?: string;
+	iconClassName?: string;
+}) => {
 	const { t } = useTranslation();
 
 	const [volume, setVolume] = useState(player.volume);
@@ -98,15 +99,8 @@ export const VolumeSlider = ({ player, ...props }: { player: VideoPlayer }) => {
 
 	return (
 		<View
-			{...css(
-				{
-					display: { xs: "none", sm: "flex" },
-					alignItems: "center",
-					flexDirection: "row",
-					paddingRight: ts(1),
-				},
-				props,
-			)}
+			className={cn("flex-row items-center pr-2 max-sm:hidden", className)}
+			{...props}
 		>
 			<IconButton
 				icon={
@@ -121,6 +115,7 @@ export const VolumeSlider = ({ player, ...props }: { player: VideoPlayer }) => {
 				onPress={() => {
 					player.muted = !muted;
 				}}
+				iconClassName={iconClassName}
 				{...tooltip(t("player.mute"), true)}
 			/>
 			<Slider
@@ -128,8 +123,7 @@ export const VolumeSlider = ({ player, ...props }: { player: VideoPlayer }) => {
 				setProgress={(vol) => {
 					player.volume = vol / 100;
 				}}
-				size={4}
-				{...css({ width: px(100) })}
+				className="h-1 w-24"
 				{...tooltip(t("player.volume"), true)}
 			/>
 		</View>
@@ -137,7 +131,6 @@ export const VolumeSlider = ({ player, ...props }: { player: VideoPlayer }) => {
 };
 
 export const LoadingIndicator = ({ player }: { player: VideoPlayer }) => {
-	const { css } = useYoshiki();
 	const [isLoading, setLoading] = useState(false);
 
 	useEvent(player, "onStatusChange", (status) => {
@@ -147,19 +140,8 @@ export const LoadingIndicator = ({ player }: { player: VideoPlayer }) => {
 	if (!isLoading) return null;
 
 	return (
-		<View
-			{...css({
-				position: "absolute",
-				pointerEvents: "none",
-				top: 0,
-				bottom: 0,
-				left: 0,
-				right: 0,
-				bg: (theme) => alpha(theme.colors.black, 0.3),
-				justifyContent: "center",
-			})}
-		>
-			<CircularProgress {...css({ alignSelf: "center" })} />
+		<View className="pointer-events-none absolute inset-0 justify-center bg-slate-900/30">
+			<CircularProgress className="self-center" />
 		</View>
 	);
 };

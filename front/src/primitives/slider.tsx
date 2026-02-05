@@ -5,8 +5,7 @@ import {
 	View,
 	type ViewProps,
 } from "react-native";
-import { percent, px, useYoshiki } from "yoshiki/native";
-import { focusReset } from "./utils";
+import { cn } from "~/utils";
 
 export const Slider = ({
 	progress,
@@ -17,7 +16,7 @@ export const Slider = ({
 	startSeek,
 	endSeek,
 	onHover,
-	size = 6,
+	className,
 	...props
 }: {
 	progress: number;
@@ -31,17 +30,13 @@ export const Slider = ({
 		position: number | null,
 		layout: { x: number; y: number; width: number; height: number },
 	) => void;
-	size?: number;
 } & Partial<ViewProps>) => {
-	const { css } = useYoshiki();
 	const ref = useRef<View>(null);
 	const [layout, setLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
 	const [isSeeking, setSeek] = useState(false);
 	const [isHover, setHover] = useState(false);
 	const [isFocus, setFocus] = useState(false);
 	const smallBar = !(isSeeking || isHover || isFocus);
-
-	const ts = (value: number) => px(value * size);
 
 	const change = (event: GestureResponderEvent) => {
 		event.preventDefault();
@@ -57,7 +52,6 @@ export const Slider = ({
 			ref={ref}
 			// @ts-expect-error Web only
 			onMouseEnter={() => setHover(true)}
-			// @ts-expect-error Web only
 			onMouseLeave={() => {
 				setHover(false);
 				onHover?.(null, layout);
@@ -104,98 +98,39 @@ export const Slider = ({
 						break;
 				}
 			}}
-			{...css(
-				{
-					paddingVertical: ts(1),
-					// @ts-expect-error Web only
-					cursor: "pointer",
-					...focusReset,
-				},
-				props,
-			)}
+			className={cn("cursor-pointer justify-center py-2 outline-0", className)}
+			{...props}
 		>
 			<View
-				{...css([
-					{
-						width: percent(100),
-						height: ts(1),
-						bg: (theme) => theme.overlay0,
-					},
-					smallBar && { transform: "scaleY(0.4)" as any },
-				])}
+				className={cn(
+					"h-2 w-full overflow-hidden rounded bg-slate-400",
+					smallBar && "scale-y-50",
+				)}
 			>
 				{subtleProgress !== undefined && (
 					<View
-						{...css(
-							{
-								bg: (theme) => theme.overlay1,
-								position: "absolute",
-								top: 0,
-								bottom: 0,
-								left: 0,
-							},
-							{
-								style: {
-									width: percent((subtleProgress / max) * 100),
-								},
-							},
-						)}
+						className={cn("absolute left-0 h-full bg-slate-300")}
+						style={{ width: `${(subtleProgress / max) * 100}%` }}
 					/>
 				)}
 				<View
-					{...css(
-						{
-							bg: (theme) => theme.accent,
-							position: "absolute",
-							top: 0,
-							bottom: 0,
-							left: 0,
-						},
-						{
-							// In an inline style because yoshiki's insertion can not catch up with the constant redraw
-							style: {
-								width: percent((progress / max) * 100),
-							},
-						},
-					)}
+					className="absolute left-0 h-full bg-accent"
+					style={{ width: `${(progress / max) * 100}%` }}
 				/>
 				{markers?.map((x) => (
 					<View
 						key={x}
-						{...css({
-							position: "absolute",
-							top: 0,
-							bottom: 0,
-							left: percent(Math.min(100, (x / max) * 100)),
-							bg: (theme) => theme.accent,
-							width: ts(0.5),
-							height: ts(1),
-						})}
+						className="absolute h-full w-1 bg-accent"
+						style={{ left: `${Math.min(100, (x / max) * 100)}%` }}
 					/>
 				))}
 			</View>
 			<View
-				{...css(
-					[
-						{
-							position: "absolute",
-							top: 0,
-							bottom: 0,
-							marginY: ts(0.5),
-							bg: (theme) => theme.accent,
-							width: ts(2),
-							height: ts(2),
-							borderRadius: ts(1),
-							marginLeft: ts(-1),
-						},
-						smallBar && { opacity: 0 },
-					],
-					{
-						style: {
-							left: percent((progress / max) * 100),
-						},
-					},
+				className={cn(
+					"absolute my-1 ml-[-6px] h-3 w-3 rounded-full bg-accent",
+					smallBar && "opacity-0",
 				)}
+				style={{ left: `${(progress / max) * 100}%` }}
 			/>
 		</View>
 	);
