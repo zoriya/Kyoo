@@ -8,7 +8,8 @@ import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import { type ComponentProps, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import { rem, useYoshiki } from "yoshiki/native";
+import { useUniwind } from "uniwind";
+import { rem } from "yoshiki/native";
 import type { KyooError, User } from "~/models";
 import {
 	Alert,
@@ -26,7 +27,6 @@ import { useMutation } from "~/query";
 import { deleteAccount, logout } from "../login/logic";
 import { PasswordInput } from "../login/password-input";
 import { Preference, SettingsContainer } from "./base";
-import { useUniwind } from "uniwind";
 
 // function dataURItoBlob(dataURI: string) {
 // 	const byteString = atob(dataURI.split(",")[1]);

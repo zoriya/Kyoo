@@ -121,10 +121,7 @@ const MenuItem = ({
 	const icn = (icon || selected) && (
 		<Icon
 			icon={icon ?? Check}
-			className={cn(
-				"mx-6",
-				disabled && "fill-slate-600 dark:fill-slate-600",
-			)}
+			className={cn("mx-6", disabled && "fill-slate-600 dark:fill-slate-600")}
 		/>
 	);
 

@@ -5,20 +5,21 @@ import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import Settings from "@material-symbols/svg-400/rounded/settings.svg";
 import { useGlobalSearchParams, usePathname, useRouter } from "expo-router";
+import KyooLongLogo from "public/icon-long.svg";
 import {
+	type ComponentProps,
 	type Ref,
 	useEffect,
 	useRef,
 	useState,
-	type ComponentProps,
 } from "react";
 import { useTranslation } from "react-i18next";
 import {
 	Platform,
+	type PressableProps,
 	type TextInput,
 	type TextInputProps,
 	View,
-	type PressableProps,
 } from "react-native";
 import {
 	A,
@@ -34,7 +35,6 @@ import {
 import { useAccount, useAccounts } from "~/providers/account-context";
 import { logout } from "~/ui/login/logic";
 import { cn } from "~/utils";
-import KyooLongLogo from "public/icon-long.svg";
 
 export const NavbarTitle = ({
 	className,

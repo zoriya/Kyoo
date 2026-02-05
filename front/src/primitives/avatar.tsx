@@ -2,9 +2,9 @@ import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill
 import type { ComponentType } from "react";
 import { Image, View, type ViewProps, type ViewStyle } from "react-native";
 import { cn } from "~/utils";
+import { Icon } from "./icons";
 import { Skeleton } from "./skeleton";
 import { P } from "./text";
-import { Icon } from "./icons";
 
 const stringToColor = (string: string) => {
 	let hash = 0;

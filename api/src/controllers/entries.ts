@@ -33,7 +33,7 @@ import {
 } from "~/models/entry";
 import { KError } from "~/models/error";
 import { madeInAbyss } from "~/models/examples";
-import type { Season } from "~/models/season";
+import { Season } from "~/models/season";
 import { Show } from "~/models/show";
 import type { Image } from "~/models/utils";
 import {
@@ -439,13 +439,12 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				"accept-language": AcceptLanguage({ autoFallback: true }),
 			}),
 			response: {
-				// TODO: add back after https://github.com/elysiajs/elysia/issues/1700
-				// 200: Page(
-				// 	t.Union([
-				// 		Entry,
-				// 		t.Composite([t.Object({ kind: t.Literal("season") }), Season]),
-				// 	]),
-				// ),
+				200: Page(
+					t.Union([
+						Entry,
+						t.Composite([t.Object({ kind: t.Literal("season") }), Season]),
+					]),
+				),
 				404: {
 					...KError,
 					description: "No serie found with the given id or slug.",

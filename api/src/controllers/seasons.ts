@@ -1,4 +1,4 @@
-import { and, eq, SQL, sql } from "drizzle-orm";
+import { and, eq, type SQL, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "~/db";
 import { seasons, seasonTranslations, shows } from "~/db/schema";

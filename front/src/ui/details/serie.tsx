@@ -26,8 +26,8 @@ export const NextUp = (nextEntry: Entry) => {
 	const { t } = useTranslation();
 
 	return (
-		<Container className="my-4 overflow-hidden rounded-2xl bg-card hover:bg-accent">
-			<H2 className="ml-4">{t("show.nextUp")}</H2>
+		<Container className="my-4 overflow-hidden rounded-2xl bg-card py-4 hover:bg-accent">
+			<H2 className="mb-4 ml-2">{t("show.nextUp")}</H2>
 			<EntryLine
 				{...nextEntry}
 				serieSlug={null}

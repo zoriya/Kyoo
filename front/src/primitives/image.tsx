@@ -1,13 +1,13 @@
 import { Image as EImage } from "expo-image";
+import KyooLogo from "public/icon.svg";
 import type { ComponentProps } from "react";
-import { type ImageStyle, Platform, ViewProps, View } from "react-native";
+import { type ImageStyle, Platform, View, type ViewProps } from "react-native";
 import { withUniwind } from "uniwind";
 import type { YoshikiStyle } from "yoshiki/src/type";
 import type { KImage } from "~/models";
 import { useToken } from "~/providers/account-context";
 import { cn } from "~/utils";
 import { Skeleton } from "./skeleton";
-import KyooLogo from "public/icon.svg";
 
 export type YoshikiEnhanced<Style> = Style extends any
 	? {

@@ -2,13 +2,13 @@ import BookmarkAdd from "@material-symbols/svg-400/rounded/bookmark_add.svg";
 import BookmarkAdded from "@material-symbols/svg-400/rounded/bookmark_added-fill.svg";
 import BookmarkRemove from "@material-symbols/svg-400/rounded/bookmark_remove.svg";
 import Bookmark from "@material-symbols/svg-400/rounded/bookmark-fill.svg";
+import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
+import type { PressableProps } from "react-native";
 import type { Serie } from "~/models";
-import { IconButton, Menu, PressableFeedback, tooltip } from "~/primitives";
+import { IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { useMutation } from "~/query";
-import { ComponentProps } from "react";
-import { PressableProps } from "react-native";
 
 type WatchStatus = NonNullable<Serie["watchStatus"]>["status"];
 const WatchStatus = [
