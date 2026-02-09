@@ -34,12 +34,18 @@ export const Image = ({
 }) => {
 	const { apiUrl, authToken } = useToken();
 
-	const uri = src ? `${apiUrl}${src[quality ?? "high"]}` : null;
+	if (!src) {
+		return (
+			<View className={cn("overflow-hidden rounded bg-gray-300", className)} />
+		);
+	}
+
+	const uri = `${apiUrl}${src[quality ?? "high"]}`;
 	return (
 		<Img
 			recyclingKey={uri}
 			source={{
-				uri: uri!,
+				uri,
 				// use cookies on web to allow `img` to make the call instead of js
 				headers:
 					authToken && Platform.OS !== "web"

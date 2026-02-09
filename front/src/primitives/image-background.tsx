@@ -1,7 +1,7 @@
 import { ImageBackground as EImageBackground } from "expo-image";
 import type { ComponentProps, ReactNode } from "react";
 import type { ImageStyle } from "react-native";
-import { Platform } from "react-native";
+import { Platform, View } from "react-native";
 import { withUniwind } from "uniwind";
 import type { KImage } from "~/models";
 import { useToken } from "~/providers/account-context";
@@ -29,12 +29,16 @@ export const ImageBackground = ({
 }) => {
 	const { apiUrl, authToken } = useToken();
 
-	const uri = src ? `${apiUrl}${src[quality ?? "high"]}` : null;
+	if (!src) {
+		return <View className={cn("overflow-hidden bg-gray-300", className)} />;
+	}
+
+	const uri = `${apiUrl}${src[quality ?? "high"]}`;
 	return (
 		<ImgBg
 			recyclingKey={uri}
 			source={{
-				uri: uri!,
+				uri,
 				// use cookies on web to allow `img` to make the call instead of js
 				headers:
 					authToken && Platform.OS !== "web"
@@ -51,6 +55,7 @@ export const ImageBackground = ({
 		/>
 	);
 };
+
 export const PosterBackground = ({
 	src,
 	className,
@@ -61,6 +66,24 @@ export const PosterBackground = ({
 		<ImageBackground
 			src={src}
 			className={cn("aspect-2/3 overflow-hidden rounded", className)}
+			{...props}
+		/>
+	);
+};
+
+export const ThumbnailBackground = ({
+	src,
+	className,
+	...props
+}: ComponentProps<typeof ImageBackground>) => {
+	if (!src)
+		return (
+			<PosterPlaceholder className={cn("aspect-video", className)} {...props} />
+		);
+	return (
+		<ImageBackground
+			src={src}
+			className={cn("aspect-video overflow-hidden rounded", className)}
 			{...props}
 		/>
 	);
