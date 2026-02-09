@@ -4,11 +4,11 @@ import { View } from "react-native";
 import type { KImage } from "~/models";
 import {
 	Image,
-	ImageBackground,
 	Link,
 	P,
 	Skeleton,
 	SubP,
+	ThumbnailBackground,
 	ts,
 } from "~/primitives";
 import type { Layout } from "~/query";
@@ -47,7 +47,7 @@ export const EntryBox = ({
 			className={cn("group w-[350px] items-center outline-0", className)}
 			{...props}
 		>
-			<ImageBackground
+			<ThumbnailBackground
 				src={thumbnail}
 				quality="low"
 				alt=""
@@ -69,7 +69,7 @@ export const EntryBox = ({
 					)}
 					iconClassName="fill-slate-200 dark:fill-slate-200"
 				/>
-			</ImageBackground>
+			</ThumbnailBackground>
 			<P className="text-center group-focus-within:underline group-hover:underline">
 				{name ?? t("show.episodeNoMetadata")}
 			</P>

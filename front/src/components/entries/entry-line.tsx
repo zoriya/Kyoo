@@ -10,11 +10,11 @@ import {
 	Heading,
 	Icon,
 	Image,
-	ImageBackground,
 	Link,
 	PressableFeedback,
 	Skeleton,
 	SubP,
+	ThumbnailBackground,
 	tooltip,
 	ts,
 } from "~/primitives";
@@ -67,7 +67,7 @@ export const EntryLine = ({
 			)}
 			{...props}
 		>
-			<ImageBackground
+			<ThumbnailBackground
 				src={poster ?? thumbnail}
 				quality="low"
 				alt=""
@@ -80,10 +80,10 @@ export const EntryLine = ({
 				{(watchedPercent ?? 0) > 0 && (
 					<ItemProgress watchPercent={watchedPercent ?? 100} />
 				)}
-			</ImageBackground>
+			</ThumbnailBackground>
 			<View className="m-1 mx-2 flex-1">
 				<View className="mb-5 flex-1 flex-row">
-					<View className="flex-1 flex-row items-center">
+					<View className="flex-1 justify-center">
 						<Heading
 							className={cn(
 								"shrink font-medium text-lg",
