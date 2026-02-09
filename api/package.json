@@ -46,7 +46,7 @@
 		"sharp": "^0.34.4"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.3.13",
+		"@biomejs/biome": "2.3.14",
 		"@types/pg": "^8.16.0"
 	},
 	"module": "src/index.js",
