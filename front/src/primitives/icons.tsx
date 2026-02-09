@@ -1,116 +1,147 @@
-import type { ComponentProps, ComponentType } from "react";
-import { Platform, type PressableProps } from "react-native";
-import type { SvgProps } from "react-native-svg";
-import type { YoshikiStyle } from "yoshiki";
-import { px, type Stylable, type Theme, useYoshiki } from "yoshiki/native";
+import { type ComponentProps, type ComponentType, useState } from "react";
+import { Animated, type PressableProps } from "react-native";
+import RSvg, { type SvgProps } from "react-native-svg";
+import { withUniwind } from "uniwind";
+import { cn } from "~/utils";
 import { PressableFeedback } from "./links";
 import { P } from "./text";
-import { type Breakpoint, focusReset, ts } from "./utils";
 
 export type Icon = ComponentType<SvgProps>;
 
-type IconProps = {
-	icon: Icon;
-	color?: Breakpoint<string>;
-	size?: YoshikiStyle<number | string>;
+const IconWrapper = ({ icon: Icon, ...props }: { icon: Icon } & SvgProps) => {
+	return <Icon {...props} />;
 };
 
-export const Icon = ({ icon: Icon, color, size = 24, ...props }: IconProps) => {
-	const { css, theme } = useYoshiki();
-	const computed = css(
-		{
-			width: size,
-			height: size,
-			fill: color ?? theme.contrast,
-			flexShrink: 0,
-		} as any,
-		props,
-	) as any;
+const BaseIcon = withUniwind(IconWrapper, {
+	stroke: {
+		fromClassName: "className",
+		styleProperty: "accentColor",
+	},
+	fill: {
+		fromClassName: "className",
+		styleProperty: "fill",
+	},
+	width: {
+		fromClassName: "className",
+		styleProperty: "width",
+	},
+	height: {
+		fromClassName: "className",
+		styleProperty: "height",
+	},
+});
 
+export const Svg = withUniwind(RSvg, {
+	stroke: {
+		fromClassName: "className",
+		styleProperty: "accentColor",
+	},
+	fill: {
+		fromClassName: "className",
+		styleProperty: "fill",
+	},
+	width: {
+		fromClassName: "className",
+		styleProperty: "width",
+	},
+	height: {
+		fromClassName: "className",
+		styleProperty: "height",
+	},
+});
+
+export const Icon = ({
+	className,
+	...props
+}: ComponentProps<typeof BaseIcon>) => {
 	return (
-		<Icon
-			{...Platform.select<SvgProps>({
-				web: computed,
-				default: {
-					height: computed.style[0]?.height,
-					width: computed.style[0]?.width,
-					fill: computed.style[0]?.fill,
-					...computed,
-				},
-			})}
+		<BaseIcon
+			className={cn(
+				"h-6 w-6 shrink-0 fill-slate-600 dark:fill-slate-400",
+				className,
+			)}
+			{...props}
 		/>
 	);
 };
 
 export const IconButton = <AsProps = PressableProps>({
 	icon,
-	size,
-	color,
 	as,
+	className,
+	iconClassName,
 	...asProps
-}: IconProps & {
+}: {
 	as?: ComponentType<AsProps>;
+	icon: Icon;
+	iconClassName?: string;
+	className?: string;
 } & AsProps) => {
-	const { css, theme } = useYoshiki();
-
 	const Container = as ?? PressableFeedback;
 
 	return (
 		<Container
 			focusRipple
-			{...(css(
-				{
-					alignSelf: "center",
-					p: ts(1),
-					m: px(2),
-					overflow: "hidden",
-					borderRadius: 9999,
-					fover: {
-						self: {
-							...focusReset,
-							bg: (theme: Theme) => theme.overlay0,
-						},
-					},
-				},
-				asProps,
-			) as AsProps)}
+			className={cn(
+				"h-10 w-10 self-center overflow-hidden rounded-full p-2",
+				"outline-0 hover:bg-gray-400/50 focus-visible:bg-gray-400/50",
+				className,
+			)}
+			{...(asProps as AsProps)}
 		>
-			<Icon
-				icon={icon}
-				size={size}
-				color={
-					"disabled" in asProps && asProps.disabled ? theme.overlay1 : color
-				}
-			/>
+			<Icon icon={icon} className={iconClassName} />
 		</Container>
 	);
 };
 
-export const IconFab = <AsProps = PressableProps>(
-	props: ComponentProps<typeof IconButton<AsProps>>,
-) => {
-	const { css, theme } = useYoshiki();
+const Pressable = Animated.createAnimatedComponent(PressableFeedback);
 
+export const IconFab = <AsProps = PressableProps>({
+	icon,
+	className,
+	iconClassName,
+	...props
+}: ComponentProps<typeof IconButton<AsProps>>) => {
+	const [hover, setHover] = useState(false);
+	const [focus, setFocus] = useState(false);
 	return (
-		<IconButton
-			color={theme.colors.black}
-			{...(css(
-				{
-					bg: (theme) => theme.accent,
-					fover: {
-						self: {
-							transform: "scale(1.3)" as any,
-							bg: (theme: Theme) => theme.accent,
-						},
-					},
-				},
-				props,
-			) as any)}
-		/>
+		<Pressable
+			className={cn(
+				"group h-10 w-10 overflow-hidden rounded-full bg-accent p-2 outline-0",
+				className,
+			)}
+			onHoverIn={() => setHover(true)}
+			onHoverOut={() => setHover(false)}
+			onFocus={() => setFocus(true)}
+			onBlur={() => setFocus(false)}
+			style={{
+				transform: hover || focus ? [{ scale: 1.3 }] : [],
+				transitionProperty: "transform",
+				transitionDuration: "150ms",
+			}}
+			{...(props as AsProps)}
+		>
+			<Icon
+				icon={icon}
+				className={cn(
+					"fill-slate-300 dark:fill-slate-300",
+					(hover || focus) && "fill-slate-200 dark:fill-slate-200",
+					iconClassName,
+				)}
+			/>
+		</Pressable>
 	);
 };
 
-export const DottedSeparator = (props: Stylable<"text">) => {
-	const { css } = useYoshiki();
-	return <P {...css({ mX: ts(1) }, props)}>{String.fromCharCode(0x2022)}</P>;
+export const DottedSeparator = ({
+	className,
+	...props
+}: {
+	className?: string;
+}) => {
+	return (
+		<P className={cn("mx-1", className)} {...props}>
+			{String.fromCharCode(0x2022)}
+		</P>
+	);
 };

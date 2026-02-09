@@ -1,4 +1,5 @@
-import { readdir } from "node:fs/promises";
+import { glob, readdir } from "node:fs/promises";
+import path from "node:path";
 
 async function jassub() {
 	const srcDir = new URL("../node_modules/jassub/dist/", import.meta.url);
@@ -19,6 +20,19 @@ async function pgs() {
 		new URL("../public/pgs/libpgs.worker.js", import.meta.url),
 		src,
 	);
+}
+
+async function fonts() {
+	const srcDir = new URL(
+		"../node_modules/@expo-google-fonts/",
+		import.meta.url,
+	);
+	const destDir = new URL("../public/fonts/", import.meta.url);
+
+	for await (const file of glob(`${srcDir.pathname}**/*.ttf`)) {
+		const src = await Bun.file(file).arrayBuffer();
+		await Bun.write(new URL(path.basename(file), destDir), src);
+	}
 }
 
 async function translations() {
@@ -62,4 +76,5 @@ export const supportedLanguages = [
 
 await jassub();
 await pgs();
+await fonts();
 await translations();

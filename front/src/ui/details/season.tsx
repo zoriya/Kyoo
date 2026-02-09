@@ -1,8 +1,9 @@
 import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
+import { useRouter } from "expo-router";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import { rem, useYoshiki } from "yoshiki/native";
+import z from "zod";
 import { EntryLine, entryDisplayNumber } from "~/components/entries";
 import { Entry, Season } from "~/models";
 import {
@@ -14,100 +15,68 @@ import {
 	P,
 	Skeleton,
 	tooltip,
-	ts,
 } from "~/primitives";
 import { type QueryIdentifier, useInfiniteFetch } from "~/query";
 import { InfiniteFetch } from "~/query/fetch-infinite";
 import { EmptyView } from "~/ui/errors";
+import { cn } from "~/utils";
 
 export const SeasonHeader = ({
 	serieSlug,
 	seasonNumber,
 	name,
 	seasons,
+	className,
+	...props
 }: {
 	serieSlug: string;
 	seasonNumber: number;
 	name: string | null;
 	seasons: Season[];
+	className?: string;
 }) => {
-	const { css } = useYoshiki();
 	const { t } = useTranslation();
+	const router = useRouter();
 
 	return (
-		<View id={`season-${seasonNumber}`}>
-			<View {...css({ flexDirection: "row", marginX: ts(1) })}>
-				<P
-					{...css({
-						width: rem(4),
-						flexShrink: 0,
-						marginX: ts(1),
-						textAlign: "center",
-						fontSize: rem(1.5),
-					})}
-				>
-					{seasonNumber}
-				</P>
-				<H2
-					{...css({
-						marginX: ts(1),
-						fontSize: rem(1.5),
-						flexGrow: 1,
-						flexShrink: 1,
-					})}
-				>
-					{name ?? t("show.season", { number: seasonNumber })}
-				</H2>
-				<Menu
-					Trigger={IconButton}
-					icon={MenuIcon}
-					{...tooltip(t("show.jumpToSeason"))}
-				>
-					{seasons.map((x) => (
-						<Menu.Item
-							key={x.seasonNumber}
-							label={`${x.seasonNumber}: ${
-								x.name ?? t("show.season", { number: x.seasonNumber })
-							} (${x.entriesCount})`}
-							href={`/series/${serieSlug}?season=${x.seasonNumber}`}
-						/>
-					))}
-				</Menu>
-			</View>
-			<HR />
+		<View
+			id={`season-${seasonNumber}`}
+			className={cn("m-1 flex-row", className)}
+			{...props}
+		>
+			<P className="mx-1 w-16 shrink-0 text-center text-2xl text-accent">
+				{seasonNumber}
+			</P>
+			<H2 className="mx-1 flex-1 text-2xl">
+				{name ?? t("show.season", { number: seasonNumber })}
+			</H2>
+			<Menu
+				Trigger={IconButton}
+				icon={MenuIcon}
+				{...tooltip(t("show.jumpToSeason"))}
+			>
+				{seasons.map((x) => (
+					<Menu.Item
+						key={x.seasonNumber}
+						label={`${x.seasonNumber}: ${
+							x.name ?? t("show.season", { number: x.seasonNumber })
+						} (${x.entriesCount})`}
+						onSelect={() => router.setParams({ season: x.seasonNumber })}
+					/>
+				))}
+			</Menu>
 		</View>
 	);
 };
 
-SeasonHeader.Loader = () => {
-	const { css } = useYoshiki();
-
+SeasonHeader.Loader = ({ className, ...props }: { className?: string }) => {
 	return (
-		<View>
-			<View
-				{...css({
-					flexDirection: "row",
-					marginX: ts(1),
-					justifyContent: "space-between",
-				})}
-			>
-				<View {...css({ flexDirection: "row", alignItems: "center" })}>
-					<Skeleton
-						variant="custom"
-						{...css({
-							width: rem(4),
-							flexShrink: 0,
-							marginX: ts(1),
-							height: rem(1.5),
-						})}
-					/>
-					<Skeleton
-						{...css({ marginX: ts(1), width: rem(12), height: rem(2) })}
-					/>
-				</View>
-				<IconButton icon={MenuIcon} disabled />
+		<View className={cn("m-1 flex-row items-center", className)} {...props}>
+			<View className="flex-1 flex-row items-center">
+				<Skeleton variant="custom" className="mx-1 h-6 w-8 shrink-0" />
+				<Skeleton className="mx-2 h-8 w-1/5" />
 			</View>
-			<HR />
+			<IconButton icon={MenuIcon} disabled />
 		</View>
 	);
 };
@@ -129,7 +98,7 @@ export const EntryList = ({
 }: {
 	slug: string;
 	season: string | number;
-} & Partial<ComponentProps<typeof InfiniteFetch<Entry>>>) => {
+} & Partial<ComponentProps<typeof InfiniteFetch<EntryOrSeason>>>) => {
 	const { t } = useTranslation();
 	const { items: seasons, error } = useInfiniteFetch(SeasonHeader.query(slug));
 
@@ -140,59 +109,65 @@ export const EntryList = ({
 			query={EntryList.query(slug, season)}
 			layout={EntryLine.layout}
 			Empty={<EmptyView message={t("show.episode-none")} />}
-			divider={() => (
-				<Container>
-					<HR />
-				</Container>
-			)}
-			// getItemType={(item) =>
-			// 	item.kind === "episode" && item.episodeNumber === 1? "withHeader" : "normal"
-			// }
+			Divider={() => <Container as={HR} />}
+			getItemType={(item, idx) =>
+				item ? item.kind : idx === 0 ? "season" : "episode"
+			}
+			getStickyIndices={(items) =>
+				items
+					.map((x, i) => (x.kind === "season" ? i : null))
+					.filter((x) => x !== null)
+			}
 			placeholderCount={5}
-			Render={({ item }) => {
-				const sea =
-					item.kind === "episode" && item.episodeNumber === 1
-						? seasons?.find((x) => x.seasonNumber === item.seasonNumber)
-						: null;
-				return (
-					<Container>
-						{sea && (
-							<SeasonHeader
-								serieSlug={slug}
-								name={sea.name}
-								seasonNumber={sea.seasonNumber}
-								seasons={seasons ?? []}
-							/>
-						)}
-						<EntryLine
-							{...item}
-							// Don't display "Go to serie"
-							serieSlug={null}
-							displayNumber={entryDisplayNumber(item)}
-							watchedPercent={item.progress.percent}
-						/>
-					</Container>
-				);
-			}}
-			Loader={({ index }) => (
-				<Container>
-					{index === 0 && <SeasonHeader.Loader />}
-					<EntryLine.Loader />
-				</Container>
-			)}
+			Render={({ item }) =>
+				item.kind === "season" ? (
+					<Container
+						as={SeasonHeader}
+						serieSlug={slug}
+						name={item.name}
+						seasonNumber={item.seasonNumber}
+						seasons={seasons ?? []}
+					/>
+				) : (
+					<Container
+						as={EntryLine}
+						{...item}
+						// Don't display "Go to serie"
+						videosCount={item.videos.length}
+						serieSlug={null}
+						displayNumber={entryDisplayNumber(item)}
+						watchedPercent={item.progress.percent}
+					/>
+				)
+			}
+			Loader={({ index }) =>
+				index === 0 ? (
+					<Container as={SeasonHeader.Loader} />
+				) : (
+					<Container as={EntryLine.Loader} />
+				)
+			}
 			{...props}
 		/>
 	);
 };
 
+const EntryOrSeason = z.union([
+	Season.extend({ kind: z.literal("season") }),
+	Entry,
+]);
+type EntryOrSeason = z.infer<typeof EntryOrSeason>;
+
 EntryList.query = (
 	slug: string,
 	season: string | number,
-): QueryIdentifier<Entry> => ({
-	parser: Entry,
+): QueryIdentifier<EntryOrSeason> => ({
+	parser: EntryOrSeason,
 	path: ["api", "series", slug, "entries"],
 	params: {
-		filter: season ? `seasonNumber gte ${season}` : undefined,
+		// TODO: use a better filter, it removes specials and movies
+		filter: season ? `seasonNumber ge ${season}` : undefined,
+		includeSeasons: true,
 	},
 	infinite: true,
 });

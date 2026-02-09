@@ -2,9 +2,13 @@ import SkipNext from "@material-symbols/svg-400/rounded/skip_next-fill.svg";
 import SkipPrevious from "@material-symbols/svg-400/rounded/skip_previous-fill.svg";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform, View, type ViewProps } from "react-native";
+import {
+	Platform,
+	type PressableProps,
+	View,
+	type ViewProps,
+} from "react-native";
 import type { VideoPlayer } from "react-native-video";
-import { percent, rem, useYoshiki } from "yoshiki/native";
 import type { Chapter, KImage } from "~/models";
 import {
 	H2,
@@ -14,9 +18,9 @@ import {
 	Poster,
 	Skeleton,
 	tooltip,
-	ts,
 	useIsTouch,
 } from "~/primitives";
+import { cn } from "~/utils";
 import { FullscreenButton, PlayButton, VolumeSlider } from "./misc";
 import { ProgressBar, ProgressText } from "./progress";
 import { AudioMenu, QualityMenu, SubtitleMenu, VideoMenu } from "./tracks-menu";
@@ -29,6 +33,7 @@ export const BottomControls = ({
 	previous,
 	next,
 	setMenu,
+	className,
 	...props
 }: {
 	player: VideoPlayer;
@@ -39,52 +44,26 @@ export const BottomControls = ({
 	next?: string | null;
 	setMenu: (isOpen: boolean) => void;
 } & ViewProps) => {
-	const { css } = useYoshiki();
-
 	return (
-		<View
-			{...css(
-				{
-					flexDirection: "row",
-					padding: ts(1),
-				},
-				props,
-			)}
-		>
-			<View
-				{...css({
-					width: "15%",
-					display: { xs: "none", sm: "flex" },
-					position: "relative",
-				})}
-			>
+		<View className={cn("flex-row p-2", className)} {...props}>
+			<View className="m-4 w-1/5 max-w-50 max-sm:hidden">
 				{poster !== undefined ? (
 					<Poster
 						src={poster}
 						quality="low"
-						layout={{ width: percent(100) }}
-						{...(css({ position: "absolute", bottom: 0 }) as any)}
+						className="absolute bottom-0 w-full"
 					/>
 				) : (
-					<Poster.Loader
-						layout={{ width: percent(100) }}
-						{...(css({ position: "absolute", bottom: 0 }) as any)}
-					/>
+					<Poster.Loader className="absolute bottom-0 w-full" />
 				)}
 			</View>
-			<View
-				{...css({
-					marginHorizontal: { xs: ts(0.5), sm: ts(3) },
-					flexDirection: "column",
-					flex: 1,
-				})}
-			>
+			<View className="my-1 mr-4 flex-1 max-sm:ml-4 sm:my-6">
 				{name ? (
-					<H2 numberOfLines={1} {...css({ paddingBottom: ts(1) })}>
+					<H2 numberOfLines={1} className="pb-2 text-slate-200">
 						{name}
 					</H2>
 				) : (
-					<Skeleton {...css({ width: rem(15), height: rem(2) })} />
+					<Skeleton className="h-8 w-1/5" />
 				)}
 				<ProgressBar player={player} chapters={chapters} />
 				<ControlButtons
@@ -103,71 +82,79 @@ const ControlButtons = ({
 	previous,
 	next,
 	setMenu,
+	className,
 	...props
 }: {
 	player: VideoPlayer;
 	previous?: string | null;
 	next?: string | null;
 	setMenu: (isOpen: boolean) => void;
+	className?: string;
 }) => {
-	const { css } = useYoshiki();
 	const { t } = useTranslation();
 	const isTouch = useIsTouch();
 
-	const spacing = css({ marginHorizontal: ts(1) });
 	const menuProps = {
 		onMenuOpen: () => setMenu(true),
 		onMenuClose: () => setMenu(false),
-		...spacing,
-	} satisfies Partial<ComponentProps<typeof Menu>>;
+		className: "mr-4",
+		iconClassName: "fill-slate-200",
+	} satisfies Partial<
+		ComponentProps<
+			typeof Menu<ComponentProps<typeof IconButton<PressableProps>>>
+		>
+	>;
 
 	return (
 		<View
-			{...css(
-				{
-					flexDirection: "row",
-					flex: 1,
-					justifyContent: "space-between",
-					flexWrap: "wrap",
-				},
-				props,
-			)}
+			className={cn("flex-1 flex-row flex-wrap justify-between", className)}
+			{...props}
 		>
-			<View {...css({ flexDirection: "row" })}>
+			<View className="flex-row items-center">
 				{!isTouch && (
-					<View {...css({ flexDirection: "row" })}>
+					<View className="flex-row">
 						{previous && (
 							<IconButton
 								icon={SkipPrevious}
 								as={Link}
 								href={`/watch/${previous}`}
 								replace
+								className="mr-4"
+								iconClassName="fill-slate-200"
 								{...tooltip(t("player.previous"), true)}
-								{...spacing}
 							/>
 						)}
-						<PlayButton player={player} {...spacing} />
+						<PlayButton
+							player={player}
+							className="mr-4"
+							iconClassName="fill-slate-200"
+						/>
 						{next && (
 							<IconButton
 								icon={SkipNext}
 								as={Link}
 								href={`/watch/${next}`}
 								replace
+								className="mr-4"
+								iconClassName="fill-slate-200"
 								{...tooltip(t("player.next"), true)}
-								{...spacing}
 							/>
 						)}
-						{Platform.OS === "web" && <VolumeSlider player={player} />}
+						{Platform.OS === "web" && (
+							<VolumeSlider player={player} iconClassName="fill-slate-200" />
+						)}
 					</View>
 				)}
-				<ProgressText player={player} {...spacing} />
+				<ProgressText player={player} className="mx-2 text-slate-300" />
 			</View>
-			<View {...css({ flexDirection: "row" })}>
+			<View className="flex-row">
 				<SubtitleMenu player={player} {...menuProps} />
 				<AudioMenu player={player} {...menuProps} />
 				<VideoMenu player={player} {...menuProps} />
 				<QualityMenu player={player} {...menuProps} />
-				{Platform.OS === "web" && <FullscreenButton {...spacing} />}
+				{Platform.OS === "web" && (
+					<FullscreenButton className="mr-4" iconClassName="fill-slate-200" />
+				)}
 			</View>
 		</View>
 	);

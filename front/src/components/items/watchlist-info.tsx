@@ -4,6 +4,7 @@ import BookmarkRemove from "@material-symbols/svg-400/rounded/bookmark_remove.sv
 import Bookmark from "@material-symbols/svg-400/rounded/bookmark-fill.svg";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
+import type { PressableProps } from "react-native";
 import type { Serie } from "~/models";
 import { IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
@@ -40,8 +41,7 @@ export const WatchListInfo = ({
 	kind: "movie" | "serie" | "episode";
 	slug: string;
 	status: WatchStatus | null;
-	color: ComponentProps<typeof IconButton>["color"];
-}) => {
+} & Partial<ComponentProps<typeof IconButton<PressableProps>>>) => {
 	const account = useAccount();
 	const { t } = useTranslation();
 
@@ -95,7 +95,7 @@ export const WatchListInfo = ({
 					Trigger={IconButton}
 					icon={watchListIcon(status)}
 					{...tooltip(t("show.watchlistEdit"))}
-					{...props}
+					{...(props as any)}
 				>
 					{Object.values(WatchStatus).map((x) => (
 						<Menu.Item

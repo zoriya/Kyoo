@@ -1,9 +1,7 @@
 import { useCallback, useState } from "react";
 import type { ViewProps } from "react-native";
-import { StyleSheet, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { View } from "react-native";
 import type { VideoPlayer } from "react-native-video";
-import { useYoshiki } from "yoshiki/native";
 import type { Chapter, KImage } from "~/models";
 import { useIsTouch } from "~/primitives";
 import { Back } from "./back";
@@ -30,8 +28,6 @@ export const Controls = ({
 	previous?: string | null;
 	next?: string | null;
 }) => {
-	const { css } = useYoshiki();
-	const insets = useSafeAreaInsets();
 	const isTouch = useIsTouch();
 
 	const [hover, setHover] = useState(false);
@@ -53,28 +49,17 @@ export const Controls = ({
 	}, []);
 
 	return (
-		<View {...css(StyleSheet.absoluteFillObject)}>
+		<View className="absolute inset-0">
 			<TouchControls
 				player={player}
 				forceShow={hover || menuOpened}
-				{...css(StyleSheet.absoluteFillObject)}
+				className="absolute inset-0"
 			>
 				<Back
 					showHref={showHref}
 					name={name}
-					{...css(
-						{
-							position: "absolute",
-							top: 0,
-							left: 0,
-							right: 0,
-							bg: (theme) => theme.darkOverlay,
-							paddingTop: insets.top,
-							paddingLeft: insets.left,
-							paddingRight: insets.right,
-						},
-						hoverControls,
-					)}
+					className="absolute top-0 w-full bg-slate-900/50 px-safe pt-safe"
+					{...hoverControls}
 				/>
 				{isTouch && (
 					<MiddleControls player={player} previous={previous} next={next} />
@@ -87,21 +72,10 @@ export const Controls = ({
 					previous={previous}
 					next={next}
 					setMenu={setMenu}
-					{...css(
-						{
-							// Fixed is used because firefox android make the hover disappear under the navigation bar in absolute
-							// position: Platform.OS === "web" ? ("fixed" as any) : "absolute",
-							position: "absolute",
-							bottom: 0,
-							left: 0,
-							right: 0,
-							bg: (theme) => theme.darkOverlay,
-							paddingLeft: insets.left,
-							paddingRight: insets.right,
-							paddingBottom: insets.bottom,
-						},
-						hoverControls,
-					)}
+					// Fixed is used because firefox android make the hover disappear under the navigation bar in absolute
+					// position: Platform.OS === "web" ? ("fixed" as any) : "absolute",
+					className="absolute bottom-0 w-full bg-slate-900/50 px-safe pt-safe"
+					{...hoverControls}
 				/>
 			</TouchControls>
 		</View>

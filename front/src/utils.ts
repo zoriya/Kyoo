@@ -1,6 +1,15 @@
+import { type ClassValue, clsx } from "clsx";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback } from "react";
-import type { Movie, Show } from "~/models";
+import { useCallback, useReducer } from "react";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+	return twMerge(clsx(inputs));
+}
+
+export const useForceRerender = () => {
+	return useReducer((x) => x + 1, 0)[1];
+};
 
 export function setServerData(_key: string, _val: any) {}
 export function getServerData(key: string) {
@@ -21,14 +30,15 @@ export const useQueryState = <S>(key: string, initial: S) => {
 	return [state, update] as const;
 };
 
-export const getDisplayDate = (data: Show | Movie) => {
-	const {
-		startAir,
-		endAir,
-		airDate,
-	}: { startAir?: Date | null; endAir?: Date | null; airDate?: Date | null } =
-		data;
-
+export const getDisplayDate = ({
+	startAir,
+	endAir,
+	airDate,
+}: {
+	startAir?: Date | null;
+	endAir?: Date | null;
+	airDate?: Date | null;
+}) => {
 	if (startAir) {
 		if (!endAir || startAir.getFullYear() === endAir.getFullYear()) {
 			return startAir.getFullYear().toString();

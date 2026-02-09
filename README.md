@@ -1,4 +1,4 @@
-# <img width="24px" src="./icons/icon-256x256.png" alt=""> Kyoo
+# <img width="24px" src="./front/public/icon-256x256.png" alt=""> Kyoo
 
 Kyoo is a self-hosted media server focused on video content (Movies, Series & Anime). It is an alternative to Jellyfin or Plex.
 

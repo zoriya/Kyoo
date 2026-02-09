@@ -5,14 +5,14 @@ import { supportedLanguages } from "./src/providers/translations.compile.ts";
 const IS_DEV = process.env.APP_VARIANT === "development";
 
 export const expo: ExpoConfig = {
-	name: IS_DEV ? "Kyoo Development" : "Kyoo",
+	name: IS_DEV ? "Kyoo Dev" : "Kyoo",
 	slug: "kyoo",
 	scheme: "kyoo",
 	version: "1.0.0",
 	newArchEnabled: true,
 	platforms: ["web", "ios", "android"],
 	orientation: "default",
-	icon: "./public/icon-256x256.png",
+	icon: "./public/favicon-96x96-dark.png",
 	userInterfaceStyle: "automatic",
 	ios: {
 		supportsTablet: true,
@@ -20,15 +20,15 @@ export const expo: ExpoConfig = {
 	android: {
 		package: IS_DEV ? "dev.zoriya.kyoo.dev" : "dev.zoriya.kyoo",
 		adaptiveIcon: {
-			foregroundImage: "./public/icon-256x256.png",
-			backgroundColor: "#eff1f5",
+			foregroundImage: "./public/android-adaptive-icon.png",
+			backgroundColor: "#6b00b8",
 		},
 		edgeToEdgeEnabled: true,
 	},
 	web: {
-		favicon: "./public/icon-256x256.png",
-		output: "single",
 		bundler: "metro",
+		favicon: "./public/icon.svg",
+		output: "single",
 	},
 	updates: {
 		url: "https://u.expo.dev/55de6b52-c649-4a15-9a45-569ff5ed036c",
@@ -56,14 +56,9 @@ export const expo: ExpoConfig = {
 		[
 			"expo-splash-screen",
 			{
-				image: "./public/icon-256x256.png",
+				image: "./public/splash-screen.png",
 				resizeMode: "contain",
-				backgroundColor: "#eff1f5",
-				dark: {
-					image: "./public/icon-256x256.png",
-					resizeMode: "contain",
-					backgroundColor: "#1e1e2e",
-				},
+				backgroundColor: "#6b00b8",
 			},
 		],
 		[
@@ -81,8 +76,39 @@ export const expo: ExpoConfig = {
 			"react-native-localization-settings",
 			{
 				languages: supportedLanguages,
-			}
-		]
+			},
+		],
+		[
+			"expo-font",
+			{
+				android: {
+					fonts: [
+						{
+							fontFamily: "Poppins",
+							fontDefinitions: [
+								{
+									path: "./node_modules/@expo-google-fonts/poppins/300Light/Poppins_300Light.ttf",
+									weight: "300",
+								},
+								{
+									path: "./node_modules/@expo-google-fonts/poppins/500Medium/Poppins_500Medium.ttf",
+									weight: "500",
+								},
+							],
+						},
+						{
+							fontFamily: "Sora",
+							fontDefinitions: [
+								{
+									path: "./node_modules/@expo-google-fonts/sora/800ExtraBold/Sora_800ExtraBold.ttf",
+									weight: "800",
+								},
+							],
+						},
+					],
+				},
+			},
+		],
 	],
 	experiments: {
 		typedRoutes: true,

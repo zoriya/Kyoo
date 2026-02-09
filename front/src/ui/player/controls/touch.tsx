@@ -4,13 +4,12 @@ import {
 	Platform,
 	Pressable,
 	type PressableProps,
-	StyleSheet,
 	View,
 	type ViewProps,
 } from "react-native";
 import { useEvent, type VideoPlayer } from "react-native-video";
-import { useYoshiki } from "yoshiki/native";
 import { useIsTouch } from "~/primitives";
+import { cn } from "~/utils";
 import { toggleFullscreen } from "./misc";
 
 export const TouchControls = ({
@@ -22,7 +21,6 @@ export const TouchControls = ({
 	player: VideoPlayer;
 	forceShow?: boolean;
 } & ViewProps) => {
-	const { css } = useYoshiki();
 	const isTouch = useIsTouch();
 
 	const [playing, setPlay] = useState(player.isPlaying);
@@ -31,7 +29,7 @@ export const TouchControls = ({
 	});
 
 	const [_show, setShow] = useState(false);
-	const hideTimeout = useRef<NodeJS.Timeout | null>(null);
+	const hideTimeout = useRef<NodeJS.Timeout | number | null>(null);
 	const shouldShow = forceShow || _show || !playing;
 	const show = useCallback((val: boolean = true) => {
 		setShow(val);
@@ -90,10 +88,7 @@ export const TouchControls = ({
 					// instantly hide the controls when mouse leaves the view
 					if (e.nativeEvent.pointerType === "mouse") show(false);
 				}}
-				{...css({
-					cursor: (shouldShow ? "unset" : "none") as any,
-					...StyleSheet.absoluteFillObject,
-				})}
+				className={cn("absolute inset-0", !shouldShow && "cursor-none")}
 			/>
 			{shouldShow && children}
 		</View>
@@ -107,7 +102,7 @@ const DoublePressable = ({
 }: {
 	onDoublePress: (e: GestureResponderEvent) => boolean | undefined;
 } & PressableProps) => {
-	const touch = useRef<{ count: number; timeout?: NodeJS.Timeout }>({
+	const touch = useRef<{ count: number; timeout?: NodeJS.Timeout | number }>({
 		count: 0,
 	});
 

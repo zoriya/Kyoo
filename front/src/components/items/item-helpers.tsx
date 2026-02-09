@@ -1,51 +1,30 @@
 import Done from "@material-symbols/svg-400/rounded/check-fill.svg";
 import { View } from "react-native";
-import { max, rem, useYoshiki } from "yoshiki/native";
 import type { WatchStatusV } from "~/models";
-import { Icon, P, ts } from "~/primitives";
+import { Icon, P } from "~/primitives";
 
 export const ItemWatchStatus = ({
 	watchStatus,
-	unseenEpisodesCount,
+	availableCount,
+	seenCount,
 	...props
 }: {
 	watchStatus?: WatchStatusV | null;
-	unseenEpisodesCount?: number | null;
+	availableCount?: number | null;
+	seenCount?: number | null;
 }) => {
-	const { css } = useYoshiki();
-
-	if (watchStatus !== "completed" && !unseenEpisodesCount) return null;
+	if (watchStatus !== "completed" && !availableCount) return null;
 
 	return (
 		<View
-			{...css(
-				{
-					position: "absolute",
-					top: 0,
-					right: 0,
-					minWidth: max(rem(1), ts(3.5)),
-					aspectRatio: 1,
-					justifyContent: "center",
-					alignItems: "center",
-					m: ts(0.5),
-					pX: ts(0.5),
-					bg: (theme) => theme.darkOverlay,
-					borderRadius: 999999,
-				},
-				props,
-			)}
+			className="absolute top-0 left-0 m-1 aspect-square min-w-8 items-center justify-center rounded-full bg-gray-800/70 p-1"
+			{...props}
 		>
 			{watchStatus === "completed" ? (
-				<Icon icon={Done} size={16} />
+				<Icon icon={Done} className="fill-slate-400" />
 			) : (
-				<P
-					{...css({
-						marginVertical: 0,
-						verticalAlign: "middle",
-						textAlign: "center",
-					})}
-				>
-					{unseenEpisodesCount}
+				<P className="text-center text-slate-400">
+					{seenCount ?? 0}/{availableCount}
 				</P>
 			)}
 		</View>

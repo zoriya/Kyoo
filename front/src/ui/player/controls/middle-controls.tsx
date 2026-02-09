@@ -2,59 +2,53 @@ import SkipNext from "@material-symbols/svg-400/rounded/skip_next-fill.svg";
 import SkipPrevious from "@material-symbols/svg-400/rounded/skip_previous-fill.svg";
 import { View } from "react-native";
 import type { VideoPlayer } from "react-native-video";
-import { useYoshiki } from "yoshiki/native";
-import { IconButton, Link, ts } from "~/primitives";
+import { IconButton, Link } from "~/primitives";
+import { cn } from "~/utils";
 import { PlayButton } from "./misc";
 
 export const MiddleControls = ({
 	player,
 	previous,
 	next,
+	className,
 	...props
 }: {
 	player: VideoPlayer;
 	previous?: string | null;
 	next?: string | null;
+	className?: string;
 }) => {
-	const { css } = useYoshiki();
-
-	const common = css({
-		backgroundColor: (theme) => theme.darkOverlay,
-		marginHorizontal: ts(3),
-	});
-
 	return (
 		<View
-			{...css(
-				{
-					flexDirection: "row",
-					justifyContent: "center",
-					alignItems: "center",
-					position: "absolute",
-					top: 0,
-					left: 0,
-					right: 0,
-					bottom: 0,
-				},
-				props,
+			className={cn(
+				"absolute inset-0 flex-row items-center justify-center",
+				className,
 			)}
+			{...props}
 		>
 			<IconButton
 				icon={SkipPrevious}
 				as={Link}
-				href={previous ?? ""}
+				href={previous}
 				replace
-				size={ts(4)}
-				{...css([!previous && { opacity: 0, pointerEvents: "none" }], common)}
+				className={cn(
+					"mx-12 h-16 w-16 bg-gray-800/70",
+					!previous && "pointer-events-none opacity-0",
+				)}
 			/>
-			<PlayButton player={player} size={ts(8)} {...common} />
+			<PlayButton
+				player={player}
+				className={cn("mx-12 h-32 w-32 bg-gray-800/70")}
+			/>
 			<IconButton
 				icon={SkipNext}
 				as={Link}
-				href={next ?? ""}
+				href={next}
 				replace
-				size={ts(4)}
-				{...css([!next && { opacity: 0, pointerEvents: "none" }], common)}
+				className={cn(
+					"mx-12 h-16 w-16 bg-gray-800/70",
+					!next && "pointer-events-none opacity-0",
+				)}
 			/>
 		</View>
 	);

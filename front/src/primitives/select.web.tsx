@@ -4,14 +4,11 @@ import ExpandLess from "@material-symbols/svg-400/rounded/keyboard_arrow_up-fill
 import * as RSelect from "@radix-ui/react-select";
 import { forwardRef } from "react";
 import { View } from "react-native";
-import { useYoshiki } from "yoshiki";
-import { px, type Theme, useYoshiki as useNativeYoshiki } from "yoshiki/native";
+import { cn } from "~/utils";
 import { Icon } from "./icons";
 import { PressableFeedback } from "./links";
-import { InternalTriger, YoshikiProvider } from "./menu.web";
+import { InternalTriger } from "./menu.web";
 import { P } from "./text";
-import { ContrastArea, SwitchVariant } from "./theme";
-import { focusReset, ts } from "./utils";
 
 export const Select = ({
 	label,
@@ -26,135 +23,79 @@ export const Select = ({
 	values: string[];
 	getLabel: (key: string) => string;
 }) => {
-	const { css: wCss } = useYoshiki();
-	const { css } = useNativeYoshiki();
-
 	return (
 		<RSelect.Root value={value} onValueChange={onValueChange}>
 			<RSelect.Trigger aria-label={label} asChild>
 				<InternalTriger
 					Component={PressableFeedback}
-					ComponentProps={css({
-						flexGrow: 0,
-						flexDirection: "row",
-						alignItems: "center",
-						justifyContent: "center",
-						overflow: "hidden",
-						p: ts(0.5),
-						borderRadius: ts(5),
-						borderColor: (theme) => theme.accent,
-						borderWidth: ts(0.5),
-						fover: {
-							self: { bg: (theme: Theme) => theme.accent },
-							text: { color: (theme: Theme) => theme.colors.white },
-						},
-					})}
+					className={cn(
+						"group flex-row items-center justify-center overflow-hidden rounded-4xl",
+						"border-2 border-accent p-1 outline-0 focus-within:bg-accent hover:bg-accent",
+					)}
 				>
-					<View
-						{...css({
-							paddingX: ts(3),
-							flexDirection: "row",
-							alignItems: "center",
-						})}
-					>
-						<P {...css({ textAlign: "center" }, "text")}>{<RSelect.Value />}</P>
-						<RSelect.Icon
-							{...wCss({ display: "flex", justifyContent: "center" })}
-						>
-							<Icon icon={ExpandMore} />
+					<View className="flex-row items-center px-6">
+						<P className="text-center group-focus-within:text-slate-200 group-hover:text-slate-200">
+							{<RSelect.Value />}
+						</P>
+						<RSelect.Icon className="flex justify-center">
+							<Icon
+								icon={ExpandMore}
+								className="group-focus-within:fill-slate-200 group-hover:fill-slate-200"
+							/>
 						</RSelect.Icon>
 					</View>
 				</InternalTriger>
 			</RSelect.Trigger>
-			<ContrastArea mode="user">
-				<SwitchVariant>
-					<YoshikiProvider>
-						{({ css }) => (
-							<RSelect.Portal>
-								<RSelect.Content
-									{...css({
-										bg: (theme) => theme.background,
-										overflow: "auto",
-										minWidth: "220px",
-										borderRadius: "8px",
-										boxShadow:
-											"0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2)",
-										zIndex: 2,
-										maxHeight:
-											"calc(var(--radix-dropdown-menu-content-available-height) * 0.8)",
-									})}
-								>
-									<RSelect.ScrollUpButton>
-										<Icon icon={ExpandLess} />
-									</RSelect.ScrollUpButton>
-									<RSelect.Viewport>
-										{values.map((x) => (
-											<Item key={x} label={getLabel(x)} value={x} />
-										))}
-									</RSelect.Viewport>
-									<RSelect.ScrollDownButton>
-										<Icon icon={ExpandMore} />
-									</RSelect.ScrollDownButton>
-								</RSelect.Content>
-							</RSelect.Portal>
-						)}
-					</YoshikiProvider>
-				</SwitchVariant>
-			</ContrastArea>
+			<RSelect.Portal>
+				<RSelect.Content
+					className="z-10 min-w-3xs overflow-auto rounded bg-popover shadow-xl"
+					style={{
+						maxHeight:
+							"calc(var(--radix-dropdown-menu-content-available-height) * 0.8)",
+					}}
+				>
+					<RSelect.ScrollUpButton className="flex justify-center">
+						<Icon icon={ExpandLess} />
+					</RSelect.ScrollUpButton>
+					<RSelect.Viewport>
+						{values.map((x) => (
+							<Item key={x} label={getLabel(x)} value={x} />
+						))}
+					</RSelect.Viewport>
+					<RSelect.ScrollDownButton className="flex justify-center">
+						<Icon icon={ExpandMore} />
+					</RSelect.ScrollDownButton>
+				</RSelect.Content>
+			</RSelect.Portal>
 		</RSelect.Root>
 	);
 };
 
 const Item = forwardRef<HTMLDivElement, { label: string; value: string }>(
 	function Item({ label, value, ...props }, ref) {
-		const { css, theme } = useYoshiki();
-		const { css: nCss } = useNativeYoshiki();
 		return (
-			<>
-				{/* <style jsx global>{` */}
-				{/* 	[data-highlighted] { */}
-				{/* 		background: ${theme.variant.accent}; */}
-				{/* 	} */}
-				{/* `}</style> */}
-				<RSelect.Item
-					ref={ref}
-					value={value}
-					{...css(
-						{
-							display: "flex",
-							alignItems: "center",
-							paddingTop: "8px",
-							paddingBottom: "8px",
-							paddingLeft: "35px",
-							paddingRight: "25px",
-							height: "32px",
-							color: (theme) => theme.paragraph,
-							borderRadius: "4px",
-							position: "relative",
-							userSelect: "none",
-							...focusReset,
-						},
-						props as any,
-					)}
-				>
-					<RSelect.ItemText {...css({ color: (theme) => theme.paragraph })}>
-						{label}
-					</RSelect.ItemText>
-					<RSelect.ItemIndicator asChild>
-						<InternalTriger
-							Component={Icon}
-							icon={Check}
-							ComponentProps={nCss({
-								position: "absolute",
-								left: 0,
-								width: px(25),
-								alignItems: "center",
-								justifyContent: "center",
-							})}
-						/>
-					</RSelect.ItemIndicator>
-				</RSelect.Item>
-			</>
+			<RSelect.Item
+				ref={ref}
+				value={value}
+				className={cn(
+					"flex select-none items-center rounded py-2 pr-6 pl-8 outline-0",
+					"font-sans text-slate-600 dark:text-slate-400",
+					"group data-highlighted:bg-accent data-highlighted:text-slate-200",
+				)}
+				{...props}
+			>
+				<RSelect.ItemText className={cn()}>{label}</RSelect.ItemText>
+				<RSelect.ItemIndicator asChild>
+					<InternalTriger
+						Component={Icon}
+						icon={Check}
+						className={cn(
+							"absolute left-0 w-6 items-center justify-center",
+							"group-data-highlighted:fill-slate-200",
+						)}
+					/>
+				</RSelect.ItemIndicator>
+			</RSelect.Item>
 		);
 	},
 );

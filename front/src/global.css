@@ -1,0 +1,56 @@
+@import "tailwindcss";
+@import "uniwind";
+
+@theme {
+	--color-accent: #6b00b8;
+	--color-background: #f0f2f5;
+	--color-card: #e3e4e5;
+	--color-popover: #c6c6c6;
+
+	--color-light: #f0f2f5;
+	--color-dark: #1f1f2e;
+
+	--font-sans: "Poppins";
+	--font-headers: "Sora";
+}
+
+@layer theme {
+	:root,
+	:host {
+		@variant light {
+			--color-background: #f0f2f5;
+			--color-card: #e3e4e5;
+			--color-popover: #c6c6c6;
+		}
+
+		@variant dark {
+			--color-background: #1f1f2e;
+			--color-card: #1e1e2e;
+			--color-popover: #14141e;
+		}
+	}
+}
+
+*::-webkit-scrollbar {
+	height: 6px;
+	width: 6px;
+	background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+	background-color: #999;
+	border-radius: 90px;
+}
+
+*:hover::-webkit-scrollbar-thumb {
+	background-color: rgb(134, 127, 127);
+}
+
+::cue {
+	background-color: transparent;
+	text-shadow:
+		-1px -1px 0 #000,
+		1px -1px 0 #000,
+		-1px 1px 0 #000,
+		1px 1px 0 #000;
+}

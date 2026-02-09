@@ -51,7 +51,7 @@ export const createPage = <T>(
 	// we can't know for sure if there's a next page when the current page is full.
 	// maybe the next page is empty, this is a bit weird but it allows us to handle pages
 	// without making a new request to the db so it's fine.
-	if (items.length === limit && limit > 0) {
+	if (items.length >= limit && limit > 0) {
 		uri.searchParams.set("after", generateAfter(items[items.length - 1], sort));
 		next = uri.toString();
 	}

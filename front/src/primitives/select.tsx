@@ -1,6 +1,5 @@
 import ExpandMore from "@material-symbols/svg-400/rounded/keyboard_arrow_down-fill.svg";
 import { Button } from "./button";
-import { Icon } from "./icons";
 import { Menu } from "./menu";
 
 export const Select = <Value extends string>({
@@ -16,11 +15,7 @@ export const Select = <Value extends string>({
 	getLabel: (key: Value) => string;
 }) => {
 	return (
-		<Menu
-			Trigger={Button}
-			text={getLabel(value)}
-			icon={<Icon icon={ExpandMore} />}
-		>
+		<Menu Trigger={Button} text={getLabel(value)} icon={ExpandMore}>
 			{values.map((x) => (
 				<Menu.Item
 					key={x}

@@ -8,6 +8,7 @@ import {
 	entryVideoJoin,
 	history,
 	profiles,
+	seasons,
 	shows,
 	showTranslations,
 	videos,
@@ -32,6 +33,7 @@ import {
 } from "~/models/entry";
 import { KError } from "~/models/error";
 import { madeInAbyss } from "~/models/examples";
+import { Season } from "~/models/season";
 import { Show } from "~/models/show";
 import type { Image } from "~/models/utils";
 import {
@@ -49,6 +51,8 @@ import {
 } from "~/models/utils";
 import { desc as description } from "~/models/utils/descriptions";
 import type { EmbeddedVideo } from "~/models/video";
+import { comment } from "~/utils";
+import { getSeasons } from "./seasons";
 import { watchStatusQ } from "./shows/logic";
 
 export const entryProgressQ = db
@@ -335,7 +339,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 		"/series/:id/entries",
 		async ({
 			params: { id },
-			query: { limit, after, query, sort, filter },
+			query: { limit, after, query, sort, filter, includeSeasons },
 			headers: { "accept-language": languages, ...headers },
 			request: { url },
 			jwt: { sub },
@@ -360,7 +364,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 			}
 
 			const langs = processLanguages(languages);
-			const items = (await getEntries({
+			let items = (await getEntries({
 				limit,
 				after,
 				query,
@@ -372,7 +376,28 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				),
 				languages: langs,
 				userId: sub,
-			})) as Entry[];
+			})) as (Entry | ({ kind: "season" } & Season))[];
+
+			if (includeSeasons) {
+				const s = await getSeasons({
+					limit:
+						Math.max(
+							...items.map((x) => (x.kind === "episode" ? x.seasonNumber : 0)),
+						) + 1,
+					filter: eq(seasons.showPk, serie.pk),
+					languages: langs,
+				});
+				items = items.flatMap((ep) => {
+					if (ep.kind !== "episode" || ep.episodeNumber !== 1) return [ep];
+					return [
+						{
+							kind: "season",
+							...s.find((x) => x.seasonNumber === ep.seasonNumber)!,
+						},
+						ep,
+					];
+				});
+			}
 
 			return createPage(items, { url, sort, limit, headers });
 		},
@@ -395,12 +420,31 @@ export const entriesH = new Elysia({ tags: ["series"] })
 					description: "Max page size.",
 				}),
 				after: t.Optional(t.String({ description: description.after })),
+				includeSeasons: t.Optional(
+					t.Boolean({
+						descrption: comment`
+						Include seasons as separator items in the items list. Example:
+
+						[
+							{ kind: "episode", seasonNumber: 1, episodeNumber: 10 },
+							{ kind: "season", seasonNumber: 2 },
+							{ kind: "episode", seasonNumber: 2, episodeNumber: 1 },
+						]
+						`,
+						default: false,
+					}),
+				),
 			}),
 			headers: t.Object({
 				"accept-language": AcceptLanguage({ autoFallback: true }),
 			}),
 			response: {
-				200: Page(Entry),
+				200: Page(
+					t.Union([
+						Entry,
+						t.Composite([t.Object({ kind: t.Literal("season") }), Season]),
+					]),
+				),
 				404: {
 					...KError,
 					description: "No serie found with the given id or slug.",

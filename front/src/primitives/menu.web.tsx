@@ -1,7 +1,6 @@
 import Dot from "@material-symbols/svg-400/rounded/fiber_manual_record-fill.svg";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
-	type ComponentProps,
 	type ComponentType,
 	forwardRef,
 	type ReactElement,
@@ -9,23 +8,11 @@ import {
 } from "react";
 import type { PressableProps } from "react-native";
 import type { SvgProps } from "react-native-svg";
-import { useYoshiki as useNativeYoshiki } from "yoshiki/native";
-import { useYoshiki } from "yoshiki/web";
+import { cn } from "~/utils";
 import { Icon } from "./icons";
-import { Link } from "./links";
+import { useLinkTo } from "./links";
 import { P } from "./text";
-import { ContrastArea, SwitchVariant } from "./theme";
-import { focusReset, ts } from "./utils";
 
-type YoshikiFunc<T> = (props: ReturnType<typeof useYoshiki>) => T;
-export const YoshikiProvider = ({
-	children,
-}: {
-	children: YoshikiFunc<ReactNode>;
-}) => {
-	const yoshiki = useYoshiki();
-	return <>{children(yoshiki)}</>;
-};
 export const InternalTriger = forwardRef<unknown, any>(function _Triger(
 	{ Component, ComponentProps, ...props },
 	ref,
@@ -67,56 +54,22 @@ const Menu = <AsProps extends { onPress: PressableProps["onPress"] }>({
 			}}
 		>
 			<DropdownMenu.Trigger asChild>
-				<InternalTriger Component={Trigger} ComponentProps={props} />
+				<InternalTriger Component={Trigger} {...props} />
 			</DropdownMenu.Trigger>
-			<ContrastArea mode="user">
-				<SwitchVariant>
-					<YoshikiProvider>
-						{({ css, theme }) => (
-							<DropdownMenu.Portal>
-								<DropdownMenu.Content
-									onFocusOutside={(e) => e.stopImmediatePropagation()}
-									{...css({
-										bg: (theme) => theme.background,
-										overflow: "auto",
-										minWidth: "220px",
-										borderRadius: "8px",
-										boxShadow:
-											"0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2)",
-										zIndex: 2,
-										maxHeight:
-											"calc(var(--radix-dropdown-menu-content-available-height) * 0.8)",
-									})}
-								>
-									{children}
-									<DropdownMenu.Arrow fill={theme.background} />
-								</DropdownMenu.Content>
-							</DropdownMenu.Portal>
-						)}
-					</YoshikiProvider>
-				</SwitchVariant>
-			</ContrastArea>
+			<DropdownMenu.Portal>
+				<DropdownMenu.Content
+					onFocusOutside={(e) => e.stopImmediatePropagation()}
+					className="z-10 min-w-2xs overflow-hidden rounded bg-popover shadow-xl"
+					style={{
+						maxHeight:
+							"calc(var(--radix-dropdown-menu-content-available-height) * 0.8)",
+					}}
+				>
+					{children}
+					<DropdownMenu.Arrow className="fill-popover" />
+				</DropdownMenu.Content>
+			</DropdownMenu.Portal>
 		</DropdownMenu.Root>
-	);
-};
-
-const Item = ({
-	children,
-	href,
-	onSelect,
-	...props
-}: ComponentProps<typeof DropdownMenu.Item> & { href?: string }) => {
-	if (href) {
-		return (
-			<DropdownMenu.Item onSelect={onSelect} {...props} asChild>
-				<Link href={href}>{children}</Link>
-			</DropdownMenu.Item>
-		);
-	}
-	return (
-		<DropdownMenu.Item onSelect={onSelect} {...props}>
-			{children}
-		</DropdownMenu.Item>
 	);
 };
 
@@ -128,74 +81,69 @@ const MenuItem = forwardRef<
 		left?: ReactElement;
 		disabled?: boolean;
 		selected?: boolean;
+		className?: string;
 	} & (
 		| { onSelect: () => void; href?: undefined }
 		| { href: string; onSelect?: undefined }
 	)
 >(function MenuItem(
-	{ label, icon, left, selected, onSelect, href, disabled, ...props },
+	{
+		label,
+		icon,
+		left,
+		selected,
+		onSelect,
+		href,
+		disabled,
+		className,
+		...props
+	},
 	ref,
 ) {
-	const { css: nCss } = useNativeYoshiki();
-	const { css, theme } = useYoshiki();
-
 	const icn = (icon || selected) && (
 		<Icon
 			icon={icon ?? Dot}
-			color={disabled ? theme.overlay0 : theme.paragraph}
-			size={icon ? 24 : ts(1)}
-			{...nCss({ paddingX: ts(1) })}
+			className={cn(
+				"mx-2 group-data-highlighted:fill-slate-200",
+				disabled && "fill-slate-600 dark:fill-slate-600",
+				!icon && "h-2 w-2",
+			)}
 		/>
 	);
 
-	return (
-		<>
-			{/* <style jsx global>{` */}
-			{/* 	[data-highlighted] { */}
-			{/* 		background: ${theme.variant.accent}; */}
-			{/* 		svg { */}
-			{/* 			fill: ${theme.alternate.contrast}; */}
-			{/* 		} */}
-			{/* 		div { */}
-			{/* 			color: ${theme.alternate.contrast}; */}
-			{/* 		} */}
-			{/* 	} */}
-			{/* `}</style> */}
-			<Item
-				ref={ref}
-				onSelect={onSelect}
-				href={href}
-				disabled={disabled}
-				{...css(
-					{
-						display: "flex",
-						alignItems: "center",
-						padding: "8px",
-						height: "32px",
-						...focusReset,
-					},
-					props as any,
-				)}
-			>
-				{left && left}
-				{!left && icn && icn}
-				<P
-					{...nCss([
-						{
-							paddingLeft: 8 * 2 + +!(icon || selected || left) * 24,
-							flexGrow: 1,
-						},
-						disabled && {
-							color: theme.overlay0,
-						},
-					])}
-				>
-					{label}
-				</P>
+	const { onPress, ...linkProps } = useLinkTo({ href });
 
-				{left && icn && icn}
-			</Item>
-		</>
+	return (
+		<DropdownMenu.Item
+			ref={ref}
+			{...linkProps}
+			onSelect={() => {
+				onSelect?.();
+				onPress?.(undefined!);
+			}}
+			disabled={disabled}
+			className={cn(
+				"group flex h-10 flex-row items-center p-2 py-6 outline-0 data-highlighted:bg-accent",
+				className,
+			)}
+			{...props}
+		>
+			{left && left}
+			{!left && icn}
+			<P
+				className={cn(
+					"flex-1 group-data-highlighted:text-slate-200",
+					disabled && "text-slate-600",
+				)}
+				style={{
+					paddingLeft: 8 * 2 + +!(icon || selected || left) * 24,
+				}}
+			>
+				{label}
+			</P>
+
+			{left && icn}
+		</DropdownMenu.Item>
 	);
 });
 Menu.Item = MenuItem;
@@ -212,8 +160,6 @@ const Sub = <AsProps,>({
 	icon?: ComponentType<SvgProps>;
 	children: ReactNode | ReactNode[] | null;
 } & AsProps) => {
-	const { css, theme } = useYoshiki();
-
 	return (
 		<DropdownMenu.Sub>
 			<DropdownMenu.SubTrigger asChild disabled={disabled}>
@@ -226,20 +172,14 @@ const Sub = <AsProps,>({
 			<DropdownMenu.Portal>
 				<DropdownMenu.SubContent
 					onFocusOutside={(e) => e.stopImmediatePropagation()}
-					{...css({
-						bg: (theme) => theme.background,
-						overflow: "auto",
-						minWidth: "220px",
-						borderRadius: "8px",
-						boxShadow:
-							"0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2)",
-						zIndex: 2,
+					className="z-10 min-w-2xs overflow-hidden rounded bg-popover shadow-xl"
+					style={{
 						maxHeight:
 							"calc(var(--radix-dropdown-menu-content-available-height) * 0.8)",
-					})}
+					}}
 				>
 					{children}
-					<DropdownMenu.Arrow fill={theme.background} />
+					<DropdownMenu.Arrow className="fill-popover" />
 				</DropdownMenu.SubContent>
 			</DropdownMenu.Portal>
 		</DropdownMenu.Sub>

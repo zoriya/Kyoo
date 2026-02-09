@@ -5,10 +5,9 @@ import { useCallback, useEffect, useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { useEvent, useVideoPlayer, VideoView } from "react-native-video";
 import { v4 as uuidv4 } from "uuid";
-import { useYoshiki } from "yoshiki/native";
 import { entryDisplayNumber } from "~/components/entries";
 import { FullVideo, type KyooError } from "~/models";
-import { ContrastArea, Head } from "~/primitives";
+import { Head } from "~/primitives";
 import { useToken } from "~/providers/account-context";
 import { useLocalSetting } from "~/providers/settings";
 import { type QueryIdentifier, useFetch } from "~/query";
@@ -158,14 +157,13 @@ export const Player = () => {
 			setPlayMode("hls");
 		else setPlaybackError({ status: error.code, message: error.message });
 	});
-	const { css } = useYoshiki();
 	if (error || infoError || playbackError) {
 		return (
 			<>
 				<Back
 					showHref={data?.show?.href}
 					name={data?.show?.name ?? "Error"}
-					{...css({ position: "relative", bg: (theme) => theme.accent })}
+					className="bg-accent"
 				/>
 				<ErrorView error={error ?? infoError ?? playbackError!} />
 			</>
@@ -173,12 +171,7 @@ export const Player = () => {
 	}
 
 	return (
-		<View
-			style={{
-				flex: 1,
-				backgroundColor: "black",
-			}}
-		>
+		<View className="flex-1 bg-black">
 			<Head
 				title={title}
 				description={entry?.description}
@@ -200,27 +193,25 @@ export const Player = () => {
 				resizeMode={"contain"}
 				style={StyleSheet.absoluteFillObject}
 			/>
-			<ContrastArea mode="dark">
-				<LoadingIndicator player={player} />
-				<PlayModeContext.Provider value={playModeState}>
-					<Controls
-						player={player}
-						showHref={data?.show?.href}
-						name={data?.show?.name}
-						poster={data?.show?.poster}
-						subName={
-							entry
-								? [entryDisplayNumber(entry), entry.name]
-										.filter((x) => x)
-										.join(" - ")
-								: undefined
-						}
-						chapters={info?.chapters ?? []}
-						previous={data?.previous?.video}
-						next={data?.next?.video}
-					/>
-				</PlayModeContext.Provider>
-			</ContrastArea>
+			<LoadingIndicator player={player} />
+			<PlayModeContext.Provider value={playModeState}>
+				<Controls
+					player={player}
+					showHref={data?.show?.href}
+					name={data?.show?.name}
+					poster={data?.show?.poster}
+					subName={
+						entry
+							? [entryDisplayNumber(entry), entry.name]
+									.filter((x) => x)
+									.join(" - ")
+							: undefined
+					}
+					chapters={info?.chapters ?? []}
+					previous={data?.previous?.video}
+					next={data?.next?.video}
+				/>
+			</PlayModeContext.Provider>
 		</View>
 	);
 };

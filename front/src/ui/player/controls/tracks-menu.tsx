@@ -5,12 +5,11 @@ import VideoSettings from "@material-symbols/svg-400/rounded/video_settings-fill
 import { type ComponentProps, createContext, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { useEvent, type VideoPlayer } from "react-native-video";
-import { useForceRerender } from "yoshiki";
 import { IconButton, Menu, tooltip } from "~/primitives";
 import { useFetch } from "~/query";
 import { useDisplayName, useSubtitleName } from "~/track-utils";
 import { Info } from "~/ui/info";
-import { useQueryState } from "~/utils";
+import { useForceRerender, useQueryState } from "~/utils";
 
 type MenuProps = ComponentProps<typeof Menu<ComponentProps<typeof IconButton>>>;
 

@@ -23,10 +23,13 @@ logger.info("Skipping request logging for these paths: {dropList}", {
 	dropList: Array.from(PATH_IGNORE).sort(),
 });
 
-const app = new Elysia()
+const app = new Elysia({
+	allowUnsafeValidationDetails: process.env.NODE_ENV === "development",
+})
 	.use(opentelemetry())
 	.use(
 		elysiaLogger({
+			format: "dev",
 			skip: (ctx) => PATH_IGNORE.has(ctx.path),
 		}),
 	)

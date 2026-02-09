@@ -1,12 +1,9 @@
 import { useState } from "react";
-import { Platform, View } from "react-native";
-import { percent, px, rem, useYoshiki } from "yoshiki/native";
+import { View } from "react-native";
 import type { KImage, WatchStatusV } from "~/models";
 import {
-	ContrastArea,
-	GradientImageBackground,
 	Heading,
-	important,
+	ImageBackground,
 	Link,
 	P,
 	Poster,
@@ -15,6 +12,7 @@ import {
 	ts,
 } from "~/primitives";
 import type { Layout } from "~/query";
+import { cn } from "~/utils";
 import { ItemContext } from "./context-menus";
 import { ItemWatchStatus } from "./item-helpers";
 
@@ -27,7 +25,9 @@ export const ItemList = ({
 	thumbnail,
 	poster,
 	watchStatus,
-	unseenEpisodesCount,
+	availableCount,
+	seenCount,
+	className,
 	...props
 }: {
 	href: string;
@@ -38,159 +38,92 @@ export const ItemList = ({
 	poster: KImage | null;
 	thumbnail: KImage | null;
 	watchStatus: WatchStatusV | null;
-	unseenEpisodesCount: number | null;
+	availableCount?: number | null;
+	seenCount?: number | null;
+	className?: string;
 }) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 
 	return (
-		<ContrastArea>
-			{({ css }) => (
-				<Link
-					href={moreOpened ? undefined : href}
-					onLongPress={() => setMoreOpened(true)}
-					{...css({
-						child: {
-							more: {
-								opacity: 0,
-							},
-						},
-						fover: {
-							title: {
-								textDecorationLine: "underline",
-							},
-							more: {
-								opacity: 100,
-							},
-						},
-					})}
-					{...props}
-				>
-					<GradientImageBackground
-						src={thumbnail}
-						alt={name}
-						quality="medium"
-						layout={{ width: percent(100), height: ItemList.layout.size }}
-						gradientStyle={{
-							alignItems: "center",
-							justifyContent: "space-evenly",
-							flexDirection: "row",
-						}}
-						{...(css({
-							borderRadius: px(10),
-							overflow: "hidden",
-						}) as any)}
-					>
-						<View
-							{...css({
-								width: { xs: "50%", lg: "30%" },
-							})}
-						>
-							<View
-								{...css({
-									flexDirection: "row",
-									justifyContent: "center",
-								})}
-							>
-								<Heading
-									{...css([
-										"title",
-										{
-											textAlign: "center",
-											fontSize: rem(2),
-											letterSpacing: rem(0.002),
-											fontWeight: "900",
-											textTransform: "uppercase",
-										},
-									])}
-								>
-									{name}
-								</Heading>
-								{kind !== "collection" && (
-									<ItemContext
-										kind={kind}
-										slug={slug}
-										status={watchStatus}
-										isOpen={moreOpened}
-										setOpen={(v) => setMoreOpened(v)}
-										{...css([
-											{
-												// I dont know why marginLeft gets overwritten by the margin: px(2) so we important
-												marginLeft: important(ts(2)),
-												bg: (theme) => theme.darkOverlay,
-											},
-											"more",
-											Platform.OS === "web" &&
-												moreOpened && { opacity: important(100) },
-										])}
-									/>
-								)}
-							</View>
-							{subtitle && (
-								<P
-									{...css({
-										textAlign: "center",
-										marginRight: ts(4),
-									})}
-								>
-									{subtitle}
-								</P>
-							)}
-						</View>
-						<PosterBackground
-							src={poster}
-							alt=""
-							quality="low"
-							layout={{ height: percent(80) }}
-						>
-							<ItemWatchStatus
-								watchStatus={watchStatus}
-								unseenEpisodesCount={unseenEpisodesCount}
-							/>
-						</PosterBackground>
-					</GradientImageBackground>
-				</Link>
+		<Link
+			href={moreOpened ? undefined : href}
+			onLongPress={() => setMoreOpened(true)}
+			className={cn(
+				"group h-80 w-full outline-0 ring-accent focus-within:ring-3 hover:ring-3",
+				className,
 			)}
-		</ContrastArea>
+			{...props}
+		>
+			<ImageBackground
+				src={thumbnail}
+				quality="medium"
+				className="h-full w-full flex-row items-center justify-evenly overflow-hidden rounded"
+			>
+				<View className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/70" />
+				<View className="w-1/2 lg:w-1/3">
+					<View className="flex-row justify-center">
+						<Heading
+							className={cn(
+								"text-center text-3xl uppercase",
+								"group-focus-within:underline group-hover:underline",
+							)}
+						>
+							{name}
+						</Heading>
+						{kind !== "collection" && (
+							<ItemContext
+								kind={kind}
+								slug={slug}
+								status={watchStatus}
+								isOpen={moreOpened}
+								setOpen={(v) => setMoreOpened(v)}
+								className={cn(
+									"ml-4",
+									"bg-gray-800/70 hover:bg-gray-800 focus-visible:bg-gray-800",
+									"native:hidden opacity-0 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100",
+									moreOpened && "opacity-100",
+								)}
+								iconClassName="fill-slate-200 dark:fill-slate-200"
+							/>
+						)}
+					</View>
+					{subtitle && <P className="mr-8 text-center">{subtitle}</P>}
+				</View>
+				<PosterBackground
+					src={poster}
+					alt=""
+					quality="low"
+					className="h-4/5 ring-accent group-focus-within:ring-4 group-hover:ring-4"
+				>
+					<ItemWatchStatus
+						watchStatus={watchStatus}
+						availableCount={availableCount}
+						seenCount={seenCount}
+					/>
+				</PosterBackground>
+			</ImageBackground>
+		</Link>
 	);
 };
 
 ItemList.Loader = (props: object) => {
-	const { css } = useYoshiki();
-
 	return (
 		<View
-			{...css(
-				{
-					alignItems: "center",
-					justifyContent: "space-evenly",
-					flexDirection: "row",
-					height: ItemList.layout.size,
-					borderRadius: px(10),
-					overflow: "hidden",
-					bg: (theme) => theme.dark.background,
-					marginX: ItemList.layout.gap,
-				},
-				props,
-			)}
+			className="h-80 w-full flex-row items-center justify-evenly overflow-hidden rounded bg-slate-800"
+			{...props}
 		>
-			<View
-				{...css({
-					width: { xs: "50%", lg: "30%" },
-					flexDirection: "column",
-					justifyContent: "center",
-				})}
-			>
-				<Skeleton {...css({ height: rem(2), alignSelf: "center" })} />
-				<Skeleton {...css({ width: rem(5), alignSelf: "center" })} />
+			<View className="w-1/2 justify-center lg:w-1/3">
+				<Skeleton className="h-8" />
+				<Skeleton className="w-2/5" />
 			</View>
-			<Poster.Loader layout={{ height: percent(80) }} />
+			<Poster.Loader className="h-4/5" />
 		</View>
 	);
 };
 
 ItemList.layout = {
 	numColumns: 1,
-	size: 300,
+	size: 320,
 	layout: "vertical",
 	gap: ts(2),
 } satisfies Layout;

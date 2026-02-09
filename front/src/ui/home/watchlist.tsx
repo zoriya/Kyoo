@@ -57,7 +57,7 @@ export const WatchlistList = () => {
 								description={entry.name}
 								thumbnail={entry.thumbnail ?? item.thumbnail}
 								href={entry.href ?? "#"}
-								watchedPercent={entry.watchStatus?.percent || null}
+								watchedPercent={entry.progress.percent}
 							/>
 						);
 					}

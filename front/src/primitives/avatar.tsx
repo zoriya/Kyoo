@@ -1,7 +1,7 @@
 import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
-import { type ComponentType, forwardRef, type RefAttributes } from "react";
-import { Image, type ImageProps, View, type ViewStyle } from "react-native";
-import { px, type Stylable, useYoshiki } from "yoshiki/native";
+import type { ComponentType } from "react";
+import { Image, View, type ViewProps, type ViewStyle } from "react-native";
+import { cn } from "~/utils";
 import { Icon } from "./icons";
 import { Skeleton } from "./skeleton";
 import { P } from "./text";
@@ -21,91 +21,58 @@ const stringToColor = (string: string) => {
 	return color;
 };
 
-const AvatarC = forwardRef<
-	View,
-	{
-		src?: string;
-		alt?: string;
-		size?: number;
-		placeholder?: string;
-		color?: string;
-		fill?: boolean;
-		as?: ComponentType<{ style?: ViewStyle } & RefAttributes<View>>;
-	} & Stylable
->(function AvatarI(
-	{ src, alt, size = px(24), color, placeholder, fill = false, as, ...props },
-	ref,
-) {
-	const { css, theme } = useYoshiki();
-	const col = color ?? theme.overlay0;
-
-	// TODO: Support dark themes when fill === true
+export const Avatar = <AsProps = ViewProps>({
+	src,
+	alt,
+	placeholder,
+	className,
+	style,
+	as,
+	...props
+}: {
+	src?: string;
+	alt?: string;
+	placeholder?: string;
+	className?: string;
+	style?: ViewStyle;
+	as?: ComponentType<AsProps>;
+} & AsProps) => {
 	const Container = as ?? View;
 	return (
 		<Container
-			ref={ref}
-			{...css(
-				[
-					{
-						borderRadius: 999999,
-						overflow: "hidden",
-						height: size,
-						width: size,
-					},
-					fill && {
-						bg: col,
-					},
-					placeholder && {
-						bg: stringToColor(placeholder),
-					},
-				],
-				props,
-			)}
+			className={cn("h-6 w-6 overflow-hidden rounded-full", className)}
+			style={
+				placeholder
+					? { backgroundColor: stringToColor(placeholder), ...style }
+					: style
+			}
+			{...(props as AsProps)}
 		>
-			{placeholder ? (
-				<P
-					{...css({
-						marginVertical: 0,
-						lineHeight: size,
-						textAlign: "center",
-					})}
-				>
+			{placeholder && (
+				<P className="text-center text-slate-200 dark:text-slate-200">
 					{placeholder[0]}
 				</P>
-			) : (
-				<Icon
-					icon={AccountCircle}
-					size={size}
-					color={fill ? col : theme.colors.white}
+			)}
+			{src && (
+				<Image
+					resizeMode="cover"
+					source={{ uri: src }}
+					alt={alt}
+					className="absolute inset-0"
 				/>
 			)}
-			<Image
-				resizeMode="cover"
-				source={{ uri: src, width: size, height: size }}
-				alt={alt}
-				width={size}
-				height={size}
-				{...(css({ position: "absolute" }) as ImageProps)}
-			/>
-		</Container>
-	);
-});
-
-const AvatarLoader = ({ size = px(24), ...props }: { size?: number }) => {
-	const { css } = useYoshiki();
-
-	return (
-		<Skeleton
-			variant="round"
-			{...css(
-				{
-					height: size,
-					width: size,
-				},
-				props,
+			{!src && !placeholder && (
+				<Icon
+					icon={AccountCircle}
+					className="fill-slate-200 dark:fill-slate-200"
+				/>
 			)}
-		/>
+		</Container>
 	);
 };
 
-export const Avatar = Object.assign(AvatarC, { Loader: AvatarLoader });
+Avatar.Loader = ({ className, ...props }: { className?: string }) => {
+	return (
+		<Skeleton variant="round" className={cn("h-6 w-6", className)} {...props} />
+	);
+};

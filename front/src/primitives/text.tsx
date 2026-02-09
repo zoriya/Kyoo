@@ -1,94 +1,149 @@
+import ExpandMore from "@material-symbols/svg-400/rounded/keyboard_arrow_down-fill.svg";
+import ExpandLess from "@material-symbols/svg-400/rounded/keyboard_arrow_up-fill.svg";
 import {
-	H1 as EH1,
-	H2 as EH2,
-	H3 as EH3,
-	H4 as EH4,
-	H5 as EH5,
-	H6 as EH6,
-	P as EP,
-} from "@expo/html-elements";
-import type { ComponentProps, ComponentType } from "react";
+	type ComponentProps,
+	type Ref,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from "react";
+import { useTranslation } from "react-i18next";
 import {
 	Platform,
-	type StyleProp,
 	Text,
 	type TextProps,
-	type TextStyle,
+	View,
+	type ViewProps,
 } from "react-native";
-import { percent, rem, useYoshiki } from "yoshiki/native";
-import { ts } from "./utils/spacing";
+import { cn } from "~/utils";
+import { IconButton } from "./icons";
+import { tooltip } from "./tooltip";
 
 const styleText = (
-	Component: ComponentType<ComponentProps<typeof EP>>,
-	type?: "header" | "sub",
-	custom?: TextStyle,
+	type: "header" | "sub" | null,
+	{ className: custom, ...customProps }: TextProps,
 ) => {
-	const Text = (
-		props: Omit<ComponentProps<typeof EP>, "style"> & {
-			style?: StyleProp<TextStyle>;
-			children?: TextProps["children"];
-		},
-	) => {
-		const { css, theme } = useYoshiki();
-
+	const Wrapped = ({
+		className,
+		...props
+	}: { ref?: Ref<Text> } & TextProps) => {
 		return (
-			<Component
-				{...css(
-					[
-						{
-							marginVertical: rem(0.5),
-							color: type === "header" ? theme.heading : theme.paragraph,
-							flexShrink: 1,
-							fontSize: rem(1),
-							fontFamily: theme.font.normal,
-						},
-						type === "sub" && {
-							fontFamily: theme.font["300"] ?? theme.font.normal,
-							fontWeight: "300",
-							opacity: 0.8,
-							fontSize: rem(0.8),
-						},
-						custom?.fontWeight && {
-							fontFamily: theme.font[custom.fontWeight] ?? theme.font.normal,
-						},
-						custom,
-					],
-					props as TextProps,
+			<Text
+				className={cn(
+					"shrink font-sans text-base text-slate-600 dark:text-slate-400",
+					type === "header" &&
+						"font-headers text-slate-900 dark:text-slate-200",
+					type === "sub" && "font-light text-sm opacity-80",
+					custom,
+					className,
 				)}
+				{...customProps}
+				{...props}
 			/>
 		);
 	};
-	return Text;
+	return Wrapped;
 };
 
-export const H1 = styleText(EH1, "header", {
-	fontSize: rem(3),
-	fontWeight: "900",
+export const H1 = styleText("header", {
+	className: cn("font-extrabold text-5xl"),
+	role: "heading",
+	// @ts-expect-error not yet added to ts
+	"aria-level": 1,
 });
-export const H2 = styleText(EH2, "header", { fontSize: rem(2) });
-export const H3 = styleText(EH3, "header");
-export const H4 = styleText(EH4, "header");
-export const H5 = styleText(EH5, "header");
-export const H6 = styleText(EH6, "header");
-export const Heading = styleText(EP, "header");
-export const P = styleText(EP, undefined, { fontSize: rem(1) });
-export const SubP = styleText(EP, "sub");
+export const H2 = styleText("header", {
+	className: cn("text-2xl"),
+	role: "heading",
+	// @ts-expect-error not yet added to ts
+	"aria-level": 2,
+});
+export const H3 = styleText("header", {
+	role: "heading",
+	// @ts-expect-error not yet added to ts
+	"aria-level": 3,
+});
+export const H4 = styleText("header", {
+	role: "heading",
+	// @ts-expect-error not yet added to ts
+	"aria-level": 4,
+});
+export const H5 = styleText("header", {
+	role: "heading",
+	// @ts-expect-error not yet added to ts
+	"aria-level": 5,
+});
+export const H6 = styleText("header", {
+	role: "heading",
+	// @ts-expect-error not yet added to ts
+	"aria-level": 6,
+});
+export const Heading = styleText("header", { role: "heading" });
+export const P = styleText(null, {});
+export const SubP = styleText("sub", {});
 
-export const LI = ({ children, ...props }: TextProps) => {
-	const { css } = useYoshiki();
-
+export const LI = ({
+	children,
+	className,
+	...props
+}: ComponentProps<typeof P>) => {
 	return (
-		<P role={Platform.OS === "web" ? "listitem" : props.role} {...props}>
-			<Text
-				{...css({
-					height: percent(100),
-					marginBottom: rem(0.5),
-					paddingRight: ts(1),
-				})}
-			>
-				{String.fromCharCode(0x2022)}
-			</Text>
+		<P
+			role="listitem"
+			className={cn("flex items-center", className)}
+			{...props}
+		>
+			<Text className="h-full px-1">{String.fromCharCode(0x2022)}</Text>
 			{children}
 		</P>
+	);
+};
+
+export const CroppedText = ({
+	className,
+	numberOfLines,
+	onTextLayout,
+	ref,
+	containerProps,
+	children,
+	...props
+}: { containerProps?: ViewProps } & ComponentProps<typeof P>) => {
+	const desc = useRef<HTMLElement>(null);
+	const [expended, setExpanded] = useState(false);
+	const [needExpand, setNeedExpand] = useState(false);
+	const { t } = useTranslation();
+
+	useLayoutEffect(() => {
+		if (Platform.OS !== "web" || !desc.current || expended) return;
+		setNeedExpand(desc.current.scrollHeight > desc.current.clientHeight + 1);
+	});
+
+	return (
+		<View className="flex-row justify-between" {...(containerProps ?? {})}>
+			<P
+				ref={ref}
+				numberOfLines={expended ? undefined : numberOfLines}
+				onTextLayout={(e) => {
+					const visible = e.nativeEvent.lines.reduce(
+						(acc, line) => acc + line.text,
+						"",
+					);
+					if (!expended)
+						setNeedExpand(visible !== children && visible?.length > 0);
+				}}
+				{...props}
+			>
+				{children}
+			</P>
+			{needExpand && (
+				<IconButton
+					icon={expended ? ExpandLess : ExpandMore}
+					{...tooltip(t(expended ? "misc.collapse" : "misc.expand"))}
+					onPress={(e) => {
+						e.preventDefault();
+						setExpanded((isExpanded) => !isExpanded);
+					}}
+				/>
+			)}
+		</View>
 	);
 };

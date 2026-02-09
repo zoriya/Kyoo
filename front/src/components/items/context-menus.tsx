@@ -4,33 +4,35 @@ import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
 import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform } from "react-native";
-import { useYoshiki } from "yoshiki/native";
 import { WatchStatusV } from "~/models";
 import { IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { useMutation } from "~/query";
+import { cn } from "~/utils";
 import { watchListIcon } from "./watchlist-info";
 // import { useDownloader } from "../../packages/ui/src/downloads/ui/src/downloads";
 
 export const EntryContext = ({
 	slug,
 	serieSlug,
+	className,
 	...props
 }: {
 	serieSlug: string | null;
 	slug: string;
-} & Partial<ComponentProps<typeof Menu<typeof IconButton>>>) => {
+	className?: string;
+} & Partial<ComponentProps<typeof Menu>> &
+	Partial<ComponentProps<typeof IconButton>>) => {
 	// const downloader = useDownloader();
-	const { css } = useYoshiki();
 	const { t } = useTranslation();
 
 	return (
 		<Menu
 			Trigger={IconButton}
 			icon={MoreVert}
+			className={cn("not:web:hidden", className)}
 			{...tooltip(t("misc.more"))}
-			{...(css([Platform.OS !== "web" && { display: "none" }], props) as any)}
+			{...(props as any)}
 		>
 			{serieSlug && (
 				<Menu.Item
@@ -57,15 +59,17 @@ export const ItemContext = ({
 	kind,
 	slug,
 	status,
+	className,
 	...props
 }: {
 	kind: "movie" | "serie";
 	slug: string;
 	status: WatchStatusV | null;
-} & Partial<ComponentProps<typeof Menu<typeof IconButton>>>) => {
+	className?: string;
+} & Partial<ComponentProps<typeof Menu>> &
+	Partial<ComponentProps<typeof IconButton>>) => {
 	const account = useAccount();
 	// const downloader = useDownloader();
-	const { css } = useYoshiki();
 	const { t } = useTranslation();
 
 	const mutation = useMutation({
@@ -87,8 +91,9 @@ export const ItemContext = ({
 		<Menu
 			Trigger={IconButton}
 			icon={MoreVert}
+			className={cn("not:web:hidden", className)}
 			{...tooltip(t("misc.more"))}
-			{...(css([Platform.OS !== "web" && { display: "none" }], props) as any)}
+			{...(props as any)}
 		>
 			<Menu.Sub
 				label={account ? t("show.watchlistEdit") : t("show.watchlistLogin")}

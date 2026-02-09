@@ -10,7 +10,6 @@ import All from "@material-symbols/svg-400/rounded/view_headline.svg";
 import ViewList from "@material-symbols/svg-400/rounded/view_list.svg";
 import { useTranslation } from "react-i18next";
 import { type PressableProps, View } from "react-native";
-import { useYoshiki } from "yoshiki/native";
 import {
 	HR,
 	Icon,
@@ -19,23 +18,24 @@ import {
 	P,
 	PressableFeedback,
 	tooltip,
-	ts,
 } from "~/primitives";
+import { cn } from "~/utils";
 import { availableSorts, type SortBy, type SortOrd } from "./types";
 
 const SortTrigger = ({
 	sortBy,
+	className,
 	...props
 }: { sortBy: SortBy } & PressableProps) => {
-	const { css } = useYoshiki();
 	const { t } = useTranslation();
 
 	return (
 		<PressableFeedback
-			{...css({ flexDirection: "row", alignItems: "center" }, props as any)}
+			className={cn("flex-row items-center", className)}
 			{...tooltip(t("browse.sortby-tt"))}
+			{...props}
 		>
-			<Icon icon={Sort} {...css({ paddingX: ts(0.5) })} />
+			<Icon icon={Sort} className="mx-1" />
 			<P>{t(`browse.sortkey.${sortBy}`)}</P>
 		</PressableFeedback>
 	);
@@ -50,20 +50,18 @@ const MediaTypeIcons = {
 
 const MediaTypeTrigger = ({
 	mediaType,
+	className,
 	...props
 }: PressableProps & { mediaType: keyof typeof MediaTypeIcons }) => {
-	const { css } = useYoshiki();
 	const { t } = useTranslation();
 
 	return (
 		<PressableFeedback
-			{...css({ flexDirection: "row", alignItems: "center" }, props as any)}
+			className={cn("flex-row items-center", className)}
 			{...tooltip(t("browse.mediatype-tt"))}
+			{...props}
 		>
-			<Icon
-				icon={MediaTypeIcons[mediaType] ?? FilterList}
-				{...css({ paddingX: ts(0.5) })}
-			/>
+			<Icon icon={MediaTypeIcons[mediaType] ?? FilterList} className="mx-1" />
 			<P>
 				{t(
 					mediaType !== "all"
@@ -92,7 +90,6 @@ export const BrowseSettings = ({
 	layout: "grid" | "list";
 	setLayout: (layout: "grid" | "list") => void;
 }) => {
-	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 
 	// TODO: have a proper filter frontend
@@ -101,15 +98,22 @@ export const BrowseSettings = ({
 		setFilter(kind !== "all" ? `kind eq ${kind}` : "");
 
 	return (
-		<View
-			{...css({
-				flexDirection: "row-reverse",
-				alignItems: "center",
-				marginX: ts(4),
-				marginY: ts(1),
-			})}
-		>
-			<View {...css({ flexDirection: "row" })}>
+		<View className="mx-8 my-2 flex-row items-center justify-between">
+			<Menu
+				Trigger={MediaTypeTrigger}
+				mediaType={mediaType as keyof typeof MediaTypeIcons}
+			>
+				{Object.keys(MediaTypeIcons).map((x) => (
+					<Menu.Item
+						key={x}
+						label={t(`browse.mediatypekey.${x as keyof typeof MediaTypeIcons}`)}
+						selected={mediaType === x}
+						icon={MediaTypeIcons[x as keyof typeof MediaTypeIcons]}
+						onSelect={() => setMediaType(x)}
+					/>
+				))}
+			</Menu>
+			<View className="flex-row">
 				<Menu Trigger={SortTrigger} sortBy={sortBy}>
 					{availableSorts.map((x) => (
 						<Menu.Item
@@ -127,37 +131,21 @@ export const BrowseSettings = ({
 				<IconButton
 					icon={GridView}
 					onPress={() => setLayout("grid")}
-					color={layout === "grid" ? theme.accent : undefined}
+					className="m-1"
+					iconClassName={cn(
+						layout === "grid" && "fill-accent dark:fill-accent",
+					)}
 					{...tooltip(t("browse.switchToGrid"))}
-					{...css({ padding: ts(0.5), marginY: "auto" })}
 				/>
 				<IconButton
 					icon={ViewList}
 					onPress={() => setLayout("list")}
-					color={layout === "list" ? theme.accent : undefined}
+					className="m-1"
+					iconClassName={cn(
+						layout === "list" && "fill-accent dark:fill-accent",
+					)}
 					{...tooltip(t("browse.switchToList"))}
-					{...css({ padding: ts(0.5), marginY: "auto" })}
 				/>
-			</View>
-			<View
-				{...css({ flexGrow: 1, flexDirection: "row", alignItems: "center" })}
-			>
-				<Menu
-					Trigger={MediaTypeTrigger}
-					mediaType={mediaType as keyof typeof MediaTypeIcons}
-				>
-					{Object.keys(MediaTypeIcons).map((x) => (
-						<Menu.Item
-							key={x}
-							label={t(
-								`browse.mediatypekey.${x as keyof typeof MediaTypeIcons}`,
-							)}
-							selected={mediaType === x}
-							icon={MediaTypeIcons[x as keyof typeof MediaTypeIcons]}
-							onSelect={() => setMediaType(x)}
-						/>
-					))}
-				</Menu>
 			</View>
 		</View>
 	);

@@ -1,86 +1,66 @@
+import type { ComponentProps, ComponentType, Ref } from "react";
 import {
-	type ComponentType,
-	type ForwardedRef,
-	forwardRef,
-	type ReactElement,
-} from "react";
-import { type Falsy, type PressableProps, View } from "react-native";
-import { type Theme, useYoshiki } from "yoshiki/native";
+	type Falsy,
+	type Pressable,
+	type PressableProps,
+	View,
+} from "react-native";
+import { cn } from "~/utils";
+import { Icon } from "./icons";
 import { PressableFeedback } from "./links";
 import { P } from "./text";
-import { ts } from "./utils";
 
-export const Button = forwardRef(function Button<AsProps = PressableProps>(
-	{
-		children,
-		text,
-		icon,
-		licon,
-		disabled,
-		as,
-		...props
-	}: {
-		children?: ReactElement | ReactElement[] | Falsy;
-		text?: string;
-		licon?: ReactElement | Falsy;
-		icon?: ReactElement | Falsy;
-		disabled?: boolean;
-		as?: ComponentType<AsProps>;
-	} & AsProps,
-	ref: ForwardedRef<unknown>,
-) {
-	const { css } = useYoshiki("button");
-
+export const Button = <AsProps = PressableProps>({
+	text,
+	icon,
+	ricon,
+	disabled,
+	as,
+	ref,
+	className,
+	...props
+}: {
+	disabled?: boolean;
+	text?: string;
+	icon?: ComponentProps<typeof Icon>["icon"] | Falsy;
+	ricon?: ComponentProps<typeof Icon>["icon"] | Falsy;
+	ref?: Ref<typeof Pressable>;
+	className?: string;
+	as?: ComponentType<AsProps>;
+} & AsProps) => {
 	const Container = as ?? PressableFeedback;
 	return (
 		<Container
-			ref={ref as any}
+			ref={ref}
 			disabled={disabled}
-			{...(css(
-				[
-					{
-						flexGrow: 0,
-						flexDirection: "row",
-						alignItems: "center",
-						justifyContent: "center",
-						overflow: "hidden",
-						p: ts(0.5),
-						borderRadius: ts(5),
-						borderColor: (theme: Theme) => theme.accent,
-						borderWidth: ts(0.5),
-						fover: {
-							self: { bg: (theme: Theme) => theme.accent },
-							text: { color: (theme: Theme) => theme.colors.white },
-						},
-					},
-					disabled && {
-						child: {
-							self: {
-								borderColor: (theme) => theme.overlay1,
-							},
-							text: {
-								color: (theme) => theme.overlay1,
-							},
-						},
-					},
-				],
-				props as any,
-			) as AsProps)}
-		>
-			{(licon || text || icon) != null && (
-				<View
-					{...css({
-						paddingX: ts(3),
-						flexDirection: "row",
-						alignItems: "center",
-					})}
-				>
-					{licon}
-					{text && <P {...css({ textAlign: "center" }, "text")}>{text}</P>}
-					{icon}
-				</View>
+			className={cn(
+				"flex-row items-center justify-center overflow-hidden",
+				"rounded-4xl border-3 border-accent p-1 outline-0",
+				disabled && "border-slate-600",
+				"group focus-within:bg-accent hover:bg-accent",
+				className,
 			)}
-			{children}
+			{...(props as AsProps)}
+		>
+			<View className="flex-row items-center px-6">
+				{icon && (
+					<Icon
+						icon={icon}
+						className="mx-2 group-focus-within:fill-slate-200 group-hover:fill-slate-200"
+					/>
+				)}
+				{text && (
+					<P className="text-center group-focus-within:text-slate-200 group-hover:text-slate-200">
+						{text}
+					</P>
+				)}
+				{ricon && (
+					<Icon
+						icon={ricon}
+						className="mx-2 group-focus-within:fill-slate-200 group-hover:fill-slate-200"
+					/>
+				)}
+			</View>
 		</Container>
 	);
-});
+};

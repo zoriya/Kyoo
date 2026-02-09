@@ -1,34 +1,44 @@
 import Star from "@material-symbols/svg-400/rounded/star-fill.svg";
 import { View } from "react-native";
-import { rem, useYoshiki } from "yoshiki/native";
-import { type Breakpoint, Icon, P, Skeleton, ts } from "~/primitives";
+import { Icon, P, Skeleton } from "~/primitives";
+import { cn } from "~/utils";
 
 export const Rating = ({
 	rating,
-	color,
+	className,
+	textClassName,
+	iconClassName,
+	...props
 }: {
 	rating: number | null;
-	color: Breakpoint<string>;
+	className?: string;
+	textClassName?: string;
+	iconClassName?: string;
 }) => {
-	const { css } = useYoshiki();
-
 	return (
-		<View {...css({ flexDirection: "row", alignItems: "center" })}>
-			<Icon icon={Star} color={color} {...css({ marginRight: ts(0.5) })} />
-			<P {...css({ color, verticalAlign: "middle" })}>
+		<View className={cn("flex-row items-center", className)} {...props}>
+			<Icon icon={Star} className={cn("mr-1", iconClassName)} />
+			<P className={cn("align-middle", textClassName)}>
 				{rating ? rating / 10 : "??"} / 10
 			</P>
 		</View>
 	);
 };
 
-Rating.Loader = ({ color }: { color: Breakpoint<string> }) => {
-	const { css } = useYoshiki();
-
+Rating.Loader = ({
+	className,
+	textClassName,
+	iconClassName,
+	...props
+}: {
+	className?: string;
+	textClassName?: string;
+	iconClassName?: string;
+}) => {
 	return (
-		<View {...css({ flexDirection: "row", alignItems: "center" })}>
-			<Icon icon={Star} color={color} {...css({ marginRight: ts(0.5) })} />
-			<Skeleton {...css({ width: rem(2) })} />
+		<View className={cn("flex-row items-center", className)} {...props}>
+			<Icon icon={Star} className={cn("mr-1", iconClassName)} />
+			<Skeleton className={cn("w-8", textClassName)} />
 		</View>
 	);
 };

@@ -8,7 +8,8 @@ import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import { type ComponentProps, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import { rem, useYoshiki } from "yoshiki/native";
+import { useUniwind } from "uniwind";
+import { rem } from "yoshiki/native";
 import type { KyooError, User } from "~/models";
 import {
 	Alert,
@@ -39,7 +40,7 @@ import { Preference, SettingsContainer } from "./base";
 
 export const AccountSettings = () => {
 	const account = useAccount()!;
-	const { css, theme } = useYoshiki();
+	const { theme } = useUniwind();
 	const [setPopup, close] = usePopup();
 	const { t } = useTranslation();
 
@@ -68,15 +69,15 @@ export const AccountSettings = () => {
 		<SettingsContainer
 			title={t("settings.account.label")}
 			extra={
-				<View {...css({ marginTop: ts(2), gap: ts(2), flexDirection: "row" })}>
+				<View className="mt-4 flex-row gap-4">
 					<Button
-						licon={<Icon icon={Logout} {...css({ marginX: ts(1) })} />}
+						icon={Logout}
 						text={t("login.logout")}
 						onPress={logout}
-						{...css({ flexGrow: 1, flexShrink: 1, flexBasis: 0 })}
+						className="flex-1"
 					/>
 					<Button
-						licon={<Icon icon={Delete} {...css({ marginX: ts(1) })} />}
+						icon={Delete}
 						text={t("login.delete")}
 						onPress={async () => {
 							Alert.alert(
@@ -92,13 +93,12 @@ export const AccountSettings = () => {
 								],
 								{
 									cancelable: true,
-									userInterfaceStyle:
-										theme.mode === "auto" ? "light" : theme.mode,
+									userInterfaceStyle: theme as "light" | "dark",
 									icon: "warning",
 								},
 							);
 						}}
-						{...css({ flexGrow: 1, flexShrink: 1, flexBasis: 0 })}
+						className="flex-1"
 					/>
 				</View>
 			}
@@ -237,7 +237,6 @@ const ChangePopup = ({
 					</View>
 					<Input
 						autoComplete={autoComplete}
-						variant="big"
 						value={value}
 						onChangeText={(v) => setValue(v)}
 					/>
@@ -299,7 +298,6 @@ const ChangePasswordPopup = ({
 					{hasPassword && (
 						<PasswordInput
 							autoComplete="current-password"
-							variant="big"
 							value={oldValue}
 							onChangeText={(v) => setOldValue(v)}
 							placeholder={t("settings.account.password.oldPassword")}
@@ -307,7 +305,6 @@ const ChangePasswordPopup = ({
 					)}
 					<PasswordInput
 						autoComplete="new-password"
-						variant="big"
 						value={newValue}
 						onChangeText={(v) => setNewValue(v)}
 						placeholder={t("settings.account.password.newPassword")}

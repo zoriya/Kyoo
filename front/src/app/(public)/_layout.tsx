@@ -1,12 +1,12 @@
 import { Stack } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTheme } from "yoshiki/native";
+import { useCSSVariable } from "uniwind";
 import { ErrorConsumer } from "~/providers/error-consumer";
 import { NavbarProfile, NavbarTitle } from "~/ui/navbar";
 
 export default function Layout() {
 	const insets = useSafeAreaInsets();
-	const theme = useTheme();
+	const accent = useCSSVariable("--color-accent");
 
 	return (
 		<ErrorConsumer scope="login">
@@ -19,7 +19,7 @@ export default function Layout() {
 						paddingRight: insets.right,
 					},
 					headerStyle: {
-						backgroundColor: theme.accent,
+						backgroundColor: accent as string,
 					},
 				}}
 			/>

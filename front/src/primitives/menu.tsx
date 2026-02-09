@@ -12,15 +12,12 @@ import {
 	useRef,
 	useState,
 } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Pressable, ScrollView, View } from "react-native";
 import type { SvgProps } from "react-native-svg";
-import { percent, px, sm, useYoshiki, vh, xl } from "yoshiki/native";
+import { cn } from "~/utils";
 import { Icon, IconButton } from "./icons";
 import { PressableFeedback } from "./links";
 import { P } from "./text";
-import { ContrastArea, SwitchVariant } from "./theme";
-import { ts } from "./utils";
 
 const MenuContext = createContext<((open: boolean) => void) | undefined>(
 	undefined,
@@ -44,7 +41,6 @@ const Menu = <AsProps,>({
 	isOpen?: boolean;
 	setOpen?: (v: boolean) => void;
 } & Optional<AsProps, "onPress">) => {
-	const insets = useSafeAreaInsets();
 	const alreadyRendered = useRef(false);
 	const [isOpen, setOpen] =
 		outerOpen !== undefined && outerSetOpen
@@ -67,67 +63,33 @@ const Menu = <AsProps,>({
 				onPress={() => {
 					setOpen(true);
 				}}
-				{...(props as any)}
+				{...(props as AsProps)}
 			/>
 			{isOpen && (
 				<Portal>
-					<ContrastArea mode="user">
-						<SwitchVariant>
-							{({ css, theme }) => (
-								<MenuContext.Provider value={setOpen}>
-									<Pressable
-										onPress={() => setOpen(false)}
-										tabIndex={-1}
-										{...css({
-											...StyleSheet.absoluteFillObject,
-											flexGrow: 1,
-											bg: "transparent",
-										})}
-									/>
-									<View
-										{...css([
-											{
-												bg: (theme) => theme.background,
-												position: "absolute",
-												bottom: 0,
-												width: percent(100),
-												maxHeight: vh(80),
-												alignSelf: "center",
-												borderTopLeftRadius: px(26),
-												borderTopRightRadius: { xs: px(26), xl: 0 },
-												paddingTop: { xs: px(26), xl: 0 },
-												marginTop: { xs: px(72), xl: 0 },
-												paddingBottom: insets.bottom,
-											},
-											sm({
-												maxWidth: px(640),
-												marginHorizontal: px(56),
-											}),
-											xl({
-												top: 0,
-												right: 0,
-												marginRight: 0,
-												borderBottomLeftRadius: px(26),
-											}),
-										])}
-									>
-										<ScrollView>
-											<IconButton
-												icon={Close}
-												color={theme.colors.black}
-												onPress={() => setOpen(false)}
-												{...css({
-													alignSelf: "flex-end",
-													display: { xs: "none", xl: "flex" },
-												})}
-											/>
-											{children}
-										</ScrollView>
-									</View>
-								</MenuContext.Provider>
+					<MenuContext.Provider value={setOpen}>
+						<Pressable
+							onPress={() => setOpen(false)}
+							tabIndex={-1}
+							className="absolute inset-0 flex-1 bg-transparent"
+						/>
+						<View
+							className={cn(
+								"absolute bottom-0 w-full self-center bg-popover pb-safe sm:mx-12 sm:max-w-2xl",
+								"mt-20 max-h-[80vh] rounded-t-4xl pt-8",
+								"xl:top-0 xl:right-0 xl:mr-0 xl:rounded-l-4xl xl:rounded-tr-0",
 							)}
-						</SwitchVariant>
-					</ContrastArea>
+						>
+							<ScrollView>
+								<IconButton
+									icon={Close}
+									onPress={() => setOpen(false)}
+									className="hidden self-end xl:flex"
+								/>
+								{children}
+							</ScrollView>
+						</View>
+					</MenuContext.Provider>
 				</Portal>
 			)}
 		</>
@@ -153,16 +115,13 @@ const MenuItem = ({
 	| { onSelect: () => void; href?: undefined }
 	| { href: string; onSelect?: undefined }
 )) => {
-	const { css, theme } = useYoshiki();
 	const setOpen = useContext(MenuContext);
 	const router = useRouter();
 
 	const icn = (icon || selected) && (
 		<Icon
 			icon={icon ?? Check}
-			color={disabled ? theme.overlay0 : theme.paragraph}
-			size={24}
-			{...css({ paddingX: ts(1) })}
+			className={cn("mx-6", disabled && "fill-slate-600 dark:fill-slate-600")}
 		/>
 	);
 
@@ -174,27 +133,16 @@ const MenuItem = ({
 				if (href) router.push(href);
 			}}
 			disabled={disabled}
-			{...css(
-				{
-					paddingHorizontal: ts(2),
-					width: percent(100),
-					height: ts(5),
-					alignItems: "center",
-					flexDirection: "row",
-				},
-				props as any,
-			)}
+			className="h-15 w-full flex-row items-center px-4"
+			{...props}
 		>
 			{left && left}
 			{!left && icn && icn}
 			<P
-				{...css([
-					{
-						paddingLeft: ts(2) + +!(icon || selected || left) * px(24),
-						flexGrow: 1,
-					},
-					disabled && { color: theme.overlay0 },
-				])}
+				className={cn("flex-1", disabled && "text-slate-600")}
+				style={{
+					paddingLeft: 8 * 2 + +!(icon || selected || left) * 24,
+				}}
 			>
 				{label}
 			</P>
