@@ -44,6 +44,7 @@ export const expo: ExpoConfig = {
 	},
 	plugins: [
 		"expo-router",
+		"@react-native-tvos/config-tv",
 		[
 			"expo-build-properties",
 			{

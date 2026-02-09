@@ -71,7 +71,7 @@ export const ItemGrid = ({
 		>
 			<PosterBackground
 				src={poster}
-				alt={name}
+				alt=""
 				quality="low"
 				className={cn(
 					"w-full",
