@@ -6,7 +6,6 @@ import { HR, P, Skeleton } from "~/primitives";
 import { type QueryIdentifier, useFetch } from "~/query";
 import { useDisplayName } from "~/track-utils";
 import { useQueryState } from "~/utils";
-import { ErrorView } from "../errors";
 
 const formatBitrate = (b: number) => `${(b / 1000000).toFixed(2)} Mbps`;
 
@@ -34,11 +33,10 @@ Row.Loading = ({ label }: { label: string }) => {
 
 export const Info = () => {
 	const [slug] = useQueryState<string>("slug", undefined!);
-	const { data, error } = useFetch(Info.infoQuery(slug));
+	const { data } = useFetch(Info.infoQuery(slug));
 	const { t } = useTranslation();
 	const getDisplayName = useDisplayName();
 
-	if (error) return <ErrorView error={error} />;
 	if (!data) return <Info.Loading />;
 
 	return (

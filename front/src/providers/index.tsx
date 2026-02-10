@@ -1,3 +1,4 @@
+import { PortalProvider } from "@gorhom/portal";
 import {
 	DefaultTheme,
 	ThemeProvider as RNThemeProvider,
@@ -15,9 +16,6 @@ import {
 import { ThemeSelector } from "~/primitives/theme";
 import { createQueryClient } from "~/query";
 import { AccountProvider } from "./account-provider";
-import { ErrorConsumer } from "./error-consumer";
-import { ErrorProvider } from "./error-provider";
-import { NativeProviders } from "./native-providers";
 import { TranslationsProvider } from "./translations.native";
 
 function getServerData(_key: string) {}
@@ -85,15 +83,11 @@ export const Providers = ({ children }: { children: ReactNode }) => {
 		<QueryProvider>
 			<ThemeProvider>
 				<RnTheme>
-					<ErrorProvider>
-						<AccountProvider>
-							<TranslationsProvider>
-								<NativeProviders>
-									<ErrorConsumer scope="root">{children}</ErrorConsumer>
-								</NativeProviders>
-							</TranslationsProvider>
-						</AccountProvider>
-					</ErrorProvider>
+					<AccountProvider>
+						<TranslationsProvider>
+							<PortalProvider>{children}</PortalProvider>
+						</TranslationsProvider>
+					</AccountProvider>
 				</RnTheme>
 			</ThemeProvider>
 		</QueryProvider>

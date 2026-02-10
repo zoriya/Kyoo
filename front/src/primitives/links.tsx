@@ -11,6 +11,7 @@ import {
 import { useTheme } from "yoshiki/native";
 import { cn } from "~/utils";
 import { alpha } from "./theme";
+import { useResolveClassNames } from "uniwind";
 
 export function useLinkTo({
 	href,
@@ -72,19 +73,14 @@ export const A = ({
 };
 
 export const PressableFeedback = ({ children, ...props }: PressableProps) => {
-	const theme = useTheme();
+	const { color } = useResolveClassNames("text-slate-400/25");
 
 	return (
 		<Pressable
-			// TODO: Enable ripple on tv. Waiting for https://github.com/react-native-tvos/react-native-tvos/issues/440
-			{...(Platform.isTV
-				? {}
-				: {
-						android_ripple: {
-							foreground: true,
-							color: alpha(theme.contrast, 0.5) as any,
-						},
-					})}
+			android_ripple={{
+				foreground: true,
+				color,
+			}}
 			{...props}
 		>
 			{children}

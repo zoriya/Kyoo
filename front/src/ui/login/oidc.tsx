@@ -12,7 +12,6 @@ import { useTranslation } from "react-i18next";
 import { ImageBackground, View } from "react-native";
 import { useRouter } from "solito/router";
 import { percent, rem, useYoshiki } from "yoshiki/native";
-import { ErrorView } from "../errors";
 
 export const OidcLogin = ({
 	apiUrl,
@@ -23,7 +22,7 @@ export const OidcLogin = ({
 }) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
-	const { data, error } = useFetch({
+	const { data } = useFetch({
 		options: { apiUrl },
 		...OidcLogin.query(),
 	});
@@ -35,33 +34,33 @@ export const OidcLogin = ({
 
 	return (
 		<View {...css({ alignItems: "center", marginY: ts(1) })}>
-			{error ? (
-				<ErrorView error={error} />
-			) : data ? (
-				Object.values(data.oidc).map((x) => (
-					<Button
-						as={Link}
-						href={{ pathname: x.link, query: { apiUrl } }}
-						key={x.displayName}
-						licon={
-							x.logoUrl != null && (
-								<ImageBackground
-									source={{ uri: x.logoUrl }}
-									{...css({ width: ts(3), height: ts(3), marginRight: ts(2) })}
-								/>
-							)
-						}
-						text={t("login.via", { provider: x.displayName })}
-						{...btn}
-					/>
-				))
-			) : (
-				[...Array(3)].map((_, i) => (
-					<Button key={i} {...btn}>
-						<Skeleton {...css({ width: percent(66), marginY: rem(0.5) })} />
-					</Button>
-				))
-			)}
+			{data
+				? Object.values(data.oidc).map((x) => (
+						<Button
+							as={Link}
+							href={{ pathname: x.link, query: { apiUrl } }}
+							key={x.displayName}
+							licon={
+								x.logoUrl != null && (
+									<ImageBackground
+										source={{ uri: x.logoUrl }}
+										{...css({
+											width: ts(3),
+											height: ts(3),
+											marginRight: ts(2),
+										})}
+									/>
+								)
+							}
+							text={t("login.via", { provider: x.displayName })}
+							{...btn}
+						/>
+					))
+				: [...Array(3)].map((_, i) => (
+						<Button key={i} {...btn}>
+							<Skeleton {...css({ width: percent(66), marginY: rem(0.5) })} />
+						</Button>
+					))}
 			<View
 				{...css({
 					marginY: ts(1),

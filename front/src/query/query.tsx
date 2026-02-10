@@ -10,6 +10,7 @@ import { useCallback, useContext, useState } from "react";
 import { Platform } from "react-native";
 import type { z } from "zod/v4";
 import { type KyooError, type Page, Paged } from "~/models";
+import { RetryableError } from "~/models/retryable-error";
 import { AccountContext } from "~/providers/account-context";
 import { setServerData } from "~/utils";
 
@@ -93,7 +94,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(context: {
 	} catch (e) {
 		console.error("Invalid json from kyoo", e);
 		throw {
-			message: "Invalid response from kyoo",
+			message: `Invalid response from kyoo at ${context.url}`,
 			status: "json",
 		} as KyooError;
 	}
@@ -170,11 +171,11 @@ export const keyToUrl = (key: ReturnType<typeof toQueryKey>) => {
 };
 
 export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
-	let { apiUrl, authToken } = useContext(AccountContext);
+	let { apiUrl, authToken, selectedAccount } = useContext(AccountContext);
 	if (query.options?.apiUrl) apiUrl = query.options.apiUrl;
 	const key = toQueryKey({ apiUrl, path: query.path, params: query.params });
 
-	return useQuery<Data, KyooError>({
+	const ret = useQuery<Data, KyooError>({
 		queryKey: key,
 		queryFn: (ctx) =>
 			queryFn({
@@ -187,6 +188,17 @@ export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 		placeholderData: query.placeholderData as any,
 		enabled: query.enabled,
 	});
+
+	if (ret.isPaused) throw new RetryableError({ key: "offline" });
+	if (ret.error && (ret.error.status === 401 || ret.error.status === 403)) {
+		throw new RetryableError({
+			key: !selectedAccount ? "needAccount" : "unauthorized",
+			inner: ret.error,
+		});
+	}
+	if (ret.error) throw ret.error;
+
+	return ret;
 };
 
 export const useRefresh = (queries: QueryIdentifier<unknown>[]) => {
@@ -237,6 +249,13 @@ export const useInfiniteFetch = <Data,>(query: QueryIdentifier<Data>) => {
 	});
 	const ret = res as typeof res & { items?: Data[] };
 	ret.items = ret.data?.pages.flatMap((x) => x.items);
+
+	if (ret.isPaused) throw new RetryableError({ key: "offline" });
+	if (ret.error && (ret.error.status === 401 || ret.error.status === 403)) {
+		throw new RetryableError({ key: "unauthorized", inner: ret.error });
+	}
+	if (ret.error) throw ret.error;
+
 	return ret;
 };
 

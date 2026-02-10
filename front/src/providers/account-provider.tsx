@@ -2,16 +2,15 @@ import { useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useMemo, useRef } from "react";
 import { z } from "zod/v4";
 import { Account, User } from "~/models";
+import { RetryableError } from "~/models/retryable-error";
 import { useFetch } from "~/query";
 import { AccountContext } from "./account-context";
 import { removeAccounts, updateAccount } from "./account-store";
-import { useSetError } from "./error-provider";
 import { useStoreValue } from "./settings";
 
 export const defaultApiUrl = "";
 
 export const AccountProvider = ({ children }: { children: ReactNode }) => {
-	const [setError, clearError] = useSetError("connection");
 	const accounts = useStoreValue("accounts", z.array(Account)) ?? [];
 
 	const ret = useMemo(() => {
@@ -44,6 +43,12 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 			authToken: ret.authToken,
 		},
 	});
+	if (userError) {
+		throw new RetryableError({
+			key: "connection",
+			retry: queryClient.resetQueries,
+		});
+	}
 	// Use a ref here because we don't want the effect to trigger when the selected
 	// value has changed, only when the fetch result changed
 	// If we trigger the effect when the selected value change, we enter an infinite render loop
@@ -58,16 +63,6 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 	}, [user, userIsSuccess, userIsPlaceholder]);
 
 	const queryClient = useQueryClient();
-	useEffect(() => {
-		if (!userError) return clearError();
-		setError({
-			error: userError,
-			retry: () => {
-				queryClient.resetQueries();
-			},
-		});
-	}, [userError, queryClient, setError, clearError]);
-
 	const selectedId = ret.selectedAccount?.id;
 	useEffect(() => {
 		selectedId;

@@ -8,7 +8,7 @@ import { Button, Link, P, ts } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { getDisplayDate } from "~/utils";
-import { EmptyView } from "../errors";
+import { EmptyView } from "~/ui/empty-view";
 import { Header } from "./genre";
 
 export const WatchlistList = () => {

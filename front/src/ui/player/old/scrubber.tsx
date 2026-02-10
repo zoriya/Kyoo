@@ -35,7 +35,6 @@ import {
 	useForceRerender,
 	useYoshiki,
 } from "yoshiki/native";
-import { ErrorView } from "../../errors";
 import { seekProgressAtom } from "../controls";
 import { toTimerString } from "../controls/left-buttonsttons";
 import { durationAtom } from "./state";
@@ -126,10 +125,8 @@ export const ScrubberTooltip = ({
 	chapters?: Chapter[];
 	seconds: number;
 }) => {
-	const { info, error, stats } = useScrubber(url);
+	const { info, stats } = useScrubber(url);
 	const { css } = useYoshiki();
-
-	if (error) return <ErrorView error={error} />;
 
 	const current =
 		info.findLast((x) => x.from <= seconds * 1000 && seconds * 1000 < x.to) ??
@@ -174,13 +171,11 @@ export const BottomScrubber = ({
 	chapters?: Chapter[];
 }) => {
 	const { css } = useYoshiki();
-	const { info, error, stats } = useScrubber(url);
+	const { info, stats } = useScrubber(url);
 	const rerender = useForceRerender();
 
 	const progress = useAtomValue(seekProgressAtom) ?? 0;
 	const duration = useAtomValue(durationAtom) ?? 1;
-
-	if (error) return <ErrorView error={error} />;
 
 	const width = stats?.width ?? 1;
 	const chapter = chapters?.findLast(

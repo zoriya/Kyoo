@@ -3,7 +3,7 @@ import { EntryBox, entryDisplayNumber } from "~/components/entries";
 import { ItemGrid } from "~/components/items";
 import { Entry } from "~/models";
 import { InfiniteFetch, type QueryIdentifier } from "~/query";
-import { EmptyView } from "../errors";
+import { EmptyView } from "~/ui/empty-view";
 import { Header } from "./genre";
 
 export const NewsList = () => {

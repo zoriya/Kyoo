@@ -39,7 +39,6 @@ import {
 } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { type Theme, useYoshiki } from "yoshiki/native";
-import { ErrorView } from "../errors";
 
 export const PartOf = ({
 	name,
@@ -99,12 +98,8 @@ export const DetailsCollections = ({
 	type: "movie" | "show";
 	slug: string;
 }) => {
-	const { items, error } = useInfiniteFetch(
-		DetailsCollections.query(type, slug),
-	);
+	const { items } = useInfiniteFetch(DetailsCollections.query(type, slug));
 	const { css } = useYoshiki();
-
-	if (error) return <ErrorView error={error} />;
 
 	// Since most items dont have collections, not having a skeleton reduces layout shifts.
 	if (!items) return null;

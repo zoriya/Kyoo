@@ -18,7 +18,7 @@ import {
 } from "~/primitives";
 import { type QueryIdentifier, useInfiniteFetch } from "~/query";
 import { InfiniteFetch } from "~/query/fetch-infinite";
-import { EmptyView } from "~/ui/errors";
+import { EmptyView } from "~/ui/empty-view";
 import { cn } from "~/utils";
 
 export const SeasonHeader = ({

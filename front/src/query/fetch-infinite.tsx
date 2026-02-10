@@ -3,8 +3,6 @@ import { type ComponentType, type ReactElement, useRef } from "react";
 import type { ViewStyle } from "react-native";
 import { withUniwind } from "uniwind";
 import { type Breakpoint, HR, useBreakpointMap } from "~/primitives";
-import { useSetError } from "~/providers/error-provider";
-import { ErrorView } from "~/ui/errors";
 import { type QueryIdentifier, useInfiniteFetch } from "./query";
 
 export type Layout = {
@@ -54,12 +52,9 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	className?: string;
 }): JSX.Element | null => {
 	const { numColumns, size, gap } = useBreakpointMap(layout);
-	const [setOffline, clearOffline] = useSetError("offline");
 	const oldItems = useRef<Data[] | undefined>(undefined);
 	let {
 		items,
-		isPaused,
-		error,
 		fetchNextPage,
 		isFetching,
 		refetch,
@@ -70,11 +65,6 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 
 	if (!query.infinite)
 		console.warn("A non infinite query was passed to an InfiniteFetch.");
-
-	if (isPaused) setOffline();
-	else clearOffline();
-
-	if (error) return <ErrorView error={error} />;
 
 	const count = items
 		? numColumns - (items.length % numColumns)

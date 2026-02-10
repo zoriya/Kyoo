@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
@@ -6,7 +5,7 @@ import { ItemGrid, itemMap } from "~/components/items";
 import { type Genre, Show } from "~/models";
 import { H3, ts } from "~/primitives";
 import { InfiniteFetch, type QueryIdentifier } from "~/query";
-import { EmptyView } from "../errors";
+import { EmptyView } from "~/ui/empty-view";
 
 export const Header = ({ title }: { title: string }) => {
 	const { css } = useYoshiki();
@@ -27,7 +26,6 @@ export const Header = ({ title }: { title: string }) => {
 };
 
 export const GenreGrid = ({ genre }: { genre: Genre }) => {
-	const displayEmpty = useRef(false);
 	const { t } = useTranslation();
 
 	return (
@@ -37,11 +35,7 @@ export const GenreGrid = ({ genre }: { genre: Genre }) => {
 				query={GenreGrid.query(genre)}
 				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
 				placeholderCount={2}
-				Empty={
-					displayEmpty.current ? (
-						<EmptyView message={t("home.none")} />
-					) : undefined
-				}
+				Empty={<EmptyView message={t("home.none")} />}
 				Render={({ item }) => <ItemGrid {...itemMap(item)} horizontal />}
 				Loader={ItemGrid.Loader}
 			/>

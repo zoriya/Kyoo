@@ -18,13 +18,18 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { type Issue, IssueP, type QueryIdentifier, queryFn, useFetch } from "@kyoo/models";
+import {
+	type Issue,
+	IssueP,
+	type QueryIdentifier,
+	queryFn,
+	useFetch,
+} from "@kyoo/models";
 import { Button, Icon, P, Skeleton, tooltip, ts } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 import { z } from "zod";
-import { ErrorView } from "../../../../src/ui/errors";
 import { SettingsContainer } from "../settings/base";
 
 import Info from "@material-symbols/svg-400/outlined/info.svg";
@@ -57,31 +62,31 @@ export const Scanner = () => {
 			}
 		>
 			<>
-				{error != null ? (
-					<ErrorView error={error} />
-				) : (
-					(data ?? [...Array(3)])?.map((x, i) => (
-						<View
-							key={x?.cause ?? `${i}`}
-							{...css({
-								marginY: ts(1),
-								marginX: ts(3),
-								flexDirection: "row",
-								alignItems: "center",
-								flexGrow: 1,
-							})}
-						>
-							<Icon
-								icon={Info}
-								{...css({ flexShrink: 0, marginRight: ts(2) })}
-								{...tooltip(x?.cause)}
-							/>
-							<Skeleton>
-								{x && <P {...css({ flexGrow: 1, flexShrink: 1, flexWrap: "wrap" })}>{x.reason}</P>}
-							</Skeleton>
-						</View>
-					))
-				)}
+				( (data ?? [...Array(3)])?.map((x, i) => (
+				<View
+					key={x?.cause ?? `${i}`}
+					{...css({
+						marginY: ts(1),
+						marginX: ts(3),
+						flexDirection: "row",
+						alignItems: "center",
+						flexGrow: 1,
+					})}
+				>
+					<Icon
+						icon={Info}
+						{...css({ flexShrink: 0, marginRight: ts(2) })}
+						{...tooltip(x?.cause)}
+					/>
+					<Skeleton>
+						{x && (
+							<P {...css({ flexGrow: 1, flexShrink: 1, flexWrap: "wrap" })}>
+								{x.reason}
+							</P>
+						)}
+					</Skeleton>
+				</View>
+				)) )}
 				{data != null && data.length === 0 && <P>{t("admin.scanner.empty")}</P>}
 			</>
 		</SettingsContainer>

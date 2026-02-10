@@ -13,9 +13,7 @@ import { useLocalSetting } from "~/providers/settings";
 import { type QueryIdentifier, useFetch } from "~/query";
 import { Info } from "~/ui/info";
 import { useQueryState } from "~/utils";
-import { ErrorView } from "../errors";
 import { Controls, LoadingIndicator } from "./controls";
-import { Back } from "./controls/back";
 import { toggleFullscreen } from "./controls/misc";
 import { PlayModeContext } from "./controls/tracks-menu";
 import { useKeyboard } from "./keyboard";
@@ -29,8 +27,8 @@ export const Player = () => {
 	const [slug, setSlug] = useQueryState<string>("slug", undefined!);
 	const [start, setStart] = useQueryState<number | undefined>("t", undefined);
 
-	const { data, error } = useFetch(Player.query(slug));
-	const { data: info, error: infoError } = useFetch(Info.infoQuery(slug));
+	const { data } = useFetch(Player.query(slug));
+	const { data: info } = useFetch(Info.infoQuery(slug));
 	// TODO: map current entry using entries' duration & the current playtime
 	const currentEntry = 0;
 	const entry = data?.entries[currentEntry] ?? data?.entries[0];
@@ -157,17 +155,8 @@ export const Player = () => {
 			setPlayMode("hls");
 		else setPlaybackError({ status: error.code, message: error.message });
 	});
-	if (error || infoError || playbackError) {
-		return (
-			<>
-				<Back
-					showHref={data?.show?.href}
-					name={data?.show?.name ?? "Error"}
-					className="bg-accent"
-				/>
-				<ErrorView error={error ?? infoError ?? playbackError!} />
-			</>
-		);
+	if (playbackError) {
+		throw playbackError;
 	}
 
 	return (
