@@ -64,7 +64,7 @@ export const ItemList = ({
 					<View className="flex-row justify-center">
 						<Heading
 							className={cn(
-								"text-center text-3xl uppercase",
+								"text-center text-3xl text-slate-200 uppercase",
 								"group-focus-within:underline group-hover:underline",
 							)}
 						>
@@ -87,7 +87,9 @@ export const ItemList = ({
 							/>
 						)}
 					</View>
-					{subtitle && <P className="mr-8 text-center">{subtitle}</P>}
+					{subtitle && (
+						<P className="mr-8 text-center text-slate-400">{subtitle}</P>
+					)}
 				</View>
 				<PosterBackground
 					src={poster}
