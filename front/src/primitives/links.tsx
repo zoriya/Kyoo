@@ -8,10 +8,8 @@ import {
 	Text,
 	type TextProps,
 } from "react-native";
-import { useTheme } from "yoshiki/native";
-import { cn } from "~/utils";
-import { alpha } from "./theme";
 import { useResolveClassNames } from "uniwind";
+import { cn } from "~/utils";
 
 export function useLinkTo({
 	href,

@@ -59,10 +59,9 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(context: {
 		if (typeof e === "object" && e && "name" in e && e.name === "AbortError")
 			throw { message: "Aborted", status: "aborted" } as KyooError;
 		console.log("Fetch error", e, context.url);
-		throw {
-			message: "Could not reach Kyoo's server.",
-			status: "aborted",
-		} as KyooError;
+		throw new RetryableError({
+			key: "offline",
+		});
 	}
 	if (resp.status === 404) {
 		throw { message: "Resource not found.", status: 404 } as KyooError;
@@ -144,6 +143,7 @@ export type QueryIdentifier<T = unknown> = {
 	enabled?: boolean;
 	options?: Partial<Parameters<typeof queryFn>[0]> & {
 		apiUrl?: string;
+		returnError?: boolean;
 	};
 };
 
@@ -189,14 +189,16 @@ export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 		enabled: query.enabled,
 	});
 
-	if (ret.isPaused) throw new RetryableError({ key: "offline" });
-	if (ret.error && (ret.error.status === 401 || ret.error.status === 403)) {
-		throw new RetryableError({
-			key: !selectedAccount ? "needAccount" : "unauthorized",
-			inner: ret.error,
-		});
+	if (query.options?.returnError !== true) {
+		if (ret.isPaused) throw new RetryableError({ key: "offline" });
+		if (ret.error && (ret.error.status === 401 || ret.error.status === 403)) {
+			throw new RetryableError({
+				key: !selectedAccount ? "needAccount" : "unauthorized",
+				inner: ret.error,
+			});
+		}
+		if (ret.error) throw ret.error;
 	}
-	if (ret.error) throw ret.error;
 
 	return ret;
 };

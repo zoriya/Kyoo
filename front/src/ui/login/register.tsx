@@ -2,8 +2,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Platform } from "react-native";
-import { percent, px, useYoshiki } from "yoshiki/native";
-import { A, Button, H1, Input, P, ts } from "~/primitives";
+import { A, Button, H1, Input, P } from "~/primitives";
 import { defaultApiUrl } from "~/providers/account-provider";
 import { useQueryState } from "~/utils";
 import { FormPage } from "./form";
@@ -21,50 +20,39 @@ export const RegisterPage = () => {
 
 	const router = useRouter();
 	const { t } = useTranslation();
-	const { css } = useYoshiki();
 
 	if (Platform.OS !== "web" && !apiUrl) return <ServerUrlPage />;
 
 	return (
 		<FormPage apiUrl={apiUrl!}>
-			<H1>{t("login.register")}</H1>
-			{/* <OidcLogin apiUrl={apiUrl} hideOr={!data?.passwordLoginEnabled} /> */}
-			{/* {data?.registrationEnabled && ( */}
-			{/* 	<> */}
-			<P {...(css({ paddingLeft: ts(1) }) as any)}>{t("login.username")}</P>
+			<H1 className="pb-4">{t("login.register")}</H1>
+			<P className="pl-2">{t("login.username")}</P>
 			<Input
 				autoComplete="username"
-				variant="big"
 				onChangeText={(value) => setUsername(value)}
 			/>
 
-			<P {...(css({ paddingLeft: ts(1) }) as any)}>{t("login.email")}</P>
-			<Input
-				autoComplete="email"
-				variant="big"
-				onChangeText={(value) => setEmail(value)}
-			/>
+			<P className="pt-2 pl-2">{t("login.email")}</P>
+			<Input autoComplete="email" onChangeText={(value) => setEmail(value)} />
 
-			<P {...(css({ paddingLeft: ts(1) }) as any)}>{t("login.password")}</P>
+			<P className="pt-2 pl-2">{t("login.password")}</P>
 			<PasswordInput
 				autoComplete="new-password"
-				variant="big"
 				onChangeText={(value) => setPassword(value)}
 			/>
 
-			<P {...(css({ paddingLeft: ts(1) }) as any)}>{t("login.confirm")}</P>
+			<P className="pt-2 pl-2">{t("login.confirm")}</P>
 			<PasswordInput
 				autoComplete="new-password"
-				variant="big"
 				onChangeText={(value) => setConfirm(value)}
 			/>
 
 			{password !== confirm && (
-				<P {...css({ color: (theme) => theme.colors.red })}>
+				<P className="text-red-500 dark:text-red-500">
 					{t("login.password-no-match")}
 				</P>
 			)}
-			{error && <P {...css({ color: (theme) => theme.colors.red })}>{error}</P>}
+			{error && <P className="text-red-500 dark:text-red-500">{error}</P>}
 			<Button
 				text={t("login.register")}
 				disabled={password !== confirm}
@@ -79,16 +67,8 @@ export const RegisterPage = () => {
 					if (error) return;
 					router.replace("/");
 				}}
-				{...css({
-					m: ts(1),
-					width: px(250),
-					maxWidth: percent(100),
-					alignSelf: "center",
-					mY: ts(3),
-				})}
+				className="m-2 my-6 w-60 self-center"
 			/>
-			{/* 	</> */}
-			{/* )} */}
 			<P>
 				<Trans i18nKey="login.or-login">
 					Have an account already?

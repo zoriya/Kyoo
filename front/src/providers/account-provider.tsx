@@ -1,5 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 import { type ReactNode, useEffect, useMemo, useRef } from "react";
+import { Platform } from "react-native";
 import { z } from "zod/v4";
 import { Account, User } from "~/models";
 import { RetryableError } from "~/models/retryable-error";
@@ -11,10 +13,11 @@ import { useStoreValue } from "./settings";
 export const defaultApiUrl = "";
 
 export const AccountProvider = ({ children }: { children: ReactNode }) => {
+	const queryClient = useQueryClient();
 	const accounts = useStoreValue("accounts", z.array(Account)) ?? [];
 
 	const ret = useMemo(() => {
-		const acc = accounts.find((x) => x.selected);
+		const acc = accounts.find((x) => x.selected) ?? accounts[0];
 		return {
 			apiUrl: acc?.apiUrl ?? defaultApiUrl,
 			authToken: acc?.token ?? null,
@@ -26,6 +29,20 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 			})),
 		};
 	}, [accounts]);
+
+	if (Platform.OS !== "web") {
+		// biome-ignore lint/correctness/useHookAtTopLevel: static
+		const router = useRouter();
+		// biome-ignore lint/correctness/useHookAtTopLevel: static
+		useEffect(() => {
+			if (!ret.apiUrl) {
+				setTimeout(() => {
+					console.log("go to login");
+					router.replace("/login");
+				}, 0);
+			}
+		}, [ret.apiUrl, router]);
+	}
 
 	// update user's data from kyoo on startup, it could have changed.
 	const {
@@ -62,7 +79,6 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 		updateAccount(nUser.id, nUser);
 	}, [user, userIsSuccess, userIsPlaceholder]);
 
-	const queryClient = useQueryClient();
 	const selectedId = ret.selectedAccount?.id;
 	useEffect(() => {
 		selectedId;

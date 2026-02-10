@@ -83,11 +83,11 @@ export const Providers = ({ children }: { children: ReactNode }) => {
 		<QueryProvider>
 			<ThemeProvider>
 				<RnTheme>
-					<AccountProvider>
-						<TranslationsProvider>
+					<TranslationsProvider>
+						<AccountProvider>
 							<PortalProvider>{children}</PortalProvider>
-						</TranslationsProvider>
-					</AccountProvider>
+						</AccountProvider>
+					</TranslationsProvider>
 				</RnTheme>
 			</ThemeProvider>
 		</QueryProvider>
