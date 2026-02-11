@@ -6,7 +6,7 @@ import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg";
 import { Stack } from "expo-router";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
+import { View, ViewProps } from "react-native";
 import { WatchListInfo } from "~/components/items/watchlist-info";
 import { Rating } from "~/components/rating";
 import {
@@ -380,78 +380,76 @@ Description.Loader = ({ ...props }: object) => {
 export const Header = ({
 	kind,
 	slug,
+	onImageLayout,
 }: {
 	kind: "movie" | "serie";
 	slug: string;
+	onImageLayout?: ViewProps["onLayout"];
 }) => {
 	return (
-		<>
-			<Stack.Screen
-				options={{
-					headerTransparent: true,
-					headerStyle: { backgroundColor: undefined },
-				}}
-			/>
-			<Fetch
-				query={Header.query(kind, slug)}
-				Render={(data) => (
-					<View className="flex-1">
-						<Head
-							title={data.name}
-							description={data.description}
-							image={data.thumbnail?.high}
-						/>
-						<ImageBackground
-							src={data.thumbnail}
-							quality="high"
-							alt=""
-							className="absolute top-0 right-0 left-0 h-[40vh] w-full sm:h-[60vh] sm:min-h-[750px] md:min-h-[680px] lg:h-[65vh]"
-						>
-							<View className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/70" />
-						</ImageBackground>
-						<TitleLine
-							kind={kind}
-							slug={slug}
-							name={data.name}
-							tagline={data.tagline}
-							date={getDisplayDate(data)}
-							rating={data.rating}
-							runtime={data.kind === "movie" ? data.runtime : null}
-							poster={data.poster}
-							playHref={data.kind !== "collection" ? data.playHref : null}
-							trailerUrl={data.kind !== "collection" ? data.trailerUrl : null}
-							watchStatus={
-								data.kind !== "collection"
-									? (data.watchStatus?.status ?? null)
-									: null
-							}
-							className="mt-[max(20vh,200px)] sm:mt-[35vh] md:mt-[max(45vh,150px)] lg:mt-[max(35vh,200px)]"
-						/>
-						<Description
-							description={data.description}
-							tags={data.tags}
-							genres={data.genres}
-							studios={data.kind !== "collection" ? data.studios! : []}
-							externalIds={data.externalId}
-						/>
+		<Fetch
+			query={Header.query(kind, slug)}
+			Render={(data) => (
+				<View className="flex-1">
+					<Head
+						title={data.name}
+						description={data.description}
+						image={data.thumbnail?.high}
+					/>
+					<ImageBackground
+						src={data.thumbnail}
+						quality="high"
+						alt=""
+						className="absolute top-0 right-0 left-0 h-[40vh] w-full sm:h-[60vh] sm:min-h-[750px] md:min-h-[680px] lg:h-[65vh]"
+						onLayout={onImageLayout}
+					>
+						<View className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/70" />
+					</ImageBackground>
+					<TitleLine
+						kind={kind}
+						slug={slug}
+						name={data.name}
+						tagline={data.tagline}
+						date={getDisplayDate(data)}
+						rating={data.rating}
+						runtime={data.kind === "movie" ? data.runtime : null}
+						poster={data.poster}
+						playHref={data.kind !== "collection" ? data.playHref : null}
+						trailerUrl={data.kind !== "collection" ? data.trailerUrl : null}
+						watchStatus={
+							data.kind !== "collection"
+								? (data.watchStatus?.status ?? null)
+								: null
+						}
+						className="mt-[max(20vh,200px)] sm:mt-[35vh] md:mt-[max(45vh,150px)] lg:mt-[max(35vh,200px)]"
+					/>
+					<Description
+						description={data.description}
+						tags={data.tags}
+						genres={data.genres}
+						studios={data.kind !== "collection" ? data.studios! : []}
+						externalIds={data.externalId}
+					/>
 
-						{/* {type === "show" && ( */}
-						{/* 	<ShowWatchStatusCard {...(data?.watchStatus as any)} /> */}
-						{/* )} */}
-					</View>
-				)}
-				Loader={() => (
-					<View className="flex-1">
-						<View className="absolute top-0 right-0 left-0 h-[40vh] w-full bg-linear-to-b from-transparent to-slate-950/70 sm:h-[60vh] sm:min-h-[750px] md:min-h-[680px] lg:h-[65vh]" />
-						<TitleLine.Loader
-							kind={kind}
-							className="mt-[max(20vh,200px)] sm:mt-[35vh] md:mt-[max(45vh,150px)] lg:mt-[max(35vh,200px)]"
-						/>
-						<Description.Loader />
-					</View>
-				)}
-			/>
-		</>
+					{/* {type === "show" && ( */}
+					{/* 	<ShowWatchStatusCard {...(data?.watchStatus as any)} /> */}
+					{/* )} */}
+				</View>
+			)}
+			Loader={() => (
+				<View className="flex-1">
+					<View
+						className="absolute top-0 right-0 left-0 h-[40vh] w-full bg-linear-to-b from-transparent to-slate-950/70 sm:h-[60vh] sm:min-h-[750px] md:min-h-[680px] lg:h-[65vh]"
+						onLayout={onImageLayout}
+					/>
+					<TitleLine.Loader
+						kind={kind}
+						className="mt-[max(20vh,200px)] sm:mt-[35vh] md:mt-[max(45vh,150px)] lg:mt-[max(35vh,200px)]"
+					/>
+					<Description.Loader />
+				</View>
+			)}
+		/>
 	);
 };
 

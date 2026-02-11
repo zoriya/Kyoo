@@ -37,7 +37,6 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 		useEffect(() => {
 			if (!ret.apiUrl) {
 				setTimeout(() => {
-					console.log("go to login");
 					router.replace("/login");
 				}, 0);
 			}

@@ -1,4 +1,3 @@
-import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCSSVariable, useResolveClassNames } from "uniwind";
@@ -26,18 +25,6 @@ export default function Layout() {
 				headerTintColor: color as string,
 			}}
 		>
-			<Stack.Screen
-				name="(tabs)"
-				options={({ route }) => {
-					if (getFocusedRouteNameFromRoute(route) === "index") {
-						return {
-							headerTransparent: true,
-							headerStyle: { backgroundColor: undefined },
-						};
-					}
-					return {};
-				}}
-			/>
 			<Stack.Screen
 				name="info/[slug]"
 				options={{

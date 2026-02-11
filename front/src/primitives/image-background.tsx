@@ -1,4 +1,7 @@
-import { ImageBackground as EImageBackground } from "expo-image";
+import {
+	ImageBackground as EImageBackground,
+	type ImageBackgroundProps,
+} from "expo-image";
 import type { ComponentProps, ReactNode } from "react";
 import type { ImageStyle } from "react-native";
 import { Platform, View } from "react-native";
@@ -25,8 +28,7 @@ export const ImageBackground = ({
 	alt?: string;
 	style?: ImageStyle;
 	children: ReactNode;
-	className?: string;
-}) => {
+} & Partial<ImageBackgroundProps>) => {
 	const { apiUrl, authToken } = useToken();
 
 	if (!src) {

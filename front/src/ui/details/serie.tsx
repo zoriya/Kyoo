@@ -1,4 +1,4 @@
-import type { ComponentProps } from "react";
+import { useState, type ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -10,6 +10,9 @@ import { Fetch } from "~/query";
 import { useQueryState } from "~/utils";
 import { Header } from "./header";
 import { EntryList } from "./season";
+import { useScrollNavbar } from "../navbar";
+import Animated from "react-native-reanimated";
+import { ViewProps } from "react-native";
 
 export const SvgWave = (props: ComponentProps<typeof Svg>) => {
 	// aspect-[width/height]: width/height of the svg
@@ -54,12 +57,16 @@ NextUp.Loader = () => {
 	);
 };
 
-const SerieHeader = () => {
-	const [slug] = useQueryState("slug", undefined!);
-
+const SerieHeader = ({
+	slug,
+	onImageLayout,
+}: {
+	slug: string;
+	onImageLayout?: ViewProps["onLayout"];
+}) => {
 	return (
 		<View className="bg-background">
-			<Header kind="serie" slug={slug} />
+			<Header kind="serie" slug={slug} onImageLayout={onImageLayout} />
 			<Fetch
 				// Use the same fetch query as header
 				query={Header.query("serie", slug)}
@@ -80,14 +87,27 @@ export const SerieDetails = () => {
 	const [slug] = useQueryState("slug", undefined!);
 	const [season] = useQueryState("season", undefined!);
 	const insets = useSafeAreaInsets();
+	const [imageHeight, setHeight] = useState(300);
+	const { scrollHandler, headerProps, headerHeight } = useScrollNavbar({
+		imageHeight,
+	});
 
 	return (
 		<View className="flex-1 bg-card">
+			<Animated.View {...headerProps} />
 			<EntryList
 				slug={slug}
 				season={season}
-				Header={SerieHeader}
+				Header={() => (
+					<SerieHeader
+						slug={slug}
+						onImageLayout={(e) => setHeight(e.nativeEvent.layout.height)}
+					/>
+				)}
 				contentContainerStyle={{ paddingBottom: insets.bottom }}
+				onScroll={scrollHandler}
+				scrollEventThrottle={16}
+				stickyHeaderConfig={{ offset: headerHeight }}
 			/>
 		</View>
 	);

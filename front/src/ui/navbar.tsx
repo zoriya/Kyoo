@@ -4,7 +4,12 @@ import Login from "@material-symbols/svg-400/rounded/login.svg";
 import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import Settings from "@material-symbols/svg-400/rounded/settings.svg";
-import { useGlobalSearchParams, usePathname, useRouter } from "expo-router";
+import {
+	useGlobalSearchParams,
+	useNavigation,
+	usePathname,
+	useRouter,
+} from "expo-router";
 import KyooLongLogo from "public/icon-long.svg";
 import {
 	type ComponentProps,
@@ -12,6 +17,8 @@ import {
 	useEffect,
 	useRef,
 	useState,
+	useLayoutEffect,
+	useCallback,
 } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -20,6 +27,7 @@ import {
 	type TextInput,
 	type TextInputProps,
 	View,
+	Animated,
 } from "react-native";
 import {
 	A,
@@ -35,6 +43,15 @@ import {
 import { useAccount, useAccounts } from "~/providers/account-context";
 import { logout } from "~/ui/login/logic";
 import { cn } from "~/utils";
+import {
+	interpolate,
+	useAnimatedScrollHandler,
+	useAnimatedStyle,
+	useSharedValue,
+} from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useIsFocused } from "@react-navigation/native";
+import { useCSSVariable } from "uniwind";
 
 export const NavbarTitle = ({
 	className,
@@ -190,78 +207,51 @@ export const NavbarRight = () => {
 	);
 };
 
-// export const Navbar = ({
-// 	left,
-// 	right,
-// 	background,
-// 	...props
-// }: {
-// 	left?: ReactElement | null;
-// 	right?: ReactElement | null;
-// 	background?: ReactElement;
-// } & Stylable) => {
-// 	const { css } = useYoshiki();
-// 	const { t } = useTranslation();
-//
-// 	return (
-// 		<Header
-// 			{...css(
-// 				{
-// 					backgroundColor: (theme) => theme.accent,
-// 					paddingX: ts(2),
-// 					height: { xs: 48, sm: 64 },
-// 					flexDirection: "row",
-// 					justifyContent: { xs: "space-between", sm: "flex-start" },
-// 					alignItems: "center",
-// 					shadowColor: "#000",
-// 					shadowOffset: {
-// 						width: 0,
-// 						height: 4,
-// 					},
-// 					shadowOpacity: 0.3,
-// 					shadowRadius: 4.65,
-// 					elevation: 8,
-// 					zIndex: 1,
-// 				},
-// 				props,
-// 			)}
-// 		>
-// 			{background}
-// 			<View
-// 				{...css({
-// 					flexDirection: "row",
-// 					alignItems: "center",
-// 					height: percent(100),
-// 				})}
-// 			>
-// 				{left !== undefined ? (
-// 					left
-// 				) : (
-// 					<>
-// 						<NavbarTitle {...css({ marginX: ts(2) })} />
-// 						<A
-// 							href="/browse"
-// 							{...css({
-// 								textTransform: "uppercase",
-// 								fontWeight: "bold",
-// 								color: (theme) => theme.contrast,
-// 							})}
-// 						>
-// 							{t("navbar.browse")}
-// 						</A>
-// 					</>
-// 				)}
-// 			</View>
-// 			<View
-// 				{...css({
-// 					flexGrow: 1,
-// 					flexShrink: 1,
-// 					flexDirection: "row",
-// 					display: { xs: "none", sm: "flex" },
-// 					marginX: ts(2),
-// 				})}
-// 			/>
-// 			{right !== undefined ? right : <NavbarRight />}
-// 		</Header>
-// 	);
-// };
+export const useScrollNavbar = ({
+	imageHeight,
+	tab = false,
+}: {
+	imageHeight: number;
+	tab?: boolean;
+}) => {
+	const insets = useSafeAreaInsets();
+	const height = insets.top + (Platform.OS === "ios" ? 44 : 56);
+
+	const scrollY = useSharedValue(0);
+	const scrollHandler = useAnimatedScrollHandler((event) => {
+		scrollY.value = event.contentOffset.y;
+	});
+	const opacity = useAnimatedStyle(
+		() => ({
+			opacity: interpolate(scrollY.value, [0, imageHeight - height], [0, 1]),
+		}),
+		[imageHeight, height],
+	);
+
+	const nav = useNavigation();
+	const focused = useIsFocused();
+	const accent = useCSSVariable("--color-accent");
+	useLayoutEffect(() => {
+		const n = tab ? nav.getParent() : nav;
+		if (focused) {
+			n?.setOptions({
+				headerTransparent: true,
+				headerStyle: { backgroundColor: "transparent" },
+			});
+		}
+		return () =>
+			n?.setOptions({
+				headerTransparent: false,
+				headerStyle: { backgroundColor: accent as string },
+			});
+	}, [nav, tab, focused, accent]);
+
+	return {
+		scrollHandler,
+		headerProps: {
+			className: cn("absolute z-10 w-full bg-accent"),
+			style: [{ height }, opacity],
+		},
+		headerHeight: height,
+	};
+};
