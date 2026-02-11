@@ -79,7 +79,8 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 			recycleItems
 			getItemType={getItemType}
 			estimatedItemSize={getItemSizeMult ? undefined : size}
-			stickyIndices={getStickyIndices?.(items ?? [])}
+			stickyHeaderIndices={getStickyIndices?.(items ?? [])}
+			// stickyHeaderConfig={{offset}}
 			getEstimatedItemSize={
 				getItemSizeMult
 					? (idx, item, type) => getItemSizeMult(item, idx, type as Type) * size

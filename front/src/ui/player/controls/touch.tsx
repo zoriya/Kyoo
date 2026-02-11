@@ -88,7 +88,7 @@ export const TouchControls = ({
 					// instantly hide the controls when mouse leaves the view
 					if (e.nativeEvent.pointerType === "mouse") show(false);
 				}}
-				className={cn("absolute inset-0", !shouldShow && "cursor-none")}
+				className={cn("absolute inset-0 cursor-default", !shouldShow && "cursor-none")}
 			/>
 			{shouldShow && children}
 		</View>

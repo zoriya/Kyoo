@@ -98,7 +98,7 @@ const ControlButtons = ({
 		onMenuOpen: () => setMenu(true),
 		onMenuClose: () => setMenu(false),
 		className: "mr-4",
-		iconClassName: "fill-slate-200",
+		iconClassName: "fill-slate-200 dark:fill-slate-200",
 	} satisfies Partial<
 		ComponentProps<
 			typeof Menu<ComponentProps<typeof IconButton<PressableProps>>>
@@ -120,14 +120,14 @@ const ControlButtons = ({
 								href={`/watch/${previous}`}
 								replace
 								className="mr-4"
-								iconClassName="fill-slate-200"
+								iconClassName="fill-slate-200 dark:fill-slate-200"
 								{...tooltip(t("player.previous"), true)}
 							/>
 						)}
 						<PlayButton
 							player={player}
 							className="mr-4"
-							iconClassName="fill-slate-200"
+							iconClassName="fill-slate-200 dark:fill-slate-200"
 						/>
 						{next && (
 							<IconButton
@@ -136,16 +136,22 @@ const ControlButtons = ({
 								href={`/watch/${next}`}
 								replace
 								className="mr-4"
-								iconClassName="fill-slate-200"
+								iconClassName="fill-slate-200 dark:fill-slate-200"
 								{...tooltip(t("player.next"), true)}
 							/>
 						)}
 						{Platform.OS === "web" && (
-							<VolumeSlider player={player} iconClassName="fill-slate-200" />
+							<VolumeSlider
+								player={player}
+								iconClassName="fill-slate-200 dark:fill-slate-200"
+							/>
 						)}
 					</View>
 				)}
-				<ProgressText player={player} className="mx-2 text-slate-300" />
+				<ProgressText
+					player={player}
+					className="mx-2 text-slate-300 dark:text-slate-300"
+				/>
 			</View>
 			<View className="flex-row">
 				<SubtitleMenu player={player} {...menuProps} />
@@ -153,7 +159,10 @@ const ControlButtons = ({
 				<VideoMenu player={player} {...menuProps} />
 				<QualityMenu player={player} {...menuProps} />
 				{Platform.OS === "web" && (
-					<FullscreenButton className="mr-4" iconClassName="fill-slate-200" />
+					<FullscreenButton
+						className="mr-4"
+						iconClassName="fill-slate-200 dark:fill-slate-200"
+					/>
 				)}
 			</View>
 		</View>

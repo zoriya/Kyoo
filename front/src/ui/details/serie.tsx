@@ -14,7 +14,7 @@ import { EntryList } from "./season";
 export const SvgWave = (props: ComponentProps<typeof Svg>) => {
 	// aspect-[width/height]: width/height of the svg
 	return (
-		<View className="aspect-[612/52.771] w-full">
+		<View className="ml-[-10px] aspect-612/52 w-[110%]">
 			<Svg width="100%" height="100%" viewBox="0 372.979 612 52.771" {...props}>
 				<Path d="M0,375.175c68,-5.1,136,-0.85,204,7.948c68,9.052,136,22.652,204,24.777s136,-8.075,170,-12.878l34,-4.973v35.7h-612" />
 			</Svg>
@@ -26,16 +26,18 @@ export const NextUp = (nextEntry: Entry) => {
 	const { t } = useTranslation();
 
 	return (
-		<Container className="my-4 overflow-hidden rounded-2xl bg-card py-4 hover:bg-accent">
-			<H2 className="mb-4 ml-2">{t("show.nextUp")}</H2>
-			<EntryLine
-				{...nextEntry}
-				serieSlug={null}
-				videosCount={nextEntry.videos.length}
-				watchedPercent={nextEntry.progress.percent}
-				displayNumber={entryDisplayNumber(nextEntry)}
-			/>
-		</Container>
+		<View className="m-4 flex-1">
+			<Container className="overflow-hidden rounded-2xl bg-card py-4">
+				<H2 className="mb-4 ml-2">{t("show.nextUp")}</H2>
+				<EntryLine
+					{...nextEntry}
+					serieSlug={null}
+					videosCount={nextEntry.videos.length}
+					watchedPercent={nextEntry.progress.percent}
+					displayNumber={entryDisplayNumber(nextEntry)}
+				/>
+			</Container>
+		</View>
 	);
 };
 
@@ -43,10 +45,12 @@ NextUp.Loader = () => {
 	const { t } = useTranslation();
 
 	return (
-		<Container className="my-4 overflow-hidden rounded-2xl bg-card">
-			<H2 className="ml-4">{t("show.nextUp")}</H2>
-			<EntryLine.Loader />
-		</Container>
+		<View className="m-4 flex-1">
+			<Container className="overflow-hidden rounded-2xl bg-card py-4">
+				<H2 className="ml-4">{t("show.nextUp")}</H2>
+				<EntryLine.Loader />
+			</Container>
+		</View>
 	);
 };
 

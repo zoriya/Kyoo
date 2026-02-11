@@ -20,7 +20,7 @@
 		"@expo-google-fonts/sora": "^0.4.2",
 		"@expo/html-elements": "^0.13.7",
 		"@gorhom/portal": "^1.0.14",
-		"@legendapp/list": "^2.0.19",
+		"@legendapp/list": "^3.0.0-beta.31",
 		"@material-symbols/svg-400": "^0.40.2",
 		"@radix-ui/react-dropdown-menu": "^2.1.16",
 		"@radix-ui/react-select": "^2.2.6",
