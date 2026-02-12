@@ -1,6 +1,6 @@
 module github.com/zoriya/kyoo/keibi
 
-go 1.24.0
+go 1.25.0
 
 toolchain go1.25.6
 
@@ -10,7 +10,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.8.0
-	github.com/labstack/echo-jwt/v4 v4.4.0
+	github.com/labstack/echo-jwt/v5 v5.0.0
 	github.com/labstack/echo/v4 v4.15.0
 	github.com/lestrrat-go/jwx/v3 v3.0.13
 	github.com/swaggo/echo-swagger v1.4.1
@@ -44,6 +44,7 @@ require (
 	github.com/go-openapi/swag/yamlutils v0.25.4 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.7 // indirect
+	github.com/labstack/echo/v5 v5.0.0 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.4 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
 	github.com/lestrrat-go/httprc/v3 v3.0.3 // indirect
