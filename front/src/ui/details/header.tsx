@@ -3,10 +3,9 @@ import MoreHoriz from "@material-symbols/svg-400/rounded/more_horiz.svg";
 import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg";
-import { Stack } from "expo-router";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
-import { View, ViewProps } from "react-native";
+import { View, type ViewProps } from "react-native";
 import { WatchListInfo } from "~/components/items/watchlist-info";
 import { Rating } from "~/components/rating";
 import {

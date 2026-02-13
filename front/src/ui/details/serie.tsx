@@ -1,6 +1,6 @@
-import { useState, type ComponentProps } from "react";
+import { type ComponentProps, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
+import { View, type ViewProps } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Path } from "react-native-svg";
 import { EntryLine, entryDisplayNumber } from "~/components/entries";
@@ -8,11 +8,9 @@ import type { Entry, Serie } from "~/models";
 import { Container, H2, Svg } from "~/primitives";
 import { Fetch } from "~/query";
 import { useQueryState } from "~/utils";
+import { HeaderBackground, useScrollNavbar } from "../navbar";
 import { Header } from "./header";
 import { EntryList } from "./season";
-import { useScrollNavbar } from "../navbar";
-import Animated from "react-native-reanimated";
-import { ViewProps } from "react-native";
 
 export const SvgWave = (props: ComponentProps<typeof Svg>) => {
 	// aspect-[width/height]: width/height of the svg
@@ -94,7 +92,7 @@ export const SerieDetails = () => {
 
 	return (
 		<View className="flex-1 bg-card">
-			<Animated.View {...headerProps} />
+			<HeaderBackground {...headerProps} />
 			<EntryList
 				slug={slug}
 				season={season}

@@ -4,7 +4,7 @@ import Animated from "react-native-reanimated";
 import { Genre } from "~/models";
 import { Fetch, useRefresh } from "~/query";
 import { shuffle } from "~/utils";
-import { useScrollNavbar } from "../navbar";
+import { HeaderBackground, useScrollNavbar } from "../navbar";
 import { GenreGrid } from "./genre";
 import { Header } from "./header";
 import { NewsList } from "./news";
@@ -23,7 +23,7 @@ export const HomePage = () => {
 
 	return (
 		<>
-			<Animated.View {...headerProps} />
+			<HeaderBackground {...headerProps} />
 			<Animated.ScrollView
 				onScroll={scrollHandler}
 				scrollEventThrottle={16}

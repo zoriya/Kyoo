@@ -4,6 +4,7 @@ import Login from "@material-symbols/svg-400/rounded/login.svg";
 import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import Settings from "@material-symbols/svg-400/rounded/settings.svg";
+import { useIsFocused } from "@react-navigation/native";
 import {
 	useGlobalSearchParams,
 	useNavigation,
@@ -15,10 +16,9 @@ import {
 	type ComponentProps,
 	type Ref,
 	useEffect,
+	useLayoutEffect,
 	useRef,
 	useState,
-	useLayoutEffect,
-	useCallback,
 } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -27,8 +27,16 @@ import {
 	type TextInput,
 	type TextInputProps,
 	View,
-	Animated,
+	type ViewProps,
 } from "react-native";
+import Animated, {
+	interpolate,
+	useAnimatedScrollHandler,
+	useAnimatedStyle,
+	useSharedValue,
+} from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useCSSVariable } from "uniwind";
 import {
 	A,
 	Avatar,
@@ -43,15 +51,6 @@ import {
 import { useAccount, useAccounts } from "~/providers/account-context";
 import { logout } from "~/ui/login/logic";
 import { cn } from "~/utils";
-import {
-	interpolate,
-	useAnimatedScrollHandler,
-	useAnimatedStyle,
-	useSharedValue,
-} from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useIsFocused } from "@react-navigation/native";
-import { useCSSVariable } from "uniwind";
 
 export const NavbarTitle = ({
 	className,
@@ -227,6 +226,12 @@ export const useScrollNavbar = ({
 		}),
 		[imageHeight, height],
 	);
+	const reverse = useAnimatedStyle(
+		() => ({
+			opacity: interpolate(scrollY.value, [0, imageHeight - height], [1, 0]),
+		}),
+		[imageHeight, height],
+	);
 
 	const nav = useNavigation();
 	const focused = useIsFocused();
@@ -249,9 +254,39 @@ export const useScrollNavbar = ({
 	return {
 		scrollHandler,
 		headerProps: {
-			className: cn("absolute z-10 w-full bg-accent"),
-			style: [{ height }, opacity],
+			opacity,
+			reverse,
+			height,
 		},
 		headerHeight: height,
 	};
+};
+
+export const HeaderBackground = ({
+	children,
+	opacity,
+	reverse,
+	height,
+	className,
+	style,
+	...props
+}: ViewProps & ReturnType<typeof useScrollNavbar>["headerProps"]) => {
+	return (
+		<>
+			<Animated.View
+				className={cn("absolute z-10 w-full bg-accent", className)}
+				style={[{ height }, opacity, style]}
+				{...props}
+			/>
+			<Animated.View
+				className={cn(
+					"absolute z-10 w-full bg-linear-to-b from-slate-950/70 to-transparent",
+					className,
+				)}
+				style={[{ height }, reverse, style]}
+				{...props}
+			/>
+			{children}
+		</>
+	);
 };

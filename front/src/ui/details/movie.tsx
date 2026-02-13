@@ -2,7 +2,7 @@ import { useState } from "react";
 import Animated from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQueryState } from "~/utils";
-import { useScrollNavbar } from "../navbar";
+import { HeaderBackground, useScrollNavbar } from "../navbar";
 import { Header } from "./header";
 
 export const MovieDetails = () => {
@@ -13,7 +13,7 @@ export const MovieDetails = () => {
 
 	return (
 		<>
-			<Animated.View {...headerProps} />
+			<HeaderBackground {...headerProps} />
 			<Animated.ScrollView
 				onScroll={scrollHandler}
 				scrollEventThrottle={16}

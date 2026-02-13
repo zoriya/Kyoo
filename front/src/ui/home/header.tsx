@@ -1,7 +1,7 @@
 import Info from "@material-symbols/svg-400/rounded/info.svg";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import { LinearGradient } from "expo-linear-gradient";
-import { ComponentProps } from "react";
+import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { min, percent, px, rem, vh } from "yoshiki/native";
