@@ -107,7 +107,13 @@ export const SerieDetails = () => {
 				contentContainerStyle={{ paddingBottom: insets.bottom }}
 				onScroll={scrollHandler}
 				scrollEventThrottle={16}
-				stickyHeaderConfig={{ offset: headerHeight }}
+				stickyHeaderConfig={{
+					offset: headerHeight,
+					backdropComponent: () => (
+						// hr bottom margin is m-4 and layout gap is 2 but it's only applied on the web and idk why
+						<View className="absolute inset-0 mb-4 web:mb-6 bg-card" />
+					),
+				}}
 			/>
 		</View>
 	);
