@@ -27,7 +27,7 @@ type VideoKey struct {
 	quality Quality
 }
 
-func (t *Transcoder) newFileStream(ctx context.Context, path string, sha string) *FileStream {
+func (t *Transcoder) newFileStream(path string, sha string) *FileStream {
 	ret := &FileStream{
 		transcoder: t,
 		Out:        fmt.Sprintf("%s/%s", Settings.Outpath, sha),
@@ -38,7 +38,7 @@ func (t *Transcoder) newFileStream(ctx context.Context, path string, sha string)
 	ret.ready.Add(1)
 	go func() {
 		defer ret.ready.Done()
-		info, err := t.metadataService.GetMetadata(ctx, path, sha)
+		info, err := t.metadataService.GetMetadata(context.Background(), path, sha)
 		ret.Info = info
 		if err != nil {
 			ret.err = err
