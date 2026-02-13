@@ -23,8 +23,9 @@ export const Input = ({
 		>
 			<TextInput
 				ref={ref}
+				textAlignVertical="center"
 				className={cn(
-					"flex-1 font-sans text-base text-slate-600 outline-0 dark:text-slate-400",
+					"h-full flex-1 font-sans text-base text-slate-600 outline-0 dark:text-slate-400",
 					className,
 				)}
 				{...props}

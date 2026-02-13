@@ -1,5 +1,6 @@
 import Admin from "@material-symbols/svg-400/rounded/admin_panel_settings.svg";
 import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
+import Close from "@material-symbols/svg-400/rounded/close.svg";
 import Login from "@material-symbols/svg-400/rounded/login.svg";
 import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
@@ -23,8 +24,8 @@ import {
 import { useTranslation } from "react-i18next";
 import {
 	Platform,
+	TextInput,
 	type PressableProps,
-	type TextInput,
 	type TextInputProps,
 	View,
 	type ViewProps,
@@ -175,23 +176,80 @@ export const NavbarProfile = () => {
 		</Menu>
 	);
 };
+
+const MobileSearchBar = () => {
+	const { t } = useTranslation();
+	const [expanded, setExpanded] = useState(false);
+	const inputRef = useRef<TextInput>(null);
+
+	const router = useRouter();
+	const [query, setQuery] = useState("");
+
+	console.log(expanded);
+
+	return (
+		<Animated.View
+			className={cn(
+				"mr-2 flex-row p-0 pl-4",
+				"rounded-full bg-slate-100 dark:bg-slate-800",
+			)}
+			style={[
+				expanded ? { flex: 1 } : { backgroundColor: "transparent" },
+				{
+					transitionProperty: ["width", "background-color"],
+					transitionDuration: "300ms",
+				},
+			]}
+		>
+			<TextInput
+				ref={inputRef}
+				value={query}
+				onChangeText={(q) => {
+					setQuery(q);
+					router.setParams({ q });
+				}}
+				onFocus={() => router.push(query ? `/browse?q=${query}` : "/browse")}
+				placeholder={t("navbar.search")}
+				textAlignVertical="center"
+				className={cn(
+					"h-full flex-1 font-sans text-base outline-0",
+					"text-slate-600 dark:text-slate-200",
+					!expanded && "grow-0",
+				)}
+				placeholderTextColorClassName="accent-slate-400 dark:text-slate-600"
+			/>
+
+			<IconButton
+				icon={expanded ? Close : Search}
+				onPress={() => {
+					if (expanded) {
+						inputRef.current?.blur();
+						setExpanded(false);
+					} else {
+						setExpanded(true);
+						console.log("set to exampeded");
+						// Small delay to allow animation to start before focusing
+						setTimeout(() => inputRef.current?.focus(), 100);
+					}
+				}}
+				iconClassName={cn(
+					expanded
+						? "fill-slate-500 dark:fill-slate-500"
+						: "fill-slate-200 dark:fill-slate-200",
+				)}
+				{...tooltip(t("navbar.search"))}
+			/>
+		</Animated.View>
+	);
+};
+
 export const NavbarRight = () => {
 	const { t } = useTranslation();
 	const isAdmin = false; //useHasPermission(AdminPage.requiredPermissions);
 
 	return (
 		<View className="shrink flex-row items-center">
-			{Platform.OS === "web" ? (
-				<SearchBar />
-			) : (
-				<IconButton
-					icon={Search}
-					as={Link}
-					href={"/browse"}
-					iconClassName="fill-slate-200 dark:fill-slate-200"
-					{...tooltip(t("navbar.search"))}
-				/>
-			)}
+			{Platform.OS === "web" ? <SearchBar /> : <MobileSearchBar />}
 			{isAdmin && (
 				<IconButton
 					icon={Admin}
