@@ -32,13 +32,15 @@ export const MiddleControls = ({
 				href={previous}
 				replace
 				className={cn(
-					"mx-12 h-16 w-16 bg-gray-800/70",
+					"mx-6 bg-gray-800/70",
 					!previous && "pointer-events-none opacity-0",
 				)}
+				iconClassName="h-16 w-16"
 			/>
 			<PlayButton
 				player={player}
-				className={cn("mx-12 h-32 w-32 bg-gray-800/70")}
+				className={cn("mx-6 bg-gray-800/50")}
+				iconClassName="h-24 w-24"
 			/>
 			<IconButton
 				icon={SkipNext}
@@ -46,9 +48,10 @@ export const MiddleControls = ({
 				href={next}
 				replace
 				className={cn(
-					"mx-12 h-16 w-16 bg-gray-800/70",
+					"mx-6 bg-gray-800/70",
 					!next && "pointer-events-none opacity-0",
 				)}
+				iconClassName="h-16 w-16"
 			/>
 		</View>
 	);

@@ -121,7 +121,7 @@ export const ItemDetails = ({
 							<Chip
 								key={x ?? i}
 								label={t(`genres.${x}`)}
-								href={"#"}
+								href={`/genres/${x}`}
 								size="small"
 								className="mx-1"
 							/>

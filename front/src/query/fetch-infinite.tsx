@@ -1,7 +1,7 @@
-import { LegendList as RLegendList } from "@legendapp/list";
+import type { LegendListProps } from "@legendapp/list";
+import { AnimatedLegendList } from "@legendapp/list/reanimated";
 import { type ComponentType, type ReactElement, useRef } from "react";
 import type { ViewStyle } from "react-native";
-import { withUniwind } from "uniwind";
 import { type Breakpoint, HR, useBreakpointMap } from "~/primitives";
 import { type QueryIdentifier, useInfiniteFetch } from "./query";
 
@@ -11,8 +11,6 @@ export type Layout = {
 	gap: Breakpoint<number>;
 	layout: "grid" | "horizontal" | "vertical";
 };
-
-const LegendList = withUniwind(RLegendList) as typeof RLegendList;
 
 export const InfiniteFetch = <Data, Type extends string = string>({
 	query,
@@ -29,8 +27,6 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	Header,
 	fetchMore = true,
 	contentContainerStyle,
-	contentContainerClassName,
-	className,
 	...props
 }: {
 	query: QueryIdentifier<Data>;
@@ -40,6 +36,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	getItemType?: (item: Data, index: number) => Type;
 	getItemSizeMult?: (item: Data, index: number, type: Type) => number;
 	getStickyIndices?: (items: Data[]) => number[];
+	stickyHeaderConfig?: LegendListProps["stickyHeaderConfig"];
 	Render: (props: { item: Data; index: number }) => ReactElement | null;
 	Loader: (props: { index: number }) => ReactElement | null;
 	Empty?: JSX.Element;
@@ -48,18 +45,13 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	Header?: ComponentType<{ children: JSX.Element }> | ReactElement;
 	fetchMore?: boolean;
 	contentContainerStyle?: ViewStyle;
-	contentContainerClassName?: string;
-	className?: string;
+	onScroll?: LegendListProps["onScroll"];
+	scrollEventThrottle?: LegendListProps["scrollEventThrottle"];
 }): JSX.Element | null => {
 	const { numColumns, size, gap } = useBreakpointMap(layout);
 	const oldItems = useRef<Data[] | undefined>(undefined);
-	let {
-		items,
-		fetchNextPage,
-		isFetching,
-		refetch,
-		isRefetching,
-	} = useInfiniteFetch(query);
+	let { items, fetchNextPage, isFetching, refetch, isRefetching } =
+		useInfiniteFetch(query);
 	if (incremental && items) oldItems.current = items;
 	if (incremental) items ??= oldItems.current;
 
@@ -74,15 +66,15 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 		isFetching || !items ? [...(items || []), ...placeholders] : items;
 
 	return (
-		<LegendList
+		<AnimatedLegendList
 			data={data}
 			recycleItems
 			getItemType={getItemType}
 			estimatedItemSize={getItemSizeMult ? undefined : size}
-			stickyIndices={getStickyIndices?.(items ?? [])}
+			stickyHeaderIndices={getStickyIndices?.(items ?? [])}
 			getEstimatedItemSize={
 				getItemSizeMult
-					? (idx, item, type) => getItemSizeMult(item, idx, type as Type) * size
+					? (item, idx, type) => getItemSizeMult(item, idx, type as Type) * size
 					: undefined
 			}
 			renderItem={({ item, index }) =>
@@ -100,10 +92,13 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 				Divider === true ? HR : (Divider as any) || undefined
 			}
 			ListEmptyComponent={Empty}
+			showsHorizontalScrollIndicator={false}
+			showsVerticalScrollIndicator={false}
 			contentContainerStyle={{
 				...contentContainerStyle,
 				gap,
-				marginHorizontal: numColumns > 1 ? gap : 0,
+				marginLeft: numColumns > 1 ? gap : 0,
+				marginRight: numColumns > 1 ? gap : 0,
 			}}
 			{...props}
 		/>

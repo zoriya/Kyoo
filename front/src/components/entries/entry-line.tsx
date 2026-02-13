@@ -61,7 +61,7 @@ export const EntryLine = ({
 			href={moreOpened ? undefined : href}
 			onLongPress={() => setMoreOpened(true)}
 			className={cn(
-				"group flex-row items-center",
+				"group flex-row items-center p-1",
 				href === null && "opacity-50",
 				className,
 			)}

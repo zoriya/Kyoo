@@ -89,7 +89,7 @@ export const PosterPlaceholder = ({ className, ...props }: ViewProps) => {
 			)}
 			{...props}
 		>
-			<KyooLogo style={{ width: "50%", height: "50%" }} />
+			<KyooLogo style={{ width: "50%", aspectRatio: "289.35/296.15" }} />
 		</View>
 	);
 };

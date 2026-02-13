@@ -63,7 +63,7 @@ export const ItemGrid = ({
 			href={moreOpened ? undefined : href}
 			onLongPress={() => setMoreOpened(true)}
 			className={cn(
-				"group items-center outline-0",
+				"group items-center p-1 outline-0",
 				horizontal && "h-full w-[200px]",
 				className,
 			)}
