@@ -1,5 +1,6 @@
 import Admin from "@material-symbols/svg-400/rounded/admin_panel_settings.svg";
 import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
+import Close from "@material-symbols/svg-400/rounded/close.svg";
 import Login from "@material-symbols/svg-400/rounded/login.svg";
 import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
@@ -23,8 +24,8 @@ import {
 import { useTranslation } from "react-i18next";
 import {
 	Platform,
+	TextInput,
 	type PressableProps,
-	type TextInput,
 	type TextInputProps,
 	View,
 	type ViewProps,
@@ -68,46 +69,6 @@ export const NavbarTitle = ({
 		>
 			<KyooLongLogo style={{ height: 24, width: (531.15 / 149) * 24 }} />
 		</A>
-	);
-};
-
-const SearchBar = ({
-	ref,
-	className,
-	...props
-}: TextInputProps & { ref?: Ref<TextInput> }) => {
-	const { t } = useTranslation();
-	const params = useGlobalSearchParams();
-	const [query, setQuery] = useState((params.q as string) ?? "");
-	const path = usePathname();
-	const router = useRouter();
-	const inputRef = useRef<TextInput>(null);
-
-	useEffect(() => {
-		if (path === "/browse") {
-			inputRef.current?.focus();
-			setQuery(params.q as string);
-		} else {
-			inputRef.current?.blur();
-			setQuery("");
-		}
-	}, [path, params.q]);
-
-	return (
-		<Input
-			ref={inputRef}
-			value={query}
-			onChangeText={(q) => {
-				setQuery(q);
-				if (path !== "/browse") router.navigate(`/browse?q=${q}`);
-				else router.setParams({ q });
-			}}
-			placeholder={t("navbar.search")}
-			containerClassName="border-light"
-			className={cn("text-slate-200 dark:text-slate-200", className)}
-			{...tooltip(t("navbar.search"))}
-			{...props}
-		/>
 	);
 };
 
@@ -175,23 +136,100 @@ export const NavbarProfile = () => {
 		</Menu>
 	);
 };
+
+const SearchBar = () => {
+	const { t } = useTranslation();
+	const [expanded, setExpanded] = useState(false);
+	const inputRef = useRef<TextInput>(null);
+
+	const router = useRouter();
+	const [query, setQuery] = useState("");
+
+	const path = usePathname();
+	useEffect(() => {
+		console.log(path);
+		if (path === "/browse") {
+			// Small delay to allow animation to start before focusing
+			setTimeout(() => {
+				setExpanded(true);
+				inputRef.current?.focus();
+			}, 300);
+		} else if (path === "/") {
+			inputRef.current?.blur();
+		}
+	}, [path]);
+
+	return (
+		<Animated.View
+			className={cn(
+				"mr-2 flex-row items-center overflow-hidden p-0 pl-4",
+				"rounded-full bg-slate-100 dark:bg-slate-800",
+			)}
+			style={[
+				expanded ? { flex: 1 } : { backgroundColor: "transparent" },
+				{
+					transitionProperty: "background-color",
+					transitionDuration: "300ms",
+				},
+			]}
+		>
+			<TextInput
+				ref={inputRef}
+				value={query}
+				onChangeText={(q) => {
+					setQuery(q);
+					router.setParams({ q });
+				}}
+				onFocus={() => router.push(query ? `/browse?q=${query}` : "/browse")}
+				onBlur={() => {
+					if (query !== "") return;
+					setExpanded(false);
+				}}
+				placeholder={t("navbar.search")}
+				textAlignVertical="center"
+				className={cn(
+					"h-full flex-1 font-sans text-base outline-0",
+					"align-middle text-slate-600 dark:text-slate-200",
+					!expanded && "w-0 grow-0",
+				)}
+				placeholderTextColorClassName="accent-slate-400 dark:text-slate-600"
+			/>
+
+			<IconButton
+				icon={expanded ? Close : Search}
+				// need to use onPressIn due to:
+				//  https://github.com/react-navigation/react-navigation/issues/12274
+				//  https://github.com/react-navigation/react-navigation/issues/12667
+				onPressIn={() => {
+					if (expanded) {
+						inputRef.current?.blur();
+						setExpanded(false);
+						setQuery("");
+						router.setParams({ q: undefined });
+					} else {
+						setExpanded(true);
+						// Small delay to allow animation to start before focusing
+						setTimeout(() => inputRef.current?.focus(), 100);
+					}
+				}}
+				iconClassName={cn(
+					expanded
+						? "fill-slate-500 dark:fill-slate-500"
+						: "fill-slate-200 dark:fill-slate-200",
+				)}
+				{...tooltip(t("navbar.search"))}
+			/>
+		</Animated.View>
+	);
+};
+
 export const NavbarRight = () => {
 	const { t } = useTranslation();
 	const isAdmin = false; //useHasPermission(AdminPage.requiredPermissions);
 
 	return (
 		<View className="shrink flex-row items-center">
-			{Platform.OS === "web" ? (
-				<SearchBar />
-			) : (
-				<IconButton
-					icon={Search}
-					as={Link}
-					href={"/browse"}
-					iconClassName="fill-slate-200 dark:fill-slate-200"
-					{...tooltip(t("navbar.search"))}
-				/>
-			)}
+			<SearchBar />
 			{isAdmin && (
 				<IconButton
 					icon={Admin}
