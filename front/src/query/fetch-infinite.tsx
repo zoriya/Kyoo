@@ -1,6 +1,6 @@
 import type { LegendListProps } from "@legendapp/list";
 import { AnimatedLegendList } from "@legendapp/list/reanimated";
-import { type ComponentType, type ReactElement, useRef } from "react";
+import { type ComponentType, type ReactElement, useMemo, useRef } from "react";
 import type { ViewStyle } from "react-native";
 import { type Breakpoint, HR, useBreakpointMap } from "~/primitives";
 import { type QueryIdentifier, useInfiniteFetch } from "./query";
@@ -50,7 +50,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 }): JSX.Element | null => {
 	const { numColumns, size, gap } = useBreakpointMap(layout);
 	const oldItems = useRef<Data[] | undefined>(undefined);
-	let { items, fetchNextPage, isFetching, refetch, isRefetching } =
+	let { items, fetchNextPage, hasNextPage, isFetching, refetch, isRefetching } =
 		useInfiniteFetch(query);
 	if (incremental && items) oldItems.current = items;
 	if (incremental) items ??= oldItems.current;
@@ -58,12 +58,14 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	if (!query.infinite)
 		console.warn("A non infinite query was passed to an InfiniteFetch.");
 
-	const count = items
-		? numColumns - (items.length % numColumns)
-		: placeholderCount;
-	const placeholders = [...Array(count === 0 ? numColumns : count)].fill(0);
-	const data =
-		isFetching || !items ? [...(items || []), ...placeholders] : items;
+	const data = useMemo(() => {
+		const count = items
+			? numColumns - (items.length % numColumns)
+			: placeholderCount;
+		const placeholders = [...Array(count === 0 ? numColumns : count)].fill(0);
+		if (!items) return placeholders;
+		return isFetching ? [...items, ...placeholders] : items;
+	}, [items, isFetching, placeholderCount, numColumns]);
 
 	return (
 		<AnimatedLegendList
@@ -83,7 +85,11 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 			keyExtractor={(item: any, index) => (item ? item.id : index + 1)}
 			horizontal={layout.layout === "horizontal"}
 			numColumns={layout.layout === "horizontal" ? 1 : numColumns}
-			onEndReached={fetchMore ? () => fetchNextPage() : undefined}
+			onEndReached={
+				fetchMore && hasNextPage && !isFetching
+					? () => fetchNextPage()
+					: undefined
+			}
 			onEndReachedThreshold={0.5}
 			onRefresh={layout.layout !== "horizontal" ? refetch : undefined}
 			refreshing={isRefetching}

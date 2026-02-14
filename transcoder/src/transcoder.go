@@ -37,9 +37,9 @@ func NewTranscoder(metadata *MetadataService) (*Transcoder, error) {
 	return ret, nil
 }
 
-func (t *Transcoder) getFileStream(ctx context.Context, path string, sha string) (*FileStream, error) {
+func (t *Transcoder) getFileStream(path string, sha string) (*FileStream, error) {
 	ret, _ := t.streams.GetOrCreate(sha, func() *FileStream {
-		return t.newFileStream(ctx, path, sha)
+		return t.newFileStream(path, sha)
 	})
 	ret.ready.Wait()
 	if ret.err != nil {
@@ -50,7 +50,7 @@ func (t *Transcoder) getFileStream(ctx context.Context, path string, sha string)
 }
 
 func (t *Transcoder) GetMaster(ctx context.Context, path string, client string, sha string) (string, error) {
-	stream, err := t.getFileStream(ctx, path, sha)
+	stream, err := t.getFileStream(path, sha)
 	if err != nil {
 		return "", err
 	}
@@ -74,7 +74,7 @@ func (t *Transcoder) GetVideoIndex(
 	client string,
 	sha string,
 ) (string, error) {
-	stream, err := t.getFileStream(ctx, path, sha)
+	stream, err := t.getFileStream(path, sha)
 	if err != nil {
 		return "", err
 	}
@@ -97,7 +97,7 @@ func (t *Transcoder) GetAudioIndex(
 	client string,
 	sha string,
 ) (string, error) {
-	stream, err := t.getFileStream(ctx, path, sha)
+	stream, err := t.getFileStream(path, sha)
 	if err != nil {
 		return "", err
 	}
@@ -121,7 +121,7 @@ func (t *Transcoder) GetVideoSegment(
 	client string,
 	sha string,
 ) (string, error) {
-	stream, err := t.getFileStream(ctx, path, sha)
+	stream, err := t.getFileStream(path, sha)
 	if err != nil {
 		return "", err
 	}
@@ -145,7 +145,7 @@ func (t *Transcoder) GetAudioSegment(
 	client string,
 	sha string,
 ) (string, error) {
-	stream, err := t.getFileStream(ctx, path, sha)
+	stream, err := t.getFileStream(path, sha)
 	if err != nil {
 		return "", err
 	}
