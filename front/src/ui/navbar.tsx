@@ -221,7 +221,10 @@ const MobileSearchBar = () => {
 
 			<IconButton
 				icon={expanded ? Close : Search}
-				onPress={() => {
+				// need to use onPressIn due to:
+				//  https://github.com/react-navigation/react-navigation/issues/12274
+				//  https://github.com/react-navigation/react-navigation/issues/12667
+				onPressIn={() => {
 					if (expanded) {
 						inputRef.current?.blur();
 						setExpanded(false);
