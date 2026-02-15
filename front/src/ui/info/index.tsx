@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import { useYoshiki } from "yoshiki/native";
 import { VideoInfo } from "~/models";
 import { HR, P, Skeleton } from "~/primitives";
 import { type QueryIdentifier, useFetch } from "~/query";
@@ -10,23 +9,19 @@ import { useQueryState } from "~/utils";
 const formatBitrate = (b: number) => `${(b / 1000000).toFixed(2)} Mbps`;
 
 const Row = ({ label, value }: { label: string; value: string }) => {
-	const { css } = useYoshiki();
-
 	return (
-		<View {...css({ flexDirection: "row" })}>
-			<P {...css({ flex: 1 })}>{label}</P>
-			<P {...css({ flex: 3 })}>{value}</P>
+		<View className="flex-row">
+			<P className="flex-1">{label}</P>
+			<P className="flex-3">{value}</P>
 		</View>
 	);
 };
 
 Row.Loading = ({ label }: { label: string }) => {
-	const { css } = useYoshiki();
-
 	return (
-		<View {...css({ flexDirection: "row" })}>
-			<P {...css({ flex: 1 })}>{label}</P>
-			<Skeleton {...css({ flex: 3 })} />
+		<View className="flex-row">
+			<P className="flex-1">{label}</P>
+			<Skeleton className="flex-3" />
 		</View>
 	);
 };

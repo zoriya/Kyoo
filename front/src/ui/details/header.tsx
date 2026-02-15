@@ -166,7 +166,6 @@ export const TitleLine = ({
 		>
 			<Poster
 				src={poster}
-				alt={name}
 				quality="medium"
 				className="w-1/2 shrink-0 max-sm:max-w-44 md:w-1/4"
 			/>

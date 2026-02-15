@@ -1,28 +1,12 @@
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
-import { useYoshiki } from "yoshiki/native";
 import { ItemGrid, itemMap } from "~/components/items";
 import { type Genre, Show } from "~/models";
-import { H3, ts } from "~/primitives";
+import { H3 } from "~/primitives";
 import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { EmptyView } from "~/ui/empty-view";
 
 export const Header = ({ title }: { title: string }) => {
-	const { css } = useYoshiki();
-
-	return (
-		<View
-			{...css({
-				marginTop: ItemGrid.layout.gap,
-				marginX: ItemGrid.layout.gap,
-				pX: ts(0.5),
-				flexDirection: "row",
-				justifyContent: "space-between",
-			})}
-		>
-			<H3>{title}</H3>
-		</View>
-	);
+	return <H3 className="m-2 flex-row justify-between px-1">{title}</H3>;
 };
 
 export const GenreGrid = ({ genre }: { genre: Genre }) => {
@@ -34,10 +18,9 @@ export const GenreGrid = ({ genre }: { genre: Genre }) => {
 			<InfiniteFetch
 				query={GenreGrid.query(genre)}
 				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
-				placeholderCount={2}
 				Empty={<EmptyView message={t("home.none")} />}
 				Render={({ item }) => <ItemGrid {...itemMap(item)} horizontal />}
-				Loader={ItemGrid.Loader}
+				Loader={() => <ItemGrid.Loader horizontal />}
 			/>
 		</>
 	);

@@ -1,32 +1,29 @@
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import { useYoshiki } from "yoshiki/native";
 import { EntryBox, entryDisplayNumber } from "~/components/entries";
-import { ItemGrid } from "~/components/items";
+import { ItemGrid, itemMap } from "~/components/items";
 import { Show } from "~/models";
-import { Button, Link, P, ts } from "~/primitives";
+import { Button, Link, P } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { EmptyView } from "~/ui/empty-view";
-import { getDisplayDate } from "~/utils";
 import { Header } from "./genre";
 
 export const WatchlistList = () => {
 	const { t } = useTranslation();
-	const { css } = useYoshiki();
 	const account = useAccount();
 
 	if (!account) {
 		return (
 			<>
 				<Header title={t("home.watchlist")} />
-				<View {...css({ justifyContent: "center", alignItems: "center" })}>
+				<View className="items-center justify-center">
 					<P>{t("home.watchlistLogin")}</P>
 					<Button
 						as={Link}
 						href={"/login"}
 						text={t("login.login")}
-						{...css({ minWidth: ts(24), margin: ts(2) })}
+						className="m-4 min-w-md"
 					/>
 				</View>
 			</>
@@ -51,6 +48,7 @@ export const WatchlistList = () => {
 					if (entry) {
 						return (
 							<EntryBox
+								kind={entry.kind}
 								slug={entry.slug}
 								serieSlug={item.slug}
 								name={`${item.name} ${entryDisplayNumber(entry)}`}
@@ -61,31 +59,10 @@ export const WatchlistList = () => {
 							/>
 						);
 					}
-					return (
-						<ItemGrid
-							href={item.href}
-							slug={item.slug}
-							kind={item.kind}
-							name={item.name!}
-							subtitle={getDisplayDate(item)}
-							poster={item.poster}
-							watchStatus={
-								item.kind !== "collection"
-									? (item.watchStatus?.status ?? null)
-									: null
-							}
-							watchPercent={
-								item.kind === "movie" && item.watchStatus
-									? item.watchStatus.percent
-									: null
-							}
-							unseenEpisodesCount={null}
-							horizontal
-						/>
-					);
+					return <ItemGrid {...itemMap(item)} horizontal />;
 				}}
 				Loader={({ index }) =>
-					index % 2 ? <EntryBox.Loader /> : <ItemGrid.Loader />
+					index % 2 ? <EntryBox.Loader /> : <ItemGrid.Loader horizontal />
 				}
 			/>
 		</>
