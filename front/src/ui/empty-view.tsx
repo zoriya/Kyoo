@@ -10,7 +10,7 @@ export const EmptyView = ({
 	className?: string;
 }) => {
 	return (
-		<View className={cn("flex-1 items-center justify-center", className)}>
+		<View className={cn("flex-1 items-center justify-center py-20", className)}>
 			<P>{message}</P>
 		</View>
 	);

@@ -67,6 +67,8 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 		return isFetching ? [...items, ...placeholders] : items;
 	}, [items, isFetching, placeholderCount, numColumns]);
 
+	if (!data.length && Empty) return Empty;
+
 	return (
 		<AnimatedLegendList
 			data={data}
@@ -97,7 +99,6 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 			ItemSeparatorComponent={
 				Divider === true ? HR : (Divider as any) || undefined
 			}
-			ListEmptyComponent={Empty}
 			showsHorizontalScrollIndicator={false}
 			showsVerticalScrollIndicator={false}
 			contentContainerStyle={{

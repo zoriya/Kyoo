@@ -6,16 +6,10 @@ import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import Settings from "@material-symbols/svg-400/rounded/settings.svg";
 import { useIsFocused } from "@react-navigation/native";
-import {
-	useGlobalSearchParams,
-	useNavigation,
-	usePathname,
-	useRouter,
-} from "expo-router";
+import { useNavigation, usePathname, useRouter } from "expo-router";
 import KyooLongLogo from "public/icon-long.svg";
 import {
 	type ComponentProps,
-	type Ref,
 	useEffect,
 	useLayoutEffect,
 	useRef,
@@ -24,9 +18,8 @@ import {
 import { useTranslation } from "react-i18next";
 import {
 	Platform,
-	TextInput,
 	type PressableProps,
-	type TextInputProps,
+	TextInput,
 	View,
 	type ViewProps,
 } from "react-native";
@@ -43,7 +36,6 @@ import {
 	Avatar,
 	HR,
 	IconButton,
-	Input,
 	Link,
 	Menu,
 	PressableFeedback,
@@ -146,9 +138,10 @@ const SearchBar = () => {
 	const [query, setQuery] = useState("");
 
 	const path = usePathname();
+	const shouldExpand = useRef(false);
 	useEffect(() => {
-		console.log(path);
-		if (path === "/browse") {
+		if (path === "/browse" && shouldExpand.current) {
+			shouldExpand.current = false;
 			// Small delay to allow animation to start before focusing
 			setTimeout(() => {
 				setExpanded(true);
@@ -207,6 +200,7 @@ const SearchBar = () => {
 						setQuery("");
 						router.setParams({ q: undefined });
 					} else {
+						shouldExpand.current = true;
 						setExpanded(true);
 						// Small delay to allow animation to start before focusing
 						setTimeout(() => inputRef.current?.focus(), 100);

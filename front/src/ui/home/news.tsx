@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 import { EntryBox, entryDisplayNumber } from "~/components/entries";
-import { ItemGrid } from "~/components/items";
 import { Entry } from "~/models";
 import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { EmptyView } from "~/ui/empty-view";
@@ -15,15 +14,11 @@ export const NewsList = () => {
 			<InfiniteFetch
 				query={NewsList.query()}
 				layout={{ ...EntryBox.layout, layout: "horizontal" }}
-				// getItemType={(x, i) =>
-				// 	x?.kind === "movie" || (!x && i % 2) ? "movie" : "episode"
-				// }
-				// getItemSizeMult={(_, __, kind) => (kind === "episode" ? 2 : 1)}
 				Empty={<EmptyView message={t("home.none")} />}
 				Render={({ item }) => {
-					// if (item.kind === "episode" || item.kind === "special") {
 					return (
 						<EntryBox
+							kind={item.kind}
 							slug={item.slug}
 							serieSlug={item.show!.slug}
 							name={`${item.show!.name} ${entryDisplayNumber(item)}`}
@@ -33,28 +28,8 @@ export const NewsList = () => {
 							watchedPercent={item.progress.percent}
 						/>
 					);
-					// 	}
-					// 	return (
-					// 		<ItemGrid
-					// 			href={item.href ?? "#"}
-					// 			slug={item.slug}
-					// 			kind={"movie"}
-					// 			name={item.name!}
-					// 			subtitle={
-					// 				item.airDate
-					// 					? new Date(item.airDate).getFullYear().toString()
-					// 					: null
-					// 			}
-					// 			poster={item.kind === "movie" ? item.poster : null}
-					// 			watchStatus={item.watchStatus?.status || null}
-					// 			watchPercent={item.watchStatus?.percent || null}
-					// 			unseenEpisodesCount={null}
-					// 		/>
-					// 	);
 				}}
-				Loader={({ index }) =>
-					index % 2 ? <EntryBox.Loader /> : <ItemGrid.Loader />
-				}
+				Loader={EntryBox.Loader}
 			/>
 		</>
 	);
