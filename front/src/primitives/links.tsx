@@ -5,11 +5,11 @@ import {
 	Platform,
 	Pressable,
 	type PressableProps,
-	Text,
 	type TextProps,
 } from "react-native";
 import { useResolveClassNames } from "uniwind";
 import { cn } from "~/utils";
+import { P } from "./text";
 
 export function useLinkTo({
 	href,
@@ -57,7 +57,7 @@ export const A = ({
 	const linkProps = useLinkTo({ href, replace });
 
 	return (
-		<Text
+		<P
 			{...linkProps}
 			className={cn(
 				"select-text text-accent hover:underline focus:underline",
@@ -66,7 +66,7 @@ export const A = ({
 			{...props}
 		>
 			{children}
-		</Text>
+		</P>
 	);
 };
 

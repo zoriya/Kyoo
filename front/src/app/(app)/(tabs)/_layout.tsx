@@ -1,13 +1,20 @@
 import Browse from "@material-symbols/svg-400/rounded/browse-fill.svg";
 // import Downloading from "@material-symbols/svg-400/rounded/downloading-fill.svg";
 import Home from "@material-symbols/svg-400/rounded/home-fill.svg";
-import { Tabs } from "expo-router";
+import { Slot, Tabs } from "expo-router";
 import { useTranslation } from "react-i18next";
+import { Platform } from "react-native";
 import { Icon } from "~/primitives";
 import { cn } from "~/utils";
 
+export const unstable_settings = {
+	initialRouteName: "index",
+};
+
 export default function TabsLayout() {
 	const { t } = useTranslation();
+
+	if (Platform.OS === "web") return <Slot />;
 
 	return (
 		<Tabs

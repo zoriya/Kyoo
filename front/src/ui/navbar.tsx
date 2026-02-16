@@ -45,6 +45,24 @@ import { useAccount, useAccounts } from "~/providers/account-context";
 import { logout } from "~/ui/login/logic";
 import { cn } from "~/utils";
 
+export const NavbarLeft = () => {
+	const { t } = useTranslation();
+
+	if (Platform.OS !== "web") return <NavbarTitle />;
+
+	return (
+		<View className="flex-row items-center gap-2">
+			<NavbarTitle />
+			<A
+				href="/browse"
+				className="font-headers text-lg text-slate-200 uppercase dark:text-slate-200"
+			>
+				{t("navbar.browse")}
+			</A>
+		</View>
+	);
+};
+
 export const NavbarTitle = ({
 	className,
 	...props
@@ -64,68 +82,24 @@ export const NavbarTitle = ({
 	);
 };
 
-const getDisplayUrl = (url: string) => {
-	url = url.replace(/\/api$/, "");
-	url = url.replace(/https?:\/\//, "");
-	return url;
-};
-
-export const NavbarProfile = () => {
+export const NavbarRight = () => {
 	const { t } = useTranslation();
-	const account = useAccount();
-	const accounts = useAccounts();
+	const isAdmin = false; //useHasPermission(AdminPage.requiredPermissions);
 
 	return (
-		<Menu
-			Trigger={Avatar<PressableProps>}
-			as={PressableFeedback}
-			src={account?.logo}
-			placeholder={account?.username}
-			alt={t("navbar.login")}
-			className="m-2"
-			{...tooltip(account?.username ?? t("navbar.login"))}
-		>
-			{accounts?.map((x) => (
-				<Menu.Item
-					key={x.id}
-					label={
-						Platform.OS === "web"
-							? x.username
-							: `${x.username} - ${getDisplayUrl(x.apiUrl)}`
-					}
-					left={
-						<Avatar placeholder={x.username} src={x.logo} className="mx-2" />
-					}
-					selected={x.selected}
-					onSelect={() => x.select()}
+		<View className="shrink flex-row items-center">
+			<SearchBar />
+			{isAdmin && (
+				<IconButton
+					icon={Admin}
+					as={Link}
+					href={"/admin"}
+					iconClassName="fill-slate-200 dark:fill-slate-200"
+					{...tooltip(t("navbar.admin"))}
 				/>
-			))}
-			{accounts.length > 0 && <HR />}
-			<Menu.Item label={t("misc.settings")} icon={Settings} href="/settings" />
-			{!account ? (
-				<>
-					<Menu.Item label={t("login.login")} icon={Login} href="/login" />
-					<Menu.Item
-						label={t("login.register")}
-						icon={Register}
-						href="/register"
-					/>
-				</>
-			) : (
-				<>
-					<Menu.Item
-						label={t("login.add-account")}
-						icon={Login}
-						href="/login"
-					/>
-					<Menu.Item
-						label={t("login.logout")}
-						icon={Logout}
-						onSelect={logout}
-					/>
-				</>
 			)}
-		</Menu>
+			<NavbarProfile />
+		</View>
 	);
 };
 
@@ -217,24 +191,68 @@ const SearchBar = () => {
 	);
 };
 
-export const NavbarRight = () => {
+const getDisplayUrl = (url: string) => {
+	url = url.replace(/\/api$/, "");
+	url = url.replace(/https?:\/\//, "");
+	return url;
+};
+
+export const NavbarProfile = () => {
 	const { t } = useTranslation();
-	const isAdmin = false; //useHasPermission(AdminPage.requiredPermissions);
+	const account = useAccount();
+	const accounts = useAccounts();
 
 	return (
-		<View className="shrink flex-row items-center">
-			<SearchBar />
-			{isAdmin && (
-				<IconButton
-					icon={Admin}
-					as={Link}
-					href={"/admin"}
-					iconClassName="fill-slate-200 dark:fill-slate-200"
-					{...tooltip(t("navbar.admin"))}
+		<Menu
+			Trigger={Avatar<PressableProps>}
+			as={PressableFeedback}
+			src={account?.logo}
+			placeholder={account?.username}
+			alt={t("navbar.login")}
+			className="m-2"
+			{...tooltip(account?.username ?? t("navbar.login"))}
+		>
+			{accounts?.map((x) => (
+				<Menu.Item
+					key={x.id}
+					label={
+						Platform.OS === "web"
+							? x.username
+							: `${x.username} - ${getDisplayUrl(x.apiUrl)}`
+					}
+					left={
+						<Avatar placeholder={x.username} src={x.logo} className="mx-2" />
+					}
+					selected={x.selected}
+					onSelect={() => x.select()}
 				/>
+			))}
+			{accounts.length > 0 && <HR />}
+			<Menu.Item label={t("misc.settings")} icon={Settings} href="/settings" />
+			{!account ? (
+				<>
+					<Menu.Item label={t("login.login")} icon={Login} href="/login" />
+					<Menu.Item
+						label={t("login.register")}
+						icon={Register}
+						href="/register"
+					/>
+				</>
+			) : (
+				<>
+					<Menu.Item
+						label={t("login.add-account")}
+						icon={Login}
+						href="/login"
+					/>
+					<Menu.Item
+						label={t("login.logout")}
+						icon={Logout}
+						onSelect={logout}
+					/>
+				</>
 			)}
-			<NavbarProfile />
-		</View>
+		</Menu>
 	);
 };
 

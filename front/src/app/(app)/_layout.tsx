@@ -1,9 +1,13 @@
 import { Stack } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCSSVariable, useResolveClassNames } from "uniwind";
-import { NavbarRight, NavbarTitle } from "~/ui/navbar";
+import { NavbarLeft, NavbarRight } from "~/ui/navbar";
 
 export { ErrorBoundary } from "~/ui/error-bondary";
+
+export const unstable_settings = {
+	initialRouteName: "(tabs)",
+};
 
 export default function Layout() {
 	const insets = useSafeAreaInsets();
@@ -13,7 +17,7 @@ export default function Layout() {
 	return (
 		<Stack
 			screenOptions={{
-				headerTitle: () => <NavbarTitle />,
+				headerTitle: () => <NavbarLeft />,
 				headerRight: () => <NavbarRight />,
 				contentStyle: {
 					paddingLeft: insets.left,
