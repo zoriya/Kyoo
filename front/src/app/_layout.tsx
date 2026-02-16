@@ -3,10 +3,12 @@ import { Slot } from "expo-router";
 import { Platform } from "react-native";
 import { Providers } from "~/providers";
 import "../global.css";
-import { Tooltip } from "~/primitives";
+import { Tooltip, useMobileHover } from "~/primitives";
 import "~/fonts.web.css";
 
 export default function Layout() {
+	useMobileHover();
+
 	return (
 		<Providers>
 			<Slot />
