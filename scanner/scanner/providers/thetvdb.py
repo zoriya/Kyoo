@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timedelta
 from logging import getLogger
 from types import TracebackType
-from typing import Any, cast, override
+from typing import Any, Literal, cast, override
 
 from aiohttp import ClientResponseError, ClientSession
 from langcodes import Language
@@ -96,6 +96,7 @@ class TVDB(Provider):
 		}
 
 	async def __aenter__(self):
+		self._image_map = (await self._get("artwork/types"))["data"]
 		return self
 
 	async def __aexit__(
@@ -258,10 +259,18 @@ class TVDB(Provider):
 						if x["language"] == trans["language"]
 					],
 					tags=[],
-					poster=self._pick_image(ret["artworks"], 2, trans["language"]),
-					logo=self._pick_image(ret["artworks"], 5, trans["language"]),
-					thumbnail=self._pick_image(ret["artworks"], 3, trans["language"]),
-					banner=self._pick_image(ret["artworks"], 1, trans["language"]),
+					poster=self._pick_image(
+						ret["artworks"], "series", "posters", trans["language"]
+					),
+					logo=self._pick_image(
+						ret["artworks"], "series", "icons", trans["language"]
+					),
+					thumbnail=self._pick_image(
+						ret["artworks"], "series", "backgrounds", trans["language"]
+					),
+					banner=self._pick_image(
+						ret["artworks"], "series", "banners", trans["language"]
+					),
 					trailer=None,
 					# trailers=[
 					# 	t["url"]
@@ -289,12 +298,22 @@ class TVDB(Provider):
 			staff=[],
 		)
 
-	def _pick_image(self, images: list[Any] | None, type: int, lng: str) -> str | None:
+	def _pick_image(
+		self,
+		images: list[Any] | None,
+		kind: Literal["series", "season", "episode", "actor", "movie", "company"],
+		type: Literal["banners", "posters", "backgrounds", "icons"],
+		lng: str,
+	) -> str | None:
 		# sometimes `artworks` is not even part of the response.
 		if images is None:
 			return None
+
+		imgId = next(
+			x for x in self._image_map if x["recordType"] == kind and x["slug"] == type
+		)
 		items = sorted(
-			(x for x in images if x["type"] == type),
+			(x for x in images if x["type"] == imgId),
 			key=lambda x: x.get("score", 0),
 			reverse=True,
 		)
@@ -337,48 +356,73 @@ class TVDB(Provider):
 		if col is None:
 			return None
 
-		async def get_translation(lang: str) -> CollectionTranslation:
-			data = (
+		data = (await self._get(f"lists/{col['id']}/extended"))["data"]
+		first_entity = data["entities"][0]
+		kind = "movie" if "movieId" in first_entity else "series"
+		show = (
+			(
 				await self._get(
-					f"lists/{col['id']}/translations/{lang}",
+					f"movies/{first_entity['movieId']}/extended",
+				)
+			)["data"]
+			if kind == "movie"
+			else (
+				await self._get(
+					f"series/{first_entity['seriesId']}/extended",
+				)
+			)["data"]
+		)
+
+		async def get_translation(lang: str) -> CollectionTranslation:
+			trans = (
+				await self._get(
+					f"lists/{data['id']}/translations/{lang}",
 					not_found_fail="Collection translation not found",
 				)
 			)["data"]
 			return CollectionTranslation(
-				name=next((x["name"] for x in data if x.get("isPrimary")), col["name"]),
+				name=next(
+					(x["name"] for x in trans if x.get("isPrimary")), data["name"]
+				),
 				latin_name=None,
-				description=data.get("overview"),
+				description=trans.get("overview"),
 				tagline=None,
 				aliases=[
 					x["name"]
-					for x in data["aliases"]
+					for x in trans["aliases"]
 					if x["language"] == lang and x.get("isAlias")
 				],
 				tags=[],
-				poster=col["image"],
-				thumbnail=None,
-				banner=None,
-				logo=None,
+				poster=trans.get("image")
+				if lang == "eng"
+				else self._pick_image(show["artworks"], kind, "posters", lang),
+				thumbnail=self._pick_image(show["artworks"], kind, "backgrounds", lang),
+				banner=self._pick_image(show["artworks"], kind, "banners", lang),
+				logo=self._pick_image(show["artworks"], kind, "icons", lang),
 			)
 
 		trans = await asyncio.gather(
-			*(get_translation(x) for x in col["nameTranslations"])
+			*(get_translation(x) for x in data["nameTranslations"])
 		)
 
 		return Collection(
-			slug=col["url"],
-			original_language=None,
-			genres=[],
+			slug=data["url"],
+			original_language=Language.get(show["originalLanguage"]),
+			genres=[
+				cast(Genre, self._genre_map[x["slug"]])
+				for x in show["genres"]
+				if self._genre_map[x["slug"]] is not None
+			],
 			rating=None,
 			external_id={
 				self.name: MetadataId(
-					data_id=col["id"],
-					link=f"https://thetvdb.com/lists/{col['url']}",
+					data_id=data["id"],
+					link=f"https://thetvdb.com/lists/{data['url']}",
 				)
 			},
 			translations={
 				Language.get(lang): tl
-				for lang, tl in zip(col["nameTranslations"], trans)
+				for lang, tl in zip(data["nameTranslations"], trans)
 			},
 		)
 
@@ -395,9 +439,11 @@ class TVDB(Provider):
 			return SeasonTranslation(
 				name=data.get("name"),
 				description=data.get("overview"),
-				poster=self._pick_image(info["artwork"], 7, lang),
-				thumbnail=self._pick_image(info["artwork"], 8, lang),
-				banner=self._pick_image(info["artwork"], 6, lang),
+				poster=self._pick_image(info["artwork"], "season", "posters", lang),
+				thumbnail=self._pick_image(
+					info["artwork"], "season", "backgrounds", lang
+				),
+				banner=self._pick_image(info["artwork"], "season", "banners", lang),
 			)
 
 		languages = set(
@@ -571,7 +617,9 @@ class TVDB(Provider):
 					),
 					None,
 				),
-				poster=self._pick_image(ret["artworks"], 14, trans["language"]),
+				poster=self._pick_image(
+					ret["artworks"], "episode", "posters", trans["language"]
+				),
 			)
 			for trans in ret["translations"]["nameTranslations"]
 			if trans.get("isAlias") is None or False
@@ -657,10 +705,18 @@ class TVDB(Provider):
 						if x["language"] == trans["language"]
 					],
 					tags=[],
-					poster=self._pick_image(ret["artworks"], 2, trans["language"]),
-					logo=self._pick_image(ret["artworks"], 5, trans["language"]),
-					thumbnail=self._pick_image(ret["artworks"], 3, trans["language"]),
-					banner=self._pick_image(ret["artworks"], 1, trans["language"]),
+					poster=self._pick_image(
+						ret["artworks"], "movie", "posters", trans["language"]
+					),
+					logo=self._pick_image(
+						ret["artworks"], "movie", "icons", trans["language"]
+					),
+					thumbnail=self._pick_image(
+						ret["artworks"], "movie", "backgrounds", trans["language"]
+					),
+					banner=self._pick_image(
+						ret["artworks"], "movie", "banners", trans["language"]
+					),
 					trailer=None,
 					# trailers=[
 					# 	t["url"]
