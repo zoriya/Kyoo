@@ -3,7 +3,9 @@ import type { TextProps } from "react-native";
 import { useEvent, type VideoPlayer } from "react-native-video";
 import type { Chapter } from "~/models";
 import { P, Slider } from "~/primitives";
-import { cn } from "~/utils";
+import { useFetch } from "~/query";
+import { Info } from "~/ui/info";
+import { cn, useQueryState } from "~/utils";
 
 export const ProgressBar = ({
 	player,
@@ -14,10 +16,8 @@ export const ProgressBar = ({
 	// url: string;
 	chapters?: Chapter[];
 }) => {
-	const [duration, setDuration] = useState(player.duration || 100);
-	useEvent(player, "onLoad", (info) => {
-		if (info.duration) setDuration(info.duration);
-	});
+	const [slug] = useQueryState<string>("slug", undefined!);
+	const { data } = useFetch(Info.infoQuery(slug));
 
 	const [progress, setProgress] = useState(player.currentTime || 0);
 	const [buffer, setBuffer] = useState(0);
@@ -33,7 +33,7 @@ export const ProgressBar = ({
 			<Slider
 				progress={seek ?? progress}
 				subtleProgress={buffer}
-				max={duration}
+				max={data?.durationSeconds}
 				startSeek={() => {
 					player.pause();
 				}}
@@ -83,14 +83,13 @@ export const ProgressText = ({
 	useEvent(player, "onProgress", (progress) => {
 		setProgress(progress.currentTime);
 	});
-	const [duration, setDuration] = useState(player.duration);
-	useEvent(player, "onLoad", (info) => {
-		if (info.duration) setDuration(info.duration);
-	});
+	const [slug] = useQueryState<string>("slug", undefined!);
+	const { data } = useFetch(Info.infoQuery(slug));
 
 	return (
 		<P className={cn("text-center", className)} {...props}>
-			{toTimerString(progress, duration)} : {toTimerString(duration)}
+			{toTimerString(progress, data?.durationSeconds)} :{" "}
+			{toTimerString(data?.durationSeconds)}
 		</P>
 	);
 };
