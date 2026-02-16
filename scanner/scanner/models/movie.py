@@ -28,7 +28,7 @@ class Movie(Model):
 
 	external_id: dict[str, MetadataId]
 	translations: dict[Language, MovieTranslation] = {}
-	collections: list[Collection] = []
+	collection: Collection | None = None
 	studios: list[Studio] = []
 	staff: list[Staff] = []
 	videos: list[str] = []
