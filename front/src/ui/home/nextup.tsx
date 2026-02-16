@@ -1,19 +1,41 @@
 import { useTranslation } from "react-i18next";
+import { View } from "react-native";
 import { EntryBox, entryDisplayNumber } from "~/components/entries";
+import { ItemGrid } from "~/components/items";
 import { Entry } from "~/models";
+import { Button, Link, P } from "~/primitives";
+import { useAccount } from "~/providers/account-context";
 import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { EmptyView } from "~/ui/empty-view";
 import { Header } from "./genre";
 
-export const NewsList = () => {
+export const NextupList = () => {
 	const { t } = useTranslation();
+	const account = useAccount();
+
+	if (!account) {
+		return (
+			<>
+				<Header title={t("home.watchlist")} />
+				<View className="items-center justify-center">
+					<P>{t("home.watchlistLogin")}</P>
+					<Button
+						as={Link}
+						href={"/login"}
+						text={t("login.login")}
+						className="m-4 min-w-md"
+					/>
+				</View>
+			</>
+		);
+	}
 
 	return (
 		<>
-			<Header title={t("home.news")} />
+			<Header title={t("home.watchlist")} />
 			<InfiniteFetch
-				query={NewsList.query()}
-				layout={{ ...EntryBox.layout, layout: "horizontal" }}
+				query={NextupList.query()}
+				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
 				Empty={<EmptyView message={t("home.none")} />}
 				Render={({ item }) => (
 					<EntryBox
@@ -33,11 +55,12 @@ export const NewsList = () => {
 	);
 };
 
-NewsList.query = (): QueryIdentifier<Entry> => ({
+NextupList.query = (): QueryIdentifier<Entry> => ({
 	parser: Entry,
 	infinite: true,
-	path: ["api", "news"],
+	path: ["api", "profiles", "me", "nextup"],
 	params: {
 		limit: 10,
+		with: ["nextEntry"],
 	},
 });

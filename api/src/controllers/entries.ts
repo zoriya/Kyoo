@@ -135,7 +135,7 @@ const newsSort: Sort = {
 	],
 };
 
-const entryRelations = {
+export const entryRelations = {
 	translations: () => {
 		const { pk, language, ...trans } = getColumns(entryTranslations);
 		return db
