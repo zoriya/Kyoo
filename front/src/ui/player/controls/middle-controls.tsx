@@ -35,12 +35,12 @@ export const MiddleControls = ({
 					"mx-6 bg-gray-800/70",
 					!previous && "pointer-events-none opacity-0",
 				)}
-				iconClassName="h-16 w-16"
+				iconClassName="h-16 w-16 fill-slate-200 dark:fill-slate-200"
 			/>
 			<PlayButton
 				player={player}
 				className={cn("mx-6 bg-gray-800/50")}
-				iconClassName="h-24 w-24"
+				iconClassName="h-24 w-24 fill-slate-200 dark:fill-slate-200"
 			/>
 			<IconButton
 				icon={SkipNext}
@@ -51,7 +51,7 @@ export const MiddleControls = ({
 					"mx-6 bg-gray-800/70",
 					!next && "pointer-events-none opacity-0",
 				)}
-				iconClassName="h-16 w-16"
+				iconClassName="h-16 w-16 fill-slate-200 dark:fill-slate-200"
 			/>
 		</View>
 	);

@@ -14,7 +14,7 @@ export const Container = <AsProps = ViewProps>({
 	return (
 		<As
 			className={cn(
-				"flex w-full flex-1 self-center px-4",
+				"flex w-full self-center px-4",
 				"sm:w-xl md:w-3xl lg:w-5xl xl:w-7xl",
 				className,
 			)}

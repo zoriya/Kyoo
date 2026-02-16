@@ -1,6 +1,5 @@
 export * from "./breakpoint";
 export * from "./capitalize";
 export * from "./head";
-export * from "./nojs";
+export * from "./hover";
 export * from "./spacing";
-export * from "./touchonly";

@@ -3,7 +3,7 @@ import ExpandMore from "@material-symbols/svg-400/rounded/keyboard_arrow_down-fi
 import ExpandLess from "@material-symbols/svg-400/rounded/keyboard_arrow_up-fill.svg";
 import * as RSelect from "@radix-ui/react-select";
 import { forwardRef } from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import { cn } from "~/utils";
 import { Icon } from "./icons";
 import { PressableFeedback } from "./links";
@@ -27,7 +27,7 @@ export const Select = ({
 		<RSelect.Root value={value} onValueChange={onValueChange}>
 			<RSelect.Trigger aria-label={label} asChild>
 				<InternalTriger
-					Component={PressableFeedback}
+					Component={Platform.OS === "web" ? "div" : PressableFeedback}
 					className={cn(
 						"group flex-row items-center justify-center overflow-hidden rounded-4xl",
 						"border-2 border-accent p-1 outline-0 focus-within:bg-accent hover:bg-accent",
