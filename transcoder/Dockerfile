@@ -1,4 +1,4 @@
-FROM golang:1.25 AS build
+FROM golang:1.26 AS build
 RUN apt-get update \
 	&& apt-get install --no-install-recommends --no-install-suggests -y \
 	ffmpeg libavformat-dev libavutil-dev libswscale-dev \

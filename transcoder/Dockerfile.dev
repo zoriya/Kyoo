@@ -1,4 +1,4 @@
-FROM golang:1.25
+FROM golang:1.26
 # read target arch from buildx or default to amd64 if using legacy builder.
 ARG TARGETARCH
 ENV TARGETARCH=${TARGETARCH:-amd64}
