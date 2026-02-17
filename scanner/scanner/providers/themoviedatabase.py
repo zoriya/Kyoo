@@ -386,7 +386,7 @@ class TheMovieDatabase(Provider):
 			},
 			seasons=seasons,
 			entries=entries,
-			extra=[],
+			extras=[],
 			collection=None,
 			studios=[self._map_studio(x) for x in serie["production_companies"]],
 			# TODO: add crew

@@ -19,6 +19,19 @@ def clean(val: str) -> str | None:
 	return val or None
 
 
+def uniq_by[T, K](data: list[T], key: Callable[[T], K]) -> list[T]:
+	seen = set()
+	ret = []
+
+	for item in data:
+		val = key(item)
+		if val not in seen:
+			seen.add(val)
+			ret.append(item)
+
+	return ret
+
+
 class Singleton(ABCMeta, type):
 	_instances = {}
 

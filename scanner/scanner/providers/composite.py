@@ -3,6 +3,7 @@ from typing import override
 from langcodes import Language
 
 from scanner.models.metadataid import MetadataId
+from scanner.utils import uniq_by
 
 from ..models.movie import Movie, SearchMovie
 from ..models.serie import SearchSerie, Serie
@@ -52,6 +53,12 @@ class CompositeProvider(Provider):
 		ret = await self._tvdb.get_serie(external_id)
 		if ret is None:
 			return None
+
+		# some series have duplicates special numbers/episode numbers, sensitize them
+		ret.entries = uniq_by(
+			ret.entries, lambda x: (x.season_number, x.episode_number, x.number, x.slug)
+		)
+
 		# themoviedb has better global info than tvdb but tvdb has better entries info
 		info = await self._themoviedb.get_serie(
 			MetadataId.map_dict(ret.external_id), skip_entries=True
@@ -60,7 +67,7 @@ class CompositeProvider(Provider):
 			return ret
 		info.seasons = ret.seasons
 		info.entries = ret.entries
-		info.extra = ret.extra
+		info.extras = ret.extras
 		if ret.collection is not None:
 			info.collection = ret.collection
 		info.external_id = MetadataId.merge(ret.external_id, info.external_id)

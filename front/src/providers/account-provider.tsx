@@ -4,7 +4,6 @@ import { type ReactNode, useEffect, useMemo, useRef } from "react";
 import { Platform } from "react-native";
 import { z } from "zod/v4";
 import { Account, User } from "~/models";
-import { RetryableError } from "~/models/retryable-error";
 import { useFetch } from "~/query";
 import { AccountContext } from "./account-context";
 import { removeAccounts, updateAccount } from "./account-store";
@@ -30,9 +29,8 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 		};
 	}, [accounts]);
 
+	const router = useRouter();
 	if (Platform.OS !== "web") {
-		// biome-ignore lint/correctness/useHookAtTopLevel: static
-		const router = useRouter();
 		// biome-ignore lint/correctness/useHookAtTopLevel: static
 		useEffect(() => {
 			if (!ret.apiUrl) {
@@ -57,13 +55,13 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 		options: {
 			apiUrl: ret.apiUrl,
 			authToken: ret.authToken,
+			returnError: true,
 		},
 	});
 	if (userError) {
-		throw new RetryableError({
-			key: "connection",
-			retry: queryClient.resetQueries,
-		});
+		setTimeout(() => {
+			router.replace("/login");
+		}, 0);
 	}
 	// Use a ref here because we don't want the effect to trigger when the selected
 	// value has changed, only when the fetch result changed

@@ -102,7 +102,7 @@ export const SeedMovie = t.Composite([
 			]),
 		),
 		videos: t.Optional(t.Array(t.String({ format: "uuid" }), { default: [] })),
-		collection: t.Optional(SeedCollection),
+		collection: t.Optional(t.Nullable(SeedCollection)),
 		studios: t.Optional(t.Array(SeedStudio, { default: [] })),
 		staff: t.Optional(t.Array(SeedStaff, { default: [] })),
 	}),

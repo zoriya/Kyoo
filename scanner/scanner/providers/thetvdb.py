@@ -292,8 +292,8 @@ class TVDB(Provider):
 			else [],
 			entries=entries,
 			# TODO: map extra entries in extra instead of entries
-			extra=[],
-			collection=await self._get_collection(ret["list"]),
+			extras=[],
+			collection=await self._get_collection(ret["lists"]),
 			studios=[],
 			staff=[],
 		)
@@ -358,7 +358,11 @@ class TVDB(Provider):
 
 		data = (await self._get(f"lists/{col['id']}/extended"))["data"]
 		first_entity = data["entities"][0]
-		kind = "movie" if "movieId" in first_entity else "series"
+		kind = (
+			"movie"
+			if "movieId" in first_entity and first_entity["movieId"] is not None
+			else "series"
+		)
 		show = (
 			(
 				await self._get(
@@ -385,15 +389,11 @@ class TVDB(Provider):
 					(x["name"] for x in trans if x.get("isPrimary")), data["name"]
 				),
 				latin_name=None,
-				description=trans.get("overview"),
+				description=trans[0].get("overview"),
 				tagline=None,
-				aliases=[
-					x["name"]
-					for x in trans["aliases"]
-					if x["language"] == lang and x.get("isAlias")
-				],
+				aliases=[x["name"] for x in trans if x.get("isAlias")],
 				tags=[],
-				poster=trans.get("image")
+				poster=data.get("image")
 				if lang == "eng"
 				else self._pick_image(show["artworks"], kind, "posters", lang),
 				thumbnail=self._pick_image(show["artworks"], kind, "backgrounds", lang),
@@ -618,7 +618,7 @@ class TVDB(Provider):
 					None,
 				),
 				poster=self._pick_image(
-					ret["artworks"], "episode", "posters", trans["language"]
+					ret["artworks"], "movie", "posters", trans["language"]
 				),
 			)
 			for trans in ret["translations"]["nameTranslations"]
@@ -648,9 +648,12 @@ class TVDB(Provider):
 				search = await self._get(
 					f"search/remoteid/{external_id[ProviderName.IMDB]}"
 				)
-				if len(search["data"]) > 0:
-					id = search["data"][0].get("movie")["id"]
-					return await self.get_movie({self.name: id})
+				if search["data"] is not None and len(search["data"]) > 0:
+					movie = search["data"][0].get("movie")
+					mId = movie.get("id") if movie is not None else None
+					if mId is None:
+						return None
+					return await self.get_movie({self.name: mId})
 			return None
 
 		ret = (
@@ -675,7 +678,7 @@ class TVDB(Provider):
 			status=MovieStatus.FINISHED
 			if ret["status"]["name"] == "Ended"
 			else MovieStatus.PLANNED,
-			runtime=ret["averageRuntime"],
+			runtime=ret["runtime"],
 			air_date=datetime.strptime(ret["first_release"]["date"], "%Y-%m-%d").date()
 			if ret.get("first_release") and ret["first_release"].get("date")
 			else None,
@@ -727,7 +730,7 @@ class TVDB(Provider):
 				for trans in ret["translations"]["nameTranslations"]
 				if trans.get("isAlias") is None or False
 			},
-			collection=await self._get_collection(ret["list"]),
+			collection=await self._get_collection(ret["lists"]),
 			studios=[],
 			staff=[],
 		)
