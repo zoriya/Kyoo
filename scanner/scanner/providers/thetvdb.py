@@ -293,7 +293,7 @@ class TVDB(Provider):
 			entries=entries,
 			# TODO: map extra entries in extra instead of entries
 			extras=[],
-			collection=await self._get_collection(ret["lists"]),
+			collection=await self._get_collection(ret),
 			studios=[],
 			staff=[],
 		)
@@ -310,7 +310,9 @@ class TVDB(Provider):
 			return None
 
 		imgId = next(
-			x for x in self._image_map if x["recordType"] == kind and x["slug"] == type
+			x["id"]
+			for x in self._image_map
+			if x["recordType"] == kind and x["slug"] == type
 		)
 		items = sorted(
 			(x for x in images if x["type"] == imgId),
@@ -347,10 +349,15 @@ class TVDB(Provider):
 
 		return ret
 
-	async def _get_collection(self, lists: list[dict[str, Any]]) -> Collection | None:
+	async def _get_collection(self, current: dict[str, Any]) -> Collection | None:
 		col = next(
-			# we blacklist mcu (id 4) to prefer sub collections (like `Iron man` instead of a big one)
-			(x for x in lists if x.get("isOfficial") == True and x["id"] != 4),
+			(
+				x
+				for x in current["lists"]
+				# we blacklist mcu (id 4) to prefer sub collections (like `Iron man` instead of a big one)
+				# we blacklist `TheTVDB’s Best Shows of 2020` (id 7289)
+				if x.get("isOfficial") == True and x["id"] != 4 and x["id"] != 7289
+			),
 			None,
 		)
 		if col is None:
@@ -363,16 +370,15 @@ class TVDB(Provider):
 			if "movieId" in first_entity and first_entity["movieId"] is not None
 			else "series"
 		)
+		first_id = (
+			first_entity["movieId"] if kind == "movie" else first_entity["seriesId"]
+		)
 		show = (
-			(
-				await self._get(
-					f"movies/{first_entity['movieId']}/extended",
-				)
-			)["data"]
-			if kind == "movie"
+			current
+			if current["id"] == first_id
 			else (
 				await self._get(
-					f"series/{first_entity['seriesId']}/extended",
+					f"{'movies' if kind == 'movie' else 'series'}/{first_id}/extended",
 				)
 			)["data"]
 		)
@@ -730,7 +736,7 @@ class TVDB(Provider):
 				for trans in ret["translations"]["nameTranslations"]
 				if trans.get("isAlias") is None or False
 			},
-			collection=await self._get_collection(ret["lists"]),
+			collection=await self._get_collection(ret),
 			studios=[],
 			staff=[],
 		)
