@@ -380,7 +380,7 @@ export const Header = ({
 	slug,
 	onImageLayout,
 }: {
-	kind: "movie" | "serie";
+	kind: "movie" | "serie" | "collection";
 	slug: string;
 	onImageLayout?: ViewProps["onLayout"];
 }) => {
@@ -458,6 +458,9 @@ Header.query = (
 	parser: Show,
 	path: ["api", `${kind}s`, slug],
 	params: {
-		with: ["studios", ...(kind === "serie" ? ["firstEntry", "nextEntry"] : [])],
+		with: [
+			...(kind !== "collection" ? ["studios"] : []),
+			...(kind === "serie" ? ["firstEntry", "nextEntry"] : []),
+		],
 	},
 });
