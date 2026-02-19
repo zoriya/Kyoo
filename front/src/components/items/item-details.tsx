@@ -1,7 +1,7 @@
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ScrollView, View } from "react-native";
+import { ScrollView, View, type ViewProps } from "react-native";
 import { ItemContext } from "~/components/items/context-menus";
 import { ItemWatchStatus } from "~/components/items/item-helpers";
 import type { Genre, KImage, WatchStatusV } from "~/models";
@@ -49,8 +49,7 @@ export const ItemDetails = ({
 	watchStatus: WatchStatusV | null;
 	availableCount?: number | null;
 	seenCount?: number | null;
-	className?: string;
-}) => {
+} & ViewProps) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 	const { t } = useTranslation();
 
@@ -82,8 +81,8 @@ export const ItemDetails = ({
 						seenCount={seenCount}
 					/>
 				</PosterBackground>
-				<View className="mb-14 flex-1 justify-end p-2">
-					<View className="my-2 flex-row-reverse justify-between">
+				<View className="mb-14 flex-1 justify-end">
+					<View className="my-2 flex-row-reverse justify-between p-2">
 						{kind !== "collection" && (
 							<ItemContext
 								kind={kind}
@@ -95,7 +94,7 @@ export const ItemDetails = ({
 						)}
 						{tagline && <P className="p-1">{tagline}</P>}
 					</View>
-					<ScrollView className="px-1">
+					<ScrollView className="p-3">
 						<SubP className="text-justify">
 							{description ?? t("show.noOverview")}
 						</SubP>
@@ -121,7 +120,7 @@ export const ItemDetails = ({
 							<Chip
 								key={x ?? i}
 								label={t(`genres.${x}`)}
-								href={"#"}
+								href={`/genres/${x}`}
 								size="small"
 								className="mx-1"
 							/>
@@ -142,10 +141,13 @@ export const ItemDetails = ({
 	);
 };
 
-ItemDetails.Loader = (props: object) => {
+ItemDetails.Loader = ({ className, ...props }: ViewProps) => {
 	return (
 		<View
-			className={"h-72 flex-row overflow-hidden rounded-xl bg-card"}
+			className={cn(
+				"h-72 flex-row overflow-hidden rounded-xl bg-card",
+				className,
+			)}
 			{...props}
 		>
 			<View className="aspect-2/3 h-full bg-gray-400">

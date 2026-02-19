@@ -80,7 +80,11 @@ Poster.Loader = ({ className, ...props }: { className?: string }) => (
 	<Image.Loader className={cn("aspect-2/3", className)} {...props} />
 );
 
-export const PosterPlaceholder = ({ className, ...props }: ViewProps) => {
+export const PosterPlaceholder = ({
+	className,
+	children,
+	...props
+}: ViewProps) => {
 	return (
 		<View
 			className={cn(
@@ -89,7 +93,8 @@ export const PosterPlaceholder = ({ className, ...props }: ViewProps) => {
 			)}
 			{...props}
 		>
-			<KyooLogo style={{ width: "50%", height: "50%" }} />
+			<KyooLogo style={{ width: "50%", aspectRatio: "289.35/296.15" }} />
+			{children}
 		</View>
 	);
 };

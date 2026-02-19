@@ -41,7 +41,7 @@ export const SeasonHeader = ({
 	return (
 		<View
 			id={`season-${seasonNumber}`}
-			className={cn("m-1 flex-row", className)}
+			className={cn("m-1 w-full flex-1 flex-row", className)}
 			{...props}
 		>
 			<P className="mx-1 w-16 shrink-0 text-center text-2xl text-accent">
@@ -109,7 +109,11 @@ export const EntryList = ({
 			query={EntryList.query(slug, season)}
 			layout={EntryLine.layout}
 			Empty={<EmptyView message={t("show.episode-none")} />}
-			Divider={() => <Container as={HR} />}
+			Divider={() => (
+				<Container>
+					<HR />
+				</Container>
+			)}
 			getItemType={(item, idx) =>
 				item ? item.kind : idx === 0 ? "season" : "episode"
 			}
@@ -119,34 +123,33 @@ export const EntryList = ({
 					.filter((x) => x !== null)
 			}
 			placeholderCount={5}
-			Render={({ item }) =>
-				item.kind === "season" ? (
-					<Container
-						as={SeasonHeader}
-						serieSlug={slug}
-						name={item.name}
-						seasonNumber={item.seasonNumber}
-						seasons={seasons ?? []}
-					/>
-				) : (
-					<Container
-						as={EntryLine}
-						{...item}
-						// Don't display "Go to serie"
-						videosCount={item.videos.length}
-						serieSlug={null}
-						displayNumber={entryDisplayNumber(item)}
-						watchedPercent={item.progress.percent}
-					/>
-				)
-			}
-			Loader={({ index }) =>
-				index === 0 ? (
-					<Container as={SeasonHeader.Loader} />
-				) : (
-					<Container as={EntryLine.Loader} />
-				)
-			}
+			Render={({ item }) => (
+				<Container>
+					{item.kind === "season" ? (
+						<SeasonHeader
+							serieSlug={slug}
+							name={item.name}
+							seasonNumber={item.seasonNumber}
+							seasons={seasons ?? []}
+						/>
+					) : (
+						<EntryLine
+							{...item}
+							// Don't display "Go to serie"
+							videosCount={item.videos.length}
+							serieSlug={null}
+							displayNumber={entryDisplayNumber(item)}
+							watchedPercent={item.progress.percent}
+						/>
+					)}
+				</Container>
+			)}
+			Loader={({ index }) => (
+				<Container>
+					{index === 0 ? <SeasonHeader.Loader /> : <EntryLine.Loader />}
+				</Container>
+			)}
+			margin={false}
 			{...props}
 		/>
 	);

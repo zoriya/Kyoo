@@ -20,6 +20,7 @@ from ..models.serie import SearchSerie, Serie, SerieStatus, SerieTranslation
 from ..models.staff import Character, Person, Role, Staff
 from ..models.studio import Studio, StudioTranslation
 from ..utils import clean, to_slug
+from .names import ProviderName
 from .provider import Provider, ProviderError
 
 logger = getLogger(__name__)
@@ -95,12 +96,10 @@ class TheMovieDatabase(Provider):
 	):
 		await self._client.close()
 
-	NAME = "themoviedatabase"
-
 	@property
 	@override
 	def name(self) -> str:
-		return self.NAME
+		return ProviderName.TMDB
 
 	@override
 	async def search_movies(
@@ -171,7 +170,7 @@ class TheMovieDatabase(Provider):
 				}
 				| (
 					{
-						"imdb": MetadataId(
+						ProviderName.IMDB: MetadataId(
 							data_id=str(movie["imdb_id"]),
 							link=f"https://www.imdb.com/title/{movie['imdb_id']}",
 						)
@@ -222,11 +221,9 @@ class TheMovieDatabase(Provider):
 				)
 				for trans in movie["translations"]["translations"]
 			},
-			collections=[
-				await self._get_collection(movie["belongs_to_collection"]["id"])
-			]
+			collection=await self._get_collection(movie["belongs_to_collection"]["id"])
 			if movie["belongs_to_collection"] is not None
-			else [],
+			else None,
 			studios=[self._map_studio(x) for x in movie["production_companies"]],
 			# TODO: add crew
 			staff=[self._map_staff(x) for x in movie["credits"]["cast"]],
@@ -327,7 +324,7 @@ class TheMovieDatabase(Provider):
 			}
 			| (
 				{
-					"imdb": MetadataId(
+					ProviderName.IMDB: MetadataId(
 						data_id=str(serie["external_ids"]["imdb_id"]),
 						link=f"https://www.imdb.com/title/{serie['external_ids']['imdb_id']}",
 					)
@@ -337,7 +334,7 @@ class TheMovieDatabase(Provider):
 			)
 			| (
 				{
-					"tvdb": MetadataId(
+					ProviderName.TVDB: MetadataId(
 						data_id=str(serie["external_ids"]["tvdb_id"]),
 						link=None,
 					)
@@ -389,8 +386,8 @@ class TheMovieDatabase(Provider):
 			},
 			seasons=seasons,
 			entries=entries,
-			extra=[],
-			collections=[],
+			extras=[],
+			collection=None,
 			studios=[self._map_studio(x) for x in serie["production_companies"]],
 			# TODO: add crew
 			staff=[self._map_staff(x) for x in serie["credits"]["cast"]],
@@ -564,6 +561,7 @@ class TheMovieDatabase(Provider):
 				)
 				for trans in episode["translations"]["translations"]
 			},
+			extra={},
 		)
 
 	async def _get_collection(self, provider_id: str | int) -> Collection:

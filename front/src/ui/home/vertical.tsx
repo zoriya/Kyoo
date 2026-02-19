@@ -1,26 +1,22 @@
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import { useYoshiki } from "yoshiki/native";
-import { ItemGrid, ItemList, itemMap } from "~/components/items";
+import { ItemList, itemMap } from "~/components/items";
 import { Show } from "~/models";
-import { H3 } from "~/primitives";
-import { InfiniteFetch, type QueryIdentifier } from "~/query";
+import { type QueryIdentifier, useInfiniteFetch } from "~/query";
+import { Header } from "./genre";
 
 export const VerticalRecommended = () => {
 	const { t } = useTranslation();
-	const { css } = useYoshiki();
+	const { items } = useInfiniteFetch(VerticalRecommended.query());
 
 	return (
-		<View {...css({ marginY: ItemGrid.layout.gap })}>
-			<H3 {...css({ mX: ItemGrid.layout.gap })}>{t("home.recommended")}</H3>
-			<InfiniteFetch
-				query={VerticalRecommended.query()}
-				placeholderCount={3}
-				layout={{ ...ItemList.layout, layout: "vertical" }}
-				fetchMore={false}
-				Render={({ item }) => <ItemList {...itemMap(item)} />}
-				Loader={() => <ItemList.Loader />}
-			/>
+		<View>
+			<Header title={t("home.recommended")} />
+			<View className="mx-2 flex-1 gap-2">
+				{items
+					? items.map((x) => <ItemList key={x.slug} {...itemMap(x)} />)
+					: [...Array(3)].map((_, i) => <ItemList.Loader key={i} />)}
+			</View>
 		</View>
 	);
 };

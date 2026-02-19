@@ -13,11 +13,13 @@ import { watchListIcon } from "./watchlist-info";
 // import { useDownloader } from "../../packages/ui/src/downloads/ui/src/downloads";
 
 export const EntryContext = ({
+	kind,
 	slug,
 	serieSlug,
 	className,
 	...props
 }: {
+	kind: "movie" | "episode" | "special";
 	serieSlug: string | null;
 	slug: string;
 	className?: string;
@@ -38,7 +40,7 @@ export const EntryContext = ({
 				<Menu.Item
 					label={t("home.episodeMore.goToShow")}
 					icon={Info}
-					href={`/series/${serieSlug}`}
+					href={`/${kind === "movie" ? "movies" : "series"}/${serieSlug}`}
 				/>
 			)}
 			{/* <Menu.Item */}

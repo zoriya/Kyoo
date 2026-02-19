@@ -112,5 +112,6 @@ export const expo: ExpoConfig = {
 	],
 	experiments: {
 		typedRoutes: true,
+		reactCompiler: true,
 	},
 };

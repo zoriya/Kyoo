@@ -17,6 +17,7 @@ import { EntryContext } from "../items/context-menus";
 import { ItemProgress } from "../items/item-grid";
 
 export const EntryBox = ({
+	kind,
 	slug,
 	serieSlug,
 	name,
@@ -27,6 +28,7 @@ export const EntryBox = ({
 	className,
 	...props
 }: {
+	kind: "movie" | "episode" | "special";
 	slug: string;
 	// if serie slug is null, disable "Go to serie" in the context menu
 	serieSlug: string | null;
@@ -44,7 +46,7 @@ export const EntryBox = ({
 		<Link
 			href={moreOpened ? undefined : href}
 			onLongPress={() => setMoreOpened(true)}
-			className={cn("group w-[350px] items-center outline-0", className)}
+			className={cn("group w-[350px] items-center p-1 outline-0", className)}
 			{...props}
 		>
 			<ThumbnailBackground
@@ -58,6 +60,7 @@ export const EntryBox = ({
 			>
 				<ItemProgress watchPercent={watchedPercent} />
 				<EntryContext
+					kind={kind}
 					slug={slug}
 					serieSlug={serieSlug}
 					isOpen={moreOpened}
@@ -80,9 +83,9 @@ export const EntryBox = ({
 	);
 };
 
-EntryBox.Loader = ({ className, ...props }: { className?: string }) => {
+EntryBox.Loader = (props: object) => {
 	return (
-		<View className={cn("items-center", className)} {...props}>
+		<View className={"h-full w-[350px] items-center p-1"} {...props}>
 			<Image.Loader className="aspect-video w-full" />
 			<Skeleton className="w-1/2" />
 			<Skeleton className="h-3 w-4/5" />

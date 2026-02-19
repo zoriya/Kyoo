@@ -1,12 +1,10 @@
 import Info from "@material-symbols/svg-400/rounded/info.svg";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
-import { LinearGradient } from "expo-linear-gradient";
+import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import { min, percent, px, rem, vh } from "yoshiki/native";
 import { type KImage, Show } from "~/models";
 import {
-	ContrastArea,
 	H1,
 	H2,
 	IconButton,
@@ -16,7 +14,6 @@ import {
 	P,
 	Skeleton,
 	tooltip,
-	ts,
 } from "~/primitives";
 import type { QueryIdentifier } from "~/query";
 import { cn } from "~/utils";
@@ -37,8 +34,7 @@ export const Header = ({
 	tagline: string | null;
 	link: string | null;
 	infoLink: string;
-	className?: string;
-}) => {
+} & Partial<ComponentProps<typeof ImageBackground>>) => {
 	const { t } = useTranslation();
 
 	return (
@@ -93,72 +89,35 @@ Header.Loader = () => {
 	const { t } = useTranslation();
 
 	return (
-		<ContrastArea mode="dark">
-			{({ css, theme }) => (
-				<View
-					{...css({
-						flexDirection: "column-reverse",
-						width: percent(100),
-						height: {
-							xs: vh(40),
-							sm: min(vh(60), px(750)),
-							md: min(vh(60), px(680)),
-							lg: vh(65),
-						},
-						minHeight: {
-							xs: px(350),
-							sm: px(300),
-							md: px(400),
-							lg: px(600),
-						},
-					})}
-				>
-					<LinearGradient
-						start={{ x: 0, y: 0.25 }}
-						end={{ x: 0, y: 1 }}
-						colors={["transparent", theme.darkOverlay]}
-						{...(css({
-							position: "absolute",
-							top: 0,
-							bottom: 0,
-							left: 0,
-							right: 0,
-						}) as any)}
-					/>
-					<View {...css({ margin: ts(2) })}>
-						<Skeleton {...css({ width: rem(8), height: rem(2.5) })} />
-						<View {...css({ flexDirection: "row", alignItems: "center" })}>
-							<IconFab
-								icon={PlayArrow}
-								aria-label={t("show.play")}
-								{...tooltip(t("show.play"))}
-								{...css({ marginRight: ts(1) })}
-							/>
-							<IconButton
-								icon={Info}
-								aria-label={t("home.info")}
-								{...tooltip(t("home.info"))}
-								{...css({ marginRight: ts(2) })}
-							/>
-							<Skeleton
-								{...css({
-									width: rem(25),
-									height: rem(2),
-									display: { xs: "none", sm: "flex" },
-								})}
-							/>
-						</View>
-						<Skeleton
-							lines={4}
-							{...css({
-								display: { xs: "none", md: "flex" },
-								marginTop: ts(1),
-							})}
-						/>
-					</View>
-				</View>
+		<View
+			className={cn(
+				"h-[40vh] w-full sm:h-[60vh] sm:min-h-[750px] md:min-h-[680px] lg:h-[65vh]",
 			)}
-		</ContrastArea>
+		>
+			<View className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/70" />
+			<View className="absolute bottom-0 m-4 md:w-3/5">
+				<Skeleton className="h-10 w-2/5" />
+				<View className="my-2 flex-row items-center">
+					<IconFab
+						icon={PlayArrow}
+						disabled
+						aria-label={t("show.play")}
+						className="mr-2"
+						{...tooltip(t("show.play"))}
+					/>
+					<IconButton
+						icon={Info}
+						disabled
+						aria-label={t("home.info")}
+						className="mr-2"
+						iconClassName="fill-slate-400"
+						{...tooltip(t("home.info"))}
+					/>
+					<Skeleton className="h-8 w-4/5 max-sm:hidden" />
+				</View>
+				<Skeleton lines={4} className="max-sm:hidden" />
+			</View>
+		</View>
 	);
 };
 

@@ -3,10 +3,9 @@ import MoreHoriz from "@material-symbols/svg-400/rounded/more_horiz.svg";
 import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg";
-import { Stack } from "expo-router";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
+import { View, type ViewProps } from "react-native";
 import { WatchListInfo } from "~/components/items/watchlist-info";
 import { Rating } from "~/components/rating";
 import {
@@ -42,6 +41,7 @@ import {
 import { useAccount } from "~/providers/account-context";
 import { Fetch, type QueryIdentifier } from "~/query";
 import { cn, displayRuntime, getDisplayDate } from "~/utils";
+import { PartOf } from "./part-of";
 
 const ButtonList = ({
 	kind,
@@ -167,7 +167,6 @@ export const TitleLine = ({
 		>
 			<Poster
 				src={poster}
-				alt={name}
 				quality="medium"
 				className="w-1/2 shrink-0 max-sm:max-w-44 md:w-1/4"
 			/>
@@ -262,7 +261,7 @@ const Description = ({
 	description: string | null;
 	tags: string[];
 	genres: Genre[];
-	studios: Studio[];
+	studios: Studio[] | null;
 	externalIds: Metadata;
 }) => {
 	const { t } = useTranslation();
@@ -270,7 +269,7 @@ const Description = ({
 	return (
 		<Container className="py-10" {...props}>
 			<View className="flex-1 flex-col-reverse sm:flex-row">
-				<P className="py-5 text-justify">
+				<P className="flex-1 py-5 text-justify">
 					{description ?? t("show.noOverview")}
 				</P>
 				<View className="basis-1/5 flex-row xl:mt-[-100px]">
@@ -295,27 +294,33 @@ const Description = ({
 			</View>
 			<View className="mt-5 flex-row flex-wrap items-center">
 				<P className="mr-1">{t("show.tags")}:</P>
-				{tags.map((tag) => (
-					<Chip
-						key={tag}
-						label={tag && capitalize(tag)}
-						href={`/search?q=${tag}`}
-						size="small"
-						className="m-1"
-					/>
-				))}
+				{tags.length ? (
+					tags.map((tag) => (
+						<Chip
+							key={tag}
+							label={tag && capitalize(tag)}
+							href={`/search?q=${tag}`}
+							size="small"
+							className="m-1"
+						/>
+					))
+				) : (
+					<P>{t("show.tags-none")}</P>
+				)}
 			</View>
-			<P className="my-5 flex-row flex-wrap items-center">
-				<P className="mr-1">{t("show.studios")}:</P>
-				{studios.map((x, i) => (
-					<Fragment key={x.id}>
-						{i !== 0 && ","}
-						<A href={x.slug} className="ml-2">
-							{x.name}
-						</A>
-					</Fragment>
-				))}
-			</P>
+			{studios !== null && (
+				<P className="my-5 flex-row flex-wrap items-center">
+					<P className="mr-1">{t("show.studios")}:</P>
+					{studios.map((x, i) => (
+						<Fragment key={x.id}>
+							{i !== 0 && ","}
+							<A href={x.slug} className="ml-2">
+								{x.name}
+							</A>
+						</Fragment>
+					))}
+				</P>
+			)}
 			<View className="flex-row flex-wrap items-center">
 				<P className="mr-1 text-center">{t("show.links")}:</P>
 				{Object.entries(externalIds)
@@ -380,78 +385,83 @@ Description.Loader = ({ ...props }: object) => {
 export const Header = ({
 	kind,
 	slug,
+	onImageLayout,
 }: {
-	kind: "movie" | "serie";
+	kind: "movie" | "serie" | "collection";
 	slug: string;
+	onImageLayout?: ViewProps["onLayout"];
 }) => {
 	return (
-		<>
-			<Stack.Screen
-				options={{
-					headerTransparent: true,
-					headerStyle: { backgroundColor: undefined },
-				}}
-			/>
-			<Fetch
-				query={Header.query(kind, slug)}
-				Render={(data) => (
-					<View className="flex-1">
-						<Head
-							title={data.name}
-							description={data.description}
-							image={data.thumbnail?.high}
-						/>
-						<ImageBackground
-							src={data.thumbnail}
-							quality="high"
-							alt=""
-							className="absolute top-0 right-0 left-0 h-[40vh] w-full sm:h-[60vh] sm:min-h-[750px] md:min-h-[680px] lg:h-[65vh]"
-						>
-							<View className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/70" />
-						</ImageBackground>
-						<TitleLine
-							kind={kind}
-							slug={slug}
-							name={data.name}
-							tagline={data.tagline}
-							date={getDisplayDate(data)}
-							rating={data.rating}
-							runtime={data.kind === "movie" ? data.runtime : null}
-							poster={data.poster}
-							playHref={data.kind !== "collection" ? data.playHref : null}
-							trailerUrl={data.kind !== "collection" ? data.trailerUrl : null}
-							watchStatus={
-								data.kind !== "collection"
-									? (data.watchStatus?.status ?? null)
-									: null
-							}
-							className="mt-[max(20vh,200px)] sm:mt-[35vh] md:mt-[max(45vh,150px)] lg:mt-[max(35vh,200px)]"
-						/>
-						<Description
-							description={data.description}
-							tags={data.tags}
-							genres={data.genres}
-							studios={data.kind !== "collection" ? data.studios! : []}
-							externalIds={data.externalId}
-						/>
+		<Fetch
+			query={Header.query(kind, slug)}
+			Render={(data) => (
+				<View className="flex-1">
+					<Head
+						title={data.name}
+						description={data.description}
+						image={data.thumbnail?.high}
+					/>
+					<ImageBackground
+						src={data.thumbnail}
+						quality="high"
+						alt=""
+						className="absolute top-0 right-0 left-0 h-[40vh] w-full sm:h-[60vh] sm:min-h-[750px] md:min-h-[680px] lg:h-[65vh]"
+						onLayout={onImageLayout}
+					>
+						<View className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/70" />
+					</ImageBackground>
+					<TitleLine
+						kind={kind}
+						slug={slug}
+						name={data.name}
+						tagline={data.tagline}
+						date={getDisplayDate(data)}
+						rating={data.rating}
+						runtime={data.kind === "movie" ? data.runtime : null}
+						poster={data.poster}
+						playHref={data.kind !== "collection" ? data.playHref : null}
+						trailerUrl={data.kind !== "collection" ? data.trailerUrl : null}
+						watchStatus={
+							data.kind !== "collection"
+								? (data.watchStatus?.status ?? null)
+								: null
+						}
+						className="mt-[max(20vh,200px)] sm:mt-[35vh] md:mt-[max(45vh,150px)] lg:mt-[max(35vh,200px)]"
+					/>
+					<Description
+						description={data.description}
+						tags={data.tags}
+						genres={data.genres}
+						studios={data.kind !== "collection" ? data.studios! : null}
+						externalIds={data.externalId}
+					/>
 
-						{/* {type === "show" && ( */}
-						{/* 	<ShowWatchStatusCard {...(data?.watchStatus as any)} /> */}
-						{/* )} */}
-					</View>
-				)}
-				Loader={() => (
-					<View className="flex-1">
-						<View className="absolute top-0 right-0 left-0 h-[40vh] w-full bg-linear-to-b from-transparent to-slate-950/70 sm:h-[60vh] sm:min-h-[750px] md:min-h-[680px] lg:h-[65vh]" />
-						<TitleLine.Loader
-							kind={kind}
-							className="mt-[max(20vh,200px)] sm:mt-[35vh] md:mt-[max(45vh,150px)] lg:mt-[max(35vh,200px)]"
-						/>
-						<Description.Loader />
-					</View>
-				)}
-			/>
-		</>
+					{data.kind !== "collection" && data.collection && (
+						<Container className="mb-4">
+							<PartOf
+								name={data.collection.name}
+								description={data.collection.description}
+								banner={data.collection.banner ?? data.collection.thumbnail}
+								href={data.collection.href}
+							/>
+						</Container>
+					)}
+				</View>
+			)}
+			Loader={() => (
+				<View className="flex-1">
+					<View
+						className="absolute top-0 right-0 left-0 h-[40vh] w-full bg-linear-to-b from-transparent to-slate-950/70 sm:h-[60vh] sm:min-h-[750px] md:min-h-[680px] lg:h-[65vh]"
+						onLayout={onImageLayout}
+					/>
+					<TitleLine.Loader
+						kind={kind}
+						className="mt-[max(20vh,200px)] sm:mt-[35vh] md:mt-[max(45vh,150px)] lg:mt-[max(35vh,200px)]"
+					/>
+					<Description.Loader />
+				</View>
+			)}
+		/>
 	);
 };
 
@@ -462,6 +472,9 @@ Header.query = (
 	parser: Show,
 	path: ["api", `${kind}s`, slug],
 	params: {
-		with: ["studios", ...(kind === "serie" ? ["firstEntry", "nextEntry"] : [])],
+		with: [
+			...(kind !== "collection" ? ["collection", "studios"] : []),
+			...(kind === "serie" ? ["firstEntry", "nextEntry"] : []),
+		],
 	},
 });

@@ -40,7 +40,7 @@ func getThumbVttPath(sha string) string {
 }
 
 func (s *MetadataService) GetThumbVtt(ctx context.Context, path string, sha string) (io.ReadCloser, error) {
-	_, err := s.ExtractThumbs(ctx, path, sha)
+	_, err := s.ExtractThumbs(context.Background(), path, sha)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (s *MetadataService) GetThumbVtt(ctx context.Context, path string, sha stri
 }
 
 func (s *MetadataService) GetThumbSprite(ctx context.Context, path string, sha string) (io.ReadCloser, error) {
-	_, err := s.ExtractThumbs(ctx, path, sha)
+	_, err := s.ExtractThumbs(context.Background(), path, sha)
 	if err != nil {
 		return nil, err
 	}

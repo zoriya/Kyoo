@@ -63,7 +63,7 @@ export const ItemGrid = ({
 			href={moreOpened ? undefined : href}
 			onLongPress={() => setMoreOpened(true)}
 			className={cn(
-				"group items-center outline-0",
+				"group items-center p-1 outline-0",
 				horizontal && "h-full w-[200px]",
 				className,
 			)}
@@ -71,7 +71,6 @@ export const ItemGrid = ({
 		>
 			<PosterBackground
 				src={poster}
-				alt={name}
 				quality="low"
 				className={cn(
 					"w-full",
@@ -113,9 +112,20 @@ export const ItemGrid = ({
 	);
 };
 
-ItemGrid.Loader = (props: object) => {
+ItemGrid.Loader = ({
+	horizontal = false,
+	...props
+}: {
+	horizontal?: boolean;
+}) => {
 	return (
-		<View className="w-full items-center" {...props}>
+		<View
+			className={cn(
+				"w-full items-center p-1",
+				horizontal && "h-full w-[200px]",
+			)}
+			{...props}
+		>
 			<Poster.Loader className="w-full" />
 			<Skeleton />
 			<Skeleton className="w-1/2" />

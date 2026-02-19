@@ -1,15 +1,17 @@
 import Admin from "@material-symbols/svg-400/rounded/admin_panel_settings.svg";
 import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
+import Close from "@material-symbols/svg-400/rounded/close.svg";
 import Login from "@material-symbols/svg-400/rounded/login.svg";
 import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import Settings from "@material-symbols/svg-400/rounded/settings.svg";
-import { useGlobalSearchParams, usePathname, useRouter } from "expo-router";
+import { useIsFocused } from "@react-navigation/native";
+import { useNavigation, usePathname, useRouter } from "expo-router";
 import KyooLongLogo from "public/icon-long.svg";
 import {
 	type ComponentProps,
-	type Ref,
 	useEffect,
+	useLayoutEffect,
 	useRef,
 	useState,
 } from "react";
@@ -17,16 +19,23 @@ import { useTranslation } from "react-i18next";
 import {
 	Platform,
 	type PressableProps,
-	type TextInput,
-	type TextInputProps,
+	TextInput,
 	View,
+	type ViewProps,
 } from "react-native";
+import Animated, {
+	interpolate,
+	useAnimatedScrollHandler,
+	useAnimatedStyle,
+	useSharedValue,
+} from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useCSSVariable } from "uniwind";
 import {
 	A,
 	Avatar,
 	HR,
 	IconButton,
-	Input,
 	Link,
 	Menu,
 	PressableFeedback,
@@ -35,6 +44,24 @@ import {
 import { useAccount, useAccounts } from "~/providers/account-context";
 import { logout } from "~/ui/login/logic";
 import { cn } from "~/utils";
+
+export const NavbarLeft = () => {
+	const { t } = useTranslation();
+
+	if (Platform.OS !== "web") return <NavbarTitle />;
+
+	return (
+		<View className="flex-row items-center gap-2">
+			<NavbarTitle />
+			<A
+				href="/browse"
+				className="font-headers text-lg text-slate-200 uppercase dark:text-slate-200"
+			>
+				{t("navbar.browse")}
+			</A>
+		</View>
+	);
+};
 
 export const NavbarTitle = ({
 	className,
@@ -55,43 +82,112 @@ export const NavbarTitle = ({
 	);
 };
 
-const SearchBar = ({
-	ref,
-	className,
-	...props
-}: TextInputProps & { ref?: Ref<TextInput> }) => {
+export const NavbarRight = () => {
 	const { t } = useTranslation();
-	const params = useGlobalSearchParams();
-	const [query, setQuery] = useState((params.q as string) ?? "");
-	const path = usePathname();
-	const router = useRouter();
-	const inputRef = useRef<TextInput>(null);
-
-	useEffect(() => {
-		if (path === "/browse") {
-			inputRef.current?.focus();
-			setQuery(params.q as string);
-		} else {
-			inputRef.current?.blur();
-			setQuery("");
-		}
-	}, [path, params.q]);
+	const isAdmin = false; //useHasPermission(AdminPage.requiredPermissions);
 
 	return (
-		<Input
-			ref={inputRef}
-			value={query}
-			onChangeText={(q) => {
-				setQuery(q);
-				if (path !== "/browse") router.navigate(`/browse?q=${q}`);
-				else router.setParams({ q });
-			}}
-			placeholder={t("navbar.search")}
-			containerClassName="border-light"
-			className={cn("text-slate-200 dark:text-slate-200", className)}
-			{...tooltip(t("navbar.search"))}
-			{...props}
-		/>
+		<View className="shrink flex-row items-center">
+			<SearchBar />
+			{isAdmin && (
+				<IconButton
+					icon={Admin}
+					as={Link}
+					href={"/admin"}
+					iconClassName="fill-slate-200 dark:fill-slate-200"
+					{...tooltip(t("navbar.admin"))}
+				/>
+			)}
+			<NavbarProfile />
+		</View>
+	);
+};
+
+const SearchBar = () => {
+	const { t } = useTranslation();
+	const [expanded, setExpanded] = useState(false);
+	const inputRef = useRef<TextInput>(null);
+
+	const router = useRouter();
+	const [query, setQuery] = useState("");
+
+	const path = usePathname();
+	const shouldExpand = useRef(false);
+	useEffect(() => {
+		if (path === "/browse" && shouldExpand.current) {
+			shouldExpand.current = false;
+			// Small delay to allow animation to start before focusing
+			setTimeout(() => {
+				setExpanded(true);
+				inputRef.current?.focus();
+			}, 300);
+		} else if (path === "/") {
+			inputRef.current?.blur();
+		}
+	}, [path]);
+
+	return (
+		<Animated.View
+			className={cn(
+				"mr-2 flex-row items-center overflow-hidden p-0 pl-4",
+				"rounded-full bg-slate-100 dark:bg-slate-800",
+			)}
+			style={[
+				expanded ? { flex: 1 } : { backgroundColor: "transparent" },
+				{
+					transitionProperty: "background-color",
+					transitionDuration: "300ms",
+				},
+			]}
+		>
+			<TextInput
+				ref={inputRef}
+				value={query}
+				onChangeText={(q) => {
+					setQuery(q);
+					router.setParams({ q });
+				}}
+				onFocus={() => router.push(query ? `/browse?q=${query}` : "/browse")}
+				onBlur={() => {
+					if (query !== "") return;
+					setExpanded(false);
+				}}
+				placeholder={t("navbar.search")}
+				textAlignVertical="center"
+				className={cn(
+					"h-full flex-1 font-sans text-base outline-0",
+					"align-middle text-slate-600 dark:text-slate-200",
+					!expanded && "w-0 grow-0",
+				)}
+				placeholderTextColorClassName="accent-slate-400 dark:text-slate-600"
+			/>
+
+			<IconButton
+				icon={expanded ? Close : Search}
+				// need to use onPressIn due to:
+				//  https://github.com/react-navigation/react-navigation/issues/12274
+				//  https://github.com/react-navigation/react-navigation/issues/12667
+				onPressIn={() => {
+					if (expanded) {
+						inputRef.current?.blur();
+						setExpanded(false);
+						setQuery("");
+						router.setParams({ q: undefined });
+					} else {
+						shouldExpand.current = true;
+						setExpanded(true);
+						// Small delay to allow animation to start before focusing
+						setTimeout(() => inputRef.current?.focus(), 100);
+					}
+				}}
+				iconClassName={cn(
+					expanded
+						? "fill-slate-500 dark:fill-slate-500"
+						: "fill-slate-200 dark:fill-slate-200",
+				)}
+				{...tooltip(t("navbar.search"))}
+			/>
+		</Animated.View>
 	);
 };
 
@@ -159,109 +255,88 @@ export const NavbarProfile = () => {
 		</Menu>
 	);
 };
-export const NavbarRight = () => {
-	const { t } = useTranslation();
-	const isAdmin = false; //useHasPermission(AdminPage.requiredPermissions);
 
-	return (
-		<View className="shrink flex-row items-center">
-			{Platform.OS === "web" ? (
-				<SearchBar />
-			) : (
-				<IconButton
-					icon={Search}
-					as={Link}
-					href={"/browse"}
-					iconClassName="fill-slate-200 dark:fill-slate-200"
-					{...tooltip(t("navbar.search"))}
-				/>
-			)}
-			{isAdmin && (
-				<IconButton
-					icon={Admin}
-					as={Link}
-					href={"/admin"}
-					iconClassName="fill-slate-200 dark:fill-slate-200"
-					{...tooltip(t("navbar.admin"))}
-				/>
-			)}
-			<NavbarProfile />
-		</View>
+export const useScrollNavbar = ({
+	imageHeight,
+	tab = false,
+}: {
+	imageHeight: number;
+	tab?: boolean;
+}) => {
+	const insets = useSafeAreaInsets();
+	const height = insets.top + (Platform.OS === "ios" ? 44 : 56);
+
+	const scrollY = useSharedValue(0);
+	const scrollHandler = useAnimatedScrollHandler((event) => {
+		scrollY.value = event.contentOffset.y;
+	});
+	const opacity = useAnimatedStyle(
+		() => ({
+			opacity: interpolate(scrollY.value, [0, imageHeight - height], [0, 1]),
+		}),
+		[imageHeight, height],
 	);
+	const reverse = useAnimatedStyle(
+		() => ({
+			opacity: interpolate(scrollY.value, [0, imageHeight - height], [1, 0]),
+		}),
+		[imageHeight, height],
+	);
+
+	const nav = useNavigation();
+	const focused = useIsFocused();
+	const accent = useCSSVariable("--color-accent");
+	useLayoutEffect(() => {
+		const n = tab ? nav.getParent() : nav;
+		if (focused) {
+			n?.setOptions({
+				headerTransparent: true,
+				headerStyle: { backgroundColor: "transparent" },
+			});
+		}
+		return () =>
+			n?.setOptions({
+				headerTransparent: false,
+				headerStyle: { backgroundColor: accent as string },
+			});
+	}, [nav, tab, focused, accent]);
+
+	return {
+		scrollHandler,
+		headerProps: {
+			opacity,
+			reverse,
+			height,
+		},
+		headerHeight: height,
+	};
 };
 
-// export const Navbar = ({
-// 	left,
-// 	right,
-// 	background,
-// 	...props
-// }: {
-// 	left?: ReactElement | null;
-// 	right?: ReactElement | null;
-// 	background?: ReactElement;
-// } & Stylable) => {
-// 	const { css } = useYoshiki();
-// 	const { t } = useTranslation();
-//
-// 	return (
-// 		<Header
-// 			{...css(
-// 				{
-// 					backgroundColor: (theme) => theme.accent,
-// 					paddingX: ts(2),
-// 					height: { xs: 48, sm: 64 },
-// 					flexDirection: "row",
-// 					justifyContent: { xs: "space-between", sm: "flex-start" },
-// 					alignItems: "center",
-// 					shadowColor: "#000",
-// 					shadowOffset: {
-// 						width: 0,
-// 						height: 4,
-// 					},
-// 					shadowOpacity: 0.3,
-// 					shadowRadius: 4.65,
-// 					elevation: 8,
-// 					zIndex: 1,
-// 				},
-// 				props,
-// 			)}
-// 		>
-// 			{background}
-// 			<View
-// 				{...css({
-// 					flexDirection: "row",
-// 					alignItems: "center",
-// 					height: percent(100),
-// 				})}
-// 			>
-// 				{left !== undefined ? (
-// 					left
-// 				) : (
-// 					<>
-// 						<NavbarTitle {...css({ marginX: ts(2) })} />
-// 						<A
-// 							href="/browse"
-// 							{...css({
-// 								textTransform: "uppercase",
-// 								fontWeight: "bold",
-// 								color: (theme) => theme.contrast,
-// 							})}
-// 						>
-// 							{t("navbar.browse")}
-// 						</A>
-// 					</>
-// 				)}
-// 			</View>
-// 			<View
-// 				{...css({
-// 					flexGrow: 1,
-// 					flexShrink: 1,
-// 					flexDirection: "row",
-// 					display: { xs: "none", sm: "flex" },
-// 					marginX: ts(2),
-// 				})}
-// 			/>
-// 			{right !== undefined ? right : <NavbarRight />}
-// 		</Header>
-// 	);
-// };
+export const HeaderBackground = ({
+	children,
+	opacity,
+	reverse,
+	height,
+	className,
+	style,
+	...props
+}: ViewProps & ReturnType<typeof useScrollNavbar>["headerProps"]) => {
+	return (
+		<>
+			<Animated.View
+				className={cn("absolute z-10 w-full bg-accent", className)}
+				style={[{ height }, opacity, style]}
+				{...props}
+			/>
+			<Animated.View
+				className={cn(
+					"absolute z-10 w-full bg-linear-to-b from-slate-950/70 to-transparent",
+					className,
+				)}
+				style={[{ height }, reverse, style]}
+				{...props}
+			/>
+			{children}
+		</>
+	);
+};
