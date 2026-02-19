@@ -6,6 +6,7 @@ import { entries } from "~/db/schema";
 import { watchlist } from "~/db/schema/watchlist";
 import { getColumns } from "~/db/utils";
 import { Entry } from "~/models/entry";
+import { Show } from "~/models/show";
 import {
 	AcceptLanguage,
 	createPage,
@@ -21,6 +22,7 @@ import { desc } from "~/models/utils/descriptions";
 import {
 	entryFilters,
 	entryProgressQ,
+	entryRelations,
 	entryVideosQ,
 	getEntryTransQ,
 	mapProgress,
@@ -71,7 +73,7 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 			query: { sort, filter, query, limit, after },
 			headers: { "accept-language": languages, ...headers },
 			request: { url },
-			jwt: { sub },
+			jwt: { sub, settings },
 		}) => {
 			const langs = processLanguages(languages);
 			const transQ = getEntryTransQ(langs);
@@ -102,6 +104,11 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 					seasonNumber: sql<number>`${seasonNumber}`,
 					episodeNumber: sql<number>`${episodeNumber}`,
 					name: sql<string>`${transQ.name}`,
+
+					show: sql`${entryRelations.show({
+						languages: langs,
+						preferOriginal: settings.preferOriginal,
+					})}`,
 				})
 				.from(entries)
 				.innerJoin(watchlist, eq(watchlist.nextEntry, entries.pk))
@@ -134,7 +141,7 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 				"accept-language": AcceptLanguage({ autoFallback: true }),
 			}),
 			response: {
-				200: Page(Entry),
+				200: Page(t.Intersect([Entry, t.Object({ show: Show })])),
 			},
 		},
 	);

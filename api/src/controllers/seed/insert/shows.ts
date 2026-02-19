@@ -119,7 +119,7 @@ async function insertBaseShow(tx: Transaction, show: Show) {
 			.insert(shows)
 			.values(show)
 			.onConflictDoUpdate({
-				target: shows.slug,
+				target: [shows.kind, shows.slug],
 				set: conflictUpdateAllExcept(shows, ["pk", "id", "slug", "createdAt"]),
 				// if year is different, this is not an update but a conflict (ex: dune-1984 vs dune-2021)
 				setWhere: sql`date_part('year', ${shows.startAir}) = date_part('year', excluded."start_air")`,

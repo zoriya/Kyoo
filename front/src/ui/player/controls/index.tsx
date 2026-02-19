@@ -72,8 +72,6 @@ export const Controls = ({
 					previous={previous}
 					next={next}
 					setMenu={setMenu}
-					// Fixed is used because firefox android make the hover disappear under the navigation bar in absolute
-					// position: Platform.OS === "web" ? ("fixed" as any) : "absolute",
 					className="absolute bottom-0 w-full bg-slate-900/50 px-safe pt-safe"
 					{...hoverControls}
 				/>

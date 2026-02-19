@@ -1,132 +1,71 @@
-/*
- * Kyoo - A portable and vast media library solution.
- * Copyright (c) Kyoo.
- *
- * See AUTHORS.md and LICENSE file in the project root for full license information.
- *
- * Kyoo is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Kyoo is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
- */
+import { useState } from "react";
+import { View, type ViewProps } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { itemMap } from "~/components/items";
+import { ItemDetails } from "~/components/items/item-details";
+import { Show } from "~/models";
+import { InfiniteFetch, type QueryIdentifier } from "~/query";
+import { useQueryState } from "~/utils";
+import { HeaderBackground, useScrollNavbar } from "../navbar";
+import { Header } from "./header";
+import { SvgWave } from "./serie";
 
-/** biome-ignore-all lint/correctness/noUnusedImports: TODO */
-
-import {
-	type Collection,
-	CollectionP,
-	type KyooImage,
-	type QueryIdentifier,
-	useInfiniteFetch,
-} from "@kyoo/models";
-import {
-	Container,
-	focusReset,
-	GradientImageBackground,
-	H2,
-	ImageBackground,
-	Link,
-	P,
-	ts,
-} from "@kyoo/primitives";
-import { useTranslation } from "react-i18next";
-import { type Theme, useYoshiki } from "yoshiki/native";
-
-export const PartOf = ({
-	name,
-	overview,
-	thumbnail,
-	href,
-}: {
-	name: string;
-	overview: string | null;
-	thumbnail: KyooImage | null;
-	href: string;
-}) => {
-	const { css, theme } = useYoshiki("part-of-collection");
-	const { t } = useTranslation();
-
-	return (
-		<Link
-			href={href}
-			{...css({
-				borderRadius: 16,
-				overflow: "hidden",
-				borderWidth: ts(0.5),
-				borderStyle: "solid",
-				borderColor: (theme) => theme.background,
-				fover: {
-					self: { ...focusReset, borderColor: (theme: Theme) => theme.accent },
-					title: { textDecorationLine: "underline" },
-				},
-			})}
-		>
-			<GradientImageBackground
-				src={thumbnail}
-				alt=""
-				quality="medium"
-				gradient={{
-					colors: [theme.darkOverlay, "transparent"],
-					start: { x: 0, y: 0 },
-					end: { x: 1, y: 0 },
-				}}
-				{...css({
-					padding: ts(3),
-				})}
-			>
-				<H2 {...css("title")}>
-					{t("show.partOf")} {name}
-				</H2>
-				<P {...css({ textAlign: "justify" })}>{overview}</P>
-			</GradientImageBackground>
-		</Link>
-	);
-};
-
-export const DetailsCollections = ({
-	type,
+const CollectionHeader = ({
 	slug,
+	onImageLayout,
 }: {
-	type: "movie" | "show";
 	slug: string;
+	onImageLayout?: ViewProps["onLayout"];
 }) => {
-	const { items } = useInfiniteFetch(DetailsCollections.query(type, slug));
-	const { css } = useYoshiki();
-
-	// Since most items dont have collections, not having a skeleton reduces layout shifts.
-	if (!items) return null;
-
 	return (
-		<Container {...css({ marginY: ts(2) })}>
-			{items.map((x) => (
-				<PartOf
-					key={x.id}
-					name={x.name}
-					overview={x.overview}
-					thumbnail={x.thumbnail}
-					href={x.href}
-				/>
-			))}
-		</Container>
+		<View className="bg-background">
+			<Header kind="collection" slug={slug} onImageLayout={onImageLayout} />
+			<SvgWave className="flex-1 shrink-0 fill-card" />
+		</View>
 	);
 };
 
-DetailsCollections.query = (
-	type: "movie" | "show",
-	slug: string,
-): QueryIdentifier<Collection> => ({
-	parser: CollectionP,
-	path: [type, slug, "collections"],
-	params: {
-		limit: 0,
-	},
+export const CollectionDetails = () => {
+	const [slug] = useQueryState("slug", undefined!);
+	const insets = useSafeAreaInsets();
+	const [imageHeight, setHeight] = useState(300);
+	const { scrollHandler, headerProps } = useScrollNavbar({
+		imageHeight,
+	});
+	return (
+		<View className="flex-1 bg-card">
+			<HeaderBackground {...headerProps} />
+			<InfiniteFetch
+				query={CollectionDetails.query(slug)}
+				layout={ItemDetails.layout}
+				Render={({ item }) => (
+					<ItemDetails
+						{...itemMap(item)}
+						tagline={item.tagline}
+						description={item.description}
+						genres={item.genres}
+						playHref={item.kind !== "collection" ? item.playHref : null}
+					/>
+				)}
+				Loader={() => <ItemDetails.Loader />}
+				Header={() => (
+					<CollectionHeader
+						slug={slug}
+						onImageLayout={(e) => setHeight(e.nativeEvent.layout.height)}
+					/>
+				)}
+				onScroll={scrollHandler}
+				contentContainerStyle={{
+					paddingBottom: insets.bottom,
+				}}
+				outerGap
+			/>
+		</View>
+	);
+};
+
+CollectionDetails.query = (slug: string): QueryIdentifier<Show> => ({
+	parser: Show,
+	path: ["api", "collections", slug, "shows"],
 	infinite: true,
 });

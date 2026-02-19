@@ -22,7 +22,7 @@ export const ItemList = ({
 	kind,
 	name,
 	subtitle,
-	thumbnail,
+	banner,
 	poster,
 	watchStatus,
 	availableCount,
@@ -36,7 +36,7 @@ export const ItemList = ({
 	name: string;
 	subtitle: string | null;
 	poster: KImage | null;
-	thumbnail: KImage | null;
+	banner: KImage | null;
 	watchStatus: WatchStatusV | null;
 	availableCount?: number | null;
 	seenCount?: number | null;
@@ -49,15 +49,16 @@ export const ItemList = ({
 			href={moreOpened ? undefined : href}
 			onLongPress={() => setMoreOpened(true)}
 			className={cn(
-				"group h-80 w-full outline-0 ring-accent focus-within:ring-3 hover:ring-3",
+				"group m-1 mx-2 h-80 overflow-hidden rounded",
+				"outline-0 ring-accent focus-within:ring-3 hover:ring-3",
 				className,
 			)}
 			{...props}
 		>
 			<ImageBackground
-				src={thumbnail}
+				src={banner}
 				quality="medium"
-				className="h-full w-full flex-row items-center justify-evenly overflow-hidden rounded"
+				className="h-full w-full flex-row items-center justify-evenly"
 			>
 				<View className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/70" />
 				<View className="w-1/2 lg:w-1/3">
@@ -111,7 +112,7 @@ export const ItemList = ({
 ItemList.Loader = (props: object) => {
 	return (
 		<View
-			className="h-80 w-full flex-row items-center justify-evenly overflow-hidden rounded bg-slate-800"
+			className="h-80 flex-row items-center justify-evenly overflow-hidden rounded bg-slate-800"
 			{...props}
 		>
 			<View className="w-1/2 justify-center lg:w-1/3">

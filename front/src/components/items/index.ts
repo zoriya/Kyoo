@@ -13,7 +13,7 @@ export const itemMap = (
 	subtitle: item.kind !== "collection" ? getDisplayDate(item) : null,
 	href: item.href,
 	poster: item.poster,
-	thumbnail: item.thumbnail,
+	banner: item.banner ?? item.thumbnail,
 	watchStatus:
 		item.kind !== "collection" ? (item.watchStatus?.status ?? null) : null,
 	watchPercent:

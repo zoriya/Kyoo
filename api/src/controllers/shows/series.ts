@@ -78,7 +78,13 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 					t.Boolean({ description: desc.preferOriginal }),
 				),
 				with: t.Array(
-					t.UnionEnum(["translations", "studios", "firstEntry", "nextEntry"]),
+					t.UnionEnum([
+						"translations",
+						"collection",
+						"studios",
+						"firstEntry",
+						"nextEntry",
+					]),
 					{
 						default: [],
 						description: "Include related resources in the response.",
@@ -123,7 +129,13 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 					t.Boolean({ description: desc.preferOriginal }),
 				),
 				with: t.Array(
-					t.UnionEnum(["translations", "studios", "firstEntry", "nextEntry"]),
+					t.UnionEnum([
+						"translations",
+						"collection",
+						"studios",
+						"firstEntry",
+						"nextEntry",
+					]),
 					{
 						default: [],
 						description: "Include related resources in the response.",

@@ -130,12 +130,12 @@ const newsSort: Sort = {
 			// in the news query we already filter nulls out
 			isNullable: false,
 			accessor: (x) => x.availableSince,
-			desc: false,
+			desc: true,
 		},
 	],
 };
 
-const entryRelations = {
+export const entryRelations = {
 	translations: () => {
 		const { pk, language, ...trans } = getColumns(entryTranslations);
 		return db

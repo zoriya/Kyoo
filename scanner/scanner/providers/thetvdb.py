@@ -3,20 +3,22 @@ import os
 from datetime import datetime, timedelta
 from logging import getLogger
 from types import TracebackType
-from typing import Any, cast, override
+from typing import Any, Literal, cast, override
 
 from aiohttp import ClientResponseError, ClientSession
 from langcodes import Language
 from langcodes.data_dicts import LANGUAGE_REPLACEMENTS
 
 from ..cache import cache
+from ..models.collection import Collection, CollectionTranslation
 from ..models.entry import Entry, EntryTranslation
 from ..models.genre import Genre
 from ..models.metadataid import EpisodeId, MetadataId, SeasonId
-from ..models.movie import Movie, SearchMovie
+from ..models.movie import Movie, MovieStatus, MovieTranslation, SearchMovie
 from ..models.season import Season, SeasonTranslation
 from ..models.serie import SearchSerie, Serie, SerieStatus, SerieTranslation
 from ..models.staff import Role
+from .names import ProviderName
 from .provider import Provider, ProviderError
 
 logger = getLogger(__name__)
@@ -94,6 +96,7 @@ class TVDB(Provider):
 		}
 
 	async def __aenter__(self):
+		self._image_map = (await self._get("artwork/types"))["data"]
 		return self
 
 	async def __aexit__(
@@ -107,18 +110,7 @@ class TVDB(Provider):
 	@property
 	@override
 	def name(self) -> str:
-		return "tvdb"
-
-	# movies are always handled by themoviedb
-	@override
-	async def search_movies(
-		self, title: str, year: int | None, *, language: list[Language]
-	) -> list[SearchMovie]:
-		raise NotImplementedError
-
-	@override
-	async def get_movie(self, external_id: dict[str, str]) -> Movie | None:
-		raise NotImplementedError
+		return ProviderName.TVDB
 
 	@cache(ttl=timedelta(days=30))
 	async def login(self):
@@ -267,10 +259,18 @@ class TVDB(Provider):
 						if x["language"] == trans["language"]
 					],
 					tags=[],
-					poster=self._pick_image(ret["artworks"], 2, trans["language"]),
-					logo=self._pick_image(ret["artworks"], 5, trans["language"]),
-					thumbnail=self._pick_image(ret["artworks"], 3, trans["language"]),
-					banner=self._pick_image(ret["artworks"], 1, trans["language"]),
+					poster=self._pick_image(
+						ret["artworks"], "series", "posters", trans["language"]
+					),
+					logo=self._pick_image(
+						ret["artworks"], "series", "icons", trans["language"]
+					),
+					thumbnail=self._pick_image(
+						ret["artworks"], "series", "backgrounds", trans["language"]
+					),
+					banner=self._pick_image(
+						ret["artworks"], "series", "banners", trans["language"]
+					),
 					trailer=None,
 					# trailers=[
 					# 	t["url"]
@@ -292,18 +292,30 @@ class TVDB(Provider):
 			else [],
 			entries=entries,
 			# TODO: map extra entries in extra instead of entries
-			extra=[],
-			collections=[],
+			extras=[],
+			collection=await self._get_collection(ret),
 			studios=[],
 			staff=[],
 		)
 
-	def _pick_image(self, images: list[Any] | None, type: int, lng: str) -> str | None:
+	def _pick_image(
+		self,
+		images: list[Any] | None,
+		kind: Literal["series", "season", "episode", "actor", "movie", "company"],
+		type: Literal["banners", "posters", "backgrounds", "icons"],
+		lng: str,
+	) -> str | None:
 		# sometimes `artworks` is not even part of the response.
 		if images is None:
 			return None
+
+		imgId = next(
+			x["id"]
+			for x in self._image_map
+			if x["recordType"] == kind and x["slug"] == type
+		)
 		items = sorted(
-			(x for x in images if x["type"] == type),
+			(x for x in images if x["type"] == imgId),
 			key=lambda x: x.get("score", 0),
 			reverse=True,
 		)
@@ -329,15 +341,96 @@ class TVDB(Provider):
 
 		imdb = next((x["id"] for x in ids if x["sourceName"] == "IMDB"), None)
 		if imdb is not None:
-			ret["imdb"] = MetadataId(data_id=imdb)
-
-		from .themoviedatabase import TheMovieDatabase
+			ret[ProviderName.IMDB] = MetadataId(data_id=imdb)
 
 		tmdb = next((x["id"] for x in ids if x["sourceName"] == "TheMovieDB.com"), None)
 		if tmdb is not None:
-			ret[TheMovieDatabase.NAME] = MetadataId(data_id=tmdb)
+			ret[ProviderName.TMDB] = MetadataId(data_id=tmdb)
 
 		return ret
+
+	async def _get_collection(self, current: dict[str, Any]) -> Collection | None:
+		col = next(
+			(
+				x
+				for x in current["lists"]
+				# we blacklist mcu (id 4) to prefer sub collections (like `Iron man` instead of a big one)
+				# we blacklist `TheTVDB’s Best Shows of 2020` (id 7289)
+				if x.get("isOfficial") == True and x["id"] != 4 and x["id"] != 7289
+			),
+			None,
+		)
+		if col is None:
+			return None
+
+		data = (await self._get(f"lists/{col['id']}/extended"))["data"]
+		first_entity = data["entities"][0]
+		kind = (
+			"movie"
+			if "movieId" in first_entity and first_entity["movieId"] is not None
+			else "series"
+		)
+		first_id = (
+			first_entity["movieId"] if kind == "movie" else first_entity["seriesId"]
+		)
+		show = (
+			current
+			if current["id"] == first_id
+			else (
+				await self._get(
+					f"{'movies' if kind == 'movie' else 'series'}/{first_id}/extended",
+				)
+			)["data"]
+		)
+
+		async def get_translation(lang: str) -> CollectionTranslation:
+			trans = (
+				await self._get(
+					f"lists/{data['id']}/translations/{lang}",
+					not_found_fail="Collection translation not found",
+				)
+			)["data"]
+			return CollectionTranslation(
+				name=next(
+					(x["name"] for x in trans if x.get("isPrimary")), data["name"]
+				),
+				latin_name=None,
+				description=trans[0].get("overview"),
+				tagline=None,
+				aliases=[x["name"] for x in trans if x.get("isAlias")],
+				tags=[],
+				poster=data.get("image")
+				if lang == "eng"
+				else self._pick_image(show["artworks"], kind, "posters", lang),
+				thumbnail=self._pick_image(show["artworks"], kind, "backgrounds", lang),
+				banner=self._pick_image(show["artworks"], kind, "banners", lang),
+				logo=self._pick_image(show["artworks"], kind, "icons", lang),
+			)
+
+		trans = await asyncio.gather(
+			*(get_translation(x) for x in data["nameTranslations"])
+		)
+
+		return Collection(
+			slug=data["url"],
+			original_language=Language.get(show["originalLanguage"]),
+			genres=[
+				cast(Genre, self._genre_map[x["slug"]])
+				for x in show["genres"]
+				if self._genre_map[x["slug"]] is not None
+			],
+			rating=None,
+			external_id={
+				self.name: MetadataId(
+					data_id=data["id"],
+					link=f"https://thetvdb.com/lists/{data['url']}",
+				)
+			},
+			translations={
+				Language.get(lang): tl
+				for lang, tl in zip(data["nameTranslations"], trans)
+			},
+		)
 
 	async def get_seasons(self, season_id: str | int) -> Season:
 		info = (await self._get(f"seasons/{season_id}/extended"))["data"]
@@ -352,18 +445,20 @@ class TVDB(Provider):
 			return SeasonTranslation(
 				name=data.get("name"),
 				description=data.get("overview"),
-				poster=self._pick_image(info["artwork"], 7, lang),
-				thumbnail=self._pick_image(info["artwork"], 8, lang),
-				banner=self._pick_image(info["artwork"], 6, lang),
+				poster=self._pick_image(info["artwork"], "season", "posters", lang),
+				thumbnail=self._pick_image(
+					info["artwork"], "season", "backgrounds", lang
+				),
+				banner=self._pick_image(info["artwork"], "season", "banners", lang),
 			)
 
-		languages = [
+		languages = set(
 			x
 			for lng in (info["nameTranslations"] + info["overviewTranslations"])
 			# for some reasons, in the season api they return a list containing a
 			# single string with all the languages joined by a ','
 			for x in lng.split(",")
-		]
+		)
 		trans = await asyncio.gather(*(get_translation(x) for x in languages))
 
 		return Season(
@@ -528,7 +623,9 @@ class TVDB(Provider):
 					),
 					None,
 				),
-				poster=self._pick_image(ret["artworks"], 14, trans["language"]),
+				poster=self._pick_image(
+					ret["artworks"], "movie", "posters", trans["language"]
+				),
 			)
 			for trans in ret["translations"]["nameTranslations"]
 			if trans.get("isAlias") is None or False
@@ -542,3 +639,104 @@ class TVDB(Provider):
 		}
 
 		return entry
+
+	# movies are always handled by themoviedb, we only complete collections for them
+	@override
+	async def search_movies(
+		self, title: str, year: int | None, *, language: list[Language]
+	) -> list[SearchMovie]:
+		raise NotImplementedError
+
+	@override
+	async def get_movie(self, external_id: dict[str, str]) -> Movie | None:
+		if self.name not in external_id:
+			if ProviderName.IMDB in external_id:
+				search = await self._get(
+					f"search/remoteid/{external_id[ProviderName.IMDB]}"
+				)
+				if search["data"] is not None and len(search["data"]) > 0:
+					movie = search["data"][0].get("movie")
+					mId = movie.get("id") if movie is not None else None
+					if mId is None:
+						return None
+					return await self.get_movie({self.name: mId})
+			return None
+
+		ret = (
+			await self._get(
+				f"movies/{external_id[self.name]}/extended",
+				params={
+					"meta": "translations",
+				},
+				not_found_fail=f"Could not find on tvdb a movie with id {external_id[self.name]}",
+			)
+		)["data"]
+
+		return Movie(
+			slug=ret["slug"],
+			original_language=Language.get(ret["originalLanguage"]),
+			genres=[
+				cast(Genre, self._genre_map[x["slug"]])
+				for x in ret["genres"]
+				if self._genre_map[x["slug"]] is not None
+			],
+			rating=None,  # TODO: maybe use the `score` value.
+			status=MovieStatus.FINISHED
+			if ret["status"]["name"] == "Ended"
+			else MovieStatus.PLANNED,
+			runtime=ret["runtime"],
+			air_date=datetime.strptime(ret["first_release"]["date"], "%Y-%m-%d").date()
+			if ret.get("first_release") and ret["first_release"].get("date")
+			else None,
+			external_id={
+				self.name: MetadataId(
+					data_id=ret["id"],
+					link=f"https://thetvdb.com/series/{ret['slug']}",
+				),
+				**self._process_remote_id(ret["remoteIds"]),
+			},
+			translations={
+				Language.get(trans["language"]): MovieTranslation(
+					name=trans["name"],
+					latin_name=None,
+					description=next(
+						(
+							x["overview"]
+							for x in (ret["translations"]["overviewTranslations"] or [])
+							if x["language"] == trans["language"]
+						),
+						None,
+					),
+					tagline=None,
+					aliases=[
+						x["name"]
+						for x in ret["aliases"]
+						if x["language"] == trans["language"]
+					],
+					tags=[],
+					poster=self._pick_image(
+						ret["artworks"], "movie", "posters", trans["language"]
+					),
+					logo=self._pick_image(
+						ret["artworks"], "movie", "icons", trans["language"]
+					),
+					thumbnail=self._pick_image(
+						ret["artworks"], "movie", "backgrounds", trans["language"]
+					),
+					banner=self._pick_image(
+						ret["artworks"], "movie", "banners", trans["language"]
+					),
+					trailer=None,
+					# trailers=[
+					# 	t["url"]
+					# 	for t in ret["data"]["trailers"]
+					# 	if t["language"] == lang
+					# ],
+				)
+				for trans in ret["translations"]["nameTranslations"]
+				if trans.get("isAlias") is None or False
+			},
+			collection=await self._get_collection(ret),
+			studios=[],
+			staff=[],
+		)

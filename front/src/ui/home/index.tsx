@@ -8,9 +8,9 @@ import { HeaderBackground, useScrollNavbar } from "../navbar";
 import { GenreGrid } from "./genre";
 import { Header } from "./header";
 import { NewsList } from "./news";
+import { NextupList } from "./nextup";
 import { Recommended } from "./recommended";
 import { VerticalRecommended } from "./vertical";
-import { WatchlistList } from "./watchlist";
 
 export const HomePage = () => {
 	const genres = shuffle(Object.values(Genre.enum));
@@ -50,7 +50,7 @@ export const HomePage = () => {
 					)}
 					Loader={Header.Loader}
 				/>
-				<WatchlistList />
+				<NextupList />
 				<NewsList />
 				{genres
 					.filter((_, i) => i < 2)
@@ -64,10 +64,11 @@ export const HomePage = () => {
 						<GenreGrid key={x} genre={x} />
 					))}
 				<VerticalRecommended />
-				{/*
-				TODO: Lazy load those items
-				{randomItems.filter((_, i) => i >= 6).map((x) => <GenreGrid key={x} genre={x} />)}
-			*/}
+				{genres
+					.filter((_, i) => i >= 6)
+					.map((x) => (
+						<GenreGrid key={x} genre={x} />
+					))}
 			</Animated.ScrollView>
 		</>
 	);
@@ -75,7 +76,7 @@ export const HomePage = () => {
 
 HomePage.queries = (randomItems: Genre[]) => [
 	Header.query(),
-	WatchlistList.query(),
+	NextupList.query(),
 	NewsList.query(),
 	...randomItems.filter((_, i) => i < 6).map((x) => GenreGrid.query(x)),
 	Recommended.query(),

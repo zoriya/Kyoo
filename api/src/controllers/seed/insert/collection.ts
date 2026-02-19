@@ -5,7 +5,9 @@ import { conflictUpdateAllExcept } from "~/db/utils";
 import type { SeedCollection } from "~/models/collections";
 import type { SeedMovie } from "~/models/movie";
 import type { SeedSerie } from "~/models/serie";
+import type { Original } from "~/models/utils";
 import { record } from "~/otel";
+import { uniq } from "~/utils";
 import { enqueueOptImage, flushImageQueue, type ImageTask } from "../images";
 
 type ShowTrans = typeof showTranslations.$inferInsert;
@@ -13,16 +15,17 @@ type ShowTrans = typeof showTranslations.$inferInsert;
 export const insertCollection = record(
 	"insertCollection",
 	async (
-		collection: SeedCollection | undefined,
+		collection: SeedCollection | null | undefined,
 		show: (
 			| ({ kind: "movie" } & SeedMovie)
 			| ({ kind: "serie" } & SeedSerie)
 		) & {
 			nextRefresh: Date;
 		},
+		original: Original,
 	) => {
 		if (!collection) return null;
-		const { translations, ...col } = collection;
+		const { translations, genres, ...col } = collection;
 
 		return await db.transaction(async (tx) => {
 			const imgQueue: ImageTask[] = [];
@@ -35,11 +38,16 @@ export const insertCollection = record(
 					endAir: show.kind === "movie" ? show.airDate : show.endAir,
 					nextRefresh: show.nextRefresh,
 					entriesCount: 0,
-					original: {} as any,
+					original: {
+						language: original.language,
+						name: original.name,
+						latinName: original.latinName,
+					},
+					genres: uniq(show.genres),
 					...col,
 				})
 				.onConflictDoUpdate({
-					target: shows.slug,
+					target: [shows.kind, shows.slug],
 					set: {
 						...conflictUpdateAllExcept(shows, [
 							"pk",

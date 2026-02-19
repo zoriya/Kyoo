@@ -6,16 +6,10 @@ import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import Settings from "@material-symbols/svg-400/rounded/settings.svg";
 import { useIsFocused } from "@react-navigation/native";
-import {
-	useGlobalSearchParams,
-	useNavigation,
-	usePathname,
-	useRouter,
-} from "expo-router";
+import { useNavigation, usePathname, useRouter } from "expo-router";
 import KyooLongLogo from "public/icon-long.svg";
 import {
 	type ComponentProps,
-	type Ref,
 	useEffect,
 	useLayoutEffect,
 	useRef,
@@ -24,9 +18,8 @@ import {
 import { useTranslation } from "react-i18next";
 import {
 	Platform,
-	TextInput,
 	type PressableProps,
-	type TextInputProps,
+	TextInput,
 	View,
 	type ViewProps,
 } from "react-native";
@@ -43,7 +36,6 @@ import {
 	Avatar,
 	HR,
 	IconButton,
-	Input,
 	Link,
 	Menu,
 	PressableFeedback,
@@ -52,6 +44,24 @@ import {
 import { useAccount, useAccounts } from "~/providers/account-context";
 import { logout } from "~/ui/login/logic";
 import { cn } from "~/utils";
+
+export const NavbarLeft = () => {
+	const { t } = useTranslation();
+
+	if (Platform.OS !== "web") return <NavbarTitle />;
+
+	return (
+		<View className="flex-row items-center gap-2">
+			<NavbarTitle />
+			<A
+				href="/browse"
+				className="font-headers text-lg text-slate-200 uppercase dark:text-slate-200"
+			>
+				{t("navbar.browse")}
+			</A>
+		</View>
+	);
+};
 
 export const NavbarTitle = ({
 	className,
@@ -69,6 +79,115 @@ export const NavbarTitle = ({
 		>
 			<KyooLongLogo style={{ height: 24, width: (531.15 / 149) * 24 }} />
 		</A>
+	);
+};
+
+export const NavbarRight = () => {
+	const { t } = useTranslation();
+	const isAdmin = false; //useHasPermission(AdminPage.requiredPermissions);
+
+	return (
+		<View className="shrink flex-row items-center">
+			<SearchBar />
+			{isAdmin && (
+				<IconButton
+					icon={Admin}
+					as={Link}
+					href={"/admin"}
+					iconClassName="fill-slate-200 dark:fill-slate-200"
+					{...tooltip(t("navbar.admin"))}
+				/>
+			)}
+			<NavbarProfile />
+		</View>
+	);
+};
+
+const SearchBar = () => {
+	const { t } = useTranslation();
+	const [expanded, setExpanded] = useState(false);
+	const inputRef = useRef<TextInput>(null);
+
+	const router = useRouter();
+	const [query, setQuery] = useState("");
+
+	const path = usePathname();
+	const shouldExpand = useRef(false);
+	useEffect(() => {
+		if (path === "/browse" && shouldExpand.current) {
+			shouldExpand.current = false;
+			// Small delay to allow animation to start before focusing
+			setTimeout(() => {
+				setExpanded(true);
+				inputRef.current?.focus();
+			}, 300);
+		} else if (path === "/") {
+			inputRef.current?.blur();
+		}
+	}, [path]);
+
+	return (
+		<Animated.View
+			className={cn(
+				"mr-2 flex-row items-center overflow-hidden p-0 pl-4",
+				"rounded-full bg-slate-100 dark:bg-slate-800",
+			)}
+			style={[
+				expanded ? { flex: 1 } : { backgroundColor: "transparent" },
+				{
+					transitionProperty: "background-color",
+					transitionDuration: "300ms",
+				},
+			]}
+		>
+			<TextInput
+				ref={inputRef}
+				value={query}
+				onChangeText={(q) => {
+					setQuery(q);
+					router.setParams({ q });
+				}}
+				onFocus={() => router.push(query ? `/browse?q=${query}` : "/browse")}
+				onBlur={() => {
+					if (query !== "") return;
+					setExpanded(false);
+				}}
+				placeholder={t("navbar.search")}
+				textAlignVertical="center"
+				className={cn(
+					"h-full flex-1 font-sans text-base outline-0",
+					"align-middle text-slate-600 dark:text-slate-200",
+					!expanded && "w-0 grow-0",
+				)}
+				placeholderTextColorClassName="accent-slate-400 dark:text-slate-600"
+			/>
+
+			<IconButton
+				icon={expanded ? Close : Search}
+				// need to use onPressIn due to:
+				//  https://github.com/react-navigation/react-navigation/issues/12274
+				//  https://github.com/react-navigation/react-navigation/issues/12667
+				onPressIn={() => {
+					if (expanded) {
+						inputRef.current?.blur();
+						setExpanded(false);
+						setQuery("");
+						router.setParams({ q: undefined });
+					} else {
+						shouldExpand.current = true;
+						setExpanded(true);
+						// Small delay to allow animation to start before focusing
+						setTimeout(() => inputRef.current?.focus(), 100);
+					}
+				}}
+				iconClassName={cn(
+					expanded
+						? "fill-slate-500 dark:fill-slate-500"
+						: "fill-slate-200 dark:fill-slate-200",
+				)}
+				{...tooltip(t("navbar.search"))}
+			/>
+		</Animated.View>
 	);
 };
 
@@ -134,113 +253,6 @@ export const NavbarProfile = () => {
 				</>
 			)}
 		</Menu>
-	);
-};
-
-const SearchBar = () => {
-	const { t } = useTranslation();
-	const [expanded, setExpanded] = useState(false);
-	const inputRef = useRef<TextInput>(null);
-
-	const router = useRouter();
-	const [query, setQuery] = useState("");
-
-	const path = usePathname();
-	useEffect(() => {
-		console.log(path);
-		if (path === "/browse") {
-			// Small delay to allow animation to start before focusing
-			setTimeout(() => {
-				setExpanded(true);
-				inputRef.current?.focus();
-			}, 300);
-		} else if (path === "/") {
-			inputRef.current?.blur();
-		}
-	}, [path]);
-
-	return (
-		<Animated.View
-			className={cn(
-				"mr-2 flex-row items-center overflow-hidden p-0 pl-4",
-				"rounded-full bg-slate-100 dark:bg-slate-800",
-			)}
-			style={[
-				expanded ? { flex: 1 } : { backgroundColor: "transparent" },
-				{
-					transitionProperty: "background-color",
-					transitionDuration: "300ms",
-				},
-			]}
-		>
-			<TextInput
-				ref={inputRef}
-				value={query}
-				onChangeText={(q) => {
-					setQuery(q);
-					router.setParams({ q });
-				}}
-				onFocus={() => router.push(query ? `/browse?q=${query}` : "/browse")}
-				onBlur={() => {
-					if (query !== "") return;
-					setExpanded(false);
-				}}
-				placeholder={t("navbar.search")}
-				textAlignVertical="center"
-				className={cn(
-					"h-full flex-1 font-sans text-base outline-0",
-					"align-middle text-slate-600 dark:text-slate-200",
-					!expanded && "w-0 grow-0",
-				)}
-				placeholderTextColorClassName="accent-slate-400 dark:text-slate-600"
-			/>
-
-			<IconButton
-				icon={expanded ? Close : Search}
-				// need to use onPressIn due to:
-				//  https://github.com/react-navigation/react-navigation/issues/12274
-				//  https://github.com/react-navigation/react-navigation/issues/12667
-				onPressIn={() => {
-					if (expanded) {
-						inputRef.current?.blur();
-						setExpanded(false);
-						setQuery("");
-						router.setParams({ q: undefined });
-					} else {
-						setExpanded(true);
-						// Small delay to allow animation to start before focusing
-						setTimeout(() => inputRef.current?.focus(), 100);
-					}
-				}}
-				iconClassName={cn(
-					expanded
-						? "fill-slate-500 dark:fill-slate-500"
-						: "fill-slate-200 dark:fill-slate-200",
-				)}
-				{...tooltip(t("navbar.search"))}
-			/>
-		</Animated.View>
-	);
-};
-
-export const NavbarRight = () => {
-	const { t } = useTranslation();
-	const isAdmin = false; //useHasPermission(AdminPage.requiredPermissions);
-
-	return (
-		<View className="shrink flex-row items-center">
-			<SearchBar />
-			{isAdmin && (
-				<IconButton
-					icon={Admin}
-					as={Link}
-					href={"/admin"}
-					iconClassName="fill-slate-200 dark:fill-slate-200"
-					{...tooltip(t("navbar.admin"))}
-				/>
-			)}
-			<NavbarProfile />
-		</View>
 	);
 };
 

@@ -54,14 +54,29 @@ export const seedMovie = async (
 
 	const { translations, videos, collection, studios, staff, ...movie } = seed;
 	const nextRefresh = guessNextRefresh(movie.airDate ?? new Date());
+	const ori = translations[movie.originalLanguage];
+	const original = ori
+		? {
+				...ori,
+				latinName: ori.latinName ?? null,
+				language: movie.originalLanguage,
+			}
+		: {
+				name: null,
+				latinName: null,
+				language: movie.originalLanguage,
+			};
 
-	const col = await insertCollection(collection, {
-		kind: "movie",
-		nextRefresh,
-		...seed,
-	});
+	const col = await insertCollection(
+		collection,
+		{
+			kind: "movie",
+			nextRefresh,
+			...seed,
+		},
+		original,
+	);
 
-	const original = translations[movie.originalLanguage];
 	const show = await insertShow(
 		{
 			kind: "movie",
@@ -71,17 +86,7 @@ export const seedMovie = async (
 			entriesCount: 1,
 			...movie,
 		},
-		original
-			? {
-					...original,
-					latinName: original.latinName ?? null,
-					language: movie.originalLanguage,
-				}
-			: {
-					name: null,
-					latinName: null,
-					language: movie.originalLanguage,
-				},
+		original,
 		translations,
 	);
 	if ("status" in show) return show;
