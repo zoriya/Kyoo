@@ -4,7 +4,7 @@ dev:
   transcoder:
     imageSelector: ghcr.io/zoriya/kyoo_transcoder
     # would be good to publish the kyoo_transcoder builder image with all deps installed
-    devImage: golang:1.25
+    devImage: golang:1.26
     workingDir: /app
     sync:
       - path: .:/app
