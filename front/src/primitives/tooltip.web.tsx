@@ -1,3 +1,4 @@
+import type { ComponentProps } from "react";
 import { Tooltip as RTooltip } from "react-tooltip";
 import { useTheme } from "yoshiki/native";
 
@@ -10,7 +11,7 @@ export const tooltip = (tooltip: string, up?: boolean) => ({
 	},
 });
 
-export const Tooltip = () => {
+export const Tooltip = (props: ComponentProps<typeof RTooltip>) => {
 	const theme = useTheme();
 	return (
 		<RTooltip
@@ -20,6 +21,9 @@ export const Tooltip = () => {
 				background: theme.contrast,
 				color: theme.alternate.contrast,
 			}}
+			{...props}
 		/>
 	);
 };
+
+export { RTooltip };

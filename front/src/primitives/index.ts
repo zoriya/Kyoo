@@ -1,5 +1,4 @@
 export { Footer, Header, Main, Nav, UL } from "@expo/html-elements";
-// export * from "./snackbar";
 export * from "./alert";
 export * from "./avatar";
 export * from "./button";
@@ -7,8 +6,9 @@ export * from "./chip";
 export * from "./container";
 export * from "./divider";
 export * from "./icons";
-export * from "./image";
-export * from "./image-background";
+export * from "./image/image";
+export * from "./image/image-background";
+export * from "./image/sprite";
 export * from "./input";
 export * from "./links";
 export * from "./menu";

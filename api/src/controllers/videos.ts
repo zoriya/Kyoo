@@ -605,6 +605,49 @@ export const videosReadH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 		},
 	)
 	.get(
+		":id/thumbnails.vtt",
+		async ({ params: { id }, status, redirect }) => {
+			const [video] = await db
+				.select({
+					path: videos.path,
+				})
+				.from(videos)
+				.leftJoin(entryVideoJoin, eq(videos.pk, entryVideoJoin.videoPk))
+				.where(isUuid(id) ? eq(videos.id, id) : eq(entryVideoJoin.slug, id))
+				.limit(1);
+
+			if (!video) {
+				return status(404, {
+					status: 404,
+					message: `No video found with id or slug '${id}'`,
+				});
+			}
+			const path = Buffer.from(video.path, "utf8").toString("base64url");
+			return redirect(`/video/${path}/thumbnails.vtt`);
+		},
+		{
+			detail: {
+				description: "Get redirected to the direct stream of the video",
+			},
+			params: t.Object({
+				id: t.String({
+					description: "The id or slug of the video to watch.",
+					example: "made-in-abyss-s1e13",
+				}),
+			}),
+			response: {
+				302: t.Void({
+					description:
+						"Redirected to the [/video/{path}/direct](?api=transcoder#tag/metadata/get/:path/direct) route (of the transcoder)",
+				}),
+				404: {
+					...KError,
+					description: "No video found with the given id or slug.",
+				},
+			},
+		},
+	)
+	.get(
 		":id/direct",
 		async ({ params: { id }, status, redirect }) => {
 			const [video] = await db
