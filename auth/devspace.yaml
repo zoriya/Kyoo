@@ -3,7 +3,7 @@ name: auth
 dev:
   auth:
     imageSelector: ghcr.io/zoriya/kyoo_auth
-    devImage: docker.io/golang:1.25
+    devImage: docker.io/golang:1.26
     workingDir: /app
     sync:
       - path: .:/app
