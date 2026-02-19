@@ -57,7 +57,11 @@ export const ImageBackground = ({
 			placeholder={{ blurhash: src?.blurhash }}
 			accessibilityLabel={alt}
 			className={cn("overflow-hidden bg-gray-300", className)}
-			imageStyle={{ width: "100%", height: "100%", margin: 0, padding: 0 }}
+			imageStyle={
+				Platform.OS === "web"
+					? { width: "100%", height: "100%", margin: 0, padding: 0 }
+					: undefined
+			}
 			{...props}
 		>
 			{children}

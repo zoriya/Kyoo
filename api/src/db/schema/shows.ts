@@ -10,9 +10,9 @@ import {
 	smallint,
 	text,
 	timestamp,
+	unique,
 	uuid,
 	varchar,
-    unique,
 } from "drizzle-orm/pg-core";
 import type { Image, Original } from "~/models/utils";
 import { entries } from "./entries";

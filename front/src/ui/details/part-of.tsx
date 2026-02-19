@@ -23,12 +23,17 @@ export const PartOf = ({
 		<Link
 			href={href}
 			className={cn(
-				"group flex-1 overflow-hidden rounded-xl ring-accent hover:ring-3 focus-visible:ring-3",
+				"group min-h-56 flex-1 overflow-hidden rounded-xl ring-accent hover:ring-3 focus-visible:ring-3",
 				className,
 			)}
 		>
-			<ImageBackground src={banner} quality="high" alt="" className="p-6">
-				<View className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/70" />
+			<ImageBackground
+				src={banner}
+				quality="high"
+				alt=""
+				className="flex-1 justify-center p-6"
+			>
+				<View className="absolute inset-0 bg-linear-to-b from-transparent via-slate-950/50 to-transparent" />
 				<H2
 					className={cn(
 						"py-2",

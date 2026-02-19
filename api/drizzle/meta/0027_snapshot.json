@@ -164,12 +164,8 @@
 					"tableFrom": "entries",
 					"tableTo": "shows",
 					"schemaTo": "kyoo",
-					"columnsFrom": [
-						"show_pk"
-					],
-					"columnsTo": [
-						"pk"
-					],
+					"columnsFrom": ["show_pk"],
+					"columnsTo": ["pk"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
@@ -179,25 +175,17 @@
 				"entries_id_unique": {
 					"name": "entries_id_unique",
 					"nullsNotDistinct": false,
-					"columns": [
-						"id"
-					]
+					"columns": ["id"]
 				},
 				"entries_slug_unique": {
 					"name": "entries_slug_unique",
 					"nullsNotDistinct": false,
-					"columns": [
-						"slug"
-					]
+					"columns": ["slug"]
 				},
 				"entries_showPk_seasonNumber_episodeNumber_unique": {
 					"name": "entries_showPk_seasonNumber_episodeNumber_unique",
 					"nullsNotDistinct": false,
-					"columns": [
-						"show_pk",
-						"season_number",
-						"episode_number"
-					]
+					"columns": ["show_pk", "season_number", "episode_number"]
 				}
 			},
 			"policies": {},
@@ -273,12 +261,8 @@
 					"tableFrom": "entry_translations",
 					"tableTo": "entries",
 					"schemaTo": "kyoo",
-					"columnsFrom": [
-						"pk"
-					],
-					"columnsTo": [
-						"pk"
-					],
+					"columnsFrom": ["pk"],
+					"columnsTo": ["pk"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
@@ -286,10 +270,7 @@
 			"compositePrimaryKeys": {
 				"entry_translations_pk_language_pk": {
 					"name": "entry_translations_pk_language_pk",
-					"columns": [
-						"pk",
-						"language"
-					]
+					"columns": ["pk", "language"]
 				}
 			},
 			"uniqueConstraints": {},
@@ -381,12 +362,8 @@
 					"tableFrom": "history",
 					"tableTo": "profiles",
 					"schemaTo": "kyoo",
-					"columnsFrom": [
-						"profile_pk"
-					],
-					"columnsTo": [
-						"pk"
-					],
+					"columnsFrom": ["profile_pk"],
+					"columnsTo": ["pk"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				},
@@ -395,12 +372,8 @@
 					"tableFrom": "history",
 					"tableTo": "entries",
 					"schemaTo": "kyoo",
-					"columnsFrom": [
-						"entry_pk"
-					],
-					"columnsTo": [
-						"pk"
-					],
+					"columnsFrom": ["entry_pk"],
+					"columnsTo": ["pk"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				},
@@ -409,12 +382,8 @@
 					"tableFrom": "history",
 					"tableTo": "videos",
 					"schemaTo": "kyoo",
-					"columnsFrom": [
-						"video_pk"
-					],
-					"columnsTo": [
-						"pk"
-					],
+					"columnsFrom": ["video_pk"],
+					"columnsTo": ["pk"],
 					"onDelete": "set null",
 					"onUpdate": "no action"
 				}
@@ -546,9 +515,7 @@
 				"images_id_unique": {
 					"name": "images_id_unique",
 					"nullsNotDistinct": false,
-					"columns": [
-						"id"
-					]
+					"columns": ["id"]
 				}
 			},
 			"policies": {},
@@ -659,9 +626,7 @@
 				"profiles_id_unique": {
 					"name": "profiles_id_unique",
 					"nullsNotDistinct": false,
-					"columns": [
-						"id"
-					]
+					"columns": ["id"]
 				}
 			},
 			"policies": {},
@@ -738,12 +703,8 @@
 					"tableFrom": "season_translations",
 					"tableTo": "seasons",
 					"schemaTo": "kyoo",
-					"columnsFrom": [
-						"pk"
-					],
-					"columnsTo": [
-						"pk"
-					],
+					"columnsFrom": ["pk"],
+					"columnsTo": ["pk"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
@@ -751,10 +712,7 @@
 			"compositePrimaryKeys": {
 				"season_translations_pk_language_pk": {
 					"name": "season_translations_pk_language_pk",
-					"columns": [
-						"pk",
-						"language"
-					]
+					"columns": ["pk", "language"]
 				}
 			},
 			"uniqueConstraints": {},
@@ -899,12 +857,8 @@
 					"tableFrom": "seasons",
 					"tableTo": "shows",
 					"schemaTo": "kyoo",
-					"columnsFrom": [
-						"show_pk"
-					],
-					"columnsTo": [
-						"pk"
-					],
+					"columnsFrom": ["show_pk"],
+					"columnsTo": ["pk"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
@@ -914,24 +868,17 @@
 				"seasons_id_unique": {
 					"name": "seasons_id_unique",
 					"nullsNotDistinct": false,
-					"columns": [
-						"id"
-					]
+					"columns": ["id"]
 				},
 				"seasons_slug_unique": {
 					"name": "seasons_slug_unique",
 					"nullsNotDistinct": false,
-					"columns": [
-						"slug"
-					]
+					"columns": ["slug"]
 				},
 				"seasons_showPk_seasonNumber_unique": {
 					"name": "seasons_showPk_seasonNumber_unique",
 					"nullsNotDistinct": false,
-					"columns": [
-						"show_pk",
-						"season_number"
-					]
+					"columns": ["show_pk", "season_number"]
 				}
 			},
 			"policies": {},
@@ -1053,12 +1000,8 @@
 					"tableFrom": "show_translations",
 					"tableTo": "shows",
 					"schemaTo": "kyoo",
-					"columnsFrom": [
-						"pk"
-					],
-					"columnsTo": [
-						"pk"
-					],
+					"columnsFrom": ["pk"],
+					"columnsTo": ["pk"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
@@ -1066,10 +1009,7 @@
 			"compositePrimaryKeys": {
 				"show_translations_pk_language_pk": {
 					"name": "show_translations_pk_language_pk",
-					"columns": [
-						"pk",
-						"language"
-					]
+					"columns": ["pk", "language"]
 				}
 			},
 			"uniqueConstraints": {},
@@ -1276,12 +1216,8 @@
 					"tableFrom": "shows",
 					"tableTo": "shows",
 					"schemaTo": "kyoo",
-					"columnsFrom": [
-						"collection_pk"
-					],
-					"columnsTo": [
-						"pk"
-					],
+					"columnsFrom": ["collection_pk"],
+					"columnsTo": ["pk"],
 					"onDelete": "set null",
 					"onUpdate": "no action"
 				}
@@ -1291,17 +1227,12 @@
 				"shows_id_unique": {
 					"name": "shows_id_unique",
 					"nullsNotDistinct": false,
-					"columns": [
-						"id"
-					]
+					"columns": ["id"]
 				},
 				"kind_slug": {
 					"name": "kind_slug",
 					"nullsNotDistinct": false,
-					"columns": [
-						"kind",
-						"slug"
-					]
+					"columns": ["kind", "slug"]
 				}
 			},
 			"policies": {},
@@ -1408,12 +1339,8 @@
 					"tableFrom": "roles",
 					"tableTo": "shows",
 					"schemaTo": "kyoo",
-					"columnsFrom": [
-						"show_pk"
-					],
-					"columnsTo": [
-						"pk"
-					],
+					"columnsFrom": ["show_pk"],
+					"columnsTo": ["pk"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				},
@@ -1422,12 +1349,8 @@
 					"tableFrom": "roles",
 					"tableTo": "staff",
 					"schemaTo": "kyoo",
-					"columnsFrom": [
-						"staff_pk"
-					],
-					"columnsTo": [
-						"pk"
-					],
+					"columnsFrom": ["staff_pk"],
+					"columnsTo": ["pk"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
@@ -1518,16 +1441,12 @@
 				"staff_id_unique": {
 					"name": "staff_id_unique",
 					"nullsNotDistinct": false,
-					"columns": [
-						"id"
-					]
+					"columns": ["id"]
 				},
 				"staff_slug_unique": {
 					"name": "staff_slug_unique",
 					"nullsNotDistinct": false,
-					"columns": [
-						"slug"
-					]
+					"columns": ["slug"]
 				}
 			},
 			"policies": {},
@@ -1558,12 +1477,8 @@
 					"tableFrom": "show_studio_join",
 					"tableTo": "shows",
 					"schemaTo": "kyoo",
-					"columnsFrom": [
-						"show_pk"
-					],
-					"columnsTo": [
-						"pk"
-					],
+					"columnsFrom": ["show_pk"],
+					"columnsTo": ["pk"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				},
@@ -1572,12 +1487,8 @@
 					"tableFrom": "show_studio_join",
 					"tableTo": "studios",
 					"schemaTo": "kyoo",
-					"columnsFrom": [
-						"studio_pk"
-					],
-					"columnsTo": [
-						"pk"
-					],
+					"columnsFrom": ["studio_pk"],
+					"columnsTo": ["pk"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
@@ -1585,10 +1496,7 @@
 			"compositePrimaryKeys": {
 				"show_studio_join_show_pk_studio_pk_pk": {
 					"name": "show_studio_join_show_pk_studio_pk_pk",
-					"columns": [
-						"show_pk",
-						"studio_pk"
-					]
+					"columns": ["show_pk", "studio_pk"]
 				}
 			},
 			"uniqueConstraints": {},
@@ -1648,12 +1556,8 @@
 					"tableFrom": "studio_translations",
 					"tableTo": "studios",
 					"schemaTo": "kyoo",
-					"columnsFrom": [
-						"pk"
-					],
-					"columnsTo": [
-						"pk"
-					],
+					"columnsFrom": ["pk"],
+					"columnsTo": ["pk"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
@@ -1661,10 +1565,7 @@
 			"compositePrimaryKeys": {
 				"studio_translations_pk_language_pk": {
 					"name": "studio_translations_pk_language_pk",
-					"columns": [
-						"pk",
-						"language"
-					]
+					"columns": ["pk", "language"]
 				}
 			},
 			"uniqueConstraints": {},
@@ -1734,16 +1635,12 @@
 				"studios_id_unique": {
 					"name": "studios_id_unique",
 					"nullsNotDistinct": false,
-					"columns": [
-						"id"
-					]
+					"columns": ["id"]
 				},
 				"studios_slug_unique": {
 					"name": "studios_slug_unique",
 					"nullsNotDistinct": false,
-					"columns": [
-						"slug"
-					]
+					"columns": ["slug"]
 				}
 			},
 			"policies": {},
@@ -1780,12 +1677,8 @@
 					"tableFrom": "entry_video_join",
 					"tableTo": "entries",
 					"schemaTo": "kyoo",
-					"columnsFrom": [
-						"entry_pk"
-					],
-					"columnsTo": [
-						"pk"
-					],
+					"columnsFrom": ["entry_pk"],
+					"columnsTo": ["pk"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				},
@@ -1794,12 +1687,8 @@
 					"tableFrom": "entry_video_join",
 					"tableTo": "videos",
 					"schemaTo": "kyoo",
-					"columnsFrom": [
-						"video_pk"
-					],
-					"columnsTo": [
-						"pk"
-					],
+					"columnsFrom": ["video_pk"],
+					"columnsTo": ["pk"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
@@ -1807,19 +1696,14 @@
 			"compositePrimaryKeys": {
 				"entry_video_join_entry_pk_video_pk_pk": {
 					"name": "entry_video_join_entry_pk_video_pk_pk",
-					"columns": [
-						"entry_pk",
-						"video_pk"
-					]
+					"columns": ["entry_pk", "video_pk"]
 				}
 			},
 			"uniqueConstraints": {
 				"entry_video_join_slug_unique": {
 					"name": "entry_video_join_slug_unique",
 					"nullsNotDistinct": false,
-					"columns": [
-						"slug"
-					]
+					"columns": ["slug"]
 				}
 			},
 			"policies": {},
@@ -1906,25 +1790,17 @@
 				"videos_id_unique": {
 					"name": "videos_id_unique",
 					"nullsNotDistinct": false,
-					"columns": [
-						"id"
-					]
+					"columns": ["id"]
 				},
 				"videos_path_unique": {
 					"name": "videos_path_unique",
 					"nullsNotDistinct": false,
-					"columns": [
-						"path"
-					]
+					"columns": ["path"]
 				},
 				"rendering_unique": {
 					"name": "rendering_unique",
 					"nullsNotDistinct": true,
-					"columns": [
-						"rendering",
-						"part",
-						"version"
-					]
+					"columns": ["rendering", "part", "version"]
 				}
 			},
 			"policies": {},
@@ -2021,12 +1897,8 @@
 					"tableFrom": "watchlist",
 					"tableTo": "profiles",
 					"schemaTo": "kyoo",
-					"columnsFrom": [
-						"profile_pk"
-					],
-					"columnsTo": [
-						"pk"
-					],
+					"columnsFrom": ["profile_pk"],
+					"columnsTo": ["pk"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				},
@@ -2035,12 +1907,8 @@
 					"tableFrom": "watchlist",
 					"tableTo": "shows",
 					"schemaTo": "kyoo",
-					"columnsFrom": [
-						"show_pk"
-					],
-					"columnsTo": [
-						"pk"
-					],
+					"columnsFrom": ["show_pk"],
+					"columnsTo": ["pk"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				},
@@ -2049,12 +1917,8 @@
 					"tableFrom": "watchlist",
 					"tableTo": "entries",
 					"schemaTo": "kyoo",
-					"columnsFrom": [
-						"next_entry"
-					],
-					"columnsTo": [
-						"pk"
-					],
+					"columnsFrom": ["next_entry"],
+					"columnsTo": ["pk"],
 					"onDelete": "set null",
 					"onUpdate": "no action"
 				}
@@ -2062,10 +1926,7 @@
 			"compositePrimaryKeys": {
 				"watchlist_profile_pk_show_pk_pk": {
 					"name": "watchlist_profile_pk_show_pk_pk",
-					"columns": [
-						"profile_pk",
-						"show_pk"
-					]
+					"columns": ["profile_pk", "show_pk"]
 				}
 			},
 			"uniqueConstraints": {},
@@ -2083,21 +1944,12 @@
 		"kyoo.entry_type": {
 			"name": "entry_type",
 			"schema": "kyoo",
-			"values": [
-				"episode",
-				"movie",
-				"special",
-				"extra"
-			]
+			"values": ["episode", "movie", "special", "extra"]
 		},
 		"kyoo.img_status": {
 			"name": "img_status",
 			"schema": "kyoo",
-			"values": [
-				"pending",
-				"link",
-				"ready"
-			]
+			"values": ["pending", "link", "ready"]
 		},
 		"kyoo.genres": {
 			"name": "genres",
@@ -2131,21 +1983,12 @@
 		"kyoo.show_kind": {
 			"name": "show_kind",
 			"schema": "kyoo",
-			"values": [
-				"serie",
-				"movie",
-				"collection"
-			]
+			"values": ["serie", "movie", "collection"]
 		},
 		"kyoo.show_status": {
 			"name": "show_status",
 			"schema": "kyoo",
-			"values": [
-				"unknown",
-				"finished",
-				"airing",
-				"planned"
-			]
+			"values": ["unknown", "finished", "airing", "planned"]
 		},
 		"kyoo.role_kind": {
 			"name": "role_kind",
@@ -2163,13 +2006,7 @@
 		"kyoo.watchlist_status": {
 			"name": "watchlist_status",
 			"schema": "kyoo",
-			"values": [
-				"watching",
-				"rewatching",
-				"completed",
-				"dropped",
-				"planned"
-			]
+			"values": ["watching", "rewatching", "completed", "dropped", "planned"]
 		}
 	},
 	"schemas": {

@@ -1,10 +1,10 @@
 import { z } from "zod/v4";
+import { Collection } from "./collection";
 import { Studio } from "./studio";
 import { Genre } from "./utils/genre";
 import { KImage } from "./utils/images";
 import { Metadata } from "./utils/metadata";
 import { zdate } from "./utils/utils";
-import { Collection } from "./collection";
 
 export const Movie = z
 	.object({

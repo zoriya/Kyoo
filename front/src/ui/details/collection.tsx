@@ -4,7 +4,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { itemMap } from "~/components/items";
 import { ItemDetails } from "~/components/items/item-details";
 import { Show } from "~/models";
-import { Container } from "~/primitives";
 import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { useQueryState } from "~/utils";
 import { HeaderBackground, useScrollNavbar } from "../navbar";
@@ -33,7 +32,6 @@ export const CollectionDetails = () => {
 	const { scrollHandler, headerProps } = useScrollNavbar({
 		imageHeight,
 	});
-
 	return (
 		<View className="flex-1 bg-card">
 			<HeaderBackground {...headerProps} />
@@ -49,11 +47,7 @@ export const CollectionDetails = () => {
 						playHref={item.kind !== "collection" ? item.playHref : null}
 					/>
 				)}
-				Loader={() => (
-					<Container>
-						<ItemDetails.Loader />
-					</Container>
-				)}
+				Loader={() => <ItemDetails.Loader />}
 				Header={() => (
 					<CollectionHeader
 						slug={slug}
@@ -64,7 +58,7 @@ export const CollectionDetails = () => {
 				contentContainerStyle={{
 					paddingBottom: insets.bottom,
 				}}
-				margin={false}
+				outerGap
 			/>
 		</View>
 	);

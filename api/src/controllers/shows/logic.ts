@@ -1,4 +1,5 @@
 import { and, eq, exists, ne, type SQL, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { db } from "~/db";
 import {
 	entries,
@@ -20,6 +21,7 @@ import {
 	jsonbObjectAgg,
 	sqlarr,
 } from "~/db/utils";
+import type { Collection } from "~/models/collections";
 import type { Entry } from "~/models/entry";
 import type { MovieStatus } from "~/models/movie";
 import { SerieStatus, type SerieTranslation } from "~/models/serie";
@@ -41,8 +43,6 @@ import {
 	getEntryTransQ,
 	mapProgress,
 } from "../entries";
-import { Collection } from "~/models/collections";
-import { alias } from "drizzle-orm/pg-core";
 
 export const watchStatusQ = db
 	.select({
