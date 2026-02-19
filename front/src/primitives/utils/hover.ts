@@ -10,13 +10,11 @@ export const useMobileHover = () => {
 	// biome-ignore lint/correctness/useHookAtTopLevel: const condition
 	useEffect(() => {
 		const enableHover = () => {
-			console.log("pc");
 			if (preventHover) return;
 			document.body.classList.remove("noHover");
 		};
 
 		const disableHover = () => {
-			console.log("mobile");
 			if (hoverTimeout) clearTimeout(hoverTimeout);
 			preventHover = true;
 			hoverTimeout = setTimeout(() => {

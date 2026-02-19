@@ -3,6 +3,7 @@ from typing import override
 from langcodes import Language
 
 from scanner.models.metadataid import MetadataId
+from scanner.utils import uniq_by
 
 from ..models.movie import Movie, SearchMovie
 from ..models.serie import SearchSerie, Serie
@@ -27,7 +28,17 @@ class CompositeProvider(Provider):
 
 	@override
 	async def get_movie(self, external_id: dict[str, str]) -> Movie | None:
-		return await self._themoviedb.get_movie(external_id)
+		ret = await self._themoviedb.get_movie(external_id)
+		if ret is None:
+			return None
+		# we only use tvdb for collections, since tmdb doesn't have them for series
+		info = await self._tvdb.get_movie(MetadataId.map_dict(ret.external_id))
+		if info is None:
+			return ret
+		if info.collection is not None:
+			ret.collection = info.collection
+		ret.external_id = MetadataId.merge(ret.external_id, info.external_id)
+		return ret
 
 	@override
 	async def search_series(
@@ -42,6 +53,12 @@ class CompositeProvider(Provider):
 		ret = await self._tvdb.get_serie(external_id)
 		if ret is None:
 			return None
+
+		# some series have duplicates special numbers/episode numbers, sensitize them
+		ret.entries = uniq_by(
+			ret.entries, lambda x: (x.season_number, x.episode_number, x.number, x.slug)
+		)
+
 		# themoviedb has better global info than tvdb but tvdb has better entries info
 		info = await self._themoviedb.get_serie(
 			MetadataId.map_dict(ret.external_id), skip_entries=True
@@ -50,6 +67,8 @@ class CompositeProvider(Provider):
 			return ret
 		info.seasons = ret.seasons
 		info.entries = ret.entries
-		info.extra = ret.extra
-		info.external_id = {**ret.external_id, **info.external_id}
+		info.extras = ret.extras
+		if ret.collection is not None:
+			info.collection = ret.collection
+		info.external_id = MetadataId.merge(ret.external_id, info.external_id)
 		return info

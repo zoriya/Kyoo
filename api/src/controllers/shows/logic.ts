@@ -1,4 +1,5 @@
 import { and, eq, exists, ne, type SQL, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { db } from "~/db";
 import {
 	entries,
@@ -20,6 +21,7 @@ import {
 	jsonbObjectAgg,
 	sqlarr,
 } from "~/db/utils";
+import type { Collection } from "~/models/collections";
 import type { Entry } from "~/models/entry";
 import type { MovieStatus } from "~/models/movie";
 import { SerieStatus, type SerieTranslation } from "~/models/serie";
@@ -123,6 +125,42 @@ export const showRelations = {
 			.from(showTranslations)
 			.where(eq(showTranslations.pk, shows.pk))
 			.as("translations");
+	},
+	collection: ({
+		languages,
+		preferOriginal,
+	}: {
+		languages: string[];
+		preferOriginal?: boolean;
+	}) => {
+		const collections = alias(shows, "collections");
+		const colTrans = alias(showTranslations, "col_trans");
+		const transQ = db
+			.selectDistinctOn([colTrans.pk])
+			.from(colTrans)
+			.orderBy(
+				colTrans.pk,
+				sql`array_position(${sqlarr(languages)}, ${colTrans.language})`,
+			)
+			.as("t");
+
+		return db
+			.select({
+				json: jsonbBuildObject<Collection>({
+					...getColumns(collections),
+					...getColumns(transQ),
+					...(preferOriginal && {
+						poster: sql<Image>`coalesce(nullif(${collections.original}->'poster', 'null'::jsonb), ${transQ.poster})`,
+						thumbnail: sql<Image>`coalesce(nullif(${collections.original}->'thumbnail', 'null'::jsonb), ${transQ.thumbnail})`,
+						banner: sql<Image>`coalesce(nullif(${collections.original}->'banner', 'null'::jsonb), ${transQ.banner})`,
+						logo: sql<Image>`coalesce(nullif(${collections.original}->'logo', 'null'::jsonb), ${transQ.logo})`,
+					}),
+				}),
+			})
+			.from(collections)
+			.innerJoin(transQ, eq(collections.pk, transQ.pk))
+			.where(eq(collections.pk, shows.collectionPk))
+			.as("collection");
 	},
 	studios: ({ languages }: { languages: string[] }) => {
 		const studioTransQ = db
@@ -304,7 +342,10 @@ export async function getShows({
 
 			watchStatus: getColumns(watchStatusQ),
 
-			...buildRelations(relations, showRelations, { languages }),
+			...buildRelations(relations, showRelations, {
+				languages,
+				preferOriginal,
+			}),
 		})
 		.from(shows)
 		.leftJoin(watchStatusQ, eq(shows.pk, watchStatusQ.showPk))

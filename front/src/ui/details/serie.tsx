@@ -74,7 +74,6 @@ const SerieHeader = ({
 				}}
 				Loader={NextUp.Loader}
 			/>
-			{/* <DetailsCollections type="serie" slug={slug} /> */}
 			{/* <Staff slug={slug} /> */}
 			<SvgWave className="flex-1 shrink-0 fill-card" />
 		</View>

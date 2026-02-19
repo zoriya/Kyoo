@@ -130,7 +130,7 @@ const newsSort: Sort = {
 			// in the news query we already filter nulls out
 			isNullable: false,
 			accessor: (x) => x.availableSince,
-			desc: false,
+			desc: true,
 		},
 	],
 };

@@ -159,7 +159,10 @@ const toQueryKey = (query: {
 		...query.path,
 		query.params
 			? `?${Object.entries(query.params)
-					.filter(([_, v]) => v !== undefined)
+					.filter(
+						([_, v]) =>
+							v !== undefined && (Array.isArray(v) ? v.length > 0 : true),
+					)
 					.map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(",") : v}`)
 					.join("&")}`
 			: undefined,

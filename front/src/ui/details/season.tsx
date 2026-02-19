@@ -123,34 +123,33 @@ export const EntryList = ({
 					.filter((x) => x !== null)
 			}
 			placeholderCount={5}
-			Render={({ item }) =>
-				item.kind === "season" ? (
-					<Container
-						as={SeasonHeader}
-						serieSlug={slug}
-						name={item.name}
-						seasonNumber={item.seasonNumber}
-						seasons={seasons ?? []}
-					/>
-				) : (
-					<Container
-						as={EntryLine}
-						{...item}
-						// Don't display "Go to serie"
-						videosCount={item.videos.length}
-						serieSlug={null}
-						displayNumber={entryDisplayNumber(item)}
-						watchedPercent={item.progress.percent}
-					/>
-				)
-			}
-			Loader={({ index }) =>
-				index === 0 ? (
-					<Container as={SeasonHeader.Loader} />
-				) : (
-					<Container as={EntryLine.Loader} />
-				)
-			}
+			Render={({ item }) => (
+				<Container>
+					{item.kind === "season" ? (
+						<SeasonHeader
+							serieSlug={slug}
+							name={item.name}
+							seasonNumber={item.seasonNumber}
+							seasons={seasons ?? []}
+						/>
+					) : (
+						<EntryLine
+							{...item}
+							// Don't display "Go to serie"
+							videosCount={item.videos.length}
+							serieSlug={null}
+							displayNumber={entryDisplayNumber(item)}
+							watchedPercent={item.progress.percent}
+						/>
+					)}
+				</Container>
+			)}
+			Loader={({ index }) => (
+				<Container>
+					{index === 0 ? <SeasonHeader.Loader /> : <EntryLine.Loader />}
+				</Container>
+			)}
+			margin={false}
 			{...props}
 		/>
 	);

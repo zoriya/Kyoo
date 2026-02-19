@@ -190,6 +190,13 @@
 			"when": 1768560733256,
 			"tag": "0026_precision",
 			"breakpoints": true
+		},
+		{
+			"idx": 27,
+			"version": "7",
+			"when": 1771505332722,
+			"tag": "0027_show_slug",
+			"breakpoints": true
 		}
 	]
 }

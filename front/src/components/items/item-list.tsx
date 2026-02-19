@@ -22,7 +22,7 @@ export const ItemList = ({
 	kind,
 	name,
 	subtitle,
-	thumbnail,
+	banner,
 	poster,
 	watchStatus,
 	availableCount,
@@ -36,7 +36,7 @@ export const ItemList = ({
 	name: string;
 	subtitle: string | null;
 	poster: KImage | null;
-	thumbnail: KImage | null;
+	banner: KImage | null;
 	watchStatus: WatchStatusV | null;
 	availableCount?: number | null;
 	seenCount?: number | null;
@@ -56,7 +56,7 @@ export const ItemList = ({
 			{...props}
 		>
 			<ImageBackground
-				src={thumbnail}
+				src={banner}
 				quality="medium"
 				className="h-full w-full flex-row items-center justify-evenly"
 			>

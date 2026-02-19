@@ -10,6 +10,7 @@ import {
 	smallint,
 	text,
 	timestamp,
+	unique,
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
@@ -69,7 +70,7 @@ export const shows = schema.table(
 	{
 		pk: integer().primaryKey().generatedAlwaysAsIdentity(),
 		id: uuid().notNull().unique().defaultRandom(),
-		slug: varchar({ length: 255 }).notNull().unique(),
+		slug: varchar({ length: 255 }).notNull(),
 		kind: showKind().notNull(),
 		genres: genres().array().notNull(),
 		rating: smallint(),
@@ -96,10 +97,13 @@ export const shows = schema.table(
 		nextRefresh: timestamp({ withTimezone: true, precision: 3 }).notNull(),
 	},
 	(t) => [
+		unique("kind_slug").on(t.kind, t.slug),
+
 		check("rating_valid", sql`${t.rating} between 0 and 100`),
 		check("runtime_valid", sql`${t.runtime} >= 0`),
 
 		index("kind").using("hash", t.kind),
+		index("slug").on(t.slug),
 		index("rating").on(t.rating),
 		index("startAir").on(t.startAir),
 	],

@@ -1,4 +1,5 @@
 import { z } from "zod/v4";
+import { Collection } from "./collection";
 import { Studio } from "./studio";
 import { Genre } from "./utils/genre";
 import { KImage } from "./utils/images";
@@ -64,6 +65,8 @@ export const Movie = z
 				percent: z.number().int().gte(0).lte(100),
 			})
 			.nullable(),
+
+		collection: Collection.optional().nullable(),
 	})
 	.transform((x) => ({
 		...x,

@@ -35,8 +35,8 @@ class Serie(Model):
 	translations: dict[Language, SerieTranslation] = {}
 	seasons: list[Season] = []
 	entries: list[Entry] = []
-	extra: list[Extra] = []
-	collections: list[Collection] = []
+	extras: list[Extra] = []
+	collection: Collection | None = None
 	studios: list[Studio] = []
 	staff: list[Staff] = []
 

@@ -1,4 +1,5 @@
 import { z } from "zod/v4";
+import { Collection } from "./collection";
 import { BaseEntry } from "./entry";
 import { Studio } from "./studio";
 import { Genre } from "./utils/genre";
@@ -62,6 +63,8 @@ export const Serie = z
 				seenCount: z.number().int().gte(0),
 			})
 			.nullable(),
+
+		collection: Collection.optional().nullable(),
 	})
 	.transform((x) => {
 		const entry = x.nextEntry ?? x.firstEntry;
