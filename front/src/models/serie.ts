@@ -5,6 +5,7 @@ import { Genre } from "./utils/genre";
 import { KImage } from "./utils/images";
 import { Metadata } from "./utils/metadata";
 import { zdate } from "./utils/utils";
+import { Collection } from "./collection";
 
 export const Serie = z
 	.object({
@@ -62,6 +63,8 @@ export const Serie = z
 				seenCount: z.number().int().gte(0),
 			})
 			.nullable(),
+
+		collection: Collection.optional().nullable(),
 	})
 	.transform((x) => {
 		const entry = x.nextEntry ?? x.firstEntry;

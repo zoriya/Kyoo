@@ -27,6 +27,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	Header,
 	fetchMore = true,
 	contentContainerStyle,
+	margin = true,
 	...props
 }: {
 	query: QueryIdentifier<Data>;
@@ -47,6 +48,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	contentContainerStyle?: ViewStyle;
 	onScroll?: LegendListProps["onScroll"];
 	scrollEventThrottle?: LegendListProps["scrollEventThrottle"];
+	margin?: boolean;
 }): JSX.Element | null => {
 	const { numColumns, size, gap } = useBreakpointMap(layout);
 	const oldItems = useRef<Data[] | undefined>(undefined);
@@ -101,12 +103,15 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 			}
 			showsHorizontalScrollIndicator={false}
 			showsVerticalScrollIndicator={false}
-			contentContainerStyle={{
-				...contentContainerStyle,
-				gap,
-				marginLeft: numColumns > 1 ? gap : 0,
-				marginRight: numColumns > 1 ? gap : 0,
-			}}
+			contentContainerStyle={[
+				{
+					...contentContainerStyle,
+					gap,
+				},
+				margin
+					? { marginLeft: gap, marginRight: gap }
+					: { marginLeft: 0, marginRight: 0 },
+			]}
 			{...props}
 		/>
 	);

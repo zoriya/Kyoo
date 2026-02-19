@@ -21,6 +21,7 @@ export const ImageBackground = ({
 	quality,
 	alt,
 	className,
+	children,
 	...props
 }: {
 	src: KImage | null;
@@ -32,7 +33,11 @@ export const ImageBackground = ({
 	const { apiUrl, authToken } = useToken();
 
 	if (!src) {
-		return <View className={cn("overflow-hidden bg-gray-300", className)} />;
+		return (
+			<View className={cn("overflow-hidden bg-gray-300", className)}>
+				{children}
+			</View>
+		);
 	}
 
 	const uri = `${apiUrl}${src[quality ?? "high"]}`;
@@ -54,7 +59,9 @@ export const ImageBackground = ({
 			className={cn("overflow-hidden bg-gray-300", className)}
 			imageStyle={{ width: "100%", height: "100%", margin: 0, padding: 0 }}
 			{...props}
-		/>
+		>
+			{children}
+		</ImgBg>
 	);
 };
 

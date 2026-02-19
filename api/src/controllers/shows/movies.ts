@@ -77,10 +77,13 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				preferOriginal: t.Optional(
 					t.Boolean({ description: desc.preferOriginal }),
 				),
-				with: t.Array(t.UnionEnum(["translations", "studios", "videos"]), {
-					default: [],
-					description: "Include related resources in the response.",
-				}),
+				with: t.Array(
+					t.UnionEnum(["translations", "collection", "studios", "videos"]),
+					{
+						default: [],
+						description: "Include related resources in the response.",
+					},
+				),
 			}),
 			headers: t.Object({
 				"accept-language": AcceptLanguage(),
@@ -119,10 +122,13 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				preferOriginal: t.Optional(
 					t.Boolean({ description: desc.preferOriginal }),
 				),
-				with: t.Array(t.UnionEnum(["translations", "studios", "videos"]), {
-					default: [],
-					description: "Include related resources in the response.",
-				}),
+				with: t.Array(
+					t.UnionEnum(["translations", "collection", "studios", "videos"]),
+					{
+						default: [],
+						description: "Include related resources in the response.",
+					},
+				),
 			}),
 			response: {
 				302: t.Void({

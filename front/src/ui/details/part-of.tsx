@@ -1,110 +1,47 @@
-import {
-	type Collection,
-	CollectionP,
-	type KyooImage,
-	type QueryIdentifier,
-	useInfiniteFetch,
-} from "@kyoo/models";
-import {
-	Container,
-	focusReset,
-	GradientImageBackground,
-	H2,
-	ImageBackground,
-	Link,
-	P,
-	ts,
-} from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
-import { type Theme, useYoshiki } from "yoshiki/native";
+import { View } from "react-native";
+import type { KImage } from "~/models";
+import { H2, ImageBackground, Link, P } from "~/primitives";
+import { cn } from "~/utils";
 
 export const PartOf = ({
 	name,
-	overview,
-	thumbnail,
+	description,
+	banner,
 	href,
+	className,
 }: {
 	name: string;
-	overview: string | null;
-	thumbnail: KyooImage | null;
+	description: string | null;
+	banner: KImage | null;
 	href: string;
+	className?: string;
 }) => {
-	const { css, theme } = useYoshiki("part-of-collection");
 	const { t } = useTranslation();
 
 	return (
 		<Link
 			href={href}
-			{...css({
-				borderRadius: 16,
-				overflow: "hidden",
-				borderWidth: ts(0.5),
-				borderStyle: "solid",
-				borderColor: (theme) => theme.background,
-				fover: {
-					self: { ...focusReset, borderColor: (theme: Theme) => theme.accent },
-					title: { textDecorationLine: "underline" },
-				},
-			})}
+			className={cn(
+				"group flex-1 overflow-hidden rounded-xl ring-accent hover:ring-3 focus-visible:ring-3",
+				className,
+			)}
 		>
-			<GradientImageBackground
-				src={thumbnail}
-				alt=""
-				quality="medium"
-				gradient={{
-					colors: [theme.darkOverlay, "transparent"],
-					start: { x: 0, y: 0 },
-					end: { x: 1, y: 0 },
-				}}
-				{...css({
-					padding: ts(3),
-				})}
-			>
-				<H2 {...css("title")}>
+			<ImageBackground src={banner} quality="high" alt="" className="p-6">
+				<View className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/70" />
+				<H2
+					className={cn(
+						"py-2",
+						"text-slate-200 dark:text-slate-200",
+						"group-focus-within:underline group-hover:underline",
+					)}
+				>
 					{t("show.partOf")} {name}
 				</H2>
-				<P {...css({ textAlign: "justify" })}>{overview}</P>
-			</GradientImageBackground>
+				<P className="text-justify text-slate-400 dark:text-slate-400">
+					{description}
+				</P>
+			</ImageBackground>
 		</Link>
 	);
 };
-
-export const DetailsCollections = ({
-	type,
-	slug,
-}: {
-	type: "movie" | "show";
-	slug: string;
-}) => {
-	const { items } = useInfiniteFetch(DetailsCollections.query(type, slug));
-	const { css } = useYoshiki();
-
-	// Since most items dont have collections, not having a skeleton reduces layout shifts.
-	if (!items) return null;
-
-	return (
-		<Container {...css({ marginY: ts(2) })}>
-			{items.map((x) => (
-				<PartOf
-					key={x.id}
-					name={x.name}
-					overview={x.overview}
-					thumbnail={x.thumbnail}
-					href={x.href}
-				/>
-			))}
-		</Container>
-	);
-};
-
-DetailsCollections.query = (
-	type: "movie" | "show",
-	slug: string,
-): QueryIdentifier<Collection> => ({
-	parser: CollectionP,
-	path: [type, slug, "collections"],
-	params: {
-		limit: 0,
-	},
-	infinite: true,
-});

@@ -4,6 +4,7 @@ import { Genre } from "./utils/genre";
 import { KImage } from "./utils/images";
 import { Metadata } from "./utils/metadata";
 import { zdate } from "./utils/utils";
+import { Collection } from "./collection";
 
 export const Movie = z
 	.object({
@@ -64,6 +65,8 @@ export const Movie = z
 				percent: z.number().int().gte(0).lte(100),
 			})
 			.nullable(),
+
+		collection: Collection.optional().nullable(),
 	})
 	.transform((x) => ({
 		...x,

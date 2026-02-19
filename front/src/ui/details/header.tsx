@@ -41,6 +41,7 @@ import {
 import { useAccount } from "~/providers/account-context";
 import { Fetch, type QueryIdentifier } from "~/query";
 import { cn, displayRuntime, getDisplayDate } from "~/utils";
+import { PartOf } from "./part-of";
 
 const ButtonList = ({
 	kind,
@@ -260,7 +261,7 @@ const Description = ({
 	description: string | null;
 	tags: string[];
 	genres: Genre[];
-	studios: Studio[];
+	studios: Studio[] | null;
 	externalIds: Metadata;
 }) => {
 	const { t } = useTranslation();
@@ -268,7 +269,7 @@ const Description = ({
 	return (
 		<Container className="py-10" {...props}>
 			<View className="flex-1 flex-col-reverse sm:flex-row">
-				<P className="py-5 text-justify">
+				<P className="flex-1 py-5 text-justify">
 					{description ?? t("show.noOverview")}
 				</P>
 				<View className="basis-1/5 flex-row xl:mt-[-100px]">
@@ -293,27 +294,33 @@ const Description = ({
 			</View>
 			<View className="mt-5 flex-row flex-wrap items-center">
 				<P className="mr-1">{t("show.tags")}:</P>
-				{tags.map((tag) => (
-					<Chip
-						key={tag}
-						label={tag && capitalize(tag)}
-						href={`/search?q=${tag}`}
-						size="small"
-						className="m-1"
-					/>
-				))}
+				{tags.length ? (
+					tags.map((tag) => (
+						<Chip
+							key={tag}
+							label={tag && capitalize(tag)}
+							href={`/search?q=${tag}`}
+							size="small"
+							className="m-1"
+						/>
+					))
+				) : (
+					<P>{t("show.tags-none")}</P>
+				)}
 			</View>
-			<P className="my-5 flex-row flex-wrap items-center">
-				<P className="mr-1">{t("show.studios")}:</P>
-				{studios.map((x, i) => (
-					<Fragment key={x.id}>
-						{i !== 0 && ","}
-						<A href={x.slug} className="ml-2">
-							{x.name}
-						</A>
-					</Fragment>
-				))}
-			</P>
+			{studios !== null && (
+				<P className="my-5 flex-row flex-wrap items-center">
+					<P className="mr-1">{t("show.studios")}:</P>
+					{studios.map((x, i) => (
+						<Fragment key={x.id}>
+							{i !== 0 && ","}
+							<A href={x.slug} className="ml-2">
+								{x.name}
+							</A>
+						</Fragment>
+					))}
+				</P>
+			)}
 			<View className="flex-row flex-wrap items-center">
 				<P className="mr-1 text-center">{t("show.links")}:</P>
 				{Object.entries(externalIds)
@@ -425,13 +432,20 @@ export const Header = ({
 						description={data.description}
 						tags={data.tags}
 						genres={data.genres}
-						studios={data.kind !== "collection" ? data.studios! : []}
+						studios={data.kind !== "collection" ? data.studios! : null}
 						externalIds={data.externalId}
 					/>
 
-					{/* {type === "show" && ( */}
-					{/* 	<ShowWatchStatusCard {...(data?.watchStatus as any)} /> */}
-					{/* )} */}
+					{data.kind !== "collection" && data.collection && (
+						<Container className="mb-4">
+							<PartOf
+								name={data.collection.name}
+								description={data.collection.description}
+								banner={data.collection.banner ?? data.collection.thumbnail}
+								href={data.collection.href}
+							/>
+						</Container>
+					)}
 				</View>
 			)}
 			Loader={() => (
@@ -459,7 +473,7 @@ Header.query = (
 	path: ["api", `${kind}s`, slug],
 	params: {
 		with: [
-			...(kind !== "collection" ? ["studios"] : []),
+			...(kind !== "collection" ? ["collection", "studios"] : []),
 			...(kind === "serie" ? ["firstEntry", "nextEntry"] : []),
 		],
 	},

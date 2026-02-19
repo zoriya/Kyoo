@@ -1,6 +1,6 @@
 import { t } from "elysia";
 import type { Prettify } from "~/utils";
-import { SeedCollection } from "./collections";
+import { Collection, SeedCollection } from "./collections";
 import { bubble, bubbleImages, registerExamples } from "./examples";
 import { SeedStaff } from "./staff";
 import { SeedStudio, Studio } from "./studio";
@@ -70,6 +70,7 @@ export const FullMovie = t.Intersect([
 	t.Object({
 		translations: t.Optional(TranslationRecord(MovieTranslation)),
 		videos: t.Optional(t.Array(EmbeddedVideo)),
+		collection: t.Optional(t.Nullable(Collection)),
 		studios: t.Optional(t.Array(Studio)),
 	}),
 ]);

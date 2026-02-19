@@ -1,30 +1,77 @@
 import { useState } from "react";
-import Animated from "react-native-reanimated";
+import { View, type ViewProps } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { itemMap } from "~/components/items";
+import { ItemDetails } from "~/components/items/item-details";
+import { Show } from "~/models";
+import { Container } from "~/primitives";
+import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { useQueryState } from "~/utils";
 import { HeaderBackground, useScrollNavbar } from "../navbar";
 import { Header } from "./header";
+import { SvgWave } from "./serie";
+
+const CollectionHeader = ({
+	slug,
+	onImageLayout,
+}: {
+	slug: string;
+	onImageLayout?: ViewProps["onLayout"];
+}) => {
+	return (
+		<View className="bg-background">
+			<Header kind="collection" slug={slug} onImageLayout={onImageLayout} />
+			<SvgWave className="flex-1 shrink-0 fill-card" />
+		</View>
+	);
+};
 
 export const CollectionDetails = () => {
 	const [slug] = useQueryState("slug", undefined!);
 	const insets = useSafeAreaInsets();
 	const [imageHeight, setHeight] = useState(300);
-	const { scrollHandler, headerProps } = useScrollNavbar({ imageHeight });
+	const { scrollHandler, headerProps } = useScrollNavbar({
+		imageHeight,
+	});
 
 	return (
-		<>
+		<View className="flex-1 bg-card">
 			<HeaderBackground {...headerProps} />
-			<Animated.ScrollView
+			<InfiniteFetch
+				query={CollectionDetails.query(slug)}
+				layout={ItemDetails.layout}
+				Render={({ item }) => (
+					<ItemDetails
+						{...itemMap(item)}
+						tagline={item.tagline}
+						description={item.description}
+						genres={item.genres}
+						playHref={item.kind !== "collection" ? item.playHref : null}
+					/>
+				)}
+				Loader={() => (
+					<Container>
+						<ItemDetails.Loader />
+					</Container>
+				)}
+				Header={() => (
+					<CollectionHeader
+						slug={slug}
+						onImageLayout={(e) => setHeight(e.nativeEvent.layout.height)}
+					/>
+				)}
 				onScroll={scrollHandler}
-				scrollEventThrottle={16}
-				contentContainerStyle={{ paddingBottom: insets.bottom }}
-			>
-				<Header
-					kind="collection"
-					slug={slug}
-					onImageLayout={(e) => setHeight(e.nativeEvent.layout.height)}
-				/>
-			</Animated.ScrollView>
-		</>
+				contentContainerStyle={{
+					paddingBottom: insets.bottom,
+				}}
+				margin={false}
+			/>
+		</View>
 	);
 };
+
+CollectionDetails.query = (slug: string): QueryIdentifier<Show> => ({
+	parser: Show,
+	path: ["api", "collections", slug, "shows"],
+	infinite: true,
+});

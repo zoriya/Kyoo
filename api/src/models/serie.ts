@@ -1,6 +1,6 @@
 import { t } from "elysia";
 import type { Prettify } from "~/utils";
-import { SeedCollection } from "./collections";
+import { Collection, SeedCollection } from "./collections";
 import { Entry, SeedEntry, SeedExtra } from "./entry";
 import { bubbleImages, madeInAbyss, registerExamples } from "./examples";
 import { SeedSeason } from "./season";
@@ -84,6 +84,7 @@ export const FullSerie = t.Intersect([
 	Serie,
 	t.Object({
 		translations: t.Optional(TranslationRecord(SerieTranslation)),
+		collection: t.Optional(t.Nullable(Collection)),
 		studios: t.Optional(t.Array(Studio)),
 		firstEntry: t.Optional(t.Nullable(Entry)),
 		nextEntry: t.Optional(t.Nullable(Entry)),
