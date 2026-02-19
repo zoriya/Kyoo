@@ -47,7 +47,7 @@ export const insertCollection = record(
 					...col,
 				})
 				.onConflictDoUpdate({
-					target: shows.slug,
+					target: [shows.kind, shows.slug],
 					set: {
 						...conflictUpdateAllExcept(shows, [
 							"pk",

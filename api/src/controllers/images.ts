@@ -184,8 +184,8 @@ export const imagesH = new Elysia({ tags: ["images"] })
 				.where(
 					id !== "random"
 						? isUuid(id)
-							? eq(shows.id, id)
-							: eq(shows.slug, id)
+							? eq(staff.id, id)
+							: eq(staff.slug, id)
 						: undefined,
 				)
 				.orderBy(sql`random()`)
