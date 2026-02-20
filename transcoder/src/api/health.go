@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 type health struct {

@@ -1,6 +1,6 @@
 module github.com/zoriya/kyoo/transcoder
 
-go 1.24.2
+go 1.25.0
 
 require (
 	github.com/MicahParks/keyfunc/v3 v3.8.0
@@ -11,7 +11,7 @@ require (
 	github.com/exaring/otelpgx v0.10.0
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/jackc/pgx/v5 v5.8.0
-	github.com/labstack/echo/v4 v4.15.0
+	github.com/labstack/echo/v5 v5.0.4
 	github.com/swaggo/echo-swagger v1.4.1
 	github.com/swaggo/swag v1.16.6
 	gitlab.com/opennota/screengen v1.0.2
@@ -61,6 +61,7 @@ require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
+	github.com/labstack/echo/v4 v4.15.0 // indirect
 	github.com/swaggo/files/v2 v2.0.2 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.40.0 // indirect

@@ -19,8 +19,8 @@ import (
 
 	"github.com/MicahParks/keyfunc/v3"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 )
 
 func ErrorHandler(err error, c echo.Context) {
