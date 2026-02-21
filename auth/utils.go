@@ -9,10 +9,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
-func GetCurrentUserId(c echo.Context) (uuid.UUID, error) {
+func GetCurrentUserId(c *echo.Context) (uuid.UUID, error) {
 	user := c.Get("user").(*jwt.Token)
 	if user == nil {
 		return uuid.UUID{}, echo.NewHTTPError(401, "Unauthorized")
@@ -28,7 +28,7 @@ func GetCurrentUserId(c echo.Context) (uuid.UUID, error) {
 	return ret, nil
 }
 
-func GetCurrentSessionId(c echo.Context) (uuid.UUID, error) {
+func GetCurrentSessionId(c *echo.Context) (uuid.UUID, error) {
 	user := c.Get("user").(*jwt.Token)
 	if user == nil {
 		return uuid.UUID{}, echo.NewHTTPError(401, "Unauthorized")
@@ -54,7 +54,7 @@ func GetCurrentSessionId(c echo.Context) (uuid.UUID, error) {
 	return ret, nil
 }
 
-func CheckPermissions(c echo.Context, perms []string) error {
+func CheckPermissions(c *echo.Context, perms []string) error {
 	token, ok := c.Get("user").(*jwt.Token)
 	if !ok {
 		return echo.NewHTTPError(401, "Not logged in")

@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/zoriya/kyoo/keibi/dbc"
 )
 
@@ -93,7 +93,7 @@ func MapOidc(oidc *dbc.GetUserRow) OidcHandle {
 // @Success      200  {object}  Page[User]
 // @Failure      422  {object}  KError "Invalid after id"
 // @Router       /users [get]
-func (h *Handler) ListUsers(c echo.Context) error {
+func (h *Handler) ListUsers(c *echo.Context) error {
 	ctx := c.Request().Context()
 
 	err := CheckPermissions(c, []string{"users.read"})
@@ -139,7 +139,7 @@ func (h *Handler) ListUsers(c echo.Context) error {
 // @Failure      404  {object}  KError "No user with the given id found"
 // @Failure      422  {object}  KError "Invalid id (not a uuid)"
 // @Router /users/{id} [get]
-func (h *Handler) GetUser(c echo.Context) error {
+func (h *Handler) GetUser(c *echo.Context) error {
 	ctx := c.Request().Context()
 	err := CheckPermissions(c, []string{"users.read"})
 	if err != nil {
@@ -179,7 +179,7 @@ func (h *Handler) GetUser(c echo.Context) error {
 // @Failure      401  {object}  KError "Missing jwt token"
 // @Failure      403  {object}  KError "Invalid jwt token (or expired)"
 // @Router /users/me [get]
-func (h *Handler) GetMe(c echo.Context) error {
+func (h *Handler) GetMe(c *echo.Context) error {
 	ctx := c.Request().Context()
 	id, err := GetCurrentUserId(c)
 	if err != nil {
@@ -217,7 +217,7 @@ func (h *Handler) GetMe(c echo.Context) error {
 // @Success      409  {object}  KError "Duplicated email or username"
 // @Failure      422  {object}  KError "Invalid register body"
 // @Router /users [post]
-func (h *Handler) Register(c echo.Context) error {
+func (h *Handler) Register(c *echo.Context) error {
 	ctx := c.Request().Context()
 	var req RegisterDto
 	err := c.Bind(&req)
@@ -260,7 +260,7 @@ func (h *Handler) Register(c echo.Context) error {
 // @Failure      404  {object}  KError "Invalid user id"
 // @Failure      422  {object}  KError "Invalid id format"
 // @Router /users/{id} [delete]
-func (h *Handler) DeleteUser(c echo.Context) error {
+func (h *Handler) DeleteUser(c *echo.Context) error {
 	ctx := c.Request().Context()
 	err := CheckPermissions(c, []string{"users.delete"})
 	if err != nil {
@@ -289,7 +289,7 @@ func (h *Handler) DeleteUser(c echo.Context) error {
 // @Security     Jwt
 // @Success      200  {object}  User
 // @Router /users/me [delete]
-func (h *Handler) DeleteSelf(c echo.Context) error {
+func (h *Handler) DeleteSelf(c *echo.Context) error {
 	ctx := c.Request().Context()
 	uid, err := GetCurrentUserId(c)
 	if err != nil {
@@ -316,7 +316,7 @@ func (h *Handler) DeleteSelf(c echo.Context) error {
 // @Success      403  {object}  KError  "You can't edit a protected claim"
 // @Success      422  {object}  KError  "Invalid body"
 // @Router /users/me [patch]
-func (h *Handler) EditSelf(c echo.Context) error {
+func (h *Handler) EditSelf(c *echo.Context) error {
 	ctx := c.Request().Context()
 	var req EditUserDto
 	err := c.Bind(&req)
@@ -365,7 +365,7 @@ func (h *Handler) EditSelf(c echo.Context) error {
 // @Success      403  {object}  KError  "You don't have permissions to edit another account"
 // @Success      422  {object}  KError  "Invalid body"
 // @Router /users/{id} [patch]
-func (h *Handler) EditUser(c echo.Context) error {
+func (h *Handler) EditUser(c *echo.Context) error {
 	ctx := c.Request().Context()
 	err := CheckPermissions(c, []string{"users.write"})
 	if err != nil {
@@ -412,7 +412,7 @@ func (h *Handler) EditUser(c echo.Context) error {
 // @Success      204
 // @Success      422  {object}  KError  "Invalid body"
 // @Router /users/me/password [patch]
-func (h *Handler) ChangePassword(c echo.Context) error {
+func (h *Handler) ChangePassword(c *echo.Context) error {
 	ctx := c.Request().Context()
 	uid, err := GetCurrentUserId(c)
 	if err != nil {

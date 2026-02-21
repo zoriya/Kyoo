@@ -11,7 +11,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/zoriya/kyoo/keibi/dbc"
 )
 
@@ -71,7 +71,7 @@ type LoginDto struct {
 // @Failure      404  {object}   KError "Account does not exists"
 // @Failure      422  {object}   KError "User does not have a password (registered via oidc, please login via oidc)"
 // @Router /sessions [post]
-func (h *Handler) Login(c echo.Context) error {
+func (h *Handler) Login(c *echo.Context) error {
 	ctx := c.Request().Context()
 	var req LoginDto
 	err := c.Bind(&req)
@@ -102,7 +102,7 @@ func (h *Handler) Login(c echo.Context) error {
 	return h.createSession(c, &user)
 }
 
-func (h *Handler) createSession(c echo.Context, user *User) error {
+func (h *Handler) createSession(c *echo.Context, user *User) error {
 	ctx := c.Request().Context()
 
 	id := make([]byte, 64)
@@ -137,7 +137,7 @@ func (h *Handler) createSession(c echo.Context, user *User) error {
 // @Failure      401  {object}  KError "Missing jwt token"
 // @Failure      403  {object}  KError "Invalid jwt token (or expired)"
 // @Router /sessions/current [delete]
-func (h *Handler) Logout(c echo.Context) error {
+func (h *Handler) Logout(c *echo.Context) error {
 	ctx := c.Request().Context()
 	uid, err := GetCurrentUserId(c)
 	if err != nil {

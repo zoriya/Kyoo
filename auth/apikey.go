@@ -13,7 +13,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/zoriya/kyoo/keibi/dbc"
 )
 
@@ -59,7 +59,7 @@ func MapDbKey(key *dbc.Apikey) ApiKeyWToken {
 // @Failure      409  {object}  KError "Duplicated api key"
 // @Failure      422  {object}  KError "Invalid create body"
 // @Router       /keys [post]
-func (h *Handler) CreateApiKey(c echo.Context) error {
+func (h *Handler) CreateApiKey(c *echo.Context) error {
 	ctx := c.Request().Context()
 	err := CheckPermissions(c, []string{"apikeys.write"})
 	if err != nil {
@@ -123,7 +123,7 @@ func (h *Handler) CreateApiKey(c echo.Context) error {
 // @Failure      404  {object}  KError "Invalid id"
 // @Failure      422  {object}  KError "Invalid id format"
 // @Router       /keys [delete]
-func (h *Handler) DeleteApiKey(c echo.Context) error {
+func (h *Handler) DeleteApiKey(c *echo.Context) error {
 	ctx := c.Request().Context()
 	err := CheckPermissions(c, []string{"apikeys.write"})
 	if err != nil {
@@ -152,7 +152,7 @@ func (h *Handler) DeleteApiKey(c echo.Context) error {
 // @Security     Jwt[apikeys.read]
 // @Success      200  {object}  Page[ApiKey]
 // @Router       /keys [get]
-func (h *Handler) ListApiKey(c echo.Context) error {
+func (h *Handler) ListApiKey(c *echo.Context) error {
 	ctx := c.Request().Context()
 	err := CheckPermissions(c, []string{"apikeys.read"})
 	if err != nil {

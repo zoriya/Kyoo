@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/lestrrat-go/jwx/v3/jwk"
 )
 
@@ -27,7 +27,7 @@ type Jwt struct {
 // @Failure      403  {object}  KError "Invalid session token (or expired)"
 // @Header       200  {string}  Authorization  "Jwt (same value as the returned token)"
 // @Router /jwt [get]
-func (h *Handler) CreateJwt(c echo.Context) error {
+func (h *Handler) CreateJwt(c *echo.Context) error {
 	ctx := c.Request().Context()
 	apikey := c.Request().Header.Get("X-Api-Key")
 	if apikey != "" {
@@ -161,7 +161,7 @@ type JwkSet struct {
 // @Produce      json
 // @Success      200  {object}  JwkSet  "OK"
 // @Router /.well-known/jwks.json [get]
-func (h *Handler) GetJwks(c echo.Context) error {
+func (h *Handler) GetJwks(c *echo.Context) error {
 	key, err := jwk.Import(h.config.JwtPublicKey)
 	if err != nil {
 		return err
@@ -175,7 +175,7 @@ func (h *Handler) GetJwks(c echo.Context) error {
 	return c.JSON(200, set)
 }
 
-func (h *Handler) GetOidcConfig(c echo.Context) error {
+func (h *Handler) GetOidcConfig(c *echo.Context) error {
 	return c.JSON(200, struct {
 		JwksUri string `json:"jwks_uri"`
 	}{
