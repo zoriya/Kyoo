@@ -257,6 +257,7 @@
 		}
 	},
 	"mediainfo": {
+		"title": "File info",
 		"file": "File",
 		"container": "Container",
 		"video": "Video",
@@ -269,6 +270,7 @@
 		"duration": "Duration",
 		"size": "Size",
 		"novideo": "No video",
+		"noaudio": "No audio",
 		"nocontainer": "Invalid container",
 		"unknown": "Unknown"
 	},

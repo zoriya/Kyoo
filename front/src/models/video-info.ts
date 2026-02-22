@@ -20,7 +20,7 @@ export const VideoTrack = z.object({
 	title: z.string().nullable(),
 	language: z.string().nullable(),
 	codec: z.string(),
-	mimeCodec: z.string(),
+	mimeCodec: z.string().nullable(),
 	width: z.number(),
 	height: z.number(),
 	bitrate: z.number(),
@@ -34,7 +34,7 @@ export const AudioTrack = z.object({
 	title: z.string().nullable(),
 	language: z.string().nullable(),
 	codec: z.string(),
-	mimeCodec: z.string(),
+	mimeCodec: z.string().nullable(),
 	bitrate: z.number(),
 	isDefault: z.boolean(),
 });
@@ -72,7 +72,7 @@ export const VideoInfo = z
 		sha: z.string(),
 		path: z.string(),
 		extension: z.string(),
-		mimeCodec: z.string(),
+		mimeCodec: z.string().nullable(),
 		size: z.number(),
 		// in seconds
 		duration: z.number(),
