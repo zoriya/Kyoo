@@ -2,7 +2,7 @@ import { db, migrate } from "~/db";
 import { profiles, shows } from "~/db/schema";
 import { bubble, madeInAbyss } from "~/models/examples";
 import { setupLogging } from "../src/logtape";
-import { createMovie, createSerie, createVideo, getVideos } from "./helpers";
+import { createMovie, createSerie, createVideo, getGuesses } from "./helpers";
 
 // test file used to run manually using `bun tests/manual.ts`
 // run those before running this script
@@ -54,7 +54,7 @@ const [resp, body] = await createVideo([
 	},
 ]);
 console.log(body);
-const [___, ret] = await getVideos();
+const [___, ret] = await getGuesses();
 console.log(JSON.stringify(ret, undefined, 4));
 
 process.exit(0);

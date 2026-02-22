@@ -49,7 +49,7 @@ class KyooClient(metaclass=Singleton):
 			)
 
 	async def get_videos_info(self) -> VideoInfo:
-		async with self._client.get("videos") as r:
+		async with self._client.get("videos/guesses") as r:
 			await self.raise_for_status(r)
 			return VideoInfo(**await r.json())
 

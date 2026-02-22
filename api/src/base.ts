@@ -8,13 +8,15 @@ import { nextup } from "./controllers/profiles/nextup";
 import { watchlistH } from "./controllers/profiles/watchlist";
 import { seasonsH } from "./controllers/seasons";
 import { seed } from "./controllers/seed";
+import { videosWriteH } from "./controllers/seed/videos";
 import { collections } from "./controllers/shows/collections";
 import { movies } from "./controllers/shows/movies";
 import { series } from "./controllers/shows/series";
 import { showsH } from "./controllers/shows/shows";
 import { staffH } from "./controllers/staff";
 import { studiosH } from "./controllers/studios";
-import { videosReadH, videosWriteH } from "./controllers/videos";
+import { videosMetadata } from "./controllers/video-metadata";
+import { videosReadH } from "./controllers/videos";
 import { dbRaw } from "./db";
 import { KError } from "./models/error";
 import { appWs } from "./websockets";
@@ -124,7 +126,8 @@ export const handlers = new Elysia({ prefix })
 				.use(watchlistH)
 				.use(historyH)
 				.use(nextup)
-				.use(videosReadH),
+				.use(videosReadH)
+				.use(videosMetadata),
 	)
 	.guard(
 		{

@@ -18,9 +18,9 @@ export const createVideo = async (video: SeedVideo | SeedVideo[]) => {
 	return [resp, body] as const;
 };
 
-export const getVideos = async () => {
+export const getGuesses = async () => {
 	const resp = await handlers.handle(
-		new Request(buildUrl("videos"), {
+		new Request(buildUrl("videos/guesses"), {
 			method: "GET",
 			headers: await getJwtHeaders(),
 		}),

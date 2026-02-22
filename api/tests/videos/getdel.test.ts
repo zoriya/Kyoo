@@ -5,7 +5,7 @@ import {
 	createSerie,
 	createVideo,
 	deleteVideo,
-	getVideos,
+	getGuesses,
 	linkVideos,
 } from "tests/helpers";
 import { expectStatus } from "tests/utils";
@@ -108,7 +108,7 @@ beforeAll(async () => {
 
 describe("Video get/deletion", () => {
 	it("Get current state", async () => {
-		const [resp, body] = await getVideos();
+		const [resp, body] = await getGuesses();
 		expectStatus(resp, body).toBe(200);
 		expect(body.guesses).toMatchObject({
 			mia: {
@@ -145,7 +145,7 @@ describe("Video get/deletion", () => {
 		});
 		expectStatus(resp, body).toBe(201);
 
-		[resp, body] = await getVideos();
+		[resp, body] = await getGuesses();
 		expectStatus(resp, body).toBe(200);
 		expect(body.guesses).toMatchObject({
 			mia: {
@@ -187,7 +187,7 @@ describe("Video get/deletion", () => {
 		});
 		expectStatus(resp, body).toBe(201);
 
-		[resp, body] = await getVideos();
+		[resp, body] = await getGuesses();
 		expectStatus(resp, body).toBe(200);
 		expect(body.guesses).toMatchObject({
 			mia: {
