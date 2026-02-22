@@ -10,18 +10,6 @@ import (
 	logotelglobal "go.opentelemetry.io/otel/log/global"
 )
 
-type SlogAdapter struct {
-	*slog.Logger
-}
-
-// add Write so SlogAdapter satisfies io.Writer (Echo's logger output)
-func (a *SlogAdapter) Write(p []byte) (int, error) {
-	msg := strings.TrimSpace(string(p))
-	// Echo middleware writes request lines at INFO; use Info here.
-	a.Info(msg)
-	return len(p), nil
-}
-
 type tee struct {
 	a, b slog.Handler
 	minA slog.Level
@@ -66,7 +54,7 @@ func (t *tee) WithGroup(name string) slog.Handler {
 	return NewTee(t.a.WithGroup(name), t.b.WithGroup(name), t.minA, t.minB)
 }
 
-func SetupLogger(ctx context.Context) (*SlogAdapter, func(context.Context) error, error) {
+func SetupLogger(ctx context.Context) (func(context.Context) error, error) {
 	stdout := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
 			// drop the default time attribute so text output has no timestamp
@@ -84,11 +72,10 @@ func SetupLogger(ctx context.Context) (*SlogAdapter, func(context.Context) error
 	handler := NewTee(stdout, otelHandler, minStdout, minOtel)
 
 	logger := slog.New(handler)
-	adapter := &SlogAdapter{logger}
 	shutdown := func(ctx context.Context) error { return nil }
 
-	slog.SetDefault(adapter.Logger)
-	return adapter, shutdown, nil
+	slog.SetDefault(logger)
+	return shutdown, nil
 }
 
 func parseLogLevel(v string) slog.Level {

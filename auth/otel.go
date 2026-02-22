@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/labstack/echo/v4"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
+	echootel "github.com/labstack/echo-opentelemetry"
+	"github.com/labstack/echo/v5"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
@@ -183,11 +183,14 @@ func setupOtel(ctx context.Context) (func(context.Context) error, error) {
 }
 
 func instrument(e *echo.Echo) {
-	e.Use(otelecho.Middleware("kyoo.auth", otelecho.WithSkipper(func(c echo.Context) bool {
-		return (c.Path() == "/auth/health" ||
-			c.Path() == "/auth/ready" ||
-			strings.HasPrefix(c.Path(), "/.well-known/"))
-	})))
+	e.Use(echootel.NewMiddlewareWithConfig(echootel.Config{
+		ServerName: "kyoo.auth",
+		Skipper: func(c *echo.Context) bool {
+			return (c.Path() == "/auth/health" ||
+				c.Path() == "/auth/ready" ||
+				strings.HasPrefix(c.Path(), "/.well-known/"))
+		},
+	}))
 }
 
 // stolen from https://github.com/exaring/otelpgx/issues/47

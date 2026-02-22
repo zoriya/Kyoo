@@ -12,6 +12,7 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/zoriya/kyoo/keibi/dbc"
 	_ "github.com/zoriya/kyoo/keibi/docs"
@@ -22,18 +23,18 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
-	echojwt "github.com/labstack/echo-jwt/v4"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	echojwt "github.com/labstack/echo-jwt/v5"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 
 	"github.com/exaring/otelpgx"
 )
 
-func ErrorHandler(err error, c echo.Context) {
-	// otelecho & RequestLoggerWithConfig middleware call c.Error
-	// otelecho docs: https://pkg.go.dev/go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho#WithOnError
-	if c.Response().Committed {
+// otelecho & RequestLoggerWithConfig middleware call c.Error
+// otelecho docs: https://pkg.go.dev/go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho#WithOnError
+func ErrorHandler(c *echo.Context, err error) {
+	if resp, _ := echo.UnwrapResponse(c.Response()); resp != nil && resp.Committed {
 		return
 	}
 
@@ -48,7 +49,7 @@ func ErrorHandler(err error, c echo.Context) {
 			code = http.StatusUnauthorized
 		}
 	} else {
-		c.Logger().Error(err)
+		c.Logger().Error(err.Error())
 	}
 
 	c.JSON(code, KError{
@@ -69,13 +70,13 @@ func (v *Validator) Validate(i any) error {
 	return nil
 }
 
-func (h *Handler) CheckHealth(c echo.Context) error {
+func (h *Handler) CheckHealth(c *echo.Context) error {
 	return c.JSON(200, struct {
 		Status string `json:"status"`
 	}{Status: "healthy"})
 }
 
-func (h *Handler) CheckReady(c echo.Context) error {
+func (h *Handler) CheckReady(c *echo.Context) error {
 	_, err := h.rawDb.Exec(c.Request().Context(), "select 1")
 
 	status := "healthy"
@@ -175,7 +176,7 @@ type Handler struct {
 }
 
 func (h *Handler) TokenToJwt(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		ctx := c.Request().Context()
 		var jwt *string
 
@@ -240,7 +241,7 @@ func (h *Handler) TokenToJwt(next echo.HandlerFunc) echo.HandlerFunc {
 func main() {
 	ctx := context.Background()
 
-	logger, _, err := SetupLogger(ctx)
+	_, err := SetupLogger(ctx)
 	if err != nil {
 		slog.Error("logger init", "err", err)
 	}
@@ -253,8 +254,7 @@ func main() {
 	defer cleanup(ctx)
 
 	e := echo.New()
-	e.HideBanner = true
-	e.Logger.SetOutput(logger)
+	e.Logger = slog.Default()
 	instrument(e)
 
 	ignorepath := []string{
@@ -268,21 +268,20 @@ func main() {
 	// full configs https://github.com/labstack/echo/blob/master/middleware/request_logger.go
 	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		// declare a small set of paths to ignore
-		Skipper: func(c echo.Context) bool {
+		Skipper: func(c *echo.Context) bool {
 			p := c.Request().URL.Path
 			return slices.Contains(ignorepath, p)
 		},
 		LogStatus:    true,
 		LogURI:       true,
-		LogError:     true,
 		LogHost:      true,
 		LogMethod:    true,
 		LogUserAgent: true,
 		HandleError:  true, // forwards error to the global error handler, so it can decide appropriate status code
-		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+		LogValuesFunc: func(c *echo.Context, v middleware.RequestLoggerValues) error {
 			rCtx := c.Request().Context()
 			if v.Error == nil {
-				logger.LogAttrs(rCtx, slog.LevelInfo,
+				slog.LogAttrs(rCtx, slog.LevelInfo,
 					fmt.Sprintf("%s %s%s %d", v.Method, v.Host, v.URI, v.Status),
 					slog.String("method", v.Method),
 					slog.Int("status", v.Status),
@@ -291,7 +290,7 @@ func main() {
 					slog.String("agent", v.UserAgent),
 				)
 			} else {
-				logger.LogAttrs(rCtx, slog.LevelError,
+				slog.LogAttrs(rCtx, slog.LevelError,
 					fmt.Sprintf("%s %s%s %d err=%s",
 						v.Method, v.Host, v.URI, v.Status, v.Error.Error()),
 					slog.String("method", v.Method),
@@ -311,7 +310,7 @@ func main() {
 
 	db, err := OpenDatabase(ctx)
 	if err != nil {
-		e.Logger.Fatal("Could not open database: ", err)
+		e.Logger.Error("Could not open database: ", slog.Any("err", err))
 		return
 	}
 
@@ -321,7 +320,7 @@ func main() {
 	}
 	conf, err := LoadConfiguration(ctx, h.db)
 	if err != nil {
-		e.Logger.Fatal("Could not load configuration: ", err)
+		e.Logger.Error("Could not load configuration: ", slog.Any("err", err))
 		return
 	}
 	h.config = conf
@@ -362,5 +361,13 @@ func main() {
 
 	g.GET("/swagger/*", echoSwagger.WrapHandler)
 
-	e.Logger.Fatal(e.Start(":4568"))
+	sc := echo.StartConfig{
+		Address:         ":4568",
+		GracefulTimeout: 10 * time.Second,
+		HideBanner:      true,
+	}
+	if err := sc.Start(ctx, e); err != nil {
+		e.Logger.Error("server failed", "err", err)
+		os.Exit(1)
+	}
 }
