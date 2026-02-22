@@ -33,7 +33,7 @@ export function uniq<T>(a: T[]): T[] {
 	return uniqBy(a, (x) => x as string);
 }
 
-export function uniqBy<T>(a: T[], key: (val: T) => string): T[] {
+export function uniqBy<T>(a: T[], key: (val: T) => string | number): T[] {
 	const seen: Record<string, boolean> = {};
 	return a.filter((item) => {
 		const k = key(item);

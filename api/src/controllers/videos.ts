@@ -9,6 +9,7 @@ import {
 	min,
 	notExists,
 	or,
+	type SQL,
 	sql,
 } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
@@ -26,18 +27,17 @@ import {
 } from "~/db/schema";
 import { watchlist } from "~/db/schema/watchlist";
 import {
-	coalesce,
 	getColumns,
-	jsonbAgg,
 	jsonbBuildObject,
 	jsonbObjectAgg,
 	sqlarr,
 } from "~/db/utils";
-import { Entry } from "~/models/entry";
+import type { Entry } from "~/models/entry";
 import { KError } from "~/models/error";
-import { Progress } from "~/models/history";
-import { Movie, type MovieStatus } from "~/models/movie";
-import { Serie } from "~/models/serie";
+import { FullVideo } from "~/models/full-video";
+import type { Progress } from "~/models/history";
+import type { Movie, MovieStatus } from "~/models/movie";
+import type { Serie } from "~/models/serie";
 import {
 	AcceptLanguage,
 	buildRelations,
@@ -54,6 +54,7 @@ import {
 import { desc as description } from "~/models/utils/descriptions";
 import { Guesses, Video } from "~/models/video";
 import type { MovieWatchStatus, SerieWatchStatus } from "~/models/watchlist";
+import { uniqBy } from "~/utils";
 import {
 	entryProgressQ,
 	entryVideosQ,
@@ -61,19 +62,29 @@ import {
 	mapProgress,
 } from "./entries";
 
-const videoRelations = {
-	slugs: () => {
-		return db
-			.select({
-				slugs: coalesce<string[]>(
-					jsonbAgg(entryVideoJoin.slug),
-					sql`'[]'::jsonb`,
-				).as("slugs"),
-			})
-			.from(entryVideoJoin)
-			.where(eq(entryVideoJoin.videoPk, videos.pk))
-			.as("slugs");
+const videoSort = Sort(
+	{
+		path: videos.path,
+		entry: [
+			{
+				sql: entries.showPk,
+				isNullable: true,
+				accessor: (x: any) => x.entries?.[0]?.showPk,
+			},
+			{
+				sql: entries.order,
+				isNullable: true,
+				accessor: (x: any) => x.entries?.[0]?.order,
+			},
+		],
 	},
+	{
+		default: ["path"],
+		tablePk: videos.pk,
+	},
+);
+
+const videoRelations = {
 	progress: () => {
 		const query = db
 			.select({
@@ -102,32 +113,6 @@ const videoRelations = {
 				)
 				as "progress"
 			)` as any;
-	},
-	entries: ({ languages }: { languages: string[] }) => {
-		const transQ = getEntryTransQ(languages);
-
-		return db
-			.select({
-				json: coalesce(
-					jsonbAgg(
-						jsonbBuildObject<Entry>({
-							...getColumns(entries),
-							...getColumns(transQ),
-							number: entries.episodeNumber,
-							videos: entryVideosQ.videos,
-							progress: mapProgress({ aliased: false }),
-						}),
-					),
-					sql`'[]'::jsonb`,
-				).as("json"),
-			})
-			.from(entries)
-			.innerJoin(transQ, eq(entries.pk, transQ.pk))
-			.leftJoin(entryProgressQ, eq(entries.pk, entryProgressQ.entryPk))
-			.crossJoinLateral(entryVideosQ)
-			.innerJoin(entryVideoJoin, eq(entryVideoJoin.entryPk, entries.pk))
-			.where(eq(entryVideoJoin.videoPk, videos.pk))
-			.as("entries");
 	},
 	show: ({
 		languages,
@@ -277,11 +262,102 @@ function getNextVideoEntry({
 		.as("next");
 }
 
+// make an alias so entry video join is not usable on subqueries
+const evJoin = alias(entryVideoJoin, "evj");
+
+export async function getVideos({
+	after,
+	limit,
+	query,
+	sort,
+	filter,
+	languages,
+	preferOriginal = false,
+	relations = [],
+	userId,
+}: {
+	after?: string;
+	limit: number;
+	query?: string;
+	sort?: Sort;
+	filter?: SQL;
+	languages: string[];
+	preferOriginal?: boolean;
+	relations?: (keyof typeof videoRelations)[];
+	userId: string;
+}) {
+	let ret = await db
+		.select({
+			...getColumns(videos),
+			...buildRelations(relations, videoRelations, {
+				languages,
+				preferOriginal,
+			}),
+		})
+		.from(videos)
+		.leftJoin(evJoin, eq(videos.pk, evJoin.videoPk))
+		// join entries only for sorting, we can't select entries here for perf reasons.
+		.leftJoin(entries, eq(entries.pk, evJoin.entryPk))
+		.where(
+			and(
+				filter,
+				query ? sql`${videos.path} %> ${query}::text` : undefined,
+				keysetPaginate({ after, sort }),
+			),
+		)
+		.orderBy(
+			...(query
+				? [sql`word_similarity(${query}::text, ${videos.path}) desc`]
+				: sortToSql(sort)),
+			videos.pk,
+		)
+		.limit(limit)
+		.execute({ userId });
+
+	ret = uniqBy(ret, (x) => x.pk);
+	if (!ret.length) return [];
+
+	const entriesByVideo = await fetchEntriesForVideos({
+		videoPks: ret.map((x) => x.pk),
+		languages,
+		userId,
+	});
+
+	return ret.map((x) => ({
+		...x,
+		entries: entriesByVideo[x.pk] ?? [],
+	})) as unknown as FullVideo[];
+}
+
+async function fetchEntriesForVideos({
+	videoPks,
+	languages,
+	userId,
+}: {
+	videoPks: number[];
+	languages: string[];
+	userId: string;
+}) {
+	if (!videoPks.length) return {};
+
+	const transQ = getEntryTransQ(languages);
+	const ret = await db
+		.select({
+			videoPk: entryVideoJoin.videoPk,
+			...getColumns(entries),
+			...getColumns(transQ),
+			number: entries.episodeNumber,
+		})
+		.from(entryVideoJoin)
+		.innerJoin(entries, eq(entries.pk, entryVideoJoin.entryPk))
+		.innerJoin(transQ, eq(entries.pk, transQ.pk))
+		.where(eq(entryVideoJoin.videoPk, sql`any(${sqlarr(videoPks)})`))
+		.execute({ userId });
+
+	return Object.groupBy(ret, (x) => x.videoPk);
+}
+
 export const videosReadH = new Elysia({ prefix: "/videos", tags: ["videos"] })
-	.model({
-		video: Video,
-		error: t.Object({}),
-	})
 	.use(auth)
 	.get(
 		":id",
@@ -293,34 +369,21 @@ export const videosReadH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 			status,
 		}) => {
 			const languages = processLanguages(langs);
-
-			// make an alias so entry video join is not usable on subqueries
-			const evj = alias(entryVideoJoin, "evj");
-
-			const [video] = await db
-				.select({
-					...getColumns(videos),
-					...buildRelations(
-						["slugs", "progress", "entries", ...relations],
-						videoRelations,
-						{
-							languages,
-							preferOriginal: preferOriginal ?? settings.preferOriginal,
-						},
-					),
-				})
-				.from(videos)
-				.leftJoin(evj, eq(videos.pk, evj.videoPk))
-				.where(isUuid(id) ? eq(videos.id, id) : eq(evj.slug, id))
-				.limit(1)
-				.execute({ userId: sub });
-			if (!video) {
+			const [ret] = await getVideos({
+				limit: 1,
+				filter: and(isUuid(id) ? eq(videos.id, id) : eq(evJoin.slug, id)),
+				languages,
+				preferOriginal: preferOriginal ?? settings.preferOriginal,
+				relations,
+				userId: sub,
+			});
+			if (!ret) {
 				return status(404, {
 					status: 404,
 					message: `No video found with id or slug '${id}'`,
 				});
 			}
-			return video as any;
+			return ret;
 		},
 		{
 			detail: {
@@ -347,44 +410,65 @@ export const videosReadH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				"accept-language": AcceptLanguage(),
 			}),
 			response: {
-				200: t.Composite([
-					Video,
-					t.Object({
-						slugs: t.Array(
-							t.String({ format: "slug", examples: ["made-in-abyss-s1e13"] }),
-						),
-						progress: Progress,
-						entries: t.Array(Entry),
-						previous: t.Optional(
-							t.Nullable(
-								t.Object({
-									video: t.String({
-										format: "slug",
-										examples: ["made-in-abyss-s1e12"],
-									}),
-									entry: Entry,
-								}),
-							),
-						),
-						next: t.Optional(
-							t.Nullable(
-								t.Object({
-									video: t.String({
-										format: "slug",
-										examples: ["made-in-abyss-dawn-of-the-deep-soul"],
-									}),
-									entry: Entry,
-								}),
-							),
-						),
-						show: t.Optional(
-							t.Union([
-								t.Composite([t.Object({ kind: t.Literal("movie") }), Movie]),
-								t.Composite([t.Object({ kind: t.Literal("serie") }), Serie]),
-							]),
-						),
+				200: FullVideo,
+				404: {
+					...KError,
+					description: "No video found with the given id or slug.",
+				},
+				422: KError,
+			},
+		},
+	)
+	.get(
+		"",
+		async ({
+			query: { limit, after, query, sort, with: relations, preferOriginal },
+			headers: { "accept-language": langs, ...headers },
+			request: { url },
+			jwt: { sub, settings },
+		}) => {
+			const languages = processLanguages(langs);
+			const items = await getVideos({
+				limit,
+				after,
+				query,
+				sort,
+				languages,
+				preferOriginal: preferOriginal ?? settings.preferOriginal,
+				relations,
+				userId: sub,
+			});
+			return createPage(items, { url, sort, limit, headers });
+		},
+		{
+			detail: {
+				description: "Get a video & it's related entries",
+			},
+			query: t.Object({
+				sort: videoSort,
+				query: t.Optional(t.String({ description: description.query })),
+				limit: t.Integer({
+					minimum: 1,
+					maximum: 250,
+					default: 50,
+					description: "Max page size.",
+				}),
+				after: t.Optional(t.String({ description: description.after })),
+				preferOriginal: t.Optional(
+					t.Boolean({
+						description: description.preferOriginal,
 					}),
-				]),
+				),
+				with: t.Array(t.UnionEnum(["previous", "next", "show"]), {
+					default: [],
+					description: "Include related entries in the response.",
+				}),
+			}),
+			headers: t.Object({
+				"accept-language": AcceptLanguage(),
+			}),
+			response: {
+				200: Page(FullVideo),
 				404: {
 					...KError,
 					description: "No video found with the given id or slug.",
@@ -511,5 +595,14 @@ export const videosReadH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				200: Page(Video),
 				422: KError,
 			},
+		},
+	)
+	.get(
+		"/series/:id/videos",
+		async () => {
+			return {};
+		},
+		{
+			detail: { description: "List videos of a serie" },
 		},
 	);
