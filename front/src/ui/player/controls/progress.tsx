@@ -1,20 +1,24 @@
-import { useState } from "react";
+import { type CSSProperties, useState } from "react";
 import type { TextProps } from "react-native";
 import { useEvent, type VideoPlayer } from "react-native-video";
+import { useResolveClassNames } from "uniwind";
 import type { Chapter } from "~/models";
-import { P, Slider } from "~/primitives";
+import { P, Slider, Tooltip } from "~/primitives";
 import { useFetch } from "~/query";
 import { Info } from "~/ui/info";
 import { cn, useQueryState } from "~/utils";
+import { ScrubberTooltip } from "../scrubber";
 
 export const ProgressBar = ({
 	player,
-	// url,
 	chapters,
+	seek,
+	setSeek,
 }: {
 	player: VideoPlayer;
-	// url: string;
 	chapters?: Chapter[];
+	seek: number | null;
+	setSeek: (v: number | null) => void;
 }) => {
 	const [slug] = useQueryState<string>("slug", undefined!);
 	const { data } = useFetch(Info.infoQuery(slug));
@@ -26,7 +30,9 @@ export const ProgressBar = ({
 		setBuffer(progress.bufferDuration);
 	});
 
-	const [seek, setSeek] = useState<number | null>(null);
+	const [hoverProgress, setHoverProgress] = useState<number | null>(null);
+	const [layout, setLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
+	const percent = hoverProgress! / (data?.durationSeconds ?? 1);
 
 	return (
 		<>
@@ -43,33 +49,40 @@ export const ProgressBar = ({
 					setTimeout(() => player.play(), 10);
 					setSeek(null);
 				}}
-				// onHover={(progress, layout) => {
-				// 	setHoverProgress(progress);
-				// 	setLayout(layout);
-				// }}
+				onHover={(progress, layout) => {
+					setHoverProgress(progress);
+					setLayout(layout);
+				}}
 				markers={chapters?.map((x) => x.startTime)}
-				// dataSet={{ tooltipId: "progress-scrubber" }}
+				// @ts-expect-error dataSet is web only and not typed
+				dataSet={{ tooltipId: "progress-scrubber" }}
 			/>
-			{/* <Tooltip */}
-			{/* 	id={"progress-scrubber"} */}
-			{/* 	isOpen={hoverProgress !== null} */}
-			{/* 	place="top" */}
-			{/* 	position={{ */}
-			{/* 		x: layout.x + (layout.width * hoverProgress!) / (duration ?? 1), */}
-			{/* 		y: layout.y, */}
-			{/* 	}} */}
-			{/* 	render={() => */}
-			{/* 		hoverProgress ? ( */}
-			{/* 			<ScrubberTooltip */}
-			{/* 				seconds={hoverProgress} */}
-			{/* 				chapters={chapters} */}
-			{/* 				url={url} */}
-			{/* 			/> */}
-			{/* 		) : null */}
-			{/* 	} */}
-			{/* 	opacity={1} */}
-			{/* 	style={{ padding: 0, borderRadius: imageBorderRadius }} */}
-			{/* /> */}
+			<Tooltip
+				id={"progress-scrubber"}
+				isOpen={hoverProgress !== null}
+				// not a real fix, we should fix it upstream
+				place={percent > 80 ? "top-end" : "top"}
+				position={{
+					x: layout.x + layout.width * percent,
+					y: layout.y,
+				}}
+				render={() =>
+					hoverProgress ? (
+						<ScrubberTooltip
+							seconds={hoverProgress}
+							chapters={chapters}
+							videoSlug={slug}
+						/>
+					) : null
+				}
+				opacity={1}
+				style={{
+					padding: 0,
+					...(useResolveClassNames(
+						cn("rounded bg-slate-200"),
+					) as CSSProperties),
+				}}
+			/>
 		</>
 	);
 };
@@ -94,7 +107,7 @@ export const ProgressText = ({
 	);
 };
 
-const toTimerString = (timer?: number, duration?: number) => {
+export const toTimerString = (timer?: number, duration?: number) => {
 	if (!duration) duration = timer;
 	if (timer === undefined || !Number.isFinite(timer)) return "??:??";
 

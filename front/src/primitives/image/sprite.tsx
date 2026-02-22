@@ -1,24 +1,7 @@
-/*
- * Kyoo - A portable and vast media library solution.
- * Copyright (c) Kyoo.
- *
- * See AUTHORS.md and LICENSE file in the project root for full license information.
- *
- * Kyoo is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * Kyoo is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
- */
-
-import { Image, View } from "react-native";
+import { Image } from "expo-image";
+import { Platform, View, type ViewProps } from "react-native";
+import { useToken } from "~/providers/account-context";
+import { cn } from "~/utils";
 
 export const Sprite = ({
 	src,
@@ -30,6 +13,7 @@ export const Sprite = ({
 	rows,
 	columns,
 	style,
+	className,
 	...props
 }: {
 	src: string;
@@ -40,19 +24,32 @@ export const Sprite = ({
 	y: number;
 	rows: number;
 	columns: number;
-	style?: object;
-}) => {
+} & ViewProps) => {
+	const { authToken } = useToken();
+
 	return (
 		<View
-			style={{ width, height, overflow: "hidden", flexGrow: 0, flexShrink: 0 }}
+			className={cn("overflow-hidden", className)}
+			style={[style, { width, height }]}
+			{...props}
 		>
 			<Image
-				source={{ uri: src }}
+				source={{
+					uri: src,
+					// use cookies on web to allow `img` to make the call instead of js
+					headers:
+						authToken && Platform.OS !== "web"
+							? {
+									Authorization: `Bearer ${authToken}`,
+								}
+							: undefined,
+				}}
 				alt={alt}
-				width={width * columns}
-				height={height * rows}
-				style={{ transform: [{ translateX: -x }, { translateY: -y }] }}
-				{...props}
+				style={{
+					width: width * columns,
+					height: height * rows,
+					transform: [{ translateX: -x }, { translateY: -y }],
+				}}
 			/>
 		</View>
 	);

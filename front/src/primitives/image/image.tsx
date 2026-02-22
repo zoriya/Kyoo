@@ -7,7 +7,7 @@ import type { YoshikiStyle } from "yoshiki/src/type";
 import type { KImage } from "~/models";
 import { useToken } from "~/providers/account-context";
 import { cn } from "~/utils";
-import { Skeleton } from "./skeleton";
+import { Skeleton } from "../skeleton";
 
 export type YoshikiEnhanced<Style> = Style extends any
 	? {

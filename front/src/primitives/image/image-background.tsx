@@ -9,7 +9,7 @@ import { withUniwind } from "uniwind";
 import type { KImage } from "~/models";
 import { useToken } from "~/providers/account-context";
 import { cn } from "~/utils";
-import { PosterPlaceholder } from "./image";
+import { PosterPlaceholder } from "../image/image";
 
 const ImgBg = withUniwind(EImageBackground);
 

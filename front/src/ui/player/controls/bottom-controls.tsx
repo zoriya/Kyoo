@@ -1,6 +1,6 @@
 import SkipNext from "@material-symbols/svg-400/rounded/skip_next-fill.svg";
 import SkipPrevious from "@material-symbols/svg-400/rounded/skip_previous-fill.svg";
-import type { ComponentProps } from "react";
+import { type ComponentProps, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
 	Platform,
@@ -21,6 +21,7 @@ import {
 	useIsTouch,
 } from "~/primitives";
 import { cn } from "~/utils";
+import { BottomScrubber } from "../scrubber";
 import { FullscreenButton, PlayButton, VolumeSlider } from "./misc";
 import { ProgressBar, ProgressText } from "./progress";
 import { AudioMenu, QualityMenu, SubtitleMenu, VideoMenu } from "./tracks-menu";
@@ -44,6 +45,9 @@ export const BottomControls = ({
 	next?: string | null;
 	setMenu: (isOpen: boolean) => void;
 } & ViewProps) => {
+	const [seek, setSeek] = useState<number | null>(null);
+	const bottomSeek = Platform.OS !== "web" && seek !== null;
+
 	return (
 		<View className={cn("flex-row p-2", className)} {...props}>
 			<View className="m-4 w-1/5 max-w-50 max-sm:hidden">
@@ -58,20 +62,30 @@ export const BottomControls = ({
 				)}
 			</View>
 			<View className="my-1 mr-4 flex-1 max-sm:ml-4 sm:my-6">
-				{name ? (
-					<H2 numberOfLines={1} className="pb-2 text-slate-200">
-						{name}
-					</H2>
-				) : (
-					<Skeleton className="h-8 w-1/5" />
-				)}
-				<ProgressBar player={player} chapters={chapters} />
-				<ControlButtons
+				{!bottomSeek &&
+					(name ? (
+						<H2 numberOfLines={1} className="pb-2 text-slate-200">
+							{name}
+						</H2>
+					) : (
+						<Skeleton className="h-8 w-1/5" />
+					))}
+				<ProgressBar
 					player={player}
-					previous={previous}
-					next={next}
-					setMenu={setMenu}
+					chapters={chapters}
+					seek={seek}
+					setSeek={setSeek}
 				/>
+				{bottomSeek ? (
+					<BottomScrubber player={player} seek={seek} chapters={chapters} />
+				) : (
+					<ControlButtons
+						player={player}
+						previous={previous}
+						next={next}
+						setMenu={setMenu}
+					/>
+				)}
 			</View>
 		</View>
 	);
