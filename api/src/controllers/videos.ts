@@ -79,7 +79,7 @@ const videoSort = Sort(
 		],
 	},
 	{
-		default: ["path"],
+		default: ["entry"],
 		tablePk: videos.pk,
 	},
 );
@@ -357,10 +357,10 @@ async function fetchEntriesForVideos({
 	return Object.groupBy(ret, (x) => x.videoPk);
 }
 
-export const videosReadH = new Elysia({ prefix: "/videos", tags: ["videos"] })
+export const videosReadH = new Elysia({ tags: ["videos"] })
 	.use(auth)
 	.get(
-		":id",
+		"videos/:id",
 		async ({
 			params: { id },
 			query: { with: relations, preferOriginal },
@@ -420,9 +420,9 @@ export const videosReadH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 		},
 	)
 	.get(
-		"",
+		"videos",
 		async ({
-			query: { limit, after, query, sort, with: relations, preferOriginal },
+			query: { limit, after, query, sort, preferOriginal },
 			headers: { "accept-language": langs, ...headers },
 			request: { url },
 			jwt: { sub, settings },
@@ -435,7 +435,6 @@ export const videosReadH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 				sort,
 				languages,
 				preferOriginal: preferOriginal ?? settings.preferOriginal,
-				relations,
 				userId: sub,
 			});
 			return createPage(items, { url, sort, limit, headers });
@@ -459,10 +458,6 @@ export const videosReadH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 						description: description.preferOriginal,
 					}),
 				),
-				with: t.Array(t.UnionEnum(["previous", "next", "show"]), {
-					default: [],
-					description: "Include related entries in the response.",
-				}),
 			}),
 			headers: t.Object({
 				"accept-language": AcceptLanguage(),
@@ -478,7 +473,7 @@ export const videosReadH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 		},
 	)
 	.get(
-		"guesses",
+		"videos/guesses",
 		async () => {
 			const years = db.$with("years").as(
 				db
@@ -549,7 +544,7 @@ export const videosReadH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 		},
 	)
 	.get(
-		"unmatched",
+		"videos/unmatched",
 		async ({ query: { sort, query, limit, after }, request: { url } }) => {
 			const ret = await db
 				.select()
@@ -598,11 +593,80 @@ export const videosReadH = new Elysia({ prefix: "/videos", tags: ["videos"] })
 		},
 	)
 	.get(
-		"/series/:id/videos",
-		async () => {
-			return {};
+		"series/:id/videos",
+		async ({
+			params: { id },
+			query: { limit, after, query, sort, preferOriginal },
+			headers: { "accept-language": langs, ...headers },
+			request: { url },
+			jwt: { sub, settings },
+			status,
+		}) => {
+			const [serie] = await db
+				.select({ pk: shows.pk })
+				.from(shows)
+				.where(
+					and(
+						eq(shows.kind, "serie"),
+						isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
+					),
+				)
+				.limit(1);
+
+			if (!serie) {
+				return status(404, {
+					status: 404,
+					message: `No serie with the id or slug: '${id}'.`,
+				});
+			}
+
+			const languages = processLanguages(langs);
+			const items = await getVideos({
+				filter: eq(entries.showPk, serie.pk),
+				limit,
+				after,
+				query,
+				sort,
+				languages,
+				preferOriginal: preferOriginal ?? settings.preferOriginal,
+				userId: sub,
+			});
+			return createPage(items, { url, sort, limit, headers });
 		},
 		{
 			detail: { description: "List videos of a serie" },
+			params: t.Object({
+				id: t.String({
+					description: "The id or slug of the serie.",
+					example: "made-in-abyss",
+				}),
+			}),
+			query: t.Object({
+				sort: videoSort,
+				query: t.Optional(t.String({ description: description.query })),
+				limit: t.Integer({
+					minimum: 1,
+					maximum: 250,
+					default: 50,
+					description: "Max page size.",
+				}),
+				after: t.Optional(t.String({ description: description.after })),
+				preferOriginal: t.Optional(
+					t.Boolean({
+						description: description.preferOriginal,
+					}),
+				),
+			}),
+			headers: t.Object({
+				"accept-language": AcceptLanguage(),
+			}),
+			response: {
+				200: Page(FullVideo),
+				404: {
+					...KError,
+					description: "No video found with the given id or slug.",
+				},
+				422: KError,
+			},
 		},
 	);
