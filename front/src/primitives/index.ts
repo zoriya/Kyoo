@@ -12,6 +12,7 @@ export * from "./image/sprite";
 export * from "./input";
 export * from "./links";
 export * from "./menu";
+export * from "./modal";
 export * from "./popup";
 export * from "./progress";
 export * from "./select";

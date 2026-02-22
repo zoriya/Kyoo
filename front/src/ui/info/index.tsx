@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { VideoInfo } from "~/models";
-import { HR, P, Skeleton } from "~/primitives";
+import { HR, Modal, P, Skeleton } from "~/primitives";
 import { type QueryIdentifier, useFetch } from "~/query";
 import { useDisplayName } from "~/track-utils";
 import { useQueryState } from "~/utils";
@@ -32,14 +32,16 @@ export const Info = () => {
 	const { t } = useTranslation();
 	const getDisplayName = useDisplayName();
 
-	if (!data) return <Info.Loading />;
+	if (!data)
+		return (
+			<Modal title={t("mediainfo.title")}>
+				<Info.Loading />
+			</Modal>
+		);
 
 	return (
-		<View>
-			<Row
-				label={t("mediainfo.file")}
-				value={data.path.replace(/^\/video\//, "")}
-			/>
+		<Modal title={t("mediainfo.title")}>
+			<Row label={t("mediainfo.file")} value={data.path} />
 			<Row
 				label={t("mediainfo.container")}
 				value={data.container ?? t("mediainfo.nocontainer")}
@@ -74,26 +76,30 @@ export const Info = () => {
 				))
 			)}
 			<HR />
-			{data.audios.map((x, i) => (
-				<Row
-					key={x.index}
-					label={
-						data.audios.length === 1
-							? t("mediainfo.audio")
-							: `${t("mediainfo.audio")} ${i + 1}`
-					}
-					value={[
-						getDisplayName(x),
-						// Only show it if there is more than one track
-						x.isDefault && data.audios.length > 0
-							? t("mediainfo.default")
-							: undefined,
-						x.codec,
-					]
-						.filter((x) => x)
-						.join(" - ")}
-				/>
-			))}
+			{data.audios.length === 0 ? (
+				<Row label={t("mediainfo.audio")} value={t("mediainfo.noaudio")} />
+			) : (
+				data.audios.map((x, i) => (
+					<Row
+						key={x.index}
+						label={
+							data.audios.length === 1
+								? t("mediainfo.audio")
+								: `${t("mediainfo.audio")} ${i + 1}`
+						}
+						value={[
+							getDisplayName(x),
+							// Only show it if there is more than one track
+							x.isDefault && data.audios.length > 0
+								? t("mediainfo.default")
+								: undefined,
+							x.codec,
+						]
+							.filter((x) => x)
+							.join(" - ")}
+					/>
+				))
+			)}
 			<HR />
 			{data.subtitles.map((x, i) => (
 				<Row
@@ -122,7 +128,7 @@ export const Info = () => {
 						.join(" - ")}
 				/>
 			))}
-		</View>
+		</Modal>
 	);
 };
 

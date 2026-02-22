@@ -32,7 +32,11 @@ export default function Layout() {
 			<Stack.Screen
 				name="info/[slug]"
 				options={{
-					presentation: "modal",
+					presentation: "transparentModal",
+					headerShown: false,
+					contentStyle: {
+						backgroundColor: "transparent",
+					},
 				}}
 			/>
 		</Stack>

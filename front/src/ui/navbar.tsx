@@ -307,6 +307,7 @@ export const useScrollNavbar = ({
 			opacity,
 			reverse,
 			height,
+			focused,
 		},
 		headerHeight: height,
 	};
@@ -317,10 +318,13 @@ export const HeaderBackground = ({
 	opacity,
 	reverse,
 	height,
+	focused,
 	className,
 	style,
 	...props
 }: ViewProps & ReturnType<typeof useScrollNavbar>["headerProps"]) => {
+	// this is to handle transparent modals, to prevent duplicated header bar.
+	if (!focused) return null;
 	return (
 		<>
 			<Animated.View

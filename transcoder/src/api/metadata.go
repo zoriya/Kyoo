@@ -5,6 +5,7 @@ import (
 	"io"
 	"mime"
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/asticode/go-astisub"
@@ -43,8 +44,33 @@ func (h *mhandler) GetInfo(c echo.Context) error {
 	}
 
 	ret, err := h.metadata.GetMetadata(c.Request().Context(), path, sha)
+	// even if the file doesn't exist, give a stub.
 	if err != nil {
-		return err
+		info, err := os.Stat(path)
+		size := int64(0)
+		if err == nil {
+			size = info.Size()
+		}
+		return c.JSON(http.StatusOK, src.MediaInfo{
+			Sha:       sha,
+			Path:      path,
+			Extension: filepath.Ext(path)[1:],
+			Size:      size,
+			Duration:  0,
+			Container: nil,
+			MimeCodec: nil,
+			Versions: src.Versions{
+				Info:      -1,
+				Extract:   0,
+				Thumbs:    0,
+				Keyframes: 0,
+			},
+			Videos:    make([]src.Video, 0),
+			Audios:    make([]src.Audio, 0),
+			Subtitles: make([]src.Subtitle, 0),
+			Chapters:  make([]src.Chapter, 0),
+			Fonts:     make([]string, 0),
+		})
 	}
 	return c.JSON(http.StatusOK, ret)
 }
