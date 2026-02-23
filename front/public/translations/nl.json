@@ -262,7 +262,9 @@
 		"duration": "Duratie",
 		"size": "Grootte",
 		"novideo": "Geen Video",
-		"nocontainer": ""
+		"nocontainer": "Ongeldige container",
+		"noaudio": "Geen audio",
+		"unknown": "Onbekend"
 	},
 	"admin": {
 		"users": {
@@ -276,8 +278,8 @@
 		},
 		"scanner": {
 			"label": "Scanner",
-			"scan": "Trigger bibliotheek scan",
-			"empty": "Geen fouten gevonden. Al je items zijn geregistreerd."
+			"scan": "Start bibliotheek scan",
+			"empty": "Geen fouten gevonden. Alle items zijn geregistreerd."
 		}
 	}
 }
