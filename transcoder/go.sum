@@ -12,8 +12,8 @@ github.com/asticode/go-astikit v0.20.0/go.mod h1:h4ly7idim1tNhaVkdVBeXQZEE3L0xbl
 github.com/asticode/go-astikit v0.30.0/go.mod h1:h4ly7idim1tNhaVkdVBeXQZEE3L0xblP7fCWbgwipF0=
 github.com/asticode/go-astikit v0.57.1 h1:fEykwH98Nny08kcRbk4uer+S8h0rKveCIpG9F6NVLuA=
 github.com/asticode/go-astikit v0.57.1/go.mod h1:fV43j20UZYfXzP9oBn33udkvCvDvCDhzjVqoLFuuYZE=
-github.com/asticode/go-astisub v0.38.0 h1:Qh3IO8Cotn0wwok5maid7xqsIJTwn2DtABT1UajKJaI=
-github.com/asticode/go-astisub v0.38.0/go.mod h1:WTkuSzFB+Bp7wezuSf2Oxulj5A8zu2zLRVFf6bIFQK8=
+github.com/asticode/go-astisub v0.39.0 h1:j1/rFLRUH0TT2CW9YCtBek9lRdMp96oxaZm6vbgE96M=
+github.com/asticode/go-astisub v0.39.0/go.mod h1:WTkuSzFB+Bp7wezuSf2Oxulj5A8zu2zLRVFf6bIFQK8=
 github.com/asticode/go-astits v1.8.0/go.mod h1:DkOWmBNQpnr9mv24KfZjq4JawCFX1FCqjLVGvO0DygQ=
 github.com/asticode/go-astits v1.14.0 h1:zkgnZzipx2XX5mWycqsSBeEyDH58+i4HtyF4j2ROb00=
 github.com/asticode/go-astits v1.14.0/go.mod h1:QSHmknZ51pf6KJdHKZHJTLlMegIrhega3LPWz3ND/iI=
