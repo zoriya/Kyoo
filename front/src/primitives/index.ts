@@ -3,6 +3,7 @@ export * from "./alert";
 export * from "./avatar";
 export * from "./button";
 export * from "./chip";
+export * from "./combobox";
 export * from "./container";
 export * from "./divider";
 export * from "./icons";

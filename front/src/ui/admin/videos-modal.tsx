@@ -1,7 +1,7 @@
 import { View } from "react-native";
 import { entryDisplayNumber } from "~/components/entries";
-import { FullVideo } from "~/models";
-import { Modal, P, Select, Skeleton } from "~/primitives";
+import { Entry, FullVideo } from "~/models";
+import { ComboBox, Modal, P, Skeleton } from "~/primitives";
 import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { useQueryState } from "~/utils";
 
@@ -16,14 +16,21 @@ export const VideosModal = () => {
 				Render={({ item }) => (
 					<View className="h-12 flex-row items-center justify-between hover:bg-card">
 						<P>{item.path}</P>
-						<Select
+						<ComboBox
 							label={"toto"}
-							value={1}
-							values={[1, 2, 3]}
-							getLabel={() =>
-								item.entries.map((x) => entryDisplayNumber(x)).join(", ")
-							}
+							value={null}
+							// value={item.entries.map((x) => entryDisplayNumber(x)).join(", ")}
+							query={(q) => ({
+								parser: Entry,
+								path: ["api", "series", slug, "entries"],
+								params: {
+									query: q,
+								},
+								infinite: true,
+							})}
+							getLabel={(x) => `${entryDisplayNumber(x)} - ${x.name}`}
 							onValueChange={(x) => {}}
+							getKey={(x) => x.id}
 						/>
 					</View>
 				)}
