@@ -37,7 +37,7 @@ export const Modal = ({
 				<Pressable
 					className={cn(
 						"w-full max-w-3xl rounded-md bg-background",
-						"max-h-[90vh] cursor-default overflow-hidden *:p-6",
+						"max-h-[90vh] cursor-default! overflow-hidden *:p-6",
 					)}
 					onPress={(e) => e.preventDefault()}
 				>

@@ -44,7 +44,9 @@
 		"nextUp": "Next up",
 		"season": "Season {{number}}",
 		"multiVideos": "Multiples video files available",
-		"videosCount": "{{number}} videos"
+		"videosCount": "{{number}} videos",
+		"videos-map": "Edit video mappings",
+		"videos-map-none": "No mapping"
 	},
 	"browse": {
 		"mediatypekey": {

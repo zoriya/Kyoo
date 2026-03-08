@@ -5,8 +5,9 @@ import SearchIcon from "@material-symbols/svg-400/rounded/search-fill.svg";
 import * as Popover from "@radix-ui/react-popover";
 import { useMemo, useRef, useState } from "react";
 import { Platform, View } from "react-native";
-import { type QueryIdentifier, useInfiniteFetch } from "~/query/query";
+import { useInfiniteFetch } from "~/query/query";
 import { cn } from "~/utils";
+import type { ComboBoxProps } from "./combobox";
 import { Icon } from "./icons";
 import { PressableFeedback } from "./links";
 import { InternalTriger } from "./menu.web";
@@ -15,23 +16,17 @@ import { P } from "./text";
 
 export const ComboBox = <Data,>({
 	label,
+	searchPlaceholder,
 	value,
+	values,
 	onValueChange,
 	query,
-	getLabel,
 	getKey,
-	placeholder,
+	getLabel,
+	getSmallLabel,
 	placeholderCount = 4,
-}: {
-	label: string;
-	value: Data | null;
-	onValueChange: (item: Data | null) => void;
-	query: (search: string) => QueryIdentifier<Data>;
-	getLabel: (item: Data) => string;
-	getKey: (item: Data) => string;
-	placeholder?: string;
-	placeholderCount?: number;
-}) => {
+	multiple,
+}: ComboBoxProps<Data>) => {
 	const [isOpen, setOpen] = useState(false);
 	const [search, setSearch] = useState("");
 
@@ -47,6 +42,11 @@ export const ComboBox = <Data,>({
 		if (!items) return placeholders;
 		return isFetching ? [...items, ...placeholders] : items;
 	}, [items, isFetching, placeholderCount]);
+
+	const selectedKeys = useMemo(() => {
+		if (multiple) return new Set(values.map(getKey));
+		return new Set(value !== null ? [getKey(value as Data)] : []);
+	}, [value, values, multiple, getKey]);
 
 	return (
 		<Popover.Root
@@ -67,7 +67,11 @@ export const ComboBox = <Data,>({
 				>
 					<View className="flex-row items-center px-6">
 						<P className="text-center group-focus-within:text-slate-200 group-hover:text-slate-200">
-							{value ? getLabel(value) : (placeholder ?? label)}
+							{(multiple ? !values : !value)
+								? label
+								: (multiple ? values : [value!])
+										.map(getSmallLabel ?? getLabel)
+										.join(", ")}
 						</P>
 						<Icon
 							icon={ExpandMore}
@@ -96,7 +100,7 @@ export const ComboBox = <Data,>({
 							type="text"
 							value={search}
 							onChange={(e) => setSearch(e.target.value)}
-							placeholder={placeholder ?? label}
+							placeholder={searchPlaceholder}
 							// biome-ignore lint/a11y/noAutofocus: combobox search should auto-focus on open
 							autoFocus
 							className={cn(
@@ -115,14 +119,22 @@ export const ComboBox = <Data,>({
 							item ? (
 								<ComboBoxItem
 									label={getLabel(item)}
-									selected={value !== null && getKey(item) === getKey(value)}
-									onSelect={() =>
-										((item: Data) => {
+									selected={selectedKeys.has(getKey(item))}
+									onSelect={() => {
+										if (!multiple) {
 											onValueChange(item);
 											setOpen(false);
-											setSearch("");
-										})(item)
-									}
+											return;
+										}
+
+										if (!selectedKeys.has(getKey(item))) {
+											onValueChange([...values, item]);
+											return;
+										}
+										onValueChange(
+											values.filter((v) => getKey(v) !== getKey(item)),
+										);
+									}}
 								/>
 							) : (
 								<ComboBoxItemLoader />

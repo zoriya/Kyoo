@@ -4,8 +4,8 @@ import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
 import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
 import ExpandMore from "@material-symbols/svg-400/rounded/keyboard_arrow_down-fill.svg";
 import SearchIcon from "@material-symbols/svg-400/rounded/search-fill.svg";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, TextInput, View } from "react-native";
+import { useMemo, useRef, useState } from "react";
+import { KeyboardAvoidingView, Pressable, TextInput, View } from "react-native";
 import { type QueryIdentifier, useInfiniteFetch } from "~/query/query";
 import { cn } from "~/utils";
 import { Icon, IconButton } from "./icons";
@@ -13,43 +13,54 @@ import { PressableFeedback } from "./links";
 import { Skeleton } from "./skeleton";
 import { P } from "./text";
 
-const useDebounce = <T,>(value: T, delay: number): T => {
-	const [debounced, setDebounced] = useState(value);
-	useEffect(() => {
-		const timer = setTimeout(() => setDebounced(value), delay);
-		return () => clearTimeout(timer);
-	}, [value, delay]);
-	return debounced;
+type ComboBoxSingleProps<Data> = {
+	multiple?: false;
+	value: Data | null;
+	values?: never;
+	onValueChange: (item: Data | null) => void;
 };
+
+type ComboBoxMultiProps<Data> = {
+	multiple: true;
+	value?: never;
+	values: Data[];
+	onValueChange: (items: Data[]) => void;
+};
+
+type ComboBoxBaseProps<Data> = {
+	label: string;
+	searchPlaceholder?: string;
+	query: (search: string) => QueryIdentifier<Data>;
+	getKey: (item: Data) => string;
+	getLabel: (item: Data) => string;
+	getSmallLabel?: (item: Data) => string;
+	placeholderCount?: number;
+};
+
+export type ComboBoxProps<Data> = ComboBoxBaseProps<Data> &
+	(ComboBoxSingleProps<Data> | ComboBoxMultiProps<Data>);
 
 export const ComboBox = <Data,>({
 	label,
 	value,
+	values,
 	onValueChange,
 	query,
 	getLabel,
+	getSmallLabel,
 	getKey,
-	placeholder,
+	searchPlaceholder,
 	placeholderCount = 4,
-}: {
-	label: string;
-	value: Data | null;
-	onValueChange: (item: Data | null) => void;
-	query: (search: string) => QueryIdentifier<Data>;
-	getLabel: (item: Data) => string;
-	getKey: (item: Data) => string;
-	placeholder?: string;
-	placeholderCount?: number;
-}) => {
+	multiple,
+}: ComboBoxProps<Data>) => {
 	const [isOpen, setOpen] = useState(false);
 	const [search, setSearch] = useState("");
-	const debouncedSearch = useDebounce(search, 300);
 	const inputRef = useRef<TextInput>(null);
 
-	const currentQuery = query(debouncedSearch);
 	const oldItems = useRef<Data[] | undefined>(undefined);
-	let { items, fetchNextPage, hasNextPage, isFetching } =
-		useInfiniteFetch(currentQuery);
+	let { items, fetchNextPage, hasNextPage, isFetching } = useInfiniteFetch(
+		query(search),
+	);
 	if (items) oldItems.current = items;
 	items ??= oldItems.current;
 
@@ -59,16 +70,10 @@ export const ComboBox = <Data,>({
 		return isFetching ? [...items, ...placeholders] : items;
 	}, [items, isFetching, placeholderCount]);
 
-	const handleSelect = (item: Data) => {
-		onValueChange(item);
-		setOpen(false);
-		setSearch("");
-	};
-
-	const handleClose = () => {
-		setOpen(false);
-		setSearch("");
-	};
+	const selectedKeys = useMemo(() => {
+		if (multiple) return new Set(values.map(getKey));
+		return new Set(value !== null ? [getKey(value)] : []);
+	}, [value, values, multiple, getKey]);
 
 	return (
 		<>
@@ -83,7 +88,11 @@ export const ComboBox = <Data,>({
 			>
 				<View className="flex-row items-center px-6">
 					<P className="text-center group-focus-within:text-slate-200 group-hover:text-slate-200">
-						{value ? getLabel(value) : (placeholder ?? label)}
+						{(multiple ? !values : !value)
+							? label
+							: (multiple ? values : [value!])
+									.map(getSmallLabel ?? getLabel)
+									.join(", ")}
 					</P>
 					<Icon
 						icon={ExpandMore}
@@ -94,11 +103,15 @@ export const ComboBox = <Data,>({
 			{isOpen && (
 				<Portal>
 					<Pressable
-						onPress={handleClose}
+						onPress={() => {
+							setOpen(false);
+							setSearch("");
+						}}
 						tabIndex={-1}
 						className="absolute inset-0 flex-1 bg-transparent"
 					/>
-					<View
+					<KeyboardAvoidingView
+						behavior="padding"
 						className={cn(
 							"absolute bottom-0 w-full self-center bg-popover pb-safe sm:mx-12 sm:max-w-2xl",
 							"mt-20 max-h-[80vh] rounded-t-4xl pt-8",
@@ -107,7 +120,10 @@ export const ComboBox = <Data,>({
 					>
 						<IconButton
 							icon={Close}
-							onPress={handleClose}
+							onPress={() => {
+								setOpen(false);
+								setSearch("");
+							}}
 							className="hidden self-end xl:flex"
 						/>
 						<View
@@ -121,7 +137,7 @@ export const ComboBox = <Data,>({
 								ref={inputRef}
 								value={search}
 								onChangeText={setSearch}
-								placeholder={placeholder ?? label}
+								placeholder={searchPlaceholder}
 								autoFocus
 								textAlignVertical="center"
 								className="h-full flex-1 font-sans text-base text-slate-600 outline-0 dark:text-slate-400"
@@ -137,8 +153,22 @@ export const ComboBox = <Data,>({
 								item ? (
 									<ComboBoxItem
 										label={getLabel(item)}
-										selected={value !== null && getKey(item) === getKey(value)}
-										onSelect={() => handleSelect(item)}
+										selected={selectedKeys.has(getKey(item))}
+										onSelect={() => {
+											if (!multiple) {
+												onValueChange(item);
+												setOpen(false);
+												return;
+											}
+
+											if (!selectedKeys.has(getKey(item))) {
+												onValueChange([...values, item]);
+												return;
+											}
+											onValueChange(
+												values.filter((v) => getKey(v) !== getKey(item)),
+											);
+										}}
 									/>
 								) : (
 									<ComboBoxItemLoader />
@@ -150,7 +180,7 @@ export const ComboBox = <Data,>({
 							onEndReachedThreshold={0.5}
 							showsVerticalScrollIndicator={false}
 						/>
-					</View>
+					</KeyboardAvoidingView>
 				</Portal>
 			)}
 		</>

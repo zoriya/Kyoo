@@ -3,6 +3,7 @@ import MoreHoriz from "@material-symbols/svg-400/rounded/more_horiz.svg";
 import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg";
+import VideoLibrary from "@material-symbols/svg-400/rounded/video_library-fill.svg";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { View, type ViewProps } from "react-native";
@@ -116,16 +117,21 @@ const ButtonList = ({
 							/>
 						</>
 					)}
-					{/* {account?.isAdmin === true && ( */}
-					{/* 	<> */}
-					{/* 		{kind === "movie" && <HR />} */}
-					{/* 		<Menu.Item */}
-					{/* 			label={t("home.refreshMetadata")} */}
-					{/* 			icon={Refresh} */}
-					{/* 			onSelect={() => metadataRefreshMutation.mutate()} */}
-					{/* 		/> */}
-					{/* 	</> */}
-					{/* )} */}
+					{account?.isAdmin === true && (
+						<>
+							{kind === "movie" && <HR />}
+							<Menu.Item
+								label={t("show.videos-map")}
+								icon={VideoLibrary}
+								href={`/series/${slug}/videos`}
+							/>
+							{/* <Menu.Item */}
+							{/* 	label={t("home.refreshMetadata")} */}
+							{/* 	icon={Refresh} */}
+							{/* 	onSelect={() => metadataRefreshMutation.mutate()} */}
+							{/* /> */}
+						</>
+					)}
 				</Menu>
 			)}
 		</View>
