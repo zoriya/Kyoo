@@ -91,6 +91,7 @@ export const ComboBox = <Data,>({
 						{(multiple ? !values : !value)
 							? label
 							: (multiple ? values : [value!])
+									.sort((a, b) => getKey(a).localeCompare(getKey(b)))
 									.map(getSmallLabel ?? getLabel)
 									.join(", ")}
 					</P>

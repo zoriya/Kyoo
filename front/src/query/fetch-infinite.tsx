@@ -68,8 +68,8 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 			: placeholderCount;
 		const placeholders = [...Array(count === 0 ? numColumns : count)].fill(0);
 		if (!items) return placeholders;
-		return isFetching ? [...items, ...placeholders] : items;
-	}, [items, isFetching, placeholderCount, numColumns]);
+		return isFetching && !isRefetching ? [...items, ...placeholders] : items;
+	}, [items, isFetching, isRefetching, placeholderCount, numColumns]);
 
 	if (!data.length && Empty) return Empty;
 

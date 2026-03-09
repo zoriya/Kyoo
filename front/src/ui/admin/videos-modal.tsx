@@ -1,9 +1,14 @@
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { entryDisplayNumber } from "~/components/entries";
-import { Entry, FullVideo } from "~/models";
+import { Entry, FullVideo, type Page } from "~/models";
 import { ComboBox, Modal, P, Skeleton } from "~/primitives";
-import { InfiniteFetch, type QueryIdentifier, useFetch } from "~/query";
+import {
+	InfiniteFetch,
+	type QueryIdentifier,
+	useFetch,
+	useMutation,
+} from "~/query";
 import { useQueryState } from "~/utils";
 import { Header } from "../details/header";
 
@@ -11,6 +16,32 @@ export const VideosModal = () => {
 	const [slug] = useQueryState<string>("slug", undefined!);
 	const { data } = useFetch(Header.query("serie", slug));
 	const { t } = useTranslation();
+
+	const { mutateAsync } = useMutation({
+		method: "PUT",
+		path: ["api", "videos", "link"],
+		compute: ({
+			video,
+			entries,
+		}: {
+			video: string;
+			entries: Omit<Entry, "href" | "progress" | "videos">[];
+		}) => ({
+			body: [{ id: video, for: entries.map((x) => ({ slug: x.slug })) }],
+		}),
+		invalidate: ["api", "series", slug],
+		optimisticKey: VideosModal.query(slug),
+		optimistic: (params, prev?: { pages: Page<FullVideo>[] }) => ({
+			...prev!,
+			pages: prev!.pages.map((p) => ({
+				...p,
+				items: p!.items.map((x) => {
+					if (x.id !== params.video) return x;
+					return { ...x, entries: params.entries };
+				}) as FullVideo[],
+			})),
+		}),
+	});
 
 	return (
 		<Modal title={data?.name ?? t("misc.loading")} scroll={false}>
@@ -36,7 +67,12 @@ export const VideosModal = () => {
 							getKey={(x) => x.id}
 							getLabel={(x) => `${entryDisplayNumber(x)} - ${x.name}`}
 							getSmallLabel={entryDisplayNumber}
-							onValueChange={(x) => {}}
+							onValueChange={async (entries) => {
+								await mutateAsync({
+									video: item.id,
+									entries,
+								});
+							}}
 						/>
 					</View>
 				)}
@@ -49,5 +85,8 @@ export const VideosModal = () => {
 VideosModal.query = (slug: string): QueryIdentifier<FullVideo> => ({
 	parser: FullVideo,
 	path: ["api", "series", slug, "videos"],
+	params: {
+		sort: "path",
+	},
 	infinite: true,
 });

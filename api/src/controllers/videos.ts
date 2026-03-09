@@ -79,7 +79,7 @@ const videoSort = Sort(
 		],
 	},
 	{
-		default: ["entry"],
+		default: ["entry", "path"],
 		tablePk: videos.pk,
 	},
 );
