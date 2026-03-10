@@ -1,11 +1,12 @@
 import { useRouter } from "expo-router";
-import type { ReactNode } from "react";
+import type { ReactNode, RefObject } from "react";
 import {
 	Linking,
 	Platform,
 	Pressable,
 	type PressableProps,
 	type TextProps,
+	type View,
 } from "react-native";
 import { useResolveClassNames } from "uniwind";
 import { cn } from "~/utils";
@@ -70,11 +71,16 @@ export const A = ({
 	);
 };
 
-export const PressableFeedback = ({ children, ...props }: PressableProps) => {
+export const PressableFeedback = ({
+	children,
+	ref,
+	...props
+}: PressableProps & { ref?: RefObject<View> }) => {
 	const { color } = useResolveClassNames("text-slate-400/25");
 
 	return (
 		<Pressable
+			ref={ref}
 			android_ripple={{
 				foreground: true,
 				color,

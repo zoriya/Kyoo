@@ -26,6 +26,7 @@ export const ComboBox = <Data,>({
 	getSmallLabel,
 	placeholderCount = 4,
 	multiple,
+	Trigger,
 }: ComboBoxProps<Data>) => {
 	const [isOpen, setOpen] = useState(false);
 	const [search, setSearch] = useState("");
@@ -57,29 +58,33 @@ export const ComboBox = <Data,>({
 			}}
 		>
 			<Popover.Trigger aria-label={label} asChild>
-				<InternalTriger
-					Component={Platform.OS === "web" ? "div" : PressableFeedback}
-					className={cn(
-						"group flex-row items-center justify-center overflow-hidden rounded-4xl",
-						"border-2 border-accent p-1 outline-0 focus-within:bg-accent hover:bg-accent",
-						"cursor-pointer",
-					)}
-				>
-					<View className="flex-row items-center px-6">
-						<P className="text-center group-focus-within:text-slate-200 group-hover:text-slate-200">
-							{(multiple ? !values : !value)
-								? label
-								: (multiple ? values : [value!])
-										.sort((a, b) => getKey(a).localeCompare(getKey(b)))
-										.map(getSmallLabel ?? getLabel)
-										.join(", ")}
-						</P>
-						<Icon
-							icon={ExpandMore}
-							className="group-focus-within:fill-slate-200 group-hover:fill-slate-200"
-						/>
-					</View>
-				</InternalTriger>
+				{Trigger ? (
+					<InternalTriger Component={Trigger} />
+				) : (
+					<InternalTriger
+						Component={Platform.OS === "web" ? "div" : PressableFeedback}
+						className={cn(
+							"group flex-row items-center justify-center overflow-hidden rounded-4xl",
+							"border-2 border-accent p-1 outline-0 focus-within:bg-accent hover:bg-accent",
+							"cursor-pointer",
+						)}
+					>
+						<View className="flex-row items-center px-6">
+							<P className="text-center group-focus-within:text-slate-200 group-hover:text-slate-200">
+								{(multiple ? !values.length : !value)
+									? label
+									: (multiple ? values : [value!])
+											.sort((a, b) => getKey(a).localeCompare(getKey(b)))
+											.map(getSmallLabel ?? getLabel)
+											.join(", ")}
+							</P>
+							<Icon
+								icon={ExpandMore}
+								className="group-focus-within:fill-slate-200 group-hover:fill-slate-200"
+							/>
+						</View>
+					</InternalTriger>
+				)}
 			</Popover.Trigger>
 			<Popover.Portal>
 				<Popover.Content
@@ -145,8 +150,6 @@ export const ComboBox = <Data,>({
 							hasNextPage && !isFetching ? () => fetchNextPage() : undefined
 						}
 						onEndReachedThreshold={0.5}
-						showsVerticalScrollIndicator={false}
-						style={{ flex: 1, overflow: "auto" as any }}
 					/>
 					<Popover.Arrow className="fill-popover" />
 				</Popover.Content>

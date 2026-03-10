@@ -4,8 +4,14 @@ import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
 import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
 import ExpandMore from "@material-symbols/svg-400/rounded/keyboard_arrow_down-fill.svg";
 import SearchIcon from "@material-symbols/svg-400/rounded/search-fill.svg";
-import { useMemo, useRef, useState } from "react";
-import { KeyboardAvoidingView, Pressable, TextInput, View } from "react-native";
+import { type ComponentType, useMemo, useRef, useState } from "react";
+import {
+	KeyboardAvoidingView,
+	Pressable,
+	type PressableProps,
+	TextInput,
+	View,
+} from "react-native";
 import { type QueryIdentifier, useInfiniteFetch } from "~/query/query";
 import { cn } from "~/utils";
 import { Icon, IconButton } from "./icons";
@@ -28,13 +34,14 @@ type ComboBoxMultiProps<Data> = {
 };
 
 type ComboBoxBaseProps<Data> = {
-	label: string;
 	searchPlaceholder?: string;
 	query: (search: string) => QueryIdentifier<Data>;
 	getKey: (item: Data) => string;
 	getLabel: (item: Data) => string;
 	getSmallLabel?: (item: Data) => string;
 	placeholderCount?: number;
+	label?: string;
+	Trigger?: ComponentType<PressableProps>;
 };
 
 export type ComboBoxProps<Data> = ComboBoxBaseProps<Data> &
@@ -52,6 +59,7 @@ export const ComboBox = <Data,>({
 	searchPlaceholder,
 	placeholderCount = 4,
 	multiple,
+	Trigger,
 }: ComboBoxProps<Data>) => {
 	const [isOpen, setOpen] = useState(false);
 	const [search, setSearch] = useState("");
@@ -77,30 +85,34 @@ export const ComboBox = <Data,>({
 
 	return (
 		<>
-			<PressableFeedback
-				onPressIn={() => setOpen(true)}
-				accessibilityLabel={label}
-				className={cn(
-					"flex-row items-center justify-center overflow-hidden",
-					"rounded-4xl border-3 border-accent p-1 outline-0",
-					"group focus-within:bg-accent hover:bg-accent",
-				)}
-			>
-				<View className="flex-row items-center px-6">
-					<P className="text-center group-focus-within:text-slate-200 group-hover:text-slate-200">
-						{(multiple ? !values : !value)
-							? label
-							: (multiple ? values : [value!])
-									.sort((a, b) => getKey(a).localeCompare(getKey(b)))
-									.map(getSmallLabel ?? getLabel)
-									.join(", ")}
-					</P>
-					<Icon
-						icon={ExpandMore}
-						className="group-focus-within:fill-slate-200 group-hover:fill-slate-200"
-					/>
-				</View>
-			</PressableFeedback>
+			{Trigger ? (
+				<Trigger onPressIn={() => setOpen(true)} />
+			) : (
+				<PressableFeedback
+					onPressIn={() => setOpen(true)}
+					accessibilityLabel={label}
+					className={cn(
+						"flex-row items-center justify-center overflow-hidden",
+						"rounded-4xl border-3 border-accent p-1 outline-0",
+						"group focus-within:bg-accent hover:bg-accent",
+					)}
+				>
+					<View className="flex-row items-center px-6">
+						<P className="text-center group-focus-within:text-slate-200 group-hover:text-slate-200">
+							{(multiple ? !values?.length : !value)
+								? label
+								: (multiple ? values : [value!])
+										.sort((a, b) => getKey(a).localeCompare(getKey(b)))
+										.map(getSmallLabel ?? getLabel)
+										.join(", ")}
+						</P>
+						<Icon
+							icon={ExpandMore}
+							className="group-focus-within:fill-slate-200 group-hover:fill-slate-200"
+						/>
+					</View>
+				</PressableFeedback>
+			)}
 			{isOpen && (
 				<Portal>
 					<Pressable
@@ -179,7 +191,6 @@ export const ComboBox = <Data,>({
 								hasNextPage && !isFetching ? () => fetchNextPage() : undefined
 							}
 							onEndReachedThreshold={0.5}
-							showsVerticalScrollIndicator={false}
 						/>
 					</KeyboardAvoidingView>
 				</Portal>

@@ -11,6 +11,8 @@ import {
 	or,
 	type SQL,
 	sql,
+	inArray,
+	WithSubquery,
 } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { Elysia, t } from "elysia";
@@ -275,6 +277,7 @@ export async function getVideos({
 	preferOriginal = false,
 	relations = [],
 	userId,
+	cte = [],
 }: {
 	after?: string;
 	limit: number;
@@ -285,8 +288,10 @@ export async function getVideos({
 	preferOriginal?: boolean;
 	relations?: (keyof typeof videoRelations)[];
 	userId: string;
+	cte?: WithSubquery[];
 }) {
 	let ret = await db
+		.with(...cte)
 		.select({
 			...getColumns(videos),
 			...buildRelations(relations, videoRelations, {
@@ -620,9 +625,27 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 				});
 			}
 
+			const titleGuess = db.$with("title_guess").as(
+				db
+					.selectDistinctOn([sql<string>`${videos.guess}->>'title'`], {
+						title: sql<string>`${videos.guess}->>'title'`.as("title"),
+					})
+					.from(videos)
+					.leftJoin(evJoin, eq(videos.pk, evJoin.videoPk))
+					.leftJoin(entries, eq(entries.pk, evJoin.entryPk))
+					.where(eq(entries.showPk, serie.pk)),
+			);
+
 			const languages = processLanguages(langs);
 			const items = await getVideos({
-				filter: eq(entries.showPk, serie.pk),
+				cte: [titleGuess],
+				filter: or(
+					eq(entries.showPk, serie.pk),
+					inArray(
+						sql<string>`${videos.guess}->>'title'`,
+						db.select().from(titleGuess),
+					),
+				),
 				limit,
 				after,
 				query,

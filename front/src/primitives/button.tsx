@@ -1,7 +1,6 @@
 import type { ComponentProps, ComponentType, Ref } from "react";
 import {
 	type Falsy,
-	type Pressable,
 	type PressableProps,
 	View,
 } from "react-native";
@@ -20,18 +19,18 @@ export const Button = <AsProps = PressableProps>({
 	className,
 	...props
 }: {
-	disabled?: boolean;
+	disabled?: boolean | null;
 	text?: string;
 	icon?: ComponentProps<typeof Icon>["icon"] | Falsy;
 	ricon?: ComponentProps<typeof Icon>["icon"] | Falsy;
-	ref?: Ref<typeof Pressable>;
+	ref?: Ref<View>;
 	className?: string;
 	as?: ComponentType<AsProps>;
 } & AsProps) => {
 	const Container = as ?? PressableFeedback;
 	return (
 		<Container
-			ref={ref}
+			ref={ref as any}
 			disabled={disabled}
 			className={cn(
 				"flex-row items-center justify-center overflow-hidden",
