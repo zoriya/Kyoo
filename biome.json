@@ -28,7 +28,8 @@
 			"suspicious": {
 				"noExplicitAny": "off",
 				"noArrayIndexKey": "off",
-				"noTemplateCurlyInString": "off"
+				"noTemplateCurlyInString": "off",
+				"noDuplicateCustomProperties": "off"
 			},
 			"security": {
 				"noDangerouslySetInnerHtml": "off"
@@ -44,16 +45,8 @@
 				"useSortedClasses": {
 					"level": "warn",
 					"options": {
-						"attributes": [
-							"classList"
-						],
-						"functions": [
-							"clsx",
-							"cva",
-							"cn",
-							"tw",
-							"tw.*"
-						]
+						"attributes": ["classList"],
+						"functions": ["clsx", "cva", "cn", "tw", "tw.*"]
 					}
 				}
 			}

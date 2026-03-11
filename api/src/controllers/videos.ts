@@ -3,6 +3,7 @@ import {
 	desc,
 	eq,
 	gt,
+	inArray,
 	isNotNull,
 	lt,
 	max,
@@ -11,8 +12,7 @@ import {
 	or,
 	type SQL,
 	sql,
-	inArray,
-	WithSubquery,
+	type WithSubquery,
 } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { Elysia, t } from "elysia";
@@ -33,7 +33,6 @@ import {
 	jsonbBuildObject,
 	jsonbObjectAgg,
 	sqlarr,
-	unnest,
 } from "~/db/utils";
 import type { Entry } from "~/models/entry";
 import { KError } from "~/models/error";
@@ -82,7 +81,7 @@ const videoSort = Sort(
 		],
 	},
 	{
-		default: ["entry", "path"],
+		default: ["path"],
 		tablePk: videos.pk,
 	},
 );

@@ -1,9 +1,5 @@
 import type { ComponentProps, ComponentType, Ref } from "react";
-import {
-	type Falsy,
-	type PressableProps,
-	View,
-} from "react-native";
+import { type Falsy, type PressableProps, View } from "react-native";
 import { cn } from "~/utils";
 import { Icon } from "./icons";
 import { PressableFeedback } from "./links";
