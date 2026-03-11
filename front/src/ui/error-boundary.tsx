@@ -9,7 +9,7 @@ import { Header, SafeAreaProviderCompat } from "@react-navigation/elements";
 import { useCSSVariable } from "uniwind";
 import { NavbarProfile, NavbarTitle } from "~/ui/navbar";
 
-export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+export function LayoutErrorBoundary({ error, retry }: ErrorBoundaryProps) {
 	const accent = useCSSVariable("--color-accent");
 
 	return (
@@ -25,6 +25,10 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
 			</View>
 		</SafeAreaProviderCompat>
 	);
+}
+
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+	return <ErrorView error={error} retry={retry} />;
 }
 
 function ErrorView({ error, retry }: ErrorBoundaryProps) {

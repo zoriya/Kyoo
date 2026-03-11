@@ -3,7 +3,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCSSVariable } from "uniwind";
 import { NavbarProfile, NavbarTitle } from "~/ui/navbar";
 
-export { ErrorBoundary } from "~/ui/error-bondary";
+export { LayoutErrorBoundary as ErrorBoundary } from "~/ui/error-boundary";
 
 export default function Layout() {
 	const insets = useSafeAreaInsets();
