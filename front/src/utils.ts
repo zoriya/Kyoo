@@ -75,3 +75,13 @@ export function shuffle<T>(array: T[]): T[] {
 
 	return array;
 }
+
+export function uniqBy<T>(a: T[], key: (val: T) => string | number): T[] {
+	const seen: Record<string, boolean> = {};
+	return a.filter((item) => {
+		const k = key(item);
+		if (seen[k]) return false;
+		seen[k] = true;
+		return true;
+	});
+}

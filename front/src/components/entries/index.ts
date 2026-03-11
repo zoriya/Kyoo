@@ -3,7 +3,7 @@ import type { Entry } from "~/models";
 export * from "./entry-box";
 export * from "./entry-line";
 
-export const entryDisplayNumber = (entry: Entry) => {
+export const entryDisplayNumber = (entry: Partial<Entry>) => {
 	switch (entry.kind) {
 		case "episode":
 			return `S${entry.seasonNumber}:E${entry.episodeNumber}`;

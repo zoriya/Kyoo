@@ -13,20 +13,20 @@ export type Sort = {
 	random?: { seed: number };
 };
 
+export type SortVal =
+	| PgColumn
+	| {
+			sql: PgColumn;
+			accessor: (cursor: any) => unknown;
+	  }
+	| {
+			sql: SQLWrapper;
+			isNullable: boolean;
+			accessor: (cursor: any) => unknown;
+	  };
+
 export const Sort = (
-	values: Record<
-		string,
-		| PgColumn
-		| {
-				sql: PgColumn;
-				accessor: (cursor: any) => unknown;
-		  }
-		| {
-				sql: SQLWrapper;
-				isNullable: boolean;
-				accessor: (cursor: any) => unknown;
-		  }
-	>,
+	values: Record<string, SortVal | SortVal[]>,
 	{
 		description = "How to sort the query",
 		default: def,
@@ -65,26 +65,29 @@ export const Sort = (
 			}
 			return {
 				tablePk,
-				sort: sort.map((x) => {
+				sort: sort.flatMap((x) => {
 					const desc = x[0] === "-";
 					const key = desc ? x.substring(1) : x;
-					if ("getSQL" in values[key]) {
+					const process = (val: SortVal): Sort["sort"][0] => {
+						if ("getSQL" in val) {
+							return {
+								sql: val,
+								isNullable: !val.notNull,
+								accessor: (x) => x[key],
+								desc,
+							};
+						}
 						return {
-							sql: values[key],
-							isNullable: !values[key].notNull,
-							accessor: (x) => x[key],
+							sql: val.sql,
+							isNullable:
+								"isNullable" in val ? val.isNullable : !val.sql.notNull,
+							accessor: val.accessor,
 							desc,
 						};
-					}
-					return {
-						sql: values[key].sql,
-						isNullable:
-							"isNullable" in values[key]
-								? values[key].isNullable
-								: !values[key].sql.notNull,
-						accessor: values[key].accessor,
-						desc,
 					};
+					return Array.isArray(values[key])
+						? values[key].map(process)
+						: process(values[key]);
 				}),
 			};
 		})

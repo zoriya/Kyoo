@@ -28,17 +28,6 @@ export default function Layout() {
 				},
 				headerTintColor: color as string,
 			}}
-		>
-			<Stack.Screen
-				name="info/[slug]"
-				options={{
-					presentation: "transparentModal",
-					headerShown: false,
-					contentStyle: {
-						backgroundColor: "transparent",
-					},
-				}}
-			/>
-		</Stack>
+		/>
 	);
 }

@@ -1,6 +1,7 @@
 import { relations, sql } from "drizzle-orm";
 import {
 	check,
+	index,
 	integer,
 	jsonb,
 	primaryKey,
@@ -52,7 +53,10 @@ export const entryVideoJoin = schema.table(
 			.references(() => videos.pk, { onDelete: "cascade" }),
 		slug: varchar({ length: 255 }).notNull().unique(),
 	},
-	(t) => [primaryKey({ columns: [t.entryPk, t.videoPk] })],
+	(t) => [
+		primaryKey({ columns: [t.entryPk, t.videoPk] }),
+		index("evj_video_pk").on(t.videoPk),
+	],
 );
 
 export const videosRelations = relations(videos, ({ many }) => ({

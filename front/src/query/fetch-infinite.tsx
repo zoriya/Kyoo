@@ -25,6 +25,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	Empty,
 	Divider,
 	Header,
+	Footer,
 	fetchMore = true,
 	contentContainerStyle,
 	columnWrapperStyle,
@@ -45,6 +46,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	incremental?: boolean;
 	Divider?: true | ComponentType;
 	Header?: ComponentType<{ children: JSX.Element }> | ReactElement;
+	Footer?: ComponentType<{ children: JSX.Element }> | ReactElement;
 	fetchMore?: boolean;
 	contentContainerStyle?: ViewStyle;
 	onScroll?: LegendListProps["onScroll"];
@@ -68,8 +70,8 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 			: placeholderCount;
 		const placeholders = [...Array(count === 0 ? numColumns : count)].fill(0);
 		if (!items) return placeholders;
-		return isFetching ? [...items, ...placeholders] : items;
-	}, [items, isFetching, placeholderCount, numColumns]);
+		return isFetching && !isRefetching ? [...items, ...placeholders] : items;
+	}, [items, isFetching, isRefetching, placeholderCount, numColumns]);
 
 	if (!data.length && Empty) return Empty;
 
@@ -100,6 +102,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 			onRefresh={layout.layout !== "horizontal" ? refetch : undefined}
 			refreshing={isRefetching}
 			ListHeaderComponent={Header}
+			ListFooterComponent={Footer}
 			ItemSeparatorComponent={
 				Divider === true ? HR : (Divider as any) || undefined
 			}

@@ -149,7 +149,6 @@ export const EntryList = ({
 					{index === 0 ? <SeasonHeader.Loader /> : <EntryLine.Loader />}
 				</Container>
 			)}
-			margin={false}
 			{...props}
 		/>
 	);

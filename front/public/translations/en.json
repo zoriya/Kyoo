@@ -44,7 +44,18 @@
 		"nextUp": "Next up",
 		"season": "Season {{number}}",
 		"multiVideos": "Multiples video files available",
-		"videosCount": "{{number}} videos"
+		"videosCount": "{{number}} videos",
+		"videos-map": "Edit video mappings"
+	},
+	"videos-map": {
+		"none": "NONE",
+		"add": "Add another video",
+		"delete": "Remove video from serie",
+		"validate": "Validate guess and add video to serie",
+		"no-guess": "This video was guessed to be part of this serie but we don't know which episode",
+		"related": "Added videos related to the title {{title}}",
+		"sort-path": "Path",
+		"sort-entry": "Episode order"
 	},
 	"browse": {
 		"mediatypekey": {
