@@ -2,6 +2,7 @@ import {
 	and,
 	desc,
 	eq,
+	exists,
 	gt,
 	inArray,
 	isNotNull,
@@ -58,7 +59,7 @@ import {
 import { desc as description } from "~/models/utils/descriptions";
 import { Guesses, Video } from "~/models/video";
 import type { MovieWatchStatus, SerieWatchStatus } from "~/models/watchlist";
-import { comment, uniqBy } from "~/utils";
+import { comment } from "~/utils";
 import {
 	entryProgressQ,
 	entryVideosQ,
@@ -71,12 +72,24 @@ const videoSort = Sort(
 		path: videos.path,
 		entry: [
 			{
-				sql: entries.showPk,
+				sql: db
+					.select({ showPk: entries.showPk })
+					.from(entryVideoJoin)
+					.innerJoin(entries, eq(entries.pk, entryVideoJoin.entryPk))
+					.where(eq(entryVideoJoin.videoPk, videos.pk))
+					.orderBy(entries.showPk, entries.order)
+					.limit(1),
 				isNullable: true,
 				accessor: (x: any) => x.entries?.[0]?.showPk,
 			},
 			{
-				sql: entries.order,
+				sql: db
+					.select({ order: entries.order })
+					.from(entryVideoJoin)
+					.innerJoin(entries, eq(entries.pk, entryVideoJoin.entryPk))
+					.where(eq(entryVideoJoin.videoPk, videos.pk))
+					.orderBy(entries.showPk, entries.order)
+					.limit(1),
 				isNullable: true,
 				accessor: (x: any) => x.entries?.[0]?.order,
 			},
@@ -304,7 +317,7 @@ export async function getVideos({
 	userId: string;
 	cte?: WithSubquery[];
 }) {
-	let ret = await db
+	const ret = await db
 		.with(...cte)
 		.select({
 			...getColumns(videos),
@@ -314,9 +327,6 @@ export async function getVideos({
 			}),
 		})
 		.from(videos)
-		.leftJoin(evJoin, eq(videos.pk, evJoin.videoPk))
-		// join entries only for sorting, we can't select entries here for perf reasons.
-		.leftJoin(entries, eq(entries.pk, evJoin.entryPk))
 		.where(
 			and(
 				filter,
@@ -333,7 +343,6 @@ export async function getVideos({
 		.limit(limit)
 		.execute({ userId });
 
-	ret = uniqBy(ret, (x) => x.pk);
 	if (!ret.length) return [];
 
 	const entriesByVideo = await fetchEntriesForVideos({
@@ -390,7 +399,19 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 			const languages = processLanguages(langs);
 			const [ret] = await getVideos({
 				limit: 1,
-				filter: and(isUuid(id) ? eq(videos.id, id) : eq(evJoin.slug, id)),
+				filter: isUuid(id)
+					? eq(videos.id, id)
+					: exists(
+							db
+								.select()
+								.from(entryVideoJoin)
+								.where(
+									and(
+										eq(entryVideoJoin.videoPk, videos.pk),
+										eq(entryVideoJoin.slug, id),
+									),
+								),
+						),
 				languages,
 				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				relations,
@@ -659,7 +680,18 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 			const items = await getVideos({
 				cte: [titleGuess],
 				filter: or(
-					eq(entries.showPk, serie.pk),
+					exists(
+						db
+							.select()
+							.from(entryVideoJoin)
+							.innerJoin(entries, eq(entries.pk, entryVideoJoin.entryPk))
+							.where(
+								and(
+									eq(entryVideoJoin.videoPk, videos.pk),
+									eq(entries.showPk, serie.pk),
+								),
+							),
+					),
 					inArray(
 						sql<string>`${videos.guess}->>'title'`,
 						db.select().from(titleGuess),
