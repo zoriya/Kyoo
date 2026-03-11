@@ -1,6 +1,6 @@
 module github.com/zoriya/kyoo/transcoder
 
-go 1.24.2
+go 1.25.0
 
 require (
 	github.com/MicahParks/keyfunc/v3 v3.8.0
@@ -30,7 +30,7 @@ require (
 	go.opentelemetry.io/otel/sdk/log v0.17.0
 	go.opentelemetry.io/otel/sdk/metric v1.41.0
 	go.opentelemetry.io/otel/trace v1.41.0
-	golang.org/x/sync v0.19.0
+	golang.org/x/sync v0.20.0
 	gopkg.in/vansante/go-ffprobe.v2 v2.3.0
 )
 
