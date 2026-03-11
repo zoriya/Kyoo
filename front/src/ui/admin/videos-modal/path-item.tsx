@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { entryDisplayNumber } from "~/components/entries";
 import { Entry, type FullVideo } from "~/models";
-import { ComboBox, IconButton, P, tooltip } from "~/primitives";
+import { ComboBox, IconButton, P, Skeleton, tooltip } from "~/primitives";
 import { uniqBy } from "~/utils";
 import type { useEditLinks } from ".";
 
@@ -39,10 +39,10 @@ export const PathItem = ({
 		: [];
 	return (
 		<View
-			className="mx-6 h-12 flex-row items-center justify-between hover:bg-card"
+			className="mx-6 min-h-12 flex-1 flex-row items-center justify-between hover:bg-card"
 			style={!saved && { opacity: 0.6 }}
 		>
-			<View className="flex-row items-center">
+			<View className="flex-1 flex-row items-center pr-1">
 				{saved ? (
 					<IconButton
 						icon={Close}
@@ -71,7 +71,7 @@ export const PathItem = ({
 						{...tooltip(t("videos-map.no-guess"))}
 					/>
 				)}
-				<P>{item.path}</P>
+				<P className="flex-1 flex-wrap">{item.path}</P>
 			</View>
 			<ComboBox
 				multiple
@@ -104,6 +104,18 @@ export const PathItem = ({
 					});
 				}}
 			/>
+		</View>
+	);
+};
+
+PathItem.Loader = () => {
+	return (
+		<View className="mx-6 min-h-12 flex-1 flex-row items-center justify-between hover:bg-card">
+			<View className="flex-1 flex-row items-center pr-1">
+				<IconButton icon={Close} />
+				<Skeleton className="w-4/5" />
+			</View>
+			<Skeleton className="w-1/5" />
 		</View>
 	);
 };

@@ -53,7 +53,7 @@ export const Modal = ({
 					{scroll ? (
 						<ScrollView className="p-6">{children}</ScrollView>
 					) : (
-						<View>{children}</View>
+						<View className="flex-1">{children}</View>
 					)}
 				</Pressable>
 			</Pressable>

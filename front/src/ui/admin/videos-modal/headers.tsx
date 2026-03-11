@@ -1,13 +1,16 @@
+import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
 import Path from "@material-symbols/svg-400/rounded/conversion_path-fill.svg";
 import LibraryAdd from "@material-symbols/svg-400/rounded/library_add-fill.svg";
 import Sort from "@material-symbols/svg-400/rounded/sort.svg";
 import Entry from "@material-symbols/svg-400/rounded/tv_next-fill.svg";
 import { useTranslation } from "react-i18next";
+import { View } from "react-native";
 import { FullVideo } from "~/models";
 import {
 	Button,
 	ComboBox,
 	Icon,
+	IconButton,
 	Menu,
 	P,
 	PressableFeedback,
@@ -50,6 +53,41 @@ export const SortMenu = ({
 				/>
 			))}
 		</Menu>
+	);
+};
+
+export const VideoListHeader = ({
+	titles,
+	removeTitle,
+	sort,
+	setSort,
+}: {
+	titles: string[];
+	removeTitle: (title: string) => void;
+	sort: "path" | "entry";
+	setSort: (sort: "path" | "entry") => void;
+}) => {
+	const { t } = useTranslation();
+
+	return (
+		<>
+			{[...titles].map((title) => (
+				<View
+					key={title}
+					className="m-2 flex-row items-center justify-between rounded bg-card px-6"
+				>
+					<P>{t("videos-map.related", { title })}</P>
+					<IconButton
+						icon={Close}
+						onPress={() => removeTitle(title)}
+						{...tooltip(t("misc.cancel"))}
+					/>
+				</View>
+			))}
+			<View className="mx-6 mb-6 flex-row items-center">
+				<SortMenu sort={sort} setSort={setSort} />
+			</View>
+		</>
 	);
 };
 
