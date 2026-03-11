@@ -4,7 +4,7 @@ import ExpandMore from "@material-symbols/svg-400/rounded/keyboard_arrow_down-fi
 import SearchIcon from "@material-symbols/svg-400/rounded/search-fill.svg";
 import * as Popover from "@radix-ui/react-popover";
 import { useMemo, useRef, useState } from "react";
-import { Platform, View } from "react-native";
+import { Platform, Pressable, View } from "react-native";
 import { useInfiniteFetch } from "~/query/query";
 import { cn } from "~/utils";
 import type { ComboBoxProps } from "./combobox";
@@ -117,6 +117,7 @@ export const ComboBox = <Data,>({
 					</div>
 					<LegendList
 						data={data}
+						extraData={selectedKeys}
 						estimatedItemSize={40}
 						keyExtractor={(item: Data | null, index: number) =>
 							item ? getKey(item) : `placeholder-${index}`
@@ -168,14 +169,11 @@ const ComboBoxItem = ({
 	onSelect: () => void;
 }) => {
 	return (
-		<button
-			type="button"
-			onClick={onSelect}
+		<Pressable
+			onPress={onSelect}
 			className={cn(
-				"flex w-full select-none items-center rounded py-2 pr-6 pl-8 outline-0",
-				"font-sans text-slate-600 dark:text-slate-400",
-				"hover:bg-accent hover:text-slate-200",
-				"group",
+				"flex w-full select-none rounded py-2 pr-6 pl-8 outline-0",
+				"group focus-within:bg-accent hover:bg-accent",
 			)}
 		>
 			{selected && (
@@ -187,8 +185,10 @@ const ComboBoxItem = ({
 					)}
 				/>
 			)}
-			<span className="text-left group-hover:text-slate-200">{label}</span>
-		</button>
+			<P className="group-focus-within:text-slate-200 group-hover:text-slate-200">
+				{label}
+			</P>
+		</Pressable>
 	);
 };
 

@@ -1,31 +1,39 @@
+import { useRecyclingState } from "@legendapp/list";
 import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
 import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
 import Question from "@material-symbols/svg-400/rounded/question_mark-fill.svg";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { entryDisplayNumber } from "~/components/entries";
-import { Entry, type FullVideo } from "~/models";
+import { Entry } from "~/models";
 import { ComboBox, IconButton, P, Skeleton, tooltip } from "~/primitives";
 import { uniqBy } from "~/utils";
 import type { useEditLinks } from ".";
 
 export const PathItem = ({
-	item,
+	id,
+	path,
+	entries,
+	guessTitle,
+	guesses,
 	serieSlug,
 	addTitle,
 	editLinks,
 }: {
-	item: FullVideo;
+	id: string;
+	guessTitle: string;
+	path: string;
+	entries: Entry[];
+	guesses: { season: number | null; episode: number }[];
 	serieSlug: string;
 	addTitle: (title: string) => void;
 	editLinks: ReturnType<typeof useEditLinks>;
 }) => {
 	const { t } = useTranslation();
-
-	const saved = item.entries.length;
+	const [saved] = useRecyclingState(entries.length);
 	const guess = !saved
 		? uniqBy(
-				item.guess.episodes.map(
+				guesses.map(
 					(x) =>
 						({
 							kind: "episode",
@@ -47,8 +55,8 @@ export const PathItem = ({
 					<IconButton
 						icon={Close}
 						onPress={async () => {
-							addTitle(item.guess.title);
-							await editLinks({ video: item.id, entries: [] });
+							addTitle(guessTitle);
+							await editLinks({ video: id, entries: [] });
 						}}
 						{...tooltip(t("videos-map.delete"))}
 					/>
@@ -57,9 +65,8 @@ export const PathItem = ({
 						icon={Check}
 						onPress={async () => {
 							await editLinks({
-								video: item.id,
+								video: id,
 								entries: guess,
-								guess: true,
 							});
 						}}
 						{...tooltip(t("videos-map.validate"))}
@@ -71,13 +78,13 @@ export const PathItem = ({
 						{...tooltip(t("videos-map.no-guess"))}
 					/>
 				)}
-				<P className="flex-1 flex-wrap">{item.path}</P>
+				<P className="flex-1 flex-wrap">{path}</P>
 			</View>
 			<ComboBox
 				multiple
 				label={t("videos-map.none")}
 				searchPlaceholder={t("navbar.search")}
-				values={saved ? item.entries : guess}
+				values={saved ? entries : guess}
 				query={(q) => ({
 					parser: Entry,
 					path: ["api", "series", serieSlug, "entries"],
@@ -97,9 +104,9 @@ export const PathItem = ({
 				getLabel={(x) => `${entryDisplayNumber(x)} - ${x.name}`}
 				getSmallLabel={entryDisplayNumber}
 				onValueChange={async (entries) => {
-					if (!entries.length) addTitle(item.guess.title);
+					if (!entries.length) addTitle(guessTitle);
 					await editLinks({
-						video: item.id,
+						video: id,
 						entries,
 					});
 				}}

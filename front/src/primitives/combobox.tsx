@@ -158,6 +158,7 @@ export const ComboBox = <Data,>({
 						</View>
 						<LegendList
 							data={data}
+							extraData={selectedKeys}
 							estimatedItemSize={48}
 							keyExtractor={(item: Data | null, index: number) =>
 								item ? getKey(item) : `placeholder-${index}`
