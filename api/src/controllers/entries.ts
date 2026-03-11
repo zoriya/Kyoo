@@ -308,13 +308,17 @@ export async function getEntries({
 		.where(
 			and(
 				filter,
-				query ? sql`${transQ.name} %> ${query}::text` : undefined,
+				query
+					? sql`concat(${entries.episodeNumber}, ' ', ${transQ.name}) %> ${query}::text`
+					: undefined,
 				keysetPaginate({ after, sort }),
 			),
 		)
 		.orderBy(
 			...(query
-				? [sql`word_similarity(${query}::text, ${transQ.name}) desc`]
+				? [
+						sql`word_similarity(${query}::text, concat(${entries.episodeNumber}, ' ', ${transQ.name})) desc`,
+					]
 				: sortToSql(sort)),
 			entries.pk,
 		)
