@@ -70,7 +70,7 @@ func (t *Transcoder) GetVideoIndex(
 	ctx context.Context,
 	path string,
 	video uint32,
-	quality Quality,
+	quality VideoQuality,
 	client string,
 	sha string,
 ) (string, error) {

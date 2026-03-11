@@ -24,7 +24,7 @@ type FileStream struct {
 
 type VideoKey struct {
 	idx     uint32
-	quality Quality
+	quality VideoQuality
 }
 
 func (t *Transcoder) newFileStream(path string, sha string) *FileStream {
@@ -110,7 +110,7 @@ func (fs *FileStream) GetMaster(client string) string {
 	}
 
 	if def_video != nil {
-		qualities := utils.Filter(Qualities, func(quality Quality) bool {
+		qualities := utils.Filter(VideoQualities, func(quality VideoQuality) bool {
 			return quality.Height() < def_video.Height
 		})
 		transcode_count := len(qualities)
@@ -179,7 +179,7 @@ func (fs *FileStream) GetMaster(client string) string {
 	return master
 }
 
-func (fs *FileStream) getVideoStream(idx uint32, quality Quality) (*VideoStream, error) {
+func (fs *FileStream) getVideoStream(idx uint32, quality VideoQuality) (*VideoStream, error) {
 	stream, _ := fs.videos.GetOrCreate(VideoKey{idx, quality}, func() *VideoStream {
 		ret, _ := fs.transcoder.NewVideoStream(fs, idx, quality)
 		return ret
@@ -188,7 +188,7 @@ func (fs *FileStream) getVideoStream(idx uint32, quality Quality) (*VideoStream,
 	return stream, nil
 }
 
-func (fs *FileStream) GetVideoIndex(idx uint32, quality Quality, client string) (string, error) {
+func (fs *FileStream) GetVideoIndex(idx uint32, quality VideoQuality, client string) (string, error) {
 	stream, err := fs.getVideoStream(idx, quality)
 	if err != nil {
 		return "", err
@@ -196,7 +196,7 @@ func (fs *FileStream) GetVideoIndex(idx uint32, quality Quality, client string) 
 	return stream.GetIndex(client)
 }
 
-func (fs *FileStream) GetVideoSegment(idx uint32, quality Quality, segment int32) (string, error) {
+func (fs *FileStream) GetVideoSegment(idx uint32, quality VideoQuality, segment int32) (string, error) {
 	stream, err := fs.getVideoStream(idx, quality)
 	if err != nil {
 		return "", err

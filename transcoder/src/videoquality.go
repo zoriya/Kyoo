@@ -6,25 +6,25 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type Quality string
+type VideoQuality string
 
 const (
-	P240     Quality = "240p"
-	P360     Quality = "360p"
-	P480     Quality = "480p"
-	P720     Quality = "720p"
-	P1080    Quality = "1080p"
-	P1440    Quality = "1440p"
-	P4k      Quality = "4k"
-	P8k      Quality = "8k"
-	NoResize Quality = "transcode"
-	Original Quality = "original"
+	P240     VideoQuality = "240p"
+	P360     VideoQuality = "360p"
+	P480     VideoQuality = "480p"
+	P720     VideoQuality = "720p"
+	P1080    VideoQuality = "1080p"
+	P1440    VideoQuality = "1440p"
+	P4k      VideoQuality = "4k"
+	P8k      VideoQuality = "8k"
+	NoResize VideoQuality = "transcode"
+	Original VideoQuality = "original"
 )
 
 // Purposfully removing Original from this list (since it require special treatments anyways)
-var Qualities = []Quality{P240, P360, P480, P720, P1080, P1440, P4k, P8k}
+var VideoQualities = []VideoQuality{P240, P360, P480, P720, P1080, P1440, P4k, P8k}
 
-func QualityFromString(str string) (Quality, error) {
+func VideoQualityFromString(str string) (VideoQuality, error) {
 	if str == string(Original) {
 		return Original, nil
 	}
@@ -32,7 +32,7 @@ func QualityFromString(str string) (Quality, error) {
 		return NoResize, nil
 	}
 
-	for _, quality := range Qualities {
+	for _, quality := range VideoQualities {
 		if string(quality) == str {
 			return quality, nil
 		}
@@ -41,7 +41,7 @@ func QualityFromString(str string) (Quality, error) {
 }
 
 // I'm not entierly sure about the values for bitrates. Double checking would be nice.
-func (v Quality) AverageBitrate() uint32 {
+func (v VideoQuality) AverageBitrate() uint32 {
 	switch v {
 	case P240:
 		return 400_000
@@ -65,7 +65,7 @@ func (v Quality) AverageBitrate() uint32 {
 	panic("Invalid quality value")
 }
 
-func (v Quality) MaxBitrate() uint32 {
+func (v VideoQuality) MaxBitrate() uint32 {
 	switch v {
 	case P240:
 		return 700_000
@@ -89,7 +89,7 @@ func (v Quality) MaxBitrate() uint32 {
 	panic("Invalid quality value")
 }
 
-func (q Quality) Height() uint32 {
+func (q VideoQuality) Height() uint32 {
 	switch q {
 	case P240:
 		return 240
@@ -113,8 +113,8 @@ func (q Quality) Height() uint32 {
 	panic("Invalid quality value")
 }
 
-func (video *Video) Quality() Quality {
-	for _, quality := range Qualities {
+func (video *Video) Quality() VideoQuality {
+	for _, quality := range VideoQualities {
 		if quality.Height() >= video.Height || quality.AverageBitrate() >= video.Bitrate {
 			return quality
 		}

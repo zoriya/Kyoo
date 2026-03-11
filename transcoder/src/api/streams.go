@@ -88,7 +88,7 @@ func (h *shandler) GetVideoIndex(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	quality, err := src.QualityFromString(c.Param("quality"))
+	quality, err := src.VideoQualityFromString(c.Param("quality"))
 	if err != nil {
 		return err
 	}
@@ -154,7 +154,7 @@ func (h *shandler) GetVideoSegment(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	quality, err := src.QualityFromString(c.Param("quality"))
+	quality, err := src.VideoQualityFromString(c.Param("quality"))
 	if err != nil {
 		return err
 	}
