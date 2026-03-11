@@ -33,6 +33,7 @@ import {
 	jsonbBuildObject,
 	jsonbObjectAgg,
 	sqlarr,
+	unnest,
 } from "~/db/utils";
 import type { Entry } from "~/models/entry";
 import { KError } from "~/models/error";
@@ -56,7 +57,7 @@ import {
 import { desc as description } from "~/models/utils/descriptions";
 import { Guesses, Video } from "~/models/video";
 import type { MovieWatchStatus, SerieWatchStatus } from "~/models/watchlist";
-import { uniqBy } from "~/utils";
+import { comment, uniqBy } from "~/utils";
 import {
 	entryProgressQ,
 	entryVideosQ,
@@ -601,7 +602,7 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 		"series/:id/videos",
 		async ({
 			params: { id },
-			query: { limit, after, query, sort, preferOriginal },
+			query: { limit, after, query, sort, preferOriginal, titles },
 			headers: { "accept-language": langs, ...headers },
 			request: { url },
 			jwt: { sub, settings },
@@ -633,7 +634,12 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 					.from(videos)
 					.leftJoin(evJoin, eq(videos.pk, evJoin.videoPk))
 					.leftJoin(entries, eq(entries.pk, evJoin.entryPk))
-					.where(eq(entries.showPk, serie.pk)),
+					.where(eq(entries.showPk, serie.pk))
+					.union(
+						db
+							.select({ title: sql<string>`title` })
+							.from(sql`unnest(${sqlarr(titles ?? [])}::text[]) as title`),
+					),
 			);
 
 			const languages = processLanguages(langs);
@@ -654,6 +660,11 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
+			for (const i of items)
+				i.entries = i.entries.filter(
+					(x) =>
+						(x as unknown as typeof entries.$inferSelect).showPk === serie.pk,
+				);
 			return createPage(items, { url, sort, limit, headers });
 		},
 		{
@@ -678,6 +689,16 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 					t.Boolean({
 						description: description.preferOriginal,
 					}),
+				),
+				titles: t.Optional(
+					t.Array(
+						t.String({
+							description: comment`
+								Return videos in the serie + videos with a title
+								guess equal to one of the element of this list
+							`,
+						}),
+					),
 				),
 			}),
 			headers: t.Object({

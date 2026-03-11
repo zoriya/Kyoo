@@ -14,7 +14,7 @@ import { bubbleVideo } from "~/models/examples";
 import { isUuid } from "~/models/utils";
 import { Guess, SeedVideo, Video } from "~/models/video";
 import { comment } from "~/utils";
-import { updateAvailableCount, updateAvailableSince } from "./insert/shows";
+import { updateAvailableCount } from "./insert/shows";
 import { linkVideos } from "./video-links";
 
 const CreatedVideo = t.Object({

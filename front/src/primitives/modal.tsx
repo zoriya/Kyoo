@@ -37,11 +37,11 @@ export const Modal = ({
 				<Pressable
 					className={cn(
 						"w-full max-w-3xl rounded-md bg-background",
-						"max-h-[90vh] cursor-default! overflow-hidden *:p-6",
+						"max-h-[90vh] cursor-default! overflow-hidden",
 					)}
 					onPress={(e) => e.preventDefault()}
 				>
-					<View className="mb-4 flex-row items-center justify-between">
+					<View className="flex-row items-center justify-between p-6">
 						<Heading>{title}</Heading>
 						<IconButton
 							icon={Close}
@@ -50,7 +50,11 @@ export const Modal = ({
 							}}
 						/>
 					</View>
-					{scroll ? <ScrollView>{children}</ScrollView> : children}
+					{scroll ? (
+						<ScrollView className="p-6">{children}</ScrollView>
+					) : (
+						<View>{children}</View>
+					)}
 				</Pressable>
 			</Pressable>
 		</>

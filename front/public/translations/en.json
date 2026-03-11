@@ -22,7 +22,8 @@
 		"staff": "Staff",
 		"staff-none": "The staff is unknown",
 		"noOverview": "No overview available",
-		"episode-none": "There is no episodes in this season", "episodeNoMetadata": "No metadata available",
+		"episode-none": "There is no episodes in this season",
+		"episodeNoMetadata": "No metadata available",
 		"tags": "Tags",
 		"tags-none": "No tags available",
 		"links": "Links",
@@ -46,7 +47,11 @@
 		"videosCount": "{{number}} videos",
 		"videos-map": "Edit video mappings",
 		"videos-map-none": "NONE",
-		"videos-map-add": "Add another video"
+		"videos-map-add": "Add another video",
+		"videos-map-delete": "Remove video from serie",
+		"videos-map-validate": "Validate guess and add video to serie",
+		"videos-map-no-guess": "This video was guessed to be part of this serie but we don't know which episode",
+		"videos-map-related": "Added videos related to the title {{title}}"
 	},
 	"browse": {
 		"mediatypekey": {
