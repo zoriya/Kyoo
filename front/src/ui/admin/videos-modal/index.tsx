@@ -25,17 +25,15 @@ export const useEditLinks = (
 		compute: ({
 			video,
 			entries,
-			guess = false,
 		}: {
 			video: string;
 			entries: Omit<Entry, "href" | "progress" | "videos">[];
-			guess?: boolean;
 		}) => ({
 			body: [
 				{
 					id: video,
 					for: entries.map((x) =>
-						guess && x.kind === "episode"
+						x.kind === "episode" && !x.slug
 							? {
 									serie: slug,
 									// @ts-expect-error: idk why it couldn't match x as an episode
@@ -93,7 +91,11 @@ export const VideosModal = () => {
 				layout={{ layout: "vertical", gap: 8, numColumns: 1, size: 48 }}
 				Render={({ item }) => (
 					<PathItem
-						item={item}
+						id={item.id}
+						path={item.path}
+						entries={item.entries as Entry[]}
+						guessTitle={item.guess.title}
+						guesses={item.guess.episodes}
 						serieSlug={slug}
 						addTitle={addTitle}
 						editLinks={editLinks}
