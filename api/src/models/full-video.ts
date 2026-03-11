@@ -8,6 +8,9 @@ import { Video } from "./video";
 export const FullVideo = t.Composite([
 	Video,
 	t.Object({
+		slugs: t.Array(
+			t.String({ format: "slug", examples: ["made-in-abyss-s1e13"] }),
+		),
 		progress: t.Optional(Progress),
 		entries: t.Array(t.Omit(Entry, ["videos", "progress"])),
 		previous: t.Optional(

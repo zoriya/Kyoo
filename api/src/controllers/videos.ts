@@ -29,7 +29,9 @@ import {
 } from "~/db/schema";
 import { watchlist } from "~/db/schema/watchlist";
 import {
+	coalesce,
 	getColumns,
+	jsonbAgg,
 	jsonbBuildObject,
 	jsonbObjectAgg,
 	sqlarr,
@@ -87,6 +89,18 @@ const videoSort = Sort(
 );
 
 const videoRelations = {
+	slugs: () => {
+		return db
+			.select({
+				slugs: coalesce<string[]>(
+					jsonbAgg(entryVideoJoin.slug),
+					sql`'[]'::jsonb`,
+				).as("slugs"),
+			})
+			.from(entryVideoJoin)
+			.where(eq(entryVideoJoin.videoPk, videos.pk))
+			.as("slugs");
+	},
 	progress: () => {
 		const query = db
 			.select({
@@ -294,7 +308,7 @@ export async function getVideos({
 		.with(...cte)
 		.select({
 			...getColumns(videos),
-			...buildRelations(relations, videoRelations, {
+			...buildRelations(["slugs", ...relations], videoRelations, {
 				languages,
 				preferOriginal,
 			}),
