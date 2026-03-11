@@ -73,8 +73,6 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 		return isFetching && !isRefetching ? [...items, ...placeholders] : items;
 	}, [items, isFetching, isRefetching, placeholderCount, numColumns]);
 
-	if (!data.length && Empty) return Empty;
-
 	return (
 		<AnimatedLegendList
 			data={data}
@@ -102,6 +100,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 			onRefresh={layout.layout !== "horizontal" ? refetch : undefined}
 			refreshing={isRefetching}
 			ListHeaderComponent={Header}
+			ListEmptyComponent={Empty}
 			ListFooterComponent={Footer}
 			ItemSeparatorComponent={
 				Divider === true ? HR : (Divider as any) || undefined

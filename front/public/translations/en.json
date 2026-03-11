@@ -55,7 +55,8 @@
 		"no-guess": "This video was guessed to be part of this serie but we don't know which episode",
 		"related": "Added videos related to the title {{title}}",
 		"sort-path": "Path",
-		"sort-entry": "Episode order"
+		"sort-entry": "Episode order",
+		"no-video": "No video file linked to this serie."
 	},
 	"browse": {
 		"mediatypekey": {

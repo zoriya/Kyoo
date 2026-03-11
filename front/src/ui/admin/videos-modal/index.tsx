@@ -1,9 +1,8 @@
-import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { type Entry, FullVideo, type Page } from "~/models";
-import { IconButton, Modal, P, Skeleton, tooltip } from "~/primitives";
+import { Modal, P } from "~/primitives";
 import {
 	InfiniteFetch,
 	type QueryIdentifier,
@@ -12,7 +11,7 @@ import {
 } from "~/query";
 import { useQueryState } from "~/utils";
 import { Header } from "../../details/header";
-import { AddVideoFooter, SortMenu } from "./headers";
+import { AddVideoFooter, VideoListHeader } from "./headers";
 import { PathItem } from "./path-item";
 
 export const useEditLinks = (
@@ -79,25 +78,17 @@ export const VideosModal = () => {
 
 	return (
 		<Modal title={data?.name ?? t("misc.loading")} scroll={false}>
-			{[...titles].map((title) => (
-				<View
-					key={title}
-					className="m-2 flex-row items-center justify-between rounded bg-card px-6"
-				>
-					<P>{t("videos-map.related", { title })}</P>
-					<IconButton
-						icon={Close}
-						onPress={() => {
-							setTitles(titles.filter((x) => x !== title));
-						}}
-						{...tooltip(t("misc.cancel"))}
-					/>
-				</View>
-			))}
-			<View className="mx-6 mb-6 flex-row items-center">
-				<SortMenu sort={sort} setSort={setSort} />
-			</View>
 			<InfiniteFetch
+				Header={
+					<VideoListHeader
+						titles={titles}
+						removeTitle={(title) =>
+							setTitles(titles.filter((x) => x !== title))
+						}
+						sort={sort}
+						setSort={setSort}
+					/>
+				}
 				query={VideosModal.query(slug, titles, sort)}
 				layout={{ layout: "vertical", gap: 8, numColumns: 1, size: 48 }}
 				Render={({ item }) => (
@@ -108,7 +99,12 @@ export const VideosModal = () => {
 						editLinks={editLinks}
 					/>
 				)}
-				Loader={() => <Skeleton />}
+				Loader={PathItem.Loader}
+				Empty={
+					<View className="flex-1">
+						<P className="flex-1 self-center">{t("videos-map.no-video")}</P>
+					</View>
+				}
 				Footer={<AddVideoFooter addTitle={addTitle} />}
 			/>
 		</Modal>
