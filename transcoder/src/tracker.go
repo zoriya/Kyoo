@@ -10,7 +10,7 @@ type ClientInfo struct {
 	sha    string
 	path   string
 	video  *VideoKey
-	audio  *uint32
+	audio  *AudioKey
 	vhead  int32
 	ahead  int32
 }
@@ -151,7 +151,7 @@ func (t *Tracker) DestroyStreamIfOld(sha string) {
 	stream.Destroy()
 }
 
-func (t *Tracker) KillAudioIfDead(sha string, path string, audio uint32) bool {
+func (t *Tracker) KillAudioIfDead(sha string, path string, audio AudioKey) bool {
 	for _, stream := range t.clients {
 		if stream.sha == sha && stream.audio != nil && *stream.audio == audio {
 			return false
@@ -191,7 +191,7 @@ func (t *Tracker) KillVideoIfDead(sha string, path string, video VideoKey) bool 
 	return true
 }
 
-func (t *Tracker) KillOrphanedHeads(sha string, video *VideoKey, audio *uint32) {
+func (t *Tracker) KillOrphanedHeads(sha string, video *VideoKey, audio *AudioKey) {
 	stream, ok := t.transcoder.streams.Get(sha)
 	if !ok {
 		return

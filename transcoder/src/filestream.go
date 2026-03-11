@@ -19,7 +19,12 @@ type FileStream struct {
 	Out        string
 	Info       *MediaInfo
 	videos     CMap[VideoKey, *VideoStream]
-	audios     CMap[uint32, *AudioStream]
+	audios     CMap[AudioKey, *AudioStream]
+}
+
+type AudioKey struct {
+	idx     uint32
+	quality AudioQuality
 }
 
 type VideoKey struct {
@@ -32,7 +37,7 @@ func (t *Transcoder) newFileStream(path string, sha string) *FileStream {
 		transcoder: t,
 		Out:        fmt.Sprintf("%s/%s", Settings.Outpath, sha),
 		videos:     NewCMap[VideoKey, *VideoStream](),
-		audios:     NewCMap[uint32, *AudioStream](),
+		audios:     NewCMap[AudioKey, *AudioStream](),
 	}
 
 	ret.ready.Add(1)
@@ -71,27 +76,28 @@ func (fs *FileStream) Destroy() {
 func (fs *FileStream) GetMaster(client string) string {
 	master := "#EXTM3U\n"
 
-	// TODO: support multiples audio qualities (and original)
-	for _, audio := range fs.Info.Audios {
-		master += "#EXT-X-MEDIA:TYPE=AUDIO,"
-		master += "GROUP-ID=\"audio\","
-		if audio.Language != nil {
-			master += fmt.Sprintf("LANGUAGE=\"%s\",", *audio.Language)
+	for _, quality := range AudioQualities {
+		for _, audio := range fs.Info.Audios {
+			master += "#EXT-X-MEDIA:TYPE=AUDIO,"
+			master += fmt.Sprintf("GROUP-ID=\"audio-%s\",", quality)
+			if audio.Language != nil {
+				master += fmt.Sprintf("LANGUAGE=\"%s\",", *audio.Language)
+			}
+			if audio.Title != nil {
+				master += fmt.Sprintf("NAME=\"%s\",", *audio.Title)
+			} else if audio.Language != nil {
+				master += fmt.Sprintf("NAME=\"%s\",", *audio.Language)
+			} else {
+				master += fmt.Sprintf("NAME=\"Audio %d\",", audio.Index)
+			}
+			if audio.IsDefault {
+				master += "DEFAULT=YES,"
+			}
+			master += "CHANNELS=\"2\","
+			master += fmt.Sprintf("URI=\"audio/%d/%s/index.m3u8?clientId=%s\"\n", audio.Index, quality, client)
 		}
-		if audio.Title != nil {
-			master += fmt.Sprintf("NAME=\"%s\",", *audio.Title)
-		} else if audio.Language != nil {
-			master += fmt.Sprintf("NAME=\"%s\",", *audio.Language)
-		} else {
-			master += fmt.Sprintf("NAME=\"Audio %d\",", audio.Index)
-		}
-		if audio.IsDefault {
-			master += "DEFAULT=YES,"
-		}
-		master += "CHANNELS=\"2\","
-		master += fmt.Sprintf("URI=\"audio/%d/index.m3u8?clientId=%s\"\n", audio.Index, client)
+		master += "\n"
 	}
-	master += "\n"
 
 	// codec is the prefix + the level, the level is not part of the codec we want to compare for the same_codec check bellow
 	transcode_prefix := "avc1.6400"
@@ -204,25 +210,25 @@ func (fs *FileStream) GetVideoSegment(idx uint32, quality VideoQuality, segment 
 	return stream.GetSegment(segment)
 }
 
-func (fs *FileStream) getAudioStream(audio uint32) (*AudioStream, error) {
-	stream, _ := fs.audios.GetOrCreate(audio, func() *AudioStream {
-		ret, _ := fs.transcoder.NewAudioStream(fs, audio)
+func (fs *FileStream) getAudioStream(idx uint32, quality AudioQuality) (*AudioStream, error) {
+	stream, _ := fs.audios.GetOrCreate(AudioKey{idx, quality}, func() *AudioStream {
+		ret, _ := fs.transcoder.NewAudioStream(fs, idx, quality)
 		return ret
 	})
 	stream.ready.Wait()
 	return stream, nil
 }
 
-func (fs *FileStream) GetAudioIndex(audio uint32, client string) (string, error) {
-	stream, err := fs.getAudioStream(audio)
+func (fs *FileStream) GetAudioIndex(idx uint32, quality AudioQuality, client string) (string, error) {
+	stream, err := fs.getAudioStream(idx, quality)
 	if err != nil {
 		return "", nil
 	}
 	return stream.GetIndex(client)
 }
 
-func (fs *FileStream) GetAudioSegment(audio uint32, segment int32) (string, error) {
-	stream, err := fs.getAudioStream(audio)
+func (fs *FileStream) GetAudioSegment(idx uint32, quality AudioQuality, segment int32) (string, error) {
+	stream, err := fs.getAudioStream(idx, quality)
 	if err != nil {
 		return "", nil
 	}

@@ -94,6 +94,7 @@ func (t *Transcoder) GetAudioIndex(
 	ctx context.Context,
 	path string,
 	audio uint32,
+	quality AudioQuality,
 	client string,
 	sha string,
 ) (string, error) {
@@ -105,18 +106,18 @@ func (t *Transcoder) GetAudioIndex(
 		client: client,
 		sha:    sha,
 		path:   path,
-		audio:  &audio,
+		audio:  &AudioKey{audio, quality},
 		vhead:  -1,
 		ahead:  -1,
 	}
-	return stream.GetAudioIndex(audio, client)
+	return stream.GetAudioIndex(audio, quality, client)
 }
 
 func (t *Transcoder) GetVideoSegment(
 	ctx context.Context,
 	path string,
 	video uint32,
-	quality Quality,
+	quality VideoQuality,
 	segment int32,
 	client string,
 	sha string,
@@ -141,6 +142,7 @@ func (t *Transcoder) GetAudioSegment(
 	ctx context.Context,
 	path string,
 	audio uint32,
+	quality AudioQuality,
 	segment int32,
 	client string,
 	sha string,
@@ -153,9 +155,9 @@ func (t *Transcoder) GetAudioSegment(
 		client: client,
 		sha:    sha,
 		path:   path,
-		audio:  &audio,
+		audio:  &AudioKey{audio, quality},
 		ahead:  segment,
 		vhead:  -1,
 	}
-	return stream.GetAudioSegment(audio, segment)
+	return stream.GetAudioSegment(audio, quality, segment)
 }

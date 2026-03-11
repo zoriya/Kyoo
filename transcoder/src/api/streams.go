@@ -20,9 +20,9 @@ func RegisterStreamHandlers(e *echo.Group, transcoder *src.Transcoder) {
 	e.GET("/:path/direct/:identifier", DirectStream)
 	e.GET("/:path/master.m3u8", h.GetMaster)
 	e.GET("/:path/:video/:quality/index.m3u8", h.GetVideoIndex)
-	e.GET("/:path/audio/:audio/index.m3u8", h.GetAudioIndex)
+	e.GET("/:path/audio/:audio/:quality/index.m3u8", h.GetAudioIndex)
 	e.GET("/:path/:video/:quality/:chunk", h.GetVideoSegment)
-	e.GET("/:path/audio/:audio/:chunk", h.GetAudioSegment)
+	e.GET("/:path/audio/:audio/:quality/:chunk", h.GetAudioSegment)
 }
 
 // @Summary      Direct video
@@ -115,12 +115,16 @@ func (h *shandler) GetVideoIndex(c echo.Context) error {
 // This route can take a few seconds to respond since it will way for at least one segment to be
 // available.
 //
-// Path: /:path/audio/:audio/index.m3u8
+// Path: /:path/audio/:audio/:quality/index.m3u8
 //
 // PRIVATE ROUTE (not documented in swagger, can change at any time)
 // Only reached via the master.m3u8.
 func (h *shandler) GetAudioIndex(c echo.Context) error {
 	audio, err := strconv.ParseInt(c.Param("audio"), 10, 32)
+	if err != nil {
+		return err
+	}
+	quality, err := src.AudioQualityFromString(c.Param("quality"))
 	if err != nil {
 		return err
 	}
@@ -133,7 +137,7 @@ func (h *shandler) GetAudioIndex(c echo.Context) error {
 		return err
 	}
 
-	ret, err := h.transcoder.GetAudioIndex(c.Request().Context(), path, uint32(audio), client, sha)
+	ret, err := h.transcoder.GetAudioIndex(c.Request().Context(), path, uint32(audio), quality, client, sha)
 	if err != nil {
 		return err
 	}
@@ -190,12 +194,16 @@ func (h *shandler) GetVideoSegment(c echo.Context) error {
 //
 // Retrieve a chunk of a transcoded audio.
 //
-// Path: /:path/audio/:audio/segments-:chunk.ts
+// Path: /:path/audio/:audio/:quality/segments-:chunk.ts
 //
 // PRIVATE ROUTE (not documented in swagger, can change at any time)
 // Only reached via the master.m3u8.
 func (h *shandler) GetAudioSegment(c echo.Context) error {
 	audio, err := strconv.ParseInt(c.Param("audio"), 10, 32)
+	if err != nil {
+		return err
+	}
+	quality, err := src.AudioQualityFromString(c.Param("quality"))
 	if err != nil {
 		return err
 	}
@@ -212,7 +220,7 @@ func (h *shandler) GetAudioSegment(c echo.Context) error {
 		return err
 	}
 
-	ret, err := h.transcoder.GetAudioSegment(c.Request().Context(), path, uint32(audio), segment, client, sha)
+	ret, err := h.transcoder.GetAudioSegment(c.Request().Context(), path, uint32(audio), quality, segment, client, sha)
 	if err != nil {
 		return err
 	}
