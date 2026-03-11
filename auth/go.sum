@@ -170,8 +170,8 @@ github.com/valyala/fastjson v1.6.7/go.mod h1:CLCAqky6SMuOcxStkYQvblddUtoRxhYMGLr
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 go.opentelemetry.io/auto/sdk v1.2.1 h1:jXsnJ4Lmnqd11kwkBV2LgLoFMZKizbCi5fNZ/ipaZ64=
 go.opentelemetry.io/auto/sdk v1.2.1/go.mod h1:KRTj+aOaElaLi+wW1kO/DZRXwkF4C5xPbEe3ZiIhN7Y=
-go.opentelemetry.io/contrib/bridges/otelslog v0.15.0 h1:yOYhGNPZseueTTvWp5iBD3/CthrmvayUXYEX862dDi4=
-go.opentelemetry.io/contrib/bridges/otelslog v0.15.0/go.mod h1:CvaNVqIfcybc+7xqZNubbE+26K6P7AKZF/l0lE2kdCk=
+go.opentelemetry.io/contrib/bridges/otelslog v0.16.0 h1:ZtVk8SzgioZhBJmJoezi6Jl5uuXoNVLnZxcJCDTqSbM=
+go.opentelemetry.io/contrib/bridges/otelslog v0.16.0/go.mod h1:p0C45DA3hvvo+5hwDilrMIp43ddVBGmwWEHZft4pY6c=
 go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.61.0 h1:F7Jx+6hwnZ41NSFTO5q4LYDtJRXBf2PD0rNBkeB/lus=
 go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.61.0/go.mod h1:UHB22Z8QsdRDrnAtX4PntOl36ajSxcdUMt1sF7Y6E7Q=
 go.opentelemetry.io/contrib/propagators/b3 v1.40.0 h1:xariChe8OOVF3rNlfzGFgQc61npQmXhzZj/i82mxMfg=
