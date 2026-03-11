@@ -94,10 +94,15 @@ SeasonHeader.query = (slug: string): QueryIdentifier<Season> => ({
 export const EntryList = ({
 	slug,
 	season,
+	onSelectVideos,
 	...props
 }: {
 	slug: string;
 	season: string | number;
+	onSelectVideos?: (entry: {
+		name: string | null;
+		videos: { slug: string; path: string }[];
+	}) => void;
 } & Partial<ComponentProps<typeof InfiniteFetch<EntryOrSeason>>>) => {
 	const { t } = useTranslation();
 	const { items: seasons, error } = useInfiniteFetch(SeasonHeader.query(slug));
@@ -140,6 +145,9 @@ export const EntryList = ({
 							serieSlug={null}
 							displayNumber={entryDisplayNumber(item)}
 							watchedPercent={item.progress.percent}
+							onSelectVideos={() =>
+								onSelectVideos?.({ name: item.name, videos: item.videos })
+							}
 						/>
 					)}
 				</Container>

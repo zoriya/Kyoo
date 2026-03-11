@@ -16,6 +16,9 @@ export const Modal = ({
 	scroll?: boolean;
 }) => {
 	const router = useRouter();
+	const close = () => {
+		if (router.canGoBack()) router.back();
+	};
 
 	return (
 		<>
@@ -30,9 +33,7 @@ export const Modal = ({
 			/>
 			<Pressable
 				className="absolute inset-0 cursor-default! items-center justify-center bg-black/60 max-md:px-4"
-				onPress={() => {
-					if (router.canGoBack()) router.back();
-				}}
+				onPress={close}
 			>
 				<Pressable
 					className={cn(
@@ -43,12 +44,7 @@ export const Modal = ({
 				>
 					<View className="flex-row items-center justify-between p-6">
 						<Heading>{title}</Heading>
-						<IconButton
-							icon={Close}
-							onPress={() => {
-								if (router.canGoBack()) router.back();
-							}}
-						/>
+						<IconButton icon={Close} onPress={close} />
 					</View>
 					{scroll ? (
 						<ScrollView className="p-6">{children}</ScrollView>

@@ -22,6 +22,7 @@ import type { Layout } from "~/query";
 import { cn, displayRuntime } from "~/utils";
 
 export const EntryLine = ({
+	kind,
 	slug,
 	serieSlug,
 	name,
@@ -35,9 +36,11 @@ export const EntryLine = ({
 	watchedPercent,
 	href,
 	className,
+	onSelectVideos,
 	videosCount,
 	...props
 }: {
+	kind: "episode" | "movie" | "special";
 	slug: string;
 	// if show slug is null, disable "Go to show" in the context menu
 	serieSlug: string | null;
@@ -51,6 +54,7 @@ export const EntryLine = ({
 	runtime: number | null;
 	watchedPercent: number | null;
 	href: string | null;
+	onSelectVideos?: () => void;
 	videosCount: number;
 } & PressableProps) => {
 	const [moreOpened, setMoreOpened] = useState(false);
@@ -100,6 +104,10 @@ export const EntryLine = ({
 						<View className="flex-col-reverse justify-end md:flex-row md:items-center">
 							{videosCount > 1 && (
 								<PressableFeedback
+									onPress={(e) => {
+										e.preventDefault();
+										onSelectVideos?.();
+									}}
 									className="flex-row items-center rounded-2xl bg-popover p-2 md:mx-4"
 									{...tooltip(t("show.multiVideos"))}
 								>
@@ -125,6 +133,7 @@ export const EntryLine = ({
 							</SubP>
 						</View>
 						<EntryContext
+							kind={kind}
 							slug={slug}
 							serieSlug={serieSlug}
 							isOpen={moreOpened}

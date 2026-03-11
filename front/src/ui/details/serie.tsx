@@ -1,11 +1,12 @@
-import { type ComponentProps, useState } from "react";
+import { type ComponentProps, useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View, type ViewProps } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Path } from "react-native-svg";
 import { EntryLine, entryDisplayNumber } from "~/components/entries";
+import { EntrySelect } from "~/components/entries/select";
 import type { Entry, Serie } from "~/models";
-import { Container, H2, Svg } from "~/primitives";
+import { Container, H2, Svg, usePopup } from "~/primitives";
 import { Fetch } from "~/query";
 import { useQueryState } from "~/utils";
 import { HeaderBackground, useScrollNavbar } from "../navbar";
@@ -23,7 +24,16 @@ export const SvgWave = (props: ComponentProps<typeof Svg>) => {
 	);
 };
 
-export const NextUp = (nextEntry: Entry) => {
+export const NextUp = ({
+	entry,
+	onSelectVideos,
+}: {
+	entry: Entry;
+	onSelectVideos?: (entry: {
+		name: string | null;
+		videos: { slug: string; path: string }[];
+	}) => void;
+}) => {
 	const { t } = useTranslation();
 
 	return (
@@ -31,11 +41,14 @@ export const NextUp = (nextEntry: Entry) => {
 			<Container className="overflow-hidden rounded-2xl bg-card py-4">
 				<H2 className="mb-4 ml-2">{t("show.nextUp")}</H2>
 				<EntryLine
-					{...nextEntry}
+					{...entry}
 					serieSlug={null}
-					videosCount={nextEntry.videos.length}
-					watchedPercent={nextEntry.progress.percent}
-					displayNumber={entryDisplayNumber(nextEntry)}
+					videosCount={entry.videos.length}
+					watchedPercent={entry.progress.percent}
+					displayNumber={entryDisplayNumber(entry)}
+					onSelectVideos={() =>
+						onSelectVideos?.({ name: entry.name, videos: entry.videos })
+					}
 				/>
 			</Container>
 		</View>
@@ -58,9 +71,14 @@ NextUp.Loader = () => {
 const SerieHeader = ({
 	slug,
 	onImageLayout,
+	onSelectVideos,
 }: {
 	slug: string;
 	onImageLayout?: ViewProps["onLayout"];
+	onSelectVideos?: (entry: {
+		name: string | null;
+		videos: { slug: string; path: string }[];
+	}) => void;
 }) => {
 	return (
 		<View className="bg-background">
@@ -70,7 +88,9 @@ const SerieHeader = ({
 				query={Header.query("serie", slug)}
 				Render={(serie) => {
 					const nextEntry = (serie as Serie).nextEntry;
-					return nextEntry ? <NextUp {...nextEntry} /> : null;
+					return nextEntry ? (
+						<NextUp entry={nextEntry} onSelectVideos={onSelectVideos} />
+					) : null;
 				}}
 				Loader={NextUp.Loader}
 			/>
@@ -88,6 +108,17 @@ export const SerieDetails = () => {
 	const { scrollHandler, headerProps, headerHeight } = useScrollNavbar({
 		imageHeight,
 	});
+	const [setPopup] = usePopup();
+
+	const openEntrySelect = useCallback(
+		(entry: {
+			name: string | null;
+			videos: { slug: string; path: string }[];
+		}) => {
+			setPopup(<EntrySelect name={entry.name!} videos={entry.videos} />);
+		},
+		[setPopup],
+	);
 
 	return (
 		<View className="flex-1 bg-card">
@@ -95,9 +126,11 @@ export const SerieDetails = () => {
 			<EntryList
 				slug={slug}
 				season={season}
+				onSelectVideos={openEntrySelect}
 				Header={() => (
 					<SerieHeader
 						slug={slug}
+						onSelectVideos={openEntrySelect}
 						onImageLayout={(e) => setHeight(e.nativeEvent.layout.height)}
 					/>
 				)}
