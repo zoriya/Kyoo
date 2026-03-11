@@ -207,6 +207,7 @@ const videoRelations = {
 						.where(eq(videos.pk, entryVideoJoin.videoPk)),
 				),
 			)
+			.limit(1)
 			.as("show");
 	},
 	previous: ({ languages }: { languages: string[] }) => {
