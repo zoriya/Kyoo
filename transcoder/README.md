@@ -35,10 +35,7 @@ Projects using gocoder:
 I did a blog post explaining the core idea, you can find it at [zoriya.dev/blogs/transcoder](https://zoriya.dev/blogs/transcoder).
 
 ## TODO:
-- Add a swagger
-- Add configurable JWT authorization (v5 of kyoo)
 - Add credits/recaps/intro/preview detection
-- Add multiples qualities for audio streams
 - Improve multi-video support
 - Add optional redis synchronization for replication (`RunLock` was made with this in mind)
 - fmp4 support
