@@ -149,6 +149,58 @@ class MultipleSeasonRule(Rule):
 		return [to_remove, to_add]
 
 
+class PreferFilenameOverDirectory(Rule):
+	"""When a property is found in both the filename and a parent directory, prefer the filename.
+
+	Example: '/media/Dark/Dark (2017) Season 1-3 S01-S03 (1080p NF WEB-DL x265 HEVC 10bit EAC3 5.1 German Ghost)/Season 2/Dark (2017) - S02E05 - Lost and Found (1080p NF WEB-DL x265 Ghost).mkv'
+	Default:
+	```json
+	{
+		"title": "Dark",
+		"season": [1, 2, 3],
+		"episode": 5,
+	}
+	```
+	Expected:
+	```json
+	{
+		"title": "Dark",
+		"season": 2,
+		"episode": 5,
+	}
+	```
+	"""
+
+	priority = POST_PROCESS
+	consequence = RemoveMatch
+
+	@override
+	def when(self, matches: Matches, context) -> Any:
+		fileparts: list[Match] = matches.markers.named("path")  # type: ignore
+
+		if len(fileparts) < 2:
+			return
+
+		filename = fileparts[-1]
+
+		to_remove = []
+		for prop in {"season", "episode"}:
+			all_matches: list[Match] = matches.named(prop)  # type: ignore
+			if not all_matches:
+				continue
+
+			filename_matches = [
+				m
+				for m in all_matches
+				if m.start >= filename.start and m.end <= filename.end
+			]
+			directory_matches = [m for m in all_matches if m.start < filename.start]
+			if filename_matches and directory_matches:
+				to_remove.extend(directory_matches)
+
+		return to_remove if to_remove else None
+
+
 class SeasonYearDedup(Rule):
 	"""Remove "season" when it's the same as "year"
 

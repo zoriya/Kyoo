@@ -1,8 +1,19 @@
 import logging
 import os
 import sys
+from typing import override
 
 from opentelemetry.sdk._logs import LoggingHandler
+
+
+class HealthCheckFilter(logging.Filter):
+	@override
+	def filter(self, record: logging.LogRecord) -> bool:
+		return (
+			record.args is not None
+			and len(record.args) >= 3
+			and record.args[2] not in ["/health", "/ready"]  # pyright: ignore[reportArgumentType]
+		)
 
 
 def configure_logging():
@@ -11,6 +22,9 @@ def configure_logging():
 
 	logging.getLogger("watchfiles").setLevel(logging.WARNING)
 	logging.getLogger("rebulk").setLevel(logging.WARNING)
+	# Only urllib3 consumer is the otel exporter (app uses aiohttp)
+	logging.getLogger("urllib3.connectionpool").setLevel(logging.WARNING)
+	logging.getLogger("uvicorn.access").addFilter(HealthCheckFilter())
 
 	# Add stdout handler
 	stdout_handler = logging.StreamHandler(sys.stdout)
