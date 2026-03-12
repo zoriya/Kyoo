@@ -35,7 +35,7 @@ export const BrowsePage = () => {
 				/>
 			}
 			Render={({ item }) => <LayoutComponent {...itemMap(item)} />}
-			Loader={LayoutComponent.Loader}
+			Loader={() => <LayoutComponent.Loader />}
 		/>
 	);
 };

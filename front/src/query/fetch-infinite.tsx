@@ -42,18 +42,18 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	stickyHeaderConfig?: LegendListProps["stickyHeaderConfig"];
 	Render: (props: { item: Data; index: number }) => ReactElement | null;
 	Loader: (props: { index: number }) => ReactElement | null;
-	Empty?: JSX.Element;
+	Empty?: ReactElement;
 	incremental?: boolean;
 	Divider?: true | ComponentType;
-	Header?: ComponentType<{ children: JSX.Element }> | ReactElement;
-	Footer?: ComponentType<{ children: JSX.Element }> | ReactElement;
+	Header?: ComponentType<{ children: ReactElement }> | ReactElement;
+	Footer?: ComponentType<{ children: ReactElement }> | ReactElement;
 	fetchMore?: boolean;
 	contentContainerStyle?: ViewStyle;
 	onScroll?: LegendListProps["onScroll"];
 	scrollEventThrottle?: LegendListProps["scrollEventThrottle"];
 	columnWrapperStyle?: ViewStyle;
 	outerGap?: boolean;
-}): JSX.Element | null => {
+}): ReactElement | null => {
 	const { numColumns, size, gap } = useBreakpointMap(layout);
 	const oldItems = useRef<Data[] | undefined>(undefined);
 	let { items, fetchNextPage, hasNextPage, isFetching, refetch, isRefetching } =
@@ -109,6 +109,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 			showsVerticalScrollIndicator={false}
 			contentContainerStyle={contentContainerStyle}
 			columnWrapperStyle={{
+				// @ts-expect-error ts is dumb
 				gap,
 				...(Platform.OS === "web" && columnWrapperStyle
 					? { display: "flex", margin: "auto" }

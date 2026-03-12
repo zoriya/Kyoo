@@ -207,6 +207,7 @@ const videoRelations = {
 						.where(eq(videos.pk, entryVideoJoin.videoPk)),
 				),
 			)
+			.limit(1)
 			.as("show");
 	},
 	previous: ({ languages }: { languages: string[] }) => {
@@ -321,7 +322,7 @@ export async function getVideos({
 		.with(...cte)
 		.select({
 			...getColumns(videos),
-			...buildRelations(["slugs", ...relations], videoRelations, {
+			...buildRelations(["slugs", "progress", ...relations], videoRelations, {
 				languages,
 				preferOriginal,
 			}),

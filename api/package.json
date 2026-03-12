@@ -6,7 +6,8 @@
 		"build": "bun build src/index.ts --target bun --outdir ./dist",
 		"start": "NODE_ENV=production bun dist/index.js",
 		"test": "bun test",
-		"format": "biome check --write ."
+		"format": "biome check --write .",
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@elysiajs/opentelemetry": "^1.4.10",
@@ -47,7 +48,8 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.4",
-		"@types/pg": "^8.16.0"
+		"@types/pg": "^8.16.0",
+		"typescript": "^5.9.3"
 	},
 	"module": "src/index.js",
 	"patchedDependencies": {

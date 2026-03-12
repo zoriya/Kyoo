@@ -3,17 +3,10 @@ import KyooLogo from "public/icon.svg";
 import type { ComponentProps } from "react";
 import { type ImageStyle, Platform, View, type ViewProps } from "react-native";
 import { withUniwind } from "uniwind";
-import type { YoshikiStyle } from "yoshiki/src/type";
 import type { KImage } from "~/models";
 import { useToken } from "~/providers/account-context";
 import { cn } from "~/utils";
 import { Skeleton } from "../skeleton";
-
-export type YoshikiEnhanced<Style> = Style extends any
-	? {
-			[key in keyof Style]: YoshikiStyle<Style[key]>;
-		}
-	: never;
 
 const Img = withUniwind(EImage);
 

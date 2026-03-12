@@ -1,6 +1,6 @@
 import type { ComponentProps } from "react";
 import { Tooltip as RTooltip } from "react-tooltip";
-import { useTheme } from "yoshiki/native";
+import { useResolveClassNames } from "uniwind";
 
 export const tooltip = (tooltip: string, up?: boolean) => ({
 	dataSet: {
@@ -12,14 +12,20 @@ export const tooltip = (tooltip: string, up?: boolean) => ({
 });
 
 export const Tooltip = (props: ComponentProps<typeof RTooltip>) => {
-	const theme = useTheme();
+	const { color: background } = useResolveClassNames(
+		"text-color-dark dark:text-color-light",
+	);
+	const { color } = useResolveClassNames(
+		"text-color-light dark:text-color-dark",
+	);
+
 	return (
 		<RTooltip
 			id="tooltip"
 			opacity={0.9}
 			style={{
-				background: theme.contrast,
-				color: theme.alternate.contrast,
+				background: background as string,
+				color: color as string,
 			}}
 			{...props}
 		/>

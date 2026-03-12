@@ -9,7 +9,7 @@ export const Fetch = <Data,>({
 	query: QueryIdentifier<Data>;
 	Render: (item: Data) => ReactElement | null;
 	Loader: () => ReactElement | null;
-}): JSX.Element | null => {
+}): ReactElement | null => {
 	const { data } = useFetch(query);
 
 	if (!data) return <Loader />;

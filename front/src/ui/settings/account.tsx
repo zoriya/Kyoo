@@ -9,17 +9,14 @@ import { type ComponentProps, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useUniwind } from "uniwind";
-import { rem } from "yoshiki/native";
 import type { KyooError, User } from "~/models";
 import {
 	Alert,
 	Button,
-	H1,
-	Icon,
+	type Icon,
 	Input,
 	P,
 	Popup,
-	ts,
 	usePopup,
 } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
@@ -226,43 +223,27 @@ const ChangePopup = ({
 	const [value, setValue] = useState(inital);
 
 	return (
-		<Popup>
-			{({ css }) => (
-				<>
-					<View
-						{...css({ flexDirection: "row", alignItems: "center", gap: ts(2) })}
-					>
-						<Icon icon={icon} />
-						<H1 {...css({ fontSize: rem(2) })}>{label}</H1>
-					</View>
-					<Input
-						autoComplete={autoComplete}
-						value={value}
-						onChangeText={(v) => setValue(v)}
-					/>
-					<View
-						{...css({
-							flexDirection: "row",
-							alignSelf: "flex-end",
-							gap: ts(1),
-						})}
-					>
-						<Button
-							text={t("misc.cancel")}
-							onPress={() => close()}
-							{...css({ minWidth: rem(6) })}
-						/>
-						<Button
-							text={t("misc.edit")}
-							onPress={async () => {
-								await apply(value);
-								close();
-							}}
-							{...css({ minWidth: rem(6) })}
-						/>
-					</View>
-				</>
-			)}
+		<Popup title={label} icon={icon} close={close}>
+			<Input
+				autoComplete={autoComplete}
+				value={value}
+				onChangeText={(v) => setValue(v)}
+			/>
+			<View className="flex-row gap-2 self-end">
+				<Button
+					text={t("misc.cancel")}
+					onPress={() => close()}
+					className="min-w-24"
+				/>
+				<Button
+					text={t("misc.edit")}
+					onPress={async () => {
+						await apply(value);
+						close();
+					}}
+					className="min-w-24"
+				/>
+			</View>
 		</Popup>
 	);
 };
@@ -286,59 +267,41 @@ const ChangePasswordPopup = ({
 	const [error, setError] = useState<string | null>(null);
 
 	return (
-		<Popup>
-			{({ css }) => (
-				<>
-					<View
-						{...css({ flexDirection: "row", alignItems: "center", gap: ts(2) })}
-					>
-						<Icon icon={icon} />
-						<H1 {...css({ fontSize: rem(2) })}>{label}</H1>
-					</View>
-					{hasPassword && (
-						<PasswordInput
-							autoComplete="current-password"
-							value={oldValue}
-							onChangeText={(v) => setOldValue(v)}
-							placeholder={t("settings.account.password.oldPassword")}
-						/>
-					)}
-					<PasswordInput
-						autoComplete="new-password"
-						value={newValue}
-						onChangeText={(v) => setNewValue(v)}
-						placeholder={t("settings.account.password.newPassword")}
-					/>
-					{error && (
-						<P {...css({ color: (theme) => theme.colors.red })}>{error}</P>
-					)}
-					<View
-						{...css({
-							flexDirection: "row",
-							alignSelf: "flex-end",
-							gap: ts(1),
-						})}
-					>
-						<Button
-							text={t("misc.cancel")}
-							onPress={() => close()}
-							{...css({ minWidth: rem(6) })}
-						/>
-						<Button
-							text={t("misc.edit")}
-							onPress={async () => {
-								try {
-									await apply(oldValue, newValue);
-									close();
-								} catch (e) {
-									setError((e as KyooError).message);
-								}
-							}}
-							{...css({ minWidth: rem(6) })}
-						/>
-					</View>
-				</>
+		<Popup title={label} icon={icon} close={close}>
+			{hasPassword && (
+				<PasswordInput
+					autoComplete="current-password"
+					value={oldValue}
+					onChangeText={(v) => setOldValue(v)}
+					placeholder={t("settings.account.password.oldPassword")}
+				/>
 			)}
+			<PasswordInput
+				autoComplete="new-password"
+				value={newValue}
+				onChangeText={(v) => setNewValue(v)}
+				placeholder={t("settings.account.password.newPassword")}
+			/>
+			{error && <P className="text-red-500">{error}</P>}
+			<View className="flex-row gap-2 self-end">
+				<Button
+					text={t("misc.cancel")}
+					onPress={() => close()}
+					className="min-w-24"
+				/>
+				<Button
+					text={t("misc.edit")}
+					onPress={async () => {
+						try {
+							await apply(oldValue, newValue);
+							close();
+						} catch (e) {
+							setError((e as KyooError).message);
+						}
+					}}
+					className="min-w-24"
+				/>
+			</View>
 		</Popup>
 	);
 };

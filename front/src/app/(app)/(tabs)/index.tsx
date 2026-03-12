@@ -1,4 +1,5 @@
-import { HomePage, loader } from "~/ui/home";
+import { HomePage } from "~/ui/home";
 
-export { loader };
+export { ErrorBoundary } from "~/ui/error-boundary";
+
 export default HomePage;

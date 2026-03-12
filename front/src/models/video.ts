@@ -42,14 +42,12 @@ export const FullVideo = Video.extend({
 			Special.omit({ progress: true, videos: true }),
 		]),
 	),
-	progress: z.optional(
-		z.object({
-			percent: z.int().min(0).max(100),
-			time: z.int().min(0),
-			playedDate: zdate().nullable(),
-			videoId: z.string().nullable(),
-		}),
-	),
+	progress: z.object({
+		percent: z.int().min(0).max(100),
+		time: z.int().min(0),
+		playedDate: zdate().nullable(),
+		videoId: z.string().nullable(),
+	}),
 	previous: z.object({ video: z.string(), entry: Entry }).nullable().optional(),
 	next: z.object({ video: z.string(), entry: Entry }).nullable().optional(),
 	show: Show.optional(),

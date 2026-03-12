@@ -5,7 +5,6 @@ import {
 } from "@react-navigation/native";
 import { HydrationBoundary, QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
-import { useColorScheme } from "react-native";
 import { SafeAreaListener } from "react-native-safe-area-context";
 import {
 	Uniwind,
@@ -13,12 +12,11 @@ import {
 	useResolveClassNames,
 	useUniwind,
 } from "uniwind";
-import { ThemeSelector } from "~/primitives/theme";
 import { createQueryClient } from "~/query";
 import { AccountProvider } from "./account-provider";
 import { TranslationsProvider } from "./translations.native";
 
-function getServerData(_key: string) {}
+function getServerData(_key: string): any {}
 
 const QueryProvider = ({ children }: { children: ReactNode }) => {
 	const [queryClient] = useState(() => createQueryClient());
@@ -28,17 +26,6 @@ const QueryProvider = ({ children }: { children: ReactNode }) => {
 				{children}
 			</HydrationBoundary>
 		</QueryClientProvider>
-	);
-};
-
-const ThemeProvider = ({ children }: { children: ReactNode }) => {
-	// we can't use "auto" here because it breaks the `RnThemeProvider`
-	const userTheme = useColorScheme();
-
-	return (
-		<ThemeSelector theme={userTheme ?? "light"} font={{ normal: "inherit" }}>
-			{children}
-		</ThemeSelector>
 	);
 };
 
@@ -81,15 +68,13 @@ const RnTheme = ({ children }: { children: ReactNode }) => {
 export const Providers = ({ children }: { children: ReactNode }) => {
 	return (
 		<QueryProvider>
-			<ThemeProvider>
-				<RnTheme>
-					<TranslationsProvider>
-						<AccountProvider>
-							<PortalProvider>{children}</PortalProvider>
-						</AccountProvider>
-					</TranslationsProvider>
-				</RnTheme>
-			</ThemeProvider>
+			<RnTheme>
+				<TranslationsProvider>
+					<AccountProvider>
+						<PortalProvider>{children}</PortalProvider>
+					</AccountProvider>
+				</TranslationsProvider>
+			</RnTheme>
 		</QueryProvider>
 	);
 };

@@ -1,65 +1,70 @@
 import { usePortal } from "@gorhom/portal";
+import Close from "@material-symbols/svg-400/rounded/close.svg";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
-import { ScrollView, View } from "react-native";
-import { px, vh } from "yoshiki/native";
-import { Container } from "./container";
-import { ContrastArea, SwitchVariant, type YoshikiFunc } from "./theme";
-import { ts } from "./utils";
+import { Pressable, ScrollView, View } from "react-native";
+import { cn } from "~/utils";
+import { Icon, IconButton, type Icon as IconType } from "./icons";
+import { Heading } from "./text";
 
-export const Popup = ({
+export const Overlay = ({
+	icon,
+	title,
+	close,
 	children,
-	...props
+	scroll = true,
 }: {
-	children: ReactNode | YoshikiFunc<ReactNode>;
+	icon?: IconType;
+	title: string;
+	close?: () => void;
+	children: ReactNode;
+	scroll?: boolean;
 }) => {
 	return (
-		<ContrastArea mode="user">
-			<SwitchVariant>
-				{({ css, theme }) => (
-					<View
-						{...css({
-							position: "absolute",
-							top: 0,
-							left: 0,
-							right: 0,
-							bottom: 0,
-							bg: (theme) => theme.themeOverlay,
-							justifyContent: "center",
-							alignItems: "center",
-						})}
-					>
-						<Container
-							{...css(
-								{
-									borderRadius: px(6),
-									paddingHorizontal: 0,
-									bg: (theme) => theme.background,
-									overflow: "hidden",
-								},
-								props,
-							)}
-						>
-							<ScrollView
-								contentContainerStyle={{
-									paddingHorizontal: px(15),
-									paddingVertical: ts(4),
-									gap: ts(2),
-								}}
-								{...css({
-									maxHeight: vh(95),
-									flexGrow: 0,
-									flexShrink: 1,
-								})}
-							>
-								{typeof children === "function"
-									? children({ css, theme })
-									: children}
-							</ScrollView>
-						</Container>
-					</View>
+		<Pressable
+			className="absolute inset-0 cursor-default! items-center justify-center bg-black/60 max-md:px-4"
+			onPress={close}
+		>
+			<Pressable
+				className={cn(
+					"w-full max-w-3xl rounded-md bg-background",
+					"max-h-[90vh] cursor-default! overflow-hidden",
 				)}
-			</SwitchVariant>
-		</ContrastArea>
+				onPress={(e) => e.preventDefault()}
+			>
+				<View className="flex-row items-center justify-between p-6">
+					<View className="flex-row items-center gap-2">
+						{icon && <Icon icon={icon} />}
+						<Heading>{title}</Heading>
+					</View>
+					{close && <IconButton icon={Close} onPress={close} />}
+				</View>
+				{scroll ? (
+					<ScrollView className="p-6">{children}</ScrollView>
+				) : (
+					<View className="flex-1">{children}</View>
+				)}
+			</Pressable>
+		</Pressable>
+	);
+};
+
+export const Popup = ({
+	icon,
+	title,
+	close,
+	children,
+	scroll,
+}: {
+	icon?: IconType;
+	title: string;
+	close?: () => void;
+	children: ReactNode;
+	scroll?: boolean;
+}) => {
+	return (
+		<Overlay icon={icon} title={title} close={close} scroll={scroll}>
+			{children}
+		</Overlay>
 	);
 };
 

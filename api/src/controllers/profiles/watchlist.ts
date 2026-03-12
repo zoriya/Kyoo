@@ -365,6 +365,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 	)
 	.delete(
 		"/series/:id/watchstatus",
+		// @ts-expect-error the t.Composite breaks typecheck idk why
 		async ({ params: { id }, jwt: { sub }, status }) => {
 			const profilePk = await getOrCreateProfile(sub);
 			if (!profilePk) {
@@ -403,7 +404,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 				}),
 			}),
 			response: {
-				200: t.Intersect([SerieWatchStatus, DbMetadata]),
+				200: t.Composite([SerieWatchStatus, DbMetadata]),
 				401: KError,
 				404: KError,
 			},

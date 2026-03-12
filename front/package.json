@@ -12,7 +12,8 @@
 		"lint": "biome lint .",
 		"lint:fix": "biome lint . --write",
 		"format": "biome format .",
-		"format:fix": "biome format . --write"
+		"format:fix": "biome format . --write",
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@babel/plugin-proposal-export-namespace-from": "^7.18.9",
@@ -74,7 +75,6 @@
 		"uniwind": "^1.2.6",
 		"uuid": "^13.0.0",
 		"video.js": "^8.23.4",
-		"yoshiki": "1.2.14",
 		"zod": "^4.3.5"
 	},
 	"devDependencies": {

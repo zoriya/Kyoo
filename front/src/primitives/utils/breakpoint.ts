@@ -1,15 +1,31 @@
 import { useWindowDimensions } from "react-native";
-import {
-	breakpoints,
-	isBreakpoints,
-	type Breakpoints as YoshikiBreakpoint,
-} from "yoshiki/native";
 
+export const breakpoints = {
+	xs: 0,
+	sm: 600,
+	md: 900,
+	lg: 1200,
+	xl: 1600,
+};
+
+type Breakpoints<Property> = {
+	[key in keyof typeof breakpoints]?: Property;
+};
 type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> &
 	U[keyof U];
-export type Breakpoint<T> = T | AtLeastOne<YoshikiBreakpoint<T>>;
+export type Breakpoint<T> = T | AtLeastOne<Breakpoints<T>>;
 
 // copied from yoshiki.
+const isBreakpoints = <T>(value: unknown): value is Breakpoints<T> => {
+	if (typeof value !== "object" || !value) return false;
+	for (const v of Object.keys(value)) {
+		if (!(v in breakpoints)) {
+			return false;
+		}
+	}
+	return true;
+};
+
 const useBreakpoint = () => {
 	const { width } = useWindowDimensions();
 	const idx = Object.values(breakpoints).findLastIndex((x) => x <= width);
@@ -19,7 +35,7 @@ const useBreakpoint = () => {
 
 const getBreakpointValue = <T>(value: Breakpoint<T>, breakpoint: number): T => {
 	if (!isBreakpoints(value)) return value;
-	const bpKeys = Object.keys(breakpoints) as Array<keyof YoshikiBreakpoint<T>>;
+	const bpKeys = Object.keys(breakpoints) as Array<keyof Breakpoints<T>>;
 	for (let i = breakpoint; i >= 0; i--) {
 		if (bpKeys[i] in value) {
 			const val = value[bpKeys[i]];

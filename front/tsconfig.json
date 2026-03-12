@@ -18,15 +18,13 @@
 		"types": ["node", "react"],
 		"lib": ["dom", "esnext"]
 	},
-	"include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
-	"exclude": [
-		"node_modules",
-		".expo",
-		"scripts",
-		"**/test",
-		"**/dist",
-		"**/types",
-		"**/tests"
+	"include": [
+		"**/*.ts",
+		"**/*.tsx",
+		".expo/types/**/*.ts",
+		"expo-env.d.ts",
+		"node_modules/uniwind/types.d.ts"
 	],
+	"exclude": [".expo", "scripts", "**/test", "**/dist", "**/types", "**/tests"],
 	"extends": "expo/tsconfig.base"
 }
