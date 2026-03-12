@@ -2,7 +2,9 @@
 	"compilerOptions": {
 		"baseUrl": ".",
 		"paths": {
-			"~/*": ["./src/*"]
+			"~/*": [
+				"./src/*"
+			]
 		},
 		"strict": true,
 		"rootDir": ".",
@@ -15,12 +17,23 @@
 		"jsx": "react-jsx",
 		"forceConsistentCasingInFileNames": true,
 		"allowImportingTsExtensions": true,
-		"types": ["node", "react"],
-		"lib": ["dom", "esnext"]
+		"types": [
+			"node",
+			"react"
+		],
+		"lib": [
+			"dom",
+			"esnext"
+		]
 	},
-	"include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
+	"include": [
+		"**/*.ts",
+		"**/*.tsx",
+		".expo/types/**/*.ts",
+		"expo-env.d.ts",
+		"node_modules/uniwind/types.d.ts"
+	],
 	"exclude": [
-		"node_modules",
 		".expo",
 		"scripts",
 		"**/test",

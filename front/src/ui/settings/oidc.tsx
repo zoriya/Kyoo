@@ -9,7 +9,6 @@
 // import { Button, IconButton, Link, Skeleton, tooltip, ts } from "@kyoo/primitives";
 // import { useTranslation } from "react-i18next";
 // import { ImageBackground } from "react-native";
-// import { rem, useYoshiki } from "yoshiki/native";
 // import { Preference, SettingsContainer } from "./base";
 //
 // import Badge from "@material-symbols/svg-400/outlined/badge.svg";
@@ -19,7 +18,6 @@
 //
 // export const OidcSettings = () => {
 // 	const account = useAccount()!;
-// 	const { css } = useYoshiki();
 // 	const { t } = useTranslation();
 // 	const { data, error } = useFetch(OidcSettings.query());
 // 	const queryClient = useQueryClient();

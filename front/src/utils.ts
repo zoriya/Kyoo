@@ -12,7 +12,7 @@ export const useForceRerender = () => {
 };
 
 export function setServerData(_key: string, _val: any) {}
-export function getServerData(key: string) {
+export function getServerData(key: string): any {
 	return key;
 }
 

@@ -20,7 +20,6 @@ export * from "./select";
 export * from "./skeleton";
 export * from "./slider";
 export * from "./text";
-export * from "./theme";
 export * from "./tooltip";
 
 export * from "./utils";

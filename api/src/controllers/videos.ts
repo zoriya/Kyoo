@@ -322,7 +322,7 @@ export async function getVideos({
 		.with(...cte)
 		.select({
 			...getColumns(videos),
-			...buildRelations(["slugs", ...relations], videoRelations, {
+			...buildRelations(["slugs", "progress", ...relations], videoRelations, {
 				languages,
 				preferOriginal,
 			}),
