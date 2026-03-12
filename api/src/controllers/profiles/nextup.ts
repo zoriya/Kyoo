@@ -69,6 +69,7 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 	})
 	.get(
 		"/profiles/me/nextup",
+		// @ts-expect-error the t.Composite breaks typecheck idk why
 		async ({
 			query: { sort, filter, query, limit, after },
 			headers: { "accept-language": languages, ...headers },

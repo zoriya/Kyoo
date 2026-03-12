@@ -12,7 +12,8 @@
 		"lint": "biome lint .",
 		"lint:fix": "biome lint . --write",
 		"format": "biome format .",
-		"format:fix": "biome format . --write"
+		"format:fix": "biome format . --write",
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@babel/plugin-proposal-export-namespace-from": "^7.18.9",
