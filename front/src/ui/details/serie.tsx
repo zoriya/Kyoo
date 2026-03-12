@@ -108,16 +108,22 @@ export const SerieDetails = () => {
 	const { scrollHandler, headerProps, headerHeight } = useScrollNavbar({
 		imageHeight,
 	});
-	const [setPopup] = usePopup();
+	const [setPopup, closePopup] = usePopup();
 
 	const openEntrySelect = useCallback(
 		(entry: {
 			name: string | null;
 			videos: { slug: string; path: string }[];
 		}) => {
-			setPopup(<EntrySelect name={entry.name!} videos={entry.videos} />);
+			setPopup(
+				<EntrySelect
+					name={entry.name ?? ""}
+					videos={entry.videos}
+					close={closePopup}
+				/>,
+			);
 		},
-		[setPopup],
+		[setPopup, closePopup],
 	);
 
 	return (
