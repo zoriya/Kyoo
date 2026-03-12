@@ -30,11 +30,13 @@ export const NextUp = ({
 }: {
 	entry: Entry;
 	onSelectVideos?: (entry: {
+		displayNumber: string;
 		name: string | null;
-		videos: { slug: string; path: string }[];
+		videos: Entry["videos"];
 	}) => void;
 }) => {
 	const { t } = useTranslation();
+	const displayNumber = entryDisplayNumber(entry);
 
 	return (
 		<View className="m-4 flex-1">
@@ -45,9 +47,13 @@ export const NextUp = ({
 					serieSlug={null}
 					videosCount={entry.videos.length}
 					watchedPercent={entry.progress.percent}
-					displayNumber={entryDisplayNumber(entry)}
+					displayNumber={displayNumber}
 					onSelectVideos={() =>
-						onSelectVideos?.({ name: entry.name, videos: entry.videos })
+						onSelectVideos?.({
+							displayNumber,
+							name: entry.name,
+							videos: entry.videos,
+						})
 					}
 				/>
 			</Container>
@@ -76,8 +82,9 @@ const SerieHeader = ({
 	slug: string;
 	onImageLayout?: ViewProps["onLayout"];
 	onSelectVideos?: (entry: {
+		displayNumber: string;
 		name: string | null;
-		videos: { slug: string; path: string }[];
+		videos: Entry["videos"];
 	}) => void;
 }) => {
 	return (
@@ -112,11 +119,13 @@ export const SerieDetails = () => {
 
 	const openEntrySelect = useCallback(
 		(entry: {
+			displayNumber: string;
 			name: string | null;
-			videos: { slug: string; path: string }[];
+			videos: Entry["videos"];
 		}) => {
 			setPopup(
 				<EntrySelect
+					displayNumber={entry.displayNumber}
 					name={entry.name ?? ""}
 					videos={entry.videos}
 					close={closePopup}

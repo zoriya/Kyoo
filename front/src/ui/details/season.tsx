@@ -100,8 +100,9 @@ export const EntryList = ({
 	slug: string;
 	season: string | number;
 	onSelectVideos?: (entry: {
+		displayNumber: string;
 		name: string | null;
-		videos: { slug: string; path: string }[];
+		videos: Entry["videos"];
 	}) => void;
 } & Partial<ComponentProps<typeof InfiniteFetch<EntryOrSeason>>>) => {
 	const { t } = useTranslation();
@@ -146,7 +147,11 @@ export const EntryList = ({
 							displayNumber={entryDisplayNumber(item)}
 							watchedPercent={item.progress.percent}
 							onSelectVideos={() =>
-								onSelectVideos?.({ name: item.name, videos: item.videos })
+								onSelectVideos?.({
+									displayNumber: entryDisplayNumber(item),
+									name: item.name,
+									videos: item.videos,
+								})
 							}
 						/>
 					)}
