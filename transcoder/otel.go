@@ -34,7 +34,7 @@ import (
 func setupOtel(ctx context.Context) (func(context.Context) error, error) {
 	res, err := resource.New(
 		ctx,
-		resource.WithAttributes(semconv.ServiceNameKey.String("kyoo.auth")),
+		resource.WithAttributes(semconv.ServiceNameKey.String("kyoo.transcoder")),
 		resource.WithFromEnv(),
 		resource.WithTelemetrySDK(),
 		resource.WithProcess(),
