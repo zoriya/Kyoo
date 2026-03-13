@@ -1,9 +1,17 @@
-import type { LegendListProps } from "@legendapp/list";
-import { AnimatedLegendList } from "@legendapp/list/reanimated";
+import type {
+	LegendListComponent,
+	LegendListProps,
+} from "@legendapp/list/react-native";
+import { LegendList } from "@legendapp/list/react-native";
 import { type ComponentType, type ReactElement, useMemo, useRef } from "react";
 import { Platform, type ViewStyle } from "react-native";
+import { createAnimatedComponent } from "react-native-reanimated";
 import { type Breakpoint, HR, useBreakpointMap } from "~/primitives";
 import { type QueryIdentifier, useInfiniteFetch } from "./query";
+
+const AnimatedLegendList = createAnimatedComponent(
+	LegendList,
+) as LegendListComponent;
 
 export type Layout = {
 	numColumns: Breakpoint<number>;
@@ -29,7 +37,6 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	fetchMore = true,
 	contentContainerStyle,
 	columnWrapperStyle,
-	outerGap = false,
 	...props
 }: {
 	query: QueryIdentifier<Data>;
@@ -51,8 +58,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	contentContainerStyle?: ViewStyle;
 	onScroll?: LegendListProps["onScroll"];
 	scrollEventThrottle?: LegendListProps["scrollEventThrottle"];
-	columnWrapperStyle?: ViewStyle;
-	outerGap?: boolean;
+	columnWrapperStyle?: Omit<ViewStyle, "gap" | "rowGap" | "columnGap">;
 }): ReactElement | null => {
 	const { numColumns, size, gap } = useBreakpointMap(layout);
 	const oldItems = useRef<Data[] | undefined>(undefined);
@@ -109,12 +115,9 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 			showsVerticalScrollIndicator={false}
 			contentContainerStyle={contentContainerStyle}
 			columnWrapperStyle={{
-				// @ts-expect-error ts is dumb
 				gap,
-				...(Platform.OS === "web" && columnWrapperStyle
-					? { display: "flex", margin: "auto" }
-					: {}),
-				...(outerGap ? { marginInline: gap } : {}),
+				marginLeft: gap,
+				marginRight: gap,
 				...columnWrapperStyle,
 			}}
 			{...props}

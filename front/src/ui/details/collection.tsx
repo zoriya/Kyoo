@@ -58,7 +58,6 @@ export const CollectionDetails = () => {
 				contentContainerStyle={{
 					paddingBottom: insets.bottom,
 				}}
-				outerGap
 			/>
 		</View>
 	);
