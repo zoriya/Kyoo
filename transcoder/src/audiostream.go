@@ -33,7 +33,7 @@ func (t *Transcoder) NewAudioStream(file *FileStream, idx uint32, quality AudioQ
 }
 
 func (as *AudioStream) getOutPath(encoder_id int) string {
-	return fmt.Sprintf("%s/segment-a%d-%d-%d-%%d.ts", as.file.Out, as.quality, as.audio.Index, encoder_id)
+	return fmt.Sprintf("%s/segment-a%d-%s-%d-%%d.ts", as.file.Out, as.audio.Index, string(as.quality), encoder_id)
 }
 
 func (as *AudioStream) getFlags() Flags {
