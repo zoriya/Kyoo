@@ -12,7 +12,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	_ "github.com/zoriya/kyoo/transcoder/docs"
 
-	echoSwagger "github.com/swaggo/echo-swagger"
+	echoSwagger "github.com/swaggo/echo-swagger/v2"
 	"github.com/zoriya/kyoo/transcoder/src"
 	"github.com/zoriya/kyoo/transcoder/src/api"
 	"github.com/zoriya/kyoo/transcoder/src/utils"
