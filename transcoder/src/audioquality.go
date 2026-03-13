@@ -13,11 +13,11 @@ const (
 	K192      AudioQuality = "192k"
 	K256      AudioQuality = "256k"
 	K320      AudioQuality = "320k"
-	M1        AudioQuality = "1411k" // AKA CD Quality (1,411mbps)
+	K512      AudioQuality = "512k"
 	AOriginal AudioQuality = "original"
 )
 
-var AudioQualities = []AudioQuality{K128, K192, K256, K320, M1}
+var AudioQualities = []AudioQuality{K128, K192, K256, K320, K512}
 
 func AudioQualityFromString(str string) (AudioQuality, error) {
 	if str == string(AOriginal) {
@@ -42,8 +42,8 @@ func (a AudioQuality) Bitrate() uint32 {
 		return 256_000
 	case K320:
 		return 320_000
-	case M1:
-		return 1_411_000
+	case K512:
+		return 512_000
 	case AOriginal:
 		panic("Original quality must be handled specially")
 	}
