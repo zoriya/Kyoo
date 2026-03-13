@@ -53,3 +53,21 @@ export const FullVideo = Video.extend({
 	show: Show.optional(),
 });
 export type FullVideo = z.infer<typeof FullVideo>;
+
+export const ScanRequest = z.object({
+	id: z.string(),
+	kind: z.enum(["episode", "movie"]),
+	title: z.string(),
+	year: z.int().nullable(),
+	status: z.enum(["pending", "running", "failed"]),
+	error: z
+		.object({
+			title: z.string(),
+			message: z.string(),
+			traceback: z.array(z.string()).default([]),
+		})
+		.nullable(),
+	startedAt: zdate().nullable(),
+	videos: z.array(z.string()).default([]),
+});
+export type ScanRequest = z.infer<typeof ScanRequest>;

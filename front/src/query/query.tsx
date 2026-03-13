@@ -141,6 +141,7 @@ export type QueryIdentifier<T = unknown> = {
 
 	placeholderData?: T | (() => T);
 	enabled?: boolean;
+	refetchInterval?: number;
 	options?: Partial<Parameters<typeof queryFn>[0]> & {
 		apiUrl?: string;
 		returnError?: boolean;
@@ -190,6 +191,7 @@ export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 			}) as Promise<Data>,
 		placeholderData: query.placeholderData as any,
 		enabled: query.enabled,
+		refetchInterval: query.refetchInterval,
 	});
 
 	if (query.options?.returnError !== true) {
@@ -251,6 +253,7 @@ export const useInfiniteFetch = <Data,>(query: QueryIdentifier<Data>) => {
 		initialPageParam: undefined,
 		placeholderData: query.placeholderData as any,
 		enabled: query.enabled,
+		refetchInterval: query.refetchInterval,
 	});
 	const ret = res as typeof res & { items?: Data[] };
 	ret.items = ret.data?.pages.flatMap((x) => x.items);
