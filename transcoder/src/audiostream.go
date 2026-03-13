@@ -7,7 +7,7 @@ import (
 
 type AudioStream struct {
 	Stream
-	index   uint32
+	audio   *Audio
 	quality AudioQuality
 }
 
@@ -20,14 +20,20 @@ func (t *Transcoder) NewAudioStream(file *FileStream, idx uint32, quality AudioQ
 	}
 
 	ret := new(AudioStream)
-	ret.index = idx
 	ret.quality = quality
+	for _, audio := range file.Info.Audios {
+		if audio.Index == idx {
+			ret.audio = &audio
+			break
+		}
+	}
+
 	NewStream(file, keyframes, ret, &ret.Stream)
 	return ret, nil
 }
 
 func (as *AudioStream) getOutPath(encoder_id int) string {
-	return fmt.Sprintf("%s/segment-a%d-%d-%d-%%d.ts", as.file.Out, as.quality, as.index, encoder_id)
+	return fmt.Sprintf("%s/segment-a%d-%d-%d-%%d.ts", as.file.Out, as.quality, as.audio.Index, encoder_id)
 }
 
 func (as *AudioStream) getFlags() Flags {
@@ -35,12 +41,18 @@ func (as *AudioStream) getFlags() Flags {
 }
 
 func (as *AudioStream) getTranscodeArgs(segments string) []string {
-	// TODO If quality is Original, get quality of original source
-	return []string{
-		"-map", fmt.Sprintf("0:a:%d", as.index),
+	args := []string{
+		"-map", fmt.Sprintf("0:a:%d", as.audio.Index),
 		"-c:a", "aac",
 		// TODO: Support 5.1 audio streams.
 		"-ac", "2",
-		"-b:a", fmt.Sprint(as.quality.Bitrate()),
 	}
+	if as.quality == AOriginal {
+		args = append(args, "-b:a", fmt.Sprint(as.audio.Bitrate))
+	} else {
+		args = append(args,
+			"-b:a", fmt.Sprint(as.quality.Bitrate()),
+		)
+	}
+	return args
 }
