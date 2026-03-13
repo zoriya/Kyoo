@@ -43,15 +43,15 @@ func (as *AudioStream) getFlags() Flags {
 func (as *AudioStream) getTranscodeArgs(segments string) []string {
 	args := []string{
 		"-map", fmt.Sprintf("0:a:%d", as.audio.Index),
-		"-c:a", "aac",
-		// TODO: Support 5.1 audio streams.
-		"-ac", "2",
 	}
 	if as.quality == AOriginal {
-		args = append(args, "-b:a", fmt.Sprint(as.audio.Bitrate))
+		args = append(args, "-c:a", "copy")
 	} else {
 		args = append(args,
+			// TODO: Support 5.1 audio streams.
+			"-ac", "2",
 			"-b:a", fmt.Sprint(as.quality.Bitrate()),
+			"-c:a", "aac",
 		)
 	}
 	return args
