@@ -103,6 +103,7 @@ class FsScanner:
 							await self.scan(file)
 						case Change.added:
 							logger.info("New video found: %s", file)
+							self._info = await self._client.get_videos_info()
 							await self._register([file])
 						case Change.deleted:
 							logger.info("Delete video at: %s", file)
