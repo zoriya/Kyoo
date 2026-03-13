@@ -1,5 +1,6 @@
 import { type ComponentProps, type ComponentType, useState } from "react";
-import { Animated, type PressableProps } from "react-native";
+import type { PressableProps } from "react-native";
+import Animated from "react-native-reanimated";
 import RSvg, { type SvgProps } from "react-native-svg";
 import { withUniwind } from "uniwind";
 import { cn } from "~/utils";

@@ -135,7 +135,7 @@ const SearchBar = () => {
 			style={[
 				expanded ? { flex: 1 } : { backgroundColor: "transparent" },
 				{
-					transitionProperty: "background-color",
+					transitionProperty: "backgroundColor",
 					transitionDuration: "300ms",
 				},
 			]}

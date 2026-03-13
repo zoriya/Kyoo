@@ -1,4 +1,4 @@
-import { LegendList } from "@legendapp/list";
+import { LegendList } from "@legendapp/list/react-native";
 import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
 import ExpandMore from "@material-symbols/svg-400/rounded/keyboard_arrow_down-fill.svg";
 import SearchIcon from "@material-symbols/svg-400/rounded/search-fill.svg";
