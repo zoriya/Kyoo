@@ -78,7 +78,7 @@ export const PathItem = ({
 						{...tooltip(t("videos-map.no-guess"))}
 					/>
 				)}
-				<P className="flex-1 flex-wrap">{path}</P>
+				<P className="wrap-anywhere flex-1 flex-wrap">{path}</P>
 			</View>
 			<ComboBox
 				multiple
