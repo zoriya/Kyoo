@@ -9,11 +9,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/zoriya/kyoo/transcoder/src"
 )
 
-func getPath(c echo.Context) (string, string, error) {
+func getPath(c *echo.Context) (string, string, error) {
 	key := c.Param("path")
 	if key == "" {
 		return "", "", echo.NewHTTPError(http.StatusBadRequest, "Missing resouce path.")

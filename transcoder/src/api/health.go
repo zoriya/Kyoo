@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 type health struct {
@@ -15,13 +15,13 @@ func RegisterHealthHandlers(e *echo.Group, db *pgxpool.Pool) {
 	e.GET("/ready", h.CheckReady)
 }
 
-func (h *health) CheckHealth(c echo.Context) error {
+func (h *health) CheckHealth(c *echo.Context) error {
 	return c.JSON(200, struct {
 		Status string `json:"status"`
 	}{Status: "healthy"})
 }
 
-func (h *health) CheckReady(c echo.Context) error {
+func (h *health) CheckReady(c *echo.Context) error {
 	_, err := h.db.Exec(c.Request().Context(), "select 1")
 
 	status := "healthy"
