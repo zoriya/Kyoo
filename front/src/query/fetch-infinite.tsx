@@ -4,7 +4,7 @@ import type {
 } from "@legendapp/list/react-native";
 import { LegendList } from "@legendapp/list/react-native";
 import { type ComponentType, type ReactElement, useMemo, useRef } from "react";
-import { Platform, type ViewStyle } from "react-native";
+import type { ViewStyle } from "react-native";
 import { createAnimatedComponent } from "react-native-reanimated";
 import { type Breakpoint, HR, useBreakpointMap } from "~/primitives";
 import { type QueryIdentifier, useInfiniteFetch } from "./query";
