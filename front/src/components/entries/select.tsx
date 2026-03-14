@@ -26,7 +26,7 @@ export const EntrySelect = ({
 	videos,
 	close,
 }: {
-	displayNumber: string;
+	displayNumber: string | null;
 	name: string;
 	videos: Entry["videos"];
 	close?: () => void;
