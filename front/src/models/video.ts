@@ -50,7 +50,7 @@ export const FullVideo = Video.extend({
 	}),
 	previous: z.object({ video: z.string(), entry: Entry }).nullable().optional(),
 	next: z.object({ video: z.string(), entry: Entry }).nullable().optional(),
-	show: Show.optional(),
+	show: Show.optional().nullable(),
 });
 export type FullVideo = z.infer<typeof FullVideo>;
 

@@ -36,10 +36,12 @@ export const FullVideo = t.Composite([
 			),
 		),
 		show: t.Optional(
-			t.Union([
-				t.Composite([t.Object({ kind: t.Literal("movie") }), Movie]),
-				t.Composite([t.Object({ kind: t.Literal("serie") }), Serie]),
-			]),
+			t.Nullable(
+				t.Union([
+					t.Composite([t.Object({ kind: t.Literal("movie") }), Movie]),
+					t.Composite([t.Object({ kind: t.Literal("serie") }), Serie]),
+				]),
+			),
 		),
 	}),
 ]);

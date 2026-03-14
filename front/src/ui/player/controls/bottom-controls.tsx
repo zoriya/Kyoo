@@ -50,18 +50,25 @@ export const BottomControls = ({
 
 	return (
 		<View className={cn("flex-row p-2", className)} {...props}>
-			<View className="m-4 w-1/5 max-w-50 max-sm:hidden">
-				{poster !== undefined ? (
-					<Poster
-						src={poster}
-						quality="low"
-						className="absolute bottom-0 w-full"
-					/>
-				) : (
-					<Poster.Loader className="absolute bottom-0 w-full" />
+			{poster !== null && (
+				<View className="m-4 w-1/5 max-w-50 max-sm:hidden">
+					{poster !== undefined ? (
+						<Poster
+							src={poster}
+							quality="low"
+							className="absolute bottom-0 w-full"
+						/>
+					) : (
+						<Poster.Loader className="absolute bottom-0 w-full" />
+					)}
+				</View>
+			)}
+			<View
+				className={cn(
+					"my-1 mr-4 flex-1 max-sm:ml-4 sm:my-6",
+					poster === null && "ml-4",
 				)}
-			</View>
-			<View className="my-1 mr-4 flex-1 max-sm:ml-4 sm:my-6">
+			>
 				{!bottomSeek &&
 					(name ? (
 						<H2 numberOfLines={1} className="pb-2 text-slate-200">
