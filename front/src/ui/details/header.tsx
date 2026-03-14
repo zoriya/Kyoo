@@ -123,7 +123,7 @@ const ButtonList = ({
 							<Menu.Item
 								label={t("show.videos-map")}
 								icon={VideoLibrary}
-								href={`/series/${slug}/videos`}
+								href={`/${kind === "movie" ? "movies" : "series"}/${slug}/videos`}
 							/>
 							{/* <Menu.Item */}
 							{/* 	label={t("home.refreshMetadata")} */}
@@ -481,6 +481,7 @@ Header.query = (
 		with: [
 			...(kind !== "collection" ? ["collection", "studios"] : []),
 			...(kind === "serie" ? ["firstEntry", "nextEntry"] : []),
+			...(kind === "movie" ? ["videos"] : []),
 		],
 	},
 });
