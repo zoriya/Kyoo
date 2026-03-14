@@ -551,6 +551,48 @@ class TVDB(Provider):
 			if entry.extra["linked_movie"]:
 				ret[i] = await self.process_movie_entry(entry)
 
+		# guess absolute numbers for episodes where tvdb has not assigned one (order=0).
+		season_refs: dict[int, list[tuple[int, float]]] = {}
+		for entry in ret:
+			if (
+				entry.order != 0
+				and entry.kind == "episode"
+				and entry.season_number is not None
+				and entry.episode_number is not None
+			):
+				season_refs.setdefault(entry.season_number, []).append(
+					(entry.episode_number, entry.order)
+				)
+		for entry in ret:
+			if (
+				entry.order != 0
+				or entry.kind != "episode"
+				or entry.season_number is None
+				or entry.episode_number is None
+			):
+				continue
+
+			refs = season_refs.get(entry.season_number)
+			if refs:
+				# Use a reference episode from the same season:
+				ref_ep, ref_abs = refs[0]
+				entry.order = ref_abs - ref_ep + entry.episode_number
+			else:
+				prev_season = season_refs.get(entry.season_number - 1)
+				if prev_season:
+					entry.order = (
+						max(abs for _ep, abs in prev_season) + entry.episode_number
+					)
+				else:
+					# we hope it's season 1
+					entry.order = entry.episode_number
+
+			season_refs.setdefault(entry.season_number, []).append(
+				(entry.episode_number, entry.order)
+			)
+
+		# handle specials and such that are between seasons
+		for entry in ret:
 			if entry.order != 0:
 				continue
 

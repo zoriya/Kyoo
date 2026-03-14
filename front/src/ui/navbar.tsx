@@ -59,6 +59,12 @@ export const NavbarLeft = () => {
 			>
 				{t("navbar.browse")}
 			</A>
+			<A
+				href="/unmatched"
+				className="mx-2 font-headers text-lg text-slate-200 uppercase dark:text-slate-200"
+			>
+				{t("admin.unmatched.label")}
+			</A>
 		</View>
 	);
 };
@@ -135,7 +141,7 @@ const SearchBar = () => {
 			style={[
 				expanded ? { flex: 1 } : { backgroundColor: "transparent" },
 				{
-					transitionProperty: "background-color",
+					transitionProperty: "backgroundColor",
 					transitionDuration: "300ms",
 				},
 			]}

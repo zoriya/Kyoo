@@ -1,4 +1,4 @@
-import { useRecyclingState } from "@legendapp/list";
+import { useRecyclingState } from "@legendapp/list/react-native";
 import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
 import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
 import Question from "@material-symbols/svg-400/rounded/question_mark-fill.svg";
@@ -78,7 +78,7 @@ export const PathItem = ({
 						{...tooltip(t("videos-map.no-guess"))}
 					/>
 				)}
-				<P className="flex-1 flex-wrap">{path}</P>
+				<P className="wrap-anywhere flex-1 flex-wrap">{path}</P>
 			</View>
 			<ComboBox
 				multiple

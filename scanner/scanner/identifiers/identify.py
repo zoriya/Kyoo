@@ -45,19 +45,21 @@ async def identify(path: str) -> Video:
 		title=cast(str, title.value),
 		kind=cast(Literal["episode", "movie"], kind.value),
 		extra_kind=None,
-		years=[cast(int, y.value) for y in years],
-		episodes=[
-			Guess.Episode(season=cast(int, s.value), episode=cast(int, e.value))
-			for s, e in zip_longest(
-				seasons,
-				episodes,
-				fillvalue=seasons[-1] if any(seasons) else Match(0, 0, value=1),
+		years=list(set(cast(int, y.value) for y in years)),
+		episodes=list(
+			set(
+				Guess.Episode(season=cast(int, s.value), episode=cast(int, e.value))
+				for s, e in zip_longest(
+					seasons,
+					episodes,
+					fillvalue=seasons[-1] if any(seasons) else Match(0, 0, value=1),
+				)
 			)
-		],
+		),
 		external_id={},
 		from_="guessit",
 		raw={
-			k: [x.value if x.value is int else str(x.value) for x in v]
+			k: set(x.value if x.value is int else str(x.value) for x in v)
 			for k, v in raw.items()
 		},
 	)
