@@ -26,7 +26,7 @@ import (
 	echojwt "github.com/labstack/echo-jwt/v5"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
-	echoSwagger "github.com/swaggo/echo-swagger"
+	echoSwagger "github.com/swaggo/echo-swagger/v2"
 
 	"github.com/exaring/otelpgx"
 )

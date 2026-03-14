@@ -14,7 +14,7 @@ require (
 	github.com/labstack/echo-opentelemetry v0.0.1
 	github.com/labstack/echo/v5 v5.0.4
 	github.com/lestrrat-go/jwx/v3 v3.0.13
-	github.com/swaggo/echo-swagger v1.5.0
+	github.com/swaggo/echo-swagger/v2 v2.0.1
 	github.com/swaggo/swag v1.16.6
 	go.opentelemetry.io/contrib/bridges/otelslog v0.16.0
 	go.opentelemetry.io/otel v1.41.0
