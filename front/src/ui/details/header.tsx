@@ -131,7 +131,7 @@ const ButtonList = ({
 					iconClassName={iconsClassName}
 					{...tooltip(t("misc.more"))}
 				>
-					{kind === "movie" && (
+					{kind === "movie" && videos?.length === 1 && (
 						<>
 							{/* <Menu.Item */}
 							{/* 	icon={Download} */}
@@ -143,11 +143,11 @@ const ButtonList = ({
 								icon={MovieInfo}
 								href={`/info/${slug}`}
 							/>
+							{account?.isAdmin && <HR />}
 						</>
 					)}
 					{account?.isAdmin === true && (
 						<>
-							{kind === "movie" && <HR />}
 							<Menu.Item
 								label={t("show.videos-map")}
 								icon={VideoLibrary}
@@ -340,7 +340,7 @@ const Description = ({
 						<Chip
 							key={tag}
 							label={tag && capitalize(tag)}
-							href={`/search?q=${tag}`}
+							href={`/browse?q=${tag}`}
 							size="small"
 							className="m-1"
 						/>

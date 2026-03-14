@@ -1,3 +1,4 @@
+import { Portal } from "@gorhom/portal";
 import { Stack, useRouter } from "expo-router";
 import type { ReactNode } from "react";
 import type { Icon } from "./icons";
@@ -30,9 +31,11 @@ export const Modal = ({
 					},
 				}}
 			/>
-			<Overlay icon={icon} title={title} close={close} scroll={scroll}>
-				{children}
-			</Overlay>
+			<Portal>
+				<Overlay icon={icon} title={title} close={close} scroll={scroll}>
+					{children}
+				</Overlay>
+			</Portal>
 		</>
 	);
 };
