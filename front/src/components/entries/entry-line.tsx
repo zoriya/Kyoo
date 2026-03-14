@@ -136,6 +136,7 @@ export const EntryLine = ({
 							kind={kind}
 							slug={slug}
 							serieSlug={serieSlug}
+							videosCount={videosCount}
 							isOpen={moreOpened}
 							setOpen={(v) => setMoreOpened(v)}
 							className={cn(

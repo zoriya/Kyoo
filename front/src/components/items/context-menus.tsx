@@ -16,12 +16,14 @@ export const EntryContext = ({
 	kind,
 	slug,
 	serieSlug,
+	videosCount,
 	className,
 	...props
 }: {
 	kind: "movie" | "episode" | "special";
 	serieSlug: string | null;
 	slug: string;
+	videosCount: number;
 	className?: string;
 } & Partial<ComponentProps<typeof Menu>> &
 	Partial<ComponentProps<typeof IconButton>>) => {
@@ -48,11 +50,13 @@ export const EntryContext = ({
 			{/* 	icon={Download} */}
 			{/* 	onSelect={() => downloader(type, slug)} */}
 			{/* /> */}
-			<Menu.Item
-				label={t("home.episodeMore.mediainfo")}
-				icon={MovieInfo}
-				href={`/info/${slug}`}
-			/>
+			{videosCount === 1 && (
+				<Menu.Item
+					label={t("home.episodeMore.mediainfo")}
+					icon={MovieInfo}
+					href={`/info/${slug}`}
+				/>
+			)}
 		</Menu>
 	);
 };
