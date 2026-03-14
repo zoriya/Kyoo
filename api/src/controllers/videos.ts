@@ -586,7 +586,11 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 	)
 	.get(
 		"videos/unmatched",
-		async ({ query: { sort, query, limit, after }, request: { url } }) => {
+		async ({
+			query: { sort, query, limit, after },
+			headers,
+			request: { url },
+		}) => {
 			const ret = await db
 				.select()
 				.from(videos)
@@ -609,7 +613,7 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 				)
 				.orderBy(...(query ? [] : sortToSql(sort)), videos.pk)
 				.limit(limit);
-			return createPage(ret, { url, sort, limit });
+			return createPage(ret, { url, sort, limit, headers });
 		},
 		{
 			detail: { description: "Get unknown/unmatched videos." },
