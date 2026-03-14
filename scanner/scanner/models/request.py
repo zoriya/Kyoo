@@ -31,5 +31,6 @@ class RequestRet(Model):
 		"running",
 		"failed",
 	]
+	videos: list[str]
 	error: dict[str, Any] | None
 	started_at: datetime | None

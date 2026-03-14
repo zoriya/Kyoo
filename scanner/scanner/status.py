@@ -28,6 +28,7 @@ class StatusService:
 				title,
 				year,
 				status,
+				jsonb_path_query_array(videos, '$.id') as videos,
 				error,
 				started_at
 			from

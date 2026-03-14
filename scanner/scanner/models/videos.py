@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Any, Literal, override
 
 from ..utils import Model
 from .extra import ExtraKind
@@ -33,6 +33,10 @@ class Guess(Model, extra="allow"):
 	class Episode(Model):
 		season: int | None
 		episode: int
+
+		@override
+		def __hash__(self) -> int:
+			return (self.season, self.episode).__hash__()
 
 
 _ = Guess.model_rebuild()

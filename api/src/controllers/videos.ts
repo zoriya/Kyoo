@@ -601,7 +601,7 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 						query
 							? or(
 									sql`${videos.path} %> ${query}::text`,
-									sql`${videos.guess}->'title' %> ${query}::text`,
+									sql`${videos.guess}->>'title' %> ${query}::text`,
 								)
 							: undefined,
 						keysetPaginate({ after, sort }),

@@ -302,6 +302,18 @@
 			"label": "Scanner",
 			"scan": "Trigger library scan",
 			"empty": "No issue found. All your items are registered."
+		},
+		"unmatched": {
+			"label": "Unmatched",
+			"rescan": "Rescan Library",
+			"empty": "All videos are matched!",
+			"search": "Search videos...",
+			"status-pending": "Pending",
+			"status-running": "Scanning",
+			"status-failed": "Failed",
+			"progress-running": "{{count}} scanning",
+			"progress-pending": "{{count}} pending",
+			"progress-failed": "{{count}} failed"
 		}
 	}
 }

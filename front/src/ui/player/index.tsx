@@ -36,7 +36,7 @@ export const Player = () => {
 		? entry.kind === "movie"
 			? entry.name
 			: `${entry.name} (${entryDisplayNumber(entry)})`
-		: null;
+		: data?.path;
 
 	const { apiUrl, authToken } = useToken();
 	const [defaultPlayMode] = useLocalSetting<"direct" | "hls">(
@@ -187,14 +187,14 @@ export const Player = () => {
 				<Controls
 					player={player}
 					showHref={data?.show?.href}
-					name={data?.show?.name}
-					poster={data?.show?.poster}
+					name={data?.show?.name ?? data?.path}
+					poster={data ? (data.show?.poster ?? null) : undefined}
 					subName={
 						entry
 							? [entryDisplayNumber(entry), entry.name]
 									.filter((x) => x)
 									.join(" - ")
-							: undefined
+							: data?.path
 					}
 					chapters={info?.chapters ?? []}
 					previous={data?.previous?.video}
