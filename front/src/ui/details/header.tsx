@@ -7,9 +7,12 @@ import VideoLibrary from "@material-symbols/svg-400/rounded/video_library-fill.s
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { View, type ViewProps } from "react-native";
+import { entryDisplayNumber } from "~/components/entries";
+import { EntrySelect } from "~/components/entries/select";
 import { WatchListInfo } from "~/components/items/watchlist-info";
 import { Rating } from "~/components/rating";
 import {
+	type Entry,
 	type Genre,
 	type KImage,
 	Show,
@@ -38,6 +41,7 @@ import {
 	Skeleton,
 	tooltip,
 	UL,
+	usePopup,
 } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { Fetch, type QueryIdentifier } from "~/query";
@@ -48,6 +52,9 @@ const ButtonList = ({
 	kind,
 	slug,
 	playHref,
+	displayNumber,
+	name,
+	videos,
 	trailerUrl,
 	watchStatus,
 	iconsClassName,
@@ -55,12 +62,16 @@ const ButtonList = ({
 	kind: "movie" | "serie" | "collection";
 	slug: string;
 	playHref: string | null;
+	displayNumber: string | null;
+	name: string;
+	videos: Entry["videos"] | null;
 	trailerUrl: string | null;
 	watchStatus: WatchStatusV | null;
 	iconsClassName?: string;
 }) => {
 	const account = useAccount();
 	const { t } = useTranslation();
+	const [setPopup, closePopup] = usePopup();
 
 	// const metadataRefreshMutation = useMutation({
 	// 	method: "POST",
@@ -73,8 +84,25 @@ const ButtonList = ({
 			{playHref !== null && (
 				<IconFab
 					icon={PlayArrow}
-					as={Link}
-					href={playHref}
+					{...(videos && videos.length > 1
+						? {
+								onPress: () => {
+									if (!videos) return;
+									setPopup(
+										<EntrySelect
+											displayNumber={displayNumber}
+											name={name}
+											videos={videos}
+											close={closePopup}
+										/>,
+									);
+								},
+							}
+						: {
+								as: Link,
+								href: videos?.length ? playHref : null,
+								disabled: !!videos?.length,
+							})}
 					{...tooltip(t("show.play"))}
 				/>
 			)}
@@ -103,7 +131,7 @@ const ButtonList = ({
 					iconClassName={iconsClassName}
 					{...tooltip(t("misc.more"))}
 				>
-					{kind === "movie" && (
+					{kind === "movie" && videos?.length === 1 && (
 						<>
 							{/* <Menu.Item */}
 							{/* 	icon={Download} */}
@@ -115,15 +143,15 @@ const ButtonList = ({
 								icon={MovieInfo}
 								href={`/info/${slug}`}
 							/>
+							{account?.isAdmin && <HR />}
 						</>
 					)}
 					{account?.isAdmin === true && (
 						<>
-							{kind === "movie" && <HR />}
 							<Menu.Item
 								label={t("show.videos-map")}
 								icon={VideoLibrary}
-								href={`/series/${slug}/videos`}
+								href={`/${kind === "movie" ? "movies" : "series"}/${slug}/videos`}
 							/>
 							{/* <Menu.Item */}
 							{/* 	label={t("home.refreshMetadata")} */}
@@ -150,6 +178,8 @@ export const TitleLine = ({
 	poster,
 	trailerUrl,
 	watchStatus,
+	displayNumber,
+	videos,
 	className,
 	...props
 }: {
@@ -164,6 +194,8 @@ export const TitleLine = ({
 	poster: KImage | null;
 	trailerUrl: string | null;
 	watchStatus: WatchStatusV | null;
+	displayNumber: string | null;
+	videos: Entry["videos"] | null;
 	className?: string;
 }) => {
 	return (
@@ -191,6 +223,9 @@ export const TitleLine = ({
 						kind={kind}
 						slug={slug}
 						playHref={playHref}
+						displayNumber={displayNumber}
+						name={name}
+						videos={videos}
 						trailerUrl={trailerUrl}
 						watchStatus={watchStatus}
 						iconsClassName="lg:fill-slate-200 dark:fill-slate-200"
@@ -305,7 +340,7 @@ const Description = ({
 						<Chip
 							key={tag}
 							label={tag && capitalize(tag)}
-							href={`/search?q=${tag}`}
+							href={`/browse?q=${tag}`}
 							size="small"
 							className="m-1"
 						/>
@@ -432,6 +467,18 @@ export const Header = ({
 								? (data.watchStatus?.status ?? null)
 								: null
 						}
+						displayNumber={
+							data.kind === "serie"
+								? entryDisplayNumber(data.nextEntry ?? data.firstEntry!)
+								: null
+						}
+						videos={
+							data.kind === "movie"
+								? (data.videos ?? null)
+								: data.kind === "serie"
+									? ((data.nextEntry ?? data.firstEntry)?.videos ?? null)
+									: null
+						}
 						className="mt-[max(20vh,200px)] sm:mt-[35vh] md:mt-[max(45vh,150px)] lg:mt-[max(35vh,200px)]"
 					/>
 					<Description
@@ -481,6 +528,7 @@ Header.query = (
 		with: [
 			...(kind !== "collection" ? ["collection", "studios"] : []),
 			...(kind === "serie" ? ["firstEntry", "nextEntry"] : []),
+			...(kind === "movie" ? ["videos"] : []),
 		],
 	},
 });

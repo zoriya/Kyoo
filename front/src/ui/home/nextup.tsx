@@ -47,6 +47,7 @@ export const NextupList = () => {
 						thumbnail={item.thumbnail ?? item.show!.thumbnail}
 						href={item.href ?? "#"}
 						watchedPercent={item.progress.percent}
+						videosCount={item.videos.length}
 					/>
 				)}
 				Loader={EntryBox.Loader}

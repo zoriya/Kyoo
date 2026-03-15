@@ -25,6 +25,7 @@ export const EntryBox = ({
 	thumbnail,
 	href,
 	watchedPercent,
+	videosCount,
 	className,
 	...props
 }: {
@@ -37,6 +38,7 @@ export const EntryBox = ({
 	href: string;
 	thumbnail: KImage | null;
 	watchedPercent: number;
+	videosCount: number;
 	className?: string;
 }) => {
 	const [moreOpened, setMoreOpened] = useState(false);
@@ -63,6 +65,7 @@ export const EntryBox = ({
 					kind={kind}
 					slug={slug}
 					serieSlug={serieSlug}
+					videosCount={videosCount}
 					isOpen={moreOpened}
 					setOpen={(v) => setMoreOpened(v)}
 					className={cn(
