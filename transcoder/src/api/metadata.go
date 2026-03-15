@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/asticode/go-astisub"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/zoriya/kyoo/transcoder/src"
 	"github.com/zoriya/kyoo/transcoder/src/utils"
 )
@@ -37,7 +37,7 @@ func RegisterMetadataHandlers(e *echo.Group, metadata *src.MetadataService) {
 //
 // @Success      200  {object}  src.MediaInfo   "Metadata info of the video."
 // @Router       /:path/info [get]
-func (h *mhandler) GetInfo(c echo.Context) error {
+func (h *mhandler) GetInfo(c *echo.Context) error {
 	path, sha, err := getPath(c)
 	if err != nil {
 		return err
@@ -86,7 +86,7 @@ func (h *mhandler) GetInfo(c echo.Context) error {
 //
 // @Success      200  file  "Requested subtitle"
 // @Router  /:path/subtitle/:name [get]
-func (h *mhandler) GetSubtitle(c echo.Context) (err error) {
+func (h *mhandler) GetSubtitle(c *echo.Context) (err error) {
 	path, sha, err := getPath(c)
 	if err != nil {
 		return err
@@ -143,7 +143,7 @@ func (h *mhandler) GetSubtitle(c echo.Context) (err error) {
 //
 // @Success      200  file   "Requested attachment"
 // @Router  /:path/attachment/:name [get]
-func (h *mhandler) GetAttachment(c echo.Context) (err error) {
+func (h *mhandler) GetAttachment(c *echo.Context) (err error) {
 	_, sha, err := getPath(c)
 	if err != nil {
 		return err
@@ -214,7 +214,7 @@ func guessMimeType(path string, content any) (string, error) {
 //
 // @Success      200  file   "sprite"
 // @Router  /:path/thumbnails.png [get]
-func (h *mhandler) GetThumbnails(c echo.Context) (err error) {
+func (h *mhandler) GetThumbnails(c *echo.Context) (err error) {
 	path, sha, err := getPath(c)
 	if err != nil {
 		return err
@@ -239,7 +239,7 @@ func (h *mhandler) GetThumbnails(c echo.Context) (err error) {
 //
 // @Success      200  file   "sprite"
 // @Router   /:path/thumbnails.vtt [get]
-func (h *mhandler) GetThumbnailsVtt(c echo.Context) (err error) {
+func (h *mhandler) GetThumbnailsVtt(c *echo.Context) (err error) {
 	path, sha, err := getPath(c)
 	if err != nil {
 		return err

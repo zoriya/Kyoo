@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/labstack/echo/v4"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
+	echootel "github.com/labstack/echo-opentelemetry"
+	"github.com/labstack/echo/v5"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
@@ -183,7 +183,11 @@ func setupOtel(ctx context.Context) (func(context.Context) error, error) {
 }
 
 func instrument(e *echo.Echo) {
-	e.Use(otelecho.Middleware("kyoo.transcoder", otelecho.WithSkipper(func(c echo.Context) bool {
-		return c.Path() == "/video/health" || c.Path() == "/video/ready"
-	})))
+	e.Use(echootel.NewMiddlewareWithConfig(echootel.Config{
+		ServerName: "kyoo.transcoder",
+		Skipper: func(c *echo.Context) bool {
+			return (c.Path() == "/video/health" ||
+				c.Path() == "/video/ready")
+		},
+	}))
 }

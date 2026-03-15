@@ -176,11 +176,11 @@ func (s *MetadataService) GetMetadata(ctx context.Context, path string, sha stri
 		go s.ExtractSubs(bgCtx, ret)
 	}
 	if ret.Versions.Keyframes < KeyframeVersion && ret.Versions.Keyframes != 0 {
-		for _, video := range ret.Videos {
-			video.Keyframes = nil
+		for i := range ret.Videos {
+			ret.Videos[i].Keyframes = nil
 		}
-		for _, audio := range ret.Audios {
-			audio.Keyframes = nil
+		for i := range ret.Audios {
+			ret.Audios[i].Keyframes = nil
 		}
 		tx, err := s.Database.Begin(bgCtx)
 		if err != nil {

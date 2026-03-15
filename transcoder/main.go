@@ -5,28 +5,30 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
 	"slices"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	_ "github.com/zoriya/kyoo/transcoder/docs"
 
-	echoSwagger "github.com/swaggo/echo-swagger"
+	echoSwagger "github.com/swaggo/echo-swagger/v2"
 	"github.com/zoriya/kyoo/transcoder/src"
 	"github.com/zoriya/kyoo/transcoder/src/api"
 	"github.com/zoriya/kyoo/transcoder/src/utils"
 
 	"github.com/MicahParks/keyfunc/v3"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 )
 
-func ErrorHandler(err error, c echo.Context) {
-	// otelecho & RequestLoggerWithConfig middleware call c.Error
-	// otelecho docs: https://pkg.go.dev/go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho#WithOnError
-	if c.Response().Committed {
+// otelecho & RequestLoggerWithConfig middleware call c.Error
+// otelecho docs: https://pkg.go.dev/go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho#WithOnError
+func ErrorHandler(c *echo.Context, err error) {
+	if resp, _ := echo.UnwrapResponse(c.Response()); resp != nil && resp.Committed {
 		return
 	}
 
@@ -36,7 +38,7 @@ func ErrorHandler(err error, c echo.Context) {
 		code = he.Code
 		message = fmt.Sprint(he.Message)
 	} else {
-		c.Logger().Error(err)
+		c.Logger().Error(err.Error())
 		message = "Internal server error"
 	}
 	c.JSON(code, struct {
@@ -45,7 +47,7 @@ func ErrorHandler(err error, c echo.Context) {
 }
 
 func RequireCorePlayPermission(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		user := c.Get("user")
 		if user == nil {
 			return echo.NewHTTPError(http.StatusForbidden, "missing jwt")
@@ -96,7 +98,7 @@ func RequireCorePlayPermission(next echo.HandlerFunc) echo.HandlerFunc {
 func main() {
 	ctx := context.Background()
 
-	logger, _, err := SetupLogger(ctx)
+	_, err := SetupLogger(ctx)
 	if err != nil {
 		slog.Error("logger init", "err", err)
 	}
@@ -109,8 +111,7 @@ func main() {
 	defer cleanup(ctx)
 
 	e := echo.New()
-	e.HideBanner = true
-	e.Logger.SetOutput(logger)
+	e.Logger = slog.Default()
 	instrument(e)
 
 	ignorepath := []string{
@@ -123,21 +124,20 @@ func main() {
 	// full configs https://github.com/labstack/echo/blob/master/middleware/request_logger.go
 	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		// declare a small set of paths to ignore
-		Skipper: func(c echo.Context) bool {
+		Skipper: func(c *echo.Context) bool {
 			p := c.Request().URL.Path
 			return slices.Contains(ignorepath, p)
 		},
 		LogStatus:    true,
 		LogURI:       true,
-		LogError:     true,
 		LogHost:      true,
 		LogMethod:    true,
 		LogUserAgent: true,
 		HandleError:  true, // forwards error to the global error handler, so it can decide appropriate status code
-		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+		LogValuesFunc: func(c *echo.Context, v middleware.RequestLoggerValues) error {
 			rCtx := c.Request().Context()
 			if v.Error == nil {
-				logger.LogAttrs(rCtx, slog.LevelInfo,
+				slog.LogAttrs(rCtx, slog.LevelInfo,
 					fmt.Sprintf("%s %s%s %d", v.Method, v.Host, v.URI, v.Status),
 					slog.String("method", v.Method),
 					slog.Int("status", v.Status),
@@ -146,7 +146,7 @@ func main() {
 					slog.String("agent", v.UserAgent),
 				)
 			} else {
-				logger.LogAttrs(rCtx, slog.LevelError,
+				slog.LogAttrs(rCtx, slog.LevelError,
 					fmt.Sprintf("%s %s%s %d err=%s",
 						v.Method, v.Host, v.URI, v.Status, v.Error.Error()),
 					slog.String("method", v.Method),
@@ -166,14 +166,14 @@ func main() {
 
 	metadata, err := src.NewMetadataService()
 	if err != nil {
-		e.Logger.Fatal("failed to create metadata service: ", err)
+		e.Logger.Error("failed to create metadata service: ", slog.Any("err", err))
 		return
 	}
 	defer utils.CleanupWithErr(&err, metadata.Close, "failed to close metadata service")
 
 	transcoder, err := src.NewTranscoder(metadata)
 	if err != nil {
-		e.Logger.Fatal("failed to create transcoder: ", err)
+		e.Logger.Error("failed to create transcoder: ", slog.Any("err", err))
 		return
 	}
 
@@ -185,10 +185,10 @@ func main() {
 
 		k, err := keyfunc.NewDefaultCtx(ctx, []string{src.Settings.JwksUrl})
 		if err != nil {
-			e.Logger.Fatalf("Failed to get a jwks: ", err)
+			e.Logger.Error("Failed to get a jwks: ", slog.Any("err", err))
 		}
 		g.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-			return func(c echo.Context) error {
+			return func(c *echo.Context) error {
 				authHeader := c.Request().Header.Get("Authorization")
 				if !strings.HasPrefix(authHeader, "Bearer ") {
 					return echo.NewHTTPError(http.StatusUnauthorized, "Missing or invalid token")
@@ -215,5 +215,13 @@ func main() {
 	api.RegisterMetadataHandlers(g, metadata)
 	api.RegisterPProfHandlers(e)
 
-	e.Logger.Fatal(e.Start(":7666"))
+	sc := echo.StartConfig{
+		Address:         ":7666",
+		GracefulTimeout: 10 * time.Second,
+		HideBanner:      true,
+	}
+	if err := sc.Start(ctx, e); err != nil {
+		e.Logger.Error("server failed", "err", err)
+		os.Exit(1)
+	}
 }

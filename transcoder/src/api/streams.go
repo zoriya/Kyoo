@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/zoriya/kyoo/transcoder/src"
 )
 
@@ -36,7 +36,7 @@ func RegisterStreamHandlers(e *echo.Group, transcoder *src.Transcoder) {
 //
 // @Success      206  file   "Video file (supports byte-requests)"
 // @Router /:path/direct [get]
-func DirectStream(c echo.Context) error {
+func DirectStream(c *echo.Context) error {
 	path, _, err := getPath(c)
 	if err != nil {
 		return err
@@ -55,7 +55,7 @@ func DirectStream(c echo.Context) error {
 //
 // @Success      200  file   "Master playlist with all available stream qualities"
 // @Router  /:path/master.m3u8 [get]
-func (h *shandler) GetMaster(c echo.Context) error {
+func (h *shandler) GetMaster(c *echo.Context) error {
 	client, err := getClientId(c)
 	if err != nil {
 		return err
@@ -83,7 +83,7 @@ func (h *shandler) GetMaster(c echo.Context) error {
 //
 // PRIVATE ROUTE (not documented in swagger, can change at any time)
 // Only reached via the master.m3u8.
-func (h *shandler) GetVideoIndex(c echo.Context) error {
+func (h *shandler) GetVideoIndex(c *echo.Context) error {
 	video, err := strconv.ParseInt(c.Param("video"), 10, 32)
 	if err != nil {
 		return err
@@ -119,7 +119,7 @@ func (h *shandler) GetVideoIndex(c echo.Context) error {
 //
 // PRIVATE ROUTE (not documented in swagger, can change at any time)
 // Only reached via the master.m3u8.
-func (h *shandler) GetAudioIndex(c echo.Context) error {
+func (h *shandler) GetAudioIndex(c *echo.Context) error {
 	audio, err := strconv.ParseInt(c.Param("audio"), 10, 32)
 	if err != nil {
 		return err
@@ -149,7 +149,7 @@ func (h *shandler) GetAudioIndex(c echo.Context) error {
 //
 // PRIVATE ROUTE (not documented in swagger, can change at any time)
 // Only reached via the master.m3u8.
-func (h *shandler) GetVideoSegment(c echo.Context) error {
+func (h *shandler) GetVideoSegment(c *echo.Context) error {
 	video, err := strconv.ParseInt(c.Param("video"), 10, 32)
 	if err != nil {
 		return err
@@ -194,7 +194,7 @@ func (h *shandler) GetVideoSegment(c echo.Context) error {
 //
 // PRIVATE ROUTE (not documented in swagger, can change at any time)
 // Only reached via the master.m3u8.
-func (h *shandler) GetAudioSegment(c echo.Context) error {
+func (h *shandler) GetAudioSegment(c *echo.Context) error {
 	audio, err := strconv.ParseInt(c.Param("audio"), 10, 32)
 	if err != nil {
 		return err
@@ -219,7 +219,7 @@ func (h *shandler) GetAudioSegment(c echo.Context) error {
 	return c.File(ret)
 }
 
-func getClientId(c echo.Context) (string, error) {
+func getClientId(c *echo.Context) (string, error) {
 	key := c.QueryParam("clientId")
 	if key == "" {
 		key = c.Request().Header.Get("X-CLIENT-ID")
