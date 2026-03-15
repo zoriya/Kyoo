@@ -33,6 +33,7 @@ class Guess(Model, extra="allow"):
 	class Episode(Model):
 		season: int | None
 		episode: int
+		external_id: dict[str, MetadataId | EpisodeId] = {}
 
 		@override
 		def __hash__(self) -> int:

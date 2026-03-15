@@ -1260,6 +1260,19 @@ wheels = [
 ]
 
 [[package]]
+name = "pydantic-xml"
+version = "2.19.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pydantic" },
+    { name = "pydantic-core" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b8/cb/5f80b61d73a8d6171ee4611bfd2b944c036c6f6e5f6e01d9fb02f29d7bfc/pydantic_xml-2.19.0.tar.gz", hash = "sha256:b7acba5a0966cbbbc9bf88d0d870b2bc875da063fe1bbe62d83939b549224730", size = 26228, upload-time = "2026-02-14T17:33:53.368Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/27/2d/dce0dc471fade04829c2948462d79c9bc4991305b0f73889f70c9645e540/pydantic_xml-2.19.0-py3-none-any.whl", hash = "sha256:42854bf962758bec338c112c2de984723708262793e108416f33aa4d6c11b3b4", size = 42536, upload-time = "2026-02-14T17:33:54.206Z" },
+]
+
+[[package]]
 name = "pygments"
 version = "2.19.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1482,6 +1495,7 @@ dependencies = [
     { name = "opentelemetry-instrumentation-fastapi" },
     { name = "opentelemetry-sdk" },
     { name = "pydantic" },
+    { name = "pydantic-xml" },
     { name = "pyjwt", extra = ["crypto"] },
     { name = "python-slugify" },
     { name = "watchfiles" },
@@ -1502,6 +1516,7 @@ requires-dist = [
     { name = "opentelemetry-instrumentation-fastapi", specifier = ">=0.59b0" },
     { name = "opentelemetry-sdk", specifier = ">=1.38.0" },
     { name = "pydantic", specifier = ">=2.11.4" },
+    { name = "pydantic-xml", specifier = ">=2.14.0" },
     { name = "pyjwt", extras = ["crypto"], specifier = ">=2.10.1" },
     { name = "python-slugify", specifier = ">=8.0.4" },
     { name = "watchfiles", specifier = ">=1.0.5" },

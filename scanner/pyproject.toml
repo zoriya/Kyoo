@@ -18,6 +18,7 @@ dependencies = [
     "opentelemetry-instrumentation-fastapi>=0.59b0",
     "opentelemetry-sdk>=1.38.0",
     "pydantic>=2.11.4",
+    "pydantic-xml>=2.14.0",
     "pyjwt[crypto]>=2.10.1",
     "python-slugify>=8.0.4",
     "watchfiles>=1.0.5",

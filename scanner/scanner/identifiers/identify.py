@@ -7,14 +7,15 @@ from typing import Callable, Literal, cast
 from rebulk.match import Match
 
 from ..models.videos import Guess, Video
+from .anilist import anilist
 from .guess.guess import guessit
 
 logger = getLogger(__name__)
 
 pipeline: list[Callable[[str, Guess], Awaitable[Guess]]] = [
+	anilist,
 	# TODO: add nfo scanner
 	# TODO: add thexem
-	# TODO: add anilist
 ]
 
 
