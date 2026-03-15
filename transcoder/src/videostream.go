@@ -8,10 +8,10 @@ import (
 type VideoStream struct {
 	Stream
 	video   *Video
-	quality Quality
+	quality VideoQuality
 }
 
-func (t *Transcoder) NewVideoStream(file *FileStream, idx uint32, quality Quality) (*VideoStream, error) {
+func (t *Transcoder) NewVideoStream(file *FileStream, idx uint32, quality VideoQuality) (*VideoStream, error) {
 	log.Printf(
 		"Creating a new video stream for %s (n %d) in quality %s",
 		file.Info.Path,
@@ -84,7 +84,7 @@ func (vs *VideoStream) getTranscodeArgs(segments string) []string {
 		args = append(args, "-vf", Settings.HwAccel.NoResizeFilter)
 
 		// NoResize doesn't have bitrate info, fallback to a know quality higher or equal.
-		for _, q := range Qualities {
+		for _, q := range VideoQualities {
 			if q.Height() >= vs.video.Height {
 				quality = q
 				break
