@@ -1,0 +1,5 @@
+FROM ghcr.io/zoriya/kyoo_transcoder:4.7
+
+RUN apt update && \
+    apt install -y nvidia-cuda-toolkit && \
+    apt clean

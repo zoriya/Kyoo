@@ -1,132 +1,130 @@
 x-transcoder: &transcoder-base
-  build: ./transcoder
-  image: ghcr.io/zoriya/kyoo_transcoder:edge
+  image: ghcr.io/zoriya/kyoo_transcoder:4.7
   networks:
     default:
       aliases:
         - transcoder
   restart: unless-stopped
-  environment:
-    - JWKS_URL=http://auth:4568/.well-known/jwks.json
   env_file:
     - ./.env
+  environment:
+    - GOCODER_PREFIX=/video
   volumes:
     - ${LIBRARY_ROOT}:/video:ro
     - ${CACHE_ROOT}:/cache
-    - transcoder_metadata:/metadata
-  labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.transcoder.rule=PathPrefix(`/video`)"
-    - "traefik.http.routers.transcoder.middlewares=phantom-token"
-    - "traefik.http.middlewares.phantom-token.forwardauth.address=http://auth:4568/auth/jwt"
-    - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,Cookie,X-Api-Key,Sec-WebSocket-Protocol"
-    - "traefik.http.middlewares.phantom-token.forwardauth.authResponseHeaders=Authorization"
+    - metadata:/metadata
 
 services:
+  back:
+    image: ghcr.io/zoriya/kyoo_back:4.7
+    restart: unless-stopped
+    cpus: 1.5
+    environment:
+      - TRANSCODER_URL=${TRANSCODER_URL:-http://transcoder:7666/video}
+      - KYOO_PREFIX=/api
+    env_file:
+      - ./.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      meilisearch:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    volumes:
+      - kyoo:/metadata
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=PathPrefix(`/api/`)"
+
+  migrations:
+    image: ghcr.io/zoriya/kyoo_migrations:4.7
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./.env
+
   front:
-    build: ./front
-    image: ghcr.io/zoriya/kyoo_front:edge
+    image: ghcr.io/zoriya/kyoo_front:4.7
     restart: unless-stopped
     environment:
-      - KYOO_URL=${KYOO_URL:-http://api:5000/api}
+      - KYOO_URL=${KYOO_URL:-http://back:5000/api}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.front.rule=PathPrefix(`/`)"
-      - "traefik.http.services.front.loadbalancer.server.port=8901"
-
-  auth:
-    build: ./auth
-    image: ghcr.io/zoriya/kyoo_auth:edge
-    restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
-    env_file:
-      - ./.env
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.auth.rule=PathPrefix(`/auth/`) || PathPrefix(`/.well-known/`)"
-
-  api:
-    build: ./api
-    restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      - JWT_ISSUER=${PUBLIC_URL}
-    env_file:
-      - ./.env
-    volumes:
-      - images:/images
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.swagger.rule=PathPrefix(`/swagger`)"
-      - "traefik.http.routers.api.rule=PathPrefix(`/api/`)"
-      - "traefik.http.routers.api.middlewares=phantom-token"
-      - "traefik.http.middlewares.phantom-token.forwardauth.address=http://auth:4568/auth/jwt"
-      - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,Cookie,X-Api-Key,Sec-WebSocket-Protocol"
-      - "traefik.http.middlewares.phantom-token.forwardauth.authResponseHeaders=Authorization"
 
   scanner:
-    build: ./scanner
-    image: ghcr.io/zoriya/kyoo_scanner:edge
+    image: ghcr.io/zoriya/kyoo_scanner:4.7
     restart: unless-stopped
+    depends_on:
+      back:
+        condition: service_healthy
     env_file:
       - ./.env
     environment:
-      # Use this env var once we use mTLS for auth
-      # - KYOO_URL=${KYOO_URL:-http://api:3567/api}
-      - KYOO_URL=${KYOO_URL:-http://traefik:8901/api}
-      - KYOO_APIKEY=$KEIBI_APIKEY_SCANNER
-      - JWKS_URL=http://auth:4568/.well-known/jwks.json
-      - JWT_ISSUER=${PUBLIC_URL}
+      - KYOO_URL=${KYOO_URL:-http://back:5000/api}
     volumes:
       - ${LIBRARY_ROOT}:/video:ro
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.scanner.rule=PathPrefix(`/scanner/`)"
-      - "traefik.http.routers.scanner.middlewares=phantom-token"
-      - "traefik.http.middlewares.phantom-token.forwardauth.address=http://auth:4568/auth/jwt"
-      - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,Cookie,X-Api-Key,Sec-WebSocket-Protocol"
-      - "traefik.http.middlewares.phantom-token.forwardauth.authResponseHeaders=Authorization"
+
+  matcher:
+    image: ghcr.io/zoriya/kyoo_scanner:4.7
+    command: matcher
+    restart: unless-stopped
+    depends_on:
+      back:
+        condition: service_healthy
+    env_file:
+      - ./.env
+    environment:
+      - KYOO_URL=${KYOO_URL:-http://back:5000/api}
+
+  autosync:
+    image: ghcr.io/zoriya/kyoo_autosync:4.7
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    env_file:
+      - ./.env
 
   transcoder:
     <<: *transcoder-base
-    profiles: ["", "cpu"]
+    profiles: ['', 'cpu']
+
   transcoder-nvidia:
     <<: *transcoder-base
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - capabilities: [gpu]
-              driver: cdi
-              device_ids:
-                - nvidia.com/gpu=all
+    image: kyoo-transcoder-nvidia
     environment:
+      - GOCODER_PREFIX=/video
       - GOCODER_HWACCEL=nvidia
-    profiles: ["nvidia"]
+    runtime: nvidia
+
   transcoder-vaapi:
     <<: *transcoder-base
     devices:
       - /dev/dri:/dev/dri
     environment:
+      - GOCODER_PREFIX=/video
       - GOCODER_HWACCEL=vaapi
       - GOCODER_VAAPI_RENDERER=${GOCODER_VAAPI_RENDERER:-/dev/dri/renderD128}
-    profiles: ["vaapi"]
+    profiles: ['vaapi']
   # qsv is the same setup as vaapi but with the hwaccel env var different
   transcoder-qsv:
     <<: *transcoder-base
     devices:
       - /dev/dri:/dev/dri
     environment:
+      - GOCODER_PREFIX=/video
       - GOCODER_HWACCEL=qsv
       - GOCODER_VAAPI_RENDERER=${GOCODER_VAAPI_RENDERER:-/dev/dri/renderD128}
-    profiles: ["qsv"]
+    profiles: ['qsv']
 
   traefik:
-    image: traefik:v3.6
+    image: traefik:latest
     restart: unless-stopped
     command:
       - "--providers.docker=true"
@@ -139,24 +137,48 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
   postgres:
-    image: postgres:18
+    image: postgres:15
     restart: unless-stopped
     env_file:
       - ./.env
     volumes:
-      - db:/var/lib/postgresql
-    environment:
-      - POSTGRES_USER=$PGUSER
-      - POSTGRES_PASSWORD=$PGPASSWORD
-      - POSTGRES_DB=$PGDATABASE
-      - POSTGRES_HOST_AUTH_METHOD=trust
+      - db:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${PGUSER} -d ${PGDATABASE}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
 
+  meilisearch:
+    image: getmeili/meilisearch:v1.4
+    restart: unless-stopped
+    volumes:
+      - search:/meili_data
+    environment:
+      - MEILI_ENV=production
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--spider", "http://meilisearch:7700/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:4-alpine
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
 volumes:
+  kyoo:
   db:
-  images:
-  transcoder_metadata:
+  metadata:
+  search:
