@@ -11,7 +11,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/labstack/echo-jwt/v5 v5.0.1
-	github.com/labstack/echo-opentelemetry v0.0.1
+	github.com/labstack/echo-opentelemetry v0.0.2
 	github.com/labstack/echo/v5 v5.0.4
 	github.com/lestrrat-go/jwx/v3 v3.0.13
 	github.com/swaggo/echo-swagger v1.5.0
