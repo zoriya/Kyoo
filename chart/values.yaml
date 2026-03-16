@@ -448,7 +448,7 @@ traefikproxy:
     extraEnv: []
     image:
       repository: docker.io/traefik
-      tag: v3.6.9
+      tag: v3.6.10
   replicaCount: 1
   updateStrategy: ~
   podLabels: {}
