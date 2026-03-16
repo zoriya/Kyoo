@@ -10,7 +10,7 @@ import (
 	runtimepprof "runtime/pprof"
 	"strconv"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // This is similar to https://github.com/sevennt/echo-pprof/blob/master/pprof.go.
