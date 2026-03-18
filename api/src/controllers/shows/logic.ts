@@ -66,7 +66,6 @@ export const showFilters: FilterDef = {
 		values: Genre.enum,
 		isArray: true,
 	},
-	rating: { column: shows.rating, type: "int" },
 	status: { column: shows.status, type: "enum", values: SerieStatus.enum },
 	runtime: { column: shows.runtime, type: "float" },
 	airDate: { column: shows.startAir, type: "date" },
@@ -88,6 +87,10 @@ export const showFilters: FilterDef = {
 	},
 	score: { column: watchStatusQ.score, type: "int" },
 	isAvailable: { column: sql`(${shows.availableCount} > 0)`, type: "bool" },
+	rating: {
+		column: (source: string) => sql`(${shows.rating}->>${source})::int`,
+		type: "int",
+	},
 };
 export const showSort = Sort(
 	{
@@ -97,7 +100,6 @@ export const showSort = Sort(
 			isNullable: false,
 			accessor: (x) => x.name,
 		},
-		rating: shows.rating,
 		airDate: shows.startAir,
 		startAir: shows.startAir,
 		endAir: shows.endAir,
@@ -105,6 +107,11 @@ export const showSort = Sort(
 		nextRefresh: shows.nextRefresh,
 		watchStatus: watchStatusQ.status,
 		score: watchStatusQ.score,
+		rating: (source: string) => ({
+			sql: sql`(${shows.rating}->>${source})::int`,
+			isNullable: true,
+			accessor: (x: any) => x.rating?.[source] ?? null,
+		}),
 	},
 	{
 		default: ["slug"],

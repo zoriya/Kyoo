@@ -26,7 +26,7 @@ export type SortVal =
 	  };
 
 export const Sort = (
-	values: Record<string, SortVal | SortVal[]>,
+	values: Record<string, SortVal | SortVal[] | ((param: string) => SortVal)>,
 	{
 		description = "How to sort the query",
 		default: def,
@@ -36,17 +36,26 @@ export const Sort = (
 		tablePk: SQLWrapper;
 		description?: string;
 	},
-) =>
-	t
+) => {
+	const staticKeys = Object.keys(values).filter(
+		(k) => typeof values[k] !== "function",
+	);
+	const paramKeys = Object.keys(values).filter(
+		(k) => typeof values[k] === "function",
+	);
+
+	return t
 		.Transform(
 			t.Array(
 				t.Union([
 					t.UnionEnum([
 						"random",
-						...Object.keys(values),
-						...Object.keys(values).map((x) => `-${x}`),
+						...staticKeys,
+						...staticKeys.map((x) => `-${x}`),
 					]),
 					t.TemplateLiteral("random:${number}"),
+					...paramKeys.map((k) => t.TemplateLiteral(`${k}:\${string}`)),
+					...paramKeys.map((k) => t.TemplateLiteral(`-${k}:\${string}`)),
 				]),
 				{
 					default: def,
@@ -67,7 +76,8 @@ export const Sort = (
 				tablePk,
 				sort: sort.flatMap((x) => {
 					const desc = x[0] === "-";
-					const key = desc ? x.substring(1) : x;
+					const [key, param] = (desc ? x.substring(1) : x).split(":", 2);
+
 					const process = (val: SortVal): Sort["sort"][0] => {
 						if ("getSQL" in val) {
 							return {
@@ -85,6 +95,16 @@ export const Sort = (
 							desc,
 						};
 					};
+
+					if (typeof values[key] === "function") {
+						if (!param) {
+							throw new Error(
+								`Sort key "${key}" requires a parameter (e.g., ${key}:source)`,
+							);
+						}
+						return process(values[key](param));
+					}
+
 					return Array.isArray(values[key])
 						? values[key].map(process)
 						: process(values[key]);
@@ -94,6 +114,7 @@ export const Sort = (
 		.Encode(() => {
 			throw new Error("Encode not supported for sort");
 		});
+};
 
 export const sortToSql = (sort: Sort | undefined) => {
 	if (!sort) return [];

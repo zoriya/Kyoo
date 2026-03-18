@@ -20,7 +20,7 @@ export const duneCollection: SeedCollection = {
 	},
 	originalLanguage: "en",
 	genres: ["adventure", "science-fiction"],
-	rating: 80,
+	rating: { themoviedatabase: 80 },
 	externalId: {
 		themoviedatabase: [
 			{

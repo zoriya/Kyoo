@@ -28,7 +28,7 @@ describe("Parse filter", () => {
 			value: {
 				type: "op",
 				operator: "eq",
-				property: "status",
+				property: { name: "status" },
 				value: { type: "enum", value: "finished" },
 			},
 		});
@@ -40,7 +40,7 @@ describe("Parse filter", () => {
 			value: {
 				type: "op",
 				operator: "lt",
-				property: "rating",
+				property: { name: "rating" },
 				value: { type: "int", value: 10 },
 			},
 		});
@@ -52,7 +52,7 @@ describe("Parse filter", () => {
 			value: {
 				type: "op",
 				operator: "ge",
-				property: "airDate",
+				property: { name: "airDate" },
 				value: { type: "date", value: "2022-10-12" },
 			},
 		});
@@ -66,7 +66,7 @@ describe("Parse filter", () => {
 				expression: {
 					type: "op",
 					operator: "lt",
-					property: "rating",
+					property: { name: "rating" },
 					value: { type: "int", value: 10 },
 				},
 			},
@@ -79,7 +79,7 @@ describe("Parse filter", () => {
 			value: {
 				type: "op",
 				operator: "lt",
-				property: "rating",
+				property: { name: "rating" },
 				value: { type: "int", value: 10 },
 			},
 		});
@@ -93,7 +93,7 @@ describe("Parse filter", () => {
 				expression: {
 					type: "op",
 					operator: "lt",
-					property: "rating",
+					property: { name: "rating" },
 					value: { type: "int", value: 10 },
 				},
 			},
@@ -110,14 +110,14 @@ describe("Parse filter", () => {
 					expression: {
 						type: "op",
 						operator: "lt",
-						property: "rating",
+						property: { name: "rating" },
 						value: { type: "int", value: 10 },
 					},
 				},
 				rhs: {
 					type: "op",
 					operator: "lt",
-					property: "rating",
+					property: { name: "rating" },
 					value: { type: "int", value: 20 },
 				},
 			},
@@ -138,14 +138,14 @@ describe("Parse filter", () => {
 						expression: {
 							type: "op",
 							operator: "lt",
-							property: "rating",
+							property: { name: "rating" },
 							value: { type: "int", value: 10 },
 						},
 					},
 					rhs: {
 						type: "op",
 						operator: "lt",
-						property: "rating",
+						property: { name: "rating" },
 						value: { type: "int", value: 20 },
 					},
 				},
@@ -154,7 +154,7 @@ describe("Parse filter", () => {
 					lhs: {
 						type: "op",
 						operator: "eq",
-						property: "status",
+						property: { name: "status" },
 						value: { type: "enum", value: "finished" },
 					},
 					rhs: {
@@ -162,7 +162,7 @@ describe("Parse filter", () => {
 						expression: {
 							type: "op",
 							operator: "ne",
-							property: "status",
+							property: { name: "status" },
 							value: { type: "enum", value: "airing" },
 						},
 					},
@@ -177,7 +177,7 @@ describe("Parse filter", () => {
 			value: {
 				type: "op",
 				operator: "eq",
-				property: "tags",
+				property: { name: "tags" },
 				value: { type: "string", value: "magic armor" },
 			},
 		});
@@ -189,7 +189,7 @@ describe("Parse filter", () => {
 			value: {
 				type: "op",
 				operator: "eq",
-				property: "tags",
+				property: { name: "tags" },
 				value: { type: "string", value: "magic armor" },
 			},
 		});
@@ -202,7 +202,7 @@ describe("Parse filter", () => {
 			value: {
 				type: "op",
 				operator: "eq",
-				property: "tags",
+				property: { name: "tags" },
 				// this is parsed as enum but is handled afterwards
 				value: { type: "enum", value: "magic" },
 			},

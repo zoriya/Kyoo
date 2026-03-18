@@ -7,7 +7,6 @@ import {
 	integer,
 	jsonb,
 	primaryKey,
-	smallint,
 	text,
 	timestamp,
 	unique,
@@ -73,7 +72,7 @@ export const shows = schema.table(
 		slug: varchar({ length: 255 }).notNull(),
 		kind: showKind().notNull(),
 		genres: genres().array().notNull(),
-		rating: smallint(),
+		rating: jsonb().$type<Record<string, number>>().notNull().default({}),
 		runtime: integer(),
 		status: showStatus().notNull(),
 		startAir: date(),
@@ -99,12 +98,10 @@ export const shows = schema.table(
 	(t) => [
 		unique("kind_slug").on(t.kind, t.slug),
 
-		check("rating_valid", sql`${t.rating} between 0 and 100`),
 		check("runtime_valid", sql`${t.runtime} >= 0`),
 
 		index("kind").using("hash", t.kind),
 		index("slug").on(t.slug),
-		index("rating").on(t.rating),
 		index("startAir").on(t.startAir),
 	],
 );

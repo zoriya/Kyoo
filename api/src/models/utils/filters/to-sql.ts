@@ -30,18 +30,38 @@ const opMap: Record<Operator, BinaryOperator> = {
 export const toDrizzle = (expr: Expression, config: FilterDef): SQL => {
 	switch (expr.type) {
 		case "op": {
-			const where = `${expr.property} ${expr.operator} ${expr.value.value}`;
-			const prop = config[expr.property];
+			const where = `${expr.property.name}${expr.property.param ? `:${expr.property.param}` : ""} ${expr.operator} ${expr.value.value}`;
+			const prop = config[expr.property.name];
 
 			if (!prop) {
 				throw new KErrorT(
 					comment`
-						Invalid property: ${expr.property}.
+						Invalid property: ${expr.property.name}.
 						Expected one of ${Object.keys(config).join(", ")}.
 					`,
 					{ in: where },
 				);
 			}
+
+			if (typeof prop.column === "function" && !expr.property.param) {
+				throw new KErrorT(
+					comment`
+						Property ${expr.property.name} requires a parameter (e.g., ${expr.property.name}:source).
+					`,
+					{ in: where },
+				);
+			} else if (typeof prop.column !== "function" && expr.property.param) {
+				throw new KErrorT(
+					comment`
+						Property ${expr.property.name} does not accept a parameter.
+					`,
+					{ in: where },
+				);
+			}
+			const column =
+				typeof prop.column === "function"
+					? prop.column(expr.property.param!)
+					: prop.column;
 
 			if (expr.value.type === "enum" && prop.type === "string") {
 				// promote enum to string since this is legal
@@ -52,7 +72,7 @@ export const toDrizzle = (expr: Expression, config: FilterDef): SQL => {
 				if (expr.value.value !== "false" && expr.value.value !== "true") {
 					throw new KErrorT(
 						comment`
-							Invalid value for property ${expr.property}.
+							Invalid value for property ${expr.property.name}.
 							Get ${expr.value.value} but expected true or false.
 						`,
 						{ in: where },
@@ -63,7 +83,7 @@ export const toDrizzle = (expr: Expression, config: FilterDef): SQL => {
 			if (prop.type !== expr.value.type) {
 				throw new KErrorT(
 					comment`
-						Invalid value for property ${expr.property}.
+						Invalid value for property ${expr.property.name}.
 						Got ${expr.value.type} but expected ${prop.type}.
 					`,
 					{ in: where },
@@ -76,7 +96,7 @@ export const toDrizzle = (expr: Expression, config: FilterDef): SQL => {
 			) {
 				throw new KErrorT(
 					comment`
-						Invalid value ${expr.value.value} for property ${expr.property}.
+						Invalid value ${expr.value.value} for property ${expr.property.name}.
 						Expected one of ${prop.values.join(", ")} but got ${expr.value.value}.
 					`,
 					{ in: where },
@@ -87,15 +107,15 @@ export const toDrizzle = (expr: Expression, config: FilterDef): SQL => {
 				if (expr.operator !== "has" && expr.operator !== "eq") {
 					throw new KErrorT(
 						comment`
-							Property ${expr.property} is an array but you wanted to use the
+							Property ${expr.property.name} is an array but you wanted to use the
 							operator ${expr.operator}. Only "has" is supported ("eq" is also aliased to "has")
 						`,
 						{ in: where },
 					);
 				}
-				return sql`${expr.value.value} = any(${prop.column})`;
+				return sql`${expr.value.value} = any(${column})`;
 			}
-			return opMap[expr.operator](prop.column, expr.value.value);
+			return opMap[expr.operator](column, expr.value.value);
 		}
 		case "and": {
 			const lhs = toDrizzle(expr.lhs, config);

@@ -21,7 +21,7 @@ export const Movie = z
 		tags: z.array(z.string()),
 		description: z.string().nullable(),
 		status: z.enum(["unknown", "finished", "planned"]),
-		rating: z.number().int().gte(0).lte(100),
+		rating: z.record(z.string(), z.number().int().gte(0).lte(100)),
 		runtime: z.number().int().nullable(),
 		airDate: zdate().nullable(),
 		genres: z.array(Genre),

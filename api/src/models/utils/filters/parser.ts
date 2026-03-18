@@ -17,6 +17,7 @@ import {
 	many,
 	many1,
 	map,
+	maybe,
 	or,
 	qthen,
 	recover,
@@ -25,7 +26,11 @@ import {
 	thenq,
 } from "parjs/combinators";
 
-export type Property = string;
+export type Property = {
+	type: "property";
+	name: string;
+	param: string | null;
+};
 export type Value =
 	| { type: "int"; value: number }
 	| { type: "float"; value: number }
@@ -57,7 +62,20 @@ const enumP = t(
 		.expects("an enum value"),
 );
 
-const property = t(letter().pipe(many1(), stringify())).expects("a property");
+const property = t(
+	letter().pipe(
+		many1(),
+		stringify(),
+		then(
+			string(":").pipe(qthen(letter().pipe(many1(), stringify())), maybe(null)),
+		),
+		map(([prop, param]) => ({
+			type: "property" as const,
+			name: prop,
+			param: param,
+		})),
+	),
+).expects("a property");
 
 const intVal = t(int().pipe(map((i) => ({ type: "int" as const, value: i }))));
 const floatVal = t(
@@ -87,6 +105,7 @@ const strVal = t(noCharOf('"').pipe(many1(), stringify(), between('"'))).pipe(
 );
 const enumVal = enumP.pipe(map((e) => ({ type: "enum" as const, value: e })));
 const value = dateVal
+
 	.pipe(
 		// until we get the `-` character, this could be an int or a float.
 		recover(() => ({ kind: "Soft" })),

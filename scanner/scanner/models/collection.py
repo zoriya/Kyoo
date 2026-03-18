@@ -9,7 +9,7 @@ class Collection(Model):
 	slug: str
 	original_language: Language | None
 	genres: list[Genre]
-	rating: int | None
+	rating: dict[str, int]
 	external_id: dict[str, list[MetadataId]]
 
 	translations: dict[Language, CollectionTranslation] = {}

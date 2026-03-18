@@ -52,7 +52,7 @@ export const bubble: SeedMovie = {
 		},
 	},
 	genres: ["animation", "adventure", "science-fiction", "fantasy"],
-	rating: 74,
+	rating: { themoviedatabase: 74 },
 	status: "finished",
 	runtime: 101,
 	airDate: "2022-02-14",

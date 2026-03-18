@@ -18,7 +18,7 @@ export const Collection = z
 		aliases: z.array(z.string()),
 		tags: z.array(z.string()),
 		description: z.string().nullable(),
-		rating: z.number().int().gte(0).lte(100).nullable(),
+		rating: z.record(z.string(), z.number().int().gte(0).lte(100)),
 		startAir: zdate().nullable(),
 		endAir: zdate().nullable(),
 		genres: z.array(Genre),

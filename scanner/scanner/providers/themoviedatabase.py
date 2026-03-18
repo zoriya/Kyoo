@@ -155,7 +155,7 @@ class TheMovieDatabase(Provider):
 			slug=to_slug(movie["title"]),
 			original_language=Language.get(movie["original_language"]),
 			genres=self._map_genres(x["id"] for x in movie["genres"]),
-			rating=round(float(movie["vote_average"]) * 10),
+			rating={self.name: round(float(movie["vote_average"]) * 10)},
 			status=MovieStatus.FINISHED
 			if movie["status"] == "Released"
 			else MovieStatus.PLANNED,
@@ -309,7 +309,7 @@ class TheMovieDatabase(Provider):
 			slug=to_slug(serie["name"]),
 			original_language=Language.get(serie["original_language"]),
 			genres=self._map_genres(x["id"] for x in serie["genres"]),
-			rating=round(float(serie["vote_average"]) * 10),
+			rating={self.name: round(float(serie["vote_average"]) * 10)},
 			status=SerieStatus.FINISHED
 			if serie["status"] == "Released"
 			else SerieStatus.AIRING
@@ -597,9 +597,11 @@ class TheMovieDatabase(Provider):
 			genres=[
 				y for x in collection["parts"] for y in self._map_genres(x["genre_ids"])
 			],
-			rating=round(
-				mean(float(x["vote_average"]) * 10 for x in collection["parts"])
-			),
+			rating={
+				self.name: round(
+					mean(float(x["vote_average"]) * 10 for x in collection["parts"])
+				)
+			},
 			external_id={
 				self.name: [
 					MetadataId(

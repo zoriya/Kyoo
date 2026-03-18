@@ -103,7 +103,7 @@ export const madeInAbyss = {
 		"fantasy",
 	],
 	status: "finished",
-	rating: 84,
+	rating: { themoviedatabase: 84 },
 	runtime: 24,
 	originalLanguage: "ja",
 	startAir: "2017-07-07",

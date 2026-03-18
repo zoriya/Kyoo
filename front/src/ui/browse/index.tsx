@@ -56,7 +56,9 @@ BrowsePage.query = ({
 		path: ["api", "shows"],
 		infinite: true,
 		params: {
-			sort: sortBy ? `${sortOrd === "desc" ? "-" : ""}${sortBy}` : "name",
+			sort: sortBy
+				? `${sortOrd === "desc" ? "-" : ""}${sortBy === "rating" ? "rating:themoviedatabase" : sortBy}`
+				: "name",
 			filter,
 			query: search,
 		},

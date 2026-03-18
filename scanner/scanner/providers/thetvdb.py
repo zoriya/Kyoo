@@ -226,7 +226,7 @@ class TVDB(Provider):
 				for x in ret["genres"]
 				if self._genre_map[x["slug"]] is not None
 			],
-			rating=None,  # TODO: maybe use the `score` value.
+			rating={},  # TODO: maybe use the `score` value.
 			status=SerieStatus.FINISHED
 			if ret["status"]["name"] == "Ended"
 			else SerieStatus.AIRING
@@ -423,7 +423,7 @@ class TVDB(Provider):
 				for x in show["genres"]
 				if self._genre_map[x["slug"]] is not None
 			],
-			rating=None,
+			rating={},
 			external_id={
 				self.name: [
 					MetadataId(
@@ -734,7 +734,7 @@ class TVDB(Provider):
 				for x in ret["genres"]
 				if self._genre_map[x["slug"]] is not None
 			],
-			rating=None,  # TODO: maybe use the `score` value.
+			rating={},  # TODO: maybe use the `score` value.
 			status=MovieStatus.FINISHED
 			if ret["status"]["name"] == "Ended"
 			else MovieStatus.PLANNED,

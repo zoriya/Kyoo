@@ -21,7 +21,7 @@ class Movie(Model):
 	slug: str
 	original_language: Language | None
 	genres: list[Genre]
-	rating: int | None
+	rating: dict[str, int]
 	status: MovieStatus
 	runtime: int | None
 	air_date: date | None

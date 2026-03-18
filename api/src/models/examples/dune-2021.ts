@@ -38,7 +38,7 @@ export const dune: SeedMovie = {
 		},
 	},
 	genres: ["adventure", "drama", "science-fiction", "action"],
-	rating: 83,
+	rating: { themoviedatabase: 83 },
 	status: "finished",
 	runtime: 155,
 	airDate: "2021-10-22",

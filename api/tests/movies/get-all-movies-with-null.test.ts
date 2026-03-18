@@ -39,7 +39,7 @@ describe("with a null value", () => {
 			},
 			genres: [],
 			status: "unknown",
-			rating: null,
+			rating: {},
 			runtime: null,
 			airDate: null,
 			originalLanguage: "en",

@@ -15,7 +15,11 @@ import {
 
 const BaseCollection = t.Object({
 	genres: t.Array(Genre),
-	rating: t.Nullable(t.Integer({ minimum: 0, maximum: 100 })),
+	rating: t.Record(t.String(), t.Integer({ minimum: 0, maximum: 100 }), {
+		default: {},
+		description:
+			"Rating from various sources (0-100 scale). Keys are source names, values are ratings.",
+	}),
 	startAir: t.Nullable(
 		t.String({
 			format: "date",

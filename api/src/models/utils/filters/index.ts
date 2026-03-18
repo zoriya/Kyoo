@@ -8,7 +8,7 @@ import { toDrizzle } from "./to-sql";
 export type FilterDef = {
 	[key: string]:
 		| {
-				column: Column | SQLWrapper;
+				column: Column | SQLWrapper | ((param: string) => Column | SQLWrapper);
 				type: "int" | "float" | "date" | "string" | "bool";
 				isArray?: boolean;
 		  }
@@ -34,9 +34,13 @@ export const Filter = ({
 					${description}
 
 					This is based on [odata's filter specification](https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_SystemQueryOptionfilter).
-					Filters available: ${Object.keys(def).join(", ")}.
+					Filters available: ${Object.keys(def)
+						.map((x) =>
+							typeof def[x].column === "function" ? `${x}:param` : x,
+						)
+						.join(", ")}.
 				`,
-				example: "(rating gt 75 and genres has action) or status eq planned",
+				example: "(runtime gt 75 and genres has action) or rating:tmdb ge 50",
 			}),
 		)
 		.Decode((filter) => {

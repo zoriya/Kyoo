@@ -10,16 +10,22 @@ export const Rating = ({
 	iconClassName,
 	...props
 }: {
-	rating: number | null;
+	rating: Record<string, number>;
 	className?: string;
 	textClassName?: string;
 	iconClassName?: string;
 }) => {
+	const values = Object.values(rating);
+	const avg =
+		values.length > 0
+			? values.reduce((a, b) => a + b, 0) / values.length
+			: null;
+
 	return (
 		<View className={cn("flex-row items-center", className)} {...props}>
 			<Icon icon={Star} className={cn("mr-1", iconClassName)} />
 			<P className={cn("align-middle", textClassName)}>
-				{rating ? rating / 10 : "??"} / 10
+				{avg !== null ? Math.round(avg) / 10 : "??"} / 10
 			</P>
 		</View>
 	);

@@ -38,7 +38,7 @@ export const dune1984: SeedMovie = {
 		},
 	},
 	genres: ["adventure", "drama", "science-fiction"],
-	rating: 60,
+	rating: { themoviedatabase: 60 },
 	status: "finished",
 	runtime: 137,
 	airDate: "1984-12-14",

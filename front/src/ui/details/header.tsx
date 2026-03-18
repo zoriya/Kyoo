@@ -190,7 +190,7 @@ export const TitleLine = ({
 	name: string;
 	tagline: string | null;
 	date: string | null;
-	rating: number | null;
+	rating: Record<string, number>;
 	runtime: number | null;
 	poster: KImage | null;
 	trailerUrl: string | null;
@@ -231,7 +231,7 @@ export const TitleLine = ({
 						watchStatus={watchStatus}
 						iconsClassName="lg:fill-slate-200 dark:fill-slate-200"
 					/>
-					{rating !== null && rating !== 0 && (
+					{Object.keys(rating).length > 0 && (
 						<>
 							<DottedSeparator className="lg:text-slate-200 dark:text-slate-200" />
 							<Rating
