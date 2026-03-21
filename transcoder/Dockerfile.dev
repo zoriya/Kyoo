@@ -10,7 +10,7 @@ RUN apt-get update \
 	# build dependencies
 	libavformat-dev libavutil-dev libswscale-dev \
 	# hwaccel dependencies
-	vainfo mesa-va-drivers \
+	vainfo mesa-va-drivers nvidia-cuda-toolkit \
 	# intel hwaccel dependencies, not available everywhere
 	$([ " $TARGETARCH" = " amd64" ] && echo "intel-media-va-driver-non-free i965-va-driver-shaders") \
 	# CA certificates for HTTPS to S3 buckets

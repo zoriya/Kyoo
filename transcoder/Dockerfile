@@ -25,7 +25,7 @@ RUN set -x && apt-get update \
 	# runtime dependencies
 	ffmpeg \
 	# hwaccel dependencies
-	vainfo mesa-va-drivers \
+	vainfo mesa-va-drivers nvidia-cuda-toolkit \
 	# intel hwaccel dependencies, not available everywhere
 	# Install QSV packages required by ffmpeg here: https://trac.ffmpeg.org/wiki/Hardware/QuickSync
 	# libvpl2 is required for newer Intel iGPUs, such as those on Raptor Lake
