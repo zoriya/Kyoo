@@ -52,7 +52,7 @@ If Kyoo is not available on your language, you can use [weblate](https://hosted.
 
 ## 📜 Why another media-browser?
 
-From a technical standpoint, both Jellyfin and Plex lean on SQLite and confine everything within a single container, Kyoo takes a different route. We're not afraid to bring in additional containers when it makes sense – whether for specialized features like Meilisearch powering our search system or for scalability, as seen with our transcoder.
+From a technical standpoint, both Jellyfin and Plex lean on SQLite and confine everything within a single container, Kyoo takes a different route. We're not afraid to bring in additional containers when it makes sense, as seen with our transcoder.
 
 Kyoo embraces the “setup once, forget about it” philosophy. Unlike Plex and Jellyfin, we don't burden you with manual file renaming or specific folder structures. Kyoo seamlessly works with files straight from your download directory, minimizing the maintenance headache for server admins.
 
