@@ -78,7 +78,7 @@ jobs:
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Login to DockerHub
         if: env.SHOULD_PUSH == 'true' && env.DOCKERHUB_ENABLED == 'true'
