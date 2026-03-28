@@ -12,6 +12,7 @@ import {
 	HR,
 	Icon,
 	IconButton,
+	Link,
 	Menu,
 	P,
 	Skeleton,
@@ -82,7 +83,10 @@ const UserRow = ({
 	});
 
 	return (
-		<View className="flex-row items-center gap-4 px-3">
+		<Link
+			href={`/profiles/${username}`}
+			className="flex-row items-center gap-4 px-3"
+		>
 			<Avatar src={logo} placeholder={username} className="h-8 w-8" />
 			<View className="min-w-0 flex-1">
 				<P
@@ -147,7 +151,7 @@ const UserRow = ({
 					onSelect={async () => await mutateAsync("delete")}
 				/>
 			</Menu>
-		</View>
+		</Link>
 	);
 };
 

@@ -1,6 +1,7 @@
 import Browse from "@material-symbols/svg-400/rounded/browse-fill.svg";
 // import Downloading from "@material-symbols/svg-400/rounded/downloading-fill.svg";
 import Home from "@material-symbols/svg-400/rounded/home-fill.svg";
+import Person from "@material-symbols/svg-400/rounded/person-fill.svg";
 import { Slot, Tabs } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
@@ -43,6 +44,18 @@ export default function TabsLayout() {
 					tabBarIcon: ({ focused }) => (
 						<Icon
 							icon={Browse}
+							className={cn(focused && "fill-accent dark:fill-accent")}
+						/>
+					),
+				}}
+			/>
+			<Tabs.Screen
+				name="profile"
+				options={{
+					tabBarLabel: t("navbar.profile"),
+					tabBarIcon: ({ focused }) => (
+						<Icon
+							icon={Person}
 							className={cn(focused && "fill-accent dark:fill-accent")}
 						/>
 					),

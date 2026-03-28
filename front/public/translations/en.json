@@ -97,6 +97,18 @@
 		"switchToGrid": "Switch to grid view",
 		"switchToList": "Switch to list view"
 	},
+	"profile": {
+		"history": "History",
+		"watchlist": "Watchlist",
+		"statuses": {
+			"all": "All",
+			"completed": "Completed",
+			"watching": "Watching",
+			"rewatching": "Rewatching",
+			"dropped": "Dropped",
+			"planned": "Planned"
+		}
+	},
 	"genres": {
 		"action": "Action",
 		"adventure": "Adventure",
@@ -139,6 +151,7 @@
 	"navbar": {
 		"home": "Home",
 		"browse": "Browse",
+		"profile": "Profile",
 		"download": "Download",
 		"search": "Search",
 		"login": "Login",

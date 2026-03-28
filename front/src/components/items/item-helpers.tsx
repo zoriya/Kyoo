@@ -1,7 +1,8 @@
-import Done from "@material-symbols/svg-400/rounded/check-fill.svg";
+import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import type { WatchStatusV } from "~/models";
-import { Icon, P } from "~/primitives";
+import { tooltip } from "~/primitives";
+import { cn } from "~/utils";
 
 export const ItemWatchStatus = ({
 	watchStatus,
@@ -13,20 +14,30 @@ export const ItemWatchStatus = ({
 	availableCount?: number | null;
 	seenCount?: number | null;
 }) => {
-	if (watchStatus !== "completed" && !availableCount) return null;
+	const { t } = useTranslation();
+
+	if (!watchStatus && !availableCount) return null;
 
 	return (
 		<View
-			className="absolute top-0 left-0 m-1 aspect-square min-w-8 items-center justify-center rounded-full bg-gray-800/70 p-1"
-			{...props}
-		>
-			{watchStatus === "completed" ? (
-				<Icon icon={Done} className="fill-slate-400" />
-			) : (
-				<P className="text-center text-slate-400">
-					{seenCount ?? 0}/{availableCount}
-				</P>
+			className={cn(
+				"absolute top-0 left-0 m-2 aspect-square w-4 rounded-full p-1",
+				"bg-gray-800/70",
+				watchStatus === "completed" && "bg-sky-500",
+				watchStatus === "watching" && "bg-emerald-500",
+				watchStatus === "rewatching" && "bg-teal-500",
+				watchStatus === "dropped" && "bg-rose-500",
+				watchStatus === "planned" && "bg-amber-500",
 			)}
-		</View>
+			{...tooltip(
+				[
+					watchStatus && t(`profile.statuses.${watchStatus}`),
+					availableCount && `${seenCount ?? 0}/${availableCount ?? 0}`,
+				]
+					.filter((x) => x)
+					.join(" · "),
+			)}
+			{...props}
+		/>
 	);
 };

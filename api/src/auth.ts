@@ -101,7 +101,7 @@ const User = t.Object({
 	oidc: t.Record(
 		t.String(),
 		t.Object({
-			id: t.String({ format: "uuid" }),
+			id: t.String(),
 			username: t.String(),
 			profileUrl: t.Nullable(t.String({ format: "url" })),
 		}),

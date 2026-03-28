@@ -3,6 +3,7 @@ import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
 import Close from "@material-symbols/svg-400/rounded/close.svg";
 import Login from "@material-symbols/svg-400/rounded/login.svg";
 import Logout from "@material-symbols/svg-400/rounded/logout.svg";
+import Person from "@material-symbols/svg-400/rounded/person-fill.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import Settings from "@material-symbols/svg-400/rounded/settings.svg";
 import { useIsFocused } from "@react-navigation/native";
@@ -52,13 +53,19 @@ export const NavbarLeft = () => {
 	if (Platform.OS !== "web") return <NavbarTitle />;
 
 	return (
-		<View className="flex-row items-center gap-2">
+		<View className="flex-row items-center gap-4">
 			<NavbarTitle />
 			<A
 				href="/browse"
 				className="font-headers text-lg text-slate-200 uppercase dark:text-slate-200"
 			>
 				{t("navbar.browse")}
+			</A>
+			<A
+				href="/profiles/me"
+				className="font-headers text-lg text-slate-200 uppercase dark:text-slate-200"
+			>
+				{t("navbar.profile")}
 			</A>
 		</View>
 	);
@@ -74,7 +81,7 @@ export const NavbarTitle = ({
 		<A
 			href="/"
 			aria-label={t("navbar.home")}
-			className={cn("m-4 flex flex-1 items-center", className)}
+			className={cn("m-2 flex flex-1 items-center", className)}
 			{...tooltip(t("navbar.home"))}
 			{...props}
 		>

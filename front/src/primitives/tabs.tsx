@@ -32,7 +32,7 @@ export const Tabs = <T,>({
 	return (
 		<View
 			className={cn(
-				"flex-row items-center overflow-hidden rounded-4xl border-3 border-accent p-1",
+				"flex-row flex-wrap items-center overflow-hidden rounded-4xl border-3 border-accent p-1",
 				disabled && "border-slate-600",
 				className,
 			)}
