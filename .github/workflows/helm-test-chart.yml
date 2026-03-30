@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Set up Helm
-        uses: azure/setup-helm@v4
+        uses: azure/setup-helm@v5
 
       - name: Lint the Helm chart
         run: |
