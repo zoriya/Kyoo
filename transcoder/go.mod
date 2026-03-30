@@ -6,7 +6,7 @@ require (
 	github.com/MicahParks/keyfunc/v3 v3.8.0
 	github.com/asticode/go-astisub v0.39.0
 	github.com/aws/aws-sdk-go-v2 v1.41.4
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.97.1
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.97.2
 	github.com/disintegration/imaging v1.6.2
 	github.com/exaring/otelpgx v0.10.0
 	github.com/golang-migrate/migrate/v4 v4.19.1
@@ -17,7 +17,6 @@ require (
 	github.com/swaggo/swag v1.16.6
 	gitlab.com/opennota/screengen v1.0.2
 	go.opentelemetry.io/contrib/bridges/otelslog v0.17.0
-	go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.67.0
 	go.opentelemetry.io/otel v1.42.0
 	go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc v0.18.0
 	go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp v0.18.0
@@ -61,7 +60,6 @@ require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sv-tools/openapi v0.4.0 // indirect
 	github.com/swaggo/files/v2 v2.0.2 // indirect
 	github.com/swaggo/swag/v2 v2.0.0-rc5 // indirect
@@ -77,13 +75,12 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260319201613-d00831a3d3e7 // indirect
 	google.golang.org/grpc v1.79.3 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
 
 require (
-	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.7 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.8 // indirect
 	github.com/aws/aws-sdk-go-v2/config v1.32.12
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.12 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.20 // indirect
