@@ -14,7 +14,7 @@
 		"@elysiajs/swagger": "zoriya/elysia-swagger#build",
 		"@kubiks/otel-drizzle": "zoriya/drizzle-otel#build",
 		"@logtape/elysia": "2.0.5",
-		"@logtape/logtape": "2.0.4",
+		"@logtape/logtape": "2.0.5",
 		"@logtape/otel": "2.0.5",
 		"@logtape/redaction": "2.0.4",
 		"@opentelemetry/api": "^1.9.0",
