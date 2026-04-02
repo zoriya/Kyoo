@@ -204,7 +204,7 @@ const UnmatchedHeader = ({
 	scanData: ScanRequest[] | undefined;
 }) => {
 	const { t } = useTranslation();
-	const rescan = useMutation<void>({
+	const rescan = useMutation({
 		method: "PUT",
 		path: ["scanner", "scan"],
 		invalidate: null,

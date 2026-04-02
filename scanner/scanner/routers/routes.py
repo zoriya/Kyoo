@@ -19,8 +19,7 @@ from ..models.movie import SearchMovie
 from ..models.page import Page
 from ..models.request import CreateRequest, Request, RequestRet
 from ..models.serie import SearchSerie
-from ..models.show import Show
-from ..models.videos import Video
+from ..models.videos import Guess, Video
 from ..providers.composite import CompositeProvider
 from ..requests import RequestCreator
 from ..status import StatusService
@@ -238,6 +237,62 @@ async def refresh_serie_by_slug(
 				year=show.start_air.year if show.start_air is not None else None,
 				external_id=MetadataId.map_dict(show.external_id),
 				videos=[],
+			)
+		]
+	)
+	return ret
+
+
+@router.post(
+	"/{kind}/{slug}/remap",
+	status_code=201,
+	response_description="Show remap request created.",
+)
+async def remap_show_by_slug(
+	kind: Literal["series", "movies"],
+	slug: str,
+	body: CreateRequest,
+	client: Annotated[KyooClient, Depends(get_client)],
+	requests: Annotated[RequestCreator, Depends(get_request_creator)],
+	_: Annotated[None, Security(validate_bearer, scopes=["scanner.add"])],
+) -> RequestRet:
+	"""
+	Delete an existing show and recreate a request with remapped metadata and all videos.
+	"""
+
+	videos = (
+		await client.get_movie_videos(slug)
+		if kind == "movies"
+		else await client.get_serie_videos(slug)
+	)
+
+	if kind == "movies":
+		await client.delete_movie(slug)
+	else:
+		await client.delete_serie(slug)
+
+	merged_videos: dict[str, set[tuple[int | None, int]]] = {}
+	for video in body.videos + videos:
+		if video.id not in merged_videos:
+			merged_videos[video.id] = set()
+		merged_videos[video.id].update((ep.season, ep.episode) for ep in video.episodes)
+
+	[ret] = await requests.enqueue(
+		[
+			Request(
+				kind="movie" if kind == "movies" else "episode",
+				title=body.title,
+				year=body.year,
+				external_id=body.external_id,
+				videos=[
+					Request.Video(
+						id=video_id,
+						episodes=[
+							Guess.Episode(season=s, episode=e) for s, e in episodes
+						],
+					)
+					for video_id, episodes in merged_videos.items()
+				],
 			)
 		]
 	)

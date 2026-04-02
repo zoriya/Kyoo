@@ -3,6 +3,8 @@ from __future__ import annotations
 from datetime import date
 from enum import StrEnum
 
+from scanner.models.videos import VideoGet
+
 from ..utils import Language, Model
 from .collection import Collection
 from .genre import Genre
@@ -58,3 +60,9 @@ class SearchMovie(Model):
 	poster: str | None
 	original_language: Language | None
 	external_id: dict[str, list[MetadataId]]
+
+
+class MovieGet(Model):
+	id: str
+	slug: str
+	videos: list[VideoGet]

@@ -307,7 +307,7 @@ export const prefetch = async (...queries: QueryIdentifier[]) => {
 	return client;
 };
 
-type MutationParams = {
+type MutationParams<T = unknown> = {
 	method?: "POST" | "PUT" | "PATCH" | "DELETE";
 	path?: string[];
 	params?: {
@@ -315,15 +315,17 @@ type MutationParams = {
 	};
 	body?: object;
 	formData?: FormData;
+	parser?: z.ZodType<T> | null;
 };
 
-export const useMutation = <T = void, QueryRet = void>({
+export const useMutation = <Ret = unknown, T = void, QueryRet = void>({
 	compute,
 	invalidate,
 	optimistic,
 	optimisticKey,
+	parser,
 	...queryParams
-}: MutationParams & {
+}: MutationParams<Ret> & {
 	compute?: (param: T) => MutationParams;
 	optimistic?: (param: T, previous?: QueryRet) => QueryRet | undefined;
 	optimisticKey?: QueryIdentifier<unknown>;
@@ -344,7 +346,7 @@ export const useMutation = <T = void, QueryRet = void>({
 				body,
 				formData,
 				authToken,
-				parser: null,
+				parser: parser ?? null,
 			});
 		},
 		...(invalidate && optimistic

@@ -152,11 +152,15 @@ export const AddPage = ({
 	title,
 	icon,
 	allowLibrary,
+	initialKind,
+	onSearchSelect,
 	videos = [],
 }: {
 	title?: string;
 	icon?: Icon;
 	allowLibrary: boolean;
+	initialKind?: "movie" | "serie" | "library";
+	onSearchSelect?: (item: SearchMovie | SearchSerie) => Promise<void>;
 	videos: {
 		id: string;
 		episodes: { season: number | null; episode: number }[];
@@ -167,7 +171,7 @@ export const AddPage = ({
 	const [query, setQuery] = useQueryState("q", "");
 	const [kind, setKind] = useQueryState<"movie" | "serie" | "library">(
 		"kind",
-		allowLibrary ? "library" : "movie",
+		initialKind ?? (allowLibrary ? "library" : "movie"),
 	);
 	const [selected, setSelected] = useState<string | null>(null);
 
@@ -284,9 +288,14 @@ export const AddPage = ({
 						}
 						onSelect={async () => {
 							setSelected(item.id);
-							if (item.kind.startsWith("search"))
-								await addShow.mutateAsync(item as SearchMovie | SearchSerie);
-							else await matchExisting.mutateAsync(item as Show);
+							if (item.kind.startsWith("search")) {
+								if (onSearchSelect)
+									await onSearchSelect(item as SearchMovie | SearchSerie);
+								else
+									await addShow.mutateAsync(item as SearchMovie | SearchSerie);
+							} else {
+								await matchExisting.mutateAsync(item as Show);
+							}
 							setSelected(null);
 							if (router.canGoBack()) router.back();
 						}}

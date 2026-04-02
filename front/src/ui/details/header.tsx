@@ -4,6 +4,7 @@ import Delete from "@material-symbols/svg-400/rounded/delete.svg";
 import MoreHoriz from "@material-symbols/svg-400/rounded/more_horiz.svg";
 import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
+import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg";
 import VideoLibrary from "@material-symbols/svg-400/rounded/video_library-fill.svg";
 import { useRouter } from "expo-router";
@@ -164,6 +165,13 @@ const ButtonList = ({
 								icon={VideoLibrary}
 								href={`/${kind === "movie" ? "movies" : "series"}/${slug}/videos`}
 							/>
+							{kind !== "collection" && (
+								<Menu.Item
+									label={t("show.remap")}
+									icon={Search}
+									href={`/${kind}s/${slug}/remap?q=${name}`}
+								/>
+							)}
 							{kind !== "collection" && <HR />}
 							{kind !== "collection" && (
 								<Menu.Item

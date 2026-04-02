@@ -48,6 +48,7 @@
 		"version": "Version {{number}}",
 		"part": "Part {{number}}",
 		"videos-map": "Edit video mappings",
+		"remap": "Remap",
 		"staff-as":"as {{character}}",
 		"staff-kind": {
 			"actor": "Actor",

@@ -92,3 +92,27 @@ class VideoLink(Model):
 	for_: list[
 		For.Slug | For.ExternalId | For.Movie | For.Episode | For.Order | For.Special
 	]
+
+
+class VideoGet(Model):
+	id: str
+	path: str
+	entries: list[Episode | Movie | Special] | None = []
+
+	class Episode(Model):
+		kind: Literal["episode"]
+		id: str
+		slug: str
+		seasonNumber: int
+		episodeNumber: int
+
+	class Special(Model):
+		kind: Literal["special"]
+		id: str
+		slug: str
+		number: int
+
+	class Movie(Model):
+		kind: Literal["movie"]
+		id: str
+		slug: str

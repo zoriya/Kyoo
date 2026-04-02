@@ -7,12 +7,21 @@ from typing import Literal
 from aiohttp import ClientResponse, ClientResponseError, ClientSession
 from pydantic import TypeAdapter
 
-from .models.movie import Movie
+from .models.movie import Movie, MovieGet
 from .models.page import Page
 from .models.request import Request
 from .models.serie import Serie
 from .models.show import Show
-from .models.videos import For, Resource, Video, VideoCreated, VideoInfo, VideoLink
+from .models.videos import (
+	For,
+	Guess,
+	Resource,
+	Video,
+	VideoCreated,
+	VideoGet,
+	VideoInfo,
+	VideoLink,
+)
 from .utils import Singleton
 
 logger = getLogger(__name__)
@@ -106,6 +115,56 @@ class KyooClient(metaclass=Singleton):
 		async with self._client.get(f"series/{slug}") as r:
 			await self.raise_for_status(r)
 			return Show.model_validate(await r.json())
+
+	async def get_movie_videos(self, slug: str) -> list[Request.Video]:
+		async with self._client.get(f"movies/{slug}?with=videos") as r:
+			await self.raise_for_status(r)
+			movie = MovieGet.model_validate(await r.json())
+			return [Request.Video(id=video.id, episodes=[]) for video in movie.videos]
+
+	async def get_serie_videos(self, slug: str) -> list[Request.Video]:
+		videos: dict[str, list[tuple[int, int] | tuple[None, int]]] = {}
+		next_url: str | None = f"series/{slug}/videos?limit=250"
+
+		while next_url is not None:
+			async with self._client.get(next_url) as r:
+				await self.raise_for_status(r)
+				page = Page[VideoGet].model_validate(await r.json())
+
+			for video in page.items:
+				episodes = [
+					(entry.seasonNumber, entry.episodeNumber)
+					for entry in video.entries
+					if entry.kind == "episode"
+				]
+				episodes += [
+					(None, entry.number)
+					for entry in video.entries
+					if entry.kind == "special"
+				]
+
+				if video.id not in videos:
+					videos[video.id] = episodes
+				else:
+					videos[video.id] += episodes
+
+			next_url = page.next
+
+		return [
+			Request.Video(
+				id=video_id,
+				episodes=[Guess.Episode(season=s, episode=e) for s, e in set(episodes)],
+			)
+			for video_id, episodes in videos.items()
+		]
+
+	async def delete_movie(self, slug: str):
+		async with self._client.delete(f"movies/{slug}") as r:
+			await self.raise_for_status(r)
+
+	async def delete_serie(self, slug: str):
+		async with self._client.delete(f"series/{slug}") as r:
+			await self.raise_for_status(r)
 
 	async def link_videos(
 		self,
