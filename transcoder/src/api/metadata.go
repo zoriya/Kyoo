@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"mime"
@@ -22,6 +23,7 @@ func RegisterMetadataHandlers(e *echo.Group, metadata *src.MetadataService) {
 	h := mhandler{metadata}
 
 	e.GET("/:path/info", h.GetInfo)
+	e.GET("/:path/prepare", h.Prepare)
 	e.GET("/:path/subtitle/:name", h.GetSubtitle)
 	e.GET("/:path/attachment/:name", h.GetAttachment)
 	e.GET("/:path/thumbnails.png", h.GetThumbnails)
@@ -73,6 +75,47 @@ func (h *mhandler) GetInfo(c *echo.Context) error {
 		})
 	}
 	return c.JSON(http.StatusOK, ret)
+}
+
+// @Summary      Prepare metadata
+//
+// @Description  Starts metadata preparation in background (info, extract, thumbs, keyframes).
+//
+// @Tags         metadata
+// @Param        path  path   string    true  "Base64 of a video's path"  format(base64) example(L3ZpZGVvL2J1YmJsZS5ta3YK)
+//
+// @Success      202  "Preparation started"
+// @Router       /:path/prepare [get]
+func (h *mhandler) Prepare(c *echo.Context) error {
+	path, sha, err := getPath(c)
+	if err != nil {
+		return err
+	}
+
+	go func(path string, sha string) {
+		bgCtx := context.Background()
+
+		info, err := h.metadata.GetMetadata(bgCtx, path, sha)
+		if err != nil {
+			fmt.Printf("failed to prepare metadata for %s: %v\n", path, err)
+			return
+		}
+
+		// thumb & subs are already extracted in `GetMetadata`
+
+		for _, video := range info.Videos {
+			if _, err := h.metadata.GetKeyframes(info, true, video.Index); err != nil {
+				fmt.Printf("failed to extract video keyframes for %s (stream %d): %v\n", path, video.Index, err)
+			}
+		}
+		for _, audio := range info.Audios {
+			if _, err := h.metadata.GetKeyframes(info, false, audio.Index); err != nil {
+				fmt.Printf("failed to extract audio keyframes for %s (stream %d): %v\n", path, audio.Index, err)
+			}
+		}
+	}(path, sha)
+
+	return c.NoContent(http.StatusAccepted)
 }
 
 // @Summary      Get subtitle

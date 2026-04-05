@@ -60,6 +60,8 @@ spec:
               value: {{ .Values.kyoo.address | quote }}
             - name: AUTH_SERVER
               value: "http://{{ include "kyoo.auth.fullname" . }}:4568"
+            - name: TRANSCODER_SERVER
+              value: "http://{{ include "kyoo.transcoder.fullname" . }}:7666"
             - name: IMAGES_PATH
               value: "/images"
             - name: PGUSER

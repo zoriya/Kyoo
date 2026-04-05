@@ -1,8 +1,14 @@
+import { getLogger } from "@logtape/logtape";
 import type { TObject, TString } from "@sinclair/typebox";
+import { eq } from "drizzle-orm";
 import Elysia, { type TSchema, t } from "elysia";
 import { auth } from "./auth";
 import { updateProgress } from "./controllers/profiles/history";
 import { getOrCreateProfile } from "./controllers/profiles/profile";
+import { getVideos } from "./controllers/videos";
+import { videos } from "./db/schema";
+
+const logger = getLogger();
 
 const actionMap = {
 	ping: handler({
@@ -16,11 +22,9 @@ const actionMap = {
 			time: t.Integer({
 				minimum: 0,
 			}),
-			videoId: t.Nullable(
-				t.String({
-					format: "uuid",
-				}),
-			),
+			videoId: t.String({
+				format: "uuid",
+			}),
 			entry: t.String(),
 		}),
 		permissions: ["core.read"],
@@ -38,7 +42,43 @@ const actionMap = {
 			const ret = await updateProgress(profilePk, [
 				{ ...body, playedDate: null },
 			]);
+
 			ws.send({ action: "watch", ...ret });
+
+			if (ret.status !== 201) return;
+
+			const old = ret.history.existing.find((x) => x.videoId === body.videoId);
+			if (!old) return;
+
+			if (
+				(old.percent < 50 && body.percent >= 50) ||
+				(old.percent < 75 && body.percent >= 75)
+			) {
+				const [vid] = await getVideos({
+					filter: eq(videos.id, body.videoId),
+					limit: 1,
+					relations: ["next"],
+					languages: ["*"],
+					userId: ws.data.jwt.sub,
+				});
+				if (!vid) return;
+
+				logger.info("Preparing next video {videoId}", {
+					videoId: vid.id,
+				});
+				const path = Buffer.from(vid.path, "utf8").toString("base64url");
+				await fetch(
+					new URL(
+						`/video/${path}/prepare`,
+						process.env.TRANSCODER_SERVER ?? "http://transcoder:7666",
+					),
+					{
+						headers: {
+							authorization: ws.data.headers.authorization!,
+						},
+					},
+				);
+			}
 		},
 	}),
 };

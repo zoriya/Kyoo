@@ -46,6 +46,7 @@ export async function updateProgress(userPk: number, progress: SeedHistory[]) {
 			const hist = await updateHistory(tx, userPk, progress);
 			if (hist.created.length + hist.updated.length !== progress.length) {
 				tx.rollback();
+				throw "unreachable";
 			}
 			// only return new and entries whose status has changed.
 			// we don't need to update the watchlist every 10s when watching a video.
@@ -53,7 +54,11 @@ export async function updateProgress(userPk: number, progress: SeedHistory[]) {
 				...hist.created,
 				...hist.updated.filter((x) => x.percent >= 95),
 			]);
-			return { status: 201, inserted: hist.created.length } as const;
+			return {
+				status: 201,
+				inserted: hist.created.length,
+				history: hist,
+			} as const;
 		});
 	} catch (e) {
 		if (!(e instanceof TransactionRollbackError)) throw e;
@@ -72,26 +77,33 @@ async function updateHistory(
 	return dbTx.transaction(async (tx) => {
 		// `for("update", { of: history })` will put the `kyoo.history` instead
 		// of `history` in the sql and that triggers a sql error.
-		const existing = (
-			await tx
-				.select({ videoId: videos.id })
-				.from(history)
-				.for("update", { of: sql`history` as any })
-				.innerJoin(videos, eq(videos.pk, history.videoPk))
-				.where(
-					and(
-						eq(history.profilePk, userPk),
-						lte(sql`now() - ${history.playedDate}`, sql`interval '1 day'`),
-					),
-				)
-		).map((x) => x.videoId);
+		const existing = await tx
+			.select({
+				videoPk: videos.pk,
+				videoId: videos.id,
+				percent: history.percent,
+			})
+			.from(history)
+			.for("update", { of: sql`history` as any })
+			.innerJoin(videos, eq(videos.pk, history.videoPk))
+			.where(
+				and(
+					eq(history.profilePk, userPk),
+					lte(sql`now() - ${history.playedDate}`, sql`interval '1 day'`),
+				),
+			);
 
 		const toUpdate = traverse(
-			progress.filter((x) => x.videoId && existing.includes(x.videoId)),
+			progress.filter(
+				(x) => x.videoId && existing.map((x) => x.videoId).includes(x.videoId),
+			),
 		);
 		const newEntries = traverse(
 			progress
-				.filter((x) => !x.videoId || !existing.includes(x.videoId))
+				.filter(
+					(x) =>
+						!x.videoId || !existing.map((x) => x.videoId).includes(x.videoId),
+				)
 				.map((x) => ({
 					...x,
 					external: x.external ?? false,
@@ -174,7 +186,7 @@ async function updateHistory(
 							playedDate: history.playedDate,
 						});
 
-		return { created, updated };
+		return { created, updated, existing };
 	});
 }
 
