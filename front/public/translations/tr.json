@@ -41,7 +41,24 @@
 			"rewatching": "Yeniden izleniyor olarak işaretleyin"
 		},
 		"nextUp": "Sonraki",
-		"season": "{{number}}. Sezon"
+		"season": "{{number}}. Sezon",
+		"tags-none": "Etiket mevcut değil",
+		"multiVideos": "Birden fazla video dosyası mevcut",
+		"videosCount": "{{number}} video mevcut",
+		"version": "{{number}}. Versiyon",
+		"part": "{{number}}. Bölüm",
+		"videos-map": "Video eşleştirmesini düzenle",
+		"remap": "Yeniden Eşleştir",
+		"staff-as": "{{character}} rolünde",
+		"staff-kind": {
+			"actor": "Oyuncu",
+			"director": "Yönetmen",
+			"writter": "Yazar",
+			"producer": "Yapımcı",
+			"music": "Müzik",
+			"crew": "Kadro",
+			"other": "Diğer"
+		}
 	},
 	"browse": {
 		"sortby": "{{key}} göre sırala",
@@ -81,15 +98,17 @@
 		"collapse": "Daralt",
 		"edit": "Düzenle",
 		"or": "ya da",
-		"loading": "Yükleniyor"
+		"loading": "Yükleniyor",
+		"delete-name": "{{name}} sil"
 	},
 	"navbar": {
 		"home": "Ana Sayfa",
 		"browse": "Keşfet",
 		"search": "Ara",
 		"login": "Oturum Aç",
-		"admin": "Yönetici Paneli",
-		"download": "İndirilenler"
+		"admin": "Yönetici",
+		"download": "İndirilenler",
+		"profile": "Profil"
 	},
 	"settings": {
 		"general": {
@@ -159,6 +178,12 @@
 				"label": "Github",
 				"description": "Kyoo'nun koduna bakabileceğiniz Github reposunu açın"
 			}
+		},
+		"sessions": {
+			"label": "Oturumlar",
+			"description": "{{createdDate}} tarhinde oluşturuldu - En son {{lastUsed}} tarihinde kullanıldı",
+			"current": "Mevcut oturum",
+			"revoke": "Oturumu Kapat"
 		}
 	},
 	"player": {
@@ -179,7 +204,10 @@
 		"auto": "Otomatik",
 		"notInPristine": "Kaynak modunda kullanılamıyor",
 		"unsupportedError": "Videonun kodeği desteklenmiyor, video işlemesi başladı...",
-		"videos": "Video"
+		"videos": "Video",
+		"not-available": "{{entry}} içeriği henüz kyoo'nuzda mevcut değil, sunucu yöneticinizle iletişime geçebilirsiniz",
+		"fatal": "Kiritk oynatma hatası",
+		"entry-list": "Girdi listesi"
 	},
 	"search": {
 		"empty": "Hiçbir sonuç bulunamadı. Farklı bir girdi deneyin."
@@ -201,7 +229,9 @@
 		"or-login": "Zaten bir hesabınız var mı? <1>Oturum Açın</1>.",
 		"password-no-match": "Girdiğiniz şifreler uyuşmuyor.",
 		"delete": "Hesabınızı silin",
-		"delete-confirmation": "Bu işlem geri alınamayacaktır, yapmak istediğinizden emin misiniz?"
+		"delete-confirmation": "Bu işlem geri alınamayacaktır, yapmak istediğinizden emin misiniz?",
+		"register-disabled": "Kayıtlar kapatılmıştır.",
+		"register-disabled-oidc": "Şifre ile kayıt olma kapatılmıştır. Lütfen OIDC (3. Parti Kimlik Doğrulayıcılarını) kullanarak oturum açın."
 	},
 	"downloads": {
 		"empty": "Henüz hiçbir şey indirilmedi, sevdiğiniz bir şeyler keşfetmeye çalışın",
@@ -225,7 +255,8 @@
 		"setup": {
 			"MissingAdminAccount": "Henüz herhangi bir yönetici hesabı oluşturulmadı. Lütfen oluşturmak için kaydolun.",
 			"NoVideoFound": "Henüz herhangi bir içerik bulunamadı. İçeriklerinizin gözükmesi için kütüphane klasörünüze film ya da dizi ekleyin!"
-		}
+		},
+		"invalid-server": "Kyoo sunucusuna erişilemedi."
 	},
 	"mediainfo": {
 		"file": "Dosya",
@@ -241,7 +272,10 @@
 		"nocontainer": "Geçersiz kapsayıcı",
 		"external": "Harici",
 		"hearing-impaired": "CC",
-		"unknown": "Bilinmeyen"
+		"unknown": "Bilinmeyen",
+		"title": "Dosya bilgisi",
+		"channels": "{{channels}} Kanal",
+		"noaudio": "Ses yok"
 	},
 	"admin": {
 		"users": {
@@ -251,12 +285,41 @@
 			"set-permissions": "İzinleri ayarla",
 			"delete": "Kullanıcıyı sil",
 			"unverifed": "Doğrulanmamış",
-			"verify": "Kullanıcıyı doğrula"
+			"verify": "Kullanıcıyı doğrula",
+			"table": {
+				"username": "Kullanıcı Adı",
+				"lastSeen": "Şu tarihte görüldü",
+				"oidc": "OIDC"
+			}
 		},
 		"scanner": {
 			"label": "Tarayıcı",
 			"scan": "Kütüphane taraması başlat",
 			"empty": "Herhangi bir sorun bulunamadı. Tüm öğeleriniz kaydedilmiştir."
+		},
+		"unmatched": {
+			"label": "Eşleştirilmemiş",
+			"rescan": "Kütüphaneyi Tekrardan Tara",
+			"empty": "Tüm videolar eşleştirilmiştir!",
+			"search": "Videolarda ara...",
+			"match": "Eşleltir",
+			"match-file": "{{file}} dosyasını eşleştir",
+			"status-pending": "Beklemede",
+			"status-running": "Taranıyor",
+			"status-failed": "Başarısız",
+			"progress-running": "{{count}} taranıyor",
+			"progress-pending": "{{count}} beklemede",
+			"progress-failed": "­{{count}} başarısız"
+		},
+		"add": {
+			"title": "Kütüphaneye ekle",
+			"searchPlaceholder": "Bir film ya da dizi ara...",
+			"year": "Yıl",
+			"library": "Kütüphane",
+			"movies": "Filmler",
+			"series": "Diziler",
+			"noResults": "Sonuç bulunamadı",
+			"typeToSearch": "Filmleri ya da dizileri aramak için bir isim yazın"
 		}
 	},
 	"genres": {
@@ -283,5 +346,28 @@
 		"animation": "Animasyon",
 		"history": "Tarih",
 		"politics": "Siyaset"
+	},
+	"videos-map": {
+		"none": "HİÇBİRİ",
+		"add": "Başka bir video daha ekle",
+		"delete": "Diziden videoyu çıkar",
+		"validate": "Tahmini doğrula ve diziye ekle",
+		"no-guess": "Bu videonun bu seriden olduğunu tahmin ediyoruz, ancak emin değiliz",
+		"related": "{{title}} içeriği ile alakalı videolar eklendi",
+		"sort-path": "Yol",
+		"sort-entry": "Bölüm sırası",
+		"no-video": "Bu dizi ile alakalı bir video dosyası mevcut değil."
+	},
+	"profile": {
+		"history": "Geçmiş",
+		"watchlist": "İzleme Listesi",
+		"statuses": {
+			"all": "Hepsi",
+			"completed": "İzlendi",
+			"watching": "İzleniyor",
+			"rewatching": "Yeniden İzleniyor",
+			"dropped": "Bırakıldı",
+			"planned": "İzlenecek"
+		}
 	}
 }
