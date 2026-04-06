@@ -2,7 +2,7 @@ import { and, eq, isNotNull, lt, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { auth } from "~/auth";
 import { db } from "~/db";
-import { entries } from "~/db/schema";
+import { entries, profiles } from "~/db/schema";
 import { watchlist } from "~/db/schema/watchlist";
 import { getColumns } from "~/db/utils";
 import { Entry } from "~/models/entry";
@@ -113,11 +113,13 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 				})
 				.from(entries)
 				.innerJoin(watchlist, eq(watchlist.nextEntry, entries.pk))
+				.innerJoin(profiles, eq(watchlist.profilePk, profiles.pk))
 				.innerJoin(transQ, eq(entries.pk, transQ.pk))
 				.crossJoinLateral(entryVideosQ)
 				.leftJoin(entryProgressQ, eq(entries.pk, entryProgressQ.entryPk))
 				.where(
 					and(
+						eq(profiles.id, sub),
 						or(
 							lt(entries.airDate, sql`now()`),
 							isNotNull(entries.availableSince),

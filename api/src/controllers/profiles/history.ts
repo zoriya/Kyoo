@@ -428,8 +428,8 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 							query,
 							sort,
 							filter: and(
-								isNotNull(entryProgressQ.playedDate),
-								eq(entryProgressQ.external, false),
+								isNotNull(historyProgressQ.playedDate),
+								eq(historyProgressQ.external, false),
 								ne(entries.kind, "extra"),
 								filter,
 							),
