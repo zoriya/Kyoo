@@ -5,6 +5,8 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
+ARG TARGETOS
+ARG TARGETARCH
 RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=$TARGETARCH go build -o /keibi
 
 FROM gcr.io/distroless/base-debian11
