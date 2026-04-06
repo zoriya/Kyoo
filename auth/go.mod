@@ -10,7 +10,7 @@ require (
 	github.com/jackc/pgx/v5 v5.9.1
 	github.com/labstack/echo-jwt/v5 v5.0.1
 	github.com/labstack/echo-opentelemetry v0.0.2
-	github.com/labstack/echo/v5 v5.0.4
+	github.com/labstack/echo/v5 v5.1.0
 	github.com/lestrrat-go/jwx/v3 v3.0.13
 	github.com/mileusna/useragent v1.3.5
 	github.com/swaggo/echo-swagger/v2 v2.0.1
