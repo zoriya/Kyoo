@@ -1,13 +1,13 @@
 from asyncio import CancelledError, Event, TaskGroup
 from logging import getLogger
 from traceback import TracebackException
-from typing import cast
 
-from asyncpg import Connection, Pool
+from asyncpg import Connection
 from opentelemetry import trace
 from pydantic import TypeAdapter
 
 from .client import KyooClient
+from .database import get_db
 from .models.request import Request, RequestRet
 from .models.videos import Resource
 from .providers.provider import Provider, ProviderError
@@ -63,11 +63,9 @@ class RequestCreator:
 class RequestProcessor:
 	def __init__(
 		self,
-		pool: Pool,
 		client: KyooClient,
 		providers: Provider,
 	):
-		self._pool = pool
 		self._database: Connection = None  # type: ignore
 		self._client = client
 		self._providers = providers
@@ -85,10 +83,9 @@ class RequestProcessor:
 
 		while True:
 			closed.clear()
-			# TODO: unsure if timeout actually work, i think not...
-			async with self._pool.acquire(timeout=10) as db:
+			async with get_db() as db:
 				try:
-					self._database = cast(Connection, db)
+					self._database = db
 					self._database.add_termination_listener(terminated)
 					await self._database.add_listener("scanner_requests", process)
 

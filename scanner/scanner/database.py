@@ -34,7 +34,7 @@ async def init_pool():
 
 @asynccontextmanager
 async def get_db():
-	async with pool.acquire() as db:
+	async with pool.acquire(timeout=10) as db:
 		await db.set_type_codec(
 			"json",
 			encoder=json.dumps,

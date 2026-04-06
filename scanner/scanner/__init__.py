@@ -11,9 +11,9 @@ from scanner.fsscan import FsScanner
 from scanner.log import configure_logging
 from scanner.otel import instrument, setup_otelproviders
 from scanner.providers.composite import CompositeProvider
-from scanner.refresh import ShowRefresh
 from scanner.providers.themoviedatabase import TheMovieDatabase
 from scanner.providers.thetvdb import TVDB
+from scanner.refresh import ShowRefresh
 from scanner.requests import RequestCreator, RequestProcessor
 
 from .database import get_db, init_pool, migrate
@@ -27,7 +27,7 @@ HTTP_LOCK_ID = 645633
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 	async with (
-		init_pool() as pool,
+		init_pool(),
 		get_db() as db,
 		get_db() as leader_db,
 		KyooClient() as client,
@@ -48,11 +48,7 @@ async def lifespan(app: FastAPI):
 		# 	return
 		if is_master:
 			await migrate()
-		processor = RequestProcessor(
-			pool,
-			client,
-			app.state.provider,
-		)
+		processor = RequestProcessor(client, app.state.provider)
 		requests = RequestCreator(db)
 		scanner = FsScanner(client, requests)
 		refresh = ShowRefresh(client, requests)
