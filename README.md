@@ -7,7 +7,7 @@ It aims to have a low amount of maintenance needed (no folder structure required
 
 Kyoo does not have a plugin system and aim to have every features built-in (see [#Features](#-features) for the list).
 
-![Kyoo in Action](https://raw.githubusercontent.com/zoriya/kyoo/screens/home.png)
+![Kyoo in Action](https://raw.githubusercontent.com/zoriya/kyoo/screens/home.webp)
 
 ## 🌐 Getting Started
 
@@ -64,15 +64,13 @@ Curious to see Kyoo in action? Check out our live demo featuring copyright-free 
 
 ## 👀 Screens
 
-![Web Show](https://raw.githubusercontent.com/zoriya/kyoo/screens/show-details.png)
+![Serie](https://raw.githubusercontent.com/zoriya/kyoo/screens/serie.webp)
 
-![Desktop Scrubber](https://raw.githubusercontent.com/zoriya/kyoo/screens/hover-scrubber.png)
+![Player](https://raw.githubusercontent.com/zoriya/kyoo/screens/player.webp)
 
-![Touch Scrubber](https://raw.githubusercontent.com/zoriya/kyoo/screens/bottom-scrubber.png)
+![Browse](https://raw.githubusercontent.com/zoriya/kyoo/screens/browse.webp)
 
-![Collection](https://raw.githubusercontent.com/zoriya/kyoo/screens/collection.png)
-
-![List](https://raw.githubusercontent.com/zoriya/kyoo/screens/list.png)
+![Movie](https://raw.githubusercontent.com/zoriya/kyoo/screens/movie.webp)
 
 <p align="center">
 	<img
