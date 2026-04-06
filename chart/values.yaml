@@ -469,7 +469,7 @@ traefikproxy:
     extraEnv: []
     image:
       repository: docker.io/traefik
-      tag: v3.6.11
+      tag: v3.6.12
   replicaCount: 1
   updateStrategy: ~
   securityContext: {}
