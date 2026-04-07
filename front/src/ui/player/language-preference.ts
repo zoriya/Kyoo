@@ -44,11 +44,11 @@ export const useLanguagePreference = (player: VideoPlayer, slug: string) => {
 		forced: false,
 	});
 	useEvent(player, "onTrackChange", (s) => {
+	 if (!subtitles?.length) return;
 		if (!s) {
 			sub.current = { idx: null, lang: null, forced: false };
 			return;
 		}
-		if (!subtitles?.length) return;
 		const idx = player.getAvailableTextTracks().findIndex((x) => x.selected);
 		sub.current = {
 			idx: idx,
