@@ -1,4 +1,4 @@
-import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
+import { and, eq, isNotNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { auth, getUserInfo } from "~/auth";
 import {
@@ -151,11 +151,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 							after,
 							query,
 							sort,
-							filter: and(
-								isNotNull(watchStatusQ.status),
-								isNull(shows.collectionPk),
-								filter,
-							),
+							filter: and(isNotNull(watchStatusQ.status), filter),
 							languages: langs,
 							preferOriginal: preferOriginal ?? settings.preferOriginal,
 							relations: ["nextEntry"],
@@ -208,11 +204,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 							after,
 							query,
 							sort,
-							filter: and(
-								isNotNull(watchStatusQ.status),
-								isNull(shows.collectionPk),
-								filter,
-							),
+							filter: and(isNotNull(watchStatusQ.status), filter),
 							languages: langs,
 							preferOriginal: preferOriginal ?? settings.preferOriginal,
 							relations: ["nextEntry"],
