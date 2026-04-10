@@ -2,7 +2,7 @@
 	"home": {
 		"recommended": "Empfehlungen",
 		"news": "Neu",
-		"watchlist": "Fortsetzen",
+		"watchlist": "Weiterschauen",
 		"info": "Mehr",
 		"none": "Keine Folgen",
 		"watchlistLogin": "Um zu sehen was du bereits geschaut hast und geplant hast zu schauen, musst du dich anmelden.",
@@ -35,12 +35,30 @@
 		"watchlistMark": {
 			"completed": "Als beendet markieren",
 			"planned": "Als geplant markieren",
-			"watching": "Als gesehen markieren",
+			"watching": "Als „gerade schauen“ markieren",
 			"dropped": "Als abgebrochen markieren",
-			"null": "Als ungesehen markieren"
+			"null": "Als ungesehen markieren",
+			"rewatching": "Als \"erneut ansehen\" markieren"
 		},
 		"nextUp": "Als Nächstes",
-		"season": "Staffel {{number}}"
+		"season": "Staffel {{number}}",
+		"tags-none": "Keine Tags verfügbar",
+		"multiVideos": "Mehrere Video-Dateien verfügbar",
+		"videosCount": "{{number}} Videos",
+		"version": "Version {{number}}",
+		"part": "Teil {{number}}",
+		"videos-map": "Videomappings bearbeiten",
+		"remap": "Neu zuordnen",
+		"staff-as": "als {{character}}",
+		"staff-kind": {
+			"actor": "Schauspieler*in",
+			"director": "Regisseur*in",
+			"writter": "Autor*in",
+			"producer": "Produzent*in",
+			"music": "Musik",
+			"crew": "Filmcrew",
+			"other": "Andere"
+		}
 	},
 	"browse": {
 		"sortby": "Sortieren nach {{key}}",
@@ -67,7 +85,8 @@
 			"serie": "Serien"
 		},
 		"mediatype-tt": "Medientyp",
-		"mediatypelabel": "Medientyp"
+		"mediatypelabel": "Medientyp",
+		"not": "Nicht"
 	},
 	"misc": {
 		"settings": "Einstellungen",
@@ -80,7 +99,8 @@
 		"collapse": "Einklappen",
 		"edit": "Bearbeiten",
 		"or": "ODER",
-		"loading": "Lädt"
+		"loading": "Lädt",
+		"delete-name": "{{name}} löschen"
 	},
 	"navbar": {
 		"home": "Startseite",
@@ -88,7 +108,8 @@
 		"search": "Suchen",
 		"login": "Anmelden",
 		"admin": "Administration",
-		"download": "Herunterladen"
+		"download": "Herunterladen",
+		"profile": "Profil"
 	},
 	"settings": {
 		"general": {
@@ -158,6 +179,12 @@
 				"label": "Github",
 				"description": "Öffne das Github repository um den Code von kyoo anzuschauen"
 			}
+		},
+		"sessions": {
+			"label": "Sitzungen",
+			"description": "Kreiert {{createdDate}} – Zuletzt benutz {{lastUsed}}",
+			"current": "Aktuelle Sitzung",
+			"revoke": "Widerrufen"
 		}
 	},
 	"player": {
@@ -177,7 +204,11 @@
 		"transmux": "Original",
 		"auto": "Auto",
 		"notInPristine": "Wiedergabe in Originalqualität nicht möglich",
-		"unsupportedError": "Video codec nicht unterstützt, Transcodierung läuft..."
+		"unsupportedError": "Video codec nicht unterstützt, Transcodierung läuft...",
+		"videos": "Video",
+		"not-available": "{{entry}} ist auf kyoo noch nicht verfügbar, fragen Sie Ihren Administrator",
+		"fatal": "Fataler Wiedergabefehler",
+		"entry-list": "Eintragliste"
 	},
 	"search": {
 		"empty": "Keine Ergebnisse gefunden. Versuche eine andere Anfrage."
@@ -199,7 +230,9 @@
 		"or-login": "Hast du bereits ein Konto? <1>Log in</1>.",
 		"password-no-match": "Passwörter stimmen nicht überein",
 		"delete": "Konto löschen",
-		"delete-confirmation": "Diese Aktion kann nicht rückgängig gemacht werden. Bist du sicher?"
+		"delete-confirmation": "Diese Aktion kann nicht rückgängig gemacht werden. Bist du sicher?",
+		"register-disabled": "Registrierungen sind deaktiviert.",
+		"register-disabled-oidc": "Passwortregistrierung ist deaktiviert. Benutzen Sie OIDC."
 	},
 	"downloads": {
 		"empty": "Noch nichts heruntergeladen, suche nach etwas das du magst",
@@ -217,13 +250,14 @@
 		"try-again": "Erneut versuchen",
 		"re-login": "Erneute Anmeldung",
 		"offline": "Du bist nicht mit dem Internet verbunden. Versuche es später nochmal.",
-		"unauthorized": "Du hast keine Berechtigungen {{permission}} um diese Seite aufzurufen",
+		"unauthorized": "Du hast keine Berechtigungen {{permission}} um diese Seite aufzurufen.",
 		"needVerification": "Dein Konto muss vom Server Administrator verifiziert werden bevor du es benutzen kannst.",
 		"needAccount": "Diese Seite kann als Gast nicht aufgerufen werden. Du musst dich anmelden oder ein Konto erstellen.",
 		"setup": {
 			"MissingAdminAccount": "Es wurde noch kein Adminkonto erstellt. Bitte registriere dich um eines zu erstellen.",
 			"NoVideoFound": "Es wurden noch keine Videos gefunden. Füge deinem Medienordner Filme oder Serien hinzu um diese hier anzuzeigen!"
-		}
+		},
+		"invalid-server": "Kyoo-Server kann nicht erreicht werden."
 	},
 	"mediainfo": {
 		"file": "Datei",
@@ -239,7 +273,10 @@
 		"nocontainer": "Unzulässiger Container",
 		"external": "Extern",
 		"hearing-impaired": "CC",
-		"unknown": "Unbekannt"
+		"unknown": "Unbekannt",
+		"title": "Dateiinformationen",
+		"channels": "{{channels}} Kanäle",
+		"noaudio": "Kein Ton"
 	},
 	"admin": {
 		"users": {
@@ -249,12 +286,38 @@
 			"set-permissions": "Berechtigungen vergeben",
 			"delete": "Benutzer löschen",
 			"unverifed": "Unbestätigt",
-			"verify": "Benutzer verifizieren"
+			"verify": "Benutzer verifizieren",
+			"table": {
+				"username": "Nutzername",
+				"lastSeen": "Zuletzt gesehen",
+				"oidc": "OIDC"
+			}
 		},
 		"scanner": {
 			"label": "Scanner",
 			"scan": "Mediathek scannen",
 			"empty": "Keine Probleme gefunden. Alle Elemente sind eingelesen"
+		},
+		"unmatched": {
+			"rescan": "Bibliothek erneut scannen",
+			"search": "Videos suchen...",
+			"match": "Treffer",
+			"status-pending": "Ausstehend",
+			"status-running": "Scanne",
+			"status-failed": "Fehlgeschlagen",
+			"progress-running": "{{count}} gescannt",
+			"progress-pending": "{{count}} ausstehend",
+			"progress-failed": "{{count}} gescheitert"
+		},
+		"add": {
+			"title": "Zur Bibliothek hinzufügen",
+			"searchPlaceholder": "Suche einen Film oder Serie...",
+			"year": "Jahr",
+			"library": "Bibliothek",
+			"movies": "Filme",
+			"series": "Serien",
+			"noResults": "Keine Ergebnisse gefunden",
+			"typeToSearch": "Tippe einen Namen ein um nach Filmen und Serien zu suchen"
 		}
 	},
 	"genres": {
@@ -274,12 +337,35 @@
 		"western": "Western",
 		"kids": "Kinderfilm",
 		"reality": "Reality-TV",
-		"soap": "Soap",
+		"soap": "Seifenoper",
 		"talk": "Talkshow",
 		"politics": "Politik",
 		"adventure": "Abenteuer",
 		"history": "Geschichte",
 		"music": "Musikfilm",
 		"action": "Action"
+	},
+	"videos-map": {
+		"none": "KEINE",
+		"add": "Ein weiteres Video hinzufügen",
+		"delete": "Video aus der Serie entfernen",
+		"validate": "Erkannte Serie bestätigen und Video hinzufügen",
+		"no-guess": "Dieses Video wurde als Teil dieser Serie erkannt, aber wir wissen nicht welche Folge",
+		"related": "Videos mit Bezug zum Titel {{title}} hinzugefügt",
+		"sort-path": "Pfad",
+		"sort-entry": "Reihenfolge der Folgen",
+		"no-video": "Keine Video-Datei mit dieser Serie verknüpft."
+	},
+	"profile": {
+		"history": "Geschichte",
+		"watchlist": "Watchlist",
+		"statuses": {
+			"all": "Alle",
+			"completed": "Vollständig",
+			"watching": "Gerade anschauen",
+			"rewatching": "Erneut ansehen",
+			"dropped": "Aufgegeben",
+			"planned": "Geplant"
+		}
 	}
 }
