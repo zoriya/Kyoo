@@ -58,9 +58,6 @@ export default function AdminTabsLayout() {
 				tabBarStyle: {
 					backgroundColor: accent as string,
 					borderBottomColor: borderColor as string,
-					borderBottomWidth: 1,
-					elevation: 0,
-					shadowOpacity: 0,
 				},
 				tabBarIndicatorStyle: {
 					backgroundColor: activeColor as string,

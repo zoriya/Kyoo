@@ -2,6 +2,7 @@ import { Slot } from "expo-router";
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
+import { useAccount } from "~/providers/account-context";
 
 export const unstable_settings = {
 	initialRouteName: "index",
@@ -9,6 +10,7 @@ export const unstable_settings = {
 
 export default function TabsLayout() {
 	const { t } = useTranslation();
+	const account = useAccount();
 
 	if (Platform.OS === "web") return <Slot />;
 
@@ -39,7 +41,7 @@ export default function TabsLayout() {
 					{t("navbar.profile")}
 				</NativeTabs.Trigger.Label>
 			</NativeTabs.Trigger>
-			<NativeTabs.Trigger name="admin">
+			<NativeTabs.Trigger name="admin" hidden={!account?.isAdmin}>
 				<NativeTabs.Trigger.Icon
 					sf={{ default: "person.3", selected: "person.3.fill" }}
 					md="admin_panel_settings"

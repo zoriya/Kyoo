@@ -51,6 +51,7 @@ import { cn, useQueryState } from "~/utils";
 
 export const NavbarLeft = () => {
 	const { t } = useTranslation();
+	const account = useAccount();
 
 	if (Platform.OS !== "web") return <NavbarTitle />;
 
@@ -63,14 +64,16 @@ export const NavbarLeft = () => {
 				label={t("navbar.profile")}
 				icon={Person}
 			/>
-			<Menu Trigger={NavbarLink} label={t("navbar.admin")} icon={Admin}>
-				<Menu.Item
-					label={t("admin.unmatched.label")}
-					icon={Search}
-					href="/admin/unmatched"
-				/>
-				<Menu.Item label="Users" icon={Admin} href="/admin/users" />
-			</Menu>
+			{account?.isAdmin && (
+				<Menu Trigger={NavbarLink} label={t("navbar.admin")} icon={Admin}>
+					<Menu.Item
+						label={t("admin.unmatched.label")}
+						icon={Search}
+						href="/admin/unmatched"
+					/>
+					<Menu.Item label="Users" icon={Admin} href="/admin/users" />
+				</Menu>
+			)}
 		</View>
 	);
 };
