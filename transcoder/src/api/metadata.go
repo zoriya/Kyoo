@@ -50,6 +50,7 @@ func (h *mhandler) GetInfo(c *echo.Context) error {
 	ret, err := h.metadata.GetMetadata(c.Request().Context(), path, sha)
 	// even if the file doesn't exist, give a stub.
 	if err != nil {
+		slog.ErrorContext(c.Request().Context(), "Failed to extract media info", "path", path, "err", err)
 		info, err := os.Stat(path)
 		size := int64(0)
 		if err == nil {

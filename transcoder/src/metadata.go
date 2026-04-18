@@ -117,9 +117,14 @@ func (s *MetadataService) setupDb() (*pgxpool.Pool, error) {
 	}
 	m, err := migrate.NewWithDatabaseInstance("file://migrations", "postgres", driver)
 	if err != nil {
+		slog.ErrorContext(ctx, "failed to init migrate ctx", "err", err)
 		return nil, err
 	}
-	m.Up()
+	err = m.Up()
+	if err != nil {
+		slog.ErrorContext(ctx, "failed to migrated database", "err", err)
+		return nil, err
+	}
 	slog.InfoContext(ctx, "migrating finished")
 
 	return db, nil

@@ -1,8 +1,6 @@
 begin;
 
 alter table gocoder.info add column id serial unique not null;
-alter table gocoder.info drop constraint info_pkey;
-alter table gocoder.info add constraint info_pkey primary key(id);
 
 -- videos
 alter table gocoder.videos add column id integer;
@@ -51,5 +49,8 @@ alter table gocoder.chapters drop column sha;
 alter table gocoder.chapters add constraint chapters_info_fk
 	foreign key (id) references gocoder.info(id) on delete cascade;
 alter table gocoder.chapters add constraint chapter_pk primary key (id, start_time);
+
+alter table gocoder.info drop constraint info_pkey;
+alter table gocoder.info add constraint info_pkey primary key(id);
 
 commit;
