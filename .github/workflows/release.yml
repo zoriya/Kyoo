@@ -20,7 +20,7 @@ jobs:
           sed "s/edge/$VERSION/" -i docker-compose.yml
 
       - name: Upload release artifacts
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             ./docker-compose.yml
