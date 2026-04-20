@@ -1,0 +1,402 @@
+{
+	"home": {
+		"recommended": "",
+		"news": "",
+		"watchlist": "",
+		"info": "",
+		"none": "",
+		"watchlistLogin": "",
+		"refreshMetadata": "",
+		"episodeMore": {
+			"goToShow": "",
+			"download": "",
+			"mediainfo": ""
+		}
+	},
+	"show": {
+		"play": "",
+		"trailer": "",
+		"studios": "",
+		"genre": "",
+		"genre-none": "",
+		"staff": "",
+		"staff-none": "",
+		"noOverview": "",
+		"episode-none": "",
+		"episodeNoMetadata": "",
+		"tags": "",
+		"tags-none": "",
+		"links": "",
+		"jumpToSeason": "",
+		"partOf": "",
+		"watchlistAdd": "",
+		"watchlistEdit": "",
+		"watchlistRemove": "",
+		"watchlistLogin": "",
+		"watchlistMark": {
+			"completed": "",
+			"planned": "",
+			"watching": "",
+			"rewatching": "",
+			"dropped": "",
+			"null": ""
+		},
+		"nextUp": "",
+		"season": "",
+		"multiVideos": "",
+		"videosCount": "",
+		"version": "",
+		"part": "",
+		"videos-map": "",
+		"remap": "",
+		"staff-as": "",
+		"staff-kind": {
+			"actor": "",
+			"director": "",
+			"writter": "",
+			"producer": "",
+			"music": "",
+			"crew": "",
+			"other": ""
+		}
+	},
+	"videos-map": {
+		"none": "",
+		"add": "",
+		"delete": "",
+		"validate": "",
+		"no-guess": "",
+		"related": "",
+		"sort-path": "",
+		"sort-entry": "",
+		"no-video": ""
+	},
+	"browse": {
+		"mediatypekey": {
+			"all": "",
+			"movie": "",
+			"collection": "",
+			"serie": ""
+		},
+		"mediatype-tt": "",
+		"mediatypelabel": "",
+		"sortby": "",
+		"sortby-tt": "",
+		"sortkey": {
+			"relevance": "",
+			"name": "",
+			"airDate": "",
+			"startAir": "",
+			"endAir": "",
+			"createdAt": "",
+			"rating": ""
+		},
+		"sortord": {
+			"asc": "",
+			"desc": ""
+		},
+		"switchToGrid": "",
+		"switchToList": "",
+		"not": ""
+	},
+	"profile": {
+		"history": "",
+		"watchlist": "",
+		"statuses": {
+			"all": "",
+			"completed": "",
+			"watching": "",
+			"rewatching": "",
+			"dropped": "",
+			"planned": ""
+		}
+	},
+	"genres": {
+		"action": "",
+		"adventure": "",
+		"animation": "",
+		"comedy": "",
+		"crime": "",
+		"documentary": "",
+		"drama": "",
+		"family": "",
+		"fantasy": "",
+		"history": "",
+		"horror": "",
+		"music": "",
+		"mystery": "",
+		"romance": "",
+		"science-fiction": "",
+		"thriller": "",
+		"war": "",
+		"western": "",
+		"kids": "",
+		"reality": "",
+		"politics": "",
+		"soap": "",
+		"talk": ""
+	},
+	"misc": {
+		"settings": "",
+		"prev-page": "",
+		"next-page": "",
+		"delete": "",
+		"delete-name": "",
+		"cancel": "",
+		"more": "",
+		"expand": "",
+		"collapse": "",
+		"edit": "",
+		"or": "",
+		"loading": ""
+	},
+	"navbar": {
+		"home": "",
+		"browse": "",
+		"profile": "",
+		"download": "",
+		"search": "",
+		"login": "",
+		"admin": ""
+	},
+	"settings": {
+		"general": {
+			"label": "",
+			"theme": {
+				"label": "",
+				"description": "",
+				"auto": "",
+				"light": "",
+				"dark": ""
+			},
+			"language": {
+				"label": "",
+				"description": ""
+			}
+		},
+		"playback": {
+			"label": "",
+			"playmode": {
+				"label": "",
+				"description": ""
+			},
+			"audioLanguage": {
+				"label": "",
+				"description": ""
+			},
+			"subtitleLanguage": {
+				"label": "",
+				"description": "",
+				"none": ""
+			},
+			"chapterSkip": {
+				"label": "",
+				"behaviors": {
+					"autoSkip": "",
+					"autoSkipExceptFirstAppearance": "",
+					"showSkipButton": "",
+					"disabled": ""
+				},
+				"types": {
+					"recap": "",
+					"intro": "",
+					"credits": "",
+					"preview": ""
+				},
+				"descriptions": {
+					"recap": "",
+					"intro": "",
+					"credits": "",
+					"preview": ""
+				}
+			}
+		},
+		"account": {
+			"label": "",
+			"username": {
+				"label": ""
+			},
+			"avatar": {
+				"label": "",
+				"description": ""
+			},
+			"email": {
+				"label": ""
+			},
+			"password": {
+				"label": "",
+				"description": "",
+				"oldPassword": "",
+				"newPassword": ""
+			}
+		},
+		"sessions": {
+			"label": "",
+			"description": "",
+			"current": "",
+			"revoke": ""
+		},
+		"oidc": {
+			"label": "",
+			"connected": "",
+			"not-connected": "",
+			"open-profile": "",
+			"link": "",
+			"delete": ""
+		},
+		"about": {
+			"label": "",
+			"android-app": {
+				"label": "",
+				"description": ""
+			},
+			"git": {
+				"label": "",
+				"description": ""
+			}
+		}
+	},
+	"player": {
+		"back": "",
+		"previous": "",
+		"next": "",
+		"play": "",
+		"pause": "",
+		"mute": "",
+		"volume": "",
+		"quality": "",
+		"audios": "",
+		"videos": "",
+		"subtitles": "",
+		"subtitle-none": "",
+		"fullscreen": "",
+		"direct": "",
+		"transmux": "",
+		"auto": "",
+		"notInPristine": "",
+		"unsupportedError": "",
+		"not-available": "",
+		"fatal": "",
+		"entry-list": "",
+		"chapters": {
+			"skip": "",
+			"intro": "",
+			"credits": "",
+			"recap": "",
+			"preview": ""
+		}
+	},
+	"search": {
+		"empty": ""
+	},
+	"login": {
+		"login": "",
+		"register": "",
+		"guest": "",
+		"guest-forbidden": "",
+		"via": "",
+		"add-account": "",
+		"logout": "",
+		"server": "",
+		"email": "",
+		"username": "",
+		"password": "",
+		"confirm": "",
+		"or-register": "",
+		"or-login": "",
+		"password-no-match": "",
+		"delete": "",
+		"delete-confirmation": "",
+		"register-disabled": "",
+		"register-disabled-oidc": ""
+	},
+	"downloads": {
+		"empty": "",
+		"error": "",
+		"delete": "",
+		"deleteMessage": "",
+		"pause": "",
+		"resume": "",
+		"retry": ""
+	},
+	"errors": {
+		"connection": "",
+		"connection-tips": "",
+		"unknown": "",
+		"try-again": "",
+		"re-login": "",
+		"offline": "",
+		"invalid-server": "",
+		"unauthorized": "",
+		"needVerification": "",
+		"needAccount": "",
+		"setup": {
+			"MissingAdminAccount": "",
+			"NoVideoFound": ""
+		}
+	},
+	"mediainfo": {
+		"title": "",
+		"file": "",
+		"container": "",
+		"video": "",
+		"audio": "",
+		"subtitles": "",
+		"channels": "",
+		"forced": "",
+		"hearing-impaired": "",
+		"default": "",
+		"external": "",
+		"duration": "",
+		"size": "",
+		"novideo": "",
+		"noaudio": "",
+		"nocontainer": "",
+		"unknown": ""
+	},
+	"admin": {
+		"users": {
+			"label": "",
+			"adminUser": "",
+			"regularUser": "",
+			"set-permissions": "",
+			"delete": "",
+			"unverifed": "",
+			"verify": "",
+			"table": {
+				"username": "",
+				"lastSeen": "",
+				"oidc": ""
+			}
+		},
+		"scanner": {
+			"label": "",
+			"scan": "",
+			"empty": ""
+		},
+		"unmatched": {
+			"label": "",
+			"rescan": "",
+			"empty": "",
+			"search": "",
+			"match": "",
+			"match-file": "",
+			"status-pending": "",
+			"status-running": "",
+			"status-failed": "",
+			"progress-running": "",
+			"progress-pending": "",
+			"progress-failed": ""
+		},
+		"add": {
+			"title": "",
+			"searchPlaceholder": "",
+			"year": "",
+			"library": "",
+			"movies": "",
+			"series": "",
+			"noResults": "",
+			"typeToSearch": ""
+		}
+	}
+}
