@@ -10,7 +10,7 @@ require (
 	github.com/disintegration/imaging v1.6.2
 	github.com/exaring/otelpgx v0.10.0
 	github.com/golang-migrate/migrate/v4 v4.19.1
-	github.com/jackc/pgx/v5 v5.9.1
+	github.com/jackc/pgx/v5 v5.9.2
 	github.com/labstack/echo-opentelemetry v0.0.2
 	github.com/labstack/echo/v5 v5.1.0
 	github.com/swaggo/echo-swagger/v2 v2.0.1
@@ -54,7 +54,6 @@ require (
 	github.com/go-openapi/swag/stringutils v0.25.5 // indirect
 	github.com/go-openapi/swag/typeutils v0.25.5 // indirect
 	github.com/go-openapi/swag/yamlutils v0.25.5 // indirect
-	github.com/go-slog/otelslog v0.3.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.28.0 // indirect
 	github.com/jackc/pgerrcode v0.0.0-20250907135507-afb5586c32a6 // indirect
