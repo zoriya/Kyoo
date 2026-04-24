@@ -121,7 +121,7 @@ func (s *MetadataService) setupDb() (*pgxpool.Pool, error) {
 		return nil, err
 	}
 	err = m.Up()
-	if err != nil {
+	if err != nil && err != migrate.ErrNoChange {
 		slog.ErrorContext(ctx, "failed to migrated database", "err", err)
 		return nil, err
 	}
