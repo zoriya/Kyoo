@@ -10,5 +10,5 @@ RUN --mount=from=ghcr.io/astral-sh/uv,source=/uv,target=/bin/uv \
 ENV PATH="/app/.venv/bin:$PATH"
 
 COPY . .
-
+EXPOSE 4389
 CMD ["fastapi", "run", "scanner", "--port", "4389"]
