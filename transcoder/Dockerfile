@@ -13,7 +13,7 @@ COPY . .
 RUN GOOS=linux go build -o ./transcoder
 
 # https://packages.debian.org/trixie/ffmpeg for version tracking
-FROM debian:trixie-20260406
+FROM debian:trixie-20260421
 
 # read target arch from buildx or default to amd64 if using legacy builder.
 ARG TARGETARCH
