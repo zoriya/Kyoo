@@ -84,16 +84,16 @@ func NewStream(file *FileStream, keyframes *Keyframe, handle StreamHandle, ret *
 		}
 
 		if !is_done {
-			keyframes.AddListener(func(keyframes []float64) {
+			keyframes.AddListener(func(keyframesLen int) {
 				ret.lock.Lock()
 				defer ret.lock.Unlock()
 				old_length := len(ret.segments)
-				if cap(ret.segments) > len(keyframes) {
-					ret.segments = ret.segments[:len(keyframes)]
+				if cap(ret.segments) > keyframesLen {
+					ret.segments = ret.segments[:keyframesLen]
 				} else {
-					ret.segments = append(ret.segments, make([]Segment, len(keyframes)-old_length)...)
+					ret.segments = append(ret.segments, make([]Segment, keyframesLen-old_length)...)
 				}
-				for seg := old_length; seg < len(keyframes); seg++ {
+				for seg := old_length; seg < keyframesLen; seg++ {
 					ret.segments[seg].channel = make(chan struct{})
 				}
 			})

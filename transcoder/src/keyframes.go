@@ -29,7 +29,7 @@ type Keyframe struct {
 type KeyframeInfo struct {
 	ready     sync.WaitGroup
 	mutex     sync.RWMutex
-	listeners []func(keyframes []float64)
+	listeners []func(keyframesLen int)
 }
 
 func (kf *Keyframe) Get(idx int32) float64 {
@@ -63,14 +63,16 @@ func (kf *Keyframe) Length() (int32, bool) {
 
 func (kf *Keyframe) add(values []float64) {
 	kf.info.mutex.Lock()
-	defer kf.info.mutex.Unlock()
 	kf.Keyframes = append(kf.Keyframes, values...)
+	newLen := len(kf.Keyframes)
+	kf.info.mutex.Unlock()
+
 	for _, listener := range kf.info.listeners {
-		listener(kf.Keyframes)
+		listener(newLen)
 	}
 }
 
-func (kf *Keyframe) AddListener(callback func(keyframes []float64)) {
+func (kf *Keyframe) AddListener(callback func(keyframesLen int)) {
 	kf.info.mutex.Lock()
 	defer kf.info.mutex.Unlock()
 	kf.info.listeners = append(kf.info.listeners, callback)
