@@ -196,6 +196,9 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 	end_padding := int32(1)
 	if end == length {
 		end_padding = 0
+	} else if copy_audio {
+		// Copy-audio runs keep one extra overlap segment because we drop it
+		end_padding += 1
 	}
 	segments := ts.keyframes.Slice(start_segment+1, end+end_padding)
 	if len(segments) == 0 {
@@ -344,7 +347,7 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 				cmd.Process.Signal(os.Interrupt)
 				slog.InfoContext(ctx, "killing ffmpeg because segment already ready", "segment", segment, "encoderId", encoder_id)
 				should_stop = true
-			} else if copy_audio && end < length && segment == end-1 {
+			} else if copy_audio && end < length-1 && segment == end {
 				// Extra overlap segment for copied audio.
 				// Delete the file immediately and stop without closing
 				// the channel, so a real producer can close it later.
