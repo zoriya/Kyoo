@@ -178,8 +178,8 @@ func listHeadRanges(file *FileStream, stream *Stream, isVideo bool, index uint32
 
 		end := stream.file.Info.Duration
 		length, _ := stream.keyframes.Length()
-		if head.end <= length {
-			end = stream.keyframes.Get(head.end)
+		if head.end-1 < length {
+			end = stream.keyframes.Get(head.end - 1)
 		}
 
 		ret = append(ret, HeadRange{
@@ -204,7 +204,7 @@ func listHeadRanges(file *FileStream, stream *Stream, isVideo bool, index uint32
 
 		ret = append(ret, HeadRange{
 			Start:     stream.keyframes.Get(start),
-			End:       stream.keyframes.Get(end),
+			End:       stream.keyframes.Get(end - 1),
 			StartHead: start,
 			EndHead:   end,
 			IsRunning: false,
