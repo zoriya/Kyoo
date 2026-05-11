@@ -261,6 +261,14 @@ func (fs *FileStream) GetVideoSegment(ctx context.Context, idx uint32, quality V
 	if err != nil {
 		return "", err
 	}
+	if segment == -1 {
+		initPath := stream.GetInitPath()
+		if _, err := os.Stat(initPath); os.IsNotExist(err) {
+			// fMP4 init is created lazily by ffmpeg; trigger segment 0 to generate it.
+			_, _ = stream.GetSegment(ctx, 0)
+		}
+		return initPath, nil
+	}
 	return stream.GetSegment(ctx, segment)
 }
 
@@ -288,6 +296,14 @@ func (fs *FileStream) GetAudioSegment(ctx context.Context, idx uint32, quality A
 	stream, err := fs.getAudioStream(ctx, idx, quality)
 	if err != nil {
 		return "", err
+	}
+	if segment == -1 {
+		initPath := stream.GetInitPath()
+		if _, err := os.Stat(initPath); os.IsNotExist(err) {
+			// fMP4 init is created lazily by ffmpeg; trigger segment 0 to generate it.
+			_, _ = stream.GetSegment(ctx, 0)
+		}
+		return initPath, nil
 	}
 	return stream.GetSegment(ctx, segment)
 }

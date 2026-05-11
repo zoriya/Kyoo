@@ -42,7 +42,7 @@ func (vs *VideoStream) getFlags() Flags {
 }
 
 func (vs *VideoStream) getOutPath(encoder_id int) string {
-	return fmt.Sprintf("%s/segment-%s-%d-%%d.ts", vs.file.Out, vs.quality, encoder_id)
+	return fmt.Sprintf("%s/segment-%s-%d-%%d.m4s", vs.file.Out, vs.quality, encoder_id)
 }
 
 func closestMultiple(n int32, x int32) int32 {
@@ -100,9 +100,13 @@ func (vs *VideoStream) getTranscodeArgs(segments string) []string {
 		"-maxrate", fmt.Sprint(quality.MaxBitrate()),
 		// Force segments to be split exactly on keyframes (only works when transcoding)
 		// forced-idr is needed to force keyframes to be an idr-frame (by default it can be any i frames)
-		// without this option, some hardware encoders uses others i-frames and the -f segment can't cut at them.
+		// without this option, some hardware encoders uses others i-frames and the -f hls can't cut at them.
 		"-forced-idr", "1",
 		"-force_key_frames", segments,
+		// Disable scene-cut keyframes and set a huge GOP so ONLY forced keyframes are inserted.
+		// This is required for deterministic per-keyframe segmentation with -f hls.
+		"-g", "999999",
+		"-sc_threshold", "0",
 		// make ffmpeg globally less buggy
 		"-strict", "-2",
 	)

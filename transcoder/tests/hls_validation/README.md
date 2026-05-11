@@ -4,8 +4,9 @@ This suite validates lazy transcoding behavior with a focus on:
 
 - timeline continuity (no gaps, no repeated/overlapping playback windows)
 - real playback patterns (sequential, ABR switches, seeks, concurrent clients)
+- fMP4 init segment presence and validity
 
-It is segment-container agnostic and does not assume `.ts` segments. Segment URLs are read from playlists and probed with `ffprobe` regardless of extension.
+Segment URLs are read from playlists and probed with `ffprobe` regardless of extension. The transcoder now outputs fMP4 (`.m4s`) segments instead of MPEG-TS (`.ts`).
 
 ## Requirements
 

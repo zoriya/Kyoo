@@ -173,7 +173,7 @@ func (h *shandler) GetAudioIndex(c *echo.Context) error {
 //
 // Retrieve a chunk of a transmuxed video.
 //
-// Path: /:path/:video/:quality/segments-:chunk.ts
+// Path: /:path/:video/:quality/segments-:chunk.m4s
 //
 // PRIVATE ROUTE (not documented in swagger, can change at any time)
 // Only reached via the master.m3u8.
@@ -221,7 +221,7 @@ func (h *shandler) GetVideoSegment(c *echo.Context) error {
 //
 // Retrieve a chunk of a transcoded audio.
 //
-// Path: /:path/audio/:audio/:quality/segments-:chunk.ts
+// Path: /:path/audio/:audio/:quality/segments-:chunk.m4s
 //
 // PRIVATE ROUTE (not documented in swagger, can change at any time)
 // Only reached via the master.m3u8.
@@ -305,9 +305,13 @@ func normalizeOptionalId(value any) *string {
 
 func parseSegment(segment string) (int32, error) {
 	var ret int32
-	_, err := fmt.Sscanf(segment, "segment-%d.ts", &ret)
-	if err != nil {
-		return 0, echo.NewHTTPError(http.StatusBadRequest, "Could not parse segment.")
+	_, err := fmt.Sscanf(segment, "segment-%d.m4s", &ret)
+	if err == nil {
+		return ret, nil
 	}
-	return ret, nil
+	// fMP4 init segments end with "-1.m4s" (e.g. segment-a0-256k-0--1.m4s)
+	if strings.HasSuffix(segment, "-1.m4s") {
+		return -1, nil
+	}
+	return 0, echo.NewHTTPError(http.StatusBadRequest, "Could not parse segment.")
 }
