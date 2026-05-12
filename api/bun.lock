@@ -8,7 +8,7 @@
         "@elysiajs/opentelemetry": "^1.4.10",
         "@elysiajs/swagger": "zoriya/elysia-swagger#build",
         "@kubiks/otel-drizzle": "zoriya/drizzle-otel#build",
-        "@logtape/elysia": "2.0.5",
+        "@logtape/elysia": "2.0.7",
         "@logtape/logtape": "2.0.7",
         "@logtape/otel": "2.0.5",
         "@logtape/redaction": "2.0.7",
@@ -195,7 +195,7 @@
 
     "@kubiks/otel-drizzle": ["@kubiks/otel-drizzle@github:zoriya/drizzle-otel#cc1d59b", { "peerDependencies": { "@opentelemetry/api": ">=1.9.0 <2.0.0", "drizzle-orm": ">=0.28.0" } }, "zoriya-drizzle-otel-cc1d59b", "sha512-H8EQ2UrVrF6Qt3NIer0++QuIsvIXN8FCMnAMMOMtmy1OSJ1ViziHnEMV+5QA3zGg5G7JgbNZ7hHCZd6bEqjdJQ=="],
 
-    "@logtape/elysia": ["@logtape/elysia@2.0.5", "", { "peerDependencies": { "@logtape/logtape": "^2.0.5", "elysia": "^1.4.0" } }, "sha512-H9hz0JtWbuGIQP0YWRNRfnvlM9UnRfvTE6rpCLnTlOd8wIgdiNaAHT2wPsg9bvXZ/Sf3omUo1qdt2HPUHGanWw=="],
+    "@logtape/elysia": ["@logtape/elysia@2.0.7", "", { "peerDependencies": { "@logtape/logtape": "^2.0.7", "elysia": "^1.4.0" } }, "sha512-idifrHS2vxdC6kmG1QUI+fyxYDX7rOGfCqKE6iaHO4Sw4KIwAz2DAvu5kv5+Nd7WzjBUfFjifUbpSM1e+SaxFQ=="],
 
     "@logtape/logtape": ["@logtape/logtape@2.0.7", "", {}, "sha512-SUkjkEIfQ3zCadlLi8rfGfe4l/JRKNbp248bfLeowyUFs9KZME/k8y+5sugWYZet/gMYnmwCc9xa3J+kjDjSSQ=="],
 
