@@ -1,4 +1,4 @@
-import { and, eq, exists, ne, or, type SQL, sql } from "drizzle-orm";
+import { and, desc, eq, exists, ne, or, type SQL, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "~/db";
 import {
@@ -334,6 +334,32 @@ export async function getShows({
 	relations?: (keyof typeof showRelations)[];
 	userId: string;
 }) {
+	const searchQ = db.$with("show_search").as(
+		db
+			.select({
+				pk: showTranslations.pk,
+				similarity:
+					sql<number>`max(word_similarity(${query ?? ""}::text, ${showTranslations.name}))`.as(
+						"similarity",
+					),
+			})
+			.from(showTranslations)
+			.where(
+				query
+					? or(
+							sql`${showTranslations.name} %> ${query}::text`,
+							exists(
+								db
+									.select()
+									.from(sql`unnest(${showTranslations.tags}) as tag`)
+									.where(sql`tag %> ${query}::text`),
+							),
+						)
+					: sql`false`,
+			)
+			.groupBy(showTranslations.pk),
+	);
+
 	const transQ = db
 		.selectDistinctOn([showTranslations.pk])
 		.from(showTranslations)
@@ -351,6 +377,7 @@ export async function getShows({
 		.as("t");
 
 	return await db
+		.with(searchQ)
 		.select({
 			...getColumns(shows),
 			...getColumns(transQ),
@@ -377,6 +404,7 @@ export async function getShows({
 		})
 		.from(shows)
 		.leftJoin(watchStatusQ, eq(shows.pk, watchStatusQ.showPk))
+		.leftJoin(searchQ, eq(shows.pk, searchQ.pk))
 		[fallbackLanguage ? "innerJoin" : ("leftJoin" as "innerJoin")](
 			transQ,
 			eq(shows.pk, transQ.pk),
@@ -384,23 +412,13 @@ export async function getShows({
 		.where(
 			and(
 				filter,
-				query
-					? or(
-							sql`${transQ.name} %> ${query}::text`,
-							exists(
-								db
-									.select()
-									.from(sql`unnest(${transQ.tags}) as tag`)
-									.where(sql`tag %> ${query}::text`),
-							),
-						)
-					: undefined,
+				query ? sql`${searchQ.pk} is not null` : undefined,
 				keysetPaginate({ after, sort }),
 			),
 		)
 		.orderBy(
 			...(query
-				? [sql`word_similarity(${query}::text, ${transQ.name}) desc`]
+				? [desc(searchQ.similarity)]
 				: sortToSql(sort)),
 			shows.pk,
 		)
