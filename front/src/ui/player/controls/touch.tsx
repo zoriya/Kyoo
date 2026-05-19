@@ -8,7 +8,7 @@ import {
 	type ViewProps,
 } from "react-native";
 import { useEvent, type VideoPlayer } from "react-native-video";
-import { useIsTouch } from "~/primitives";
+import { isTouchDevice } from "~/primitives";
 import { cn } from "~/utils";
 import { toggleFullscreen } from "./misc";
 
@@ -23,8 +23,6 @@ export const TouchControls = ({
 	forceShow?: boolean;
 	onVisibilityChange?: (isVisible: boolean) => void;
 } & ViewProps) => {
-	const isTouch = useIsTouch();
-
 	const [playing, setPlay] = useState(player.isPlaying);
 	useEvent(player, "onPlaybackStateChange", (status) => {
 		setPlay(status.isPlaying);
@@ -66,7 +64,7 @@ export const TouchControls = ({
 			<DoublePressable
 				tabIndex={-1}
 				onPress={() => {
-					if (isTouch) {
+					if (isTouchDevice()) {
 						show(!shouldShow);
 						return;
 					}
@@ -74,7 +72,7 @@ export const TouchControls = ({
 					else player.play();
 				}}
 				onDoublePress={(e) => {
-					if (!isTouch) {
+					if (!isTouchDevice()) {
 						toggleFullscreen();
 						return;
 					}

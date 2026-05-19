@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "uniwind";
 
+@custom-variant touch (:where(body.noHover) &);
+@custom-variant no-touch (:where(body:not(.noHover)) &);
+
 @theme {
 	--color-accent: #6b00b8;
 	--color-background: #f0f2f5;

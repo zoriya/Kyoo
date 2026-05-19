@@ -18,7 +18,6 @@ import {
 	Poster,
 	Skeleton,
 	tooltip,
-	useIsTouch,
 } from "~/primitives";
 import { cn } from "~/utils";
 import { BottomScrubber } from "../scrubber";
@@ -118,7 +117,6 @@ const ControlButtons = ({
 	className?: string;
 }) => {
 	const { t } = useTranslation();
-	const isTouch = useIsTouch();
 
 	const menuProps = {
 		onMenuOpen: () => setMenu(true),
@@ -137,39 +135,37 @@ const ControlButtons = ({
 			{...props}
 		>
 			<View className="flex-row items-center">
-				{!isTouch && (
-					<View className="flex-row">
-						{playPrev && (
-							<IconButton
-								icon={SkipPrevious}
-								onPress={() => playPrev()}
-								className="mr-4"
-								iconClassName="fill-slate-200 dark:fill-slate-200"
-								{...tooltip(t("player.previous"), true)}
-							/>
-						)}
-						<PlayButton
-							player={player}
+				<View className="touch:hidden flex-row">
+					{playPrev && (
+						<IconButton
+							icon={SkipPrevious}
+							onPress={() => playPrev()}
 							className="mr-4"
 							iconClassName="fill-slate-200 dark:fill-slate-200"
+							{...tooltip(t("player.previous"), true)}
 						/>
-						{playNext && (
-							<IconButton
-								icon={SkipNext}
-								onPress={() => playNext()}
-								className="mr-4"
-								iconClassName="fill-slate-200 dark:fill-slate-200"
-								{...tooltip(t("player.next"), true)}
-							/>
-						)}
-						{Platform.OS === "web" && (
-							<VolumeSlider
-								player={player}
-								iconClassName="fill-slate-200 dark:fill-slate-200"
-							/>
-						)}
-					</View>
-				)}
+					)}
+					<PlayButton
+						player={player}
+						className="mr-4"
+						iconClassName="fill-slate-200 dark:fill-slate-200"
+					/>
+					{playNext && (
+						<IconButton
+							icon={SkipNext}
+							onPress={() => playNext()}
+							className="mr-4"
+							iconClassName="fill-slate-200 dark:fill-slate-200"
+							{...tooltip(t("player.next"), true)}
+						/>
+					)}
+					{Platform.OS === "web" && (
+						<VolumeSlider
+							player={player}
+							iconClassName="fill-slate-200 dark:fill-slate-200"
+						/>
+					)}
+				</View>
 				<ProgressText
 					player={player}
 					className="mx-2 text-slate-300 dark:text-slate-300"

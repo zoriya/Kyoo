@@ -17,7 +17,6 @@ import {
 	ThumbnailBackground,
 	tooltip,
 	ts,
-	useIsTouch,
 } from "~/primitives";
 import type { Layout } from "~/query";
 import { cn, displayRuntime } from "~/utils";
@@ -60,7 +59,6 @@ export const EntryLine = ({
 } & PressableProps) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 	const { t } = useTranslation();
-	const isTouch = useIsTouch();
 
 	return (
 		<Link
@@ -142,9 +140,7 @@ export const EntryLine = ({
 							isOpen={moreOpened}
 							setOpen={(v) => setMoreOpened(v)}
 							className={cn(
-								"ml-3 flex native:hidden self-end",
-								!isTouch &&
-									"opacity-0 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100",
+								"ml-3 flex native:hidden self-end no-touch:opacity-0 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100",
 								moreOpened && "opacity-100",
 							)}
 						/>
