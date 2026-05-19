@@ -141,7 +141,7 @@ export const Player = () => {
 	}, [data?.next, setSlug, setStart, t]);
 	const onEnd = useCallback(() => {
 		const hasNext = playNext();
-		if (!hasNext && data?.show?.href) router.navigate(data.show.href);
+		if (!hasNext && data?.show?.href) router.replace(data.show.href);
 	}, [data?.show?.href, playNext, router]);
 
 	useProgressObserver(

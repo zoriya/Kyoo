@@ -36,7 +36,7 @@ export const Back = ({
 				as={PressableFeedback}
 				onPress={() => {
 					if (router.canGoBack()) router.back();
-					else if (showHref) router.navigate(showHref);
+					else if (showHref) router.replace(showHref);
 				}}
 				className="my-4 ml-4"
 				iconClassName="fill-slate-200"
