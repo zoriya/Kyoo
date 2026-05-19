@@ -17,6 +17,7 @@ import {
 	ThumbnailBackground,
 	tooltip,
 	ts,
+	useIsTouch,
 } from "~/primitives";
 import type { Layout } from "~/query";
 import { cn, displayRuntime } from "~/utils";
@@ -59,6 +60,7 @@ export const EntryLine = ({
 } & PressableProps) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 	const { t } = useTranslation();
+	const isTouch = useIsTouch();
 
 	return (
 		<Link
@@ -86,7 +88,7 @@ export const EntryLine = ({
 				)}
 			</ThumbnailBackground>
 			<View className="m-1 mx-2 flex-1">
-				<View className="mb-5 flex-1 flex-row">
+				<View className="mb-5 flex-1 md:flex-row">
 					<View className="flex-1 justify-center">
 						<Heading
 							className={cn(
@@ -100,26 +102,8 @@ export const EntryLine = ({
 						</Heading>
 						{tagline && <Heading>{tagline}</Heading>}
 					</View>
-					<View className="flex-row">
-						<View className="flex-col-reverse justify-end md:flex-row md:items-center">
-							{videos.length > 1 && (
-								<PressableFeedback
-									onPress={(e) => {
-										e.preventDefault();
-										onSelectVideos?.();
-									}}
-									className="flex-row items-center rounded-2xl bg-popover p-2 md:mx-4"
-									{...tooltip(t("show.multiVideos"))}
-								>
-									<Icon
-										icon={MultipleVideos}
-										className="fill-accent dark:fill-slate-400"
-									/>
-									<SubP className="ml-2">
-										{t("show.videosCount", { number: videos.length })}
-									</SubP>
-								</PressableFeedback>
-							)}
+					<View className="flex-row justify-between">
+						<View className="flex-row justify-between max-sm:flex-col sm:flex-1 md:flex-row-reverse md:items-center md:justify-end">
 							<SubP>
 								{[
 									airDate
@@ -131,6 +115,24 @@ export const EntryLine = ({
 									.filter((item) => item != null)
 									.join(" · ")}
 							</SubP>
+							{videos.length > 1 && (
+								<PressableFeedback
+									onPress={(e) => {
+										e.preventDefault();
+										onSelectVideos?.();
+									}}
+									className="shrink grow-0 flex-row items-center rounded-2xl bg-popover p-2 md:mx-4"
+									{...tooltip(t("show.multiVideos"))}
+								>
+									<Icon
+										icon={MultipleVideos}
+										className="fill-accent dark:fill-slate-400"
+									/>
+									<SubP className="ml-2">
+										{t("show.videosCount", { number: videos.length })}
+									</SubP>
+								</PressableFeedback>
+							)}
 						</View>
 						<EntryContext
 							kind={kind}
@@ -140,8 +142,9 @@ export const EntryLine = ({
 							isOpen={moreOpened}
 							setOpen={(v) => setMoreOpened(v)}
 							className={cn(
-								"ml-3 flex native:hidden",
-								"opacity-0 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100",
+								"ml-3 flex native:hidden self-end",
+								!isTouch &&
+									"opacity-0 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100",
 								moreOpened && "opacity-100",
 							)}
 						/>
