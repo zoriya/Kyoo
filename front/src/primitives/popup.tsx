@@ -1,5 +1,6 @@
 import { usePortal } from "@gorhom/portal";
 import Close from "@material-symbols/svg-400/rounded/close.svg";
+import { usePathname } from "expo-router";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { cn } from "~/utils";
@@ -22,6 +23,13 @@ export const Overlay = ({
 	scroll?: boolean;
 	className?: string;
 }) => {
+	const pathname = usePathname();
+
+	useEffect(() => {
+		pathname;
+		close?.();
+	}, [pathname, close]);
+
 	return (
 		<Pressable
 			className="absolute inset-0 cursor-default! items-center justify-center bg-black/60 max-md:px-4"

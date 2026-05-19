@@ -1,4 +1,4 @@
-import { and, eq, exists, type SQL, sql } from "drizzle-orm";
+import { and, eq, exists, type SQL, sql, desc as sqlDesc } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { auth } from "~/auth";
 import { prefix } from "~/base";
@@ -101,6 +101,11 @@ export async function getStudios({
 		.select({
 			...getColumns(studios),
 			...getColumns(transQ),
+			__similarity: query
+				? sql`word_similarity(${query}::text, ${transQ.name})`.as(
+						"__similarity",
+					)
+				: sql`false`,
 			...buildRelations(relations, studioRelations),
 		})
 		.from(studios)
@@ -112,13 +117,11 @@ export async function getStudios({
 			and(
 				filter,
 				query ? sql`${transQ.name} %> ${query}::text` : undefined,
-				keysetPaginate({ after, sort }),
+				keysetPaginate({ after, sort, query }),
 			),
 		)
 		.orderBy(
-			...(query
-				? [sql`word_similarity(${query}::text, ${transQ.name}) desc`]
-				: sortToSql(sort)),
+			...(query ? [sqlDesc(sql`__similarity`)] : sortToSql(sort)),
 			studios.pk,
 		)
 		.limit(limit);
@@ -243,7 +246,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 				sort,
 				languages: langs,
 			});
-			return createPage(items, { url, sort, limit, headers });
+			return createPage(items, { url, sort, limit, headers, query });
 		},
 		{
 			detail: { description: "Get all studios" },
@@ -342,7 +345,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
-			return createPage(items, { url, sort, limit, headers });
+			return createPage(items, { url, sort, limit, headers, query });
 		},
 		{
 			detail: { description: "Get all series & movies made by a studio." },
@@ -404,7 +407,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
-			return createPage(items, { url, sort, limit, headers });
+			return createPage(items, { url, sort, limit, headers, query });
 		},
 		{
 			detail: { description: "Get all movies made by a studio." },
@@ -466,7 +469,7 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
-			return createPage(items, { url, sort, limit, headers });
+			return createPage(items, { url, sort, limit, headers, query });
 		},
 		{
 			detail: { description: "Get all series made by a studio." },

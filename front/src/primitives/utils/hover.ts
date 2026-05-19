@@ -32,9 +32,8 @@ export const useMobileHover = () => {
 	}, []);
 };
 
-export const useIsTouch = () => {
+export const isTouchDevice = () => {
 	if (Platform.OS !== "web") return true;
 	if (typeof window === "undefined") return false;
-	// TODO: Subscribe to the change.
 	return document.body.classList.contains("noHover");
 };

@@ -1,4 +1,4 @@
-import { and, eq, type SQL, sql } from "drizzle-orm";
+import { and, eq, type SQL, sql, desc as sqlDesc } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { db } from "~/db";
 import { seasons, seasonTranslations, shows } from "~/db/schema";
@@ -83,6 +83,11 @@ export async function getSeasons({
 		.select({
 			...getColumns(seasons),
 			...transCol,
+			__similarity: query
+				? sql`word_similarity(${query}::text, ${transQ.name})`.as(
+						"__similarity",
+					)
+				: sql`false`,
 		})
 		.from(seasons)
 		.leftJoin(transQ, eq(seasons.pk, transQ.pk))
@@ -90,13 +95,11 @@ export async function getSeasons({
 			and(
 				filter,
 				query ? sql`${transQ.name} %> ${query}::text` : undefined,
-				keysetPaginate({ after, sort }),
+				keysetPaginate({ after, sort, query }),
 			),
 		)
 		.orderBy(
-			...(query
-				? [sql`word_similarity(${query}::text, ${transQ.name}) desc`]
-				: sortToSql(sort)),
+			...(query ? [sqlDesc(sql`__similarity`)] : sortToSql(sort)),
 			seasons.pk,
 		)
 		.limit(limit);
@@ -144,7 +147,7 @@ export const seasonsH = new Elysia({ tags: ["series"] })
 				languages: langs,
 			});
 
-			return createPage(items, { url, sort, limit, headers });
+			return createPage(items, { url, sort, limit, headers, query });
 		},
 		{
 			detail: { description: "Get seasons of a serie" },

@@ -1,4 +1,4 @@
-import { and, eq, type SQL, sql } from "drizzle-orm";
+import { and, eq, type SQL, sql, desc as sqlDesc } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { auth } from "~/auth";
 import { prefix } from "~/base";
@@ -93,6 +93,9 @@ async function getStaffRoles({
 		.select({
 			...getColumns(roles),
 			staff: getColumns(staff),
+			__similarity: query
+				? sql`word_similarity(${query}::text, ${staff.name})`.as("__similarity")
+				: sql`false`,
 		})
 		.from(roles)
 		.innerJoin(staff, eq(roles.staffPk, staff.pk))
@@ -100,13 +103,11 @@ async function getStaffRoles({
 			and(
 				filter,
 				query ? sql`${staff.name} %> ${query}::text` : undefined,
-				keysetPaginate({ sort, after }),
+				keysetPaginate({ sort, after, query }),
 			),
 		)
 		.orderBy(
-			...(query
-				? [sql`word_similarity(${query}::text, ${staff.name}) desc`]
-				: sortToSql(sort)),
+			...(query ? [sqlDesc(sql`__similarity`)] : sortToSql(sort)),
 			staff.pk,
 		)
 		.limit(limit);
@@ -232,6 +233,11 @@ export const staffH = new Elysia({ tags: ["staff"] })
 			const items = await db
 				.select({
 					...getColumns(roles),
+					__similarity: query
+						? sql`word_similarity(${query}::text, ${transQ.name})`.as(
+								"__similarity",
+							)
+						: sql`false`,
 					show: {
 						...getColumns(shows),
 						...getColumns(transQ),
@@ -259,17 +265,15 @@ export const staffH = new Elysia({ tags: ["staff"] })
 						eq(roles.staffPk, member.pk),
 						filter,
 						query ? sql`${transQ.name} %> ${query}::text` : undefined,
-						keysetPaginate({ after, sort }),
+						keysetPaginate({ after, sort, query }),
 					),
 				)
 				.orderBy(
-					...(query
-						? [sql`word_similarity(${query}::text, ${transQ.name}) desc`]
-						: sortToSql(sort)),
+					...(query ? [sqlDesc(sql`__similarity`)] : sortToSql(sort)),
 					roles.showPk,
 				)
 				.limit(limit);
-			return createPage(items, { url, sort, limit, headers });
+			return createPage(items, { url, sort, limit, headers, query });
 		},
 		{
 			detail: {
@@ -319,22 +323,27 @@ export const staffH = new Elysia({ tags: ["staff"] })
 			headers,
 		}) => {
 			const items = await db
-				.select()
+				.select({
+					...getColumns(staff),
+					__similarity: query
+						? sql`word_similarity(${query}::text, ${staff.name})`.as(
+								"__similarity",
+							)
+						: sql`false`,
+				})
 				.from(staff)
 				.where(
 					and(
 						query ? sql`${staff.name} %> ${query}::text` : undefined,
-						keysetPaginate({ after, sort }),
+						keysetPaginate({ after, sort, query }),
 					),
 				)
 				.orderBy(
-					...(query
-						? [sql`word_similarity(${query}::text, ${staff.name}) desc`]
-						: sortToSql(sort)),
+					...(query ? [sqlDesc(sql`__similarity`)] : sortToSql(sort)),
 					staff.pk,
 				)
 				.limit(limit);
-			return createPage(items, { url, sort, limit, headers });
+			return createPage(items, { url, sort, limit, headers, query });
 		},
 		{
 			detail: {
@@ -391,7 +400,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 				sort,
 				filter: and(eq(roles.showPk, movie.pk), filter),
 			});
-			return createPage(items, { url, sort, limit, headers });
+			return createPage(items, { url, sort, limit, headers, query });
 		},
 		{
 			detail: {
@@ -459,7 +468,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 				sort,
 				filter: and(eq(roles.showPk, serie.pk), filter),
 			});
-			return createPage(items, { url, sort, limit, headers });
+			return createPage(items, { url, sort, limit, headers, query });
 		},
 		{
 			detail: {

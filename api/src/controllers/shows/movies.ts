@@ -161,7 +161,7 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
-			return createPage(items, { url, sort, limit, headers });
+			return createPage(items, { url, sort, limit, headers, query });
 		},
 		{
 			detail: { description: "Get all movies" },

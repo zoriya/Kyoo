@@ -391,7 +391,7 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 							relations: ["show"],
 						})) as (Entry & { show: Show })[];
 
-						return createPage(items, { url, sort, limit, headers });
+						return createPage(items, { url, sort, limit, headers, query });
 					},
 					{
 						detail: {
@@ -438,7 +438,7 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 							progressQ: historyProgressQ,
 						})) as Entry[];
 
-						return createPage(items, { url, sort, limit, headers });
+						return createPage(items, { url, sort, limit, headers, query });
 					},
 					{
 						detail: {

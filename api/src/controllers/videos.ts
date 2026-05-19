@@ -326,6 +326,11 @@ export async function getVideos({
 		.with(...cte)
 		.select({
 			...getColumns(videos),
+			__similarity: query
+				? sql`word_similarity(${query}::text, ${videos.path})`.as(
+						"__similarity",
+					)
+				: sql`false`,
 			...buildRelations(["slugs", "progress", ...relations], videoRelations, {
 				languages,
 				preferOriginal,
@@ -336,13 +341,11 @@ export async function getVideos({
 			and(
 				filter,
 				query ? sql`${videos.path} %> ${query}::text` : undefined,
-				keysetPaginate({ after, sort }),
+				keysetPaginate({ after, sort, query }),
 			),
 		)
 		.orderBy(
-			...(query
-				? [sql`word_similarity(${query}::text, ${videos.path}) desc`]
-				: sortToSql(sort)),
+			...(query ? [desc(sql`__similarity`)] : sortToSql(sort)),
 			videos.pk,
 		)
 		.limit(limit)
@@ -482,7 +485,7 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
-			return createPage(items, { url, sort, limit, headers });
+			return createPage(items, { url, sort, limit, headers, query });
 		},
 		{
 			detail: {
@@ -596,7 +599,14 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 			request: { url },
 		}) => {
 			const ret = await db
-				.select()
+				.select({
+					...getColumns(videos),
+					__similarity: query
+						? sql`greatest(word_similarity(${query}::text, ${videos.path}), word_similarity(${query}::text, ${videos.guess}->>'title'))`.as(
+								"__similarity",
+							)
+						: sql`false`,
+				})
 				.from(videos)
 				.where(
 					and(
@@ -612,12 +622,15 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 									sql`${videos.guess}->>'title' %> ${query}::text`,
 								)
 							: undefined,
-						keysetPaginate({ after, sort }),
+						keysetPaginate({ after, sort, query }),
 					),
 				)
-				.orderBy(...(query ? [] : sortToSql(sort)), videos.pk)
+				.orderBy(
+					...(query ? [desc(sql`__similarity`)] : sortToSql(sort)),
+					videos.pk,
+				)
 				.limit(limit);
-			return createPage(ret, { url, sort, limit, headers });
+			return createPage(ret, { url, sort, limit, headers, query });
 		},
 		{
 			detail: { description: "Get unknown/unmatched videos." },
@@ -719,7 +732,7 @@ export const videosReadH = new Elysia({ tags: ["videos"] })
 					(x) =>
 						(x as unknown as typeof entries.$inferSelect).showPk === serie.pk,
 				);
-			return createPage(items, { url, sort, limit, headers });
+			return createPage(items, { url, sort, limit, headers, query });
 		},
 		{
 			detail: { description: "List videos of a serie" },

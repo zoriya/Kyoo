@@ -19,9 +19,11 @@ type After = (string | number | boolean | Date | undefined)[];
 export const keysetPaginate = ({
 	sort,
 	after,
+	query,
 }: {
 	sort: Sort | undefined;
 	after: string | undefined;
+	query?: string;
 }) => {
 	if (!after || !sort) return undefined;
 	const cursor: After = JSON.parse(
@@ -34,6 +36,13 @@ export const keysetPaginate = ({
 		accessor: (x: any) => x.pk,
 		desc: false,
 	};
+
+	if (query) {
+		return or(
+			lt(sql`__similarity`, cursor[0]),
+			and(eq(sql`__similarity`, cursor[0]), gt(sort.tablePk, cursor[1])),
+		);
+	}
 
 	if (sort.random) {
 		return or(
@@ -76,7 +85,9 @@ export const keysetPaginate = ({
 	return where;
 };
 
-export const generateAfter = (cursor: any, sort: Sort) => {
-	const ret = [...sort.sort.map((by) => by.accessor(cursor)), cursor.pk];
+export const generateAfter = (cursor: any, sort: Sort, query?: string) => {
+	const ret = query
+		? [cursor.__similarity, cursor.pk]
+		: [...sort.sort.map((by) => by.accessor(cursor)), cursor.pk];
 	return Buffer.from(JSON.stringify(ret), "utf-8").toString("base64url");
 };

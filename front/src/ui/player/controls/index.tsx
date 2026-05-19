@@ -3,7 +3,6 @@ import type { ViewProps } from "react-native";
 import { View } from "react-native";
 import type { VideoPlayer } from "react-native-video";
 import type { Chapter, KImage, Show } from "~/models";
-import { useIsTouch } from "~/primitives";
 import { Back } from "./back";
 import { BottomControls } from "./bottom-controls";
 import { MiddleControls } from "./middle-controls";
@@ -39,8 +38,6 @@ export const Controls = ({
 	onOpenEntriesMenu?: () => void;
 	forceShow?: boolean;
 }) => {
-	const isTouch = useIsTouch();
-
 	const [hover, setHover] = useState(false);
 	const [menuOpened, setMenuOpened] = useState(false);
 	const [controlsVisible, setControlsVisible] = useState(false);
@@ -76,13 +73,12 @@ export const Controls = ({
 					className="absolute top-0 w-full bg-slate-900/50 px-safe pt-safe"
 					{...hoverControls}
 				/>
-				{isTouch && (
-					<MiddleControls
-						player={player}
-						playPrev={playPrev}
-						playNext={playNext}
-					/>
-				)}
+				<MiddleControls
+					player={player}
+					playPrev={playPrev}
+					playNext={playNext}
+					className="touch:flex hidden"
+				/>
 				<BottomControls
 					player={player}
 					name={subName}
