@@ -1,4 +1,4 @@
-import { and, eq, isNotNull, lt, or, sql } from "drizzle-orm";
+import { and, eq, isNotNull, lt, or, sql, desc as sqlDesc } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { auth } from "~/auth";
 import { db } from "~/db";
@@ -93,6 +93,11 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 				.select({
 					...entryCol,
 					...getColumns(transQ),
+					__similarity: query
+						? sql`word_similarity(${query}::text, ${transQ.name})`.as(
+								"__similarity",
+							)
+						: sql`false`,
 					videos: entryVideosQ.videos,
 					progress: mapProgress({ aliased: true }),
 					// specials don't have an `episodeNumber` but a `number` field.
@@ -126,19 +131,17 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 						),
 						filter,
 						query ? sql`${transQ.name} %> ${query}::text` : undefined,
-						keysetPaginate({ after, sort }),
+						keysetPaginate({ after, sort, query }),
 					),
 				)
 				.orderBy(
-					...(query
-						? [sql`word_similarity(${query}::text, ${transQ.name}) desc`]
-						: sortToSql(sort)),
+					...(query ? [sqlDesc(sql`__similarity`)] : sortToSql(sort)),
 					entries.pk,
 				)
 				.limit(limit)
 				.execute({ userId: sub });
 
-			return createPage(items, { url, sort, limit, headers });
+			return createPage(items, { url, sort, limit, headers, query });
 		},
 		{
 			detail: {

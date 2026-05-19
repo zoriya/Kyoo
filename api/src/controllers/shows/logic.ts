@@ -340,7 +340,7 @@ export async function getShows({
 				pk: showTranslations.pk,
 				similarity:
 					sql<number>`max(word_similarity(${query ?? ""}::text, ${showTranslations.name}))`.as(
-						"similarity",
+						"__similarity",
 					),
 			})
 			.from(showTranslations)
@@ -397,6 +397,8 @@ export async function getShows({
 
 			watchStatus: getColumns(watchStatusQ),
 
+			__similarity: searchQ.similarity,
+
 			...buildRelations(relations, showRelations, {
 				languages,
 				preferOriginal,
@@ -413,13 +415,11 @@ export async function getShows({
 			and(
 				filter,
 				query ? sql`${searchQ.pk} is not null` : undefined,
-				keysetPaginate({ after, sort }),
+				keysetPaginate({ after, sort, query }),
 			),
 		)
 		.orderBy(
-			...(query
-				? [desc(searchQ.similarity)]
-				: sortToSql(sort)),
+			...(query ? [desc(searchQ.similarity)] : sortToSql(sort)),
 			shows.pk,
 		)
 		.limit(limit)

@@ -21,6 +21,7 @@ export const createPage = <T>(
 	{
 		url,
 		sort,
+		query,
 		limit,
 		headers,
 	}: {
@@ -28,6 +29,7 @@ export const createPage = <T>(
 		sort: Sort;
 		limit: number;
 		headers?: Record<string, string | undefined>;
+		query?: string;
 	},
 ) => {
 	const uri = new URL(url);
@@ -52,7 +54,10 @@ export const createPage = <T>(
 	// maybe the next page is empty, this is a bit weird but it allows us to handle pages
 	// without making a new request to the db so it's fine.
 	if (items.length >= limit && limit > 0) {
-		uri.searchParams.set("after", generateAfter(items[items.length - 1], sort));
+		uri.searchParams.set(
+			"after",
+			generateAfter(items[items.length - 1], sort, query),
+		);
 		next = uri.toString();
 	}
 	return { items, this: current, next };

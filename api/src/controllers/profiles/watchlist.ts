@@ -157,7 +157,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 							relations: ["nextEntry"],
 							userId: sub,
 						});
-						return createPage(items, { url, sort, limit, headers });
+						return createPage(items, { url, sort, limit, headers, query });
 					},
 					{
 						detail: { description: "Get all movies/series in your watchlist" },
@@ -210,7 +210,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 							relations: ["nextEntry"],
 							userId: uInfo.id,
 						});
-						return createPage(items, { url, sort, limit, headers });
+						return createPage(items, { url, sort, limit, headers, query });
 					},
 					{
 						detail: {

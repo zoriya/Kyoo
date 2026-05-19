@@ -298,6 +298,12 @@ export async function getEntries({
 			episodeNumber: sql<number>`${episodeNumber}`,
 			name: sql<string>`${transQ.name}`,
 
+			__similarity: query
+				? sql`word_similarity(${query}::text, concat(${entries.episodeNumber}, ' ', ${transQ.name}))`.as(
+						"__similarity",
+					)
+				: sql`false`,
+
 			...buildRelations(relations, entryRelations, {
 				languages,
 				preferOriginal,
@@ -313,15 +319,11 @@ export async function getEntries({
 				query
 					? sql`concat(${entries.episodeNumber}, ' ', ${transQ.name}) %> ${query}::text`
 					: undefined,
-				keysetPaginate({ after, sort }),
+				keysetPaginate({ after, sort, query }),
 			),
 		)
 		.orderBy(
-			...(query
-				? [
-						sql`word_similarity(${query}::text, concat(${entries.episodeNumber}, ' ', ${transQ.name})) desc`,
-					]
-				: sortToSql(sort)),
+			...(query ? [desc(sql`__similarity`)] : sortToSql(sort)),
 			entries.pk,
 		)
 		.limit(limit)
@@ -405,7 +407,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				});
 			}
 
-			return createPage(items, { url, sort, limit, headers });
+			return createPage(items, { url, sort, limit, headers, query });
 		},
 		{
 			detail: { description: "Get entries of a serie" },
@@ -501,7 +503,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				userId: sub,
 			})) as Extra[];
 
-			return createPage(items, { url, sort, limit, headers });
+			return createPage(items, { url, sort, limit, headers, query });
 		},
 		{
 			detail: { description: "Get extras of a serie" },
@@ -559,7 +561,7 @@ export const entriesH = new Elysia({ tags: ["series"] })
 				preferOriginal: settings.preferOriginal,
 			})) as (Entry & { show: Show })[];
 
-			return createPage(items, { url, sort, limit, headers });
+			return createPage(items, { url, sort, limit, headers, query });
 		},
 		{
 			detail: { description: "Get new movies/episodes added recently." },

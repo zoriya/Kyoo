@@ -167,7 +167,7 @@ export const collections = new Elysia({
 				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
-			return createPage(items, { url, sort, limit, headers });
+			return createPage(items, { url, sort, limit, headers, query });
 		},
 		{
 			detail: { description: "Get all collections" },
@@ -268,7 +268,7 @@ export const collections = new Elysia({
 				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
-			return createPage(items, { url, sort, limit, headers });
+			return createPage(items, { url, sort, limit, headers, query });
 		},
 		{
 			detail: { description: "Get all movies in a collection" },
@@ -325,7 +325,7 @@ export const collections = new Elysia({
 				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
-			return createPage(items, { url, sort, limit, headers });
+			return createPage(items, { url, sort, limit, headers, query });
 		},
 		{
 			detail: { description: "Get all series in a collection" },
@@ -378,7 +378,7 @@ export const collections = new Elysia({
 				preferOriginal: preferOriginal ?? settings.preferOriginal,
 				userId: sub,
 			});
-			return createPage(items, { url, sort, limit, headers });
+			return createPage(items, { url, sort, limit, headers, query });
 		},
 		{
 			detail: { description: "Get all series & movies in a collection" },
