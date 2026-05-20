@@ -9,6 +9,7 @@ import fr from "../../public/translations/fr.json";
 import gl from "../../public/translations/gl.json";
 import is from "../../public/translations/is.json";
 import it from "../../public/translations/it.json";
+import ja from "../../public/translations/ja.json";
 import ko from "../../public/translations/ko.json";
 import ml from "../../public/translations/ml.json";
 import nl from "../../public/translations/nl.json";
@@ -32,6 +33,7 @@ export const resources = {
 	gl: { translation: gl },
 	is: { translation: is },
 	it: { translation: it },
+	ja: { translation: ja },
 	ko: { translation: ko },
 	ml: { translation: ml },
 	nl: { translation: nl },
@@ -56,6 +58,7 @@ export const supportedLanguages = [
 	"gl",
 	"is",
 	"it",
+	"ja",
 	"ko",
 	"ml",
 	"nl",

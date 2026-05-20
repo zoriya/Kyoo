@@ -94,8 +94,8 @@ export const TouchControls = ({
 					if (e.nativeEvent.pointerType === "mouse") show(false);
 				}}
 				className={cn(
-					"absolute inset-0 cursor-default",
-					!shouldShow && "cursor-none",
+					"absolute inset-0 cursor-default!",
+					!shouldShow && "cursor-none!",
 				)}
 			/>
 			{shouldShow && children}
