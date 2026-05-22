@@ -31,14 +31,14 @@
 		"watchlistAdd": "Ajouter à votre liste de visionnage",
 		"watchlistEdit": "Editer le status",
 		"watchlistRemove": "Marquer comme non vu",
-		"watchlistLogin": "Connectez-vous pour ajouter a votre liste de visionnage",
+		"watchlistLogin": "Connectez-vous pour ajouter à votre liste de visionnage",
 		"watchlistMark": {
-			"completed": "Marquer comme complété",
-			"planned": "Marquer comme prévu a voir",
-			"watching": "Marquer en cours de visionnage",
+			"completed": "Marquer comme terminé",
+			"planned": "Marquer comme prévu",
+			"watching": "Marquer comme en cours de visionnage",
 			"dropped": "Marquer comme abandonné",
 			"null": "Marquer comme non vu",
-			"rewatching": "Marquer comme revisionnage"
+			"rewatching": "Marquer comme à revisionner"
 		},
 		"nextUp": "Continuer",
 		"season": "Saison {{number}}",
