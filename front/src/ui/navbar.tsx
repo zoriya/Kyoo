@@ -8,9 +8,8 @@ import Person from "@material-symbols/svg-400/rounded/person-fill.svg";
 import Play from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import Settings from "@material-symbols/svg-400/rounded/settings.svg";
-import { useIsFocused } from "@react-navigation/native";
 import { useNavigation, usePathname, useRouter } from "expo-router";
-import KyooLongLogo from "public/icon-long.svg";
+import { useIsFocused } from "expo-router/react-navigation";
 import {
 	type ComponentProps,
 	type ComponentType,
@@ -49,6 +48,7 @@ import {
 import { useAccount, useAccounts } from "~/providers/account-context";
 import { logout } from "~/ui/login/logic";
 import { cn, useQueryState } from "~/utils";
+import KyooLongLogo from "~public/icon-long.svg";
 
 export const NavbarLeft = () => {
 	const { t } = useTranslation();

@@ -1,9 +1,9 @@
 import { PortalProvider } from "@gorhom/portal";
+import { HydrationBoundary, QueryClientProvider } from "@tanstack/react-query";
 import {
 	DefaultTheme,
 	ThemeProvider as RNThemeProvider,
-} from "@react-navigation/native";
-import { HydrationBoundary, QueryClientProvider } from "@tanstack/react-query";
+} from "expo-router/react-navigation";
 import { type ReactNode, useState } from "react";
 import { SafeAreaListener } from "react-native-safe-area-context";
 import {
