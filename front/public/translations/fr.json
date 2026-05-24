@@ -18,7 +18,7 @@
 		"trailer": "Lire la bande annonce",
 		"studios": "Studio",
 		"genre": "Genres",
-		"genre-none": "Aucun genres",
+		"genre-none": "Aucun genre",
 		"staff": "Équipe",
 		"staff-none": "Aucun membre du staff connu",
 		"noOverview": "Aucune description disponible",
@@ -38,7 +38,7 @@
 			"watching": "Marquer comme en cours de visionnage",
 			"dropped": "Marquer comme abandonné",
 			"null": "Marquer comme non vu",
-			"rewatching": "Marquer comme à revisionner"
+			"rewatching": "Marquer à revoir"
 		},
 		"nextUp": "Continuer",
 		"season": "Saison {{number}}",
@@ -47,7 +47,17 @@
 		"videosCount": "{{number}} vidéos",
 		"version": "Version {{number}}",
 		"part": "Partie {{number}}",
-		"videos-map": "Modifier les correspondances vidéos"
+		"videos-map": "Modifier les correspondances vidéos",
+		"staff-as": "comme {{character}}",
+		"staff-kind": {
+			"actor": "Acteur",
+			"director": "Directeur",
+			"writter": "Auteur",
+			"producer": "Producteur",
+			"music": "Musique",
+			"crew": "Equipage",
+			"other": "Autre"
+		}
 	},
 	"browse": {
 		"sortby": "Trier par {{key}}",
@@ -87,7 +97,8 @@
 		"collapse": "Replier",
 		"edit": "Modifier",
 		"or": "OU",
-		"loading": "Chargement en cours"
+		"loading": "Chargement en cours",
+		"delete-name": "Supprimer {{name}}"
 	},
 	"navbar": {
 		"home": "Accueil",
@@ -95,7 +106,8 @@
 		"search": "Rechercher",
 		"login": "Connexion",
 		"admin": "Section admin",
-		"download": "Télécharger"
+		"download": "Télécharger",
+		"profile": "Profil"
 	},
 	"settings": {
 		"general": {
@@ -219,7 +231,7 @@
 		"retry": "Réessayer"
 	},
 	"errors": {
-		"connection": "Impossible de se connecter au serveur de kyoo.",
+		"connection": "Impossible de se connecter au serveur de kyoo",
 		"connection-tips": "Possible causes:\n - Etes-vous connecté a internet ?\n - Votre serveur kyoo est-il allumé ?\n - Votre compte est-il bannis ?",
 		"unknown": "Erreur inconnue",
 		"try-again": "Réessayer",
@@ -315,5 +327,12 @@
 		"sort-path": "Chemin",
 		"sort-entry": "Ordre des épisodes",
 		"no-video": "Aucun fichier vidéo lié à cette série."
+	},
+	"profile": {
+		"history": "Historique",
+		"watchlist": "Watchlist",
+		"statuses": {
+			"all": "Tout"
+		}
 	}
 }
