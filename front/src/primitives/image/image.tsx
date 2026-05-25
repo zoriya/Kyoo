@@ -1,11 +1,11 @@
 import { Image as EImage } from "expo-image";
-import KyooLogo from "public/icon.svg";
 import type { ComponentProps } from "react";
 import { type ImageStyle, Platform, View, type ViewProps } from "react-native";
 import { withUniwind } from "uniwind";
 import type { KImage } from "~/models";
 import { useToken } from "~/providers/account-context";
 import { cn } from "~/utils";
+import KyooLogo from "~public/icon.svg";
 import { Skeleton } from "../skeleton";
 
 const Img = withUniwind(EImage);

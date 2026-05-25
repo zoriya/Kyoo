@@ -1,15 +1,16 @@
+import { Slot, withLayoutContext } from "expo-router";
 import {
 	createMaterialTopTabNavigator,
 	type MaterialTopTabNavigationEventMap,
 	type MaterialTopTabNavigationOptions,
-} from "@react-navigation/material-top-tabs";
-import type {
-	NavigationProp,
-	ParamListBase,
-	TabNavigationState,
-} from "@react-navigation/native";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import { Slot, withLayoutContext } from "expo-router";
+} from "expo-router/js-top-tabs";
+import {
+	type NavigationProp,
+	type ParamListBase,
+	type TabNavigationState,
+	useFocusEffect,
+	useNavigation,
+} from "expo-router/react-navigation";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";

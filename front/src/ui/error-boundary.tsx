@@ -5,7 +5,7 @@ import { RetryableError } from "~/models/retryable-error";
 import { Button, H1, P } from "~/primitives";
 import "../global.css";
 import "~/fonts.web.css";
-import { Header, SafeAreaProviderCompat } from "@react-navigation/elements";
+import { Header, SafeAreaProviderCompat } from "expo-router/react-navigation";
 import { useCSSVariable } from "uniwind";
 import { NavbarProfile, NavbarTitle } from "~/ui/navbar";
 

@@ -126,7 +126,7 @@ func (h *Handler) createSession(c *echo.Context, user *User) error {
 		return err
 	}
 
-	dev := cmp.Or(c.Param("device"), c.Request().Header.Get("User-Agent"))
+	dev := cmp.Or(c.QueryParam("device"), c.Request().Header.Get("User-Agent"))
 	device := &dev
 	if dev == "" {
 		device = nil

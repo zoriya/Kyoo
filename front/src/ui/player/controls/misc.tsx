@@ -44,7 +44,6 @@ export const toggleFullscreen = async (set?: boolean) => {
 	try {
 		if (set) {
 			await document.body.requestFullscreen({ navigationUI: "hide" });
-			// @ts-expect-error Firefox does not support this so ts complains
 			await screen.orientation.lock("landscape");
 		} else {
 			if (document.fullscreenElement) await document.exitFullscreen();

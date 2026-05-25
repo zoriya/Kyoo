@@ -38,9 +38,11 @@ export const FormPage = ({
 	return (
 		<ImageBackground
 			source={{ uri: `${apiUrl ?? defaultApiUrl}/api/shows/random/thumbnail` }}
-			className="h-lvw w-lvw flex-1 flex-row overflow-x-hidden bg-popover"
+			className="flex-1 flex-row overflow-x-hidden bg-popover"
 		>
-			<SvgBlob className="absolute top-0 left-0" />
+			<View className="absolute inset-0 overflow-hidden">
+				<SvgBlob />
+			</View>
 			<ScrollView className="pr-6">
 				<View
 					className={cn(
