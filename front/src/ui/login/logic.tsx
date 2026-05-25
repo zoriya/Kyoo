@@ -1,5 +1,7 @@
+import { Platform } from "react-native";
 import { z } from "zod/v4";
 import { type Account, type KyooError, User } from "~/models";
+import { capitalize } from "~/primitives";
 import { defaultApiUrl } from "~/providers/account-provider";
 import {
 	addAccount,
@@ -29,9 +31,11 @@ export const login = async (
 	try {
 		const controller = new AbortController();
 		setTimeout(() => controller.abort(), 5_000);
+		const device =
+			Platform.OS === "web" ? "" : `?device=${capitalize(Platform.OS)} App`;
 		const { token } = await queryFn({
 			method: "POST",
-			url: `${apiUrl}/auth/${action === "login" ? "sessions" : "users"}`,
+			url: `${apiUrl}/auth/${action === "login" ? "sessions" : "users"}${device}`,
 			body,
 			authToken: null,
 			signal: controller.signal,
@@ -60,9 +64,11 @@ export const oidcLogin = async (
 ) => {
 	apiUrl ??= defaultApiUrl;
 	try {
+		const device =
+			Platform.OS === "web" ? "" : `?device=${capitalize(Platform.OS)} App`;
 		const { token } = await queryFn({
 			method: "GET",
-			url: `${apiUrl}/auth/oidc/callback/${provider}?token=${code}`,
+			url: `${apiUrl}/auth/oidc/callback/${provider}?token=${code}${device}`,
 			authToken: linkToToken,
 			parser: linkToToken ? null : z.object({ token: z.string() }),
 		});

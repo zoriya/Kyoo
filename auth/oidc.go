@@ -158,6 +158,7 @@ func (h *Handler) OidcLogged(c *echo.Context) error {
 // @Param        provider      path   string  true   "OIDC provider id"  Example(google)
 // @Param        token         query  string  true   "Opaque token returned by /oidc/logged/:provider"
 // @Param        tenant        query  string  false  "Optional tenant passthrough for federated setups"
+// @Param        device        query  string  false  "The device the created session will be used on"  example(android tv)
 // @Param        Authorization header string  false  "Bearer token to link provider to current account"
 // @Success      201  {object}  SessionWToken
 // @Failure      404  {object}  KError "Unknown OIDC provider"
