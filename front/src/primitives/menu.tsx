@@ -117,8 +117,8 @@ const MenuItem = ({
 	closeOnSelect?: boolean;
 	icon?: ComponentType<SvgProps>;
 } & (
-	| { onSelect: () => void; href?: undefined }
-	| { href: string; onSelect?: undefined }
+	| { onSelect: () => void; href?: undefined; download?: undefined }
+	| { href: string; download?: boolean; onSelect?: undefined }
 )) => {
 	const setOpen = useContext(MenuContext);
 	const router = useRouter();

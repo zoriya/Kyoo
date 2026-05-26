@@ -15,9 +15,11 @@ import { P } from "./text";
 export function useLinkTo({
 	href,
 	replace = false,
+	download,
 }: {
 	href?: string | null;
 	replace?: boolean;
+	download?: boolean;
 }) {
 	const router = useRouter();
 
@@ -28,8 +30,9 @@ export function useLinkTo({
 	return {
 		// @ts-expect-error href is not known
 		href: href,
+		download,
 		onPress: (e) => {
-			if (e?.defaultPrevented) return;
+			if (e?.defaultPrevented || download) return;
 			// prevent native navigation via href.
 			e?.preventDefault();
 			if (href.startsWith("http")) {
@@ -46,15 +49,17 @@ export function useLinkTo({
 export const A = ({
 	href,
 	replace,
+	download,
 	children,
 	className,
 	...props
 }: TextProps & {
 	href?: string | null;
 	replace?: boolean;
+	download?: boolean;
 	children: ReactNode;
 }) => {
-	const linkProps = useLinkTo({ href, replace });
+	const linkProps = useLinkTo({ href, replace, download });
 
 	return (
 		<P
@@ -94,6 +99,7 @@ export const PressableFeedback = ({
 export const Link = ({
 	href,
 	replace,
+	download,
 	children,
 	disabled,
 	...props
@@ -102,7 +108,7 @@ export const Link = ({
 	replace?: boolean;
 	download?: boolean;
 } & PressableProps) => {
-	const linkProps = useLinkTo({ href, replace });
+	const linkProps = useLinkTo({ href, replace, download });
 
 	return (
 		<PressableFeedback
