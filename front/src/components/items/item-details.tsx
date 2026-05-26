@@ -2,7 +2,7 @@ import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, View, type ViewProps } from "react-native";
-import { ItemContext } from "~/components/items/context-menus";
+import { ShowContext } from "~/components/items/context-menus";
 import { ItemWatchStatus } from "~/components/items/item-helpers";
 import type { Genre, KImage, WatchStatusV } from "~/models";
 import {
@@ -85,16 +85,15 @@ export const ItemDetails = ({
 				</PosterBackground>
 				<View className="mb-14 flex-1 justify-end">
 					<View className="my-2 flex-row-reverse justify-between p-2">
-						{kind !== "collection" && (
-							<ItemContext
-								kind={kind}
-								slug={slug}
-								status={watchStatus}
-								isOpen={moreOpened}
-								setOpen={(v) => setMoreOpened(v)}
-								videoSlug={videoSlug}
-							/>
-						)}
+						<ShowContext
+							kind={kind}
+							slug={slug}
+							name={name}
+							status={watchStatus}
+							isOpen={moreOpened}
+							setOpen={(v) => setMoreOpened(v)}
+							videoSlug={videoSlug}
+						/>
 						{tagline && <P className="p-1">{tagline}</P>}
 					</View>
 					<ScrollView className="p-3">

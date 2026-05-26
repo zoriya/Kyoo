@@ -1,17 +1,21 @@
-// import Download from "@material-symbols/svg-400/rounded/download.svg";
 import Refresh from "@material-symbols/svg-400/rounded/autorenew.svg";
+import Delete from "@material-symbols/svg-400/rounded/delete.svg";
+import Download from "@material-symbols/svg-400/rounded/download.svg";
 import Info from "@material-symbols/svg-400/rounded/info.svg";
 import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
 import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
+import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
+import VideoLibrary from "@material-symbols/svg-400/rounded/video_library-fill.svg";
+import { useRouter } from "expo-router";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
+import { Alert } from "react-native";
 import { WatchStatusV } from "~/models";
-import { HR, IconButton, Menu, tooltip } from "~/primitives";
+import { HRP, IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { useMutation } from "~/query";
 import { cn } from "~/utils";
 import { watchListIcon } from "./watchlist-info";
-// import { useDownloader } from "../../packages/ui/src/downloads/ui/src/downloads";
 
 export const EntryContext = ({
 	kind,
@@ -28,7 +32,6 @@ export const EntryContext = ({
 	className?: string;
 } & Partial<ComponentProps<typeof Menu>> &
 	Partial<ComponentProps<typeof IconButton>>) => {
-	// const downloader = useDownloader();
 	const account = useAccount();
 	const { t } = useTranslation();
 
@@ -70,39 +73,46 @@ export const EntryContext = ({
 					onSelect={() => markAsSeenMutation.mutate()}
 				/>
 			)}
-			{/* <Menu.Item */}
-			{/* 	label={t("home.episodeMore.download")} */}
-			{/* 	icon={Download} */}
-			{/* 	onSelect={() => downloader(type, slug)} */}
-			{/* /> */}
 			{videoSlug && (
-				<Menu.Item
-					label={t("home.episodeMore.mediainfo")}
-					icon={MovieInfo}
-					href={`/info/${videoSlug}`}
-				/>
+				<>
+					<Menu.Item
+						label={t("home.episodeMore.download")}
+						icon={Download}
+						href={`/api/videos/${videoSlug}/direct`}
+						download
+					/>
+					<Menu.Item
+						label={t("home.episodeMore.mediainfo")}
+						icon={MovieInfo}
+						href={`/info/${videoSlug}`}
+					/>
+				</>
 			)}
 		</Menu>
 	);
 };
 
-export const ItemContext = ({
+export const ShowContext = ({
 	kind,
 	slug,
+	name,
 	videoSlug,
 	status,
+	showWatchlist = true,
 	className,
 	...props
 }: {
-	kind: "movie" | "serie";
+	kind: "movie" | "serie" | "collection";
 	slug: string;
+	name: string;
 	videoSlug: string | null;
 	status: WatchStatusV | null;
+	showWatchlist?: boolean;
 	className?: string;
 } & Partial<ComponentProps<typeof Menu>> &
 	Partial<ComponentProps<typeof IconButton>>) => {
 	const account = useAccount();
-	// const downloader = useDownloader();
+	const router = useRouter();
 	const { t } = useTranslation();
 
 	const mutation = useMutation({
@@ -120,6 +130,12 @@ export const ItemContext = ({
 		invalidate: null,
 	});
 
+	const deleteMutation = useMutation({
+		method: "DELETE",
+		path: ["api", `${kind}s`, slug],
+		invalidate: ["api", "shows"],
+	});
+
 	return (
 		<Menu
 			Trigger={IconButton}
@@ -128,35 +144,38 @@ export const ItemContext = ({
 			{...tooltip(t("misc.more"))}
 			{...(props as any)}
 		>
-			<Menu.Sub
-				label={account ? t("show.watchlistEdit") : t("show.watchlistLogin")}
-				disabled={!account}
-				icon={watchListIcon(status)}
-			>
-				{Object.values(WatchStatusV).map((x) => (
-					<Menu.Item
-						key={x}
-						label={t(
-							`show.watchlistMark.${x.toLowerCase() as Lowercase<WatchStatusV>}`,
-						)}
-						onSelect={() => mutation.mutate(x)}
-						selected={x === status}
-					/>
-				))}
-				{status !== null && (
-					<Menu.Item
-						label={t("show.watchlistMark.null")}
-						onSelect={() => mutation.mutate(null)}
-					/>
-				)}
-			</Menu.Sub>
+			{showWatchlist && kind !== "collection" && (
+				<Menu.Sub
+					label={account ? t("show.watchlistEdit") : t("show.watchlistLogin")}
+					disabled={!account}
+					icon={watchListIcon(status)}
+				>
+					{Object.values(WatchStatusV).map((x) => (
+						<Menu.Item
+							key={x}
+							label={t(
+								`show.watchlistMark.${x.toLowerCase() as Lowercase<WatchStatusV>}`,
+							)}
+							onSelect={() => mutation.mutate(x)}
+							selected={x === status}
+						/>
+					))}
+					{status !== null && (
+						<Menu.Item
+							label={t("show.watchlistMark.null")}
+							onSelect={() => mutation.mutate(null)}
+						/>
+					)}
+				</Menu.Sub>
+			)}
 			{videoSlug && (
 				<>
-					{/* <Menu.Item */}
-					{/* 	label={t("home.episodeMore.download")} */}
-					{/* 	icon={Download} */}
-					{/* 	onSelect={() => downloader(type, slug)} */}
-					{/* /> */}
+					<Menu.Item
+						label={t("home.episodeMore.download")}
+						icon={Download}
+						href={`/api/videos/${videoSlug}/direct`}
+						download
+					/>
 					<Menu.Item
 						label={t("home.episodeMore.mediainfo")}
 						icon={MovieInfo}
@@ -166,11 +185,47 @@ export const ItemContext = ({
 			)}
 			{account?.isAdmin === true && (
 				<>
-					<HR />
+					<HRP text={t("navbar.admin")} />
 					<Menu.Item
-						label={t("home.refreshMetadata")}
-						icon={Refresh}
-						onSelect={() => metadataRefreshMutation.mutate()}
+						label={t("show.videos-map")}
+						icon={VideoLibrary}
+						href={`/${kind === "movie" ? "movies" : "series"}/${slug}/videos`}
+					/>
+					{kind !== "collection" && (
+						<Menu.Item
+							label={t("show.remap")}
+							icon={Search}
+							href={`/${kind}s/${slug}/remap?q=${name}`}
+						/>
+					)}
+					{kind !== "collection" && (
+						<Menu.Item
+							label={t("home.refreshMetadata")}
+							icon={Refresh}
+							onSelect={() => metadataRefreshMutation.mutate()}
+						/>
+					)}
+					<Menu.Item
+						label={t("misc.delete")}
+						icon={Delete}
+						onSelect={() => {
+							Alert.alert(
+								t("misc.delete-name", { name }),
+								t("login.delete-confirmation"),
+								[
+									{ text: t("misc.cancel"), style: "cancel" },
+									{
+										text: t("misc.delete"),
+										style: "destructive",
+										onPress: async () => {
+											await deleteMutation.mutateAsync();
+											router.back();
+										},
+									},
+								],
+								{ cancelable: true },
+							);
+						}}
 					/>
 				</>
 			)}
