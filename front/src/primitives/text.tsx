@@ -1,3 +1,4 @@
+import { useRecyclingState } from "@legendapp/list/react-native";
 import ExpandMore from "@material-symbols/svg-400/rounded/keyboard_arrow_down-fill.svg";
 import ExpandLess from "@material-symbols/svg-400/rounded/keyboard_arrow_up-fill.svg";
 import {
@@ -108,7 +109,7 @@ export const CroppedText = ({
 	...props
 }: { containerProps?: ViewProps } & ComponentProps<typeof P>) => {
 	const desc = useRef<HTMLElement>(null);
-	const [expended, setExpanded] = useState(false);
+	const [expended, setExpanded] = useRecyclingState(false);
 	const [needExpand, setNeedExpand] = useState(false);
 	const { t } = useTranslation();
 
