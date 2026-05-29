@@ -17,20 +17,22 @@ If you are unsure whether your version is affected, please include the version, 
 
 Please do **not** report security vulnerabilities through public GitHub issues, pull requests, or discussions.
 
-To report a vulnerability, use one of the following private channels:
+To report a vulnerability, please contact the maintainer privately using one of the following channels:
 
-1. GitHub private vulnerability reporting, if enabled for this repository.
-2. Email: `security@example.com`
+* Email: `zoe.roux@zoriya.dev`
+* Discord: `@zoriya`
+
+Email is preferred for detailed vulnerability reports, proof-of-concept material, logs, patches, or any information that should remain private.
 
 Please include as much detail as possible to help us understand and reproduce the issue:
 
 * A clear description of the vulnerability
-* The affected component or endpoint
-* Impact and attack scenario
+* The affected component, route, endpoint, API, or feature
+* Impact and realistic attack scenario
 * Steps to reproduce
 * Proof of concept, if available
 * Affected version, commit hash, or Docker image tag
-* Deployment details, such as reverse proxy, authentication setup, and exposed services
+* Deployment details, such as reverse proxy, authentication setup, exposed services, and configuration
 * Any suggested remediation or patch
 
 We will acknowledge receipt of a valid report as soon as possible and will work with the reporter to validate the issue, develop a fix, and coordinate disclosure.
