@@ -220,9 +220,7 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 		args = append(args, Settings.HwAccel.DecodeFlags...)
 	}
 
-	// in `copy_audio` mode, we use `-ss` and `-t` as an output flag.
-	// without this, seeking is NOT precise and we can have an overlap/gap.
-	if start_ref != 0 && !copy_audio {
+	if start_ref != 0 {
 		if ts.handle.getFlags()&VideoF != 0 {
 			// This is the default behavior in transmux mode and needed to force pre/post segment to work
 			// This must be disabled when processing only audio because it creates gaps in audio
