@@ -57,11 +57,13 @@ export const PlaybackSettings = () => {
 					label={t("settings.playback.audioLanguage.label")}
 					value={audio}
 					onValueChange={(value) => setAudio(value)}
-					values={["default", ...languageCodes]}
+					values={["default", "original", ...languageCodes]}
 					getLabel={(key) =>
 						key === "default"
 							? t("mediainfo.default")
-							: (getLanguageName(key) ?? key)
+							: key === "original"
+								? t("settings.playback.audioLanguage.original")
+								: (getLanguageName(key) ?? key)
 					}
 				/>
 			</Preference>

@@ -35,7 +35,7 @@ export const User = z
 							z.literal("240p"),
 						])
 						.catch("original"),
-					audioLanguage: z.string().catch("default"),
+					audioLanguage: z.string().catch("original"),
 					subtitleLanguage: z.string().nullable().catch(null),
 					chapterSkip: z
 						.object({
