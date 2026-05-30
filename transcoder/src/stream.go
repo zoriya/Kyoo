@@ -345,10 +345,9 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 				cmd.Process.Signal(os.Interrupt)
 				slog.InfoContext(ctx, "killing ffmpeg because segment already ready", "segment", segment, "encoderId", encoder_id)
 				should_stop = true
-			} else if copy_audio && end < length-1 && segment == end {
-				// Extra overlap segment for copied audio.
-				// Delete the file immediately and stop without closing
-				// the channel, so a real producer can close it later.
+			} else if end < length-1 && segment == end {
+				// Extra overlap segment used for accurate cuts.
+				// Ignore it so a future request can create it cleanly if needed.
 				extraPath := fmt.Sprintf(ts.handle.getOutPath(encoder_id), segment)
 				_ = os.Remove(extraPath)
 				should_stop = true
