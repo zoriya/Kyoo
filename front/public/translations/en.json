@@ -182,7 +182,8 @@
 			},
 			"audioLanguage": {
 				"label": "Audio language",
-				"description": "The default audio language used when playing multi-audio videos"
+				"description": "The default audio language used when playing multi-audio videos",
+				"original": "Original"
 			},
 			"subtitleLanguage": {
 				"label": "Subtitle language",

@@ -5,7 +5,11 @@ import { useFetch } from "~/query";
 import { Info } from "../info";
 
 // When the video change, try to persist the subtitle/audio language.
-export const useLanguagePreference = (player: VideoPlayer, slug: string) => {
+export const useLanguagePreference = (
+	player: VideoPlayer,
+	slug: string,
+	originalAudio?: string | null,
+) => {
 	const { data } = useFetch(Info.infoQuery(slug));
 	const account = useAccount();
 
@@ -23,10 +27,12 @@ export const useLanguagePreference = (player: VideoPlayer, slug: string) => {
 	});
 	useEffect(() => {
 		if (!audios?.length) return;
+		const lang =
+			aud.current.lang === "original" ? originalAudio : aud.current.lang;
 		let audRet = audios.findIndex(
 			aud.current.lang === "default"
 				? (x) => x.isDefault
-				: (x) => x.language === aud.current.lang,
+				: (x) => x.language === lang,
 		);
 		if (audRet === -1) audRet = aud.current.idx;
 		if (audRet !== -1) {
@@ -35,7 +41,7 @@ export const useLanguagePreference = (player: VideoPlayer, slug: string) => {
 				player.selectAudioTrack(player.getAvailableAudioTracks()[audRet]);
 			}, 1000);
 		}
-	}, [player, audios]);
+	}, [player, audios, originalAudio]);
 
 	const subtitles = data?.subtitles;
 	const sub = useRef({
