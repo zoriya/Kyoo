@@ -9,6 +9,14 @@ export const WatchlistStatus = t.UnionEnum([
 ]);
 export type WatchlistStatus = typeof WatchlistStatus.static;
 
+export const WatchStatusSync = t.Object({
+	status: t.UnionEnum(["synced", "failed"]),
+	lastAttempt: t.Date(),
+	lastSuccess: t.Date(),
+	error: t.Nullable(t.String()),
+});
+export type WatchStatusSync = typeof WatchStatusSync.static;
+
 export const SerieWatchStatus = t.Object({
 	status: WatchlistStatus,
 	score: t.Nullable(t.Integer({ minimum: 0, maximum: 100 })),
@@ -18,6 +26,8 @@ export const SerieWatchStatus = t.Object({
 		description: "The number of episodes you watched in this serie.",
 		minimum: 0,
 	}),
+
+	syncStatus: t.Optional(t.Record(t.String(), WatchStatusSync))
 });
 export type SerieWatchStatus = typeof SerieWatchStatus.static;
 
@@ -29,8 +39,13 @@ export const MovieWatchStatus = t.Object({
 		minimum: 0,
 		maximum: 100,
 	}),
+
+	syncStatus: t.Optional(t.Record(t.String(), WatchStatusSync))
 });
 export type MovieWatchStatus = typeof MovieWatchStatus.static;
+
+export const WatchStatus = t.Union([SerieWatchStatus, MovieWatchStatus]);
+export type WatchStatus = typeof WatchStatus.static;
 
 export const SeedSerieWatchStatus = t.Object({
 	status: SerieWatchStatus.properties.status,

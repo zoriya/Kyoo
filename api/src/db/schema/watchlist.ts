@@ -1,5 +1,12 @@
 import { sql } from "drizzle-orm";
-import { check, integer, primaryKey, timestamp } from "drizzle-orm/pg-core";
+import {
+	check,
+	integer,
+	jsonb,
+	primaryKey,
+	timestamp,
+} from "drizzle-orm/pg-core";
+import type { WatchStatusSync } from "~/models/watchlist";
 import { entries } from "./entries";
 import { profiles } from "./profiles";
 import { shows } from "./shows";
@@ -28,6 +35,10 @@ export const watchlist = schema.table(
 		nextEntry: integer().references(() => entries.pk, { onDelete: "set null" }),
 
 		score: integer(),
+		syncStatus: jsonb()
+			.$type<Record<string, WatchStatusSync>>()
+			.notNull()
+			.default({}),
 
 		startedAt: timestamp({ withTimezone: true, precision: 3 }),
 		lastPlayedAt: timestamp({ withTimezone: true, precision: 3 }),
