@@ -230,6 +230,38 @@ func (q *Queries) GetAllUsersAfter(ctx context.Context, arg GetAllUsersAfterPara
 	return items, nil
 }
 
+const getOidcHandleTokenByUserId = `-- name: GetOidcHandleTokenByUserId :one
+select
+	h.access_token,
+	h.refresh_token,
+	h.expire_at
+from
+	keibi.oidc_handle as h
+	inner join keibi.users as u on u.pk = h.user_pk
+where
+	u.id = $1
+	and h.provider = $2
+limit 1
+`
+
+type GetOidcHandleTokenByUserIdParams struct {
+	Id       uuid.UUID `json:"id"`
+	Provider string    `json:"provider"`
+}
+
+type GetOidcHandleTokenByUserIdRow struct {
+	AccessToken  *string    `json:"accessToken"`
+	RefreshToken *string    `json:"refreshToken"`
+	ExpireAt     *time.Time `json:"expireAt"`
+}
+
+func (q *Queries) GetOidcHandleTokenByUserId(ctx context.Context, arg GetOidcHandleTokenByUserIdParams) (GetOidcHandleTokenByUserIdRow, error) {
+	row := q.db.QueryRow(ctx, getOidcHandleTokenByUserId, arg.Id, arg.Provider)
+	var i GetOidcHandleTokenByUserIdRow
+	err := row.Scan(&i.AccessToken, &i.RefreshToken, &i.ExpireAt)
+	return i, err
+}
+
 const getUser = `-- name: GetUser :one
 select
 	u.pk, u.id, u.username, u.email, u.password, u.claims, u.created_date, u.last_seen,

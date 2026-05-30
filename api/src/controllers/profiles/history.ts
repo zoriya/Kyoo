@@ -31,6 +31,7 @@ import {
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import type { WatchlistStatus } from "~/models/watchlist";
+import { getTouchedShowPks, syncWatchlistToBackends } from "~/watch-sync/watch-syncer";
 import { traverse } from "~/utils";
 import {
 	entryFilters,
@@ -40,9 +41,17 @@ import {
 } from "../entries";
 import { getOrCreateProfile } from "./profile";
 
-export async function updateProgress(userPk: number, progress: SeedHistory[]) {
+export async function updateProgress(
+	userPk: number,
+	progress: SeedHistory[],
+	opts?: {
+		userId?: string;
+		authorization?: string;
+		syncBackends?: boolean;
+	},
+) {
 	try {
-		return await db.transaction(async (tx) => {
+		const ret = await db.transaction(async (tx) => {
 			const hist = await updateHistory(tx, userPk, progress);
 			if (hist.created.length + hist.updated.length !== progress.length) {
 				tx.rollback();
@@ -60,6 +69,24 @@ export async function updateProgress(userPk: number, progress: SeedHistory[]) {
 				history: hist,
 			} as const;
 		});
+
+		if (
+			opts?.userId &&
+			opts.authorization &&
+			opts.syncBackends !== false &&
+			"history" in ret
+		) {
+			const touched = [...ret.history.created, ...ret.history.updated];
+			const showPks = await getTouchedShowPks(touched.map((x) => x.entryPk));
+			await syncWatchlistToBackends({
+				profilePk: userPk,
+				userId: opts.userId,
+				authorization: opts.authorization,
+				showPks,
+			});
+		}
+
+		return ret;
 	} catch (e) {
 		if (!(e instanceof TransactionRollbackError)) throw e;
 		return {
@@ -469,7 +496,7 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 	)
 	.post(
 		"/profiles/me/history",
-		async ({ body, jwt: { sub }, status }) => {
+		async ({ body, jwt: { sub }, status, headers: { authorization } }) => {
 			const profilePk = await getOrCreateProfile(sub);
 			if (!profilePk) {
 				return status(401, {
@@ -478,7 +505,10 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 				});
 			}
 
-			const ret = await updateProgress(profilePk, body);
+			const ret = await updateProgress(profilePk, body, {
+				userId: sub,
+				authorization: authorization!,
+			});
 			return status(ret.status, ret);
 		},
 		{

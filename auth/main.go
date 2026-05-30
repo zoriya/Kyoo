@@ -370,6 +370,7 @@ func main() {
 
 	r.GET("/users", h.ListUsers)
 	r.GET("/users/:id", h.GetUser)
+	r.GET("/users/:id/oidc-tokens/:provider", h.GetOidcProviderToken)
 	r.GET("/users/me", h.GetMe)
 	r.GET("/users/me/logo", h.GetMyLogo)
 	r.POST("/users/me/logo", h.UploadMyLogo)

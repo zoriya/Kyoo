@@ -167,3 +167,16 @@ delete from keibi.oidc_handle
 where
 	user_pk = $1
 	and provider = $2;
+
+-- name: GetOidcHandleTokenByUserId :one
+select
+	h.access_token,
+	h.refresh_token,
+	h.expire_at
+from
+	keibi.oidc_handle as h
+	inner join keibi.users as u on u.pk = h.user_pk
+where
+	u.id = $1
+	and h.provider = $2
+limit 1;

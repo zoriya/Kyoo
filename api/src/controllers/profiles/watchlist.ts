@@ -32,18 +32,26 @@ import {
 	SeedSerieWatchStatus,
 	SerieWatchStatus,
 } from "~/models/watchlist";
+import {
+	resyncWatchlist,
+	syncWatchlistToBackends,
+} from "~/watch-sync/watch-syncer";
 import { getOrCreateProfile } from "./profile";
 
 async function setWatchStatus({
 	show,
 	status,
 	userPk,
+	userId,
+	authorization,
 }: {
 	show:
 		| { pk: number; kind: "movie" }
 		| { pk: number; kind: "serie"; entriesCount: number };
 	status: SeedSerieWatchStatus;
 	userPk: number;
+	userId: string;
+	authorization: string;
 }) {
 	const firstEntryQ = db
 		.select({ pk: entries.pk })
@@ -107,6 +115,13 @@ async function setWatchStatus({
 			...getColumns(watchlist),
 			percent: sql<number>`${watchlist.seenCount}`.as("percent"),
 		});
+
+	await syncWatchlistToBackends({
+		profilePk: userPk,
+		userId,
+		authorization,
+		showPks: [show.pk],
+	});
 	return ret;
 }
 
@@ -253,7 +268,13 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 	)
 	.post(
 		"/series/:id/watchstatus",
-		async ({ params: { id }, body, jwt: { sub }, status }) => {
+		async ({
+			params: { id },
+			body,
+			jwt: { sub },
+			headers: { authorization },
+			status,
+		}) => {
 			const profilePk = await getOrCreateProfile(sub);
 			if (!profilePk) {
 				return status(401, {
@@ -281,6 +302,8 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 			return await setWatchStatus({
 				show: { pk: show.pk, kind: "serie", entriesCount: show.entriesCount },
 				userPk: profilePk,
+				userId: sub,
+				authorization: authorization!,
 				status: body,
 			});
 		},
@@ -303,7 +326,13 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 	)
 	.post(
 		"/movies/:id/watchstatus",
-		async ({ params: { id }, body, jwt: { sub }, status }) => {
+		async ({
+			params: { id },
+			body,
+			jwt: { sub },
+			headers: { authorization },
+			status,
+		}) => {
 			const profilePk = await getOrCreateProfile(sub);
 			if (!profilePk) {
 				return status(401, {
@@ -332,6 +361,8 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 			return await setWatchStatus({
 				show: { pk: show.pk, kind: "movie" },
 				userPk: profilePk,
+				userId: sub,
+				authorization: authorization!,
 				status: {
 					...body,
 					startedAt: body.completedAt,
@@ -351,6 +382,43 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 				200: t.Intersect([MovieWatchStatus, DbMetadata]),
 				401: { ...KError, description: "Guest can't set their watchstatus" },
 				404: KError,
+			},
+			permissions: ["core.read"],
+		},
+	)
+	.post(
+		"/profiles/me/watchlist/resync",
+		async ({ jwt: { sub }, headers: { authorization }, status }) => {
+			const profilePk = await getOrCreateProfile(sub);
+			if (!profilePk) {
+				return status(401, {
+					status: 401,
+					message: "Guest can't sync watchlist",
+				});
+			}
+
+			const ret = await resyncWatchlist({
+				profilePk,
+				userId: sub,
+				authorization: authorization!,
+			});
+			return status(200, ret);
+		},
+		{
+			detail: {
+				description: "Manually trigger two-way watchlist sync with external backends.",
+			},
+			response: {
+				200: t.Object({
+					pulled: t.Object({
+						fetched: t.Integer(),
+						matched: t.Integer(),
+						upserted: t.Integer(),
+						skipped: t.Integer(),
+					}),
+					pushed: t.Any(),
+				}),
+				401: KError,
 			},
 			permissions: ["core.read"],
 		},

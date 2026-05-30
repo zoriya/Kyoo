@@ -8,6 +8,7 @@ import { getOrCreateProfile } from "./controllers/profiles/profile";
 import { prepareVideo } from "./controllers/video-metadata";
 import { getVideos } from "./controllers/videos";
 import { videos } from "./db/schema";
+import { syncRealtimeWatchEvent } from "./watch-sync/watch-syncer";
 
 const logger = getLogger();
 
@@ -41,9 +42,15 @@ const actionMap = {
 				return;
 			}
 
-			const ret = await updateProgress(profilePk, [
-				{ ...body, playedDate: null },
-			]);
+			const ret = await updateProgress(
+				profilePk,
+				[{ ...body, playedDate: null }],
+				{
+					userId: ws.data.jwt.sub,
+					authorization: ws.data.headers.authorization!,
+					syncBackends: false,
+				},
+			);
 
 			ws.send({ action: "watch", ...ret });
 
@@ -51,6 +58,15 @@ const actionMap = {
 
 			const old = ret.history.existing.find((x) => x.videoId === body.videoId);
 			if (!old) return;
+
+			await syncRealtimeWatchEvent({
+				profilePk,
+				userId: ws.data.jwt.sub,
+				authorization: ws.data.headers.authorization!,
+				videoId: body.videoId,
+				fromPercent: old.percent,
+				toPercent: body.percent,
+			});
 
 			if (
 				(old.percent < 50 && body.percent >= 50) ||

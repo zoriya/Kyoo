@@ -220,10 +220,13 @@ export const staffH = new Elysia({ tags: ["staff"] })
 
 			const watchStatusQ = db
 				.select({
-					watchStatus: jsonbBuildObject<MovieWatchStatus & SerieWatchStatus>({
-						...getColumns(watchlist),
-						percent: watchlist.seenCount,
-					}).as("watchStatus"),
+					watchStatus: (() => {
+						const { syncStatus, ...watchCols } = getColumns(watchlist);
+						return jsonbBuildObject<MovieWatchStatus & SerieWatchStatus>({
+							...watchCols,
+							percent: watchlist.seenCount,
+						}).as("watchStatus");
+					})(),
 				})
 				.from(watchlist)
 				.leftJoin(profiles, eq(watchlist.profilePk, profiles.pk))

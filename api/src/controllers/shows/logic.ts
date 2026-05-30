@@ -48,7 +48,10 @@ import {
 
 export const watchStatusQ = db
 	.select({
-		...getColumns(watchlist),
+		...(() => {
+			const { syncStatus, ...ret } = getColumns(watchlist);
+			return ret;
+		})(),
 		percent: sql<number>`${watchlist.seenCount}`.as("percent"),
 	})
 	.from(watchlist)
