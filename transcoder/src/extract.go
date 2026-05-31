@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 
 	"github.com/zoriya/kyoo/transcoder/src/exec"
@@ -16,13 +17,20 @@ import (
 
 const ExtractVersion = 1
 
-func (s *MetadataService) ExtractSubs(ctx context.Context, info *MediaInfo) (any, error) {
+func (s *MetadataService) ExtractSubs(ctx context.Context, info *MediaInfo) (res any, err error) {
 	get_running, set := s.extractLock.Start(info.Sha)
 	if get_running != nil {
 		return get_running()
 	}
+	defer func() {
+		if r := recover(); r != nil {
+			slog.ErrorContext(ctx, "recovered from panic while extracting subtitles",
+				"path", info.Path, "panic", fmt.Sprintf("%v", r), "stack", string(debug.Stack()))
+			res, err = set(nil, fmt.Errorf("panic while extracting subtitles: %v", r))
+		}
+	}()
 
-	err := s.extractSubs(ctx, info)
+	err = s.extractSubs(ctx, info)
 	if err != nil {
 		slog.ErrorContext(ctx, "couldn't extract subs", "err", err)
 		return set(nil, err)

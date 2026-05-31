@@ -117,6 +117,8 @@ func main() {
 	e.Filesystem = os.DirFS("/")
 	instrument(e)
 
+	e.Use(middleware.Recover())
+
 	ignorepath := []string{
 		"/video/health",
 		"/video/ready",

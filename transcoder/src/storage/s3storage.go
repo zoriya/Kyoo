@@ -15,8 +15,6 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-var noSuchKeyError = &s3types.NoSuchKey{}
-
 // S3StorageBackend is a struct that implements the StorageBackend interface,
 // backed by S3-compatible object storage.
 // It is up to the user to ensure that the object storage service supports
@@ -90,7 +88,8 @@ func (ssb *S3StorageBackend) DeleteItem(ctx context.Context, path string) error 
 		Key:    &path,
 	})
 	if err != nil {
-		if errors.Is(err, noSuchKeyError) {
+		var noSuchKey *s3types.NoSuchKey
+		if errors.As(err, &noSuchKey) {
 			return nil
 		}
 		return fmt.Errorf("failed to delete item %q from bucket %q: %w", path, ssb.bucket, err)
@@ -117,40 +116,33 @@ func (ssb *S3StorageBackend) DeleteItemsWithPrefix(ctx context.Context, pathPref
 	// than deleting each item individually.
 
 	// The API call supports up to 1000 items at a time, so chunk the items if needed.
-	chunkSize := min(len(items), 1000)
-	chunkItems := make([]s3types.ObjectIdentifier, chunkSize)
+	const maxBatch = 1000
 	var deletionRequests errgroup.Group
 
-	for i := range items {
-		item := items[i]
-		chunkIndex := i % chunkSize
+	for start := 0; start < len(items); start += maxBatch {
+		end := min(start+maxBatch, len(items))
 
-		chunkItems[chunkIndex] = s3types.ObjectIdentifier{
-			Key: &item,
+		chunkItems := make([]s3types.ObjectIdentifier, 0, end-start)
+		for i := start; i < end; i++ {
+			chunkItems = append(chunkItems, s3types.ObjectIdentifier{Key: &items[i]})
 		}
 
-		// If the chunk is full, delete the objects in this chunk.
-		if chunkIndex == chunkSize-1 {
-			deletionRequests.Go(func() error {
-				_, err := ssb.s3Client.DeleteObjects(ctx, &s3.DeleteObjectsInput{
-					Bucket: &ssb.bucket,
-					Delete: &s3types.Delete{
-						Objects: chunkItems,
-						// Only include keys in the response that encountered an error.
-						Quiet: aws.Bool(true),
-					},
-				})
-
-				if err != nil {
-					chunkNumber := 1 + i/chunkSize // Int division in Go rounds down.
-					// TODO if the error doesn't include sufficient information, the below line
-					// will need to pull in error details from the response.
-					return fmt.Errorf("failed to delete items in chunk %d with prefix %q: %w", chunkNumber, pathPrefix, err)
-				}
-
-				return nil
+		deletionRequests.Go(func() error {
+			_, err := ssb.s3Client.DeleteObjects(ctx, &s3.DeleteObjectsInput{
+				Bucket: &ssb.bucket,
+				Delete: &s3types.Delete{
+					Objects: chunkItems,
+					// Only include keys in the response that encountered an error.
+					Quiet: aws.Bool(true),
+				},
 			})
-		}
+
+			if err != nil {
+				return fmt.Errorf("failed to delete items in chunk starting at %d with prefix %q: %w", start, pathPrefix, err)
+			}
+
+			return nil
+		})
 	}
 
 	err = deletionRequests.Wait()

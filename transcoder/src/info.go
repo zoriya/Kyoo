@@ -280,8 +280,7 @@ func RetriveMediaInfo(ctx context.Context, path string, sha string) (*MediaInfo,
 	ret := MediaInfo{
 		Sha:  sha,
 		Path: path,
-		// Remove leading .
-		Extension: filepath.Ext(path)[1:],
+		Extension: strings.TrimPrefix(filepath.Ext(path), "."),
 		Size:      ParseInt64(mi.Format.Size),
 		Duration:  mi.Format.DurationSeconds,
 		Container: OrNull(mi.Format.FormatName),

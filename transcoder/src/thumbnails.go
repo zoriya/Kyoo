@@ -9,6 +9,7 @@ import (
 	"io"
 	"log/slog"
 	"math"
+	"runtime/debug"
 	"strings"
 	"sync"
 
@@ -67,13 +68,20 @@ func (s *MetadataService) GetThumbSprite(ctx context.Context, path string, sha s
 	return sprite, nil
 }
 
-func (s *MetadataService) ExtractThumbs(ctx context.Context, path string, sha string) (interface{}, error) {
+func (s *MetadataService) ExtractThumbs(ctx context.Context, path string, sha string) (res interface{}, err error) {
 	get_running, set := s.thumbLock.Start(sha)
 	if get_running != nil {
 		return get_running()
 	}
+	defer func() {
+		if r := recover(); r != nil {
+			slog.ErrorContext(ctx, "recovered from panic while extracting thumbnails",
+				"path", path, "panic", fmt.Sprintf("%v", r), "stack", string(debug.Stack()))
+			res, err = set(nil, fmt.Errorf("panic while extracting thumbnails: %v", r))
+		}
+	}()
 
-	err := s.extractThumbnail(ctx, path, sha)
+	err = s.extractThumbnail(ctx, path, sha)
 	if err != nil {
 		return set(nil, err)
 	}
@@ -103,15 +111,14 @@ func (s *MetadataService) extractThumbnail(ctx context.Context, path string, sha
 	gen.Fast = true
 
 	duration := int(gen.Duration) / 1000
-	var numcaps int
-	if default_interval < duration {
-		numcaps = duration / default_interval
-	} else {
-		numcaps = duration / 10
+	if duration <= 0 || gen.Height() <= 0 || gen.Width() <= 0 {
+		slog.WarnContext(ctx, "skipping thumbnail extraction: no usable duration or video dimensions",
+			"path", path, "duration", duration, "height", gen.Height(), "width", gen.Width())
+		return nil
 	}
-	numcaps = min(numcaps, max_numcaps)
-	interval := duration / numcaps
-	columns := int(math.Sqrt(float64(numcaps)))
+	numcaps := min(max(duration/default_interval, 1), max_numcaps)
+	interval := max(duration/numcaps, 1)
+	columns := max(int(math.Sqrt(float64(numcaps))), 1)
 	rows := int(math.Ceil(float64(numcaps) / float64(columns)))
 
 	height := 144
