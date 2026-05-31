@@ -5,12 +5,28 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"runtime/debug"
 	"time"
 
 	"go.opentelemetry.io/otel"
 )
 
 var tracer = otel.Tracer("")
+
+// RecoverPanic recovers from a panic in a background goroutine and logs it with
+// a stack trace, instead of letting it crash the whole process (Go does not
+// recover panics in goroutines). Use as the first deferred call in a goroutine:
+//
+//	go func() {
+//		defer utils.RecoverPanic(ctx, "extracting thumbnails")
+//		...
+//	}()
+func RecoverPanic(ctx context.Context, label string) {
+	if r := recover(); r != nil {
+		slog.ErrorContext(ctx, "recovered from panic in background task",
+			"task", label, "panic", fmt.Sprintf("%v", r), "stack", string(debug.Stack()))
+	}
+}
 
 func PrintExecTime(ctx context.Context, message string, args ...any) func() {
 	msg := fmt.Sprintf(message, args...)

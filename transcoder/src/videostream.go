@@ -29,6 +29,9 @@ func (t *Transcoder) NewVideoStream(ctx context.Context, file *FileStream, idx u
 			break
 		}
 	}
+	if ret.video == nil {
+		return nil, fmt.Errorf("no video track with index %d", idx)
+	}
 
 	NewStream(file, keyframes, ret, &ret.Stream)
 	return ret, nil

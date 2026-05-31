@@ -29,6 +29,9 @@ func (t *Transcoder) NewAudioStream(ctx context.Context, file *FileStream, idx u
 			break
 		}
 	}
+	if ret.audio == nil {
+		return nil, fmt.Errorf("no audio track with index %d", idx)
+	}
 
 	NewStream(file, keyframes, ret, &ret.Stream)
 	return ret, nil

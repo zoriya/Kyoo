@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 
 	"github.com/asticode/go-astisub"
 	"github.com/labstack/echo/v5"
@@ -59,7 +60,7 @@ func (h *mhandler) GetInfo(c *echo.Context) error {
 		return c.JSON(http.StatusOK, src.MediaInfo{
 			Sha:       sha,
 			Path:      path,
-			Extension: filepath.Ext(path)[1:],
+			Extension: strings.TrimPrefix(filepath.Ext(path), "."),
 			Size:      size,
 			Duration:  0,
 			Container: nil,
@@ -110,6 +111,7 @@ func (h *mhandler) Prepare(c *echo.Context) error {
 
 	go func() {
 		ctx := context.WithoutCancel(c.Request().Context())
+		defer utils.RecoverPanic(ctx, "prepare metadata")
 
 		info, err := h.metadata.GetMetadata(ctx, path, sha)
 		if err != nil {
@@ -203,6 +205,7 @@ func (h *mhandler) GetSubtitle(c *echo.Context) (err error) {
 	pr, pw := io.Pipe()
 	outExt := fmt.Sprintf(".%s", outFmt)
 	err = src.ConvertSubtitle(
+		c.Request().Context(),
 		filepath.Ext(name),
 		stream,
 		outExt,
