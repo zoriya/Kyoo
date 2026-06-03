@@ -91,8 +91,22 @@ async function parseSslConfig(): Promise<PoolConfig> {
 	if (process.env.PGSSLMODE) {
 		switch (process.env.PGSSLMODE) {
 			// Disable is handled above, gateing the configurating of any SSL options.
-			// Allow and prefer are not currently supported. Supporting them would require
-			// either mulitiple attempted connections, or changes upstream to the postgres driver.
+			// 'prefer' and 'allow' cannot be fully supported without multiple attempted
+			// connections or upstream driver changes; the closest we can do with a
+			// single connection is to attempt SSL with no certificate validation, so
+			// an SSL-capable server still negotiates TLS while an SSL-disabled server
+			// surfaces a connection error the operator can act on.
+			case "allow":
+			case "prefer":
+				logger.info(
+					"PGSSLMODE={mode} requested: attempting SSL without certificate validation",
+					{ mode: process.env.PGSSLMODE },
+				);
+				ssl.checkServerIdentity = (_host, _cert) => {
+					return undefined;
+				};
+				ssl.rejectUnauthorized = false;
+				break;
 			case "verify-ca":
 				ssl.rejectUnauthorized = true;
 				ssl.checkServerIdentity = (_host, _cert) => {
