@@ -35,7 +35,7 @@ jobs:
           cache-dependency-path: front/yarn.lock
 
       - name: Setup Expo
-        uses: expo/expo-github-action@v8
+        uses: expo/expo-github-action@v9
         if: env.IS_EXPO_ENABLED == 'true'
         with:
           expo-version: latest
