@@ -9,7 +9,7 @@
         "@elysiajs/swagger": "zoriya/elysia-swagger#build",
         "@kubiks/otel-drizzle": "zoriya/drizzle-otel#build",
         "@logtape/elysia": "2.1.1",
-        "@logtape/logtape": "2.1.1",
+        "@logtape/logtape": "2.1.3",
         "@logtape/otel": "2.1.1",
         "@logtape/redaction": "2.1.1",
         "@opentelemetry/api": "^1.9.0",
@@ -197,7 +197,7 @@
 
     "@logtape/elysia": ["@logtape/elysia@2.1.1", "", { "peerDependencies": { "@logtape/logtape": "^2.1.1", "elysia": "^1.4.0" } }, "sha512-rM0bcNbVkH56IKhxRWxw+u+LMcGSJyLrOHi5Es9VRcYPrR1RstalYTtsodf9vRlz+Wm2NQYS254sO0U1Ek4E3g=="],
 
-    "@logtape/logtape": ["@logtape/logtape@2.1.1", "", {}, "sha512-aULbCqUQGerfOsZ3CMvcKtueKzmdchluXYUd3bIHKmOIS93fx1ko0+hyRQ4flloGZ8EiyRPydZXiy8n1J/eAQA=="],
+    "@logtape/logtape": ["@logtape/logtape@2.1.3", "", {}, "sha512-DgFWjTYG403/FYbe2rIN6oEE20aN34r5UBC4wktCsM+qSF1L9HMZErvH+u+urNuDQX4bcnLm5UYgX+wWE79U3g=="],
 
     "@logtape/otel": ["@logtape/otel@2.1.1", "", { "dependencies": { "@opentelemetry/api": "^1.9.0", "@opentelemetry/api-logs": "^0.208.0", "@opentelemetry/exporter-logs-otlp-grpc": "^0.208.0", "@opentelemetry/exporter-logs-otlp-http": "^0.208.0", "@opentelemetry/exporter-logs-otlp-proto": "^0.208.0", "@opentelemetry/otlp-exporter-base": "^0.208.0", "@opentelemetry/resources": "^2.2.0", "@opentelemetry/sdk-logs": "^0.208.0", "@opentelemetry/semantic-conventions": "^1.38.0" }, "peerDependencies": { "@logtape/logtape": "^2.1.1" } }, "sha512-fb8+oxIYLVCym0agUNN5fVqCi/GHhwb6vk1hilKfBzJMqT+7lEzWUmx3XKAvmS/y7Zm9ATkgeFGRJ8mWBqryqA=="],
 
