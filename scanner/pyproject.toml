@@ -5,7 +5,7 @@ description = "Register video files to kyoo"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "aiohttp>=3.11.18",
+    "aiohttp>=3.14.1",
     "asyncpg>=0.30.0",
     "fastapi[standard]>=0.115.12",
     "guessit",
