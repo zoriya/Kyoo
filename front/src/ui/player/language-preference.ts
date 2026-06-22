@@ -4,6 +4,27 @@ import { useAccount } from "~/providers/account-context";
 import { useFetch } from "~/query";
 import { Info } from "../info";
 
+// Delay before selecting a track: the player needs a moment to initialise its
+// track list after a new episode loads.
+const SELECT_DELAY = 1000;
+// Delay before releasing the restore guard, a bit longer than SELECT_DELAY so the
+// change event triggered by our own selection doesn't overwrite the preference.
+const RELEASE_DELAY = 1500;
+
+const scheduleRestore = (
+	restoring: { current: boolean },
+	select?: () => void,
+) => {
+	const selectId = select ? setTimeout(select, SELECT_DELAY) : undefined;
+	const releaseId = setTimeout(() => {
+		restoring.current = false;
+	}, RELEASE_DELAY);
+	return () => {
+		if (selectId) clearTimeout(selectId);
+		clearTimeout(releaseId);
+	};
+};
+
 // When the video change, try to persist the subtitle/audio language.
 export const useLanguagePreference = (
 	player: VideoPlayer,
@@ -14,69 +35,81 @@ export const useLanguagePreference = (
 	const account = useAccount();
 
 	const audios = data?.audios;
-	const aud = useRef({
-		idx: -1,
-		lang: account?.claims.settings.audioLanguage ?? null,
-	});
+	const audioPref = useRef(account?.claims.settings.audioLanguage ?? "default");
+	const audioIdx = useRef(-1);
+	const restoringAudio = useRef(false);
+
 	useEvent(player, "onAudioTrackChange", () => {
-		if (!audios?.length) return;
-		const selected =
-			audios?.[player.getAvailableAudioTracks().findIndex((x) => x.selected)];
-		if (!selected) return;
-		aud.current = { idx: selected.index, lang: selected.language };
+		if (restoringAudio.current || !audios?.length) return;
+		const idx = player.getAvailableAudioTracks().findIndex((x) => x.selected);
+		if (idx === -1 || !audios[idx]) return;
+		audioIdx.current = idx;
+		audioPref.current = audios[idx].language ?? audioPref.current;
 	});
 	useEffect(() => {
 		if (!audios?.length) return;
-		const lang =
-			aud.current.lang === "original" ? originalAudio : aud.current.lang;
+		restoringAudio.current = true;
+		const original = audioPref.current === "original";
+		const lang = original ? originalAudio : audioPref.current;
 		let audRet = audios.findIndex(
-			aud.current.lang === "default"
+			audioPref.current === "default"
 				? (x) => x.isDefault
 				: (x) => x.language === lang,
 		);
-		if (audRet === -1) audRet = aud.current.idx;
-		if (audRet !== -1) {
-			// we need to wait for player to init audio list before we can select it
-			setTimeout(() => {
-				player.selectAudioTrack(player.getAvailableAudioTracks()[audRet]);
-			}, 1000);
-		}
+		if (audRet === -1) audRet = audioIdx.current;
+		// "original" is wanted but the show's original language hasn't loaded yet
+		// (it comes from a separate query): keep the guard up and wait for the next
+		// run instead of resolving against an undefined language.
+		if (audRet === -1 && original && originalAudio === undefined) return;
+		if (audRet >= 0) audioIdx.current = audRet;
+		// we need to wait for player to init audio list before we can select it
+		return scheduleRestore(restoringAudio, () => {
+			if (audRet === -1) return;
+			const track = player.getAvailableAudioTracks()[audRet];
+			if (track) player.selectAudioTrack(track);
+		});
 	}, [player, audios, originalAudio]);
 
 	const subtitles = data?.subtitles;
-	const sub = useRef({
+	const subPref = useRef({
 		idx: account?.claims.settings.subtitleLanguage === null ? null : -1,
 		lang: account?.claims.settings.subtitleLanguage,
 		forced: false,
 	});
+	const restoringSub = useRef(false);
 	useEvent(player, "onTrackChange", (s) => {
-		if (!subtitles?.length) return;
+		if (restoringSub.current || !subtitles?.length) return;
 		if (!s) {
-			sub.current = { idx: null, lang: null, forced: false };
+			subPref.current = { idx: null, lang: null, forced: false };
 			return;
 		}
 		const idx = player.getAvailableTextTracks().findIndex((x) => x.selected);
-		sub.current = {
-			idx: idx,
+		if (idx === -1 || !subtitles[idx]) return;
+		subPref.current = {
+			idx,
 			lang: subtitles[idx].language,
 			forced: subtitles[idx].isForced,
 		};
 	});
 	useEffect(() => {
-		if (!subtitles?.length || sub.current.idx === null) return;
+		if (!subtitles?.length) return;
+		restoringSub.current = true;
+		// subtitles are disabled: don't force any track, just hold the guard so the
+		// player auto-enabling one on load doesn't overwrite the preference.
+		if (subPref.current.idx === null) return scheduleRestore(restoringSub);
 		let subRet = subtitles.findIndex(
-			sub.current.lang === "default"
+			subPref.current.lang === "default"
 				? (x) => x.isDefault
 				: (x) =>
-						x.language === sub.current.lang &&
-						x.isForced === sub.current.forced,
+						x.language === subPref.current.lang &&
+						x.isForced === subPref.current.forced,
 		);
-		if (subRet === -1) subRet = sub.current.idx;
-		if (subRet !== -1) {
-			// we need to wait for player to init subs list before we can select it
-			setTimeout(() => {
-				player.selectTextTrack(player.getAvailableTextTracks()[subRet]);
-			}, 1000);
-		}
+		if (subRet === -1) subRet = subPref.current.idx;
+		if (subRet === -1) return scheduleRestore(restoringSub);
+		subPref.current.idx = subRet;
+		return scheduleRestore(restoringSub, () => {
+			const track = player.getAvailableTextTracks()[subRet];
+			if (track) player.selectTextTrack(track);
+		});
 	}, [player, subtitles]);
 };
