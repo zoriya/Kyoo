@@ -109,8 +109,8 @@ github.com/labstack/echo-jwt/v5 v5.0.1 h1:uIpCHCiDPN3jA8Jb47i4EViToUl1uypMiPvVAA
 github.com/labstack/echo-jwt/v5 v5.0.1/go.mod h1:kcHmJPzrVSEJa1FRheVoi9EJrBLLUqr1ntlil6uPe1Q=
 github.com/labstack/echo-opentelemetry v0.0.2 h1:zNzIDYf2uXSYgpBXcuwRELrnOOFSRvMaC41DTF80ke8=
 github.com/labstack/echo-opentelemetry v0.0.2/go.mod h1:kBwoqFuXPxpM9fxbs++asMsI42uOufQjuYJut3qqg6w=
-github.com/labstack/echo/v5 v5.1.1 h1:4QkvKoS8ps5ch49t8b72QS9Z581ytgxhTzxuB/CBA2I=
-github.com/labstack/echo/v5 v5.1.1/go.mod h1:SyvlSdObGjRXeQfCCXW/sybkZdOOQZBmpKF0bvALaeo=
+github.com/labstack/echo/v5 v5.2.1 h1:TzpIksY6zLMzV0T0ycYbvTEoj9w6o6AcL5twg182VTY=
+github.com/labstack/echo/v5 v5.2.1/go.mod h1:SyvlSdObGjRXeQfCCXW/sybkZdOOQZBmpKF0bvALaeo=
 github.com/leodido/go-urn v1.4.0 h1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=
 github.com/leodido/go-urn v1.4.0/go.mod h1:bvxc+MVxLKB4z00jd1z+Dvzr47oO32F/QSNjSBOlFxI=
 github.com/lestrrat-go/blackmagic v1.0.4 h1:IwQibdnf8l2KoO+qC3uT4OaTWsW7tuRQXy9TRN9QanA=
