@@ -1,18 +1,12 @@
-import Refresh from "@material-symbols/svg-400/rounded/autorenew.svg";
-import BookmarkAdd from "@material-symbols/svg-400/rounded/bookmark_add.svg";
-import Delete from "@material-symbols/svg-400/rounded/delete.svg";
 import MoreHoriz from "@material-symbols/svg-400/rounded/more_horiz.svg";
-import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
-import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg";
-import VideoLibrary from "@material-symbols/svg-400/rounded/video_library-fill.svg";
-import { useRouter } from "expo-router";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { View, type ViewProps } from "react-native";
 import { entryDisplayNumber } from "~/components/entries";
 import { EntrySelect } from "~/components/entries/select";
+import { ShowContext } from "~/components/items/context-menus";
 import { WatchListInfo } from "~/components/items/watchlist-info";
 import { Rating } from "~/components/rating";
 import {
@@ -26,7 +20,6 @@ import {
 import type { Metadata } from "~/models/utils/metadata";
 import {
 	A,
-	Alert,
 	Chip,
 	Container,
 	capitalize,
@@ -40,7 +33,6 @@ import {
 	ImageBackground,
 	LI,
 	Link,
-	Menu,
 	P,
 	Popup,
 	Poster,
@@ -49,8 +41,7 @@ import {
 	UL,
 	usePopup,
 } from "~/primitives";
-import { useAccount } from "~/providers/account-context";
-import { Fetch, type QueryIdentifier, useMutation } from "~/query";
+import { Fetch, type QueryIdentifier } from "~/query";
 import { cn, displayRuntime, getDisplayDate } from "~/utils";
 import { PartOf } from "./part-of";
 
@@ -64,6 +55,7 @@ const ButtonList = ({
 	trailerUrl,
 	watchStatus,
 	iconsClassName,
+	videoSlug,
 }: {
 	kind: "movie" | "serie" | "collection";
 	slug: string;
@@ -74,22 +66,10 @@ const ButtonList = ({
 	trailerUrl: string | null;
 	watchStatus: WatchStatusV | null;
 	iconsClassName?: string;
+	videoSlug: string | null;
 }) => {
-	const account = useAccount();
 	const { t } = useTranslation();
-	const router = useRouter();
 	const [setPopup, closePopup] = usePopup();
-	const deleteMutation = useMutation({
-		method: "DELETE",
-		path: ["api", `${kind}s`, slug],
-		invalidate: ["api", "shows"],
-	});
-
-	const metadataRefreshMutation = useMutation({
-		method: "POST",
-		path: ["scanner", `${kind}s`, slug, "refresh"],
-		invalidate: null,
-	});
 
 	return (
 		<View className="flex-row items-center justify-center">
@@ -135,76 +115,15 @@ const ButtonList = ({
 					iconClassName={iconsClassName}
 				/>
 			)}
-			{(kind === "movie" || account?.isAdmin === true) && (
-				<Menu
-					Trigger={IconButton}
-					icon={MoreHoriz}
-					iconClassName={iconsClassName}
-					{...tooltip(t("misc.more"))}
-				>
-					{kind === "movie" && videos?.length === 1 && (
-						<>
-							{/* <Menu.Item */}
-							{/* 	icon={Download} */}
-							{/* 	onSelect={() => downloader(kind, slug)} */}
-							{/* 	label={t("home.episodeMore.download")} */}
-							{/* /> */}
-							<Menu.Item
-								label={t("home.episodeMore.mediainfo")}
-								icon={MovieInfo}
-								href={`/info/${slug}`}
-							/>
-							{account?.isAdmin && <HR />}
-						</>
-					)}
-					{account?.isAdmin === true && (
-						<>
-							<Menu.Item
-								label={t("show.videos-map")}
-								icon={VideoLibrary}
-								href={`/${kind === "movie" ? "movies" : "series"}/${slug}/videos`}
-							/>
-							{kind !== "collection" && (
-								<Menu.Item
-									label={t("show.remap")}
-									icon={Search}
-									href={`/${kind}s/${slug}/remap?q=${name}`}
-								/>
-							)}
-							{kind !== "collection" && <HR />}
-							{kind !== "collection" && (
-								<Menu.Item
-									label={t("home.refreshMetadata")}
-									icon={Refresh}
-									onSelect={() => metadataRefreshMutation.mutate()}
-								/>
-							)}
-							<Menu.Item
-								label={t("misc.delete")}
-								icon={Delete}
-								onSelect={() => {
-									Alert.alert(
-										t("misc.delete-name", { name }),
-										t("login.delete-confirmation"),
-										[
-											{ text: t("misc.cancel"), style: "cancel" },
-											{
-												text: t("misc.delete"),
-												style: "destructive",
-												onPress: async () => {
-													await deleteMutation.mutateAsync();
-													router.back();
-												},
-											},
-										],
-										{ cancelable: true },
-									);
-								}}
-							/>
-						</>
-					)}
-				</Menu>
-			)}
+			<ShowContext
+				kind={kind}
+				slug={slug}
+				name={name}
+				videoSlug={videoSlug}
+				status={watchStatus}
+				showWatchlist={false}
+				iconClassName={iconsClassName}
+			/>
 		</View>
 	);
 };
@@ -272,6 +191,7 @@ export const TitleLine = ({
 						trailerUrl={trailerUrl}
 						watchStatus={watchStatus}
 						iconsClassName="lg:fill-slate-200 dark:fill-slate-200"
+						videoSlug={videos?.length === 1 ? videos[0].slug : null}
 					/>
 					{Object.keys(rating).length > 0 && (
 						<>
@@ -317,10 +237,7 @@ TitleLine.Loader = ({
 				<View className="flex-warp flex-row items-center max-sm:justify-center sm:mt-8">
 					<IconFab icon={PlayArrow} iconClassName="lg:fill-slate-200" />
 					<IconButton icon={Theaters} iconClassName="lg:fill-slate-200" />
-					{kind !== "collection" && (
-						<IconButton icon={BookmarkAdd} iconClassName="lg:fill-slate-200" />
-					)}
-					{kind === "movie" && <IconButton icon={MoreHoriz} />}
+					<IconButton icon={MoreHoriz} iconClassName="lg:fill-slate-200" />
 					<DottedSeparator className="lg:text-slate-200" />
 					<Rating.Loader
 						textClassName="lg:text-slate-200"

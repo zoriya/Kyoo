@@ -148,7 +148,7 @@ export const Player = () => {
 		player,
 		data && entry ? { videoId: data.id, entryId: entry.id } : null,
 	);
-	useLanguagePreference(player, slug);
+	useLanguagePreference(player, slug, data?.show?.original.language);
 
 	useEvent(player, "onEnd", onEnd);
 

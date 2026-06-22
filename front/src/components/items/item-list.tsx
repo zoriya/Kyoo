@@ -13,7 +13,7 @@ import {
 } from "~/primitives";
 import type { Layout } from "~/query";
 import { cn } from "~/utils";
-import { ItemContext } from "./context-menus";
+import { ShowContext } from "./context-menus";
 import { ItemWatchStatus } from "./item-helpers";
 
 export const ItemList = ({
@@ -73,23 +73,22 @@ export const ItemList = ({
 						>
 							{name}
 						</Heading>
-						{kind !== "collection" && (
-							<ItemContext
-								kind={kind}
-								slug={slug}
-								videoSlug={videoSlug}
-								status={watchStatus}
-								isOpen={moreOpened}
-								setOpen={(v) => setMoreOpened(v)}
-								className={cn(
-									"ml-4",
-									"bg-gray-800/70 hover:bg-gray-800 focus-visible:bg-gray-800",
-									"native:hidden opacity-0 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100",
-									moreOpened && "opacity-100",
-								)}
-								iconClassName="fill-slate-200 dark:fill-slate-200"
-							/>
-						)}
+						<ShowContext
+							kind={kind}
+							slug={slug}
+							name={name}
+							videoSlug={videoSlug}
+							status={watchStatus}
+							isOpen={moreOpened}
+							setOpen={(v) => setMoreOpened(v)}
+							className={cn(
+								"ml-4",
+								"bg-gray-800/70 hover:bg-gray-800 focus-visible:bg-gray-800",
+								"native:hidden opacity-0 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100",
+								moreOpened && "opacity-100",
+							)}
+							iconClassName="fill-slate-200 dark:fill-slate-200"
+						/>
 					</View>
 					{subtitle && (
 						<P className="mr-8 text-center text-slate-400">{subtitle}</P>

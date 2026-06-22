@@ -85,8 +85,8 @@ const MenuItem = forwardRef<
 		closeOnSelect?: boolean;
 		className?: string;
 	} & (
-		| { onSelect: () => void; href?: undefined }
-		| { href: string; onSelect?: undefined }
+		| { onSelect: () => void; href?: undefined; download?: undefined }
+		| { href: string; download?: boolean; onSelect?: undefined }
 	)
 >(function MenuItem(
 	{
@@ -96,6 +96,7 @@ const MenuItem = forwardRef<
 		selected,
 		onSelect,
 		href,
+		download,
 		disabled,
 		closeOnSelect = true,
 		className,
@@ -114,7 +115,36 @@ const MenuItem = forwardRef<
 		/>
 	);
 
-	const { onPress, ...linkProps } = useLinkTo({ href });
+	let content = (
+		<>
+			{left && left}
+			{!left && icn}
+			<P
+				className={cn(
+					"flex-1 group-data-highlighted:text-slate-200",
+					disabled && "text-slate-600",
+				)}
+				style={{
+					paddingLeft: 8 * 2 + +!(icon || selected || left) * 24,
+				}}
+			>
+				{label}
+			</P>
+			{left && icn}
+		</>
+	);
+
+	let { onPress, ...linkProps } = useLinkTo({ href });
+
+	if (href && download) {
+		content = (
+			<a href={href} download className="flew-row flex items-center">
+				{content}
+			</a>
+		);
+		onPress = undefined;
+		linkProps = {};
+	}
 
 	return (
 		<DropdownMenu.Item
@@ -132,21 +162,7 @@ const MenuItem = forwardRef<
 			)}
 			{...props}
 		>
-			{left && left}
-			{!left && icn}
-			<P
-				className={cn(
-					"flex-1 group-data-highlighted:text-slate-200",
-					disabled && "text-slate-600",
-				)}
-				style={{
-					paddingLeft: 8 * 2 + +!(icon || selected || left) * 24,
-				}}
-			>
-				{label}
-			</P>
-
-			{left && icn}
+			{content}
 		</DropdownMenu.Item>
 	);
 });
