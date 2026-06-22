@@ -6,7 +6,7 @@ require (
 	github.com/MicahParks/keyfunc/v3 v3.8.0
 	github.com/asticode/go-astisub v0.40.0
 	github.com/aws/aws-sdk-go-v2 v1.42.0
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.103.3
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.104.0
 	github.com/disintegration/imaging v1.6.2
 	github.com/exaring/otelpgx v0.11.1
 	github.com/golang-migrate/migrate/v4 v4.19.1
