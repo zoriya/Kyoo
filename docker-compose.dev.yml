@@ -87,6 +87,7 @@ services:
       - "3567:3567"
     environment:
       - JWT_ISSUER=${PUBLIC_URL}
+      - IMAGES_PATH=/images
     env_file:
       - ./.env
     volumes:
