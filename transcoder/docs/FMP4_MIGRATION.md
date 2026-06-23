@@ -127,7 +127,7 @@ honor explicit cut points, and it forces a rewrite of segment-ready detection.
 
 ---
 
-## Approach B — `-f segment -segment_format mp4` + a separately-generated init
+## Approach B — `-f segment -segment_format mp4` + `-segment_header_filename`
 
 Keep the **exact** segmenting machinery we use today (`-f segment`,
 `-segment_times`, `-segment_start_number`, `-segment_list pipe:1`, `-copyts`) and
@@ -135,17 +135,26 @@ only change the per-segment container:
 
 ```
 -f segment -segment_format mp4 \
--segment_format_options movflags=frag_keyframe+empty_moov+default_base_moof
+-segment_header_filename init.mp4 \
+-segment_format_options movflags=frag_keyframe+empty_moov+default_base_moof+skip_trailer
 ```
 
-This makes each segment a self-contained fragmented MP4:
-`ftyp + moov + sidx + moof + mdat + mfra`.
+`-segment_header_filename` makes the muxer write the shared init segment
+(`ftyp + moov`) to its own file, and `skip_trailer` drops the per-file `mfra`, so
+every media segment comes out as a clean `moof + mdat` pair. No box surgery on
+the segments is needed — only a `tfdt` patch (below).
+
+> An earlier iteration omitted `-segment_header_filename` and instead emitted
+> self-contained segments (`ftyp+moov+sidx+moof+mdat+mfra`), extracting the init
+> and stripping each segment by hand. `-segment_header_filename` (suggested in
+> review) is cleaner: ffmpeg separates the moov natively and the segments need no
+> stripping, so we trust the muxer's output instead of hand-parsing boxes.
 
 ### What we found
 
-- **The `moov` is byte-identical across independent ffmpeg invocations**, for
-  every stream type we tested:
-  - copy video — md5 `4f190f81`
+- **The init (`ftyp + moov`) is byte-identical across independent ffmpeg
+  invocations**, for every stream type we tested:
+  - copy video — md5 `496f820d` (header file), `4f190f81` (older embedded-moov)
   - transcoded x264 video — md5 `54e84930`
   - copy audio — md5 `c4cab1d4`
 
@@ -153,39 +162,39 @@ This makes each segment a self-contained fragmented MP4:
   windows. (The original notes worried transcoded params might differ between
   windows; with fixed encoder settings they do not.)
 
-- **No `edts`/`elst` is ever written.** The segment muxer with `empty_moov` does
-  not emit an edit list at all. This is the single biggest advantage over
-  Approach A: there is no window-specific offset that can poison the init, so the
-  "which init does this segment belong to" problem simply does not exist.
+- **No `edts`/`elst` is ever written.** The segment muxer does not emit an edit
+  list at all. This is the single biggest advantage over Approach A: there is no
+  window-specific offset that can poison the init, so the "which init does this
+  segment belong to" problem simply does not exist.
 
-- **`tfdt` is rebased to 0 in every segment** (regardless of `-copyts`,
-  `default_base_moof`, or `dash` flags — the segment muxer creates a fresh muxer
-  context per file). This must be patched, exactly like Approach A.
+- **`tfdt` is rebased to the window start.** A window starting at t=0 has
+  absolute `tfdt` (seg N → N·segdur), but a window starting mid-file via `-ss`
+  rebases its first segment to `tfdt = 0`. So for any non-zero lazy window the
+  `tfdt` must be patched back to the absolute decode time. (Patching is a no-op
+  for the t=0 window and the essential fix for the rest.)
 
-- **Init generation is free and unambiguous.** Extracting `ftyp + moov` from the
-  first produced segment yields a `moov` byte-identical (md5 `496f820d`) to one
-  produced by a dedicated init-only ffmpeg run (`-t 0.001 -f mp4 -movflags
-  frag_keyframe+empty_moov+default_base_moof`). We can therefore generate the
-  init by copying the head of the first segment we produce — no extra process.
+- **Init generation is free and unambiguous.** The header the muxer writes via
+  `-segment_header_filename` is byte-identical (md5 `496f820d`) to one produced
+  by a short dedicated run, so the init can be generated on demand by a 0.5 s
+  ffmpeg run for the case where the player asks for `#EXT-X-MAP` before any
+  window has produced a segment.
 
 - **Proven end-to-end:** a 16-segment playlist whose segment 15 came from a
-  *separate* ffmpeg process — init extracted once, each segment stripped to
-  `moof + mdat` and `tfdt` patched — decoded as 768/768 frames, monotonic PTS
-  across the 29.96 s → 30.0 s window boundary, zero decode errors, HLS demuxer
-  reporting the correct 32 s duration.
+  *separate* ffmpeg process — shared init + each segment `tfdt`-patched — decoded
+  as 768/768 frames, monotonic PTS across the 29.96 s → 30.0 s window boundary,
+  zero decode errors, HLS demuxer reporting the correct 32 s duration. Reproduced
+  as a Go test in `src/mp4_test.go` (two independent windows, identical init,
+  rebased-then-patched segment reads its correct absolute PTS).
 
 ### Per-segment processing required
 
-For each segment we serve (done once, when the segment becomes ready):
-
-1. **Strip** `ftyp` / `moov` / `sidx` / `mfra`, keeping only `moof + mdat`.
-2. **Patch** the `tfdt` `baseMediaDecodeTime` to the absolute decode time
-   `round(keyframes.Get(segment) * timescale)`, where `timescale` is read once
-   from the init's `mdhd` (video and audio each have their own init/timescale).
-
-Both are cheap byte operations on ~16 KB files. `tfdt` is a single integer
-overwrite; sample durations/offsets in `trun` are untouched, so the patch cannot
-desync the media.
+For each segment we serve (done once, when the segment becomes ready): **patch**
+the `tfdt` `baseMediaDecodeTime` to the absolute decode time
+`round(keyframes.Get(segment) * timescale)`, where `timescale` is read once from
+the init's `mdhd` (video and audio each have their own init/timescale). This is a
+single integer overwrite; sample durations/offsets in `trun` are untouched, so
+the patch cannot desync the media. No stripping is needed — `skip_trailer` +
+`-segment_header_filename` already make the segments clean `moof + mdat`.
 
 ### Verdict
 **Recommended.** It is the only approach that preserves our proven
@@ -239,7 +248,7 @@ per-window inits) is more complex than Approach B with no benefit for us.
 | Explicit `-segment_times` cuts | **no** (only `-hls_time`) | **yes (unchanged)** | no (regular GOP) |
 | Native-keyframe copy quality | **broken** | **works** | not supported |
 | `-segment_list pipe:1` ready detection | must rewrite (watch m3u8/files) | **unchanged** | must rewrite |
-| Per-segment work | patch `tfdt` | strip boxes + patch `tfdt` | none (but per-window init + routing) |
+| Per-segment work | patch `tfdt` | patch `tfdt` (clean segments, no strip) | none (but per-window init + routing) |
 | `tfdt` rebased per window | yes (patch) | yes (patch) | yes (`frag_discont`) |
 | Playlist changes | `EXT-X-MAP` once | `EXT-X-MAP` once | `EXT-X-MAP` per window |
 | End-to-end validated here | yes | yes | n/a |
@@ -255,21 +264,20 @@ deterministic, and done once per segment.
 ### Implementation (Approach B, as built)
 
 1. `stream.go::run()` — swap `-segment_format mpegts` → `mp4` with
-   `-segment_format_options movflags=frag_keyframe+empty_moov+default_base_moof`.
-   Keep `-segment_times`, `-segment_start_number`, `-segment_list pipe:1`,
-   `-copyts` untouched.
-2. **Init** (`Stream.GetInit`, `src/mp4.go::extractInitSegment`): generated
-   on demand by a short dedicated ffmpeg run (`-t 0.5 -movflags
-   frag_keyframe+empty_moov+default_base_moof -f mp4`) reusing the stream's
-   transcode args, then keeping only `ftyp+moov`. Decoupled from the lazy
-   windows because the player fetches `#EXT-X-MAP` before any media segment.
-   The dedicated-run moov is byte-identical to the segments' moov (verified for
-   copy video, transcoded video, and copy audio).
+   `-segment_header_filename <init>` and `-segment_format_options
+   movflags=frag_keyframe+empty_moov+default_base_moof+skip_trailer`. Each window
+   rewrites the init with byte-identical content; segments come out as clean
+   `moof+mdat`. Keep `-segment_times`, `-segment_start_number`,
+   `-segment_list pipe:1`, `-copyts` untouched.
+2. **Init** (`Stream.GetInit`): the windows write it via
+   `-segment_header_filename`; for the cold case where the player fetches
+   `#EXT-X-MAP` before any window has run, a short dedicated ffmpeg run (0.5 s,
+   same `-segment_header_filename` mechanism) produces the byte-identical init.
 3. **Segment post-processing** (`Stream.finalizeSegment`, run in the
    segment-ready goroutine, outside the heads lock — the file is unique per
-   `(encoder, segment)`): strip to `moof+mdat` and patch
-   `tfdt = round(keyframes.Get(seg) * timescale)`, with `timescale` read from
-   the segment's own `mdhd`.
+   `(encoder, segment)`): patch `tfdt = round(keyframes.Get(seg) * timescale)`,
+   with `timescale` read once from the init's `mdhd` (`Stream.loadTimescale`).
+   No stripping.
 4. `GetIndex` — `#EXT-X-VERSION:7`, add `#EXT-X-MAP:URI="init.mp4"`, list
    `segment-N.mp4`.
 5. Routes / `streams.go` — the `init.mp4` request is handled by the existing

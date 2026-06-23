@@ -48,8 +48,11 @@ type Stream struct {
 	heads     []Head
 	// the lock used for the the heads
 	lock sync.RWMutex
-	// guards the on-demand generation of the shared init segment.
+	// guards the shared init segment and the cached media timescale below.
 	initLock sync.Mutex
+	// media timescale (from the init's mdhd) used to convert segment start times
+	// into tfdt baseMediaDecodeTime values. 0 until first read.
+	timescale uint32
 }
 
 type Segment struct {
@@ -310,13 +313,15 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 		// we take a little bit more than that to be extra safe but too much can be harmfull
 		// when segments are short (can make the video repeat itself)
 		"-segment_time_delta", "0.05",
-		// fMP4 segments. Each output file is a self-contained fragmented mp4
-		// (ftyp+moov+sidx+moof+mdat+mfra). We extract a single shared init
-		// (ftyp+moov) separately and strip every served segment down to
-		// moof+mdat (see finalizeSegment / mp4.go). default_base_moof makes each
-		// moof self-referential so the strip keeps sample offsets valid.
+		// fMP4 segments. -segment_header_filename diverts the ftyp+moov into a
+		// single shared init segment (referenced by #EXT-X-MAP); each window
+		// rewrites it with byte-identical content. skip_trailer drops the per-file
+		// mfra, so every media segment is a clean moof+mdat pair. We only need to
+		// patch each segment's tfdt to an absolute decode time (see
+		// finalizeSegment); no per-segment box stripping is required.
 		"-segment_format", "mp4",
-		"-segment_format_options", "movflags=frag_keyframe+empty_moov+default_base_moof",
+		"-segment_header_filename", ts.handle.getInitPath(),
+		"-segment_format_options", "movflags=frag_keyframe+empty_moov+default_base_moof+skip_trailer",
 		"-segment_times", toSegmentStr(Map(segments, func(seg float64, _ int) float64 {
 			// segment_times want durations, not timestamps so we must substract the -ss param
 			// since we give a greater value to -ss to prevent wrong seeks but -segment_times
@@ -362,12 +367,11 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 				continue
 			}
 			// The segment list pipe reports a file only once it is closed, so the
-			// raw fMP4 file is complete here. Rewrite it in place to the served
-			// shape (strip ftyp/moov/sidx/mfra, patch tfdt to absolute decode
-			// time) before marking it ready. Done outside the lock to avoid disk
-			// IO under the heads lock; the file is unique per (encoder, segment)
-			// so there is no concurrent writer. A failure here just skips marking
-			// the segment ready, letting a future request re-encode it.
+			// fMP4 segment is complete here. Patch its tfdt to the absolute decode
+			// time before marking it ready. Done outside the lock to avoid disk IO
+			// under the heads lock; the file is unique per (encoder, segment) so
+			// there is no concurrent writer. A failure here just skips marking the
+			// segment ready, letting a future request re-encode it.
 			segPath := fmt.Sprintf(ts.handle.getOutPath(encoder_id), segment)
 			if err := ts.finalizeSegment(segPath, segment); err != nil {
 				slog.ErrorContext(ctx, "failed to finalize fmp4 segment", "segment", segment, "encoderId", encoder_id, "err", err)
@@ -443,37 +447,55 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 	return nil
 }
 
-// finalizeSegment rewrites a raw fMP4 segment file produced by the segment muxer
-// into the form served to clients: only moof+mdat, with the tfdt
-// baseMediaDecodeTime patched to the segment's absolute decode time. The segment
-// muxer rebases every segment to decode time 0; patching it keeps a single
+// loadTimescale returns the media timescale read from the shared init segment,
+// caching it after the first read. The init is written by the segment muxer
+// (-segment_header_filename) before its first segment, so it exists by the time
+// a segment is finalized.
+func (ts *Stream) loadTimescale() (uint32, error) {
+	ts.initLock.Lock()
+	defer ts.initLock.Unlock()
+	if ts.timescale != 0 {
+		return ts.timescale, nil
+	}
+	data, err := os.ReadFile(ts.handle.getInitPath())
+	if err != nil {
+		return 0, err
+	}
+	timescale, err := readMediaTimescale(data)
+	if err != nil {
+		return 0, err
+	}
+	ts.timescale = timescale
+	return timescale, nil
+}
+
+// finalizeSegment patches a freshly produced fMP4 segment's tfdt
+// baseMediaDecodeTime to the segment's absolute decode time. The segment muxer
+// emits clean moof+mdat segments (thanks to -segment_header_filename +
+// skip_trailer) but rebases each one to decode time 0; patching keeps a single
 // continuous timeline across independent lazy-window encodes (mirroring how
 // -copyts kept absolute PTS in the old MPEG-TS path).
 func (ts *Stream) finalizeSegment(path string, segment int32) error {
+	timescale, err := ts.loadTimescale()
+	if err != nil {
+		return err
+	}
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
-	timescale, err := readMediaTimescale(data)
-	if err != nil {
-		return err
-	}
-	frags, err := stripToFragments(data)
-	if err != nil {
-		return err
-	}
 	decodeTime := uint64(math.Round(ts.keyframes.Get(segment) * float64(timescale)))
-	if err := patchBaseMediaDecodeTime(frags, decodeTime); err != nil {
+	if err := patchBaseMediaDecodeTime(data, decodeTime); err != nil {
 		return err
 	}
-	return os.WriteFile(path, frags, 0o644)
+	return os.WriteFile(path, data, 0o644)
 }
 
-// GetInit lazily generates and returns the path of the shared fMP4 init segment
-// (ftyp+moov) for this stream/quality. The moov only depends on the (fixed)
-// codec parameters, not on the encode start point, so we produce it with a short
-// dedicated ffmpeg run decoupled from the lazy windows. This matters because the
-// player fetches the #EXT-X-MAP init before requesting any media segment.
+// GetInit returns the path of the shared fMP4 init segment (ftyp+moov) for this
+// stream/quality, generating it if no lazy window has produced it yet. The moov
+// only depends on the (fixed) codec parameters, not on the encode start point,
+// so a short dedicated ffmpeg run yields the same init the windows write. This
+// matters because the player fetches the #EXT-X-MAP init before any media segment.
 func (ts *Stream) GetInit(ctx context.Context) (string, error) {
 	ctx = context.WithoutCancel(ctx)
 	initPath := ts.handle.getInitPath()
@@ -487,20 +509,29 @@ func (ts *Stream) GetInit(ctx context.Context) (string, error) {
 		return "", err
 	}
 
+	// Throwaway segment output: we only care about the header the muxer writes to
+	// initPath via -segment_header_filename.
+	tmpDir, err := os.MkdirTemp(filepath.Dir(initPath), "init-gen-")
+	if err != nil {
+		return "", err
+	}
+	defer os.RemoveAll(tmpDir)
+
 	args := []string{"-nostats", "-hide_banner", "-loglevel", "warning"}
 	if ts.handle.getFlags()&VideoF != 0 {
 		args = append(args, Settings.HwAccel.DecodeFlags...)
 	}
 	args = append(args, "-i", ts.file.Info.Path)
-	// "0" is a dummy -force_key_frames value: we discard the media and keep the moov.
+	// "0" is a dummy -force_key_frames value: only the header (moov) is kept.
 	args = append(args, ts.handle.getTranscodeArgs("0")...)
-	tmp := fmt.Sprintf("%s.%d.tmp", initPath, os.Getpid())
 	args = append(args,
-		// just enough output to emit the moov header.
+		// just enough output to emit the header.
 		"-t", "0.5",
-		"-movflags", "frag_keyframe+empty_moov+default_base_moof",
-		"-f", "mp4",
-		tmp,
+		"-f", "segment",
+		"-segment_format", "mp4",
+		"-segment_header_filename", initPath,
+		"-segment_format_options", "movflags=frag_keyframe+empty_moov+default_base_moof+skip_trailer",
+		filepath.Join(tmpDir, "s_%d.mp4"),
 	)
 
 	cmd := exec.CommandContext(ctx, "ffmpeg", args...)
@@ -508,21 +539,11 @@ func (ts *Stream) GetInit(ctx context.Context) (string, error) {
 	var stderr strings.Builder
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
-		_ = os.Remove(tmp)
+		_ = os.Remove(initPath)
 		return "", fmt.Errorf("could not generate init segment: %w (%s)", err, stderr.String())
 	}
-	defer os.Remove(tmp)
-
-	data, err := os.ReadFile(tmp)
-	if err != nil {
-		return "", err
-	}
-	init, err := extractInitSegment(data)
-	if err != nil {
-		return "", err
-	}
-	if err := os.WriteFile(initPath, init, 0o644); err != nil {
-		return "", err
+	if _, err := os.Stat(initPath); err != nil {
+		return "", fmt.Errorf("init segment was not produced: %w (%s)", err, stderr.String())
 	}
 	return initPath, nil
 }

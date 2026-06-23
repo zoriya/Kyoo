@@ -7,16 +7,17 @@ import (
 
 // Minimal ISO-BMFF (mp4) box helpers used by the fMP4 segment pipeline.
 //
-// The segment muxer (`-f segment -segment_format mp4`) writes each segment as a
-// fully self-contained fragmented mp4:
+// With `-f segment -segment_format mp4 -segment_header_filename <init>
+// -segment_format_options movflags=frag_keyframe+empty_moov+default_base_moof+skip_trailer`
+// the segment muxer writes the shared init segment (ftyp+moov) to its own file
+// and emits each media segment as a clean `moof + mdat` pair (skip_trailer drops
+// the trailing mfra). No box surgery is needed on the segments themselves.
 //
-//	ftyp + moov + sidx + moof + mdat + mfra
-//
-// For HLS fMP4 we want a single shared init segment (ftyp + moov) referenced by
-// `#EXT-X-MAP`, and each media segment reduced to `moof + mdat`. The segment
-// muxer also rebases every segment's `tfdt` (baseMediaDecodeTime) to 0, so we
-// patch it back to the absolute decode time to keep a continuous timeline
-// across independent lazy-window encodes. See docs/FMP4_MIGRATION.md.
+// The one thing the muxer does that we must undo: it rebases every segment's
+// `tfdt` (baseMediaDecodeTime) to 0. We patch it back to the absolute decode
+// time so the timeline stays continuous across independent lazy-window encodes.
+// readMediaTimescale reads the timescale that value is expressed in from the
+// init segment. See docs/FMP4_MIGRATION.md.
 
 type mp4Box struct {
 	typ        string
@@ -67,46 +68,6 @@ func findBox(data []byte, start, end int, typ string) (mp4Box, bool) {
 		return nil
 	})
 	return found, ok
-}
-
-// extractInitSegment returns the concatenation of the ftyp and moov boxes, which
-// forms a valid HLS fMP4 initialization segment.
-func extractInitSegment(data []byte) ([]byte, error) {
-	var init []byte
-	err := iterBoxes(data, 0, len(data), func(b mp4Box) error {
-		if b.typ == "ftyp" || b.typ == "moov" {
-			init = append(init, data[b.start:b.payloadEnd]...)
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	if _, ok := findBox(init, 0, len(init), "moov"); !ok {
-		return nil, fmt.Errorf("mp4: no moov box found while extracting init segment")
-	}
-	return init, nil
-}
-
-// stripToFragments returns the concatenation of every moof and mdat box, i.e. the
-// media-only portion of the segment with ftyp/moov/sidx/mfra removed. The
-// `default_base_moof` movflag makes each moof self-referential (base data offset
-// = start of the moof), so dropping the preceding boxes keeps sample offsets valid.
-func stripToFragments(data []byte) ([]byte, error) {
-	var out []byte
-	err := iterBoxes(data, 0, len(data), func(b mp4Box) error {
-		if b.typ == "moof" || b.typ == "mdat" {
-			out = append(out, data[b.start:b.payloadEnd]...)
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	if _, ok := findBox(out, 0, len(out), "moof"); !ok {
-		return nil, fmt.Errorf("mp4: no moof box found while stripping segment")
-	}
-	return out, nil
 }
 
 // readMediaTimescale parses the first trak's mdhd timescale from a moov (or from
