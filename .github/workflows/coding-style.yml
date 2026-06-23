@@ -9,7 +9,7 @@ jobs:
       run:
         working-directory: ./api
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Biome
         uses: biomejs/setup-biome@v2
@@ -26,7 +26,7 @@ jobs:
       run:
         working-directory: ./front
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Biome
         uses: biomejs/setup-biome@v2
@@ -43,7 +43,7 @@ jobs:
       run:
         working-directory: ./api
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: oven-sh/setup-bun@v2
 
@@ -60,7 +60,7 @@ jobs:
       run:
         working-directory: ./front
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: oven-sh/setup-bun@v2
 
@@ -74,7 +74,7 @@ jobs:
     name: "Lint scanner"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: chartboost/ruff-action@v1
         with:
@@ -87,7 +87,7 @@ jobs:
       run:
         working-directory: ./transcoder
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Run go fmt
         run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then exit 1; fi
@@ -99,7 +99,7 @@ jobs:
       run:
         working-directory: ./auth
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Run go fmt
         run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then exit 1; fi
