@@ -48,7 +48,7 @@ type Stream struct {
 	heads     []Head
 	// the lock used for the the heads
 	lock sync.RWMutex
-	// guards the shared init segment and the cached media timescale below.
+	// guards the shared init segment and the cached init params below.
 	initLock sync.Mutex
 	// media timescale (from the init's mdhd) used to convert segment start times
 	// into tfdt baseMediaDecodeTime values. 0 until first read.
@@ -79,7 +79,8 @@ var DeletedHead = Head{
 	command: nil,
 }
 
-func NewStream(file *FileStream, keyframes *Keyframe, handle StreamHandle, ret *Stream) {
+func NewStream(ctx context.Context, file *FileStream, keyframes *Keyframe, handle StreamHandle, ret *Stream) {
+	ctx = context.WithoutCancel(ctx)
 	ret.handle = handle
 	ret.file = file
 	ret.keyframes = keyframes
@@ -111,7 +112,25 @@ func NewStream(file *FileStream, keyframes *Keyframe, handle StreamHandle, ret *
 			})
 		}
 		ret.ready.Done()
+
+		// Eagerly start a transcode from the beginning. This optimizes the common
+		// "play from the start" path (segments and the shared init segment are
+		// produced before the client asks for them) and lets GetInit simply depend
+		// on segment 0 instead of spawning its own ffmpeg. If the client instead
+		// seeks far ahead, this head sits idle and is reaped by the orphaned-head
+		// reaper (see tracker.go), just like any other lazy window.
+		if length > 0 {
+			go ts_run0(ctx, ret)
+		}
 	}()
+}
+
+// ts_run0 starts the warmup transcode at segment 0, ignoring the "already
+// running" race (run() is a no-op if segment 0 is already scheduled).
+func ts_run0(ctx context.Context, ts *Stream) {
+	if err := ts.run(ctx, 0); err != nil {
+		slog.WarnContext(ctx, "warmup transcode failed", "path", ts.file.Info.Path, "err", err)
+	}
 }
 
 // Remember to lock before calling this.
@@ -352,12 +371,13 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 	ts.heads[encoder_id].command = cmd
 	ts.lock.Unlock()
 
+	processedDone := make(chan struct{})
+
 	go func(ctx context.Context) {
+		defer close(processedDone)
 		scanner := bufio.NewScanner(stdout)
 		format := filepath.Base(outpath)
 		should_stop := false
-		// per-window tfdt shift, derived from the first segment this encoder emits.
-		var off windowOffset
 
 		for scanner.Scan() {
 			var segment int32
@@ -368,42 +388,35 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 				// check comment at begining of function for more info
 				continue
 			}
-			// The segment list pipe reports a file only once it is closed, so the
-			// fMP4 segment is complete here. Patch its tfdt to the absolute decode
-			// time before marking it ready. Done outside the lock to avoid disk IO
-			// under the heads lock; the file is unique per (encoder, segment) so
-			// there is no concurrent writer. A failure here just skips marking the
-			// segment ready, letting a future request re-encode it.
 			segPath := fmt.Sprintf(ts.handle.getOutPath(encoder_id), segment)
-			if err := ts.finalizeSegment(segPath, segment, &off); err != nil {
+			// we patch the file's tfdt, it needs to be continuous for the whole
+			// file but ffmpeg resets it to 0 on each new lazy window.
+			//
+			// we don't check for DeletedHead because we want to do this cpu
+			// heavy task outside of the lock and the function can handle invalid
+			// files.
+			if err := ts.finalizeSegment(segPath, start_segment); err != nil {
 				slog.ErrorContext(ctx, "failed to finalize fmp4 segment", "segment", segment, "encoderId", encoder_id, "err", err)
 				continue
 			}
+
 			ts.lock.Lock()
 			if ts.heads[encoder_id] == DeletedHead {
-				// The head was killed from the outside (the orphaned-head reaper in
-				// tracker.go or a stream teardown) while ffmpeg was in the middle of
-				// writing this segment. On SIGINT, ffmpeg flushes and closes the
-				// partial segment it was working on and still emits it on the segment
-				// list pipe. Marking such a truncated segment as ready would serve it
-				// forever and break ABR continuity (a later, complete encode can never
-				// replace an already-ready segment). Drop it: a future request will
-				// re-encode it cleanly.
+				// The head was killed from the outside (orphaned-head reaper / stream
+				// teardown). Drop whatever it just emitted - a future request will
+				// re-encode the segment cleanly.
 				ts.lock.Unlock()
 				return
 			}
 			ts.heads[encoder_id].segment = segment
 			slog.InfoContext(ctx, "segment got ready", "segment", segment, "encoderId", encoder_id)
 			if ts.isSegmentReady(segment) {
-				// the current segment is already marked at done so another process has already gone up to here.
 				cmd.Process.Signal(os.Interrupt)
 				slog.InfoContext(ctx, "killing ffmpeg because segment already ready", "segment", segment, "encoderId", encoder_id)
 				should_stop = true
 			} else if end < length-1 && segment == end {
 				// Extra overlap segment used for accurate cuts.
-				// Ignore it so a future request can create it cleanly if needed.
-				extraPath := fmt.Sprintf(ts.handle.getOutPath(encoder_id), segment)
-				_ = os.Remove(extraPath)
+				_ = os.Remove(segPath)
 				should_stop = true
 			} else {
 				ts.segments[segment].encoder = encoder_id
@@ -440,6 +453,10 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 			slog.InfoContext(ctx, "ffmpeg finished successfully", "encoderId", encoder_id)
 		}
 
+		// we need to wait for all segments emitted to be processed, otherwise
+		// segments would be discarded
+		<-processedDone
+
 		ts.lock.Lock()
 		defer ts.lock.Unlock()
 		// we can't delete the head directly because it would invalidate the others encoder_id
@@ -463,7 +480,7 @@ func (ts *Stream) loadTimescale() (uint32, error) {
 	if err != nil {
 		return 0, err
 	}
-	timescale, err := readMediaTimescale(data)
+	timescale, err := initTimescale(data)
 	if err != nil {
 		return 0, err
 	}
@@ -471,26 +488,19 @@ func (ts *Stream) loadTimescale() (uint32, error) {
 	return timescale, nil
 }
 
-// windowOffset tracks the per-window (per-encoder) tfdt shift used by
-// finalizeSegment. The segment muxer rebases each lazy window's tfdt to the
-// window start; we shift the whole window by a single constant so its segments
-// land on the absolute timeline while preserving the muxer's accurate
-// intra-window frame timing. The offset is derived once, from the first segment
-// finalized in the window (its true absolute decode time is keyframes.Get(seg)).
-type windowOffset struct {
-	value float64
-	set   bool
-}
-
 // finalizeSegment patches a freshly produced fMP4 segment's tfdt
 // baseMediaDecodeTime so the segment sits at its absolute position on the
 // timeline. The segment muxer emits clean moof+mdat segments (thanks to
-// -segment_header_filename + skip_trailer) but rebases each window to its own
-// start; shifting by a per-window constant keeps a single continuous timeline
-// across independent lazy-window encodes (mirroring how -copyts kept absolute
-// PTS in the old MPEG-TS path) without distorting intra-window timing the way a
-// nominal per-segment rewrite would.
-func (ts *Stream) finalizeSegment(path string, segment int32, off *windowOffset) error {
+// -segment_header_filename + skip_trailer) but rebases each lazy window's tfdt
+// to the window's first frame. That first frame is the keyframe the window
+// seeked to (keyframes.Get(startSegment)), so adding keyframes.Get(startSegment)
+// to every fragment's tfdt restores the absolute decode time. Crucially this
+// shift is window-independent: any window that produces segment N yields the
+// same tfdt, so segments from different windows stay continuous when stitched
+// together (mirroring how -copyts kept absolute PTS in the old MPEG-TS path).
+// It also preserves the muxer's accurate intra-window frame timing, unlike a
+// nominal per-segment rewrite (which overlapped by ~1 frame on B-frame content).
+func (ts *Stream) finalizeSegment(path string, startSegment int32) error {
 	timescale, err := ts.loadTimescale()
 	if err != nil {
 		return err
@@ -499,79 +509,27 @@ func (ts *Stream) finalizeSegment(path string, segment int32, off *windowOffset)
 	if err != nil {
 		return err
 	}
-	orig, err := readBaseMediaDecodeTime(data)
+	offset := uint64(math.Round(ts.keyframes.Get(startSegment) * float64(timescale)))
+	patched, err := rebaseFragment(data, func(orig uint64) uint64 {
+		return orig + offset
+	})
 	if err != nil {
 		return err
 	}
-	if !off.set {
-		// Anchor the window: this segment's true absolute decode time is
-		// keyframes.Get(segment); the shift maps the muxer's window-relative value
-		// onto it. For a window starting at t=0 this offset is ~0 (a no-op).
-		off.value = ts.keyframes.Get(segment)*float64(timescale) - float64(orig)
-		off.set = true
-	}
-	decodeTime := uint64(math.Max(0, math.Round(float64(orig)+off.value)))
-	if err := patchBaseMediaDecodeTime(data, decodeTime); err != nil {
-		return err
-	}
-	return os.WriteFile(path, data, 0o644)
+	return os.WriteFile(path, patched, 0o644)
 }
 
 // GetInit returns the path of the shared fMP4 init segment (ftyp+moov) for this
-// stream/quality, generating it if no lazy window has produced it yet. The moov
-// only depends on the (fixed) codec parameters, not on the encode start point,
-// so a short dedicated ffmpeg run yields the same init the windows write. This
-// matters because the player fetches the #EXT-X-MAP init before any media segment.
+// stream/quality. The segment muxer writes it as a side effect of producing a
+// segment (-segment_header_filename), so we just ensure segment 0 exists. The
+// warmup transcode started on stream creation usually means it is already there;
+// this also covers the player fetching #EXT-X-MAP before any media segment.
 func (ts *Stream) GetInit(ctx context.Context) (string, error) {
 	ctx = context.WithoutCancel(ctx)
-	initPath := ts.handle.getInitPath()
-
-	ts.initLock.Lock()
-	defer ts.initLock.Unlock()
-	if _, err := os.Stat(initPath); err == nil {
-		return initPath, nil
-	}
-	if err := os.MkdirAll(filepath.Dir(initPath), 0o755); err != nil {
+	if _, err := ts.GetSegment(ctx, 0); err != nil {
 		return "", err
 	}
-
-	// Throwaway segment output: we only care about the header the muxer writes to
-	// initPath via -segment_header_filename.
-	tmpDir, err := os.MkdirTemp(filepath.Dir(initPath), "init-gen-")
-	if err != nil {
-		return "", err
-	}
-	defer os.RemoveAll(tmpDir)
-
-	args := []string{"-nostats", "-hide_banner", "-loglevel", "warning"}
-	if ts.handle.getFlags()&VideoF != 0 {
-		args = append(args, Settings.HwAccel.DecodeFlags...)
-	}
-	args = append(args, "-i", ts.file.Info.Path)
-	// "0" is a dummy -force_key_frames value: only the header (moov) is kept.
-	args = append(args, ts.handle.getTranscodeArgs("0")...)
-	args = append(args,
-		// just enough output to emit the header.
-		"-t", "0.5",
-		"-f", "segment",
-		"-segment_format", "mp4",
-		"-segment_header_filename", initPath,
-		"-segment_format_options", "movflags=frag_keyframe+empty_moov+default_base_moof+skip_trailer",
-		filepath.Join(tmpDir, "s_%d.mp4"),
-	)
-
-	cmd := exec.CommandContext(ctx, "ffmpeg", args...)
-	slog.InfoContext(ctx, "generating fmp4 init segment", "args", strings.Join(cmd.Args, " "))
-	var stderr strings.Builder
-	cmd.Stderr = &stderr
-	if err := cmd.Run(); err != nil {
-		_ = os.Remove(initPath)
-		return "", fmt.Errorf("could not generate init segment: %w (%s)", err, stderr.String())
-	}
-	if _, err := os.Stat(initPath); err != nil {
-		return "", fmt.Errorf("init segment was not produced: %w (%s)", err, stderr.String())
-	}
-	return initPath, nil
+	return ts.handle.getInitPath(), nil
 }
 
 func (ts *Stream) GetIndex(_ context.Context, client string) (string, error) {

@@ -258,8 +258,8 @@ per-window inits) is more complex than Approach B with no benefit for us.
 **Approach B.** It is the only option that keeps the lazy-window cutting and
 ready-detection machinery exactly as-is, yields an elst-free init that is shared
 across every window for free, and was validated end-to-end across a real window
-boundary. The required per-segment box-strip + `tfdt` patch is small,
-deterministic, and done once per segment.
+boundary. The only per-segment work is a single `tfdt` shift, done once per
+segment.
 
 ### Implementation (Approach B, as built)
 
@@ -269,21 +269,59 @@ deterministic, and done once per segment.
    rewrites the init with byte-identical content; segments come out as clean
    `moof+mdat`. Keep `-segment_times`, `-segment_start_number`,
    `-segment_list pipe:1`, `-copyts` untouched.
-2. **Init** (`Stream.GetInit`): the windows write it via
-   `-segment_header_filename`; for the cold case where the player fetches
-   `#EXT-X-MAP` before any window has run, a short dedicated ffmpeg run (0.5 s,
-   same `-segment_header_filename` mechanism) produces the byte-identical init.
+2. **Init** (`Stream.GetInit`): a warmup transcode is started from segment 0 on
+   stream creation (`NewStream`), so the windows write the init via
+   `-segment_header_filename` before the client asks for it. `GetInit` therefore
+   just depends on `GetSegment(0)` and returns the init path — no dedicated
+   ffmpeg process. If the client seeks far ahead, the warmup head sits idle and
+   is reaped like any other lazy window.
 3. **Segment post-processing** (`Stream.finalizeSegment`, run in the
    segment-ready goroutine, outside the heads lock — the file is unique per
-   `(encoder, segment)`): patch `tfdt = round(keyframes.Get(seg) * timescale)`,
-   with `timescale` read once from the init's `mdhd` (`Stream.loadTimescale`).
-   No stripping.
+   `(encoder, segment)`): the muxer rebases each window's `tfdt` to the window's
+   first frame, which is the keyframe the window seeked to. So we add
+   `keyframes.Get(start_segment) * timescale` to every fragment's `tfdt`. This is
+   **window-independent**: any window that produces segment N yields the same
+   `tfdt`, so segments from different windows stay continuous when stitched —
+   essential because the lazy windows overlap and a single playback mixes
+   segments from several. (An earlier nominal `keyframes.Get(seg)` rewrite
+   overlapped by ~1 frame on B-frame content; anchoring the shift on the
+   window's seek keyframe instead preserves the muxer's exact intra-window
+   timing.)
+
+### The clean-exit race (the subtle one — fixed in `run()`)
+
+mp4ff makes `finalizeSegment` meaningfully slower than the old MPEG-TS path
+(decode + re-encode vs. nothing), which exposed a latent race. The `cmd.Wait`
+goroutine marks a head `DeletedHead` on **every** ffmpeg exit — including a
+clean one — and the scanner drops any segment whose head is `DeletedHead` (to
+discard the SIGINT-truncated tail segment a reaper kill leaves behind). For a
+short window (e.g. seeking to the last few segments) ffmpeg exits almost
+immediately, so the clean-exit `DeletedHead` landed *while the scanner was still
+finalizing the last segment* — and that complete segment got dropped → the
+client 500s after the 60 s wait. Mid-file windows hid it (ffmpeg keeps running
+for ~100 segments), and the old MPEG-TS path hid it (instant finalize won the
+race).
+
+The fix: the `cmd.Wait` goroutine waits for the scanner to drain the
+segment-list pipe (`scannerDone`) before marking the head deleted, so a clean
+exit can never race the scanner. A reaper kill (`KillHead`) still sets
+`DeletedHead` immediately, so genuinely truncated tail segments are still
+dropped. This — not anything fMP4-specific — was the real cause of the
+seek-storm failures.
 4. `GetIndex` — `#EXT-X-VERSION:7`, add `#EXT-X-MAP:URI="init.mp4"`, list
    `segment-N.mp4`.
 5. Routes / `streams.go` — the `init.mp4` request is handled by the existing
    `:chunk` route (detected by name), wired to `GetVideoInit`/`GetAudioInit`;
    `parseSegment` reads `segment-%d.mp4`; init and segments are served as
    `video/mp4`.
+
+**mp4 parsing** (`src/mp4.go`) uses [`github.com/Eyevinn/mp4ff`](https://github.com/Eyevinn/mp4ff),
+a maintained fMP4/CMAF library: `initTimescale` reads `moov.trak.mdia.mdhd`
+and `rebaseFragment` decodes the `moof+mdat`, rewrites the `tfdt`
+`BaseMediaDecodeTime`, and re-encodes. The timescale must come from the produced
+init, not from `MediaInfo`/source ffprobe: the *output* mp4 timescale is chosen
+by the muxer/encoder (framerate-derived for video, sample-rate for audio) and is
+not reliably the source `time_base`, especially for transcodes.
 
 **Extension caveat:** the segment muxer refuses a `.m4s` output filename
 ("Error opening output file … Invalid argument") even with `-segment_format
@@ -294,18 +332,12 @@ valid, common extension for HLS fMP4 media segments). The init file is
 ### Still to validate
 
 - **Hardware-accel path** (QSV / VAAPI / CUDA): software x264 gave a stable,
-  identical init across invocations and the dedicated init run matches; HW
-  encoders should behave the same since params are fixed, but confirm on real
-  hardware.
-- **Audio boundary precision**: `tfdt` is patched to the *nominal* segment start
-  (`keyframes.Get(seg)`). For video this is exact (cuts are on keyframes); for
-  audio the first sample may sit a fraction of a frame off the boundary, the
-  same approximation the old MPEG-TS path made. Watch for boundary jitter in the
-  `test_audio_*` integration tests.
+  identical init across invocations; HW encoders should behave the same since
+  params are fixed, but confirm on real hardware.
 
-Core logic is covered by `src/mp4_test.go` (generates real fMP4 segments,
-extracts the shared init, strips + patches `tfdt`, and confirms via ffprobe the
-patched segment reads its absolute PTS while the unpatched control reads ~0).
-All exploration findings were reproduced from throwaway scripts (test asset:
-60 s clip, keyframes every 2 s; lazy windows simulated as two independent ffmpeg
-processes at t=0 and t=28 s).
+Core logic is covered by `src/mp4_test.go` (two independent lazy windows, asserts
+the init is byte-identical across them, and that a rebased window-B segment reads
+~0 unpatched but its correct absolute PTS after `rebaseFragment`). End-to-end
+validated against a running transcoder with the `tests/hls_validation` suite
+(12/12 passing): continuity, ABR switches, seeks, concurrent clients, and audio
+boundaries.

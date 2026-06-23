@@ -1,192 +1,56 @@
 package src
 
 import (
-	"encoding/binary"
+	"bytes"
 	"fmt"
+
+	"github.com/Eyevinn/mp4ff/mp4"
 )
 
-// Minimal ISO-BMFF (mp4) box helpers used by the fMP4 segment pipeline.
+// fMP4 helpers for the segment pipeline, backed by github.com/Eyevinn/mp4ff.
 //
-// With `-f segment -segment_format mp4 -segment_header_filename <init>
-// -segment_format_options movflags=frag_keyframe+empty_moov+default_base_moof+skip_trailer`
-// the segment muxer writes the shared init segment (ftyp+moov) to its own file
-// and emits each media segment as a clean `moof + mdat` pair (skip_trailer drops
-// the trailing mfra). No box surgery is needed on the segments themselves.
-//
-// The one thing the muxer does that we must undo: it rebases every segment's
-// `tfdt` (baseMediaDecodeTime) to 0. We patch it back to the absolute decode
-// time so the timeline stays continuous across independent lazy-window encodes.
-// readMediaTimescale reads the timescale that value is expressed in from the
-// init segment. See docs/FMP4_MIGRATION.md.
+// The segment muxer (-f segment -segment_format mp4 -segment_header_filename …
+// -segment_format_options movflags=…+skip_trailer) writes the shared init
+// segment (ftyp+moov) to its own file and emits each media segment as a clean
+// moof+mdat fragment. It rebases every lazy window's tfdt to the window start;
+// rebaseFragment shifts it back onto the absolute timeline. See
+// docs/FMP4_MIGRATION.md.
 
-type mp4Box struct {
-	typ        string
-	start      int // offset of the box (including header) in the buffer
-	size       int // total box size including header
-	payload    int // offset of the box payload (after header)
-	payloadEnd int // end offset of the box
-}
-
-// iterBoxes walks the direct children boxes in data[start:end] and calls fn for
-// each. It does not recurse.
-func iterBoxes(data []byte, start, end int, fn func(b mp4Box) error) error {
-	i := start
-	for i+8 <= end {
-		size := int(binary.BigEndian.Uint32(data[i : i+4]))
-		typ := string(data[i+4 : i+8])
-		payload := i + 8
-		switch {
-		case size == 1:
-			if i+16 > end {
-				return fmt.Errorf("mp4: truncated 64-bit box size at %d", i)
-			}
-			size = int(binary.BigEndian.Uint64(data[i+8 : i+16]))
-			payload = i + 16
-		case size == 0:
-			size = end - i
-		}
-		if size < 8 || i+size > end {
-			return fmt.Errorf("mp4: invalid box %q size %d at %d (end %d)", typ, size, i, end)
-		}
-		if err := fn(mp4Box{typ: typ, start: i, size: size, payload: payload, payloadEnd: i + size}); err != nil {
-			return err
-		}
-		i += size
-	}
-	return nil
-}
-
-// findBox returns the first direct child box of the given type in data[start:end].
-func findBox(data []byte, start, end int, typ string) (mp4Box, bool) {
-	var found mp4Box
-	ok := false
-	_ = iterBoxes(data, start, end, func(b mp4Box) error {
-		if !ok && b.typ == typ {
-			found = b
-			ok = true
-		}
-		return nil
-	})
-	return found, ok
-}
-
-// readMediaTimescale parses the first trak's mdhd timescale from a moov (or from
-// a buffer containing one). This is the timescale `tfdt`/baseMediaDecodeTime is
-// expressed in.
-func readMediaTimescale(data []byte) (uint32, error) {
-	moov, ok := findBox(data, 0, len(data), "moov")
-	if !ok {
-		return 0, fmt.Errorf("mp4: no moov box found while reading timescale")
-	}
-	trak, ok := findBox(data, moov.payload, moov.payloadEnd, "trak")
-	if !ok {
-		return 0, fmt.Errorf("mp4: no trak box found while reading timescale")
-	}
-	mdia, ok := findBox(data, trak.payload, trak.payloadEnd, "mdia")
-	if !ok {
-		return 0, fmt.Errorf("mp4: no mdia box found while reading timescale")
-	}
-	mdhd, ok := findBox(data, mdia.payload, mdia.payloadEnd, "mdhd")
-	if !ok {
-		return 0, fmt.Errorf("mp4: no mdhd box found while reading timescale")
-	}
-	version := data[mdhd.payload]
-	// payload layout: version(1) flags(3) creation modification timescale duration
-	// creation/modification are 4 bytes in v0 and 8 bytes in v1.
-	var off int
-	if version == 1 {
-		off = mdhd.payload + 4 + 8 + 8
-	} else {
-		off = mdhd.payload + 4 + 4 + 4
-	}
-	if off+4 > mdhd.payloadEnd {
-		return 0, fmt.Errorf("mp4: truncated mdhd box")
-	}
-	return binary.BigEndian.Uint32(data[off : off+4]), nil
-}
-
-// readBaseMediaDecodeTime returns the baseMediaDecodeTime of the first tfdt box.
-func readBaseMediaDecodeTime(data []byte) (uint64, error) {
-	var value uint64
-	found := false
-	err := iterBoxes(data, 0, len(data), func(moof mp4Box) error {
-		if moof.typ != "moof" || found {
-			return nil
-		}
-		return iterBoxes(data, moof.payload, moof.payloadEnd, func(traf mp4Box) error {
-			if traf.typ != "traf" || found {
-				return nil
-			}
-			return iterBoxes(data, traf.payload, traf.payloadEnd, func(tfdt mp4Box) error {
-				if tfdt.typ != "tfdt" || found {
-					return nil
-				}
-				version := data[tfdt.payload]
-				off := tfdt.payload + 4
-				if version == 1 {
-					if off+8 > tfdt.payloadEnd {
-						return fmt.Errorf("mp4: truncated v1 tfdt box")
-					}
-					value = binary.BigEndian.Uint64(data[off : off+8])
-				} else {
-					if off+4 > tfdt.payloadEnd {
-						return fmt.Errorf("mp4: truncated v0 tfdt box")
-					}
-					value = uint64(binary.BigEndian.Uint32(data[off : off+4]))
-				}
-				found = true
-				return nil
-			})
-		})
-	})
+// initTimescale reads the media (mdhd) timescale from an fMP4 init segment. This
+// is the unit baseMediaDecodeTime is expressed in.
+func initTimescale(init []byte) (uint32, error) {
+	f, err := mp4.DecodeFile(bytes.NewReader(init))
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("decode init segment: %w", err)
 	}
-	if !found {
-		return 0, fmt.Errorf("mp4: no tfdt box found while reading decode time")
+	if f.Init == nil || f.Init.Moov == nil || f.Init.Moov.Trak == nil {
+		return 0, fmt.Errorf("init segment has no moov/trak")
 	}
-	return value, nil
+	return f.Init.Moov.Trak.Mdia.Mdhd.Timescale, nil
 }
 
-// patchBaseMediaDecodeTime rewrites the baseMediaDecodeTime of every tfdt box in
-// data (in place) to value. There is normally a single tfdt per segment.
-func patchBaseMediaDecodeTime(data []byte, value uint64) error {
-	patched := false
-	err := iterBoxes(data, 0, len(data), func(moof mp4Box) error {
-		if moof.typ != "moof" {
-			return nil
-		}
-		return iterBoxes(data, moof.payload, moof.payloadEnd, func(traf mp4Box) error {
-			if traf.typ != "traf" {
-				return nil
-			}
-			return iterBoxes(data, traf.payload, traf.payloadEnd, func(tfdt mp4Box) error {
-				if tfdt.typ != "tfdt" {
-					return nil
-				}
-				version := data[tfdt.payload]
-				off := tfdt.payload + 4 // skip version + flags
-				if version == 1 {
-					if off+8 > tfdt.payloadEnd {
-						return fmt.Errorf("mp4: truncated v1 tfdt box")
-					}
-					binary.BigEndian.PutUint64(data[off:off+8], value)
-				} else {
-					if off+4 > tfdt.payloadEnd {
-						return fmt.Errorf("mp4: truncated v0 tfdt box")
-					}
-					binary.BigEndian.PutUint32(data[off:off+4], uint32(value))
-				}
-				patched = true
-				return nil
-			})
-		})
-	})
+// rebaseFragment decodes a clean moof+mdat segment, recomputes its tfdt
+// baseMediaDecodeTime via newBase (which receives the muxer's original,
+// window-relative value), and returns the re-encoded segment. newBase is called
+// once, with the first fragment's decode time.
+func rebaseFragment(segment []byte, newBase func(orig uint64) uint64) ([]byte, error) {
+	f, err := mp4.DecodeFile(bytes.NewReader(segment))
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("decode segment: %w", err)
 	}
-	if !patched {
-		return fmt.Errorf("mp4: no tfdt box found while patching decode time")
+	if len(f.Segments) == 0 || len(f.Segments[0].Fragments) == 0 {
+		return nil, fmt.Errorf("segment has no media fragment")
 	}
-	return nil
+	tfdt := f.Segments[0].Fragments[0].Moof.Traf.Tfdt
+	if tfdt == nil {
+		return nil, fmt.Errorf("fragment has no tfdt box")
+	}
+	tfdt.SetBaseMediaDecodeTime(newBase(tfdt.BaseMediaDecodeTime()))
+
+	var out bytes.Buffer
+	out.Grow(len(segment))
+	if err := f.Encode(&out); err != nil {
+		return nil, fmt.Errorf("re-encode segment: %w", err)
+	}
+	return out.Bytes(), nil
 }

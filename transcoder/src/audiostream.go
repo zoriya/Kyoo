@@ -33,7 +33,7 @@ func (t *Transcoder) NewAudioStream(ctx context.Context, file *FileStream, idx u
 		return nil, fmt.Errorf("no audio track with index %d", idx)
 	}
 
-	NewStream(file, keyframes, ret, &ret.Stream)
+	NewStream(ctx, file, keyframes, ret, &ret.Stream)
 	return ret, nil
 }
 

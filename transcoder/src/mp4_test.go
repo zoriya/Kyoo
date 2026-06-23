@@ -1,6 +1,7 @@
 package src
 
 import (
+	"bytes"
 	"fmt"
 	"math"
 	"os"
@@ -10,14 +11,11 @@ import (
 	"testing"
 )
 
-// These tests exercise the fMP4 tfdt-patch path against segments produced by the
-// real ffmpeg segment muxer, mirroring the production pipeline:
-//   1. produce a shared init (ftyp+moov) via -segment_header_filename and clean
-//      moof+mdat media segments (skip_trailer)
-//   2. patch a segment's tfdt to an absolute decode time
-//   3. concatenate init+segment and confirm ffprobe reads the patched timestamp
-//
-// They are skipped when ffmpeg/ffprobe are unavailable.
+// These tests exercise the fMP4 helpers (initTimescale, rebaseFragment) against
+// segments produced by the real ffmpeg segment muxer, mirroring the production
+// pipeline: a shared init (ftyp+moov) via -segment_header_filename and clean
+// moof+mdat media segments (skip_trailer), with the lazy-window tfdt rebased
+// onto the absolute timeline. Skipped when ffmpeg/ffprobe are unavailable.
 
 func requireFfmpeg(t *testing.T) {
 	t.Helper()
@@ -95,23 +93,16 @@ func TestFmp4InitAndSegmentPipeline(t *testing.T) {
 	if err != nil {
 		t.Fatalf("reading init: %v", err)
 	}
-	// init must be a clean ftyp+moov (no media boxes).
-	if _, ok := findBox(initBytes, 0, len(initBytes), "moov"); !ok {
-		t.Fatal("init segment has no moov box")
-	}
-	if _, ok := findBox(initBytes, 0, len(initBytes), "moof"); ok {
-		t.Fatal("init segment unexpectedly contains a moof box")
-	}
 	// the two independent windows must produce a byte-identical init.
 	if otherInit, err := os.ReadFile(initB); err != nil {
 		t.Fatalf("reading window B init: %v", err)
-	} else if string(initBytes) != string(otherInit) {
+	} else if !bytes.Equal(initBytes, otherInit) {
 		t.Fatalf("init segments differ across windows (len %d vs %d)", len(initBytes), len(otherInit))
 	}
 
-	timescale, err := readMediaTimescale(initBytes)
+	timescale, err := initTimescale(initBytes)
 	if err != nil {
-		t.Fatalf("readMediaTimescale: %v", err)
+		t.Fatalf("initTimescale: %v", err)
 	}
 	if timescale == 0 {
 		t.Fatal("timescale is 0")
@@ -120,17 +111,9 @@ func TestFmp4InitAndSegmentPipeline(t *testing.T) {
 	// Window B's segment 10 covers absolute t=20s, but the muxer rebased window B
 	// to start at 0, so unpatched it reads ~0s with the shared init. This is the
 	// crux of the lazy-window problem.
-	seg := filepath.Join(dirB, "seg_10.mp4")
-	raw, err := os.ReadFile(seg)
+	raw, err := os.ReadFile(filepath.Join(dirB, "seg_10.mp4"))
 	if err != nil {
 		t.Fatalf("reading seg: %v", err)
-	}
-	// segments must be clean moof+mdat (no moov to strip).
-	if _, ok := findBox(raw, 0, len(raw), "moov"); ok {
-		t.Fatal("media segment unexpectedly contains a moov box")
-	}
-	if _, ok := findBox(raw, 0, len(raw), "moof"); !ok {
-		t.Fatal("media segment has no moof box")
 	}
 
 	combinedRaw := filepath.Join(dirB, "combined_raw.mp4")
@@ -141,20 +124,36 @@ func TestFmp4InitAndSegmentPipeline(t *testing.T) {
 		t.Fatalf("unpatched window-B segment PTS = %.4f, expected ~0 (rebased to window start)", ptsRaw)
 	}
 
-	// Patching tfdt to the absolute decode time (segment 10 -> 20s) restores the
-	// continuous timeline, exactly like Stream.finalizeSegment.
+	// rebaseFragment shifts the segment to its absolute decode time (segment 10 ->
+	// 20s), exactly like Stream.finalizeSegment, restoring the continuous timeline.
 	const absStart = 20.0
-	patched := append([]byte{}, raw...)
-	decodeTime := uint64(math.Round(absStart * float64(timescale)))
-	if err := patchBaseMediaDecodeTime(patched, decodeTime); err != nil {
-		t.Fatalf("patchBaseMediaDecodeTime: %v", err)
+	var sawOrig bool
+	patched, err := rebaseFragment(raw, func(orig uint64) uint64 {
+		sawOrig = true
+		// window B rebased seg 10 to ~0
+		if orig > uint64(timescale) {
+			t.Fatalf("expected rebased (~0) tfdt, got %d", orig)
+		}
+		return uint64(math.Round(absStart * float64(timescale)))
+	})
+	if err != nil {
+		t.Fatalf("rebaseFragment: %v", err)
 	}
+	if !sawOrig {
+		t.Fatal("rebaseFragment never invoked the newBase callback")
+	}
+
 	combined := filepath.Join(dirB, "combined.mp4")
 	if err := os.WriteFile(combined, append(append([]byte{}, initBytes...), patched...), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if pts := probeFirstPts(t, combined); math.Abs(pts-absStart) > 0.2 {
 		t.Fatalf("patched segment PTS = %.4f, want ~%.1f", pts, absStart)
+	}
+
+	// the re-encoded segment must still decode cleanly.
+	if out, err := exec.Command("ffmpeg", "-v", "error", "-i", combined, "-f", "null", "-").CombinedOutput(); err != nil || len(bytes.TrimSpace(out)) != 0 {
+		t.Fatalf("re-encoded segment decode errors: %v\n%s", err, out)
 	}
 
 	_ = dirA
