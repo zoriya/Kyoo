@@ -157,6 +157,36 @@ func (t *Transcoder) GetVideoSegment(
 	return stream.GetVideoSegment(ctx, video, quality, segment)
 }
 
+func (t *Transcoder) GetVideoInit(
+	ctx context.Context,
+	path string,
+	video uint32,
+	quality VideoQuality,
+	sha string,
+) (string, error) {
+	ctx = context.WithoutCancel(ctx)
+	stream, err := t.getFileStream(ctx, path, sha)
+	if err != nil {
+		return "", err
+	}
+	return stream.GetVideoInit(ctx, video, quality)
+}
+
+func (t *Transcoder) GetAudioInit(
+	ctx context.Context,
+	path string,
+	audio uint32,
+	quality AudioQuality,
+	sha string,
+) (string, error) {
+	ctx = context.WithoutCancel(ctx)
+	stream, err := t.getFileStream(ctx, path, sha)
+	if err != nil {
+		return "", err
+	}
+	return stream.GetAudioInit(ctx, audio, quality)
+}
+
 func (t *Transcoder) GetAudioSegment(
 	ctx context.Context,
 	path string,

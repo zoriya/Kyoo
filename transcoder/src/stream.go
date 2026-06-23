@@ -33,6 +33,9 @@ const (
 type StreamHandle interface {
 	getTranscodeArgs(segments string) []string
 	getOutPath(encoder_id int) string
+	// getInitPath returns the path of the shared fMP4 initialization segment
+	// (ftyp+moov) referenced by #EXT-X-MAP for this stream/quality.
+	getInitPath() string
 	getFlags() Flags
 }
 
@@ -45,6 +48,8 @@ type Stream struct {
 	heads     []Head
 	// the lock used for the the heads
 	lock sync.RWMutex
+	// guards the on-demand generation of the shared init segment.
+	initLock sync.Mutex
 }
 
 type Segment struct {
@@ -305,7 +310,13 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 		// we take a little bit more than that to be extra safe but too much can be harmfull
 		// when segments are short (can make the video repeat itself)
 		"-segment_time_delta", "0.05",
-		"-segment_format", "mpegts",
+		// fMP4 segments. Each output file is a self-contained fragmented mp4
+		// (ftyp+moov+sidx+moof+mdat+mfra). We extract a single shared init
+		// (ftyp+moov) separately and strip every served segment down to
+		// moof+mdat (see finalizeSegment / mp4.go). default_base_moof makes each
+		// moof self-referential so the strip keeps sample offsets valid.
+		"-segment_format", "mp4",
+		"-segment_format_options", "movflags=frag_keyframe+empty_moov+default_base_moof",
 		"-segment_times", toSegmentStr(Map(segments, func(seg float64, _ int) float64 {
 			// segment_times want durations, not timestamps so we must substract the -ss param
 			// since we give a greater value to -ss to prevent wrong seeks but -segment_times
@@ -348,6 +359,18 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 			if segment < start {
 				// This happen because we use -f segments for accurate cutting (since -ss is not)
 				// check comment at begining of function for more info
+				continue
+			}
+			// The segment list pipe reports a file only once it is closed, so the
+			// raw fMP4 file is complete here. Rewrite it in place to the served
+			// shape (strip ftyp/moov/sidx/mfra, patch tfdt to absolute decode
+			// time) before marking it ready. Done outside the lock to avoid disk
+			// IO under the heads lock; the file is unique per (encoder, segment)
+			// so there is no concurrent writer. A failure here just skips marking
+			// the segment ready, letting a future request re-encode it.
+			segPath := fmt.Sprintf(ts.handle.getOutPath(encoder_id), segment)
+			if err := ts.finalizeSegment(segPath, segment); err != nil {
+				slog.ErrorContext(ctx, "failed to finalize fmp4 segment", "segment", segment, "encoderId", encoder_id, "err", err)
 				continue
 			}
 			ts.lock.Lock()
@@ -420,28 +443,114 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 	return nil
 }
 
+// finalizeSegment rewrites a raw fMP4 segment file produced by the segment muxer
+// into the form served to clients: only moof+mdat, with the tfdt
+// baseMediaDecodeTime patched to the segment's absolute decode time. The segment
+// muxer rebases every segment to decode time 0; patching it keeps a single
+// continuous timeline across independent lazy-window encodes (mirroring how
+// -copyts kept absolute PTS in the old MPEG-TS path).
+func (ts *Stream) finalizeSegment(path string, segment int32) error {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	timescale, err := readMediaTimescale(data)
+	if err != nil {
+		return err
+	}
+	frags, err := stripToFragments(data)
+	if err != nil {
+		return err
+	}
+	decodeTime := uint64(math.Round(ts.keyframes.Get(segment) * float64(timescale)))
+	if err := patchBaseMediaDecodeTime(frags, decodeTime); err != nil {
+		return err
+	}
+	return os.WriteFile(path, frags, 0o644)
+}
+
+// GetInit lazily generates and returns the path of the shared fMP4 init segment
+// (ftyp+moov) for this stream/quality. The moov only depends on the (fixed)
+// codec parameters, not on the encode start point, so we produce it with a short
+// dedicated ffmpeg run decoupled from the lazy windows. This matters because the
+// player fetches the #EXT-X-MAP init before requesting any media segment.
+func (ts *Stream) GetInit(ctx context.Context) (string, error) {
+	ctx = context.WithoutCancel(ctx)
+	initPath := ts.handle.getInitPath()
+
+	ts.initLock.Lock()
+	defer ts.initLock.Unlock()
+	if _, err := os.Stat(initPath); err == nil {
+		return initPath, nil
+	}
+	if err := os.MkdirAll(filepath.Dir(initPath), 0o755); err != nil {
+		return "", err
+	}
+
+	args := []string{"-nostats", "-hide_banner", "-loglevel", "warning"}
+	if ts.handle.getFlags()&VideoF != 0 {
+		args = append(args, Settings.HwAccel.DecodeFlags...)
+	}
+	args = append(args, "-i", ts.file.Info.Path)
+	// "0" is a dummy -force_key_frames value: we discard the media and keep the moov.
+	args = append(args, ts.handle.getTranscodeArgs("0")...)
+	tmp := fmt.Sprintf("%s.%d.tmp", initPath, os.Getpid())
+	args = append(args,
+		// just enough output to emit the moov header.
+		"-t", "0.5",
+		"-movflags", "frag_keyframe+empty_moov+default_base_moof",
+		"-f", "mp4",
+		tmp,
+	)
+
+	cmd := exec.CommandContext(ctx, "ffmpeg", args...)
+	slog.InfoContext(ctx, "generating fmp4 init segment", "args", strings.Join(cmd.Args, " "))
+	var stderr strings.Builder
+	cmd.Stderr = &stderr
+	if err := cmd.Run(); err != nil {
+		_ = os.Remove(tmp)
+		return "", fmt.Errorf("could not generate init segment: %w (%s)", err, stderr.String())
+	}
+	defer os.Remove(tmp)
+
+	data, err := os.ReadFile(tmp)
+	if err != nil {
+		return "", err
+	}
+	init, err := extractInitSegment(data)
+	if err != nil {
+		return "", err
+	}
+	if err := os.WriteFile(initPath, init, 0o644); err != nil {
+		return "", err
+	}
+	return initPath, nil
+}
+
 func (ts *Stream) GetIndex(_ context.Context, client string) (string, error) {
 	// playlist type is event since we can append to the list if Keyframe.IsDone is false.
 	// start time offset makes the stream start at 0s instead of ~3segments from the end (requires version 6 of hls)
-	index := `#EXTM3U
-#EXT-X-VERSION:6
+	// version 7 is required for fMP4 segments (#EXT-X-MAP referencing an init segment).
+	index := fmt.Sprintf(`#EXTM3U
+#EXT-X-VERSION:7
 #EXT-X-PLAYLIST-TYPE:EVENT
 #EXT-X-START:TIME-OFFSET=0
 #EXT-X-TARGETDURATION:4
 #EXT-X-MEDIA-SEQUENCE:0
 #EXT-X-INDEPENDENT-SEGMENTS
-`
+#EXT-X-MAP:URI="init.mp4?clientId=%s"
+`, client)
 	length, is_done := ts.keyframes.Length()
 
 	for segment := int32(0); segment < length-1; segment++ {
 		index += fmt.Sprintf("#EXTINF:%.6f\n", ts.keyframes.Get(segment+1)-ts.keyframes.Get(segment))
-		index += fmt.Sprintf("segment-%d.ts?clientId=%s\n", segment, client)
+		index += fmt.Sprintf("segment-%d.mp4?clientId=%s\n", segment, client)
 	}
 	// do not forget to add the last segment between the last keyframe and the end of the file
 	// if the keyframes extraction is not done, do not bother to add it, it will be retrived on the next index retrival
 	if is_done && length > 0 {
 		index += fmt.Sprintf("#EXTINF:%.6f\n", float64(ts.file.Info.Duration)-ts.keyframes.Get(length-1))
-		index += fmt.Sprintf("segment-%d.ts?clientId=%s\n", length-1, client)
+		index += fmt.Sprintf("segment-%d.mp4?clientId=%s\n", length-1, client)
 		index += `#EXT-X-ENDLIST`
 	}
 	return index, nil
