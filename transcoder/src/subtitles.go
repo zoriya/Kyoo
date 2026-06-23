@@ -1,6 +1,7 @@
 package src
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -93,6 +94,7 @@ outer:
 }
 
 func ConvertSubtitle(
+	ctx context.Context,
 	format string,
 	stream io.ReadCloser,
 	outFmt string,
@@ -141,6 +143,7 @@ func ConvertSubtitle(
 	}
 
 	go func() {
+		defer utils.RecoverPanic(ctx, "subtitle conversion")
 		convert(out)
 		out.Close()
 	}()

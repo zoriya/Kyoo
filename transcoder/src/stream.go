@@ -17,6 +17,10 @@ import (
 	"github.com/zoriya/kyoo/transcoder/src/exec"
 )
 
+// ErrSegmentOutOfRange is returned by GetSegment when the requested segment
+// index does not exist (negative or past the last available segment).
+var ErrSegmentOutOfRange = errors.New("segment out of range")
+
 type Flags int32
 
 const (
@@ -140,6 +144,13 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 	}
 	// Stop at the first finished segment
 	ts.lock.Lock()
+	// ts.segments is grown by the keyframe listener and can momentarily lag
+	// behind keyframes.Length() while the analysis is still running. Clamp end to
+	// the number of allocated segments so the loop below never indexes out of
+	// range (that would panic while holding the lock and deadlock the stream).
+	if end > int32(len(ts.segments)) {
+		end = int32(len(ts.segments))
+	}
 	for i := start; i < end; i++ {
 		if ts.isSegmentReady(i) || ts.isSegmentTranscoding(i) {
 			end = i
@@ -220,9 +231,7 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 		args = append(args, Settings.HwAccel.DecodeFlags...)
 	}
 
-	// in `copy_audio` mode, we use `-ss` and `-t` as an output flag.
-	// without this, seeking is NOT precise and we can have an overlap/gap.
-	if start_ref != 0 && !copy_audio {
+	if start_ref != 0 {
 		if ts.handle.getFlags()&VideoF != 0 {
 			// This is the default behavior in transmux mode and needed to force pre/post segment to work
 			// This must be disabled when processing only audio because it creates gaps in audio
@@ -240,7 +249,9 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 		// it seems that the -to is confused when -ss seek before the given time (because it searches for a keyframe)
 		// add back the time that would be lost otherwise
 		// this only appens when -to is before -i but having -to after -i gave a bug (not sure, don't remember)
-		end_ref += start_ref - ts.keyframes.Get(start_segment)
+		if start_ref != 0 {
+			end_ref += start_ref - ts.keyframes.Get(start_segment)
+		}
 		args = append(args,
 			"-to", fmt.Sprintf("%.6f", end_ref),
 		)
@@ -298,8 +309,8 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 		"-segment_times", toSegmentStr(Map(segments, func(seg float64, _ int) float64 {
 			// segment_times want durations, not timestamps so we must substract the -ss param
 			// since we give a greater value to -ss to prevent wrong seeks but -segment_times
-			// needs precise segments, we use the keyframe we want to seek to as a reference.
-			return seg - ts.keyframes.Get(start_segment)
+			// needs precise segments, we use the actual -ss value as a reference.
+			return seg - start_ref
 		})),
 		"-segment_list_type", "flat",
 		"-segment_list", "pipe:1",
@@ -340,6 +351,18 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 				continue
 			}
 			ts.lock.Lock()
+			if ts.heads[encoder_id] == DeletedHead {
+				// The head was killed from the outside (the orphaned-head reaper in
+				// tracker.go or a stream teardown) while ffmpeg was in the middle of
+				// writing this segment. On SIGINT, ffmpeg flushes and closes the
+				// partial segment it was working on and still emits it on the segment
+				// list pipe. Marking such a truncated segment as ready would serve it
+				// forever and break ABR continuity (a later, complete encode can never
+				// replace an already-ready segment). Drop it: a future request will
+				// re-encode it cleanly.
+				ts.lock.Unlock()
+				return
+			}
 			ts.heads[encoder_id].segment = segment
 			slog.InfoContext(ctx, "segment got ready", "segment", segment, "encoderId", encoder_id)
 			if ts.isSegmentReady(segment) {
@@ -347,10 +370,9 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 				cmd.Process.Signal(os.Interrupt)
 				slog.InfoContext(ctx, "killing ffmpeg because segment already ready", "segment", segment, "encoderId", encoder_id)
 				should_stop = true
-			} else if copy_audio && end < length-1 && segment == end {
-				// Extra overlap segment for copied audio.
-				// Delete the file immediately and stop without closing
-				// the channel, so a real producer can close it later.
+			} else if end < length-1 && segment == end {
+				// Extra overlap segment used for accurate cuts.
+				// Ignore it so a future request can create it cleanly if needed.
 				extraPath := fmt.Sprintf(ts.handle.getOutPath(encoder_id), segment)
 				_ = os.Remove(extraPath)
 				should_stop = true
@@ -417,7 +439,7 @@ func (ts *Stream) GetIndex(_ context.Context, client string) (string, error) {
 	}
 	// do not forget to add the last segment between the last keyframe and the end of the file
 	// if the keyframes extraction is not done, do not bother to add it, it will be retrived on the next index retrival
-	if is_done {
+	if is_done && length > 0 {
 		index += fmt.Sprintf("#EXTINF:%.6f\n", float64(ts.file.Info.Duration)-ts.keyframes.Get(length-1))
 		index += fmt.Sprintf("segment-%d.ts?clientId=%s\n", length-1, client)
 		index += `#EXT-X-ENDLIST`
@@ -428,6 +450,10 @@ func (ts *Stream) GetIndex(_ context.Context, client string) (string, error) {
 func (ts *Stream) GetSegment(ctx context.Context, segment int32) (string, error) {
 	ctx = context.WithoutCancel(ctx)
 	ts.lock.RLock()
+	if segment < 0 || int(segment) >= len(ts.segments) {
+		ts.lock.RUnlock()
+		return "", ErrSegmentOutOfRange
+	}
 	ready := ts.isSegmentReady(segment)
 	// we want to calculate distance in the same lock else it can be funky
 	distance := 0.
@@ -463,7 +489,10 @@ func (ts *Stream) GetSegment(ctx context.Context, segment int32) (string, error)
 		}
 	}
 	ts.prerareNextSegements(ctx, segment)
-	return fmt.Sprintf(ts.handle.getOutPath(ts.segments[segment].encoder), segment), nil
+	ts.lock.RLock()
+	encoder := ts.segments[segment].encoder
+	ts.lock.RUnlock()
+	return fmt.Sprintf(ts.handle.getOutPath(encoder), segment), nil
 }
 
 func (ts *Stream) prerareNextSegements(ctx context.Context, segment int32) {

@@ -1,6 +1,68 @@
 from __future__ import annotations
 
-from .hls_utils import fetch_text, parse_media_playlist, probe_segment_timeline
+import time
+
+from .hls_utils import (
+    fetch_binary,
+    fetch_text,
+    parse_media_playlist,
+    probe_segment_timeline,
+)
+
+
+def test_copied_audio_deep_seek_is_not_slow(master_context: dict, test_config) -> None:
+    """Deep copied-audio seeks should not be slow enough to cause "segment never loads".
+
+    This targets long copied-audio playlists where lazy generation requests a far segment.
+    """
+    max_allowed_fetch_seconds = 1.5
+    min_segments_for_check = 1000
+    failures: list[str] = []
+    tested = 0
+
+    for audio in master_context["audios"]:
+        if "original" not in audio.url:
+            continue
+
+        text = fetch_text(
+            audio.url,
+            timeout_seconds=test_config.timeout_seconds,
+            headers=test_config.headers,
+        )
+        playlist = parse_media_playlist(text, audio.url, master_context["client_id"])
+        if len(playlist.segment_urls) < min_segments_for_check:
+            continue
+
+        tested += 1
+        target_idx = min(
+            int(len(playlist.segment_urls) * 0.85), len(playlist.segment_urls) - 2
+        )
+
+        started = time.monotonic()
+        try:
+            fetch_binary(
+                playlist.segment_urls[target_idx],
+                timeout_seconds=test_config.timeout_seconds,
+                headers=test_config.headers,
+            )
+        except Exception as err:  # pragma: no cover - assertion path only
+            failures.append(
+                f"{audio.attrs.get('GROUP-ID', audio.url)}"
+                f" seg={target_idx} fetch_failed={type(err).__name__}: {err}"
+            )
+            continue
+
+        elapsed = time.monotonic() - started
+        if elapsed > max_allowed_fetch_seconds:
+            failures.append(
+                f"{audio.attrs.get('GROUP-ID', audio.url)}"
+                f" seg={target_idx} fetch_time={elapsed:.3f}s"
+            )
+
+    if tested == 0:
+        return
+
+    assert not failures, "copied-audio deep seek too slow: " + ", ".join(failures)
 
 
 def test_audio_segment_100_boundary_is_continuous(

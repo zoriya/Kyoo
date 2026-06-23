@@ -3,6 +3,7 @@ package src
 import (
 	"os"
 	"path"
+	"strings"
 )
 
 func GetEnvOr(env string, def string) string {
@@ -31,7 +32,7 @@ type HwAccelT struct {
 var Settings = SettingsT{
 	// we manually add a folder to make sure we do not delete user data.
 	Outpath:  path.Join(GetEnvOr("GOCODER_CACHE_ROOT", "/cache"), "kyoo_cache"),
-	SafePath: GetEnvOr("GOCODER_SAFE_PATH", "/video"),
+	SafePath: strings.TrimRight(GetEnvOr("GOCODER_SAFE_PATH", "/video"), "/"),
 	JwksUrl:  os.Getenv("JWKS_URL"),
 	HwAccel:  DetectHardwareAccel(),
 }

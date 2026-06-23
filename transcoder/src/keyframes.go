@@ -45,6 +45,16 @@ func (kf *Keyframe) Slice(start int32, end int32) []float64 {
 	kf.info.mutex.RLock()
 	defer kf.info.mutex.RUnlock()
 
+	if start < 0 {
+		start = 0
+	}
+	if end > int32(len(kf.Keyframes)) {
+		end = int32(len(kf.Keyframes))
+	}
+	if end <= start {
+		return []float64{}
+	}
+
 	ref := kf.Keyframes[start:end]
 	if kf.IsDone {
 		return ref
@@ -105,6 +115,13 @@ type KeyframeKey struct {
 }
 
 func (s *MetadataService) GetKeyframes(ctx context.Context, info *MediaInfo, isVideo bool, idx uint32) (*Keyframe, error) {
+	if isVideo && int(idx) >= len(info.Videos) {
+		return nil, fmt.Errorf("no video track with index %d", idx)
+	}
+	if !isVideo && int(idx) >= len(info.Audios) {
+		return nil, fmt.Errorf("no audio track with index %d", idx)
+	}
+
 	info.lock.Lock()
 	var ret *Keyframe
 	if isVideo && info.Videos[idx].Keyframes != nil {
@@ -143,6 +160,7 @@ func (s *MetadataService) GetKeyframes(ctx context.Context, info *MediaInfo, isV
 
 	go func(ctx context.Context) {
 		ctx = context.WithoutCancel(ctx)
+		defer utils.RecoverPanic(ctx, "extracting keyframes")
 		var table string
 		var err error
 		if isVideo {

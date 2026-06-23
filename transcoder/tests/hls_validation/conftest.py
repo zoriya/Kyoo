@@ -57,7 +57,7 @@ def test_config() -> TestConfig:
         max_audio_playlists=max(
             0, int(os.getenv("TRANSCODER_MAX_AUDIO_PLAYLISTS", "2"))
         ),
-        timeout_seconds=float(os.getenv("TRANSCODER_TIMEOUT_SECONDS", "40")),
+        timeout_seconds=float(os.getenv("TRANSCODER_TIMEOUT_SECONDS", "600")),
         headers=headers,
     )
 

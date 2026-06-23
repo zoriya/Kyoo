@@ -45,6 +45,15 @@ func (t *Transcoder) newFileStream(ctx context.Context, path string, sha string)
 	go func(ctx context.Context) {
 		defer ret.ready.Done()
 		ctx = context.WithoutCancel(ctx)
+		defer func() {
+			if r := recover(); r != nil {
+				slog.ErrorContext(ctx, "recovered from panic while retrieving metadata",
+					"path", path, "panic", fmt.Sprintf("%v", r))
+				if ret.err == nil {
+					ret.err = fmt.Errorf("panic while retrieving metadata: %v", r)
+				}
+			}
+		}()
 		info, err := t.metadataService.GetMetadata(ctx, path, sha)
 		ret.Info = info
 		if err != nil {
@@ -238,10 +247,23 @@ func (fs *FileStream) GetMaster(ctx context.Context, client string) string {
 
 func (fs *FileStream) getVideoStream(ctx context.Context, idx uint32, quality VideoQuality) (*VideoStream, error) {
 	ctx = context.WithoutCancel(ctx)
-	stream, _ := fs.videos.GetOrCreate(VideoKey{idx, quality}, func() *VideoStream {
-		ret, _ := fs.transcoder.NewVideoStream(ctx, fs, idx, quality)
+	var createErr error
+	key := VideoKey{idx, quality}
+	stream, _ := fs.videos.GetOrCreate(key, func() *VideoStream {
+		ret, err := fs.transcoder.NewVideoStream(ctx, fs, idx, quality)
+		if err != nil {
+			createErr = err
+			return nil
+		}
 		return ret
 	})
+	if stream == nil {
+		fs.videos.Remove(key)
+		if createErr == nil {
+			createErr = fmt.Errorf("could not create video stream %d/%s", idx, quality)
+		}
+		return nil, createErr
+	}
 	stream.ready.Wait()
 	return stream, nil
 }
@@ -266,10 +288,23 @@ func (fs *FileStream) GetVideoSegment(ctx context.Context, idx uint32, quality V
 
 func (fs *FileStream) getAudioStream(ctx context.Context, idx uint32, quality AudioQuality) (*AudioStream, error) {
 	ctx = context.WithoutCancel(ctx)
-	stream, _ := fs.audios.GetOrCreate(AudioKey{idx, quality}, func() *AudioStream {
-		ret, _ := fs.transcoder.NewAudioStream(ctx, fs, idx, quality)
+	var createErr error
+	key := AudioKey{idx, quality}
+	stream, _ := fs.audios.GetOrCreate(key, func() *AudioStream {
+		ret, err := fs.transcoder.NewAudioStream(ctx, fs, idx, quality)
+		if err != nil {
+			createErr = err
+			return nil
+		}
 		return ret
 	})
+	if stream == nil {
+		fs.audios.Remove(key)
+		if createErr == nil {
+			createErr = fmt.Errorf("could not create audio stream %d/%s", idx, quality)
+		}
+		return nil, createErr
+	}
 	stream.ready.Wait()
 	return stream, nil
 }

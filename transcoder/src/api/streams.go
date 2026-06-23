@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -212,7 +213,7 @@ func (h *shandler) GetVideoSegment(c *echo.Context) error {
 		sha,
 	)
 	if err != nil {
-		return err
+		return segmentError(err)
 	}
 	return c.File(strings.TrimLeft(ret, "/"))
 }
@@ -260,9 +261,17 @@ func (h *shandler) GetAudioSegment(c *echo.Context) error {
 		sha,
 	)
 	if err != nil {
-		return err
+		return segmentError(err)
 	}
 	return c.File(strings.TrimLeft(ret, "/"))
+}
+
+// segmentError maps internal segment-retrieval errors to clean HTTP responses.
+func segmentError(err error) error {
+	if errors.Is(err, src.ErrSegmentOutOfRange) {
+		return echo.NewHTTPError(http.StatusNotFound, "Requested segment does not exist.")
+	}
+	return err
 }
 
 func (h *shandler) GetStreams(c *echo.Context) error {

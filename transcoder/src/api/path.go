@@ -26,7 +26,7 @@ func getPathS(key string) (string, string, error) {
 	if !filepath.IsAbs(path) {
 		return "", "", echo.NewHTTPError(http.StatusBadRequest, "Absolute path required.")
 	}
-	if !strings.HasPrefix(path, src.Settings.SafePath) {
+	if !strings.HasPrefix(path, src.Settings.SafePath+"/") {
 		return "", "", echo.NewHTTPError(http.StatusBadRequest, "Selected path is not marked as safe.")
 	}
 	hash, err := getHash(path)

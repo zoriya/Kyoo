@@ -2,7 +2,9 @@ package src
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
+	"runtime/debug"
 	"time"
 )
 
@@ -51,6 +53,17 @@ func Abs(x int32) int32 {
 }
 
 func (t *Tracker) start() {
+	// The tracker is a single goroutine that everything else depends on for
+	// cleanup; if it dies the clientChan stops draining and requests eventually
+	// block. Never let a panic kill it for good - log and restart the loop.
+	defer func() {
+		if r := recover(); r != nil {
+			slog.Error("tracker goroutine panicked; restarting",
+				"panic", fmt.Sprintf("%v", r), "stack", string(debug.Stack()))
+			go t.start()
+		}
+	}()
+
 	inactive_time := 1 * time.Hour
 	timer := time.After(inactive_time)
 	for {
