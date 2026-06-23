@@ -105,6 +105,49 @@ func readMediaTimescale(data []byte) (uint32, error) {
 	return binary.BigEndian.Uint32(data[off : off+4]), nil
 }
 
+// readBaseMediaDecodeTime returns the baseMediaDecodeTime of the first tfdt box.
+func readBaseMediaDecodeTime(data []byte) (uint64, error) {
+	var value uint64
+	found := false
+	err := iterBoxes(data, 0, len(data), func(moof mp4Box) error {
+		if moof.typ != "moof" || found {
+			return nil
+		}
+		return iterBoxes(data, moof.payload, moof.payloadEnd, func(traf mp4Box) error {
+			if traf.typ != "traf" || found {
+				return nil
+			}
+			return iterBoxes(data, traf.payload, traf.payloadEnd, func(tfdt mp4Box) error {
+				if tfdt.typ != "tfdt" || found {
+					return nil
+				}
+				version := data[tfdt.payload]
+				off := tfdt.payload + 4
+				if version == 1 {
+					if off+8 > tfdt.payloadEnd {
+						return fmt.Errorf("mp4: truncated v1 tfdt box")
+					}
+					value = binary.BigEndian.Uint64(data[off : off+8])
+				} else {
+					if off+4 > tfdt.payloadEnd {
+						return fmt.Errorf("mp4: truncated v0 tfdt box")
+					}
+					value = uint64(binary.BigEndian.Uint32(data[off : off+4]))
+				}
+				found = true
+				return nil
+			})
+		})
+	})
+	if err != nil {
+		return 0, err
+	}
+	if !found {
+		return 0, fmt.Errorf("mp4: no tfdt box found while reading decode time")
+	}
+	return value, nil
+}
+
 // patchBaseMediaDecodeTime rewrites the baseMediaDecodeTime of every tfdt box in
 // data (in place) to value. There is normally a single tfdt per segment.
 func patchBaseMediaDecodeTime(data []byte, value uint64) error {

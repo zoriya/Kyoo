@@ -356,6 +356,8 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 		scanner := bufio.NewScanner(stdout)
 		format := filepath.Base(outpath)
 		should_stop := false
+		// per-window tfdt shift, derived from the first segment this encoder emits.
+		var off windowOffset
 
 		for scanner.Scan() {
 			var segment int32
@@ -373,7 +375,7 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 			// there is no concurrent writer. A failure here just skips marking the
 			// segment ready, letting a future request re-encode it.
 			segPath := fmt.Sprintf(ts.handle.getOutPath(encoder_id), segment)
-			if err := ts.finalizeSegment(segPath, segment); err != nil {
+			if err := ts.finalizeSegment(segPath, segment, &off); err != nil {
 				slog.ErrorContext(ctx, "failed to finalize fmp4 segment", "segment", segment, "encoderId", encoder_id, "err", err)
 				continue
 			}
@@ -469,13 +471,26 @@ func (ts *Stream) loadTimescale() (uint32, error) {
 	return timescale, nil
 }
 
+// windowOffset tracks the per-window (per-encoder) tfdt shift used by
+// finalizeSegment. The segment muxer rebases each lazy window's tfdt to the
+// window start; we shift the whole window by a single constant so its segments
+// land on the absolute timeline while preserving the muxer's accurate
+// intra-window frame timing. The offset is derived once, from the first segment
+// finalized in the window (its true absolute decode time is keyframes.Get(seg)).
+type windowOffset struct {
+	value float64
+	set   bool
+}
+
 // finalizeSegment patches a freshly produced fMP4 segment's tfdt
-// baseMediaDecodeTime to the segment's absolute decode time. The segment muxer
-// emits clean moof+mdat segments (thanks to -segment_header_filename +
-// skip_trailer) but rebases each one to decode time 0; patching keeps a single
-// continuous timeline across independent lazy-window encodes (mirroring how
-// -copyts kept absolute PTS in the old MPEG-TS path).
-func (ts *Stream) finalizeSegment(path string, segment int32) error {
+// baseMediaDecodeTime so the segment sits at its absolute position on the
+// timeline. The segment muxer emits clean moof+mdat segments (thanks to
+// -segment_header_filename + skip_trailer) but rebases each window to its own
+// start; shifting by a per-window constant keeps a single continuous timeline
+// across independent lazy-window encodes (mirroring how -copyts kept absolute
+// PTS in the old MPEG-TS path) without distorting intra-window timing the way a
+// nominal per-segment rewrite would.
+func (ts *Stream) finalizeSegment(path string, segment int32, off *windowOffset) error {
 	timescale, err := ts.loadTimescale()
 	if err != nil {
 		return err
@@ -484,7 +499,18 @@ func (ts *Stream) finalizeSegment(path string, segment int32) error {
 	if err != nil {
 		return err
 	}
-	decodeTime := uint64(math.Round(ts.keyframes.Get(segment) * float64(timescale)))
+	orig, err := readBaseMediaDecodeTime(data)
+	if err != nil {
+		return err
+	}
+	if !off.set {
+		// Anchor the window: this segment's true absolute decode time is
+		// keyframes.Get(segment); the shift maps the muxer's window-relative value
+		// onto it. For a window starting at t=0 this offset is ~0 (a no-op).
+		off.value = ts.keyframes.Get(segment)*float64(timescale) - float64(orig)
+		off.set = true
+	}
+	decodeTime := uint64(math.Max(0, math.Round(float64(orig)+off.value)))
 	if err := patchBaseMediaDecodeTime(data, decodeTime); err != nil {
 		return err
 	}
