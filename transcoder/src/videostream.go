@@ -45,11 +45,16 @@ func (vs *VideoStream) getFlags() Flags {
 }
 
 func (vs *VideoStream) getOutPath(encoder_id int) string {
-	return fmt.Sprintf("%s/segment-%s-%d-%%d.mp4", vs.file.Out, vs.quality, encoder_id)
+	return fmt.Sprintf(
+		"%s/segment-%s-%d-%%d.mp4",
+		vs.file.Out,
+		vs.quality,
+		encoder_id,
+	)
 }
 
-func (vs *VideoStream) getInitPath() string {
-	return fmt.Sprintf("%s/init-%s.mp4", vs.file.Out, vs.quality)
+func (vs *VideoStream) getInitPath(encoder_id int) string {
+	return fmt.Sprintf("%s/init-%s-%d.mp4", vs.file.Out, vs.quality, encoder_id)
 }
 
 func closestMultiple(n int32, x int32) int32 {

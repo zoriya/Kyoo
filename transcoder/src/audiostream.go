@@ -38,11 +38,23 @@ func (t *Transcoder) NewAudioStream(ctx context.Context, file *FileStream, idx u
 }
 
 func (as *AudioStream) getOutPath(encoder_id int) string {
-	return fmt.Sprintf("%s/segment-a%d-%s-%d-%%d.mp4", as.file.Out, as.audio.Index, string(as.quality), encoder_id)
+	return fmt.Sprintf(
+		"%s/segment-a%d-%s-%d-%%d.mp4",
+		as.file.Out,
+		as.audio.Index,
+		string(as.quality),
+		encoder_id,
+	)
 }
 
-func (as *AudioStream) getInitPath() string {
-	return fmt.Sprintf("%s/init-a%d-%s.mp4", as.file.Out, as.audio.Index, string(as.quality))
+func (as *AudioStream) getInitPath(encoder_id int) string {
+	return fmt.Sprintf(
+		"%s/init-a%d-%s-%d.mp4",
+		as.file.Out,
+		as.audio.Index,
+		string(as.quality),
+		encoder_id,
+	)
 }
 
 func (as *AudioStream) getFlags() Flags {

@@ -4,6 +4,7 @@ This suite validates lazy transcoding behavior with a focus on:
 
 - timeline continuity (no gaps, no repeated/overlapping playback windows)
 - real playback patterns (sequential, ABR switches, seeks, concurrent clients)
+- fMP4 `tfdt` correctness (absolute, monotonic decode times across lazy windows)
 
 It is segment-container agnostic and does not assume `.ts` segments. Segment URLs are read from playlists and probed with `ffprobe` regardless of extension.
 

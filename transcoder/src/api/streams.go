@@ -193,22 +193,28 @@ func (h *shandler) GetVideoSegment(c *echo.Context) error {
 	}
 
 	if c.Param("chunk") == InitSegmentName {
-		ret, err := h.transcoder.GetVideoInit(c.Request().Context(), path, uint32(video), quality, sha)
+		ret, err := h.transcoder.GetVideoInit(
+			c.Request().Context(),
+			path,
+			uint32(video),
+			quality,
+			sha,
+		)
 		if err != nil {
 			return err
 		}
-		return serveSegment(c, ret)
+		return c.File(strings.TrimLeft(ret, "/"))
 	}
 
 	segment, err := parseSegment(c.Param("chunk"))
 	if err != nil {
 		return err
 	}
+	profileId, sessionId := getIdentity(c)
 	client, err := getClientId(c)
 	if err != nil {
 		return err
 	}
-	profileId, sessionId := getIdentity(c)
 
 	ret, err := h.transcoder.GetVideoSegment(
 		c.Request().Context(),
@@ -224,7 +230,7 @@ func (h *shandler) GetVideoSegment(c *echo.Context) error {
 	if err != nil {
 		return segmentError(err)
 	}
-	return serveSegment(c, ret)
+	return c.File(strings.TrimLeft(ret, "/"))
 }
 
 // Get audio chunk
@@ -250,22 +256,28 @@ func (h *shandler) GetAudioSegment(c *echo.Context) error {
 	}
 
 	if c.Param("chunk") == InitSegmentName {
-		ret, err := h.transcoder.GetAudioInit(c.Request().Context(), path, uint32(audio), quality, sha)
+		ret, err := h.transcoder.GetAudioInit(
+			c.Request().Context(),
+			path,
+			uint32(audio),
+			quality,
+			sha,
+		)
 		if err != nil {
 			return err
 		}
-		return serveSegment(c, ret)
+		return c.File(strings.TrimLeft(ret, "/"))
 	}
 
 	segment, err := parseSegment(c.Param("chunk"))
 	if err != nil {
 		return err
 	}
+	profileId, sessionId := getIdentity(c)
 	client, err := getClientId(c)
 	if err != nil {
 		return err
 	}
-	profileId, sessionId := getIdentity(c)
 
 	ret, err := h.transcoder.GetAudioSegment(
 		c.Request().Context(),
@@ -281,7 +293,7 @@ func (h *shandler) GetAudioSegment(c *echo.Context) error {
 	if err != nil {
 		return segmentError(err)
 	}
-	return serveSegment(c, ret)
+	return c.File(strings.TrimLeft(ret, "/"))
 }
 
 // segmentError maps internal segment-retrieval errors to clean HTTP responses.
@@ -330,8 +342,6 @@ func normalizeOptionalId(value any) *string {
 	return &id
 }
 
-// InitSegmentName is the filename of the shared fMP4 initialization segment
-// referenced by #EXT-X-MAP in the media playlists.
 const InitSegmentName = "init.mp4"
 
 func parseSegment(segment string) (int32, error) {
@@ -341,10 +351,4 @@ func parseSegment(segment string) (int32, error) {
 		return 0, echo.NewHTTPError(http.StatusBadRequest, "Could not parse segment.")
 	}
 	return ret, nil
-}
-
-// serveSegment serves an fMP4 init or media segment with the correct content type.
-func serveSegment(c *echo.Context, path string) error {
-	c.Response().Header().Set("Content-Type", "video/mp4")
-	return c.File(strings.TrimLeft(path, "/"))
 }
