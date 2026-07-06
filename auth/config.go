@@ -12,6 +12,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"maps"
+	"net/url"
 	"os"
 	"slices"
 	"strconv"
@@ -30,6 +31,7 @@ type Configuration struct {
 	JwtKid              string
 	PublicUrl           string
 	OidcProviders       map[string]OidcProviderConfig
+	OidcRedirectUrls    []OidcRedirectRule
 	DefaultClaims       jwt.MapClaims
 	FirstUserClaims     jwt.MapClaims
 	GuestClaims         jwt.MapClaims
@@ -47,6 +49,11 @@ const (
 	OidcClientSecretPost  OidcAuthMethod = "ClientSecretPost"
 )
 
+type OidcRedirectRule struct {
+	Scheme string
+	Host   string
+}
+
 type OidcProviderConfig struct {
 	Id            string
 	Name          string
@@ -61,12 +68,13 @@ type OidcProviderConfig struct {
 }
 
 var DefaultConfig = Configuration{
-	DefaultClaims:   make(jwt.MapClaims),
-	FirstUserClaims: make(jwt.MapClaims),
-	OidcProviders:   make(map[string]OidcProviderConfig),
-	ProtectedClaims: []string{"permissions"},
-	ExpirationDelay: 30 * 24 * time.Hour,
-	EnvApiKeys:      make([]ApiKeyWToken, 0),
+	DefaultClaims:    make(jwt.MapClaims),
+	FirstUserClaims:  make(jwt.MapClaims),
+	OidcProviders:    make(map[string]OidcProviderConfig),
+	OidcRedirectUrls: make([]OidcRedirectRule, 0),
+	ProtectedClaims:  []string{"permissions"},
+	ExpirationDelay:  30 * 24 * time.Hour,
+	EnvApiKeys:       make([]ApiKeyWToken, 0),
 }
 
 func LoadConfiguration(ctx context.Context, db *dbc.Queries) (*Configuration, error) {
@@ -77,6 +85,37 @@ func LoadConfiguration(ctx context.Context, db *dbc.Queries) (*Configuration, er
 		os.Getenv("PROFILE_PICTURE_PATH"),
 		"/profile_pictures",
 	)
+
+	pub, err := url.Parse(ret.PublicUrl)
+	if err != nil {
+		return nil, fmt.Errorf("invalid PUBLIC_URL: %w", err)
+	}
+	if pub.Host != "" {
+		ret.OidcRedirectUrls = append(ret.OidcRedirectUrls, OidcRedirectRule{
+			Scheme: pub.Scheme,
+			Host:   pub.Host,
+		})
+	}
+	for entry := range strings.SplitSeq(os.Getenv("EXTRA_OIDC_REDIRECT_URLS"), ",") {
+		entry = strings.TrimSpace(entry)
+		if entry == "" {
+			continue
+		}
+		u, err := url.Parse(entry)
+		if err != nil {
+			return nil, fmt.Errorf("invalid EXTRA_OIDC_REDIRECT_URLS entry %q: %w", entry, err)
+		}
+		if u.Scheme == "" {
+			ret.OidcRedirectUrls = append(ret.OidcRedirectUrls, OidcRedirectRule{
+				Scheme: strings.TrimSuffix(entry, ":"),
+			})
+		} else {
+			ret.OidcRedirectUrls = append(ret.OidcRedirectUrls, OidcRedirectRule{
+				Scheme: u.Scheme,
+				Host:   u.Host,
+			})
+		}
+	}
 
 	disableRegistration, err := strconv.ParseBool(cmp.Or(os.Getenv("DISABLE_REGISTRATION"), "false"))
 	if err != nil {

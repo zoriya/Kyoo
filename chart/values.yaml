@@ -107,6 +107,11 @@ kyoo:
     guestClaims: '{"permissions": ["core.read"], "verified": true}'
     extraClaims: '{"permissions": ["core.read", "core.play"], "verified": false}'
     protectedClaims: "permissions,verified"
+    # Extra post-login OIDC redirect targets (comma separated) for third-party
+    # clients. The kyoo app scheme, your `address` origin, and loopback addresses
+    # are always allowed. Each entry is a web origin (https://app.example.com) or
+    # a bare custom scheme (myapp).
+    extraOidcRedirectUrls: ""
 
     # Providing a private key is optional, one will be generated at startup
     privatekey:
