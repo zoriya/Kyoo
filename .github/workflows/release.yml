@@ -1,12 +1,14 @@
 name: Release
 on:
-  push:
-    tags:
-      - v*
+  release:
+    types: [created]
+
+permissions:
+  contents: write
 
 jobs:
-  update:
-    name: Release
+  artifacts:
+    name: Upload release artifacts
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -14,14 +16,100 @@ jobs:
 
       - name: Set correct versions
         run: |
-          VERSION=${{ github.ref_name }}
+          VERSION=${{ github.event.release.tag_name }}
           VERSION=${VERSION:1} # Remove v prefix
           VERSION=${VERSION%.*} # Remove minor version
           sed "s/edge/$VERSION/" -i docker-compose.yml
 
-      - name: Upload release artifacts
+      - name: Upload artifacts to draft release
         uses: softprops/action-gh-release@v3
         with:
+          draft: true
+          tag_name: ${{ github.event.release.tag_name }}
           files: |
             ./docker-compose.yml
             ./.env.example
+
+  native:
+    name: Expo Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./front
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      # This is required because GHA doesn't support secrets in the `if` condition
+      - name: Check if Expo build is enabled
+        env:
+          IS_SECRET_SET: ${{ env.IS_EXPO_ENABLED == 'true' && 'true' || 'false' }}
+        run: echo "IS_EXPO_ENABLED=${IS_SECRET_SET}" >> "${GITHUB_ENV}"
+
+      - name: Log if Expo build is disabled due to fork
+        if: env.IS_EXPO_ENABLED != 'true'
+        run: |
+          echo "Expo build is disabled for forks. To enable it, add an EXPO_TOKEN secret to this repository. See https://docs.expo.dev/eas-update/github-actions/ for more information."
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        if: env.IS_EXPO_ENABLED == 'true'
+        with:
+          node-version: 24.x
+          cache: yarn
+          cache-dependency-path: front/yarn.lock
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@v9
+        if: env.IS_EXPO_ENABLED == 'true'
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        if: env.IS_EXPO_ENABLED == 'true'
+        run: yarn install --immutable
+
+      - name: Build Mobile Release
+        if: env.IS_EXPO_ENABLED == 'true'
+        run: yarn build:mobile:apk | tee log.txt
+
+      - name: Parse Asset URL
+        id: url
+        if: env.IS_EXPO_ENABLED == 'true'
+        run: |
+          ASSET_URL=$(cat log.txt | jq '.[0].artifacts.buildUrl' -r)
+          echo The android url is $ASSET_URL
+          echo "assetUrl=$ASSET_URL" >> $GITHUB_OUTPUT
+
+      - name: Download APK Asset
+        if: env.IS_EXPO_ENABLED == 'true'
+        run: wget -O kyoo.apk ${{ steps.url.outputs.assetUrl }}
+
+      - uses: actions/upload-artifact@v7
+        if: env.IS_EXPO_ENABLED == 'true'
+        with:
+          name: kyoo.apk
+          path: ./front/kyoo.apk
+
+      - name: Upload APK to draft release
+        uses: softprops/action-gh-release@v3
+        if: env.IS_EXPO_ENABLED == 'true'
+        with:
+          draft: true
+          tag_name: ${{ github.event.release.tag_name }}
+          files: ./front/kyoo.apk
+
+  publish:
+    name: Publish release
+    runs-on: ubuntu-latest
+    needs: [artifacts, native]
+    # Publish once every asset is attached. `always()` lets this run even when the
+    # native job is skipped (e.g. forks without EXPO_TOKEN); we only block on failures.
+    if: always() && needs.artifacts.result == 'success' && needs.native.result != 'failure'
+    steps:
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit ${{ github.event.release.tag_name }} --draft=false --repo ${{ github.repository }}
