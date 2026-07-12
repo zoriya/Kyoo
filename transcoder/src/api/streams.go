@@ -187,16 +187,31 @@ func (h *shandler) GetVideoSegment(c *echo.Context) error {
 	if err != nil {
 		return err
 	}
+	path, sha, err := getPath(c)
+	if err != nil {
+		return err
+	}
+
+	if c.Param("chunk") == InitSegmentName {
+		ret, err := h.transcoder.GetVideoInit(
+			c.Request().Context(),
+			path,
+			uint32(video),
+			quality,
+			sha,
+		)
+		if err != nil {
+			return err
+		}
+		return c.File(strings.TrimLeft(ret, "/"))
+	}
+
 	segment, err := parseSegment(c.Param("chunk"))
 	if err != nil {
 		return err
 	}
-	client, err := getClientId(c)
-	if err != nil {
-		return err
-	}
 	profileId, sessionId := getIdentity(c)
-	path, sha, err := getPath(c)
+	client, err := getClientId(c)
 	if err != nil {
 		return err
 	}
@@ -235,16 +250,31 @@ func (h *shandler) GetAudioSegment(c *echo.Context) error {
 	if err != nil {
 		return err
 	}
+	path, sha, err := getPath(c)
+	if err != nil {
+		return err
+	}
+
+	if c.Param("chunk") == InitSegmentName {
+		ret, err := h.transcoder.GetAudioInit(
+			c.Request().Context(),
+			path,
+			uint32(audio),
+			quality,
+			sha,
+		)
+		if err != nil {
+			return err
+		}
+		return c.File(strings.TrimLeft(ret, "/"))
+	}
+
 	segment, err := parseSegment(c.Param("chunk"))
 	if err != nil {
 		return err
 	}
-	client, err := getClientId(c)
-	if err != nil {
-		return err
-	}
 	profileId, sessionId := getIdentity(c)
-	path, sha, err := getPath(c)
+	client, err := getClientId(c)
 	if err != nil {
 		return err
 	}
@@ -312,9 +342,11 @@ func normalizeOptionalId(value any) *string {
 	return &id
 }
 
+const InitSegmentName = "init.mp4"
+
 func parseSegment(segment string) (int32, error) {
 	var ret int32
-	_, err := fmt.Sscanf(segment, "segment-%d.ts", &ret)
+	_, err := fmt.Sscanf(segment, "segment-%d.mp4", &ret)
 	if err != nil {
 		return 0, echo.NewHTTPError(http.StatusBadRequest, "Could not parse segment.")
 	}

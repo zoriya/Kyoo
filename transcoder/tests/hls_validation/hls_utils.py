@@ -293,6 +293,98 @@ def probe_segment_timeline(
     raise AssertionError(f"ffprobe could not decode media packets for {segment_url}")
 
 
+def fetch_segment_bytes(
+    url: str,
+    timeout_seconds: float,
+    byte_cache: ByteCache,
+    headers: dict[str, str] | None = None,
+    retries: int = 2,
+    retry_delay_seconds: float = 0.7,
+) -> bytes:
+    last_err: Exception | None = None
+    for attempt in range(retries + 1):
+        try:
+            return byte_cache.get(url, timeout_seconds, headers=headers)
+        except (TimeoutError, URLError, HTTPError) as err:
+            last_err = err
+            if attempt == retries:
+                break
+            time.sleep(retry_delay_seconds * (attempt + 1))
+    raise AssertionError(f"Failed to fetch after retries: {url} ({last_err})")
+
+
+def iter_boxes(data: bytes, start: int = 0, end: int | None = None):
+    """Yield (type, box_start, header_len, total_size) for each top-level ISO-BMFF
+    box within [start, end). Does not descend into containers."""
+    if end is None:
+        end = len(data)
+    i = start
+    while i + 8 <= end:
+        size = int.from_bytes(data[i : i + 4], "big")
+        btype = data[i + 4 : i + 8]
+        header = 8
+        if size == 1:
+            if i + 16 > end:
+                break
+            size = int.from_bytes(data[i + 8 : i + 16], "big")
+            header = 16
+        elif size == 0:
+            size = end - i
+        if size < header or i + size > end:
+            break
+        yield btype, i, header, size
+        i += size
+
+
+def descend_box(
+    data: bytes, path: list[bytes], start: int = 0, end: int | None = None
+) -> tuple[int, int] | None:
+    """Walk a container path (e.g. [b"moov", b"trak", b"mdia", b"mdhd"]) and return
+    the (payload_start, payload_end) of the first matching leaf, or None."""
+    rng = (start, len(data) if end is None else end)
+    for want in path:
+        found = None
+        for btype, off, hdr, size in iter_boxes(data, rng[0], rng[1]):
+            if btype == want:
+                found = (off + hdr, off + size)
+                break
+        if found is None:
+            return None
+        rng = found
+    return rng
+
+
+def read_init_timescale(init_bytes: bytes) -> int:
+    """Read the media (mdhd) timescale from an fMP4 init segment."""
+    rng = descend_box(init_bytes, [b"moov", b"trak", b"mdia", b"mdhd"])
+    if rng is None:
+        raise AssertionError("init segment has no moov/trak/mdia/mdhd")
+    p = rng[0]
+    version = init_bytes[p]
+    # payload: version(1) flags(3) then creation/modification (4 or 8 each) then timescale(4)
+    ts_off = p + 4 + (16 if version == 1 else 8)
+    return int.from_bytes(init_bytes[ts_off : ts_off + 4], "big")
+
+
+def read_fragment_base_decode_times(segment_bytes: bytes) -> list[int]:
+    """Return the tfdt baseMediaDecodeTime of every moof fragment in a media
+    segment, in file order."""
+    out: list[int] = []
+    for btype, off, hdr, size in iter_boxes(segment_bytes):
+        if btype != b"moof":
+            continue
+        rng = descend_box(segment_bytes, [b"traf", b"tfdt"], off + hdr, off + size)
+        if rng is None:
+            continue
+        p = rng[0]
+        version = segment_bytes[p]
+        if version == 1:
+            out.append(int.from_bytes(segment_bytes[p + 4 : p + 12], "big"))
+        else:
+            out.append(int.from_bytes(segment_bytes[p + 4 : p + 8], "big"))
+    return out
+
+
 def assert_no_large_gaps_or_overlaps(
     timelines: Iterable[SegmentTimeline],
     gap_tolerance_seconds: float,

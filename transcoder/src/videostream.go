@@ -33,7 +33,7 @@ func (t *Transcoder) NewVideoStream(ctx context.Context, file *FileStream, idx u
 		return nil, fmt.Errorf("no video track with index %d", idx)
 	}
 
-	NewStream(file, keyframes, ret, &ret.Stream)
+	NewStream(ctx, file, keyframes, ret, &ret.Stream)
 	return ret, nil
 }
 
@@ -45,7 +45,16 @@ func (vs *VideoStream) getFlags() Flags {
 }
 
 func (vs *VideoStream) getOutPath(encoder_id int) string {
-	return fmt.Sprintf("%s/segment-%s-%d-%%d.ts", vs.file.Out, vs.quality, encoder_id)
+	return fmt.Sprintf(
+		"%s/segment-%s-%d-%%d.mp4",
+		vs.file.Out,
+		vs.quality,
+		encoder_id,
+	)
+}
+
+func (vs *VideoStream) getInitPath(encoder_id int) string {
+	return fmt.Sprintf("%s/init-%s-%d.mp4", vs.file.Out, vs.quality, encoder_id)
 }
 
 func closestMultiple(n int32, x int32) int32 {

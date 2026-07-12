@@ -286,6 +286,15 @@ func (fs *FileStream) GetVideoSegment(ctx context.Context, idx uint32, quality V
 	return stream.GetSegment(ctx, segment)
 }
 
+func (fs *FileStream) GetVideoInit(ctx context.Context, idx uint32, quality VideoQuality) (string, error) {
+	ctx = context.WithoutCancel(ctx)
+	stream, err := fs.getVideoStream(ctx, idx, quality)
+	if err != nil {
+		return "", err
+	}
+	return stream.GetInit(ctx)
+}
+
 func (fs *FileStream) getAudioStream(ctx context.Context, idx uint32, quality AudioQuality) (*AudioStream, error) {
 	ctx = context.WithoutCancel(ctx)
 	var createErr error
@@ -325,6 +334,15 @@ func (fs *FileStream) GetAudioSegment(ctx context.Context, idx uint32, quality A
 		return "", err
 	}
 	return stream.GetSegment(ctx, segment)
+}
+
+func (fs *FileStream) GetAudioInit(ctx context.Context, idx uint32, quality AudioQuality) (string, error) {
+	ctx = context.WithoutCancel(ctx)
+	stream, err := fs.getAudioStream(ctx, idx, quality)
+	if err != nil {
+		return "", err
+	}
+	return stream.GetInit(ctx)
 }
 
 func matchAudioQuality(q VideoQuality) AudioQuality {
