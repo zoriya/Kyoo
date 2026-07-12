@@ -284,12 +284,24 @@ func LoadConfiguration(ctx context.Context, db *dbc.Queries) (*Configuration, er
 		if provider.Name == "" {
 			provider.Name = name
 		}
-		if provider.ClientId == "" ||
-			provider.Secret == "" ||
-			provider.Authorization == "" ||
-			provider.Token == "" ||
-			provider.Profile == "" {
-			return nil, fmt.Errorf("invalid oidc configuration for provider %s, missing required values", providerId)
+		var missing []string
+		if provider.ClientId == "" {
+			missing = append(missing, fmt.Sprintf("OIDC_%s_CLIENTID", name))
+		}
+		if provider.Secret == "" {
+			missing = append(missing, fmt.Sprintf("OIDC_%s_SECRET", name))
+		}
+		if provider.Authorization == "" {
+			missing = append(missing, fmt.Sprintf("OIDC_%s_AUTHORIZATION", name))
+		}
+		if provider.Token == "" {
+			missing = append(missing, fmt.Sprintf("OIDC_%s_TOKEN", name))
+		}
+		if provider.Profile == "" {
+			missing = append(missing, fmt.Sprintf("OIDC_%s_PROFILE", name))
+		}
+		if len(missing) > 0 {
+			return nil, fmt.Errorf("invalid oidc configuration for provider %s, missing required values: %s", providerId, strings.Join(missing, ", "))
 		}
 		if provider.Scope == "" {
 			provider.Scope = "openid profile email"
