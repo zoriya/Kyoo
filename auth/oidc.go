@@ -34,6 +34,31 @@ func (h *Handler) getOidcProvider(provider string) (OidcProviderConfig, error) {
 	return p, nil
 }
 
+func (h *Handler) isAllowedRedirectUrl(redirectURL string) bool {
+	u, err := url.Parse(redirectURL)
+	if err != nil || u.Scheme == "" {
+		return false
+	}
+
+	// Loopback (RFC 8252) is always allowed: native/CLI apps bind an ephemeral port.
+	scheme, host := strings.ToLower(u.Scheme), strings.ToLower(u.Hostname())
+	if (scheme == "http" || scheme == "https") &&
+		(host == "127.0.0.1" || host == "::1" || host == "localhost") {
+		return true
+	}
+
+	for _, rule := range h.config.OidcRedirectUrls {
+		if !strings.EqualFold(u.Scheme, rule.Scheme) {
+			continue
+		}
+		// Empty host: custom-scheme native app. Else require an exact origin match.
+		if rule.Host == "" || strings.EqualFold(u.Host, rule.Host) {
+			return true
+		}
+	}
+	return false
+}
+
 // @Summary      OIDC login
 // @Description  Start an OIDC login with a provider.
 // @Tags         oidc
@@ -55,6 +80,9 @@ func (h *Handler) OidcLogin(c *echo.Context) error {
 	redirectURL := c.QueryParam("redirectUrl")
 	if redirectURL == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "Missing redirectUrl")
+	}
+	if !h.isAllowedRedirectUrl(redirectURL) {
+		return echo.NewHTTPError(http.StatusBadRequest, "Unauthorized redirectUrl, ask your server admin to whitelist it.")
 	}
 
 	opaque := make([]byte, 64)

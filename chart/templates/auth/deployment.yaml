@@ -62,6 +62,9 @@ spec:
               value: {{ .Values.kyoo.auth.protectedClaims | quote }}
             - name: PUBLIC_URL
               value: {{ .Values.kyoo.address | quote }}
+            # Always allow the kyoo app scheme, on top of any user-provided targets.
+            - name: EXTRA_OIDC_REDIRECT_URLS
+              value: {{ printf "kyoo,%s" .Values.kyoo.auth.extraOidcRedirectUrls | trimSuffix "," | quote }}
             - name: KEIBI_APIKEY_SCANNER
               valueFrom:
                 secretKeyRef:

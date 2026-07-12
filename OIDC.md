@@ -30,6 +30,35 @@ OIDC_<name>_AUTHMETHOD=ClientSecretBasic
 - `OIDC_<name>_SCOPE` is the scope of the OIDC provider. This is a space-separated list of scopes.
 - `OIDC_<name>_AUTHMETHOD` is the authentication method of the OIDC provider. This can be `ClientSecretBasic` or `ClientSecretPost`.
 
+## Third-party clients (redirect allowlist)
+
+After a successful OIDC login, Kyoo redirects the browser back to a client with a
+one-use login token appended to the URL. To prevent that token from being handed
+to an attacker-controlled destination, Kyoo only redirects to registered targets.
+
+The following targets are always allowed, with no configuration:
+
+- The official web app — your `PUBLIC_URL` origin.
+- The official mobile app — the `kyoo://` scheme.
+- Loopback addresses (`http://127.0.0.1`, `http://localhost`, `http://[::1]`) on
+  any port, for native/CLI apps that bind an ephemeral local port (RFC 8252).
+
+To let any other third-party client complete OIDC login, register its redirect
+target(s) with `EXTRA_OIDC_REDIRECT_URLS` (comma separated):
+
+```env
+EXTRA_OIDC_REDIRECT_URLS=https://app.example.com,myapp
+```
+
+Each entry is one of:
+
+- **A web origin** (`https://app.example.com`) — matched exactly by scheme, host,
+  and port. Include the port if the client uses a non-default one.
+- **A bare custom scheme** (`myapp`) — matched by scheme only, for native apps
+  that own a URL scheme (e.g. `myapp://oidc-callback`).
+
+Any redirect target not covered by these rules is rejected with `400`.
+
 ## Example
 
 ### Google OIDC

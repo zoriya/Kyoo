@@ -62,6 +62,9 @@ services:
         condition: service_healthy
     ports:
       - "4568:4568"
+    environment:
+      # Always allow the kyoo app scheme, on top of any user-provided targets.
+      - EXTRA_OIDC_REDIRECT_URLS=kyoo,${EXTRA_OIDC_REDIRECT_URLS:-}
     env_file:
       - ./.env
     volumes:
