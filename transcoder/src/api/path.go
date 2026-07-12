@@ -30,8 +30,9 @@ func getPathS(key string) (string, string, error) {
 	if !strings.HasPrefix(path, src.Settings.SafePath+"/") {
 		return "", "", echo.NewHTTPError(http.StatusBadRequest, "Selected path is not marked as safe.")
 	}
-	if !strings.HasPrefix(mime.TypeByExtension(filepath.Ext(path)), "video/") {
-		return "", "", echo.NewHTTPError(http.StatusBadRequest, "Selected path is not a video file.")
+	mimeType := mime.TypeByExtension(filepath.Ext(path))
+	if !strings.HasPrefix(mimeType, "video/") && !strings.HasPrefix(mimeType, "audio/") {
+		return "", "", echo.NewHTTPError(http.StatusBadRequest, "Selected path is not a video or audio file.")
 	}
 	hash, err := getHash(path)
 	if err != nil {
