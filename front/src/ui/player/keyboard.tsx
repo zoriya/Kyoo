@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Platform } from "react-native";
-import type { VideoPlayer } from "react-native-video";
+import { type OmniPlayer, usePlayer } from "react-native-omni";
 import type { Subtitle } from "~/models";
 import { toggleFullscreen } from "./controls/misc";
 
@@ -14,7 +14,7 @@ type Action =
 	| { type: "volume"; value: number }
 	| { type: "subtitle"; subtitles: Subtitle[]; fonts: string[] };
 
-const reducer = (player: VideoPlayer, action: Action) => {
+const reducer = (player: OmniPlayer, action: Action) => {
 	switch (action.type) {
 		case "play":
 			if (player.isPlaying) player.pause();
@@ -30,13 +30,13 @@ const reducer = (player: VideoPlayer, action: Action) => {
 			player.seekBy(action.value);
 			break;
 		case "seekTo":
-			player.seekTo(action.value);
+			player.currentTime = action.value;
 			break;
 		case "seekPercent":
-			player.seekTo((player.duration * action.value) / 100);
+			player.currentTime = (player.duration * action.value) / 100;
 			break;
 		case "volume":
-			player.volume = Math.max(0, Math.min(player.volume + action.value, 100));
+			player.volume = Math.max(0, Math.min(player.volume + action.value, 1));
 			break;
 		// case "subtitle": {
 		// 	const subtitle = get(subtitleAtom);
@@ -55,12 +55,12 @@ const reducer = (player: VideoPlayer, action: Action) => {
 };
 
 export const useKeyboard = (
-	player: VideoPlayer,
 	playPrev: () => void,
 	playNext: () => void,
 	// subtitles?: Subtitle[],
 	// fonts?: string[],
 ) => {
+	const player = usePlayer();
 	useEffect(() => {
 		if (Platform.OS !== "web") return;
 		const handler = (event: KeyboardEvent) => {

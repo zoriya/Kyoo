@@ -7,26 +7,22 @@ import {
 	View,
 	type ViewProps,
 } from "react-native";
-import { useEvent, type VideoPlayer } from "react-native-video";
+import { usePlayer, usePlayerState } from "react-native-omni";
 import { isTouchDevice } from "~/primitives";
 import { cn } from "~/utils";
 import { toggleFullscreen } from "./misc";
 
 export const TouchControls = ({
-	player,
 	children,
 	forceShow = false,
 	onVisibilityChange,
 	...props
 }: {
-	player: VideoPlayer;
 	forceShow?: boolean;
 	onVisibilityChange?: (isVisible: boolean) => void;
 } & ViewProps) => {
-	const [playing, setPlay] = useState(player.isPlaying);
-	useEvent(player, "onPlaybackStateChange", (status) => {
-		setPlay(status.isPlaying);
-	});
+	const player = usePlayer();
+	const playing = usePlayerState("isPlaying");
 
 	const [_show, setShow] = useState(false);
 	const hideTimeout = useRef<NodeJS.Timeout | number | null>(null);

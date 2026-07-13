@@ -1,7 +1,6 @@
 import { useCallback, useState } from "react";
 import type { ViewProps } from "react-native";
 import { View } from "react-native";
-import type { VideoPlayer } from "react-native-video";
 import type { Chapter, KImage, Show } from "~/models";
 import { Back } from "./back";
 import { BottomControls } from "./bottom-controls";
@@ -10,7 +9,6 @@ import { SkipChapterButton } from "./skip-chapter";
 import { TouchControls } from "./touch";
 
 export const Controls = ({
-	player,
 	showHref,
 	name,
 	poster,
@@ -24,7 +22,6 @@ export const Controls = ({
 	onOpenEntriesMenu,
 	forceShow,
 }: {
-	player: VideoPlayer;
 	showHref?: string;
 	name?: string;
 	poster?: KImage | null;
@@ -60,7 +57,6 @@ export const Controls = ({
 	return (
 		<View className="absolute inset-0">
 			<TouchControls
-				player={player}
 				forceShow={hover || menuOpened || forceShow}
 				onVisibilityChange={setControlsVisible}
 				className="absolute inset-0"
@@ -74,13 +70,11 @@ export const Controls = ({
 					{...hoverControls}
 				/>
 				<MiddleControls
-					player={player}
 					playPrev={playPrev}
 					playNext={playNext}
 					className="touch:flex hidden"
 				/>
 				<BottomControls
-					player={player}
 					name={subName}
 					poster={poster}
 					chapters={chapters}
@@ -93,7 +87,6 @@ export const Controls = ({
 				/>
 			</TouchControls>
 			<SkipChapterButton
-				player={player}
 				chapters={chapters}
 				isVisible={controlsVisible}
 				seekEnd={seekEnd}

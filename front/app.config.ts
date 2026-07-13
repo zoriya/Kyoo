@@ -59,17 +59,7 @@ export const expo: ExpoConfig = {
 				backgroundColor: "#6b00b8",
 			},
 		],
-		[
-			"react-native-video",
-			{
-				enableAndroidPictureInPicture: true,
-				enableBackgroundAudio: true,
-				androidExtensions: {
-					useExoplayerDash: true,
-					useExoplayerHls: true,
-				},
-			},
-		],
+		"react-native-omni",
 		[
 			"react-native-localization-settings",
 			{

@@ -1,27 +1,6 @@
 import { glob, readdir } from "node:fs/promises";
 import path from "node:path";
 
-async function jassub() {
-	const srcDir = new URL("../node_modules/jassub/dist/", import.meta.url);
-	const destDir = new URL("../public/jassub/", import.meta.url);
-
-	const files = await readdir(srcDir);
-	for (const file of files) {
-		const src = await Bun.file(new URL(file, srcDir)).arrayBuffer();
-		await Bun.write(new URL(file, destDir), src);
-	}
-}
-
-async function pgs() {
-	const src = await Bun.file(
-		new URL("../node_modules/libpgs/dist/libpgs.worker.js", import.meta.url),
-	).arrayBuffer();
-	await Bun.write(
-		new URL("../public/pgs/libpgs.worker.js", import.meta.url),
-		src,
-	);
-}
-
 async function fonts() {
 	const srcDir = new URL(
 		"../node_modules/@expo-google-fonts/",
@@ -74,7 +53,5 @@ export const supportedLanguages = [
 	);
 }
 
-await jassub();
-await pgs();
 await fonts();
 await translations();

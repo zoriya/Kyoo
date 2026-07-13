@@ -9,7 +9,6 @@ import {
 	View,
 	type ViewProps,
 } from "react-native";
-import type { VideoPlayer } from "react-native-video";
 import type { Chapter, KImage } from "~/models";
 import {
 	H2,
@@ -26,7 +25,6 @@ import { ProgressBar, ProgressText } from "./progress";
 import { AudioMenu, QualityMenu, SubtitleMenu, VideoMenu } from "./tracks-menu";
 
 export const BottomControls = ({
-	player,
 	poster,
 	name,
 	chapters,
@@ -37,7 +35,6 @@ export const BottomControls = ({
 	className,
 	...props
 }: {
-	player: VideoPlayer;
 	poster?: KImage | null;
 	name?: string;
 	chapters: Chapter[];
@@ -78,17 +75,11 @@ export const BottomControls = ({
 					) : (
 						<Skeleton className="h-8 w-1/5" />
 					))}
-				<ProgressBar
-					player={player}
-					chapters={chapters}
-					seek={seek}
-					setSeek={setSeek}
-				/>
+				<ProgressBar chapters={chapters} seek={seek} setSeek={setSeek} />
 				{bottomSeek ? (
-					<BottomScrubber player={player} seek={seek} chapters={chapters} />
+					<BottomScrubber seek={seek} chapters={chapters} />
 				) : (
 					<ControlButtons
-						player={player}
 						playPrev={playPrev}
 						playNext={playNext}
 						setMenu={setMenu}
@@ -101,7 +92,6 @@ export const BottomControls = ({
 };
 
 const ControlButtons = ({
-	player,
 	playPrev,
 	playNext,
 	setMenu,
@@ -109,7 +99,6 @@ const ControlButtons = ({
 	className,
 	...props
 }: {
-	player: VideoPlayer;
 	playPrev: (() => boolean) | null;
 	playNext: (() => boolean) | null;
 	setMenu: (isOpen: boolean) => void;
@@ -146,7 +135,6 @@ const ControlButtons = ({
 						/>
 					)}
 					<PlayButton
-						player={player}
 						className="mr-4"
 						iconClassName="fill-slate-200 dark:fill-slate-200"
 					/>
@@ -160,16 +148,10 @@ const ControlButtons = ({
 						/>
 					)}
 					{Platform.OS === "web" && (
-						<VolumeSlider
-							player={player}
-							iconClassName="fill-slate-200 dark:fill-slate-200"
-						/>
+						<VolumeSlider iconClassName="fill-slate-200 dark:fill-slate-200" />
 					)}
 				</View>
-				<ProgressText
-					player={player}
-					className="mx-2 text-slate-300 dark:text-slate-300"
-				/>
+				<ProgressText className="mx-2 text-slate-300 dark:text-slate-300" />
 			</View>
 			<View className="flex-row">
 				{onOpenEntriesMenu && (
@@ -181,10 +163,10 @@ const ControlButtons = ({
 						{...tooltip(t("player.entry-list"), true)}
 					/>
 				)}
-				<SubtitleMenu player={player} {...menuProps} />
-				<AudioMenu player={player} {...menuProps} />
-				<VideoMenu player={player} {...menuProps} />
-				<QualityMenu player={player} {...menuProps} />
+				<SubtitleMenu {...menuProps} />
+				<AudioMenu {...menuProps} />
+				<VideoMenu {...menuProps} />
+				<QualityMenu {...menuProps} />
 				{Platform.OS === "web" && (
 					<FullscreenButton
 						className="mr-4"

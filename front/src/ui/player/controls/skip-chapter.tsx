@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useEvent, type VideoPlayer } from "react-native-video";
+import { usePlayer, usePlayerState } from "react-native-omni";
 import type { Chapter } from "~/models";
 import { Button, P } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
@@ -9,12 +9,10 @@ import { Info } from "~/ui/info";
 import { cn, useQueryState } from "~/utils";
 
 export const SkipChapterButton = ({
-	player,
 	seekEnd,
 	chapters,
 	isVisible,
 }: {
-	player: VideoPlayer;
 	seekEnd: () => void;
 	chapters: Chapter[];
 	isVisible: boolean;
@@ -25,10 +23,8 @@ export const SkipChapterButton = ({
 	const { data } = useFetch(Info.infoQuery(slug));
 	const lastAutoSkippedChapter = useRef<number | null>(null);
 
-	const [progress, setProgress] = useState(player.currentTime || 0);
-	useEvent(player, "onProgress", ({ currentTime }) => {
-		setProgress(currentTime);
-	});
+	const player = usePlayer();
+	const progress = usePlayerState("currentTime");
 
 	const chapter = chapters.find(
 		(chapter) => chapter.startTime <= progress && progress < chapter.endTime,
@@ -55,7 +51,7 @@ export const SkipChapterButton = ({
 		if (data?.durationSeconds && data.durationSeconds <= chapter.endTime + 3) {
 			return seekEnd();
 		}
-		player.seekTo(chapter.endTime);
+		player.currentTime = chapter.endTime;
 	}, [player, chapter, data?.durationSeconds, seekEnd]);
 
 	useEffect(() => {

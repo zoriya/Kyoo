@@ -2,14 +2,9 @@ import ClosedCaption from "@material-symbols/svg-400/rounded/closed_caption-fill
 import MusicNote from "@material-symbols/svg-400/rounded/music_note-fill.svg";
 import SettingsIcon from "@material-symbols/svg-400/rounded/settings-fill.svg";
 import VideoSettings from "@material-symbols/svg-400/rounded/video_settings-fill.svg";
-import {
-	type ComponentProps,
-	createContext,
-	useContext,
-	useState,
-} from "react";
+import { type ComponentProps, createContext, useContext } from "react";
 import { useTranslation } from "react-i18next";
-import { useEvent, type VideoPlayer } from "react-native-video";
+import { useEvent, usePlayer } from "react-native-omni";
 import { IconButton, Menu, tooltip } from "~/primitives";
 import { useFetch } from "~/query";
 import { useDisplayName, useSubtitleName } from "~/track-utils";
@@ -18,23 +13,14 @@ import { useForceRerender, useQueryState } from "~/utils";
 
 type MenuProps = ComponentProps<typeof Menu<ComponentProps<typeof IconButton>>>;
 
-export const SubtitleMenu = ({
-	player,
-	...props
-}: {
-	player: VideoPlayer;
-} & Partial<MenuProps>) => {
+export const SubtitleMenu = (props: Partial<MenuProps>) => {
 	const { t } = useTranslation();
 	const getDisplayName = useSubtitleName();
 
-	const [selectedIdx, setSelectedIdx] = useState(
-		player.getAvailableTextTracks().findIndex((x) => x.selected),
-	);
-	useEvent(player, "onTrackChange", () => {
-		setSelectedIdx(
-			player.getAvailableTextTracks().findIndex((x) => x.selected),
-		);
-	});
+	const player = usePlayer();
+	const rerender = useForceRerender();
+	useEvent("subtitleChange", rerender);
+	const selectedIdx = player.subtitles.findIndex((x) => x.selected);
 
 	const [slug] = useQueryState<string>("slug", undefined!);
 	const { data } = useFetch(Info.infoQuery(slug));
@@ -51,33 +37,29 @@ export const SubtitleMenu = ({
 			<Menu.Item
 				label={t("player.subtitle-none")}
 				selected={selectedIdx === -1}
-				onSelect={() => player.selectTextTrack(null)}
+				onSelect={() => player.selectSubtitle(undefined)}
 			/>
 			{data?.subtitles.map((x, i) => (
 				<Menu.Item
 					key={x.index ?? x.link}
 					label={getDisplayName(x)}
 					selected={i === selectedIdx}
-					onSelect={() =>
-						player.selectTextTrack(player.getAvailableTextTracks()[i])
-					}
+					onSelect={() => player.selectSubtitle(player.subtitles[i])}
 				/>
 			))}
 		</Menu>
 	);
 };
 
-export const AudioMenu = ({
-	player,
-	...props
-}: { player: VideoPlayer } & Partial<MenuProps>) => {
+export const AudioMenu = (props: Partial<MenuProps>) => {
 	const { t } = useTranslation();
 	const getDisplayName = useDisplayName();
 
+	const player = usePlayer();
 	const rerender = useForceRerender();
-	useEvent(player, "onAudioTrackChange", rerender);
+	useEvent("audioTrackChange", rerender);
 
-	const tracks = player.getAvailableAudioTracks();
+	const tracks = player.audios;
 	if (tracks.length <= 1) return null;
 
 	return (
@@ -92,26 +74,22 @@ export const AudioMenu = ({
 					key={x.id}
 					label={getDisplayName({ title: x.label, language: x.language })}
 					selected={x.selected}
-					onSelect={() => player.selectAudioTrack(x)}
+					onSelect={() => player.selectAudio(x)}
 				/>
 			))}
 		</Menu>
 	);
 };
 
-export const VideoMenu = ({
-	player,
-	...props
-}: {
-	player: VideoPlayer;
-} & Partial<MenuProps>) => {
+export const VideoMenu = (props: Partial<MenuProps>) => {
 	const { t } = useTranslation();
 	const getDisplayName = useDisplayName();
 
+	const player = usePlayer();
 	const rerender = useForceRerender();
-	useEvent(player, "onVideoTrackChange", rerender);
+	useEvent("videoTrackChange", rerender);
 
-	const tracks = player.getAvailableVideoTracks();
+	const tracks = player.videos;
 	if (tracks.length <= 1) return null;
 
 	return (
@@ -126,7 +104,7 @@ export const VideoMenu = ({
 					key={x.id}
 					label={getDisplayName({ title: x.label, language: x.language })}
 					selected={x.selected}
-					onSelect={() => player.selectVideoTrack(x)}
+					onSelect={() => player.selectVideo(x)}
 				/>
 			))}
 		</Menu>
@@ -137,19 +115,17 @@ export const PlayModeContext = createContext<
 	["direct" | "hls", (val: "direct" | "hls") => void]
 >(null!);
 
-export const QualityMenu = ({
-	player,
-	...props
-}: { player: VideoPlayer } & Partial<MenuProps>) => {
+export const QualityMenu = (props: Partial<MenuProps>) => {
 	const { t } = useTranslation();
 	const [playMode, setPlayMode] = useContext(PlayModeContext);
+	const player = usePlayer();
 	const rerender = useForceRerender();
 
-	useEvent(player, "onQualityChange", rerender);
+	useEvent("renditionChange", rerender);
 
-	const lvls = player.getAvailableQualities();
-	const current = player.currentQuality;
-	const auto = player.autoQualityEnabled;
+	const lvls = player.rendition;
+	const current = player.rendition.find((x) => x.selected);
+	const auto = player.isAutoQuality;
 
 	return (
 		<Menu
@@ -172,7 +148,7 @@ export const QualityMenu = ({
 				selected={auto && playMode === "hls"}
 				onSelect={() => {
 					setPlayMode("hls");
-					player.selectQuality(null);
+					player.selectRendition(undefined);
 				}}
 			/>
 			{lvls
@@ -188,7 +164,7 @@ export const QualityMenu = ({
 						selected={x.selected && !auto}
 						onSelect={() => {
 							setPlayMode("hls");
-							player.selectQuality(x);
+							player.selectRendition(x);
 						}}
 					/>
 				))
