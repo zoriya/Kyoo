@@ -5,7 +5,7 @@ go 1.26.0
 require (
 	github.com/Eyevinn/mp4ff v0.52.0
 	github.com/MicahParks/keyfunc/v3 v3.8.0
-	github.com/asticode/go-astisub v0.41.0
+	github.com/asticode/go-astisub v0.42.0
 	github.com/aws/aws-sdk-go-v2 v1.42.1
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.105.0
 	github.com/disintegration/imaging v1.6.2
