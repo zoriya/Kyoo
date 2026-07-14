@@ -61,9 +61,12 @@ func (s *MetadataService) GetSubtitle(
 	name string,
 ) (io.ReadCloser, error) {
 	// name is either `{index}.{extension}` or `ext-{filename}.{extension}`
-	if strings.HasPrefix(name, "ext") {
-		// external subtitle already available on the fs
-		return os.Open(path)
+	if filename, ok := strings.CutPrefix(name, "ext-"); ok {
+		subPath := filepath.Join(filepath.Dir(path), filename)
+		if !isSubtitleFile(subPath) {
+			return nil, fmt.Errorf("not a subtitle file: %q", filename)
+		}
+		return os.Open(subPath)
 	}
 
 	_, err := s.extractLock.WaitFor(sha)
