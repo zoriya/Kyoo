@@ -1,3 +1,4 @@
+/// <reference types="bun" />
 import { glob, readdir } from "node:fs/promises";
 import path from "node:path";
 
@@ -12,6 +13,44 @@ async function fonts() {
 		const src = await Bun.file(file).arrayBuffer();
 		await Bun.write(new URL(path.basename(file), destDir), src);
 	}
+}
+
+async function jassub() {
+	const srcDir = new URL("../node_modules/jassub/dist/", import.meta.url);
+	const destDir = new URL("../public/jassub/", import.meta.url);
+
+	const build = await Bun.build({
+		entrypoints: [new URL("worker/worker.js", srcDir).pathname],
+		target: "browser",
+		format: "esm",
+	});
+	if (!build.success)
+		throw new AggregateError(build.logs, "failed to bundle jassub worker");
+	await Bun.write(
+		new URL("jassub-worker.js", destDir),
+		await build.outputs[0].text(),
+	);
+
+	for (const file of [
+		"wasm/jassub-worker.wasm",
+		"wasm/jassub-worker-modern.wasm",
+		"default.woff2",
+	]) {
+		await Bun.write(
+			new URL(path.basename(file), destDir),
+			Bun.file(new URL(file, srcDir)),
+		);
+	}
+}
+
+async function libpgs() {
+	const srcDir = new URL("../node_modules/libpgs/dist/", import.meta.url);
+	const destDir = new URL("../public/libpgs/", import.meta.url);
+
+	await Bun.write(
+		new URL("libpgs.worker.js", destDir),
+		Bun.file(new URL("libpgs.worker.js", srcDir)),
+	);
 }
 
 async function translations() {
@@ -54,4 +93,6 @@ export const supportedLanguages = [
 }
 
 await fonts();
+await jassub();
+await libpgs();
 await translations();

@@ -25,6 +25,12 @@ server {
   root /usr/share/nginx/html;
   index index.html;
 
+  # jassub's wasm is multithreaded (SharedArrayBuffer) and needs the page to be
+  # cross-origin isolated. `credentialless` keeps cross-origin video/subtitle
+  # requests working without CORP headers on every remote asset.
+  add_header Cross-Origin-Opener-Policy same-origin;
+  add_header Cross-Origin-Embedder-Policy credentialless;
+
   location / {
     try_files \$uri \$uri/ /index.html;
   }

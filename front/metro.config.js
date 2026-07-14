@@ -15,6 +15,17 @@ module.exports = (() => {
 		sourceExts: [...resolver.sourceExts, "svg"],
 	};
 
+	// jassub's wasm is multithreaded (SharedArrayBuffer), which requires the page
+	// to be cross-origin isolated. Mirror the production headers on the dev server.
+	config.server = {
+		...config.server,
+		enhanceMiddleware: (middleware) => (req, res, next) => {
+			res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+			res.setHeader("Cross-Origin-Embedder-Policy", "credentialless");
+			return middleware(req, res, next);
+		},
+	};
+
 	return withUniwindConfig(config, {
 		cssEntryFile: "./src/global.css",
 	});

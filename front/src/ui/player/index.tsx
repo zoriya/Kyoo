@@ -229,7 +229,20 @@ const PlayerContent = ({
 
 	return (
 		<>
-			<OmniView autoplay autoPip style={StyleSheet.absoluteFill} />
+			<OmniView
+				autoplay
+				autoPip
+				style={StyleSheet.absoluteFill}
+				subtitleAssets={{
+					jassub: {
+						workerUrl: "/jassub/jassub-worker.js",
+						wasmUrl: "/jassub/jassub-worker.wasm",
+						modernWasmUrl: "/jassub/jassub-worker-modern.wasm",
+						fontUrl: "/jassub/default.woff2",
+					},
+					pgs: { workerUrl: "/libpgs/libpgs.worker.js" },
+				}}
+			/>
 			<LoadingIndicator />
 			<Controls
 				showHref={data?.show?.href}
