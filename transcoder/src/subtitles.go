@@ -17,6 +17,17 @@ import (
 
 var separator = regexp.MustCompile(`[\s.]+`)
 
+// isSubtitleFile reports whether the path has a known subtitle extension.
+func isSubtitleFile(path string) bool {
+	ext := strings.TrimPrefix(strings.ToLower(filepath.Ext(path)), ".")
+	for _, subExt := range SubtitleExtensions {
+		if ext == subExt {
+			return true
+		}
+	}
+	return false
+}
+
 func (mi *MediaInfo) SearchExternalSubtitles() error {
 	base_path := strings.TrimSuffix(mi.Path, filepath.Ext(mi.Path))
 	dir, err := os.ReadDir(filepath.Dir(mi.Path))
@@ -35,7 +46,7 @@ outer:
 			if strings.HasSuffix(match, ext) {
 				link := fmt.Sprintf(
 					"/video/%s/subtitle/ext-%s",
-					base64.RawURLEncoding.EncodeToString([]byte(match)),
+					base64.RawURLEncoding.EncodeToString([]byte(mi.Path)),
 					filepath.Base(match),
 				)
 				sub := Subtitle{
