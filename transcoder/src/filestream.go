@@ -65,16 +65,33 @@ func (t *Transcoder) newFileStream(ctx context.Context, path string, sha string)
 }
 
 func (fs *FileStream) Kill() {
-	fs.videos.lock.Lock()
-	defer fs.videos.lock.Unlock()
-	fs.audios.lock.Lock()
-	defer fs.audios.lock.Unlock()
-
+	// Snapshot the substreams under a brief read lock, then kill them outside the
+	// lock. Killing acquires each substream's head lock, which can be contended;
+	// holding the CMap write locks across those calls would block concurrent
+	// stream creation (GetOrCreate) and status snapshots on this file.
+	fs.videos.lock.RLock()
+	videos := make([]*VideoStream, 0, len(fs.videos.data))
 	for _, s := range fs.videos.data {
-		s.Kill()
+		videos = append(videos, s)
 	}
+	fs.videos.lock.RUnlock()
+
+	fs.audios.lock.RLock()
+	audios := make([]*AudioStream, 0, len(fs.audios.data))
 	for _, s := range fs.audios.data {
-		s.Kill()
+		audios = append(audios, s)
+	}
+	fs.audios.lock.RUnlock()
+
+	for _, s := range videos {
+		if s != nil {
+			s.Kill()
+		}
+	}
+	for _, s := range audios {
+		if s != nil {
+			s.Kill()
+		}
 	}
 }
 

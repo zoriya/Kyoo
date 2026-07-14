@@ -67,6 +67,17 @@ func (t *Tracker) start() {
 	inactive_time := 1 * time.Hour
 	timer := time.After(inactive_time)
 	for {
+		// Serve pending snapshots first so /streams stays responsive even when
+		// clientChan is flooded (a burst of index.m3u8/segment requests). Without
+		// this, select picks between the ready cases uniformly at random and the
+		// snapshot can be starved for the whole burst.
+		select {
+		case reply := <-t.snapshotReq:
+			reply <- t.cloneClients()
+			continue
+		default:
+		}
+
 		select {
 		case info, ok := <-t.transcoder.clientChan:
 			if !ok {
@@ -163,7 +174,7 @@ func (t *Tracker) KillStreamIfDead(sha string, path string) bool {
 	if !ok {
 		return false
 	}
-	stream.Kill()
+	go stream.Kill()
 	go func() {
 		time.Sleep(4 * time.Hour)
 		t.deletedStream <- sha
@@ -183,7 +194,7 @@ func (t *Tracker) DestroyStreamIfOld(sha string) {
 	if !ok {
 		return
 	}
-	stream.Destroy(context.WithoutCancel(context.Background()))
+	go stream.Destroy(context.WithoutCancel(context.Background()))
 }
 
 func (t *Tracker) KillAudioIfDead(sha string, path string, audio AudioKey) bool {
@@ -203,7 +214,7 @@ func (t *Tracker) KillAudioIfDead(sha string, path string, audio AudioKey) bool 
 	if !aok {
 		return false
 	}
-	astream.Kill()
+	go astream.Kill()
 	return true
 }
 
@@ -224,31 +235,41 @@ func (t *Tracker) KillVideoIfDead(sha string, path string, video VideoKey) bool 
 	if !vok {
 		return false
 	}
-	vstream.Kill()
+	go vstream.Kill()
 	return true
 }
 
 func (t *Tracker) KillOrphanedHeads(sha string, video *VideoKey, audio *AudioKey) {
-	stream, ok := t.transcoder.streams.Get(sha)
-	if !ok {
-		return
+	// Snapshot the viewer head positions while we are on the tracker goroutine
+	// (the only writer of t.clients). The lock-heavy part - acquiring each
+	// stream's head lock - is then dispatched so it can't stall the loop.
+	vheads := make([]int32, 0, len(t.clients))
+	aheads := make([]int32, 0, len(t.clients))
+	for _, info := range t.clients {
+		vheads = append(vheads, info.vhead)
+		aheads = append(aheads, info.ahead)
 	}
 
-	if video != nil {
-		vstream, vok := stream.videos.Get(*video)
-		if vok {
-			t.killOrphanedeheads(&vstream.Stream, true)
+	go func() {
+		stream, ok := t.transcoder.streams.Get(sha)
+		if !ok {
+			return
 		}
-	}
-	if audio != nil {
-		astream, aok := stream.audios.Get(*audio)
-		if aok {
-			t.killOrphanedeheads(&astream.Stream, false)
+
+		if video != nil {
+			if vstream, vok := stream.videos.Get(*video); vok {
+				killOrphanedHeads(&vstream.Stream, vheads)
+			}
 		}
-	}
+		if audio != nil {
+			if astream, aok := stream.audios.Get(*audio); aok {
+				killOrphanedHeads(&astream.Stream, aheads)
+			}
+		}
+	}()
 }
 
-func (t *Tracker) killOrphanedeheads(stream *Stream, is_video bool) {
+func killOrphanedHeads(stream *Stream, viewerHeads []int32) {
 	ctx := context.WithoutCancel(context.Background())
 	stream.lock.Lock()
 	defer stream.lock.Unlock()
@@ -259,11 +280,7 @@ func (t *Tracker) killOrphanedeheads(stream *Stream, is_video bool) {
 		}
 
 		distance := int32(99999)
-		for _, info := range t.clients {
-			ihead := info.ahead
-			if is_video {
-				ihead = info.vhead
-			}
+		for _, ihead := range viewerHeads {
 			distance = min(Abs(ihead-head.segment), distance)
 		}
 		if distance > 20 {

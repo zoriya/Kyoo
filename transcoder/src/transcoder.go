@@ -2,6 +2,7 @@ package src
 
 import (
 	"context"
+	"log/slog"
 	"os"
 	"path"
 )
@@ -30,11 +31,25 @@ func NewTranscoder(metadata *MetadataService) (*Transcoder, error) {
 
 	ret := &Transcoder{
 		streams:         NewCMap[string, *FileStream](),
-		clientChan:      make(chan ClientInfo, 10),
+		clientChan:      make(chan ClientInfo, 2048),
 		metadataService: metadata,
 	}
 	ret.tracker = NewTracker(ret)
 	return ret, nil
+}
+
+// track records viewer activity for the tracker goroutine. It is intentionally
+// non-blocking and best-effort: client tracking only drives background cleanup,
+// and every route re-sends fresh info on the next request. Blocking here would
+// couple request latency to the tracker's health - if the tracker ever stalls
+// (e.g. inside a Kill), a blocking send on a full channel would hang every
+// in-flight request (index.m3u8, segments, ...) behind it.
+func (t *Transcoder) track(info ClientInfo) {
+	select {
+	case t.clientChan <- info:
+	default:
+		slog.Warn("client tracking channel full, dropping update", "client", info.client, "sha", info.sha)
+	}
 }
 
 func (t *Transcoder) getFileStream(ctx context.Context, path string, sha string) (*FileStream, error) {
@@ -56,7 +71,7 @@ func (t *Transcoder) GetMaster(ctx context.Context, path string, client string, 
 	if err != nil {
 		return "", err
 	}
-	t.clientChan <- ClientInfo{
+	t.track(ClientInfo{
 		client:    client,
 		profileId: profileId,
 		sessionId: sessionId,
@@ -66,7 +81,7 @@ func (t *Transcoder) GetMaster(ctx context.Context, path string, client string, 
 		audio:     nil,
 		vhead:     -1,
 		ahead:     -1,
-	}
+	})
 	return stream.GetMaster(ctx, client), nil
 }
 
@@ -85,7 +100,7 @@ func (t *Transcoder) GetVideoIndex(
 	if err != nil {
 		return "", err
 	}
-	t.clientChan <- ClientInfo{
+	t.track(ClientInfo{
 		client:    client,
 		profileId: profileId,
 		sessionId: sessionId,
@@ -95,7 +110,7 @@ func (t *Transcoder) GetVideoIndex(
 		audio:     nil,
 		vhead:     -1,
 		ahead:     -1,
-	}
+	})
 	return stream.GetVideoIndex(ctx, video, quality, client)
 }
 
@@ -114,7 +129,7 @@ func (t *Transcoder) GetAudioIndex(
 	if err != nil {
 		return "", err
 	}
-	t.clientChan <- ClientInfo{
+	t.track(ClientInfo{
 		client:    client,
 		profileId: profileId,
 		sessionId: sessionId,
@@ -123,7 +138,7 @@ func (t *Transcoder) GetAudioIndex(
 		audio:     &AudioKey{audio, quality},
 		vhead:     -1,
 		ahead:     -1,
-	}
+	})
 	return stream.GetAudioIndex(ctx, audio, quality, client)
 }
 
@@ -143,7 +158,7 @@ func (t *Transcoder) GetVideoSegment(
 	if err != nil {
 		return "", err
 	}
-	t.clientChan <- ClientInfo{
+	t.track(ClientInfo{
 		client:    client,
 		profileId: profileId,
 		sessionId: sessionId,
@@ -153,7 +168,7 @@ func (t *Transcoder) GetVideoSegment(
 		vhead:     segment,
 		audio:     nil,
 		ahead:     -1,
-	}
+	})
 	return stream.GetVideoSegment(ctx, video, quality, segment)
 }
 
@@ -203,7 +218,7 @@ func (t *Transcoder) GetAudioSegment(
 	if err != nil {
 		return "", err
 	}
-	t.clientChan <- ClientInfo{
+	t.track(ClientInfo{
 		client:    client,
 		profileId: profileId,
 		sessionId: sessionId,
@@ -212,6 +227,6 @@ func (t *Transcoder) GetAudioSegment(
 		audio:     &AudioKey{audio, quality},
 		ahead:     segment,
 		vhead:     -1,
-	}
+	})
 	return stream.GetAudioSegment(ctx, audio, quality, segment)
 }
