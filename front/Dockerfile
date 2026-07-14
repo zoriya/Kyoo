@@ -7,6 +7,7 @@ RUN apt update && apt install -y nodejs && rm /usr/local/bun-node-fallback-bin/n
 
 ENV NODE_ENV=production
 COPY package.json bun.lock .
+COPY patches patches
 COPY scripts scripts
 COPY public public
 RUN bun install --production

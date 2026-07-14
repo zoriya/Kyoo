@@ -95,5 +95,8 @@
 				"react-native-get-random-values"
 			]
 		}
+	},
+	"patchedDependencies": {
+		"@videojs/core@10.0.0-beta.25": "patches/@videojs%2Fcore@10.0.0-beta.25.patch"
 	}
 }

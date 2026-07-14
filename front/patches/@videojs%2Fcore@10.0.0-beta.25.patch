@@ -1,0 +1,111 @@
+diff --git a/node_modules/@videojs/core/.bun-tag-c99bf98327cf098c b/.bun-tag-c99bf98327cf098c
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/dist/default/dom/media/hls-js/media-tracks.js b/dist/default/dom/media/hls-js/media-tracks.js
+index 99ca6c647292de8ee811f6b0595b23744301fa88..fadfd434b71d2053e6565857a9a8db6a5b658b63 100644
+--- a/dist/default/dom/media/hls-js/media-tracks.js
++++ b/dist/default/dom/media/hls-js/media-tracks.js
+@@ -22,6 +22,8 @@ function HlsJsMediaMediaTracksMixin(BaseClass) {
+ 			if (!engine) return;
+ 			engine.on(Hls.Events.MANIFEST_PARSED, this.#onManifestParsed);
+ 			engine.on(Hls.Events.AUDIO_TRACKS_UPDATED, this.#onAudioTracksUpdated);
++			engine.on(Hls.Events.AUDIO_TRACK_SWITCHING, this.#reflectAudioSelection);
++			engine.on(Hls.Events.AUDIO_TRACK_SWITCHED, this.#reflectAudioSelection);
+ 			engine.on(Hls.Events.LEVELS_UPDATED, this.#onLevelsUpdated);
+ 			engine.on(Hls.Events.LEVEL_SWITCHED, this.#onLevelSwitched);
+ 			engine.once(Hls.Events.DESTROYING, this.#teardown);
+@@ -41,14 +43,30 @@ function HlsJsMediaMediaTracksMixin(BaseClass) {
+ 			}
+ 		};
+ 		#onAudioTracksUpdated = (_event, data) => {
++			if (this.#audioTracksMatch(data.audioTracks)) return;
+ 			this.#removeAudioTracks();
+ 			for (const hlsAudioTrack of data.audioTracks) {
+ 				const kind = hlsAudioTrack.default ? "main" : "alternative";
+ 				const audioTrack = this.addAudioTrack(kind, hlsAudioTrack.name, hlsAudioTrack.lang);
+ 				audioTrack.id = `${hlsAudioTrack.id}`;
+-				audioTrack.enabled = Boolean(hlsAudioTrack.default);
+ 			}
+ 		};
++		#reflectAudioSelection = (_event, data) => {
++			const selectedId = `${data.id}`;
++			for (const track of this.audioTracks) track.enabled = track.id === selectedId;
++		};
++		#audioTracksMatch(incoming) {
++			const current = [...this.audioTracks];
++			if (current.length !== incoming.length) return false;
++			return incoming.every((hlsAudioTrack, index) => {
++				const existing = current[index];
++				return (
++					existing?.id === `${hlsAudioTrack.id}` &&
++					existing.label === (hlsAudioTrack.name ?? "") &&
++					existing.language === (hlsAudioTrack.lang ?? "")
++				);
++			});
++		}
+ 		#switchAudioTrack = () => {
+ 			const { engine } = this;
+ 			if (!engine) return;
+@@ -79,6 +97,8 @@ function HlsJsMediaMediaTracksMixin(BaseClass) {
+ 			const { engine } = this;
+ 			engine?.off(Hls.Events.MANIFEST_PARSED, this.#onManifestParsed);
+ 			engine?.off(Hls.Events.AUDIO_TRACKS_UPDATED, this.#onAudioTracksUpdated);
++			engine?.off(Hls.Events.AUDIO_TRACK_SWITCHING, this.#reflectAudioSelection);
++			engine?.off(Hls.Events.AUDIO_TRACK_SWITCHED, this.#reflectAudioSelection);
+ 			engine?.off(Hls.Events.LEVELS_UPDATED, this.#onLevelsUpdated);
+ 			engine?.off(Hls.Events.LEVEL_SWITCHED, this.#onLevelSwitched);
+ 			engine?.off(Hls.Events.DESTROYING, this.#teardown);
+diff --git a/dist/dev/dom/media/hls-js/media-tracks.js b/dist/dev/dom/media/hls-js/media-tracks.js
+index 99ca6c647292de8ee811f6b0595b23744301fa88..fadfd434b71d2053e6565857a9a8db6a5b658b63 100644
+--- a/dist/dev/dom/media/hls-js/media-tracks.js
++++ b/dist/dev/dom/media/hls-js/media-tracks.js
+@@ -22,6 +22,8 @@ function HlsJsMediaMediaTracksMixin(BaseClass) {
+ 			if (!engine) return;
+ 			engine.on(Hls.Events.MANIFEST_PARSED, this.#onManifestParsed);
+ 			engine.on(Hls.Events.AUDIO_TRACKS_UPDATED, this.#onAudioTracksUpdated);
++			engine.on(Hls.Events.AUDIO_TRACK_SWITCHING, this.#reflectAudioSelection);
++			engine.on(Hls.Events.AUDIO_TRACK_SWITCHED, this.#reflectAudioSelection);
+ 			engine.on(Hls.Events.LEVELS_UPDATED, this.#onLevelsUpdated);
+ 			engine.on(Hls.Events.LEVEL_SWITCHED, this.#onLevelSwitched);
+ 			engine.once(Hls.Events.DESTROYING, this.#teardown);
+@@ -41,14 +43,30 @@ function HlsJsMediaMediaTracksMixin(BaseClass) {
+ 			}
+ 		};
+ 		#onAudioTracksUpdated = (_event, data) => {
++			if (this.#audioTracksMatch(data.audioTracks)) return;
+ 			this.#removeAudioTracks();
+ 			for (const hlsAudioTrack of data.audioTracks) {
+ 				const kind = hlsAudioTrack.default ? "main" : "alternative";
+ 				const audioTrack = this.addAudioTrack(kind, hlsAudioTrack.name, hlsAudioTrack.lang);
+ 				audioTrack.id = `${hlsAudioTrack.id}`;
+-				audioTrack.enabled = Boolean(hlsAudioTrack.default);
+ 			}
+ 		};
++		#reflectAudioSelection = (_event, data) => {
++			const selectedId = `${data.id}`;
++			for (const track of this.audioTracks) track.enabled = track.id === selectedId;
++		};
++		#audioTracksMatch(incoming) {
++			const current = [...this.audioTracks];
++			if (current.length !== incoming.length) return false;
++			return incoming.every((hlsAudioTrack, index) => {
++				const existing = current[index];
++				return (
++					existing?.id === `${hlsAudioTrack.id}` &&
++					existing.label === (hlsAudioTrack.name ?? "") &&
++					existing.language === (hlsAudioTrack.lang ?? "")
++				);
++			});
++		}
+ 		#switchAudioTrack = () => {
+ 			const { engine } = this;
+ 			if (!engine) return;
+@@ -79,6 +97,8 @@ function HlsJsMediaMediaTracksMixin(BaseClass) {
+ 			const { engine } = this;
+ 			engine?.off(Hls.Events.MANIFEST_PARSED, this.#onManifestParsed);
+ 			engine?.off(Hls.Events.AUDIO_TRACKS_UPDATED, this.#onAudioTracksUpdated);
++			engine?.off(Hls.Events.AUDIO_TRACK_SWITCHING, this.#reflectAudioSelection);
++			engine?.off(Hls.Events.AUDIO_TRACK_SWITCHED, this.#reflectAudioSelection);
+ 			engine?.off(Hls.Events.LEVELS_UPDATED, this.#onLevelsUpdated);
+ 			engine?.off(Hls.Events.LEVEL_SWITCHED, this.#onLevelSwitched);
+ 			engine?.off(Hls.Events.DESTROYING, this.#teardown);

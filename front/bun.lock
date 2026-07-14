@@ -72,6 +72,9 @@
       },
     },
   },
+  "patchedDependencies": {
+    "@videojs/core@10.0.0-beta.25": "patches/@videojs%2Fcore@10.0.0-beta.25.patch",
+  },
   "packages": {
     "@adobe/css-tools": ["@adobe/css-tools@4.5.0", "", {}, "sha512-6OzddxPio9UiWTCemp4N8cYLV2ZN1ncRnV1cVGtve7dhPOtRkleRyx32GQCYSwDYgaHU3USMm84tNsvKzRCa1Q=="],
 
