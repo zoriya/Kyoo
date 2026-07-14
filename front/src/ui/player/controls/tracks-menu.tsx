@@ -20,7 +20,6 @@ export const SubtitleMenu = (props: Partial<MenuProps>) => {
 	const player = usePlayer();
 	const rerender = useForceRerender();
 	useEvent("subtitleChange", rerender);
-	const selectedIdx = player.subtitles.findIndex((x) => x.selected);
 
 	const [slug] = useQueryState<string>("slug", undefined!);
 	const { data } = useFetch(Info.infoQuery(slug));
@@ -36,17 +35,22 @@ export const SubtitleMenu = (props: Partial<MenuProps>) => {
 		>
 			<Menu.Item
 				label={t("player.subtitle-none")}
-				selected={selectedIdx === -1}
+				selected={!player.subtitles.some((x) => x.selected)}
 				onSelect={() => player.selectSubtitle(undefined)}
 			/>
-			{data?.subtitles.map((x, i) => (
-				<Menu.Item
-					key={x.index ?? x.link}
-					label={getDisplayName(x)}
-					selected={i === selectedIdx}
-					onSelect={() => player.selectSubtitle(player.subtitles[i])}
-				/>
-			))}
+			{data?.subtitles.map((x, i) => {
+				const track = player.subtitles.find(
+					(s) => s.id === (x.index ?? i).toString(),
+				);
+				return (
+					<Menu.Item
+						key={x.index ?? x.link}
+						label={getDisplayName(x)}
+						selected={track?.selected ?? false}
+						onSelect={() => track && player.selectSubtitle(track)}
+					/>
+				);
+			})}
 		</Menu>
 	);
 };
