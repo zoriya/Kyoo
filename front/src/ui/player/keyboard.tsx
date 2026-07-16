@@ -11,13 +11,21 @@ type Action =
 	| { type: "seekTo"; value: number }
 	| { type: "seekPercent"; value: number }
 	| { type: "volume"; value: number }
-	| { type: "subtitle" };
+	| { type: "subtitle" }
+	| { type: "prev" }
+	| { type: "next" };
 
 const reducer = (player: OmniPlayer, action: Action) => {
 	switch (action.type) {
 		case "play":
 			if (player.isPlaying) player.pause();
 			else player.play();
+			break;
+		case "prev":
+			player.playPrev();
+			break;
+		case "next":
+			player.playNext();
 			break;
 		case "mute":
 			player.muted = !player.muted;
@@ -49,7 +57,7 @@ const reducer = (player: OmniPlayer, action: Action) => {
 	}
 };
 
-export const useKeyboard = (playPrev: () => void, playNext: () => void) => {
+export const useKeyboard = () => {
 	const player = usePlayer();
 	useEffect(() => {
 		if (Platform.OS !== "web") return;
@@ -102,12 +110,14 @@ export const useKeyboard = (playPrev: () => void, playNext: () => void) => {
 
 				case "n":
 				case "N":
-					playNext();
+				case "MediaTrackNext":
+					reducer(player, { type: "next" });
 					break;
 
 				case "p":
 				case "P":
-					playPrev();
+				case "MediaTrackPrevious":
+					reducer(player, { type: "prev" });
 					break;
 
 				default:
@@ -149,5 +159,5 @@ export const useKeyboard = (playPrev: () => void, playNext: () => void) => {
 
 		document.addEventListener("keyup", handler);
 		return () => document.removeEventListener("keyup", handler);
-	}, [player, playPrev, playNext]);
+	}, [player]);
 };

@@ -9,6 +9,7 @@ import {
 	OmniView,
 	type Source,
 	useEvent,
+	usePlayer,
 } from "react-native-omni";
 import { v4 as uuidv4 } from "uuid";
 import { entryDisplayNumber } from "~/components/entries";
@@ -162,44 +163,13 @@ const PlayerContent = ({
 }) => {
 	const router = useRouter();
 	const { t } = useTranslation();
+	const player = usePlayer();
 	const [entriesMenuOpen, setEntriesMenuOpen] = useState(false);
 
-	const playPrev = useCallback(() => {
-		if (!data?.previous) return false;
-		if (!data.previous.video) {
-			setPlaybackError({
-				status: "not-available",
-				message: t("player.not-available", {
-					entry: `${entryDisplayNumber(data.previous.entry)} ${data.previous.entry.name}`,
-				}),
-			});
-			return true;
-		}
-		setPlaybackError(undefined);
-		setStart("0");
-		setSlug(data.previous.video);
-		return true;
-	}, [data?.previous, setSlug, setStart, setPlaybackError, t]);
-	const playNext = useCallback(() => {
-		if (!data?.next) return false;
-		if (!data.next.video) {
-			setPlaybackError({
-				status: "not-available",
-				message: t("player.not-available", {
-					entry: `${entryDisplayNumber(data.next.entry)} ${data.next.entry.name}`,
-				}),
-			});
-			return true;
-		}
-		setPlaybackError(undefined);
-		setStart("0");
-		setSlug(data.next.video);
-		return true;
-	}, [data?.next, setSlug, setStart, setPlaybackError, t]);
 	const onEnd = useCallback(() => {
-		const hasNext = playNext();
-		if (!hasNext && data?.show?.href) router.replace(data.show.href);
-	}, [data?.show?.href, playNext, router]);
+		if (data?.next) player.playNext();
+		else if (data?.show?.href) router.replace(data.show.href);
+	}, [data?.next, data?.show?.href, player, router]);
 
 	useProgressObserver(
 		data && entry ? { videoId: data.id, entryId: entry.id } : null,
@@ -207,11 +177,44 @@ const PlayerContent = ({
 	useLanguagePreference(slug, data?.show?.original.language);
 
 	useEvent("end", onEnd);
-	// wire the prev/next events (fired from the OS media controls) to navigation
-	useEvent("prev", playPrev);
-	useEvent("next", playNext);
+	useEvent(
+		"prev",
+		useCallback(() => {
+			if (!data?.previous) return;
+			if (!data.previous.video) {
+				setPlaybackError({
+					status: "not-available",
+					message: t("player.not-available", {
+						entry: `${entryDisplayNumber(data.previous.entry)} ${data.previous.entry.name}`,
+					}),
+				});
+				return;
+			}
+			setPlaybackError(undefined);
+			setStart("0");
+			setSlug(data.previous.video);
+		}, [data?.previous, setSlug, setStart, setPlaybackError, t]),
+	);
+	useEvent(
+		"next",
+		useCallback(() => {
+			if (!data?.next) return;
+			if (!data.next.video) {
+				setPlaybackError({
+					status: "not-available",
+					message: t("player.not-available", {
+						entry: `${entryDisplayNumber(data.next.entry)} ${data.next.entry.name}`,
+					}),
+				});
+				return;
+			}
+			setPlaybackError(undefined);
+			setStart("0");
+			setSlug(data.next.video);
+		}, [data?.next, setSlug, setStart, setPlaybackError, t]),
+	);
 
-	useKeyboard(playPrev, playNext);
+	useKeyboard();
 
 	useEffect(() => {
 		if (Platform.OS !== "web") return;
@@ -258,8 +261,8 @@ const PlayerContent = ({
 						: data?.path
 				}
 				chapters={info?.chapters ?? []}
-				playPrev={data?.previous ? playPrev : null}
-				playNext={data?.next ? playNext : null}
+				hasPrev={!!data?.previous}
+				hasNext={!!data?.next}
 				seekEnd={onEnd}
 				onOpenEntriesMenu={
 					data?.show?.kind === "serie"

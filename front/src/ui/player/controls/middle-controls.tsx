@@ -1,20 +1,22 @@
 import SkipNext from "@material-symbols/svg-400/rounded/skip_next-fill.svg";
 import SkipPrevious from "@material-symbols/svg-400/rounded/skip_previous-fill.svg";
 import { View } from "react-native";
+import { usePlayer } from "react-native-omni";
 import { IconButton } from "~/primitives";
 import { cn } from "~/utils";
 import { PlayButton } from "./misc";
 
 export const MiddleControls = ({
-	playPrev,
-	playNext,
+	hasPrev,
+	hasNext,
 	className,
 	...props
 }: {
-	playPrev: (() => boolean) | null;
-	playNext: (() => boolean) | null;
+	hasPrev: boolean;
+	hasNext: boolean;
 	className?: string;
 }) => {
+	const player = usePlayer();
 	return (
 		<View
 			className={cn(
@@ -25,10 +27,10 @@ export const MiddleControls = ({
 		>
 			<IconButton
 				icon={SkipPrevious}
-				onPress={playPrev ? () => playPrev() : undefined}
+				onPress={hasPrev ? () => player.playPrev() : undefined}
 				className={cn(
 					"mx-6 bg-gray-800/70",
-					!playPrev && "pointer-events-none opacity-0",
+					!hasPrev && "pointer-events-none opacity-0",
 				)}
 				iconClassName="h-16 w-16 fill-slate-200 dark:fill-slate-200"
 			/>
@@ -38,10 +40,10 @@ export const MiddleControls = ({
 			/>
 			<IconButton
 				icon={SkipNext}
-				onPress={playNext ? () => playNext() : undefined}
+				onPress={hasNext ? () => player.playNext() : undefined}
 				className={cn(
 					"mx-6 bg-gray-800/70",
-					!playNext && "pointer-events-none opacity-0",
+					!hasNext && "pointer-events-none opacity-0",
 				)}
 				iconClassName="h-16 w-16 fill-slate-200 dark:fill-slate-200"
 			/>

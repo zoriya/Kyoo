@@ -16,8 +16,8 @@ export const Controls = ({
 	showLogo,
 	subName,
 	chapters,
-	playPrev,
-	playNext,
+	hasPrev,
+	hasNext,
 	seekEnd,
 	onOpenEntriesMenu,
 	forceShow,
@@ -29,8 +29,8 @@ export const Controls = ({
 	showLogo?: KImage | null;
 	subName?: string;
 	chapters: Chapter[];
-	playPrev: (() => boolean) | null;
-	playNext: (() => boolean) | null;
+	hasPrev: boolean;
+	hasNext: boolean;
 	seekEnd: () => void;
 	onOpenEntriesMenu?: () => void;
 	forceShow?: boolean;
@@ -70,16 +70,16 @@ export const Controls = ({
 					{...hoverControls}
 				/>
 				<MiddleControls
-					playPrev={playPrev}
-					playNext={playNext}
+					hasPrev={hasPrev}
+					hasNext={hasNext}
 					className="touch:flex hidden"
 				/>
 				<BottomControls
 					name={subName}
 					poster={poster}
 					chapters={chapters}
-					playPrev={playPrev}
-					playNext={playNext}
+					hasPrev={hasPrev}
+					hasNext={hasNext}
 					onOpenEntriesMenu={onOpenEntriesMenu}
 					setMenu={setMenu}
 					className="absolute bottom-0 w-full bg-slate-900/50 px-safe pt-safe"

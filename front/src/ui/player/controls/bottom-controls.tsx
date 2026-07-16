@@ -9,6 +9,7 @@ import {
 	View,
 	type ViewProps,
 } from "react-native";
+import { usePlayer } from "react-native-omni";
 import type { Chapter, KImage } from "~/models";
 import {
 	H2,
@@ -28,8 +29,8 @@ export const BottomControls = ({
 	poster,
 	name,
 	chapters,
-	playPrev,
-	playNext,
+	hasPrev,
+	hasNext,
 	setMenu,
 	onOpenEntriesMenu,
 	className,
@@ -38,8 +39,8 @@ export const BottomControls = ({
 	poster?: KImage | null;
 	name?: string;
 	chapters: Chapter[];
-	playPrev: (() => boolean) | null;
-	playNext: (() => boolean) | null;
+	hasPrev: boolean;
+	hasNext: boolean;
 	setMenu: (isOpen: boolean) => void;
 	onOpenEntriesMenu?: () => void;
 } & ViewProps) => {
@@ -80,8 +81,8 @@ export const BottomControls = ({
 					<BottomScrubber seek={seek} chapters={chapters} />
 				) : (
 					<ControlButtons
-						playPrev={playPrev}
-						playNext={playNext}
+						hasPrev={hasPrev}
+						hasNext={hasNext}
 						setMenu={setMenu}
 						onOpenEntriesMenu={onOpenEntriesMenu}
 					/>
@@ -92,20 +93,21 @@ export const BottomControls = ({
 };
 
 const ControlButtons = ({
-	playPrev,
-	playNext,
+	hasPrev,
+	hasNext,
 	setMenu,
 	onOpenEntriesMenu,
 	className,
 	...props
 }: {
-	playPrev: (() => boolean) | null;
-	playNext: (() => boolean) | null;
+	hasPrev: boolean;
+	hasNext: boolean;
 	setMenu: (isOpen: boolean) => void;
 	onOpenEntriesMenu?: () => void;
 	className?: string;
 }) => {
 	const { t } = useTranslation();
+	const player = usePlayer();
 
 	const menuProps = {
 		onMenuOpen: () => setMenu(true),
@@ -125,10 +127,10 @@ const ControlButtons = ({
 		>
 			<View className="flex-row items-center">
 				<View className="touch:hidden flex-row">
-					{playPrev && (
+					{hasPrev && (
 						<IconButton
 							icon={SkipPrevious}
-							onPress={() => playPrev()}
+							onPress={() => player.playPrev()}
 							className="mr-4"
 							iconClassName="fill-slate-200 dark:fill-slate-200"
 							{...tooltip(t("player.previous"), true)}
@@ -138,10 +140,10 @@ const ControlButtons = ({
 						className="mr-4"
 						iconClassName="fill-slate-200 dark:fill-slate-200"
 					/>
-					{playNext && (
+					{hasNext && (
 						<IconButton
 							icon={SkipNext}
-							onPress={() => playNext()}
+							onPress={() => player.playNext()}
 							className="mr-4"
 							iconClassName="fill-slate-200 dark:fill-slate-200"
 							{...tooltip(t("player.next"), true)}
