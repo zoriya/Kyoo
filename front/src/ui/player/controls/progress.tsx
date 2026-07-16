@@ -1,5 +1,5 @@
 import { type CSSProperties, useState } from "react";
-import type { TextProps } from "react-native";
+import { type TextProps, useWindowDimensions } from "react-native";
 import { usePlayer, usePlayerState } from "react-native-omni";
 import { useResolveClassNames } from "uniwind";
 import type { Chapter } from "~/models";
@@ -22,7 +22,13 @@ export const ProgressBar = ({
 	const { data } = useFetch(Info.infoQuery(slug));
 
 	const player = usePlayer();
-	const progress = usePlayerState("currentTime");
+	// only refresh when the slider would visually move by ~1px (once per second
+	// at most), instead of every second regardless of the video's length.
+	const { width } = useWindowDimensions();
+	const refreshInterval = data?.durationSeconds
+		? Math.max(1, data.durationSeconds / width)
+		: 1;
+	const progress = usePlayerState("currentTime", refreshInterval);
 	const buffer = usePlayerState("buffered");
 
 	const [hoverProgress, setHoverProgress] = useState<number | null>(null);
