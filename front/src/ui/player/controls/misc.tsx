@@ -9,22 +9,17 @@ import VolumeUp from "@material-symbols/svg-400/rounded/volume_up-fill.svg";
 import { type ComponentProps, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { type PressableProps, View } from "react-native";
-import { useEvent, type VideoPlayer } from "react-native-video";
+import { usePlayer, usePlayerState } from "react-native-omni";
 import { CircularProgress, IconButton, Slider, tooltip } from "~/primitives";
 import { cn } from "~/utils";
 
-export const PlayButton = ({
-	player,
-	...props
-}: { player: VideoPlayer } & Partial<
-	ComponentProps<typeof IconButton<PressableProps>>
->) => {
+export const PlayButton = (
+	props: Partial<ComponentProps<typeof IconButton<PressableProps>>>,
+) => {
 	const { t } = useTranslation();
 
-	const [playing, setPlay] = useState(player.isPlaying);
-	useEvent(player, "onPlaybackStateChange", (status) => {
-		setPlay(status.isPlaying);
-	});
+	const player = usePlayer();
+	const playing = usePlayerState("isPlaying");
 
 	return (
 		<IconButton
@@ -78,23 +73,18 @@ export const FullscreenButton = (
 };
 
 export const VolumeSlider = ({
-	player,
 	className,
 	iconClassName,
 	...props
 }: {
-	player: VideoPlayer;
 	className?: string;
 	iconClassName?: string;
 }) => {
 	const { t } = useTranslation();
 
-	const [volume, setVolume] = useState(player.volume);
-	const [muted, setMuted] = useState(player.muted);
-	useEvent(player, "onVolumeChange", (info) => {
-		setVolume(info.volume);
-		setMuted(info.muted);
-	});
+	const player = usePlayer();
+	const volume = usePlayerState("volume");
+	const muted = usePlayerState("muted");
 
 	return (
 		<View
@@ -129,12 +119,9 @@ export const VolumeSlider = ({
 	);
 };
 
-export const LoadingIndicator = ({ player }: { player: VideoPlayer }) => {
-	const [isLoading, setLoading] = useState(false);
-
-	useEvent(player, "onStatusChange", (status) => {
-		setLoading(status === "loading");
-	});
+export const LoadingIndicator = () => {
+	const status = usePlayerState("status");
+	const isLoading = status === "loading";
 
 	if (!isLoading) return null;
 

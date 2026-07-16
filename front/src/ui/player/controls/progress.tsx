@@ -1,6 +1,6 @@
 import { type CSSProperties, useState } from "react";
-import type { TextProps } from "react-native";
-import { useEvent, type VideoPlayer } from "react-native-video";
+import { type TextProps, useWindowDimensions } from "react-native";
+import { usePlayer, usePlayerState } from "react-native-omni";
 import { useResolveClassNames } from "uniwind";
 import type { Chapter } from "~/models";
 import { P, Slider, Tooltip } from "~/primitives";
@@ -10,12 +10,10 @@ import { cn, useQueryState } from "~/utils";
 import { ScrubberTooltip } from "../scrubber";
 
 export const ProgressBar = ({
-	player,
 	chapters,
 	seek,
 	setSeek,
 }: {
-	player: VideoPlayer;
 	chapters?: Chapter[];
 	seek: number | null;
 	setSeek: (v: number | null) => void;
@@ -23,12 +21,15 @@ export const ProgressBar = ({
 	const [slug] = useQueryState<string>("slug", undefined!);
 	const { data } = useFetch(Info.infoQuery(slug));
 
-	const [progress, setProgress] = useState(player.currentTime || 0);
-	const [buffer, setBuffer] = useState(0);
-	useEvent(player, "onProgress", (progress) => {
-		setProgress(progress.currentTime);
-		setBuffer(progress.bufferDuration);
-	});
+	const player = usePlayer();
+	// only refresh when the slider would visually move by ~1px (once per second
+	// at most), instead of every second regardless of the video's length.
+	const { width } = useWindowDimensions();
+	const refreshInterval = data?.durationSeconds
+		? Math.max(1, data.durationSeconds / width)
+		: 1;
+	const progress = usePlayerState("currentTime", refreshInterval);
+	const buffer = usePlayerState("buffered");
 
 	const [hoverProgress, setHoverProgress] = useState<number | null>(null);
 	const [layout, setLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
@@ -45,7 +46,7 @@ export const ProgressBar = ({
 				}}
 				setProgress={setSeek}
 				endSeek={() => {
-					player.seekTo(seek!);
+					player.currentTime = seek!;
 					setTimeout(() => player.play(), 10);
 					setSeek(null);
 				}}
@@ -87,15 +88,8 @@ export const ProgressBar = ({
 	);
 };
 
-export const ProgressText = ({
-	player,
-	className,
-	...props
-}: { player: VideoPlayer } & TextProps) => {
-	const [progress, setProgress] = useState(player.currentTime);
-	useEvent(player, "onProgress", (progress) => {
-		setProgress(progress.currentTime);
-	});
+export const ProgressText = ({ className, ...props }: TextProps) => {
+	const progress = usePlayerState("currentTime");
 	const [slug] = useQueryState<string>("slug", undefined!);
 	const { data } = useFetch(Info.infoQuery(slug));
 

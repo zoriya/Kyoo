@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { Platform } from "react-native";
-import type { VideoPlayer } from "react-native-video";
-import type { Subtitle } from "~/models";
+import { type OmniPlayer, usePlayer } from "react-native-omni";
 import { toggleFullscreen } from "./controls/misc";
 
 type Action =
@@ -12,13 +11,21 @@ type Action =
 	| { type: "seekTo"; value: number }
 	| { type: "seekPercent"; value: number }
 	| { type: "volume"; value: number }
-	| { type: "subtitle"; subtitles: Subtitle[]; fonts: string[] };
+	| { type: "subtitle" }
+	| { type: "prev" }
+	| { type: "next" };
 
-const reducer = (player: VideoPlayer, action: Action) => {
+const reducer = (player: OmniPlayer, action: Action) => {
 	switch (action.type) {
 		case "play":
 			if (player.isPlaying) player.pause();
 			else player.play();
+			break;
+		case "prev":
+			player.playPrev();
+			break;
+		case "next":
+			player.playNext();
 			break;
 		case "mute":
 			player.muted = !player.muted;
@@ -30,37 +37,28 @@ const reducer = (player: VideoPlayer, action: Action) => {
 			player.seekBy(action.value);
 			break;
 		case "seekTo":
-			player.seekTo(action.value);
+			player.currentTime = action.value;
 			break;
 		case "seekPercent":
-			player.seekTo((player.duration * action.value) / 100);
+			player.currentTime = (player.duration * action.value) / 100;
 			break;
 		case "volume":
-			player.volume = Math.max(0, Math.min(player.volume + action.value, 100));
+			player.volume = Math.max(0, Math.min(player.volume + action.value, 1));
 			break;
-		// case "subtitle": {
-		// 	const subtitle = get(subtitleAtom);
-		// 	const index = subtitle
-		// 		? action.subtitles.findIndex((x) => x.index === subtitle.index)
-		// 		: -1;
-		// 	set(
-		// 		subtitleAtom,
-		// 		index === -1
-		// 			? null
-		// 			: action.subtitles[(index + 1) % action.subtitles.length],
-		// 	);
-		// 	break;
-		// }
+		case "subtitle": {
+			if (player.subtitles.length === 0) break;
+			// cycle off (-1) -> first -> ... -> last -> off
+			const next = player.subtitles.findIndex((x) => x.selected) + 1;
+			player.selectSubtitle(
+				next >= player.subtitles.length ? undefined : player.subtitles[next],
+			);
+			break;
+		}
 	}
 };
 
-export const useKeyboard = (
-	player: VideoPlayer,
-	playPrev: () => void,
-	playNext: () => void,
-	// subtitles?: Subtitle[],
-	// fonts?: string[],
-) => {
+export const useKeyboard = () => {
+	const player = usePlayer();
 	useEffect(() => {
 		if (Platform.OS !== "web") return;
 		const handler = (event: KeyboardEvent) => {
@@ -105,20 +103,21 @@ export const useKeyboard = (
 					reducer(player, { type: "fullscreen" });
 					break;
 
-				// case "v":
-				// case "c":
-				// 	if (!subtitles || !fonts) return;
-				// 	reducer(player, { type: "subtitle", subtitles, fonts });
-				// 	break;
+				case "v":
+				case "c":
+					reducer(player, { type: "subtitle" });
+					break;
 
 				case "n":
 				case "N":
-					playNext();
+				case "MediaTrackNext":
+					reducer(player, { type: "next" });
 					break;
 
 				case "p":
 				case "P":
-					playPrev();
+				case "MediaTrackPrevious":
+					reducer(player, { type: "prev" });
 					break;
 
 				default:
@@ -160,5 +159,5 @@ export const useKeyboard = (
 
 		document.addEventListener("keyup", handler);
 		return () => document.removeEventListener("keyup", handler);
-	}, [player, playPrev, playNext]);
+	}, [player]);
 };

@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import { useEvent, type VideoPlayer } from "react-native-video";
+import { usePlayerState } from "react-native-omni";
 import type { Chapter } from "~/models";
 import { P, Sprite, SubP } from "~/primitives";
 import { useToken } from "~/providers/account-context";
@@ -132,20 +132,15 @@ export const ScrubberTooltip = ({
 export const BottomScrubber = ({
 	chapters,
 	seek,
-	player,
 }: {
 	chapters?: Chapter[];
 	seek: number;
-	player: VideoPlayer;
 }) => {
 	const [slug] = useQueryState<string>("slug", undefined!);
 	const { info, stats } = useScrubber(slug);
 	const { t } = useTranslation();
 
-	const [duration, setDuration] = useState(player.duration);
-	useEvent(player, "onLoad", (info) => {
-		if (info.duration) setDuration(info.duration);
-	});
+	const duration = usePlayerState("duration");
 
 	const width = stats?.width ?? 1;
 	const chapter = chapters?.findLast(
