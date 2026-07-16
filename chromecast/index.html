@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en" class="h-full">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Kyoo</title>
+		<link rel="icon" href="/icon.svg" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			rel="stylesheet"
+			href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Sora:wght@600;700&display=swap"
+		/>
+		<script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+	</head>
+	<body>
+		<cast-media-player id="player"></cast-media-player>
+
+		<div id="overlay" class="overlay">
+			<div id="splash" class="splash">
+				<img class="splash-logo" src="/icon-long.svg" alt="Kyoo" />
+			</div>
+
+			<div id="top-bar" class="top-bar">
+				<img class="top-logo" src="/icon.svg" alt="Kyoo" />
+				<span id="top-title" class="top-title"></span>
+			</div>
+
+			<div id="loading" class="loading">
+				<div class="spinner" role="progressbar" aria-label="Loading"></div>
+			</div>
+
+			<div id="bottom-bar" class="bottom-bar">
+				<img id="poster" class="poster" alt="" hidden />
+				<div class="bottom-info">
+					<div id="title" class="title"></div>
+					<div id="subtitle" class="subtitle"></div>
+					<div class="progress-row">
+						<span id="time-current" class="time">00:00</span>
+						<div class="progress-track">
+							<div id="progress-buffer" class="progress-buffer"></div>
+							<div id="progress-fill" class="progress-fill"></div>
+						</div>
+						<span id="time-total" class="time">00:00</span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="subtitle-layer" class="subtitle-layer"></div>
+
+		<script type="module" src="/src/main.ts"></script>
+	</body>
+</html>
