@@ -114,18 +114,6 @@ func NewStream(ctx context.Context, file *FileStream, keyframes *Keyframe, handl
 			})
 		}
 		ret.ready.Done()
-
-		// Eagerly start a transcode from the beginning. This optimizes the common
-		// "play from the start" path (segments and the shared init segment are
-		// produced before the client asks for them)
-		if length > 0 {
-			go func() {
-				err := ret.run(ctx, 0)
-				if err != nil {
-					slog.WarnContext(ctx, "warmup transcode failed", "path", ret.file.Info.Path, "err", err)
-				}
-			}()
-		}
 	}()
 }
 
@@ -528,12 +516,16 @@ func (ts *Stream) finalizeSegment(path string, startSegment int32) error {
 
 func (ts *Stream) GetInit(ctx context.Context) (string, error) {
 	ctx = context.WithoutCancel(ctx)
-	if _, err := ts.GetSegment(ctx, 0); err != nil {
-		return "", err
-	}
 	encoder := ts.initEncoderId.Load()
 	if encoder == -1 {
-		return "", fmt.Errorf("init segment not ready yet")
+		// not init.mp4 ready, start transcode at 0 it should generate an init
+		if _, err := ts.GetSegment(ctx, 0); err != nil {
+			return "", err
+		}
+		encoder = ts.initEncoderId.Load()
+		if encoder == -1 {
+			return "", fmt.Errorf("init segment not ready yet")
+		}
 	}
 	return ts.handle.getInitPath(int(encoder)), nil
 }
