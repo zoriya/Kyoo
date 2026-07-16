@@ -271,6 +271,12 @@
 		"subtitles": "Subtitles",
 		"subtitle-none": "None",
 		"fullscreen": "Fullscreen",
+		"cast": "Cast to device",
+		"stop-cast": "Stop casting",
+		"casting": {
+			"connecting": "Connecting…",
+			"playing": "Playing on your TV"
+		},
 		"direct": "Pristine",
 		"transmux": "Original",
 		"auto": "Auto",
@@ -286,6 +292,11 @@
 			"recap": "recap",
 			"preview": "preview"
 		}
+	},
+	"miniPlayer": {
+		"casting": "Casting",
+		"open": "Open player",
+		"stop": "Stop casting"
 	},
 	"search": {
 		"empty": "No result found. Try a different query."

@@ -4,7 +4,11 @@ import {
 	DefaultTheme,
 	ThemeProvider as RNThemeProvider,
 } from "expo-router/react-navigation";
-import { type ReactNode, useState } from "react";
+import {
+	type ReactNode,
+	useState,
+} from "react";
+import { OmniProvider, } from "react-native-omni";
 import { SafeAreaListener } from "react-native-safe-area-context";
 import {
 	Uniwind,
@@ -17,6 +21,17 @@ import { AccountProvider } from "./account-provider";
 import { TranslationsProvider } from "./translations.native";
 
 function getServerData(_key: string): any {}
+
+const PlayerProvider = ({ children }: { children: ReactNode }) => {
+	return (
+		<OmniProvider
+			cast={{ receiverApplicationId: "D8FB0FC1", }}
+			showNotification
+		>
+			{children}
+		</OmniProvider>
+	);
+};
 
 const QueryProvider = ({ children }: { children: ReactNode }) => {
 	const [queryClient] = useState(() => createQueryClient());
@@ -71,7 +86,9 @@ export const Providers = ({ children }: { children: ReactNode }) => {
 			<RnTheme>
 				<TranslationsProvider>
 					<AccountProvider>
-						<PortalProvider>{children}</PortalProvider>
+						<PortalProvider>
+							<PlayerProvider>{children}</PlayerProvider>
+						</PortalProvider>
 					</AccountProvider>
 				</TranslationsProvider>
 			</RnTheme>
