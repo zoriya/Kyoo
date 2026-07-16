@@ -26,6 +26,7 @@ data:
           entryPoints:
           - web
           middlewares:
+          - cors
           - phantomtoken
           service: transcoder
           rule: "PathPrefix(`/video`)"
@@ -43,6 +44,7 @@ data:
           entryPoints:
           - web
           middlewares:
+          - cors
           - phantomtoken
           service: api
           rule: "PathPrefix(`/api/`)"
@@ -69,6 +71,19 @@ data:
               - "Sec-WebSocket-Protocol"
             authResponseHeaders:
               - Authorization
+        cors:
+          headers:
+            accessControlAllowOriginList:
+              - "*"
+            accessControlAllowMethods:
+              - GET
+              - OPTIONS
+            accessControlAllowHeaders:
+              - Authorization
+              - Content-Type
+              - Range
+              - X-Api-Key
+            addVaryHeader: true
       services:
         api:
           loadBalancer:
