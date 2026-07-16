@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { Platform } from "react-native";
 import { type OmniPlayer, usePlayer } from "react-native-omni";
-import type { Subtitle } from "~/models";
 import { toggleFullscreen } from "./controls/misc";
 
 type Action =
@@ -12,7 +11,7 @@ type Action =
 	| { type: "seekTo"; value: number }
 	| { type: "seekPercent"; value: number }
 	| { type: "volume"; value: number }
-	| { type: "subtitle"; subtitles: Subtitle[]; fonts: string[] };
+	| { type: "subtitle" };
 
 const reducer = (player: OmniPlayer, action: Action) => {
 	switch (action.type) {
@@ -38,28 +37,19 @@ const reducer = (player: OmniPlayer, action: Action) => {
 		case "volume":
 			player.volume = Math.max(0, Math.min(player.volume + action.value, 1));
 			break;
-		// case "subtitle": {
-		// 	const subtitle = get(subtitleAtom);
-		// 	const index = subtitle
-		// 		? action.subtitles.findIndex((x) => x.index === subtitle.index)
-		// 		: -1;
-		// 	set(
-		// 		subtitleAtom,
-		// 		index === -1
-		// 			? null
-		// 			: action.subtitles[(index + 1) % action.subtitles.length],
-		// 	);
-		// 	break;
-		// }
+		case "subtitle": {
+			if (player.subtitles.length === 0) break;
+			// cycle off (-1) -> first -> ... -> last -> off
+			const next = player.subtitles.findIndex((x) => x.selected) + 1;
+			player.selectSubtitle(
+				next >= player.subtitles.length ? undefined : player.subtitles[next],
+			);
+			break;
+		}
 	}
 };
 
-export const useKeyboard = (
-	playPrev: () => void,
-	playNext: () => void,
-	// subtitles?: Subtitle[],
-	// fonts?: string[],
-) => {
+export const useKeyboard = (playPrev: () => void, playNext: () => void) => {
 	const player = usePlayer();
 	useEffect(() => {
 		if (Platform.OS !== "web") return;
@@ -105,11 +95,10 @@ export const useKeyboard = (
 					reducer(player, { type: "fullscreen" });
 					break;
 
-				// case "v":
-				// case "c":
-				// 	if (!subtitles || !fonts) return;
-				// 	reducer(player, { type: "subtitle", subtitles, fonts });
-				// 	break;
+				case "v":
+				case "c":
+					reducer(player, { type: "subtitle" });
+					break;
 
 				case "n":
 				case "N":
