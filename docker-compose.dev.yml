@@ -21,10 +21,14 @@ x-transcoder: &transcoder-base
   labels:
     - "traefik.enable=true"
     - "traefik.http.routers.transcoder.rule=PathPrefix(`/video`)"
-    - "traefik.http.routers.transcoder.middlewares=phantom-token"
+    - "traefik.http.routers.transcoder.middlewares=cors,phantom-token"
     - "traefik.http.middlewares.phantom-token.forwardauth.address=http://auth:4568/auth/jwt"
     - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,Cookie,X-Api-Key,Sec-WebSocket-Protocol"
     - "traefik.http.middlewares.phantom-token.forwardauth.authResponseHeaders=Authorization"
+    - "traefik.http.middlewares.cors.headers.accessControlAllowOriginList=*"
+    - "traefik.http.middlewares.cors.headers.accessControlAllowMethods=GET,OPTIONS"
+    - "traefik.http.middlewares.cors.headers.accessControlAllowHeaders=Authorization,Content-Type,Range,X-Api-Key"
+    - "traefik.http.middlewares.cors.headers.addVaryHeader=true"
   develop:
     watch:
       - action: sync+restart
@@ -99,10 +103,14 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.swagger.rule=PathPrefix(`/swagger`)"
       - "traefik.http.routers.api.rule=PathPrefix(`/api/`)"
-      - "traefik.http.routers.api.middlewares=phantom-token"
+      - "traefik.http.routers.api.middlewares=cors,phantom-token"
       - "traefik.http.middlewares.phantom-token.forwardauth.address=http://auth:4568/auth/jwt"
       - "traefik.http.middlewares.phantom-token.forwardauth.authRequestHeaders=Authorization,Cookie,X-Api-Key,Sec-WebSocket-Protocol"
       - "traefik.http.middlewares.phantom-token.forwardauth.authResponseHeaders=Authorization"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowOriginList=*"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowMethods=GET,OPTIONS"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowHeaders=Authorization,Content-Type,Range,X-Api-Key"
+      - "traefik.http.middlewares.cors.headers.addVaryHeader=true"
     develop:
       watch:
         - action: sync
