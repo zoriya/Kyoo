@@ -1,0 +1,23 @@
+{
+	"name": "kyoo-chromecast-receiver",
+	"version": "1.0.0",
+	"private": true,
+	"description": "Kyoo Chromecast (CAF) custom receiver application with ass/pgs subtitle support",
+	"type": "module",
+	"scripts": {
+		"dev": "vite --host",
+		"typecheck": "tsc --noEmit",
+		"build": "tsc --noEmit && vite build",
+		"preview": "vite preview"
+	},
+	"dependencies": {
+		"jassub": "1.8.8",
+		"libpgs": "^0.8.1"
+	},
+	"devDependencies": {
+		"@types/chromecast-caf-receiver": "^6.0.26",
+		"@types/node": "^26.1.1",
+		"typescript": "^7.0.2",
+		"vite": "^5.4.0"
+	}
+}
