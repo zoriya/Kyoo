@@ -13,6 +13,18 @@ module.exports = (() => {
 		...resolver,
 		assetExts: resolver.assetExts.filter((ext) => ext !== "svg"),
 		sourceExts: [...resolver.sourceExts, "svg"],
+		resolveRequest: (context, moduleName, platform) => {
+			if (
+				platform === "web" &&
+				((context.originModulePath.includes("jassub/dist") &&
+					(moduleName.startsWith("./worker/") ||
+						moduleName.startsWith("./wasm/") ||
+						moduleName === "./default.woff2")) ||
+					moduleName === "libpgs/dist/libpgs.worker.js")
+			)
+				return { type: "empty" };
+			return context.resolveRequest(context, moduleName, platform);
+		},
 	};
 
 	// jassub's wasm is multithreaded (SharedArrayBuffer), which requires the page
