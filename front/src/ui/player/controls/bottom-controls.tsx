@@ -21,7 +21,7 @@ import {
 } from "~/primitives";
 import { cn } from "~/utils";
 import { BottomScrubber } from "../scrubber";
-import { FullscreenButton, PlayButton, VolumeSlider } from "./misc";
+import { CastButton, FullscreenButton, PlayButton, VolumeSlider } from "./misc";
 import { ProgressBar, ProgressText } from "./progress";
 import { AudioMenu, QualityMenu, SubtitleMenu, VideoMenu } from "./tracks-menu";
 
@@ -169,6 +169,10 @@ const ControlButtons = ({
 				<AudioMenu {...menuProps} />
 				<VideoMenu {...menuProps} />
 				<QualityMenu {...menuProps} />
+				<CastButton
+					className="mr-4"
+					iconClassName="fill-slate-200 dark:fill-slate-200"
+				/>
 				{Platform.OS === "web" && (
 					<FullscreenButton
 						className="mr-4"

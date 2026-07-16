@@ -1,3 +1,5 @@
+import CastConnected from "@material-symbols/svg-400/rounded/cast_connected-fill.svg";
+import Cast from "@material-symbols/svg-400/rounded/cast-fill.svg";
 import FullscreenExit from "@material-symbols/svg-400/rounded/fullscreen_exit-fill.svg";
 import Fullscreen from "@material-symbols/svg-400/rounded/fullscreen-fill.svg";
 import Pause from "@material-symbols/svg-400/rounded/pause-fill.svg";
@@ -29,6 +31,32 @@ export const PlayButton = (
 				else player.play();
 			}}
 			{...tooltip(playing ? t("player.pause") : t("player.play"), true)}
+			{...props}
+		/>
+	);
+};
+
+export const CastButton = (
+	props: Partial<ComponentProps<typeof IconButton<PressableProps>>>,
+) => {
+	const { t } = useTranslation();
+
+	const player = usePlayer();
+	const castStatus = usePlayerState("castStatus");
+
+	if (
+		!castStatus ||
+		castStatus === "unavailable" ||
+		castStatus === "unsupported"
+	)
+		return null;
+
+	const active = castStatus === "connected" || castStatus === "connecting";
+	return (
+		<IconButton
+			icon={active ? CastConnected : Cast}
+			onPress={() => player.toggleCastStatus()}
+			{...tooltip(active ? t("player.stop-cast") : t("player.cast"), true)}
 			{...props}
 		/>
 	);

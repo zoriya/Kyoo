@@ -1,15 +1,15 @@
 import "react-native-get-random-values";
 
 import { Stack, useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, StyleSheet, View } from "react-native";
 import {
-	OmniProvider,
 	OmniView,
 	type Source,
 	useEvent,
 	usePlayer,
+	usePlayerState,
 } from "react-native-omni";
 import { v4 as uuidv4 } from "uuid";
 import { entryDisplayNumber } from "~/components/entries";
@@ -20,6 +20,7 @@ import { useLocalSetting } from "~/providers/settings";
 import { type QueryIdentifier, useFetch } from "~/query";
 import { Info } from "~/ui/info";
 import { useQueryState } from "~/utils";
+import { CastingScreen } from "./casting-screen";
 import { Controls, LoadingIndicator } from "./controls";
 import { ErrorPopup } from "./controls/error-popup";
 import { toggleFullscreen } from "./controls/misc";
@@ -92,9 +93,28 @@ export const Player = () => {
 				hasPrev: !!data?.previous?.video,
 				hasNext: !!data?.next?.video,
 			},
+			castId: `${apiUrl}/api/videos/${slug}`,
+			castData: { apiUrl, slug, clientId, ...(authToken && { token: authToken }) },
 		}),
 		[apiUrl, slug, playMode, info, authToken, start, data, title],
 	);
+
+	const player = usePlayer();
+	useEffect(() => {
+		player.setSource(source);
+	}, [source, player]);
+
+	// When leaving the watch screen, unload the player unless it is casting (the
+	// mini-player then keeps driving the receiver).
+	const castStatus = usePlayerState("castStatus");
+	const castingRef = useRef(false);
+	castingRef.current =
+		castStatus === "connected" || castStatus === "connecting";
+	useEffect(() => {
+		return () => {
+			if (!castingRef.current) player.setSource(undefined);
+		};
+	}, [player]);
 
 	return (
 		<View className="flex-1 bg-black">
@@ -112,22 +132,20 @@ export const Player = () => {
 					contentStyle: { paddingLeft: 0, paddingRight: 0 },
 				}}
 			/>
-			<OmniProvider source={source} showNotification>
-				<PlayModeContext.Provider value={playModeState}>
-					<PlayerContent
-						data={data}
-						info={info}
-						entry={entry}
-						slug={slug}
-						setSlug={setSlug}
-						setStart={setStart}
-						playMode={playMode}
-						setPlayMode={playModeState[1]}
-						playbackError={playbackError}
-						setPlaybackError={setPlaybackError}
-					/>
-				</PlayModeContext.Provider>
-			</OmniProvider>
+			<PlayModeContext.Provider value={playModeState}>
+				<PlayerContent
+					data={data}
+					info={info}
+					entry={entry}
+					slug={slug}
+					setSlug={setSlug}
+					setStart={setStart}
+					playMode={playMode}
+					setPlayMode={playModeState[1]}
+					playbackError={playbackError}
+					setPlaybackError={setPlaybackError}
+				/>
+			</PlayModeContext.Provider>
 			{playbackError && (
 				<ErrorPopup
 					message={playbackError.message}
@@ -246,6 +264,7 @@ const PlayerContent = ({
 					pgs: { workerUrl: "/libpgs/libpgs.worker.js" },
 				}}
 			/>
+			<CastingScreen name={data?.show?.name ?? data?.path} />
 			<LoadingIndicator />
 			<Controls
 				showHref={data?.show?.href}
