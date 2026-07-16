@@ -101,7 +101,7 @@ export const Player = () => {
 
 	const player = usePlayer();
 	useEffect(() => {
-		player.setSource(source);
+		player.source = source;
 	}, [source, player]);
 
 	// When leaving the watch screen, unload the player unless it is casting (the
@@ -112,7 +112,7 @@ export const Player = () => {
 		castStatus === "connected" || castStatus === "connecting";
 	useEffect(() => {
 		return () => {
-			if (!castingRef.current) player.setSource(undefined);
+			if (!castingRef.current) player.source = undefined;
 		};
 	}, [player]);
 
