@@ -9,7 +9,8 @@ export const useWebsockets = ({
 	filterActions: string[];
 }) => {
 	const { apiUrl, authToken } = useToken();
-	const ret = useWebSocket(`${apiUrl}/api/ws`, {
+	const wsUrl = `${apiUrl.replace(/^http/, "ws")}/api/ws`;
+	const ret = useWebSocket(wsUrl, {
 		// on web use cookies, firefox doesn't like protocols idk why
 		protocols:
 			Platform.OS !== "web" && authToken
@@ -28,11 +29,11 @@ export const useWebsockets = ({
 	useEffect(() => {
 		console.log(
 			"websocket connected to:",
-			`${apiUrl}/api/ws`,
+			wsUrl,
 			"status:",
 			ret.readyState,
 		);
-	}, [apiUrl, ret.readyState]);
+	}, [wsUrl, ret.readyState]);
 
 	return ret;
 };
