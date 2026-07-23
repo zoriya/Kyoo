@@ -23,6 +23,7 @@ export const Recommended = () => {
 						{[...Array(itemCount / numColumns)].map((_, y) => {
 							if (!items) return <ItemDetails.Loader key={y} />;
 							const item = items[x * (itemCount / numColumns) + y];
+							if (!item) return null;
 							return (
 								<ItemDetails
 									key={y}
