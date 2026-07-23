@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"slices"
 	"strings"
 
@@ -11,6 +12,34 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/labstack/echo/v5"
 )
+
+// getQueryAuth extracts credentials passed as query parameters: an api key
+// (`apikey`) or a session/bearer token (`token`). This lets videos and images be
+// authenticated from third-party browser contexts (e.g. <img>/<video> tags or
+// the chromecast receiver) that can't set an Authorization/X-Api-Key header nor
+// a cookie.
+//
+// When keibi is reached through traefik's forward-auth middleware, the original
+// request's query string is not present on the /auth/jwt request itself but is
+// forwarded in the X-Forwarded-Uri header, so we read it from there too.
+func getQueryAuth(c *echo.Context) (apikey string, token string) {
+	query := c.Request().URL.Query()
+	apikey = query.Get("apikey")
+	token = query.Get("session-token")
+
+	if apikey != "" || token != "" {
+		return apikey, token
+	}
+
+	if fwd := c.Request().Header.Get("X-Forwarded-Uri"); fwd != "" {
+		if u, err := url.Parse(fwd); err == nil {
+			fq := u.Query()
+			apikey = fq.Get("apikey")
+			token = fq.Get("session-token")
+		}
+	}
+	return apikey, token
+}
 
 func GetCurrentUserId(c *echo.Context) (uuid.UUID, error) {
 	user, ok := c.Get("user").(*jwt.Token)

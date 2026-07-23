@@ -30,6 +30,20 @@ HTTP 200
 [Captures]
 jwt: jsonpath "$.token"
 
+# apikey passed as a query param (used to load videos/images in third-party
+# browsers where headers/cookies can't be set)
+GET {{host}}/jwt?apikey={{token}}
+HTTP 200
+[Asserts]
+jsonpath "$.token" exists
+
+# apikey forwarded by traefik's forward-auth in the X-Forwarded-Uri header
+GET {{host}}/jwt
+X-Forwarded-Uri: /api/videos/x/master.m3u8?apikey={{token}}
+HTTP 200
+[Asserts]
+jsonpath "$.token" exists
+
 # Duplicates email
 POST {{host}}/keys
 X-API-KEY: 1234apikey
