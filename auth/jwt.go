@@ -31,7 +31,12 @@ type Jwt struct {
 // @Router /jwt [get]
 func (h *Handler) CreateJwt(c *echo.Context) error {
 	ctx := c.Request().Context()
+	queryApikey, queryToken := getQueryAuth(c)
+
 	apikey := c.Request().Header.Get("X-Api-Key")
+	if apikey == "" {
+		apikey = queryApikey
+	}
 	if apikey != "" {
 		token, err := h.createApiJwt(ctx, apikey)
 		if err != nil {
@@ -53,11 +58,10 @@ func (h *Handler) CreateJwt(c *echo.Context) error {
 			protocol[0] == "kyoo" &&
 			strings.HasPrefix(protocol[1], "Bearer ") {
 			token = protocol[1][len("Bearer "):]
+		} else if cookie, _ := c.Request().Cookie("X-Bearer"); cookie != nil {
+			token = cookie.Value
 		} else {
-			cookie, _ := c.Request().Cookie("X-Bearer")
-			if cookie != nil {
-				token = cookie.Value
-			}
+			token = queryToken
 		}
 	} else if strings.HasPrefix(auth, "Bearer ") {
 		token = auth[len("Bearer "):]

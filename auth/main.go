@@ -168,7 +168,12 @@ func (h *Handler) TokenToJwt(next echo.HandlerFunc) echo.HandlerFunc {
 		ctx := c.Request().Context()
 		var jwt *string
 
+		queryApikey, queryToken := getQueryAuth(c)
+
 		apikey := c.Request().Header.Get("X-Api-Key")
+		if apikey == "" {
+			apikey = queryApikey
+		}
 		if apikey != "" {
 			token, err := h.createApiJwt(ctx, apikey)
 			if err != nil {
@@ -180,9 +185,10 @@ func (h *Handler) TokenToJwt(next echo.HandlerFunc) echo.HandlerFunc {
 			var token string
 
 			if auth == "" {
-				cookie, _ := c.Request().Cookie("X-Bearer")
-				if cookie != nil {
+				if cookie, _ := c.Request().Cookie("X-Bearer"); cookie != nil {
 					token = cookie.Value
+				} else {
+					token = queryToken
 				}
 			} else if strings.HasPrefix(auth, "Bearer ") {
 				token = auth[len("Bearer "):]
