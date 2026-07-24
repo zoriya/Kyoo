@@ -9,10 +9,13 @@ export type VideoInfo = {
 	fonts: string[];
 };
 
-export type OverlayMetadata = {
+export type VideoMeta = {
+	showName: string;
+	entryName: string;
+	displayNumber: string;
 	title: string;
-	subtitle: string;
 	poster: string | null;
+	thumbnail: string | null;
 };
 
 export const fetchVideoInfo = async (
@@ -60,21 +63,44 @@ export const fetchVideoInfo = async (
 
 type ApiImage = { id?: string };
 
+type ApiEntry = {
+	kind?: string;
+	name?: string | null;
+	seasonNumber?: number | null;
+	episodeNumber?: number | null;
+	number?: number | null;
+	thumbnail?: ApiImage | null;
+};
+
 type ApiVideo = {
 	path?: string;
-	entries?: { name?: string; thumbnail?: ApiImage | null }[];
+	entries?: ApiEntry[];
 	show?: {
 		name?: string;
-		thumbnail?: ApiImage | null;
 		poster?: ApiImage | null;
+		thumbnail?: ApiImage | null;
 	} | null;
+};
+
+const entryDisplayNumber = (entry: ApiEntry): string => {
+	switch (entry.kind) {
+		case "episode":
+			if (!entry.seasonNumber) return `SP${entry.episodeNumber}`;
+			return `S${entry.seasonNumber}:E${entry.episodeNumber}`;
+		case "special":
+			return `SP${entry.number}`;
+		case "movie":
+			return "";
+		default:
+			return "??";
+	}
 };
 
 export const fetchVideoMeta = async (
 	apiUrl: string,
 	slug: string,
 	token?: string,
-) => {
+): Promise<VideoMeta> => {
 	const res = await fetch(`${apiUrl}/api/videos/${slug}?with=show`, {
 		headers: token ? { Authorization: `Bearer ${token}` } : {},
 	});
@@ -82,17 +108,28 @@ export const fetchVideoMeta = async (
 	const data = (await res.json()) as ApiVideo;
 	const entry = data.entries?.[0];
 	const show = data.show ?? undefined;
-	const posterId =
-		show?.poster?.id ?? show?.thumbnail?.id ?? entry?.thumbnail?.id ?? null;
-	let poster: string | null = null;
-	if (posterId) {
-		const url = new URL(`${apiUrl}/api/images/${posterId}?quality=high`);
+	const path = data.path ?? "";
+
+	const image = (img?: ApiImage | null): string | null => {
+		if (!img?.id) return null;
+		const url = new URL(`${apiUrl}/api/images/${img.id}?quality=high`);
 		if (token) url.searchParams.set("session-token", token);
-		poster = url.href;
-	}
+		return url.href;
+	};
+
+	const displayNumber = entry ? entryDisplayNumber(entry) : "";
+	const entryName = entry?.name ?? path;
+
 	return {
-		title: entry?.name ?? show?.name ?? data.path ?? "",
-		subtitle: entry?.name && show?.name ? show.name : "",
-		poster,
+		showName: show?.name ?? path,
+		entryName,
+		displayNumber,
+		title: entry
+			? entry.kind === "movie"
+				? entryName
+				: `${entryName} (${displayNumber})`
+			: path,
+		poster: image(show?.poster) ?? image(entry?.thumbnail),
+		thumbnail: image(show?.thumbnail) ?? image(show?.poster),
 	};
 };

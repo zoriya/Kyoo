@@ -48,7 +48,6 @@ const describeError = (e: framework.events.ErrorEvent): string => {
 	}
 };
 
-
 export class ReceiverUi {
 	#el = {
 		overlay: byId("overlay"),
@@ -57,7 +56,6 @@ export class ReceiverUi {
 		loading: byId("loading"),
 		poster: byId<HTMLImageElement>("poster"),
 		title: byId("title"),
-		subtitle: byId("subtitle"),
 		timeCurrent: byId("time-current"),
 		timeTotal: byId("time-total"),
 		progressFill: byId("progress-fill"),
@@ -73,17 +71,18 @@ export class ReceiverUi {
 	}
 
 	setMetadata({
-		title,
-		subtitle,
+		showName,
+		entryName,
+		displayNumber,
 		poster,
 	}: {
-		title: string;
-		subtitle: string;
+		showName: string;
+		entryName: string;
+		displayNumber: string;
 		poster: string | null;
 	}): void {
-		this.#el.topTitle.textContent = title;
-		this.#el.title.textContent = title;
-		this.#el.subtitle.textContent = subtitle;
+		this.#el.topTitle.textContent = showName;
+		this.#el.title.textContent = [displayNumber, entryName].join(" - ");
 		if (poster) {
 			this.#el.poster.src = poster;
 			this.#el.poster.hidden = false;
@@ -150,7 +149,10 @@ export class ReceiverUi {
 		if (Number.isFinite(buffered) && dur) {
 			this.#el.progressBuffer.style.width = `${Math.min(100, (buffered / dur) * 100)}%`;
 		}
-		this.#el.timeCurrent.textContent = formatTime(currentTime, dur || undefined);
+		this.#el.timeCurrent.textContent = formatTime(
+			currentTime,
+			dur || undefined,
+		);
 		this.#el.timeTotal.textContent = formatTime(dur || undefined);
 	}
 

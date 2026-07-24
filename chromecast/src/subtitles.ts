@@ -6,7 +6,7 @@ import jassubWasmUrl from "jassub/dist/jassub-worker.wasm?url";
 import jassubLegacyWasmUrl from "jassub/dist/jassub-worker.wasm.js?url";
 import { PgsRenderer } from "libpgs";
 import libpgsWorkerUrl from "libpgs/dist/libpgs.worker.js?url";
-import type { VideoInfo } from "./api";
+import { fetchVideoInfo, type VideoInfo } from "./api";
 import { getVideoElement } from "./cast";
 
 type Subtitle = VideoInfo["subtitles"][0];
@@ -59,11 +59,19 @@ export class SubtitleManager {
 		});
 	}
 
-	reset(): void {
+	async load(apiUrl: string, slug: string, token: string): Promise<void> {
 		this.#tracks = [];
 		this.#fontUrls = [];
 		this.#selectedId = null;
 		this.#teardown();
+
+		if (!apiUrl || !slug) return;
+		try {
+			const info = await fetchVideoInfo(apiUrl, slug, token);
+			this.setTracks(info.subtitles, info.fonts);
+		} catch (e) {
+			console.error("[kyoo-receiver] failed to load subtitle tracks", e);
+		}
 	}
 
 	setTracks(subtitles: Subtitle[], fonts: string[]): void {

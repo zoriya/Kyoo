@@ -1,8 +1,8 @@
 export type KyooCastData = {
-	apiUrl?: string;
-	slug?: string;
-	token?: string;
-	clientId?: string;
+	apiUrl: string;
+	slug: string;
+	token: string;
+	clientId: string;
 };
 
 // omni's channel for the selected custom (ass/pgs) subtitle; keep in sync with react-native-omni.

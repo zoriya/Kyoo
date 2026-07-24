@@ -1,11 +1,15 @@
-import { fetchVideoInfo, fetchVideoMeta } from "./api";
+import { fetchVideoMeta } from "./api";
 import { asObject, type KyooCastData, OMNI_NAMESPACE } from "./cast";
 import { SubtitleManager } from "./subtitles";
 import { ReceiverUi } from "./ui";
 
 const { EventType } = cast.framework.events;
-const { MessageType, HlsSegmentFormat, HlsVideoSegmentFormat } =
-	cast.framework.messages;
+const {
+	MessageType,
+	HlsSegmentFormat,
+	HlsVideoSegmentFormat,
+	GenericMediaMetadata,
+} = cast.framework.messages;
 
 export class KyooReceiver {
 	#context = cast.framework.CastReceiverContext.getInstance();
@@ -64,9 +68,8 @@ export class KyooReceiver {
 	#onLoad = async (
 		request: messages.LoadRequestData,
 	): Promise<messages.LoadRequestData> => {
-		const data =
-			(asObject(request.media?.customData) as KyooCastData | null) ?? {};
-		this.#subtitles.reset();
+		const data = (asObject(request.media?.customData) as KyooCastData) ?? {};
+		this.#subtitles.load(data.apiUrl, data.slug, data.token);
 		this.#ui.clearError();
 
 		if (data.token) {
@@ -104,21 +107,20 @@ export class KyooReceiver {
 			}
 		}
 
-		this.#loadMetadata(data);
+		try {
+			const meta = await fetchVideoMeta(data.apiUrl, data.slug, data.token);
+			this.#ui.setMetadata(meta);
+			if (request.media) {
+				const metadata = new GenericMediaMetadata();
+				metadata.title = meta.title;
+				if (meta.showName) metadata.subtitle = meta.showName;
+				if (meta.thumbnail) metadata.images = [{ url: meta.thumbnail }];
+				request.media.metadata = metadata;
+			}
+		} catch (e) {
+			console.error("[kyoo-receiver] failed to load metadata", e);
+		}
+
 		return request;
 	};
-
-	async #loadMetadata(data: KyooCastData): Promise<void> {
-		if (!data.apiUrl || !data.slug) return;
-		try {
-			const [info, meta] = await Promise.all([
-				fetchVideoInfo(data.apiUrl, data.slug, data.token),
-				fetchVideoMeta(data.apiUrl, data.slug, data.token),
-			]);
-			this.#subtitles.setTracks(info.subtitles, info.fonts);
-			this.#ui.setMetadata(meta);
-		} catch (e) {
-			console.error("[kyoo-receiver] failed to load video data", e);
-		}
-	}
 }
