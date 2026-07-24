@@ -32,6 +32,18 @@ export class KyooReceiver {
 			const subtitle = asObject(event.data)?.subtitle;
 			this.#subtitles.select(typeof subtitle === "string" ? subtitle : null);
 		});
+		// When a sender (re)connects, tell it which custom (ass/pgs) subtitle is
+		// currently showing so its menu can sync after a reconnect — CAF only
+		// restores native/vtt track state, not our overlay subtitles.
+		this.#context.addEventListener(
+			cast.framework.system.EventType.SENDER_CONNECTED,
+			(event) => {
+				const { senderId } = event as framework.system.SenderConnectedEvent;
+				this.#context.sendCustomMessage(OMNI_NAMESPACE, senderId, {
+					subtitle: this.#subtitles.selected,
+				});
+			},
+		);
 		this.#player.addEventListener(EventType.MEDIA_FINISHED, () => {
 			this.#subtitles.select(null);
 		});

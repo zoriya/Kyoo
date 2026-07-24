@@ -97,6 +97,7 @@
 		}
 	},
 	"patchedDependencies": {
-		"@videojs/core@10.0.0-beta.25": "patches/@videojs%2Fcore@10.0.0-beta.25.patch"
+		"@videojs/core@10.0.0-beta.25": "patches/@videojs%2Fcore@10.0.0-beta.25.patch",
+		"@videojs/react@10.0.0-beta.25": "patches/@videojs%2Freact@10.0.0-beta.25.patch"
 	}
 }

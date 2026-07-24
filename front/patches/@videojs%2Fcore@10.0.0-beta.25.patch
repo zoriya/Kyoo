@@ -1,6 +1,47 @@
+diff --git a/node_modules/@videojs/core/.bun-tag-6ae2888ce9205340 b/.bun-tag-6ae2888ce9205340
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/node_modules/@videojs/core/.bun-tag-c99bf98327cf098c b/.bun-tag-c99bf98327cf098c
 new file mode 100644
 index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/dist/default/dom/media/google-cast/utils.js b/dist/default/dom/media/google-cast/utils.js
+index 8ca144e0a61f3f25b7628964a2dff818efc689f3..ef2660883dc0be47e18009773d0922a95ac274dd 100644
+--- a/dist/default/dom/media/google-cast/utils.js
++++ b/dist/default/dom/media/google-cast/utils.js
+@@ -52,6 +52,24 @@ function getCastContext() {
+ function currentSession() {
+ 	return getCastContext()?.getCurrentSession();
+ }
++function castConnectionState() {
++	const ctx = getCastContext();
++	if (!ctx || typeof cast === "undefined") return "disconnected";
++	switch (ctx.getCastState()) {
++		case cast.framework.CastState.CONNECTED: return "connected";
++		case cast.framework.CastState.CONNECTING: return "connecting";
++		default: return "disconnected";
++	}
++}
++function castDevicesAvailable() {
++	const ctx = getCastContext();
++	if (!ctx || typeof cast === "undefined") return false;
++	const state = ctx.getCastState();
++	return !!state && state !== cast.framework.CastState.NO_DEVICES_AVAILABLE;
++}
++function endCastSession(stopCasting = true) {
++	getCastContext()?.endCurrentSession(stopCasting);
++}
+ function currentMedia() {
+ 	return currentSession()?.getSessionObj().media[0] ?? void 0;
+ }
+@@ -138,6 +156,6 @@ async function getPlaylistSegmentFormat(url) {
+ 	}
+ }
+ //#endregion
+-export { InvalidStateError, IterableWeakSet, NotFoundError, NotSupportedError, currentMedia, currentSession, editTracksInfo, getCastContext, getMediaStatus, getPlaylistSegmentFormat, isHls, loadCastFramework, onCastApiAvailable, requiresCastFramework, setCastOptions, setPlaybackRate };
++export { InvalidStateError, IterableWeakSet, NotFoundError, NotSupportedError, castConnectionState, castDevicesAvailable, currentMedia, currentSession, editTracksInfo, endCastSession, getCastContext, getMediaStatus, getPlaylistSegmentFormat, isHls, loadCastFramework, onCastApiAvailable, requiresCastFramework, setCastOptions, setPlaybackRate };
+ 
+ //# sourceMappingURL=utils.js.map
+\ No newline at end of file
 diff --git a/dist/default/dom/media/hls-js/media-tracks.js b/dist/default/dom/media/hls-js/media-tracks.js
 index 99ca6c647292de8ee811f6b0595b23744301fa88..fadfd434b71d2053e6565857a9a8db6a5b658b63 100644
 --- a/dist/default/dom/media/hls-js/media-tracks.js
@@ -55,6 +96,114 @@ index 99ca6c647292de8ee811f6b0595b23744301fa88..fadfd434b71d2053e6565857a9a8db6a
  			engine?.off(Hls.Events.LEVELS_UPDATED, this.#onLevelsUpdated);
  			engine?.off(Hls.Events.LEVEL_SWITCHED, this.#onLevelSwitched);
  			engine?.off(Hls.Events.DESTROYING, this.#teardown);
+diff --git a/dist/default/dom/store/features/remote-playback.js b/dist/default/dom/store/features/remote-playback.js
+index 9a00dbf2858199afe8a66c8f3796ba78efdfc7bc..d59fc75ad19a88acd94d66b196b78ad9a48d73d1 100644
+--- a/dist/default/dom/store/features/remote-playback.js
++++ b/dist/default/dom/store/features/remote-playback.js
+@@ -1,7 +1,9 @@
+ import { isMediaRemotePlaybackCapable } from "../../../media/predicate.js";
+ import { definePlayerFeature } from "../../feature.js";
+-import { isRemotePlaybackConnected, requestRemotePlayback } from "../../presentation/remote-playback.js";
++import { isRemotePlaybackConnected, isRemotePlaybackConnecting, requestRemotePlayback } from "../../presentation/remote-playback.js";
+ import { exitFullscreen, isFullscreen } from "../../presentation/fullscreen.js";
++import { castConnectionState, castDevicesAvailable, endCastSession, getCastContext, requiresCastFramework } from "../../media/google-cast/utils.js";
++import { castFramework, ensureCastFramework } from "../../media/google-cast/registry.js";
+ import { isWebKitAirPlayCapable, listen } from "@videojs/utils/dom";
+ //#region src/dom/store/features/remote-playback.ts
+ const remotePlaybackFeature = definePlayerFeature({
+@@ -11,15 +13,21 @@ const remotePlaybackFeature = definePlayerFeature({
+ 		remotePlaybackAvailability: "unsupported",
+ 		async toggleRemotePlayback() {
+ 			const { media, container } = target();
+-			if (isRemotePlaybackConnected(media)) return requestRemotePlayback(media);
++			const capable = Boolean(isMediaRemotePlaybackCapable(media));
++			const connected = isRemotePlaybackConnected(media) || isRemotePlaybackConnecting(media) || castConnectionState() !== "disconnected";
++			if (connected) {
++				if (capable) return requestRemotePlayback(media);
++				endCastSession();
++				return;
++			}
++			if (!capable) return;
+ 			if (isFullscreen(container, media)) await exitFullscreen(media);
+ 			return await requestRemotePlayback(media);
+ 		}
+ 	}),
+ 	attach({ target, signal, set }) {
+ 		const { media } = target;
+-		if (!isMediaRemotePlaybackCapable(media)) return;
+-		if (isWebKitAirPlayCapable(media)) {
++		if (media && isWebKitAirPlayCapable(media)) {
+ 			const syncConnection = () => {
+ 				set({ remotePlaybackState: media.webkitCurrentPlaybackTargetIsWireless ? "connected" : "disconnected" });
+ 			};
+@@ -32,6 +40,29 @@ const remotePlaybackFeature = definePlayerFeature({
+ 			syncConnection();
+ 			return;
+ 		}
++		if (requiresCastFramework()) {
++			const sync = () => {
++				set({
++					remotePlaybackState: castConnectionState(),
++					remotePlaybackAvailability: castDevicesAvailable() ? "available" : "unavailable"
++				});
++			};
++			ensureCastFramework().then(() => {
++				if (signal.aborted) return;
++				const ctx = getCastContext();
++				if (!ctx || !castFramework) return;
++				const { CAST_STATE_CHANGED, SESSION_STATE_CHANGED } = castFramework.CastContextEventType;
++				ctx.addEventListener(CAST_STATE_CHANGED, sync);
++				ctx.addEventListener(SESSION_STATE_CHANGED, sync);
++				signal.addEventListener("abort", () => {
++					ctx.removeEventListener(CAST_STATE_CHANGED, sync);
++					ctx.removeEventListener(SESSION_STATE_CHANGED, sync);
++				});
++				sync();
++			}, () => set({ remotePlaybackAvailability: "unsupported" }));
++			return;
++		}
++		if (!isMediaRemotePlaybackCapable(media)) return;
+ 		const syncState = () => set({ remotePlaybackState: media.remote.state });
+ 		syncState();
+ 		listen(media.remote, "connect", syncState, { signal });
+diff --git a/dist/dev/dom/media/google-cast/utils.js b/dist/dev/dom/media/google-cast/utils.js
+index 8ca144e0a61f3f25b7628964a2dff818efc689f3..ef2660883dc0be47e18009773d0922a95ac274dd 100644
+--- a/dist/dev/dom/media/google-cast/utils.js
++++ b/dist/dev/dom/media/google-cast/utils.js
+@@ -52,6 +52,24 @@ function getCastContext() {
+ function currentSession() {
+ 	return getCastContext()?.getCurrentSession();
+ }
++function castConnectionState() {
++	const ctx = getCastContext();
++	if (!ctx || typeof cast === "undefined") return "disconnected";
++	switch (ctx.getCastState()) {
++		case cast.framework.CastState.CONNECTED: return "connected";
++		case cast.framework.CastState.CONNECTING: return "connecting";
++		default: return "disconnected";
++	}
++}
++function castDevicesAvailable() {
++	const ctx = getCastContext();
++	if (!ctx || typeof cast === "undefined") return false;
++	const state = ctx.getCastState();
++	return !!state && state !== cast.framework.CastState.NO_DEVICES_AVAILABLE;
++}
++function endCastSession(stopCasting = true) {
++	getCastContext()?.endCurrentSession(stopCasting);
++}
+ function currentMedia() {
+ 	return currentSession()?.getSessionObj().media[0] ?? void 0;
+ }
+@@ -138,6 +156,6 @@ async function getPlaylistSegmentFormat(url) {
+ 	}
+ }
+ //#endregion
+-export { InvalidStateError, IterableWeakSet, NotFoundError, NotSupportedError, currentMedia, currentSession, editTracksInfo, getCastContext, getMediaStatus, getPlaylistSegmentFormat, isHls, loadCastFramework, onCastApiAvailable, requiresCastFramework, setCastOptions, setPlaybackRate };
++export { InvalidStateError, IterableWeakSet, NotFoundError, NotSupportedError, castConnectionState, castDevicesAvailable, currentMedia, currentSession, editTracksInfo, endCastSession, getCastContext, getMediaStatus, getPlaylistSegmentFormat, isHls, loadCastFramework, onCastApiAvailable, requiresCastFramework, setCastOptions, setPlaybackRate };
+ 
+ //# sourceMappingURL=utils.js.map
+\ No newline at end of file
 diff --git a/dist/dev/dom/media/hls-js/media-tracks.js b/dist/dev/dom/media/hls-js/media-tracks.js
 index 99ca6c647292de8ee811f6b0595b23744301fa88..fadfd434b71d2053e6565857a9a8db6a5b658b63 100644
 --- a/dist/dev/dom/media/hls-js/media-tracks.js
@@ -109,3 +258,73 @@ index 99ca6c647292de8ee811f6b0595b23744301fa88..fadfd434b71d2053e6565857a9a8db6a
  			engine?.off(Hls.Events.LEVELS_UPDATED, this.#onLevelsUpdated);
  			engine?.off(Hls.Events.LEVEL_SWITCHED, this.#onLevelSwitched);
  			engine?.off(Hls.Events.DESTROYING, this.#teardown);
+diff --git a/dist/dev/dom/store/features/remote-playback.js b/dist/dev/dom/store/features/remote-playback.js
+index 9a00dbf2858199afe8a66c8f3796ba78efdfc7bc..d59fc75ad19a88acd94d66b196b78ad9a48d73d1 100644
+--- a/dist/dev/dom/store/features/remote-playback.js
++++ b/dist/dev/dom/store/features/remote-playback.js
+@@ -1,7 +1,9 @@
+ import { isMediaRemotePlaybackCapable } from "../../../media/predicate.js";
+ import { definePlayerFeature } from "../../feature.js";
+-import { isRemotePlaybackConnected, requestRemotePlayback } from "../../presentation/remote-playback.js";
++import { isRemotePlaybackConnected, isRemotePlaybackConnecting, requestRemotePlayback } from "../../presentation/remote-playback.js";
+ import { exitFullscreen, isFullscreen } from "../../presentation/fullscreen.js";
++import { castConnectionState, castDevicesAvailable, endCastSession, getCastContext, requiresCastFramework } from "../../media/google-cast/utils.js";
++import { castFramework, ensureCastFramework } from "../../media/google-cast/registry.js";
+ import { isWebKitAirPlayCapable, listen } from "@videojs/utils/dom";
+ //#region src/dom/store/features/remote-playback.ts
+ const remotePlaybackFeature = definePlayerFeature({
+@@ -11,15 +13,21 @@ const remotePlaybackFeature = definePlayerFeature({
+ 		remotePlaybackAvailability: "unsupported",
+ 		async toggleRemotePlayback() {
+ 			const { media, container } = target();
+-			if (isRemotePlaybackConnected(media)) return requestRemotePlayback(media);
++			const capable = Boolean(isMediaRemotePlaybackCapable(media));
++			const connected = isRemotePlaybackConnected(media) || isRemotePlaybackConnecting(media) || castConnectionState() !== "disconnected";
++			if (connected) {
++				if (capable) return requestRemotePlayback(media);
++				endCastSession();
++				return;
++			}
++			if (!capable) return;
+ 			if (isFullscreen(container, media)) await exitFullscreen(media);
+ 			return await requestRemotePlayback(media);
+ 		}
+ 	}),
+ 	attach({ target, signal, set }) {
+ 		const { media } = target;
+-		if (!isMediaRemotePlaybackCapable(media)) return;
+-		if (isWebKitAirPlayCapable(media)) {
++		if (media && isWebKitAirPlayCapable(media)) {
+ 			const syncConnection = () => {
+ 				set({ remotePlaybackState: media.webkitCurrentPlaybackTargetIsWireless ? "connected" : "disconnected" });
+ 			};
+@@ -32,6 +40,29 @@ const remotePlaybackFeature = definePlayerFeature({
+ 			syncConnection();
+ 			return;
+ 		}
++		if (requiresCastFramework()) {
++			const sync = () => {
++				set({
++					remotePlaybackState: castConnectionState(),
++					remotePlaybackAvailability: castDevicesAvailable() ? "available" : "unavailable"
++				});
++			};
++			ensureCastFramework().then(() => {
++				if (signal.aborted) return;
++				const ctx = getCastContext();
++				if (!ctx || !castFramework) return;
++				const { CAST_STATE_CHANGED, SESSION_STATE_CHANGED } = castFramework.CastContextEventType;
++				ctx.addEventListener(CAST_STATE_CHANGED, sync);
++				ctx.addEventListener(SESSION_STATE_CHANGED, sync);
++				signal.addEventListener("abort", () => {
++					ctx.removeEventListener(CAST_STATE_CHANGED, sync);
++					ctx.removeEventListener(SESSION_STATE_CHANGED, sync);
++				});
++				sync();
++			}, () => set({ remotePlaybackAvailability: "unsupported" }));
++			return;
++		}
++		if (!isMediaRemotePlaybackCapable(media)) return;
+ 		const syncState = () => set({ remotePlaybackState: media.remote.state });
+ 		syncState();
+ 		listen(media.remote, "connect", syncState, { signal });

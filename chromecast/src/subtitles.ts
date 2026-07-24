@@ -77,6 +77,11 @@ export class SubtitleManager {
 		this.#apply();
 	}
 
+	/** The id of the currently-selected custom (ass/pgs) subtitle, or null. */
+	get selected(): string | null {
+		return this.#selectedId;
+	}
+
 	#apply(): void {
 		this.#render(
 			(this.#selectedId != null &&
