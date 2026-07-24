@@ -11,6 +11,7 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
+		"blurhash": "^2.0.5",
 		"jassub": "1.8.8",
 		"libpgs": "^0.8.1"
 	},

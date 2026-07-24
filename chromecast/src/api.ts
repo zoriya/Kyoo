@@ -15,6 +15,7 @@ export type VideoMeta = {
 	displayNumber: string;
 	title: string;
 	poster: string | null;
+	blurhash: string | null;
 	thumbnail: string | null;
 };
 
@@ -61,7 +62,7 @@ export const fetchVideoInfo = async (
 	};
 };
 
-type ApiImage = { id?: string };
+type ApiImage = { id?: string; blurhash?: string };
 
 type ApiEntry = {
 	kind?: string;
@@ -119,6 +120,7 @@ export const fetchVideoMeta = async (
 
 	const displayNumber = entry ? entryDisplayNumber(entry) : "";
 	const entryName = entry?.name ?? path;
+	const posterImg = show?.poster?.id ? show.poster : entry?.thumbnail;
 
 	return {
 		showName: show?.name ?? path,
@@ -129,7 +131,8 @@ export const fetchVideoMeta = async (
 				? entryName
 				: `${entryName} (${displayNumber})`
 			: path,
-		poster: image(show?.poster) ?? image(entry?.thumbnail),
+		poster: image(posterImg),
+		blurhash: posterImg?.blurhash ?? null,
 		thumbnail: image(show?.thumbnail) ?? image(show?.poster),
 	};
 };

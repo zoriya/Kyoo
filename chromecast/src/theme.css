@@ -167,6 +167,11 @@ cast-media-player {
 }
 .poster {
 	width: 120px;
+	/* Fixed box so the blurhash background has dimensions before the image loads. */
+	aspect-ratio: 2 / 3;
+	object-fit: cover;
+	background-size: cover;
+	background-position: center;
 	border-radius: 0.5rem;
 	box-shadow: 0 10px 15px rgba(0, 0, 0, 0.5);
 }

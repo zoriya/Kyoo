@@ -1,9 +1,32 @@
+import { decode } from "blurhash";
 import { castMediaPlayerShadow, getVideoElement } from "./cast";
 
 const { EventType, DetailedErrorCode } = cast.framework.events;
 
 const byId = <T extends HTMLElement = HTMLElement>(id: string): T =>
 	document.getElementById(id) as T;
+
+const blurhashToDataUrl = (
+	hash: string | null,
+	width = 32,
+	height = 48,
+): string | null => {
+	if (!hash) return null;
+	try {
+		const pixels = decode(hash, width, height);
+		const canvas = document.createElement("canvas");
+		canvas.width = width;
+		canvas.height = height;
+		const ctx = canvas.getContext("2d");
+		if (!ctx) return null;
+		const imageData = ctx.createImageData(width, height);
+		imageData.data.set(pixels);
+		ctx.putImageData(imageData, 0, 0);
+		return canvas.toDataURL();
+	} catch {
+		return null;
+	}
+};
 
 const formatTime = (seconds?: number, reference = seconds): string => {
 	if (seconds === undefined || !Number.isFinite(seconds)) return "??:??";
@@ -75,19 +98,27 @@ export class ReceiverUi {
 		entryName,
 		displayNumber,
 		poster,
+		blurhash,
 	}: {
 		showName: string;
 		entryName: string;
 		displayNumber: string;
 		poster: string | null;
+		blurhash: string | null;
 	}): void {
 		this.#el.topTitle.textContent = showName;
 		this.#el.title.textContent = [displayNumber, entryName].join(" - ");
 		if (poster) {
+			const placeholder = blurhashToDataUrl(blurhash);
+			this.#el.poster.style.backgroundImage = placeholder
+				? `url(${placeholder})`
+				: "";
 			this.#el.poster.src = poster;
 			this.#el.poster.hidden = false;
 		} else {
 			this.#el.poster.hidden = true;
+			this.#el.poster.removeAttribute("src");
+			this.#el.poster.style.backgroundImage = "";
 		}
 	}
 
