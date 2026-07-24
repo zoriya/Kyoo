@@ -118,6 +118,42 @@ cast-media-player {
 	}
 }
 
+.error {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 2000003;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 1.5rem;
+	padding: 3rem;
+	text-align: center;
+	background: var(--background);
+}
+.error[hidden] {
+	display: none;
+}
+.error-logo {
+	height: 4rem;
+	width: 4rem;
+	opacity: 0.9;
+}
+.error-title {
+	font-weight: 700;
+	font-size: 2rem;
+}
+.error-message {
+	font-weight: 500;
+	font-size: 1.25rem;
+	color: var(--slate-300);
+	max-width: 60ch;
+	line-height: 1.5;
+}
+
 .bottom-bar {
 	position: absolute;
 	left: 0;

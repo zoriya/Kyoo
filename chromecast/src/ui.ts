@@ -1,6 +1,6 @@
 import { castMediaPlayerShadow, getVideoElement } from "./cast";
 
-const { EventType } = cast.framework.events;
+const { EventType, DetailedErrorCode } = cast.framework.events;
 
 const byId = <T extends HTMLElement = HTMLElement>(id: string): T =>
 	document.getElementById(id) as T;
@@ -12,6 +12,42 @@ const formatTime = (seconds?: number, reference = seconds): string => {
 	const hms = `${pad(seconds / 3600)}:${pad((seconds / 60) % 60)}:${pad(seconds % 60)}`;
 	return showHours ? hms : `${pad((seconds / 60) % 60)}:${pad(seconds % 60)}`;
 };
+
+const describeError = (e: framework.events.ErrorEvent): string => {
+	const C = DetailedErrorCode;
+	switch (e.detailedErrorCode) {
+		case C.LOAD_FAILED:
+		case C.LOAD_INTERRUPTED:
+			return "Could not load this video. It may be unavailable or you may not be signed in.";
+		case C.MEDIA_SRC_NOT_SUPPORTED:
+		case C.MEDIA_UNKNOWN:
+			return "This video format is not supported by your Chromecast.";
+		case C.MEDIA_DECODE:
+		case C.SOURCE_BUFFER_FAILURE:
+			return "Your Chromecast could not decode this video.";
+		case C.NETWORK_UNKNOWN:
+		case C.SEGMENT_NETWORK:
+		case C.HLS_NETWORK_MASTER_PLAYLIST:
+		case C.HLS_NETWORK_PLAYLIST:
+		case C.HLS_NETWORK_KEY_LOAD:
+		case C.HLS_NETWORK_INVALID_SEGMENT:
+		case C.DASH_NETWORK:
+			return "Network error while streaming. Check the connection to your server.";
+		case C.MANIFEST_UNKNOWN:
+		case C.HLS_MANIFEST_MASTER:
+		case C.HLS_MANIFEST_PLAYLIST:
+		case C.DASH_MANIFEST_UNKNOWN:
+		case C.DASH_MANIFEST_NO_PERIODS:
+		case C.DASH_MANIFEST_NO_MIMETYPE:
+			return "The video stream could not be read (invalid manifest).";
+		case C.HLS_SEGMENT_PARSING:
+		case C.SEGMENT_UNKNOWN:
+			return "A video segment failed to load or parse.";
+		default:
+			return `Playback failed (error ${e.detailedErrorCode ?? "unknown"}).`;
+	}
+};
+
 
 export class ReceiverUi {
 	#el = {
@@ -26,6 +62,9 @@ export class ReceiverUi {
 		timeTotal: byId("time-total"),
 		progressFill: byId("progress-fill"),
 		progressBuffer: byId("progress-buffer"),
+		error: byId("error"),
+		errorTitle: byId("error-title"),
+		errorMessage: byId("error-message"),
 	};
 	#hideTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -57,9 +96,21 @@ export class ReceiverUi {
 		this.#el.loading.style.display = isLoading ? "flex" : "none";
 	}
 
+	showError(message: string, title = "Playback error"): void {
+		this.setLoading(false);
+		this.#el.errorTitle.textContent = title;
+		this.#el.errorMessage.textContent = message;
+		this.#el.error.hidden = false;
+	}
+
+	clearError(): void {
+		this.#el.error.hidden = true;
+	}
+
 	bindTo(player: framework.PlayerManager): void {
 		player.addEventListener(EventType.PLAYER_LOAD_COMPLETE, () => {
 			this.setLoading(false);
+			this.clearError();
 			this.#syncProgress(player);
 			this.show();
 		});
@@ -71,13 +122,14 @@ export class ReceiverUi {
 		});
 		player.addEventListener(EventType.PLAYING, () => {
 			this.setLoading(false);
+			this.clearError();
 			this.show();
 		});
 		player.addEventListener(EventType.PAUSE, () => {
 			this.show({ sticky: true });
 		});
-		player.addEventListener(EventType.ERROR, () => {
-			this.setLoading(false);
+		player.addEventListener(EventType.ERROR, (e) => {
+			this.showError(describeError(e));
 		});
 	}
 

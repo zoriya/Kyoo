@@ -55,10 +55,11 @@ export class KyooReceiver {
 		const data =
 			(asObject(request.media?.customData) as KyooCastData | null) ?? {};
 		this.#subtitles.reset();
+		this.#ui.clearError();
 
 		if (data.token) {
 			const authed: RequestHandler = (req) => {
-				req.headers = { ...req.headers, Authorization: `Bearer ${data.token}`  };
+				req.headers = { ...req.headers, Authorization: `Bearer ${data.token}` };
 			};
 			this.#playbackConfig.manifestRequestHandler = authed;
 			this.#playbackConfig.segmentRequestHandler = authed;
