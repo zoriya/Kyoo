@@ -94,7 +94,23 @@ export const Player = () => {
 				hasNext: !!data?.next?.video,
 			},
 			castId: `${apiUrl}/api/videos/${slug}`,
-			castData: { apiUrl, slug, clientId, ...(authToken && { token: authToken }) },
+			castData: {
+				apiUrl,
+				slug,
+				clientId,
+				...(authToken && { token: authToken }),
+				// Cast notification metadata for the sender: videojs otherwise loads
+				// an empty GenericMediaMetadata, so the phone/lock-screen notification
+				// falls back to the app/device name. The image must be an absolute,
+				// authed URL to load off-device (thumbnail.high is relative).
+				title: title ?? data?.path ?? "",
+				...(data?.show?.name && { subtitle: data.show.name }),
+				...(data?.show?.thumbnail?.id && {
+					poster: `${apiUrl}/api/images/${data.show.thumbnail.id}?quality=high${
+						authToken ? `&session-token=${authToken}` : ""
+					}`,
+				}),
+			},
 		}),
 		[apiUrl, slug, playMode, info, authToken, start, data, title],
 	);
