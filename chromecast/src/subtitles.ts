@@ -7,7 +7,7 @@ import jassubLegacyWasmUrl from "jassub/dist/jassub-worker.wasm.js?url";
 import { PgsRenderer } from "libpgs";
 import libpgsWorkerUrl from "libpgs/dist/libpgs.worker.js?url";
 import { fetchVideoInfo, type VideoInfo } from "./api";
-import { getVideoElement } from "./cast";
+import { asObject, getVideoElement } from "./cast";
 
 type Subtitle = VideoInfo["subtitles"][0];
 
@@ -34,6 +34,7 @@ type Renderer = { destroy(): void };
 export class SubtitleManager {
 	#layer: HTMLElement;
 	#video: Promise<HTMLVideoElement>;
+	#player: framework.PlayerManager | null = null;
 
 	#tracks: Subtitle[] = [];
 	#fontUrls: string[] = [];
@@ -57,6 +58,22 @@ export class SubtitleManager {
 				}
 			}, 200);
 		});
+	}
+
+	bindTo(player: framework.PlayerManager): void {
+		this.#player = player;
+		player.setMessageInterceptor(
+			cast.framework.messages.MessageType.MEDIA_STATUS,
+			(status) => {
+				// add custom subtitles in customData so it stay synced accross all clients
+				if (status)
+					status.customData = {
+						...(asObject(status.customData) ?? {}),
+						subtitle: this.#selectedId,
+					};
+				return status;
+			},
+		);
 	}
 
 	async load(apiUrl: string, slug: string, token: string): Promise<void> {
@@ -83,11 +100,7 @@ export class SubtitleManager {
 	select(id: string | null): void {
 		this.#selectedId = id;
 		this.#apply();
-	}
-
-	/** The id of the currently-selected custom (ass/pgs) subtitle, or null. */
-	get selected(): string | null {
-		return this.#selectedId;
+		this.#player?.broadcastStatus(true);
 	}
 
 	#apply(): void {
