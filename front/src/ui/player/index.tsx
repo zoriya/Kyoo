@@ -12,6 +12,7 @@ import {
 	usePlayerState,
 } from "react-native-omni";
 import { v4 as uuidv4 } from "uuid";
+import { z } from "zod/v4";
 import { entryDisplayNumber } from "~/components/entries";
 import { FullVideo, type KyooError, type VideoInfo } from "~/models";
 import { Head } from "~/primitives";
@@ -32,6 +33,13 @@ import { useProgressObserver } from "./progress-observer";
 
 const clientId = uuidv4();
 
+const CastPresign = z.object({ signature: z.string() });
+
+const base64UrlPath = (path: string): string =>
+	typeof window !== "undefined" && window.btoa
+		? window.btoa(path).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")
+		: Buffer.from(path).toString("base64url");
+
 type PlayMode = "direct" | "hls";
 
 export const Player = () => {
@@ -50,6 +58,13 @@ export const Player = () => {
 		: data?.path;
 
 	const { apiUrl, authToken } = useToken();
+	const { data: presign } = useFetch(
+		Player.presignQuery(
+			slug,
+			authToken ? data?.path : undefined,
+			data?.show?.poster?.id,
+		),
+	);
 	const [defaultPlayMode] = useLocalSetting<PlayMode>("playMode", "direct");
 	const playModeState = useState(defaultPlayMode);
 	const [playMode] = playModeState;
@@ -98,21 +113,17 @@ export const Player = () => {
 				apiUrl,
 				slug,
 				clientId,
-				...(authToken && { token: authToken }),
-				// Cast notification metadata for the sender: videojs otherwise loads
-				// an empty GenericMediaMetadata, so the phone/lock-screen notification
-				// falls back to the app/device name. The image must be an absolute,
-				// authed URL to load off-device (thumbnail.high is relative).
+				...(presign && { presign: presign.signature }),
 				title: title ?? data?.path ?? "",
 				...(data?.show?.name && { subtitle: data.show.name }),
-				...(data?.show?.thumbnail?.id && {
-					poster: `${apiUrl}/api/images/${data.show.thumbnail.id}?quality=high${
-						authToken ? `&session-token=${authToken}` : ""
+				...(data?.show?.poster?.id && {
+					poster: `${apiUrl}/api/images/${data.show.poster.id}?quality=high${
+						presign ? `&x-presign=${presign.signature}` : ""
 					}`,
 				}),
 			},
 		}),
-		[apiUrl, slug, playMode, info, authToken, start, data, title],
+		[apiUrl, slug, playMode, info, authToken, start, data, title, presign],
 	);
 
 	const player = usePlayer();
@@ -325,4 +336,31 @@ Player.query = (slug: string): QueryIdentifier<FullVideo> => ({
 		with: ["next", "previous", "show"],
 	},
 	parser: FullVideo,
+});
+
+Player.presignQuery = (
+	slug: string,
+	path: string | undefined,
+	posterId: string | undefined,
+): QueryIdentifier<z.infer<typeof CastPresign>> => ({
+	path: ["auth", "presign"],
+	params: { slug },
+	enabled: !!path,
+	parser: CastPresign,
+	options: {
+		method: "POST",
+		body: {
+			for: [
+				{ prefix: `/api/videos/${slug}`, verb: "GET" },
+				...(path
+					? [{ prefix: `/video/${base64UrlPath(path)}`, verb: "GET" }]
+					: []),
+				...(posterId
+					? [{ url: `/api/images/${posterId}`, verb: "GET" }]
+					: []),
+			],
+			duration: "24h",
+		},
+		returnError: true,
+	},
 });

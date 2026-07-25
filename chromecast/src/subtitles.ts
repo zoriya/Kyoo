@@ -76,7 +76,7 @@ export class SubtitleManager {
 		);
 	}
 
-	async load(apiUrl: string, slug: string, token: string): Promise<void> {
+	async load(apiUrl: string, slug: string, presign?: string): Promise<void> {
 		this.#tracks = [];
 		this.#fontUrls = [];
 		this.#selectedId = null;
@@ -84,7 +84,7 @@ export class SubtitleManager {
 
 		if (!apiUrl || !slug) return;
 		try {
-			const info = await fetchVideoInfo(apiUrl, slug, token);
+			const info = await fetchVideoInfo(apiUrl, slug, presign);
 			this.setTracks(info.subtitles, info.fonts);
 		} catch (e) {
 			console.error("[kyoo-receiver] failed to load subtitle tracks", e);

@@ -1,7 +1,7 @@
 export type KyooCastData = {
 	apiUrl: string;
 	slug: string;
-	token: string;
+	presign?: string;
 	clientId: string;
 };
 

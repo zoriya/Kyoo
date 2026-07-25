@@ -1,4 +1,4 @@
-import { fetchVideoMeta } from "./api";
+import { fetchVideoMeta, withPresign } from "./api";
 import { asObject, type KyooCastData, OMNI_NAMESPACE } from "./cast";
 import { SubtitleManager } from "./subtitles";
 import { ReceiverUi } from "./ui";
@@ -58,24 +58,18 @@ export class KyooReceiver {
 		request: messages.LoadRequestData,
 	): Promise<messages.LoadRequestData> => {
 		const data = (asObject(request.media?.customData) as KyooCastData) ?? {};
-		this.#subtitles.load(data.apiUrl, data.slug, data.token);
+		this.#subtitles.load(data.apiUrl, data.slug, data.presign);
 		this.#ui.clearError();
-
-		if (data.token) {
-			const authed: RequestHandler = (req) => {
-				req.headers = { ...req.headers, Authorization: `Bearer ${data.token}` };
-			};
-			this.#playbackConfig.manifestRequestHandler = authed;
-			this.#playbackConfig.segmentRequestHandler = authed;
-			this.#playbackConfig.licenseRequestHandler = authed;
-		}
 
 		this.#ui.dismissSplash();
 		this.#ui.setLoading(true);
 		this.#ui.show({ sticky: true });
 
 		if (request.media && data.apiUrl && data.slug) {
-			request.media.contentUrl = `${data.apiUrl}/api/videos/${data.slug}/master.m3u8?clientId=${data.clientId}`;
+			request.media.contentUrl = withPresign(
+				`${data.apiUrl}/api/videos/${data.slug}/master.m3u8?clientId=${data.clientId}`,
+				data.presign,
+			);
 			request.media.contentType = "application/vnd.apple.mpegurl";
 			request.media.hlsSegmentFormat = HlsSegmentFormat.FMP4;
 			request.media.hlsVideoSegmentFormat = HlsVideoSegmentFormat.FMP4;
@@ -86,7 +80,6 @@ export class KyooReceiver {
 		if (request.media?.contentUrl) {
 			try {
 				const res = await fetch(request.media.contentUrl, {
-					headers: { Authorization: `Bearer ${data.token}` },
 					redirect: "follow",
 				});
 				res.body?.cancel();
@@ -97,13 +90,13 @@ export class KyooReceiver {
 		}
 
 		try {
-			const meta = await fetchVideoMeta(data.apiUrl, data.slug, data.token);
+			const meta = await fetchVideoMeta(data.apiUrl, data.slug, data.presign);
 			this.#ui.setMetadata(meta);
 			if (request.media) {
 				const metadata = new GenericMediaMetadata();
 				metadata.title = meta.title;
 				if (meta.showName) metadata.subtitle = meta.showName;
-				if (meta.thumbnail) metadata.images = [{ url: meta.thumbnail }];
+				if (meta.poster) metadata.images = [{ url: meta.poster }];
 				request.media.metadata = metadata;
 			}
 		} catch (e) {
