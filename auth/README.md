@@ -67,6 +67,16 @@ Post `/keys` {...claims} Create a new api keys with given claims
 An api key can be used like an opaque token, calling /jwt with it will return a valid jwt with the claims you specified during the post request to create it.
 Creating an apikeys requires the `apikey.write` permission, reading them requires the `apikey.read` permission.
 
+### Presigned urls
+
+```
+POST `/presign` { for: [{ url|prefix, verb }], duration } -> { signature, for, expireAt }
+```
+
+`/presign` returns a signature valid for the given requests. Each `for` rule matches either an exact `url` or (if `prefix` is set instead) any request path starting with that prefix, restricted to the given `verb` (all matched against the request path).
+
+Append the returned signature as a `x-presign=$signature` query parameter to any request allowed by `for`, and the auth middleware (`/jwt`) will verify the signature and issue a jwt carrying the claims you had when you created it ; without needing a session token or an api key.
+
 ### OIDC
 
 ```

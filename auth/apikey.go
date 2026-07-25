@@ -216,9 +216,5 @@ func (h *Handler) createApiJwt(ctx context.Context, apikey string) (string, erro
 	}
 	jwt := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	jwt.Header["kid"] = h.config.JwtKid
-	t, err := jwt.SignedString(h.config.JwtPrivateKey)
-	if err != nil {
-		return "", err
-	}
-	return t, nil
+	return jwt.SignedString(h.config.JwtPrivateKey)
 }

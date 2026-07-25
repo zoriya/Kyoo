@@ -168,13 +168,15 @@ func (h *Handler) TokenToJwt(next echo.HandlerFunc) echo.HandlerFunc {
 		ctx := c.Request().Context()
 		var jwt *string
 
-		queryApikey, queryToken := getQueryAuth(c)
-
+		presign := getQueryPresign(c)
 		apikey := c.Request().Header.Get("X-Api-Key")
-		if apikey == "" {
-			apikey = queryApikey
-		}
-		if apikey != "" {
+		if presign != "" {
+			token, err := h.createPresignJwt(c, presign)
+			if err != nil {
+				return err
+			}
+			jwt = &token
+		} else if apikey != "" {
 			token, err := h.createApiJwt(ctx, apikey)
 			if err != nil {
 				return err
@@ -187,8 +189,6 @@ func (h *Handler) TokenToJwt(next echo.HandlerFunc) echo.HandlerFunc {
 			if auth == "" {
 				if cookie, _ := c.Request().Cookie("X-Bearer"); cookie != nil {
 					token = cookie.Value
-				} else {
-					token = queryToken
 				}
 			} else if strings.HasPrefix(auth, "Bearer ") {
 				token = auth[len("Bearer "):]
@@ -409,6 +409,7 @@ func main() {
 
 	g.Any("/jwt", h.CreateJwt)
 	g.Any("/jwt/*", h.CreateJwt)
+	r.POST("/presign", h.Presign)
 	e.GET("/.well-known/jwks.json", h.GetJwks)
 	e.GET("/.well-known/openid-configuration", h.GetOidcConfig)
 
