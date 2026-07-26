@@ -40,6 +40,11 @@ const base64UrlPath = (path: string): string =>
 		? window.btoa(path).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")
 		: Buffer.from(path).toString("base64url");
 
+const withPresign = (url: string, signature?: string): string => {
+	if (!url || !signature) return url;
+	return `${url}${url.includes("?") ? "&" : "?"}x-presign=${signature}`;
+};
+
 type PlayMode = "direct" | "hls";
 
 export const Player = () => {
@@ -74,7 +79,10 @@ export const Player = () => {
 		() => ({
 			src: [
 				{
-					uri: `${apiUrl}/api/videos/${slug}/${playMode === "direct" ? "direct" : "master.m3u8"}?clientId=${clientId}`,
+					uri: withPresign(
+						`${apiUrl}/api/videos/${slug}/${playMode === "direct" ? "direct" : "master.m3u8"}?clientId=${clientId}`,
+						presign?.signature,
+					),
 					// chrome based browsers support matroska but they tell they don't
 					mimeType:
 						playMode === "direct"
@@ -93,14 +101,16 @@ export const Player = () => {
 					// of sync with `info.subtitles`. since we never actually play those
 					// this is fine.
 					id: (x.index ?? i).toString(),
-					link:
+					link: withPresign(
 						(x.codec === "subrip" && x.link && Platform.OS === "web"
 							? `${x.link}?format=vtt`
 							: x.link) ?? "",
+						presign?.signature,
+					),
 					label: x.title ?? "Unknown",
 					language: x.language ?? "und",
 				})),
-			fonts: info?.fonts ?? [],
+			fonts: (info?.fonts ?? []).map((x) => withPresign(x, presign?.signature)),
 			metadata: {
 				title: title ?? data?.path ?? "",
 				artist: data?.show?.name ?? undefined,
