@@ -83,10 +83,16 @@ function getRedirectToImageHandler({ filter }: { filter?: SQL }) {
 				message: "Accept-Language header could not be satisfied.",
 			});
 		}
+		if (!ret.image) {
+			return status(404, {
+				status: 404,
+				message: `No ${image} available for the item with id or slug: '${id}'.`,
+			});
+		}
 		set.headers["content-language"] = ret.language;
 		return quality
-			? redirect(`${prefix}/images/${ret.image!.id}?quality=${quality}`)
-			: redirect(`${prefix}/images/${ret.image!.id}`);
+			? redirect(`${prefix}/images/${ret.image.id}?quality=${quality}`)
+			: redirect(`${prefix}/images/${ret.image.id}`);
 	};
 }
 
@@ -271,10 +277,16 @@ export const imagesH = new Elysia({ tags: ["images"] })
 					message: "Accept-Language header could not be satisfied.",
 				});
 			}
+			if (!ret.image) {
+				return status(404, {
+					status: 404,
+					message: `No logo available for the studio with id or slug: '${id}'.`,
+				});
+			}
 			set.headers["content-language"] = ret.language;
 			return quality
-				? redirect(`${prefix}/images/${ret.image!.id}?quality=${quality}`)
-				: redirect(`${prefix}/images/${ret.image!.id}`);
+				? redirect(`${prefix}/images/${ret.image.id}?quality=${quality}`)
+				: redirect(`${prefix}/images/${ret.image.id}`);
 		},
 		{
 			detail: { description: "Get the logo of a studio." },
