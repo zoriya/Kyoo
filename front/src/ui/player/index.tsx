@@ -77,20 +77,18 @@ export const Player = () => {
 
 	const source = useMemo<Source>(
 		() => ({
-			src: [
-				{
-					uri: withPresign(
-						`${apiUrl}/api/videos/${slug}/${playMode === "direct" ? "direct" : "master.m3u8"}?clientId=${clientId}`,
-						presign?.signature,
-					),
-					// chrome based browsers support matroska but they tell they don't
-					mimeType:
-						playMode === "direct"
-							? info?.mimeCodec?.replace("x-matroska", "mp4")
-							: "application/vnd.apple.mpegurl",
-					headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
-				},
-			],
+			src: {
+				uri: withPresign(
+					`${apiUrl}/api/videos/${slug}/${playMode === "direct" ? "direct" : "master.m3u8"}?clientId=${clientId}`,
+					presign?.signature,
+				),
+				// chrome based browsers support matroska but they tell they don't
+				mimeType:
+					playMode === "direct"
+						? info?.mimeCodec?.replace("x-matroska", "mp4")
+						: "application/vnd.apple.mpegurl",
+				headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+			},
 			startTime: start ? Number.parseInt(start, 10) : data?.progress.time,
 			subtitles: (info?.subtitles ?? [])
 				.filter(

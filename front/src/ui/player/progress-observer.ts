@@ -15,8 +15,7 @@ export const useProgressObserver = (
 		if (
 			ids === null ||
 			Number.isNaN(player.currentTime) ||
-			Number.isNaN(player.duration) ||
-			!player.isPlaying
+			Number.isNaN(player.duration)
 		)
 			return;
 		sendJsonMessage({
@@ -29,12 +28,9 @@ export const useProgressObserver = (
 	}, [player, ids, sendJsonMessage]);
 
 	useEffect(() => {
+		updateProgress();
+		if (!isPlaying) return;
 		const interval = setInterval(updateProgress, 5000);
 		return () => clearInterval(interval);
-	}, [updateProgress]);
-
-	// send an update whenever playback is toggled (play/pause)
-	useEffect(() => {
-		updateProgress();
-	}, [updateProgress]);
+	}, [updateProgress, isPlaying]);
 };

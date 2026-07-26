@@ -73,7 +73,7 @@ export const toggleFullscreen = async (set?: boolean) => {
 			screen.orientation.unlock();
 		}
 	} catch (e) {
-		console.log(e);
+		console.error("failed to toggle fullscreen", e);
 	}
 };
 

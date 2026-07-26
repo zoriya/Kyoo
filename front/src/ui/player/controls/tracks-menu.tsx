@@ -100,7 +100,7 @@ export const VideoMenu = (props: Partial<MenuProps>) => {
 		<Menu
 			Trigger={IconButton}
 			icon={VideoSettings}
-			{...tooltip(t("player.audios"), true)}
+			{...tooltip(t("player.videos"), true)}
 			{...props}
 		>
 			{tracks.map((x) => (
@@ -155,24 +155,21 @@ export const QualityMenu = (props: Partial<MenuProps>) => {
 					player.selectRendition(undefined);
 				}}
 			/>
-			{lvls
-				.reverse()
-				.map((x) => (
-					<Menu.Item
-						key={x.id}
-						label={
-							x.id.includes("original")
-								? `${t("player.transmux")} (${x.height}p)`
-								: `${x.height}p`
-						}
-						selected={x.selected && !auto}
-						onSelect={() => {
-							setPlayMode("hls");
-							player.selectRendition(x);
-						}}
-					/>
-				))
-				.reverse()}
+			{[...lvls].reverse().map((x) => (
+				<Menu.Item
+					key={x.id}
+					label={
+						x.id.includes("original")
+							? `${t("player.transmux")} (${x.height}p)`
+							: `${x.height}p`
+					}
+					selected={x.selected && !auto}
+					onSelect={() => {
+						setPlayMode("hls");
+						player.selectRendition(x);
+					}}
+				/>
+			))}
 		</Menu>
 	);
 };

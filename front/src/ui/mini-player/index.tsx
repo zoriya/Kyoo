@@ -50,12 +50,12 @@ export const MiniPlayer = () => {
 						{t("miniPlayer.casting")}
 					</P>
 				</View>
-				{player.source?.src[0]?.uri.match(/\/videos\/([^/?]+)\//)?.[1] && (
+				{player.source?.src?.uri.match(/\/videos\/([^/?]+)\//)?.[1] && (
 					<IconButton
 						icon={OpenInFull}
 						onPress={() =>
 							router.push(
-								`/watch/${player.source?.src[0]?.uri.match(/\/videos\/([^/?]+)\//)?.[1]}`,
+								`/watch/${player.source?.src?.uri.match(/\/videos\/([^/?]+)\//)?.[1]}`,
 							)
 						}
 						iconClassName={"fill-slate-200"}
