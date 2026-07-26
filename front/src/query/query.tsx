@@ -49,7 +49,7 @@ export const queryFn = async <Parser extends z.ZodTypeAny>(context: {
 					? { Authorization: `Bearer ${context.authToken}` }
 					: {}),
 				...(context.body ? { "Content-Type": "application/json" } : {}),
-				"Accept-Language": context.lang ?? "en",
+				"Accept-Language": `${context.lang ?? "en"}, en, *`,
 			},
 			signal: context.signal,
 		});
