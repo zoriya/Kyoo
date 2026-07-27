@@ -13,7 +13,7 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/labstack/echo-opentelemetry v0.0.3
-	github.com/labstack/echo/v5 v5.3.0
+	github.com/labstack/echo/v5 v5.3.1
 	github.com/swaggo/echo-swagger/v2 v2.0.1
 	github.com/swaggo/swag v1.16.6
 	gitlab.com/opennota/screengen v1.0.2
@@ -97,8 +97,8 @@ require (
 	github.com/aws/smithy-go v1.27.3 // indirect
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	golang.org/x/image v0.41.0 // indirect
-	golang.org/x/net v0.56.0 // indirect
-	golang.org/x/sys v0.46.0 // indirect
+	golang.org/x/net v0.57.0 // indirect
+	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.40.0
 	golang.org/x/time v0.15.0 // indirect
 )
