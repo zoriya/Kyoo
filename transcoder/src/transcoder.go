@@ -65,7 +65,7 @@ func (t *Transcoder) getFileStream(ctx context.Context, path string, sha string)
 	return ret, nil
 }
 
-func (t *Transcoder) GetMaster(ctx context.Context, path string, client string, profileId *string, sessionId *string, sha string) (string, error) {
+func (t *Transcoder) GetMaster(ctx context.Context, path string, client string, query string, profileId *string, sessionId *string, sha string) (string, error) {
 	ctx = context.WithoutCancel(ctx)
 	stream, err := t.getFileStream(ctx, path, sha)
 	if err != nil {
@@ -82,7 +82,7 @@ func (t *Transcoder) GetMaster(ctx context.Context, path string, client string, 
 		vhead:     -1,
 		ahead:     -1,
 	})
-	return stream.GetMaster(ctx, client), nil
+	return stream.GetMaster(ctx, query), nil
 }
 
 func (t *Transcoder) GetVideoIndex(
@@ -91,6 +91,7 @@ func (t *Transcoder) GetVideoIndex(
 	video uint32,
 	quality VideoQuality,
 	client string,
+	query string,
 	profileId *string,
 	sessionId *string,
 	sha string,
@@ -111,7 +112,7 @@ func (t *Transcoder) GetVideoIndex(
 		vhead:     -1,
 		ahead:     -1,
 	})
-	return stream.GetVideoIndex(ctx, video, quality, client)
+	return stream.GetVideoIndex(ctx, video, quality, query)
 }
 
 func (t *Transcoder) GetAudioIndex(
@@ -120,6 +121,7 @@ func (t *Transcoder) GetAudioIndex(
 	audio uint32,
 	quality AudioQuality,
 	client string,
+	query string,
 	profileId *string,
 	sessionId *string,
 	sha string,
@@ -139,7 +141,7 @@ func (t *Transcoder) GetAudioIndex(
 		vhead:     -1,
 		ahead:     -1,
 	})
-	return stream.GetAudioIndex(ctx, audio, quality, client)
+	return stream.GetAudioIndex(ctx, audio, quality, query)
 }
 
 func (t *Transcoder) GetVideoSegment(

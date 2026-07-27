@@ -530,7 +530,7 @@ func (ts *Stream) GetInit(ctx context.Context) (string, error) {
 	return ts.handle.getInitPath(int(encoder)), nil
 }
 
-func (ts *Stream) GetIndex(_ context.Context, client string) (string, error) {
+func (ts *Stream) GetIndex(_ context.Context, query string) (string, error) {
 	// playlist type is event since we can append to the list if Keyframe.IsDone is false.
 	// start time offset makes the stream start at 0s instead of ~3segments from the end (requires version 6 of hls)
 	// version 7 is required for fMP4 segments (#EXT-X-MAP referencing an init segment).
@@ -541,19 +541,19 @@ func (ts *Stream) GetIndex(_ context.Context, client string) (string, error) {
 #EXT-X-TARGETDURATION:4
 #EXT-X-MEDIA-SEQUENCE:0
 #EXT-X-INDEPENDENT-SEGMENTS
-#EXT-X-MAP:URI="init.mp4?clientId=%s"
-`, client)
+#EXT-X-MAP:URI="init.mp4?%s"
+`, query)
 	length, is_done := ts.keyframes.Length()
 
 	for segment := int32(0); segment < length-1; segment++ {
 		index += fmt.Sprintf("#EXTINF:%.6f\n", ts.keyframes.Get(segment+1)-ts.keyframes.Get(segment))
-		index += fmt.Sprintf("segment-%d.mp4?clientId=%s\n", segment, client)
+		index += fmt.Sprintf("segment-%d.mp4?%s\n", segment, query)
 	}
 	// do not forget to add the last segment between the last keyframe and the end of the file
 	// if the keyframes extraction is not done, do not bother to add it, it will be retrived on the next index retrival
 	if is_done && length > 0 {
 		index += fmt.Sprintf("#EXTINF:%.6f\n", float64(ts.file.Info.Duration)-ts.keyframes.Get(length-1))
-		index += fmt.Sprintf("segment-%d.mp4?clientId=%s\n", length-1, client)
+		index += fmt.Sprintf("segment-%d.mp4?%s\n", length-1, query)
 		index += `#EXT-X-ENDLIST`
 	}
 	return index, nil

@@ -124,24 +124,27 @@ export const series = new Elysia({ prefix: "/series", tags: ["series"] })
 			detail: {
 				description: "Get a random serie",
 			},
-			query: t.Object({
-				preferOriginal: t.Optional(
-					t.Boolean({ description: desc.preferOriginal }),
-				),
-				with: t.Array(
-					t.UnionEnum([
-						"translations",
-						"collection",
-						"studios",
-						"firstEntry",
-						"nextEntry",
-					]),
-					{
-						default: [],
-						description: "Include related resources in the response.",
-					},
-				),
-			}),
+			query: t.Object(
+				{
+					preferOriginal: t.Optional(
+						t.Boolean({ description: desc.preferOriginal }),
+					),
+					with: t.Array(
+						t.UnionEnum([
+							"translations",
+							"collection",
+							"studios",
+							"firstEntry",
+							"nextEntry",
+						]),
+						{
+							default: [],
+							description: "Include related resources in the response.",
+						},
+					),
+				},
+				{ additionalProperties: true },
+			),
 			response: {
 				302: t.Void({
 					description:

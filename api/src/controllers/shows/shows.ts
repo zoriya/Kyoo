@@ -33,11 +33,7 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 	.use(auth)
 	.get(
 		"random",
-		async ({
-			status,
-			redirect,
-			query: { preferOriginal, with: relations },
-		}) => {
+		async ({ status, redirect, query }) => {
 			const [show] = await db
 				.select({ kind: shows.kind, slug: shows.slug })
 				.from(shows)
@@ -57,8 +53,8 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 
 			return redirect(
 				`${prefix}/${show.kind}s/${show.slug}${toQueryStr({
-					preferOriginal,
-					with: relations.filter((x) => x in availableRelations[show.kind]),
+					...query,
+					with: query.with.filter((x) => x in availableRelations[show.kind]),
 				})}`,
 			);
 		},
@@ -66,18 +62,21 @@ export const showsH = new Elysia({ prefix: "/shows", tags: ["shows"] })
 			detail: {
 				description: "Get a random movie/serie/collection",
 			},
-			query: t.Object({
-				preferOriginal: t.Optional(
-					t.Boolean({ description: desc.preferOriginal }),
-				),
-				with: t.Array(
-					t.UnionEnum(Object.keys(showRelations) as NonEmptyArray<string>),
-					{
-						default: [],
-						description: "Include related resources in the response.",
-					},
-				),
-			}),
+			query: t.Object(
+				{
+					preferOriginal: t.Optional(
+						t.Boolean({ description: desc.preferOriginal }),
+					),
+					with: t.Array(
+						t.UnionEnum(Object.keys(showRelations) as NonEmptyArray<string>),
+						{
+							default: [],
+							description: "Include related resources in the response.",
+						},
+					),
+				},
+				{ additionalProperties: true },
+			),
 			response: {
 				302: t.Void({
 					description: "Redirected to the appropriate get endpoint.",

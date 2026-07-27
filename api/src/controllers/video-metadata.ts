@@ -23,7 +23,7 @@ export const videosMetadata = new Elysia({
 	.use(auth)
 	.get(
 		":id/info",
-		async ({ params: { id }, status, redirect }) => {
+		async ({ params: { id }, query, status, redirect }) => {
 			const [video] = await db
 				.select({
 					path: videos.path,
@@ -40,7 +40,7 @@ export const videosMetadata = new Elysia({
 				});
 			}
 			const path = Buffer.from(video.path, "utf8").toString("base64url");
-			return redirect(`/video/${path}/info`);
+			return redirect(`/video/${path}/info${toQueryStr(query)}`);
 		},
 		{
 			detail: { description: "Get a video's metadata informations" },
@@ -64,7 +64,7 @@ export const videosMetadata = new Elysia({
 	)
 	.get(
 		":id/thumbnails.vtt",
-		async ({ params: { id }, status, redirect }) => {
+		async ({ params: { id }, query, status, redirect }) => {
 			const [video] = await db
 				.select({
 					path: videos.path,
@@ -81,7 +81,7 @@ export const videosMetadata = new Elysia({
 				});
 			}
 			const path = Buffer.from(video.path, "utf8").toString("base64url");
-			return redirect(`/video/${path}/thumbnails.vtt`);
+			return redirect(`/video/${path}/thumbnails.vtt${toQueryStr(query)}`);
 		},
 		{
 			detail: {
@@ -107,7 +107,7 @@ export const videosMetadata = new Elysia({
 	)
 	.get(
 		":id/direct",
-		async ({ params: { id }, status, redirect }) => {
+		async ({ params: { id }, query, status, redirect }) => {
 			const [video] = await db
 				.select({
 					path: videos.path,
@@ -126,7 +126,7 @@ export const videosMetadata = new Elysia({
 			const path = Buffer.from(video.path, "utf8").toString("base64url");
 			const filename = video.path.substring(video.path.lastIndexOf("/") + 1);
 			return redirect(
-				`/video/${path}/direct/${slugify(filename, { lower: true })}`,
+				`/video/${path}/direct/${slugify(filename, { lower: true })}${toQueryStr(query)}`,
 			);
 		},
 		{
@@ -153,7 +153,7 @@ export const videosMetadata = new Elysia({
 	)
 	.get(
 		":id/master.m3u8",
-		async ({ params: { id }, request, status, redirect }) => {
+		async ({ params: { id }, query, status, redirect }) => {
 			const [video] = await db
 				.select({
 					path: videos.path,
@@ -170,8 +170,7 @@ export const videosMetadata = new Elysia({
 				});
 			}
 			const path = Buffer.from(video.path, "utf8").toString("base64url");
-			const query = request.url.substring(request.url.indexOf("?"));
-			return redirect(`/video/${path}/master.m3u8${query}`);
+			return redirect(`/video/${path}/master.m3u8${toQueryStr(query)}`);
 		},
 		{
 			detail: { description: "Get redirected to the master.m3u8 of the video" },

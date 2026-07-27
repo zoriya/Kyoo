@@ -70,7 +70,7 @@ func (h *shandler) GetMaster(c *echo.Context) error {
 		return err
 	}
 
-	ret, err := h.transcoder.GetMaster(c.Request().Context(), path, client, profileId, sessionId, sha)
+	ret, err := h.transcoder.GetMaster(c.Request().Context(), path, client, getQuery(c, client), profileId, sessionId, sha)
 	if err != nil {
 		return err
 	}
@@ -113,6 +113,7 @@ func (h *shandler) GetVideoIndex(c *echo.Context) error {
 		uint32(video),
 		quality,
 		client,
+		getQuery(c, client),
 		profileId,
 		sessionId,
 		sha,
@@ -159,6 +160,7 @@ func (h *shandler) GetAudioIndex(c *echo.Context) error {
 		uint32(audio),
 		quality,
 		client,
+		getQuery(c, client),
 		profileId,
 		sessionId,
 		sha,
@@ -317,6 +319,12 @@ func getClientId(c *echo.Context) (string, error) {
 		return "", echo.NewHTTPError(http.StatusBadRequest, "missing client id. Please specify the X-CLIENT-ID header (or the clientId query param) to a guid constant for the lifetime of the player (but unique per instance)")
 	}
 	return key, nil
+}
+
+func getQuery(c *echo.Context, client string) string {
+	query := c.Request().URL.Query()
+	query.Set("clientId", client)
+	return query.Encode()
 }
 
 func getIdentity(c *echo.Context) (*string, *string) {

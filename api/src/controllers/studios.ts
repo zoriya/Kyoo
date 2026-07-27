@@ -213,12 +213,15 @@ export const studiosH = new Elysia({ prefix: "/studios", tags: ["studios"] })
 			detail: {
 				description: "Get a random studio.",
 			},
-			query: t.Object({
-				with: t.Array(t.UnionEnum(["translations"]), {
-					default: [],
-					description: "Include related resources in the response.",
-				}),
-			}),
+			query: t.Object(
+				{
+					with: t.Array(t.UnionEnum(["translations"]), {
+						default: [],
+						description: "Include related resources in the response.",
+					}),
+				},
+				{ additionalProperties: true },
+			),
 			response: {
 				302: t.Void({
 					description:
