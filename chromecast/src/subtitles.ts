@@ -1,22 +1,32 @@
-import JASSUB from "jassub";
 // jassub 1.x, not 2.x: 2.x needs OffscreenCanvas + threaded WASM (SharedArrayBuffer),
 // absent on Chromecast's Chrome 90; 1.x offers offscreenRender:false + manual setCurrentTime.
+import JASSUB from "jassub";
+import jassubDefaultFontUrl from "jassub/dist/default.woff2?url";
 import jassubWorkerUrl from "jassub/dist/jassub-worker.js?url";
 import jassubWasmUrl from "jassub/dist/jassub-worker.wasm?url";
 import jassubLegacyWasmUrl from "jassub/dist/jassub-worker.wasm.js?url";
 import { PgsRenderer } from "libpgs";
 import libpgsWorkerUrl from "libpgs/dist/libpgs.worker.js?url";
-import { fetchVideoInfo, type VideoInfo } from "./api";
-import { asObject, getVideoElement } from "./cast";
+import { getVideoElement } from "./cast";
 
-type Subtitle = VideoInfo["subtitles"][0];
+// A valid but empty WebVTT (`WEBVTT\n\n`), as a data URI. ass/pgs tracks are
+// swapped to this so CAF happily holds them "active" (rendering nothing) while
+// we draw the real subtitle ourselves as an overlay.
+const EMPTY_VTT = "data:text/vtt;base64,V0VCVlRUCgo=";
 
 // ass (jassub) and pgs (libpgs) are drawn by us; vtt/native are left to CAF.
 type Format = "ass" | "pgs";
 
-const detectFormat = (subtitle: Subtitle): Format | null => {
-	const mime = (subtitle.mimeType ?? "").toLowerCase();
-	const ext = subtitle.link.split(/[?#]/)[0]?.split(".").pop()?.toLowerCase();
+const detectFormat = (
+	contentType: string | undefined,
+	contentId: string | undefined,
+): Format | null => {
+	const mime = (contentType ?? "").toLowerCase();
+	const ext = (contentId ?? "")
+		.split(/[?#]/)[0]
+		?.split(".")
+		.pop()
+		?.toLowerCase();
 	if (
 		mime.includes("ass") ||
 		mime.includes("ssa") ||
@@ -28,21 +38,19 @@ const detectFormat = (subtitle: Subtitle): Format | null => {
 	return null;
 };
 
-// A drawing backend; destroy() stops rendering and releases its worker.
+type CustomTrack = { url: string; format: Format };
+
 type Renderer = { destroy(): void };
 
 export class SubtitleManager {
 	#layer: HTMLElement;
 	#video: Promise<HTMLVideoElement>;
-	#player: framework.PlayerManager | null = null;
-
-	#tracks: Subtitle[] = [];
+	#tracks = new Map<number, CustomTrack>();
 	#fontUrls: string[] = [];
-	#selectedId: string | null = null;
 
 	#renderer: Renderer | null = null;
 	#canvas: HTMLCanvasElement | null = null;
-	#current: Subtitle | null = null;
+	#currentUrl: string | null = null;
 
 	constructor(layer: HTMLElement) {
 		this.#layer = layer;
@@ -60,69 +68,56 @@ export class SubtitleManager {
 		});
 	}
 
-	bindTo(player: framework.PlayerManager): void {
-		this.#player = player;
-		player.setMessageInterceptor(
-			cast.framework.messages.MessageType.MEDIA_STATUS,
-			(status) => {
-				// add custom subtitles in customData so it stay synced accross all clients
-				if (status)
-					status.customData = {
-						...(asObject(status.customData) ?? {}),
-						subtitle: this.#selectedId,
-					};
-				return status;
-			},
-		);
-	}
-
-	async load(apiUrl: string, slug: string, presign?: string): Promise<void> {
-		this.#tracks = [];
-		this.#fontUrls = [];
-		this.#selectedId = null;
-		this.#teardown();
-
-		if (!apiUrl || !slug) return;
-		try {
-			const info = await fetchVideoInfo(apiUrl, slug, presign);
-			this.setTracks(info.subtitles, info.fonts);
-		} catch (e) {
-			console.error("[kyoo-receiver] failed to load subtitle tracks", e);
+	// Process the LOAD request's text tracks: record the ass/pgs ones we must
+	// draw ourselves (keyed by trackId) and neutralise them to an empty vtt so
+	// CAF holds them active harmlessly while we overlay the real subtitle.
+	// Native (vtt) tracks are left untouched for CAF.
+	registerTracks(tracks: messages.Track[] | undefined): void {
+		this.#tracks = new Map();
+		for (const track of tracks ?? []) {
+			if (track.type !== cast.framework.messages.TrackType.TEXT) continue;
+			const format = detectFormat(track.trackContentType, track.trackContentId);
+			if (!format) continue;
+			this.#tracks.set(track.trackId, {
+				url: track.trackContentId ?? "",
+				format,
+			});
+			track.trackContentId = EMPTY_VTT;
+			track.trackContentType = "text/vtt";
 		}
 	}
 
-	setTracks(subtitles: Subtitle[], fonts: string[]): void {
-		this.#tracks = subtitles;
+	setFonts(fonts: string[]): void {
 		this.#fontUrls = fonts;
-		this.#apply();
 	}
 
-	select(id: string | null): void {
-		this.#selectedId = id;
-		this.#apply();
-		this.#player?.broadcastStatus(true);
+	applyActive(activeTrackIds: number[] | undefined): void {
+		const custom =
+			(activeTrackIds ?? [])
+				.map((id) => this.#tracks.get(id))
+				.find((t): t is CustomTrack => !!t) ?? null;
+		this.#render(custom);
 	}
 
-	#apply(): void {
-		this.#render(
-			(this.#selectedId != null &&
-				this.#tracks.find((s) => s.id === this.#selectedId)) ||
-				null,
-		);
+	clear(): void {
+		this.#tracks = new Map();
+		this.#fontUrls = [];
+		this.#render(null);
 	}
 
-	async #render(subtitle: Subtitle | null): Promise<void> {
-		if (!subtitle?.link) return this.#teardown();
-		if (this.#current?.link === subtitle.link) return;
-		const format = detectFormat(subtitle);
-		if (!format) return this.#teardown();
+	async #render(track: CustomTrack | null): Promise<void> {
+		if (!track?.url) {
+			this.#teardown();
+			return;
+		}
+		if (this.#currentUrl === track.url) return;
 
 		this.#teardown();
-		this.#current = subtitle;
+		this.#currentUrl = track.url;
 
 		const video = await this.#video;
 		// Selection changed while we waited for the <video> element.
-		if (this.#current !== subtitle) return;
+		if (this.#currentUrl !== track.url) return;
 
 		const width = window.innerWidth || video.videoWidth || 1920;
 		const height = window.innerHeight || video.videoHeight || 1080;
@@ -133,9 +128,9 @@ export class SubtitleManager {
 		this.#canvas = canvas;
 
 		this.#renderer =
-			format === "ass"
-				? this.#renderAss(video, canvas, subtitle.link, width, height)
-				: this.#renderPgs(video, canvas, subtitle.link);
+			track.format === "ass"
+				? this.#renderAss(video, canvas, track.url, width, height)
+				: this.#renderPgs(video, canvas, track.url);
 	}
 
 	#renderAss(
@@ -155,6 +150,8 @@ export class SubtitleManager {
 			offscreenRender: false,
 			onDemandRender: false,
 			fonts: this.#fontUrls,
+			availableFonts: { "liberation sans": jassubDefaultFontUrl },
+			fallbackFont: "liberation sans",
 		});
 		jassub.resize(width, height, 0, 0);
 
@@ -194,7 +191,7 @@ export class SubtitleManager {
 	}
 
 	#teardown(): void {
-		this.#current = null;
+		this.#currentUrl = null;
 		this.#renderer?.destroy();
 		this.#renderer = null;
 		this.#canvas?.remove();

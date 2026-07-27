@@ -5,9 +5,6 @@ export type KyooCastData = {
 	clientId: string;
 };
 
-// omni's channel for the selected custom (ass/pgs) subtitle; keep in sync with react-native-omni.
-export const OMNI_NAMESPACE = "urn:x-cast:dev.zoriya.omni";
-
 // CAF passes castData/messages as an object or a JSON string; normalise to an object.
 export const asObject = (raw: unknown): Record<string, unknown> | null => {
 	if (typeof raw === "string") {

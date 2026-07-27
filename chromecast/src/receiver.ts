@@ -1,5 +1,5 @@
-import { fetchVideoMeta, withPresign } from "./api";
-import { asObject, type KyooCastData, OMNI_NAMESPACE } from "./cast";
+import { fetchVideoInfo, fetchVideoMeta, withPresign } from "./api";
+import { asObject, type KyooCastData } from "./cast";
 import { SubtitleManager } from "./subtitles";
 import { ReceiverUi } from "./ui";
 
@@ -23,22 +23,15 @@ export class KyooReceiver {
 	start(): void {
 		this.#ui.hideCafChrome();
 		this.#ui.bindTo(this.#player);
-		this.#subtitles.bindTo(this.#player);
 
 		this.#playbackConfig.initialBandwidth = 20_000_000;
 		this.#player.setMessageInterceptor(MessageType.LOAD, this.#onLoad);
 		this.#player.setMessageInterceptor(MessageType.EDIT_TRACKS_INFO, (req) => {
-			// A native track was picked — drop our custom subtitle.
-			if (req.activeTrackIds?.length) this.#subtitles.select(null);
+			this.#subtitles.applyActive(req.activeTrackIds);
 			return req;
 		});
-		this.#context.addCustomMessageListener(OMNI_NAMESPACE, (event) => {
-			// omni sends { subtitle: <track id> | null }.
-			const subtitle = asObject(event.data)?.subtitle;
-			this.#subtitles.select(typeof subtitle === "string" ? subtitle : null);
-		});
 		this.#player.addEventListener(EventType.MEDIA_FINISHED, () => {
-			this.#subtitles.select(null);
+			this.#subtitles.clear();
 		});
 		this.#player.addEventListener(EventType.ERROR, (e) => {
 			console.error("[kyoo-receiver] playback error", e);
@@ -47,10 +40,6 @@ export class KyooReceiver {
 		const options = new cast.framework.CastReceiverOptions();
 		options.playbackConfig = this.#playbackConfig;
 		options.maxInactivity = 3600;
-		// Register omni's namespace before start() or sender messages may not arrive.
-		options.customNamespaces = {
-			[OMNI_NAMESPACE]: cast.framework.system.MessageType.JSON,
-		};
 		this.#context.start(options);
 	}
 
@@ -58,9 +47,10 @@ export class KyooReceiver {
 		request: messages.LoadRequestData,
 	): Promise<messages.LoadRequestData> => {
 		const data = (asObject(request.media?.customData) as KyooCastData) ?? {};
-		this.#subtitles.load(data.apiUrl, data.slug, data.presign);
-		this.#ui.clearError();
 
+		this.#subtitles.registerTracks(request.media?.tracks);
+
+		this.#ui.clearError();
 		this.#ui.dismissSplash();
 		this.#ui.setLoading(true);
 		this.#ui.show({ sticky: true });
@@ -89,18 +79,30 @@ export class KyooReceiver {
 			}
 		}
 
-		try {
-			const meta = await fetchVideoMeta(data.apiUrl, data.slug, data.presign);
-			this.#ui.setMetadata(meta);
-			if (request.media) {
-				const metadata = new GenericMediaMetadata();
-				metadata.title = meta.title;
-				if (meta.showName) metadata.subtitle = meta.showName;
-				if (meta.poster) metadata.images = [{ url: meta.poster }];
-				request.media.metadata = metadata;
+		if (data.apiUrl && data.slug) {
+			try {
+				const info = await fetchVideoInfo(data.apiUrl, data.slug, data.presign);
+				this.#subtitles.setFonts(info.fonts);
+			} catch (e) {
+				console.error("[kyoo-receiver] failed to load subtitle fonts", e);
 			}
-		} catch (e) {
-			console.error("[kyoo-receiver] failed to load metadata", e);
+		}
+		this.#subtitles.applyActive(request.activeTrackIds);
+
+		if (data.apiUrl && data.slug) {
+			try {
+				const meta = await fetchVideoMeta(data.apiUrl, data.slug, data.presign);
+				this.#ui.setMetadata(meta);
+				if (request.media) {
+					const metadata = new GenericMediaMetadata();
+					metadata.title = meta.title;
+					if (meta.showName) metadata.subtitle = meta.showName;
+					if (meta.poster) metadata.images = [{ url: meta.poster }];
+					request.media.metadata = metadata;
+				}
+			} catch (e) {
+				console.error("[kyoo-receiver] failed to load metadata", e);
+			}
 		}
 
 		return request;

@@ -24,6 +24,8 @@ const crossOriginIsolation: Plugin = {
 	},
 	configurePreviewServer(server) {
 		server.middlewares.use((req, res, next) => {
+			// TEMP diagnostic: log every request the device makes through the tunnel.
+			console.log(`[recv] ${req.method} ${req.url}`);
 			headers(req, res);
 			next();
 		});
