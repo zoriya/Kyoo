@@ -45,6 +45,8 @@ export const expo: ExpoConfig = {
 	},
 	plugins: [
 		"expo-router",
+		"expo-image",
+		"expo-status-bar",
 		[
 			"expo-build-properties",
 			{
