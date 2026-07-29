@@ -30,6 +30,7 @@ const actionMap = {
 			entry: t.String(),
 		}),
 		permissions: ["core.read"],
+		name: (body) => `watch/${body.entry}`,
 		async message(ws, body) {
 			const profilePk = await getOrCreateProfile(ws.data.jwt.sub);
 			if (!profilePk) {
@@ -91,6 +92,7 @@ export const appWs = baseWs.ws("/ws", {
 	},
 	async message(ws, { action, ...body }) {
 		const handler = actionMap[action as keyof typeof actionMap];
+
 		if (!handler.skipRefresh) {
 			try {
 				const resp = await fetch(
@@ -115,6 +117,19 @@ export const appWs = baseWs.ws("/ws", {
 				// If refresh fails, continue with the old JWT
 			}
 		}
+
+		if (ws.data.jwt.wsRoutes && handler.permissions) {
+			const route = handler.name?.(body as any) ?? action;
+			if (!ws.data.jwt.wsRoutes.includes(route)) {
+				ws.send({
+					action,
+					status: 403,
+					message: `Not allowed to use the '${route}' route.`,
+				});
+				return;
+			}
+		}
+
 		for (const perm of handler.permissions ?? []) {
 			if (!ws.data.jwt.permissions.includes(perm)) {
 				ws.send({
@@ -134,6 +149,7 @@ function handler<Schema extends TSchema = TObject<{}>>(ret: {
 	body?: Schema;
 	permissions?: string[];
 	skipRefresh?: boolean;
+	name?: (body: Schema["static"]) => string;
 	message: (ws: Ws, body: Schema["static"]) => void | Promise<void>;
 }) {
 	return ret;

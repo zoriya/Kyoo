@@ -1,5 +1,6 @@
 import { fetchVideoInfo, fetchVideoMeta, withPresign } from "./api";
 import { asObject, type KyooCastData } from "./cast";
+import { ProgressObserver } from "./progress-observer";
 import { SubtitleManager } from "./subtitles";
 import { ReceiverUi } from "./ui";
 
@@ -19,10 +20,12 @@ export class KyooReceiver {
 	#subtitles = new SubtitleManager(
 		document.getElementById("subtitle-layer") as HTMLElement,
 	);
+	#progress = new ProgressObserver(this.#player);
 
 	start(): void {
 		this.#ui.hideCafChrome();
 		this.#ui.bindTo(this.#player);
+		this.#progress.start();
 
 		this.#playbackConfig.initialBandwidth = 20_000_000;
 		this.#player.setMessageInterceptor(MessageType.LOAD, this.#onLoad);
@@ -93,6 +96,12 @@ export class KyooReceiver {
 			try {
 				const meta = await fetchVideoMeta(data.apiUrl, data.slug, data.presign);
 				this.#ui.setMetadata(meta);
+				if (meta.videoId && meta.entryId) {
+					this.#progress.load(data, {
+						videoId: meta.videoId,
+						entryId: meta.entryId,
+					});
+				}
 				if (request.media) {
 					const metadata = new GenericMediaMetadata();
 					metadata.title = meta.title;

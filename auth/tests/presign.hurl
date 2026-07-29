@@ -106,6 +106,46 @@ X-Forwarded-Uri: /videos/abc/master.m3u8
 X-Forwarded-Method: GET
 HTTP 403
 
+# Presign the progress websocket: a `GET` rule authorizes opening it and a
+# `wsRoutes` claim scopes which message the token may send (checked by the api).
+POST {{host}}/presign
+Authorization: Bearer {{jwt}}
+{
+    "for": [
+        { "url": "/api/ws", "verb": "GET" }
+    ],
+    "claims": {
+        "wsRoutes": ["watch/entry-abc"]
+    },
+    "duration": "1h"
+}
+HTTP 200
+[Captures]
+ws_signature: jsonpath "$.signature"
+[Asserts]
+jsonpath "$.for[0].url" == "/api/ws"
+jsonpath "$.claims.wsRoutes[0]" == "watch/entry-abc"
+
+# The signature grants a jwt for the websocket upgrade (a plain GET).
+GET {{host}}/jwt?x-presign={{ws_signature}}
+X-Forwarded-Uri: /api/ws
+X-Forwarded-Method: GET
+HTTP 200
+[Asserts]
+jsonpath "$.token" exists
+
+# A presign request may not set a protected claim (would escalate the token).
+POST {{host}}/presign
+Authorization: Bearer {{jwt}}
+{
+    "for": [{ "url": "/api/ws", "verb": "GET" }],
+    "claims": {
+        "permissions": ["users.read"]
+    },
+    "duration": "1h"
+}
+HTTP 400
+
 # Cleanup
 DELETE {{host}}/users/me
 Authorization: Bearer {{jwt}}

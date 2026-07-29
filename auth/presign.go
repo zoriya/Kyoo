@@ -20,6 +20,8 @@ type PresignRequest struct {
 	For []PresignRule `json:"for" validate:"required,min=1,dive"`
 	// How long the signature stays valid (go duration, e.g. `24h`).
 	Duration string `json:"duration" validate:"required" example:"24h"`
+	// Extra claims to add to the signed jwt. Protected claims (`sub`, `permissions`, ...) are rejected.
+	Claims map[string]any `json:"claims,omitempty"`
 }
 
 type PresignRule struct {
@@ -100,6 +102,15 @@ func (h *Handler) Presign(c *echo.Context) error {
 		rule.Verb = strings.ToUpper(rule.Verb)
 	}
 
+	for key := range dto.Claims {
+		if slices.Contains(h.config.ProtectedClaims, key) {
+			return echo.NewHTTPError(
+				http.StatusBadRequest,
+				fmt.Sprintf("Cannot set the protected claim `%s`", key),
+			)
+		}
+	}
+
 	duration, err := time.ParseDuration(dto.Duration)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid `duration` value: not a valid duration")
@@ -113,7 +124,9 @@ func (h *Handler) Presign(c *echo.Context) error {
 		return err
 	}
 
-	presignClaims := maps.Clone(claims)
+	presignClaims := jwt.MapClaims{}
+	maps.Copy(presignClaims, dto.Claims)
+	maps.Copy(presignClaims, claims)
 	presignClaims["presign"] = string(rules)
 	presignClaims["iat"] = &jwt.NumericDate{Time: now}
 	presignClaims["exp"] = &jwt.NumericDate{Time: expireAt}

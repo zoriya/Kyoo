@@ -37,7 +37,11 @@ const CastPresign = z.object({ signature: z.string() });
 
 const base64UrlPath = (path: string): string =>
 	typeof window !== "undefined" && window.btoa
-		? window.btoa(path).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")
+		? window
+				.btoa(path)
+				.replace(/\+/g, "-")
+				.replace(/\//g, "_")
+				.replace(/=+$/, "")
 		: Buffer.from(path).toString("base64url");
 
 const withPresign = (url: string, signature?: string): string => {
@@ -68,6 +72,7 @@ export const Player = () => {
 			slug,
 			authToken ? data?.path : undefined,
 			data?.show?.poster?.id,
+			entry?.id,
 		),
 	);
 	const [defaultPlayMode] = useLocalSetting<PlayMode>("playMode", "direct");
@@ -350,6 +355,7 @@ Player.presignQuery = (
 	slug: string,
 	path: string | undefined,
 	posterId: string | undefined,
+	entryId: string | undefined,
 ): QueryIdentifier<z.infer<typeof CastPresign>> => ({
 	path: ["auth", "presign"],
 	params: { slug },
@@ -360,13 +366,13 @@ Player.presignQuery = (
 		body: {
 			for: [
 				{ prefix: `/api/videos/${slug}`, verb: "GET" },
+				{ url: "/api/ws", verb: "GET" },
 				...(path
 					? [{ prefix: `/video/${base64UrlPath(path)}`, verb: "GET" }]
 					: []),
-				...(posterId
-					? [{ url: `/api/images/${posterId}`, verb: "GET" }]
-					: []),
+				...(posterId ? [{ url: `/api/images/${posterId}`, verb: "GET" }] : []),
 			],
+			...(entryId && { claims: { wsRoutes: [`watch/${entryId}`] } }),
 			duration: "24h",
 		},
 		returnError: true,

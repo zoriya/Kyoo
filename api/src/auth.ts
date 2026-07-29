@@ -29,6 +29,7 @@ const Jwt = t.Object({
 	username: t.String(),
 	permissions: t.Array(t.String()),
 	settings: t.Optional(t.Partial(Settings, { default: {} })),
+	wsRoutes: t.Optional(t.Array(t.String())),
 });
 type Jwt = typeof Jwt.static;
 const validator = TypeCompiler.Compile(Jwt);

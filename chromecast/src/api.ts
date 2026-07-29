@@ -17,6 +17,8 @@ export const withPresign = (url: string, presign?: string): string => {
 };
 
 export type VideoMeta = {
+	videoId: string | null;
+	entryId: string | null;
 	showName: string;
 	entryName: string;
 	displayNumber: string;
@@ -64,6 +66,7 @@ export const fetchVideoInfo = async (
 type ApiImage = { id?: string; blurhash?: string };
 
 type ApiEntry = {
+	id?: string;
 	kind?: string;
 	name?: string | null;
 	seasonNumber?: number | null;
@@ -72,6 +75,7 @@ type ApiEntry = {
 };
 
 type ApiVideo = {
+	id?: string;
 	path?: string;
 	entries?: ApiEntry[];
 	show?: {
@@ -113,6 +117,8 @@ export const fetchVideoMeta = async (
 	const entryName = entry?.name ?? path;
 
 	return {
+		videoId: data.id ?? null,
+		entryId: entry?.id ?? null,
 		showName: show?.name ?? path,
 		entryName,
 		displayNumber,
