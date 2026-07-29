@@ -1,0 +1,419 @@
+{
+	"home": {
+		"recommended": "Recomanats",
+		"news": "Novetats",
+		"watchlist": "Continua mirant",
+		"info": "Mostra'n més",
+		"none": "Cap episodi",
+		"watchlistLogin": "Per fer un seguiment del que has vist o tens pensat veure, has d'iniciar sessió.",
+		"refreshMetadata": "Actualitza les metadades",
+		"episodeMore": {
+			"goToShow": "Vés a la sèrie",
+			"download": "Baixa",
+			"mediainfo": "Mostra la informació del fitxer"
+		}
+	},
+	"show": {
+		"play": "Reprodueix",
+		"trailer": "Reprodueix el tràiler",
+		"studios": "Estudis",
+		"genre": "Gèneres",
+		"genre-none": "Cap gènere",
+		"staff": "Equip",
+		"staff-none": "Es desconeix l'equip",
+		"noOverview": "No hi ha cap sinopsi disponible",
+		"episode-none": "Aquesta temporada no té episodis",
+		"episodeNoMetadata": "No hi ha metadades disponibles",
+		"tags": "Etiquetes",
+		"tags-none": "No hi ha etiquetes disponibles",
+		"links": "Enllaços",
+		"jumpToSeason": "Vés a la temporada",
+		"partOf": "Forma part de",
+		"watchlistAdd": "Afegeix a la llista de pendents",
+		"watchlistEdit": "Edita l'estat de visualització",
+		"watchlistRemove": "Marca com a no vist",
+		"watchlistLogin": "Inicia sessió per afegir-ho a la teva llista",
+		"watchlistMark": {
+			"completed": "Marca com a completat",
+			"planned": "Marca com a pendent",
+			"watching": "Marca com a en curs",
+			"rewatching": "Marca com a tornant a mirar",
+			"dropped": "Marca com a abandonat",
+			"null": "Marca com a no vist"
+		},
+		"nextUp": "A continuació",
+		"season": "Temporada {{number}}",
+		"multiVideos": "Hi ha diversos fitxers de vídeo disponibles",
+		"videosCount": "{{number}} vídeos",
+		"version": "Versió {{number}}",
+		"part": "Part {{number}}",
+		"videos-map": "Edita les assignacions de vídeo",
+		"remap": "Reassigna",
+		"staff-as": "com a {{character}}",
+		"staff-kind": {
+			"actor": "Actor",
+			"director": "Director",
+			"writter": "Guionista",
+			"producer": "Productor",
+			"music": "Música",
+			"crew": "Equip tècnic",
+			"other": "Altres"
+		}
+	},
+	"videos-map": {
+		"none": "CAP",
+		"add": "Afegeix un altre vídeo",
+		"delete": "Elimina el vídeo de la sèrie",
+		"validate": "Valida la suposició i afegeix el vídeo a la sèrie",
+		"no-guess": "S'ha deduït que aquest vídeo forma part d'aquesta sèrie, però no sabem de quin episodi es tracta",
+		"related": "S'han afegit vídeos relacionats amb el títol {{title}}",
+		"sort-path": "Camí",
+		"sort-entry": "Ordre d'episodis",
+		"no-video": "No hi ha cap fitxer de vídeo enllaçat a aquesta sèrie."
+	},
+	"browse": {
+		"mediatypekey": {
+			"all": "Tot",
+			"movie": "Pel·lícules",
+			"collection": "Col·lecció",
+			"serie": "Sèries"
+		},
+		"mediatype-tt": "Tipus de contingut",
+		"mediatypelabel": "Tipus de contingut",
+		"sortby": "Ordena per {{key}}",
+		"sortby-tt": "Ordena per",
+		"sortkey": {
+			"relevance": "Rellevància",
+			"name": "Nom",
+			"airDate": "Data d'emissió",
+			"startAir": "Inici d'emissió",
+			"endAir": "Fi d'emissió",
+			"createdAt": "Data d'addició",
+			"rating": "Valoracions"
+		},
+		"sortord": {
+			"asc": "asc",
+			"desc": "desc"
+		},
+		"switchToGrid": "Canvia a la vista de graella",
+		"switchToList": "Canvia a la vista de llista",
+		"not": "No"
+	},
+	"profile": {
+		"history": "Historial",
+		"watchlist": "Llista de seguiment",
+		"statuses": {
+			"all": "Tots",
+			"completed": "Completats",
+			"watching": "En curs",
+			"rewatching": "Tornant a mirar",
+			"dropped": "Abandonats",
+			"planned": "Pendents"
+		}
+	},
+	"genres": {
+		"action": "Acció",
+		"adventure": "Aventura",
+		"animation": "Animació",
+		"comedy": "Comèdia",
+		"crime": "Crim",
+		"documentary": "Documental",
+		"drama": "Drama",
+		"family": "Familiar",
+		"fantasy": "Fantasia",
+		"history": "Història",
+		"horror": "Terror",
+		"music": "Música",
+		"mystery": "Misteri",
+		"romance": "Romanç",
+		"science-fiction": "Ciència-ficció",
+		"thriller": "Thriller",
+		"war": "Bèl·lic",
+		"western": "Western",
+		"kids": "Infantil",
+		"reality": "Telerealitat",
+		"politics": "Política",
+		"soap": "Telenovel·la",
+		"talk": "Entrevistes"
+	},
+	"misc": {
+		"settings": "Configuració",
+		"prev-page": "Pàgina anterior",
+		"next-page": "Pàgina següent",
+		"delete": "Suprimeix",
+		"delete-name": "Suprimeix {{name}}",
+		"cancel": "Cancel·la",
+		"more": "Més",
+		"expand": "Desplega",
+		"collapse": "Replega",
+		"edit": "Edita",
+		"or": "O",
+		"loading": "S'està carregant"
+	},
+	"navbar": {
+		"home": "Inici",
+		"browse": "Explora",
+		"profile": "Perfil",
+		"download": "Baixades",
+		"search": "Cerca",
+		"login": "Inicia sessió",
+		"admin": "Administració"
+	},
+	"settings": {
+		"general": {
+			"label": "General",
+			"theme": {
+				"label": "Tema",
+				"description": "Estableix el tema de l'aplicació",
+				"auto": "Sistema",
+				"light": "Clar",
+				"dark": "Fosc"
+			},
+			"language": {
+				"label": "Idioma",
+				"description": "Estableix l'idioma de l'aplicació"
+			}
+		},
+		"playback": {
+			"label": "Reproducció",
+			"playmode": {
+				"label": "Mode de reproducció per defecte",
+				"description": "El mode de reproducció per defecte d'aquest client. El mode Pristine consumeix menys recursos del servidor, però no permet canvis automàtics de qualitat"
+			},
+			"audioLanguage": {
+				"label": "Idioma de l'àudio",
+				"description": "L'idioma d'àudio per defecte quan es reprodueixen vídeos amb diversos àudios",
+				"original": "Original"
+			},
+			"subtitleLanguage": {
+				"label": "Idioma dels subtítols",
+				"description": "L'idioma de subtítols per defecte",
+				"none": "Cap"
+			},
+			"chapterSkip": {
+				"label": "Omissió de capítols",
+				"behaviors": {
+					"autoSkip": "Omet automàticament",
+					"autoSkipExceptFirstAppearance": "Omet automàticament excepte la primera aparició",
+					"showSkipButton": "Mostra el botó d'omissió",
+					"disabled": "No facis res"
+				},
+				"types": {
+					"recap": "Resum",
+					"intro": "Intro",
+					"credits": "Crèdits",
+					"preview": "Avanç"
+				},
+				"descriptions": {
+					"recap": "Controla què passa quan comença un capítol de resum",
+					"intro": "Controla què passa quan comença un capítol d'introducció",
+					"credits": "Controla què passa quan comença un capítol de crèdits",
+					"preview": "Controla què passa quan comença un capítol d'avanç"
+				}
+			}
+		},
+		"account": {
+			"label": "Compte",
+			"username": {
+				"label": "Nom d'usuari"
+			},
+			"avatar": {
+				"label": "Avatar",
+				"description": "Canvia la icona del teu perfil"
+			},
+			"email": {
+				"label": "Correu electrònic"
+			},
+			"password": {
+				"label": "Contrasenya",
+				"description": "Canvia la contrasenya",
+				"oldPassword": "Contrasenya antiga",
+				"newPassword": "Contrasenya nova"
+			}
+		},
+		"sessions": {
+			"label": "Sessions",
+			"description": "Creada {{createdDate}} - Últim ús {{lastUsed}}",
+			"current": "Sessió actual",
+			"revoke": "Revoca"
+		},
+		"oidc": {
+			"label": "Comptes vinculats",
+			"connected": "Connectat com a {{username}}.",
+			"not-connected": "Desconnectat",
+			"open-profile": "Obre el teu perfil de {{provider}}",
+			"link": "Vincula",
+			"delete": "Desvincula el teu compte de kyoo del teu compte de {{provider}}"
+		},
+		"about": {
+			"label": "Quant a",
+			"android-app": {
+				"label": "Aplicació per a Android",
+				"description": "Baixa l'aplicació per a Android"
+			},
+			"git": {
+				"label": "Github",
+				"description": "Obre el repositori de Github on pots consultar el codi de kyoo"
+			}
+		}
+	},
+	"player": {
+		"back": "Enrere",
+		"previous": "Episodi anterior",
+		"next": "Episodi següent",
+		"play": "Reprodueix",
+		"pause": "Pausa",
+		"mute": "Activa o desactiva el silenci",
+		"volume": "Volum",
+		"quality": "Qualitat",
+		"audios": "Àudio",
+		"videos": "Vídeo",
+		"subtitles": "Subtítols",
+		"subtitle-none": "Cap",
+		"fullscreen": "Pantalla completa",
+		"direct": "Pristine",
+		"transmux": "Original",
+		"auto": "Automàtica",
+		"notInPristine": "No disponible en mode Pristine",
+		"unsupportedError": "El còdec de vídeo no és compatible; s'està transcodificant...",
+		"not-available": "{{entry}} encara no està disponible a kyoo; pregunta-ho als administradors del teu servidor",
+		"fatal": "Error fatal de reproducció",
+		"entry-list": "Llista d'entrades",
+		"chapters": {
+			"skip": "Omet {{type}}",
+			"intro": "la intro",
+			"credits": "els crèdits",
+			"recap": "el resum",
+			"preview": "l'avanç"
+		}
+	},
+	"search": {
+		"empty": "No s'ha trobat cap resultat. Prova una cerca diferent."
+	},
+	"login": {
+		"login": "Inicia sessió",
+		"register": "Registra't",
+		"guest": "Continua com a convidat",
+		"guest-forbidden": "Aquesta instància de kyoo no permet convidats.",
+		"via": "Continua amb {{provider}}",
+		"add-account": "Afegeix un compte",
+		"logout": "Tanca la sessió",
+		"server": "Adreça del servidor",
+		"email": "Correu electrònic",
+		"username": "Nom d'usuari",
+		"password": "Contrasenya",
+		"confirm": "Confirma la contrasenya",
+		"or-register": "No tens cap compte? <1>Registra't</1>.",
+		"or-login": "Ja tens un compte? <1>Inicia sessió</1>.",
+		"password-no-match": "Les contrasenyes no coincideixen.",
+		"delete": "Suprimeix el teu compte",
+		"delete-confirmation": "Aquesta acció no es pot desfer. Segur que vols continuar?",
+		"register-disabled": "Els registres estan desactivats.",
+		"register-disabled-oidc": "El registre amb contrasenya està desactivat. Fes servir OIDC."
+	},
+	"downloads": {
+		"empty": "Encara no has baixat res; explora per trobar alguna cosa que t'agradi",
+		"error": "Error: {{error}}",
+		"delete": "Suprimeix l'element",
+		"deleteMessage": "Vols eliminar aquest element de l'emmagatzematge local?",
+		"pause": "Pausa",
+		"resume": "Reprèn",
+		"retry": "Torna-ho a provar"
+	},
+	"errors": {
+		"connection": "No s'ha pogut connectar amb el servidor de kyoo",
+		"connection-tips": "Consells per resoldre el problema:\n - Estàs connectat a internet?\n - El teu servidor de kyoo està en línia?\n - T'han bloquejat el compte?",
+		"unknown": "Error desconegut",
+		"try-again": "Torna-ho a provar",
+		"re-login": "Torna a iniciar sessió",
+		"offline": "No estàs connectat a internet. Torna-ho a provar més tard.",
+		"invalid-server": "No s'ha pogut accedir al servidor de kyoo.",
+		"unauthorized": "Et falten els permisos {{permission}} per accedir a aquesta pàgina.",
+		"needVerification": "L'administrador del servidor ha de verificar el teu compte abans que el puguis utilitzar.",
+		"needAccount": "No es pot accedir a aquesta pàgina en mode convidat. Has de crear un compte o iniciar sessió.",
+		"setup": {
+			"MissingAdminAccount": "Encara no s'ha creat cap compte d'administrador. Registra't per crear-ne un.",
+			"NoVideoFound": "Encara no s'ha trobat cap vídeo. Afegeix pel·lícules o sèries a la carpeta de la teva biblioteca perquè apareguin aquí!"
+		}
+	},
+	"mediainfo": {
+		"title": "Informació del fitxer",
+		"file": "Fitxer",
+		"container": "Contenidor",
+		"video": "Vídeo",
+		"audio": "Àudio",
+		"subtitles": "Subtítols",
+		"channels": "{{channels}} canals",
+		"forced": "Forçats",
+		"hearing-impaired": "CC",
+		"default": "Per defecte",
+		"external": "Extern",
+		"duration": "Durada",
+		"size": "Mida",
+		"novideo": "Sense vídeo",
+		"noaudio": "Sense àudio",
+		"nocontainer": "Contenidor no vàlid",
+		"unknown": "Desconegut"
+	},
+	"admin": {
+		"users": {
+			"label": "Usuaris",
+			"adminUser": "Administrador",
+			"regularUser": "Usuari",
+			"set-permissions": "Estableix els permisos",
+			"delete": "Suprimeix l'usuari",
+			"unverifed": "Sense verificar",
+			"verify": "Verifica l'usuari",
+			"table": {
+				"username": "Nom d'usuari",
+				"lastSeen": "Última connexió",
+				"oidc": "OIDC"
+			}
+		},
+		"scanner": {
+			"label": "Escàner",
+			"scan": "Inicia l'escaneig de la biblioteca",
+			"empty": "No s'ha trobat cap problema. Tots els elements estan registrats."
+		},
+		"unmatched": {
+			"label": "Sense assignar",
+			"rescan": "Torna a escanejar la biblioteca",
+			"empty": "Tots els vídeos estan assignats!",
+			"search": "Cerca vídeos...",
+			"match": "Assigna",
+			"match-file": "Assigna {{file}}",
+			"status-pending": "Pendent",
+			"status-running": "S'està escanejant",
+			"status-failed": "Ha fallat",
+			"progress-running": "{{count}} en escaneig",
+			"progress-pending": "{{count}} pendents",
+			"progress-failed": "{{count}} amb errors"
+		},
+		"streams": {
+			"title": "Reproduccions",
+			"subtitle": "Vídeos que s'estan reproduint i transcodificacions actives.",
+			"empty": "Ara mateix no hi ha cap reproducció en curs.",
+			"guest": "Convidat",
+			"viewers": "Espectadors",
+			"noActiveViewer": "Cap espectador actiu",
+			"watching": "Mirant en {{quality}}",
+			"none": "Cap",
+			"runningVideoTranscodes": "Transcodificacions de vídeo",
+			"runningAudioTranscodes": "Transcodificacions d'àudio",
+			"progress": {
+				"available": "Disponible",
+				"transcoding": "S'està transcodificant"
+			}
+		},
+		"add": {
+			"title": "Afegeix a la biblioteca",
+			"searchPlaceholder": "Cerca una pel·lícula o sèrie...",
+			"year": "Any",
+			"library": "Biblioteca",
+			"movies": "Pel·lícules",
+			"series": "Sèries",
+			"noResults": "No s'ha trobat cap resultat",
+			"typeToSearch": "Escriu un nom per cercar pel·lícules o sèries"
+		}
+	}
+}
