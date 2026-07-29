@@ -4,9 +4,11 @@ import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
 import AudioLanguage from "@material-symbols/svg-400/rounded/music_note.svg";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow.svg";
 import Replay from "@material-symbols/svg-400/rounded/replay.svg";
+import PlayerI from "@material-symbols/svg-400/rounded/smart_display.svg";
 import Theaters from "@material-symbols/svg-400/rounded/theaters.svg";
 import langmap from "langmap";
 import { useTranslation } from "react-i18next";
+import { Platform } from "react-native";
 import { Select } from "~/primitives";
 import { useLocalSetting } from "~/providers/settings";
 import { useLanguageName } from "~/track-utils";
@@ -29,6 +31,10 @@ export const languageCodes = Object.keys(langmap)
 export const PlaybackSettings = () => {
 	const { t } = useTranslation();
 	const [playMode, setDefaultPlayMode] = useLocalSetting("playMode", "direct");
+	const [player, setPlayer] = useLocalSetting<"vlc" | "exoplayer">(
+		"player",
+		"vlc",
+	);
 	const [audio, setAudio] = useSetting("audioLanguage")!;
 	const [subtitle, setSubtitle] = useSetting("subtitleLanguage")!;
 	const getLanguageName = useLanguageName();
@@ -48,6 +54,21 @@ export const PlaybackSettings = () => {
 					getLabel={(key) => t(key === "hls" ? "player.auto" : "player.direct")}
 				/>
 			</Preference>
+			{Platform.OS === "android" && (
+				<Preference
+					icon={PlayerI}
+					label={t("settings.playback.player.label")}
+					description={t("settings.playback.player.description")}
+				>
+					<Select
+						label={t("settings.playback.player.label")}
+						value={player}
+						onValueChange={(value) => setPlayer(value)}
+						values={["vlc", "exoplayer"]}
+						getLabel={(key) => t(`settings.playback.player.${key}`)}
+					/>
+				</Preference>
+			)}
 			<Preference
 				icon={AudioLanguage}
 				label={t("settings.playback.audioLanguage.label")}

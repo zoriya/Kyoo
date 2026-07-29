@@ -45,6 +45,7 @@ services:
       - "8081:8081"
     environment:
       - KYOO_URL=${KYOO_URL:-http://api:5000/api}
+      - EXPO_PUBLIC_CAST_APPLICATION_ID=${CAST_APPLICATION_ID}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.front.rule=PathPrefix(`/`)"

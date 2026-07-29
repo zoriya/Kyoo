@@ -59,7 +59,7 @@ export const Player = () => {
 	const title = entry
 		? entry.kind === "movie"
 			? entry.name
-			: `${entry.name} (${entryDisplayNumber(entry)})`
+			: `${entryDisplayNumber(entry)} - ${entry.name}`
 		: data?.path;
 
 	const { apiUrl, authToken } = useToken();

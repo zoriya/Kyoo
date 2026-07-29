@@ -18,14 +18,20 @@ import {
 } from "uniwind";
 import { createQueryClient } from "~/query";
 import { AccountProvider } from "./account-provider";
+import { useLocalSetting } from "./settings";
 import { TranslationsProvider } from "./translations.native";
 
 function getServerData(_key: string): any {}
 
 const PlayerProvider = ({ children }: { children: ReactNode }) => {
+	const [player] = useLocalSetting<"vlc" | "exoplayer">("player", "vlc");
 	return (
 		<OmniProvider
-			cast={{ receiverApplicationId: "D8FB0FC1", }}
+			backend={{ android: player }}
+			cast={{
+				receiverApplicationId:
+					process.env.EXPO_PUBLIC_CAST_APPLICATION_ID ?? "D8FB0FC1",
+			}}
 			showNotification
 		>
 			{children}

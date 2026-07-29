@@ -165,14 +165,14 @@ const ControlButtons = ({
 						{...tooltip(t("player.entry-list"), true)}
 					/>
 				)}
-				<SubtitleMenu {...menuProps} />
-				<AudioMenu {...menuProps} />
-				<VideoMenu {...menuProps} />
-				<QualityMenu {...menuProps} />
 				<CastButton
 					className="mr-4"
 					iconClassName="fill-slate-200 dark:fill-slate-200"
 				/>
+				<SubtitleMenu {...menuProps} />
+				<AudioMenu {...menuProps} />
+				<VideoMenu {...menuProps} />
+				<QualityMenu {...menuProps} />
 				{Platform.OS === "web" && (
 					<FullscreenButton
 						className="mr-4"

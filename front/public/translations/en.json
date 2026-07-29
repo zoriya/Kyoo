@@ -180,6 +180,12 @@
 				"label": "Default play mode",
 				"description": "The default play mode used on this client. Pristine is lighter on the server but does not allow automatic quality changes"
 			},
+			"player": {
+				"label": "Video player",
+				"description": "The player backend used to play videos on this device",
+				"vlc": "VLC",
+				"exoplayer": "ExoPlayer"
+			},
 			"audioLanguage": {
 				"label": "Audio language",
 				"description": "The default audio language used when playing multi-audio videos",
@@ -294,7 +300,6 @@
 		}
 	},
 	"miniPlayer": {
-		"casting": "Casting",
 		"open": "Open player",
 		"stop": "Stop casting"
 	},
