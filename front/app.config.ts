@@ -18,6 +18,9 @@ export const expo: ExpoConfig = {
 	},
 	android: {
 		package: IS_DEV ? "dev.zoriya.kyoo.dev" : "dev.zoriya.kyoo",
+		versionCode: process.env.ANDROID_VERSION_CODE
+			? Number(process.env.ANDROID_VERSION_CODE)
+			: undefined,
 		adaptiveIcon: {
 			foregroundImage: "./public/android-adaptive-icon.png",
 			backgroundColor: "#6b00b8",
