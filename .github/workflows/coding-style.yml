@@ -36,6 +36,23 @@ jobs:
       - name: Run Biome
         run: biome ci .
 
+  chromecast:
+    name: "Lint Chromecast"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./chromecast
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
+        with:
+          version: latest
+
+      - name: Run Biome
+        run: biome ci .
+
   typecheck-api:
     name: "Typecheck api"
     runs-on: ubuntu-latest
@@ -59,6 +76,23 @@ jobs:
     defaults:
       run:
         working-directory: ./front
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bun run typecheck
+
+  typecheck-chromecast:
+    name: "Typecheck chromecast"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./chromecast
     steps:
       - uses: actions/checkout@v7
 

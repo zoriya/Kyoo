@@ -1,0 +1,6 @@
+{
+	"extends": "//",
+	"files": {
+		"includes": ["**", "!public", "!dist"]
+	}
+}

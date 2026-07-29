@@ -79,9 +79,7 @@ export const MiniPlayer = () => {
 				"absolute right-2 z-50 overflow-hidden rounded-lg bg-slate-900 shadow-lg",
 				Platform.OS !== "web" ? "left-2" : "bottom-2 w-80 max-w-[90%]",
 			)}
-			style={
-				Platform.OS !== "web" ? { bottom: tabBarHeight + 8 } : undefined
-			}
+			style={Platform.OS !== "web" ? { bottom: tabBarHeight + 8 } : undefined}
 		>
 			<View className="h-0.5 w-full bg-slate-700">
 				<View

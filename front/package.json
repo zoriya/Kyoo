@@ -57,7 +57,7 @@
 		"react-native-localization-settings": "^1.2.0",
 		"react-native-mmkv": "^4.3.1",
 		"react-native-nitro-modules": "^0.35.7",
-		"react-native-omni": "^1.9.1",
+		"react-native-omni": "^1.9.2",
 		"react-native-pager-view": "8.0.2",
 		"react-native-reanimated": "4.5.0",
 		"react-native-safe-area-context": "~5.7.0",

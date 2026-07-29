@@ -4,11 +4,8 @@ import {
 	DefaultTheme,
 	ThemeProvider as RNThemeProvider,
 } from "expo-router/react-navigation";
-import {
-	type ReactNode,
-	useState,
-} from "react";
-import { OmniProvider, } from "react-native-omni";
+import { type ReactNode, useState } from "react";
+import { OmniProvider } from "react-native-omni";
 import { SafeAreaListener } from "react-native-safe-area-context";
 import {
 	Uniwind,
