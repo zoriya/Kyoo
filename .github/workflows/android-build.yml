@@ -1,0 +1,168 @@
+name: Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: Which APK(s) to build
+        type: choice
+        default: both
+        options:
+          - both
+          - development
+          - release
+  workflow_call:
+    inputs:
+      variant:
+        description: Which APK(s) to build (development, release or both)
+        type: string
+        default: release
+      attach-to-release:
+        description: Attach the release APK to the GitHub release given by release-tag
+        type: boolean
+        default: false
+      release-tag:
+        description: Tag of the release to attach the APK to
+        type: string
+        default: ""
+
+concurrency:
+  group: android-build-${{ github.ref }}-${{ inputs.variant }}
+  cancel-in-progress: true
+
+jobs:
+  matrix:
+    name: Resolve variants
+    runs-on: ubuntu-latest
+    outputs:
+      variants: ${{ steps.compute.outputs.variants }}
+    steps:
+      - id: compute
+        env:
+          VARIANT: ${{ inputs.variant || 'both' }}
+        run: |
+          case "$VARIANT" in
+            both) echo 'variants=["development","release"]' >> "$GITHUB_OUTPUT" ;;
+            development|release) echo "variants=[\"$VARIANT\"]" >> "$GITHUB_OUTPUT" ;;
+            *) echo "Unknown variant: $VARIANT" >&2; exit 1 ;;
+          esac
+
+  build:
+    name: Build ${{ matrix.variant }} APK
+    needs: matrix
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: ${{ fromJson(needs.matrix.outputs.variants) }}
+    defaults:
+      run:
+        working-directory: ./front
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('front/bun.lock') }}
+          restore-keys: gradle-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Detect signing secrets
+        id: signing
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::ANDROID_KEYSTORE_BASE64 is not set; release APK will be signed with the debug keystore."
+          fi
+
+      - name: Generate native project
+        env:
+          APP_VARIANT: ${{ matrix.variant == 'development' && 'development' || '' }}
+          ANDROID_VERSION_CODE: ${{ github.run_number }}
+          EXPO_NO_TELEMETRY: "1"
+        run: bunx expo prebuild --platform android --no-install
+
+      - name: Build APK
+        working-directory: ./front/android
+        run: |
+          if [ "${{ matrix.variant }}" = "development" ]; then
+            ./gradlew :app:assembleDebug --no-daemon
+          else
+            ./gradlew :app:assembleRelease --no-daemon
+          fi
+
+      - name: Sign release APK
+        if: matrix.variant == 'release' && steps.signing.outputs.enabled == 'true'
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/kyoo.jks"
+          BUILD_TOOLS="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n1)"
+          APK=android/app/build/outputs/apk/release/app-release.apk
+          "$BUILD_TOOLS/zipalign" -f -p 4 "$APK" "$RUNNER_TEMP/aligned.apk"
+          "$BUILD_TOOLS/apksigner" sign \
+            --ks "$RUNNER_TEMP/kyoo.jks" \
+            --ks-key-alias "$ANDROID_KEY_ALIAS" \
+            --ks-pass "pass:$ANDROID_KEYSTORE_PASSWORD" \
+            --key-pass "pass:$ANDROID_KEY_PASSWORD" \
+            --out "$APK" \
+            "$RUNNER_TEMP/aligned.apk"
+          "$BUILD_TOOLS/apksigner" verify --verbose "$APK"
+
+      - name: Collect APK
+        id: apk
+        run: |
+          if [ "${{ matrix.variant }}" = "development" ]; then
+            SRC=android/app/build/outputs/apk/debug/app-debug.apk
+            OUT=kyoo-dev.apk
+          else
+            SRC=android/app/build/outputs/apk/release/app-release.apk
+            OUT=kyoo.apk
+          fi
+          cp "$SRC" "$OUT"
+          echo "name=$OUT" >> "$GITHUB_OUTPUT"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.apk.outputs.name }}
+          path: front/${{ steps.apk.outputs.name }}
+          if-no-files-found: error
+
+      - name: Upload APK to draft release
+        if: inputs.attach-to-release && matrix.variant == 'release'
+        uses: softprops/action-gh-release@v3
+        with:
+          draft: true
+          tag_name: ${{ inputs.release-tag }}
+          files: front/${{ steps.apk.outputs.name }}
