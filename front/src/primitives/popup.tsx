@@ -53,7 +53,7 @@ export const Overlay = ({
 						{children}
 					</ScrollView>
 				) : (
-					<View className={cn("flex-1", className)} {...props}>
+					<View className={cn("web:flex-1", className)} {...props}>
 						{children}
 					</View>
 				)}

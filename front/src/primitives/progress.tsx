@@ -1,18 +1,30 @@
-import { ActivityIndicator } from "react-native";
+import Animated from "react-native-reanimated";
 import { cn } from "~/utils";
 
-export const CircularProgress = ({
-	tickness = 5,
-	...props
+export const Spinner = ({
+	size = 40,
+	className,
 }: {
-	tickness?: number;
+	size?: number;
 	className?: string;
 }) => {
 	return (
-		<ActivityIndicator
-			colorClassName={cn("accent-accent")}
-			size="large"
-			{...props}
+		<Animated.View
+			className={cn(
+				"rounded-full border-4 border-white/25 border-t-accent",
+				className,
+			)}
+			style={{
+				width: size,
+				height: size,
+				animationName: {
+					from: { transform: [{ rotate: "0deg" }] },
+					to: { transform: [{ rotate: "360deg" }] },
+				},
+				animationDuration: "900ms",
+				animationTimingFunction: "linear",
+				animationIterationCount: "infinite",
+			}}
 		/>
 	);
 };

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"os"
 	"slices"
 	"sort"
@@ -316,23 +317,31 @@ func main() {
 		HandleError:  true, // forwards error to the global error handler, so it can decide appropriate status code
 		LogValuesFunc: func(c *echo.Context, v middleware.RequestLoggerValues) error {
 			rCtx := c.Request().Context()
+			uri := v.URI
+			if u, err := url.Parse(v.URI); err == nil {
+				if q := u.Query(); q.Has("x-presign") {
+					q.Del("x-presign")
+					u.RawQuery = q.Encode()
+					uri = u.String()
+				}
+			}
 			if v.Error == nil {
 				slog.LogAttrs(rCtx, slog.LevelInfo,
-					fmt.Sprintf("%s %s%s %d", v.Method, v.Host, v.URI, v.Status),
+					fmt.Sprintf("%s %s%s %d", v.Method, v.Host, uri, v.Status),
 					slog.String("method", v.Method),
 					slog.Int("status", v.Status),
 					slog.String("host", v.Host),
-					slog.String("uri", v.URI),
+					slog.String("uri", uri),
 					slog.String("agent", v.UserAgent),
 				)
 			} else {
 				slog.LogAttrs(rCtx, slog.LevelError,
 					fmt.Sprintf("%s %s%s %d err=%s",
-						v.Method, v.Host, v.URI, v.Status, v.Error.Error()),
+						v.Method, v.Host, uri, v.Status, v.Error.Error()),
 					slog.String("method", v.Method),
 					slog.Int("status", v.Status),
 					slog.String("host", v.Host),
-					slog.String("uri", v.URI),
+					slog.String("uri", uri),
 					slog.String("agent", v.UserAgent),
 					slog.String("err", v.Error.Error()),
 				)

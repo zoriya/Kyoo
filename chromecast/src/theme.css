@@ -153,6 +153,26 @@ cast-media-player {
 	max-width: 60ch;
 	line-height: 1.5;
 }
+.error-detail {
+	margin: 0;
+	max-width: 80ch;
+	max-height: 30vh;
+	overflow: auto;
+	padding: 1rem;
+	border-radius: 0.5rem;
+	background: rgba(0, 0, 0, 0.35);
+	color: var(--slate-300);
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 0.8rem;
+	line-height: 1.4;
+	text-align: left;
+	white-space: pre-wrap;
+	word-break: break-word;
+	opacity: 0.75;
+}
+.error-detail[hidden] {
+	display: none;
+}
 
 .bottom-bar {
 	position: absolute;

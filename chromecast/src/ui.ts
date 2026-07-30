@@ -71,6 +71,42 @@ const describeError = (e: framework.events.ErrorEvent): string => {
 	}
 };
 
+const stringifyError = (value: unknown): string => {
+	if (value == null) return "";
+	if (value instanceof Error)
+		return value.stack ?? `${value.name}: ${value.message}`;
+	if (typeof value !== "object") return String(value);
+	const seen = new WeakSet<object>();
+	try {
+		return JSON.stringify(
+			value,
+			(_key, val) => {
+				if (val instanceof Error)
+					return { name: val.name, message: val.message, stack: val.stack };
+				if (typeof val === "object" && val !== null) {
+					if (seen.has(val)) return "[Circular]";
+					seen.add(val);
+				}
+				return val;
+			},
+			2,
+		);
+	} catch {
+		return String(value);
+	}
+};
+
+const errorDetail = (e: framework.events.ErrorEvent): string => {
+	const parts: string[] = [];
+	if (e.detailedErrorCode != null)
+		parts.push(`detailedErrorCode: ${e.detailedErrorCode}`);
+	const underlying = stringifyError(
+		(e as unknown as { error?: unknown }).error,
+	);
+	if (underlying) parts.push(underlying);
+	return parts.join("\n");
+};
+
 export class ReceiverUi {
 	#el = {
 		overlay: byId("overlay"),
@@ -86,6 +122,7 @@ export class ReceiverUi {
 		error: byId("error"),
 		errorTitle: byId("error-title"),
 		errorMessage: byId("error-message"),
+		errorDetail: byId("error-detail"),
 	};
 	#hideTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -126,10 +163,12 @@ export class ReceiverUi {
 		this.#el.loading.style.display = isLoading ? "flex" : "none";
 	}
 
-	showError(message: string, title = "Playback error"): void {
+	showError(message: string, detail = "", title = "Playback error"): void {
 		this.setLoading(false);
 		this.#el.errorTitle.textContent = title;
 		this.#el.errorMessage.textContent = message;
+		this.#el.errorDetail.textContent = detail;
+		this.#el.errorDetail.hidden = !detail;
 		this.#el.error.hidden = false;
 	}
 
@@ -159,7 +198,7 @@ export class ReceiverUi {
 			this.show({ sticky: true });
 		});
 		player.addEventListener(EventType.ERROR, (e) => {
-			this.showError(describeError(e));
+			this.showError(describeError(e), errorDetail(e));
 		});
 	}
 

@@ -123,6 +123,7 @@ const ButtonList = ({
 				status={watchStatus}
 				showWatchlist={false}
 				iconClassName={iconsClassName}
+				horizontal
 			/>
 		</View>
 	);

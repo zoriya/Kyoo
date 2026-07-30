@@ -140,9 +140,11 @@ export const Player = () => {
 	);
 
 	const player = usePlayer();
+	const presignReady = !authToken || !!presign;
 	useEffect(() => {
+		if (!presignReady) return;
 		player.source = source;
-	}, [source, player]);
+	}, [source, player, presignReady]);
 
 	// When leaving the watch screen, unload the player unless it is casting (the
 	// mini-player then keeps driving the receiver).

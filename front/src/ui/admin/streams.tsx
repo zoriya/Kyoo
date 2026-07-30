@@ -229,7 +229,7 @@ const StreamCard = ({
 				) : (
 					viewers.map((x, i) => (
 						<StreamViewer
-							key={x.user?.id ?? i}
+							key={i}
 							username={x.user?.username ?? t("admin.streams.guest")}
 							logo={x.user?.logo}
 							progress={x.progress}

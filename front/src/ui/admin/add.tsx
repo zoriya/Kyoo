@@ -7,10 +7,9 @@ import Library from "@material-symbols/svg-400/rounded/video_library-fill.svg";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, View } from "react-native";
+import { Platform, Pressable, useWindowDimensions, View } from "react-native";
 import { type KImage, SearchMovie, SearchSerie, Show } from "~/models";
 import {
-	CircularProgress,
 	HR,
 	type Icon,
 	IconButton,
@@ -20,6 +19,7 @@ import {
 	P,
 	PosterBackground,
 	Skeleton,
+	Spinner,
 	SubP,
 	Tabs,
 	tooltip,
@@ -59,7 +59,7 @@ const SearchResultItem = ({
 			>
 				{isPending && (
 					<View className="absolute inset-0 items-center justify-center bg-black/50">
-						<CircularProgress />
+						<Spinner />
 					</View>
 				)}
 				{externalHref && (
@@ -168,6 +168,7 @@ export const AddPage = ({
 }) => {
 	const { t } = useTranslation();
 	const router = useRouter();
+	const { height } = useWindowDimensions();
 	const [query, setQuery] = useQueryState("q", "");
 	const [kind, setKind] = useQueryState<"movie" | "serie" | "library">(
 		"kind",
@@ -240,6 +241,7 @@ export const AddPage = ({
 			scroll={false}
 		>
 			<InfiniteFetch
+				style={Platform.OS === "web" ? undefined : { maxHeight: height * 0.7 }}
 				layout={{
 					layout: "grid",
 					gap: 8,

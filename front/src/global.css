@@ -1,7 +1,14 @@
 @import "tailwindcss";
 @import "uniwind";
 
-@custom-variant touch (:where(body.noHover) &);
+@custom-variant touch {
+	@media native {
+		@slot;
+	}
+	:where(body.noHover) & {
+		@slot;
+	}
+}
 @custom-variant no-touch (:where(body:not(.noHover)) &);
 
 @theme {

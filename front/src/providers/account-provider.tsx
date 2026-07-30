@@ -51,17 +51,20 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 		isPlaceholderData: userIsPlaceholder,
 		data: user,
 		error: userError,
-	} = useFetch({
-		path: ["auth", "users", "me"],
-		parser: User,
-		placeholderData: ret.selectedAccount,
-		enabled: !!ret.selectedAccount,
-		options: {
-			apiUrl: ret.apiUrl,
-			authToken: ret.authToken,
-			returnError: true,
+	} = useFetch(
+		{
+			path: ["auth", "users", "me"],
+			parser: User,
+			placeholderData: ret.selectedAccount,
+			enabled: !!ret.selectedAccount,
+			options: {
+				apiUrl: ret.apiUrl,
+				authToken: ret.authToken,
+				returnError: true,
+			},
 		},
-	});
+		{ skipFocusCheck: true },
+	);
 	if (userError) {
 		setTimeout(() => {
 			router.replace("/login");

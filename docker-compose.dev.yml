@@ -45,7 +45,7 @@ services:
       - "8081:8081"
     environment:
       - KYOO_URL=${KYOO_URL:-http://api:5000/api}
-      - EXPO_PUBLIC_CAST_APPLICATION_ID=${CAST_APPLICATION_ID}
+      - EXPO_PUBLIC_CAST_APPLICATION_ID=${CAST_APPLICATION_ID:-}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.front.rule=PathPrefix(`/`)"
@@ -192,13 +192,14 @@ services:
     profiles: ['qsv']
 
   traefik:
-    image: traefik:v3.6
+    image: traefik:v3.7
     restart: on-failure
     command:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entryPoints.web.address=:8901"
       - "--accesslog=true"
+      - "--accesslog.fields.queryparameters.defaultmode=drop"
     ports:
       - "8901:8901"
     volumes:

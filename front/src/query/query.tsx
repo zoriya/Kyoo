@@ -6,6 +6,7 @@ import {
 	useQueryClient,
 	useMutation as useRQMutation,
 } from "@tanstack/react-query";
+import { useIsFocused } from "expo-router/react-navigation";
 import { useCallback, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
@@ -124,7 +125,16 @@ export const createQueryClient = () =>
 				staleTime: 300_000,
 				refetchOnWindowFocus: false,
 				refetchOnReconnect: false,
-				retry: false,
+				retry: (failureCount: number, error: unknown) => {
+					if (failureCount >= 4) return false;
+					if (error instanceof RetryableError) return error.key === "offline";
+					const status = (error as KyooError | null)?.status;
+					return typeof status === "number" && status >= 500;
+				},
+				retryDelay: (attempt: number) => {
+					const base = Math.min(1000 * 2 ** attempt, 10000);
+					return base / 2 + Math.random() * (base / 2);
+				},
 			},
 		},
 	});
@@ -172,11 +182,16 @@ export const keyToUrl = (key: ReturnType<typeof toQueryKey>) => {
 	return key.join("/").replace("/?", "?");
 };
 
-export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
+export const useFetch = <Data,>(
+	query: QueryIdentifier<Data>,
+	{ skipFocusCheck = false }: { skipFocusCheck?: boolean } = {},
+) => {
 	const { i18n } = useTranslation();
 	let { apiUrl, authToken, selectedAccount } = useContext(AccountContext);
 	if (query.options?.apiUrl) apiUrl = query.options.apiUrl;
 	const key = toQueryKey({ apiUrl, path: query.path, params: query.params });
+	// biome-ignore lint/correctness/useHookAtTopLevel: skipFocusCheck is static per call site
+	const focused = skipFocusCheck ? true : useIsFocused();
 
 	const ret = useQuery<Data, KyooError>({
 		queryKey: key,
@@ -192,6 +207,7 @@ export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 		placeholderData: query.placeholderData as any,
 		enabled: query.enabled,
 		refetchInterval: query.refetchInterval,
+		subscribed: focused,
 	});
 
 	if (query.options?.returnError !== true) {
@@ -234,11 +250,16 @@ export const useRefresh = (queries: QueryIdentifier<unknown>[]) => {
 	return [refreshing, refresh] as const;
 };
 
-export const useInfiniteFetch = <Data,>(query: QueryIdentifier<Data>) => {
+export const useInfiniteFetch = <Data,>(
+	query: QueryIdentifier<Data>,
+	{ skipFocusCheck = false }: { skipFocusCheck?: boolean } = {},
+) => {
 	const { i18n } = useTranslation();
 	let { apiUrl, authToken } = useContext(AccountContext);
 	if (query.options?.apiUrl) apiUrl = query.options.apiUrl;
 	const key = toQueryKey({ apiUrl, path: query.path, params: query.params });
+	// biome-ignore lint/correctness/useHookAtTopLevel: skipFocusCheck is static per call site
+	const focused = skipFocusCheck ? true : useIsFocused();
 
 	const res = useInfiniteQuery<Page<Data>, KyooError>({
 		queryKey: key,
@@ -256,6 +277,7 @@ export const useInfiniteFetch = <Data,>(query: QueryIdentifier<Data>) => {
 		placeholderData: query.placeholderData as any,
 		enabled: query.enabled,
 		refetchInterval: query.refetchInterval,
+		subscribed: focused,
 	});
 	const ret = res as typeof res & { items?: Data[] };
 	ret.items = ret.data?.pages.flatMap((x) => x.items);

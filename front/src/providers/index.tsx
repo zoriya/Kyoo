@@ -5,6 +5,7 @@ import {
 	ThemeProvider as RNThemeProvider,
 } from "expo-router/react-navigation";
 import { type ReactNode, useState } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { OmniProvider } from "react-native-omni";
 import { SafeAreaListener } from "react-native-safe-area-context";
 import {
@@ -85,16 +86,18 @@ const RnTheme = ({ children }: { children: ReactNode }) => {
 
 export const Providers = ({ children }: { children: ReactNode }) => {
 	return (
-		<QueryProvider>
-			<RnTheme>
-				<TranslationsProvider>
-					<AccountProvider>
-						<PortalProvider>
-							<PlayerProvider>{children}</PlayerProvider>
-						</PortalProvider>
-					</AccountProvider>
-				</TranslationsProvider>
-			</RnTheme>
-		</QueryProvider>
+		<GestureHandlerRootView style={{ flex: 1 }}>
+			<QueryProvider>
+				<RnTheme>
+					<TranslationsProvider>
+						<AccountProvider>
+							<PortalProvider>
+								<PlayerProvider>{children}</PlayerProvider>
+							</PortalProvider>
+						</AccountProvider>
+					</TranslationsProvider>
+				</RnTheme>
+			</QueryProvider>
+		</GestureHandlerRootView>
 	);
 };

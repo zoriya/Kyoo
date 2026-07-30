@@ -2,6 +2,7 @@ import Refresh from "@material-symbols/svg-400/rounded/autorenew.svg";
 import Delete from "@material-symbols/svg-400/rounded/delete.svg";
 import Download from "@material-symbols/svg-400/rounded/download.svg";
 import Info from "@material-symbols/svg-400/rounded/info.svg";
+import MoreHoriz from "@material-symbols/svg-400/rounded/more_horiz.svg";
 import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
 import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
@@ -100,6 +101,7 @@ export const ShowContext = ({
 	status,
 	showWatchlist = true,
 	className,
+	horizontal = false,
 	...props
 }: {
 	kind: "movie" | "serie" | "collection";
@@ -109,6 +111,7 @@ export const ShowContext = ({
 	status: WatchStatusV | null;
 	showWatchlist?: boolean;
 	className?: string;
+	horizontal?: boolean;
 } & Partial<ComponentProps<typeof Menu>> &
 	Partial<ComponentProps<typeof IconButton>>) => {
 	const account = useAccount();
@@ -139,7 +142,7 @@ export const ShowContext = ({
 	return (
 		<Menu
 			Trigger={IconButton}
-			icon={MoreVert}
+			icon={horizontal ? MoreHoriz : MoreVert}
 			className={cn("not:web:hidden", className)}
 			{...tooltip(t("misc.more"))}
 			{...(props as any)}

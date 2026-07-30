@@ -55,6 +55,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	Header?: ComponentType<{ children: ReactElement }> | ReactElement;
 	Footer?: ComponentType<{ children: ReactElement }> | ReactElement;
 	fetchMore?: boolean;
+	style?: LegendListProps["style"];
 	contentContainerStyle?: ViewStyle;
 	onScroll?: LegendListProps["onScroll"];
 	scrollEventThrottle?: LegendListProps["scrollEventThrottle"];
