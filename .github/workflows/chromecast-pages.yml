@@ -34,9 +34,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Build
-        # GitHub Pages serves project sites from /<repo>/, so the built assets
-        # must be resolved from that base path rather than the domain root.
-        run: bun run build --base "/${GITHUB_REPOSITORY#*/}/"
+        run: bun run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
