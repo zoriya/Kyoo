@@ -1,15 +1,13 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import { usePlayerState } from "react-native-omni";
 import type { Chapter } from "~/models";
 import { P, Sprite, SubP } from "~/primitives";
 import { useToken } from "~/providers/account-context";
 import { type QueryIdentifier, useFetch } from "~/query";
-import { useQueryState } from "~/utils";
 import { toTimerString } from "./controls/progress";
 
-type Thumb = {
+export type Thumb = {
 	from: number;
 	to: number;
 	url: string;
@@ -125,71 +123,6 @@ export const ScrubberTooltip = ({
 			{chapter && chapter.type !== "content" && (
 				<SubP>{t(`player.chapters.${chapter.type}`)}</SubP>
 			)}
-		</View>
-	);
-};
-
-export const BottomScrubber = ({
-	chapters,
-	seek,
-}: {
-	chapters?: Chapter[];
-	seek: number;
-}) => {
-	const [slug] = useQueryState<string>("slug", undefined!);
-	const { info, stats } = useScrubber(slug);
-	const { t } = useTranslation();
-
-	const duration = usePlayerState("duration");
-	const [viewportWidth, setViewportWidth] = useState(0);
-
-	const width = stats?.width ?? 1;
-	const offset = duration ? (seek / duration) * width * info.length : 0;
-	const chapter = chapters?.findLast(
-		(x) => x.startTime <= seek && seek < x.endTime,
-	);
-
-	const sprites = useMemo(
-		() =>
-			info.map((thumb) => (
-				<Sprite
-					key={thumb.to}
-					src={thumb.url}
-					alt=""
-					width={thumb.width}
-					height={thumb.height}
-					x={thumb.x}
-					y={thumb.y}
-					columns={stats!.columns}
-					rows={stats!.rows}
-				/>
-			)),
-		[info, stats],
-	);
-
-	return (
-		<View
-			className="overflow-hidden"
-			onLayout={(e) => setViewportWidth(e.nativeEvent.layout.width)}
-		>
-			<View
-				className="flex-row"
-				style={{
-					transform: [{ translateX: viewportWidth / 2 - offset - width / 2 }],
-				}}
-			>
-				{sprites}
-			</View>
-			<View className="absolute top-0 right-1/2 bottom-0 left-1/2 w-1 bg-slate-200" />
-			<View className="absolute inset-0 items-center">
-				<P className="rounded bg-slate-800 p-1 text-center text-slate-200 dark:text-slate-200">
-					{toTimerString(seek)}
-					{chapter && `\n${chapter.name}`}
-				</P>
-				{chapter && chapter.type !== "content" && (
-					<SubP>{t(`player.chapters.${chapter.type}`)}</SubP>
-				)}
-			</View>
 		</View>
 	);
 };

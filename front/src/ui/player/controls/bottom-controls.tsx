@@ -9,6 +9,7 @@ import {
 	View,
 	type ViewProps,
 } from "react-native";
+import { useSharedValue } from "react-native-reanimated";
 import { usePlayer } from "react-native-omni";
 import type { Chapter, KImage } from "~/models";
 import {
@@ -20,7 +21,7 @@ import {
 	tooltip,
 } from "~/primitives";
 import { cn } from "~/utils";
-import { BottomScrubber } from "../scrubber";
+import { BottomScrubber } from "../bottom-scrubber";
 import { CastButton, FullscreenButton, PlayButton, VolumeSlider } from "./misc";
 import { ProgressBar, ProgressText } from "./progress";
 import { AudioMenu, QualityMenu, SubtitleMenu, VideoMenu } from "./tracks-menu";
@@ -46,6 +47,10 @@ export const BottomControls = ({
 } & ViewProps) => {
 	const [seek, setSeek] = useState<number | null>(null);
 	const bottomSeek = Platform.OS !== "web" && seek !== null;
+	// Position of the drag as a 0..1 fraction, written on the UI thread by the
+	// slider's pan gesture and read by the bottom scrubber so its filmstrip pans
+	// off the JS thread.
+	const seekProgress = useSharedValue(0);
 
 	return (
 		<View className={cn("flex-row p-2 touch:p-1", className)} {...props}>
@@ -79,9 +84,18 @@ export const BottomControls = ({
 					) : (
 						<Skeleton className="h-8 w-1/5" />
 					))}
-				<ProgressBar chapters={chapters} seek={seek} setSeek={setSeek} />
+				<ProgressBar
+					chapters={chapters}
+					seek={seek}
+					setSeek={setSeek}
+					seekProgress={seekProgress}
+				/>
 				{bottomSeek ? (
-					<BottomScrubber seek={seek} chapters={chapters} />
+					<BottomScrubber
+						seek={seek}
+						chapters={chapters}
+						seekProgress={seekProgress}
+					/>
 				) : (
 					<ControlButtons
 						hasPrev={hasPrev}

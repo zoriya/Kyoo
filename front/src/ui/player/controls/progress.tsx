@@ -1,6 +1,7 @@
 import { type CSSProperties, useState } from "react";
 import { type TextProps, useWindowDimensions } from "react-native";
 import { usePlayer, usePlayerState } from "react-native-omni";
+import type { SharedValue } from "react-native-reanimated";
 import { useResolveClassNames } from "uniwind";
 import type { Chapter } from "~/models";
 import { P, Slider, Tooltip } from "~/primitives";
@@ -13,10 +14,12 @@ export const ProgressBar = ({
 	chapters,
 	seek,
 	setSeek,
+	seekProgress,
 }: {
 	chapters?: Chapter[];
 	seek: number | null;
 	setSeek: (v: number | null) => void;
+	seekProgress?: SharedValue<number>;
 }) => {
 	const [slug] = useQueryState<string>("slug", undefined!);
 	const { data } = useFetch(Info.infoQuery(slug));
@@ -45,6 +48,7 @@ export const ProgressBar = ({
 					player.pause();
 				}}
 				setProgress={setSeek}
+				progressValue={seekProgress}
 				endSeek={() => {
 					if (seek) player.currentTime = seek;
 					setTimeout(() => player.play(), 10);

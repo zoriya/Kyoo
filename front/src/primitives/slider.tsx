@@ -1,10 +1,16 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
 	type GestureResponderEvent,
 	Platform,
 	View,
 	type ViewProps,
 } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import {
+	runOnJS,
+	type SharedValue,
+	useSharedValue,
+} from "react-native-reanimated";
 import { cn } from "~/utils";
 
 export const Slider = ({
@@ -16,6 +22,12 @@ export const Slider = ({
 	startSeek,
 	endSeek,
 	onHover,
+	// When provided (native only), the drag runs on the UI thread and writes the
+	// current position (as a 0..1 fraction) to this shared value, so consumers
+	// like the bottom scrubber can follow the finger without a per-frame JS
+	// re-render. The React `setProgress`/state path is still driven (via
+	// `runOnJS`) for the label, the fill and the final seek commit.
+	progressValue,
 	className,
 	...props
 }: {
@@ -30,6 +42,7 @@ export const Slider = ({
 		position: number | null,
 		layout: { x: number; y: number; width: number; height: number },
 	) => void;
+	progressValue?: SharedValue<number>;
 } & Partial<ViewProps>) => {
 	const ref = useRef<View>(null);
 	const [layout, setLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
@@ -37,6 +50,33 @@ export const Slider = ({
 	const [isHover, setHover] = useState(false);
 	const [isFocus, setFocus] = useState(false);
 	const smallBar = !(isSeeking || isHover || isFocus);
+
+	// Off-thread drag: only used on native and only when a caller opts in by
+	// passing `progressValue`. Web and the volume slider keep the responder path.
+	const useGesture = progressValue != null && Platform.OS !== "web";
+	const trackWidth = useSharedValue(0);
+	const pan = useMemo(
+		() =>
+			Gesture.Pan()
+				.minDistance(0)
+				.onBegin((e) => {
+					const fraction = Math.max(0, Math.min(e.x / trackWidth.value, 1));
+					if (progressValue) progressValue.value = fraction;
+					runOnJS(setSeek)(true);
+					if (startSeek) runOnJS(startSeek)();
+					runOnJS(setProgress)(fraction * max);
+				})
+				.onUpdate((e) => {
+					const fraction = Math.max(0, Math.min(e.x / trackWidth.value, 1));
+					if (progressValue) progressValue.value = fraction;
+					runOnJS(setProgress)(fraction * max);
+				})
+				.onFinalize(() => {
+					runOnJS(setSeek)(false);
+					if (endSeek) runOnJS(endSeek)();
+				}),
+		[max, progressValue, setProgress, startSeek, endSeek, trackWidth],
+	);
 
 	const change = (event: GestureResponderEvent) => {
 		event.preventDefault();
@@ -47,7 +87,7 @@ export const Slider = ({
 		setProgress(Math.max(0, Math.min(locationX / layout.width, 1)) * max);
 	};
 
-	return (
+	const content = (
 		<View
 			ref={ref}
 			// @ts-expect-error Web only
@@ -66,7 +106,9 @@ export const Slider = ({
 			tabIndex={0}
 			onFocus={() => setFocus(true)}
 			onBlur={() => setFocus(false)}
-			onStartShouldSetResponder={() => true}
+			// On the native gesture path, decline the RN responder so it doesn't
+			// fight the gesture-handler Pan for the same touch.
+			onStartShouldSetResponder={() => !useGesture}
 			onResponderGrant={() => {
 				setSeek(true);
 				startSeek?.call(null);
@@ -78,9 +120,10 @@ export const Slider = ({
 			onResponderStart={change}
 			onResponderMove={change}
 			onLayout={() =>
-				ref.current?.measure((_, __, width, height, pageX, pageY) =>
-					setLayout({ width, height, x: pageX, y: pageY }),
-				)
+				ref.current?.measure((_, __, width, height, pageX, pageY) => {
+					setLayout({ width, height, x: pageX, y: pageY });
+					trackWidth.value = width;
+				})
 			}
 			onKeyDown={(e: KeyboardEvent) => {
 				switch (e.code) {
@@ -134,4 +177,7 @@ export const Slider = ({
 			/>
 		</View>
 	);
+
+	if (useGesture) return <GestureDetector gesture={pan}>{content}</GestureDetector>;
+	return content;
 };
