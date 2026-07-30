@@ -1,0 +1,24 @@
+diff --git a/dist/default/player/create-player.js b/dist/default/player/create-player.js
+index 39d5f4db4395ac040f9601d2d1e4ec995f4d320d..8dc91a65823013aca78a550df76aece0a5ee3223 100644
+--- a/dist/default/player/create-player.js
++++ b/dist/default/player/create-player.js
+@@ -15,7 +15,6 @@ function createPlayer(config) {
+ 		const [container, setContainer] = useState(null);
+ 		useDestroy(store);
+ 		useEffect(() => {
+-			if (!media) return;
+ 			if (store.destroyed) {
+ 				setStore(createStore()(combine(...config.features)));
+ 				return;
+diff --git a/dist/dev/player/create-player.js b/dist/dev/player/create-player.js
+index afddb3eee75c78daff111a9ddba0080e4bd90dc6..b520ed04e8d663781dd0664e41f17bb9f6a1a21e 100644
+--- a/dist/dev/player/create-player.js
++++ b/dist/dev/player/create-player.js
+@@ -15,7 +15,6 @@ function createPlayer(config) {
+ 		const [container, setContainer] = useState(null);
+ 		useDestroy(store);
+ 		useEffect(() => {
+-			if (!media) return;
+ 			if (store.destroyed) {
+ 				setStore(createStore()(combine(...config.features)));
+ 				return;

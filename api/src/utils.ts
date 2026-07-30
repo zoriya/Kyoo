@@ -80,9 +80,10 @@ export const toQueryStr = (query: Record<string, unknown>) => {
 	return `?${entries
 		.map(([k, v]) => {
 			if (!v) return null;
-			if (!Array.isArray(v)) return `${k}=${v}`;
+			const key = encodeURIComponent(k);
+			if (!Array.isArray(v)) return `${key}=${encodeURIComponent(`${v}`)}`;
 			if (v.length === 0) return null;
-			return `${k}=${v.join(",")}`;
+			return `${key}=${v.map((x) => encodeURIComponent(`${x}`)).join(",")}`;
 		})
 		.filter((x) => x)
 		.join("&")}`;

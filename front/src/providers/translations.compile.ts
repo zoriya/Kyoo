@@ -2,6 +2,7 @@
 
 import am from "../../public/translations/am.json";
 import ar from "../../public/translations/ar.json";
+import ca from "../../public/translations/ca.json";
 import de from "../../public/translations/de.json";
 import en from "../../public/translations/en.json";
 import es from "../../public/translations/es.json";
@@ -26,6 +27,7 @@ import zh from "../../public/translations/zh.json";
 export const resources = {
 	am: { translation: am },
 	ar: { translation: ar },
+	ca: { translation: ca },
 	de: { translation: de },
 	en: { translation: en },
 	es: { translation: es },
@@ -51,6 +53,7 @@ export const resources = {
 export const supportedLanguages = [
 	"am",
 	"ar",
+	"ca",
 	"de",
 	"en",
 	"es",

@@ -1,3 +1,5 @@
+import CastConnected from "@material-symbols/svg-400/rounded/cast_connected-fill.svg";
+import Cast from "@material-symbols/svg-400/rounded/cast-fill.svg";
 import FullscreenExit from "@material-symbols/svg-400/rounded/fullscreen_exit-fill.svg";
 import Fullscreen from "@material-symbols/svg-400/rounded/fullscreen-fill.svg";
 import Pause from "@material-symbols/svg-400/rounded/pause-fill.svg";
@@ -10,7 +12,7 @@ import { type ComponentProps, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { type PressableProps, View } from "react-native";
 import { usePlayer, usePlayerState } from "react-native-omni";
-import { CircularProgress, IconButton, Slider, tooltip } from "~/primitives";
+import { IconButton, Slider, Spinner, tooltip } from "~/primitives";
 import { cn } from "~/utils";
 
 export const PlayButton = (
@@ -34,6 +36,32 @@ export const PlayButton = (
 	);
 };
 
+export const CastButton = (
+	props: Partial<ComponentProps<typeof IconButton<PressableProps>>>,
+) => {
+	const { t } = useTranslation();
+
+	const player = usePlayer();
+	const castStatus = usePlayerState("castStatus");
+
+	if (
+		!castStatus ||
+		castStatus === "unavailable" ||
+		castStatus === "unsupported"
+	)
+		return null;
+
+	const active = castStatus === "connected" || castStatus === "connecting";
+	return (
+		<IconButton
+			icon={active ? CastConnected : Cast}
+			onPress={() => player.toggleCastStatus()}
+			{...tooltip(active ? t("player.stop-cast") : t("player.cast"), true)}
+			{...props}
+		/>
+	);
+};
+
 export const toggleFullscreen = async (set?: boolean) => {
 	set ??= document.fullscreenElement === null;
 	try {
@@ -45,7 +73,7 @@ export const toggleFullscreen = async (set?: boolean) => {
 			screen.orientation.unlock();
 		}
 	} catch (e) {
-		console.log(e);
+		console.error("failed to toggle fullscreen", e);
 	}
 };
 
@@ -125,9 +153,10 @@ export const LoadingIndicator = () => {
 
 	if (!isLoading) return null;
 
+	// Make the loader indicator be a border for the play button on touch devices (72px)
 	return (
-		<View className="pointer-events-none absolute inset-0 justify-center bg-slate-900/30">
-			<CircularProgress className="self-center" />
+		<View className="pointer-events-none absolute inset-0 items-center justify-center">
+			<Spinner size={72} />
 		</View>
 	);
 };

@@ -102,7 +102,7 @@ func (fs *FileStream) Destroy(ctx context.Context) {
 	_ = os.RemoveAll(fs.Out)
 }
 
-func (fs *FileStream) GetMaster(ctx context.Context, client string) string {
+func (fs *FileStream) GetMaster(ctx context.Context, query string) string {
 	ctx = context.WithoutCancel(ctx)
 	master := "#EXTM3U\n"
 
@@ -135,7 +135,8 @@ func (fs *FileStream) GetMaster(ctx context.Context, client string) string {
 
 	if def_audio != nil {
 		aqualities := utils.Filter(AudioQualities, func(quality AudioQuality) bool {
-			return quality.Bitrate() < def_audio.Bitrate
+			return quality.Bitrate() <= def_audio.Quality().Bitrate() &&
+				(def_video == nil || quality.Bitrate() <= matchAudioQuality(def_video.Quality()).Bitrate())
 		})
 		aqualities = append(aqualities, AOriginal)
 
@@ -161,7 +162,7 @@ func (fs *FileStream) GetMaster(ctx context.Context, client string) string {
 				} else {
 					master += "CHANNELS=\"2\","
 				}
-				master += fmt.Sprintf("URI=\"audio/%d/%s/index.m3u8?clientId=%s\"\n", audio.Index, quality, client)
+				master += fmt.Sprintf("URI=\"audio/%d/%s/index.m3u8?%s\"\n", audio.Index, quality, query)
 			}
 			master += "\n"
 		}
@@ -180,29 +181,31 @@ func (fs *FileStream) GetMaster(ctx context.Context, client string) string {
 		}
 		qualities = append(qualities, Original)
 
-		for _, video := range fs.Info.Videos {
-			for _, quality := range slices.Backward(qualities) {
-				master += "#EXT-X-MEDIA:TYPE=VIDEO,"
-				master += fmt.Sprintf("GROUP-ID=\"%s\",", quality)
-				if video.Language != nil {
-					master += fmt.Sprintf("LANGUAGE=\"%s\",", *video.Language)
+		if len(fs.Info.Videos) > 1 {
+			for _, video := range fs.Info.Videos {
+				for _, quality := range slices.Backward(qualities) {
+					master += "#EXT-X-MEDIA:TYPE=VIDEO,"
+					master += fmt.Sprintf("GROUP-ID=\"%s\",", quality)
+					if video.Language != nil {
+						master += fmt.Sprintf("LANGUAGE=\"%s\",", *video.Language)
+					}
+					if video.Title != nil {
+						master += fmt.Sprintf("NAME=\"%s\",", *video.Title)
+					} else if video.Language != nil {
+						master += fmt.Sprintf("NAME=\"%s\",", *video.Language)
+					} else {
+						master += fmt.Sprintf("NAME=\"Video %d\",", video.Index)
+					}
+					if video == *def_video {
+						master += "DEFAULT=YES\n"
+					} else {
+						master += fmt.Sprintf("URI=\"%d/%s/index.m3u8?%s\"\n", video.Index, quality, query)
+					}
 				}
-				if video.Title != nil {
-					master += fmt.Sprintf("NAME=\"%s\",", *video.Title)
-				} else if video.Language != nil {
-					master += fmt.Sprintf("NAME=\"%s\",", *video.Language)
-				} else {
-					master += fmt.Sprintf("NAME=\"Video %d\",", video.Index)
-				}
-				if video == *def_video {
-					master += "DEFAULT=YES\n"
-				} else {
-					master += fmt.Sprintf("URI=\"%d/%s/index.m3u8?clientId=%s\"\n", video.Index, quality, client)
-				}
+				master += "\n"
 			}
 			master += "\n"
 		}
-		master += "\n"
 
 		aspectRatio := float32(def_video.Width) / float32(def_video.Height)
 		for _, quality := range slices.Backward(qualities) {
@@ -241,7 +244,7 @@ func (fs *FileStream) GetMaster(ctx context.Context, client string) string {
 						master += fmt.Sprintf("AUDIO=\"a-%s\",", string(aquality))
 					}
 					master += "CLOSED-CAPTIONS=NONE\n"
-					master += fmt.Sprintf("%d/%s/index.m3u8?clientId=%s\n", def_video.Index, quality, client)
+					master += fmt.Sprintf("%d/%s/index.m3u8?%s\n", def_video.Index, quality, query)
 				}
 				continue
 			}
@@ -255,7 +258,7 @@ func (fs *FileStream) GetMaster(ctx context.Context, client string) string {
 				master += fmt.Sprintf("AUDIO=\"a-%s\",", string(matchAudioQuality(quality)))
 			}
 			master += "CLOSED-CAPTIONS=NONE\n"
-			master += fmt.Sprintf("%d/%s/index.m3u8?clientId=%s\n", def_video.Index, quality, client)
+			master += fmt.Sprintf("%d/%s/index.m3u8?%s\n", def_video.Index, quality, query)
 		}
 	}
 
@@ -285,13 +288,13 @@ func (fs *FileStream) getVideoStream(ctx context.Context, idx uint32, quality Vi
 	return stream, nil
 }
 
-func (fs *FileStream) GetVideoIndex(ctx context.Context, idx uint32, quality VideoQuality, client string) (string, error) {
+func (fs *FileStream) GetVideoIndex(ctx context.Context, idx uint32, quality VideoQuality, query string) (string, error) {
 	ctx = context.WithoutCancel(ctx)
 	stream, err := fs.getVideoStream(ctx, idx, quality)
 	if err != nil {
 		return "", err
 	}
-	return stream.GetIndex(ctx, client)
+	return stream.GetIndex(ctx, query)
 }
 
 func (fs *FileStream) GetVideoSegment(ctx context.Context, idx uint32, quality VideoQuality, segment int32) (string, error) {
@@ -335,13 +338,13 @@ func (fs *FileStream) getAudioStream(ctx context.Context, idx uint32, quality Au
 	return stream, nil
 }
 
-func (fs *FileStream) GetAudioIndex(ctx context.Context, idx uint32, quality AudioQuality, client string) (string, error) {
+func (fs *FileStream) GetAudioIndex(ctx context.Context, idx uint32, quality AudioQuality, query string) (string, error) {
 	ctx = context.WithoutCancel(ctx)
 	stream, err := fs.getAudioStream(ctx, idx, quality)
 	if err != nil {
 		return "", err
 	}
-	return stream.GetIndex(ctx, client)
+	return stream.GetIndex(ctx, query)
 }
 
 func (fs *FileStream) GetAudioSegment(ctx context.Context, idx uint32, quality AudioQuality, segment int32) (string, error) {

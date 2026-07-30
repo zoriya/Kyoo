@@ -127,15 +127,18 @@ export const collections = new Elysia({
 			detail: {
 				description: "Get a random collection",
 			},
-			query: t.Object({
-				preferOriginal: t.Optional(
-					t.Boolean({ description: desc.preferOriginal }),
-				),
-				with: t.Array(t.UnionEnum(["translations"]), {
-					default: [],
-					description: "Include related resources in the response.",
-				}),
-			}),
+			query: t.Object(
+				{
+					preferOriginal: t.Optional(
+						t.Boolean({ description: desc.preferOriginal }),
+					),
+					with: t.Array(t.UnionEnum(["translations"]), {
+						default: [],
+						description: "Include related resources in the response.",
+					}),
+				},
+				{ additionalProperties: true },
+			),
 			response: {
 				302: t.Void({
 					description:

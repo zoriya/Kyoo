@@ -15,21 +15,21 @@ import { sqlarr } from "~/db/utils";
 import { KError } from "~/models/error";
 import { bubble } from "~/models/examples";
 import { AcceptLanguage, isUuid, processLanguages } from "~/models/utils";
-import { comment, getFile } from "~/utils";
+import { comment, getFile, toQueryStr } from "~/utils";
 import { imageDir } from "./seed/images";
 
 function getRedirectToImageHandler({ filter }: { filter?: SQL }) {
 	return async function Handler({
 		params: { id, image },
 		headers: { "accept-language": languages },
-		query: { quality },
+		query,
 		set,
 		status,
 		redirect,
 	}: {
 		params: { id?: string; image: "poster" | "thumbnail" | "banner" | "logo" };
 		headers: { "accept-language": string };
-		query: { quality?: "high" | "medium" | "low" };
+		query: Record<string, unknown>;
 		set: Context["set"];
 		status: Context["status"];
 		redirect: Context["redirect"];
@@ -90,9 +90,7 @@ function getRedirectToImageHandler({ filter }: { filter?: SQL }) {
 			});
 		}
 		set.headers["content-language"] = ret.language;
-		return quality
-			? redirect(`${prefix}/images/${ret.image.id}?quality=${quality}`)
-			: redirect(`${prefix}/images/${ret.image.id}`);
+		return redirect(`${prefix}/images/${ret.image.id}${toQueryStr(query)}`);
 	};
 }
 
@@ -161,14 +159,17 @@ export const imagesH = new Elysia({ tags: ["images"] })
 		},
 	)
 	.guard({
-		query: t.Object({
-			quality: t.Optional(
-				t.UnionEnum(["high", "medium", "low"], {
-					default: "high",
-					description: "The quality you want your image to be in.",
-				}),
-			),
-		}),
+		query: t.Object(
+			{
+				quality: t.Optional(
+					t.UnionEnum(["high", "medium", "low"], {
+						default: "high",
+						description: "The quality you want your image to be in.",
+					}),
+				),
+			},
+			{ additionalProperties: true },
+		),
 		response: {
 			302: t.Void({
 				description:
@@ -183,7 +184,7 @@ export const imagesH = new Elysia({ tags: ["images"] })
 	})
 	.get(
 		"/staff/:id/image",
-		async ({ params: { id }, query: { quality }, status, redirect }) => {
+		async ({ params: { id }, query, status, redirect }) => {
 			const [ret] = await db
 				.select({ image: staff.image })
 				.from(staff)
@@ -203,9 +204,7 @@ export const imagesH = new Elysia({ tags: ["images"] })
 					message: `No staff member found with id or slug: '${id}'.`,
 				});
 			}
-			return quality
-				? redirect(`${prefix}/images/${ret.image!.id}?quality=${quality}`)
-				: redirect(`${prefix}/images/${ret.image!.id}`);
+			return redirect(`${prefix}/images/${ret.image!.id}${toQueryStr(query)}`);
 		},
 		{
 			detail: { description: "Get the image of a staff member." },
@@ -227,7 +226,7 @@ export const imagesH = new Elysia({ tags: ["images"] })
 		async ({
 			params: { id },
 			headers: { "accept-language": languages },
-			query: { quality },
+			query,
 			set,
 			status,
 			redirect,
@@ -284,9 +283,7 @@ export const imagesH = new Elysia({ tags: ["images"] })
 				});
 			}
 			set.headers["content-language"] = ret.language;
-			return quality
-				? redirect(`${prefix}/images/${ret.image.id}?quality=${quality}`)
-				: redirect(`${prefix}/images/${ret.image.id}`);
+			return redirect(`${prefix}/images/${ret.image.id}${toQueryStr(query)}`);
 		},
 		{
 			detail: { description: "Get the logo of a studio." },

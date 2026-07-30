@@ -1,0 +1,56 @@
+name: Deploy Chromecast Receiver
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "chromecast/**"
+      - ".github/workflows/chromecast-pages.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: chromecast-pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build receiver
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./chromecast
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build
+        # GitHub Pages serves project sites from /<repo>/, so the built assets
+        # must be resolved from that base path rather than the domain root.
+        run: bun run build --base "/${GITHUB_REPOSITORY#*/}/"
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./chromecast/dist
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

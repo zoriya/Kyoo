@@ -470,11 +470,13 @@ traefikproxy:
       - "--api.dashboard=true"
       - "--api.insecure=true"
       - "--log.level=INFO"
+      - "--accesslog=true"
+      - "--accesslog.fields.queryparameters.defaultmode=drop"
       - "--providers.file.filename=/dynamic_config/dynamic_config.yaml"
     extraEnv: []
     image:
       repository: docker.io/traefik
-      tag: v3.6.15
+      tag: v3.7.9
   replicaCount: 1
   updateStrategy: ~
   securityContext: {}

@@ -1,0 +1,114 @@
+diff --git a/react-native.js b/react-native.js
+index 229f09a8230ab24079d471f65d28d36908f0f2ea..18b3bde2371af9e093b648021b16ad3c9a2969c3 100644
+--- a/react-native.js
++++ b/react-native.js
+@@ -3958,10 +3958,13 @@ function scheduleRenderRangeProjectionSettle(ctx) {
+ }
+ function findCurrentStickyIndex(stickyArray, scroll, state) {
+   const positions = state.positions;
++  // Clamp scroll to 0 minimum since negative values (from padding offset) should
++  // still activate the first sticky header at position 0
++  const effectiveScroll = Math.max(0, scroll);
+   for (let i = stickyArray.length - 1; i >= 0; i--) {
+     const stickyIndex = stickyArray[i];
+     const stickyPos = positions[stickyIndex];
+-    if (stickyPos !== void 0 && scroll >= stickyPos) {
++    if (stickyPos !== void 0 && effectiveScroll >= stickyPos) {
+       return i;
+     }
+   }
+diff --git a/react-native.mjs b/react-native.mjs
+index c2e0f3823f524e31e2105a5fbda76be78c926226..6b3c111069a2427a752f2300b63ca99476548156 100644
+--- a/react-native.mjs
++++ b/react-native.mjs
+@@ -3937,10 +3937,13 @@ function scheduleRenderRangeProjectionSettle(ctx) {
+ }
+ function findCurrentStickyIndex(stickyArray, scroll, state) {
+   const positions = state.positions;
++  // Clamp scroll to 0 minimum since negative values (from padding offset) should
++  // still activate the first sticky header at position 0
++  const effectiveScroll = Math.max(0, scroll);
+   for (let i = stickyArray.length - 1; i >= 0; i--) {
+     const stickyIndex = stickyArray[i];
+     const stickyPos = positions[stickyIndex];
+-    if (stickyPos !== void 0 && scroll >= stickyPos) {
++    if (stickyPos !== void 0 && effectiveScroll >= stickyPos) {
+       return i;
+     }
+   }
+diff --git a/react-native.web.js b/react-native.web.js
+index 544cca82136ab14cbeec0a01499f554bd4eca75f..4987da52de388646bb66dadd4e3a73a9d10c9631 100644
+--- a/react-native.web.js
++++ b/react-native.web.js
+@@ -3980,10 +3980,13 @@ function scheduleRenderRangeProjectionSettle(ctx) {
+ }
+ function findCurrentStickyIndex(stickyArray, scroll, state) {
+   const positions = state.positions;
++  // Clamp scroll to 0 minimum since negative values (from padding offset) should
++  // still activate the first sticky header at position 0
++  const effectiveScroll = Math.max(0, scroll);
+   for (let i = stickyArray.length - 1; i >= 0; i--) {
+     const stickyIndex = stickyArray[i];
+     const stickyPos = positions[stickyIndex];
+-    if (stickyPos !== void 0 && scroll >= stickyPos) {
++    if (stickyPos !== void 0 && effectiveScroll >= stickyPos) {
+       return i;
+     }
+   }
+diff --git a/react-native.web.mjs b/react-native.web.mjs
+index 6b2d9011f6c5e85664eca195de538617fe7d9dee..364a477d308a7c62c35a9fe6371d59bbb33a3ba0 100644
+--- a/react-native.web.mjs
++++ b/react-native.web.mjs
+@@ -3959,10 +3959,13 @@ function scheduleRenderRangeProjectionSettle(ctx) {
+ }
+ function findCurrentStickyIndex(stickyArray, scroll, state) {
+   const positions = state.positions;
++  // Clamp scroll to 0 minimum since negative values (from padding offset) should
++  // still activate the first sticky header at position 0
++  const effectiveScroll = Math.max(0, scroll);
+   for (let i = stickyArray.length - 1; i >= 0; i--) {
+     const stickyIndex = stickyArray[i];
+     const stickyPos = positions[stickyIndex];
+-    if (stickyPos !== void 0 && scroll >= stickyPos) {
++    if (stickyPos !== void 0 && effectiveScroll >= stickyPos) {
+       return i;
+     }
+   }
+diff --git a/react.js b/react.js
+index 544cca82136ab14cbeec0a01499f554bd4eca75f..4987da52de388646bb66dadd4e3a73a9d10c9631 100644
+--- a/react.js
++++ b/react.js
+@@ -3980,10 +3980,13 @@ function scheduleRenderRangeProjectionSettle(ctx) {
+ }
+ function findCurrentStickyIndex(stickyArray, scroll, state) {
+   const positions = state.positions;
++  // Clamp scroll to 0 minimum since negative values (from padding offset) should
++  // still activate the first sticky header at position 0
++  const effectiveScroll = Math.max(0, scroll);
+   for (let i = stickyArray.length - 1; i >= 0; i--) {
+     const stickyIndex = stickyArray[i];
+     const stickyPos = positions[stickyIndex];
+-    if (stickyPos !== void 0 && scroll >= stickyPos) {
++    if (stickyPos !== void 0 && effectiveScroll >= stickyPos) {
+       return i;
+     }
+   }
+diff --git a/react.mjs b/react.mjs
+index 6b2d9011f6c5e85664eca195de538617fe7d9dee..364a477d308a7c62c35a9fe6371d59bbb33a3ba0 100644
+--- a/react.mjs
++++ b/react.mjs
+@@ -3959,10 +3959,13 @@ function scheduleRenderRangeProjectionSettle(ctx) {
+ }
+ function findCurrentStickyIndex(stickyArray, scroll, state) {
+   const positions = state.positions;
++  // Clamp scroll to 0 minimum since negative values (from padding offset) should
++  // still activate the first sticky header at position 0
++  const effectiveScroll = Math.max(0, scroll);
+   for (let i = stickyArray.length - 1; i >= 0; i--) {
+     const stickyIndex = stickyArray[i];
+     const stickyPos = positions[stickyIndex];
+-    if (stickyPos !== void 0 && scroll >= stickyPos) {
++    if (stickyPos !== void 0 && effectiveScroll >= stickyPos) {
+       return i;
+     }
+   }

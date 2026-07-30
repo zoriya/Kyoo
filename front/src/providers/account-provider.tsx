@@ -18,7 +18,11 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 	const ret = useMemo(() => {
 		const acc = accounts.find((x) => x.selected) ?? accounts[0];
 		return {
-			apiUrl: acc?.apiUrl ?? defaultApiUrl,
+			apiUrl:
+				acc?.apiUrl ||
+				(Platform.OS === "web" && typeof window !== "undefined"
+					? window.location.origin
+					: defaultApiUrl),
 			authToken: acc?.token ?? null,
 			selectedAccount: acc ?? null,
 			accounts: accounts.map((account) => ({
@@ -47,17 +51,20 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 		isPlaceholderData: userIsPlaceholder,
 		data: user,
 		error: userError,
-	} = useFetch({
-		path: ["auth", "users", "me"],
-		parser: User,
-		placeholderData: ret.selectedAccount,
-		enabled: !!ret.selectedAccount,
-		options: {
-			apiUrl: ret.apiUrl,
-			authToken: ret.authToken,
-			returnError: true,
+	} = useFetch(
+		{
+			path: ["auth", "users", "me"],
+			parser: User,
+			placeholderData: ret.selectedAccount,
+			enabled: !!ret.selectedAccount,
+			options: {
+				apiUrl: ret.apiUrl,
+				authToken: ret.authToken,
+				returnError: true,
+			},
 		},
-	});
+		{ skipFocusCheck: true },
+	);
 	if (userError) {
 		setTimeout(() => {
 			router.replace("/login");

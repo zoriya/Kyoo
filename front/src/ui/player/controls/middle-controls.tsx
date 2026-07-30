@@ -29,23 +29,23 @@ export const MiddleControls = ({
 				icon={SkipPrevious}
 				onPress={hasPrev ? () => player.playPrev() : undefined}
 				className={cn(
-					"mx-6 bg-gray-800/70",
+					"mx-8 bg-gray-800/70",
 					!hasPrev && "pointer-events-none opacity-0",
 				)}
-				iconClassName="h-16 w-16 fill-slate-200 dark:fill-slate-200"
+				iconClassName="h-10 w-10 fill-slate-200 dark:fill-slate-200"
 			/>
 			<PlayButton
-				className={cn("mx-6 bg-gray-800/50")}
-				iconClassName="h-24 w-24 fill-slate-200 dark:fill-slate-200"
+				className={cn("mx-8 bg-gray-800/50")}
+				iconClassName="h-14 w-14 fill-slate-200 dark:fill-slate-200"
 			/>
 			<IconButton
 				icon={SkipNext}
 				onPress={hasNext ? () => player.playNext() : undefined}
 				className={cn(
-					"mx-6 bg-gray-800/70",
+					"mx-8 bg-gray-800/70",
 					!hasNext && "pointer-events-none opacity-0",
 				)}
-				iconClassName="h-16 w-16 fill-slate-200 dark:fill-slate-200"
+				iconClassName="h-10 w-10 fill-slate-200 dark:fill-slate-200"
 			/>
 		</View>
 	);

@@ -26,6 +26,7 @@ import {
 } from "~/models/utils";
 import { desc } from "~/models/utils/descriptions";
 import type { MovieWatchStatus, SerieWatchStatus } from "~/models/watchlist";
+import { toQueryStr } from "~/utils";
 import { showFilters, showSort } from "./shows/logic";
 
 const staffSort = Sort(
@@ -156,7 +157,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 	)
 	.get(
 		"/staff/random",
-		async ({ status, redirect }) => {
+		async ({ status, redirect, query }) => {
 			const [member] = await db
 				.select({ slug: staff.slug })
 				.from(staff)
@@ -167,7 +168,7 @@ export const staffH = new Elysia({ tags: ["staff"] })
 					status: 404,
 					message: "No staff in the database.",
 				});
-			return redirect(`${prefix}/staff/${member.slug}`);
+			return redirect(`${prefix}/staff/${member.slug}${toQueryStr(query)}`);
 		},
 		{
 			detail: {

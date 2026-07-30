@@ -25,7 +25,11 @@ import {
 	MeterProvider,
 	PeriodicExportingMetricReader,
 } from "@opentelemetry/sdk-metrics";
-import type { SpanExporter } from "@opentelemetry/sdk-trace-base";
+import type {
+	ReadableSpan,
+	SpanExporter,
+	SpanProcessor,
+} from "@opentelemetry/sdk-trace-base";
 import {
 	BatchSpanProcessor,
 	NodeTracerProvider,
@@ -45,6 +49,37 @@ const resource = resourceFromAttributes({
 });
 
 const logger = getLogger();
+
+function stripPresignSpanProcessor(): SpanProcessor {
+	const stripQuery = (query: string): string => {
+		const params = new URLSearchParams(query);
+		if (!params.has("x-presign")) return query;
+		params.delete("x-presign");
+		return params.toString();
+	};
+	const stripUrl = (url: string): string => {
+		try {
+			const u = new URL(url);
+			if (!u.searchParams.has("x-presign")) return url;
+			u.searchParams.delete("x-presign");
+			return u.toString();
+		} catch {
+			return url;
+		}
+	};
+	return {
+		onStart() {},
+		onEnd(span: ReadableSpan) {
+			const attrs = span.attributes as Record<string, unknown>;
+			if (typeof attrs["url.full"] === "string")
+				attrs["url.full"] = stripUrl(attrs["url.full"]);
+			if (typeof attrs["url.query"] === "string")
+				attrs["url.query"] = stripQuery(attrs["url.query"]);
+		},
+		forceFlush: async () => {},
+		shutdown: async () => {},
+	};
+}
 
 // all logs in kyoo are in uppercase by default, also make it uppercase here.
 function upperCaseSeverityTextProcessor(): LogRecordProcessor {
@@ -135,7 +170,7 @@ export function setupOtel() {
 	if (te) {
 		tp = new NodeTracerProvider({
 			resource,
-			spanProcessors: [new BatchSpanProcessor(te)],
+			spanProcessors: [stripPresignSpanProcessor(), new BatchSpanProcessor(te)],
 		});
 	}
 

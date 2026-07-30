@@ -26,7 +26,6 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	incremental = false,
 	getKey,
 	getItemType,
-	getItemSizeMult,
 	getStickyIndices,
 	Render,
 	Loader,
@@ -46,7 +45,6 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	horizontal?: boolean;
 	getKey?: (item: Data, index: number) => string;
 	getItemType?: (item: Data, index: number) => Type;
-	getItemSizeMult?: (item: Data, index: number, type: Type) => number;
 	getStickyIndices?: (items: Data[]) => number[];
 	stickyHeaderConfig?: LegendListProps["stickyHeaderConfig"];
 	Render: (props: { item: Data; index: number }) => ReactElement | null;
@@ -57,6 +55,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	Header?: ComponentType<{ children: ReactElement }> | ReactElement;
 	Footer?: ComponentType<{ children: ReactElement }> | ReactElement;
 	fetchMore?: boolean;
+	style?: LegendListProps["style"];
 	contentContainerStyle?: ViewStyle;
 	onScroll?: LegendListProps["onScroll"];
 	scrollEventThrottle?: LegendListProps["scrollEventThrottle"];
@@ -86,13 +85,8 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 			data={data}
 			recycleItems
 			getItemType={getItemType}
-			estimatedItemSize={getItemSizeMult ? undefined : size}
+			estimatedItemSize={size}
 			stickyHeaderIndices={getStickyIndices?.(items ?? [])}
-			getEstimatedItemSize={
-				getItemSizeMult
-					? (item, idx, type) => getItemSizeMult(item, idx, type as Type) * size
-					: undefined
-			}
 			renderItem={({ item, index }) =>
 				item ? <Render index={index} item={item} /> : <Loader index={index} />
 			}

@@ -65,10 +65,12 @@ export const oidcLogin = async (
 	apiUrl ??= defaultApiUrl;
 	try {
 		const device =
-			Platform.OS === "web" ? "" : `?device=${capitalize(Platform.OS)} App`;
+			Platform.OS === "web"
+				? ""
+				: `&device=${encodeURIComponent(`${capitalize(Platform.OS)} App`)}`;
 		const { token } = await queryFn({
 			method: "GET",
-			url: `${apiUrl}/auth/oidc/callback/${provider}?token=${code}${device}`,
+			url: `${apiUrl}/auth/oidc/callback/${provider}?token=${encodeURIComponent(code)}${device}`,
 			authToken: linkToToken,
 			parser: linkToToken ? null : z.object({ token: z.string() }),
 		});

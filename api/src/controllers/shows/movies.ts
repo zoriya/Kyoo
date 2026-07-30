@@ -118,18 +118,21 @@ export const movies = new Elysia({ prefix: "/movies", tags: ["movies"] })
 			detail: {
 				description: "Get a random movie",
 			},
-			query: t.Object({
-				preferOriginal: t.Optional(
-					t.Boolean({ description: desc.preferOriginal }),
-				),
-				with: t.Array(
-					t.UnionEnum(["translations", "collection", "studios", "videos"]),
-					{
-						default: [],
-						description: "Include related resources in the response.",
-					},
-				),
-			}),
+			query: t.Object(
+				{
+					preferOriginal: t.Optional(
+						t.Boolean({ description: desc.preferOriginal }),
+					),
+					with: t.Array(
+						t.UnionEnum(["translations", "collection", "studios", "videos"]),
+						{
+							default: [],
+							description: "Include related resources in the response.",
+						},
+					),
+				},
+				{ additionalProperties: true },
+			),
 			response: {
 				302: t.Void({
 					description:

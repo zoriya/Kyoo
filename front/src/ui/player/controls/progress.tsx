@@ -46,7 +46,7 @@ export const ProgressBar = ({
 				}}
 				setProgress={setSeek}
 				endSeek={() => {
-					player.currentTime = seek!;
+					if (seek) player.currentTime = seek;
 					setTimeout(() => player.play(), 10);
 					setSeek(null);
 				}}
@@ -62,7 +62,7 @@ export const ProgressBar = ({
 				id={"progress-scrubber"}
 				isOpen={hoverProgress !== null}
 				// not a real fix, we should fix it upstream
-				place={percent > 80 ? "top-end" : "top"}
+				place={percent > 0.8 ? "top-end" : "top"}
 				position={{
 					x: layout.x + layout.width * percent,
 					y: layout.y,

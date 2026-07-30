@@ -1,10 +1,15 @@
 import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
+import { Image as EImage } from "expo-image";
 import type { ComponentType } from "react";
-import { Image, View, type ViewProps, type ViewStyle } from "react-native";
+import { Platform, View, type ViewProps, type ViewStyle } from "react-native";
+import { withUniwind } from "uniwind";
+import { useToken } from "~/providers/account-context";
 import { cn } from "~/utils";
 import { Icon } from "./icons";
 import { Skeleton } from "./skeleton";
 import { P } from "./text";
+
+const Img = withUniwind(EImage);
 
 const stringToColor = (string: string) => {
 	let hash = 0;
@@ -38,6 +43,7 @@ export const Avatar = <AsProps = ViewProps>({
 	as?: ComponentType<AsProps>;
 } & AsProps) => {
 	const Container = as ?? View;
+	const { apiUrl, authToken } = useToken();
 	return (
 		<Container
 			className={cn("h-6 w-6 overflow-hidden rounded-full", className)}
@@ -54,10 +60,17 @@ export const Avatar = <AsProps = ViewProps>({
 				</P>
 			)}
 			{src && (
-				<Image
-					resizeMode="cover"
-					source={{ uri: src }}
-					alt={alt}
+				<Img
+					source={{
+						uri: src.startsWith("http") ? src : `${apiUrl}${src}`,
+						// use cookies on web to allow `img` to make the call instead of js
+						headers:
+							!src.startsWith("http") && authToken && Platform.OS !== "web"
+								? { Authorization: `Bearer ${authToken}` }
+								: undefined,
+					}}
+					contentFit="cover"
+					accessibilityLabel={alt}
 					className="absolute inset-0 bg-slate-200 dark:bg-slate-200"
 				/>
 			)}

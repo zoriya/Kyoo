@@ -21,7 +21,7 @@ import {
 } from "~/primitives";
 import { cn } from "~/utils";
 import { BottomScrubber } from "../scrubber";
-import { FullscreenButton, PlayButton, VolumeSlider } from "./misc";
+import { CastButton, FullscreenButton, PlayButton, VolumeSlider } from "./misc";
 import { ProgressBar, ProgressText } from "./progress";
 import { AudioMenu, QualityMenu, SubtitleMenu, VideoMenu } from "./tracks-menu";
 
@@ -48,9 +48,9 @@ export const BottomControls = ({
 	const bottomSeek = Platform.OS !== "web" && seek !== null;
 
 	return (
-		<View className={cn("flex-row p-2", className)} {...props}>
+		<View className={cn("flex-row p-2 touch:p-1", className)} {...props}>
 			{poster !== null && (
-				<View className="m-4 w-1/5 max-w-50 max-sm:hidden">
+				<View className="m-4 touch:w-1/6 w-1/5 max-w-50 touch:max-w-30 max-sm:hidden">
 					{poster !== undefined ? (
 						<Poster
 							src={poster}
@@ -64,13 +64,16 @@ export const BottomControls = ({
 			)}
 			<View
 				className={cn(
-					"my-1 mr-4 flex-1 max-sm:ml-4 sm:my-6",
+					"my-1 mr-4 flex-1 max-sm:ml-4 no-touch:sm:my-6",
 					poster === null && "ml-4",
 				)}
 			>
 				{!bottomSeek &&
 					(name ? (
-						<H2 numberOfLines={1} className="pb-2 text-slate-200">
+						<H2
+							numberOfLines={1}
+							className="pb-2 touch:pb-1 text-slate-200 touch:text-xl"
+						>
 							{name}
 						</H2>
 					) : (
@@ -112,8 +115,8 @@ const ControlButtons = ({
 	const menuProps = {
 		onMenuOpen: () => setMenu(true),
 		onMenuClose: () => setMenu(false),
-		className: "mr-4",
-		iconClassName: "fill-slate-200 dark:fill-slate-200",
+		className: "mr-4 touch:mr-5",
+		iconClassName: "fill-slate-200 dark:fill-slate-200 touch:h-5 touch:w-5",
 	} satisfies Partial<
 		ComponentProps<
 			typeof Menu<ComponentProps<typeof IconButton<PressableProps>>>
@@ -160,19 +163,23 @@ const ControlButtons = ({
 					<IconButton
 						icon={MenuIcon}
 						onPress={onOpenEntriesMenu}
-						className="mr-4"
-						iconClassName="fill-slate-200 dark:fill-slate-200"
+						className="mr-4 touch:mr-5"
+						iconClassName="fill-slate-200 dark:fill-slate-200 touch:h-5 touch:w-5"
 						{...tooltip(t("player.entry-list"), true)}
 					/>
 				)}
+				<CastButton
+					className="mr-4 touch:mr-5"
+					iconClassName="fill-slate-200 dark:fill-slate-200 touch:h-5 touch:w-5"
+				/>
 				<SubtitleMenu {...menuProps} />
 				<AudioMenu {...menuProps} />
 				<VideoMenu {...menuProps} />
 				<QualityMenu {...menuProps} />
 				{Platform.OS === "web" && (
 					<FullscreenButton
-						className="mr-4"
-						iconClassName="fill-slate-200 dark:fill-slate-200"
+						className="mr-4 touch:mr-5"
+						iconClassName="fill-slate-200 dark:fill-slate-200 touch:h-5 touch:w-5"
 					/>
 				)}
 			</View>

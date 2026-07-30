@@ -75,7 +75,7 @@ definitions:
               example: RSA
               type: string
             "n":
-              example: oBcXcJUR-Sb8_b4qIj28LRAPxdF_6odRr52K5-ymiEkR2DOlEuXBtM-biWxPESW-U-zhfHzdVLf6ioy5xL0bJTh8BMIorkrDliN3vb81jCvyOMgZ7ATMJpMAQMmSDN7sL3U45r22FaoQufCJMQHmUsZPecdQSgj2aFBiRXxsLleYlSezdBVT_gKH-coqeYXSC_hk-ezSq4aDZ10BlDnZ-FA7-ES3T7nBmJEAU7KDAGeSvbYAfYimOW0r-Vc0xQNuwGCfzZtSexKXDbYbNwOVo3SjfCabq-gMfap_owcHbKicGBZu1LDlh7CpkmLQf_kv6GihM2LWFFh6Vwg2cltiwF22EIPlUDtYTkUR0qRkdNJaNkwV5Vv_6r3pzSmu5ovRriKtlrvJMjlTnLb4_ltsge3fw5Z34cJrsp094FbUc2O6Or4FGEXUldieJCnVRhs2_h6SDcmeMXs1zfvE5GlDnq8tZV6WMJ5Sb4jNO7rs_hTkr23_E6mVg-DdtozGfqzRzhIjPym6D_jVfR6dZv5W0sKwOHRmT7nYq-C7b2sAwmNNII296M4Rq-jn0b5pgSeMDYbIpbIA4thU8LYU0lBZp_ZVwWKG1RFZDxz3k9O5UVth2kTpTWlwn0hB1aAvgXHo6in1CScITGA72p73RbDieNnLFaCK4xUVstkWAKLqPxs
+              example: oBcXcJUR-Sb8_b4qIj28LRAPxdF_6odRr52K5-ymiEkR2DOlEuXBtM-biWxPESW-U-zhfHzdVLf6ioy5xL0bJTh8BMIorkrDliN3vb81jCvyOMgZ7ATMJpMAQMmSDN7sL3U45r22FaoQufCJMQHmUsZPecdQSgj2aFBiRXxsLleYlSezdBVT_gKH-coqeYXSC_hk-ezSq4aDZ10BlDnZ-FA7-ES3T7nBmJEAU7KDAGeSvbYAfYimOW0r-Vc0xQNuwGCfzZtSexKXDbYbNwOVo3SjfCabq-gMfap_owcHbKicGBZu1LDlh7CpkmLQf_kv6GihM2LWFFh6Vwg2cltiwF22EIPlUDtYTkUR0qRkdNJaNkwV5Vv_6r3pzSmu5ovRriKtlrvJMjlTnLb4_ltsge3fw5Z34cJrsp094FbUc2O6Or4FGEXUldieJCnVRhs2_h6SDcmeMXs1zfvE5GlDnq8tZV6WMJ5Sb4jNO7rs_hTkr23_E6mVg-DdtRS256ozGfqzRzhIjPym6D_jVfR6dZv5W0sKwOHRmT7nYq-C7b2sAwmNNII296M4Rq-jn0b5pgSeMDYbIpbIA4thU8LYU0lBZp_ZVwWKG1RFZDxz3k9O5UVth2kTpTWlwn0hB1aAvgXHo6in1CScITGA72p73RbDieNnLFaCK4xUVstkWAKLqPxs
               type: string
             use:
               example: sig
@@ -147,6 +147,66 @@ definitions:
       this:
         example: https://kyoo.zoriya.dev/auth/users
         type: string
+    type: object
+  main.Presign:
+    properties:
+      duration:
+        description: How long the signature stays valid (go duration, e.g. `24h`).
+        example: 24h
+        type: string
+      expireAt:
+        description: When this signature stops being valid.
+        example: "2025-03-29T18:20:05.267Z"
+        type: string
+      for:
+        description: The list of requests the signature should be valid for.
+        items:
+          $ref: '#/definitions/main.PresignRule'
+        minItems: 1
+        type: array
+      signature:
+        description: The signature to append as a `x-presign` query parameter to any
+          request allowed by `for`.
+        example: eyJhbGciOiJSUzI1NiIsImtpZCI6Ii4uLiJ9.eyJmb3IiOlt7InVybCI6Ii4uLiJ9XX0.KMUFsID...
+        type: string
+    required:
+    - duration
+    - for
+    type: object
+  main.PresignRequest:
+    properties:
+      duration:
+        description: How long the signature stays valid (go duration, e.g. `24h`).
+        example: 24h
+        type: string
+      for:
+        description: The list of requests the signature should be valid for.
+        items:
+          $ref: '#/definitions/main.PresignRule'
+        minItems: 1
+        type: array
+    required:
+    - duration
+    - for
+    type: object
+  main.PresignRule:
+    properties:
+      prefix:
+        description: When set, matches any request path starting with this prefix
+          instead of the exact `url`.
+        example: /videos/e05089d6-9179-4b5b-a63e-94dd5fc2a397/
+        type: string
+      url:
+        description: The exact url (matched against the request path) this rule allows.
+          Ignored when `prefix` is set.
+        example: /api/videos/example
+        type: string
+      verb:
+        description: The http verb this rule allows.
+        example: GET
+        type: string
+    required:
+    - verb
     type: object
   main.ServerInfo:
     properties:
@@ -366,7 +426,8 @@ paths:
       - oidc
   /jwt:
     get:
-      description: Convert a session token or an API key to a short lived JWT.
+      description: Convert a session token or an API key to a short lived JWT. Passing
+        an existing JWT will refresh it.
       produces:
       - application/json
       responses:
@@ -479,6 +540,11 @@ paths:
       - description: Optional tenant passthrough for federated setups
         in: query
         name: tenant
+        type: string
+      - description: The device the created session will be used on
+        example: android tv
+        in: query
+        name: device
         type: string
       - description: Bearer token to link provider to current account
         in: header
@@ -599,6 +665,42 @@ paths:
       summary: OIDC login
       tags:
       - oidc
+  /presign:
+    post:
+      consumes:
+      - application/json
+      description: Add the signature as a `x-presign` query parameter
+      parameters:
+      - description: The requests to presign
+        in: body
+        name: presign
+        required: true
+        schema:
+          $ref: '#/definitions/main.PresignRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Presign'
+        "400":
+          description: Invalid parameters
+          schema:
+            $ref: '#/definitions/main.KError'
+        "401":
+          description: Not logged in
+          schema:
+            $ref: '#/definitions/main.KError'
+        "422":
+          description: Invalid body
+          schema:
+            $ref: '#/definitions/main.KError'
+      security:
+      - Jwt: []
+      summary: Presign a group of urls
+      tags:
+      - jwt
   /sessions:
     get:
       description: List all active sessions for the currently connected user

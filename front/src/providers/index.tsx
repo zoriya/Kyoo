@@ -5,6 +5,8 @@ import {
 	ThemeProvider as RNThemeProvider,
 } from "expo-router/react-navigation";
 import { type ReactNode, useState } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { OmniProvider } from "react-native-omni";
 import { SafeAreaListener } from "react-native-safe-area-context";
 import {
 	Uniwind,
@@ -14,9 +16,26 @@ import {
 } from "uniwind";
 import { createQueryClient } from "~/query";
 import { AccountProvider } from "./account-provider";
+import { useLocalSetting } from "./settings";
 import { TranslationsProvider } from "./translations.native";
 
 function getServerData(_key: string): any {}
+
+const PlayerProvider = ({ children }: { children: ReactNode }) => {
+	const [player] = useLocalSetting<"vlc" | "exoplayer">("player", "vlc");
+	return (
+		<OmniProvider
+			backend={{ android: player }}
+			cast={{
+				receiverApplicationId:
+					process.env.EXPO_PUBLIC_CAST_APPLICATION_ID ?? "D8FB0FC1",
+			}}
+			showNotification
+		>
+			{children}
+		</OmniProvider>
+	);
+};
 
 const QueryProvider = ({ children }: { children: ReactNode }) => {
 	const [queryClient] = useState(() => createQueryClient());
@@ -67,14 +86,18 @@ const RnTheme = ({ children }: { children: ReactNode }) => {
 
 export const Providers = ({ children }: { children: ReactNode }) => {
 	return (
-		<QueryProvider>
-			<RnTheme>
-				<TranslationsProvider>
-					<AccountProvider>
-						<PortalProvider>{children}</PortalProvider>
-					</AccountProvider>
-				</TranslationsProvider>
-			</RnTheme>
-		</QueryProvider>
+		<GestureHandlerRootView style={{ flex: 1 }}>
+			<QueryProvider>
+				<RnTheme>
+					<TranslationsProvider>
+						<AccountProvider>
+							<PortalProvider>
+								<PlayerProvider>{children}</PlayerProvider>
+							</PortalProvider>
+						</AccountProvider>
+					</TranslationsProvider>
+				</RnTheme>
+			</QueryProvider>
+		</GestureHandlerRootView>
 	);
 };
