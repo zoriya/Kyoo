@@ -1,4 +1,3 @@
-import { Portal } from "@gorhom/portal";
 import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
 import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
 import { useRouter } from "expo-router";
@@ -14,6 +13,7 @@ import {
 } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import type { SvgProps } from "react-native-svg";
+import { Portal } from "react-native-teleport";
 import { cn } from "~/utils";
 import { Icon, IconButton } from "./icons";
 import { PressableFeedback } from "./links";
@@ -69,7 +69,7 @@ const Menu = <AsProps,>({
 				{...(props as AsProps)}
 			/>
 			{isOpen && (
-				<Portal>
+				<Portal hostName="root">
 					<MenuContext.Provider value={setOpen}>
 						<Pressable
 							onPress={() => setOpen(false)}

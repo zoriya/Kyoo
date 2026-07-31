@@ -1,6 +1,6 @@
-import { Portal } from "@gorhom/portal";
 import { Stack, useRouter } from "expo-router";
 import type { ReactNode } from "react";
+import { Portal } from "react-native-teleport";
 import type { Icon } from "./icons";
 import { Overlay } from "./popup";
 
@@ -31,7 +31,7 @@ export const Modal = ({
 					},
 				}}
 			/>
-			<Portal>
+			<Portal hostName="root" style={{ pointerEvents: "auto" }}>
 				<Overlay icon={icon} title={title} close={close} scroll={scroll}>
 					{children}
 				</Overlay>

@@ -1,4 +1,3 @@
-import { PortalProvider } from "@gorhom/portal";
 import { HydrationBoundary, QueryClientProvider } from "@tanstack/react-query";
 import {
 	DefaultTheme,
@@ -8,6 +7,7 @@ import { type ReactNode, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { OmniProvider } from "react-native-omni";
 import { SafeAreaListener } from "react-native-safe-area-context";
+import { PortalProvider } from "react-native-teleport";
 import {
 	Uniwind,
 	useCSSVariable,

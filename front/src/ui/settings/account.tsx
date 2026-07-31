@@ -18,7 +18,6 @@ import {
 	Input,
 	P,
 	Popup,
-	usePopup,
 } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { useMutation } from "~/query";
@@ -29,7 +28,10 @@ import { Preference, SettingsContainer } from "./base";
 export const AccountSettings = () => {
 	const account = useAccount()!;
 	const { theme } = useUniwind();
-	const [setPopup, close] = usePopup();
+	const [openPopup, setOpenPopup] = useState<
+		"username" | "email" | "password" | null
+	>(null);
+	const close = () => setOpenPopup(null);
 	const { t } = useTranslation();
 
 	const { mutateAsync } = useMutation({
@@ -106,18 +108,7 @@ export const AccountSettings = () => {
 			>
 				<Button
 					text={t("misc.edit")}
-					onPress={() =>
-						setPopup(
-							<ChangePopup
-								icon={Username}
-								autoComplete="username-new"
-								label={t("settings.account.username.label")}
-								inital={account.username}
-								apply={async (v) => await mutateAsync({ username: v })}
-								close={close}
-							/>,
-						)
-					}
+					onPress={() => setOpenPopup("username")}
 				/>
 			</Preference>
 			<Preference
@@ -162,21 +153,7 @@ export const AccountSettings = () => {
 				label={t("settings.account.email.label")}
 				description={account.email}
 			>
-				<Button
-					text={t("misc.edit")}
-					onPress={() =>
-						setPopup(
-							<ChangePopup
-								icon={Mail}
-								autoComplete="email"
-								label={t("settings.account.email.label")}
-								inital={account.email}
-								apply={async (v) => await mutateAsync({ email: v })}
-								close={close}
-							/>,
-						)
-					}
-				/>
+				<Button text={t("misc.edit")} onPress={() => setOpenPopup("email")} />
 			</Preference>
 			<Preference
 				icon={Password}
@@ -185,21 +162,40 @@ export const AccountSettings = () => {
 			>
 				<Button
 					text={t("misc.edit")}
-					onPress={() =>
-						setPopup(
-							<ChangePasswordPopup
-								icon={Password}
-								label={t("settings.account.password.label")}
-								hasPassword={account.hasPassword}
-								apply={async (op, np) =>
-									await editPassword({ oldPassword: op, newPassword: np })
-								}
-								close={close}
-							/>,
-						)
-					}
+					onPress={() => setOpenPopup("password")}
 				/>
 			</Preference>
+			{openPopup === "username" && (
+				<ChangePopup
+					icon={Username}
+					autoComplete="username-new"
+					label={t("settings.account.username.label")}
+					inital={account.username}
+					apply={async (v) => await mutateAsync({ username: v })}
+					close={close}
+				/>
+			)}
+			{openPopup === "email" && (
+				<ChangePopup
+					icon={Mail}
+					autoComplete="email"
+					label={t("settings.account.email.label")}
+					inital={account.email}
+					apply={async (v) => await mutateAsync({ email: v })}
+					close={close}
+				/>
+			)}
+			{openPopup === "password" && (
+				<ChangePasswordPopup
+					icon={Password}
+					label={t("settings.account.password.label")}
+					hasPassword={account.hasPassword}
+					apply={async (op, np) =>
+						await editPassword({ oldPassword: op, newPassword: np })
+					}
+					close={close}
+				/>
+			)}
 		</SettingsContainer>
 	);
 };

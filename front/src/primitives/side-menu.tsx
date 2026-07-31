@@ -1,7 +1,7 @@
-import { Portal } from "@gorhom/portal";
 import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
 import type { ReactNode } from "react";
 import { Pressable, View } from "react-native";
+import { Portal } from "react-native-teleport";
 import { cn } from "~/utils";
 import { IconButton } from "./icons";
 import { Heading } from "./text";
@@ -24,7 +24,7 @@ export const SideMenu = ({
 	if (!isOpen) return null;
 
 	return (
-		<Portal>
+		<Portal hostName="root" style={{ pointerEvents: "auto" }}>
 			<Pressable
 				onPress={onClose}
 				className="absolute inset-0 cursor-default! bg-black/60"

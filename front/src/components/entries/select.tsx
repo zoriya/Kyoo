@@ -30,25 +30,28 @@ if (Platform.OS !== "web") {
 	};
 }
 
-export const EntrySelect = ({
-	displayNumber,
-	name,
-	videos,
-	close,
-}: {
+export type EntrySelectEntry = {
 	displayNumber: string | null;
-	name: string;
+	name: string | null;
 	videos: Entry["videos"];
-	close?: () => void;
+};
+
+export const EntrySelect = ({
+	entry,
+	onClose,
+}: {
+	entry: EntrySelectEntry | null;
+	onClose: () => void;
 }) => {
 	const { t } = useTranslation();
 
+	if (!entry) return null;
 	return (
 		<Popup
-			title={[displayNumber, name].filter((x) => x).join(" · ")}
-			close={close}
+			title={[entry.displayNumber, entry.name].filter((x) => x).join(" · ")}
+			close={onClose}
 		>
-			{[...Map.groupBy(videos, (v) => v.rendering).entries()].map(
+			{[...Map.groupBy(entry.videos, (v) => v.rendering).entries()].map(
 				([rendering, items], i) => (
 					<Fragment key={rendering}>
 						{i > 0 && <HR />}

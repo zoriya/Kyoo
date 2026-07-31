@@ -1,11 +1,14 @@
 import MoreHoriz from "@material-symbols/svg-400/rounded/more_horiz.svg";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View, type ViewProps } from "react-native";
 import { entryDisplayNumber } from "~/components/entries";
-import { EntrySelect } from "~/components/entries/select";
+import {
+	EntrySelect,
+	type EntrySelectEntry,
+} from "~/components/entries/select";
 import { ShowContext } from "~/components/items/context-menus";
 import { WatchListInfo } from "~/components/items/watchlist-info";
 import { Rating } from "~/components/rating";
@@ -39,7 +42,6 @@ import {
 	Skeleton,
 	tooltip,
 	UL,
-	usePopup,
 } from "~/primitives";
 import { Fetch, type QueryIdentifier } from "~/query";
 import { cn, displayRuntime, getDisplayDate } from "~/utils";
@@ -69,7 +71,7 @@ const ButtonList = ({
 	videoSlug: string | null;
 }) => {
 	const { t } = useTranslation();
-	const [setPopup, closePopup] = usePopup();
+	const [selected, setSelected] = useState<EntrySelectEntry | null>(null);
 
 	return (
 		<View className="flex-row items-center justify-center">
@@ -80,14 +82,7 @@ const ButtonList = ({
 						? {
 								onPress: () => {
 									if (!videos) return;
-									setPopup(
-										<EntrySelect
-											displayNumber={displayNumber}
-											name={name}
-											videos={videos}
-											close={closePopup}
-										/>,
-									);
+									setSelected({ displayNumber, name, videos });
 								},
 							}
 						: {
@@ -125,6 +120,7 @@ const ButtonList = ({
 				iconClassName={iconsClassName}
 				horizontal
 			/>
+			<EntrySelect entry={selected} onClose={() => setSelected(null)} />
 		</View>
 	);
 };
@@ -259,41 +255,39 @@ const ExternalIdChip = ({
 	name: string;
 	items: Metadata[string];
 }) => {
-	const [setPopup, closePopup] = usePopup();
+	const [open, setOpen] = useState(false);
 
 	const withLinks = items.filter((x) => x.link);
 	if (withLinks.length === 0) return null;
 
 	return (
-		<Chip
-			label={name}
-			href={withLinks.length === 1 ? withLinks[0].link : null}
-			size="small"
-			outline
-			className="m-1"
-			onPress={
-				withLinks.length > 1
-					? () =>
-							setPopup(
-								<Popup title={capitalize(name)} close={closePopup}>
-									{withLinks
-										.sort((a, b) =>
-											(a.label ?? a.link!).localeCompare(b.label ?? b.link!),
-										)
-										.map((x) => (
-											<A
-												key={x.dataId}
-												href={x.link!}
-												className="rounded p-4 hover:bg-popover"
-											>
-												{x.label ?? x.link}
-											</A>
-										))}
-								</Popup>,
-							)
-					: undefined
-			}
-		/>
+		<>
+			<Chip
+				label={name}
+				href={withLinks.length === 1 ? withLinks[0].link : null}
+				size="small"
+				outline
+				className="m-1"
+				onPress={withLinks.length > 1 ? () => setOpen(true) : undefined}
+			/>
+			{open && (
+				<Popup title={capitalize(name)} close={() => setOpen(false)}>
+					{withLinks
+						.sort((a, b) =>
+							(a.label ?? a.link!).localeCompare(b.label ?? b.link!),
+						)
+						.map((x) => (
+							<A
+								key={x.dataId}
+								href={x.link!}
+								className="rounded p-4 hover:bg-popover"
+							>
+								{x.label ?? x.link}
+							</A>
+						))}
+				</Popup>
+			)}
+		</>
 	);
 };
 

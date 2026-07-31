@@ -1,4 +1,3 @@
-import { Portal } from "@gorhom/portal";
 import { LegendList } from "@legendapp/list/react-native";
 import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
 import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
@@ -117,7 +116,7 @@ export const ComboBox = <Data,>({
 				</PressableFeedback>
 			)}
 			{isOpen && (
-				<Portal>
+				<Portal hostName="root">
 					<Pressable
 						onPress={() => {
 							setOpen(false);
