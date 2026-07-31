@@ -94,7 +94,7 @@ export const ItemGrid = ({
 					videoSlug={videoSlug}
 					status={watchStatus}
 					isOpen={moreOpened}
-					setOpen={(v) => setMoreOpened(v)}
+					setOpen={setMoreOpened}
 					className={cn(
 						"absolute top-0 right-0 bg-gray-800/70 hover:bg-gray-800 focus-visible:bg-gray-800",
 						"native:hidden opacity-0 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100",

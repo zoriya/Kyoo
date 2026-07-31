@@ -10,6 +10,7 @@ import VideoLibrary from "@material-symbols/svg-400/rounded/video_library-fill.s
 import { useRouter } from "expo-router";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
+import { Platform } from "react-native";
 import { WatchStatusV } from "~/models";
 import { Alert, HRP, IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
@@ -50,6 +51,8 @@ export const EntryContext = ({
 		],
 		invalidate: null,
 	});
+
+	if (Platform.OS !== "web" && props.setOpen && !props.isOpen) return null;
 
 	return (
 		<Menu
@@ -137,6 +140,8 @@ export const ShowContext = ({
 		path: ["api", `${kind}s`, slug],
 		invalidate: ["api", "shows"],
 	});
+
+	if (Platform.OS !== "web" && props.setOpen && !props.isOpen) return null;
 
 	return (
 		<Menu

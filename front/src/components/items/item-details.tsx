@@ -91,7 +91,7 @@ export const ItemDetails = ({
 							name={name}
 							status={watchStatus}
 							isOpen={moreOpened}
-							setOpen={(v) => setMoreOpened(v)}
+							setOpen={setMoreOpened}
 							videoSlug={videoSlug}
 						/>
 						{tagline && <P className="p-1">{tagline}</P>}

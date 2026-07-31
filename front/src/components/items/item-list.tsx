@@ -80,7 +80,7 @@ export const ItemList = ({
 							videoSlug={videoSlug}
 							status={watchStatus}
 							isOpen={moreOpened}
-							setOpen={(v) => setMoreOpened(v)}
+							setOpen={setMoreOpened}
 							className={cn(
 								"ml-4",
 								"bg-gray-800/70 hover:bg-gray-800 focus-visible:bg-gray-800",

@@ -1,7 +1,12 @@
-import { useState } from "react";
-import { RefreshControl } from "react-native";
-import Animated from "react-native-reanimated";
+import {
+	LegendList,
+	type LegendListComponent,
+} from "@legendapp/list/react-native";
+import { type ReactElement, useMemo } from "react";
+import { useWindowDimensions } from "react-native";
+import { createAnimatedComponent } from "react-native-reanimated";
 import { Genre } from "~/models";
+import { useBreakpointValue } from "~/primitives";
 import { Fetch, useRefresh } from "~/query";
 import { shuffle } from "~/utils";
 import { HeaderBackground, useScrollNavbar } from "../navbar";
@@ -12,10 +17,22 @@ import { NextupList } from "./nextup";
 import { Recommended } from "./recommended";
 import { VerticalRecommended } from "./vertical";
 
+const AnimatedLegendList = createAnimatedComponent(
+	LegendList,
+) as LegendListComponent;
+
 export const HomePage = () => {
-	const genres = shuffle(Object.values(Genre.enum));
+	const genres = useMemo(() => shuffle(Object.values(Genre.enum)), []);
 	const [isRefreshing, refresh] = useRefresh(HomePage.queries(genres));
-	const [imageHeight, setHeight] = useState(300);
+	// The hero height is deterministic from the viewport, so mirror its
+	// responsive classes here instead of measuring it — that avoids the
+	// onLayout -> setState that used to reflow the whole list at first paint.
+	// Keep in sync with header.tsx:
+	//   h-[40vh] sm:h-[60vh] sm:min-h-[750px] md:min-h-[680px] lg:h-[65vh]
+	const { height } = useWindowDimensions();
+	const heroVh = useBreakpointValue({ xs: 0.4, sm: 0.6, lg: 0.65 });
+	const heroMinH = useBreakpointValue({ xs: 1, sm: 750, md: 680 });
+	const imageHeight = Math.max(Math.round(height * heroVh), heroMinH);
 	const { scrollHandler, headerProps } = useScrollNavbar({
 		imageHeight,
 		tab: true,
@@ -24,32 +41,50 @@ export const HomePage = () => {
 	return (
 		<>
 			<HeaderBackground {...headerProps} />
-			<Animated.ScrollView
+			<AnimatedLegendList
+				recycleItems={false}
+				estimatedItemSize={340}
+				estimatedHeaderSize={imageHeight}
+				drawDistance={300}
+				getItemType={(el: ReactElement) => {
+					switch (el.type) {
+						case GenreGrid:
+							return "genre";
+						case Recommended:
+							return "recommended";
+						case VerticalRecommended:
+							return "vertical";
+						case NextupList:
+							return "nextup";
+						case NewsList:
+							return "news";
+						default:
+							console.warn("unhandled item type in home screen", el)
+							return "other";
+					}
+				}}
 				onScroll={scrollHandler}
 				scrollEventThrottle={16}
-				refreshControl={
-					<RefreshControl
-						progressViewOffset={60}
-						onRefresh={refresh}
-						refreshing={isRefreshing}
+				onRefresh={refresh}
+				refreshing={isRefreshing}
+				progressViewOffset={60}
+				ListHeaderComponent={
+					<Fetch
+						query={Header.query()}
+						Render={(x) => (
+							<Header
+								name={x.name}
+								tagline={x.kind !== "collection" ? x.tagline : null}
+								description={x.description}
+								thumbnail={x.thumbnail}
+								link={x.kind !== "collection" ? x.playHref : null}
+								infoLink={x.href}
+							/>
+						)}
+						Loader={Header.Loader}
 					/>
 				}
 			>
-				<Fetch
-					query={Header.query()}
-					Render={(x) => (
-						<Header
-							name={x.name}
-							tagline={x.kind !== "collection" ? x.tagline : null}
-							description={x.description}
-							thumbnail={x.thumbnail}
-							link={x.kind !== "collection" ? x.playHref : null}
-							infoLink={x.href}
-							onLayout={(info) => setHeight(info.nativeEvent.layout.height)}
-						/>
-					)}
-					Loader={Header.Loader}
-				/>
 				<NextupList />
 				<NewsList />
 				{genres
@@ -69,7 +104,7 @@ export const HomePage = () => {
 					.map((x) => (
 						<GenreGrid key={x} genre={x} />
 					))}
-			</Animated.ScrollView>
+			</AnimatedLegendList>
 		</>
 	);
 };
