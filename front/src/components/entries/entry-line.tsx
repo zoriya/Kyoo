@@ -100,7 +100,7 @@ export const EntryLine = ({
 						</Heading>
 						{tagline && <Heading>{tagline}</Heading>}
 					</View>
-					<View className="flex-row justify-between">
+					<View className="flex-row justify-between md:ml-auto">
 						<View className="flex-row justify-between max-sm:flex-col sm:flex-1 md:flex-row-reverse md:items-center md:justify-end">
 							<SubP>
 								{[

@@ -12,6 +12,8 @@ import {
 	TextInput,
 	View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Portal } from "react-native-teleport";
 import { type QueryIdentifier, useInfiniteFetch } from "~/query/query";
 import { cn } from "~/utils";
 import { Icon, IconButton } from "./icons";
@@ -64,6 +66,7 @@ export const ComboBox = <Data,>({
 	const [isOpen, setOpen] = useState(false);
 	const [search, setSearch] = useState("");
 	const inputRef = useRef<TextInput>(null);
+	const insets = useSafeAreaInsets();
 
 	const oldItems = useRef<Data[] | undefined>(undefined);
 	let { items, fetchNextPage, hasNextPage, isFetching } = useInfiniteFetch(
@@ -126,9 +129,9 @@ export const ComboBox = <Data,>({
 					<KeyboardAvoidingView
 						behavior="padding"
 						className={cn(
-							"absolute bottom-0 w-full self-center bg-popover pb-safe sm:mx-12 sm:max-w-2xl",
+							"absolute bottom-0 w-full self-center bg-popover px-safe sm:mx-12 sm:max-w-2xl",
 							"mt-20 max-h-[80vh] rounded-t-4xl pt-8",
-							"xl:top-0 xl:right-0 xl:mr-0 xl:rounded-l-4xl xl:rounded-tr-0",
+							"xl:top-0 xl:right-0 xl:mr-0 xl:rounded-l-4xl xl:rounded-tr-0 xl:pt-safe",
 						)}
 					>
 						<IconButton
@@ -159,6 +162,7 @@ export const ComboBox = <Data,>({
 						<LegendList
 							data={data}
 							extraData={selectedKeys}
+							contentContainerStyle={{ paddingBottom: insets.bottom }}
 							estimatedItemSize={48}
 							keyExtractor={(item: Data | null, index: number) =>
 								item ? getKey(item) : `placeholder-${index}`

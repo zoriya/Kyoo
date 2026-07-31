@@ -176,5 +176,5 @@ ItemDetails.layout = {
 	size: 288,
 	numColumns: { xs: 1, md: 2, xl: 3 },
 	layout: "grid",
-	gap: { xs: ts(1), md: ts(8) },
+	gap: { xs: ts(1), md: ts(2) },
 } satisfies Layout;

@@ -10,9 +10,8 @@ import VideoLibrary from "@material-symbols/svg-400/rounded/video_library-fill.s
 import { useRouter } from "expo-router";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert } from "react-native";
 import { WatchStatusV } from "~/models";
-import { HRP, IconButton, Menu, tooltip } from "~/primitives";
+import { Alert, HRP, IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { useMutation } from "~/query";
 import { cn } from "~/utils";

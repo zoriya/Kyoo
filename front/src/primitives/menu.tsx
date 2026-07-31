@@ -78,12 +78,12 @@ const Menu = <AsProps,>({
 						/>
 						<View
 							className={cn(
-								"absolute bottom-0 w-full self-center bg-popover pb-safe sm:mx-12 sm:max-w-2xl",
+								"absolute bottom-0 w-full self-center bg-popover px-safe pb-safe sm:mx-12 sm:max-w-2xl",
 								"mt-20 max-h-[80vh] rounded-t-4xl pt-8",
-								"xl:top-0 xl:right-0 xl:mr-0 xl:rounded-l-4xl xl:rounded-tr-0",
+								"xl:top-0 xl:right-0 xl:mr-0 xl:rounded-l-4xl xl:rounded-tr-0 xl:pt-safe",
 							)}
 						>
-							<ScrollView>
+							<ScrollView className="native:max-h-[80vh]">
 								<IconButton
 									icon={Close}
 									onPress={() => setOpen(false)}

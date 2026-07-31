@@ -82,7 +82,7 @@ export const Controls = ({
 					hasNext={hasNext}
 					onOpenEntriesMenu={onOpenEntriesMenu}
 					setMenu={setMenu}
-					className="absolute bottom-0 w-full bg-slate-900/50 px-safe pt-safe"
+					className="absolute bottom-0 w-full bg-slate-900/50 px-safe pb-safe"
 					{...hoverControls}
 				/>
 			</TouchControls>

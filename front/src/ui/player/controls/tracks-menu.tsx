@@ -155,21 +155,22 @@ export const QualityMenu = (props: Partial<MenuProps>) => {
 					player.selectRendition(undefined);
 				}}
 			/>
-			{[...lvls].reverse().map((x) => (
-				<Menu.Item
-					key={x.id}
-					label={
-						x.id.includes("original")
-							? `${t("player.transmux")} (${x.height}p)`
-							: `${x.height}p`
-					}
-					selected={x.selected && !auto}
-					onSelect={() => {
-						setPlayMode("hls");
-						player.selectRendition(x);
-					}}
-				/>
-			))}
+			{playMode !== "direct" &&
+				[...lvls].reverse().map((x) => (
+					<Menu.Item
+						key={x.id}
+						label={
+							x.id.includes("original")
+								? `${t("player.transmux")} (${x.height}p)`
+								: `${x.height}p`
+						}
+						selected={x.selected && !auto}
+						onSelect={() => {
+							setPlayMode("hls");
+							player.selectRendition(x);
+						}}
+					/>
+				))}
 		</Menu>
 	);
 };

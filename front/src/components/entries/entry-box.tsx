@@ -106,6 +106,6 @@ EntryBox.Loader = (props: object) => {
 EntryBox.layout = {
 	size: 350,
 	numColumns: { xs: 3, sm: 4, md: 5, lg: 6, xl: 8 },
-	gap: { xs: ts(1), sm: ts(2), md: ts(4) },
+	gap: { xs: ts(1), md: ts(2) },
 	layout: "grid",
 } satisfies Layout;

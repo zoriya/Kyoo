@@ -93,7 +93,7 @@ const ButtonList = ({
 						: {
 								as: Link,
 								href: videos?.length ? playHref : null,
-								disabled: !!videos?.length,
+								disabled: !videos?.length,
 							})}
 					{...tooltip(t("show.play"))}
 				/>

@@ -49,7 +49,10 @@ export const Overlay = ({
 					{close && <IconButton icon={Close} onPress={close} />}
 				</View>
 				{scroll ? (
-					<ScrollView className={cn("p-6", className)} {...props}>
+					<ScrollView
+						className={cn("native:max-h-[85vh] p-6", className)}
+						{...props}
+					>
 						{children}
 					</ScrollView>
 				) : (

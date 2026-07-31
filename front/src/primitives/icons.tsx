@@ -1,4 +1,8 @@
-import { type ComponentProps, type ComponentType, useState } from "react";
+import {
+	type ComponentProps,
+	type ComponentType,
+	useState,
+} from "react";
 import type { PressableProps } from "react-native";
 import Animated from "react-native-reanimated";
 import RSvg, { type SvgProps } from "react-native-svg";
@@ -108,14 +112,17 @@ const Pressable = Animated.createAnimatedComponent(PressableFeedback);
 
 export const IconFab = <AsProps = PressableProps>({
 	icon,
+	as,
 	className,
 	iconClassName,
 	...props
 }: ComponentProps<typeof IconButton<AsProps>>) => {
 	const [hover, setHover] = useState(false);
 	const [focus, setFocus] = useState(false);
+	const Container = as ?? Pressable;
+
 	return (
-		<Pressable
+		<Container
 			className={cn(
 				"group h-10 w-10 overflow-hidden rounded-full bg-accent p-2 outline-0",
 				className,
@@ -139,7 +146,7 @@ export const IconFab = <AsProps = PressableProps>({
 					iconClassName,
 				)}
 			/>
-		</Pressable>
+		</Container>
 	);
 };
 

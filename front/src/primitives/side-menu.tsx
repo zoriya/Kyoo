@@ -33,17 +33,17 @@ export const SideMenu = ({
 			<View
 				className={cn(
 					"absolute inset-y-0 right-0 w-4/5 max-w-xl bg-popover",
-					"border-white/10 border-l",
+					"border-white/10 border-l pt-safe pr-safe pb-safe",
 					containerClassName,
 				)}
 			>
 				{title && (
-					<View className="flex-row items-center justify-between border-white/10 border-b p-4 pt-safe">
+					<View className="flex-row items-center justify-between border-white/10 border-b p-4">
 						<Heading>{title}</Heading>
 						<IconButton icon={Close} onPress={onClose} />
 					</View>
 				)}
-				<View className={cn("flex-1 pb-safe", className)}>{children}</View>
+				<View className={cn("flex-1", className)}>{children}</View>
 			</View>
 		</Portal>
 	);
