@@ -341,7 +341,7 @@ func getAudioKeyframes(ctx context.Context, info *MediaInfo, audio_idx uint32, k
 	notified := false
 
 	for scanner.Scan() {
-		pts := scanner.Text()
+		pts := strings.TrimSuffix(scanner.Text(), ",")
 		if pts == "" || pts == "N/A" {
 			continue
 		}
