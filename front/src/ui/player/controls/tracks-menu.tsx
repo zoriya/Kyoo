@@ -33,24 +33,28 @@ export const SubtitleMenu = (props: Partial<MenuProps>) => {
 			{...tooltip(t("player.subtitles"), true)}
 			{...props}
 		>
-			<Menu.Item
-				label={t("player.subtitle-none")}
-				selected={!player.subtitles.some((x) => x.selected)}
-				onSelect={() => player.selectSubtitle(undefined)}
-			/>
-			{data?.subtitles.map((x, i) => {
-				const track = player.subtitles.find(
-					(s) => s.id === (x.index ?? i).toString(),
-				);
-				return (
+			{() => (
+				<>
 					<Menu.Item
-						key={x.index ?? x.link}
-						label={getDisplayName(x)}
-						selected={track?.selected ?? false}
-						onSelect={() => track && player.selectSubtitle(track)}
+						label={t("player.subtitle-none")}
+						selected={!player.subtitles.some((x) => x.selected)}
+						onSelect={() => player.selectSubtitle(undefined)}
 					/>
-				);
-			})}
+					{data?.subtitles.map((x, i) => {
+						const track = player.subtitles.find(
+							(s) => s.id === (x.index ?? i).toString(),
+						);
+						return (
+							<Menu.Item
+								key={x.index ?? x.link}
+								label={getDisplayName(x)}
+								selected={track?.selected ?? false}
+								onSelect={() => track && player.selectSubtitle(track)}
+							/>
+						);
+					})}
+				</>
+			)}
 		</Menu>
 	);
 };
@@ -73,14 +77,18 @@ export const AudioMenu = (props: Partial<MenuProps>) => {
 			{...tooltip(t("player.audios"), true)}
 			{...props}
 		>
-			{tracks.map((x) => (
-				<Menu.Item
-					key={x.id}
-					label={getDisplayName({ title: x.label, language: x.language })}
-					selected={x.selected}
-					onSelect={() => player.selectAudio(x)}
-				/>
-			))}
+			{() => (
+				<>
+					{tracks.map((x) => (
+						<Menu.Item
+							key={x.id}
+							label={getDisplayName({ title: x.label, language: x.language })}
+							selected={x.selected}
+							onSelect={() => player.selectAudio(x)}
+						/>
+					))}
+				</>
+			)}
 		</Menu>
 	);
 };
@@ -103,14 +111,18 @@ export const VideoMenu = (props: Partial<MenuProps>) => {
 			{...tooltip(t("player.videos"), true)}
 			{...props}
 		>
-			{tracks.map((x) => (
-				<Menu.Item
-					key={x.id}
-					label={getDisplayName({ title: x.label, language: x.language })}
-					selected={x.selected}
-					onSelect={() => player.selectVideo(x)}
-				/>
-			))}
+			{() => (
+				<>
+					{tracks.map((x) => (
+						<Menu.Item
+							key={x.id}
+							label={getDisplayName({ title: x.label, language: x.language })}
+							selected={x.selected}
+							onSelect={() => player.selectVideo(x)}
+						/>
+					))}
+				</>
+			)}
 		</Menu>
 	);
 };
@@ -138,39 +150,43 @@ export const QualityMenu = (props: Partial<MenuProps>) => {
 			{...tooltip(t("player.quality"), true)}
 			{...props}
 		>
-			<Menu.Item
-				label={t("player.direct")}
-				selected={playMode === "direct"}
-				onSelect={() => setPlayMode("direct")}
-			/>
-			<Menu.Item
-				label={
-					auto && current
-						? `${t("player.auto")} (${current.id.includes("original") ? t("player.transmux") : `${current.height}p`})`
-						: t("player.auto")
-				}
-				selected={auto && playMode === "hls"}
-				onSelect={() => {
-					setPlayMode("hls");
-					player.selectRendition(undefined);
-				}}
-			/>
-			{playMode !== "direct" &&
-				[...lvls].reverse().map((x) => (
+			{() => (
+				<>
 					<Menu.Item
-						key={x.id}
+						label={t("player.direct")}
+						selected={playMode === "direct"}
+						onSelect={() => setPlayMode("direct")}
+					/>
+					<Menu.Item
 						label={
-							x.id.includes("original")
-								? `${t("player.transmux")} (${x.height}p)`
-								: `${x.height}p`
+							auto && current
+								? `${t("player.auto")} (${current.id.includes("original") ? t("player.transmux") : `${current.height}p`})`
+								: t("player.auto")
 						}
-						selected={x.selected && !auto}
+						selected={auto && playMode === "hls"}
 						onSelect={() => {
 							setPlayMode("hls");
-							player.selectRendition(x);
+							player.selectRendition(undefined);
 						}}
 					/>
-				))}
+					{playMode !== "direct" &&
+						[...lvls].reverse().map((x) => (
+							<Menu.Item
+								key={x.id}
+								label={
+									x.id.includes("original")
+										? `${t("player.transmux")} (${x.height}p)`
+										: `${x.height}p`
+								}
+								selected={x.selected && !auto}
+								onSelect={() => {
+									setPlayMode("hls");
+									player.selectRendition(x);
+								}}
+							/>
+						))}
+				</>
+			)}
 		</Menu>
 	);
 };

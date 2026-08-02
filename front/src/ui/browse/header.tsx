@@ -205,17 +205,21 @@ export const BrowseSettings = ({
 						Trigger={MediaTypeTrigger}
 						mediaType={mediaType as keyof typeof MediaTypeIcons}
 					>
-						{Object.keys(MediaTypeIcons).map((x) => (
-							<Menu.Item
-								key={x}
-								label={t(
-									`browse.mediatypekey.${x as keyof typeof MediaTypeIcons}`,
-								)}
-								selected={mediaType === x}
-								icon={MediaTypeIcons[x as keyof typeof MediaTypeIcons]}
-								onSelect={() => applyFilters({ kind: x })}
-							/>
-						))}
+						{() => (
+							<>
+								{Object.keys(MediaTypeIcons).map((x) => (
+									<Menu.Item
+										key={x}
+										label={t(
+											`browse.mediatypekey.${x as keyof typeof MediaTypeIcons}`,
+										)}
+										selected={mediaType === x}
+										icon={MediaTypeIcons[x as keyof typeof MediaTypeIcons]}
+										onSelect={() => applyFilters({ kind: x })}
+									/>
+								))}
+							</>
+						)}
 					</Menu>
 					<Menu
 						Trigger={(props: PressableProps) => (
@@ -227,43 +231,47 @@ export const BrowseSettings = ({
 							/>
 						)}
 					>
-						{Genre.options.map((genre) => {
-							const isIncluded = includedGenres.includes(genre);
-							const isExcluded = excludedGenres.includes(genre);
-							return (
-								<Menu.Item
-									key={genre}
-									label={t(`genres.${genre}`)}
-									left={
-										<View className="h-6 w-6 items-center justify-center">
-											{(isIncluded || isExcluded) && (
-												<Icon icon={isExcluded ? CloseIcon : Check} />
-											)}
-										</View>
-									}
-									closeOnSelect={false}
-									onSelect={() => {
-										let nextIncluded = includedGenres;
-										let nextExcluded = excludedGenres;
-										if (isIncluded) {
-											// include -> exclude
-											nextIncluded = nextIncluded.filter((g) => g !== genre);
-											nextExcluded = [...nextExcluded, genre];
-										} else if (isExcluded) {
-											// exclude -> neutral
-											nextExcluded = nextExcluded.filter((g) => g !== genre);
-										} else {
-											// neutral -> include
-											nextIncluded = [...nextIncluded, genre];
-										}
-										applyFilters({
-											nextIncludedGenres: nextIncluded,
-											nextExcludedGenres: nextExcluded,
-										});
-									}}
-								/>
-							);
-						})}
+						{() => (
+							<>
+								{Genre.options.map((genre) => {
+									const isIncluded = includedGenres.includes(genre);
+									const isExcluded = excludedGenres.includes(genre);
+									return (
+										<Menu.Item
+											key={genre}
+											label={t(`genres.${genre}`)}
+											left={
+												<View className="h-6 w-6 items-center justify-center">
+													{(isIncluded || isExcluded) && (
+														<Icon icon={isExcluded ? CloseIcon : Check} />
+													)}
+												</View>
+											}
+											closeOnSelect={false}
+											onSelect={() => {
+												let nextIncluded = includedGenres;
+												let nextExcluded = excludedGenres;
+												if (isIncluded) {
+													// include -> exclude
+													nextIncluded = nextIncluded.filter((g) => g !== genre);
+													nextExcluded = [...nextExcluded, genre];
+												} else if (isExcluded) {
+													// exclude -> neutral
+													nextExcluded = nextExcluded.filter((g) => g !== genre);
+												} else {
+													// neutral -> include
+													nextIncluded = [...nextIncluded, genre];
+												}
+												applyFilters({
+													nextIncludedGenres: nextIncluded,
+													nextExcludedGenres: nextExcluded,
+												});
+											}}
+										/>
+									);
+								})}
+							</>
+						)}
 					</Menu>
 					<ComboBox
 						multiple
@@ -322,17 +330,21 @@ export const BrowseSettings = ({
 				</View>
 				<View className="flex-row">
 					<Menu Trigger={SortTrigger} sortBy={sortBy}>
-						{availableSorts.map((x) => (
-							<Menu.Item
-								key={x}
-								label={t(`browse.sortkey.${x}`)}
-								selected={sortBy === x}
-								icon={sortOrd === "asc" ? ArrowUpward : ArrowDownward}
-								onSelect={() =>
-									setSort(x, sortBy === x && sortOrd === "asc" ? "desc" : "asc")
-								}
-							/>
-						))}
+						{() => (
+							<>
+								{availableSorts.map((x) => (
+									<Menu.Item
+										key={x}
+										label={t(`browse.sortkey.${x}`)}
+										selected={sortBy === x}
+										icon={sortOrd === "asc" ? ArrowUpward : ArrowDownward}
+										onSelect={() =>
+											setSort(x, sortBy === x && sortOrd === "asc" ? "desc" : "asc")
+										}
+									/>
+								))}
+							</>
+						)}
 					</Menu>
 					<HR orientation="vertical" />
 					<IconButton

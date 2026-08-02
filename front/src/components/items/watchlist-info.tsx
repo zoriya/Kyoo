@@ -97,18 +97,22 @@ export const WatchListInfo = ({
 					{...tooltip(t("show.watchlistEdit"))}
 					{...(props as any)}
 				>
-					{Object.values(WatchStatus).map((x) => (
-						<Menu.Item
-							key={x}
-							label={t(`show.watchlistMark.${x}`)}
-							onSelect={() => mutation.mutate(x)}
-							selected={x === displayStatus}
-						/>
-					))}
-					<Menu.Item
-						label={t("show.watchlistMark.null")}
-						onSelect={() => mutation.mutate(null)}
-					/>
+					{() => (
+						<>
+							{Object.values(WatchStatus).map((x) => (
+								<Menu.Item
+									key={x}
+									label={t(`show.watchlistMark.${x}`)}
+									onSelect={() => mutation.mutate(x)}
+									selected={x === displayStatus}
+								/>
+							))}
+							<Menu.Item
+								label={t("show.watchlistMark.null")}
+								onSelect={() => mutation.mutate(null)}
+							/>
+						</>
+					)}
 				</Menu>
 			);
 		default:

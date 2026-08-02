@@ -43,15 +43,19 @@ export const SortMenu = ({
 				</PressableFeedback>
 			)}
 		>
-			{sortModes.map((x) => (
-				<Menu.Item
-					key={x[0]}
-					icon={x[1]}
-					label={t(`videos-map.sort-${x[0]}`)}
-					selected={sort === x[0]}
-					onSelect={() => setSort(x[0])}
-				/>
-			))}
+			{() => (
+				<>
+					{sortModes.map((x) => (
+						<Menu.Item
+							key={x[0]}
+							icon={x[1]}
+							label={t(`videos-map.sort-${x[0]}`)}
+							selected={sort === x[0]}
+							onSelect={() => setSort(x[0])}
+						/>
+					))}
+				</>
+			)}
 		</Menu>
 	);
 };

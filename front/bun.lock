@@ -46,7 +46,7 @@
         "react-native-localization-settings": "^1.2.0",
         "react-native-mmkv": "^4.3.1",
         "react-native-nitro-modules": "^0.35.7",
-        "react-native-omni": "^1.9.6",
+        "react-native-omni": "^1.9.7",
         "react-native-pager-view": "8.0.2",
         "react-native-reanimated": "4.5.0",
         "react-native-safe-area-context": "~5.7.0",
@@ -1279,7 +1279,7 @@
 
     "react-native-nitro-modules": ["react-native-nitro-modules@0.35.10", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-KsySOAIkbSTjNiX2GvXiNT9P5DMeZd99yvtE/+Lw7RXV7Ztxh9Z+YyAbYkBqadhN5J/KXXuPjhRYgyLOIZgsbQ=="],
 
-    "react-native-omni": ["react-native-omni@1.9.6", "", { "dependencies": { "@expo/config-plugins": "^57.0.3", "@videojs/react": "10.0.0-beta.25", "jassub": "^2.5.7", "libpgs": "^0.8.1" }, "peerDependencies": { "react": ">=19.0.0", "react-native": ">=0.86.0", "react-native-nitro-modules": ">=0.36.0" } }, "sha512-Yyqx3ByIFiYbWPJQ8lb1zcjQwKNBONnsQwgH3hQhC+e2pQHR5BimWfzM7VP3fXiU/1cYWKyODR607eD2EoDSRQ=="],
+    "react-native-omni": ["react-native-omni@1.9.7", "", { "dependencies": { "@expo/config-plugins": "^57.0.3", "@videojs/react": "10.0.0-beta.25", "jassub": "^2.5.7", "libpgs": "^0.8.1" }, "peerDependencies": { "react": ">=19.0.0", "react-native": ">=0.86.0", "react-native-nitro-modules": ">=0.36.0" } }, "sha512-vKnkMyfQJl1Ee3Ob+tw8nxHrp6rkDxXRAWsjt6CiFkhw0yiOICeyevE+dtAvyjoblqMaJ0QRw14z2ditHgCE5Q=="],
 
     "react-native-pager-view": ["react-native-pager-view@8.0.2", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-Y8All2BbjidI4ZIF9kBOIIoldkqrY/2FXapHZMdjwD+ByXhiOWTFenPs5rq9KRN5uAH/gOXtQCqHLxQDNBQRiQ=="],
 

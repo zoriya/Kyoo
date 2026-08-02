@@ -132,24 +132,28 @@ const UserRow = ({
 				)}
 			/>
 			<Menu Trigger={IconButton} icon={MoreVert}>
-				{!isVerified && (
-					<Menu.Item
-						label={t("admin.users.verify")}
-						icon={Check}
-						onSelect={async () => await mutateAsync("verify")}
-					/>
+				{() => (
+					<>
+						{!isVerified && (
+							<Menu.Item
+								label={t("admin.users.verify")}
+								icon={Check}
+								onSelect={async () => await mutateAsync("verify")}
+							/>
+						)}
+						<Menu.Item
+							label={t("admin.users.set-permissions")}
+							icon={Admin}
+							onSelect={async () => await mutateAsync("admin")}
+						/>
+						<HR />
+						<Menu.Item
+							label={t("admin.users.delete")}
+							icon={Close}
+							onSelect={async () => await mutateAsync("delete")}
+						/>
+					</>
 				)}
-				<Menu.Item
-					label={t("admin.users.set-permissions")}
-					icon={Admin}
-					onSelect={async () => await mutateAsync("admin")}
-				/>
-				<HR />
-				<Menu.Item
-					label={t("admin.users.delete")}
-					icon={Close}
-					onSelect={async () => await mutateAsync("delete")}
-				/>
 			</Menu>
 		</Link>
 	);

@@ -36,7 +36,7 @@ const Menu = <AsProps,>({
 	...props
 }: {
 	Trigger: ComponentType<AsProps>;
-	children?: ReactNode | ReactNode[] | null;
+	children?: ReactNode | ReactNode[] | null | (() => ReactNode);
 	onMenuOpen?: () => void;
 	onMenuClose?: () => void;
 	isOpen?: boolean;
@@ -92,7 +92,7 @@ const Menu = <AsProps,>({
 									onPress={() => setOpen(false)}
 									className="hidden self-end xl:flex"
 								/>
-								{children}
+								{typeof children === "function" ? children() : children}
 							</ScrollView>
 						</View>
 					</MenuContext.Provider>
@@ -169,7 +169,7 @@ const Sub = <AsProps,>({
 	left?: ReactElement;
 	disabled?: boolean;
 	icon?: ComponentType<SvgProps>;
-	children?: ReactNode | ReactNode[] | null;
+	children?: ReactNode | ReactNode[] | null | (() => ReactNode);
 } & AsProps) => {
 	const setOpen = useContext(MenuContext);
 	return (

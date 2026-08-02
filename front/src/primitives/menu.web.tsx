@@ -5,8 +5,9 @@ import {
 	forwardRef,
 	type ReactElement,
 	type ReactNode,
+	useState,
 } from "react";
-import type { PressableProps } from "react-native";
+import type { GestureResponderEvent, PressableProps } from "react-native";
 import type { SvgProps } from "react-native-svg";
 import { cn } from "~/utils";
 import { Icon } from "./icons";
@@ -38,18 +39,46 @@ const Menu = <AsProps extends { onPress: PressableProps["onPress"] }>({
 	...props
 }: {
 	Trigger: ComponentType<AsProps>;
-	children: ReactNode | ReactNode[] | null;
+	children: ReactNode | ReactNode[] | null | (() => ReactNode);
 	onMenuOpen?: () => void;
 	onMenuClose?: () => void;
 	isOpen?: boolean;
 	setOpen?: (v: boolean) => void;
 } & Omit<AsProps, "onPress">) => {
+	const controlled = isOpen !== undefined;
+	const [innerOpen, setInnerOpen] = useState(false);
+	const open = controlled ? isOpen : innerOpen;
+
+	const setOpenState = (v: boolean) => {
+		if (controlled) setOpen?.(v);
+		else setInnerOpen(v);
+	};
+
+	// radix is heavy on setup, it mounts a `Root` (even closed) + setup events
+	// lazy loading it is a real perf gain
+	const [mounted, setMounted] = useState(!!open);
+	if (open && !mounted) setMounted(true);
+	if (!mounted) {
+		return (
+			<InternalTrigger
+				Component={Trigger}
+				{...props}
+				onPress={(e: GestureResponderEvent) => {
+					e.preventDefault();
+					e.stopPropagation();
+					setOpenState(true);
+					onMenuOpen?.call(null);
+				}}
+			/>
+		);
+	}
+
 	return (
 		<DropdownMenu.Root
 			modal
-			open={isOpen}
+			open={open}
 			onOpenChange={(newOpen) => {
-				if (setOpen) setOpen(newOpen);
+				setOpenState(newOpen);
 				if (newOpen) onMenuOpen?.call(null);
 				else onMenuClose?.call(null);
 			}}
@@ -66,7 +95,7 @@ const Menu = <AsProps extends { onPress: PressableProps["onPress"] }>({
 							"calc(var(--radix-dropdown-menu-content-available-height) * 0.8)",
 					}}
 				>
-					{children}
+					{typeof children === "function" ? children() : children}
 					<DropdownMenu.Arrow className="fill-popover" />
 				</DropdownMenu.Content>
 			</DropdownMenu.Portal>
@@ -178,7 +207,7 @@ const Sub = <AsProps,>({
 	left?: ReactElement;
 	disabled?: boolean;
 	icon?: ComponentType<SvgProps>;
-	children: ReactNode | ReactNode[] | null;
+	children: ReactNode | ReactNode[] | null | (() => ReactNode);
 } & AsProps) => {
 	return (
 		<DropdownMenu.Sub>
@@ -198,7 +227,7 @@ const Sub = <AsProps,>({
 							"calc(var(--radix-dropdown-menu-content-available-height) * 0.8)",
 					}}
 				>
-					{children}
+					{typeof children === "function" ? children() : children}
 					<DropdownMenu.Arrow className="fill-popover" />
 				</DropdownMenu.SubContent>
 			</DropdownMenu.Portal>
