@@ -1,12 +1,15 @@
-import { type ComponentProps, useCallback, useState } from "react";
+import { type ComponentProps, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View, type ViewProps } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Path } from "react-native-svg";
 import { EntryLine, entryDisplayNumber } from "~/components/entries";
-import { EntrySelect } from "~/components/entries/select";
+import {
+	EntrySelect,
+	type EntrySelectEntry,
+} from "~/components/entries/select";
 import type { Entry, Serie } from "~/models";
-import { Container, H2, Svg, usePopup } from "~/primitives";
+import { Container, H2, Svg } from "~/primitives";
 import { Fetch } from "~/query";
 import { SearchBar } from "~/ui/navbar";
 import { useQueryState } from "~/utils";
@@ -129,25 +132,7 @@ export const SerieDetails = () => {
 	const { scrollHandler, headerProps, headerHeight } = useScrollNavbar({
 		imageHeight,
 	});
-	const [setPopup, closePopup] = usePopup();
-
-	const openEntrySelect = useCallback(
-		(entry: {
-			displayNumber: string;
-			name: string | null;
-			videos: Entry["videos"];
-		}) => {
-			setPopup(
-				<EntrySelect
-					displayNumber={entry.displayNumber}
-					name={entry.name ?? ""}
-					videos={entry.videos}
-					close={closePopup}
-				/>,
-			);
-		},
-		[setPopup, closePopup],
-	);
+	const [selected, setSelected] = useState<EntrySelectEntry | null>(null);
 
 	return (
 		<View className="flex-1 bg-card">
@@ -156,11 +141,11 @@ export const SerieDetails = () => {
 				slug={slug}
 				season={season}
 				search={search}
-				onSelectVideos={openEntrySelect}
+				onSelectVideos={setSelected}
 				Header={() => (
 					<SerieHeader
 						slug={slug}
-						onSelectVideos={openEntrySelect}
+						onSelectVideos={setSelected}
 						onImageLayout={(e) => setHeight(e.nativeEvent.layout.height)}
 					/>
 				)}
@@ -170,6 +155,7 @@ export const SerieDetails = () => {
 				scrollEventThrottle={16}
 				stickyHeaderConfig={{ offset: headerHeight }}
 			/>
+			<EntrySelect entry={selected} onClose={() => setSelected(null)} />
 		</View>
 	);
 };

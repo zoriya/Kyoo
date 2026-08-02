@@ -74,7 +74,7 @@ export const EntryBox = ({
 					serieSlug={serieSlug}
 					videoSlug={videos.length === 1 ? videos[0].slug : null}
 					isOpen={moreOpened}
-					setOpen={(v) => setMoreOpened(v)}
+					setOpen={setMoreOpened}
 					className={cn(
 						"absolute top-0 right-0 bg-gray-800/70 hover:bg-gray-800 focus-visible:bg-gray-800",
 						"native:hidden opacity-0 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100",
@@ -106,6 +106,6 @@ EntryBox.Loader = (props: object) => {
 EntryBox.layout = {
 	size: 350,
 	numColumns: { xs: 3, sm: 4, md: 5, lg: 6, xl: 8 },
-	gap: { xs: ts(1), sm: ts(2), md: ts(4) },
+	gap: { xs: ts(1), md: ts(2) },
 	layout: "grid",
 } satisfies Layout;

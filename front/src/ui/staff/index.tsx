@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { RoleWithShow, Staff as StaffModel } from "~/models";
-import { Container, H1, Head, Poster, Skeleton, SubP } from "~/primitives";
+import { Container, H1, Head, Poster, Skeleton, SubP, ts } from "~/primitives";
 import { Fetch, InfiniteFetch, type QueryIdentifier } from "~/query";
 import { useQueryState } from "~/utils";
 import { CharacterCard } from "../details/staff";
@@ -44,7 +44,7 @@ export const StaffPage = () => {
 			layout={{
 				layout: "grid",
 				numColumns: { xs: 1, md: 2, lg: 3, xl: 4 },
-				gap: { xs: 8, lg: 12 },
+				gap: { xs: ts(1), md: ts(2) },
 				size: 112,
 			}}
 			Header={<StaffHeader slug={slug} />}

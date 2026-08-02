@@ -105,6 +105,11 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 			onRefresh={layout.layout !== "horizontal" ? refetch : undefined}
 			refreshing={isRefetching}
 			ListHeaderComponent={Header}
+			ListHeaderComponentStyle={
+				// Cancel the content padding for the header so banners/headers stay
+				// full-bleed while the items keep their outer margin.
+				layout.layout === "horizontal" ? undefined : { marginHorizontal: -gap }
+			}
 			ListEmptyComponent={Empty}
 			ListFooterComponent={Footer}
 			ItemSeparatorComponent={
@@ -112,11 +117,14 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 			}
 			showsHorizontalScrollIndicator={false}
 			showsVerticalScrollIndicator={false}
-			contentContainerStyle={contentContainerStyle}
+			contentContainerStyle={{
+				// Outer margin lives here (columnWrapperStyle only forwards gap/rowGap/
+				// columnGap to LegendList, so margins set there are dropped)
+				...(layout.layout === "horizontal" ? null : { paddingHorizontal: gap }),
+				...contentContainerStyle,
+			}}
 			columnWrapperStyle={{
 				gap,
-				marginLeft: gap,
-				marginRight: gap,
 				...columnWrapperStyle,
 			}}
 			{...props}

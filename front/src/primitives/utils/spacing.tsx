@@ -1,3 +1,3 @@
 export const ts = (spacing: number) => {
-	return spacing * 8;
+	return spacing * 4;
 };

@@ -71,7 +71,7 @@ export const Player = () => {
 		Player.presignQuery(
 			slug,
 			authToken ? data?.path : undefined,
-			data?.show?.poster?.id,
+			[data?.show?.poster?.id, data?.show?.thumbnail?.id],
 			entry?.id,
 		),
 	);
@@ -117,7 +117,12 @@ export const Player = () => {
 			metadata: {
 				title: title ?? data?.path ?? "",
 				artist: data?.show?.name ?? undefined,
-				imageLink: data?.show?.thumbnail?.high ?? undefined,
+				imageLink: data?.show?.thumbnail
+					? withPresign(
+							`${apiUrl}${data.show.thumbnail.high}`,
+							presign?.signature,
+						)
+					: undefined,
 				hasPrev: !!data?.previous?.video,
 				hasNext: !!data?.next?.video,
 			},
@@ -356,7 +361,7 @@ Player.query = (slug: string): QueryIdentifier<FullVideo> => ({
 Player.presignQuery = (
 	slug: string,
 	path: string | undefined,
-	posterId: string | undefined,
+	imageIds: (string | undefined)[],
 	entryId: string | undefined,
 ): QueryIdentifier<z.infer<typeof CastPresign>> => ({
 	path: ["auth", "presign"],
@@ -372,7 +377,9 @@ Player.presignQuery = (
 				...(path
 					? [{ prefix: `/video/${base64UrlPath(path)}`, verb: "GET" }]
 					: []),
-				...(posterId ? [{ url: `/api/images/${posterId}`, verb: "GET" }] : []),
+				...imageIds
+					.filter((id) => !!id)
+					.map((id) => ({ url: `/api/images/${id}`, verb: "GET" })),
 			],
 			...(entryId && { claims: { wsRoutes: [`watch/${entryId}`] } }),
 			duration: "24h",

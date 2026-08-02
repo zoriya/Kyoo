@@ -3,14 +3,17 @@ import Cancel from "@material-symbols/svg-400/rounded/cancel-fill.svg";
 import CheckCircle from "@material-symbols/svg-400/rounded/check_circle-fill.svg";
 import Replay from "@material-symbols/svg-400/rounded/replay.svg";
 import Clock from "@material-symbols/svg-400/rounded/schedule-fill.svg";
-import { useCallback } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { EntryBox, entryDisplayNumber } from "~/components/entries";
-import { EntrySelect } from "~/components/entries/select";
+import {
+	EntrySelect,
+	type EntrySelectEntry,
+} from "~/components/entries/select";
 import { ItemGrid, itemMap } from "~/components/items";
 import { Entry, Show, type User, User as UserModel } from "~/models";
-import { Avatar, H1, H3, P, Tabs, usePopup } from "~/primitives";
+import { Avatar, H1, H3, P, Tabs } from "~/primitives";
 import { Fetch, InfiniteFetch, type QueryIdentifier } from "~/query";
 import { EmptyView } from "~/ui/empty-view";
 import { useQueryState } from "~/utils";
@@ -60,25 +63,7 @@ const ProfileHeader = ({
 	setStatus: (value: WatchlistFilter) => void;
 }) => {
 	const { t } = useTranslation();
-	const [setPopup, closePopup] = usePopup();
-
-	const openEntrySelect = useCallback(
-		(entry: {
-			displayNumber: string;
-			name: string | null;
-			videos: Entry["videos"];
-		}) => {
-			setPopup(
-				<EntrySelect
-					displayNumber={entry.displayNumber}
-					name={entry.name ?? ""}
-					videos={entry.videos}
-					close={closePopup}
-				/>,
-			);
-		},
-		[setPopup, closePopup],
-	);
+	const [selected, setSelected] = useState<EntrySelectEntry | null>(null);
 
 	return (
 		<View className="mx-2 my-4 gap-4">
@@ -129,7 +114,7 @@ const ProfileHeader = ({
 							watchedPercent={item.progress.percent}
 							videos={item.videos}
 							onSelectVideos={() =>
-								openEntrySelect({
+								setSelected({
 									displayNumber: entryDisplayNumber(item),
 									name: item.name,
 									videos: item.videos,
@@ -154,6 +139,7 @@ const ProfileHeader = ({
 					className="self-start"
 				/>
 			</View>
+			<EntrySelect entry={selected} onClose={() => setSelected(null)} />
 		</View>
 	);
 };

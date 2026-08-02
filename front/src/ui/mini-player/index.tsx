@@ -56,22 +56,27 @@ export const MeasureTabBar = () => {
 };
 
 export const MiniPlayer = () => {
-	const { t } = useTranslation();
-	const router = useRouter();
 	const pathname = usePathname();
-	const player = usePlayer();
-	const [tabBarHeight] = useContext(TabBarHeightContext);
-
 	const castStatus = usePlayerState("castStatus");
-	const playing = usePlayerState("isPlaying");
-	const current = usePlayerState("currentTime");
-	const duration = usePlayerState("duration");
 
 	if (
 		!(castStatus === "connected" || castStatus === "connecting") ||
 		pathname.startsWith("/watch")
 	)
 		return null;
+
+	return <MiniPlayerInner />;
+};
+
+const MiniPlayerInner = () => {
+	const { t } = useTranslation();
+	const router = useRouter();
+	const player = usePlayer();
+	const [tabBarHeight] = useContext(TabBarHeightContext);
+
+	const playing = usePlayerState("isPlaying");
+	const current = usePlayerState("currentTime");
+	const duration = usePlayerState("duration");
 
 	return (
 		<View

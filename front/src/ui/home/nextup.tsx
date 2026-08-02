@@ -1,11 +1,14 @@
-import { useCallback } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { EntryBox, entryDisplayNumber } from "~/components/entries";
-import { EntrySelect } from "~/components/entries/select";
+import {
+	EntrySelect,
+	type EntrySelectEntry,
+} from "~/components/entries/select";
 import { ItemGrid } from "~/components/items";
 import { Entry } from "~/models";
-import { Button, Link, P, usePopup } from "~/primitives";
+import { Button, Link, P } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { EmptyView } from "~/ui/empty-view";
@@ -14,25 +17,7 @@ import { Header } from "./genre";
 export const NextupList = () => {
 	const { t } = useTranslation();
 	const account = useAccount();
-	const [setPopup, closePopup] = usePopup();
-
-	const openEntrySelect = useCallback(
-		(entry: {
-			displayNumber: string;
-			name: string | null;
-			videos: Entry["videos"];
-		}) => {
-			setPopup(
-				<EntrySelect
-					displayNumber={entry.displayNumber}
-					name={entry.name ?? ""}
-					videos={entry.videos}
-					close={closePopup}
-				/>,
-			);
-		},
-		[setPopup, closePopup],
-	);
+	const [selected, setSelected] = useState<EntrySelectEntry | null>(null);
 
 	if (!account) {
 		return (
@@ -70,7 +55,7 @@ export const NextupList = () => {
 						watchedPercent={item.progress.percent}
 						videos={item.videos}
 						onSelectVideos={() =>
-							openEntrySelect({
+							setSelected({
 								displayNumber: entryDisplayNumber(item),
 								name: item.name,
 								videos: item.videos,
@@ -80,6 +65,7 @@ export const NextupList = () => {
 				)}
 				Loader={EntryBox.Loader}
 			/>
+			<EntrySelect entry={selected} onClose={() => setSelected(null)} />
 		</>
 	);
 };
