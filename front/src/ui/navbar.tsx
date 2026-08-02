@@ -29,6 +29,7 @@ import {
 } from "react-native";
 import Animated, {
 	interpolate,
+	type SharedValue,
 	useAnimatedScrollHandler,
 	useAnimatedStyle,
 	useSharedValue,
@@ -326,7 +327,7 @@ export const useScrollNavbar = ({
 	imageHeight,
 	tab = false,
 }: {
-	imageHeight: number;
+	imageHeight: number | SharedValue<number>;
 	tab?: boolean;
 }) => {
 	const insets = useSafeAreaInsets();
@@ -337,15 +338,23 @@ export const useScrollNavbar = ({
 		scrollY.value = event.contentOffset.y;
 	});
 	const opacity = useAnimatedStyle(
-		() => ({
-			opacity: interpolate(scrollY.value, [0, imageHeight - height], [0, 1]),
-		}),
+		() => {
+			const ih =
+				typeof imageHeight === "number" ? imageHeight : imageHeight.value;
+			return {
+				opacity: interpolate(scrollY.value, [0, ih - height], [0, 1]),
+			};
+		},
 		[imageHeight, height],
 	);
 	const reverse = useAnimatedStyle(
-		() => ({
-			opacity: interpolate(scrollY.value, [0, imageHeight - height], [1, 0]),
-		}),
+		() => {
+			const ih =
+				typeof imageHeight === "number" ? imageHeight : imageHeight.value;
+			return {
+				opacity: interpolate(scrollY.value, [0, ih - height], [1, 0]),
+			};
+		},
 		[imageHeight, height],
 	);
 

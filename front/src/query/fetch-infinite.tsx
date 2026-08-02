@@ -3,7 +3,13 @@ import type {
 	LegendListProps,
 } from "@legendapp/list/react-native";
 import { LegendList } from "@legendapp/list/react-native";
-import { type ComponentType, type ReactElement, useMemo, useRef } from "react";
+import {
+	type ComponentType,
+	type ReactElement,
+    useLayoutEffect,
+	useMemo,
+	useState,
+} from "react";
 import type { ViewStyle } from "react-native";
 import { createAnimatedComponent } from "react-native-reanimated";
 import { type Breakpoint, HR, useBreakpointMap } from "~/primitives";
@@ -62,11 +68,21 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	columnWrapperStyle?: Omit<ViewStyle, "gap" | "rowGap" | "columnGap">;
 }): ReactElement | null => {
 	const { numColumns, size, gap } = useBreakpointMap(layout);
-	const oldItems = useRef<Data[] | undefined>(undefined);
-	let { items, fetchNextPage, hasNextPage, isFetching, refetch, isRefetching } =
-		useInfiniteFetch(query);
-	if (incremental && items) oldItems.current = items;
-	if (incremental) items ??= oldItems.current;
+	const {
+		items: fetched,
+		fetchNextPage,
+		hasNextPage,
+		isFetching,
+		refetch,
+		isRefetching,
+	} = useInfiniteFetch(query);
+
+	// keep previous items instead of flashing skeletons with `incremental`
+	const [retained, setRetained] = useState<Data[] | undefined>(undefined);
+	useLayoutEffect(() => {
+		if (incremental && fetched) setRetained(fetched);
+	}, [incremental, fetched]);
+	const items = incremental ? (fetched ?? retained) : fetched;
 
 	if (!query.infinite)
 		console.warn("A non infinite query was passed to an InfiniteFetch.");

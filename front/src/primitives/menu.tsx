@@ -42,11 +42,10 @@ const Menu = <AsProps,>({
 	setOpen?: (v: boolean) => void;
 } & Optional<AsProps, "onPress">) => {
 	const alreadyRendered = useRef(false);
-	const [isOpen, setOpen] =
-		outerOpen !== undefined && outerSetOpen
-			? [outerOpen, outerSetOpen]
-			: // biome-ignore lint/correctness/useHookAtTopLevel: const
-				useState(false);
+	const [innerOpen, innerSetOpen] = useState(false);
+	const controlled = outerOpen !== undefined && outerSetOpen !== undefined;
+	const isOpen = controlled ? outerOpen : innerOpen;
+	const setOpen = controlled ? outerSetOpen : innerSetOpen;
 
 	// does the same as a useMemo but for props.
 	const memoRef = useRef({ onMenuOpen, onMenuClose });

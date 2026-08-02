@@ -5,10 +5,9 @@ let preventHover = false;
 let hoverTimeout: NodeJS.Timeout | number;
 
 export const useMobileHover = () => {
-	if (Platform.OS !== "web") return;
-
-	// biome-ignore lint/correctness/useHookAtTopLevel: const condition
 	useEffect(() => {
+		if (Platform.OS !== "web") return;
+
 		const enableHover = () => {
 			if (preventHover) return;
 			document.body.classList.remove("noHover");

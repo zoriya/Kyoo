@@ -1,24 +1,26 @@
 import { createContext, useContext } from "react";
 import type { Account } from "~/models";
 
+// context needed by every image/fetch component. kept low to re-render as
+// little as possible (in case of account edit for example)
 export const AccountContext = createContext<{
 	apiUrl: string;
 	authToken: string | null;
+}>({ apiUrl: "", authToken: null });
+
+export const AccountsContext = createContext<{
 	selectedAccount: Account | null;
 	accounts: (Account & { select: () => void; remove: () => void })[];
-}>({ apiUrl: "", authToken: null, selectedAccount: null, accounts: [] });
+}>({ selectedAccount: null, accounts: [] });
 
 export const useToken = () => {
-	const { apiUrl, authToken } = useContext(AccountContext);
-	return { apiUrl, authToken };
+	return useContext(AccountContext);
 };
 
 export const useAccount = () => {
-	const { selectedAccount } = useContext(AccountContext);
-	return selectedAccount;
+	return useContext(AccountsContext).selectedAccount;
 };
 
 export const useAccounts = () => {
-	const { accounts } = useContext(AccountContext);
-	return accounts;
+	return useContext(AccountsContext).accounts;
 };

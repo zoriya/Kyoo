@@ -182,16 +182,12 @@ export const keyToUrl = (key: ReturnType<typeof toQueryKey>) => {
 	return key.join("/").replace("/?", "?");
 };
 
-export const useFetch = <Data,>(
-	query: QueryIdentifier<Data>,
-	{ skipFocusCheck = false }: { skipFocusCheck?: boolean } = {},
-) => {
+export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 	const { i18n } = useTranslation();
-	let { apiUrl, authToken, selectedAccount } = useContext(AccountContext);
+	let { apiUrl, authToken } = useContext(AccountContext);
 	if (query.options?.apiUrl) apiUrl = query.options.apiUrl;
 	const key = toQueryKey({ apiUrl, path: query.path, params: query.params });
-	// biome-ignore lint/correctness/useHookAtTopLevel: skipFocusCheck is static per call site
-	const focused = skipFocusCheck ? true : useIsFocused();
+	const focused = useIsFocused();
 
 	const ret = useQuery<Data, KyooError>({
 		queryKey: key,
@@ -214,7 +210,7 @@ export const useFetch = <Data,>(
 		if (ret.isPaused) throw new RetryableError({ key: "offline" });
 		if (ret.error && (ret.error.status === 401 || ret.error.status === 403)) {
 			throw new RetryableError({
-				key: !selectedAccount ? "needAccount" : "unauthorized",
+				key: !authToken ? "needAccount" : "unauthorized",
 				inner: ret.error,
 			});
 		}
@@ -250,16 +246,12 @@ export const useRefresh = (queries: QueryIdentifier<unknown>[]) => {
 	return [refreshing, refresh] as const;
 };
 
-export const useInfiniteFetch = <Data,>(
-	query: QueryIdentifier<Data>,
-	{ skipFocusCheck = false }: { skipFocusCheck?: boolean } = {},
-) => {
+export const useInfiniteFetch = <Data,>(query: QueryIdentifier<Data>) => {
 	const { i18n } = useTranslation();
 	let { apiUrl, authToken } = useContext(AccountContext);
 	if (query.options?.apiUrl) apiUrl = query.options.apiUrl;
 	const key = toQueryKey({ apiUrl, path: query.path, params: query.params });
-	// biome-ignore lint/correctness/useHookAtTopLevel: skipFocusCheck is static per call site
-	const focused = skipFocusCheck ? true : useIsFocused();
+	const focused = useIsFocused();
 
 	const res = useInfiniteQuery<Page<Data>, KyooError>({
 		queryKey: key,
