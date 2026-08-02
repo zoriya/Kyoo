@@ -1,8 +1,4 @@
-import {
-	type ComponentProps,
-	type ComponentType,
-	useState,
-} from "react";
+import { type ComponentProps, type ComponentType, useState } from "react";
 import type { PressableProps } from "react-native";
 import Animated from "react-native-reanimated";
 import RSvg, { type SvgProps } from "react-native-svg";

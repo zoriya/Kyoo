@@ -59,7 +59,7 @@ export const HomePage = () => {
 						case NewsList:
 							return "news";
 						default:
-							console.warn("unhandled item type in home screen", el)
+							console.warn("unhandled item type in home screen", el);
 							return "other";
 					}
 				}}
