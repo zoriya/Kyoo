@@ -12,7 +12,7 @@
 	},
 	"dependencies": {
 		"blurhash": "^2.0.5",
-		"jassub": "1.8.8",
+		"jassub": "2.5.11",
 		"libpgs": "^0.8.1"
 	},
 	"devDependencies": {
