@@ -2,7 +2,7 @@ import CastConnected from "@material-symbols/svg-400/rounded/cast_connected-fill
 import OpenInFull from "@material-symbols/svg-400/rounded/open_in_full-fill.svg";
 import Pause from "@material-symbols/svg-400/rounded/pause-fill.svg";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
-import { usePathname, useRouter } from "expo-router";
+import { usePathname, useRouter, useSegments } from "expo-router";
 import {
 	createContext,
 	type ReactNode,
@@ -13,7 +13,11 @@ import {
 import { useTranslation } from "react-i18next";
 import { Platform, StyleSheet, View } from "react-native";
 import { usePlayer, usePlayerState } from "react-native-omni";
-import { useSafeAreaFrame } from "react-native-safe-area-context";
+import {
+	useSafeAreaFrame,
+	useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import { Portal } from "react-native-teleport";
 import { H6, IconButton, P, tooltip } from "~/primitives";
 import { cn } from "~/utils";
 
@@ -72,62 +76,74 @@ const MiniPlayerInner = () => {
 	const { t } = useTranslation();
 	const router = useRouter();
 	const player = usePlayer();
+	const segments = useSegments();
+	const insets = useSafeAreaInsets();
 	const [tabBarHeight] = useContext(TabBarHeightContext);
 
 	const playing = usePlayerState("isPlaying");
 	const current = usePlayerState("currentTime");
 	const duration = usePlayerState("duration");
 
+	const videoId = player.source?.src?.uri.match(/\/videos\/([^/?]+)\//)?.[1];
+
+	const inTabs = segments.includes("(tabs)");
+	const bottom = (inTabs ? tabBarHeight : insets.bottom) + 8;
+
 	return (
-		<View
-			className={cn(
-				"absolute right-2 z-50 overflow-hidden rounded-lg bg-slate-900 shadow-lg",
-				Platform.OS !== "web" ? "left-2" : "bottom-2 w-80 max-w-[90%]",
-			)}
-			style={Platform.OS !== "web" ? { bottom: tabBarHeight + 8 } : undefined}
-		>
-			<View className="h-0.5 w-full bg-slate-700">
-				<View
-					className="h-full bg-accent"
-					style={{
-						width: `${Math.min(100, Math.max(0, (current / duration) * 100))}%`,
-					}}
-				/>
-			</View>
-			<View className="flex-row items-center gap-1 p-1">
-				<IconButton
-					icon={playing ? Pause : PlayArrow}
-					onPress={() => (playing ? player.pause() : player.play())}
-					iconClassName={"fill-slate-200"}
-					{...tooltip(playing ? t("player.pause") : t("player.play"))}
-				/>
-				<View className="min-w-0 flex-1">
-					<H6 numberOfLines={1} className="text-slate-200">
-						{player.source?.metadata?.title}
-					</H6>
-					<P numberOfLines={1} className="text-slate-400 text-xs">
-						{player.source?.metadata?.artist}
-					</P>
+		<Portal hostName="root">
+			<View
+				className={cn(
+					"absolute right-2 overflow-hidden rounded-lg bg-slate-900 shadow-lg",
+					Platform.OS !== "web" ? "left-2" : "bottom-2 w-80 max-w-[90%]",
+				)}
+				style={Platform.OS !== "web" ? { bottom, elevation: 0 } : undefined}
+			>
+				<View className="h-0.5 w-full bg-slate-700">
+					<View
+						className="h-full bg-accent"
+						style={{
+							width: `${Math.min(100, Math.max(0, (current / duration) * 100))}%`,
+						}}
+					/>
 				</View>
-				{player.source?.src?.uri.match(/\/videos\/([^/?]+)\//)?.[1] && (
+				<View className="flex-row items-center gap-1 p-1">
 					<IconButton
-						icon={OpenInFull}
+						icon={playing ? Pause : PlayArrow}
+						onPress={() => (playing ? player.pause() : player.play())}
+						iconClassName={"fill-slate-200"}
+						{...tooltip(playing ? t("player.pause") : t("player.play"))}
+					/>
+					<View className="min-w-0 flex-1">
+						<H6 numberOfLines={1} className="text-slate-200">
+							{player.source?.metadata?.title}
+						</H6>
+						<P numberOfLines={1} className="text-slate-400 text-xs">
+							{player.source?.metadata?.artist}
+						</P>
+					</View>
+					{videoId && (
+						<IconButton
+							icon={OpenInFull}
+							onPress={() => router.push(`/watch/${videoId}`)}
+							iconClassName={"fill-slate-200"}
+							{...tooltip(t("miniPlayer.open"))}
+						/>
+					)}
+					<IconButton
+						icon={CastConnected}
+						// Tearing down the cast requires the player's media tech, which
+						// only exists while the watch screen (OmniView) is mounted. Go
+						// back there first and let it stop the cast once it is live.
 						onPress={() =>
-							router.push(
-								`/watch/${player.source?.src?.uri.match(/\/videos\/([^/?]+)\//)?.[1]}`,
-							)
+							videoId
+								? router.push(`/watch/${videoId}?stopCast=true`)
+								: player.toggleCastStatus()
 						}
 						iconClassName={"fill-slate-200"}
-						{...tooltip(t("miniPlayer.open"))}
+						{...tooltip(t("miniPlayer.stop"))}
 					/>
-				)}
-				<IconButton
-					icon={CastConnected}
-					onPress={player.toggleCastStatus}
-					iconClassName={"fill-slate-200"}
-					{...tooltip(t("miniPlayer.stop"))}
-				/>
+				</View>
 			</View>
-		</View>
+		</Portal>
 	);
 };

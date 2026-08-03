@@ -162,6 +162,19 @@ export const Player = () => {
 		return () => unloadUnlessCasting();
 	}, []);
 
+	// The mini-player cannot stop a cast on its own (the media tech only lives
+	// on this screen), so it navigates here with `?stopCast`. Once the tech is
+	// live again (cast reconnected), tear the cast down and clear the flag.
+	const [stopCast, setStopCast] = useQueryState<string | undefined>(
+		"stopCast",
+		undefined,
+	);
+	useEffect(() => {
+		if (!stopCast || castStatus !== "connected") return;
+		player.toggleCastStatus();
+		setStopCast(undefined);
+	}, [stopCast, castStatus, player, setStopCast]);
+
 	return (
 		<View className="flex-1 bg-black">
 			<Head
