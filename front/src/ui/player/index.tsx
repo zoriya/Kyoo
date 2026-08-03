@@ -98,17 +98,16 @@ export const Player = () => {
 			startTime: start ? Number.parseInt(start, 10) : data?.progress.time,
 			subtitles: (info?.subtitles ?? [])
 				.filter(
-					(x) => Platform.OS === "web" || playMode === "hls" || x.isExternal,
+					(x) =>
+						x.link &&
+						(Platform.OS === "web" || playMode === "hls" || x.isExternal),
 				)
 				.map((x, i) => ({
-					// we also add those without link to prevent the order from getting out
-					// of sync with `info.subtitles`. since we never actually play those
-					// this is fine.
 					id: (x.index ?? i).toString(),
 					link: withPresign(
-						(x.codec === "subrip" && x.link && Platform.OS === "web"
+						x.codec === "subrip" && Platform.OS === "web"
 							? `${x.link}?format=vtt`
-							: x.link) ?? "",
+							: x.link!,
 						presign?.signature,
 					),
 					label: x.title ?? "Unknown",
@@ -156,8 +155,7 @@ export const Player = () => {
 	// mini-player then keeps driving the receiver).
 	const castStatus = usePlayerState("castStatus");
 	const unloadUnlessCasting = useEffectEvent(() => {
-		const isCasting =
-			castStatus === "connected" || castStatus === "connecting";
+		const isCasting = castStatus === "connected" || castStatus === "connecting";
 		if (!isCasting) setPlayerSource(player, undefined);
 	});
 	useEffect(() => {
