@@ -107,9 +107,9 @@ jobs:
         working-directory: ./front/android
         run: |
           if [ "${{ matrix.variant }}" = "development" ]; then
-            ./gradlew :app:assembleDebug --no-daemon
+            ./gradlew :app:assembleDebug --no-daemon --stacktrace --info
           else
-            ./gradlew :app:assembleRelease --no-daemon \
+            ./gradlew :app:assembleRelease --no-daemon --stacktrace --info \
               -PreactNativeArchitectures=armeabi-v7a,arm64-v8a
           fi
 
