@@ -365,3 +365,99 @@ index 9a00dbf2858199afe8a66c8f3796ba78efdfc7bc..16737d05303a2806575ba6ea0984d84b
  		const syncState = () => set({ remotePlaybackState: media.remote.state });
  		syncState();
  		listen(media.remote, "connect", syncState, { signal });
+diff --git a/dist/dev/dom/store/features/quality.js b/dist/dev/dom/store/features/quality.js
+index c91df9b..9ce8132 100644
+--- a/dist/dev/dom/store/features/quality.js
++++ b/dist/dev/dom/store/features/quality.js
+@@ -39,6 +39,7 @@ const qualityFeature = definePlayerFeature({
+ 	}),
+ 	attach({ target, signal, set }) {
+ 		const { media } = target;
++		if (!media) return;
+ 		let videoRenditions = null;
+ 		let cleanup = null;
+ 		const getVideoRenditions = () => isMediaVideoRenditionCapable(media) ? media.videoRenditions : null;
+diff --git a/dist/dev/dom/store/features/audio-track.js b/dist/dev/dom/store/features/audio-track.js
+index f70ac68..53da741 100644
+--- a/dist/dev/dom/store/features/audio-track.js
++++ b/dist/dev/dom/store/features/audio-track.js
+@@ -29,6 +29,7 @@ const audioTrackFeature = definePlayerFeature({
+ 	}),
+ 	attach({ target, signal, set }) {
+ 		const { media } = target;
++		if (!media) return;
+ 		let audioTracks = null;
+ 		let cleanup = null;
+ 		const getAudioTracks = () => isMediaAudioTrackCapable(media) ? media.audioTracks : null;
+diff --git a/dist/dev/dom/store/features/fullscreen.js b/dist/dev/dom/store/features/fullscreen.js
+index ef8c703..749de28 100644
+--- a/dist/dev/dom/store/features/fullscreen.js
++++ b/dist/dev/dom/store/features/fullscreen.js
+@@ -27,6 +27,7 @@ const fullscreenFeature = definePlayerFeature({
+ 	attach({ target, signal, set }) {
+ 		const { media, container } = target;
+ 		set({ fullscreenAvailability: isFullscreenEnabled() ? "available" : "unsupported" });
++		if (!media) return;
+ 		const sync = () => set({ fullscreen: isFullscreen(container, media) });
+ 		sync();
+ 		listen(document, "fullscreenchange", sync, { signal });
+diff --git a/dist/dev/dom/store/features/pip.js b/dist/dev/dom/store/features/pip.js
+index 4620e78..87d0828 100644
+--- a/dist/dev/dom/store/features/pip.js
++++ b/dist/dev/dom/store/features/pip.js
+@@ -27,6 +27,7 @@ const pipFeature = definePlayerFeature({
+ 	attach({ target, signal, set }) {
+ 		const { media } = target;
+ 		set({ pipAvailability: isPictureInPictureEnabled() ? "available" : "unsupported" });
++		if (!media) return;
+ 		const sync = () => set({ pip: isPictureInPicture(media) });
+ 		sync();
+ 		listen(media, "enterpictureinpicture", sync, { signal });
+diff --git a/dist/default/dom/store/features/quality.js b/dist/default/dom/store/features/quality.js
+index c91df9b..9ce8132 100644
+--- a/dist/default/dom/store/features/quality.js
++++ b/dist/default/dom/store/features/quality.js
+@@ -39,6 +39,7 @@ const qualityFeature = definePlayerFeature({
+ 	}),
+ 	attach({ target, signal, set }) {
+ 		const { media } = target;
++		if (!media) return;
+ 		let videoRenditions = null;
+ 		let cleanup = null;
+ 		const getVideoRenditions = () => isMediaVideoRenditionCapable(media) ? media.videoRenditions : null;
+diff --git a/dist/default/dom/store/features/audio-track.js b/dist/default/dom/store/features/audio-track.js
+index f70ac68..53da741 100644
+--- a/dist/default/dom/store/features/audio-track.js
++++ b/dist/default/dom/store/features/audio-track.js
+@@ -29,6 +29,7 @@ const audioTrackFeature = definePlayerFeature({
+ 	}),
+ 	attach({ target, signal, set }) {
+ 		const { media } = target;
++		if (!media) return;
+ 		let audioTracks = null;
+ 		let cleanup = null;
+ 		const getAudioTracks = () => isMediaAudioTrackCapable(media) ? media.audioTracks : null;
+diff --git a/dist/default/dom/store/features/fullscreen.js b/dist/default/dom/store/features/fullscreen.js
+index ef8c703..749de28 100644
+--- a/dist/default/dom/store/features/fullscreen.js
++++ b/dist/default/dom/store/features/fullscreen.js
+@@ -27,6 +27,7 @@ const fullscreenFeature = definePlayerFeature({
+ 	attach({ target, signal, set }) {
+ 		const { media, container } = target;
+ 		set({ fullscreenAvailability: isFullscreenEnabled() ? "available" : "unsupported" });
++		if (!media) return;
+ 		const sync = () => set({ fullscreen: isFullscreen(container, media) });
+ 		sync();
+ 		listen(document, "fullscreenchange", sync, { signal });
+diff --git a/dist/default/dom/store/features/pip.js b/dist/default/dom/store/features/pip.js
+index 4620e78..87d0828 100644
+--- a/dist/default/dom/store/features/pip.js
++++ b/dist/default/dom/store/features/pip.js
+@@ -27,6 +27,7 @@ const pipFeature = definePlayerFeature({
+ 	attach({ target, signal, set }) {
+ 		const { media } = target;
+ 		set({ pipAvailability: isPictureInPictureEnabled() ? "available" : "unsupported" });
++		if (!media) return;
+ 		const sync = () => set({ pip: isPictureInPicture(media) });
+ 		sync();
+ 		listen(media, "enterpictureinpicture", sync, { signal });
