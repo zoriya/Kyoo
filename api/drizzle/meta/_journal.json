@@ -225,6 +225,13 @@
 			"when": 1775238108619,
 			"tag": "0031_entry-content",
 			"breakpoints": true
+		},
+		{
+			"idx": 32,
+			"version": "7",
+			"when": 1785762849068,
+			"tag": "0032_history_indexes",
+			"breakpoints": true
 		}
 	]
 }

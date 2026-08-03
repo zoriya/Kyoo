@@ -1,0 +1,2 @@
+CREATE INDEX "history_profile_play_date" ON "kyoo"."history" USING btree ("profile_pk","played_date" DESC NULLS LAST);--> statement-breakpoint
+CREATE INDEX "history_profile_entry" ON "kyoo"."history" USING btree ("profile_pk","entry_pk","played_date" DESC NULLS LAST);
