@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { usePlayer, usePlayerState } from "react-native-omni";
 import type { Chapter } from "~/models";
@@ -7,6 +7,7 @@ import { useAccount } from "~/providers/account-context";
 import { useFetch } from "~/query";
 import { Info } from "~/ui/info";
 import { cn, useQueryState } from "~/utils";
+import { seekPlayerTo } from "../imperative";
 
 export const SkipChapterButton = ({
 	seekEnd,
@@ -46,14 +47,6 @@ export const SkipChapterButton = ({
 		? chapter.startTime + +(chapter.type === "credits") * 4
 		: Infinity;
 
-	const skipChapter = useCallback(() => {
-		if (!chapter) return;
-		if (data?.durationSeconds && data.durationSeconds <= chapter.endTime + 3) {
-			return seekEnd();
-		}
-		player.currentTime = chapter.endTime;
-	}, [player, chapter, data?.durationSeconds, seekEnd]);
-
 	useEffect(() => {
 		if (
 			chapter &&
@@ -62,9 +55,15 @@ export const SkipChapterButton = ({
 			lastAutoSkippedChapter.current !== chapter.startTime
 		) {
 			lastAutoSkippedChapter.current = chapter.startTime;
-			skipChapter();
+			if (
+				data?.durationSeconds &&
+				data.durationSeconds <= chapter.endTime + 3
+			) {
+				return seekEnd();
+			}
+			seekPlayerTo(player, chapter.endTime);
 		}
-	}, [chapter, progress, shouldAutoSkip, start, skipChapter]);
+	}, [chapter, progress, shouldAutoSkip, start, data, player, seekEnd]);
 
 	if (!chapter || chapter.type === "content" || behavior === "disabled")
 		return null;
@@ -72,7 +71,16 @@ export const SkipChapterButton = ({
 
 	return (
 		<Button
-			onPress={skipChapter}
+			onPress={() => {
+				if (!chapter) return;
+				if (
+					data?.durationSeconds &&
+					data.durationSeconds <= chapter.endTime + 3
+				) {
+					return seekEnd();
+				}
+				seekPlayerTo(player, chapter.endTime);
+			}}
 			className={cn(
 				"absolute right-safe bottom-2/10 m-8",
 				"z-20 bg-slate-900/70 px-4 py-2",

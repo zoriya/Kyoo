@@ -14,6 +14,7 @@ import { type PressableProps, View } from "react-native";
 import { usePlayer, usePlayerState } from "react-native-omni";
 import { IconButton, Slider, Spinner, tooltip } from "~/primitives";
 import { cn } from "~/utils";
+import { setPlayerMuted, setPlayerVolume } from "../imperative";
 
 export const PlayButton = (
 	props: Partial<ComponentProps<typeof IconButton<PressableProps>>>,
@@ -130,7 +131,7 @@ export const VolumeSlider = ({
 								: VolumeUp
 				}
 				onPress={() => {
-					player.muted = !muted;
+					setPlayerMuted(player, !muted);
 				}}
 				iconClassName={iconClassName}
 				{...tooltip(t("player.mute"), true)}
@@ -138,7 +139,7 @@ export const VolumeSlider = ({
 			<Slider
 				progress={volume * 100}
 				setProgress={(vol) => {
-					player.volume = vol / 100;
+					setPlayerVolume(player, vol / 100);
 				}}
 				className="h-1 w-24"
 				{...tooltip(t("player.volume"), true)}

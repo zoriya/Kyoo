@@ -3,6 +3,7 @@ import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
 import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
 import ExpandMore from "@material-symbols/svg-400/rounded/keyboard_arrow_down-fill.svg";
 import SearchIcon from "@material-symbols/svg-400/rounded/search-fill.svg";
+import { keepPreviousData } from "@tanstack/react-query";
 import { type ComponentType, useMemo, useRef, useState } from "react";
 import {
 	KeyboardAvoidingView,
@@ -67,12 +68,10 @@ export const ComboBox = <Data,>({
 	const inputRef = useRef<TextInput>(null);
 	const insets = useSafeAreaInsets();
 
-	const oldItems = useRef<Data[] | undefined>(undefined);
-	let { items, fetchNextPage, hasNextPage, isFetching } = useInfiniteFetch(
-		query(search),
-	);
-	if (items) oldItems.current = items;
-	items ??= oldItems.current;
+	const { items, fetchNextPage, hasNextPage, isFetching } = useInfiniteFetch({
+		...query(search),
+		placeholderData: keepPreviousData,
+	});
 
 	const data = useMemo(() => {
 		const placeholders = [...Array(placeholderCount)].fill(null);

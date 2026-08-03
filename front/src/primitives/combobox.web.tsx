@@ -3,7 +3,8 @@ import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
 import ExpandMore from "@material-symbols/svg-400/rounded/keyboard_arrow_down-fill.svg";
 import SearchIcon from "@material-symbols/svg-400/rounded/search-fill.svg";
 import * as Popover from "@radix-ui/react-popover";
-import { useMemo, useRef, useState } from "react";
+import { keepPreviousData } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { Platform, Pressable, View } from "react-native";
 import { useInfiniteFetch } from "~/query/query";
 import { cn } from "~/utils";
@@ -31,12 +32,10 @@ export const ComboBox = <Data,>({
 	const [isOpen, setOpen] = useState(false);
 	const [search, setSearch] = useState("");
 
-	const oldItems = useRef<Data[] | undefined>(undefined);
-	let { items, fetchNextPage, hasNextPage, isFetching } = useInfiniteFetch(
-		query(search),
-	);
-	if (items) oldItems.current = items;
-	items ??= oldItems.current;
+	const { items, fetchNextPage, hasNextPage, isFetching } = useInfiniteFetch({
+		...query(search),
+		placeholderData: keepPreviousData,
+	});
 
 	const data = useMemo(() => {
 		const placeholders = [...Array(placeholderCount)].fill(null);

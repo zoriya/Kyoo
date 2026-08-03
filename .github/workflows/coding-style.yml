@@ -87,6 +87,23 @@ jobs:
       - name: Typecheck
         run: bun run typecheck
 
+  react-compiler-front:
+    name: "React Compiler front"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./front
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Check React Compiler
+        run: bun run health
+
   typecheck-chromecast:
     name: "Typecheck chromecast"
     runs-on: ubuntu-latest

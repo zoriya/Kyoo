@@ -1,7 +1,7 @@
 import "react-native-get-random-values";
 
 import { Stack, useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, StyleSheet, View } from "react-native";
 import {
@@ -27,6 +27,7 @@ import { ErrorPopup } from "./controls/error-popup";
 import { toggleFullscreen } from "./controls/misc";
 import { PlayModeContext } from "./controls/tracks-menu";
 import { EntriesMenu } from "./entries-menu";
+import { setPlayerSource } from "./imperative";
 import { useKeyboard } from "./keyboard";
 import { useLanguagePreference } from "./language-preference";
 import { useProgressObserver } from "./progress-observer";
@@ -148,20 +149,20 @@ export const Player = () => {
 	const presignReady = !authToken || !!presign;
 	useEffect(() => {
 		if (!presignReady) return;
-		player.source = source;
+		setPlayerSource(player, source);
 	}, [source, player, presignReady]);
 
 	// When leaving the watch screen, unload the player unless it is casting (the
 	// mini-player then keeps driving the receiver).
 	const castStatus = usePlayerState("castStatus");
-	const castingRef = useRef(false);
-	castingRef.current =
-		castStatus === "connected" || castStatus === "connecting";
+	const unloadUnlessCasting = useEffectEvent(() => {
+		const isCasting =
+			castStatus === "connected" || castStatus === "connecting";
+		if (!isCasting) setPlayerSource(player, undefined);
+	});
 	useEffect(() => {
-		return () => {
-			if (!castingRef.current) player.source = undefined;
-		};
-	}, [player]);
+		return () => unloadUnlessCasting();
+	}, []);
 
 	return (
 		<View className="flex-1 bg-black">
@@ -231,10 +232,10 @@ const PlayerContent = ({
 	const player = usePlayer();
 	const [entriesMenuOpen, setEntriesMenuOpen] = useState(false);
 
-	const onEnd = useCallback(() => {
+	const onEnd = () => {
 		if (data?.next) player.playNext();
 		else if (data?.show?.href) router.replace(data.show.href);
-	}, [data?.next, data?.show?.href, player, router]);
+	};
 
 	useProgressObserver(
 		data && entry ? { videoId: data.id, entryId: entry.id } : null,
@@ -242,42 +243,36 @@ const PlayerContent = ({
 	useLanguagePreference(slug, data?.show?.original.language);
 
 	useEvent("end", onEnd);
-	useEvent(
-		"prev",
-		useCallback(() => {
-			if (!data?.previous) return;
-			if (!data.previous.video) {
-				setPlaybackError({
-					status: "not-available",
-					message: t("player.not-available", {
-						entry: `${entryDisplayNumber(data.previous.entry)} ${data.previous.entry.name}`,
-					}),
-				});
-				return;
-			}
-			setPlaybackError(undefined);
-			setStart("0");
-			setSlug(data.previous.video);
-		}, [data?.previous, setSlug, setStart, setPlaybackError, t]),
-	);
-	useEvent(
-		"next",
-		useCallback(() => {
-			if (!data?.next) return;
-			if (!data.next.video) {
-				setPlaybackError({
-					status: "not-available",
-					message: t("player.not-available", {
-						entry: `${entryDisplayNumber(data.next.entry)} ${data.next.entry.name}`,
-					}),
-				});
-				return;
-			}
-			setPlaybackError(undefined);
-			setStart("0");
-			setSlug(data.next.video);
-		}, [data?.next, setSlug, setStart, setPlaybackError, t]),
-	);
+	useEvent("prev", () => {
+		if (!data?.previous) return;
+		if (!data.previous.video) {
+			setPlaybackError({
+				status: "not-available",
+				message: t("player.not-available", {
+					entry: `${entryDisplayNumber(data.previous.entry)} ${data.previous.entry.name}`,
+				}),
+			});
+			return;
+		}
+		setPlaybackError(undefined);
+		setStart("0");
+		setSlug(data.previous.video);
+	});
+	useEvent("next", () => {
+		if (!data?.next) return;
+		if (!data.next.video) {
+			setPlaybackError({
+				status: "not-available",
+				message: t("player.not-available", {
+					entry: `${entryDisplayNumber(data.next.entry)} ${data.next.entry.name}`,
+				}),
+			});
+			return;
+		}
+		setPlaybackError(undefined);
+		setStart("0");
+		setSlug(data.next.video);
+	});
 
 	useKeyboard();
 

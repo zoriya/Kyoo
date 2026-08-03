@@ -13,7 +13,8 @@
 		"lint:fix": "biome lint . --write",
 		"format": "biome format .",
 		"format:fix": "biome format . --write",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit",
+		"health": "react-compiler-marker --babel-plugin-path node_modules/babel-plugin-react-compiler --include-extensions .ts,.tsx src"
 	},
 	"dependencies": {
 		"@babel/plugin-proposal-export-namespace-from": "^7.18.9",
@@ -82,6 +83,8 @@
 		"@types/bun": "^1.3.14",
 		"@types/react": "~19.2.15",
 		"@types/react-dom": "~19.2.3",
+		"babel-plugin-react-compiler": "^1.0.0",
+		"react-compiler-marker": "0.1.0",
 		"typescript": "6.0.3"
 	},
 	"expo": {

@@ -29,9 +29,17 @@ const parseTs = (time: string) => {
 	);
 };
 
+const scrubberQuery = (videoSlug: string): QueryIdentifier<string> => ({
+	path: ["api", "videos", videoSlug, "thumbnails.vtt"],
+	parser: null!,
+	options: {
+		plainText: true,
+	},
+});
+
 export const useScrubber = (videoSlug: string) => {
 	const { apiUrl } = useToken();
-	const { data } = useFetch(useScrubber.query(videoSlug));
+	const { data } = useFetch(scrubberQuery(videoSlug));
 
 	const info = useMemo(() => {
 		if (!data) return [];
@@ -77,14 +85,6 @@ export const useScrubber = (videoSlug: string) => {
 			: null,
 	} as const;
 };
-
-useScrubber.query = (videoSlug: string): QueryIdentifier<string> => ({
-	path: ["api", "videos", videoSlug, "thumbnails.vtt"],
-	parser: null!,
-	options: {
-		plainText: true,
-	},
-});
 
 export const ScrubberTooltip = ({
 	videoSlug,

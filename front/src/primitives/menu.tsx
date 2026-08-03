@@ -8,6 +8,7 @@ import {
 	type ReactNode,
 	useContext,
 	useEffect,
+	useEffectEvent,
 	useRef,
 	useState,
 } from "react";
@@ -47,12 +48,15 @@ const Menu = <AsProps,>({
 	const isOpen = controlled ? outerOpen : innerOpen;
 	const setOpen = controlled ? outerSetOpen : innerSetOpen;
 
-	// does the same as a useMemo but for props.
-	const memoRef = useRef({ onMenuOpen, onMenuClose });
-	memoRef.current = { onMenuOpen, onMenuClose };
+	const onOpen = useEffectEvent(() => {
+		onMenuOpen?.();
+	});
+	const onClose = useEffectEvent(() => {
+		onMenuClose?.();
+	});
 	useEffect(() => {
-		if (isOpen) memoRef.current.onMenuOpen?.();
-		else if (alreadyRendered.current) memoRef.current.onMenuClose?.();
+		if (isOpen) onOpen();
+		else if (alreadyRendered.current) onClose?.();
 		alreadyRendered.current = true;
 	}, [isOpen]);
 

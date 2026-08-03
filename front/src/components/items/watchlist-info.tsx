@@ -54,7 +54,7 @@ export const WatchListInfo = ({
 		invalidate: ["api", `${kind}s`, slug],
 		// optimistic is a pain to do because shows queries often have query params
 	});
-	if (mutation.isPending) status = mutation.variables;
+	const displayStatus = mutation.isPending ? mutation.variables : status;
 
 	if (account == null) {
 		return (
@@ -67,7 +67,7 @@ export const WatchListInfo = ({
 		);
 	}
 
-	switch (status) {
+	switch (displayStatus) {
 		case null:
 			return (
 				<IconButton
@@ -93,7 +93,7 @@ export const WatchListInfo = ({
 			return (
 				<Menu
 					Trigger={IconButton}
-					icon={watchListIcon(status)}
+					icon={watchListIcon(displayStatus)}
 					{...tooltip(t("show.watchlistEdit"))}
 					{...(props as any)}
 				>
@@ -102,7 +102,7 @@ export const WatchListInfo = ({
 							key={x}
 							label={t(`show.watchlistMark.${x}`)}
 							onSelect={() => mutation.mutate(x)}
-							selected={x === status}
+							selected={x === displayStatus}
 						/>
 					))}
 					<Menu.Item
@@ -112,7 +112,7 @@ export const WatchListInfo = ({
 				</Menu>
 			);
 		default:
-			return exhaustiveCheck(status);
+			return exhaustiveCheck(displayStatus);
 	}
 };
 

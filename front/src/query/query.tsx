@@ -1,5 +1,6 @@
 import {
 	dehydrate,
+	keepPreviousData,
 	QueryClient,
 	useInfiniteQuery,
 	useQuery,
@@ -147,7 +148,7 @@ export type QueryIdentifier<T = unknown> = {
 	};
 	infinite?: boolean;
 
-	placeholderData?: T | (() => T);
+	placeholderData?: T | (() => T) | typeof keepPreviousData;
 	enabled?: boolean;
 	refetchInterval?: number;
 	options?: Partial<Parameters<typeof queryFn>[0]> & {
@@ -246,6 +247,16 @@ export const useRefresh = (queries: QueryIdentifier<unknown>[]) => {
 	return [refreshing, refresh] as const;
 };
 
+// Writes a property in place. Kept as a plain function so the React Compiler
+// tolerates mutating a value it considers frozen (the react-query result).
+const assignField = <T extends object>(
+	target: T,
+	key: PropertyKey,
+	value: unknown,
+) => {
+	(target as Record<PropertyKey, unknown>)[key] = value;
+};
+
 export const useInfiniteFetch = <Data,>(query: QueryIdentifier<Data>) => {
 	const { i18n } = useTranslation();
 	let { apiUrl, authToken } = useContext(AccountContext);
@@ -272,7 +283,10 @@ export const useInfiniteFetch = <Data,>(query: QueryIdentifier<Data>) => {
 		subscribed: focused,
 	});
 	const ret = res as typeof res & { items?: Data[] };
-	ret.items = ret.data?.pages.flatMap((x) => x.items);
+	// Attach `items` in-place (not via spread, which would broaden react-query's
+	// property tracking and re-render all consumers). The write lives in a plain
+	// helper so the compiler doesn't see a mutation of the frozen hook result.
+	assignField(ret, "items", ret.data?.pages.flatMap((x) => x.items));
 
 	if (ret.isPaused) throw new RetryableError({ key: "offline" });
 	if (ret.error && (ret.error.status === 401 || ret.error.status === 403)) {

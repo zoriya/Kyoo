@@ -181,11 +181,12 @@ export const BrowseSettings = ({
 		nextStaff?: string[];
 	}) => {
 		const clauses: string[] = [];
-		kind ??= mediaType;
-		nextIncludedGenres ??= includedGenres;
-		nextExcludedGenres ??= excludedGenres;
-		nextStudios ??= studioSlugs;
-		nextStaff ??= staffSlugs;
+		// ??= is forbidden by react-compiler (/shrug)
+		kind = kind ?? mediaType;
+		nextIncludedGenres = nextIncludedGenres ?? includedGenres;
+		nextExcludedGenres = nextExcludedGenres ?? excludedGenres;
+		nextStudios = nextStudios ?? studioSlugs;
+		nextStaff = nextStaff ?? staffSlugs;
 
 		if (kind !== "all") clauses.push(`kind eq ${kind}`);
 		for (const studio of nextStudios) clauses.push(`studios has ${studio}`);
