@@ -42,10 +42,9 @@ export const HomePage = () => {
 		<>
 			<HeaderBackground {...headerProps} />
 			<AnimatedLegendList
-				recycleItems={false}
 				estimatedItemSize={340}
 				estimatedHeaderSize={imageHeight}
-				drawDistance={300}
+				drawDistance={600}
 				getItemType={(el: ReactElement) => {
 					switch (el.type) {
 						case GenreGrid:
@@ -59,7 +58,7 @@ export const HomePage = () => {
 						case NewsList:
 							return "news";
 						default:
-							console.warn("unhandled item type in home screen", el);
+							console.error("unhandled item type in home screen", el);
 							return "other";
 					}
 				}}

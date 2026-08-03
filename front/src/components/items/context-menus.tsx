@@ -52,8 +52,6 @@ export const EntryContext = ({
 		invalidate: null,
 	});
 
-	if (Platform.OS !== "web" && props.setOpen && !props.isOpen) return null;
-
 	return (
 		<Menu
 			Trigger={IconButton}
@@ -144,8 +142,6 @@ export const ShowContext = ({
 		path: ["api", `${kind}s`, slug],
 		invalidate: ["api", "shows"],
 	});
-
-	if (Platform.OS !== "web" && props.setOpen && !props.isOpen) return null;
 
 	return (
 		<Menu

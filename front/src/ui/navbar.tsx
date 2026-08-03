@@ -337,26 +337,20 @@ export const useScrollNavbar = ({
 	const scrollHandler = useAnimatedScrollHandler((event) => {
 		scrollY.value = event.contentOffset.y;
 	});
-	const opacity = useAnimatedStyle(
-		() => {
-			const ih =
-				typeof imageHeight === "number" ? imageHeight : imageHeight.value;
-			return {
-				opacity: interpolate(scrollY.value, [0, ih - height], [0, 1]),
-			};
-		},
-		[imageHeight, height],
-	);
-	const reverse = useAnimatedStyle(
-		() => {
-			const ih =
-				typeof imageHeight === "number" ? imageHeight : imageHeight.value;
-			return {
-				opacity: interpolate(scrollY.value, [0, ih - height], [1, 0]),
-			};
-		},
-		[imageHeight, height],
-	);
+	const opacity = useAnimatedStyle(() => {
+		const ih =
+			typeof imageHeight === "number" ? imageHeight : imageHeight.value;
+		return {
+			opacity: interpolate(scrollY.value, [0, ih - height], [0, 1]),
+		};
+	}, [imageHeight, height]);
+	const reverse = useAnimatedStyle(() => {
+		const ih =
+			typeof imageHeight === "number" ? imageHeight : imageHeight.value;
+		return {
+			opacity: interpolate(scrollY.value, [0, ih - height], [1, 0]),
+		};
+	}, [imageHeight, height]);
 
 	const nav = useNavigation();
 	const focused = useIsFocused();

@@ -40,7 +40,6 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 	const authToken = accountsV.selectedAccount?.token ?? null;
 	const auth = useMemo(() => ({ apiUrl, authToken }), [apiUrl, authToken]);
 
-
 	useEffect(() => {
 		if (Platform.OS === "web" || apiUrl) return;
 		const id = setTimeout(() => router.replace("/login"), 0);

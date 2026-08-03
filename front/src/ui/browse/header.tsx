@@ -253,11 +253,15 @@ export const BrowseSettings = ({
 												let nextExcluded = excludedGenres;
 												if (isIncluded) {
 													// include -> exclude
-													nextIncluded = nextIncluded.filter((g) => g !== genre);
+													nextIncluded = nextIncluded.filter(
+														(g) => g !== genre,
+													);
 													nextExcluded = [...nextExcluded, genre];
 												} else if (isExcluded) {
 													// exclude -> neutral
-													nextExcluded = nextExcluded.filter((g) => g !== genre);
+													nextExcluded = nextExcluded.filter(
+														(g) => g !== genre,
+													);
 												} else {
 													// neutral -> include
 													nextIncluded = [...nextIncluded, genre];
@@ -339,7 +343,10 @@ export const BrowseSettings = ({
 										selected={sortBy === x}
 										icon={sortOrd === "asc" ? ArrowUpward : ArrowDownward}
 										onSelect={() =>
-											setSort(x, sortBy === x && sortOrd === "asc" ? "desc" : "asc")
+											setSort(
+												x,
+												sortBy === x && sortOrd === "asc" ? "desc" : "asc",
+											)
 										}
 									/>
 								))}

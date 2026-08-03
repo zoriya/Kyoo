@@ -48,6 +48,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	getItemType?: (item: Data, index: number) => Type;
 	getStickyIndices?: (items: Data[]) => number[];
 	stickyHeaderConfig?: LegendListProps["stickyHeaderConfig"];
+	drawDistance?: LegendListProps["drawDistance"];
 	Render: (props: { item: Data; index: number }) => ReactElement | null;
 	Loader: (props: { index: number }) => ReactElement | null;
 	Empty?: ReactElement;

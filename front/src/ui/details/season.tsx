@@ -193,6 +193,7 @@ export const EntryList = ({
 		<InfiniteFetch
 			query={EntryList.query(slug, season, search)}
 			layout={EntryLine.layout}
+			drawDistance={1000}
 			Empty={<EmptyView message={t("show.episode-none")} />}
 			Divider={() => (
 				<C>

@@ -1,6 +1,6 @@
 import {
 	dehydrate,
-	keepPreviousData,
+	type keepPreviousData,
 	QueryClient,
 	useInfiniteQuery,
 	useQuery,
@@ -286,7 +286,11 @@ export const useInfiniteFetch = <Data,>(query: QueryIdentifier<Data>) => {
 	// Attach `items` in-place (not via spread, which would broaden react-query's
 	// property tracking and re-render all consumers). The write lives in a plain
 	// helper so the compiler doesn't see a mutation of the frozen hook result.
-	assignField(ret, "items", ret.data?.pages.flatMap((x) => x.items));
+	assignField(
+		ret,
+		"items",
+		ret.data?.pages.flatMap((x) => x.items),
+	);
 
 	if (ret.isPaused) throw new RetryableError({ key: "offline" });
 	if (ret.error && (ret.error.status === 401 || ret.error.status === 403)) {

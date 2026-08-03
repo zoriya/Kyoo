@@ -169,7 +169,7 @@ EntryLine.Loader = ({ className, ...props }: { className?: string }) => {
 
 EntryLine.layout = {
 	numColumns: 1,
-	size: 100,
+	size: 170,
 	layout: "vertical",
 	gap: ts(1),
 } satisfies Layout;
