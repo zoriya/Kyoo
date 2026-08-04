@@ -121,7 +121,11 @@ export const CroppedText = ({
 	return (
 		<View className="flex-row justify-between" {...(containerProps ?? {})}>
 			<P
-				ref={ref}
+				ref={(node) => {
+					desc.current = node as unknown as HTMLElement | null;
+					if (typeof ref === "function") ref(node);
+					else if (ref) ref.current = node;
+				}}
 				numberOfLines={expended ? undefined : numberOfLines}
 				onTextLayout={(e) => {
 					const visible = e.nativeEvent.lines.reduce(

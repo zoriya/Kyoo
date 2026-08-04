@@ -105,7 +105,9 @@ const VideoItem = ({
 					</View>
 					{scanStatus?.status === "failed" && scanStatus.error && (
 						<View className="mt-2 rounded bg-card p-2">
-							<SubP className="text-xs">{scanStatus.error.message}</SubP>
+							<SubP className="text-xs" numberOfLines={3}>
+								{scanStatus.error.message}
+							</SubP>
 						</View>
 					)}
 				</View>

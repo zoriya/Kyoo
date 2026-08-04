@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pydantic import field_validator
+
 from ..utils import Model
 
 
@@ -7,6 +9,17 @@ class MetadataId(Model):
 	data_id: str
 	link: str | None = None
 	label: str | None = None
+
+	@field_validator("link")
+	@classmethod
+	def _clean_link(cls, link: str | None) -> str | None:
+		# Provider data sometimes contains stray whitespace (e.g. a trailing tab
+		# in a thetvdb people url), which makes the link fail the api's url
+		# validation and rejects the whole serie/movie with a 422.
+		if link is None:
+			return None
+		link = link.strip()
+		return link or None
 
 	@classmethod
 	def map_dict(cls, self: dict[str, list[MetadataId]]):

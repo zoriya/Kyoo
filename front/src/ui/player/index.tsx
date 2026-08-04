@@ -97,21 +97,22 @@ export const Player = () => {
 			},
 			startTime: start ? Number.parseInt(start, 10) : data?.progress.time,
 			subtitles: (info?.subtitles ?? [])
+				.map((x, i) => ({ sub: x, id: (x.index ?? i).toString() }))
 				.filter(
-					(x) =>
-						x.link &&
-						(Platform.OS === "web" || playMode === "hls" || x.isExternal),
+					({ sub }) =>
+						sub.link &&
+						(Platform.OS === "web" || playMode === "hls" || sub.isExternal),
 				)
-				.map((x, i) => ({
-					id: (x.index ?? i).toString(),
+				.map(({ sub, id }) => ({
+					id,
 					link: withPresign(
-						x.codec === "subrip" && Platform.OS === "web"
-							? `${x.link}?format=vtt`
-							: x.link!,
+						sub.codec === "subrip" && Platform.OS === "web"
+							? `${sub.link}?format=vtt`
+							: sub.link!,
 						presign?.signature,
 					),
-					label: x.title ?? "Unknown",
-					language: x.language ?? "und",
+					label: sub.title ?? "Unknown",
+					language: sub.language ?? "und",
 				})),
 			fonts: (info?.fonts ?? []).map((x) => withPresign(x, presign?.signature)),
 			metadata: {

@@ -10,7 +10,6 @@ import VideoLibrary from "@material-symbols/svg-400/rounded/video_library-fill.s
 import { useRouter } from "expo-router";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform } from "react-native";
 import { WatchStatusV } from "~/models";
 import { Alert, HRP, IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
@@ -155,7 +154,9 @@ export const ShowContext = ({
 				<>
 					{showWatchlist && kind !== "collection" && (
 						<Menu.Sub
-							label={account ? t("show.watchlistEdit") : t("show.watchlistLogin")}
+							label={
+								account ? t("show.watchlistEdit") : t("show.watchlistLogin")
+							}
 							disabled={!account}
 							icon={watchListIcon(status)}
 						>
