@@ -1521,7 +1521,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aiohttp", specifier = ">=3.11.18" },
+    { name = "aiohttp", specifier = ">=3.14.3" },
     { name = "asyncpg", specifier = ">=0.30.0" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.12" },
     { name = "guessit", git = "https://github.com/zoriya/guessit" },
