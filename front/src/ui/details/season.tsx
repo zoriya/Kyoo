@@ -80,36 +80,40 @@ export const SeasonHeader = ({
 				{name ?? t("show.season", { number: seasonNumber })}
 			</H2>
 			<Menu Trigger={IconButton} icon={MoreVert} {...tooltip(t("misc.more"))}>
-				{account && (
-					<Menu.Item
-						label={t("show.watchlistMark.completed")}
-						icon={watchListIcon("completed")}
-						onSelect={async () => {
-							if (markAsSeen.isPending) return;
+				{() => (
+					<>
+						{account && (
+							<Menu.Item
+								label={t("show.watchlistMark.completed")}
+								icon={watchListIcon("completed")}
+								onSelect={async () => {
+									if (markAsSeen.isPending) return;
 
-							const page = await queryFn({
-								url: keyToUrl(
-									toQueryKey({
-										apiUrl,
-										path: ["api", "series", serieSlug, "entries"],
-										params: {
-											filter: `seasonNumber eq ${seasonNumber}`,
-											limit: 250,
-										},
-									}),
-								),
-								authToken: authToken ?? null,
-								parser: Paged(
-									z.object({
-										slug: z.string(),
-									}),
-								),
-							});
-							const entries = page.items.map((x) => x.slug);
-							if (entries.length === 0) return;
-							await markAsSeen.mutateAsync(entries);
-						}}
-					/>
+									const page = await queryFn({
+										url: keyToUrl(
+											toQueryKey({
+												apiUrl,
+												path: ["api", "series", serieSlug, "entries"],
+												params: {
+													filter: `seasonNumber eq ${seasonNumber}`,
+													limit: 250,
+												},
+											}),
+										),
+										authToken: authToken ?? null,
+										parser: Paged(
+											z.object({
+												slug: z.string(),
+											}),
+										),
+									});
+									const entries = page.items.map((x) => x.slug);
+									if (entries.length === 0) return;
+									await markAsSeen.mutateAsync(entries);
+								}}
+							/>
+						)}
+					</>
 				)}
 			</Menu>
 			<Menu
@@ -117,15 +121,19 @@ export const SeasonHeader = ({
 				icon={MenuIcon}
 				{...tooltip(t("show.jumpToSeason"))}
 			>
-				{seasons.map((x) => (
-					<Menu.Item
-						key={x.seasonNumber}
-						label={`${x.seasonNumber}: ${
-							x.name ?? t("show.season", { number: x.seasonNumber })
-						} (${x.entriesCount})`}
-						onSelect={() => router.setParams({ season: x.seasonNumber })}
-					/>
-				))}
+				{() => (
+					<>
+						{seasons.map((x) => (
+							<Menu.Item
+								key={x.seasonNumber}
+								label={`${x.seasonNumber}: ${
+									x.name ?? t("show.season", { number: x.seasonNumber })
+								} (${x.entriesCount})`}
+								onSelect={() => router.setParams({ season: x.seasonNumber })}
+							/>
+						))}
+					</>
+				)}
 			</Menu>
 		</View>
 	);
@@ -185,6 +193,7 @@ export const EntryList = ({
 		<InfiniteFetch
 			query={EntryList.query(slug, season, search)}
 			layout={EntryLine.layout}
+			drawDistance={1000}
 			Empty={<EmptyView message={t("show.episode-none")} />}
 			Divider={() => (
 				<C>

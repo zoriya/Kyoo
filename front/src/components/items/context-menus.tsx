@@ -10,7 +10,6 @@ import VideoLibrary from "@material-symbols/svg-400/rounded/video_library-fill.s
 import { useRouter } from "expo-router";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform } from "react-native";
 import { WatchStatusV } from "~/models";
 import { Alert, HRP, IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
@@ -52,8 +51,6 @@ export const EntryContext = ({
 		invalidate: null,
 	});
 
-	if (Platform.OS !== "web" && props.setOpen && !props.isOpen) return null;
-
 	return (
 		<Menu
 			Trigger={IconButton}
@@ -62,33 +59,37 @@ export const EntryContext = ({
 			{...tooltip(t("misc.more"))}
 			{...(props as any)}
 		>
-			{serieSlug && (
-				<Menu.Item
-					label={t("home.episodeMore.goToShow")}
-					icon={Info}
-					href={`/${kind === "movie" ? "movies" : "series"}/${serieSlug}`}
-				/>
-			)}
-			{account && (
-				<Menu.Item
-					label={t("show.watchlistMark.completed")}
-					icon={watchListIcon("completed")}
-					onSelect={() => markAsSeenMutation.mutate()}
-				/>
-			)}
-			{videoSlug && (
+			{() => (
 				<>
-					<Menu.Item
-						label={t("home.episodeMore.download")}
-						icon={Download}
-						href={`/api/videos/${videoSlug}/direct`}
-						download
-					/>
-					<Menu.Item
-						label={t("home.episodeMore.mediainfo")}
-						icon={MovieInfo}
-						href={`/info/${videoSlug}`}
-					/>
+					{serieSlug && (
+						<Menu.Item
+							label={t("home.episodeMore.goToShow")}
+							icon={Info}
+							href={`/${kind === "movie" ? "movies" : "series"}/${serieSlug}`}
+						/>
+					)}
+					{account && (
+						<Menu.Item
+							label={t("show.watchlistMark.completed")}
+							icon={watchListIcon("completed")}
+							onSelect={() => markAsSeenMutation.mutate()}
+						/>
+					)}
+					{videoSlug && (
+						<>
+							<Menu.Item
+								label={t("home.episodeMore.download")}
+								icon={Download}
+								href={`/api/videos/${videoSlug}/direct`}
+								download
+							/>
+							<Menu.Item
+								label={t("home.episodeMore.mediainfo")}
+								icon={MovieInfo}
+								href={`/info/${videoSlug}`}
+							/>
+						</>
+					)}
 				</>
 			)}
 		</Menu>
@@ -141,8 +142,6 @@ export const ShowContext = ({
 		invalidate: ["api", "shows"],
 	});
 
-	if (Platform.OS !== "web" && props.setOpen && !props.isOpen) return null;
-
 	return (
 		<Menu
 			Trigger={IconButton}
@@ -151,89 +150,95 @@ export const ShowContext = ({
 			{...tooltip(t("misc.more"))}
 			{...(props as any)}
 		>
-			{showWatchlist && kind !== "collection" && (
-				<Menu.Sub
-					label={account ? t("show.watchlistEdit") : t("show.watchlistLogin")}
-					disabled={!account}
-					icon={watchListIcon(status)}
-				>
-					{Object.values(WatchStatusV).map((x) => (
-						<Menu.Item
-							key={x}
-							label={t(
-								`show.watchlistMark.${x.toLowerCase() as Lowercase<WatchStatusV>}`,
+			{() => (
+				<>
+					{showWatchlist && kind !== "collection" && (
+						<Menu.Sub
+							label={
+								account ? t("show.watchlistEdit") : t("show.watchlistLogin")
+							}
+							disabled={!account}
+							icon={watchListIcon(status)}
+						>
+							{Object.values(WatchStatusV).map((x) => (
+								<Menu.Item
+									key={x}
+									label={t(
+										`show.watchlistMark.${x.toLowerCase() as Lowercase<WatchStatusV>}`,
+									)}
+									onSelect={() => mutation.mutate(x)}
+									selected={x === status}
+								/>
+							))}
+							{status !== null && (
+								<Menu.Item
+									label={t("show.watchlistMark.null")}
+									onSelect={() => mutation.mutate(null)}
+								/>
 							)}
-							onSelect={() => mutation.mutate(x)}
-							selected={x === status}
-						/>
-					))}
-					{status !== null && (
-						<Menu.Item
-							label={t("show.watchlistMark.null")}
-							onSelect={() => mutation.mutate(null)}
-						/>
+						</Menu.Sub>
 					)}
-				</Menu.Sub>
-			)}
-			{videoSlug && (
-				<>
-					<Menu.Item
-						label={t("home.episodeMore.download")}
-						icon={Download}
-						href={`/api/videos/${videoSlug}/direct`}
-						download
-					/>
-					<Menu.Item
-						label={t("home.episodeMore.mediainfo")}
-						icon={MovieInfo}
-						href={`/info/${videoSlug}`}
-					/>
-				</>
-			)}
-			{account?.isAdmin === true && (
-				<>
-					<HRP text={t("navbar.admin")} />
-					<Menu.Item
-						label={t("show.videos-map")}
-						icon={VideoLibrary}
-						href={`/${kind === "movie" ? "movies" : "series"}/${slug}/videos`}
-					/>
-					{kind !== "collection" && (
-						<Menu.Item
-							label={t("show.remap")}
-							icon={Search}
-							href={`/${kind}s/${slug}/remap?q=${name}`}
-						/>
+					{videoSlug && (
+						<>
+							<Menu.Item
+								label={t("home.episodeMore.download")}
+								icon={Download}
+								href={`/api/videos/${videoSlug}/direct`}
+								download
+							/>
+							<Menu.Item
+								label={t("home.episodeMore.mediainfo")}
+								icon={MovieInfo}
+								href={`/info/${videoSlug}`}
+							/>
+						</>
 					)}
-					{kind !== "collection" && (
-						<Menu.Item
-							label={t("home.refreshMetadata")}
-							icon={Refresh}
-							onSelect={() => metadataRefreshMutation.mutate()}
-						/>
+					{account?.isAdmin === true && (
+						<>
+							<HRP text={t("navbar.admin")} />
+							<Menu.Item
+								label={t("show.videos-map")}
+								icon={VideoLibrary}
+								href={`/${kind === "movie" ? "movies" : "series"}/${slug}/videos`}
+							/>
+							{kind !== "collection" && (
+								<Menu.Item
+									label={t("show.remap")}
+									icon={Search}
+									href={`/${kind}s/${slug}/remap?q=${name}`}
+								/>
+							)}
+							{kind !== "collection" && (
+								<Menu.Item
+									label={t("home.refreshMetadata")}
+									icon={Refresh}
+									onSelect={() => metadataRefreshMutation.mutate()}
+								/>
+							)}
+							<Menu.Item
+								label={t("misc.delete")}
+								icon={Delete}
+								onSelect={() => {
+									Alert.alert(
+										t("misc.delete-name", { name }),
+										t("login.delete-confirmation"),
+										[
+											{ text: t("misc.cancel"), style: "cancel" },
+											{
+												text: t("misc.delete"),
+												style: "destructive",
+												onPress: async () => {
+													await deleteMutation.mutateAsync();
+													router.back();
+												},
+											},
+										],
+										{ cancelable: true },
+									);
+								}}
+							/>
+						</>
 					)}
-					<Menu.Item
-						label={t("misc.delete")}
-						icon={Delete}
-						onSelect={() => {
-							Alert.alert(
-								t("misc.delete-name", { name }),
-								t("login.delete-confirmation"),
-								[
-									{ text: t("misc.cancel"), style: "cancel" },
-									{
-										text: t("misc.delete"),
-										style: "destructive",
-										onPress: async () => {
-											await deleteMutation.mutateAsync();
-											router.back();
-										},
-									},
-								],
-								{ cancelable: true },
-							);
-						}}
-					/>
 				</>
 			)}
 		</Menu>

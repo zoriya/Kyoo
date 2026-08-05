@@ -85,7 +85,7 @@ export const EntryLine = ({
 					<ItemProgress watchPercent={watchedPercent ?? 100} />
 				)}
 			</ThumbnailBackground>
-			<View className="m-1 mx-2 shrink">
+			<View className="m-1 mx-2 web:flex-1 native:shrink">
 				<View className="mb-5 md:flex-row">
 					<View>
 						<Heading
@@ -169,7 +169,7 @@ EntryLine.Loader = ({ className, ...props }: { className?: string }) => {
 
 EntryLine.layout = {
 	numColumns: 1,
-	size: 100,
+	size: 170,
 	layout: "vertical",
 	gap: ts(1),
 } satisfies Layout;

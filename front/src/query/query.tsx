@@ -1,5 +1,6 @@
 import {
 	dehydrate,
+	type keepPreviousData,
 	QueryClient,
 	useInfiniteQuery,
 	useQuery,
@@ -147,7 +148,7 @@ export type QueryIdentifier<T = unknown> = {
 	};
 	infinite?: boolean;
 
-	placeholderData?: T | (() => T);
+	placeholderData?: T | (() => T) | typeof keepPreviousData;
 	enabled?: boolean;
 	refetchInterval?: number;
 	options?: Partial<Parameters<typeof queryFn>[0]> & {
@@ -182,16 +183,12 @@ export const keyToUrl = (key: ReturnType<typeof toQueryKey>) => {
 	return key.join("/").replace("/?", "?");
 };
 
-export const useFetch = <Data,>(
-	query: QueryIdentifier<Data>,
-	{ skipFocusCheck = false }: { skipFocusCheck?: boolean } = {},
-) => {
+export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 	const { i18n } = useTranslation();
-	let { apiUrl, authToken, selectedAccount } = useContext(AccountContext);
+	let { apiUrl, authToken } = useContext(AccountContext);
 	if (query.options?.apiUrl) apiUrl = query.options.apiUrl;
 	const key = toQueryKey({ apiUrl, path: query.path, params: query.params });
-	// biome-ignore lint/correctness/useHookAtTopLevel: skipFocusCheck is static per call site
-	const focused = skipFocusCheck ? true : useIsFocused();
+	const focused = useIsFocused();
 
 	const ret = useQuery<Data, KyooError>({
 		queryKey: key,
@@ -214,7 +211,7 @@ export const useFetch = <Data,>(
 		if (ret.isPaused) throw new RetryableError({ key: "offline" });
 		if (ret.error && (ret.error.status === 401 || ret.error.status === 403)) {
 			throw new RetryableError({
-				key: !selectedAccount ? "needAccount" : "unauthorized",
+				key: !authToken ? "needAccount" : "unauthorized",
 				inner: ret.error,
 			});
 		}
@@ -250,16 +247,22 @@ export const useRefresh = (queries: QueryIdentifier<unknown>[]) => {
 	return [refreshing, refresh] as const;
 };
 
-export const useInfiniteFetch = <Data,>(
-	query: QueryIdentifier<Data>,
-	{ skipFocusCheck = false }: { skipFocusCheck?: boolean } = {},
+// Writes a property in place. Kept as a plain function so the React Compiler
+// tolerates mutating a value it considers frozen (the react-query result).
+const assignField = <T extends object>(
+	target: T,
+	key: PropertyKey,
+	value: unknown,
 ) => {
+	(target as Record<PropertyKey, unknown>)[key] = value;
+};
+
+export const useInfiniteFetch = <Data,>(query: QueryIdentifier<Data>) => {
 	const { i18n } = useTranslation();
 	let { apiUrl, authToken } = useContext(AccountContext);
 	if (query.options?.apiUrl) apiUrl = query.options.apiUrl;
 	const key = toQueryKey({ apiUrl, path: query.path, params: query.params });
-	// biome-ignore lint/correctness/useHookAtTopLevel: skipFocusCheck is static per call site
-	const focused = skipFocusCheck ? true : useIsFocused();
+	const focused = useIsFocused();
 
 	const res = useInfiniteQuery<Page<Data>, KyooError>({
 		queryKey: key,
@@ -280,7 +283,14 @@ export const useInfiniteFetch = <Data,>(
 		subscribed: focused,
 	});
 	const ret = res as typeof res & { items?: Data[] };
-	ret.items = ret.data?.pages.flatMap((x) => x.items);
+	// Attach `items` in-place (not via spread, which would broaden react-query's
+	// property tracking and re-render all consumers). The write lives in a plain
+	// helper so the compiler doesn't see a mutation of the frozen hook result.
+	assignField(
+		ret,
+		"items",
+		ret.data?.pages.flatMap((x) => x.items),
+	);
 
 	if (ret.isPaused) throw new RetryableError({ key: "offline" });
 	if (ret.error && (ret.error.status === 401 || ret.error.status === 403)) {

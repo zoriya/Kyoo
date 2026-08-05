@@ -13,7 +13,8 @@
 		"lint:fix": "biome lint . --write",
 		"format": "biome format .",
 		"format:fix": "biome format . --write",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit",
+		"health": "react-compiler-marker --babel-plugin-path node_modules/babel-plugin-react-compiler --include-extensions .ts,.tsx src"
 	},
 	"dependencies": {
 		"@babel/plugin-proposal-export-namespace-from": "^7.18.9",
@@ -57,7 +58,7 @@
 		"react-native-localization-settings": "^1.2.0",
 		"react-native-mmkv": "^4.3.1",
 		"react-native-nitro-modules": "^0.35.7",
-		"react-native-omni": "^1.9.6",
+		"react-native-omni": "^1.11.0",
 		"react-native-pager-view": "8.0.2",
 		"react-native-reanimated": "4.5.0",
 		"react-native-safe-area-context": "~5.7.0",
@@ -82,6 +83,8 @@
 		"@types/bun": "^1.3.14",
 		"@types/react": "~19.2.15",
 		"@types/react-dom": "~19.2.3",
+		"babel-plugin-react-compiler": "^1.0.0",
+		"react-compiler-marker": "0.1.0",
 		"typescript": "6.0.3"
 	},
 	"expo": {
@@ -97,8 +100,6 @@
 		}
 	},
 	"patchedDependencies": {
-		"@videojs/core@10.0.0-beta.25": "patches/@videojs%2Fcore@10.0.0-beta.25.patch",
-		"@videojs/react@10.0.0-beta.25": "patches/@videojs%2Freact@10.0.0-beta.25.patch",
 		"@legendapp/list@3.3.3": "patches/@legendapp%2Flist@3.3.3.patch"
 	}
 }

@@ -3,7 +3,8 @@ import type {
 	LegendListProps,
 } from "@legendapp/list/react-native";
 import { LegendList } from "@legendapp/list/react-native";
-import { type ComponentType, type ReactElement, useMemo, useRef } from "react";
+import { keepPreviousData } from "@tanstack/react-query";
+import { type ComponentType, type ReactElement, useMemo } from "react";
 import type { ViewStyle } from "react-native";
 import { createAnimatedComponent } from "react-native-reanimated";
 import { type Breakpoint, HR, useBreakpointMap } from "~/primitives";
@@ -47,6 +48,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	getItemType?: (item: Data, index: number) => Type;
 	getStickyIndices?: (items: Data[]) => number[];
 	stickyHeaderConfig?: LegendListProps["stickyHeaderConfig"];
+	drawDistance?: LegendListProps["drawDistance"];
 	Render: (props: { item: Data; index: number }) => ReactElement | null;
 	Loader: (props: { index: number }) => ReactElement | null;
 	Empty?: ReactElement;
@@ -62,11 +64,17 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	columnWrapperStyle?: Omit<ViewStyle, "gap" | "rowGap" | "columnGap">;
 }): ReactElement | null => {
 	const { numColumns, size, gap } = useBreakpointMap(layout);
-	const oldItems = useRef<Data[] | undefined>(undefined);
-	let { items, fetchNextPage, hasNextPage, isFetching, refetch, isRefetching } =
-		useInfiniteFetch(query);
-	if (incremental && items) oldItems.current = items;
-	if (incremental) items ??= oldItems.current;
+	const {
+		items,
+		fetchNextPage,
+		hasNextPage,
+		isFetching,
+		refetch,
+		isRefetching,
+		isPlaceholderData,
+	} = useInfiniteFetch(
+		incremental ? { ...query, placeholderData: keepPreviousData } : query,
+	);
 
 	if (!query.infinite)
 		console.warn("A non infinite query was passed to an InfiniteFetch.");
@@ -103,7 +111,9 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 			}
 			onEndReachedThreshold={0.5}
 			onRefresh={layout.layout !== "horizontal" ? refetch : undefined}
-			refreshing={isRefetching}
+			// keepPreviousData reports a query-key change as isRefetching; exclude
+			// that (isPlaceholderData) so the spinner only shows on pull-to-refresh.
+			refreshing={isRefetching && !isPlaceholderData}
 			ListHeaderComponent={Header}
 			ListHeaderComponentStyle={
 				// Cancel the content padding for the header so banners/headers stay

@@ -8,6 +8,7 @@ import {
 	type ReactNode,
 	useContext,
 	useEffect,
+	useEffectEvent,
 	useRef,
 	useState,
 } from "react";
@@ -35,25 +36,27 @@ const Menu = <AsProps,>({
 	...props
 }: {
 	Trigger: ComponentType<AsProps>;
-	children?: ReactNode | ReactNode[] | null;
+	children?: ReactNode | ReactNode[] | null | (() => ReactNode);
 	onMenuOpen?: () => void;
 	onMenuClose?: () => void;
 	isOpen?: boolean;
 	setOpen?: (v: boolean) => void;
 } & Optional<AsProps, "onPress">) => {
 	const alreadyRendered = useRef(false);
-	const [isOpen, setOpen] =
-		outerOpen !== undefined && outerSetOpen
-			? [outerOpen, outerSetOpen]
-			: // biome-ignore lint/correctness/useHookAtTopLevel: const
-				useState(false);
+	const [innerOpen, innerSetOpen] = useState(false);
+	const controlled = outerOpen !== undefined && outerSetOpen !== undefined;
+	const isOpen = controlled ? outerOpen : innerOpen;
+	const setOpen = controlled ? outerSetOpen : innerSetOpen;
 
-	// does the same as a useMemo but for props.
-	const memoRef = useRef({ onMenuOpen, onMenuClose });
-	memoRef.current = { onMenuOpen, onMenuClose };
+	const onOpen = useEffectEvent(() => {
+		onMenuOpen?.();
+	});
+	const onClose = useEffectEvent(() => {
+		onMenuClose?.();
+	});
 	useEffect(() => {
-		if (isOpen) memoRef.current.onMenuOpen?.();
-		else if (alreadyRendered.current) memoRef.current.onMenuClose?.();
+		if (isOpen) onOpen();
+		else if (alreadyRendered.current) onClose?.();
 		alreadyRendered.current = true;
 	}, [isOpen]);
 
@@ -89,7 +92,7 @@ const Menu = <AsProps,>({
 									onPress={() => setOpen(false)}
 									className="hidden self-end xl:flex"
 								/>
-								{children}
+								{typeof children === "function" ? children() : children}
 							</ScrollView>
 						</View>
 					</MenuContext.Provider>
@@ -166,7 +169,7 @@ const Sub = <AsProps,>({
 	left?: ReactElement;
 	disabled?: boolean;
 	icon?: ComponentType<SvgProps>;
-	children?: ReactNode | ReactNode[] | null;
+	children?: ReactNode | ReactNode[] | null | (() => ReactNode);
 } & AsProps) => {
 	const setOpen = useContext(MenuContext);
 	return (

@@ -1,6 +1,7 @@
-import { type ComponentProps, useState } from "react";
+import { type ComponentProps, useDeferredValue, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View, type ViewProps } from "react-native";
+import { useSharedValue } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Path } from "react-native-svg";
 import { EntryLine, entryDisplayNumber } from "~/components/entries";
@@ -93,22 +94,30 @@ const SerieHeader = ({
 	}) => void;
 }) => {
 	const [_, setSearch] = useQueryState("search", "");
+	// Defer the cast grid & next-up block to a low-priority render: the hero
+	// commits (and paints) first, then the below-the-fold subtree mounts,
+	// instead of everything landing in the same synchronous commit.
+	const belowFold = useDeferredValue(true, false);
 
 	return (
 		<View className="bg-background">
 			<Header kind="serie" slug={slug} onImageLayout={onImageLayout} />
-			<Fetch
-				// Use the same fetch query as header
-				query={Header.query("serie", slug)}
-				Render={(serie) => {
-					const nextEntry = (serie as Serie).nextEntry;
-					return nextEntry ? (
-						<NextUp entry={nextEntry} onSelectVideos={onSelectVideos} />
-					) : null;
-				}}
-				Loader={NextUp.Loader}
-			/>
-			<Staff kind="serie" slug={slug} />
+			{belowFold && (
+				<>
+					<Fetch
+						// Use the same fetch query as header
+						query={Header.query("serie", slug)}
+						Render={(serie) => {
+							const nextEntry = (serie as Serie).nextEntry;
+							return nextEntry ? (
+								<NextUp entry={nextEntry} onSelectVideos={onSelectVideos} />
+							) : null;
+						}}
+						Loader={NextUp.Loader}
+					/>
+					<Staff kind="serie" slug={slug} />
+				</>
+			)}
 			<SvgWave className="flex-1 shrink-0 fill-card" />
 			<View className="bg-card pb-4 pl-[10%]">
 				<View className="-mt-4 lg:-mt-12 xl:-mt-24">
@@ -128,7 +137,9 @@ export const SerieDetails = () => {
 	const [season] = useQueryState("season", undefined!);
 	const [search] = useQueryState("search", "");
 	const insets = useSafeAreaInsets();
-	const [imageHeight, setHeight] = useState(300);
+	// Shared value instead of state: the hero's first `onLayout` writes straight
+	// to the UI thread, so it no longer triggers a React re-render at all.
+	const imageHeight = useSharedValue(300);
 	const { scrollHandler, headerProps, headerHeight } = useScrollNavbar({
 		imageHeight,
 	});
@@ -146,7 +157,9 @@ export const SerieDetails = () => {
 					<SerieHeader
 						slug={slug}
 						onSelectVideos={setSelected}
-						onImageLayout={(e) => setHeight(e.nativeEvent.layout.height)}
+						onImageLayout={(e) => {
+							imageHeight.value = e.nativeEvent.layout.height;
+						}}
 					/>
 				)}
 				contentContainerStyle={{ paddingBottom: insets.bottom }}

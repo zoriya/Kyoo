@@ -46,7 +46,7 @@
         "react-native-localization-settings": "^1.2.0",
         "react-native-mmkv": "^4.3.1",
         "react-native-nitro-modules": "^0.35.7",
-        "react-native-omni": "^1.9.6",
+        "react-native-omni": "^1.11.0",
         "react-native-pager-view": "8.0.2",
         "react-native-reanimated": "4.5.0",
         "react-native-safe-area-context": "~5.7.0",
@@ -71,14 +71,14 @@
         "@types/bun": "^1.3.14",
         "@types/react": "~19.2.15",
         "@types/react-dom": "~19.2.3",
+        "babel-plugin-react-compiler": "^1.0.0",
+        "react-compiler-marker": "0.1.0",
         "typescript": "6.0.3",
       },
     },
   },
   "patchedDependencies": {
     "@legendapp/list@3.3.3": "patches/@legendapp%2Flist@3.3.3.patch",
-    "@videojs/react@10.0.0-beta.25": "patches/@videojs%2Freact@10.0.0-beta.25.patch",
-    "@videojs/core@10.0.0-beta.25": "patches/@videojs%2Fcore@10.0.0-beta.25.patch",
   },
   "packages": {
     "@adobe/css-tools": ["@adobe/css-tools@4.5.0", "", {}, "sha512-6OzddxPio9UiWTCemp4N8cYLV2ZN1ncRnV1cVGtve7dhPOtRkleRyx32GQCYSwDYgaHU3USMm84tNsvKzRCa1Q=="],
@@ -617,15 +617,17 @@
 
     "@ungap/structured-clone": ["@ungap/structured-clone@1.3.3", "", {}, "sha512-60YRaenCQcVjYEKOcG824+DRGGIQ3VKErcBoAEDJZz5bKIs2ZG+X/H9Nk+Q6EVkwJk5QNApxbrc5QtBSwtrXAg=="],
 
-    "@videojs/core": ["@videojs/core@10.0.0-beta.25", "", { "dependencies": { "@videojs/spf": "10.0.0-beta.25", "@videojs/store": "10.0.0-beta.25", "@videojs/utils": "10.0.0-beta.25", "@vimeo/player": "^2.30.3", "dashjs": "^5.2.0", "hls.js": "^1.6.7", "mux-embed": "^5.17.10" } }, "sha512-Yxd6c+u7LrYl6aKzZRyR5PjDqUt1lUbgFwIhg6pMzI8bJszIGjLS7TDzXdALpEFJpM1Z08dbqCEzCGaMj7Eu6A=="],
+    "@videojs/core": ["@videojs/core@github:zoriya/v10#02a4769", { "peerDependencies": { "@videojs/media": "*", "@videojs/store": "*", "@videojs/utils": "*" } }, "zoriya-v10-02a4769", "sha512-eq79BQJ+e2Lx6k9tCW68vBolcJD3OynwgE7Y8pmI9gb+RWQAYJFLEY8B576ueKHhcgOOT/taerI/Wg3eqougSg=="],
 
-    "@videojs/react": ["@videojs/react@10.0.0-beta.25", "", { "dependencies": { "@videojs/core": "10.0.0-beta.25", "@videojs/spf": "10.0.0-beta.25", "@videojs/store": "10.0.0-beta.25", "@videojs/utils": "10.0.0-beta.25" }, "peerDependencies": { "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" } }, "sha512-MUG8NFntK3u4OTArwqG4utZ11HU1Ku5kzzTfTA2BMG5shNj7KWqPz0BMR2Nnv6hwEvcxpm9vwZxk+AwkmoB5jA=="],
+    "@videojs/media": ["@videojs/media@github:zoriya/v10#46507f9", { "dependencies": { "@vimeo/player": "^2.30.3", "dashjs": "^5.2.0", "hls.js": "^1.6.7", "mux-embed": "^5.17.10" }, "peerDependencies": { "@videojs/spf": "*", "@videojs/utils": "*" } }, "zoriya-v10-46507f9", "sha512-1f7jIP5KPGKo4NeyG+Q22eS7KhvYZam8yvG985Y9edCp7wFcrVcraEQwKJrESaa/GDNgeKIeEg05MZ+l+ZHftQ=="],
 
-    "@videojs/spf": ["@videojs/spf@10.0.0-beta.25", "", { "dependencies": { "@videojs/utils": "10.0.0-beta.25", "signal-polyfill": "^0.2.2" } }, "sha512-SETOzCPbSxuzCoX+bF2u7/Z80AA/Xwpqpy5ki//yslIyPxWkMT0GFydXdoZ/bJpNsBqGmDbDxEBDo1uMjnM4mQ=="],
+    "@videojs/react": ["@videojs/react@github:zoriya/v10#784a383", { "peerDependencies": { "@videojs/core": "*", "@videojs/media": "*", "@videojs/spf": "*", "@videojs/store": "*", "@videojs/utils": "*", "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" } }, "zoriya-v10-784a383", "sha512-wLuXUjLfhLNZAVSxCsTmpidN8DZPy6Us788vXDSRJKh/a6WDTCWV2op26EK3eCgeC1P8Hwc5s5cOEhqx2fGMRQ=="],
 
-    "@videojs/store": ["@videojs/store@10.0.0-beta.25", "", { "dependencies": { "@videojs/utils": "10.0.0-beta.25" }, "peerDependencies": { "@videojs/element": "10.0.0-beta.25", "react": "^18.0.0 || ^19.0.0" }, "optionalPeers": ["@videojs/element", "react"] }, "sha512-XvPC0+MQ6AZ/oKGpSzmjOM56aYESMpPsTg5zddBDXhcqeAOUxpEsXDqhU1rsm751tU4ZavGxHENx70lBOa5dUA=="],
+    "@videojs/spf": ["@videojs/spf@github:zoriya/v10#8920135", { "dependencies": { "signal-polyfill": "^0.2.2" }, "peerDependencies": { "@videojs/utils": "*" } }, "zoriya-v10-8920135", "sha512-jGXo5tyPpIk96XWksTKbWpi7POHzdt4KtvqDZ9+SDa+MOqLV3TcgM8soo6KO2jMnkv8d8APqaz+E27qfDf16kg=="],
 
-    "@videojs/utils": ["@videojs/utils@10.0.0-beta.25", "", {}, "sha512-tq/848qmzgTncopeYE5iiYs1Pfzj4OEdSe7zE2H6xoOB0PUMlnPOThA3aybHJ8Lh9bmw+wTb6QJ0NZanIzt2Zg=="],
+    "@videojs/store": ["@videojs/store@github:zoriya/v10#3f9bddd", { "peerDependencies": { "@videojs/element": "*", "@videojs/utils": "*", "react": "^18.0.0 || ^19.0.0" }, "optionalPeers": ["@videojs/element", "react"] }, "zoriya-v10-3f9bddd", "sha512-QjSGJ6EO6uoij41F7KgMKrNi5XjvXfkODOrn17wcFa6+Ig1+ftnckkNZsJ44bARdJ1XUkuj3wNyGidYMrmKRmQ=="],
+
+    "@videojs/utils": ["@videojs/utils@github:zoriya/v10#9fed1b6", {}, "zoriya-v10-9fed1b6", "sha512-ZgbMw3v41aEru0056VVwy0UtiZk8zq6Tm6ddRAJtm5VXz2nEf36CoejFFvmGICW5cQ2WWhvMQmtqCSr+HmYGIw=="],
 
     "@vimeo/player": ["@vimeo/player@2.30.4", "", { "dependencies": { "native-promise-only": "0.8.1", "weakmap-polyfill": "2.0.4" } }, "sha512-M8m1UAhJSb+KCWuXDLWHViwj+3YY/0ogwFquRfMHs9e9LYjXT9iB7n+sOCKwUusbiXuU2HKmXx+FEGHtYZfUSg=="],
 
@@ -1247,6 +1249,8 @@
 
     "react": ["react@19.2.3", "", {}, "sha512-Ku/hhYbVjOQnXDZFv2+RibmLFGwFdeeKHFcOTlrt7xplBnya5OGn/hIRDsqDiSUcfORsDC7MPxwork8jBwsIWA=="],
 
+    "react-compiler-marker": ["react-compiler-marker@0.1.0", "", { "bin": { "react-compiler-marker": "bin/cli.js" } }, "sha512-7JfjUslAHBHW9Jf/wCt9AyoMzgQwsFNgxYKnB4rS6yuJ8BVnwQ9FwuOckp9iM2bHcVgmrMwXbhtspbwaxNT3xw=="],
+
     "react-devtools-core": ["react-devtools-core@6.1.5", "", { "dependencies": { "shell-quote": "^1.6.1", "ws": "^7" } }, "sha512-ePrwPfxAnB+7hgnEr8vpKxL9cmnp7F322t8oqcPshbIQQhDKgFDW4tjhF2wjVbdXF9O/nyuy3sQWd9JGpiLPvA=="],
 
     "react-dom": ["react-dom@19.2.3", "", { "dependencies": { "scheduler": "^0.27.0" }, "peerDependencies": { "react": "^19.2.3" } }, "sha512-yELu4WmLPw5Mr/lmeEpox5rw3RETacE++JgHqQzd2dg+YbJuat3jH4ingc+WPZhxaoFzdv9y33G+F7Nl5O0GBg=="],
@@ -1275,7 +1279,7 @@
 
     "react-native-nitro-modules": ["react-native-nitro-modules@0.35.10", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-KsySOAIkbSTjNiX2GvXiNT9P5DMeZd99yvtE/+Lw7RXV7Ztxh9Z+YyAbYkBqadhN5J/KXXuPjhRYgyLOIZgsbQ=="],
 
-    "react-native-omni": ["react-native-omni@1.9.6", "", { "dependencies": { "@expo/config-plugins": "^57.0.3", "@videojs/react": "10.0.0-beta.25", "jassub": "^2.5.7", "libpgs": "^0.8.1" }, "peerDependencies": { "react": ">=19.0.0", "react-native": ">=0.86.0", "react-native-nitro-modules": ">=0.36.0" } }, "sha512-Yyqx3ByIFiYbWPJQ8lb1zcjQwKNBONnsQwgH3hQhC+e2pQHR5BimWfzM7VP3fXiU/1cYWKyODR607eD2EoDSRQ=="],
+    "react-native-omni": ["react-native-omni@1.11.0", "", { "dependencies": { "@expo/config-plugins": "^57.0.3", "@videojs/core": "github:zoriya/v10#build26-core", "@videojs/media": "github:zoriya/v10#build26-media", "@videojs/react": "github:zoriya/v10#build26-react", "@videojs/spf": "github:zoriya/v10#build26-spf", "@videojs/store": "github:zoriya/v10#build26-store", "@videojs/utils": "github:zoriya/v10#build26-utils", "jassub": "^2.5.7", "libpgs": "^0.8.1" }, "peerDependencies": { "react": ">=19.0.0", "react-native": ">=0.86.0", "react-native-nitro-modules": ">=0.36.0" } }, "sha512-dz3WL4YZybm3LpvuTphDYuD73K6sFPMqZcu9Qs5mGn024j0kXuVClEVvIy7VaSRzt0izUIckBc1UdlJyqV8RzQ=="],
 
     "react-native-pager-view": ["react-native-pager-view@8.0.2", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-Y8All2BbjidI4ZIF9kBOIIoldkqrY/2FXapHZMdjwD+ByXhiOWTFenPs5rq9KRN5uAH/gOXtQCqHLxQDNBQRiQ=="],
 

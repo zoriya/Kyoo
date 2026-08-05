@@ -7,6 +7,7 @@ import { P, Slider, Tooltip } from "~/primitives";
 import { useFetch } from "~/query";
 import { Info } from "~/ui/info";
 import { cn, useQueryState } from "~/utils";
+import { seekPlayerTo } from "../imperative";
 import { ScrubberTooltip } from "../scrubber";
 
 export const ProgressBar = ({
@@ -46,7 +47,7 @@ export const ProgressBar = ({
 				}}
 				setProgress={setSeek}
 				endSeek={() => {
-					if (seek) player.currentTime = seek;
+					if (seek) seekPlayerTo(player, seek);
 					setTimeout(() => player.play(), 10);
 					setSeek(null);
 				}}

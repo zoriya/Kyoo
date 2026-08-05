@@ -28,6 +28,12 @@ export const history = schema.table(
 	},
 	(t) => [
 		index("history_play_date").on(t.playedDate.desc()),
+		index("history_profile_play_date").on(t.profilePk, t.playedDate.desc()),
+		index("history_profile_entry").on(
+			t.profilePk,
+			t.entryPk,
+			t.playedDate.desc(),
+		),
 
 		check("percent_valid", sql`${t.percent} between 0 and 100`),
 	],

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useEvent, usePlayer } from "react-native-omni";
 import { useAccount } from "~/providers/account-context";
 import { useFetch } from "~/query";
@@ -39,16 +39,13 @@ export const useLanguagePreference = (
 	const audioIdx = useRef(-1);
 	const restoringAudio = useRef(false);
 
-	useEvent(
-		"audioTrackChange",
-		useCallback(() => {
-			if (restoringAudio.current || !audios?.length) return;
-			const idx = player.audios.findIndex((x) => x.selected);
-			if (idx === -1 || !audios[idx]) return;
-			audioIdx.current = idx;
-			audioPref.current = audios[idx].language ?? audioPref.current;
-		}, [player, audios]),
-	);
+	useEvent("audioTrackChange", (selected) => {
+		if (restoringAudio.current || !audios?.length) return;
+		const idx = player.audios.indexOf(selected);
+		if (idx === -1 || !audios[idx]) return;
+		audioIdx.current = idx;
+		audioPref.current = audios[idx].language ?? audioPref.current;
+	});
 	useEffect(() => {
 		if (!audios?.length) return;
 		restoringAudio.current = true;
@@ -80,26 +77,25 @@ export const useLanguagePreference = (
 		forced: false,
 	});
 	const restoringSub = useRef(false);
-	useEvent(
-		"subtitleChange",
-		useCallback(() => {
-			if (restoringSub.current || !subtitles?.length) return;
-			const selected = player.subtitles.find((x) => x.selected);
-			if (!selected) {
-				subPref.current = { idx: null, lang: null, forced: false };
-				return;
-			}
-			const idx = subtitles.findIndex(
-				(x, i) => (x.index ?? i).toString() === selected.id,
-			);
-			if (idx === -1) return;
-			subPref.current = {
-				idx,
-				lang: subtitles[idx].language,
-				forced: subtitles[idx].isForced,
-			};
-		}, [player, subtitles]),
-	);
+	useEvent("subtitleChange", (selected) => {
+		if (restoringSub.current || !subtitles?.length) return;
+		if (!selected) {
+			subPref.current = { idx: null, lang: null, forced: false };
+			return;
+		}
+		const idx =
+			selected.index >= 0
+				? subtitles.findIndex((x) => x.index === selected.index)
+				: subtitles.findIndex(
+						(x, i) => (x.index ?? i).toString() === selected.id,
+					);
+		if (idx === -1) return;
+		subPref.current = {
+			idx,
+			lang: subtitles[idx].language,
+			forced: subtitles[idx].isForced,
+		};
+	});
 	useEffect(() => {
 		if (!subtitles?.length) return;
 		restoringSub.current = true;
@@ -119,7 +115,9 @@ export const useLanguagePreference = (
 		return scheduleRestore(restoringSub, () => {
 			const sub = subtitles[subRet];
 			const id = (sub.index ?? subRet).toString();
-			const track = player.subtitles.find((x) => x.id === id);
+			const track = player.subtitles.find((x) =>
+				x.index >= 0 ? x.index === sub.index : x.id === id,
+			);
 			if (track) player.selectSubtitle(track);
 		});
 	}, [player, subtitles]);

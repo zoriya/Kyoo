@@ -48,7 +48,7 @@ func GetMimeCodec(stream *ffprobe.Stream) *string {
 			ret += ".1.4"
 		}
 
-		ret += fmt.Sprintf(".L%02X.BO", stream.Level)
+		ret += fmt.Sprintf(".L%02X.B0", stream.Level)
 		return &ret
 
 	case "av1":
