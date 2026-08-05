@@ -37,10 +37,23 @@
 			"planned": "Отметить как запланированное",
 			"watching": "Отметить как просматриваемое",
 			"dropped": "Отметить как заброшенное",
-			"null": "Отметить как не просмотренное"
+			"null": "Отметить как не просмотренное",
+			"rewatching": "Отметить как для повторного просмотра"
 		},
 		"nextUp": "Следующее",
-		"season": "Сезон {{number}}"
+		"season": "Сезон {{number}}",
+		"tags-none": "Нет доступных тегов",
+		"multiVideos": "Доступно несколько видеофайлов",
+		"videosCount": "{{number}} видео",
+		"version": "Версия {{number}}",
+		"part": "Часть {{number}}",
+		"staff-as": "как {{character}}",
+		"staff-kind": {
+			"actor": "Актер",
+			"director": "Режиссер",
+			"writter": "Автор",
+			"producer": "Продюсер"
+		}
 	},
 	"browse": {
 		"mediatypekey": {
