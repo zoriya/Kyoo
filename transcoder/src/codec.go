@@ -42,13 +42,13 @@ func GetMimeCodec(stream *ffprobe.Stream) *string {
 		// FORMAT: [codecTag].[profile].[constraint?].L[level * 30].[UNKNOWN]
 		ret := "hvc1"
 
-		if stream.Profile == "main 10" {
+		if strings.ToLower(stream.Profile) == "main 10" {
 			ret += ".2.4"
 		} else {
 			ret += ".1.4"
 		}
 
-		ret += fmt.Sprintf(".L%02X.B0", stream.Level)
+		ret += fmt.Sprintf(".L%d.B0", stream.Level)
 		return &ret
 
 	case "av1":
@@ -74,7 +74,7 @@ func GetMimeCodec(stream *ffprobe.Stream) *string {
 		}
 
 		tierflag := 'M'
-		ret += fmt.Sprintf(".%02X%c.%02d", stream.Level, tierflag, bitdepth)
+		ret += fmt.Sprintf(".%02d%c.%02d", stream.Level, tierflag, bitdepth)
 
 		return &ret
 
