@@ -460,7 +460,7 @@ export const Header = ({
 								: null
 						}
 						displayNumber={
-							data.kind === "serie"
+							data.kind === "serie" && (data.nextEntry ?? data.firstEntry)
 								? entryDisplayNumber(data.nextEntry ?? data.firstEntry!)
 								: null
 						}
