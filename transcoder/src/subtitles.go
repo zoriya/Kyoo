@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -47,7 +48,7 @@ outer:
 				link := fmt.Sprintf(
 					"/video/%s/subtitle/ext-%s",
 					base64.RawURLEncoding.EncodeToString([]byte(mi.Path)),
-					filepath.Base(match),
+					url.PathEscape(filepath.Base(match)),
 				)
 				sub := Subtitle{
 					Index:      nil,
