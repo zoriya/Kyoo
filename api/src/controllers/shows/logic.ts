@@ -1,4 +1,14 @@
-import { and, desc, eq, exists, ne, or, type SQL, sql } from "drizzle-orm";
+import {
+	and,
+	desc,
+	eq,
+	exists,
+	isNotNull,
+	ne,
+	or,
+	type SQL,
+	sql,
+} from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "~/db";
 import {
@@ -269,7 +279,13 @@ export const showRelations = {
 			.innerJoin(transQ, eq(entries.pk, transQ.pk))
 			.leftJoin(entryProgressQ, eq(entries.pk, entryProgressQ.entryPk))
 			.crossJoinLateral(entryVideosQ)
-			.where(and(eq(entries.showPk, shows.pk), ne(entries.kind, "extra")))
+			.where(
+				and(
+					eq(entries.showPk, shows.pk),
+					ne(entries.kind, "extra"),
+					isNotNull(entries.availableSince),
+				),
+			)
 			.orderBy(entries.order)
 			.limit(1)
 			.as("firstEntry");

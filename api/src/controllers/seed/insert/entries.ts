@@ -92,6 +92,7 @@ export const insertEntries = record(
 						"id",
 						"slug",
 						"createdAt",
+						"availableSince",
 					]),
 				})
 				.returning({ pk: entries.pk, id: entries.id, slug: entries.slug });

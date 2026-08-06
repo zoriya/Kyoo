@@ -474,6 +474,28 @@ func (ts *Stream) loadTimescale() (uint32, error) {
 	return scale, nil
 }
 
+// for some formats (m4a), ffmpeg doesn't flush before printing `segment ready`
+// so we can start reading an incomplete segment. retry a few times for those
+// files
+func decodeSegmentFile(path string) (*mp4.File, []byte, error) {
+	var lastErr error
+	for attempt := 0; attempt < 20; attempt++ {
+		if attempt > 0 {
+			time.Sleep(20 * time.Millisecond)
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return nil, nil, err
+		}
+		f, err := mp4.DecodeFile(bytes.NewReader(data))
+		if err == nil {
+			return f, data, nil
+		}
+		lastErr = fmt.Errorf("decode segment %s: %w", path, err)
+	}
+	return nil, nil, lastErr
+}
+
 // the tfdt is reset at 0 on each window so we need to manually override it
 // (ffmpeg doesn't allow us to do that). we decided to shift the tfdt instead
 // of overwriting it blindly because the mixer is more precise than what we could
@@ -483,13 +505,9 @@ func (ts *Stream) finalizeSegment(path string, startSegment int32) error {
 	if err != nil {
 		return err
 	}
-	data, err := os.ReadFile(path)
+	f, data, err := decodeSegmentFile(path)
 	if err != nil {
 		return err
-	}
-	f, err := mp4.DecodeFile(bytes.NewReader(data))
-	if err != nil {
-		return fmt.Errorf("decode segment %s: %w", path, err)
 	}
 	offset := uint64(math.Round(ts.keyframes.Get(startSegment) * float64(timescale)))
 	patched := false

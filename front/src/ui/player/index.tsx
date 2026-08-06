@@ -106,15 +106,15 @@ export const Player = () => {
 				.map(({ sub, id }) => ({
 					id,
 					link: withPresign(
-						sub.codec === "subrip" && Platform.OS === "web"
-							? `${sub.link}?format=vtt`
-							: sub.link!,
+						`${apiUrl}${sub.codec === "subrip" && Platform.OS === "web" ? `${sub.link}?format=vtt` : sub.link!}`,
 						presign?.signature,
 					),
 					label: sub.title ?? "Unknown",
 					language: sub.language ?? "und",
 				})),
-			fonts: (info?.fonts ?? []).map((x) => withPresign(x, presign?.signature)),
+			fonts: (info?.fonts ?? []).map((x) =>
+				withPresign(`${apiUrl}${x}`, presign?.signature),
+			),
 			metadata: {
 				title: title ?? data?.path ?? "",
 				artist: data?.show?.name ?? undefined,
