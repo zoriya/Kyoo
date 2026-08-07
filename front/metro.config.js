@@ -38,6 +38,10 @@ module.exports = (() => {
 		},
 	};
 
+	// NOTE: no `isTV` here on purpose. It would make uniwind compile the css for
+	// the `android-tv` platform, where `native:` classes are dropped (the tv
+	// platforms are their own bucket), and we style the tv with the same classes as
+	// the phone rather than gating anything on it.
 	return withUniwindConfig(config, {
 		cssEntryFile: "./src/global.css",
 	});
