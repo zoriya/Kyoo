@@ -6,6 +6,7 @@
       "name": "kyoo-chromecast-receiver",
       "dependencies": {
         "blurhash": "^2.0.5",
+        "hls-parser": "^0.16.1",
         "jassub": "1.8.8",
         "libpgs": "^0.8.1",
       },
@@ -113,6 +114,8 @@
     "fdir": ["fdir@6.5.0", "", { "peerDependencies": { "picomatch": "^3 || ^4" }, "optionalPeers": ["picomatch"] }, "sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg=="],
 
     "fsevents": ["fsevents@2.3.3", "", { "os": "darwin" }, "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw=="],
+
+    "hls-parser": ["hls-parser@0.16.1", "", {}, "sha512-6B2XobrddgXNl1pXw0dKXq0ovczjzra/pam7ifV0G/RXpt4bEbQcE6ndY+kGGlrNxB3zE42s7xmIypwG+sxh9A=="],
 
     "jassub": ["jassub@1.8.8", "", { "dependencies": { "rvfc-polyfill": "^1.0.7" } }, "sha512-Vtw27Z0/hN2Tm2Qs4HAR+eONwwSD5ULo/hisPvmiaW9Ya6aFCt7esvWQSZy6nvBASbRyKmpghgeioIPqXGHA0Q=="],
 
