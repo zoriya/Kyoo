@@ -11,12 +11,20 @@ on:
           - both
           - development
           - release
+      tv:
+        description: Build the Android TV (leanback) app instead of the phone app
+        type: boolean
+        default: false
   workflow_call:
     inputs:
       variant:
         description: Which APK(s) to build (development, release or both)
         type: string
         default: release
+      tv:
+        description: Build the Android TV (leanback) app instead of the phone app
+        type: boolean
+        default: false
       attach-to-release:
         description: Attach the release APK to the GitHub release given by release-tag
         type: boolean
@@ -27,7 +35,7 @@ on:
         default: ""
 
 concurrency:
-  group: android-build-${{ github.ref }}-${{ inputs.variant }}
+  group: android-build-${{ github.ref }}-${{ inputs.variant }}-${{ inputs.tv }}
   cancel-in-progress: true
 
 jobs:
@@ -94,9 +102,22 @@ jobs:
       - name: Generate native project
         env:
           APP_VARIANT: ${{ matrix.variant == 'development' && 'development' || '' }}
-          ANDROID_VERSION_CODE: ${{ github.run_number }}
           EXPO_NO_TELEMETRY: "1"
-        run: bunx expo prebuild --platform android --no-install
+          EXPO_TV: ${{ inputs.tv && '1' || '' }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          # the phone and tv apks share a package name, so play needs a distinct
+          # (and always increasing) versionCode for each. give the tv build its own
+          # slot in every run rather than a flat offset, which would collide with
+          # the next run's phone build.
+          if [ -n "$EXPO_TV" ]; then
+            ANDROID_VERSION_CODE=$((RUN_NUMBER * 10 + 1))
+          else
+            ANDROID_VERSION_CODE=$((RUN_NUMBER * 10))
+          fi
+          export ANDROID_VERSION_CODE
+          echo "versionCode=$ANDROID_VERSION_CODE"
+          bunx expo prebuild --platform android --no-install
 
       - name: Disable release lint (lintVital)
         working-directory: ./front/android
@@ -143,13 +164,15 @@ jobs:
 
       - name: Collect APK
         id: apk
+        env:
+          TV_SUFFIX: ${{ inputs.tv && '-tv' || '' }}
         run: |
           if [ "${{ matrix.variant }}" = "development" ]; then
             SRC=android/app/build/outputs/apk/debug/app-debug.apk
-            OUT=kyoo-dev.apk
+            OUT="kyoo-dev$TV_SUFFIX.apk"
           else
             SRC=android/app/build/outputs/apk/release/app-release.apk
-            OUT=kyoo.apk
+            OUT="kyoo$TV_SUFFIX.apk"
           fi
           cp "$SRC" "$OUT"
           echo "name=$OUT" >> "$GITHUB_OUTPUT"

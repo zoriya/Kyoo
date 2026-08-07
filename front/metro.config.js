@@ -40,5 +40,6 @@ module.exports = (() => {
 
 	return withUniwindConfig(config, {
 		cssEntryFile: "./src/global.css",
+		isTV: process.env.EXPO_TV === "1",
 	});
 })();
