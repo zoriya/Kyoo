@@ -316,7 +316,7 @@ func RetriveMediaInfo(ctx context.Context, path string, sha string) (*MediaInfo,
 				Codec:     stream.CodecName,
 				MimeCodec: GetMimeCodec(stream),
 				Channels:  stream.Channels,
-				Bitrate:   ParseUint(cmp.Or(stream.BitRate, mi.Format.BitRate)),
+				Bitrate:   ParseUint(cmp.Or(stream.BitRate, "0")),
 				IsDefault: stream.Disposition.Default != 0,
 			}
 		}),

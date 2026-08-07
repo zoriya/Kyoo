@@ -136,7 +136,7 @@ func (fs *FileStream) GetMaster(ctx context.Context, query string) string {
 	if def_audio != nil {
 		aqualities := utils.Filter(AudioQualities, func(quality AudioQuality) bool {
 			return quality.Bitrate() <= def_audio.Quality().Bitrate() &&
-				(def_video == nil || quality.Bitrate() <= matchAudioQuality(def_video.Quality()).Bitrate())
+				(def_video == nil || quality.Bitrate() <= matchAudioQuality(def_video.Quality(), def_audio.Quality()).Bitrate())
 		})
 		aqualities = append(aqualities, AOriginal)
 
@@ -212,7 +212,7 @@ func (fs *FileStream) GetMaster(ctx context.Context, query string) string {
 			if quality == Original || quality == NoResize {
 				audios := []AudioQuality{AOriginal}
 				if def_audio != nil && (def_audio.MimeCodec == nil || *def_audio.MimeCodec != transcode_audio_codec) {
-					audios = append(audios, matchAudioQuality(def_video.Quality()))
+					audios = append(audios, matchAudioQuality(def_video.Quality(), def_audio.Quality()))
 				}
 				for _, aquality := range audios {
 					// original & noresize streams
@@ -255,7 +255,7 @@ func (fs *FileStream) GetMaster(ctx context.Context, query string) string {
 			master += fmt.Sprintf("RESOLUTION=%dx%d,", int(aspectRatio*float32(quality.Height())+0.5), quality.Height())
 			master += fmt.Sprintf("CODECS=\"%s\",", strings.Join([]string{transcode_codec, transcode_audio_codec}, ","))
 			if def_audio != nil {
-				master += fmt.Sprintf("AUDIO=\"a-%s\",", string(matchAudioQuality(quality)))
+				master += fmt.Sprintf("AUDIO=\"a-%s\",", string(matchAudioQuality(quality, def_audio.Quality())))
 			}
 			master += "CLOSED-CAPTIONS=NONE\n"
 			master += fmt.Sprintf("%d/%s/index.m3u8?%s\n", def_video.Index, quality, query)
@@ -365,25 +365,30 @@ func (fs *FileStream) GetAudioInit(ctx context.Context, idx uint32, quality Audi
 	return stream.GetInit(ctx)
 }
 
-func matchAudioQuality(q VideoQuality) AudioQuality {
+func matchAudioQuality(q VideoQuality, maxQuality AudioQuality) AudioQuality {
+	var ret AudioQuality
 	switch q {
 	case P240:
-		return K128
+		ret = K128
 	case P360:
-		return K128
+		ret = K128
 	case P480:
-		return K128
+		ret = K128
 	case P720:
-		return K192
+		ret = K192
 	case P1080:
-		return K192
+		ret = K192
 	case P1440:
-		return K256
+		ret = K256
 	case P4k:
-		return K512
+		ret = K512
 	case P8k:
-		return K512
+		ret = K512
 	default:
 		return AOriginal
 	}
+	if maxQuality != AOriginal && ret.Bitrate() > maxQuality.Bitrate() {
+		return maxQuality
+	}
+	return ret
 }

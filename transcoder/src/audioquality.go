@@ -51,10 +51,13 @@ func (a AudioQuality) Bitrate() uint32 {
 }
 
 func (audio *Audio) Quality() AudioQuality {
+	if audio.Bitrate == 0 {
+		return AudioQualities[len(AudioQualities)-1]
+	}
 	for _, quality := range AudioQualities {
 		if quality.Bitrate() >= audio.Bitrate {
 			return quality
 		}
 	}
-	return K128
+	return AudioQualities[len(AudioQualities)-1]
 }
