@@ -1,4 +1,5 @@
 import type * as http from "node:http";
+import legacy from "@vitejs/plugin-legacy";
 import { type Connect, defineConfig, type Plugin } from "vite";
 
 // Chromecast aggressively caches the receiver app; if index.html is cacheable
@@ -33,9 +34,15 @@ const crossOriginIsolation: Plugin = {
 };
 
 export default defineConfig({
-	plugins: [crossOriginIsolation],
+	plugins: [
+		crossOriginIsolation,
+		legacy({
+			renderLegacyChunks: false,
+			modernPolyfills: true,
+			modernTargets: "chrome >= 90",
+		}),
+	],
 	build: {
-		target: "chrome90",
 		outDir: "dist",
 	},
 	worker: {

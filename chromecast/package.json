@@ -19,6 +19,7 @@
 	"devDependencies": {
 		"@types/chromecast-caf-receiver": "^6.0.26",
 		"@types/node": "^26.1.1",
+		"@vitejs/plugin-legacy": "^8.2.3",
 		"typescript": "^7.0.2",
 		"vite": "^8.0.0"
 	}
