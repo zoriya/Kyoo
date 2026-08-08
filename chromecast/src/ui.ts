@@ -181,7 +181,7 @@ export class ReceiverUi {
 			this.setLoading(false);
 			this.clearError();
 			this.#syncProgress(player);
-			this.show();
+			this.show({ sticky: true });
 		});
 		player.addEventListener(EventType.TIME_UPDATE, () =>
 			this.#syncProgress(player),

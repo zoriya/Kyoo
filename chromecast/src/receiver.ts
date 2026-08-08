@@ -1,3 +1,4 @@
+import { parse, stringify } from "hls-parser";
 import { fetchVideoInfo, fetchVideoMeta, withPresign } from "./api";
 import { asObject, type KyooCastData } from "./cast";
 import { ProgressObserver } from "./progress-observer";
@@ -11,6 +12,33 @@ const {
 	HlsVideoSegmentFormat,
 	GenericMediaMetadata,
 } = cast.framework.messages;
+
+export const filterMasterPlaylist = (
+	text: string,
+	baseUrl: string,
+): string | null => {
+	console.log("parsing manifest:", text);
+	const playlist = parse(text);
+	if (!playlist.isMasterPlaylist) return null;
+
+	const kept = playlist.variants.filter(
+		(v) =>
+			!v.codecs ||
+			MediaSource.isTypeSupported(`video/mp4; codecs="${v.codecs}"`) ||
+			MediaSource.isTypeSupported(`audio/mp4; codecs="${v.codecs}"`),
+	);
+	if (kept.length === 0 || kept.length === playlist.variants.length)
+		return null;
+	playlist.variants = kept;
+
+	// data: URLs have no base to resolve against, so absolutize every URI.
+	for (const v of playlist.variants) {
+		v.uri = new URL(v.uri, baseUrl).href;
+		for (const r of [...v.audio, ...v.video, ...v.subtitles])
+			if (r.uri) r.uri = new URL(r.uri, baseUrl).href;
+	}
+	return stringify(playlist);
+};
 
 export class KyooReceiver {
 	#context = cast.framework.CastReceiverContext.getInstance();
@@ -33,11 +61,13 @@ export class KyooReceiver {
 			this.#subtitles.applyActive(req.activeTrackIds);
 			return req;
 		});
-		this.#player.addEventListener(EventType.MEDIA_FINISHED, () => {
+		this.#player.addEventListener(EventType.MEDIA_FINISHED, (e) => {
 			this.#subtitles.clear();
+			if (e.endedReason === "ERROR") this.#player.stop();
 		});
 		this.#player.addEventListener(EventType.ERROR, (e) => {
 			console.error("[kyoo-receiver] playback error", e);
+			this.#player.stop();
 		});
 
 		const options = new cast.framework.CastReceiverOptions();
@@ -68,17 +98,24 @@ export class KyooReceiver {
 			request.media.hlsVideoSegmentFormat = HlsVideoSegmentFormat.FMP4;
 		}
 
-		// Shaka resolves manifest-relative URLs against the pre-redirect URL (#2679);
-		// kyoo's master 302-redirects, so follow it and hand Shaka the final URL.
+		// Fetch the master ourselves to:
+		// - resolve the 302 (relative urls resolve against the pre-redirect url)
+		//   (https://github.com/shaka-project/shaka-player/issues/2679)
+		// - drop variants the device can't decode
+		//   (https://github.com/shaka-project/shaka-player/issues/9211)
 		if (request.media?.contentUrl) {
 			try {
 				const res = await fetch(request.media.contentUrl, {
 					redirect: "follow",
 				});
-				res.body?.cancel();
-				if (res.redirected && res.url) request.media.contentUrl = res.url;
+				const finalUrl =
+					res.redirected && res.url ? res.url : request.media.contentUrl;
+				const filtered = filterMasterPlaylist(await res.text(), finalUrl);
+				request.media.contentUrl = filtered
+					? `data:application/vnd.apple.mpegurl,${encodeURIComponent(filtered)}`
+					: finalUrl;
 			} catch (e) {
-				console.error("[kyoo-receiver] manifest redirect resolve failed", e);
+				console.error("[kyoo-receiver] manifest fetch/filter failed", e);
 			}
 		}
 
