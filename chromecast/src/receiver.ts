@@ -21,14 +21,29 @@ export const filterMasterPlaylist = (
 	const playlist = parse(text);
 	if (!playlist.isMasterPlaylist) return null;
 
-	const kept = playlist.variants.filter(
+	const supported = playlist.variants.filter(
 		(v) =>
 			!v.codecs ||
 			MediaSource.isTypeSupported(`video/mp4; codecs="${v.codecs}"`) ||
 			MediaSource.isTypeSupported(`audio/mp4; codecs="${v.codecs}"`),
 	);
-	if (kept.length === 0 || kept.length === playlist.variants.length)
-		return null;
+
+	if (supported.length === 0) return null;
+
+	// the device can't switch video codec mid-stream, so keep a single ladder:
+	// the codec with the most variants (ties keep the first, ie the original).
+	const ladders = new Map<string, typeof supported>();
+	for (const v of supported) {
+		const codec = (v.codecs ?? "").split(",")[0].split(".")[0];
+		const ladder = ladders.get(codec);
+		if (ladder) ladder.push(v);
+		else ladders.set(codec, [v]);
+	}
+	const kept = [...ladders.values()].reduce((a, b) =>
+		b.length > a.length ? b : a,
+	);
+
+	if (kept.length === playlist.variants.length) return null;
 	playlist.variants = kept;
 
 	// data: URLs have no base to resolve against, so absolutize every URI.
@@ -37,7 +52,9 @@ export const filterMasterPlaylist = (
 		for (const r of [...v.audio, ...v.video, ...v.subtitles])
 			if (r.uri) r.uri = new URL(r.uri, baseUrl).href;
 	}
-	return stringify(playlist);
+	const ret = stringify(playlist);
+	console.log("stripped manifest:", ret);
+	return ret;
 };
 
 export class KyooReceiver {
