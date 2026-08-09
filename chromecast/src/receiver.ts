@@ -5,7 +5,7 @@ import { ProgressObserver } from "./progress-observer";
 import { SubtitleManager } from "./subtitles";
 import { ReceiverUi } from "./ui";
 
-const { EventType } = cast.framework.events;
+const { EventType, DetailedErrorCode } = cast.framework.events;
 const {
 	MessageType,
 	HlsSegmentFormat,
@@ -90,6 +90,10 @@ export class KyooReceiver {
 			if (e.endedReason === "ERROR") this.#player.stop();
 		});
 		this.#player.addEventListener(EventType.ERROR, (e) => {
+			if (e.detailedErrorCode === DetailedErrorCode.LOAD_INTERRUPTED) {
+				console.log("[kyoo-receiver] load interrupted by a newer one");
+				return;
+			}
 			console.error("[kyoo-receiver] playback error", e);
 			this.#player.stop();
 		});

@@ -224,6 +224,7 @@ export class ReceiverUi {
 			this.show({ sticky: true });
 		});
 		player.addEventListener(EventType.ERROR, (e) => {
+			if (e.detailedErrorCode === DetailedErrorCode.LOAD_INTERRUPTED) return;
 			this.showError(describeError(e), errorDetail(e));
 		});
 	}
