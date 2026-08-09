@@ -77,6 +77,10 @@ export class KyooReceiver {
 
 		this.#playbackConfig.initialBandwidth = 20_000_000;
 		this.#player.setMessageInterceptor(MessageType.LOAD, this.#onLoad);
+		this.#player.setMessageInterceptor(
+			MessageType.MEDIA_STATUS,
+			this.#onStatus,
+		);
 		this.#player.setMessageInterceptor(MessageType.EDIT_TRACKS_INFO, (req) => {
 			this.#subtitles.applyActive(req.activeTrackIds);
 			return req;
@@ -95,6 +99,38 @@ export class KyooReceiver {
 		options.maxInactivity = 3600;
 		this.#context.start(options);
 	}
+
+	// cast messages are capped at 64kb. strip all unnecessary data (and presigns)
+	#onStatus = (status: messages.MediaStatus): messages.MediaStatus => {
+		if (!status.media) return status;
+		const copy = <T extends object>(obj: T): T =>
+			Object.assign(Object.create(Object.getPrototypeOf(obj)), obj);
+		const strip = (media: messages.MediaInformation) => {
+			const data = asObject(media.customData) as KyooCastData | null;
+			const stripped = copy(media);
+			stripped.contentUrl =
+				data?.apiUrl && data?.slug
+					? `${data.apiUrl}/api/videos/${data.slug}/master.m3u8`
+					: undefined;
+			stripped.customData = undefined;
+			stripped.tracks = media.tracks?.map((track) => {
+				const copied = copy(track);
+				copied.trackContentId = undefined;
+				return copied;
+			});
+			return stripped;
+		};
+
+		const stripped = copy(status);
+		stripped.media = strip(status.media);
+		stripped.items = status.items?.map((item) => {
+			if (!item.media) return item;
+			const copied = copy(item);
+			copied.media = strip(item.media);
+			return copied;
+		});
+		return stripped;
+	};
 
 	#onLoad = async (
 		request: messages.LoadRequestData,
