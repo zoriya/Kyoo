@@ -76,6 +76,20 @@ export class KyooReceiver {
 		this.#progress.start();
 
 		this.#playbackConfig.initialBandwidth = 20_000_000;
+		this.#playbackConfig.segmentRequestRetryLimit = 4;
+		const retryParameters = {
+			maxAttempts: 5,
+			baseDelay: 1000,
+			backoffFactor: 2,
+			fuzzFactor: 0.5,
+			connectionTimeout: 0,
+			stallTimeout: 0,
+			timeout: 90_000,
+		};
+		this.#playbackConfig.shakaConfig = {
+			manifest: { retryParameters },
+			streaming: { retryParameters },
+		};
 		this.#player.setMessageInterceptor(MessageType.LOAD, this.#onLoad);
 		this.#player.setMessageInterceptor(
 			MessageType.MEDIA_STATUS,
@@ -164,18 +178,31 @@ export class KyooReceiver {
 		// - drop variants the device can't decode
 		//   (https://github.com/shaka-project/shaka-player/issues/9211)
 		if (request.media?.contentUrl) {
-			try {
-				const res = await fetch(request.media.contentUrl, {
-					redirect: "follow",
-				});
-				const finalUrl =
-					res.redirected && res.url ? res.url : request.media.contentUrl;
-				const filtered = filterMasterPlaylist(await res.text(), finalUrl);
-				request.media.contentUrl = filtered
-					? `data:application/vnd.apple.mpegurl,${encodeURIComponent(filtered)}`
-					: finalUrl;
-			} catch (e) {
-				console.error("[kyoo-receiver] manifest fetch/filter failed", e);
+			const masterUrl = request.media.contentUrl;
+			for (let attempt = 0; ; attempt++) {
+				try {
+					const res = await fetch(masterUrl, { redirect: "follow" });
+					if (!res.ok) throw new Error(`master request failed: ${res.status}`);
+					const finalUrl = res.redirected && res.url ? res.url : masterUrl;
+					const filtered = filterMasterPlaylist(await res.text(), finalUrl);
+					request.media.contentUrl = filtered
+						? `data:application/vnd.apple.mpegurl,${encodeURIComponent(filtered)}`
+						: finalUrl;
+					break;
+				} catch (e) {
+					if (attempt >= 4) {
+						console.error("[kyoo-receiver] manifest fetch/filter failed", e);
+						break;
+					}
+					console.warn(
+						`[kyoo-receiver] manifest fetch failed (attempt ${attempt + 1}), retrying`,
+						e,
+					);
+					const base = Math.min(1000 * 2 ** attempt, 10_000);
+					await new Promise((r) =>
+						setTimeout(r, base / 2 + Math.random() * (base / 2)),
+					);
+				}
 			}
 		}
 
