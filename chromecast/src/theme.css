@@ -118,6 +118,32 @@ cast-media-player {
 	}
 }
 
+.paused {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(15, 23, 42, 0.3);
+}
+.paused[hidden] {
+	display: none;
+}
+.pause-icon {
+	display: flex;
+	gap: 1.25rem;
+	filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.6));
+}
+.pause-icon span {
+	width: 26px;
+	height: 84px;
+	border-radius: 6px;
+	background: var(--slate-200);
+}
+
 .error {
 	position: absolute;
 	top: 0;

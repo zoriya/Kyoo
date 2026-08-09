@@ -11,6 +11,9 @@ const {
 	HlsSegmentFormat,
 	HlsVideoSegmentFormat,
 	GenericMediaMetadata,
+	Track,
+	TrackType,
+	TextTrackType,
 } = cast.framework.messages;
 
 export const filterMasterPlaylist = (
@@ -21,14 +24,29 @@ export const filterMasterPlaylist = (
 	const playlist = parse(text);
 	if (!playlist.isMasterPlaylist) return null;
 
-	const kept = playlist.variants.filter(
+	const supported = playlist.variants.filter(
 		(v) =>
 			!v.codecs ||
 			MediaSource.isTypeSupported(`video/mp4; codecs="${v.codecs}"`) ||
 			MediaSource.isTypeSupported(`audio/mp4; codecs="${v.codecs}"`),
 	);
-	if (kept.length === 0 || kept.length === playlist.variants.length)
-		return null;
+
+	if (supported.length === 0) return null;
+
+	// the device can't switch video codec mid-stream, so keep a single ladder:
+	// the codec with the most variants (ties keep the first, ie the original).
+	const ladders = new Map<string, typeof supported>();
+	for (const v of supported) {
+		const codec = (v.codecs ?? "").split(",")[0].split(".")[0];
+		const ladder = ladders.get(codec);
+		if (ladder) ladder.push(v);
+		else ladders.set(codec, [v]);
+	}
+	const kept = [...ladders.values()].reduce((a, b) =>
+		b.length > a.length ? b : a,
+	);
+
+	if (kept.length === playlist.variants.length) return null;
 	playlist.variants = kept;
 
 	// data: URLs have no base to resolve against, so absolutize every URI.
@@ -37,7 +55,9 @@ export const filterMasterPlaylist = (
 		for (const r of [...v.audio, ...v.video, ...v.subtitles])
 			if (r.uri) r.uri = new URL(r.uri, baseUrl).href;
 	}
-	return stringify(playlist);
+	const ret = stringify(playlist);
+	console.log("stripped manifest:", ret);
+	return ret;
 };
 
 export class KyooReceiver {
@@ -57,6 +77,10 @@ export class KyooReceiver {
 
 		this.#playbackConfig.initialBandwidth = 20_000_000;
 		this.#player.setMessageInterceptor(MessageType.LOAD, this.#onLoad);
+		this.#player.setMessageInterceptor(
+			MessageType.MEDIA_STATUS,
+			this.#onStatus,
+		);
 		this.#player.setMessageInterceptor(MessageType.EDIT_TRACKS_INFO, (req) => {
 			this.#subtitles.applyActive(req.activeTrackIds);
 			return req;
@@ -76,15 +100,47 @@ export class KyooReceiver {
 		this.#context.start(options);
 	}
 
+	// cast messages are capped at 64kb. strip all unnecessary data (and presigns)
+	#onStatus = (status: messages.MediaStatus): messages.MediaStatus => {
+		if (!status.media) return status;
+		const copy = <T extends object>(obj: T): T =>
+			Object.assign(Object.create(Object.getPrototypeOf(obj)), obj);
+		const strip = (media: messages.MediaInformation) => {
+			const data = asObject(media.customData) as KyooCastData | null;
+			const stripped = copy(media);
+			stripped.contentUrl =
+				data?.apiUrl && data?.slug
+					? `${data.apiUrl}/api/videos/${data.slug}/master.m3u8`
+					: undefined;
+			stripped.customData = undefined;
+			stripped.tracks = media.tracks?.map((track) => {
+				const copied = copy(track);
+				copied.trackContentId = undefined;
+				return copied;
+			});
+			return stripped;
+		};
+
+		const stripped = copy(status);
+		stripped.media = strip(status.media);
+		stripped.items = status.items?.map((item) => {
+			if (!item.media) return item;
+			const copied = copy(item);
+			copied.media = strip(item.media);
+			return copied;
+		});
+		return stripped;
+	};
+
 	#onLoad = async (
 		request: messages.LoadRequestData,
 	): Promise<messages.LoadRequestData> => {
 		const data = (asObject(request.media?.customData) as KyooCastData) ?? {};
 
-		this.#subtitles.registerTracks(request.media?.tracks);
-
 		this.#ui.clearError();
 		this.#ui.dismissSplash();
+		this.#ui.clearMetadata();
+		this.#ui.setPaused(false);
 		this.#ui.setLoading(true);
 		this.#ui.show({ sticky: true });
 
@@ -123,10 +179,24 @@ export class KyooReceiver {
 			try {
 				const info = await fetchVideoInfo(data.apiUrl, data.slug, data.presign);
 				this.#subtitles.setFonts(info.fonts);
+				if (request.media) {
+					request.media.tracks = info.subtitles.map((sub, i) => {
+						// caf tracks are 1 based instead of 0 based
+						const track = new Track(i + 1, TrackType.TEXT);
+						track.trackContentId = sub.link;
+						track.trackContentType = sub.mimeType;
+						track.subtype = TextTrackType.SUBTITLES;
+						track.name = sub.label;
+						track.language = sub.language;
+						return track;
+					});
+				}
 			} catch (e) {
-				console.error("[kyoo-receiver] failed to load subtitle fonts", e);
+				console.error("[kyoo-receiver] failed to load subtitles", e);
 			}
 		}
+
+		this.#subtitles.registerTracks(request.media?.tracks);
 		this.#subtitles.applyActive(request.activeTrackIds);
 
 		if (data.apiUrl && data.slug) {

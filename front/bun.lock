@@ -46,7 +46,7 @@
         "react-native-localization-settings": "^1.2.0",
         "react-native-mmkv": "^4.3.1",
         "react-native-nitro-modules": "^0.35.7",
-        "react-native-omni": "^1.11.1",
+        "react-native-omni": "^1.11.2",
         "react-native-pager-view": "8.0.2",
         "react-native-reanimated": "4.5.0",
         "react-native-safe-area-context": "~5.7.0",
@@ -1279,7 +1279,7 @@
 
     "react-native-nitro-modules": ["react-native-nitro-modules@0.35.10", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-KsySOAIkbSTjNiX2GvXiNT9P5DMeZd99yvtE/+Lw7RXV7Ztxh9Z+YyAbYkBqadhN5J/KXXuPjhRYgyLOIZgsbQ=="],
 
-    "react-native-omni": ["react-native-omni@1.11.1", "", { "dependencies": { "@expo/config-plugins": "^57.0.3", "@videojs/core": "github:zoriya/v10#build26-core", "@videojs/media": "github:zoriya/v10#build26-media", "@videojs/react": "github:zoriya/v10#build26-react", "@videojs/spf": "github:zoriya/v10#build26-spf", "@videojs/store": "github:zoriya/v10#build26-store", "@videojs/utils": "github:zoriya/v10#build26-utils", "jassub": "^2.5.7", "libpgs": "^0.8.1" }, "peerDependencies": { "react": ">=19.0.0", "react-native": ">=0.86.0", "react-native-nitro-modules": ">=0.36.0" } }, "sha512-5HITGj11Yp3bq/ML2PWwzCdxw9HftPyM3wCjEvJsiN0H5jVy3yOua/qzZCFiMnhaZQxguMbr1CXCW+sKjiCQKg=="],
+    "react-native-omni": ["react-native-omni@1.11.2", "", { "dependencies": { "@expo/config-plugins": "^57.0.3", "@videojs/core": "github:zoriya/v10#build26-core", "@videojs/media": "github:zoriya/v10#build26-media", "@videojs/react": "github:zoriya/v10#build26-react", "@videojs/spf": "github:zoriya/v10#build26-spf", "@videojs/store": "github:zoriya/v10#build26-store", "@videojs/utils": "github:zoriya/v10#build26-utils", "jassub": "^2.5.7", "libpgs": "^0.8.1" }, "peerDependencies": { "react": ">=19.0.0", "react-native": ">=0.86.0", "react-native-nitro-modules": ">=0.36.0" } }, "sha512-bHLFxDdeLgOfnIZeyW9MvlFxorF7alWescyI4mAG88Ci3Kyaf1xRoQgM0QRcbdpVncL9b0pPS8sUn95cCep6ww=="],
 
     "react-native-pager-view": ["react-native-pager-view@8.0.2", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-Y8All2BbjidI4ZIF9kBOIIoldkqrY/2FXapHZMdjwD+ByXhiOWTFenPs5rq9KRN5uAH/gOXtQCqHLxQDNBQRiQ=="],
 

@@ -2,6 +2,7 @@ import { decode } from "blurhash";
 import { castMediaPlayerShadow, getVideoElement } from "./cast";
 
 const { EventType, DetailedErrorCode } = cast.framework.events;
+const { PlayerState } = cast.framework.messages;
 
 const byId = <T extends HTMLElement = HTMLElement>(id: string): T =>
 	document.getElementById(id) as T;
@@ -113,6 +114,7 @@ export class ReceiverUi {
 		splash: byId("splash"),
 		topTitle: byId("top-title"),
 		loading: byId("loading"),
+		paused: byId("paused"),
 		poster: byId<HTMLImageElement>("poster"),
 		title: byId("title"),
 		timeCurrent: byId("time-current"),
@@ -125,6 +127,7 @@ export class ReceiverUi {
 		errorDetail: byId("error-detail"),
 	};
 	#hideTimer: ReturnType<typeof setTimeout> | null = null;
+	#pendingLoad = false;
 
 	dismissSplash(): void {
 		this.#el.splash.classList.add("gone");
@@ -159,8 +162,25 @@ export class ReceiverUi {
 		}
 	}
 
+	clearMetadata(): void {
+		this.#pendingLoad = true;
+		this.#el.topTitle.textContent = "";
+		this.#el.title.textContent = "";
+		this.#el.poster.hidden = true;
+		this.#el.poster.removeAttribute("src");
+		this.#el.poster.style.backgroundImage = "";
+		this.#el.progressFill.style.width = "0%";
+		this.#el.progressBuffer.style.width = "0%";
+		this.#el.timeCurrent.textContent = "00:00";
+		this.#el.timeTotal.textContent = "??:??";
+	}
+
 	setLoading(isLoading: boolean): void {
 		this.#el.loading.style.display = isLoading ? "flex" : "none";
+	}
+
+	setPaused(isPaused: boolean): void {
+		this.#el.paused.hidden = !isPaused;
 	}
 
 	showError(message: string, detail = "", title = "Playback error"): void {
@@ -178,7 +198,9 @@ export class ReceiverUi {
 
 	bindTo(player: framework.PlayerManager): void {
 		player.addEventListener(EventType.PLAYER_LOAD_COMPLETE, () => {
+			this.#pendingLoad = false;
 			this.setLoading(false);
+			this.setPaused(false);
 			this.clearError();
 			this.#syncProgress(player);
 			this.show({ sticky: true });
@@ -191,10 +213,14 @@ export class ReceiverUi {
 		});
 		player.addEventListener(EventType.PLAYING, () => {
 			this.setLoading(false);
+			this.setPaused(false);
 			this.clearError();
 			this.show();
 		});
 		player.addEventListener(EventType.PAUSE, () => {
+			this.setPaused(
+				!this.#pendingLoad && player.getPlayerState() === PlayerState.PAUSED,
+			);
 			this.show({ sticky: true });
 		});
 		player.addEventListener(EventType.ERROR, (e) => {
@@ -203,6 +229,7 @@ export class ReceiverUi {
 	}
 
 	#syncProgress(player: framework.PlayerManager): void {
+		if (this.#pendingLoad) return;
 		const video = getVideoElement();
 		let buffered = Number.NaN;
 		try {
