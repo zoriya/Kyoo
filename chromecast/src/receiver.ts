@@ -104,6 +104,7 @@ export class KyooReceiver {
 		this.#ui.clearError();
 		this.#ui.dismissSplash();
 		this.#ui.clearMetadata();
+		this.#ui.setPaused(false);
 		this.#ui.setLoading(true);
 		this.#ui.show({ sticky: true });
 

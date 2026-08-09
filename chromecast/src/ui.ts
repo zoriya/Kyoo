@@ -2,6 +2,7 @@ import { decode } from "blurhash";
 import { castMediaPlayerShadow, getVideoElement } from "./cast";
 
 const { EventType, DetailedErrorCode } = cast.framework.events;
+const { PlayerState } = cast.framework.messages;
 
 const byId = <T extends HTMLElement = HTMLElement>(id: string): T =>
 	document.getElementById(id) as T;
@@ -113,6 +114,7 @@ export class ReceiverUi {
 		splash: byId("splash"),
 		topTitle: byId("top-title"),
 		loading: byId("loading"),
+		paused: byId("paused"),
 		poster: byId<HTMLImageElement>("poster"),
 		title: byId("title"),
 		timeCurrent: byId("time-current"),
@@ -177,6 +179,10 @@ export class ReceiverUi {
 		this.#el.loading.style.display = isLoading ? "flex" : "none";
 	}
 
+	setPaused(isPaused: boolean): void {
+		this.#el.paused.hidden = !isPaused;
+	}
+
 	showError(message: string, detail = "", title = "Playback error"): void {
 		this.setLoading(false);
 		this.#el.errorTitle.textContent = title;
@@ -194,6 +200,7 @@ export class ReceiverUi {
 		player.addEventListener(EventType.PLAYER_LOAD_COMPLETE, () => {
 			this.#pendingLoad = false;
 			this.setLoading(false);
+			this.setPaused(false);
 			this.clearError();
 			this.#syncProgress(player);
 			this.show({ sticky: true });
@@ -206,10 +213,14 @@ export class ReceiverUi {
 		});
 		player.addEventListener(EventType.PLAYING, () => {
 			this.setLoading(false);
+			this.setPaused(false);
 			this.clearError();
 			this.show();
 		});
 		player.addEventListener(EventType.PAUSE, () => {
+			this.setPaused(
+				!this.#pendingLoad && player.getPlayerState() === PlayerState.PAUSED,
+			);
 			this.show({ sticky: true });
 		});
 		player.addEventListener(EventType.ERROR, (e) => {
