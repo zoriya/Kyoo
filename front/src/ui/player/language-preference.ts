@@ -41,7 +41,7 @@ export const useLanguagePreference = (
 
 	useEvent("audioTrackChange", (selected) => {
 		if (restoringAudio.current || !audios?.length) return;
-		const idx = player.audios.indexOf(selected);
+		const idx = player.audios.findIndex((x) => x.id === selected.id);
 		if (idx === -1 || !audios[idx]) return;
 		audioIdx.current = idx;
 		audioPref.current = audios[idx].language ?? audioPref.current;
