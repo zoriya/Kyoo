@@ -14,6 +14,9 @@ const {
 	Track,
 	TrackType,
 	TextTrackType,
+	TextTrackStyle,
+	TextTrackEdgeType,
+	TextTrackFontGenericFamily,
 } = cast.framework.messages;
 
 export const filterMasterPlaylist = (
@@ -136,6 +139,7 @@ export class KyooReceiver {
 				copied.trackContentId = undefined;
 				return copied;
 			});
+			stripped.textTrackStyle = undefined
 			return stripped;
 		};
 
@@ -170,6 +174,17 @@ export class KyooReceiver {
 			request.media.contentType = "application/vnd.apple.mpegurl";
 			request.media.hlsSegmentFormat = HlsSegmentFormat.FMP4;
 			request.media.hlsVideoSegmentFormat = HlsVideoSegmentFormat.FMP4;
+		}
+
+		if (request.media) {
+			const style = new TextTrackStyle();
+			style.foregroundColor = "#FFFFFFFF";
+			style.backgroundColor = "#00000000";
+			style.edgeType = TextTrackEdgeType.OUTLINE;
+			style.edgeColor = "#000000FF";
+			style.fontFamily = "Poppins";
+			style.fontGenericFamily = TextTrackFontGenericFamily.SANS_SERIF;
+			request.media.textTrackStyle = style;
 		}
 
 		// Fetch the master ourselves to:
