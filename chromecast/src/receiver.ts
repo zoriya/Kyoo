@@ -6,8 +6,10 @@ import { SubtitleManager } from "./subtitles";
 import { ReceiverUi } from "./ui";
 
 const { EventType, DetailedErrorCode } = cast.framework.events;
+const { EventType: SystemEventType } = cast.framework.system;
 const {
 	MessageType,
+	Command,
 	HlsSegmentFormat,
 	HlsVideoSegmentFormat,
 	GenericMediaMetadata,
@@ -18,6 +20,9 @@ const {
 	TextTrackEdgeType,
 	TextTrackFontGenericFamily,
 } = cast.framework.messages;
+
+// prev/next requests we forward to the senders (react-native-omni listens to it)
+const KYOO_NAMESPACE = "urn:x-cast:dev.zoriya.omni";
 
 export const filterMasterPlaylist = (
 	text: string,
@@ -72,6 +77,7 @@ export class KyooReceiver {
 		document.getElementById("subtitle-layer") as HTMLElement,
 	);
 	#progress = new ProgressObserver(this.#player);
+	#idleTimer: ReturnType<typeof setTimeout> | undefined;
 
 	start(): void {
 		this.#ui.hideCafChrome();
@@ -94,6 +100,20 @@ export class KyooReceiver {
 			streaming: { retryParameters },
 		};
 		this.#player.setMessageInterceptor(MessageType.LOAD, this.#onLoad);
+		// we never queue anything, so caf has nothing to skip to: forward the
+		// intent to the senders instead, they are the ones knowing the next entry
+		// & they load it like they do for their own prev/next buttons.
+		this.#player.setMessageInterceptor(MessageType.QUEUE_UPDATE, (request) => {
+			const jump = request.jump ?? 0;
+			if (jump || request.currentItemId !== undefined) {
+				const action = jump < 0 ? "prev" : "next";
+				console.log(
+					`[kyoo-receiver] asking senders to play the ${action} entry`,
+				);
+				this.#context.sendCustomMessage(KYOO_NAMESPACE, undefined, { action });
+			}
+			return null;
+		});
 		this.#player.setMessageInterceptor(
 			MessageType.MEDIA_STATUS,
 			this.#onStatus,
@@ -104,7 +124,10 @@ export class KyooReceiver {
 		});
 		this.#player.addEventListener(EventType.MEDIA_FINISHED, (e) => {
 			this.#subtitles.clear();
-			if (e.endedReason === "ERROR") this.#player.stop();
+			// if no new item is enqueued, reset the ui
+			// (will be cancelled if a request comes in)
+			if (e.endedReason === "END_OF_STREAM")
+				this.#idleTimer = setTimeout(() => this.#ui.reset(), 5_000);
 		});
 		this.#player.addEventListener(EventType.ERROR, (e) => {
 			if (e.detailedErrorCode === DetailedErrorCode.LOAD_INTERRUPTED) {
@@ -115,9 +138,20 @@ export class KyooReceiver {
 			this.#player.stop();
 		});
 
+		// senders that lost the app can't answer a skip, don't offer it anymore
+		this.#context.addEventListener(SystemEventType.SENDER_DISCONNECTED, () => {
+			if (this.#context.getSenders().length === 0)
+				this.#player.removeSupportedMediaCommands(
+					Command.QUEUE_PREV | Command.QUEUE_NEXT,
+				);
+		});
+
 		const options = new cast.framework.CastReceiverOptions();
 		options.playbackConfig = this.#playbackConfig;
 		options.maxInactivity = 3600;
+		options.customNamespaces = {
+			[KYOO_NAMESPACE]: cast.framework.system.MessageType.JSON,
+		};
 		this.#context.start(options);
 	}
 
@@ -139,7 +173,7 @@ export class KyooReceiver {
 				copied.trackContentId = undefined;
 				return copied;
 			});
-			stripped.textTrackStyle = undefined
+			stripped.textTrackStyle = undefined;
 			return stripped;
 		};
 
@@ -158,6 +192,7 @@ export class KyooReceiver {
 		request: messages.LoadRequestData,
 	): Promise<messages.LoadRequestData> => {
 		const data = (asObject(request.media?.customData) as KyooCastData) ?? {};
+		clearTimeout(this.#idleTimer);
 
 		this.#ui.clearError();
 		this.#ui.dismissSplash();
@@ -249,6 +284,14 @@ export class KyooReceiver {
 			try {
 				const meta = await fetchVideoMeta(data.apiUrl, data.slug, data.presign);
 				this.#ui.setMetadata(meta);
+				this.#player.setSupportedMediaCommands(
+					Command.PAUSE |
+						Command.SEEK |
+						Command.STREAM_VOLUME |
+						Command.STREAM_MUTE |
+						(meta.previousSlug ? Command.QUEUE_PREV : 0) |
+						(meta.nextSlug ? Command.QUEUE_NEXT : 0),
+				);
 				if (meta.videoId && meta.entryId) {
 					this.#progress.load(data, {
 						videoId: meta.videoId,

@@ -133,6 +133,14 @@ export class ReceiverUi {
 		this.#el.splash.classList.add("gone");
 	}
 
+	reset(): void {
+		this.#el.splash.classList.remove("gone");
+		this.clearMetadata();
+		this.setLoading(false);
+		this.setPaused(false);
+		this.show({ sticky: true });
+	}
+
 	setMetadata({
 		showName,
 		entryName,
