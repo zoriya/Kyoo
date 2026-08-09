@@ -1,8 +1,7 @@
 export type VideoInfo = {
 	subtitles: {
-		id: string;
 		link: string;
-		mimeType?: string;
+		mimeType: string;
 		label?: string;
 		language?: string;
 	}[];
@@ -49,14 +48,19 @@ export const fetchVideoInfo = async (
 
 	return {
 		subtitles: (data.subtitles ?? [])
-			.map((s, i) => ({
-				id: String(s.index ?? i),
-				link: s.link ? withPresign(new URL(s.link, apiUrl).href, presign) : "",
-				mimeType: s.codec,
-				label: s.title ?? undefined,
-				language: s.language ?? undefined,
-			}))
-			.filter((s) => !!s.link),
+			.filter((s) => !!s.link)
+			.map((s) => {
+				const custom =
+					s.codec === "ass" || s.codec === "ssa" || s.codec.includes("pgs");
+				const link = new URL(s.link!, apiUrl);
+				if (!custom) link.searchParams.set("format", "vtt");
+				return {
+					link: withPresign(link.href, presign),
+					mimeType: custom ? s.codec : "text/vtt",
+					label: s.title ?? undefined,
+					language: s.language ?? undefined,
+				};
+			}),
 		fonts: (data.fonts ?? []).map((f) =>
 			withPresign(new URL(f, apiUrl).href, presign),
 		),

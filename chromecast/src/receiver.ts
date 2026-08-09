@@ -11,6 +11,9 @@ const {
 	HlsSegmentFormat,
 	HlsVideoSegmentFormat,
 	GenericMediaMetadata,
+	Track,
+	TrackType,
+	TextTrackType,
 } = cast.framework.messages;
 
 export const filterMasterPlaylist = (
@@ -98,8 +101,6 @@ export class KyooReceiver {
 	): Promise<messages.LoadRequestData> => {
 		const data = (asObject(request.media?.customData) as KyooCastData) ?? {};
 
-		this.#subtitles.registerTracks(request.media?.tracks);
-
 		this.#ui.clearError();
 		this.#ui.dismissSplash();
 		this.#ui.setLoading(true);
@@ -140,10 +141,24 @@ export class KyooReceiver {
 			try {
 				const info = await fetchVideoInfo(data.apiUrl, data.slug, data.presign);
 				this.#subtitles.setFonts(info.fonts);
+				if (request.media) {
+					request.media.tracks = info.subtitles.map((sub, i) => {
+						// caf tracks are 1 based instead of 0 based
+						const track = new Track(i + 1, TrackType.TEXT);
+						track.trackContentId = sub.link;
+						track.trackContentType = sub.mimeType;
+						track.subtype = TextTrackType.SUBTITLES;
+						track.name = sub.label;
+						track.language = sub.language;
+						return track;
+					});
+				}
 			} catch (e) {
-				console.error("[kyoo-receiver] failed to load subtitle fonts", e);
+				console.error("[kyoo-receiver] failed to load subtitles", e);
 			}
 		}
+
+		this.#subtitles.registerTracks(request.media?.tracks);
 		this.#subtitles.applyActive(request.activeTrackIds);
 
 		if (data.apiUrl && data.slug) {
