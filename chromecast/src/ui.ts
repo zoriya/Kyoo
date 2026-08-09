@@ -125,6 +125,7 @@ export class ReceiverUi {
 		errorDetail: byId("error-detail"),
 	};
 	#hideTimer: ReturnType<typeof setTimeout> | null = null;
+	#pendingLoad = false;
 
 	dismissSplash(): void {
 		this.#el.splash.classList.add("gone");
@@ -159,6 +160,19 @@ export class ReceiverUi {
 		}
 	}
 
+	clearMetadata(): void {
+		this.#pendingLoad = true;
+		this.#el.topTitle.textContent = "";
+		this.#el.title.textContent = "";
+		this.#el.poster.hidden = true;
+		this.#el.poster.removeAttribute("src");
+		this.#el.poster.style.backgroundImage = "";
+		this.#el.progressFill.style.width = "0%";
+		this.#el.progressBuffer.style.width = "0%";
+		this.#el.timeCurrent.textContent = "00:00";
+		this.#el.timeTotal.textContent = "??:??";
+	}
+
 	setLoading(isLoading: boolean): void {
 		this.#el.loading.style.display = isLoading ? "flex" : "none";
 	}
@@ -178,6 +192,7 @@ export class ReceiverUi {
 
 	bindTo(player: framework.PlayerManager): void {
 		player.addEventListener(EventType.PLAYER_LOAD_COMPLETE, () => {
+			this.#pendingLoad = false;
 			this.setLoading(false);
 			this.clearError();
 			this.#syncProgress(player);
@@ -203,6 +218,7 @@ export class ReceiverUi {
 	}
 
 	#syncProgress(player: framework.PlayerManager): void {
+		if (this.#pendingLoad) return;
 		const video = getVideoElement();
 		let buffered = Number.NaN;
 		try {
