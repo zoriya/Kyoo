@@ -256,9 +256,11 @@ export class KyooReceiver {
 			}
 		}
 
+		let duration: number | null = null;
 		if (data.apiUrl && data.slug) {
 			try {
 				const info = await fetchVideoInfo(data.apiUrl, data.slug, data.presign);
+				duration = info.duration;
 				this.#subtitles.setFonts(info.fonts);
 				if (request.media) {
 					request.media.tracks = info.subtitles.map((sub, i) => {
@@ -296,6 +298,7 @@ export class KyooReceiver {
 					this.#progress.load(data, {
 						videoId: meta.videoId,
 						entryId: meta.entryId,
+						duration,
 					});
 				}
 				if (request.media) {

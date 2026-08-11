@@ -3,7 +3,7 @@ import type { KyooCastData } from "./cast";
 const { EventType } = cast.framework.events;
 const { PlayerState } = cast.framework.messages;
 
-type Ids = { videoId: string; entryId: string };
+type Ids = { videoId: string; entryId: string; duration: number | null };
 
 // mirrors the app's `useProgressObserver` (front/src/ui/player/progress-observer.ts):
 export class ProgressObserver {
@@ -22,7 +22,13 @@ export class ProgressObserver {
 	start(): void {
 		this.#player.addEventListener(EventType.PLAYING, this.#sync);
 		this.#player.addEventListener(EventType.PAUSE, this.#sync);
-		this.#player.addEventListener(EventType.ENDED, this.#sync);
+		this.#player.addEventListener(EventType.MEDIA_FINISHED, (e) => {
+			if (this.#interval !== null) {
+				clearInterval(this.#interval);
+				this.#interval = null;
+			}
+			if (e.endedReason === "END_OF_STREAM") this.#send(true);
+		});
 	}
 
 	// Called on every LOAD once the video/entry ids and presign are known.
@@ -35,8 +41,6 @@ export class ProgressObserver {
 		if (url !== this.#wsUrl) {
 			this.#wsUrl = url;
 			this.#connect();
-		} else {
-			this.#send();
 		}
 	}
 
@@ -48,7 +52,6 @@ export class ProgressObserver {
 		this.#ws = ws;
 
 		ws.addEventListener("open", () => {
-			this.#send();
 			this.#ping = setInterval(() => {
 				if (ws.readyState === WebSocket.OPEN)
 					ws.send(JSON.stringify({ action: "ping" }));
@@ -78,23 +81,23 @@ export class ProgressObserver {
 		}
 	};
 
-	#send = (): void => {
+	#send = (finished?: boolean): void => {
 		if (!this.#ids || !this.#ws || this.#ws.readyState !== WebSocket.OPEN)
 			return;
+		if (!finished && this.#player.getPlayerState() === PlayerState.IDLE) return;
 		const time = this.#player.getCurrentTimeSec();
-		const duration = this.#player.getDurationSec();
-		if (!Number.isFinite(time) || !Number.isFinite(duration) || duration <= 0)
-			return;
+		const duration = this.#ids.duration ?? this.#player.getDurationSec();
+		if (!Number.isFinite(duration) || duration <= 0) return;
+		if (!finished && !Number.isFinite(time)) return;
 		this.#ws.send(
 			JSON.stringify({
 				action: "watch",
 				entry: this.#ids.entryId,
 				videoId: this.#ids.videoId,
-				percent: Math.min(
-					100,
-					Math.max(0, Math.round((time / duration) * 100)),
-				),
-				time: Math.max(0, Math.round(time)),
+				percent: finished
+					? 100
+					: Math.min(100, Math.max(0, Math.round((time / duration) * 100))),
+				time: finished ? Math.round(duration) : Math.max(0, Math.round(time)),
 			}),
 		);
 	};
