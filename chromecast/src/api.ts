@@ -24,6 +24,8 @@ export type VideoMeta = {
 	title: string;
 	poster: string | null;
 	blurhash: string | null;
+	previousSlug: string | null;
+	nextSlug: string | null;
 };
 
 export const fetchVideoInfo = async (
@@ -86,6 +88,8 @@ type ApiVideo = {
 		name?: string;
 		poster?: ApiImage | null;
 	} | null;
+	previous?: { video?: string | null } | null;
+	next?: { video?: string | null } | null;
 };
 
 const entryDisplayNumber = (entry: ApiEntry): string => {
@@ -108,7 +112,10 @@ export const fetchVideoMeta = async (
 	presign?: string,
 ): Promise<VideoMeta> => {
 	const res = await fetch(
-		withPresign(`${apiUrl}/api/videos/${slug}?with=show`, presign),
+		withPresign(
+			`${apiUrl}/api/videos/${slug}?with=show,previous,next`,
+			presign,
+		),
 	);
 	if (!res.ok) throw new Error(`video request failed: ${res.status}`);
 	const data = (await res.json()) as ApiVideo;
@@ -135,5 +142,7 @@ export const fetchVideoMeta = async (
 			? withPresign(`${apiUrl}/api/images/${poster.id}?quality=high`, presign)
 			: null,
 		blurhash: poster?.blurhash ?? null,
+		previousSlug: data.previous?.video ?? null,
+		nextSlug: data.next?.video ?? null,
 	};
 };
