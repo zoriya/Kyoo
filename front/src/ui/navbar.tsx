@@ -48,6 +48,7 @@ import {
 } from "~/primitives";
 import { useAccount, useAccounts } from "~/providers/account-context";
 import { logout } from "~/ui/login/logic";
+import { CastButton } from "~/ui/player/controls/misc";
 import { cn, useQueryState } from "~/utils";
 import KyooLongLogo from "~public/icon-long.svg";
 
@@ -156,6 +157,9 @@ export const NavbarRight = () => {
 					}
 				}}
 			/>
+			{Platform.OS !== "web" && (
+				<CastButton iconClassName="fill-slate-200 dark:fill-slate-200" />
+			)}
 			<NavbarProfile />
 		</View>
 	);
