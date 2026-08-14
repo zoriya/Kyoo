@@ -37,10 +37,28 @@
 			"planned": "标记为已计划",
 			"watching": "标记为正在观看",
 			"dropped": "标记为已放弃",
-			"null": "标记为未观看"
+			"null": "标记为未观看",
+			"rewatching": "标记为重看状态"
 		},
 		"nextUp": "下一集",
-		"season": "第{{number}}季"
+		"season": "第{{number}}季",
+		"tags-none": "无标签可用",
+		"multiVideos": "有多个视频文件可用",
+		"videosCount": "{{number}} 个视频",
+		"version": "版本 {{number}}",
+		"part": "第 {{number}} 部分",
+		"videos-map": "编辑视频映射",
+		"remap": "重新映射",
+		"staff-as": "饰 {{character}}",
+		"staff-kind": {
+			"actor": "演员",
+			"director": "导演",
+			"writter": "编剧",
+			"producer": "制片人",
+			"music": "音乐",
+			"crew": "剧组人员",
+			"other": "其他"
+		}
 	},
 	"browse": {
 		"sortby": "按{{key}}排序",
@@ -67,7 +85,8 @@
 			"serie": "系列"
 		},
 		"mediatype-tt": "媒体类型",
-		"mediatypelabel": "媒体类型"
+		"mediatypelabel": "媒体类型",
+		"not": "排除"
 	},
 	"misc": {
 		"settings": "设置",
@@ -279,5 +298,28 @@
 		"soap": "肥皂剧",
 		"talk": "访谈",
 		"politics": "政治"
+	},
+	"videos-map": {
+		"none": "无",
+		"add": "添加另一个视频",
+		"delete": "从剧集中移除视频",
+		"validate": "确认识别结果并添加到剧集",
+		"no-guess": "已识别该视频属于本剧集，但无法确定具体集数",
+		"related": "已添加与《{{title}}》相关的视频",
+		"sort-path": "路径",
+		"sort-entry": "集数顺序",
+		"no-video": "尚未有视频文件关联到本剧集。"
+	},
+	"profile": {
+		"history": "观看历史",
+		"watchlist": "观看列表",
+		"statuses": {
+			"all": "全部",
+			"completed": "已完成",
+			"watching": "正在观看",
+			"rewatching": "重看中",
+			"dropped": "已放弃",
+			"planned": "已计划"
+		}
 	}
 }
