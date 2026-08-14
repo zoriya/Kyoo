@@ -78,9 +78,21 @@ export const Player = () => {
 		),
 	);
 	const [defaultPlayMode] = useLocalSetting<PlayMode>("playMode", "direct");
-	const playModeState = useState(defaultPlayMode);
-	const [playMode] = playModeState;
+	const [playMode, setPlayMode] = useState(defaultPlayMode);
 	const [playbackError, setPlaybackError] = useState<KyooError | undefined>();
+
+	const player = usePlayer();
+	const playModeState = useMemo<[PlayMode, (mode: PlayMode) => void]>(
+		() => [
+			playMode,
+			(mode) => {
+				// changing the mode reloads the video, restart it where we are now
+				setStart(Math.round(player.currentTime).toString());
+				setPlayMode(mode);
+			},
+		],
+		[playMode, player, setStart],
+	);
 
 	const source = useMemo<Source>(
 		() => ({
@@ -146,7 +158,6 @@ export const Player = () => {
 		[apiUrl, slug, playMode, info, authToken, start, data, title, presign],
 	);
 
-	const player = usePlayer();
 	const presignReady = !authToken || !!presign;
 	useEffect(() => {
 		if (!presignReady) return;
