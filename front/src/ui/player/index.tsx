@@ -105,7 +105,7 @@ export const Player = () => {
 				mimeType:
 					playMode === "direct"
 						? info?.mimeCodec?.replace("x-matroska", "mp4")
-						: "application/vnd.apple.mpegurl",
+						: "application/x-mpegURL",
 				headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
 			},
 			startTime: start ? Number.parseInt(start, 10) : data?.progress.time,
