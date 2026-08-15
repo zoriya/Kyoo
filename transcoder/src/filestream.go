@@ -104,7 +104,9 @@ func (fs *FileStream) Destroy(ctx context.Context) {
 
 func (fs *FileStream) GetMaster(ctx context.Context, query string) string {
 	ctx = context.WithoutCancel(ctx)
-	master := "#EXTM3U\n"
+	master := `#EXTM3U
+#EXT-X-VERSION:7
+`
 
 	// codec is the prefix + the level, the level is not part of the codec we want to compare for the same_codec check bellow
 	transcode_prefix := "avc1.6400"
