@@ -565,7 +565,13 @@ func (ts *Stream) GetIndex(_ context.Context, query string) (string, error) {
 #EXT-X-MAP:URI="init.mp4?%s"
 `, query)
 
-	for segment := int32(0); segment < length-1; segment++ {
+	// while the keyframe analysis runs, run() keeps the last two keyframes as padding
+	// so those segments can't be encoded yet. don't announce them
+	last := length - 1
+	if !is_done {
+		last = length - 2
+	}
+	for segment := int32(0); segment < last; segment++ {
 		fmt.Fprintf(&index, "#EXTINF:%.6f\n", ts.keyframes.Get(segment+1)-ts.keyframes.Get(segment))
 		fmt.Fprintf(&index, "segment-%d.mp4?%s\n", segment, query)
 	}
