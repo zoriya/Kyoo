@@ -20,6 +20,7 @@ import { useToken } from "~/providers/account-context";
 import { useLocalSetting } from "~/providers/settings";
 import { type QueryIdentifier, useFetch } from "~/query";
 import { Info } from "~/ui/info";
+import { Remote } from "~/ui/remote";
 import { useQueryState } from "~/utils";
 import { CastingScreen } from "./casting-screen";
 import { Controls, LoadingIndicator } from "./controls";
@@ -77,9 +78,21 @@ export const Player = () => {
 		),
 	);
 	const [defaultPlayMode] = useLocalSetting<PlayMode>("playMode", "direct");
-	const playModeState = useState(defaultPlayMode);
-	const [playMode] = playModeState;
+	const [playMode, setPlayMode] = useState(defaultPlayMode);
 	const [playbackError, setPlaybackError] = useState<KyooError | undefined>();
+
+	const player = usePlayer();
+	const playModeState = useMemo<[PlayMode, (mode: PlayMode) => void]>(
+		() => [
+			playMode,
+			(mode) => {
+				// changing the mode reloads the video, restart it where we are now
+				setStart(Math.round(player.currentTime).toString());
+				setPlayMode(mode);
+			},
+		],
+		[playMode, player, setStart],
+	);
 
 	const source = useMemo<Source>(
 		() => ({
@@ -92,7 +105,7 @@ export const Player = () => {
 				mimeType:
 					playMode === "direct"
 						? info?.mimeCodec?.replace("x-matroska", "mp4")
-						: "application/vnd.apple.mpegurl",
+						: "application/x-mpegURL",
 				headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
 			},
 			startTime: start ? Number.parseInt(start, 10) : data?.progress.time,
@@ -145,12 +158,21 @@ export const Player = () => {
 		[apiUrl, slug, playMode, info, authToken, start, data, title, presign],
 	);
 
-	const player = usePlayer();
 	const presignReady = !authToken || !!presign;
 	useEffect(() => {
 		if (!presignReady) return;
+		if (
+			Platform.OS !== "web" &&
+			(player.castStatus === "connected" ||
+				player.castStatus === "connecting") &&
+			(!data || player.source?.castId === source.castId)
+		) {
+			// do not re-set the source when casting the correct content,
+			// it would restart playback
+			return;
+		}
 		setPlayerSource(player, source);
-	}, [source, player, presignReady]);
+	}, [source, player, presignReady, data]);
 
 	// When leaving the watch screen, unload the player unless it is casting (the
 	// mini-player then keeps driving the receiver).
@@ -176,73 +198,8 @@ export const Player = () => {
 		setStopCast(undefined);
 	}, [stopCast, castStatus, player, setStopCast]);
 
-	return (
-		<View className="flex-1 bg-black">
-			<Head
-				title={title}
-				description={entry?.description}
-				image={data?.show?.thumbnail?.high}
-			/>
-			<Stack.Screen
-				options={{
-					headerShown: false,
-					navigationBarHidden: true,
-					statusBarHidden: true,
-					orientation: "landscape",
-					contentStyle: { paddingLeft: 0, paddingRight: 0 },
-				}}
-			/>
-			<PlayModeContext.Provider value={playModeState}>
-				<PlayerContent
-					data={data}
-					info={info}
-					entry={entry}
-					slug={slug}
-					setSlug={setSlug}
-					setStart={setStart}
-					playMode={playMode}
-					setPlayMode={playModeState[1]}
-					playbackError={playbackError}
-					setPlaybackError={setPlaybackError}
-				/>
-			</PlayModeContext.Provider>
-			{playbackError && (
-				<ErrorPopup
-					message={playbackError.message}
-					dismiss={() => setPlaybackError(undefined)}
-				/>
-			)}
-		</View>
-	);
-};
-
-const PlayerContent = ({
-	data,
-	info,
-	entry,
-	slug,
-	setSlug,
-	setStart,
-	playMode,
-	setPlayMode,
-	playbackError,
-	setPlaybackError,
-}: {
-	data?: FullVideo;
-	info?: VideoInfo;
-	entry?: FullVideo["entries"][number];
-	slug: string;
-	setSlug: (slug: string) => void;
-	setStart: (start: string | undefined) => void;
-	playMode: PlayMode;
-	setPlayMode: (mode: PlayMode) => void;
-	playbackError?: KyooError;
-	setPlaybackError: (error: KyooError | undefined) => void;
-}) => {
 	const router = useRouter();
 	const { t } = useTranslation();
-	const player = usePlayer();
-	const [entriesMenuOpen, setEntriesMenuOpen] = useState(false);
 
 	const onEnd = () => {
 		if (data?.next) player.playNext();
@@ -285,6 +242,87 @@ const PlayerContent = ({
 		setStart("0");
 		setSlug(data.next.video);
 	});
+
+	const remote =
+		Platform.OS !== "web" &&
+		(castStatus === "connected" || castStatus === "connecting");
+
+	return (
+		<View className="flex-1 bg-black">
+			<Head
+				title={title}
+				description={entry?.description}
+				image={data?.show?.thumbnail?.high}
+			/>
+			<Stack.Screen
+				options={{
+					headerShown: false,
+					navigationBarHidden: !remote,
+					statusBarHidden: !remote,
+					orientation: remote ? "default" : "landscape",
+					contentStyle: { paddingLeft: 0, paddingRight: 0 },
+				}}
+			/>
+			{remote ? (
+				<Remote
+					showHref={data?.show?.href}
+					name={data?.show?.name ?? data?.path}
+					poster={data ? (data.show?.poster ?? null) : undefined}
+					subName={
+						entry
+							? [entryDisplayNumber(entry), entry.name]
+									.filter((x) => x)
+									.join(" - ")
+							: data?.path
+					}
+					chapters={info?.chapters ?? []}
+					hasPrev={!!data?.previous}
+					hasNext={!!data?.next}
+				/>
+			) : (
+				<PlayModeContext.Provider value={playModeState}>
+					<PlayerContent
+						data={data}
+						info={info}
+						entry={entry}
+						playMode={playMode}
+						setPlayMode={playModeState[1]}
+						playbackError={playbackError}
+						setPlaybackError={setPlaybackError}
+						seekEnd={onEnd}
+					/>
+				</PlayModeContext.Provider>
+			)}
+			{playbackError && (
+				<ErrorPopup
+					message={playbackError.message}
+					dismiss={() => setPlaybackError(undefined)}
+				/>
+			)}
+		</View>
+	);
+};
+
+const PlayerContent = ({
+	data,
+	info,
+	entry,
+	playMode,
+	setPlayMode,
+	playbackError,
+	setPlaybackError,
+	seekEnd,
+}: {
+	data?: FullVideo;
+	info?: VideoInfo;
+	entry?: FullVideo["entries"][number];
+	playMode: PlayMode;
+	setPlayMode: (mode: PlayMode) => void;
+	playbackError?: KyooError;
+	setPlaybackError: (error: KyooError | undefined) => void;
+	seekEnd: () => void;
+}) => {
+	const [entriesMenuOpen, setEntriesMenuOpen] = useState(false);
 
 	useKeyboard();
 
@@ -336,7 +374,7 @@ const PlayerContent = ({
 				chapters={info?.chapters ?? []}
 				hasPrev={!!data?.previous}
 				hasNext={!!data?.next}
-				seekEnd={onEnd}
+				seekEnd={seekEnd}
 				onOpenEntriesMenu={
 					data?.show?.kind === "serie"
 						? () => setEntriesMenuOpen(true)

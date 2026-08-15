@@ -7,6 +7,7 @@ import {
 	createContext,
 	type ReactNode,
 	useContext,
+	useEffect,
 	useRef,
 	useState,
 } from "react";
@@ -19,6 +20,7 @@ import {
 } from "react-native-safe-area-context";
 import { Portal } from "react-native-teleport";
 import { H6, IconButton, P, tooltip } from "~/primitives";
+import { setPlayerSource } from "~/ui/player/imperative";
 import { cn } from "~/utils";
 
 // no way to read native tabs height: github.com/software-mansion/react-native-screens#3627
@@ -61,13 +63,21 @@ export const MeasureTabBar = () => {
 
 export const MiniPlayer = () => {
 	const pathname = usePathname();
+	const player = usePlayer();
 	const castStatus = usePlayerState("castStatus");
+	const source = usePlayerState("source");
 
-	if (
-		!(castStatus === "connected" || castStatus === "connecting") ||
-		pathname.startsWith("/watch")
-	)
-		return null;
+	const casting = castStatus === "connected" || castStatus === "connecting";
+	const onWatch = pathname.startsWith("/watch");
+
+	// ending a cast hands the playback back to the local player. outside of the
+	// watch screen that means playing with no ui at all, drop the media instead.
+	useEffect(() => {
+		if (Platform.OS === "web") return;
+		if (!casting && !onWatch && source) setPlayerSource(player, undefined);
+	}, [casting, onWatch, source, player]);
+
+	if (!casting || !source || onWatch) return null;
 
 	return <MiniPlayerInner />;
 };
@@ -129,19 +139,18 @@ const MiniPlayerInner = () => {
 							{...tooltip(t("miniPlayer.open"))}
 						/>
 					)}
-					<IconButton
-						icon={CastConnected}
-						// Tearing down the cast requires the player's media tech, which
-						// only exists while the watch screen (OmniView) is mounted. Go
-						// back there first and let it stop the cast once it is live.
-						onPress={() =>
-							videoId
-								? router.push(`/watch/${videoId}?stopCast=true`)
-								: player.toggleCastStatus()
-						}
-						iconClassName={"fill-slate-200"}
-						{...tooltip(t("miniPlayer.stop"))}
-					/>
+					{Platform.OS === "web" && (
+						<IconButton
+							icon={CastConnected}
+							onPress={() =>
+								videoId
+									? router.push(`/watch/${videoId}?stopCast=true`)
+									: player.toggleCastStatus()
+							}
+							iconClassName={"fill-slate-200"}
+							{...tooltip(t("miniPlayer.stop"))}
+						/>
+					)}
 				</View>
 			</View>
 		</Portal>

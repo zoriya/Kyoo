@@ -29,6 +29,7 @@ const PlayerProvider = ({ children }: { children: ReactNode }) => {
 			cast={{
 				receiverApplicationId:
 					process.env.EXPO_PUBLIC_CAST_APPLICATION_ID ?? "D8FB0FC1",
+				notificationUrl: "kyoo:///remote",
 			}}
 			showNotification
 		>

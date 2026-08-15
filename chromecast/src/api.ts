@@ -6,6 +6,7 @@ export type VideoInfo = {
 		language?: string;
 	}[];
 	fonts: string[];
+	duration: number | null;
 };
 
 export const withPresign = (url: string, presign?: string): string => {
@@ -46,6 +47,7 @@ export const fetchVideoInfo = async (
 			link: string | null;
 		}[];
 		fonts?: string[];
+		duration?: number | null;
 	};
 
 	return {
@@ -66,6 +68,7 @@ export const fetchVideoInfo = async (
 		fonts: (data.fonts ?? []).map((f) =>
 			withPresign(new URL(f, apiUrl).href, presign),
 		),
+		duration: data.duration ?? null,
 	};
 };
 

@@ -303,6 +303,10 @@
 		"open": "Open player",
 		"stop": "Stop casting"
 	},
+	"remote": {
+		"rewind": "Rewind 10 seconds",
+		"forward": "Forward 10 seconds"
+	},
 	"search": {
 		"empty": "No result found. Try a different query."
 	},

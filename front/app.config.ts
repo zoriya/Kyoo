@@ -65,6 +65,7 @@ export const expo: ExpoConfig = {
 			},
 		],
 		"react-native-omni",
+		"./plugins/withNotificationIcon",
 		[
 			"react-native-localization-settings",
 			{

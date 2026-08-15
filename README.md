@@ -9,7 +9,7 @@ Kyoo does not have a plugin system and aim to have every features built-in (see 
 
 ![Kyoo in Action](https://raw.githubusercontent.com/zoriya/kyoo/screens/home.webp)
 
-## 🌐 Getting Started
+## Getting Started
 
 - **[Installation](./INSTALLING.md):** Basic installation guidelines, how to start Kyoo, enable OIDC or hardware transcoding.
 - **[Join the discord](https://discord.gg/E6Apw3aFaA):** Ask questions, talk about the development, feature you might want or bugs you might encounter.
@@ -18,17 +18,19 @@ Kyoo does not have a plugin system and aim to have every features built-in (see 
 
 [![](https://discord.com/api/guilds/1216460898139635753/widget.png?style=banner2)](https://discord.gg/zpA74Qpvj5)
 
-## 🚀 Features
+## Features
 
-- **Dynamic Transcoding:** Transcode your media to any quality, change on the fly with auto quality, and seek instantly without waiting for the transcoder.
+- **Dynamic Transcoding:** Transcode to any quality, support ABR (automatic quality switching based on network), even with original quality.
+
+- **No folder structure**: Kyoo is there to help you manage your medias, we do not require you to already have a well organized media library. Bad naming, everything in the same directory, weird anime names, everything works out of the box.
 
 - **Video Preview Thumbnails:** Simply hover the video's progress bar and see a preview of the video.
 
+- **Vlc backed player**: On android (and android tv soon), we use VLC to support as many codecs as possible (you can use exoplayer if you want to too).
+
 - **Intro/Credit detection:** Automatically detect intro/credits with audio fingerprinting (or chapter title matching).
 
-- **Enhanced Subtitle Support:** Subtitles are important, Kyoo supports PGS/VODSUB and SSA/ASS and uses the video's embedded fonts when available.
-
-- **Anime Name Parsing**: Kyoo will match weird anime names (like `[Some-Stuffs] Jojo's Bizarre Adventure Stone Ocean 24 (1920x1080 Blu-Ray Opus) [2750810F].mkv`) without issue.
+- **Subtitle Support:** Supports PGS/VODSUB and SSA/ASS and uses the video's embedded fonts when available. Even on web or chromecast.
 
 - **Helm Chart:** Deploy Kyoo to your Kubernetes cluster today!  There is an official Helm chart.  Multiple replicas is a WIP!
 
@@ -38,33 +40,35 @@ Kyoo does not have a plugin system and aim to have every features built-in (see 
 
 - ~**Download and Offline Support:** Download videos to watch them without internet access, your progress will automatically be synced next time your devices goes online.~ (soon, not reimplemented in v5 yet)
 
-## 📺 Clients
+## Clients
 
-Kyoo currently supports Web and ~Android clients~ (soon, not yet in v5), with additional platforms being thought about.
+Currently supported clients:
+ - [x] Web
+ - [x] Android
+ - [ ] Android TV (planned, hopefully soon)
+ - [x] Chromecast
 
-Don't see your client? Kyoo is focused on adding features, but welcomes contributors! The frontend is built with React-Native and Expo. Come hang and develop with us on Discord.
+Kyoo is being developed by one person only, as such only a few clients are available. If you want to see more please contribute ; the front is written in react-native so maintaining more clients isn't a huge burden but adapting the code so the native experience is good still takes time.
 
-Support for Apple devices (iOS, tvOS) is not currently planned due to buying hardware and yearly developer fee (~$100).
-
-## 📖 Translations
+## Translations
 
 If Kyoo is not available on your language, you can use [weblate](https://hosted.weblate.org/engage/kyoo/) to add translations easily.
 
 [![Translation status](https://hosted.weblate.org/widget/kyoo/kyoo/multi-auto.svg)](https://hosted.weblate.org/engage/kyoo/)
 
-## 📜 Why another media-browser?
+## Why another media-browser?
 
-From a technical standpoint, both Jellyfin and Plex lean on SQLite and confine everything within a single container, Kyoo takes a different route. We're not afraid to bring in additional containers when it makes sense, as seen with our transcoder.
+I started this project while Jellyfin wasn't a thing yet. At first it was my playground to try stuffs ; now it's a project i use daily and want it to be good.
 
-Kyoo embraces the “setup once, forget about it” philosophy. Unlike Plex and Jellyfin, we don't burden you with manual file renaming or specific folder structures. Kyoo seamlessly works with files straight from your download directory, minimizing the maintenance headache for server admins.
+Kyoo has a relatively low tech-depth (v5 rewrote most of the code) and targets servers (postgres instead of sqlite, multiple services...). Technically, the project is split into multiple services that can work separately. This can allow third party apps to use kyoo's services (for example [Meelo](https://github.com/Arthi-chaud/Meelo/) uses kyoo's transcoder) or writing integrations/scripts for kyoo is easy.
 
-Kyoo narrows its focus to movies, TV shows, and anime streaming. No music, e-books, or games – just pure cinematic delight.
+Philosophically, kyoo's goal is to be low maintenance. There is few server-wide options and no directory structure to follow ; setup should be done in 5min and you will not have to clean-up your medias. You could plug kyoo into your download directory if you wanted kyoo would work perfectly fine with that.
 
-## 🔗 Live Demo
+## Live Demo
 
-Curious to see Kyoo in action? Check out our live demo featuring copyright-free movies at [kyoo.zoriya.dev](https://kyoo.zoriya.dev). Special thanks to the Blender Studio for providing open-source movies available for all.
+We have a live demo at [kyoo.zoriya.dev](https://kyoo.zoriya.dev) with open source movies. Special thanks to the Blender Studio for providing open-source movies available for all.
 
-## 👀 Screens
+## Screens
 
 ![Serie](https://raw.githubusercontent.com/zoriya/kyoo/screens/serie.webp)
 
@@ -81,6 +85,5 @@ Curious to see Kyoo in action? Check out our live demo featuring copyright-free 
 		width="350"
 	/>
 </p>
-Ready to elevate your streaming experience? Dive into Kyoo now! 🎬🎉
 
 <!-- vim: set wrap: -->
