@@ -16,6 +16,7 @@ import {
 	P,
 	Poster,
 	Skeleton,
+	Spinner,
 	tooltip,
 } from "~/primitives";
 import { useFetch } from "~/query";
@@ -49,6 +50,7 @@ export const Remote = ({
 	const router = useRouter();
 	const player = usePlayer();
 	const castStatus = usePlayerState("castStatus");
+	const status = usePlayerState("status");
 
 	const [slug, setSlug] = useQueryState<string>("slug", undefined!);
 	const { data: info } = useFetch(Info.infoQuery(slug));
@@ -149,10 +151,20 @@ export const Remote = ({
 					iconClassName="h-8 w-8 fill-slate-200 dark:fill-slate-200"
 					{...tooltip(t("remote.rewind"))}
 				/>
-				<PlayButton
-					className="mx-4 bg-accent p-4"
-					iconClassName="h-12 w-12 fill-slate-200 dark:fill-slate-200"
-				/>
+				<View className="mx-4 items-center justify-center p-1">
+					<PlayButton
+						className="bg-accent p-4"
+						iconClassName="h-12 w-12 fill-slate-200 dark:fill-slate-200"
+					/>
+					{status === "loading" && (
+						<View className="pointer-events-none absolute inset-0 items-center justify-center">
+							<Spinner
+								size={88}
+								className="border-slate-200/25 border-t-slate-200"
+							/>
+						</View>
+					)}
+				</View>
 				<IconButton
 					icon={Forward10}
 					onPress={() => player.seekBy(10)}
