@@ -1,6 +1,7 @@
 package main
 
 import (
+	"compress/gzip"
 	"context"
 	"fmt"
 	"log/slog"
@@ -119,6 +120,14 @@ func main() {
 	instrument(e)
 
 	e.Use(middleware.Recover())
+
+	// hls playlists are very repetitive and can get pretty big (especially with presign)
+	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
+		Level: gzip.BestSpeed,
+		Skipper: func(c *echo.Context) bool {
+			return !strings.HasSuffix(c.Request().URL.Path, ".m3u8")
+		},
+	}))
 
 	ignorepath := []string{
 		"/video/health",

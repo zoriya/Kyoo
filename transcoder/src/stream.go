@@ -549,10 +549,13 @@ func (ts *Stream) GetInit(ctx context.Context) (string, error) {
 }
 
 func (ts *Stream) GetIndex(_ context.Context, query string) (string, error) {
+	length, is_done := ts.keyframes.Length()
+	var index strings.Builder
+	index.Grow(int(length) * (len(query) + 40))
 	// playlist type is event since we can append to the list if Keyframe.IsDone is false.
 	// start time offset makes the stream start at 0s instead of ~3segments from the end (requires version 6 of hls)
 	// version 7 is required for fMP4 segments (#EXT-X-MAP referencing an init segment).
-	index := fmt.Sprintf(`#EXTM3U
+	fmt.Fprintf(&index, `#EXTM3U
 #EXT-X-VERSION:7
 #EXT-X-PLAYLIST-TYPE:EVENT
 #EXT-X-START:TIME-OFFSET=0
@@ -561,20 +564,25 @@ func (ts *Stream) GetIndex(_ context.Context, query string) (string, error) {
 #EXT-X-INDEPENDENT-SEGMENTS
 #EXT-X-MAP:URI="init.mp4?%s"
 `, query)
-	length, is_done := ts.keyframes.Length()
 
-	for segment := int32(0); segment < length-1; segment++ {
-		index += fmt.Sprintf("#EXTINF:%.6f\n", ts.keyframes.Get(segment+1)-ts.keyframes.Get(segment))
-		index += fmt.Sprintf("segment-%d.mp4?%s\n", segment, query)
+	// while the keyframe analysis runs, run() keeps the last two keyframes as padding
+	// so those segments can't be encoded yet. don't announce them
+	last := length - 1
+	if !is_done {
+		last = length - 2
+	}
+	for segment := int32(0); segment < last; segment++ {
+		fmt.Fprintf(&index, "#EXTINF:%.6f\n", ts.keyframes.Get(segment+1)-ts.keyframes.Get(segment))
+		fmt.Fprintf(&index, "segment-%d.mp4?%s\n", segment, query)
 	}
 	// do not forget to add the last segment between the last keyframe and the end of the file
 	// if the keyframes extraction is not done, do not bother to add it, it will be retrived on the next index retrival
 	if is_done && length > 0 {
-		index += fmt.Sprintf("#EXTINF:%.6f\n", float64(ts.file.Info.Duration)-ts.keyframes.Get(length-1))
-		index += fmt.Sprintf("segment-%d.mp4?%s\n", length-1, query)
-		index += `#EXT-X-ENDLIST`
+		fmt.Fprintf(&index, "#EXTINF:%.6f\n", float64(ts.file.Info.Duration)-ts.keyframes.Get(length-1))
+		fmt.Fprintf(&index, "segment-%d.mp4?%s\n", length-1, query)
+		index.WriteString(`#EXT-X-ENDLIST`)
 	}
-	return index, nil
+	return index.String(), nil
 }
 
 func (ts *Stream) GetSegment(ctx context.Context, segment int32) (string, error) {
