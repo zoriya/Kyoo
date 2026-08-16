@@ -13,6 +13,7 @@ const {
 	HlsSegmentFormat,
 	HlsVideoSegmentFormat,
 	GenericMediaMetadata,
+	StreamType,
 	Track,
 	TrackType,
 	TextTrackType,
@@ -78,6 +79,7 @@ export class KyooReceiver {
 	);
 	#progress = new ProgressObserver(this.#player);
 	#idleTimer: ReturnType<typeof setTimeout> | undefined;
+	#duration: number | null = null;
 
 	start(): void {
 		this.#ui.hideCafChrome();
@@ -163,6 +165,12 @@ export class KyooReceiver {
 		const strip = (media: messages.MediaInformation) => {
 			const data = asObject(media.customData) as KyooCastData | null;
 			const stripped = copy(media);
+			// our playlist is still growing while the transcode runs (EVENT type, no
+			// endlist), so shaka calls the media live and its duration keeps moving.
+			// senders believing that lose their seekbar (android's media notification
+			// has none on a live stream), tell them what we really play.
+			stripped.streamType = StreamType.BUFFERED;
+			if (this.#duration) stripped.duration = this.#duration;
 			stripped.contentUrl =
 				data?.apiUrl && data?.slug
 					? `${data.apiUrl}/api/videos/${data.slug}/master.m3u8`
@@ -193,6 +201,7 @@ export class KyooReceiver {
 	): Promise<messages.LoadRequestData> => {
 		const data = (asObject(request.media?.customData) as KyooCastData) ?? {};
 		clearTimeout(this.#idleTimer);
+		this.#duration = null;
 
 		this.#ui.clearError();
 		this.#ui.dismissSplash();
@@ -256,13 +265,12 @@ export class KyooReceiver {
 			}
 		}
 
-		let duration: number | null = null;
 		if (data.apiUrl && data.slug) {
 			try {
 				const info = await fetchVideoInfo(data.apiUrl, data.slug, data.presign);
-				duration = info.duration;
-				this.#ui.setDuration(duration);
-				if (request.media && duration) request.media.duration = duration;
+				this.#duration = info.duration;
+				this.#ui.setDuration(info.duration);
+				if (request.media && info.duration) request.media.duration = info.duration;
 				this.#subtitles.setFonts(info.fonts);
 				if (request.media) {
 					request.media.tracks = info.subtitles.map((sub, i) => {
@@ -300,7 +308,7 @@ export class KyooReceiver {
 					this.#progress.load(data, {
 						videoId: meta.videoId,
 						entryId: meta.entryId,
-						duration,
+						duration: this.#duration,
 					});
 				}
 				if (request.media) {
