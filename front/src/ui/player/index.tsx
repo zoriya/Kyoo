@@ -202,8 +202,12 @@ export const Player = () => {
 	const { t } = useTranslation();
 
 	const onEnd = () => {
-		if (data?.next) player.playNext();
-		else if (data?.show?.href) router.replace(data.show.href);
+		if (data?.next) {
+			player.playNext();
+			return;
+		}
+		setPlayerSource(player, undefined);
+		if (data?.show?.href) router.replace(data.show.href);
 	};
 
 	useProgressObserver(
