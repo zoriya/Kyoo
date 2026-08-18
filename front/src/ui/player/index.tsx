@@ -278,6 +278,7 @@ export const Player = () => {
 					chapters={info?.chapters ?? []}
 					hasPrev={!!data?.previous}
 					hasNext={!!data?.next}
+					seekEnd={onEnd}
 				/>
 			) : (
 				<PlayModeContext.Provider value={playModeState}>
