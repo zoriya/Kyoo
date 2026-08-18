@@ -8,7 +8,7 @@ export const expo: ExpoConfig = {
 	name: IS_DEV ? "Kyoo Dev" : "Kyoo",
 	slug: "kyoo",
 	scheme: "kyoo",
-	version: "1.0.0",
+	version: process.env.APP_VERSION || "1.0.0",
 	platforms: ["web", "ios", "android"],
 	orientation: "default",
 	icon: "./public/favicon-96x96-dark.png",
