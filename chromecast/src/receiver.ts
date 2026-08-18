@@ -199,7 +199,7 @@ export class KyooReceiver {
 		this.#ui.clearMetadata();
 		this.#ui.setPaused(false);
 		this.#ui.setLoading(true);
-		this.#ui.show({ sticky: true });
+		this.#ui.show();
 
 		if (request.media && data.apiUrl && data.slug) {
 			request.media.contentUrl = withPresign(
@@ -261,6 +261,8 @@ export class KyooReceiver {
 			try {
 				const info = await fetchVideoInfo(data.apiUrl, data.slug, data.presign);
 				duration = info.duration;
+				this.#ui.setDuration(duration);
+				if (request.media && duration) request.media.duration = duration;
 				this.#subtitles.setFonts(info.fonts);
 				if (request.media) {
 					request.media.tracks = info.subtitles.map((sub, i) => {
