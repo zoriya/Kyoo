@@ -22,6 +22,7 @@ import { useFetch } from "~/query";
 import { Info } from "~/ui/info";
 import { CastButton, PlayButton } from "~/ui/player/controls/misc";
 import { ProgressBar, toTimerString } from "~/ui/player/controls/progress";
+import { SkipChapterButton } from "~/ui/player/controls/skip-chapter";
 import { AudioMenu, SubtitleMenu } from "~/ui/player/controls/tracks-menu";
 import { cn, useQueryState } from "~/utils";
 
@@ -33,6 +34,7 @@ export const Remote = ({
 	chapters,
 	hasPrev,
 	hasNext,
+	seekEnd,
 }: {
 	showHref?: string;
 	name?: string;
@@ -41,6 +43,7 @@ export const Remote = ({
 	chapters: Chapter[];
 	hasPrev: boolean;
 	hasNext: boolean;
+	seekEnd: () => void;
 }) => {
 	const { t } = useTranslation();
 	const router = useRouter();
@@ -107,6 +110,15 @@ export const Remote = ({
 						{name}
 					</P>
 				) : null}
+			</View>
+
+			<View className="items-end px-4">
+				<SkipChapterButton
+					chapters={chapters}
+					isVisible
+					seekEnd={seekEnd}
+					className="mt-2"
+				/>
 			</View>
 
 			<View className="px-4 pt-4">

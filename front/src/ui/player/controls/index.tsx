@@ -90,6 +90,7 @@ export const Controls = ({
 				chapters={chapters}
 				isVisible={controlsVisible}
 				seekEnd={seekEnd}
+				className="absolute right-safe bottom-2/10 m-8"
 			/>
 		</View>
 	);
