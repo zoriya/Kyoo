@@ -41,6 +41,14 @@ export const TouchControls = ({
 		}, 2500);
 	}, []);
 
+	// whatever forced the controls open (a menu, a seek) is over: give back the usual
+	// grace period instead of hiding right away.
+	const wasForced = useRef(forceShow);
+	useEffect(() => {
+		if (wasForced.current && !forceShow) show();
+		wasForced.current = forceShow;
+	}, [forceShow, show]);
+
 	// On mouse move
 	useEffect(() => {
 		if (Platform.OS !== "web") return;
