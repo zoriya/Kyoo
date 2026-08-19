@@ -14,10 +14,12 @@ export const ProgressBar = ({
 	chapters,
 	seek,
 	setSeek,
+	setSeeking,
 }: {
 	chapters?: Chapter[];
 	seek: number | null;
 	setSeek: (v: number | null) => void;
+	setSeeking?: (v: boolean) => void;
 }) => {
 	const [slug] = useQueryState<string>("slug", undefined!);
 	const { data } = useFetch(Info.infoQuery(slug));
@@ -43,6 +45,8 @@ export const ProgressBar = ({
 				subtleProgress={buffer}
 				max={data?.durationSeconds}
 				startSeek={() => {
+					// the controls must not auto-hide mid drag, it would unmount the slider
+					setSeeking?.(true);
 					player.pause();
 				}}
 				setProgress={setSeek}
@@ -50,6 +54,7 @@ export const ProgressBar = ({
 					if (seek) seekPlayerTo(player, seek);
 					setTimeout(() => player.play(), 10);
 					setSeek(null);
+					setSeeking?.(false);
 				}}
 				onHover={(progress, layout) => {
 					setHoverProgress(progress);

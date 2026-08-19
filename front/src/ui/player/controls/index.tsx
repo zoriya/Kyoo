@@ -37,6 +37,7 @@ export const Controls = ({
 }) => {
 	const [hover, setHover] = useState(false);
 	const [menuOpened, setMenuOpened] = useState(false);
+	const [seeking, setSeeking] = useState(false);
 	const [controlsVisible, setControlsVisible] = useState(false);
 
 	const hoverControls = {
@@ -57,7 +58,7 @@ export const Controls = ({
 	return (
 		<View className="absolute inset-0">
 			<TouchControls
-				forceShow={hover || menuOpened || forceShow}
+				forceShow={hover || menuOpened || seeking || forceShow}
 				onVisibilityChange={setControlsVisible}
 				className="absolute inset-0"
 			>
@@ -82,6 +83,7 @@ export const Controls = ({
 					hasNext={hasNext}
 					onOpenEntriesMenu={onOpenEntriesMenu}
 					setMenu={setMenu}
+					setSeeking={setSeeking}
 					className="absolute bottom-0 w-full bg-slate-900/50 px-safe pb-safe"
 					{...hoverControls}
 				/>
