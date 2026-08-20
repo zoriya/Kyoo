@@ -1,4 +1,7 @@
+import FastForward from "@material-symbols/svg-400/rounded/fast_forward-fill.svg";
+import FastRewind from "@material-symbols/svg-400/rounded/fast_rewind-fill.svg";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
 	type GestureResponderEvent,
 	Platform,
@@ -8,7 +11,7 @@ import {
 	type ViewProps,
 } from "react-native";
 import { usePlayer, usePlayerState } from "react-native-omni";
-import { isTouchDevice } from "~/primitives";
+import { Icon, isTouchDevice, P } from "~/primitives";
 import { cn } from "~/utils";
 import { toggleFullscreen } from "./misc";
 
@@ -21,6 +24,7 @@ export const TouchControls = ({
 	forceShow?: boolean;
 	onVisibilityChange?: (isVisible: boolean) => void;
 } & ViewProps) => {
+	const { t } = useTranslation();
 	const player = usePlayer();
 	const playing = usePlayerState("isPlaying");
 
@@ -63,6 +67,9 @@ export const TouchControls = ({
 
 	const playerWidth = useRef<number | null>(null);
 
+	const [seeked, setSeeked] = useState(0);
+	const seekedTimeout = useRef<NodeJS.Timeout | number | null>(null);
+
 	return (
 		<View {...props}>
 			<DoublePressable
@@ -85,8 +92,21 @@ export const TouchControls = ({
 					if (Number.isNaN(player.duration) || !playerWidth.current) return;
 
 					const x = e.nativeEvent.locationX ?? e.nativeEvent.pageX;
-					if (x < playerWidth.current * 0.33) player.seekBy(-10);
-					if (x > playerWidth.current * 0.66) player.seekBy(10);
+					const seek =
+						x < playerWidth.current * 0.33
+							? -10
+							: x > playerWidth.current * 0.66
+								? 10
+								: 0;
+					if (!seek) return true;
+
+					player.seekBy(seek);
+					setSeeked((old) => (old * seek > 0 ? old : 0) + seek);
+					if (seekedTimeout.current) clearTimeout(seekedTimeout.current);
+					seekedTimeout.current = setTimeout(() => {
+						seekedTimeout.current = null;
+						setSeeked(0);
+					}, 800);
 					// Do not reset press count, you can continue to seek by pressing again.
 					return true;
 				}}
@@ -102,6 +122,24 @@ export const TouchControls = ({
 					!shouldShow && "cursor-none!",
 				)}
 			/>
+			{seeked !== 0 && (
+				<View
+					className={cn(
+						"pointer-events-none absolute inset-y-0 w-1/3 items-center justify-center",
+						seeked < 0 ? "left-0" : "right-0",
+					)}
+				>
+					<View className="items-center rounded-full bg-slate-900/40 p-4">
+						<Icon
+							icon={seeked < 0 ? FastRewind : FastForward}
+							className="fill-slate-200 dark:fill-slate-200"
+						/>
+						<P className="text-slate-200 dark:text-slate-200">
+							{t("player.seek", { seconds: Math.abs(seeked) })}
+						</P>
+					</View>
+				</View>
+			)}
 			{shouldShow && children}
 		</View>
 	);
