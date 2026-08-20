@@ -13,7 +13,7 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, StyleSheet, View } from "react-native";
-import { usePlayer, usePlayerState } from "react-native-omni";
+import { type Source, usePlayer, usePlayerState } from "react-native-omni";
 import {
 	useSafeAreaFrame,
 	useSafeAreaInsets,
@@ -79,10 +79,10 @@ export const MiniPlayer = () => {
 
 	if (!casting || !source || onWatch) return null;
 
-	return <MiniPlayerInner />;
+	return <MiniPlayerInner source={source} />;
 };
 
-const MiniPlayerInner = () => {
+const MiniPlayerInner = ({ source }: { source: Source }) => {
 	const { t } = useTranslation();
 	const router = useRouter();
 	const player = usePlayer();
@@ -94,7 +94,7 @@ const MiniPlayerInner = () => {
 	const current = usePlayerState("currentTime");
 	const duration = usePlayerState("duration");
 
-	const videoId = player.source?.src?.uri.match(/\/videos\/([^/?]+)\//)?.[1];
+	const videoId = source.src?.uri.match(/\/videos\/([^/?]+)\//)?.[1];
 
 	const inTabs = segments.includes("(tabs)");
 	const bottom = (inTabs ? tabBarHeight : insets.bottom) + 8;
@@ -125,10 +125,10 @@ const MiniPlayerInner = () => {
 					/>
 					<View className="min-w-0 flex-1">
 						<H6 numberOfLines={1} className="text-slate-200">
-							{player.source?.metadata?.title}
+							{source.metadata?.title}
 						</H6>
 						<P numberOfLines={1} className="text-slate-400 text-xs">
-							{player.source?.metadata?.artist}
+							{source.metadata?.artist}
 						</P>
 					</View>
 					{videoId && (

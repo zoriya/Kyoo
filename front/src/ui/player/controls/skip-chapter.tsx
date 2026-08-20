@@ -13,10 +13,12 @@ export const SkipChapterButton = ({
 	seekEnd,
 	chapters,
 	isVisible,
+	className,
 }: {
 	seekEnd: () => void;
 	chapters: Chapter[];
 	isVisible: boolean;
+	className?: string;
 }) => {
 	const { t } = useTranslation();
 	const account = useAccount();
@@ -81,10 +83,7 @@ export const SkipChapterButton = ({
 				}
 				seekPlayerTo(player, chapter.endTime);
 			}}
-			className={cn(
-				"absolute right-safe bottom-2/10 m-8",
-				"z-20 bg-slate-900/70 px-4 py-2",
-			)}
+			className={cn("z-20 bg-slate-900/70 px-4 py-2", className)}
 		>
 			<P
 				className={cn(

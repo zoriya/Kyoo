@@ -32,6 +32,7 @@ export const BottomControls = ({
 	hasPrev,
 	hasNext,
 	setMenu,
+	setSeeking,
 	onOpenEntriesMenu,
 	className,
 	...props
@@ -42,6 +43,7 @@ export const BottomControls = ({
 	hasPrev: boolean;
 	hasNext: boolean;
 	setMenu: (isOpen: boolean) => void;
+	setSeeking: (isSeeking: boolean) => void;
 	onOpenEntriesMenu?: () => void;
 } & ViewProps) => {
 	const [seek, setSeek] = useState<number | null>(null);
@@ -79,7 +81,12 @@ export const BottomControls = ({
 					) : (
 						<Skeleton className="h-8 w-1/5" />
 					))}
-				<ProgressBar chapters={chapters} seek={seek} setSeek={setSeek} />
+				<ProgressBar
+					chapters={chapters}
+					seek={seek}
+					setSeek={setSeek}
+					setSeeking={setSeeking}
+				/>
 				{bottomSeek ? (
 					<BottomScrubber seek={seek} chapters={chapters} />
 				) : (

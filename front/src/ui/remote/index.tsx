@@ -16,12 +16,14 @@ import {
 	P,
 	Poster,
 	Skeleton,
+	Spinner,
 	tooltip,
 } from "~/primitives";
 import { useFetch } from "~/query";
 import { Info } from "~/ui/info";
 import { CastButton, PlayButton } from "~/ui/player/controls/misc";
 import { ProgressBar, toTimerString } from "~/ui/player/controls/progress";
+import { SkipChapterButton } from "~/ui/player/controls/skip-chapter";
 import { AudioMenu, SubtitleMenu } from "~/ui/player/controls/tracks-menu";
 import { cn, useQueryState } from "~/utils";
 
@@ -33,6 +35,7 @@ export const Remote = ({
 	chapters,
 	hasPrev,
 	hasNext,
+	seekEnd,
 }: {
 	showHref?: string;
 	name?: string;
@@ -41,11 +44,13 @@ export const Remote = ({
 	chapters: Chapter[];
 	hasPrev: boolean;
 	hasNext: boolean;
+	seekEnd: () => void;
 }) => {
 	const { t } = useTranslation();
 	const router = useRouter();
 	const player = usePlayer();
 	const castStatus = usePlayerState("castStatus");
+	const status = usePlayerState("status");
 
 	const [slug, setSlug] = useQueryState<string>("slug", undefined!);
 	const { data: info } = useFetch(Info.infoQuery(slug));
@@ -109,6 +114,15 @@ export const Remote = ({
 				) : null}
 			</View>
 
+			<View className="items-end px-4">
+				<SkipChapterButton
+					chapters={chapters}
+					isVisible
+					seekEnd={seekEnd}
+					className="mt-2"
+				/>
+			</View>
+
 			<View className="px-4 pt-4">
 				<ProgressBar chapters={chapters} seek={seek} setSeek={setSeek} />
 				<View className="flex-row justify-between pt-1">
@@ -137,10 +151,20 @@ export const Remote = ({
 					iconClassName="h-8 w-8 fill-slate-200 dark:fill-slate-200"
 					{...tooltip(t("remote.rewind"))}
 				/>
-				<PlayButton
-					className="mx-4 bg-accent p-4"
-					iconClassName="h-12 w-12 fill-slate-200 dark:fill-slate-200"
-				/>
+				<View className="mx-4 items-center justify-center p-1">
+					<PlayButton
+						className="bg-accent p-4"
+						iconClassName="h-12 w-12 fill-slate-200 dark:fill-slate-200"
+					/>
+					{status === "loading" && (
+						<View className="pointer-events-none absolute inset-0 items-center justify-center">
+							<Spinner
+								size={88}
+								className="border-slate-200/25 border-t-slate-200"
+							/>
+						</View>
+					)}
+				</View>
 				<IconButton
 					icon={Forward10}
 					onPress={() => player.seekBy(10)}
