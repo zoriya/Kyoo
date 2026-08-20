@@ -147,10 +147,11 @@ export class KyooReceiver {
 					Command.QUEUE_PREV | Command.QUEUE_NEXT,
 				);
 		});
-
+		this.#context.setLastSenderDisconnectedHandler?.(() => {
+			console.log("[kyoo-receiver] last sender left, keeping the playback up");
+		});
 		const options = new cast.framework.CastReceiverOptions();
 		options.playbackConfig = this.#playbackConfig;
-		options.maxInactivity = 3600;
 		options.customNamespaces = {
 			[KYOO_NAMESPACE]: cast.framework.system.MessageType.JSON,
 		};
