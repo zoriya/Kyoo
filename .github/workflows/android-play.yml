@@ -1,0 +1,151 @@
+name: Google Play
+
+on:
+  workflow_dispatch:
+    inputs:
+      track:
+        description: Play track to publish to
+        type: choice
+        default: internal
+        options:
+          - internal
+          - alpha
+          - beta
+          - production
+      version-name:
+        description: Version name (defaults to the latest tag)
+        type: string
+        default: ""
+  workflow_call:
+    inputs:
+      track:
+        description: Play track to publish to (internal, alpha, beta or production)
+        type: string
+        default: production
+      version-name:
+        description: Version name shown on the store (usually the release tag)
+        type: string
+        default: ""
+
+concurrency:
+  group: android-play-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Build & publish AAB
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: ./front
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Resolve version
+        id: version
+        run: |
+          VERSION="${{ inputs.version-name }}"
+          if [ -z "$VERSION" ]; then
+            VERSION="$(git describe --tags --abbrev=0)"
+          fi
+          VERSION="${VERSION#v}"
+          echo "name=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Publishing $VERSION (versionCode ${{ github.run_number }})"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Cache Gradle
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('front/bun.lock') }}
+          restore-keys: gradle-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Generate native project
+        env:
+          ANDROID_VERSION_CODE: ${{ github.run_number }}
+          APP_VERSION: ${{ steps.version.outputs.name }}
+          EXPO_NO_TELEMETRY: "1"
+        run: bunx expo prebuild --platform android --no-install
+
+      - name: Setup signing
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        working-directory: ./front/android
+        run: |
+          if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "::error::Signing secrets are missing. Set ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS and ANDROID_KEY_PASSWORD." >&2
+            exit 1
+          fi
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/kyoo.jks"
+          # A bundle can't be signed after the fact (apksigner only handles apks),
+          # so we override the signing config expo generated with the upload key.
+          cat >> app/build.gradle <<'EOF'
+
+          android {
+              signingConfigs {
+                  upload {
+                      storeFile file(System.getenv("ANDROID_KEYSTORE_PATH"))
+                      storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                      keyAlias System.getenv("ANDROID_KEY_ALIAS")
+                      keyPassword System.getenv("ANDROID_KEY_PASSWORD")
+                  }
+              }
+              buildTypes {
+                  release {
+                      signingConfig signingConfigs.upload
+                  }
+              }
+              lint {
+                  checkReleaseBuilds false
+                  abortOnError false
+              }
+          }
+          EOF
+
+      - name: Build AAB
+        working-directory: ./front/android
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/kyoo.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: ./gradlew :app:bundleRelease --no-daemon --stacktrace
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: kyoo.aab
+          path: front/android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+
+      - name: Publish to Google Play
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: dev.zoriya.kyoo
+          releaseFiles: front/android/app/build/outputs/bundle/release/app-release.aab
+          releaseName: ${{ steps.version.outputs.name }}
+          track: ${{ inputs.track || 'internal' }}
+          status: completed
