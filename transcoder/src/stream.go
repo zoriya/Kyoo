@@ -476,10 +476,12 @@ func (ts *Stream) loadTimescale() (uint32, error) {
 
 // for some formats (m4a), ffmpeg doesn't flush before printing `segment ready`
 // so we can start reading an incomplete segment. retry a few times for those
-// files
+// files.
+// failing here is expensive (the segment is never marked ready, so clients hang
+// until they time out) while retrying only costs us a few ms, so be generous.
 func decodeSegmentFile(path string) (*mp4.File, []byte, error) {
 	var lastErr error
-	for attempt := 0; attempt < 20; attempt++ {
+	for attempt := 0; attempt < 50; attempt++ {
 		if attempt > 0 {
 			time.Sleep(20 * time.Millisecond)
 		}
@@ -488,10 +490,28 @@ func decodeSegmentFile(path string) (*mp4.File, []byte, error) {
 			return nil, nil, err
 		}
 		f, err := mp4.DecodeFile(bytes.NewReader(data))
-		if err == nil {
-			return f, data, nil
+		if err != nil {
+			lastErr = fmt.Errorf("decode segment %s: %w", path, err)
+			continue
 		}
-		lastErr = fmt.Errorf("decode segment %s: %w", path, err)
+		// an empty (or header-only) file decodes without any error but carries
+		// no fragment at all. this is the very same "ffmpeg did not flush yet"
+		// case as a decode error, so retry it too: bailing out here marks a
+		// perfectly fine segment as never-ready and strands every client
+		// waiting on it until their own timeout.
+		fragments := 0
+		for _, seg := range f.Segments {
+			for _, frag := range seg.Fragments {
+				if frag.Moof != nil && frag.Moof.Traf != nil && frag.Moof.Traf.Tfdt != nil {
+					fragments++
+				}
+			}
+		}
+		if fragments == 0 {
+			lastErr = fmt.Errorf("segment %s has no media fragment to rebase", path)
+			continue
+		}
+		return f, data, nil
 	}
 	return nil, nil, lastErr
 }
@@ -620,10 +640,34 @@ func (ts *Stream) GetSegment(ctx context.Context, segment int32) (string, error)
 			slog.InfoContext(ctx, "waiting for segment", "segment", segment, "distance", distance)
 		}
 
-		select {
-		case <-readyChan:
-		case <-time.After(60 * time.Second):
-			return "", errors.New("could not retrive the selected segment (timeout)")
+		// the head we count on can die without ever emitting our segment (it got
+		// killed, or the segment failed to finalize) and nobody would ever close
+		// the channel, so re-check for a live head instead of waiting once.
+		timeout := time.After(60 * time.Second)
+	wait:
+		for {
+			select {
+			case <-readyChan:
+				break wait
+			case <-timeout:
+				return "", errors.New("could not retrive the selected segment (timeout)")
+			case <-time.After(2 * time.Second):
+			}
+			ts.lock.RLock()
+			is_scheduled = false
+			for _, head := range ts.heads {
+				if head.segment <= segment && segment < head.end {
+					is_scheduled = true
+					break
+				}
+			}
+			ts.lock.RUnlock()
+			if !is_scheduled {
+				slog.InfoContext(ctx, "recreating dead head", "segment", segment)
+				if err := ts.run(ctx, segment); err != nil {
+					return "", err
+				}
+			}
 		}
 	}
 	ts.prerareNextSegements(ctx, segment)
