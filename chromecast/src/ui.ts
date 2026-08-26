@@ -225,10 +225,12 @@ export class ReceiverUi {
 			this.setLoading(e.isBuffering === true);
 		});
 		player.addEventListener(EventType.PLAYING, () => {
+			// the overlay is only up to show the pause, drop it as soon as it is gone
+			const wasPaused = !this.#el.paused.hidden;
 			this.setLoading(false);
 			this.setPaused(false);
 			this.clearError();
-			this.hideSoon();
+			this.hideSoon(wasPaused ? 300 : undefined);
 		});
 		// the receiver shows the indicator itself: it knows the pauses it asked
 		// for from the ones a sender did
@@ -268,11 +270,11 @@ export class ReceiverUi {
 		if (this.#hideTimer) clearTimeout(this.#hideTimer);
 	}
 
-	hideSoon(): void {
+	hideSoon(delay = 5_000): void {
 		if (this.#hideTimer) clearTimeout(this.#hideTimer);
 		this.#hideTimer = setTimeout(() => {
 			this.#el.overlay.style.opacity = "0";
-		}, 5000);
+		}, delay);
 	}
 
 	// Hide CAF's own controls/splash/logo/spinner so only our overlay shows; its
