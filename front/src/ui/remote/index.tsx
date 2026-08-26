@@ -4,6 +4,7 @@ import Replay10 from "@material-symbols/svg-400/rounded/replay_10-fill.svg";
 import SkipNext from "@material-symbols/svg-400/rounded/skip_next-fill.svg";
 import SkipPrevious from "@material-symbols/svg-400/rounded/skip_previous-fill.svg";
 import { useRouter } from "expo-router";
+import { useIsFocused } from "expo-router/react-navigation";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
@@ -57,15 +58,16 @@ export const Remote = ({
 	const progress = usePlayerState("currentTime");
 	const [seek, setSeek] = useState<number | null>(null);
 
+	const isFocused = useIsFocused();
 	const source = usePlayerState("source");
 	const playing = source?.src.uri.match(/\/videos\/([^/?]+)\//)?.[1];
 	const lastPlaying = useRef(playing);
 	useEffect(() => {
-		if (!playing || playing === lastPlaying.current) return;
+		if (!isFocused || !playing || playing === lastPlaying.current) return;
 		lastPlaying.current = playing;
 		if (playing === slug) return;
 		setSlug(playing);
-	}, [playing, slug, setSlug]);
+	}, [isFocused, playing, slug, setSlug]);
 
 	return (
 		<View className="absolute inset-0 bg-slate-950 px-safe pt-safe pb-safe">

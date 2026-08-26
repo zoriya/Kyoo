@@ -1,6 +1,7 @@
 import "react-native-get-random-values";
 
 import { Stack, useRouter } from "expo-router";
+import { useIsFocused } from "expo-router/react-navigation";
 import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, StyleSheet, View } from "react-native";
@@ -200,6 +201,7 @@ export const Player = () => {
 
 	const router = useRouter();
 	const { t } = useTranslation();
+	const isFocused = useIsFocused();
 
 	const onEnd = () => {
 		if (data?.next) {
@@ -217,7 +219,7 @@ export const Player = () => {
 
 	useEvent("end", onEnd);
 	useEvent("prev", () => {
-		if (!data?.previous) return;
+		if (!isFocused || !data?.previous) return;
 		if (!data.previous.video) {
 			setPlaybackError({
 				status: "not-available",
@@ -232,7 +234,7 @@ export const Player = () => {
 		setSlug(data.previous.video);
 	});
 	useEvent("next", () => {
-		if (!data?.next) return;
+		if (!isFocused || !data?.next) return;
 		if (!data.next.video) {
 			setPlaybackError({
 				status: "not-available",
