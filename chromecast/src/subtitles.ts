@@ -91,12 +91,14 @@ export class SubtitleManager {
 		this.#fontUrls = fonts;
 	}
 
-	applyActive(activeTrackIds: number[] | undefined): void {
+	applyActive(activeTrackIds: number[] | undefined): Promise<void> {
 		const custom =
 			(activeTrackIds ?? [])
 				.map((id) => this.#tracks.get(id))
 				.find((t): t is CustomTrack => !!t) ?? null;
-		this.#render(custom);
+		return this.#render(custom).catch((e) =>
+			console.error("[kyoo-receiver] failed to render subtitle", e),
+		);
 	}
 
 	clear(): void {
@@ -127,19 +129,25 @@ export class SubtitleManager {
 		this.#layer.appendChild(canvas);
 		this.#canvas = canvas;
 
-		this.#renderer =
+		const renderer =
 			track.format === "ass"
-				? this.#renderAss(video, canvas, track.url, width, height)
-				: this.#renderPgs(video, canvas, track.url);
+				? await this.#renderAss(video, canvas, track.url, width, height)
+				: await this.#renderPgs(video, canvas, track.url);
+		// selection changed again while the renderer was coming up
+		if (this.#currentUrl !== track.url) {
+			renderer.destroy();
+			return;
+		}
+		this.#renderer = renderer;
 	}
 
-	#renderAss(
+	async #renderAss(
 		video: HTMLVideoElement,
 		canvas: HTMLCanvasElement,
 		subUrl: string,
 		width: number,
 		height: number,
-	): Renderer {
+	): Promise<Renderer> {
 		const jassub = new JASSUB({
 			video,
 			canvas,
@@ -152,6 +160,11 @@ export class SubtitleManager {
 			fonts: this.#fontUrls,
 			availableFonts: { "liberation sans": jassubDefaultFontUrl },
 			fallbackFont: "liberation sans",
+		});
+		// there is no other way to wait for readiness with this old jassub
+		await new Promise<void>((resolve) => {
+			jassub.addEventListener("ready", () => resolve(), { once: true });
+			jassub.addEventListener("error", () => resolve(), { once: true });
 		});
 		jassub.resize(width, height, 0, 0);
 
@@ -175,11 +188,11 @@ export class SubtitleManager {
 		};
 	}
 
-	#renderPgs(
+	async #renderPgs(
 		video: HTMLVideoElement,
 		canvas: HTMLCanvasElement,
 		subUrl: string,
-	): Renderer {
+	): Promise<Renderer> {
 		const pgs = new PgsRenderer({
 			video,
 			canvas,
@@ -187,6 +200,9 @@ export class SubtitleManager {
 			aspectRatio: "contain",
 			workerUrl: libpgsWorkerUrl,
 		});
+		await pgs.ready.catch((e) =>
+			console.error("[kyoo-receiver] failed to load pgs subtitle", e),
+		);
 		return { destroy: () => pgs.dispose() };
 	}
 

@@ -2,7 +2,6 @@ import { decode } from "blurhash";
 import { castMediaPlayerShadow, getVideoElement } from "./cast";
 
 const { EventType, DetailedErrorCode } = cast.framework.events;
-const { PlayerState } = cast.framework.messages;
 
 const byId = <T extends HTMLElement = HTMLElement>(id: string): T =>
 	document.getElementById(id) as T;
@@ -128,6 +127,7 @@ export class ReceiverUi {
 	};
 	#hideTimer: ReturnType<typeof setTimeout> | null = null;
 	#pendingLoad = false;
+	#duration: number | null = null;
 
 	dismissSplash(): void {
 		this.#el.splash.classList.add("gone");
@@ -138,7 +138,7 @@ export class ReceiverUi {
 		this.clearMetadata();
 		this.setLoading(false);
 		this.setPaused(false);
-		this.show({ sticky: true });
+		this.show();
 	}
 
 	setMetadata({
@@ -170,8 +170,13 @@ export class ReceiverUi {
 		}
 	}
 
+	setDuration(duration: number | null): void {
+		this.#duration = duration;
+	}
+
 	clearMetadata(): void {
 		this.#pendingLoad = true;
+		this.#duration = null;
 		this.#el.topTitle.textContent = "";
 		this.#el.title.textContent = "";
 		this.#el.poster.hidden = true;
@@ -211,7 +216,7 @@ export class ReceiverUi {
 			this.setPaused(false);
 			this.clearError();
 			this.#syncProgress(player);
-			this.show({ sticky: true });
+			this.show();
 		});
 		player.addEventListener(EventType.TIME_UPDATE, () =>
 			this.#syncProgress(player),
@@ -220,17 +225,16 @@ export class ReceiverUi {
 			this.setLoading(e.isBuffering === true);
 		});
 		player.addEventListener(EventType.PLAYING, () => {
+			// the overlay is only up to show the pause, drop it as soon as it is gone
+			const wasPaused = !this.#el.paused.hidden;
 			this.setLoading(false);
 			this.setPaused(false);
 			this.clearError();
-			this.show();
+			this.hideSoon(wasPaused ? 300 : undefined);
 		});
-		player.addEventListener(EventType.PAUSE, () => {
-			this.setPaused(
-				!this.#pendingLoad && player.getPlayerState() === PlayerState.PAUSED,
-			);
-			this.show({ sticky: true });
-		});
+		// the receiver shows the indicator itself: it knows the pauses it asked
+		// for from the ones a sender did
+		player.addEventListener(EventType.PAUSE, () => this.show());
 		player.addEventListener(EventType.ERROR, (e) => {
 			if (e.detailedErrorCode === DetailedErrorCode.LOAD_INTERRUPTED) return;
 			this.showError(describeError(e), errorDetail(e));
@@ -248,8 +252,7 @@ export class ReceiverUi {
 			// buffered stays NaN
 		}
 		const currentTime = player.getCurrentTimeSec();
-		const duration = player.getDurationSec();
-		const dur = Number.isFinite(duration) && duration > 0 ? duration : 0;
+		const dur = this.#duration ?? player.getDurationSec();
 		const percent = dur ? Math.min(100, (currentTime / dur) * 100) : 0;
 		this.#el.progressFill.style.width = `${percent}%`;
 		if (Number.isFinite(buffered) && dur) {
@@ -262,14 +265,16 @@ export class ReceiverUi {
 		this.#el.timeTotal.textContent = formatTime(dur || undefined);
 	}
 
-	show({ sticky = false }: { sticky?: boolean } = {}): void {
+	show(): void {
 		this.#el.overlay.style.opacity = "1";
 		if (this.#hideTimer) clearTimeout(this.#hideTimer);
-		if (!sticky) {
-			this.#hideTimer = setTimeout(() => {
-				this.#el.overlay.style.opacity = "0";
-			}, 5000);
-		}
+	}
+
+	hideSoon(delay = 5_000): void {
+		if (this.#hideTimer) clearTimeout(this.#hideTimer);
+		this.#hideTimer = setTimeout(() => {
+			this.#el.overlay.style.opacity = "0";
+		}, delay);
 	}
 
 	// Hide CAF's own controls/splash/logo/spinner so only our overlay shows; its

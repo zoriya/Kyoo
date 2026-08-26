@@ -9,10 +9,12 @@ const { EventType, DetailedErrorCode } = cast.framework.events;
 const { EventType: SystemEventType } = cast.framework.system;
 const {
 	MessageType,
+	PlayerState,
 	Command,
 	HlsSegmentFormat,
 	HlsVideoSegmentFormat,
 	GenericMediaMetadata,
+	StreamType,
 	Track,
 	TrackType,
 	TextTrackType,
@@ -78,6 +80,9 @@ export class KyooReceiver {
 	);
 	#progress = new ProgressObserver(this.#player);
 	#idleTimer: ReturnType<typeof setTimeout> | undefined;
+	#duration: number | null = null;
+	#subtitleLoad: Promise<void> | null = null;
+	#resumeAfterSubtitles = false;
 
 	start(): void {
 		this.#ui.hideCafChrome();
@@ -119,7 +124,34 @@ export class KyooReceiver {
 			this.#onStatus,
 		);
 		this.#player.setMessageInterceptor(MessageType.EDIT_TRACKS_INFO, (req) => {
-			this.#subtitles.applyActive(req.activeTrackIds);
+			if (!this.#subtitleLoad) {
+				this.#resumeAfterSubtitles =
+					this.#player.getPlayerState() === PlayerState.PLAYING;
+				if (this.#resumeAfterSubtitles) this.#player.pause();
+				this.#ui.setLoading(true);
+			}
+			const load = this.#subtitles.applyActive(req.activeTrackIds);
+			this.#subtitleLoad = load;
+			load.then(() => {
+				// switched again since: that newer load owns the hold
+				if (this.#subtitleLoad !== load) return;
+				this.#subtitleLoad = null;
+				this.#ui.setLoading(false);
+				if (this.#resumeAfterSubtitles) this.#player.play();
+			});
+			return req;
+		});
+		this.#player.setMessageInterceptor(MessageType.PLAY, (req) => {
+			if (!this.#subtitleLoad) return req;
+			this.#resumeAfterSubtitles = true;
+			// returning null cancels the request, the caf typings just do not say so
+			return null as unknown as messages.RequestData;
+		});
+		this.#player.setMessageInterceptor(MessageType.PAUSE, (req) => {
+			// requestId is 0 for the `pause()` above, senders always send a real one
+			if (!req.requestId) return req;
+			this.#ui.setPaused(true);
+			if (this.#subtitleLoad) this.#resumeAfterSubtitles = false;
 			return req;
 		});
 		this.#player.addEventListener(EventType.MEDIA_FINISHED, (e) => {
@@ -145,10 +177,11 @@ export class KyooReceiver {
 					Command.QUEUE_PREV | Command.QUEUE_NEXT,
 				);
 		});
-
+		this.#context.setLastSenderDisconnectedHandler?.(() => {
+			console.log("[kyoo-receiver] last sender left, keeping the playback up");
+		});
 		const options = new cast.framework.CastReceiverOptions();
 		options.playbackConfig = this.#playbackConfig;
-		options.maxInactivity = 3600;
 		options.customNamespaces = {
 			[KYOO_NAMESPACE]: cast.framework.system.MessageType.JSON,
 		};
@@ -163,6 +196,12 @@ export class KyooReceiver {
 		const strip = (media: messages.MediaInformation) => {
 			const data = asObject(media.customData) as KyooCastData | null;
 			const stripped = copy(media);
+			// our playlist is still growing while the transcode runs (EVENT type, no
+			// endlist), so shaka calls the media live and its duration keeps moving.
+			// senders believing that lose their seekbar (android's media notification
+			// has none on a live stream), tell them what we really play.
+			stripped.streamType = StreamType.BUFFERED;
+			if (this.#duration) stripped.duration = this.#duration;
 			stripped.contentUrl =
 				data?.apiUrl && data?.slug
 					? `${data.apiUrl}/api/videos/${data.slug}/master.m3u8`
@@ -178,6 +217,8 @@ export class KyooReceiver {
 		};
 
 		const stripped = copy(status);
+		if (this.#subtitleLoad && this.#resumeAfterSubtitles)
+			stripped.playerState = PlayerState.BUFFERING;
 		stripped.media = strip(status.media);
 		stripped.items = status.items?.map((item) => {
 			if (!item.media) return item;
@@ -193,13 +234,14 @@ export class KyooReceiver {
 	): Promise<messages.LoadRequestData> => {
 		const data = (asObject(request.media?.customData) as KyooCastData) ?? {};
 		clearTimeout(this.#idleTimer);
+		this.#duration = null;
 
 		this.#ui.clearError();
 		this.#ui.dismissSplash();
 		this.#ui.clearMetadata();
 		this.#ui.setPaused(false);
 		this.#ui.setLoading(true);
-		this.#ui.show({ sticky: true });
+		this.#ui.show();
 
 		if (request.media && data.apiUrl && data.slug) {
 			request.media.contentUrl = withPresign(
@@ -256,11 +298,13 @@ export class KyooReceiver {
 			}
 		}
 
-		let duration: number | null = null;
 		if (data.apiUrl && data.slug) {
 			try {
 				const info = await fetchVideoInfo(data.apiUrl, data.slug, data.presign);
-				duration = info.duration;
+				this.#duration = info.duration;
+				this.#ui.setDuration(info.duration);
+				if (request.media && info.duration)
+					request.media.duration = info.duration;
 				this.#subtitles.setFonts(info.fonts);
 				if (request.media) {
 					request.media.tracks = info.subtitles.map((sub, i) => {
@@ -280,7 +324,8 @@ export class KyooReceiver {
 		}
 
 		this.#subtitles.registerTracks(request.media?.tracks);
-		this.#subtitles.applyActive(request.activeTrackIds);
+		// nothing plays yet: bring the renderer up before playback starts
+		await this.#subtitles.applyActive(request.activeTrackIds);
 
 		if (data.apiUrl && data.slug) {
 			try {
@@ -298,7 +343,7 @@ export class KyooReceiver {
 					this.#progress.load(data, {
 						videoId: meta.videoId,
 						entryId: meta.entryId,
-						duration,
+						duration: this.#duration,
 					});
 				}
 				if (request.media) {

@@ -46,7 +46,7 @@
         "react-native-localization-settings": "^1.2.0",
         "react-native-mmkv": "^4.3.1",
         "react-native-nitro-modules": "^0.35.7",
-        "react-native-omni": "^1.12.2",
+        "react-native-omni": "^1.14.0",
         "react-native-pager-view": "8.0.2",
         "react-native-reanimated": "4.5.0",
         "react-native-safe-area-context": "~5.7.0",
@@ -1279,7 +1279,7 @@
 
     "react-native-nitro-modules": ["react-native-nitro-modules@0.35.10", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-KsySOAIkbSTjNiX2GvXiNT9P5DMeZd99yvtE/+Lw7RXV7Ztxh9Z+YyAbYkBqadhN5J/KXXuPjhRYgyLOIZgsbQ=="],
 
-    "react-native-omni": ["react-native-omni@1.12.2", "", { "dependencies": { "@expo/config-plugins": "^57.0.3", "@videojs/core": "github:zoriya/v10#build26-core", "@videojs/media": "github:zoriya/v10#build26-media", "@videojs/react": "github:zoriya/v10#build26-react", "@videojs/spf": "github:zoriya/v10#build26-spf", "@videojs/store": "github:zoriya/v10#build26-store", "@videojs/utils": "github:zoriya/v10#build26-utils", "jassub": "^2.5.7", "libpgs": "^0.8.1" }, "peerDependencies": { "react": ">=19.0.0", "react-native": ">=0.86.0", "react-native-nitro-modules": ">=0.36.0" } }, "sha512-W1n23oIJ/QWRrTVeL9V4UbJn8AlVxliCo1uJJYz9qaeFbiQvj9431neUucvqt1JDrfNDXCPRTK8lr7vi9jRiIw=="],
+    "react-native-omni": ["react-native-omni@1.14.0", "", { "dependencies": { "@expo/config-plugins": "^57.0.3", "@videojs/core": "github:zoriya/v10#build26-core", "@videojs/media": "github:zoriya/v10#build26-media", "@videojs/react": "github:zoriya/v10#build26-react", "@videojs/spf": "github:zoriya/v10#build26-spf", "@videojs/store": "github:zoriya/v10#build26-store", "@videojs/utils": "github:zoriya/v10#build26-utils", "jassub": "^2.5.7", "libpgs": "github:zoriya/libpgs-js#build" }, "peerDependencies": { "react": ">=19.0.0", "react-native": ">=0.86.0", "react-native-nitro-modules": ">=0.36.0" } }, "sha512-Ca48VhCCysNrYcFTkuHUt0hTYydF/HMt8V8jR2fSfFRNOeJo2NVzqs222G16ZevKtSKZ/PXqS1cmqMuD5bGaQw=="],
 
     "react-native-pager-view": ["react-native-pager-view@8.0.2", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-Y8All2BbjidI4ZIF9kBOIIoldkqrY/2FXapHZMdjwD+ByXhiOWTFenPs5rq9KRN5uAH/gOXtQCqHLxQDNBQRiQ=="],
 
@@ -1658,6 +1658,8 @@
     "plist/xmlbuilder": ["xmlbuilder@15.1.1", "", {}, "sha512-yMqGBqtXyeN1e3TGYvgNgDVZ3j84W4cwkOXQswghol6APgZWaff9lnbvN7MHYJOiXsvGPXtjTYJEiC9J2wv9Eg=="],
 
     "pretty-format/react-is": ["react-is@18.3.1", "", {}, "sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg=="],
+
+    "react-native-omni/libpgs": ["libpgs@github:zoriya/libpgs-js#bfd15e6", {}, "zoriya-libpgs-js-bfd15e6", "sha512-zU62Vh/q0QQP7MSmcPI5phh/DpzHMLuzh92TjU62dmqpMHrG3Y92H+bFjhkhucioprowznv/6bQTVZ4jYnyP1A=="],
 
     "react-native-web/@react-native/normalize-colors": ["@react-native/normalize-colors@0.74.89", "", {}, "sha512-qoMMXddVKVhZ8PA1AbUCk83trpd6N+1nF2A6k1i6LsQObyS92fELuk8kU/lQs6M7BsMHwqyLCpQJ1uFgNvIQXg=="],
 

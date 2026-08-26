@@ -79,14 +79,25 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
 
-      - name: Cache Gradle
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: false
+          cache-cleanup: on-success
+          add-job-summary: never
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: ccache-android-${{ matrix.variant }}
+          max-size: 1G
+
+      - name: Cache bun install
         uses: actions/cache@v6
         with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('front/bun.lock') }}
-          restore-keys: gradle-${{ runner.os }}-
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('front/bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
@@ -105,11 +116,14 @@ jobs:
 
       - name: Build APK
         working-directory: ./front/android
+        env:
+          CMAKE_C_COMPILER_LAUNCHER: ccache
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
         run: |
           if [ "${{ matrix.variant }}" = "development" ]; then
-            ./gradlew :app:assembleDebug --no-daemon --stacktrace --info
+            ./gradlew :app:assembleDebug --build-cache --stacktrace
           else
-            ./gradlew :app:assembleRelease --no-daemon --stacktrace --info \
+            ./gradlew :app:assembleRelease --build-cache --stacktrace \
               -PreactNativeArchitectures=armeabi-v7a,arm64-v8a
           fi
 
