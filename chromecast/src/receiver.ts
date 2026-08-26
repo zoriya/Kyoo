@@ -9,6 +9,7 @@ const { EventType, DetailedErrorCode } = cast.framework.events;
 const { EventType: SystemEventType } = cast.framework.system;
 const {
 	MessageType,
+	PlayerState,
 	Command,
 	HlsSegmentFormat,
 	HlsVideoSegmentFormat,
@@ -80,6 +81,8 @@ export class KyooReceiver {
 	#progress = new ProgressObserver(this.#player);
 	#idleTimer: ReturnType<typeof setTimeout> | undefined;
 	#duration: number | null = null;
+	#subtitleLoad: Promise<void> | null = null;
+	#resumeAfterSubtitles = false;
 
 	start(): void {
 		this.#ui.hideCafChrome();
@@ -121,7 +124,34 @@ export class KyooReceiver {
 			this.#onStatus,
 		);
 		this.#player.setMessageInterceptor(MessageType.EDIT_TRACKS_INFO, (req) => {
-			this.#subtitles.applyActive(req.activeTrackIds);
+			if (!this.#subtitleLoad) {
+				this.#resumeAfterSubtitles =
+					this.#player.getPlayerState() === PlayerState.PLAYING;
+				if (this.#resumeAfterSubtitles) this.#player.pause();
+				this.#ui.setLoading(true);
+			}
+			const load = this.#subtitles.applyActive(req.activeTrackIds);
+			this.#subtitleLoad = load;
+			load.then(() => {
+				// switched again since: that newer load owns the hold
+				if (this.#subtitleLoad !== load) return;
+				this.#subtitleLoad = null;
+				this.#ui.setLoading(false);
+				if (this.#resumeAfterSubtitles) this.#player.play();
+			});
+			return req;
+		});
+		this.#player.setMessageInterceptor(MessageType.PLAY, (req) => {
+			if (!this.#subtitleLoad) return req;
+			this.#resumeAfterSubtitles = true;
+			// returning null cancels the request, the caf typings just do not say so
+			return null as unknown as messages.RequestData;
+		});
+		this.#player.setMessageInterceptor(MessageType.PAUSE, (req) => {
+			// requestId is 0 for the `pause()` above, senders always send a real one
+			if (!req.requestId) return req;
+			this.#ui.setPaused(true);
+			if (this.#subtitleLoad) this.#resumeAfterSubtitles = false;
 			return req;
 		});
 		this.#player.addEventListener(EventType.MEDIA_FINISHED, (e) => {
@@ -187,6 +217,8 @@ export class KyooReceiver {
 		};
 
 		const stripped = copy(status);
+		if (this.#subtitleLoad && this.#resumeAfterSubtitles)
+			stripped.playerState = PlayerState.BUFFERING;
 		stripped.media = strip(status.media);
 		stripped.items = status.items?.map((item) => {
 			if (!item.media) return item;
@@ -292,7 +324,8 @@ export class KyooReceiver {
 		}
 
 		this.#subtitles.registerTracks(request.media?.tracks);
-		this.#subtitles.applyActive(request.activeTrackIds);
+		// nothing plays yet: bring the renderer up before playback starts
+		await this.#subtitles.applyActive(request.activeTrackIds);
 
 		if (data.apiUrl && data.slug) {
 			try {

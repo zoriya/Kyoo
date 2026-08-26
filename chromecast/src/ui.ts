@@ -2,7 +2,6 @@ import { decode } from "blurhash";
 import { castMediaPlayerShadow, getVideoElement } from "./cast";
 
 const { EventType, DetailedErrorCode } = cast.framework.events;
-const { PlayerState } = cast.framework.messages;
 
 const byId = <T extends HTMLElement = HTMLElement>(id: string): T =>
 	document.getElementById(id) as T;
@@ -231,12 +230,9 @@ export class ReceiverUi {
 			this.clearError();
 			this.hideSoon();
 		});
-		player.addEventListener(EventType.PAUSE, () => {
-			this.setPaused(
-				!this.#pendingLoad && player.getPlayerState() === PlayerState.PAUSED,
-			);
-			this.show();
-		});
+		// the receiver shows the indicator itself: it knows the pauses it asked
+		// for from the ones a sender did
+		player.addEventListener(EventType.PAUSE, () => this.show());
 		player.addEventListener(EventType.ERROR, (e) => {
 			if (e.detailedErrorCode === DetailedErrorCode.LOAD_INTERRUPTED) return;
 			this.showError(describeError(e), errorDetail(e));
