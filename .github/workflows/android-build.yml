@@ -11,6 +11,14 @@ on:
           - both
           - development
           - release
+      attach-to-release:
+        description: Attach the release APK to the GitHub release given by release-tag
+        type: boolean
+        default: false
+      release-tag:
+        description: Tag of the release to attach the APK to
+        type: string
+        default: ""
   workflow_call:
     inputs:
       variant:
