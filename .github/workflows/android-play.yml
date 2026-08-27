@@ -3,29 +3,47 @@ name: Google Play
 on:
   workflow_dispatch:
     inputs:
-      track:
-        description: Play track to publish to
-        type: choice
-        default: internal
-        options:
-          - internal
-          - alpha
-          - beta
-          - production
+      internal:
+        description: Internal testing
+        type: boolean
+        default: false
+      alpha:
+        description: Closed testing (alpha)
+        type: boolean
+        default: false
+      beta:
+        description: Open testing (beta)
+        type: boolean
+        default: false
+      production:
+        description: Production
+        type: boolean
+        default: true
       version-name:
         description: Version name (defaults to the latest tag)
         type: string
         default: ""
+      status:
+        description: Release status (a draft app only accepts draft releases)
+        type: choice
+        default: completed
+        options:
+          - draft
+          - completed
   workflow_call:
     inputs:
-      track:
-        description: Play track to publish to (internal, alpha, beta or production)
+      tracks:
+        description: Comma-separated Play tracks to publish to (internal, alpha, beta or production)
         type: string
         default: production
       version-name:
         description: Version name shown on the store (usually the release tag)
         type: string
         default: ""
+      status:
+        description: Release status (draft or completed)
+        type: string
+        default: completed
 
 concurrency:
   group: android-play-${{ github.ref }}
@@ -45,9 +63,23 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Resolve version
+      - name: Resolve version and tracks
         id: version
         run: |
+          TRACKS="${{ inputs.tracks }}"
+          if [ -z "$TRACKS" ]; then
+            if [ "${{ inputs.internal }}" = "true" ]; then TRACKS="$TRACKS,internal"; fi
+            if [ "${{ inputs.alpha }}" = "true" ]; then TRACKS="$TRACKS,alpha"; fi
+            if [ "${{ inputs.beta }}" = "true" ]; then TRACKS="$TRACKS,beta"; fi
+            if [ "${{ inputs.production }}" = "true" ]; then TRACKS="$TRACKS,production"; fi
+            TRACKS="${TRACKS#,}"
+          fi
+          if [ -z "$TRACKS" ]; then
+            echo "::error::Tick at least one track." >&2
+            exit 1
+          fi
+          echo "tracks=$TRACKS" >> "$GITHUB_OUTPUT"
+
           VERSION="${{ inputs.version-name }}"
           if [ -z "$VERSION" ]; then
             VERSION="$(git describe --tags --abbrev=0)"
@@ -147,5 +179,5 @@ jobs:
           packageName: dev.zoriya.kyoo
           releaseFiles: front/android/app/build/outputs/bundle/release/app-release.aab
           releaseName: ${{ steps.version.outputs.name }}
-          track: ${{ inputs.track || 'internal' }}
-          status: completed
+          tracks: ${{ steps.version.outputs.tracks }}
+          status: ${{ inputs.status || 'completed' }}
