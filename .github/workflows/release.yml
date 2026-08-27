@@ -1,14 +1,15 @@
 name: Release
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - v*
 
 permissions:
   contents: write
 
 jobs:
-  artifacts:
-    name: Upload release artifacts
+  draft:
+    name: Create draft release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -16,7 +17,7 @@ jobs:
 
       - name: Set correct versions
         run: |
-          VERSION=${{ github.event.release.tag_name }}
+          VERSION=${{ github.ref_name }}
           VERSION=${VERSION:1} # Remove v prefix
           VERSION=${VERSION%.*} # Remove minor version
           sed "s/edge/$VERSION/" -i docker-compose.yml
@@ -25,20 +26,22 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           draft: true
-          tag_name: ${{ github.event.release.tag_name }}
+          generate_release_notes: true
+          tag_name: ${{ github.ref_name }}
           files: |
             ./docker-compose.yml
             ./.env.example
 
   native:
     name: Build Android APK
+    needs: draft
     permissions:
       contents: write
     uses: ./.github/workflows/android-build.yml
     with:
       variant: release
       attach-to-release: true
-      release-tag: ${{ github.event.release.tag_name }}
+      release-tag: ${{ github.ref_name }}
     secrets: inherit
 
   play:
@@ -46,18 +49,15 @@ jobs:
     uses: ./.github/workflows/android-play.yml
     with:
       tracks: production
-      version-name: ${{ github.event.release.tag_name }}
+      version-name: ${{ github.ref_name }}
     secrets: inherit
 
   publish:
     name: Publish release
     runs-on: ubuntu-latest
-    needs: [artifacts, native, play]
-    # Publish once every asset is attached. `always()` lets this run even when the
-    # native job is skipped; we only block on an outright failure.
-    if: always() && needs.artifacts.result == 'success' && needs.native.result != 'failure' && needs.play.result != 'failure'
+    needs: [draft, native, play]
     steps:
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release edit ${{ github.event.release.tag_name }} --draft=false --repo ${{ github.repository }}
+        run: gh release edit ${{ github.ref_name }} --draft=false --repo ${{ github.repository }}
