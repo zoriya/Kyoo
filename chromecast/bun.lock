@@ -8,7 +8,7 @@
         "blurhash": "^2.0.5",
         "hls-parser": "^0.16.1",
         "jassub": "1.8.8",
-        "libpgs": "github:zoriya/libpgs-js#build",
+        "libpgs": "^0.9.0",
       },
       "devDependencies": {
         "@types/chromecast-caf-receiver": "^6.0.26",
@@ -364,7 +364,7 @@
 
     "json5": ["json5@2.2.3", "", { "bin": { "json5": "lib/cli.js" } }, "sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg=="],
 
-    "libpgs": ["libpgs@github:zoriya/libpgs-js#bfd15e6", {}, "zoriya-libpgs-js-bfd15e6", "sha512-zU62Vh/q0QQP7MSmcPI5phh/DpzHMLuzh92TjU62dmqpMHrG3Y92H+bFjhkhucioprowznv/6bQTVZ4jYnyP1A=="],
+    "libpgs": ["libpgs@0.9.0", "", {}, "sha512-kKgKKelcc2dRahni5WysOq9CjglObiGp3zPqlupYb9O0Ewwiu4OMDbyRP/YH043IXub3D6rrR15+9od4Yu7JWA=="],
 
     "lightningcss": ["lightningcss@1.33.0", "", { "dependencies": { "detect-libc": "^2.0.3" }, "optionalDependencies": { "lightningcss-android-arm64": "1.33.0", "lightningcss-darwin-arm64": "1.33.0", "lightningcss-darwin-x64": "1.33.0", "lightningcss-freebsd-x64": "1.33.0", "lightningcss-linux-arm-gnueabihf": "1.33.0", "lightningcss-linux-arm64-gnu": "1.33.0", "lightningcss-linux-arm64-musl": "1.33.0", "lightningcss-linux-x64-gnu": "1.33.0", "lightningcss-linux-x64-musl": "1.33.0", "lightningcss-win32-arm64-msvc": "1.33.0", "lightningcss-win32-x64-msvc": "1.33.0" } }, "sha512-WkUDrojuJs0xkgGf2udWxa3yGBRxPtxUkB79i6aCZLRgc7PM8fZe9TosfPDcvEpQZbuFASnHYmRLBLUbmLOIIA=="],
 

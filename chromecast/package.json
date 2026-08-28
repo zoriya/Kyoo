@@ -14,7 +14,7 @@
 		"blurhash": "^2.0.5",
 		"hls-parser": "^0.16.1",
 		"jassub": "1.8.8",
-		"libpgs": "github:zoriya/libpgs-js#build"
+		"libpgs": "^0.9.0"
 	},
 	"devDependencies": {
 		"@types/chromecast-caf-receiver": "^6.0.26",
