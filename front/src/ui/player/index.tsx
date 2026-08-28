@@ -2,7 +2,7 @@ import "react-native-get-random-values";
 
 import { Stack, useRouter } from "expo-router";
 import { useIsFocused } from "expo-router/react-navigation";
-import { useEffect, useEffectEvent, useMemo, useState } from "react";
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, StyleSheet, View } from "react-native";
 import {
@@ -330,6 +330,7 @@ const PlayerContent = ({
 	seekEnd: () => void;
 }) => {
 	const [entriesMenuOpen, setEntriesMenuOpen] = useState(false);
+	const entriesTrigger = useRef<View | null>(null);
 
 	useKeyboard();
 
@@ -384,7 +385,10 @@ const PlayerContent = ({
 				seekEnd={seekEnd}
 				onOpenEntriesMenu={
 					data?.show?.kind === "serie"
-						? () => setEntriesMenuOpen(true)
+						? (trigger) => {
+								entriesTrigger.current = trigger;
+								setEntriesMenuOpen(true);
+							}
 						: undefined
 				}
 				forceShow={!!playbackError}
@@ -396,6 +400,7 @@ const PlayerContent = ({
 					showSlug={data.show.slug}
 					season={entry?.kind === "episode" ? entry.seasonNumber : 0}
 					currentEntrySlug={entry?.slug}
+					returnFocus={entriesTrigger}
 				/>
 			)}
 		</>

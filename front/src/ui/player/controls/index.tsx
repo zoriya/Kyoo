@@ -32,7 +32,7 @@ export const Controls = ({
 	hasPrev: boolean;
 	hasNext: boolean;
 	seekEnd: () => void;
-	onOpenEntriesMenu?: () => void;
+	onOpenEntriesMenu?: (trigger: View | null) => void;
 	forceShow?: boolean;
 }) => {
 	const [hover, setHover] = useState(false);

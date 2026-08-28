@@ -16,6 +16,7 @@ import {
 	IconButton,
 	Menu,
 	P,
+	preferFocus,
 	Skeleton,
 	tooltip,
 } from "~/primitives";
@@ -227,6 +228,9 @@ export const EntryList = ({
 									? "rounded-md bg-accent/10"
 									: undefined
 							}
+							// the list is opened from the player to change episode: the one
+							// playing is where the remote should already be.
+							{...preferFocus(item.slug === currentEntrySlug)}
 							// Don't display "Go to serie"
 							serieSlug={null}
 							displayNumber={entryDisplayNumber(item)}

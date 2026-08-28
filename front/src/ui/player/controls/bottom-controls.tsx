@@ -1,7 +1,7 @@
 import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
 import SkipNext from "@material-symbols/svg-400/rounded/skip_next-fill.svg";
 import SkipPrevious from "@material-symbols/svg-400/rounded/skip_previous-fill.svg";
-import { type ComponentProps, useState } from "react";
+import { type ComponentProps, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
 	Platform,
@@ -44,7 +44,7 @@ export const BottomControls = ({
 	hasNext: boolean;
 	setMenu: (isOpen: boolean) => void;
 	setSeeking: (isSeeking: boolean) => void;
-	onOpenEntriesMenu?: () => void;
+	onOpenEntriesMenu?: (trigger: View | null) => void;
 } & ViewProps) => {
 	const [seek, setSeek] = useState<number | null>(null);
 	const bottomSeek = Platform.OS !== "web" && seek !== null;
@@ -113,11 +113,12 @@ const ControlButtons = ({
 	hasPrev: boolean;
 	hasNext: boolean;
 	setMenu: (isOpen: boolean) => void;
-	onOpenEntriesMenu?: () => void;
+	onOpenEntriesMenu?: (trigger: View | null) => void;
 	className?: string;
 }) => {
 	const { t } = useTranslation();
 	const player = usePlayer();
+	const entries = useRef<View | null>(null);
 
 	const menuProps = {
 		onMenuOpen: () => setMenu(true),
@@ -169,7 +170,9 @@ const ControlButtons = ({
 				{onOpenEntriesMenu && (
 					<IconButton
 						icon={MenuIcon}
-						onPress={onOpenEntriesMenu}
+						// the sheet it opens has to know where to put the selection back
+						ref={entries}
+						onPress={() => onOpenEntriesMenu(entries.current)}
 						className="mr-4 touch:mr-5"
 						iconClassName="fill-slate-200 dark:fill-slate-200 touch:h-5 touch:w-5"
 						{...tooltip(t("player.entry-list"), true)}
