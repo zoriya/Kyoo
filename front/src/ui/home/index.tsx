@@ -3,12 +3,11 @@ import {
 	type LegendListComponent,
 } from "@legendapp/list/react-native";
 import { type ReactElement, useMemo } from "react";
-import { useWindowDimensions } from "react-native";
 import { createAnimatedComponent } from "react-native-reanimated";
 import { Genre } from "~/models";
-import { useBreakpointValue } from "~/primitives";
 import { Fetch, useRefresh } from "~/query";
 import { shuffle } from "~/utils";
+import { useHeroHeight } from "../hero";
 import { HeaderBackground, useScrollNavbar } from "../navbar";
 import { GenreGrid } from "./genre";
 import { Header } from "./header";
@@ -24,15 +23,10 @@ const AnimatedLegendList = createAnimatedComponent(
 export const HomePage = () => {
 	const genres = useMemo(() => shuffle(Object.values(Genre.enum)), []);
 	const [isRefreshing, refresh] = useRefresh(HomePage.queries(genres));
-	// The hero height is deterministic from the viewport, so mirror its
-	// responsive classes here instead of measuring it — that avoids the
-	// onLayout -> setState that used to reflow the whole list at first paint.
-	// Keep in sync with header.tsx:
-	//   h-[40vh] sm:h-[60vh] sm:min-h-[750px] md:min-h-[680px] lg:h-[65vh]
-	const { height } = useWindowDimensions();
-	const heroVh = useBreakpointValue({ xs: 0.4, sm: 0.6, lg: 0.65 });
-	const heroMinH = useBreakpointValue({ xs: 1, sm: 750, md: 680 });
-	const imageHeight = Math.max(Math.round(height * heroVh), heroMinH);
+	// The hero height is deterministic from the viewport, so the list can just ask
+	// for it instead of measuring it — that avoids the onLayout -> setState that
+	// used to reflow the whole list at first paint.
+	const imageHeight = useHeroHeight();
 	const { scrollHandler, headerProps } = useScrollNavbar({
 		imageHeight,
 		tab: true,
@@ -64,6 +58,8 @@ export const HomePage = () => {
 				}}
 				onScroll={scrollHandler}
 				scrollEventThrottle={16}
+				// see fetch-infinite: the scroll view itself must not be a focus target
+				focusable={false}
 				onRefresh={refresh}
 				refreshing={isRefreshing}
 				progressViewOffset={60}

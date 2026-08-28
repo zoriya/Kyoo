@@ -42,7 +42,7 @@ export const NextupList = () => {
 			<InfiniteFetch
 				query={NextupList.query()}
 				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
-				Empty={<EmptyView message={t("home.none")} />}
+				Empty={<EmptyView message={t("home.none")} className="py-6" />}
 				Render={({ item }) => (
 					<EntryBox
 						kind={item.kind}

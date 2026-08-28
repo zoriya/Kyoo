@@ -411,6 +411,9 @@ export const HeaderBackground = ({
 }: ViewProps & ReturnType<typeof useScrollNavbar>["headerProps"]) => {
 	// this is to handle transparent modals, to prevent duplicated header bar.
 	if (!focused) return null;
+	// the tv navigates with the rail, there is no header bar to fade the accent
+	// into as the page scrolls.
+	if (Platform.isTV) return children;
 	return (
 		<>
 			<Animated.View
