@@ -1,4 +1,5 @@
-import { useState } from "react";
+import type { LegendListRef } from "@legendapp/list/react-native";
+import { useRef, useState } from "react";
 import { View, type ViewProps } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { itemMap } from "~/components/items";
@@ -14,13 +15,20 @@ import { SvgWave } from "./serie";
 const CollectionHeader = ({
 	slug,
 	onImageLayout,
+	onSelected,
 }: {
 	slug: string;
 	onImageLayout?: ViewProps["onLayout"];
+	onSelected?: () => void;
 }) => {
 	return (
 		<View className="bg-background">
-			<Header kind="collection" slug={slug} onImageLayout={onImageLayout} />
+			<Header
+				kind="collection"
+				slug={slug}
+				onImageLayout={onImageLayout}
+				onSelected={onSelected}
+			/>
 			<SvgWave className="flex-1 shrink-0 fill-card" />
 		</View>
 	);
@@ -30,6 +38,7 @@ export const CollectionDetails = () => {
 	const [slug] = useQueryState("slug", undefined!);
 	const insets = useSafeAreaInsets();
 	const [imageHeight, setHeight] = useState(300);
+	const list = useRef<LegendListRef>(null);
 	const { scrollHandler, headerProps } = useScrollNavbar({
 		imageHeight,
 	});
@@ -37,6 +46,7 @@ export const CollectionDetails = () => {
 		<View className="flex-1 bg-card">
 			<HeaderBackground {...headerProps} />
 			<InfiniteFetch
+				ref={list}
 				query={CollectionDetails.query(slug)}
 				layout={ItemDetails.layout}
 				Render={({ item, index }) => (
@@ -59,6 +69,11 @@ export const CollectionDetails = () => {
 					<CollectionHeader
 						slug={slug}
 						onImageLayout={(e) => setHeight(e.nativeEvent.layout.height)}
+						// the header is the top of the page, so that is where the page
+						// belongs once the remote is on it.
+						onSelected={() =>
+							list.current?.scrollToOffset({ offset: 0, animated: false })
+						}
 					/>
 				)}
 				onScroll={scrollHandler}

@@ -1,10 +1,16 @@
 import type {
 	LegendListComponent,
 	LegendListProps,
+	LegendListRef,
 } from "@legendapp/list/react-native";
 import { LegendList } from "@legendapp/list/react-native";
 import { keepPreviousData } from "@tanstack/react-query";
-import { type ComponentType, type ReactElement, useMemo } from "react";
+import {
+	type ComponentType,
+	type ReactElement,
+	type Ref,
+	useMemo,
+} from "react";
 import type { ViewStyle } from "react-native";
 import { createAnimatedComponent } from "react-native-reanimated";
 import {
@@ -64,6 +70,8 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	fetchMore?: boolean;
 	style?: LegendListProps["style"];
 	contentContainerStyle?: ViewStyle;
+	// a screen that has to put the list back where it belongs needs to reach it
+	ref?: Ref<LegendListRef>;
 	onScroll?: LegendListProps["onScroll"];
 	scrollEventThrottle?: LegendListProps["scrollEventThrottle"];
 	columnWrapperStyle?: Omit<ViewStyle, "gap" | "rowGap" | "columnGap">;

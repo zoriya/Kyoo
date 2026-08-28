@@ -1,4 +1,5 @@
-import { type ComponentProps, useDeferredValue, useState } from "react";
+import type { LegendListRef } from "@legendapp/list/react-native";
+import { type ComponentProps, useDeferredValue, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View, type ViewProps } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
@@ -83,10 +84,12 @@ NextUp.Loader = () => {
 const SerieHeader = ({
 	slug,
 	onImageLayout,
+	onSelected,
 	onSelectVideos,
 }: {
 	slug: string;
 	onImageLayout?: ViewProps["onLayout"];
+	onSelected?: () => void;
 	onSelectVideos?: (entry: {
 		displayNumber: string;
 		name: string | null;
@@ -101,7 +104,12 @@ const SerieHeader = ({
 
 	return (
 		<View className="bg-background">
-			<Header kind="serie" slug={slug} onImageLayout={onImageLayout} />
+			<Header
+				kind="serie"
+				slug={slug}
+				onImageLayout={onImageLayout}
+				onSelected={onSelected}
+			/>
 			{belowFold && (
 				<>
 					<Fetch
@@ -144,11 +152,13 @@ export const SerieDetails = () => {
 		imageHeight,
 	});
 	const [selected, setSelected] = useState<EntrySelectEntry | null>(null);
+	const list = useRef<LegendListRef>(null);
 
 	return (
 		<View className="flex-1 bg-card">
 			<HeaderBackground {...headerProps} />
 			<EntryList
+				ref={list}
 				slug={slug}
 				season={season}
 				search={search}
@@ -157,6 +167,11 @@ export const SerieDetails = () => {
 					<SerieHeader
 						slug={slug}
 						onSelectVideos={setSelected}
+						// the header is the top of the page, so that is where the page
+						// belongs once the remote is on it.
+						onSelected={() =>
+							list.current?.scrollToOffset({ offset: 0, animated: false })
+						}
 						onImageLayout={(e) => {
 							imageHeight.value = e.nativeEvent.layout.height;
 						}}

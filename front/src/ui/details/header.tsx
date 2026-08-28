@@ -60,6 +60,7 @@ const ButtonList = ({
 	watchStatus,
 	iconsClassName,
 	videoSlug,
+	onSelected,
 }: {
 	kind: "movie" | "serie" | "collection";
 	slug: string;
@@ -71,6 +72,8 @@ const ButtonList = ({
 	watchStatus: WatchStatusV | null;
 	iconsClassName?: string;
 	videoSlug: string | null;
+	// fires when the remote lands on one of these, see the detail screens
+	onSelected?: () => void;
 }) => {
 	const { t } = useTranslation();
 	const [selected, setSelected] = useState<EntrySelectEntry | null>(null);
@@ -85,6 +88,20 @@ const ButtonList = ({
 				: trailerUrl
 					? "trailer"
 					: "watchlist";
+	// These sit at the top of the page, so the page belongs at the top when one of
+	// them is selected — asking for the focus makes the list scroll to reveal a
+	// button that is already in view, and it stops as soon as it is rather than
+	// where the title above it can still be read.
+	const start = (mine: boolean) => {
+		const focus = preferFocus(mine);
+		return {
+			...focus,
+			onFocus: () => {
+				focus.onFocus?.();
+				onSelected?.();
+			},
+		};
+	};
 
 	return (
 		<View className="flex-row items-center justify-center">
@@ -103,7 +120,7 @@ const ButtonList = ({
 								href: videos?.length ? playHref : null,
 								disabled: !videos?.length,
 							})}
-					{...preferFocus(first === "play")}
+					{...start(first === "play")}
 					{...tooltip(t("show.play"))}
 				/>
 			)}
@@ -113,7 +130,7 @@ const ButtonList = ({
 					as={Link}
 					href={trailerUrl}
 					iconClassName={iconsClassName}
-					{...preferFocus(first === "trailer")}
+					{...start(first === "trailer")}
 					{...tooltip(t("show.trailer"))}
 				/>
 			)}
@@ -123,7 +140,7 @@ const ButtonList = ({
 					slug={slug}
 					status={watchStatus}
 					iconClassName={iconsClassName}
-					{...preferFocus(first === "watchlist")}
+					{...start(first === "watchlist")}
 				/>
 			)}
 			<ShowContext
@@ -155,6 +172,7 @@ export const TitleLine = ({
 	watchStatus,
 	displayNumber,
 	videos,
+	onSelected,
 	className,
 	...props
 }: {
@@ -172,6 +190,7 @@ export const TitleLine = ({
 	displayNumber: string | null;
 	videos: Entry["videos"] | null;
 	className?: string;
+	onSelected?: () => void;
 } & ViewProps) => {
 	return (
 		<Container
@@ -205,6 +224,7 @@ export const TitleLine = ({
 						watchStatus={watchStatus}
 						iconsClassName="lg:fill-slate-200 dark:fill-slate-200"
 						videoSlug={videos?.length === 1 ? videos[0].slug : null}
+						onSelected={onSelected}
 					/>
 					{Object.keys(rating).length > 0 && (
 						<>
@@ -435,10 +455,13 @@ export const Header = ({
 	kind,
 	slug,
 	onImageLayout,
+	onSelected,
 }: {
 	kind: "movie" | "serie" | "collection";
 	slug: string;
 	onImageLayout?: ViewProps["onLayout"];
+	// fires when the remote lands on the header, see the detail screens
+	onSelected?: () => void;
 }) => {
 	const hero = useHeroHeight();
 	const bleed = useHeroBleed();
@@ -471,6 +494,7 @@ export const Header = ({
 					<TitleLine
 						kind={kind}
 						slug={slug}
+						onSelected={onSelected}
 						name={data.name}
 						tagline={data.tagline}
 						date={getDisplayDate(data)}
