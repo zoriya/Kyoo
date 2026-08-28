@@ -127,14 +127,18 @@ const Menu = <AsProps,>({
 							className={cn(
 								"absolute bottom-0 w-full self-center bg-popover px-safe pb-safe sm:mx-12 sm:max-w-2xl",
 								"mt-20 max-h-[80vh] rounded-t-4xl pt-8",
-								"xl:top-0 xl:right-0 xl:mr-0 xl:rounded-l-4xl xl:rounded-tr-0 xl:pt-safe",
+								// a sheet that comes up from the bottom is a thumb gesture; from a
+								// couch it is a long walk down the screen and back. Anything wide
+								// enough to have room beside the page gets it on the side instead.
+								"md:top-0 md:right-0 md:mt-0 md:mr-0 md:mb-0 md:max-h-full md:max-w-md",
+								"md:rounded-l-4xl md:rounded-tr-0 md:pt-safe xl:max-w-2xl",
 							)}
 						>
-							<ScrollView className="native:max-h-[80vh]">
+							<ScrollView className="native:max-h-[80vh] md:native:max-h-full">
 								<IconButton
 									icon={Close}
 									onPress={() => setOpen(false)}
-									className="hidden self-end xl:flex"
+									className="hidden self-end md:flex"
 								/>
 								{typeof children === "function" ? children() : children}
 							</ScrollView>

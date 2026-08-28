@@ -6,7 +6,7 @@ import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import Settings from "@material-symbols/svg-400/rounded/settings.svg";
 import { usePathname } from "expo-router";
 import type { ComponentProps, ReactNode } from "react";
-import { useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { type PressableProps, View } from "react-native";
 import {
@@ -28,6 +28,13 @@ import { AccountMenuItems } from "./navbar";
 // launcher does it.
 const collapsedWidth = 72;
 const expandedWidth = 260;
+
+// The rail floats over the page instead of taking a column out of it, so a hero
+// image that stopped at its edge would read as a window rather than as the
+// background of the screen. Anything meant to be full bleed asks how much room
+// there is to claim back — nothing, when there is no rail.
+const RailWidth = createContext(0);
+export const useRailWidth = () => useContext(RailWidth);
 
 const RailItem = ({
 	href,
@@ -144,7 +151,12 @@ export const TvNavRail = ({ children }: { children: ReactNode }) => {
 				className={cn(
 					"absolute top-0 bottom-0 left-0 z-20 gap-1 p-2",
 					"overflow-hidden transition-all duration-150",
-					expanded ? "bg-slate-950/95" : "bg-transparent",
+					// collapsed it sits on top of whatever the page is showing, so it
+					// carries just enough shade for the icons to stay readable over a
+					// bright backdrop.
+					expanded
+						? "bg-slate-950/95"
+						: "bg-linear-to-r from-slate-950/80 to-transparent",
 				)}
 				style={{ width: expanded ? expandedWidth : collapsedWidth }}
 			>
@@ -214,7 +226,11 @@ export const TvNavRail = ({ children }: { children: ReactNode }) => {
 			{/* no focus group around the content: `autoFocus` on a container this big
 			    intercepts every focus move that bubbles up to it and bounces it back to
 			    the child it remembers, which eats one dpad press out of two. */}
-			<View className="flex-1">{children}</View>
+			<View className="flex-1">
+				<RailWidth.Provider value={collapsedWidth}>
+					{children}
+				</RailWidth.Provider>
+			</View>
 		</View>
 	);
 };

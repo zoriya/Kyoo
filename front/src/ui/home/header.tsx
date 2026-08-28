@@ -18,7 +18,7 @@ import {
 } from "~/primitives";
 import type { QueryIdentifier } from "~/query";
 import { cn } from "~/utils";
-import { useHeroHeight } from "../hero";
+import { useHeroBleed, useHeroHeight } from "../hero";
 
 export const Header = ({
 	name,
@@ -42,6 +42,7 @@ export const Header = ({
 } & Partial<ComponentProps<typeof ImageBackground>>) => {
 	const { t } = useTranslation();
 	const height = useHeroHeight();
+	const bleed = useHeroBleed();
 	const play = preferFocus();
 	const info = preferFocus(link === null);
 
@@ -50,12 +51,14 @@ export const Header = ({
 			src={thumbnail}
 			alt=""
 			quality="high"
-			className={cn("w-full", className)}
-			style={{ height }}
+			// no `w-full`: the negative margin has to make it wider than its parent,
+			// and a hundred percent width would just slide it out to the left.
+			className={cn("self-stretch", className)}
+			style={{ height, ...bleed.image }}
 			{...props}
 		>
 			<View className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/70" />
-			<View className="absolute bottom-0 m-4 md:w-3/5">
+			<View className="absolute bottom-0 m-4 md:w-3/5" style={bleed.content}>
 				<H1 numberOfLines={4} className="text-3xl text-slate-200 sm:text-5xl">
 					{name}
 				</H1>
@@ -105,11 +108,12 @@ export const Header = ({
 Header.Loader = () => {
 	const { t } = useTranslation();
 	const height = useHeroHeight();
+	const bleed = useHeroBleed();
 
 	return (
-		<View className="w-full" style={{ height }}>
+		<View className="self-stretch" style={{ height, ...bleed.image }}>
 			<View className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/70" />
-			<View className="absolute bottom-0 m-4 md:w-3/5">
+			<View className="absolute bottom-0 m-4 md:w-3/5" style={bleed.content}>
 				<Skeleton className="h-10 w-2/5" />
 				<View className="my-2 flex-row items-center">
 					<IconFab

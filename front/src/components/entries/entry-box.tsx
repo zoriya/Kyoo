@@ -52,7 +52,7 @@ export const EntryBox = ({
 			onPress={videos.length > 1 ? onSelectVideos : undefined}
 			onLongPress={() => setMoreOpened(true)}
 			className={cn(
-				"group w-[350px] items-center p-1 outline-0",
+				"group w-[200px] items-center p-1 outline-0 sm:w-[240px] xl:w-[350px]",
 				href === null && "opacity-50",
 				className,
 			)}
@@ -106,7 +106,10 @@ export const EntryBox = ({
 
 EntryBox.Loader = (props: object) => {
 	return (
-		<View className={"h-full w-[350px] items-center p-1"} {...props}>
+		<View
+			className="h-full w-[200px] items-center p-1 sm:w-[240px] xl:w-[350px]"
+			{...props}
+		>
 			<Image.Loader className="aspect-video w-full" />
 			<Skeleton className="w-1/2" />
 			<Skeleton className="h-3 w-4/5" />
@@ -114,8 +117,11 @@ EntryBox.Loader = (props: object) => {
 	);
 };
 
+// A card is a thumbnail plus three lines of text, so it is a third of a tv
+// screen tall at the width it used to have everywhere — a row of them and the
+// hero above it did not leave room for a second row.
 EntryBox.layout = {
-	size: 350,
+	size: { xs: 200, sm: 240, xl: 350 },
 	numColumns: { xs: 3, sm: 4, md: 5, lg: 6, xl: 8 },
 	gap: { xs: ts(1), md: ts(2) },
 	layout: "grid",

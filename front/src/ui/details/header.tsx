@@ -46,7 +46,7 @@ import {
 } from "~/primitives";
 import { Fetch, type QueryIdentifier } from "~/query";
 import { cn, displayRuntime, getDisplayDate } from "~/utils";
-import { useHeroHeight } from "../hero";
+import { useHeroBleed, useHeroHeight } from "../hero";
 import { PartOf } from "./part-of";
 
 const ButtonList = ({
@@ -441,6 +441,7 @@ export const Header = ({
 	onImageLayout?: ViewProps["onLayout"];
 }) => {
 	const hero = useHeroHeight();
+	const bleed = useHeroBleed();
 	// the poster straddles the bottom of the backdrop
 	const titleOffset = Math.round(hero * 0.36);
 
@@ -458,8 +459,11 @@ export const Header = ({
 						src={data.thumbnail}
 						quality="high"
 						alt=""
-						className="absolute top-0 right-0 left-0 w-full"
-						style={{ height: hero }}
+						// left comes from the bleed: the backdrop reaches back under the
+						// nav rail floating over it. The text below is in a centred
+						// container and stays clear of it on its own.
+						className="absolute top-0 right-0"
+						style={{ height: hero, left: bleed.image.marginLeft }}
 						onLayout={onImageLayout}
 					>
 						<View className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/70" />
