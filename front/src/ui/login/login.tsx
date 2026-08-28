@@ -34,6 +34,7 @@ export const LoginPage = () => {
 				autoComplete="username"
 				onChangeText={(value) => setUsername(value)}
 				autoCapitalize="none"
+				autoFocus={Platform.isTV}
 			/>
 			<P className="pt-2 pl-2">{t("login.password")}</P>
 			<PasswordInput

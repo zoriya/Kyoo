@@ -16,6 +16,7 @@ export const ServerUrlPage = () => {
 	const apiUrl = cleanApiUrl(_apiUrl);
 	const { data, error } = useQuery({
 		queryKey: [apiUrl, "api", "health"],
+		enabled: !!_apiUrl,
 		queryFn: async (ctx) => {
 			try {
 				const resp = await fetch(`${apiUrl}/api/health`, {
@@ -41,8 +42,9 @@ export const ServerUrlPage = () => {
 					onChangeText={setApiUrl}
 					autoCorrect={false}
 					autoCapitalize="none"
+					autoFocus={Platform.isTV}
 				/>
-				{!data && (
+				{!!_apiUrl && !data && (
 					<P className="self-center text-red-500 dark:text-red-500">
 						{error
 							? error.message === "offline"

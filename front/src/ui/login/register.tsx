@@ -58,6 +58,7 @@ export const RegisterPage = () => {
 			<Input
 				autoComplete="username"
 				onChangeText={(value) => setUsername(value)}
+				autoFocus={Platform.isTV}
 			/>
 
 			<P className="pt-2 pl-2">{t("login.email")}</P>
