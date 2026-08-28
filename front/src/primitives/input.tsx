@@ -19,7 +19,6 @@ export const Input = ({
 		<View
 			className={cn(
 				"shrink flex-row content-center items-center rounded-xl border border-accent p-2",
-				"ring-accent focus-within:ring-2",
 				containerClassName,
 			)}
 		>
@@ -31,7 +30,11 @@ export const Input = ({
 				// @ts-expect-error not yet in typescript i think
 				includeFontPadding={false}
 				className={cn(
-					"min-h-6 min-w-0 flex-1 font-sans text-base text-slate-600 outline-0 dark:text-slate-400",
+					"min-h-6 min-w-0 flex-1 font-sans text-base text-slate-600 dark:text-slate-400",
+					// the ring goes on the input rather than around the whole row: only
+					// the input can report its own focus to uniwind, a plain view has no
+					// `:focus-within` on native.
+					"highlighted:outline-3 highlighted:outline-accent",
 					className,
 				)}
 				{...props}

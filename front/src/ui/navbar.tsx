@@ -222,8 +222,9 @@ export const SearchBar = ({
 				placeholder={t("navbar.search")}
 				textAlignVertical="center"
 				className={cn(
-					"h-full min-w-0 flex-1 font-sans text-base outline-0",
+					"h-full min-w-0 flex-1 font-sans text-base",
 					"align-middle text-slate-600 dark:text-slate-200",
+					"highlighted:outline-3 highlighted:outline-accent",
 					!expanded && "w-0 grow-0",
 					className,
 				)}
