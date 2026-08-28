@@ -3,6 +3,7 @@ import {
 	type LegendListComponent,
 } from "@legendapp/list/react-native";
 import { type ReactElement, useMemo } from "react";
+import { View } from "react-native";
 import { createAnimatedComponent } from "react-native-reanimated";
 import { Genre } from "~/models";
 import { useRefresh } from "~/query";
@@ -36,6 +37,7 @@ export const HomePage = () => {
 				estimatedItemSize={340}
 				estimatedHeaderSize={imageHeight}
 				drawDistance={600}
+				snapToAlignment="item"
 				getItemType={(el: ReactElement) => {
 					switch (el.type) {
 						case GenreGrid:
@@ -59,7 +61,11 @@ export const HomePage = () => {
 				onRefresh={refresh}
 				refreshing={isRefreshing}
 				progressViewOffset={60}
-				ListHeaderComponent={<Header />}
+				ListHeaderComponent={
+					<View scrollSnapAlign="start">
+						<Header />
+					</View>
+				}
 			>
 				<NextupList />
 				<NewsList />

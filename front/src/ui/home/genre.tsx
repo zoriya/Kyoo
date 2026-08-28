@@ -1,20 +1,32 @@
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { View } from "react-native";
 import { ItemGrid, itemMap } from "~/components/items";
 import { type Genre, Show } from "~/models";
 import { H3 } from "~/primitives";
 import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { EmptyView } from "~/ui/empty-view";
 
-export const Header = ({ title }: { title: string }) => {
-	return <H3 className="m-2 flex-row justify-between px-1">{title}</H3>;
+export const Header = ({
+	title,
+	children,
+}: {
+	title: string;
+	children?: ReactNode;
+}) => {
+	return (
+		<View scrollSnapAlign="start">
+			<H3 className="m-2 flex-row justify-between px-1">{title}</H3>
+			{children}
+		</View>
+	);
 };
 
 export const GenreGrid = ({ genre }: { genre: Genre }) => {
 	const { t } = useTranslation();
 
 	return (
-		<>
-			<Header title={t(`genres.${genre}`)} />
+		<Header title={t(`genres.${genre}`)}>
 			<InfiniteFetch
 				query={GenreGrid.query(genre)}
 				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
@@ -22,7 +34,7 @@ export const GenreGrid = ({ genre }: { genre: Genre }) => {
 				Render={({ item }) => <ItemGrid {...itemMap(item)} horizontal />}
 				Loader={() => <ItemGrid.Loader horizontal />}
 			/>
-		</>
+		</Header>
 	);
 };
 

@@ -27,6 +27,7 @@ export const Recommended = () => {
 							return (
 								<ItemDetails
 									key={y}
+									scrollSnapAlign="start"
 									slug={item.slug}
 									kind={item.kind}
 									name={item.name}

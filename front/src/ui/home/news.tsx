@@ -16,33 +16,34 @@ export const NewsList = () => {
 
 	return (
 		<>
-			<Header title={t("home.news")} />
-			<InfiniteFetch
-				query={NewsList.query()}
-				layout={{ ...EntryBox.layout, layout: "horizontal" }}
-				Empty={<EmptyView message={t("home.none")} className="py-6" />}
-				Render={({ item }) => (
-					<EntryBox
-						kind={item.kind}
-						slug={item.slug}
-						serieSlug={item.show!.slug}
-						name={`${item.show!.name} ${entryDisplayNumber(item)}`}
-						description={item.name}
-						thumbnail={item.thumbnail ?? item.show!.thumbnail}
-						href={item.href}
-						watchedPercent={item.progress.percent}
-						videos={item.videos}
-						onSelectVideos={() =>
-							setSelected({
-								displayNumber: entryDisplayNumber(item),
-								name: item.name,
-								videos: item.videos,
-							})
-						}
-					/>
-				)}
-				Loader={EntryBox.Loader}
-			/>
+			<Header title={t("home.news")}>
+				<InfiniteFetch
+					query={NewsList.query()}
+					layout={{ ...EntryBox.layout, layout: "horizontal" }}
+					Empty={<EmptyView message={t("home.none")} className="py-6" />}
+					Render={({ item }) => (
+						<EntryBox
+							kind={item.kind}
+							slug={item.slug}
+							serieSlug={item.show!.slug}
+							name={`${item.show!.name} ${entryDisplayNumber(item)}`}
+							description={item.name}
+							thumbnail={item.thumbnail ?? item.show!.thumbnail}
+							href={item.href}
+							watchedPercent={item.progress.percent}
+							videos={item.videos}
+							onSelectVideos={() =>
+								setSelected({
+									displayNumber: entryDisplayNumber(item),
+									name: item.name,
+									videos: item.videos,
+								})
+							}
+						/>
+					)}
+					Loader={EntryBox.Loader}
+				/>
+			</Header>
 			<EntrySelect entry={selected} onClose={() => setSelected(null)} />
 		</>
 	);

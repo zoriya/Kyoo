@@ -21,8 +21,7 @@ export const NextupList = () => {
 
 	if (!account) {
 		return (
-			<>
-				<Header title={t("home.watchlist")} />
+			<Header title={t("home.watchlist")}>
 				<View className="items-center justify-center">
 					<P>{t("home.watchlistLogin")}</P>
 					<Button
@@ -32,39 +31,40 @@ export const NextupList = () => {
 						className="m-4 min-w-md"
 					/>
 				</View>
-			</>
+			</Header>
 		);
 	}
 
 	return (
 		<>
-			<Header title={t("home.watchlist")} />
-			<InfiniteFetch
-				query={NextupList.query()}
-				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
-				Empty={<EmptyView message={t("home.none")} className="py-6" />}
-				Render={({ item }) => (
-					<EntryBox
-						kind={item.kind}
-						slug={item.slug}
-						serieSlug={item.show!.slug}
-						name={`${item.show!.name} ${entryDisplayNumber(item)}`}
-						description={item.name}
-						thumbnail={item.thumbnail ?? item.show!.thumbnail}
-						href={item.href}
-						watchedPercent={item.progress.percent}
-						videos={item.videos}
-						onSelectVideos={() =>
-							setSelected({
-								displayNumber: entryDisplayNumber(item),
-								name: item.name,
-								videos: item.videos,
-							})
-						}
-					/>
-				)}
-				Loader={EntryBox.Loader}
-			/>
+			<Header title={t("home.watchlist")}>
+				<InfiniteFetch
+					query={NextupList.query()}
+					layout={{ ...ItemGrid.layout, layout: "horizontal" }}
+					Empty={<EmptyView message={t("home.none")} className="py-6" />}
+					Render={({ item }) => (
+						<EntryBox
+							kind={item.kind}
+							slug={item.slug}
+							serieSlug={item.show!.slug}
+							name={`${item.show!.name} ${entryDisplayNumber(item)}`}
+							description={item.name}
+							thumbnail={item.thumbnail ?? item.show!.thumbnail}
+							href={item.href}
+							watchedPercent={item.progress.percent}
+							videos={item.videos}
+							onSelectVideos={() =>
+								setSelected({
+									displayNumber: entryDisplayNumber(item),
+									name: item.name,
+									videos: item.videos,
+								})
+							}
+						/>
+					)}
+					Loader={EntryBox.Loader}
+				/>
+			</Header>
 			<EntrySelect entry={selected} onClose={() => setSelected(null)} />
 		</>
 	);

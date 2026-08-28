@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View } from "react-native";
+import { type PressableProps, View } from "react-native";
 import type { KImage, WatchStatusV } from "~/models";
 import {
 	Heading,
@@ -42,8 +42,7 @@ export const ItemList = ({
 	availableCount?: number | null;
 	videoSlug: string | null;
 	seenCount?: number | null;
-	className?: string;
-}) => {
+} & PressableProps) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 
 	return (
