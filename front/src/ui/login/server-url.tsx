@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, View } from "react-native";
 import { RetryableError } from "~/models/retryable-error";
-import { Button, H1, Input, Link, P } from "~/primitives";
+import { Button, H1, Input, Link, P, preferFocus } from "~/primitives";
 
 export const cleanApiUrl = (apiUrl: string) => {
 	if (Platform.OS === "web") return undefined;
@@ -16,6 +16,10 @@ export const ServerUrlPage = () => {
 	const apiUrl = cleanApiUrl(_apiUrl);
 	const { data, error } = useQuery({
 		queryKey: [apiUrl, "api", "health"],
+		// an empty field is not a server: `cleanApiUrl` turns it into `http:/`,
+		// which resolves to a host called "api" and fails, so the screen opened
+		// telling you it could not reach kyoo before you had typed anything.
+		enabled: !!_apiUrl,
 		queryFn: async (ctx) => {
 			try {
 				const resp = await fetch(`${apiUrl}/api/health`, {
@@ -41,8 +45,9 @@ export const ServerUrlPage = () => {
 					onChangeText={setApiUrl}
 					autoCorrect={false}
 					autoCapitalize="none"
+					{...preferFocus()}
 				/>
-				{!data && (
+				{!!_apiUrl && !data && (
 					<P className="self-center text-red-500 dark:text-red-500">
 						{error
 							? error.message === "offline"

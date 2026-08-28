@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Image, View } from "react-native";
 import { AuthInfo } from "~/models/auth-info";
-import { Button, HRP, Link, Skeleton } from "~/primitives";
+import { Button, HRP, Link, preferFocus, Skeleton } from "~/primitives";
 import { Fetch, type QueryIdentifier } from "~/query";
 
 export const OidcLogin = ({ apiUrl }: { apiUrl: string }) => {
@@ -13,13 +13,16 @@ export const OidcLogin = ({ apiUrl }: { apiUrl: string }) => {
 			Render={(info) => (
 				<>
 					<View className="my-2 items-center">
-						{Object.entries(info.oidc).map(([id, provider]) => (
+						{Object.entries(info.oidc).map(([id, provider], index) => (
 							<Button
 								as={Link}
 								key={id}
 								href={provider.connect}
 								replace
 								className="w-full sm:w-3/4"
+								// signing in with a provider is one press, typing a username on
+								// a tv is not: when there is one it is where to start.
+								{...preferFocus(index === 0)}
 								left={
 									provider.logo ? (
 										<Image

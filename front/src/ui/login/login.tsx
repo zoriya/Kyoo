@@ -2,7 +2,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Platform } from "react-native";
-import { A, Button, H1, Input, P } from "~/primitives";
+import { A, Button, H1, Input, P, preferFocus } from "~/primitives";
 import { defaultApiUrl } from "~/providers/account-provider";
 import { useFetch } from "~/query";
 import { useQueryState } from "~/utils";
@@ -34,6 +34,10 @@ export const LoginPage = () => {
 				autoComplete="username"
 				onChangeText={(value) => setUsername(value)}
 				autoCapitalize="none"
+				// the only thing to do on this screen is fill it in, and a remote has
+				// no way of reaching it other than being put there — unless there is a
+				// provider button above, which is the shorter way in.
+				{...preferFocus(!Object.keys(info?.oidc ?? {}).length)}
 			/>
 			<P className="pt-2 pl-2">{t("login.password")}</P>
 			<PasswordInput

@@ -1,5 +1,5 @@
 import type { ComponentProps, RefObject } from "react";
-import { TVFocusGuideView, type View } from "react-native";
+import { Platform, TVFocusGuideView, type View } from "react-native";
 import { withUniwind } from "uniwind";
 
 const Guide = withUniwind(TVFocusGuideView);
@@ -69,5 +69,15 @@ export const preferFocus = (prefer: boolean | null | undefined = true) => {
 // was selected inside it, and android has nowhere to fall back to: the dpad ends
 // up selecting nothing at all until it walks into something by chance.
 export const requestFocus = (view: unknown) => {
-	(view as { requestTVFocus?: () => void } | null)?.requestTVFocus?.();
+	const v = view as {
+		requestTVFocus?: () => void;
+		focus?: () => void;
+	} | null;
+	if (v?.requestTVFocus) return v.requestTVFocus();
+	// A text input is not a view and has no `requestTVFocus`; `focus` is the one
+	// it answers to, and it brings the keyboard up with it. That is what you want
+	// from a couch, where there is no pointer to put the caret with and nothing on
+	// the screen to do but type — and not what you want in a hand, where it covers
+	// half the page before you have decided to type anything.
+	if (Platform.isTV) v?.focus?.();
 };
