@@ -65,89 +65,95 @@ export const EntryLine = ({
 			href={moreOpened ? undefined : href}
 			onLongPress={() => setMoreOpened(true)}
 			className={cn(
-				"group flex-row items-center p-1",
+				"group flex-row items-center p-1 outline-0",
 				href === null && "opacity-50",
 				className,
 			)}
 			{...props}
 		>
-			<ThumbnailBackground
-				src={poster ?? thumbnail}
-				quality="low"
-				alt=""
-				className={cn(
-					"mr-1 w-1/5 shrink-0 rounded",
-					poster ? "aspect-2/3" : "aspect-video",
-					"ring-accent group-hover:ring-3 group-focus-visible:ring-3",
-				)}
-			>
-				{(watchedPercent ?? 0) > 0 && (
-					<ItemProgress watchPercent={watchedPercent ?? 100} />
-				)}
-			</ThumbnailBackground>
-			<View className="m-1 mx-2 web:flex-1 native:shrink">
-				<View className="mb-5 md:flex-row">
-					<View>
-						<Heading
+			{({ focused, hovered }) => {
+				const highlighted = focused || hovered || undefined;
+				return (
+					<>
+						<ThumbnailBackground
+							src={poster ?? thumbnail}
+							quality="low"
+							alt=""
+							data-highlighted={highlighted}
 							className={cn(
-								"shrink font-medium text-lg",
-								"group-hover:underline group-focus-visible:underline",
+								"mr-1 w-1/5 shrink-0 rounded",
+								poster ? "aspect-2/3" : "aspect-video",
+								"data-highlighted:outline-3 data-highlighted:outline-accent",
 							)}
 						>
-							{[displayNumber, name ?? t("show.episodeNoMetadata")]
-								.filter((x) => x)
-								.join(" · ")}
-						</Heading>
-						{tagline && <Heading>{tagline}</Heading>}
-					</View>
-					<View className="flex-row justify-between md:ml-auto">
-						<View className="flex-row justify-between max-sm:flex-col sm:flex-1 md:flex-row-reverse md:items-center md:justify-end">
-							<SubP>
-								{[
-									airDate
-										? // @ts-expect-error Source https://www.i18next.com/translation-function/formatting#datetime
-											t("{{val, datetime}}", { val: airDate })
-										: null,
-									displayRuntime(runtime),
-								]
-									.filter((item) => item != null)
-									.join(" · ")}
-							</SubP>
-							{videos.length > 1 && (
-								<PressableFeedback
-									onPress={(e) => {
-										e.preventDefault();
-										onSelectVideos?.();
-									}}
-									className="shrink grow-0 flex-row items-center rounded-2xl bg-popover p-2 md:mx-4"
-									{...tooltip(t("show.multiVideos"))}
-								>
-									<Icon
-										icon={MultipleVideos}
-										className="fill-accent dark:fill-slate-400"
+							{(watchedPercent ?? 0) > 0 && (
+								<ItemProgress watchPercent={watchedPercent ?? 100} />
+							)}
+						</ThumbnailBackground>
+						<View className="m-1 mx-2 web:flex-1 native:shrink">
+							<View className="mb-5 md:flex-row">
+								<View>
+									<Heading
+										data-highlighted={highlighted}
+										className="shrink font-medium text-lg data-highlighted:underline"
+									>
+										{[displayNumber, name ?? t("show.episodeNoMetadata")]
+											.filter((x) => x)
+											.join(" · ")}
+									</Heading>
+									{tagline && <Heading>{tagline}</Heading>}
+								</View>
+								<View className="flex-row justify-between md:ml-auto">
+									<View className="flex-row justify-between max-sm:flex-col sm:flex-1 md:flex-row-reverse md:items-center md:justify-end">
+										<SubP>
+											{[
+												airDate
+													? // @ts-expect-error Source https://www.i18next.com/translation-function/formatting#datetime
+														t("{{val, datetime}}", { val: airDate })
+													: null,
+												displayRuntime(runtime),
+											]
+												.filter((item) => item != null)
+												.join(" · ")}
+										</SubP>
+										{videos.length > 1 && (
+											<PressableFeedback
+												onPress={(e) => {
+													e.preventDefault();
+													onSelectVideos?.();
+												}}
+												className="shrink grow-0 flex-row items-center rounded-2xl bg-popover p-2 md:mx-4"
+												{...tooltip(t("show.multiVideos"))}
+											>
+												<Icon
+													icon={MultipleVideos}
+													className="fill-accent dark:fill-slate-400"
+												/>
+												<SubP className="ml-2">
+													{t("show.videosCount", { number: videos.length })}
+												</SubP>
+											</PressableFeedback>
+										)}
+									</View>
+									<EntryContext
+										kind={kind}
+										slug={slug}
+										serieSlug={serieSlug}
+										videoSlug={videos.length === 1 ? videos[0].slug : null}
+										isOpen={moreOpened}
+										setOpen={(v) => setMoreOpened(v)}
+										className={cn(
+											"ml-3 flex native:hidden self-end no-touch:opacity-0 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100",
+											moreOpened && "opacity-100",
+										)}
 									/>
-									<SubP className="ml-2">
-										{t("show.videosCount", { number: videos.length })}
-									</SubP>
-								</PressableFeedback>
-							)}
+								</View>
+							</View>
+							<CroppedText numberOfLines={3}>{description}</CroppedText>
 						</View>
-						<EntryContext
-							kind={kind}
-							slug={slug}
-							serieSlug={serieSlug}
-							videoSlug={videos.length === 1 ? videos[0].slug : null}
-							isOpen={moreOpened}
-							setOpen={(v) => setMoreOpened(v)}
-							className={cn(
-								"ml-3 flex native:hidden self-end no-touch:opacity-0 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100",
-								moreOpened && "opacity-100",
-							)}
-						/>
-					</View>
-				</View>
-				<CroppedText numberOfLines={3}>{description}</CroppedText>
-			</View>
+					</>
+				);
+			}}
 		</Link>
 	);
 };

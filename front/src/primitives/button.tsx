@@ -44,31 +44,46 @@ export const Button = <AsProps = PressableProps>({
 				"flex-row items-center justify-center overflow-hidden",
 				"rounded-4xl border-3 border-accent p-1 px-6 outline-0",
 				disabled && "border-slate-600",
-				"group focus-within:bg-accent hover:bg-accent",
+				"group highlighted:bg-accent",
+				"highlighted:outline-3 highlighted:outline-accent",
 				className,
 			)}
 			{...(props as AsProps)}
 		>
-			{icon && (
-				<Icon
-					icon={icon}
-					className="mx-2 group-focus-within:fill-slate-200 group-hover:fill-slate-200"
-				/>
-			)}
-			{left}
-			{text && (
-				<P className="text-center group-focus-within:text-slate-200 group-hover:text-slate-200">
-					{text}
-				</P>
-			)}
-			{children}
-			{right}
-			{ricon && (
-				<Icon
-					icon={ricon}
-					className="mx-2 group-focus-within:fill-slate-200 group-hover:fill-slate-200"
-				/>
-			)}
+			{/* the label has to stay readable once the accent slides in, and a child
+			    cannot match its parent's `:focus` — see item-grid for the why. */}
+			{({ focused, hovered }: { focused?: boolean; hovered?: boolean }) => {
+				const highlighted = focused || hovered || undefined;
+				return (
+					<>
+						{icon && (
+							<Icon
+								icon={icon}
+								data-highlighted={highlighted}
+								className="mx-2 data-highlighted:fill-slate-200"
+							/>
+						)}
+						{left}
+						{text && (
+							<P
+								data-highlighted={highlighted}
+								className="text-center data-highlighted:text-slate-200"
+							>
+								{text}
+							</P>
+						)}
+						{children}
+						{right}
+						{ricon && (
+							<Icon
+								icon={ricon}
+								data-highlighted={highlighted}
+								className="mx-2 data-highlighted:fill-slate-200"
+							/>
+						)}
+					</>
+				);
+			}}
 		</Container>
 	);
 };

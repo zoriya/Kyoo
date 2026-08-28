@@ -71,45 +71,58 @@ export const ItemGrid = ({
 			)}
 			{...props}
 		>
-			<PosterBackground
-				src={poster}
-				quality="low"
-				className={cn(
-					"w-full",
-					"ring-accent group-hover:ring-3 group-focus-visible:ring-3",
-				)}
-			>
-				<ItemWatchStatus
-					watchStatus={watchStatus}
-					availableCount={availableCount}
-					seenCount={seenCount}
-				/>
-				{kind === "movie" && !!watchPercent && (
-					<ItemProgress watchPercent={watchPercent} />
-				)}
-				<ShowContext
-					kind={kind}
-					slug={slug}
-					name={name}
-					videoSlug={videoSlug}
-					status={watchStatus}
-					isOpen={moreOpened}
-					setOpen={setMoreOpened}
-					className={cn(
-						"absolute top-0 right-0 bg-gray-800/70 hover:bg-gray-800 focus-visible:bg-gray-800",
-						"native:hidden opacity-0 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100",
-						moreOpened && "opacity-100",
-					)}
-					iconClassName="fill-slate-200 dark:fill-slate-200"
-				/>
-			</PosterBackground>
-			<P
-				numberOfLines={subtitle ? 1 : 2}
-				className="text-center group-focus-within:underline group-hover:underline"
-			>
-				{name}
-			</P>
-			{subtitle && <SubP className="text-center">{subtitle}</SubP>}
+			{/* `group-*` only exists on the web: uniwind can only match a pseudo-class
+			    against the component it is set on, never against an ancestor. The
+			    pressable's own state is handed down as `data-highlighted` instead, so
+			    the styling still lives in the class list. */}
+			{({ focused, hovered }) => {
+				const highlighted = focused || hovered || undefined;
+				return (
+					<>
+						<PosterBackground
+							src={poster}
+							quality="low"
+							data-highlighted={highlighted}
+							className={cn(
+								"w-full",
+								"data-highlighted:outline-3 data-highlighted:outline-accent",
+							)}
+						>
+							<ItemWatchStatus
+								watchStatus={watchStatus}
+								availableCount={availableCount}
+								seenCount={seenCount}
+							/>
+							{kind === "movie" && !!watchPercent && (
+								<ItemProgress watchPercent={watchPercent} />
+							)}
+							<ShowContext
+								kind={kind}
+								slug={slug}
+								name={name}
+								videoSlug={videoSlug}
+								status={watchStatus}
+								isOpen={moreOpened}
+								setOpen={setMoreOpened}
+								className={cn(
+									"absolute top-0 right-0 bg-gray-800/70 hover:bg-gray-800 focus-visible:bg-gray-800",
+									"native:hidden opacity-0 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100",
+									moreOpened && "opacity-100",
+								)}
+								iconClassName="fill-slate-200 dark:fill-slate-200"
+							/>
+						</PosterBackground>
+						<P
+							numberOfLines={subtitle ? 1 : 2}
+							data-highlighted={highlighted}
+							className="text-center data-highlighted:underline"
+						>
+							{name}
+						</P>
+						{subtitle && <SubP className="text-center">{subtitle}</SubP>}
+					</>
+				);
+			}}
 		</Link>
 	);
 };

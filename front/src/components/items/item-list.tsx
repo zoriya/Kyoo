@@ -51,62 +51,69 @@ export const ItemList = ({
 			href={moreOpened ? undefined : href}
 			onLongPress={() => setMoreOpened(true)}
 			className={cn(
-				"group m-1 mx-2 h-80 overflow-hidden rounded",
-				"outline-0 ring-accent focus-within:ring-3 hover:ring-3",
+				"group m-1 mx-2 h-80 overflow-hidden rounded outline-0",
+				"highlighted:outline-3 highlighted:outline-accent",
 				className,
 			)}
 			{...props}
 		>
-			<ImageBackground
-				src={banner}
-				quality="medium"
-				className="h-full w-full flex-row items-center justify-evenly"
-			>
-				<View className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/70" />
-				<View className="w-1/2 lg:w-1/3">
-					<View className="flex-row justify-center">
-						<Heading
+			{({ focused, hovered }) => {
+				const highlighted = focused || hovered || undefined;
+				return (
+					<ImageBackground
+						src={banner}
+						quality="medium"
+						className="h-full w-full flex-row items-center justify-evenly"
+					>
+						<View className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/70" />
+						<View className="w-1/2 lg:w-1/3">
+							<View className="flex-row justify-center">
+								<Heading
+									data-highlighted={highlighted}
+									className="text-center text-3xl text-slate-200 uppercase data-highlighted:underline"
+								>
+									{name}
+								</Heading>
+								<ShowContext
+									kind={kind}
+									slug={slug}
+									name={name}
+									videoSlug={videoSlug}
+									status={watchStatus}
+									isOpen={moreOpened}
+									setOpen={setMoreOpened}
+									className={cn(
+										"ml-4",
+										"bg-gray-800/70 hover:bg-gray-800 focus-visible:bg-gray-800",
+										"native:hidden opacity-0 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100",
+										moreOpened && "opacity-100",
+									)}
+									iconClassName="fill-slate-200 dark:fill-slate-200"
+								/>
+							</View>
+							{subtitle && (
+								<P className="mr-8 text-center text-slate-400">{subtitle}</P>
+							)}
+						</View>
+						<PosterBackground
+							src={poster}
+							alt=""
+							quality="low"
+							data-highlighted={highlighted}
 							className={cn(
-								"text-center text-3xl text-slate-200 uppercase",
-								"group-focus-within:underline group-hover:underline",
+								"h-4/5",
+								"data-highlighted:outline-3 data-highlighted:outline-accent",
 							)}
 						>
-							{name}
-						</Heading>
-						<ShowContext
-							kind={kind}
-							slug={slug}
-							name={name}
-							videoSlug={videoSlug}
-							status={watchStatus}
-							isOpen={moreOpened}
-							setOpen={setMoreOpened}
-							className={cn(
-								"ml-4",
-								"bg-gray-800/70 hover:bg-gray-800 focus-visible:bg-gray-800",
-								"native:hidden opacity-0 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100",
-								moreOpened && "opacity-100",
-							)}
-							iconClassName="fill-slate-200 dark:fill-slate-200"
-						/>
-					</View>
-					{subtitle && (
-						<P className="mr-8 text-center text-slate-400">{subtitle}</P>
-					)}
-				</View>
-				<PosterBackground
-					src={poster}
-					alt=""
-					quality="low"
-					className="h-4/5 ring-accent group-focus-within:ring-4 group-hover:ring-4"
-				>
-					<ItemWatchStatus
-						watchStatus={watchStatus}
-						availableCount={availableCount}
-						seenCount={seenCount}
-					/>
-				</PosterBackground>
-			</ImageBackground>
+							<ItemWatchStatus
+								watchStatus={watchStatus}
+								availableCount={availableCount}
+								seenCount={seenCount}
+							/>
+						</PosterBackground>
+					</ImageBackground>
+				);
+			}}
 		</Link>
 	);
 };

@@ -47,37 +47,46 @@ const SearchResultItem = ({
 		<Pressable
 			onPress={onSelect}
 			disabled={isPending}
-			className="group items-center p-1 outline-0"
+			className="items-center p-1 outline-0"
 		>
-			<PosterBackground
-				src={poster}
-				quality="medium"
-				className={cn(
-					"w-full",
-					"ring-accent group-hover:ring-3 group-focus-visible:ring-3",
-				)}
-			>
-				{isPending && (
-					<View className="absolute inset-0 items-center justify-center bg-black/50">
-						<Spinner />
-					</View>
-				)}
-				{externalHref && (
-					<IconButton
-						icon={OpenInNew}
-						as={Link}
-						href={externalHref}
-						iconClassName="h-5 w-5 fill-slate-200 dark:fill-slate-200"
-					/>
-				)}
-			</PosterBackground>
-			<P
-				numberOfLines={subtitle ? 1 : 2}
-				className="text-center group-focus-within:underline group-hover:underline"
-			>
-				{name}
-			</P>
-			{subtitle && <SubP className="text-center">{subtitle}</SubP>}
+			{({ focused, hovered }) => {
+				const highlighted = focused || hovered || undefined;
+				return (
+					<>
+						<PosterBackground
+							src={poster}
+							quality="medium"
+							data-highlighted={highlighted}
+							className={cn(
+								"w-full",
+								"data-highlighted:outline-3 data-highlighted:outline-accent",
+							)}
+						>
+							{isPending && (
+								<View className="absolute inset-0 items-center justify-center bg-black/50">
+									<Spinner />
+								</View>
+							)}
+							{externalHref && (
+								<IconButton
+									icon={OpenInNew}
+									as={Link}
+									href={externalHref}
+									iconClassName="h-5 w-5 fill-slate-200 dark:fill-slate-200"
+								/>
+							)}
+						</PosterBackground>
+						<P
+							numberOfLines={subtitle ? 1 : 2}
+							data-highlighted={highlighted}
+							className="text-center data-highlighted:underline"
+						>
+							{name}
+						</P>
+						{subtitle && <SubP className="text-center">{subtitle}</SubP>}
+					</>
+				);
+			}}
 		</Pressable>
 	);
 };

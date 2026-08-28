@@ -1,6 +1,5 @@
-import { type ComponentProps, type ComponentType, useState } from "react";
+import type { ComponentProps, ComponentType } from "react";
 import type { PressableProps } from "react-native";
-import Animated from "react-native-reanimated";
 import RSvg, { type SvgProps } from "react-native-svg";
 import { withUniwind } from "uniwind";
 import { cn } from "~/utils";
@@ -86,8 +85,9 @@ export const IconButton = <AsProps = PressableProps>({
 		<Container
 			focusRipple
 			className={cn(
-				"self-center overflow-hidden rounded-full p-2",
-				"outline-0 hover:bg-gray-400/50 focus-visible:bg-gray-400/50",
+				"self-center overflow-hidden rounded-full p-2 outline-0",
+				"highlighted:bg-gray-400/50",
+				"highlighted:outline-3 highlighted:outline-accent",
 				className,
 			)}
 			disabled={disabled}
@@ -104,8 +104,6 @@ export const IconButton = <AsProps = PressableProps>({
 	);
 };
 
-const Pressable = Animated.createAnimatedComponent(PressableFeedback);
-
 export const IconFab = <AsProps = PressableProps>({
 	icon,
 	as,
@@ -113,35 +111,29 @@ export const IconFab = <AsProps = PressableProps>({
 	iconClassName,
 	...props
 }: ComponentProps<typeof IconButton<AsProps>>) => {
-	const [hover, setHover] = useState(false);
-	const [focus, setFocus] = useState(false);
-	const Container = as ?? Pressable;
+	const Container = as ?? PressableFeedback;
 
 	return (
 		<Container
 			className={cn(
-				"group h-10 w-10 overflow-hidden rounded-full bg-accent p-2 outline-0",
+				"h-10 w-10 overflow-hidden rounded-full bg-accent p-2 outline-0",
+				"highlighted:scale-130 transition-transform duration-150",
+				"highlighted:outline-3 highlighted:outline-accent",
 				className,
 			)}
-			onHoverIn={() => setHover(true)}
-			onHoverOut={() => setHover(false)}
-			onFocus={() => setFocus(true)}
-			onBlur={() => setFocus(false)}
-			style={{
-				transform: hover || focus ? [{ scale: 1.3 }] : [],
-				transitionProperty: "transform",
-				transitionDuration: "150ms",
-			}}
 			{...(props as AsProps)}
 		>
-			<Icon
-				icon={icon}
-				className={cn(
-					"fill-slate-300 dark:fill-slate-300",
-					(hover || focus) && "fill-slate-200 dark:fill-slate-200",
-					iconClassName,
-				)}
-			/>
+			{({ focused, hovered }: { focused?: boolean; hovered?: boolean }) => (
+				<Icon
+					icon={icon}
+					data-highlighted={focused || hovered || undefined}
+					className={cn(
+						"fill-slate-300 dark:fill-slate-300",
+						"data-highlighted:fill-slate-200",
+						iconClassName,
+					)}
+				/>
+			)}
 		</Container>
 	);
 };

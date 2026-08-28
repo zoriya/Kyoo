@@ -58,37 +58,48 @@ export const EntryBox = ({
 			)}
 			{...props}
 		>
-			<ThumbnailBackground
-				src={thumbnail}
-				quality="low"
-				alt=""
-				className={cn(
-					"aspect-video w-full rounded",
-					"ring-accent group-hover:ring-3 group-focus-visible:ring-3",
-				)}
-			>
-				<ItemProgress watchPercent={watchedPercent} />
-				<EntryContext
-					kind={kind}
-					slug={slug}
-					serieSlug={serieSlug}
-					videoSlug={videos.length === 1 ? videos[0].slug : null}
-					isOpen={moreOpened}
-					setOpen={setMoreOpened}
-					className={cn(
-						"absolute top-0 right-0 bg-gray-800/70 hover:bg-gray-800 focus-visible:bg-gray-800",
-						"native:hidden opacity-0 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100",
-						moreOpened && "opacity-100",
-					)}
-					iconClassName="fill-slate-200 dark:fill-slate-200"
-				/>
-			</ThumbnailBackground>
-			<P className="text-center group-focus-within:underline group-hover:underline">
-				{name ?? t("show.episodeNoMetadata")}
-			</P>
-			<SubP numberOfLines={3} className="text-center">
-				{description}
-			</SubP>
+			{({ focused, hovered }) => {
+				const highlighted = focused || hovered || undefined;
+				return (
+					<>
+						<ThumbnailBackground
+							src={thumbnail}
+							quality="low"
+							alt=""
+							data-highlighted={highlighted}
+							className={cn(
+								"aspect-video w-full rounded",
+								"data-highlighted:outline-3 data-highlighted:outline-accent",
+							)}
+						>
+							<ItemProgress watchPercent={watchedPercent} />
+							<EntryContext
+								kind={kind}
+								slug={slug}
+								serieSlug={serieSlug}
+								videoSlug={videos.length === 1 ? videos[0].slug : null}
+								isOpen={moreOpened}
+								setOpen={setMoreOpened}
+								className={cn(
+									"absolute top-0 right-0 bg-gray-800/70 hover:bg-gray-800 focus-visible:bg-gray-800",
+									"native:hidden opacity-0 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100",
+									moreOpened && "opacity-100",
+								)}
+								iconClassName="fill-slate-200 dark:fill-slate-200"
+							/>
+						</ThumbnailBackground>
+						<P
+							data-highlighted={highlighted}
+							className="text-center data-highlighted:underline"
+						>
+							{name ?? t("show.episodeNoMetadata")}
+						</P>
+						<SubP numberOfLines={3} className="text-center">
+							{description}
+						</SubP>
+					</>
+				);
+			}}
 		</Link>
 	);
 };

@@ -32,30 +32,36 @@ export const Chip = ({
 				size === "small" && "px-2.5 py-1",
 				size === "medium" && "px-5 py-2",
 				size === "large" && "px-10 py-4",
-				outline && "hover:bg-accent focus:bg-accent",
-				!outline && "bg-accent hover:bg-transparent focus:bg-transparent",
+				outline && "highlighted:bg-accent",
+				!outline && "bg-accent highlighted:bg-transparent",
+				"highlighted:outline-3 highlighted:outline-accent",
 				className,
 			)}
 			{...props}
 		>
-			<P
-				className={cn(
-					outline &&
-						cn(
-							"dark:text-slate-300",
-							"group-hover:text-slate-200 group-focus:text-slate-200",
-						),
-					!outline &&
-						cn(
-							"text-slate-200 dark:text-slate-300",
-							"group-hover:text-slate-600 group-focus:text-slate-600",
-							"dark:group-focus:text-slate-300 dark:group-hover:text-slate-300",
-						),
-					size === "small" && "text-sm",
-				)}
-			>
-				{capitalize(label)}
-			</P>
+			{/* the label flips with the background — a child cannot match its parent's
+			    `:focus`, see item-grid for the why. */}
+			{({ focused, hovered }) => {
+				const highlighted = focused || hovered || undefined;
+				return (
+					<P
+						data-highlighted={highlighted}
+						className={cn(
+							outline &&
+								cn("dark:text-slate-300", "data-highlighted:text-slate-200"),
+							!outline &&
+								cn(
+									"text-slate-200 dark:text-slate-300",
+									"data-highlighted:text-slate-600",
+									"dark:data-highlighted:text-slate-300",
+								),
+							size === "small" && "text-sm",
+						)}
+					>
+						{capitalize(label)}
+					</P>
+				);
+			}}
 		</Link>
 	);
 };
@@ -73,7 +79,7 @@ Chip.Loader = ({
 	return (
 		<View
 			className={cn(
-				"group justify-center overflow-hidden rounded-4xl border border-accent outline-0",
+				"justify-center overflow-hidden rounded-4xl border border-accent outline-0",
 				size === "small" && "px-2.5 py-1",
 				size === "medium" && "px-5 py-2",
 				size === "large" && "px-10 py-4",

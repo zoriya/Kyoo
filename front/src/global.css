@@ -11,6 +11,26 @@
 }
 @custom-variant no-touch (:where(body:not(.noHover)) &);
 
+/* Pointer hover, keyboard focus and dpad focus all mean the same thing here:
+ * this is what the user is about to act on, and it has to read from a couch.
+ * react-native has no :focus-visible and does not need one, focus only ever
+ * moves there through a remote or a keyboard.
+ * The `@media native` block has to stay last: uniwind loses track of the class
+ * it is in once it walked into a media query. */
+@custom-variant highlighted {
+	&:hover {
+		@slot;
+	}
+	&:focus-visible {
+		@slot;
+	}
+	@media native {
+		&:focus {
+			@slot;
+		}
+	}
+}
+
 @theme {
 	--color-accent: #6b00b8;
 	--color-background: #f0f2f5;

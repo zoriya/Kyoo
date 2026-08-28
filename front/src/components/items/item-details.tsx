@@ -61,47 +61,59 @@ export const ItemDetails = ({
 				href={moreOpened ? undefined : href}
 				onLongPress={() => setMoreOpened(true)}
 				className={cn(
-					"h-full flex-row overflow-hidden rounded-xl bg-card",
-					"group outline-0 ring-accent focus-within:ring-3 hover:ring-3",
+					"group h-full flex-row overflow-hidden rounded-xl bg-card outline-0",
+					"highlighted:outline-3 highlighted:outline-accent",
 				)}
 			>
-				<PosterBackground
-					src={poster}
-					alt=""
-					quality="low"
-					className="h-full rounded-none"
-				>
-					<View className="absolute bottom-0 w-full bg-slate-900/50 p-2 px-3">
-						<P className="text-slate-200 group-focus-within:underline group-hover:underline">
-							{name}
-						</P>
-						{subtitle && <SubP className="text-slate-400">{subtitle}</SubP>}
-					</View>
-					<ItemWatchStatus
-						watchStatus={watchStatus}
-						availableCount={availableCount}
-						seenCount={seenCount}
-					/>
-				</PosterBackground>
-				<View className="mb-14 flex-1 justify-end">
-					<View className="my-2 flex-row-reverse justify-between p-2">
-						<ShowContext
-							kind={kind}
-							slug={slug}
-							name={name}
-							status={watchStatus}
-							isOpen={moreOpened}
-							setOpen={setMoreOpened}
-							videoSlug={videoSlug}
-						/>
-						{tagline && <P className="p-1">{tagline}</P>}
-					</View>
-					<ScrollView className="p-3">
-						<SubP className="text-justify">
-							{description ?? t("show.noOverview")}
-						</SubP>
-					</ScrollView>
-				</View>
+				{({ focused, hovered }) => {
+					const highlighted = focused || hovered || undefined;
+					return (
+						<>
+							<PosterBackground
+								src={poster}
+								alt=""
+								quality="low"
+								className="h-full rounded-none"
+							>
+								<View className="absolute bottom-0 w-full bg-slate-900/50 p-2 px-3">
+									<P
+										data-highlighted={highlighted}
+										className="text-slate-200 data-highlighted:underline"
+									>
+										{name}
+									</P>
+									{subtitle && (
+										<SubP className="text-slate-400">{subtitle}</SubP>
+									)}
+								</View>
+								<ItemWatchStatus
+									watchStatus={watchStatus}
+									availableCount={availableCount}
+									seenCount={seenCount}
+								/>
+							</PosterBackground>
+							<View className="mb-14 flex-1 justify-end">
+								<View className="my-2 flex-row-reverse justify-between p-2">
+									<ShowContext
+										kind={kind}
+										slug={slug}
+										name={name}
+										status={watchStatus}
+										isOpen={moreOpened}
+										setOpen={setMoreOpened}
+										videoSlug={videoSlug}
+									/>
+									{tagline && <P className="p-1">{tagline}</P>}
+								</View>
+								<ScrollView className="p-3">
+									<SubP className="text-justify">
+										{description ?? t("show.noOverview")}
+									</SubP>
+								</ScrollView>
+							</View>
+						</>
+					);
+				}}
 			</Link>
 
 			{/* This view needs to be out of the Link because nested <a> are not allowed on the web */}
