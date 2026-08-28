@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
+import { type PressableProps, View } from "react-native";
 import { type KImage, Role } from "~/models";
 import { Container, H2, Link, P, Poster, Skeleton, SubP } from "~/primitives";
 import { InfiniteGrid, type QueryIdentifier } from "~/query";
@@ -12,35 +12,42 @@ export const CharacterCard = ({
 	subtitle,
 	image,
 	characterImage,
+	...props
 }: {
 	href: string;
 	name: string;
 	subtitle: string;
 	image: KImage | null;
 	characterImage?: KImage | null;
-}) => {
+} & PressableProps) => {
 	return (
 		<Link
 			href={href}
 			className={cn(
-				"flex-row items-center overflow-hidden rounded-xl bg-card",
-				"group ring-accent hover:ring-3 focus-visible:ring-3",
+				"flex-row items-center overflow-hidden rounded-xl bg-card outline-0",
+				"highlighted:outline-3 highlighted:outline-accent",
 			)}
+			{...props}
 		>
-			<Poster src={image} quality="low" className="w-28" />
-			<View className="flex-1 items-center justify-center py-5">
-				<P
-					className="text-center font-semibold group-hover:underline group-focus-visible:underline"
-					numberOfLines={2}
-				>
-					{name}
-				</P>
-				<SubP className="mt-1 text-center" numberOfLines={2}>
-					{subtitle}
-				</SubP>
-			</View>
-			{characterImage && (
-				<Poster src={characterImage} quality="low" className="w-28" />
+			{({ focused, hovered }) => (
+				<>
+					<Poster src={image} quality="low" className="w-28" />
+					<View className="flex-1 items-center justify-center py-5">
+						<P
+							data-highlighted={focused || hovered || undefined}
+							className="text-center font-semibold data-highlighted:underline"
+							numberOfLines={2}
+						>
+							{name}
+						</P>
+						<SubP className="mt-1 text-center" numberOfLines={2}>
+							{subtitle}
+						</SubP>
+					</View>
+					{characterImage && (
+						<Poster src={characterImage} quality="low" className="w-28" />
+					)}
+				</>
 			)}
 		</Link>
 	);

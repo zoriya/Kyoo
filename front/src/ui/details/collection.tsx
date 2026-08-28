@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { itemMap } from "~/components/items";
 import { ItemDetails } from "~/components/items/item-details";
 import { Show } from "~/models";
+import { preferFocus } from "~/primitives";
 import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { useQueryState } from "~/utils";
 import { HeaderBackground, useScrollNavbar } from "../navbar";
@@ -38,9 +39,10 @@ export const CollectionDetails = () => {
 			<InfiniteFetch
 				query={CollectionDetails.query(slug)}
 				layout={ItemDetails.layout}
-				Render={({ item }) => (
+				Render={({ item, index }) => (
 					<ItemDetails
 						{...itemMap(item)}
+						{...preferFocus(index === 0)}
 						tagline={item.tagline}
 						description={item.description}
 						genres={item.genres}

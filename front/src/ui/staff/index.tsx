@@ -1,7 +1,16 @@
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { RoleWithShow, Staff as StaffModel } from "~/models";
-import { Container, H1, Head, Poster, Skeleton, SubP, ts } from "~/primitives";
+import {
+	Container,
+	H1,
+	Head,
+	Poster,
+	preferFocus,
+	Skeleton,
+	SubP,
+	ts,
+} from "~/primitives";
 import { Fetch, InfiniteFetch, type QueryIdentifier } from "~/query";
 import { useQueryState } from "~/utils";
 import { CharacterCard } from "../details/staff";
@@ -48,9 +57,10 @@ export const StaffPage = () => {
 				size: 112,
 			}}
 			Header={<StaffHeader slug={slug} />}
-			Render={({ item }) => (
+			Render={({ item, index }) => (
 				<CharacterCard
 					href={`/${item.show.kind}s/${item.show.slug}`}
+					{...preferFocus(index === 0)}
 					name={item.show.name}
 					subtitle={
 						item.character
