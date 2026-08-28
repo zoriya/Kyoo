@@ -13,6 +13,7 @@ import { useIsFocused } from "expo-router/react-navigation";
 import {
 	type ComponentProps,
 	type ComponentType,
+	type Ref,
 	useLayoutEffect,
 	useRef,
 	useState,
@@ -175,11 +176,13 @@ export const SearchBar = ({
 	containerClassName,
 	forceExpand,
 	overlayOnSmallScreen,
+	ref,
 	...props
 }: TextInputProps & {
 	forceExpand?: boolean;
 	containerClassName?: string;
 	overlayOnSmallScreen?: boolean;
+	ref?: Ref<TextInput>;
 }) => {
 	const { t } = useTranslation();
 	const [_expanded, setExpanded] = useState(!!value);
@@ -207,7 +210,13 @@ export const SearchBar = ({
 			]}
 		>
 			<TextInput
-				ref={inputRef}
+				// the close button needs the input to blur it, and a caller may want it
+				// to put the selection there — both, not either.
+				ref={(view) => {
+					inputRef.current = view;
+					if (typeof ref === "function") ref(view);
+					else if (ref) ref.current = view;
+				}}
 				value={value}
 				onChangeText={(q) => onChangeText?.(q)}
 				onSubmitEditing={(e) => onSubmitEditing?.(e)}

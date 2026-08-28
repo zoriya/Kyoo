@@ -25,6 +25,7 @@ import {
 	Menu,
 	P,
 	PressableFeedback,
+	preferFocus,
 	tooltip,
 } from "~/primitives";
 import { SearchBar } from "~/ui/navbar";
@@ -269,9 +270,9 @@ export const BrowseSettings = ({
 					value={query}
 					onChangeText={(q) => setQuery(q || undefined)}
 					containerClassName="mx-8 my-2 h-12"
-					// a plain react-native prop rather than `preferFocus`: it opens the
-					// on-screen keyboard with it, which is what picking "search" means.
-					autoFocus={focusSearch}
+					// on a tv this also brings the on-screen keyboard up, which is what
+					// picking "search" in the rail means.
+					{...preferFocus(focusSearch)}
 				/>
 			)}
 			<View className="my-2 flex-1 flex-row flex-wrap items-center justify-between sm:mx-8">
