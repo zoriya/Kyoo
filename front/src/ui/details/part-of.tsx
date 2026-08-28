@@ -23,30 +23,35 @@ export const PartOf = ({
 		<Link
 			href={href}
 			className={cn(
-				"group min-h-56 flex-1 overflow-hidden rounded-xl ring-accent hover:ring-3 focus-visible:ring-3",
+				"min-h-56 flex-1 overflow-hidden rounded-xl outline-0",
+				"highlighted:outline-3 highlighted:outline-accent",
 				className,
 			)}
 		>
-			<ImageBackground
-				src={banner}
-				quality="high"
-				alt=""
-				className="flex-1 justify-center p-6"
-			>
-				<View className="absolute inset-0 bg-linear-to-b from-transparent via-slate-950/50 to-transparent" />
-				<H2
-					className={cn(
-						"py-2",
-						"text-slate-200 dark:text-slate-200",
-						"group-focus-within:underline group-hover:underline",
-					)}
+			{({ focused, hovered }) => (
+				<ImageBackground
+					src={banner}
+					quality="high"
+					alt=""
+					className="flex-1 justify-center p-6"
 				>
-					{t("show.partOf")} {name}
-				</H2>
-				<P className="text-justify text-slate-400 dark:text-slate-400">
-					{description}
-				</P>
-			</ImageBackground>
+					<View className="absolute inset-0 bg-linear-to-b from-transparent via-slate-950/50 to-transparent" />
+					{/* a child cannot match its parent's `:focus` — see item-grid for the why */}
+					<H2
+						data-highlighted={focused || hovered || undefined}
+						className={cn(
+							"py-2",
+							"text-slate-200 dark:text-slate-200",
+							"data-highlighted:underline",
+						)}
+					>
+						{t("show.partOf")} {name}
+					</H2>
+					<P className="text-justify text-slate-400 dark:text-slate-400">
+						{description}
+					</P>
+				</ImageBackground>
+			)}
 		</Link>
 	);
 };

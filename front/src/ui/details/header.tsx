@@ -39,12 +39,14 @@ import {
 	P,
 	Popup,
 	Poster,
+	preferFocus,
 	Skeleton,
 	tooltip,
 	UL,
 } from "~/primitives";
 import { Fetch, type QueryIdentifier } from "~/query";
 import { cn, displayRuntime, getDisplayDate } from "~/utils";
+import { useHeroHeight } from "../hero";
 import { PartOf } from "./part-of";
 
 const ButtonList = ({
@@ -72,6 +74,17 @@ const ButtonList = ({
 }) => {
 	const { t } = useTranslation();
 	const [selected, setSelected] = useState<EntrySelectEntry | null>(null);
+	// whichever of these exists comes first takes the focus when the screen opens.
+	// A collection has none of them worth starting on, its own grid of shows below
+	// is the better target.
+	const first =
+		kind === "collection"
+			? "none"
+			: playHref !== null
+				? "play"
+				: trailerUrl
+					? "trailer"
+					: "watchlist";
 
 	return (
 		<View className="flex-row items-center justify-center">
@@ -90,6 +103,7 @@ const ButtonList = ({
 								href: videos?.length ? playHref : null,
 								disabled: !videos?.length,
 							})}
+					{...preferFocus(first === "play")}
 					{...tooltip(t("show.play"))}
 				/>
 			)}
@@ -99,6 +113,7 @@ const ButtonList = ({
 					as={Link}
 					href={trailerUrl}
 					iconClassName={iconsClassName}
+					{...preferFocus(first === "trailer")}
 					{...tooltip(t("show.trailer"))}
 				/>
 			)}
@@ -108,6 +123,7 @@ const ButtonList = ({
 					slug={slug}
 					status={watchStatus}
 					iconClassName={iconsClassName}
+					{...preferFocus(first === "watchlist")}
 				/>
 			)}
 			<ShowContext
@@ -156,7 +172,7 @@ export const TitleLine = ({
 	displayNumber: string | null;
 	videos: Entry["videos"] | null;
 	className?: string;
-}) => {
+} & ViewProps) => {
 	return (
 		<Container
 			className={cn("flex-1 max-sm:items-center sm:flex-row", className)}
@@ -221,7 +237,7 @@ TitleLine.Loader = ({
 }: {
 	kind: "serie" | "movie" | "collection";
 	className?: string;
-}) => {
+} & ViewProps) => {
 	return (
 		<Container
 			className={cn("flex-1 max-sm:items-center sm:flex-row", className)}
@@ -424,6 +440,10 @@ export const Header = ({
 	slug: string;
 	onImageLayout?: ViewProps["onLayout"];
 }) => {
+	const hero = useHeroHeight();
+	// the poster straddles the bottom of the backdrop
+	const titleOffset = Math.round(hero * 0.36);
+
 	return (
 		<Fetch
 			query={Header.query(kind, slug)}
@@ -438,7 +458,8 @@ export const Header = ({
 						src={data.thumbnail}
 						quality="high"
 						alt=""
-						className="absolute top-0 right-0 left-0 h-[40vh] w-full sm:h-[60vh] sm:min-h-[750px] md:min-h-[680px] lg:h-[65vh]"
+						className="absolute top-0 right-0 left-0 w-full"
+						style={{ height: hero }}
 						onLayout={onImageLayout}
 					>
 						<View className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/70" />
@@ -471,7 +492,7 @@ export const Header = ({
 									? ((data.nextEntry ?? data.firstEntry)?.videos ?? null)
 									: null
 						}
-						className="mt-[max(20vh,200px)] sm:mt-[35vh] md:mt-[max(45vh,150px)] lg:mt-[max(35vh,200px)]"
+						style={{ marginTop: titleOffset }}
 					/>
 					<Description
 						description={data.description}
@@ -496,13 +517,11 @@ export const Header = ({
 			Loader={() => (
 				<View className="flex-1">
 					<View
-						className="absolute top-0 right-0 left-0 h-[40vh] w-full bg-linear-to-b from-transparent to-slate-950/70 sm:h-[60vh] sm:min-h-[750px] md:min-h-[680px] lg:h-[65vh]"
+						className="absolute top-0 right-0 left-0 w-full bg-linear-to-b from-transparent to-slate-950/70"
+						style={{ height: hero }}
 						onLayout={onImageLayout}
 					/>
-					<TitleLine.Loader
-						kind={kind}
-						className="mt-[max(20vh,200px)] sm:mt-[35vh] md:mt-[max(45vh,150px)] lg:mt-[max(35vh,200px)]"
-					/>
+					<TitleLine.Loader kind={kind} style={{ marginTop: titleOffset }} />
 					<Description.Loader />
 				</View>
 			)}
