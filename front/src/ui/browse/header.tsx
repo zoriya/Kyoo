@@ -14,7 +14,7 @@ import All from "@material-symbols/svg-400/rounded/view_headline.svg";
 import ViewList from "@material-symbols/svg-400/rounded/view_list.svg";
 import type { ComponentType } from "react";
 import { useTranslation } from "react-i18next";
-import { type PressableProps, View } from "react-native";
+import { Platform, type PressableProps, View } from "react-native";
 import type { SvgProps } from "react-native-svg";
 import { Genre, Staff, Studio } from "~/models";
 import {
@@ -27,7 +27,8 @@ import {
 	PressableFeedback,
 	tooltip,
 } from "~/primitives";
-import { cn } from "~/utils";
+import { SearchBar } from "~/ui/navbar";
+import { cn, useQueryState } from "~/utils";
 import { availableSorts, type SortBy, type SortOrd } from "./types";
 
 const SortTrigger = ({
@@ -39,12 +40,32 @@ const SortTrigger = ({
 
 	return (
 		<PressableFeedback
-			className={cn("flex-row items-center", className)}
+			className={cn(
+				"flex-row items-center rounded-full px-2 outline-0",
+				"highlighted:bg-accent",
+				className,
+			)}
 			{...tooltip(t("browse.sortby-tt"))}
 			{...props}
 		>
-			<Icon icon={Sort} className="mx-1" />
-			<P>{t(`browse.sortkey.${sortBy}`)}</P>
+			{({ focused, hovered }) => {
+				const highlighted = focused || hovered || undefined;
+				return (
+					<>
+						<Icon
+							icon={Sort}
+							data-highlighted={highlighted}
+							className="mx-1 data-highlighted:fill-slate-200"
+						/>
+						<P
+							data-highlighted={highlighted}
+							className="data-highlighted:text-slate-200"
+						>
+							{t(`browse.sortkey.${sortBy}`)}
+						</P>
+					</>
+				);
+			}}
 		</PressableFeedback>
 	);
 };
@@ -65,18 +86,36 @@ const MediaTypeTrigger = ({
 
 	return (
 		<PressableFeedback
-			className={cn("flex-row items-center", className)}
+			className={cn(
+				"flex-row items-center rounded-full px-2 outline-0",
+				"highlighted:bg-accent",
+				className,
+			)}
 			{...tooltip(t("browse.mediatype-tt"))}
 			{...props}
 		>
-			<Icon icon={MediaTypeIcons[mediaType] ?? FilterList} className="mx-1" />
-			<P>
-				{t(
-					mediaType !== "all"
-						? `browse.mediatypekey.${mediaType}`
-						: "browse.mediatypelabel",
-				)}
-			</P>
+			{({ focused, hovered }) => {
+				const highlighted = focused || hovered || undefined;
+				return (
+					<>
+						<Icon
+							icon={MediaTypeIcons[mediaType] ?? FilterList}
+							data-highlighted={highlighted}
+							className="mx-1 data-highlighted:fill-slate-200"
+						/>
+						<P
+							data-highlighted={highlighted}
+							className="data-highlighted:text-slate-200"
+						>
+							{t(
+								mediaType !== "all"
+									? `browse.mediatypekey.${mediaType}`
+									: "browse.mediatypelabel",
+							)}
+						</P>
+					</>
+				);
+			}}
 		</PressableFeedback>
 	);
 };
@@ -94,11 +133,31 @@ const FilterTrigger = ({
 } & PressableProps) => {
 	return (
 		<PressableFeedback
-			className={cn("flex-row items-center", className)}
+			className={cn(
+				"flex-row items-center rounded-full px-2 outline-0",
+				"highlighted:bg-accent",
+				className,
+			)}
 			{...props}
 		>
-			<Icon icon={icon ?? FilterList} className="mx-1" />
-			<P>{count > 0 ? `${label} (${count})` : label}</P>
+			{({ focused, hovered }) => {
+				const highlighted = focused || hovered || undefined;
+				return (
+					<>
+						<Icon
+							icon={icon ?? FilterList}
+							data-highlighted={highlighted}
+							className="mx-1 data-highlighted:fill-slate-200"
+						/>
+						<P
+							data-highlighted={highlighted}
+							className="data-highlighted:text-slate-200"
+						>
+							{count > 0 ? `${label} (${count})` : label}
+						</P>
+					</>
+				);
+			}}
 		</PressableFeedback>
 	);
 };
@@ -138,6 +197,7 @@ export const BrowseSettings = ({
 	setFilter,
 	layout,
 	setLayout,
+	focusSearch,
 }: {
 	sortBy: SortBy;
 	sortOrd: SortOrd;
@@ -146,8 +206,10 @@ export const BrowseSettings = ({
 	setFilter: (filter: string) => void;
 	layout: "grid" | "list";
 	setLayout: (layout: "grid" | "list") => void;
+	focusSearch?: boolean;
 }) => {
 	const { t } = useTranslation();
+	const [query, setQuery] = useQueryState<string | undefined>("q", undefined);
 
 	const mediaType = /kind eq (\w+)/.exec(filter)?.[1] ?? "all";
 	const includedGenres = parseFilterValues(
@@ -199,6 +261,19 @@ export const BrowseSettings = ({
 
 	return (
 		<View>
+			{/* the tv has no header bar to hold the navbar's search field, so browse
+			    carries its own — it is the only way in to a query there. */}
+			{Platform.isTV && (
+				<SearchBar
+					forceExpand
+					value={query}
+					onChangeText={(q) => setQuery(q || undefined)}
+					containerClassName="mx-8 my-2 h-12"
+					// a plain react-native prop rather than `preferFocus`: it opens the
+					// on-screen keyboard with it, which is what picking "search" means.
+					autoFocus={focusSearch}
+				/>
+			)}
 			<View className="my-2 flex-1 flex-row flex-wrap items-center justify-between sm:mx-8">
 				<View className="flex-1 flex-row flex-wrap gap-3">
 					<Menu

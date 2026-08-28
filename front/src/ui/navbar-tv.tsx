@@ -163,7 +163,7 @@ export const TvNavRail = ({ children }: { children: ReactNode }) => {
 				</View>
 				<View className="flex-1 justify-center gap-1">
 					<RailItem
-						href="/browse"
+						href="/browse?focus=search"
 						label={t("navbar.search")}
 						icon={Search}
 						expanded={expanded}

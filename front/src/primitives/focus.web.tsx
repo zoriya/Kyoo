@@ -18,3 +18,8 @@ export const FocusGroup = ({
 // The browser gives the first tab press to the first element in the dom, which
 // is what a keyboard user expects; nothing to hand over here.
 export const preferFocus = (_prefer: boolean | null | undefined = true) => ({});
+
+// react-native-web hands out dom nodes as refs, so this is just `.focus()`.
+export const requestFocus = (view: unknown) => {
+	(view as HTMLElement | null)?.focus?.();
+};

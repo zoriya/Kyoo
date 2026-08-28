@@ -1,5 +1,6 @@
 import { ItemGrid, ItemList, itemMap } from "~/components/items";
 import { Show } from "~/models";
+import { preferFocus } from "~/primitives";
 import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { useQueryState } from "~/utils";
 import { BrowseSettings } from "./header";
@@ -9,6 +10,9 @@ export const BrowsePage = () => {
 	const [filter, setFilter] = useQueryState("filter", "");
 	const [sort, setSort] = useQueryState("sort", "name");
 	const [search] = useQueryState("q", "");
+	// the nav rail's search entry lands here, and hands the focus to the field
+	// rather than to the grid.
+	const [focus] = useQueryState("focus", "");
 	const sortOrd = sort.startsWith("-") ? "desc" : "asc";
 	const sortBy = (sort.startsWith("-") ? sort.substring(1) : sort) as SortBy;
 
@@ -32,9 +36,15 @@ export const BrowsePage = () => {
 					setFilter={setFilter}
 					layout={layout}
 					setLayout={setLayout}
+					focusSearch={focus === "search"}
 				/>
 			}
-			Render={({ item }) => <LayoutComponent {...itemMap(item)} />}
+			Render={({ item, index }) => (
+				<LayoutComponent
+					{...itemMap(item)}
+					{...preferFocus(index === 0 && focus !== "search")}
+				/>
+			)}
 			Loader={() => <LayoutComponent.Loader />}
 		/>
 	);

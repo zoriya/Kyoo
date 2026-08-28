@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import type { ReactNode, RefObject } from "react";
+import type { ReactNode, Ref } from "react";
 import {
 	Linking,
 	Platform,
@@ -79,7 +79,7 @@ export const PressableFeedback = ({
 	children,
 	ref,
 	...props
-}: PressableProps & { ref?: RefObject<View> }) => {
+}: PressableProps & { ref?: Ref<View> }) => {
 	const { color } = useResolveClassNames("text-slate-400/25");
 
 	return (

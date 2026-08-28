@@ -33,3 +33,10 @@ export const FocusGroup = ({ destination, ...props }: FocusGroupProps) => {
 // asks for it, so exactly one element per screen should.
 export const preferFocus = (prefer: boolean | null | undefined = true) =>
 	prefer ? { hasTVPreferredFocus: true } : {};
+
+// Hands the focus back to a view on demand. Closing an overlay unmounts whatever
+// was selected inside it, and android has nowhere to fall back to: the dpad ends
+// up selecting nothing at all until it walks into something by chance.
+export const requestFocus = (view: unknown) => {
+	(view as { requestTVFocus?: () => void } | null)?.requestTVFocus?.();
+};
