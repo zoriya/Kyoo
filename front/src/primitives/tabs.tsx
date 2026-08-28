@@ -47,30 +47,34 @@ export const Tabs = <T,>({
 					disabled={disabled}
 					onPress={() => setValue(x.value)}
 					className={cn(
-						"group flex-row items-center justify-center rounded-3xl px-4 py-2 outline-0",
-						!(x.value === value) && "hover:bg-accent focus:bg-accent",
+						"flex-row items-center justify-center rounded-3xl px-4 py-2 outline-0",
+						// the fill says which tab you are on, the ring says which one you are
+						// about to pick: with a remote those are two different things and
+						// filling both leaves nothing to tell them apart.
 						x.value === value && "bg-accent",
+						"highlighted:outline-3 highlighted:outline-accent",
 					)}
 				>
-					<Icon
-						icon={x.icon}
-						className={cn(
-							"mx-1",
-							x.value === value
-								? "fill-slate-200"
-								: "group-hover:fill-slate-200 group-focus:fill-slate-200",
-						)}
-					/>
-					<P
-						className={cn(
-							"ml-1",
-							x.value === value
-								? "text-slate-200"
-								: "group-hover:text-slate-200 group-focus:text-slate-200",
-						)}
-					>
-						{x.label}
-					</P>
+					{({ focused, hovered }) => {
+						// on the accent either way, see item-grid for why a child cannot
+						// read its parent's focus on its own.
+						const light = x.value === value || focused || hovered || undefined;
+						return (
+							<>
+								<Icon
+									icon={x.icon}
+									data-highlighted={light}
+									className="mx-1 data-highlighted:fill-slate-200"
+								/>
+								<P
+									data-highlighted={light}
+									className="ml-1 data-highlighted:text-slate-200"
+								>
+									{x.label}
+								</P>
+							</>
+						);
+					}}
 				</Pressable>
 			))}
 		</ScrollView>
