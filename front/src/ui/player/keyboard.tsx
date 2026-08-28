@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { Platform } from "react-native";
 import { type OmniPlayer, usePlayer } from "react-native-omni";
 import { toggleFullscreen } from "./controls/misc";
+import { useRemote } from "./remote";
 
 type Action =
 	| { type: "play" }
@@ -160,4 +161,52 @@ export const useKeyboard = () => {
 		document.addEventListener("keyup", handler);
 		return () => document.removeEventListener("keyup", handler);
 	}, [player]);
+};
+
+// The same actions, from a remote instead of a keyboard. It has no pointer to
+// wake the controls with, so any press does that; and while they are down there
+// is no reason to make anyone walk to a button to seek, the dpad drives the
+// playback straight. Once the controls are up they hold the focus and only the
+// media keys stay ours.
+export const useRemoteKeys = ({
+	controlsShown,
+	showControls,
+}: {
+	controlsShown: boolean;
+	showControls: () => void;
+}) => {
+	const player = usePlayer();
+	const shown = useRef(controlsShown);
+	shown.current = controlsShown;
+
+	useRemote(
+		useCallback(
+			(key) => {
+				const hidden = !shown.current;
+				showControls();
+
+				switch (key) {
+					case "playPause":
+						reducer(player, { type: "play" });
+						break;
+					case "rewind":
+						reducer(player, { type: "seek", value: -10 });
+						break;
+					case "fastForward":
+						reducer(player, { type: "seek", value: +10 });
+						break;
+					case "select":
+						if (hidden) reducer(player, { type: "play" });
+						break;
+					case "left":
+						if (hidden) reducer(player, { type: "seek", value: -10 });
+						break;
+					case "right":
+						if (hidden) reducer(player, { type: "seek", value: +10 });
+						break;
+				}
+			},
+			[player, showControls],
+		),
+	);
 };

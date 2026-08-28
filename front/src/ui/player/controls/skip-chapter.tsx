@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { usePlayer, usePlayerState } from "react-native-omni";
 import type { Chapter } from "~/models";
-import { Button, P } from "~/primitives";
+import { Button } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { useFetch } from "~/query";
 import { Info } from "~/ui/info";
@@ -84,15 +84,10 @@ export const SkipChapterButton = ({
 				seekPlayerTo(player, chapter.endTime);
 			}}
 			className={cn("z-20 bg-slate-900/70 px-4 py-2", className)}
-		>
-			<P
-				className={cn(
-					"text-center text-slate-300 dark:text-slate-300",
-					"group-focus-within:text-slate-200 group-hover:text-slate-200",
-				)}
-			>
-				{t(`player.chapters.skip`, { type: chapter.type })}
-			</P>
-		</Button>
+			// the label is the button's own, so it lights up with it: a child of a
+			// pressable cannot read the focus off its parent on native.
+			textClassName="text-slate-300 dark:text-slate-300"
+			text={t(`player.chapters.skip`, { type: chapter.type })}
+		/>
 	);
 };

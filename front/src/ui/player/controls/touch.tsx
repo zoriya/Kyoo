@@ -13,6 +13,7 @@ import {
 import { usePlayer, usePlayerState } from "react-native-omni";
 import { Icon, isTouchDevice, P } from "~/primitives";
 import { cn } from "~/utils";
+import { useRemoteKeys } from "../keyboard";
 import { toggleFullscreen } from "./misc";
 
 export const TouchControls = ({
@@ -53,6 +54,8 @@ export const TouchControls = ({
 		wasForced.current = forceShow;
 	}, [forceShow, show]);
 
+	useRemoteKeys({ controlsShown: shouldShow, showControls: show });
+
 	// On mouse move
 	useEffect(() => {
 		if (Platform.OS !== "web") return;
@@ -73,6 +76,10 @@ export const TouchControls = ({
 	return (
 		<View {...props}>
 			<DoublePressable
+				// it covers the whole video to catch a tap or a mouse, and a remote has
+				// neither: left focusable it is the biggest target on the screen and the
+				// first one the focus finder walks into.
+				focusable={false}
 				tabIndex={-1}
 				onPress={() => {
 					if (isTouchDevice()) {

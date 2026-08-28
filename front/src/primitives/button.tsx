@@ -22,6 +22,7 @@ export const Button = <AsProps = PressableProps>({
 	ref,
 	children,
 	className,
+	textClassName,
 	...props
 }: {
 	disabled?: boolean | null;
@@ -33,6 +34,7 @@ export const Button = <AsProps = PressableProps>({
 	children?: ReactNode;
 	ref?: Ref<View>;
 	className?: string;
+	textClassName?: string;
 	as?: ComponentType<AsProps>;
 } & AsProps) => {
 	const Container = as ?? PressableFeedback;

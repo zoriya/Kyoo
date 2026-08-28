@@ -2,7 +2,7 @@ import SkipNext from "@material-symbols/svg-400/rounded/skip_next-fill.svg";
 import SkipPrevious from "@material-symbols/svg-400/rounded/skip_previous-fill.svg";
 import { View } from "react-native";
 import { usePlayer } from "react-native-omni";
-import { IconButton } from "~/primitives";
+import { IconButton, preferFocus } from "~/primitives";
 import { cn } from "~/utils";
 import { PlayButton } from "./misc";
 
@@ -37,6 +37,9 @@ export const MiddleControls = ({
 			<PlayButton
 				className={cn("mx-8 bg-gray-800/50")}
 				iconClassName="h-14 w-14 fill-slate-200 dark:fill-slate-200"
+				// the controls are unmounted while hidden, so this fires every time they
+				// come back: the remote always lands on play.
+				{...preferFocus()}
 			/>
 			<IconButton
 				icon={SkipNext}
