@@ -232,6 +232,7 @@ export const EntryList = ({
 									? "rounded-md bg-accent/10"
 									: undefined
 							}
+							hasTVPreferredFocus={item.slug === currentEntrySlug}
 							// Don't display "Go to serie"
 							serieSlug={null}
 							displayNumber={entryDisplayNumber(item)}
