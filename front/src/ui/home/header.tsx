@@ -17,6 +17,7 @@ import {
 } from "~/primitives";
 import type { QueryIdentifier } from "~/query";
 import { cn } from "~/utils";
+import { useHeroHeight } from "../hero";
 
 export const Header = ({
 	name,
@@ -36,16 +37,15 @@ export const Header = ({
 	infoLink: string;
 } & Partial<ComponentProps<typeof ImageBackground>>) => {
 	const { t } = useTranslation();
+	const height = useHeroHeight();
 
 	return (
 		<ImageBackground
 			src={thumbnail}
 			alt=""
 			quality="high"
-			className={cn(
-				"h-[40vh] w-full sm:h-[60vh] sm:min-h-187.5 md:min-h-170 lg:h-[65vh]",
-				className,
-			)}
+			className={cn("w-full", className)}
+			style={{ height }}
 			{...props}
 		>
 			<View className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/70" />
@@ -61,6 +61,7 @@ export const Header = ({
 							as={Link}
 							href={link}
 							className="mr-2"
+							hasTVPreferredFocus
 							{...tooltip(t("show.play"))}
 						/>
 					)}
@@ -70,6 +71,7 @@ export const Header = ({
 						aria-label={t("home.info")}
 						href={infoLink}
 						className="mr-2"
+						hasTVPreferredFocus={link === null}
 						iconClassName="fill-slate-400"
 						{...tooltip(t("home.info"))}
 					/>
@@ -87,13 +89,10 @@ export const Header = ({
 
 Header.Loader = () => {
 	const { t } = useTranslation();
+	const height = useHeroHeight();
 
 	return (
-		<View
-			className={cn(
-				"h-[40vh] w-full sm:h-[60vh] sm:min-h-187.5 md:min-h-170 lg:h-[65vh]",
-			)}
-		>
+		<View className="w-full" style={{ height }}>
 			<View className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/70" />
 			<View className="absolute bottom-0 m-4 md:w-3/5">
 				<Skeleton className="h-10 w-2/5" />

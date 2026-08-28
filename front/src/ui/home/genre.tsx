@@ -18,7 +18,7 @@ export const GenreGrid = ({ genre }: { genre: Genre }) => {
 			<InfiniteFetch
 				query={GenreGrid.query(genre)}
 				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
-				Empty={<EmptyView message={t("home.none")} />}
+				Empty={<EmptyView message={t("home.none")} className="py-6" />}
 				Render={({ item }) => <ItemGrid {...itemMap(item)} horizontal />}
 				Loader={() => <ItemGrid.Loader horizontal />}
 			/>
