@@ -1,4 +1,5 @@
 import ExpandMore from "@material-symbols/svg-400/rounded/keyboard_arrow_down-fill.svg";
+import type { ComponentProps } from "react";
 import { Button } from "./button";
 import { Menu } from "./menu";
 
@@ -7,15 +8,16 @@ export const Select = <Value extends string>({
 	onValueChange,
 	values,
 	getLabel,
+	...props
 }: {
 	label: string;
 	value: Value;
 	onValueChange: (v: Value) => void;
 	values: Value[];
 	getLabel: (key: Value) => string;
-}) => {
+} & Partial<ComponentProps<typeof Button>>) => {
 	return (
-		<Menu Trigger={Button} text={getLabel(value)} icon={ExpandMore}>
+		<Menu Trigger={Button} text={getLabel(value)} icon={ExpandMore} {...props}>
 			{values.map((x) => (
 				<Menu.Item
 					key={x}

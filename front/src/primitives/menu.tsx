@@ -12,7 +12,7 @@ import {
 	useRef,
 	useState,
 } from "react";
-import { BackHandler, Pressable, ScrollView } from "react-native";
+import { BackHandler, Pressable, ScrollView, type View } from "react-native";
 import type { SvgProps } from "react-native-svg";
 import { Portal } from "react-native-teleport";
 import { cn } from "~/utils";
@@ -53,7 +53,7 @@ const Menu = <AsProps,>({
 	setOpen?: (v: boolean) => void;
 } & Optional<AsProps, "onPress">) => {
 	const alreadyRendered = useRef(false);
-	const trigger = useRef(null);
+	const trigger = useRef<View | null>(null);
 	const [innerOpen, innerSetOpen] = useState(false);
 	const controlled = outerOpen !== undefined && outerSetOpen !== undefined;
 	const isOpen = controlled ? outerOpen : innerOpen;
@@ -95,7 +95,6 @@ const Menu = <AsProps,>({
 	return (
 		<>
 			<Trigger
-				ref={trigger}
 				// need to use onPressIn due to:
 				//  https://github.com/react-navigation/react-navigation/issues/12274
 				//  https://github.com/react-navigation/react-navigation/issues/12667
@@ -103,6 +102,13 @@ const Menu = <AsProps,>({
 					setOpen(true);
 				}}
 				{...(props as AsProps)}
+				// after whatever the caller has to say about it (`preferFocus` hands out
+				// a ref of its own), because closing the menu has to put the selection
+				// back on the trigger.
+				ref={(view: View | null) => {
+					trigger.current = view;
+					(props as { ref?: (v: View | null) => void }).ref?.(view);
+				}}
 			/>
 			{isOpen && (
 				<Portal hostName="root">

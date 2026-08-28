@@ -1,7 +1,12 @@
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ScrollView, View, type ViewProps } from "react-native";
+import {
+	type PressableProps,
+	ScrollView,
+	View,
+	type ViewProps,
+} from "react-native";
 import { ShowContext } from "~/components/items/context-menus";
 import { ItemWatchStatus } from "~/components/items/item-helpers";
 import type { Genre, KImage, WatchStatusV } from "~/models";
@@ -51,15 +56,18 @@ export const ItemDetails = ({
 	availableCount?: number | null;
 	seenCount?: number | null;
 	videoSlug: string | null;
-} & ViewProps) => {
+} & PressableProps) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 	const { t } = useTranslation();
 
 	return (
-		<View className={cn("h-72", className)} {...props}>
+		<View className={cn("h-72", className)}>
 			<Link
 				href={moreOpened ? undefined : href}
 				onLongPress={() => setMoreOpened(true)}
+				// the card is the link, not the box around it: anything a caller has to
+				// say about the focus belongs on the thing that can take it.
+				{...props}
 				className={cn(
 					"group h-full flex-row overflow-hidden rounded-xl bg-card outline-0",
 					"highlighted:outline-3 highlighted:outline-accent",

@@ -31,8 +31,39 @@ export const FocusGroup = ({ destination, ...props }: FocusGroupProps) => {
 // to start from, and left to itself the focus finder picks whatever happens to
 // sit closest to a corner. react-native-tvos hands the initial focus to whoever
 // asks for it, so exactly one element per screen should.
-export const preferFocus = (prefer: boolean | null | undefined = true) =>
-	prefer ? { hasTVPreferredFocus: true } : {};
+// The prop on its own is not enough: android reads it while it is building the
+// view and never looks at it again, and a screen that waits on a query is not
+// on screen yet by then. So ask by hand as well, on every layout until one of
+// the asks lands — a request made before the view is placed is dropped on the
+// floor and nothing says it was.
+const claimed = new WeakSet<object>();
+export const preferFocus = (prefer: boolean | null | undefined = true) => {
+	// A screen only opens with something selected where there is no pointer to
+	// select with: on a phone this would put a highlight on a button nobody
+	// touched, and android would happily give it the focus in touch mode.
+	if (!prefer || !Platform.isTV) return {};
+	const view: { current: object | null } = { current: null };
+	const claim = () => {
+		if (!view.current || claimed.has(view.current)) return;
+		requestFocus(view.current);
+	};
+	return {
+		hasTVPreferredFocus: true,
+		ref: (v: object | null) => {
+			view.current = v;
+		},
+		onLayout: () => {
+			claim();
+			// a list keeps moving for a while after its last layout, and the ask that
+			// lands is the one made once it stopped.
+			setTimeout(claim, 300);
+		},
+		// it landed, and from here the selection is the user's to move.
+		onFocus: () => {
+			if (view.current) claimed.add(view.current);
+		},
+	};
+};
 
 // Hands the focus back to a view on demand. Closing an overlay unmounts whatever
 // was selected inside it, and android has nowhere to fall back to: the dpad ends

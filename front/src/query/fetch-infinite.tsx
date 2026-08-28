@@ -97,6 +97,11 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 		<AnimatedLegendList
 			data={data}
 			recycleItems
+			// a dpad scrolls a row by focusing the card next to the one you are on, and
+			// a card that has not been drawn yet cannot take the focus: the default
+			// distance stops about half a card past the edge, so the selection falls
+			// off the row instead of walking along it.
+			drawDistance={layout.layout === "horizontal" ? 2000 : undefined}
 			getItemType={getItemType}
 			estimatedItemSize={size}
 			stickyHeaderIndices={getStickyIndices?.(items ?? [])}

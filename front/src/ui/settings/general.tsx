@@ -5,7 +5,7 @@ import Public from "@material-symbols/svg-400/rounded/public.svg";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Uniwind, useUniwind } from "uniwind";
-import { Link, Select } from "~/primitives";
+import { Link, preferFocus, Select } from "~/primitives";
 import { supportedLanguages } from "~/providers/translations.compile";
 import { useLanguageName } from "~/track-utils";
 import { Preference, SettingsContainer } from "./base";
@@ -33,6 +33,7 @@ export const GeneralSettings = () => {
 					}
 					values={["auto", "light", "dark"]}
 					getLabel={(key) => t(`settings.general.theme.${key}`)}
+					{...preferFocus()}
 				/>
 			</Preference>
 			<Preference

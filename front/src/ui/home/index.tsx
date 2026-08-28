@@ -1,8 +1,9 @@
 import {
 	LegendList,
 	type LegendListComponent,
+	type LegendListRef,
 } from "@legendapp/list/react-native";
-import { type ReactElement, useMemo } from "react";
+import { type ReactElement, useMemo, useRef } from "react";
 import { createAnimatedComponent } from "react-native-reanimated";
 import { Genre } from "~/models";
 import { Fetch, useRefresh } from "~/query";
@@ -27,6 +28,7 @@ export const HomePage = () => {
 	// for it instead of measuring it — that avoids the onLayout -> setState that
 	// used to reflow the whole list at first paint.
 	const imageHeight = useHeroHeight();
+	const list = useRef<LegendListRef>(null);
 	const { scrollHandler, headerProps } = useScrollNavbar({
 		imageHeight,
 		tab: true,
@@ -38,6 +40,13 @@ export const HomePage = () => {
 			<AnimatedLegendList
 				estimatedItemSize={340}
 				estimatedHeaderSize={imageHeight}
+				// The rows below fill in one after the other and each one changes size as
+				// its images arrive. Legend List keeps the content that is on screen where
+				// it is while that happens, which for a first paint means walking the list
+				// down until the hero is off the top of the screen — and the play button
+				// that should have taken the focus goes with it.
+				maintainVisibleContentPosition={false}
+				ref={list}
 				drawDistance={600}
 				getItemType={(el: ReactElement) => {
 					switch (el.type) {
@@ -74,6 +83,13 @@ export const HomePage = () => {
 								thumbnail={x.thumbnail}
 								link={x.kind !== "collection" ? x.playHref : null}
 								infoLink={x.href}
+								// the hero is the top of the list, so that is where the list
+								// belongs once the remote is on it — asking for the focus from
+								// the header makes the list scroll to reveal it, and it stops
+								// as soon as the button is on screen rather than at the top.
+								onSelected={() =>
+									list.current?.scrollToOffset({ offset: 0, animated: false })
+								}
 							/>
 						)}
 						Loader={Header.Loader}

@@ -27,6 +27,7 @@ export const Header = ({
 	tagline,
 	link,
 	infoLink,
+	onSelected,
 	className,
 	...props
 }: {
@@ -36,9 +37,13 @@ export const Header = ({
 	tagline: string | null;
 	link: string | null;
 	infoLink: string;
+	// fires when the remote lands on the hero, see HomePage
+	onSelected?: () => void;
 } & Partial<ComponentProps<typeof ImageBackground>>) => {
 	const { t } = useTranslation();
 	const height = useHeroHeight();
+	const play = preferFocus();
+	const info = preferFocus(link === null);
 
 	return (
 		<ImageBackground
@@ -62,7 +67,11 @@ export const Header = ({
 							as={Link}
 							href={link}
 							className="mr-2"
-							{...preferFocus()}
+							{...play}
+							onFocus={() => {
+								play.onFocus?.();
+								onSelected?.();
+							}}
 							{...tooltip(t("show.play"))}
 						/>
 					)}
@@ -73,7 +82,11 @@ export const Header = ({
 						href={infoLink}
 						className="mr-2"
 						// only when there is no play button to take it
-						{...preferFocus(link === null)}
+						{...info}
+						onFocus={() => {
+							info.onFocus?.();
+							onSelected?.();
+						}}
 						iconClassName="fill-slate-400"
 						{...tooltip(t("home.info"))}
 					/>
