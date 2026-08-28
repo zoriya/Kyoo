@@ -78,6 +78,7 @@ export const A = ({
 export const PressableFeedback = ({
 	children,
 	ref,
+	hasTVPreferredFocus,
 	...props
 }: PressableProps & { ref?: RefObject<View> }) => {
 	const { color } = useResolveClassNames("text-slate-400/25");
@@ -89,6 +90,7 @@ export const PressableFeedback = ({
 				foreground: true,
 				color,
 			}}
+			hasTVPreferredFocus={Platform.isTV && hasTVPreferredFocus}
 			{...props}
 		>
 			{children}

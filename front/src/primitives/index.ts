@@ -6,6 +6,7 @@ export * from "./chip";
 export * from "./combobox";
 export * from "./container";
 export * from "./divider";
+export * from "./focus";
 export * from "./icons";
 export * from "./image/image";
 export * from "./image/image-background";
