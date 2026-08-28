@@ -13,6 +13,7 @@ import { useIsFocused } from "expo-router/react-navigation";
 import {
 	type ComponentProps,
 	type ComponentType,
+	type Ref,
 	useLayoutEffect,
 	useRef,
 	useState,
@@ -175,14 +176,17 @@ export const SearchBar = ({
 	containerClassName,
 	forceExpand,
 	overlayOnSmallScreen,
+	ref,
 	...props
 }: TextInputProps & {
 	forceExpand?: boolean;
 	containerClassName?: string;
 	overlayOnSmallScreen?: boolean;
+	ref?: Ref<TextInput>;
 }) => {
 	const { t } = useTranslation();
 	const [_expanded, setExpanded] = useState(!!value);
+	const [focused, setFocused] = useState(false);
 	const inputRef = useRef<TextInput>(null);
 
 	const expanded = _expanded || forceExpand;
@@ -191,6 +195,8 @@ export const SearchBar = ({
 		<Animated.View
 			className={cn(
 				"mr-2 flex-row items-center overflow-hidden rounded-full p-0 pl-4",
+				"ring-accent focus-within:ring-3",
+				focused && "ring-3",
 				expanded ? "bg-slate-100 dark:bg-slate-800" : "bg-transparent",
 				Platform.OS === "web" &&
 					overlayOnSmallScreen &&
@@ -207,24 +213,29 @@ export const SearchBar = ({
 			]}
 		>
 			<TextInput
-				ref={inputRef}
+				ref={(view) => {
+					inputRef.current = view;
+					if (typeof ref === "function") ref(view);
+					else if (ref) ref.current = view;
+				}}
 				value={value}
 				onChangeText={(q) => onChangeText?.(q)}
 				onSubmitEditing={(e) => onSubmitEditing?.(e)}
 				onFocus={(e) => {
 					onFocus?.(e);
 					setExpanded(true);
+					setFocused(true);
 				}}
 				onBlur={(e) => {
 					onBlur?.(e);
 					if (!value) setExpanded(false);
+					setFocused(false);
 				}}
 				placeholder={t("navbar.search")}
 				textAlignVertical="center"
 				className={cn(
 					"h-full min-w-0 flex-1 font-sans text-base outline-0",
 					"align-middle text-slate-600 dark:text-slate-200",
-					"highlighted:outline-3 outline-accent",
 					!expanded && "w-0 grow-0",
 					className,
 				)}

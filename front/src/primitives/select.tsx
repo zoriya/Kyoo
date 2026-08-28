@@ -7,15 +7,17 @@ export const Select = <Value extends string>({
 	onValueChange,
 	values,
 	getLabel,
+	...props
 }: {
 	label: string;
 	value: Value;
 	onValueChange: (v: Value) => void;
 	values: Value[];
 	getLabel: (key: Value) => string;
+	hasTVPreferredFocus?: boolean;
 }) => {
 	return (
-		<Menu Trigger={Button} text={getLabel(value)} icon={ExpandMore}>
+		<Menu Trigger={Button} text={getLabel(value)} icon={ExpandMore} {...props}>
 			{values.map((x) => (
 				<Menu.Item
 					key={x}

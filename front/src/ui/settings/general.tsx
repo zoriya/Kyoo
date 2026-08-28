@@ -33,6 +33,7 @@ export const GeneralSettings = () => {
 					}
 					values={["auto", "light", "dark"]}
 					getLabel={(key) => t(`settings.general.theme.${key}`)}
+					hasTVPreferredFocus
 				/>
 			</Preference>
 			<Preference
