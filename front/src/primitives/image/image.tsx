@@ -90,7 +90,12 @@ export const PosterPlaceholder = ({
 			)}
 			{...props}
 		>
-			<KyooLogo style={{ width: "50%", aspectRatio: "289.35/296.15" }} />
+			{/* painted with `currentColor` on native (see .svgrrc): on a light
+			    placeholder that is the dark it wears on a light page. */}
+			<KyooLogo
+				color="#1f1e2f"
+				style={{ width: "50%", aspectRatio: "289.35/296.15" }}
+			/>
 			{children}
 		</View>
 	);

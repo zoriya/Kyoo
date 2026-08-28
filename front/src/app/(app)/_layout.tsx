@@ -1,4 +1,5 @@
 import { Stack } from "expo-router";
+import { Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCSSVariable, useResolveClassNames } from "uniwind";
 import { MiniPlayer, TabBarHeightProvider } from "~/ui/mini-player";
@@ -19,6 +20,9 @@ export default function Layout() {
 		<TabBarHeightProvider>
 			<Stack
 				screenOptions={{
+					// the tv navigates with the rail and the remote's back button, a header
+					// bar would only eat 56px of a screen meant to be watched from a couch.
+					headerShown: !Platform.isTV,
 					headerTitle: () => <NavbarLeft />,
 					headerRight: () => <NavbarRight />,
 					contentStyle: {

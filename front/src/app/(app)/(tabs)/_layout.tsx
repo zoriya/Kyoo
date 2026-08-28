@@ -3,6 +3,7 @@ import { NativeTabs } from "expo-router/unstable-native-tabs";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 import { useAccount } from "~/providers/account-context";
+import { TvNavRail } from "~/ui/navbar-tv";
 
 export const unstable_settings = {
 	initialRouteName: "index",
@@ -12,6 +13,14 @@ export default function TabsLayout() {
 	const { t } = useTranslation();
 	const account = useAccount();
 
+	// the dpad can't reach a bottom tab bar in any sensible way, the tv gets a
+	// nav rail on the side instead.
+	if (Platform.isTV)
+		return (
+			<TvNavRail>
+				<Slot />
+			</TvNavRail>
+		);
 	if (Platform.OS === "web") return <Slot />;
 
 	return (

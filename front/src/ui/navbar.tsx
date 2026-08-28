@@ -268,21 +268,15 @@ const getDisplayUrl = (url: string) => {
 	return url;
 };
 
-export const NavbarProfile = () => {
+// The accounts you can switch to and the things you can do about them. Shared
+// so the phone's avatar and the tv rail's open the same menu.
+export const AccountMenuItems = () => {
 	const { t } = useTranslation();
 	const account = useAccount();
 	const accounts = useAccounts();
 
 	return (
-		<Menu
-			Trigger={Avatar<PressableProps>}
-			as={PressableFeedback}
-			src={account?.logo}
-			placeholder={account?.username}
-			alt={t("navbar.login")}
-			className="m-2"
-			{...tooltip(account?.username ?? t("navbar.login"))}
-		>
+		<>
 			{accounts?.map((x) => (
 				<Menu.Item
 					key={x.id}
@@ -323,6 +317,25 @@ export const NavbarProfile = () => {
 					/>
 				</>
 			)}
+		</>
+	);
+};
+
+export const NavbarProfile = () => {
+	const { t } = useTranslation();
+	const account = useAccount();
+
+	return (
+		<Menu
+			Trigger={Avatar<PressableProps>}
+			as={PressableFeedback}
+			src={account?.logo}
+			placeholder={account?.username}
+			alt={t("navbar.login")}
+			className="m-2"
+			{...tooltip(account?.username ?? t("navbar.login"))}
+		>
+			<AccountMenuItems />
 		</Menu>
 	);
 };

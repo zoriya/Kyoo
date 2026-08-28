@@ -1,0 +1,20 @@
+{
+	"//": "react-native-svg-transformer inlines a stylesheet into a `style` prop that nothing can override, and react-native-svg gives a path with no fill its own black default. Turning the style back into an attribute lets the fill be `currentColor`, which is the only way to ask an svg what colour to be from the outside. The overrides repeat the transformer's own defaults, which a config file replaces rather than extends.",
+	"svgoConfig": {
+		"plugins": [
+			{
+				"name": "preset-default",
+				"params": {
+					"overrides": {
+						"inlineStyles": { "onlyMatchedOnce": false },
+						"removeViewBox": false,
+						"removeUnknownsAndDefaults": false,
+						"convertColors": false
+					}
+				}
+			},
+			"convertStyleToAttrs"
+		]
+	},
+	"replaceAttrValues": { "#1f1e2f": "currentColor" }
+}
