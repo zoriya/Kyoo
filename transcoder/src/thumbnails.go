@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
-	"image/png"
+	"image/jpeg"
 	"io"
 	"log/slog"
 	"math"
@@ -23,17 +23,17 @@ var default_interval = 10
 
 // The maximim number of thumbnails per video.
 // Setting this too high allows really long processing times.
-var max_numcaps = 150
+var max_numcaps = 300
 
 type Thumbnail struct {
 	ready sync.WaitGroup
 	path  string
 }
 
-const ThumbsVersion = 1
+const ThumbsVersion = 2
 
 func getThumbPath(sha string) string {
-	return fmt.Sprintf("%s/thumbs-v%d.png", sha, ThumbsVersion)
+	return fmt.Sprintf("%s/thumbs-v%d.jpg", sha, ThumbsVersion)
 }
 
 func getThumbVttPath(sha string) string {
@@ -145,7 +145,7 @@ func (s *MetadataService) extractThumbnail(ctx context.Context, path string, sha
 		timestamps := ts
 		ts += interval
 		vtt += fmt.Sprintf(
-			"%s --> %s\n/video/%s/thumbnails.png#xywh=%d,%d,%d,%d\n\n",
+			"%s --> %s\n/video/%s/thumbnails.jpg#xywh=%d,%d,%d,%d\n\n",
 			tsToVttTime(timestamps),
 			tsToVttTime(ts),
 			base64.RawURLEncoding.EncodeToString([]byte(path)),
@@ -160,7 +160,7 @@ func (s *MetadataService) extractThumbnail(ctx context.Context, path string, sha
 	_ = s.storage.DeleteItem(ctx, vttPath)
 
 	err = s.storage.SaveItemWithCallback(ctx, spritePath, func(_ context.Context, writer io.Writer) error {
-		return png.Encode(writer, sprite)
+		return jpeg.Encode(writer, sprite, &jpeg.Options{Quality: 85})
 	})
 	if err != nil {
 		return err

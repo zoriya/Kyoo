@@ -29,7 +29,7 @@ func RegisterMetadataHandlers(e *echo.Group, metadata *src.MetadataService) {
 	e.GET("/:path/prepare", h.Prepare)
 	e.GET("/:path/subtitle/:name", h.GetSubtitle)
 	e.GET("/:path/attachment/:name", h.GetAttachment)
-	e.GET("/:path/thumbnails.png", h.GetThumbnails)
+	e.GET("/:path/thumbnails.jpg", h.GetThumbnails)
 	e.GET("/:path/thumbnails.vtt", h.GetThumbnailsVtt)
 }
 
@@ -300,7 +300,7 @@ func guessMimeType(path string, content any) (string, error) {
 // @Param        path  path   string    true  "Base64 of a video's path"  format(base64) example(L3ZpZGVvL2J1YmJsZS5ta3YK)
 //
 // @Success      200  file   "sprite"
-// @Router  /:path/thumbnails.png [get]
+// @Router  /:path/thumbnails.jpg [get]
 func (h *mhandler) GetThumbnails(c *echo.Context) (err error) {
 	path, sha, err := getPath(c)
 	if err != nil {
@@ -313,7 +313,7 @@ func (h *mhandler) GetThumbnails(c *echo.Context) (err error) {
 	}
 	defer utils.CleanupWithErr(&err, sprite.Close, "failed to close thumbnail sprite reader")
 
-	return c.Stream(200, "image/png", sprite)
+	return c.Stream(200, "image/jpeg", sprite)
 }
 
 // @Summary      Get thumbnail vtt
