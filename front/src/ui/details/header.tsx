@@ -316,7 +316,7 @@ const ExternalIdChip = ({
 							<A
 								key={x.dataId}
 								href={x.link!}
-								className="rounded p-4 hover:bg-popover"
+								className="rounded highlighted:bg-popover p-4 outline-0"
 							>
 								{x.label ?? x.link}
 							</A>

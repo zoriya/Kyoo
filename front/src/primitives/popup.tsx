@@ -1,9 +1,10 @@
 import Close from "@material-symbols/svg-400/rounded/close.svg";
 import { usePathname } from "expo-router";
-import { type ReactNode, useEffect, useRef } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { type ReactNode, useEffect, useRef, useState } from "react";
+import { BackHandler, Pressable, ScrollView, View } from "react-native";
 import { Portal } from "react-native-teleport";
 import { cn } from "~/utils";
+import { FocusGroup, preferFocus } from "./focus";
 import { Icon, IconButton, type Icon as IconType } from "./icons";
 import { Heading } from "./text";
 
@@ -40,7 +41,11 @@ export const Overlay = ({
 						{icon && <Icon icon={icon} />}
 						<Heading>{title}</Heading>
 					</View>
-					{close && <IconButton icon={Close} onPress={close} />}
+					{/* the popup has to take the selection off the page behind it, and the
+					    one control every popup has is the one that closes it. */}
+					{close && (
+						<IconButton icon={Close} onPress={close} {...preferFocus()} />
+					)}
 				</View>
 				{scroll ? (
 					<ScrollView
@@ -76,6 +81,19 @@ export const Popup = ({
 }) => {
 	const pathname = usePathname();
 	const prevPathname = useRef(pathname);
+	// The trap can only go up once the focus is already inside: a focus guide that
+	// traps a direction also refuses to let the focus in through it.
+	const [trapped, setTrapped] = useState(false);
+	useEffect(() => {
+		setTrapped(true);
+		// while this is up it is the whole screen as far as a remote is concerned,
+		// so back has to dismiss it rather than the page under it.
+		const back = BackHandler.addEventListener("hardwareBackPress", () => {
+			close?.();
+			return true;
+		});
+		return () => back.remove();
+	}, [close]);
 
 	useEffect(() => {
 		if (prevPathname.current !== pathname) {
@@ -86,15 +104,23 @@ export const Popup = ({
 
 	return (
 		<Portal hostName="root" style={{ pointerEvents: "auto" }}>
-			<Overlay
-				icon={icon}
-				title={title}
-				close={close}
-				scroll={scroll}
-				{...props}
+			<FocusGroup
+				className="absolute inset-0"
+				trapFocusUp={trapped}
+				trapFocusDown={trapped}
+				trapFocusLeft={trapped}
+				trapFocusRight={trapped}
 			>
-				{children}
-			</Overlay>
+				<Overlay
+					icon={icon}
+					title={title}
+					close={close}
+					scroll={scroll}
+					{...props}
+				>
+					{children}
+				</Overlay>
+			</FocusGroup>
 		</Portal>
 	);
 };
