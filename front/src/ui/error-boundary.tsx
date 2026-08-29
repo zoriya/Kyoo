@@ -33,30 +33,28 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
 
 function ErrorView({ error, retry }: ErrorBoundaryProps) {
 	const { t } = useTranslation();
+	const retryable = error instanceof RetryableError;
 
-	if (!(error instanceof RetryableError)) {
-		return (
-			<View>
-				<P>{error.message ?? t("errors.unknown")}</P>
-			</View>
-		);
-	}
 	return (
-		<View className="flex-1 items-center justify-center">
+		<View className="flex-1 items-center justify-center p-4">
 			<H1 className="mb-2 text-center text-xl">
-				{t(`errors.${error.key}` as any)}
+				{retryable ? t(`errors.${error.key}` as any) : t("errors.unknown")}
 			</H1>
-			<P className="my-2">{error.inner?.message ?? t("errors.unknown")}</P>
-			{error.key === "offline" && (
-				<P className="my-2">{t("errors.connection-tips")}</P>
+			<P className="my-2 text-center">
+				{(retryable ? error.inner?.message : error.message) ??
+					t("errors.unknown")}
+			</P>
+			{retryable && error.key === "offline" && (
+				<P className="my-2 text-center">{t("errors.connection-tips")}</P>
 			)}
 			<Button
 				className="mt-5"
 				text={t("errors.try-again")}
 				onPress={async () => {
-					await error.retry?.();
+					if (retryable) await error.retry?.();
 					await retry();
 				}}
+				hasTVPreferredFocus
 			/>
 		</View>
 	);
