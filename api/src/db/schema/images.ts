@@ -30,5 +30,5 @@ export const images = schema.table(
 			.defaultNow(),
 		downloadedAt: timestamp({ withTimezone: true, precision: 3 }),
 	},
-	(t) => [index("imgqueue_sort").on(t.priority, t.attempt, t.createdAt)],
+	(t) => [index("imgqueue_sort").on(t.priority.desc(), t.attempt, t.createdAt)],
 );

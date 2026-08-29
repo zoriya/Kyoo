@@ -232,6 +232,13 @@
 			"when": 1785762849068,
 			"tag": "0032_history_indexes",
 			"breakpoints": true
+		},
+		{
+			"idx": 33,
+			"version": "7",
+			"when": 1788015540457,
+			"tag": "0033_image_priority",
+			"breakpoints": true
 		}
 	]
 }

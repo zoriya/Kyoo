@@ -3,7 +3,7 @@ import { getCurrentSpan, setAttributes } from "@elysiajs/opentelemetry";
 import { getLogger } from "@logtape/logtape";
 import { SpanStatusCode } from "@opentelemetry/api";
 import { encode } from "blurhash";
-import { and, eq, is, lt, ne, type SQL, sql } from "drizzle-orm";
+import { and, desc, eq, is, lt, ne, type SQL, sql } from "drizzle-orm";
 import { PgColumn, type PgTable } from "drizzle-orm/pg-core";
 import { version } from "package.json";
 import type { PoolClient } from "pg";
@@ -167,7 +167,7 @@ const processOne = record("download", async () => {
 			.from(images)
 			.for("update", { skipLocked: true })
 			.where(and(ne(images.status, "ready"), lt(images.attempt, 5)))
-			.orderBy(images.priority, images.attempt, images.createdAt)
+			.orderBy(desc(images.priority), images.attempt, images.createdAt)
 			.limit(1);
 
 		if (!img) return false;
