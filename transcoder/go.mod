@@ -7,7 +7,6 @@ require (
 	github.com/asticode/go-astisub v0.42.0
 	github.com/aws/aws-sdk-go-v2 v1.43.8
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.107.4
-	github.com/disintegration/imaging v1.6.2
 	github.com/exaring/otelpgx v0.11.1
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/jackc/pgx/v5 v5.10.0
@@ -15,7 +14,7 @@ require (
 	github.com/labstack/echo/v5 v5.3.1
 	github.com/swaggo/echo-swagger/v2 v2.0.1
 	github.com/swaggo/swag v1.16.6
-	gitlab.com/opennota/screengen v1.0.2
+	gitlab.com/opennota/screengen v1.0.3-0.20260325071014-3d76485eda08
 	go.opentelemetry.io/contrib/bridges/otelslog v0.19.0
 	go.opentelemetry.io/otel v1.44.0
 	go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc v0.20.0
@@ -95,7 +94,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.45.8 // indirect
 	github.com/aws/smithy-go v1.27.10 // indirect
 	github.com/golang-jwt/jwt/v5 v5.3.1
-	golang.org/x/image v0.41.0 // indirect
 	golang.org/x/net v0.57.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.41.0

@@ -1,11 +1,7 @@
-FROM ghcr.io/zoriya/ffmpeg:v8.0.2
+FROM ghcr.io/zoriya/ffmpeg:v8.0.2-dev
 
 COPY --from=golang:1.26 /usr/local/go /usr/local/go
 ENV PATH="/usr/local/go/bin:${PATH}"
-# `-race` of go needs gcc
-RUN apt-get update \
-	&& apt-get install --no-install-recommends --no-install-suggests -y gcc libc6-dev
-
 WORKDIR /app
 
 COPY go.mod go.sum ./

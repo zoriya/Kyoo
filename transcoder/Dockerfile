@@ -1,10 +1,13 @@
-FROM golang:1.26 AS build
+FROM ghcr.io/zoriya/ffmpeg:v8.0.2-dev AS build
+COPY --from=golang:1.26 /usr/local/go /usr/local/go
+ENV PATH="/usr/local/go/bin:${PATH}"
+
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o ./transcoder
+RUN GOOS=linux go build -o ./transcoder
 
 FROM ghcr.io/zoriya/ffmpeg:v8.0.2
 
@@ -17,4 +20,5 @@ ENV NVIDIA_VISIBLE_DEVICES="all"
 ENV NVIDIA_DRIVER_CAPABILITIES="all"
 
 EXPOSE 7666
+ENTRYPOINT []
 CMD ["./transcoder"]

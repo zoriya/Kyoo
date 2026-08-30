@@ -5,7 +5,8 @@ import (
 	"encoding/base64"
 	"fmt"
 	"image"
-	"image/color"
+	"image/draw"
+	"image/png"
 	"io"
 	"log/slog"
 	"math"
@@ -13,7 +14,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/disintegration/imaging"
 	"github.com/zoriya/kyoo/transcoder/src/utils"
 	"gitlab.com/opennota/screengen"
 )
@@ -124,7 +124,8 @@ func (s *MetadataService) extractThumbnail(ctx context.Context, path string, sha
 	height := 144
 	width := int(float64(height) / float64(gen.Height()) * float64(gen.Width()))
 
-	sprite := imaging.New(width*columns, height*rows, color.Black)
+	sprite := image.NewRGBA(image.Rect(0, 0, width*columns, height*rows))
+	draw.Draw(sprite, sprite.Bounds(), image.Black, image.Point{}, draw.Src)
 	vtt := "WEBVTT\n\n"
 
 	slog.InfoContext(ctx, "extracting thumbnails", "count", numcaps, "path", path, "interval", interval)
@@ -139,7 +140,7 @@ func (s *MetadataService) extractThumbnail(ctx context.Context, path string, sha
 
 		x := (i % columns) * width
 		y := (i / columns) * height
-		sprite = imaging.Paste(sprite, img, image.Pt(x, y))
+		draw.Draw(sprite, image.Rect(x, y, x+width, y+height), img, image.Point{}, draw.Src)
 
 		timestamps := ts
 		ts += interval
@@ -158,13 +159,8 @@ func (s *MetadataService) extractThumbnail(ctx context.Context, path string, sha
 	_ = s.storage.DeleteItem(ctx, spritePath)
 	_ = s.storage.DeleteItem(ctx, vttPath)
 
-	spriteFormat, err := imaging.FormatFromFilename(spritePath)
-	if err != nil {
-		return err
-	}
-
 	err = s.storage.SaveItemWithCallback(ctx, spritePath, func(_ context.Context, writer io.Writer) error {
-		return imaging.Encode(writer, sprite, spriteFormat)
+		return png.Encode(writer, sprite)
 	})
 	if err != nil {
 		return err
