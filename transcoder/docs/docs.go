@@ -185,7 +185,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/:path/thumbnails.png": {
+        "/:path/thumbnails.jpg": {
             "get": {
                 "description": "Get a sprite file containing all the thumbnails of the show.",
                 "tags": [

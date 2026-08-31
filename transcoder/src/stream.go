@@ -2,7 +2,6 @@ package src
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -16,7 +15,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Eyevinn/mp4ff/mp4"
 	"github.com/zoriya/kyoo/transcoder/src/exec"
 )
 
@@ -50,10 +48,6 @@ type Stream struct {
 	// the lock used for the the heads
 	lock          sync.RWMutex
 	initEncoderId atomic.Int64
-	// media timescale (from the init's mdhd) used to convert segment start times
-	// into tfdt baseMediaDecodeTime values. 0 until first read; loaded lazily and
-	// cached lock-free since every window's init is byte-identical.
-	timescale atomic.Uint32
 }
 
 type Segment struct {
@@ -310,28 +304,35 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 	}
 	args = append(args, ts.handle.getTranscodeArgs(toSegmentStr(segments))...)
 	args = append(args,
-		"-f", "segment",
+		"-f", "hls",
+		"-hls_segment_type", "fmp4",
 		// needed for rounding issues when forcing keyframes
 		// recommended value is 1/(2*frame_rate), which for a 24fps is ~0.021
 		// we take a little bit more than that to be extra safe but too much can be harmfull
 		// when segments are short (can make the video repeat itself)
-		"-segment_time_delta", "0.05",
-		// fMP4 segments. -segment_header_filename moves the ftyp+moov into a
-		// single shared init segment. skip_trailer drops the per-file
-		// mfra, so every media segment is a clean moof+mdat pair
-		"-segment_format", "mp4",
-		"-segment_header_filename", ts.handle.getInitPath(encoder_id),
-		"-segment_format_options", "movflags=frag_keyframe+empty_moov+default_base_moof+skip_trailer",
-		"-segment_times", toSegmentStr(Map(segments, func(seg float64, _ int) float64 {
-			// segment_times want durations, not timestamps so we must substract the -ss param
-			// since we give a greater value to -ss to prevent wrong seeks but -segment_times
-			// needs precise segments, we use the actual -ss value as a reference.
-			return seg - start_ref
+		"-hls_time_delta", "0.05",
+		"-hls_fmp4_init_filename", ts.handle.getInitPath(encoder_id),
+		// use_editlist=0 keeps the moov byte-identical between lazy windows (else the
+		// window's start offset leaks in as an empty edit, and since every window shares
+		// this init through #EXT-X-MAP one window's offset would apply to all the others).
+		// strict lets truehd through, the outer -strict wouldn't reach the mp4 muxer.
+		// absolute_tfdt writes our -copyts timestamps in the tfdt instead of rebasing the
+		// first fragment of each window to 0, which is what makes all the windows land on
+		// the same timeline (without it we had to patch every segment afterwards).
+		"-hls_segment_options", "use_editlist=0:strict=experimental:movflags=+absolute_tfdt",
+		"-hls_times", toSegmentStr(Map(segments, func(seg float64, _ int) float64 {
+			// hls_times want durations, not timestamps, and the muxer measures them
+			// from the first packet it sees. that packet is the keyframe -ss landed on, which
+			// is keyframes.Get(start_segment) ; NOT start_ref: for video start_ref is pushed
+			// to the middle of the segment so the seek doesn't land on the previous keyframe.
+			// subtracting start_ref there shifts the whole list by half a segment and the cuts
+			// drift (audio is unaffected, its start_ref already is keyframes.Get(start_segment)).
+			return seg - ts.keyframes.Get(start_segment)
 		})),
-		"-segment_list_type", "flat",
-		"-segment_list", "pipe:1",
-		"-segment_start_number", fmt.Sprint(start_segment),
-		outpath,
+		"-start_number", fmt.Sprint(start_segment),
+		"-hls_segment_filename", outpath,
+		"-hls_list_size", "1",
+		"pipe:1",
 	)
 
 	cmd := exec.CommandContext(ctx, "ffmpeg", args...)
@@ -359,30 +360,29 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 		scanner := bufio.NewScanner(stdout)
 		format := filepath.Base(outpath)
 		should_stop := false
+		prev_segment := int32(-1)
 
 		for scanner.Scan() {
 			var segment int32
-			_, _ = fmt.Sscanf(scanner.Text(), format, &segment)
+			// stdout is the m3u8, rewritten every time a segment is done. with
+			// -hls_list_size 1 the only segment line it holds is the one that just got
+			// ready, every other line is a #EXT tag that doesn't match
+			if n, _ := fmt.Sscanf(scanner.Text(), format, &segment); n != 1 {
+				continue
+			}
+			if segment == prev_segment {
+				// the last rewrite (the one appending #EXT-X-ENDLIST) repeats the last entry
+				continue
+			}
+			prev_segment = segment
 
 			if segment < start {
-				// This happen because we use -f segments for accurate cutting (since -ss is not)
+				// This happen because we use -f hls for accurate cutting (since -ss is not)
 				// check comment at begining of function for more info
 				continue
 			}
 
 			ts.initEncoderId.CompareAndSwap(-1, int64(encoder_id))
-
-			segPath := fmt.Sprintf(ts.handle.getOutPath(encoder_id), segment)
-			// we patch the file's tfdt, it needs to be continuous for the whole
-			// file but ffmpeg resets it to 0 on each new lazy window.
-			//
-			// we don't check for DeletedHead because we want to do this cpu
-			// heavy task outside of the lock and the function can handle invalid
-			// files.
-			if err := ts.finalizeSegment(segPath, start_segment); err != nil {
-				slog.ErrorContext(ctx, "failed to finalize fmp4 segment", "segment", segment, "encoderId", encoder_id, "err", err)
-				continue
-			}
 
 			ts.lock.Lock()
 			if ts.heads[encoder_id] == DeletedHead {
@@ -400,7 +400,7 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 				should_stop = true
 			} else if end < length-1 && segment == end {
 				// Extra overlap segment used for accurate cuts.
-				_ = os.Remove(segPath)
+				_ = os.Remove(fmt.Sprintf(ts.handle.getOutPath(encoder_id), segment))
 				should_stop = true
 			} else {
 				ts.segments[segment].encoder = encoder_id
@@ -448,108 +448,6 @@ func (ts *Stream) run(ctx context.Context, start int32) error {
 	}(ctx)
 
 	return nil
-}
-
-func (ts *Stream) loadTimescale() (uint32, error) {
-	if scale := ts.timescale.Load(); scale != 0 {
-		return scale, nil
-	}
-	encoder := ts.initEncoderId.Load()
-	if encoder == -1 {
-		return 0, fmt.Errorf("init segment not ready yet")
-	}
-	data, err := os.ReadFile(ts.handle.getInitPath(int(encoder)))
-	if err != nil {
-		return 0, err
-	}
-	f, err := mp4.DecodeFile(bytes.NewReader(data))
-	if err != nil {
-		return 0, fmt.Errorf("decode init segment: %w", err)
-	}
-	if f.Init == nil || f.Init.Moov == nil || f.Init.Moov.Trak == nil {
-		return 0, fmt.Errorf("init segment has no moov/trak")
-	}
-	scale := f.Init.Moov.Trak.Mdia.Mdhd.Timescale
-	ts.timescale.Store(scale)
-	return scale, nil
-}
-
-// for some formats (m4a), ffmpeg doesn't flush before printing `segment ready`
-// so we can start reading an incomplete segment. retry a few times for those
-// files.
-// failing here is expensive (the segment is never marked ready, so clients hang
-// until they time out) while retrying only costs us a few ms, so be generous.
-func decodeSegmentFile(path string) (*mp4.File, []byte, error) {
-	var lastErr error
-	for attempt := 0; attempt < 50; attempt++ {
-		if attempt > 0 {
-			time.Sleep(20 * time.Millisecond)
-		}
-		data, err := os.ReadFile(path)
-		if err != nil {
-			return nil, nil, err
-		}
-		f, err := mp4.DecodeFile(bytes.NewReader(data))
-		if err != nil {
-			lastErr = fmt.Errorf("decode segment %s: %w", path, err)
-			continue
-		}
-		// an empty (or header-only) file decodes without any error but carries
-		// no fragment at all. this is the very same "ffmpeg did not flush yet"
-		// case as a decode error, so retry it too: bailing out here marks a
-		// perfectly fine segment as never-ready and strands every client
-		// waiting on it until their own timeout.
-		fragments := 0
-		for _, seg := range f.Segments {
-			for _, frag := range seg.Fragments {
-				if frag.Moof != nil && frag.Moof.Traf != nil && frag.Moof.Traf.Tfdt != nil {
-					fragments++
-				}
-			}
-		}
-		if fragments == 0 {
-			lastErr = fmt.Errorf("segment %s has no media fragment to rebase", path)
-			continue
-		}
-		return f, data, nil
-	}
-	return nil, nil, lastErr
-}
-
-// the tfdt is reset at 0 on each window so we need to manually override it
-// (ffmpeg doesn't allow us to do that). we decided to shift the tfdt instead
-// of overwriting it blindly because the mixer is more precise than what we could
-// calculate
-func (ts *Stream) finalizeSegment(path string, startSegment int32) error {
-	timescale, err := ts.loadTimescale()
-	if err != nil {
-		return err
-	}
-	f, data, err := decodeSegmentFile(path)
-	if err != nil {
-		return err
-	}
-	offset := uint64(math.Round(ts.keyframes.Get(startSegment) * float64(timescale)))
-	patched := false
-	for _, seg := range f.Segments {
-		for _, frag := range seg.Fragments {
-			if frag.Moof == nil || frag.Moof.Traf == nil || frag.Moof.Traf.Tfdt == nil {
-				continue
-			}
-			tfdt := frag.Moof.Traf.Tfdt
-			tfdt.SetBaseMediaDecodeTime(tfdt.BaseMediaDecodeTime() + offset)
-			patched = true
-		}
-	}
-	if !patched {
-		return fmt.Errorf("segment %s has no media fragment to rebase", path)
-	}
-	var out bytes.Buffer
-	out.Grow(len(data))
-	if err := f.Encode(&out); err != nil {
-		return fmt.Errorf("re-encode segment %s: %w", path, err)
-	}
-	return os.WriteFile(path, out.Bytes(), 0o644)
 }
 
 func (ts *Stream) GetInit(ctx context.Context) (string, error) {

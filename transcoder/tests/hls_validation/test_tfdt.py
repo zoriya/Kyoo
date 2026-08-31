@@ -13,10 +13,10 @@ from .hls_utils import (
 )
 
 # tfdt (baseMediaDecodeTime) is the decode time of a fragment's first sample. The
-# segment muxer rebases every lazy window to its own start (tfdt ~= 0), and
-# Stream.finalizeSegment shifts it back onto the absolute timeline. These tests
-# read tfdt straight from the segment bytes (not the ffprobe-derived PTS the
-# continuity tests use) so they assert that rebasing directly.
+# muxer rebases every lazy window to its own start (tfdt ~= 0) unless it is asked
+# not to, which is what `-movflags +absolute_tfdt` does. These tests read tfdt
+# straight from the segment bytes (not the ffprobe-derived PTS the continuity
+# tests use) so they assert the absolute timeline directly.
 
 # tfdt is a *decode* time while EXTINF is a *presentation* duration; on B-frame
 # content the first decoded sample can sit a few frames before the segment's
@@ -45,8 +45,7 @@ def _first_tfdt_seconds(
     )
     tfdts = read_fragment_base_decode_times(data)
     assert tfdts, f"no moof/tfdt found in segment {segment_url}"
-    # Every fragment in the segment must already be monotonically increasing
-    # (Stream.finalizeSegment shifts them all by the same offset).
+    # Every fragment in the segment must be monotonically increasing.
     assert tfdts == sorted(tfdts), (
         f"non-monotonic tfdt within segment {segment_url}: {tfdts}"
     )
@@ -109,9 +108,9 @@ def test_tfdt_is_absolute_and_monotonic_across_sequential_segments(
 
 
 def test_tfdt_absolute_after_lazy_window_seek(test_config, byte_cache) -> None:
-    """Regression for Stream.finalizeSegment: a deep segment served by a *fresh*
-    lazy window is rebased to that window's start by the muxer. Its tfdt must be
-    patched back to its absolute timeline position, not left near ~0."""
+    """Regression for absolute_tfdt: a deep segment served by a *fresh* lazy
+    window would be rebased to that window's start by the muxer. Its tfdt must be
+    at its absolute timeline position, not left near ~0."""
     client_id = f"{test_config.client_prefix}-tfdt-seek"
     master_url = build_master_url(
         test_config.base_url, test_config.media_path, client_id
@@ -146,7 +145,7 @@ def test_tfdt_absolute_after_lazy_window_seek(test_config, byte_cache) -> None:
 
     # Seek straight to the deepest segment for this fresh client. It is far from
     # the warmup window (anchored at t=0), so the transcoder spawns a new window
-    # that the muxer rebases to ~0 -- exactly the case finalizeSegment must fix.
+    # that the muxer would rebase to ~0 without absolute_tfdt.
     target = len(playlist.segment_urls) - 1
     tfdt = _first_tfdt_seconds(
         playlist.segment_urls[target], timescale, test_config, byte_cache
