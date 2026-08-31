@@ -1,4 +1,4 @@
-FROM ghcr.io/zoriya/ffmpeg:v8.0.2-dev
+FROM ghcr.io/zoriya/ffmpeg:v8.0.4-dev
 
 COPY --from=golang:1.26 /usr/local/go /usr/local/go
 ENV PATH="/usr/local/go/bin:${PATH}"

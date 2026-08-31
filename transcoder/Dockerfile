@@ -1,4 +1,4 @@
-FROM ghcr.io/zoriya/ffmpeg:v8.0.2-dev AS build
+FROM ghcr.io/zoriya/ffmpeg:v8.0.4-dev AS build
 COPY --from=golang:1.26 /usr/local/go /usr/local/go
 ENV PATH="/usr/local/go/bin:${PATH}"
 
@@ -9,7 +9,7 @@ RUN go mod download
 COPY . .
 RUN GOOS=linux go build -o ./transcoder
 
-FROM ghcr.io/zoriya/ffmpeg:v8.0.2
+FROM ghcr.io/zoriya/ffmpeg:v8.0.4
 
 WORKDIR /app
 COPY --from=build /app/transcoder /app/transcoder

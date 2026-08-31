@@ -43,7 +43,7 @@ func DetectHardwareAccel() HwAccelT {
 			Name: name,
 			DecodeFlags: []string{
 				"-hwaccel", "vaapi",
-				"-hwaccel_device", GetEnvOr("GOCODER_VAAPI_RENDERER", "/dev/dri/renderD128"),
+				"-vaapi_device", GetEnvOr("GOCODER_VAAPI_RENDERER", "/dev/dri/renderD128"),
 				"-hwaccel_output_format", "vaapi",
 			},
 			EncodeFlags: []string{
@@ -93,6 +93,8 @@ func DetectHardwareAccel() HwAccelT {
 		return HwAccelT{
 			Name: "nvidia",
 			DecodeFlags: []string{
+				"-init_hw_device", "cuda=cu",
+				"-filter_hw_device", "cu",
 				"-hwaccel", "cuda",
 				// this flag prevents data to go from gpu space to cpu space
 				// it forces the whole dec/enc to be on the gpu. We want that.
