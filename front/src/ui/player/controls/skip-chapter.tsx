@@ -88,7 +88,7 @@ export const SkipChapterButton = ({
 			<P
 				className={cn(
 					"text-center text-slate-300 dark:text-slate-300",
-					"group-focus-within:text-slate-200 group-hover:text-slate-200",
+					"group-highlighted:text-slate-200",
 				)}
 			>
 				{t(`player.chapters.skip`, { type: chapter.type })}

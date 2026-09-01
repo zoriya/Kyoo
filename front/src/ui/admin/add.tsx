@@ -25,7 +25,7 @@ import {
 	tooltip,
 } from "~/primitives";
 import { InfiniteFetch, type QueryIdentifier, useMutation } from "~/query";
-import { cn, getDisplayDate, useQueryState } from "~/utils";
+import { getDisplayDate, useQueryState } from "~/utils";
 import { EmptyView } from "../empty-view";
 
 const SearchResultItem = ({
@@ -52,10 +52,7 @@ const SearchResultItem = ({
 			<PosterBackground
 				src={poster}
 				quality="medium"
-				className={cn(
-					"w-full",
-					"ring-accent group-hover:ring-3 group-focus-visible:ring-3",
-				)}
+				className="w-full ring-accent group-highlighted:ring-3"
 			>
 				{isPending && (
 					<View className="absolute inset-0 items-center justify-center bg-black/50">
@@ -73,7 +70,7 @@ const SearchResultItem = ({
 			</PosterBackground>
 			<P
 				numberOfLines={subtitle ? 1 : 2}
-				className="text-center group-focus-within:underline group-hover:underline"
+				className="text-center group-highlighted:underline"
 			>
 				{name}
 			</P>

@@ -58,7 +58,7 @@ export const Tabs = <T,>({
 							"mx-1",
 							x.value === value
 								? "fill-slate-200"
-								: "group-hover:fill-slate-200 group-focus:fill-slate-200",
+								: "group-highlighted:fill-slate-200",
 						)}
 					/>
 					<P
@@ -66,7 +66,7 @@ export const Tabs = <T,>({
 							"ml-1",
 							x.value === value
 								? "text-slate-200"
-								: "group-hover:text-slate-200 group-focus:text-slate-200",
+								: "group-highlighted:text-slate-200",
 						)}
 					>
 						{x.label}

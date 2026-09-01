@@ -30,7 +30,7 @@ export const CharacterCard = ({
 			<Poster src={image} quality="low" className="w-28" />
 			<View className="flex-1 items-center justify-center py-5">
 				<P
-					className="text-center font-semibold group-hover:underline group-focus-visible:underline"
+					className="text-center font-semibold group-highlighted:underline"
 					numberOfLines={2}
 				>
 					{name}

@@ -1,0 +1,75 @@
+diff --git a/src/components/native/Pressable.tsx b/src/components/native/Pressable.tsx
+index f23dc00566374b6f42b4b92a41a4f5acbf36450c..1bcbbe2377835698b6a71968b7a6c7ea8789c7db 100644
+--- a/src/components/native/Pressable.tsx
++++ b/src/components/native/Pressable.tsx
+@@ -1,6 +1,8 @@
+-import type { PressableProps } from 'react-native'
++import type { ReactNode } from 'react'
++import { useMemo } from 'react'
++import type { PressableProps, PressableStateCallbackType } from 'react-native'
+ import { Pressable as RNPressable } from 'react-native'
+-import { useUniwindContext } from '../../core/context'
++import { UniwindContext, useUniwindContext } from '../../core/context'
+ import { UniwindStore } from '../../core/native'
+ import { copyComponentProperties } from '../utils'
+ import { useStyle } from './useStyle'
+@@ -11,6 +13,23 @@ declare module 'react-native' {
+     }
+ }
+ 
++// `.group` is a marker class, tailwind emits no rule for it — the className string is
++// the only place it exists. A group publishes its state for descendants to match on.
++const GroupProvider = ({ state, children }: { state: PressableStateCallbackType; children: ReactNode }) => {
++    const uniwindContext = useUniwindContext()
++    const { pressed, focused, hovered } = state as PressableStateCallbackType & { hovered?: boolean }
++    const value = useMemo(() => ({
++        ...uniwindContext,
++        groupAttrs: {
++            'data-group-pressed': pressed || undefined,
++            'data-group-focused': focused || undefined,
++            'data-group-hovered': hovered || undefined,
++        },
++    }), [uniwindContext, pressed, focused, hovered])
++
++    return <UniwindContext.Provider value={value}>{children}</UniwindContext.Provider>
++}
++
+ export const Pressable = copyComponentProperties(RNPressable, (props: PressableProps) => {
+     const style = useStyle(
+         props.className,
+@@ -39,6 +58,11 @@ export const Pressable = copyComponentProperties(RNPressable, (props: PressableP
+ 
+                 return [style, typeof props.style === 'function' ? props.style(state) : props.style]
+             }}
++            children={!props.className?.split(' ').includes('group') ? props.children : state => (
++                <GroupProvider state={state}>
++                    {typeof props.children === 'function' ? props.children(state) : props.children}
++                </GroupProvider>
++            )}
+         />
+     )
+ })
+diff --git a/src/core/native/store.ts b/src/core/native/store.ts
+index e2c676aa3caeacc0bfcc778249f21ce8aa7ffb74..a112f95d3f7886fd0247778ed1abb81582598987 100644
+--- a/src/core/native/store.ts
++++ b/src/core/native/store.ts
+@@ -108,6 +108,9 @@ class UniwindStoreBuilder {
+         let dependencySum = 0
+         const bestBreakpoints = new Map<string, Style>()
+         const isScopedTheme = uniwindContext.scopedTheme !== null
++        // state of the nearest `.group` ancestor, put on the context by Pressable —
++        // native has no cascade for a child to read a parent's state through
++        const { groupAttrs } = uniwindContext as { groupAttrs?: Record<string, unknown> }
+         const classNameTokens = classNames.includes('\n')
+             ? classNames.split(/\s+/).filter(Boolean)
+             : classNames.split(' ')
+@@ -142,7 +145,8 @@ class UniwindStoreBuilder {
+                     || (style.active !== null && state?.isPressed !== style.active)
+                     || (style.focus !== null && state?.isFocused !== style.focus)
+                     || (style.disabled !== null && state?.isDisabled !== style.disabled)
+-                    || (style.dataAttributes !== null && !this.validateDataAttributes(style.dataAttributes, componentProps))
++                    || (style.dataAttributes !== null
++                        && !this.validateDataAttributes(style.dataAttributes, { ...groupAttrs, ...componentProps }))
+                 ) {
+                     continue
+                 }

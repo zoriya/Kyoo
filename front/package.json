@@ -102,6 +102,7 @@
 		}
 	},
 	"patchedDependencies": {
-		"@legendapp/list@3.3.3": "patches/@legendapp%2Flist@3.3.3.patch"
+		"@legendapp/list@3.3.3": "patches/@legendapp%2Flist@3.3.3.patch",
+		"uniwind@1.10.1": "patches/uniwind@1.10.1.patch"
 	}
 }

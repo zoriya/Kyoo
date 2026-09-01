@@ -38,7 +38,7 @@ export const PartOf = ({
 					className={cn(
 						"py-2",
 						"text-slate-200 dark:text-slate-200",
-						"group-focus-within:underline group-hover:underline",
+						"group-highlighted:underline",
 					)}
 				>
 					{t("show.partOf")} {name}

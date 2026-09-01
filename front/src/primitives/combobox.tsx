@@ -99,7 +99,7 @@ export const ComboBox = <Data,>({
 					)}
 				>
 					<View className="flex-row items-center px-6">
-						<P className="text-center group-focus-within:text-slate-200 group-hover:text-slate-200">
+						<P className="text-center group-highlighted:text-slate-200">
 							{(multiple ? !values?.length : !value)
 								? label
 								: (multiple ? values : [value!])
@@ -109,7 +109,7 @@ export const ComboBox = <Data,>({
 						</P>
 						<Icon
 							icon={ExpandMore}
-							className="group-focus-within:fill-slate-200 group-hover:fill-slate-200"
+							className="group-highlighted:fill-slate-200"
 						/>
 					</View>
 				</PressableFeedback>

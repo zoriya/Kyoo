@@ -50,24 +50,16 @@ export const Button = <AsProps = PressableProps>({
 			{...(props as AsProps)}
 		>
 			{icon && (
-				<Icon
-					icon={icon}
-					className="mx-2 group-focus-within:fill-slate-200 group-hover:fill-slate-200"
-				/>
+				<Icon icon={icon} className="mx-2 group-highlighted:fill-slate-200" />
 			)}
 			{left}
 			{text && (
-				<P className="text-center group-focus-within:text-slate-200 group-hover:text-slate-200">
-					{text}
-				</P>
+				<P className="text-center group-highlighted:text-slate-200">{text}</P>
 			)}
 			{children}
 			{right}
 			{ricon && (
-				<Icon
-					icon={ricon}
-					className="mx-2 group-focus-within:fill-slate-200 group-hover:fill-slate-200"
-				/>
+				<Icon icon={ricon} className="mx-2 group-highlighted:fill-slate-200" />
 			)}
 		</Container>
 	);
