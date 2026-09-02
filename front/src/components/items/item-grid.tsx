@@ -93,7 +93,7 @@ export const ItemGrid = ({
 					isOpen={moreOpened}
 					setOpen={setMoreOpened}
 					className={cn(
-						"absolute top-0 right-0 bg-gray-800/70 hover:bg-gray-800 focus-visible:bg-gray-800",
+						"absolute top-0 right-0 bg-gray-800/70 highlighted:bg-gray-800",
 						"native:hidden opacity-0 focus-visible:opacity-100 group-highlighted:opacity-100",
 						moreOpened && "opacity-100",
 					)}

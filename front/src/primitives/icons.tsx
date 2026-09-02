@@ -86,8 +86,8 @@ export const IconButton = <AsProps = PressableProps>({
 		<Container
 			focusRipple
 			className={cn(
-				"self-center overflow-hidden rounded-full p-2",
-				"outline-0 hover:bg-gray-400/50 focus-visible:bg-gray-400/50",
+				"self-center overflow-hidden rounded-full p-2 outline-0",
+				"highlighted:bg-gray-400/50",
 				className,
 			)}
 			disabled={disabled}

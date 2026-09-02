@@ -65,7 +65,7 @@ export const A = ({
 		<P
 			{...linkProps}
 			className={cn(
-				"select-text text-accent hover:underline focus:underline dark:text-accent",
+				"select-text text-accent highlighted:underline dark:text-accent",
 				className,
 			)}
 			{...props}

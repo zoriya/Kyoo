@@ -11,6 +11,20 @@
 }
 @custom-variant no-touch (:where(body:not(.noHover)) &);
 
+@custom-variant highlighted {
+	&:hover {
+		@slot;
+	}
+	&:focus-visible {
+		@slot;
+	}
+	@media native {
+		&:focus {
+			@slot;
+		}
+	}
+}
+
 @custom-variant group-highlighted {
 	:where(.group:hover, .group:focus-visible, .group:focus-within) & {
 		@slot;

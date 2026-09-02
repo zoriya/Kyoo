@@ -32,8 +32,8 @@ export const Chip = ({
 				size === "small" && "px-2.5 py-1",
 				size === "medium" && "px-5 py-2",
 				size === "large" && "px-10 py-4",
-				outline && "hover:bg-accent focus:bg-accent",
-				!outline && "bg-accent hover:bg-transparent focus:bg-transparent",
+				outline && "highlighted:bg-accent",
+				!outline && "bg-accent highlighted:bg-transparent",
 				className,
 			)}
 			{...props}

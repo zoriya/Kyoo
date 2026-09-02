@@ -95,7 +95,7 @@ export const ComboBox = <Data,>({
 					className={cn(
 						"flex-row items-center justify-center overflow-hidden",
 						"rounded-4xl border-3 border-accent p-1 outline-0",
-						"group focus-within:bg-accent hover:bg-accent",
+						"group highlighted:bg-accent",
 					)}
 				>
 					<View className="flex-row items-center px-6">
