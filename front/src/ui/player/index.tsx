@@ -38,14 +38,12 @@ const clientId = uuidv4();
 
 const CastPresign = z.object({ signature: z.string() });
 
-const base64UrlPath = (path: string): string =>
-	typeof window !== "undefined" && window.btoa
-		? window
-				.btoa(path)
-				.replace(/\+/g, "-")
-				.replace(/\//g, "_")
-				.replace(/=+$/, "")
-		: Buffer.from(path).toString("base64url");
+// btoa only handles latin1, so give it the utf8 bytes instead of the string
+const base64UrlPath = (path: string) =>
+	btoa(String.fromCharCode(...new TextEncoder().encode(path)))
+		.replaceAll("+", "-")
+		.replaceAll("/", "_")
+		.replaceAll("=", "");
 
 const withPresign = (url: string, signature?: string): string => {
 	if (!url || !signature) return url;

@@ -6,15 +6,11 @@ import { getServerData } from "~/utils";
 
 export const storage = createMMKV({ id: "kyoo-v5" });
 
-function toBase64(utf8: string) {
-	if (typeof window !== "undefined") return window.btoa(utf8);
-	return Buffer.from(utf8, "utf8").toString("base64");
-}
-
-function fromBase64(b64: string) {
-	if (typeof window !== "undefined") return window.atob(b64);
-	return Buffer.from(b64, "base64").toString("utf8");
-}
+// btoa/atob only handle latin1, so go through the utf8 bytes
+const toBase64 = (utf8: string) =>
+	btoa(String.fromCharCode(...new TextEncoder().encode(utf8)));
+const fromBase64 = (b64: string) =>
+	new TextDecoder().decode(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)));
 
 export const setCookie = (
 	key: string,
