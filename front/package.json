@@ -48,7 +48,7 @@
 		"i18next-http-backend": "^4.0.0",
 		"jassub": "^2.5.11",
 		"langmap": "^0.0.16",
-		"libpgs": "^0.8.1",
+		"libpgs": "^0.9.0",
 		"react": "19.2.3",
 		"react-dom": "19.2.3",
 		"react-i18next": "^17.0.8",

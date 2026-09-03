@@ -214,8 +214,10 @@ export const streamsH = new Elysia({ tags: ["videos"] }).use(auth).get(
 		headers: t.Object({
 			"accept-language": AcceptLanguage({ autoFallback: true }),
 		}),
+		permissions: ["users.read"],
 		response: {
 			200: t.Array(RunningStream),
+			403: KError,
 			422: KError,
 			502: KError,
 		},

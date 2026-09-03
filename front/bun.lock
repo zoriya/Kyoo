@@ -36,7 +36,7 @@
         "i18next-http-backend": "^4.0.0",
         "jassub": "^2.5.11",
         "langmap": "^0.0.16",
-        "libpgs": "^0.8.1",
+        "libpgs": "^0.9.0",
         "react": "19.2.3",
         "react-dom": "19.2.3",
         "react-i18next": "^17.0.8",
@@ -1051,7 +1051,7 @@
 
     "lfa-ponyfill": ["lfa-ponyfill@1.1.1", "", {}, "sha512-Had4tsGEHtIj58MRtf6SlubNDltxinxMSdxIn1GdwrWbye8TD+pZ+D6qKETnJ9+vQOfG9q/Ds4WUPskhyAMp5Q=="],
 
-    "libpgs": ["libpgs@0.8.1", "", {}, "sha512-Z8WCvHRYr37QjU8b2WqiJpCvnoojbYPtoE4FktwdI+m+b1QkNIKqrYQrlPKG1xvYyQWgV1j+16xjFOhun4nBUA=="],
+    "libpgs": ["libpgs@0.9.0", "", {}, "sha512-kKgKKelcc2dRahni5WysOq9CjglObiGp3zPqlupYb9O0Ewwiu4OMDbyRP/YH043IXub3D6rrR15+9od4Yu7JWA=="],
 
     "lie": ["lie@3.1.1", "", { "dependencies": { "immediate": "~3.0.5" } }, "sha512-RiNhHysUjhrDQntfYSfY4MU24coXXdEOgw9WGcKHNeEwffDYbF//u87M1EWaMGzuFoSbqW0C9C6lEEhDOAswfw=="],
 

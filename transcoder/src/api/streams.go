@@ -19,7 +19,7 @@ type shandler struct {
 func RegisterStreamHandlers(e *echo.Group, transcoder *src.Transcoder) {
 	h := shandler{transcoder}
 
-	e.GET("/streams", h.GetStreams)
+	e.GET("/streams", h.GetStreams, RequirePermission("users.read"))
 	e.GET("/:path/direct", DirectStream)
 	e.GET("/:path/direct/:identifier", DirectStream)
 	e.GET("/:path/master.m3u8", h.GetMaster)

@@ -48,35 +48,6 @@ func ErrorHandler(c *echo.Context, err error) {
 	}{Errors: []string{message}})
 }
 
-func RequireCorePlayPermission(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c *echo.Context) error {
-		user := c.Get("user")
-		if user == nil {
-			return echo.NewHTTPError(http.StatusForbidden, "missing jwt")
-		}
-		token, ok := user.(*jwt.Token)
-		if !ok {
-			return echo.NewHTTPError(http.StatusForbidden, "invalid jwt")
-		}
-		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok {
-			return echo.NewHTTPError(http.StatusForbidden, "invalid jwt claims")
-		}
-		permissions, ok := claims["permissions"]
-		if !ok {
-			return echo.NewHTTPError(http.StatusForbidden, "missing permissions claim")
-		}
-		perms, ok := permissions.([]any)
-		if !ok {
-			return echo.NewHTTPError(http.StatusForbidden, "permissions claim is not an array")
-		}
-		if !slices.Contains(perms, "core.play") {
-			return echo.NewHTTPError(http.StatusForbidden, "missing core.play permission")
-		}
-		return next(c)
-	}
-}
-
 // @title gocoder - Kyoo's transcoder
 // @version 1.0
 // @description Real time transcoder.
@@ -233,7 +204,7 @@ func main() {
 			}
 		})
 
-		g.Use(RequireCorePlayPermission)
+		g.Use(api.RequirePermission("core.play"))
 	}
 
 	api.RegisterHealthHandlers(e.Group("/video"), metadata.Database)
