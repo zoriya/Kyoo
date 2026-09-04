@@ -1,4 +1,5 @@
 import { Stack } from "expo-router";
+import { Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCSSVariable, useResolveClassNames } from "uniwind";
 import { MiniPlayer, TabBarHeightProvider } from "~/ui/mini-player";
@@ -19,6 +20,7 @@ export default function Layout() {
 		<TabBarHeightProvider>
 			<Stack
 				screenOptions={{
+					headerShown: !Platform.isTV,
 					headerTitle: () => <NavbarLeft />,
 					headerRight: () => <NavbarRight />,
 					contentStyle: {

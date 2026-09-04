@@ -269,21 +269,13 @@ const getDisplayUrl = (url: string) => {
 	return url;
 };
 
-export const NavbarProfile = () => {
+export const AccountMenuItems = () => {
 	const { t } = useTranslation();
 	const account = useAccount();
 	const accounts = useAccounts();
 
 	return (
-		<Menu
-			Trigger={Avatar<PressableProps>}
-			as={PressableFeedback}
-			src={account?.logo}
-			placeholder={account?.username}
-			alt={t("navbar.login")}
-			className="m-2"
-			{...tooltip(account?.username ?? t("navbar.login"))}
-		>
+		<>
 			{accounts?.map((x) => (
 				<Menu.Item
 					key={x.id}
@@ -324,6 +316,25 @@ export const NavbarProfile = () => {
 					/>
 				</>
 			)}
+		</>
+	);
+};
+
+export const NavbarProfile = () => {
+	const { t } = useTranslation();
+	const account = useAccount();
+
+	return (
+		<Menu
+			Trigger={Avatar<PressableProps>}
+			as={PressableFeedback}
+			src={account?.logo}
+			placeholder={account?.username}
+			alt={t("navbar.login")}
+			className="m-2"
+			{...tooltip(account?.username ?? t("navbar.login"))}
+		>
+			<AccountMenuItems />
 		</Menu>
 	);
 };
@@ -398,7 +409,7 @@ export const HeaderBackground = ({
 	...props
 }: ViewProps & ReturnType<typeof useScrollNavbar>["headerProps"]) => {
 	// this is to handle transparent modals, to prevent duplicated header bar.
-	if (!focused) return null;
+	if (Platform.isTV || !focused) return null;
 	return (
 		<>
 			<Animated.View

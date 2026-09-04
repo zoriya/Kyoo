@@ -90,7 +90,10 @@ export const PosterPlaceholder = ({
 			)}
 			{...props}
 		>
-			<KyooLogo style={{ width: "50%", aspectRatio: "289.35/296.15" }} />
+			<KyooLogo
+				color="#1f1e2f"
+				style={{ width: "50%", aspectRatio: "289.35/296.15" }}
+			/>
 			{children}
 		</View>
 	);

@@ -1,0 +1,18 @@
+{
+	"svgoConfig": {
+		"plugins": [
+			{
+				"name": "preset-default",
+				"params": {
+					"overrides": {
+						"inlineStyles": false,
+						"removeViewBox": false,
+						"removeUnknownsAndDefaults": false,
+						"convertColors": false
+					}
+				}
+			},
+			"removeStyleElement"
+		]
+	}
+}

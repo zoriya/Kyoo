@@ -3,6 +3,7 @@ import { NativeTabs } from "expo-router/unstable-native-tabs";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 import { useAccount } from "~/providers/account-context";
+import { TvTabs } from "~/ui/navbar-tv";
 
 export const unstable_settings = {
 	initialRouteName: "index",
@@ -12,6 +13,7 @@ export default function TabsLayout() {
 	const { t } = useTranslation();
 	const account = useAccount();
 
+	if (Platform.isTV) return <TvTabs />;
 	if (Platform.OS === "web") return <Slot />;
 
 	return (
