@@ -33,13 +33,18 @@ jobs:
             ./.env.example
 
   native:
-    name: Build Android APK
+    name: Build Android ${{ matrix.tv && 'TV' || 'phone' }} APK
     needs: draft
     permissions:
       contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        tv: [false, true]
     uses: ./.github/workflows/android-build.yml
     with:
       variant: release
+      tv: ${{ matrix.tv }}
       attach-to-release: true
       release-tag: ${{ github.ref_name }}
     secrets: inherit

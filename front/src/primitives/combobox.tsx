@@ -95,11 +95,11 @@ export const ComboBox = <Data,>({
 					className={cn(
 						"flex-row items-center justify-center overflow-hidden",
 						"rounded-4xl border-3 border-accent p-1 outline-0",
-						"group focus-within:bg-accent hover:bg-accent",
+						"group highlighted:bg-accent",
 					)}
 				>
 					<View className="flex-row items-center px-6">
-						<P className="text-center group-focus-within:text-slate-200 group-hover:text-slate-200">
+						<P className="text-center group-highlighted:text-slate-200">
 							{(multiple ? !values?.length : !value)
 								? label
 								: (multiple ? values : [value!])
@@ -109,7 +109,7 @@ export const ComboBox = <Data,>({
 						</P>
 						<Icon
 							icon={ExpandMore}
-							className="group-focus-within:fill-slate-200 group-hover:fill-slate-200"
+							className="group-highlighted:fill-slate-200"
 						/>
 					</View>
 				</PressableFeedback>

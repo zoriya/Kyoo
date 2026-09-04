@@ -44,30 +44,22 @@ export const Button = <AsProps = PressableProps>({
 				"flex-row items-center justify-center overflow-hidden",
 				"rounded-4xl border-3 border-accent p-1 px-6 outline-0",
 				disabled && "border-slate-600",
-				"group focus-within:bg-accent hover:bg-accent",
+				"group highlighted:bg-accent",
 				className,
 			)}
 			{...(props as AsProps)}
 		>
 			{icon && (
-				<Icon
-					icon={icon}
-					className="mx-2 group-focus-within:fill-slate-200 group-hover:fill-slate-200"
-				/>
+				<Icon icon={icon} className="mx-2 group-highlighted:fill-slate-200" />
 			)}
 			{left}
 			{text && (
-				<P className="text-center group-focus-within:text-slate-200 group-hover:text-slate-200">
-					{text}
-				</P>
+				<P className="text-center group-highlighted:text-slate-200">{text}</P>
 			)}
 			{children}
 			{right}
 			{ricon && (
-				<Icon
-					icon={ricon}
-					className="mx-2 group-focus-within:fill-slate-200 group-hover:fill-slate-200"
-				/>
+				<Icon icon={ricon} className="mx-2 group-highlighted:fill-slate-200" />
 			)}
 		</Container>
 	);

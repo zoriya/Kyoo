@@ -64,7 +64,7 @@ export const EntryBox = ({
 				alt=""
 				className={cn(
 					"aspect-video w-full rounded",
-					"ring-accent group-hover:ring-3 group-focus-visible:ring-3",
+					"ring-accent group-highlighted:ring-3",
 				)}
 			>
 				<ItemProgress watchPercent={watchedPercent} />
@@ -76,14 +76,14 @@ export const EntryBox = ({
 					isOpen={moreOpened}
 					setOpen={setMoreOpened}
 					className={cn(
-						"absolute top-0 right-0 bg-gray-800/70 hover:bg-gray-800 focus-visible:bg-gray-800",
-						"native:hidden opacity-0 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100",
+						"absolute top-0 right-0 bg-gray-800/70 highlighted:bg-gray-800",
+						"native:hidden opacity-0 focus-visible:opacity-100 group-highlighted:opacity-100",
 						moreOpened && "opacity-100",
 					)}
 					iconClassName="fill-slate-200 dark:fill-slate-200"
 				/>
 			</ThumbnailBackground>
-			<P className="text-center group-focus-within:underline group-hover:underline">
+			<P className="text-center group-highlighted:underline">
 				{name ?? t("show.episodeNoMetadata")}
 			</P>
 			<SubP numberOfLines={3} className="text-center">

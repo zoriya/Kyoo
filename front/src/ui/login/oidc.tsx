@@ -13,13 +13,14 @@ export const OidcLogin = ({ apiUrl }: { apiUrl: string }) => {
 			Render={(info) => (
 				<>
 					<View className="my-2 items-center">
-						{Object.entries(info.oidc).map(([id, provider]) => (
+						{Object.entries(info.oidc).map(([id, provider], index) => (
 							<Button
 								as={Link}
 								key={id}
 								href={provider.connect}
 								replace
 								className="w-full sm:w-3/4"
+								hasTVPreferredFocus={index === 0}
 								left={
 									provider.logo ? (
 										<Image

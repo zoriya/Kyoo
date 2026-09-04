@@ -62,7 +62,7 @@ export const ItemDetails = ({
 				onLongPress={() => setMoreOpened(true)}
 				className={cn(
 					"h-full flex-row overflow-hidden rounded-xl bg-card",
-					"group outline-0 ring-accent focus-within:ring-3 hover:ring-3",
+					"group outline-0 highlighted:ring-3 ring-accent focus-within:ring-3",
 				)}
 			>
 				<PosterBackground
@@ -72,9 +72,7 @@ export const ItemDetails = ({
 					className="h-full rounded-none"
 				>
 					<View className="absolute bottom-0 w-full bg-slate-900/50 p-2 px-3">
-						<P className="text-slate-200 group-focus-within:underline group-hover:underline">
-							{name}
-						</P>
+						<P className="text-slate-200 group-highlighted:underline">{name}</P>
 						{subtitle && <SubP className="text-slate-400">{subtitle}</SubP>}
 					</View>
 					<ItemWatchStatus

@@ -224,6 +224,7 @@ export const SearchBar = ({
 				className={cn(
 					"h-full min-w-0 flex-1 font-sans text-base outline-0",
 					"align-middle text-slate-600 dark:text-slate-200",
+					"highlighted:outline-3 outline-accent",
 					!expanded && "w-0 grow-0",
 					className,
 				)}

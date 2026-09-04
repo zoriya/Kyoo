@@ -1,4 +1,4 @@
-import type { ReactNode, Ref } from "react";
+import { type ReactNode, type Ref, useState } from "react";
 import { TextInput, type TextInputProps, View } from "react-native";
 import { cn } from "~/utils";
 
@@ -15,11 +15,14 @@ export const Input = ({
 	containerClassName?: string;
 	ref?: Ref<TextInput>;
 } & TextInputProps) => {
+	const [focused, setFocused] = useState(false);
+
 	return (
 		<View
 			className={cn(
 				"shrink flex-row content-center items-center rounded-xl border border-accent p-2",
 				"ring-accent focus-within:ring-2",
+				focused && "ring-2",
 				containerClassName,
 			)}
 		>
@@ -35,6 +38,14 @@ export const Input = ({
 					className,
 				)}
 				{...props}
+				onFocus={(e) => {
+					setFocused(true);
+					props.onFocus?.(e);
+				}}
+				onBlur={(e) => {
+					setFocused(false);
+					props.onBlur?.(e);
+				}}
 			/>
 			{right}
 		</View>

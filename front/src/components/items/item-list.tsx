@@ -52,7 +52,7 @@ export const ItemList = ({
 			onLongPress={() => setMoreOpened(true)}
 			className={cn(
 				"group m-1 mx-2 h-80 overflow-hidden rounded",
-				"outline-0 ring-accent focus-within:ring-3 hover:ring-3",
+				"outline-0 highlighted:ring-3 ring-accent focus-within:ring-3",
 				className,
 			)}
 			{...props}
@@ -68,7 +68,7 @@ export const ItemList = ({
 						<Heading
 							className={cn(
 								"text-center text-3xl text-slate-200 uppercase",
-								"group-focus-within:underline group-hover:underline",
+								"group-highlighted:underline",
 							)}
 						>
 							{name}
@@ -83,8 +83,8 @@ export const ItemList = ({
 							setOpen={setMoreOpened}
 							className={cn(
 								"ml-4",
-								"bg-gray-800/70 hover:bg-gray-800 focus-visible:bg-gray-800",
-								"native:hidden opacity-0 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100",
+								"bg-gray-800/70 highlighted:bg-gray-800",
+								"native:hidden opacity-0 focus-visible:opacity-100 group-highlighted:opacity-100",
 								moreOpened && "opacity-100",
 							)}
 							iconClassName="fill-slate-200 dark:fill-slate-200"
@@ -98,7 +98,7 @@ export const ItemList = ({
 					src={poster}
 					alt=""
 					quality="low"
-					className="h-4/5 ring-accent group-focus-within:ring-4 group-hover:ring-4"
+					className="h-4/5 ring-accent group-highlighted:ring-4"
 				>
 					<ItemWatchStatus
 						watchStatus={watchStatus}

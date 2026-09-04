@@ -98,7 +98,7 @@ const StreamViewer = ({
 		<Link
 			className={cn(
 				"flex-row items-center gap-2 rounded-4xl p-1",
-				"hover:bg-gray-400/50 focus-visible:bg-gray-400/50",
+				"highlighted:bg-gray-400/50",
 			)}
 			href={`/profiles/${username}`}
 		>
@@ -199,7 +199,7 @@ const StreamCard = ({
 		<View
 			className={cn(
 				"group rounded-md bg-card p-4 outline-0",
-				"ring-accent hover:ring-3 focus-visible:ring-3",
+				"highlighted:ring-3 ring-accent",
 			)}
 		>
 			<Image

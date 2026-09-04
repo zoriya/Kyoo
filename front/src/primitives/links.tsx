@@ -65,7 +65,7 @@ export const A = ({
 		<P
 			{...linkProps}
 			className={cn(
-				"select-text text-accent hover:underline focus:underline dark:text-accent",
+				"select-text text-accent highlighted:underline dark:text-accent",
 				className,
 			)}
 			{...props}
@@ -78,6 +78,7 @@ export const A = ({
 export const PressableFeedback = ({
 	children,
 	ref,
+	hasTVPreferredFocus,
 	...props
 }: PressableProps & { ref?: RefObject<View> }) => {
 	const { color } = useResolveClassNames("text-slate-400/25");
@@ -89,6 +90,7 @@ export const PressableFeedback = ({
 				foreground: true,
 				color,
 			}}
+			hasTVPreferredFocus={Platform.isTV && hasTVPreferredFocus}
 			{...props}
 		>
 			{children}

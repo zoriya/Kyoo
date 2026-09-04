@@ -38,6 +38,8 @@ module.exports = (() => {
 		},
 	};
 
+	// `isTv` disable `native` and `android` tags in profit of `tv`.
+	// prefer keeping those so no `isTv: true` here.
 	return withUniwindConfig(config, {
 		cssEntryFile: "./src/global.css",
 	});

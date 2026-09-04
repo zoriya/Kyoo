@@ -78,7 +78,7 @@ export const EntryLine = ({
 				className={cn(
 					"mr-1 w-1/5 shrink-0 rounded",
 					poster ? "aspect-2/3" : "aspect-video",
-					"ring-accent group-hover:ring-3 group-focus-visible:ring-3",
+					"ring-accent group-highlighted:ring-3",
 				)}
 			>
 				{(watchedPercent ?? 0) > 0 && (
@@ -91,7 +91,7 @@ export const EntryLine = ({
 						<Heading
 							className={cn(
 								"shrink font-medium text-lg",
-								"group-hover:underline group-focus-visible:underline",
+								"group-highlighted:underline",
 							)}
 						>
 							{[displayNumber, name ?? t("show.episodeNoMetadata")]
@@ -140,7 +140,7 @@ export const EntryLine = ({
 							isOpen={moreOpened}
 							setOpen={(v) => setMoreOpened(v)}
 							className={cn(
-								"ml-3 flex native:hidden self-end no-touch:opacity-0 focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100",
+								"ml-3 flex native:hidden self-end no-touch:opacity-0 focus-visible:opacity-100 group-highlighted:opacity-100",
 								moreOpened && "opacity-100",
 							)}
 						/>

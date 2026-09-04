@@ -3,6 +3,7 @@ import type { ExpoConfig } from "expo/config";
 import { supportedLanguages } from "./src/providers/translations.compile.ts";
 
 const IS_DEV = process.env.APP_VARIANT === "development";
+const IS_TV = process.env.EXPO_TV === "1";
 
 export const expo: ExpoConfig = {
 	name: IS_DEV ? "Kyoo Dev" : "Kyoo",
@@ -31,13 +32,6 @@ export const expo: ExpoConfig = {
 		favicon: "./public/icon.svg",
 		output: "single",
 	},
-	updates: {
-		url: "https://u.expo.dev/55de6b52-c649-4a15-9a45-569ff5ed036c",
-		fallbackToCacheTimeout: 0,
-	},
-	runtimeVersion: {
-		policy: "sdkVersion",
-	},
 	extra: {
 		eas: {
 			projectId: "55de6b52-c649-4a15-9a45-569ff5ed036c",
@@ -47,6 +41,19 @@ export const expo: ExpoConfig = {
 		"expo-router",
 		"expo-image",
 		"expo-status-bar",
+		...(IS_TV
+			? [
+					[
+						"@react-native-tvos/config-tv",
+						{
+							isTV: true,
+							androidTVRequired: true,
+							androidTVBanner: "./public/tv-banner.png",
+						},
+					] as [string, Record<string, unknown>],
+				]
+			: []),
+		["./plugins/with-tv-dev-menu"],
 		[
 			"expo-build-properties",
 			{

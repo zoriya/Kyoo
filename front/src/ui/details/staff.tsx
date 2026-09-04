@@ -24,13 +24,13 @@ export const CharacterCard = ({
 			href={href}
 			className={cn(
 				"flex-row items-center overflow-hidden rounded-xl bg-card",
-				"group ring-accent hover:ring-3 focus-visible:ring-3",
+				"group highlighted:ring-3 ring-accent",
 			)}
 		>
 			<Poster src={image} quality="low" className="w-28" />
 			<View className="flex-1 items-center justify-center py-5">
 				<P
-					className="text-center font-semibold group-hover:underline group-focus-visible:underline"
+					className="text-center font-semibold group-highlighted:underline"
 					numberOfLines={2}
 				>
 					{name}

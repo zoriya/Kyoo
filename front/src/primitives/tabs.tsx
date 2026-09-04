@@ -48,7 +48,7 @@ export const Tabs = <T,>({
 					onPress={() => setValue(x.value)}
 					className={cn(
 						"group flex-row items-center justify-center rounded-3xl px-4 py-2 outline-0",
-						!(x.value === value) && "hover:bg-accent focus:bg-accent",
+						!(x.value === value) && "highlighted:bg-accent",
 						x.value === value && "bg-accent",
 					)}
 				>
@@ -58,7 +58,7 @@ export const Tabs = <T,>({
 							"mx-1",
 							x.value === value
 								? "fill-slate-200"
-								: "group-hover:fill-slate-200 group-focus:fill-slate-200",
+								: "group-highlighted:fill-slate-200",
 						)}
 					/>
 					<P
@@ -66,7 +66,7 @@ export const Tabs = <T,>({
 							"ml-1",
 							x.value === value
 								? "text-slate-200"
-								: "group-hover:text-slate-200 group-focus:text-slate-200",
+								: "group-highlighted:text-slate-200",
 						)}
 					>
 						{x.label}
