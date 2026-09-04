@@ -54,6 +54,7 @@ export const expo: ExpoConfig = {
 				]
 			: []),
 		["./plugins/with-tv-dev-menu"],
+		["./plugins/with-tv-density"],
 		[
 			"expo-build-properties",
 			{
