@@ -18,6 +18,7 @@ import {
 	Skeleton,
 	SubP,
 	tooltip,
+	ts,
 } from "~/primitives";
 import {
 	InfiniteFetch,
@@ -208,7 +209,7 @@ export const AdminUsersPage = () => {
 				layout: "vertical",
 				numColumns: 1,
 				size: 76,
-				gap: 8,
+				gap: ts(2),
 			}}
 			Header={
 				<View>

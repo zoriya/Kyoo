@@ -23,6 +23,7 @@ import {
 	Menu,
 	P,
 	PressableFeedback,
+	ts,
 	useLinkTo,
 } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
@@ -47,7 +48,7 @@ export const TvTabs = () => {
 						onFocus={() => setExpanded(true)}
 						onBlur={() => setExpanded(false)}
 						style={{
-							width: expanded ? 260 : 72,
+							width: expanded ? ts(65) : ts(18),
 							transitionProperty: "width",
 							transitionDuration: "250ms",
 						}}
@@ -55,7 +56,7 @@ export const TvTabs = () => {
 					>
 						<View className="mb-2 h-14 justify-center overflow-hidden pl-2">
 							<KyooLongLogo
-								style={{ height: 50, width: (531.15 / 149) * 50 }}
+								style={{ height: ts(12.5), width: (531.15 / 149) * ts(12.5) }}
 							/>
 						</View>
 						<RailItem

@@ -23,6 +23,7 @@ import {
 	SubP,
 	Tabs,
 	tooltip,
+	ts,
 } from "~/primitives";
 import { InfiniteFetch, type QueryIdentifier, useMutation } from "~/query";
 import { getDisplayDate, useQueryState } from "~/utils";
@@ -241,7 +242,7 @@ export const AddPage = ({
 				style={Platform.OS === "web" ? undefined : { maxHeight: height * 0.7 }}
 				layout={{
 					layout: "grid",
-					gap: 8,
+					gap: ts(2),
 					numColumns: { xs: 2, sm: 3, md: 4 },
 					size: 200,
 				}}

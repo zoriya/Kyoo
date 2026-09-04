@@ -7,7 +7,7 @@ import { keepPreviousData } from "@tanstack/react-query";
 import { type ComponentType, type ReactElement, useMemo } from "react";
 import type { ViewStyle } from "react-native";
 import { createAnimatedComponent } from "react-native-reanimated";
-import { type Breakpoint, HR, useBreakpointMap } from "~/primitives";
+import { type Breakpoint, HR, uiScale, useBreakpointMap } from "~/primitives";
 import { type QueryIdentifier, useInfiniteFetch } from "./query";
 
 const AnimatedLegendList = createAnimatedComponent(
@@ -93,7 +93,9 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 			data={data}
 			recycleItems
 			getItemType={getItemType}
-			estimatedItemSize={size}
+			// `size` is a design-pixel guess like the classNames it mirrors, so it
+			// has to go through the same scale to stay a useful estimate on tv.
+			estimatedItemSize={size * uiScale}
 			stickyHeaderIndices={getStickyIndices?.(items ?? [])}
 			renderItem={({ item, index }) =>
 				item ? <Render index={index} item={item} /> : <Loader index={index} />

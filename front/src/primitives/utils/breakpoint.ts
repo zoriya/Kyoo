@@ -1,4 +1,5 @@
 import { useWindowDimensions } from "react-native";
+import { uiScale } from "./spacing";
 
 export const breakpoints = {
 	xs: 0,
@@ -28,7 +29,12 @@ const isBreakpoints = <T>(value: unknown): value is Breakpoints<T> => {
 
 const useBreakpoint = () => {
 	const { width } = useWindowDimensions();
-	const idx = Object.values(breakpoints).findLastIndex((x) => x <= width);
+	// The breakpoints are design pixels, not dp: a 1080p tv is 960dp wide but
+	// draws at 3/4 scale, so it has as much room as a 1280px page and should
+	// pick that page's breakpoint.
+	const idx = Object.values(breakpoints).findLastIndex(
+		(x) => x <= width / uiScale,
+	);
 	if (idx === -1) return 0;
 	return idx;
 };

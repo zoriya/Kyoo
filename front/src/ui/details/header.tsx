@@ -438,7 +438,7 @@ export const Header = ({
 						src={data.thumbnail}
 						quality="high"
 						alt=""
-						className="absolute top-0 right-0 left-0 h-[40vh] w-full sm:h-[60vh] sm:min-h-[750px] md:min-h-[680px] lg:h-[65vh]"
+						className="absolute top-0 right-0 left-0 h-[40vh] w-full sm:h-[60vh] sm:min-h-187.5 md:min-h-170 lg:h-[65vh]"
 						onLayout={onImageLayout}
 					>
 						<View className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/70" />
@@ -496,7 +496,7 @@ export const Header = ({
 			Loader={() => (
 				<View className="flex-1">
 					<View
-						className="absolute top-0 right-0 left-0 h-[40vh] w-full bg-linear-to-b from-transparent to-slate-950/70 sm:h-[60vh] sm:min-h-[750px] md:min-h-[680px] lg:h-[65vh]"
+						className="absolute top-0 right-0 left-0 h-[40vh] w-full bg-linear-to-b from-transparent to-slate-950/70 sm:h-[60vh] sm:min-h-187.5 md:min-h-170 lg:h-[65vh]"
 						onLayout={onImageLayout}
 					/>
 					<TitleLine.Loader

@@ -52,6 +52,76 @@
 	--font-headers: "Sora";
 }
 
+/* Android TV reports a 320dpi (2x) display, so a 1080p panel gives the app a
+ * 960x540dp viewport — half the room the same panel gives a browser. Every
+ * length the design system spells out in dp therefore lands twice as large on
+ * screen, which is why the tv looks blown up while web and phone are fine.
+ * --ui-scale shrinks the whole scale so the tv lays out like a 1280x720 page:
+ * still readable from a couch, without a single card eating a third of it.
+ *
+ * The one knob for this is really the root em — every value below is one of
+ * tailwind's own rem defaults, only multiplied by the scale. Uniwind resolves
+ * `rem` at build time though (`polyfills.rem` in the metro config), and metro
+ * can't tell a tv from a phone: both ask for `platform=android`, off the same
+ * dev server. So the root em can't be it, and the tokens get restated here
+ * instead, where uniwind resolves `var()` per platform at runtime.
+ *
+ * Ratios (--text-*--line-height) are unitless and follow their font size on
+ * their own. The dp values in .ts files can't read these, so `uiScale` in
+ * ~/primitives repeats the factor for them — keep the two in sync. */
+@theme {
+	--ui-scale: 1;
+
+	--spacing: calc(0.25rem * var(--ui-scale));
+
+	--text-xs: calc(0.75rem * var(--ui-scale));
+	--text-sm: calc(0.875rem * var(--ui-scale));
+	--text-base: calc(1rem * var(--ui-scale));
+	--text-lg: calc(1.125rem * var(--ui-scale));
+	--text-xl: calc(1.25rem * var(--ui-scale));
+	--text-2xl: calc(1.5rem * var(--ui-scale));
+	--text-3xl: calc(1.875rem * var(--ui-scale));
+	--text-4xl: calc(2.25rem * var(--ui-scale));
+	--text-5xl: calc(3rem * var(--ui-scale));
+	--text-6xl: calc(3.75rem * var(--ui-scale));
+	--text-7xl: calc(4.5rem * var(--ui-scale));
+	--text-8xl: calc(6rem * var(--ui-scale));
+	--text-9xl: calc(8rem * var(--ui-scale));
+
+	--container-3xs: calc(16rem * var(--ui-scale));
+	--container-2xs: calc(18rem * var(--ui-scale));
+	--container-xs: calc(20rem * var(--ui-scale));
+	--container-sm: calc(24rem * var(--ui-scale));
+	--container-md: calc(28rem * var(--ui-scale));
+	--container-lg: calc(32rem * var(--ui-scale));
+	--container-xl: calc(36rem * var(--ui-scale));
+	--container-2xl: calc(42rem * var(--ui-scale));
+	--container-3xl: calc(48rem * var(--ui-scale));
+	--container-4xl: calc(56rem * var(--ui-scale));
+	--container-5xl: calc(64rem * var(--ui-scale));
+	--container-6xl: calc(72rem * var(--ui-scale));
+	--container-7xl: calc(80rem * var(--ui-scale));
+
+	--radius-xs: calc(0.125rem * var(--ui-scale));
+	--radius-sm: calc(0.25rem * var(--ui-scale));
+	--radius-md: calc(0.375rem * var(--ui-scale));
+	--radius-lg: calc(0.5rem * var(--ui-scale));
+	--radius-xl: calc(0.75rem * var(--ui-scale));
+	--radius-2xl: calc(1rem * var(--ui-scale));
+	--radius-3xl: calc(1.5rem * var(--ui-scale));
+	--radius-4xl: calc(2rem * var(--ui-scale));
+}
+
+/* `tv` covers android tv and apple tv — uniwind reads it from `Platform.isTV`
+ * at runtime, so one bundle stays correct on a phone. Browsers never match the
+ * deprecated `tv` media type, so web keeps 1. */
+/* biome-ignore lint/suspicious/noDeprecatedMediaType: uniwind's platform selector, not a browser one */
+@media tv {
+	:root {
+		--ui-scale: 0.75;
+	}
+}
+
 @layer theme {
 	:root,
 	:host {

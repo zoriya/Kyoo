@@ -105,7 +105,7 @@ export const ItemDetails = ({
 			{/* This view needs to be out of the Link because nested <a> are not allowed on the web */}
 			<View
 				className={cn(
-					"absolute right-0 bottom-0 left-0 ml-[192px] h-14",
+					"absolute right-0 bottom-0 left-0 ml-48 h-14",
 					"flex-row items-center justify-end overflow-hidden bg-popover",
 					"overflow-hidden rounded-br-xl",
 				)}

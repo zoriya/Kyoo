@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { type Entry, type Episode, FullVideo, type Page } from "~/models";
-import { Modal } from "~/primitives";
+import { Modal, ts } from "~/primitives";
 import {
 	InfiniteFetch,
 	type QueryIdentifier,
@@ -88,7 +88,7 @@ export const VideosModal = () => {
 					/>
 				}
 				query={VideosModal.query(slug, titles, sort)}
-				layout={{ layout: "vertical", gap: 8, numColumns: 1, size: 48 }}
+				layout={{ layout: "vertical", gap: ts(2), numColumns: 1, size: 48 }}
 				Render={({ item }) => (
 					<PathItem
 						id={item.id}

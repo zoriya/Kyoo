@@ -52,7 +52,7 @@ export const EntryBox = ({
 			onPress={videos.length > 1 ? onSelectVideos : undefined}
 			onLongPress={() => setMoreOpened(true)}
 			className={cn(
-				"group w-[350px] items-center p-1 outline-0",
+				"group w-87.5 items-center p-1 outline-0",
 				href === null && "opacity-50",
 				className,
 			)}
@@ -95,7 +95,7 @@ export const EntryBox = ({
 
 EntryBox.Loader = (props: object) => {
 	return (
-		<View className={"h-full w-[350px] items-center p-1"} {...props}>
+		<View className={"h-full w-87.5 items-center p-1"} {...props}>
 			<Image.Loader className="aspect-video w-full" />
 			<Skeleton className="w-1/2" />
 			<Skeleton className="h-3 w-4/5" />

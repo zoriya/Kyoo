@@ -43,7 +43,7 @@ export const Header = ({
 			alt=""
 			quality="high"
 			className={cn(
-				"h-[40vh] w-full sm:h-[60vh] sm:min-h-[750px] md:min-h-[680px] lg:h-[65vh]",
+				"h-[40vh] w-full sm:h-[60vh] sm:min-h-187.5 md:min-h-170 lg:h-[65vh]",
 				className,
 			)}
 			{...props}
@@ -91,7 +91,7 @@ Header.Loader = () => {
 	return (
 		<View
 			className={cn(
-				"h-[40vh] w-full sm:h-[60vh] sm:min-h-[750px] md:min-h-[680px] lg:h-[65vh]",
+				"h-[40vh] w-full sm:h-[60vh] sm:min-h-187.5 md:min-h-170 lg:h-[65vh]",
 			)}
 		>
 			<View className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/70" />

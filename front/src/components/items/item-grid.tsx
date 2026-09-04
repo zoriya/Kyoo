@@ -66,7 +66,7 @@ export const ItemGrid = ({
 			onLongPress={() => setMoreOpened(true)}
 			className={cn(
 				"group items-center p-1 outline-0",
-				horizontal && "h-full w-[200px]",
+				horizontal && "h-full w-50",
 				className,
 			)}
 			{...props}
@@ -119,10 +119,7 @@ ItemGrid.Loader = ({
 }) => {
 	return (
 		<View
-			className={cn(
-				"w-full items-center p-1",
-				horizontal && "h-full w-[200px]",
-			)}
+			className={cn("w-full items-center p-1", horizontal && "h-full w-50")}
 			{...props}
 		>
 			<Poster.Loader className="w-full" />
