@@ -41,14 +41,18 @@ export const expo: ExpoConfig = {
 		"expo-router",
 		"expo-image",
 		"expo-status-bar",
-		[
-			"@react-native-tvos/config-tv",
-			{
-				isTV: IS_TV,
-				androidTVRequired: IS_TV,
-				androidTVBanner: "./public/tv-banner.png",
-			},
-		],
+		...(IS_TV
+			? [
+					[
+						"@react-native-tvos/config-tv",
+						{
+							isTV: true,
+							androidTVRequired: true,
+							androidTVBanner: "./public/tv-banner.png",
+						},
+					] as [string, Record<string, unknown>],
+				]
+			: []),
 		["./plugins/with-tv-dev-menu"],
 		[
 			"expo-build-properties",
