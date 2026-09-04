@@ -409,7 +409,7 @@ export const HeaderBackground = ({
 	...props
 }: ViewProps & ReturnType<typeof useScrollNavbar>["headerProps"]) => {
 	// this is to handle transparent modals, to prevent duplicated header bar.
-	if (!focused) return null;
+	if (Platform.isTV || !focused) return null;
 	return (
 		<>
 			<Animated.View
