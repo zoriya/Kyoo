@@ -12,10 +12,11 @@ import {
 	useRef,
 	useState,
 } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { Pressable, ScrollView } from "react-native";
 import type { SvgProps } from "react-native-svg";
 import { Portal } from "react-native-teleport";
 import { cn } from "~/utils";
+import { FocusTrap } from "./focus";
 import { Icon, IconButton } from "./icons";
 import { PressableFeedback } from "./links";
 import { P } from "./text";
@@ -79,22 +80,18 @@ const Menu = <AsProps,>({
 							tabIndex={-1}
 							className="absolute inset-0 flex-1 bg-transparent"
 						/>
-						<View
+						<FocusTrap
+							onBack={() => setOpen(false)}
 							className={cn(
 								"absolute bottom-0 w-full self-center bg-popover px-safe pb-safe sm:mx-12 sm:max-w-2xl",
 								"mt-20 max-h-[80vh] rounded-t-4xl pt-8",
-								"xl:top-0 xl:right-0 xl:mr-0 xl:rounded-l-4xl xl:rounded-tr-0 xl:pt-safe",
+								"xl:top-0 xl:right-0 xl:mt-0 xl:mr-0 xl:max-h-screen xl:max-w-xl xl:rounded-l-4xl xl:rounded-tr-none xl:pt-safe-offset-10",
 							)}
 						>
-							<ScrollView className="native:max-h-[80vh]">
-								<IconButton
-									icon={Close}
-									onPress={() => setOpen(false)}
-									className="hidden self-end xl:flex"
-								/>
+							<ScrollView>
 								{typeof children === "function" ? children() : children}
 							</ScrollView>
-						</View>
+						</FocusTrap>
 					</MenuContext.Provider>
 				</Portal>
 			)}
@@ -129,7 +126,10 @@ const MenuItem = ({
 	const icn = (icon || selected) && (
 		<Icon
 			icon={icon ?? Check}
-			className={cn("mx-6", disabled && "fill-slate-600 dark:fill-slate-600")}
+			className={cn(
+				"mx-6 group-highlighted:fill-slate-200",
+				disabled && "fill-slate-600 dark:fill-slate-600",
+			)}
 		/>
 	);
 
@@ -141,20 +141,24 @@ const MenuItem = ({
 				if (href) router.push(href);
 			}}
 			disabled={disabled}
-			className="h-15 w-full flex-row items-center px-4"
+			// same highlight as the web menu, where radix sets the attribute itself
+			className="group h-15 w-full flex-row items-center highlighted:bg-accent px-4"
 			{...props}
 		>
 			{left && left}
-			{!left && icn && icn}
+			{!left && icn}
 			<P
-				className={cn("flex-1", disabled && "text-slate-600")}
+				className={cn(
+					"flex-1 group-highlighted:text-slate-200",
+					disabled && "text-slate-600",
+				)}
 				style={{
 					paddingLeft: 8 * 2 + +!(icon || selected || left) * 24,
 				}}
 			>
 				{label}
 			</P>
-			{left && icn && icn}
+			{left && icn}
 		</PressableFeedback>
 	);
 };

@@ -4,7 +4,13 @@ import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
 import ExpandMore from "@material-symbols/svg-400/rounded/keyboard_arrow_down-fill.svg";
 import SearchIcon from "@material-symbols/svg-400/rounded/search-fill.svg";
 import { keepPreviousData } from "@tanstack/react-query";
-import { type ComponentType, useMemo, useRef, useState } from "react";
+import {
+	type ComponentType,
+	useCallback,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import {
 	KeyboardAvoidingView,
 	Pressable,
@@ -16,6 +22,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Portal } from "react-native-teleport";
 import { type QueryIdentifier, useInfiniteFetch } from "~/query/query";
 import { cn } from "~/utils";
+import { FocusTrap } from "./focus";
 import { Icon, IconButton } from "./icons";
 import { PressableFeedback } from "./links";
 import { Skeleton } from "./skeleton";
@@ -65,6 +72,10 @@ export const ComboBox = <Data,>({
 }: ComboBoxProps<Data>) => {
 	const [isOpen, setOpen] = useState(false);
 	const [search, setSearch] = useState("");
+	const close = useCallback(() => {
+		setOpen(false);
+		setSearch("");
+	}, []);
 	const inputRef = useRef<TextInput>(null);
 	const insets = useSafeAreaInsets();
 
@@ -117,10 +128,7 @@ export const ComboBox = <Data,>({
 			{isOpen && (
 				<Portal hostName="root">
 					<Pressable
-						onPress={() => {
-							setOpen(false);
-							setSearch("");
-						}}
+						onPress={close}
 						tabIndex={-1}
 						className="absolute inset-0 flex-1 bg-transparent"
 					/>
@@ -129,72 +137,66 @@ export const ComboBox = <Data,>({
 						className={cn(
 							"absolute bottom-0 w-full self-center bg-popover px-safe sm:mx-12 sm:max-w-2xl",
 							"mt-20 max-h-[80vh] rounded-t-4xl pt-8",
-							"xl:top-0 xl:right-0 xl:mr-0 xl:rounded-l-4xl xl:rounded-tr-0 xl:pt-safe",
+							"xl:top-0 xl:right-0 xl:mt-0 xl:mr-0 xl:max-h-screen xl:rounded-l-4xl xl:rounded-tr-0 xl:pt-safe-offset-10",
 						)}
 					>
-						<IconButton
-							icon={Close}
-							onPress={() => {
-								setOpen(false);
-								setSearch("");
-							}}
-							className="hidden self-end xl:flex"
-						/>
-						<View
-							className={cn(
-								"mx-4 mb-2 flex-row items-center rounded-xl border border-accent p-1",
-								"focus-within:border-2",
-							)}
-						>
-							<Icon icon={SearchIcon} className="mx-2" />
-							<TextInput
-								ref={inputRef}
-								value={search}
-								onChangeText={setSearch}
-								placeholder={searchPlaceholder}
-								autoFocus
-								textAlignVertical="center"
-								className="h-full flex-1 font-sans text-base text-slate-600 outline-0 dark:text-slate-400"
-							/>
-						</View>
-						<LegendList
-							data={data}
-							extraData={selectedKeys}
-							contentContainerStyle={{ paddingBottom: insets.bottom }}
-							estimatedItemSize={48}
-							keyExtractor={(item: Data | null, index: number) =>
-								item ? getKey(item) : `placeholder-${index}`
-							}
-							renderItem={({ item }: { item: Data | null }) =>
-								item ? (
-									<ComboBoxItem
-										label={getLabel(item)}
-										selected={selectedKeys.has(getKey(item))}
-										onSelect={() => {
-											if (!multiple) {
-												onValueChange(item);
-												setOpen(false);
-												return;
-											}
+						<FocusTrap onBack={close} className="flex-1">
+							<View
+								className={cn(
+									"mx-4 mb-2 flex-row items-center rounded-xl border border-accent p-1",
+									"focus-within:border-2",
+								)}
+							>
+								<Icon icon={SearchIcon} className="mx-2" />
+								<TextInput
+									ref={inputRef}
+									value={search}
+									onChangeText={setSearch}
+									placeholder={searchPlaceholder}
+									autoFocus
+									textAlignVertical="center"
+									className="h-full flex-1 font-sans text-base text-slate-600 outline-0 dark:text-slate-400"
+								/>
+							</View>
+							<LegendList
+								data={data}
+								extraData={selectedKeys}
+								contentContainerStyle={{ paddingBottom: insets.bottom }}
+								estimatedItemSize={48}
+								keyExtractor={(item: Data | null, index: number) =>
+									item ? getKey(item) : `placeholder-${index}`
+								}
+								renderItem={({ item }: { item: Data | null }) =>
+									item ? (
+										<ComboBoxItem
+											label={getLabel(item)}
+											selected={selectedKeys.has(getKey(item))}
+											onSelect={() => {
+												if (!multiple) {
+													onValueChange(item);
+													setOpen(false);
+													return;
+												}
 
-											if (!selectedKeys.has(getKey(item))) {
-												onValueChange([...values, item]);
-												return;
-											}
-											onValueChange(
-												values.filter((v) => getKey(v) !== getKey(item)),
-											);
-										}}
-									/>
-								) : (
-									<ComboBoxItemLoader />
-								)
-							}
-							onEndReached={
-								hasNextPage && !isFetching ? () => fetchNextPage() : undefined
-							}
-							onEndReachedThreshold={0.5}
-						/>
+												if (!selectedKeys.has(getKey(item))) {
+													onValueChange([...values, item]);
+													return;
+												}
+												onValueChange(
+													values.filter((v) => getKey(v) !== getKey(item)),
+												);
+											}}
+										/>
+									) : (
+										<ComboBoxItemLoader />
+									)
+								}
+								onEndReached={
+									hasNextPage && !isFetching ? () => fetchNextPage() : undefined
+								}
+								onEndReachedThreshold={0.5}
+							/>
+						</FocusTrap>
 					</KeyboardAvoidingView>
 				</Portal>
 			)}

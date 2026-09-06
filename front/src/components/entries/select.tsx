@@ -62,7 +62,7 @@ export const EntrySelect = ({
 							>
 								<Link
 									href={`/watch/${x.slug}`}
-									className="flex-1 flex-row items-center gap-2 hover:bg-popover"
+									className="flex-1 flex-row items-center gap-2 rounded highlighted:bg-popover outline-0"
 								>
 									<Icon icon={PlayArrow} className="shrink-0" />
 									<View className="flex-1">
