@@ -29,6 +29,9 @@ const BaseIcon = withUniwind(IconWrapper, {
 		fromClassName: "className",
 		styleProperty: "height",
 	},
+	style: {
+		fromClassName: "className",
+	},
 });
 
 export const Svg = withUniwind(RSvg, {
@@ -47,6 +50,9 @@ export const Svg = withUniwind(RSvg, {
 	height: {
 		fromClassName: "className",
 		styleProperty: "height",
+	},
+	style: {
+		fromClassName: "className",
 	},
 });
 
