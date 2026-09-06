@@ -40,10 +40,8 @@ const getBreakpointValue = <T>(value: Breakpoint<T>, breakpoint: number): T => {
 	if (!isBreakpoints(value)) return value;
 	const bpKeys = Object.keys(breakpoints) as Array<keyof Breakpoints<T>>;
 	for (let i = breakpoint; i >= 0; i--) {
-		if (bpKeys[i] in value) {
-			const val = value[bpKeys[i]];
-			if (val) return val;
-		}
+		const val = value[bpKeys[i]];
+		if (val !== undefined) return val;
 	}
 	// This should never be reached.
 	return undefined!;
