@@ -57,6 +57,27 @@ services:
         - action: rebuild
           path: ./front/bun.lock
 
+  front-tv:
+    profiles: ['tv']
+    build:
+      context: ./front
+      dockerfile: Dockerfile.dev
+    restart: on-failure
+    command: ["bun", "dev", "--port", "8082"]
+    ports:
+      - "8082:8082"
+    environment:
+      - EXPO_TV=1
+      - KYOO_URL=${KYOO_URL:-http://api:5000/api}
+      - EXPO_PUBLIC_CAST_APPLICATION_ID=${CAST_APPLICATION_ID:-}
+    develop:
+      watch:
+        - action: sync
+          path: ./front
+          target: /app
+        - action: rebuild
+          path: ./front/bun.lock
+
   auth:
     build:
       context: ./auth

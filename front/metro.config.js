@@ -42,5 +42,8 @@ module.exports = (() => {
 	// prefer keeping those so no `isTv: true` here.
 	return withUniwindConfig(config, {
 		cssEntryFile: "./src/global.css",
+		// android tv lays out in 960x540dp on a 1080p panel, half what a browser gets
+		// from it. tailwind sizes everything in rem, so the root em scales all of it.
+		polyfills: { rem: 16 * (process.env.EXPO_TV === "1" ? 0.75 : 1) },
 	});
 })();

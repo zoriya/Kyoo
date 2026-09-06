@@ -6,9 +6,9 @@ import {
 	P,
 	Poster,
 	PosterBackground,
+	rem,
 	Skeleton,
 	SubP,
-	ts,
 } from "~/primitives";
 import type { Layout } from "~/query";
 import { cn } from "~/utils";
@@ -66,7 +66,7 @@ export const ItemGrid = ({
 			onLongPress={() => setMoreOpened(true)}
 			className={cn(
 				"group items-center p-1 outline-0",
-				horizontal && "h-full w-[200px]",
+				horizontal && "h-full w-50",
 				className,
 			)}
 			{...props}
@@ -119,10 +119,7 @@ ItemGrid.Loader = ({
 }) => {
 	return (
 		<View
-			className={cn(
-				"w-full items-center p-1",
-				horizontal && "h-full w-[200px]",
-			)}
+			className={cn("w-full items-center p-1", horizontal && "h-full w-50")}
 			{...props}
 		>
 			<Poster.Loader className="w-full" />
@@ -133,8 +130,8 @@ ItemGrid.Loader = ({
 };
 
 ItemGrid.layout = {
-	size: 200,
+	size: rem(50),
 	numColumns: { xs: 3, sm: 4, md: 5, lg: 6, xl: 8 },
-	gap: { xs: ts(1), md: ts(2) },
+	gap: { xs: rem(1), md: rem(2) },
 	layout: "grid",
 } satisfies Layout;
