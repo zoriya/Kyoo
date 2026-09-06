@@ -1,7 +1,7 @@
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ScrollView, View, type ViewProps } from "react-native";
+import { Platform, ScrollView, View, type ViewProps } from "react-native";
 import { ShowContext } from "~/components/items/context-menus";
 import { ItemWatchStatus } from "~/components/items/item-helpers";
 import type { Genre, KImage, WatchStatusV } from "~/models";
@@ -91,6 +91,7 @@ export const ItemDetails = ({
 							isOpen={moreOpened}
 							setOpen={setMoreOpened}
 							videoSlug={videoSlug}
+							className={cn(Platform.isTV && "hidden")}
 						/>
 						{tagline && <P className="p-1">{tagline}</P>}
 					</View>

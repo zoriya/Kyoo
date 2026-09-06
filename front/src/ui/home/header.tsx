@@ -57,7 +57,6 @@ export const Header = ({
 							disabled={Platform.isTV ? false : undefined}
 							aria-label={t("show.play")}
 							className="mr-2"
-							hasTVPreferredFocus
 							{...tooltip(t("show.play"))}
 						/>
 					)}
@@ -66,7 +65,6 @@ export const Header = ({
 						as={Link}
 						href={data?.href}
 						disabled={Platform.isTV ? false : undefined}
-						hasTVPreferredFocus={!!data && !link}
 						aria-label={t("home.info")}
 						className="mr-2"
 						iconClassName="fill-slate-400"
