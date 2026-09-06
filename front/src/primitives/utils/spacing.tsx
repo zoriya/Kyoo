@@ -1,12 +1,11 @@
 import "~/global.css";
-import { Platform } from "react-native";
 import { Uniwind } from "uniwind";
 
 export const rem = (spacing: number) => {
-	return (
-		spacing *
-		(Platform.OS !== "web"
-			? (Uniwind.getCSSVariable("--spacing") as number)
-			: 16)
-	);
+	const unit = Uniwind.getCSSVariable("--spacing");
+	const px =
+		typeof unit === "number"
+			? unit
+			: Number.parseFloat(unit ?? "") * (unit?.endsWith("rem") ? 16 : 1);
+	return spacing * (Number.isNaN(px) ? 4 : px);
 };

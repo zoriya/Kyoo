@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { type PressableProps, View } from "react-native";
+import { View } from "react-native";
 import type { KImage, WatchStatusV } from "~/models";
 import {
 	Heading,
@@ -42,7 +42,9 @@ export const ItemList = ({
 	availableCount?: number | null;
 	videoSlug: string | null;
 	seenCount?: number | null;
-} & PressableProps) => {
+	className?: string;
+	scrollSnapAlign?: "start" | "center" | "end";
+}) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 
 	return (
