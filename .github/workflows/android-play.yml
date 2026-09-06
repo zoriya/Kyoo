@@ -50,13 +50,12 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  publish:
-    name: Build & publish AAB
+  setup:
+    name: Resolve version and tracks
     runs-on: ubuntu-latest
-    timeout-minutes: 60
-    defaults:
-      run:
-        working-directory: ./front
+    outputs:
+      tracks: ${{ steps.version.outputs.tracks }}
+      name: ${{ steps.version.outputs.name }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -86,7 +85,25 @@ jobs:
           fi
           VERSION="${VERSION#v}"
           echo "name=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Publishing $VERSION (versionCode ${{ github.run_number }})"
+          echo "Publishing $VERSION"
+
+  build:
+    name: Build ${{ matrix.target }} AAB
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [phone, tv]
+    defaults:
+      run:
+        working-directory: ./front
+    env:
+      EXPO_TV: ${{ matrix.target == 'tv' && '1' || '' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -116,10 +133,22 @@ jobs:
 
       - name: Generate native project
         env:
-          ANDROID_VERSION_CODE: ${{ github.run_number }}
-          APP_VERSION: ${{ steps.version.outputs.name }}
+          APP_VERSION: ${{ needs.setup.outputs.name }}
           EXPO_NO_TELEMETRY: "1"
-        run: bunx expo prebuild --platform android --no-install
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          # phone and tv share a package name, so play needs a distinct (and always
+          # increasing) versionCode for each. give the tv build its own slot in
+          # every run rather than a flat offset, which would collide with the next
+          # run's phone build.
+          if [ -n "$EXPO_TV" ]; then
+            ANDROID_VERSION_CODE=$((RUN_NUMBER * 10 + 1))
+          else
+            ANDROID_VERSION_CODE=$((RUN_NUMBER * 10))
+          fi
+          export ANDROID_VERSION_CODE
+          echo "versionCode=$ANDROID_VERSION_CODE"
+          bunx expo prebuild --platform android --no-install
 
       - name: Setup signing
         env:
@@ -168,16 +197,28 @@ jobs:
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v7
         with:
-          name: kyoo.aab
+          name: kyoo-${{ matrix.target }}.aab
           path: front/android/app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
 
+  publish:
+    name: Publish to Google Play
+    needs: [setup, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download AABs
+        uses: actions/download-artifact@v8
+        with:
+          path: aabs
+
+      # Both bundles go out in one release: they share a package name and are told
+      # apart by their versionCode and the leanback feature the tv one declares.
       - name: Publish to Google Play
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: dev.zoriya.kyoo
-          releaseFiles: front/android/app/build/outputs/bundle/release/app-release.aab
-          releaseName: ${{ steps.version.outputs.name }}
-          tracks: ${{ steps.version.outputs.tracks }}
+          releaseFiles: aabs/kyoo-phone.aab/app-release.aab,aabs/kyoo-tv.aab/app-release.aab
+          releaseName: ${{ needs.setup.outputs.name }}
+          tracks: ${{ needs.setup.outputs.tracks }}
           status: ${{ inputs.status || 'completed' }}

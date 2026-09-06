@@ -62,6 +62,8 @@ jobs:
     timeout-minutes: 60
     permissions:
       contents: write
+    env:
+      EXPO_TV: ${{ inputs.tv && '1' || '' }}
     strategy:
       fail-fast: false
       matrix:
@@ -114,7 +116,6 @@ jobs:
         env:
           APP_VARIANT: ${{ matrix.variant == 'development' && 'development' || '' }}
           EXPO_NO_TELEMETRY: "1"
-          EXPO_TV: ${{ inputs.tv && '1' || '' }}
           RUN_NUMBER: ${{ github.run_number }}
         run: |
           # the phone and tv apks share a package name, so play needs a distinct
