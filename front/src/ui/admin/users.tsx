@@ -15,6 +15,7 @@ import {
 	Link,
 	Menu,
 	P,
+	rem,
 	Skeleton,
 	SubP,
 	tooltip,
@@ -207,7 +208,7 @@ export const AdminUsersPage = () => {
 			layout={{
 				layout: "vertical",
 				numColumns: 1,
-				size: 76,
+				size: rem(19),
 				gap: 8,
 			}}
 			Header={

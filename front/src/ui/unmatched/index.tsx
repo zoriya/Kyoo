@@ -17,10 +17,10 @@ import {
 	Link,
 	Menu,
 	P,
+	rem,
 	Skeleton,
 	SubP,
 	tooltip,
-	ts,
 } from "~/primitives";
 import {
 	InfiniteFetch,
@@ -260,8 +260,8 @@ export const UnmatchedPage = () => {
 			layout={{
 				layout: "vertical",
 				numColumns: 1,
-				size: 100,
-				gap: ts(0),
+				size: rem(25),
+				gap: rem(0),
 			}}
 			Header={
 				<UnmatchedHeader

@@ -7,7 +7,12 @@ import { keepPreviousData } from "@tanstack/react-query";
 import { type ComponentType, type ReactElement, useMemo } from "react";
 import type { ViewStyle } from "react-native";
 import { createAnimatedComponent } from "react-native-reanimated";
-import { type Breakpoint, HR, useBreakpointMap } from "~/primitives";
+import {
+	type Breakpoint,
+	FocusGroup,
+	HR,
+	useBreakpointMap,
+} from "~/primitives";
 import { type QueryIdentifier, useInfiniteFetch } from "./query";
 
 const AnimatedLegendList = createAnimatedComponent(
@@ -88,7 +93,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 		return isFetching && !isRefetching ? [...items, ...placeholders] : items;
 	}, [items, isFetching, isRefetching, placeholderCount, numColumns]);
 
-	return (
+	const list = (
 		<AnimatedLegendList
 			data={data}
 			recycleItems
@@ -130,14 +135,29 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 			contentContainerStyle={{
 				// Outer margin lives here (columnWrapperStyle only forwards gap/rowGap/
 				// columnGap to LegendList, so margins set there are dropped)
-				...(layout.layout === "horizontal" ? null : { paddingHorizontal: gap }),
+				paddingHorizontal: gap,
 				...contentContainerStyle,
 			}}
 			columnWrapperStyle={{
 				gap,
 				...columnWrapperStyle,
 			}}
+			focusable={false}
+			scrollEnabled={layout.layout !== "horizontal" || !!items?.length}
 			{...props}
 		/>
 	);
+
+	// A row is a focus group of its own: coming back to it from another row lands
+	// on the card the user left it on, rather than on whatever the focus finder
+	// decides is geometrically closest.
+	if (layout.layout === "horizontal")
+		return items?.length ? (
+			<FocusGroup autoFocus trapFocusRight focusable>
+				{list}
+			</FocusGroup>
+		) : (
+			list
+		);
+	return list;
 };

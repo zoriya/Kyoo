@@ -12,11 +12,11 @@ import {
 	Image,
 	Link,
 	PressableFeedback,
+	rem,
 	Skeleton,
 	SubP,
 	ThumbnailBackground,
 	tooltip,
-	ts,
 } from "~/primitives";
 import type { Layout } from "~/query";
 import { cn, displayRuntime } from "~/utils";
@@ -169,7 +169,7 @@ EntryLine.Loader = ({ className, ...props }: { className?: string }) => {
 
 EntryLine.layout = {
 	numColumns: 1,
-	size: 170,
+	size: rem(42.5),
 	layout: "vertical",
-	gap: ts(1),
+	gap: rem(1),
 } satisfies Layout;

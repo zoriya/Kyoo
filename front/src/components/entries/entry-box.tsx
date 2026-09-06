@@ -6,10 +6,10 @@ import {
 	Image,
 	Link,
 	P,
+	rem,
 	Skeleton,
 	SubP,
 	ThumbnailBackground,
-	ts,
 } from "~/primitives";
 import type { Layout } from "~/query";
 import { cn } from "~/utils";
@@ -52,7 +52,7 @@ export const EntryBox = ({
 			onPress={videos.length > 1 ? onSelectVideos : undefined}
 			onLongPress={() => setMoreOpened(true)}
 			className={cn(
-				"group w-[350px] items-center p-1 outline-0",
+				"group w-87.5 items-center p-1 outline-0",
 				href === null && "opacity-50",
 				className,
 			)}
@@ -95,7 +95,7 @@ export const EntryBox = ({
 
 EntryBox.Loader = (props: object) => {
 	return (
-		<View className={"h-full w-[350px] items-center p-1"} {...props}>
+		<View className={"h-full w-87.5 items-center p-1"} {...props}>
 			<Image.Loader className="aspect-video w-full" />
 			<Skeleton className="w-1/2" />
 			<Skeleton className="h-3 w-4/5" />
@@ -104,8 +104,8 @@ EntryBox.Loader = (props: object) => {
 };
 
 EntryBox.layout = {
-	size: 350,
+	size: rem(87.5),
 	numColumns: { xs: 3, sm: 4, md: 5, lg: 6, xl: 8 },
-	gap: { xs: ts(1), md: ts(2) },
+	gap: { xs: rem(1), md: rem(2) },
 	layout: "grid",
 } satisfies Layout;

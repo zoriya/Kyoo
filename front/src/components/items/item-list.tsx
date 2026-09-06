@@ -8,8 +8,8 @@ import {
 	P,
 	Poster,
 	PosterBackground,
+	rem,
 	Skeleton,
-	ts,
 } from "~/primitives";
 import type { Layout } from "~/query";
 import { cn } from "~/utils";
@@ -43,6 +43,7 @@ export const ItemList = ({
 	videoSlug: string | null;
 	seenCount?: number | null;
 	className?: string;
+	scrollSnapAlign?: "start" | "center" | "end";
 }) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 
@@ -128,7 +129,7 @@ ItemList.Loader = (props: object) => {
 
 ItemList.layout = {
 	numColumns: 1,
-	size: 320,
+	size: rem(80),
 	layout: "vertical",
-	gap: ts(2),
+	gap: rem(2),
 } satisfies Layout;

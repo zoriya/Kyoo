@@ -14,7 +14,9 @@ export const VerticalRecommended = () => {
 			<Header title={t("home.recommended")} />
 			<View className="mx-2 flex-1 gap-2">
 				{items
-					? items.map((x) => <ItemList key={x.slug} {...itemMap(x)} />)
+					? items.map((x) => (
+							<ItemList key={x.slug} {...itemMap(x)} scrollSnapAlign="start" />
+						))
 					: [...Array(3)].map((_, i) => <ItemList.Loader key={i} />)}
 			</View>
 		</View>

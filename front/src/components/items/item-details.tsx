@@ -1,7 +1,7 @@
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ScrollView, View, type ViewProps } from "react-native";
+import { Platform, ScrollView, View, type ViewProps } from "react-native";
 import { ShowContext } from "~/components/items/context-menus";
 import { ItemWatchStatus } from "~/components/items/item-helpers";
 import type { Genre, KImage, WatchStatusV } from "~/models";
@@ -11,10 +11,10 @@ import {
 	Link,
 	P,
 	PosterBackground,
+	rem,
 	Skeleton,
 	SubP,
 	tooltip,
-	ts,
 } from "~/primitives";
 import type { Layout } from "~/query";
 import { cn } from "~/utils";
@@ -91,6 +91,7 @@ export const ItemDetails = ({
 							isOpen={moreOpened}
 							setOpen={setMoreOpened}
 							videoSlug={videoSlug}
+							className={cn(Platform.isTV && "hidden")}
 						/>
 						{tagline && <P className="p-1">{tagline}</P>}
 					</View>
@@ -105,7 +106,7 @@ export const ItemDetails = ({
 			{/* This view needs to be out of the Link because nested <a> are not allowed on the web */}
 			<View
 				className={cn(
-					"absolute right-0 bottom-0 left-0 ml-[192px] h-14",
+					"absolute right-0 bottom-0 left-0 ml-48 h-14",
 					"flex-row items-center justify-end overflow-hidden bg-popover",
 					"overflow-hidden rounded-br-xl",
 				)}
@@ -171,8 +172,8 @@ ItemDetails.Loader = ({ className, ...props }: ViewProps) => {
 };
 
 ItemDetails.layout = {
-	size: 288,
+	size: rem(72),
 	numColumns: { xs: 1, md: 2, xl: 3 },
 	layout: "grid",
-	gap: { xs: ts(1), md: ts(2) },
+	gap: { xs: rem(1), md: rem(2) },
 } satisfies Layout;

@@ -18,6 +18,7 @@ import {
 	Modal,
 	P,
 	PosterBackground,
+	rem,
 	Skeleton,
 	Spinner,
 	SubP,
@@ -243,7 +244,7 @@ export const AddPage = ({
 					layout: "grid",
 					gap: 8,
 					numColumns: { xs: 2, sm: 3, md: 4 },
-					size: 200,
+					size: rem(50),
 				}}
 				query={
 					(kind === "library"

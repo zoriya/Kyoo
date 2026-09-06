@@ -12,10 +12,13 @@ import {
 	type TabTriggerSlotProps,
 } from "expo-router/ui";
 import type { ReactNode } from "react";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import Animated from "react-native-reanimated";
+import Animated, {
+	useAnimatedStyle,
+	useSharedValue,
+	withTiming,
+} from "react-native-reanimated";
 import {
 	Avatar,
 	FocusGroup,
@@ -23,6 +26,7 @@ import {
 	Menu,
 	P,
 	PressableFeedback,
+	rem,
 	useLinkTo,
 } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
@@ -30,32 +34,49 @@ import { cn } from "~/utils";
 import KyooLongLogo from "~public/icon-long.svg";
 import { AccountMenuItems } from "./navbar";
 
-const AnimatedRail = Animated.createAnimatedComponent(FocusGroup);
+const AnimatedGuide = Animated.createAnimatedComponent(FocusGroup);
+
+const collapsedWidth = rem(18);
+const expandedWidth = rem(65);
 
 export const TvTabs = () => {
 	const { t } = useTranslation();
 	const account = useAccount();
-	const [expanded, setExpanded] = useState(false);
+	const expanded = useSharedValue(0);
+	const slide = useAnimatedStyle(() => ({
+		transform: [
+			{ translateX: expanded.value * (expandedWidth - collapsedWidth) },
+		],
+	}));
+	const grow = useAnimatedStyle(() => ({
+		width: collapsedWidth + expanded.value * (expandedWidth - collapsedWidth),
+	}));
 
 	return (
 		<Tabs asChild>
 			<View className="flex-1 flex-row bg-background">
+				<View style={{ width: collapsedWidth }} />
+				<AnimatedGuide autoFocus style={[{ flex: 1 }, slide]}>
+					<TabSlot style={{ flex: 1 }} />
+				</AnimatedGuide>
 				<TabList asChild style={{ flexDirection: "column" }}>
-					<AnimatedRail
+					<AnimatedGuide
 						autoFocus
 						trapFocusLeft
-						onFocus={() => setExpanded(true)}
-						onBlur={() => setExpanded(false)}
-						style={{
-							width: expanded ? 260 : 72,
-							transitionProperty: "width",
-							transitionDuration: "250ms",
+						trapFocusUp
+						trapFocusDown
+						onFocus={() => {
+							expanded.value = withTiming(1, { duration: 250 });
 						}}
-						className={cn("gap-0.5 overflow-hidden p-2")}
+						onBlur={() => {
+							expanded.value = withTiming(0, { duration: 250 });
+						}}
+						style={grow}
+						className="absolute inset-y-0 left-0 z-10 gap-0.5 overflow-hidden bg-background p-2 shadow-black/50 shadow-xl"
 					>
 						<View className="mb-2 h-14 justify-center overflow-hidden pl-2">
 							<KyooLongLogo
-								style={{ height: 50, width: (531.15 / 149) * 50 }}
+								style={{ height: rem(12.5), width: (531.15 / 149) * rem(12.5) }}
 							/>
 						</View>
 						<RailItem
@@ -98,9 +119,8 @@ export const TvTabs = () => {
 						>
 							<AccountMenuItems />
 						</Menu>
-					</AnimatedRail>
+					</AnimatedGuide>
 				</TabList>
-				<TabSlot style={{ flex: 1 }} />
 			</View>
 		</Tabs>
 	);
@@ -149,8 +169,9 @@ const RailItem = ({
 			</View>
 			<P
 				numberOfLines={1}
+				style={{ width: expandedWidth - collapsedWidth, flexShrink: 0 }}
 				className={cn(
-					"flex-1 font-headers text-lg text-slate-200 dark:text-slate-200",
+					"font-headers text-lg text-slate-200 dark:text-slate-200",
 					small && "text-sm",
 				)}
 			>

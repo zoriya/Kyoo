@@ -1,5 +1,5 @@
 import { View, type ViewProps } from "react-native";
-import type { FocusGroupProps } from "./focus";
+import type { FocusGroupProps, FocusTrapProps } from "./focus";
 
 export const FocusGroup = ({
 	autoFocus: _autoFocus,
@@ -9,5 +9,9 @@ export const FocusGroup = ({
 	trapFocusRight: _right,
 	...props
 }: FocusGroupProps) => {
+	return <View {...(props as ViewProps)} />;
+};
+
+export const FocusTrap = ({ onBack: _onBack, ...props }: FocusTrapProps) => {
 	return <View {...(props as ViewProps)} />;
 };
