@@ -4,7 +4,7 @@ import {
 } from "expo-image";
 import type { ComponentProps, ReactNode } from "react";
 import type { ImageStyle } from "react-native";
-import { Platform, View } from "react-native";
+import { Platform } from "react-native";
 import { withUniwind } from "uniwind";
 import type { KImage } from "~/models";
 import { useToken } from "~/providers/account-context";
@@ -22,6 +22,7 @@ export const ImageBackground = ({
 	alt,
 	className,
 	children,
+	style,
 	...props
 }: {
 	src: KImage | null;
@@ -32,32 +33,27 @@ export const ImageBackground = ({
 } & Partial<ImageBackgroundProps>) => {
 	const { apiUrl, authToken } = useToken();
 
-	if (!src) {
-		return (
-			<View className={cn("overflow-hidden bg-gray-300", className)}>
-				{children}
-			</View>
-		);
-	}
-
-	const path = src[quality ?? "high"];
-	const uri = path.startsWith("http") ? path : `${apiUrl}${path}`;
+	const path = src?.[quality ?? "high"];
+	const uri = !path || path.startsWith("http") ? path : `${apiUrl}${path}`;
 	return (
 		<ImgBg
 			recyclingKey={uri}
-			source={{
-				uri,
-				// use cookies on web to allow `img` to make the call instead of js
-				headers:
-					authToken && Platform.OS !== "web"
-						? {
-								Authorization: `Bearer ${authToken}`,
-							}
-						: undefined,
-			}}
-			placeholder={{ blurhash: src?.blurhash }}
+			source={
+				uri && {
+					uri,
+					// use cookies on web to allow `img` to make the call instead of js
+					headers:
+						authToken && Platform.OS !== "web"
+							? {
+									Authorization: `Bearer ${authToken}`,
+								}
+							: undefined,
+				}
+			}
+			placeholder={src && { blurhash: src.blurhash }}
 			accessibilityLabel={alt}
 			className={cn("overflow-hidden bg-gray-300", className)}
+			style={style}
 			imageStyle={
 				Platform.OS === "web"
 					? { width: "100%", height: "100%", margin: 0, padding: 0 }

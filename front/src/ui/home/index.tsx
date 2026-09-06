@@ -5,7 +5,7 @@ import {
 import { type ReactElement, useMemo } from "react";
 import { createAnimatedComponent } from "react-native-reanimated";
 import { Genre } from "~/models";
-import { Fetch, useRefresh } from "~/query";
+import { useRefresh } from "~/query";
 import { shuffle } from "~/utils";
 import { useHeroHeight } from "../hero";
 import { HeaderBackground, useScrollNavbar } from "../navbar";
@@ -59,22 +59,7 @@ export const HomePage = () => {
 				onRefresh={refresh}
 				refreshing={isRefreshing}
 				progressViewOffset={60}
-				ListHeaderComponent={
-					<Fetch
-						query={Header.query()}
-						Render={(x) => (
-							<Header
-								name={x.name}
-								tagline={x.kind !== "collection" ? x.tagline : null}
-								description={x.description}
-								thumbnail={x.thumbnail}
-								link={x.kind !== "collection" ? x.playHref : null}
-								infoLink={x.href}
-							/>
-						)}
-						Loader={Header.Loader}
-					/>
-				}
+				ListHeaderComponent={<Header />}
 			>
 				<NextupList />
 				<NewsList />

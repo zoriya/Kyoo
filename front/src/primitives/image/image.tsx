@@ -17,6 +17,7 @@ export const Image = ({
 	quality,
 	alt,
 	className,
+	style,
 	contentFit = "cover",
 	...props
 }: {
@@ -29,31 +30,28 @@ export const Image = ({
 }) => {
 	const { apiUrl, authToken } = useToken();
 
-	if (!src) {
-		return (
-			<View className={cn("overflow-hidden rounded bg-gray-300", className)} />
-		);
-	}
-
-	const path = src[quality ?? "high"];
-	const uri = path.startsWith("http") ? path : `${apiUrl}${path}`;
+	const path = src?.[quality ?? "high"];
+	const uri = !path || path.startsWith("http") ? path : `${apiUrl}${path}`;
 	return (
 		<Img
 			recyclingKey={uri}
-			source={{
-				uri,
-				// use cookies on web to allow `img` to make the call instead of js
-				headers:
-					authToken && Platform.OS !== "web"
-						? {
-								Authorization: `Bearer ${authToken}`,
-							}
-						: undefined,
-			}}
-			placeholder={{ blurhash: src?.blurhash }}
+			source={
+				uri && {
+					uri,
+					// use cookies on web to allow `img` to make the call instead of js
+					headers:
+						authToken && Platform.OS !== "web"
+							? {
+									Authorization: `Bearer ${authToken}`,
+								}
+							: undefined,
+				}
+			}
+			placeholder={src && { blurhash: src.blurhash }}
 			accessibilityLabel={alt}
 			contentFit={contentFit}
 			className={cn("overflow-hidden rounded bg-gray-300", className)}
+			style={style}
 			{...props}
 		/>
 	);
