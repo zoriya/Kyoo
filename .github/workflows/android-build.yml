@@ -15,14 +15,6 @@ on:
         description: Build the Android TV (leanback) app instead of the phone app
         type: boolean
         default: false
-      attach-to-release:
-        description: Attach the release APK to the GitHub release given by release-tag
-        type: boolean
-        default: false
-      release-tag:
-        description: Tag of the release to attach the APK to
-        type: string
-        default: ""
   workflow_call:
     inputs:
       variant:
