@@ -1,7 +1,6 @@
 import { type ComponentProps, useDeferredValue, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { View, type ViewProps } from "react-native";
-import { useSharedValue } from "react-native-reanimated";
+import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Path } from "react-native-svg";
 import { EntryLine, entryDisplayNumber } from "~/components/entries";
@@ -14,6 +13,7 @@ import { Container, H2, Svg } from "~/primitives";
 import { Fetch } from "~/query";
 import { SearchBar } from "~/ui/navbar";
 import { useQueryState } from "~/utils";
+import { useHeroHeight } from "../hero";
 import { HeaderBackground, useScrollNavbar } from "../navbar";
 import { Header } from "./header";
 import { EntryList } from "./season";
@@ -82,11 +82,9 @@ NextUp.Loader = () => {
 
 const SerieHeader = ({
 	slug,
-	onImageLayout,
 	onSelectVideos,
 }: {
 	slug: string;
-	onImageLayout?: ViewProps["onLayout"];
 	onSelectVideos?: (entry: {
 		displayNumber: string;
 		name: string | null;
@@ -101,7 +99,7 @@ const SerieHeader = ({
 
 	return (
 		<View className="bg-background">
-			<Header kind="serie" slug={slug} onImageLayout={onImageLayout} />
+			<Header kind="serie" slug={slug} />
 			{belowFold && (
 				<>
 					<Fetch
@@ -137,11 +135,8 @@ export const SerieDetails = () => {
 	const [season] = useQueryState("season", undefined!);
 	const [search] = useQueryState("search", "");
 	const insets = useSafeAreaInsets();
-	// Shared value instead of state: the hero's first `onLayout` writes straight
-	// to the UI thread, so it no longer triggers a React re-render at all.
-	const imageHeight = useSharedValue(300);
 	const { scrollHandler, headerProps, headerHeight } = useScrollNavbar({
-		imageHeight,
+		imageHeight: useHeroHeight(),
 	});
 	const [selected, setSelected] = useState<EntrySelectEntry | null>(null);
 
@@ -153,15 +148,7 @@ export const SerieDetails = () => {
 				season={season}
 				search={search}
 				onSelectVideos={setSelected}
-				Header={() => (
-					<SerieHeader
-						slug={slug}
-						onSelectVideos={setSelected}
-						onImageLayout={(e) => {
-							imageHeight.value = e.nativeEvent.layout.height;
-						}}
-					/>
-				)}
+				Header={() => <SerieHeader slug={slug} onSelectVideos={setSelected} />}
 				contentContainerStyle={{ paddingBottom: insets.bottom }}
 				withContainer
 				onScroll={scrollHandler}

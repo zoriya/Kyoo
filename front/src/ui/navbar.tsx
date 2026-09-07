@@ -358,7 +358,9 @@ export const useScrollNavbar = ({
 	tab?: boolean;
 }) => {
 	const insets = useSafeAreaInsets();
-	const height = insets.top + (Platform.OS === "ios" ? 44 : 56);
+	const height = Platform.isTV
+		? 0
+		: insets.top + (Platform.OS === "ios" ? 44 : 56);
 
 	const scrollY = useSharedValue(0);
 	const scrollHandler = useAnimatedScrollHandler((event) => {

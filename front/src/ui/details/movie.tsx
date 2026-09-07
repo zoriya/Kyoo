@@ -1,7 +1,7 @@
-import { useState } from "react";
 import Animated from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQueryState } from "~/utils";
+import { useHeroHeight } from "../hero";
 import { HeaderBackground, useScrollNavbar } from "../navbar";
 import { Header } from "./header";
 import { Staff } from "./staff";
@@ -9,8 +9,9 @@ import { Staff } from "./staff";
 export const MovieDetails = () => {
 	const [slug] = useQueryState("slug", undefined!);
 	const insets = useSafeAreaInsets();
-	const [imageHeight, setHeight] = useState(300);
-	const { scrollHandler, headerProps } = useScrollNavbar({ imageHeight });
+	const { scrollHandler, headerProps } = useScrollNavbar({
+		imageHeight: useHeroHeight(),
+	});
 
 	return (
 		<>
@@ -20,11 +21,7 @@ export const MovieDetails = () => {
 				scrollEventThrottle={16}
 				contentContainerStyle={{ paddingBottom: insets.bottom }}
 			>
-				<Header
-					kind="movie"
-					slug={slug}
-					onImageLayout={(e) => setHeight(e.nativeEvent.layout.height)}
-				/>
+				<Header kind="movie" slug={slug} />
 				<Staff kind="movie" slug={slug} />
 			</Animated.ScrollView>
 		</>

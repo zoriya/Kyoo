@@ -3,7 +3,7 @@ import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg";
 import { Fragment, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { View, type ViewProps } from "react-native";
+import { useWindowDimensions, View, type ViewProps } from "react-native";
 import { entryDisplayNumber } from "~/components/entries";
 import {
 	EntrySelect,
@@ -39,12 +39,14 @@ import {
 	P,
 	Popup,
 	Poster,
+	rem,
 	Skeleton,
 	tooltip,
 	UL,
 } from "~/primitives";
 import { Fetch, type QueryIdentifier } from "~/query";
 import { cn, displayRuntime, getDisplayDate } from "~/utils";
+import { useHeroHeight } from "../hero";
 import { PartOf } from "./part-of";
 
 const ButtonList = ({
@@ -156,16 +158,19 @@ export const TitleLine = ({
 	displayNumber: string | null;
 	videos: Entry["videos"] | null;
 	className?: string;
-}) => {
+} & ViewProps) => {
 	return (
 		<Container
-			className={cn("flex-1 max-sm:items-center sm:flex-row", className)}
+			className={cn(
+				"flex-1 max-sm:items-center sm:translate-y-[10%] sm:flex-row",
+				className,
+			)}
 			{...props}
 		>
 			<Poster
 				src={poster}
 				quality="medium"
-				className="w-1/2 shrink-0 max-sm:max-w-44 md:w-1/4"
+				className="w-1/2 shrink-0 max-sm:max-w-44 sm:w-1/4 sm:max-w-[30vh]"
 			/>
 			<View className="flex-1 self-center max-sm:mt-8 max-sm:items-center sm:pl-10 sm:max-md:self-end md:max-lg:mt-5">
 				<P className="max-sm:text-center">
@@ -187,23 +192,23 @@ export const TitleLine = ({
 						videos={videos}
 						trailerUrl={trailerUrl}
 						watchStatus={watchStatus}
-						iconsClassName="lg:fill-slate-200 dark:fill-slate-200"
+						iconsClassName="sm:fill-slate-200 dark:fill-slate-200"
 						videoSlug={videos?.length === 1 ? videos[0].slug : null}
 					/>
 					{Object.keys(rating).length > 0 && (
 						<>
-							<DottedSeparator className="lg:text-slate-200 dark:text-slate-200" />
+							<DottedSeparator className="sm:text-slate-200 dark:text-slate-200" />
 							<Rating
 								rating={rating}
-								textClassName="lg:text-slate-200 dark:text-slate-200"
-								iconClassName="lg:fill-slate-200 dark:fill-slate-200"
+								textClassName="sm:text-slate-200 dark:text-slate-200"
+								iconClassName="sm:fill-slate-200 dark:fill-slate-200"
 							/>
 						</>
 					)}
 					{runtime && (
 						<>
-							<DottedSeparator className="lg:text-slate-200 dark:text-slate-200" />
-							<P className="lg:text-slate-200 dark:text-slate-200">
+							<DottedSeparator className="sm:text-slate-200 dark:text-slate-200" />
+							<P className="sm:text-slate-200 dark:text-slate-200">
 								{displayRuntime(runtime)}
 							</P>
 						</>
@@ -221,26 +226,29 @@ TitleLine.Loader = ({
 }: {
 	kind: "serie" | "movie" | "collection";
 	className?: string;
-}) => {
+} & ViewProps) => {
 	return (
 		<Container
-			className={cn("flex-1 max-sm:items-center sm:flex-row", className)}
+			className={cn(
+				"flex-1 max-sm:items-center sm:translate-y-[10%] sm:flex-row",
+				className,
+			)}
 			{...props}
 		>
-			<Poster.Loader className="w-1/2 shrink-0 max-sm:max-w-44 md:w-1/4" />
+			<Poster.Loader className="w-1/2 shrink-0 max-sm:max-w-44 sm:w-1/4 sm:max-w-[30vh]" />
 			<View className="flex-1 self-center max-sm:mt-8 max-sm:items-center sm:pl-10 sm:max-md:self-end md:max-lg:mt-5">
 				<Skeleton variant="custom" className="h-10 w-2/5 max-sm:text-center" />
 				<Skeleton className="h-6 w-4/5 max-sm:text-center" />
 				<View className="flex-warp flex-row items-center max-sm:justify-center sm:mt-8">
-					<IconFab icon={PlayArrow} iconClassName="lg:fill-slate-200" />
-					<IconButton icon={Theaters} iconClassName="lg:fill-slate-200" />
-					<IconButton icon={MoreHoriz} iconClassName="lg:fill-slate-200" />
-					<DottedSeparator className="lg:text-slate-200" />
+					<IconFab icon={PlayArrow} iconClassName="sm:fill-slate-200" />
+					<IconButton icon={Theaters} iconClassName="sm:fill-slate-200" />
+					<IconButton icon={MoreHoriz} iconClassName="sm:fill-slate-200" />
+					<DottedSeparator className="sm:text-slate-200" />
 					<Rating.Loader
-						textClassName="lg:text-slate-200"
-						iconClassName="lg:fill-slate-200"
+						textClassName="sm:text-slate-200"
+						iconClassName="sm:fill-slate-200"
 					/>
-					<DottedSeparator className="lg:text-slate-200" />
+					<DottedSeparator className="sm:text-slate-200" />
 					<Skeleton className="w-1/5" />
 				</View>
 			</View>
@@ -313,7 +321,7 @@ const Description = ({
 				<P className="flex-1 py-5 text-justify">
 					{description ?? t("show.noOverview")}
 				</P>
-				<View className="basis-1/5 flex-row xl:mt-[-100px]">
+				<View className="basis-1/5 flex-row xl:-mt-25">
 					<HR orientation="vertical" className="max-sm:hidden" />
 					<View className="flex-1 max-sm:flex-row">
 						<H2>{t("show.genre")}</H2>
@@ -381,7 +389,7 @@ Description.Loader = ({ ...props }: object) => {
 		<Container className="py-10" {...props}>
 			<View className="flex-1 flex-col-reverse sm:flex-row">
 				<Skeleton lines={4} />
-				<View className="basis-1/5 flex-row xl:mt-[-100px]">
+				<View className="basis-1/5 flex-row xl:-mt-25">
 					<HR orientation="vertical" className="max-sm:hidden" />
 					<View className="flex-1 items-center max-sm:flex-row">
 						<H2>{t("show.genre")}</H2>
@@ -418,12 +426,17 @@ Description.Loader = ({ ...props }: object) => {
 export const Header = ({
 	kind,
 	slug,
-	onImageLayout,
 }: {
 	kind: "movie" | "serie" | "collection";
 	slug: string;
-	onImageLayout?: ViewProps["onLayout"];
 }) => {
+	const hero = useHeroHeight();
+	const overhang = Math.round(Math.min(hero * 0.1, rem(50)));
+	const { width } = useWindowDimensions();
+	const stackedTop = Math.round(
+		hero + overhang - Math.min(width / 2, rem(44)) * 1.5,
+	);
+
 	return (
 		<Fetch
 			query={Header.query(kind, slug)}
@@ -434,45 +447,51 @@ export const Header = ({
 						description={data.description}
 						image={data.thumbnail?.high}
 					/>
-					<ImageBackground
-						src={data.thumbnail}
-						quality="high"
-						alt=""
-						className="absolute top-0 right-0 left-0 h-[40vh] w-full sm:h-[60vh] sm:min-h-187.5 md:min-h-170 lg:h-[65vh]"
-						onLayout={onImageLayout}
-					>
-						<View className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/70" />
-					</ImageBackground>
-					<TitleLine
-						kind={kind}
-						slug={slug}
-						name={data.name}
-						tagline={data.tagline}
-						date={getDisplayDate(data)}
-						rating={data.rating}
-						runtime={data.kind === "movie" ? data.runtime : null}
-						poster={data.poster}
-						playHref={data.kind !== "collection" ? data.playHref : null}
-						trailerUrl={data.kind !== "collection" ? data.trailerUrl : null}
-						watchStatus={
-							data.kind !== "collection"
-								? (data.watchStatus?.status ?? null)
-								: null
-						}
-						displayNumber={
-							data.kind === "serie" && (data.nextEntry ?? data.firstEntry)
-								? entryDisplayNumber(data.nextEntry ?? data.firstEntry!)
-								: null
-						}
-						videos={
-							data.kind === "movie"
-								? (data.videos ?? null)
-								: data.kind === "serie"
-									? ((data.nextEntry ?? data.firstEntry)?.videos ?? null)
-									: null
-						}
-						className="mt-[max(20vh,200px)] sm:mt-[35vh] md:mt-[max(45vh,150px)] lg:mt-[max(35vh,200px)]"
-					/>
+					<View style={{ minHeight: hero, marginBottom: overhang }}>
+						<ImageBackground
+							src={data.thumbnail}
+							quality="high"
+							alt=""
+							className="absolute top-0 right-0 left-0"
+							style={{ height: hero }}
+						>
+							<View className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/70" />
+						</ImageBackground>
+						<View
+							className="sm:absolute sm:right-0 sm:bottom-0 sm:left-0"
+							style={{ marginTop: stackedTop }}
+						>
+							<TitleLine
+								kind={kind}
+								slug={slug}
+								name={data.name}
+								tagline={data.tagline}
+								date={getDisplayDate(data)}
+								rating={data.rating}
+								runtime={data.kind === "movie" ? data.runtime : null}
+								poster={data.poster}
+								playHref={data.kind !== "collection" ? data.playHref : null}
+								trailerUrl={data.kind !== "collection" ? data.trailerUrl : null}
+								watchStatus={
+									data.kind !== "collection"
+										? (data.watchStatus?.status ?? null)
+										: null
+								}
+								displayNumber={
+									data.kind === "serie" && (data.nextEntry ?? data.firstEntry)
+										? entryDisplayNumber(data.nextEntry ?? data.firstEntry!)
+										: null
+								}
+								videos={
+									data.kind === "movie"
+										? (data.videos ?? null)
+										: data.kind === "serie"
+											? ((data.nextEntry ?? data.firstEntry)?.videos ?? null)
+											: null
+								}
+							/>
+						</View>
+					</View>
 					<Description
 						description={data.description}
 						tags={data.tags}
@@ -495,14 +514,18 @@ export const Header = ({
 			)}
 			Loader={() => (
 				<View className="flex-1">
-					<View
-						className="absolute top-0 right-0 left-0 h-[40vh] w-full bg-linear-to-b from-transparent to-slate-950/70 sm:h-[60vh] sm:min-h-187.5 md:min-h-170 lg:h-[65vh]"
-						onLayout={onImageLayout}
-					/>
-					<TitleLine.Loader
-						kind={kind}
-						className="mt-[max(20vh,200px)] sm:mt-[35vh] md:mt-[max(45vh,150px)] lg:mt-[max(35vh,200px)]"
-					/>
+					<View style={{ minHeight: hero, marginBottom: overhang }}>
+						<View
+							className="absolute top-0 right-0 left-0 bg-linear-to-b from-transparent to-slate-950/70"
+							style={{ height: hero }}
+						/>
+						<View
+							className="sm:absolute sm:right-0 sm:bottom-0 sm:left-0"
+							style={{ marginTop: stackedTop }}
+						>
+							<TitleLine.Loader kind={kind} />
+						</View>
+					</View>
 					<Description.Loader />
 				</View>
 			)}

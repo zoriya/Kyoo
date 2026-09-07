@@ -1,25 +1,19 @@
-import { useState } from "react";
-import { View, type ViewProps } from "react-native";
+import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { itemMap } from "~/components/items";
 import { ItemDetails } from "~/components/items/item-details";
 import { Show } from "~/models";
 import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { useQueryState } from "~/utils";
+import { useHeroHeight } from "../hero";
 import { HeaderBackground, useScrollNavbar } from "../navbar";
 import { Header } from "./header";
 import { SvgWave } from "./serie";
 
-const CollectionHeader = ({
-	slug,
-	onImageLayout,
-}: {
-	slug: string;
-	onImageLayout?: ViewProps["onLayout"];
-}) => {
+const CollectionHeader = ({ slug }: { slug: string }) => {
 	return (
 		<View className="bg-background">
-			<Header kind="collection" slug={slug} onImageLayout={onImageLayout} />
+			<Header kind="collection" slug={slug} />
 			<SvgWave className="flex-1 shrink-0 fill-card" />
 		</View>
 	);
@@ -28,9 +22,8 @@ const CollectionHeader = ({
 export const CollectionDetails = () => {
 	const [slug] = useQueryState("slug", undefined!);
 	const insets = useSafeAreaInsets();
-	const [imageHeight, setHeight] = useState(300);
 	const { scrollHandler, headerProps } = useScrollNavbar({
-		imageHeight,
+		imageHeight: useHeroHeight(),
 	});
 	return (
 		<View className="flex-1 bg-card">
@@ -53,12 +46,7 @@ export const CollectionDetails = () => {
 					/>
 				)}
 				Loader={() => <ItemDetails.Loader />}
-				Header={() => (
-					<CollectionHeader
-						slug={slug}
-						onImageLayout={(e) => setHeight(e.nativeEvent.layout.height)}
-					/>
-				)}
+				Header={() => <CollectionHeader slug={slug} />}
 				onScroll={scrollHandler}
 				contentContainerStyle={{
 					paddingBottom: insets.bottom,
