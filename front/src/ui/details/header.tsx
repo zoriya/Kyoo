@@ -1,3 +1,4 @@
+import Info from "@material-symbols/svg-400/rounded/info.svg";
 import MoreHoriz from "@material-symbols/svg-400/rounded/more_horiz.svg";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg";
@@ -60,6 +61,7 @@ const ButtonList = ({
 	watchStatus,
 	iconsClassName,
 	videoSlug,
+	openInfo,
 }: {
 	kind: "movie" | "serie" | "collection";
 	slug: string;
@@ -71,6 +73,7 @@ const ButtonList = ({
 	watchStatus: WatchStatusV | null;
 	iconsClassName?: string;
 	videoSlug: string | null;
+	openInfo?: () => void;
 }) => {
 	const { t } = useTranslation();
 	const [selected, setSelected] = useState<EntrySelectEntry | null>(null);
@@ -102,6 +105,14 @@ const ButtonList = ({
 					href={trailerUrl}
 					iconClassName={iconsClassName}
 					{...tooltip(t("show.trailer"))}
+				/>
+			)}
+			{openInfo && (
+				<IconButton
+					icon={Info}
+					onPress={openInfo}
+					iconClassName={iconsClassName}
+					{...tooltip(t("show.details"))}
 				/>
 			)}
 			{kind !== "collection" && (
@@ -141,6 +152,7 @@ export const TitleLine = ({
 	watchStatus,
 	displayNumber,
 	videos,
+	openInfo,
 	className,
 	...props
 }: {
@@ -157,6 +169,7 @@ export const TitleLine = ({
 	watchStatus: WatchStatusV | null;
 	displayNumber: string | null;
 	videos: Entry["videos"] | null;
+	openInfo?: () => void;
 	className?: string;
 } & ViewProps) => {
 	return (
@@ -194,6 +207,7 @@ export const TitleLine = ({
 						watchStatus={watchStatus}
 						iconsClassName="sm:fill-slate-200 dark:fill-slate-200"
 						videoSlug={videos?.length === 1 ? videos[0].slug : null}
+						openInfo={openInfo}
 					/>
 					{Object.keys(rating).length > 0 && (
 						<>
@@ -256,7 +270,7 @@ TitleLine.Loader = ({
 	);
 };
 
-const ExternalIdChip = ({
+export const ExternalIdChip = ({
 	name,
 	items,
 }: {
@@ -305,6 +319,7 @@ const Description = ({
 	genres,
 	studios,
 	externalIds,
+	textOnly,
 	...props
 }: {
 	description: string | null;
@@ -312,8 +327,18 @@ const Description = ({
 	genres: Genre[];
 	studios: Studio[] | null;
 	externalIds: Metadata;
+	textOnly?: boolean;
 }) => {
 	const { t } = useTranslation();
+
+	if (textOnly)
+		return (
+			<Container className="py-10" {...props}>
+				<P className="py-5 text-justify">
+					{description ?? t("show.noOverview")}
+				</P>
+			</Container>
+		);
 
 	return (
 		<Container className="py-10" {...props}>
@@ -382,8 +407,15 @@ const Description = ({
 	);
 };
 
-Description.Loader = ({ ...props }: object) => {
+Description.Loader = ({ textOnly, ...props }: { textOnly?: boolean }) => {
 	const { t } = useTranslation();
+
+	if (textOnly)
+		return (
+			<Container className="py-10" {...props}>
+				<Skeleton lines={4} />
+			</Container>
+		);
 
 	return (
 		<Container className="py-10" {...props}>
@@ -426,9 +458,11 @@ Description.Loader = ({ ...props }: object) => {
 export const Header = ({
 	kind,
 	slug,
+	openInfo,
 }: {
 	kind: "movie" | "serie" | "collection";
 	slug: string;
+	openInfo?: () => void;
 }) => {
 	const hero = useHeroHeight();
 	const overhang = Math.round(Math.min(hero * 0.1, rem(50)));
@@ -489,6 +523,7 @@ export const Header = ({
 											? ((data.nextEntry ?? data.firstEntry)?.videos ?? null)
 											: null
 								}
+								openInfo={openInfo}
 							/>
 						</View>
 					</View>
@@ -498,6 +533,7 @@ export const Header = ({
 						genres={data.genres}
 						studios={data.kind !== "collection" ? data.studios! : null}
 						externalIds={data.externalId}
+						textOnly={!!openInfo}
 					/>
 
 					{data.kind !== "collection" && data.collection && (
@@ -526,7 +562,7 @@ export const Header = ({
 							<TitleLine.Loader kind={kind} />
 						</View>
 					</View>
-					<Description.Loader />
+					<Description.Loader textOnly={!!openInfo} />
 				</View>
 			)}
 		/>

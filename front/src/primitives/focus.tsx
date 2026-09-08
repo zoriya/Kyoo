@@ -7,6 +7,8 @@ import {
 import { BackHandler, TVFocusGuideView } from "react-native";
 import { withUniwind } from "uniwind";
 
+export { useTVEventHandler } from "react-native";
+
 export const FocusGroup = withUniwind(TVFocusGuideView);
 export type FocusGroupProps = ComponentProps<typeof FocusGroup>;
 export type FocusTrapProps = { onBack?: () => void } & FocusGroupProps;

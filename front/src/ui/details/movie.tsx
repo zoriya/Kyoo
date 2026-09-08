@@ -1,9 +1,13 @@
+import { useState } from "react";
+import { Platform, View } from "react-native";
 import Animated from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Container, FocusGroup } from "~/primitives";
 import { useQueryState } from "~/utils";
 import { useHeroHeight } from "../hero";
 import { HeaderBackground, useScrollNavbar } from "../navbar";
 import { Header } from "./header";
+import { InfoShelf } from "./shelf";
 import { Staff } from "./staff";
 
 export const MovieDetails = () => {
@@ -12,18 +16,40 @@ export const MovieDetails = () => {
 	const { scrollHandler, headerProps } = useScrollNavbar({
 		imageHeight: useHeroHeight(),
 	});
+	const [info, setInfo] = useState(false);
 
 	return (
 		<>
 			<HeaderBackground {...headerProps} />
-			<Animated.ScrollView
-				onScroll={scrollHandler}
-				scrollEventThrottle={16}
-				contentContainerStyle={{ paddingBottom: insets.bottom }}
-			>
-				<Header kind="movie" slug={slug} />
-				<Staff kind="movie" slug={slug} />
-			</Animated.ScrollView>
+			<FocusGroup autoFocus focusable={!info} className="flex-1">
+				<Animated.ScrollView
+					onScroll={scrollHandler}
+					scrollEventThrottle={16}
+					snapToAlignment="item"
+					contentContainerStyle={{ paddingBottom: insets.bottom }}
+				>
+					<View scrollSnapAlign="start">
+						<Header
+							kind="movie"
+							slug={slug}
+							openInfo={Platform.isTV ? () => setInfo(true) : undefined}
+						/>
+					</View>
+					{!Platform.isTV && (
+						<Container className="mb-4">
+							<Staff kind="movie" slug={slug} layout={Staff.layout} />
+						</Container>
+					)}
+				</Animated.ScrollView>
+			</FocusGroup>
+			{Platform.isTV && (
+				<InfoShelf
+					kind="movie"
+					slug={slug}
+					isOpen={info}
+					close={() => setInfo(false)}
+				/>
+			)}
 		</>
 	);
 };

@@ -1,6 +1,6 @@
 import { type ComponentProps, useDeferredValue, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Path } from "react-native-svg";
 import { EntryLine, entryDisplayNumber } from "~/components/entries";
@@ -9,7 +9,7 @@ import {
 	type EntrySelectEntry,
 } from "~/components/entries/select";
 import type { Entry, Serie } from "~/models";
-import { Container, H2, Svg } from "~/primitives";
+import { Container, FocusGroup, H2, Svg } from "~/primitives";
 import { Fetch } from "~/query";
 import { SearchBar } from "~/ui/navbar";
 import { useQueryState } from "~/utils";
@@ -17,6 +17,7 @@ import { useHeroHeight } from "../hero";
 import { HeaderBackground, useScrollNavbar } from "../navbar";
 import { Header } from "./header";
 import { EntryList } from "./season";
+import { InfoShelf } from "./shelf";
 import { Staff } from "./staff";
 
 export const SvgWave = (props: ComponentProps<typeof Svg>) => {
@@ -83,8 +84,10 @@ NextUp.Loader = () => {
 const SerieHeader = ({
 	slug,
 	onSelectVideos,
+	openInfo,
 }: {
 	slug: string;
+	openInfo?: () => void;
 	onSelectVideos?: (entry: {
 		displayNumber: string;
 		name: string | null;
@@ -99,7 +102,9 @@ const SerieHeader = ({
 
 	return (
 		<View className="bg-background">
-			<Header kind="serie" slug={slug} />
+			<View scrollSnapAlign="start">
+				<Header kind="serie" slug={slug} openInfo={openInfo} />
+			</View>
 			{belowFold && (
 				<>
 					<Fetch
@@ -113,19 +118,25 @@ const SerieHeader = ({
 						}}
 						Loader={NextUp.Loader}
 					/>
-					<Staff kind="serie" slug={slug} />
+					{!Platform.isTV && (
+						<Container className="mb-4">
+							<Staff kind="serie" slug={slug} layout={Staff.layout} />
+						</Container>
+					)}
 				</>
 			)}
 			<SvgWave className="flex-1 shrink-0 fill-card" />
-			<View className="bg-card pb-4 pl-[10%]">
-				<View className="-mt-4 lg:-mt-12 xl:-mt-24">
-					<SearchBar
-						onChangeText={(q) => setSearch(q)}
-						forceExpand
-						containerClassName="w-2/5 max-w-90"
-					/>
+			{!Platform.isTV && (
+				<View className="bg-card pb-4 pl-[10%]">
+					<View className="-mt-4 lg:-mt-12 xl:-mt-24">
+						<SearchBar
+							onChangeText={(q) => setSearch(q)}
+							forceExpand
+							containerClassName="w-2/5 max-w-90"
+						/>
+					</View>
 				</View>
-			</View>
+			)}
 		</View>
 	);
 };
@@ -139,22 +150,39 @@ export const SerieDetails = () => {
 		imageHeight: useHeroHeight(),
 	});
 	const [selected, setSelected] = useState<EntrySelectEntry | null>(null);
+	const [info, setInfo] = useState(false);
 
 	return (
 		<View className="flex-1 bg-card">
 			<HeaderBackground {...headerProps} />
-			<EntryList
-				slug={slug}
-				season={season}
-				search={search}
-				onSelectVideos={setSelected}
-				Header={() => <SerieHeader slug={slug} onSelectVideos={setSelected} />}
-				contentContainerStyle={{ paddingBottom: insets.bottom }}
-				withContainer
-				onScroll={scrollHandler}
-				scrollEventThrottle={16}
-				stickyHeaderConfig={{ offset: headerHeight }}
-			/>
+			<FocusGroup autoFocus focusable={!info} className="flex-1">
+				<EntryList
+					slug={slug}
+					season={season}
+					search={search}
+					onSelectVideos={setSelected}
+					Header={() => (
+						<SerieHeader
+							slug={slug}
+							onSelectVideos={setSelected}
+							openInfo={Platform.isTV ? () => setInfo(true) : undefined}
+						/>
+					)}
+					contentContainerStyle={{ paddingBottom: insets.bottom }}
+					withContainer
+					onScroll={scrollHandler}
+					scrollEventThrottle={16}
+					stickyHeaderConfig={{ offset: headerHeight }}
+				/>
+			</FocusGroup>
+			{Platform.isTV && (
+				<InfoShelf
+					kind="serie"
+					slug={slug}
+					isOpen={info}
+					close={() => setInfo(false)}
+				/>
+			)}
 			<EntrySelect entry={selected} onClose={() => setSelected(null)} />
 		</View>
 	);

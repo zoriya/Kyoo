@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef } from "react";
 import { type HWEvent, Platform } from "react-native";
 import { type OmniPlayer, usePlayer } from "react-native-omni";
+import { useTVEventHandler } from "~/primitives";
 import { toggleFullscreen } from "./controls/misc";
-import { useTVEventHandler } from "./remote";
 
 type Action =
 	| { type: "play" }
