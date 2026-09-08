@@ -235,10 +235,12 @@ export const TitleLine = ({
 
 TitleLine.Loader = ({
 	kind,
+	openInfo,
 	className,
 	...props
 }: {
 	kind: "serie" | "movie" | "collection";
+	openInfo?: () => void;
 	className?: string;
 } & ViewProps) => {
 	return (
@@ -256,6 +258,9 @@ TitleLine.Loader = ({
 				<View className="flex-warp flex-row items-center max-sm:justify-center sm:mt-8">
 					<IconFab icon={PlayArrow} iconClassName="sm:fill-slate-200" />
 					<IconButton icon={Theaters} iconClassName="sm:fill-slate-200" />
+					{openInfo && (
+						<IconButton icon={Info} iconClassName="sm:fill-slate-200" />
+					)}
 					<IconButton icon={MoreHoriz} iconClassName="sm:fill-slate-200" />
 					<DottedSeparator className="sm:text-slate-200" />
 					<Rating.Loader
@@ -567,7 +572,7 @@ export const Header = ({
 							className="sm:absolute sm:right-0 sm:bottom-0 sm:left-0"
 							style={{ marginTop: stackedTop }}
 						>
-							<TitleLine.Loader kind={kind} />
+							<TitleLine.Loader kind={kind} openInfo={openInfo} />
 						</View>
 					</View>
 					<Description.Loader textOnly={!!openInfo} />

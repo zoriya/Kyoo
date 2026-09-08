@@ -126,6 +126,12 @@ export const TouchControls = ({
 					!shouldShow && "cursor-none!",
 				)}
 			/>
+			{/* android only walks key events down to the focused view, and hiding the
+			    controls unmounts every focusable one: without a sink to hold the focus
+			    the remote goes dead and can't even bring the controls back. */}
+			{Platform.isTV && !shouldShow && (
+				<View focusable hasTVPreferredFocus className="absolute inset-0" />
+			)}
 			{seeked !== 0 && (
 				<View
 					className={cn(

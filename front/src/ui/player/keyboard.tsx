@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useEffectEvent } from "react";
 import { type HWEvent, Platform } from "react-native";
 import { type OmniPlayer, usePlayer } from "react-native-omni";
 import { useTVEventHandler } from "~/primitives";
@@ -171,39 +171,46 @@ export const useRemoteKeys = ({
 	showControls: () => void;
 }) => {
 	const player = usePlayer();
-	const shown = useRef(controlsShown);
-	shown.current = controlsShown;
 
 	useTVEventHandler(
-		useCallback(
-			(event: HWEvent) => {
-				// rn can send both the press (0) and the release (1), only act once
-				if (event.eventKeyAction === 0) return;
-				const hidden = !shown.current;
-				showControls();
+		useEffectEvent((event: HWEvent) => {
+			// rn can send both the press (0) and the release (1), only act once
+			if (event.eventKeyAction === 0) return;
+			const hidden = !controlsShown;
+			showControls();
 
-				switch (event.eventType) {
-					case "playPause":
-						reducer(player, { type: "play" });
-						break;
-					case "rewind":
-						reducer(player, { type: "seek", value: -10 });
-						break;
-					case "fastForward":
-						reducer(player, { type: "seek", value: +10 });
-						break;
-					case "select":
-						if (hidden) reducer(player, { type: "play" });
-						break;
-					case "left":
-						if (hidden) reducer(player, { type: "seek", value: -10 });
-						break;
-					case "right":
-						if (hidden) reducer(player, { type: "seek", value: +10 });
-						break;
-				}
-			},
-			[player, showControls],
-		),
+			switch (event.eventType) {
+				case "playPause":
+					reducer(player, { type: "play" });
+					break;
+				case "play":
+					player.play();
+					break;
+				case "pause":
+					player.pause();
+					break;
+				case "next":
+					reducer(player, { type: "next" });
+					break;
+				case "previous":
+					reducer(player, { type: "prev" });
+					break;
+				case "rewind":
+					reducer(player, { type: "seek", value: -10 });
+					break;
+				case "fastForward":
+					reducer(player, { type: "seek", value: +10 });
+					break;
+				case "select":
+					if (hidden) reducer(player, { type: "play" });
+					break;
+				case "left":
+					if (hidden) reducer(player, { type: "seek", value: -10 });
+					break;
+				case "right":
+					if (hidden) reducer(player, { type: "seek", value: +10 });
+					break;
+			}
+		}),
 	);
 };
