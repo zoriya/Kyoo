@@ -1,4 +1,5 @@
-import { ScrollView } from "react-native";
+import { Platform, ScrollView, useWindowDimensions } from "react-native";
+import { FocusGroup, rem } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { AccountSettings } from "./account";
 import { About, GeneralSettings } from "./general";
@@ -8,15 +9,22 @@ import { SessionsSettings } from "./sessions";
 
 export const SettingsPage = () => {
 	const account = useAccount();
+
 	return (
-		<ScrollView contentContainerClassName="gap-8 pb-8">
-			<GeneralSettings />
-			{account && <PlaybackSettings />}
-			{account && <ChapterSkipSettings />}
-			{account && <AccountSettings />}
-			{account && <SessionsSettings />}
-			{account && <OidcSettings />}
-			<About />
-		</ScrollView>
+		<FocusGroup autoFocus className="flex-1">
+			<ScrollView
+				snapToAlignment="item"
+				focusable={false}
+				contentContainerClassName="gap-8"
+			>
+				<GeneralSettings />
+				{account && <PlaybackSettings />}
+				{account && <ChapterSkipSettings />}
+				{account && <AccountSettings />}
+				{account && <SessionsSettings />}
+				{account && <OidcSettings />}
+				<About />
+			</ScrollView>
+		</FocusGroup>
 	);
 };
