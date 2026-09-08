@@ -1,4 +1,3 @@
-import Admin from "@material-symbols/svg-400/rounded/admin_panel_settings.svg";
 import Browse from "@material-symbols/svg-400/rounded/browse-fill.svg";
 import Home from "@material-symbols/svg-400/rounded/home-fill.svg";
 import Person from "@material-symbols/svg-400/rounded/person-fill.svg";
@@ -93,11 +92,6 @@ export const TvTabs = () => {
 						<TabTrigger name="profile" href="/profile" asChild>
 							<RailItem label={t("navbar.profile")} icon={Person} />
 						</TabTrigger>
-						{account?.isAdmin && (
-							<TabTrigger name="admin" href="/admin" asChild>
-								<RailItem label={t("navbar.admin")} icon={Admin} />
-							</TabTrigger>
-						)}
 						<View className="flex-1" />
 						<RailItem
 							href="/settings"
