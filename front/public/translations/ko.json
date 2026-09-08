@@ -5,7 +5,7 @@
 		"watchlist": "이어보기",
 		"info": "더보기",
 		"none": "에피소드 없음",
-		"watchlistLogin": "시청했거나 시청할 예정인 콘텐츠를 추적하려면 로그인하세요.",
+		"watchlistLogin": "시청한 콘텐츠와 시청할 콘텐츠를 관리하려면 로그인해야 합니다.",
 		"refreshMetadata": "메타데이터 새로고침",
 		"episodeMore": {
 			"goToShow": "시리즈로 이동하기",
@@ -19,40 +19,58 @@
 		"studios": "스튜디오",
 		"genre": "장르",
 		"genre-none": "장르 없음",
-		"staff": "스태프",
-		"staff-none": "스태프 알 수 없음",
-		"noOverview": "사용 가능한 개요 없음",
+		"staff": "제작진",
+		"staff-none": "제작진 알 수 없음",
+		"noOverview": "개요가 없습니다",
 		"episode-none": "이 시즌에는 에피소드가 없습니다",
-		"episodeNoMetadata": "사용 가능한 메타데이터 없음",
+		"episodeNoMetadata": "등록된 메타데이터가 없습니다",
 		"tags": "태그",
 		"links": "링크",
-		"jumpToSeason": "시즌으로 이동하기",
+		"jumpToSeason": "시즌 선택",
 		"partOf": "이 컬렉션에 포함되어 있습니다:",
 		"watchlistAdd": "관심 목록에 추가하세요",
 		"watchlistEdit": "시청 상태 변경",
 		"watchlistRemove": "시청하지 않음으로 표시",
-		"watchlistLogin": "로그인하여 관심 목록에 추가하기",
+		"watchlistLogin": "시청 목록에 추가하려면 로그인해 주세요",
 		"watchlistMark": {
-			"completed": "시청함으로 표시",
-			"planned": "계획됨으로 표시",
+			"completed": "시청 완료로 표시",
+			"planned": "시청 예정으로 표시",
 			"watching": "시청 중으로 표시",
-			"dropped": "취소한 것으로 표시",
-			"null": "시청하지 않음으로 표시"
+			"dropped": "시청 중단으로 표시",
+			"null": "시청하지 않음으로 표시",
+			"rewatching": "재시청 중으로 표시"
 		},
-		"nextUp": "다음",
-		"season": "시즌 {{number}}"
+		"nextUp": "다음 콘텐츠",
+		"season": "시즌 {{number}}",
+		"videosCount": "{{number}}개 영상",
+		"version": "버전 {{number}}",
+		"part": "{{number}}부",
+		"videos-map": "영상 매핑 수정",
+		"remap": "다시 매핑",
+		"staff-as": "{{character}} 역",
+		"staff-kind": {
+			"actor": "배우",
+			"director": "감독",
+			"writter": "작가",
+			"producer": "제작자",
+			"music": "음악",
+			"crew": "제작진",
+			"other": "기타"
+		},
+		"tags-none": "태그가 없습니다",
+		"multiVideos": "여러 영상 파일이 있습니다"
 	},
 	"browse": {
 		"mediatypekey": {
-			"all": "전부",
+			"all": "전체",
 			"movie": "영화",
 			"collection": "컬렉션",
 			"serie": "시리즈"
 		},
-		"mediatype-tt": "미디어 타입",
-		"mediatypelabel": "미디어 타입",
+		"mediatype-tt": "콘텐츠 유형",
+		"mediatypelabel": "콘텐츠 유형",
 		"sortby": "{{key}} 기준으로 정렬",
-		"sortby-tt": "해당 기준으로 정렬",
+		"sortby-tt": "정렬 기준",
 		"sortkey": {
 			"relevance": "관련성",
 			"name": "이름",
@@ -66,12 +84,13 @@
 			"asc": "오름차순",
 			"desc": "내림차순"
 		},
-		"switchToGrid": "그리드 뷰로 전환하기",
-		"switchToList": "리스트 뷰로 전환하기"
+		"switchToGrid": "그리드 보기로 전환",
+		"switchToList": "리스트 보기로 전환",
+		"not": "Not"
 	},
 	"genres": {
 		"action": "액션",
-		"adventure": "모험",
+		"adventure": "어드벤처",
 		"animation": "애니메이션",
 		"comedy": "코미디",
 		"crime": "범죄",
@@ -80,7 +99,7 @@
 		"family": "가족",
 		"fantasy": "판타지",
 		"history": "역사",
-		"horror": "호러",
+		"horror": "공포",
 		"music": "음악",
 		"mystery": "미스터리",
 		"romance": "로맨스",
@@ -105,45 +124,75 @@
 		"collapse": "접기",
 		"edit": "수정",
 		"or": "또는",
-		"loading": "불러오는 중"
+		"loading": "불러오는 중",
+		"delete-name": "{{name}} 삭제"
 	},
 	"navbar": {
 		"home": "홈",
-		"browse": "탐색",
+		"browse": "둘러보기",
 		"download": "다운로드",
 		"search": "검색",
 		"login": "로그인",
-		"admin": "관리자 패널"
+		"admin": "관리",
+		"profile": "프로필"
 	},
 	"settings": {
 		"general": {
 			"label": "일반",
 			"theme": {
 				"label": "테마",
-				"description": "애플리케이션 테마 설정",
+				"description": "애플리케이션 테마를 설정합니다",
 				"auto": "시스템",
-				"light": "밝음",
-				"dark": "어두움"
+				"light": "라이트",
+				"dark": "다크"
 			},
 			"language": {
 				"label": "언어",
-				"description": "애플리케이션 언어 설정"
+				"description": "애플리케이션 언어를 설정합니다"
 			}
 		},
 		"playback": {
 			"label": "재생",
 			"playmode": {
 				"label": "기본 재생 모드",
-				"description": "이 클라이언트에서 사용되는 기본 재생 모드입니다. 네이티브는 서버에 부하를 덜 주지만, 화질 자동 변경을 허용하지 않습니다"
+				"description": "이 클라이언트에서 사용할 기본 재생 방식입니다. 원본 재생은 서버 부하가 적지만 자동 화질 변경을 지원하지 않습니다"
 			},
 			"audioLanguage": {
-				"label": "음성 언어",
-				"description": "다국어 음성이 포함된 영상 재생 시 사용될 기본 음성 언어"
+				"label": "오디오 언어",
+				"description": "여러 오디오 트랙이 있는 영상을 재생할 때 사용할 기본 오디오 언어입니다",
+				"original": "원본"
 			},
 			"subtitleLanguage": {
 				"label": "자막 언어",
-				"description": "기본으로 사용될 자막 언어",
+				"description": "기본으로 사용할 자막 언어입니다",
 				"none": "없음"
+			},
+			"chapterSkip": {
+				"label": "자동 건너뛰기",
+				"behaviors": {
+					"autoSkip": "자동 스킵",
+					"autoSkipExceptFirstAppearance": "이미 본 인트로 자동 건너뛰기",
+					"showSkipButton": "스킵 버튼 표시",
+					"disabled": "아무것도 하지 않기"
+				},
+				"types": {
+					"recap": "지난 이야기",
+					"intro": "인트로",
+					"credits": "크레딧",
+					"preview": "미리보기"
+				},
+				"descriptions": {
+					"recap": "지난 이야기가 시작될 때의 동작을 설정합니다",
+					"intro": "인트로가 시작될 때의 동작을 설정합니다",
+					"credits": "크레딧이 시작될 때의 동작을 설정합니다",
+					"preview": "미리보기가 시작될 때의 동작을 설정합니다"
+				}
+			},
+			"player": {
+				"label": "비디오 플레이어",
+				"description": "이 기기에서 영상을 재생하는 데 사용할 플레이어 백엔드입니다",
+				"vlc": "VLC",
+				"exoplayer": "ExoPlayer"
 			}
 		},
 		"account": {
@@ -177,12 +226,18 @@
 			"label": "정보",
 			"android-app": {
 				"label": "안드로이드 앱",
-				"description": "안드로이드 앱 다운로드"
+				"description": "Android 앱 다운로드"
 			},
 			"git": {
-				"label": "깃허브",
-				"description": "kyoo의 코드를 확인할 수 있는 깃허브 레포지토리를 엽니다"
+				"label": "Github",
+				"description": "Kyoo의 소스 코드를 확인할 수 있는 GitHub 저장소를 엽니다"
 			}
+		},
+		"sessions": {
+			"label": "연결된 기기",
+			"current": "현재 로그인된 기기",
+			"revoke": "연결 끊기",
+			"description": "생성일 {{createdDate}} - 마지막 사용 {{lastUsed}}"
 		}
 	},
 	"player": {
@@ -191,18 +246,35 @@
 		"next": "다음 에피소드",
 		"play": "재생",
 		"pause": "일시정지",
-		"mute": "음소거 토글",
+		"mute": "음소거",
 		"volume": "음량",
 		"quality": "화질",
-		"audios": "음성",
+		"audios": "오디오",
 		"subtitles": "자막",
 		"subtitle-none": "해제",
 		"fullscreen": "전체화면",
-		"direct": "네이티브",
-		"transmux": "원본",
+		"direct": "원본 재생",
+		"transmux": "원본 스트리밍",
 		"auto": "자동",
-		"notInPristine": "네이티브에서는 사용할 수 없습니다",
-		"unsupportedError": "영상 코덱이 지원되지 않습니다. 트랜스코딩 진행 중..."
+		"notInPristine": "원본 재생에서는 사용할 수 없습니다",
+		"unsupportedError": "지원되지 않는 영상 형식입니다. 재생을 위해 변환 중입니다...",
+		"chapters": {
+			"skip": "{{type}} 스킵",
+			"intro": "인트로",
+			"credits": "크레딧",
+			"recap": "지난 이야기",
+			"preview": "미리보기"
+		},
+		"videos": "영상",
+		"seek": "{{seconds}} 초",
+		"cast": "기기로 전송",
+		"stop-cast": "전송 중지",
+		"casting": {
+			"connecting": "연결 중…",
+			"playing": "TV에서 재생 중"
+		},
+		"not-available": "{{entry}}은(는) 아직 Kyoo에서 사용할 수 없습니다. 서버 관리자에게 문의해 주세요",
+		"fatal": "재생 오류"
 	},
 	"search": {
 		"empty": "검색 결과가 없습니다. 다른 검색어를 시도해 보세요."
@@ -210,27 +282,29 @@
 	"login": {
 		"login": "로그인",
 		"register": "회원가입",
-		"guest": "손님으로 계속하기",
-		"guest-forbidden": "이 kyoo 인스턴스는 손님을 허용하지 않습니다.",
+		"guest": "게스트로 계속하기",
+		"guest-forbidden": "이 Kyoo에서는 게스트 이용을 허용하지 않습니다.",
 		"via": "{{provider}}로 계속하기",
 		"add-account": "계정 추가",
 		"logout": "로그아웃",
 		"server": "서버 주소",
 		"email": "이메일",
-		"username": "사용자 명",
+		"username": "사용자명",
 		"password": "비밀번호",
 		"confirm": "비밀번호 확인",
 		"or-register": "계정이 없으신가요? <1>가입하기</1>.",
 		"or-login": "이미 계정을 가지고 계신가요? <1>로그인하기</1>.",
 		"password-no-match": "비밀번호가 일치하지 않습니다.",
 		"delete": "계정 삭제하기",
-		"delete-confirmation": "이 액션은 되돌릴 수 없습니다. 계속하시겠습니까?"
+		"delete-confirmation": "이 작업은 취소할 수 없습니다. 계속하시겠습니까?",
+		"register-disabled": "현재 회원가입이 비활성화되어 있습니다.",
+		"register-disabled-oidc": "비밀번호 회원가입이 비활성화되어 있습니다. OIDC를 사용해 주세요."
 	},
 	"downloads": {
-		"empty": "아직 아무것도 다운로드하지 않았습니다. 마음에 드는 것을 찾아보세요",
+		"empty": "아직 다운로드한 콘텐츠가 없습니다. 마음에 드는 콘텐츠를 찾아 다운로드해 보세요",
 		"error": "오류: {{error}}",
 		"delete": "항목 삭제",
-		"deleteMessage": "로컬 저장소에서 이 항목을 제거하시겠습니까?",
+		"deleteMessage": "이 항목을 기기에서 삭제하시겠습니까?",
 		"pause": "일시정지",
 		"resume": "계속하기",
 		"retry": "재시도"
@@ -242,19 +316,20 @@
 		"try-again": "재시도하기",
 		"re-login": "다시 로그인하기",
 		"offline": "인터넷에 연결되어 있지 않습니다. 나중에 다시 시도하세요.",
-		"unauthorized": "이 페이지에 액세스하려면 {{permission}} 권한이 있어야 합니다.",
+		"unauthorized": "이 페이지에 접근하려면 {{permission}} 권한이 필요합니다.",
 		"needVerification": "계정을 사용하려면 먼저 서버 관리자의 인증을 받아야 합니다.",
-		"needAccount": "이 페이지는 손님 모드에서는 액세스할 수 없습니다. 계정을 만들거나 로그인해야 합니다.",
+		"needAccount": "게스트 모드에서는 이 페이지에 접근할 수 없습니다. 계정을 만들거나 로그인해 주세요.",
 		"setup": {
-			"MissingAdminAccount": "아직 관리자 계정이 생성되지 않았습니다. 계정을 생성하세요.",
-			"NoVideoFound": "아직 아무 영상도 없어요. 라이브러리 폴더에 영화나 시리즈를 추가하여 여기 표시해보세요!"
-		}
+			"MissingAdminAccount": "아직 관리자 계정이 없습니다. 회원가입하여 관리자 계정을 생성해 주세요.",
+			"NoVideoFound": "아직 등록된 영상이 없습니다. 라이브러리 폴더에 영화나 시리즈를 추가하면 여기에 표시됩니다!"
+		},
+		"invalid-server": "Kyoo 서버에 연결할 수 없습니다."
 	},
 	"mediainfo": {
 		"file": "파일",
 		"container": "컨테이너",
 		"video": "영상",
-		"audio": "음성",
+		"audio": "오디오",
 		"subtitles": "자막",
 		"forced": "강제됨",
 		"default": "기본",
@@ -262,7 +337,11 @@
 		"duration": "재생 길이",
 		"size": "크기",
 		"novideo": "영상 없음",
-		"nocontainer": "올바르지 않은 컨테이너"
+		"nocontainer": "올바르지 않은 컨테이너",
+		"title": "파일 정보",
+		"noaudio": "오디오 없음",
+		"channels": "{{channels}}채널",
+		"hearing-impaired": "자막"
 	},
 	"admin": {
 		"users": {
@@ -272,12 +351,88 @@
 			"set-permissions": "권한 설정",
 			"delete": "사용자 삭제",
 			"unverifed": "인증되지 않음",
-			"verify": "인증된 사용자"
+			"verify": "사용자 인증",
+			"table": {
+				"username": "사용자명",
+				"lastSeen": "마지막 접속",
+				"oidc": "OIDC"
+			}
 		},
 		"scanner": {
 			"label": "스캐너",
 			"scan": "라이브러리 스캔 실행",
-			"empty": "아무 문제도 없습니다. 모든 항목이 등록되었습니다."
+			"empty": "문제가 발견되지 않았습니다. 모든 항목이 등록되어 있습니다."
+		},
+		"unmatched": {
+			"label": "미식별 영상",
+			"rescan": "라이브러리 재스캔",
+			"empty": "모든 영상이 매칭되었습니다!",
+			"search": "영상 검색...",
+			"match": "매칭",
+			"match-file": "{{file}} 매칭",
+			"status-pending": "대기 중",
+			"status-running": "스캔 중",
+			"status-failed": "실패",
+			"progress-running": "{{count}}개 스캔 중",
+			"progress-pending": "{{count}}개 대기 중",
+			"progress-failed": "{{count}}개 실패"
+		},
+		"streams": {
+			"subtitle": "현재 재생 중인 영상 및 활성 트랜스코딩.",
+			"empty": "현재 재생 중인 스트림이 없습니다.",
+			"guest": "게스트",
+			"viewers": "시청자",
+			"noActiveViewer": "현재 시청자가 없습니다",
+			"watching": "{{quality}}로 시청 중",
+			"runningVideoTranscodes": "영상 트랜스코딩",
+			"runningAudioTranscodes": "오디오 트랜스코딩",
+			"progress": {
+				"available": "사용 가능",
+				"transcoding": "트랜스코딩 중"
+			},
+			"title": "재생 현황",
+			"none": "없음"
+		},
+		"add": {
+			"title": "라이브러리에 추가",
+			"searchPlaceholder": "영화 또는 시리즈 검색...",
+			"library": "라이브러리",
+			"movies": "영화",
+			"series": "시리즈",
+			"noResults": "검색 결과가 없습니다",
+			"typeToSearch": "영화 또는 시리즈 이름을 입력하세요",
+			"year": "연도"
 		}
+	},
+	"videos-map": {
+		"add": "영상 추가",
+		"delete": "시리즈에서 영상 제거",
+		"validate": "매칭 확인 후 시리즈에 영상 추가",
+		"no-guess": "이 영상은 이 시리즈에 속하는 것으로 추정되지만, 어떤 에피소드인지는 알 수 없습니다",
+		"related": "{{title}}에 연결된 영상",
+		"sort-path": "경로",
+		"sort-entry": "에피소드 순서",
+		"no-video": "이 시리즈에 연결된 영상이 없습니다.",
+		"none": "없음"
+	},
+	"profile": {
+		"history": "시청 기록",
+		"watchlist": "시청 목록",
+		"statuses": {
+			"all": "전체",
+			"completed": "시청 완료",
+			"watching": "시청 중",
+			"rewatching": "재시청 중",
+			"dropped": "시청 중단",
+			"planned": "시청 예정"
+		}
+	},
+	"miniPlayer": {
+		"open": "플레이어 열기",
+		"stop": "전송 중지"
+	},
+	"remote": {
+		"rewind": "10초 되감기",
+		"forward": "10초 빨리감기"
 	}
 }
