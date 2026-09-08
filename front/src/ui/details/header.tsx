@@ -481,7 +481,11 @@ export const Header = ({
 						description={data.description}
 						image={data.thumbnail?.high}
 					/>
-					<View style={{ minHeight: hero, marginBottom: overhang }}>
+					<View
+						collapsable={false}
+						scrollSnapAlign="start"
+						style={{ minHeight: hero, marginBottom: overhang }}
+					>
 						<ImageBackground
 							src={data.thumbnail}
 							quality="high"
@@ -550,7 +554,11 @@ export const Header = ({
 			)}
 			Loader={() => (
 				<View className="flex-1">
-					<View style={{ minHeight: hero, marginBottom: overhang }}>
+					<View
+						collapsable={false}
+						scrollSnapAlign="start"
+						style={{ minHeight: hero, marginBottom: overhang }}
+					>
 						<View
 							className="absolute top-0 right-0 left-0 bg-linear-to-b from-transparent to-slate-950/70"
 							style={{ height: hero }}

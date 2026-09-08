@@ -11,7 +11,7 @@ export const InfoShelf = ({
 	isOpen,
 	close,
 }: {
-	kind: "serie" | "movie";
+	kind: "movie" | "serie" | "collection";
 	slug: string;
 	isOpen: boolean;
 	close: () => void;
@@ -32,7 +32,11 @@ export const InfoShelf = ({
 					query={Header.query(kind, slug)}
 					Render={(data) => (
 						<>
-							<View scrollSnapOffset={rem(4)} className="gap-1">
+							<View
+								collapsable={false}
+								scrollSnapOffset={rem(4)}
+								className="gap-1"
+							>
 								<H2>{t("show.genre")}</H2>
 								{data.genres.length ? (
 									<View className="flex-row flex-wrap gap-1">
@@ -50,7 +54,11 @@ export const InfoShelf = ({
 									<SubP>{t("show.genre-none")}</SubP>
 								)}
 							</View>
-							<View scrollSnapOffset={rem(4)} className="gap-1">
+							<View
+								collapsable={false}
+								scrollSnapOffset={rem(4)}
+								className="gap-1"
+							>
 								<H2>{t("show.tags")}</H2>
 								{data.tags.length ? (
 									<View className="flex-row flex-wrap gap-1">
@@ -68,7 +76,11 @@ export const InfoShelf = ({
 								)}
 							</View>
 							{data.kind !== "collection" && !!data.studios?.length && (
-								<View scrollSnapOffset={rem(4)} className="gap-1">
+								<View
+									collapsable={false}
+									scrollSnapOffset={rem(4)}
+									className="gap-1"
+								>
 									<H2>{t("show.studios")}</H2>
 									<View className="flex-row flex-wrap gap-1">
 										{data.studios.map((x) => (
@@ -83,7 +95,11 @@ export const InfoShelf = ({
 									</View>
 								</View>
 							)}
-							<View scrollSnapOffset={rem(4)} className="gap-1">
+							<View
+								collapsable={false}
+								scrollSnapOffset={rem(4)}
+								className="gap-1"
+							>
 								<H2>{t("show.links")}</H2>
 								<View className="flex-row flex-wrap">
 									{Object.entries(data.externalId).map(([name, items]) => (
@@ -95,13 +111,15 @@ export const InfoShelf = ({
 					)}
 					Loader={() => <Skeleton lines={6} />}
 				/>
-				<View scrollSnapOffset={rem(4)}>
-					<Staff
-						kind={kind}
-						slug={slug}
-						layout={{ numColumns: 1, numLines: 3, gap: rem(1) }}
-					/>
-				</View>
+				{kind !== "collection" && (
+					<View collapsable={false} scrollSnapOffset={rem(4)}>
+						<Staff
+							kind={kind}
+							slug={slug}
+							layout={{ numColumns: 1, numLines: 3, gap: rem(1) }}
+						/>
+					</View>
+				)}
 			</ScrollView>
 		</SideMenu>
 	);

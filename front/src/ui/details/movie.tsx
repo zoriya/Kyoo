@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Platform, View } from "react-native";
+import { Platform } from "react-native";
 import Animated from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Container, FocusGroup } from "~/primitives";
@@ -28,13 +28,11 @@ export const MovieDetails = () => {
 					snapToAlignment="item"
 					contentContainerStyle={{ paddingBottom: insets.bottom }}
 				>
-					<View scrollSnapAlign="start">
-						<Header
-							kind="movie"
-							slug={slug}
-							openInfo={Platform.isTV ? () => setInfo(true) : undefined}
-						/>
-					</View>
+					<Header
+						kind="movie"
+						slug={slug}
+						openInfo={Platform.isTV ? () => setInfo(true) : undefined}
+					/>
 					{!Platform.isTV && (
 						<Container className="mb-4">
 							<Staff kind="movie" slug={slug} layout={Staff.layout} />

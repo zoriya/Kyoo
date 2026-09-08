@@ -102,9 +102,7 @@ const SerieHeader = ({
 
 	return (
 		<View className="bg-background">
-			<View scrollSnapAlign="start">
-				<Header kind="serie" slug={slug} openInfo={openInfo} />
-			</View>
+			<Header kind="serie" slug={slug} openInfo={openInfo} />
 			{belowFold && (
 				<>
 					<Fetch
@@ -126,8 +124,8 @@ const SerieHeader = ({
 				</>
 			)}
 			<SvgWave className="flex-1 shrink-0 fill-card" />
-			{!Platform.isTV && (
-				<View className="bg-card pb-4 pl-[10%]">
+			<View className="bg-card pb-4 pl-[10%]">
+				{!Platform.isTV && (
 					<View className="-mt-4 lg:-mt-12 xl:-mt-24">
 						<SearchBar
 							onChangeText={(q) => setSearch(q)}
@@ -135,8 +133,8 @@ const SerieHeader = ({
 							containerClassName="w-2/5 max-w-90"
 						/>
 					</View>
-				</View>
-			)}
+				)}
+			</View>
 		</View>
 	);
 };
