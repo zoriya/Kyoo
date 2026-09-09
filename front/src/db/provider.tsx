@@ -4,6 +4,7 @@ import { type ReactNode, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useAccount, useToken } from "~/providers/account-context";
 import { createDbClient } from "./client";
+import { DbEventsListener } from "./events-listener";
 import { createPersistence } from "./sqlite";
 
 /**
@@ -39,6 +40,9 @@ export const KyooDbProvider = ({ children }: { children: ReactNode }) => {
 	}, [client]);
 
 	return (
-		<DbProvider client={client}>{children}</DbProvider>
+		<DbProvider client={client}>
+			<DbEventsListener />
+			{children}
+		</DbProvider>
 	);
 };
