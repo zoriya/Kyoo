@@ -1,8 +1,15 @@
 import FastForward from "@material-symbols/svg-400/rounded/fast_forward-fill.svg";
 import FastRewind from "@material-symbols/svg-400/rounded/fast_rewind-fill.svg";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+	useCallback,
+	useEffect,
+	useEffectEvent,
+	useRef,
+	useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import {
+	BackHandler,
 	type GestureResponderEvent,
 	Platform,
 	Pressable,
@@ -54,7 +61,24 @@ export const TouchControls = ({
 		wasForced.current = forceShow;
 	}, [forceShow, show]);
 
+	useEffect(() => {
+		if (playing) show();
+	}, [playing, show]);
+
 	useRemoteKeys({ controlsShown: shouldShow, showControls: show });
+
+	const onBack = useEffectEvent(() => {
+		if (forceShow || !_show || !playing) return false;
+		show(false);
+		return true;
+	});
+	useEffect(() => {
+		if (!Platform.isTV) return;
+		const sub = BackHandler.addEventListener("hardwareBackPress", () =>
+			onBack(),
+		);
+		return () => sub.remove();
+	}, []);
 
 	// On mouse move
 	useEffect(() => {
