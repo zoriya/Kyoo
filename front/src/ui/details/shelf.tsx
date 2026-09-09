@@ -1,8 +1,9 @@
 import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
 import { Chip, H2, rem, SideMenu, Skeleton, SubP } from "~/primitives";
-import { Fetch } from "~/query";
-import { ExternalIdChip, Header } from "./header";
+import { showQuery } from "~/db";
+import { Live } from "~/query";
+import { ExternalIdChip } from "./header";
 import { Staff } from "./staff";
 
 export const InfoShelf = ({
@@ -28,8 +29,8 @@ export const InfoShelf = ({
 				snapToAlignment="item"
 				contentContainerClassName="gap-4 p-4 pb-16"
 			>
-				<Fetch
-					query={Header.query(kind, slug)}
+				<Live
+					query={(q) => showQuery(q, kind, slug)}
 					Render={(data) => (
 						<>
 							<View

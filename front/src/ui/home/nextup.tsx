@@ -7,10 +7,11 @@ import {
 	type EntrySelectEntry,
 } from "~/components/entries/select";
 import { ItemGrid } from "~/components/items";
-import { Entry } from "~/models";
 import { Button, Link, P } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
-import { InfiniteFetch, type QueryIdentifier } from "~/query";
+import { eq, inArray, type InitialQueryBuilder } from "@tanstack/react-db";
+import { entries, showWatchStatus, shows } from "~/db";
+import { InfiniteList } from "~/query";
 import { EmptyView } from "~/ui/empty-view";
 import { Header } from "./genre";
 
@@ -38,26 +39,30 @@ export const NextupList = () => {
 	return (
 		<>
 			<Header title={t("home.watchlist")}>
-				<InfiniteFetch
-					query={NextupList.query()}
+				<InfiniteList
+					query={NextupList.query}
+					pageSize={10}
 					layout={{ ...ItemGrid.layout, layout: "horizontal" }}
 					Empty={<EmptyView message={t("home.none")} className="py-6" />}
-					Render={({ item }) => (
+					getKey={(x) => x.entry.id}
+					Render={({ item: { entry, show } }) => (
 						<EntryBox
-							kind={item.kind}
-							slug={item.slug}
-							serieSlug={item.show!.slug}
-							name={`${item.show!.name} ${entryDisplayNumber(item)}`}
-							description={item.name}
-							thumbnail={item.thumbnail ?? item.show!.thumbnail}
-							href={item.href}
-							watchedPercent={item.progress.percent}
-							videos={item.videos}
+							kind={entry.kind}
+							slug={entry.slug}
+							serieSlug={show?.slug ?? null}
+							name={
+								show ? `${show.name} ${entryDisplayNumber(entry)}` : entry.name
+							}
+							description={entry.name}
+							thumbnail={entry.thumbnail ?? show?.thumbnail ?? null}
+							href={entry.href}
+							watchedPercent={entry.progress.percent}
+							videos={entry.videos}
 							onSelectVideos={() =>
 								setSelected({
-									displayNumber: entryDisplayNumber(item),
-									name: item.name,
-									videos: item.videos,
+									displayNumber: entryDisplayNumber(entry),
+									name: entry.name,
+									videos: entry.videos,
 								})
 							}
 						/>
@@ -70,12 +75,13 @@ export const NextupList = () => {
 	);
 };
 
-NextupList.query = (): QueryIdentifier<Entry> => ({
-	parser: Entry,
-	infinite: true,
-	path: ["api", "profiles", "me", "nextup"],
-	params: {
-		limit: 10,
-		with: ["nextEntry"],
-	},
-});
+/** The next entry of every show being watched, last played first. */
+NextupList.query = (q: InitialQueryBuilder) =>
+	q
+		.from({ s: shows })
+		.innerJoin({ e: entries }, ({ s, e }) => eq(s.nextEntryId, e.id))
+		.where(({ s }) =>
+			inArray(showWatchStatus(s).status, ["watching", "rewatching"]),
+		)
+		.orderBy(({ s }) => showWatchStatus(s).lastPlayedAt, "desc")
+		.select(({ s, e }) => ({ entry: e, show: s }));

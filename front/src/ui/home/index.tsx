@@ -2,10 +2,12 @@ import {
 	LegendList,
 	type LegendListComponent,
 } from "@legendapp/list/react-native";
-import { type ReactElement, useMemo } from "react";
+import { type ReactElement, useMemo, useState } from "react";
 import { View } from "react-native";
 import { createAnimatedComponent } from "react-native-reanimated";
 import { Genre } from "~/models";
+import { useDbClient } from "@tanstack/react-db";
+import { refetchAll } from "~/db";
 import { useRefresh } from "~/query";
 import { shuffle } from "~/utils";
 import { useHeroHeight } from "../hero";
@@ -23,7 +25,18 @@ const AnimatedLegendList = createAnimatedComponent(
 
 export const HomePage = () => {
 	const genres = useMemo(() => shuffle(Object.values(Genre.enum)), []);
-	const [isRefreshing, refresh] = useRefresh(HomePage.queries(genres));
+	const client = useDbClient();
+	const [isRefreshingHeader, refreshHeader] = useRefresh([Header.query()]);
+	const [isRefreshingDb, setRefreshingDb] = useState(false);
+	const isRefreshing = isRefreshingHeader || isRefreshingDb;
+	const refresh = async () => {
+		setRefreshingDb(true);
+		try {
+			await Promise.all([refreshHeader(), refetchAll(client)]);
+		} finally {
+			setRefreshingDb(false);
+		}
+	};
 	const imageHeight = useHeroHeight();
 	const { scrollHandler, headerProps } = useScrollNavbar({
 		imageHeight,
@@ -90,12 +103,3 @@ export const HomePage = () => {
 		</>
 	);
 };
-
-HomePage.queries = (randomItems: Genre[]) => [
-	Header.query(),
-	NextupList.query(),
-	NewsList.query(),
-	...randomItems.filter((_, i) => i < 6).map((x) => GenreGrid.query(x)),
-	Recommended.query(),
-	VerticalRecommended.query(),
-];

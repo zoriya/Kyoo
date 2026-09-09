@@ -1,13 +1,20 @@
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { ItemList, itemMap } from "~/components/items";
-import { Show } from "~/models";
-import { type QueryIdentifier, useInfiniteFetch } from "~/query";
+import { useLiveQuery } from "@tanstack/react-db";
+import { randomOrder, shows } from "~/db";
 import { Header } from "./genre";
 
 export const VerticalRecommended = () => {
 	const { t } = useTranslation();
-	const { items } = useInfiniteFetch(VerticalRecommended.query());
+	// desc: the other end of the shuffle than the recommended row
+	const { data, isReady } = useLiveQuery((q) =>
+		q
+			.from({ s: shows })
+			.orderBy(({ s }) => randomOrder(s.id), "desc")
+			.limit(3),
+	);
+	const items = isReady ? data : undefined;
 
 	return (
 		<View>
@@ -22,13 +29,3 @@ export const VerticalRecommended = () => {
 		</View>
 	);
 };
-
-VerticalRecommended.query = (): QueryIdentifier<Show> => ({
-	parser: Show,
-	infinite: true,
-	path: ["api", "shows"],
-	params: {
-		sort: "random",
-		limit: 3,
-	},
-});

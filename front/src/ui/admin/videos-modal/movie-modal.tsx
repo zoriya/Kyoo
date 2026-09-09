@@ -12,9 +12,10 @@ import {
 	Skeleton,
 	tooltip,
 } from "~/primitives";
-import { useFetch, useMutation } from "~/query";
+import { useLiveQuery } from "@tanstack/react-db";
+import { showQuery } from "~/db";
+import { useMutation } from "~/query";
 import { useQueryState } from "~/utils";
-import { Header } from "../../details/header";
 
 const MoviePathItem = ({
 	id,
@@ -107,7 +108,7 @@ const AddMovieVideoFooter = ({ slug }: { slug: string }) => {
 
 export const MovieVideosModal = () => {
 	const [slug] = useQueryState<string>("slug", undefined!);
-	const { data } = useFetch(Header.query("movie", slug));
+	const { data } = useLiveQuery((q) => showQuery(q, "movie", slug));
 	const { t } = useTranslation();
 
 	const videos = (data as Movie)?.videos;

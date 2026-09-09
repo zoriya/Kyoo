@@ -2,13 +2,14 @@ import BookmarkAdd from "@material-symbols/svg-400/rounded/bookmark_add.svg";
 import BookmarkAdded from "@material-symbols/svg-400/rounded/bookmark_added-fill.svg";
 import BookmarkRemove from "@material-symbols/svg-400/rounded/bookmark_remove.svg";
 import Bookmark from "@material-symbols/svg-400/rounded/bookmark-fill.svg";
+import { eq, or, useDbClient, useLiveQuery } from "@tanstack/react-db";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import type { PressableProps } from "react-native";
 import type { Serie } from "~/models";
 import { IconButton, Menu, tooltip } from "~/primitives";
+import { shows, watchStatusOf } from "~/db";
 import { useAccount } from "~/providers/account-context";
-import { useMutation } from "~/query";
 
 type WatchStatus = NonNullable<Serie["watchStatus"]>["status"];
 const WatchStatus = [
@@ -45,16 +46,24 @@ export const WatchListInfo = ({
 	const account = useAccount();
 	const { t } = useTranslation();
 
-	const mutation = useMutation({
-		path: ["api", `${kind}s`, slug, "watchstatus"],
-		compute: (newStatus: WatchStatus | null) => ({
-			method: newStatus ? "POST" : "DELETE",
-			body: newStatus ? { status: newStatus } : undefined,
-		}),
-		invalidate: ["api", `${kind}s`, slug],
-		// optimistic is a pain to do because shows queries often have query params
-	});
-	const displayStatus = mutation.isPending ? mutation.variables : status;
+	const client = useDbClient();
+	const { data: row } = useLiveQuery((q) =>
+		q
+			.from({ s: shows })
+			.where(({ s }) => or(eq(s.slug, slug), eq(s.id, slug)))
+			.findOne(),
+	);
+	// The local row is edited optimistically and every screen showing it follows.
+	const mutate = (newStatus: WatchStatus | null) => {
+		if (!row || row.kind === "collection") return;
+		client.collection(shows).update(row.id, (d) => {
+			if (d.kind !== "collection") d.watchStatus = watchStatusOf(d, newStatus);
+		});
+	};
+	const displayStatus =
+		row && row.kind !== "collection"
+			? (row.watchStatus?.status ?? null)
+			: status;
 
 	if (account == null) {
 		return (
@@ -72,7 +81,7 @@ export const WatchListInfo = ({
 			return (
 				<IconButton
 					icon={BookmarkAdd}
-					onPress={() => mutation.mutate("planned")}
+					onPress={() => mutate("planned")}
 					{...tooltip(t("show.watchlistAdd"))}
 					{...props}
 				/>
@@ -81,7 +90,7 @@ export const WatchListInfo = ({
 			return (
 				<IconButton
 					icon={BookmarkAdded}
-					onPress={() => mutation.mutate(null)}
+					onPress={() => mutate(null)}
 					{...tooltip(t("show.watchlistRemove"))}
 					{...props}
 				/>
@@ -103,13 +112,13 @@ export const WatchListInfo = ({
 								<Menu.Item
 									key={x}
 									label={t(`show.watchlistMark.${x}`)}
-									onSelect={() => mutation.mutate(x)}
+									onSelect={() => mutate(x)}
 									selected={x === displayStatus}
 								/>
 							))}
 							<Menu.Item
 								label={t("show.watchlistMark.null")}
-								onSelect={() => mutation.mutate(null)}
+								onSelect={() => mutate(null)}
 							/>
 						</>
 					)}

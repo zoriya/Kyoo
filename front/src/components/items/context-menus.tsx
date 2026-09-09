@@ -7,13 +7,15 @@ import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
 import MovieInfo from "@material-symbols/svg-400/rounded/movie_info.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import VideoLibrary from "@material-symbols/svg-400/rounded/video_library-fill.svg";
+import { eq, or, useDbClient, useLiveQuery } from "@tanstack/react-db";
 import { useRouter } from "expo-router";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { WatchStatusV } from "~/models";
 import { Alert, HRP, IconButton, Menu, tooltip } from "~/primitives";
-import { useAccount } from "~/providers/account-context";
-import { useMutation } from "~/query";
+import { entries, shows, watchStatusOf } from "~/db";
+import { useAccount, useToken } from "~/providers/account-context";
+import { keyToUrl, queryFn, toQueryKey, useMutation } from "~/query";
 import { cn } from "~/utils";
 import { watchListIcon } from "./watchlist-info";
 
@@ -35,21 +37,41 @@ export const EntryContext = ({
 	const account = useAccount();
 	const { t } = useTranslation();
 
-	const markAsSeenMutation = useMutation({
-		method: "POST",
-		path: ["api", "profiles", "me", "history"],
-		body: [
-			{
-				percent: 100,
-				entry: slug,
-				videoId: null,
-				time: 0,
-				playedDate: null,
-				external: true,
-			},
-		],
-		invalidate: null,
-	});
+	const client = useDbClient();
+	const { apiUrl, authToken } = useToken();
+	const { data: row } = useLiveQuery((q) =>
+		q
+			.from({ e: entries })
+			.where(({ e }) => eq(e.slug, slug))
+			.findOne(),
+	);
+	const markAsSeen = async () => {
+		if (row) {
+			client.collection(entries).update(row.id, (d) => {
+				d.progress = { ...d.progress, percent: 100, playedDate: new Date() };
+			});
+			return;
+		}
+		// Not in the local db (player...): plain api call, the ws event syncs the rest.
+		await queryFn({
+			method: "POST",
+			url: keyToUrl(
+				toQueryKey({ apiUrl, path: ["api", "profiles", "me", "history"] }),
+			),
+			body: [
+				{
+					percent: 100,
+					entry: slug,
+					videoId: null,
+					time: 0,
+					playedDate: null,
+					external: true,
+				},
+			],
+			authToken,
+			parser: null,
+		});
+	};
 
 	return (
 		<Menu
@@ -72,7 +94,7 @@ export const EntryContext = ({
 						<Menu.Item
 							label={t("show.watchlistMark.completed")}
 							icon={watchListIcon("completed")}
-							onSelect={() => markAsSeenMutation.mutate()}
+							onSelect={() => markAsSeen()}
 						/>
 					)}
 					{videoSlug && (
@@ -101,7 +123,7 @@ export const ShowContext = ({
 	slug,
 	name,
 	videoSlug,
-	status,
+	status: fallbackStatus,
 	showWatchlist = true,
 	className,
 	horizontal = false,
@@ -121,25 +143,28 @@ export const ShowContext = ({
 	const router = useRouter();
 	const { t } = useTranslation();
 
-	const mutation = useMutation({
-		path: ["api", `${kind}s`, slug, "watchstatus"],
-		compute: (newStatus: WatchStatusV | null) => ({
-			method: newStatus ? "POST" : "DELETE",
-			body: newStatus ? { status: newStatus } : undefined,
-		}),
-		invalidate: [kind, slug],
-	});
+	const client = useDbClient();
+	const { data: row } = useLiveQuery((q) =>
+		q
+			.from({ s: shows })
+			.where(({ s }) => or(eq(s.slug, slug), eq(s.id, slug)))
+			.findOne(),
+	);
+	const status =
+		row && row.kind !== "collection"
+			? (row.watchStatus?.status ?? null)
+			: fallbackStatus;
+	const setStatus = (status: WatchStatusV | null) => {
+		if (!row) return;
+		client.collection(shows).update(row.id, (d) => {
+			if (d.kind !== "collection") d.watchStatus = watchStatusOf(d, status);
+		});
+	};
 
 	const metadataRefreshMutation = useMutation({
 		method: "POST",
 		path: ["scanner", `${kind}s`, slug, "refresh"],
 		invalidate: null,
-	});
-
-	const deleteMutation = useMutation({
-		method: "DELETE",
-		path: ["api", `${kind}s`, slug],
-		invalidate: ["api", "shows"],
 	});
 
 	return (
@@ -166,14 +191,14 @@ export const ShowContext = ({
 									label={t(
 										`show.watchlistMark.${x.toLowerCase() as Lowercase<WatchStatusV>}`,
 									)}
-									onSelect={() => mutation.mutate(x)}
+									onSelect={() => setStatus(x)}
 									selected={x === status}
 								/>
 							))}
 							{status !== null && (
 								<Menu.Item
 									label={t("show.watchlistMark.null")}
-									onSelect={() => mutation.mutate(null)}
+									onSelect={() => setStatus(null)}
 								/>
 							)}
 						</Menu.Sub>
@@ -228,7 +253,9 @@ export const ShowContext = ({
 												text: t("misc.delete"),
 												style: "destructive",
 												onPress: async () => {
-													await deleteMutation.mutateAsync();
+													if (row)
+														await client.collection(shows).delete(row.id)
+															.isPersisted.promise;
 													router.back();
 												},
 											},

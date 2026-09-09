@@ -1,13 +1,24 @@
 import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
 import MoreVert from "@material-symbols/svg-400/rounded/more_vert.svg";
+import {
+	and,
+	eq,
+	gte,
+	ilike,
+	isNull,
+	not,
+	or,
+	useLiveQuery,
+} from "@tanstack/react-db";
 import { useRouter } from "expo-router";
-import { type ComponentProps, useContext } from "react";
+import { useContext, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import z from "zod";
 import { EntryLine, entryDisplayNumber } from "~/components/entries";
 import { watchListIcon } from "~/components/items/watchlist-info";
-import { Entry, Season } from "~/models";
+import { entries, type EntryRow, type SeasonRow, seasons, } from "~/db";
+import type { Entry, Season } from "~/models";
 import { Paged } from "~/models/utils/page";
 import {
 	Container,
@@ -21,15 +32,8 @@ import {
 	tooltip,
 } from "~/primitives";
 import { AccountContext, useAccount } from "~/providers/account-context";
-import {
-	keyToUrl,
-	type QueryIdentifier,
-	queryFn,
-	toQueryKey,
-	useInfiniteFetch,
-	useMutation,
-} from "~/query";
-import { InfiniteFetch } from "~/query/fetch-infinite";
+import { keyToUrl, queryFn, toQueryKey } from "~/query";
+import { InfiniteList, type InfiniteViewProps } from "~/query/fetch-infinite";
 import { EmptyView } from "~/ui/empty-view";
 import { cn } from "~/utils";
 
@@ -51,22 +55,6 @@ export const SeasonHeader = ({
 	const router = useRouter();
 	const account = useAccount();
 	const { apiUrl, authToken } = useContext(AccountContext);
-
-	const markAsSeen = useMutation({
-		method: "POST",
-		path: ["api", "profiles", "me", "history"],
-		compute: (entries: string[]) => ({
-			body: entries.map((entry) => ({
-				percent: 100,
-				entry,
-				videoId: null,
-				time: 0,
-				playedDate: null,
-				external: true,
-			})),
-		}),
-		invalidate: ["api", "series", serieSlug, "entries"],
-	});
 
 	return (
 		<FocusGroup
@@ -91,8 +79,6 @@ export const SeasonHeader = ({
 								label={t("show.watchlistMark.completed")}
 								icon={watchListIcon("completed")}
 								onSelect={async () => {
-									if (markAsSeen.isPending) return;
-
 									const page = await queryFn({
 										url: keyToUrl(
 											toQueryKey({
@@ -107,13 +93,33 @@ export const SeasonHeader = ({
 										authToken: authToken ?? null,
 										parser: Paged(
 											z.object({
+												id: z.string(),
 												slug: z.string(),
 											}),
 										),
 									});
-									const entries = page.items.map((x) => x.slug);
-									if (entries.length === 0) return;
-									await markAsSeen.mutateAsync(entries);
+									if (page.items.length === 0) return;
+									// Most of the season is not local: plain api call, the ws
+									// events patch the entries we have and re-fetch the show.
+									await queryFn({
+										method: "POST",
+										url: keyToUrl(
+											toQueryKey({
+												apiUrl,
+												path: ["api", "profiles", "me", "history"],
+											}),
+										),
+										body: page.items.map((x) => ({
+											percent: 100,
+											entry: x.slug,
+											videoId: null,
+											time: 0,
+											playedDate: null,
+											external: true,
+										})),
+										authToken: authToken ?? null,
+										parser: null,
+									});
 								}}
 							/>
 						)}
@@ -155,15 +161,7 @@ SeasonHeader.Loader = ({ className, ...props }: { className?: string }) => {
 	);
 };
 
-SeasonHeader.query = (slug: string): QueryIdentifier<Season> => ({
-	parser: Season,
-	path: ["api", "series", slug, "seasons"],
-	params: {
-		// I don't wanna deal with pagination, no serie has more than 100 seasons anyways, right?
-		limit: 100,
-	},
-	infinite: true,
-});
+type EntryOrSeason = EntryRow | (SeasonRow & { kind: "season" });
 
 export const EntryList = ({
 	slug,
@@ -185,17 +183,56 @@ export const EntryList = ({
 	}) => void;
 	search?: string;
 	withContainer?: boolean;
-} & Partial<ComponentProps<typeof InfiniteFetch<EntryOrSeason>>>) => {
+} & Partial<InfiniteViewProps<EntryOrSeason>>) => {
 	const { t } = useTranslation();
-	const { items: seasons, error } = useInfiniteFetch(SeasonHeader.query(slug));
-
-	if (error) console.error("Could not fetch seasons", error);
+	const { data: seasonRows } = useLiveQuery((q) =>
+		q
+			.from({ se: seasons })
+			.where(({ se }) => eq(se.showSlug, slug))
+			.orderBy(({ se }) => se.seasonNumber),
+	);
+	// A season header before the first entry of each season (the api used to
+	// interleave them with `includeSeasons`, the local db does it itself).
+	const interleave = useMemo(
+		() => (rows: EntryRow[]) =>
+			rows.flatMap((entry, i): EntryOrSeason[] => {
+				const previous = rows[i - 1];
+				if (
+					entry.kind !== "episode" ||
+					previous?.seasonNumber === entry.seasonNumber
+				)
+					return [entry];
+				const season = seasonRows.find(
+					(x) => x.seasonNumber === entry.seasonNumber,
+				);
+				return season ? [{ ...season, kind: "season" }, entry] : [entry];
+			}),
+		[seasonRows],
+	);
 
 	const C = withContainer ? Container : View;
 
 	return (
-		<InfiniteFetch
-			query={EntryList.query(slug, season, search)}
+		<InfiniteList
+			query={(q) =>
+				q
+					.from({ e: entries })
+					.where(({ e }) =>
+						and(
+							eq(e.showSlug, slug),
+							// TODO: use a better filter, it removes specials and movies
+							or(
+								eq(e.kind, "episode"),
+								not(isNull(e.availableSince)),
+								eq(e.content, "story"),
+							),
+							...(season ? [gte(e.seasonNumber, Number(season))] : []),
+							...(search ? [ilike(e.name, `%${search}%`)] : []),
+						),
+					)
+					.orderBy(({ e }) => e.order)
+			}
+			transform={interleave}
 			layout={EntryLine.layout}
 			snapToAlignment="item"
 			drawDistance={1000}
@@ -221,7 +258,7 @@ export const EntryList = ({
 							serieSlug={slug}
 							name={item.name}
 							seasonNumber={item.seasonNumber}
-							seasons={seasons ?? []}
+							seasons={seasonRows}
 						/>
 					) : (
 						<EntryLine
@@ -262,30 +299,3 @@ export const EntryList = ({
 		/>
 	);
 };
-
-const EntryOrSeason = z.union([
-	Season.extend({ kind: z.literal("season") }),
-	Entry,
-]);
-type EntryOrSeason = z.infer<typeof EntryOrSeason>;
-
-EntryList.query = (
-	slug: string,
-	season: string | number,
-	query: string | undefined,
-): QueryIdentifier<EntryOrSeason> => ({
-	parser: EntryOrSeason,
-	path: ["api", "series", slug, "entries"],
-	params: {
-		query,
-		filter: [
-			// TODO: use a better filter, it removes specials and movies
-			season && `seasonNumber ge ${season}`,
-			"(kind eq episode or isAvailable eq true or content eq story)",
-		]
-			.filter((x) => x)
-			.join(" and "),
-		includeSeasons: true,
-	},
-	infinite: true,
-});

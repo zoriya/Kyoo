@@ -1,6 +1,7 @@
 import { ItemGrid, ItemList, itemMap } from "~/components/items";
-import { Show } from "~/models";
-import { InfiniteFetch, type QueryIdentifier } from "~/query";
+import { and, ilike, type InitialQueryBuilder } from "@tanstack/react-db";
+import { parseFilter, showFields, shows } from "~/db";
+import { InfiniteList } from "~/query";
 import { useQueryState } from "~/utils";
 import { BrowseSettings } from "./header";
 import type { SortBy, SortOrd } from "./types";
@@ -16,10 +17,9 @@ export const BrowsePage = () => {
 	const LayoutComponent = layout === "grid" ? ItemGrid : ItemList;
 
 	return (
-		<InfiniteFetch
+		<InfiniteList
 			key={layout}
-			query={BrowsePage.query({ filter, sortBy, sortOrd, search })}
-			incremental
+			query={(q) => BrowsePage.query(q, { filter, sortBy, sortOrd, search })}
 			layout={LayoutComponent.layout}
 			Header={
 				<BrowseSettings
@@ -40,27 +40,43 @@ export const BrowsePage = () => {
 	);
 };
 
-BrowsePage.query = ({
-	filter,
-	sortBy,
-	sortOrd,
-	search,
-}: {
-	filter?: string;
-	sortBy?: SortBy;
-	sortOrd?: SortOrd;
-	search?: string;
-}): QueryIdentifier<Show> => {
-	return {
-		parser: Show,
-		path: ["api", "shows"],
-		infinite: true,
-		params: {
-			sort: sortBy
-				? `${sortOrd === "desc" ? "-" : ""}${sortBy === "rating" ? "rating:themoviedatabase" : sortBy}`
-				: "name",
-			filter,
-			query: search,
-		},
-	};
+BrowsePage.query = (
+	q: InitialQueryBuilder,
+	{
+		filter,
+		sortBy = "name",
+		sortOrd = "asc",
+		search,
+	}: {
+		filter?: string;
+		sortBy?: SortBy;
+		sortOrd?: SortOrd;
+		search?: string;
+	},
+) => {
+	// The user typed filter runs both locally and server side.
+	let where: ReturnType<typeof parseFilter> | undefined;
+	try {
+		where = filter ? parseFilter(filter, showFields) : undefined;
+	} catch (e) {
+		console.log("Invalid filter", filter, e);
+	}
+	return q
+		.from({ s: shows })
+		.where(({ s }) =>
+			and(where?.(s) ?? true, search ? ilike(s.name, `%${search}%`) : true),
+		)
+		.orderBy(
+			({ s }) =>
+				sortBy === "rating"
+					? s.rating.themoviedatabase
+					: sortBy === "startAir"
+						? s.startAir
+						: sortBy === "endAir"
+							? s.endAir
+							: sortBy === "createdAt"
+								? s.createdAt
+								: s.name,
+			sortOrd,
+		);
 };

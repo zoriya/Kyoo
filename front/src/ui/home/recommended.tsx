@@ -1,9 +1,9 @@
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { ItemDetails } from "~/components/items/item-details";
-import { Show } from "~/models";
 import { useBreakpointMap } from "~/primitives";
-import { type QueryIdentifier, useInfiniteFetch } from "~/query";
+import { coalesce, eq, useLiveQuery } from "@tanstack/react-db";
+import { entries, randomOrder, shows } from "~/db";
 import { getDisplayDate } from "~/utils";
 import { Header } from "./genre";
 
@@ -12,7 +12,19 @@ const itemCount = 6;
 export const Recommended = () => {
 	const { t } = useTranslation();
 	const { numColumns, gap } = useBreakpointMap(ItemDetails.layout);
-	const { items } = useInfiniteFetch(Recommended.query());
+	const { data, isReady } = useLiveQuery((q) =>
+		q
+			.from({ s: shows })
+			.leftJoin({ fe: entries }, ({ s, fe }) => eq(s.firstEntryId, fe.id))
+			.leftJoin({ ne: entries }, ({ s, ne }) => eq(s.nextEntryId, ne.id))
+			.orderBy(({ s }) => randomOrder(s.id))
+			.select(({ s, fe, ne }) => ({
+				show: s,
+				playHref: coalesce(ne.href, fe.href),
+			}))
+			.limit(itemCount),
+	);
+	const items = isReady ? data : undefined;
 
 	return (
 		<View>
@@ -22,7 +34,9 @@ export const Recommended = () => {
 					<View key={x} className="flex-1" style={{ gap }}>
 						{[...Array(itemCount / numColumns)].map((_, y) => {
 							if (!items) return <ItemDetails.Loader key={y} />;
-							const item = items[x * (itemCount / numColumns) + y];
+							const row = items[x * (itemCount / numColumns) + y];
+							if (!row) return <ItemDetails.Loader key={y} />;
+							const item = row.show;
 							if (!item) return null;
 							return (
 								<ItemDetails
@@ -47,7 +61,9 @@ export const Recommended = () => {
 											: null
 									}
 									href={item.href}
-									playHref={item.kind !== "collection" ? item.playHref : null}
+									playHref={
+										item.kind !== "collection" ? (row.playHref ?? null) : null
+									}
 									watchStatus={
 										(item.kind !== "collection" && item.watchStatus?.status) ||
 										null
@@ -72,14 +88,3 @@ export const Recommended = () => {
 		</View>
 	);
 };
-
-Recommended.query = (): QueryIdentifier<Show> => ({
-	parser: Show,
-	infinite: true,
-	path: ["api", "shows"],
-	params: {
-		sort: "random",
-		limit: itemCount,
-		with: ["firstEntry"],
-	},
-});

@@ -13,14 +13,7 @@ import {
 import { ShowContext } from "~/components/items/context-menus";
 import { WatchListInfo } from "~/components/items/watchlist-info";
 import { Rating } from "~/components/rating";
-import {
-	type Entry,
-	type Genre,
-	type KImage,
-	Show,
-	type Studio,
-	type WatchStatusV,
-} from "~/models";
+import type { Entry, Genre, KImage, Studio, WatchStatusV } from "~/models";
 import type { Metadata } from "~/models/utils/metadata";
 import {
 	A,
@@ -45,7 +38,8 @@ import {
 	tooltip,
 	UL,
 } from "~/primitives";
-import { Fetch, type QueryIdentifier } from "~/query";
+import { showQuery } from "~/db";
+import { Live } from "~/query";
 import { cn, displayRuntime, getDisplayDate } from "~/utils";
 import { useHeroHeight } from "../hero";
 import { PartOf } from "./part-of";
@@ -477,8 +471,8 @@ export const Header = ({
 	);
 
 	return (
-		<Fetch
-			query={Header.query(kind, slug)}
+		<Live
+			query={(q) => showQuery(q, kind, slug)}
 			Render={(data) => (
 				<View className="flex-1">
 					<Head
@@ -581,18 +575,3 @@ export const Header = ({
 		/>
 	);
 };
-
-Header.query = (
-	kind: "serie" | "movie" | "collection",
-	slug: string,
-): QueryIdentifier<Show> => ({
-	parser: Show,
-	path: ["api", `${kind}s`, slug],
-	params: {
-		with: [
-			...(kind !== "collection" ? ["collection", "studios"] : []),
-			...(kind === "serie" ? ["firstEntry", "nextEntry"] : []),
-			...(kind === "movie" ? ["videos"] : []),
-		],
-	},
-});

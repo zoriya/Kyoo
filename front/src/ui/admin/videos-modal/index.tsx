@@ -2,15 +2,11 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { type Entry, type Episode, FullVideo, type Page } from "~/models";
 import { Modal, rem } from "~/primitives";
-import {
-	InfiniteFetch,
-	type QueryIdentifier,
-	useFetch,
-	useMutation,
-} from "~/query";
+import { useLiveQuery } from "@tanstack/react-db";
+import { showQuery } from "~/db";
+import { InfiniteFetch, type QueryIdentifier, useMutation } from "~/query";
 import { EmptyView } from "~/ui/empty-view";
 import { useQueryState } from "~/utils";
-import { Header } from "../../details/header";
 import { AddVideoFooter, VideoListHeader } from "./headers";
 import { PathItem } from "./path-item";
 
@@ -64,7 +60,7 @@ export const useEditLinks = (
 
 export const VideosModal = () => {
 	const [slug] = useQueryState<string>("slug", undefined!);
-	const { data } = useFetch(Header.query("serie", slug));
+	const { data } = useLiveQuery((q) => showQuery(q, "serie", slug));
 	const { t } = useTranslation();
 	const [titles, setTitles] = useState<string[]>([]);
 	const [sort, setSort] = useState<"entry" | "path">("path");

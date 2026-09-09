@@ -3,9 +3,10 @@ import { Platform, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { itemMap } from "~/components/items";
 import { ItemDetails } from "~/components/items/item-details";
-import { Show } from "~/models";
 import { FocusGroup, rem } from "~/primitives";
-import { InfiniteFetch, type QueryIdentifier } from "~/query";
+import { coalesce, eq } from "@tanstack/react-db";
+import { entries, shows } from "~/db";
+import { InfiniteList } from "~/query";
 import { useQueryState } from "~/utils";
 import { useHeroHeight } from "../hero";
 import { HeaderBackground, useScrollNavbar } from "../navbar";
@@ -44,19 +45,35 @@ export const CollectionDetails = () => {
 		<View className="flex-1 bg-card">
 			<HeaderBackground {...headerProps} />
 			<FocusGroup autoFocus focusable={!info} className="flex-1">
-				<InfiniteFetch
-					query={CollectionDetails.query(slug)}
+				<InfiniteList
+					query={(q) =>
+						q
+							.from({ s: shows })
+							.leftJoin({ fe: entries }, ({ s, fe }) =>
+								eq(s.firstEntryId, fe.id),
+							)
+							.leftJoin({ ne: entries }, ({ s, ne }) =>
+								eq(s.nextEntryId, ne.id),
+							)
+							.where(({ s }) => eq(s.collectionSlug, slug))
+							.orderBy(({ s }) => s.startAir)
+							.select(({ s, fe, ne }) => ({
+								show: s,
+								playHref: coalesce(ne.href, fe.href),
+							}))
+					}
+					getKey={(x) => x.show.id}
 					layout={ItemDetails.layout}
-					Render={({ item }) => (
+					Render={({ item: { show, playHref } }) => (
 						<ItemDetails
-							{...itemMap(item)}
-							tagline={item.tagline}
-							description={item.description}
-							genres={item.genres}
-							playHref={item.kind !== "collection" ? item.playHref : null}
+							{...itemMap(show)}
+							tagline={show.tagline}
+							description={show.description}
+							genres={show.genres}
+							playHref={show.kind !== "collection" ? (playHref ?? null) : null}
 							videoSlug={
-								item.kind === "movie" && item.videos?.length === 1
-									? item.videos[0].slug
+								show.kind === "movie" && show.videos?.length === 1
+									? show.videos[0].slug
 									: null
 							}
 						/>
@@ -88,12 +105,3 @@ export const CollectionDetails = () => {
 		</View>
 	);
 };
-
-CollectionDetails.query = (slug: string): QueryIdentifier<Show> => ({
-	parser: Show,
-	path: ["api", "collections", slug, "shows"],
-	params: {
-		sort: ["airDate"],
-	},
-	infinite: true,
-});

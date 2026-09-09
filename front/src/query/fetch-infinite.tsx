@@ -4,7 +4,13 @@ import type {
 } from "@legendapp/list/react-native";
 import { LegendList } from "@legendapp/list/react-native";
 import { keepPreviousData } from "@tanstack/react-query";
-import { type ComponentType, type ReactElement, useMemo } from "react";
+import {
+	type ComponentType,
+	type ReactElement,
+	useCallback,
+	useMemo,
+	useState,
+} from "react";
 import type { ViewStyle } from "react-native";
 import { createAnimatedComponent } from "react-native-reanimated";
 import {
@@ -13,6 +19,16 @@ import {
 	HR,
 	useBreakpointMap,
 } from "~/primitives";
+import {
+	type Context,
+	type InferResultType,
+	type InitialQueryBuilder,
+	type QueryBuilder,
+	useDbClient,
+	useLiveInfiniteQuery,
+} from "@tanstack/react-db";
+import { lastLoadError, refetchAll, toRenderableError } from "~/db";
+import { useToken } from "~/providers/account-context";
 import { type QueryIdentifier, useInfiniteFetch } from "./query";
 
 const AnimatedLegendList = createAnimatedComponent(
@@ -26,26 +42,7 @@ export type Layout = {
 	layout: "grid" | "horizontal" | "vertical";
 };
 
-export const InfiniteFetch = <Data, Type extends string = string>({
-	query,
-	placeholderCount = 4,
-	incremental = false,
-	getKey,
-	getItemType,
-	getStickyIndices,
-	Render,
-	Loader,
-	layout,
-	Empty,
-	Divider,
-	Header,
-	Footer,
-	fetchMore = true,
-	contentContainerStyle,
-	columnWrapperStyle,
-	...props
-}: {
-	query: QueryIdentifier<Data>;
+export type InfiniteViewProps<Data, Type extends string = string> = {
 	placeholderCount?: number;
 	layout: Layout;
 	horizontal?: boolean;
@@ -68,6 +65,124 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 	onScroll?: LegendListProps["onScroll"];
 	scrollEventThrottle?: LegendListProps["scrollEventThrottle"];
 	columnWrapperStyle?: Omit<ViewStyle, "gap" | "rowGap" | "columnGap">;
+};
+
+export type InfiniteSource<Data> = {
+	/** `undefined` until the first page is known. */
+	items?: Data[];
+	fetchNextPage: () => unknown;
+	hasNextPage: boolean;
+	isFetching: boolean;
+	refetch: () => unknown;
+	isRefetching: boolean;
+	isPlaceholderData?: boolean;
+};
+
+/**
+ * Legacy path: a react-query infinite query. Screens rendering shows,
+ * entries or seasons use `InfiniteList` (rendered from the local db) instead.
+ */
+export const InfiniteFetch = <Data, Type extends string = string>({
+	query,
+	incremental = false,
+	...props
+}: InfiniteViewProps<Data, Type> & {
+	query: QueryIdentifier<Data>;
+}): ReactElement | null => {
+	const source = useInfiniteFetch(
+		incremental ? { ...query, placeholderData: keepPreviousData } : query,
+	);
+	if (!query.infinite)
+		console.warn("A non infinite query was passed to an InfiniteFetch.");
+	return <InfiniteView source={source} incremental={incremental} {...props} />;
+};
+
+/**
+ * A paginated list over the local db. `query` is a live query without
+ * limit/offset (`.orderBy()` is required): it is windowed page by page and
+ * the collection fetches what the window needs from the api.
+ */
+export const InfiniteList = <
+	TContext extends Context,
+	Data = InferResultType<TContext>[number],
+	Type extends string = string,
+>({
+	query,
+	pageSize = 30,
+	transform,
+	...props
+}: InfiniteViewProps<Data, Type> & {
+	query: (q: InitialQueryBuilder) => QueryBuilder<TContext>;
+	pageSize?: number;
+	/** Derive the rendered items from the rows (interleave headers...). */
+	transform?: (rows: any[]) => Data[];
+}): ReactElement | null => {
+	const client = useDbClient();
+	const { authToken } = useToken();
+	const {
+		data,
+		fetchNextPage,
+		hasNextPage,
+		isFetchingNextPage,
+		isReady,
+		isError,
+		error,
+		collection,
+	} = useLiveInfiniteQuery(query, { pageSize });
+
+	const [isRefetching, setRefetching] = useState(false);
+	const refetch = useCallback(async () => {
+		setRefetching(true);
+		try {
+			await refetchAll(client);
+		} finally {
+			setRefetching(false);
+		}
+	}, [client]);
+
+	const items = useMemo(
+		() => (transform ? transform(data) : (data as unknown as Data[])),
+		[data, transform],
+	);
+	if (isError && data.length === 0)
+		throw toRenderableError(error ?? lastLoadError(collection), authToken, refetch);
+
+	return (
+		<InfiniteView
+			source={{
+				items: isReady || data.length ? items : undefined,
+				// a failed page is reported through `isError`, keep the list rendered
+				fetchNextPage: () => fetchNextPage().catch(() => {}),
+				hasNextPage,
+				isFetching: !isReady || isFetchingNextPage,
+				refetch,
+				isRefetching,
+			}}
+			{...props}
+		/>
+	);
+};
+
+export const InfiniteView = <Data, Type extends string = string>({
+	source,
+	placeholderCount = 4,
+	incremental: _incremental = false,
+	getKey,
+	getItemType,
+	getStickyIndices,
+	Render,
+	Loader,
+	layout,
+	Empty,
+	Divider,
+	Header,
+	Footer,
+	fetchMore = true,
+	contentContainerStyle,
+	columnWrapperStyle,
+	...props
+}: InfiniteViewProps<Data, Type> & {
+	source: InfiniteSource<Data>;
 }): ReactElement | null => {
 	const { numColumns, size, gap } = useBreakpointMap(layout);
 	const {
@@ -78,12 +193,7 @@ export const InfiniteFetch = <Data, Type extends string = string>({
 		refetch,
 		isRefetching,
 		isPlaceholderData,
-	} = useInfiniteFetch(
-		incremental ? { ...query, placeholderData: keepPreviousData } : query,
-	);
-
-	if (!query.infinite)
-		console.warn("A non infinite query was passed to an InfiniteFetch.");
+	} = source;
 
 	const data = useMemo(() => {
 		const count = items

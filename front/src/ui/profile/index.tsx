@@ -12,9 +12,24 @@ import {
 	type EntrySelectEntry,
 } from "~/components/entries/select";
 import { ItemGrid, itemMap } from "~/components/items";
-import { Entry, Show, type User, User as UserModel } from "~/models";
+import type { User } from "~/models";
+import { User as UserModel } from "~/models";
 import { Avatar, H1, H3, P, Tabs } from "~/primitives";
-import { Fetch, InfiniteFetch, type QueryIdentifier } from "~/query";
+import {
+	eq,
+	inArray,
+	type InitialQueryBuilder,
+	isNull,
+	not,
+} from "@tanstack/react-db";
+import { entries, showWatchStatus, shows } from "~/db";
+import { Entry, Show, WatchStatusV } from "~/models";
+import {
+	Fetch,
+	InfiniteFetch,
+	InfiniteList,
+	type QueryIdentifier,
+} from "~/query";
 import { EmptyView } from "~/ui/empty-view";
 import { useQueryState } from "~/utils";
 
@@ -52,6 +67,35 @@ const statusTabs = [
 ] as const;
 
 type WatchlistFilter = (typeof statusTabs)[number]["value"];
+
+const renderHistory = (
+	entry: Pick<
+		Entry,
+		"kind" | "slug" | "name" | "thumbnail" | "href" | "progress" | "videos"
+	> &
+		Parameters<typeof entryDisplayNumber>[0],
+	show: Pick<Show, "slug" | "name" | "thumbnail"> | undefined,
+	setSelected: (entry: EntrySelectEntry | null) => void = () => {},
+) => (
+	<EntryBox
+		kind={entry.kind}
+		slug={entry.slug}
+		serieSlug={show?.slug ?? null}
+		name={show ? `${show.name} ${entryDisplayNumber(entry)}` : entry.name}
+		description={entry.name}
+		thumbnail={entry.thumbnail ?? show?.thumbnail ?? null}
+		href={entry.href}
+		watchedPercent={entry.progress.percent}
+		videos={entry.videos}
+		onSelectVideos={() =>
+			setSelected({
+				displayNumber: entryDisplayNumber(entry),
+				name: entry.name,
+				videos: entry.videos,
+			})
+		}
+	/>
+);
 
 const ProfileHeader = ({
 	slug,
@@ -93,37 +137,29 @@ const ProfileHeader = ({
 
 			<View>
 				<H3 className="mb-2">{t("profile.history")}</H3>
-				<InfiniteFetch
-					query={ProfilePage.historyQuery(slug)}
-					layout={{ ...EntryBox.layout, layout: "horizontal" }}
-					getKey={(x) => `${x.id}-${x.progress.playedDate?.toISOString()}`}
-					Empty={<EmptyView message={t("home.none")} />}
-					Render={({ item }) => (
-						<EntryBox
-							kind={item.kind}
-							slug={item.slug}
-							serieSlug={item.show?.slug ?? null}
-							name={
-								item.show
-									? `${item.show.name} ${entryDisplayNumber(item)}`
-									: item.name
-							}
-							description={item.name}
-							thumbnail={item.thumbnail ?? item.show?.thumbnail ?? null}
-							href={item.href}
-							watchedPercent={item.progress.percent}
-							videos={item.videos}
-							onSelectVideos={() =>
-								setSelected({
-									displayNumber: entryDisplayNumber(item),
-									name: item.name,
-									videos: item.videos,
-								})
-							}
-						/>
-					)}
-					Loader={EntryBox.Loader}
-				/>
+				{slug === "me" ? (
+					<InfiniteList
+						query={ProfilePage.historyQuery}
+						pageSize={10}
+						layout={{ ...EntryBox.layout, layout: "horizontal" }}
+						getKey={(x) => x.entry.id}
+						Empty={<EmptyView message={t("home.none")} />}
+						Render={({ item: { entry, show } }) =>
+							renderHistory(entry, show, setSelected)
+						}
+						Loader={EntryBox.Loader}
+					/>
+				) : (
+					// Another user's history is not part of our local db.
+					<InfiniteFetch
+						query={ProfilePage.historyFetch(slug)}
+						layout={{ ...EntryBox.layout, layout: "horizontal" }}
+						getKey={(x) => `${x.id}-${x.progress.playedDate?.toISOString()}`}
+						Empty={<EmptyView message={t("home.none")} />}
+						Render={({ item }) => renderHistory(item, item.show, setSelected)}
+						Loader={EntryBox.Loader}
+					/>
+				)}
 			</View>
 
 			<View>
@@ -154,13 +190,25 @@ export const ProfileScreen = ({ slug }: { slug: string }) => {
 	const { t } = useTranslation();
 	const [status, setStatus] = useQueryState<WatchlistFilter>("status", "all");
 
+	const header = (
+		<ProfileHeader slug={slug} status={status} setStatus={setStatus} />
+	);
+	if (slug !== "me")
+		return (
+			<InfiniteFetch
+				query={ProfilePage.watchlistFetch(slug, status)}
+				layout={ItemGrid.layout}
+				Header={header}
+				Render={({ item }) => <ItemGrid {...itemMap(item)} />}
+				Loader={() => <ItemGrid.Loader />}
+				Empty={<EmptyView message={t("home.none")} className="py-8" />}
+			/>
+		);
 	return (
-		<InfiniteFetch
-			query={ProfilePage.watchlistQuery(slug, status)}
+		<InfiniteList
+			query={(q) => ProfilePage.watchlistQuery(q, status)}
 			layout={ItemGrid.layout}
-			Header={
-				<ProfileHeader slug={slug} status={status} setStatus={setStatus} />
-			}
+			Header={header}
 			Render={({ item }) => <ItemGrid {...itemMap(item)} />}
 			Loader={() => <ItemGrid.Loader />}
 			Empty={<EmptyView message={t("home.none")} className="py-8" />}
@@ -169,6 +217,27 @@ export const ProfileScreen = ({ slug }: { slug: string }) => {
 };
 
 ProfilePage.watchlistQuery = (
+	q: InitialQueryBuilder,
+	status: WatchlistFilter,
+) =>
+	q
+		.from({ s: shows })
+		.where(({ s }) =>
+			status === "all"
+				? inArray(showWatchStatus(s).status, [...WatchStatusV])
+				: eq(showWatchStatus(s).status, status),
+		)
+		.orderBy(({ s }) => showWatchStatus(s).lastPlayedAt, "desc");
+
+ProfilePage.historyQuery = (q: InitialQueryBuilder) =>
+	q
+		.from({ e: entries })
+		.innerJoin({ s: shows }, ({ e, s }) => eq(e.showId, s.id))
+		.where(({ e }) => not(isNull(e.progress.playedDate)))
+		.orderBy(({ e }) => e.progress.playedDate, "desc")
+		.select(({ e, s }) => ({ entry: e, show: s }));
+
+ProfilePage.watchlistFetch = (
 	slug: string,
 	status: WatchlistFilter,
 ): QueryIdentifier<Show> => ({
@@ -180,7 +249,7 @@ ProfilePage.watchlistQuery = (
 	},
 });
 
-ProfilePage.historyQuery = (slug: string): QueryIdentifier<Entry> => ({
+ProfilePage.historyFetch = (slug: string): QueryIdentifier<Entry> => ({
 	parser: Entry,
 	infinite: true,
 	path: ["api", "profiles", slug, "history"],

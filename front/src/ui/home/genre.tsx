@@ -2,9 +2,11 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { ItemGrid, itemMap } from "~/components/items";
-import { type Genre, Show } from "~/models";
+import type { Genre } from "~/models";
 import { H3 } from "~/primitives";
-import { InfiniteFetch, type QueryIdentifier } from "~/query";
+import { inArray } from "@tanstack/react-db";
+import { randomOrder, shows } from "~/db";
+import { InfiniteList } from "~/query";
 import { EmptyView } from "~/ui/empty-view";
 
 export const Header = ({
@@ -27,8 +29,15 @@ export const GenreGrid = ({ genre }: { genre: Genre }) => {
 
 	return (
 		<Header title={t(`genres.${genre}`)}>
-			<InfiniteFetch
-				query={GenreGrid.query(genre)}
+			<InfiniteList
+				query={(q) =>
+					q
+						.from({ s: shows })
+						.where(({ s }) => inArray(genre, s.genres))
+						.orderBy(({ s }) => randomOrder(s.id))
+				}
+				// Limit the initial numbers of items
+				pageSize={10}
 				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
 				Empty={<EmptyView message={t("home.none")} className="py-6" />}
 				Render={({ item }) => <ItemGrid {...itemMap(item)} horizontal />}
@@ -37,15 +46,3 @@ export const GenreGrid = ({ genre }: { genre: Genre }) => {
 		</Header>
 	);
 };
-
-GenreGrid.query = (genre: Genre): QueryIdentifier<Show> => ({
-	parser: Show,
-	infinite: true,
-	path: ["api", "shows"],
-	params: {
-		filter: `genres has ${genre}`,
-		sort: "random",
-		// Limit the initial numbers of items
-		limit: 10,
-	},
-});

@@ -10,7 +10,8 @@ import {
 } from "~/components/entries/select";
 import type { Entry, Serie } from "~/models";
 import { Container, FocusGroup, H2, Svg } from "~/primitives";
-import { Fetch } from "~/query";
+import { showQuery } from "~/db";
+import { Live } from "~/query";
 import { SearchBar } from "~/ui/navbar";
 import { useQueryState } from "~/utils";
 import { useHeroHeight } from "../hero";
@@ -105,9 +106,8 @@ const SerieHeader = ({
 			<Header kind="serie" slug={slug} openInfo={openInfo} />
 			{belowFold && (
 				<>
-					<Fetch
-						// Use the same fetch query as header
-						query={Header.query("serie", slug)}
+					<Live
+						query={(q) => showQuery(q, "serie", slug)}
 						Render={(serie) => {
 							const nextEntry = (serie as Serie).nextEntry;
 							return nextEntry ? (

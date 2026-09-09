@@ -5,8 +5,9 @@ import {
 	EntrySelect,
 	type EntrySelectEntry,
 } from "~/components/entries/select";
-import { Entry } from "~/models";
-import { InfiniteFetch, type QueryIdentifier } from "~/query";
+import { eq, type InitialQueryBuilder, isNull, not } from "@tanstack/react-db";
+import { entries, shows } from "~/db";
+import { InfiniteList } from "~/query";
 import { EmptyView } from "~/ui/empty-view";
 import { Header } from "./genre";
 
@@ -17,26 +18,30 @@ export const NewsList = () => {
 	return (
 		<>
 			<Header title={t("home.news")}>
-				<InfiniteFetch
-					query={NewsList.query()}
+				<InfiniteList
+					query={NewsList.query}
+					pageSize={10}
 					layout={{ ...EntryBox.layout, layout: "horizontal" }}
 					Empty={<EmptyView message={t("home.none")} className="py-6" />}
-					Render={({ item }) => (
+					getKey={(x) => x.entry.id}
+					Render={({ item: { entry, show } }) => (
 						<EntryBox
-							kind={item.kind}
-							slug={item.slug}
-							serieSlug={item.show!.slug}
-							name={`${item.show!.name} ${entryDisplayNumber(item)}`}
-							description={item.name}
-							thumbnail={item.thumbnail ?? item.show!.thumbnail}
-							href={item.href}
-							watchedPercent={item.progress.percent}
-							videos={item.videos}
+							kind={entry.kind}
+							slug={entry.slug}
+							serieSlug={show?.slug ?? null}
+							name={
+								show ? `${show.name} ${entryDisplayNumber(entry)}` : entry.name
+							}
+							description={entry.name}
+							thumbnail={entry.thumbnail ?? show?.thumbnail ?? null}
+							href={entry.href}
+							watchedPercent={entry.progress.percent}
+							videos={entry.videos}
 							onSelectVideos={() =>
 								setSelected({
-									displayNumber: entryDisplayNumber(item),
-									name: item.name,
-									videos: item.videos,
+									displayNumber: entryDisplayNumber(entry),
+									name: entry.name,
+									videos: entry.videos,
 								})
 							}
 						/>
@@ -49,11 +54,11 @@ export const NewsList = () => {
 	);
 };
 
-NewsList.query = (): QueryIdentifier<Entry> => ({
-	parser: Entry,
-	infinite: true,
-	path: ["api", "news"],
-	params: {
-		limit: 10,
-	},
-});
+/** Entries that got a video, most recent first. */
+NewsList.query = (q: InitialQueryBuilder) =>
+	q
+		.from({ e: entries })
+		.innerJoin({ s: shows }, ({ e, s }) => eq(e.showId, s.id))
+		.where(({ e }) => not(isNull(e.availableSince)))
+		.orderBy(({ e }) => e.availableSince, "desc")
+		.select(({ e, s }) => ({ entry: e, show: s }));

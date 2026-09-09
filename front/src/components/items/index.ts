@@ -1,11 +1,12 @@
 import type { ComponentProps } from "react";
+import type { ShowRow } from "~/db";
 import type { Show } from "~/models";
 import { getDisplayDate } from "~/utils";
 import { ItemGrid } from "./item-grid";
 import { ItemList } from "./item-list";
 
 export const itemMap = (
-	item: Show,
+	item: Show | ShowRow,
 ): ComponentProps<typeof ItemGrid> & ComponentProps<typeof ItemList> => ({
 	kind: item.kind,
 	slug: item.slug,
