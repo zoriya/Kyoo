@@ -2,6 +2,7 @@ import { and, eq } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { db } from "~/db";
 import { shows } from "~/db/schema";
+import { publish } from "~/events";
 import { KError } from "~/models/error";
 import { SeedMovie } from "~/models/movie";
 import { SeedSerie } from "~/models/serie";
@@ -22,6 +23,7 @@ export const seed = new Elysia()
 		async ({ body, status }) => {
 			const ret = await seedMovie(body);
 			if ("status" in ret) return status(ret.status, ret as any);
+			publish({ collection: "shows", op: "invalidate", ids: [ret.id] });
 			// @ts-expect-error idk why
 			return status(ret.updated ? 200 : 201, ret);
 		},
@@ -54,6 +56,7 @@ export const seed = new Elysia()
 		async ({ body, status }) => {
 			const ret = await seedSerie(body);
 			if ("status" in ret) return status(ret.status, ret as any);
+			publish({ collection: "shows", op: "invalidate", ids: [ret.id] });
 			// @ts-expect-error idk why
 			return status(ret.updated ? 200 : 201, ret);
 		},
@@ -99,6 +102,7 @@ export const seed = new Elysia()
 					message: "No movie found with the given id or slug.",
 				});
 			}
+			publish({ collection: "shows", op: "delete", ids: [deleted.id] });
 			return deleted;
 		},
 		{
@@ -138,6 +142,7 @@ export const seed = new Elysia()
 					message: "No serie found with the given id or slug.",
 				});
 			}
+			publish({ collection: "shows", op: "delete", ids: [deleted.id] });
 			return deleted;
 		},
 		{
@@ -177,6 +182,7 @@ export const seed = new Elysia()
 					message: "No collection found with the given id or slug.",
 				});
 			}
+			publish({ collection: "shows", op: "delete", ids: [deleted.id] });
 			return deleted;
 		},
 		{

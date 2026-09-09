@@ -17,6 +17,7 @@ import { db, type Transaction } from "~/db";
 import { entries, history, profiles, shows, videos } from "~/db/schema";
 import { watchlist } from "~/db/schema/watchlist";
 import { coalesce, sqlarr } from "~/db/utils";
+import { publish } from "~/events";
 import { Entry } from "~/models/entry";
 import { KError } from "~/models/error";
 import { SeedHistory } from "~/models/history";
@@ -39,6 +40,66 @@ import {
 	getEntries,
 } from "../entries";
 import { getOrCreateProfile } from "./profile";
+
+/**
+ * Tell the user's other clients which entries/shows changed after a progress
+ * update. There is no route to fetch a single entry so the progress itself is
+ * sent; shows are only invalidated (their watch status/next entry moved).
+ */
+export async function publishProgress(
+	userId: string,
+	hist: {
+		entryPk: number;
+		videoPk: number | null;
+		percent: number;
+		time: number;
+		playedDate: Date | null;
+	}[],
+) {
+	if (!hist.length) return;
+	const rows = await db
+		.select({ pk: entries.pk, id: entries.id, showId: shows.id })
+		.from(entries)
+		.innerJoin(shows, eq(shows.pk, entries.showPk))
+		.where(eq(entries.pk, sql`any(${sqlarr(hist.map((x) => x.entryPk))})`));
+	const videoPks = hist.map((x) => x.videoPk).filter((x) => x !== null);
+	const vids = videoPks.length
+		? await db
+				.select({ pk: videos.pk, id: videos.id })
+				.from(videos)
+				.where(eq(videos.pk, sql`any(${sqlarr(videoPks)})`))
+		: [];
+	publish(
+		{
+			collection: "entries",
+			op: "update",
+			data: hist.flatMap((h) => {
+				const entry = rows.find((r) => r.pk === h.entryPk);
+				if (!entry) return [];
+				return [
+					{
+						id: entry.id,
+						progress: {
+							percent: h.percent,
+							time: h.time,
+							playedDate: h.playedDate,
+							videoId: vids.find((v) => v.pk === h.videoPk)?.id ?? null,
+						},
+					},
+				];
+			}),
+		},
+		userId,
+	);
+	publish(
+		{
+			collection: "shows",
+			op: "invalidate",
+			ids: [...new Set(rows.map((r) => r.showId))],
+		},
+		userId,
+	);
+}
 
 export async function updateProgress(userPk: number, progress: SeedHistory[]) {
 	try {
@@ -138,6 +199,7 @@ async function updateHistory(
 							entryPk: history.entryPk,
 							videoPk: history.videoPk,
 							percent: history.percent,
+							time: history.time,
 							playedDate: history.playedDate,
 						});
 
@@ -183,6 +245,7 @@ async function updateHistory(
 							entryPk: history.entryPk,
 							videoPk: history.videoPk,
 							percent: history.percent,
+							time: history.time,
 							playedDate: history.playedDate,
 						});
 
@@ -479,6 +542,12 @@ export const historyH = new Elysia({ tags: ["profiles"] })
 			}
 
 			const ret = await updateProgress(profilePk, body);
+			if (ret.status === 201) {
+				await publishProgress(sub!, [
+					...ret.history.created,
+					...ret.history.updated,
+				]);
+			}
 			return status(ret.status, ret);
 		},
 		{

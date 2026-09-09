@@ -3,11 +3,15 @@ import type { TObject, TString } from "@sinclair/typebox";
 import { eq } from "drizzle-orm";
 import Elysia, { type TSchema, t } from "elysia";
 import { auth, verifyJwt } from "./auth";
-import { updateProgress } from "./controllers/profiles/history";
+import {
+	publishProgress,
+	updateProgress,
+} from "./controllers/profiles/history";
 import { getOrCreateProfile } from "./controllers/profiles/profile";
 import { prepareVideo } from "./controllers/video-metadata";
 import { getVideos } from "./controllers/videos";
 import { videos } from "./db/schema";
+import { registerSocket, unregisterSocket } from "./events";
 
 const logger = getLogger();
 
@@ -49,6 +53,10 @@ const actionMap = {
 			ws.send({ action: "watch", ...ret });
 
 			if (ret.status !== 201) return;
+			await publishProgress(ws.data.jwt.sub!, [
+				...ret.history.created,
+				...ret.history.updated,
+			]);
 
 			const old = ret.history.existing.find((x) => x.videoId === body.videoId);
 			if (!old) return;
@@ -88,7 +96,12 @@ export const appWs = baseWs.ws("/ws", {
 	async open(ws) {
 		if (!ws.data.jwt.sub) {
 			ws.close(3000, "Unauthorized");
+			return;
 		}
+		registerSocket(ws.data.jwt.sub, ws);
+	},
+	close(ws) {
+		if (ws.data.jwt.sub) unregisterSocket(ws.data.jwt.sub, ws);
 	},
 	async message(ws, { action, ...body }) {
 		const handler = actionMap[action as keyof typeof actionMap];

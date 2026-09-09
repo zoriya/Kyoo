@@ -11,6 +11,7 @@ import { db } from "~/db";
 import { entries, shows } from "~/db/schema";
 import { watchlist } from "~/db/schema/watchlist";
 import { coalesce, getColumns, rowToModel } from "~/db/utils";
+import { publish } from "~/events";
 import { Entry } from "~/models/entry";
 import { KError } from "~/models/error";
 import { bubble, madeInAbyss } from "~/models/examples";
@@ -33,6 +34,24 @@ import {
 	SerieWatchStatus,
 } from "~/models/watchlist";
 import { getOrCreateProfile } from "./profile";
+
+async function publishWatchlistRemoval(
+	userId: string,
+	kind: "serie" | "movie",
+	id: string,
+) {
+	const [show] = await db
+		.select({ id: shows.id })
+		.from(shows)
+		.where(
+			and(
+				eq(shows.kind, kind),
+				isUuid(id) ? eq(shows.id, id) : eq(shows.slug, id),
+			),
+		);
+	if (show)
+		publish({ collection: "shows", op: "invalidate", ids: [show.id] }, userId);
+}
 
 async function setWatchStatus({
 	show,
@@ -263,7 +282,11 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 			}
 
 			const [show] = await db
-				.select({ pk: shows.pk, entriesCount: shows.entriesCount })
+				.select({
+					pk: shows.pk,
+					id: shows.id,
+					entriesCount: shows.entriesCount,
+				})
 				.from(shows)
 				.where(
 					and(
@@ -278,11 +301,13 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 					message: `No serie found for the id/slug: '${id}'.`,
 				});
 			}
-			return await setWatchStatus({
+			const ret = await setWatchStatus({
 				show: { pk: show.pk, kind: "serie", entriesCount: show.entriesCount },
 				userPk: profilePk,
 				status: body,
 			});
+			publish({ collection: "shows", op: "invalidate", ids: [show.id] }, sub!);
+			return ret;
 		},
 		{
 			detail: { description: "Set watchstatus of a series." },
@@ -313,7 +338,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 			}
 
 			const [show] = await db
-				.select({ pk: shows.pk })
+				.select({ pk: shows.pk, id: shows.id })
 				.from(shows)
 				.where(
 					and(
@@ -329,7 +354,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 				});
 			}
 
-			return await setWatchStatus({
+			const ret = await setWatchStatus({
 				show: { pk: show.pk, kind: "movie" },
 				userPk: profilePk,
 				status: {
@@ -337,6 +362,8 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 					startedAt: body.completedAt,
 				},
 			});
+			publish({ collection: "shows", op: "invalidate", ids: [show.id] }, sub!);
+			return ret;
 		},
 		{
 			detail: { description: "Set watchstatus of a movie." },
@@ -385,6 +412,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 				});
 			}
 
+			await publishWatchlistRemoval(sub!, "serie", id);
 			return rowToModel(rows.rows[0], watchlist);
 		},
 		{
@@ -432,6 +460,7 @@ export const watchlistH = new Elysia({ tags: ["profiles"] })
 				});
 			}
 
+			await publishWatchlistRemoval(sub!, "movie", id);
 			const ret = rowToModel(rows.rows[0], watchlist);
 			return { ...ret, percent: ret.seenCount };
 		},
