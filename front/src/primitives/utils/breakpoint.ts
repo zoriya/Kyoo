@@ -1,14 +1,12 @@
 import { useWindowDimensions } from "react-native";
 import { rem } from "./spacing";
 
-// In spacing units so they scale with the theme: a tv draws at 3/4, so its 960dp
-// reaches the same breakpoint a 1280px page does.
 export const breakpoints = {
 	xs: 0,
-	sm: rem(150),
-	md: rem(225),
-	lg: rem(300),
-	xl: rem(400),
+	sm: rem(160),
+	md: rem(192),
+	lg: rem(256),
+	xl: rem(320),
 };
 
 type Breakpoints<Property> = {

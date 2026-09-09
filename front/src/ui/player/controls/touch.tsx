@@ -1,8 +1,15 @@
 import FastForward from "@material-symbols/svg-400/rounded/fast_forward-fill.svg";
 import FastRewind from "@material-symbols/svg-400/rounded/fast_rewind-fill.svg";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+	useCallback,
+	useEffect,
+	useEffectEvent,
+	useRef,
+	useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import {
+	BackHandler,
 	type GestureResponderEvent,
 	Platform,
 	Pressable,
@@ -13,6 +20,7 @@ import {
 import { usePlayer, usePlayerState } from "react-native-omni";
 import { Icon, isTouchDevice, P } from "~/primitives";
 import { cn } from "~/utils";
+import { useRemoteKeys } from "../keyboard";
 import { toggleFullscreen } from "./misc";
 
 export const TouchControls = ({
@@ -53,6 +61,25 @@ export const TouchControls = ({
 		wasForced.current = forceShow;
 	}, [forceShow, show]);
 
+	useEffect(() => {
+		if (playing) show();
+	}, [playing, show]);
+
+	useRemoteKeys({ controlsShown: shouldShow, showControls: show });
+
+	const onBack = useEffectEvent(() => {
+		if (forceShow || !_show || !playing) return false;
+		show(false);
+		return true;
+	});
+	useEffect(() => {
+		if (!Platform.isTV) return;
+		const sub = BackHandler.addEventListener("hardwareBackPress", () =>
+			onBack(),
+		);
+		return () => sub.remove();
+	}, []);
+
 	// On mouse move
 	useEffect(() => {
 		if (Platform.OS !== "web") return;
@@ -73,6 +100,7 @@ export const TouchControls = ({
 	return (
 		<View {...props}>
 			<DoublePressable
+				focusable={false}
 				tabIndex={-1}
 				onPress={() => {
 					if (isTouchDevice()) {
@@ -122,6 +150,12 @@ export const TouchControls = ({
 					!shouldShow && "cursor-none!",
 				)}
 			/>
+			{/* android only walks key events down to the focused view, and hiding the
+			    controls unmounts every focusable one: without a sink to hold the focus
+			    the remote goes dead and can't even bring the controls back. */}
+			{Platform.isTV && !shouldShow && (
+				<View focusable hasTVPreferredFocus className="absolute inset-0" />
+			)}
 			{seeked !== 0 && (
 				<View
 					className={cn(

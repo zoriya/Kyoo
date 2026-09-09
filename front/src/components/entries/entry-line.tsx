@@ -1,12 +1,13 @@
 import MultipleVideos from "@material-symbols/svg-400/rounded/subscriptions-fill.svg";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { type PressableProps, View } from "react-native";
+import { Platform, type PressableProps, View } from "react-native";
 import { EntryContext } from "~/components/items/context-menus";
 import { ItemProgress } from "~/components/items/item-grid";
 import type { Entry, KImage } from "~/models";
 import {
 	CroppedText,
+	FocusGroup,
 	Heading,
 	Icon,
 	Image,
@@ -59,96 +60,114 @@ export const EntryLine = ({
 } & PressableProps) => {
 	const [moreOpened, setMoreOpened] = useState(false);
 	const { t } = useTranslation();
+	const [self, setSelf] = useState<View | null>(null);
+	const [expand, setExpand] = useState<View | null>(null);
 
 	return (
-		<Link
-			href={moreOpened ? undefined : href}
-			onLongPress={() => setMoreOpened(true)}
-			className={cn(
-				"group flex-row items-center p-1",
-				href === null && "opacity-50",
-				className,
-			)}
-			{...props}
-		>
-			<ThumbnailBackground
-				src={poster ?? thumbnail}
-				quality="low"
-				alt=""
+		<FocusGroup autoFocus focusable trapFocusLeft trapFocusRight>
+			<Link
+				href={moreOpened ? undefined : href}
+				onLongPress={() => setMoreOpened(true)}
+				disabled={Platform.isTV ? false : undefined}
+				ref={setSelf}
+				nextFocusRight={expand}
+				scrollSnapAlign="center"
 				className={cn(
-					"mr-1 w-1/5 shrink-0 rounded",
-					poster ? "aspect-2/3" : "aspect-video",
-					"ring-accent group-highlighted:ring-3",
+					"group flex-row items-center p-1",
+					href === null && "opacity-50",
+					className,
 				)}
+				{...props}
 			>
-				{(watchedPercent ?? 0) > 0 && (
-					<ItemProgress watchPercent={watchedPercent ?? 100} />
-				)}
-			</ThumbnailBackground>
-			<View className="m-1 mx-2 web:flex-1 native:shrink">
-				<View className="mb-5 md:flex-row">
-					<View>
-						<Heading
-							className={cn(
-								"shrink font-medium text-lg",
-								"group-highlighted:underline",
-							)}
-						>
-							{[displayNumber, name ?? t("show.episodeNoMetadata")]
-								.filter((x) => x)
-								.join(" · ")}
-						</Heading>
-						{tagline && <Heading>{tagline}</Heading>}
-					</View>
-					<View className="flex-row justify-between md:ml-auto">
-						<View className="flex-row justify-between max-sm:flex-col sm:flex-1 md:flex-row-reverse md:items-center md:justify-end">
-							<SubP>
-								{[
-									airDate
-										? // @ts-expect-error Source https://www.i18next.com/translation-function/formatting#datetime
-											t("{{val, datetime}}", { val: airDate })
-										: null,
-									displayRuntime(runtime),
-								]
-									.filter((item) => item != null)
+				<ThumbnailBackground
+					src={poster ?? thumbnail}
+					quality="low"
+					alt=""
+					className={cn(
+						"mr-1 w-1/5 shrink-0 rounded",
+						poster ? "aspect-2/3" : "aspect-video",
+						"ring-accent group-highlighted:ring-3",
+					)}
+				>
+					{(watchedPercent ?? 0) > 0 && (
+						<ItemProgress watchPercent={watchedPercent ?? 100} />
+					)}
+				</ThumbnailBackground>
+				<View className="m-1 mx-2 web:flex-1 native:shrink">
+					<View className="mb-5 md:flex-row">
+						<View>
+							<Heading
+								className={cn(
+									"shrink font-medium text-lg",
+									"group-highlighted:underline",
+								)}
+							>
+								{[displayNumber, name ?? t("show.episodeNoMetadata")]
+									.filter((x) => x)
 									.join(" · ")}
-							</SubP>
-							{videos.length > 1 && (
-								<PressableFeedback
-									onPress={(e) => {
-										e.preventDefault();
-										onSelectVideos?.();
-									}}
-									className="shrink grow-0 flex-row items-center rounded-2xl bg-popover p-2 md:mx-4"
-									{...tooltip(t("show.multiVideos"))}
-								>
-									<Icon
-										icon={MultipleVideos}
-										className="fill-accent dark:fill-slate-400"
-									/>
-									<SubP className="ml-2">
-										{t("show.videosCount", { number: videos.length })}
-									</SubP>
-								</PressableFeedback>
-							)}
+							</Heading>
+							{tagline && <Heading>{tagline}</Heading>}
 						</View>
-						<EntryContext
-							kind={kind}
-							slug={slug}
-							serieSlug={serieSlug}
-							videoSlug={videos.length === 1 ? videos[0].slug : null}
-							isOpen={moreOpened}
-							setOpen={(v) => setMoreOpened(v)}
-							className={cn(
-								"ml-3 flex native:hidden self-end no-touch:opacity-0 focus-visible:opacity-100 group-highlighted:opacity-100",
-								moreOpened && "opacity-100",
-							)}
-						/>
+						<View className="flex-row justify-between md:ml-auto">
+							<View className="flex-row justify-between max-sm:flex-col sm:flex-1 md:flex-row-reverse md:items-center md:justify-end">
+								<SubP>
+									{[
+										airDate
+											? // @ts-expect-error Source https://www.i18next.com/translation-function/formatting#datetime
+												t("{{val, datetime}}", { val: airDate })
+											: null,
+										displayRuntime(runtime),
+									]
+										.filter((item) => item != null)
+										.join(" · ")}
+								</SubP>
+								{videos.length > 1 && (
+									<PressableFeedback
+										onPress={(e) => {
+											e.preventDefault();
+											onSelectVideos?.();
+										}}
+										className="shrink grow-0 flex-row items-center rounded-2xl bg-popover p-2 md:mx-4"
+										{...tooltip(t("show.multiVideos"))}
+									>
+										<Icon
+											icon={MultipleVideos}
+											className="fill-accent dark:fill-slate-400"
+										/>
+										<SubP className="ml-2">
+											{t("show.videosCount", { number: videos.length })}
+										</SubP>
+									</PressableFeedback>
+								)}
+							</View>
+							<EntryContext
+								kind={kind}
+								slug={slug}
+								serieSlug={serieSlug}
+								videoSlug={videos.length === 1 ? videos[0].slug : null}
+								isOpen={moreOpened}
+								setOpen={(v) => setMoreOpened(v)}
+								className={cn(
+									"ml-3 flex native:hidden self-end no-touch:opacity-0 focus-visible:opacity-100 group-highlighted:opacity-100",
+									moreOpened && "opacity-100",
+								)}
+							/>
+						</View>
 					</View>
+					<CroppedText
+						numberOfLines={3}
+						iconProps={{
+							ref: setExpand,
+							nextFocusLeft: self,
+							onFocus: (e) => e.stopPropagation(),
+							onBlur: (e) => e.stopPropagation(),
+						}}
+					>
+						{description}
+					</CroppedText>
 				</View>
-				<CroppedText numberOfLines={3}>{description}</CroppedText>
-			</View>
-		</Link>
+			</Link>
+		</FocusGroup>
 	);
 };
 

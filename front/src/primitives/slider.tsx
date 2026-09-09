@@ -1,11 +1,13 @@
-import { useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import {
 	type GestureResponderEvent,
+	type HWEvent,
 	Platform,
 	View,
 	type ViewProps,
 } from "react-native";
 import { cn } from "~/utils";
+import { useTVEventHandler } from "./focus";
 
 export const Slider = ({
 	progress,
@@ -47,6 +49,37 @@ export const Slider = ({
 		setProgress(Math.max(0, Math.min(locationX / layout.width, 1)) * max);
 	};
 
+	const commit = useRef<NodeJS.Timeout | number | null>(null);
+	useEffect(() => {
+		return () => {
+			if (commit.current) clearTimeout(commit.current);
+		};
+	}, []);
+	useTVEventHandler(
+		useEffectEvent((event: HWEvent) => {
+			if (!isFocus || event.eventKeyAction === 0) return;
+			const step =
+				event.eventType === "left"
+					? -0.05 * max
+					: event.eventType === "right"
+						? 0.05 * max
+						: 0;
+			if (!step) return;
+
+			if (!isSeeking) {
+				setSeek(true);
+				startSeek?.();
+			}
+			setProgress(Math.max(0, Math.min(progress + step, max)));
+			if (commit.current) clearTimeout(commit.current);
+			commit.current = setTimeout(() => {
+				commit.current = null;
+				setSeek(false);
+				endSeek?.();
+			}, 500);
+		}),
+	);
+
 	return (
 		<View
 			ref={ref}
@@ -64,6 +97,8 @@ export const Slider = ({
 				)
 			}
 			tabIndex={0}
+			focusable
+			collapsable={false}
 			onFocus={() => setFocus(true)}
 			onBlur={() => setFocus(false)}
 			onStartShouldSetResponder={() => true}

@@ -1,6 +1,7 @@
-import { useEffect } from "react";
-import { Platform } from "react-native";
+import { useEffect, useEffectEvent } from "react";
+import { type HWEvent, Platform } from "react-native";
 import { type OmniPlayer, usePlayer } from "react-native-omni";
+import { useTVEventHandler } from "~/primitives";
 import { toggleFullscreen } from "./controls/misc";
 
 type Action =
@@ -160,4 +161,56 @@ export const useKeyboard = () => {
 		document.addEventListener("keyup", handler);
 		return () => document.removeEventListener("keyup", handler);
 	}, [player]);
+};
+
+export const useRemoteKeys = ({
+	controlsShown,
+	showControls,
+}: {
+	controlsShown: boolean;
+	showControls: () => void;
+}) => {
+	const player = usePlayer();
+
+	useTVEventHandler(
+		useEffectEvent((event: HWEvent) => {
+			// rn can send both the press (0) and the release (1), only act once
+			if (event.eventKeyAction === 0) return;
+			const hidden = !controlsShown;
+			showControls();
+
+			switch (event.eventType) {
+				case "playPause":
+					reducer(player, { type: "play" });
+					break;
+				case "play":
+					player.play();
+					break;
+				case "pause":
+					player.pause();
+					break;
+				case "next":
+					reducer(player, { type: "next" });
+					break;
+				case "previous":
+					reducer(player, { type: "prev" });
+					break;
+				case "rewind":
+					reducer(player, { type: "seek", value: -10 });
+					break;
+				case "fastForward":
+					reducer(player, { type: "seek", value: +10 });
+					break;
+				case "select":
+					if (hidden) reducer(player, { type: "play" });
+					break;
+				case "left":
+					if (hidden) reducer(player, { type: "seek", value: -10 });
+					break;
+				case "right":
+					if (hidden) reducer(player, { type: "seek", value: +10 });
+					break;
+			}
+		}),
+	);
 };

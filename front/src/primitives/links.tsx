@@ -109,6 +109,7 @@ export const Link = ({
 	href?: string | null;
 	replace?: boolean;
 	download?: boolean;
+	ref?: Ref<View>;
 } & PressableProps) => {
 	const linkProps = useLinkTo({ href, replace, download });
 
