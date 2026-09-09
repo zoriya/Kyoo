@@ -61,6 +61,7 @@ export const Serie = z
 				startedAt: zdate().nullable(),
 				completedAt: zdate().nullable(),
 				seenCount: z.number().int().gte(0),
+				lastPlayedAt: zdate().nullable(),
 			})
 			.nullable(),
 

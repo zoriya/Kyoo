@@ -29,6 +29,8 @@ const Base = z.object({
 			version: z.int(),
 		}),
 	),
+	// When the first video of this entry was added, null if none is available.
+	availableSince: zdate().nullable(),
 	progress: z.object({
 		percent: z.int().min(0).max(100),
 		time: z.int().min(0),

@@ -63,6 +63,7 @@ export const Movie = z
 				score: z.number().int().gte(0).lte(100).nullable(),
 				completedAt: zdate().nullable(),
 				percent: z.number().int().gte(0).lte(100),
+				lastPlayedAt: zdate().nullable(),
 			})
 			.nullable(),
 
