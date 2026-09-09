@@ -25,6 +25,14 @@
 		"expo-env.d.ts",
 		"node_modules/uniwind/types.d.ts"
 	],
-	"exclude": [".expo", "scripts", "**/test", "**/dist", "**/types", "**/tests"],
+	"exclude": [
+		".expo",
+		"scripts",
+		"**/test",
+		"**/dist",
+		"**/types",
+		"**/tests",
+		"**/*.test.ts"
+	],
 	"extends": "expo/tsconfig.base"
 }
