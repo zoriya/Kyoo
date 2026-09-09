@@ -138,6 +138,11 @@ export const showSort = Sort(
 		nextRefresh: shows.nextRefresh,
 		watchStatus: watchStatusQ.status,
 		score: watchStatusQ.score,
+		lastPlayed: {
+			sql: watchStatusQ.lastPlayedAt,
+			isNullable: true,
+			accessor: (x: any) => x.watchStatus?.lastPlayedAt ?? null,
+		},
 		rating: (source: string) => ({
 			sql: sql`(${shows.rating}->>${source})::int`,
 			isNullable: true,

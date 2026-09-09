@@ -46,6 +46,12 @@ export const MovieEntry = t.Composite([
 	BaseMovieEntry,
 	t.Object({
 		videos: t.Array(EmbeddedVideo),
+		availableSince: t.Nullable(
+			t.String({
+				format: "date-time",
+				description: "When the first video of this entry was added.",
+			}),
+		),
 		progress: Progress,
 	}),
 	DbMetadata,

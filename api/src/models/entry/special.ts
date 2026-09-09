@@ -38,6 +38,12 @@ export const Special = t.Composite([
 	BaseSpecial,
 	t.Object({
 		videos: t.Optional(t.Array(EmbeddedVideo)),
+		availableSince: t.Nullable(
+			t.String({
+				format: "date-time",
+				description: "When the first video of this entry was added.",
+			}),
+		),
 		progress: Progress,
 	}),
 	DbMetadata,

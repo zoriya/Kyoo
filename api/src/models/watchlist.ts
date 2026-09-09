@@ -18,6 +18,7 @@ export const SerieWatchStatus = t.Object({
 		description: "The number of episodes you watched in this serie.",
 		minimum: 0,
 	}),
+	lastPlayedAt: t.Nullable(t.Date()),
 });
 export type SerieWatchStatus = typeof SerieWatchStatus.static;
 
@@ -29,6 +30,7 @@ export const MovieWatchStatus = t.Object({
 		minimum: 0,
 		maximum: 100,
 	}),
+	lastPlayedAt: SerieWatchStatus.properties.lastPlayedAt,
 });
 export type MovieWatchStatus = typeof MovieWatchStatus.static;
 

@@ -29,6 +29,12 @@ export const Episode = t.Composite([
 	BaseEpisode,
 	t.Object({
 		videos: t.Array(EmbeddedVideo),
+		availableSince: t.Nullable(
+			t.String({
+				format: "date-time",
+				description: "When the first video of this entry was added.",
+			}),
+		),
 		progress: Progress,
 	}),
 	DbMetadata,
