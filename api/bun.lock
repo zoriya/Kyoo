@@ -11,7 +11,7 @@
         "@logtape/elysia": "2.3.2",
         "@logtape/logtape": "2.3.4",
         "@logtape/otel": "2.3.2",
-        "@logtape/redaction": "2.3.2",
+        "@logtape/redaction": "2.3.4",
         "@opentelemetry/api": "^1.9.0",
         "@opentelemetry/api-logs": "^0.219.0",
         "@opentelemetry/core": "^2.6.0",
@@ -201,7 +201,7 @@
 
     "@logtape/otel": ["@logtape/otel@2.3.2", "", { "dependencies": { "@opentelemetry/api": "^1.9.0", "@opentelemetry/api-logs": "^0.208.0", "@opentelemetry/exporter-logs-otlp-grpc": "^0.208.0", "@opentelemetry/exporter-logs-otlp-http": "^0.208.0", "@opentelemetry/exporter-logs-otlp-proto": "^0.208.0", "@opentelemetry/otlp-exporter-base": "^0.208.0", "@opentelemetry/resources": "^2.2.0", "@opentelemetry/sdk-logs": "^0.208.0", "@opentelemetry/semantic-conventions": "^1.38.0" }, "peerDependencies": { "@logtape/logtape": "^2.3.2" } }, "sha512-bQ861MB4yVs5q2AdmEb29LwFH2ZEzLLj2ILkyGg9dtvH7cu62jWo1I/ng02KLzTWjjtEgk4OdWe3SIVD62QemA=="],
 
-    "@logtape/redaction": ["@logtape/redaction@2.3.2", "", { "peerDependencies": { "@logtape/logtape": "^2.3.2" } }, "sha512-tLiLxtMm99oKP6g19+yBUmk54HawuVKh4xlW9lAPhyayjisnJ9gwjihxjqd6lo0Bf090/gQvI9eJ3MWSS8w+aw=="],
+    "@logtape/redaction": ["@logtape/redaction@2.3.4", "", { "peerDependencies": { "@logtape/logtape": "^2.3.4" } }, "sha512-Mdn4yPczbwxlLRkMiFrNuvalCa+Z0mdACkswete67K6jV9xP+faBR/Ht1Y8YRXZbg3piV08N23bFkQoblYyu8Q=="],
 
     "@opentelemetry/api": ["@opentelemetry/api@1.9.0", "", {}, "sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg=="],
 
