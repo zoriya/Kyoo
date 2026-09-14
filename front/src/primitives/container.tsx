@@ -8,4 +8,5 @@ export const Container = ({ className, ...props }: ViewProps) => {
 Container.className = cn(
 	"flex w-full self-center px-4",
 	"sm:w-xl md:w-3xl lg:w-5xl xl:w-7xl",
+	"max-w-[92vw]",
 );

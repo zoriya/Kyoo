@@ -11,6 +11,7 @@ import {
 import { useTranslation } from "react-i18next";
 import {
 	Platform,
+	type PressableProps,
 	Text,
 	type TextProps,
 	View,
@@ -104,10 +105,16 @@ export const CroppedText = ({
 	numberOfLines,
 	onTextLayout,
 	ref,
+	iconProps,
 	containerProps,
 	children,
 	...props
-}: { containerProps?: ViewProps } & ComponentProps<typeof P>) => {
+}: {
+	containerProps?: ViewProps;
+	iconProps?: Partial<
+		ComponentProps<typeof IconButton<PressableProps>> & { ref?: Ref<View> }
+	>;
+} & ComponentProps<typeof P>) => {
 	const desc = useRef<HTMLElement>(null);
 	const [expended, setExpanded] = useRecyclingState(false);
 	const [needExpand, setNeedExpand] = useState(false);
@@ -141,6 +148,7 @@ export const CroppedText = ({
 			</P>
 			{needExpand && (
 				<IconButton
+					{...iconProps}
 					icon={expended ? ExpandLess : ExpandMore}
 					{...tooltip(t(expended ? "misc.collapse" : "misc.expand"))}
 					onPress={(e) => {

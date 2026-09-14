@@ -11,6 +11,7 @@ import { Entry, Season } from "~/models";
 import { Paged } from "~/models/utils/page";
 import {
 	Container,
+	FocusGroup,
 	H2,
 	HR,
 	IconButton,
@@ -68,7 +69,10 @@ export const SeasonHeader = ({
 	});
 
 	return (
-		<View
+		<FocusGroup
+			autoFocus
+			focusable
+			scrollSnapAlign="center"
 			id={`season-${seasonNumber}`}
 			className={cn("m-1 w-full flex-1 flex-row", className)}
 			{...props}
@@ -135,7 +139,7 @@ export const SeasonHeader = ({
 					</>
 				)}
 			</Menu>
-		</View>
+		</FocusGroup>
 	);
 };
 
@@ -193,6 +197,7 @@ export const EntryList = ({
 		<InfiniteFetch
 			query={EntryList.query(slug, season, search)}
 			layout={EntryLine.layout}
+			snapToAlignment="item"
 			drawDistance={1000}
 			Empty={<EmptyView message={t("show.episode-none")} />}
 			Divider={() => (
@@ -227,6 +232,7 @@ export const EntryList = ({
 									? "rounded-md bg-accent/10"
 									: undefined
 							}
+							hasTVPreferredFocus={item.slug === currentEntrySlug}
 							// Don't display "Go to serie"
 							serieSlug={null}
 							displayNumber={entryDisplayNumber(item)}

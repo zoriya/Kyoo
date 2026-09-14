@@ -48,8 +48,8 @@ export const Tabs = <T,>({
 					onPress={() => setValue(x.value)}
 					className={cn(
 						"group flex-row items-center justify-center rounded-3xl px-4 py-2 outline-0",
-						!(x.value === value) && "highlighted:bg-accent",
 						x.value === value && "bg-accent",
+						"highlighted:outline-3 highlighted:outline-accent",
 					)}
 				>
 					<Icon

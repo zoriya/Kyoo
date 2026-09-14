@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { type KImage, Role } from "~/models";
-import { Container, H2, Link, P, Poster, Skeleton, SubP } from "~/primitives";
-import { InfiniteGrid, type QueryIdentifier } from "~/query";
+import { H2, Link, P, Poster, Skeleton, SubP } from "~/primitives";
+import { type GridLayout, InfiniteGrid, type QueryIdentifier } from "~/query";
 import { cn } from "~/utils";
 import { EmptyView } from "../empty-view";
 
@@ -60,51 +60,53 @@ CharacterCard.Loader = () => (
 export const Staff = ({
 	kind,
 	slug,
+	layout,
 }: {
 	kind: "serie" | "movie";
 	slug: string;
+	layout: GridLayout;
 }) => {
 	const { t } = useTranslation();
 
 	return (
-		<Container className="mb-4">
-			<InfiniteGrid
-				query={Staff.query(kind, slug)}
-				layout={{
-					numColumns: { xs: 1, md: 2, xl: 3 },
-					numLines: 3,
-					gap: { xs: 8, lg: 12 },
-				}}
-				Header={({ controls }) => (
-					<View className="mb-3 flex-row items-center justify-between">
-						<H2>{t("show.staff")}</H2>
-						{controls}
-					</View>
-				)}
-				Empty={<EmptyView message={t("show.staff-none")} />}
-				Render={({ item }) => (
-					<CharacterCard
-						href={`/staff/${item.staff.slug}`}
-						name={item.staff.name}
-						subtitle={
-							item.character
-								? t("show.staff-as", {
-										character: item.character.name,
-									})
-								: t(`show.staff-kind.${item.kind}`)
-						}
-						image={item.staff.image}
-						characterImage={item.character?.image}
-					/>
-				)}
-				Loader={() => <CharacterCard.Loader />}
-				getItemKey={(item) =>
-					`${item.staff.id}-${item.kind}-${item.character?.name ?? "none"}`
-				}
-			/>
-		</Container>
+		<InfiniteGrid
+			query={Staff.query(kind, slug)}
+			layout={layout}
+			Header={({ controls }) => (
+				<View className="mb-3 flex-row items-center justify-between">
+					<H2>{t("show.staff")}</H2>
+					{controls}
+				</View>
+			)}
+			Empty={<EmptyView message={t("show.staff-none")} />}
+			Render={({ item }) => (
+				<CharacterCard
+					href={`/staff/${item.staff.slug}`}
+					name={item.staff.name}
+					subtitle={
+						item.character
+							? t("show.staff-as", {
+									character: item.character.name,
+								})
+							: t(`show.staff-kind.${item.kind}`)
+					}
+					image={item.staff.image}
+					characterImage={item.character?.image}
+				/>
+			)}
+			Loader={() => <CharacterCard.Loader />}
+			getItemKey={(item) =>
+				`${item.staff.id}-${item.kind}-${item.character?.name ?? "none"}`
+			}
+		/>
 	);
 };
+
+Staff.layout = {
+	numColumns: { xs: 1, md: 2, xl: 3 },
+	numLines: 3,
+	gap: { xs: 8, lg: 12 },
+} satisfies GridLayout;
 
 Staff.query = (
 	kind: "serie" | "movie",

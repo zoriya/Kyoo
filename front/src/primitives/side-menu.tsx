@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Pressable, View } from "react-native";
 import { Portal } from "react-native-teleport";
 import { cn } from "~/utils";
+import { FocusTrap } from "./focus";
 import { IconButton } from "./icons";
 import { Heading } from "./text";
 
@@ -30,7 +31,8 @@ export const SideMenu = ({
 				className="absolute inset-0 cursor-default! bg-black/60"
 				tabIndex={-1}
 			/>
-			<View
+			<FocusTrap
+				onBack={onClose}
 				className={cn(
 					"absolute inset-y-0 right-0 w-4/5 max-w-xl bg-popover",
 					"border-white/10 border-l pt-safe pr-safe pb-safe",
@@ -44,7 +46,7 @@ export const SideMenu = ({
 					</View>
 				)}
 				<View className={cn("flex-1", className)}>{children}</View>
-			</View>
+			</FocusTrap>
 		</Portal>
 	);
 };

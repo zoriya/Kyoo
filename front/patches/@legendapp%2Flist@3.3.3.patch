@@ -1,5 +1,5 @@
 diff --git a/react-native.js b/react-native.js
-index 229f09a8230ab24079d471f65d28d36908f0f2ea..18b3bde2371af9e093b648021b16ad3c9a2969c3 100644
+index 229f09a8230ab24079d471f65d28d36908f0f2ea..24a089985c58132c580851921ee33d9b72fcd46e 100644
 --- a/react-native.js
 +++ b/react-native.js
 @@ -3958,10 +3958,13 @@ function scheduleRenderRangeProjectionSettle(ctx) {
@@ -17,8 +17,58 @@ index 229f09a8230ab24079d471f65d28d36908f0f2ea..18b3bde2371af9e093b648021b16ad3c
        return i;
      }
    }
+@@ -5096,7 +5099,7 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
+     () => getStickyPushLimit(ctx.state, itemIndex, itemKey),
+     [ctx.state, itemIndex, itemKey, _totalSize]
+   );
+-  const transform = React2__namespace.useMemo(() => {
++  const stickyOffset = React2__namespace.useMemo(() => {
+     var _a3;
+     if (animatedScrollY) {
+       const stickyConfigOffset = (_a3 = stickyHeaderConfig == null ? void 0 : stickyHeaderConfig.offset) != null ? _a3 : 0;
+@@ -5104,13 +5107,13 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
+       let nextStickyPosition;
+       if (pushLimit !== void 0) {
+         if (pushLimit <= position) {
+-          nextStickyPosition = pushLimit;
++          nextStickyPosition = pushLimit - position;
+         } else {
+           nextStickyPosition = animatedScrollY.interpolate({
+             extrapolateLeft: "clamp",
+             extrapolateRight: "clamp",
+             inputRange: [stickyStart, stickyStart + (pushLimit - position)],
+-            outputRange: [position, pushLimit]
++            outputRange: [0, pushLimit - position]
+           });
+         }
+       } else {
+@@ -5118,7 +5121,7 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
+           extrapolateLeft: "clamp",
+           extrapolateRight: "extend",
+           inputRange: [stickyStart, stickyStart + 5e3],
+-          outputRange: [position, position + 5e3]
++          outputRange: [0, 5e3]
+         });
+       }
+       return horizontal ? [{ translateX: nextStickyPosition }] : [{ translateY: nextStickyPosition }];
+@@ -5133,8 +5136,13 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
+     stickyHeaderConfig == null ? void 0 : stickyHeaderConfig.offset
+   ]);
+   const viewStyle = React2__namespace.useMemo(
+-    () => [style, { zIndex: itemIndex + 1e3 }, { transform }],
+-    [style, itemIndex, transform]
++    () => [
++      style,
++      { zIndex: itemIndex + 1e3 },
++      horizontal ? { left: position } : { top: position },
++      { transform: stickyOffset }
++    ],
++    [style, itemIndex, stickyOffset, horizontal, position]
+   );
+   const renderStickyHeaderBackdrop = React2__namespace.useMemo(() => {
+     if (!(stickyHeaderConfig == null ? void 0 : stickyHeaderConfig.backdropComponent)) {
 diff --git a/react-native.mjs b/react-native.mjs
-index c2e0f3823f524e31e2105a5fbda76be78c926226..6b3c111069a2427a752f2300b63ca99476548156 100644
+index c2e0f3823f524e31e2105a5fbda76be78c926226..3a475daf7212054a947f76add8b8fe3e8a51020a 100644
 --- a/react-native.mjs
 +++ b/react-native.mjs
 @@ -3937,10 +3937,13 @@ function scheduleRenderRangeProjectionSettle(ctx) {
@@ -36,6 +86,56 @@ index c2e0f3823f524e31e2105a5fbda76be78c926226..6b3c111069a2427a752f2300b63ca994
        return i;
      }
    }
+@@ -5075,7 +5078,7 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
+     () => getStickyPushLimit(ctx.state, itemIndex, itemKey),
+     [ctx.state, itemIndex, itemKey, _totalSize]
+   );
+-  const transform = React2.useMemo(() => {
++  const stickyOffset = React2.useMemo(() => {
+     var _a3;
+     if (animatedScrollY) {
+       const stickyConfigOffset = (_a3 = stickyHeaderConfig == null ? void 0 : stickyHeaderConfig.offset) != null ? _a3 : 0;
+@@ -5083,13 +5086,13 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
+       let nextStickyPosition;
+       if (pushLimit !== void 0) {
+         if (pushLimit <= position) {
+-          nextStickyPosition = pushLimit;
++          nextStickyPosition = pushLimit - position;
+         } else {
+           nextStickyPosition = animatedScrollY.interpolate({
+             extrapolateLeft: "clamp",
+             extrapolateRight: "clamp",
+             inputRange: [stickyStart, stickyStart + (pushLimit - position)],
+-            outputRange: [position, pushLimit]
++            outputRange: [0, pushLimit - position]
+           });
+         }
+       } else {
+@@ -5097,7 +5100,7 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
+           extrapolateLeft: "clamp",
+           extrapolateRight: "extend",
+           inputRange: [stickyStart, stickyStart + 5e3],
+-          outputRange: [position, position + 5e3]
++          outputRange: [0, 5e3]
+         });
+       }
+       return horizontal ? [{ translateX: nextStickyPosition }] : [{ translateY: nextStickyPosition }];
+@@ -5112,8 +5115,13 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
+     stickyHeaderConfig == null ? void 0 : stickyHeaderConfig.offset
+   ]);
+   const viewStyle = React2.useMemo(
+-    () => [style, { zIndex: itemIndex + 1e3 }, { transform }],
+-    [style, itemIndex, transform]
++    () => [
++      style,
++      { zIndex: itemIndex + 1e3 },
++      horizontal ? { left: position } : { top: position },
++      { transform: stickyOffset }
++    ],
++    [style, itemIndex, stickyOffset, horizontal, position]
+   );
+   const renderStickyHeaderBackdrop = React2.useMemo(() => {
+     if (!(stickyHeaderConfig == null ? void 0 : stickyHeaderConfig.backdropComponent)) {
 diff --git a/react-native.web.js b/react-native.web.js
 index 544cca82136ab14cbeec0a01499f554bd4eca75f..4987da52de388646bb66dadd4e3a73a9d10c9631 100644
 --- a/react-native.web.js

@@ -88,7 +88,7 @@ const Menu = <AsProps,>({
 								"xl:top-0 xl:right-0 xl:mt-0 xl:mr-0 xl:max-h-screen xl:max-w-xl xl:rounded-l-4xl xl:rounded-tr-none xl:pt-safe-offset-10",
 							)}
 						>
-							<ScrollView>
+							<ScrollView snapToAlignment="item">
 								{typeof children === "function" ? children() : children}
 							</ScrollView>
 						</FocusTrap>
@@ -141,6 +141,8 @@ const MenuItem = ({
 				if (href) router.push(href);
 			}}
 			disabled={disabled}
+			hasTVPreferredFocus={selected}
+			scrollSnapAlign="center"
 			// same highlight as the web menu, where radix sets the attribute itself
 			className="group h-15 w-full flex-row items-center highlighted:bg-accent px-4"
 			{...props}

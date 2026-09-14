@@ -37,6 +37,7 @@ export const MiddleControls = ({
 			<PlayButton
 				className={cn("mx-8 bg-gray-800/50")}
 				iconClassName="h-14 w-14 fill-slate-200 dark:fill-slate-200"
+				hasTVPreferredFocus
 			/>
 			<IconButton
 				icon={SkipNext}

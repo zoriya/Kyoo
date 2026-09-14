@@ -1,7 +1,7 @@
 import { Children, Fragment, type ReactElement, type ReactNode } from "react";
 import { type Falsy, View } from "react-native";
 import type { User } from "~/models";
-import { Container, H1, HR, Icon, P, SubP } from "~/primitives";
+import { Container, FocusGroup, H1, HR, Icon, P, SubP } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { useMutation } from "~/query";
 
@@ -60,11 +60,17 @@ export const SettingsContainer = ({
 					.map((x, i) => (
 						<Fragment key={i}>
 							{i !== 0 && <HR className="my-2" />}
-							{x}
+							<FocusGroup trapFocusLeft trapFocusRight scrollSnapAlign="center">
+								{x}
+							</FocusGroup>
 						</Fragment>
 					))}
 			</View>
-			{extra}
+			{extra && (
+				<FocusGroup trapFocusLeft trapFocusRight scrollSnapAlign="center">
+					{extra}
+				</FocusGroup>
+			)}
 		</Container>
 	);
 };

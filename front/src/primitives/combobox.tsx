@@ -1,6 +1,5 @@
 import { LegendList } from "@legendapp/list/react-native";
 import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
-import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
 import ExpandMore from "@material-symbols/svg-400/rounded/keyboard_arrow_down-fill.svg";
 import SearchIcon from "@material-symbols/svg-400/rounded/search-fill.svg";
 import { keepPreviousData } from "@tanstack/react-query";
@@ -23,7 +22,7 @@ import { Portal } from "react-native-teleport";
 import { type QueryIdentifier, useInfiniteFetch } from "~/query/query";
 import { cn } from "~/utils";
 import { FocusTrap } from "./focus";
-import { Icon, IconButton } from "./icons";
+import { Icon } from "./icons";
 import { PressableFeedback } from "./links";
 import { Skeleton } from "./skeleton";
 import { P } from "./text";
@@ -216,14 +215,16 @@ const ComboBoxItem = ({
 	return (
 		<PressableFeedback
 			onPress={onSelect}
-			className="h-12 w-full flex-row items-center px-4"
+			className="group h-12 w-full flex-row items-center highlighted:bg-accent px-4"
 		>
-			{selected && <Icon icon={Check} className="mx-6" />}
+			{selected && (
+				<Icon icon={Check} className="mx-6 group-highlighted:fill-slate-200" />
+			)}
 			<P
 				style={{
 					paddingLeft: selected ? 0 : 8 * 2 + 24,
 				}}
-				className="flex-1"
+				className="flex-1 group-highlighted:text-slate-200"
 			>
 				{label}
 			</P>

@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import type { ViewProps } from "react-native";
-import { View } from "react-native";
 import type { Chapter, KImage, Show } from "~/models";
+import { FocusGroup } from "~/primitives";
 import { Back } from "./back";
 import { BottomControls } from "./bottom-controls";
 import { MiddleControls } from "./middle-controls";
@@ -56,7 +56,7 @@ export const Controls = ({
 	}, []);
 
 	return (
-		<View className="absolute inset-0">
+		<FocusGroup autoFocus className="absolute inset-0">
 			<TouchControls
 				forceShow={hover || menuOpened || seeking || forceShow}
 				onVisibilityChange={setControlsVisible}
@@ -94,7 +94,7 @@ export const Controls = ({
 				seekEnd={seekEnd}
 				className="absolute right-safe bottom-2/10 m-8"
 			/>
-		</View>
+		</FocusGroup>
 	);
 };
 

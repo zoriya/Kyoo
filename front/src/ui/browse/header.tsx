@@ -12,9 +12,15 @@ import TheaterComedy from "@material-symbols/svg-400/rounded/theater_comedy.svg"
 import TV from "@material-symbols/svg-400/rounded/tv.svg";
 import All from "@material-symbols/svg-400/rounded/view_headline.svg";
 import ViewList from "@material-symbols/svg-400/rounded/view_list.svg";
-import type { ComponentType } from "react";
+import { useFocusEffect } from "expo-router/react-navigation";
+import { type ComponentType, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { type PressableProps, View } from "react-native";
+import {
+	Platform,
+	type PressableProps,
+	type TextInput,
+	View,
+} from "react-native";
 import type { SvgProps } from "react-native-svg";
 import { Genre, Staff, Studio } from "~/models";
 import {
@@ -27,7 +33,8 @@ import {
 	PressableFeedback,
 	tooltip,
 } from "~/primitives";
-import { cn } from "~/utils";
+import { SearchBar } from "~/ui/navbar";
+import { cn, useQueryState } from "~/utils";
 import { availableSorts, type SortBy, type SortOrd } from "./types";
 
 const SortTrigger = ({
@@ -39,12 +46,18 @@ const SortTrigger = ({
 
 	return (
 		<PressableFeedback
-			className={cn("flex-row items-center", className)}
+			className={cn(
+				"group flex-row items-center overflow-hidden rounded-full px-2 outline-0",
+				"highlighted:bg-accent",
+				className,
+			)}
 			{...tooltip(t("browse.sortby-tt"))}
 			{...props}
 		>
-			<Icon icon={Sort} className="mx-1" />
-			<P>{t(`browse.sortkey.${sortBy}`)}</P>
+			<Icon icon={Sort} className="mx-1 group-highlighted:fill-slate-200" />
+			<P className="group-highlighted:text-slate-200">
+				{t(`browse.sortkey.${sortBy}`)}
+			</P>
 		</PressableFeedback>
 	);
 };
@@ -65,12 +78,19 @@ const MediaTypeTrigger = ({
 
 	return (
 		<PressableFeedback
-			className={cn("flex-row items-center", className)}
+			className={cn(
+				"group flex-row items-center overflow-hidden rounded-full px-2 outline-0",
+				"highlighted:bg-accent",
+				className,
+			)}
 			{...tooltip(t("browse.mediatype-tt"))}
 			{...props}
 		>
-			<Icon icon={MediaTypeIcons[mediaType] ?? FilterList} className="mx-1" />
-			<P>
+			<Icon
+				icon={MediaTypeIcons[mediaType] ?? FilterList}
+				className="mx-1 group-highlighted:fill-slate-200"
+			/>
+			<P className="group-highlighted:text-slate-200">
 				{t(
 					mediaType !== "all"
 						? `browse.mediatypekey.${mediaType}`
@@ -94,11 +114,20 @@ const FilterTrigger = ({
 } & PressableProps) => {
 	return (
 		<PressableFeedback
-			className={cn("flex-row items-center", className)}
+			className={cn(
+				"group flex-row items-center overflow-hidden rounded-full px-2 outline-0",
+				"highlighted:bg-accent",
+				className,
+			)}
 			{...props}
 		>
-			<Icon icon={icon ?? FilterList} className="mx-1" />
-			<P>{count > 0 ? `${label} (${count})` : label}</P>
+			<Icon
+				icon={icon ?? FilterList}
+				className="mx-1 group-highlighted:fill-slate-200"
+			/>
+			<P className="group-highlighted:text-slate-200">
+				{count > 0 ? `${label} (${count})` : label}
+			</P>
 		</PressableFeedback>
 	);
 };
@@ -148,6 +177,14 @@ export const BrowseSettings = ({
 	setLayout: (layout: "grid" | "list") => void;
 }) => {
 	const { t } = useTranslation();
+	const [query, setQuery] = useQueryState<string | undefined>("q", undefined);
+	const [focus] = useQueryState("focus", "");
+	const searchRef = useRef<TextInput>(null);
+	useFocusEffect(
+		useCallback(() => {
+			if (focus === "search") searchRef.current?.focus();
+		}, [focus]),
+	);
 
 	const mediaType = /kind eq (\w+)/.exec(filter)?.[1] ?? "all";
 	const includedGenres = parseFilterValues(
@@ -199,6 +236,15 @@ export const BrowseSettings = ({
 
 	return (
 		<View>
+			{Platform.isTV && (
+				<SearchBar
+					ref={searchRef}
+					forceExpand
+					value={query}
+					onChangeText={(q) => setQuery(q || undefined)}
+					containerClassName="mx-8 my-2 h-12"
+				/>
+			)}
 			<View className="my-2 flex-1 flex-row flex-wrap items-center justify-between sm:mx-8">
 				<View className="flex-1 flex-row flex-wrap gap-3">
 					<Menu
