@@ -37,10 +37,14 @@
 			"planned": "Marque como planejado",
 			"watching": "Marque como assistindo",
 			"dropped": "Marque como desistido",
-			"null": "Marque como não assistido"
+			"null": "Marque como não assistido",
+			"rewatching": "Marque como reassistido"
 		},
 		"nextUp": "Próximo",
-		"season": "Temporada {{number}}"
+		"season": "Temporada {{number}}",
+		"details": "Gêneros, tags e equipe",
+		"tags-none": "Nenhuma tag disponível",
+		"multiVideos": "Múltiplos arquivos de vídeo disponíveis"
 	},
 	"browse": {
 		"mediatypekey": {
