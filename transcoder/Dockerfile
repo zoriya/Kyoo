@@ -1,5 +1,5 @@
 FROM ghcr.io/zoriya/ffmpeg:v8.0.4-dev AS build
-COPY --from=golang:1.26 /usr/local/go /usr/local/go
+COPY --from=golang:1.27 /usr/local/go /usr/local/go
 ENV PATH="/usr/local/go/bin:${PATH}"
 
 WORKDIR /app
