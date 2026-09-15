@@ -85,6 +85,7 @@ export const Player = () => {
 		() => [
 			playMode,
 			(mode) => {
+				if (mode === playMode) return;
 				// changing the mode reloads the video, restart it where we are now
 				setStart(Math.round(player.currentTime).toString());
 				setPlayMode(mode);
