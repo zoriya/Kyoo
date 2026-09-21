@@ -14,7 +14,7 @@ require (
 	github.com/lestrrat-go/jwx/v3 v3.3.0
 	github.com/mileusna/useragent v1.3.5
 	github.com/swaggo/echo-swagger/v2 v2.0.1
-	github.com/swaggo/swag/v2 v2.0.0-rc5
+	github.com/swaggo/swag/v2 v2.0.0-rc6
 	go.opentelemetry.io/contrib/bridges/otelslog v0.19.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.70.0
 	go.opentelemetry.io/otel v1.45.0
