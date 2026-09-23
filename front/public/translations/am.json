@@ -1,6 +1,6 @@
 {
 	"home": {
-		"recommended": "",
+		"recommended": "ለእርስዎ የተመረጡ",
 		"news": "ዜና",
 		"watchlist": "መመልከቱን ይቀጥሉ",
 		"info": "ተጨማሪ ይመልከቱ",
@@ -29,18 +29,37 @@
 		"jumpToSeason": "ወደ ምዕራፍ ይዝለሉ",
 		"partOf": "",
 		"watchlistAdd": "ለመመልከት ወዳቀዱት ዝርዝር ይጨምሩ",
-		"watchlistEdit": "",
+		"watchlistEdit": "የእይታ ሁኔታን ይቀይሩ",
 		"watchlistRemove": "አልተመለከትኩትም",
 		"watchlistLogin": "መመልከት ወደሚፈልጉት ዝርዝር ለመጨመር ወደ አካውንቶ ይግቡ",
 		"watchlistMark": {
-			"completed": "",
-			"planned": "",
-			"watching": "",
-			"dropped": "",
-			"null": "አላየሁትም"
+			"completed": "ተጠናቋል በሉ",
+			"planned": "ለማየት የታቀደ",
+			"watching": "እየታየ",
+			"dropped": "የተተወ",
+			"null": "አላየሁትም",
+			"rewatching": "እንደገና እየታየ"
 		},
 		"nextUp": "ቀጣይ",
-		"season": "ምዕራፍ {{number}}"
+		"season": "ምዕራፍ {{number}}",
+		"tags-none": "ምንም መለያዎች አልተገኙም",
+		"multiVideos": "ብዙ የቪዲዮ ፋይሎች አሉ",
+		"videosCount": "{{number}} ቪዲዮዎች",
+		"version": "ቨርዥን {{number}}",
+		"part": "ክፍል {{number}}",
+		"videos-map": "የቪዲዮ ማዛመጃዎችን ያስተካክሉ",
+		"remap": "እንደገና ያዛምዱ",
+		"staff-as": "እንደ {{character}}",
+		"staff-kind": {
+			"actor": "ተዋናይ",
+			"director": "ዳይሬክተር",
+			"writter": "ደራሲ",
+			"producer": "ፕሮዲዉሰር",
+			"music": "ሙዚቃ",
+			"crew": "ተዋናዮች",
+			"other": "ሌሎች"
+		},
+		"details": "ዘውጎች፣ መለያዎች እና ሰራተኞች"
 	},
 	"browse": {
 		"mediatypekey": {
@@ -63,87 +82,98 @@
 			"rating": "ግምገማዎች"
 		},
 		"sortord": {
-			"asc": "",
-			"desc": ""
+			"asc": "እየጨመረ የሚሄድ",
+			"desc": "እየቀነሰ የሚሄድ"
 		},
-		"switchToGrid": "",
-		"switchToList": ""
+		"switchToGrid": "ወደ ግሪድ እይታ ይቀይሩ",
+		"switchToList": "ወደ ዝርዝር እይታ ይቀይሩ",
+		"not": "ያለ"
 	},
 	"genres": {
-		"action": "",
-		"adventure": "",
-		"animation": "",
-		"comedy": "",
-		"crime": "",
-		"documentary": "",
-		"drama": "",
-		"family": "",
-		"fantasy": "",
-		"history": "",
-		"horror": "",
-		"music": "",
-		"mystery": "",
-		"romance": "",
-		"science-fiction": "",
-		"thriller": "",
-		"war": "",
-		"western": "",
-		"kids": "",
-		"reality": "",
-		"soap": "",
-		"talk": "",
-		"politics": ""
+		"action": "አክሽን",
+		"adventure": "ጀብዱ",
+		"animation": "አኒሜሽን",
+		"comedy": "ኮሜዲ",
+		"crime": "ወንጀል",
+		"documentary": "ዶክመንተሪ",
+		"drama": "ድራማ",
+		"family": "ቤተሰብ",
+		"fantasy": "ምናባዊ",
+		"history": "ታሪካዊ",
+		"horror": "አስፈሪ",
+		"music": "ሙዚቃ",
+		"mystery": "ምስጢራዊ",
+		"romance": "ፍቅር",
+		"science-fiction": "ሳይንስ ልብ-ወለድ",
+		"thriller": "አስደንጋጭ",
+		"war": "ጦርነት",
+		"western": "ዌስተርን",
+		"kids": "የልጆች",
+		"reality": "የእውነታ",
+		"soap": "ሶፕ ኦፔራ",
+		"talk": "የውይይት",
+		"politics": "ፖለቲካ"
 	},
 	"misc": {
-		"settings": "",
-		"prev-page": "",
-		"next-page": "",
-		"delete": "",
-		"cancel": "",
-		"more": "",
-		"expand": "",
-		"collapse": "",
-		"edit": "",
-		"or": "",
-		"loading": ""
+		"settings": "ሴቲንግ",
+		"prev-page": "ያለፈው ገጽ",
+		"next-page": "ቀጣይ ገጽ",
+		"delete": "ይሰርዙ",
+		"cancel": "ይቅር",
+		"more": "ተጨማሪ",
+		"expand": "አስፋ",
+		"collapse": "ይሰብስቡ",
+		"edit": "ያስተካክሉ",
+		"or": "ወይም",
+		"loading": "በመጫን ላይ...",
+		"delete-name": "{{name}}ን ይሰርዙ"
 	},
 	"navbar": {
-		"home": "",
-		"browse": "",
-		"download": "",
-		"search": "",
-		"login": "",
-		"admin": ""
+		"home": "መነሻ ገጽ",
+		"browse": "አስስ",
+		"download": "ያውርዱ",
+		"search": "ይፈልጉ",
+		"login": "ይግቡ",
+		"admin": "አስተዳዳሪ",
+		"profile": "ፕሮፋይል"
 	},
 	"settings": {
 		"general": {
-			"label": "",
+			"label": "አጠቃላይ",
 			"theme": {
-				"label": "",
-				"description": "",
-				"auto": "",
-				"light": "",
-				"dark": ""
+				"label": "ገጽታ",
+				"description": "የመተግበሪያዎን ገጽታ ይምረጡ",
+				"auto": "ሲስተም",
+				"light": "ብሩህ",
+				"dark": "ጨለማ"
 			},
 			"language": {
-				"label": "",
-				"description": ""
+				"label": "ቋንቋ",
+				"description": "የመተግበሪያዎን ቋንቋ ይምረጡ"
 			}
 		},
 		"playback": {
-			"label": "",
+			"label": "አጫዉት",
 			"playmode": {
-				"label": "",
-				"description": ""
+				"label": "ነባሪ የማጫወቻ ሁኔታ",
+				"description": "በጥቅም ላይ የሚውለው ነባሪ የማጫወቻ ሁኔታ ነዉ። Pristine ለሰርቨር ቀለል ቢልም፣ ጥራቱን በራሱ መቀየር አይችልም።"
 			},
 			"audioLanguage": {
-				"label": "",
-				"description": ""
+				"label": "የድምፅ ቋንቋ",
+				"description": "ብዙ ድምፅ ያላቸዉ ቪዲዮዎችን በሚያጫውቱበት ጊዜ ጥቅም ላይ የሚውለው ነባሪዉ ቋንቋ ነዉ።",
+				"original": "ኦሪጅናል"
 			},
 			"subtitleLanguage": {
-				"label": "",
-				"description": "",
-				"none": ""
+				"label": "የትርጉም ጽሑፍ ቋንቋ",
+				"description": "ጥቅም ላይ የሚውለው ነባሪዉ የትርጉም ጽሑፍ ቋንቋ ነዉ።",
+				"none": "ምንም"
+			},
+			"player": {
+				"label": "የቪዲዮ ማጫወቻ",
+				"vlc": "VLC"
+			},
+			"chapterSkip": {
+				"label": "ምዕራፎችን ዝለል"
 			}
 		},
 		"account": {
@@ -278,6 +308,29 @@
 			"label": "",
 			"scan": "",
 			"empty": ""
+		}
+	},
+	"videos-map": {
+		"none": "ምንም",
+		"add": "ሌላ ቪዲዮ ይጨምሩ",
+		"delete": "ቪዲዮውን ከተከታታይ ድራማው ያስወግዱ",
+		"validate": "ግምቱን ያረጋግጡ እና ቪዲዮውን ወደ ተከታታይ ድራማው ይጨምሩ",
+		"no-guess": "ይህ ቪዲዮ የዚህ ተከታታይ ድራማ አካል እንደሆነ ተገምቷል፣ ነገር ግን የትኛው ክፍል እንደሆነ አይታወቅም",
+		"related": "ከ {{title}} ርዕስ ጋር የተያያዙ ቪዲዮዎች ላይ ተጨምረዋል",
+		"sort-entry": "የክፍሎች ቅደም ተከተል",
+		"no-video": "ከዚህ ተከታታይ ድራማ ጋር የተያያዘ ምንም የቪዲዮ ፋይል የለም።",
+		"sort-path": "መንገድ"
+	},
+	"profile": {
+		"history": "ታሪክ",
+		"watchlist": "የእይታ ዝርዝር",
+		"statuses": {
+			"all": "ሁሉም",
+			"completed": "የተጠናቀቀ",
+			"watching": "በመመልከት ላይ",
+			"rewatching": "እንደገና በመመልከት ላይ",
+			"dropped": "የተተወ",
+			"planned": "የታቀደ"
 		}
 	}
 }
