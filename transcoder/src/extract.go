@@ -119,12 +119,27 @@ func (s *MetadataService) extractSubs(ctx context.Context, info *MediaInfo) (err
 	// Dump the attachments and subtitles
 	cmd := exec.Command(
 		"ffmpeg",
-		"-dump_attachment:t", "",
 		// override old attachments
 		"-y",
-		"-i", info.Path,
 	)
-	cmd.Dir = attDir
+	// ffmpeg dumps an attachment under the filename stored in the file if that name match [A-Za-z0-9._-].
+	// Attachment names (such as fonts) often have spaces in them.
+	// As a workaround we pass the destination path to ffmpeg ourselves, after checking
+	// the name stored in the file is a plain file name (prevent path traversal).
+	for i, link := range info.Fonts {
+		_, name, ok := strings.Cut(link, "/attachment/")
+		if !ok || name == "." || name == ".." || name != filepath.Base(name) {
+			slog.WarnContext(ctx, "skipping attachment with an unsafe name",
+				"path", info.Path, "link", link)
+			continue
+		}
+		cmd.Args = append(
+			cmd.Args,
+			fmt.Sprintf("-dump_attachment:t:%d", i),
+			filepath.Join(attDir, name),
+		)
+	}
+	cmd.Args = append(cmd.Args, "-i", info.Path)
 
 	for _, sub := range info.Subtitles {
 		if ext := sub.Extension; ext != nil {
