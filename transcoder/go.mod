@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	github.com/MicahParks/keyfunc/v3 v3.8.2
-	github.com/asticode/go-astisub v0.44.0
+	github.com/asticode/go-astisub v0.45.0
 	github.com/aws/aws-sdk-go-v2 v1.47.1
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.113.4
 	github.com/exaring/otelpgx v0.11.1
