@@ -92,6 +92,14 @@ func (s *MetadataService) setupDb() (*pgxpool.Pool, error) {
 	if _, ok := config.ConnConfig.RuntimeParams["application_name"]; !ok {
 		config.ConnConfig.RuntimeParams["application_name"] = "gocoder"
 	}
+	// pgxpool.ParseConfig does not read PGOPTIONS, merge it manually for
+	// libpq parity (e.g. PGOPTIONS="-c search_path=gocoder"). An explicit
+	// options parameter in POSTGRES_URL takes precedence, like in libpq.
+	if _, ok := config.ConnConfig.RuntimeParams["options"]; !ok {
+		if opts, ok := os.LookupEnv("PGOPTIONS"); ok && opts != "" {
+			config.ConnConfig.RuntimeParams["options"] = opts
+		}
+	}
 
 	config.ConnConfig.Tracer = otelpgx.NewTracer(
 		otelpgx.WithDisableQuerySpanNamePrefix(),
