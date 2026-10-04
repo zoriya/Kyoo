@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from contextlib import asynccontextmanager
 from logging import getLogger
 from typing import Any, cast
@@ -11,6 +12,22 @@ logger = getLogger(__name__)
 tracer = trace.get_tracer("kyoo.scanner")
 
 pool: Pool
+
+# asyncpg does not read PGOPTIONS, parse it manually for libpq parity.
+# Only -c name=value pairs are honored (e.g. "-c search_path=scanner").
+_PGOPTIONS_RE = re.compile(
+	r"-c\s+(?P<key>[A-Za-z_][\w.]*)\s*=\s*(?P<val>'(?:[^'\\]|\\.)*'|\"(?:[^\"\\]|\\.)*\"|\S+)"
+)
+
+
+def pgoptions_server_settings() -> dict[str, str]:
+	settings: dict[str, str] = {}
+	for match in _PGOPTIONS_RE.finditer(os.environ.get("PGOPTIONS", "")):
+		value = match.group("val")
+		if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
+			value = value[1:-1]
+		settings[match.group("key")] = value
+	return settings
 
 
 @asynccontextmanager
@@ -25,6 +42,9 @@ async def init_pool():
 		if url is None
 		else {"dns": url}
 	)
+	server_settings = pgoptions_server_settings()
+	if server_settings:
+		connection["server_settings"] = server_settings
 	async with await create_pool(**connection) as p:
 		global pool
 		pool = p
