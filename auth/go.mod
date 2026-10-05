@@ -9,7 +9,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/labstack/echo-jwt/v5 v5.0.2
-	github.com/labstack/echo-opentelemetry v0.0.3
+	github.com/labstack/echo-opentelemetry v0.0.4
 	github.com/labstack/echo/v5 v5.3.1
 	github.com/lestrrat-go/jwx/v3 v3.3.0
 	github.com/mileusna/useragent v1.3.5
