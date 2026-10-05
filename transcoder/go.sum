@@ -180,8 +180,8 @@ github.com/swaggo/swag/v2 v2.0.0-rc5 h1:fK7d6ET9rrEsdB8IyuwXREWMcyQN3N7gawGFbbrj
 github.com/swaggo/swag/v2 v2.0.0-rc5/go.mod h1:kCL8Fu4Zl8d5tB2Bgj96b8wRowwrwk175bZHXfuGVFI=
 github.com/zoriya/go-astisub v0.42.1-0.20260810114112-a5151634cd4e h1:nlZ82WW9dGqfFtV+hmETkASo86dm0u0gaqSYpVJgafQ=
 github.com/zoriya/go-astisub v0.42.1-0.20260810114112-a5151634cd4e/go.mod h1:WTkuSzFB+Bp7wezuSf2Oxulj5A8zu2zLRVFf6bIFQK8=
-gitlab.com/opennota/screengen v1.0.3-0.20260325071014-3d76485eda08 h1:Lma+gm+LQb4PMJL05fQqTl6O5CJpWmCzJvQoINF5PIw=
-gitlab.com/opennota/screengen v1.0.3-0.20260325071014-3d76485eda08/go.mod h1:4kED4yriw2zslwYmXFCa5qCvEKwleBA7l5OE+d94NTU=
+gitlab.com/opennota/screengen v1.0.5 h1:9eQnWpvKUiWBFS5JRLz8TZHzEh9O3Zj+SAio77P15rg=
+gitlab.com/opennota/screengen v1.0.5/go.mod h1:Bq9PX3eDP5hZd83Eujo1SJnW5AAi/i4/LSk4EhDtaPw=
 go.opentelemetry.io/auto/sdk v1.2.1 h1:jXsnJ4Lmnqd11kwkBV2LgLoFMZKizbCi5fNZ/ipaZ64=
 go.opentelemetry.io/auto/sdk v1.2.1/go.mod h1:KRTj+aOaElaLi+wW1kO/DZRXwkF4C5xPbEe3ZiIhN7Y=
 go.opentelemetry.io/contrib/bridges/otelslog v0.19.0 h1:5RgvxieNq9tS3ewrV1vnODvbHPfKUIJcYtF9Cvz+6aQ=

@@ -14,7 +14,7 @@ require (
 	github.com/labstack/echo/v5 v5.3.1
 	github.com/swaggo/echo-swagger/v2 v2.0.1
 	github.com/swaggo/swag v1.16.6
-	gitlab.com/opennota/screengen v1.0.3-0.20260325071014-3d76485eda08
+	gitlab.com/opennota/screengen v1.0.5
 	go.opentelemetry.io/contrib/bridges/otelslog v0.19.0
 	go.opentelemetry.io/otel v1.44.0
 	go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc v0.20.0
