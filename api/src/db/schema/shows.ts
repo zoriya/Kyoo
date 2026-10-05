@@ -126,7 +126,7 @@ export const showTranslations = schema.table(
 	},
 	(t) => [
 		primaryKey({ columns: [t.pk, t.language] }),
-		index("name_trgm").using("gin", sql`${t.name} gin_trgm_ops`),
+		index("name_trgm").using("gin", sql`${t.name} kyoo.gin_trgm_ops`),
 		index("tags").on(t.tags),
 	],
 );

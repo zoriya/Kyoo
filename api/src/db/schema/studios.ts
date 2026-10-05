@@ -37,7 +37,7 @@ export const studioTranslations = schema.table(
 	},
 	(t) => [
 		primaryKey({ columns: [t.pk, t.language] }),
-		index("studio_name_trgm").using("gin", sql`${t.name} gin_trgm_ops`),
+		index("studio_name_trgm").using("gin", sql`${t.name} kyoo.gin_trgm_ops`),
 	],
 );
 
