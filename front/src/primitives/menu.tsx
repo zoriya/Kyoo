@@ -1,5 +1,4 @@
 import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
-import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
 import { useRouter } from "expo-router";
 import {
 	type ComponentType,
@@ -17,7 +16,7 @@ import type { SvgProps } from "react-native-svg";
 import { Portal } from "react-native-teleport";
 import { cn } from "~/utils";
 import { FocusTrap } from "./focus";
-import { Icon, IconButton } from "./icons";
+import { Icon } from "./icons";
 import { PressableFeedback } from "./links";
 import { P } from "./text";
 

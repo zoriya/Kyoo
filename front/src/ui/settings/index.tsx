@@ -1,5 +1,5 @@
-import { Platform, ScrollView, useWindowDimensions } from "react-native";
-import { FocusGroup, rem } from "~/primitives";
+import { ScrollView } from "react-native";
+import { FocusGroup } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { AccountSettings } from "./account";
 import { About, GeneralSettings } from "./general";

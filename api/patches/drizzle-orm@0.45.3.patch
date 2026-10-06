@@ -1,8 +1,8 @@
 diff --git a/pg-core/dialect.cjs b/pg-core/dialect.cjs
-index d776a1fb503f35b5e53c6d3c1c086efa8230ea94..86541bf408e4955029c65be59d7b8ec98bb6e914 100644
+index b2c2a77086503f751985bc6928d398c62cf79762..45adac1a94a0019767111a7dd1b69d476f22a326 100644
 --- a/pg-core/dialect.cjs
 +++ b/pg-core/dialect.cjs
-@@ -347,7 +347,14 @@ class PgDialect {
+@@ -358,7 +358,14 @@ class PgDialect {
    buildInsertQuery({ table, values: valuesOrSelect, onConflict, returning, withList, select, overridingSystemValue_ }) {
      const valuesSqlList = [];
      const columns = table[import_table2.Table.Symbol.Columns];
@@ -19,10 +19,10 @@ index d776a1fb503f35b5e53c6d3c1c086efa8230ea94..86541bf408e4955029c65be59d7b8ec9
        ([, column]) => import_sql2.sql.identifier(this.casing.getColumnCasing(column))
      );
 diff --git a/pg-core/dialect.js b/pg-core/dialect.js
-index 74a16c9e86fe3a89ced32af44af0a72f1cf43cf6..08f820d46a040c315fed40b8b36d94d094174425 100644
+index 31a019cc0a6bc67303a745fdf9ad613e8fbdcb5f..430cd0a0e82ec5d3938c97c17cc5d2924935c9e9 100644
 --- a/pg-core/dialect.js
 +++ b/pg-core/dialect.js
-@@ -345,7 +345,14 @@ class PgDialect {
+@@ -356,7 +356,14 @@ class PgDialect {
    buildInsertQuery({ table, values: valuesOrSelect, onConflict, returning, withList, select, overridingSystemValue_ }) {
      const valuesSqlList = [];
      const columns = table[Table.Symbol.Columns];
@@ -39,7 +39,7 @@ index 74a16c9e86fe3a89ced32af44af0a72f1cf43cf6..08f820d46a040c315fed40b8b36d94d0
        ([, column]) => sql.identifier(this.casing.getColumnCasing(column))
      );
 diff --git a/pg-core/query-builders/insert.cjs b/pg-core/query-builders/insert.cjs
-index 22e0a4b4ad7ac64b065fc540416c6ed15ff4336b..fd590a6a3feb48c9f1894a0619b09ca6a5d22a5c 100644
+index 22e0a4b4ad7ac64b065fc540416c6ed15ff4336b..7562b76a0d8f0406385bddabd7cbaa4af03c219f 100644
 --- a/pg-core/query-builders/insert.cjs
 +++ b/pg-core/query-builders/insert.cjs
 @@ -76,11 +76,6 @@ class PgInsertBuilder {
@@ -55,7 +55,7 @@ index 22e0a4b4ad7ac64b065fc540416c6ed15ff4336b..fd590a6a3feb48c9f1894a0619b09ca6
    }
  }
 diff --git a/pg-core/query-builders/insert.js b/pg-core/query-builders/insert.js
-index 60a8bb0d1c22b890bd8fbf4c85d5df41ca42444c..8754d0f2923f905816016c42f339c3e9097b4128 100644
+index 60a8bb0d1c22b890bd8fbf4c85d5df41ca42444c..638091e488275172c8513cb4e4f94aacc6ac5978 100644
 --- a/pg-core/query-builders/insert.js
 +++ b/pg-core/query-builders/insert.js
 @@ -52,11 +52,6 @@ class PgInsertBuilder {

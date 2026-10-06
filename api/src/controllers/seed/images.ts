@@ -7,7 +7,7 @@ import { and, desc, eq, is, lt, ne, type SQL, sql } from "drizzle-orm";
 import { PgColumn, type PgTable } from "drizzle-orm/pg-core";
 import { version } from "package.json";
 import type { PoolClient } from "pg";
-import sharp from "sharp";
+import sharp, { type Sharp } from "sharp";
 import { db, type Transaction } from "~/db";
 import { images } from "~/db/schema";
 import { unnestValues } from "~/db/utils";
@@ -262,7 +262,7 @@ async function downloadImage(id: string, url: string): Promise<string> {
 	return await getBlurhash(image);
 }
 
-async function getBlurhash(image: sharp.Sharp): Promise<string> {
+async function getBlurhash(image: Sharp): Promise<string> {
 	const { data, info } = await image
 		.resize(32, 32, { fit: "inside" })
 		.ensureAlpha()

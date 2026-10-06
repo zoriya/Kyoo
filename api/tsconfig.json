@@ -2,17 +2,17 @@
 	"compilerOptions": {
 		"target": "esnext",
 		"module": "esnext",
-		"moduleResolution": "node",
+		"moduleResolution": "bundler",
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"strict": true,
 		"skipLibCheck": true,
 		"noErrorTruncation": true,
 		"resolveJsonModule": true,
-		"baseUrl": ".",
 		"paths": {
 			"~/*": ["./src/*"],
-			"package.json": ["package.json"]
+			"tests/*": ["./tests/*"],
+			"package.json": ["./package.json"]
 		}
 	}
 }

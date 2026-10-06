@@ -50,10 +50,10 @@ index f23dc00566374b6f42b4b92a41a4f5acbf36450c..1bcbbe2377835698b6a71968b7a6c7ea
      )
  })
 diff --git a/src/core/native/store.ts b/src/core/native/store.ts
-index e2c676aa3caeacc0bfcc778249f21ce8aa7ffb74..a112f95d3f7886fd0247778ed1abb81582598987 100644
+index afb5f4a73eef4e6fac7fb005d68ec0fb0f90ae26..d48afa59d65711fc5530b54b73e89ecdd81add8b 100644
 --- a/src/core/native/store.ts
 +++ b/src/core/native/store.ts
-@@ -108,6 +108,9 @@ class UniwindStoreBuilder {
+@@ -123,6 +123,9 @@ class UniwindStoreBuilder {
          let dependencySum = 0
          const bestBreakpoints = new Map<string, Style>()
          const isScopedTheme = uniwindContext.scopedTheme !== null
@@ -63,7 +63,7 @@ index e2c676aa3caeacc0bfcc778249f21ce8aa7ffb74..a112f95d3f7886fd0247778ed1abb815
          const classNameTokens = classNames.includes('\n')
              ? classNames.split(/\s+/).filter(Boolean)
              : classNames.split(' ')
-@@ -142,7 +145,8 @@ class UniwindStoreBuilder {
+@@ -157,7 +160,8 @@ class UniwindStoreBuilder {
                      || (style.active !== null && state?.isPressed !== style.active)
                      || (style.focus !== null && state?.isFocused !== style.focus)
                      || (style.disabled !== null && state?.isDisabled !== style.disabled)

@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import type { Prettify } from "elysia/dist/types";
+import type { Prettify } from "elysia/types";
 import { bubbleImages, duneCollection, registerExamples } from "./examples";
 import {
 	DbMetadata,
