@@ -110,6 +110,18 @@ describe("Serie seeding", () => {
 		const [resp, body] = await createSerie({
 			...madeInAbyss,
 			slug: "quote-test",
+			studios: [
+				{
+					...madeInAbyss.studios[0],
+					slug: "quote-studio",
+					translations: {
+						en: {
+							...madeInAbyss.studios[0].translations.en,
+							name: `Studio"d'Abyss`,
+						},
+					},
+				},
+			],
 			seasons: [
 				{
 					...madeInAbyss.seasons[0],
@@ -144,6 +156,7 @@ describe("Serie seeding", () => {
 					orderBy: seasons.seasonNumber,
 					with: { translations: true },
 				},
+				studios: { with: { studio: { with: { translations: true } } } },
 				entries: {
 					with: {
 						translations: true,
@@ -157,6 +170,8 @@ describe("Serie seeding", () => {
 		expect(ret!.seasons).toBeArrayOfSize(2);
 		expect(ret!.seasons[0].translations[0].name).toBe("Season'1");
 		expect(ret!.seasons[1].translations[0].name).toBe('Season"2');
+		expect(ret!.studios).toBeArrayOfSize(1);
+		expect(ret!.studios[0].studio.translations[0].name).toBe(`Studio"d'Abyss`);
 		expect(ret!.entries).toBeArrayOfSize(
 			madeInAbyss.entries.length + madeInAbyss.extras.length,
 		);
