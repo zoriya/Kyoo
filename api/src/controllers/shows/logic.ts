@@ -355,7 +355,7 @@ export async function getShows({
 			.select({
 				pk: showTranslations.pk,
 				similarity:
-					sql<number>`max(kyoo.word_similarity(${query ?? ""}::text, ${showTranslations.name}))`.as(
+					sql<number>`max(word_similarity(${query ?? ""}::text, ${showTranslations.name}))`.as(
 						"__similarity",
 					),
 			})
@@ -363,12 +363,12 @@ export async function getShows({
 			.where(
 				query
 					? or(
-							sql`${showTranslations.name} OPERATOR(kyoo.%) ${query}::text`,
+							sql`${showTranslations.name} %> ${query}::text`,
 							exists(
 								db
 									.select()
 									.from(sql`unnest(${showTranslations.tags}) as tag`)
-									.where(sql`tag OPERATOR(kyoo.%) ${query}::text`),
+									.where(sql`tag %> ${query}::text`),
 							),
 						)
 					: sql`false`,

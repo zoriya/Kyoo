@@ -29,12 +29,6 @@ global:
       passwordKey: postgres_password
       existingSecret: bigsecret
     # shared postgres settings
-    # NOTE for externally managed databases (e.g. CNPG instead of the postgres
-    # subchart): the app schema of each database must be resolvable without
-    # relying on the subchart's initdb scripts (which set a per-database
-    # search_path and revoke PUBLIC). Either set an equivalent role-level
-    # search_path on the database, or pass PGOPTIONS (supported by all
-    # workloads, e.g. via .Values.global.extraEnv) accordingly.
     shared:
       # base setting for specifying host for all kyoo workloads
       # defaults to <release-name>-postgres
@@ -520,26 +514,28 @@ postgres:
       kyoo_api.sql: |
         CREATE DATABASE {{ .Values.global.postgres.kyoo_api.database }} WITH OWNER {{ .Values.global.postgres.infra.user }};
         \connect {{ .Values.global.postgres.kyoo_api.database }};
-        REVOKE ALL ON SCHEMA public FROM PUBLIC;
+        REVOKE CREATE ON SCHEMA public FROM PUBLIC;
         CREATE SCHEMA IF NOT EXISTS kyoo AUTHORIZATION {{ .Values.global.postgres.infra.user }};
 
-        CREATE EXTENSION IF NOT EXISTS pg_trgm SCHEMA kyoo;
+        -- installed into public (not the app schema) so unqualified references
+        -- resolve via the default search_path without any role setting.
+        CREATE EXTENSION IF NOT EXISTS pg_trgm SCHEMA public;
         SET pg_trgm.word_similarity_threshold = 0.4;
         ALTER DATABASE {{ .Values.global.postgres.kyoo_api.database }} SET pg_trgm.word_similarity_threshold = 0.4;
       kyoo_auth.sql: |
         CREATE DATABASE {{ .Values.global.postgres.kyoo_auth.database }} WITH OWNER {{ .Values.global.postgres.infra.user }};
         \connect {{ .Values.global.postgres.kyoo_auth.database }};
-        REVOKE ALL ON SCHEMA public FROM PUBLIC;
+        REVOKE CREATE ON SCHEMA public FROM PUBLIC;
         CREATE SCHEMA IF NOT EXISTS keibi AUTHORIZATION {{ .Values.global.postgres.infra.user }};
       kyoo_scanner.sql: |
         CREATE DATABASE {{ .Values.global.postgres.kyoo_scanner.database }} WITH OWNER {{ .Values.global.postgres.infra.user }};
         \connect {{ .Values.global.postgres.kyoo_scanner.database }};
-        REVOKE ALL ON SCHEMA public FROM PUBLIC;
+        REVOKE CREATE ON SCHEMA public FROM PUBLIC;
         CREATE SCHEMA IF NOT EXISTS scanner AUTHORIZATION {{ .Values.global.postgres.infra.user }};
       kyoo_transcoder.sql: |
         CREATE DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} WITH OWNER {{ .Values.global.postgres.infra.user }};
         \connect {{ .Values.global.postgres.kyoo_transcoder.database }};
-        REVOKE ALL ON SCHEMA public FROM PUBLIC;
+        REVOKE CREATE ON SCHEMA public FROM PUBLIC;
         CREATE SCHEMA IF NOT EXISTS gocoder AUTHORIZATION {{ .Values.global.postgres.infra.user }};
       user.sql: |
         ALTER ROLE {{ .Values.global.postgres.infra.user }}
