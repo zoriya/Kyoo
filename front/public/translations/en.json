@@ -242,7 +242,15 @@
 			"label": "Sessions",
 			"description": "Created {{createdDate}} - Last used {{lastUsed}}",
 			"current": "Current session",
-			"revoke": "Revoke"
+			"revoke": "Revoke",
+			"device": {
+				"label": "Login a TV",
+				"description": "Enter the code displayed on your TV to log it into your account.",
+				"login": "Login",
+				"success": "{{device}} is now logged in.",
+				"unknown": "Your TV",
+				"invalid": "Invalid or expired code."
+			}
 		},
 		"oidc": {
 			"label": "Linked accounts",
@@ -331,7 +339,11 @@
 		"delete": "Delete your account",
 		"delete-confirmation": "This action can't be reverted. Are you sure?",
 		"register-disabled": "Registrations are disabled.",
-		"register-disabled-oidc": "Password registration is disabled. Use OIDC."
+		"register-disabled-oidc": "Password registration is disabled. Use OIDC.",
+		"device": {
+			"instructions": "On your phone or computer, go to {{url}} (Settings > Sessions > Login a TV) and enter this code:",
+			"or-login": "Or login/register"
+		}
 	},
 	"downloads": {
 		"empty": "Nothing downloaded yet, start browsing for something you like",
