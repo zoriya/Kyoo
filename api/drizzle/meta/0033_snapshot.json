@@ -244,7 +244,7 @@
 					"name": "entry_name_trgm",
 					"columns": [
 						{
-							"expression": "\"name\" kyoo.gin_trgm_ops",
+							"expression": "\"name\" gin_trgm_ops",
 							"asc": true,
 							"isExpression": true,
 							"nulls": "last"
@@ -740,7 +740,7 @@
 					"name": "season_name_trgm",
 					"columns": [
 						{
-							"expression": "\"name\" kyoo.gin_trgm_ops",
+							"expression": "\"name\" gin_trgm_ops",
 							"asc": true,
 							"isExpression": true,
 							"nulls": "last"
@@ -1016,7 +1016,7 @@
 					"name": "name_trgm",
 					"columns": [
 						{
-							"expression": "\"name\" kyoo.gin_trgm_ops",
+							"expression": "\"name\" gin_trgm_ops",
 							"asc": true,
 							"isExpression": true,
 							"nulls": "last"
@@ -1569,7 +1569,7 @@
 					"name": "studio_name_trgm",
 					"columns": [
 						{
-							"expression": "\"name\" kyoo.gin_trgm_ops",
+							"expression": "\"name\" gin_trgm_ops",
 							"asc": true,
 							"isExpression": true,
 							"nulls": "last"

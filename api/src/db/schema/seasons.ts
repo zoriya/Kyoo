@@ -74,7 +74,7 @@ export const seasonTranslations = schema.table(
 	},
 	(t) => [
 		primaryKey({ columns: [t.pk, t.language] }),
-		index("season_name_trgm").using("gin", sql`${t.name} kyoo.gin_trgm_ops`),
+		index("season_name_trgm").using("gin", sql`${t.name} gin_trgm_ops`),
 	],
 );
 

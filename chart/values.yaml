@@ -29,6 +29,12 @@ global:
       passwordKey: postgres_password
       existingSecret: bigsecret
     # shared postgres settings
+    # NOTE for externally managed databases (e.g. CNPG instead of the postgres
+    # subchart): the app schema of each database must be resolvable without
+    # relying on the subchart's initdb scripts (which set a per-database
+    # search_path and revoke PUBLIC). Either set an equivalent role-level
+    # search_path on the database, or pass PGOPTIONS (supported by all
+    # workloads, e.g. via .Values.global.extraEnv) accordingly.
     shared:
       # base setting for specifying host for all kyoo workloads
       # defaults to <release-name>-postgres
