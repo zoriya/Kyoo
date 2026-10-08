@@ -19,6 +19,9 @@ export const useWebsockets = ({
 		filter: (msg) => filterActions.includes(msg.data.action),
 		share: true,
 		retryOnError: true,
+		shouldReconnect: () => true,
+		reconnectAttempts: Number.POSITIVE_INFINITY,
+		reconnectInterval: (attempt) => Math.min(1000 * 2 ** attempt, 30_000),
 		heartbeat: {
 			message: `{"action": "ping"}`,
 			returnMessage: `{"action":"ping","response":"pong"}`,

@@ -1,8 +1,8 @@
 diff --git a/react-native.js b/react-native.js
-index 229f09a8230ab24079d471f65d28d36908f0f2ea..24a089985c58132c580851921ee33d9b72fcd46e 100644
+index 0b730ecae1086eae294f5fad7938502557f9569e..442ce5dfb9108c10a489fd4ce9e66f684f2dd6e4 100644
 --- a/react-native.js
 +++ b/react-native.js
-@@ -3958,10 +3958,13 @@ function scheduleRenderRangeProjectionSettle(ctx) {
+@@ -4265,10 +4265,13 @@ function scheduleRenderRangeProjectionSettle(ctx) {
  }
  function findCurrentStickyIndex(stickyArray, scroll, state) {
    const positions = state.positions;
@@ -17,7 +17,7 @@ index 229f09a8230ab24079d471f65d28d36908f0f2ea..24a089985c58132c580851921ee33d9b
        return i;
      }
    }
-@@ -5096,7 +5099,7 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
+@@ -5487,7 +5490,7 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
      () => getStickyPushLimit(ctx.state, itemIndex, itemKey),
      [ctx.state, itemIndex, itemKey, _totalSize]
    );
@@ -26,7 +26,7 @@ index 229f09a8230ab24079d471f65d28d36908f0f2ea..24a089985c58132c580851921ee33d9b
      var _a3;
      if (animatedScrollY) {
        const stickyConfigOffset = (_a3 = stickyHeaderConfig == null ? void 0 : stickyHeaderConfig.offset) != null ? _a3 : 0;
-@@ -5104,13 +5107,13 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
+@@ -5495,13 +5498,13 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
        let nextStickyPosition;
        if (pushLimit !== void 0) {
          if (pushLimit <= position) {
@@ -42,7 +42,7 @@ index 229f09a8230ab24079d471f65d28d36908f0f2ea..24a089985c58132c580851921ee33d9b
            });
          }
        } else {
-@@ -5118,7 +5121,7 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
+@@ -5509,7 +5512,7 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
            extrapolateLeft: "clamp",
            extrapolateRight: "extend",
            inputRange: [stickyStart, stickyStart + 5e3],
@@ -51,7 +51,7 @@ index 229f09a8230ab24079d471f65d28d36908f0f2ea..24a089985c58132c580851921ee33d9b
          });
        }
        return horizontal ? [{ translateX: nextStickyPosition }] : [{ translateY: nextStickyPosition }];
-@@ -5133,8 +5136,13 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
+@@ -5524,8 +5527,13 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
      stickyHeaderConfig == null ? void 0 : stickyHeaderConfig.offset
    ]);
    const viewStyle = React2__namespace.useMemo(
@@ -68,10 +68,10 @@ index 229f09a8230ab24079d471f65d28d36908f0f2ea..24a089985c58132c580851921ee33d9b
    const renderStickyHeaderBackdrop = React2__namespace.useMemo(() => {
      if (!(stickyHeaderConfig == null ? void 0 : stickyHeaderConfig.backdropComponent)) {
 diff --git a/react-native.mjs b/react-native.mjs
-index c2e0f3823f524e31e2105a5fbda76be78c926226..3a475daf7212054a947f76add8b8fe3e8a51020a 100644
+index a3d8d9a3939b11d410dbc04d5bc54df820a90534..b34b71e18d46e2b098ae9c731b47bcddf8e64122 100644
 --- a/react-native.mjs
 +++ b/react-native.mjs
-@@ -3937,10 +3937,13 @@ function scheduleRenderRangeProjectionSettle(ctx) {
+@@ -4244,10 +4244,13 @@ function scheduleRenderRangeProjectionSettle(ctx) {
  }
  function findCurrentStickyIndex(stickyArray, scroll, state) {
    const positions = state.positions;
@@ -86,7 +86,7 @@ index c2e0f3823f524e31e2105a5fbda76be78c926226..3a475daf7212054a947f76add8b8fe3e
        return i;
      }
    }
-@@ -5075,7 +5078,7 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
+@@ -5466,7 +5469,7 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
      () => getStickyPushLimit(ctx.state, itemIndex, itemKey),
      [ctx.state, itemIndex, itemKey, _totalSize]
    );
@@ -95,7 +95,7 @@ index c2e0f3823f524e31e2105a5fbda76be78c926226..3a475daf7212054a947f76add8b8fe3e
      var _a3;
      if (animatedScrollY) {
        const stickyConfigOffset = (_a3 = stickyHeaderConfig == null ? void 0 : stickyHeaderConfig.offset) != null ? _a3 : 0;
-@@ -5083,13 +5086,13 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
+@@ -5474,13 +5477,13 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
        let nextStickyPosition;
        if (pushLimit !== void 0) {
          if (pushLimit <= position) {
@@ -111,7 +111,7 @@ index c2e0f3823f524e31e2105a5fbda76be78c926226..3a475daf7212054a947f76add8b8fe3e
            });
          }
        } else {
-@@ -5097,7 +5100,7 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
+@@ -5488,7 +5491,7 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
            extrapolateLeft: "clamp",
            extrapolateRight: "extend",
            inputRange: [stickyStart, stickyStart + 5e3],
@@ -120,7 +120,7 @@ index c2e0f3823f524e31e2105a5fbda76be78c926226..3a475daf7212054a947f76add8b8fe3e
          });
        }
        return horizontal ? [{ translateX: nextStickyPosition }] : [{ translateY: nextStickyPosition }];
-@@ -5112,8 +5115,13 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
+@@ -5503,8 +5506,13 @@ var PositionViewSticky = typedMemo(function PositionViewSticky2({
      stickyHeaderConfig == null ? void 0 : stickyHeaderConfig.offset
    ]);
    const viewStyle = React2.useMemo(
@@ -137,10 +137,10 @@ index c2e0f3823f524e31e2105a5fbda76be78c926226..3a475daf7212054a947f76add8b8fe3e
    const renderStickyHeaderBackdrop = React2.useMemo(() => {
      if (!(stickyHeaderConfig == null ? void 0 : stickyHeaderConfig.backdropComponent)) {
 diff --git a/react-native.web.js b/react-native.web.js
-index 544cca82136ab14cbeec0a01499f554bd4eca75f..4987da52de388646bb66dadd4e3a73a9d10c9631 100644
+index a0f962c42b7b28a49e7480ed3e16056b9e154a4c..0982de6a437d4b457ac3cb65efd67f69d771bc49 100644
 --- a/react-native.web.js
 +++ b/react-native.web.js
-@@ -3980,10 +3980,13 @@ function scheduleRenderRangeProjectionSettle(ctx) {
+@@ -4302,10 +4302,13 @@ function scheduleRenderRangeProjectionSettle(ctx) {
  }
  function findCurrentStickyIndex(stickyArray, scroll, state) {
    const positions = state.positions;
@@ -156,10 +156,10 @@ index 544cca82136ab14cbeec0a01499f554bd4eca75f..4987da52de388646bb66dadd4e3a73a9
      }
    }
 diff --git a/react-native.web.mjs b/react-native.web.mjs
-index 6b2d9011f6c5e85664eca195de538617fe7d9dee..364a477d308a7c62c35a9fe6371d59bbb33a3ba0 100644
+index 9338287159778f842fa05b5a0467336bf5f50fe8..503d10644a0a07d6bbd8e8fe1b36abe5c0fe2c7e 100644
 --- a/react-native.web.mjs
 +++ b/react-native.web.mjs
-@@ -3959,10 +3959,13 @@ function scheduleRenderRangeProjectionSettle(ctx) {
+@@ -4281,10 +4281,13 @@ function scheduleRenderRangeProjectionSettle(ctx) {
  }
  function findCurrentStickyIndex(stickyArray, scroll, state) {
    const positions = state.positions;
@@ -175,10 +175,10 @@ index 6b2d9011f6c5e85664eca195de538617fe7d9dee..364a477d308a7c62c35a9fe6371d59bb
      }
    }
 diff --git a/react.js b/react.js
-index 544cca82136ab14cbeec0a01499f554bd4eca75f..4987da52de388646bb66dadd4e3a73a9d10c9631 100644
+index a0f962c42b7b28a49e7480ed3e16056b9e154a4c..0982de6a437d4b457ac3cb65efd67f69d771bc49 100644
 --- a/react.js
 +++ b/react.js
-@@ -3980,10 +3980,13 @@ function scheduleRenderRangeProjectionSettle(ctx) {
+@@ -4302,10 +4302,13 @@ function scheduleRenderRangeProjectionSettle(ctx) {
  }
  function findCurrentStickyIndex(stickyArray, scroll, state) {
    const positions = state.positions;
@@ -194,10 +194,10 @@ index 544cca82136ab14cbeec0a01499f554bd4eca75f..4987da52de388646bb66dadd4e3a73a9
      }
    }
 diff --git a/react.mjs b/react.mjs
-index 6b2d9011f6c5e85664eca195de538617fe7d9dee..364a477d308a7c62c35a9fe6371d59bbb33a3ba0 100644
+index 9338287159778f842fa05b5a0467336bf5f50fe8..503d10644a0a07d6bbd8e8fe1b36abe5c0fe2c7e 100644
 --- a/react.mjs
 +++ b/react.mjs
-@@ -3959,10 +3959,13 @@ function scheduleRenderRangeProjectionSettle(ctx) {
+@@ -4281,10 +4281,13 @@ function scheduleRenderRangeProjectionSettle(ctx) {
  }
  function findCurrentStickyIndex(stickyArray, scroll, state) {
    const positions = state.positions;

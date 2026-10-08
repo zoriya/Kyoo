@@ -1,6 +1,6 @@
 import { and, isNull, sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import type { NonEmptyArray } from "elysia/dist/type-system/types";
+import type { NonEmptyArray } from "elysia/type-system/types";
 import { auth } from "~/auth";
 import { prefix } from "~/base";
 import { db } from "~/db";

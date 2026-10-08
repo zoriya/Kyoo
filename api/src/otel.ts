@@ -151,7 +151,7 @@ export function setupOtel() {
 			resource,
 			processors: [
 				upperCaseSeverityTextProcessor(),
-				new BatchLogRecordProcessor(le),
+				new BatchLogRecordProcessor({ exporter: le }),
 			],
 		});
 	}
