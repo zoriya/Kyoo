@@ -57,6 +57,52 @@ definitions:
         example: myapp-lyHzTYm9yi+pkEv3m2tamAeeK7Dj7N3QRP7xv7dPU5q9MAe8tU4ySwYczE0RaMr4fijsA==
         type: string
     type: object
+  main.DeviceApproveDto:
+    properties:
+      code:
+        description: The user code displayed on the device.
+        example: BCDFGHJK
+        type: string
+    required:
+    - code
+    type: object
+  main.DeviceApproved:
+    properties:
+      device:
+        description: Device that is now logged in.
+        example: Android - Android TV
+        type: string
+    type: object
+  main.DeviceCodeDto:
+    properties:
+      deviceCode:
+        description: Secret code returned when the device login was created (POST
+          /device).
+        example: lyHzTYm9yi+pkEv3m2tamAeeK7Dj7N3QRP7xv7dPU5q9MAe8tU4ySwYczE0RaMr4fijsA
+        type: string
+    required:
+    - deviceCode
+    type: object
+  main.DeviceLogin:
+    properties:
+      deviceCode:
+        description: Secret code the device uses to poll for its session. Never show
+          it to the user.
+        example: lyHzTYm9yi+pkEv3m2tamAeeK7Dj7N3QRP7xv7dPU5q9MAe8tU4ySwYczE0RaMr4fijsA
+        type: string
+      expiresIn:
+        description: Number of seconds before the codes expire.
+        example: 600
+        type: integer
+      interval:
+        description: Minimum number of seconds to wait between two polls.
+        example: 5
+        type: integer
+      userCode:
+        description: Code the user needs to input on an already logged in device.
+        example: BCDFGHJK
+        type: string
+    type: object
   main.JwkSet:
     properties:
       keys:
@@ -150,6 +196,11 @@ definitions:
     type: object
   main.Presign:
     properties:
+      claims:
+        additionalProperties: {}
+        description: Extra claims to add to the signed jwt. Protected claims (`sub`,
+          `permissions`, ...) are rejected.
+        type: object
       duration:
         description: How long the signature stays valid (go duration, e.g. `24h`).
         example: 24h
@@ -175,6 +226,11 @@ definitions:
     type: object
   main.PresignRequest:
     properties:
+      claims:
+        additionalProperties: {}
+        description: Extra claims to add to the signed jwt. Protected claims (`sub`,
+          `permissions`, ...) are rejected.
+        type: object
       duration:
         description: How long the signature stays valid (go duration, e.g. `24h`).
         example: 24h
@@ -411,6 +467,92 @@ paths:
       summary: Jwks
       tags:
       - jwt
+  /device:
+    delete:
+      consumes:
+      - application/json
+      description: Poll a device login. Once approved, the login request is deleted
+        and a session is created and returned.
+      parameters:
+      - description: The device the created session will be used on
+        example: android tv
+        in: query
+        name: device
+        type: string
+      - description: Device code
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/main.DeviceCodeDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main.SessionWToken'
+        "410":
+          description: Device code expired or already used
+          schema:
+            $ref: '#/definitions/main.KError'
+        "428":
+          description: Login not yet approved by the user, retry later
+          schema:
+            $ref: '#/definitions/main.KError'
+      summary: Finish device login
+      tags:
+      - sessions
+    patch:
+      consumes:
+      - application/json
+      description: Login a device (like a TV) with the current account using the code
+        displayed on the device.
+      parameters:
+      - description: User code
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/main.DeviceApproveDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.DeviceApproved'
+        "401":
+          description: Missing jwt token
+          schema:
+            $ref: '#/definitions/main.KError'
+        "404":
+          description: Invalid or expired code
+          schema:
+            $ref: '#/definitions/main.KError'
+      security:
+      - Jwt: []
+      summary: Approve device login
+      tags:
+      - sessions
+    post:
+      description: |-
+        Start a login for a device with limited input (like a TV). Display the userCode to the user
+        and poll DELETE /device until a logged in user approves it via PATCH /device.
+      parameters:
+      - description: The device the created session will be used on
+        example: android tv
+        in: query
+        name: device
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main.DeviceLogin'
+      summary: Start device login
+      tags:
+      - sessions
   /info:
     get:
       description: List keibi's settings (oidc providers, public url...)

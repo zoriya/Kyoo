@@ -404,6 +404,10 @@ func main() {
 	r.GET("/users/:id/sessions", h.ListUserSessions)
 	r.GET("/users/me/sessions", h.ListMySessions)
 
+	g.POST("/device", h.StartDeviceLogin)
+	g.DELETE("/device", h.PollDeviceLogin)
+	r.PATCH("/device", h.ApproveDeviceLogin)
+
 	g.GET("/oidc/login/:provider", h.OidcLogin)
 	r.DELETE("/oidc/login/:provider", h.OidcUnlink)
 	g.GET("/oidc/logged/:provider", h.OidcLogged)

@@ -36,6 +36,133 @@
                 }
             }
         },
+        "/device": {
+            "post": {
+                "description": "Start a login for a device with limited input (like a TV). Display the userCode to the user\nand poll DELETE /device until a logged in user approves it via PATCH /device.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Start device login",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "android tv",
+                        "description": "The device the created session will be used on",
+                        "name": "device",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/main.DeviceLogin"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Poll a device login. Once approved, the login request is deleted and a session is created and returned.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Finish device login",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "android tv",
+                        "description": "The device the created session will be used on",
+                        "name": "device",
+                        "in": "query"
+                    },
+                    {
+                        "description": "Device code",
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/main.DeviceCodeDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/main.SessionWToken"
+                        }
+                    },
+                    "410": {
+                        "description": "Device code expired or already used",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    },
+                    "428": {
+                        "description": "Login not yet approved by the user, retry later",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "Jwt": []
+                    }
+                ],
+                "description": "Login a device (like a TV) with the current account using the code displayed on the device.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Approve device login",
+                "parameters": [
+                    {
+                        "description": "User code",
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/main.DeviceApproveDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.DeviceApproved"
+                        }
+                    },
+                    "401": {
+                        "description": "Missing jwt token",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    },
+                    "404": {
+                        "description": "Invalid or expired code",
+                        "schema": {
+                            "$ref": "#/definitions/main.KError"
+                        }
+                    }
+                }
+            }
+        },
         "/info": {
             "get": {
                 "description": "List keibi's settings (oidc providers, public url...)",
@@ -1435,6 +1562,67 @@
                 }
             }
         },
+        "main.DeviceApproveDto": {
+            "type": "object",
+            "required": [
+                "code"
+            ],
+            "properties": {
+                "code": {
+                    "description": "The user code displayed on the device.",
+                    "type": "string",
+                    "example": "BCDFGHJK"
+                }
+            }
+        },
+        "main.DeviceApproved": {
+            "type": "object",
+            "properties": {
+                "device": {
+                    "description": "Device that is now logged in.",
+                    "type": "string",
+                    "example": "Android - Android TV"
+                }
+            }
+        },
+        "main.DeviceCodeDto": {
+            "type": "object",
+            "required": [
+                "deviceCode"
+            ],
+            "properties": {
+                "deviceCode": {
+                    "description": "Secret code returned when the device login was created (POST /device).",
+                    "type": "string",
+                    "example": "lyHzTYm9yi+pkEv3m2tamAeeK7Dj7N3QRP7xv7dPU5q9MAe8tU4ySwYczE0RaMr4fijsA"
+                }
+            }
+        },
+        "main.DeviceLogin": {
+            "type": "object",
+            "properties": {
+                "deviceCode": {
+                    "description": "Secret code the device uses to poll for its session. Never show it to the user.",
+                    "type": "string",
+                    "example": "lyHzTYm9yi+pkEv3m2tamAeeK7Dj7N3QRP7xv7dPU5q9MAe8tU4ySwYczE0RaMr4fijsA"
+                },
+                "expiresIn": {
+                    "description": "Number of seconds before the codes expire.",
+                    "type": "integer",
+                    "example": 600
+                },
+                "interval": {
+                    "description": "Minimum number of seconds to wait between two polls.",
+                    "type": "integer",
+                    "example": 5
+                },
+                "userCode": {
+                    "description": "Code the user needs to input on an already logged in device.",
+                    "type": "string",
+                    "example": "BCDFGHJK"
+                }
+            }
+        },
         "main.JwkSet": {
             "type": "object",
             "properties": {
@@ -1572,6 +1760,11 @@
                 "for"
             ],
             "properties": {
+                "claims": {
+                    "description": "Extra claims to add to the signed jwt. Protected claims (`sub`, `permissions`, ...) are rejected.",
+                    "type": "object",
+                    "additionalProperties": {}
+                },
                 "duration": {
                     "description": "How long the signature stays valid (go duration, e.g. `24h`).",
                     "type": "string",
@@ -1604,6 +1797,11 @@
                 "for"
             ],
             "properties": {
+                "claims": {
+                    "description": "Extra claims to add to the signed jwt. Protected claims (`sub`, `permissions`, ...) are rejected.",
+                    "type": "object",
+                    "additionalProperties": {}
+                },
                 "duration": {
                     "description": "How long the signature stays valid (go duration, e.g. `24h`).",
                     "type": "string",
