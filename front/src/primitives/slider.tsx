@@ -7,12 +7,13 @@ import {
 	type ViewProps,
 } from "react-native";
 import { cn } from "~/utils";
-import { useTVEventHandler } from "./focus";
+import { FocusGroup, useTVEventHandler } from "./focus";
 
 export const Slider = ({
 	progress,
 	subtleProgress,
 	max = 100,
+	step,
 	markers,
 	setProgress,
 	startSeek,
@@ -23,6 +24,7 @@ export const Slider = ({
 }: {
 	progress: number;
 	max?: number;
+	step?: number;
 	subtleProgress?: number;
 	markers?: number[];
 	setProgress: (progress: number) => void;
@@ -58,19 +60,16 @@ export const Slider = ({
 	useTVEventHandler(
 		useEffectEvent((event: HWEvent) => {
 			if (!isFocus || event.eventKeyAction === 0) return;
-			const step =
-				event.eventType === "left"
-					? -0.05 * max
-					: event.eventType === "right"
-						? 0.05 * max
-						: 0;
-			if (!step) return;
+			const s = step ?? 0.05 * max;
+			const offset =
+				event.eventType === "left" ? -s : event.eventType === "right" ? s : 0;
+			if (!offset) return;
 
 			if (!isSeeking) {
 				setSeek(true);
 				startSeek?.();
 			}
-			setProgress(Math.max(0, Math.min(progress + step, max)));
+			setProgress(Math.max(0, Math.min(progress + offset, max)));
 			if (commit.current) clearTimeout(commit.current);
 			commit.current = setTimeout(() => {
 				commit.current = null;
@@ -81,92 +80,101 @@ export const Slider = ({
 	);
 
 	return (
-		<View
-			ref={ref}
-			// @ts-expect-error Web only
-			onMouseEnter={() => setHover(true)}
-			onMouseLeave={() => {
-				setHover(false);
-				onHover?.(null, layout);
-			}}
-			// @ts-expect-error Web only
-			onMouseMove={(e) =>
-				onHover?.(
-					Math.max(0, Math.min((e.clientX - layout.x) / layout.width, 1) * max),
-					layout,
-				)
-			}
-			tabIndex={0}
-			focusable
-			collapsable={false}
-			onFocus={() => setFocus(true)}
-			onBlur={() => setFocus(false)}
-			onStartShouldSetResponder={() => true}
-			onResponderGrant={() => {
-				setSeek(true);
-				startSeek?.call(null);
-			}}
-			onResponderRelease={() => {
-				setSeek(false);
-				endSeek?.call(null);
-			}}
-			onResponderStart={change}
-			onResponderMove={change}
-			onLayout={() =>
-				ref.current?.measure((_, __, width, height, pageX, pageY) =>
-					setLayout({ width, height, x: pageX, y: pageY }),
-				)
-			}
-			onKeyDown={(e: KeyboardEvent) => {
-				switch (e.code) {
-					case "ArrowLeft":
-						setProgress(Math.max(progress - 0.05 * max, 0));
-						break;
-					case "ArrowRight":
-						setProgress(Math.min(progress + 0.05 * max, max));
-						break;
-					case "ArrowDown":
-						setProgress(Math.max(progress - 0.1 * max, 0));
-						break;
-					case "ArrowUp":
-						setProgress(Math.min(progress + 0.1 * max, max));
-						break;
+		// left/right seek, they must not also move the focus out of the slider
+		<FocusGroup autoFocus trapFocusLeft trapFocusRight>
+			<View
+				ref={ref}
+				// @ts-expect-error Web only
+				onMouseEnter={() => setHover(true)}
+				onMouseLeave={() => {
+					setHover(false);
+					onHover?.(null, layout);
+				}}
+				// @ts-expect-error Web only
+				onMouseMove={(e) =>
+					onHover?.(
+						Math.max(
+							0,
+							Math.min((e.clientX - layout.x) / layout.width, 1) * max,
+						),
+						layout,
+					)
 				}
-			}}
-			className={cn("cursor-pointer justify-center py-2 outline-0", className)}
-			{...props}
-		>
-			<View
+				tabIndex={0}
+				focusable
+				collapsable={false}
+				onFocus={() => setFocus(true)}
+				onBlur={() => setFocus(false)}
+				onStartShouldSetResponder={() => true}
+				onResponderGrant={() => {
+					setSeek(true);
+					startSeek?.call(null);
+				}}
+				onResponderRelease={() => {
+					setSeek(false);
+					endSeek?.call(null);
+				}}
+				onResponderStart={change}
+				onResponderMove={change}
+				onLayout={() =>
+					ref.current?.measure((_, __, width, height, pageX, pageY) =>
+						setLayout({ width, height, x: pageX, y: pageY }),
+					)
+				}
+				onKeyDown={(e: KeyboardEvent) => {
+					switch (e.code) {
+						case "ArrowLeft":
+							setProgress(Math.max(progress - 0.05 * max, 0));
+							break;
+						case "ArrowRight":
+							setProgress(Math.min(progress + 0.05 * max, max));
+							break;
+						case "ArrowDown":
+							setProgress(Math.max(progress - 0.1 * max, 0));
+							break;
+						case "ArrowUp":
+							setProgress(Math.min(progress + 0.1 * max, max));
+							break;
+					}
+				}}
 				className={cn(
-					"h-2 w-full overflow-hidden rounded bg-slate-400",
-					smallBar && "scale-y-50",
+					"cursor-pointer justify-center py-2 outline-0",
+					className,
 				)}
+				{...props}
 			>
-				{subtleProgress !== undefined && (
-					<View
-						className={cn("absolute left-0 h-full bg-slate-300")}
-						style={{ width: `${(subtleProgress / max) * 100}%` }}
-					/>
-				)}
 				<View
-					className="absolute left-0 h-full bg-accent"
-					style={{ width: `${(progress / max) * 100}%` }}
-				/>
-				{markers?.map((x) => (
+					className={cn(
+						"h-2 w-full overflow-hidden rounded bg-slate-400",
+						smallBar && "scale-y-50",
+					)}
+				>
+					{subtleProgress !== undefined && (
+						<View
+							className={cn("absolute left-0 h-full bg-slate-300")}
+							style={{ width: `${(subtleProgress / max) * 100}%` }}
+						/>
+					)}
 					<View
-						key={x}
-						className="absolute h-full w-1 bg-accent"
-						style={{ left: `${Math.min(100, (x / max) * 100)}%` }}
+						className="absolute left-0 h-full bg-accent"
+						style={{ width: `${(progress / max) * 100}%` }}
 					/>
-				))}
+					{markers?.map((x) => (
+						<View
+							key={x}
+							className="absolute h-full w-1 bg-accent"
+							style={{ left: `${Math.min(100, (x / max) * 100)}%` }}
+						/>
+					))}
+				</View>
+				<View
+					className={cn(
+						"absolute my-1 ml-[-6px] h-3 w-3 rounded-full bg-accent",
+						smallBar && "opacity-0",
+					)}
+					style={{ left: `${(progress / max) * 100}%` }}
+				/>
 			</View>
-			<View
-				className={cn(
-					"absolute my-1 ml-[-6px] h-3 w-3 rounded-full bg-accent",
-					smallBar && "opacity-0",
-				)}
-				style={{ left: `${(progress / max) * 100}%` }}
-			/>
-		</View>
+		</FocusGroup>
 	);
 };
