@@ -39,6 +39,7 @@ export const Controls = ({
 	const [menuOpened, setMenuOpened] = useState(false);
 	const [seeking, setSeeking] = useState(false);
 	const [controlsVisible, setControlsVisible] = useState(false);
+	const [focusProgress, setFocusProgress] = useState(false);
 
 	const hoverControls = {
 		onPointerEnter: (e) => {
@@ -55,11 +56,17 @@ export const Controls = ({
 		if (!val) setHover(false);
 	}, []);
 
+	const onVisibilityChange = useCallback((visible: boolean) => {
+		setControlsVisible(visible);
+		if (!visible) setFocusProgress(false);
+	}, []);
+
 	return (
 		<FocusGroup autoFocus className="absolute inset-0">
 			<TouchControls
 				forceShow={hover || menuOpened || seeking || forceShow}
-				onVisibilityChange={setControlsVisible}
+				onVisibilityChange={onVisibilityChange}
+				onHiddenSeek={() => setFocusProgress(true)}
 				className="absolute inset-0"
 			>
 				<Back
@@ -73,6 +80,7 @@ export const Controls = ({
 				<MiddleControls
 					hasPrev={hasPrev}
 					hasNext={hasNext}
+					focusPlay={!focusProgress}
 					className="touch:flex hidden"
 				/>
 				<BottomControls
@@ -84,6 +92,7 @@ export const Controls = ({
 					onOpenEntriesMenu={onOpenEntriesMenu}
 					setMenu={setMenu}
 					setSeeking={setSeeking}
+					focusProgress={focusProgress}
 					className="absolute bottom-0 w-full bg-slate-900/50 px-safe pb-safe"
 					{...hoverControls}
 				/>
