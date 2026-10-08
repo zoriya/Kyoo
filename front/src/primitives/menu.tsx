@@ -82,9 +82,9 @@ const Menu = <AsProps,>({
 						<FocusTrap
 							onBack={() => setOpen(false)}
 							className={cn(
-								"absolute bottom-0 w-full self-center bg-popover px-safe pb-safe sm:mx-12 sm:max-w-2xl",
+								"absolute bottom-0 w-full self-center bg-popover px-safe pb-safe sm:mx-safe-or-12 sm:max-w-2xl sm:px-0",
 								"mt-20 max-h-[80vh] rounded-t-4xl pt-8",
-								"xl:top-0 xl:right-0 xl:mt-0 xl:mr-0 xl:max-h-screen xl:max-w-xl xl:rounded-l-4xl xl:rounded-tr-none xl:pt-safe-offset-10",
+								"xl:top-0 xl:right-0 xl:mt-0 xl:mr-0 xl:max-h-screen xl:max-w-xl xl:rounded-l-4xl xl:rounded-tr-none xl:pt-safe-offset-10 xl:pr-safe",
 							)}
 						>
 							<ScrollView snapToAlignment="item">
@@ -126,7 +126,7 @@ const MenuItem = ({
 		<Icon
 			icon={icon ?? Check}
 			className={cn(
-				"mx-6 group-highlighted:fill-slate-200",
+				"group-highlighted:fill-slate-200",
 				disabled && "fill-slate-600 dark:fill-slate-600",
 			)}
 		/>
@@ -143,7 +143,7 @@ const MenuItem = ({
 			hasTVPreferredFocus={selected}
 			scrollSnapAlign="center"
 			// same highlight as the web menu, where radix sets the attribute itself
-			className="group h-15 w-full flex-row items-center highlighted:bg-accent px-4"
+			className="group h-15 w-full flex-row items-center gap-4 highlighted:bg-accent px-4"
 			{...props}
 		>
 			{left && left}
@@ -151,11 +151,10 @@ const MenuItem = ({
 			<P
 				className={cn(
 					"flex-1 group-highlighted:text-slate-200",
+					// keep labels aligned with the ones that have an icon (size-6 + gap-4)
+					!(icon || selected || left) && "pl-10",
 					disabled && "text-slate-600",
 				)}
-				style={{
-					paddingLeft: 8 * 2 + +!(icon || selected || left) * 24,
-				}}
 			>
 				{label}
 			</P>

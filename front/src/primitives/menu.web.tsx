@@ -137,9 +137,10 @@ const MenuItem = forwardRef<
 		<Icon
 			icon={icon ?? Dot}
 			className={cn(
-				"mx-2 group-data-highlighted:fill-slate-200",
+				"group-data-highlighted:fill-slate-200",
 				disabled && "fill-slate-600 dark:fill-slate-600",
-				!icon && "h-2 w-2",
+				// the dot is smaller than an icon, center it in the same slot
+				!icon && "mx-2 h-2 w-2",
 			)}
 		/>
 	);
@@ -151,11 +152,10 @@ const MenuItem = forwardRef<
 			<P
 				className={cn(
 					"flex-1 group-data-highlighted:text-slate-200",
+					// keep labels aligned with the ones that have an icon (size-6 + gap-4)
+					!(icon || selected || left) && "pl-10",
 					disabled && "text-slate-600",
 				)}
-				style={{
-					paddingLeft: 8 * 2 + +!(icon || selected || left) * 24,
-				}}
 			>
 				{label}
 			</P>
@@ -186,7 +186,7 @@ const MenuItem = forwardRef<
 			}}
 			disabled={disabled}
 			className={cn(
-				"group flex h-10 flex-row items-center p-2 py-6 outline-0 data-highlighted:bg-accent",
+				"group flex h-10 flex-row items-center gap-4 p-2 py-6 outline-0 data-highlighted:bg-accent",
 				className,
 			)}
 			{...props}
