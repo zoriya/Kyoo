@@ -5,10 +5,57 @@ from copy import copy
 from logging import getLogger
 from typing import Any, cast, override
 
+from guessit.rules.properties.title import TitleFromPosition
 from rebulk import POST_PROCESS, AppendMatch, RemoveMatch, RenameMatch, Rule
 from rebulk.match import Match, Matches
 
 logger = getLogger(__name__)
+
+
+class DirectoryTitleNumber(Rule):
+	"""Remove episode numbers already part of a directory's title
+
+	guessit's `TitleToEpisodeTitle` converts titles that follow an episode number to an
+	episode_title, so the `100` of the directory would make the filename's title an episode_title.
+	This needs to run before it (same dependency & we're loaded first).
+
+	Example: '/media/Zom 100/[Erai-raws] Zom 100 - Zombie ni Naru made ni Shitai 100 no Koto - 01 [1080p][Multiple Subtitle][8AFBB298].mkv'
+	Default:
+	```json
+	{
+		"title": "Zom 100",
+		"episode_title": "Zom 100 - Zombie ni Naru made ni Shitai",
+		"episode": [100, 1],
+	}
+	```
+	Expected:
+	```json
+	{
+		"title": "Zom 100",
+		"episode_title": "Zombie ni Naru made ni Shitai 100 no Koto",
+		"episode": 1,
+	}
+	```
+	"""
+
+	dependency = TitleFromPosition
+	consequence = RemoveMatch
+
+	@override
+	def when(self, matches: Matches, context) -> Any:
+		fileparts: list[Match] = matches.markers.named("path")  # type: ignore
+
+		to_remove = []
+		for part in fileparts[:-1]:
+			for title in matches.range(
+				part.start, part.end, lambda x: x.name == "title"
+			):
+				to_remove += matches.range(
+					title.start,
+					title.end,
+					lambda x: x.name == "episode" and x.tagged("weak-episode"),
+				)
+		return to_remove
 
 
 class UnlistTitles(Rule):
