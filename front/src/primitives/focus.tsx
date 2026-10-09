@@ -4,7 +4,7 @@ import {
 	useEffectEvent,
 	useState,
 } from "react";
-import { BackHandler, TVFocusGuideView } from "react-native";
+import { BackHandler, Platform, TVFocusGuideView } from "react-native";
 import { withUniwind } from "uniwind";
 
 export { useTVEventHandler } from "react-native";
@@ -30,7 +30,7 @@ export const FocusTrap = ({ onBack, ...props }: FocusTrapProps) => {
 	return (
 		<FocusGroup
 			autoFocus
-			hasTVPreferredFocus={mounted}
+			hasTVPreferredFocus={Platform.isTV && mounted}
 			trapFocusUp
 			trapFocusDown
 			trapFocusLeft

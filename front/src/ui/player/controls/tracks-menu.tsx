@@ -1,11 +1,14 @@
 import ClosedCaption from "@material-symbols/svg-400/rounded/closed_caption-fill.svg";
 import MusicNote from "@material-symbols/svg-400/rounded/music_note-fill.svg";
 import SettingsIcon from "@material-symbols/svg-400/rounded/settings-fill.svg";
+import PlayerI from "@material-symbols/svg-400/rounded/smart_display.svg";
 import VideoSettings from "@material-symbols/svg-400/rounded/video_settings-fill.svg";
 import { type ComponentProps, createContext, useContext } from "react";
 import { useTranslation } from "react-i18next";
+import { Platform } from "react-native";
 import { usePlayer, usePlayerState } from "react-native-omni";
-import { IconButton, Menu, tooltip } from "~/primitives";
+import { HR, IconButton, Menu, tooltip } from "~/primitives";
+import { useLocalSetting } from "~/providers/settings";
 import { useFetch } from "~/query";
 import { useDisplayName, useSubtitleName } from "~/track-utils";
 import { Info } from "~/ui/info";
@@ -140,6 +143,10 @@ export const PlayModeContext = createContext<
 export const QualityMenu = (props: Partial<MenuProps>) => {
 	const { t } = useTranslation();
 	const [playMode, setPlayMode] = useContext(PlayModeContext);
+	const [backend, setBackend] = useLocalSetting<"vlc" | "exoplayer">(
+		"player",
+		"vlc",
+	);
 	const player = usePlayer();
 	const lvls = usePlayerState("renditions");
 	const isAuto = usePlayerState("isAutoQuality");
@@ -154,6 +161,19 @@ export const QualityMenu = (props: Partial<MenuProps>) => {
 		>
 			{() => (
 				<>
+					{Platform.OS === "android" && (
+						<>
+							<Menu.Item
+								label={`${t("settings.playback.player.label")}: ${t(`settings.playback.player.${backend}`)}`}
+								icon={PlayerI}
+								closeOnSelect={false}
+								onSelect={() =>
+									setBackend(backend === "vlc" ? "exoplayer" : "vlc")
+								}
+							/>
+							<HR />
+						</>
+					)}
 					<Menu.Item
 						label={t("player.direct")}
 						selected={playMode === "direct"}

@@ -1,5 +1,5 @@
 import { type CSSProperties, useState } from "react";
-import { type TextProps, useWindowDimensions } from "react-native";
+import { Platform, type TextProps, useWindowDimensions } from "react-native";
 import { usePlayer, usePlayerState } from "react-native-omni";
 import { useResolveClassNames } from "uniwind";
 import type { Chapter } from "~/models";
@@ -15,11 +15,13 @@ export const ProgressBar = ({
 	seek,
 	setSeek,
 	setSeeking,
+	hasTVPreferredFocus,
 }: {
 	chapters?: Chapter[];
 	seek: number | null;
 	setSeek: (v: number | null) => void;
 	setSeeking?: (v: boolean) => void;
+	hasTVPreferredFocus?: boolean;
 }) => {
 	const [slug] = useQueryState<string>("slug", undefined!);
 	const { data } = useFetch(Info.infoQuery(slug));
@@ -44,6 +46,8 @@ export const ProgressBar = ({
 				progress={seek ?? progress}
 				subtleProgress={buffer}
 				max={data?.durationSeconds}
+				// same as seeking with left/right while the controls are hidden
+				step={10}
 				startSeek={() => {
 					// the controls must not auto-hide mid drag, it would unmount the slider
 					setSeeking?.(true);
@@ -61,6 +65,7 @@ export const ProgressBar = ({
 					setLayout(layout);
 				}}
 				markers={chapters?.map((x) => x.startTime)}
+				hasTVPreferredFocus={Platform.isTV && hasTVPreferredFocus}
 				// @ts-expect-error dataSet is web only and not typed
 				dataSet={{ tooltipId: "progress-scrubber" }}
 			/>

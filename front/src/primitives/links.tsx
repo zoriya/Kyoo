@@ -112,12 +112,16 @@ export const Link = ({
 	ref?: Ref<View>;
 } & PressableProps) => {
 	const linkProps = useLinkTo({ href, replace, download });
+	const isDisabled = disabled ?? (!href && !props?.onPress);
 
 	return (
 		<PressableFeedback
 			{...linkProps}
 			{...props}
-			disabled={disabled ?? (!href && !props?.onPress)}
+			// a disabled pressable ignores long presses too, keep them for the menu.
+			// `disabled` must stay undefined or it would override `aria-disabled`.
+			aria-disabled={isDisabled}
+			disabled={(isDisabled && !props?.onLongPress) || undefined}
 			onPress={(e?: any) => {
 				props?.onPress?.(e);
 				if (!href) return;

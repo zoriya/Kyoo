@@ -134,9 +134,9 @@ export const ComboBox = <Data,>({
 					<KeyboardAvoidingView
 						behavior="padding"
 						className={cn(
-							"absolute bottom-0 w-full self-center bg-popover px-safe sm:mx-12 sm:max-w-2xl",
+							"absolute bottom-0 w-full self-center bg-popover px-safe sm:mx-safe-or-12 sm:max-w-2xl sm:px-0",
 							"mt-20 max-h-[80vh] rounded-t-4xl pt-8",
-							"xl:top-0 xl:right-0 xl:mt-0 xl:mr-0 xl:max-h-screen xl:rounded-l-4xl xl:rounded-tr-0 xl:pt-safe-offset-10",
+							"xl:top-0 xl:right-0 xl:mt-0 xl:mr-0 xl:max-h-screen xl:rounded-l-4xl xl:rounded-tr-0 xl:pt-safe-offset-10 xl:pr-safe",
 						)}
 					>
 						<FocusTrap onBack={close} className="flex-1">

@@ -33,6 +33,7 @@ export const BottomControls = ({
 	hasNext,
 	setMenu,
 	setSeeking,
+	focusProgress,
 	onOpenEntriesMenu,
 	className,
 	...props
@@ -44,10 +45,11 @@ export const BottomControls = ({
 	hasNext: boolean;
 	setMenu: (isOpen: boolean) => void;
 	setSeeking: (isSeeking: boolean) => void;
+	focusProgress?: boolean;
 	onOpenEntriesMenu?: () => void;
 } & ViewProps) => {
 	const [seek, setSeek] = useState<number | null>(null);
-	const bottomSeek = Platform.OS !== "web" && seek !== null;
+	const bottomSeek = Platform.OS !== "web" && !Platform.isTV && seek !== null;
 
 	return (
 		<View className={cn("flex-row p-2 touch:p-1", className)} {...props}>
@@ -86,6 +88,7 @@ export const BottomControls = ({
 					seek={seek}
 					setSeek={setSeek}
 					setSeeking={setSeeking}
+					hasTVPreferredFocus={focusProgress}
 				/>
 				{bottomSeek ? (
 					<BottomScrubber seek={seek} chapters={chapters} />

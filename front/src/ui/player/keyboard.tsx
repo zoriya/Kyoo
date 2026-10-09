@@ -166,9 +166,11 @@ export const useKeyboard = () => {
 export const useRemoteKeys = ({
 	controlsShown,
 	showControls,
+	onHiddenSeek,
 }: {
 	controlsShown: boolean;
 	showControls: () => void;
+	onHiddenSeek?: () => void;
 }) => {
 	const player = usePlayer();
 
@@ -205,10 +207,14 @@ export const useRemoteKeys = ({
 					if (hidden) reducer(player, { type: "play" });
 					break;
 				case "left":
-					if (hidden) reducer(player, { type: "seek", value: -10 });
+					if (!hidden) break;
+					reducer(player, { type: "seek", value: -10 });
+					onHiddenSeek?.();
 					break;
 				case "right":
-					if (hidden) reducer(player, { type: "seek", value: +10 });
+					if (!hidden) break;
+					reducer(player, { type: "seek", value: +10 });
+					onHiddenSeek?.();
 					break;
 			}
 		}),

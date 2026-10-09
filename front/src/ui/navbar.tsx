@@ -295,9 +295,7 @@ export const AccountMenuItems = () => {
 							? x.username
 							: `${x.username} - ${getDisplayUrl(x.apiUrl)}`
 					}
-					left={
-						<Avatar placeholder={x.username} src={x.logo} className="mx-2" />
-					}
+					left={<Avatar placeholder={x.username} src={x.logo} />}
 					selected={x.selected}
 					onSelect={() => x.select()}
 				/>

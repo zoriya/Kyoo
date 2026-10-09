@@ -27,10 +27,12 @@ export const TouchControls = ({
 	children,
 	forceShow = false,
 	onVisibilityChange,
+	onHiddenSeek,
 	...props
 }: {
 	forceShow?: boolean;
 	onVisibilityChange?: (isVisible: boolean) => void;
+	onHiddenSeek?: () => void;
 } & ViewProps) => {
 	const { t } = useTranslation();
 	const player = usePlayer();
@@ -65,7 +67,11 @@ export const TouchControls = ({
 		if (playing) show();
 	}, [playing, show]);
 
-	useRemoteKeys({ controlsShown: shouldShow, showControls: show });
+	useRemoteKeys({
+		controlsShown: shouldShow,
+		showControls: show,
+		onHiddenSeek,
+	});
 
 	const onBack = useEffectEvent(() => {
 		if (forceShow || !_show || !playing) return false;
