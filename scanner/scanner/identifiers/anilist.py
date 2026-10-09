@@ -272,6 +272,16 @@ async def identify_anilist(_path: str, guess: Guess) -> Guess:
 			)
 	aid = anime.anidbid
 
+	# a movie file named like the start of a tv serie (`Iron man.mkv`, `Monster (2003).mkv`)
+	# is way more likely to be a movie with the same name than the first episode of the anime.
+	if (
+		guess.kind == "movie"
+		and not anime.tmdbid
+		and anime.episodeoffset == 0
+		and anime.defaulttvdbseason in (1, "a")
+	):
+		return guess
+
 	new_external_id = dict(guess.external_id)
 	new_external_id[ProviderName.ANIDB] = aid
 	if anime.tvdbid:
