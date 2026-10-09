@@ -711,13 +711,14 @@ class TVDB(Provider):
 			if trans.get("isAlias") is None or False
 		}
 		entry.external_id = {  # pyright: ignore[reportAttributeAccessIssue]
+			**self._process_remote_id(ret["remoteIds"]),
 			self.name: [
 				MetadataId(
 					data_id=ret["id"],
 					link=f"https://thetvdb.com/movies/{ret['slug']}",
-				)
+				),
+				*entry.external_id[self.name],
 			],
-			**self._process_remote_id(ret["remoteIds"]),
 		}
 
 		return entry

@@ -73,7 +73,8 @@ class AnimeListDb(BaseXmlModel, tag="anime-list"):
 		@field_validator("tvdbid", "tmdbtv", "tmdbid", "imdbid", "defaulttvdbseason")
 		@classmethod
 		def _empty_to_none(cls, v: str | None) -> str | None:
-			return v or None
+			# `defaulttvdbseason="0"` (specials) should not be converted to None
+			return v if v != "" else None
 
 		class EpisodeMapping(BaseXmlModel):
 			anidbseason: int = attr()
@@ -107,6 +108,9 @@ class AnimeListData:
 	fetched_at: datetime
 	# normalized title -> anidbid
 	titles: dict[str, str] = field(default_factory=dict)
+	# normalized title without anidb's disambiguation year -> (year, anidbid)
+	# (`Hunter x Hunter (1999)` is stored as `hunter x hunter` -> (1999, 132))
+	yearless_titles: dict[str, list[tuple[int, str]]] = field(default_factory=dict)
 	# anidbid -> AnimeEntry
 	animes: dict[str, AnimeListDb.AnimeEntry] = field(default_factory=dict)
 	# tvdbid -> anidbid
@@ -130,6 +134,14 @@ async def get_anilist_data() -> AnimeListData:
 				for x in titles.animes
 				for title in x.titles
 			}
+			ret.yearless_titles = defaultdict(list)
+			for x in titles.animes:
+				for title in x.titles:
+					m = re.match(r"^(.*\S)\s*\((\d{4})\)$", title.text)
+					if m:
+						ret.yearless_titles[normalize_title(m.group(1))].append(
+							(int(m.group(2)), x.aid)
+						)
 		async with session.get(AnimeListDb.get_url()) as resp:
 			resp.raise_for_status()
 			db = AnimeListDb.from_xml(await resp.read())
@@ -233,12 +245,32 @@ def tvdb_to_anidb(
 async def identify_anilist(_path: str, guess: Guess) -> Guess:
 	data = await get_anilist_data()
 
-	aid = data.titles.get(normalize_title(guess.title))
-	if aid is None:
-		return guess
-	anime = data.animes.get(aid)
+	title = normalize_title(guess.title)
+	yearless = [
+		(year, data.animes[x])
+		for year, x in data.yearless_titles.get(title, [])
+		if x in data.animes
+	]
+	anime = next((x for year, x in yearless if year in guess.years), None)
 	if anime is None:
-		return guess
+		aid = data.titles.get(title)
+		anime = data.animes.get(aid) if aid else None
+		if anime is None:
+			return guess
+		# a file named with the bare title of a special (pilot, ova) is way more likely to be
+		# an episode of the serie with the same name & tvdb id.
+		if anime.defaulttvdbseason == 0 and anime.tvdbid:
+			anime = next(
+				(
+					x
+					for _, x in yearless
+					if x.tvdbid == anime.tvdbid
+					and x.defaulttvdbseason == 1
+					and x.episodeoffset == 0
+				),
+				anime,
+			)
+	aid = anime.anidbid
 
 	new_external_id = dict(guess.external_id)
 	new_external_id[ProviderName.ANIDB] = aid
@@ -313,14 +345,13 @@ async def identify_anilist(_path: str, guess: Guess) -> Guess:
 		and anime.tvdbid
 		and isinstance(anime.defaulttvdbseason, int)
 	):
+		tvdb_season, tvdb_eps = anidb_to_tvdb(anime, 1)
+		new_episodes += [
+			Guess.Episode(season=tvdb_season, episode=tvdb_ep) for tvdb_ep in tvdb_eps
+		]
+	if anime.tvdbid and new_episodes:
 		kind = "episode"
-		new_episodes.append(
-			Guess.Episode(
-				season=anime.defaulttvdbseason,
-				episode=1 + anime.episodeoffset,
-			)
-		)
-	elif guess.kind == "episode" and anime.tmdbid:
+	elif anime.tmdbid:
 		kind = "movie"
 
 	return Guess(
