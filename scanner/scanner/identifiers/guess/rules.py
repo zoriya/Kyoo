@@ -367,6 +367,24 @@ class ExpectedTitles(Rule):
 		"episode": 15
 	}
 	```
+
+	Or
+	Example: '[Erai-raws] JoJo no Kimyou na Bouken - Steel Ball Run - 01 [1080p NF WEBRip HEVC AAC][MultiSub][3C988D2A].mkv'
+	Default:
+	```json
+	{
+		"title": "JoJo no Kimyou na Bouken",
+		"episode_title": "Steel Ball Run",
+		"episode": 1
+	}
+	```
+	Expected:
+	```json
+	{
+		"title": "Steel Ball Run JoJo no Kimyou na Bouken",
+		"episode": 1
+	}
+	```
 	"""
 
 	priority = POST_PROCESS
@@ -389,6 +407,7 @@ class ExpectedTitles(Rule):
 			nmatch: list[Match] = matches.next(current)
 			if not nmatch or not (
 				nmatch[0].tagged("title")
+				or nmatch[0].named("episode_title")
 				or nmatch[0].named("season")
 				or nmatch[0].named("episode")
 				or nmatch[0].named("part")
@@ -415,11 +434,15 @@ class ExpectedTitles(Rule):
 				mtitle = f"{mtitle}{hole}{m.value}"
 				prev = m
 
-			if normalize_title(mtitle) in context["expected_titles"]:
-				new_title = copy(title)
-				new_title.end = candidate_matches[-1].end
-				new_title.value = mtitle
-				return [[title] + candidate_matches, [new_title]]
+			# releases sometimes swap the parts (`JoJo no Kimyou na Bouken - Steel Ball Run`
+			# for `Steel Ball Run: JoJo no Kimyou na Bouken`)
+			swapped = f"{mtitle[len(str(title.value)) :].strip(' -')} {title.value}"
+			for value in [mtitle, swapped]:
+				if normalize_title(value) in context["expected_titles"]:
+					new_title = copy(title)
+					new_title.end = candidate_matches[-1].end
+					new_title.value = value
+					return [[title] + candidate_matches, [new_title]]
 
 
 class SeasonYearDedup(Rule):
