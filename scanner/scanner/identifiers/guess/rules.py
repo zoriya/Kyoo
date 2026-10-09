@@ -12,6 +12,66 @@ from rebulk.match import Match, Matches
 logger = getLogger(__name__)
 
 
+class NumberTitle(Rule):
+	"""Understand a number at the start of the filename as the title when an episode follows it
+
+	Example: '[SubsPlease] 86 - Eighty Six - 05 (1080p).mkv'
+	Default:
+	```json
+	{
+		"episode": [86, 5],
+		"episode_title": "Eighty Six",
+	}
+	```
+	Expected:
+	```json
+	{
+		"title": "86",
+		"episode_title": "Eighty Six",
+		"episode": 5,
+	}
+	```
+	"""
+
+	# run before the other rules (like `ExpectedTitles` or `PreferFilenameOverDirectory`) that need the title
+	priority = POST_PROCESS + 1
+	consequence = [RemoveMatch, AppendMatch]
+
+	@override
+	def when(self, matches: Matches, context) -> Any:
+		fileparts: list[Match] = matches.markers.named("path")
+		if not fileparts:
+			return
+		filename = fileparts[-1]
+
+		if matches.range(filename.start, filename.end, lambda x: x.name == "title"):
+			return
+		first: Match | None = matches.range(
+			filename.start,
+			filename.end,
+			lambda x: not x.private and x.name != "release_group",
+			0,
+		)
+		if first is None or first.name != "episode":
+			return
+		episodes: list[Match] = matches.range(
+			first.end, filename.end, lambda x: x.name == "episode"
+		)
+		if not episodes:
+			return
+		# `12 - 13.mkv` is a range of episodes, not the serie `12`.
+		between = matches.range(first.end, episodes[0].start, lambda x: not x.private)
+		if not between and cast(int, first.value) < cast(int, episodes[0].value):
+			return
+
+		title = copy(first)
+		title.name = "title"
+		title.value = (matches.input_string or "")[first.start : first.end].strip()
+		title.tags = ["title"]
+		to_remove = matches.range(first.start, first.end, lambda x: x.name == "episode")
+		return [to_remove, [title]]
+
+
 class DirectoryTitleNumber(Rule):
 	"""Remove episode numbers already part of a directory's title
 
