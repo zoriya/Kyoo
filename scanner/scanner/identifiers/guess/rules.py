@@ -378,7 +378,7 @@ class ExpectedTitles(Rule):
 
 		titles: list[Match] = matches.named("title", lambda m: m.tagged("title"))  # type: ignore
 
-		if not titles or not context["expected_titles"]:
+		if not titles or not context or not context["expected_titles"]:
 			return
 		title = titles[0]
 
