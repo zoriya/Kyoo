@@ -331,6 +331,16 @@ async def identify_anilist(_path: str, guess: Guess) -> Guess:
 	new_episodes: list[Guess.Episode] = []
 	for ep in guess.episodes:
 		if (
+			anime.tvdbid is not None
+			and anime.defaulttvdbseason == 1
+			and anime.episodeoffset == 0
+			and "season" not in guess.raw
+		):
+			# fansubs use absolute numbers for the first entry of an anime
+			# (`Jujutsu Kaisen - 47.mkv` is s2e23 not s1e47)
+			new_episodes.append(Guess.Episode(season=None, episode=ep.episode))
+			continue
+		if (
 			anime.tvdbid is None
 			or anime.defaulttvdbseason is None
 			or (anime.defaulttvdbseason == 1 and anime.episodeoffset == 0)
