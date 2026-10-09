@@ -72,6 +72,68 @@ class NumberTitle(Rule):
 		return [to_remove, [title]]
 
 
+class SingleDigitEpisode(Rule):
+	"""Split a single digit episode from a known title
+
+	guessit doesn't parse single digit episodes without a separator, they become part of the title.
+
+	Example: 'Asobi Asobase 6.mkv'
+	Default:
+	```json
+	{
+		"title": "Asobi Asobase 6",
+		"type": "movie",
+	}
+	```
+	Expected:
+	```json
+	{
+		"title": "Asobi Asobase",
+		"episode": 6,
+		"type": "episode",
+	}
+	```
+	"""
+
+	# run before guessit's `TypeProcessor` so the file is marked as an episode
+	priority = POST_PROCESS + 1
+	consequence = [RemoveMatch, AppendMatch]
+
+	@override
+	def when(self, matches: Matches, context) -> Any:
+		from ..anilist import normalize_title
+
+		if not context or not context["expected_titles"] or matches.named("episode"):
+			return
+
+		to_remove = []
+		to_add = []
+		for title in matches.named("title"):
+			m = re.match(r"^(.*\S)\s+(\d)$", str(title.value))
+			if (
+				not m
+				or normalize_title(m.group(1)) not in context["expected_titles"]
+				or normalize_title(str(title.value)) in context["expected_titles"]
+			):
+				continue
+
+			raw = (matches.input_string or "")[title.start : title.end]
+			digit = title.start + raw.rindex(m.group(2))
+
+			new_title = copy(title)
+			new_title.value = m.group(1)
+			new_title.end = digit
+			episode = copy(title)
+			episode.name = "episode"
+			episode.value = int(m.group(2))
+			episode.start = digit
+			episode.end = digit + 1
+			episode.tags = []
+			to_remove.append(title)
+			to_add += [new_title, episode]
+		return [to_remove, to_add]
+
+
 class DirectoryTitleNumber(Rule):
 	"""Remove episode numbers already part of a directory's title
 
