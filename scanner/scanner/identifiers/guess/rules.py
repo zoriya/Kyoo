@@ -224,26 +224,40 @@ class UnlistTitles(Rule):
 
 	@override
 	def when(self, matches: Matches, context) -> Any:
-		fileparts: list[Match] = matches.markers.named("path")  # type: ignore
+		from ..anilist import normalize_title
 
+		expected_titles = context["expected_titles"] if context else []
+		fileparts: list[Match] = matches.markers.named("path")
+
+		to_remove = []
+		to_add = []
 		for part in fileparts:
 			titles: list[Match] = matches.range(
-				part.start, part.end, lambda x: x.name == "title"
-			)  # type: ignore
+				part.start,
+				part.end,
+				lambda x: x.name in ("title", "alternative_title"),
+			)
 
-			if not titles or len(titles) <= 1:
+			if len(titles) <= 1 or titles[0].name != "title":
 				continue
 
 			title = copy(titles[0])
 			for nmatch in titles[1:]:
 				# Check if titles are next to each other, if they are not ignore it.
-				next: list[Match] = matches.next(title)  # type: ignore
+				next: list[Match] = matches.next(title)
 				if not next or next[0] != nmatch:
 					logger.warning(f"Ignoring potential part of title: {nmatch.value}")
 					continue
 				title.end = nmatch.end
 
-			return [titles, [title]]
+			if (
+				normalize_title(str(titles[0].value)) in expected_titles
+				and normalize_title(str(title.value)) not in expected_titles
+			):
+				continue
+			to_remove += titles
+			to_add.append(title)
+		return [to_remove, to_add]
 
 
 class OrdinalSeasonRule(Rule):
