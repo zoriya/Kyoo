@@ -282,7 +282,7 @@ async def identify_anilist(_path: str, guess: Guess) -> Guess:
 		if (
 			anime.tvdbid is None
 			or anime.defaulttvdbseason is None
-			or anime.defaulttvdbseason == 1
+			or (anime.defaulttvdbseason == 1 and anime.episodeoffset == 0)
 		):
 			new_episodes.append(
 				Guess.Episode(
@@ -292,8 +292,8 @@ async def identify_anilist(_path: str, guess: Guess) -> Guess:
 			)
 			continue
 
-		# guess numbers are anidb-relative if defaulttvdbseason != 1 because
-		# the title already contains season information.
+		# guess numbers are anidb-relative if the anime is not the first tvdb season
+		# (or a later part of it) because the title already contains season information.
 		tvdb_season, tvdb_eps = anidb_to_tvdb(anime, ep.episode)
 		new_episodes += [
 			Guess.Episode(
