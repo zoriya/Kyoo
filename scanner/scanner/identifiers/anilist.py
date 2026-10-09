@@ -286,7 +286,9 @@ async def identify_anilist(_path: str, guess: Guess) -> Guess:
 		):
 			new_episodes.append(
 				Guess.Episode(
-					season=ep.season or (1 if anime.defaulttvdbseason else None),
+					season=ep.season
+					if ep.season is not None
+					else (1 if anime.defaulttvdbseason else None),
 					episode=ep.episode,
 				)
 			)
