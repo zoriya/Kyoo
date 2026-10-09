@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { ViewProps } from "react-native";
 import type { Chapter, KImage, Show } from "~/models";
 import { FocusGroup } from "~/primitives";
@@ -40,6 +40,7 @@ export const Controls = ({
 	const [seeking, setSeeking] = useState(false);
 	const [controlsVisible, setControlsVisible] = useState(false);
 	const [focusProgress, setFocusProgress] = useState(false);
+	const skipChapter = useRef<(() => void) | null>(null);
 
 	const hoverControls = {
 		onPointerEnter: (e) => {
@@ -67,6 +68,11 @@ export const Controls = ({
 				forceShow={hover || menuOpened || seeking || forceShow}
 				onVisibilityChange={onVisibilityChange}
 				onHiddenSeek={() => setFocusProgress(true)}
+				onHiddenSelect={() => {
+					if (!skipChapter.current) return false;
+					skipChapter.current();
+					return true;
+				}}
 				className="absolute inset-0"
 			>
 				<Back
@@ -101,6 +107,7 @@ export const Controls = ({
 				chapters={chapters}
 				isVisible={controlsVisible}
 				seekEnd={seekEnd}
+				skipRef={skipChapter}
 				className="absolute right-safe bottom-2/10 m-8"
 			/>
 		</FocusGroup>

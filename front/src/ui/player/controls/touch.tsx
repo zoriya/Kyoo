@@ -28,11 +28,13 @@ export const TouchControls = ({
 	forceShow = false,
 	onVisibilityChange,
 	onHiddenSeek,
+	onHiddenSelect,
 	...props
 }: {
 	forceShow?: boolean;
 	onVisibilityChange?: (isVisible: boolean) => void;
 	onHiddenSeek?: () => void;
+	onHiddenSelect?: () => boolean;
 } & ViewProps) => {
 	const { t } = useTranslation();
 	const player = usePlayer();
@@ -71,6 +73,7 @@ export const TouchControls = ({
 		controlsShown: shouldShow,
 		showControls: show,
 		onHiddenSeek,
+		onHiddenSelect,
 	});
 
 	const onBack = useEffectEvent(() => {

@@ -167,10 +167,13 @@ export const useRemoteKeys = ({
 	controlsShown,
 	showControls,
 	onHiddenSeek,
+	onHiddenSelect,
 }: {
 	controlsShown: boolean;
 	showControls: () => void;
 	onHiddenSeek?: () => void;
+	// return true if the press was handled, play/pause is skipped then.
+	onHiddenSelect?: () => boolean;
 }) => {
 	const player = usePlayer();
 
@@ -204,7 +207,7 @@ export const useRemoteKeys = ({
 					reducer(player, { type: "seek", value: +10 });
 					break;
 				case "select":
-					if (hidden) reducer(player, { type: "play" });
+					if (hidden && !onHiddenSelect?.()) reducer(player, { type: "play" });
 					break;
 				case "left":
 					if (!hidden) break;

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { type RefObject, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { usePlayer, usePlayerState } from "react-native-omni";
 import type { Chapter } from "~/models";
@@ -13,11 +13,14 @@ export const SkipChapterButton = ({
 	seekEnd,
 	chapters,
 	isVisible,
+	skipRef,
 	className,
 }: {
 	seekEnd: () => void;
 	chapters: Chapter[];
 	isVisible: boolean;
+	// filled with the skip action while the button is displayed
+	skipRef?: RefObject<(() => void) | null>;
 	className?: string;
 }) => {
 	const { t } = useTranslation();
@@ -67,22 +70,33 @@ export const SkipChapterButton = ({
 		}
 	}, [chapter, progress, shouldAutoSkip, start, data, player, seekEnd]);
 
-	if (!chapter || chapter.type === "content" || behavior === "disabled")
-		return null;
-	if (!isVisible && progress >= start + 8) return null;
+	const shown =
+		chapter &&
+		chapter.type !== "content" &&
+		behavior !== "disabled" &&
+		(isVisible || progress < start + 8);
+
+	const skip = () => {
+		if (!chapter) return;
+		if (data?.durationSeconds && data.durationSeconds <= chapter.endTime + 3) {
+			return seekEnd();
+		}
+		seekPlayerTo(player, chapter.endTime);
+	};
+
+	useEffect(() => {
+		if (!skipRef) return;
+		skipRef.current = shown ? skip : null;
+		return () => {
+			skipRef.current = null;
+		};
+	});
+
+	if (!shown) return null;
 
 	return (
 		<Button
-			onPress={() => {
-				if (!chapter) return;
-				if (
-					data?.durationSeconds &&
-					data.durationSeconds <= chapter.endTime + 3
-				) {
-					return seekEnd();
-				}
-				seekPlayerTo(player, chapter.endTime);
-			}}
+			onPress={skip}
 			className={cn("z-20 bg-slate-900/70 px-4 py-2", className)}
 		>
 			<P
