@@ -276,13 +276,22 @@ async def identify_anilist(_path: str, guess: Guess) -> Guess:
 	new_external_id[ProviderName.ANIDB] = aid
 	if anime.tvdbid:
 		new_external_id[ProviderName.TVDB] = anime.tvdbid
+	# anidb can group multiple movies in an entry (`Kizumonogatari` is a trilogy with
+	# `tmdbid="357786,362584,362585"`), the episode number is the index of the movie.
+	tmdbids = anime.tmdbid.split(",") if anime.tmdbid else []
+	imdbids = anime.imdbid.split(",") if anime.imdbid else []
+	movie = guess.episodes[0].episode - 1 if len(guess.episodes) == 1 else None
 	# tmdbtv is for TV series, tmdbid is for standalone movies
 	if anime.tmdbtv:
 		new_external_id[ProviderName.TMDB] = anime.tmdbtv
-	elif anime.tmdbid and "," not in anime.tmdbid:
-		new_external_id[ProviderName.TMDB] = anime.tmdbid
-	if anime.imdbid and "," not in anime.imdbid:
-		new_external_id[ProviderName.IMDB] = anime.imdbid
+	elif len(tmdbids) == 1:
+		new_external_id[ProviderName.TMDB] = tmdbids[0]
+	elif movie is not None and 0 <= movie < len(tmdbids):
+		new_external_id[ProviderName.TMDB] = tmdbids[movie]
+	if len(imdbids) == 1:
+		new_external_id[ProviderName.IMDB] = imdbids[0]
+	elif movie is not None and 0 <= movie < len(imdbids):
+		new_external_id[ProviderName.IMDB] = imdbids[movie]
 
 	# if we don't have a single external id, skip it and use the normal flow
 	if len(new_external_id) == 1:
@@ -353,6 +362,13 @@ async def identify_anilist(_path: str, guess: Guess) -> Guess:
 		kind = "episode"
 	elif anime.tmdbid:
 		kind = "movie"
+
+	if kind == "movie" and anime.name:
+		new_title = (
+			f"{anime.name} {movie + 1}"
+			if len(tmdbids) > 1 and movie is not None
+			else anime.name
+		)
 
 	return Guess(
 		title=new_title or guess.title,
