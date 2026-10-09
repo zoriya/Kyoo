@@ -165,7 +165,7 @@ class DirectoryTitleNumber(Rule):
 
 	@override
 	def when(self, matches: Matches, context) -> Any:
-		fileparts: list[Match] = matches.markers.named("path")  # type: ignore
+		fileparts: list[Match] = matches.markers.named("path")
 
 		to_remove = []
 		for part in fileparts[:-1]:
@@ -292,7 +292,7 @@ class OrdinalSeasonRule(Rule):
 
 	@override
 	def when(self, matches: Matches, context) -> Any:
-		titles: list[Match] = matches.named("title")  # type: ignore
+		titles: list[Match] = matches.named("title")
 
 		to_remove = []
 		to_add = []
@@ -350,7 +350,7 @@ class MultipleSeasonRule(Rule):
 
 	@override
 	def when(self, matches: Matches, context) -> Any:
-		seasons: list[Match] = matches.named("season")  # type: ignore
+		seasons: list[Match] = matches.named("season")
 
 		if not seasons:
 			return
@@ -362,7 +362,7 @@ class MultipleSeasonRule(Rule):
 		):
 			return
 
-		value: str = initiator.value  # type: ignore
+		value: str = initiator.value
 		if "-" not in value:
 			return
 
@@ -417,7 +417,7 @@ class PreferFilenameOverDirectory(Rule):
 
 	@override
 	def when(self, matches: Matches, context) -> Any:
-		fileparts: list[Match] = matches.markers.named("path")  # type: ignore
+		fileparts: list[Match] = matches.markers.named("path")
 
 		if len(fileparts) < 2:
 			return
@@ -426,7 +426,7 @@ class PreferFilenameOverDirectory(Rule):
 
 		to_remove = []
 		for prop in {"season", "episode", "title"}:
-			all_matches: list[Match] = matches.named(prop)  # type: ignore
+			all_matches: list[Match] = matches.named(prop)
 			if not all_matches:
 				continue
 
@@ -628,7 +628,7 @@ class ExpectedTitles(Rule):
 			mtitle = f"{title.value}"
 			prev = title
 			for m in candidate_matches:
-				holes: list[Match] = matches.holes(prev.end, m.start)  # type: ignore
+				holes: list[Match] = matches.holes(prev.end, m.start)
 				hole = (
 					"".join(f" {h.value}" if h.value != "-" else " - " for h in holes)
 					or " "
@@ -645,6 +645,56 @@ class ExpectedTitles(Rule):
 					new_title.end = candidate_matches[-1].end
 					new_title.value = value
 					return [[title] + candidate_matches, [new_title]]
+
+
+class NumericEpisodeTitle(Rule):
+	"""Promote a numeric episode title to the episode number when there's no episode
+
+	guessit's `NumericEpisodeTitleToEpisode` only does this when a season is found but
+	`ExpectedTitles` merges the season in the title (`Honzuki no Gekokujou S4`).
+
+	Example: '[Erai-raws] Honzuki no Gekokujou S4 - 01 [1080p CR WEBRip HEVC AAC][MultiSub][1D7396AE].mkv'
+	Default:
+	```json
+	{
+		"title": "Honzuki no Gekokujou S4",
+		"episode_title": "01",
+	}
+	```
+	Expected:
+	```json
+	{
+		"title": "Honzuki no Gekokujou S4",
+		"episode": 1,
+	}
+	```
+	"""
+
+	priority = POST_PROCESS
+	dependency = ExpectedTitles
+	consequence = [RemoveMatch, AppendMatch]
+
+	@override
+	def when(self, matches: Matches, context) -> Any:
+		if matches.named("episode"):
+			return
+
+		titles: list[Match] = matches.named(
+			"episode_title",
+			lambda m: re.match(r"^\d{1,4}$", str(m.value).strip()) is not None,
+		)
+		titles += matches.named(
+			"alternative_title",
+			lambda m: re.match(r"^\d{1,4}$", str(m.value).strip()) is not None,
+		)
+		if not titles:
+			return
+
+		episode = copy(titles[0])
+		episode.name = "episode"
+		episode.value = int(str(titles[0].value).strip())
+		episode.tags = []
+		return [[titles[0]], [episode]]
 
 
 class SeasonYearDedup(Rule):
@@ -683,8 +733,8 @@ class SeasonYearDedup(Rule):
 
 	@override
 	def when(self, matches: Matches, context) -> Any:
-		season: list[Match] = matches.named("season")  # type: ignore
-		year: list[Match] = matches.named("year")  # type: ignore
+		season: list[Match] = matches.named("season")
+		year: list[Match] = matches.named("year")
 
 		to_remove = []
 		for y in year:
