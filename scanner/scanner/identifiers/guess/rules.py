@@ -415,6 +415,16 @@ class ExpectedTitles(Rule):
 	}
 	```
 
+	But the title should not absorb the only episode number of the file
+	Example: '[SubsPlease] Oshi no Ko - 02 (1080p).mkv' (with `Oshi no Ko 2` as an expected title)
+	Expected:
+	```json
+	{
+		"title": "Oshi no Ko",
+		"episode": 2
+	}
+	```
+
 	Or
 	Example: '[Erai-raws] JoJo no Kimyou na Bouken - Steel Ball Run - 01 [1080p NF WEBRip HEVC AAC][MultiSub][3C988D2A].mkv'
 	Default:
@@ -441,7 +451,7 @@ class ExpectedTitles(Rule):
 	def when(self, matches: Matches, context) -> Any:
 		from ..anilist import normalize_title
 
-		titles: list[Match] = matches.named("title", lambda m: m.tagged("title"))  # type: ignore
+		titles: list[Match] = matches.named("title", lambda m: m.tagged("title"))
 
 		if not titles or not context or not context["expected_titles"]:
 			return
@@ -469,6 +479,15 @@ class ExpectedTitles(Rule):
 		# Try longest combined title first, then progressively shorter ones
 		for end in range(len(absorbed), 0, -1):
 			candidate_matches = absorbed[:end]
+
+			# `Oshi no Ko - 02` is the episode 2, not the title `Oshi no Ko 2` without episode.
+			# seasons are also accepted since `Season 3 - 12` is still parsed as a range of seasons here.
+			if any(m.named("episode") for m in candidate_matches) and not matches.range(
+				candidate_matches[-1].end,
+				len(matches.input_string or ""),
+				lambda m: m.name in ("episode", "season"),
+			):
+				continue
 
 			mtitle = f"{title.value}"
 			prev = title
