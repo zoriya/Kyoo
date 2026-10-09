@@ -283,6 +283,8 @@ async def identify_anilist(_path: str, guess: Guess) -> Guess:
 			anime.tvdbid is None
 			or anime.defaulttvdbseason is None
 			or (anime.defaulttvdbseason == 1 and anime.episodeoffset == 0)
+			# absolute numbered animes (`One Piece 155.mkv`) can also use tvdb numbers (`One Piece S21E33.mkv`)
+			or (anime.defaulttvdbseason == "a" and "season" in guess.raw)
 		):
 			new_episodes.append(
 				Guess.Episode(
