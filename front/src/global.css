@@ -53,8 +53,7 @@
 }
 
 @layer theme {
-	:root,
-	:host {
+	:root {
 		@variant light {
 			--color-background: #f0f2f5;
 			--color-card: #e3e4e5;
