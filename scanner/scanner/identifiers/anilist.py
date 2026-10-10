@@ -184,11 +184,11 @@ def anidb_to_tvdb(
 				return (None, [])
 			return (map.tvdbseason, tvdb_eps)
 
-		# Check start/end range with offset
+		# Check start/end range with offset (no end means the range is still airing)
 		if (
 			map.start is not None
-			and map.end is not None
-			and map.start <= anidb_ep <= map.end
+			and map.start <= anidb_ep
+			and (map.end is None or anidb_ep <= map.end)
 		):
 			return (map.tvdbseason, [anidb_ep + map.offset])
 
@@ -216,9 +216,9 @@ def tvdb_to_anidb(
 			if len(overrides):
 				return [(anime, map.anidbseason, ep) for ep in overrides]
 
-			if map.start is not None and map.end is not None:
+			if map.start is not None:
 				candidate = tvdb_ep - map.offset
-				if map.start <= candidate <= map.end:
+				if map.start <= candidate and (map.end is None or candidate <= map.end):
 					return [(anime, map.anidbseason, candidate)]
 
 	seasons = sorted(
