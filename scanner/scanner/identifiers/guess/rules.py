@@ -5,10 +5,179 @@ from copy import copy
 from logging import getLogger
 from typing import Any, cast, override
 
+from guessit.rules.properties.title import TitleFromPosition
 from rebulk import POST_PROCESS, AppendMatch, RemoveMatch, RenameMatch, Rule
 from rebulk.match import Match, Matches
 
 logger = getLogger(__name__)
+
+
+class NumberTitle(Rule):
+	"""Understand a number at the start of the filename as the title when an episode follows it
+
+	Example: '[SubsPlease] 86 - Eighty Six - 05 (1080p).mkv'
+	Default:
+	```json
+	{
+		"episode": [86, 5],
+		"episode_title": "Eighty Six",
+	}
+	```
+	Expected:
+	```json
+	{
+		"title": "86",
+		"episode_title": "Eighty Six",
+		"episode": 5,
+	}
+	```
+	"""
+
+	# run before the other rules (like `ExpectedTitles` or `PreferFilenameOverDirectory`) that need the title
+	priority = POST_PROCESS + 1
+	consequence = [RemoveMatch, AppendMatch]
+
+	@override
+	def when(self, matches: Matches, context) -> Any:
+		fileparts: list[Match] = matches.markers.named("path")
+		if not fileparts:
+			return
+		filename = fileparts[-1]
+
+		if matches.range(filename.start, filename.end, lambda x: x.name == "title"):
+			return
+		first: Match | None = matches.range(
+			filename.start,
+			filename.end,
+			lambda x: not x.private and x.name != "release_group",
+			0,
+		)
+		if first is None or first.name != "episode":
+			return
+		episodes: list[Match] = matches.range(
+			first.end, filename.end, lambda x: x.name == "episode"
+		)
+		if not episodes:
+			return
+		# `12 - 13.mkv` is a range of episodes, not the serie `12`.
+		between = matches.range(first.end, episodes[0].start, lambda x: not x.private)
+		if not between and cast(int, first.value) < cast(int, episodes[0].value):
+			return
+
+		title = copy(first)
+		title.name = "title"
+		title.value = (matches.input_string or "")[first.start : first.end].strip()
+		title.tags = ["title"]
+		to_remove = matches.range(first.start, first.end, lambda x: x.name == "episode")
+		return [to_remove, [title]]
+
+
+class SingleDigitEpisode(Rule):
+	"""Split a single digit episode from a known title
+
+	guessit doesn't parse single digit episodes without a separator, they become part of the title.
+
+	Example: 'Asobi Asobase 6.mkv'
+	Default:
+	```json
+	{
+		"title": "Asobi Asobase 6",
+		"type": "movie",
+	}
+	```
+	Expected:
+	```json
+	{
+		"title": "Asobi Asobase",
+		"episode": 6,
+		"type": "episode",
+	}
+	```
+	"""
+
+	# run before guessit's `TypeProcessor` so the file is marked as an episode
+	priority = POST_PROCESS + 1
+	consequence = [RemoveMatch, AppendMatch]
+
+	@override
+	def when(self, matches: Matches, context) -> Any:
+		from ..anilist import normalize_title
+
+		if not context or not context["expected_titles"] or matches.named("episode"):
+			return
+
+		to_remove = []
+		to_add = []
+		for title in matches.named("title"):
+			m = re.match(r"^(.*\S)\s+(\d)$", str(title.value))
+			if (
+				not m
+				or normalize_title(m.group(1)) not in context["expected_titles"]
+				or normalize_title(str(title.value)) in context["expected_titles"]
+			):
+				continue
+
+			raw = (matches.input_string or "")[title.start : title.end]
+			digit = title.start + raw.rindex(m.group(2))
+
+			new_title = copy(title)
+			new_title.value = m.group(1)
+			new_title.end = digit
+			episode = copy(title)
+			episode.name = "episode"
+			episode.value = int(m.group(2))
+			episode.start = digit
+			episode.end = digit + 1
+			episode.tags = []
+			to_remove.append(title)
+			to_add += [new_title, episode]
+		return [to_remove, to_add]
+
+
+class DirectoryTitleNumber(Rule):
+	"""Remove episode numbers already part of a directory's title
+
+	guessit's `TitleToEpisodeTitle` converts titles that follow an episode number to an
+	episode_title, so the `100` of the directory would make the filename's title an episode_title.
+	This needs to run before it (same dependency & we're loaded first).
+
+	Example: '/media/Zom 100/[Erai-raws] Zom 100 - Zombie ni Naru made ni Shitai 100 no Koto - 01 [1080p][Multiple Subtitle][8AFBB298].mkv'
+	Default:
+	```json
+	{
+		"title": "Zom 100",
+		"episode_title": "Zom 100 - Zombie ni Naru made ni Shitai",
+		"episode": [100, 1],
+	}
+	```
+	Expected:
+	```json
+	{
+		"title": "Zom 100",
+		"episode_title": "Zombie ni Naru made ni Shitai 100 no Koto",
+		"episode": 1,
+	}
+	```
+	"""
+
+	dependency = TitleFromPosition
+	consequence = RemoveMatch
+
+	@override
+	def when(self, matches: Matches, context) -> Any:
+		fileparts: list[Match] = matches.markers.named("path")
+
+		to_remove = []
+		for part in fileparts[:-1]:
+			for title in matches.range(
+				part.start, part.end, lambda x: x.name == "title"
+			):
+				to_remove += matches.range(
+					title.start,
+					title.end,
+					lambda x: x.name == "episode" and x.tagged("weak-episode"),
+				)
+		return to_remove
 
 
 class UnlistTitles(Rule):
@@ -55,26 +224,40 @@ class UnlistTitles(Rule):
 
 	@override
 	def when(self, matches: Matches, context) -> Any:
-		fileparts: list[Match] = matches.markers.named("path")  # type: ignore
+		from ..anilist import normalize_title
 
+		expected_titles = context["expected_titles"] if context else []
+		fileparts: list[Match] = matches.markers.named("path")
+
+		to_remove = []
+		to_add = []
 		for part in fileparts:
 			titles: list[Match] = matches.range(
-				part.start, part.end, lambda x: x.name == "title"
-			)  # type: ignore
+				part.start,
+				part.end,
+				lambda x: x.name in ("title", "alternative_title"),
+			)
 
-			if not titles or len(titles) <= 1:
+			if len(titles) <= 1 or titles[0].name != "title":
 				continue
 
 			title = copy(titles[0])
 			for nmatch in titles[1:]:
 				# Check if titles are next to each other, if they are not ignore it.
-				next: list[Match] = matches.next(title)  # type: ignore
+				next: list[Match] = matches.next(title)
 				if not next or next[0] != nmatch:
 					logger.warning(f"Ignoring potential part of title: {nmatch.value}")
 					continue
 				title.end = nmatch.end
 
-			return [titles, [title]]
+			if (
+				normalize_title(str(titles[0].value)) in expected_titles
+				and normalize_title(str(title.value)) not in expected_titles
+			):
+				continue
+			to_remove += titles
+			to_add.append(title)
+		return [to_remove, to_add]
 
 
 class OrdinalSeasonRule(Rule):
@@ -109,7 +292,7 @@ class OrdinalSeasonRule(Rule):
 
 	@override
 	def when(self, matches: Matches, context) -> Any:
-		titles: list[Match] = matches.named("title")  # type: ignore
+		titles: list[Match] = matches.named("title")
 
 		to_remove = []
 		to_add = []
@@ -167,7 +350,7 @@ class MultipleSeasonRule(Rule):
 
 	@override
 	def when(self, matches: Matches, context) -> Any:
-		seasons: list[Match] = matches.named("season")  # type: ignore
+		seasons: list[Match] = matches.named("season")
 
 		if not seasons:
 			return
@@ -179,7 +362,7 @@ class MultipleSeasonRule(Rule):
 		):
 			return
 
-		value: str = initiator.value  # type: ignore
+		value: str = initiator.value
 		if "-" not in value:
 			return
 
@@ -234,7 +417,7 @@ class PreferFilenameOverDirectory(Rule):
 
 	@override
 	def when(self, matches: Matches, context) -> Any:
-		fileparts: list[Match] = matches.markers.named("path")  # type: ignore
+		fileparts: list[Match] = matches.markers.named("path")
 
 		if len(fileparts) < 2:
 			return
@@ -243,7 +426,7 @@ class PreferFilenameOverDirectory(Rule):
 
 		to_remove = []
 		for prop in {"season", "episode", "title"}:
-			all_matches: list[Match] = matches.named(prop)  # type: ignore
+			all_matches: list[Match] = matches.named(prop)
 			if not all_matches:
 				continue
 
@@ -367,6 +550,34 @@ class ExpectedTitles(Rule):
 		"episode": 15
 	}
 	```
+
+	But the title should not absorb the only episode number of the file
+	Example: '[SubsPlease] Oshi no Ko - 02 (1080p).mkv' (with `Oshi no Ko 2` as an expected title)
+	Expected:
+	```json
+	{
+		"title": "Oshi no Ko",
+		"episode": 2
+	}
+	```
+
+	Or
+	Example: '[Erai-raws] JoJo no Kimyou na Bouken - Steel Ball Run - 01 [1080p NF WEBRip HEVC AAC][MultiSub][3C988D2A].mkv'
+	Default:
+	```json
+	{
+		"title": "JoJo no Kimyou na Bouken",
+		"episode_title": "Steel Ball Run",
+		"episode": 1
+	}
+	```
+	Expected:
+	```json
+	{
+		"title": "Steel Ball Run JoJo no Kimyou na Bouken",
+		"episode": 1
+	}
+	```
 	"""
 
 	priority = POST_PROCESS
@@ -376,9 +587,9 @@ class ExpectedTitles(Rule):
 	def when(self, matches: Matches, context) -> Any:
 		from ..anilist import normalize_title
 
-		titles: list[Match] = matches.named("title", lambda m: m.tagged("title"))  # type: ignore
+		titles: list[Match] = matches.named("title", lambda m: m.tagged("title"))
 
-		if not titles or not context["expected_titles"]:
+		if not titles or not context or not context["expected_titles"]:
 			return
 		title = titles[0]
 
@@ -389,6 +600,7 @@ class ExpectedTitles(Rule):
 			nmatch: list[Match] = matches.next(current)
 			if not nmatch or not (
 				nmatch[0].tagged("title")
+				or nmatch[0].named("episode_title")
 				or nmatch[0].named("season")
 				or nmatch[0].named("episode")
 				or nmatch[0].named("part")
@@ -404,10 +616,19 @@ class ExpectedTitles(Rule):
 		for end in range(len(absorbed), 0, -1):
 			candidate_matches = absorbed[:end]
 
+			# `Oshi no Ko - 02` is the episode 2, not the title `Oshi no Ko 2` without episode.
+			# seasons are also accepted since `Season 3 - 12` is still parsed as a range of seasons here.
+			if any(m.named("episode") for m in candidate_matches) and not matches.range(
+				candidate_matches[-1].end,
+				len(matches.input_string or ""),
+				lambda m: m.name in ("episode", "season"),
+			):
+				continue
+
 			mtitle = f"{title.value}"
 			prev = title
 			for m in candidate_matches:
-				holes: list[Match] = matches.holes(prev.end, m.start)  # type: ignore
+				holes: list[Match] = matches.holes(prev.end, m.start)
 				hole = (
 					"".join(f" {h.value}" if h.value != "-" else " - " for h in holes)
 					or " "
@@ -415,11 +636,65 @@ class ExpectedTitles(Rule):
 				mtitle = f"{mtitle}{hole}{m.value}"
 				prev = m
 
-			if normalize_title(mtitle) in context["expected_titles"]:
-				new_title = copy(title)
-				new_title.end = candidate_matches[-1].end
-				new_title.value = mtitle
-				return [[title] + candidate_matches, [new_title]]
+			# releases sometimes swap the parts (`JoJo no Kimyou na Bouken - Steel Ball Run`
+			# for `Steel Ball Run: JoJo no Kimyou na Bouken`)
+			swapped = f"{mtitle[len(str(title.value)) :].strip(' -')} {title.value}"
+			for value in [mtitle, swapped]:
+				if normalize_title(value) in context["expected_titles"]:
+					new_title = copy(title)
+					new_title.end = candidate_matches[-1].end
+					new_title.value = value
+					return [[title] + candidate_matches, [new_title]]
+
+
+class NumericEpisodeTitle(Rule):
+	"""Promote a numeric episode title to the episode number when there's no episode
+
+	guessit's `NumericEpisodeTitleToEpisode` only does this when a season is found but
+	`ExpectedTitles` merges the season in the title (`Honzuki no Gekokujou S4`).
+
+	Example: '[Erai-raws] Honzuki no Gekokujou S4 - 01 [1080p CR WEBRip HEVC AAC][MultiSub][1D7396AE].mkv'
+	Default:
+	```json
+	{
+		"title": "Honzuki no Gekokujou S4",
+		"episode_title": "01",
+	}
+	```
+	Expected:
+	```json
+	{
+		"title": "Honzuki no Gekokujou S4",
+		"episode": 1,
+	}
+	```
+	"""
+
+	priority = POST_PROCESS
+	dependency = ExpectedTitles
+	consequence = [RemoveMatch, AppendMatch]
+
+	@override
+	def when(self, matches: Matches, context) -> Any:
+		if matches.named("episode"):
+			return
+
+		titles: list[Match] = matches.named(
+			"episode_title",
+			lambda m: re.match(r"^\d{1,4}$", str(m.value).strip()) is not None,
+		)
+		titles += matches.named(
+			"alternative_title",
+			lambda m: re.match(r"^\d{1,4}$", str(m.value).strip()) is not None,
+		)
+		if not titles:
+			return
+
+		episode = copy(titles[0])
+		episode.name = "episode"
+		episode.value = int(str(titles[0].value).strip())
+		episode.tags = []
+		return [[titles[0]], [episode]]
 
 
 class SeasonYearDedup(Rule):
@@ -458,8 +733,8 @@ class SeasonYearDedup(Rule):
 
 	@override
 	def when(self, matches: Matches, context) -> Any:
-		season: list[Match] = matches.named("season")  # type: ignore
-		year: list[Match] = matches.named("year")  # type: ignore
+		season: list[Match] = matches.named("season")
+		year: list[Match] = matches.named("year")
 
 		to_remove = []
 		for y in year:

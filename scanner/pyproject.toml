@@ -8,7 +8,7 @@ dependencies = [
     "aiohttp>=3.14.3",
     "asyncpg>=0.30.0",
     "fastapi[standard]>=0.115.12",
-    "guessit",
+    "guessit>=4.4.0",
     "langcodes>=3.5.0",
     "opentelemetry-api>=1.38.0",
     "opentelemetry-exporter-otlp-proto-grpc>=1.38.0",
@@ -23,9 +23,6 @@ dependencies = [
     "python-slugify>=8.0.4",
     "watchfiles>=1.0.5",
 ]
-
-[tool.uv.sources]
-guessit = { git = "https://github.com/zoriya/guessit" }
 
 [tool.ruff.format]
 indent-style = "tab"

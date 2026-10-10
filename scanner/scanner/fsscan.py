@@ -174,9 +174,13 @@ class FsScanner:
 			for ep in video.guess.episodes:
 				for slug in slugs:
 					video.for_.append(
-						For.Episode(serie=slug, season=ep.season, episode=ep.episode)
-						if ep.season is not None and ep.season != 0
+						For.Order(serie=slug, order=ep.episode)
+						if ep.season is None
 						else For.Special(serie=slug, special=ep.episode)
+						if ep.season == 0
+						else For.Episode(
+							serie=slug, season=ep.season, episode=ep.episode
+						)
 					)
 
 				for k, v in video.guess.external_id.items():

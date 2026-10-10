@@ -73,7 +73,8 @@ class AnimeListDb(BaseXmlModel, tag="anime-list"):
 		@field_validator("tvdbid", "tmdbtv", "tmdbid", "imdbid", "defaulttvdbseason")
 		@classmethod
 		def _empty_to_none(cls, v: str | None) -> str | None:
-			return v or None
+			# `defaulttvdbseason="0"` (specials) should not be converted to None
+			return v if v != "" else None
 
 		class EpisodeMapping(BaseXmlModel):
 			anidbseason: int = attr()
@@ -107,6 +108,9 @@ class AnimeListData:
 	fetched_at: datetime
 	# normalized title -> anidbid
 	titles: dict[str, str] = field(default_factory=dict)
+	# normalized title without anidb's disambiguation year -> (year, anidbid)
+	# (`Hunter x Hunter (1999)` is stored as `hunter x hunter` -> (1999, 132))
+	yearless_titles: dict[str, list[tuple[int, str]]] = field(default_factory=dict)
 	# anidbid -> AnimeEntry
 	animes: dict[str, AnimeListDb.AnimeEntry] = field(default_factory=dict)
 	# tvdbid -> anidbid
@@ -130,6 +134,14 @@ async def get_anilist_data() -> AnimeListData:
 				for x in titles.animes
 				for title in x.titles
 			}
+			ret.yearless_titles = defaultdict(list)
+			for x in titles.animes:
+				for title in x.titles:
+					m = re.match(r"^(.*\S)\s*\((\d{4})\)$", title.text)
+					if m:
+						ret.yearless_titles[normalize_title(m.group(1))].append(
+							(int(m.group(2)), x.aid)
+						)
 		async with session.get(AnimeListDb.get_url()) as resp:
 			resp.raise_for_status()
 			db = AnimeListDb.from_xml(await resp.read())
@@ -172,11 +184,11 @@ def anidb_to_tvdb(
 				return (None, [])
 			return (map.tvdbseason, tvdb_eps)
 
-		# Check start/end range with offset
+		# Check start/end range with offset (no end means the range is still airing)
 		if (
 			map.start is not None
-			and map.end is not None
-			and map.start <= anidb_ep <= map.end
+			and map.start <= anidb_ep
+			and (map.end is None or anidb_ep <= map.end)
 		):
 			return (map.tvdbseason, [anidb_ep + map.offset])
 
@@ -204,9 +216,9 @@ def tvdb_to_anidb(
 			if len(overrides):
 				return [(anime, map.anidbseason, ep) for ep in overrides]
 
-			if map.start is not None and map.end is not None:
+			if map.start is not None:
 				candidate = tvdb_ep - map.offset
-				if map.start <= candidate <= map.end:
+				if map.start <= candidate and (map.end is None or candidate <= map.end):
 					return [(anime, map.anidbseason, candidate)]
 
 	seasons = sorted(
@@ -233,24 +245,63 @@ def tvdb_to_anidb(
 async def identify_anilist(_path: str, guess: Guess) -> Guess:
 	data = await get_anilist_data()
 
-	aid = data.titles.get(normalize_title(guess.title))
-	if aid is None:
-		return guess
-	anime = data.animes.get(aid)
+	title = normalize_title(guess.title)
+	yearless = [
+		(year, data.animes[x])
+		for year, x in data.yearless_titles.get(title, [])
+		if x in data.animes
+	]
+	anime = next((x for year, x in yearless if year in guess.years), None)
 	if anime is None:
+		aid = data.titles.get(title)
+		anime = data.animes.get(aid) if aid else None
+		if anime is None:
+			return guess
+		# a file named with the bare title of a special (pilot, ova) is way more likely to be
+		# an episode of the serie with the same name & tvdb id.
+		if anime.defaulttvdbseason == 0 and anime.tvdbid:
+			anime = next(
+				(
+					x
+					for _, x in yearless
+					if x.tvdbid == anime.tvdbid
+					and x.defaulttvdbseason == 1
+					and x.episodeoffset == 0
+				),
+				anime,
+			)
+	aid = anime.anidbid
+
+	# a movie file named like the start of a tv serie (`Iron man.mkv`, `Monster (2003).mkv`)
+	# is way more likely to be a movie with the same name than the first episode of the anime.
+	if (
+		guess.kind == "movie"
+		and not anime.tmdbid
+		and anime.episodeoffset == 0
+		and anime.defaulttvdbseason in (1, "a")
+	):
 		return guess
 
 	new_external_id = dict(guess.external_id)
 	new_external_id[ProviderName.ANIDB] = aid
 	if anime.tvdbid:
 		new_external_id[ProviderName.TVDB] = anime.tvdbid
+	# anidb can group multiple movies in an entry (`Kizumonogatari` is a trilogy with
+	# `tmdbid="357786,362584,362585"`), the episode number is the index of the movie.
+	tmdbids = anime.tmdbid.split(",") if anime.tmdbid else []
+	imdbids = anime.imdbid.split(",") if anime.imdbid else []
+	movie = guess.episodes[0].episode - 1 if len(guess.episodes) == 1 else None
 	# tmdbtv is for TV series, tmdbid is for standalone movies
 	if anime.tmdbtv:
 		new_external_id[ProviderName.TMDB] = anime.tmdbtv
-	elif anime.tmdbid and "," not in anime.tmdbid:
-		new_external_id[ProviderName.TMDB] = anime.tmdbid
-	if anime.imdbid and "," not in anime.imdbid:
-		new_external_id[ProviderName.IMDB] = anime.imdbid
+	elif len(tmdbids) == 1:
+		new_external_id[ProviderName.TMDB] = tmdbids[0]
+	elif movie is not None and 0 <= movie < len(tmdbids):
+		new_external_id[ProviderName.TMDB] = tmdbids[movie]
+	if len(imdbids) == 1:
+		new_external_id[ProviderName.IMDB] = imdbids[0]
+	elif movie is not None and 0 <= movie < len(imdbids):
+		new_external_id[ProviderName.IMDB] = imdbids[movie]
 
 	# if we don't have a single external id, skip it and use the normal flow
 	if len(new_external_id) == 1:
@@ -280,20 +331,34 @@ async def identify_anilist(_path: str, guess: Guess) -> Guess:
 	new_episodes: list[Guess.Episode] = []
 	for ep in guess.episodes:
 		if (
+			anime.tvdbid is not None
+			and anime.defaulttvdbseason == 1
+			and anime.episodeoffset == 0
+			and "season" not in guess.raw
+		):
+			# fansubs use absolute numbers for the first entry of an anime
+			# (`Jujutsu Kaisen - 47.mkv` is s2e23 not s1e47)
+			new_episodes.append(Guess.Episode(season=None, episode=ep.episode))
+			continue
+		if (
 			anime.tvdbid is None
 			or anime.defaulttvdbseason is None
-			or anime.defaulttvdbseason == 1
+			or (anime.defaulttvdbseason == 1 and anime.episodeoffset == 0)
+			# absolute numbered animes (`One Piece 155.mkv`) can also use tvdb numbers (`One Piece S21E33.mkv`)
+			or (anime.defaulttvdbseason == "a" and "season" in guess.raw)
 		):
 			new_episodes.append(
 				Guess.Episode(
-					season=ep.season or (1 if anime.defaulttvdbseason else None),
+					season=ep.season
+					if ep.season is not None
+					else (1 if anime.defaulttvdbseason else None),
 					episode=ep.episode,
 				)
 			)
 			continue
 
-		# guess numbers are anidb-relative if defaulttvdbseason != 1 because
-		# the title already contains season information.
+		# guess numbers are anidb-relative if the anime is not the first tvdb season
+		# (or a later part of it) because the title already contains season information.
 		tvdb_season, tvdb_eps = anidb_to_tvdb(anime, ep.episode)
 		new_episodes += [
 			Guess.Episode(
@@ -309,15 +374,21 @@ async def identify_anilist(_path: str, guess: Guess) -> Guess:
 		and anime.tvdbid
 		and isinstance(anime.defaulttvdbseason, int)
 	):
+		tvdb_season, tvdb_eps = anidb_to_tvdb(anime, 1)
+		new_episodes += [
+			Guess.Episode(season=tvdb_season, episode=tvdb_ep) for tvdb_ep in tvdb_eps
+		]
+	if anime.tvdbid and new_episodes:
 		kind = "episode"
-		new_episodes.append(
-			Guess.Episode(
-				season=anime.defaulttvdbseason,
-				episode=1 + anime.episodeoffset,
-			)
-		)
-	elif guess.kind == "episode" and anime.tmdbid:
+	elif anime.tmdbid:
 		kind = "movie"
+
+	if kind == "movie" and anime.name:
+		new_title = (
+			f"{anime.name} {movie + 1}"
+			if len(tmdbids) > 1 and movie is not None
+			else anime.name
+		)
 
 	return Guess(
 		title=new_title or guess.title,

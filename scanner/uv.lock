@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.13"
 resolution-markers = [
     "python_full_version >= '3.14'",
@@ -868,12 +868,16 @@ wheels = [
 
 [[package]]
 name = "guessit"
-version = "3.8.0"
-source = { git = "https://github.com/zoriya/guessit#f1d818cfe2e88a08c620f032cf1abd1457e81bcb" }
+version = "4.4.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "babelfish" },
     { name = "python-dateutil" },
     { name = "rebulk" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a7/59/7efd84be0e171260ba4252dab8415d60a5500c22148fa91c61f727a6c909/guessit-4.4.0.tar.gz", hash = "sha256:cca2c19ecd872c75ee7ebcbdc11075f5ae884882ec0ad67f742c3d25f2d47beb", size = 481149, upload-time = "2026-07-31T22:39:30.586Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4c/87/90c2040ffc623ab90993eee9e03ade9ce8168de4d04948b77004d17032c1/guessit-4.4.0-py3-none-any.whl", hash = "sha256:565bf82dd6dc8801f357b2eec6a1dd447007f398dbebd06b7b440e303e2df3bc", size = 334253, upload-time = "2026-07-31T22:39:28.126Z" },
 ]
 
 [[package]]
@@ -1938,7 +1942,7 @@ requires-dist = [
     { name = "aiohttp", specifier = ">=3.14.3" },
     { name = "asyncpg", specifier = ">=0.30.0" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.12" },
-    { name = "guessit", git = "https://github.com/zoriya/guessit" },
+    { name = "guessit", specifier = ">=4.4.0" },
     { name = "langcodes", specifier = ">=3.5.0" },
     { name = "opentelemetry-api", specifier = ">=1.38.0" },
     { name = "opentelemetry-exporter-otlp-proto-grpc", specifier = ">=1.38.0" },
