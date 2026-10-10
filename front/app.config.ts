@@ -71,7 +71,7 @@ export const expo: ExpoConfig = {
 				backgroundColor: "#6b00b8",
 			},
 		],
-		"react-native-omni",
+		["react-native-omni", { castReceiver: IS_TV }],
 		"./plugins/withNotificationIcon",
 		[
 			"react-native-localization-settings",

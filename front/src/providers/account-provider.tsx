@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
+import { useRouter, useSegments } from "expo-router";
 import { type ReactNode, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
@@ -40,11 +40,14 @@ export const AccountProvider = ({ children }: { children: ReactNode }) => {
 	const authToken = accountsV.selectedAccount?.token ?? null;
 	const auth = useMemo(() => ({ apiUrl, authToken }), [apiUrl, authToken]);
 
+	// the watch page can play a cast (android tv) with the caster's account
+	const segments: string[] = useSegments();
+	const needsAccount = segments[0] === "(app)" && segments[1] !== "watch";
 	useEffect(() => {
-		if (Platform.OS === "web" || apiUrl) return;
+		if (Platform.OS === "web" || apiUrl || !needsAccount) return;
 		const id = setTimeout(() => router.replace("/login"), 0);
 		return () => clearTimeout(id);
-	}, [apiUrl, router]);
+	}, [apiUrl, router, needsAccount]);
 
 	// update user's data from kyoo on startup, it could have changed.
 	// (provider lives above the navigator, we can't use `useFetch`)
