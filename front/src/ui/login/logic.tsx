@@ -120,10 +120,10 @@ export const deviceLogin = async (
 	}
 };
 
-export const logout = async () => {
+export const logout = async (id?: string) => {
 	const accounts = readAccounts();
-	const account = accounts.find((x) => x.selected);
-	removeAccounts((x) => x.selected);
+	const account = accounts.find((x) => (id ? x.id === id : x.selected));
+	removeAccounts((x) => x.id === account?.id);
 	if (account) {
 		try {
 			await queryFn({

@@ -343,6 +343,11 @@
 		"device": {
 			"instructions": "On your phone or computer, go to {{url}} (Settings > Sessions > Login a TV) and enter this code:",
 			"or-login": "Or login/register"
+		},
+		"switch": {
+			"title": "Who's watching?",
+			"hint": "Long press an account to logout.",
+			"logout-confirmation": "Logout {{username}} from this device?"
 		}
 	},
 	"downloads": {

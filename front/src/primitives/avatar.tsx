@@ -31,6 +31,7 @@ export const Avatar = <AsProps = ViewProps>({
 	alt,
 	placeholder,
 	className,
+	placeholderClassName,
 	style,
 	as,
 	...props
@@ -39,6 +40,7 @@ export const Avatar = <AsProps = ViewProps>({
 	alt?: string;
 	placeholder?: string;
 	className?: string;
+	placeholderClassName?: string;
 	style?: ViewStyle;
 	as?: ComponentType<AsProps>;
 } & AsProps) => {
@@ -55,7 +57,12 @@ export const Avatar = <AsProps = ViewProps>({
 			{...(props as AsProps)}
 		>
 			{placeholder && (
-				<P className="text-center text-slate-200 dark:text-slate-200">
+				<P
+					className={cn(
+						"text-center text-slate-200 dark:text-slate-200",
+						placeholderClassName,
+					)}
+				>
 					{placeholder[0]}
 				</P>
 			)}
