@@ -100,5 +100,3 @@ require (
 	golang.org/x/text v0.42.0
 	golang.org/x/time v0.16.0 // indirect
 )
-
-replace github.com/asticode/go-astisub => github.com/zoriya/go-astisub v0.42.1-0.20260810114112-a5151634cd4e
