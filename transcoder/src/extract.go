@@ -1,6 +1,7 @@
 package src
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -15,7 +16,7 @@ import (
 	"github.com/zoriya/kyoo/transcoder/src/utils"
 )
 
-const ExtractVersion = 1
+const ExtractVersion = 2
 
 func (s *MetadataService) ExtractSubs(ctx context.Context, info *MediaInfo) (res any, err error) {
 	get_running, set := s.extractLock.Start(info.Sha)
@@ -161,6 +162,25 @@ func (s *MetadataService) extractSubs(ctx context.Context, info *MediaInfo) (err
 	if err := cmd.Run(); err != nil {
 		slog.ErrorContext(ctx, "error starting ffmpeg extract", "err", err)
 		return err
+	}
+
+	// mkv's ass CodecPrivate (the header) can end with a NUL that ffmpeg copies
+	// as is. libass reads tracks as C strings and drops every event after it.
+	for _, sub := range info.Subtitles {
+		if sub.IsExternal || sub.Extension == nil || *sub.Extension != "ass" {
+			continue
+		}
+		path := fmt.Sprintf("%s/%d.%s", subDir, *sub.Index, *sub.Extension)
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return fmt.Errorf("failed to read extracted subtitle %q: %w", path, err)
+		}
+		if bytes.IndexByte(data, 0) == -1 {
+			continue
+		}
+		if err := os.WriteFile(path, bytes.ReplaceAll(data, []byte{0}, nil), 0660); err != nil {
+			return fmt.Errorf("failed to write extracted subtitle %q: %w", path, err)
+		}
 	}
 
 	err = storage.SaveFilesToBackend(ctx, s.storage, workdir, info.Sha)
