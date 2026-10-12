@@ -35,6 +35,13 @@ cast-media-player {
 	--splash-color: var(--background);
 }
 
+/* Google TV devices get caf's dpad ui instead of the tv-overlay: it's appended
+ * to the body (not in cast-media-player) & its scrim covers the subtitles.
+ * Keep it focusable so the remote's ok button still toggles pause. */
+touch-controls {
+	opacity: 0 !important;
+}
+
 .overlay {
 	position: absolute;
 	top: 0;
