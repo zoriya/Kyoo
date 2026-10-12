@@ -46,9 +46,9 @@
 		"multiVideos": "Plusieurs fichiers vidéo sont disponibles",
 		"videosCount": "{{number}} vidéos",
 		"version": "Version {{number}}",
-		"part": "Partie {{number}}",
+		"part": "Partie N°{{number}}",
 		"videos-map": "Modifier les correspondances vidéos",
-		"staff-as": "comme {{character}}",
+		"staff-as": "en tant que {{character}}",
 		"staff-kind": {
 			"actor": "Acteur",
 			"director": "Directeur",
@@ -57,7 +57,9 @@
 			"music": "Musique",
 			"crew": "Equipage",
 			"other": "Autre"
-		}
+		},
+		"details": "Genres, tags et distribution",
+		"remap": "Changer l'attribution"
 	},
 	"browse": {
 		"sortby": "Trier par {{key}}",
@@ -84,7 +86,8 @@
 			"serie": "Séries"
 		},
 		"mediatype-tt": "Type de média",
-		"mediatypelabel": "Type de média"
+		"mediatypelabel": "Type de média",
+		"not": "N'est pas"
 	},
 	"misc": {
 		"settings": "Paramètres",
@@ -105,7 +108,7 @@
 		"browse": "Galerie",
 		"search": "Rechercher",
 		"login": "Connexion",
-		"admin": "Section admin",
+		"admin": "Administrateur",
 		"download": "Télécharger",
 		"profile": "Profil"
 	},
@@ -132,12 +135,40 @@
 			},
 			"audioLanguage": {
 				"label": "Langue audio",
-				"description": "Langue audio par défaut utilisée lors de la lecture de vidéos multi-audio"
+				"description": "Langue audio par défaut utilisée lors de la lecture de vidéos multi-audio",
+				"original": "D'origine"
 			},
 			"subtitleLanguage": {
 				"label": "Langue des sous-titres",
 				"description": "Langue des sous-titres utilisée par défaut",
 				"none": "Aucun"
+			},
+			"player": {
+				"label": "Lecteur vidéo",
+				"description": "Le lecteur vidéo utilisé pour lire des vidéos sur cet appareil",
+				"vlc": "VLC",
+				"exoplayer": "Lecteur ExoPlayer"
+			},
+			"chapterSkip": {
+				"label": "Passer le chapitre",
+				"behaviors": {
+					"autoSkip": "Passer automatiquement",
+					"autoSkipExceptFirstAppearance": "Passer automatiquement après la première apparition",
+					"showSkipButton": "Montrer le bouton 'Passer'",
+					"disabled": "Ne rien faire"
+				},
+				"types": {
+					"recap": "Résumé",
+					"intro": "Introduction",
+					"credits": "Crédits",
+					"preview": "Aperçu"
+				},
+				"descriptions": {
+					"recap": "Contrôle le comportement lorsqu'un chapitre résumé commence",
+					"intro": "Contrôle le comportement lorsque le générique commence",
+					"credits": "Contrôle le comportement lorsque le générique de fin commence",
+					"preview": "Contrôle le comportement lorsque l'aperçu du prochain épisode commence"
+				}
 			}
 		},
 		"account": {
@@ -177,6 +208,12 @@
 				"label": "Github",
 				"description": "Ouvrez la page github où vous pouvez lire le code de kyoo"
 			}
+		},
+		"sessions": {
+			"label": "Sessions",
+			"description": "Crée le {{createdDate}} - Dernière utilisation le {{lastUsed}}",
+			"current": "Session actuelle",
+			"revoke": "Révoquer"
 		}
 	},
 	"player": {
@@ -197,7 +234,24 @@
 		"auto": "Auto",
 		"notInPristine": "Non disponible en pristine",
 		"unsupportedError": "Le codec vidéo n'est pas pris en charge, transcode en cours…",
-		"videos": "Vidéo"
+		"videos": "Vidéo",
+		"seek": "{{seconds}} secondes",
+		"cast": "Projeter sur un appareil (Cast)",
+		"stop-cast": "Arrêter de projeter",
+		"casting": {
+			"connecting": "Connection en cours…",
+			"playing": "En lecture sur votre TV"
+		},
+		"not-available": "{{entry}} n'est pas encore disponible sur Kyoo pour le moment, demandez aux administrateurs",
+		"fatal": "Erreur de lecture critique",
+		"entry-list": "Liste des entrées",
+		"chapters": {
+			"skip": "Passer {{type}}",
+			"intro": "Intro",
+			"credits": "Générique",
+			"recap": "Récap'",
+			"preview": "Prévisualisation"
+		}
 	},
 	"search": {
 		"empty": "Aucun résultat trouvé. Essayer avec une autre recherche."
@@ -219,7 +273,9 @@
 		"or-login": "Vous avez déjà un compte ? <1>Connectez-vous<1/>.",
 		"password-no-match": "Mots de passe différents.",
 		"delete": "Supprimer votre compte",
-		"delete-confirmation": "Cette action ne peut pas être annulée. Êtes-vous sûr ?"
+		"delete-confirmation": "Cette action ne peut pas être annulée. Êtes-vous sûr ?",
+		"register-disabled": "L'enregistrement est désactivé",
+		"register-disabled-oidc": "La création de mot de passe est désactivé. Veuillez utiliser l'OIDC (OAuth)."
 	},
 	"downloads": {
 		"empty": "Rien de téléchargé pour l'instant, commencez à rechercher quelque chose que vous aimez",
@@ -262,7 +318,8 @@
 		"hearing-impaired": "ST",
 		"unknown": "Inconnu",
 		"title": "Infos du fichier",
-		"noaudio": "Aucune piste audio"
+		"noaudio": "Aucune piste audio",
+		"channels": "{{channels}} Chaînes"
 	},
 	"admin": {
 		"users": {
@@ -272,7 +329,12 @@
 			"set-permissions": "Definir les permissions",
 			"delete": "Supprimer l'utilisateur",
 			"unverifed": "Non vérifié",
-			"verify": "Vérifier l'utilisateur"
+			"verify": "Vérifier l'utilisateur",
+			"table": {
+				"username": "Nom d'utilisateur",
+				"lastSeen": "Vu pour la dernière fois",
+				"oidc": "OIDC (OAuth)"
+			}
 		},
 		"scanner": {
 			"label": "Scanner",
@@ -289,7 +351,35 @@
 			"status-failed": "Échec",
 			"progress-running": "{{count}} en cours d'analyse",
 			"progress-pending": "{{count}} en attente",
-			"progress-failed": "{{count}} en échec"
+			"progress-failed": "{{count}} en échec",
+			"match": "Correspondance",
+			"match-file": "Correspond à {{file}}"
+		},
+		"streams": {
+			"title": "Streams",
+			"subtitle": "Actuellement en train de lire des vidéos et de transcoder",
+			"empty": "Pas de stream en cours.",
+			"guest": "Invité",
+			"viewers": "Spectateurs",
+			"noActiveViewer": "Aucun spectateurs",
+			"watching": "Lecture en {{quality}}",
+			"none": "Aucun",
+			"runningVideoTranscodes": "Transcodages vidéos",
+			"runningAudioTranscodes": "Transcodages audios",
+			"progress": {
+				"available": "Disponible",
+				"transcoding": "Transcodage"
+			}
+		},
+		"add": {
+			"title": "Ajouter à la bibliothèque",
+			"searchPlaceholder": "Rechercher un film, série...",
+			"year": "Année",
+			"library": "Bibliothèque",
+			"movies": "Films",
+			"series": "Séries",
+			"noResults": "Aucun résultat",
+			"typeToSearch": "Entrez un nom pour trouver un film, série"
 		}
 	},
 	"genres": {
@@ -332,7 +422,20 @@
 		"history": "Historique",
 		"watchlist": "Watchlist",
 		"statuses": {
-			"all": "Tout"
+			"all": "Tout",
+			"completed": "Complété",
+			"watching": "En visionnage",
+			"rewatching": "En re-visionnage",
+			"dropped": "Abandonné",
+			"planned": "Prévu"
 		}
+	},
+	"miniPlayer": {
+		"open": "Ouvrir le lecteur",
+		"stop": "Arrêter la projection"
+	},
+	"remote": {
+		"rewind": "Retour de 10s",
+		"forward": "Avancer de 10s"
 	}
 }
