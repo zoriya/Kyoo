@@ -22,6 +22,15 @@ type Apikey struct {
 	LastUsed  time.Time     `json:"lastUsed"`
 }
 
+type DeviceLogin struct {
+	Pk         int32     `json:"pk"`
+	DeviceCode string    `json:"deviceCode"`
+	UserCode   string    `json:"userCode"`
+	Device     *string   `json:"device"`
+	UserPk     *int32    `json:"userPk"`
+	CreatedAt  time.Time `json:"createdAt"`
+}
+
 type OidcHandle struct {
 	UserPk       int32      `json:"userPk"`
 	Provider     string     `json:"provider"`

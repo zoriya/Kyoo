@@ -22,7 +22,6 @@ import {
 	Avatar,
 	FocusGroup,
 	Icon,
-	Menu,
 	P,
 	PressableFeedback,
 	rem,
@@ -31,7 +30,6 @@ import {
 import { useAccount } from "~/providers/account-context";
 import { cn } from "~/utils";
 import KyooLongLogo from "~public/icon-long.svg";
-import { AccountMenuItems } from "./navbar";
 
 const AnimatedGuide = Animated.createAnimatedComponent(FocusGroup);
 
@@ -99,8 +97,8 @@ export const TvTabs = () => {
 							icon={Settings}
 							small
 						/>
-						<Menu
-							Trigger={RailItem}
+						<RailItem
+							href="/accounts"
 							label={account?.username ?? t("navbar.login")}
 							left={
 								<Avatar
@@ -110,9 +108,7 @@ export const TvTabs = () => {
 									className="h-7 w-7"
 								/>
 							}
-						>
-							<AccountMenuItems />
-						</Menu>
+						/>
 					</AnimatedGuide>
 				</TabList>
 			</View>

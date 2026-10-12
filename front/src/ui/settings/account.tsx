@@ -72,7 +72,7 @@ export const AccountSettings = () => {
 					<Button
 						icon={Logout}
 						text={t("login.logout")}
-						onPress={logout}
+						onPress={() => logout()}
 						className="flex-1"
 					/>
 					<Button

@@ -90,10 +90,40 @@ export const oidcLogin = async (
 	}
 };
 
-export const logout = async () => {
+export const deviceLogin = async (
+	deviceCode: string,
+	device: string,
+	apiUrl: string,
+): Promise<Result<Account | null, KyooError>> => {
+	try {
+		const { token } = await queryFn({
+			method: "DELETE",
+			url: `${apiUrl}/auth/device?device=${encodeURIComponent(device)}`,
+			body: { deviceCode },
+			authToken: null,
+			parser: z.object({ token: z.string() }),
+		});
+		const user = await queryFn({
+			method: "GET",
+			url: `${apiUrl}/auth/users/me`,
+			authToken: token,
+			parser: User,
+		});
+		const account: Account = { ...user, apiUrl, token, selected: true };
+		addAccount(account);
+		return { ok: true, value: account };
+	} catch (e) {
+		// the user has not yet approved the login
+		if ((e as KyooError).status === 428) return { ok: true, value: null };
+		console.error("deviceLogin", e);
+		return { ok: false, error: e as KyooError };
+	}
+};
+
+export const logout = async (id?: string) => {
 	const accounts = readAccounts();
-	const account = accounts.find((x) => x.selected);
-	removeAccounts((x) => x.selected);
+	const account = accounts.find((x) => (id ? x.id === id : x.selected));
+	removeAccounts((x) => x.id === account?.id);
 	if (account) {
 		try {
 			await queryFn({

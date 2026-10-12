@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, View } from "react-native";
@@ -12,7 +13,8 @@ export const cleanApiUrl = (apiUrl: string) => {
 };
 
 export const ServerUrlPage = () => {
-	const [_apiUrl, setApiUrl] = useState("");
+	const { serverUrl } = useLocalSearchParams<{ serverUrl?: string }>();
+	const [_apiUrl, setApiUrl] = useState(serverUrl ?? "");
 	const apiUrl = cleanApiUrl(_apiUrl);
 	const { data, error } = useQuery({
 		queryKey: [apiUrl, "api", "health"],
@@ -39,6 +41,7 @@ export const ServerUrlPage = () => {
 			<H1>{t("login.server")}</H1>
 			<View className="justify-center">
 				<Input
+					defaultValue={serverUrl}
 					onChangeText={setApiUrl}
 					autoCorrect={false}
 					autoCapitalize="none"

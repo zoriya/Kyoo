@@ -6,6 +6,7 @@ import { A, Button, H1, Input, P } from "~/primitives";
 import { defaultApiUrl } from "~/providers/account-provider";
 import { useFetch } from "~/query";
 import { useQueryState } from "~/utils";
+import { DeviceLoginPage } from "./device";
 import { FormPage } from "./form";
 import { login } from "./logic";
 import { OidcLogin } from "./oidc";
@@ -24,6 +25,8 @@ export const LoginPage = () => {
 	const { data: info } = useFetch(OidcLogin.query(apiUrl));
 
 	if (Platform.OS !== "web" && !apiUrl) return <ServerUrlPage />;
+	if (Platform.isTV && !params.form)
+		return <DeviceLoginPage apiUrl={apiUrl!} />;
 
 	return (
 		<FormPage apiUrl={apiUrl!}>

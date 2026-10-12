@@ -52,3 +52,4 @@ overrides:
       keibi_session: Session
       keibi_user: User
       keibi_oidc_login: OidcLogin
+      keibi_device_login: DeviceLogin

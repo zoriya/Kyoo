@@ -274,19 +274,27 @@ export const SearchBar = ({
 	);
 };
 
-const getDisplayUrl = (url: string) => {
+export const getDisplayUrl = (url: string) => {
 	url = url.replace(/\/api$/, "");
 	url = url.replace(/https?:\/\//, "");
 	return url;
 };
 
-export const AccountMenuItems = () => {
+export const NavbarProfile = () => {
 	const { t } = useTranslation();
 	const account = useAccount();
 	const accounts = useAccounts();
 
 	return (
-		<>
+		<Menu
+			Trigger={Avatar<PressableProps>}
+			as={PressableFeedback}
+			src={account?.logo}
+			placeholder={account?.username}
+			alt={t("navbar.login")}
+			className="m-2"
+			{...tooltip(account?.username ?? t("navbar.login"))}
+		>
 			{accounts?.map((x) => (
 				<Menu.Item
 					key={x.id}
@@ -321,29 +329,10 @@ export const AccountMenuItems = () => {
 					<Menu.Item
 						label={t("login.logout")}
 						icon={Logout}
-						onSelect={logout}
+						onSelect={() => logout()}
 					/>
 				</>
 			)}
-		</>
-	);
-};
-
-export const NavbarProfile = () => {
-	const { t } = useTranslation();
-	const account = useAccount();
-
-	return (
-		<Menu
-			Trigger={Avatar<PressableProps>}
-			as={PressableFeedback}
-			src={account?.logo}
-			placeholder={account?.username}
-			alt={t("navbar.login")}
-			className="m-2"
-			{...tooltip(account?.username ?? t("navbar.login"))}
-		>
-			<AccountMenuItems />
 		</Menu>
 	);
 };

@@ -4,12 +4,16 @@ import {
 	useEffectEvent,
 	useState,
 } from "react";
-import { BackHandler, Platform, TVFocusGuideView } from "react-native";
+import { BackHandler, Platform, TVFocusGuideView, View } from "react-native";
 import { withUniwind } from "uniwind";
 
 export { useTVEventHandler } from "react-native";
 
-export const FocusGroup = withUniwind(TVFocusGuideView);
+const TVFocusGroup = withUniwind(TVFocusGuideView);
+// focus guides are useless without a remote and they steal the focus on touch devices
+export const FocusGroup = (
+	Platform.isTV ? TVFocusGroup : View
+) as typeof TVFocusGroup;
 export type FocusGroupProps = ComponentProps<typeof FocusGroup>;
 export type FocusTrapProps = { onBack?: () => void } & FocusGroupProps;
 
