@@ -55,6 +55,10 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.auth.rule=PathPrefix(`/auth/`) || PathPrefix(`/.well-known/`)"
+      # presigns are checked against those, only traefik's forwardauth may set them
+      - "traefik.http.routers.auth.middlewares=strip-forwarded"
+      - "traefik.http.middlewares.strip-forwarded.headers.customrequestheaders.X-Forwarded-Uri="
+      - "traefik.http.middlewares.strip-forwarded.headers.customrequestheaders.X-Forwarded-Method="
 
   api:
     build: ./api
