@@ -64,7 +64,7 @@ export const Back = ({
 			{caster && (
 				<View className="mr-4 touch:mr-2 ml-auto flex-row items-center">
 					<Avatar
-						src={caster.logo}
+						account={caster}
 						placeholder={caster.username}
 						alt={caster.username}
 						className="h-7 w-7"

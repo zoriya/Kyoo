@@ -128,7 +128,7 @@ export const logout = async (id?: string) => {
 		try {
 			await queryFn({
 				method: "DELETE",
-				url: "auth/sessions/current",
+				url: `${account.apiUrl}/auth/sessions/current`,
 				authToken: account.token,
 				parser: null,
 			});
@@ -144,7 +144,7 @@ export const deleteAccount = async () => {
 	if (account) {
 		await queryFn({
 			method: "DELETE",
-			url: "auth/users/me",
+			url: `${account.apiUrl}/auth/users/me`,
 			authToken: account.token,
 			parser: null,
 		});

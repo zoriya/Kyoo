@@ -2,7 +2,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { createContext, type ReactNode, useContext, useMemo } from "react";
 import { View } from "react-native";
 import { v4 as uuidv4 } from "uuid";
-import { User } from "~/models";
+import { type Account, User } from "~/models";
 import { AccountContext, AccountsContext } from "~/providers/account-context";
 import { createQueryClient, useFetch } from "~/query";
 import { useQueryState } from "~/utils";
@@ -23,7 +23,7 @@ export const startCastSession = (apiUrl: string, token: string | null) => {
 	return current.id;
 };
 
-const CasterContext = createContext<User | null>(null);
+const CasterContext = createContext<Account | null>(null);
 
 export const useCaster = () => useContext(CasterContext);
 
@@ -76,7 +76,7 @@ const CasterAccount = ({
 	if (isLoading) return <View className="flex-1 bg-black" />;
 	return (
 		<AccountsContext.Provider value={value}>
-			<CasterContext.Provider value={user ?? null}>
+			<CasterContext.Provider value={value.selectedAccount}>
 				{children}
 			</CasterContext.Provider>
 		</AccountsContext.Provider>

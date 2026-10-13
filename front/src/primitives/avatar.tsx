@@ -28,6 +28,7 @@ const stringToColor = (string: string) => {
 
 export const Avatar = <AsProps = ViewProps>({
 	src,
+	account,
 	alt,
 	placeholder,
 	className,
@@ -37,6 +38,8 @@ export const Avatar = <AsProps = ViewProps>({
 	...props
 }: {
 	src?: string;
+	// fetch the logo of this account (via its own server & token) instead of `src`
+	account?: { id: string; apiUrl: string; token: string | null } | null;
 	alt?: string;
 	placeholder?: string;
 	className?: string;
@@ -45,7 +48,10 @@ export const Avatar = <AsProps = ViewProps>({
 	as?: ComponentType<AsProps>;
 } & AsProps) => {
 	const Container = as ?? View;
-	const { apiUrl, authToken } = useToken();
+	const ctx = useToken();
+	const apiUrl = account?.apiUrl || ctx.apiUrl;
+	const authToken = account ? account.token : ctx.authToken;
+	if (account) src = "/auth/users/me/logo";
 	return (
 		<Container
 			className={cn("h-6 w-6 overflow-hidden rounded-full", className)}
@@ -71,10 +77,17 @@ export const Avatar = <AsProps = ViewProps>({
 					source={{
 						uri: src.startsWith("http") ? src : `${apiUrl}${src}`,
 						// use cookies on web to allow `img` to make the call instead of js
+						// (cookies only hold the selected account's token)
 						headers:
-							!src.startsWith("http") && authToken && Platform.OS !== "web"
+							!src.startsWith("http") &&
+							authToken &&
+							(Platform.OS !== "web" || authToken !== ctx.authToken)
 								? { Authorization: `Bearer ${authToken}` }
 								: undefined,
+						// `/me` urls are the same for every account of a server
+						cacheKey: account
+							? `${apiUrl}/auth/users/${account.id}/logo`
+							: undefined,
 					}}
 					contentFit="cover"
 					accessibilityLabel={alt}

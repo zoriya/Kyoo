@@ -289,7 +289,7 @@ export const NavbarProfile = () => {
 		<Menu
 			Trigger={Avatar<PressableProps>}
 			as={PressableFeedback}
-			src={account?.logo}
+			account={account}
 			placeholder={account?.username}
 			alt={t("navbar.login")}
 			className="m-2"
@@ -303,7 +303,7 @@ export const NavbarProfile = () => {
 							? x.username
 							: `${x.username} - ${getDisplayUrl(x.apiUrl)}`
 					}
-					left={<Avatar placeholder={x.username} src={x.logo} />}
+					left={<Avatar placeholder={x.username} account={x} />}
 					selected={x.selected}
 					onSelect={() => x.select()}
 				/>

@@ -102,7 +102,7 @@ export const TvTabs = () => {
 							label={account?.username ?? t("navbar.login")}
 							left={
 								<Avatar
-									src={account?.logo}
+									account={account}
 									placeholder={account?.username}
 									alt={t("navbar.login")}
 									className="h-7 w-7"
