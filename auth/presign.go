@@ -32,8 +32,8 @@ type PresignRule struct {
 	Url *string `json:"url" example:"/api/videos/example"`
 	// The http verb this rule allows.
 	Verb string `json:"verb" validate:"required" example:"GET"`
-	// When set, matches any request path starting with this prefix instead of the exact `url`.
-	Prefix *string `json:"prefix,omitempty" example:"/videos/e05089d6-9179-4b5b-a63e-94dd5fc2a397/"`
+	// When set, matches this path and every path under it (`/videos/abc` does not match `/videos/abcd`) instead of the exact `url`.
+	Prefix *string `json:"prefix,omitempty" example:"/videos/e05089d6-9179-4b5b-a63e-94dd5fc2a397"`
 }
 
 func (r PresignRule) matches(path string, method string) bool {
@@ -41,7 +41,8 @@ func (r PresignRule) matches(path string, method string) bool {
 		return false
 	}
 	if r.Prefix != nil {
-		return strings.HasPrefix(path, *r.Prefix)
+		prefix := strings.TrimSuffix(*r.Prefix, "/")
+		return path == prefix || strings.HasPrefix(path, prefix+"/")
 	}
 	return r.Url != nil && path == *r.Url
 }

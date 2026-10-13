@@ -105,6 +105,37 @@ X-Forwarded-Uri: /videos/other/master.m3u8
 X-Forwarded-Method: GET
 HTTP 403
 
+# A prefix matches whole path segments, with or without a trailing slash
+POST {{host}}/presign
+Authorization: Bearer {{jwt}}
+{
+    "for": [{ "prefix": "/videos/abc", "verb": "GET" }],
+    "duration": "1h"
+}
+HTTP 200
+[Captures]
+segment_signature: jsonpath "$.signature"
+
+GET {{host}}/jwt?x-presign={{segment_signature}}
+X-Forwarded-Uri: /videos/abc
+X-Forwarded-Method: GET
+HTTP 200
+
+GET {{host}}/jwt?x-presign={{segment_signature}}
+X-Forwarded-Uri: /videos/abc/master.m3u8
+X-Forwarded-Method: GET
+HTTP 200
+
+GET {{host}}/jwt?x-presign={{segment_signature}}
+X-Forwarded-Uri: /videos/abcd/master.m3u8
+X-Forwarded-Method: GET
+HTTP 403
+
+GET {{host}}/jwt?x-presign={{signature}}
+X-Forwarded-Uri: /videos/abcd/master.m3u8
+X-Forwarded-Method: GET
+HTTP 403
+
 # The signature is rejected when the verb does not match
 GET {{host}}/jwt?x-presign={{signature}}
 X-Forwarded-Uri: /videos/abc/master.m3u8
