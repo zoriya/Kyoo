@@ -72,6 +72,9 @@ func (h *Handler) Presign(c *echo.Context) error {
 	if !ok {
 		return echo.NewHTTPError(http.StatusForbidden, "Could not retrieve claims")
 	}
+	if _, ok := claims["presign"]; ok {
+		return echo.NewHTTPError(http.StatusForbidden, "Cannot presign from a presigned request")
+	}
 
 	var dto PresignRequest
 	if err := c.Bind(&dto); err != nil {
@@ -157,6 +160,18 @@ func getQueryPresign(c *echo.Context) string {
 	return ""
 }
 
+// presign signatures (and the jwts they are exchanged for) are signed like any jwt
+// and carry the user's claims. they must only be accepted via `x-presign`, where
+// their rules are checked. the signature is verified later, this only rejects.
+func isPresignJwt(token string) bool {
+	claims := jwt.MapClaims{}
+	if _, _, err := jwt.NewParser().ParseUnverified(token, claims); err != nil {
+		return false
+	}
+	_, ok := claims["presign"]
+	return ok
+}
+
 func urlPath(raw string) (string, error) {
 	parsed, err := url.Parse(raw)
 	if err != nil {
@@ -233,11 +248,14 @@ func (h *Handler) createPresignJwt(c *echo.Context, presign string) (string, err
 	}
 
 	now := time.Now().UTC()
-	delete(claims, "presign")
+	exp := now.Add(time.Hour)
+	if sigExp, err := claims.GetExpirationTime(); err == nil && sigExp != nil && sigExp.Before(exp) {
+		exp = sigExp.Time
+	}
 	claims["jti"] = uuid.New().String()
 	claims["iss"] = h.config.PublicUrl
 	claims["iat"] = &jwt.NumericDate{Time: now}
-	claims["exp"] = &jwt.NumericDate{Time: now.Add(time.Hour)}
+	claims["exp"] = &jwt.NumericDate{Time: exp}
 
 	jwtTok := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	jwtTok.Header["kid"] = h.config.JwtKid

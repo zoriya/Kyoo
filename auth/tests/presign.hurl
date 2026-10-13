@@ -106,6 +106,51 @@ X-Forwarded-Uri: /videos/abc/master.m3u8
 X-Forwarded-Method: GET
 HTTP 403
 
+# The signature is not a bearer: it can't be refreshed into an unscoped jwt
+GET {{host}}/jwt
+Authorization: Bearer {{signature}}
+HTTP 403
+
+# nor be used on keibi's own routes
+GET {{host}}/users/me
+Authorization: Bearer {{signature}}
+HTTP 403
+
+POST {{host}}/presign
+Authorization: Bearer {{signature}}
+{
+    "for": [{ "prefix": "/", "verb": "GET" }],
+    "duration": "1h"
+}
+HTTP 403
+
+# The jwt a signature is exchanged for is scoped the same way
+GET {{host}}/jwt?x-presign={{signature}}
+X-Forwarded-Uri: /videos/abc/master.m3u8
+X-Forwarded-Method: GET
+HTTP 200
+[Captures]
+presigned_jwt: jsonpath "$.token"
+
+GET {{host}}/jwt
+Authorization: Bearer {{presigned_jwt}}
+HTTP 403
+
+GET {{host}}/users/me
+Authorization: Bearer {{presigned_jwt}}
+HTTP 403
+
+# it is still a presign for the same rules (expiring with the signature)
+GET {{host}}/jwt?x-presign={{presigned_jwt}}
+X-Forwarded-Uri: /videos/abc/master.m3u8
+X-Forwarded-Method: GET
+HTTP 200
+
+GET {{host}}/jwt?x-presign={{presigned_jwt}}
+X-Forwarded-Uri: /videos/other/master.m3u8
+X-Forwarded-Method: GET
+HTTP 403
+
 # Presign the progress websocket: a `GET` rule authorizes opening it and a
 # `wsRoutes` claim scopes which message the token may send (checked by the api).
 POST {{host}}/presign
@@ -141,6 +186,17 @@ Authorization: Bearer {{jwt}}
     "for": [{ "url": "/api/ws", "verb": "GET" }],
     "claims": {
         "permissions": ["users.read"]
+    },
+    "duration": "1h"
+}
+HTTP 400
+
+POST {{host}}/presign
+Authorization: Bearer {{jwt}}
+{
+    "for": [{ "url": "/api/ws", "verb": "GET" }],
+    "claims": {
+        "presign": "[{\"prefix\":\"/\",\"verb\":\"GET\"}]"
     },
     "duration": "1h"
 }
