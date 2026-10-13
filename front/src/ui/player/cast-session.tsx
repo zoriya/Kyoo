@@ -1,5 +1,11 @@
 import { QueryClientProvider } from "@tanstack/react-query";
-import { createContext, type ReactNode, useContext, useMemo } from "react";
+import {
+	createContext,
+	type ReactNode,
+	useContext,
+	useEffect,
+	useMemo,
+} from "react";
 import { View } from "react-native";
 import { v4 as uuidv4 } from "uuid";
 import { type Account, User } from "~/models";
@@ -34,6 +40,13 @@ export const CastSessionProvider = ({ children }: { children: ReactNode }) => {
 		() => session && { apiUrl: session.apiUrl, authToken: session.token },
 		[session],
 	);
+	// do not keep the caster's token around once their cast is left
+	useEffect(() => {
+		if (!session) return;
+		return () => {
+			if (current === session) current = null;
+		};
+	}, [session]);
 
 	if (!session || !auth) return children;
 	return (
