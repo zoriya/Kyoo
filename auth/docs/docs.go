@@ -1773,7 +1773,7 @@ const docTemplate = `{
                     "additionalProperties": {}
                 },
                 "duration": {
-                    "description": "How long the signature stays valid (go duration, e.g. ` + "`" + `24h` + "`" + `).",
+                    "description": "How long the signature stays valid (go duration, e.g. ` + "`" + `24h` + "`" + `, at most 7 days).",
                     "type": "string",
                     "example": "24h"
                 },
@@ -1810,7 +1810,7 @@ const docTemplate = `{
                     "additionalProperties": {}
                 },
                 "duration": {
-                    "description": "How long the signature stays valid (go duration, e.g. ` + "`" + `24h` + "`" + `).",
+                    "description": "How long the signature stays valid (go duration, e.g. ` + "`" + `24h` + "`" + `, at most 7 days).",
                     "type": "string",
                     "example": "24h"
                 },

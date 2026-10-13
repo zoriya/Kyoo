@@ -39,6 +39,23 @@ Authorization: Bearer {{jwt}}
 }
 HTTP 422
 
+# `duration` is capped
+POST {{host}}/presign
+Authorization: Bearer {{jwt}}
+{
+    "for": [{ "prefix": "/videos/abc/", "verb": "GET" }],
+    "duration": "100000h"
+}
+HTTP 400
+
+POST {{host}}/presign
+Authorization: Bearer {{jwt}}
+{
+    "for": [{ "prefix": "/videos/abc/", "verb": "GET" }],
+    "duration": "-1h"
+}
+HTTP 400
+
 # `verb` is required in a rule
 POST {{host}}/presign
 Authorization: Bearer {{jwt}}
@@ -97,6 +114,22 @@ HTTP 403
 # The exact url rule does not match a longer path
 GET {{host}}/jwt?x-presign={{signature}}
 X-Forwarded-Uri: /images/logo.png/extra
+X-Forwarded-Method: GET
+HTTP 403
+
+# The prefix rule can't be escaped with a path traversal
+GET {{host}}/jwt?x-presign={{signature}}
+X-Forwarded-Uri: /videos/abc/../../users/me
+X-Forwarded-Method: GET
+HTTP 403
+
+GET {{host}}/jwt?x-presign={{signature}}
+X-Forwarded-Uri: /videos/abc/%2e%2e/other/master.m3u8
+X-Forwarded-Method: GET
+HTTP 403
+
+GET {{host}}/jwt?x-presign={{signature}}
+X-Forwarded-Uri: /videos/abc//master.m3u8
 X-Forwarded-Method: GET
 HTTP 403
 

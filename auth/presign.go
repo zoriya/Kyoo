@@ -6,6 +6,7 @@ import (
 	"maps"
 	"net/http"
 	"net/url"
+	"path"
 	"slices"
 	"strings"
 	"time"
@@ -15,10 +16,12 @@ import (
 	"github.com/labstack/echo/v5"
 )
 
+const maxPresignDuration = 7 * 24 * time.Hour
+
 type PresignRequest struct {
 	// The list of requests the signature should be valid for.
 	For []PresignRule `json:"for" validate:"required,min=1,dive"`
-	// How long the signature stays valid (go duration, e.g. `24h`).
+	// How long the signature stays valid (go duration, e.g. `24h`, at most 7 days).
 	Duration string `json:"duration" validate:"required" example:"24h"`
 	// Extra claims to add to the signed jwt. Protected claims (`sub`, `permissions`, ...) are rejected.
 	Claims map[string]any `json:"claims,omitempty"`
@@ -117,6 +120,12 @@ func (h *Handler) Presign(c *echo.Context) error {
 	duration, err := time.ParseDuration(dto.Duration)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid `duration` value: not a valid duration")
+	}
+	if duration <= 0 || duration > maxPresignDuration {
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			fmt.Sprintf("Invalid `duration` value: must be positive and at most %s", maxPresignDuration),
+		)
 	}
 
 	now := time.Now().UTC()
@@ -229,11 +238,14 @@ func (h *Handler) createPresignJwt(c *echo.Context, presign string) (string, err
 		}()
 	}
 
-	path := c.Request().URL.Path
+	reqPath := c.Request().URL.Path
 	if fwd := c.Request().Header.Get("X-Forwarded-Uri"); fwd != "" {
 		if u, err := url.Parse(fwd); err == nil {
-			path = u.Path
+			reqPath = u.Path
 		}
+	}
+	if cleaned := path.Clean(reqPath); cleaned != reqPath && cleaned+"/" != reqPath {
+		return "", echo.NewHTTPError(http.StatusForbidden, "Presign signature is not valid for this request")
 	}
 	method := c.Request().Method
 	if m := c.Request().Header.Get("X-Forwarded-Method"); m != "" {
@@ -241,7 +253,7 @@ func (h *Handler) createPresignJwt(c *echo.Context, presign string) (string, err
 	}
 
 	allowed := slices.ContainsFunc(rules, func(r PresignRule) bool {
-		return r.matches(path, method)
+		return r.matches(reqPath, method)
 	})
 	if !allowed {
 		return "", echo.NewHTTPError(http.StatusForbidden, "Presign signature is not valid for this request")

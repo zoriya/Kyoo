@@ -202,7 +202,8 @@ definitions:
           `permissions`, ...) are rejected.
         type: object
       duration:
-        description: How long the signature stays valid (go duration, e.g. `24h`).
+        description: How long the signature stays valid (go duration, e.g. `24h`,
+          at most 7 days).
         example: 24h
         type: string
       expireAt:
@@ -232,7 +233,8 @@ definitions:
           `permissions`, ...) are rejected.
         type: object
       duration:
-        description: How long the signature stays valid (go duration, e.g. `24h`).
+        description: How long the signature stays valid (go duration, e.g. `24h`,
+          at most 7 days).
         example: 24h
         type: string
       for:
