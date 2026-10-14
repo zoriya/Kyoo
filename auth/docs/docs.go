@@ -1773,7 +1773,7 @@ const docTemplate = `{
                     "additionalProperties": {}
                 },
                 "duration": {
-                    "description": "How long the signature stays valid (go duration, e.g. ` + "`" + `24h` + "`" + `).",
+                    "description": "How long the signature stays valid (go duration, e.g. ` + "`" + `24h` + "`" + `, at most 7 days).",
                     "type": "string",
                     "example": "24h"
                 },
@@ -1810,7 +1810,7 @@ const docTemplate = `{
                     "additionalProperties": {}
                 },
                 "duration": {
-                    "description": "How long the signature stays valid (go duration, e.g. ` + "`" + `24h` + "`" + `).",
+                    "description": "How long the signature stays valid (go duration, e.g. ` + "`" + `24h` + "`" + `, at most 7 days).",
                     "type": "string",
                     "example": "24h"
                 },
@@ -1831,9 +1831,9 @@ const docTemplate = `{
             ],
             "properties": {
                 "prefix": {
-                    "description": "When set, matches any request path starting with this prefix instead of the exact ` + "`" + `url` + "`" + `.",
+                    "description": "When set, matches this path and every path under it (whole segments: ` + "`" + `/videos/abc` + "`" + ` does not match ` + "`" + `/videos/abcd` + "`" + `) instead of the exact ` + "`" + `url` + "`" + `.",
                     "type": "string",
-                    "example": "/videos/e05089d6-9179-4b5b-a63e-94dd5fc2a397/"
+                    "example": "/videos/e05089d6-9179-4b5b-a63e-94dd5fc2a397"
                 },
                 "url": {
                     "description": "The exact url (matched against the request path) this rule allows. Ignored when ` + "`" + `prefix` + "`" + ` is set.",

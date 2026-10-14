@@ -206,6 +206,9 @@ func (h *Handler) TokenToJwt(next echo.HandlerFunc) echo.HandlerFunc {
 				// this is only used to check if it is a session token or a jwt
 				_, err := base64.RawURLEncoding.DecodeString(token)
 				if err != nil {
+					if isPresignJwt(token) {
+						return echo.NewHTTPError(http.StatusForbidden, "Presigned tokens are only valid via x-presign")
+					}
 					return next(c)
 				}
 
@@ -242,6 +245,9 @@ func (h *Handler) OptionalAuthToJwt(jwtMiddlware echo.MiddlewareFunc) echo.Middl
 			// this is only used to check if it is a session token or a jwt
 			_, err := base64.RawURLEncoding.DecodeString(token)
 			if err != nil {
+				if isPresignJwt(token) {
+					return echo.NewHTTPError(http.StatusForbidden, "Presigned tokens are only valid via x-presign")
+				}
 				return jwtMiddlware(next)(c)
 			}
 

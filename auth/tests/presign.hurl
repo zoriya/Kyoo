@@ -39,6 +39,23 @@ Authorization: Bearer {{jwt}}
 }
 HTTP 422
 
+# `duration` is capped
+POST {{host}}/presign
+Authorization: Bearer {{jwt}}
+{
+    "for": [{ "prefix": "/videos/abc/", "verb": "GET" }],
+    "duration": "100000h"
+}
+HTTP 400
+
+POST {{host}}/presign
+Authorization: Bearer {{jwt}}
+{
+    "for": [{ "prefix": "/videos/abc/", "verb": "GET" }],
+    "duration": "-1h"
+}
+HTTP 400
+
 # `verb` is required in a rule
 POST {{host}}/presign
 Authorization: Bearer {{jwt}}
@@ -88,6 +105,37 @@ X-Forwarded-Uri: /videos/other/master.m3u8
 X-Forwarded-Method: GET
 HTTP 403
 
+# A prefix matches whole path segments, with or without a trailing slash
+POST {{host}}/presign
+Authorization: Bearer {{jwt}}
+{
+    "for": [{ "prefix": "/videos/abc", "verb": "GET" }],
+    "duration": "1h"
+}
+HTTP 200
+[Captures]
+segment_signature: jsonpath "$.signature"
+
+GET {{host}}/jwt?x-presign={{segment_signature}}
+X-Forwarded-Uri: /videos/abc
+X-Forwarded-Method: GET
+HTTP 200
+
+GET {{host}}/jwt?x-presign={{segment_signature}}
+X-Forwarded-Uri: /videos/abc/master.m3u8
+X-Forwarded-Method: GET
+HTTP 200
+
+GET {{host}}/jwt?x-presign={{segment_signature}}
+X-Forwarded-Uri: /videos/abcd/master.m3u8
+X-Forwarded-Method: GET
+HTTP 403
+
+GET {{host}}/jwt?x-presign={{signature}}
+X-Forwarded-Uri: /videos/abcd/master.m3u8
+X-Forwarded-Method: GET
+HTTP 403
+
 # The signature is rejected when the verb does not match
 GET {{host}}/jwt?x-presign={{signature}}
 X-Forwarded-Uri: /videos/abc/master.m3u8
@@ -100,9 +148,70 @@ X-Forwarded-Uri: /images/logo.png/extra
 X-Forwarded-Method: GET
 HTTP 403
 
+# The prefix rule can't be escaped with a path traversal
+GET {{host}}/jwt?x-presign={{signature}}
+X-Forwarded-Uri: /videos/abc/../../users/me
+X-Forwarded-Method: GET
+HTTP 403
+
+GET {{host}}/jwt?x-presign={{signature}}
+X-Forwarded-Uri: /videos/abc/%2e%2e/other/master.m3u8
+X-Forwarded-Method: GET
+HTTP 403
+
+GET {{host}}/jwt?x-presign={{signature}}
+X-Forwarded-Uri: /videos/abc//master.m3u8
+X-Forwarded-Method: GET
+HTTP 403
+
 # A garbage signature is rejected
 GET {{host}}/jwt?x-presign=not-a-real-signature
 X-Forwarded-Uri: /videos/abc/master.m3u8
+X-Forwarded-Method: GET
+HTTP 403
+
+# The signature is not a bearer: it can't be refreshed into an unscoped jwt
+GET {{host}}/jwt
+Authorization: Bearer {{signature}}
+HTTP 403
+
+# nor be used on keibi's own routes
+GET {{host}}/users/me
+Authorization: Bearer {{signature}}
+HTTP 403
+
+POST {{host}}/presign
+Authorization: Bearer {{signature}}
+{
+    "for": [{ "prefix": "/", "verb": "GET" }],
+    "duration": "1h"
+}
+HTTP 403
+
+# The jwt a signature is exchanged for is scoped the same way
+GET {{host}}/jwt?x-presign={{signature}}
+X-Forwarded-Uri: /videos/abc/master.m3u8
+X-Forwarded-Method: GET
+HTTP 200
+[Captures]
+presigned_jwt: jsonpath "$.token"
+
+GET {{host}}/jwt
+Authorization: Bearer {{presigned_jwt}}
+HTTP 403
+
+GET {{host}}/users/me
+Authorization: Bearer {{presigned_jwt}}
+HTTP 403
+
+# it is still a presign for the same rules (expiring with the signature)
+GET {{host}}/jwt?x-presign={{presigned_jwt}}
+X-Forwarded-Uri: /videos/abc/master.m3u8
+X-Forwarded-Method: GET
+HTTP 200
+
+GET {{host}}/jwt?x-presign={{presigned_jwt}}
+X-Forwarded-Uri: /videos/other/master.m3u8
 X-Forwarded-Method: GET
 HTTP 403
 
@@ -141,6 +250,17 @@ Authorization: Bearer {{jwt}}
     "for": [{ "url": "/api/ws", "verb": "GET" }],
     "claims": {
         "permissions": ["users.read"]
+    },
+    "duration": "1h"
+}
+HTTP 400
+
+POST {{host}}/presign
+Authorization: Bearer {{jwt}}
+{
+    "for": [{ "url": "/api/ws", "verb": "GET" }],
+    "claims": {
+        "presign": "[{\"prefix\":\"/\",\"verb\":\"GET\"}]"
     },
     "duration": "1h"
 }

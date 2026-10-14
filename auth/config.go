@@ -72,7 +72,7 @@ var DefaultConfig = Configuration{
 	FirstUserClaims:  make(jwt.MapClaims),
 	OidcProviders:    make(map[string]OidcProviderConfig),
 	OidcRedirectUrls: make([]OidcRedirectRule, 0),
-	ProtectedClaims:  []string{"permissions"},
+	ProtectedClaims:  []string{"permissions", "presign"},
 	ExpirationDelay:  30 * 24 * time.Hour,
 	EnvApiKeys:       make([]ApiKeyWToken, 0),
 }

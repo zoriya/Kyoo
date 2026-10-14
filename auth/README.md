@@ -73,7 +73,7 @@ Creating an apikeys requires the `apikey.write` permission, reading them require
 POST `/presign` { for: [{ url|prefix, verb }], duration } -> { signature, for, expireAt }
 ```
 
-`/presign` returns a signature valid for the given requests. Each `for` rule matches either an exact `url` or (if `prefix` is set instead) any request path starting with that prefix, restricted to the given `verb` (all matched against the request path).
+`/presign` returns a signature valid for the given requests. Each `for` rule matches either an exact `url` or (if `prefix` is set instead) any request path starting with that prefix, restricted to the given `verb` (all matched against the request path, which must be clean: no `..`, `.` or `//`). The `duration` can be at most 7 days.
 
 Append the returned signature as a `x-presign=$signature` query parameter to any request allowed by `for`, and the auth middleware (`/jwt`) will verify the signature and issue a jwt carrying the claims you had when you created it ; without needing a session token or an api key.
 

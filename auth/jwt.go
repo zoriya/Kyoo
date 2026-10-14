@@ -175,6 +175,9 @@ func (h *Handler) refreshJwt(ctx context.Context, jwtToken string) (string, erro
 	if !ok {
 		return "", echo.NewHTTPError(http.StatusForbidden, "Invalid JWT claims")
 	}
+	if _, ok := claims["presign"]; ok {
+		return "", echo.NewHTTPError(http.StatusForbidden, "Presigned tokens are only valid via x-presign")
+	}
 
 	sidStr, ok := claims["sid"].(string)
 	if !ok {
