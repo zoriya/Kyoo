@@ -15,7 +15,7 @@ import { sqlarr } from "~/db/utils";
 import { KError } from "~/models/error";
 import { bubble } from "~/models/examples";
 import { AcceptLanguage, isUuid, processLanguages } from "~/models/utils";
-import { comment, getFile, toQueryStr } from "~/utils";
+import { comment, getFile, isS3Enabled, toQueryStr } from "~/utils";
 import { imageDir } from "./seed/images";
 
 function getRedirectToImageHandler({ filter }: { filter?: SQL }) {
@@ -126,7 +126,14 @@ export const imagesH = new Elysia({ tags: ["images"] })
 
 			const [start = 0, end = Number.POSITIVE_INFINITY] =
 				reqHeaders.range?.split("-").map(Number) ?? [];
-			return new Response(file.slice(start, end), {
+			// Bun's Response does not accept an S3File body together with init
+			// options (headers), so buffer S3 bodies first. Local files keep the
+			// zero-copy streaming path. Open-ended ranges must not pass an
+			// infinite end into a slice either.
+			const ranged = end !== Number.POSITIVE_INFINITY;
+			const src = ranged ? file.slice(start, end) : file;
+			const body = isS3Enabled() ? await src.arrayBuffer() : src;
+			return new Response(body, {
 				headers: {
 					Etag: etag,
 					"Cache-Control": `public, max-age=${3 * 60 * 60}`,

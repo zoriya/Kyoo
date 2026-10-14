@@ -17,10 +17,14 @@ export type Prettify<T> = {
 	[K in keyof T]: T[K];
 } & {};
 
+export function isS3Enabled(): boolean {
+	return "S3_BUCKET" in process.env || "AWS_BUCKET" in process.env;
+}
+
 // Returns either a filesystem-backed file, or a S3-backed file,
 // depending on whether or not S3 environment variables are set.
 export function getFile(path: string): BunFile | S3File {
-	if ("S3_BUCKET" in process.env || "AWS_BUCKET" in process.env) {
+	if (isS3Enabled()) {
 		// This will use a S3 client configured via environment variables.
 		// See https://bun.sh/docs/api/s3#credentials for more details.
 		return Bun.s3.file(path);
