@@ -75,6 +75,31 @@ func (fsb *FileStorageBackend) ListItemsWithPrefix(_ context.Context, pathPrefix
 	return items, nil
 }
 
+func (fsb *FileStorageBackend) ListItemsWithMeta(_ context.Context, pathPrefix string) ([]ItemMeta, error) {
+	var items []ItemMeta
+
+	err := fs.WalkDir(fsb.root.FS(), pathPrefix, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		info, err := d.Info()
+		if err != nil {
+			return err
+		}
+		items = append(items, ItemMeta{Path: path, ModTime: info.ModTime()})
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return items, nil
+}
+
 func (fsb *FileStorageBackend) DeleteItem(_ context.Context, path string) error {
 	err := fsb.root.Remove(path)
 	if err != nil && !os.IsNotExist(err) {

@@ -18,9 +18,11 @@ type FileStream struct {
 	ready      sync.WaitGroup
 	err        error
 	Out        string
-	Info       *MediaInfo
-	videos     CMap[VideoKey, *VideoStream]
-	audios     CMap[AudioKey, *AudioStream]
+	// sha identifies the source file; used as the shared-cache namespace.
+	sha    string
+	Info   *MediaInfo
+	videos CMap[VideoKey, *VideoStream]
+	audios CMap[AudioKey, *AudioStream]
 }
 
 type AudioKey struct {
@@ -37,6 +39,7 @@ func (t *Transcoder) newFileStream(ctx context.Context, path string, sha string)
 	ret := &FileStream{
 		transcoder: t,
 		Out:        fmt.Sprintf("%s/%s", Settings.Outpath, sha),
+		sha:        sha,
 		videos:     NewCMap[VideoKey, *VideoStream](),
 		audios:     NewCMap[AudioKey, *AudioStream](),
 	}

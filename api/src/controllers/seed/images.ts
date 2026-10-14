@@ -13,7 +13,7 @@ import { images } from "~/db/schema";
 import { unnestValues } from "~/db/utils";
 import type { Image } from "~/models/utils";
 import { record } from "~/otel";
-import { getFile } from "~/utils";
+import { getFile, writeFileAtomic } from "~/utils";
 
 const logger = getLogger();
 
@@ -254,9 +254,11 @@ async function downloadImage(id: string, url: string): Promise<string> {
 	await Promise.all(
 		Object.entries(resolutions).map(async ([resolution, dimensions]) => {
 			const buffer = await image.clone().resize(dimensions.width).toBuffer();
-			const file = getFile(path.join(imageDir, `${id}.${resolution}.jpg`));
 
-			await Bun.write(file, buffer, { mode: 0o660 });
+			await writeFileAtomic(
+				path.join(imageDir, `${id}.${resolution}.jpg`),
+				buffer,
+			);
 		}),
 	);
 	return await getBlurhash(image);

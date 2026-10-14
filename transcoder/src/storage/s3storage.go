@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -11,7 +12,6 @@ import (
 	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
-	"github.com/zoriya/kyoo/transcoder/src/utils"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -75,6 +75,37 @@ func (ssb *S3StorageBackend) ListItemsWithPrefix(ctx context.Context, pathPrefix
 			if item.Key != nil {
 				items = append(items, *item.Key)
 			}
+		}
+	}
+
+	return items, nil
+}
+
+// ListItemsWithMeta returns items under prefix plus modification times.
+func (ssb *S3StorageBackend) ListItemsWithMeta(ctx context.Context, pathPrefix string) ([]ItemMeta, error) {
+	listObjectsInput := &s3.ListObjectsV2Input{
+		Bucket: &ssb.bucket,
+		Prefix: &pathPrefix,
+	}
+
+	paginator := s3.NewListObjectsV2Paginator(ssb.s3Client, listObjectsInput)
+
+	var items []ItemMeta
+	for paginator.HasMorePages() {
+		resp, err := paginator.NextPage(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list items with prefix %q in bucket %q: %w", pathPrefix, ssb.bucket, err)
+		}
+
+		for _, item := range resp.Contents {
+			if item.Key == nil {
+				continue
+			}
+			meta := ItemMeta{Path: *item.Key}
+			if item.LastModified != nil {
+				meta.ModTime = *item.LastModified
+			}
+			items = append(items, meta)
 		}
 	}
 
@@ -155,40 +186,19 @@ func (ssb *S3StorageBackend) DeleteItemsWithPrefix(ctx context.Context, pathPref
 
 // SaveItemWithCallback saves an item to the storage backend. If the item already exists, it overwrites it.
 // The writeContents function is called with a writer to write the contents of the item.
-func (ssb *S3StorageBackend) SaveItemWithCallback(ctx context.Context, path string, writeContents ContentsWriterCallback) (err error) {
-	// Create a pipe to connect the writer and reader.
-	pr, pw := io.Pipe()
-
-	// Start a goroutine to write to the pipe.
-	// Writing and reading must occur concurrently to avoid deadlocks.
-
-	// Use a separate context for the writer to allow cancellation if the upload fails. This is important to avoid
-	// a hung goroutine leak if the upload fails.
-	writeCtx, cancel := context.WithCancel(ctx)
-
-	var writerGroup errgroup.Group
-	writerGroup.Go(func() (err error) {
-		defer utils.CleanupWithErr(&err, pw.Close, "failed to close pipe writer")
-		return writeContents(writeCtx, pw)
-	})
-
-	// Handle cleanup and avoid a goroutines leak.
-	// Order is critical here. If the context is not cancelled, or the pipe is not closed
-	// before waiting for the writer to finish, there can be a deadlock. This happens when
-	// a writer without context support is waiting for written bytes to be read.
-	// Remember: the last deferred function is executed first.
-	// Wait for the write to complete and check for errors.
-	// This should always happen even if saving fails, to prevent a goroutine leak.
-	defer utils.CleanupWithErr(&err, writerGroup.Wait, "writer callback failed")
-	defer utils.CleanupWithErr(&err, pr.Close, "failed to close pipe reader")
-	defer cancel()
-
-	// Upload the object to S3 using the pipe as the body.
-	if err := ssb.SaveItem(ctx, path, pr); err != nil {
-		return fmt.Errorf("failed to save item with path %q: %w", path, err)
+//
+// The callback output is buffered in memory so the PUT carries Content-Length
+// instead of chunked transfer encoding, which some S3-compatible stores
+// (e.g. Garage) reject. Payloads must stay small (thumbnail sprites,
+// subtitles); the whole output is buffered in memory. Buffering also removes
+// the pipe's goroutine/deadlock hazards and keeps writer and upload errors
+// distinct.
+func (ssb *S3StorageBackend) SaveItemWithCallback(ctx context.Context, path string, writeContents ContentsWriterCallback) error {
+	var buf bytes.Buffer
+	if err := writeContents(ctx, &buf); err != nil {
+		return fmt.Errorf("writer callback failed for %q: %w", path, err)
 	}
-
-	return nil
+	return ssb.SaveItem(ctx, path, bytes.NewReader(buf.Bytes()))
 }
 
 // SaveItem saves an item to the storage backend. If the item already exists, it overwrites it.

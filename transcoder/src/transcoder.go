@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"path"
+	"time"
 )
 
 type Transcoder struct {
@@ -13,19 +14,24 @@ type Transcoder struct {
 	clientChan      chan ClientInfo
 	tracker         *Tracker
 	metadataService *MetadataService
+	// Shared cache of completed segments (nil without a shared S3 backend).
+	shared *SharedSegments
 }
 
 func NewTranscoder(metadata *MetadataService) (*Transcoder, error) {
 	out := Settings.Outpath
+	// Segments are per-pod cache (emptyDir /cache): clear stale state from a
+	// previous run of this pod. Best-effort only: never fail boot because a
+	// stale file is busy, and never wipe anything outside our own Outpath.
 	os.MkdirAll(out, 0o755)
 	dir, err := os.ReadDir(out)
 	if err != nil {
-		return nil, err
-	}
-	for _, d := range dir {
-		err = os.RemoveAll(path.Join(out, d.Name()))
-		if err != nil {
-			return nil, err
+		slog.Warn("could not list transcode cache, continuing with stale files", "err", err)
+	} else {
+		for _, d := range dir {
+			if err := os.RemoveAll(path.Join(out, d.Name())); err != nil {
+				slog.Warn("could not clear stale transcode cache entry, continuing", "entry", d.Name(), "err", err)
+			}
 		}
 	}
 
@@ -33,9 +39,27 @@ func NewTranscoder(metadata *MetadataService) (*Transcoder, error) {
 		streams:         NewCMap[string, *FileStream](),
 		clientChan:      make(chan ClientInfo, 2048),
 		metadataService: metadata,
+		shared:          NewSharedSegments(metadata.Storage(), Settings.SegmentsTTL),
 	}
 	ret.tracker = NewTracker(ret)
+	if ret.shared != nil {
+		slog.Info("shared segment cache enabled, starting sweeper", "ttl", Settings.SegmentsTTL.String())
+		go ret.sweepSharedSegments()
+	}
 	return ret, nil
+}
+
+// sweepSharedSegments periodically evicts shared segments older than the TTL.
+// Deletes are idempotent, so overlapping sweeps across replicas are harmless.
+func (t *Transcoder) sweepSharedSegments() {
+	ticker := time.NewTicker(time.Hour)
+	defer ticker.Stop()
+	for range ticker.C {
+		ctx := context.WithoutCancel(context.Background())
+		if err := t.shared.Sweep(ctx); err != nil {
+			slog.WarnContext(ctx, "shared segment sweep failed", "err", err)
+		}
+	}
 }
 
 // track records viewer activity for the tracker goroutine. It is intentionally

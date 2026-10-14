@@ -84,6 +84,29 @@ stringData:
 ```
 
 # Additional Notes
+## High availability / horizontal scaling
+
+`front` is stateless. `api`, `auth`, `transcoder` and `scanner` can run with
+`replicaCount > 1` without a shared (`ReadWriteMany`) filesystem:
+
+- `api`: set `api.persistence.enabled=false` and configure S3 via
+  `api.kyoo_api.extraEnv` (`S3_BUCKET` + credentials, see
+  [Bun S3 docs](https://bun.sh/docs/api/s3#credentials)). Image writes are
+  atomic (S3 PUT, or tmp-file+rename locally).
+- `auth`: set `auth.persistence.enabled=false` and set `S3_BUCKET_NAME` via
+  `auth.kyoo_auth.extraEnv`. All replicas must share one RSA signing key
+  (`kyoo.auth.privatekey.existingSecret`), otherwise JWTs issued by one
+  replica fail validation on others.
+- `transcoder`: set `transcoder.persistence.enabled=false` and set
+  `S3_BUCKET_NAME` via `transcoder.kyoo_transcoder.extraEnv` for shared
+  metadata (thumbnails, subtitles, keyframes) and the shared completed-segment
+  cache (`segments/` prefix, evicted after `GOCODER_SEGMENTS_TTL`, default 7d).
+  Live HLS segments stay in the
+  per-pod `emptyDir` `/cache`, so use sticky sessions on `/video` for the
+  stream duration (the realistic GPU topology stays at 1 replica anyway).
+- `scanner`: elects a leader via `pg_try_advisory_lock`; standby replicas
+  only serve HTTP and are safe.
+
 ## Postgres
 Strongly recomended to use a Kubernetes operator for managing Postgres.  Kyoo consists of multiple microservices.  Best practice is for each microservice to use its own database.  Kyoo workloads support best practices or sharing a single postgres database.  
 
