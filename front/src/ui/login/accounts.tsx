@@ -58,7 +58,7 @@ export const AccountsPage = () => {
 							}}
 						>
 							<Avatar
-								src={x.logo}
+								account={x}
 								placeholder={x.username}
 								alt={x.username}
 								className="h-full w-full justify-center"

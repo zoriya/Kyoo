@@ -146,6 +146,9 @@ export const Player = () => {
 				slug,
 				clientId,
 				...(presign && { presign: presign.signature }),
+				// an android tv plays casts with the caster's account. not sent by the
+				// tv itself, it reports its castData to every sender.
+				...(authToken && !Platform.isTV && { token: authToken }),
 				title: title ?? data?.path ?? "",
 				...(data?.show?.name && { subtitle: data.show.name }),
 				...(data?.show?.poster?.id && {

@@ -4,14 +4,17 @@ import { useTranslation } from "react-i18next";
 import { View, type ViewProps } from "react-native";
 import type { KImage } from "~/models";
 import {
+	Avatar,
 	H1,
 	IconButton,
 	Image,
+	P,
 	PressableFeedback,
 	Skeleton,
 	tooltip,
 } from "~/primitives";
 import { cn } from "~/utils";
+import { useCaster } from "../cast-session";
 
 export const Back = ({
 	name,
@@ -28,6 +31,7 @@ export const Back = ({
 } & ViewProps) => {
 	const { t } = useTranslation();
 	const router = useRouter();
+	const caster = useCaster();
 
 	return (
 		<View className={cn("flex-row items-center", className)} {...props}>
@@ -56,6 +60,19 @@ export const Back = ({
 				</H1>
 			) : (
 				<Skeleton className="my-4 touch:my-2 w-20" />
+			)}
+			{caster && (
+				<View className="mr-4 touch:mr-2 ml-auto flex-row items-center">
+					<Avatar
+						account={caster}
+						placeholder={caster.username}
+						alt={caster.username}
+						className="h-7 w-7"
+					/>
+					<P className="ml-2 text-slate-200">
+						{t("player.cast-by", { name: caster.username })}
+					</P>
+				</View>
 			)}
 		</View>
 	);
