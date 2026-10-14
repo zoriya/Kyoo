@@ -170,6 +170,7 @@ export const EntryList = ({
 	season,
 	currentEntrySlug,
 	onSelectVideos,
+	onPlay,
 	search,
 	withContainer,
 	stickyHeaderConfig,
@@ -178,6 +179,8 @@ export const EntryList = ({
 	slug: string;
 	season: string | number;
 	currentEntrySlug?: string;
+	// play the entry's video in place of navigating to its watch page
+	onPlay?: (videoSlug: string) => void;
 	onSelectVideos?: (entry: {
 		displayNumber: string;
 		name: string | null;
@@ -237,6 +240,14 @@ export const EntryList = ({
 							serieSlug={null}
 							displayNumber={entryDisplayNumber(item)}
 							watchedPercent={item.progress.percent}
+							onPress={
+								onPlay && item.videos.length
+									? (e) => {
+											e.preventDefault();
+											onPlay(item.videos[0].slug);
+										}
+									: undefined
+							}
 							onSelectVideos={() =>
 								onSelectVideos?.({
 									displayNumber: entryDisplayNumber(item),
