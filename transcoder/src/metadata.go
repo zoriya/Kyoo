@@ -73,6 +73,12 @@ func (s *MetadataService) Close() error {
 	return nil
 }
 
+// Storage exposes the shared metadata/storage backend (S3 or local files).
+// The transcoder reuses it for the shared segment cache.
+func (s *MetadataService) Storage() storage.StorageBackend {
+	return s.storage
+}
+
 func (s *MetadataService) setupDb() (*pgxpool.Pool, error) {
 	ctx := context.Background()
 

@@ -7,11 +7,18 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"time"
 
 	"golang.org/x/sync/errgroup"
 )
 
 type ContentsWriterCallback func(ctx context.Context, writer io.Writer) error
+
+// ItemMeta is a stored item plus its last-modification time.
+type ItemMeta struct {
+	Path    string
+	ModTime time.Time
+}
 
 // Handles storage and retrieval of items in a storage backend.
 // "Items" are pieces of data that can be stored and retrieved.
@@ -20,6 +27,9 @@ type StorageBackend interface {
 	DoesItemExist(ctx context.Context, path string) (bool, error)
 	// Note: returned items may have a "/" in them, e.g. "foo/bar/baz".
 	ListItemsWithPrefix(ctx context.Context, pathPrefix string) ([]string, error)
+	// ListItemsWithMeta is ListItemsWithPrefix plus each item's modification
+	// time. Used by the shared segment sweeper for TTL eviction.
+	ListItemsWithMeta(ctx context.Context, pathPrefix string) ([]ItemMeta, error)
 	// DeleteItem deletes an item from the storage backend. If the item does not exist, it returns nil.
 	// Deletion should be "synchronous" (i.e. the function should block until the write is complete).
 	DeleteItem(ctx context.Context, path string) error

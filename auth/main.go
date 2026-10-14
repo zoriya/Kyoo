@@ -15,9 +15,12 @@ import (
 	"time"
 
 	"github.com/zoriya/kyoo/keibi/dbc"
+	"github.com/zoriya/kyoo/keibi/storage"
 	_ "github.com/zoriya/kyoo/keibi/docs"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/golang-migrate/migrate/v4"
 	pgxd "github.com/golang-migrate/migrate/v4/database/pgx/v5"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -107,6 +110,20 @@ func GetenvOr(env string, def string) string {
 	return out
 }
 
+func newPictureStorage(
+	ctx context.Context,
+	conf *Configuration,
+) (storage.BlobStorage, error) {
+	if conf.S3BucketName != "" {
+		awsConfig, err := config.LoadDefaultConfig(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load AWS config: %w", err)
+		}
+		return storage.NewS3BlobStorage(s3.NewFromConfig(awsConfig), conf.S3BucketName), nil
+	}
+	return storage.NewFileBlobStorage(conf.ProfilePicturePath)
+}
+
 func OpenDatabase(ctx context.Context) (*pgxpool.Pool, error) {
 	connectionString := os.Getenv("POSTGRES_URL")
 	config, err := pgxpool.ParseConfig(connectionString)
@@ -159,9 +176,10 @@ func OpenDatabase(ctx context.Context) (*pgxpool.Pool, error) {
 }
 
 type Handler struct {
-	db     *dbc.Queries
-	rawDb  *pgxpool.Pool
-	config *Configuration
+	db       *dbc.Queries
+	rawDb    *pgxpool.Pool
+	config   *Configuration
+	pictures storage.BlobStorage
 }
 
 func (h *Handler) TokenToJwt(next echo.HandlerFunc) echo.HandlerFunc {
@@ -369,6 +387,12 @@ func main() {
 		return
 	}
 	h.config = conf
+	pictures, err := newPictureStorage(ctx, conf)
+	if err != nil {
+		e.Logger.Error("Could not init profile picture storage: ", slog.Any("err", err))
+		return
+	}
+	h.pictures = pictures
 
 	jwtMiddleware := echojwt.WithConfig(echojwt.Config{
 		SigningMethod: "RS256",
