@@ -39,6 +39,7 @@ type Configuration struct {
 	ExpirationDelay     time.Duration
 	EnvApiKeys          []ApiKeyWToken
 	ProfilePicturePath  string
+	S3BucketName        string
 	DisableRegistration bool
 }
 
@@ -85,6 +86,9 @@ func LoadConfiguration(ctx context.Context, db *dbc.Queries) (*Configuration, er
 		os.Getenv("PROFILE_PICTURE_PATH"),
 		"/profile_pictures",
 	)
+	// Same env name as the transcoder metadata backend. When set, avatars go
+	// to S3 so auth replicas need no shared filesystem.
+	ret.S3BucketName = os.Getenv("S3_BUCKET_NAME")
 
 	pub, err := url.Parse(ret.PublicUrl)
 	if err != nil {
