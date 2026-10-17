@@ -51,6 +51,7 @@ export const expo: ExpoConfig = {
 							androidTVBanner: "./public/tv-banner.png",
 						},
 					] as [string, Record<string, unknown>],
+					"./plugins/with-tv-splash",
 				]
 			: []),
 		["./plugins/with-tv-dev-menu"],
