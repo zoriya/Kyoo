@@ -30,6 +30,7 @@ export const MiddleControls = ({
 			<IconButton
 				icon={SkipPrevious}
 				onPress={hasPrev ? () => player.playPrev() : undefined}
+				focusable={hasPrev}
 				className={cn(
 					"mx-8 bg-gray-800/70",
 					!hasPrev && "pointer-events-none opacity-0",
@@ -44,6 +45,7 @@ export const MiddleControls = ({
 			<IconButton
 				icon={SkipNext}
 				onPress={hasNext ? () => player.playNext() : undefined}
+				focusable={hasNext}
 				className={cn(
 					"mx-8 bg-gray-800/70",
 					!hasNext && "pointer-events-none opacity-0",
