@@ -36,6 +36,7 @@ export const User = z
 						])
 						.catch("original"),
 					audioLanguage: z.string().catch("original"),
+					showCollectionItems: z.boolean().catch(false),
 					subtitleLanguage: z.string().nullable().catch(null),
 					chapterSkip: z
 						.object({
@@ -54,6 +55,7 @@ export const User = z
 				.default({
 					downloadQuality: "original",
 					audioLanguage: "default",
+					showCollectionItems: false,
 					subtitleLanguage: null,
 					chapterSkip: {
 						recap: "showSkipButton",

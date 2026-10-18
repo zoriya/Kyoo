@@ -1,11 +1,15 @@
 import { ItemGrid, ItemList, itemMap } from "~/components/items";
 import { Show } from "~/models";
+import { useAccount } from "~/providers/account-context";
 import { InfiniteFetch, type QueryIdentifier } from "~/query";
 import { useQueryState } from "~/utils";
 import { BrowseSettings } from "./header";
 import type { SortBy, SortOrd } from "./types";
 
 export const BrowsePage = () => {
+	const account = useAccount();
+	const showCollectionItems =
+		account?.claims.settings.showCollectionItems ?? false;
 	const [filter, setFilter] = useQueryState("filter", "");
 	const [sort, setSort] = useQueryState("sort", "name");
 	const [search] = useQueryState("q", "");
@@ -18,7 +22,13 @@ export const BrowsePage = () => {
 	return (
 		<InfiniteFetch
 			key={layout}
-			query={BrowsePage.query({ filter, sortBy, sortOrd, search })}
+			query={BrowsePage.query({
+				filter,
+				sortBy,
+				sortOrd,
+				search,
+				showCollectionItems,
+			})}
 			incremental
 			layout={LayoutComponent.layout}
 			Header={
@@ -45,11 +55,13 @@ BrowsePage.query = ({
 	sortBy,
 	sortOrd,
 	search,
+	showCollectionItems,
 }: {
 	filter?: string;
 	sortBy?: SortBy;
 	sortOrd?: SortOrd;
 	search?: string;
+	showCollectionItems?: boolean;
 }): QueryIdentifier<Show> => {
 	return {
 		parser: Show,
@@ -61,6 +73,8 @@ BrowsePage.query = ({
 				: "name",
 			filter,
 			query: search,
+			// The api hides collection members by default; only send the param to opt out.
+			ignoreInCollection: showCollectionItems ? false : undefined,
 		},
 	};
 };

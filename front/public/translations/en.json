@@ -161,6 +161,15 @@
 		"admin": "Admin"
 	},
 	"settings": {
+		"library": {
+			"label": "Library",
+			"showCollectionItems": {
+				"label": "Show items in collections",
+				"description": "Also list movies and series that belong to a collection when browsing",
+				"on": "On",
+				"off": "Off"
+			}
+		},
 		"general": {
 			"label": "General",
 			"theme": {
