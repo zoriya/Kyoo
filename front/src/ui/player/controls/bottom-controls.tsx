@@ -94,6 +94,7 @@ export const BottomControls = ({
 					<BottomScrubber seek={seek} chapters={chapters} />
 				) : (
 					<ControlButtons
+						seek={seek}
 						hasPrev={hasPrev}
 						hasNext={hasNext}
 						setMenu={setMenu}
@@ -106,6 +107,7 @@ export const BottomControls = ({
 };
 
 const ControlButtons = ({
+	seek,
 	hasPrev,
 	hasNext,
 	setMenu,
@@ -113,6 +115,7 @@ const ControlButtons = ({
 	className,
 	...props
 }: {
+	seek: number | null;
 	hasPrev: boolean;
 	hasNext: boolean;
 	setMenu: (isOpen: boolean) => void;
@@ -166,7 +169,10 @@ const ControlButtons = ({
 						<VolumeSlider iconClassName="fill-slate-200 dark:fill-slate-200" />
 					)}
 				</View>
-				<ProgressText className="mx-2 text-slate-300 dark:text-slate-300" />
+				<ProgressText
+					seek={seek}
+					className="mx-2 text-slate-300 dark:text-slate-300"
+				/>
 			</View>
 			<View className="flex-row">
 				{onOpenEntriesMenu && (

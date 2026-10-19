@@ -99,14 +99,18 @@ export const ProgressBar = ({
 	);
 };
 
-export const ProgressText = ({ className, ...props }: TextProps) => {
+export const ProgressText = ({
+	seek,
+	className,
+	...props
+}: { seek?: number | null } & TextProps) => {
 	const progress = usePlayerState("currentTime");
 	const [slug] = useQueryState<string>("slug", undefined!);
 	const { data } = useFetch(Info.infoQuery(slug));
 
 	return (
 		<P className={cn("text-center", className)} {...props}>
-			{toTimerString(progress, data?.durationSeconds)} :{" "}
+			{toTimerString(seek ?? progress, data?.durationSeconds)} :{" "}
 			{toTimerString(data?.durationSeconds)}
 		</P>
 	);
