@@ -39,7 +39,7 @@ export const Controls = ({
 	const [menuOpened, setMenuOpened] = useState(false);
 	const [seeking, setSeeking] = useState(false);
 	const [controlsVisible, setControlsVisible] = useState(false);
-	const [focusProgress, setFocusProgress] = useState(false);
+	const [hiddenSeek, setHiddenSeek] = useState<number | null>(null);
 	const skipChapter = useRef<(() => void) | null>(null);
 
 	const hoverControls = {
@@ -59,7 +59,7 @@ export const Controls = ({
 
 	const onVisibilityChange = useCallback((visible: boolean) => {
 		setControlsVisible(visible);
-		if (!visible) setFocusProgress(false);
+		if (!visible) setHiddenSeek(null);
 	}, []);
 
 	return (
@@ -67,7 +67,7 @@ export const Controls = ({
 			<TouchControls
 				forceShow={hover || menuOpened || seeking || forceShow}
 				onVisibilityChange={onVisibilityChange}
-				onHiddenSeek={() => setFocusProgress(true)}
+				onHiddenSeek={setHiddenSeek}
 				onHiddenSelect={() => {
 					if (!skipChapter.current) return false;
 					skipChapter.current();
@@ -86,7 +86,7 @@ export const Controls = ({
 				<MiddleControls
 					hasPrev={hasPrev}
 					hasNext={hasNext}
-					focusPlay={!focusProgress}
+					focusPlay={hiddenSeek === null}
 					className="touch:flex hidden"
 				/>
 				<BottomControls
@@ -98,7 +98,7 @@ export const Controls = ({
 					onOpenEntriesMenu={onOpenEntriesMenu}
 					setMenu={setMenu}
 					setSeeking={setSeeking}
-					focusProgress={focusProgress}
+					hiddenSeek={hiddenSeek}
 					className="absolute bottom-0 w-full bg-slate-900/50 px-safe pb-safe"
 					{...hoverControls}
 				/>

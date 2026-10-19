@@ -33,7 +33,7 @@ export const BottomControls = ({
 	hasNext,
 	setMenu,
 	setSeeking,
-	focusProgress,
+	hiddenSeek,
 	onOpenEntriesMenu,
 	className,
 	...props
@@ -45,7 +45,8 @@ export const BottomControls = ({
 	hasNext: boolean;
 	setMenu: (isOpen: boolean) => void;
 	setSeeking: (isSeeking: boolean) => void;
-	focusProgress?: boolean;
+	// direction of the arrow that brought up the controls, the seekbar takes the focus and handles it
+	hiddenSeek?: number | null;
 	onOpenEntriesMenu?: () => void;
 } & ViewProps) => {
 	const [seek, setSeek] = useState<number | null>(null);
@@ -88,7 +89,8 @@ export const BottomControls = ({
 					seek={seek}
 					setSeek={setSeek}
 					setSeeking={setSeeking}
-					hasTVPreferredFocus={focusProgress}
+					hasTVPreferredFocus={hiddenSeek != null}
+					seekOnFocus={hiddenSeek ?? undefined}
 				/>
 				{bottomSeek ? (
 					<BottomScrubber seek={seek} chapters={chapters} />

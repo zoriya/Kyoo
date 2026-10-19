@@ -16,12 +16,14 @@ export const ProgressBar = ({
 	setSeek,
 	setSeeking,
 	hasTVPreferredFocus,
+	seekOnFocus,
 }: {
 	chapters?: Chapter[];
 	seek: number | null;
 	setSeek: (v: number | null) => void;
 	setSeeking?: (v: boolean) => void;
 	hasTVPreferredFocus?: boolean;
+	seekOnFocus?: number;
 }) => {
 	const [slug] = useQueryState<string>("slug", undefined!);
 	const { data } = useFetch(Info.infoQuery(slug));
@@ -48,6 +50,7 @@ export const ProgressBar = ({
 				max={data?.durationSeconds}
 				// same as seeking with left/right while the controls are hidden
 				step={10}
+				seekOnFocus={seekOnFocus}
 				startSeek={() => {
 					// the controls must not auto-hide mid drag, it would unmount the slider
 					setSeeking?.(true);

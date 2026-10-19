@@ -171,7 +171,8 @@ export const useRemoteKeys = ({
 }: {
 	controlsShown: boolean;
 	showControls: () => void;
-	onHiddenSeek?: () => void;
+	// left/right while hidden: the seekbar comes up in seek mode and handles the arrow
+	onHiddenSeek?: (direction: number) => void;
 	// return true if the press was handled, play/pause is skipped then.
 	onHiddenSelect?: () => boolean;
 }) => {
@@ -210,14 +211,8 @@ export const useRemoteKeys = ({
 					if (hidden && !onHiddenSelect?.()) reducer(player, { type: "play" });
 					break;
 				case "left":
-					if (!hidden) break;
-					reducer(player, { type: "seek", value: -10 });
-					onHiddenSeek?.();
-					break;
 				case "right":
-					if (!hidden) break;
-					reducer(player, { type: "seek", value: +10 });
-					onHiddenSeek?.();
+					if (hidden) onHiddenSeek?.(event.eventType === "left" ? -1 : 1);
 					break;
 			}
 		}),

@@ -33,7 +33,7 @@ export const TouchControls = ({
 }: {
 	forceShow?: boolean;
 	onVisibilityChange?: (isVisible: boolean) => void;
-	onHiddenSeek?: () => void;
+	onHiddenSeek?: (direction: number) => void;
 	onHiddenSelect?: () => boolean;
 } & ViewProps) => {
 	const { t } = useTranslation();

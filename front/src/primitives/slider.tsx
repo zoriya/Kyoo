@@ -14,6 +14,7 @@ export const Slider = ({
 	subtleProgress,
 	max = 100,
 	step,
+	seekOnFocus,
 	markers,
 	setProgress,
 	startSeek,
@@ -25,6 +26,8 @@ export const Slider = ({
 	progress: number;
 	max?: number;
 	step?: number;
+	// steps (-1 or 1) to seek by once the slider gets the focus
+	seekOnFocus?: number;
 	subtleProgress?: number;
 	markers?: number[];
 	setProgress: (progress: number) => void;
@@ -70,10 +73,17 @@ export const Slider = ({
 		}
 		setProgress(Math.max(0, Math.min(progress + offset, max)));
 		if (commit.current) clearTimeout(commit.current);
-		commit.current = setTimeout(end, 500);
+		commit.current = setTimeout(end, Platform.isTV ? 1500 : 500);
 	});
 
 	const s = step ?? 0.05 * max;
+	const pendingSeek = useRef(seekOnFocus);
+	useEffect(() => {
+		if (!isFocus || !pendingSeek.current) return;
+		move(pendingSeek.current * s);
+		pendingSeek.current = undefined;
+	}, [isFocus, s]);
+
 	useTVEventHandler(
 		useEffectEvent((event: HWEvent) => {
 			// android only sends the release (1) of a short press
