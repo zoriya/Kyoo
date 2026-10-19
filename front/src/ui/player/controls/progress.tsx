@@ -40,7 +40,9 @@ export const ProgressBar = ({
 
 	const [hoverProgress, setHoverProgress] = useState<number | null>(null);
 	const [layout, setLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
-	const percent = hoverProgress! / (data?.durationSeconds ?? 1);
+	// there is no hover on tv, preview where the seek mode will land instead
+	const tooltipProgress = hoverProgress ?? (Platform.isTV ? seek : null);
+	const percent = tooltipProgress! / (data?.durationSeconds ?? 1);
 
 	return (
 		<>
@@ -63,10 +65,8 @@ export const ProgressBar = ({
 					setSeek(null);
 					setSeeking?.(false);
 				}}
-				onHover={(progress, layout) => {
-					setHoverProgress(progress);
-					setLayout(layout);
-				}}
+				onHover={setHoverProgress}
+				onMeasure={setLayout}
 				markers={chapters?.map((x) => x.startTime)}
 				hasTVPreferredFocus={Platform.isTV && hasTVPreferredFocus}
 				// @ts-expect-error dataSet is web only and not typed
@@ -74,7 +74,7 @@ export const ProgressBar = ({
 			/>
 			<Tooltip
 				id={"progress-scrubber"}
-				isOpen={hoverProgress !== null}
+				isOpen={tooltipProgress !== null}
 				// not a real fix, we should fix it upstream
 				place={percent > 0.8 ? "top-end" : "top"}
 				position={{
@@ -82,9 +82,9 @@ export const ProgressBar = ({
 					y: layout.y,
 				}}
 				render={() =>
-					hoverProgress ? (
+					tooltipProgress !== null ? (
 						<ScrubberTooltip
-							seconds={hoverProgress}
+							seconds={tooltipProgress}
 							chapters={chapters}
 							videoSlug={slug}
 						/>

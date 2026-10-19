@@ -20,6 +20,7 @@ export const Slider = ({
 	startSeek,
 	endSeek,
 	onHover,
+	onMeasure,
 	className,
 	...props
 }: {
@@ -37,6 +38,13 @@ export const Slider = ({
 		position: number | null,
 		layout: { x: number; y: number; width: number; height: number },
 	) => void;
+	// layout of the slider, relative to the page
+	onMeasure?: (layout: {
+		x: number;
+		y: number;
+		width: number;
+		height: number;
+	}) => void;
 } & Partial<ViewProps>) => {
 	const ref = useRef<View>(null);
 	const [layout, setLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
@@ -131,9 +139,11 @@ export const Slider = ({
 				onResponderStart={change}
 				onResponderMove={change}
 				onLayout={() =>
-					ref.current?.measure((_, __, width, height, pageX, pageY) =>
-						setLayout({ width, height, x: pageX, y: pageY }),
-					)
+					ref.current?.measure((_, __, width, height, pageX, pageY) => {
+						const layout = { width, height, x: pageX, y: pageY };
+						setLayout(layout);
+						onMeasure?.(layout);
+					})
 				}
 				onKeyDown={(e: KeyboardEvent) => {
 					if (e.code === "ArrowLeft") move(-s);
