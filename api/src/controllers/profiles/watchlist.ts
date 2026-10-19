@@ -70,6 +70,7 @@ async function setWatchStatus({
 					? sql`${firstEntryQ}`
 					: sql`null`,
 			lastPlayedAt: status.startedAt,
+			rewatchStartedAt: status.status === "rewatching" ? sql`now()` : null,
 		})
 		.onConflictDoUpdate({
 			target: [watchlist.profilePk, watchlist.showPk],
@@ -99,6 +100,12 @@ async function setWatchStatus({
 						when excluded.status = 'completed' then null
 						when excluded.status = 'rewatching' and ${watchlist.status} != 'rewatching' then excluded.next_entry
 						else ${watchlist.nextEntry}
+					end
+				`,
+				rewatchStartedAt: sql`
+					case
+						when excluded.status = 'rewatching' and ${watchlist.status} != 'rewatching' then excluded.rewatch_started_at
+						else ${watchlist.rewatchStartedAt}
 					end
 				`,
 			},

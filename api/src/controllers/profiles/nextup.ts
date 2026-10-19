@@ -1,4 +1,14 @@
-import { and, eq, isNotNull, lt, or, sql, desc as sqlDesc } from "drizzle-orm";
+import {
+	and,
+	eq,
+	gte,
+	isNotNull,
+	lt,
+	ne,
+	or,
+	sql,
+	desc as sqlDesc,
+} from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import { auth } from "~/auth";
 import { db } from "~/db";
@@ -121,7 +131,17 @@ export const nextup = new Elysia({ tags: ["profiles"] })
 				.innerJoin(profiles, eq(watchlist.profilePk, profiles.pk))
 				.innerJoin(transQ, eq(entries.pk, transQ.pk))
 				.crossJoinLateral(entryVideosQ)
-				.leftJoin(entryProgressQ, eq(entries.pk, entryProgressQ.entryPk))
+				.leftJoin(
+					entryProgressQ,
+					and(
+						eq(entries.pk, entryProgressQ.entryPk),
+						// ignore progress from before the rewatch
+						or(
+							ne(watchlist.status, "rewatching"),
+							gte(entryProgressQ.playedDate, watchlist.rewatchStartedAt),
+						),
+					),
+				)
 				.where(
 					and(
 						eq(profiles.id, sub),
