@@ -33,7 +33,7 @@ export const BottomControls = ({
 	hasNext,
 	setMenu,
 	setSeeking,
-	focusProgress,
+	hiddenSeek,
 	onOpenEntriesMenu,
 	className,
 	...props
@@ -45,7 +45,8 @@ export const BottomControls = ({
 	hasNext: boolean;
 	setMenu: (isOpen: boolean) => void;
 	setSeeking: (isSeeking: boolean) => void;
-	focusProgress?: boolean;
+	// the arrow that brought up the controls, the seekbar takes the focus and handles it
+	hiddenSeek?: { direction: number; held: boolean } | null;
 	onOpenEntriesMenu?: () => void;
 } & ViewProps) => {
 	const [seek, setSeek] = useState<number | null>(null);
@@ -88,12 +89,14 @@ export const BottomControls = ({
 					seek={seek}
 					setSeek={setSeek}
 					setSeeking={setSeeking}
-					hasTVPreferredFocus={focusProgress}
+					hasTVPreferredFocus={hiddenSeek != null}
+					seekOnFocus={hiddenSeek ?? undefined}
 				/>
 				{bottomSeek ? (
 					<BottomScrubber seek={seek} chapters={chapters} />
 				) : (
 					<ControlButtons
+						seek={seek}
 						hasPrev={hasPrev}
 						hasNext={hasNext}
 						setMenu={setMenu}
@@ -106,6 +109,7 @@ export const BottomControls = ({
 };
 
 const ControlButtons = ({
+	seek,
 	hasPrev,
 	hasNext,
 	setMenu,
@@ -113,6 +117,7 @@ const ControlButtons = ({
 	className,
 	...props
 }: {
+	seek: number | null;
 	hasPrev: boolean;
 	hasNext: boolean;
 	setMenu: (isOpen: boolean) => void;
@@ -166,7 +171,10 @@ const ControlButtons = ({
 						<VolumeSlider iconClassName="fill-slate-200 dark:fill-slate-200" />
 					)}
 				</View>
-				<ProgressText className="mx-2 text-slate-300 dark:text-slate-300" />
+				<ProgressText
+					seek={seek}
+					className="mx-2 text-slate-300 dark:text-slate-300"
+				/>
 			</View>
 			<View className="flex-row">
 				{onOpenEntriesMenu && (

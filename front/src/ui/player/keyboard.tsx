@@ -171,7 +171,8 @@ export const useRemoteKeys = ({
 }: {
 	controlsShown: boolean;
 	showControls: () => void;
-	onHiddenSeek?: () => void;
+	// left/right while hidden: the seekbar comes up in seek mode and handles the arrow
+	onHiddenSeek?: (arrow: { direction: number; held: boolean }) => void;
 	// return true if the press was handled, play/pause is skipped then.
 	onHiddenSelect?: () => boolean;
 }) => {
@@ -180,7 +181,20 @@ export const useRemoteKeys = ({
 	useTVEventHandler(
 		useEffectEvent((event: HWEvent) => {
 			// rn can send both the press (0) and the release (1), only act once
-			if (event.eventKeyAction === 0) return;
+			if (event.eventKeyAction === 0) {
+				// a hold of left/right is only sent as a long press
+				if (
+					!controlsShown &&
+					(event.eventType === "longLeft" || event.eventType === "longRight")
+				) {
+					showControls();
+					onHiddenSeek?.({
+						direction: event.eventType === "longLeft" ? -1 : 1,
+						held: true,
+					});
+				}
+				return;
+			}
 			const hidden = !controlsShown;
 			showControls();
 
@@ -210,14 +224,12 @@ export const useRemoteKeys = ({
 					if (hidden && !onHiddenSelect?.()) reducer(player, { type: "play" });
 					break;
 				case "left":
-					if (!hidden) break;
-					reducer(player, { type: "seek", value: -10 });
-					onHiddenSeek?.();
-					break;
 				case "right":
-					if (!hidden) break;
-					reducer(player, { type: "seek", value: +10 });
-					onHiddenSeek?.();
+					if (hidden)
+						onHiddenSeek?.({
+							direction: event.eventType === "left" ? -1 : 1,
+							held: false,
+						});
 					break;
 			}
 		}),

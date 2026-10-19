@@ -14,17 +14,21 @@ export const Slider = ({
 	subtleProgress,
 	max = 100,
 	step,
+	seekOnFocus,
 	markers,
 	setProgress,
 	startSeek,
 	endSeek,
 	onHover,
+	onMeasure,
 	className,
 	...props
 }: {
 	progress: number;
 	max?: number;
 	step?: number;
+	// steps (-1 or 1) to seek by once the slider gets the focus, continuously if held
+	seekOnFocus?: { direction: number; held: boolean };
 	subtleProgress?: number;
 	markers?: number[];
 	setProgress: (progress: number) => void;
@@ -34,6 +38,13 @@ export const Slider = ({
 		position: number | null,
 		layout: { x: number; y: number; width: number; height: number },
 	) => void;
+	// layout of the slider, relative to the page
+	onMeasure?: (layout: {
+		x: number;
+		y: number;
+		width: number;
+		height: number;
+	}) => void;
 } & Partial<ViewProps>) => {
 	const ref = useRef<View>(null);
 	const [layout, setLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
@@ -57,31 +68,68 @@ export const Slider = ({
 			if (commit.current) clearTimeout(commit.current);
 		};
 	}, []);
+	// endSeek must be read when the timeout fires, it closes over the seek value
+	const end = useEffectEvent(() => {
+		commit.current = null;
+		setSeek(false);
+		endSeek?.();
+	});
+	const move = useEffectEvent((offset: number) => {
+		if (!isSeeking) {
+			setSeek(true);
+			startSeek?.();
+		}
+		setProgress(Math.max(0, Math.min(progress + offset, max)));
+		if (commit.current) clearTimeout(commit.current);
+		commit.current = setTimeout(end, Platform.isTV ? 1500 : 500);
+	});
+
+	const s = step ?? 0.05 * max;
+	// direction of the arrow being held (-1 or 1), 0 when none is
+	const [held, setHeld] = useState(0);
+	useEffect(() => {
+		if (!held) return;
+		const start = Date.now();
+		move(held * s);
+		// speed up the longer the key is held: x2 every second, up to x16
+		const interval = setInterval(() => {
+			const elapsed = Date.now() - start;
+			move(held * s * Math.min(2 ** Math.floor(elapsed / 1000), 16));
+		}, 100);
+		return () => clearInterval(interval);
+	}, [held, s]);
+
+	const pendingSeek = useRef(seekOnFocus && { ...seekOnFocus });
+	useEffect(() => {
+		const arrow = pendingSeek.current;
+		if (!isFocus || !arrow) return;
+		pendingSeek.current = undefined;
+		if (arrow.held) setHeld(arrow.direction);
+		else move(arrow.direction * s);
+	}, [isFocus, s]);
+
 	useTVEventHandler(
 		useEffectEvent((event: HWEvent) => {
+			// the hold may end before the slider got the focus
+			if (
+				pendingSeek.current &&
+				event.eventKeyAction !== 0 &&
+				(event.eventType === "longLeft" || event.eventType === "longRight")
+			)
+				pendingSeek.current.held = false;
 			if (!isFocus) return;
-			const s = step ?? 0.05 * max;
-			const offset =
-				event.eventType === "left" ? -s : event.eventType === "right" ? s : 0;
-			if (!offset) return;
-
-			if (commit.current) clearTimeout(commit.current);
-			// a held key sends a press (0) per repeat and a single release (1)
-			if (event.eventKeyAction !== 1) {
-				if (!isSeeking) {
-					setSeek(true);
-					startSeek?.();
-				}
-				setProgress(Math.max(0, Math.min(progress + offset, max)));
+			switch (event.eventType) {
+				case "left":
+				case "right":
+					if (event.eventKeyAction !== 0)
+						move(event.eventType === "left" ? -s : s);
+					break;
+				case "longLeft":
+				case "longRight":
+					if (event.eventKeyAction !== 0) setHeld(0);
+					else setHeld(event.eventType === "longLeft" ? -1 : 1);
+					break;
 			}
-			// keep seeking while the key is held, commit once it's released
-			if (event.eventKeyAction === 0) return;
-			if (event.eventKeyAction === 1 && !isSeeking) return;
-			commit.current = setTimeout(() => {
-				commit.current = null;
-				setSeek(false);
-				endSeek?.();
-			}, 500);
 		}),
 	);
 
@@ -110,7 +158,10 @@ export const Slider = ({
 				focusable
 				collapsable={false}
 				onFocus={() => setFocus(true)}
-				onBlur={() => setFocus(false)}
+				onBlur={() => {
+					setFocus(false);
+					setHeld(0);
+				}}
 				onStartShouldSetResponder={() => true}
 				onResponderGrant={() => {
 					setSeek(true);
@@ -123,25 +174,24 @@ export const Slider = ({
 				onResponderStart={change}
 				onResponderMove={change}
 				onLayout={() =>
-					ref.current?.measure((_, __, width, height, pageX, pageY) =>
-						setLayout({ width, height, x: pageX, y: pageY }),
-					)
+					ref.current?.measure((_, __, width, height, pageX, pageY) => {
+						const layout = { width, height, x: pageX, y: pageY };
+						setLayout(layout);
+						onMeasure?.(layout);
+					})
 				}
 				onKeyDown={(e: KeyboardEvent) => {
-					switch (e.code) {
-						case "ArrowLeft":
-							setProgress(Math.max(progress - 0.05 * max, 0));
-							break;
-						case "ArrowRight":
-							setProgress(Math.min(progress + 0.05 * max, max));
-							break;
-						case "ArrowDown":
-							setProgress(Math.max(progress - 0.1 * max, 0));
-							break;
-						case "ArrowUp":
-							setProgress(Math.min(progress + 0.1 * max, max));
-							break;
-					}
+					const direction =
+						e.code === "ArrowLeft" ? -1 : e.code === "ArrowRight" ? 1 : 0;
+					if (!direction) return;
+					if (e.repeat) setHeld(direction);
+					else move(direction * s);
+				}}
+				onKeyUp={(e: KeyboardEvent) => {
+					if (e.code !== "ArrowLeft" && e.code !== "ArrowRight") return;
+					// the player's shortcuts would also seek on arrows
+					e.stopPropagation();
+					setHeld(0);
 				}}
 				className={cn(
 					"cursor-pointer justify-center py-2 outline-0",
