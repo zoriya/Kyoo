@@ -59,18 +59,24 @@ export const Slider = ({
 	}, []);
 	useTVEventHandler(
 		useEffectEvent((event: HWEvent) => {
-			if (!isFocus || event.eventKeyAction === 0) return;
+			if (!isFocus) return;
 			const s = step ?? 0.05 * max;
 			const offset =
 				event.eventType === "left" ? -s : event.eventType === "right" ? s : 0;
 			if (!offset) return;
 
-			if (!isSeeking) {
-				setSeek(true);
-				startSeek?.();
-			}
-			setProgress(Math.max(0, Math.min(progress + offset, max)));
 			if (commit.current) clearTimeout(commit.current);
+			// a held key sends a press (0) per repeat and a single release (1)
+			if (event.eventKeyAction !== 1) {
+				if (!isSeeking) {
+					setSeek(true);
+					startSeek?.();
+				}
+				setProgress(Math.max(0, Math.min(progress + offset, max)));
+			}
+			// keep seeking while the key is held, commit once it's released
+			if (event.eventKeyAction === 0) return;
+			if (event.eventKeyAction === 1 && !isSeeking) return;
 			commit.current = setTimeout(() => {
 				commit.current = null;
 				setSeek(false);

@@ -10,6 +10,7 @@ import VideoLibrary from "@material-symbols/svg-400/rounded/video_library-fill.s
 import { useRouter } from "expo-router";
 import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
+import { Platform } from "react-native";
 import { WatchStatusV } from "~/models";
 import { Alert, HRP, IconButton, Menu, tooltip } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
@@ -196,12 +197,14 @@ export const ShowContext = ({
 					{account?.isAdmin === true && (
 						<>
 							<HRP text={t("navbar.admin")} />
-							<Menu.Item
-								label={t("show.videos-map")}
-								icon={VideoLibrary}
-								href={`/${kind === "movie" ? "movies" : "series"}/${slug}/videos`}
-							/>
-							{kind !== "collection" && (
+							{!Platform.isTV && (
+								<Menu.Item
+									label={t("show.videos-map")}
+									icon={VideoLibrary}
+									href={`/${kind === "movie" ? "movies" : "series"}/${slug}/videos`}
+								/>
+							)}
+							{!Platform.isTV && kind !== "collection" && (
 								<Menu.Item
 									label={t("show.remap")}
 									icon={Search}
