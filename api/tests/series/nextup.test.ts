@@ -213,4 +213,31 @@ describe("nextup", () => {
 		expect(body.nextEntry.slug).toBe(`${madeInAbyss.slug}-s2e3`);
 		expect(body.watchStatus).toMatchObject({ status: "watching" });
 	});
+
+	it("dropped shows are hidden from nextup", async () => {
+		let [resp, body] = await setSerieStatus(madeInAbyss.slug, {
+			status: "dropped",
+			completedAt: null,
+			score: null,
+			startedAt: null,
+		});
+		expectStatus(resp, body).toBe(200);
+
+		[resp, body] = await getNextup("me", {});
+		expectStatus(resp, body).toBe(200);
+		expect(body.items).toBeArrayOfSize(0);
+
+		[resp, body] = await setSerieStatus(madeInAbyss.slug, {
+			status: "watching",
+			completedAt: null,
+			score: null,
+			startedAt: null,
+		});
+		expectStatus(resp, body).toBe(200);
+
+		[resp, body] = await getNextup("me", {});
+		expectStatus(resp, body).toBe(200);
+		expect(body.items).toBeArrayOfSize(1);
+		expect(body.items[0].slug).toBe(`${madeInAbyss.slug}-s2e3`);
+	});
 });
