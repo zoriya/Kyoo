@@ -389,7 +389,7 @@ const PlayerContent = ({
 						? () => setEntriesMenuOpen(true)
 						: undefined
 				}
-				forceShow={!!playbackError}
+				forceShow={!!playbackError || entriesMenuOpen}
 			/>
 			{data?.show?.kind === "serie" && (
 				<EntriesMenu
