@@ -39,7 +39,10 @@ export const Controls = ({
 	const [menuOpened, setMenuOpened] = useState(false);
 	const [seeking, setSeeking] = useState(false);
 	const [controlsVisible, setControlsVisible] = useState(false);
-	const [hiddenSeek, setHiddenSeek] = useState<number | null>(null);
+	const [hiddenSeek, setHiddenSeek] = useState<{
+		direction: number;
+		held: boolean;
+	} | null>(null);
 	const skipChapter = useRef<(() => void) | null>(null);
 
 	const hoverControls = {

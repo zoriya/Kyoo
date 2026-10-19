@@ -45,8 +45,8 @@ export const BottomControls = ({
 	hasNext: boolean;
 	setMenu: (isOpen: boolean) => void;
 	setSeeking: (isSeeking: boolean) => void;
-	// direction of the arrow that brought up the controls, the seekbar takes the focus and handles it
-	hiddenSeek?: number | null;
+	// the arrow that brought up the controls, the seekbar takes the focus and handles it
+	hiddenSeek?: { direction: number; held: boolean } | null;
 	onOpenEntriesMenu?: () => void;
 } & ViewProps) => {
 	const [seek, setSeek] = useState<number | null>(null);

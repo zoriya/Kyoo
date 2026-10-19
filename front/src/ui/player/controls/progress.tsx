@@ -23,7 +23,7 @@ export const ProgressBar = ({
 	setSeek: (v: number | null) => void;
 	setSeeking?: (v: boolean) => void;
 	hasTVPreferredFocus?: boolean;
-	seekOnFocus?: number;
+	seekOnFocus?: { direction: number; held: boolean };
 }) => {
 	const [slug] = useQueryState<string>("slug", undefined!);
 	const { data } = useFetch(Info.infoQuery(slug));

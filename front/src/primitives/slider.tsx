@@ -27,8 +27,8 @@ export const Slider = ({
 	progress: number;
 	max?: number;
 	step?: number;
-	// steps (-1 or 1) to seek by once the slider gets the focus
-	seekOnFocus?: number;
+	// steps (-1 or 1) to seek by once the slider gets the focus, continuously if held
+	seekOnFocus?: { direction: number; held: boolean };
 	subtleProgress?: number;
 	markers?: number[];
 	setProgress: (progress: number) => void;
@@ -85,19 +85,51 @@ export const Slider = ({
 	});
 
 	const s = step ?? 0.05 * max;
-	const pendingSeek = useRef(seekOnFocus);
+	// direction of the arrow being held (-1 or 1), 0 when none is
+	const [held, setHeld] = useState(0);
 	useEffect(() => {
-		if (!isFocus || !pendingSeek.current) return;
-		move(pendingSeek.current * s);
+		if (!held) return;
+		const start = Date.now();
+		move(held * s);
+		// speed up the longer the key is held: x2 every second, up to x16
+		const interval = setInterval(() => {
+			const elapsed = Date.now() - start;
+			move(held * s * Math.min(2 ** Math.floor(elapsed / 1000), 16));
+		}, 100);
+		return () => clearInterval(interval);
+	}, [held, s]);
+
+	const pendingSeek = useRef(seekOnFocus && { ...seekOnFocus });
+	useEffect(() => {
+		const arrow = pendingSeek.current;
+		if (!isFocus || !arrow) return;
 		pendingSeek.current = undefined;
+		if (arrow.held) setHeld(arrow.direction);
+		else move(arrow.direction * s);
 	}, [isFocus, s]);
 
 	useTVEventHandler(
 		useEffectEvent((event: HWEvent) => {
-			// android only sends the release (1) of a short press
-			if (!isFocus || event.eventKeyAction === 0) return;
-			if (event.eventType === "left") move(-s);
-			if (event.eventType === "right") move(s);
+			// the hold may end before the slider got the focus
+			if (
+				pendingSeek.current &&
+				event.eventKeyAction !== 0 &&
+				(event.eventType === "longLeft" || event.eventType === "longRight")
+			)
+				pendingSeek.current.held = false;
+			if (!isFocus) return;
+			switch (event.eventType) {
+				case "left":
+				case "right":
+					if (event.eventKeyAction !== 0)
+						move(event.eventType === "left" ? -s : s);
+					break;
+				case "longLeft":
+				case "longRight":
+					if (event.eventKeyAction !== 0) setHeld(0);
+					else setHeld(event.eventType === "longLeft" ? -1 : 1);
+					break;
+			}
 		}),
 	);
 
@@ -126,7 +158,10 @@ export const Slider = ({
 				focusable
 				collapsable={false}
 				onFocus={() => setFocus(true)}
-				onBlur={() => setFocus(false)}
+				onBlur={() => {
+					setFocus(false);
+					setHeld(0);
+				}}
 				onStartShouldSetResponder={() => true}
 				onResponderGrant={() => {
 					setSeek(true);
@@ -146,13 +181,17 @@ export const Slider = ({
 					})
 				}
 				onKeyDown={(e: KeyboardEvent) => {
-					if (e.code === "ArrowLeft") move(-s);
-					if (e.code === "ArrowRight") move(s);
+					const direction =
+						e.code === "ArrowLeft" ? -1 : e.code === "ArrowRight" ? 1 : 0;
+					if (!direction) return;
+					if (e.repeat) setHeld(direction);
+					else move(direction * s);
 				}}
 				onKeyUp={(e: KeyboardEvent) => {
+					if (e.code !== "ArrowLeft" && e.code !== "ArrowRight") return;
 					// the player's shortcuts would also seek on arrows
-					if (e.code === "ArrowLeft" || e.code === "ArrowRight")
-						e.stopPropagation();
+					e.stopPropagation();
+					setHeld(0);
 				}}
 				className={cn(
 					"cursor-pointer justify-center py-2 outline-0",
