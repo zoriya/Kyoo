@@ -24,6 +24,7 @@ import {
 	type PressableProps,
 	Text,
 	TextInput,
+	type TextInputInstance,
 	type TextInputProps,
 	View,
 	type ViewProps,
@@ -182,12 +183,12 @@ export const SearchBar = ({
 	forceExpand?: boolean;
 	containerClassName?: string;
 	overlayOnSmallScreen?: boolean;
-	ref?: Ref<TextInput>;
+	ref?: Ref<TextInputInstance>;
 }) => {
 	const { t } = useTranslation();
 	const [_expanded, setExpanded] = useState(!!value);
 	const [focused, setFocused] = useState(false);
-	const inputRef = useRef<TextInput>(null);
+	const inputRef = useRef<TextInputInstance>(null);
 
 	const expanded = _expanded || forceExpand;
 
@@ -239,7 +240,6 @@ export const SearchBar = ({
 					!expanded && "w-0 grow-0",
 					className,
 				)}
-				verticalAlign="middle"
 				// @ts-expect-error not yet in typescript i think
 				includeFontPadding={false}
 				placeholderTextColorClassName="accent-slate-400 dark:text-slate-600"

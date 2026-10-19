@@ -1,12 +1,12 @@
 import { Slot } from "expo-router";
-import { NativeTabs } from "expo-router/unstable-native-tabs";
+import { NativeTabs } from "expo-router/native-tabs";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 import { useAccount } from "~/providers/account-context";
 import { TvTabs } from "~/ui/navbar-tv";
 
 export const unstable_settings = {
-	initialRouteName: "index",
+	anchor: "index",
 };
 
 export default function TabsLayout() {

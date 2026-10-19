@@ -10,9 +10,9 @@ import {
 	TabTrigger,
 	type TabTriggerSlotProps,
 } from "expo-router/ui";
-import type { ReactNode } from "react";
+import type { ReactNode, Ref } from "react";
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
+import { View, type ViewInstance } from "react-native";
 import Animated, {
 	useAnimatedStyle,
 	useSharedValue,
@@ -123,6 +123,7 @@ const RailItem = ({
 	left,
 	isFocused,
 	small,
+	ref,
 	...props
 }: TabTriggerSlotProps & {
 	label: string;
@@ -134,6 +135,8 @@ const RailItem = ({
 
 	return (
 		<PressableFeedback
+			// expo-router types the ref with the legacy View class
+			ref={ref as Ref<ViewInstance>}
 			{...link}
 			{...props}
 			className={cn(

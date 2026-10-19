@@ -4,10 +4,23 @@ import {
 	useEffectEvent,
 	useState,
 } from "react";
-import { BackHandler, Platform, TVFocusGuideView, View } from "react-native";
+import {
+	BackHandler,
+	Platform,
+	TVFocusGuideView,
+	type TVRemoteEvent,
+	useTVEventHandler as useRNTVEventHandler,
+	View,
+} from "react-native";
 import { withUniwind } from "uniwind";
 
-export { useTVEventHandler } from "react-native";
+// rn types eventKeyAction as a string but native sends 0 (press) or 1 (release)
+export type TVEvent = Omit<TVRemoteEvent, "eventKeyAction"> & {
+	eventKeyAction?: number;
+};
+export const useTVEventHandler = useRNTVEventHandler as unknown as (
+	handler: (event: TVEvent) => void,
+) => void;
 
 const TVFocusGroup = withUniwind(TVFocusGuideView);
 // focus guides are useless without a remote and they steal the focus on touch devices

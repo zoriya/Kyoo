@@ -1,4 +1,5 @@
-import { type Falsy, Pressable, ScrollView } from "react-native";
+import { Pressable, ScrollView } from "react-native";
+import type { Falsy } from "~/utils";
 import { cn } from "~/utils";
 import { Icon, type Icon as IconType } from "./icons";
 import { P } from "./text";

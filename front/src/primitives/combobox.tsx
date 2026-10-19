@@ -15,6 +15,7 @@ import {
 	Pressable,
 	type PressableProps,
 	TextInput,
+	type TextInputInstance,
 	View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -75,7 +76,7 @@ export const ComboBox = <Data,>({
 		setOpen(false);
 		setSearch("");
 	}, []);
-	const inputRef = useRef<TextInput>(null);
+	const inputRef = useRef<TextInputInstance>(null);
 	const insets = useSafeAreaInsets();
 
 	const { items, fetchNextPage, hasNextPage, isFetching } = useInfiniteFetch({

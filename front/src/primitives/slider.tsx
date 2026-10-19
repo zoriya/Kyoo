@@ -1,13 +1,13 @@
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import {
 	type GestureResponderEvent,
-	type HWEvent,
 	Platform,
 	View,
+	type ViewInstance,
 	type ViewProps,
 } from "react-native";
 import { cn } from "~/utils";
-import { FocusGroup, useTVEventHandler } from "./focus";
+import { FocusGroup, type TVEvent, useTVEventHandler } from "./focus";
 
 export const Slider = ({
 	progress,
@@ -46,7 +46,7 @@ export const Slider = ({
 		height: number;
 	}) => void;
 } & Partial<ViewProps>) => {
-	const ref = useRef<View>(null);
+	const ref = useRef<ViewInstance>(null);
 	const [layout, setLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
 	const [isSeeking, setSeek] = useState(false);
 	const [isHover, setHover] = useState(false);
@@ -109,7 +109,7 @@ export const Slider = ({
 	}, [isFocus, s]);
 
 	useTVEventHandler(
-		useEffectEvent((event: HWEvent) => {
+		useEffectEvent((event: TVEvent) => {
 			// the hold may end before the slider got the focus
 			if (
 				pendingSeek.current &&
@@ -138,7 +138,6 @@ export const Slider = ({
 		<FocusGroup autoFocus trapFocusLeft trapFocusRight>
 			<View
 				ref={ref}
-				// @ts-expect-error Web only
 				onMouseEnter={() => setHover(true)}
 				onMouseLeave={() => {
 					setHover(false);
@@ -180,15 +179,17 @@ export const Slider = ({
 						onMeasure?.(layout);
 					})
 				}
-				onKeyDown={(e: KeyboardEvent) => {
+				onKeyDown={(e) => {
+					const { code, repeat } = e.nativeEvent;
 					const direction =
-						e.code === "ArrowLeft" ? -1 : e.code === "ArrowRight" ? 1 : 0;
+						code === "ArrowLeft" ? -1 : code === "ArrowRight" ? 1 : 0;
 					if (!direction) return;
-					if (e.repeat) setHeld(direction);
+					if (repeat) setHeld(direction);
 					else move(direction * s);
 				}}
-				onKeyUp={(e: KeyboardEvent) => {
-					if (e.code !== "ArrowLeft" && e.code !== "ArrowRight") return;
+				onKeyUp={(e) => {
+					const { code } = e.nativeEvent;
+					if (code !== "ArrowLeft" && code !== "ArrowRight") return;
 					// the player's shortcuts would also seek on arrows
 					e.stopPropagation();
 					setHeld(0);

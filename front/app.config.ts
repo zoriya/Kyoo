@@ -90,11 +90,11 @@ export const expo: ExpoConfig = {
 							fontDefinitions: [
 								{
 									path: "./node_modules/@expo-google-fonts/poppins/300Light/Poppins_300Light.ttf",
-									weight: "300",
+									weight: 300,
 								},
 								{
 									path: "./node_modules/@expo-google-fonts/poppins/500Medium/Poppins_500Medium.ttf",
-									weight: "500",
+									weight: 500,
 								},
 							],
 						},
@@ -103,7 +103,7 @@ export const expo: ExpoConfig = {
 							fontDefinitions: [
 								{
 									path: "./node_modules/@expo-google-fonts/sora/800ExtraBold/Sora_800ExtraBold.ttf",
-									weight: "800",
+									weight: 800,
 								},
 							],
 						},

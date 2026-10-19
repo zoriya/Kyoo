@@ -9,7 +9,7 @@ import { Tooltip, useMobileHover } from "~/primitives";
 import "~/fonts.web.css";
 
 export const unstable_settings = {
-	initialRouteName: "(app)",
+	anchor: "(app)",
 };
 
 const CastReceiver = () => {

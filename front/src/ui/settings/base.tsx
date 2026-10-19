@@ -1,9 +1,10 @@
 import { Children, Fragment, type ReactElement, type ReactNode } from "react";
-import { type Falsy, View } from "react-native";
+import { View } from "react-native";
 import type { User } from "~/models";
 import { Container, FocusGroup, H1, HR, Icon, P, SubP } from "~/primitives";
 import { useAccount } from "~/providers/account-context";
 import { useMutation } from "~/query";
+import type { Falsy } from "~/utils";
 
 export const Preference = ({
 	customIcon,
