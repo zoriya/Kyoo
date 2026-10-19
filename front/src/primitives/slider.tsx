@@ -57,31 +57,29 @@ export const Slider = ({
 			if (commit.current) clearTimeout(commit.current);
 		};
 	}, []);
+	// endSeek must be read when the timeout fires, it closes over the seek value
+	const end = useEffectEvent(() => {
+		commit.current = null;
+		setSeek(false);
+		endSeek?.();
+	});
+	const move = useEffectEvent((offset: number) => {
+		if (!isSeeking) {
+			setSeek(true);
+			startSeek?.();
+		}
+		setProgress(Math.max(0, Math.min(progress + offset, max)));
+		if (commit.current) clearTimeout(commit.current);
+		commit.current = setTimeout(end, 500);
+	});
+
+	const s = step ?? 0.05 * max;
 	useTVEventHandler(
 		useEffectEvent((event: HWEvent) => {
-			if (!isFocus) return;
-			const s = step ?? 0.05 * max;
-			const offset =
-				event.eventType === "left" ? -s : event.eventType === "right" ? s : 0;
-			if (!offset) return;
-
-			if (commit.current) clearTimeout(commit.current);
-			// a held key sends a press (0) per repeat and a single release (1)
-			if (event.eventKeyAction !== 1) {
-				if (!isSeeking) {
-					setSeek(true);
-					startSeek?.();
-				}
-				setProgress(Math.max(0, Math.min(progress + offset, max)));
-			}
-			// keep seeking while the key is held, commit once it's released
-			if (event.eventKeyAction === 0) return;
-			if (event.eventKeyAction === 1 && !isSeeking) return;
-			commit.current = setTimeout(() => {
-				commit.current = null;
-				setSeek(false);
-				endSeek?.();
-			}, 500);
+			// android only sends the release (1) of a short press
+			if (!isFocus || event.eventKeyAction === 0) return;
+			if (event.eventType === "left") move(-s);
+			if (event.eventType === "right") move(s);
 		}),
 	);
 
@@ -128,20 +126,13 @@ export const Slider = ({
 					)
 				}
 				onKeyDown={(e: KeyboardEvent) => {
-					switch (e.code) {
-						case "ArrowLeft":
-							setProgress(Math.max(progress - 0.05 * max, 0));
-							break;
-						case "ArrowRight":
-							setProgress(Math.min(progress + 0.05 * max, max));
-							break;
-						case "ArrowDown":
-							setProgress(Math.max(progress - 0.1 * max, 0));
-							break;
-						case "ArrowUp":
-							setProgress(Math.min(progress + 0.1 * max, max));
-							break;
-					}
+					if (e.code === "ArrowLeft") move(-s);
+					if (e.code === "ArrowRight") move(s);
+				}}
+				onKeyUp={(e: KeyboardEvent) => {
+					// the player's shortcuts would also seek on arrows
+					if (e.code === "ArrowLeft" || e.code === "ArrowRight")
+						e.stopPropagation();
 				}}
 				className={cn(
 					"cursor-pointer justify-center py-2 outline-0",
