@@ -4,9 +4,12 @@ import {
 	eq,
 	exists,
 	gt,
+	gte,
 	isNotNull,
 	lte,
 	ne,
+	notExists,
+	or,
 	sql,
 	TransactionRollbackError,
 } from "drizzle-orm";
@@ -213,6 +216,33 @@ async function updateWatchlist(
 				ne(nextEntry.kind, "extra"),
 				eq(nextEntry.content, "story"),
 				gt(nextEntry.order, entries.order),
+				// skip entries already watched (unless we are rewatching the show)
+				or(
+					exists(
+						tx
+							.select()
+							.from(watchlist)
+							.where(
+								and(
+									eq(watchlist.profilePk, userPk),
+									eq(watchlist.showPk, entries.showPk),
+									eq(watchlist.status, "rewatching"),
+								),
+							),
+					),
+					notExists(
+						tx
+							.select()
+							.from(history)
+							.where(
+								and(
+									eq(history.profilePk, userPk),
+									eq(history.entryPk, nextEntry.pk),
+									gte(history.percent, 95),
+								),
+							),
+					),
+				),
 			),
 		)
 		.orderBy(nextEntry.order)

@@ -167,4 +167,50 @@ describe("nextup", () => {
 		expect(body.items).toBeArrayOfSize(1);
 		expect(body.items[0].slug).toBe(miaNextEntrySlug);
 	});
+
+	it("history completed skips already watched entries", async () => {
+		let [resp, body] = await addToHistory("me", [
+			{
+				entry: `${madeInAbyss.slug}-s2e1`,
+				videoId: null,
+				percent: 100,
+				time: 24 * 60,
+				playedDate: new Date("2025-02-06"),
+			},
+			{
+				entry: `${madeInAbyss.slug}-s2e2`,
+				videoId: null,
+				percent: 100,
+				time: 24 * 60,
+				playedDate: new Date("2025-02-07"),
+			},
+		]);
+		expectStatus(resp, body).toBe(201);
+
+		[resp, body] = await getSerie(madeInAbyss.slug, {
+			with: ["nextEntry"],
+		});
+		expectStatus(resp, body).toBe(200);
+		expect(body.nextEntry).toBeObject();
+		expect(body.nextEntry.slug).toBe(`${madeInAbyss.slug}-s2e3`);
+
+		[resp, body] = await addToHistory("me", [
+			{
+				entry: miaNextEntrySlug,
+				videoId: null,
+				percent: 100,
+				time: 105 * 60,
+				playedDate: new Date("2025-02-08"),
+			},
+		]);
+		expectStatus(resp, body).toBe(201);
+
+		[resp, body] = await getSerie(madeInAbyss.slug, {
+			with: ["nextEntry"],
+		});
+		expectStatus(resp, body).toBe(200);
+		expect(body.nextEntry).toBeObject();
+		expect(body.nextEntry.slug).toBe(`${madeInAbyss.slug}-s2e3`);
+		expect(body.watchStatus).toMatchObject({ status: "watching" });
+	});
 });
