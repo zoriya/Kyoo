@@ -16,7 +16,7 @@
 		"@logtape/elysia": "2.4.1",
 		"@logtape/logtape": "2.4.1",
 		"@logtape/otel": "2.4.0",
-		"@logtape/redaction": "2.4.0",
+		"@logtape/redaction": "2.4.1",
 		"@opentelemetry/api": "^1.9.1",
 		"@opentelemetry/api-logs": "^0.223.0",
 		"@opentelemetry/core": "^2.12.0",
